@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.10 $	$Date: 2004/01/13 09:56:35 $
+#	$Revision: 1.13 $	$Date: 2005/02/08 17:05:40 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -15,6 +15,7 @@ fasp <- function(fns, titles, formulae, which,
   stopifnot(length(fns) == length(which))
 
   fns <- lapply(fns, as.fv)
+  n   <- length(which)
 
   if(!missing(titles)) 
     stopifnot(length(titles) == length(which))
@@ -22,23 +23,14 @@ fasp <- function(fns, titles, formulae, which,
     titles <- lapply(seq(length(which)), function(i) NULL)
 
   if(!missing(formulae)) {
-    if(inherits(formulae, "formula")) 
-      # single formula 
-      # make it a list of same length as "fns"
-      formulae <- lapply(seq(length(which)),
-                                 function(i, f) {f}, f=formulae)
-    else {
-      # list of formulae
-      stopifnot(is.list(formulae))
-      if(!all(unlist(lapply(formulae, inherits, what="formula"))))
-        stop("The entries of \`formulae\' should all be formulae")
-      if(length(formulae) == 1 && length(which) != 1)
-        # list of length 1 - replicate
-        formulae <- lapply(seq(length(which)),
-                                 function(i, f) {f}, f=formulae[[1]])
-      else 
+    # verify format and convert to character vector
+    formulae <- FormatFaspFormulae(formulae, "formulae")
+    # ensure length matches length of "fns"
+    if(length(formulae) == 1 && n > 1)
+        # single formula - replicate it
+        formulae <- rep(formulae, n)
+    else 
         stopifnot(length(formulae) == length(which))
-    }
   }
 
   rslt <- list(fns=fns, titles=titles, default.formula=formulae,
@@ -92,4 +84,29 @@ print.fasp <- function(x, ...) {
   cat(paste("Dimensions: ", dim[1], "x", dim[2], "\n"))
   cat(paste("Title:", if(is.null(x$title)) "(None)" else x$title, "\n"))
   invisible(NULL)
+}
+
+FormatFaspFormulae <- function(f, argname) {
+  # f should be a single formula object, a list of formula objects,
+  # a character vector, or a list containing formulae and strings.
+  # It will be converted to a character vector.
+  
+  zapit <- function(x, argname) {
+    if(inherits(x, "formula")) deparse(x)
+    else if(is.character(x)) x
+    else stop(paste("The entries of \`", argname,
+                    "\' must be formula objects or strings", sep=""))
+  }
+
+  result <-
+    if(is.character(f))
+      f
+    else if(inherits(f, "formula"))
+      deparse(f)
+    else if(is.list(f))
+      unlist(lapply(f, zapit, argname=argname))
+    else stop(paste("\'", argname, "\' should be a formula,",
+                    "a list of formulae, or a character vector"))
+
+  return(result)
 }

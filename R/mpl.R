@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.15 $	$Date: 2004/11/27 05:55:31 $
+#	$Revision: 5.17 $	$Date: 2005/02/03 23:19:09 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -55,7 +55,7 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=5,
                     release=7,
-                    date="$Date: 2004/11/27 05:55:31 $")
+                    date="$Date: 2005/02/03 23:19:09 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -77,6 +77,7 @@ if(!want.trend && !want.inter) {
                Q           = Q,
                maxlogpl    = maxlogpl,
                internal    = list(),
+               covariates  = NULL,
 	       correction  = correction,
                rbord       = rbord,
                version     = the.version)
@@ -151,6 +152,11 @@ return(rslt)
 mpl.prepare <- function(Q, X, P, trend, interaction, covariates, 
                         want.trend, want.inter, correction, rbord) {
 
+  if(missing(want.trend))
+    want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
+  if(missing(want.inter))
+    want.inter <- !is.null(interaction) && !is.null(interaction$family)
+    
 # Validate/evaluate covariates
 if(want.trend && !is.null(covariates))
   covariates.df <- mpl.get.covariates(covariates, P, "quadrature points")

@@ -13,8 +13,9 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
     or variables from which the plotting coordinates can be computed.
   }
   \item{fmla}{
-    an S language formula determining which variables or expressions
-    are plotted. 
+    an R language formula 
+    determining which variables or expressions are plotted.
+    Either a formula object, or a string that can be parsed as a formula.
   }
   \item{subset}{
     (optional) subset of rows of the data frame that will be plotted.

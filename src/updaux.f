@@ -1,7 +1,7 @@
 C Output from Public domain Ratfor, version 1.0
       subroutine updaux(itype,x,y,u,v,npts,ix,par,period,aux)
       implicit double precision(a-h,o-z)
-      dimension x(1), y(1), par(4), period(2)
+      dimension x(1), y(1), par(3), period(2)
       integer aux(1)
       logical per
       r2 = par(3)**2

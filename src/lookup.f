@@ -1,7 +1,7 @@
 C Output from Public domain Ratfor, version 1.0
       subroutine lookup(u,v,ix,x,y,npts,par,period,cifval)
       implicit double precision(a-h,o-z)
-      dimension par(1), x(1), y(1), period(2)
+      dimension par(5), x(1), y(1), period(2)
       logical per, equisp
       zero = 0.d0
       one = 1.d0
@@ -55,7 +55,7 @@ C Output from Public domain Ratfor, version 1.0
       endif
       endif
       endif
-      hk0 = par(4+k0)
+      hk0 = par(5+k0)
       if(hk0 .le. eps)then
       cifval = zero
       return

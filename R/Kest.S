@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.7 $	$Date: 2004/08/31 10:26:13 $
+#	$Revision: 5.9 $	$Date: 2005/02/08 02:10:11 $
 #
 #
 # -------- functions ----------------------------------------
@@ -125,10 +125,10 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         corrxns <- rev(nama2[nama2 != "r"])
 
         # default is to display them all
-        attr(K, "fmla") <- as.formula(paste(
+        attr(K, "fmla") <- deparse(as.formula(paste(
                        "cbind(",
                         paste(corrxns, collapse=","),
-                        ") ~ r"))
+                        ") ~ r")))
         return(K)
 }
 	

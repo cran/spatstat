@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.7 $    $Date: 2004/09/21 20:01:12 $
+#  $Revision: 1.8 $    $Date: 2005/02/08 01:52:32 $
 #
 #
 
@@ -19,6 +19,9 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL,
   defaultplot <- missing(fmla)
   if(defaultplot)
     fmla <- attr(x, "fmla")
+
+  # This *is* the last possible moment, so...
+  fmla <- as.formula(fmla)
 
   lhs <- fmla[[2]]
   rhs <- fmla[[3]]
