@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.6 $	$Date: 2005/03/12 01:01:28 $
+#    $Revision: 2.7 $	$Date: 2005/03/22 02:27:01 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -208,7 +208,7 @@ MultiStraussHard <- function(types, iradii, hradii) {
            h <- self$par$hradii
            ractive <- !is.na(r)
            hactive <- !is.na(h)
-           if(!is.na(coeffs)) {
+           if(any(!is.na(coeffs))) {
              gamma <- (self$interpret)(coeffs, self)$param$gammas
              gamma[is.na(gamma)] <- 1
              ractive <- ractive & (abs(log(gamma)) > epsilon)

@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.9 $	$Date: 2005/03/12 01:10:07 $
+#    $Revision: 1.10 $	$Date: 2005/03/22 02:28:55 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -76,7 +76,7 @@ PairPiece <- function(r) {
         },
         irange = function(self, coeffs=NA, epsilon=0, ...) {
           r <- self$par$r
-          if(is.na(coeffs))
+          if(all(is.na(coeffs)))
             return(max(r))
           gamma <- (self$interpret)(coeffs, self)$param$gammas
           gamma[is.na(gamma)] <- 1

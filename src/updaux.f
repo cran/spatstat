@@ -5,7 +5,7 @@ C Output from Public domain Ratfor, version 1.0
       integer aux(1)
       logical per
       zero = 0.d0
-      r2 = par(3)**2
+      r2 = par(3)
       per = period(1) .gt. zero
       if(itype .eq. 1)then
       nm1 = npts-1

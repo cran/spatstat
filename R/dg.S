@@ -1,7 +1,7 @@
 #
 #     dg.S
 #
-#    $Revision: 1.4 $	$Date: 2005/03/12 01:05:54 $
+#    $Revision: 1.5 $	$Date: 2005/03/22 02:27:58 $
 #
 #     Diggle-Gratton pair potential
 #
@@ -52,7 +52,7 @@ DiggleGratton <- function(delta, rho) {
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            rho <- self$par$rho
-           if(is.na(coeffs))
+           if(all(is.na(coeffs)))
              return(rho)
            kappa <- coeffs[["Interaction"]]
            delta <- self$par$delta

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.5 $	$Date: 2005/03/12 01:07:56 $
+#    $Revision: 2.6 $	$Date: 2005/03/22 02:26:40 $
 #
 #    The multitype Strauss process
 #
@@ -170,7 +170,7 @@ MultiStrauss <- function(types, radii) {
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$radii
            active <- !is.na(r)
-           if(!is.na(coeffs)) {
+           if(any(!is.na(coeffs))) {
              gamma <- (self$interpret)(coeffs, self)$param$gammas
              gamma[is.na(gamma)] <- 1
              active <- active & (abs(log(gamma)) > epsilon)
