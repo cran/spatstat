@@ -24,6 +24,7 @@ centroid.owin           Centroid of a window
 coef.ppm                Coefficients of Fitted Point Process Model
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
+copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
@@ -35,6 +36,9 @@ diameter                Diameter of a Window Frame
 DiggleGratton           Diggle-Gratton model
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
+distmap                 Distance Map
+distmap.owin            Distance Map of Window
+distmap.ppp             Distance Map of Point Pattern
 dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
 eroded.areas            Areas of Morphological Erosions
@@ -164,6 +168,8 @@ rSSI                    Simple Sequential Inhibition
 rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
+scanpp                  Read Point Pattern From Data File
+setcov                  Set Covariance of a Window
 setmarks                Set or Reset the Marks in a Point Pattern
 shift                   Apply Vector Translation
 shift.im                Apply Vector Translation To Pixel Image
