@@ -347,20 +347,21 @@ if they have been obtained with different values of \code{rbord}.
  ## MULTITYPE POINT PROCESSES ### 
  data(lansing)
  # Multitype point pattern --- trees marked by species
- mpl(lansing, ~ marks, Poisson())
- # fit stationary marked Poisson process
- # with different intensity for each species
-
-\dontrun{
- mpl(lansing, ~ marks * polynom(x,y,3), Poisson())
-}
- # fit nonstationary marked Poisson process
- # with different log-cubic trend for each species
 \testonly{
  # equivalent functionality - smaller dataset
  data(ganglia)
- mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())
-}
+ }
+
+ # fit stationary marked Poisson process
+ # with different intensity for each species
+\dontrun{mpl(lansing, ~ marks, Poisson())}
+\testonly{mpl(ganglia, ~ marks, Poisson())}
+
+ # fit nonstationary marked Poisson process
+ # with different log-cubic trend for each species
+\dontrun{mpl(lansing, ~ marks * polynom(x,y,3), Poisson())}
+\testonly{mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())}
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

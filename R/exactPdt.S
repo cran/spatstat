@@ -2,7 +2,7 @@
 #	exactPdt.S
 #	S function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.2 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.3 $	$Date: 2004/03/08 21:06:43 $
 #
 
 "exactPdt"<-
@@ -31,7 +31,8 @@ function(im)
 		dd = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		rr = as.integer(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		cc = as.integer(matrix(0, ncol = nc + 2, nrow = nr + 2)),
-		bb = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2))
+		bb = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
+                PACKAGE="spatstat"
 		)
 	dist <- matrix(res$dd, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
 	rows <- matrix(res$rr, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]

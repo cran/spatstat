@@ -4,7 +4,7 @@
        Exact distance transform of a point pattern
        (used to estimate the empty space function F)
        
-       $Revision: 1.1 $ $Date: 2001/07/21 09:18:03 $
+       $Revision: 1.3 $ $Date: 2004/03/08 21:19:32 $
 
        Author: Adrian Baddeley
 
@@ -29,6 +29,8 @@
 
 #include <math.h>
 #include "raster.h"
+
+#define R_INT int
 
 void 
 shape_raster(ras,data,xmin,ymin,xmax,ymax,nrow,ncol,mrow,mcol)
@@ -79,7 +81,7 @@ exact_dt(x, y, npt, dist, index)
 #define Is_Defined(I) (I >= 0)
 #define Is_Undefined(I) (I < 0)
 	
-	Clear(*index,long,UNDEFINED)
+	Clear(*index,R_INT,UNDEFINED)
 		
 	d = 2.0 * DistanceSquared(dist->xmin,dist->ymin,dist->xmax,dist->ymax); 
 	Clear(*dist,double,d)
@@ -100,14 +102,14 @@ exact_dt(x, y, npt, dist, index)
 		for(l = j; l <= j+1; l++) 
 		for(m = k; m <= k+1; m++) {
 			d = DistanceToSquared(x[i],y[i],*index,l,m);
-			if(   Is_Undefined(Entry(*index,l,m,long))
+			if(   Is_Undefined(Entry(*index,l,m,R_INT))
 			   || Entry(*dist,l,m,double) > d)
 			{
 				/* printf("writing (%ld,%ld) -> %ld\t%lf\n", l,m,i,d); */
-				Entry(*index,l,m,long) = i;
+				Entry(*index,l,m,R_INT) = i;
 				Entry(*dist,l,m,double) = d;
 				/* printf("checking: %ld, %lf\n",
-				       Entry(*index,l,m,long),
+				       Entry(*index,l,m,R_INT),
 				       Entry(*dist,l,m,double));
 				 */
 			}
@@ -117,22 +119,22 @@ exact_dt(x, y, npt, dist, index)
 	for(j = 0; j <= index->nrow; j++)
 		for(k = 0; k <= index->ncol; k++)
 			printf("[%ld,%ld] %ld\t%lf\n",
-			       j,k,Entry(*index,j,k,long),Entry(*dist,j,k,double));
+			       j,k,Entry(*index,j,k,R_INT),Entry(*dist,j,k,double));
 */			
 	/* how to update the distance values */
 	
 #define COMPARE(ROW,COL,RR,CC,BOUND) \
 	d = Entry(*dist,ROW,COL,double); \
-	ii = Entry(*index,RR,CC,long); \
+	ii = Entry(*index,RR,CC,R_INT); \
 	/* printf(" %lf\t (%ld,%ld) |-> %ld\n", d, RR, CC, ii); */ \
 	if(Is_Defined(ii) /* && ii < npt */ \
 	   && Entry(*dist,RR,CC,double) < d) { \
 	     dd = DistanceSquared(x[ii],y[ii],Xpos(*index,COL),Ypos(*index,ROW)); \
 	     if(dd < d) { \
 		/* printf("(%ld,%ld) <- %ld\n", ROW, COL, ii); */ \
-		Entry(*index,ROW,COL,long) = ii; \
+		Entry(*index,ROW,COL,R_INT) = ii; \
 		Entry(*dist,ROW,COL,double) = dd; \
-		/* printf("checking: %ld, %lf\n", Entry(*index,ROW,COL,long), Entry(*dist,ROW,COL,double)); */\
+		/* printf("checking: %ld, %lf\n", Entry(*index,ROW,COL,R_INT), Entry(*dist,ROW,COL,double)); */\
 	     } \
 	}
 
@@ -198,14 +200,14 @@ exact_dt_S(x, y, npt,
 	   nr, nc,
 	   distances, indices, boundary)
 	double *x, *y;		/* input data points */
-	long	*npt;
+	R_INT	*npt;
 	double *xmin, *ymin,
 		*xmax, *ymax;  	/* guaranteed bounding box */
-	long *nr, *nc;		/* desired raster dimensions
+	R_INT *nr, *nc;		/* desired raster dimensions
 				   EXCLUDING margin of 1 on each side */
 	     /* output arrays */
 	double *distances;	/* distance to nearest point */
-	long   *indices;	/* index to nearest point */
+	R_INT   *indices;	/* index to nearest point */
 	double	*boundary;	/* distance to boundary */
 {
 	Raster dist, index, bdist;
@@ -217,6 +219,6 @@ exact_dt_S(x, y, npt,
 	shape_raster( &bdist, (char *) boundary, *xmin,*ymin,*xmax,*ymax,
 			   *nr+2,*nc+2,1,1);
 	
-	exact_dt(x, y, *npt, &dist, &index);
+	exact_dt(x, y, (long) *npt, &dist, &index);
 	dist_to_bdry(&bdist);
 }	

@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.2 $     $Date: 2003/07/22 19:12:19 $
+#      $Revision: 1.3 $     $Date: 2004/03/08 21:08:30 $
 #
 #
 #      Interpoint distances
@@ -39,7 +39,8 @@ function(x, y=NULL, method="C")
          C={
            d <- numeric( n * n)
            z<- .C("pairdist", n = as.integer(n),
-                  x= as.double(x), y= as.double(y), d= as.double(d))
+                  x= as.double(x), y= as.double(y), d= as.double(d),
+                  PACKAGE="spatstat")
            d <- matrix(z$d, nrow=n, ncol=n)
          },
          stop(paste("Unrecognised method \"", method, "\"", sep=""))
@@ -90,7 +91,8 @@ function(x, y=NULL, method="C")
            z<- .C("nndistsort",
                   n= as.integer(n),
                   x= as.double(x[o]), y= as.double(y[o]), nnd= as.double(nnd),
-                  as.double(big))
+                  as.double(big),
+                  PACKAGE="spatstat")
            nnd[o] <- z$nnd
          },
          stop(paste("Unrecognised method \"", method, "\"", sep=""))

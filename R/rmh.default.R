@@ -40,7 +40,8 @@ iseed.save <- iseed
 		ix=as.integer(iseed[1]),
 		iy=as.integer(iseed[2]),
 		iz=as.integer(iseed[3]),
-		rand=double(1)
+		rand=double(1),
+                PACKAGE="spatstat"
 	)
 	build.seed <- round(rrr$rand*1e6)
 	iseed <- unlist(rrr[c("ix","iy","iz")])
@@ -448,7 +449,8 @@ if(nmbr==8) {
 		x=as.double(x),
 		y=as.double(y),
 		npts=as.integer(npts),
-		aux=integer(npts)
+		aux=integer(npts),
+                PACKAGE="spatstat"
 	)$aux
 	need.aux <- TRUE
 } else {
@@ -519,7 +521,8 @@ repeat {
 			marks=as.integer(marks),
 			aux=as.integer(aux),
 			npts=as.integer(npts),
-			fixall=as.logical(fixall)
+			fixall=as.logical(fixall),
+                        PACKAGE="spatstat"
 		)
 
 # If npts > npmax we've run out of storage space.  Tack some space
