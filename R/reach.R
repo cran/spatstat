@@ -1,7 +1,7 @@
 #
 #   reach.R
 #
-#  $Revision: 1.1 $   $Date: 2005/03/12 01:32:31 $
+#  $Revision: 1.2 $   $Date: 2005/03/15 20:01:15 $
 #
 
 reach <- function(x, ...) {
@@ -25,6 +25,9 @@ reach.ppm <- function(x, ..., epsilon=0) {
   verifyclass(x, "ppm")
   coeffs <- coef(x)
   inte <- x$interaction
+  # Poisson case
+  if(is.null(inte))
+    return(0)
   irange <- inte$irange
   if(is.null(irange))
     return(NA)

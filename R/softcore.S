@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 2.3 $   $Date: 2005/03/12 01:01:19 $
+#    $Revision: 2.4 $   $Date: 2005/03/22 02:28:21 $
 #
 #    Soft core processes.
 #
@@ -52,7 +52,7 @@ number less than 1")
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            # distance d beyond which log(interaction factor) <= epsilon
-           if(is.na(coeffs) || epsilon == 0)
+           if(any(is.na(coeffs)) || epsilon == 0)
              return(Inf)
            theta <- coeffs[["Interaction"]]
            kappa <- self$par$kappa

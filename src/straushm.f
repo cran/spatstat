@@ -28,10 +28,10 @@ C Output from Public domain Ratfor, version 1.0
       do23010 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
-      rint(i) = par(ind)**2
+      rint(i) = par(ind)
       endif
       if(i.eq.mrk .and. j.gt.mrk)then
-      rint(j) = par(ind)**2
+      rint(j) = par(ind)
       endif
 23010 continue
 23011 continue
