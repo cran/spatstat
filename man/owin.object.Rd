@@ -56,13 +56,20 @@
   \code{\link{nearest.raster.point}}.
 
   There is a \code{plot} method for window objects,
-  \code{\link{plot.owin}}.
+  \code{\link{plot.owin}}. This may be useful if you wish to
+  plot a point pattern's window without the points for graphical
+  purposes.
+
+  There are also methods for
+  \code{summary} and \code{print}. 
 }
 \seealso{
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{as.rectangle}},
   \code{\link{as.mask}},
+  \code{\link{summary.owin}},
+  \code{\link{print.owin}},
   \code{\link{complement.owin}},
   \code{\link{erode.owin}},
   \code{\link{affine.owin}},

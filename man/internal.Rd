@@ -9,6 +9,7 @@
 \alias{breakpts.from.r}
 \alias{checkfields}          
 \alias{check.hist.lengths}
+\alias{contour.im}
 \alias{countingweights}
 \alias{crossdist}            
 \alias{default.ngrid}
@@ -28,6 +29,7 @@
 \alias{gridindex}            
 \alias{handle.r.b.args}
 \alias{identical.formulae}
+\alias{image.im}            
 \alias{inside.xypolygon}     
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
@@ -58,19 +60,22 @@
 \alias{MultiPair.checkmatrix}
 \alias{multipair.family}
 \alias{nearest.pixel}
-\alias{nndist}
 \alias{no.trend.ppm}
 \alias{n.quad}               
 \alias{overlap.owin}
 \alias{overlap.trapezium}
 \alias{overlap.xypolygon}    
-\alias{pairdist}
+\alias{persp.im}
+\alias{pixellate}
+\alias{plot.im}
 \alias{polynom}
 \alias{print.interact}       
 \alias{print.isf}
 \alias{quad}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
+\alias{rasterx.im}
+\alias{rastery.im}
 \alias{replicate}
 \alias{reverse.xypolygon}    
 \alias{rotxy}
@@ -78,6 +83,7 @@
 \alias{runifpoispp}          
 \alias{runifrect}
 \alias{scanpp}
+\alias{second.moment.calc}
 \alias{setcov}
 \alias{shiftxy}              
 \alias{sympoly}
@@ -110,6 +116,7 @@ breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
+contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 crossdist(x1, y1, x2, y2)            
 default.ngrid(X)
@@ -129,6 +136,7 @@ getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
 identical.formulae(a,b)
+image.im(x, \dots)
 inside.xypolygon(pts, polly, test01 = TRUE)     
 intX.owin(w)
 intX.xypolygon(polly)
@@ -159,19 +167,22 @@ mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)
 MultiPair.checkmatrix(mat, n, name)
 multipair.family
 nearest.pixel(x, y, im)
-nndist(x, y)
 no.trend.ppm(x)
 n.quad(Q)               
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)   
-pairdist(x, y)
+persp.im(x, \dots)
+pixellate(x, \dots)
+plot.im(x, \dots)
 polynom(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
 quad(data, dummy, w)
 quadscheme.replicated(data, dummy = default.dummy(data), method = "grid", \dots)
 quadscheme.spatial(data, dummy = default.dummy(data), method = "grid", \dots)
+rasterx.im(x)
+rastery.im(x)
 replicate(pp, markset, fac = TRUE)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)
@@ -179,6 +190,7 @@ runifdisc(n, r = 1, x = 0, y = 0)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 scanpp(filename, window, header = TRUE, dir = "", multitype = FALSE)
+second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE, \dots)
 setcov(W)
 shiftxy(X, vec = c(0, 0))              
 sympoly(x, y, n)

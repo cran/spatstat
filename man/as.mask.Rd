@@ -9,8 +9,8 @@
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}).}
-  \item{eps}{Width and height of a pixel.}
-  \item{dimyx}{Two integers giving the pixel array dimensions}
+  \item{eps}{(optional) width and height of pixels.}
+  \item{dimyx}{(optional) pixel array dimensions}
 }
 \value{
   A window (object of class \code{"owin"})
@@ -22,19 +22,20 @@
   explanation of binary image masks.
 
   The pixel raster will be an \eqn{m \times n}{m x n} rectangular grid
-  where \eqn{m, n} are given by \code{dimyx[2], dimyx[1]}
+  where \eqn{m, n} are given by \code{dimyx[2]}, \code{dimyx[1]}
   respectively (if the argument \code{dimyx} is given)
   or by the constraint that
   pixel widths and heights should be approximately \code{eps}.
   If neither \code{eps} nor \code{dimyx} is given,
-  the default is to set \code{eps} equal to 1/100 of the window
-  width or height.
+  the pixel raster dimensions are obtained from
+  \code{spatstat.options("npixel")}.
 
   There is no inverse of this function!
 }
 \seealso{
   \code{\link{owin.object}},
   \code{\link{as.rectangle}},
+  \code{\link{spatstat.options}}
 }
 \examples{
   \dontrun{library(spatstat)}

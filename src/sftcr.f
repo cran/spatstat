@@ -1,4 +1,3 @@
-C Output from Public domain Ratfor, version 1.0
       subroutine sftcr(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       double precision kappa
@@ -14,19 +13,20 @@ C Output from Public domain Ratfor, version 1.0
       twook = two/kappa
       per = period(1) .gt. 0.d0
       sx = zero
-      do23000 j = 1,n 
-      if(j .eq. ix)then
+      do 23000 j = 1,n 
+      if(.not.(j .eq. ix))goto 23002
       continue
-      else
-      if(per)then
+      goto 23003
+23002 continue
+      if(.not.(per))goto 23004
       call dist2(u,v,x(j),y(j),period,d2)
-      else
+      goto 23005
+23004 continue
       d2 = (u-x(j))**2 + (v-y(j))**2
-      endif
+23005 continue
       sx = sx + exp(oneomk*log(d2))
-      endif
+23003 continue
 23000 continue
-23001 continue
       cifval = beta*exp(-(sigma**twook)*sx)
       return
       end

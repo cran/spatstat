@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 1.2 $	$Date: 2001/07/27 03:56:05 $
+#    $Revision: 1.3 $	$Date: 2002/08/05 14:18:50 $
 #
 #    Geyer's saturation process
 #
@@ -35,7 +35,14 @@ Geyer <- function(r, sat) {
                        stop("saturation parameter sat must be a number >= 1")
                     },
          update = NULL,  # default OK
-         print = NULL    # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           loggamma <- coeffs[["Interaction"]]
+           gamma <- exp(loggamma)
+           return(list(param=list(gamma=gamma),
+                       inames="interaction parameter gamma",
+                       printable=round(gamma,4)))
+         }
   )
   class(out) <- "interact"
   out$init(out)

@@ -12,8 +12,8 @@
   \tabular{ll}{
     \code{x} \tab Cartesian \eqn{x}-coordinate of cell \cr
     \code{y} \tab Cartesian \eqn{y}-coordinate of cell \cr
-    \code{marks} \tab factor with levels 0 or 1
-    indicating ``off'' and ``on'' cells
+    \code{marks} \tab factor with levels \code{off} and \code{on} \cr
+                 \tab indicating ``off'' and ``on'' cells
   }
   See \code{\link{ppp.object}} for details of the format.
 }

@@ -63,6 +63,9 @@
   values are plotted successively using
   \code{\link{persp}}, \code{\link{image}} and \code{\link{contour}}
   (or only a selection of these three, if \code{how} is given).
+  Extra graphical parameters controlling the display may be passed
+  directly via the arguments \code{...} or
+  indirectly reset using \code{\link{spatstat.options}}.
 
   The default action is to create a rectangular 40 by 40 grid of points
   in the observation window of the data point pattern, and evaluate
@@ -79,6 +82,7 @@
 
   If the fitted model was a marked point process, then 
   predictions are made and plotted for each possible mark value in turn.
+
 }
 \seealso{
   \code{\link{mpl}},
@@ -88,7 +92,8 @@
   \code{\link{persp}},
   \code{\link{image}},
   \code{\link{contour}},
-  \code{\link{plot}}
+  \code{\link{plot}},
+  \code{\link{spatstat.options}}
 }
 \section{Warnings}{
   See warnings in \code{\link{predict.ppm}}.

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 1.8 $	$Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.9 $	$Date: 2002/08/05 14:18:50 $
 #
 #    The multitype Strauss process
 #
@@ -15,12 +15,12 @@
 MultiStrauss <- function(types, radii) {
   if(length(types) == 1)
     stop("The \`types\' argument should be a vector of all possible types")
-  if(!is.factor(types)) {
-    # warning("\`types\' converted to a factor")
-    types <- factor(types)
+  if(is.factor(types)) {
+    types <- levels(types)
+  } else {
+    types <- levels(factor(types, levels=types))
   }
-  ct <- levels(types)
-  dimnames(radii) <- list(ct, ct)
+  dimnames(radii) <- list(types, types)
   out <- 
   list(
          name     = "Multitype Strauss process",
@@ -41,6 +41,11 @@ MultiStrauss <- function(types, radii) {
      lu <- levels(tu)
      if(length(lx) != length(lu) || any(lx != lu))
 	stop("marks of data and dummy points do not have same possible levels")
+
+     if(!identical(lx, par$types))
+        stop("data and model do not have the same possible levels of marks")
+     if(!identical(lu, par$types))
+        stop("dummy points and model do not have the same possible levels of marks")
 
      # list all UNORDERED pairs of types to be checked
      # (the interaction must be symmetric in type, and scored as such)
@@ -97,7 +102,36 @@ MultiStrauss <- function(types, radii) {
            cat("Interaction radii:\n")
            print(self$par$radii)
            invisible()
-         }
+         },
+        interpret = function(coeffs, self) {
+          # get possible types
+          typ <- self$par$types
+          ntypes <- length(typ)
+          # get matrix of Strauss interaction radii
+          r <- self$par$radii
+          # list all unordered pairs of types
+          uptri <- (row(r) <= col(r)) & (!is.na(r))
+          mark1 <- (typ[row(r)])[uptri]
+          mark2 <- (typ[col(r)])[uptri]
+          # names of coefficients
+          basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
+          thetaname <- paste("mark", basename, sep="")
+          npairs <- length(basename)
+          # extract canonical parameters; shape them into a matrix
+          gammas <- matrix(, ntypes, ntypes)
+          dimnames(gammas) <- list(typ, typ)
+          for(i in 1:npairs) {
+            theta <- coeffs[thetaname[i]]
+            gamma <- exp(theta)
+            gammas[mark1[i], mark2[i]] <- gamma
+            gammas[mark2[i], mark1[i]] <- gamma
+          }
+          #
+          return(list(param=list(gammas=gammas),
+                      inames="interaction parameters gamma_ij",
+                      printable=round(gammas,4)))
+        }
+       
   )
   class(out) <- "interact"
   out$init(out)

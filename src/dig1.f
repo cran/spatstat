@@ -1,4 +1,3 @@
-C Output from Public domain Ratfor, version 1.0
       subroutine dig1(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       dimension par(2), x(n), y(n), period(2)
@@ -11,24 +10,26 @@ C Output from Public domain Ratfor, version 1.0
       r2 = rho**2
       a = two*atan(1.d0)/rho
       soglum = zero
-      do23000 j = 1,n 
-      if(j .eq. ix)then
+      do 23000 j = 1,n 
+      if(.not.(j .eq. ix))goto 23002
       sincr = zero
-      else
-      if(per)then
+      goto 23003
+23002 continue
+      if(.not.(per))goto 23004
       call dist2(u,v,x(j),y(j),period,d2)
-      else
+      goto 23005
+23004 continue
       d2 = (u-x(j))**2 + (v-y(j))**2
-      endif
-      if(d2 .lt. r2)then
+23005 continue
+      if(.not.(d2 .lt. r2))goto 23006
       sincr = two*log(sin(a*sqrt(d2)))
-      else
+      goto 23007
+23006 continue
       sincr = zero
-      endif
-      endif
+23007 continue
+23003 continue
       soglum = soglum + sincr
 23000 continue
-23001 continue
       cifval = beta*exp(soglum)
       return
       end

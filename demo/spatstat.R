@@ -21,6 +21,10 @@ K <- Kest(swedishpines)
 conspire(K, cbind(border,theo)~r, subset="r <= 40")
 title(main="K function for Swedish Pines")
 
+pc <- pcf(K, spar=1.5)
+conspire(pc, cbind(pcf, 1) ~ r, xlim=c(0,25), ylab="pcf(r)")
+title(main="Pair correlation function")
+
 e <- exactdt(swedishpines)
 image(e$xcol, e$yrow, t(e$d), axes=FALSE, xlab="", ylab="",
       main="Distance transform")

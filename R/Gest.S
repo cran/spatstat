@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.4 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.5 $	$Date: 2002/05/27 11:26:54 $
 #
 ################################################################################
 #
@@ -50,16 +50,3 @@ function(X, r=NULL, breaks=NULL, ...) {
 	return(data.frame(result))
 }	
 
-nndist <- function(x, y) {
-	#  computes the vector of nearest-neighbour distances 
-	#  for the pattern of points (x[i],y[i])
-	#	
-#  matrix of squared distances between all pairs of points
-	sq <- function(a, b) { (a-b)^2 }
-	squd <-  outer(x, x, sq) + outer(y, y, sq)
-#  reset diagonal to a large value so it is excluded from minimum
-	diag(squd) <- Inf
-#  nearest neighbour distances
-	nnd <- sqrt(apply(squd,1,min))
-	nnd
-}

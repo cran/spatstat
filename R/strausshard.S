@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 1.5 $	$Date: 2001/08/10 09:13:59 $
+#    $Revision: 1.6 $	$Date: 2002/08/05 14:18:50 $
 #
 #    The Strauss/hard core process
 #
@@ -35,7 +35,14 @@ StraussHard <- function(r, hc) {
              stop("interaction distance r must be a number greater than hc")
          },
          update = NULL,       # default OK
-         print = NULL         # default OK
+         print = NULL,         # default OK
+         interpret =  function(coeffs, self) {
+           loggamma <- coeffs[["Interaction"]]
+           gamma <- exp(loggamma)
+           return(list(param=list(gamma=gamma),
+                       inames="interaction parameter gamma",
+                       printable=round(gamma,4)))
+         }
   )
   class(out) <- "interact"
   (out$init)(out)

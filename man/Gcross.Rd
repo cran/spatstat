@@ -202,27 +202,25 @@ Gcross(X, i=1, j=2, breaks)
 \examples{
     \dontrun{library(spatstat)}
     data(ganglia)
-     # cat retina data: types 0,1 represent off/on
-    G01 <- Gcross(ganglia, "0", "1") # note: "0" not 0
-    \dontrun{plot(G01$r, G01$km,
-                  xlab="r", ylab="G01(r)",
-                  type="l", ylim=c(0,1))}
-    G10 <- Gcross(ganglia, "1", "0")
-    # Poisson theoretical curve
-    lambda1 <-
-         table(ganglia$marks)["1"]/area.owin(ganglia$window)
-    \dontrun{lines(G01$r, 1 - exp( - lambda1 * pi * G01$r^2), lty=2)}
-
-    # empty space function of type 1 points
+     # cat retina data
+    G01 <- Gcross(ganglia, "off", "on") 
     \dontrun{
-       F1 <- Fest(ganglia[ganglia$marks == "1"], r = G01$r, eps=0.01)
+    plot(G01$r, G01$km,
+                xlab="r", ylab="G01(r)",
+                type="l", ylim=c(0,1))
+    # Poisson theoretical curve
+    lines(G01$r, G01$theo, lty=2)
+    }
+    # empty space function of `on' points
+    \dontrun{
+       F1 <- Fest(ganglia[ganglia$marks == "on"], r = G01$r, eps=0.01)
        lines(F1$r, F1$km, lty=3)
     }
 
     # synthetic example    
     pp <- runifpoispp(50)
-    pp$marks <- sample(c("a","b"), pp$n, replace=TRUE)
-    G <- Gcross(pp, "a", "b")
+    pp$marks <- factor(sample(0:1, pp$n, replace=TRUE))
+    G <- Gcross(pp, "0", "1")   # note: "0" not 0
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

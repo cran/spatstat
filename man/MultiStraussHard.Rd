@@ -62,7 +62,7 @@ which can then be fitted to point pattern data.
    data(ganglia)
    r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    h <- 0.03 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   mpl(ganglia, ~1, MultiStraussHard(c("0","1"), r, h), rbord=0.06)
+   mpl(ganglia, ~1, MultiStraussHard(c("off","on"), r, h), rbord=0.06)
    # fit the stationary multitype hardcore Strauss process to `ganglia'
 }
 \section{Warnings}{

@@ -14,7 +14,9 @@ Jmulti                  Marked J Function
 Kcross                  Multitype K Function (Cross-type) 
 Kdot                    Multitype K Function (i-to-any) 
 Kest                    K-function
+Kest.fft                K-function using FFT
 Kinhom                  Inhomogeneous K-function
+Kmeasure                Reduced Second Moment Measure
 Kmulti                  Marked K-Function 
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
@@ -37,6 +39,8 @@ allstats                Calculate four standard summary functions of a
 alltypes                Calculate Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
+applynbd                Apply Function to Every Neighbourhood in a
+                        Point Pattern
 area.owin               Area of a Window
 as.mask                 Pixel Image Approximation of a Window
 as.owin                 Convert Data To Class owin
@@ -66,6 +70,9 @@ ganglia                 Cat Retinal Ganglia Data
 gridcentres             Rectangular grid of points
 gridweights             Compute Quadrature Weights Based on Grid Counts
 hamster                 Aherne's hamster tumour data
+harmonic                Basis for Harmonic Functions
+im                      Create a Pixel Image Object
+im.object               Class of Images
 inside.owin             Test Whether Points Are Inside A Window
 spatstat-internal       Internal spatstat functions
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
@@ -77,10 +84,12 @@ markcorr                Mark Correlation Function
 mpl                     Fit Point Process Model by Maximum
                         Pseudolikelihood 
 nearest.raster.point    Find Pixel Nearest to a Given Point
+nndist                  Nearest neighbour distances
 nztrees                 New Zealand Trees Point Pattern 
 ord.family              Ord Interaction Process Family
 owin                    Create a Window
 owin.object             Class owin
+pairdist                Pairwise distances
 pairsat.family          Saturated Pairwise Interaction Point Process
                         Family
 pairwise.family         Pairwise Interaction Process Family
@@ -93,7 +102,9 @@ ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
 ppp.object              Class of Point Patterns
 predict.ppm             Prediction from a Fitted Point Process Model
+print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
+print.ppp               Print Brief Details of a Point Pattern Dataset
 quad.object             Class of Quadrature Schemes
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
@@ -121,10 +132,13 @@ shift                   Apply Vector Translation
 shift.owin              Apply Vector Translation To Window
 shift.ppp               Apply Vector Translation To Point Pattern
 simdat                  Simulated Point Pattern 
+spatstat.options        Internal Options in Spatstat Package
 spokes                  Spokes pattern of dummy points
 stratrand               Stratified random point pattern
 subset.fasp             Extract Subset of Function Array
 subset.ppp              Extract Subset of Point Pattern
+summary.owin            Summary of a Spatial Window
+summary.ppp             Summary of a Point Pattern Dataset
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern 
 union.quad              Union of Data and Dummy Points

@@ -38,5 +38,5 @@ structure(list(window = structure(list(type = "rectangle", xrange = c(0,
 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-1, 1, 1, 1, 1, 1, 1, 1), .Label = c("0", "1"), class = "factor")), .Names = c("window", 
+1, 1, 1, 1, 1, 1, 1, 1), .Label = c("off", "on"), class = "factor")), .Names = c("window", 
 "n", "x", "y", "marks"), class = "ppp")

@@ -123,7 +123,7 @@ from a point pattern in a window of arbitrary shape.
   See \code{\link{pcf}} on how to estimate this function.
 
 }
-\references
+\references{
 Baddeley, A.J. Spatial sampling and censoring.
      In O.E. Barndorff-Nielsen, W.S. Kendall and
      M.N.M. van Lieshout (eds) 

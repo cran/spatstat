@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.6 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.9 $	$Date: 2002/06/12 11:25:31 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -199,6 +199,7 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
   ppp(XY$x, XY$y, window=win, marks=M)
 }
 
+#-------------------------------------------------------------------
 
 "is.marked.ppp" <-
 function(X, na.action="warn") {
@@ -246,3 +247,63 @@ function(X) {
   else
     stop("Don't know how to compute total mass of mark space")
 }
+
+#-------------------------------------------------------------------
+
+print.ppp <- function(x, ...) {
+  verifyclass(x, "ppp")
+  ism <- is.marked(x)
+  cat(paste(if(ism) "marked" else NULL,
+            "planar point pattern:",
+            x$n,
+            "points\n"))
+  if(ism) {
+    mks <- x$marks
+    if(is.factor(mks)) {
+      cat("multitype, with ")
+      cat(paste("levels =", paste(levels(mks), collapse="\t"),"\n"))
+    } else {
+      cat(paste("marks are ",
+                if(is.numeric(mks)) "numeric, ",
+                "of type \"", typeof(mks),
+                "\"\n", sep=""))
+    }
+  }
+  print(x$window)
+  return(invisible(NULL))
+}
+
+summary.ppp <- function(object, ...) {
+  verifyclass(object, "ppp")
+  ism <- is.marked(object)
+  cat(paste(if(ism) "marked " else NULL,
+            "planar point pattern: ",
+            object$n,
+            " points\n",
+            sep=""))
+  a <- area.owin(object$window)
+  cat(paste("average intensity",
+            signif(object$n/a,3), "points per unit area\n"))
+  if(ism) {
+    mks <- object$marks
+    if(is.factor(mks)) {
+      cat("Marks:\n")
+      tm <- as.vector(table(mks))
+      tfp <- data.frame(frequency=tm,
+                        proportion=signif(tm/sum(tm),3),
+                        intensity=signif(tm/a, 3),
+                        row.names=levels(mks))
+      print(tfp)
+    } else {
+      cat(paste("marks are ",
+                if(is.numeric(mks)) "numeric, ",
+                "of type \"", typeof(mks),
+                "\"\n", sep=""))
+      cat("summary:\n")
+      print(summary(mks))
+    }
+  }
+  summary(object$window)
+  return(invisible(NULL))
+}
+

@@ -13,8 +13,8 @@ A marked point pattern.
   \tabular{ll}{
     \code{x} \tab Cartesian \eqn{x}-coordinate of cell \cr
     \code{y} \tab Cartesian \eqn{y}-coordinate of cell \cr
-    \code{marks} \tab factor with levels 0 and 1 indicating
-      ``off'' and ``on'' cells respectively.
+    \code{marks} \tab factor with levels \code{off} and \code{on} \cr
+                 \tab indicating ``off'' and ``on'' cells
     }
   See \code{\link{ppp.object}} for details of the format.
 }
@@ -32,7 +32,7 @@ The data were analysed by Diggle (1986).
 \references{
 Diggle, P. J. (1986).
 Displaced amacrine cells in the retina of a
-rabbit : analysis of a bivariate spatial point pattern. 
+rabbit: analysis of a bivariate spatial point pattern. 
 \emph{J. Neurosci. Meth.} \bold{18}, 115--125.
 } 
 \keyword{datasets}

@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.3 $    $Date: 2002/05/13 12:41:10 $
+#     $Revision: 1.5 $    $Date: 2002/07/25 10:45:35 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -36,6 +36,9 @@ distpl <- function(p, l) {
   d1 <- sqrt(xpl^2 + ypl^2)
   d2 <- sqrt((xp-l[3])^2 + (yp-l[4])^2)
   dmin <- min(d1,d2)
+  # test for zero length
+  if(leng < .Machine$double.eps)
+    return(dmin)
   # rotation sine & cosine
   co <- dx/leng
   si <- dy/leng
@@ -61,6 +64,9 @@ distppl <- function(p, l) {
   d1 <- sqrt(xpl^2 + ypl^2)
   d2 <- sqrt((xp-l[3])^2 + (yp-l[4])^2)
   dmin <- pmin(d1,d2)
+  # test for zero length
+  if(leng < .Machine$double.eps)
+    return(dmin)
   # rotation sine & cosine
   co <- dx/leng
   si <- dy/leng
@@ -105,7 +111,8 @@ distppll <- function(p, l) {
   d3 <- ypr^2
   # test
   lenf <- matrix(leng, nrow=np, ncol=nl, byrow=TRUE)
-  outside <- (xpr < 0 | xpr > lenf)
+  zero <- (lenf < .Machine$double.eps) 
+  outside <- (zero | xpr < 0 | xpr > lenf) 
   if(any(outside))
     d3[outside] <- Inf
 
