@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.4 $	$Date: 2003/03/11 03:04:14 $
 #
 # -------- functions ----------------------------------------
 #
@@ -168,7 +168,7 @@ erode.owin <- function(w, r, shrink.frame=TRUE, ...) {
           keepcol <- (wnew$xcol >= exr[1] & wnew$xcol <= exr[2])
           keeprow <- (wnew$yrow >= eyr[1] & wnew$yrow <= eyr[2])
           wnew$xcol <- w$xcol[keepcol]
-          wnew$yrow <- w$yrow[keepcol]
+          wnew$yrow <- w$yrow[keeprow]
           wnew$dim <- c(sum(keeprow), sum(keepcol))
           wnew$m <- wnew$m[keeprow, keepcol]
         }

@@ -2,7 +2,7 @@
 #
 #    multipair.family.S
 #
-#    $Revision: 1.4 $	$Date: 2002/05/06 09:32:17 $
+#    $Revision: 1.5 $	$Date: 2003/03/11 07:46:50 $
 #
 #    Pairwise interaction class for multitype point processes
 #    i.e. marked point processes with a finite number of possible types
@@ -23,7 +23,7 @@ multipair.family <-
   #
   # multipair.family$eval
   #
-  #  $Revision: 1.4 $  $Date: 2002/05/06 09:32:17 $
+  #  $Revision: 1.5 $  $Date: 2003/03/11 07:46:50 $
   #         
   # This auxiliary function is not meant to be called by the user.
   # It computes the distances between points,
@@ -66,7 +66,12 @@ xx <- U$x
 yy <- U$y
 mm <- U$marks
 
-if(!any(correction == c("periodic", "border", "translate", "none")))
+if(!any(correction == c(
+          "periodic",
+          "border",
+          "translate",
+          "isotropic", "Ripley",
+          "none")))
   stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
           
 #  

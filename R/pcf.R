@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.2 $   $Date: 2001/11/23 06:25:02 $
+#   $Revision: 1.3 $   $Date: 2003/03/11 08:09:51 $
 #
 #
 #   calculate pair correlation function
@@ -38,21 +38,21 @@ function(X, ..., method="c") {
 	switch(method,
 		a = { 
 			ss <- smooth.spline(r, K, ...)
-			dK <- predict.smooth.spline(ss, r, deriv=1)$y
+			dK <- predict(ss, r, deriv=1)$y
 			g <- dK/(2 * pi * r)
 		},
 		b = {
 			y <- K/(2 * pi * r)
 			y[is.nan(y)] <- 0
 			ss <- smooth.spline(r, y, ...)
-			dy <- predict.smooth.spline(ss, r, deriv=1)$y
+			dy <- predict(ss, r, deriv=1)$y
 			g <- dy + y/r
 		},
 		c = {
 			z <- K/(pi * r^2)
 			z[is.nan(z)] <- 1
 			ss <- smooth.spline(r, z, ...)
-			dz <- predict.smooth.spline(ss, r, deriv=1)$y
+			dz <- predict(ss, r, deriv=1)$y
 			g <- (r/2) * dz + z
 		},
 		stop(paste("unrecognised method \"", method, "\""))

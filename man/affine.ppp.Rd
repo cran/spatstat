@@ -6,12 +6,13 @@
   plus vector shift) to a point pattern. 
 }
 \usage{
- affine.ppp(X, mat=diag(c(1,1)), vec=c(0,0))
+ affine.ppp(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Point pattern (object of class \code{"ppp"}).}
   \item{mat}{Matrix representing a linear transformation.}
   \item{vec}{Vector of length 2 representing a translation.}
+  \item{\dots}{Ignored}
 }
 \value{
   Another point pattern (of class \code{"ppp"}) representing the

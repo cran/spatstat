@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.12 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 1.13 $	$Date: 2003/03/11 02:55:10 $
 #
 #
 #--------------------------------------------------------------------------
@@ -38,22 +38,42 @@ plot.ppp <-
     # real-valued marks
     ok <- !(any(is.na(marks)) || any(is.infinite(marks)))
     if(ok) {
-      # rescale marks to unit interval
-      mr <- range(c(0,marks))
-      if(diff(mr) > 4 * .Machine$double.eps)
-        ms <- (marks - mr[1])/diff(mr)
-      else
-        ms <- rep(1, length(marks))
-      # determine roughly appropriate max radius on plot
-      if(missing(maxsize)) {
+      # guess appropriate max physical size of symbols
+      if (missing(maxsize)) {
         maxsize <- 1.4/sqrt(pi * x$n/area.owin(x$window))
         maxsize <- min(maxsize, diameter(x$window) * 0.07)
       }
-      # fire
-      symbols(x$x, x$y, circles=ms * maxsize, inches=FALSE, add=TRUE, ...)
-      # compute plottable scale bar for marks
-      mp.value <- pretty(mr)
-      mp.plotted <- mp.value * maxsize/mr[2]
+      # find range of values
+      mr <- range(c(0,marks))
+      maxabs <- max(abs(mr))
+      # determine physical scale and apply it
+      if (diff(mr) < 4 * .Machine$double.eps
+          || maxabs < 4 * .Machine$double.eps)
+        {
+          # constant values - plot at half maxsize
+          ms <- rep(0.5 * maxsize, length(marks))
+          mp.value <- mr[1]
+          mp.plotted <- 0.5 * maxsize
+        } else {
+          # scale to [0,maxsize]
+          scal <- maxsize/maxabs
+          ms <- marks * scal
+          mp.value <- pretty(mr)
+          mp.plotted <- mp.value * scal
+        }
+      # plot positive values as circles
+      neg <- (marks < 0)
+      if(any(!neg))
+        symbols(x$x[!neg], x$y[!neg],
+                circles = ms[!neg],
+                inches = FALSE, add = TRUE, ...)
+      # plot negative values as squares
+      if(any(neg))
+        symbols(x$x[neg], x$y[neg],
+                squares = - ms[neg],
+                inches = FALSE, add = TRUE, ...)
+
+      # return a plottable scale bar
       names(mp.plotted) <- paste(mp.value)
       return(mp.plotted)
     } else {

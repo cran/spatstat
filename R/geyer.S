@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 1.3 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.4 $	$Date: 2003/03/12 05:23:54 $
 #
 #    Geyer's saturation process
 #
@@ -42,6 +42,20 @@ Geyer <- function(r, sat) {
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
                        printable=round(gamma,4)))
+         },
+         rmhmodel = function(fit, self) {
+           # not implemented if there is a trend 
+           if(!no.trend.ppm(fit))
+             return(NULL)
+           coeffs <- fit$coef
+           beta <- exp(coeffs[["(Intercept)"]])
+           gamma <- exp(coeffs[["Interaction"]])
+           r <- self$par$r
+           sat <- self$par$saturate
+           w <- fit$Q$data$window
+           return(list(cif='geyer',
+                       par=c(beta=beta,gamma=gamma,r=r,sat=sat),
+                       w=w))
          }
   )
   class(out) <- "interact"

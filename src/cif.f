@@ -44,7 +44,7 @@
       goto 23017
 23016 continue
       if(.not.(nmbr .eq. 6))goto 23020
-      call dig1(u,v,ix,x,y,npts,par,period,cifval)
+      call dgs(u,v,ix,x,y,npts,par,period,cifval)
       if(.not.(tpar(1) .gt. 0))goto 23022
       call lpt(u,v,tpar,tval)
       cifval = cifval*tval
@@ -52,7 +52,7 @@
       goto 23021
 23020 continue
       if(.not.(nmbr .eq. 7))goto 23024
-      call dig2(u,v,ix,x,y,npts,par,period,cifval)
+      call diggra(u,v,ix,x,y,npts,par,period,cifval)
       if(.not.(tpar(1) .gt. 0))goto 23026
       call lpt(u,v,tpar,tval)
       cifval = cifval*tval

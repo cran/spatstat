@@ -6,12 +6,13 @@
   plus vector shift) to a window. 
 }
 \usage{
- affine.owin(W, mat=diag(c(1,1)), vec=c(0,0))
+ affine.owin(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
 }
 \arguments{
-  \item{W}{Window (object of class \code{"owin"}).}
+  \item{X}{Window (object of class \code{"owin"}).}
   \item{mat}{Matrix representing a linear transformation.}
   \item{vec}{Vector of length 2 representing a translation.}
+  \item{\dots}{Ignored}
 }
 \value{
   Another window (of class \code{"owin"}) representing the

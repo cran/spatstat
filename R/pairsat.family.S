@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.12 $	$Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.13 $	$Date: 2003/03/11 07:47:32 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -68,7 +68,12 @@ ndummy <- nall - ndata
 saturate <- potpars$saturate
 
 # validate 'correction' argument
-if(!any(correction == c("periodic", "border", "translate", "none")))
+if(!any(correction == c(
+          "periodic",
+          "border",
+          "translate",
+          "isotropic", "Ripley",
+          "none")))
   stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
           
 #  

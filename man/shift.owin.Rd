@@ -5,11 +5,12 @@
   Applies a vector shift to a window
 }
 \usage{
- shift.owin(W, vec=c(0,0))
+ shift.owin(X, vec=c(0,0), \dots)
 }
 \arguments{
-  \item{W}{Window (object of class \code{"owin"}).}
+  \item{X}{Window (object of class \code{"owin"}).}
   \item{vec}{Vector of length 2 representing a translation.}
+  \item{\dots}{Ignored}
 }
 \value{
   Another window (of class \code{"owin"}) representing the

@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.3 $    $Date: 2002/07/18 10:53:11 $
+#    $Revision: 1.5 $    $Date: 2002/08/12 03:51:52 $
 #
 #    Translation edge correction weights
 #
@@ -25,9 +25,11 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
   W <- X$window
   x <- X$x
   y <- X$y
+
+  Y <- as.ppp(Y, W)
   xx <- Y$x
   yy <- Y$y
-
+  
   # For irregular polygons, exact evaluation is very slow;
   # so use pixel approximation, unless exact=TRUE
   if(W$type == "polygonal" && !exact)

@@ -2,7 +2,7 @@
 #
 #    strauss.S
 #
-#    $Revision: 1.6 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.8 $	$Date: 2003/03/12 05:16:45 $
 #
 #    The Strauss process
 #
@@ -36,6 +36,19 @@ Strauss <- function(r) {
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
                        printable=round(gamma,4)))
+         },
+         rmhmodel = function(fit, self) {
+           # not implemented if there is a trend 
+           if(!no.trend.ppm(fit))
+             return(NULL)
+           coeffs <- fit$coef
+           beta <- exp(coeffs[["(Intercept)"]])
+           gamma <- exp(coeffs[["Interaction"]])
+           r <- self$par$r
+           w <- fit$Q$data$window
+           return(list(cif='strauss',
+                       par=c(beta=beta,gamma=gamma,r=r),
+                       w=w))
          }
   )
   class(out) <- "interact"
