@@ -5,30 +5,53 @@
   Obtain a discrete (pixel image) approximation of a given window
 }
 \usage{
- as.mask(w, eps=NULL, dimyx=NULL)
+ as.mask(w, eps=NULL, dimyx=NULL, xy=NULL)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}).}
   \item{eps}{(optional) width and height of pixels.}
   \item{dimyx}{(optional) pixel array dimensions}
+  \item{xy}{(optional) pixel coordinates}
 }
 \value{
   A window (object of class \code{"owin"})
   of type \code{"mask"} representing a binary pixel image.
 }
 \details{
-  The shape of the window \code{w} will be approximated
-  by a binary pixel image. See \code{\link{owin.object}} for
-  explanation of binary image masks.
+  This function generates a rectangular grid of locations in the plane,
+  tests whether each of these locations lies inside the
+  window \code{w}, and stores the results as a binary pixel image
+  or `mask' (an object of class \code{"owin"}, see \code{\link{owin.object}}).
 
-  The pixel raster will be an \eqn{m \times n}{m x n} rectangular grid
+  The most common use of this function is to approximate the shape
+  of another window \code{w} by a binary pixel image. In this case,
+  we will usually want to have a very fine grid of pixels.
+
+  This function can also be used to generate a coarsely-spaced grid of
+  locations inside a window, for purposes such as subsampling
+  and prediction.
+
+  The grid spacing and location are controlled by the
+  arguments \code{eps}, \code{dimyx} and \code{xy},
+  which are mutually incompatible.
+
+  If \code{eps} is given, then the grid spacing will be 
+  approximately \code{eps} in both the \eqn{x} and \eqn{y} directions.
+
+  If \code{dimyx} is given, then the pixel grid will be an
+  \eqn{m \times n}{m x n} rectangular grid
   where \eqn{m, n} are given by \code{dimyx[2]}, \code{dimyx[1]}
-  respectively (if the argument \code{dimyx} is given)
-  or by the constraint that
-  pixel widths and heights should be approximately \code{eps}.
-  If neither \code{eps} nor \code{dimyx} is given,
+  respectively.
+
+  If \code{xy} is given, then this should be a structure
+  containing two elements \code{x} and \code{y} which are the
+  vectors of \eqn{x} and \code{y} coordinates of the margins
+  of the grid. The pixel coordinates will be generated
+  from these two vectors. In this case \code{w} may be omitted.
+  
+  If neither \code{eps} nor \code{dimyx} nor \code{xy} is given,
   the pixel raster dimensions are obtained from
-  \code{spatstat.options("npixel")}.
+  \code{\link{spatstat.options}("npixel")}.
 
   There is no inverse of this function!
 }
@@ -42,6 +65,9 @@
   \dontrun{plot(w)}
   m <- as.mask(w)
   \dontrun{plot(m)}
+  x <- 1:9
+  y <- seq(0.25, 9.75, by=0.5)
+  m <- as.mask(w, xy=list(x=x, y=y))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

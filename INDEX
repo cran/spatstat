@@ -16,6 +16,7 @@ as.ppp                  Convert Data To Class ppp
 as.rectangle            Window Frame
 bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
+betacells               Beta Ganglion Cells in Cat Retina
 bounding.box            Bounding Box of a Window
 bramblecanes            Hutchings' Bramble Canes data
 cells                   Biological Cells Point Pattern
@@ -43,7 +44,7 @@ Fest                    Estimate the empty space function F
 fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
 fv.object               Data Frames of Function Values
-ganglia                 Cat Retinal Ganglia Data
+ganglia                 Beta Ganglion Cells in Cat Retina, Old Version
 Gcross                  Multitype Nearest Neighbour Distance Function
                         (i-to-j)
 Gdot                    Multitype Nearest Neighbour Distance Function
@@ -113,9 +114,11 @@ pcf                     Pair Correlation Function
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.owin               Plot a Spatial Window
+plot.plotppm            Plot a plotppm Object Created by plot.ppm
 plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
 plot.quad               plot a Spatial Quadrature Scheme
+plot.splitppp           Plot a List of Point Patterns
 Poisson                 Poisson Point Process Model
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
@@ -167,6 +170,7 @@ shift.ppp               Apply Vector Translation To Point Pattern
 simdat                  Simulated Point Pattern
 Softcore                The Soft Core Point Process Model
 spatstat.options        Internal Options in Spatstat Package
+split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
 square                  Square Window
 stratrand               Stratified random point pattern
@@ -175,7 +179,7 @@ StraussHard             The Strauss / Hard Core Point Process Model
 subset.fasp             Extract Subset of Function Array
 subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image
-subset.ppp              Extract Subset of Point Pattern
+subset.ppp              Extract or Replace Subset of Point Pattern
 summary.im              Summarizing a Pixel Image
 summary.owin            Summary of a Spatial Window
 summary.ppm             Summarizing a Fitted Point Process Model

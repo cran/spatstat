@@ -1,3 +1,4 @@
+require(spatstat, quietly=TRUE, save=FALSE)
 redwoodfull <- scanpp("redwoodfull.tab", owin(c(0,540),c(0,543)),
                       dir=spatstat.rawdata.location())
 # auxiliary info

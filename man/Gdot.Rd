@@ -205,9 +205,9 @@ Gdot(X, i=1, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    data(ganglia)
+    data(betacells)
      # cat retina data
-    G0. <- Gdot(ganglia, "off") 
+    G0. <- Gdot(betacells, "off") 
     plot(G0.)
 
     # synthetic example    

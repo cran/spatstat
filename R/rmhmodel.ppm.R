@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.4 $   $Date: 2004/01/27 11:28:21 $
+#  $Revision: 2.7 $   $Date: 2004/08/20 10:32:00 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -67,7 +67,14 @@ list(
        # interaction parameters gamma[i,j]
        gamma <- (inte$interpret)(coeffs, inte)$param$gammas
        return(list(cif='straushm',
-                   par=list(gamma=gamma,iradii=radii,hradii=hradii)))
+                   par=list(gamma=gamma,iradii=iradii,hradii=hradii)))
+     },
+     "Piecewise constant pairwise interaction process" =
+     function(coeffs, inte) {
+       r <- inte$par$r
+       gamma <- (inte$interpret)(coeffs, inte)$param$gammas
+       h <- stepfun(r, c(gamma, 1))
+       return(list(cif='lookup', par=list(h=h)))
      }
 )
 
@@ -79,8 +86,6 @@ list(
 #      ------------------           -----------
 #
 #           <none>                   dgs
-#
-#           PairPiece                <none>
 #
 #           LennardJones             <none>
 #
@@ -122,8 +127,15 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE) {
         "Re-fit the model using the current version of the package")
         stop(whinge)
       }
+      
       # Extract the interpoint interaction object
       inte <- Y$entries$interaction
+      # Determine whether the model can be simulated using rmh
+      siminfo <- .Spatstat.Rmhinfo[[inte$name]]
+      if(is.null(siminfo))
+        stop(paste("Simulation of a fitted \'", inte$name,
+                   "\' has not yet been implemented"))
+      
       # Get fitted model's canonical coefficients
       coeffs <- Y$entries$theta
       # Ensure the fitted model is valid
@@ -139,11 +151,6 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE) {
         else
           stop("The fitted model is not a valid point process")
       }
-      # Determine whether the model can be simulated using rmh
-      siminfo <- .Spatstat.Rmhinfo[[inte$name]]
-      if(is.null(siminfo))
-        stop(paste("Simulation of a fitted \'", inte$name,
-                   "\' has not yet been implemented"))
       # Translate the model to the format required by rmh.default
       Z <- siminfo(coeffs, inte)
       if(is.null(Z))

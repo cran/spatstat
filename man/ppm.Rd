@@ -212,6 +212,12 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl")
   as a good initial starting point for these iterative methods. 
   Maximum pseudolikelihood may also be used profitably for
   model selection in the initial phases of modelling.
+
+  The warning message ``Algorithm did not converge in: glm.fit( ...''
+  is sometimes obtained. It means that the glm fitting algorithm
+  did not converge in a reasonable number of iterations. In most cases
+  this can be fixed by taking a finer quadrature scheme.
+  See \code{\link{quadscheme}}.
 }
 \references{
   Baddeley, A. and Turner, R.
@@ -387,18 +393,18 @@ if they have been obtained with different values of \code{rbord}.
  # Multitype point pattern --- trees marked by species
 \testonly{
  # equivalent functionality - smaller dataset
- data(ganglia)
+ data(betacells)
  }
 
  # fit stationary marked Poisson process
  # with different intensity for each species
 \dontrun{ppm(lansing, ~ marks, Poisson())}
-\testonly{ppm(ganglia, ~ marks, Poisson())}
+\testonly{ppm(betacells, ~ marks, Poisson())}
 
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
 \dontrun{ppm(lansing, ~ marks * polynom(x,y,3), Poisson())}
-\testonly{ppm(ganglia, ~ marks * polynom(x,y,2), Poisson())}
+\testonly{ppm(betacells, ~ marks * polynom(x,y,2), Poisson())}
 
 }
 \author{Adrian Baddeley

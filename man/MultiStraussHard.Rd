@@ -58,11 +58,11 @@ which can then be fitted to point pattern data.
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStraussHard(1:2, r, h)
    # prints a sensible description of itself
-   data(ganglia)
-   r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   h <- 0.03 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(ganglia, ~1, MultiStraussHard(c("off","on"), r, h), rbord=0.06)
-   # fit the stationary multitype hardcore Strauss process to `ganglia'
+   data(betacells)
+   r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
+   h <- 30.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
+   ppm(betacells, ~1, MultiStraussHard(c("off","on"), r, h), rbord=60.0)
+   # fit the stationary multitype hardcore Strauss process to `betacells'
 }
 \section{Warnings}{
   The argument \code{types} is interpreted as a

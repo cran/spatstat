@@ -224,8 +224,8 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     # see help(density) for correct interpretation of 'bw'
 
    \testonly{
-    data(ganglia)
-    niets <- markcorr(ganglia, function(m1,m2){m1 == m2}, method="loess")
+    data(betacells)
+    niets <- markcorr(betacells, function(m1,m2){m1 == m2}, method="loess")
     niets <- markcorr(X, correction="isotropic", method="smrep")
     }
 }

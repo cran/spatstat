@@ -21,7 +21,7 @@
       point in the observation window) which calculates the value
       of the trend at the point \code{(x,y)} or an \bold{image}
       which specifies the value of the trend at (a grid of) points
-      in the observation window.  Auxilliary arguments may be passed
+      in the observation window.  Auxiliary arguments may be passed
       to the \code{trend} function via the \dots argument.
       If the model being simulated is multitype, then \code{trend}
       may be a \bold{list} of functions or images, with as many entries
@@ -119,7 +119,7 @@
         \item{\code{'dgs'}}{Diggle, Gates and Stibbard (1987) process}
 	\item{\code{'diggra'}}{Diggle and Gratton (1984) process}
 	\item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
-	\item{\code{'lookup'}}{General pairwise interaction process,
+	\item{\code{'lookup'}}{General isotropic pairwise interaction process,
 	with the interaction function specified via a ``lookup table''.}
       }
       See the section \bold{Extensions} for the possibility of extending
@@ -225,14 +225,16 @@
 	  \eqn{\beta}{beta} since we reserve the symbol \eqn{\beta}{beta}
 	  for an intensity parameter.
 	}
-	\item{geyer}{
-	  (See Geyer (1999))  A \bold{named} vector
+	\item{geyer:}{
+	  (Geyer's saturation process. See Geyer (1999).)
+	  A \bold{named} vector
 	  with components \code{beta}, \code{gamma}, \code{r}, and \code{sat}.
 	  The components \code{beta}, \code{gamma}, \code{r} are as for
 	  the Strauss model, and \code{sat} is the ``saturation''
 	  parameter.  The model is Geyer's ``saturation'' point process
-	  model.  It is ``like a Strauss model, but with an upper bound
-	  to the number of \eqn{r}-close neighbors of any point.''
+	  model, a modification of the Strauss process in which
+	  we effectively impose an upper limit (\code{sat}) on the number of
+	  neighbours which will be counted as close to a given point.
 	 
 	  Explicitly, a saturation point process with interaction
 	  radius \eqn{r}, saturation threshold \eqn{s}, and
@@ -246,41 +248,81 @@
 	  pattern \eqn{X}.
 	}
 
-	\item{lookup}{ A \bold{named} list with components
-	\code{beta}, \code{h}, and \code{r}.  The component
-	\code{beta} is a (positive) scalar which determines the ``base''
-	intensity of the process.  The components \code{h} and
-	\code{r} are vectors (of equal length, equal to \code{N},
-	say) specifying the pairwise interaction function of the
-	model (see, e.g., Diggle (2003)).
+	\item{lookup:}{
+	  (Arbitrary pairwise interaction process with isotropic interaction.)
+	  A \bold{named} list with components
+	  \code{beta}, \code{r}, and \code{h}, or just with components
+	  \code{beta} and \code{h}.
 
-	The entries of \code{r} need not be sorted into ascending
-	order, but they must (of course) be ordered consistent
-	with those of \code{h}.  Henceforth it will be assumed, for
-	simplicity, that \code{r} \emph{is} in fact sorted.
+	  This model is the pairwise interaction process
+	  with an isotropic interaction given by any chosen function \eqn{H}.
+	  Each pair of points \eqn{x_i, x_j}{x[i], x[j]} in the
+	  point pattern contributes
+	  a factor \eqn{H(d(x_i, x_j))}{H(d(x[i],x[j]))}
+	  to the probability density, where \eqn{d} denotes distance
+	  and \eqn{H} is the pair interaction function.
 
-	Explicitly \code{h[i]} is equal to \eqn{h(r[i])} where
-	\eqn{h()} (by a slight abuse of notation) denotes the
-	pairwise interaction function being modeled as well as the
-	vector of values of this function.  The \code{r[i]} are
-	(distinct) distances varying from 0 to some maximal value
-	\code{r[N]}.  It is assumed that the pairwise interaction
-	function is identically equal to 1 for distances greater
-	than \code{r.max}.
+	  The component \code{beta} is a
+	  (positive) scalar which determines the ``base'' intensity
+	  of the process.
 
-	All of the entries of \code{h} and \code{r} \bold{must}
-	be non-negative; the minimal entry of \code{r} \bold{must}
-	be equal to 0.	If any entry of \code{h} is greater than
-	1, then the entry corresponding to \code{r=0} must be 0
-	(otherwise the specified process is non-existant).
+	  In this implementation, \eqn{H} must be a step function.
+	  It is specified by the user in one of two ways.
+	  \itemize{
+	    \item
+	    \bold{as a vector of values:}
+	    If \code{r} is present, then \code{r} is assumed to 
+	    give the locations of jumps in the function \eqn{H},
+	    while the vector \code{h} gives the corresponding
+	    values of the function.
 
-	The software takes the value of \eqn{h(x)} to be \code{h[i]}
-	for \eqn{x} in the half-open interval \eqn{[r[i],r[i+1])}
-	for \eqn{1 <= i <= N-1}.  As previously mentioned, \eqn{h(x)}
-	is taken to be identically equal to 1 for \eqn{x >= r[N]}.
+	    Specifically, the interaction function
+	    \eqn{H(t)} takes the value \code{h[1]}
+	    for distances \eqn{t} in the interval 
+	    \code{[0, r[1])}; takes the value \code{h[i]}
+	    for distances \eqn{t} in the interval 
+	    \code{[r[i-1], r[i])} where
+	    \eqn{i = 2,\ldots, n}{i = 2, ..., n};
+	    and takes the value 1 for \eqn{t \ge r[n]}{t >= r[n]}.
+	    Here \eqn{n} denotes the length of \code{r}.
+	    
+	    The components \code{r} and \code{h}
+	    must be numeric vectors of equal length.
+	    The \code{r} values must be strictly positive, and 
+	    sorted in increasing order.
 
-	Greatest efficiency is achieved if the \code{r[i]} are
-	equispaced on the interval from 0 to \code{r.max}.
+	    The entries of \code{h} must be non-negative. 
+	    If any entry of \code{h} is greater than 1,
+	    then the entry \code{h[1]} must be 0 (otherwise the specified
+	    process is non-existent).
+
+	    Greatest efficiency is achieved if the values of
+	    \code{r} are equally spaced.
+	    
+	    [\bold{Note:} The usage of \code{r} and \code{h}
+	    has \emph{changed} from the previous usage in \code{spatstat}
+	    versions 1.4-7 to 1.5-1, in which ascending order was not required,
+	    and in which the first entry of \code{r} had to be 0.]
+
+	    \item
+	    \bold{as a stepfun object:}
+	    If \code{r} is absent, then \code{h} must be
+	    an object of class \code{"stepfun"} specifying
+	    a step function. Such objects are created by
+	    \code{\link{stepfun}}. 
+
+	    The stepfun object \code{h} must be right-continuous
+	    (which is the default using \code{\link{stepfun}}.)
+
+	    The values of the step function must all be nonnegative.
+	    The values must all be less than 1
+	    unless the function is identically zero on some initial
+	    interval \eqn{[0,r)}. The rightmost value (the value of
+	    \code{h(t)} for large \code{t}) must be equal to 1.
+
+	    Greatest efficiency is achieved if the jumps (the
+	    ``knots'' of the step function) are equally spaced.
+	  }
 	}
     }
     \item{trend}{
@@ -310,6 +352,7 @@
       by \code{\link{as.owin}()}.
     }
   }
+  }
   The argument \code{start} determines the initial state of the
   Metropolis-Hastings algorithm. Possible components are
     \describe{
@@ -336,7 +379,7 @@
 	\code{n.start} gets multiplied by the ratio of the area of
 	the \bold{expanded} window to that of the original window.
 	Then that many points are uniformly generated in the expanded
-	window; see below for a discussion of the expanded window.
+	window; see below for a discussion of the expanded window.)
 	The value of \code{n.start} should be roughly equal to
 	(an educated guess at) the expected number of points which
 	will be generated inside the window.
@@ -455,7 +498,7 @@
        }
      }
    }
-}
+   
  
 \references{
    Baddeley, A. and Turner, R. (2000) Practical maximum
@@ -511,7 +554,39 @@
   }
 }
     
-\section{Warnings}{
+\section{Warnings in Respect of ``lookup''}{
+
+The syntax of \code{rmh.default} in respect of the \code{lookup} cif
+has \emph{changed} from the previous release of \code{spatstat}
+(versions 1.4-7 to 1.5-1).
+Read the \emph{Details} carefully. In particular it is now required
+that the first entry of the \code{r} component of \code{par}
+be \emph{strictly positive}.  (This is the opposite of what was
+required in the previous release, which was that this first entry
+had to be 0.)
+
+It is also now required that the entries of \code{r} be
+sorted into ascending order.  (In the previous release it
+was assumed that the entries of \code{r} and \code{h} were
+in corresponding order and the two vectors were sorted
+commensurately.  It was decided that this is dangerous sand
+unnecessary.)
+
+Note that if you specify the \code{lookup} pairwise interaction
+function via \code{\link{stepfun}()} the arguments \code{x}
+and \code{y} which are passed to \code{stepfun()} are slightly
+different from \code{r} and \code{h}:  \code{length(y)} is equal
+to \code{1+length(x)}; the final entry of \code{y} must be equal
+to 1 --- i.e. this value is explicitly supplied by the user rather
+than getting tacked on internally.
+
+The step function returned by \code{stepfun()} must be right
+continuous (this is the default behaviour of \code{stepfun()})
+otherwise an error is given.
+}
+
+\section{Other Warnings}{
+
 There is never a guarantee that the Metropolis-Hastings algorithm
 has converged to the steady state.
 
@@ -564,6 +639,7 @@ or trends.
 }
 \examples{
    \dontrun{
+   require(spatstat)
    nr   <- 1e5
    nv  <- 5000
    }
@@ -727,7 +803,7 @@ or trends.
                    control=list(p=1,periodic=TRUE,nrep=nr,nverb=nv))
 
    # Lookup (interaction function h_2 from page 76, Diggle (2003)):
-      r <- seq(from=0,to=0.2,length=101)
+      r <- seq(from=0,to=0.2,length=101)[-1] # Drop 0.
       h <- 20*(r-0.05)
       h[r<0.05] <- 0
       h[r>0.10] <- 1

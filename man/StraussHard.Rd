@@ -30,7 +30,6 @@ which can then be fitted to point pattern data.
       than a distance \eqn{h} apart
     \item each pair of points closer than \eqn{r} units apart
       contributes a factor \eqn{\gamma}{gamma} to the probability density.
-    }
   }
   This is a hybrid of the Strauss process and the hard core process.
 

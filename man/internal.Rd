@@ -41,6 +41,7 @@
 \alias{intX.xypolygon}     
 \alias{intY.owin}     
 \alias{intY.xypolygon}     
+\alias{is.cadlag}
 \alias{is.data}
 \alias{is.fv}
 \alias{is.marked.default}    
@@ -61,7 +62,6 @@
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{mkcor}
-\alias{mpl}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
@@ -89,6 +89,7 @@
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{resolve.defaults}
 \alias{reverse.xypolygon}    
 \alias{rotxy}
 \alias{runifdisc}
@@ -135,7 +136,7 @@ cartesian(pp, markset, fac = TRUE)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 conspire(\dots)
-contour.im(x, \dots, xlab="x", ylab="y")
+contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 crossdist(x1, y1, x2, y2)            
 default.ngrid(X)
@@ -157,12 +158,13 @@ getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
 identical.formulae(x,y)
-image.im(x, \dots, xlab="x", ylab="y")
+image.im(x, \dots)
 inside.xypolygon(pts, polly, test01 = TRUE)     
 intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
 intY.xypolygon(polly)
+is.cadlag(s)
 is.data(Q)
 is.fv(x)
 is.marked(X, \dots)
@@ -186,7 +188,6 @@ matrowsum(x)
 meanX.owin(w)            
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)
-mpl(Q, trend, interaction, data, correction, rbord, use.gam)
 mpl.engine(Q, trend, interaction, covariates, correction,
 	 rbord, use.gam)
 mpl.get.covariates(covariates, locations, type)
@@ -201,9 +202,9 @@ overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)   
 param.quad(Q)
-persp.im(x, \dots, xlab="x", ylab="y")
+persp.im(x, \dots)
 pixellate(x, \dots, weights)
-plot.im(x, \dots, xlab="x", ylab="y")
+plot.im(x, \dots)
 polynom(x, \dots)
 print.fasp(x, \dots)
 print.fv(x, \dots)
@@ -216,6 +217,7 @@ quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
+resolve.defaults(\dots)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)
 rmhmodel.ppm(model, win, \dots, verbose, project)

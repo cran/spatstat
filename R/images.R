@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.9 $     $Date: 2004/06/09 02:13:00 $
+#         $Revision: 1.11 $     $Date: 2004/08/30 05:25:56 $
 #
 #      The class "im" of raster images
 #
@@ -58,25 +58,35 @@ inherits(x,"im")
 ########   methods for class "im"
 ################################################################
 
-image.im <- function(x, ..., xlab="x", ylab="y") {
-    image(x$xcol, x$yrow, t(x$v), ...,
-                  xlab=xlab, ylab=ylab, asp=1.0)
+image.im <- function(x, ...) {
+  main <- deparse(substitute(x))
+  do.call("image",
+          resolve.defaults(list(x$xcol, x$yrow, t(x$v)),
+                           list(...),
+                           list(xlab="x", ylab="y", asp=1.0, main=main)))
 }
 
-persp.im <- function(x, ..., xlab="x", ylab="y") {
-  persp(x$xcol, x$yrow, t(x$v), ...,
-                xlab=xlab, ylab=ylab, asp=1.0)
+persp.im <- function(x, ...) {
+  xname <- deparse(substitute(x))
+  do.call("persp",
+          resolve.defaults(list(x$xcol, x$yrow, t(x$v)),
+                           list(...),
+                           list(xlab="x", ylab="y", zlab=xname),
+                           list(main=xname)))
 }
 
-contour.im <- function (x, ..., xlab="x", ylab="y")
+contour.im <- function (x, ...)
 {
-    doit <- function(x, ..., add=FALSE) {
-      if(!add) 
-        plot(x$xcol, x$yrow, type="n", asp = 1, ...)
-      contour(x$xcol, x$yrow, t(x$v), add=TRUE, ...)
-    }
-    doit(x, ..., xlab=xlab, ylab=ylab)
-    invisible(NULL)
+  main <- deparse(substitute(x))
+  add <- resolve.defaults(list(...), list(add=FALSE))$add
+  if(!add) 
+    do.call("plot",
+            resolve.defaults(list(range(x$xcol), range(x$yrow), type="n"),
+                             list(...),
+                             list(asp = 1, xlab="x", ylab="y", main=main)))
+  do.call("contour",
+          resolve.defaults(list(x$xcol, x$yrow, t(x$v), add=TRUE),
+                           list(...)))
 }
 
 plot.im <- image.im

@@ -66,11 +66,11 @@ which can then be fitted to point pattern data.
    r <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStrauss(1:2, r)
    # prints a sensible description of itself
-   data(ganglia)
-   r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   ppm(ganglia, ~1, MultiStrauss(c("off","on"), r), rbord=0.06)
-   # fit the stationary multitype Strauss process to `ganglia'
-   ppm(ganglia, ~polynom(x,y,3), MultiStrauss(c("off","on"), r), rbord=0.06)
+   data(betacells)
+   r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
+   ppm(betacells, ~1, MultiStrauss(c("off","on"), r), rbord=60.0)
+   # fit the stationary multitype Strauss process to `betacells'
+   ppm(betacells, ~polynom(x,y,3), MultiStrauss(c("off","on"), r), rbord=60.0)
    # fit a nonstationary Strauss process with log-cubic polynomial trend
 }
 \section{Warnings}{

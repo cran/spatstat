@@ -62,6 +62,7 @@
   \code{\link{Geyer}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},
+  \code{\link{PairPiece}},
   \code{\link{Poisson}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}}
@@ -112,6 +113,7 @@
   \code{\link{rmh.default}},
   \code{\link{ppp.object}},
   \code{\link{ppm}},
+  \code{\link{PairPiece}},
   \code{\link{Poisson}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}},
@@ -146,7 +148,8 @@
    plot(Xsim, main="simulation from fitted Geyer model")
 
    # soft core interaction process
-   fit <- ppm(X, ~1, Softcore(kappa=0.1))
+   Q <- quadscheme(X, nd=50)
+   fit <- ppm(Q, ~1, Softcore(kappa=0.1))
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Soft Core model")
 
@@ -156,7 +159,17 @@
    fit <- ppm(cells, ~1, DiggleGratton(0.05, 0.1))
    Xsim <- rmh(fit, start=list(n.start=cells$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Diggle-Gratton model")
-   
+
+   \dontrun{
+   X <- rSSI(0.05, 100)
+   plot(X, main="new data")
+
+   # piecewise-constant pairwise interaction function
+   fit <- ppm(X, ~1, PairPiece(seq(0.02, 0.1, by=0.01)))
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
+   plot(Xsim, main="simulation from fitted pairwise model")
+   }
+
    # marked point pattern
    data(amacrine)
    Y <- amacrine

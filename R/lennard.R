@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.2 $	$Date: 2004/01/08 04:52:40 $
+#    $Revision: 1.3 $	$Date: 2004/08/11 07:45:49 $
 #
 #    Lennard-Jones potential
 #
@@ -27,7 +27,7 @@ LennardJones <- function() {
            theta1 <- coeffs[["Interact.1"]]
            theta2 <- coeffs[["Interact.2"]]
            if(theta1 <= 0) {
-             warning("Fitted regular parameter sigma^12 is negative")
+             # Fitted regular parameter sigma^12 is negative
              sigma <- NA
              tau <- NA
            }
@@ -39,7 +39,15 @@ LennardJones <- function() {
                        inames="interaction parameters",
                        printable=round(c(sigma=sigma,tau=tau),4)))
          },
-         siminfo = NULL
+         valid = function(coeffs, self) {
+           p <- self$interpret(coeffs, self)$param
+           return(!any(is.na(p)))
+         },
+         project = function(coeffs, self) {
+           p <- self$interpret(coeffs, self)$param
+           if(any(is.na(p)))
+             stop("Don't know how to project Lennard-Jones models")
+         }
   )
   class(out) <- "interact"
   out$init(out)

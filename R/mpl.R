@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.10 $	$Date: 2004/06/09 10:56:36 $
+#	$Revision: 5.13 $	$Date: 2004/09/01 04:13:03 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -19,7 +19,7 @@
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE) {
-   .Deprecated("ppm")
+   .Deprecated("ppm", package="spatstat")
    ppm(Q, trend, interaction, data, correction, rbord, use.gam, method="mpl")
 }
 
@@ -54,8 +54,8 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.version <- list(major=1,
                     minor=5,
-                    release=1,
-                    date="$Date: 2004/06/09 10:56:36 $")
+                    release=3,
+                    date="$Date: 2004/09/01 04:13:03 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)

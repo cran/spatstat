@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.2 $	$Date: 2004/01/27 08:56:20 $
+#    $Revision: 2.4 $	$Date: 2004/09/01 04:04:41 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -97,14 +97,20 @@ MultiStraussHard <- function(types, iradii, hradii) {
          par      = list(types=types, iradii = iradii, hradii = hradii),
          parnames = c("possible types", "interaction distances", "hardcore distances"),
          init     = function(self) {
-
                       r <- self$par$iradii
                       h <- self$par$hradii
                       nt <- length(self$par$types)
 
                       MultiPair.checkmatrix(r, nt, "\`iradii\'")
                       MultiPair.checkmatrix(h, nt, "\`hradii\'")
-                      
+
+                      ina <- is.na(iradii)
+                      hna <- is.na(hradii)
+                      if(all(ina))
+                        stop("All entries of \`iradii\' are NA")
+                      both <- !ina & !hna
+                      if(any(iradii[both] <= hradii[both]))
+                        stop("iradii must be larger than hradii")
                     },
          update = NULL,  # default OK
          print = function(self) {
@@ -155,12 +161,15 @@ MultiStraussHard <- function(types, iradii, hradii) {
            hradii <- self$par$hradii
            # interaction parameters gamma[i,j]
            gamma <- (self$interpret)(coeffs, self)$param$gammas
-           if(!all(is.finite(gamma)))
+           # Check that we managed to estimate all required parameters
+           required <- !is.na(iradii)
+           if(!all(is.finite(gamma[required])))
              return(FALSE)
-           # inactive hard cores?
+           # Check that the model is integrable
+           # inactive hard cores ...
            ihc <- (is.na(hradii) | hradii == 0)
-           # non-integrable?
-           return(all(gamma[ihc] <= 1))
+           # .. must have gamma <= 1
+           return(all(gamma[required & ihc] <= 1))
          },
          project = function(coeffs, self) {
            # interaction radii r[i,j]

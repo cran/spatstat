@@ -172,12 +172,12 @@ Kcross(X, i=1, j=2, breaks)
  \code{\link{pcf}}
 }
 \examples{
-    data(ganglia)
+    data(betacells)
      # cat retina data
-    K01 <- Kcross(ganglia, "off", "on") 
+    K01 <- Kcross(betacells, "off", "on") 
     plot(K01)
 
-    K10 <- Kcross(ganglia, "on", "off")
+    K10 <- Kcross(betacells, "on", "off")
 
     # synthetic example    
     pp <- runifpoispp(50)

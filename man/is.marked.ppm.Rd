@@ -56,8 +56,8 @@
 
    \testonly{
       # Smaller dataset
-      data(ganglia)
-      lansing <- ganglia[seq(2, 135, by=3), ]
+      data(betacells)
+      lansing <- betacells[seq(2, 135, by=3), ]
    }
 
   fit1 <- ppm(lansing, ~ marks, Poisson())

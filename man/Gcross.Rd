@@ -202,14 +202,14 @@ Gcross(X, i=1, j=2, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    data(ganglia)
+    data(betacells)
      # cat retina data
-    G01 <- Gcross(ganglia, "off", "on") 
+    G01 <- Gcross(betacells, "off", "on") 
     plot(G01)
 
     # empty space function of `on' points
     \dontrun{
-       F1 <- Fest(ganglia[ganglia$marks == "on"], r = G01$r, eps=0.01)
+       F1 <- Fest(betacells[betacells == "on"], r = G01$r, eps=10.0)
        lines(F1$r, F1$km, lty=3)
     }
 

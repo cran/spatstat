@@ -78,7 +78,7 @@ from a point pattern in a window of arbitrary shape.
   a dip in the image near \code{(0,0)} suggests inhibition;
   peaks or dips at other positions suggest possible periodicity.
 }
-\references
+\references{
   Stoyan, D, Kendall, W.S. and Mecke, J. (1995)
   \emph{Stochastic geometry and its applications}.
   2nd edition. Springer Verlag.

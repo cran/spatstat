@@ -1,6 +1,6 @@
 \name{ganglia}
 \alias{ganglia}
-\title{Cat Retinal Ganglia Data} 
+\title{Beta Ganglion Cells in Cat Retina, Old Version} 
 \description{
   Point pattern of retinal ganglion cells identified as `on' or `off'.
   A marked point pattern.
@@ -18,37 +18,52 @@
   See \code{\link{ppp.object}} for details of the format.
 }
 \usage{data(ganglia)}
-\source{W\"assle et al (1981), data supplied by Peter Diggle}
+\source{W\"assle et al (1981), data supplied by Marie-Colette van
+  Lieshout and attributed to Peter Diggle}
 \section{Notes}{
-The data represent a pattern of beta-type ganglion cells
-in the retina of a cat recorded by W\"assle et al. (1981).
-The window is a rectangle 
-\eqn{(0,1) \times (0, .7533)}{(0,1) x (0, .7533)} mm approximately.
+  \bold{Important: these data are INCORRECT.  See below.}
+  
+  The data represent a pattern of beta-type ganglion cells in the
+  retina of a cat recorded in Figure 6(a) of W\"assle et al. (1981).
 
-Beta cells are associated
-with the resolution of fine detail in the cat's visual system.
-They can be classified anatomically as ``on'' or ``off''.
-Statistical independence of the ``on''- and ``off''-components would strengthen
-the claim that there are two separate channels for 
-``brightness'' and ``darkness'' as postulated by Hering in 1874.
-For details see Waessle et al (1981).
+  The pattern was first analysed by W\"assle et al (1981) using
+  nearest neighbour distances. The data used in their analysis
+  are not available.
 
-These data have been analysed by Diggle (1986) and
-Van Lieshout and Baddeley (1999).
+  The present dataset \code{\link{ganglia}} was
+  scanned from Figure 6(a) of W\"assle et al (1981)
+  in the early 1990's, but we have no further information.
+  This dataset is the one analysed by Van Lieshout and Baddeley (1999)
+  using multitype J functions, and by Stoyan (1995) using second
+  order methods (pair correlation and mark correlation).
+  
+  It has now been discovered that these data are \bold{incorrect}.
+  They are not faithful to the scale in Figure 6 of W\"assle et al (1981),
+  and they contain some scanning errors.
+  Hence they should not be used to address the original scientific question.
+  They have been retained only for comparison with other analyses
+  in the statistical literature.
+
+  A new, corrected dataset, scanned from the original microscope image,
+  has been provided under the name \code{\link{betacells}}.  Use that
+  dataset for any further study.
+}
+\section{Warnings}{
+  These data are incorrect.
+  Use the new corrected dataset \code{\link{betacells}}.  
 }
 \references{
-Diggle, P. J. (1986).
-Displaced amacrine cells in the retina of a
-rabbit : analysis of a bivariate spatial point pattern. 
-\emph{J. Neurosci. Meth.} \bold{18}, 115--125.
- 
-Van Lieshout, M.N.M. and Baddeley, A.J. (1999)
-Indices of dependence between types in multivariate point patterns.
-\emph{Scandinavian Journal of Statistics} \bold{26}, 511--532.
+  Stoyan, D. (1995) Personal communication.
+  
+  Van Lieshout, M.N.M. and Baddeley, A.J. (1999) Indices of
+  dependence between types in multivariate point patterns.
+  \emph{Scandinavian Journal of Statistics} \bold{26}, 511--532.
 
-W\"assle, H., Boycott, B. B. & Illing, R.-B. (1981).
-Morphology and mosaic of on- and off-beta cells in the cat retina and
-some functional considerations.
-\emph{Proc. Roy. Soc. London Ser. B} \bold{212}, 177--195.
+  W\"assle, H., Boycott, B. B. & Illing, R.-B. (1981).  Morphology
+  and mosaic of on- and off-beta cells in the cat retina and some
+  functional considerations.  \emph{Proc. Roy. Soc. London Ser. B}
+  \bold{212}, 177--195.
 }
 \keyword{datasets}
+
+

@@ -1,10 +1,12 @@
 \name{subset.ppp}
 \alias{subset.ppp}
 \alias{[.ppp}
-\title{Extract Subset of Point Pattern}
+\alias{[<-.ppp}
+\title{Extract or Replace Subset of Point Pattern}
 \description{
-  Extract a subset of a point pattern, either by thinning the 
-  points or by trimming the window.
+  Extract or replace a subset of a point pattern.
+  Extraction has the effect of thinning the 
+  points and/or or trimming the window.
 }
 \synopsis{
   subset.ppp(x, subset, window, drop, \dots)
@@ -14,6 +16,8 @@
   subset.ppp(x, subset, window)
   x[subset]
   x[subset,window]
+  x[subset] <- value
+  x[subset, window] <- value
 }
 \arguments{
   \item{x}{
@@ -29,28 +33,39 @@
   }
   \item{drop}{
     Ignored - this argument is required for consistency with other
-    methods for \code{"["}.
+    methods for \code{\link{[}}.
   }
   \item{\dots}{
     Ignored - this argument is required for consistency with other
-    methods for \code{"["}.
+    methods for \code{\link{[}}.
+  }
+  \item{value}{
+    Replacement value for the subset. A point pattern.
   }
 } 
 \value{
   A point pattern (of class \code{"ppp"}).
 }
 \details{
-  This function takes performs either ``\emph{thinning}''
+  These functions extract a designated subset of a point pattern,
+  or replace the designated subset with another point pattern.
+
+  The function \code{[.ppp} is a method for \code{\link{[}} for the
+  class \code{"ppp"}. It extracts a designated subset of a point pattern,
+  either by ``\emph{thinning}''
   (retaining/deleting some points of a point pattern)
   or ``\emph{trimming}'' (reducing the window of observation
   to a smaller subregion and retaining only
-  those points which lie in the subregion). 
+  those points which lie in the subregion) or both.
  
   The pattern will be ``thinned''
-  if  \code{subset} is specified. This should
-  be a logical vector of length equal to the number of points in the 
-  point pattern \code{x}.
-  The points \code{(x$x[i], x$y[i])} for which 
+  if  \code{subset} is specified. The points designated by \code{subset}
+  will be retained. Here \code{subset} can be a numeric vector
+  of positive indices (identifying the points to be retained),
+  a numeric vector of negative indices (identifying the points
+  to be deleted) or a logical vector of length equal to the number
+  of points in the point pattern \code{x}. In the latter case,
+  the points \code{(x$x[i], x$y[i])} for which 
   \code{subset[i]=TRUE} will be retained, and the others
   will be deleted.
  
@@ -63,17 +78,36 @@
  
   Both ``thinning'' and ``trimming'' can be performed together.
 
+  The function \code{[<-.ppp} is a method for \code{\link{[<-}} for the
+  class \code{"ppp"}. It replaces the designated
+  subset with the point pattern \code{value}.
+  The subset of \code{x} to be replaced is designated by
+  the arguments \code{subset} and \code{window} as above.
+
+  The replacement point pattern \code{value} must lie inside the
+  window of the original pattern \code{x}.
+  The ordering of points in \code{x} will be preserved
+  if the replacement pattern \code{value} has the same number of points
+  as the subset to be replaced.  Otherwise the ordering is
+  unpredictable.
+
   Use the function \code{\link{unmark}} to remove marks from a
   marked point pattern.
+
+  Use the function \code{\link{split.ppp}} to select those points
+  in a marked point pattern which have a specified mark.
 }
 \seealso{
   \code{\link{ppp.object}},
   \code{\link{owin.object}},
-  \code{\link{unmark}}
+  \code{\link{unmark}},
+  \code{\link{split.ppp}},
+  \code{\link{cut.ppp}}
 }
 \section{Warnings}{
   The function does not check whether \code{window} is a subset of
-  \code{x$window}.
+  \code{x$window}. Nor does it check whether \code{value} lies
+  inside \code{x$window}.
 }
 \examples{
  data(longleaf)
@@ -119,14 +153,24 @@
  \dontrun{
  plot(thinred)
  }
+ # Scramble 60\% of data
+ modif <- (runif(redwood$n) < 0.6)
+ scramble <- function(x) { runifpoint(x$n, x$window) }
+ redwood[modif] <- scramble(redwood[modif])
 
  # Lansing woods data - multitype points
  data(lansing)
+ \testonly{
+    lansing <- lansing[seq(1, lansing$n, length=100)]
+ }
  # hickory trees only
  hick <- lansing[lansing$marks == "hickory", ]
  # still a marked pattern -- remove marks
  hick <- unmark(hick)
- 
+
+ # scramble the hickories
+ lansing[lansing$marks == "hickory"] <- scramble(hick)
+  
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
