@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.11 $    $Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.12 $    $Date: 2002/07/18 10:36:21 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by mpl().
@@ -93,7 +93,13 @@ plot.ppm <- function(x, nx = 40, ny = 40,
             #
             for(style in how) {
               switch(style, 
-                persp = persp(xyz, ...),
+                persp = {
+                  arg1 <- list(xyz)
+                  arg2 <- spatstat.options("par.persp")[[1]]
+                  arg3 <- list(...)
+                  argue <- append(arg1, append(arg2, arg3))
+                  do.call("persp", argue)
+                },
                 image = {
                   plot(data$window, main="")
                   image(xyz, add=TRUE, ...)
@@ -120,7 +126,11 @@ plot.ppm <- function(x, nx = 40, ny = 40,
               for(style in how) {
                 switch(style, 
                   persp = {
-                    persp(slice, ...)
+                    arg1 <- list(slice, xlab="x")
+                    arg2 <- spatstat.options("par.persp")[[1]]
+                    arg3 <- list(...)
+                    argue <- append(arg1, append(arg2, arg3))
+                    do.call("persp", argue)
                     title(main=main)
                   },
                   image = {

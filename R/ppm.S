@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 1.18 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 1.19 $	$Date: 2002/08/05 14:18:50 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -146,8 +146,15 @@ print.ppm <- function(x, ...) {
           cat("\n\n-----------Interaction------------------\n\n")
           print(x$interaction)
         
-          cat("Fitted interaction terms:\n")
-          print(exp(unlist(theta[x$internal$Vnames])))
+          if(!is.null(x$interaction$interpret)) {
+            sensible <- (x$interaction$interpret)(x$coef, x$interaction)
+            cat(paste("Fitted ", sensible$inames, ":\n", sep=""))
+            print(sensible$printable)
+          } else {
+            # panic - fallback
+            cat("Fitted interaction terms:\n")
+            print(exp(unlist(theta[x$internal$Vnames])))
+          }
         }
 
         cat("\n\n----------- gory details -----\n")

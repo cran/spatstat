@@ -1,15 +1,12 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.2 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 5.3 $	$Date: 2002/05/27 11:26:11 $
 #
 #
 # -------- functions ----------------------------------------
 #	Kest()		compute estimate of K
 #                       using various edge corrections
-#
-#	pairdist()	compute matrix of distances between 	
-#			  each pair of data points
 #
 #       Kount()         internal routine for border correction
 #
@@ -38,18 +35,6 @@
 #
 # ------------------------------------------------------------------------
 
-"pairdist"<-
-function(x, y)
-{
-	if(length(x) != length(y))
-		stop("lengths of x and y do not match")
-	n <- length(x)
-	xx <- matrix(rep(x, n), nrow = n)
-	yy <- matrix(rep(y, n), nrow = n)
-	d <- sqrt((xx - t(xx))^2 + (yy - t(yy))^2)
-	return(d)
-}
-	
 "Kest"<-
 function(X, r=NULL, breaks=NULL, slow=FALSE,
          correction=c("border", "isotropic", "Ripley", "translate"), ...)

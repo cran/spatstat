@@ -44,6 +44,7 @@
   \code{\link{amacrine}},
   \code{\link{ganglia}},
   \code{\link{cells}},
+  \code{\link{demopat}},
   \code{\link{lansing}},
   \code{\link{longleaf}},
   \code{\link{nztrees}},
@@ -60,9 +61,14 @@
   \code{\link{subset.ppp}},
   \code{\link{"[.ppp"}} and
   \code{\link{superimpose}}.
-  
-  There is a \code{plot} method for point pattern objects,
-  \code{\link{plot.ppp}}.
+
+  Point pattern objects can be plotted just by typing \code{plot(X)}
+  which invokes the \code{plot} method for point pattern objects,
+  \code{\link{plot.ppp}}. See \code{\link{plot.ppp}} for further information.
+
+  There are also methods for \code{summary} and \code{print}
+  for point patterns. Use \code{summary(X)} to see a useful description
+  of the data.
   
   Patterns may be generated at random by
    \code{\link{runifpoint}},
@@ -95,6 +101,7 @@
   x <- runif(100)
   y <- runif(100)
   X <- ppp(x, y, c(0,1),c(0,1))
+  X
   \dontrun{plot(X)}
   mar <- sample(1:3, 100, replace=TRUE)
   mm <- ppp(x, y, c(0,1), c(0,1), marks=mar)

@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.2 $	$Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.3 $	$Date: 2002/08/05 14:18:50 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -37,7 +37,22 @@ PairPiece <- function(r) {
                         stop("interaction thresholds r must be strictly increasing")
                     },
          update = NULL,  # default OK
-         print = NULL    # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           r <- self$par$r
+           npiece <- length(r)
+           # extract coefficients
+           vnames <- paste("Interact.", 1:npiece, sep="")
+           thetas <- coeffs[vnames]
+           gammas <- exp(thetas)
+           # name them
+           gn <- gammas
+           names(gn) <- paste("(", c(0,r[-npiece]),",", r, "]", sep="")
+           #
+           return(list(param=list(gammas=gammas),
+                       inames="interaction parameters gamma_i",
+                       printable=round(gn,4)))
+         }
   )
   class(out) <- "interact"
   out$init(out)

@@ -2,7 +2,7 @@
 #
 #    ordthresh.S
 #
-#    $Revision: 1.1 $	$Date: 2000/07/11 10:49:01 $
+#    $Revision: 1.2 $	$Date: 2002/08/05 14:18:50 $
 #
 #    Ord process with threshold potential
 #
@@ -30,7 +30,14 @@ OrdThresh <- function(r) {
                        stop("threshold distance r must be a positive number")
                     },
          update = NULL,  # default OK
-         print = NULL    # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           loggamma <- coeffs[["Interaction"]]
+           gamma <- exp(loggamma)
+           return(list(param=list(gamma=gamma),
+                       inames="interaction parameter gamma",
+                       printable=round(gamma,4)))
+         }
   )
   class(out) <- "interact"
   out$init(out)

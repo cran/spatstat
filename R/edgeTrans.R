@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.2 $    $Date: 2002/05/06 09:38:12 $
+#    $Revision: 1.3 $    $Date: 2002/07/18 10:53:11 $
 #
 #    Translation edge correction weights
 #
@@ -17,7 +17,8 @@
 #
 #######################################################################
 
-edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, trim=1000) {
+edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
+                       trim=spatstat.options("maxedgewt")[[1]]) {
 
   X <- as.ppp(X, W)
 

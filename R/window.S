@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.11 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.15 $	$Date: 2002/07/18 10:25:07 $
 #
 #
 #	A window may be either
@@ -234,9 +234,16 @@ as.mask <- function(w, eps=NULL, dimyx=NULL) {
             nr <- ceiling(diff(w$yrange)/eps)
             nc <- ceiling(diff(w$xrange)/eps)
           } else {
-            # warning("raster resolution defaults to 1/100 window width")
-            nr <- 100
-            nc <- 100
+            # use spatstat defaults
+            np <- spatstat.options("npixel")[[1]]
+            if(!is.numeric(np) || length(np) > 2)
+                   stop("Illegal value for spatstat.options(\"npixel\")")
+            if(length(np) == 1)
+                     nr <- nc <- np[1]
+            else {
+                     nr <- np[2]  
+                     nc <- np[1]
+            }
           }
         }
 
@@ -259,6 +266,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL) {
                stop("Unrecognised window type \`", w$type, "\'")
                )
 }
+
 #
 #-----------------------------------------------------------------------------
 #
@@ -456,3 +464,78 @@ inside.owin <- function(x, y, w) {
          stop("unrecognised window type", w$type)
          )
 }
+
+#-------------------------------------------------------------------------
+  
+print.owin <- function(x, ...) {
+  verifyclass(x, "owin")
+  cat("window: ")
+  switch(x$type,
+         rectangle={
+           cat("rectangle = ")
+         },
+         polygonal={
+           cat("polygonal boundary\n")
+           cat("enclosing rectangle: ")
+         },
+         mask={
+           cat("binary image mask\n")
+           cat("enclosing rectangle: ")
+         }
+         )
+    cat(paste("[",
+              x$xrange[1],
+              ",",
+              x$xrange[2],
+              "] x [",
+              x$yrange[1],
+              ",",
+              x$yrange[2],
+              "]\n"))
+}
+
+summary.owin <- function(object, ...) {
+  verifyclass(object, "owin")
+  cat("window: ")
+  switch(object$type,
+         rectangle={
+           cat("rectangle = ")
+         },
+         polygonal={
+           poly <- object$bdry
+           cat("polygonal boundary\n")
+           npoly <- length(poly)
+           if(npoly == 1) {
+             cat(paste("single connected closed polygon with",
+                       length(poly[[1]]$x),
+                       "vertices\n"))
+           } else {
+             cat(paste(npoly, "separate polygons ("))
+             nhole <- sum(unlist(lapply(poly, area.xypolygon)) < 0)
+             if(nhole == 0) cat("no holes)\n")
+             else if(nhole == 1) cat("1 hole)\n")
+             else cat(paste(nhole, "holes)\n"))
+           }
+           cat("enclosing rectangle: ")
+         },
+         mask={
+           cat("binary image mask\n")
+           di <- object$dim
+           cat(paste(di[1], "x", di[2], "pixel array\n"))
+           cat("enclosing rectangle: ")
+         }
+         )
+  cat(paste("[",
+            object$xrange[1],
+            ",",
+            object$xrange[2],
+            "] x [",
+            object$yrange[1],
+            ",",
+            object$yrange[2],
+            "]\n"))
+  cat(paste("Window area = ", area.owin(object), "\n"))
+  return(invisible(NULL))
+}
+
+  

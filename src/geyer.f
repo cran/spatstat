@@ -1,4 +1,3 @@
-C Output from Public domain Ratfor, version 1.0
       subroutine geyer(u,v,ix,x,y,npts,par,period,cifval,aux)
       implicit double precision(a-h,o-z)
       dimension par(4), x(1), y(1), period(2)
@@ -8,72 +7,82 @@ C Output from Public domain Ratfor, version 1.0
       zero = 0.d0
       one = 1.d0
       per = period(1) .gt. 0.d0
-      if(ix .gt. 0)then
-      if(per)then
+      if(.not.(ix .gt. 0))goto 23000
+      if(.not.(per))goto 23002
       call dist2(u,v,x(ix),y(ix),period,d2)
-      else
+      goto 23003
+23002 continue
       d2 = (u-x(ix))**2 + (v-y(ix))**2
-      endif
+23003 continue
       newpt = d2 .gt. eps
-      else
+      goto 23001
+23000 continue
       newpt = .true.
-      endif
+23001 continue
       beta = par(1)
       gamma = par(2)
       r2 = par(3)**2
       s = par(4)
-      if(newpt)then
+      if(.not.(newpt))goto 23004
       c1 = zero
-      else
+      goto 23005
+23004 continue
       c1 = dble(aux(ix))
-      endif
+23005 continue
       c2 = zero
-      do23006 j = 1,npts 
-      if(j .eq. ix)then
+      do 23006 j = 1,npts 
+      if(.not.(j .eq. ix))goto 23008
       goto 23006
-      endif
-      if(ix .gt. 0)then
-      if(per)then
+23008 continue
+      if(.not.(ix .gt. 0))goto 23010
+      if(.not.(per))goto 23012
       call dist2(x(ix),y(ix),x(j),y(j),period,d2)
-      else
+      goto 23013
+23012 continue
       d2 = (x(ix)-x(j))**2 + (y(ix)-y(j))**2
-      endif
-      if(d2 .lt. r2)then
+23013 continue
+      if(.not.(d2 .lt. r2))goto 23014
       a1 = one
-      else
+      goto 23015
+23014 continue
       a1 = zero
-      endif
-      else
+23015 continue
+      goto 23011
+23010 continue
       a1 = zero
-      endif
-      if(newpt)then
-      if(per)then
+23011 continue
+      if(.not.(newpt))goto 23016
+      if(.not.(per))goto 23018
       call dist2(u,v,x(j),y(j),period,d2)
-      else
+      goto 23019
+23018 continue
       d2 = (u-x(j))**2 + (v-y(j))**2
-      endif
-      if(d2 .lt. r2)then
+23019 continue
+      if(.not.(d2 .lt. r2))goto 23020
       a2 = one
-      else
+      goto 23021
+23020 continue
       a2 = zero
-      endif
+23021 continue
       c1 = c1 + a2
-      else
+      goto 23017
+23016 continue
       a2 = a1
-      endif
+23017 continue
       a0 = dble(aux(j))
       c2 = c2 + min(s,a0-a1+a2) - min(s,a0-a1)
 23006 continue
-23007 continue
       count = min(s,c1) + c2
-      if(gamma .lt. eps )then
-      if(count .gt. zero)then
+      if(.not.(gamma .lt. eps ))goto 23022
+      if(.not.(count .gt. zero))goto 23024
       cifval = zero
-      else
+      goto 23025
+23024 continue
       cifval = beta
-      endif
-      else
+23025 continue
+      goto 23023
+23022 continue
       cifval = beta*exp(log(gamma)*dble(count))
-      endif
+23023 continue
       return
       end

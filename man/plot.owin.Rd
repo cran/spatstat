@@ -47,10 +47,18 @@
   If \code{x} is of type \code{"mask"} 
   the discrete raster approximation of the window is displayed
   as a binary image (white inside the window, black outside).
+
+  Graphical parameters controlling the display (e.g. setting the
+  colours) may be passed directly via the \code{...} arguments,
+  or indirectly reset using 
+  \code{\link{spatstat.options}}.
+  The parameter \code{par.binary} of \code{\link{spatstat.options}}
+  controls the display when \code{x} is of type \code{"mask"}.
 }
 \seealso{
   \code{\link{owin.object}},
-  \code{\link{plot.ppp}}
+  \code{\link{plot.ppp}},
+  \code{\link{spatstat.options}}
 }
 \examples{
 \dontrun{
@@ -70,6 +78,8 @@
 
   # binary mask
   we <- erode.owin(w, 0.05, FALSE)
+  plot(we)
+  spatstat.options(par.binary=list(col=grey(c(0.5,1))))
   plot(we)
 }
 }

@@ -1,33 +1,48 @@
 \name{redwoodfull}
 \alias{redwoodfull}
-\alias{redwoodfull.diag}
-\alias{redwoodI}
-\alias{redwoodII}
+\alias{redwoodfull.extra}
 \title{
   California Redwoods Point Pattern (Entire Dataset)
 }
 \description{
-  Locations of 195 seedlings and saplings 
-  of California redwood trees.
- 
-  The data \code{redwoodfull}
-  represent the locations of 195 seedlings and saplings 
+  These data represent the locations of 195 seedlings and saplings 
   of California redwood trees in a square sampling region.  
   They were described and analysed by Strauss (1975).
+  This is the ``\bold{full}'' dataset; most writers have
+  analysed a subset extracted by Ripley (1977)
+  which is available as \code{\link{redwood}}.
+ 
+  Strauss (1975) divided the sampling region into two subregions I and II
+  demarcated by a diagonal line across the region. The spatial pattern
+  appears to be slightly regular in region I and strongly clustered in 
+  region II.
 
-  Strauss divided the sampling region into two subregions I and II
-  demarcated by a diagonal line across the region. The dataset
-  \code{redwoodfull.diag} specifies this diagonal line,
-  and the datasets \code{redwoodI} and \code{redwoodII}
-  represent the point patterns in these two subregions. 
+  The dataset \code{redwoodfull} contains the full point pattern
+  of 195 trees. 
+  The auxiliary information about the subregions is contained in 
+  \code{redwoodfull.extra}, which is a list with entries
+  \tabular{ll}{
+    \code{diag}\tab The coordinates of the diagonal boundary\cr
+               \tab between regions I and II \cr
+    \code{regionI} \tab Region I as a window object \cr
+    \code{regionII} \tab Region II as a window object \cr
+    \code{regionR} \tab Ripley's subrectangle (approximate) \cr
+    \code{plot}    \tab Function to plot the full data and auxiliary markings
+  }
 
-  Yet another subset of the full dataset, consisting of 62 points
-  in a square subregion, was extracted by Ripley (1977). It
-  has been re-analysed many times, and is the dataset usually known as
-  "the redwood data" in the spatial statistics literature.
-  That dataset is supplied in the \code{spatstat}
+  Ripley (1977) extracted a subset of these data, containing 62 points,
+  lying within a square subregion which overlaps regions I and II.
+  He rescaled the data to the unit square. 
+  This has been re-analysed many times, and is the dataset usually known as
+  ``the redwood data'' in the spatial statistics literature.
+  The exact dataset used by Ripley is supplied in the \code{spatstat}
   library as \code{\link{redwood}}.
+  There are some minor inconsistencies with
+  \code{redwood} since it originates from a different digitisation.
 
+  The approximate position of the square chosen by Ripley
+  within the \code{redwoodfull} pattern
+  is indicated by the window \code{redwoodfull.extra$regionR}.
 } 
 \format{
   The dataset \code{redwoodfull} is an object of class \code{"ppp"}
@@ -36,22 +51,23 @@
   See \code{\link{ppp.object}} for details of the format of a
   point pattern object.
 
-  The datasets \code{redwoodI} and \code{redwoodII} are also objects of
-  class \code{"ppp"} representing the point patterns in regions I and II
-  respectively, on the same scale as \code{redwoodfull}.
-
-  The dataset \code{redwoodfull.diag} is a list with components
-  \code{x} and \code{y} giving the \eqn{x,y} coordinates of the
-  two endpoints of the diagonal line separating regions I and II.
-  Its main use is in plotting the data.
+  The dataset \code{redwoodfull.extra} is a list with entries
+  \tabular{ll}{
+    \code{diag}\tab coordinates of endpoints of a line,\cr
+               \tab in format \code{list(x=numeric(2),y=numeric(2))} \cr
+    \code{regionI} \tab a window object \cr
+    \code{regionII} \tab a window object \cr
+    \code{regionR} \tab a window object \cr
+    \code{plot}    \tab Function with no arguments
+  }
 }
 \usage{data(redwoodfull)
        plot(redwoodfull)
-       lines(redwood.diag)
-       plot(redwoodI)
-       plot(redwoodII)
+       redwoodfull.extra$plot()
+       # extract the pattern in region II 
+       redwoodII <- redwoodfull[, redwood.extra$regionII]
 }
-\source{The plot of the data published by Strauss (1975)
+\source{Strauss (1975). The plot of the data published by Strauss (1975)
   was scanned and digitised by Sandra Pereira, University of
   Western Australia, 2002.
 }

@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.9 $	$Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.10 $	$Date: 2002/08/05 14:18:50 $
 #
 #    The Ord model (family of point process models)
 #
@@ -62,15 +62,24 @@ else
 Wdata <- dirichlet.weights(X)   # sic - these are the tile areas.
 Pdata <- pot(Wdata, pars)
 summa <- function(P) {
-  if(is.vector(P)) sum(P) else matrowsum(P)
+  if(is.matrix(P))
+    matrowsum(P)
+  else if(is.vector(P) || length(dim(P))==1 )
+    sum(P)
+  else
+    stop("Don't know how to take row sums of this object")
 }
 total.data.potential <- summa(Pdata)
 
 # Initialise V
 
 dimpot <- dim(Pdata)[-1]  # dimension of each value of the potential function
-                          # (NULL if scalar)
+                          # (= numeric(0) if potential is a scalar)
+
 dimV <- c(nall, dimpot)
+if(length(dimV) == 1)
+  dimV <- c(dimV, 1)
+
 V <- array(0, dim=dimV)
 
 rowV <- array(1:nall, dim=dimV)
@@ -82,12 +91,9 @@ rowV <- array(1:nall, dim=dimV)
 #############################################################################
 
 
-Xminus <- X
 for(j in seq(X$n)) {
-  Xminus$x <- X$x[-j]
-  Xminus$y <- X$y[-j]
         #  Dirichlet tessellation of data without point j
-  Wminus <- dirichlet.weights(Xminus)
+  Wminus <- dirichlet.weights(X[-j])
         #  regressor is the difference in total potential
   V[rowV == j] <- total.data.potential - summa(pot(Wminus, pars))
 }
@@ -99,16 +105,16 @@ for(j in seq(X$n)) {
 # Take difference of total potential.
 #############################################################################
 
-Xplus <- X
-
 for(j in seq(U$x)[!is.data]) {
-		Xplus$x <- c(U$x[j], X$x)
-		Xplus$y <- c(U$y[j], X$y)
+                Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]))
                      #  compute Dirichlet tessellation (of these points only!)
                 Wplus <- dirichlet.weights(Xplus)
                      #  regressor is difference in total potential
-                V[rowV == j] <- summa(pot(Wplus)) - total.data.potential
+                V[rowV == j] <- summa(pot(Wplus, pars)) - total.data.potential
 }
+
+cat("dim(V) = \n")
+print(dim(V))
 
 return(V)
 

@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 1.2 $   $Date: 2000/07/11 10:52:01 $
+#    $Revision: 1.3 $   $Date: 2002/08/05 14:18:50 $
 #
 #    Soft core processes.
 #
@@ -31,7 +31,14 @@ Softcore <- function(kappa) {
 number less than 1")
                     },
          update = NULL,  # default OK
-         print = NULL    # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           theta <- coeffs[["Interaction"]]
+           sigma <- theta * self$par$kappa/2
+           return(list(param=list(sigma=sigma),
+                       inames="interaction parameter sigma",
+                       printable=sigma))
+         }
   )
   class(out) <- "interact"
   out$init(out)

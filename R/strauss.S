@@ -2,7 +2,7 @@
 #
 #    strauss.S
 #
-#    $Revision: 1.5 $	$Date: 2001/07/29 07:25:54 $
+#    $Revision: 1.6 $	$Date: 2002/08/05 14:18:50 $
 #
 #    The Strauss process
 #
@@ -19,7 +19,7 @@ Strauss <- function(r) {
          name     = "Strauss process",
          family    = pairwise.family,
          pot      = function(d, par) {
-                         (d <= par$r)
+                         d <= par$r
                     },
          par      = list(r = r),
          parnames = "interaction distance",
@@ -29,7 +29,14 @@ Strauss <- function(r) {
                        stop("interaction distance r must be a positive number")
                     },
          update = NULL,  # default OK
-         print = NULL    # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           loggamma <- coeffs[["Interaction"]]
+           gamma <- exp(loggamma)
+           return(list(param=list(gamma=gamma),
+                       inames="interaction parameter gamma",
+                       printable=round(gamma,4)))
+         }
   )
   class(out) <- "interact"
   out$init(out)

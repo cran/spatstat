@@ -172,19 +172,21 @@ Kcross(X, i=1, j=2, breaks)
 \examples{
     \dontrun{library(spatstat)}
     data(ganglia)
-     # cat retina data: types 0,1 represent off/on
-    K01 <- Kcross(ganglia, "0", "1") # note: "0" not 0
+     # cat retina data
+    K01 <- Kcross(ganglia, "off", "on") 
     \dontrun{plot(K01$r, K01$iso,
                   xlab="r", ylab="K01(r)",
-                  type="l", ylim=c(0,1))}
-    K10 <- Kcross(ganglia, "1", "0")
+                  type="l", ylim=c(0,1))
     # Poisson theoretical curve
-    \dontrun{lines(K01$r, K01$theo, lty=2)}
+    lines(K01$r, K01$theo, lty=2)
+    }
+
+    K10 <- Kcross(ganglia, "on", "off")
 
     # synthetic example    
     pp <- runifpoispp(50)
-    pp$marks <- sample(c("a","b"), pp$n, replace=TRUE)
-    K <- Kcross(pp, "a", "b")
+    pp$marks <- factor(sample(0:1, pp$n, replace=TRUE))
+    K <- Kcross(pp, "0", "1") # note: "0" not 0
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
