@@ -1,7 +1,7 @@
 #
 # simulation of FITTED model
 #
-#  $Revision: 1.9 $ $Date: 2004/09/02 03:50:58 $
+#  $Revision: 1.10 $ $Date: 2004/11/30 19:25:19 $
 #
 #
 rmh.ppm <- function(model, start = NULL, control = NULL, ...,
@@ -19,7 +19,7 @@ rmh.ppm <- function(model, start = NULL, control = NULL, ...,
       start <- list(n.start=datapattern$n)
     }
     if(is.null(control)) 
-      control <- list(nrep=1e6)
+      control <- list(nrep=5e5)
     return(rmh.default(X, start=start, control=control, ..., verbose=verbose))
   }
   

@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.25 $	$Date: 2004/07/26 05:30:46 $
+#	$Revision: 4.26 $	$Date: 2005/01/25 00:48:58 $
 #
 #
 #	A window may be either
@@ -418,7 +418,7 @@ bounding.box <- function(...) {
         w <- wins[[1]]
           
         # determine a tight bounding box for the window w
-        verifyclass(w, "owin")
+        w <- as.owin(w)
 
         switch(w$type,
                rectangle = {

@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.17 2004/08/23 04:12:18 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.18 2004/11/30 19:24:36 adrian Exp adrian $
 #
 rmh.default <- function(model,start,control=NULL, verbose=TRUE, ...) {
 #
@@ -55,7 +55,7 @@ if(is.null(control)) {
 	control <- list(
 			p=0.9,
 			q=0.5,
-			nrep=6e5,
+			nrep=5e5,
 			fixall=FALSE,
 			periodic=FALSE,
 			nverb=0
@@ -557,7 +557,7 @@ mrep  <- 1
 
 # Set up remaining control parameters:
 q     <- if(is.null(control$q)) 0.5 else control$q
-nrep  <- if(is.null(control$nrep)) 0.6e5 else control$nrep
+nrep  <- if(is.null(control$nrep)) 5e5 else control$nrep
 nverb <- if(is.null(control$nverb)) 0 else control$nverb
 
 # If the pattern is multitype, generate the mark proposals.
