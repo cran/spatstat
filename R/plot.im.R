@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.2 $   $Date: 2005/01/26 00:29:45 $
+#  $Revision: 1.3 $   $Date: 2005/02/08 18:10:22 $
 #
 #  Plotting code for pixel images
 #
@@ -16,7 +16,10 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
   main <- deparse(substitute(x))
   verifyclass(x, "im")
   vrange <- summary(x)$range
-  if(!identical(ribbon, TRUE) || diff(vrange) <= .Machine$double.eps)
+  add <- resolve.defaults(list(...), list(add=FALSE))$add
+  if(!identical(ribbon, TRUE)
+     || identical(add, TRUE)
+     || diff(vrange) <= .Machine$double.eps)
     {
       # plot image without ribbon
       do.call("image",

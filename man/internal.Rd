@@ -30,6 +30,7 @@
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{fasp}
+\alias{FormatFaspFormulae}
 \alias{fv}
 \alias{getfields}
 \alias{gridindex}            
@@ -148,8 +149,9 @@ erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(im)
-fv(x, argu, ylab, valu, fmla, alim, labl, desc)
 fasp((fns, titles, formulae, which, dataname, title)
+FormatFaspFormulae(f, argname)
+fv(x, argu, ylab, valu, fmla, alim, labl, desc)
 getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)

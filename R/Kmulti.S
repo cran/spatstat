@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.4 $	$Date: 2004/01/13 05:57:54 $
+#	$Revision: 5.6 $	$Date: 2005/02/08 02:11:16 $
 #
 #
 # -------- functions ----------------------------------------
@@ -219,10 +219,10 @@ function(X, I, J, r=NULL, breaks=NULL,
         corrxns <- nama2[nama2 != "r"]
 
         # default is to display them all
-        attr(K, "fmla") <- as.formula(paste(
+        attr(K, "fmla") <- deparse(as.formula(paste(
                        "cbind(",
                         paste(corrxns, collapse=","),
-                        ") ~ r"))
+                        ") ~ r")))
 
         return(K)
           

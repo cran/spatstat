@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.9 $   $Date: 2004/01/13 13:09:29 $
+#    $Revision: 1.11 $   $Date: 2005/02/08 02:11:39 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -47,8 +47,11 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
 
   if(is.null(fmla))
     fmla <- as.formula(paste(valu, "~", argu))
-  else if(!inherits(fmla, "formula"))
-    stop("\`fmla\' should be a formula")
+  else if(!inherits(fmla, "formula") && !is.character(fmla))
+    stop("\`fmla\' should be a formula or a string")
+  # convert to string
+  fmla <- deparse(fmla)
+
   if(is.null(alim)) {
     argue <- x[[argu]]
     xlim <- range(argue[is.finite(argue)], na.rm=TRUE)
@@ -113,7 +116,7 @@ print.fv <- function(x, ...) {
               a$desc[j],"\n", sep=""))
   cat("--------------------------------------\n\n")
   cat("Default plot formula:\n\t")
-  print.formula(a$fmla)
+  print.formula(as.formula(a$fmla))
   cat(paste("\nRecommended range of argument ", a$argu,
             ": [", a$alim[1], ", ", a$alim[2], "]\n", sep=""))
   invisible(NULL)

@@ -9,14 +9,14 @@
 }
 
 \synopsis{
-   plot.fasp(x,formula=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots)
+   plot.fasp(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots)
 }
 
 \usage{
 plot(x)
-plot(x, formula=formula)
-plot(x, formula=formula, subset)
-plot(x, formula=formula, subset, lty, col, title, \dots)
+plot(x, formule=formule)
+plot(x, formule=formule, subset)
+plot(x, formule=formule, subset, lty, col, title, \dots)
 }
 
 \arguments{
@@ -24,9 +24,11 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
     function array.
   }
 
-  \item{formula}{A formula or list of formulae indicating what
-    variables are to be plotted against what variable.  If
-    \code{formula} is a list, its \eqn{k^{th}}{k-th} component
+  \item{formule}{A formula or list of formulae indicating what
+    variables are to be plotted against what variable. Each formula is
+    either an R language formula object, or a string that can be parsed
+    as a formula. If
+    \code{formule} is a list, its \eqn{k^{th}}{k-th} component
     should be applicable to the \eqn{(i,j)^{th}}{(i,j)-th}
     plot where \code{x$which[i,j]=k}.  If the formula is left
     as \code{NULL}, then \code{plot.fasp} attempts to use the component
@@ -79,7 +81,7 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
   individual panels.
 
   For information about the interpretation of the
-  arguments \code{formula}, \code{subset}, \code{lty} and \code{col},
+  arguments \code{formule}, \code{subset}, \code{lty} and \code{col},
   see \code{\link{plot.fv}}.
 
   The argument \code{title}, if present, will determine the
@@ -121,7 +123,7 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
    X.G <- alltypes(bramblecanes,type="G",dataname="Bramblecanes",verb=TRUE)
    plot(X.G)
    plot(X.G,subset="r<=0.2")
-   plot(X.G,formula=cbind(asin(sqrt(km)),
+   plot(X.G,formule=cbind(asin(sqrt(km)),
                     asin(sqrt(theo))) ~ asin(sqrt(theo)))
        plot(X.G,fo=cbind(km-theo,0)~r,"r<=0.2")
 
