@@ -41,6 +41,7 @@ eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
 fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
+finpines                Pine saplings in Finland.
 fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
 fv.object               Data Frames of Function Values
@@ -72,6 +73,7 @@ is.ppm                  Test Whether An Object Is A Fitted Point
 is.ppp                  Test Whether An Object Is A Point Pattern
 is.subset.owin          Determine Whether One Window is Contained In
                         Another
+japanesepines           Japanese Pines Point Pattern
 Jcross                  Multitype J Function (i-to-j)
 Jdot                    Multitype J Function (i-to-any)
 Jest                    Estimate the J-function
@@ -172,6 +174,7 @@ Softcore                The Soft Core Point Process Model
 spatstat.options        Internal Options in Spatstat Package
 split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
+spruces                 Spruces Point Pattern
 square                  Square Window
 stratrand               Stratified random point pattern
 Strauss                 The Strauss Point Process Model

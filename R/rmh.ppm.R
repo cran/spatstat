@@ -1,7 +1,7 @@
 #
 # simulation of FITTED model
 #
-#  $Revision: 1.8 $ $Date: 2004/08/30 05:38:41 $
+#  $Revision: 1.9 $ $Date: 2004/09/02 03:50:58 $
 #
 #
 rmh.ppm <- function(model, start = NULL, control = NULL, ...,
@@ -14,8 +14,10 @@ rmh.ppm <- function(model, start = NULL, control = NULL, ...,
   # call appropriate simulation routine
 
   if(X$cif != "poisson") {
-    if(is.null(start))
-      start <- list(n.start=summary(model, quick=TRUE)$data$n)
+    if(is.null(start)) {
+      datapattern <- summary(model, quick="no prediction")$data
+      start <- list(n.start=datapattern$n)
+    }
     if(is.null(control)) 
       control <- list(nrep=1e6)
     return(rmh.default(X, start=start, control=control, ..., verbose=verbose))

@@ -74,4 +74,19 @@ plot(Xg, main=paste("Geyer saturation process\n",
                     "rmh() with cif=\"geyer\""))
 
 par(oldpar)
+
+showoffK <- function(Y, u, d, r, fullpicture,rad) { 
+	plot(fullpicture,
+             main="Animation using \`applynbd\'\n explaining the K function")
+	points(Y[r>0], cex=2)
+	points(u[1],u[2],pch="+",cex=3)
+	theta <- seq(0,2*pi,length=100)
+	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
+	text(u[1]+rad/3,u[2]+rad/2,Y$n-1,cex=3)
+	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
+	return(Y$n - 1)
+}
+data(redwood)
+applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2)
+
 options(oldoptions)
