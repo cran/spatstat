@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.9 $	$Date: 2003/03/12 02:48:02 $
+#	$Revision: 4.11 $	$Date: 2004/01/08 13:00:03 $
 #
 #
 #
@@ -134,7 +134,105 @@ overlap.owin <- function(A, B) {
   }
   stop("Internal error")
 }
+
+#
+#
+#  Intersection and union of windows
+#
+#
+intersect.owin <- function(A, B) {
+  verifyclass(A, "owin")
+  verifyclass(B, "owin")
+
+  # chicken out 
+  if(A$type == "polygonal")
+    A <- as.mask(A)
+  if(B$type == "polygonal")
+    B <- as.mask(B)
   
+  # determine intersection of x and y ranges
+  intersect.ranges <- function(a, b) {
+    lo <- max(a[1],b[1])
+    hi <- min(a[2],b[2])
+    if(lo >= hi) stop("Intersection is empty")
+    return(c(lo, hi))
+  }
+  xr <- intersect.ranges(A$xrange, B$xrange)
+  yr <- intersect.ranges(A$yrange, B$yrange)
+  C <- owin(xr, yr)
+  
+  Arect <- (A$type == "rectangle")
+  Brect <- (B$type == "rectangle")
+
+  if(Arect && Brect)
+    return(owin(xr, yr))
+
+  # Otherwise, we'll need this
+  trim.mask <- function(M, R) {
+    # M is a mask,
+    # R is a rectangle inside bounding.box(M)
+    # Extract subset of image grid
+    within.range <- function(u, v) { (u >= v[1]) & (u <= v[2]) }
+    yrowok <- within.range(M$yrow, R$yrange)
+    xcolok <- within.range(M$xcol, R$xrange)
+    if(sum(yrowok) == 0 || sum(xcolok) == 0)
+      stop("result is empty")
+    Z <- M
+    Z$xrange <- R$xrange
+    Z$yrange <- R$yrange
+    Z$yrow <- M$yrow[yrowok]
+    Z$xcol <- M$xcol[xcolok]
+    Z$m <- M$m[yrowok, xcolok]
+    Z$dim <- dim(Z$m)
+    return(Z)
+  }
+
+  if(!Arect && Brect)
+    return(trim.mask(A, C))
+  else if(Arect && !Brect) 
+    return(trim.mask(B, C))
+  else {
+    # both are masks
+    # First trim A 
+    D <- trim.mask(A, C)
+    # Then determine which pixels of D are inside B
+    x <- raster.x(D)
+    y <- raster.y(D)
+    ok <- inside.owin(x, y, B)
+    # 'and'
+    if(!all(ok))
+      D$m[!ok] <- FALSE
+    return(D)
+  }
+          
+  stop("Internal error")
+}
 
 
+union.owin <- function(A, B) {
+  verifyclass(A, "owin")
+  verifyclass(B, "owin")
+
+  if(A$type == "rectangle" && B$type == "rectangle") {
+    if(is.subset.owin(A, B))
+      return(B)
+    else if (is.subset.owin(B,A))
+      return(A)
+  }
+
+  C <- owin(range(A$xrange, B$xrange),
+            range(A$yrange, B$yrange))
   
+  C <- as.mask(C)
+  x <- raster.x(C)
+  y <- raster.y(C)
+  ok <- inside.owin(x, y, A) | inside.owin(x, y, B)
+
+  if(!any(ok))
+    stop("Internal error: union is empty")
+
+  if(!all(ok))
+    C$m[!ok] <- FALSE
+
+  return(C)
+}

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.8 $     $Date: 2003/07/22 19:13:44 $
+#       $Revision: 4.10 $     $Date: 2004/01/27 07:02:14 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -149,28 +149,42 @@ concatxy <- function(...) {
 
 #------------------------------------------------------------
 
-default.dummy <- function(X, nx=NULL, ny=NULL, random=FALSE) {
+default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, ..., verbose=FALSE) {
 	# default action to create dummy points.
-	# regular grid of (order) nx * ny tiles
-	# plus corner points of window frame.
+	# regular grid of nd[1] * nd[2] points
+	# plus corner points of window frame,
+        # all clipped to window.
 	# 
 	X <- as.ppp(X)
 	win <- X$window
         # default dimensions
-        if(is.null(nx)) nx <- default.ngrid(X)
-        if(is.null(ny)) ny <- nx
+        if(is.null(nd)) 
+          nd <- if(!is.null(ntile)) ntile else default.ngrid(X)
+        if(length(nd) == 1)
+          nd <- rep(nd, 2)
+        if(verbose)
+          cat(paste("dummy point grid", nd[1], "x", nd[2], "\n"))
         # make dummy points
         dummy <- if(random) 
-                  stratrand(win, nx, ny, 1)
+                  stratrand(win, nd[1], nd[2], 1)
                 else
-                  tilemiddles(win, nx, ny)
+                  tilemiddles(win, nd[1], nd[2])
         # add corner points
 	dummy <- concatxy(dummy, corners(win))
-	# restrict to window (if it's a mask)
+	# restrict to window 
 	ok <- inside.owin(dummy$x, dummy$y, win)
+        if(sum(ok) == 0)
+          stop("None of the dummy points lies inside the window")
 	x <- dummy$x[ok]
 	y <- dummy$y[ok]
-	ppp(x, y, window=win)
+        X <- ppp(x, y, window=win)
+        # pass parameters for computing weights
+        if(is.null(ntile))
+          ntile <- nd
+        attr(X, "dummy.parameters") <- list(nd=nd, verbose=verbose)
+        attr(X, "weight.parameters") <-
+          append(list(...), list(ntile=ntile, verbose=verbose))
+        return(X)
 }
 
 

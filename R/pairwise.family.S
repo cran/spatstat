@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.6 $	$Date: 2002/05/06 09:29:11 $
+#    $Revision: 1.7 $	$Date: 2004/01/07 12:09:21 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -117,12 +117,15 @@ if(correction == "translate") {
 }
 
 # No pair potential term between a point and itself
-if(!is.null(Equal))
+if(!is.null(Equal) && any(Equal))
   POT[Equal] <- 0
 
 # Sum the pairwise potentials 
 
 V <- apply(POT, c(2,3), sum)
+
+# attach the original pair potentials
+attr(V, "POT") <- POT
 
 return(V)
 

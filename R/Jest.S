@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.4 $	$Date: 2001/11/13 01:25:49 $
+#	$Revision: 4.5 $	$Date: 2004/01/09 13:59:34 $
 #
 #
 #
@@ -23,9 +23,22 @@ function(X, eps=NULL, r=NULL, breaks=NULL) {
 	Jun <- ratio(1-G$raw, 1-FF$raw, NA)
         theo <- rep(1, length(FF$r))
 
-        rslt <- data.frame(J=Jkm,r=FF$r,km=Jkm,rs=Jrs,un=Jun,theo=theo)
-        attr(rslt, "F") <- FF
-        attr(rslt, "G") <- G
-        rslt
+        rslt <- data.frame(r=FF$r, theo=theo, rs=Jrs, km=Jkm, un=Jun)
+# convert to class "fv"
+        alim <- range(rslt$r[FF$km <= 0.9])
+        labl <- c("r", "Jpois(r)", "Jbord(r)", "Jkm(r)",
+                  "Jun(r)")
+        desc <- c("distance argument r",
+                  "theoretical Poisson J(r) = 1",
+                  "border corrected estimate of J(r)",
+                  "Kaplan-Meier estimate of J(r)",
+                  "uncorrected estimate of J(r)")
+        Z <- fv(rslt, "r", "J(r)", "km", cbind(km, 1) ~ r, alim, labl, desc)
+
+# add more info        
+        attr(Z, "F") <- FF
+        attr(Z, "G") <- G
+
+        return(Z)
 }
 

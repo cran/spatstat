@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.4 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.6 $	$Date: 2004/01/13 04:34:58 $
 #
 #
 #
@@ -81,8 +81,19 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
 	Jun <- ratio(1-GIJ$raw, 1-FJ$raw, NA)
         theo <- rep(1, length(FJ$r))
         
-	result <- data.frame(J=Jkm,r=FJ$r,km=Jkm,rs=Jrs,un=Jun,theo=theo)
-        attr(result, "G") <- GIJ
-        attr(result, "F") <- FJ
-        result
+	result <- data.frame(r=FJ$r,theo=theo,rs=Jrs,km=Jkm,un=Jun)
+
+        alim <- range(result$r[FJ$km <= 0.9])
+        labl <- c("r", "Jpois(r)", "Jbord(r)", "Jkm(r)", "Jun(r)")
+        desc <- c("distance argument r",
+                  "theoretical Poisson J(r)=1",
+                  "border corrected estimate of J(r)",
+                  "Kaplan-Meier estimate of J(r)",
+                  "uncorrected estimate of J(r)")
+        Z <- fv(result,
+                "r", "J(r)", "km", cbind(km, theo) ~ r, alim, labl, desc)
+        
+        attr(Z, "G") <- GIJ
+        attr(Z, "F") <- FJ
+        return(Z)
 }

@@ -3,14 +3,16 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.8 $   $Date: 2003/07/22 19:08:39 $
+#    $Revision: 4.12 $   $Date: 2004/01/27 07:05:16 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
 #
 #    runifpoispp()     uniform Poisson point process
 #
-#    rpoispp()         general Poisson point process (rejection method)
+#    rpoispp()         general Poisson point process (thinning method)
+#
+#    rpoint()          n independent random points (rejection/pixel list)
 #
 #    rMaternI()        Mat'ern model I 
 #    rMaternII()       Mat'ern model II
@@ -56,46 +58,64 @@
 {
     win <- as.owin(win)
 
-    if(win$type == "rectangle")
-      return(runifrect(n, win))
-
-    # otherwise - window is irregular
-    
-    # rejection method
-    # initialise empty pattern
-    x <- numeric(0)
-    y <- numeric(0)
-    X <- ppp(x, y, window=win)
-    #
-    # rectangle in which trial points will be generated
-    box <- bounding.box(win)
-    # 
-    ntries <- 0
-    repeat {
-      ntries <- ntries + 1
-      # generate trial points in batches of n
-      qq <- runifrect(n, box) 
-      # retain those which are inside 'win'
-      qq <- qq[, win]
-      # add them to result
-      X <- superimpose(X, qq)
-      # if we have enough points, exit
-      if(X$n > n) 
-        return(X[1:n])
-      else if(X$n == n)
-        return(X)
-      # otherwise get bored eventually
-      else if(ntries >= giveup)
-        stop(paste("Gave up after", giveup * n, "trials,",
-                   np, "points accepted"))
-    }
+    switch(win$type,
+           rectangle = {
+             return(runifrect(n, win))
+           },
+           mask = {
+             dx <- win$xstep
+             dy <- win$ystep
+             # extract pixel coordinates and probabilities
+             xpix <- as.vector(raster.x(win)[win$m])
+             ypix <- as.vector(raster.y(win)[win$m])
+             # select pixels with equal probability
+             id <- sample(seq(xpix), n, replace=TRUE)
+             # extract pixel centres and randomise within pixels
+             x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
+             y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
+             return(ppp(x, y, window=win))
+           },
+           polygonal={
+             # rejection method
+             # initialise empty pattern
+             x <- numeric(0)
+             y <- numeric(0)
+             X <- ppp(x, y, window=win)
+             #
+             # rectangle in which trial points will be generated
+             box <- bounding.box(win)
+             # 
+             ntries <- 0
+             repeat {
+               ntries <- ntries + 1
+               # generate trial points in batches of n
+               qq <- runifrect(n, box) 
+               # retain those which are inside 'win'
+               qq <- qq[, win]
+               # add them to result
+               X <- superimpose(X, qq)
+               # if we have enough points, exit
+               if(X$n > n) 
+                 return(X[1:n])
+               else if(X$n == n)
+                 return(X)
+               # otherwise get bored eventually
+               else if(ntries >= giveup)
+                 stop(paste("Gave up after", giveup * n, "trials,",
+                            np, "points accepted"))
+             }
+           })
+    stop("Unrecognised window type")
 }
 
 "runifpoispp" <-
 function(lambda, win = owin(c(0,1),c(0,1))) {
     win <- as.owin(win)
-    if(!is.numeric(lambda) || length(lambda) > 1 || lambda <= 0)
-      stop("Intensity lambda must be a single number > 0")
+    if(!is.numeric(lambda) || length(lambda) > 1 || lambda < 0)
+      stop("Intensity lambda must be a single number >= 0")
+
+    if(lambda == 0) # return empty pattern
+      return(ppp(numeric(0), numeric(0), window=win))
 
     # generate Poisson process in enclosing rectangle 
     box <- bounding.box(win)
@@ -110,32 +130,134 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
     return(X)
 }
 
+rpoint <- function(n, f, fmax=NULL,
+                   win=unit.square(), ..., giveup=1000,verbose=FALSE) {
+  
+  if(missing(f) || (is.numeric(f) && length(f) == 1))
+    # uniform distribution
+    return(runifpoint(n, win, giveup))
+  
+  # non-uniform distribution....
+  
+  if(!is.function(f) && !is.im(f))
+    stop("\`f\' must be either a function or an \`im\' object")
+  
+  if(is.im(f)) {
+    # ------------ PIXEL IMAGE ---------------------
+    w <- as.mask(as.owin(f))
+    dx <- w$xstep
+    dy <- w$ystep
+    # extract pixel coordinates and probabilities
+    xpix <- as.vector(raster.x(w)[w$m])
+    ypix <- as.vector(raster.y(w)[w$m])
+    ppix <- as.vector(f$v[w$m]) # not normalised - OK
+    # select pixels
+    id <- sample(length(xpix), n, replace=TRUE, prob=ppix)
+    # extract pixel centres and randomise within pixels
+    x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
+    y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
+    return(ppp(x, y, window=as.owin(f)))
+  }
+
+  # ------------ FUNCTION  ---------------------  
+  # Establish parameters for rejection method
+
+  verifyclass(win, "owin")
+  if(is.null(fmax)) {
+    # compute approx maximum value of f
+    imag <- as.im(f, win, ...)
+    summ <- summary(imag)
+    fmax <- summ$max + 0.05 * diff(summ$range)
+  }
+  irregular <- (win$type != "rectangle")
+  box <- bounding.box(win)
+  X <- ppp(numeric(0), numeric(0), window=win)
+  
+  ntries <- 0
+
+  # generate uniform random points in batches
+  # and apply the rejection method.
+  # Collect any points that are retained in X
+
+  repeat{
+    ntries <- ntries + 1
+    # proposal points
+    prop <- runifrect(n, box)
+    if(irregular)
+      prop <- prop[, win]
+    if(prop$n > 0) {
+      fvalues <- f(prop$x, prop$y, ...)
+      paccept <- fvalues/fmax
+      u <- runif(prop$n)
+      # accepted points
+      Y <- prop[u < paccept]
+      if(Y$n > 0) {
+        # add to X
+        X <- superimpose(X, Y)
+        if(X$n >= n) {
+          # we have enough!
+          if(verbose)
+            cat(paste("acceptance rate = ",
+                      round(100 * X$n/(ntries * n), 2), "\%\n"))
+          return(X[1:n])
+        }
+      }
+    }
+    if(ntries > giveup)
+      stop(paste("Gave up after",giveup * n,"trials with",
+                 X$n, "points accepted"))
+  }
+  invisible(NULL)
+}
+
 "rpoispp" <-
-  function(lambda, max, win = owin(c(0,1),c(0,1)), ...) {
+  function(lambda, lmax=NULL, win = owin(c(0,1),c(0,1)), ...) {
     # arguments:
-    #     win     observation window (of class 'owin')
-    #     lambda  intensity - constant or function(x,y,...)
-    #     max     maximum possible value of lambda(x,y,...)
+    #     lambda  intensity: constant, function(x,y,...) or image
+    #     lmax     maximum possible value of lambda(x,y,...)
+    #     win     default observation window (of class 'owin')
     #   ...       arguments passed to lambda(x, y, ...)
-    win <- as.owin(win)
+
+    win <- if(is.im(lambda)) as.owin(lambda) else as.owin(win)
     
-    if(is.numeric(lambda))
+    if(is.numeric(lambda)) 
       # uniform Poisson
       return(runifpoispp(lambda, win))
-    # inhomogeneous Poisson - use rejection filtering 
-    X <- runifpoispp(max, win)  # includes sanity checks on `max'
-    prob <- lambda(X$x, X$y, ...)/max
-    u <- runif(X$n)
-    retain <- (u <= prob)
-    X <- X[retain, ]
-    return(X)
+
+    # inhomogeneous Poisson
+    # perform thinning of uniform Poisson
+
+    if(is.null(lmax)) {
+      imag <- as.im(lambda, win, ...)
+      summ <- summary(imag)
+      lmax <- summ$max + 0.05 * diff(summ$range)
+    }
+
+    if(is.function(lambda)) {
+      X <- runifpoispp(lmax, win)  # includes sanity checks on `lmax'
+      if(X$n == 0) return(X)
+      prob <- lambda(X$x, X$y, ...)/lmax
+      u <- runif(X$n)
+      retain <- (u <= prob)
+      X <- X[retain, ]
+      return(X)
+    }
+    if(is.im(lambda)) {
+      X <- runifpoispp(lmax, win)
+      if(X$n == 0) return(X)
+      prob <- lambda[X]/lmax
+      u <- runif(X$n)
+      retain <- (u <= prob)
+      X <- X[retain, ]
+      return(X)
+    }
+    stop("\'lambda\' must be a constant, a function or an image")
 }
     
 "rMaternI" <-
   function(lambda, r, win = owin(c(0,1),c(0,1)))
 {
-    win <- as.owin(win)
-    X <- runifpoispp(lambda, win)
+    X <- rpoispp(lambda, win=win)
     if(X$n <= 1) return(X)
     d <- nndist(X$x, X$y)
     qq <- X[d > r]
@@ -145,9 +267,7 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
 "rMaternII" <-
   function(lambda, r, win = owin(c(0,1),c(0,1)))
 {
-    win <- as.owin(win)
-
-    X <- runifpoispp(lambda, win)
+    X <- rpoispp(lambda, win=win)
     
     if(X$n <= 1) return(X)
     
@@ -191,12 +311,12 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
          return(X)
      }
      warning(paste("Gave up after", giveup,
-                "attempts with only", X$n, "points placed"))
+                "attempts with only", X$n, "points placed out of", n))
      return(X)
 }
 
 "rNeymanScott" <-
-  function(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), ...)
+  function(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), ..., lmax=NULL)
 {
   # Generic Neyman-Scott process
   # Implementation for bounded cluster radius
@@ -206,11 +326,17 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
   #
   # "..." are arguments to be passed to 'rcluster()'
   #
+
+  win <- as.owin(win)
+  
   # Generate parents in dilated window
   frame <- bounding.box(win)
   dilated <- owin(frame$xrange + c(-rmax, rmax),
                   frame$yrange + c(-rmax, rmax))
-  parents <- runifpoispp(lambda, win=dilated)
+  if(is.im(lambda) && !is.subset.owin(as.owin(lambda), dilated))
+    stop("The window in which the image \'lambda\' is defined\n\
+is not large enough to contain the dilation of the window \'win\'")
+  parents <- rpoispp(lambda, lmax=lmax, win=dilated)
   #
   result <- ppp(numeric(0), numeric(0), window = win)
   
@@ -238,7 +364,8 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
                            n <- rpois(1, mu)
                            return(runifdisc(n, radius, x0, y0))
                          }
-  result <- rNeymanScott(lambda, r, poisclus, win, radius=r, mu=mu)
+  result <- rNeymanScott(lambda, r, poisclus,
+                         win, radius=r, mu=mu)
   return(result)
 }
     
@@ -254,7 +381,8 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
                            y <- rnorm(n, mean=y0, sd=sigma)
                            return(list(x=x, y=y))
                          }
-  result <- rNeymanScott(lambda, 4 * sigma, thomclus, win, sigma=sigma, mu=mu)
+  result <- rNeymanScott(lambda, 4 * sigma, thomclus,
+                         win, sigma=sigma, mu=mu)
   return(result)
 }
   

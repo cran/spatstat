@@ -7,10 +7,10 @@ evaluate the spatial trend and the conditional intensity of the model
 at new locations.
 }
 \synopsis{
-predict.ppm(object, newdata, nx = 40, ny = NULL, type="trend",\dots)
+predict.ppm(object, newdata, window, ngrid=NULL, type="trend",\dots)
 }
 \usage{
-predict.ppm(object, nx = 40, ny = NULL, type="trend")
+predict.ppm(object, window, ngrid=NULL, type="trend")
 predict.ppm(object, newdata, type="trend")
 }
 \arguments{
@@ -21,16 +21,19 @@ predict.ppm(object, newdata, type="trend")
   }
   \item{newdata}{
     optional data frame giving the values of any spatial covariates
-    for the locations at which the trend and conditional intensity should be
-    computed. (Incompatible with \code{nx,ny})
+    for the locations at which predictions should be
+    computed. (Incompatible with \code{window, ngrid})
   }
-  \item{nx}{predictions are to be made at 
-    an (\code{nx} by \code{ny}) rectangular grid of positions in the 
-    original window of observation.
+  \item{window}{
+    window delimiting the locations where predictions
+    should be computed. Defaults to the window of the
+    original data used to fit the model \code{object}.
     (Incompatible with \code{newdata})
   }
-  \item{ny}{
-    see \code{nx} above; \code{ny} defaults to the same value as \code{nx}
+  \item{ngrid}{dimensions (either (\code{ngrid[1]} by \code{ngrid[2]}
+    or \code{ngrid} by \code{ngrid}) of a rectangular grid of locations
+    inside \code{window} where predictions should be computed.
+    (Incompatible with \code{newdata})
   }
   \item{type}{
     character string.
@@ -45,17 +48,13 @@ predict.ppm(object, newdata, type="trend")
   (and marks and covariates) given in the rows of \code{newdata}.
 
   \emph{If \code{newdata} is not given:}
-  a list with components
-  \code{x}, \code{y}, \code{z} giving the
-  coordinates and predicted values for a rectangular grid of points.
   If \code{object} is an unmarked point process,
-  \code{z} is a matrix such that \code{z[i,j]} 
-  gives the predicted value at location \code{(x[i],y[j])};
-  for marked point processes,
-  \code{z} is a three-dimensional array 
-  such that \code{z[i,j,m]} gives the predicted value for a
-  point at location \code{(x[i],y[j])} with mark \code{m}.
-  
+  the result is an image object (of class \code{"im"}, see
+  \code{\link{im.object}}) containing the predictions. 
+  If \code{object} is a multitype point process,
+  the result is a list of images, containing the predictions
+  for each type at the same grid of locations.
+
   The ``predicted values'' are either values of the spatial trend
   (if \code{type="trend"}) or values of the conditional intensity
   (if \code{type="cif"} or \code{type="lambda"}).
@@ -82,7 +81,7 @@ predict.ppm(object, newdata, type="trend")
   \code{glm} and \code{gam} objects. The current implementation
   invokes \code{\link{predict.glm}}.
  
-  The default action is to create a rectangular 40 by 40 grid of points
+  The default action is to create a rectangular grid of points
   in the observation window of the data point pattern, and evaluate
   the spatial trend and conditional intensity at these locations.
   Note that by ``spatial trend'' we mean the

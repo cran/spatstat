@@ -9,6 +9,7 @@ amacrine                Hughes' Amacrine Cell Data
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
+as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.owin                 Convert Data To Class owin
 as.ppp                  Convert Data To Class ppp
@@ -22,7 +23,6 @@ centroid.owin           Centroid of a window
 coef.ppm                Coefficients of Fitted Point Process Model
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
-conspire                Plot Together According to a Formula
 corners                 Corners of a rectangle
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
@@ -42,6 +42,7 @@ fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
 fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
+fv.object               Data Frames of Function Values
 ganglia                 Cat Retinal Ganglia Data
 Gcross                  Multitype Nearest Neighbour Distance Function
                         (i-to-j)
@@ -59,9 +60,17 @@ identify.ppp            Identify Points in a Point Pattern
 im.object               Class of Images
 im                      Create a Pixel Image Object
 inside.owin             Test Whether Points Are Inside A Window
+intersect.owin          Intersection or Union of Two Windows
+is.im                   Test Whether An Object Is A Pixel Image
 is.marked.ppm           Test Whether A Point Process Model is Marked
 is.marked.ppp           Test Whether A Point Pattern is Marked
 is.marked               Test Whether Marks Are Present
+is.owin                 Test Whether An Object Is A Window
+is.ppm                  Test Whether An Object Is A Fitted Point
+                        Process Model
+is.ppp                  Test Whether An Object Is A Point Pattern
+is.subset.owin          Determine Whether One Window is Contained In
+                        Another
 Jcross                  Multitype J Function (i-to-j)
 Jdot                    Multitype J Function (i-to-any)
 Jest                    Estimate the J-function
@@ -104,6 +113,7 @@ pairwise.family         Pairwise Interaction Process Family
 Pairwise                Generic Pairwise Interaction model
 pcf                     Pair Correlation Function
 plot.fasp               Plot a Function Array
+plot.fv                 Plot Function Valuesn
 plot.owin               Plot a Spatial Window
 plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
@@ -113,9 +123,11 @@ ppm.object              Class of Fitted Point Process Models
 ppp.object              Class of Point Patterns
 ppp                     Create a Point Pattern
 predict.ppm             Prediction from a Fitted Point Process Model
+print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
+print.quad              Print a Quadrature Scheme
 quad.object             Class of Quadrature Schemes
 quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
@@ -136,10 +148,13 @@ rmh.default             Simulate Point Process Models using the
 rmh.ppm                 Simulate from a Fitted Point Process Model
 rmh                     Simulate point patterns using the
                         Metropolis-Hastings algorithm.
+rmpoint                 Generate N Random Multitype Points
+rmpoispp                Generate Multitype Poisson Point Pattern
 rNeymanScott            Simulate Neyman-Scott Process
 rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
 rotate                  Rotate
+rpoint                  Generate N Random Points
 rpoispp                 Generate Poisson Point Pattern
 rSSI                    Simple Sequential Inhibition
 rThomas                 Simulate Thomas Process
@@ -159,11 +174,16 @@ stratrand               Stratified random point pattern
 StraussHard             The Strauss / Hard Core Point Process Model
 Strauss                 The Strauss Point Process Model
 subset.fasp             Extract Subset of Function Array
+subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image
 subset.ppp              Extract Subset of Point Pattern
+summary.im              Summarizing a Pixel Image
 summary.owin            Summary of a Spatial Window
+summary.ppm             Summarizing a Fitted Point Process Model
 summary.ppp             Summary of a Point Pattern Dataset
+summary.quad            Summarizing a Quadrature Scheme
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
 union.quad              Union of Data and Dummy Points
 unmark                  Remove Marks from a Marked Point Pattern
+update.ppm              Update a Fitted Point Process Model

@@ -2,17 +2,15 @@
 #
 #	classes.S
 #
-#	$Revision: 1.4 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 1.6 $	$Date: 2004/01/05 08:01:17 $
 #
 #	Generic utilities for classes
-#
-#	These are supposed to work under BOTH Splus3.4 and Splus5.1
 #
 #
 #--------------------------------------------------------------------------
 
 verifyclass <- function(X, C, N=deparse(substitute(X)), fatal=TRUE) {
-  if(is.null(class(X)) || class(X) != C) {
+  if(!inherits(X, C)) {
     if(fatal) {
         gripe <- paste("argument \'", N,
                        "\' is not of class \'", C, "\'", sep="")

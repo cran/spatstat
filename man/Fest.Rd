@@ -34,7 +34,10 @@ Fest(X, eps, breaks)
   }
 }
 \value{
-  A data frame containing six columns:
+  An object of class \code{"fv"}, see \code{\link{fv.object}},
+  which can be plotted directly using \code{\link{plot.fv}}.
+
+  Essentially a data frame containing six columns:
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{F(r)} has been  estimated
   }
@@ -227,27 +230,22 @@ Fest(X, eps, breaks)
   \code{\link{kaplan.meier}}
 }
 \examples{
-   library(spatstat)
+   require(spatstat)
+
    data(cells)
    Fc <- Fest(cells, 0.01)
-   \dontrun{
-       plot(Fc$r, Fc$km, type="l")
-       plot(km ~ r, type="l", data=Fc)
-       # restrict the plot to values of r less than 0.1
-       plot(km ~ r, type="l", data=Fc[Fc$r <= 0.1, ])
-       plot(km ~ r, type="l", data=Fc, subset=(r <= 0.1))
-   }
-   # simulated data
-   pp <- runifpoint(50)
-   Fpp <- Fest(pp, 0.01)
-   \dontrun{
-        plot(Fpp$r, Fpp$km, type="l", xlab="r", ylab="F(r)", ylim=c(0,1),
-        main = "empty space function")
-        r <- Fpp$r
-        lines(r, Fpp$theo, lty=2)
-        legend(0.5, 2, c("Kaplan-Meier estimator", "Poisson process"), %
-                   lty=c(1,2))
-   }
+
+   # Tip: don't use F for the left hand side!
+   # That's an abbreviation for FALSE
+
+   plot(Fc)
+
+   # P-P style plot
+   plot(Fc, cbind(km, theo) ~ theo)
+
+   # The empirical F is above the Poisson F
+   # indicating an inhibited pattern
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

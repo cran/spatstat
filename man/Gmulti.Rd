@@ -41,7 +41,9 @@ Gmulti(X, I, J, breaks)
   }
 }
 \value{
-  A data frame containing six numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing six numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{G_{IJ}(r)}{GIJ(r)} has been  estimated
   }
@@ -170,24 +172,14 @@ Gmulti(X, I, J, breaks)
  \code{\link{Gest}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
-    \dontrun{
-    Gm <- Gmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
-    }
     \testonly{
-    sub <- longleaf[seq(1,longleaf$n, by=50), ]
-    Gm <- Gmulti(sub, sub$marks <= 15, sub$marks >= 25)
-    }    
-    \dontrun{
-         plot(Gm$r, Gm$km,
-                  xlab="r", ylab="Gmulti(r)",
-                  type="l", ylim=c(0,1))
-         # Poisson theoretical curve
-         lines(Gm$r, Gm$theo, lty=2)
+      longleaf <- longleaf[seq(1,longleaf$n, by=50), ]
     }
-
+    Gm <- Gmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
+    plot(Gm)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

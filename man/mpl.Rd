@@ -301,34 +301,37 @@ if they have been obtained with different values of \code{rbord}.
 \examples{
  \dontrun{library(spatstat)}
  data(nztrees)
- Q <- quadscheme(nztrees) # default quadrature scheme
- mpl(Q)
+ mpl(nztrees)
  # fit the stationary Poisson process
- # to point pattern or data/dummy quadrature scheme Q
+ # to point pattern 'nztrees'
 
- mpl(Q, ~ x)
+ Q <- quadscheme(nztrees) 
+ mpl(Q) 
+ # equivalent.
+
+ mpl(nztrees, ~ x)
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx)
  # where x,y are the Cartesian coordinates
  # and a,b are parameters to be estimated
 
- mpl(Q, ~ polynom(x,2))
+ mpl(nztrees, ~ polynom(x,2))
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx + cx^2)
 
  library(splines)
- mpl(Q, ~ bs(x,df=3))
+ mpl(nztrees, ~ bs(x,df=3))
  #       WARNING: do not use predict.ppm() on this result
  # Fits the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(B(x))
  # where B is a B-spline with df = 3
  
- mpl(Q, ~1, Strauss(r=0.1), rbord=0.1)
- # Fit the stationary Strauss process with interaction range 0.1
- # using the border method with margin rbord=0.1
+ mpl(nztrees, ~1, Strauss(r=10), rbord=10)
+ # Fit the stationary Strauss process with interaction range r=10
+ # using the border method with margin rbord=10
   
- mpl(Q, ~ x, Strauss(0.1), correction="periodic")
- # Fit the nonstationary Strauss process with interaction range 0.07
+ mpl(nztrees, ~ x, Strauss(13), correction="periodic")
+ # Fit the nonstationary Strauss process with interaction range r=13
  # and exp(first order potential) =  activity = beta(x,y) = exp(a+bx)
  # using the periodic correction.
 

@@ -11,7 +11,7 @@
 \arguments{
   \item{lambda}{
     Intensity of the Poisson process of cluster centres.
-    A single positive number.
+    A single positive number, a function, or a pixel image.
   }
   \item{r}{
     Radius parameter of the clusters.
@@ -31,7 +31,7 @@
 \details{
   This algorithm generates a realisation of Mat\'ern's cluster process
   inside the window \code{win}. The process is constructed by first
-  generating a uniform Poisson point process of ``parent'' points 
+  generating a Poisson point process of ``parent'' points 
   with intensity \code{lambda}. Then each parent point is
   replaced by a random cluster of points, the number of points in each
   cluster being random with a Poisson (\code{mu}) distribution,
@@ -40,7 +40,7 @@
 
   In this implementation, parent points are not restricted to lie in the
   window; the parent process is effectively the uniform
-  Poisson process on the infinite plane. 
+  Poisson process on the infinite plane.
 }
 \seealso{
 \code{\link{rpoispp}},

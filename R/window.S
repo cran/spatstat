@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.18 $	$Date: 2003/09/15 12:31:33 $
+#	$Revision: 4.24 $	$Date: 2004/01/08 12:20:05 $
 #
 #
 #	A window may be either
@@ -176,6 +176,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
 #-----------------------------------------------------------------------------
 #
 
+is.owin <- function(x) { inherits(x, "owin") }
+
 as.owin <- function(W) {
 	# Tries to interpret data as an object of class 'window'
 	# W may be
@@ -184,21 +186,30 @@ as.owin <- function(W) {
 	#	a four-element vector (interpreted xmin, xmax, ymin, ymax)
 	#	a structure with entries xl, xu, yl, yu
 	#	an object of class 'ppp'
+	#	an object of class 'im'
 
 	if(verifyclass(W, "owin", fatal=FALSE))
 		return(W)
-	else if(checkfields(W, c("xrange", "yrange"))) {
+        else if(verifyclass(W, "ppp", fatal=FALSE))
+		return(W$window)
+        else if(verifyclass(W, "im", fatal=FALSE)) 
+                return(owin(W$xrange, W$yrange, mask=!is.na(W$v)))
+        else if(checkfields(W, c("xrange", "yrange"))) {
 		Z <- owin(W$xrange, W$yrange)
 		return(Z)
 	} else if(is.vector(W) && is.numeric(W) && length(W) == 4) {
 		Z <- owin(W[1:2], W[3:4])
 		return(Z)
 	} else if(checkfields(W, c("xl", "xu", "yl", "yu"))) {
+                W <- as.list(W)
 		Z <- owin(c(W$xl, W$xu),c(W$yl, W$yu))
 		return(Z)
-	} else if(verifyclass(W, "ppp", fatal=FALSE))
-		return(W$window)
-	else
+        } else if(checkfields(W, c("x", "y", "area"))
+                  && checkfields(W$area, c("xl", "xu", "yl", "yu"))) {
+                V <- as.list(W$area)
+                Z <- owin(c(V$xl, V$xu),c(V$yl, V$yu))
+                return(Z)
+	} else
 		stop("Can't interpret W as a window")
 }		
 
@@ -335,7 +346,23 @@ nearest.raster.point <- function(x,y,w) {
 
 #------------------------------------------------------------------
 		
-bounding.box <- function(w) {
+bounding.box <- function(...) {
+        wins <- list(...)
+
+        if(length(wins) == 0)
+          stop("No arguments supplied")
+
+        if(length(wins) > 1) {
+          # multiple arguments -- compute bounding box for each
+          boxes <- lapply(wins, bounding.box)
+          # take bounding box of these boxes
+          xrange <- range(unlist(lapply(boxes, function(b){b$xrange})))
+          yrange <- range(unlist(lapply(boxes, function(b){b$yrange})))
+          return(owin(xrange, yrange))
+        }
+
+        w <- wins[[1]]
+          
         # determine a tight bounding box for the window w
         verifyclass(w, "owin")
 

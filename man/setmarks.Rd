@@ -33,9 +33,11 @@
 
   If \code{X} is already a marked point pattern, then its marks
   are ignored and replaced by the values in \code{m}.
-  
-  The length of \code{m} must agree with the number of points in
-  \code{X}. 
+
+  If \code{m} is a single value, then all points will be
+  given this mark value. Otherwise, \code{m} must be a vector
+  of length equal to the number of points in \code{X}, and
+  the point \code{X[i]} will receive the mark \code{m[i]}.
 
   Use \code{\link{unmark}} to remove marks.
   Use \code{\link{ppp}} to create point patterns in more general

@@ -42,7 +42,9 @@ Gcross(X, i=1, j=2, breaks)
   }
 }
 \value{
-  A data frame containing 6 numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing six numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{G_{ij}(r)}{Gij(r)} has been  estimated
   }
@@ -200,17 +202,12 @@ Gcross(X, i=1, j=2, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(ganglia)
      # cat retina data
     G01 <- Gcross(ganglia, "off", "on") 
-    \dontrun{
-    plot(G01$r, G01$km,
-                xlab="r", ylab="G01(r)",
-                type="l", ylim=c(0,1))
-    # Poisson theoretical curve
-    lines(G01$r, G01$theo, lty=2)
-    }
+    plot(G01)
+
     # empty space function of `on' points
     \dontrun{
        F1 <- Fest(ganglia[ganglia$marks == "on"], r = G01$r, eps=0.01)
@@ -219,7 +216,7 @@ Gcross(X, i=1, j=2, breaks)
 
     # synthetic example    
     pp <- runifpoispp(50)
-    pp$marks <- factor(sample(0:1, pp$n, replace=TRUE))
+    pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     G <- Gcross(pp, "0", "1")   # note: "0" not 0
 }
 \author{Adrian Baddeley

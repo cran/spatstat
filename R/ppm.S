@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 1.20 $	$Date: 2003/05/02 11:24:07 $
+#	$Revision: 1.21 $	$Date: 2004/01/06 10:12:59 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -36,159 +36,66 @@
 #
 #------------------------------------------------------------------------
 
+is.ppm <- function(x) { inherits(x, "ppm") }
+
 print.ppm <- function(x, ...) {
 	verifyclass(x, "ppm")
 
-        notrend <- no.trend.ppm(x)
-	stationary <- is.stationary.ppm(x)
-	poisson <- is.poisson.ppm(x)
-        markeddata <- is.marked(x$Q$data)
+        s <- summary.ppm(x)
+        
+        notrend <-    s$no.trend
+	stationary <- s$stationary
+	poisson <-    s$poisson
+        markeddata <- s$marked
+        multitype  <- s$multitype
         
         markedpoisson <- poisson && markeddata
-        # i.e. if the data are marked and mpl() is called with
-        # a Poisson interaction, the fitted model is a marked Poisson process.
 
         # names of interaction variables if any
-        Vnames <- x$internal$Vnames
+        Vnames <- s$Vnames
+        # their fitted coefficients
+        theta <- s$theta
 
         # ----------- Print model type -------------------
         
-	cat(paste(
-		if(stationary) "Stationary " else "Nonstationary ",
-                if(markedpoisson) "marked " else "", 
-                if(poisson) "Poisson process" else x$interaction$name,
-                "\n", sep=""))
-
-        if(markeddata) {
-          mrk <- x$Q$data$marks
-          if(is.factor(mrk)) {
-            cat("Possible marks: \n")
-            print(factor(levels(mrk)))
-          }
-        }
-
-        if(exists("is.R") && is.R()) 
-          theta <- x$coef # result of coef(glm(...))
-        else
-          theta <- x$theta # result of dummy.coef(glm(....))
-          
-        # ----- trivial case: uniform Poisson --------
+	cat(s$name)
+        cat("\n")
         
-	if(poisson && notrend) {
-          lambda <- exp(theta[[1]])
-          cat(paste("Uniform intensity", lambda))
-          if(markeddata) {
-            cat("(for each mark level).\n")
-            m <- markspace.integral(x$Q$data)
-            cat(paste("Total point intensity", lambda * m))
-          } 
-          cat("\n")
-          return(invisible(NULL))
-	}
+        if(markeddata) mrk <- s$entries$marks
+        if(multitype) {
+            cat("Possible marks: \n")
+            cat(paste(levels(mrk)))
+          }
 
         # ----- trend --------------------------
 
-        cat(paste("\n\n-----------",
-                  if(poisson) "Intensity" else "First order term",
-                  "-------------\n\n"))
+        cat(paste("\n", s$trend$name, ":\n", sep=""))
 
 	if(!notrend) {
-		cat("Trend formula:\n")
-		print(x$trend)
+		cat("Trend formula: ")
+		print(s$trend$formula)
         }
-
-        # process is at least one of: marked, nonstationary, non-poisson
         
-        if(stationary) {
-          if(!markeddata) {
-            # it can't be poisson
-            cat("First order term:\n")
-            beta <- exp(theta[[1]])
-            print(unlist(list(beta=beta)))
-          } else {
-            # marked and stationary
-            cat( if(poisson)
-                "Fitted intensities:\n"
-                 else
-                "Fitted first order terms:\n")
-            lev <- factor(levels(mrk))
-            betas <- predict(x, newdata=data.frame(marks=lev), type="trend")
-            names(betas) <- paste("beta_", as.character(lev), sep="")
-            print(betas)
-          }
-        } else {
-          # not stationary 
-          cat("Fitted coefficients for trend formula:\n")
-          # extract trend terms without trying to understand them much
-          if(is.null(Vnames)) 
-            trendbits <- theta
-          else {
-            agree <- outer(names(theta), Vnames, "==")
-            whichbits <- apply(!agree, 1, all)
-            trendbits <- theta[whichbits]
-          }
-          # decide whether there are 'labels within labels'
-          unlabelled <- unlist(lapply(trendbits,
-                                    function(x) { is.null(names(x)) } ))
-          if(all(unlabelled))
-            print(unlist(trendbits))
-          else 
-            for(i in seq(trendbits))
-              if(unlabelled[i])
-                print(unlist(trendbits[i]))
-              else
-                print(trendbits[[i]])
-        }
+        cat(paste("\n", s$trend$label, ":\n", sep=""))
+
+        tv <- s$trend$value
+        if(!is.list(tv))
+          print(tv)
+        else 
+          for(i in seq(tv))
+            print(tv[[i]])
         
         # ---- Interaction ----------------------------
 
 	if(!poisson) {
-          cat("\n\n-----------Interaction------------------\n\n")
-          print(x$interaction)
+          cat("\nInteraction:\n")
+          print(s$entries$interaction)
         
-          if(!is.null(x$interaction$interpret)) {
-            sensible <- (x$interaction$interpret)(x$coef, x$interaction)
-            cat(paste("Fitted ", sensible$inames, ":\n", sep=""))
-            print(sensible$printable)
-          } else {
-            # panic - fallback
-            cat("Fitted interaction terms:\n")
-            print(exp(unlist(theta[x$internal$Vnames])))
-          }
+          cat(paste(s$interaction$header, ":\n", sep=""))
+          print(s$interaction$printable)
         }
 
-        cat("\n\n----------- gory details -----\n")
-        
-        cat("\nFitted regular parameters (theta): \n")
-        print(theta)
-
-        cat("\nFitted exp(theta): \n")
-        print(exp(unlist(theta)))
-
 	invisible(NULL)
-}
-
-no.trend.ppm <- function(x) {
-  # the result is TRUE only when the trend is ~1
-  verifyclass(x, "ppm")
-  length(termsinformula(x$trend)) == 0
-}
-
-is.stationary.ppm <- function(x) {
-  verifyclass(x, "ppm")
-  turms <- termsinformula(x$trend)
-  (length(turms) == 0) ||
-     ((length(turms) == 1) && turms[1] == "marks")
-}
-
-is.poisson.ppm <- function(x) {
-  verifyclass(x, "ppm")
-  is.null(x$interaction) || is.null(x$interaction$pot)
-}
-
-is.marked.ppm <- function(X, ...) {
-  verifyclass(X, "ppm")
-  is.marked.ppp(X$Q$data)
 }
 
 quad.ppm <- function(object) {

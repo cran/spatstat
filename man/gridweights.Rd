@@ -6,17 +6,19 @@
   using the ``counting weights'' for a grid of rectangular tiles.
 }
 \usage{
- gridweights(X, nx, ny, window=NULL)
+ gridweights(X, ntile, \dots, window=NULL, verbose=FALSE)
 }
 \arguments{
   \item{X}{Data defining a point pattern.}
-  \item{nx}{Number of tiles
-    in each row of the rectangular grid.
+  \item{ntile}{Number of tiles
+    in each row and column of the rectangular grid.
+    An integer vector of length 1 or 2.
   }
-  \item{ny}{Number of tiles
-    in each column of the rectangular grid.
-  }
+  \item{\dots}{Ignored.}
   \item{window}{Default window for the point pattern}
+  \item{verbose}{Logical flag. If \code{TRUE}, information will be printed
+    about the computation of the grid weights.
+  }
 }
 \value{
   Vector of nonnegative weights for each point in \code{X}.
@@ -33,7 +35,7 @@
   First \code{X} and (optionally) \code{window} are converted into a
   point pattern object. Then the bounding rectangle of the window of
   the point pattern is
-  divided into a regular \eqn{nx \times ny}{nx * ny} grid of rectangular tiles.
+  divided into a regular \code{ntile[1] * ntile[2]} grid of rectangular tiles.
   The weight attached to a point of \code{X} is the area of the tile
   in which it lies, divided by the number of points of \code{X} lying in
   that tile.
@@ -48,7 +50,8 @@
   }
   Q <- quadscheme(runifpoispp(10))
   X <- as.ppp(Q) # data and dummy points together
-  w <- gridweights(X, 10, 10)
+  w <- gridweights(X, 10)
+  w <- gridweights(X, c(10, 10))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.13 $	$Date: 2003/03/11 07:47:32 $
+#    $Revision: 1.15 $	$Date: 2004/01/08 15:02:42 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -54,93 +54,32 @@ pairsat.family <-
 X <- as.ppp(X)
 U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
 
-# extract coordinates
-x <- X$x
-y <- X$y
-xx <- U$x
-yy <- U$y
-
-ndata <- length(x)
-nall <- length(xx)
-ndummy <- nall - ndata
-
 # saturation parameter
 saturate <- potpars$saturate
 
-# validate 'correction' argument
-if(!any(correction == c(
-          "periodic",
-          "border",
-          "translate",
-          "isotropic", "Ripley",
-          "none")))
-  stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
-          
-#  
-# Form the matrix of distances
-	
-sqdif <- function(u,v) {(u-v)^2}
-
-MX <- outer(x,xx,sqdif)
-MY <- outer(y,yy,sqdif)
-
-if(correction=="periodic") {
-	if(X$window$type != "rectangle")
-		stop("Periodic edge correction can't be applied",
-                     "in an irregular window")
-	wide <- diff(X$window$xrange)
-	high <- diff(X$window$yrange)
-	MX1 <- outer(x,xx-wide,sqdif)
-	MX2 <- outer(x,xx+wide,sqdif)
-	MX <- pmin(MX, MX1, MX2)
-	MY1 <- outer(y,yy-high,sqdif)
-	MY2 <- outer(y,yy+high,sqdif)
-	MY <- pmin(MY, MY1, MY2)
-}
-M <- sqrt(MX + MY)
-
-# Evaluate the pairwise potential 
-
-POT <- pairpot(M, potpars)
-if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dim(M))) {
-        whinge <- paste(
-           "The pair potential function ",deparse(substitute(pairpot)),
-           "must produce a matrix or array with its first two dimensions\n",
-           "the same as the dimensions of its input.\n", sep="")
-	stop(whinge)
-}
-
-# make it a 3D array
-if(length(dim(POT))==2)
-        POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
-                          
-if(correction == "translate") {
-        edgewt <- edge.Trans(X, U)
-        # sanity check ("everybody knows there ain't no...")
-        if(!is.matrix(edgewt))
-          stop("internal error: edge.Trans() did not yield a matrix")
-        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
-          stop("internal error: edge weights matrix returned by edge.Trans() has wrong dimensions")
-        POT <- c(edgewt) * POT
-} else if(correction == "isotropic" || correction == "Ripley") {
-        # weights are required for contributions from QUADRATURE points
-        edgewt <- t(edge.Ripley(U, t(M), X$window))
-        if(!is.matrix(edgewt))
-          stop("internal error: edge.Ripley() did not return a matrix")
-        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
-          stop("internal error: edge weights matrix returned by edge.Ripley() has wrong dimensions")
-        POT <- c(edgewt) * POT
-}
-
-# No pair potential term between a point and itself
-if(!is.null(Equal))
-  POT[Equal] <- 0
-
-# Sum the pairwise potentials (sum over the data points)
-   V <- apply(POT, c(2,3), sum)
-
-if(is.null(saturate))
+if(is.null(saturate)) {
+  # pairwise interaction 
+  V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction)
   return(V)
+}
+
+# first check that all data points are included in the quadrature points
+missingdata <- !as.vector(matrowany(Equal))
+somemissing <- any(missingdata)
+if(somemissing) {
+  # add the missing data points
+  U <- superimpose(U, X[missingdata])
+  # extend the equality matrix to maintain Equal[i,j] = (X[i] == U[j])
+  originalcolumns <- seq(ncol(Equal))
+  sn <- seq(X$n)
+  id <- outer(sn, sn[missingdata], "==")
+  Equal <- cbind(Equal, id)
+}
+
+# compute the pair potentials POT and the unsaturated potential sums V
+
+V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction)
+POT <- attr(V, "POT")
 
 #################################################################
 ################## saturation part ##############################
@@ -156,13 +95,13 @@ V.sat <- array(pmin(saturate, V), dim=dim(V))
 #
 # Identify data points
      # is.data <- apply(Equal, 2, any)
-is.data <- matcolany(Equal)              # logical vector corresp. to V
+is.data <- as.vector(matcolany(Equal))  # logical vector corresp. to rows of V
 
 # Extract potential sums for data points only
 V.data <- V[is.data, , drop=FALSE]
 
 # replicate them so that V.dat.rep[i,j,k] = V.data[i, k]
-V.dat.rep <- aperm(array(V.data, dim=c(dim(V.data), nall)), c(1,3,2))
+V.dat.rep <- aperm(array(V.data, dim=c(dim(V.data), U$n)), c(1,3,2))
 
 # make a logical array   col.is.data[i,j,k] = is.data[j]
 dip <- dim(POT)
@@ -192,7 +131,12 @@ V.delta.sum <- apply(V.delta, c(2,3), sum)
 #
 # (e) Result
 V <- V.sat + V.delta.sum
-  
+
+##########################################
+# remove any columns that were added
+if(somemissing)
+      V <- V[originalcolumns, , drop=FALSE]
+
 return(V)
 
 }     ######### end of function $eval                            

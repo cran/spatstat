@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.1 $	$Date: 2003/03/11 02:17:37 $
+#    $Revision: 1.2 $	$Date: 2004/01/08 04:52:40 $
 #
 #    Lennard-Jones potential
 #
@@ -38,7 +38,8 @@ LennardJones <- function() {
            return(list(param=list(sigma=sigma, tau=tau),
                        inames="interaction parameters",
                        printable=round(c(sigma=sigma,tau=tau),4)))
-         }
+         },
+         siminfo = NULL
   )
   class(out) <- "interact"
   out$init(out)

@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.3 $	$Date: 2002/05/27 11:26:11 $
+#	$Revision: 5.6 $	$Date: 2004/01/13 06:37:18 $
 #
 #
 # -------- functions ----------------------------------------
@@ -16,7 +16,7 @@
 #	r		distance values at which to compute K	
 #
 # -------- standard output ------------------------------
-#      A data frame with columns named
+#      A data frame (class "fv") with columns named
 #
 #	r:		same as input
 #
@@ -59,10 +59,15 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
              correction <- correction[!iso]
            }
         }
-         
+
+        # recommended range of r values
+        alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+        
         # this will be the output data frame
         K <- data.frame(r=r, theo= pi * r^2)
-        
+        desc <- c("distance argument r", "theoretical Poisson K(r)")
+        K <- fv(K, "r", "K(r)", "theo", , alim, c("r","Kpois(r)"), desc)
+
         # pairwise distance
 	d <- pairdist(X$x, X$y)
 
@@ -76,11 +81,18 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
           diag(d) <- Inf
           # apply reduced sample algorithm
           RS <- Kount(d, b, breaks, slow)
-          if(any(correction == "border"))
-            K$border <- RS$numerator/(lambda * RS$denom.count)
           if(any(correction == "bord.modif")) {
             denom.area <- eroded.areas(W, r)
-            K$bord.modif <- RS$numerator/(lambda2 * denom.area)
+            Kbm <- RS$numerator/(lambda2 * denom.area)
+            K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
+                         "modified border-corrected estimate of K(r)",
+                         "bord.modif")
+          }
+          if(any(correction == "border")) {
+            Kb <- RS$numerator/(lambda * RS$denom.count)
+            K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
+                         "border-corrected estimate of K(r)",
+                         "border")
           }
           # reset diagonal to original values
           diag(d) <- 0
@@ -89,18 +101,34 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
           # translation correction
             edgewt <- edge.Trans(X)
             wh <- whist(d[offdiag], breaks$val, edgewt[offdiag])
-            K$trans <- cumsum(wh)/(lambda2 * area)
+            Ktrans <- cumsum(wh)/(lambda2 * area)
             rmax <- diameter(W)/2
-            K$trans[r >= rmax] <- NA
+            Ktrans[r >= rmax] <- NA
+            K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
+                         "translation-corrected estimate of K(r)",
+                         "trans")
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
             edgewt <- edge.Ripley(X, d)
             wh <- whist(d[offdiag], breaks$val, edgewt[offdiag])
-            K$iso <- cumsum(wh)/(lambda2 * area)
+            Kiso <- cumsum(wh)/(lambda2 * area)
             rmax <- diameter(W)/2
-            K$iso[r >= rmax] <- NA
+            Kiso[r >= rmax] <- NA
+            K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
+                         "Ripley isotropic correction estimate of K(r)",
+                         "iso")
         }
+
+        # which corrections have been computed?
+        nama2 <- names(K)
+        corrxns <- nama2[nama2 != "r"]
+
+        # default is to display them all
+        attr(K, "fmla") <- as.formula(paste(
+                       "cbind(",
+                        paste(corrxns, collapse=","),
+                        ") ~ r"))
         return(K)
 }
 	

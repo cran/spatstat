@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.2 $ $Date: 2002/05/13 12:41:10 $
+#     $Revision: 1.3 $ $Date: 2004/01/13 11:33:46 $
 #
 #    Estimate the mark correlation function
 #
@@ -41,6 +41,11 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
          
         # this will be the output data frame
         result <- data.frame(r=r, theo= rep(1,length(r)))
+        desc <- c("distance argument r", "theoretical Poisson m(r)=1")
+        alim <- c(0, min(diff(X$window$xrange),diff(X$window$yrange))/4)
+        result <- fv(result,
+                     "r", "m(r)", "theo", , alim, c("r","mpois(r)"), desc)
+
 
         # pairwise distances
 	d <- pairdist(X$x, X$y)
@@ -65,22 +70,34 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
           # set edge correction weight = 1 iff b > d
           ok <- 1 * (bb > d)
           # get smoothed estimate of mcf
-          result$border <- mkcor(d[offdiag], ff[offdiag], ok[offdiag],
+          Mborder <- mkcor(d[offdiag], ff[offdiag], ok[offdiag],
                                  Ef, r, method, ...)
+          result <- bind.fv(result,
+                            data.frame(border=Mborder), "mbord(r)",
+                            "border-corrected estimate of m(r)",
+                            "border")
         }
         if(any(correction == "translate")) {
           # translation correction
             edgewt <- edge.Trans(X, exact=slow)
           # get smoothed estimate of mark covariance
-            result$trans <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
+            Mtrans <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
                                   Ef, r, method, ...)
+            result <- bind.fv(result,
+                              data.frame(trans=Mtrans), "mtrans(r)",
+                              "translation-corrected estimate of m(r)",
+                              "trans")
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
             edgewt <- edge.Ripley(X, d)
           # get smoothed estimate of mark covariance
-            result$iso <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
+            Miso <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
                                 Ef, r, method, ...)
+            result <- bind.fv(result,
+                              data.frame(iso=Miso), "miso(r)",
+                              "Ripley isotropic correction estimate of m(r)",
+                              "iso")
         }
         return(result)
 }

@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.14 $	$Date: 2003/07/29 12:53:24 $
+#	$Revision: 4.18 $	$Date: 2004/01/06 08:21:02 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -51,6 +51,8 @@ ppp <- function(x, y, ..., window, marks ) {
 #
 #--------------------------------------------------------------------------
 #
+
+is.ppp <- function(x) { inherits(x, "ppp") }
 
 as.ppp <- function(X, W = NULL, fatal=TRUE) {
 	# tries to coerce data X to a point pattern
@@ -167,7 +169,8 @@ cut.ppp <- function(x, ...) {
 #
 #
 scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
-  filename <- paste(dir, filename, sep="")
+  filename <- if(dir=="") filename else
+              paste(dir, filename, sep=.Platform$file.sep)
   df <- read.table(filename, header=header)
   if(header) {
     x <- df$x
@@ -352,6 +355,9 @@ print.summary.ppp <- function(x, ..., dp=3) {
 "%mark%" <-
 setmarks <- function(X, m) {
   verifyclass(X, "ppp")
+  if(length(m) == 1) m <- rep(m, X$n)
+  else if(X$n == 0) m <- rep(m, 0) # ensures marked pattern is obtained
+  else if(length(m) != X$n) stop("number of points != number of marks")
   Y <- ppp(X$x,X$y,window=X$window,marks=m)
   return(Y)
 }

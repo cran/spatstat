@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.3 $    $Date: 2003/10/13 14:36:57 $
+#      $Revision: 4.6 $    $Date: 2004/01/27 07:04:36 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -14,27 +14,52 @@
 #
 #---------------------------------------------------------------------
 
-quadscheme <- function(data, dummy=default.dummy(data), ...) {
+quadscheme <- function(data, dummy, method="grid", ...) {
         #
 	# generate a quadrature scheme from data and dummy patterns.
 	#
 	# Other arguments control how the quadrature weights are computed
         #
-  mX <- is.marked(data)
-  mQ <- is.marked(dummy)
+
+  data <- as.ppp(data)
+
+  if(missing(dummy)) {
+    # create dummy points
+    dummy <- default.dummy(data, method=method, ...)
+    # extract full set of parameters used to create dummy points
+    dp <- attr(dummy, "dummy.parameters")
+    # extract recommended parameters for computing weights
+    wp <- attr(dummy, "weight.parameters")
+  } else {
+    # use existing dummy points
+    dummy <- as.ppp(dummy, data$window)
+		# note data$window is the DEFAULT quadrature window
+		# applicable when 'dummy' does not contain a window
+    dp <- NULL
+    # use given weight parameters without inspection
+    wp <- append(list(method=method), list(...))
+  }
   
-  if(!mX && !mQ)
-    quadscheme.spatial(data, dummy, ...)
-  else if(mX && !mQ)
-    quadscheme.replicated(data, dummy, ...)
-  else if(!mX && mQ)
+  mX <- is.marked(data)
+  mD <- is.marked(dummy)
+
+  if(!mX && !mD)
+    Q <- do.call("quadscheme.spatial", append(list(data, dummy), wp))
+  else if(mX && !mD)
+    Q <- do.call("quadscheme.replicated", append(list(data, dummy), wp))
+  else if(!mX && mD)
     stop("dummy points are marked but data are unmarked")
   else
     stop("marked data and marked dummy points -- sorry, this case is not implemented")
+
+  # record parameters used to make dummy points
+  Q$param$dummy <- dp
+
+  return(Q)
 }
 
 quadscheme.spatial <-
-  function(data, dummy=default.dummy(data), method="grid", ...) {
+  function(data, dummy, method="grid", ...) {
         #
 	# generate a quadrature scheme from data and dummy patterns.
 	#
@@ -52,9 +77,9 @@ quadscheme.spatial <-
         # 
 
 	data <- as.ppp(data)
-	dummy <- as.ppp(dummy, data$window)
+        dummy <- as.ppp(dummy, data$window)
 		# note data$window is the DEFAULT quadrature window
-		# unless otherwise specified in 'dummy'
+		# applicable when 'dummy' does not contain a window
 
         if(is.marked(data))
           warning("marks in data pattern - ignored")
@@ -73,12 +98,17 @@ quadscheme.spatial <-
 			stop(paste("unrecognised method \'", method, "\'")) 
 		}
 	)
-	Q <- quad(data, dummy, w)
-	invisible(Q)
+
+        # parameters actually used to make weights
+        wp <- attr(w, "weight.parameters")
+        param <- list(weight = wp, dummy = NULL)
+
+	Q <- quad(data, dummy, w, param)
+        return(Q)
 }
 
 "quadscheme.replicated" <-
-  function(data, dummy=default.dummy(data), method="grid", ...) {
+  function(data, dummy, method="grid", ...) {
         #
 	# generate a quadrature scheme from data and dummy patterns.
 	#
@@ -139,10 +169,12 @@ quadscheme.spatial <-
         dumb <- superimpose(dumdum, dumdat)
         Wdumb <- c(Wdumdum, Wdumdat)
 
-        # wrap up
+        # record the quadrature parameters
+        param <- list(weight = P$param$weight, dummy = NULL)
 
-	Q <- quad(data, dumb, c(Wdat, Wdumb))
-	invisible(Q)
+        # wrap up
+	Q <- quad(data, dumb, c(Wdat, Wdumb), param)
+        return(Q)
 }
 
 

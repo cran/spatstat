@@ -1,3 +1,4 @@
+C Output from Public domain Ratfor, version 1.0
       subroutine dgs(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       dimension par(2), x(n), y(n), period(2)
@@ -10,26 +11,24 @@
       r2 = rho**2
       a = two*atan(1.d0)/rho
       soglum = zero
-      do 23000 j = 1,n 
-      if(.not.(j .eq. ix))goto 23002
+      do23000 j = 1,n 
+      if(j .eq. ix)then
       sincr = zero
-      goto 23003
-23002 continue
-      if(.not.(per))goto 23004
+      else
+      if(per)then
       call dist2(u,v,x(j),y(j),period,d2)
-      goto 23005
-23004 continue
+      else
       d2 = (u-x(j))**2 + (v-y(j))**2
-23005 continue
-      if(.not.(d2 .lt. r2))goto 23006
+      endif
+      if(d2 .lt. r2)then
       sincr = two*log(sin(a*sqrt(d2)))
-      goto 23007
-23006 continue
+      else
       sincr = zero
-23007 continue
-23003 continue
+      endif
+      endif
       soglum = soglum + sincr
 23000 continue
+23001 continue
       cifval = beta*exp(soglum)
       return
       end

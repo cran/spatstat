@@ -1,0 +1,49 @@
+\name{print.quad}
+\alias{print.quad}
+\title{Print a Quadrature Scheme}
+\description{
+  \code{print} method for a quadrature scheme.
+}
+\synopsis{
+ print.quad(x,\dots)
+}
+\usage{
+ print.quad(x)
+ x
+}
+\arguments{
+  \item{x}{
+    A quadrature scheme object, typically obtained from
+    \code{\link{quadscheme}}.
+    An object of class \code{"quad"}.
+  }
+}
+\value{
+  none.
+}
+\details{
+  This is the \code{print} method for the class \code{"quad"}.
+  It prints simple information about the quadrature scheme.
+
+  See \code{\link{quad.object}} for details of the class \code{"quad"}.
+}
+\seealso{
+  \code{\link{quadscheme}},
+  \code{\link{quad.object}},
+  \code{\link{plot.quad}},
+  \code{\link{summary.quad}}
+}
+\examples{
+ require(spatstat)
+ data(cells)
+ Q <- quadscheme(cells)
+ Q
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}

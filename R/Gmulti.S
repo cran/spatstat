@@ -8,12 +8,13 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.5 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.6 $	$Date: 2004/01/12 11:19:04 $
 #
 ################################################################################
 
 "Gcross" <-		
-function(X, i=1, j=2, r=NULL, breaks=NULL, ...) {
+function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
+{
 #	computes G_{ij} estimates
 #
 #	X		marked point pattern (of class 'ppp')
@@ -126,7 +127,20 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
         lamJ <- sum(J)/area.owin(window)
         result$theo <- 1 - exp( - lamJ * pi * result$r^2)
         
-	return(data.frame(result))
+# convert to class "fv"
+        result <- as.data.frame(result)
+        Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
+        alim <- range(result$r[result$km <= 0.9])
+        labl <- c("r", "Gpois(r)", "Gbord(r)", "Gkm(r)",
+                  "lambda(r)", "Graw(r)")
+        desc <- c("distance argument r",
+                  "theoretical Poisson G(r)",
+                  "border corrected estimate of G(r)",
+                  "Kaplan-Meier estimate of G(r)",
+                  "Kaplan-Meier estimate of hazard function lambda(r)",
+                  "uncorrected estimate of G(r)")
+        Z <- fv(Z, "r", "G(r)", "km", cbind(km, theo) ~ r, alim, labl, desc)
+	return(Z)
 }	
 
 

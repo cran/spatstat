@@ -1,20 +1,18 @@
-\name{conspire}
-\alias{conspire}
-\title{Plot Together According to a Formula}
+\name{plot.fv}
+\alias{plot.fv}
+\title{Plot Function Valuesn}
 \description{
-  Given a data frame and a formula involving variables in the data frame,
-  plot the left hand side of the formula versus the right hand side. 
+  Plot method for the class \code{"fv"}.
 }
 \usage{
- conspire(indata, formula, subset=NULL, lty=NULL, col=NULL, xlim, ylim,
-xlab, ylab)
+plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
 }
 \arguments{
-  \item{indata}{
-    A data frame, containing the variables to be plotted
+  \item{x}{
+    An object of class \code{"fv"}, containing the variables to be plotted
     or variables from which the plotting coordinates can be computed.
   }
-  \item{formula}{
+  \item{fmla}{
     an S language formula determining which variables or expressions
     are plotted. 
   }
@@ -41,16 +39,21 @@ xlab, ylab)
   \item{ylab}{
     (optional) label for y axis
   }
+  \item{\dots}{
+    Extra arguments passed to \code{plot.default}.
+  }
 }
 \value{
   none. Side effect is a plot.
 }
 \details{
-  This function is like \code{plot.formula} but offers
+  This is the \code{plot} method for the class \code{"fv"}.
+
+  The use of the argument \code{fmla} is like \code{plot.formula}, but offers
   some extra functionality.
   
-  The left and right hand sides of the formula argument
-  are evaluated in the data frame \code{indata},
+  The left and right hand sides of \code{fmla}
+  are evaluated in the data frame \code{x},
   and the results are plotted against each other
   (the left side on the \eqn{y} axis 
   against the right side on the \eqn{x} axis). 
@@ -66,35 +69,28 @@ xlab, ylab)
   See the examples.
 }
 \examples{
-   \dontrun{
-   library(spatstat)
+   require(spatstat)
 
-   df <- data.frame(x=1:20, y=sqrt(1:20), z = sqrt(1:20) + runif(20))
+   data(cells)
+   K <- Kest(cells)
+   # K is an object of class "fv"
 
-   conspire(df, y ~ x)             # plots y against x
+   plot(K, iso ~ r)                # plots iso against r
 
-   conspire(df, log(y) ~ log(x))   # plots log(y) against log(x)
+   plot(K, sqrt(iso/pi) ~ r)   # plots sqrt(iso/r)  against r
 
-   conspire(df, z - sqrt(x) ~ x)   # plots z - sqrt(x) against x
+   plot(K, cbind(iso,theo) ~ r)   # plots iso against r  AND theo against r
 
+   plot(K, cbind(iso,theo) ~ r, col=c(2,3))
+                                   # plots iso against r  in colour 2
+                                   # and theo against r in colour 3
 
-   conspire(df, cbind(y,z) ~ x)   # plots y against x  AND z against x
-
-   conspire(df, cbind(z,sqrt(x)) ~ x)
-                                  # plots z against x  AND sqrt(x) against x
-
-   conspire(df, cbind(z - sqrt(x),0) ~ x)
-                                   # plots z - sqrt(x) against x
-                                   # with dashed horizontal line at height 0
-
-   conspire(df, cbind(y,z) ~ x, col=c(2,3))
-                                   # plots y against x  in colour 2
-                                   # and z against x in colour 3
-
-   conspire(df, y ~ x, subset=quote(x < 10))
-                                   # plots y against x for x < 10
-
-  }
+   plot(K, iso ~ r, subset=quote(r < 0.2))
+                                   # plots iso against r for r < 10
+}
+\seealso{
+  \code{\link{fv.object}},
+  \code{\link{Kest}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -35,7 +35,10 @@
   }
 }
 \value{
-  A data frame containing
+  An object of class \code{"fv"}, see \code{\link{fv.object}},
+  which can be plotted directly using \code{\link{plot.fv}}.
+
+  Essentially a data frame containing
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the function \eqn{J} has been  estimated}
   \item{J}{the recommended estimate of \eqn{J(r)}, which is the 
@@ -210,48 +213,16 @@
   \code{\link{kaplan.meier}}
 }
 \examples{
-   library(spatstat)
+   require(spatstat)
    data(cells)
-   Jc <- Jest(cells, 0.01)
-   \dontrun{
-   plot(Jc$r, Jc$km, type="l")
-   abline(h=1, lty=2)
+   J <- Jest(cells, 0.01)
+   plot(J, main="cells data")
    # values are far above J= 1, indicating regular pattern
-   }
-   data(redwood)
-   Jw <- Jest(redwood, 0.01)
-   \dontrun{
-   plot(Jw$r, Jw$km, type="l")
-   abline(h=1, lty=2)
-   # values are below J= 1, indicating clustered pattern
-   }
-   \dontrun{
-   Jc <- Jest(cells, 0.01)
-   # alternative plot commands
-   plot(km ~ r, type="l", data=Jc)
-   # restrict the plot to values of r less than 0.1
-   plot(km ~ r, type="l", data=Fc[Fc$r <= 0.1, ])
-   plot(km ~ r, type="l", data=Fc, subset=(r <= 0.1))
-   }
-   # simulated data
-   X <- runifpoint(50)
-   J <- Jest(X, 0.01)
-   \dontrun{
-   plot(J$r, J$km, type="l", xlab="r", ylab="J(r)", ylim=c(0,1),
-       main = "empty space function")
-   abline(h=1, lty=2)
-   legend(0.5, 2, c("Kaplan-Meier estimator", "Poisson process"), lty=c(1,2))
-   }
 
-   # functions F, G and J
-   Jout <- Jest(X, 0.01)
-   FF <- attr(Jout, "F")
-   G <- attr(Jout, "G")
-   \dontrun{
-   plot(km ~ r, type="l", data=FF, main="Empty space function")
-   plot(km ~ r, type="l", data=G, main="Nearest neighbour function")
-   plot(km ~ r, type="l", data=Jout, main="J-function")
-   }
+   data(redwood)
+   J <- Jest(redwood, 0.01)
+   plot(J, main="redwood data")
+   # values are below J= 1, indicating clustered pattern
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

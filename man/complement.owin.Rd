@@ -31,9 +31,14 @@
   \code{\link{owin.object}}
 }
 \examples{
-  \dontrun{
+   require(spatstat)
+   # polygonal
+   data(demopat)
+   w <- demopat$window
    outside <- complement.owin(w)
-  }
+   # mask
+   w <- as.mask(demopat$window)
+   outside <- complement.owin(w)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 1.8 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 2.2 $	$Date: 2004/01/27 08:56:20 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -147,6 +147,52 @@ MultiStraussHard <- function(types, iradii, hradii) {
           return(list(param=list(gammas=gammas),
                       inames="interaction parameters gamma_ij",
                       printable=round(gammas,4)))
+        },
+        valid = function(coeffs, self) {
+           # interaction radii r[i,j]
+           iradii <- self$par$iradii
+           # hard core radii r[i,j]
+           hradii <- self$par$hradii
+           # interaction parameters gamma[i,j]
+           gamma <- (self$interpret)(coeffs, self)$param$gammas
+           if(!all(is.finite(gamma)))
+             return(FALSE)
+           # inactive hard cores?
+           ihc <- (is.na(hradii) | hradii == 0)
+           # non-integrable?
+           return(all(gamma[ihc] <= 1))
+         },
+         project = function(coeffs, self) {
+           # interaction radii r[i,j]
+           iradii <- self$par$iradii
+           # hard core radii r[i,j]
+           hradii <- self$par$hradii
+           # interaction parameters gamma[i,j]
+           gamma <- (self$interpret)(coeffs, self)$param$gammas
+           # remove NA's
+           gamma[is.na(gamma)] <- 1
+           # inactive hard cores?
+           ihc <- (is.na(hradii) | hradii == 0)
+           if(any(ihc & (gamma > 1))) 
+               gamma[ihc] <- pmin(gamma[ihc], 1)
+           # now put them back... %^[
+           # get possible types
+           typ <- self$par$types
+           ntypes <- length(typ)
+           # get matrices of interaction radii
+           r <- self$par$iradii
+           h <- self$par$hradii
+           # list all unordered pairs of types
+           uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
+           mark1 <- (typ[row(r)])[uptri]
+           mark2 <- (typ[col(r)])[uptri]
+           # names of coefficients
+           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
+           thetaname <- paste("mark", basename, sep="")
+           npairs <- length(basename)
+           # reassign 
+           coeffs[thetaname] <- log(gamma[uptri])
+           return(coeffs)
         }
   )
   class(out) <- "interact"

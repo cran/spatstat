@@ -1,13 +1,15 @@
 #
 #       images.R
 #
-#         $Revision: 1.4 $     $Date: 2003/05/02 11:27:38 $
+#         $Revision: 1.7 $     $Date: 2004/01/27 07:02:57 $
 #
 #      The class "im" of raster images
 #
 # Temporary code until we sort out the class structure
 #
 #     im()     object creator
+#
+#     is.im()   converter
 #
 #     plot.im(), image.im(), contour.im(), persp.im()
 #                      plotting functions
@@ -48,26 +50,32 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat))) {
   return(out)
 }
 
+is.im <- function(x) {
+inherits(x,"im")
+}
+
 ################################################################
 ########   methods for class "im"
 ################################################################
 
-image.im <- function(x, ...) {
-  image.default(x$xcol, x$yrow, t(x$v), ..., asp=1.0)
+image.im <- function(x, ..., xlab="x", ylab="y") {
+    image.default(x$xcol, x$yrow, t(x$v), ...,
+                  xlab=xlab, ylab=ylab, asp=1.0)
 }
 
-persp.im <- function(x, ...) {
-  persp.default(x$xcol, x$yrow, t(x$v), ..., asp=1.0)
+persp.im <- function(x, ..., xlab="x", ylab="y") {
+  persp.default(x$xcol, x$yrow, t(x$v), ...,
+                xlab=xlab, ylab=ylab, asp=1.0)
 }
 
-contour.im <- function (x, ...)
+contour.im <- function (x, ..., xlab="x", ylab="y")
 {
     doit <- function(x, ..., add=FALSE) {
       if(!add) 
         plot.default(x$xcol, x$yrow, type="n", asp = 1, ...)
       contour.default(x$xcol, x$yrow, t(x$v), add=TRUE, ...)
     }
-    doit(x, ...)
+    doit(x, ..., xlab=xlab, ylab=ylab)
     invisible(NULL)
 }
 
@@ -105,12 +113,12 @@ lookup.im <- function(im, x, y, naok=FALSE) {
   value <- rep(NA, length(x))
                
   # test whether inside bounding rectangle
-  xr <- range(im$xcol)
-  yr <- range(im$yrow)
+  xr <- im$xrange
+  yr <- im$yrange
   frameok <- (xr[1] <= x) & (x <= xr[2]) & (yr[1] <= y) & (y <= yr[2])
   value[!frameok] <- 0
   
-  if(all(!frameok))  # all points OUTSIDE range - no further work needed
+  if(!any(frameok))  # all points OUTSIDE range - no further work needed
     return(value)  # all zero
 
   # consider only those points which are inside the frame
@@ -119,11 +127,7 @@ lookup.im <- function(im, x, y, naok=FALSE) {
   # map locations to raster (row,col) coordinates
   loc <- nearest.pixel(xf,yf,im)
   # look up image values
-  v <- im$v
-  nf <- sum(frameok)
-  vf <- logical(nf)
-  for(i in 1:nf) 
-    vf[i] <- v[loc$row[i],loc$col[i]]
+  vf <- im$v[cbind(loc$row, loc$col)]
   
   # insert into 'ok' vector
   value[frameok] <- vf

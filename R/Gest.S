@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.7 $	$Date: 2003/07/22 19:18:06 $
+#	$Revision: 4.8 $	$Date: 2004/01/09 13:51:42 $
 #
 ################################################################################
 #
@@ -61,6 +61,19 @@ function(X, r=NULL, breaks=NULL, ...) {
 # neaten up and return        
         result$breaks <- NULL
 
-	return(data.frame(result))
+# convert to class "fv"
+        result <- as.data.frame(result)
+        Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
+        alim <- range(result$r[result$km <= 0.9])
+        labl <- c("r", "Gpois(r)", "Gbord(r)", "Gkm(r)",
+                  "lambda(r)", "Graw(r)")
+        desc <- c("distance argument r",
+                  "theoretical Poisson G(r)",
+                  "border corrected estimate of G(r)",
+                  "Kaplan-Meier estimate of G(r)",
+                  "Kaplan-Meier estimate of hazard function lambda(r)",
+                  "uncorrected estimate of G(r)")
+        Z <- fv(Z, "r", "G(r)", "km", cbind(km, theo) ~ r, alim, labl, desc)
+	return(Z)
 }	
 

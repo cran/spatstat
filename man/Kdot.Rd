@@ -46,7 +46,9 @@ Kdot(X, i=1, breaks)
   }
 }
 \value{
-  A data frame containing numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+  Essentially a data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{i\bullet}(r)}{Ki.(r)} has been  estimated
   }
@@ -166,7 +168,7 @@ Kdot(X, i=1, breaks)
  \code{\link{pcf}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
      # Lansing woods data: 6 types of trees
     data(lansing)
 
@@ -178,16 +180,11 @@ Kdot(X, i=1, breaks)
     Kh. <- Kdot(sub, "hickory") 
     }
     # diagnostic plot for independence between hickories and other trees
-    \dontrun{
-       plot(Kh.$r, Kh.$trans,
-                  xlab="r", ylab="Kh.(r)",
-                  type="l", ylim=c(0,1))
-       lines(Kh.$r, Kh.$theo, lty=2)
-    }
+    plot(Kh.)
 
     # synthetic example with two marks "a" and "b"
     pp <- runifpoispp(50)
-    pp$marks <- sample(c("a","b"), pp$n, replace=TRUE)
+    pp <- pp \%mark\% sample(c("a","b"), pp$n, replace=TRUE)
     K <- Kdot(pp, "a")
 }
 \author{Adrian Baddeley

@@ -1,7 +1,7 @@
 #
-#    predictppm.S
+#    predict.ppm.S
 #
-#	$Revision: 1.12 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 1.15 $	$Date: 2004/01/08 13:12:27 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by mpl(),	
@@ -12,7 +12,7 @@
 # -------------------------------------------------------------------
 
 predict.ppm <-
-function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
+function(object, newdata, window, ngrid=NULL, type="trend", ...) {
 #
 #	'object' is the output of mpl()
 #
@@ -21,27 +21,45 @@ function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
 #
 #       find out what kind of model it is
 #
-  stationary <- is.stationary.ppm(model)
-  poisson <- is.poisson.ppm(model)
-  markeddata <- is.marked(model$Q$data)
-  notrend <- no.trend.ppm(model)
-  trivial <- poisson && notrend
-
-  if(markeddata) {
-      mrks <- model$Q$data$marks
-  }    
+  mod <- summary(model, quick="no prediction")  # undocumented hack!
+  stationary <- mod$stationary
+  poisson    <- mod$poisson
+  marked     <- mod$marked
+  multitype  <- mod$multitype
+  notrend    <- mod$no.trend
+  trivial    <- poisson && notrend
+#
+#       determine mark space
+#  
+  if(marked) {
+    if(!multitype)
+      stop("Not yet implemented for general marked point processes")
+    else 
+      types <- levels(mod$entries$data$marks)
+  }
+#
+#      determine what kind of output is required: image(s) or data frame
+#  
+  want.image <- missing(newdata)
 #
 #  Create data frame to pass to predict.glm()
-#		
-  want.grid <- missing(newdata)
-
-  if(want.grid) {
-  # create a rectangular grid of nx x ny points in window
-    window <- model$Q$data$window
-    if(is.null(ny))
-      ny <- nx
-    xr <- window$xrange
-    yr <- window$yrange
+#
+  if(want.image) {
+#
+#      validate parameters for image
+#  
+    if(missing(window))
+      window <- mod$entries$data$window
+    if(!is.null(ngrid)) {
+      if(!is.numeric(ngrid))
+        stop("ngrid should be a numeric vector")
+      nn <- length(ngrid)
+      if(nn < 1 || nn > 2)
+        stop("ngrid should be a vector of length 1 or 2")
+      if(nn == 1)
+        ngrid <- rep(ngrid,2)
+    }
+    masque <- as.mask(window, dimyx=ngrid)
   # gam with lo() will not allow extrapolation beyond the range of x,y
   # values actually used for the fit. Check this:
     tums <- termsinformula(model$trend)
@@ -51,33 +69,26 @@ function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
            tums == "lo(x,y)" |
            tums == "lo(y,x)")
     ) {
+      # determine range of x,y used for fit
       gg <- model$internal$glmdata
       gxr <- range(gg$x[gg$SUBSET])
       gyr <- range(gg$y[gg$SUBSET])
-      intersect.ranges <- function(r, s) {
-        c(max(r[1],s[1]), min(r[2],s[2]))
-      }
-      xr <- intersect.ranges(xr, gxr)
-      yr <- intersect.ranges(yr, gyr)
+      # trim window to this range
+      masque <- intersect.owin(masque, owin(gxr, gyr))
     }
-  # determine x and y vectors for nx * ny grid
-    dx <- diff(xr)/nx
-    dy <- diff(yr)/ny
-    xvals <- seq(xr[1] + dx/2, xr[2]-dx/2, length=nx)
-    yvals <- seq(yr[1] + dy/2, yr[2]-dy/2, length=ny)
-    if(!markeddata) {
-      # create nx * ny grid
-      newdata <- expand.grid(x=xvals, y = yvals)
-      # initialise output list
-      out <- list(x=xvals, y=yvals)
-    } else {
-      if(!is.factor(mrks))
-        stop("marks are not a factor")
-      mrkvals <- levels(mrks)
-      # create (nx * ny * nmarks) marked points
-      newdata <- expand.grid(x=xvals, y=yvals, marks=mrkvals)
-      # initialise output list
-      out <- list(x=xvals, y=yvals, marks = mrkvals)
+  # determine x and y vectors for grid
+    xx <- raster.x(masque)
+    yy <- raster.y(masque)
+    xx <- xx[masque$m]
+    yy <- yy[masque$m]
+    if(!marked) 
+      newdata <- data.frame(x=xx, y=yy)
+    else {
+      nt <- length(types)
+      nx <- length(xx)
+      newdata <- data.frame(x = rep(xx, nt),
+                            y = rep(yy, nt),
+                            marks=rep(types, rep(nx, nt)))
     }
   }
 
@@ -142,7 +153,7 @@ function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
     X <- model$Q$data
     U <- list(x=newdata$x, y=newdata$y)
     Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
-    if(markeddata) {
+    if(marked) {
       U$marks <- newdata$marks
       Equal <- Equal & outer(X$marks, U$marks, "==")
     }
@@ -185,15 +196,26 @@ function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
 #
 # reshape the result
 #
-    if(!want.grid) 
+    if(!want.image) 
       out <- as.vector(z)
     else {
-      out$z <-
-        if(!markeddata)
-          matrix(z, nx, ny)
-        else
-          array(z, dim=c(nx,ny,length(mrkvals)),
-                dimnames=list(NULL, NULL, as.character(mrkvals)))
+      # make an image of the right shape
+      imago <- as.im(masque)
+      if(!marked) {
+        # single image
+        out <- imago
+        # set entries
+        out$v[masque$m] <- z
+      } else {
+        # list of images
+        out <- list()
+        for(i in seq(types)) {
+          outi <- imago
+          # set entries
+          outi$v[masque$m] <- z[newdata$marks == types[i]]
+          out[[i]] <- outi
+        }
+      }
     }
 
 ####################################################################

@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 1.4 $   $Date: 2003/03/14 06:50:12 $
+#    $Revision: 2.1 $   $Date: 2004/01/27 08:06:38 $
 #
 #    Soft core processes.
 #
@@ -34,24 +34,21 @@ number less than 1")
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
            theta <- coeffs[["Interaction"]]
-           sigma <- theta * self$par$kappa/2
+           sigma <- theta^(self$par$kappa/2)
            return(list(param=list(sigma=sigma),
                        inames="interaction parameter sigma",
                        printable=sigma))
          },
-         rmhmodel = function(fit, self) {
-           # not implemented if there is a trend 
-           if(!no.trend.ppm(fit))
-             return(NULL)
-           kappa <- self$par$kappa
-           coeffs <- fit$coef
-           beta <- exp(coeffs[["(Intercept)"]])
-           theta <- exp(coeffs[["Interaction"]])
-           sigma <- theta * kappa/2
-           w <- fit$Q$data$window
-           return(list(cif='sftcr',
-                       par=c(beta=beta,sigma=sigma,kappa=kappa),
-                       w=w))
+         valid = function(coeffs, self) {
+           theta <- coeffs[["Interaction"]]
+           return(is.finite(theta) && (theta >= 0))
+         },
+         project = function(coeffs, self) {
+           theta <- coeffs[["Interaction"]]
+           if(is.na(theta))
+             theta <- 0
+           coeffs[["Interaction"]] <- max(0, theta)
+           return(coeffs)
          }
   )
   class(out) <- "interact"

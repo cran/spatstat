@@ -51,12 +51,14 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   }
   \item{\dots}{
     Arguments passed to the density estimation routine
-    (\code{\link{density}}, \code{\link{loess}} or \code{\link{sm.density}})
+    (\code{\link{density}}, \code{\link{loess}} or \code{sm.density})
     selected by \code{method}.
   }
 }
 \value{
-  A data frame containing numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the mark correlation function \eqn{\rho_f(r)}{rho_f(r)}
     has been  estimated
@@ -197,13 +199,13 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     sub <- longleaf[ , swcorner]
     # mark correlation function
     mc <- markcorr(sub)
-    conspire(mc, cbind(trans,theo) ~ r, xlim=c(0,40),ylim=c(0,2))
+    plot(mc)
 
     # (2) simulated data with independent marks
     X <- rpoispp(100)
-    X$marks <- runif(X$n)
+    X <- X \%mark\% runif(X$n)
     Xc <- markcorr(X)
-    conspire(Xc, cbind(iso,trans,theo) ~ r, xlim=c(0,0.4),ylim=c(0,2))
+    plot(Xc)
     
     # MULTITYPE DATA:
     # Hughes' amacrine data
@@ -214,7 +216,7 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     M <- markcorr(amacrine, function(m1,m2) {m1==m2},
                   correction="translate", method="density",
                   kernel="epanechnikov")
-    conspire(M, cbind(trans, theo) ~ r, subset="r <= 0.5")
+    plot(M)
     # Note: kernel="epanechnikov" comes from help(density)
 
     # (4) Same again with explicit control over bandwidth

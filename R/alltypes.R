@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.6 $   $Date: 2002/05/13 12:41:10 $
+#   $Revision: 1.9 $   $Date: 2004/01/13 10:05:46 $
 #
 #
 alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
@@ -34,25 +34,18 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
   # select appropriate statistics
   F1 <- switch(fun,F=Fest,G=Gest,J=Jest,K=Kest, wrong)
   F2 <- switch(fun,F={},G=Gcross,J=Jcross,K=Kcross, wrong)
-  RF  <- switch(fun,F=c("r","km","rs","raw","hazard","theo"),
-                   G=c("r","km","rs","hazard", "theo"),
-                   J=c("r","km","rs","un","theo"),
-                   K=c("r","border","trans","theo"),
-                   NA)
-  deform <- switch(fun,F=cbind(km,theo)~r,
-                      G=cbind(km,theo)~r,
-                      J=cbind(km,theo)~r,
-                      K=cbind(trans,theo)~r,
-                      NA)
 
-# initialise 'fasp' object
+# build 'fasp' object
   fns  <- list()
+  deform <- list()
   
   if(fun=="F") {
     witch <- matrix(1:nm,ncol=1,nrow=nm)
+    names(witch) <- um
     titles <- if(nm > 1) as.list(paste("mark =", um)) else list("")
   } else {
     witch <- matrix(1:(nm^2),ncol=nm,nrow=nm,byrow=TRUE)
+    dimnames(witch) <- list(um, um)
     titles <- if(nm > 1)
       as.list(paste("(", um[t(row(witch))], ",", um[t(col(witch))], ")", sep=""))
     else
@@ -66,13 +59,14 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 	for(j in 1:ncol(witch)) {
           if(verb) cat("i =",i,"j =",j,"\n")
           k <- k+1
-          fns[[k]] <-
+          fns[[k]] <- currentfv <- 
             if(nm == 1) # univariate pattern
-              F1(pp,eps=NULL,breaks=brks)[RF]
+              F1(pp,eps=NULL,breaks=brks)
             else if(fun=="F" | i==j) # F_i or G_ii, J_ii, K_ii
-              F1(pp[pp$marks==um[i]], eps=NULL,breaks=brks)[RF]
+              F1(pp[pp$marks==um[i]], eps=NULL,breaks=brks)
             else 
-              F2(pp,um[i],um[j], eps=NULL, breaks=brks)[RF]
+              F2(pp,um[i],um[j], eps=NULL, breaks=brks)
+          deform[[k]] <- attr(currentfv, "fmla")
         }
       }
 
@@ -85,8 +79,6 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
   else
 	title <- paste(fun," function for ",dataname,".",sep="")
 
-  rslt <- list(fns=fns,titles=titles,default.formula=deform,which=witch,
-             dataname=dataname,title=title)
-  class(rslt) <- "fasp"
-  rslt
+  rslt <- fasp(fns, titles, deform, witch, dataname, title)
+  return(rslt)
 }

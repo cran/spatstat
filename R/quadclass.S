@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.6 $	$Date: 2003/11/12 06:38:52 $
+#	$Revision: 4.7 $	$Date: 2004/01/27 07:03:53 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -23,13 +23,36 @@
 #               equivalent to (w == 0). If this is absent
 #               then all points are known to have positive weights.
 #
+#       $param:
+#               parameters that were used to compute the weights
+#               and possibly to create the dummy points (see below).
+#              
 #       The combined (data+dummy) vectors of x, y coordinates of the points, 
 #       and their weights, are extracted using standard functions 
 #       x.quad(), y.quad(), w.quad() etc.
 #
+# ----------------------------------------------------------------------
+#  Note about parameters:
+#
+#       If the quadrature scheme was created by quadscheme(),
+#       then $param contains
+#
+#           $param$weight
+#                list containing the values of all parameters
+#                actually used to compute the weights.
+#
+#           $param$dummy
+#                list containing the values of all parameters
+#                actually used to construct the dummy pattern
+#                via default.dummy();
+#                or NULL if the dummy pattern was provided externally
+#
+#   If you constructed the quadrature scheme manually, this
+#   structure may not be present.
+#
 #-------------------------------------------------------------
 
-quad <- function(data, dummy, w) {
+quad <- function(data, dummy, w, param=NULL) {
   
   data <- as.ppp(data)
   dummy <- as.ppp(dummy)
@@ -47,7 +70,7 @@ quad <- function(data, dummy, w) {
   if(is.null(attr(w, "zeroes")) && any( w == 0))
 	attr(w, "zeroes") <- (w == 0)
 
-  Q <- list(data=data, dummy=dummy, w=w)
+  Q <- list(data=data, dummy=dummy, w=w, param=param)
   class(Q) <- "quad"
 
   invisible(Q)
@@ -70,6 +93,11 @@ w.quad <- function(Q) {
   Q$w
 }
 
+param.quad <- function(Q) {
+  verifyclass(Q, "quad")
+  Q$param
+}
+ 
 n.quad <- function(Q) {
   verifyclass(Q, "quad")
   Q$data$n + Q$dummy$n

@@ -1,3 +1,4 @@
+C Output from Public domain Ratfor, version 1.0
       subroutine strauss(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       dimension par(3), x(1), y(1), period(2)
@@ -8,32 +9,29 @@
       gamma = par(2)
       r = par(3)**2
       kount = 0
-      do 23000 j = 1,n 
-      if(.not.(j .eq. ix))goto 23002
+      do23000 j = 1,n 
+      if(j .eq. ix)then
       continue
-      goto 23003
-23002 continue
-      if(.not.(per))goto 23004
+      else
+      if(per)then
       call dist2(u,v,x(j),y(j),period,d2)
-      goto 23005
-23004 continue
+      else
       d2 = (u-x(j))**2 + (v-y(j))**2
-23005 continue
-      if(.not.(d2 .lt. r))goto 23006
+      endif
+      if(d2 .lt. r)then
       kount = kount+1
-23006 continue
-23003 continue
+      endif
+      endif
 23000 continue
-      if(.not.(gamma .lt. eps ))goto 23008
-      if(.not.(kount .gt. 0))goto 23010
+23001 continue
+      if(gamma .lt. eps )then
+      if(kount .gt. 0)then
       cifval = 0.d0
-      goto 23011
-23010 continue
+      else
       cifval = beta
-23011 continue
-      goto 23009
-23008 continue
+      endif
+      else
       cifval = beta*exp(log(gamma)*dble(kount))
-23009 continue
+      endif
       return
       end
