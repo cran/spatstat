@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.17 $	$Date: 2005/02/03 23:19:09 $
+#	$Revision: 5.18 $	$Date: 2005/02/08 23:56:24 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -55,7 +55,7 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=5,
                     release=7,
-                    date="$Date: 2005/02/03 23:19:09 $")
+                    date="$Date: 2005/02/08 23:56:24 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -150,7 +150,7 @@ return(rslt)
 
 
 mpl.prepare <- function(Q, X, P, trend, interaction, covariates, 
-                        want.trend, want.inter, correction, rbord) {
+                        want.trend, want.inter, correction, rbord, ...) {
 
   if(missing(want.trend))
     want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
@@ -246,7 +246,7 @@ if(want.inter) {
   V <- interaction$family$eval(X, P, E,
                         interaction$pot,
                         interaction$par,
-                        correction)
+                        correction, ...)
 
   if(!is.matrix(V))
     stop("interaction evaluator did not return a matrix")
