@@ -205,7 +205,7 @@
   \code{\link{Fest}},
   \code{\link{Gest}},
   \code{\link{Kest}},
-  \code{\link{kmrs}},
+  \code{\link{km.rs}},
   \code{\link{reduced.sample}},
   \code{\link{kaplan.meier}}
 }

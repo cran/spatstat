@@ -8,7 +8,7 @@
   of a marked point pattern.
 }
 \usage{
-markcorr(X, f = function(x,y) { x * y }, r=NULL,
+markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
          slow=FALSE, correction=c("border", "isotropic", "Ripley", "translate"),
          method="density", \dots)
 }

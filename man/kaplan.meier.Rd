@@ -65,7 +65,7 @@
 }
 \seealso{
   \code{\link{reduced.sample}},
-  \code{\link{kmrs}}
+  \code{\link{km.rs}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
