@@ -189,7 +189,7 @@ mpl.engine(Q, trend, interaction, covariates, correction,
 	 rbord, use.gam)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
-            want.trend, want.inter, correction, rbord)
+            want.trend, want.inter, correction, rbord, \dots)
 MultiPair.checkmatrix(mat, n, name)
 multipair.family
 nearest.pixel(x, y, im)
