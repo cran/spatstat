@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.11 $     $Date: 2004/08/30 05:25:56 $
+#         $Revision: 1.12 $     $Date: 2004/11/27 05:42:48 $
 #
 #      The class "im" of raster images
 #
@@ -125,8 +125,9 @@ lookup.im <- function(im, x, y, naok=FALSE) {
   # test whether inside bounding rectangle
   xr <- im$xrange
   yr <- im$yrange
-  frameok <- (xr[1] <= x) & (x <= xr[2]) & (yr[1] <= y) & (y <= yr[2])
-  value[!frameok] <- 0
+  eps <- sqrt(.Machine$double.eps)
+  frameok <- (x >= xr[1] - eps) & (x <= xr[2] + eps) & 
+             (y >= yr[1] - eps) & (y <= yr[2] + eps)
   
   if(!any(frameok))  # all points OUTSIDE range - no further work needed
     return(value)  # all zero

@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.5 $    $Date: 2002/08/12 03:51:52 $
+#    $Revision: 1.6 $    $Date: 2004/11/27 05:47:39 $
 #
 #    Translation edge correction weights
 #
@@ -64,7 +64,7 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
            # compute set covariance of window
            g <- setcov(W)
            # evaluate set covariance at these vectors
-           gvalues <- lookup.im(g, as.vector(DX), as.vector(DY))
+           gvalues <- lookup.im(g, as.vector(DX), as.vector(DY), naok=TRUE)
            # reshape
            gvalues <- matrix(gvalues, nrow=X$n, ncol=Y$n)
            weight <- area.owin(W)/gvalues
