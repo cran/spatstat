@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.16 $    $Date: 2004/06/08 10:48:33 $
+#    $Revision: 2.1 $    $Date: 2004/07/26 05:33:01 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by ppm().
@@ -11,134 +11,86 @@
 plot.ppm <- function(x, ngrid = c(40,40),
 		     superimpose = TRUE,
                      trend = TRUE, cif = TRUE, pause = TRUE,
-                     how=c("persp","image", "contour"),  ...)
+                     how=c("persp","image", "contour"),
+                     plot.it=TRUE,
+                     locations=NULL, covariates=NULL, ...)
 {
-  
-        model <- x
-        
+  model <- x
 #       Plot a point process model fitted by ppm().
 #
-        verifyclass(model, "ppm")
+  verifyclass(model, "ppm")
 #
 #       find out what kind of model it is
 #
-        mod <- summary(model)
-        stationary <- mod$stationary
-        poisson    <- mod$poisson
-        marked     <- mod$marked
-        multitype  <- mod$multitype
-        funnywindow <- (mod$entries$data$window$type != "rectangle")
-
-        data <- mod$entries$data
+  mod <- summary(model)
+  stationary <- mod$stationary
+  poisson    <- mod$poisson
+  marked     <- mod$marked
+  multitype  <- mod$multitype
+  data       <- mod$entries$data
         
-        if(marked) {
-          if(!multitype)
-            stop("Not implemented for general marked point processes")
-          else
-            mrkvals <- levels(data$marks)
-        }
+  if(marked) {
+    if(!multitype)
+      stop("Not implemented for general marked point processes")
+    else
+      mrkvals <- levels(data$marks)
+  } else mrkvals <- 1
+  ntypes <- length(mrkvals)
         
 #
-# Interpret options
-#
+#        Interpret options
+#        -----------------
 #        
-#                        plotting style
-#        
-        howmat <- outer(how, c("persp","image", "contour"), "==")
-        howmatch <- apply(howmat, 1, any)
-        if(any(!howmatch))
-          stop(paste("unrecognised option", how[!howmatch]))
-
-#                       whether to plot trend, cif
+#        Whether to plot trend, cif
         
-        if(!missing(trend) && !missing(cif) && !trend && !cif) {
-          cat("Nothing plotted - both \'trend\' and \'cif\' are FALSE\n")
-          return(invisible(NULL))
-        }
-#                       suppress uninteresting plots
-#                       unless explicitly instructed otherwise
-        if(missing(trend))
-          trend <- !stationary
-	if(missing(cif))
-          cif <- !poisson
+  if(!trend && !cif) {
+    cat("Nothing plotted - both \'trend\' and \'cif\' are FALSE\n")
+    return(invisible(NULL))
+  }
+#        Suppress uninteresting plots
+#        unless explicitly instructed otherwise
+  if(missing(trend))
+    trend <- !stationary
+  if(missing(cif))
+    cif <- !poisson
         
-        if(!trend && !cif) {
-          cat("Nothing plotted -- all plots selected are flat surfaces.\n")
-          return(invisible())
-        }
+  if(!trend && !cif) {
+    cat("Nothing plotted -- all plots selected are flat surfaces.\n")
+    return(invisible())
+  }
 
 #
-#        
-#
-# Do the plotting --- first the trend, then the full cif
-# (if both are requested).
-#
+#        Do the prediction
+#        ------------------
 
-        if(pause)
-          oldpar <- par(ask=TRUE)
+  out <- list()
+  surftypes <- c("trend","cif")[c(trend,cif)]
+  ng <- if(missing(ngrid) && !missing(locations)) NULL else ngrid
 
-        on.exit(if(pause) par(oldpar))
+  for (ttt in surftypes) {
+    p <- predict(model,
+                   ngrid=ng, locations=locations, covariates=covariates,
+                   type = ttt)
+    if(is.im(p))
+      p <- list(p)
+    out[[ttt]] <- p
+  }
 
-#
-#        
-	types <- c("trend","cif")[c(trend,cif)]
-	for(ttt in types) {
-          # compute the predictions
-          pred <-  predict.ppm(model, ngrid=ngrid, type=ttt)
-          if(!marked) {
-            # can use xyz directly
-            for(style in how) {
-              switch(style, 
-                persp = {
-                  arg1 <- list(pred, xlab="x")
-                  arg2 <- spatstat.options("par.persp")[[1]]
-                  arg3 <- list(...)
-                  argue <- append(arg1, append(arg2, arg3))
-                  do.call("persp", argue)
-                },
-                image = {
-                  image(pred, ...)
-                  if(superimpose) plot(data, add=TRUE)
-                },
-                contour = {
-                  contour(pred, ...)
-                  if(superimpose) plot(data, add=TRUE)
-                },
-                {stop(paste("Unrecognised plot style", style))}
-              )
-            }
-          } else {
-            # multitype process - list of images
-            for(i in seq(mrkvals)) {
-              level <- mrkvals[i]
-              main <- paste("mark =",level)
-              for(style in how) {
-                switch(style, 
-                  persp = {
-                    arg1 <- list(pred[[i]], xlab="x")
-                    arg2 <- spatstat.options("par.persp")[[1]]
-                    arg3 <- list(...)
-                    argue <- append(arg1, append(arg2, arg3))
-                    do.call("persp", argue)
-                    title(main=main)
-                  },
-                  image = {
-                    image(pred[[i]], ...)
-                    if(superimpose) plot(data[data$marks == level], add=TRUE)
-                  },
-                  contour = {
-                    contour(pred[[i]], ...)
-                    if(superimpose) plot(data[data$marks == level], add=TRUE)
-                  },
-                  {
-                    stop(paste("Unrecognised plot style", style))
-                  }
-                )
-              }
-            }
-          }
-        }
+#        Make it a plotppm object
+#        ------------------------  
+  
+  class(out) <- "plotppm"
+  attr(out, "mrkvals") <- mrkvals
 
-        return(invisible())
-}      
+#        Actually plot it if required
+#        ----------------------------  
+  if(plot.it) {
+    if(!superimpose)
+      data <- NULL
+    plot(out,data=data,trend=trend,cif=cif,how=how, ...)
+  }
+
+  
+  return(invisible(out)) 
+}
 

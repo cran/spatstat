@@ -11,6 +11,10 @@ plot(demopat, cols=c("green", "blue"), main="Multitype point pattern")
 data(longleaf)
 plot(longleaf, fg="blue", main="Marked point pattern")
 
+data(lansing)
+plot(lansing, "Lansing Woods data")
+plot(split(lansing))
+
 data(letterR)
 plot(letterR)
 lambda <- 10/area.owin(letterR)
@@ -28,7 +32,7 @@ K <- Kest(swedishpines)
 plot(K)
 title(main="K function for Swedish Pines")
 
-pc <- pcf(K, spar=1.5)
+pc <- pcf(K, spar=0.8, method="b")
 plot(pc)
 title(main="Pair correlation function")
 
@@ -66,7 +70,8 @@ plot(rMatClust(10, 0.05, 4))
 Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
                w=c(0,10,0,10)),
           control=list(nrep=1e4), start=list(n.start=200))
-plot(Xg, main="rmh(...) for Geyer saturation model")
+plot(Xg, main=paste("Geyer saturation process\n",
+                    "rmh() with cif=\"geyer\""))
 
 par(oldpar)
 options(oldoptions)

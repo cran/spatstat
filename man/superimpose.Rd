@@ -27,15 +27,20 @@
   \code{\dots} is either a point pattern object (of class \code{"ppp"})
   or a structure containing (at least) the elements
   \code{x} and \code{y}. All the point patterns are assumed to have
-  the same window of observation, and (if they are marked point
-  patterns) the same space of possible marks.
+  the same window of observation.
 
   The first argument must be a point pattern
-  object, and it determines the observation window and mark space
+  object, and it determines the observation window
   for the result.
 
-  To superimpose point patterns consisting only of \code{x,y} coordinates,
-  use \code{\link{concatxy}}.
+  If any of the arguments is a \emph{marked} point pattern,
+  then all of them must be.
+  In that case, the result is also a marked point pattern.
+
+  If the arguments are given in the form \code{name=value},
+  then the names will be used
+  as marks attached to the corresponding points. See the last line
+  in the Examples.
 }
 \seealso{
   \code{\link{concatxy}},
@@ -46,6 +51,12 @@
   xy <- list(x=runif(10),y=runif(10))
   new <- superimpose(dat, xy)
   \dontrun{plot(new)}
+
+  # how to make a 2-type point pattern with types "a" and "b"
+  u <- superimpose(a = rpoispp(10), b = rpoispp(20))
+
+  # how to make a 2-type point pattern with types 1 and 2
+  u <- superimpose("1" = rpoispp(10), "2" = rpoispp(20))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

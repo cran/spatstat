@@ -1,3 +1,6 @@
+#
+# $Id: rmh.default.R,v 1.17 2004/08/23 04:12:18 adrian Exp adrian $
+#
 rmh.default <- function(model,start,control=NULL, verbose=TRUE, ...) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
@@ -299,7 +302,7 @@ if(cif=="strauss") {
 		stop("Bailing out.\n")
 	}
 	if(any(par<0))
-		stop("Negative parameters.\n")
+		stop("Negative parameters for strauss cif.\n")
 	if(par["gamma"] > 1)
 		stop("For Strauss processes, gamma must be <= 1.\n")
 	par <- par[nms]
@@ -314,7 +317,7 @@ if(cif=="straush") {
 		stop("Bailing out.\n")
 	}
 	if(any(par<0))
-		stop("Negative parameters.\n")
+		stop("Negative parameters for straush cif.\n")
 	par <- par[nms]
 }
 
@@ -327,7 +330,7 @@ if(cif=="sftcr") {
 		stop("Bailing out.\n")
 	}
 	if(any(par<0))
-		stop("Negative  parameters.\n")
+		stop("Negative  parameters for sftcr cif.\n")
 	if(par["kappa"] > 1)
 		stop("For Softcore processes, kappa must be <= 1.\n")
 	par <- par[nms]
@@ -354,7 +357,7 @@ if(cif=="straussm") {
 	r <- t(r)[row(r)>=col(r)]
 	par <- c(beta,gamma,r)
 	if(any(par[!is.na(par)]<0))
-		stop("Negative  parameters.\n")
+		stop("Negative  parameters for straussm cif.\n")
 }
 
 # 5. Marked Strauss with hardcore.
@@ -403,7 +406,7 @@ if(cif=="dgs") {
 		stop("Bailing out.\n")
 	}
 	if(any(par<0))
-		stop("Negative parameters.\n")
+		stop("Negative parameters for dgs cif.\n")
 	par <- par[nms]
 }
 
@@ -417,7 +420,7 @@ if(cif=="diggra") {
 		stop("Bailing out.\n")
         }
 	if(any(par<0))
-		stop("Negative parameters.\n")
+		stop("Negative parameters for diggra cif.\n")
 	if(par["delta"] >= par["rho"])
 		stop("Radius delta must be less than radius rho.\n")
 	par <- par[nms]
@@ -432,47 +435,78 @@ if(cif=="geyer") {
 		stop("Bailing out.\n")
 	}
 	if(any(par<0))
-		stop("Negative parameters.\n")
+		stop("Negative parameters for geyer cif.\n")
 	if(par["sat"] > .Machine$integer.max-100)
 		par["sat"] <- .Machine$integer.max-100
 	par <- par[nms]
 }
 
 # 9. The ``lookup'' device.  This permits simulating, at least
-# approximately, ANY pairwise interaction function model.  The
-# pairwise interaction function is provided as a vector of
+# approximately, ANY pairwise interaction function model
+# with isotropic pair interaction (i.e. depending only on distance).
+# The pair interaction function is provided as a vector of
 # distances and corresponding function values which are used
 # as a ``lookup table'' by the Fortran code.
 
 if(cif=="lookup") {
-	nms <- c("beta","h","r")
-	if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 3) {
+	nms <- c("beta","h")
+	if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 2) {
                 cat("For the lookup cif, par must be a named list\n")
-                cat("with components beta, h, and r.\n")
+                cat("with components beta and h (and optionally r).\n")
                 stop("Bailing out.\n")
         }
 	beta <- par[["beta"]]
 	if(beta < 0)
-		stop("Negative value of intensity = beta.\n")
-	h <- par[["h"]]
+		stop("Negative value of beta for lookup cif.\n")
+	h.init <- par[["h"]]
 	r <- par[["r"]]
-	nlook <- length(h)
-	if(length(r) != nlook)
-		stop("Mismatch of lengths of h and r lookup vectors.\n")
-	o <- order(r)
-	r <- r[o]
-	h <- h[o]
-	if(any(r < 0))
-		stop("Negative values lookup distances.\n")
-	if(r[1] > 0)
-		stop("The r vector must start at 0.\n")
+	if(is.null(r)) {
+		if(!is.stepfun(h.init))
+			stop(paste("For cif=lookup, if component r of",
+				   "par is absent then component h must",
+				   "be a stepfun object.\n"))
+		if(!is.cadlag(h.init))
+			stop(paste("The lookup pairwise interaction step",
+			     "function must be right continuous,\n",
+			     "i.e. built using the default values of",
+                             "the \"f\" and \"right\" arguments for stepfun.\n"))
+		r     <- knots(h.init)
+		h0    <- get("yleft",envir=environment(h.init))
+		h     <- h.init(r)
+		nlook <- length(r)
+		if(!identical(all.equal(h[nlook],1),TRUE))
+			stop(paste("The lookup interaction step function",
+                                   "must be equal to 1 for \"large\"",
+                                   "distances.\n"))
+		if(r[1] <= 0)
+			stop(paste("The first jump point (knot) of the lookup",
+				   "interaction step function must be",
+                                   "strictly positive.\n"))
+		h <- c(h0,h)
+	} else {
+		h     <- h.init
+		nlook <- length(r)
+		if(length(h) != nlook)
+			stop("Mismatch of lengths of h and r lookup vectors.\n")
+		if(any(is.na(r)))
+			stop("Missing values not allowed in r lookup vector.\n")
+		if(is.unsorted(r))
+			stop("The r lookup vector must be in increasing order.\n")
+		if(r[1] <= 0)
+			stop(paste("The first entry of the lookup vector r",
+                                   "should be strictly positive.\n"))
+		h <- c(h,1)
+	}
 	if(any(h < 0))
-		stop("Negative values in lookup pairwise int. func.\n")
+		stop(paste("Negative values in the lookup",
+                           "pairwise interaction function.\n"))
 	if(h[1] > 0 & any(h > 1))
-		stop("Non-meaningful lookup pairwise int. func.\n")
+		stop("Lookup pairwise interaction function does not define a valid point process.\n")
 	rmax   <- r[nlook]
+	r <- c(0,r)
+	nlook <- nlook+1
 	deltar <- mean(diff(r))
-	if(all.equal(diff(r),rep(deltar,nlook-1))) {
+	if(identical(all.equal(diff(r),rep(deltar,nlook-1)),TRUE)) {
 		equisp <- 1
 		par <- c(beta,nlook,equisp,deltar,rmax,h)
 	} else {

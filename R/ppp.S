@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.20 $	$Date: 2004/06/01 03:28:09 $
+#	$Revision: 4.21 $	$Date: 2004/08/26 05:14:23 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -192,36 +192,6 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
     X <- ppp(x, y, window=window, marks = marks)
   }
   X
-}
-
-
-"superimpose" <-
-  function(...)
-{
-  # superimpose any number of point patterns
-  # ASSUMED TO BE IN THE SAME WINDOW
-  # WITH THE SAME MARK SPACE if relevant
-  
-  # concatenate lists of (x,y) coordinates
-  XY <- concatxy(...)
-  # concatenate vectors of marks
-  M <- unlist(lapply(list(...), function(x) {x$marks}))
-  if(length(M) > 0 && length(M) != length(XY$x)) {
-    warning("marks not present in all patterns -- ignored them.")
-    M <- NULL
-  }
-  # determine window
-  P <- ..1
-  verifyclass(P, "ppp")
-  win <- P$window
-  #
-  # determine type of marks
-  if(!is.null(M) && is.factor(P$marks)) {
-    M <- factor(M)
-    levels(M) <- levels(P$marks)
-  }
-  #
-  ppp(XY$x, XY$y, window=win, marks=M)
 }
 
 #-------------------------------------------------------------------

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.10 $     $Date: 2004/01/27 07:02:14 $
+#       $Revision: 4.11 $     $Date: 2004/06/22 02:42:33 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -124,7 +124,13 @@ spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault=1) {
 	#       fctr:	 length of largest radius = fctr * M
 	#                where M is mean nearest neighbour distance in data
 	#
-	M <- if(length(x) > 1) mean(nndist(x,y)) else Mdefault
+        pat <- inherits(x,"ppp")
+        if(pat) w <- x$w
+        if(checkfields(x,c("x","y"))) {
+          y <- x$y
+          x <- x$x
+        }
+        M <- if(length(x) > 1) mean(nndist(x,y)) else Mdefault
 	lrad  <- fctr * M / nper
 	theta <- 2 * pi * (1:nrad)/nrad
 	cs    <- cos(theta)
@@ -134,7 +140,8 @@ spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault=1) {
 	xd    <- as.vector(outer(x, xt, "+"))
 	yd    <- as.vector(outer(y, yt, "+"))
 	
-	return(list(x=xd,y=yd))
+        tmp <- list(x = xd, y = yd)
+        if(pat) return(as.ppp(tmp,W=w)[,w]) else return(tmp)
 }
 	
 # concatenate any number of list(x,y) into a list(x,y)

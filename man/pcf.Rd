@@ -172,8 +172,8 @@
   # indicates inhibition at distances r < 0.3
 
   # multitype point pattern
-  data(ganglia)
-  p <- pcf(alltypes(ganglia, "K"), spar=0.5, method="b")
+  data(betacells)
+  p <- pcf(alltypes(betacells, "K"), spar=0.5, method="b")
   plot(p)
   # short range inhibition between all types
   # strong inhibition between "on" and "off"

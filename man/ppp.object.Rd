@@ -15,7 +15,6 @@
     \item optionally, a ``mark'' attached to each point
       (extra information such as a type label).
     }
-  }
   If \code{X} is an object of type \code{ppp},
   it contains the following elements:
   \tabular{ll}{
@@ -40,11 +39,12 @@
 
   Standard point pattern datasets provided with the package
   include
-  \code{\link{bramblecanes}},
   \code{\link{amacrine}},
-  \code{\link{ganglia}},
+  \code{\link{betacells}},
+  \code{\link{bramblecanes}},
   \code{\link{cells}},
   \code{\link{demopat}},
+  \code{\link{ganglia}},
   \code{\link{lansing}},
   \code{\link{longleaf}},
   \code{\link{nztrees}},

@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.21 $	$Date: 2004/06/09 10:38:51 $
+#	$Revision: 1.27 $	$Date: 2004/08/30 05:27:45 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -57,15 +57,25 @@ function(object, window, ngrid=NULL, locations=NULL,
 #      determine what kind of output is required:
 #      (arguments present)    (output)  
 #         window, ngrid    ->   image
-#         locations        ->   data frame
+#         locations (mask) ->   image
+#         locations (other) ->  data frame
 #
-  want.image <- is.null(locations)
+  if(!is.null(ngrid) && !is.null(locations))
+    stop("Only one of \`ngrid\' and \`locations\' should be specified")
+
+  if(is.null(ngrid) && is.null(locations)) 
+    # use ngrid 
+    ngrid <- 50
+    
+  want.image <- is.null(locations) ||
+                    (is.owin(locations) && locations$type == "mask")
+  make.grid <- !is.null(ngrid)
 #
 #
 ################   Determine prediction points  #####################
 #  
   if(!want.image) {
-    # list of (x,y) coordinates given by `locations'
+    # (A) list of (x,y) coordinates given by `locations'
     xpredict <- locations$x
     ypredict <- locations$y
     if(is.null(xpredict) || is.null(ypredict)) {
@@ -79,31 +89,38 @@ function(object, window, ngrid=NULL, locations=NULL,
     if(marked)
       mpredict <- locations$marks
   } else {
-    # pixel grid of points
+    # (B) pixel grid of points
     #
-    # Validate ngrid
+    if(!make.grid) 
+    #    (B)(i) The grid is given in `locations'
+      masque <- locations
+    else {
+    #    (B)(ii) We have to make the grid ourselves  
+    #    Validate ngrid
     #  
-    if(!is.null(ngrid)) {
-      if(!is.numeric(ngrid))
-        stop("ngrid should be a numeric vector")
-      nn <- length(ngrid)
-      if(nn < 1 || nn > 2)
-        stop("ngrid should be a vector of length 1 or 2")
-      if(nn == 1)
-        ngrid <- rep(ngrid,2)
+      if(!is.null(ngrid)) {
+        if(!is.numeric(ngrid))
+          stop("ngrid should be a numeric vector")
+        nn <- length(ngrid)
+        if(nn < 1 || nn > 2)
+          stop("ngrid should be a vector of length 1 or 2")
+        if(nn == 1)
+          ngrid <- rep(ngrid,2)
+      }
+      if(missing(window))
+        window <- mod$entries$data$window
+      masque <- as.mask(window, dimyx=ngrid)
     }
-    if(missing(window))
-      window <- mod$entries$data$window
-    masque <- as.mask(window, dimyx=ngrid)
-  # gam with lo() will not allow extrapolation beyond the range of x,y
-  # values actually used for the fit. Check this:
+    # Hack -----------------------------------------------
+    # gam with lo() will not allow extrapolation beyond the range of x,y
+    # values actually used for the fit. Check this:
     tums <- termsinformula(model$trend)
     if(any(
            tums == "lo(x)" |
            tums == "lo(y)" |
            tums == "lo(x,y)" |
            tums == "lo(y,x)")
-    ) {
+       ) {
       # determine range of x,y used for fit
       gg <- model$internal$glmdata
       gxr <- range(gg$x[gg$SUBSET])
@@ -111,7 +128,9 @@ function(object, window, ngrid=NULL, locations=NULL,
       # trim window to this range
       masque <- intersect.owin(masque, owin(gxr, gyr))
     }
-  # determine x and y vectors for grid
+    # ------------------------------------ End Hack
+    #
+    # Finally, determine x and y vectors for grid
     xx <- raster.x(masque)
     yy <- raster.y(masque)
     xpredict <- xx[masque$m]
@@ -132,15 +151,17 @@ function(object, window, ngrid=NULL, locations=NULL,
       # replicate
       nt <- length(types)
       np <- length(xpredict)
-      newdata <- data.frame(x = rep(xpredict, nt),
-                            y = rep(ypredict, nt),
+      xpredict <- rep(xpredict,nt)
+      ypredict <- rep(ypredict,nt)
+      newdata <- data.frame(x = xpredict,
+                            y = ypredict,
                             marks=rep(types, rep(np, nt)))
     }
 
 #### Next the external covariates, if any
 #
    if(need.covariates) {
-     if(missing(covariates)) {
+     if(is.null(covariates)) {
        # Extract covariates from fitted model object
        # They have to be images.
        oldcov <- model$covariates
@@ -224,7 +245,10 @@ function(object, window, ngrid=NULL, locations=NULL,
                               inter$pot, inter$par, model$correction)
     if(!is.matrix(Vnew))
       stop("internal error: eval.pair.inter() did not return a matrix")
-  
+
+  # Negative infinite values signify cif = zero
+    cif.equals.zero <- matrowany(Vnew == -Inf)
+    
   # Insert the potential into the relevant column(s) of `newdata'
     if(ncol(Vnew) == 1)
       # Potential is real valued (Vnew is a column vector)
@@ -250,6 +274,10 @@ function(object, window, ngrid=NULL, locations=NULL,
   # invoke predict.glm
   z <- predict(model$internal$glmfit, newdata, type="response")
 
+  # reset to zero if potential was zero
+  if(any(cif.equals.zero))
+    z[cif.equals.zero] <- 0
+    
 #################################################################    
   } else
      stop(paste("Unrecognised type \'", type, "\'\n", sep=""))

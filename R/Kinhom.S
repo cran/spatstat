@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.4 $	$Date: 2004/05/21 05:26:28 $
+#	$Revision: 1.5 $	$Date: 2004/08/31 10:26:31 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -138,6 +138,17 @@
                    "Ripley isotropic correction estimate of K(r)",
                    "iso")
     }
+
+    # which corrections have been computed?
+    nama2 <- names(K)
+    corrxns <- rev(nama2[nama2 != "r"])
+
+    # default is to display them all
+    attr(K, "fmla") <- as.formula(paste(
+                       "cbind(",
+                        paste(corrxns, collapse=","),
+                        ") ~ r"))
+
     return(K)
 }
 

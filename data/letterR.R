@@ -1,3 +1,4 @@
+require(spatstat, quietly=TRUE, save=FALSE)
 .getLetterR <- function() {
   filename <- paste(spatstat.rawdata.location(), "letterR.tab",
                     sep=.Platform$file.sep)

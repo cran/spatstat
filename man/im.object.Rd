@@ -11,7 +11,6 @@
     \item the dimensions of the rectangular array of pixels
     \item \eqn{x} and \eqn{y} coordinates for the pixels
     \item a numeric value (``grey value'') at each pixel
-    }
   }
   If \code{X} is an object of type \code{im},
   it contains the following elements:

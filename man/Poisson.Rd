@@ -62,8 +62,8 @@ which can then be fitted to point pattern data.
  # with different log-cubic trend for each species
 \testonly{
  # equivalent functionality - smaller dataset
- data(ganglia)
- ppm(ganglia, ~ marks * polynom(x,y,2), Poisson())
+ data(betacells)
+ ppm(betacells, ~ marks * polynom(x,y,2), Poisson())
 }
 }
 \author{Adrian Baddeley

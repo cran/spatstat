@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.24 $	$Date: 2004/01/08 12:20:05 $
+#	$Revision: 4.25 $	$Date: 2004/07/26 05:30:46 $
 #
 #
 #	A window may be either
@@ -225,57 +225,111 @@ as.rectangle <- function(...) {
 #
 #-----------------------------------------------------------------------------
 #
-as.mask <- function(w, eps=NULL, dimyx=NULL) {
+as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #	eps:		   grid mesh (pixel) size
 #	dimyx:		   dimensions of pixel raster
+#       xy:                coordinates of pixel raster  
 #
 #  NOTE: rows <=> y coordinate
 
-        verifyclass(w, "owin")
-        if(w$type == "mask")
-          return(w)
+  if(!missing(w)) {
+    verifyclass(w, "owin")
+  } else if(is.null(xy))
+    stop("If w is missing, xy is required")
 
-        # determine row & column dimensions of output raster
-        if(!is.null(dimyx)) {
-          nr <- dimyx[1]
-          nc <- dimyx[2]
-        } else {
-          # use pixel size 'eps'
-          if(!is.null(eps)) {
-            nr <- ceiling(diff(w$yrange)/eps)
-            nc <- ceiling(diff(w$xrange)/eps)
-          } else {
-            # use spatstat defaults
-            np <- spatstat.options("npixel")[[1]]
-            if(!is.numeric(np) || length(np) > 2)
-                   stop("Illegal value for spatstat.options(\"npixel\")")
-            if(length(np) == 1)
-                     nr <- nc <- np[1]
-            else {
-                     nr <- np[2]  
-                     nc <- np[1]
-            }
-          }
+  # If it's already a mask, and no other arguments specified,
+  # just return it.
+  if(!missing(w) && w$type == "mask" &&
+     is.null(eps) && is.null(dimyx) && is.null(xy))
+    return(w)
+  
+#
+#  First create pixel array
+#  
+  if(is.null(xy)) {
+#
+# Pixel coordinates to be computed from other dimensions
+#
+    # determine row & column dimensions of output raster
+    if(!is.null(dimyx)) {
+      nr <- dimyx[1]
+      nc <- dimyx[2]
+    } else {
+    # use pixel size 'eps'
+      if(!is.null(eps)) {
+        nr <- ceiling(diff(w$yrange)/eps)
+        nc <- ceiling(diff(w$xrange)/eps)
+      } else {
+    # use spatstat defaults
+        np <- spatstat.options("npixel")[[1]]
+        if(!is.numeric(np) || length(np) > 2)
+          stop("Illegal value for spatstat.options(\"npixel\")")
+        if(length(np) == 1)
+          nr <- nc <- np[1]
+        else {
+          nr <- np[2]  
+          nc <- np[1]
         }
+      }
+    }
+    # Initial mask with all entries True
+    out <- owin(w$xrange, w$yrange,
+                mask=matrix(TRUE, nrow=nr, ncol=nc))
+  } else {
+#
+# Pixel coordinates given explicitly:
+#
+    if(!checkfields(xy, c("x", "y")))
+      stop("\`xy\' should be a list containing two vectors x and y")
+    x <- sort(unique(xy$x))
+    y <- sort(unique(xy$y))
+    # derive other parameters
+    nr <- length(y)
+    nc <- length(x)
+    # x and y pixel sizes
+    dx <- diff(x)
+    if(diff(range(dx)) > 0.01 * mean(dx))
+      stop("x coordinates must be evenly spaced")
+    xstep <- mean(dx)
+    dy <- diff(y)
+    if(diff(range(dy)) > 0.01 * mean(dy))
+      stop("y coordinates must be evenly spaced")
+    ystep <- mean(dy)
+    # coordinate ranges
+    xrange <- range(x) + xstep * c(-1,1)/2
+    yrange <- range(y) + ystep * c(-1,1)/2
+    # Initial mask with all entries TRUE
+    m <- matrix(TRUE, nrow=nr, ncol=nc)
+    out <- list(type     = "mask",
+                xrange   = xrange,
+                yrange   = yrange,
+                dim      = c(nr, nc),
+                xstep    = xstep,
+                ystep    = ystep,
+                warnings = c(
+"Row index corresponds to increasing y coordinate; column to increasing x",
+"Transpose matrices to get the standard presentation in S",
+"Example: image(result$xcol,result$yrow,t(result$d))"
+                  ),
+                xcol    = x, 
+                yrow    = y,
+                m       = m)
+    class(out) <- "owin"
+    # window may be implicit in this case.
+    if(missing(w))
+      w <- owin(xrange, yrange)
+  }
 
-        # mask with all entries True
-        out <- owin(w$xrange, w$yrange,
-                    mask=matrix(TRUE, nrow=nr, ncol=nc))
-        
-        switch(w$type,
-               rectangle={
-                 return(out)
-               },
-               polygonal={
-                 # test every pixel
-                 x <- as.vector(raster.x(out))
-                 y <- as.vector(raster.y(out))
-                 value <- inside.owin(x, y, w)
-                 return(owin(w$xrange, w$yrange,
-                             mask=matrix(value, nrow=nr, ncol=nc)))
-               },
-               stop("Unrecognised window type \`", w$type, "\'")
-               )
+  # Second, intersect pixel raster with existing window
+  if(w$type != "rectangle") {
+    # test every pixel
+    x <- as.vector(raster.x(out))
+    y <- as.vector(raster.y(out))
+    value <- inside.owin(x, y, w)
+    out$m <- matrix(value, nrow=nr, ncol=nc)
+  }
+  
+  return(out)
 }
 
 #

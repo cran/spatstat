@@ -10,7 +10,7 @@
   PairPiece(r)
 }
 \arguments{
-  \item{r}{vector of discontinuity points for the potential}
+  \item{r}{vector of jump points for the potential function}
 }
 \value{
   An object of class \code{"interact"}
@@ -55,16 +55,18 @@
 
   The entries of \code{r} must be strictly increasing, positive numbers.
   They are interpreted as the points of discontinuity of \eqn{H}.
-  It is assumed that \eqn{h(s) =1} for all \eqn{s > r_{max}}{s > rmax}
+  It is assumed that \eqn{H(s) =1} for all \eqn{s > r_{max}}{s > rmax}
   where \eqn{r_{max}}{rmax} is the maximum value in \code{r}. Thus the
   model has as many regular parameters (see \code{\link{ppm}}) 
   as there are entries in \code{r}. The \eqn{i}-th regular parameter
   \eqn{\theta_i}{theta[i]} is the logarithm of the value of the
   interaction function \eqn{H} on the interval
-  \eqn{(r_{i-1},r_i)}{(r[i-1],r[i])}. 
+  \eqn{[r_{i-1},r_i)}{[r[i-1],r[i])}. 
 
-  If \code{r} is a single number, this reduces to the
-  Strauss process, see \code{\link{Strauss}}.
+  If \code{r} is a single number, this model is similar to the 
+  Strauss process, see \code{\link{Strauss}}. The difference is that
+  in \code{PairPiece} the interaction function is continuous on the
+  right, while in \code{\link{Strauss}} it is continuous on the left.
 
   The analogue of this model for multitype point processes
   has not yet been implemented.
@@ -72,7 +74,9 @@
 \seealso{
   \code{\link{ppm}},
   \code{\link{pairwise.family}},
-  \code{\link{ppm.object}}
+  \code{\link{ppm.object}},
+  \code{\link{Strauss}}
+  \code{\link{rmh.ppm}}
 }
 \examples{
    PairPiece(c(0.1,0.2))

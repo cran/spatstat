@@ -28,7 +28,8 @@ at new locations.
   }
   \item{locations}{
     data giving the \eqn{x,y} coordinates (and marks, if required)
-    at which predictions should be computed. 
+    at which predictions should be computed. Either a data frame
+    or a binary image mask.
     (Incompatible with \code{ngrid})
   }
   \item{covariates}{
@@ -47,11 +48,12 @@ at new locations.
   }
 }
 \value{
-  \emph{If \code{locations} is given:}
+  \emph{If \code{locations} is given and is a data frame:}
   a vector of predicted values for the spatial locations
   (and marks, if required) given in \code{locations}.
 
-  \emph{If \code{locations} is not given:}
+  \emph{If \code{ngrid} is given, or if \code{locations} is given
+    and is a binary image mask:}
   If \code{object} is an unmarked point process,
   the result is an image object (of class \code{"im"}, see
   \code{\link{im.object}}) containing the predictions. 
@@ -77,17 +79,11 @@ at new locations.
   simply by printing the \code{ppm} object.
   The spatial trend and conditional intensity of the 
   fitted model are evaluated using this function \code{predict.ppm}.
- 
-  This is feasible in such generality because the Berman-Turner-Baddeley method
-  (Berman and Turner, 1992; Baddeley and Turner, 2000) 
-  reduces maximum pseudolikelihood estimation to the fitting
-  of a GLM or GAM, and because \R contains \code{predict} methods for
-  \code{glm} and \code{gam} objects. The current implementation
-  invokes \code{\link{predict.glm}}.
 
   The default action is to create a rectangular grid of points
   in the observation window of the data point pattern, and evaluate
   the spatial trend and conditional intensity at these locations.
+
   Note that by ``spatial trend'' we mean the
   (exponentiated) first order potential
   and not the intensity of the process. [For example if we fit the
@@ -98,25 +94,45 @@ at new locations.
   fitted model is evaluated at each required spatial location \eqn{u},
   with respect to the data point pattern \eqn{X}.
 
-  If the argument \code{locations} is absent, then
+  If the argument \code{ngrid} is present, then
   predictions are performed at an \code{ngrid} by \code{ngrid}
   pixel grid of locations in the window \code{window}. 
   The result of prediction will be a pixel image or images.
   
   If \code{locations} is present, then predictions
-  will be performed at the locations given by
-  this dataset. The result of prediction will be a
-  vector of values.
+  will be performed at the spatial locations given by
+  this dataset. The result of prediction will be either a
+  vector of values or a pixel image or a list of images, depending
+  on the format of \code{locations}. 
 
-  For an \emph{unmarked} point process model,
-  \code{locations} is expected to specify the \eqn{x,y} coordinates
-  of the prediction locations, in any format acceptable
-  to \code{\link{xy.coords}}. For a marked point process model,
-  \code{locations} must specify the \eqn{x,y} coordinates
-  \bold{and} the \emph{marks} of the prediction locations;
-  it should be a data frame or list containing entries named
-  \code{x}, \code{y} and \code{marks}.
+  The argument \code{locations} may be either a data frame or list
+  specifying arbitrary locations,
+  or a binary image mask (an object of class \code{"owin"}
+  with type \code{"mask"}) specifying (a subset of) a rectangular
+  grid of locations. 
+
+  If \code{locations} is a data frame or list, then it must contain
+  vectors \code{locations$x} and \code{locations$y} specifying the
+  \eqn{x,y} coordinates of the prediction locations. Additionally, if
+  the model is a marked point process, then \code{locations} must also contain
+  a factor \code{locations$marks} specifying the marks of the
+  prediction locations. These vectors must have equal length.
+  The result of prediction will be a vector of predicted values,
+  of the same length.
   
+  If \code{locations} is a binary image mask, then prediction will be
+  performed at each pixel in this binary image where the pixel value
+  is \code{TRUE} (in other words, at each pixel that is inside the
+  window). If the fitted model is an unmarked point process, then the
+  result of prediction will be an image. If the fitted model is a
+  marked point process, then prediction will
+  be performed for each possible value of the mark at each such
+  location, and the result of prediction will be a 
+  list of images, one for each mark value.
+  
+  If neither \code{ngrid} nor \code{locations} is given, then
+  \code{ngrid} is assumed. It defaults to 50.
+
   The argument \code{covariates} gives the values of any spatial covariates
   at the prediction locations.
   If the trend formula in the fitted model 
@@ -124,14 +140,10 @@ at new locations.
   the Cartesian coordinates \code{x}, \code{y})
   then \code{covariates} is required.
 
-  The format and use of \code{covariates} is analogous to that of the
+  The format and use of \code{covariates} are analogous to those of the
   argument of the same name in \code{\link{ppm}}.
   It is either a data frame or a list of images.
-  If it is a data frame, then each row of \code{covariates}
-  is assumed to contain covariate data for the location
-  specified in the corresponding row of \code{locations}
-  (which must be present).
-
+  
   If \code{covariates} is a list of images, then
   the names of the entries should correspond to
   the names of covariates in the model formula \code{trend}.
@@ -140,11 +152,22 @@ at new locations.
   The software will look up
   the pixel values of each image at the quadrature points.
 
+  If \code{covariates} is a data frame, then the
+  \code{i}th row of \code{covariates}
+  is assumed to contain covariate data for the \code{i}th location.
+  When \code{locations} is a data frame,
+  this just means that each row of \code{covariates} contains the
+  covariate data for the location specified in the corresponding row of
+  \code{locations}. When \code{locations} is a binary image
+  mask, the row \code{covariates[i,]} must correspond to the location
+  \code{x[i],y[i]} where \code{x = as.vector(raster.x(locations))}
+  and \code{y = as.vector(raster.y(locations))}.
+
   Note that if you only want to use prediction in order to
   generate a plot of the predicted values,
   it may be easier to use \code{\link{plot.ppm}} which calls
   this function and plots the results.
-  
+
 }
 \references{
   Baddeley, A. and Turner, R.
@@ -160,7 +183,8 @@ at new locations.
   \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{plot.ppm}},
-  \code{\link{print.ppm}}
+  \code{\link{print.ppm}},
+  \code{\link{fitted.ppm}}
 }
 \section{Warnings}{
   The current implementation invokes \code{\link{predict.glm}}
