@@ -35,7 +35,6 @@
 \alias{gridindex}            
 \alias{handle.r.b.args}
 \alias{identical.formulae}
-\alias{image.im}            
 \alias{inside.xypolygon}     
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
@@ -76,7 +75,6 @@
 \alias{param.quad}
 \alias{persp.im}
 \alias{pixellate}
-\alias{plot.im}
 \alias{polynom}
 \alias{print.fasp}       
 \alias{print.fv}       
@@ -156,7 +154,6 @@ getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
 identical.formulae(x,y)
-image.im(x, \dots)
 inside.xypolygon(pts, polly, test01 = TRUE)     
 intX.owin(w)
 intX.xypolygon(polly)
@@ -202,7 +199,6 @@ overlap.xypolygon(P, Q)
 param.quad(Q)
 persp.im(x, \dots)
 pixellate(x, \dots, weights)
-plot.im(x, \dots)
 polynom(x, \dots)
 print.fasp(x, \dots)
 print.fv(x, \dots)

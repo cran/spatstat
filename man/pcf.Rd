@@ -20,7 +20,7 @@
     function \code{smooth.spline}.
   }
   \item{method}{
-    Letter \code{"a"}, \code{"b"}, code{"c"} or \code{"d"} indicating the
+    Letter \code{"a"}, \code{"b"}, \code{"c"} or \code{"d"} indicating the
     method for deriving the pair correlation function from the
     \code{K} function.
   }

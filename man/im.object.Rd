@@ -33,10 +33,10 @@
   \code{\link{Kmeasure}} and
   \code{\link{setcov}}.
   They may be displayed using the methods
-  \code{image.im}, \code{persp.im}
+  \code{\link{plot.im}}, \code{image.im}, \code{persp.im}
   and \code{contour.im}.
   Values of an image may be looked-up using
-  \code{lookup.im}.
+  \code{lookup.im} or using the subset operator \code{\link{[.im}}.
 
   Note that the \bold{row} index of the matrix \code{v} corresponds
   to increasing \bold{y} coordinate, while the column index of \code{m}

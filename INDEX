@@ -6,6 +6,7 @@ allstats                Calculate four standard summary functions of a
 alltypes                Calculate Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
+anova.ppm               ANOVA for Fitted Point Process Models
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
@@ -119,6 +120,7 @@ pairwise.family         Pairwise Interaction Process Family
 pcf                     Pair Correlation Function
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
+plot.im                 Plot a Pixel Image
 plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
 plot.ppm                plot a Fitted Point Process Model
