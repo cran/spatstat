@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.26 $	$Date: 2005/01/25 00:48:58 $
+#	$Revision: 4.27 $	$Date: 2005/03/02 21:01:57 $
 #
 #
 #	A window may be either
@@ -192,9 +192,24 @@ as.owin <- function(W) {
 		return(W)
         else if(verifyclass(W, "ppp", fatal=FALSE))
 		return(W$window)
-        else if(verifyclass(W, "im", fatal=FALSE)) 
-                return(owin(W$xrange, W$yrange, mask=!is.na(W$v)))
-        else if(checkfields(W, c("xrange", "yrange"))) {
+        else if(verifyclass(W, "im", fatal=FALSE))  {
+          out <- list(type     = "mask",
+                      xrange   = W$xrange,
+                      yrange   = W$yrange,
+                      dim      = W$dim,
+                      xstep    = W$xstep,
+                      ystep    = W$ystep,
+                      warnings = c(
+"Row index corresponds to increasing y coordinate; column to increasing x",
+"Transpose matrices to get the standard presentation in S",
+"Example: image(result$xcol,result$yrow,t(result$d))"
+                        ),
+                      xcol    = W$xcol,
+                      yrow    = W$yrow,
+                      m       = !is.na(W$v))
+          class(out) <- "owin"
+          return(out)
+        } else if(checkfields(W, c("xrange", "yrange"))) {
 		Z <- owin(W$xrange, W$yrange)
 		return(Z)
 	} else if(is.vector(W) && is.numeric(W) && length(W) == 4) {

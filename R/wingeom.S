@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.11 $	$Date: 2004/01/08 13:00:03 $
+#	$Revision: 4.12 $	$Date: 2005/03/10 02:32:52 $
 #
 #
 #
@@ -235,4 +235,20 @@ union.owin <- function(A, B) {
     C$m[!ok] <- FALSE
 
   return(C)
+}
+
+expand.owin <- function(W, f=1) {
+  # expand bounding box of 'win'
+  # by factor 'f' in **area**
+  if(f <= 0)
+    stop("f must be > 0")
+  if(f == 1)
+    return(W)
+  bb <- bounding.box(W)
+  xr <- bb$xrange
+  yr <- bb$yrange
+  fff <- (sqrt(f) - 1)/2
+  Wexp <- owin(xr + fff * c(-1,1) * diff(xr),
+               yr + fff * c(-1,1) * diff(yr))
+  return(Wexp)
 }

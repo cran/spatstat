@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.1 $	$Date: 2004/01/27 08:06:38 $
+#    $Revision: 2.3 $	$Date: 2005/03/12 01:15:35 $
 #
 #    Geyer's saturation process
 #
@@ -55,6 +55,15 @@ Geyer <- function(r, sat) {
              coeffs[["Interaction"]] <-
                log(.Machine$double.xmax)/self$par$saturate
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$r
+           if(!is.na(coeffs)) {
+             loggamma <- coeffs[["Interaction"]]
+             if(!is.na(loggamma) && (abs(loggamma) <= epsilon))
+               return(0)
+           }
+           return(r)
          }
   )
   class(out) <- "interact"

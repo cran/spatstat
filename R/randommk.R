@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.7 $   $Date: 2004/01/08 10:24:31 $
+#   $Revision: 1.8 $   $Date: 2005/03/08 21:29:51 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -110,6 +110,11 @@
   if(!is.numeric(n))
     stop("n must be a scalar or vector")
 
+  if(sum(n) == 0)
+    return(runifpoint(0, f=f, fmax=fmax, win=win) %mark% sample(types, 0))
+
+  #############
+  
   Model <- if(length(n) == 1) {
     if(missing(ptypes)) "I" else "II"
   } else "III"

@@ -2,7 +2,7 @@
 #
 #    poisson.S
 #
-#    $Revision: 1.3 $	$Date: 2001/08/07 11:52:17 $
+#    $Revision: 1.4 $	$Date: 2005/03/11 22:55:48 $
 #
 #    The Poisson process
 #
@@ -27,7 +27,10 @@ Poisson <- function() {
          print    = function(self) {
            cat("Poisson process\n")
            invisible()
-         }
+         },
+         valid = function(...) { TRUE },
+         project = function(coeffs, ...) { coeffs },
+         irange = function(...) { 0 }
   )
   class(out) <- "interact"
   return(out)

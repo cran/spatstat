@@ -12,7 +12,7 @@ C Output from Public domain Ratfor, version 1.0
       kappa = par(3)
       oneomk = -one/kappa
       twook = two/kappa
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       sx = zero
       do23000 j = 1,n 
       if(j .eq. ix)then

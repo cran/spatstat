@@ -1,7 +1,7 @@
 #
 #     dg.S
 #
-#    $Revision: 1.2 $	$Date: 2004/01/27 10:17:59 $
+#    $Revision: 1.4 $	$Date: 2005/03/12 01:05:54 $
 #
 #     Diggle-Gratton pair potential
 #
@@ -49,6 +49,16 @@ DiggleGratton <- function(delta, rho) {
            coeffs[["Interaction"]] <-
              if(is.na(kappa)) 0 else max(0, kappa)
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           rho <- self$par$rho
+           if(is.na(coeffs))
+             return(rho)
+           kappa <- coeffs[["Interaction"]]
+           delta <- self$par$delta
+           if(abs(kappa) <= epsilon)
+             return(delta)
+           else return(rho)
          }
   )
   class(out) <- "interact"

@@ -2,7 +2,7 @@
 #
 #    ordthresh.S
 #
-#    $Revision: 1.2 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.3 $	$Date: 2005/03/11 22:39:36 $
 #
 #    Ord process with threshold potential
 #
@@ -37,6 +37,9 @@ OrdThresh <- function(r) {
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
                        printable=round(gamma,4)))
+         },
+         irange = function(...) {
+           return(Inf)
          }
   )
   class(out) <- "interact"

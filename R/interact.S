@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.7 $	$Date: 2004/06/08 10:48:08 $
+#	$Revision: 1.8 $	$Date: 2005/03/12 02:08:54 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -158,3 +158,4 @@ update.interact <- function(object, ...) {
   }    
 }
 
+  

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.12 $   $Date: 2004/01/27 07:05:16 $
+#    $Revision: 4.13 $   $Date: 2005/03/08 21:20:51 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -57,7 +57,9 @@
   function(n, win=owin(c(0,1),c(0,1)), giveup=1000)
 {
     win <- as.owin(win)
-
+    if(n == 0)
+      return(ppp(numeric(0), numeric(0), window=win))
+    
     switch(win$type,
            rectangle = {
              return(runifrect(n, win))
@@ -144,7 +146,10 @@ rpoint <- function(n, f, fmax=NULL,
   
   if(is.im(f)) {
     # ------------ PIXEL IMAGE ---------------------
-    w <- as.mask(as.owin(f))
+    wf <- as.owin(f)
+    if(n == 0)
+      return(ppp(numeric(0), numeric(0), window=wf))
+    w <- as.mask(wf)
     dx <- w$xstep
     dy <- w$ystep
     # extract pixel coordinates and probabilities
@@ -156,13 +161,16 @@ rpoint <- function(n, f, fmax=NULL,
     # extract pixel centres and randomise within pixels
     x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
     y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
-    return(ppp(x, y, window=as.owin(f)))
+    return(ppp(x, y, window=wf))
   }
 
   # ------------ FUNCTION  ---------------------  
   # Establish parameters for rejection method
 
   verifyclass(win, "owin")
+  if(n == 0)
+    return(ppp(numeric(0), numeric(0), window=win))
+  
   if(is.null(fmax)) {
     # compute approx maximum value of f
     imag <- as.im(f, win, ...)

@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 2.1 $   $Date: 2004/01/27 08:06:38 $
+#    $Revision: 2.3 $   $Date: 2005/03/12 01:01:19 $
 #
 #    Soft core processes.
 #
@@ -49,6 +49,14 @@ number less than 1")
              theta <- 0
            coeffs[["Interaction"]] <- max(0, theta)
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           # distance d beyond which log(interaction factor) <= epsilon
+           if(is.na(coeffs) || epsilon == 0)
+             return(Inf)
+           theta <- coeffs[["Interaction"]]
+           kappa <- self$par$kappa
+           return((theta/epsilon)^(kappa/2))
          }
   )
   class(out) <- "interact"

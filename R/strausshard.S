@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.1 $	$Date: 2004/01/27 08:06:38 $
+#    $Revision: 2.4 $	$Date: 2005/03/12 00:19:42 $
 #
 #    The Strauss/hard core process
 #
@@ -55,6 +55,17 @@ StraussHard <- function(r, hc) {
              coeffs[["Interaction"]] <-
                log(.Machine$double.xmax)
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$r
+           hc <- self$par$hc
+           if(any(is.na(coeffs)))
+             return(r)
+           loggamma <- coeffs[["Interaction"]]
+           if(abs(loggamma) <= epsilon)
+             return(hc)
+           else
+             return(r)
          }
   )
   class(out) <- "interact"

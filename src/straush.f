@@ -4,11 +4,12 @@ C Output from Public domain Ratfor, version 1.0
       dimension par(4), x(n), y(n), period(2)
       logical per
       eps = 2.22d-16
-      per = period(1) .gt. 0.d0
+      zero = 0.d0
+      per = period(1) .gt. zero
       beta = par(1)
       gamma = par(2)
-      ri = par(3)**2
-      rhc = par(4)**2
+      ri = par(3)
+      rhc = par(4)
       kount = 0
       do23000 j = 1,n 
       if(j .eq. ix)then
@@ -20,7 +21,7 @@ C Output from Public domain Ratfor, version 1.0
       d2 = (u-x(j))**2 + (v-y(j))**2
       endif
       if(d2 .lt. rhc)then
-      cifval = 0.d0
+      cifval = zero
       return
       endif
       if(d2 .lt. ri)then
@@ -31,7 +32,7 @@ C Output from Public domain Ratfor, version 1.0
 23001 continue
       if(gamma .lt. eps)then
       if(kount .gt. 0)then
-      cifval = 0.d0
+      cifval = zero
       else
       cifval = beta
       endif

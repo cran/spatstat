@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.4 $	$Date: 2004/09/01 04:04:41 $
+#    $Revision: 2.6 $	$Date: 2005/03/12 01:01:28 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -202,7 +202,22 @@ MultiStraussHard <- function(types, iradii, hradii) {
            # reassign 
            coeffs[thetaname] <- log(gamma[uptri])
            return(coeffs)
-        }
+        },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$iradii
+           h <- self$par$hradii
+           ractive <- !is.na(r)
+           hactive <- !is.na(h)
+           if(!is.na(coeffs)) {
+             gamma <- (self$interpret)(coeffs, self)$param$gammas
+             gamma[is.na(gamma)] <- 1
+             ractive <- ractive & (abs(log(gamma)) > epsilon)
+           }
+           if(!any(c(ractive,hactive)))
+             return(0)
+           else
+             return(max(c(r[ractive],h[hactive])))
+         }
   )
   class(out) <- "interact"
   out$init(out)

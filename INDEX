@@ -44,6 +44,7 @@ dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
 eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
+expand.owin             Expand Window By Factor
 fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
 finpines                Pine saplings in Finland.
@@ -144,20 +145,28 @@ quad.ppm                Extract Quadrature Scheme Used to Fit a Point
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
 raster.x                Cartesian Coordinates for a Pixel Raster
+reach                   Interaction Distance of a Point Process
 reduced.sample          Reduced Sample Estimator using Histogram Data
 redwood                 California Redwoods Point Pattern (Ripley's
                         Subset)
 redwoodfull             California Redwoods Point Pattern (Entire
                         Dataset)
+rescue.rectangle        Convert Window Back To Rectangle
 ripras                  Estimate window from points alone
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I
 rMaternII               Simulate Matern Model II
 rmh                     Simulate point patterns using the
                         Metropolis-Hastings algorithm.
+rmhcontrol              Set Control Parameters for Metropolis-Hastings
+                        Algorithm.
 rmh.default             Simulate Point Process Models using the
                         Metropolis-Hastings Algorithm.
+rmhmodel                Define Point Process Model for
+                        Metropolis-Hastings Simulation.
 rmh.ppm                 Simulate from a Fitted Point Process Model
+rmhstart                Determine Initial State for
+                        Metropolis-Hastings Simulation.
 rmpoint                 Generate N Random Multitype Points
 rmpoispp                Generate Multitype Poisson Point Pattern
 rNeymanScott            Simulate Neyman-Scott Process

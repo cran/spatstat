@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.7 $   $Date: 2004/08/20 10:32:00 $
+#  $Revision: 2.13 $   $Date: 2005/03/10 21:09:39 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -97,18 +97,26 @@ list(
 #  Implementing rmh.default for the others is probably too hard.
 
 
-rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE) {
-  # convert ppm object `model' into format palatable to rmh.default
+rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
+                         control=rmhcontrol()) {
+  # converts ppm object `model' into format palatable to rmh.default
   
     verifyclass(model, "ppm")
     X <- model
 
+    if(verbose)
+      cat("Extracting model information...")
+    
     # Extract essential information
     Y <- summary(X)
 
     if(Y$marked && !Y$multitype)
       stop("Not implemented for marked point processes other than multitype")
 
+    # enforce defaults for `control'
+
+    control <- rmhcontrol(control)
+    
     ########  Interpoint interaction
     if(Y$poisson) {
       Z <- list(cif="poisson",
@@ -163,26 +171,55 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE) {
     if(Y$multitype && is.null(Z$types))
       Z$types <- levels(Y$entries$marks)
        
-    ######## Simulation window 
+    ######## Window for result 
     
     if(missing(win))
       win <- Y$entries$data$window
 
     Z$w <- win
 
+    ######## Expanded window for simulation?
+
+    expand <- control$expand
+    if(is.null(expand)) 
+      wsim <- win
+    else if(is.owin(expand))
+      wsim <- expand
+    else if(is.numeric(expand) && length(expand) == 1) {
+      if(expand < 1)
+        stop("expand must be >= 1")
+      wsim <- if(expand == 1) win else expand.owin(win, expand)
+     } else stop("Unrecognised format for \"expand\"")
+      
+    
     ###### Trend or Intensity ############
 
+    if(verbose)
+      cat("Evaluating trend...")
+    
     if(Y$stationary) {
       # first order terms (beta or beta[i]) are carried in Z$par$beta
       Z$par[["beta"]] <- Y$trend$value
       Z$trend <- NULL
     } else {
+      # trend terms present
+      # cannot simulate if there are covariates given as data frame
+      if(Y$has.covars && is.data.frame(X$covariates))
+        stop(paste("This model cannot be simulated, because the",
+                   "covariates are given as a data frame."))
       # all first order effects are subsumed in Z$trend
       Z$par[["beta"]] <- if(!Y$marked) 1 else rep(1, length(Z$types))
-      Z$trend <- predict(X, window=as.mask(win), type="trend")
+      # predict on window possibly larger than original data window
+      Z$trend <- predict(X, window=wsim, type="trend")
     }
+    if(verbose)
+      cat("done.\n")
     # Note the construction m[["name"]] <-
     # ensures that m does not need to be coerced from vector to list
+    Z <- rmhmodel(Z)
     return(Z)
 }
+
+
+
 

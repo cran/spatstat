@@ -9,7 +9,7 @@ C Output from Public domain Ratfor, version 1.0
       eps = 2.22d-16
       beta = par(1)
       nlook = par(2)
-      equisp = par(3) .gt. 0
+      equisp = par(3) .gt. zero
       delta = par(4)
       rmax = par(5)
       some = zero

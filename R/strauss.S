@@ -2,7 +2,7 @@
 #
 #    strauss.S
 #
-#    $Revision: 2.1 $	$Date: 2004/01/27 08:06:38 $
+#    $Revision: 2.4 $	$Date: 2005/03/12 00:19:58 $
 #
 #    The Strauss process
 #
@@ -46,6 +46,17 @@ Strauss <- function(r) {
            coeffs[["Interaction"]] <-
              if(is.na(loggamma)) 0 else min(0, loggamma)
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$r
+           if(any(is.na(coeffs)))
+             return(r)
+           loggamma <- coeffs[["Interaction"]]
+           if(abs(loggamma) <= epsilon)
+             return(0)
+           else
+             return(r)
+           
          }
   )
   class(out) <- "interact"
