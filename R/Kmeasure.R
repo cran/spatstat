@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.2 $    $Date: 2003/03/11 02:57:20 $
+#           $Revision: 1.4 $    $Date: 2003/05/02 10:54:55 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -88,7 +88,7 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
   }
   if(what=="smooth") {
     # return the smoothed point pattern
-    smo <- im(Mod(sm)[1:nr, 1:nc], xcol.pad[1:nc], yrow.pad[1:nr])
+    smo <- im(Re(sm)[1:nr, 1:nc], xcol.pad[1:nc], yrow.pad[1:nr])
     return(smo)
   }
 
@@ -170,4 +170,16 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
 }
 
 
-
+ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
+  verifyclass(x, "ppp")
+  if(missing(sigma))
+    sigma <- 0.1 * diameter(x$window)
+  smo <- second.moment.calc(x, sigma=sigma, what="smooth", ...)
+  edg <- second.moment.calc(x, sigma, what="edge")
+  smo$v <- smo$v/(smo$xstep * smo$ystep)
+  if(edge)
+    smo$v <- smo$v/edg
+  sub <- smo[x$window, drop=FALSE]
+  return(sub)
+}
+  

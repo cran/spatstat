@@ -67,6 +67,9 @@
   An object of class \code{"quad"} can be converted into an ordinary
   point pattern by the function \code{\link{union.quad}} which simply
   takes the union of the data and dummy points.
+
+  Quadrature schemes can be plotted using \code{\link{plot.quad}}
+  (a method for the generic \code{\link{plot}}).
 }
 \seealso{
   \code{\link{quadscheme}},

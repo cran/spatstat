@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.4 $	$Date: 2003/05/01 09:45:24 $
 #
 #
 # Main functions:
@@ -104,7 +104,7 @@ gridweights <- function(X, nx, ny, window=NULL) {
 	win <- X$window
 
         if(missing(nx))
-          nx <- default.ngrid(X)
+          nx <- default.ntile(X)
         if(missing(ny))
           ny <- nx
 
@@ -220,4 +220,11 @@ dirichlet.weights <- function(X, window = NULL, exact=TRUE) {
 	} 
 }
 
+default.ntile <- function(X) { 
+	# default number of tiles (n x n) for tile weights
+        # when data and dummy points are X
+  X <- as.ppp(X)
+  guess.ngrid <- 10 * floor(sqrt(X$n)/10)
+  max(5, guess.ngrid/2)
+}
 

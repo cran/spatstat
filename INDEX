@@ -1,40 +1,6 @@
-DiggleGratton           Diggle-Gratton model
-Fest                    Estimate the empty space function F
-Gcross                  Multitype Nearest Neighbour Distance Function
-                        (i-to-j) 
-Gdot                    Multitype Nearest Neighbour Distance Function
-                        (i-to-any) 
-Gest                    Nearest Neighbour Distance Function G 
-Geyer                   Geyer's Saturation Point Process Model
-Gmulti                  Marked Nearest Neighbour Distance Function 
-Jcross                  Multitype J Function (i-to-j) 
-Jdot                    Multitype J Function (i-to-any) 
-Jest                    Estimate the J-function
-Jmulti                  Marked J Function 
-Kcross                  Multitype K Function (Cross-type) 
-Kdot                    Multitype K Function (i-to-any) 
-Kest                    K-function
-Kest.fft                K-function using FFT
-Kinhom                  Inhomogeneous K-function
-Kmeasure                Reduced Second Moment Measure
-Kmulti                  Marked K-Function 
-LennardJones            The Lennard-Jones Potential
-MultiStrauss            The Multitype Strauss Point Process Model
-MultiStraussHard        The Multitype/Hard Core Strauss Point Process
-                        Model
-Ord                     Generic Ord Interaction model
-OrdThresh               Ord's Interaction model
-PairPiece               The Piecewise Constant Pairwise Interaction
-                        Point Process Model
-Pairwise                Generic Pairwise Interaction model
-Poisson                 Poisson Point Process Model
-Saturated               Saturated Pairwise Interaction model
-Softcore                The Soft Core Point Process Model
-Strauss                 The Strauss Point Process Model
-StraussHard             The Strauss / Hard Core Point Process Model
-affine                  Apply Affine Transformation
 affine.owin             Apply Affine Transformation To Window
 affine.ppp              Apply Affine Transformation To Point Pattern
+affine                  Apply Affine Transformation
 allstats                Calculate four standard summary functions of a
                         point pattern.
 alltypes                Calculate Statistic for All Types in a
@@ -51,101 +17,153 @@ bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
 bounding.box            Bounding Box of a Window
 bramblecanes            Hutchings' Bramble Canes data
-cells                   Biological Cells Point Pattern 
+cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
+coef.ppm                Coefficients of Fitted Point Process Model
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
 conspire                Plot Together According to a Formula
 corners                 Corners of a rectangle
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
+data.ppm                Extract Original Data from a Fitted Point
+                        Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
-demopat                 Artificial Data Point Pattern 
+demopat                 Artificial Data Point Pattern
 diameter                Diameter of a Window Frame
+DiggleGratton           Diggle-Gratton model
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
-erode.owin              Erode a Window
+dummy.ppm               Extract Dummy Points Used to Fit a Point
+                        Process Model
 eroded.areas            Areas of Morphological Erosions
+erode.owin              Erode a Window
 fasp.object             Function Arrays for Spatial Patterns
+Fest                    Estimate the empty space function F
+fitted.ppm              Fitted Conditional Intensity for Point Process
+                        Model
 ganglia                 Cat Retinal Ganglia Data
+Gcross                  Multitype Nearest Neighbour Distance Function
+                        (i-to-j)
+Gdot                    Multitype Nearest Neighbour Distance Function
+                        (i-to-any)
+Gest                    Nearest Neighbour Distance Function G
+Geyer                   Geyer's Saturation Point Process Model
+Gmulti                  Marked Nearest Neighbour Distance Function
 gridcentres             Rectangular grid of points
-gridweights             Compute Quadrature Weights Based on Grid Counts
+gridweights             Compute Quadrature Weights Based on Grid
+                        Counts
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
-im                      Create a Pixel Image Object
+identify.ppp            Identify Points in a Point Pattern
 im.object               Class of Images
+im                      Create a Pixel Image Object
 inside.owin             Test Whether Points Are Inside A Window
-spatstat-internal       Internal spatstat functions
+is.marked.ppm           Test Whether A Point Process Model is Marked
+is.marked.ppp           Test Whether A Point Pattern is Marked
+is.marked               Test Whether Marks Are Present
+Jcross                  Multitype J Function (i-to-j)
+Jdot                    Multitype J Function (i-to-any)
+Jest                    Estimate the J-function
+Jmulti                  Marked J Function
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
-kmrs                    Kaplan-Meier and Reduced Sample Estimator using
-                        Histograms
-lansing                 Lansing Woods Point Pattern 
+Kcross                  Multitype K Function (Cross-type)
+Kdot                    Multitype K Function (i-to-any)
+Kest.fft                K-function using FFT
+Kest                    K-function
+Kinhom                  Inhomogeneous K-function
+Kmeasure                Reduced Second Moment Measure
+kmrs                    Kaplan-Meier and Reduced Sample Estimator
+                        using Histograms
+Kmulti                  Marked K-Function
+ksmooth.ppp             Kernel Smoothed Intensity of Point Pattern
+lansing                 Lansing Woods Point Pattern
+LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
-longleaf                Longleaf Pines Point Pattern 
-markcorr                Mark Correlation Function 
+longleaf                Longleaf Pines Point Pattern
+markcorr                Mark Correlation Function
 mpl                     Fit Point Process Model by Maximum
-                        Pseudolikelihood 
+                        Pseudolikelihood
+MultiStraussHard        The Multitype/Hard Core Strauss Point Process
+                        Model
+MultiStrauss            The Multitype Strauss Point Process Model
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nndist                  Nearest neighbour distances
-nztrees                 New Zealand Trees Point Pattern 
+nztrees                 New Zealand Trees Point Pattern
 ord.family              Ord Interaction Process Family
-owin                    Create a Window
+Ord                     Generic Ord Interaction model
+OrdThresh               Ord's Interaction model
 owin.object             Class owin
+owin                    Create a Window
 pairdist                Pairwise distances
+PairPiece               The Piecewise Constant Pairwise Interaction
+                        Point Process Model
 pairsat.family          Saturated Pairwise Interaction Point Process
                         Family
 pairwise.family         Pairwise Interaction Process Family
+Pairwise                Generic Pairwise Interaction model
 pcf                     Pair Correlation Function
 plot.fasp               Plot a Function Array
 plot.owin               Plot a Spatial Window
 plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
+plot.quad               plot a Spatial Quadrature Scheme
+Poisson                 Poisson Point Process Model
 ppm.object              Class of Fitted Point Process Models
-ppp                     Create a Point Pattern
 ppp.object              Class of Point Patterns
+ppp                     Create a Point Pattern
 predict.ppm             Prediction from a Fitted Point Process Model
 print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
 quad.object             Class of Quadrature Schemes
+quad.ppm                Extract Quadrature Scheme Used to Fit a Point
+                        Process Model
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
-rMatClust               Simulate Matern Cluster Process
-rMaternI                Simulate Matern Model I
-rMaternII               Simulate Matern Model II
-rNeymanScott            Simulate Neyman-Scott Process
-rSSI                    Simple Sequential Inhibition
-rThomas                 Simulate Thomas Process
 raster.x                Cartesian Coordinates for a Pixel Raster
 reduced.sample          Reduced Sample Estimator using Histogram Data
-redwood                 California Redwoods Point Pattern (Ripley's
-                        Subset) 
 redwoodfull             California Redwoods Point Pattern (Entire
-                        Dataset) 
+                        Dataset)
+redwood                 California Redwoods Point Pattern (Ripley's
+                        Subset)
 ripras                  Estimate window from points alone
-rmh                     Simulate point patterns using the
-                        Metropolis-Hastings algorithm.
+rMatClust               Simulate Matern Cluster Process
+rMaternII               Simulate Matern Model II
+rMaternI                Simulate Matern Model I
 rmh.default             Simulate Point Process Models using the
                         Metropolis-Hastings Algorithm.
 rmh.ppm                 Simulate from a Fitted Point Process Model
-rotate                  Rotate
+rmh                     Simulate point patterns using the
+                        Metropolis-Hastings algorithm.
+rNeymanScott            Simulate Neyman-Scott Process
 rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
+rotate                  Rotate
 rpoispp                 Generate Poisson Point Pattern
+rSSI                    Simple Sequential Inhibition
+rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points
-shift                   Apply Vector Translation
+Saturated               Saturated Pairwise Interaction model
+setmarks                Set or Reset the Marks in a Point Pattern
+shift.im                Apply Vector Translation To Pixel Image
 shift.owin              Apply Vector Translation To Window
 shift.ppp               Apply Vector Translation To Point Pattern
-simdat                  Simulated Point Pattern 
+shift                   Apply Vector Translation
+simdat                  Simulated Point Pattern
+Softcore                The Soft Core Point Process Model
 spatstat.options        Internal Options in Spatstat Package
 spokes                  Spokes pattern of dummy points
 square                  Square Window
 stratrand               Stratified random point pattern
+StraussHard             The Strauss / Hard Core Point Process Model
+Strauss                 The Strauss Point Process Model
 subset.fasp             Extract Subset of Function Array
+subset.im               Extract Subset of Image
 subset.ppp              Extract Subset of Point Pattern
 summary.owin            Summary of a Spatial Window
 summary.ppp             Summary of a Point Pattern Dataset
 superimpose             Superimpose Several Point Patterns
-swedishpines            Swedish Pines Point Pattern 
+swedishpines            Swedish Pines Point Pattern
 union.quad              Union of Data and Dummy Points
 unmark                  Remove Marks from a Marked Point Pattern

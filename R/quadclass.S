@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.4 $	$Date: 2003/05/02 11:20:58 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -115,3 +115,38 @@ union.quad <- function(Q) {
       marks=marks.quad(Q))
 }
 	
+#
+#   Plot a quadrature scheme
+#
+#
+plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
+  verifyclass(x, "quad")
+  data <- x$data
+  dummy <- x$dummy
+  dummyplot <- function(x, ..., pch=".", add=TRUE) {
+    plot(x, pch=pch, add=add, ...)
+  }
+  if(!is.marked(data)) {
+    plot(data, main=main, ...)
+    do.call("dummyplot", append(list(
+                                     dummy,
+                                     main=paste(main, "\n dummy points")
+                                     ),
+                                dum))
+  } else if(is.factor(data$marks)) {
+    types <- levels(data$marks)
+    for(k in types) {
+      maink <- paste(main, "\n mark = ", k, sep="")
+      plot(unmark(data[data$marks == k]), main=maink, ...)
+      do.call("dummyplot", append(list(unmark(dummy[dummy$marks == k])), dum))
+    }
+  } else {
+    plot(data, ..., main=main)
+    addplot <- function(x, ..., add=TRUE, main=deparse(substitute(x))) {
+      browser()
+      plot(x, ..., main=main, add=add)
+    }
+    do.call("addplot", append(list(dummy), dum))
+  }
+  invisible(NULL)
+}

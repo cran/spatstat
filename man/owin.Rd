@@ -112,11 +112,11 @@ describing a window in the two-dimensional plane.
   w <- owin(c(0,1), c(0,2), poly=list(x=c(0.5,1,0.5,0),y=c(0,1,2,1)))
   # diamond shape
 
-  w <- owin(c(0,1), c(0,1), mask=matrix(TRUE, 100,100))
+  w <- owin(c(-1,1), c(-1,1), mask=matrix(TRUE, 100,100))
           # 100 x 100 image, all TRUE
   X <- raster.x(w)
   Y <- raster.y(w)
-  wm <- owin(w$xrange, w$yrange, mask=((X - 0.5)^2 + (Y - 0.5)^2 <= 1))
+  wm <- owin(w$xrange, w$yrange, mask=(X^2 + Y^2 <= 1))
           # discrete approximation to the unit disc
 
   \dontrun{

@@ -162,7 +162,7 @@
 	  as for \code{straussm} and
 	  \bold{two} ``radii'' components:
 	  \itemize{
-            \item\code{iradii}: the interaction radii
+            \item \code{iradii}: the interaction radii
             \item \code{hradii}: the hardcore radii
 	  }
 	  which are both symmetric matrices of nonnegative numbers.
@@ -453,12 +453,12 @@
 
   In these circumstances
   \itemize{
-	\item{}{ The value of \code{expand} must be equal to 1; it
+	\item { The value of \code{expand} must be equal to 1; it
 	defaults to 1, and it is an error to specify a value larger
 	than 1.}
-	\item{}{ The window in which the pattern is being simulated
+	\item { The window in which the pattern is being simulated
 	must (currently) be rectangular.}
-	\item{}{ The resulting simulated pattern will have precisely
+	\item { The resulting simulated pattern will have precisely
 	  the number of points (of each type) specified by
 	  \code{n.start}.
 	}

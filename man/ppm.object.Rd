@@ -9,10 +9,24 @@
   An object of class \code{ppm} represents a stochastic point process
   model that has been fitted to a point pattern dataset.
   Typically it is the output of the maximum pseudolikelihood model fitter,
-  \code{\link{mpl}}. There are methods \code{\link{print.ppm}},
-  \code{\link{predict.ppm}} and \code{\link{plot.ppm}}
+  \code{\link{mpl}}.
 
-  A \code{ppm} object contains at least the following entries:
+  There are methods \code{\link{print.ppm}},
+  \code{\link{plot.ppm}}, \code{\link{predict.ppm}}, \code{\link{fitted.ppm}}
+  and \code{\link{coef.ppm}} for the generic functions
+  \code{\link{print}}, \code{\link{plot}}, \code{\link{predict}},
+  \code{\link{fitted}} and \code{\link{coef}} respectively.
+
+  See also (for example) \code{\link{Strauss}}
+  to understand how to specify 
+  a point process model with unknown parameters.
+
+  Information about the data (to which the model was fitted)
+  can be extracted using \code{\link{data.ppm}}, \code{\link{dummy.ppm}}
+  and \code{\link{quad.ppm}}.
+
+  If you really need to get at the internals,
+  a \code{ppm} object contains at least the following entries:
   \tabular{ll}{
     \code{coef} \tab  the fitted regular parameters (as returned by
                      \code{glm}) \cr
@@ -27,13 +41,12 @@
   See \code{\link{mpl}} for explanation of these concepts.
   The irregular parameters (e.g. the interaction radius of the
   Strauss process) are encoded in the \code{interaction} entry.
-
-  See also (for example) \code{\link{Strauss}}
-  to understand how to specify 
-  a point process model with unknown parameters.
+  However see the Warnings.
 }
 \seealso{
   \code{\link{mpl}},
+  \code{\link{coef.ppm}},
+  \code{\link{fitted.ppm}},
   \code{\link{print.ppm}},
   \code{\link{predict.ppm}},
   \code{\link{plot.ppm}}.
@@ -47,6 +60,7 @@
   data(cells)
   fit <- mpl(cells, ~ x, Strauss(0.1), correction="periodic")
   fit
+  coef(fit)
   pred <- predict(fit)
   pred <- predict(fit, nx=50, ny=50, type="trend")
   \dontrun{
