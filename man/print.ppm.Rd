@@ -14,7 +14,7 @@
 \arguments{
   \item{x}{
     A fitted point process model, typically obtained from
-    the maximum pseudolikelihood algorithm \code{\link{mpl}}.
+    the model-fittingg algorithm \code{\link{ppm}}.
     An object of class \code{"ppm"}.
   }
 }
@@ -28,17 +28,16 @@
   See \code{\link{ppm.object}} for details of the class \code{"ppm"}.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{plot.ppm}},
   \code{\link{predict.ppm}}
 }
 \examples{
  \dontrun{
- library(spatstat)
  data(cells)
  Q <- quadscheme(cells)
- m <- mpl(Q, ~1, Strauss(0.05))
+ m <- ppm(Q, ~1, Strauss(0.05))
  m
  }
 }

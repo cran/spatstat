@@ -42,7 +42,6 @@
   \code{\link{shift}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
   # shear transformation
   X <- affine(cells, matrix(c(1,0,0.6,1),ncol=2))

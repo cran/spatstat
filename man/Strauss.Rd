@@ -48,7 +48,7 @@ which can then be fitted to point pattern data.
   is a function \eqn{\beta(x_i)}{beta(x[i])}
   of location, rather than a constant beta. 
  
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -59,22 +59,21 @@ which can then be fitted to point pattern data.
   When \code{r} is fixed, the model becomes an exponential family.
   The canonical parameters \eqn{\log(\beta)}{log(beta)}
   and \eqn{\log(\gamma)}{log(gamma)}
-  are estimated by \code{\link{mpl}()}, not fixed in
+  are estimated by \code{\link{ppm}()}, not fixed in
   \code{Strauss()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
 \examples{
-   library(spatstat)
    Strauss(r=0.1)
    # prints a sensible description of itself
    data(cells) 
-   mpl(cells, ~1, Strauss(r=0.07), rbord=0.07)
+   ppm(cells, ~1, Strauss(r=0.07), rbord=0.07)
    # fit the stationary Strauss process to `cells'
-   mpl(cells, ~polynom(x,y,3), Strauss(r=0.07), rbord=0.1)
+   ppm(cells, ~polynom(x,y,3), Strauss(r=0.07), rbord=0.1)
    # fit a nonstationary Strauss process with log-cubic polynomial trend
 }
 \author{Adrian Baddeley

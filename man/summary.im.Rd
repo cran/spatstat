@@ -47,7 +47,6 @@
   while \code{print.summary.im} returns \code{NULL}.
 }
 \examples{
-  require(spatstat)
   # make an image
   X <- as.im(function(x,y) {x^2}, unit.square())
   # summarize it

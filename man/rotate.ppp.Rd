@@ -30,7 +30,6 @@
   \code{\link{rotate.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
   X <- rotate(cells, pi/3)
   \dontrun{

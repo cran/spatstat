@@ -1,14 +1,14 @@
-\name{mpl}
-\alias{mpl}
+\name{ppm}
+\alias{ppm}
 \title{
-  Fit Point Process Model by Maximum Pseudolikelihood
+  Fit Point Process Model to Data
 }
 \description{
   Fits a point process model to an observed point pattern
-  by the method of maximum pseudolikelihood.
 }
 \usage{
- mpl(Q, trend=~1, interaction=NULL, data, correction="border", rbord=0, use.gam=FALSE)
+ ppm(Q, trend=~1, interaction=NULL, covariates=NULL,
+correction="border", rbord=0, use.gam=FALSE, method="mpl")
 }
 \arguments{
   \item{Q}{
@@ -28,9 +28,11 @@
     structure, or \code{NULL} indicating that a Poisson process (stationary
     or nonstationary) should be fitted.
   }
-  \item{data}{
-    An optional data frame of spatial covariates (evaluated at the
-    locations given in the quadrature scheme \code{Q}).
+  \item{covariates}{
+    The values of any spatial covariates (other than the Cartesian
+    coordinates) required by the model.
+    Either a data frame, or a list of images.
+    See Details.
   }
   \item{correction}{
     The name of the edge correction to be used. The default 
@@ -48,6 +50,10 @@
     Logical flag; if \code{TRUE} then computations are performed
     using \code{gam} instead of \code{\link{glm}}.
   }
+  \item{method}{
+    The method used to fit the model. Currently the only option
+    is \code{"mpl"} indicating the method of Maximum PseudoLikelihood.
+  }
 }
 \value{
   An object of class \code{"ppm"} describing a fitted point process
@@ -61,11 +67,14 @@
 }
 \details{
   This function fits a point process model
-  to an observed point pattern by the method of maximum pseudolikelihood
-  (Besag, 1975).
+  to an observed point pattern.
   The model may include
   spatial trend, interpoint interaction, and dependence on covariates.
  
+  Model-fitting is currently performed by
+  the method of maximum pseudolikelihood (Besag, 1975).
+  Other options will be added in future versions.
+  
   The algorithm is an implementation of the method of
   Baddeley and Turner (2000), which approximates the pseudolikelihood
   by a special type of quadrature sum generalising the Berman-Turner (1992) 
@@ -87,11 +96,11 @@
   by \code{\link{default.dummy}()} is added, and the default weighting rule is
   invoked to compute the quadrature weights.
  
-  The usage of \code{mpl()} is closely analogous to the Splus/\R functions
+  The usage of \code{ppm()} is closely analogous to the Splus/\R functions
   \code{\link{glm}} and \code{gam}.
   The analogy is:
   \tabular{ll}{
-  \bold{glm} \tab \bold{mpl} \cr
+  \bold{glm} \tab \bold{ppm} \cr
   \code{formula} \tab \code{trend} \cr
   \code{family} \tab \code{interaction}
   }
@@ -105,12 +114,11 @@
   \code{trend}. This is an Splus/\R formula object, which may be expressed
   in terms of the Cartesian coordinates \code{x}, \code{y},
   the marks \code{marks},
-  or the variables in the data frame \code{data} (if supplied), or both.
+  or the variables in \code{covariates} (if supplied), or both.
   It specifies the \bold{logarithm} of the first order potential
   of the process.
-  The formula should not use the names \code{Y}, \code{V}, \code{W}, or
-  \code{SUBSET},
-  which are reserved for internal use.
+  The formula should not use any names beginning with \code{.mpl}
+  as these are reserved for internal use.
   If \code{trend} is absent or equal to the default, \code{~1}, then
   the model to be fitted is stationary (or at least, its first order 
   potential is constant). 
@@ -126,22 +134,44 @@
   (stationary or nonstationary according to \code{trend}). In this case
   the method of maximum pseudolikelihood
   coincides with maximum likelihood.
- 
-  The argument \code{data}, if supplied, must be a data frame with
-  as many rows as there are points in \code{Q}.
-  The \eqn{i}th row of \code{data} should contain the values of
-  spatial variables which have been observed
-  at the \eqn{i}th point of \code{Q}. In this case \code{Q} must be a
-  quadrature scheme, not merely a point pattern.
-  Thus, it is not sufficient to have observed
-  a spatial variable only at the points of the data point pattern; 
-  the variable must also have been observed at certain other 
+
+  To fit a model involving spatial covariates
+  other than the Cartesian coordinates \eqn{x} and \eqn{y},
+  the values of the covariates should be supplied in the
+  argument \code{covariates}. 
+  Note that it is not sufficient to have observed
+  the covariate only at the points of the data point pattern; 
+  the covariate must also have been observed at other 
   locations in the window.
+
+  The argument \code{covariates}, if supplied, should be either
+  a data frame or a list of images.
+  If it is a data frame, it must have
+  as many rows as there are points in \code{Q}.
+  The \eqn{i}th row of \code{covariates} should contain the values of
+  spatial variables which have been observed
+  at the \eqn{i}th point of \code{Q}. In this case
+  the argument \code{Q} must be a quadrature scheme,
+  not merely a point pattern.
+
+  Alternatively, \code{covariates} may be a list of images,
+  each image giving the values of a spatial covariate at 
+  a fine grid of locations. 
+  The argument \code{covariates} should then be a named list,
+  with the names corresponding to
+  the names of covariates in the model formula \code{trend}.
+  Each entry in the list must be an image object (of class \code{"im"},
+  see \code{\link{im.object}}).
+  The software will look up
+  the pixel values of each image at the quadrature points.
+  In this case the argument \code{Q} may be either a quadrature
+  scheme or a point pattern.
+
   The variable names \code{x}, \code{y} and \code{marks}
   are reserved for the Cartesian 
   coordinates and the mark values,
-  and these should not be used for variables in \code{data}.
- 
+  and these should not be used for variables in \code{covariates}.
+  
   The argument \code{correction} is the name of an edge correction method.
   The default \code{correction="border"} specifies the border correction,
   in which the quadrature window (the domain of integration of the 
@@ -243,16 +273,16 @@ Some of the point process models are only defined when the parameter
 values lie in a certain subset. For example the Strauss process only 
 exists when the interaction parameter \eqn{\gamma}{gamma}
 is less than or equal to \eqn{1},
-corresponding to a value of \code{mpl()$theta[2]}
+corresponding to a value of \code{ppm()$theta[2]}
 less than or equal to \code{0}.
-The current version of \code{mpl} maximises the pseudolikelihood
+The current version of \code{ppm} maximises the pseudolikelihood
 without constraining the parameters, and does not apply any checks for
 sanity after fitting the model. 
  
-The \code{trend} formula should not use the names
-\code{Y}, \code{V}, \code{W}, or \code{SUBSET},
-which are reserved
-for internal use. The data frame \code{data} should have as many rows
+The \code{trend} formula should not use any variable names
+beginning with the prefixes \code{.mpl} or \code{Interaction}
+as these names are reserved
+for internal use. The data frame \code{covariates} should have as many rows
 as there are points in \code{Q}. It should not contain
 variables called \code{x}, \code{y} or \code{marks}
 as these names are reserved for the Cartesian coordinates
@@ -299,50 +329,58 @@ Values of the maximised pseudolikelihood are not comparable
 if they have been obtained with different values of \code{rbord}.
 }
 \examples{
- \dontrun{library(spatstat)}
  data(nztrees)
- mpl(nztrees)
+ ppm(nztrees)
  # fit the stationary Poisson process
  # to point pattern 'nztrees'
 
  Q <- quadscheme(nztrees) 
- mpl(Q) 
+ ppm(Q) 
  # equivalent.
 
- mpl(nztrees, ~ x)
+ ppm(nztrees, ~ x)
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx)
  # where x,y are the Cartesian coordinates
  # and a,b are parameters to be estimated
 
- mpl(nztrees, ~ polynom(x,2))
+ ppm(nztrees, ~ polynom(x,2))
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx + cx^2)
 
  library(splines)
- mpl(nztrees, ~ bs(x,df=3))
+ ppm(nztrees, ~ bs(x,df=3))
  #       WARNING: do not use predict.ppm() on this result
  # Fits the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(B(x))
  # where B is a B-spline with df = 3
  
- mpl(nztrees, ~1, Strauss(r=10), rbord=10)
+ ppm(nztrees, ~1, Strauss(r=10), rbord=10)
  # Fit the stationary Strauss process with interaction range r=10
  # using the border method with margin rbord=10
   
- mpl(nztrees, ~ x, Strauss(13), correction="periodic")
+ ppm(nztrees, ~ x, Strauss(13), correction="periodic")
  # Fit the nonstationary Strauss process with interaction range r=13
  # and exp(first order potential) =  activity = beta(x,y) = exp(a+bx)
  # using the periodic correction.
 
- \dontrun{
- data(soilsurvey)
- mpl(soilsurvey, ~ bs(pH,3), Strauss(0.1), rbord=0.1, data=soilchem)
- #       WARNING: do not use predict.ppm() on this result
- # Fit the nonstationary Strauss process 
- # with intensity modelled as a third order spline function of the 
- # spatial variable "pH" in data frame 'soilchem'
- }
+ # COVARIATES
+ #
+ X <- rpoispp(42)
+ weirdfunction <- function(x,y){ 10 * x^2 + runif(length(x))}
+ Zimage <- as.im(weirdfunction, unit.square())
+ #
+ # (a) covariate values in pixel image
+ ppm(X, ~ y + Z, covariates=list(Z=Zimage))
+ #
+ # (b) covariate values in data frame
+ Q <- quadscheme(X)
+ xQ <- x.quad(Q)
+ yQ <- y.quad(Q)
+ Zvalues <- weirdfunction(xQ,yQ)
+ ppm(Q, ~ y + Z, covariates=data.frame(Z=Zvalues))
+ # Note Q not X
+
 
  ## MULTITYPE POINT PROCESSES ### 
  data(lansing)
@@ -354,13 +392,13 @@ if they have been obtained with different values of \code{rbord}.
 
  # fit stationary marked Poisson process
  # with different intensity for each species
-\dontrun{mpl(lansing, ~ marks, Poisson())}
-\testonly{mpl(ganglia, ~ marks, Poisson())}
+\dontrun{ppm(lansing, ~ marks, Poisson())}
+\testonly{ppm(ganglia, ~ marks, Poisson())}
 
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
-\dontrun{mpl(lansing, ~ marks * polynom(x,y,3), Poisson())}
-\testonly{mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())}
+\dontrun{ppm(lansing, ~ marks * polynom(x,y,3), Poisson())}
+\testonly{ppm(ganglia, ~ marks * polynom(x,y,2), Poisson())}
 
 }
 \author{Adrian Baddeley

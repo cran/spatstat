@@ -116,8 +116,6 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
   # some arbitrary coordinates in [0,1]
   x <- runif(20)
   y <- runif(20)

@@ -56,7 +56,7 @@
   is used (in a slightly different parameterisation)
   to model interactions between uncharged molecules in statistical physics.
   
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -64,20 +64,19 @@
   yielded by the function \code{LennardJones()}.
   See the examples below.
  
-  The ``canonical regular parameters'' estimated by \code{mpl} are
+  The ``canonical regular parameters'' estimated by \code{\link{ppm}} are
   \eqn{\theta_1 = \sigma^{12}}{theta1 = sigma^12}
   and 
   \eqn{\theta_2 = \tau \sigma^6}{theta2 = tau * sigma^6}.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
 \examples{
-   require(spatstat)
    X <- rpoispp(100)
-   mpl(X, ~1, LennardJones(), correction="translate")
+   ppm(X, ~1, LennardJones(), correction="translate")
    # Typically yields very small values for theta_1, theta_2
    # so the values of sigma, tau may not be sensible
 ##########

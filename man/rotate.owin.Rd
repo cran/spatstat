@@ -27,7 +27,6 @@
   \code{\link{owin.object}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   w <- owin(c(0,1),c(0,1))
   v <- rotate(w, pi/3)
   \dontrun{

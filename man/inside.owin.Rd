@@ -50,10 +50,6 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
-
   # hexagonal window
   k <- 6
   theta <- 2 * pi * (0:(k-1))/k

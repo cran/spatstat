@@ -205,7 +205,6 @@ Gdot(X, i=1, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    require(spatstat)
     data(ganglia)
      # cat retina data
     G0. <- Gdot(ganglia, "off") 

@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.6 $   $Date: 2004/01/13 12:12:35 $
+#   $Revision: 1.7 $   $Date: 2004/06/01 04:44:14 $
 #
 #
 #   calculate pair correlation function
@@ -10,8 +10,10 @@
 #
 
 "pcf" <-
-function(X, ..., method="c") { 
-	require(modreg)
+function(X, ..., method="c") {
+        if(!exists("R.Version") ||
+           ((virg <- R.Version())$major == "1" && as.numeric(virg$minor) < 9))
+             require(modreg)
 
 	if(verifyclass(X, "ppp", fatal=FALSE))
         # point pattern - estimate K and continue

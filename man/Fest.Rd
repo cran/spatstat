@@ -230,8 +230,6 @@ Fest(X, eps, breaks)
   \code{\link{kaplan.meier}}
 }
 \examples{
-   require(spatstat)
-
    data(cells)
    Fc <- Fest(cells, 0.01)
 

@@ -115,8 +115,6 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
 
 \examples{
    \dontrun{
-   library(spatstat)
-
    # Bramble Canes data.
    data(bramblecanes)
 

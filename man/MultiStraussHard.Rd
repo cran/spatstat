@@ -43,18 +43,17 @@ which can then be fitted to point pattern data.
   are specified in \code{MultiStraussHard}.
   The canonical parameters \eqn{\log(\beta_j)}{log(beta[j])}
   and \eqn{\log(\gamma_{ij})}{log(gamma[i,j])}
-  are estimated by \code{\link{mpl}()}, not fixed in
+  are estimated by \code{\link{ppm}()}, not fixed in
   \code{MultiStraussHard()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
   \code{\link{MultiStrauss}},
   \code{\link{Strauss}}
 }
 \examples{
-   \dontrun{library(spatstat)}
    r <- matrix(3, nrow=2,ncol=2)
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStraussHard(1:2, r, h)
@@ -62,13 +61,13 @@ which can then be fitted to point pattern data.
    data(ganglia)
    r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    h <- 0.03 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   mpl(ganglia, ~1, MultiStraussHard(c("off","on"), r, h), rbord=0.06)
+   ppm(ganglia, ~1, MultiStraussHard(c("off","on"), r, h), rbord=0.06)
    # fit the stationary multitype hardcore Strauss process to `ganglia'
 }
 \section{Warnings}{
   The argument \code{types} is interpreted as a
   set of factor levels. That is,
-  in order that \code{\link{mpl}} can fit the multitype Strauss model
+  in order that \code{\link{ppm}} can fit the multitype Strauss model
   correctly to a point pattern \code{X},
   this must be a marked point pattern; the mark vector
   \code{X$marks} must be a factor; and 

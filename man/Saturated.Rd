@@ -22,7 +22,7 @@
   ``saturated pairwise'' family \code{\link{pairsat.family}}.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairsat.family}},
   \code{\link{ppm.object}}
 }

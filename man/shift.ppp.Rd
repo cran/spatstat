@@ -29,7 +29,6 @@
   \code{\link{affine}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
   X <- shift(cells, c(2,3))
   \dontrun{

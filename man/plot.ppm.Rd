@@ -2,7 +2,7 @@
 \alias{plot.ppm}
 \title{plot a Fitted Point Process Model}
 \description{
-  Given a fitted point process model obtained by \code{\link{mpl}},
+  Given a fitted point process model obtained by \code{\link{ppm}},
   plot the spatial trend and conditional intensity of the model.
 }
 \usage{
@@ -13,7 +13,7 @@
 \arguments{
   \item{x}{
     A fitted point process model, typically obtained from
-    the maximum pseudolikelihood algorithm \code{\link{mpl}}.
+    the model-fitting algorithm \code{\link{ppm}}.
     An object of class \code{"ppm"}.
   }
   \item{ngrid}{
@@ -86,7 +86,7 @@
 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{predict.ppm}},
   \code{\link{print.ppm}},
@@ -101,10 +101,9 @@
 }
 \examples{
  \dontrun{
- library(spatstat)
  data(cells)
  Q <- quadscheme(cells)
- m <- mpl(Q, ~1, Strauss(0.05))
+ m <- ppm(Q, ~1, Strauss(0.05))
  plot(m)
  }
 }

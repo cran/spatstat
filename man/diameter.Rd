@@ -32,7 +32,6 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   w <- owin(c(0,1),c(0,1))
   diameter(w) 
   # returns sqrt(2)

@@ -25,7 +25,6 @@
   \code{\link{as.ppp}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(lansing)
   hicks <- lansing[lansing$marks == "hickory", ]
   \dontrun{

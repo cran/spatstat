@@ -23,9 +23,11 @@ A marked point pattern.
 \section{Notes}{
 Austin Hughes' data: a point pattern 
 of displaced amacrine cells in the retina of a rabbit.
-152 ``on'' cells and 142 ``off'' cells in a rectangle
-with dimensions 1.6065 by 1.0 where the unit of measurement
-is approximately 1 mm.
+152 ``on'' cells and 142 ``off'' cells in a rectangular sampling frame.
+
+The true dimensions of the rectangle are 1060 by 662 microns.
+The coordinates here are scaled to a rectangle of height 1 and width
+\eqn{1060/662 = 1.601} so the unit of measurement is approximately 662 microns.
 
 The data were analysed by Diggle (1986).
 }
@@ -36,3 +38,4 @@ rabbit: analysis of a bivariate spatial point pattern.
 \emph{J. Neurosci. Meth.} \bold{18}, 115--125.
 } 
 \keyword{datasets}
+

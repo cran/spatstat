@@ -11,7 +11,7 @@
 \arguments{
   \item{X}{
     Fitted point process model (object of class \code{"ppm"})
-    usually obtained from \code{\link{mpl}}.
+    usually obtained from \code{\link{ppm}}.
   }
   \item{\dots}{
     Ignored.
@@ -31,7 +31,7 @@
 
   The argument \code{X} is a fitted point process model
   (an object of class \code{"ppm"}) typically obtained
-  by fitting a model to point pattern data using \code{\link{mpl}}.
+  by fitting a model to point pattern data using \code{\link{ppm}}.
 
   This function returns \code{TRUE} if the \emph{original data}
   (to which the model \code{X} was fitted) were a marked point pattern.
@@ -51,23 +51,27 @@
   \code{\link{is.marked.ppm}}
 }
 \examples{
-  require(spatstat)
-  
-  data(lansing)
-  # Multitype point pattern --- trees marked by species
+   data(lansing)
+   # Multitype point pattern --- trees marked by species
 
-  fit1 <- mpl(lansing, ~ marks, Poisson())
+   \testonly{
+      # Smaller dataset
+      data(ganglia)
+      lansing <- ganglia[seq(2, 135, by=3), ]
+   }
+
+  fit1 <- ppm(lansing, ~ marks, Poisson())
   is.marked(fit1)
   # TRUE
 
-  fit2 <- mpl(lansing, ~ 1, Poisson())
+  fit2 <- ppm(lansing, ~ 1, Poisson())
   is.marked(fit2)
   # TRUE
 
   data(cells)
   # Unmarked point pattern
 
-  fit3 <- mpl(cells, ~ 1, Poisson())
+  fit3 <- ppm(cells, ~ 1, Poisson())
   is.marked(fit3)
   # FALSE
 

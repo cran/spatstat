@@ -4,10 +4,10 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.6 $	$Date: 2002/01/18 06:57:18 $
+#	$Revision: 1.8 $	$Date: 2004/06/01 11:14:42 $
 #
 #   identical.formulae()
-#          Check whether two formulae are identical
+#          Test whether two formulae are identical
 #
 #   termsinformula()
 #          Extract the terms from a formula
@@ -21,16 +21,8 @@
 # -------------------------------------------------------------------
 #	
 
-identical.formulae <- function(a, b) {
-   if(is.null(a))
-      return(is.null(b))
-   if(is.null(b))
-      return(is.null(a))
-   if(class(a) != "formula" || class(b) != "formula")
-      stop("one of the arguments is not a formula")
-   ac <- as.character(a)
-   bc <- as.character(b)
-   return( (length(ac) == length(bc)) && all(ac == bc))
+identical.formulae <- function(x, y) {
+  return(identical(all.equal(x,y), TRUE))
 }
 
 termsinformula <- function(x) {

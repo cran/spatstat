@@ -2,38 +2,39 @@
 \alias{predict.ppm}
 \title{Prediction from a Fitted Point Process Model}
 \description{
-Given a fitted point process model obtained by \code{\link{mpl}},	
+Given a fitted point process model obtained by \code{\link{ppm}},	
 evaluate the spatial trend and the conditional intensity of the model
 at new locations.
 }
-\synopsis{
-predict.ppm(object, newdata, window, ngrid=NULL, type="trend",\dots)
-}
 \usage{
-predict.ppm(object, window, ngrid=NULL, type="trend")
-predict.ppm(object, newdata, type="trend")
+   predict.ppm(object, window, ngrid=NULL, locations=NULL,
+   covariates=NULL, type="trend", \dots)
 }
 \arguments{
   \item{object}{
     A fitted point process model, typically obtained from
-    the maximum pseudolikelihood algorithm \code{\link{mpl}}. An object of
+    the model-fitting algorithm \code{\link{ppm}}. An object of
     class \code{"ppm"} (see \code{\link{ppm.object}}).
-  }
-  \item{newdata}{
-    optional data frame giving the values of any spatial covariates
-    for the locations at which predictions should be
-    computed. (Incompatible with \code{window, ngrid})
   }
   \item{window}{
     window delimiting the locations where predictions
     should be computed. Defaults to the window of the
     original data used to fit the model \code{object}.
-    (Incompatible with \code{newdata})
   }
   \item{ngrid}{dimensions (either (\code{ngrid[1]} by \code{ngrid[2]}
     or \code{ngrid} by \code{ngrid}) of a rectangular grid of locations
     inside \code{window} where predictions should be computed.
-    (Incompatible with \code{newdata})
+    (Incompatible with \code{locations})
+  }
+  \item{locations}{
+    data giving the \eqn{x,y} coordinates (and marks, if required)
+    at which predictions should be computed. 
+    (Incompatible with \code{ngrid})
+  }
+  \item{covariates}{
+    Values of external covariates required by the model.
+    Either a data frame or a list of images.
+    See Details.
   }
   \item{type}{
     character string.
@@ -41,13 +42,16 @@ predict.ppm(object, newdata, type="trend")
     Options are \code{"trend"} for the spatial trend, and 
     \code{"cif"} or \code{"lambda"} for the conditional intensity.
   }
+  \item{\dots}{
+    Ignored.
+  }
 }
 \value{
-  \emph{If \code{newdata} is given:}
+  \emph{If \code{locations} is given:}
   a vector of predicted values for the spatial locations
-  (and marks and covariates) given in the rows of \code{newdata}.
+  (and marks, if required) given in \code{locations}.
 
-  \emph{If \code{newdata} is not given:}
+  \emph{If \code{locations} is not given:}
   If \code{object} is an unmarked point process,
   the result is an image object (of class \code{"im"}, see
   \code{\link{im.object}}) containing the predictions. 
@@ -66,7 +70,7 @@ predict.ppm(object, newdata, type="trend")
  
   Given a point pattern dataset, we may fit
   a point process model to the data using the 
-  maximum pseudolikelihood algorithm \code{\link{mpl}}. This
+  model-fitting algorithm \code{\link{ppm}}. This
   returns an object of class \code{"ppm"} representing 
   the fitted point process model (see \code{\link{ppm.object}}).
   The parameter estimates in this fitted model can be read off 
@@ -77,10 +81,10 @@ predict.ppm(object, newdata, type="trend")
   This is feasible in such generality because the Berman-Turner-Baddeley method
   (Berman and Turner, 1992; Baddeley and Turner, 2000) 
   reduces maximum pseudolikelihood estimation to the fitting
-  of a GLM or GAM, and because Splus/\R contains \code{predict} methods for
+  of a GLM or GAM, and because \R contains \code{predict} methods for
   \code{glm} and \code{gam} objects. The current implementation
   invokes \code{\link{predict.glm}}.
- 
+
   The default action is to create a rectangular grid of points
   in the observation window of the data point pattern, and evaluate
   the spatial trend and conditional intensity at these locations.
@@ -93,23 +97,48 @@ predict.ppm(object, newdata, type="trend")
   The conditional intensity \eqn{\lambda(u, X)}{lambda(u,X)} of the
   fitted model is evaluated at each required spatial location \eqn{u},
   with respect to the data point pattern \eqn{X}.
- 
-  The argument \code{newdata}, if given, is a data frame 
-  giving the values of any spatial covariates
-  at the locations where the trend and conditional intensity should be
-  computed. 
+
+  If the argument \code{locations} is absent, then
+  predictions are performed at an \code{ngrid} by \code{ngrid}
+  pixel grid of locations in the window \code{window}. 
+  The result of prediction will be a pixel image or images.
+  
+  If \code{locations} is present, then predictions
+  will be performed at the locations given by
+  this dataset. The result of prediction will be a
+  vector of values.
+
+  For an \emph{unmarked} point process model,
+  \code{locations} is expected to specify the \eqn{x,y} coordinates
+  of the prediction locations, in any format acceptable
+  to \code{\link{xy.coords}}. For a marked point process model,
+  \code{locations} must specify the \eqn{x,y} coordinates
+  \bold{and} the \emph{marks} of the prediction locations;
+  it should be a data frame or list containing entries named
+  \code{x}, \code{y} and \code{marks}.
+  
+  The argument \code{covariates} gives the values of any spatial covariates
+  at the prediction locations.
   If the trend formula in the fitted model 
   involves spatial covariates (other than
   the Cartesian coordinates \code{x}, \code{y})
-  then \code{newdata} is required.
- 
-  If \code{newdata} is present then it must contain variables
-  matching all the variable names featuring in the trend formula
-  \bold{and} the Cartesian coordinates \code{x} and \code{y}
-  and the mark values \code{marks}.
-  [This is different from the role of the \code{data}
-  argument in \code{\link{mpl}} which must not contain
-  \code{x} and \code{y} variables.]
+  then \code{covariates} is required.
+
+  The format and use of \code{covariates} is analogous to that of the
+  argument of the same name in \code{\link{ppm}}.
+  It is either a data frame or a list of images.
+  If it is a data frame, then each row of \code{covariates}
+  is assumed to contain covariate data for the location
+  specified in the corresponding row of \code{locations}
+  (which must be present).
+
+  If \code{covariates} is a list of images, then
+  the names of the entries should correspond to
+  the names of covariates in the model formula \code{trend}.
+  Each entry in the list must be an image object (of class \code{"im"},
+  see \code{\link{im.object}}).
+  The software will look up
+  the pixel values of each image at the quadrature points.
 
   Note that if you only want to use prediction in order to
   generate a plot of the predicted values,
@@ -128,7 +157,7 @@ predict.ppm(object, newdata, type="trend")
   \emph{Applied Statistics} \bold{41} (1992) 31--38.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{plot.ppm}},
   \code{\link{print.ppm}}
@@ -143,15 +172,14 @@ predict.ppm(object, newdata, type="trend")
   Error messages may be very opaque,
   as they tend to come from deep in the workings of 
   \code{\link{predict.glm}}.
-  If you are passing the \code{newdata} argument
+  If you are passing the \code{covariates} argument
   and the function crashes,
   it is advisable to start by checking that all the conditions 
   listed above are satisfied.
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
-  m <- mpl(cells, ~ polynom(x,y,2), Strauss(0.05), rbord=0.05)
+  m <- ppm(cells, ~ polynom(x,y,2), Strauss(0.05), rbord=0.05)
   trend <- predict(m, type="trend")
   \dontrun{
   image(trend)

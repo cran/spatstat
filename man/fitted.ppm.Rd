@@ -34,8 +34,8 @@
 }
 \details{
   The argument \code{object} must be a fitted point process model
-  (object of class \code{"ppm"}). Such objects are produced by the maximum
-  pseudolikelihood fitting algorithm \code{\link{mpl}}).
+  (object of class \code{"ppm"}). Such objects are produced by the 
+  model-fitting algorithm \code{\link{ppm}}).
 
   This function evaluates the conditional intensity
   \eqn{\hat\lambda(u, x)}{lambdahat(u,x)}
@@ -46,7 +46,7 @@
 
   The locations \eqn{u} at which the fitted conditional intensity/trend
   is evaluated, are the points of the
-  quadrature scheme used to fit the model in \code{\link{mpl}}.
+  quadrature scheme used to fit the model in \code{\link{ppm}}.
   They include the data points (the points of the original point pattern
   dataset \code{x}) and other ``dummy'' points 
   in the window of observation.
@@ -62,13 +62,12 @@
 }
 \seealso{
  \code{\link{ppm.object}},
- \code{\link{mpl}},
+ \code{\link{ppm}},
  \code{\link{predict.ppm}}
 }
 \examples{
-    require(spatstat)
     data(cells)
-    str <- mpl(cells, ~x, Strauss(r=0.15), rbord=0.15)
+    str <- ppm(cells, ~x, Strauss(r=0.15), rbord=0.15)
     lambda <- fitted(str)
 
     # extract quadrature points in corresponding order

@@ -25,7 +25,6 @@
   \code{\link{shift}}
 }
 \examples{
-  require(spatstat)
  # make up an image
  X <- setcov(unit.square())
  plot(X)

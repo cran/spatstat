@@ -168,7 +168,6 @@ Kdot(X, i=1, breaks)
  \code{\link{pcf}}
 }
 \examples{
-    require(spatstat)
      # Lansing woods data: 6 types of trees
     data(lansing)
 
@@ -176,7 +175,7 @@ Kdot(X, i=1, breaks)
     Kh. <- Kdot(lansing, "hickory") 
     }
     \testonly{
-    sub <- lansing[seq(1,lansing$n, by=30), ]
+    sub <- lansing[seq(1,lansing$n, by=80), ]
     Kh. <- Kdot(sub, "hickory") 
     }
     # diagnostic plot for independence between hickories and other trees

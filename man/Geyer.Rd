@@ -64,7 +64,7 @@ which can then be fitted to point pattern data.
   is replaced by a function \eqn{\beta(x_i)}{beta(x[i])}
   of location.
  
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -80,11 +80,11 @@ which can then be fitted to point pattern data.
   the model becomes an exponential family.
   The canonical parameters \eqn{\log(\beta)}{log(beta)}
   and \eqn{\log(\gamma)}{log(gamma)}
-  are estimated by \code{\link{mpl}()}, not fixed in
+  are estimated by \code{\link{ppm}()}, not fixed in
   \code{Geyer()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
   \code{\link{Strauss}}
@@ -101,9 +101,8 @@ Pages 79--140.
 }
 
 \examples{
-   \dontrun{library(spatstat)}
    data(cells) 
-   mpl(cells, ~1, Geyer(r=0.07, sat=2), rbord=0.07)
+   ppm(cells, ~1, Geyer(r=0.07, sat=2), rbord=0.07)
    # fit the stationary saturation process to `cells'
 }
 \author{Adrian Baddeley

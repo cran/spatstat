@@ -2,13 +2,13 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.1 $    $Date: 2004/01/27 07:07:02 $
+#  $Revision: 1.3 $    $Date: 2004/06/09 06:03:17 $
 #
 #
 #
 
 update.ppm <- function(object, ...,
-                       Q, trend, interaction, data,
+                       Q, trend, interaction, covariates,
                        correction, rbord, use.gam) {
   verifyclass(object, "ppm")
 
@@ -28,7 +28,7 @@ update.ppm <- function(object, ...,
   if(!missing(Q)) matchedargs$Q <- Q
   if(!missing(trend)) matchedargs$trend <- trend
   if(!missing(interaction)) matchedargs$interaction <- interaction
-  if(!missing(data)) matchedargs$data <- data
+  if(!missing(covariates)) matchedargs$covariates <- covariates
   if(!missing(correction)) matchedargs$correction <- correction
   if(!missing(rbord)) matchedargs$rbord <- rbord
   if(!missing(use.gam)) matchedargs$rbord <- use.gam
@@ -73,8 +73,8 @@ update.ppm <- function(object, ...,
        matchedargs$interaction <- aargh[[n]]
     if(n<- foundclass("formula", aargh, "trend", missing(trend)))
        matchedargs$trend <- aargh[[n]]
-    if(n<- foundclass("data.frame", aargh, "data", missing(data)))
-       matchedargs$data <- aargh[[n]]
+    if(n<- foundclass("data.frame", aargh, "covariates", missing(covariates)))
+       matchedargs$covariates <- aargh[[n]]
   }
   
   # *************************************************************
@@ -93,7 +93,7 @@ update.ppm <- function(object, ...,
     matchedargs$Q <- Qnew
   }
 
-  # finally call mpl
-  result <- do.call("mpl", matchedargs)
+  # finally call ppm
+  result <- do.call("ppm", matchedargs)
   return(result)
 }

@@ -69,8 +69,6 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
   See the examples.
 }
 \examples{
-   require(spatstat)
-
    data(cells)
    K <- Kest(cells)
    # K is an object of class "fv"

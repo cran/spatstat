@@ -58,7 +58,6 @@ in any of several formats, into an object of class \code{"owin"}.
   \code{\link{owin}}
 }
 \examples{
- require(spatstat)
  w <- as.owin(c(0,1,0,1))
  w <- as.owin(list(xrange=c(0,5),yrange=c(0,10)))
  # point pattern

@@ -54,8 +54,6 @@
   \code{\link{par}}
 }
 \examples{
-   require(spatstat)
-
    data(nztrees)
    Q <- quadscheme(nztrees)
 

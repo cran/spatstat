@@ -172,7 +172,6 @@ Kcross(X, i=1, j=2, breaks)
  \code{\link{pcf}}
 }
 \examples{
-    require(spatstat)
     data(ganglia)
      # cat retina data
     K01 <- Kcross(ganglia, "off", "on") 

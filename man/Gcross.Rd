@@ -202,7 +202,6 @@ Gcross(X, i=1, j=2, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    require(spatstat)
     data(ganglia)
      # cat retina data
     G01 <- Gcross(ganglia, "off", "on") 

@@ -213,7 +213,6 @@
   \code{\link{kaplan.meier}}
 }
 \examples{
-   require(spatstat)
    data(cells)
    J <- Jest(cells, 0.01)
    plot(J, main="cells data")

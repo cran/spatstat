@@ -64,7 +64,6 @@
 \code{\link{rMatClust}}
 }
 \examples{
-  require(spatstat)
   nclust <-  function(x0, y0, radius, n) {
                            return(runifdisc(n, radius, x0, y0))
                          }

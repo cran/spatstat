@@ -59,7 +59,6 @@
 \code{\link{rpoint}}
 }
 \examples{
- require(spatstat)
  # 100 random points in the unit square
  pp <- runifpoint(100)
  # irregular window

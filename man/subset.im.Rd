@@ -86,7 +86,6 @@
   \code{\link{plot.im}}
 }
 \examples{
- \dontrun{require(spatstat)}
  # make up an image
  X <- setcov(unit.square())
  plot(X)

@@ -165,7 +165,6 @@
   \code{\link{predict.smooth.spline}}
 }
 \examples{
-  require(spatstat)
   # univariate point pattern
   data(simdat)
   p <- pcf(simdat, spar=0.5, method="b")

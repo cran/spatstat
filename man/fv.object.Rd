@@ -26,7 +26,6 @@
   \code{\link{Kest}}
 }
 \examples{
-    require(spatstat)
     data(cells)
     K <- Kest(cells)
 

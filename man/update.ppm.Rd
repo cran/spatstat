@@ -6,12 +6,13 @@
 }
 \usage{
   update.ppm(object, \dots,
-            Q, trend, interaction, data,
+            Q, trend, interaction, covariates,
             correction, rbord, use.gam)
 }
 \arguments{
   \item{object}{
-    An existing fitted point process model.
+    An existing fitted point process model,
+    typically produced by \code{\link{ppm}}.
   }
   \item{\dots}{
     Unnamed arguments - see Details.
@@ -28,7 +29,7 @@
     a new interpoint interaction structure (object of class
     \code{"interact"}) for the model. 
   }
-  \item{data}{
+  \item{covariates}{
     a new data frame of spatial covariates,
     or \code{NULL} to remove all spatial covariates.
   }
@@ -42,7 +43,7 @@
   }
   \item{use.gam}{
     logical value indicating whether to fit the model using
-    \code{\link{gam}}. See \code{\link{mpl}}.
+    \code{\link{gam}}. See \code{\link{ppm}}.
   }
 }
 \details{
@@ -54,7 +55,8 @@
   \code{update.ppm} will modify the point process model
   specified by \code{object} according to the new arguments given,
   then re-fit it.
-  The actual re-fitting is performed by \code{\link{mpl}}.
+  The actual re-fitting is performed by the model-fitting
+  function \code{\link{ppm}}.
 
   If you are comparing several model fits to the same data,
   or fits of the same model to different data, it is
@@ -64,8 +66,8 @@
   in a way which is comparable to the original fit.
 
   The named arguments \code{Q}, \code{trend},
-  \code{interaction}, \code{data}, \code{correction},
-  \code{rbord}, \code{use.gam} are passed to \code{mpl}.
+  \code{interaction}, \code{covariates}, \code{correction},
+  \code{rbord}, \code{use.gam} are passed to \code{\link{ppm}}.
   Use \code{name=NULL} to remove the argument \code{name} from the
   call.
 
@@ -82,20 +84,18 @@
     interpreted as the named argument \code{interaction};
     \item
     exactly one argument of class \code{"data.frame"}, which will be
-    interpreted as the named argument \code{data}.
+    interpreted as the named argument \code{covariates}.
   }
 }
 \value{
   Another fitted point process model (object of class \code{"ppm"}).
 }
 \examples{
-  require(spatstat)
-
   data(nztrees)
   data(cells)
 
   # fit the stationary Poisson process
-  fit <- mpl(nztrees, ~ 1)
+  fit <- ppm(nztrees, ~ 1)
 
   # fit a nonstationary Poisson process
   fitP <- update(fit, trend=~x)

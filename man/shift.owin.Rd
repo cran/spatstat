@@ -27,7 +27,6 @@
   \code{\link{affine}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   W <- owin(c(0,1),c(0,1))
   X <- shift(W, c(2,3))
   \dontrun{

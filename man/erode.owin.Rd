@@ -47,7 +47,6 @@
   \code{\link{eroded.areas}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   w <- owin(c(0,1),c(0,1))
   v <- erode.owin(w, 0.1) 
   # returns rectangle [0.1, 0.9] x [0.1,0.9]

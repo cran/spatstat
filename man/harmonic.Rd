@@ -30,7 +30,7 @@
   and evaluates them at given \eqn{x,y} locations.
   It can be used in model formulas (for example in
   the model-fitting functions
-  \code{\link{lm},\link{glm},\link{gam}} and \code{\link{mpl}}) to specify a
+  \code{\link{lm},\link{glm},\link{gam}} and \code{\link{ppm}}) to specify a
   linear predictor which is a harmonic function.
 
   A function \eqn{f(x,y)} is harmonic if
@@ -44,20 +44,22 @@
   for fitting nonstationary spatial trend to point process models.
 }
 \seealso{
-  \code{\link{mpl}}
+  \code{\link{ppm}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
    data(longleaf)
    X <- unmark(longleaf)
    # inhomogeneous point pattern
+   \testonly{
+	# smaller dataset
+	longleaf <- longleaf[seq(1,longleaf$n, by=50)]
+   }
 
    # fit Poisson point process with log-cubic intensity
-   fit.3 <- mpl(X, ~ polynom(x,y,3), Poisson())
+   fit.3 <- ppm(X, ~ polynom(x,y,3), Poisson())
 
    # fit Poisson process with log-cubic-harmonic intensity
-   fit.h <- mpl(X, ~ harmonic(x,y,3), Poisson())
+   fit.h <- ppm(X, ~ harmonic(x,y,3), Poisson())
 
    # Likelihood ratio test
    lrts <- 2 * (fit.3$maxlogpl - fit.h$maxlogpl)

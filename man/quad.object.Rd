@@ -25,7 +25,7 @@
 
   An object of class \code{"quad"} represents a Berman-Turner
   quadrature scheme. It can be passed as an argument to
-  the model-fitting function \code{\link{mpl}}, which
+  the model-fitting function \code{\link{ppm}}, which
   requires a quadrature scheme.
 
   An object of this class contains at least the following elements:
@@ -73,7 +73,7 @@
 }
 \seealso{
   \code{\link{quadscheme}},
-  \code{\link{mpl}}
+  \code{\link{ppm}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -62,8 +62,6 @@
 }
 \examples{
 \dontrun{
-   library(spatstat)
-
   # rectangular window
    data(nztrees)
    plot(nztrees$window)

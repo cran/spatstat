@@ -68,8 +68,6 @@
   \code{\link{options}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
   spatstat.options(npixel=150)
   spatstat.options(npixel=c(100,200))
 

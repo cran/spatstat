@@ -37,7 +37,7 @@ which can then be fitted to point pattern data.
   is a function \eqn{\beta(x_i)}{beta(x[i])}
   of location and type, rather than a constant beta. 
  
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -53,31 +53,30 @@ which can then be fitted to point pattern data.
   Note that only the interaction radii are specified in \code{MultiStrauss}.
   The canonical parameters \eqn{\log(\beta_j)}{log(beta[j])}
   and \eqn{\log(\gamma_{ij})}{log(gamma[i,j])}
-  are estimated by \code{\link{mpl}()}, not fixed in
+  are estimated by \code{\link{ppm}()}, not fixed in
   \code{Strauss()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
   \code{\link{Strauss}}
 }
 \examples{
-   \dontrun{library(spatstat)}
    r <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStrauss(1:2, r)
    # prints a sensible description of itself
    data(ganglia)
    r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   mpl(ganglia, ~1, MultiStrauss(c("off","on"), r), rbord=0.06)
+   ppm(ganglia, ~1, MultiStrauss(c("off","on"), r), rbord=0.06)
    # fit the stationary multitype Strauss process to `ganglia'
-   mpl(ganglia, ~polynom(x,y,3), MultiStrauss(c("off","on"), r), rbord=0.06)
+   ppm(ganglia, ~polynom(x,y,3), MultiStrauss(c("off","on"), r), rbord=0.06)
    # fit a nonstationary Strauss process with log-cubic polynomial trend
 }
 \section{Warnings}{
   The argument \code{types} is interpreted as a
   set of factor levels. That is,
-  in order that \code{\link{mpl}} can fit the multitype Strauss model
+  in order that \code{\link{ppm}} can fit the multitype Strauss model
   correctly to a point pattern \code{X},
   this must be a marked point pattern; the mark vector
   \code{X$marks} must be a factor; and 

@@ -68,7 +68,7 @@ which can then be fitted to point pattern data.
   is a function \eqn{\beta(x_i)}{beta(x[i])}
   of location, rather than a constant beta. 
  
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -83,11 +83,11 @@ which can then be fitted to point pattern data.
   }{
     log(gamma) = (2/kappa) log(sigma)
   }
-  The canonical parameters are estimated by \code{\link{mpl}()}, not fixed in
+  The canonical parameters are estimated by \code{\link{ppm}()}, not fixed in
   \code{Softcore()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
@@ -104,11 +104,8 @@ which can then be fitted to point pattern data.
   \bold{46}, 496--518.
 }
 \examples{
-   \dontrun{
-   library(spatstat)
-   }
    data(cells) 
-   mpl(cells, ~1, Softcore(kappa=0.5), rbord=0)
+   ppm(cells, ~1, Softcore(kappa=0.5), rbord=0)
    # fit the stationary Soft Core process to `cells'
 }
 \author{Adrian Baddeley

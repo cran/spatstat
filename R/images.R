@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.8 $     $Date: 2004/05/24 06:52:32 $
+#         $Revision: 1.9 $     $Date: 2004/06/09 02:13:00 $
 #
 #      The class "im" of raster images
 #
@@ -9,7 +9,7 @@
 #
 #     im()     object creator
 #
-#     is.im()   converter
+#     is.im()   tests class membership
 #
 #     plot.im(), image.im(), contour.im(), persp.im()
 #                      plotting functions

@@ -25,8 +25,6 @@
   \code{\link{summary.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
   owin()  # the unit square
 
   data(demopat)

@@ -43,7 +43,7 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)
+  \dontrun{
   plot(owin())
   }
   x <- runif(30)

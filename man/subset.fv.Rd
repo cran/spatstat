@@ -48,8 +48,6 @@
   \code{\link{fv.object}}
 }
 \examples{
- require(spatstat)
-
  data(cells)
  K <- Kest(cells)
 

@@ -53,12 +53,14 @@
   \code{\link{ppp.object}}
 }
 \examples{
- \dontrun{library(spatstat)}
-
  data(longleaf)
  # Longleaf Pines data
  # the marks are positive real numbers indicating tree diameters.
 
+ \testonly{
+	# smaller dataset
+	longleaf <- longleaf[seq(1, longleaf$n, by=80)]
+ }
  \dontrun{
  plot(longleaf)
  }

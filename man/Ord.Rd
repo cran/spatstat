@@ -55,7 +55,7 @@ which can then be fitted to point pattern data.
 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{OrdThresh}}
 }

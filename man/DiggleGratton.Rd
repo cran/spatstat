@@ -53,13 +53,13 @@
   regular parameter \eqn{\kappa}{kappa} will be estimated.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}},
   \code{\link{Pairwise}}
 }
 \examples{
    data(cells)
-   mpl(cells, ~1, DiggleGratton(0.05, 0.1))
+   ppm(cells, ~1, DiggleGratton(0.05, 0.1))
 }
 \references{
   Diggle, P.J., Gates, D.J. and Stibbard, A. (1987)

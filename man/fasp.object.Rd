@@ -71,9 +71,12 @@
   \code{\link{[.fasp}}
 }
 \examples{
-  require(spatstat)
   # unmarked point pattern
   data(swedishpines)
+  \testonly{
+	# smaller dataset
+	swedishpines <- swedishpines[1:30]
+  }
   a <- allstats(swedishpines,dataname="Swedish Pines")
   a
   plot(a)

@@ -188,8 +188,6 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
  \code{\link{Kmulti}}
 }
 \examples{
-    require(spatstat)
-
     # CONTINUOUS-VALUED MARKS:
     # (1) Longleaf Pine data
     # marks represent tree diameter

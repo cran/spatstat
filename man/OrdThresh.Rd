@@ -30,10 +30,10 @@ which can then be fitted to point pattern data.
 
   This function creates an instance of Ord's model with a given
   value of \eqn{r}. It can then be fitted to point process data
-  using \code{\link{mpl}}. 
+  using \code{\link{ppm}}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{ppm.object}}
 }
 \references{

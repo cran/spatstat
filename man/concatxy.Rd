@@ -35,9 +35,6 @@
   \code{\link{quadscheme}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   dat <- runifrect(30)
   xy <- list(x=runif(10),y=runif(10))
   new <- concatxy(dat, xy)

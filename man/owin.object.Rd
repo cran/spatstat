@@ -92,7 +92,6 @@
   and the column index corresponds to increasing \eqn{x} coordinate.
 }
 \examples{
- \dontrun{library(spatstat)}
  w <- owin()
  w <- owin(c(0,1), c(0,1))
  # the unit square

@@ -20,15 +20,15 @@
 \details{
   An object of class \code{"ppm"} represents a point process model
   that has been fitted to data. It is typically produced by
-  the maximum pseudolikelihood fitting algorithm \code{\link{mpl}}.
+  the model-fitting algorithm \code{\link{ppm}}.
   
-  The \code{\link{mpl}} algorithm approximates the pseudolikelihood
+  The \code{\link{ppm}} algorithm approximates the pseudolikelihood
   integral by a sum over a finite set of quadrature points,
   which is constructed by augmenting
   the original data point pattern by a set of ``dummy'' points.
-  The fitted model object returned by \code{\link{mpl}}
+  The fitted model object returned by \code{\link{ppm}}
   contains complete information about this quadrature scheme.
-  See \code{\link{mpl}} or \code{\link{ppm.object}} for further
+  See \code{\link{ppm}} or \code{\link{ppm.object}} for further
   information.
   
   This function extracts the quadrature scheme.
@@ -44,12 +44,11 @@
 \seealso{
   \code{\link{ppm.object}},
   \code{\link{quad.object}},
-  \code{\link{mpl}}
+  \code{\link{ppm}}
 }
 \examples{
- require(spatstat)
  data(cells)
- fit <- mpl(cells, ~1, Strauss(r=0.1), rbord=0.1)
+ fit <- ppm(cells, ~1, Strauss(r=0.1), rbord=0.1)
  Q <- quad.ppm(fit)
  \dontrun{plot(Q)}
  Q$data$n
