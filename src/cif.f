@@ -28,7 +28,11 @@ C Output from Public domain Ratfor, version 1.0
       if(nmbr .eq. 8)then
       call geyer(u,v,ix,x,y,npts,par,period,cifval,aux)
       else
-      call fexit("Cif number is greater than 8; bailing out.")
+      if(nmbr .eq. 9)then
+      call lookup(u,v,ix,x,y,npts,par,period,cifval)
+      else
+      call fexit("Cif number is not in the range 1 to 9; bailing out.")
+      endif
       endif
       endif
       endif

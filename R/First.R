@@ -1,6 +1,6 @@
 .First.lib <- function(lib, pkg) {
     library.dynam("spatstat", pkg, lib)
-    cat("spatstat 1.4-5\n")
+    cat("spatstat 1.4-6\n")
     cat("Type \"demo(spatstat)\" for a demonstration\n")
     locn <- paste(.path.package(package="spatstat"),
                   "doc", sep=.Platform$file.sep)

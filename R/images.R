@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.7 $     $Date: 2004/01/27 07:02:57 $
+#         $Revision: 1.8 $     $Date: 2004/05/24 06:52:32 $
 #
 #      The class "im" of raster images
 #
@@ -59,12 +59,12 @@ inherits(x,"im")
 ################################################################
 
 image.im <- function(x, ..., xlab="x", ylab="y") {
-    image.default(x$xcol, x$yrow, t(x$v), ...,
+    image(x$xcol, x$yrow, t(x$v), ...,
                   xlab=xlab, ylab=ylab, asp=1.0)
 }
 
 persp.im <- function(x, ..., xlab="x", ylab="y") {
-  persp.default(x$xcol, x$yrow, t(x$v), ...,
+  persp(x$xcol, x$yrow, t(x$v), ...,
                 xlab=xlab, ylab=ylab, asp=1.0)
 }
 
@@ -72,8 +72,8 @@ contour.im <- function (x, ..., xlab="x", ylab="y")
 {
     doit <- function(x, ..., add=FALSE) {
       if(!add) 
-        plot.default(x$xcol, x$yrow, type="n", asp = 1, ...)
-      contour.default(x$xcol, x$yrow, t(x$v), add=TRUE, ...)
+        plot(x$xcol, x$yrow, type="n", asp = 1, ...)
+      contour(x$xcol, x$yrow, t(x$v), add=TRUE, ...)
     }
     doit(x, ..., xlab=xlab, ylab=ylab)
     invisible(NULL)

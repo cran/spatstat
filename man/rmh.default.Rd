@@ -91,7 +91,7 @@
   \code{control=list(p=p,q=q,nrep=nrep,expand,periodic,
                      ptypes=ptypes,fixall=fixall)}
 
-  Note that only one of \code{n.start} and \code{x.start} may appear
+  Note that only one of \code{x.start} and \code{x.start} appear in
   in the \code{start} list.
 }
 
@@ -119,6 +119,8 @@
         \item{\code{'dgs'}}{Diggle, Gates and Stibbard (1987) process}
 	\item{\code{'diggra'}}{Diggle and Gratton (1984) process}
 	\item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
+	\item{\code{'lookup'}}{General pairwise interaction process,
+	with the interaction function specified via a ``lookup table''.}
       }
       See the section \bold{Extensions} for the possibility of extending
       this list of options.
@@ -233,17 +235,53 @@
 	  to the number of \eqn{r}-close neighbors of any point.''
 	 
 	  Explicitly, a saturation point process with interaction
-	  radius \eqn{r}, saturation threshold \eqn{s}, and  parameters
-	  \eqn{\beta}{beta} and \eqn{\gamma}{gamma}, is the point process
-	  in which each point \eqn{x_i}{x[i]}
-	  in the pattern \eqn{X} contributes a factor
-	  \deqn{\beta \gamma^{\min(s, t(x_i,X))}}{beta gamma^min(s,t(x[i],X))}
-	  to the probability density of the point pattern, where
-	  \eqn{t(x_i,X)}{t(x[i],X)}
-	  denotes the number of ``\eqn{r}-close neighbours''
-	  of \eqn{x_i}{x[i]} in the pattern \eqn{X}.
+	  radius \eqn{r}, saturation threshold \eqn{s}, and
+	  parameters \eqn{\beta}{beta} and \eqn{\gamma}{gamma},
+	  is the point process in which each point \eqn{x_i}{x[i]}
+	  in the pattern \eqn{X} contributes a factor \deqn{\beta
+	  \gamma^{\min(s, t(x_i,X))}}{beta gamma^min(s,t(x[i],X))}
+	  to the probability density of the point pattern,
+	  where \eqn{t(x_i,X)}{t(x[i],X)} denotes the number of
+	  ``\eqn{r}-close neighbours'' of \eqn{x_i}{x[i]} in the
+	  pattern \eqn{X}.
 	}
-      }
+
+	\item{lookup}{ A \bold{named} list with components
+	\code{beta}, \code{h}, and \code{r}.  The component
+	\code{beta} is a (positive) scalar which determines the ``base''
+	intensity of the process.  The components \code{h} and
+	\code{r} are vectors (of equal length, equal to \code{N},
+	say) specifying the pairwise interaction function of the
+	model (see, e.g., Diggle (2003)).
+
+	The entries of \code{r} need not be sorted into ascending
+	order, but they must (of course) be ordered consistent
+	with those of \code{h}.  Henceforth it will be assumed, for
+	simplicity, that \code{r} \emph{is} in fact sorted.
+
+	Explicitly \code{h[i]} is equal to \eqn{h(r[i])} where
+	\eqn{h()} (by a slight abuse of notation) denotes the
+	pairwise interaction function being modeled as well as the
+	vector of values of this function.  The \code{r[i]} are
+	(distinct) distances varying from 0 to some maximal value
+	\code{r[N]}.  It is assumed that the pairwise interaction
+	function is identically equal to 1 for distances greater
+	than \code{r.max}.
+
+	All of the entries of \code{h} and \code{r} \bold{must}
+	be non-negative; the minimal entry of \code{r} \bold{must}
+	be equal to 0.	If any entry of \code{h} is greater than
+	1, then the entry corresponding to \code{r=0} must be 0
+	(otherwise the specified process is non-existant).
+
+	The software takes the value of \eqn{h(x)} to be \code{h[i]}
+	for \eqn{x} in the half-open interval \eqn{[r[i],r[i+1])}
+	for \eqn{1 <= i <= N-1}.  As previously mentioned, \eqn{h(x)}
+	is taken to be identically equal to 1 for \eqn{x >= r[N]}.
+
+	Greatest efficiency is achieved if the \code{r[i]} are
+	equispaced on the interval from 0 to \code{r.max}.
+	}
     }
     \item{trend}{
 	A function or image (or a list of such if the model
@@ -417,12 +455,16 @@
        }
      }
    }
+}
  
 \references{
    Baddeley, A. and Turner, R. (2000) Practical maximum
    pseudolikelihood for spatial point patterns.
    \emph{Australian and New Zealand Journal of Statistics}
    \bold{42}, 283 -- 322.
+
+   Diggle, P. J. (2003) \emph{Statistical Analysis of Spatial Point
+   Patterns} (2nd ed.) Arnold, London.
 
    Diggle, P.J. and Gratton, R.J. (1984)
    Monte Carlo methods of inference for implicit statistical models.
@@ -510,8 +552,15 @@ or trends.
   to add her own.  Note that in addition to writing Fortran
   code for the new conditional intensity function, the user
   would have to modify the code in the files \code{cif.f} and
-  \code{rmh.default.R} appropriately, and reinstall
-  the compiled Fortran code.
+  \code{rmh.default.R} appropriately.  (And of course re-install
+  the \code{spatstat} package so as to update the dynamically
+  loadable shared object \code{spatstat.so}.)
+
+  Note that the \code{lookup} conditional intensity function
+  permits the simulation (in theory, to any desired degree
+  of approximation) of any pairwise interaction process for
+  which the interaction depends only on the distance between
+  the pair of points.
 }
 \examples{
    \dontrun{
@@ -677,7 +726,16 @@ or trends.
    # on a torus, and conditioning on n:
    X4.geyer <- rmh(model=mod16,start=list(x.start=redwood),
                    control=list(p=1,periodic=TRUE,nrep=nr,nverb=nv))
-   
+
+   # Lookup (interaction function h_2 from page 76, Diggle (2003)):
+      r <- seq(from=0,to=0.2,length=101)
+      h <- 20*(r-0.05)
+      h[r<0.05] <- 0
+      h[r>0.10] <- 1
+      mod17 <- list(cif="lookup",par=list(beta=4000,h=h,r=r),w=c(0,1,0,1))
+      X.lookup <- rmh(model=mod17,start=list(n.start=100),
+                      control=list(nrep=nr,nverb=nv))
+                   
    # Strauss with trend
    tr <- function(x,y){x <- x/250; y <- y/250;
    			   exp((6*x + 5*y - 18*x^2 + 12*x*y - 9*y^2)/6)
