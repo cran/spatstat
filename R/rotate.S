@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.1 $	$Date: 2001/11/21 09:07:22 $
+#	$Revision: 1.2 $	$Date: 2003/03/11 01:21:59 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -11,20 +11,20 @@ rotxy <- function(X, angle=pi/2) {
        y = si * X$x + co * X$y)
 }
 
-"rotate.owin" <- function(W, angle=pi/2) {
-  verifyclass(W, "owin")
-  switch(W$type,
+"rotate.owin" <- function(X, angle=pi/2, ...) {
+  verifyclass(X, "owin")
+  switch(X$type,
          rectangle={
            # convert rectangle to polygon
-           P <- owin(W$xrange, W$yrange, poly=
-                     list(x=W$xrange[c(1,2,2,1)],
-                          y=W$yrange[c(1,1,2,2)]))
+           P <- owin(X$xrange, X$yrange, poly=
+                     list(x=X$xrange[c(1,2,2,1)],
+                          y=X$yrange[c(1,1,2,2)]))
            # call polygonal case
            return(rotate.owin(P, angle))
          },
          polygonal={
            # First rotate the polygonal boundaries
-           bdry <- lapply(W$bdry, rotxy, angle=angle)
+           bdry <- lapply(X$bdry, rotxy, angle=angle)
            # Compute bounding box of new polygons
            xr <- range(unlist(lapply(bdry, function(a) a$x)))
            yr <- range(unlist(lapply(bdry, function(a) a$y)))
@@ -38,7 +38,7 @@ rotxy <- function(X, angle=pi/2) {
          )
 }
 
-"rotate.ppp" <- function(X, angle=pi/2) {
+"rotate.ppp" <- function(X, angle=pi/2, ...) {
   verifyclass(X, "ppp")
   r <- rotxy(X, angle)
   w <- rotate.owin(X$window, angle)

@@ -11,6 +11,13 @@ plot(demopat, cols=c("green", "blue"), main="Multitype point pattern")
 data(longleaf)
 plot(longleaf, fg="blue", main="Marked point pattern")
 
+data(letterR)
+plot(letterR)
+lambda <- 10/area.owin(letterR)
+points(rpoispp(lambda, win=letterR))
+points(rpoispp(10 * lambda, win=letterR))
+points(rpoispp(100 * lambda, win=letterR))
+
 X <- swedishpines
 subset <- 1:20
 plot(X[subset])
@@ -39,9 +46,9 @@ plot(allstats(swedishpines),
 fit <- mpl(swedishpines, ~1, Strauss(r=7))
 print(fit)
 
-Xsim <- rmh("strauss", c(0.03,0.2,7), swedishpines$window,
-            n.start=swedishpines$n, nrep=1e4)
-
+Xsim <- rmh(model=fit,
+            start=list(n.start=80),
+            control=list(nrep=100))
 plot(Xsim, main="Simulation from fitted Strauss model")
 
 data(demopat)
@@ -57,9 +64,10 @@ plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
-Xg <- rmh("geyer", par=c(1.25, 1.6, 0.2, 4.5),w=c(0,10,0,10),
-          n.start=200, nrep=1e4)
-plot(Xg, main="rmh(\"geyer\", ...)")
+Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
+               w=c(0,10,0,10)),
+          control=list(nrep=1e4), start=list(n.start=200))
+plot(Xg, main="rmh(...) for Geyer saturation model")
 
 par(oldpar)
 options(oldoptions)

@@ -92,7 +92,6 @@
 \alias{tilemiddles}
 \alias{try.FGJKest}
 \alias{try.Kcross}           
-\alias{unit.square}
 \alias{update.interact}
 \alias{validate.mask}        
 \alias{verifyclass}
@@ -145,7 +144,7 @@ intY.xypolygon(polly)
 is.data(Q)
 is.marked(X, \dots)
 is.marked.default(\dots)  
-is.marked.ppp(X, na.action="warn")
+is.marked.ppp(X, na.action="warn", \dots)
 is.poisson.ppm(x)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
@@ -173,7 +172,7 @@ overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)   
 persp.im(x, \dots)
-pixellate(x, \dots)
+pixellate(x, \dots, weights)
 plot.im(x, \dots)
 polynom(x, \dots)
 print.interact(x, \dots)       
@@ -199,7 +198,6 @@ tilecentroids(W, nx, ny)
 tilemiddles(W, nx, ny)
 try.FGJKest(niter = 20, lambda = 25, r = seq(0, sqrt(2), 0.02), eps = 0.01, slow = FALSE)
 try.Kcross(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R = 0.2)           
-unit.square()
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)

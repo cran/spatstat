@@ -65,7 +65,7 @@
        plot(redwoodfull)
        redwoodfull.extra$plot()
        # extract the pattern in region II 
-       redwoodII <- redwoodfull[, redwood.extra$regionII]
+       redwoodII <- redwoodfull[, redwoodfull.extra$regionII]
 }
 \source{Strauss (1975). The plot of the data published by Strauss (1975)
   was scanned and digitised by Sandra Pereira, University of

@@ -7,19 +7,22 @@ Tries to coerce any reasonable kind of data to a point pattern
 for use by the \code{spatstat} package).
 }
 \synopsis{
-  as.ppp(X, W=NULL)
+  as.ppp(X, W=NULL, fatal=TRUE)
 }
 \usage{
   as.ppp(X)
   as.ppp(X, W)
+  as.ppp(X, fatal=TRUE)
 }
 \arguments{
   \item{X}{Data which will be converted into a point pattern}
   \item{W}{Data which define a default window for the pattern}
+  \item{fatal}{Logical value. See Details.}
 }
 \value{
   An object of class \code{"ppp"} (see \code{\link{ppp.object}})
   describing the point pattern and its window of observation.
+  The value \code{NULL} may also be returned; see Details.
 }
 \details{
   This function tries to coerce the data \code{X} to a point pattern
@@ -50,7 +53,13 @@ for use by the \code{spatstat} package).
   which is converted to a window object
   by the function \code{\link{as.owin}}.
   In the first three cases, \code{W} will be ignored.
-  
+
+  The argument \code{fatal} indicates what to do when 
+  \code{W} is missing and \code{X} contains no
+  information about the window. If \code{fatal=TRUE}, a fatal error
+  will be generated; if \code{fatal=FALSE}, the
+  value \code{NULL} is returned.
+
   Point pattern datasets can also be created by the function
   \code{\link{ppp}}.
 }

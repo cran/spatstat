@@ -35,8 +35,9 @@
   \item{correction}{
     The name of the edge correction to be used. The default 
     is \code{"border"} indicating the border correction.
-    Other possibilities may include \code{"Ripley"}, \code{"isotropic"}
-    and \code{"translate"}.
+    Other possibilities may include \code{"Ripley"}, \code{"isotropic"},
+    \code{"translate"} and \code{"none"}, depending on the 
+    \code{interaction}.
   }
   \item{rbord}{
     If \code{correction = "border"}

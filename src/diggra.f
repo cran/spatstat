@@ -1,4 +1,4 @@
-      subroutine dig2(u,v,ix,x,y,n,par,period,cifval)
+      subroutine diggra(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       double precision kappa
       dimension par(4), x(n), y(n), period(2)

@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.2 $	$Date: 2002/05/08 13:11:10 $
+#	$Revision: 1.3 $	$Date: 2003/03/11 01:20:27 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -13,25 +13,25 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
               y = ans[2,]))
 }
 
-"affine.owin" <- function(W,  mat=diag(c(1,1)), vec=c(0,0)) {
-  verifyclass(W, "owin")
+"affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
+  verifyclass(X, "owin")
   # Inspect the determinant
   detmat <- det(mat)
   if(abs(detmat) < .Machine$double.eps)
     stop("Matrix of linear transformation is singular")
   #
-  switch(W$type,
+  switch(X$type,
          rectangle={
            # convert rectangle to polygon
-           P <- owin(W$xrange, W$yrange, poly=
-                     list(x=W$xrange[c(1,2,2,1)],
-                          y=W$yrange[c(1,1,2,2)]))
+           P <- owin(X$xrange, X$yrange, poly=
+                     list(x=X$xrange[c(1,2,2,1)],
+                          y=X$yrange[c(1,1,2,2)]))
            # call polygonal case
            return(affine.owin(P, mat, vec))
          },
          polygonal={
            # First transform the polygonal boundaries
-           bdry <- lapply(W$bdry, affinexy, mat=mat, vec=vec)
+           bdry <- lapply(X$bdry, affinexy, mat=mat, vec=vec)
            # If determinant < 0, traverse polygons in reverse direction
            if(detmat < 0)
              bdry <- lapply(bdry, reverse.xypolygon)
@@ -48,7 +48,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
          )
 }
 
-"affine.ppp" <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
+"affine.ppp" <- function(X, mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "ppp")
   r <- affinexy(X, mat, vec)
   w <- affine.owin(X$window, mat, vec)
@@ -71,30 +71,30 @@ shiftxy <- function(X, vec=c(0,0)) {
        y = X$y + vec[2])
 }
 
-"shift.owin" <- function(W,  vec=c(0,0)) {
-  verifyclass(W, "owin")
+"shift.owin" <- function(X,  vec=c(0,0), ...) {
+  verifyclass(X, "owin")
   # Shift the bounding box
-  W$xrange <- W$xrange + vec[1]
-  W$yrange <- W$yrange + vec[2]
-  switch(W$type,
+  X$xrange <- X$xrange + vec[1]
+  X$yrange <- X$yrange + vec[2]
+  switch(X$type,
          rectangle={
          },
          polygonal={
            # Shift the polygonal boundaries
-           W$bdry <- lapply(W$bdry, shiftxy, vec=vec)
+           X$bdry <- lapply(X$bdry, shiftxy, vec=vec)
          },
          mask={
            # Shift the pixel coordinates
-           W$xcol <- W$xcol + vec[1]
-           W$yrow <- W$yrow + vec[2]
+           X$xcol <- X$xcol + vec[1]
+           X$yrow <- X$yrow + vec[2]
            # That's all --- the mask entries are unchanged
          },
          stop("Unrecognised window type")
          )
-  return(W)
+  return(X)
 }
 
-"shift.ppp" <- function(X, vec=c(0,0)) {
+"shift.ppp" <- function(X, vec=c(0,0), ...) {
   verifyclass(X, "ppp")
   r <- shiftxy(X, vec)
   w <- shift.owin(X$window, vec)

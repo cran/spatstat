@@ -85,7 +85,9 @@
       If \code{x$marks} is a numeric vector,
       the marks are rescaled to the unit interval and
       each point is represented by a circle 
-      with radius proportional to the rescaled mark.
+      with radius proportional to the rescaled mark
+      (if the value is positive) or a square with side proportional
+      to the absolute value of the rescaled mark (if the value is negative).
     }
     \item{otherwise:}{
       Each possible mark will be represented by a

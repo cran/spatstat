@@ -1,4 +1,4 @@
-      subroutine dig1(u,v,ix,x,y,n,par,period,cifval)
+      subroutine dgs(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       dimension par(2), x(n), y(n), period(2)
       logical per

@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 1.3 $   $Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.4 $   $Date: 2003/03/14 06:50:12 $
 #
 #    Soft core processes.
 #
@@ -38,6 +38,20 @@ number less than 1")
            return(list(param=list(sigma=sigma),
                        inames="interaction parameter sigma",
                        printable=sigma))
+         },
+         rmhmodel = function(fit, self) {
+           # not implemented if there is a trend 
+           if(!no.trend.ppm(fit))
+             return(NULL)
+           kappa <- self$par$kappa
+           coeffs <- fit$coef
+           beta <- exp(coeffs[["(Intercept)"]])
+           theta <- exp(coeffs[["Interaction"]])
+           sigma <- theta * kappa/2
+           w <- fit$Q$data$window
+           return(list(cif='sftcr',
+                       par=c(beta=beta,sigma=sigma,kappa=kappa),
+                       w=w))
          }
   )
   class(out) <- "interact"

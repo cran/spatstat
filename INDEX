@@ -18,6 +18,7 @@ Kest.fft                K-function using FFT
 Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
 Kmulti                  Marked K-Function 
+LennardJones            The Lennard-Jones Potential
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
@@ -79,6 +80,7 @@ kaplan.meier            Kaplan-Meier Estimator using Histogram Data
 kmrs                    Kaplan-Meier and Reduced Sample Estimator using
                         Histograms
 lansing                 Lansing Woods Point Pattern 
+letterR                 Window in Shape of Letter R
 longleaf                Longleaf Pines Point Pattern 
 markcorr                Mark Correlation Function 
 mpl                     Fit Point Process Model by Maximum
@@ -123,6 +125,9 @@ redwoodfull             California Redwoods Point Pattern (Entire
 ripras                  Estimate window from points alone
 rmh                     Simulate point patterns using the
                         Metropolis-Hastings algorithm.
+rmh.default             Simulate Point Process Models using the
+                        Metropolis-Hastings Algorithm.
+rmh.ppm                 Simulate from a Fitted Point Process Model
 rotate                  Rotate
 rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
@@ -134,6 +139,7 @@ shift.ppp               Apply Vector Translation To Point Pattern
 simdat                  Simulated Point Pattern 
 spatstat.options        Internal Options in Spatstat Package
 spokes                  Spokes pattern of dummy points
+square                  Square Window
 stratrand               Stratified random point pattern
 subset.fasp             Extract Subset of Function Array
 subset.ppp              Extract Subset of Point Pattern

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 1.9 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.10 $	$Date: 2003/03/14 07:16:40 $
 #
 #    The multitype Strauss process
 #
@@ -130,8 +130,30 @@ MultiStrauss <- function(types, radii) {
           return(list(param=list(gammas=gammas),
                       inames="interaction parameters gamma_ij",
                       printable=round(gammas,4)))
-        }
-       
+        },
+         rmhmodel = function(fit, self) {
+           # not implemented for nonstationary processes
+           if(!is.stationary.ppm(fit))
+             return(NULL)
+           # interaction radii r[i,j]
+           radii <- self$par$radii
+           # interaction parameters gamma[i,j]
+           coeffs <- fit$coef
+           gamma <- (self$interpret)(coeffs, self)$param$gammas
+           if(any(gamma > 1)) {
+             warning("Nonexistent model: some interaction parameters gamma[i,j] exceed 1")
+             return(NULL)
+           }
+           # base intensities beta[i]
+           X <- fit$Q$data
+           lev <- factor(levels(X$marks))
+           beta <- predict(fit, newdata=data.frame(marks=lev), type="trend")
+           # 
+           w <- X$window
+           return(list(cif='straussm',
+                       par=list(beta=beta,gamma=gamma,radii=radii),
+                       w=w))
+         }
   )
   class(out) <- "interact"
   out$init(out)

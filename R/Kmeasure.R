@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.1 $    $Date: 2002/07/18 10:54:34 $
+#           $Revision: 1.2 $    $Date: 2003/03/11 02:57:20 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -13,16 +13,23 @@
 #
 #     This file uses the temporary 'image' class defined in images.R
 
-pixellate <- function(x, ...) {
-  verifyclass(x, "ppp")
-  w <- as.mask(x$window, ...)
-  pixels <- nearest.raster.point(x$x, x$y, w)
-  nr <- w$dim[1]
-  nc <- w$dim[2]
-  ta <- table(row=factor(pixels$row, levels=1:nr),
-              col=factor(pixels$col, levels=1:nc))
-  out <- im(ta, xcol=w$xcol, yrow=w$yrow)
-  return(out)
+pixellate <- function(x, ..., weights=NULL)
+{
+    verifyclass(x, "ppp")
+    w <- as.mask(x$window, ...)
+    pixels <- nearest.raster.point(x$x, x$y, w)
+    nr <- w$dim[1]
+    nc <- w$dim[2]
+    if(missing(weights)) {
+    ta <- table(row = factor(pixels$row, levels = 1:nr), col = factor(pixels$col,
+        levels = 1:nc))
+    } else {
+        ta <- tapply(weights, list(row = factor(pixels$row, levels = 1:nr),
+                    col = factor(pixels$col, levels=1:nc)), sum)
+        ta[is.na(ta)] <- 0
+    }
+    out <- im(ta, xcol = w$xcol, yrow = w$yrow)
+    return(out)
 }
 
 Kmeasure <- function(X, sigma, edge=TRUE) {
@@ -31,7 +38,7 @@ Kmeasure <- function(X, sigma, edge=TRUE) {
 
 second.moment.calc <- function(x, sigma, edge=TRUE,
                                what="Kmeasure", debug=FALSE, ...) {
-  choices <- c("kernel", "smooth", "Kmeasure", "Bartlett")
+  choices <- c("kernel", "smooth", "Kmeasure", "Bartlett", "edge")
   if(!(what %in% choices))
     stop(paste("Unknown choice: what = \"", what, "\"; available options are:", paste(choices, collapse=",")))
   # convert list of points to mass distribution 
@@ -132,6 +139,12 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
   if(debug) {
     if(any(order(xcol.G) != rtwist))
       cat("something round the twist\n")
+  }
+  if(what=="edge") {
+    # return convolution of window with kernel
+    # (evaluated inside window only)
+    con <- fft(fM * fK, inverse=TRUE)/lengthMpad
+    return(Mod(con[1:nr, 1:nc]))
   }
   # divide by number of points * lambda
   mom <- mom * area.owin(x$window) / x$n^2

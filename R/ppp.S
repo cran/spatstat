@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.9 $	$Date: 2002/06/12 11:25:31 $
+#	$Revision: 4.11 $	$Date: 2003/03/12 02:01:23 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -52,7 +52,7 @@ ppp <- function(x, y, ..., window, marks ) {
 #--------------------------------------------------------------------------
 #
 
-as.ppp <- function(X, W = NULL) {
+as.ppp <- function(X, W = NULL, fatal=TRUE) {
 	# tries to coerce data X to a point pattern
 	# X may be:
 	#	1. an object of class 'ppp'
@@ -80,22 +80,34 @@ as.ppp <- function(X, W = NULL) {
 				marks=X$marks)
 		return(Z)
 	} else if(is.matrix(X) && is.numeric(X)) {
-		if(is.null(W))
-			stop("x,y coords given but no window specified")
+		if(is.null(W)) {
+                  if(fatal)
+                    stop("x,y coords given but no window specified")
+                  else
+                    return(NULL)
+                }
 		win <- as.owin(W)
 		Z <- ppp(X[,1], X[,2], window = win)
 		return(Z)
 	} else if(checkfields(X, c("x", "y"))) {
-		if(is.null(W))
-			stop("x,y coords given but no window specified")
+		if(is.null(W)) {
+                  if(fatal)
+                    stop("x,y coords given but no window specified")
+                  else
+                    return(NULL)
+                }
 		win <- as.owin(W)
 		if(is.null(X$marks))
                   Z <- ppp(X$x, X$y, window=win)
                 else
                   Z <- ppp(X$x, X$y, window=win, marks=X$marks)
                 return(Z)
-	} else
-		stop("Can't interpret X as a point pattern")
+	} else {
+          if(fatal)
+            stop("Can't interpret X as a point pattern")
+          else
+            return(NULL)
+        }
 }
 
 # --------------------------------------------------------------
@@ -202,7 +214,7 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
 #-------------------------------------------------------------------
 
 "is.marked.ppp" <-
-function(X, na.action="warn") {
+function(X, na.action="warn", ...) {
     verifyclass(X, "ppp")
     if(is.null(X$marks))
       return(FALSE)

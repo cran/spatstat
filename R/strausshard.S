@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 1.6 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.7 $	$Date: 2003/03/12 05:24:28 $
 #
 #    The Strauss/hard core process
 #
@@ -42,6 +42,20 @@ StraussHard <- function(r, hc) {
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
                        printable=round(gamma,4)))
+         },
+         rmhmodel = function(fit, self) {
+           # not implemented if there is a trend 
+           if(!no.trend.ppm(fit))
+             return(NULL)
+           coeffs <- fit$coef
+           beta <- exp(coeffs[["(Intercept)"]])
+           gamma <- exp(coeffs[["Interaction"]])
+           r <- self$par$r
+           hc <- self$par$hc
+           w <- fit$Q$data$window
+           return(list(cif='straush',
+                       par=c(beta=beta,gamma=gamma,r=r,hc=hc),
+                       w=w))
          }
   )
   class(out) <- "interact"

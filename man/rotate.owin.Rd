@@ -5,11 +5,12 @@
   Rotates a window
 }
 \usage{
- rotate.owin(W, angle=pi/2)
+ rotate.owin(X, angle=pi/2, \dots)
 }
 \arguments{
-  \item{W}{A window (object of class \code{"owin"}).}
+  \item{X}{A window (object of class \code{"owin"}).}
   \item{angle}{Angle of rotation.}
+  \item{\dots}{Ignored.}
 }
 \value{
   Another object of class \code{"owin"} representing the

@@ -1,5 +1,5 @@
 #
-#	$Revision: 4.9 $	$Date: 2002/08/05 15:02:53 $
+#	$Revision: 4.10 $	$Date: 2003/03/11 03:24:03 $
 #
 #    mpl()
 #          Fit a point process model to a two-dimensional point pattern
@@ -43,7 +43,7 @@ want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.call <- deparse(sys.call())
-the.version <- "Spatstat 1.2; mpl.S $Date: 2002/08/05 15:02:53 $"
+the.version <- "Spatstat 1.3; mpl.S $Date: 2003/03/11 03:24:03 $"
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)

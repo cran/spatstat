@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.15 $	$Date: 2002/07/18 10:25:07 $
+#	$Revision: 4.16 $	$Date: 2003/03/11 03:06:06 $
 #
 #
 #	A window may be either
@@ -379,7 +379,7 @@ complement.owin <- function(w) {
                  # first check whether one of the current boundary polygons
                  # is the bounding box itself (with + sign)
                  nvert <- unlist(lapply(bdry, function(a) { length(a$x) }))
-                 area <- unlist(lapply(bdry, area.xypolygon, test01=FALSE))
+                 area <- unlist(lapply(bdry, area.xypolygon))
                  boxarea.mineps <- boxarea * (1 - .Machine$single.eps)
                  is.box <- (nvert == 4 & area >= boxarea.mineps)
                  if(sum(is.box) > 1)
