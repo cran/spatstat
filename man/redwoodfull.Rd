@@ -61,7 +61,9 @@
     \code{plot}    \tab Function with no arguments
   }
 }
-\usage{data(redwoodfull)
+\usage{data(redwoodfull)}
+\examples{
+       data(redwoodfull)
        plot(redwoodfull)
        redwoodfull.extra$plot()
        # extract the pattern in region II 

@@ -73,7 +73,7 @@ Kest.fft                K-function using FFT
 Kest                    K-function
 Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
-kmrs                    Kaplan-Meier and Reduced Sample Estimator
+km.rs                   Kaplan-Meier and Reduced Sample Estimator
                         using Histograms
 Kmulti                  Marked K-Function
 ksmooth.ppp             Kernel Smoothed Intensity of Point Pattern

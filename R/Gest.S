@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.5 $	$Date: 2002/05/27 11:26:54 $
+#	$Revision: 4.7 $	$Date: 2003/07/22 19:18:06 $
 #
 ################################################################################
 #
@@ -16,13 +16,27 @@ function(X, r=NULL, breaks=NULL, ...) {
 #	breaks:		(optional) breakpoints for argument r
 #
 	verifyclass(X, "ppp")
+
+#  determine breakpoints for r values
+        breaks <- handle.r.b.args(r, breaks, X$window)
+
+# handle special case of empty pattern
+        if(X$n == 0) {
+          rvalues <- breaks$r
+          nr <- length(rvalues)
+          zero <- rep(0, nr)
+          result <- list(rs     = zero,
+                         km     = zero,
+                         hazard = zero,
+                         r      = rvalues,
+                         raw    = zero,
+                         theo   = zero)
+          return(result)
+        }
         
 #  compute nearest neighbour distances
 	nnd <- nndist(X$x, X$y)
 		
-#  determine breakpoints for r values
-        breaks <- handle.r.b.args(r, breaks, X$window)
-
 #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
         hh <- hist(nnd,breaks=breaks$val,plot=FALSE)$counts
         edf <- cumsum(hh)/sum(hh)

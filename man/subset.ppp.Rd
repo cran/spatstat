@@ -1,6 +1,6 @@
 \name{subset.ppp}
 \alias{subset.ppp}
-\alias{"[.ppp"}
+\alias{[.ppp}
 \title{Extract Subset of Point Pattern}
 \description{
   Extract a subset of a point pattern, either by thinning the 
@@ -10,9 +10,9 @@
   subset.ppp(x, subset, window, drop, \dots)
 }
 \usage{
+  subset.ppp(x, subset, window, drop, \dots)
   subset.ppp(x, subset, window)
   x[subset]
-  x[ , window]
   x[subset,window]
 }
 \arguments{
@@ -26,6 +26,14 @@
   \item{window}{
     window (an object of class \code{"owin"})
     delineating a subset of the original observation window. 
+  }
+  \item{drop}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{"["}.
+  }
+  \item{\dots}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{"["}.
   }
 } 
 \value{

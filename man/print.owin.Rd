@@ -1,5 +1,6 @@
 \name{print.owin}
 \alias{print.owin}
+\alias{print}
 \title{Print Brief Details of a Spatial Window}
 \description{
   Prints a very brief description of a window object.

@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.4 $	$Date: 2003/05/02 11:20:58 $
+#	$Revision: 4.5 $	$Date: 2003/08/01 05:14:06 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -134,6 +134,9 @@ plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
                                      ),
                                 dum))
   } else if(is.factor(data$marks)) {
+    oldpar <- par(ask = interactive() &&
+            (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
+    on.exit(par(oldpar))
     types <- levels(data$marks)
     for(k in types) {
       maink <- paste(main, "\n mark = ", k, sep="")
@@ -143,7 +146,6 @@ plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
   } else {
     plot(data, ..., main=main)
     addplot <- function(x, ..., add=TRUE, main=deparse(substitute(x))) {
-      browser()
       plot(x, ..., main=main, add=add)
     }
     do.call("addplot", append(list(dummy), dum))

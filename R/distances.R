@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.1 $     $Date: 2002/05/27 11:24:43 $
+#      $Revision: 1.2 $     $Date: 2003/07/22 19:12:19 $
 #
 #
 #      Interpoint distances
@@ -70,7 +70,7 @@ function(x, y=NULL, method="C")
   if(n == 0)
     return(numeric(0))
   else if(n == 1)
-    return(NA)
+    return(Inf)
   
   switch(method,
          interpreted={

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.6 $     $Date: 2003/05/01 09:59:36 $
+#       $Revision: 4.8 $     $Date: 2003/07/22 19:13:44 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -112,7 +112,7 @@ tilemiddles <- function (W, nx, ny)
     return(list(x=x,y=y))
 }
 
-spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5) {
+spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault=1) {
 	#
 	# Rolf Turner's "spokes" arrangement
 	#
@@ -124,7 +124,7 @@ spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5) {
 	#       fctr:	 length of largest radius = fctr * M
 	#                where M is mean nearest neighbour distance in data
 	#
-	M <- mean(nndist(x,y))
+	M <- if(length(x) > 1) mean(nndist(x,y)) else Mdefault
 	lrad  <- fctr * M / nper
 	theta <- 2 * pi * (1:nrad)/nrad
 	cs    <- cos(theta)

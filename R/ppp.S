@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.12 $	$Date: 2003/05/02 10:55:09 $
+#	$Revision: 4.14 $	$Date: 2003/07/29 12:53:24 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -56,7 +56,9 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
 	# tries to coerce data X to a point pattern
 	# X may be:
 	#	1. an object of class 'ppp'
-	#	2. a structure with entries x, y, xl, xu, yl, yu
+	#	2a. a structure with entries x, y, xl, xu, yl, yu
+	#	2b. a structure with entries x, y, area where
+        #                    'area' has entries xl, xu, yl, yu
 	#	3. a two-column matrix
 	#	4. a structure with entries x, y
         #       5. a quadrature scheme (object of class 'quad')
@@ -79,6 +81,14 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
 			Z <- ppp(X$x, X$y, xrange, yrange, 
 				marks=X$marks)
 		return(Z)
+        } else if(checkfields(X, c("x", "y", "area"))
+                  && checkfields(X$area, c("xl", "xu", "yl", "yu"))) {
+                win <- as.owin(X$area)
+                if (is.null(X$marks))
+                  Z <- ppp(X$x, X$y, window=win)
+                else
+                  Z <- ppp(X$x, X$y, window=win, marks = X$marks)
+                return(Z)
 	} else if(is.matrix(X) && is.numeric(X)) {
 		if(is.null(W)) {
                   if(fatal)
@@ -287,36 +297,54 @@ print.ppp <- function(x, ...) {
 
 summary.ppp <- function(object, ...) {
   verifyclass(object, "ppp")
-  ism <- is.marked(object)
-  cat(paste(if(ism) "marked " else NULL,
-            "planar point pattern: ",
-            object$n,
-            " points\n",
-            sep=""))
-  a <- area.owin(object$window)
-  cat(paste("average intensity",
-            signif(object$n/a,3), "points per unit area\n"))
-  if(ism) {
+  result <- list()
+  result$is.marked <- is.marked(object)
+  result$n <- object$n
+  result$window <- summary(object$window)
+  result$intensity <- result$n/result$window$area
+  if(result$is.marked) {
     mks <- object$marks
-    if(is.factor(mks)) {
-      cat("Marks:\n")
+    result$is.multitype <- is.factor(mks)
+    result$is.numeric <- is.numeric(mks)
+    result$marktype <- typeof(mks)
+    if(result$is.multitype) {
       tm <- as.vector(table(mks))
       tfp <- data.frame(frequency=tm,
-                        proportion=signif(tm/sum(tm),3),
-                        intensity=signif(tm/a, 3),
+                        proportion=tm/sum(tm),
+                        intensity=tm/result$window$area,
                         row.names=levels(mks))
-      print(tfp)
+      result$marks <- tfp
+    } else 
+      result$marks <- summary(mks)
+  }
+  class(result) <- "summary.ppp"
+  return(result)
+}
+
+print.summary.ppp <- function(x, ..., dp=3) {
+  verifyclass(x, "summary.ppp")
+  cat(paste(if(x$is.marked) "Marked planar " else "Planar ",
+            "point pattern: ",
+            x$n,
+            " points\n",
+            sep=""))
+  cat(paste("Average intensity",
+            signif(x$intensity,dp), "points per unit area\n"))
+  if(x$is.marked)
+    if(x$is.multitype) {
+      cat("Marks:\n")
+      print(signif(x$marks,dp))
     } else {
       cat(paste("marks are ",
-                if(is.numeric(mks)) "numeric, ",
-                "of type \"", typeof(mks),
+                if(x$is.numeric) "numeric, ",
+                "of type \"", x$marktype,
                 "\"\n", sep=""))
       cat("summary:\n")
-      print(summary(mks))
+      print(x$marks)
     }
-  }
-  summary(object$window)
-  return(invisible(NULL))
+  cat("\n")
+  print(x$window)
+  return(invisible(x))
 }
 
 # ---------------------------------------------------------------

@@ -7,6 +7,7 @@
 \alias{bdrylength.xypolygon} 
 \alias{breakpts}
 \alias{breakpts.from.r}
+\alias{cartesian}
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{contour.im}
@@ -70,12 +71,13 @@
 \alias{polynom}
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.summary.owin}
+\alias{print.summary.ppp}
 \alias{quad}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
-\alias{replicate}
 \alias{reverse.xypolygon}    
 \alias{rotxy}
 \alias{runifdisc}
@@ -112,6 +114,7 @@ as.polygonal(W)
 bdrylength.xypolygon(polly)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
+cartesian(pp, markset, fac = TRUE)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 contour.im(x, \dots)
@@ -177,12 +180,13 @@ plot.im(x, \dots)
 polynom(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
+print.summary.owin(x, \dots)
+print.summary.ppp(x, \dots, dp=3)
 quad(data, dummy, w)
 quadscheme.replicated(data, dummy = default.dummy(data), method = "grid", \dots)
 quadscheme.spatial(data, dummy = default.dummy(data), method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
-replicate(pp, markset, fac = TRUE)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)
 runifdisc(n, r = 1, x = 0, y = 0)

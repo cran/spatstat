@@ -34,6 +34,15 @@
   computed using interpreted R code only. If \code{method="C"}
   then C code is used. The C code is faster by two to three orders of magnitude
   and uses much less memory.
+  
+  If there is only one point (if \code{x} has length 1),
+  then a nearest neighbour distance of \code{Inf} is returned.
+  If there are no points (if \code{x} has length zero)
+  a numeric vector of length zero is returned.
+}
+\section{Warnings}{
+  An infinite value is returned if there is only one point
+  in the point pattern.
 }
 \seealso{
   \code{\link{pairdist}},
