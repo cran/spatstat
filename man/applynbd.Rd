@@ -143,8 +143,7 @@
 	theta <- seq(0,2*pi,length=100)
 	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
 	text(u[1]+rad/3,u[2]+rad/2,Y$n-1,cex=3)
-	if(runif(1) < 0.1)
-		system("sleep 1")
+	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
 	return(Y$n - 1)
   }
   applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2)
@@ -160,8 +159,7 @@
 	w <- (u + v)/2
 	nnd <- sqrt(sum((u-v)^2))
 	text(w[1],w[2],round(nnd,3),cex=2)
-	if(runif(1) < 0.1)
-		system("sleep 1")
+	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
 	return(nnd)
   }
 

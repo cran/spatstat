@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.21 $	$Date: 2004/08/26 05:14:23 $
+#	$Revision: 4.22 $	$Date: 2004/09/02 04:18:53 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -35,7 +35,14 @@ ppp <- function(x, y, ..., window, marks ) {
 	n <- length(x)
 	if(length(y) != n)
 		stop("coordinate vectors x and y are not of equal length")
+        # validate x, y coordinates
+        stopifnot(is.numeric(x))
+        stopifnot(is.numeric(y))
+        names(x) <- NULL
+        names(y) <- NULL
+        # initialise ppp object
 	pp <- list(window=window, n=n, x=x, y=y)
+        # add marks if any
 	if(!missing(marks) && !is.null(marks)) {
                 if(is.matrix(marks) || is.data.frame(marks))
                   stop(paste("Attempted to create point pattern with",
@@ -43,6 +50,7 @@ ppp <- function(x, y, ..., window, marks ) {
                              "multidimensional marks are not yet implemented"))
 		if(length(marks) != n)
 			stop("length of marks vector != length of x and y")
+                names(marks) <- NULL
 		pp$marks <- marks
 	}
 	class(pp) <- "ppp"
@@ -227,9 +235,16 @@ function(X, ...) {
 
 "unmark" <-
 function(X) {
-  verifyclass(X, "ppp")
-  X$marks <- NULL
-  X
+  if(inherits(X, "ppp")) {
+    X$marks <- NULL
+    return(X)
+  } else if(inherits(X, "splitppp")) {
+    Y <- lapply(X, unmark)
+    class(Y) <- c("splitppp", class(Y))
+    return(Y)
+  } else
+    stop(paste("X must be a point pattern (class \"ppp\")\n",
+               "or a list of point patterns (class \"splitppp\")"))
 }
 
 "markspace.integral" <-

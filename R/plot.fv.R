@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.6 $    $Date: 2004/01/13 04:45:32 $
+#  $Revision: 1.7 $    $Date: 2004/09/21 20:01:12 $
 #
 #
 
@@ -51,7 +51,11 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL,
   } 
 
   # determine x and y limits and clip data to these limits
-  if(missing(xlim)) {
+  if(!missing(xlim)) {
+    ok <- (xlim[1] <= rhsdata & rhsdata <= xlim[2])
+    rhsdata <- rhsdata[ok]
+    lhsdata <- lhsdata[ok, , drop=FALSE]
+  } else {
     # if we're using the default argument, use its recommended range
     if(rhs == attr(x, "argu")) {
       xlim <- attr(x,"alim")

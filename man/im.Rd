@@ -42,7 +42,7 @@
   next release of this package.
 }
 \examples{
-   whitenoise <- im(matrix(rnorm(10000, 100, 100)))
+   whitenoise <- im(matrix(rnorm(10000), 100, 100))
    image(whitenoise)
 }
 \author{Adrian Baddeley
