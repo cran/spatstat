@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.6 $   $Date: 2002/05/15 22:13:17 $
+#    $Revision: 4.7 $   $Date: 2003/05/02 07:34:33 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -78,7 +78,6 @@
       # retain those which are inside 'win'
       qq <- qq[, win]
       # add them to result
-      browser()
       X <- superimpose(X, qq)
       # if we have enough points, exit
       if(X$n > n) 

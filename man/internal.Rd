@@ -13,6 +13,7 @@
 \alias{countingweights}
 \alias{crossdist}            
 \alias{default.ngrid}
+\alias{default.ntile}
 \alias{discretise}
 \alias{distpl}               
 \alias{distppl}
@@ -36,9 +37,7 @@
 \alias{intY.owin}     
 \alias{intY.xypolygon}     
 \alias{is.data}
-\alias{is.marked}
 \alias{is.marked.default}    
-\alias{is.marked.ppp}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
 \alias{km.rs}
@@ -119,6 +118,7 @@ contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 crossdist(x1, y1, x2, y2)            
 default.ngrid(X)
+default.ntile(X)
 dgpot(tt,par)
 discretise(x, xrange, nx)
 distpl(p, l)               
@@ -150,7 +150,7 @@ is.stationary.ppm(x)
 km.rs(o, cc, d, breaks)
 Kount(d, b, breaks, slow = FALSE)
 Kwtsum(d, b, wi, wj, breaks)
-lookup.im(im, x, y)
+lookup.im(im, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
 markspace.integral(X)
 marks.quad(Q)           

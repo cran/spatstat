@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.4 $     $Date: 2002/05/13 12:41:10 $
+#       $Revision: 4.6 $     $Date: 2003/05/01 09:59:36 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -175,8 +175,9 @@ default.dummy <- function(X, nx=NULL, ny=NULL, random=FALSE) {
 
 
 default.ngrid <- function(X) {
-	# default dimensions of rectangular grid
-        # (for dummy points, tile weights etc)
+	# default dimensions of rectangular grid of dummy points
+        # for data pattern X
   X <- as.ppp(X)
-  min(30, 10 * ceiling(X$n/10))
+  max(30, 10 * ceiling(2 * sqrt(X$n)/10))
 }
+

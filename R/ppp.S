@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.11 $	$Date: 2003/03/12 02:01:23 $
+#	$Revision: 4.12 $	$Date: 2003/05/02 10:55:09 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -318,4 +318,26 @@ summary.ppp <- function(object, ...) {
   summary(object$window)
   return(invisible(NULL))
 }
+
+# ---------------------------------------------------------------
+
+"%mark%" <-
+setmarks <- function(X, m) {
+  verifyclass(X, "ppp")
+  Y <- ppp(X$x,X$y,window=X$window,marks=m)
+  return(Y)
+}
+
+identify.ppp <- function(x, ...) {
+  verifyclass(x, "ppp")
+  if(!is.marked(x) || "labels" %in% names(list(...)))
+    identify(x$x, x$y, ...)
+  else {
+    id <- identify(x$x, x$y, labels=paste(x$marks), ...)
+    mk <- x$marks[id]
+    if(is.factor(x$marks)) mk <- levels(x$marks)[mk]
+    cbind(id=id, marks=mk)
+  }
+}
+
 

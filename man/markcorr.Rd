@@ -50,7 +50,9 @@ markcorr(X, f = function(x,y) { x * y }, r=NULL,
     package.
   }
   \item{\dots}{
-    Arguments passed to the function \code{\link{loess}}.
+    Arguments passed to the density estimation routine
+    (\code{\link{density}}, \code{\link{loess}} or \code{\link{sm.density}})
+    selected by \code{method}.
   }
 }
 \value{
@@ -184,34 +186,45 @@ markcorr(X, f = function(x,y) { x * y }, r=NULL,
  \code{\link{Kmulti}}
 }
 \examples{
-    \dontrun{library(spatstat)}
-    # Longleaf Pine data: real-valued marks represent tree diameter
+    require(spatstat)
+
+    # CONTINUOUS-VALUED MARKS:
+    # (1) Longleaf Pine data
+    # marks represent tree diameter
     data(longleaf)
     # Subset of this large pattern
     swcorner <- owin(c(0,100),c(0,100))
     sub <- longleaf[ , swcorner]
     # mark correlation function
     mc <- markcorr(sub)
-    plot(mc$r, mc$trans,
-         xlab="r", ylab="mcf(r)",
-         type="l", ylim=c(0,2), xlim=c(0,40))
-    abline(1,0,lty=2)
-    # or:
     conspire(mc, cbind(trans,theo) ~ r, xlim=c(0,40),ylim=c(0,2))
 
-    # simulated data with independent marks
+    # (2) simulated data with independent marks
     X <- rpoispp(100)
     X$marks <- runif(X$n)
     Xc <- markcorr(X)
     conspire(Xc, cbind(iso,trans,theo) ~ r, xlim=c(0,0.4),ylim=c(0,2))
     
-    # multitype pattern
-    data(ganglia)
-    gmc <- markcorr(ganglia, function(m1,m2){m1 == m2})
-    conspire(gmc, cbind(iso,trans,theo)~ r, ylim=c(0,2), xlim=c(0,0.4))
-    # shows strong negative association between types at close distances
+    # MULTITYPE DATA:
+    # Hughes' amacrine data
+    # Cells marked as 'on'/'off'
+    data(amacrine)
+    # (3) Kernel density estimate with Epanecnikov kernel
+    # (as proposed by Stoyan & Stoyan)
+    M <- markcorr(amacrine, function(m1,m2) {m1==m2},
+                  correction="translate", method="density",
+                  kernel="epanechnikov")
+    conspire(M, cbind(trans, theo) ~ r, subset="r <= 0.5")
+    # Note: kernel="epanechnikov" comes from help(density)
+
+    # (4) Same again with explicit control over bandwidth
+    M <- markcorr(amacrine, function(m1,m2) {m1==m2},
+                  correction="translate", method="density",
+                  kernel="epanechnikov", bw=0.02)
+    # see help(density) for correct interpretation of 'bw'
 
    \testonly{
+    data(ganglia)
     niets <- markcorr(ganglia, function(m1,m2){m1 == m2}, method="loess")
     niets <- markcorr(X, correction="isotropic", method="smrep")
     }

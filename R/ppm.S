@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 1.19 $	$Date: 2002/08/05 14:18:50 $
+#	$Revision: 1.20 $	$Date: 2003/05/02 11:24:07 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -186,4 +186,56 @@ is.poisson.ppm <- function(x) {
   is.null(x$interaction) || is.null(x$interaction$pot)
 }
 
+is.marked.ppm <- function(X, ...) {
+  verifyclass(X, "ppm")
+  is.marked.ppp(X$Q$data)
+}
+
+quad.ppm <- function(object) {
+  verifyclass(object, "ppm")
+  object$Q
+}
+
+data.ppm <- function(object) { 
+  verifyclass(object, "ppm")
+  object$Q$data
+}
+
+dummy.ppm <- function(object) { 
+  verifyclass(object, "ppm")
+  object$Q$dummy
+}
   
+# method for 'coef'
+coef.ppm <- function(object, ...) {
+  verifyclass(object, "ppm")
+  object$coef
+}
+
+# method for 'fitted'
+fitted.ppm <- function(object, ...) {
+  verifyclass(object, "ppm")
+  
+  uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
+
+  if(uniform) {
+    fitcoef <- coef.ppm(object)
+    lambda <- exp(fitcoef[[1]])
+    Q <- quad.ppm(object)
+    lambda <- rep(lambda, n.quad(Q))
+  } else {
+    lambda <- predict(object$internal$glmfit,
+                 newdata=object$internal$glmdata,
+                 type="response")
+    # Note: the `newdata' argument is necessary in order to obtain predictions
+    # at all quadrature points. If it is omitted then we would only get
+    # predictions at the quadrature points j where glmdata$SUBSET[j]=TRUE.
+  }
+  
+  return(lambda)
+}
+
+# ??? method for 'effects' ???
+
+
+
