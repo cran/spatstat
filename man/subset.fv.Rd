@@ -1,0 +1,70 @@
+\name{subset.fv}
+\alias{subset.fv}
+\alias{[.fv}
+\title{Extract Subset of Function Values}
+\description{
+  Extract a subset of an object of class \code{"fv"}.
+}
+\synopsis{
+  subset.fv(x, i, j, \dots, drop=FALSE)
+}
+\usage{
+  subset.fv(x, i, j, drop=FALSE)
+  x[i, j]
+}
+\arguments{
+  \item{x}{
+    a function value object,
+    of class \code{"fv"} (see \code{\link{fv.object}}).
+    Essentially a data frame.
+  }
+  \item{i}{
+    any appropriate subset index.
+    Selects a subset of the rows of the data frame, i.e.
+    a subset of the domain of the function(s) represented by \code{x}.
+  }
+  \item{j}{
+    any appropriate subset index for the columns of the data frame.
+    Selects some of the functions present in \code{x}.
+  }
+  \item{\dots}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{"["}.
+  }
+  \item{drop}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{"["}.
+  }
+} 
+\value{
+  A function value object (of class \code{"fv"}).
+}
+\details{
+  This is a method for \code{"["} for the class \code{"fv"}.
+  It is very similar to \code{\link{[.data.frame}}
+  except for a few extra checks on the sanity of the result.
+}
+\seealso{
+  \code{\link{fv.object}}
+}
+\examples{
+ require(spatstat)
+
+ data(cells)
+ K <- Kest(cells)
+
+ # discard the estimates of K(r) for r  > 0.1
+ Ksub <- K[K$r <= 0.1, ]
+
+ # discard the border method estimator
+ Ksub <- K[ , names(K) != "border"]
+ 
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}

@@ -6,12 +6,12 @@
   Neyman-Scott cluster process.
 }
 \usage{
- rNeymanScott(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), \dots)
+ rNeymanScott(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), \dots, lmax=NULL)
 }
 \arguments{
   \item{lambda}{
     Intensity of the Poisson process of cluster centres.
-    A single positive number.
+    A single positive number, a function, or a pixel image.
   }
   \item{rmax}{
     Maximum radius of a random cluster.
@@ -27,6 +27,10 @@
   \item{\dots}{
     Arguments passed to \code{rcluster}
   }
+  \item{lmax}{
+    Optional. Upper bound on the values of \code{lambda}
+    when \code{lambda} is a function or pixel image.
+  }
 }
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
@@ -37,9 +41,14 @@
   given by the function \code{rcluster}. 
   The clusters must have a finite maximum possible radius \code{rmax}.
 
-  We algorithm 
-  generates a uniform Poisson point process of ``parent'' points 
-  with intensity \code{lambda}. Then each parent point is
+  First, the algorithm
+  generates a Poisson point process of ``parent'' points 
+  with intensity \code{lambda}. Here \code{lambda} may be a single
+  positive number, a function \code{lambda(x, y)}, or a pixel image
+  object of class \code{"im"} (see \code{\link{im.object}}).
+  See \code{\link{rpoispp}} for details.
+  
+  Second, each parent point is
   replaced by a random cluster of points, created by calling the
   function \code{rcluster}.
 
@@ -55,7 +64,7 @@
 \code{\link{rMatClust}}
 }
 \examples{
-  \dontrun{library(spatstat)}
+  require(spatstat)
   nclust <-  function(x0, y0, radius, n) {
                            return(runifdisc(n, radius, x0, y0))
                          }

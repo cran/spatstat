@@ -25,11 +25,11 @@ subwindow <- owin(poly=list(x=c(0,96,96,40,40,0),y=c(0,0,100,100,50,0)))
 plot(X[,subwindow])
 
 K <- Kest(swedishpines)
-conspire(K, cbind(border,theo)~r, subset="r <= 40")
+plot(K)
 title(main="K function for Swedish Pines")
 
 pc <- pcf(K, spar=1.5)
-conspire(pc, cbind(pcf, 1) ~ r, xlim=c(0,25), ylab="pcf(r)")
+plot(pc)
 title(main="Pair correlation function")
 
 e <- exactdt(swedishpines)
@@ -40,8 +40,7 @@ points(swedishpines)
 image(e$xcol, e$yrow, t(e$d < 4.5), axes=FALSE, xlab="", ylab="")
 points(swedishpines)
 
-plot(allstats(swedishpines),
-     subset=list("r <= 15", "r <= 15", "r <= 9", "r <= 30"))
+plot(allstats(swedishpines))
 
 fit <- mpl(swedishpines, ~1, Strauss(r=7))
 print(fit)
@@ -53,7 +52,7 @@ plot(Xsim, main="Simulation from fitted Strauss model")
 
 data(demopat)
 plot(demopat, cols=c("red", "blue"))
-plot(alltypes(demopat, "K"), subset="r <= 1500")
+plot(alltypes(demopat, "K"))
 
 fit <- mpl(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit)

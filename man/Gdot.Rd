@@ -40,7 +40,9 @@ Gdot(X, i=1, breaks)
   }
 }
 \value{
-  A data frame containing six numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing six numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{G_{i\bullet}(r)}{Gi.(r)} has been  estimated
   }
@@ -203,20 +205,15 @@ Gdot(X, i=1, breaks)
  \code{\link{Gmulti}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(ganglia)
      # cat retina data
     G0. <- Gdot(ganglia, "off") 
-    \dontrun{plot(G0.$r, G0.$km,
-                  xlab="r", ylab="G0.(r)",
-                  type="l", ylim=c(0,1))
-    # Poisson theoretical curve
-    lines(G0.$r, G0.$theo, lty=2)
-    }
+    plot(G0.)
 
     # synthetic example    
     pp <- runifpoispp(50)
-    pp$marks <- factor(sample(0:1, pp$n, replace=TRUE))
+    pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     G <- Gdot(pp, "0") # note: "0" not 0
 }
 \author{Adrian Baddeley

@@ -33,7 +33,7 @@
   Both \code{\link{alltypes}} and \code{\link{allstats}}
   return an object of class \code{"fasp"}.
 
-  There are methods for \code{plot} and \code{"["} in this class.
+  There are methods for \code{plot}, \code{print} and \code{"["} in this class.
   The plot method displays the entire array of functions.
   The method \code{\link{[.fasp}} selects a sub-array using the natural
   indices \code{i,j}. 
@@ -42,10 +42,7 @@
   following components:
   
   \item{fns}{
-    A list, each component \code{fns[[i]]} of which represents a
-    function. The precise format of \code{fns[[i]]} depends on the function
-    which it represents, but it is a list containing several
-    labelled components.
+    A list of data frames, each representing one of the functions.
   }
   \item{which}{
     A matrix representing the spatial arrangement of the
@@ -74,19 +71,22 @@
   \code{\link{[.fasp}}
 }
 \examples{
- \dontrun{
-        # unmarked point pattern
-	data(swedishpines)
-        a <- allstats(swedishpines,dataname="Swedish Pines")
-        plot(a)
-        plot(a, subset=list("r<=15","r<=15","r<=15","r<=50"))
+  require(spatstat)
+  # unmarked point pattern
+  data(swedishpines)
+  a <- allstats(swedishpines,dataname="Swedish Pines")
+  a
+  plot(a)
+  plot(a[1,])
 
-        # multitype point pattern
-        data(lansing)
-        a <- alltypes(lansing, "G")
-        plot(a)
-        plot(a["blackoak", ])
- }
+  # multitype point pattern
+  data(amacrine)
+  a <- alltypes(amacrine, "G")
+  plot(a)
+
+  # select the row corresponding to cells of type "on"
+  b <- a["on", ]
+  plot(b)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

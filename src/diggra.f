@@ -1,3 +1,4 @@
+C Output from Public domain Ratfor, version 1.0
       subroutine diggra(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       double precision kappa
@@ -13,30 +14,28 @@
       r2 = rho**2
       a = log(rho - delta)
       soglum = zero
-      do 23000 j = 1,n 
-      if(.not.(j .eq. ix))goto 23002
+      do23000 j = 1,n 
+      if(j .eq. ix)then
       sincr = zero
-      goto 23003
-23002 continue
-      if(.not.(per))goto 23004
+      else
+      if(per)then
       call dist2(u,v,x(j),y(j),period,t2)
-      goto 23005
-23004 continue
+      else
       t2 = (u-x(j))**2 + (v-y(j))**2
-23005 continue
-      if(.not.(t2 .lt. d2))goto 23006
+      endif
+      if(t2 .lt. d2)then
       cifval = zero
       return
-23006 continue
-      if(.not.(t2 .lt. r2))goto 23008
+      endif
+      if(t2 .lt. r2)then
       sincr = log(sqrt(t2) - delta) - a
-      goto 23009
-23008 continue
+      else
       sincr = zero
-23009 continue
-23003 continue
+      endif
+      endif
       soglum = soglum + sincr
 23000 continue
+23001 continue
       cifval = beta*exp(kappa*soglum)
       return
       end

@@ -43,7 +43,9 @@ Jdot(X, i=1, eps, breaks)
   }
 }
 \value{
-  A data frame containing six numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+  Essentially a data frame containing six numeric columns 
   \item{J}{the recommended
     estimator of \eqn{J_{i\bullet}(r)}{Ji.(r)},
     currently the Kaplan-Meier estimator.
@@ -160,30 +162,22 @@ Jdot(X, i=1, eps, breaks)
  \code{\link{Jmulti}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
      # Lansing woods data: 6 types of trees
     data(lansing)
 
-    \dontrun{
-    Jh. <- Jdot(lansing, "hickory")
-    }
     \testonly{
-    sub <- lansing[seq(1,lansing$n, by=30), ]
-    Jh. <- Jdot(sub, "hickory") 
-    Jhh <- Jest(sub[sub$marks == "hickory", ])
+        lansing <- lansing[seq(1,lansing$n, by=30), ]
     }
+    Jh. <- Jdot(lansing, "hickory")
+    plot(Jh.)
     # diagnostic plot for independence between hickories and other trees
-    \dontrun{
-       Jhh <- Jest(lansing[lansing$marks == "hickory", ])
-       plot(Jh.$r, Jh.$J - Jhh$J,
-                  xlab="r", ylab="Jh.(r)-Jhh(r)",
-                  type="l")
-       abline(h=0, lty=2)
-    }
+    Jhh <- Jest(lansing[lansing$marks == "hickory", ])
+    plot(Jhh, add=TRUE)
 
     # synthetic example with two marks "a" and "b"
     pp <- runifpoispp(50)
-    pp$marks <- sample(c("a","b"), pp$n, replace=TRUE)
+    pp <- pp \%mark\% sample(c("a","b"), pp$n, replace=TRUE)
     J <- Jdot(pp, "a")
 }
 \author{Adrian Baddeley

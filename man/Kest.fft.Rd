@@ -3,7 +3,8 @@
 \title{K-function using FFT}
 \description{
 Estimates the reduced second moment function \eqn{K(r)} 
-from a point pattern in a window of arbitrary shape.
+from a point pattern in a window of arbitrary shape,
+using the Fast Fourier Transform.
 }
 \usage{
   Kest.fft(X, sigma, r=NULL, breaks=NULL)
@@ -29,11 +30,13 @@ from a point pattern in a window of arbitrary shape.
   }
 }
 \value{
-  A data frame containing columns
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing columns
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the function \eqn{K} has been  estimated
   }
-  \item{K}{the estimates of \eqn{K(r)} for these values of \eqn{r}
+  \item{border}{the estimates of \eqn{K(r)} for these values of \eqn{r}
   }
   \item{theo}{the theoretical value \eqn{K(r) = \pi r^2}{K(r) = pi * r^2}
     for a stationary Poisson process
@@ -85,7 +88,7 @@ from a point pattern in a window of arbitrary shape.
   \code{\link{spatstat.options}}
 }
 \examples{
- library(spatstat)
+ require(spatstat)
  pp <- runifpoint(10000)
  \dontrun{
  spatstat.options(npixel=512)
@@ -94,8 +97,7 @@ from a point pattern in a window of arbitrary shape.
   spatstat.options(npixel=256)
  }
  Kpp <- Kest.fft(pp, 0.01)
- plot(K ~ r, Kpp, main="K-function", xlim=c(0,0.2))
- lines(theo ~ r, Kpp, lty=2)
+ plot(Kpp)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -22,21 +22,35 @@
   introduced the pairwise interaction point
   process with pair potential \eqn{h(t)} of the form
   \deqn{
-    h(t) = \left( \frac{t-\delta}{\rho-\delta} \right)^\beta
+    h(t) = \left( \frac{t-\delta}{\rho-\delta} \right)^\kappa
     \quad\quad \mbox{  if  } \delta \le t \le \rho
   }{
-    h(t) = ((t - delta)/(rho - delta))^beta, {    } delta <= t <= rho
+    h(t) = ((t - delta)/(rho - delta))^kappa, {    } delta <= t <= rho
   }
   with \eqn{h(t) = 0} for \eqn{t < \delta}{t < delta}
   and  \eqn{h(t) = 1} for \eqn{t > \rho}{t > rho}.
+  Here \eqn{\delta}{delta}, \eqn{\rho}{rho} and \eqn{\kappa}{kappa}
+  are parameters.
 
-  Here \eqn{\delta \le \rho}{delta <= rho} are irregular parameters.
+  Note that we use the symbol \eqn{\kappa}{kappa}
+  where Diggle and Gratton (1984) and Diggle, Gates and Stibbard (1987)
+  use \eqn{\beta}{beta}, since in \code{spatstat} we reserve the symbol
+  \eqn{\beta}{beta} for an intensity parameter.
+
+  The parameters must all be nonnegative,
+  and must satisfy \eqn{\delta \le \rho}{delta <= rho}.
+
   The potential is inhibitory, i.e.\ this model is only appropriate for
-  regular point patterns.
+  regular point patterns. The strength of inhibition increases with
+  \eqn{\kappa}{kappa}. For \eqn{\kappa=0}{kappa=0} the model is
+  a hard core process with hard core radius \eqn{\delta}{delta}.
+  For \eqn{\kappa=\infty}{kappa=infinity} the model is a hard core
+  process with hard core radius \eqn{\rho}{rho}.
 
-  Note that the irregular parameters 
-  \eqn{\delta, \rho}{delta, rho} must be fixed, while the
-  regular parameter \eqn{\beta}{beta} will be estimated. 
+  The irregular parameters 
+  \eqn{\delta, \rho}{delta, rho} must be given in the call to
+  \code{DiggleGratton}, while the
+  regular parameter \eqn{\kappa}{kappa} will be estimated.
 }
 \seealso{
   \code{\link{mpl}},
@@ -46,9 +60,12 @@
 \examples{
    data(cells)
    mpl(cells, ~1, DiggleGratton(0.05, 0.1))
-   # NOTE: resulting estimate of beta is 8.569, not exp(8.569) = 5267.54
 }
 \references{
+  Diggle, P.J., Gates, D.J. and Stibbard, A. (1987)
+  A nonparametric estimator for pairwise-interaction point processes.
+  \emph{Biometrika} \bold{74}, 763 -- 770.
+
   Diggle, P.J. and Gratton, R.J. (1984)
   Monte Carlo methods of inference for implicit statistical models.
   \emph{Journal of the Royal Statistical Society, series B}

@@ -26,12 +26,40 @@
   }
 } 
 \value{
-  A data frame containing (at least) the variables
+  Either a function value table
+  (object of class \code{"fv"}, see \code{\link{fv.object}})
+  representing a pair correlation function,
+  or a function array (object of class \code{"fasp"},
+  see \code{\link{fasp.object}})
+  representing an array of pair correlation functions.
+
+  If \code{X} is an unmarked point pattern, the return value is
+  a function value table (class \code{"fv"}). It is
+  essentially a data frame containing (at least) the variables
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the pair correlation function \eqn{g(r)} has been  estimated
   }
   \item{pcf}{vector of values of \eqn{g(r)}
   }
+  If code{X} is a function value table (class \code{"fv"}) representing
+  the estimated \eqn{K} function of a point pattern
+  (obtained from \code{\link{Kest}}, \code{\link{Kinhom}}
+  or \code{\link{Kest.fft}}),
+  then the return value is again a function value table,
+  representing the pair correlation function.
+
+  If \code{X} is a multitype point pattern,
+  the return value is a function array (class \code{"fasp"}).
+  This can be thought of as a matrix \code{Y} each of whose entries
+  \code{Y[i,j]} is a function value table (class \code{"fv"})
+  representing the pair correlation function between
+  points of type \code{i} and points of type \code{j}.
+
+  If \code{X} is a function array (class \code{"fasp"})
+  representing an array of estimated \eqn{K} functions
+  (obtained from \code{\link{alltypes}}),
+  the return value is another function array, containing
+  the corresponding pair correlation functions.
 }
 \details{
   The pair correlation function of a stationary point process is
@@ -68,8 +96,10 @@
     should be computed. This should be an object of class \code{"ppp"},
     or in a format recognised by \code{\link{as.ppp}()}.
     \item
-    a data frame containing an estimate of a \eqn{K} function.
-    This data frame should be the value returned by
+    an estimated \eqn{K} function,
+    given as a function value table (object of class \code{"fv"},
+    see \code{\link{fv.object}}).
+    This object should be the value returned by
     \code{\link{Kest}}, \code{\link{Kcross}}, \code{\link{Kmulti}}
     or \code{\link{Kinhom}}.
     \item
@@ -113,7 +143,6 @@
   include the smoothing tradeoff parameter \code{spar}
   and the degrees of freedom \code{df}. See \code{\link{smooth.spline}}
   for details.
-
 }
 \references{
   Stoyan, D, Kendall, W.S. and Mecke, J. (1995)
@@ -136,24 +165,19 @@
   \code{\link{predict.smooth.spline}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
+  require(spatstat)
+  # univariate point pattern
   data(simdat)
-  p <- pcf(simdat)
-  \dontrun{
-    plot(p$r, p$pcf, type="l", xlab="r", ylab="g(r)",
-                  main="pair correlation")
-    abline(h=1, lty=1)
-  }
+  p <- pcf(simdat, spar=0.5, method="b")
+  plot(p, main="pair correlation function for simdat")
+  # indicates inhibition at distances r < 0.3
 
   # multitype point pattern
   data(ganglia)
   p <- pcf(alltypes(ganglia, "K"), spar=0.5, method="b")
-  \dontrun{
-         conspire(p, cbind(pcf,1) ~ r, subset="r <= 0.2",
-             title="Pair correlation functions for ganglia")
-   }
+  plot(p)
+  # short range inhibition between all types
+  # strong inhibition between "on" and "off"
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

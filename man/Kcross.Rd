@@ -49,7 +49,9 @@ Kcross(X, i=1, j=2, breaks)
   }
 }
 \value{
-  A data frame containing numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+  Essentially a data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{ij}(r)}{Kij(r)} has been  estimated
   }
@@ -170,22 +172,17 @@ Kcross(X, i=1, j=2, breaks)
  \code{\link{pcf}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(ganglia)
      # cat retina data
     K01 <- Kcross(ganglia, "off", "on") 
-    \dontrun{plot(K01$r, K01$iso,
-                  xlab="r", ylab="K01(r)",
-                  type="l", ylim=c(0,1))
-    # Poisson theoretical curve
-    lines(K01$r, K01$theo, lty=2)
-    }
+    plot(K01)
 
     K10 <- Kcross(ganglia, "on", "off")
 
     # synthetic example    
     pp <- runifpoispp(50)
-    pp$marks <- factor(sample(0:1, pp$n, replace=TRUE))
+    pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     K <- Kcross(pp, "0", "1") # note: "0" not 0
 }
 \author{Adrian Baddeley

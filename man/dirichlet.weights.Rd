@@ -6,7 +6,7 @@
   using the areas of tiles in the Dirichlet tessellation.
 }
 \usage{
- dirichlet.weights(X, window=NULL, exact=TRUE)
+ dirichlet.weights(X, window=NULL, exact=TRUE, \dots)
 }
 \arguments{
   \item{X}{Data defining a point pattern.}
@@ -14,6 +14,9 @@
   \item{exact}{Logical value. If \code{TRUE}, compute exact areas
     using the package \code{deldir}. If \code{FALSE}, compute
     approximate areas using a pixel raster.
+  }
+  \item{\dots}{
+    Ignored.
   }
 }
 \value{

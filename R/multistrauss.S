@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 1.10 $	$Date: 2003/03/14 07:16:40 $
+#    $Revision: 2.2 $	$Date: 2004/01/27 08:55:58 $
 #
 #    The multitype Strauss process
 #
@@ -131,28 +131,36 @@ MultiStrauss <- function(types, radii) {
                       inames="interaction parameters gamma_ij",
                       printable=round(gammas,4)))
         },
-         rmhmodel = function(fit, self) {
-           # not implemented for nonstationary processes
-           if(!is.stationary.ppm(fit))
-             return(NULL)
-           # interaction radii r[i,j]
-           radii <- self$par$radii
+         valid = function(coeffs, self) {
            # interaction parameters gamma[i,j]
-           coeffs <- fit$coef
            gamma <- (self$interpret)(coeffs, self)$param$gammas
-           if(any(gamma > 1)) {
-             warning("Nonexistent model: some interaction parameters gamma[i,j] exceed 1")
-             return(NULL)
-           }
-           # base intensities beta[i]
-           X <- fit$Q$data
-           lev <- factor(levels(X$marks))
-           beta <- predict(fit, newdata=data.frame(marks=lev), type="trend")
-           # 
-           w <- X$window
-           return(list(cif='straussm',
-                       par=list(beta=beta,gamma=gamma,radii=radii),
-                       w=w))
+           return(all(is.finite(gamma) & gamma <= 1))
+         },
+         project  = function(coeffs, self) {
+           # interaction parameters gamma[i,j]
+           gamma <- (self$interpret)(coeffs, self)$param$gammas
+           # remove NA's
+           gamma[is.na(gamma)] <- 1
+           # constrain them
+           gamma <- matrix(pmin(gamma, 1),
+                           nrow=nrow(gamma), ncol=ncol(gamma))
+           # now put them back ... :-(
+           # get possible types
+           typ <- self$par$types
+           ntypes <- length(typ)
+           # get matrix of Strauss interaction radii
+           r <- self$par$radii
+           # list all unordered pairs of types
+           uptri <- (row(r) <= col(r)) & (!is.na(r))
+           mark1 <- (typ[row(r)])[uptri]
+           mark2 <- (typ[col(r)])[uptri]
+           # names of coefficients
+           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
+           thetaname <- paste("mark", basename, sep="")
+           npairs <- length(basename)
+           # reassign 
+           coeffs[thetaname] <- log(gamma[uptri])
+           return(coeffs)
          }
   )
   class(out) <- "interact"

@@ -5,8 +5,11 @@
   Generates a default pattern of dummy points
   for use in a quadrature scheme.
 }
+\synopsis{
+ default.dummy(X, nd, random=FALSE, ntile=NULL, \dots, verbose=FALSE)
+}
 \usage{
- default.dummy(X, nx, ny, random=FALSE)
+ default.dummy(X, nd, random=FALSE, \dots, verbose=FALSE)
 }
 \arguments{
   \item{X}{
@@ -14,13 +17,21 @@
     An object of class \code{"ppp"}
     or in a format recognised by \code{\link{as.ppp}()}
   }
-  \item{nx, ny}{
-    Integers specifying an \code{nx} by \code{ny}
+  \item{nd}{
+    Integer, or integer vector of length 2, specifying an
+    \code{nd * nd} or \code{nd[1] * nd[2]}
     rectangular array of dummy points. 
   }
   \item{random}{
     Logical value. If \code{TRUE}, the dummy points are
     randomised.
+  }
+  \item{\dots}{
+    Ignored.
+  }
+  \item{verbose}{
+    If \code{TRUE}, information about the construction of the
+    quadrature scheme is printed.
   }
 } 
 \value{
@@ -39,24 +50,23 @@
 
   If \code{random} is false (the default),
   then the function creates dummy points
-  in an \code{nx} by \code{ny} rectangular grid.
+  in an \code{nd[1]} by \code{nd[1]} rectangular grid.
   If \code{random} is true, then the frame of the window is divided into
-  an  \code{nx} by \code{ny} array of tiles, and one dummy point
+  an  \code{nd[1]} by \code{nd[1]} array of tiles, and one dummy point
   is generated at random inside each tile.
   In either case, the four corner points of the frame of the window
   are added. Then if the window is not rectangular, any dummy points
   lying outside it are deleted. 
   
-  If \code{nx} is missing, a default value (depending on the
+  If \code{nd} is missing, 
+  a default value (depending on the
   data pattern \code{X}) is computed by \code{default.ngrid}.
-  If \code{ny} is missing, it defaults to \code{nx}.
-  
+
   Alternative functions for creating dummy patterns
   include \code{\link{corners}},
   \code{\link{gridcentres}},
   \code{\link{stratrand}} and
   \code{\link{spokes}}.
- 
 }
 \seealso{
   \code{\link{quad.object}},

@@ -1,14 +1,14 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.13 $    $Date: 2003/07/22 18:22:56 $
+#    $Revision: 1.15 $    $Date: 2004/01/08 16:21:04 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by mpl().
 #        
 #
 #
-plot.ppm <- function(x, nx = 40, ny = 40, 
+plot.ppm <- function(x, ngrid = c(40,40),
 		     superimpose = TRUE,
                      trend = TRUE, cif = TRUE, pause = TRUE,
                      how=c("persp","image", "contour"),  ...)
@@ -22,19 +22,22 @@ plot.ppm <- function(x, nx = 40, ny = 40,
 #
 #       find out what kind of model it is
 #
-        stationary <- is.stationary.ppm(model)
-        poisson <- is.poisson.ppm(model)
-        markeddata <- is.marked(model$Q$data)
-        funnywindow <- (model$Q$data$window$type != "rectangle")
+        mod <- summary(model)
+        stationary <- mod$stationary
+        poisson    <- mod$poisson
+        marked     <- mod$marked
+        multitype  <- mod$multitype
+        funnywindow <- (mod$entries$data$window$type != "rectangle")
 
-        data <- model$Q$data
+        data <- mod$entries$data
         
-        if(markeddata) {
-          mrks <- data$marks
-          if(!is.factor(mrks))
-            stop("Marks are not a factor -- I don't know how to plot this")
-          mrkvals <- levels(mrks)
+        if(marked) {
+          if(!multitype)
+            stop("Not implemented for general marked point processes")
+          else
+            mrkvals <- levels(data$marks)
         }
+        
 #
 # Interpret options
 #
@@ -81,56 +84,38 @@ plot.ppm <- function(x, nx = 40, ny = 40,
 	types <- c("trend","cif")[c(trend,cif)]
 	for(ttt in types) {
           # compute the predictions
-          xyz <-  predict.ppm(model, nx = nx, ny = ny, type=ttt)
-          # 
-          if(funnywindow) {
-            # determine which prediction points are inside the window
-            xy <- expand.grid(x=xyz$x, y=xyz$y)
-            inside <- inside.owin(xy$x, xy$y, model$Q$data$window)
-          }
-          if(!markeddata) {
+          pred <-  predict.ppm(model, ngrid=ngrid, type=ttt)
+          if(!marked) {
             # can use xyz directly
-            #
-            # first set predictions outside window to NA
-            if(funnywindow)
-              xyz$z[!inside] <- NA
-            #
             for(style in how) {
               switch(style, 
                 persp = {
-                  arg1 <- list(xyz)
+                  arg1 <- list(pred, xlab="x")
                   arg2 <- spatstat.options("par.persp")[[1]]
                   arg3 <- list(...)
                   argue <- append(arg1, append(arg2, arg3))
                   do.call("persp", argue)
                 },
                 image = {
-                  plot(data$window, main="")
-                  image(xyz, add=TRUE, ...)
+                  image(pred, ...)
                   if(superimpose) plot(data, add=TRUE)
                 },
                 contour = {
-                  plot(data$window, main="")
-                  contour(xyz, add=TRUE, ...)
+                  contour(pred, ...)
                   if(superimpose) plot(data, add=TRUE)
                 },
                 {stop(paste("Unrecognised plot style", style))}
               )
             }
           } else {
-            # marked points - slice the prediction at each level
-            slice <- xyz
-            for(level in mrkvals) {
-              slice$z <- xyz$z[,,level]
-              # set predictions outside window to NA
-              if(funnywindow)
-                slice$z[!inside] <- NA
-              #
+            # multitype process - list of images
+            for(i in seq(mrkvals)) {
+              level <- mrkvals[i]
               main <- paste("mark =",level)
               for(style in how) {
                 switch(style, 
                   persp = {
-                    arg1 <- list(slice, xlab="x")
+                    arg1 <- list(pred[[i]], xlab="x")
                     arg2 <- spatstat.options("par.persp")[[1]]
                     arg3 <- list(...)
                     argue <- append(arg1, append(arg2, arg3))
@@ -138,13 +123,11 @@ plot.ppm <- function(x, nx = 40, ny = 40,
                     title(main=main)
                   },
                   image = {
-                    plot(data$window, main=main)
-                    image(slice, add=TRUE, ...)
+                    image(pred[[i]], ...)
                     if(superimpose) plot(data[data$marks == level], add=TRUE)
                   },
                   contour = {
-                    plot(data$window, main=main)
-                    contour(slice, add=TRUE, ...)
+                    contour(pred[[i]], ...)
                     if(superimpose) plot(data[data$marks == level], add=TRUE)
                   },
                   {

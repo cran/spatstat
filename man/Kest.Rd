@@ -38,7 +38,10 @@ from a point pattern in a window of arbitrary shape.
     }
 }
 \value{
-  A data frame containing columns
+  An object of class \code{"fv"}, see \code{\link{fv.object}},
+  which can be plotted directly using \code{\link{plot.fv}}.
+
+  Essentially a data frame containing columns
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the function \eqn{K} has been  estimated
   }
@@ -178,25 +181,16 @@ Baddeley, A.J. Spatial sampling and censoring.
   \code{\link{Kmulti}}
 }
 \examples{
- library(spatstat)
+ require(spatstat)
  pp <- runifpoint(50)
- Kpp <- Kest(pp)
- \dontrun{
- plot(Kpp$r, Kpp$border, type="l", xlab="r", ylab="K(r)", ylim=c(0,1),
-       main = "K-function")
- r <- Kpp$r
- lines(r, Kpp$theo, lty=2)
- legend(0.5, 2, c("empirical (border correction)", "Poisson process"), lty=c(1,2))
- }
+ K <- Kest(pp)
  data(cells)
  K <- Kest(cells, correction="isotropic")
- \dontrun{
- plot(K$r, K$iso, type="l")
- plot(iso ~ r, type="l", data=K)
- # restrict the plot to values of r less than 0.1
- plot(iso ~ r, type="l", data=K[K$r <= 0.1, ])
- plot(iso ~ r, type="l", data=K, subset=(r <= 0.1))
- }
+ plot(K)
+ plot(K, main="K function for cells")
+ # plot the L function
+ plot(K, sqrt(iso/pi) ~ r)
+ plot(K, cbind(r, sqrt(iso/pi)) ~ r, ylab="L(r)", main="L function for cells")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

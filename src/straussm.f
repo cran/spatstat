@@ -1,5 +1,6 @@
-      subroutine straussm(u,v,mrk,ix,x,y,marks,n,nmarks,par,period,
-&     cifval)
+C Output from Public domain Ratfor, version 1.0
+      subroutine straussm(u,v,mrk,ix,x,y,marks,n,ntypes,par,period,cifva
+     *l)
       implicit double precision(a-h,o-z)
       dimension x(n), y(n), marks(n), par(1), period(2)
       dimension gmma(100), rad(100), k(100)
@@ -7,61 +8,65 @@
       eps = 2.22d-16
       per = period(1) .gt. 0.d0
       beta = par(mrk)
-      ind = nmarks
-      do 23000 i = 1,mrk 
-      do 23002 j = i,nmarks 
+      ind = ntypes
+      do23000 i = 1,mrk 
+      do23002 j = i,ntypes 
       ind = ind+1
-      if(.not.(i.le.mrk .and. j.eq.mrk))goto 23004
+      if(i.le.mrk .and. j.eq.mrk)then
       gmma(i) = par(ind)
-23004 continue
-      if(.not.(i.eq.mrk .and. j.gt.mrk))goto 23006
+      endif
+      if(i.eq.mrk .and. j.gt.mrk)then
       gmma(j) = par(ind)
-23006 continue
+      endif
 23002 continue
+23003 continue
 23000 continue
-      ind = nmarks + nmarks*(nmarks+1)/2
-      do 23008 i = 1,mrk 
-      do 23010 j = i,nmarks 
+23001 continue
+      ind = ntypes + ntypes*(ntypes+1)/2
+      do23008 i = 1,mrk 
+      do23010 j = i,ntypes 
       ind = ind+1
-      if(.not.(i.le.mrk .and. j.eq.mrk))goto 23012
+      if(i.le.mrk .and. j.eq.mrk)then
       rad(i) = par(ind)**2
-23012 continue
-      if(.not.(i.eq.mrk .and. j.gt.mrk))goto 23014
+      endif
+      if(i.eq.mrk .and. j.gt.mrk)then
       rad(j) = par(ind)**2
-23014 continue
+      endif
 23010 continue
+23011 continue
 23008 continue
-      do 23016 i = 1,nmarks 
+23009 continue
+      do23016 i = 1,ntypes 
       k(i) = 0
 23016 continue
-      do 23018 j = 1,n 
-      if(.not.(j .eq. ix))goto 23020
+23017 continue
+      do23018 j = 1,n 
+      if(j .eq. ix)then
       continue
-      goto 23021
-23020 continue
-      if(.not.(per))goto 23022
+      else
+      if(per)then
       call dist2(u,v,x(j),y(j),period,d2)
-      goto 23023
-23022 continue
+      else
       d2 = (u-x(j))**2 + (v-y(j))**2
-23023 continue
-      if(.not.(d2 .le. rad(marks(j))))goto 23024
+      endif
+      if(d2 .le. rad(marks(j)))then
       k(marks(j)) = k(marks(j))+1
-23024 continue
-23021 continue
+      endif
+      endif
 23018 continue
+23019 continue
       cifval = zero
-      do 23026 i=1,nmarks 
-      if(.not.(gmma(i) .lt. eps))goto 23028
-      if(.not.(k(i).gt.0))goto 23030
+      do23026 i=1,ntypes 
+      if(gmma(i) .lt. eps)then
+      if(k(i).gt.0)then
       cifval = 0.d0
       return
-23030 continue
-      goto 23029
-23028 continue
+      endif
+      else
       cifval = cifval + log(gmma(i))*dble(k(i))
-23029 continue
+      endif
 23026 continue
+23027 continue
       cifval = beta*exp(cifval)
       return
       end

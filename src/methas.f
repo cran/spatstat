@@ -1,143 +1,141 @@
-      subroutine methas(nmbr,rw,par,period,tpar,ntypes,ptypes,iseed,
-&     nrep,mrep, p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
+C Output from Public domain Ratfor, version 1.0
+      subroutine methas(nmbr,aw,par,period,xprop,yprop,mprop,ntypes,ptyp
+     *es,iseed, nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
       implicit double precision(a-h,o-z)
-      dimension par(1), tpar(1), ptypes(1), rw(4), iseed(3)
+      dimension par(1), ptypes(1), iseed(3)
       dimension x(1), y(1), marks(1), period(2)
+      dimension xprop(1), yprop(1), mprop(1)
       integer aux(1)
       logical verb, marked, fixall
       eps = 2.22d-16
       one = 1.d0
       zero = 0.d0
       m1 = -1
-      aw = (rw(2)-rw(1))*(rw(4)-rw(3))
       verb = .not.(nverb.eq.0)
       marked = ntypes .gt. 1
       irep = mrep
-23000 if(.not.(irep .le. nrep))goto 23001
-      if(.not.(verb .and. mod(irep,nverb).eq.0))goto 23002
+23000 if(irep .le. nrep)then
+      if(verb .and. mod(irep,nverb).eq.0)then
       iprt = irep/nverb
       call intpr('irep/nverb=',-1,iprt,1)
-23002 continue
+      endif
       itype = 0
       call aru(1,zero,one,iseed,urp)
-      if(.not.(urp.gt.p))goto 23004
+      if(urp.gt.p)then
       call aru(1,zero,one,iseed,urq)
-      if(.not.(urq.gt.q))goto 23006
-      call aru(1,rw(1),rw(2),iseed,u)
-      call aru(1,rw(3),rw(4),iseed,v)
-      if(.not.(marked))goto 23008
-      call rmark(1,ntypes,ptypes,iseed,mrk)
-      goto 23009
-23008 continue
+      if(urq.gt.q)then
+      u = xprop(irep)
+      v = yprop(irep)
+      if(marked)then
+      mrk = mprop(irep)
+      else
       mrk = -1
-23009 continue
-      call cif(nmbr,u,v,mrk,m1,x,y,marks,npts,ntypes, par,period,tpar,
-&     cifval,aux)
-      if(.not.(marked))goto 23010
+      endif
+      call cif(nmbr,u,v,mrk,m1,x,y,marks,npts,ntypes, par,period,cifval,
+     *aux)
+      if(marked)then
       ffm = ptypes(mrk)
-      goto 23011
-23010 continue
+      else
       ffm = one
-23011 continue
+      endif
       a1 = q*aw*cifval/(ffm*(1-q)*(npts+1))
       a = min(one,a1)
       call aru(1,zero,one,iseed,bp)
-      if(.not.(bp.lt.a))goto 23012
+      if(bp.lt.a)then
       npts = npts + 1
-      if(.not.(npts .gt. npmax))goto 23014
+      if(npts .gt. npmax)then
       mrep = irep
       return
-23014 continue
+      endif
       itype = 1
-23012 continue
-      goto 23007
-23006 continue
+      endif
+      else
       call aru(1,zero,one,iseed,xi)
       ix = 1 + int(npts*xi)
-      if(.not.(marked))goto 23016
+      if(marked)then
       mrki = marks(ix)
       ffm = ptypes(mrki)
-      goto 23017
-23016 continue
+      else
       mrki = -1
       ffm = one
-23017 continue
-      call cif(nmbr,x(ix),y(ix),mrki,ix,x,y, marks,npts,ntypes,par,
-&     period,tpar,cifval,aux)
+      endif
+      call cif(nmbr,x(ix),y(ix),mrki,ix,x,y, marks,npts,ntypes,par,perio
+     *d,cifval,aux)
       a1 = (one-q)*npts*ffm/(q*aw*cifval)
       a = min(one,a1)
       call aru(1,zero,one,iseed,dp)
-      if(.not.(dp.lt.a))goto 23018
+      if(dp.lt.a)then
       itype = 2
-23018 continue
-23007 continue
-      goto 23005
-23004 continue
+      endif
+      endif
+      else
       call aru(1,zero,one,iseed,xi)
       ix = 1 + int(npts*xi)
-      call aru(1,rw(1),rw(2),iseed,u)
-      call aru(1,rw(3),rw(4),iseed,v)
-      if(.not.(marked))goto 23020
+      u = xprop(irep)
+      v = yprop(irep)
+      if(marked)then
       mrki = marks(ix)
-      if(.not.(fixall))goto 23022
+      if(fixall)then
       mrk = mrki
-      goto 23023
-23022 continue
-      call rmark(1,ntypes,ptypes,iseed,mrk)
-23023 continue
+      else
+      mrk = mprop(irep)
+      endif
       ffm = ptypes(mrki)/ptypes(mrk)
-      goto 23021
-23020 continue
+      else
       mrki = -1
+      mrk = -1
       ffm = one
-23021 continue
-      call cif(nmbr,x(ix),y(ix),mrki,ix,x,y,marks,npts, ntypes,par,
-&     period,tpar,cvd,aux)
-      call cif(nmbr,u,v,mrk,ix,x,y,marks,npts, ntypes,par,period,tpar,
-&     cvn,aux)
-      if(.not.(cvd .lt. eps))goto 23024
-      if(.not.(cvn .lt. eps))goto 23026
+      endif
+      call cif(nmbr,x(ix),y(ix),mrki,ix,x,y,marks,npts, ntypes,par,perio
+     *d,cvd,aux)
+      call cif(nmbr,u,v,mrk,ix,x,y,marks,npts, ntypes,par,period,cvn,aux
+     *)
+      if(cvd .lt. eps)then
+      if(cvn .lt. eps)then
       goto 23000
-23026 continue
+      else
       a = one
-23027 continue
-      goto 23025
-23024 continue
+      endif
+      else
       a1 = ffm*cvn/cvd
       a = min(one,a1)
-23025 continue
+      endif
       call aru(1,zero,one,iseed,sp)
-      if(.not.(sp.lt.a))goto 23028
+      if(sp.lt.a)then
       itype = 3
-23028 continue
-23005 continue
-      if(.not.(itype .gt. 0))goto 23030
-      if(.not.(nmbr .eq. 8))goto 23032
+      endif
+      endif
+c      call intpr('itype=', -1, itype, 1)
+      if(itype .gt. 0)then
+      if(nmbr .eq. 8)then
       call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
-23032 continue
-      if(.not.(itype.eq.1))goto 23034
+      endif
+      if(itype.eq.1)then
+c      call intpr('birth, npts :=', -1, npts, 1)
       ix = npts
       x(ix) = u
       y(ix) = v
-      if(.not.(marked))goto 23036
+      if(marked)then
       marks(ix) = mrk
-23036 continue
-      goto 23035
-23034 continue
-      if(.not.(itype.eq.2))goto 23038
+      endif
+      else
+      if(itype.eq.2)then
       call death(x,y,marks,marked,npts,ix)
-      goto 23039
-23038 continue
+c      call intpr('death, npts :=', -1, npts, 1)
+      else
+c      call intpr('shift, npts ==', -1, npts, 1)
       x(ix) = u
       y(ix) = v
-      if(.not.(marked))goto 23040
+      if(marked)then
       marks(ix) = mrk
-23040 continue
-23039 continue
-23035 continue
-23030 continue
+      endif
+      endif
+      endif
+      endif
       irep = irep+1
+      dildo = 42.d0
       goto 23000
+      endif
 23001 continue
       return
       end

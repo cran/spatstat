@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.6 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 4.7 $	$Date: 2004/01/09 13:48:47 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -61,8 +61,21 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
 
 # neaten up and return        
         result$breaks <- NULL
-        
-	return(data.frame(result))
+
+# convert to class "fv"
+        result <- as.data.frame(result)
+        Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
+        alim <- range(result$r[result$km <= 0.9])
+        labl <- c("r", "Fpois(r)", "Fbord(r)", "Fkm(r)",
+                  "lambda(r)", "Fraw(r)")
+        desc <- c("distance argument r",
+                  "theoretical Poisson F(r)",
+                  "border corrected estimate of F(r)",
+                  "Kaplan-Meier estimate of F(r)",
+                  "Kaplan-Meier estimate of hazard function lambda(r)",
+                  "uncorrected estimate of F(r)")
+        Z <- fv(Z, "r", "F(r)", "km", cbind(km, theo) ~ r, alim, labl, desc)
+	return(Z)
 }
 
 	

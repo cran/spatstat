@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.2 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 5.4 $	$Date: 2004/01/13 05:57:54 $
 #
 #
 # -------- functions ----------------------------------------
@@ -139,10 +139,15 @@ function(X, I, J, r=NULL, breaks=NULL,
 	lambdaI <- nI/area
 	lambdaJ <- nJ/area
 
-# This will be the output data frame
-# It will be given more columns later        
-        K <- data.frame(r=r, theo= pi * r^2)
+        # recommended range of r values
+        alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
         
+        # this will be the output data frame
+        # It will be given more columns later
+        K <- data.frame(r=r, theo= pi * r^2)
+        desc <- c("distance argument r", "theoretical Poisson K(r)")
+        K <- fv(K, "r", "K(r)", "theo", , alim, c("r","Kpois(r)"), desc)
+
 # interpoint distances		
 	d <- crossdist(x[I], y[I], x[J], y[J])
 # distances to boundary	
@@ -171,11 +176,18 @@ function(X, I, J, r=NULL, breaks=NULL,
           d[identical] <- Inf
           # apply reduced sample algorithm
           RS <- Kount(d, b, breaks, slow=FALSE)
-          if(any(correction == "border"))
-            K$border <- RS$numerator/(lambdaJ * RS$denom.count)
           if(any(correction == "bord.modif")) {
             denom.area <- eroded.areas(W, r)
-            K$bord.modif <- RS$numerator/(denom.area * nI * nJ)
+            Kbm <- RS$numerator/(denom.area * nI * nJ)
+            K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
+                         "modified border-corrected estimate of K(r)",
+                         "bord.modif")
+          }
+          if(any(correction == "border")) {
+            Kb <- RS$numerator/(lambdaJ * RS$denom.count)
+            K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
+                         "border-corrected estimate of K(r)",
+                         "border")
           }
           # reset identical pairs to original values
           d[identical] <- 0
@@ -184,18 +196,33 @@ function(X, I, J, r=NULL, breaks=NULL,
           # translation correction
             edgewt <- edge.Trans(X[I], X[J])
             wh <- whist(d[!identical], breaks$val, edgewt[!identical])
-            K$trans <- cumsum(wh)/(lambdaI * lambdaJ * area)
+            Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
             rmax <- diameter(W)/2
-            K$trans[r >= rmax] <- NA
+            Ktrans[r >= rmax] <- NA
+            K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
+                         "translation-corrected estimate of K(r)",
+                         "trans")
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
             edgewt <- edge.Ripley(X[I], d)
             wh <- whist(d[!identical], breaks$val, edgewt[!identical])
-            K$iso <- cumsum(wh)/(lambdaI * lambdaJ * area)
+            Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
             rmax <- diameter(W)/2
-            K$iso[r >= rmax] <- NA
+            Kiso[r >= rmax] <- NA
+            K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
+                         "Ripley isotropic correction estimate of K(r)",
+                         "iso")
         }
+        # which corrections have been computed?
+        nama2 <- names(K)
+        corrxns <- nama2[nama2 != "r"]
+
+        # default is to display them all
+        attr(K, "fmla") <- as.formula(paste(
+                       "cbind(",
+                        paste(corrxns, collapse=","),
+                        ") ~ r"))
 
         return(K)
           

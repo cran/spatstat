@@ -28,6 +28,10 @@
   For details of its use, see 
   \code{\link{rmh.ppm}} or \code{\link{rmh.default}}.
 
+  [If the model is a Poisson process, then Metropolis-Hastings
+  is not used; the Poisson model is generated directly
+  using \code{\link{rpoispp}} or \code{\link{rmpoispp}}.]
+
   In brief, the Metropolis-Hastings algorithm is a Markov Chain,
   whose states are spatial point patterns, and whose limiting
   distribution is the desired point process. After

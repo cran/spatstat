@@ -47,7 +47,9 @@ Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate
   }
 }
 \value{
-  A data frame containing numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{IJ}(r)}{KIJ(r)} has been  estimated
   }
@@ -176,23 +178,14 @@ Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate
  \code{\link{pcf}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
-    \dontrun{
-    K <- Kmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
-    }
     \testonly{
-    sub <- longleaf[seq(1,longleaf$n, by=50), ]
-    K <- Kmulti(sub, sub$marks <= 15, sub$marks >= 25)
-    }    
-    \dontrun{plot(K$r, K$trans,
-                  xlab="r", ylab="Kmulti(r)",
-                  type="l", ylim=c(0,1))}
-
-    # Poisson theoretical curve
-    \dontrun{lines(K$r, K$theo, lty=2)}
-
+        longleaf <- longleaf[seq(1,longleaf$n, by=50), ]
+    }
+    K <- Kmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
+    plot(K)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -1,7 +1,7 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.7 $   $Date: 2002/08/05 14:32:37 $
+#   $Revision: 1.8 $   $Date: 2004/01/13 08:38:41 $
 #
 plot.fasp <- function(x,formula=NULL,subset=NULL,lty=NULL,
                       col=NULL,title=NULL,...) {
@@ -57,10 +57,10 @@ if(ns > 1) {
 			if(is.na(k)) plot(0,0,type='n',xlim=c(0,1),
 					  ylim=c(0,1),axes=FALSE,xlab='',ylab='', ...)
 			else {
-				dat.loc <- x$fns[[k]]
-				sij <- if(msub) subset[[k]] else subset
-				fij <- if(mfor) formula[[k]] else formula[[1]]
-				conspire(dat.loc,fij,sij,lty,col, ...)
+				fun <- as.fv(x$fns[[k]])
+				fmla <- if(mfor) formula[[k]] else formula[[1]]
+				sub <- if(msub) subset[[k]] else subset
+				plot(fun, fmla, sub, lty,col, ...)
 
 # Add the (sub)title of each plot.
 				if(!is.null(x$titles[[k]]))

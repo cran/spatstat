@@ -1,30 +1,19 @@
-rmh.default <- function(model,start,control, ...) {
+rmh.default <- function(model,start,control=NULL, verbose=TRUE, ...) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
 # patterns, given the conditional intensity function of the 
 # underlying process, via the Metropolis-Hastings algorithm.
 #
-# model: cif par w tpar
-# start: n.start x.start iseed
-# control: ptypes fixall expand periodic nrep p q iseed nverb
+# model:   cif par w trend types
+# start:   n.start x.start iseed
+# control: p q nrep expand periodic ptypes fixall nverb
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
 # Name lists --- these will need to be modified when new
 # conditional intensity functions are added to the repertoire.
 cif.list <- c('strauss','straush','sftcr','straussm','straushm',
                'dgs','diggra','geyer')
 mt.list <- c("straussm","straushm")
-
-# Make sure that the arguments are adequately specified.
-if(is.null(control)) {
-	control <- list(
-			fixall=FALSE,
-			periodic=FALSE,
-			nrep=1e6,
-			p=0.9,
-			q=0.5,
-			nverb=0
-		   )
-}
 
 # Check that cif is available:
 cif <- model$cif
@@ -35,195 +24,270 @@ if(!is.loaded(symbol.For(cif)))
 nmbr <- match(cif,cif.list)
 if(is.na(nmbr)) stop("Name of cif not in cif list.\n")
 
-# Check that precisely one method of specifying the starting
-# configuration is provided.
-n.start <- start$n.start
-x.start <- start$x.start
-start.count <- sum(c(is.null(n.start),is.null(x.start)))
-if(start.count != 1)
-	stop("Specify precisely one of n.start or x.start.\n")
-
-# Check that a window in which to simulate is provided.
-w <- model$w
-w.count <- 2 - sum(c(is.null(w),is.null(x.start)))
-if(w.count == 0)
-	stop("No window specified in which to simulate.\n")
-
-# If x.start is given, coerce it into a point pattern.
-if(!is.null(x.start)) {
-	if(is.null(x.start$window) & !is.null(w))
-		x.start <- as.ppp(x.start,w)
-	else x.start <- as.ppp(x.start)
-}
-
-# Save the window to which the simulated process will be
-# clipped at the finish.
-w.save <- if(is.null(w)) x.start$window else as.owin(w)
-
-# Determine if the window is rectangular
-wtype   <- if(is.null(x.start)) as.owin(w)$type else x.start$window$type
-rectwin <- wtype == "rectangle"
-
-# What sort of conditioning are we doing?
-# cond = 1 <--> no conditioning
-# cond = 2 <--> conditioning on n = number of points
-# cond = 3 <--> conditioning on the number of points of each type.
-p      <- if(is.null(control$p)) 0.9 else control$p
-fixall <- if(is.null(control$fixall)) FALSE else control$fixall
-cond <- 2 - (p<1) + fixall - fixall*(p<1)
-
-# Determine the number of types:
-ntypes <- if(!is.na(match(model$cif,mt.list))) length(model$par$beta) else 1
-
-# Set the value of periodic.
-periodic <- if(is.null(control$periodic)) FALSE else control$periodic
-
-# Set the value of expand.
-expand <- control$expand
-if(is.null(expand)) expand <- if(cond > 1 | periodic) 1 else 2
-
-# Now check that arguments make sense for the sort of conditioning
-# that we are doing.
-# If cond > 1, then
-#	o expand must equal 1 (this includes w == x.start$window)
-#	o the window must be rectangular
-# If cond = 3, then
-#	o length(n.start) must equal ntypes
-bwinge <- "When conditioning on the number of points,"
-if(cond > 1) {
-	if(!is.null(expand) && expand > 1)
-		stop(paste(bwinge,"expand must be 1.\n"))
-	if(w.count == 2 && !identical(all.equal(as.owin(w),x.start$window),TRUE))
-		stop(paste(bwinge,"w must be the same as x.start$window.\n"))
-	if(!rectwin)
-		stop(paste(bwinge,"window must be rectangular.\n"))
-}
-
 # Set the 3-vector of integer seeds needed by the subroutine arand:
 iseed <- if(is.null(start$iseed)) sample(1:1000000,3) else start$iseed
 iseed.save <- iseed
 
-# If n.start is specified, check that other arguments make
-# sense, and construct the starting configuration.
-if(!is.null(n.start)) {
+# The R in-house random number/sampling system gets used below.
+# Therefore we set an argument for set.seed() --- from iseed --- so
+# that if iseed was supplied, then it determines all the randomness,
+# including ``proposal points'' and possibly the starting state.
+# Thus supplying the same ``iseed'' in a repeat simulation will
+# give ***exactly*** the same result.)
 
-# Turn w into a vector of length 4 determining the
-# enclosing box (which may simply be the window if the
-# original window was rectangular).
-        rw <- c(w.save$xrange,w.save$yrange)
-
-# Build the expanded window within which to suspend the actual
-# window of interest (in order to approximate the simulation of a
-# windowed process, rather than a process existing only in the given
-# window.  If expand == 1, then we are simulating the latter.  The
-# larger ``expand'' is, the better we approximate the former.  Note
-# that any value of ``expand'' smaller than 1 is treated as if it
-# were 1.
-	if(expand>1) {
-		xdim <- rw[2]-rw[1]
-		ydim <- rw[4]-rw[3]
-		fff  <- (sqrt(expand)-1)*0.5
-		erw  <- c(rw[1] - fff*xdim,rw[2] + fff*xdim,
-                          rw[3] - fff*ydim,rw[4] + fff*ydim)
-	}
-	else erw <- rw
-
-# If we are conditioning on the number of points of each type, make
-# sure that the length of the vector of these numbers is the same as
-# ntypes.
-if(cond == 3 & length(n.start) != ntypes)
-	stop("Length of n.start not equal to number of types.\n")
-
-# Even if we are conditioning on the number of points of each type,
-# rather than just on the total, we still need the total.  Get the
-# total number of points in the starting configuration (redundant
-# unless we are conditioning on the number of points of each type).
-	npts <- sum(n.start)
-
-# Adjust npts; it is/should be given as the ``expected'' number
-# of points in the actual window.  It should be magnified to the
-# expected number of points in the bounding box ``rw''.
-	a1 <- area.owin(w.save)
-	a2 <- area.owin(as.owin(rw))
-	npts <- ceiling(a2*npts/a1)
-
-# Check for compatibility of ntypes and length of ptypes.
-	if(ntypes == 1) ptypes <- 1
-	else {
-		ptypes <- if(is.null(control$ptypes))
-				rep(1/ntypes,ntypes)
-			   else control$ptypes
-		if(length(ptypes) != ntypes | sum(ptypes) != 1)
-			stop("Argument ptypes is mis-specified.\n")
-	}
-
-# Set the random number generation seed --- from iseed.  (So that
-# if iseed was supplied, then it determines all the randomness,
-# including the starting state.  Thus supplying the same iseed in a
-# repeat simulation will give ***exactly*** the same result.)
-rrr <- .Fortran(
+	rrr <- .Fortran(
 		"arand",
 		ix=as.integer(iseed[1]),
 		iy=as.integer(iseed[2]),
 		iz=as.integer(iseed[3]),
 		rand=double(1)
 	)
-build.seed <- round(rrr$rand*1e6)
-iseed <- unlist(rrr[c("ix","iy","iz")])
-set.seed(build.seed)
+	build.seed <- round(rrr$rand*1e6)
+	iseed <- unlist(rrr[c("ix","iy","iz")])
+	set.seed(build.seed)
 
-# Build starting state consisting of x, y and possibly marks.
-	npts  <- if(expand > 1) ceiling(expand*npts) else npts
-	x <- runif(npts,erw[1],erw[2])
-	y <- runif(npts,erw[3],erw[4])
-	if(ntypes > 1) {
-		marks <- if(fixall) rep(1:ntypes,n.start)
-			 else sample(1:ntypes,npts,TRUE,ptypes)
-	} else marks <- 0
+# Make sure that the control arguments are adequately specified.
+if(is.null(control)) {
+	control <- list(
+			p=0.9,
+			q=0.5,
+			nrep=6e5,
+			fixall=FALSE,
+			periodic=FALSE,
+			nverb=0
+		   )
 }
 
-# If x.start is specified, set up other arguments from x.start:
-else {
-	erw <- c(x.start$window$xrange,x.start$window$yrange)
-	npts <- x.start$n
-	x    <- x.start$x
-	y    <- x.start$y
-	expand <- 1
-	if(is.marked(x.start)) {
-		marks  <- x.start$marks
-		if(ntypes != length(levels(marks)))
-			stop("Wrong number of levels in x.start$marks.\n")
-		marks  <- match(marks,levels(marks))
-		ptypes <- control$ptypes
-		if(is.null(ptypes)) ptypes <- table(marks)/npts
-		else if(length(ptypes) != ntypes)
-			stop("Argument ptypes is of wrong length.\n")
-	} else {
-		if(ntypes > 1)
-			stop(paste("Multitype process specified but",
-                                   "x.start is unmarked.\n"))
-		marks  <- 0
-		ptypes <- 1
+# Check that precisely one method of specifying the starting
+# configuration is provided.  If x.start is given, coerce it into
+# a point pattern.  If x.start is specified, model$w may be used to
+# specify the simulation window (if this is absent from x.start)
+# or a window to which the pattern will be clipped at the finish.
+# Dig out these (possibly different) windows.
+
+if(is.null(start$n.start)) {
+	if(is.null(start$x.start))
+		stop("No starting method provided.\n")
+	else {
+		whinge <- "Window model$w is not a subwindow of x.start$window.\n"
+		use.n <- FALSE
+		x.start <- start$x.start
+		if(is.null(x.start$window)) {
+			if(is.null(model$w))
+				stop("No window specified in which to simulate.\n")
+			w.sim <- w.clip <- model$w
+			x.start <- as.ppp(x.start,w.sim)
+		} else {
+			x.start <- as.ppp(x.start)
+			w.sim   <- x.start$window
+			w.clip  <- if(is.null(model$w)) w.sim else model$w
+			if(is.null(model$w))
+				w.clip <- w.sim
+			else {
+				if(is.subset.owin(model$w,w.sim)) w.clip <- model$w
+				else stop(whinge)
+			}
+		}
 	}
+} else {
+	if(is.null(start$x.start)) {
+		if(is.null(model$w))
+			stop("No window specified in which to simulate.\n")
+		use.n <- TRUE
+		n.start <- start$n.start
+		w.clip  <- w.sim <- model$w
+	} else stop("Both n.start and x.start were specified.\n")
+}
+
+w.sim  <- as.owin(w.sim)
+w.clip <- as.owin(w.clip)
+
+# Now (possibly) expand the window; to do this we need to deal
+# the expand argument.  Dealing with expand requires that we
+# check on several other things.
+expand <- control$expand
+
+# Expand must be 1 if there is a trend given by an image.
+trendy <- !is.null(model$trend)
+if(trendy) {
+	trim <- is.im(model$trend) | any(unlist(lapply(model$trend,is.im)))
+	if(trim) {
+		if(is.null(expand)) expand <- 1
+		if(expand > 1)
+			stop(paste("When there is trend given as an image,",
+                                   "expand must be 1.\n"))
+	}
+}
+
+# Expand must be 1 if we are conditioning on the number of points.
+# cond = 1 <--> no conditioning
+# cond = 2 <--> conditioning on n = number of points
+# cond = 3 <--> conditioning on the number of points of each type.
+p <- control[[match("p",names(control))]]
+if(is.null(p)) p <- 0.9
+fixall  <- if(is.null(control$fixall)) FALSE else control$fixall
+cond    <- 2 - (p<1) + fixall - fixall*(p<1)
+bwhinge <- "When conditioning on the number of points,"
+if(cond > 1) {
+        if(is.null(expand)) expand <- 1
+        if(expand > 1)
+                stop(paste(bwhinge,"expand must be 1.\n"))
+}
+
+# Also the expand argument must be 1 if we are using x.start.
+# In a similar vein, if we are using x.start and we are conditioning
+# on the number of points, no clipping of the final result
+# should be done.  (Nothing to do with expand, as such, but
+# we might as well check on this here.)
+if(!use.n) {
+	if(is.null(expand)) expand <- 1
+	else if(expand > 1)
+		stop("When using x.start, expand must be 1.\n")
+	if(cond > 1 & !identical(all.equal(w.clip,w.sim),TRUE))
+		stop(paste(bwhinge,"we cannot clip the result to another window.\n"))
+}
+
+# If periodic is TRUE, expand must be 1.  While we're at it,
+# if periodic is TRUE check that the window is rectangular and set
+# the period.
+periodic <- if(is.null(control$periodic)) FALSE else control$periodic
+if(periodic) {
+	if(is.null(expand)) expand <- 1
+        else if(expand > 1)
+		stop("Must have expand=1 for periodic simulation.\n")
+	if(w.sim$type != "rectangle")
+		stop("Need rectangular window for periodic simulation.\n")
+	period <- c(w.sim$xrange[2] - w.sim$xrange[1],
+                    w.sim$yrange[2] - w.sim$yrange[1])
+} else period <- c(-1,-1)
+
+# At this stage we have no reason not to expand the window, and
+# if expand has not been specified we let it default to 2.
+if(is.null(expand)) expand <- 2
+
+# Now build the expanded window within which to suspend the actual
+# window of interest (in order to approximate the simulation of a
+# windowed process, rather than a process existing only in the given
+# window.  If expand == 1, then we are simulating the latter.  The
+# larger ``expand'' is, the better we approximate the former.  Note
+# that any value of ``expand'' smaller than 1 is treated as if it
+# were 1.
+if(expand>1) { # Note that if expand > 1, then use.n is TRUE!
+       	rw <- c(w.sim$xrange,w.sim$yrange) # Enclosing box.
+	xdim <- rw[2]-rw[1]
+	ydim <- rw[4]-rw[3]
+	fff  <- (sqrt(expand)-1)*0.5
+	ew   <- as.owin(c(rw[1] - fff*xdim,rw[2] + fff*xdim,
+                          rw[3] - fff*ydim,rw[4] + fff*ydim))
+	n.start <- ceiling(n.start*area.owin(ew)/area.owin(w.sim))
+		# The foregoing is incorrect if there is a trend/are trends,
+		# but in that case it's just too bloody complicated for it
+		# to be worthwhile to try to do the correct thing.
+}
+else ew <- w.sim
+
+# Determine if the model is multitype.  If so, set up the number
+# of types and the types themselves.
+if(use.n) {
+	mtype <- (!is.null(model$types)) | (length(model$par$beta) > 1)
+	npts <- sum(n.start) # Redundant if n.start is scalar; no harm, but.
+} else {
+	mtype <- is.marked(x.start)
+	npts  <- x.start$n
+}
+
+if(mtype) {
+	if(is.na(match(model$cif, mt.list)))
+		stop(paste("Conditional intensity function", cif,
+                           "is not multitype.\n"))
+	ptypes <- control$ptypes
+	if(use.n) {
+		types <- model$types
+		if (is.null(types)) {
+			ntypes <- length(model$par$beta)
+			types <- 1:ntypes
+		} else {
+			ntypes <- length(types)
+			if (ntypes != length(model$par$beta))
+				stop(paste("Mismatch in lengths of model$types",
+                                           "and model$par$beta.\n"))
+		}
+
+# If we are conditioning on the number of points of each type, make
+# sure that the length of the vector of these numbers is the same as
+# ntypes.
+		if(cond == 3 & length(n.start) != ntypes)
+			stop("Length of n.start not equal to number of types.\n")
+# Build ptypes and marks
+		if(is.null(ptypes)) ptypes <- rep(1/ntypes,ntypes)
+		marks <- if(fixall) rep(1:ntypes,n.start)
+			 else sample(1:ntypes,npts,TRUE,ptypes)
+	} else {
+		marks  <- x.start$marks
+                types  <- levels(marks)
+                ntypes <- length(types)
+                marks  <- match(marks,levels(marks)) # Makes marks into an integer
+                                                     # vector for passing to
+                                                     # subroutine methas.
+		if(is.null(ptypes)) ptypes <- table(marks)/npts
+	}
+
+# Check for compatibility of ntypes and length of ptypes.
+	if(length(ptypes) != ntypes | sum(ptypes) != 1)
+		stop("Argument ptypes is mis-specified.\n")
+} else {
+	ntypes <- 1
+	ptypes <- 1
+	marks  <- 0
 }
 
 # Warn about a silly value of fixall:
 if(fixall & (ntypes==1 | p < 1))
 	warning("Setting fixall = TRUE is silly when ntypes = 1 or p < 1.\n")
 
-# Set the ``period''.
-if(periodic) {
-	if(!rectwin)
-		stop("Need rectangular window for periodic simulation.\n")
-	if(expand>1)
-		stop("Must have expand=1 for periodic simulation.\n")
-	period <- c(erw[2] - erw[1], erw[4] - erw[3])
-} else period <- c(-1,-1)
+# Integral of trend over the expanded window (or area of window):
+# Iota == Integral Of Trend (or) Area.
+if(trendy) {
+	if(is.function(model$trend) | is.im(model$trend)) {
+		tmp  <- as.im(model$trend,ew)[ew, drop=FALSE]
+                sump <- summary(tmp)
+		iota <- sump$integral
+		tmax <- sump$max
+	} else {
+		if(is.list(model$trend)) {
+			if(length(model$trend) != ntypes)
+				stop(paste("Mismatch of ntypes and",
+                                           "length of trend list.\n"))
+			iota <- numeric(ntypes)
+			tmax <- numeric(ntypes)
+			for(i in 1:ntypes) {
+				tmp <- as.im(model$trend[[i]],ew)[ew, drop=FALSE]
+                                sump <- summary(tmp)
+				iota[i] <- sump$integral
+				tmax[i] <- sump$max
+			}
+		}
+	}
+} else {
+	iota <- area.owin(ew)
+	tmax <- NULL
+}
 
-# Do some rudimentary pre-processing of the par and tpar arguments.
-# Save the supplied values of par and tpar first.
-par.save  <- par  <- model$par
-tpar.save <- tpar <- model$tpar
+# Build starting state consisting of x, y and possibly marks.
+if(use.n) {
+	xy   <- if(trendy) rpoint.multi(npts,model$trend,tmax,factor(marks),ew,...)
+			else runifpoint(npts,ew,...)
+	x <- xy$x
+	y <- xy$y
+} else {
+	x <- x.start$x
+	y <- x.start$y
+}
+
+# Do some rudimentary pre-processing of the par arguments. Save
+# the supplied values of par first.
+
+par.save <- par <- model$par
 
 # 1. Strauss.
 if(cif=="strauss") {
@@ -329,9 +393,7 @@ if(cif=="straushm") {
 		stop("Some parameters negative or illegally set to NA.\n")
 }
 
-# 6. Using the Diggle-Gratton interaction function (function
-# number 1 from Diggle, Gates, and Stibbard).
-
+# 6. Using the interaction function number 1 from Diggle, Gates, and Stibbard).
 if(cif=="dgs") {
 	nms <- c("beta","rho")
 	if(sum(!is.na(match(names(par),nms))) != 2) {
@@ -344,9 +406,8 @@ if(cif=="dgs") {
 	par <- par[nms]
 }
 
-# 7. Using interaction function number 2 from Diggle, Gates,
-#    and Stibbard.
-
+# 7. Using Diggle-Gratton interaction function (function number 2
+#    from Diggle, Gates, and Stibbard).
 if(cif=="diggra") {
 	nms <- c("beta","kappa","delta","rho")
 	if(sum(!is.na(match(names(par),nms))) != 4) {
@@ -362,7 +423,6 @@ if(cif=="diggra") {
 }
 
 # 8. The Geyer conditional intensity function.
-
 if(cif=="geyer") {
 	nms <- c("beta","gamma","r","sat")
 	if(sum(!is.na(match(names(par),nms))) != 4) {
@@ -375,33 +435,6 @@ if(cif=="geyer") {
 	if(par["sat"] > .Machine$integer.max-100)
 		par["sat"] <- .Machine$integer.max-100
 	par <- par[nms]
-}
-
-# Calculate the degree(s) of the polynomial(s) in the log polynomial
-# trend(s), if any, and tack it/them onto tpar.  Note that
-# if tpar is NULL, this will make tpar into a scalar equal to 0.
-if(!is.null(tpar) & ntypes > 1) {
-	if(!is.list(tpar) || length(tpar) != ntypes)
-		stop("Argument tpar has wrong form.\n")
-	tmp <- NULL
-	for(cc in tpar) {
-		nc <- length(cc)
-		nd <- (sqrt(9+8*nc) - 3)/2
-		if(nd%%1 > .Machine$double.eps) {
-			stpms <- "Length of a component of tpar"
-			stpms <- paste(stpms,"does not make sense.\n")
-			stop(stpms)
-		}
-		tmp <- c(tmp,nd)
-	}
-	tpar <- c(ntypes,tmp,unlist(tpar))
-}
-else {
-	nt <- length(tpar)
-	nd <- (sqrt(9+8*nt) - 3)/2
-	if(nd%%1 > .Machine$double.eps)
-		stop("Length of tpar does not make sense.\n")
-	tpar <- c(nd,tpar)
 }
 
 # If we are simulating a Geyer saturation process we need some
@@ -448,6 +481,16 @@ q     <- if(is.null(control$q)) 0.5 else control$q
 nrep  <- if(is.null(control$nrep)) 0.6e5 else control$nrep
 nverb <- if(is.null(control$nverb)) 0 else control$nverb
 
+# If the pattern is multitype, generate the mark proposals.
+mprop <- if(ntypes>1)
+	sample(1:ntypes,nrep,TRUE,prob=ptypes) else 0
+		
+# Generate the ``proposal points'' in the expanded window.
+xy <- if(trendy) rpoint.multi(nrep,model$trend,tmax,factor(mprop),ew,...) else
+			runifpoint(nrep,ew)
+xprop <- xy$x
+yprop <- xy$y
+
 # The repetion is to allow the storage space to be incremented if
 # necessary.
 repeat {
@@ -456,10 +499,12 @@ repeat {
 	rslt <- .Fortran(
 			"methas",
 			nmbr=as.integer(nmbr),
-			rw=as.double(erw),
+			iota=as.double(iota),
 			par=as.double(par),
 			period=as.double(period),
-			tpar=as.double(tpar),
+			xprop=as.double(xprop),
+			yprop=as.double(yprop),
+			mprop=as.integer(mprop),
 			ntypes=as.integer(ntypes),
 			ptypes=as.double(ptypes),
 			iseed=as.integer(iseed),
@@ -479,14 +524,16 @@ repeat {
 
 # If npts > npmax we've run out of storage space.  Tack some space
 # onto the end of the ``state'' already generated, increase npmax
-# correspondingly, and re-call the hasmet subroutine.  Note that
+# correspondingly, and re-call the methas subroutine.  Note that
 # mrep is the number of the repetion on which things stopped due
 # to lack of storage; so we start again at the ***beginning*** of
 # the mrep repetion.
 	npts <- rslt$npts
 	if(npts <= npmax) break
-	cat('Number of points greater than ',npmax,';\n',sep='')
-	cat('increasing storage space and continuing.\n')
+	if(verbose) {
+		cat('Number of points greater than ',npmax,';\n',sep='')
+		cat('increasing storage space and continuing.\n')
+	}
 	x     <- c(rslt$x,numeric(nincr))
 	y     <- c(rslt$y,numeric(nincr))
 	marks <- if(ntypes>1) c(rslt$marks,numeric(nincr)) else 0
@@ -498,23 +545,20 @@ repeat {
 
 x <- rslt$x[1:npts]
 y <- rslt$y[1:npts]
-if(ntypes>1) marks <- rslt$marks[1:npts]
+if(mtype) {
+	marks <- factor(rslt$marks[1:npts],labels=types)
+	xxx <- ppp(x=x, y=y, window=as.owin(ew), marks=marks)
+} else xxx <- ppp(x=x, y=y, window=as.owin(ew))
 
-if(ntypes>1) {
-  tmp <- ppp(x=x, y=y, window=as.owin(erw), marks=factor(marks))
-} else {
-  tmp <- ppp(x=x, y=y, window=as.owin(erw))
-}
-
-# Now clip the pattern to the original window:
-tmp <- tmp[,w.save]
+# Now clip the pattern to the ``clipping'' window:
+xxx <- xxx[,w.clip]
 
 # Append to the result information about how it was generated.
-attr(tmp, "info") <- list(model=list(cif=cif,par=par.save,tpar=tpar.save),
-                 start=list(n.start=n.start,x.start=x.start,
-                            iseed=iseed.save),
-                 control=list(nrep=nrep,p=p,q=q,expand=expand,
-                              periodic=periodic))
-
-return(tmp)
+start <- if(use.n) list(n.start=n.start,iseed=iseed.save)
+		else list(x.start=x.start,iseed=iseed.save)
+attr(xxx, "info") <- list(model=list(cif=cif,par=par.save,trend=model$trend),
+                          start=start,
+                          control=list(p=p,q=q,nrep=nrep,expand,periodic,
+                                       ptypes=ptypes,fixall=fixall))
+return(xxx)
 }

@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.1 $	$Date: 2001/11/21 09:07:22 $
+#	$Revision: 1.2 $	$Date: 2004/01/12 11:00:45 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -28,7 +28,16 @@
     w <- 1/lambda
     RS <- Kwtsum(d, b, w, w, breaks)
     K <- RS$numerator/RS$denominator
-    return(data.frame(K = K, r = r, theo = pi*r**2, border=K))
+    w <- X$window
+    alim <- c(0, min(diff(w$xrange), diff(w$yrange))/4)
+    out <- fv(data.frame(r = r, theo = pi*r**2, border=K),
+              "r", "Kinhom(r)", "border",
+              cbind(border, theo) ~ r, alim,
+              c("r", "Kpois(r)", "Kinhom(r)"),
+              c("distance argument r",
+                "theoretical Poisson K(r)",
+                "border-corrected estimate of Kinhom(r)"))
+    return(out)
 }
 
 

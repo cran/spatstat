@@ -34,7 +34,10 @@ nearest.neighbour(X)
   }
 }
 \value{
-  A data frame containing six columns:
+  An object of class \code{"fv"}, see \code{\link{fv.object}},
+  which can be plotted directly using \code{\link{plot.fv}}.
+
+  Essentially a data frame containing six columns:
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{G(r)} has been  estimated
   }
@@ -178,25 +181,18 @@ nearest.neighbour(X)
   \code{\link{kaplan.meier}}
 }
 \examples{
-    library(spatstat)
-    pp <- runifpoint(50)
-    Gpp <- Gest(pp)
-  \dontrun{
-    plot(Gpp$r, Gpp$km, type="l", xlab="r", ylab="G(r)", ylim=c(0,1),
-    main = "nearest neighbour function")
-    r <- Gpp$r
-    lines(r, Gpp$theo, lty=2)
-    legend(0.5, 2, c("Kaplan-Meier estimator", "Poisson process"), lty=c(1,2))
-  }
+    require(spatstat)
+
   data(cells)
-  Gc <- Gest(cells)
-  \dontrun{
-  plot(Gc$r, Gc$km, type="l")
-  plot(km ~ r, type="l", data=Gc)
-  # restrict the plot to values of r less than 0.1
-  plot(km ~ r, type="l", data=Gc[Gc$r <= 0.1, ])
-  plot(km ~ r, type="l", data=Gc, subset=(r <= 0.1))
-  }
+  G <- Gest(cells)
+  plot(G)
+
+  # P-P style plot
+  plot(G, cbind(km,theo) ~ theo)
+
+  # the empirical G is below the Poisson G,
+  # indicating an inhibited pattern
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -61,11 +61,11 @@
     coef(poi)
     # This is the log of the fitted intensity of the Poisson process
 
-    str <- mpl(cells, ~1, Strauss(r=0.15), rbord=0.15)
-    coef(str)
-    # is a vector of two entries,
-    # "(Intercept)" and "Interaction"
-    # which are respectively log(beta) and log(gamma)
+    stra <- mpl(cells, ~1, Strauss(r=0.07), rbord=0.07)
+    coef(stra)
+
+    # The two entries "(Intercept)" and "Interaction"
+    # are respectively log(beta) and log(gamma)
     # in the usual notation for Strauss(beta, gamma, r)
 
 }

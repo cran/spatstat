@@ -75,12 +75,12 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
   or \code{\link{allstats}}.
 
   The function \code{plot.fasp} is
-  a method for \code{plot}.  It calls \code{\link{conspire}} to do the
-  actual plotting.
+  a method for \code{plot}.  It calls \code{\link{plot.fv}} to plot the
+  individual panels.
 
   For information about the interpretation of the
   arguments \code{formula}, \code{subset}, \code{lty} and \code{col},
-  see \code{\link{conspire}}.
+  see \code{\link{plot.fv}}.
 
   The argument \code{title}, if present, will determine the
   overall title of the plot. If it is absent, it defaults to \code{x$title}.
@@ -109,7 +109,7 @@ plot(x, formula=formula, subset, lty, col, title, \dots)
 \seealso{
   \code{\link{alltypes}},
   \code{\link{allstats}},
-  \code{\link{conspire}},
+  \code{\link{plot.fv}},
   \code{\link{fasp.object}}
 }
 

@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.3 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.5 $	$Date: 2004/01/08 04:50:02 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -52,7 +52,8 @@ PairPiece <- function(r) {
            return(list(param=list(gammas=gammas),
                        inames="interaction parameters gamma_i",
                        printable=round(gn,4)))
-         }
+         },
+         siminfo = NULL
   )
   class(out) <- "interact"
   out$init(out)

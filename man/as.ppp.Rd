@@ -107,8 +107,10 @@ for use by the \code{spatstat} package).
  pp <- as.ppp(xy, c(0,1,0,1))
  
  # Venables-Ripley format
- sp <- list(x=runif(10), y=runif(10), xl=0, xu=1, yl=0, yu=1)
- pp <- as.ppp(sp)   # converted to our format
+ require(spatial)
+ towns <- ppinit("towns.dat")
+ pp <- as.ppp(towns)   # converted to our format
+ detach(package:spatial)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

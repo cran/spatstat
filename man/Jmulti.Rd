@@ -46,7 +46,9 @@ Jmulti(X, I, J, eps, breaks)
   }
 }
 \value{
-  A data frame containing six numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+  Essentially a data frame containing six numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{J_{IJ}(r)}{JIJ(r)} has been  estimated
   }
@@ -127,24 +129,14 @@ Jmulti(X, I, J, eps, breaks)
  \code{\link{Jest}}
 }
 \examples{
-    \dontrun{library(spatstat)}
+    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
-    \dontrun{
-    Jm <- Jmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
-    }
     \testonly{
-    sub <- longleaf[seq(1,longleaf$n, by=50), ]
-    Jm <- Jmulti(sub, sub$marks <= 15, sub$marks >= 25)
-    }    
-    \dontrun{
-         plot(Jm$r, Jm$km,
-                  xlab="r", ylab="Jmulti(r)",
-                  type="l")
-         # Poisson theoretical curve
-         abline(h=1, lty=2)
+        longleaf <- longleaf[seq(1,longleaf$n, by=50), ]
     }
-
+    Jm <- Jmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
+    plot(Jm)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -37,11 +37,13 @@
     }
 } 
 \value{
-  A data frame containing
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  
+  Essentially a data frame containing three columns,
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the pair correlation function \eqn{g(r)} has been  estimated
   }
-  \item{K}{vector of values of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
+  \item{border}{vector of values of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
   }
   \item{theo}{vector of values of \eqn{\pi r^2}{pi * r^2},
     the theoretical value of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
@@ -101,9 +103,7 @@
   \code{\link{pcf}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
+  require(spatstat)
 
   data(lansing)
   # inhomogeneous pattern of maples
@@ -118,9 +118,7 @@
   lambda <- predict(fit, newdata=data.frame(x=X$x, y=X$y), type="trend")
   # inhomogeneous K function
   Ki <- Kinhom(X, lambda)
-  \dontrun{
-    conspire(Ki, cbind(K, theo) ~ r, subset="r <= 0.4")
-  }
+  plot(Ki)
 
   # SIMULATED DATA
   # known intensity function
@@ -131,9 +129,7 @@
   lambda <- lamfun(Y$x, Y$y)
   # inhomogeneous K function
   Ki <- Kinhom(Y, lambda)
-  \dontrun{
-    conspire(Ki, cbind(K, theo) ~ r, subset="r <= 0.2")
-  }
+  plot(Ki)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

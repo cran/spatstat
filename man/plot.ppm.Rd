@@ -6,7 +6,7 @@
   plot the spatial trend and conditional intensity of the model.
 }
 \usage{
- plot.ppm(x, nx = 40, ny = 40, superimpose = TRUE, 
+ plot.ppm(x, ngrid = c(40,40), superimpose = TRUE, 
                   trend = TRUE, cif = TRUE, pause = TRUE,
                   how=c("persp","image", "contour"), \dots)
 }
@@ -16,11 +16,12 @@
     the maximum pseudolikelihood algorithm \code{\link{mpl}}.
     An object of class \code{"ppm"}.
   }
-  \item{nx}{
+  \item{ngrid}{
     the spatial trend and conditional intensity are to be evaluated and
-    displayed on a rectangular grid (\code{nx} by \code{ny}) of points
+    displayed on a rectangular grid (\code{ngrid[1]} by \code{ngrid[2]}
+    or \code{ngrid} by \code{ngrid})
+    of points.
   }
-  \item{ny}{see \code{nx} above}
   \item{superimpose}{
     logical flag; if \code{TRUE}, the original data point pattern
     will be superimposed on the plots.

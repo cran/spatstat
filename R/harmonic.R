@@ -2,7 +2,7 @@
 #
 #   harmonic.R
 #
-#	$Revision: 1.1 $	$Date: 2002/05/27 11:17:16 $
+#	$Revision: 1.2 $	$Date: 2004/01/07 08:57:39 $
 #
 #   harmonic()
 #          Analogue of polynom() for harmonic functions only
@@ -11,6 +11,8 @@
 #	
 
 harmonic <- function(x,y,n) {
+  if(missing(n))
+    stop("the order n must be specified")
   n <- as.integer(n)
   if(is.na(n) || n <= 0)
     stop("n must be a positive integer")

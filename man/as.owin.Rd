@@ -41,19 +41,38 @@ in any of several formats, into an object of class \code{"owin"}.
     class \code{spp} used in the Venables and Ripley \code{spatial}
     library.
     \item
-    an object of class \code{ppp} 
-    (in which case the object's \code{window} structure will be
-    extracted).
+    an object of class \code{"ppp"} representing a point pattern.
+    In this case, the object's \code{window} structure will be
+    extracted.
+    \item
+    an object of class \code{"im"} representing a pixel image.
+    In this case, a window of type \code{"mask"} will be returned,
+    with the same pixel raster coordinates as the image.
+    An image pixel value of \code{NA}, signifying that the pixel
+    lies outside the window, is transformed into the logical value
+    \code{FALSE}, which is the corresponding convention for window masks.
   }
 }
 \seealso{
-
   \code{\link{owin.object}},
   \code{\link{owin}}
 }
 \examples{
- \dontrun{library(spatstat)}
+ require(spatstat)
  w <- as.owin(c(0,1,0,1))
+ w <- as.owin(list(xrange=c(0,5),yrange=c(0,10)))
+ # point pattern
+ data(demopat)
+ w <- as.owin(demopat)
+ # image
+ Z <- as.im(function(x,y) { x + 3}, unit.square())
+ w <- as.owin(Z)
+
+ # Venables & Ripley 'spatial' package
+ require(spatial)
+ towns <- ppinit("towns.dat")
+ w <- as.owin(towns)
+ detach(package:spatial)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

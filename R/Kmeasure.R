@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.4 $    $Date: 2003/05/02 10:54:55 $
+#           $Revision: 1.5 $    $Date: 2004/01/12 11:06:05 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -166,7 +166,17 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   K  <- cumsum(tr)
   rmax <- min(rr[is.na(u$v)])
   K[rvalues >= rmax] <- NA
-  return(list(r=rvalues,K=K,theo=pi * rvalues^2))
+  result <- data.frame(r=rvalues,border=K,theo=pi * rvalues^2)
+  w <- X$window
+  alim <- c(0, min(diff(w$xrange), diff(w$yrange))/4)
+  out <- fv(result,
+            "r", "Kinhom(r)", "border",
+              cbind(border, theo) ~ r, alim,
+              c("r", "Kpois(r)", "Kinhom(r)"),
+              c("distance argument r",
+                "theoretical Poisson K(r)",
+                "border-corrected estimate of Kinhom(r)"))
+  return(out)
 }
 
 

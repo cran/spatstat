@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.5 $	$Date: 2003/11/12 06:36:56 $
+#	$Revision: 4.8 $	$Date: 2004/01/27 07:06:14 $
 #
 #
 # Main functions:
@@ -86,15 +86,15 @@ discretise <- function(x, xrange, nx) {
 	i
 }
 
-gridweights <- function(X, nx, ny, window=NULL) {
+gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE) {
 	#
 	# Compute counting weights based on a regular tessellation of the
-	# window frame into nx * ny rectangular tiles.
+	# window frame into ntile[1] * ntile[2] rectangular tiles.
 	#
 	# Arguments X and (optionally) 'window' are interpreted as a
 	# point pattern.
 	#
-	# The window frame is divided into a regular nx * ny grid
+	# The window frame is divided into a regular ntile[1] * ntile[2] grid
 	# of rectangular tiles. The counting weights based on this tessellation
 	# are computed for the points (x, y) of the pattern.
 	#
@@ -104,11 +104,17 @@ gridweights <- function(X, nx, ny, window=NULL) {
 	y <- X$y
 	win <- X$window
 
-        if(missing(nx))
-          nx <- default.ntile(X)
-        if(missing(ny))
-          ny <- nx
+        # determine number of tiles
+        if(is.null(ntile))
+          ntile <- default.ntile(X)
+        if(length(ntile) == 1)
+          ntile <- rep(ntile, 2)
+        nx <- ntile[1]
+        ny <- ntile[2]
 
+        if(verbose)
+          cat(paste("grid weights for a", nx, "x", ny, "grid of tiles\n"))
+        
 	# classify each point according	to its tile
 	
 	id <- gridindex(x, y, win$xrange, win$yrange, nx, ny)$index
@@ -141,11 +147,14 @@ gridweights <- function(X, nx, ny, window=NULL) {
 	# compute counting weights 
 	w <- countingweights(id, areas)
 
-	w
+        # attach information about weight construction parameters
+        attr(w, "weight.parameters") <- list(method="grid", ntile=ntile)
+        
+	return(w)
 }
 
 
-dirichlet.weights <- function(X, window = NULL, exact=TRUE) {
+dirichlet.weights <- function(X, window = NULL, exact=TRUE, ...) {
 	#
 	# Compute weights based on Dirichlet tessellation of the window 
 	# induced by the point pattern X. 
@@ -188,7 +197,6 @@ dirichlet.weights <- function(X, window = NULL, exact=TRUE) {
 		tessellation <- deldir(x, y, dpl=NULL, rw=rw)
 	        # extract tile areas
 	        w <- tessellation$summary[, 'dir.area']
-		return(w)
 	} else {
 		# Compute digital areas of Dirichlet tiles.
                 win <- as.mask(win)
@@ -216,8 +224,11 @@ dirichlet.weights <- function(X, window = NULL, exact=TRUE) {
 			warning("some Dirichlet tiles have zero digital area")
 			attr(w, "zeroes") <- zeroes
 		}
-		return(w)
 	} 
+        # attach information about weight construction parameters
+        attr(w, "weight.parameters") <- list(method="dirichlet", exact=exact)
+
+        return(w)
 }
 
 default.ntile <- function(X) { 
