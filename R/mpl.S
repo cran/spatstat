@@ -1,5 +1,5 @@
 #
-#	$Revision: 4.14 $	$Date: 2004/02/09 13:47:18 $
+#	$Revision: 4.16 $	$Date: 2004/03/08 21:38:15 $
 #
 #    mpl()
 #          Fit a point process model to a two-dimensional point pattern
@@ -45,8 +45,8 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.call <- deparse(sys.call())
 the.version <- list(major=1,
                     minor=4,
-                    release=4,
-                    date="$Date: 2004/02/09 13:47:18 $")
+                    release=5,
+                    date="$Date: 2004/03/08 21:38:15 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -213,10 +213,12 @@ fmla <- as.formula(fmla)
 
 if(want.trend && use.gam)
   FIT  <- gam(fmla, family=quasi(link=log, var=mu), weights=W,
-              data=glmdata, subset=(SUBSET=="TRUE"), maxit=50)
+              data=glmdata, subset=(SUBSET=="TRUE"),
+              control=gam.control(maxit=50))
 else
   FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=W,
-              data=glmdata, subset=(SUBSET=="TRUE"), maxit=50)
+              data=glmdata, subset=(SUBSET=="TRUE"),
+              control=glm.control(maxit=50))
   
 ################  I n t e r p r e t    f i t   #######################
 

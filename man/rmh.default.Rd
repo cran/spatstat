@@ -91,7 +91,7 @@
   \code{control=list(p=p,q=q,nrep=nrep,expand,periodic,
                      ptypes=ptypes,fixall=fixall)}
 
-  Note that only one of \code{x.start} and \code{x.start} appear in
+  Note that only one of \code{n.start} and \code{x.start} may appear
   in the \code{start} list.
 }
 
@@ -510,9 +510,8 @@ or trends.
   to add her own.  Note that in addition to writing Fortran
   code for the new conditional intensity function, the user
   would have to modify the code in the files \code{cif.f} and
-  \code{rmh.default.R} appropriately.  (And of course re-install
-  the \code{spatstat} package so as to update the dynamically
-  loadable shared object \code{spatstat.so}.)
+  \code{rmh.default.R} appropriately, and reinstall
+  the compiled Fortran code.
 }
 \examples{
    \dontrun{
