@@ -1,5 +1,6 @@
 \name{cut.ppp}
 \alias{cut.ppp}
+\alias{cut}
 \title{Convert Point Pattern Marks from Numeric to Factor}
 \description{
   Transform the marks of a marked point pattern

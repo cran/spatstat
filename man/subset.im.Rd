@@ -1,12 +1,12 @@
 \name{subset.im}
 \alias{subset.im}
-\alias{"[.im"}
+\alias{[.im}
 \title{Extract Subset of Image}
 \description{
   Extract a subset or subregion of a pixel image.
 }
 \synopsis{
-  subset.im(x, i, j, drop=TRUE, ...)
+  subset.im(x, i, j, drop=TRUE, \dots)
 }
 \usage{
   subset.im(X, w)

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.7 $   $Date: 2003/05/02 07:34:33 $
+#    $Revision: 4.8 $   $Date: 2003/07/22 19:08:39 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -136,6 +136,7 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
 {
     win <- as.owin(win)
     X <- runifpoispp(lambda, win)
+    if(X$n <= 1) return(X)
     d <- nndist(X$x, X$y)
     qq <- X[d > r]
     return(qq)
@@ -147,7 +148,9 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
     win <- as.owin(win)
 
     X <- runifpoispp(lambda, win)
-
+    
+    if(X$n <= 1) return(X)
+    
     # matrix of pairwise distances
     d <- pairdist(X$x, X$y)
     close <- (d <= r)

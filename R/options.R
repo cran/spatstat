@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.1 $   $Date: 2002/07/18 10:54:34 $
+#    $Revision: 1.2 $   $Date: 2003/07/22 18:23:31 $
 #
 #
 ".Spatstat.Options" <-
@@ -21,6 +21,15 @@ function (...)
     if(length(called) == 0)
     	return(.Spatstat.Options)
 
+    if(is.null(names(called)) && length(called)==1) {
+      # spatstat.options(x) 
+      x <- called[[1]]
+      if(is.null(x))
+        return(.Spatstat.Options)  # spatstat.options(NULL)
+      if(is.list(x))
+        called <- x 
+    }
+    
     if(is.null(names(called))) {
         # spatstat.options("par1", "par2", ...)
 	ischar <- unlist(lapply(called, is.character))

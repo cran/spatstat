@@ -1,5 +1,6 @@
 \name{summary.owin}
 \alias{summary.owin}
+\alias{summary}
 \title{Summary of a Spatial Window}
 \description{
   Prints a useful description of a window object.

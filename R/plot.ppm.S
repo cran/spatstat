@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.12 $    $Date: 2002/07/18 10:36:21 $
+#    $Revision: 1.13 $    $Date: 2003/07/22 18:22:56 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by mpl().
@@ -73,7 +73,11 @@ plot.ppm <- function(x, nx = 40, ny = 40,
 
         if(pause)
           oldpar <- par(ask=TRUE)
-          
+
+        on.exit(if(pause) par(oldpar))
+
+#
+#        
 	types <- c("trend","cif")[c(trend,cif)]
 	for(ttt in types) {
           # compute the predictions
@@ -151,8 +155,7 @@ plot.ppm <- function(x, nx = 40, ny = 40,
             }
           }
         }
-        if(pause)
-          par(oldpar)
+
         return(invisible())
 }      
 

@@ -1,6 +1,6 @@
 \name{subset.fasp}
 \alias{subset.fasp}
-\alias{"[.fasp"}
+\alias{[.fasp}
 \title{Extract Subset of Function Array}
 \description{
   Extract a subset of a function array (an object of class
@@ -10,13 +10,13 @@
   subset.fasp(x, I, J, drop,\dots)
 }
 \usage{
-  subset.fasp(x, I, J)
-  x[I, ]
-  x[ , J]
-  x[I, J]
+  subset.fasp(X, I, J, drop,\dots)
+  subset.fasp(X, I, J)
+  X[I]
+  X[I, J]
 }
 \arguments{
-  \item{x}{
+  \item{X}{
     A function array. An object of class \code{"fasp"}.
   }
   \item{I}{
@@ -24,6 +24,14 @@
   }
   \item{J}{
     any valid expression for a subset of the column indices of the array.
+  }
+  \item{drop}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{subset}.
+  }
+  \item{\dots}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{subset}.
   }
 } 
 \value{

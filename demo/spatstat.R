@@ -3,6 +3,7 @@ if(dev.cur() <= 1) get(getOption("device"))()
 oldpar <- par(ask = interactive() &&
             (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
 oldoptions <- options(warn=-1)
+on.exit({par(oldpar); options(oldoptions)})
 
 data(swedishpines)
 plot(swedishpines, main="Point pattern")

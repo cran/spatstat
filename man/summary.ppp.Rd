@@ -1,5 +1,6 @@
 \name{summary.ppp}
 \alias{summary.ppp}
+\alias{summary}
 \title{Summary of a Point Pattern Dataset}
 \description{
   Prints a useful summary of a point pattern dataset.

@@ -1,5 +1,6 @@
 \name{plot.fasp}
 \alias{plot.fasp}
+\alias{plot}
 \title{Plot a Function Array}
 \description{
    Plots an array of summary functions, usually associated with a
@@ -15,6 +16,7 @@
 plot(x)
 plot(x, formula=formula)
 plot(x, formula=formula, subset)
+plot(x, formula=formula, subset, lty, col, title, \dots)
 }
 
 \arguments{
@@ -47,12 +49,21 @@ plot(x, formula=formula, subset)
      where \code{x$which[i,j]=k}.
   }
 
-\item{lty}{A vector of integers indicating line types to be
+  \item{lty}{A vector of integers indicating line types to be
     used in forming the plot.
   }
 
-\item{col}{A vector of integers indicating colours for the different
+  \item{col}{
+    A vector of integers indicating colours for the different
     lines which form the plot.
+  }
+
+  \item{title}{
+    Overall title for the plot.
+  }
+  \item{\dots}{
+    Arguments passed to \code{\link{plot.default}} to control other
+    features of the individual plot panels.
   }
 }
 
@@ -80,14 +91,6 @@ plot(x, formula=formula, subset)
 \value{None.}
 
 \section{Warnings}{
-  The new classes and methods of S version 4 have not been
-  used here. Hence, this function falls over in some versions of S-PLUS
-  if a formula is given explicitly
-  as an argument, unless either this argument is presented in the
-  ``name=value'' format, \bold{or} this function is called explicitly
-  as \code{plot.fasp} and \bold{not} as \code{plot}.  There is no
-  problem in R.
-
   (Each component of) the \code{subset} argument may be a
   logical vector (of the same length as the vectors of data which
   are extracted from \code{x}), or a vector of indices, or an

@@ -33,17 +33,13 @@ for use by the \code{spatstat} package).
   The data \code{X} may be:
   \itemize{
     \item
-    an object of class \code{"ppp"} 
+    an object of class \code{"ppp"}  
     \item
-    an object of class \code{"spp"} as used in the 
-    Venables and Ripley package \code{spatial}
+    an object of class \code{"spp"} as defined in the 
+    \code{spatial} library
     \item
     an object of class \code{"quad"} representing a quadrature scheme
     (see \code{\link{quad.object}})
-    \item
-    a structure with entries \code{x}, \code{y} (vectors of equal
-    length) and \code{xl}, \code{xu}, \code{yl}, \code{yu} (numbers
-    giving the dimensions of a rectangular window)
     \item
     a two-column matrix
     \item
@@ -60,6 +56,24 @@ for use by the \code{spatstat} package).
   will be generated; if \code{fatal=FALSE}, the
   value \code{NULL} is returned.
 
+  An \code{spp} object is the representation of a point pattern
+  in the \code{spatial} library. Our implementation recognises
+  the following formats:
+  \itemize{
+    \item
+    a structure with entries \code{x}, \code{y}
+    \code{xl}, \code{xu}, \code{yl}, \code{yu}
+    \item
+    a structure with entries
+    \code{x}, \code{y} and \code{area},
+    where \code{area} is a structure with entries
+    \code{xl}, \code{xu}, \code{yl}, \code{yu}
+  }
+  (used in \code{spatial} versions 1 to 6 and version 7.1 respectively)
+  where \code{x} and \code{y} are vectors of equal length
+  giving the point coordinates, and \code{xl}, \code{xu}, \code{yl},
+  \code{yu} are numbers giving the dimensions of a rectangular window.
+
   Point pattern datasets can also be created by the function
   \code{\link{ppp}}.
 }
@@ -68,6 +82,12 @@ for use by the \code{spatstat} package).
   \code{\link{ppp.object}},
   \code{\link{as.owin}},
   \code{\link{owin.object}}
+}
+\section{Warnings}{
+  If the format of \code{spp} objects
+  is changed in future versions of the \code{spatial} library,
+  then \code{as.ppp} may not be able to interpret them.
+  It currently handles all versions of \code{spatial} up to 7.1-4.
 }
 \examples{
  library(spatstat)

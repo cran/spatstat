@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.16 $	$Date: 2003/03/11 03:06:06 $
+#	$Revision: 4.18 $	$Date: 2003/09/15 12:31:33 $
 #
 #
 #	A window may be either
@@ -194,7 +194,7 @@ as.owin <- function(W) {
 		Z <- owin(W[1:2], W[3:4])
 		return(Z)
 	} else if(checkfields(W, c("xl", "xu", "yl", "yu"))) {
-		Z <- owin(c(X$xl, X$xu),c(X$yl, X$yu))
+		Z <- owin(c(W$xl, W$xu),c(W$yl, W$yu))
 		return(Z)
 	} else if(verifyclass(W, "ppp", fatal=FALSE))
 		return(W$window)
@@ -496,46 +496,80 @@ print.owin <- function(x, ...) {
 
 summary.owin <- function(object, ...) {
   verifyclass(object, "owin")
-  cat("window: ")
+  result <- list(xrange=object$xrange,
+                 yrange=object$yrange,
+                 type=object$type,
+                 area=area.owin(object))
   switch(object$type,
+         rectangle={
+         },
+         polygonal={
+           poly <- object$bdry
+           result$npoly <- npoly <- length(poly)
+           if(npoly == 1) {
+             result$areas <- area.xypolygon(poly[[1]])
+             result$nvertices <- length(poly[[1]]$x)
+           } else {
+             result$areas <- unlist(lapply(poly, area.xypolygon))
+             result$nvertices <- unlist(lapply(poly,
+                                               function(a) {length(a$x)}))
+           }
+           result$nhole <- sum(result$areas < 0)
+         },
+         mask={
+           result$npixels <- object$dim
+         }
+         )
+  class(result) <- "summary.owin"
+  result
+}
+
+print.summary.owin <- function(x, ...) {
+  verifyclass(x, "summary.owin")
+  cat("Window: ")
+  switch(x$type,
          rectangle={
            cat("rectangle = ")
          },
          polygonal={
-           poly <- object$bdry
            cat("polygonal boundary\n")
-           npoly <- length(poly)
-           if(npoly == 1) {
+           if(x$npoly == 1) {
              cat(paste("single connected closed polygon with",
-                       length(poly[[1]]$x),
+                       x$nvertices, 
                        "vertices\n"))
            } else {
-             cat(paste(npoly, "separate polygons ("))
-             nhole <- sum(unlist(lapply(poly, area.xypolygon)) < 0)
-             if(nhole == 0) cat("no holes)\n")
-             else if(nhole == 1) cat("1 hole)\n")
-             else cat(paste(nhole, "holes)\n"))
+             cat(paste(x$npoly, "separate polygons ("))
+             if(x$nhole == 0) cat("no holes)\n")
+             else if(x$nhole == 1) cat("1 hole)\n")
+             else cat(paste(x$nhole, "holes)\n"))
+             print(data.frame(vertices=x$nvertices,
+                              area=x$areas,
+                              relative.area=signif(x$areas/x$area,3),
+                              row.names=paste("polygon",
+                                1:(x$npoly),
+                                ifelse(x$areas < 0, "(hole)", "")
+                                )))
            }
            cat("enclosing rectangle: ")
          },
          mask={
            cat("binary image mask\n")
-           di <- object$dim
+           di <- x$npixels
            cat(paste(di[1], "x", di[2], "pixel array\n"))
            cat("enclosing rectangle: ")
          }
          )
   cat(paste("[",
-            object$xrange[1],
+            x$xrange[1],
             ",",
-            object$xrange[2],
+            x$xrange[2],
             "] x [",
-            object$yrange[1],
+            x$yrange[1],
             ",",
-            object$yrange[2],
+            x$yrange[2],
             "]\n"))
-  cat(paste("Window area = ", area.owin(object), "\n"))
-  return(invisible(NULL))
+  cat(paste("Window area = ", x$area, "\n"))
+  return(invisible(x))
 }
 
   

@@ -30,7 +30,7 @@
       the inhomogeneous \eqn{K} function
       should be evaluated. There is a sensible default.
     }
-    \item{breaks}
+    \item{breaks}{
     An alternative to the argument \code{r}.
     Not normally invoked by the user.
     See Details.

@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.2 $    $Date: 2002/05/13 12:41:10 $
+#      $Revision: 4.3 $    $Date: 2003/10/13 14:36:57 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -118,13 +118,13 @@ quadscheme.spatial <-
         # replicate dummy points, one copy for each possible mark
         # -> dummy x {1,..,K}
         
-        dumdum <- replicate(dummy, markset)
+        dumdum <- cartesian(dummy, markset)
         Wdumdum <- rep(Wdum, nmarks)
         
         # also make dummy marked points at same locations as data points
         # but with different marks
 
-        dumdat <- replicate(unmark(data), markset)
+        dumdat <- cartesian(unmark(data), markset)
         Wdumdat <- rep(Wdat, nmarks)
         Mdumdat <- dumdat$marks
         
@@ -146,7 +146,7 @@ quadscheme.spatial <-
 }
 
 
-"replicate" <-
+"cartesian" <-
 function(pp, markset, fac=TRUE) {
   # given an unmarked point pattern 'pp'
   # and a finite set of marks,

@@ -8,7 +8,7 @@
   data point.
 }
 \usage{
- spokes(x, y, nrad = 3, nper = 3, fctr = 1.5)
+ spokes(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault = 1)
 }
 \arguments{
   \item{x}{
@@ -28,6 +28,9 @@
     Length of largest spoke radius is \code{fctr * M}
     where \code{M} is the mean nearest neighbour distance
     for the data points.
+  }
+  \item{Mdefault}{
+    Value of \code{M} to be used if \code{x} has length 1.
   }
 }
 \value{
@@ -53,6 +56,10 @@
   dummy points is \code{fctr * M}
   where \code{M} is the mean nearest neighbour distance
   for the data points.
+
+  If the point pattern specified by \code{x} and \code{y} contains
+  only one point, the nearest neighbour distance is infinite,
+  so the value \code{Mdefault} will be used in place of \code{M}.
 }
 \seealso{
   \code{\link{quad.object}},

@@ -1,5 +1,5 @@
-\name{kmrs}
-\alias{kmrs}
+\name{km.rs}
+\alias{km.rs}
 \title{Kaplan-Meier and Reduced Sample Estimator using Histograms}
 \description{
   Compute the Kaplan-Meier and Reduced Sample estimators of a
