@@ -1,7 +1,7 @@
 #
 #  is.subset.owin.R
 #
-#  $Revision: 1.1 $   $Date: 2004/01/06 11:00:01 $
+#  $Revision: 1.2 $   $Date: 2004/02/09 13:33:09 $
 #
 #  Determine whether a window is a subset of another window
 #
@@ -17,7 +17,7 @@ is.subset.owin <- function(A, B) {
     # (1) A is also a rectangle
    if(A$type == "rectangle") {
      xx <- A$xrange[c(1,2,2,1)]
-     yy <- A$xrange[c(1,1,2,2)]
+     yy <- A$yrange[c(1,1,2,2)]
      ok <- inside.owin(xx, yy, B)
      return(all(ok))
    } 
