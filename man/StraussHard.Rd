@@ -60,7 +60,7 @@ which can then be fitted to point pattern data.
   \eqn{h}, but has an ``attraction'' between points lying at
   distances in the range between \eqn{h} and \eqn{r}.
   
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -69,11 +69,11 @@ which can then be fitted to point pattern data.
   yielded by the function \code{StraussHard()}. See the examples below.
  
   The canonical parameter \eqn{\log(\gamma)}{log(gamma)}
-  is estimated by \code{\link{mpl}()}, not fixed in
+  is estimated by \code{\link{ppm}()}, not fixed in
   \code{StraussHard()}. 
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
@@ -92,15 +92,14 @@ which can then be fitted to point pattern data.
   \emph{Biometrika} \bold{63}, 467--475.
 }
 \examples{
-   \dontrun{library(spatstat)}
    StraussHard(r=1,hc=0.02)
    # prints a sensible description of itself
 
    data(cells) 
-   mpl(cells, ~1, StraussHard(r=0.1, hc=0.05), rbord=0.1)
+   ppm(cells, ~1, StraussHard(r=0.1, hc=0.05), rbord=0.1)
    # fit the stationary Strauss/hard core  process to `cells'
 
-   mpl(cells, ~ polynom(x,y,3), StraussHard(r=0.1, hc=0.05), rbord=0.1)
+   ppm(cells, ~ polynom(x,y,3), StraussHard(r=0.1, hc=0.05), rbord=0.1)
    # fit a nonstationary Strauss/hard core process
    # with log-cubic polynomial trend
    }

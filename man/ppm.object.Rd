@@ -3,13 +3,13 @@
 \title{Class of Fitted Point Process Models}
 \description{
   A class \code{ppm} to represent a fitted stochastic model
-  for a point process. The output of \code{\link{mpl}}.
+  for a point process. The output of \code{\link{ppm}}.
 }
 \details{
   An object of class \code{ppm} represents a stochastic point process
   model that has been fitted to a point pattern dataset.
-  Typically it is the output of the maximum pseudolikelihood model fitter,
-  \code{\link{mpl}}.
+  Typically it is the output of the model fitter,
+  \code{\link{ppm}}.
 
   There are methods \code{\link{print.ppm}},
   \code{\link{plot.ppm}}, \code{\link{predict.ppm}}, \code{\link{fitted.ppm}}
@@ -38,13 +38,13 @@
     \code{maxlogpl} \tab the maximised value of log pseudolikelihood \cr
     \code{correction} \tab  name of edge correction method used \cr
   }
-  See \code{\link{mpl}} for explanation of these concepts.
+  See \code{\link{ppm}} for explanation of these concepts.
   The irregular parameters (e.g. the interaction radius of the
   Strauss process) are encoded in the \code{interaction} entry.
   However see the Warnings.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{coef.ppm}},
   \code{\link{fitted.ppm}},
   \code{\link{print.ppm}},
@@ -56,9 +56,8 @@
   of the \code{spatstat} package.
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
-  fit <- mpl(cells, ~ x, Strauss(0.1), correction="periodic")
+  fit <- ppm(cells, ~ x, Strauss(0.1), correction="periodic")
   fit
   coef(fit)
   pred <- predict(fit)

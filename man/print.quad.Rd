@@ -34,7 +34,6 @@
   \code{\link{summary.quad}}
 }
 \examples{
- require(spatstat)
  data(cells)
  Q <- quadscheme(cells)
  Q

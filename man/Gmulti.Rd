@@ -172,7 +172,6 @@ Gmulti(X, I, J, breaks)
  \code{\link{Gest}}
 }
 \examples{
-    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
     \testonly{

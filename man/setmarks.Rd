@@ -1,6 +1,6 @@
 \name{setmarks}
 \alias{setmarks}
-\alias{"%mark%"}
+\alias{\%mark\%}
 \title{Set or Reset the Marks in a Point Pattern}
 \description{
   Create a marked point pattern from given point locations
@@ -11,7 +11,7 @@
 }
 \usage{
   setmarks(X, m)
-  X %mark% m
+  X \%mark\% m
 }
 \arguments{
   \item{X}{
@@ -50,13 +50,12 @@
   \code{\link{is.marked.ppp}}
 }
 \examples{
-   require(spatstat)
    data(cells)
 
    m <- runif(cells$n)
 
    Y <- setmarks(cells, m)
-   Y <- cells %mark% m
+   Y <- cells \%mark\% m
    # equivalent
 
    \dontrun{plot(Y)}

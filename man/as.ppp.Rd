@@ -90,8 +90,6 @@ for use by the \code{spatstat} package).
   It currently handles all versions of \code{spatial} up to 7.1-4.
 }
 \examples{
- library(spatstat)
-
  \dontrun{
  plot(c(0,1),c(0,1),type="n")
  xy <- locator(20) # click on 20 points in plot window

@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.18 $	$Date: 2004/01/06 08:21:02 $
+#	$Revision: 4.20 $	$Date: 2004/06/01 03:28:09 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -367,9 +367,11 @@ identify.ppp <- function(x, ...) {
   if(!is.marked(x) || "labels" %in% names(list(...)))
     identify(x$x, x$y, ...)
   else {
-    id <- identify(x$x, x$y, labels=paste(x$marks), ...)
-    mk <- x$marks[id]
-    if(is.factor(x$marks)) mk <- levels(x$marks)[mk]
+    marx <- x$marks
+    marques <- if(is.numeric(marx)) paste(signif(marx, 3)) else paste(marx)
+    id <- identify(x$x, x$y, labels=marques, ...)
+    mk <- marx[id]
+    if(is.factor(marx)) mk <- levels(marx)[mk]
     cbind(id=id, marks=mk)
   }
 }

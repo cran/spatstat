@@ -1,12 +1,14 @@
 #
-#	ppm.S
+#	ppmclass.R
 #
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 1.23 $	$Date: 2004/02/09 13:37:13 $
+#	$Revision: 2.2 $	$Date: 2004/06/09 06:02:28 $
 #
 #       An object of class 'ppm' contains the following:
+#
+#            $method           model-fitting method (currently "mpl")
 #
 #            $coef             vector of fitted regular parameters
 #                              as given by coef(glm(....))
@@ -29,7 +31,7 @@
 #            $correction       name of edge correction method used
 #            $rbord            erosion distance for border correction (or NULL)
 #
-#            $the.call         the originating call to mpl()
+#            $the.call         the originating call to ppm()
 #
 #            $the.version      version of mpl() which yielded the fit
 #

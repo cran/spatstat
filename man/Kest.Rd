@@ -181,7 +181,6 @@ Baddeley, A.J. Spatial sampling and censoring.
   \code{\link{Kmulti}}
 }
 \examples{
- require(spatstat)
  pp <- runifpoint(50)
  K <- Kest(pp)
  data(cells)

@@ -33,7 +33,6 @@
   \code{\link{as.rectangle}}
 }
 \examples{
-  require(spatstat)
   w <- owin(c(0,10),c(0,10), poly=list(x=c(1,2,3,2,1), y=c(2,3,4,6,7)))
   r <- bounding.box(w)
   # returns rectangle [1,3] x [2,7]

@@ -76,12 +76,13 @@
   \code{x$window}.
 }
 \examples{
- \dontrun{library(spatstat)}
-
  data(longleaf)
  # Longleaf pines data
  \dontrun{
  plot(longleaf)
+ }
+ \testonly{
+	longleaf <- longleaf[seq(1,longleaf$n,by=10)]
  }
  # adult trees defined to have diameter at least 30 cm
  adult <- (longleaf$marks >= 30)

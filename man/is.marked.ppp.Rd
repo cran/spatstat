@@ -47,7 +47,6 @@
   \code{\link{is.marked.ppm}}
 }
 \examples{
-   require(spatstat)
    data(cells)
    is.marked(cells)  #FALSE
    data(longleaf)

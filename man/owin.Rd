@@ -98,8 +98,6 @@ describing a window in the two-dimensional plane.
   \code{\link{ppp}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
   w <- owin()
   w <- owin(c(0,1), c(0,1))
   # the unit square

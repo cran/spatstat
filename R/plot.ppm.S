@@ -1,10 +1,10 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.15 $    $Date: 2004/01/08 16:21:04 $
+#    $Revision: 1.16 $    $Date: 2004/06/08 10:48:33 $
 #
 #    plot.ppm()
-#         Plot a point process model fitted by mpl().
+#         Plot a point process model fitted by ppm().
 #        
 #
 #
@@ -16,7 +16,7 @@ plot.ppm <- function(x, ngrid = c(40,40),
   
         model <- x
         
-#       Plot a point process model fitted by mpl().
+#       Plot a point process model fitted by ppm().
 #
         verifyclass(model, "ppm")
 #

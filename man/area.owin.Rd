@@ -29,9 +29,6 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   w <- unit.square()
   area.owin(w)
        # returns 1.00000

@@ -116,8 +116,6 @@
 }
 \examples{
    \dontrun{
-   library(spatstat)
-
    data(cells)
    plot(cells)
 

@@ -35,7 +35,6 @@
   \code{\link{erode.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(cells)
   d <- bdist.points(cells)
 }

@@ -47,7 +47,6 @@
   \code{\link{bdist.points}},
 }
 \examples{
-  \dontrun{library(spatstat)}
   u <- owin(c(0,1),c(0,1))
   d <- bdist.pixels(u, eps=0.01)
   image(d)

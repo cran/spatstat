@@ -35,7 +35,6 @@
   \code{\link{shift}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   # shear transformation
   X <- affine(owin(), matrix(c(1,0,0.6,1),ncol=2))
   \dontrun{

@@ -49,8 +49,6 @@
   \code{\link{fasp.object}}
 }
 \examples{
- \dontrun{library(spatstat)}
-
  # Lansing woods data - multitype points with 6 types
  data(lansing)
  \dontrun{
@@ -60,7 +58,7 @@
  }
  \testonly{
  # smaller dataset
-   sub <- lansing[ seq(1,lansing$n,by=30), ]
+   sub <- lansing[ seq(1,lansing$n,by=40), ]
    a <- alltypes(sub, "K")
  }
  # first three marks only

@@ -77,9 +77,6 @@
   \code{\link{spokes}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   data(simdat)
   P <- simdat
   D <- default.dummy(P, 100)

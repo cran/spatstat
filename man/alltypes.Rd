@@ -120,7 +120,6 @@
   \code{\link{Kcross}}
 }
 \examples{
-   \dontrun{library(spatstat)}
    # bramblecanes (3 marks).
    data(bramblecanes)
    \dontrun{
@@ -141,10 +140,13 @@
    
    # Swedishpines (unmarked).
    data(swedishpines)
+   \testonly{
+	swedishpines <- swedishpines[1:25]
+   }
+   X.K <- alltypes(swedishpines,fun="K")
    X.F <- alltypes(swedishpines,fun="F")
    X.G <- alltypes(swedishpines,fun="G")
    X.J <- alltypes(swedishpines,fun="J")
-   X.K <- alltypes(swedishpines,fun="K")
 
    # simulated data
    \dontrun{

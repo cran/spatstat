@@ -37,7 +37,6 @@
   \code{\link{as.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   w <- owin(c(0,1),c(0,1))
   centroid.owin(w) 
   # returns 0.5, 0.5

@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.4 $   $Date: 2004/01/07 08:25:16 $
+#    $Revision: 1.9 $   $Date: 2004/06/09 09:59:17 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -14,6 +14,13 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   x <- object
   y <- list()
 
+  #######  Check version #########################
+  
+  ver <- object$version 
+  antiquated <- is.null(ver) || !is.list(ver) ||
+                      (ver$major == 1 && ver$minor < 5)
+  y$antiquated <- antiquated
+  
   #######  Extract main data components #########################
 
   QUAD <- object$Q
@@ -25,12 +32,9 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   ####### Determine type of model ############################
   
-  y$no.trend <- (length(termsinformula(TREND)) == 0)
-  # TRUE only when the trend is ~1
+  y$no.trend <- identical.formulae(TREND, NULL) || identical.formulae(TREND, ~1)
 
-  turms <- termsinformula(TREND)
-  y$stationary <- (length(turms) == 0) ||
-     ((length(turms) == 1) && turms[1] == "marks")
+  y$stationary <- y$no.trend || identical.formulae(TREND, ~marks)
 
   y$poisson <- is.null(INTERACT$family)
 
@@ -53,6 +57,20 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     return(y)
   }
   
+  ######  Does it have external covariates?  ####################
+
+  if(!antiquated) {
+    hc <- !is.null(x$covariates)
+  } else {
+    # Antiquated format
+    # Interpret the function call instead
+    callexpr <- parse(text=x$call)
+    callargs <- names(as.list(callexpr[[1]]))
+    # Data frame of covariates was called 'data' in versions up to 1.4-x
+    hc <- !is.null(callargs) && !is.na(pmatch("data", callargs))
+  }
+  y$has.covars <- hc
+    
   ######  Arguments in call ####################################
   
   y$args <- x[c("call", "correction", "rbord")]
@@ -112,8 +130,11 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       mrk <- DATA$marks
       y$trend$label <-
         if(y$poisson) "Fitted intensities" else "Fitted first order terms"
+      # Use predict.ppm to evaluate the fitted intensities
       lev <- factor(levels(mrk), levels=levels(mrk))
-      betas <- predict(x, newdata=data.frame(marks=lev), type="trend")
+      nlev <- length(lev)
+      marx <- list(x=rep(0, nlev), y=rep(0, nlev), marks=lev)
+      betas <- predict(x, locations=marx, type="trend")
       names(betas) <- paste("beta_", as.character(lev), sep="")
       y$trend$value <- betas
     }
@@ -228,6 +249,8 @@ print.summary.ppm <- function(x, ...) {
   if(!notrend) {
     cat("Trend formula: ")
     print(x$trend$formula)
+    if(x$has.covars)
+      cat("Model involves external covariates\n")
   }
         
   cat(paste("\n", x$trend$label, ":\n", sep=""))
@@ -263,18 +286,18 @@ print.summary.ppm <- function(x, ...) {
 }
 
 no.trend.ppm <- function(x) {
-  summary(x, quick=TRUE)$no.trend
+  summary.ppm(x, quick=TRUE)$no.trend
 }
 
 is.stationary.ppm <- function(x) {
-  summary(x, quick=TRUE)$stationary
+  summary.ppm(x, quick=TRUE)$stationary
 }
 
 is.poisson.ppm <- function(x) {
-  summary(x, quick=TRUE)$poisson
+  summary.ppm(x, quick=TRUE)$poisson
 }
 
 is.marked.ppm <- function(X, ...) {
-  summary(X, quick=TRUE)$marked
+  summary.ppm(X, quick=TRUE)$marked
 }
 

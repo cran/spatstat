@@ -1,10 +1,10 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.15 $	$Date: 2004/01/08 13:12:27 $
+#	$Revision: 1.21 $	$Date: 2004/06/09 10:38:51 $
 #
 #    predict.ppm()
-#	   From fitted model obtained by mpl(),	
+#	   From fitted model obtained by ppm(),	
 #	   evaluate the fitted trend or conditional intensity 
 #	   at a grid/list of other locations 
 #
@@ -12,9 +12,19 @@
 # -------------------------------------------------------------------
 
 predict.ppm <-
-function(object, newdata, window, ngrid=NULL, type="trend", ...) {
+function(object, window, ngrid=NULL, locations=NULL,
+         covariates=NULL, type="trend", ...) {
 #
-#	'object' is the output of mpl()
+# guard against mistakes
+  dotargs <- list(...)
+  nama <- names(dotargs)
+  if(!is.null(nama) && any(nama == "newdata"))
+    warning("The use of the argument \`newdata\' is out-of-date. See help(predict.ppm)")
+  else if(length(dotargs) > 0)
+    warning("Some arguments were ignored by predict.ppm")
+  
+#
+#	'object' is the output of ppm()
 #
   model <- object
   verifyclass(model, "ppm")
@@ -28,28 +38,51 @@ function(object, newdata, window, ngrid=NULL, type="trend", ...) {
   multitype  <- mod$multitype
   notrend    <- mod$no.trend
   trivial    <- poisson && notrend
+
+  need.covariates <- mod$has.covars
+
+  if(mod$antiquated)
+    warning("The model was fitted by an out-of-date version of spatstat")
+  
 #
 #       determine mark space
 #  
   if(marked) {
     if(!multitype)
-      stop("Not yet implemented for general marked point processes")
+      stop("Prediction not yet implemented for general marked point processes")
     else 
       types <- levels(mod$entries$data$marks)
   }
 #
-#      determine what kind of output is required: image(s) or data frame
+#      determine what kind of output is required:
+#      (arguments present)    (output)  
+#         window, ngrid    ->   image
+#         locations        ->   data frame
+#
+  want.image <- is.null(locations)
+#
+#
+################   Determine prediction points  #####################
 #  
-  want.image <- missing(newdata)
-#
-#  Create data frame to pass to predict.glm()
-#
-  if(want.image) {
-#
-#      validate parameters for image
-#  
-    if(missing(window))
-      window <- mod$entries$data$window
+  if(!want.image) {
+    # list of (x,y) coordinates given by `locations'
+    xpredict <- locations$x
+    ypredict <- locations$y
+    if(is.null(xpredict) || is.null(ypredict)) {
+      xy <- xy.coords(locations)
+      xpredict <- xy$x
+      xpredict <- xy$y
+    }
+    if(is.null(xpredict) || is.null(ypredict))
+      stop("Don't know how to extract x,y coordinates from \`locations\'")
+    # marks if required
+    if(marked)
+      mpredict <- locations$marks
+  } else {
+    # pixel grid of points
+    #
+    # Validate ngrid
+    #  
     if(!is.null(ngrid)) {
       if(!is.numeric(ngrid))
         stop("ngrid should be a numeric vector")
@@ -59,6 +92,8 @@ function(object, newdata, window, ngrid=NULL, type="trend", ...) {
       if(nn == 1)
         ngrid <- rep(ngrid,2)
     }
+    if(missing(window))
+      window <- mod$entries$data$window
     masque <- as.mask(window, dimyx=ngrid)
   # gam with lo() will not allow extrapolation beyond the range of x,y
   # values actually used for the fit. Check this:
@@ -79,19 +114,47 @@ function(object, newdata, window, ngrid=NULL, type="trend", ...) {
   # determine x and y vectors for grid
     xx <- raster.x(masque)
     yy <- raster.y(masque)
-    xx <- xx[masque$m]
-    yy <- yy[masque$m]
-    if(!marked) 
-      newdata <- data.frame(x=xx, y=yy)
-    else {
-      nt <- length(types)
-      nx <- length(xx)
-      newdata <- data.frame(x = rep(xx, nt),
-                            y = rep(yy, nt),
-                            marks=rep(types, rep(nx, nt)))
-    }
+    xpredict <- xx[masque$m]
+    ypredict <- yy[masque$m]
   }
 
+#
+##################  CREATE DATA FRAME  ##########################
+#                           ... to be passed to predict.glm()  
+#
+# First the x, y coordinates
+  
+    if(!marked) 
+      newdata <- data.frame(x=xpredict, y=ypredict)
+    else if(!want.image) 
+      newdata <- data.frame(x=xpredict, y=ypredict, marks=mpredict)
+    else {
+      # replicate
+      nt <- length(types)
+      np <- length(xpredict)
+      newdata <- data.frame(x = rep(xpredict, nt),
+                            y = rep(ypredict, nt),
+                            marks=rep(types, rep(np, nt)))
+    }
+
+#### Next the external covariates, if any
+#
+   if(need.covariates) {
+     if(missing(covariates)) {
+       # Extract covariates from fitted model object
+       # They have to be images.
+       oldcov <- model$covariates
+       if(is.null(oldcov))
+         stop("External covariates are required, and are not available")
+       if(is.data.frame(oldcov))
+         stop(paste("External covariates are required.",
+                    "Prediction is not possible at new locations"))
+       covariates <- oldcov
+     }
+     covariates.df <-  mpl.get.covariates(covariates,
+                       list(x=xpredict, y=ypredict), "prediction points")
+     newdata <- cbind(newdata, covariates.df)
+   }
 #
 ######## Set up prediction variables ################################
 #
@@ -101,10 +164,9 @@ function(object, newdata, window, ngrid=NULL, type="trend", ...) {
         if(is.null(newdata$SUBSET))
           newdata$SUBSET <- rep(TRUE, nrow(newdata))
 #
-# Dig out information used in the original call to mpl().
+# Dig out information used in the original call to ppm().
 #        Vnames:     the names for the ``interaction variables''
 #        glmdata:    the data frame used for the glm fit
-# and set the contrasts according to the convention followed in mpl().
 #
   if(!trivial) {
 	Vnames <- model$internal$Vnames

@@ -178,7 +178,6 @@ Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate
  \code{\link{pcf}}
 }
 \examples{
-    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
     \testonly{

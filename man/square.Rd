@@ -37,7 +37,6 @@ Creates a square window
   \code{\link{owin}}
 }
 \examples{
- require(spatstat)
  W <- square(10)
 }
 \author{Adrian Baddeley

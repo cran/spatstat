@@ -41,11 +41,10 @@
   while \code{print.summary.ppm} returns \code{NULL}.
 }
 \examples{
-  require(spatstat)
   # invent some data
   X <- rpoispp(42)
   # fit a model to it
-  fit <- mpl(X, ~x, Strauss(r=0.1))
+  fit <- ppm(X, ~x, Strauss(r=0.1))
   # summarize the fitted model
   summary(fit)
   # `quick' option
@@ -64,7 +63,7 @@
 
   # multitype pattern
   data(demopat)
-  fit <- mpl(demopat, ~marks, Poisson())
+  fit <- ppm(demopat, ~marks, Poisson())
   summary(fit)
 }
 \author{Adrian Baddeley

@@ -48,7 +48,6 @@
   An image object of class \code{"im"}.
 }
 \examples{
-  require(spatstat)
   data(demopat)
   # window object
   W <- demopat$window

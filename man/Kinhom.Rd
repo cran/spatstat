@@ -136,8 +136,6 @@
   \code{\link{pcf}}
 }
 \examples{
-  require(spatstat)
-
   data(lansing)
   # inhomogeneous pattern of maples
   X <- unmark(lansing[lansing$marks == "maple",])
@@ -146,9 +144,9 @@
      X <- X[sub , ]
   }
   # fit spatial trend
-  fit <- mpl(X, ~ polynom(x,y,2), Poisson())
+  fit <- ppm(X, ~ polynom(x,y,2), Poisson())
   # predict intensity values at points themselves
-  lambda <- predict(fit, newdata=data.frame(x=X$x, y=X$y), type="trend")
+  lambda <- predict(fit, locations=X, type="trend")
   # inhomogeneous K function
   Ki <- Kinhom(X, lambda)
   plot(Ki)

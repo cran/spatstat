@@ -25,7 +25,6 @@
   \code{\link{summary.im}}
 }
 \examples{
-  require(spatstat)
   data(letterR)
   U <- as.im(letterR)
   U

@@ -13,7 +13,7 @@
   \item{model}{A fitted point process model (object of class
     \code{"ppm"}, see \code{\link{ppm.object}}) which it is desired
     to simulate.  This fitted model is usually the result of a call
-    to \code{\link{mpl}}.  See \bold{Details} below.
+    to \code{\link{ppm}}.  See \bold{Details} below.
   }
   \item{start}{A list of arguments determining the initial state
     of the Metropolis-Hastings algorithm.  See
@@ -54,7 +54,7 @@
   The argument \code{model} describes the fitted model.  It must be
   an object of class \code{"ppm"} (see \code{\link{ppm.object}}),
   and will typically be the result of a call to the point process
-  model fitting function \code{\link{mpl}}.
+  model fitting function \code{\link{ppm}}.
 
   The current implementation enables simulation from any fitted model
   involving the interactions
@@ -66,15 +66,14 @@
   \code{\link{Strauss}},
   \code{\link{StraussHard}}
   and \code{\link{Softcore}},
-  including nonstationary models, provided the trend does not
-  involve spatial covariates. See the examples.
+  including nonstationary models. See the examples.
 
   It is possible that the fitted coefficients of a point process model
   may be ``illegal'', i.e. that there may not exist a
   mathematically well-defined point process with the given parameter
   values. For example, a Strauss process with interaction
   parameter \eqn{\gamma > 1}{gamma > 1} does not exist,
-  but the model-fitting procedure used in \code{\link{mpl}} will sometimes
+  but the model-fitting procedure used in \code{\link{ppm}} will sometimes
   produce values of \eqn{\gamma}{gamma} greater than 1.
   In such cases, if \code{project=FALSE} then an error will occur,
   while if \code{project=TRUE} then \code{rmh.ppm} will find
@@ -112,7 +111,7 @@
   \code{\link{rmh}},
   \code{\link{rmh.default}},
   \code{\link{ppp.object}},
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{Poisson}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}},
@@ -122,41 +121,39 @@
 }
 
 \examples{
-   require(spatstat)
-   
    data(swedishpines)
    X <- swedishpines
    plot(X, main="Swedish Pines data")
 
    # Poisson process
-   fit <- mpl(X, ~1, Poisson())
+   fit <- ppm(X, ~1, Poisson())
    Xsim <- rmh(fit)
    plot(Xsim, main="simulation from fitted Poisson model")
 
    # Strauss process   
-   fit <- mpl(X, ~1, Strauss(r=7), rbord=7)
+   fit <- ppm(X, ~1, Strauss(r=7), rbord=7)
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Strauss model")
 
    # Strauss - hard core process
-   fit <- mpl(X, ~1, StraussHard(r=7,hc=2), rbord=7)
+   fit <- ppm(X, ~1, StraussHard(r=7,hc=2), rbord=7)
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Strauss hard core model")
 
    # Geyer saturation process
-   fit <- mpl(X, ~1, Geyer(r=7,sat=2), rbord=7)
+   fit <- ppm(X, ~1, Geyer(r=7,sat=2), rbord=7)
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Geyer model")
 
    # soft core interaction process
-   fit <- mpl(X, ~1, Softcore(kappa=0.1))
+   fit <- ppm(X, ~1, Softcore(kappa=0.1))
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Soft Core model")
 
    data(cells)
    plot(cells)
    # Diggle-Gratton pairwise interaction model
-   fit <- mpl(cells, ~1, DiggleGratton(0.05, 0.1))
+   fit <- ppm(cells, ~1, DiggleGratton(0.05, 0.1))
    Xsim <- rmh(fit, start=list(n.start=cells$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Diggle-Gratton model")
    
@@ -166,34 +163,34 @@
    plot(Y, main="Amacrine data")
 
    # marked Poisson models 
-   fit <- mpl(Y)
+   fit <- ppm(Y)
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from mpl(Y)")
+   plot(Ysim, main="simulation from ppm(Y)")
 
-   fit <- mpl(Y,~marks)
+   fit <- ppm(Y,~marks)
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from mpl(Y, ~marks)")
+   plot(Ysim, main="simulation from ppm(Y, ~marks)")
 
-   fit <- mpl(Y,~polynom(x,y,2))
+   fit <- ppm(Y,~polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from mpl(Y, ~polynom(x,y,2))")
+   plot(Ysim, main="simulation from ppm(Y, ~polynom(x,y,2))")
 
-   fit <- mpl(Y,~marks+polynom(x,y,2))
+   fit <- ppm(Y,~marks+polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from mpl(Y, ~marks+polynom(x,y,2))")
+   plot(Ysim, main="simulation from ppm(Y, ~marks+polynom(x,y,2))")
 
-   fit <- mpl(Y,~marks*polynom(x,y,2))
+   fit <- ppm(Y,~marks*polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from mpl(Y, ~marks*polynom(x,y,2))")
+   plot(Ysim, main="simulation from ppm(Y, ~marks*polynom(x,y,2))")
 
    # multitype Strauss models
    MS <- MultiStrauss(types = levels(Y$marks),
                       radii=matrix(0.07, ncol=2, nrow=2))
-   fit <- mpl(Y, ~marks, MS)
+   fit <- ppm(Y, ~marks, MS)
    Ysim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Ysim, main="simulation from fitted Multitype Strauss")
 
-   fit <- mpl(Y,~marks*polynom(x,y,2), MS)
+   fit <- ppm(Y,~marks*polynom(x,y,2), MS)
    Ysim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Ysim, main="simulation from fitted inhomogeneous Multitype Strauss")
 

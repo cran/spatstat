@@ -160,7 +160,6 @@ Jcross(X, i=1, j=2, eps, breaks)
  \code{\link{Jmulti}}
 }
 \examples{
-    require(spatstat)
      # Lansing woods data: 6 types of trees
     data(lansing)
 

@@ -42,7 +42,6 @@
   \code{\link{erode.owin}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   w <- owin(c(0,1),c(0,1))
   a <- eroded.areas(w, seq(0.01,0.49,by=0.01))
 }

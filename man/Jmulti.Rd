@@ -129,7 +129,6 @@ Jmulti(X, I, J, eps, breaks)
  \code{\link{Jest}}
 }
 \examples{
-    require(spatstat)
     data(longleaf)
      # Longleaf Pine data: marks represent diameter
     \testonly{

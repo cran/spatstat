@@ -27,7 +27,7 @@
   
   The argument \code{object} must be a fitted point process model
   (object of class \code{"ppm"}). Such objects are produced by the maximum
-  pseudolikelihood fitting algorithm \code{\link{mpl}}).
+  pseudolikelihood fitting algorithm \code{\link{ppm}}).
 
   This function extracts the vector of coefficients of the fitted model.
   This is the estimate of the parameter vector
@@ -51,17 +51,16 @@
 \seealso{
  \code{\link{print.ppm}},
  \code{\link{ppm.object}},
- \code{\link{mpl}}
+ \code{\link{ppm}}
 }
 \examples{
-    require(spatstat)
     data(cells)
 
-    poi <- mpl(cells, ~1, Poisson())
+    poi <- ppm(cells, ~1, Poisson())
     coef(poi)
     # This is the log of the fitted intensity of the Poisson process
 
-    stra <- mpl(cells, ~1, Strauss(r=0.07), rbord=0.07)
+    stra <- ppm(cells, ~1, Strauss(r=0.07), rbord=0.07)
     coef(stra)
 
     # The two entries "(Intercept)" and "Interaction"

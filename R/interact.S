@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.6 $	$Date: 2002/01/18 06:46:36 $
+#	$Revision: 1.7 $	$Date: 2004/06/08 10:48:08 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -16,14 +16,14 @@
 #
 #               The analogy is:
 #
-#                       glm()             mpl()
+#                       glm()             ppm()
 #
 #                       model formula     trend formula
 #
 #                       family            interaction
 #
 #               That is, the 'systematic' trend part of a point process
-#               model is specified by a 'trend' formula argument to mpl(),
+#               model is specified by a 'trend' formula argument to ppm(),
 #               and the interpoint interaction is specified as an 'interact'
 #               object.
 #
@@ -40,7 +40,7 @@
 #       An object of class 'interact' completely defines the interpoint
 #       interactions in a specific point process model, except for the
 #       regular parameters of the interaction, which are to be estimated
-#       by mpl() or otherwise. An 'interact' object specifies the values
+#       by ppm() or otherwise. An 'interact' object specifies the values
 #       of all the 'nuisance' or 'irregular' parameters. An example
 #       is the Strauss process with a given, fixed threshold r
 #       but with the parameters beta and gamma undetermined.

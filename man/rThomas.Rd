@@ -45,7 +45,6 @@
 \code{\link{rNeymanScott}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   X <- rThomas(10, 0.2, 5)
 }
 \author{Adrian Baddeley

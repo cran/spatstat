@@ -88,7 +88,6 @@ using the Fast Fourier Transform.
   \code{\link{spatstat.options}}
 }
 \examples{
- require(spatstat)
  pp <- runifpoint(10000)
  \dontrun{
  spatstat.options(npixel=512)

@@ -45,7 +45,7 @@
   function (a function which is constant except for jumps at a finite
   number of places). 
  
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
   structure of the model to be fitted. 
@@ -57,7 +57,7 @@
   They are interpreted as the points of discontinuity of \eqn{H}.
   It is assumed that \eqn{h(s) =1} for all \eqn{s > r_{max}}{s > rmax}
   where \eqn{r_{max}}{rmax} is the maximum value in \code{r}. Thus the
-  model has as many regular parameters (see \code{\link{mpl}}) 
+  model has as many regular parameters (see \code{\link{ppm}}) 
   as there are entries in \code{r}. The \eqn{i}-th regular parameter
   \eqn{\theta_i}{theta[i]} is the logarithm of the value of the
   interaction function \eqn{H} on the interval
@@ -70,18 +70,17 @@
   has not yet been implemented.
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
 \examples{
-   \dontrun{library(spatstat)}
    PairPiece(c(0.1,0.2))
    # prints a sensible description of itself
    data(cells) 
-   mpl(cells, ~1, PairPiece(r = c(0.05, 0.1, 0.2)), rbord=0.2)
+   ppm(cells, ~1, PairPiece(r = c(0.05, 0.1, 0.2)), rbord=0.2)
    # fit a stationary piecewise constant pairwise interaction process
-   mpl(cells, ~polynom(x,y,3), PairPiece(c(0.05, 0.1)), rbord=0.1)
+   ppm(cells, ~polynom(x,y,3), PairPiece(c(0.05, 0.1)), rbord=0.1)
    # nonstationary process with log-cubic polynomial trend
 }
 \author{Adrian Baddeley

@@ -20,7 +20,7 @@
 \details{
   An object of class \code{"ppm"} represents a point process model
   that has been fitted to data. It is typically produced by
-  the maximum pseudolikelihood fitting algorithm \code{\link{mpl}}.
+  the model-fitting algorithm \code{\link{ppm}}.
   The object contains complete information about the original data
   point pattern to which the model was fitted.
   This function extracts the original data pattern.
@@ -33,9 +33,8 @@
   \code{\link{ppp.object}}
 }
 \examples{
- require(spatstat)
  data(cells)
- fit <- mpl(cells, ~1, Strauss(r=0.1), rbord=0.1)
+ fit <- ppm(cells, ~1, Strauss(r=0.1), rbord=0.1)
  X <- data.ppm(fit)
  # 'X' is identical to 'cells'
 }

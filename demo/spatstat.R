@@ -42,7 +42,7 @@ points(swedishpines)
 
 plot(allstats(swedishpines))
 
-fit <- mpl(swedishpines, ~1, Strauss(r=7))
+fit <- ppm(swedishpines, ~1, Strauss(r=7))
 print(fit)
 
 Xsim <- rmh(model=fit,
@@ -54,7 +54,7 @@ data(demopat)
 plot(demopat, cols=c("red", "blue"))
 plot(alltypes(demopat, "K"))
 
-fit <- mpl(demopat, ~marks + polynom(x,y,2), Poisson())
+fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit)
 
 plot(rpoispp(100))

@@ -45,9 +45,6 @@
   \code{\link{dirichlet.weights}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   Q <- quadscheme(runifpoispp(10))
   X <- as.ppp(Q) # data and dummy points together
   w <- gridweights(X, 10)

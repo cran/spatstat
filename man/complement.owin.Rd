@@ -31,7 +31,6 @@
   \code{\link{owin.object}}
 }
 \examples{
-   require(spatstat)
    # polygonal
    data(demopat)
    w <- demopat$window

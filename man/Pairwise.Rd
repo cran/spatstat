@@ -44,7 +44,7 @@ which can then be fitted to point pattern data.
   giving those parameter values.  
 }
 \seealso{
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}
 }
@@ -60,7 +60,7 @@ which can then be fitted to point pattern data.
    mySH <- Pairwise(strpot, "StraussHard", list(r=0.7,h=0.2),
            c("interaction distance r", "hard core distance c"))
    data(cells)
-   mpl(cells, ~ 1, mySH)
+   ppm(cells, ~ 1, mySH)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

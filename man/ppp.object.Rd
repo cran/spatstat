@@ -97,7 +97,6 @@
   next release of this package.
 }
 \examples{
-  \dontrun{library(spatstat)}
   x <- runif(100)
   y <- runif(100)
   X <- ppp(x, y, c(0,1),c(0,1))

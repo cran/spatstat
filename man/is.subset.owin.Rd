@@ -42,7 +42,6 @@ is.subset.owin(A, B)
 }
 
 \examples{
-   require(spatstat)
    w1 <- as.owin(c(0,1,0,1))
    w2 <- as.owin(c(-1,2,-1,2))
    is.subset.owin(w1,w2)  # Returns TRUE.

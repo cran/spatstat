@@ -48,7 +48,6 @@
 \code{\link{rMaternII}}
 }
 \examples{
- \dontrun{library(spatstat)}
  pp <- rSSI(0.05, 200)
  \dontrun{plot(pp)}
 }

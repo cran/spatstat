@@ -61,6 +61,10 @@
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{mkcor}
+\alias{mpl}
+\alias{mpl.engine}
+\alias{mpl.get.covariates}
+\alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
 \alias{multipair.family}
 \alias{nearest.pixel}
@@ -152,7 +156,7 @@ fasp((fns, titles, formulae, which, dataname, title)
 getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
-identical.formulae(a,b)
+identical.formulae(x,y)
 image.im(x, \dots, xlab="x", ylab="y")
 inside.xypolygon(pts, polly, test01 = TRUE)     
 intX.owin(w)
@@ -181,7 +185,13 @@ matrowany(x)
 matrowsum(x)
 meanX.owin(w)            
 meanY.owin(w)
-mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)      
+mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)
+mpl(Q, trend, interaction, data, correction, rbord, use.gam)
+mpl.engine(Q, trend, interaction, covariates, correction,
+	 rbord, use.gam)
+mpl.get.covariates(covariates, locations, type)
+mpl.prepare(Q, X, P, trend, interaction, covariates,
+            want.trend, want.inter, correction, rbord)
 MultiPair.checkmatrix(mat, n, name)
 multipair.family
 nearest.pixel(x, y, im)

@@ -94,7 +94,6 @@ from a point pattern in a window of arbitrary shape.
   \code{\link{im.object}}
 }
 \examples{
- library(spatstat)
  data(cells)
  image(Kmeasure(cells, 0.05))
  # shows pronounced dip around origin consistent with strong inhibition

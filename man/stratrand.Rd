@@ -47,9 +47,6 @@
   \code{\link{gridcentres}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   w <- unit.square()
   xy <- stratrand(w, 10, 10)
   \dontrun{

@@ -536,7 +536,7 @@ or trends.
   \code{\link{rmh}},
   \code{\link{rmh.ppm}},
   \code{\link{ppp}},
-  \code{\link{mpl}},
+  \code{\link{ppm}},
   \code{\link{Strauss}},
   \code{\link{Softcore}},
   \code{\link{StraussHard}},
@@ -564,7 +564,6 @@ or trends.
 }
 \examples{
    \dontrun{
-   require(spatstat)
    nr   <- 1e5
    nv  <- 5000
    }

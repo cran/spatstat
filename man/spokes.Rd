@@ -69,9 +69,6 @@
   \code{\link{stratrand}}
 }
 \examples{
-  \dontrun{
-  library(spatstat)
-  }
   dat <- runifrect(10)
   \dontrun{
   plot(dat)

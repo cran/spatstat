@@ -36,7 +36,6 @@
   while \code{print.summary.quad} returns \code{NULL}.
 }
 \examples{
-  require(spatstat)
   # make a quadrature scheme
   Q <- quadscheme(rpoispp(42))
   # summarize it

@@ -15,7 +15,7 @@ which can then be fitted to point pattern data.
   (namely, there are no interactions).
 }
 \details{
-  The function \code{\link{mpl}()}, which fits point process models to 
+  The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument \code{interaction}
   of class \code{"interact"}
   describing the interpoint interaction structure
@@ -31,35 +31,39 @@ which can then be fitted to point pattern data.
   \code{\link{StraussHard}}
 }
 \examples{
- \dontrun{library(spatstat)}
-
  data(nztrees)
- mpl(nztrees, ~1, Poisson())
+ ppm(nztrees, ~1, Poisson())
  # fit the stationary Poisson process to 'nztrees'
  # no edge correction needed
 
  data(longleaf)
+ \testonly{
+   longleaf <- longleaf[seq(1, longleaf$n, by=50)]
+ }
  longadult <- longleaf[longleaf$marks >= 30, ]
  longadult <- unmark(longadult)
- mpl(longadult, ~ x, Poisson())
+ ppm(longadult, ~ x, Poisson())
  # fit the nonstationary Poisson process 
  # with intensity lambda(x,y) = exp( a + bx)
 
  data(lansing)
  # trees marked by species
- mpl(lansing, ~ marks, Poisson())
+ \testonly{
+     lansing <- lansing[seq(1,lansing$n, by=30), ]
+ }
+ ppm(lansing, ~ marks, Poisson())
  # fit stationary marked Poisson process
  # with different intensity for each species
 
 \dontrun{
- mpl(lansing, ~ marks * polynom(x,y,3), Poisson())
+ ppm(lansing, ~ marks * polynom(x,y,3), Poisson())
 }
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
 \testonly{
  # equivalent functionality - smaller dataset
  data(ganglia)
- mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())
+ ppm(ganglia, ~ marks * polynom(x,y,2), Poisson())
 }
 }
 \author{Adrian Baddeley

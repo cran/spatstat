@@ -112,7 +112,6 @@
   \code{\link{apply}}
 }
 \examples{
-  require(spatstat)
   data(redwood)
 
   # count the number of points within radius 0.2 of each point of X
@@ -125,6 +124,10 @@
 
   # marked point pattern
   data(longleaf)
+  \testonly{
+	# smaller dataset
+	longleaf <- longleaf[seq(1, longleaf$n, by=80)]
+  }
   # compute the median of the marks of all neighbours of a point
   dbh.med <- applynbd(longleaf, R=40, exclude=TRUE,
                  function(Y,...) { median(Y$marks)})

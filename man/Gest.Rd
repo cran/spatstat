@@ -181,8 +181,6 @@ nearest.neighbour(X)
   \code{\link{kaplan.meier}}
 }
 \examples{
-    require(spatstat)
-
   data(cells)
   G <- Gest(cells)
   plot(G)

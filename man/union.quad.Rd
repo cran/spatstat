@@ -29,7 +29,6 @@
   \code{\link{as.ppp}}
 }
 \examples{
-  \dontrun{library(spatstat)}
   data(simdat)
   Q <- quadscheme(simdat, default.dummy(simdat))
   U <- union.quad(Q)

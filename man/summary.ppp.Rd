@@ -24,8 +24,6 @@
   \code{\link{print.ppp}}
 }
 \examples{
-  \dontrun{library(spatstat)}
-
   data(cells)      # plain vanilla point pattern
   summary(cells)  
 

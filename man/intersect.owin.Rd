@@ -45,8 +45,6 @@
   \code{\link{owin.object}}
 }
 \examples{
-   require(spatstat)
-
 # rectangles
    u <- unit.square()
    v <- owin(c(0.5,3.5), c(0.4,2.5))

@@ -91,8 +91,6 @@ LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
 longleaf                Longleaf Pines Point Pattern
 markcorr                Mark Correlation Function
-mpl                     Fit Point Process Model by Maximum
-                        Pseudolikelihood
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
@@ -119,6 +117,7 @@ plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 Poisson                 Poisson Point Process Model
+ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
 ppp.object              Class of Point Patterns
