@@ -4,7 +4,7 @@
        `Pseudoexact' distance transform of a discrete binary image
        (the closest counterpart to `exactdist.c')
        
-       $Revision: 1.5 $ $Date: 2000/07/11 10:55:13 $
+       $Revision: 1.6 $ $Date: 2004/11/15 19:19:06 $
 
        
 */
@@ -23,13 +23,13 @@ ps_exact_dt(in, dist, row, col)
 	/* rasters must have been dimensioned by shape_raster()
 	   and must all have identical dimensions and margins */
 {
-	long	i,j,k,l,m;
+	int	i,j,k,l,m;
 	double	d, x, y;
-	long	r, c;
+	int	r, c;
 	double	dnew;
 	double  bdiag;
 	double  huge;
-	long  *ip; 
+	int  *ip; 
 	double *dp;
 	
 	    /* initialise */
@@ -37,8 +37,8 @@ ps_exact_dt(in, dist, row, col)
 #define Is_Defined(I) (I >= 0)
 #define Is_Undefined(I) (I < 0)
 	
-	Clear(*row,long,UNDEFINED)
-	Clear(*col,long,UNDEFINED)
+	Clear(*row,int,UNDEFINED)
+	Clear(*col,int,UNDEFINED)
 		
 	huge = 2.0 * DistanceSquared(dist->xmin,dist->ymin,dist->xmax,dist->ymax); 
 	Clear(*dist,double,huge)
@@ -47,10 +47,10 @@ ps_exact_dt(in, dist, row, col)
 	  /* if input pixel is TRUE, set distance to 0 and make pixel point to itself */
 	for(j = in->rmin; j <= in->rmax; j++)
 	for(k = in->cmin; k <= in->cmax; k++) 
-	  if(Entry(*in, j, k, long) != 0) {
+	  if(Entry(*in, j, k, int) != 0) {
 	      Entry(*dist, j, k, double) = 0.0;
-	      Entry(*row,  j, k, long)   = j;
-	      Entry(*col,  j, k, long)   = k;
+	      Entry(*row,  j, k, int)   = j;
+	      Entry(*col,  j, k, int)   = k;
 	  }
 
 	/* how to update the distance values */
@@ -61,14 +61,14 @@ ps_exact_dt(in, dist, row, col)
 	d = Entry(*dist,ROW,COL,double); 
 
 #define COMPARE(ROW,COL,RR,CC,BOUND) \
-	r = Entry(*row,RR,CC,long); \
-	c = Entry(*col,RR,CC,long); \
+	r = Entry(*row,RR,CC,int); \
+	c = Entry(*col,RR,CC,int); \
 	if(Is_Defined(r) && Is_Defined(c) \
 	   && Entry(*dist,RR,CC,double) < d) { \
 	     dnew = DistanceSquared(x, y, Xpos(*in,c), Ypos(*in,r)); \
 	     if(dnew < d) { \
-		Entry(*row,ROW,COL,long) = r; \
-		Entry(*col,ROW,COL,long) = c; \
+		Entry(*row,ROW,COL,int) = r; \
+		Entry(*col,ROW,COL,int) = c; \
 		Entry(*dist,ROW,COL,double) = dnew; \
 		d = dnew; \
 	     } \
@@ -107,17 +107,17 @@ ps_exact_dt(in, dist, row, col)
 
 }
 
-/* S interface */
+/* R interface */
 
-ps_exact_dt_S(xmin, ymin, xmax, ymax, nr, nc,
+ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc,
 	   in, distances, rows, cols, boundary)
 	double *xmin, *ymin, *xmax, *ymax;  	  /* x, y dimensions */
-	long *nr, *nc;	 	                  /* raster dimensions
+	int *nr, *nc;	 	                  /* raster dimensions
 				                     EXCLUDING margin of 1 on each side */
-	long   *in;              /* input:  binary image */
+	int   *in;              /* input:  binary image */
 	double *distances;	/* output: distance to nearest point */
-	long   *rows;	        /* output: row of nearest point (start= 0) */
-	long   *cols;	        /* output: column of nearest point (start = 0) */
+	int   *rows;	        /* output: row of nearest point (start= 0) */
+	int   *cols;	        /* output: column of nearest point (start = 0) */
 	double *boundary;       /* output: distance to boundary of rectangle */
 	/* all images must have identical dimensions including a margin of 1 on each side */
 {

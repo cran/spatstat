@@ -2,7 +2,7 @@
 #	exactdt.S
 #	S function exactdt() for exact distance transform
 #
-#	$Revision: 4.3 $	$Date: 2004/03/08 21:06:55 $
+#	$Revision: 4.4 $	$Date: 2004/11/15 19:28:30 $
 #
 
 "exactdt"<-
@@ -16,7 +16,7 @@ function(X, ...)
 	nr <- w$dim[1]
 	nc <- w$dim[2]
 #	
-	res <- .C("exact_dt_S",
+	res <- .C("exact_dt_R",
 		as.double(X$x),
 		as.double(X$y),
 		as.integer(X$n),
