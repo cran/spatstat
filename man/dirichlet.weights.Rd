@@ -6,7 +6,7 @@
   using the areas of tiles in the Dirichlet tessellation.
 }
 \usage{
- dirichlet.weights(X, window=NULL, exact=T)
+ dirichlet.weights(X, window=NULL, exact=TRUE)
 }
 \arguments{
   \item{X}{Data defining a point pattern.}

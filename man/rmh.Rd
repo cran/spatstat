@@ -6,7 +6,7 @@ Simulates point patterns from a (still small) range of point process models.
 }
 \usage{
 rmh(cif,par,w,ntypes=0,ptypes=NULL,tpar=NULL,n.start,expand=NULL,
-        periodic=F,nrep=1e6,p=0.9,q=0.5,iseed=NULL,nverb=0)
+        periodic=FALSE,nrep=1e6,p=0.9,q=0.5,iseed=NULL,nverb=0)
 }
 \arguments{
   \item{cif}{A character string giving the \bold{name} of a

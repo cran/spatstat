@@ -6,7 +6,7 @@
   function, from histogram data
 }
 \usage{
-  reduced.sample(nco, cen, ncc, show=F)
+  reduced.sample(nco, cen, ncc, show=FALSE)
 }
 \arguments{
   \item{nco}{vector of counts giving the histogram of

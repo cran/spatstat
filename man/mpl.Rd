@@ -8,7 +8,7 @@
   by the method of maximum pseudolikelihood.
 }
 \usage{
- mpl(Q, trend=~1, interaction=NULL, data, correction="border", rbord=0, use.gam=F)
+ mpl(Q, trend=~1, interaction=NULL, data, correction="border", rbord=0, use.gam=FALSE)
 }
 \arguments{
   \item{Q}{
@@ -35,6 +35,8 @@
   \item{correction}{
     The name of the edge correction to be used. The default 
     is \code{"border"} indicating the border correction.
+    Other possibilities may include \code{"Ripley"}, \code{"isotropic"}
+    and \code{"translate"}.
   }
   \item{rbord}{
     If \code{correction = "border"}
@@ -149,8 +151,11 @@
   Other options depend on the argument \code{interaction}, but these generally 
   include \code{"periodic"} (the periodic or toroidal edge correction
   in which opposite edges of a rectangular window are identified)
-  and \code{"translation"}
-  (the translation correction, see Baddeley 1998 and Baddeley and Turner 2000).
+  and \code{"translate"}
+  (the translation correction, see Baddeley 1998 and Baddeley and Turner
+  2000).
+  For pairwise interaction there is also Ripley's isotropic correction,
+  identified by \code{"isotropic"} or \code{"Ripley"}.
  
   The fitted point process model returned by this function can be printed 
   (by the print method \code{\link{print.ppm}})
@@ -288,6 +293,9 @@ to \code{poly} except that it does not orthonormalise.
 The resulting coefficient estimates then have
 their natural interpretation and can be predicted correctly. 
 Numerical stability may be compromised.
+
+Values of the maximised pseudolikelihood are not comparable
+if they have been obtained with different values of \code{rbord}.
 }
 \examples{
  \dontrun{library(spatstat)}
@@ -346,8 +354,8 @@ Numerical stability may be compromised.
  # with different log-cubic trend for each species
 \testonly{
  # equivalent functionality - smaller dataset
- data(catWaessle)
- mpl(catWaessle, ~ marks * polynom(x,y,2), Poisson())
+ data(ganglia)
+ mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())
 }
 }
 \author{Adrian Baddeley

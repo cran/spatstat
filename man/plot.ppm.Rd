@@ -6,8 +6,8 @@
   plot the spatial trend and conditional intensity of the model.
 }
 \usage{
- plot.ppm(x, nx = 40, ny = 40, superimpose = T, 
-                  trend = T, cif = T, pause = T,
+ plot.ppm(x, nx = 40, ny = 40, superimpose = TRUE, 
+                  trend = TRUE, cif = TRUE, pause = TRUE,
                   how=c("persp","image", "contour"), \dots)
 }
 \arguments{

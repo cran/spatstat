@@ -1,11 +1,11 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.3 $    $Date: 2002/01/17 10:01:49 $
+#    $Revision: 1.5 $    $Date: 2002/05/13 12:41:10 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
-verify.xypolygon <- function(p, fatal=T) {
+verify.xypolygon <- function(p, fatal=TRUE) {
   whinge <- NULL
   if(!is.list(p) || length(p) != 2 ||
      length(names(p)) != 2 || any(sort(names(p)) != c("x","y")))
@@ -20,7 +20,7 @@ verify.xypolygon <- function(p, fatal=T) {
   return(ok)
 }
 
-inside.xypolygon <- function(pts, polly, test01=T) {
+inside.xypolygon <- function(pts, polly, test01=TRUE) {
   # pts:  list(x,y) points to be tested
   # polly: list(x,y) vertices of a single polygon (n joins to 1)
   # test01: logical - if TRUE, test whether all values in output are 0 or 1
@@ -36,7 +36,7 @@ inside.xypolygon <- function(pts, polly, test01=T) {
   nedges <- length(xp)   # sic
 
   score <- rep(0, npts)
-  on.boundary <- rep(F, npts)
+  on.boundary <- rep(FALSE, npts)
 
   for(i in 1:nedges) {
     x0 <- xp[i]
@@ -141,9 +141,7 @@ reverse.xypolygon <- function(p) {
 
   verify.xypolygon(p)
   
-  n <- length(p$x)
-
-  return(list(x=p$x[n:1], y=p$y[n:1]))
+  return(lapply(p, rev))
 }
 
 overlap.xypolygon <- function(P, Q) {
@@ -180,7 +178,7 @@ overlap.xypolygon <- function(P, Q) {
   return(area)
 }
 
-overlap.trapezium <- function(xa, ya, xb, yb, verb=F) {
+overlap.trapezium <- function(xa, ya, xb, yb, verb=FALSE) {
   # compute area of overlap of two trapezia
   # which have same baseline y = 0
   #

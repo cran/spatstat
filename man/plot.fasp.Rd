@@ -117,7 +117,7 @@ plot(x, formula=formula, subset)
    # Bramble Canes data.
    data(bramblecanes)
 
-   X.G <- alltypes(bramblecanes,type="G",dataname="Bramblecanes",verb=T)
+   X.G <- alltypes(bramblecanes,type="G",dataname="Bramblecanes",verb=TRUE)
    plot(X.G)
    plot(X.G,subset="r<=0.2")
    plot(X.G,formula=cbind(asin(sqrt(km)),
@@ -132,7 +132,7 @@ plot(x, formula=formula, subset)
    # Simulated data.
    pp <- runifpoint(350, owin(c(0,1),c(0,1)))
    pp$marks <- factor(c(rep(1,50),rep(2,100),rep(3,200)))
-   X.K <- alltypes(pp,type="K",verb=T,dataname="Fake Data")
+   X.K <- alltypes(pp,type="K",verb=TRUE,dataname="Fake Data")
    plot(X.K,fo=cbind(border,theo)~theo,"theo<=0.75")
    }
 }

@@ -67,11 +67,11 @@ which can then be fitted to point pattern data.
    r <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStrauss(1:2, r)
    # prints a sensible description of itself
-   data(catWaessle)
+   data(ganglia)
    r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   mpl(catWaessle, ~1, MultiStrauss(c("0","1"), r), rbord=0.06)
-   # fit the stationary multitype Strauss process to `catWaessle'
-   mpl(catWaessle, ~polynom(x,y,3), MultiStrauss(c("0","1"), r), rbord=0.06)
+   mpl(ganglia, ~1, MultiStrauss(c("0","1"), r), rbord=0.06)
+   # fit the stationary multitype Strauss process to `ganglia'
+   mpl(ganglia, ~polynom(x,y,3), MultiStrauss(c("0","1"), r), rbord=0.06)
    # fit a nonstationary Strauss process with log-cubic polynomial trend
 }
 \section{Warnings}{

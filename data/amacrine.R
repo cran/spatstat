@@ -1,4 +1,4 @@
-"catHughes" <-
+"amacrine" <-
 structure(list(window = structure(list(type = "rectangle", xrange = c(0, 
 1.6065), yrange = c(0, 1)), .Names = c("type", "xrange", "yrange"
 ), class = "owin"), n = 294, x = c(0.0224, 0.0243, 0.1626, 0.1215, 

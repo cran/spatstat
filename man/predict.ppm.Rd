@@ -20,13 +20,14 @@ predict.ppm(object, newdata, type="trend")
     class \code{"ppm"} (see \code{\link{ppm.object}}).
   }
   \item{newdata}{
-    data frame giving the values of any spatial covariates
+    optional data frame giving the values of any spatial covariates
     for the locations at which the trend and conditional intensity should be
-    computed. 
+    computed. (Incompatible with \code{nx,ny})
   }
   \item{nx}{predictions are to be made at 
     an (\code{nx} by \code{ny}) rectangular grid of positions in the 
-    original window of observation. 
+    original window of observation.
+    (Incompatible with \code{newdata})
   }
   \item{ny}{
     see \code{nx} above; \code{ny} defaults to the same value as \code{nx}
@@ -39,27 +40,25 @@ predict.ppm(object, newdata, type="trend")
   }
 }
 \value{
-  A list with components \code{x}, \code{y}, \code{z} giving the 
-  Cartesian coordinates and the predicted values respectively.
-  If \code{type="trend"} then the predicted values in \code{z}
-  are values of the spatial trend. If \code{type="cif"}
-  or \code{type="lambda"} then the entries of \code{z} are
-  values of the conditional intensity.
+  \emph{If \code{newdata} is given:}
+  a vector of predicted values for the spatial locations
+  (and marks and covariates) given in the rows of \code{newdata}.
 
-  If the argument \code{newdata} is given, then \code{z} is a vector of
-  length equal to the number of rows in \code{newdata}, and gives the 
-  predicted values corresponding to the rows in \code{newdata}.
-
-  If \code{newdata} is
-  absent, then for \bold{unmarked} point processes,
-  \code{z} is an (\code{nx} by \code{ny}) matrix
-  giving the predicted values
-  at a rectangular grid of locations;
-  for \bold{marked} point processes,
-  \code{z} is an (\code{nx} by \code{ny} by \code{nmarks}) array
-  such that \code{z[,,m]} gives the predicted values for mark value
-  \code{m} at a rectangular grid of locations.
-
+  \emph{If \code{newdata} is not given:}
+  a list with components
+  \code{x}, \code{y}, \code{z} giving the
+  coordinates and predicted values for a rectangular grid of points.
+  If \code{object} is an unmarked point process,
+  \code{z} is a matrix such that \code{z[i,j]} 
+  gives the predicted value at location \code{(x[i],y[j])};
+  for marked point processes,
+  \code{z} is a three-dimensional array 
+  such that \code{z[i,j,m]} gives the predicted value for a
+  point at location \code{(x[i],y[j])} with mark \code{m}.
+  
+  The ``predicted values'' are either values of the spatial trend
+  (if \code{type="trend"}) or values of the conditional intensity
+  (if \code{type="cif"} or \code{type="lambda"}).
 }
 \details{
   This function computes the spatial trend

@@ -1,11 +1,12 @@
 #
 #       conspire.S
 #
-#  $Revision: 1.1 $    $Date: 2001/11/05 05:50:40 $
+#  $Revision: 1.4 $    $Date: 2002/05/13 12:41:10 $
 #
 #
 
-conspire <- function(indata, formula, subset=NULL, lty=NULL, col=NULL) {
+conspire <- function(indata, formula, subset=NULL, lty=NULL, col=NULL,
+                     xlim, ylim, xlab, ylab) {
 
   lhs <- formula[[2]]
   rhs <- formula[[3]]
@@ -32,22 +33,27 @@ conspire <- function(indata, formula, subset=NULL, lty=NULL, col=NULL) {
 		evaluate(parse(text=subset), indata)
             else
                 evaluate(subset, indata)
-    lhsdata <- lhsdata[keep, , drop=F]
+    lhsdata <- lhsdata[keep, , drop=FALSE]
     rhsdata <- rhsdata[keep]
   }
 
-  ylim <- range(lhsdata,na.rm=T)
-  xlim <- range(rhsdata,na.rm=T)
+  if(missing(xlim))
+    xlim <- range(rhsdata[is.finite(rhsdata)],na.rm=TRUE)
+  if(missing(ylim))
+    ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
 
   # work out how to label the plot
-  yname <- paste(lhs)
-  if(length(yname) > 1 && yname[[1]] == "cbind")
-    ylab <- paste(yname[-1], collapse=" , ")
-  else
-    ylab <- as.character(formula)[2]
-  
-  xlab <- as.character(formula)[3]
+  if(missing(xlab))
+    xlab <- as.character(formula)[3]
 
+  if(missing(ylab)) {
+    yname <- paste(lhs)
+    if(length(yname) > 1 && yname[[1]] == "cbind")
+      ylab <- paste(yname[-1], collapse=" , ")
+    else
+      ylab <- as.character(formula)[2]
+  }
+  
   plot(xlim, ylim, type="n", xlab=xlab, ylab=ylab)
 
   nplots <- ncol(lhsdata)

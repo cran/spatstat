@@ -5,7 +5,7 @@
   Plot a two-dimensional spatial point pattern
 }
 \usage{
- plot.ppp(x, main, \dots, chars, use.marks=TRUE, add=FALSE)
+ plot.ppp(x, main, \dots, chars, cols, use.marks=TRUE, add=FALSE, maxsize)
 }
 \arguments{
   \item{x}{
@@ -18,11 +18,18 @@
     text to be displayed as a title above the plot.
   }
   \item{\dots}{
-    extra arguments passed to the generic \code{\link{plot}} function.
+    extra arguments that will be passed to the plotting functions
+    \code{\link{plot.default}} (see \code{\link{par}} for possible
+    options) or \code{\link{symbols}}.
   }
   \item{chars}{
     the plotting characters which should be used to represent
-    the points with different marks. See below.
+    the points of different types, in the case of a multitype
+    point pattern. 
+  }
+  \item{cols}{
+    the colours which should be used to plot the points of
+    different types, in the case of a multitype point pattern.
   }
   \item{use.marks}{
     logical flag; if \code{TRUE}, plot points using a different
@@ -36,42 +43,74 @@
     A new plot is not created, and
     the window is not plotted.
   }
+  \item{maxsize}{
+    the maximum radius of the circles plotted.
+    If \code{x} is a marked point pattern with 
+    numerical marks, the marks are plotted as circles with
+    maximum radius \code{maxsize} 
+    (in the same units as the coordinates of
+    the point pattern). There is a sensible default.
+  }
 }
 \value{
   \code{NULL}, or a vector giving the correspondence between 
   mark values and plotting characters.
 }
 \details{
-  This is the \code{plot} method for the class \code{"ppp"}
-  (see \code{\link{ppp.object}} for details of this class).
-  
-  It invokes \code{\link{plot.owin}} to display the observation window
-  \code{x$window}.
-  Then the locations of the points are
-  plotted using \code{\link{points}()}. 
+  This is the \code{plot} method for 
+  point pattern datasets (of class \code{"ppp"}, see \code{\link{ppp.object}}).
+
+  First the observation window \code{x$window} is plotted 
+  using \code{\link{plot.owin}}.
+  Then the locations of the points are plotted. 
  
   If the points do not have marks (i.e. \code{x$marks} is absent)
   or if \code{use.marks = FALSE},
   then the locations of the points will be plotted 
   using a single plot character. This character can be changed
   by the extra argument \code{pch};  see the examples.
- 
-  If the points have marks, then each mark value will be 
-  represented by a different plot character. This action can be overridden
-  by setting \code{use.marks = FALSE}.
- 
-  For marked point patterns the default 
-  is to represent the \eqn{i}th unique mark value by
-  \code{points(..., pch=i)}. 
-  If the vector \code{chars} is supplied, it should have the same length
+
+  For a marked point pattern (where \code{x$marks} is not null)
+  each point will be represented by a graphical symbol plotted at the
+  location of the point.
+  The graphical representation of the marks depends
+  on their storage mode:
+  \describe{
+    \item{multitype point pattern:}{
+      If \code{x$marks} is a factor, then 
+      each level of the factor is 
+      represented by a different plot character.
+    }
+    \item{continuous marks:}{
+      If \code{x$marks} is a numeric vector,
+      the marks are rescaled to the unit interval and
+      each point is represented by a circle 
+      with radius proportional to the rescaled mark.
+    }
+    \item{otherwise:}{
+      Each possible mark will be represented by a
+      different plotting character. The default is to
+      represent the \eqn{i}th smallest mark value by
+      \code{points(..., pch=i)}.
+    }
+  }
+  If the arguments \code{chars} and/or \code{cols} are supplied,
+  they should be vectors of the same length
   as \code{sort(unique(x$marks))}, and then the \eqn{i}th smallest mark
-  will be plotted using \code{points(..., pch=chars[i])}. 
+  will be plotted using character \code{chars[i]} and colour
+  \code{cols[i]}.
+
+  The argument \code{cols} is incompatible with
+  the generic plot argument \code{col}. If both are given,
+  an error is generated and no plot is produced.
 }
 \seealso{
   \code{\link{ppp.object}},
   \code{\link{plot}},
+  \code{\link{par}},
   \code{\link{points}},
-  \code{\link{plot.owin}}
+  \code{\link{plot.owin}},
+  \code{\link{symbols}}
 }
 \examples{
    \dontrun{
@@ -89,13 +128,22 @@
    plot(longleaf)
 
    # just plot the points
-   plot(longleaf, use.marks=F)
+   plot(longleaf, use.marks=FALSE)
    plot(unmark(longleaf)) # equivalent
+
+   # controlling COLOURS
+   plot(cells, col="blue")
+   plot(lansing, cols=c("black", "yellow", "green", "pink",
+                        "blue","red","white")
+   plot(longleaf, fg="blue")
 
    # use selected plot characters
    lma <- sort(unique(longleaf$marks))
    adult <- ifelse(lma >= 30, "o", "+")
    plot(longleaf, chars = adult)
+
+   # make the plotting symbols larger (for publication at reduced scale)
+   plot(cells, cex=2)
 
   }
 }

@@ -10,12 +10,12 @@
   within a given distance from a typical point in subset \code{I}.
 }
 \synopsis{
-Kmulti(X, I, J, r=NULL, breaks=NULL, \dots)
+Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots)
 }
 \usage{
-Kmulti(X, I, J)
-Kmulti(X, I, J, r)
-Kmulti(X, I, J, breaks)
+Kmulti(X, I, J, correction=c("border", "isotropic", "Ripley", "translate"))
+Kmulti(X, I, J, r, correction=c("border", "isotropic", "Ripley", "translate"))
+Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -39,18 +39,27 @@ Kmulti(X, I, J, breaks)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{correction}{
+    A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    It specifies the edge correction(s) to be applied.
+  }
 }
 \value{
-  A data frame containing three numeric columns 
+  A data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{IJ}(r)}{KIJ(r)} has been  estimated
-  }
-  \item{border}{the ``reduced sample'' or ``border correction''
-    estimator of \eqn{K_{IJ}(r)}{KIJ(r)}
   }
   \item{theo}{the theoretical value of  \eqn{K_{IJ}(r)}{KIJ(r)}
     for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
   }
+  together with a column or columns named 
+  \code{"border"}, \code{"bord.modif"},
+  \code{"iso"} and/or \code{"trans"},
+  according to the selected edge corrections. These columns contain
+  estimates of the function \eqn{K_{IJ}(r)}{KIJ(r)}
+  obtained by the edge corrections named.
 }
 \details{
   The function \code{Kmulti}
@@ -97,17 +106,27 @@ Kmulti(X, I, J, breaks)
   a bounded window.
   The window (which is specified in \code{X} as \code{X$window})
   may have arbitrary shape.
+
   Biases due to edge effects are
   treated in the same manner as in \code{\link{Kest}}.
+  The edge corrections implemented here are
+  \describe{
+    \item{border}{the border method or
+      ``reduced sample'' estimator (see Ripley, 1988). This is
+      the least efficient (statistically) and the fastest to compute.
+      It can be computed for a window of arbitrary shape.
+    }
+    \item{isotropic/Ripley}{Ripley's isotropic correction
+      (see Ripley, 1988; Ohser, 1983).
+      This is currently implemented only for rectangular windows.
+    }
+    \item{translate}{Translation correction (Ohser, 1983).
+      Implemented for all window geometries.
+    }
+  }
 
-  There are several alternative estimators of \eqn{K}
-  based on different ``edge corrections''. 
-  The current implementation computes only the ``border correction''
-  (or ``reduced sample'') estimator
-  (Ripley, 1988; Baddeley, 2000).
-
-  The pair correlation function can also be applied to the
-  result of \code{Kmulti}; see \code{\link{pcf}}.
+  The pair correlation function \code{\link{pcf}} can also be applied to the
+  result of \code{Kmulti}.
 
 }
 \references{
@@ -167,7 +186,7 @@ Kmulti(X, I, J, breaks)
     sub <- longleaf[seq(1,longleaf$n, by=50), ]
     K <- Kmulti(sub, sub$marks <= 15, sub$marks >= 25)
     }    
-    \dontrun{plot(K$r, K$border,
+    \dontrun{plot(K$r, K$trans,
                   xlab="r", ylab="Kmulti(r)",
                   type="l", ylim=c(0,1))}
 

@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.2 $	$Date: 2002/01/17 09:44:54 $
+#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -92,8 +92,8 @@ marks.quad <- function(Q) {
 
 is.data <- function(Q) {
   verifyclass(Q, "quad")
-  return(c(rep(T, Q$data$n),
-	   rep(F, Q$dummy$n)))
+  return(c(rep(TRUE, Q$data$n),
+	   rep(FALSE, Q$dummy$n)))
 }
 
 equals.quad <- function(Q) {
@@ -101,8 +101,8 @@ equals.quad <- function(Q) {
     # where X = Q$data and U = union.quad(Q)
     n <- Q$data$n
     m <- Q$dummy$n
-    E <- matrix(F, nrow=n, ncol=n+m)
-    diag(E) <- T
+    E <- matrix(FALSE, nrow=n, ncol=n+m)
+    diag(E) <- TRUE
     E
 }
 

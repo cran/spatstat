@@ -1,6 +1,6 @@
-\name{catWaessle}
-\alias{catWaessle}
-\title{Cat Retina Data} 
+\name{ganglia}
+\alias{ganglia}
+\title{Cat Retinal Ganglia Data} 
 \description{
   Point pattern of retinal ganglion cells identified as `on' or `off'.
   A marked point pattern.
@@ -17,7 +17,7 @@
   }
   See \code{\link{ppp.object}} for details of the format.
 }
-\usage{data(catWaessle)}
+\usage{data(ganglia)}
 \source{W\"assle et al (1981), data supplied by Peter Diggle}
 \section{Notes}{
 The data represent a pattern of beta-type ganglion cells
@@ -30,7 +30,11 @@ with the resolution of fine detail in the cat's visual system.
 They can be classified anatomically as ``on'' or ``off''.
 Statistical independence of the ``on''- and ``off''-components would strengthen
 the claim that there are two separate channels for 
-``brightness'' and ``darkness'' as postulated by Hering in 1874. 
+``brightness'' and ``darkness'' as postulated by Hering in 1874.
+For details see Waessle et al (1981).
+
+These data have been analysed by Diggle (1986) and
+Van Lieshout and Baddeley (1999).
 }
 \references{
 Diggle, P. J. (1986).

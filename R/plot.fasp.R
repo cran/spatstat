@@ -1,7 +1,7 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.5 $   $Date: 2002/01/18 06:27:22 $
+#   $Revision: 1.6 $   $Date: 2002/05/13 12:41:10 $
 #
 plot.fasp <- function(x,formula=NULL,subset=NULL,lty=NULL,
                       col=NULL,title=NULL,...) {
@@ -22,16 +22,16 @@ nf <- length(formula)
 if(nf > 1) {
 	if(nf != length(x$fns))
 		stop("Wrong number of entries in formula argument.\n")
-	mfor <- T
-} else mfor <- F
+	mfor <- TRUE
+} else mfor <- FALSE
 
 # Check on the length of the subset argument.
 ns <- length(subset)
 if(ns > 1) {
 	if(ns != length(x$fns))
 		stop("Wrong number of entries in subset argument.\n")
-	msub <- T
-} else msub <- F
+	msub <- TRUE
+} else msub <- FALSE
 
 # Set up the array of plotting regions.
 	mfrow.save <- par("mfrow")
@@ -55,7 +55,7 @@ if(ns > 1) {
 # Now do the actual plotting.
 			k <- which[i,j]
 			if(is.na(k)) plot(0,0,type='n',xlim=c(0,1),
-					  ylim=c(0,1),axes=F,xlab='',ylab='')
+					  ylim=c(0,1),axes=FALSE,xlab='',ylab='')
 			else {
 				dat.loc <- x$fns[[k]]
 				sij <- if(msub) subset[[k]] else subset
@@ -82,7 +82,7 @@ if(ns > 1) {
 		
 	}
 	if(nm > 1 || subtit)
-          mtext(side=3,outer=T,line=1,text=overall,cex=1.2)
+          mtext(side=3,outer=TRUE,line=1,text=overall,cex=1.2)
 	else title(main=overall)
 	invisible()
 }

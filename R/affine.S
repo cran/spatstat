@@ -1,14 +1,16 @@
 #
 #	affine.S
 #
-#	$Revision: 1.1 $	$Date: 2001/11/21 09:07:22 $
+#	$Revision: 1.2 $	$Date: 2002/05/08 13:11:10 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
+  if(length(X$x) == 0 && length(X$y) == 0)
+    return(list(x=c(),y=c()))
   # Y = M X + V
   ans <- mat %*% rbind(X$x, X$y) + matrix(vec, nrow=2, ncol=length(X$x))
-  list(x = ans[1,],
-       y = ans[2,])
+  return(list(x = ans[1,],
+              y = ans[2,]))
 }
 
 "affine.owin" <- function(W,  mat=diag(c(1,1)), vec=c(0,0)) {

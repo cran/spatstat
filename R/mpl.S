@@ -1,5 +1,5 @@
 #
-#	$Revision: 4.6 $	$Date: 2001/12/11 15:29:17 $
+#	$Revision: 4.8 $	$Date: 2002/05/13 12:41:10 $
 #
 #    mpl()
 #          Fit a point process model to a two-dimensional point pattern
@@ -20,15 +20,15 @@ function(Q,
          data,
 	 correction="border",
 	 rbord = 0,
-         use.gam=F
+         use.gam=FALSE
 ) {
 #
 # Extract quadrature scheme 
 #
-	if(verifyclass(Q, "ppp", fatal = F)) {
+	if(verifyclass(Q, "ppp", fatal = FALSE)) {
 #		warning("using default quadrature scheme")
 		Q <- quadscheme(Q)   
-	} else if(!verifyclass(Q, "quad", fatal=F))
+	} else if(!verifyclass(Q, "quad", fatal=FALSE))
 		stop("First argument Q should be a quadrature scheme")
 #
 # Data points
@@ -43,10 +43,10 @@ want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.call <- deparse(sys.call())
-the.version <- "Spatstat 1.0; mpl.S $Date: 2001/12/11 15:29:17 $"
+the.version <- "Spatstat 1.1; mpl.S $Date: 2002/05/13 12:41:10 $"
 
-if(use.gam && exists("is.R") && is.R())
-  stop("gam() is not available in R; you have specified use.gam=T")
+if(use.gam && exists("is.R") && is.R()) 
+  require(mgcv)
         
 if(!want.trend && !want.inter) {
   # the model is the uniform Poisson process
@@ -88,7 +88,7 @@ n <- length(Y)
 MARKS <- marks.quad(Q)    # is NULL for unmarked patterns
 	
 glmdata <- data.frame(W=W, Y=Y)
-SUBSET <- rep(T, n)
+SUBSET <- rep(TRUE, n)
 
 zeroes <- attr(W, "zeroes")
 if(!is.null(zeroes))

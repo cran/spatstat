@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.3 $	$Date: 2001/11/12 10:40:04 $
+#	$Revision: 4.4 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 #
@@ -44,7 +44,7 @@ function(X, i=1, eps=NULL, r=NULL, breaks=NULL) {
         if(!is.marked(X))
           stop("point pattern has no \'marks\'")
         I <- (X$marks == i)
-        J <- rep(T, X$n)
+        J <- rep(TRUE, X$n)
         result <- Jmulti(X, I, J, eps, r, breaks)
 	return(result)
 }

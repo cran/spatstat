@@ -81,7 +81,7 @@
   quadrature points in that tile. 
  
   If \code{method="dirichlet"} then the optional arguments are
-  \code{(exact=T)}.
+  \code{(exact=TRUE)}.
   The quadrature points (both data and dummy) are used to construct the
   Dirichlet tessellation. The quadrature weight of each point is the
   area of its Dirichlet tile inside the quadrature region.

@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 1.9 $    $Date: 2002/01/18 06:35:13 $
+#    $Revision: 1.11 $    $Date: 2002/05/13 12:41:10 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by mpl().
@@ -9,8 +9,8 @@
 #
 #
 plot.ppm <- function(x, nx = 40, ny = 40, 
-		     superimpose = T,
-                     trend = T, cif = T, pause = T,
+		     superimpose = TRUE,
+                     trend = TRUE, cif = TRUE, pause = TRUE,
                      how=c("persp","image", "contour"),  ...)
 {
   
@@ -49,7 +49,7 @@ plot.ppm <- function(x, nx = 40, ny = 40,
 #                       whether to plot trend, cif
         
         if(!missing(trend) && !missing(cif) && !trend && !cif) {
-          cat("Nothing plotted - both \'trend\' and \'cif\' are F\n")
+          cat("Nothing plotted - both \'trend\' and \'cif\' are FALSE\n")
           return(invisible(NULL))
         }
 #                       suppress uninteresting plots
@@ -70,6 +70,10 @@ plot.ppm <- function(x, nx = 40, ny = 40,
 # Do the plotting --- first the trend, then the full cif
 # (if both are requested).
 #
+
+        if(pause)
+          oldpar <- par(ask=TRUE)
+          
 	types <- c("trend","cif")[c(trend,cif)]
 	for(ttt in types) {
           # compute the predictions
@@ -92,22 +96,16 @@ plot.ppm <- function(x, nx = 40, ny = 40,
                 persp = persp(xyz, ...),
                 image = {
                   plot(data$window, main="")
-                  image(xyz, add=T, ...)
-                  if(superimpose) plot(data, add=T)
+                  image(xyz, add=TRUE, ...)
+                  if(superimpose) plot(data, add=TRUE)
                 },
                 contour = {
                   plot(data$window, main="")
-                  contour(xyz, add=T, ...)
-                  if(superimpose) plot(data, add=T)
+                  contour(xyz, add=TRUE, ...)
+                  if(superimpose) plot(data, add=TRUE)
                 },
                 {stop(paste("Unrecognised plot style", style))}
               )
-              lastone <- (style == how[length(how)] &&
-                          ttt == types[length(types)] )
-              if(pause && !lastone) {
-                cat('Next plot? ')
-                readline()
-              }
             }
           } else {
             # marked points - slice the prediction at each level
@@ -127,29 +125,24 @@ plot.ppm <- function(x, nx = 40, ny = 40,
                   },
                   image = {
                     plot(data$window, main=main)
-                    image(slice, add=T, ...)
-                    if(superimpose) plot(data[data$marks == level], add=T)
+                    image(slice, add=TRUE, ...)
+                    if(superimpose) plot(data[data$marks == level], add=TRUE)
                   },
                   contour = {
                     plot(data$window, main=main)
-                    contour(slice, add=T, ...)
-                    if(superimpose) plot(data[data$marks == level], add=T)
+                    contour(slice, add=TRUE, ...)
+                    if(superimpose) plot(data[data$marks == level], add=TRUE)
                   },
                   {
                     stop(paste("Unrecognised plot style", style))
                   }
                 )
-              lastone <- (style == how[length(how)] &&
-                          ttt == types[length(types)] &&
-                          level == mrkvals[length(mrkvals)])
-              if(pause && !lastone) {
-                cat('Next plot? ')
-                readline()
-              }
               }
             }
           }
         }
-        invisible()
+        if(pause)
+          par(oldpar)
+        return(invisible())
 }      
 

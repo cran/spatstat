@@ -8,7 +8,7 @@
   \code{\link{fasp.object}}).
 }
 \usage{
-  allstats(pp, dataname=NULL, verb=F)
+  allstats(pp, dataname=NULL, verb=FALSE)
 }
 \arguments{
   \item{pp}{The observed point pattern, for which summary function
@@ -61,7 +61,7 @@
 
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J, and
-  \code{cbind(border,theo) ~ r} for K.}
+  \code{cbind(trans,theo) ~ r} for K.}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

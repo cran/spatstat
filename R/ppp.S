@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.5 $	$Date: 2002/01/18 06:53:42 $
+#	$Revision: 4.6 $	$Date: 2002/05/13 12:41:10 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -66,9 +66,9 @@ as.ppp <- function(X, W = NULL) {
         # In cases 2 and 4, if X also has an entry X$marks
         # then this will be interpreted as the marks vector for the pattern.
 	#
-	if(verifyclass(X, "ppp", fatal=F))
+	if(verifyclass(X, "ppp", fatal=FALSE))
 		return(X)
-        else if(verifyclass(X, "quad", fatal=F))
+        else if(verifyclass(X, "quad", fatal=FALSE))
                 return(union.quad(X))
 	else if(checkfields(X, 	c("x", "y", "xl", "xu", "yl", "yu"))) {
 		xrange <- c(X$xl, X$xu)
@@ -132,9 +132,19 @@ as.ppp <- function(X, W = NULL) {
 }
 
 # ------------------------------------------------------------------
+
+cut.ppp <- function(x, ...) {
+  x <- as.ppp(x)
+  if(!is.marked(x))
+    stop("x has no marks to cut")
+  x$marks <- cut(x$marks, ...)
+  return(x)
+}
+
+# ------------------------------------------------------------------
 #
 #
-scanpp <- function(filename, window, header=T, dir="", multitype=F) {
+scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
   filename <- paste(dir, filename, sep="")
   df <- read.table(filename, header=header)
   if(header) {
@@ -194,7 +204,7 @@ scanpp <- function(filename, window, header=T, dir="", multitype=F) {
 function(X, na.action="warn") {
     verifyclass(X, "ppp")
     if(is.null(X$marks))
-      return(F)
+      return(FALSE)
     if(any(is.na(X$marks)))
       switch(na.action,
              warn = {
@@ -202,13 +212,13 @@ function(X, na.action="warn") {
                     deparse(substitute(X))))
              },
              fatal = {
-               return(F)
+               return(FALSE)
              },
              ignore = {
-               return(T)
+               return(TRUE)
              }
       )
-    return(T)
+    return(TRUE)
 }
 
 "is.marked" <-
@@ -217,7 +227,7 @@ function(X, ...) {
 }
 
 "is.marked.default" <-
-  function(...) { return(F) }
+  function(...) { return(FALSE) }
 
 "unmark" <-
 function(X) {

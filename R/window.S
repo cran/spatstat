@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.10 $	$Date: 2002/01/17 10:15:06 $
+#	$Revision: 4.11 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 #	A window may be either
@@ -18,7 +18,7 @@
 #	
 #		- digital mask:
 #			defined by a binary image
-#			whose pixel values are T wherever the pixel
+#			whose pixel values are TRUE wherever the pixel
 #                       is inside the window
 #
 #	Any window is an object of class 'owin', 
@@ -82,10 +82,10 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
     ######### polygonal boundary ########
     #
     # test whether it's a single polygon or multiple polygons
-    if(verify.xypolygon(poly, fatal=F))
-      psingle <- T
-    else if(all(unlist(lapply(poly, verify.xypolygon, fatal=F))))
-      psingle <- F
+    if(verify.xypolygon(poly, fatal=FALSE))
+      psingle <- TRUE
+    else if(all(unlist(lapply(poly, verify.xypolygon, fatal=FALSE))))
+      psingle <- FALSE
     else
       stop("poly must be either a list(x,y) or a list of list(x,y)")
                   
@@ -185,7 +185,7 @@ as.owin <- function(W) {
 	#	a structure with entries xl, xu, yl, yu
 	#	an object of class 'ppp'
 
-	if(verifyclass(W, "owin", fatal=F))
+	if(verifyclass(W, "owin", fatal=FALSE))
 		return(W)
 	else if(checkfields(W, c("xrange", "yrange"))) {
 		Z <- owin(W$xrange, W$yrange)
@@ -196,7 +196,7 @@ as.owin <- function(W) {
 	} else if(checkfields(W, c("xl", "xu", "yl", "yu"))) {
 		Z <- owin(c(X$xl, X$xu),c(X$yl, X$yu))
 		return(Z)
-	} else if(verifyclass(W, "ppp", fatal=F))
+	} else if(verifyclass(W, "ppp", fatal=FALSE))
 		return(W$window)
 	else
 		stop("Can't interpret W as a window")
@@ -242,7 +242,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL) {
 
         # mask with all entries True
         out <- owin(w$xrange, w$yrange,
-                    mask=matrix(T, nrow=nr, ncol=nc))
+                    mask=matrix(TRUE, nrow=nr, ncol=nc))
         
         switch(w$type,
                rectangle={
@@ -284,15 +284,15 @@ as.polygonal <- function(W) {
 #
 # ----------------------------------------------------------------------
 
-validate.mask <- function(w, fatal=T) {
+validate.mask <- function(w, fatal=TRUE) {
   verifyclass(w, "owin", fatal=fatal)
   if(w$type == "mask")
-    return(T)
+    return(TRUE)
   if(fatal)
       stop(deparse(substitute(w)), "is not a binary mask")
   else {
       warning(deparse(substitute(w)), "is not a binary mask")
-      return(F)
+      return(FALSE)
   }
 }
              
@@ -371,7 +371,7 @@ complement.owin <- function(w) {
                  # first check whether one of the current boundary polygons
                  # is the bounding box itself (with + sign)
                  nvert <- unlist(lapply(bdry, function(a) { length(a$x) }))
-                 area <- unlist(lapply(bdry, area.xypolygon, test01=F))
+                 area <- unlist(lapply(bdry, area.xypolygon, test01=FALSE))
                  boxarea.mineps <- boxarea * (1 - .Machine$single.eps)
                  is.box <- (nvert == 4 & area >= boxarea.mineps)
                  if(sum(is.box) > 1)
@@ -424,9 +424,9 @@ inside.owin <- function(x, y, w) {
            xy <- list(x=x,y=y)
            bdry <- w$bdry
            total <- rep(0, length(x))
-           on.bdry <- rep(F, length(x))
+           on.bdry <- rep(FALSE, length(x))
            for(i in seq(bdry)) {
-             score <- inside.xypolygon(xy, bdry[[i]], test01=F)
+             score <- inside.xypolygon(xy, bdry[[i]], test01=FALSE)
              total <- total + score
              on.bdry <- on.bdry | attr(score, "on.boundary")
            }

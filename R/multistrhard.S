@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 1.6 $	$Date: 2001/11/05 08:20:43 $
+#    $Revision: 1.7 $	$Date: 2002/05/13 12:41:10 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -66,11 +66,11 @@ MultiStraussHard <- function(types, iradii, hradii) {
      # apply the relevant interaction distance to each pair of points
      rxu <- r[ tx, tu ]
      str <- (d < rxu)
-     str[is.na(str)] <- F
+     str[is.na(str)] <- FALSE
      # and the relevant hard core distance
      hxu <- h[ tx, tu ]
      forbid <- (d < hxu)
-     forbid[is.na(forbid)] <- F
+     forbid[is.na(forbid)] <- FALSE
      # form the potential 
      value <- ifelse(forbid, -Inf, str)
      # create numeric array for result

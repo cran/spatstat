@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.2 $	$Date: 2001/12/11 16:06:27 $
+#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 # Main functions:
@@ -36,7 +36,7 @@
 #
 #-------------------------------------------------------------------
 	
-countingweights <- function(id, areas, check=T) {
+countingweights <- function(id, areas, check=TRUE) {
 	#
 	# id:        cell indices of n points
 	#                     (length n, values in 1:k)
@@ -145,7 +145,7 @@ gridweights <- function(X, nx, ny, window=NULL) {
 }
 
 
-dirichlet.weights <- function(X, window = NULL, exact=T) {
+dirichlet.weights <- function(X, window = NULL, exact=TRUE) {
 	#
 	# Compute weights based on Dirichlet tessellation of the window 
 	# induced by the point pattern X. 
@@ -162,8 +162,8 @@ dirichlet.weights <- function(X, window = NULL, exact=T) {
 	# tessellation of the window frame induced by the points.
 	# [NOTE: the functionality of deldir to create dummy points
 	# is NOT used. ]
-	#	if exact=T	compute the exact areas, using "deldir"
-	#	if exact=F      compute the digital areas using exactdt()
+	#	if exact=TRUE	compute the exact areas, using "deldir"
+	#	if exact=FALSE      compute the digital areas using exactdt()
 	# 
 	# If the window is a mask, we compute the digital area of
 	# each tile of the Dirichlet tessellation by counting pixels.
@@ -179,7 +179,7 @@ dirichlet.weights <- function(X, window = NULL, exact=T) {
 
         if(exact && !exists("deldir")) {
           warning("\'deldir\' package not found; using discrete approximation")
-          exact <- F
+          exact <- FALSE
         }
 
 	if(exact && (win$type == "rectangle")) {

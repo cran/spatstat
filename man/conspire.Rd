@@ -6,7 +6,8 @@
   plot the left hand side of the formula versus the right hand side. 
 }
 \usage{
- conspire(indata, formula, subset=NULL, lty=NULL, col=NULL)
+ conspire(indata, formula, subset=NULL, lty=NULL, col=NULL, xlim, ylim,
+xlab, ylab)
 }
 \arguments{
   \item{indata}{
@@ -27,6 +28,18 @@
   \item{col}{
     (optional) numeric vector of values of the graphical parameter
     \code{col} controlling the colour of each plot.
+  }
+  \item{xlim}{
+    (optional) range of x axis
+  }
+  \item{ylim}{
+    (optional) range of y axis
+  }
+  \item{xlab}{
+    (optional) label for x axis
+  }
+  \item{ylab}{
+    (optional) label for y axis
   }
 }
 \value{

@@ -6,7 +6,7 @@
   for use in a quadrature scheme.
 }
 \usage{
- default.dummy(X, nx, ny, random=F)
+ default.dummy(X, nx, ny, random=FALSE)
 }
 \arguments{
   \item{X}{

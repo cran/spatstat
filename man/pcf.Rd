@@ -148,11 +148,11 @@
   }
 
   # multitype point pattern
-  data(catWaessle)
-  p <- pcf(alltypes(catWaessle, "K"), spar=0.5, method="b")
+  data(ganglia)
+  p <- pcf(alltypes(ganglia, "K"), spar=0.5, method="b")
   \dontrun{
          conspire(p, cbind(pcf,1) ~ r, subset="r <= 0.2",
-             title="Pair correlation functions for catWaessle")
+             title="Pair correlation functions for ganglia")
    }
 }
 \author{Adrian Baddeley

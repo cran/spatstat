@@ -1,4 +1,4 @@
-"catWaessle" <-
+"ganglia" <-
 structure(list(window = structure(list(type = "rectangle", xrange = c(0, 
 1), yrange = c(0, 0.7533)), .Names = c("type", "xrange", "yrange"
 ), class = "owin"), n = 135, x = c(0.013, 0.032, 0.065, 0.084, 

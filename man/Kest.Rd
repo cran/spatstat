@@ -6,12 +6,14 @@ Estimates the reduced second moment function \eqn{K(r)}
 from a point pattern in a window of arbitrary shape.
 }
 \synopsis{
-  Kest(X, r=NULL, breaks=NULL, slow, both, \dots)
+  Kest(X, r=NULL, breaks=NULL, slow,
+     correction=c("border", "isotropic", "Ripley", "translate"), \dots)
 }
 \usage{
   Kest(X)
   Kest(X, r)
-  Kest(X, breaks)
+  Kest(X, r, correction=c("border", "isotropic", "Ripley", "translate"))
+  Kest(X, breaks=breaks)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -23,23 +25,32 @@ from a point pattern in a window of arbitrary shape.
       vector of values for the argument \eqn{r} at which \eqn{K(r)} 
       should be evaluated. There is a sensible default.
     }
-    \item{breaks}
-    An alternative to the argument \code{r}.
-    Not normally invoked by the user.
-    See Details.
+    \item{breaks}{
+      An alternative to the argument \code{r}.
+      Not normally invoked by the user.
+      See Details.
+    }
+    \item{correction}{
+      A character vector containing any selection of the
+      options \code{"border"}, \code{"bord.modif"},
+      \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+      It specifies the edge correction(s) to be applied.
     }
 }
 \value{
-  A data frame containing
+  A data frame containing columns
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the function \eqn{K} has been  estimated
-  }
-  \item{border}{the ``reduced sample'' or ``border corrected''
-    estimator of \eqn{K(r)}
   }
   \item{theo}{the theoretical value \eqn{K(r) = \pi r^2}{K(r) = pi * r^2}
     for a stationary Poisson process
   }
+  together with columns named 
+  \code{"border"}, \code{"bord.modif"},
+  \code{"iso"} and/or \code{"trans"},
+  according to the selected edge corrections. These columns contain
+  estimates of the function \eqn{K(r)} obtained by the edge corrections
+  named.
 }
 \details{
   The \eqn{K} function (variously called ``Ripley's K-function''
@@ -75,11 +86,22 @@ from a point pattern in a window of arbitrary shape.
   The estimation of \eqn{K} is hampered by edge effects arising from 
   the unobservability of points of the random pattern outside the window. 
   An edge correction is needed to reduce bias (Baddeley, 1998; Ripley, 1988). 
-  The correction implemented here is the border method or
-  ``reduced sample'' estimator (Ripley, 1988). Although this is less
-  efficient than some alternative corrections, it has the advantage that it can
-  be computed for a window of arbitrary shape.
-
+  The corrections implemented here are
+  \describe{
+    \item{border}{the border method or
+      ``reduced sample'' estimator (see Ripley, 1988). This is
+      the least efficient (statistically) and the fastest to compute.
+      It can be computed for a window of arbitrary shape.
+    }
+    \item{isotropic/Ripley}{Ripley's isotropic correction
+      (see Ripley, 1988; Ohser, 1983).
+      This is currently implemented only for rectangular windows.
+    }
+    \item{translate}{Translation correction (Ohser, 1983).
+      Implemented for all window geometries, but slow for
+      complex windows. 
+    }
+  }
   Note that the estimator assumes the process is stationary (spatially
   homogeneous). For inhomogeneous point patterns, see
   \code{\link{Kinhom}}.
@@ -113,8 +135,13 @@ Baddeley, A.J. Spatial sampling and censoring.
     John Wiley and Sons, 1991.
 
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.
-    Academic Press, 1983.
+  Academic Press, 1983.
 
+  Ohser, J. (1983)
+  On estimators for the reduced second moment measure of
+  point processes. \emph{Mathematische Operationsforschung und
+  Statistik, series Statistics}, \bold{14}, 63 -- 71.
+    
   Ripley, B.D. \emph{Statistical inference for spatial processes}.
   Cambridge University Press, 1988.
 
@@ -162,13 +189,13 @@ Baddeley, A.J. Spatial sampling and censoring.
  legend(0.5, 2, c("empirical (border correction)", "Poisson process"), lty=c(1,2))
  }
  data(cells)
- K <- Kest(cells)
+ K <- Kest(cells, correction="isotropic")
  \dontrun{
- plot(K$r, K$border, type="l")
- plot(border ~ r, type="l", data=K)
+ plot(K$r, K$iso, type="l")
+ plot(iso ~ r, type="l", data=K)
  # restrict the plot to values of r less than 0.1
- plot(border ~ r, type="l", data=K[K$r <= 0.1, ])
- plot(border ~ r, type="l", data=K, subset=(r <= 0.1))
+ plot(iso ~ r, type="l", data=K[K$r <= 0.1, ])
+ plot(iso ~ r, type="l", data=K, subset=(r <= 0.1))
  }
 }
 \author{Adrian Baddeley

@@ -5,7 +5,7 @@
   Plot a two-dimensional window of observation for a spatial point pattern
 }
 \usage{
- plot.owin(x, main, \dots, box=TRUE, edge=0.04)
+ plot.owin(x, main, add=FALSE, \dots, box=TRUE, edge=0.04)
 }
 \arguments{
   \item{x}{
@@ -16,6 +16,10 @@
   }
   \item{main}{
     text to be displayed as a title above the plot.
+  }
+  \item{add}{
+    logical flag: if \code{TRUE}, draw the window in 
+    the current plot; if \code{FALSE}, generate a new plot.
   }
   \item{\dots}{
     extra arguments passed to the generic \code{\link{plot}} function.

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.4 $   $Date: 2001/11/26 09:51:16 $
+#    $Revision: 4.6 $   $Date: 2002/05/15 22:13:17 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -112,11 +112,12 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
 }
 
 "rpoispp" <-
-  function(lambda, max, win = owin(c(0,1),c(0,1))) {
+  function(lambda, max, win = owin(c(0,1),c(0,1)), ...) {
     # arguments:
     #     win     observation window (of class 'owin')
-    #     lambda  intensity - constant or function(x,y)
-    #     max     maximum possible value of lambda(x,y)
+    #     lambda  intensity - constant or function(x,y,...)
+    #     max     maximum possible value of lambda(x,y,...)
+    #   ...       arguments passed to lambda(x, y, ...)
     win <- as.owin(win)
     
     if(is.numeric(lambda))
@@ -124,7 +125,7 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
       return(runifpoispp(lambda, win))
     # inhomogeneous Poisson - use rejection filtering 
     X <- runifpoispp(max, win)  # includes sanity checks on `max'
-    prob <- lambda(X$x, X$y)/max
+    prob <- lambda(X$x, X$y, ...)/max
     u <- runif(X$n)
     retain <- (u <= prob)
     X <- X[retain, ]
@@ -153,7 +154,7 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
     close <- (d <= r)
 
     # random order 1:n
-    age <- sample(seq(X$n), X$n, replace=F)
+    age <- sample(seq(X$n), X$n, replace=FALSE)
     earlier <- outer(age, age, ">")
 
     conflict <- close & earlier

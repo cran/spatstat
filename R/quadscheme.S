@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.1 $    $Date: 2001/08/07 10:14:29 $
+#      $Revision: 4.2 $    $Date: 2002/05/13 12:41:10 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -147,7 +147,7 @@ quadscheme.spatial <-
 
 
 "replicate" <-
-function(pp, markset, fac=T) {
+function(pp, markset, fac=TRUE) {
   # given an unmarked point pattern 'pp'
   # and a finite set of marks,
   # create the marked point pattern which is

@@ -6,7 +6,7 @@
   from each pixel in a window to the boundary of the window.
 }
 \usage{
- bdist.pixels(w, \dots, coords=T)
+ bdist.pixels(w, \dots, coords=TRUE)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}).}
@@ -51,7 +51,7 @@
   u <- owin(c(0,1),c(0,1))
   d <- bdist.pixels(u, eps=0.01)
   image(d)
-  d <- bdist.pixels(u, eps=0.01, coords=F)
+  d <- bdist.pixels(u, eps=0.01, coords=FALSE)
   mean(d >= 0.1)
   # value is approx (1 - 2 * 0.1)^2 = 0.64
 }

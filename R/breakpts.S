@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.5 $	$Date: 2001/11/16 09:03:00 $
+#	$Revision: 1.6 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -55,7 +55,7 @@
 #                       or NULL if cells not evenly spaced
 #       
 # --------------------------------------------------------------------
-breakpts <- function(val, maxi, even=F, npos=NULL, step=NULL) {
+breakpts <- function(val, maxi, even=FALSE, npos=NULL, step=NULL) {
   out <- list(val=val, max=maxi, ncells=length(val)-1, r = val[-1],
               even=even, npos=npos, step=step)
   class(out) <- "breakpts"
@@ -75,7 +75,7 @@ function(bmax, npos, bstep) {
           val <- c(-bstep,val)
           npos <- length(val) - 2
         }
-        breakpts(val, bmax, T, npos, bstep)
+        breakpts(val, bmax, TRUE, npos, bstep)
 }
 
 "as.breakpts" <- function(...) {
@@ -97,10 +97,10 @@ function(bmax, npos, bstep) {
       steps <- diff(X)
       if(all(steps == mean(steps)))
         # equally spaced
-        return(breakpts(X, max(X), T, length(X)-2, steps[1]))
+        return(breakpts(X, max(X), TRUE, length(X)-2, steps[1]))
       else
         # unknown spacing
-        return(breakpts(X, max(X), F))
+        return(breakpts(X, max(X), FALSE))
     }
   } else {
 

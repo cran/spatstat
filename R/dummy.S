@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.3 $     $Date: 2001/12/11 15:29:17 $
+#       $Revision: 4.4 $     $Date: 2002/05/13 12:41:10 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -149,7 +149,7 @@ concatxy <- function(...) {
 
 #------------------------------------------------------------
 
-default.dummy <- function(X, nx=NULL, ny=NULL, random=F) {
+default.dummy <- function(X, nx=NULL, ny=NULL, random=FALSE) {
 	# default action to create dummy points.
 	# regular grid of (order) nx * ny tiles
 	# plus corner points of window frame.
