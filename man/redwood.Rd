@@ -1,7 +1,7 @@
 \name{redwood}
 \alias{redwood}
 \title{
-  California Redwoods Point Pattern
+  California Redwoods Point Pattern (Ripley's Subset)
 }
 \description{
   Locations of 62 seedlings and saplings 
@@ -14,8 +14,11 @@
   in a subregion that has been rescaled to a unit square.
  
   There are many further analyses of this dataset. It is often used as a 
-  canonical illustration of a clustered point pattern
+  canonical example of a clustered point pattern
   (see e.g. Diggle, 1983).
+
+  The original, full redwood dataset is supplied in the \code{spatstat}
+  library as \code{redwoodfull}.
 } 
 \format{
   An object of class \code{"ppp"}
@@ -27,7 +30,8 @@
 }
 \usage{data(redwood)}
 \source{Strauss (1975), subset extracted by Ripley (1977)}
-\section{Notes}{
+\seealso{
+  \code{\link{redwoodfull}}
 }
 \references{
   Diggle, P.J. (1983)

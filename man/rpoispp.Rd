@@ -6,12 +6,12 @@
   (homogeneous or inhomogeneous) Poisson process.
 }
 \usage{
- rpoispp(lambda, max, win)
+ rpoispp(lambda, max, win, \dots)
 }
 \arguments{
   \item{lambda}{
     Intensity of the Poisson process.
-    Either a single positive number, or a \code{function(x,y)}.
+    Either a single positive number, or a \code{function(x,y, \dots)}.
   }
   \item{max}{
     An upper bound for the value of \code{lambda(x,y)},
@@ -21,6 +21,9 @@
     Window in which to simulate the pattern.
     An object of class \code{"owin"}
     or something acceptable to \code{\link{as.owin}}.
+  }
+  \item{\dots}{
+    Arguments passed to \code{lambda} if it is a function.
   }
 }
 \value{
@@ -34,11 +37,11 @@
  
   If \code{lambda} is a function, then this algorithm generates a realisation
   of the inhomogeneous Poisson process with intensity function
-  \code{lambda(x,y)} at spatial location \code{(x,y)}.
+  \code{lambda(x,y,\dots)} at spatial location \code{(x,y)}.
   The function \code{lambda} must work correctly with vectors \code{x}
   and \code{y}.
   The value \code{max} must be given and must be an upper bound on the 
-  values of \code{lambda(x,y)} for all locations \code{(x, y)}
+  values of \code{lambda(x,y,\dots)} for all locations \code{(x, y)}
   inside the window \code{win}. 
  
   To generate an inhomogeneous Poisson process
@@ -64,7 +67,11 @@
  # with intensity lambda(x,y) = 100 * exp(-3*x)
  # Intensity is bounded by 100
  pp <- rpoispp(function(x,y) {100 * exp(-3*x)}, 100)
- 
+
+ # How to tune the coefficient of x
+ lamb <- function(x,y,a) { 100 * exp( - a * x)}
+ pp <- rpoispp(lamb, 100, a=3)
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

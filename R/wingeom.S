@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.5 $	$Date: 2002/01/17 10:43:13 $
+#	$Revision: 4.7 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 #
@@ -45,12 +45,12 @@ eroded.areas <- function(w, r) {
                },
                mask = {
                  # distances from each pixel to window boundary
-                 b <- bdist.pixels(w, coords=F)
+                 b <- bdist.pixels(w, coords=FALSE)
                  # histogram breaks to satisfy hist()
                  Bmax <- max(b, r)
                  breaks <- c(-1,r,Bmax+1)
                  # histogram of boundary distances
-                 h <- hist(b, breaks=breaks, plot=F, probability=F)$counts
+                 h <- hist(b, breaks=breaks, plot=FALSE, probability=FALSE)$counts
                  # reverse cumulative histogram
                  H <- rev(cumsum(rev(h)))
                  # drop first entry corresponding to r=-1
@@ -109,16 +109,16 @@ overlap.owin <- function(A, B) {
   if(At=="mask") {
     # count pixels in A that belong to B
     pixelarea <- abs(A$xstep * A$ystep)
-    x <- as.vector(raster.x(A))
-    y <- as.vector(raster.y(A))
-    ok <- inside.owin(x, y, B)
+    x <- as.vector(raster.x(A)[A$m])
+    y <- as.vector(raster.y(A)[A$m])
+    ok <- inside.owin(x, y, B) 
     return(pixelarea * sum(ok))
   }
   if(Bt== "mask") {
     # count pixels in B that belong to A
     pixelarea <- abs(B$xstep * B$ystep)
-    x <- as.vector(raster.x(B))
-    y <- as.vector(raster.y(B))
+    x <- as.vector(raster.x(B)[B$m])
+    y <- as.vector(raster.y(B)[B$m])
     ok <- inside.owin(x, y, A)
     return(pixelarea * sum(ok))
   }

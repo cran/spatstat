@@ -2,7 +2,7 @@
 #	exactPdt.S
 #	S function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.1 $	$Date: 2001/08/07 09:48:04 $
+#	$Revision: 4.2 $	$Date: 2002/05/13 12:41:10 $
 #
 
 "exactPdt"<-
@@ -17,8 +17,8 @@ function(im)
 	nc <- im$dim[2]
 # pad out the input image with a margin of width 1 on all sides
 	x <- im$m
-	x <- cbind(F, x, F)
-	x <- rbind(F, x, F)
+	x <- cbind(FALSE, x, FALSE)
+	x <- rbind(FALSE, x, FALSE)
 #	
 	res <- .C("ps_exact_dt_S",
 		as.double(im$xrange[1]),
@@ -33,10 +33,10 @@ function(im)
 		cc = as.integer(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		bb = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2))
 		)
-	dist <- matrix(res$dd, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
-	rows <- matrix(res$rr, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
-	cols <- matrix(res$cc, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
-	bdist<- matrix(res$bb, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
+	dist <- matrix(res$dd, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+	rows <- matrix(res$rr, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+	cols <- matrix(res$cc, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+	bdist<- matrix(res$bb, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
 
         # convert from C to S
         rows <- rows + 1

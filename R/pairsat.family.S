@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.9 $	$Date: 2001/08/09 11:35:41 $
+#    $Revision: 1.12 $	$Date: 2002/05/13 12:41:10 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -110,16 +110,20 @@ if(length(dim(POT))==2)
         POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
                           
 if(correction == "translate") {
-	if(X$window$type != "rectangle")
-		stop("sorry, translation correction is not yet implemented",
-                     "for irregular windows")
-	wide <- diff(X$window$xrange)
-	high <- diff(X$window$yrange)
-        DX <- abs(outer(x,xx,"-"))
-        DY <- abs(outer(y,yy,"-"))
-                                        # translation correction
-        edgewt <- wide * high / ((wide - DX) * (high - DY))
-        edgewt <- pmin(edgewt, 1000)    # arbitrary stabilisation
+        edgewt <- edge.Trans(X, U)
+        # sanity check ("everybody knows there ain't no...")
+        if(!is.matrix(edgewt))
+          stop("internal error: edge.Trans() did not yield a matrix")
+        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
+          stop("internal error: edge weights matrix returned by edge.Trans() has wrong dimensions")
+        POT <- c(edgewt) * POT
+} else if(correction == "isotropic" || correction == "Ripley") {
+        # weights are required for contributions from QUADRATURE points
+        edgewt <- t(edge.Ripley(U, t(M), X$window))
+        if(!is.matrix(edgewt))
+          stop("internal error: edge.Ripley() did not return a matrix")
+        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
+          stop("internal error: edge weights matrix returned by edge.Ripley() has wrong dimensions")
         POT <- c(edgewt) * POT
 }
 
@@ -150,7 +154,7 @@ V.sat <- array(pmin(saturate, V), dim=dim(V))
 is.data <- matcolany(Equal)              # logical vector corresp. to V
 
 # Extract potential sums for data points only
-V.data <- V[is.data, , drop=F]
+V.data <- V[is.data, , drop=FALSE]
 
 # replicate them so that V.dat.rep[i,j,k] = V.data[i, k]
 V.dat.rep <- aperm(array(V.data, dim=c(dim(V.data), nall)), c(1,3,2))
@@ -176,7 +180,7 @@ V.after.sat <- array(pmin(saturate, V.after), dim=dim(V.after))
 V.dat.rep.sat <- array(pmin(saturate, V.dat.rep), dim=dim(V.dat.rep))
 # difference
 V.delta <- V.after.sat - V.dat.rep.sat
-V.delta <- ifelse(col.is.data, V.delta, -V.delta)
+V.delta <- ifelse(col.is.data, -V.delta, V.delta)
 #
 # (d) Sum (c) over all data points i
 V.delta.sum <- apply(V.delta, c(2,3), sum)

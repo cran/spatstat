@@ -41,8 +41,8 @@
   Standard point pattern datasets provided with the package
   include
   \code{\link{bramblecanes}},
-  \code{\link{catHughes}},
-  \code{\link{catWaessle}},
+  \code{\link{amacrine}},
+  \code{\link{ganglia}},
   \code{\link{cells}},
   \code{\link{lansing}},
   \code{\link{longleaf}},
@@ -96,7 +96,7 @@
   y <- runif(100)
   X <- ppp(x, y, c(0,1),c(0,1))
   \dontrun{plot(X)}
-  mar <- sample(1:3, 100, replace=T)
+  mar <- sample(1:3, 100, replace=TRUE)
   mm <- ppp(x, y, c(0,1), c(0,1), marks=mar)
   \dontrun{plot(mm)}
   # points with mark equal to 2

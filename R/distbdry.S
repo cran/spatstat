@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.2 $	$Date: 2001/08/07 09:22:52 $
+#	$Revision: 4.3 $	$Date: 2002/05/13 12:41:10 $
 #
 # -------- functions ----------------------------------------
 #
@@ -53,7 +53,7 @@ function(X)
                  }
                },
                mask = {
-                 b <- bdist.pixels(window, coords=F)
+                 b <- bdist.pixels(window, coords=FALSE)
                  loc <- nearest.raster.point(x,y,window)
                  result <- numeric(X$n)
                  for(i in 1:(X$n)) 
@@ -64,7 +64,7 @@ function(X)
         return(result)
 }
 
-"bdist.pixels" <- function(w, ..., coords=T) {
+"bdist.pixels" <- function(w, ..., coords=TRUE) {
 	verifyclass(w, "owin")
 
         masque <- as.mask(w, ...)
@@ -128,7 +128,7 @@ erode.mask <- function(w, r) {
         if(w$type != "mask")
           stop("window w is not of type \'mask\'")
         
-	bb <- bdist.pixels(w, coords=F)
+	bb <- bdist.pixels(w, coords=FALSE)
 
         if(r > max(bb))
           warning("eroded mask is empty")
@@ -138,7 +138,7 @@ erode.mask <- function(w, r) {
 }
 
         
-erode.owin <- function(w, r, shrink.frame=T, ...) {
+erode.owin <- function(w, r, shrink.frame=TRUE, ...) {
 	verifyclass(w, "owin")
 
         if(2 * r >= max(diff(w$xrange), diff(w$yrange)))

@@ -201,21 +201,21 @@ Gcross(X, i=1, j=2, breaks)
 }
 \examples{
     \dontrun{library(spatstat)}
-    data(catWaessle)
+    data(ganglia)
      # cat retina data: types 0,1 represent off/on
-    G01 <- Gcross(catWaessle, "0", "1") # note: "0" not 0
+    G01 <- Gcross(ganglia, "0", "1") # note: "0" not 0
     \dontrun{plot(G01$r, G01$km,
                   xlab="r", ylab="G01(r)",
                   type="l", ylim=c(0,1))}
-    G10 <- Gcross(catWaessle, "1", "0")
+    G10 <- Gcross(ganglia, "1", "0")
     # Poisson theoretical curve
     lambda1 <-
-         table(catWaessle$marks)["1"]/area.owin(catWaessle$window)
+         table(ganglia$marks)["1"]/area.owin(ganglia$window)
     \dontrun{lines(G01$r, 1 - exp( - lambda1 * pi * G01$r^2), lty=2)}
 
     # empty space function of type 1 points
     \dontrun{
-       F1 <- Fest(catWaessle[catWaessle$marks == "1"], r = G01$r, eps=0.01)
+       F1 <- Fest(ganglia[ganglia$marks == "1"], r = G01$r, eps=0.01)
        lines(F1$r, F1$km, lty=3)
     }
 

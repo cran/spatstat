@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 1.7 $	$Date: 2001/11/05 08:20:43 $
+#    $Revision: 1.8 $	$Date: 2002/05/13 12:41:10 $
 #
 #    The multitype Strauss process
 #
@@ -65,7 +65,7 @@ MultiStrauss <- function(types, radii) {
      # apply relevant threshold to each pair of points
      str <- (d <= rxu)
      # create logical array for result
-     z <- array(F, dim=c(dim(d), npairs),
+     z <- array(FALSE, dim=c(dim(d), npairs),
                 dimnames=list(character(0), character(0), vname))
      # assign str[i,j] -> z[i,j,k] where k is relevant interaction code
      for(i in 1:nordpairs) {

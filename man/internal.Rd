@@ -16,6 +16,9 @@
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
+\alias{dgpot}
+\alias{edge.Ripley}
+\alias{edge.Trans}
 \alias{equals.quad}          
 \alias{erode.mask}
 \alias{even.breaks.owin}
@@ -26,6 +29,10 @@
 \alias{handle.r.b.args}
 \alias{identical.formulae}
 \alias{inside.xypolygon}     
+\alias{intX.owin}     
+\alias{intX.xypolygon}     
+\alias{intY.owin}     
+\alias{intY.xypolygon}     
 \alias{is.data}
 \alias{is.marked}
 \alias{is.marked.default}    
@@ -35,6 +42,7 @@
 \alias{km.rs}
 \alias{Kount}
 \alias{Kwtsum}               
+\alias{lookup.im}
 \alias{make.even.breaks}
 \alias{markspace.integral}
 \alias{marks.quad}           
@@ -43,9 +51,13 @@
 \alias{matcolsum}            
 \alias{matrowall}
 \alias{matrowany}
-\alias{matrowsum}            
+\alias{matrowsum}
+\alias{meanX.owin}
+\alias{meanY.owin}
+\alias{mkcor}
 \alias{MultiPair.checkmatrix}
 \alias{multipair.family}
+\alias{nearest.pixel}
 \alias{nndist}
 \alias{no.trend.ppm}
 \alias{n.quad}               
@@ -66,6 +78,7 @@
 \alias{runifpoispp}          
 \alias{runifrect}
 \alias{scanpp}
+\alias{setcov}
 \alias{shiftxy}              
 \alias{sympoly}
 \alias{termsinformula}
@@ -78,6 +91,7 @@
 \alias{validate.mask}        
 \alias{verifyclass}
 \alias{verify.xypolygon}
+\alias{whist}               
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}               
@@ -92,27 +106,34 @@ area.xypolygon(polly)
 as.breakpts(\dots)
 as.polygonal(W)
 bdrylength.xypolygon(polly)
-breakpts(val, maxi, even = F, npos = NULL, step = NULL)
+breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
-countingweights(id, areas, check = T)
+countingweights(id, areas, check = TRUE)
 crossdist(x1, y1, x2, y2)            
 default.ngrid(X)
+dgpot(tt,par)
 discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l)
+edge.Ripley(X, r, W)
+edge.Trans(X, Y, W, exact, trim)
 equals.quad(Q)          
 erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(im)
-getfields(X, L, fatal = T)
+getfields(X, L, fatal = TRUE)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
 identical.formulae(a,b)
-inside.xypolygon(pts, polly, test01 = T)     
+inside.xypolygon(pts, polly, test01 = TRUE)     
+intX.owin(w)
+intX.xypolygon(polly)
+intY.owin(w)
+intY.xypolygon(polly)
 is.data(Q)
 is.marked(X, \dots)
 is.marked.default(\dots)  
@@ -120,8 +141,9 @@ is.marked.ppp(X, na.action="warn")
 is.poisson.ppm(x)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
-Kount(d, b, breaks, slow = F)
-Kwtsum(d, b, wi, wj, breaks)               
+Kount(d, b, breaks, slow = FALSE)
+Kwtsum(d, b, wi, wj, breaks)
+lookup.im(im, x, y)
 make.even.breaks(bmax, npos, bstep)
 markspace.integral(X)
 marks.quad(Q)           
@@ -130,14 +152,18 @@ matcolany(x)
 matcolsum(x)            
 matrowall(x)
 matrowany(x)
-matrowsum(x)            
+matrowsum(x)
+meanX.owin(w)            
+meanY.owin(w)
+mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)      
 MultiPair.checkmatrix(mat, n, name)
 multipair.family
+nearest.pixel(x, y, im)
 nndist(x, y)
 no.trend.ppm(x)
 n.quad(Q)               
 overlap.owin(A,B)
-overlap.trapezium(xa, ya, xb, yb, verb = F)
+overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)   
 pairdist(x, y)
 polynom(x, \dots)
@@ -146,31 +172,33 @@ print.isf(x, \dots)
 quad(data, dummy, w)
 quadscheme.replicated(data, dummy = default.dummy(data), method = "grid", \dots)
 quadscheme.spatial(data, dummy = default.dummy(data), method = "grid", \dots)
-replicate(pp, markset, fac = T)
+replicate(pp, markset, fac = TRUE)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)
 runifdisc(n, r = 1, x = 0, y = 0)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
-scanpp(filename, window, header = T, dir = "", multitype = F)
+scanpp(filename, window, header = TRUE, dir = "", multitype = FALSE)
+setcov(W)
 shiftxy(X, vec = c(0, 0))              
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
 tilemiddles(W, nx, ny)
-try.FGJKest(niter = 20, lambda = 25, r = seq(0, sqrt(2), 0.02), eps = 0.01, slow = F)
+try.FGJKest(niter = 20, lambda = 25, r = seq(0, sqrt(2), 0.02), eps = 0.01, slow = FALSE)
 try.Kcross(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R = 0.2)           
 unit.square()
 update.interact(object, \dots)
-validate.mask(w, fatal=T)        
-verifyclass(X, C, N = deparse(substitute(X)), fatal = T)
-verify.xypolygon(p, fatal=T)
+validate.mask(w, fatal=TRUE)        
+verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
+verify.xypolygon(p, fatal=TRUE)
+whist(x,breaks,weights)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)               
 }
 
 \details{
-  These are not to be called by the user.
+  These are usually not to be called by the user.
 }
 \keyword{internal}

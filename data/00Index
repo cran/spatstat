@@ -1,11 +1,15 @@
-bramblecanes             Hutchings' Bramble Canes data
-catHughes                Hughes' Cat Retina Data
-catWaessle               Cat Retina Data
-cells                    Biological Cells Point Pattern
-demopat                  Artificial Data Point Pattern
-lansing                  Lansing Woods Point Pattern
-longleaf                 Longleaf Pines Point Pattern
-nztrees                  New Zealand Trees Point Pattern
-redwood                  California Redwoods Point Pattern
-simdat                   Simulated Point Pattern
-swedishpines             Swedish Pines Point Pattern
+amacrine                Hughes' Amacrine Cell Data
+bramblecanes            Hutchings' Bramble Canes data
+cells                   Biological Cells Point Pattern 
+demopat                 Artificial Data Point Pattern 
+ganglia                 Cat Retinal Ganglia Data
+hamster                 Aherne's hamster tumour data
+lansing                 Lansing Woods Point Pattern 
+longleaf                Longleaf Pines Point Pattern 
+nztrees                 New Zealand Trees Point Pattern 
+redwood                 California Redwoods Point Pattern (Ripley's
+                        Subset) 
+redwoodfull             California Redwoods Point Pattern (Entire
+                        Dataset) 
+simdat                  Simulated Point Pattern 
+swedishpines            Swedish Pines Point Pattern 

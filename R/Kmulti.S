@@ -4,10 +4,8 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 4.4 $	$Date: 2001/11/06 11:05:09 $
+#	$Revision: 5.2 $	$Date: 2002/05/13 12:41:10 $
 #
-#	Border correction only.
-#	Arbitrary window.
 #
 # -------- functions ----------------------------------------
 #	Kcross()	cross-type K function K_{ij}
@@ -27,31 +25,23 @@
 #				including 'marks' vector
 #	r		distance values at which to compute K	
 #
-# -------- standard outputs ------------------------------	
-#	border:		cross K function estimated by border method
-#			using standard formula (denominator = count of points)
-#
-#       bord.modif:	cross K function estimated by border method
-#			using modified formula 
-#			(denominator = area of eroded window
+# -------- standard output ------------------------------
+#      A data frame with columns named
 #
 #	r:		same as input
 #
+#	trans:		K function estimated by translation correction
 #
-# -------- example -----------------------------------------
+#	iso:		K function estimated by Ripley isotropic correction
 #
-#	x <- runif(50)
-#	y <- runif(50)
-#	m <- c(rep(1,25),rep(2,25))
-#	X <- ppp(x,y,c(0,1),c(0,1),marks=m)
-# either:
-#	r <- seq(0,0.5,length=50)
-#	k <- Kcross(X, 1, 2, r)$border
-#	plot(r, k, type="l")
-#	lines(r, pi * r^2, lty=2)
-# or:
-#       Kdat <- Kcross(X, 1, 2)
-#       plot(border ~ r, type="l", data=Kdat)
+#	theo:		K function for Poisson ( = pi * r ^2 )
+#
+#	border:		K function estimated by border method
+#			using standard formula (denominator = count of points)
+#
+#       bord.modif:	K function estimated by border method
+#			using modified formula 
+#			(denominator = area of eroded window
 #
 # ------------------------------------------------------------------------
 
@@ -74,7 +64,10 @@ function(x1, y1, x2, y2)
 }
 
 "Kcross" <- 
-function(X, i=1, j=2, r=NULL, breaks=NULL, ...) {
+function(X, i=1, j=2, r=NULL, breaks=NULL,
+         correction =c("border", "isotropic", "Ripley", "translate") , ...)
+{
+    
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
@@ -89,13 +82,15 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...) {
 }
 
 "Kdot" <- 
-function(X, i=1, r=NULL, breaks=NULL, ...) {
+function(X, i=1, r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") , ...)
+{
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
 	
 	I <- (X$marks == i)
-	J <- rep(T, X$n)  # i.e. all points
+	J <- rep(TRUE, X$n)  # i.e. all points
 	
 	if(!any(I)) stop(paste("No points have mark i =", i))
 	
@@ -104,18 +99,32 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 
 
 "Kmulti"<-
-function(X, I, J, r=NULL, breaks=NULL, ...)
+function(X, I, J, r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") , ...)
 {
 	verifyclass(X, "ppp")
 
 	npoints <- X$n
 	x <- X$x
 	y <- X$y
-	area <- area.owin(X$window)
+        W <- X$window
+	area <- area.owin(W)
 
-        breaks <- handle.r.b.args(r, breaks, X$window)
+        breaks <- handle.r.b.args(r, breaks, W)
         r <- breaks$r
         
+        # available selection of edge corrections depends on window
+        if(W$type != "rectangle") {
+           iso <- (correction == "isotropic") | (correction == "Ripley")
+           if(all(iso))
+             stop("Isotropic correction not implemented for non-rectangular windows")
+           if(any(iso)) {
+             if(!missing(correction))
+               warning("Isotropic correction not implemented for non-rectangular windows")
+             correction <- correction[!iso]
+           }
+        }
+         
 	if(!is.logical(I) || !is.logical(J))
 		stop("I and J must be logical vectors")
 	if(length(I) != npoints || length(J) != npoints)
@@ -130,34 +139,64 @@ function(X, I, J, r=NULL, breaks=NULL, ...)
 	lambdaI <- nI/area
 	lambdaJ <- nJ/area
 
+# This will be the output data frame
+# It will be given more columns later        
+        K <- data.frame(r=r, theo= pi * r^2)
+        
 # interpoint distances		
 	d <- crossdist(x[I], y[I], x[J], y[J])
 # distances to boundary	
 	b <- (bdist.points(X))[I]
         
-# interpoint distances that refer to identical points
-# are excluded from consideration by setting them to infinity        
+# Determine which interpoint distances d[i,j] refer to the same point
+# (not just which distances are zero)        
+        identical <- matrix(FALSE, nrow=nI, ncol=nJ)
         common <- I & J
         if(any(common)) {
           Irow <- cumsum(I)
           Jcol <- cumsum(J)
           icommon <- (1:npoints)[common]
           for(i in icommon)
-            d[Irow[i], Jcol[i]] <- Inf
+            identical[Irow[i], Jcol[i]] <- TRUE
         }
-          
-# border correction estimator          
-	RS <- Kount(d, b, breaks, slow=F)  
-        
-        K.b1 <- RS$numerator/(lambdaJ * RS$denom.count)
 
-# variant 
-        denom.area <- eroded.areas(X$window, r)
-        K.b2 <- RS$numerator/(denom.area * nI * nJ)
-
-# theoretical value for marked Poisson
-        theo <- pi * r^2
+# Compute estimates by each of the selected edge corrections.
         
-        return(data.frame(border=K.b1, bord.modif = K.b2, r=r, theo=theo))
+        if(any(correction == "border" | correction == "bord.modif")) {
+          # border method
+          # Compute distances to boundary
+          b <- bdist.points(X[I])
+          # Distances corresponding to identical pairs
+          # are excluded from consideration
+          d[identical] <- Inf
+          # apply reduced sample algorithm
+          RS <- Kount(d, b, breaks, slow=FALSE)
+          if(any(correction == "border"))
+            K$border <- RS$numerator/(lambdaJ * RS$denom.count)
+          if(any(correction == "bord.modif")) {
+            denom.area <- eroded.areas(W, r)
+            K$bord.modif <- RS$numerator/(denom.area * nI * nJ)
+          }
+          # reset identical pairs to original values
+          d[identical] <- 0
+        }
+        if(any(correction == "translate")) {
+          # translation correction
+            edgewt <- edge.Trans(X[I], X[J])
+            wh <- whist(d[!identical], breaks$val, edgewt[!identical])
+            K$trans <- cumsum(wh)/(lambdaI * lambdaJ * area)
+            rmax <- diameter(W)/2
+            K$trans[r >= rmax] <- NA
+        }
+        if(any(correction == "isotropic" | correction == "Ripley")) {
+          # Ripley isotropic correction
+            edgewt <- edge.Ripley(X[I], d)
+            wh <- whist(d[!identical], breaks$val, edgewt[!identical])
+            K$iso <- cumsum(wh)/(lambdaI * lambdaJ * area)
+            rmax <- diameter(W)/2
+            K$iso[r >= rmax] <- NA
+        }
+
+        return(K)
           
 }

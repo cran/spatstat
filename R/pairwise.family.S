@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.4 $	$Date: 2001/08/07 08:44:48 $
+#    $Revision: 1.6 $	$Date: 2002/05/06 09:29:11 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -53,8 +53,11 @@ x <- X$x
 y <- X$y
 xx <- U$x
 yy <- U$y
-  
-if(!any(correction == c("periodic", "border", "translate", "none")))
+
+if(length(correction) > 1)
+  stop("Only one edge correction allowed at a time!")
+
+if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley", "none")))
   stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
           
 #  
@@ -96,16 +99,20 @@ if(length(dim(POT))==2)
         POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
                           
 if(correction == "translate") {
-	if(X$window$type != "rectangle")
-		stop("sorry, translation correction is not yet implemented",
-                     "for irregular windows")
-	wide <- diff(X$window$xrange)
-	high <- diff(X$window$yrange)
-        DX <- abs(outer(x,xx,"-"))
-        DY <- abs(outer(y,yy,"-"))
-                                        # translation correction
-        edgewt <- wide * high / ((wide - DX) * (high - DY))
-        edgewt <- pmin(edgewt, 1000)    # arbitrary stabilisation
+        edgewt <- edge.Trans(X, U)
+        # sanity check ("everybody knows there ain't no...")
+        if(!is.matrix(edgewt))
+          stop("internal error: edge.Trans() did not yield a matrix")
+        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
+          stop("internal error: edge weights matrix returned by edge.Trans() has wrong dimensions")
+        POT <- c(edgewt) * POT
+} else if(correction == "isotropic" || correction == "Ripley") {
+        # weights are required for contributions from QUADRATURE points
+        edgewt <- t(edge.Ripley(U, t(M), X$window))
+        if(!is.matrix(edgewt))
+          stop("internal error: edge.Ripley() did not return a matrix")
+        if(nrow(edgewt) != X$n || ncol(edgewt) != length(U$x))
+          stop("internal error: edge weights matrix returned by edge.Ripley() has wrong dimensions")
         POT <- c(edgewt) * POT
 }
 

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 1.17 $	$Date: 2002/01/18 06:56:34 $
+#	$Revision: 1.18 $	$Date: 2002/05/13 12:41:10 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -162,7 +162,7 @@ print.ppm <- function(x, ...) {
 }
 
 no.trend.ppm <- function(x) {
-  # the result is T only when the trend is ~1
+  # the result is TRUE only when the trend is ~1
   verifyclass(x, "ppm")
   length(termsinformula(x$trend)) == 0
 }

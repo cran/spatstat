@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.3 $	$Date: 2000/06/22 13:19:43 $
+#	$Revision: 3.4 $	$Date: 2002/05/13 12:41:10 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -48,7 +48,7 @@ function(obs, nco, breaks) {
 }
 
 "reduced.sample" <-
-function(nco, cen, ncc, show=F)
+function(nco, cen, ncc, show=FALSE)
 #	nco: histogram of noncensored observations: T_i such that T_i <= C_i
 #	cen: histogram of all censoring times: C_i
 #	ncc: histogram of censoring times for noncensored obs:
@@ -103,10 +103,10 @@ function(o, cc, d, breaks) {
 #
         breaks <- as.breakpts(breaks)
 # compile histograms
-	obs <- hist( o,		breaks=breaks$val,plot=F,probability=F)$counts
-	nco <- hist( o[d], 	breaks=breaks$val,plot=F,probability=F)$counts
-	cen <- hist( cc,	breaks=breaks$val,plot=F,probability=F)$counts
-	ncc <- hist( cc[d],	breaks=breaks$val,plot=F,probability=F)$counts
+	obs <- hist( o,		breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
+	nco <- hist( o[d], 	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
+	cen <- hist( cc,	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
+	ncc <- hist( cc[d],	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
 # go
 	km <- kaplan.meier(obs, nco, breaks)
 	rs <- reduced.sample(nco, cen, ncc)

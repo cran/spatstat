@@ -2,7 +2,7 @@
 #	exactdt.S
 #	S function exactdt() for exact distance transform
 #
-#	$Revision: 4.1 $	$Date: 2001/08/07 09:22:52 $
+#	$Revision: 4.2 $	$Date: 2002/05/13 12:41:10 $
 #
 
 "exactdt"<-
@@ -29,9 +29,9 @@ function(X, ...)
 		d = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		i = as.integer(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		b = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)))
-	dist <- matrix(res$d, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
-	inde <- matrix(res$i, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
-	bdry <- matrix(res$b, ncol = nc + 2, byrow = T)[2:(nr + 1), 2:(nc +1)]
+	dist <- matrix(res$d, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+	inde <- matrix(res$i, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+	bdry <- matrix(res$b, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
 
         inde <- inde + 1    # convert from C to S indexing
         

@@ -2,10 +2,10 @@
 #
 #   allstats.R
 #
-#   $Revision: 1.5 $   $Date: 2001/11/06 07:09:17 $
+#   $Revision: 1.7 $   $Date: 2002/05/13 12:41:10 $
 #
 #
-allstats <- function(pp,dataname=NULL,verb=F) {
+allstats <- function(pp,dataname=NULL,verb=FALSE) {
 #
 # Function allstats --- to calculate the F, G, K, and J functions
 # for an unmarked point pattern.
@@ -45,15 +45,15 @@ allstats <- function(pp,dataname=NULL,verb=F) {
   if(verb) cat("J done.\n")
 
 # compute second moment function K
-  fns[[4]] <- Kest(pp,eps=NULL,breaks=brks)[c("r","border","theo")]
+  fns[[4]] <- Kest(pp,eps=NULL,breaks=brks)[c("r","border","trans","theo")]
   titles[[4]] <- "K function"
   if(verb) cat("K done.\n")
 
 # wrap into 'fasp' object
   
   deform <- list(cbind(km,theo)~r,cbind(km,theo)~r,
-               cbind(km,theo)~r,cbind(border,theo)~r)
-  witch <- matrix(1:4,2,2,byrow=T)
+               cbind(km,theo)~r,cbind(trans,theo)~r)
+  witch <- matrix(1:4,2,2,byrow=TRUE)
 
   if(is.null(dataname))
     dataname <- deparse(substitute(pp))

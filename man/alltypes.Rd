@@ -11,7 +11,7 @@
 }
 
 \usage{
-  alltypes(pp, fun="K",dataname=NULL,verb=F)
+  alltypes(pp, fun="K",dataname=NULL,verb=FALSE)
 }
 
 \arguments{
@@ -100,7 +100,7 @@
 
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J, and
-  \code{cbind(border,theo) ~ r} for K.}
+  \code{cbind(trans,theo) ~ r} for K.}
   }
 }
 \note{
@@ -124,19 +124,19 @@
    # bramblecanes (3 marks).
    data(bramblecanes)
    \dontrun{
-   X.F <- alltypes(bramblecanes,fun="F",verb=T)
+   X.F <- alltypes(bramblecanes,fun="F",verb=TRUE)
    plot(X.F) 
-   X.G <- alltypes(bramblecanes,fun="G",verb=T)
-   X.J <- alltypes(bramblecanes,fun="J",verb=T)
-   X.K <- alltypes(bramblecanes,fun="K",verb=T)
+   X.G <- alltypes(bramblecanes,fun="G",verb=TRUE)
+   X.J <- alltypes(bramblecanes,fun="J",verb=TRUE)
+   X.K <- alltypes(bramblecanes,fun="K",verb=TRUE)
    }
    \testonly{
       # smaller dataset
       bram <- bramblecanes[seq(1, bramblecanes$n, by=20), ]
-      X.F <- alltypes(bram,fun="F",verb=T)
-      X.G <- alltypes(bram,fun="G",verb=T)
-      X.J <- alltypes(bram,fun="J",verb=T)
-      X.K <- alltypes(bram,fun="K",verb=T)
+      X.F <- alltypes(bram,fun="F",verb=TRUE)
+      X.G <- alltypes(bram,fun="G",verb=TRUE)
+      X.J <- alltypes(bram,fun="J",verb=TRUE)
+      X.K <- alltypes(bram,fun="K",verb=TRUE)
    }
    
    # Swedishpines (unmarked).
@@ -150,17 +150,17 @@
    \dontrun{
    pp <- runifpoint(350, owin(c(0,1),c(0,1)))
    pp$marks <- factor(c(rep(1,50),rep(2,100),rep(3,200)))
-   X.F <- alltypes(pp,fun="F",verb=T,dataname="Fake Data")
-   X.G <- alltypes(pp,fun="G",verb=T,dataname="Fake Data")
-   X.J <- alltypes(pp,fun="J",verb=T,dataname="Fake Data")
-   X.K <- alltypes(pp,fun="K",verb=T,dataname="Fake Data")
+   X.F <- alltypes(pp,fun="F",verb=TRUE,dataname="Fake Data")
+   X.G <- alltypes(pp,fun="G",verb=TRUE,dataname="Fake Data")
+   X.J <- alltypes(pp,fun="J",verb=TRUE,dataname="Fake Data")
+   X.K <- alltypes(pp,fun="K",verb=TRUE,dataname="Fake Data")
    }
 
    # A setting where you might REALLY want to use dataname:
    \dontrun{
    xxx <- alltypes(ppp(Melvin$x,Melvin$y,
                 window=as.owin(c(5,20,15,50)),marks=clyde),
-                fun="F",verb=T,dataname="Melvin")
+                fun="F",verb=TRUE,dataname="Melvin")
    }
 }
 \author{Adrian Baddeley

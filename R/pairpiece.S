@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.1 $	$Date: 2000/07/11 10:49:01 $
+#    $Revision: 1.2 $	$Date: 2002/05/13 12:41:10 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -21,7 +21,7 @@ PairPiece <- function(r) {
          pot      = function(d, par) {
                          r <- par$r
                          nr <- length(r)
-                         out <- array(F, dim=c(dim(d), nr))
+                         out <- array(FALSE, dim=c(dim(d), nr))
                          out[,,1] <-  ifelse(d <= r[1], 1, 0)
                          for(i in 2:nr) 
                            out[,,i] <- ifelse((d > r[i-1]) & (d <= r[i]), 1, 0)

@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.3 $	$Date: 2001/11/06 07:00:19 $
+#	$Revision: 4.4 $	$Date: 2002/05/13 12:41:10 $
 #
 ################################################################################
 #
@@ -24,7 +24,7 @@ function(X, r=NULL, breaks=NULL, ...) {
         breaks <- handle.r.b.args(r, breaks, X$window)
 
 #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
-        hh <- hist(nnd,breaks=breaks$val,plot=F)$counts
+        hh <- hist(nnd,breaks=breaks$val,plot=FALSE)$counts
         edf <- cumsum(hh)/sum(hh)
 	
 #  distance to boundary

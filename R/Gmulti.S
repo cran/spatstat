@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.4 $	$Date: 2001/11/06 10:55:56 $
+#	$Revision: 4.5 $	$Date: 2002/05/13 12:41:10 $
 #
 ################################################################################
 
@@ -53,7 +53,7 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 #
 	I <- (X$marks == i)
 	if(sum(I) == 0) stop("No points are of type i")
-	J <- rep(T, X$n)	# i.e. all points
+	J <- rep(TRUE, X$n)	# i.e. all points
 # 
 	Gmulti(X, I, J, r, breaks)
 }	
@@ -119,7 +119,7 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
         result$breaks <- NULL
 
 #  UNCORRECTED e.d.f. of I-to-J nearest neighbour distances: use with care
-        hh <- hist(nnd,breaks=brks,plot=F)$counts
+        hh <- hist(nnd,breaks=brks,plot=FALSE)$counts
         result$raw <- cumsum(hh)/sum(hh)
 
 # theoretical value for marked Poisson processes

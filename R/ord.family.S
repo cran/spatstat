@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.8 $	$Date: 2001/08/09 10:53:16 $
+#    $Revision: 1.9 $	$Date: 2002/05/13 12:41:10 $
 #
 #    The Ord model (family of point process models)
 #
@@ -52,7 +52,7 @@ if(!is.null(Equal))
   #is.data <- apply(Equal, 2, any)
   is.data <- matcolany(Equal)
 else
-  is.data <- rep(F, nall)
+  is.data <- rep(FALSE, nall)
 
 #############################################################################
 # First compute Dirichlet tessellation of data

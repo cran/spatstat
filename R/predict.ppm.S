@@ -1,7 +1,7 @@
 #
 #    predictppm.S
 #
-#	$Revision: 1.11 $	$Date: 2002/01/18 06:57:40 $
+#	$Revision: 1.12 $	$Date: 2002/05/13 12:41:10 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by mpl(),	
@@ -88,7 +88,7 @@ function(object, newdata, nx = 40, ny = NULL, type="trend", ...) {
 # Provide SUBSET variable
 #
         if(is.null(newdata$SUBSET))
-          newdata$SUBSET <- rep(T, nrow(newdata))
+          newdata$SUBSET <- rep(TRUE, nrow(newdata))
 #
 # Dig out information used in the original call to mpl().
 #        Vnames:     the names for the ``interaction variables''

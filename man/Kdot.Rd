@@ -10,11 +10,12 @@
   within a given distance of a point of type \eqn{i}.
 }
 \synopsis{
-Kdot(X, i=1, r=NULL, breaks=NULL, \dots)
+Kdot(X, i=1, r=NULL, breaks=NULL, correction, \dots)
 }
 \usage{
 Kdot(X, i=1)
-Kdot(X, i=1, r)
+Kdot(X, i=1, correction=c("border", "isotropic", "Ripley", "translate"))
+Kdot(X, i=1, r, correction)
 Kdot(X, i=1, breaks)
 }
 \arguments{
@@ -37,18 +38,27 @@ Kdot(X, i=1, breaks)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{correction}{
+    A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    It specifies the edge correction(s) to be applied.
+  }
 }
 \value{
-  A data frame containing 3 numeric columns 
+  A data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{i\bullet}(r)}{Ki.(r)} has been  estimated
-  }
-  \item{border}{the ``border correction''
-    estimator of \eqn{K_{i\bullet}(r)}{Ki.(r)}
   }
   \item{theo}{the theoretical value of  \eqn{K_{i\bullet}(r)}{Ki.(r)}
     for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
   }
+  together with a column or columns named 
+  \code{"border"}, \code{"bord.modif"},
+  \code{"iso"} and/or \code{"trans"},
+  according to the selected edge corrections. These columns contain
+  estimates of the function \eqn{K_{i\bullet}(r)}{Ki.(r)}
+  obtained by the edge corrections named.
 }
 \details{
   This function \code{Kdot} and its companions
@@ -169,7 +179,7 @@ Kdot(X, i=1, breaks)
     }
     # diagnostic plot for independence between hickories and other trees
     \dontrun{
-       plot(Kh.$r, Kh.$border,
+       plot(Kh.$r, Kh.$trans,
                   xlab="r", ylab="Kh.(r)",
                   type="l", ylim=c(0,1))
        lines(Kh.$r, Kh.$theo, lty=2)

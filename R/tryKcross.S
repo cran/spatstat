@@ -3,7 +3,7 @@
 #
 #	Test the routine Kcross()
 #
-#	$Revision: 4.2 $ $Date: 2001/11/13 04:31:36 $
+#	$Revision: 4.3 $ $Date: 2002/05/13 12:41:10 $
 #
 ################################################################
 #
@@ -20,7 +20,7 @@ function(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R=0.2)
 		cat(paste(i,", ", sep=""))
 
                 X <- rpoispp(lambda)
-		X$marks <- factor(sample(1:2, X$n, prob=probs, replace=T))
+		X$marks <- factor(sample(1:2, X$n, prob=probs, replace=TRUE))
 		out <- Kcross(X, "1", "2", r)
 		k[i,  ] <- out$border
 		k2[i,  ] <- out$bord.modif
@@ -35,7 +35,7 @@ function(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R=0.2)
         
 	truek <- pi * r^2
 	rrange <- range(r)
-	krange <- range(c(k, k2, truek), na.rm=T)
+	krange <- range(c(k, k2, truek), na.rm=TRUE)
 	
 	plot(rrange, krange, xlab = "r", ylab = "Kcross", 
 				main = "border method", type = "n")

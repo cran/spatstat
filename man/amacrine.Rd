@@ -1,9 +1,9 @@
-\name{catHughes}
-\alias{catHughes}
-\title{Hughes' Cat Retina Data}
+\name{amacrine}
+\alias{amacrine}
+\title{Hughes' Amacrine Cell Data}
 \description{
 Austin Hughes' data: a point pattern 
-of ganglion cells in the retina of a cat.
+of displaced amacrine cells in the retina of a rabbit.
 A marked point pattern.
 } 
 \format{
@@ -18,13 +18,21 @@ A marked point pattern.
     }
   See \code{\link{ppp.object}} for details of the format.
 }
-\usage{data(catHughes)}
+\usage{data(amacrine)}
 \source{Peter Diggle, personal communication}
 \section{Notes}{
 Austin Hughes' data: a point pattern 
-of ganglion cells in the retina of a cat.
+of displaced amacrine cells in the retina of a rabbit.
 152 ``on'' cells and 142 ``off'' cells in a rectangle
 with dimensions 1.6065 by 1.0 where the unit of measurement
-is approximately 1 mm. 
+is approximately 1 mm.
+
+The data were analysed by Diggle (1986).
 }
+\references{
+Diggle, P. J. (1986).
+Displaced amacrine cells in the retina of a
+rabbit : analysis of a bivariate spatial point pattern. 
+\emph{J. Neurosci. Meth.} \bold{18}, 115--125.
+} 
 \keyword{datasets}

@@ -1,5 +1,5 @@
 .First.lib <- function(lib, pkg) {
     library.dynam("spatstat", pkg, lib)
-    cat("spatstat\nversion: 1.0-1\n")
+    cat("spatstat version 1.1-3\n")
 }
 

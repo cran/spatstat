@@ -58,8 +58,8 @@ which can then be fitted to point pattern data.
  # with different log-cubic trend for each species
 \testonly{
  # equivalent functionality - smaller dataset
- data(catWaessle)
- mpl(catWaessle, ~ marks * polynom(x,y,2), Poisson())
+ data(ganglia)
+ mpl(ganglia, ~ marks * polynom(x,y,2), Poisson())
 }
 }
 \author{Adrian Baddeley

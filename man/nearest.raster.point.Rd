@@ -35,7 +35,7 @@
 }
 \examples{
   \dontrun{library(spatstat)}
-  w <- owin(c(0,1), c(0,1), mask=matrix(T, 100,100))  # 100 x 100 grid
+  w <- owin(c(0,1), c(0,1), mask=matrix(TRUE, 100,100))  # 100 x 100 grid
   nearest.raster.point(0.5, 0.3, w)
 }
 \author{Adrian Baddeley

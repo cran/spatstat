@@ -1,27 +1,34 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 4.5 $	$Date: 2001/11/06 10:27:52 $
-#
-#	Border correction only.
-#	Arbitrary window.
-#       Fastest implementation, using 'hist' and 'reduced.sample'
+#	$Revision: 5.2 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 # -------- functions ----------------------------------------
-#	Kest()		compute estimate of K by border correction
+#	Kest()		compute estimate of K
+#                       using various edge corrections
 #
 #	pairdist()	compute matrix of distances between 	
 #			  each pair of data points
 #
-#       Kount()         internal routine
+#       Kount()         internal routine for border correction
 #
 # -------- standard arguments ------------------------------	
-#	pp		point pattern (of class 'ppp')
+#	X		point pattern (of class 'ppp')
 #
 #	r		distance values at which to compute K	
 #
-# -------- standard outputs ------------------------------	
+# -------- standard output ------------------------------
+#      A data frame with columns named
+#
+#	r:		same as input
+#
+#	trans:		K function estimated by translation correction
+#
+#	iso:		K function estimated by Ripley isotropic correction
+#
+#	theo:		K function for Poisson ( = pi * r ^2 )
+#
 #	border:		K function estimated by border method
 #			using standard formula (denominator = count of points)
 #
@@ -29,21 +36,6 @@
 #			using modified formula 
 #			(denominator = area of eroded window
 #
-#	r:		same as input
-#
-# -------- example -----------------------------------------
-#
-#	x <- runif(50)
-#	y <- runif(50)
-#	X <- ppp(x,y,c(0,1),c(0,1))
-# either:
-#	r <- seq(0,0.25,length=50)
-#	k <- Kest(X, r)$border
-#	plot(r, k, type="l")
-#	lines(r, pi * r^2, lty=2)
-# or:
-#       Kdat <- Kest(X)
-#       plot(border ~ r, type="l", data=Kdat)
 # ------------------------------------------------------------------------
 
 "pairdist"<-
@@ -59,41 +51,75 @@ function(x, y)
 }
 	
 "Kest"<-
-function(X, r=NULL, breaks=NULL, slow=F, both=F, ...)
+function(X, r=NULL, breaks=NULL, slow=FALSE,
+         correction=c("border", "isotropic", "Ripley", "translate"), ...)
 {
 	verifyclass(X, "ppp")
 
 	npoints <- X$n
-	area <- area.owin(X$window)
+        W <- X$window
+	area <- area.owin(W)
 	lambda <- npoints/area
 	lambda2 <- (npoints * (npoints - 1))/(area^2)
 
-        breaks <- handle.r.b.args(r, breaks, X$window)
+        breaks <- handle.r.b.args(r, breaks, W)
         r <- breaks$r
+
+        # available selection of edge corrections depends on window
+        if(W$type != "rectangle") {
+           iso <- (correction == "isotropic") | (correction == "Ripley")
+           if(any(iso)) {
+             if(!missing(correction))
+               warning("Isotropic correction not implemented for non-rectangular windows")
+             correction <- correction[!iso]
+           }
+        }
+         
+        # this will be the output data frame
+        K <- data.frame(r=r, theo= pi * r^2)
         
         # pairwise distance
 	d <- pairdist(X$x, X$y)
-        diag(d) <- Inf
 
-        # distances to boundary
-	b <- bdist.points(X)
-
-        # count 
-        RS <- Kount(d, b, breaks, slow)
+        offdiag <- (row(d) != col(d))
         
-        K.b1 <- RS$numerator/(lambda * RS$denom.count)
-        
-        if(!both)
-          return(data.frame(border=K.b1, r=r, theo= pi * r^2))
-        
-        denom.area <- eroded.areas(X$window, r)
-        K.b2 <- RS$numerator/(lambda2 * denom.area)
-
-        return(data.frame(border=K.b1, bord.modif=K.b2, r=r,
-                          theo=pi * r^2))
+        if(any(correction == "border" | correction == "bord.modif")) {
+          # border method
+          # Compute distances to boundary
+          b <- bdist.points(X)
+          # Ignore pairs (i,i)
+          diag(d) <- Inf
+          # apply reduced sample algorithm
+          RS <- Kount(d, b, breaks, slow)
+          if(any(correction == "border"))
+            K$border <- RS$numerator/(lambda * RS$denom.count)
+          if(any(correction == "bord.modif")) {
+            denom.area <- eroded.areas(W, r)
+            K$bord.modif <- RS$numerator/(lambda2 * denom.area)
+          }
+          # reset diagonal to original values
+          diag(d) <- 0
+        }
+        if(any(correction == "translate")) {
+          # translation correction
+            edgewt <- edge.Trans(X)
+            wh <- whist(d[offdiag], breaks$val, edgewt[offdiag])
+            K$trans <- cumsum(wh)/(lambda2 * area)
+            rmax <- diameter(W)/2
+            K$trans[r >= rmax] <- NA
+        }
+        if(any(correction == "isotropic" | correction == "Ripley")) {
+          # Ripley isotropic correction
+            edgewt <- edge.Ripley(X, d)
+            wh <- whist(d[offdiag], breaks$val, edgewt[offdiag])
+            K$iso <- cumsum(wh)/(lambda2 * area)
+            rmax <- diameter(W)/2
+            K$iso[r >= rmax] <- NA
+        }
+        return(K)
 }
 	
-Kount <- function(d, b, breaks, slow=F) {
+Kount <- function(d, b, breaks, slow=FALSE) {
   #
   # "internal" routine to compute border-correction estimate of K or Kij
   #
@@ -113,7 +139,7 @@ Kount <- function(d, b, breaks, slow=F) {
 
        for(i in 1:nr) {
          close <- (d <= r[i])
-         nclose <- apply(close, 1, sum) # assumes diag(d) set to Inf
+         nclose <- matrowsum(close) # assumes diag(d) set to Inf
          bok <- (b > r[i])
          numerator[i] <- sum(nclose[bok])
          denom.count[i] <- sum(bok)
@@ -126,13 +152,13 @@ Kount <- function(d, b, breaks, slow=F) {
         uncen <- (d <= bb)
         #
         # histogram of noncensored distances
-        nco <- hist(d[uncen], breaks=breaks$val,plot=F,probability=F)$counts
+        nco <- whist(d[uncen], breaks$val)
         # histogram of censoring times for noncensored distances
-        ncc <- hist(bb[uncen], breaks=breaks$val,plot=F,probability=F)$counts
+        ncc <- whist(bb[uncen], breaks$val)
         # histogram of censoring times (yes, this is a different total size)
-        cen <- hist(b, breaks=breaks$val,plot=F,probability=F)$counts
+        cen <- whist(b, breaks$val)
         # go
-        RS <- reduced.sample(nco, cen, ncc, show=T)
+        RS <- reduced.sample(nco, cen, ncc, show=TRUE)
         # extract results
         numerator <- RS$numerator
         denom.count <- RS$denominator
@@ -141,7 +167,6 @@ Kount <- function(d, b, breaks, slow=F) {
           stop("internal error: length(numerator) != breaks$ncells")
         if(length(denom.count) != breaks$ncells)
           stop("internal error: length(denom.count) != breaks$ncells")
-             
   }
   
   return(list(numerator=numerator, denom.count=denom.count))

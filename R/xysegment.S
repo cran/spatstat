@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.2 $    $Date: 2001/11/19 05:08:06 $
+#     $Revision: 1.3 $    $Date: 2002/05/13 12:41:10 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -88,8 +88,8 @@ distppll <- function(p, l) {
   # rotation sines & cosines
   co <- dx/leng
   si <- dy/leng
-  co <- matrix(co, nrow=np, ncol=nl, byrow=T)
-  si <- matrix(si, nrow=np, ncol=nl, byrow=T)
+  co <- matrix(co, nrow=np, ncol=nl, byrow=TRUE)
+  si <- matrix(si, nrow=np, ncol=nl, byrow=TRUE)
   # matrix of squared distances from p[i] to 1st endpoint of segment j
   xp.x1 <- outer(xp, l[,1], "-")
   yp.y1 <- outer(yp, l[,2], "-")
@@ -104,7 +104,7 @@ distppll <- function(p, l) {
   ypr <-  - xp.x1 * si + yp.y1 * co
   d3 <- ypr^2
   # test
-  lenf <- matrix(leng, nrow=np, ncol=nl, byrow=T)
+  lenf <- matrix(leng, nrow=np, ncol=nl, byrow=TRUE)
   outside <- (xpr < 0 | xpr > lenf)
   if(any(outside))
     d3[outside] <- Inf

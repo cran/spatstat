@@ -204,14 +204,14 @@ Gdot(X, i=1, breaks)
 }
 \examples{
     \dontrun{library(spatstat)}
-    data(catWaessle)
+    data(ganglia)
      # cat retina data: types 0,1 represent off/on
-    G0. <- Gdot(catWaessle, "0")    # note: "0" not 0
+    G0. <- Gdot(ganglia, "0")    # note: "0" not 0
     \dontrun{plot(G0.$r, G0.$km,
                   xlab="r", ylab="G0.(r)",
                   type="l", ylim=c(0,1))}
     # Poisson theoretical curve
-    lambda <- catWaessle$n/area.owin(catWaessle$window)
+    lambda <- ganglia$n/area.owin(ganglia$window)
     \dontrun{lines(G0.$r, 1 - exp( - lambda * pi * G0.$r^2), lty=2)}
 
     # synthetic example    

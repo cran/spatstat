@@ -1,10 +1,10 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.4 $   $Date: 2001/11/25 00:32:04 $
+#   $Revision: 1.6 $   $Date: 2002/05/13 12:41:10 $
 #
 #
-alltypes <- function(pp, fun="K", dataname=NULL,verb=F) {
+alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 #
 # Function 'alltypes' --- calculates a summary function for
 # each type, or each pair of types, in a multitype point pattern
@@ -37,12 +37,12 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=F) {
   RF  <- switch(fun,F=c("r","km","rs","raw","hazard","theo"),
                    G=c("r","km","rs","hazard", "theo"),
                    J=c("r","km","rs","un","theo"),
-                   K=c("r","border","theo"),
+                   K=c("r","border","trans","theo"),
                    NA)
   deform <- switch(fun,F=cbind(km,theo)~r,
                       G=cbind(km,theo)~r,
                       J=cbind(km,theo)~r,
-                      K=cbind(border,theo)~r,
+                      K=cbind(trans,theo)~r,
                       NA)
 
 # initialise 'fasp' object
@@ -52,7 +52,7 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=F) {
     witch <- matrix(1:nm,ncol=1,nrow=nm)
     titles <- if(nm > 1) as.list(paste("mark =", um)) else list("")
   } else {
-    witch <- matrix(1:(nm^2),ncol=nm,nrow=nm,byrow=T)
+    witch <- matrix(1:(nm^2),ncol=nm,nrow=nm,byrow=TRUE)
     titles <- if(nm > 1)
       as.list(paste("(", um[t(row(witch))], ",", um[t(col(witch))], ")", sep=""))
     else

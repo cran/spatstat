@@ -2,13 +2,13 @@
 #
 #    rmh.R
 #
-#    $Revision: 1.4 $     $Date: 2001/12/12 14:35:06 $
+#    $Revision: 1.5 $     $Date: 2002/05/13 12:41:10 $
 #
 #
 #
 
 rmh <- function(cif,par,w,ntypes=0,ptypes=NULL,tpar=NULL,n.start,
-                expand=NULL,periodic=F,nrep=1e6,p=0.9,q=0.5,
+                expand=NULL,periodic=FALSE,nrep=1e6,p=0.9,q=0.5,
                 iseed=NULL,nverb=0) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
@@ -63,8 +63,8 @@ a1 <- area.owin(w.save)
 a2 <- area.owin(as.owin(rw))
 n.start <- ceiling(a2*n.start/a1)
 
-# Set need.aux to F (it gets set to T iff cif == 'geyer').
-need.aux <- F
+# Set need.aux to FALSE (it gets set to TRUE iff cif == 'geyer').
+need.aux <- FALSE
 
 # Do some rudimentary pre-processing of the par and tpar arguments.
 # Save the supplied values of par and tpar first.
@@ -215,7 +215,7 @@ if(cif=="geyer") {
 		stop("Negative parameters.\n")
 	if(par[4] > .Machine$integer.max-100)
 		par[4] <- .Machine$integer.max-100
-	need.aux <- T
+	need.aux <- TRUE
 }
 
 # Calculate the degree(s) of the polynomial(s) in the log polynomial

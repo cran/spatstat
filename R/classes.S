@@ -2,7 +2,7 @@
 #
 #	classes.S
 #
-#	$Revision: 1.3 $	$Date: 2000/07/11 10:53:19 $
+#	$Revision: 1.4 $	$Date: 2002/05/13 12:41:10 $
 #
 #	Generic utilities for classes
 #
@@ -11,16 +11,16 @@
 #
 #--------------------------------------------------------------------------
 
-verifyclass <- function(X, C, N=deparse(substitute(X)), fatal=T) {
+verifyclass <- function(X, C, N=deparse(substitute(X)), fatal=TRUE) {
   if(is.null(class(X)) || class(X) != C) {
     if(fatal) {
         gripe <- paste("argument \'", N,
                        "\' is not of class \'", C, "\'", sep="")
 	stop(gripe)
     } else 
-	return(F)
+	return(FALSE)
   }
-  return(T)
+  return(TRUE)
 }
 
 #--------------------------------------------------------------------------
@@ -31,7 +31,7 @@ checkfields <- function(X, L) {
 	return(all(!is.na(match(L,names(X)))))
 }
 
-getfields <- function(X, L, fatal=T) {
+getfields <- function(X, L, fatal=TRUE) {
 	  # X is a list, L is a vector of strings
 	  # Extracts all fields with names L[i] from list X
 	  # Checks for presence of all desired fields

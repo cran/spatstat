@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.5 $	$Date: 2001/11/06 06:59:55 $
+#	$Revision: 4.6 $	$Date: 2002/05/13 12:41:10 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -36,7 +36,7 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
           
                 # Distance transform & boundary distance for all pixels
 		e <- exactdt(dX)
-		b <- bdist.pixels(dX$window, coords=F)
+		b <- bdist.pixels(dX$window, coords=FALSE)
                 # select only those pixels inside mask
 		dist <- e$d[dwin$m]
 		bdry <- b[dwin$m]
@@ -51,7 +51,7 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
 	result <- km.rs(o, bdry, d, breaks)
 
 # also calculate UNCORRECTED e.d.f. !!!! use with care
-        hh <- hist(dist,breaks=breaks$val,plot=F)$counts
+        hh <- hist(dist,breaks=breaks$val,plot=FALSE)$counts
         edf <- cumsum(hh)/sum(hh)
         result$raw <- edf
 

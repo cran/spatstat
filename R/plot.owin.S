@@ -3,12 +3,12 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.4 $	$Date: 2002/01/21 02:24:37 $
+#	$Revision: 1.6 $	$Date: 2002/05/13 12:41:10 $
 #
 #
 #
 
-plot.owin <- function(x, main, ..., box=T, edge=0.04)
+plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
 {
 #
 # Function plot.owin.  A method for plot.
@@ -42,8 +42,9 @@ plot.owin <- function(x, main, ..., box=T, edge=0.04)
         if(yscale > sc) ylim <- blowup(ylim, yscale/sc) 
 
 # Commit scales
+        if(!add)
         plot(x, y, xlim=xlim, ylim=ylim, type="n", ...,
-             main=main, axes=F, xlab="", ylab="", xaxs="i", yaxs="i")
+             main=main, axes=FALSE, xlab="", ylab="", xaxs="i", yaxs="i")
 
 # Draw window
 
@@ -61,13 +62,14 @@ plot.owin <- function(x, main, ..., box=T, edge=0.04)
                  }
                },
                mask = {
-                 image(W$xcol, W$yrow, !t(W$m), add=T, ...)
+                 image(W$xcol, W$yrow, !t(W$m), add=TRUE, ...)
                },
                stop("Don't know how to plot image type", W$type)
                )
 
 # Draw surrounding box
-        if(box)
+        wantbox <- (!missing(box) && box) || (missing(box) && W$type == "rectangle")
+        if(wantbox)
           segments(x[c(1,2,2,1)],
                    y[c(1,1,2,2)],
                    x[c(2,2,1,1)],

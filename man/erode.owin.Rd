@@ -5,7 +5,7 @@
   Perform morphological erosion of a window 
 }
 \usage{
- erode.owin(w, r, shrink.frame=T, \dots)
+ erode.owin(w, r, shrink.frame=TRUE, \dots)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}.}

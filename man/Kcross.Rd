@@ -10,11 +10,12 @@
   within a given distance of a point of type \eqn{i}.
 }
 \synopsis{
-Kcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
+Kcross(X, i=1, j=2, r=NULL, breaks=NULL, correction, \dots)
 }
 \usage{
 Kcross(X, i=1, j=2)
-Kcross(X, i=1, j=2, r)
+Kcross(X, i=1, j=2, correction=c("border", "isotropic", "Ripley", "translate"))
+Kcross(X, i=1, j=2, r, correction)
 Kcross(X, i=1, j=2, breaks)
 }
 \arguments{
@@ -40,18 +41,27 @@ Kcross(X, i=1, j=2, breaks)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{correction}{
+    A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    It specifies the edge correction(s) to be applied.
+  }
 }
 \value{
-  A data frame containing 3 numeric columns 
+  A data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{K_{ij}(r)}{Kij(r)} has been  estimated
-  }
-  \item{border}{the ``border correction''
-    estimator of \eqn{K_{ij}(r)}{Kij(r)}
   }
   \item{theo}{the theoretical value of  \eqn{K_{ij}(r)}{Kij(r)}
     for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
   }
+  together with a column or columns named 
+  \code{"border"}, \code{"bord.modif"},
+  \code{"iso"} and/or \code{"trans"},
+  according to the selected edge corrections. These columns contain
+  estimates of the function \eqn{K_{ij}(r)}{Kij(r)}
+  obtained by the edge corrections named.
 }
 \details{
   This function \code{Kcross} and its companions
@@ -161,13 +171,13 @@ Kcross(X, i=1, j=2, breaks)
 }
 \examples{
     \dontrun{library(spatstat)}
-    data(catWaessle)
+    data(ganglia)
      # cat retina data: types 0,1 represent off/on
-    K01 <- Kcross(catWaessle, "0", "1") # note: "0" not 0
-    \dontrun{plot(K01$r, K01$border,
+    K01 <- Kcross(ganglia, "0", "1") # note: "0" not 0
+    \dontrun{plot(K01$r, K01$iso,
                   xlab="r", ylab="K01(r)",
                   type="l", ylim=c(0,1))}
-    K10 <- Kcross(catWaessle, "1", "0")
+    K10 <- Kcross(ganglia, "1", "0")
     # Poisson theoretical curve
     \dontrun{lines(K01$r, K01$theo, lty=2)}
 
