@@ -1,6 +1,5 @@
 \name{print.ppp}
 \alias{print.ppp}
-\alias{print}
 \title{Print Brief Details of a Point Pattern Dataset}
 \description{
   Prints a very brief description of a point pattern dataset.
@@ -10,7 +9,6 @@
 }
 \usage{
  print.ppp(x)
- print(x)
  x
 }
 \arguments{

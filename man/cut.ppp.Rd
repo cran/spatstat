@@ -46,7 +46,7 @@
   for example to plot it or analyse it. See the examples.
 
   To select some points from a point pattern, use the subset operator
-  \code{\link{"[.ppp"}} instead.
+  \code{\link{[.ppp}} instead.
 }
 \seealso{
   \code{\link{cut}},

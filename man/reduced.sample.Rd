@@ -72,7 +72,7 @@
 }
 \seealso{
   \code{\link{kaplan.meier}},
-  \code{\link{kmrs}}
+  \code{\link{km.rs}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

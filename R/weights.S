@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.4 $	$Date: 2003/05/01 09:45:24 $
+#	$Revision: 4.5 $	$Date: 2003/11/12 06:36:56 $
 #
 #
 # Main functions:
@@ -47,6 +47,7 @@ countingweights <- function(id, areas, check=TRUE) {
     id <- factor(id, levels=seq(areas))
     counts <- table(id)
     w <- areas[id] / counts[id]     # ensures denominator > 0
+    w <- as.vector(w)
 #	
 # that's it; but check for funny business
 #
@@ -132,10 +133,9 @@ gridweights <- function(X, nx, ny, window=NULL) {
                 pixelid <- factor(pixelid, levels=seq(nx * ny))
                                 
 		# compute digital areas of tiles
-		tilepixels <- table(pixelid)
+		tilepixels <- as.vector(table(pixelid))
 		pixelarea <- win$xstep * win$ystep
 		areas <- tilepixels * pixelarea
-
 	} 
 
 	# compute counting weights 

@@ -41,7 +41,6 @@
 \alias{is.marked.default}    
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
-\alias{km.rs}
 \alias{Kount}
 \alias{Kwtsum}               
 \alias{lookup.im}

@@ -59,7 +59,7 @@
   
   They may be manipulated by the functions 
   \code{\link{subset.ppp}},
-  \code{\link{"[.ppp"}} and
+  \code{\link{[.ppp}} and
   \code{\link{superimpose}}.
 
   Point pattern objects can be plotted just by typing \code{plot(X)}
@@ -90,7 +90,7 @@
   \code{\link{owin}},
   \code{\link{ppp}},
   \code{\link{as.ppp}},
-  \code{\link{"[.ppp"}}
+  \code{\link{[.ppp}}
 }
 \section{Warnings}{
   The internal representation of marks is likely to change in the

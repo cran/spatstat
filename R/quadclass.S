@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.5 $	$Date: 2003/08/01 05:14:06 $
+#	$Revision: 4.6 $	$Date: 2003/11/12 06:38:52 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -38,8 +38,11 @@ quad <- function(data, dummy, w) {
 	
   if(missing(w))
     w <- rep(1, n)
-  else if(length(w) != n)
-    stop("length of weights vector w is not equal to total number of points")
+  else {
+    w <- as.vector(w)
+    if(length(w) != n)
+      stop("length of weights vector w is not equal to total number of points")
+  }
 
   if(is.null(attr(w, "zeroes")) && any( w == 0))
 	attr(w, "zeroes") <- (w == 0)

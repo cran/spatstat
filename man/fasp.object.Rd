@@ -35,7 +35,7 @@
 
   There are methods for \code{plot} and \code{"["} in this class.
   The plot method displays the entire array of functions.
-  The method \code{"[.fasp"} selects a sub-array using the natural
+  The method \code{\link{[.fasp}} selects a sub-array using the natural
   indices \code{i,j}. 
 
   An object of class \code{"fasp"} is a list containing at least the
@@ -71,7 +71,7 @@
   \code{\link{alltypes}},
   \code{\link{allstats}},
   \code{\link{plot.fasp}},
-  \code{\link{"[.fasp"}}
+  \code{\link{[.fasp}}
 }
 \examples{
  \dontrun{
