@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.1 $   $Date: 2004/01/06 10:17:04 $
+#    $Revision: 1.3 $   $Date: 2005/03/02 21:24:34 $
 #
 #    as.im()
 #
@@ -19,7 +19,16 @@ as.im <- function(X, W, ...) {
     m <- w$m
     v <- m * 1
     v[!m] <- NA
-    return(im(v, w$xcol, w$yrow))
+    out <- list(v = v, 
+                dim    = w$dim,
+                xrange = w$xrange,
+                yrange = w$yrange,
+                xstep  = w$xstep,
+                ystep  = w$ystep,
+                xcol   = w$xcol,
+                yrow   = w$yrow)
+    class(out) <- "im"
+    return(out)
   }
 
   if(is.numeric(x) && length(x) == 1) {

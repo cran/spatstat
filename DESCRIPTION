@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.5-10
-Date: 16 February 2005
+Version: 1.6-1
+Date: 14 March 2005
 Title: Spatial Point Pattern analysis, model-fitting and simulation
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
 	Rolf Turner <rolf@math.unb.ca>, with contributions by
@@ -11,4 +11,4 @@ Description: Spatial Point Pattern data analysis, modelling and simulation
 	including multitype/marked points and spatial covariates
 License: GPL version 2 or newer
 URL: http://www.maths.uwa.edu.au/~adrian/spatstat.html
-Packaged: Thu Feb 17 04:27:38 2005; adrian
+Packaged: Tue Mar 15 02:15:30 2005; adrian

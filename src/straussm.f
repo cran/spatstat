@@ -6,7 +6,8 @@ C Output from Public domain Ratfor, version 1.0
       dimension gmma(100), rad(100), k(100)
       logical per
       eps = 2.22d-16
-      per = period(1) .gt. 0.d0
+      zero = 0.d0
+      per = period(1) .gt. zero
       beta = par(mrk)
       ind = ntypes
       do23000 i = 1,mrk 
@@ -27,10 +28,10 @@ C Output from Public domain Ratfor, version 1.0
       do23010 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
-      rad(i) = par(ind)**2
+      rad(i) = par(ind)
       endif
       if(i.eq.mrk .and. j.gt.mrk)then
-      rad(j) = par(ind)**2
+      rad(j) = par(ind)
       endif
 23010 continue
 23011 continue
@@ -59,7 +60,7 @@ C Output from Public domain Ratfor, version 1.0
       do23026 i=1,ntypes 
       if(gmma(i) .lt. eps)then
       if(k(i).gt.0)then
-      cifval = 0.d0
+      cifval = zero
       return
       endif
       else

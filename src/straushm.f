@@ -7,7 +7,7 @@ C Output from Public domain Ratfor, version 1.0
       logical per
       eps = 2.22d-16
       zero = 0.d0
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       beta = par(mrk)
       ind = ntypes
       do23000 i = 1,mrk 
@@ -42,10 +42,10 @@ C Output from Public domain Ratfor, version 1.0
       do23018 j = i,ntypes 
       ind = ind+1
       if(j.eq.mrk)then
-      rhc(i) = par(ind)**2
+      rhc(i) = par(ind)
       endif
       if(i.eq.mrk .and. j.gt.mrk)then
-      rhc(j) = par(ind)**2
+      rhc(j) = par(ind)
       endif
 23018 continue
 23019 continue

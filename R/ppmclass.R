@@ -157,5 +157,3 @@ fitted.ppm <- function(object, ..., type="lambda") {
 
 # ??? method for 'effects' ???
 
-
-

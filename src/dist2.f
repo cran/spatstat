@@ -1,7 +1,7 @@
 C Output from Public domain Ratfor, version 1.0
       subroutine dist2(u,v,x,y,period,d2)
       implicit double precision(a-h,o-z)
-      dimension period(2), a(3), b(3)
+      dimension period(2)
       wide = period(1)
       high = period(2)
       a1 = (u-x)**2

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.3 $	$Date: 2004/08/11 07:20:36 $
+#    $Revision: 2.5 $	$Date: 2005/03/12 01:07:56 $
 #
 #    The multitype Strauss process
 #
@@ -166,6 +166,16 @@ MultiStrauss <- function(types, radii) {
            # reassign 
            coeffs[thetaname] <- log(gamma[uptri])
            return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$radii
+           active <- !is.na(r)
+           if(!is.na(coeffs)) {
+             gamma <- (self$interpret)(coeffs, self)$param$gammas
+             gamma[is.na(gamma)] <- 1
+             active <- active & (abs(log(gamma)) > epsilon)
+           }
+           if(any(active)) return(max(r[active])) else return(0)
          }
   )
   class(out) <- "interact"

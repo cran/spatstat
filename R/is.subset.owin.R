@@ -1,7 +1,7 @@
 #
 #  is.subset.owin.R
 #
-#  $Revision: 1.2 $   $Date: 2004/02/09 13:33:09 $
+#  $Revision: 1.3 $   $Date: 2005/03/02 22:52:14 $
 #
 #  Determine whether a window is a subset of another window
 #
@@ -11,6 +11,9 @@ is.subset.owin <- function(A, B) {
   A <- as.owin(A)
   B <- as.owin(B)
 
+  A <- rescue.rectangle(A)
+  B <- rescue.rectangle(B)
+  
   if(B$type == "rectangle") {
     # Some cases can be resolved using convexity of B
     
@@ -51,3 +54,4 @@ is.subset.owin <- function(A, B) {
   return(all(ok))
 
 }
+

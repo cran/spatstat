@@ -12,6 +12,7 @@
 \alias{cartesian}
 \alias{checkfields}          
 \alias{check.hist.lengths}
+\alias{cobble.xy}
 \alias{conspire}
 \alias{contour.im}
 \alias{countingweights}
@@ -81,6 +82,10 @@
 \alias{print.fv}       
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.rmhcontrol}
+\alias{print.rmhmodel}
+\alias{print.rmhstart}
+\alias{print.rmhseed}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{quad}
@@ -94,6 +99,14 @@
 \alias{runifdisc}
 \alias{runifpoispp}          
 \alias{runifrect}
+\alias{rmhResolveTypes}
+\alias{rmhcontrol.rmhcontrol}
+\alias{rmhcontrol.list}
+\alias{rmhmodel.rmhmodel}
+\alias{rmhmodel.list}
+\alias{rmhseed}
+\alias{rmhstart.rmhstart}
+\alias{rmhstart.list}
 \alias{rmhmodel.ppm}
 \alias{rmpoint.I.allim}
 \alias{rpoint.multi}
@@ -132,6 +145,7 @@ breakpts.from.r(r)
 cartesian(pp, markset, fac = TRUE)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
+cobble.xy(x, y, f, fatal)
 conspire(\dots)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
@@ -149,7 +163,7 @@ erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(im)
-fasp((fns, titles, formulae, which, dataname, title)
+fasp(fns, titles, formulae, which, dataname, title)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc)
 getfields(X, L, fatal = TRUE)
@@ -206,6 +220,10 @@ print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
+print.rmhcontrol(x, \dots)
+print.rmhmodel(x, \dots)
+print.rmhstart(x, \dots)
+print.rmhseed(x, \dots)
 print.summary.owin(x, \dots)
 print.summary.ppp(x, \dots, dp=3)
 quad(data, dummy, w, param)
@@ -216,7 +234,15 @@ rastery.im(x)
 resolve.defaults(\dots)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)
-rmhmodel.ppm(model, win, \dots, verbose, project)
+rmhResolveTypes(model, start, control)
+rmhcontrol.rmhcontrol(control, \dots)
+rmhcontrol.list(control, \dots)
+rmhmodel.rmhmodel(model, \dots)
+rmhmodel.list(model, \dots)
+rmhseed(iseed)
+rmhstart.rmhstart(start, \dots)
+rmhstart.list(start, \dots)
+rmhmodel.ppm(model, win, \dots, verbose, project, control)
 rmpoint.I.allim(n, f, types)
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifdisc(n, r = 1, x = 0, y = 0)

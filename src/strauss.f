@@ -4,10 +4,11 @@ C Output from Public domain Ratfor, version 1.0
       dimension par(3), x(1), y(1), period(2)
       logical per
       eps = 2.22d-16
-      per = period(1) .gt. 0.d0
+      zero = 0.d0
+      per = period(1) .gt. zero
       beta = par(1)
       gamma = par(2)
-      r = par(3)**2
+      r = par(3)
       kount = 0
       do23000 j = 1,n 
       if(j .eq. ix)then
@@ -26,7 +27,7 @@ C Output from Public domain Ratfor, version 1.0
 23001 continue
       if(gamma .lt. eps )then
       if(kount .gt. 0)then
-      cifval = 0.d0
+      cifval = zero
       else
       cifval = beta
       endif

@@ -7,7 +7,7 @@ C Output from Public domain Ratfor, version 1.0
       eps = 2.22d-16
       zero = 0.d0
       one = 1.d0
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       if(ix .gt. 0)then
       if(per)then
       call dist2(u,v,x(ix),y(ix),period,d2)
@@ -20,7 +20,7 @@ C Output from Public domain Ratfor, version 1.0
       endif
       beta = par(1)
       gamma = par(2)
-      r2 = par(3)**2
+      r2 = par(3)
       s = par(4)
       if(newpt)then
       c1 = zero

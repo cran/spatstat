@@ -4,8 +4,9 @@ C Output from Public domain Ratfor, version 1.0
       dimension x(1), y(1), par(3), period(2)
       integer aux(1)
       logical per
+      zero = 0.d0
       r2 = par(3)**2
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       if(itype .eq. 1)then
       nm1 = npts-1
       aux(npts) = 0

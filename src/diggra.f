@@ -2,17 +2,17 @@ C Output from Public domain Ratfor, version 1.0
       subroutine diggra(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
       double precision kappa
-      dimension par(4), x(n), y(n), period(2)
+      dimension par(7), x(n), y(n), period(2)
       logical per
       zero = 0.d0
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       beta = par(1)
       kappa = par(2)
       delta = par(3)
       rho = par(4)
-      d2 = delta**2
-      r2 = rho**2
-      a = log(rho - delta)
+      d2 = par(5)
+      r2 = par(6)
+      a = par(7)
       soglum = zero
       do23000 j = 1,n 
       if(j .eq. ix)then

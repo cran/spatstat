@@ -7,7 +7,8 @@ C Output from Public domain Ratfor, version 1.0
       if(nmbr .ne. 8)then
       return
       endif
-      per = period(1) .gt. 0.d0
+      zero = 0.d0
+      per = period(1) .gt. zero
       r2 = par(3)**2
       do23002 i = 1, npts 
       aux(i) = 0

@@ -1,15 +1,16 @@
 C Output from Public domain Ratfor, version 1.0
       subroutine dgs(u,v,ix,x,y,n,par,period,cifval)
       implicit double precision(a-h,o-z)
-      dimension par(2), x(n), y(n), period(2)
+      dimension par(3), x(n), y(n), period(2)
       logical per
       zero = 0.d0
+      one = 1.d0
       two = 2.d0
-      per = period(1) .gt. 0.d0
+      per = period(1) .gt. zero
       beta = par(1)
       rho = par(2)
-      r2 = rho**2
-      a = two*atan(1.d0)/rho
+      r2 = par(3)
+      a = two*atan(one)/rho
       soglum = zero
       do23000 j = 1,n 
       if(j .eq. ix)then

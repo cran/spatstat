@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.3 $	$Date: 2004/08/11 07:45:49 $
+#    $Revision: 1.6 $	$Date: 2005/03/12 01:17:43 $
 #
 #    Lennard-Jones potential
 #
@@ -47,6 +47,13 @@ LennardJones <- function() {
            p <- self$interpret(coeffs, self)$param
            if(any(is.na(p)))
              stop("Don't know how to project Lennard-Jones models")
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           if(any(is.na(coeffs)) || epsilon == 0)
+             return(Inf)
+           theta1 <- abs(coeffs[["Interact.1"]])
+           theta2 <- abs(coeffs[["Interact.2"]])
+           return(max((theta1/epsilon)^(1/12), (theta2/epsilon)^(1/6)))
          }
   )
   class(out) <- "interact"

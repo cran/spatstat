@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.22 $	$Date: 2004/09/02 04:18:53 $
+#	$Revision: 4.23 $	$Date: 2005/03/09 19:49:55 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -99,17 +99,21 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
                 else
                   Z <- ppp(X$x, X$y, window=win, marks = X$marks)
                 return(Z)
-	} else if(is.matrix(X) && is.numeric(X)) {
+	} else if(is.matrix(X) && is.numeric(X) && ncol(X) == 2) {
+                if(is.function(W))
+                  return(cobble.ppp(X[,1], X[,2], W, fatal))
 		if(is.null(W)) {
                   if(fatal)
                     stop("x,y coords given but no window specified")
                   else
                     return(NULL)
-                }
-		win <- as.owin(W)
+                } 
+                win <- as.owin(W)
 		Z <- ppp(X[,1], X[,2], window = win)
 		return(Z)
 	} else if(checkfields(X, c("x", "y"))) {
+                if(is.function(W))
+                  return(cobble.ppp(X$x, X$y, W, fatal))
 		if(is.null(W)) {
                   if(fatal)
                     stop("x,y coords given but no window specified")
@@ -129,6 +133,23 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
             return(NULL)
         }
 }
+
+cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
+  if(!is.function(f))
+    stop("f is not a function")
+  w <- f(x,y)
+  if(!is.owin(w)) {
+    gripe <- "Supplied function f did not return an owin object"
+    if(fatal)
+      stop(gripe)
+    else {
+      warning(gripe)
+      return(NULL)
+    }
+  }
+  return(ppp(x, y, window=w))
+}
+  
 
 # --------------------------------------------------------------
 
