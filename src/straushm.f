@@ -1,5 +1,5 @@
 C Output from Public domain Ratfor, version 1.0
-      subroutine straushm(u,v,mrk,ix,x,y,marks,nmarks,n,par,period,cifva
+      subroutine straushm(u,v,mrk,ix,x,y,marks,ntypes,n,par,period,cifva
      *l)
       implicit double precision(a-h,o-z)
       dimension x(n), y(n), marks(n), par(1), period(2)
@@ -9,9 +9,9 @@ C Output from Public domain Ratfor, version 1.0
       zero = 0.d0
       per = period(1) .gt. 0.d0
       beta = par(mrk)
-      ind = nmarks
+      ind = ntypes
       do23000 i = 1,mrk 
-      do23002 j = i,nmarks 
+      do23002 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
       gmma(i) = par(ind)
@@ -23,9 +23,9 @@ C Output from Public domain Ratfor, version 1.0
 23003 continue
 23000 continue
 23001 continue
-      ind = nmarks + nmarks*(nmarks+1)/2
+      ind = ntypes + ntypes*(ntypes+1)/2
       do23008 i = 1,mrk 
-      do23010 j = i,nmarks 
+      do23010 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
       rint(i) = par(ind)**2
@@ -37,9 +37,9 @@ C Output from Public domain Ratfor, version 1.0
 23011 continue
 23008 continue
 23009 continue
-      ind = nmarks + nmarks*(nmarks+1)
+      ind = ntypes + ntypes*(ntypes+1)
       do23016 i = 1,mrk 
-      do23018 j = i,nmarks 
+      do23018 j = i,ntypes 
       ind = ind+1
       if(j.eq.mrk)then
       rhc(i) = par(ind)**2
@@ -51,7 +51,7 @@ C Output from Public domain Ratfor, version 1.0
 23019 continue
 23016 continue
 23017 continue
-      do23024 i = 1,nmarks 
+      do23024 i = 1,ntypes 
       k(i) = 0
 23024 continue
 23025 continue
@@ -75,7 +75,7 @@ C Output from Public domain Ratfor, version 1.0
 23026 continue
 23027 continue
       cifval = zero
-      do23036 i=1,nmarks 
+      do23036 i=1,ntypes 
       if(gmma(i) .lt. eps)then
       if(k(i).gt.0)then
       cifval = zero

@@ -1,6 +1,6 @@
+affine                  Apply Affine Transformation
 affine.owin             Apply Affine Transformation To Window
 affine.ppp              Apply Affine Transformation To Point Pattern
-affine                  Apply Affine Transformation
 allstats                Calculate four standard summary functions of a
                         point pattern.
 alltypes                Calculate Statistic for All Types in a
@@ -57,14 +57,14 @@ gridweights             Compute Quadrature Weights Based on Grid
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
 identify.ppp            Identify Points in a Point Pattern
-im.object               Class of Images
 im                      Create a Pixel Image Object
+im.object               Class of Images
 inside.owin             Test Whether Points Are Inside A Window
 intersect.owin          Intersection or Union of Two Windows
 is.im                   Test Whether An Object Is A Pixel Image
+is.marked               Test Whether Marks Are Present
 is.marked.ppm           Test Whether A Point Process Model is Marked
 is.marked.ppp           Test Whether A Point Pattern is Marked
-is.marked               Test Whether Marks Are Present
 is.owin                 Test Whether An Object Is A Window
 is.ppm                  Test Whether An Object Is A Fitted Point
                         Process Model
@@ -78,8 +78,8 @@ Jmulti                  Marked J Function
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
 Kcross                  Multitype K Function (Cross-type)
 Kdot                    Multitype K Function (i-to-any)
-Kest.fft                K-function using FFT
 Kest                    K-function
+Kest.fft                K-function using FFT
 Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
 km.rs                   Kaplan-Meier and Reduced Sample Estimator
@@ -93,24 +93,24 @@ longleaf                Longleaf Pines Point Pattern
 markcorr                Mark Correlation Function
 mpl                     Fit Point Process Model by Maximum
                         Pseudolikelihood
+MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
-MultiStrauss            The Multitype Strauss Point Process Model
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nndist                  Nearest neighbour distances
 nztrees                 New Zealand Trees Point Pattern
-ord.family              Ord Interaction Process Family
 Ord                     Generic Ord Interaction model
+ord.family              Ord Interaction Process Family
 OrdThresh               Ord's Interaction model
-owin.object             Class owin
 owin                    Create a Window
+owin.object             Class owin
 pairdist                Pairwise distances
 PairPiece               The Piecewise Constant Pairwise Interaction
                         Point Process Model
 pairsat.family          Saturated Pairwise Interaction Point Process
                         Family
-pairwise.family         Pairwise Interaction Process Family
 Pairwise                Generic Pairwise Interaction model
+pairwise.family         Pairwise Interaction Process Family
 pcf                     Pair Correlation Function
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
@@ -120,8 +120,8 @@ plot.ppp                plot a Spatial Point Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 Poisson                 Poisson Point Process Model
 ppm.object              Class of Fitted Point Process Models
-ppp.object              Class of Point Patterns
 ppp                     Create a Point Pattern
+ppp.object              Class of Point Patterns
 predict.ppm             Prediction from a Fitted Point Process Model
 print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
@@ -135,25 +135,25 @@ quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
 raster.x                Cartesian Coordinates for a Pixel Raster
 reduced.sample          Reduced Sample Estimator using Histogram Data
-redwoodfull             California Redwoods Point Pattern (Entire
-                        Dataset)
 redwood                 California Redwoods Point Pattern (Ripley's
                         Subset)
+redwoodfull             California Redwoods Point Pattern (Entire
+                        Dataset)
 ripras                  Estimate window from points alone
 rMatClust               Simulate Matern Cluster Process
-rMaternII               Simulate Matern Model II
 rMaternI                Simulate Matern Model I
+rMaternII               Simulate Matern Model II
+rmh                     Simulate point patterns using the
+                        Metropolis-Hastings algorithm.
 rmh.default             Simulate Point Process Models using the
                         Metropolis-Hastings Algorithm.
 rmh.ppm                 Simulate from a Fitted Point Process Model
-rmh                     Simulate point patterns using the
-                        Metropolis-Hastings algorithm.
 rmpoint                 Generate N Random Multitype Points
 rmpoispp                Generate Multitype Poisson Point Pattern
 rNeymanScott            Simulate Neyman-Scott Process
+rotate                  Rotate
 rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
-rotate                  Rotate
 rpoint                  Generate N Random Points
 rpoispp                 Generate Poisson Point Pattern
 rSSI                    Simple Sequential Inhibition
@@ -161,18 +161,18 @@ rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
 setmarks                Set or Reset the Marks in a Point Pattern
+shift                   Apply Vector Translation
 shift.im                Apply Vector Translation To Pixel Image
 shift.owin              Apply Vector Translation To Window
 shift.ppp               Apply Vector Translation To Point Pattern
-shift                   Apply Vector Translation
 simdat                  Simulated Point Pattern
 Softcore                The Soft Core Point Process Model
 spatstat.options        Internal Options in Spatstat Package
 spokes                  Spokes pattern of dummy points
 square                  Square Window
 stratrand               Stratified random point pattern
-StraussHard             The Strauss / Hard Core Point Process Model
 Strauss                 The Strauss Point Process Model
+StraussHard             The Strauss / Hard Core Point Process Model
 subset.fasp             Extract Subset of Function Array
 subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image

@@ -12,7 +12,7 @@ rmh.default <- function(model,start,control=NULL, verbose=TRUE, ...) {
 # Name lists --- these will need to be modified when new
 # conditional intensity functions are added to the repertoire.
 cif.list <- c('strauss','straush','sftcr','straussm','straushm',
-               'dgs','diggra','geyer')
+               'dgs','diggra','geyer','lookup')
 mt.list <- c("straussm","straushm")
 
 # Check that cif is available:
@@ -438,6 +438,49 @@ if(cif=="geyer") {
 	par <- par[nms]
 }
 
+# 9. The ``lookup'' device.  This permits simulating, at least
+# approximately, ANY pairwise interaction function model.  The
+# pairwise interaction function is provided as a vector of
+# distances and corresponding function values which are used
+# as a ``lookup table'' by the Fortran code.
+
+if(cif=="lookup") {
+	nms <- c("beta","h","r")
+	if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 3) {
+                cat("For the lookup cif, par must be a named list\n")
+                cat("with components beta, h, and r.\n")
+                stop("Bailing out.\n")
+        }
+	beta <- par[["beta"]]
+	if(beta < 0)
+		stop("Negative value of intensity = beta.\n")
+	h <- par[["h"]]
+	r <- par[["r"]]
+	nlook <- length(h)
+	if(length(r) != nlook)
+		stop("Mismatch of lengths of h and r lookup vectors.\n")
+	o <- order(r)
+	r <- r[o]
+	h <- h[o]
+	if(any(r < 0))
+		stop("Negative values lookup distances.\n")
+	if(r[1] > 0)
+		stop("The r vector must start at 0.\n")
+	if(any(h < 0))
+		stop("Negative values in lookup pairwise int. func.\n")
+	if(h[1] > 0 & any(h > 1))
+		stop("Non-meaningful lookup pairwise int. func.\n")
+	rmax   <- r[nlook]
+	deltar <- mean(diff(r))
+	if(all.equal(diff(r),rep(deltar,nlook-1))) {
+		equisp <- 1
+		par <- c(beta,nlook,equisp,deltar,rmax,h)
+	} else {
+		equisp <- 0
+		par <- c(beta,nlook,equisp,deltar,rmax,h,r)
+	}
+}
+
 # If we are simulating a Geyer saturation process we need some
 # ``auxilliary information''.
 if(nmbr==8) {
@@ -493,7 +536,7 @@ xy <- if(trendy) rpoint.multi(nrep,model$trend,tmax,factor(mprop),ew,...) else
 xprop <- xy$x
 yprop <- xy$y
 
-# The repetion is to allow the storage space to be incremented if
+# The repetition is to allow the storage space to be incremented if
 # necessary.
 repeat {
 	npmax <- npmax + nincr
@@ -528,9 +571,9 @@ repeat {
 # If npts > npmax we've run out of storage space.  Tack some space
 # onto the end of the ``state'' already generated, increase npmax
 # correspondingly, and re-call the methas subroutine.  Note that
-# mrep is the number of the repetion on which things stopped due
+# mrep is the number of the repetition on which things stopped due
 # to lack of storage; so we start again at the ***beginning*** of
-# the mrep repetion.
+# the mrep repetition.
 	npts <- rslt$npts
 	if(npts <= npmax) break
 	if(verbose) {

@@ -105,13 +105,11 @@ C Output from Public domain Ratfor, version 1.0
       itype = 3
       endif
       endif
-c      call intpr('itype=', -1, itype, 1)
       if(itype .gt. 0)then
       if(nmbr .eq. 8)then
       call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
       endif
       if(itype.eq.1)then
-c      call intpr('birth, npts :=', -1, npts, 1)
       ix = npts
       x(ix) = u
       y(ix) = v
@@ -121,9 +119,7 @@ c      call intpr('birth, npts :=', -1, npts, 1)
       else
       if(itype.eq.2)then
       call death(x,y,marks,marked,npts,ix)
-c      call intpr('death, npts :=', -1, npts, 1)
       else
-c      call intpr('shift, npts ==', -1, npts, 1)
       x(ix) = u
       y(ix) = v
       if(marked)then
@@ -133,7 +129,6 @@ c      call intpr('shift, npts ==', -1, npts, 1)
       endif
       endif
       irep = irep+1
-      dildo = 42.d0
       goto 23000
       endif
 23001 continue

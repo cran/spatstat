@@ -5,13 +5,9 @@
   Estimates the inhomogeneous \eqn{K} function of
   a non-stationary point pattern.
 }
-\synopsis{
-  Kinhom(X, lambda, r = NULL, breaks = NULL)
-}
 \usage{
-  Kinhom(X, lambda)
-  Kinhom(X, lambda, r)
-  Kinhom(X, lambda, breaks)
+  Kinhom(X, lambda, r = NULL, breaks = NULL, slow = FALSE,
+    correction=c("border", "isotropic", "Ripley", "translate"), \dots)
 }
 \arguments{
   \item{X}{
@@ -23,32 +19,58 @@
   }
   \item{lambda}{
     Vector of values of the estimated intensity function,
-    evaluated at the points of the pattern \code{X}
+    evaluated at the points of the pattern \code{X}.
+    Alternatively this may be a matrix: 
+    see Details.
   }
-    \item{r}{
-      vector of values for the argument \eqn{r} at which
-      the inhomogeneous \eqn{K} function
-      should be evaluated. There is a sensible default.
-    }
-    \item{breaks}{
+  \item{r}{
+    vector of values for the argument \eqn{r} at which
+    the inhomogeneous \eqn{K} function
+    should be evaluated. Not normally given by the user;
+    there is a sensible default.
+  }
+  \item{breaks}{
     An alternative to the argument \code{r}.
     Not normally invoked by the user.
     See Details.
-    }
+  }
+  \item{slow}{
+    Not normally given by the user. 
+    Logical flag which selects the algorithm used to compute the
+    inhomogeneous \eqn{K} function. The default (\code{slow=FALSE})
+    is faster than the alternative (\code{slow=TRUE}). The slow
+    algorithm is retained for internal purposes as a check on
+    validity.
+  }
+  \item{correction}{
+      A character vector containing any selection of the
+      options \code{"border"}, \code{"bord.modif"},
+      \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+      It specifies the edge correction(s) to be applied.
+  }
+  \item{\dots}{
+    Currently ignored.
+  }
 } 
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
   
-  Essentially a data frame containing three columns,
+  Essentially a data frame containing at least the following columns,
   \item{r}{the vector of values of the argument \eqn{r} 
     at which the pair correlation function \eqn{g(r)} has been  estimated
-  }
-  \item{border}{vector of values of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
   }
   \item{theo}{vector of values of \eqn{\pi r^2}{pi * r^2},
     the theoretical value of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
     for an inhomogeneous Poisson process
   }
+  and containing additional columns
+  according to the choice specified in the \code{correction}
+  argument. The additional columns are named
+  \code{border}, \code{trans} and \code{iso}
+  and give the estimated values of 
+  \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
+  using the border correction, translation correction,
+  and Ripley isotropic correction, respectively.
 }
 \details{
   This computes a generalisation of the \eqn{K} function
@@ -84,11 +106,22 @@
   \eqn{K_{\rm inhom}(r) > \pi r^2}{Kinhom(r) > pi * r^2}
   are suggestive of clustering.
 
-  The argument \code{lambda} must be a vector of length equal to the
+  The argument \code{lambda} should be a vector of length equal to the
   number of points in the pattern \code{X}. It will be interpreted as
   giving the (estimated) values of \eqn{\lambda(x_i)}{lambda(x[i])} for
   each point \eqn{x_i}{x[i]} of the pattern \eqn{x}.
 
+  Alternatively \code{lambda} may be a square matrix of dimensions
+  \eqn{n \times n}{n * n} where \eqn{n} is the number of points in
+  \code{X}. In this case \code{lambda[i,j]} will be interpreted
+  as an estimate of
+  \eqn{\lambda(x_i)\lambda(x_j)}{lambda(x[i]) * lambda(x[j])}.
+
+  Edge corrections are used to correct bias in the estimation
+  of \eqn{K_{\rm inhom}}{Kinhom}, in exactly the same way
+  as for the classical \eqn{K} function.
+  See the documentation for \code{\link{Kest}}.
+  
   The pair correlation function can also be applied to the
   result of \code{Kinhom}; see \code{\link{pcf}}.
 }
