@@ -1,10 +1,10 @@
 Package: spatstat
-Version: 1.4-3
-Date: 27 January 2004
+Version: 1.4-4
+Date: 11 February 2004
 Title: Analysis of spatial point patterns
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
 	Rolf Turner <rolf@math.unb.ca>, with contributions by
-	Marie-Colette van Lieshout and others
+	Marie-Colette van Lieshout and 17 others
 Maintainer: Adrian Baddeley <adrian@maths.uwa.edu.au>
 Depends: R (>= 1.8.0), mgcv, modreg, sm
 Description: Spatial Point Pattern data analysis, modelling and simulation

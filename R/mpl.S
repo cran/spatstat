@@ -1,5 +1,5 @@
 #
-#	$Revision: 4.13 $	$Date: 2004/01/27 08:16:25 $
+#	$Revision: 4.14 $	$Date: 2004/02/09 13:47:18 $
 #
 #    mpl()
 #          Fit a point process model to a two-dimensional point pattern
@@ -45,8 +45,8 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.call <- deparse(sys.call())
 the.version <- list(major=1,
                     minor=4,
-                    release=3,
-                    date="$Date: 2004/01/27 08:16:25 $")
+                    release=4,
+                    date="$Date: 2004/02/09 13:47:18 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)

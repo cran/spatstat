@@ -9,7 +9,7 @@
   at the points of the quadrature scheme used to fit the model.
 }
 \usage{
-  fitted.ppm(object, \dots)
+  fitted.ppm(object, \dots, type="lambda")
 }
 \arguments{
   \item{object}{
@@ -18,9 +18,15 @@
   \item{\dots}{
     Ignored.
   }
+  \item{type}{
+    String (partially matched) indicating whether the fitted value is the
+    conditional intensity (\code{"lambda"}) or the trend
+    (\code{"trend"}).
+  }
 }
 \value{
-  A vector containing the values of the fitted conditional intensity.
+  A vector containing the values of the fitted conditional intensity
+  or (if \code{type="trend"}) the fitted spatial trend.
   
   Entries in this vector correspond to the quadrature points (data or
   dummy points) used to fit the model. The quadrature points can be
@@ -32,12 +38,13 @@
   pseudolikelihood fitting algorithm \code{\link{mpl}}).
 
   This function evaluates the conditional intensity
-  \eqn{\hat\lambda(u, x)}{lambdahat(u,x)} of the fitted point process
+  \eqn{\hat\lambda(u, x)}{lambdahat(u,x)}
+  or spatial trend \eqn{\hat b(u)}{bhat(u)} of the fitted point process
   model for certain locations \eqn{u},
   where \code{x} is the original point pattern dataset to which
   the model was fitted.
 
-  The locations \eqn{u} at which the fitted conditional intensity
+  The locations \eqn{u} at which the fitted conditional intensity/trend
   is evaluated, are the points of the
   quadrature scheme used to fit the model in \code{\link{mpl}}.
   They include the data points (the points of the original point pattern
