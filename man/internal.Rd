@@ -98,9 +98,7 @@
 \alias{rmhmodel.ppm}
 \alias{rmpoint.I.allim}
 \alias{rpoint.multi}
-\alias{scanpp}
 \alias{second.moment.calc}
-\alias{setcov}
 \alias{shiftxy}              
 \alias{spatstat.rawdata.location}
 \alias{sympoly}
@@ -226,11 +224,9 @@ rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, 
 runifdisc(n, r = 1, x = 0, y = 0)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
-scanpp(filename, window, header = TRUE, dir = "", multitype = FALSE)
 second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE, \dots)
-setcov(W)
 shiftxy(X, vec = c(0, 0))
-spatstat.rawdata.location()             
+spatstat.rawdata.location(\dots)             
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        

@@ -5,8 +5,9 @@
 #   Typically data/murgatroyd.R reads data-raw/murgatroyd.tab
 #   and applies special processing
 #
-spatstat.rawdata.location <- function() {
-    locn <- paste(.path.package(package="spatstat"),
-                  "data-raw", sep=.Platform$file.sep)
+spatstat.rawdata.location <- function(...) {
+    locn <- system.file("data-raw", package="spatstat")
+    if(length(list(...)) != 0) 
+      locn <- paste(c(locn, ...), collapse=.Platform$file.sep)
     return(locn)
 }

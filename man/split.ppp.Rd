@@ -59,7 +59,9 @@
   updates the point pattern \code{x} so that
   it satisfies \code{split(x, f) = value}. The argument \code{value}
   is expected to be a list of point patterns, one for each level of
-  \code{f}. 
+  \code{f}. These point patterns are expected to be compatible in the sense
+  that they all have the same window, and either they are all unmarked
+  or they all have marks of the same kind. 
 
   Splitting can also be undone by the function \code{\link{superimpose}}.
 }
@@ -82,7 +84,8 @@
 # plot them
  plot(split(amacrine))
 
-# Scramble the 'on' cells
+# Scramble the locations of the 'on' cells
+ u <- unmark(split(amacrine))
  u$on <- runifpoint(amon$n, amon$window)
  split(amacrine) <- u
 

@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.3 $  $Date: 2004/08/30 04:55:22 $
+# $Revision: 1.4 $  $Date: 2004/10/21 18:34:30 $
 #
 #
 
@@ -48,7 +48,8 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=TRUE,
     xs <- x[[ttt]]
     for (i in seq(mrkvals)) {
       level <- mrkvals[i]
-      main <- if(marked) paste("mark =", level) else ""
+      main <- paste("Fitted", ttt, "\n",
+                    if(marked) paste("mark =", level) else NULL)
       for (style in how) {
         switch(style,
                persp = {
@@ -56,7 +57,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=TRUE,
                          resolve.defaults(list(xs[[i]]),
                                           list(...), 
                                           spatstat.options("par.persp")[[1]],
-                                          list(xlab="x", main=main)))
+                                          list(xlab="x", zlab=ttt, main=main)))
                },
                image = {
                  do.call("image",

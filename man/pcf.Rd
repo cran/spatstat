@@ -20,7 +20,7 @@
     function \code{smooth.spline}.
   }
   \item{method}{
-    Letter \code{"a"}, \code{"b"} or \code{"c"} indicating the
+    Letter \code{"a"}, \code{"b"}, code{"c"} or \code{"d"} indicating the
     method for deriving the pair correlation function from the
     \code{K} function.
   }
@@ -115,7 +115,7 @@
   The smoothing spline operations are performed by
   \code{\link{smooth.spline}} and \code{\link{predict.smooth.spline}}
   from the \code{modreg} library.
-  Three numerical methods are available:
+  Four numerical methods are available:
   \itemize{
     \item
     \bold{"a"} apply smoothing to \eqn{K(r)},
@@ -129,6 +129,10 @@
     \bold{"c"} apply smoothing to 
     \eqn{Z(r) = \frac{K(r)}{\pi r^2}}{Y(r) = K(r)/(pi * r^2)}
     constraining \eqn{Z(0)=1},
+    estimate its derivative, and solve.
+    \item
+    \bold{"d"} apply smoothing to 
+    \eqn{V(r) = \sqrt{K(r)}}{V(r) = sqrt(K(r))},
     estimate its derivative, and solve.
   }
   Method \code{"c"} seems to be the best at 

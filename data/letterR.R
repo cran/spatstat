@@ -1,7 +1,6 @@
 require(spatstat, quietly=TRUE, save=FALSE)
 .getLetterR <- function() {
-  filename <- paste(spatstat.rawdata.location(), "letterR.tab",
-                    sep=.Platform$file.sep)
+  filename <- spatstat.rawdata.location("letterR.tab")
   lt <- read.table(filename, header=TRUE)
   hole <- lt[lt$which == "inner", ]
   outside <- lt[lt$which == "outer", ]

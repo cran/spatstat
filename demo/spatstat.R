@@ -36,12 +36,14 @@ pc <- pcf(K, spar=0.8, method="b")
 plot(pc)
 title(main="Pair correlation function")
 
-e <- exactdt(swedishpines)
-image(e$xcol, e$yrow, t(e$d), axes=FALSE, xlab="", ylab="",
-      main="Distance transform")
+plot(swedishpines$window, main="Distance map")
+dis <- distmap(swedishpines)
+plot(dis, add=TRUE)
 points(swedishpines)
 
-image(e$xcol, e$yrow, t(e$d < 4.5), axes=FALSE, xlab="", ylab="")
+plot(swedishpines$window, main="Thresholded distance")
+dis$v <- (dis$v < 4.5)
+plot(dis, add=TRUE)
 points(swedishpines)
 
 plot(allstats(swedishpines))
@@ -83,7 +85,7 @@ showoffK <- function(Y, u, d, r, fullpicture,rad) {
 	theta <- seq(0,2*pi,length=100)
 	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
 	text(u[1]+rad/3,u[2]+rad/2,Y$n-1,cex=3)
-	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
+	Sys.sleep(if(runif(1) < 0.05) 1.2 else 0.25)
 	return(Y$n - 1)
 }
 data(redwood)
