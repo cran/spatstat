@@ -15,7 +15,7 @@
   An object of class \code{"ppp"}
   representing the point pattern of tree locations
   in a 5.7 x 5.7 metre square, rescaled to the unit square
-  and rounded to t
+  and rounded to two decimal places.
 
   See \code{\link{ppp.object}} for details of the format of a
   point pattern object.

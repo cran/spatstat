@@ -5,19 +5,19 @@
 
       requires <math.h> (for floor())
 
-      $Revision: 1.2 $ $Date: 1997/08/18 16:03:31 $
+      $Revision: 1.3 $ $Date: 2004/11/15 19:25:11 $
 */
 
 typedef struct Raster{
  /* array of data */
 	char		*data;		/* coerced to appropriate type */
-	long	nrow;		/* dimensions of entire array */
-	long	ncol;
-	unsigned long	length;
-	long	rmin;		/* position of valid subrectangle */
-	long	rmax;
-	long	cmin;
-	long	cmax;
+	int	nrow;		/* dimensions of entire array */
+	int	ncol;
+	int	length;
+	int	rmin;		/* position of valid subrectangle */
+	int	rmax;
+	int	cmin;
+	int	cmax;
 /* definition of mapping into continuous space */
 	double	x0;	/* position of entry (rmin,cmin) */
 	double	y0;
@@ -40,7 +40,7 @@ typedef struct Raster{
 /*      how to clear the data      */
 
 #define Clear(ARRAY,TYPE,VALUE) \
-       { unsigned long i; TYPE *p; \
+       { unsigned int i; TYPE *p; \
 	 for(i = 0, p = (TYPE *) (ARRAY).data; i < (ARRAY).length; i++, p++) \
 	 *p = VALUE; }
 		
@@ -82,7 +82,7 @@ typedef struct Raster{
   */
 
 #define RowIndex(ARRAY,Y) \
-	((ARRAY).rmin + (long) floor(((Y) - (ARRAY).y0)/(ARRAY).ystep))
+	((ARRAY).rmin + (int) floor(((Y) - (ARRAY).y0)/(ARRAY).ystep))
 #define ColIndex(ARRAY,X) \
-	((ARRAY).cmin + (long) floor(((X) - (ARRAY).x0)/(ARRAY).xstep))
+	((ARRAY).cmin + (int) floor(((X) - (ARRAY).x0)/(ARRAY).xstep))
 	

@@ -2,7 +2,7 @@
 #	exactPdt.S
 #	S function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.3 $	$Date: 2004/03/08 21:06:43 $
+#	$Revision: 4.4 $	$Date: 2004/11/15 19:29:16 $
 #
 
 "exactPdt"<-
@@ -20,7 +20,7 @@ function(im)
 	x <- cbind(FALSE, x, FALSE)
 	x <- rbind(FALSE, x, FALSE)
 #	
-	res <- .C("ps_exact_dt_S",
+	res <- .C("ps_exact_dt_R",
 		as.double(im$xrange[1]),
 		as.double(im$yrange[1]),
 		as.double(im$xrange[2]),
