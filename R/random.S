@@ -1,0 +1,257 @@
+#
+#    random.S
+#
+#    Functions for generating random point patterns
+#
+#    $Revision: 4.4 $   $Date: 2001/11/26 09:51:16 $
+#
+#
+#    runifpoint()      n i.i.d. uniform random points ("binomial process")
+#
+#    runifpoispp()     uniform Poisson point process
+#
+#    rpoispp()         general Poisson point process (rejection method)
+#
+#    rMaternI()        Mat'ern model I 
+#    rMaternII()       Mat'ern model II
+#    rSSI()            Simple Sequential Inhibition process
+#
+#    rNeymanScott()    Neyman-Scott process (generic)
+#    rMatClust()       Mat'ern cluster process
+#    rThomas()         Thomas process
+#
+#
+#
+#    Examples:
+#          u01 <- owin(0:1,0:1)
+#          plot(runifpoispp(100, u01))
+#          X <- rpoispp(function(x,y) {100 * (1-x/2)}, 100, u01)
+#          X <- rpoispp(function(x,y) {ifelse(x < 0.5, 100, 20)}, 100)
+#          plot(X)
+#          plot(rMaternI(100, 0.02))
+#          plot(rMaternII(100, 0.05))
+#
+
+"runifrect" <-
+  function(n, win=owin(c(0,1),c(0,1)))
+{
+  # no checking
+      x <- runif(n, min=win$xrange[1], max=win$xrange[2])
+      y <- runif(n, min=win$yrange[1], max=win$yrange[2])  
+      return(ppp(x, y, window=win))
+}
+
+"runifdisc" <-
+  function(n, r=1, x=0, y=0)
+{
+  # i.i.d. uniform points in the disc of radius r and centre (x,y)
+  theta <- runif(n, min=0, max= 2 * pi)
+  s <- sqrt(runif(n, min=0, max=r^2))
+  return(list(x = x + s * cos(theta), y = y + s * sin(theta)))
+}
+
+
+"runifpoint" <-
+  function(n, win=owin(c(0,1),c(0,1)), giveup=1000)
+{
+    win <- as.owin(win)
+
+    if(win$type == "rectangle")
+      return(runifrect(n, win))
+
+    # otherwise - window is irregular
+    
+    # rejection method
+    # initialise empty pattern
+    x <- numeric(0)
+    y <- numeric(0)
+    X <- ppp(x, y, window=win)
+    #
+    # rectangle in which trial points will be generated
+    box <- bounding.box(win)
+    # 
+    ntries <- 0
+    repeat {
+      ntries <- ntries + 1
+      # generate trial points in batches of n
+      qq <- runifrect(n, box) 
+      # retain those which are inside 'win'
+      qq <- qq[, win]
+      # add them to result
+      browser()
+      X <- superimpose(X, qq)
+      # if we have enough points, exit
+      if(X$n > n) 
+        return(X[1:n])
+      else if(X$n == n)
+        return(X)
+      # otherwise get bored eventually
+      else if(ntries >= giveup)
+        stop(paste("Gave up after", giveup * n, "trials,",
+                   np, "points accepted"))
+    }
+}
+
+"runifpoispp" <-
+function(lambda, win = owin(c(0,1),c(0,1))) {
+    win <- as.owin(win)
+    if(!is.numeric(lambda) || length(lambda) > 1 || lambda <= 0)
+      stop("Intensity lambda must be a single number > 0")
+
+    # generate Poisson process in enclosing rectangle 
+    box <- bounding.box(win)
+    mean <- lambda * area.owin(box)
+    n <- rpois(1, mean)
+    X <- runifpoint(n, box)
+
+    # trim to window
+    if(win$type != "rectangle")
+      X <- X[, win]  
+
+    return(X)
+}
+
+"rpoispp" <-
+  function(lambda, max, win = owin(c(0,1),c(0,1))) {
+    # arguments:
+    #     win     observation window (of class 'owin')
+    #     lambda  intensity - constant or function(x,y)
+    #     max     maximum possible value of lambda(x,y)
+    win <- as.owin(win)
+    
+    if(is.numeric(lambda))
+      # uniform Poisson
+      return(runifpoispp(lambda, win))
+    # inhomogeneous Poisson - use rejection filtering 
+    X <- runifpoispp(max, win)  # includes sanity checks on `max'
+    prob <- lambda(X$x, X$y)/max
+    u <- runif(X$n)
+    retain <- (u <= prob)
+    X <- X[retain, ]
+    return(X)
+}
+    
+"rMaternI" <-
+  function(lambda, r, win = owin(c(0,1),c(0,1)))
+{
+    win <- as.owin(win)
+    X <- runifpoispp(lambda, win)
+    d <- nndist(X$x, X$y)
+    qq <- X[d > r]
+    return(qq)
+}
+    
+"rMaternII" <-
+  function(lambda, r, win = owin(c(0,1),c(0,1)))
+{
+    win <- as.owin(win)
+
+    X <- runifpoispp(lambda, win)
+
+    # matrix of pairwise distances
+    d <- pairdist(X$x, X$y)
+    close <- (d <= r)
+
+    # random order 1:n
+    age <- sample(seq(X$n), X$n, replace=F)
+    earlier <- outer(age, age, ">")
+
+    conflict <- close & earlier
+    # delete <- apply(conflict, 1, any)
+    delete <- matrowany(conflict)
+    
+    qq <- X[ !delete]
+    return(qq)
+}
+  
+"rSSI" <-
+  function(r, n, win = owin(c(0,1),c(0,1)), giveup = 1000)
+{
+     # Simple Sequential Inhibition process
+     # fixed number of points
+     # Naive implementation, proposals are uniform
+     win <- as.owin(win)
+     X <- ppp(numeric(0),numeric(0), window=win)
+     r2 <- r^2
+     if(n * pi * r2/4  > area.owin(win))
+       stop(paste("Window is too small to fit", n, "points",
+                  "at minimum separation", r))
+     ntries <- 0
+     while(ntries < giveup) {
+       ntries <- ntries + 1
+       qq <- runifpoint(1, win)
+       x <- qq$x[1]
+       y <- qq$y[1]
+       if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
+         X <- superimpose(X, qq)
+       if(X$n == n)
+         return(X)
+     }
+     warning(paste("Gave up after", giveup,
+                "attempts with only", X$n, "points placed"))
+     return(X)
+}
+
+"rNeymanScott" <-
+  function(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), ...)
+{
+  # Generic Neyman-Scott process
+  # Implementation for bounded cluster radius
+  #
+  # 'rcluster' is a function(x,y) that takes the coordinates
+  # (x,y) of the parent point and generates a list(x,y) of offspring
+  #
+  # "..." are arguments to be passed to 'rcluster()'
+  #
+  # Generate parents in dilated window
+  frame <- bounding.box(win)
+  dilated <- owin(frame$xrange + c(-rmax, rmax),
+                  frame$yrange + c(-rmax, rmax))
+  parents <- runifpoispp(lambda, win=dilated)
+  #
+  result <- ppp(numeric(0), numeric(0), window = win)
+  
+  if(parents$n == 0)
+    return(result)
+  
+  for(i in seq(parents$n)) {
+    # generate random offspring of i-th parent point
+    cluster <- rcluster(parents$x[i], parents$y[i], ...)
+    cluster <- ppp(cluster$x, cluster$y, window=frame)
+    # trim to window
+    cluster <- cluster[,win]
+    # add to pattern
+    result <- superimpose(result, cluster)
+  }
+  return(result)
+}  
+
+"rMatClust" <-
+  function(lambda, r, mu, win = owin(c(0,1),c(0,1)))
+{
+  # Matern Cluster Process with Poisson (mu) offspring distribution
+  #
+  poisclus <-  function(x0, y0, radius, mu) {
+                           n <- rpois(1, mu)
+                           return(runifdisc(n, radius, x0, y0))
+                         }
+  result <- rNeymanScott(lambda, r, poisclus, win, radius=r, mu=mu)
+  return(result)
+}
+    
+"rThomas" <-
+  function(lambda, sigma, mu, win = owin(c(0,1),c(0,1)))
+{
+  # Thomas process with Poisson(mu) number of offspring
+  # at isotropic Normal(0,sigma^2) displacements from parent
+  #
+  thomclus <-  function(x0, y0, sigma, mu) {
+                           n <- rpois(1, mu)
+                           x <- rnorm(n, mean=x0, sd=sigma)
+                           y <- rnorm(n, mean=y0, sd=sigma)
+                           return(list(x=x, y=y))
+                         }
+  result <- rNeymanScott(lambda, 4 * sigma, thomclus, win, sigma=sigma, mu=mu)
+  return(result)
+}
+  

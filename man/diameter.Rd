@@ -1,0 +1,47 @@
+\name{diameter}
+\alias{diameter}
+\title{Diameter of a Window Frame}
+\description{
+  Computes the diameter of a window 
+}
+\usage{
+ diameter(w)
+}
+\arguments{
+  \item{w}{A window, whose diameter will be computed.}
+}
+\value{
+  The numerical value of the diameter of the window. 
+}
+\details{
+  It is intended that this function compute the 
+  diameter of a window of arbitrary shape,
+  i.e. the maximum distance between any two points
+  in the window. 
+  The current implementation just computes 
+  the length of the diagonal of the rectangular frame
+  surrounding the window.
+
+  The argument \code{w} should be a window (an object of class
+  \code{"owin"}, see \code{\link{owin.object}} for details)
+  or can be given in any format acceptable to \code{\link{as.owin}()}.
+  }
+}
+\seealso{
+  \code{\link{owin}},
+  \code{\link{as.owin}}
+}
+\examples{
+  \dontrun{library(spatstat)}
+  w <- owin(c(0,1),c(0,1))
+  diameter(w) 
+  # returns sqrt(2)
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}

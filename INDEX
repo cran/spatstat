@@ -1,0 +1,121 @@
+Fest                     Estimate the empty space function F
+Gcross                   Multitype Nearest Neighbour Distance Function
+                         (i-to-j)
+Gdot                     Multitype Nearest Neighbour Distance Function
+                         (i-to-any)
+Gest                     Nearest Neighbour Distance Function G
+Geyer                    Geyer's Saturation Point Process Model
+Gmulti                   Marked Nearest Neighbour Distance Function
+Jcross                   Multitype J Function (i-to-j)
+Jdot                     Multitype J Function (i-to-any)
+Jest                     Estimate the J-function
+Jmulti                   Marked J Function
+Kcross                   Multitype K Function (Cross-type)
+Kdot                     Multitype K Function (i-to-any)
+Kest                     K-function
+Kinhom                   Inhomogeneous K-function
+Kmulti                   Marked K-Function
+MultiStrauss             The Multitype Strauss Point Process Model
+MultiStraussHard         The Multitype/Hard Core Strauss Point Process
+                         Model
+Ord                      Generic Ord Interaction model
+OrdThresh                Ord's Interaction model
+PairPiece                The Piecewise Constant Pairwise Interaction
+                         Point Process Model
+Pairwise                 Generic Pairwise Interaction model
+Poisson                  Poisson Point Process Model
+Saturated                Saturated Pairwise Interaction model
+Softcore                 The Soft Core Point Process Model
+Strauss                  The Strauss Point Process Model
+StraussHard              The Strauss / Hard Core Point Process Model
+affine                   Apply Affine Transformation
+affine.owin              Apply Affine Transformation To Window
+affine.ppp               Apply Affine Transformation To Point Pattern
+allstats                 Calculate four standard summary functions of a
+                         point pattern.
+alltypes                 Calculate Statistic for All Types in a Multitype
+                         Point Pattern
+area.owin                Area of a Window
+as.mask                  Pixel Image Approximation of a Window
+as.owin                  Convert Data To Class owin
+as.ppp                   Convert Data To Class ppp
+as.rectangle             Window Frame
+bdist.pixels             Distance to Boundary of Window
+bdist.points             Distance to Boundary of Window
+bounding.box             Bounding Box of a Window
+bramblecanes             Hutchings' Bramble Canes data
+catHughes                Hughes' Cat Retina Data
+catWaessle               Cat Retina Data
+cells                    Biological Cells Point Pattern
+complement.owin          Take Complement of a Window
+concatxy                 Concatenate x,y Coordinate Vectors
+conspire                 Plot Together According to a Formula
+corners                  Corners of a rectangle
+default.dummy            Generate a Default Pattern of Dummy Points
+demopat                  Artificial Data Point Pattern
+diameter                 Diameter of a Window Frame
+dirichlet.weights        Compute Quadrature Weights Based on Dirichlet
+                         Tessellation
+erode.owin               Erode a Window
+eroded.areas             Areas of Morphological Erosions
+fasp.object              Function Arrays for Spatial Patterns
+gridcentres              Rectangular grid of points
+gridweights              Compute Quadrature Weights Based on Grid Counts
+inside.owin              Test Whether Points Are Inside A Window
+spatstat-internal        Internal spatstat functions
+kaplan.meier             Kaplan-Meier Estimator using Histogram Data
+kmrs                     Kaplan-Meier and Reduced Sample Estimator using
+                         Histograms
+lansing                  Lansing Woods Point Pattern
+longleaf                 Longleaf Pines Point Pattern
+mpl                      Fit Point Process Model by Maximum
+                         Pseudolikelihood
+nearest.raster.point     Find Pixel Nearest to a Given Point
+nztrees                  New Zealand Trees Point Pattern
+ord.family               Ord Interaction Process Family
+owin                     Create a Window
+owin.object              Class owin
+pairsat.family           Saturated Pairwise Interaction Point Process
+                         Family
+pairwise.family          Pairwise Interaction Process Family
+pcf                      Pair Correlation Function
+plot.fasp                Plot a Function Array
+plot.owin                Plot a Spatial Window
+plot.ppm                 plot a Fitted Point Process Model
+plot.ppp                 plot a Spatial Point Pattern
+ppm.object               Class of Fitted Point Process Models
+ppp                      Create a Point Pattern
+ppp.object               Class of Point Patterns
+predict.ppm              Prediction from a Fitted Point Process Model
+print.ppm                Print a Fitted Point Process Model
+quad.object              Class of Quadrature Schemes
+quadscheme               Generate a Quadrature Scheme from a Point
+                         Pattern
+rMatClust                Simulate Matern Cluster Process
+rMaternI                 Simulate Matern Model I
+rMaternII                Simulate Matern Model II
+rNeymanScott             Simulate Neyman-Scott Process
+rSSI                     Simple Sequential Inhibition
+rThomas                  Simulate Thomas Process
+raster.x                 Cartesian Coordinates for a Pixel Raster
+reduced.sample           Reduced Sample Estimator using Histogram Data
+redwood                  California Redwoods Point Pattern
+rmh                      Simulate point patterns using the Metropolis-
+                         Hastings algorithm.
+rotate                   Rotate
+rotate.owin              Rotate a Window
+rotate.ppp               Rotate a Point Pattern
+rpoispp                  Generate Poisson Point Pattern
+runifpoint               Generate N Uniform Random Points
+shift                    Apply Vector Translation
+shift.owin               Apply Vector Translation To Window
+shift.ppp                Apply Vector Translation To Point Pattern
+simdat                   Simulated Point Pattern
+spokes                   Spokes pattern of dummy points
+stratrand                Stratified random point pattern
+subset.fasp              Extract Subset of Function Array
+subset.ppp               Extract Subset of Point Pattern
+superimpose              Superimpose Several Point Patterns
+swedishpines             Swedish Pines Point Pattern
+union.quad               Union of Data and Dummy Points
+unmark                   Remove Marks from a Marked Point Pattern
