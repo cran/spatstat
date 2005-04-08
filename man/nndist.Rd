@@ -1,22 +1,32 @@
 \name{nndist}
 \alias{nndist}
+\alias{nndist.ppp}
+\alias{nndist.default}
 \title{Nearest neighbour distances}
 \description{
   Computes the distance from each point to its nearest neighbour
   in a point pattern.
 }
 \usage{
-  nndist(x, y=NULL, method="C")
+  nndist(X, \dots, method="C")
+  nndist.ppp(X, \dots, method="C")
+  nndist.default(X, Y=NULL, \dots, method="C")
 }
 \arguments{
-  \item{x,y}{
-    Arguments specifying the \eqn{x} and \eqn{y} coordinates of
-    a set of points. Typically \code{x} and \code{y} would be
-    numeric vectors of equal length. Alternatively \code{y} may be
-    omitted and \code{x} may be
-    a point pattern (object of class \code{"ppp"})
-    or a list with two components \code{x} and \code{y},
+  \item{X,Y}{
+    Arguments specifying the locations of
+    a set of points.
+    For \code{nndist.ppp}, the argument \code{X} should be a point
+    pattern (object of class \code{"ppp"}).
+    For \code{nndist.default}, typically \code{X} and \code{Y} would be
+    numeric vectors of equal length. Alternatively \code{Y} may be
+    omitted and \code{X} may be
+    a list with two components \code{x} and \code{y},
     or a matrix with two columns.
+  }
+  \item{\dots}{
+    Ignored by \code{nndist.ppp}
+    and \code{nndist.default}.
   }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
@@ -30,9 +40,26 @@
   in a point pattern to its nearest neighbour (the nearest other
   point of the pattern).
 
+  The function \code{nndist} is generic, with
+  a method for point patterns (objects of class \code{"ppp"})
+  and a default method.
+
+  The method for point patterns expects a single
+  point pattern argument \code{X} and returns the vector of its
+  nearest neighbour distances.
+
+  The default method expects that \code{X} and \code{Y} will determine
+  the coordinates of a set of points. Typically \code{X} and
+  \code{Y} would be numeric vectors of equal length. Alternatively
+  \code{Y} may be omitted and \code{X} may be a list with two components
+  named \code{x} and \code{y}, or a matrix or data frame with two columns.
+  
+  The argument \code{method} is not normally used. It is
+  retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
   computed using interpreted R code only. If \code{method="C"}
-  then C code is used. The C code is faster by two to three orders of magnitude
+  (the default) then C code is used. 
+  The C code is faster by two to three orders of magnitude
   and uses much less memory.
   
   If there is only one point (if \code{x} has length 1),
@@ -49,11 +76,12 @@
   \code{\link{Gest}}
 }
 \examples{
+   data(cells)
+   d <- nndist(cells)
+
    x <- runif(100)
    y <- runif(100)
    d <- nndist(x, y)
-   data(cells)
-   d <- nndist(cells)
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}

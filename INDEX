@@ -27,6 +27,8 @@ complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
 copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
+crossdist               Pairwise distances between two different point
+                        patterns
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
 data.ppm                Extract Original Data from a Fitted Point

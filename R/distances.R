@@ -2,21 +2,26 @@
 #
 #      distances.R
 #
-#      $Revision: 1.3 $     $Date: 2004/03/08 21:08:30 $
+#      $Revision: 1.8 $     $Date: 2005/04/09 01:58:34 $
 #
 #
 #      Interpoint distances
 #
 #
 
-"pairdist"<-
-function(x, y=NULL, method="C")
+pairdist <- function(X, ..., method="C") {
+  UseMethod("pairdist")
+}
+
+pairdist.ppp <- function(X, ..., method="C") {
+  verifyclass(X, "ppp")
+  return(pairdist.default(X$x, X$y, method="C"))
+}
+
+pairdist.default <-
+  function(X, Y=NULL, ..., method="C")
 {
-  # extract x and y coordinate vectors
-  if(verifyclass(x, "ppp", fatal=FALSE)) 
-    xy <- list(x=x$x, y=x$y)
-  else 
-    xy <- xy.coords(x,y)[c("x","y")]
+  xy <- xy.coords(X,Y)[c("x","y")]
   x <- xy$x
   y <- xy$y
 
@@ -26,9 +31,9 @@ function(x, y=NULL, method="C")
 
   # special cases
   if(n == 0)
-    return(numeric(0))
+    return(matrix(numeric(0), nrow=0, ncol=0))
   else if(n == 1)
-    return(matrix(1,nrow=1,ncol=1))
+    return(matrix(0,nrow=1,ncol=1))
   
   switch(method,
          interpreted={
@@ -48,17 +53,22 @@ function(x, y=NULL, method="C")
   invisible(d)
 }
 
-"nndist"<-
-function(x, y=NULL, method="C")
+nndist <- function(X, ..., method="C") {
+  UseMethod("nndist")
+}
+
+nndist.ppp <- function(X, ..., method="C") {
+  verifyclass(X, "ppp")
+  return(nndist.default(X$x, X$y, method="C"))
+}
+
+nndist.default <-
+  function(X, Y=NULL, ..., method="C")
 {
 	#  computes the vector of nearest-neighbour distances 
 	#  for the pattern of points (x[i],y[i])
 	#
-  # extract x and y coordinate vectors
-  if(verifyclass(x, "ppp", fatal=FALSE)) 
-    xy <- list(x=x$x, y=x$y)
-  else 
-    xy <- xy.coords(x,y)[c("x","y")]
+  xy <- xy.coords(X,Y)[c("x","y")]
   x <- xy$x
   y <- xy$y
 
@@ -100,4 +110,51 @@ function(x, y=NULL, method="C")
   invisible(nnd)
 }
 
+crossdist <- function(X, Y, ..., method="C") {
+  UseMethod("crossdist")
+}
+
+crossdist.ppp <- function(X, Y, ..., method="C") {
+  verifyclass(X, "ppp")
+  return(crossdist.default(X$x, X$y, Y$x, Y$y, method="C"))
+}
+
+crossdist.default <-
+  function(X, Y, x2, y2, ..., method="C")
+{
+  x1 <- X
+  y1 <- Y
+  # returns matrix[i,j] = distance from (x1[i],y1[i]) to (x2[j],y2[j])
+  if(length(x1) != length(y1))
+    stop("lengths of x and y do not match")
+  if(length(x2) != length(y2))
+    stop("lengths of x2 and y2 do not match")
+  n1 <- length(x1)
+  n2 <- length(x2)
+  if(n1 == 0 || n2 == 0)
+    return(matrix(numeric(0), nrow=n1, ncol=n2))
+  switch(method,
+         interpreted = {
+                 X1 <- matrix(rep(x1, n2), ncol = n2)
+                 Y1 <- matrix(rep(y1, n2), ncol = n2)
+                 X2 <- matrix(rep(x2, n1), ncol = n1)
+                 Y2 <- matrix(rep(y2, n1), ncol = n1)
+                 d <- sqrt((X1 - t(X2))^2 + (Y1 - t(Y2))^2)
+                 return(d)
+               },
+               C = {
+                 z<- .C("crossdist",
+                        nfrom = as.integer(n1),
+                        xfrom = as.double(x1),
+                        yfrom = as.double(y1),
+                        nto = as.integer(n2),
+                        xto = as.double(x2),
+                        yto = as.double(y2),
+                        d = as.double(matrix(0, nrow=n1, ncol=n2)),
+                        PACKAGE="spatstat")
+                 return(matrix(z$d, nrow=n1, ncol=n2))
+               },
+               stop(paste("Unrecognised method", method))
+               )
+      }
 

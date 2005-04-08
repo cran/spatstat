@@ -8,7 +8,7 @@
 }
 \usage{
  ppm(Q, trend=~1, interaction=NULL, covariates=NULL,
-correction="border", rbord=0, use.gam=FALSE, method="mpl")
+correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
 }
 \arguments{
   \item{Q}{
@@ -53,6 +53,12 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl")
   \item{method}{
     The method used to fit the model. Currently the only option
     is \code{"mpl"} indicating the method of Maximum PseudoLikelihood.
+  }
+  \item{forcefit}{
+    Logical flag for internal use.
+    If \code{forcefit=FALSE}, some trivial models will be
+    fitted by a shortcut. If \code{forcefit=TRUE},
+    the generic fitting method will always be used. 
   }
 }
 \value{

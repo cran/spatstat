@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.27 $	$Date: 2004/08/30 05:27:45 $
+#	$Revision: 1.28 $	$Date: 2005/04/12 20:49:13 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -185,9 +185,10 @@ function(object, window, ngrid=NULL, locations=NULL,
         if(is.null(newdata$SUBSET))
           newdata$SUBSET <- rep(TRUE, nrow(newdata))
 #
-# Dig out information used in the original call to ppm().
+# Dig out information used in Berman-Turner device 
 #        Vnames:     the names for the ``interaction variables''
 #        glmdata:    the data frame used for the glm fit
+#        glmfit:     the fitted glm object
 #
   if(!trivial) {
 	Vnames <- model$internal$Vnames
@@ -196,6 +197,8 @@ function(object, window, ngrid=NULL, locations=NULL,
 	    glmdata <- model$internal$glmdata
         else        
             assign("glmdata", model$internal$glmdata, f = 1)
+
+        glmfit <- getglmfit(model)
   }
   
 ############  COMPUTE PREDICTION ##############################
@@ -223,8 +226,8 @@ function(object, window, ngrid=NULL, locations=NULL,
       newdata[[vn]] <- zeroes
 #
 #   invoke predict.glm()
-#  
-    z <- predict(model$internal$glmfit, newdata, type="response")
+#
+    z <- predict(glmfit, newdata, type="response")
 
 ##############################################################  
   } else if(type == "cif" || type =="lambda") {
@@ -272,7 +275,7 @@ function(object, window, ngrid=NULL, locations=NULL,
       #
     }
   # invoke predict.glm
-  z <- predict(model$internal$glmfit, newdata, type="response")
+  z <- predict(glmfit, newdata, type="response")
 
   # reset to zero if potential was zero
   if(any(cif.equals.zero))
