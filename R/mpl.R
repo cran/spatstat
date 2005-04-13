@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.18 $	$Date: 2005/02/08 23:56:24 $
+#	$Revision: 5.19 $	$Date: 2005/04/12 20:27:05 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -30,7 +30,8 @@ function(Q,
          covariates = NULL,
 	 correction="border",
 	 rbord = 0,
-         use.gam=FALSE
+         use.gam=FALSE,
+         forcefit=FALSE
 ) {
 #
 # Extract quadrature scheme 
@@ -55,12 +56,12 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=5,
                     release=7,
-                    date="$Date: 2005/02/08 23:56:24 $")
+                    date="$Date: 2005/04/12 20:27:05 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
         
-if(!want.trend && !want.inter) {
+if(!want.trend && !want.inter && !forcefit) {
   # the model is the uniform Poisson process
   # The MPLE (= MLE) can be evaluated directly
   npts <- X$n

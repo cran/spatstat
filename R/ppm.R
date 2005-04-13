@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.2 $	$Date: 2004/06/09 10:58:18 $
+#	$Revision: 1.3 $	$Date: 2005/04/12 20:23:57 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -14,7 +14,8 @@ function(Q,
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
-         method = "mpl"
+         method = "mpl",
+         forcefit=FALSE
 ) {
   if(method != "mpl")
     stop(paste("Unrecognised fitting method \"", method, "\"", sep=""))
@@ -23,7 +24,8 @@ function(Q,
                     interaction=interaction,
                     covariates=covariates,
                     correction=correction,
-                    rbord=rbord, use.gam=use.gam)
+                    rbord=rbord, use.gam=use.gam,
+                    forcefit=forcefit)
   fit$call <- deparse(sys.call())
   return(fit)
 }

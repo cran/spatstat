@@ -7,7 +7,7 @@
 \usage{
   update.ppm(object, \dots,
             Q, trend, interaction, covariates,
-            correction, rbord, use.gam)
+            correction, rbord, use.gam, forcefit)
 }
 \arguments{
   \item{object}{
@@ -45,6 +45,10 @@
     logical value indicating whether to fit the model using
     \code{\link{gam}}. See \code{\link{ppm}}.
   }
+  \item{forcefit}{
+    logical value controlling the use of shortcuts
+    when fitting trivial models. See \code{\link{ppm}}.
+  }
 }
 \details{
   This is a method for the generic function \code{\link{update}}
@@ -67,7 +71,8 @@
 
   The named arguments \code{Q}, \code{trend},
   \code{interaction}, \code{covariates}, \code{correction},
-  \code{rbord}, \code{use.gam} are passed to \code{\link{ppm}}.
+  \code{rbord}, \code{use.gam} and \code{forcefit}
+  are passed to \code{\link{ppm}}.
   Use \code{name=NULL} to remove the argument \code{name} from the
   call.
 

@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.6 $	$Date: 2005/02/08 02:11:16 $
+#	$Revision: 5.7 $	$Date: 2005/04/09 00:19:07 $
 #
 #
 # -------- functions ----------------------------------------
@@ -16,9 +16,6 @@
 #
 #       Kmulti()        (generic)
 #
-#	crossdist()	compute matrix of distances between 	
-#			  each pair of data points 
-#			  in two separate lists of points
 #
 # -------- standard arguments ------------------------------	
 #	X		point pattern (of class 'ppp')
@@ -44,24 +41,6 @@
 #			(denominator = area of eroded window
 #
 # ------------------------------------------------------------------------
-
-"crossdist"<-
-function(x1, y1, x2, y2)
-{
-        # returns matrix[i,j] = distance from (x1[i],y1[i]) to (x2[j],y2[j])
-	if(length(x1) != length(y1))
-		stop("lengths of x1 and y1 do not match")
-	if(length(x2) != length(y2))
-		stop("lengths of x2 and y2 do not match")
-	n1 <- length(x1)
-	n2 <- length(x2)
-	X1 <- matrix(rep(x1, n2), ncol = n2)
-	Y1 <- matrix(rep(y1, n2), ncol = n2)
-	X2 <- matrix(rep(x2, n1), ncol = n1)
-	Y2 <- matrix(rep(y2, n1), ncol = n1)
-	d <- sqrt((X1 - t(X2))^2 + (Y1 - t(Y2))^2)
-	return(d)
-}
 
 "Kcross" <- 
 function(X, i=1, j=2, r=NULL, breaks=NULL,

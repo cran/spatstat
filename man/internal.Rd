@@ -16,7 +16,6 @@
 \alias{conspire}
 \alias{contour.im}
 \alias{countingweights}
-\alias{crossdist}            
 \alias{default.ngrid}
 \alias{default.ntile}
 \alias{discretise}
@@ -34,6 +33,7 @@
 \alias{FormatFaspFormulae}
 \alias{fv}
 \alias{getfields}
+\alias{getglmfit}
 \alias{gridindex}            
 \alias{handle.r.b.args}
 \alias{identical.formulae}
@@ -149,7 +149,6 @@ cobble.xy(x, y, f, fatal)
 conspire(\dots)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
-crossdist(x1, y1, x2, y2)            
 default.ngrid(X)
 default.ntile(X)
 discretise(x, xrange, nx)
@@ -167,6 +166,7 @@ fasp(fns, titles, formulae, which, dataname, title)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc)
 getfields(X, L, fatal = TRUE)
+getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
 identical.formulae(x,y)
@@ -200,7 +200,7 @@ meanX.owin(w)
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)
 mpl.engine(Q, trend, interaction, covariates, correction,
-	 rbord, use.gam)
+	 rbord, use.gam, forcefit)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, \dots)

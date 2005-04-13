@@ -2,14 +2,14 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.3 $    $Date: 2004/06/09 06:03:17 $
+#  $Revision: 1.5 $    $Date: 2005/04/12 20:29:57 $
 #
 #
 #
 
 update.ppm <- function(object, ...,
                        Q, trend, interaction, covariates,
-                       correction, rbord, use.gam) {
+                       correction, rbord, use.gam, forcefit) {
   verifyclass(object, "ppm")
 
   aargh <- list(...)
@@ -19,7 +19,8 @@ update.ppm <- function(object, ...,
                    trend=object$trend,
                    interaction=object$interaction,
                    correction=object$correction,
-                   rbord=object$rbord)
+                   rbord=object$rbord,
+                   forcefit=FALSE)
 
   matchedargs <- defaults
 
@@ -31,7 +32,8 @@ update.ppm <- function(object, ...,
   if(!missing(covariates)) matchedargs$covariates <- covariates
   if(!missing(correction)) matchedargs$correction <- correction
   if(!missing(rbord)) matchedargs$rbord <- rbord
-  if(!missing(use.gam)) matchedargs$rbord <- use.gam
+  if(!missing(use.gam)) matchedargs$use.gam <- use.gam
+  if(!missing(forcefit)) matchedargs$forcefit <- forcefit
   
   # Some formal arguments may be recognised implicitly by their class
   foundclass <- function(cname, inlist, formalname, absent) {

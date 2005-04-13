@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.1 $     $Date: 2002/05/27 11:24:14 $
+  $Revision: 1.6 $     $Date: 2005/04/09 00:31:05 $
 
  */
 
@@ -39,13 +39,37 @@ void pairdist(n, x, y, d)
 	  dx = x[j] - xi;
 	  dy = y[j] - yi;
 	  dist = sqrt( dx * dx + dy * dy ); 
-	  /* lower triangle */
+	  /* upper triangle */
 	  *dp = dist;
 	  ++dp;
-	  /* upper triangle */
+	  /* lower triangle */
 	  d[ j * npoints + i] = dist;
 	}
     }
+}
+
+void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
+     int *nto, *nfrom;
+     double *xfrom, *yfrom, *xto, *yto, *d;
+{ 
+  int i, j, nf, nt; 
+  double *dptr;
+  double xi, yi, dx, dy;
+
+  nf = *nfrom;
+  nt = *nto;
+
+  dptr = d;
+
+  for (i=0; i < nf; i++) {
+    xi = xfrom[i];
+    yi = yfrom[i];
+    for(j = 0; j < nt; j++, dptr++) {
+	dx = xto[j] - xi;
+	dy = yto[j] - yi;
+	*dptr = sqrt( dx * dx + dy * dy ); 
+    }
+  }
 }
 
 
