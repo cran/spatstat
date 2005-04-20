@@ -18,6 +18,7 @@
 \alias{countingweights}
 \alias{default.ngrid}
 \alias{default.ntile}
+\alias{densityhack}
 \alias{discretise}
 \alias{distpl}               
 \alias{distppl}
@@ -151,6 +152,8 @@ contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 default.ngrid(X)
 default.ntile(X)
+densityhack(x, bw, adjust, kernel, window, width,
+             give.Rkern, n, from, to, cut, na.rm, weights)
 discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)

@@ -44,6 +44,7 @@ distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern
 dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
+envelope                Simulation envelopes of summary function
 eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
 expand.owin             Expand Window By Factor
@@ -121,6 +122,11 @@ pairsat.family          Saturated Pairwise Interaction Point Process
 Pairwise                Generic Pairwise Interaction model
 pairwise.family         Pairwise Interaction Process Family
 pcf                     Pair Correlation Function
+pcf.fasp                Pair Correlation Function obtained from array
+                        of K functions
+pcf.fv                  Pair Correlation Function obtained from K
+                        Function
+pcf.ppp                 Pair Correlation Function of Point Pattern
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.im                 Plot a Pixel Image
@@ -144,6 +150,7 @@ print.quad              Print a Quadrature Scheme
 quad.object             Class of Quadrature Schemes
 quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
+quadratcount            Quadrat counting for a point pattern
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
 raster.x                Cartesian Coordinates for a Pixel Raster

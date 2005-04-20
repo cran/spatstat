@@ -19,8 +19,8 @@ data(letterR)
 plot(letterR)
 lambda <- 10/area.owin(letterR)
 points(rpoispp(lambda, win=letterR))
-points(rpoispp(10 * lambda, win=letterR))
-points(rpoispp(100 * lambda, win=letterR))
+points(rpoispp(9 * lambda, win=letterR))
+points(rpoispp(90 * lambda, win=letterR))
 
 X <- swedishpines
 subset <- 1:20
@@ -32,7 +32,10 @@ K <- Kest(swedishpines)
 plot(K)
 title(main="K function for Swedish Pines")
 
-pc <- pcf(K, spar=0.8, method="b")
+en <- envelope(swedishpines, fun=Kest, nsim=10, correction="translate")
+plot(en, main="Envelopes of K function based on CSR")
+
+pc <- pcf(swedishpines)
 plot(pc)
 title(main="Pair correlation function")
 

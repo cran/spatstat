@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.15 $	$Date: 2004/01/08 15:02:42 $
+#    $Revision: 1.16 $	$Date: 2005/04/16 01:35:18 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -21,7 +21,8 @@ pairsat.family <-
          print = function(self) {
                       cat("Saturated pairwise interaction family\n")
          },
-         eval  = function(X,U,Equal,pairpot,potpars,correction) {
+         eval  = function(X,U,Equal,pairpot,potpars,correction,
+                          halfway=FALSE) {
   #
   # This auxiliary function is not meant to be called by the user.
   # It computes the distances between points,
@@ -89,6 +90,8 @@ POT <- attr(V, "POT")
 # (a) compute SATURATED potential sums
 V.sat <- array(pmin(saturate, V), dim=dim(V))
 
+if(halfway)
+  return(V.sat)
 #
 # (b) compute effect of addition/deletion of dummy/data point j
 # on the UNSATURATED potential sum of each data point i
@@ -139,8 +142,54 @@ if(somemissing)
 
 return(V)
 
-}     ######### end of function $eval                            
+},     ######### end of function $eval                            
+suffstat = function(model, X) {
+# for saturated pairwise models only  (possibly nonstationary)
+  verifyclass(model, "ppm")
+  verifyclass(X, "ppp")
 
+  if(!identical(model$interaction$family$name,"saturated pairwise"))
+    stop("Model is not a saturated pairwise interaction process")
+
+  trend <- model$trend
+  inter <- model$interaction
+  covar <- model$covariates
+ 
+  Empty <- X[rep(FALSE, X$n)]
+  Q     <- quad(X, Empty)
+  prep  <- mpl.prepare(Q, X, X, trend, inter, covar,
+                       correction=model$correction,
+                       rbord=model$rbord, halfway=TRUE)
+  # halfway=TRUE is passed to inter$family$eval
+  # and yields matrix of saturated potential sums 
+  fmla    <- prep$fmla
+  glmdata <- prep$glmdata
+
+  mof <- model.frame(fmla, glmdata)
+  mom <- model.matrix(fmla, mof)
+
+  if(any(colnames(mom) != names(coef(model))))
+    warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
+     
+  order2  <- colnames(mom) %in% model$internal$Vnames
+  order1  <- !order2
+
+  if(any(order1)) {
+    o1terms <- mom[, order1, drop=FALSE]
+    o1sum   <- apply(o1terms, 2, sum)
+  }
+  if(any(order2)) {
+    o2terms <- mom[, order2, drop=FALSE]
+    o2sum   <- apply(o2terms, 2, sum)/2
+  }
+
+  result <- 0 * coef(model)
+  result[order1] <- o1sum
+  result[order2] <- o2sum
+  return(result)
+         
+
+} ######### end of function $suffstat
 )     ######### end of list
 
 class(pairsat.family) <- "isf"

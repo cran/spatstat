@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.3 $	$Date: 2005/04/12 20:46:26 $
+#	$Revision: 2.4 $	$Date: 2005/04/16 01:40:57 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -140,11 +140,8 @@ fitted.ppm <- function(object, ..., type="lambda") {
     lambda <- rep(lambda, n.quad(Q))
   } else {
     glmdata <- object$internal$glmdata
-    glmfit  <- object$internal$glmfit
-#   (hack it for Ogata-Huang method)
-    if(object$method == "oh")
-      glmfit$coefficients <- object$coef
-               
+    glmfit  <- getglmfit(object)
+
     if(type == "trend") {
       # first zero the interaction statistics
       Vnames <- object$internal$Vnames
@@ -165,7 +162,7 @@ getglmfit <- function(object) {
   glmfit <- object$internal$glmfit
   if(is.null(glmfit))
     return(NULL)
-  if(object$method == "oh")
+  if(object$method == "ho")
     glmfit$coefficients <- object$coef
   return(glmfit)
 }
