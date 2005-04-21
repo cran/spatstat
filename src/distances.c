@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.6 $     $Date: 2005/04/09 00:31:05 $
+  $Revision: 1.8 $     $Date: 2005/04/21 02:42:29 $
 
  */
 
@@ -54,19 +54,19 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
 { 
   int i, j, nf, nt; 
   double *dptr;
-  double xi, yi, dx, dy;
+  double xj, yj, dx, dy;
 
   nf = *nfrom;
   nt = *nto;
 
   dptr = d;
 
-  for (i=0; i < nf; i++) {
-    xi = xfrom[i];
-    yi = yfrom[i];
-    for(j = 0; j < nt; j++, dptr++) {
-	dx = xto[j] - xi;
-	dy = yto[j] - yi;
+  for (j=0; j < nt; j++) {
+    xj = xto[j];
+    yj = yto[j];
+    for(i = 0; i < nf; i++, dptr++) {
+	dx = xj - xfrom[i];
+	dy = yj - yfrom[i];
 	*dptr = sqrt( dx * dx + dy * dy ); 
     }
   }

@@ -82,6 +82,9 @@
    x <- runif(100)
    y <- runif(100)
    d <- nndist(x, y)
+
+   # Stienen diagram
+   plot(cells \%mark\% (nndist(cells)/2), markscale=1)
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}
