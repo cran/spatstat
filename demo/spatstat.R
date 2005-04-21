@@ -39,6 +39,8 @@ pc <- pcf(swedishpines)
 plot(pc)
 title(main="Pair correlation function")
 
+plot(swedishpines %mark% (nndist(swedishpines)/2), markscale=1, main="Stienen diagram")
+
 plot(swedishpines$window, main="Distance map")
 dis <- distmap(swedishpines)
 plot(dis, add=TRUE)

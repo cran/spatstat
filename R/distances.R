@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.8 $     $Date: 2005/04/09 01:58:34 $
+#      $Revision: 1.9 $     $Date: 2005/04/21 02:29:37 $
 #
 #
 #      Interpoint distances
@@ -116,7 +116,7 @@ crossdist <- function(X, Y, ..., method="C") {
 
 crossdist.ppp <- function(X, Y, ..., method="C") {
   verifyclass(X, "ppp")
-  return(crossdist.default(X$x, X$y, Y$x, Y$y, method="C"))
+  return(crossdist.default(X$x, X$y, Y$x, Y$y, method=method))
 }
 
 crossdist.default <-

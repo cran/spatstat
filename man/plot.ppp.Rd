@@ -5,7 +5,8 @@
   Plot a two-dimensional spatial point pattern
 }
 \usage{
- plot.ppp(x, main, \dots, chars, cols, use.marks=TRUE, add=FALSE, maxsize)
+ plot.ppp(x, main, \dots, chars, cols, use.marks=TRUE, add=FALSE,
+maxsize, markscale)
 }
 \arguments{
   \item{x}{
@@ -19,17 +20,14 @@
   }
   \item{\dots}{
     extra arguments that will be passed to the plotting functions
-    \code{\link{plot.default}} (see \code{\link{par}} for possible
-    options) or \code{\link{symbols}}.
+    \code{\link{plot.default}}, \code{\link{points}} and/or
+    \code{\link{symbols}}.
   }
   \item{chars}{
-    the plotting characters which should be used to represent
-    the points of different types, in the case of a multitype
-    point pattern. 
+    plotting character(s) used to plot points.
   }
   \item{cols}{
-    the colours which should be used to plot the points of
-    different types, in the case of a multitype point pattern.
+    the colour(s) used to plot points.
   }
   \item{use.marks}{
     logical flag; if \code{TRUE}, plot points using a different
@@ -44,12 +42,15 @@
     the window is not plotted.
   }
   \item{maxsize}{
-    the maximum radius of the circles plotted.
-    If \code{x} is a marked point pattern with 
-    numerical marks, the marks are plotted as circles with
-    maximum radius \code{maxsize} 
-    (in the same units as the coordinates of
-    the point pattern). There is a sensible default.
+    maximum size of the circles/squares plotted
+    when \code{x} is a marked point pattern with 
+    numerical marks.
+    Incompatible with \code{markscale}.
+  }
+  \item{markscale}{
+    physical scale factor determining the sizes of the
+    circles/squares plotted when \code{x} is a marked point pattern with 
+    numerical marks. Incompatible with \code{maxsize}.
   }
 }
 \value{
@@ -60,22 +61,16 @@
   This is the \code{plot} method for 
   point pattern datasets (of class \code{"ppp"}, see \code{\link{ppp.object}}).
 
-  First the observation window \code{x$window} is plotted 
-  using \code{\link{plot.owin}}.
-  Then the locations of the points are plotted. 
- 
-  If the points do not have marks (i.e. \code{x$marks} is absent)
-  or if \code{use.marks = FALSE},
-  then the locations of the points will be plotted 
-  using a single plot character. This character can be changed
-  by the extra argument \code{pch};  see the examples.
-
-  For a marked point pattern (where \code{x$marks} is not null)
-  each point will be represented by a graphical symbol plotted at the
-  location of the point.
-  The graphical representation of the marks depends
-  on their storage mode:
+  First the observation window \code{x$window} is plotted.
+  Then the points themselves are plotted,
+  in a fashion that depends on their marks,
+  as follows.
   \describe{
+    \item{unmarked point pattern:}{
+      If the point pattern does not have marks, or if \code{use.marks = FALSE},
+      then the locations of all points will be plotted 
+      using a single plot character
+    }
     \item{multitype point pattern:}{
       If \code{x$marks} is a factor, then 
       each level of the factor is 
@@ -89,22 +84,63 @@
       (if the value is positive) or a square with side proportional
       to the absolute value of the rescaled mark (if the value is negative).
     }
-    \item{otherwise:}{
-      Each possible mark will be represented by a
+    \item{other kinds of marks:}{
+      If \code{x$marks} is neither numeric nor a factor,
+      then each possible mark will be represented by a
       different plotting character. The default is to
       represent the \eqn{i}th smallest mark value by
       \code{points(..., pch=i)}.
     }
   }
-  If the arguments \code{chars} and/or \code{cols} are supplied,
-  they should be vectors of the same length
-  as \code{sort(unique(x$marks))}, and then the \eqn{i}th smallest mark
-  will be plotted using character \code{chars[i]} and colour
-  \code{cols[i]}.
 
-  The argument \code{cols} is incompatible with
-  the generic plot argument \code{col}. If both are given,
-  an error is generated and no plot is produced.
+  Plotting of the window \code{x$window} is performed by
+  \code{\link{plot.owin}}. This plot may be modified 
+  through the \code{...} arguments. In particular the
+  extra argument \code{col} determines the colour of the window.
+
+  Plotting of the points themselves is performed
+  by the function \code{\link{points}}, except for the case of
+  continuous marks, where it is performed by \code{\link{symbols}}.
+  Their plotting behaviour may be modified through the \code{...}
+  arguments.
+
+  The argument \code{chars} determines the plotting character
+  or characters used to display the points (in all cases except
+  for the case of continuous marks). For an unmarked point pattern,
+  this should be a single integer or character determining a
+  plotting character (see \code{par("pch")}).
+  For a multitype point pattern, \code{chars} should be a vector
+  of integers or characters, of the same length
+  as \code{levels(x$marks)}, and then the \eqn{i}th level or type 
+  will be plotted using character \code{chars[i]}.
+
+  If \code{chars} is absent, but there is an extra argument
+  \code{pch}, then this will determine the plotting character for
+  all points.
+  
+  The argument \code{cols} determines the colour or colours used to
+  display the points. For an unmarked point pattern, or a
+  marked point pattern with continuous marks, this should be a character string
+  determining a colour. For a multitype point pattern, \code{cols}
+  should be a character vector, of the same length
+  as \code{levels(x$marks)}. The \eqn{i}th level or type will
+  be plotted using colour \code{cols[i]}.
+
+  If \code{cols} is absent, the colour used to plot \emph{all} the
+  points may be determined by the extra argument \code{fg}
+  (for multitype point patterns) or the extra argument \code{col}
+  (for all other cases). Note that \code{col} will also reset the
+  colour of the window.
+
+  The arguments \code{maxsize} and \code{markscale} 
+  incompatible. They control the physical size of the circles and
+  squares which represent the marks in a point pattern with continuous
+  marks. If \code{markscale} is given, then a mark value of \code{m}
+  is plotted as a circle of radius \code{m * markscale}
+  (if \code{m} is positive) or a square of side \code{abs(m) * markscale}
+  (if \code{m} is negative). If \code{maxsize} is given, then the
+  largest mark in absolute value, \code{mmax=max(abs(x$marks))},
+  will be scaled to have physical size \code{maxsize}.
 }
 \seealso{
   \code{\link{ppp.object}},
@@ -115,9 +151,11 @@
   \code{\link{symbols}}
 }
 \examples{
-   \dontrun{
    data(cells)
    plot(cells)
+
+   # make the plotting symbols larger (for publication at reduced scale)
+   plot(cells, cex=2)
 
    # multitype 
    data(lansing)
@@ -131,22 +169,28 @@
    plot(longleaf, use.marks=FALSE)
    plot(unmark(longleaf)) # equivalent
 
-   # controlling COLOURS
-   plot(cells, col="blue")
-   plot(lansing, cols=c("black", "yellow", "green", "pink",
-                        "blue","red","white")
+   # controlling COLOURS of points
+   plot(cells, cols="blue")
+   plot(lansing, cols=c("black", "yellow", "green", 
+                        "blue","red","pink"))
    plot(longleaf, fg="blue")
 
-   # use selected plot characters
-   lma <- sort(unique(longleaf$marks))
-   adult <- ifelse(lma >= 30, "o", "+")
-   plot(longleaf, chars = adult)
+   # make points and window purple
+   plot(lansing, col="purple")
+   # make everything purple
+   plot(lansing, col="purple", col.main="purple")
+ 
+   # controlling PLOT CHARACTERS
+   plot(lansing, chars = 11:16)
+   plot(lansing, chars = c("o","h","m",".","o","o"))
 
-   # make the plotting symbols larger (for publication at reduced scale)
-   plot(cells, cex=2)
+   # controlling MARK SCALE
+   plot(longleaf, markscale=0.1)
 
-  }
+   # draw circles of diameter equal to nearest neighbour distance
+   plot(cells \%mark\% (nndist(cells)/2), markscale=1)
 }
+
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
