@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.27 $	$Date: 2005/03/02 21:01:57 $
+#	$Revision: 4.28 $	$Date: 2005/05/05 00:16:11 $
 #
 #
 #	A window may be either
@@ -336,13 +336,20 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
   }
 
   # Second, intersect pixel raster with existing window
-  if(w$type != "rectangle") {
-    # test every pixel
-    x <- as.vector(raster.x(out))
-    y <- as.vector(raster.y(out))
-    value <- inside.owin(x, y, w)
-    out$m <- matrix(value, nrow=nr, ncol=nc)
-  }
+  switch(w$type,
+         rectangle = { },
+         mask = {
+           phase <- c((out$xcol[1] - w$xcol[1])/w$xstep,
+                      (out$yrow[1] - w$yrow[1])/w$ystep)
+           out$m <- matrixsample(w$m, c(nr, nc), phase=round(phase))
+         },
+         polygonal = {
+           # test every pixel
+           x <- as.vector(raster.x(out))
+           y <- as.vector(raster.y(out))
+           value <- inside.owin(x, y, w)
+           out$m <- matrix(value, nrow=nr, ncol=nc)
+         })
   
   return(out)
 }

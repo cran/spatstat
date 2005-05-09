@@ -10,22 +10,26 @@
 \alias{breakpts}
 \alias{breakpts.from.r}
 \alias{cartesian}
+\alias{cellmiddles}
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{cobble.xy}
 \alias{conspire}
 \alias{contour.im}
 \alias{countingweights}
-\alias{default.ngrid}
+\alias{default.n.tiling}
 \alias{default.ntile}
 \alias{densityhack}
 \alias{discretise}
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
+\alias{divisors}
 \alias{edge.Ripley}
 \alias{edge.Trans}
+\alias{ensure2vector}
 \alias{equals.quad}          
+\alias{eratosthenes}
 \alias{erode.mask}
 \alias{even.breaks.owin}
 \alias{exactdt}              
@@ -33,10 +37,12 @@
 \alias{fasp}
 \alias{FormatFaspFormulae}
 \alias{fv}
+\alias{greatest.common.divisor}
 \alias{getfields}
 \alias{getglmfit}
 \alias{gridindex}            
 \alias{handle.r.b.args}
+\alias{ho.engine}
 \alias{identical.formulae}
 \alias{inside.xypolygon}     
 \alias{intX.owin}     
@@ -47,17 +53,21 @@
 \alias{is.data}
 \alias{is.fv}
 \alias{is.marked.default}    
+\alias{is.prime}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
 \alias{Kount}
 \alias{Kwtsum}               
+\alias{killinteraction}
+\alias{least.common.multiple}
 \alias{lookup.im}
 \alias{make.even.breaks}
 \alias{markspace.integral}
 \alias{marks.quad}           
 \alias{matcolall}
 \alias{matcolany}
-\alias{matcolsum}            
+\alias{matcolsum}
+\alias{matrixsample}
 \alias{matrowall}
 \alias{matrowany}
 \alias{matrowsum}
@@ -79,6 +89,7 @@
 \alias{persp.im}
 \alias{pixellate}
 \alias{polynom}
+\alias{primefactors}       
 \alias{print.fasp}       
 \alias{print.fv}       
 \alias{print.interact}       
@@ -114,10 +125,13 @@
 \alias{second.moment.calc}
 \alias{shiftxy}              
 \alias{spatstat.rawdata.location}
+\alias{sp.foundclass}
+\alias{sp.foundclasses}
+\alias{suffstat.generic}
+\alias{suffstat.poisson}
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
-\alias{tilemiddles}
 \alias{try.FGJKest}
 \alias{try.Kcross}           
 \alias{update.interact}
@@ -144,13 +158,14 @@ bdrylength.xypolygon(polly)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 cartesian(pp, markset, fac = TRUE)
+cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 cobble.xy(x, y, f, fatal)
 conspire(\dots)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
-default.ngrid(X)
+default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
 densityhack(x, bw, adjust, kernel, window, width,
              give.Rkern, n, from, to, cut, na.rm, weights)
@@ -158,9 +173,12 @@ discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l)
+divisors(n)
 edge.Ripley(X, r, W)
 edge.Trans(X, Y, W, exact, trim)
+ensure2vector(x)
 equals.quad(Q)          
+eratosthenes(nmax)
 erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
@@ -168,12 +186,14 @@ exactPdt(im)
 fasp(fns, titles, formulae, which, dataname, title)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc)
+greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
+ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
-inside.xypolygon(pts, polly, test01 = TRUE)     
+inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")     
 intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
@@ -185,10 +205,13 @@ is.marked(X, \dots)
 is.marked.default(\dots)  
 is.marked.ppp(X, na.action="warn", \dots)
 is.poisson.ppm(x)
+is.prime(n)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
 Kount(d, b, breaks, slow = FALSE)
 Kwtsum(d, b, weight, breaks, slow)
+killinteraction(model)
+least.common.multiple(n,m)
 lookup.im(im, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
 markspace.integral(X)
@@ -196,6 +219,7 @@ marks.quad(Q)
 matcolall(x)
 matcolany(x)
 matcolsum(x)            
+matrixsample(mat, newdim, phase)
 matrowall(x)
 matrowany(x)
 matrowsum(x)
@@ -219,6 +243,7 @@ param.quad(Q)
 persp.im(x, \dots)
 pixellate(x, \dots, weights)
 polynom(x, \dots)
+primefactors(n, prmax)
 print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
@@ -254,10 +279,13 @@ runifrect(n, win = owin(c(0, 1), c(0, 1)))
 second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE, \dots)
 shiftxy(X, vec = c(0, 0))
 spatstat.rawdata.location(\dots)             
+sp.foundclass(cname, inlist, formalname, argsgiven)             
+sp.foundclasses(cnames, inlist, formalname, argsgiven)             
+suffstat.generic(model, X)
+suffstat.poisson(model, X)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
-tilemiddles(W, nx, ny)
 try.FGJKest(niter = 20, lambda = 25, r = seq(0, sqrt(2), 0.02), eps = 0.01, slow = FALSE)
 try.Kcross(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R = 0.2)           
 update.interact(object, \dots)

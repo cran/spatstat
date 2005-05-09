@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.4 $ $Date: 2004/06/01 04:44:01 $
+#     $Revision: 1.5 $ $Date: 2005/04/27 01:26:35 $
 #
 #    Estimate the mark correlation function
 #
@@ -99,6 +99,15 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
                               "Ripley isotropic correction estimate of m(r)",
                               "iso")
         }
+        # which corrections have been computed?
+        nama2 <- names(result)
+        corrxns <- rev(nama2[nama2 != "r"])
+
+        # default is to display them all
+        attr(result, "fmla") <- deparse(as.formula(paste(
+                       "cbind(",
+                        paste(corrxns, collapse=","),
+                        ") ~ r")))
         return(result)
 }
 	

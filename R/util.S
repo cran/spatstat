@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.4 $    $Date: 2002/04/07 11:11:54 $
+#    $Revision: 1.6 $    $Date: 2005/05/10 01:30:19 $
 #
 #  (a) for matrices only:
 #
@@ -15,6 +15,10 @@
 #
 #  (c) weighted histogram
 #    whist()
+#
+#  (d) for matrices:
+#    matrixsample()
+#           subsamples or supersamples a matrix
 #
 matrowsum <- function(x) {
   x %*% rep(1, ncol(x))
@@ -72,4 +76,44 @@ whist <-
       h[is.na(h)] <- 0
     }
     return(h)
+}
+
+######################
+#
+#   matrixsample         subsample or supersample a matrix
+#
+
+matrixsample <- function(mat, newdim, phase=c(0,0)) {
+  olddim <- dim(mat)
+  oldlength <- prod(olddim)
+  if(all(olddim >= newdim) && all(olddim %% newdim == 0)) {
+    # new matrix is periodic subsample of old matrix
+    ratio <- olddim/newdim
+    ii <- seq(1+phase[1], olddim[1], by=ratio[1])
+    jj <- seq(1+phase[2], olddim[2], by=ratio[2])
+    return(mat[ii,jj])
+  } else if(all(olddim <= newdim) && all(newdim %% olddim == 0)) {
+    # new matrix is repetition of old matrix
+    ratio <- newdim/olddim
+    replicate.rows <- function(m, nrep, l=length(m)) {
+      matrix(rep(m, rep(nrep, l)), nrow(m) * nrep, ncol(m))
+    }
+    mrow <- replicate.rows(mat, ratio[1], oldlength)
+    mfinal <- t(replicate.rows(t(mrow), ratio[2], oldlength * ratio[1]))
+    return(mfinal)
+  } else {
+    # general case
+    newmat <- matrix(, newdim[1], newdim[2])
+    newrow <- row(newmat)
+    newcol <- col(newmat)
+    oldrow <- phase[1] + ceiling((newrow * olddim[1])/newdim[1])
+    oldcol <- phase[2] + ceiling((newcol * olddim[2])/newdim[2])
+    oldrow[oldrow < 1] <- 1
+    oldrow[oldrow > olddim[1]] <- olddim[1]
+    oldcol[oldcol < 1] <- 1
+    oldcol[oldcol > olddim[2]] <- olddim[2]
+    newmat <- matrix(mat[cbind(as.vector(oldrow), as.vector(oldcol))],
+                     newdim[1], newdim[2])
+    return(newmat)
+  }
 }

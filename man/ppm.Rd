@@ -8,13 +8,17 @@
 }
 \usage{
  ppm(Q, trend=~1, interaction=NULL, covariates=NULL,
-correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
+ correction="border", rbord=0, use.gam=FALSE, method="mpl",
+ forcefit=FALSE, nsim=100, nrmh=1e5,
+        start=list(n.start=X$n),
+         control=list(nrep=nrmh),
+         verb=TRUE)
 }
 \arguments{
   \item{Q}{
     A data point pattern (of class \code{"ppp"})
     to which the model will be fitted,
-    or preferably a quadrature scheme (of class \code{"quad"})
+    or a quadrature scheme (of class \code{"quad"})
     containing this pattern.
   }
   \item{trend}{
@@ -51,8 +55,10 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
     using \code{gam} instead of \code{\link{glm}}.
   }
   \item{method}{
-    The method used to fit the model. Currently the only option
-    is \code{"mpl"} indicating the method of Maximum PseudoLikelihood.
+    The method used to fit the model. Options are 
+    \code{"mpl"} for the method of Maximum PseudoLikelihood,
+    and \code{"ho"} for the Huang-Ogata approximate maximum likelihood
+    method.
   }
   \item{forcefit}{
     Logical flag for internal use.
@@ -60,6 +66,23 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
     fitted by a shortcut. If \code{forcefit=TRUE},
     the generic fitting method will always be used. 
   }
+  \item{nsim}{
+    Number of simulated realisations
+    to generate (for \code{method="ho"})
+  }
+  \item{nrmh}{
+    Number of Metropolis-Hastings iterations
+    for each simulated realisation (for \code{method="ho"})
+  }
+  \item{start,control}{
+    Arguments passed to \code{\link{rmh}} controlling the behaviour
+    of the Metropolis-Hastings algorithm (for \code{method="ho"})
+  }
+  \item{verb}{
+    Logical flag indicating whether to print progress reports
+    (for \code{method="ho"})
+  }
+  
 }
 \value{
   An object of class \code{"ppm"} describing a fitted point process
@@ -76,155 +99,229 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
   to an observed point pattern.
   The model may include
   spatial trend, interpoint interaction, and dependence on covariates.
- 
-  Model-fitting is currently performed by
-  the method of maximum pseudolikelihood (Besag, 1975).
-  Other options will be added in future versions.
-  
-  The algorithm is an implementation of the method of
-  Baddeley and Turner (2000), which approximates the pseudolikelihood
-  by a special type of quadrature sum generalising the Berman-Turner (1992) 
-  approximation. 
- 
-  The argument \code{Q} should be either a point pattern
-  or a quadrature scheme. If it is a point pattern, it is converted
-  into a quadrature scheme.
 
-  A quadrature scheme is an object of class \code{"quad"}
-  (see \code{\link{quad.object}})
-  which specifies both the data point pattern and the dummy points
-  for the quadrature scheme, as well as the quadrature weights
-  associated with these points.
-  If \code{Q} is simply a point pattern
-  (of class \code{"ppp"}, see \code{\link{ppp.object}})
-  then it is interpreted as specifying the
-  data points only; a set of dummy points specified
-  by \code{\link{default.dummy}()} is added, and the default weighting rule is
-  invoked to compute the quadrature weights.
+  \describe{
+    \item{basic use:}{
+      In basic use, \code{Q} is a point pattern dataset
+      (an object of class \code{"ppp"}) to which we wish to fit a model.
+
+      The syntax of \code{ppm()} is closely analogous to the \R functions
+      \code{\link{glm}} and \code{gam}.
+      The analogy is:
+      \tabular{ll}{
+	\bold{glm} \tab \bold{ppm} \cr
+	\code{formula} \tab \code{trend} \cr
+	\code{family} \tab \code{interaction}
+      }
+      The point process model to be fitted is specified by the 
+      arguments \code{trend} and \code{interaction}
+      which are respectively analogous to
+      the \code{formula} and \code{family} arguments of glm(). 
  
-  The usage of \code{ppm()} is closely analogous to the Splus/\R functions
-  \code{\link{glm}} and \code{gam}.
-  The analogy is:
-  \tabular{ll}{
-  \bold{glm} \tab \bold{ppm} \cr
-  \code{formula} \tab \code{trend} \cr
-  \code{family} \tab \code{interaction}
+      Systematic effects (spatial trend and/or dependence on 
+      spatial covariates) are specified by the argument
+      \code{trend}. This is an \R formula object, which may be expressed
+      in terms of the Cartesian coordinates \code{x}, \code{y},
+      the marks \code{marks},
+      or the variables in \code{covariates} (if supplied), or both.
+      It specifies the \bold{logarithm} of the first order potential
+      of the process.
+      The formula should not use any names beginning with \code{.mpl}
+      as these are reserved for internal use.
+      If \code{trend} is absent or equal to the default, \code{~1}, then
+      the model to be fitted is stationary (or at least, its first order 
+      potential is constant). 
+ 
+      Stochastic interactions between random points of the point process
+      are defined by the argument \code{interaction}. This is an object of
+      class \code{"interact"} which is initialised in a very similar way to the
+      usage of family objects in \code{\link{glm}} and \code{gam}.
+      The families currently available are:
+      \code{\link{Poisson}},
+      \code{\link{Strauss}},
+      \code{\link{StraussHard}},
+      \code{\link{MultiStrauss}},
+      \code{\link{MultiStraussHard}},
+      \code{\link{Softcore}},
+      \code{\link{DiggleGratton}},
+      \code{\link{Pairwise}},
+      \code{\link{PairPiece}},
+      \code{\link{Geyer}},
+      \code{\link{LennardJones}},
+      \code{\link{Saturated}},
+      \code{\link{OrdThresh}}, and
+      \code{\link{Ord}}.
+      See the examples below.
+ 
+      If \code{interaction} is missing or \code{NULL},
+      then the model to be fitted
+      has no interpoint interactions, that is, it is a Poisson process
+      (stationary or nonstationary according to \code{trend}). In this case
+      the method of maximum pseudolikelihood
+      coincides with maximum likelihood. 
+
+      The fitted point process model returned by this function can be printed 
+      (by the print method \code{\link{print.ppm}})
+      to inspect the fitted parameter values.
+      If a nonparametric spatial trend was fitted, this can be extracted using
+      the predict method \code{\link{predict.ppm}}.
+    }
+    \item{Models with covariates:}{
+      To fit a model involving spatial covariates
+      other than the Cartesian coordinates \eqn{x} and \eqn{y},
+      the values of the covariates should be supplied in the
+      argument \code{covariates}. 
+      Note that it is not sufficient to have observed
+      the covariate only at the points of the data point pattern; 
+      the covariate must also have been observed at other 
+      locations in the window.
+
+      The argument \code{covariates}, if supplied, should be either
+      a list of images, or a data frame.
+  
+      Typically \code{covariates} is a list of images,
+      each image giving the values of a spatial covariate at 
+      a fine grid of locations. 
+      The argument \code{covariates} should then be a named list,
+      with the names corresponding to
+      the names of covariates in the model formula \code{trend}.
+      Each entry in the list must be an image object (of class \code{"im"},
+      see \code{\link{im.object}}).
+      The software will look up
+      the pixel values of each image at the required locations
+      (quadrature points).
+      In this case the argument \code{Q} may be either a quadrature
+      scheme or a point pattern.
+
+      The variable names \code{x}, \code{y} and \code{marks}
+      are reserved for the Cartesian 
+      coordinates and the mark values,
+      and these should not be used for variables in \code{covariates}.
+
+      If \code{covariates} is a data frame, \code{Q} must be a
+      quadrature scheme (see under Quadrature Schemes below).
+      Then \code{covariates} must have
+      as many rows as there are points in \code{Q}.
+      The \eqn{i}th row of \code{covariates} should contain the values of
+      spatial variables which have been observed
+      at the \eqn{i}th point of \code{Q}. 
+    }
+    \item{Quadrature schemes:}{
+      In advanced use, \code{Q} may be a `quadrature scheme'.
+      This was originally just a technicality but it has turned out
+      to have practical uses, as we explain below.
+
+      Quadrature schemes are required for our implementation of
+      the method of maximum pseudolikelihood. 
+      The definition of the pseudolikelihood involves an integral over
+      the spatial window containing the data. In practice this integral
+      must be approximated by a finite sum over a set of quadrature points.
+      We use the technique of Baddeley and Turner (2000), a generalisation
+      of the Berman-Turner (1992) device. In this technique the quadrature
+      points for the numerical approximation include all the data points
+      (points of the observed point pattern) as well as
+      additional `dummy' points. 
+
+      A quadrature scheme is an object of class \code{"quad"}
+      (see \code{\link{quad.object}})
+      which specifies both the data point pattern and the dummy points
+      for the quadrature scheme, as well as the quadrature weights
+      associated with these points.
+      If \code{Q} is simply a point pattern
+      (of class \code{"ppp"}, see \code{\link{ppp.object}})
+      then it is interpreted as specifying the
+      data points only; a set of dummy points specified
+      by \code{\link{default.dummy}()} is added,
+      and the default weighting rule is
+      invoked to compute the quadrature weights.
+ 
+      Finer quadrature schemes (i.e. those with more dummy
+      points) generally yield a better approximation, at the
+      expense of higher computational load. 
+      Complete control over the quadrature scheme is possible.
+      See \code{\link{quadscheme}} for an overview.
+
+      A practical advantage of quadrature schemes arises when we want to fit
+      a model involving covariates (e.g. soil pH). Suppose we have only been
+      able to observe the covariates at a small number of locations.
+      Suppose \code{cov.dat} is a data frame containing the values of
+      the covariates at the data points (i.e.\ \code{cov.dat[i,]}
+      contains the observations for the \code{i}th data point)
+      and \code{cov.dum} is another data frame (with the same columns as
+      \code{cov.dat}) containing the covariate values at another
+      set of points whose locations are given by the point pattern \code{Y}.
+      Then setting \code{Q = quadscheme(X,Y)} combines the data points
+      and dummy points into a quadrature scheme, and 
+      \code{covariates = rbind(cov.dat, cov.dum)} combines the covariate
+      data frames. We can then fit the model by calling
+      \code{ppm(Q, ..., covariates)}.
+    }
+    \item{Model-fitting technique:}{
+      The model may be fitted either by
+      the method of maximum pseudolikelihood (Besag, 1975)
+      or by the approximate maximum likelihood
+      method of Huang and Ogata (1999).
+      Maximum pseudolikelihood is much faster,
+      but has poorer statistical properties. 
+  
+      In either case, the algorithm will begin by fitting the model
+      by maximum pseudolikelihood. By default the algorithm returns
+      the maximum pseudolikelihood fit.
+
+      Maximum pseudolikelihood is equivalent to maximum likelihood
+      for Poisson point processes. 
+      
+      Note that the method of maximum pseudolikelihood is
+      believed to be inefficient and biased for point processes with strong
+      interpoint interactions. In such cases, the Huang-Ogata approximate
+      maximum likelihood method should be used, although
+      maximum pseudolikelihood may also be used profitably for
+      model selection in the initial phases of modelling.
+    }
+    \item{Huang-Ogata method:}{
+      If \code{method="ho"} then the model will be fitted using
+      the Huang-Ogata (1999) approximate maximum likelihood method.
+      First the model is fitted by maximum pseudolikelihood as
+      described above, yielding an initial estimate of the parameter
+      vector \eqn{\theta_0}{theta0}.
+      From this initial model, \code{nsim} simulated
+      realisations are generated. The score and Fisher information of
+      the model at \eqn{\theta=\theta_0}{theta=theta0}
+      are estimated from the simulated realisations. Then one step
+      of the Fisher scoring algorithm is taken, yielding an updated
+      estimate \eqn{\theta_1}{theta1}. The corresponding model is
+      returned.
+
+      Simulated realisations are generated using \code{\link{rmh}}.
+      The iterative behaviour of the Metropolis-Hastings algorithm
+      is controlled by the arguments \code{start} and \code{control}
+      which are passed to \code{\link{rmh}}. As a shortcut, the argument
+      \code{nrmh} determines the number of Metropolis-Hastings
+      iterations run to produce one simulated realisation (if
+      \code{control} is absent).
+    }
+    \item{Edge correction}{
+      Edge correction should be applied to the sufficient statistics
+      of the model, to reduce bias.
+      The argument \code{correction} is the name of an edge correction
+      method.
+      The default \code{correction="border"} specifies the border correction,
+      in which the quadrature window (the domain of integration of the 
+      pseudolikelihood) is obtained by trimming off a margin of width
+      \code{rbord} from the observation window of the data pattern.
+      Not all edge corrections are implemented (or implementable)
+      for arbitrary windows.
+      Other options depend on the argument \code{interaction}, but these
+      generally include \code{"periodic"} (the periodic or toroidal edge
+      correction in which opposite edges of a rectangular window are
+      identified) and \code{"translate"} (the translation correction,
+      see Baddeley 1998 and Baddeley and Turner 2000).
+      For pairwise interaction there is also Ripley's isotropic correction,
+      identified by \code{"isotropic"} or \code{"Ripley"}.
+    }
   }
-  The point process model to be fitted is specified by the 
-  arguments \code{trend} and \code{interaction}
-  which are respectively analogous to
-  the \code{formula} and \code{family} arguments of glm(). 
- 
-  Systematic effects (spatial trend and/or dependence on 
-  spatial covariates) are specified by the argument
-  \code{trend}. This is an Splus/\R formula object, which may be expressed
-  in terms of the Cartesian coordinates \code{x}, \code{y},
-  the marks \code{marks},
-  or the variables in \code{covariates} (if supplied), or both.
-  It specifies the \bold{logarithm} of the first order potential
-  of the process.
-  The formula should not use any names beginning with \code{.mpl}
-  as these are reserved for internal use.
-  If \code{trend} is absent or equal to the default, \code{~1}, then
-  the model to be fitted is stationary (or at least, its first order 
-  potential is constant). 
- 
-  Stochastic interactions between random points of the point process
-  are defined by the argument \code{interaction}. This is an object of
-  class \code{"interact"} which is initialised in a very similar way to the
-  usage of family objects in \code{\link{glm}} and \code{gam}.
-  See the examples below.
- 
-  If \code{interaction} is missing or \code{NULL}, then the model to be fitted
-  has no interpoint interactions, that is, it is a Poisson process
-  (stationary or nonstationary according to \code{trend}). In this case
-  the method of maximum pseudolikelihood
-  coincides with maximum likelihood.
-
-  To fit a model involving spatial covariates
-  other than the Cartesian coordinates \eqn{x} and \eqn{y},
-  the values of the covariates should be supplied in the
-  argument \code{covariates}. 
-  Note that it is not sufficient to have observed
-  the covariate only at the points of the data point pattern; 
-  the covariate must also have been observed at other 
-  locations in the window.
-
-  The argument \code{covariates}, if supplied, should be either
-  a data frame or a list of images.
-  If it is a data frame, it must have
-  as many rows as there are points in \code{Q}.
-  The \eqn{i}th row of \code{covariates} should contain the values of
-  spatial variables which have been observed
-  at the \eqn{i}th point of \code{Q}. In this case
-  the argument \code{Q} must be a quadrature scheme,
-  not merely a point pattern.
-
-  Alternatively, \code{covariates} may be a list of images,
-  each image giving the values of a spatial covariate at 
-  a fine grid of locations. 
-  The argument \code{covariates} should then be a named list,
-  with the names corresponding to
-  the names of covariates in the model formula \code{trend}.
-  Each entry in the list must be an image object (of class \code{"im"},
-  see \code{\link{im.object}}).
-  The software will look up
-  the pixel values of each image at the quadrature points.
-  In this case the argument \code{Q} may be either a quadrature
-  scheme or a point pattern.
-
-  The variable names \code{x}, \code{y} and \code{marks}
-  are reserved for the Cartesian 
-  coordinates and the mark values,
-  and these should not be used for variables in \code{covariates}.
-  
-  The argument \code{correction} is the name of an edge correction method.
-  The default \code{correction="border"} specifies the border correction,
-  in which the quadrature window (the domain of integration of the 
-  pseudolikelihood) is obtained by trimming off a margin of width \code{rbord}
-  from the observation window of the data pattern.
-  Not all edge corrections are implemented (or implementable)
-  for arbitrary windows.
-  Other options depend on the argument \code{interaction}, but these generally 
-  include \code{"periodic"} (the periodic or toroidal edge correction
-  in which opposite edges of a rectangular window are identified)
-  and \code{"translate"}
-  (the translation correction, see Baddeley 1998 and Baddeley and Turner
-  2000).
-  For pairwise interaction there is also Ripley's isotropic correction,
-  identified by \code{"isotropic"} or \code{"Ripley"}.
- 
-  The fitted point process model returned by this function can be printed 
-  (by the print method \code{\link{print.ppm}})
-  to inspect the fitted parameter values.
-  If a nonparametric spatial trend was fitted, this can be extracted using
-  the predict method \code{\link{predict.ppm}}.
-
-  This algorithm approximates the log pseudolikelihood
-  by a sum over a finite set of quadrature points.
-  Finer quadrature schemes (i.e. those with more
-  quadrature points) generally yield a better approximation, at the
-  expense of higher computational load. 
-  Complete control over the quadrature scheme is possible.
-  See \code{\link{quadscheme}} for an overview.
-
-  Note that the method of maximum pseudolikelihood is
-  believed to be inefficient and biased for point processes with strong
-  interpoint interactions. In such cases, it is advisable to use
-  iterative maximum likelihood
-  methods such as Monte Carlo Maximum Likelihood (Geyer, 1999) 
-  provided the appropriate simulation algorithm exists. 
-  The maximum pseudolikelihood parameter estimate often serves
-  as a good initial starting point for these iterative methods. 
-  Maximum pseudolikelihood may also be used profitably for
-  model selection in the initial phases of modelling.
-
-  The warning message ``Algorithm did not converge in: glm.fit( ...''
-  is sometimes obtained. It means that the glm fitting algorithm
-  did not converge in a reasonable number of iterations. In most cases
-  this can be fixed by taking a finer quadrature scheme.
-  See \code{\link{quadscheme}}.
 }
+
 \references{
   Baddeley, A. and Turner, R.
   Practical maximum pseudolikelihood for spatial point patterns.
@@ -243,7 +340,13 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
   Tanemura, M.
   On parameter estimation for pairwise interaction processes.
   \emph{International Statistical Review} \bold{62} (1994) 99-117.
- 
+
+  Huang, F. and Ogata, Y.
+  Improvements of the maximum pseudo-likelihood estimators
+  in various spatial statistical models.
+  \emph{Journal of Computational and Graphical Statistics}
+  \bold{8} (1999) 510-530.
+  
   Jensen, J.L. and Moeller, M.
   Pseudolikelihood for exponential family models of spatial point processes.
   \emph{Annals of Applied Probability} \bold{1} (1991) 445--461.
@@ -275,74 +378,76 @@ correction="border", rbord=0, use.gam=FALSE, method="mpl", forcefit=FALSE)
   \code{\link{Ord}}
 }
 \section{Warnings}{
-See the comments above about the possible inefficiency
-and bias of the maximum pseudolikelihood estimator.
+  The implementation of the Huang-Ogata method is experimental.
+  
+  See the comments above about the possible inefficiency
+  and bias of the maximum pseudolikelihood estimator.
  
-The accuracy of the Berman-Turner-Baddeley approximation to
-the pseudolikelihood depends on the number of dummy points used
-in the quadrature scheme. The number of dummy points should 
-at least equal the number of data points.
+  The accuracy of the Berman-Turner approximation to
+  the pseudolikelihood depends on the number of dummy points used
+  in the quadrature scheme. The number of dummy points should 
+  at least equal the number of data points.
  
-The parameter values of the fitted model
-do not necessarily determine a valid point process.
-Some of the point process models are only defined when the parameter
-values lie in a certain subset. For example the Strauss process only 
-exists when the interaction parameter \eqn{\gamma}{gamma}
-is less than or equal to \eqn{1},
-corresponding to a value of \code{ppm()$theta[2]}
-less than or equal to \code{0}.
-The current version of \code{ppm} maximises the pseudolikelihood
-without constraining the parameters, and does not apply any checks for
-sanity after fitting the model. 
+  The parameter values of the fitted model
+  do not necessarily determine a valid point process.
+  Some of the point process models are only defined when the parameter
+  values lie in a certain subset. For example the Strauss process only 
+  exists when the interaction parameter \eqn{\gamma}{gamma}
+  is less than or equal to \eqn{1},
+  corresponding to a value of \code{ppm()$theta[2]}
+  less than or equal to \code{0}.
+  The current version of \code{ppm} maximises the pseudolikelihood
+  without constraining the parameters, and does not apply any checks for
+  sanity after fitting the model. 
  
-The \code{trend} formula should not use any variable names
-beginning with the prefixes \code{.mpl} or \code{Interaction}
-as these names are reserved
-for internal use. The data frame \code{covariates} should have as many rows
-as there are points in \code{Q}. It should not contain
-variables called \code{x}, \code{y} or \code{marks}
-as these names are reserved for the Cartesian coordinates
-and the marks.
+  The \code{trend} formula should not use any variable names
+  beginning with the prefixes \code{.mpl} or \code{Interaction}
+  as these names are reserved
+  for internal use. The data frame \code{covariates} should have as many rows
+  as there are points in \code{Q}. It should not contain
+  variables called \code{x}, \code{y} or \code{marks}
+  as these names are reserved for the Cartesian coordinates
+  and the marks.
  
-If the model formula involves one of the functions
-\code{poly()}, \code{bs()}
-or \code{ns()}
-(e.g. applied to spatial coordinates \code{x} and \code{y}),
-the fitted coefficients can be misleading.
-The resulting fit is not to the raw spatial variates
-(\code{x}, \code{x^2}, \code{x*y}, etc.) 
-but to a transformation of these variates.  The transformation is implemented
-by \code{poly()} in order to achieve better numerical stability.
-However the
-resulting coefficients are appropriate for use with the transformed
-variates, not with the raw variates.  
-This affects the interpretation of the constant
-term in the fitted model, \code{logbeta}. 
-Conventionally, \eqn{\beta}{beta} is the background intensity, i.e. the  
-value taken by the conditional intensity function when all predictors
-(including spatial or ``trend'' predictors) are set equal to \eqn{0}.
-However the coefficient actually produced is the value that the
-log conditional intensity takes when all the predictors, 
-including the \emph{transformed}
-spatial predictors, are set equal to \code{0}, which is not the same thing.
+  If the model formula involves one of the functions
+  \code{poly()}, \code{bs()}
+  or \code{ns()}
+  (e.g. applied to spatial coordinates \code{x} and \code{y}),
+  the fitted coefficients can be misleading.
+  The resulting fit is not to the raw spatial variates
+  (\code{x}, \code{x^2}, \code{x*y}, etc.) 
+  but to a transformation of these variates.  The transformation is implemented
+  by \code{poly()} in order to achieve better numerical stability.
+  However the
+  resulting coefficients are appropriate for use with the transformed
+  variates, not with the raw variates.  
+  This affects the interpretation of the constant
+  term in the fitted model, \code{logbeta}. 
+  Conventionally, \eqn{\beta}{beta} is the background intensity, i.e. the  
+  value taken by the conditional intensity function when all predictors
+  (including spatial or ``trend'' predictors) are set equal to \eqn{0}.
+  However the coefficient actually produced is the value that the
+  log conditional intensity takes when all the predictors, 
+  including the \emph{transformed}
+  spatial predictors, are set equal to \code{0}, which is not the same thing.
 
-Worse still, the result of \code{\link{predict.ppm}} can be
-completely wrong if the trend formula contains one of the
-functions \code{poly()}, \code{bs()}
-or \code{ns()}. This is a weakness of the underlying
-function \code{\link{predict.glm}}. 
+  Worse still, the result of \code{\link{predict.ppm}} can be
+  completely wrong if the trend formula contains one of the
+  functions \code{poly()}, \code{bs()}
+  or \code{ns()}. This is a weakness of the underlying
+  function \code{\link{predict.glm}}. 
 
-If you wish to fit a polynomial trend, 
-we offer an alternative to \code{\link{poly}()},
-namely \code{polynom()}, which avoids the
-difficulty induced by transformations.  It is completely analogous
-to \code{poly} except that it does not orthonormalise.
-The resulting coefficient estimates then have
-their natural interpretation and can be predicted correctly. 
-Numerical stability may be compromised.
+  If you wish to fit a polynomial trend, 
+  we offer an alternative to \code{\link{poly}()},
+  namely \code{polynom()}, which avoids the
+  difficulty induced by transformations.  It is completely analogous
+  to \code{poly} except that it does not orthonormalise.
+  The resulting coefficient estimates then have
+  their natural interpretation and can be predicted correctly. 
+  Numerical stability may be compromised.
 
-Values of the maximised pseudolikelihood are not comparable
-if they have been obtained with different values of \code{rbord}.
+  Values of the maximised pseudolikelihood are not comparable
+  if they have been obtained with different values of \code{rbord}.
 }
 \examples{
  data(nztrees)
@@ -379,6 +484,10 @@ if they have been obtained with different values of \code{rbord}.
  # Fit the nonstationary Strauss process with interaction range r=13
  # and exp(first order potential) =  activity = beta(x,y) = exp(a+bx)
  # using the periodic correction.
+
+# Huang-Ogata fit:
+\dontrun{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="mpl")}
+
 
  # COVARIATES
  #

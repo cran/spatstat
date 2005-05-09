@@ -106,10 +106,14 @@ describing a window in the two-dimensional plane.
   # a rectangle of dimensions 10 x 20 units
   # with lower left corner at (10,10)
 
+  # polygon (diamond shape)
   w <- owin(poly=list(x=c(0.5,1,0.5,0),y=c(0,1,2,1)))
   w <- owin(c(0,1), c(0,2), poly=list(x=c(0.5,1,0.5,0),y=c(0,1,2,1)))
-  # diamond shape
 
+  # polygon with hole
+  ho <- owin(poly=list(list(x=c(0,1,1,0), y=c(0,0,1,1)),
+                       list(x=c(0.6,0.4,0.4,0.6), y=c(0.2,0.2,0.4,0.4))))
+  
   w <- owin(c(-1,1), c(-1,1), mask=matrix(TRUE, 100,100))
           # 100 x 100 image, all TRUE
   X <- raster.x(w)

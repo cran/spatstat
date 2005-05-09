@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.9 $	$Date: 2004/06/22 02:35:47 $
+#	$Revision: 4.15 $	$Date: 2005/05/10 00:06:57 $
 #
 #
 # Main functions:
@@ -86,7 +86,8 @@ discretise <- function(x, xrange, nx) {
 	i
 }
 
-gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE) {
+gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE,
+                        npix=NULL, areas=NULL) {
 	#
 	# Compute counting weights based on a regular tessellation of the
 	# window frame into ntile[1] * ntile[2] rectangular tiles.
@@ -98,6 +99,8 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE) {
 	# of rectangular tiles. The counting weights based on this tessellation
 	# are computed for the points (x, y) of the pattern.
 	#
+        # 'npix' determines the dimensions of the pixel raster used to
+        # approximate tile areas.
 	
 	X <- as.ppp(X, window)
 	x <- X$x
@@ -112,43 +115,58 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE) {
         nx <- ntile[1]
         ny <- ntile[2]
 
-        if(verbose)
+        if(verbose) 
           cat(paste("grid weights for a", nx, "x", ny, "grid of tiles\n"))
         
 	# classify each point according	to its tile
 	
 	id <- gridindex(x, y, win$xrange, win$yrange, nx, ny)$index
 
-	# compute tile areas
-	if(win$type == "rectangle") {
+        if(is.null(areas)) {
+  	  # compute tile areas
+          if(win$type == "rectangle") {
 
-		tilearea <- area.owin(win)/(nx * ny)
-		areas <- rep(tilearea, nx * ny)
+            tilearea <- area.owin(win)/(nx * ny)
+            areas <- rep(tilearea, nx * ny)
 
-	} else {
-                # convert to mask
-                win <- as.mask(win)
+          } else {
+            # convert window to mask
 
-                # extract pixel coordinates inside window
-		xx <- as.vector(raster.x(win)[win$m])
-		yy <- as.vector(raster.y(win)[win$m])
+            win <- as.mask(win, dimyx=rev(npix))
+
+            if(verbose) {
+              if(!is.null(npix)) 
+                np <- npix
+              else {
+                np <- spatstat.options("npixel")[[1]]
+                if(length(np) == 1) np <- rep(np, 2)
+              }
+              cat(paste("Approximating window by mask (",
+                        np[1], " x ", np[2], " pixels)\n", sep=""))
+            }
+                
+            # extract pixel coordinates inside window
+            xx <- as.vector(raster.x(win)[win$m])
+            yy <- as.vector(raster.y(win)[win$m])
                                 
-		# classify all pixels into tiles
-		pixelid <- gridindex(xx, yy, 
-				win$xrange, win$yrange, nx, nx)$index
-                pixelid <- factor(pixelid, levels=seq(nx * ny))
+	    # classify all pixels into tiles
+            pixelid <- gridindex(xx, yy, 
+                                 win$xrange, win$yrange, nx, ny)$index
+            pixelid <- factor(pixelid, levels=seq(nx * ny))
                                 
-		# compute digital areas of tiles
-		tilepixels <- as.vector(table(pixelid))
-		pixelarea <- win$xstep * win$ystep
-		areas <- tilepixels * pixelarea
-	} 
-
+	    # compute digital areas of tiles
+            tilepixels <- as.vector(table(pixelid))
+            pixelarea <- win$xstep * win$ystep
+            areas <- tilepixels * pixelarea
+          } 
+        }
+        
 	# compute counting weights 
 	w <- countingweights(id, areas)
 
         # attach information about weight construction parameters
-        attr(w, "weight.parameters") <- list(method="grid", ntile=ntile)
+        attr(w, "weight.parameters") <-
+          list(method="grid", ntile=ntile, npix=npix, areas=areas)
         
 	return(w)
 }

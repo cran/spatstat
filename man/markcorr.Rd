@@ -225,6 +225,7 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
 
    \testonly{
     data(betacells)
+    betacells <- betacells[seq(1,betacells$n,by=3)]
     niets <- markcorr(betacells, function(m1,m2){m1 == m2}, method="loess")
     niets <- markcorr(X, correction="isotropic", method="smrep")
     }

@@ -209,6 +209,7 @@ subset.fasp             Extract Subset of Function Array
 subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image
 subset.ppp              Extract or Replace Subset of Point Pattern
+suffstat                Sufficient Statistic of Point Process Model
 summary.im              Summarizing a Pixel Image
 summary.owin            Summary of a Spatial Window
 summary.ppm             Summarizing a Fitted Point Process Model

@@ -1,13 +1,14 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.11 $   $Date: 2005/02/08 17:05:53 $
+#   $Revision: 1.12 $   $Date: 2005/05/06 03:32:43 $
 #
 plot.fasp <- function(x, formule=NULL, subset=NULL,
-                      lty=NULL, col=NULL, title=NULL, ...) {
+                      lty=NULL, col=NULL, title=NULL, ..., samex=TRUE) {
 
 # If no formula is given, look for a default formula in x:
-  if(is.null(formule)) {
+  defaultplot <- is.null(formule)
+  if(defaultplot) {
     if(is.null(x$default.formula))
       stop("No formula supplied.\n")
     formule <- x$default.formula
@@ -45,7 +46,17 @@ plot.fasp <- function(x, formule=NULL, subset=NULL,
   subtit <- (nm > 1) || !(is.null(x$titles[[1]]) || x$titles[[1]] == "")
   if(nm>1) par(oma=c(0,3,4,0))
   else if(subtit) par(oma=c(3,3,4,0))
-        
+
+# compute common x axis limits for all plots (in default case)
+  if(defaultplot && samex) {
+    ends <- lapply(x$fns, function(z) { attr(z, "alim")})
+    isnul <- unlist(lapply(ends, is.null))
+    ends <- ends[!isnul]
+    lo <- max(unlist(lapply(ends, min)))
+    hi <- min(unlist(lapply(ends, max)))
+    xlim <- c(lo,hi)
+  } else xlim <- NULL
+          
 # Run through the components of the structure x, plotting each
 # in the appropriate region, according to the formula.
   k <- 0
@@ -59,7 +70,10 @@ plot.fasp <- function(x, formule=NULL, subset=NULL,
         fun <- as.fv(x$fns[[k]])
         fmla <- formule[k] 
         sub <- if(msub) subset[[k]] else subset
-        plot(fun, fmla, sub, lty,col, ...)
+        if(is.null(xlim))
+          plot(fun, fmla, sub, lty,col, ...)
+        else
+          plot(fun, fmla, sub, lty,col, xlim=xlim, ...)
 
 # Add the (sub)title of each plot.
         if(!is.null(x$titles[[k]]))

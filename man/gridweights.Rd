@@ -6,7 +6,7 @@
   using the ``counting weights'' for a grid of rectangular tiles.
 }
 \usage{
- gridweights(X, ntile, \dots, window=NULL, verbose=FALSE)
+ gridweights(X, ntile, \dots, window=NULL, verbose=FALSE, npix=NULL, areas=NULL)
 }
 \arguments{
   \item{X}{Data defining a point pattern.}
@@ -19,6 +19,10 @@
   \item{verbose}{Logical flag. If \code{TRUE}, information will be printed
     about the computation of the grid weights.
   }
+  \item{npix}{Dimensions of pixel grid to use when
+    computing a digital approximation to the tile areas.
+  }
+  \item{areas}{Vector of areas of the tiles, if they are already known.}
 }
 \value{
   Vector of nonnegative weights for each point in \code{X}.
@@ -39,6 +43,11 @@
   The weight attached to a point of \code{X} is the area of the tile
   in which it lies, divided by the number of points of \code{X} lying in
   that tile.
+
+  For non-rectangular windows the tile areas are currently calculated
+  by approximating the window as a binary mask. The accuracy of this
+  approximation is controlled by \code{npix}, which becomes
+  the argument \code{dimyx} of \code{\link{as.mask}}. 
 }
 \seealso{
   \code{\link{quad.object}},

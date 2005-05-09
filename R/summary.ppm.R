@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.9 $   $Date: 2004/06/09 09:59:17 $
+#    $Revision: 1.10 $   $Date: 2005/04/29 20:31:04 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -200,7 +200,8 @@ print.summary.ppm <- function(x, ...) {
   cat("Point process model\n")
   cat("fitted by maximum pseudolikelihood\n")
 
-  cat(paste("Call:\n", x$args$call, "\n"))
+  cat("Call:\n")
+  print(x$args$call)
 
   cat(paste("Edge correction: \'", x$args$correction, "\'\n", sep=""))
   if(x$args$rbord > 0)

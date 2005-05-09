@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.8 $	$Date: 2004/01/09 13:51:42 $
+#	$Revision: 4.9 $	$Date: 2005/05/05 01:15:23 $
 #
 ################################################################################
 #
@@ -73,7 +73,7 @@ function(X, r=NULL, breaks=NULL, ...) {
                   "Kaplan-Meier estimate of G(r)",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
                   "uncorrected estimate of G(r)")
-        Z <- fv(Z, "r", "G(r)", "km", cbind(km, theo) ~ r, alim, labl, desc)
+        Z <- fv(Z, "r", "G(r)", "km", cbind(km, rs, theo) ~ r, alim, labl, desc)
 	return(Z)
 }	
 

@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.5 $	$Date: 2004/01/09 13:59:34 $
+#	$Revision: 4.6 $	$Date: 2005/05/05 01:16:42 $
 #
 #
 #
@@ -33,7 +33,7 @@ function(X, eps=NULL, r=NULL, breaks=NULL) {
                   "border corrected estimate of J(r)",
                   "Kaplan-Meier estimate of J(r)",
                   "uncorrected estimate of J(r)")
-        Z <- fv(rslt, "r", "J(r)", "km", cbind(km, 1) ~ r, alim, labl, desc)
+        Z <- fv(rslt, "r", "J(r)", "km", cbind(km, rs, un, 1) ~ r, alim, labl, desc)
 
 # add more info        
         attr(Z, "F") <- FF
