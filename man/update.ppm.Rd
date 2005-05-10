@@ -5,9 +5,8 @@
   \code{update} method for class \code{"ppm"}.
 }
 \usage{
-  update.ppm(object, \dots,
-            Q, trend, interaction, covariates,
-            correction, rbord, use.gam, forcefit)
+  update.ppm(object, \dots, fixdummy=TRUE)
+
 }
 \arguments{
   \item{object}{
@@ -15,39 +14,12 @@
     typically produced by \code{\link{ppm}}.
   }
   \item{\dots}{
-    Unnamed arguments - see Details.
+    Arguments to be updated in the new call to \code{\link{ppm}}.
   }
-  \item{Q}{
-    a new point pattern dataset or quadrature scheme
-    to which the model should be fitted. An object of class
-    \code{"ppp"} or \code{"quad"}.
-  }
-  \item{trend}{
-    a new \code{formula} for the spatial trend of the model.
-  }
-  \item{interaction}{
-    a new interpoint interaction structure (object of class
-    \code{"interact"}) for the model. 
-  }
-  \item{covariates}{
-    a new data frame of spatial covariates,
-    or \code{NULL} to remove all spatial covariates.
-  }
-  \item{correction}{
-    character string giving a new type of edge correction,
-    or \code{NULL} to return to the default.
-  }
-  \item{rbord}{
-    numerical value of the distance for the `border' edge correction,
-    or \code{NULL} to suppress the border correction.
-  }
-  \item{use.gam}{
-    logical value indicating whether to fit the model using
-    \code{\link{gam}}. See \code{\link{ppm}}.
-  }
-  \item{forcefit}{
-    logical value controlling the use of shortcuts
-    when fitting trivial models. See \code{\link{ppm}}.
+  \item{fixdummy}{
+    Logical flag indicating whether the quadrature scheme for the
+    call to \code{\link{ppm}} should use the same set of dummy points
+    as that in the original call.
   }
 }
 \details{
@@ -69,14 +41,17 @@
   This is because \code{update.ppm} re-fits the model
   in a way which is comparable to the original fit.
 
-  The named arguments \code{Q}, \code{trend},
-  \code{interaction}, \code{covariates}, \code{correction},
-  \code{rbord}, \code{use.gam} and \code{forcefit}
-  are passed to \code{\link{ppm}}.
+  The arguments \code{...} are matched to the formal arguments
+  of \code{\link{ppm}} as follows.
+
+  First, all the \emph{named} arguments in \code{...} are matched
+  with the formal arguments of \code{\link{ppm}}.
   Use \code{name=NULL} to remove the argument \code{name} from the
   call.
 
-  The unnamed arguments \code{...} may include
+  Second, any \emph{unnamed} arguments in \code{...} are
+  matched with formal arguments of \code{\link{ppm}} if the matching
+  is obvious from the class of the object. Thus \code{...} may contain
   \itemize{
     \item
     exactly one argument of class \code{"ppp"} or \code{"quad"},
@@ -91,6 +66,15 @@
     exactly one argument of class \code{"data.frame"}, which will be
     interpreted as the named argument \code{covariates}.
   }
+
+  When \code{fixdummy=FALSE}, calling \code{update.ppm}
+  is exactly the same as calling \code{ppm} with the updated
+  arguments. However, the original and updated models
+  are not strictly comparable (for example, their pseudolikelihoods
+  are not strictly comparable) unless they used the same set of dummy
+  points for the quadrature scheme. Setting \code{fixdummy=TRUE}
+  ensures that the re-fitting will be performed using the same set
+  of dummy points. This is highly recommended.
 }
 \value{
   Another fitted point process model (object of class \code{"ppm"}).

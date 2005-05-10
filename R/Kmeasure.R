@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.6 $    $Date: 2005/02/08 01:47:33 $
+#           $Revision: 1.8 $    $Date: 2005/05/10 03:06:01 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -16,7 +16,12 @@
 pixellate <- function(x, ..., weights=NULL)
 {
     verifyclass(x, "ppp")
-    w <- as.mask(x$window, ...)
+
+    dotargs <- list(...)
+    namesargs <- names(dotargs)
+    matched <- namesargs %in% names(formals(as.mask))
+    w <- do.call("as.mask", append(list(x$window), dotargs[matched]))
+    
     pixels <- nearest.raster.point(x$x, x$y, w)
     nr <- w$dim[1]
     nc <- w$dim[2]
@@ -166,7 +171,7 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   K  <- cumsum(tr)
   rmax <- min(rr[is.na(u$v)])
   K[rvalues >= rmax] <- NA
-  result <- data.frame(r=rvalues,border=K,theo=pi * rvalues^2)
+  result <- data.frame(r=rvalues, theo=pi * rvalues^2, border=K)
   w <- X$window
   alim <- c(0, min(diff(w$xrange), diff(w$yrange))/4)
   out <- fv(result,
@@ -185,7 +190,7 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
   if(missing(sigma))
     sigma <- 0.1 * diameter(x$window)
   smo <- second.moment.calc(x, sigma=sigma, what="smooth", ...)
-  edg <- second.moment.calc(x, sigma, what="edge")
+  edg <- second.moment.calc(x, sigma, what="edge", ...)
   smo$v <- smo$v/(smo$xstep * smo$ystep)
   if(edge)
     smo$v <- smo$v/edg

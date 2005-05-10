@@ -9,14 +9,14 @@
 }
 
 \synopsis{
-   plot.fasp(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots)
+   plot.fasp(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots, samex=TRUE)
 }
 
 \usage{
 plot(x)
 plot(x, formule=formule)
 plot(x, formule=formule, subset)
-plot(x, formule=formule, subset, lty, col, title, \dots)
+plot(x, formule=formule, subset, lty, col, title, \dots, samex=TRUE)
 }
 
 \arguments{
@@ -66,6 +66,12 @@ plot(x, formule=formule, subset, lty, col, title, \dots)
   \item{\dots}{
     Arguments passed to \code{\link{plot.default}} to control other
     features of the individual plot panels.
+  }
+  \item{samex}{
+    Logical flag indicating whether all individual plots should have the
+    same x axis limits. This makes it easier to compare the plots.
+    It can only be set to \code{FALSE} if you are using the default plot style
+    (i.e. only when \code{formule} is missing).
   }
 }
 

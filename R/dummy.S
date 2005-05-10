@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 4.11 $     $Date: 2004/06/22 02:42:33 $
+#       $Revision: 5.1 $     $Date: 2005/05/10 01:34:13 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -69,46 +69,50 @@ tilecentroids <- function (W, nx, ny)
   }
 }
 
-tilemiddles <- function (W, nx, ny)
+cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
 {
     if(W$type == "rectangle")
       return(gridcentres(W, nx, ny))
-    
+
     # pixel approximation to window
     # This matches the pixel approximation used to compute tile areas
     # and ensures that dummy points are generated only inside those tiles
     # that have nonzero digital area
-    M   <- as.mask(W)
-    xx  <- as.vector(raster.x(M))[M$m]
-    yy  <- as.vector(raster.y(M))[M$m]
-    # label the pixels by tile index
-    pid <- gridindex(xx,yy,W$xrange,W$yrange,nx,ny)$index
-    pidvalues <- levels(as.factor(pid))
-    # Latter is for comparison with the output of tapply( ..., pid, ...)
+    M   <- as.mask(W, dimyx=rev(npix))
+    if(gi) {
+      xx <- as.vector(raster.x(M)[M$m])
+      yy <- as.vector(raster.y(M)[M$m])
+      pid <- gridindex(xx,yy,W$xrange,W$yrange,nx,ny)$index
+    } else {
+      # identify all pixels that are inside the window
+      # by their row and column index
+      Mrow <- as.vector(row(M$m)[M$m])
+      Mcol <- as.vector(col(M$m)[M$m])
+      # this code matches 'gridindex'
+      imap <- discretise(M$yrow, M$yrange, ny)
+      jmap <- discretise(M$xcol, M$xrange, nx)
+      # apply this mapping to all pixels inside the window
+      ii <- imap[Mrow]
+      jj <- jmap[Mcol]
+      # construct a tile index 
+      pid <- (ii-1) * nx + jj
+    }
     
-    ######## 1st try: centroids of tiles
-    # (usually inside tile, e.g. if it's convex, but not always inside)
-    cx <- tapply(xx, pid, mean)
-    cy <- tapply(yy, pid, mean)
-    # centroids which are inside window
-    cok <- inside.owin(cx, cy, W)
-    x <- cx[cok]
-    y <- cy[cok]
-    # tiles for which this strategy did not work
-    nbg <- pidvalues[!cok]
-    
-    ######### 2nd try: middle point in list of pixels in each tile
+    ## For each tile, find middle point in list of pixels in each tile
     # (always inside tile, by construction)
-    todo <- pid %in% nbg
-    xx <- xx[todo]
-    yy <- yy[todo]
-    pid <- pid[todo]
-    middle <- function(v) { n <- length(v); mid <- ceiling(n/2); v[mid]}
-    mx   <- tapply(xx,pid,middle)
-    my   <- tapply(yy,pid,middle)
+    middle <- function(v) { n <- length(v);
+                            mid <- ceiling(n/2); v[mid]}
+    if(gi) {
+      x <- tapply(xx, pid, middle)
+      y <- tapply(yy, pid, middle)
+    }
+    else {
+      midcol   <- tapply(Mcol,pid,middle)
+      midrow   <- tapply(Mrow,pid,middle)
     
-    x <- c( x, mx)
-    y <- c( y, my)
+      x <- M$xcol[midcol]
+      y <- M$yrow[midrow]
+    }
     return(list(x=x,y=y))
 }
 
@@ -156,7 +160,7 @@ concatxy <- function(...) {
 
 #------------------------------------------------------------
 
-default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, ..., verbose=FALSE) {
+default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ..., verbose=FALSE) {
 	# default action to create dummy points.
 	# regular grid of nd[1] * nd[2] points
 	# plus corner points of window frame,
@@ -165,40 +169,193 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, ..., verbose=FAL
 	X <- as.ppp(X)
 	win <- X$window
         # default dimensions
-        if(is.null(nd)) 
-          nd <- if(!is.null(ntile)) ntile else default.ngrid(X)
-        if(length(nd) == 1)
-          nd <- rep(nd, 2)
-        if(verbose)
-          cat(paste("dummy point grid", nd[1], "x", nd[2], "\n"))
+        a <- default.n.tiling(X, nd=nd, ntile=ntile, npix=npix,
+                              verbose=verbose)
+        nd    <- a$nd
+        ntile <- a$ntile
+        npix  <- a$npix
         # make dummy points
         dummy <- if(random) 
                   stratrand(win, nd[1], nd[2], 1)
                 else
-                  tilemiddles(win, nd[1], nd[2])
+                  cellmiddles(win, nd[1], nd[2], npix)
         # add corner points
 	dummy <- concatxy(dummy, corners(win))
-	# restrict to window 
-	ok <- inside.owin(dummy$x, dummy$y, win)
-        if(sum(ok) == 0)
-          stop("None of the dummy points lies inside the window")
-	x <- dummy$x[ok]
-	y <- dummy$y[ok]
+        # make point pattern
+        if(win$type == "mask") {
+          x <- dummy$x
+          y <- dummy$y
+        } else {
+	# restrict to window
+          ok <- inside.owin(dummy$x, dummy$y, win)
+          if(sum(ok) == 0)
+            stop("None of the dummy points lies inside the window")
+          x <- dummy$x[ok]
+          y <- dummy$y[ok]
+        }
         X <- ppp(x, y, window=win)
         # pass parameters for computing weights
-        if(is.null(ntile))
-          ntile <- nd
-        attr(X, "dummy.parameters") <- list(nd=nd, verbose=verbose)
+        attr(X, "dummy.parameters") <-
+          list(nd=nd, random=random, verbose=verbose)
         attr(X, "weight.parameters") <-
-          append(list(...), list(ntile=ntile, verbose=verbose))
+          append(list(...), list(ntile=ntile, verbose=verbose, npix=npix))
         return(X)
 }
 
 
-default.ngrid <- function(X) {
-	# default dimensions of rectangular grid of dummy points
-        # for data pattern X
-  X <- as.ppp(X)
-  max(30, 10 * ceiling(2 * sqrt(X$n)/10))
+# Criteria:
+#   for rectangular windows,
+#       R1.  nd >= ntile
+#   for non-rectangular windows,
+#       R2. nd should be a multiple of ntile
+#       R3. each dummy point is also a pixel of the npix grid
+#       R4. npix should ideally be a multiple of nd, for speed
+#       R5. npix should be large, for accuracy
+#       R6. npix should not be too large, for speed
+#       R7. if the window is a mask, npix should ideally be
+#           a multiple of the mask array dimensions, for speed.
+#
+
+default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
+  # computes dimensions of rectangular grids of 
+  #     - dummy points  (nd)
+  #     - tiles for grid weights (ntile)
+  #     - pixels for approximating area (npix)
+  # for data pattern X.
+  #
+  verifyclass(X, "ppp")
+  win <- X$window
+  pixels <- (win$type != "rectangle")
+  
+  ensure2print <- function(x, verbose=TRUE, blah="user specified") {
+    xname <- deparse(substitute(x))
+    x <- ensure2vector(x)
+    if(verbose)
+      cat(paste(blah, xname, "=", x[1], "*", x[2], "\n"))
+    x
+  }
+  
+  if(nd.given <- !is.null(nd)) 
+    nd <- ensure2print(nd, verbose)
+  if(ntile.given <- !is.null(ntile)) 
+    ntile <- ensure2print(ntile, verbose)
+  if(npix.given <- !is.null(npix)) 
+    npix <- ensure2print(npix, verbose)
+
+  if(pixels) {
+    sonpixel <- spatstat.options("npixel")[[1]]
+    sonpixel <- ensure2print(sonpixel, verbose, "default")
+  }
+  
+  ndminX <- max(25, 10 * ceiling(2 * sqrt(X$n)/10))
+  ndminX <- ensure2vector(ndminX)
+
+  minmultiple <- function(n, lo, hi) {
+    if(lo > hi) {
+      temp <- hi
+      hi <- lo
+      lo <- temp
+    }
+    if(n > hi) return(hi)
+    m <- n * (floor(lo/n):ceiling(hi/n))
+    m <- m[m >= n & m >= lo & m <= hi]
+    if(length(m) > 0) min(m) else hi
+  }
+    
+  mindivisor <- function(N, lo, Nbig) {
+    d <- divisors(N)
+    ok <- (d >= lo)
+    if(any(ok)) return(min(d[ok]))
+    m <- floor(Nbig/N)
+    d <- unlist(lapply(as.list(seq(m) * N), divisors))
+    d <- sort(unique(d))
+    ok <- (d >= lo)
+    if(any(ok)) return(min(d[ok]))
+    return(Nbig)
+  }
+
+  min2mul <- function(n, lo, hi) 
+    c(minmultiple(n[1], lo[1], hi[1]),
+      minmultiple(n[2], lo[2], hi[2]))
+
+  min2div <- function(N, lo, Nbig) 
+    c(mindivisor(N[1], lo[1], Nbig[1]),
+      mindivisor(N[2], lo[2], Nbig[2]))
+
+  # range of acceptable values for npix
+  if(npix.given)
+    Nmin <- Nmax <- npix
+  else 
+    switch(win$type,
+           rectangle = {
+             Nmin <- ensure2vector(X$n)
+             Nmax <- Inf
+           },
+           polygonal = {
+             Nmin <- sonpixel
+             Nmax <- 4 * sonpixel
+           },
+           mask={
+             nmask <- rev(win$dim)
+             Nmin <- nmask
+             Nmax <- pmax(2 * nmask, 4 * sonpixel)
+           })
+
+  # determine values of nd and ntile
+
+  if(nd.given && !ntile.given) {
+    # ntile must be a divisor of nd
+    if(any(nd > Nmax))
+      warning("number of dummy points nd exceeds maximum pixel dimensions")
+    ntile <- min2div(nd, ndminX, nd)
+  } else if(!nd.given && ntile.given) {
+    # ntile must be a multiple of ntile
+    nd <- min2mul(ntile, ndminX, Nmin)
+    if(any(nd >= Nmin))
+      nd <- ntile
+  } else if(!nd.given && !ntile.given) {
+     if(!pixels) {
+       nd <- ntile <- ensure2vector(ndminX)
+       if(verbose)
+         cat(paste("nd and ntile default to", nd[1], "*", nd[2], "\n"))
+     } else {
+       # find suitable divisors of the number of pixels
+       nd <- ntile <- min2div(Nmin, ndminX, Nmax)
+       if(any(nd >= Nmin))  # none suitable
+         nd <- ntile <- ndminX
+     }
+  } else {
+    # both nd, ntile were given
+    if(any(ntile > nd))
+      warning("the number of tiles (ntile) exceeds the number of dummy points (nd)")
+  }
+  
+  if(!npix.given && pixels) 
+    npix <- min2mul(nd, Nmin, Nmax)
+ 
+  if(verbose) {
+    cat(paste("dummy point grid", nd[1], "x", nd[2], "\n"))
+    cat(paste("weighting tiles", ntile[1], "x", ntile[2], "\n"))
+    if(pixels) cat(paste("pixel grid", npix[1], "x", npix[2], "\n"))
+  }
+
+  if(pixels) 
+    return(list(nd=nd, ntile=ntile, npix=npix))
+  else
+    return(list(nd=nd, ntile=ntile, npix=npix))
+  
+}
+
+
+ensure2vector <- function(x) {
+  xname <- deparse(substitute(x))
+  if(!is.numeric(x))
+    stop(paste(xname, "is not numeric"))
+  n <- length(x)
+  if(n == 0 || n > 2)
+    stop(paste(xname, "should be of length 1 or 2"))
+  if(n == 1)
+    return(rep(x,2))
+  return(x)
 }
 

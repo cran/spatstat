@@ -6,7 +6,7 @@
   for use in a quadrature scheme.
 }
 \synopsis{
- default.dummy(X, nd, random=FALSE, ntile=NULL, \dots, verbose=FALSE)
+ default.dummy(X, nd, random=FALSE, ntile=NULL, npix=NULL, \dots, verbose=FALSE)
 }
 \usage{
  default.dummy(X, nd, random=FALSE, \dots, verbose=FALSE)

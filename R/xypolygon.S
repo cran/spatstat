@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.5 $    $Date: 2002/05/13 12:41:10 $
+#    $Revision: 1.7 $    $Date: 2005/04/30 01:37:15 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -20,7 +20,7 @@ verify.xypolygon <- function(p, fatal=TRUE) {
   return(ok)
 }
 
-inside.xypolygon <- function(pts, polly, test01=TRUE) {
+inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   # pts:  list(x,y) points to be tested
   # polly: list(x,y) vertices of a single polygon (n joins to 1)
   # test01: logical - if TRUE, test whether all values in output are 0 or 1
@@ -38,51 +38,84 @@ inside.xypolygon <- function(pts, polly, test01=TRUE) {
   score <- rep(0, npts)
   on.boundary <- rep(FALSE, npts)
 
-  for(i in 1:nedges) {
-    x0 <- xp[i]
-    y0 <- yp[i]
-    x1 <- if(i == nedges) xp[1] else xp[i+1]
-    y1 <- if(i == nedges) yp[1] else yp[i+1]
-    dx <- x1 - x0
-    dy <- y1 - y0
-    if(dx < 0) {
-      # upper edge
-      xcriterion <- (x - x0) * (x - x1)
-      consider <- (xcriterion <= 0)
-      if(any(consider)) {
-        ycriterion <- y[consider] * dx - x[consider] * dy + (x0 * dy - y0 * dx)
-        # closed inequality
-        contrib <- (ycriterion >= 0) * ifelse(xcriterion[consider] == 0, 1/2, 1)
-        # positive edge sign
-        score[consider] <- score[consider] + contrib
-        # detect whether any point lies on this segment
-        on.boundary[consider] <- on.boundary[consider] | (ycriterion == 0)
-      }
-    } else if(dx > 0) {
-      # lower edge
-      xcriterion <- (x - x0) * (x - x1)
-      consider <- (xcriterion <= 0)
-      if(any(consider)) {
-        ycriterion <- y[consider] * dx - x[consider] * dy + (x0 * dy - y0 * dx)
-        # open inequality
-        contrib <- (ycriterion < 0) * ifelse(xcriterion[consider] == 0, 1/2, 1)
-        # negative edge sign
-        score[consider] <- score[consider] - contrib
-        # detect whether any point lies on this segment
-        on.boundary[consider] <- on.boundary[consider] | (ycriterion == 0)
-      }
-    } else {
-      # vertical edge
-      consider <- (x == x0)
-      if(any(consider)) {
-        # zero score
-        # detect whether any point lies on this segment
-        yconsider <- y[consider]
-        ycriterion <- (yconsider - y0) * (yconsider - y1)
-        on.boundary[consider] <- on.boundary[consider] | (ycriterion <= 0)
-      }
-    }
-  }
+  switch(method,
+         Fortran={
+           #------------------ call Fortran routine ------------------
+           temp <- .Fortran(
+                            "inxyp",
+                            x=as.double(x),
+                            y=as.double(y),
+                            xp=as.double(xp),
+                            yp=as.double(yp),
+                            npts=as.integer(npts),
+                            nedges=as.integer(nedges),
+                            score=as.double(score),
+                            onbndry=as.logical(on.boundary),
+                            PACKAGE="spatstat"
+                            )
+           score <- temp$score
+           on.boundary <- temp$onbndry
+         },
+         interpreted={
+           #----------------- original interpreted code --------------
+           for(i in 1:nedges) {
+             x0 <- xp[i]
+             y0 <- yp[i]
+             x1 <- if(i == nedges) xp[1] else xp[i+1]
+             y1 <- if(i == nedges) yp[1] else yp[i+1]
+             dx <- x1 - x0
+             dy <- y1 - y0
+             if(dx < 0) {
+               # upper edge
+               xcriterion <- (x - x0) * (x - x1)
+               consider <- (xcriterion <= 0)
+               if(any(consider)) {
+                 ycriterion <- y[consider] * dx - x[consider] * dy
+                               + (x0 * dy - y0 * dx)
+                 # closed inequality
+                 contrib <- (ycriterion >= 0) *
+                             ifelse(xcriterion[consider] == 0, 1/2, 1)
+                 # positive edge sign
+                 score[consider] <- score[consider] + contrib
+                 # detect whether any point lies on this segment
+                 on.boundary[consider] <-
+                   on.boundary[consider] | (ycriterion == 0)
+               }
+             } else if(dx > 0) {
+               # lower edge
+               xcriterion <- (x - x0) * (x - x1)
+               consider <- (xcriterion <= 0)
+               if(any(consider)) {
+                 ycriterion <- y[consider] * dx - x[consider] * dy
+                               + (x0 * dy - y0 * dx)
+                 # open inequality
+                 contrib <- (ycriterion < 0) *
+                   ifelse(xcriterion[consider] == 0, 1/2, 1)
+                 # negative edge sign
+                 score[consider] <- score[consider] - contrib
+                 # detect whether any point lies on this segment
+                 on.boundary[consider] <-
+                   on.boundary[consider] | (ycriterion == 0)
+               }
+             } else {
+               # vertical edge
+               consider <- (x == x0)
+               if(any(consider)) {
+                 # zero score
+                 # detect whether any point lies on this segment
+                 yconsider <- y[consider]
+                 ycriterion <- (yconsider - y0) * (yconsider - y1)
+                 on.boundary[consider] <-
+                   on.boundary[consider] | (ycriterion <= 0)
+               }
+             }
+           }
+         },
+         stop("Unrecognised choice for \"method\"")
+         )
+
+  #------------------- END SWITCH ------------------------------
+
   
   # any point recognised as lying on the boundary gets score 1.
   score[on.boundary] <- 1
