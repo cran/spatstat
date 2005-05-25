@@ -75,8 +75,8 @@
 }
 \source{
   Dr J. Huntington.
-  Coordinates kindly provided by Dr. Mark Berman, CSIRO, Sydney,
-  Australia.
+  Coordinates kindly provided by Dr. Mark Berman
+  and Dr. A. Green, CSIRO, Sydney, Australia.
 }
 \references{
 Baddeley, A. and Turner, R. (2000)

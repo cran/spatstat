@@ -35,6 +35,8 @@ data.ppm                Extract Original Data from a Fitted Point
                         Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
 demopat                 Artificial Data Point Pattern
+diagnose.ppm            Diagnostic Plots for Fitted Point Process
+                        Model
 diameter                Diameter of a Window Frame
 DiggleGratton           Diggle-Gratton model
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
@@ -44,6 +46,7 @@ distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern
 dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
+eem                     Exponential Energy Marks
 envelope                Simulation envelopes of summary function
 eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
@@ -102,6 +105,7 @@ lansing                 Lansing Woods Point Pattern
 LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
 longleaf                Longleaf Pines Point Pattern
+lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
@@ -147,6 +151,8 @@ print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
 print.quad              Print a Quadrature Scheme
+qqplot.ppm              Q-Q Plot of Residuals from Fitted Point
+                        Process Model
 quad.object             Class of Quadrature Schemes
 quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
@@ -161,6 +167,9 @@ redwood                 California Redwoods Point Pattern (Ripley's
 redwoodfull             California Redwoods Point Pattern (Entire
                         Dataset)
 rescue.rectangle        Convert Window Back To Rectangle
+residualspaper          Data and Code From JRSS Discussion Paper on
+                        Residuals
+residuals.ppm           Residuals for Fitted Point Process Model
 ripras                  Estimate window from points alone
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I

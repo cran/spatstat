@@ -1,6 +1,6 @@
 # 	applynbd.R
 #
-#     $Revision: 1.1 $     $Date: 2002/07/18 10:53:11 $
+#     $Revision: 1.5 $     $Date: 2005/05/19 23:40:11 $
 #
 #
 # For each point, identify either
@@ -60,7 +60,8 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
         distances <- ai[,2]
 	dranks <- ai[,3]
         here <- ai[1,4]	
-	fun(Z[which], c(x=Z$x[here], y=Z$y[here]), distances[which], dranks[which], ...) 
+	fun(Y=Z[which], current=c(x=Z$x[here], y=Z$y[here]),
+            dists=distances[which], dranks=dranks[which], ...) 
      }
 
      result <- apply(a, 1, go, Z=X, fun=FUN, ...)

@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.15 $	$Date: 2005/05/10 00:06:57 $
+#	$Revision: 4.17 $	$Date: 2005/05/14 01:50:47 $
 #
 #
 # Main functions:
@@ -118,10 +118,6 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE,
         if(verbose) 
           cat(paste("grid weights for a", nx, "x", ny, "grid of tiles\n"))
         
-	# classify each point according	to its tile
-	
-	id <- gridindex(x, y, win$xrange, win$yrange, nx, ny)$index
-
         if(is.null(areas)) {
   	  # compute tile areas
           if(win$type == "rectangle") {
@@ -160,6 +156,16 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE,
             areas <- tilepixels * pixelarea
           } 
         }
+        
+	# classify each point according	to its tile
+
+        if(win$type == "mask") {
+          # first move each data point to nearest pixel
+          Xapprox <- nearest.raster.point(X$x, X$y, win, indices=FALSE)
+          x <- Xapprox$x
+          y <- Xapprox$y
+        }
+        id <- gridindex(x, y, win$xrange, win$yrange, nx, ny)$index
         
 	# compute counting weights 
 	w <- countingweights(id, areas)

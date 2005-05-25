@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.1 $     $Date: 2005/05/10 01:34:13 $
+#       $Revision: 5.2 $     $Date: 2005/05/11 17:53:27 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -179,27 +179,22 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
                   stratrand(win, nd[1], nd[2], 1)
                 else
                   cellmiddles(win, nd[1], nd[2], npix)
-        # add corner points
-	dummy <- concatxy(dummy, corners(win))
-        # make point pattern
-        if(win$type == "mask") {
-          x <- dummy$x
-          y <- dummy$y
-        } else {
-	# restrict to window
-          ok <- inside.owin(dummy$x, dummy$y, win)
-          if(sum(ok) == 0)
-            stop("None of the dummy points lies inside the window")
-          x <- dummy$x[ok]
-          y <- dummy$y[ok]
-        }
-        X <- ppp(x, y, window=win)
+        dummy <- as.ppp(dummy, win)
+        # restrict to window
+        if(!(win$type == "rectangle" || (win$type == "mask" && !random)))
+          dummy <- dummy[, win]
+        # corner points
+        corn <- as.ppp(corners(win), win)
+        corn <- corn[, win]
+	dummy <- superimpose(dummy, corn)
+        if(dummy$n == 0)
+          stop("None of the dummy points lies inside the window")
         # pass parameters for computing weights
-        attr(X, "dummy.parameters") <-
+        attr(dummy, "dummy.parameters") <-
           list(nd=nd, random=random, verbose=verbose)
-        attr(X, "weight.parameters") <-
+        attr(dummy, "weight.parameters") <-
           append(list(...), list(ntile=ntile, verbose=verbose, npix=npix))
-        return(X)
+        return(dummy)
 }
 
 

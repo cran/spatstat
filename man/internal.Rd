@@ -5,6 +5,7 @@
 \alias{as.breakpts}
 \alias{as.fv}
 \alias{as.polygonal}
+\alias{beachcolours}
 \alias{bind.fv}
 \alias{bdrylength.xypolygon} 
 \alias{breakpts}
@@ -17,9 +18,12 @@
 \alias{conspire}
 \alias{contour.im}
 \alias{countingweights}
+\alias{default.expand}
+\alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{densityhack}
+\alias{diagnose.ppm.engine}
 \alias{discretise}
 \alias{distpl}               
 \alias{distppl}
@@ -88,12 +92,18 @@
 \alias{param.quad}
 \alias{persp.im}
 \alias{pixellate}
+\alias{ploterodewin}
+\alias{ploterodeimage}
+\alias{plot.diagppm}
+\alias{plot.qqppm}
 \alias{polynom}
 \alias{primefactors}       
+\alias{print.diagppm}
 \alias{print.fasp}       
 \alias{print.fv}       
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.qqppm}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
@@ -105,6 +115,9 @@
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{resid4plot}
+\alias{resid1plot}
+\alias{resid1panel}
 \alias{resolve.defaults}
 \alias{reverse.xypolygon}    
 \alias{rotxy}
@@ -153,6 +166,7 @@ area.xypolygon(polly)
 as.breakpts(\dots)
 as.fv(x)
 as.polygonal(W)
+beachcolours(heightrange, sealevel, monochrome, ncolours)
 bind.fv(x, y, labl, desc, preferred)
 bdrylength.xypolygon(polly)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
@@ -165,14 +179,19 @@ cobble.xy(x, y, f, fatal)
 conspire(\dots)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
+default.expand(object, m, epsilon)
+default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
 densityhack(x, bw, adjust, kernel, window, width,
              give.Rkern, n, from, to, cut, na.rm, weights)
+diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
+                         sigma=NULL, rbord = reach(object), compute.sd=TRUE,
+                         compute.cts=TRUE, rv=NULL)
 discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)
-distppll(p, l)
+distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 divisors(n)
 edge.Ripley(X, r, W)
 edge.Trans(X, Y, W, exact, trim)
@@ -242,12 +261,21 @@ overlap.xypolygon(P, Q)
 param.quad(Q)
 persp.im(x, \dots)
 pixellate(x, \dots, weights)
+ploterodewin(W1, W2, col.edge, col.inside, \dots)
+ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
+plot.diagppm(x, \dots, which, plot.neg="image",
+                         plot.smooth="imagecontour",
+                         plot.sd=TRUE, spacing=0.1,
+                         srange=NULL, monochrome=FALSE, main=NULL)
+plot.qqppm(x, \dots, limits=TRUE)
 polynom(x, \dots)
 primefactors(n, prmax)
+print.diagppm(x, \dots)
 print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
+print.qqppm(x, \dots)
 print.rmhcontrol(x, \dots)
 print.rmhmodel(x, \dots)
 print.rmhstart(x, \dots)
@@ -259,6 +287,12 @@ quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
+resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
+           spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL)
+resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
+              srange=NULL, monochrome=FALSE, main=NULL)
+resid1panel(observedX, observedV,
+            theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots)
 reverse.xypolygon(p)    
 rotxy(X, angle = pi/2)

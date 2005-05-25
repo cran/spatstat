@@ -259,7 +259,6 @@ trend corresponding to a particular type, there is still a component
 }
 \examples{
    \dontrun{
-   require(spatstat)
    nr   <- 1e5
    nv  <- 5000
    }
