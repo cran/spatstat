@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.6 $    $Date: 2005/05/10 01:30:19 $
+#    $Revision: 1.7 $    $Date: 2005/05/12 21:48:10 $
 #
 #  (a) for matrices only:
 #
@@ -89,6 +89,7 @@ matrixsample <- function(mat, newdim, phase=c(0,0)) {
   if(all(olddim >= newdim) && all(olddim %% newdim == 0)) {
     # new matrix is periodic subsample of old matrix
     ratio <- olddim/newdim
+    phase <- pmin(pmax(phase, 0), ratio-1)
     ii <- seq(1+phase[1], olddim[1], by=ratio[1])
     jj <- seq(1+phase[2], olddim[2], by=ratio[2])
     return(mat[ii,jj])

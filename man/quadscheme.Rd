@@ -34,6 +34,10 @@
   (data points, dummy points, and quadrature weights)
   suitable as the argument \code{Q} of the function \code{\link{ppm}()} for
   fitting a point process model.
+
+  The quadrature scheme can be inspected using the
+  \code{print} and \code{plot} methods for objects
+  of class \code{"quad"}. 
 }
 \details{
   This is the primary method for producing a quadrature schemes
@@ -119,16 +123,28 @@
 
   # grid weights
   Q <- quadscheme(simdat)
-  Q <- quadscheme(simdat, , "grid")
+  Q <- quadscheme(simdat, method="grid")
   Q <- quadscheme(simdat, nd=50)           # 1 dummy point per tile
   Q <- quadscheme(simdat, ntile=25, nd=50) # 4 dummy points per tile
 
   # Dirichlet weights
-  Q <- quadscheme(simdat, , "dirichlet", exact=FALSE)
+  Q <- quadscheme(simdat, method="dirichlet", exact=FALSE)
 
   # random dummy pattern
+  \dontrun{
   D <- runifpoint(250, simdat$window)
-  Q <- quadscheme(simdat, D, "dirichlet", exact=FALSE)
+  Q <- quadscheme(simdat, D, method="dirichlet", exact=FALSE)
+  }
+
+  # polygonal window
+  data(demopat)
+  X <- unmark(demopat)
+  Q <- quadscheme(X)
+
+  # mask window
+  X$window <- as.mask(X$window)
+  Q <- quadscheme(X)
+  
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

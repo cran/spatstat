@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.23 $	$Date: 2005/03/09 19:49:55 $
+#	$Revision: 4.24 $	$Date: 2005/05/11 23:27:48 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -113,7 +113,7 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
 		return(Z)
 	} else if(checkfields(X, c("x", "y"))) {
                 if(is.function(W))
-                  return(cobble.ppp(X$x, X$y, W, fatal))
+                  return(cobble.xy(X$x, X$y, W, fatal))
 		if(is.null(W)) {
                   if(fatal)
                     stop("x,y coords given but no window specified")

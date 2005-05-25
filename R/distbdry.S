@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.4 $	$Date: 2003/03/11 03:04:14 $
+#	$Revision: 4.6 $	$Date: 2005/05/14 02:13:45 $
 #
 # -------- functions ----------------------------------------
 #
@@ -55,9 +55,7 @@ function(X)
                mask = {
                  b <- bdist.pixels(window, coords=FALSE)
                  loc <- nearest.raster.point(x,y,window)
-                 result <- numeric(X$n)
-                 for(i in 1:(X$n)) 
-			result[i] <- b[loc$row[i],loc$col[i]]
+                 result <- b[cbind(loc$row, loc$col)]
                },
                stop("Unrecognised window type", window$type)
                )
@@ -171,6 +169,8 @@ erode.owin <- function(w, r, shrink.frame=TRUE, ...) {
           wnew$yrow <- w$yrow[keeprow]
           wnew$dim <- c(sum(keeprow), sum(keepcol))
           wnew$m <- wnew$m[keeprow, keepcol]
+          wnew$xrange <- exr
+          wnew$yrange <- eyr
         }
 
         return(wnew)

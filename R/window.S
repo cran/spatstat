@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.28 $	$Date: 2005/05/05 00:16:11 $
+#	$Revision: 4.32 $	$Date: 2005/05/24 20:29:49 $
 #
 #
 #	A window may be either
@@ -267,6 +267,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #
     # determine row & column dimensions of output raster
     if(!is.null(dimyx)) {
+      if(length(dimyx) == 1)
+        dimyx <- rep(dimyx, 2)
       nr <- dimyx[1]
       nc <- dimyx[2]
     } else {
@@ -384,9 +386,9 @@ validate.mask <- function(w, fatal=TRUE) {
   if(w$type == "mask")
     return(TRUE)
   if(fatal)
-      stop(deparse(substitute(w)), "is not a binary mask")
+      stop(paste(deparse(substitute(w)), "is not a binary mask"))
   else {
-      warning(deparse(substitute(w)), "is not a binary mask")
+      warning(paste(deparse(substitute(w)), "is not a binary mask"))
       return(FALSE)
   }
 }
@@ -409,15 +411,18 @@ raster.y <- function(w) {
 	matrix(w$yrow[row(m)], nrow=nr, ncol=nc)
 }
 
-nearest.raster.point <- function(x,y,w) {
+nearest.raster.point <- function(x,y,w, indices=TRUE) {
 	validate.mask(w)
 	nr <- w$dim[1]
 	nc <- w$dim[2]
-	cc <- round(0.5 + (x - w$xrange[1])/w$xstep)
-	rr <- round(0.5 + (y - w$yrange[1])/w$ystep)
+	cc <- 1 + round((x - w$xcol[1])/w$xstep)
+	rr <- 1 + round((y - w$yrow[1])/w$ystep)
 	cc <- pmax(1,pmin(cc, nc))
 	rr <- pmax(1,pmin(rr, nr))
-	return(list(row=rr, col=cc))
+        if(indices) 
+          return(list(row=rr, col=cc))
+        else
+          return(list(x=w$xcol[cc], y=w$yrow[rr]))
 }
 
 #------------------------------------------------------------------

@@ -93,9 +93,11 @@
 
   Each point of \code{X} is visited; the neighbourhood
   of the current point is determined, and stored as a point pattern
-  \code{Y}; then the function \code{FUN} is called as
-  \code{FUN(Y, current, dists, dranks, \dots)}
-  where \code{current} is a \code{list(x,y)} giving the location of the
+  \code{Y}; then the function \code{FUN} is called as:
+  
+  \code{FUN(Y=Y, current=current, dists=dists, dranks=dranks, \dots)}
+
+  where \code{current} is a vector of length 2 giving the coordinates of the
   current point, \code{dists} is a vector of distances from the current
   point to each of the points in \code{Y}, 
   \code{dranks} is a vector of the ranks of these distances
@@ -106,6 +108,11 @@
   The results of each call to \code{FUN} are collected and returned
   according to the usual rules for \code{\link{apply}} and its
   relatives. See \bold{Value} above.
+
+  Note that \code{FUN} will be called exactly as described above,
+  with each argument named explicitly. Care is required when writing the
+  function \code{FUN} to ensure that
+  the arguments will match up. See the Examples.
 }
 \seealso{
   \code{\link{ppp.object}},
@@ -120,7 +127,9 @@
   nneighbours <- applynbd(redwood, R=0.2, function(Y, ...){Y$n}, exclude=TRUE)
 
   # compute the distance to the second nearest neighbour of each point
-  secondnndist <- applynbd(redwood, N = 2, function(Y, cur, d, r){max(d)}, exclude=TRUE)
+  secondnndist <- applynbd(redwood, N = 2,
+                           function(dists, ...){max(dists)},
+                           exclude=TRUE)
 
   # marked point pattern
   data(longleaf)
@@ -130,34 +139,36 @@
   }
   # compute the median of the marks of all neighbours of a point
   dbh.med <- applynbd(longleaf, R=40, exclude=TRUE,
-                 function(Y,...) { median(Y$marks)})
+                 function(Y, ...) { median(Y$marks)})
 
 
   # ANIMATION explaining the definition of the K function
   # (arguments `fullpicture' and 'rad' are passed to FUN)
 
-  showoffK <- function(Y, u, d, r, fullpicture,rad) { 
+  showoffK <- function(Y, current, dists, dranks, fullpicture,rad) { 
 	plot(fullpicture, main="")
-	points(Y[r>0], cex=2)
+	points(Y, cex=2)
+        u <- current
 	points(u[1],u[2],pch="+",cex=3)
 	theta <- seq(0,2*pi,length=100)
 	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
-	text(u[1]+rad/3,u[2]+rad/2,Y$n-1,cex=3)
+	text(u[1]+rad/3,u[2]+rad/2,Y$n,cex=3)
 	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
 	return(Y$n - 1)
   }
-  applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2)
+  applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2, exclude=TRUE)
 
   # animation explaining the definition of the G function
 
-  showoffG <- function(Y, u, d, r, fullpicture) { 
+  showoffG <- function(Y, current, dists, dranks, fullpicture) { 
 	plot(fullpicture, main="")
 	points(Y, cex=2)
+        u <- current
 	points(u[1],u[2],pch="+",cex=3)
 	v <- c(Y$x[1],Y$y[1])
 	segments(u[1],u[2],v[1],v[2],lwd=2)
 	w <- (u + v)/2
-	nnd <- sqrt(sum((u-v)^2))
+	nnd <- dists[1]
 	text(w[1],w[2],round(nnd,3),cex=2)
 	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
 	return(nnd)

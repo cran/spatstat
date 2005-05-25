@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.8 $    $Date: 2005/05/10 03:06:01 $
+#           $Revision: 1.9 $    $Date: 2005/05/10 03:22:23 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #

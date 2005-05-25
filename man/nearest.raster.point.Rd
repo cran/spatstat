@@ -5,7 +5,7 @@
   Given cartesian coordinates, find the nearest pixel.
 }
 \usage{
- nearest.raster.point(x,y,w)
+ nearest.raster.point(x,y,w, indices=TRUE)
 }
 \arguments{
   \item{x}{Numeric vector of \eqn{x} coordinates of any points}
@@ -13,21 +13,38 @@
   \item{w}{A window (an object of class \code{"owin"})
     of type \code{"mask"} representing a binary pixel image.
   }
+  \item{indices}{Logical flag indicating whether to return the
+    row and column indices, or the actual \eqn{x,y} coordinates.
+    }
 }
 \value{
-  List containing two vectors \code{rr} and \code{cc}
+  If \code{indices=TRUE}, a 
+  list containing two vectors \code{rr} and \code{cc}
   giving row and column positions (in the image matrix).
+  If \code{indices=FALSE}, a list containing
+  vectors \code{x} and \code{y} giving actual coordinates
+  of the pixels.
 }
 \details{
   The argument \code{w} should be a window (an object of class
-  \code{"owin"}, see \code{\link{owin.object}} for details).
-  A window of type \code{"mask"} represents a binary pixel image.
+  \code{"owin"}, see \code{\link{owin.object}} for details)
+  of type \code{"mask"}. This represents a binary pixel image.
 
-  This function returns a list containing two vectors \code{rr} and
+  The arguments \code{x} and \code{y} should be numeric vectors
+  of equal length. They are interpreted as the coordinates of
+  points in space. For each point \code{(x[i], y[i])}, the function
+  finds the nearest pixel in the grid of pixels for \code{w}.
+
+  If \code{indices=TRUE},
+  this function returns a list containing two vectors \code{rr} and
   \code{cc} giving row and column positions (in the image matrix).
   For the location \code{(x[i],y[i])} the nearest
   pixel is at row \code{rr[i]} and column \code{cc[i]} of
   the image.
+
+  If \code{indices=FALSE}, the function returns a list containing
+  two vectors \code{x} and \code{y} giving the actual coordinates
+  of the pixels.
 }
 \seealso{
   \code{\link{owin.object}},
@@ -36,6 +53,7 @@
 \examples{
   w <- owin(c(0,1), c(0,1), mask=matrix(TRUE, 100,100))  # 100 x 100 grid
   nearest.raster.point(0.5, 0.3, w)
+  nearest.raster.point(0.5, 0.3, w, indices=FALSE)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
