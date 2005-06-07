@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.7 $	$Date: 2005/05/05 01:18:44 $
+#	$Revision: 4.8 $	$Date: 2005/06/08 18:07:57 $
 #
 #
 #
@@ -91,7 +91,7 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
                   "Kaplan-Meier estimate of J(r)",
                   "uncorrected estimate of J(r)")
         Z <- fv(result,
-                "r", "J(r)", "km", cbind(km, rs, un, theo) ~ r, alim, labl, desc)
+                "r", "J(r)", "km", . ~ r, alim, labl, desc)
         
         attr(Z, "G") <- GIJ
         attr(Z, "F") <- FJ

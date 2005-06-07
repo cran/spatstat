@@ -15,7 +15,6 @@
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{cobble.xy}
-\alias{conspire}
 \alias{contour.im}
 \alias{countingweights}
 \alias{default.expand}
@@ -103,6 +102,7 @@
 \alias{print.fv}       
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.plotppm}
 \alias{print.qqppm}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
@@ -176,7 +176,6 @@ cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 cobble.xy(x, y, f, fatal)
-conspire(\dots)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 default.expand(object, m, epsilon)
@@ -275,6 +274,7 @@ print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
+print.plotppm(x, \dots)
 print.qqppm(x, \dots)
 print.rmhcontrol(x, \dots)
 print.rmhmodel(x, \dots)

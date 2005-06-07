@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.7 $	$Date: 2005/04/09 00:19:07 $
+#	$Revision: 5.8 $	$Date: 2005/06/08 18:10:21 $
 #
 #
 # -------- functions ----------------------------------------
@@ -193,16 +193,8 @@ function(X, I, J, r=NULL, breaks=NULL,
                          "Ripley isotropic correction estimate of K(r)",
                          "iso")
         }
-        # which corrections have been computed?
-        nama2 <- names(K)
-        corrxns <- nama2[nama2 != "r"]
-
         # default is to display them all
-        attr(K, "fmla") <- deparse(as.formula(paste(
-                       "cbind(",
-                        paste(corrxns, collapse=","),
-                        ") ~ r")))
-
+        attr(K, "fmla") <- . ~ r
         return(K)
           
 }

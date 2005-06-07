@@ -191,6 +191,11 @@ nearest.neighbour(X)
   # the empirical G is below the Poisson G,
   # indicating an inhibited pattern
 
+  \dontrun{
+     plot(G, . ~ r)
+     plot(G, . ~ theo)
+     plot(G, asin(sqrt(.)) ~ asin(sqrt(theo)))
+  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

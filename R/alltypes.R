@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.9 $   $Date: 2004/01/13 10:05:46 $
+#   $Revision: 1.11 $   $Date: 2005/06/07 19:08:30 $
 #
 #
 alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
@@ -10,36 +10,88 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 # each type, or each pair of types, in a multitype point pattern
 #
   verifyclass(pp,"ppp")
-
-# validate 'fun'
-  switch(fun, F={}, G={}, J={}, K={},
-         stop("Unrecognized function name: ",fun,".\n"))
+  if(!is.character(fun))
+    stop("\`fun\' should be a character string")
+  
+  
+# select appropriate statistics
+  
   wrong <- function(...) {stop("Internal error!")}
+  S <- Si <- Sii <- Sij <- wrong
+  
+  switch(fun,
+         F = {
+           indices <- 1
+           S  <- Fest
+           Si <- function(X, i, ...) { Fest(split(X)[[i]], ...) }
+         },
+         G = , Gcross = {
+           fun <- "Gcross"
+           indices <- 2
+           S   <- Gest
+           Sii <- function(X, i, ...) { Gest(split(X)[[i]], ...) }
+           Sij <- function(X, i, j, ...) { Gcross(X, i, j, ...) }
+         },
+         J = , Jcross = {
+           fun <- "Jcross"
+           indices <- 2
+           S   <- Jest
+           Sii <- function(X, i, ...) { Jest(split(X)[[i]], ...) }
+           Sij <- function(X, i, j, ...) { Jcross(X, i, j, ...) }
+         },
+         K = , Kcross = {
+           fun <- "Kcross"
+           indices <- 2
+           S   <- Kest
+           Sii <- function(X, i, ...) { Kest(split(X)[[i]], ...) }
+           Sij <- function(X, i, j, ...) { Kcross(X, i, j, ...) }
+         },
+         Gdot = {
+           indices <- 1
+           S  <- Gest
+           Si <- Gdot
+         },
+         Jdot = {
+           indices <- 1
+           S  <- Jest
+           Si <- Jdot
+         },
+         Kdot = {
+           indices <- 1
+           S  <- Kest
+           Si <- Kdot
+         },
+         stop(paste("Unrecognised function name: \`", fun, "\'\n"))
+         )
 
-# list all possible types  
+# inspect the possible types  
   if(!is.marked(pp)) {
     um <- 1
     nm <- 1
+    indices <- 0
+    Tij <- function(X, i, j, ...) { S(X, ...) }
   } else {
     if(!is.factor(pp$marks))
       stop("the marks must be a factor")
     um <- levels(pp$marks)
     nm <- length(um)
+    if(indices == 1)
+      Tij <- function(X, i, j, ...) { Si(X, i, ...) }
+    else
+      Tij <- function(X, i, j, ...) {
+        if(i == j) Sii(X, i, ...) else Sij(X, i, j, ...)
+      }
   }
-  
+
 # get sensible 'r' values
   brks <- handle.r.b.args(r=NULL, breaks=NULL, pp$window, eps=NULL)
   r    <- brks$r
-
-  # select appropriate statistics
-  F1 <- switch(fun,F=Fest,G=Gest,J=Jest,K=Kest, wrong)
-  F2 <- switch(fun,F={},G=Gcross,J=Jcross,K=Kcross, wrong)
 
 # build 'fasp' object
   fns  <- list()
   deform <- list()
   
-  if(fun=="F") {
+  if(indices <= 1) {
     witch <- matrix(1:nm,ncol=1,nrow=nm)
     names(witch) <- um
     titles <- if(nm > 1) as.list(paste("mark =", um)) else list("")
@@ -59,13 +111,8 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 	for(j in 1:ncol(witch)) {
           if(verb) cat("i =",i,"j =",j,"\n")
           k <- k+1
-          fns[[k]] <- currentfv <- 
-            if(nm == 1) # univariate pattern
-              F1(pp,eps=NULL,breaks=brks)
-            else if(fun=="F" | i==j) # F_i or G_ii, J_ii, K_ii
-              F1(pp[pp$marks==um[i]], eps=NULL,breaks=brks)
-            else 
-              F2(pp,um[i],um[j], eps=NULL, breaks=brks)
+          fns[[k]] <- currentfv <-
+            Tij(pp, um[i], um[j], eps=NULL, breaks=brks)
           deform[[k]] <- attr(currentfv, "fmla")
         }
       }

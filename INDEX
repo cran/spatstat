@@ -7,6 +7,7 @@ alltypes                Calculate Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
 anova.ppm               ANOVA for Fitted Point Process Models
+ants                    Harkness-Isham ants' nests data
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
@@ -70,7 +71,10 @@ gridweights             Compute Quadrature Weights Based on Grid
                         Counts
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
+humberside              Humberside Data on Childhood Leukaemia and
+                        Lymphoma
 identify.ppp            Identify Points in a Point Pattern
+Iest                    Estimate the I-function
 im                      Create a Pixel Image Object
 im.object               Class of Images
 inside.owin             Test Whether Points Are Inside A Window
@@ -171,6 +175,7 @@ residualspaper          Data and Code From JRSS Discussion Paper on
                         Residuals
 residuals.ppm           Residuals for Fitted Point Process Model
 ripras                  Estimate window from points alone
+rlabel                  Random Re-Labelling of Point Pattern
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I
 rMaternII               Simulate Matern Model II
@@ -195,6 +200,7 @@ rpoint                  Generate N Random Points
 rpoispp                 Generate Poisson Point Pattern
 rSSI                    Simple Sequential Inhibition
 rThomas                 Simulate Thomas Process
+rtoro                   Random Toroidal Shift of Point Pattern
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
 scanpp                  Read Point Pattern From Data File

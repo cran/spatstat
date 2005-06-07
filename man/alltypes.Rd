@@ -17,13 +17,15 @@
 \arguments{
   \item{pp}{The observed point pattern, for which summary function
     estimates are required.  An object of class \code{"ppp"}.
-    If the pattern is not marked, the resulting ``array'' is
+    If the pattern is not marked, the resulting ``array'' has dimensions
     \eqn{1 \times 1}{1 x 1}.
   }
 
   \item{fun}{Character string indicating the summary function
-    required.  Must be one of the letters \code{"F"},
-    \code{"G"}, \code{"J"}, \code{"K"}.
+    required.  Options are
+    \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"},
+    \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"},
+    \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}.
   }
 
   \item{dataname}{Character string giving an optional (alternative)
@@ -46,27 +48,43 @@
   types in a multitype point pattern.
   Suppose that the points have possible types \eqn{1,2,\ldots,m}
   and let \eqn{X_i}{X[i]} denote the pattern of points of type \eqn{i} only.
+
   If \code{fun="F"} then this routine
   calculates, for each possible type \eqn{i},
   an estimate of the Empty Space Function \eqn{F_i(r)} of
-  \eqn{X_i}{X[i]}.
-  If \code{fun} is \code{"G"}, \code{"J"} or \code{"K"},
+  \eqn{X_i}{X[i]}. See \code{\link{Fest}} for explanation of the
+  empty space function.
+
+  If \code{fun} is
+  \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
   the routine calculates, for each pair of types \eqn{(i,j)},
-  an estimate of the cross-type function
+  an estimate of the ``\code{i}-to\code{j}'' cross-type function
   \eqn{G_{ij}(r)}{G[i,j](r)},
   \eqn{J_{ij}(r)}{J[i,j](r)} or
   \eqn{K_{ij}(r)}{K[i,j](r)} respectively describing the
   dependence between 
   \eqn{X_i}{X[i]} and \eqn{X_j}{X[j]}.
+  See \code{\link{Gcross}}, \code{\link{Jcross}}
+  or \code{\link{Kcross}} respectively for explanation of these functions.
 
-  The real work is done by the functions \code{Fest}, \code{Gest},
-  \code{Kest}, \code{Jest},
-  \code{Gcross}, \code{Kcross}, and \code{Jcross}.
-  One of the first four functions (according to
-  \code{fun}) is invoked if the two marks under consideration are
-  equal.  The latter three are invoked if the marks are distinct.
-  (There is no \code{Fcross}; for the empty space function \eqn{F(r)}
-  there is no cross-type version.)
+  If \code{fun} is 
+  \code{"Gdot"}, \code{"Jdot"} or \code{"Kdot"},
+  the routine calculates, for each type \eqn{i},
+  an estimate of the ``\code{i}-to-any'' dot-type function
+  \eqn{G_{i\bullet}(r)}{G[i.](r)},
+  \eqn{J_{i\bullet}(r)}{J[i.](r)} or
+  \eqn{K_{i\bullet}(r)}{K[i.](r)} respectively describing the
+  dependence between \eqn{X_i}{X[i]} and \eqn{X}{X}.
+  See \code{\link{Gdot}}, \code{\link{Jdot}}
+  or \code{\link{Kdot}} respectively for explanation of these functions.
+
+  The letters \code{"G"}, \code{"J"} and \code{"K"}
+  are interpreted as abbreviations for \code{"Gcross"}, \code{"Jcross"}
+  and \code{"Kcross"} respectively, assumin the point pattern is
+  marked. If the point pattern is unmarked, the appropriate
+  function \code{\link{Fest}}, \code{\link{Jest}}
+  or \code{\link{Kest}} is invoked instead.
+  
 }
 
 \value{
@@ -75,13 +93,21 @@
   using \code{\link{plot.fasp}}.
 
   If \code{fun="F"},
-  the function array has dimensions \eqn{m \times 1}{n * 1}
+  the function array has dimensions \eqn{m \times 1}{m * 1}
   where \eqn{m} is the number of different marks in the point pattern.
   The entry at position \code{[i,1]} in this array
   is the result of applying \code{\link{Fest}} to the
   points of type \code{i} only.
 
-  If \code{fun} is \code{"G"}, \code{"J"} or \code{"K"}, 
+  If \code{fun} is \code{"Gdot"}, \code{"Jdot"}
+  or \code{"Kdot"}, the function array
+  again has dimensions \eqn{m \times 1}{m * 1}.
+  The entry at position \code{[i,1]} in this array
+  is the result of \code{Gdot(pp, i)} or \code{Jdot(pp, i)}
+  or \code{Kdot(pp, i)} respectively.
+
+  If \code{fun} is \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
+  (or their abbreviations \code{"G"}, \code{"J"} or \code{"K"}),
   the function array has dimensions \eqn{m \times m}{m * m}.
   The \code{[i,j]} entry of the function array
   (for \eqn{i \neq j}{i != j}) is the
@@ -96,12 +122,12 @@
   Each function entry \code{fns[[i]]} retains the format
   of the output of the relevant estimating routine
   \code{\link{Fest}}, \code{\link{Gest}}, \code{\link{Jest}},
-  \code{\link{Kest}},  \code{Gcross}, \code{Jcross}, or \code{Kcross}.
+  \code{\link{Kest}},  \code{Gcross}, \code{Jcross}, \code{Kcross},
+  \code{Gdot}, \code{Jdot}, or \code{Kdot}.
 
   The default formulae for plotting these functions are 
-  \code{cbind(km,theo) ~ r} for F, G, and J, and
-  \code{cbind(trans,theo) ~ r} for K.}
-  }
+  \code{cbind(km,theo) ~ r} for F, G, and J functions, and
+  \code{cbind(trans,theo) ~ r} for K functions.
 }
 \note{
   Sizeable amounts of memory may be needed during the calculation.
@@ -117,7 +143,10 @@
   \code{\link{Kest}},
   \code{\link{Gcross}},
   \code{\link{Jcross}},
-  \code{\link{Kcross}}
+  \code{\link{Kcross}},
+  \code{\link{Gdot}},
+  \code{\link{Jdot}},
+  \code{\link{Kdot}}
 }
 \examples{
    # bramblecanes (3 marks).
@@ -128,6 +157,9 @@
    X.G <- alltypes(bramblecanes,fun="G",verb=TRUE)
    X.J <- alltypes(bramblecanes,fun="J",verb=TRUE)
    X.K <- alltypes(bramblecanes,fun="K",verb=TRUE)
+   X.Gd <- alltypes(bramblecanes,fun="Gdot",verb=TRUE)
+   X.Jd <- alltypes(bramblecanes,fun="Jdot",verb=TRUE)
+   X.Kd <- alltypes(bramblecanes,fun="Kdot",verb=TRUE)
    }
    \testonly{
       # smaller dataset
@@ -136,6 +168,9 @@
       X.G <- alltypes(bram,fun="G",verb=TRUE)
       X.J <- alltypes(bram,fun="J",verb=TRUE)
       X.K <- alltypes(bram,fun="K",verb=TRUE)
+      X.Gd <- alltypes(bram,fun="Gdot",verb=TRUE)
+      X.Jd <- alltypes(bram,fun="Jdot",verb=TRUE)
+      X.Kd <- alltypes(bram,fun="Kdot",verb=TRUE)
    }
    
    # Swedishpines (unmarked).
