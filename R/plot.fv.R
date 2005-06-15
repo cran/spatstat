@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.8 $    $Date: 2005/02/08 01:52:32 $
+#  $Revision: 1.13 $    $Date: 2005/06/14 04:27:42 $
 #
 #
 
@@ -10,7 +10,7 @@ conspire <- function(...) {
   plot.fv(...)
 }
 
-plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL,
+plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                      xlim, ylim, xlab, ylab, ...) {
 
   verifyclass(x, "fv")
@@ -23,6 +23,18 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL,
   # This *is* the last possible moment, so...
   fmla <- as.formula(fmla)
 
+  # expand "."
+  dotnames <- attr(x, "dotnames")
+  if(is.null(dotnames)) {
+    argu <- attr(x, "argu")
+    allvars <- names(x)
+    dotnames <- allvars[allvars != argu]
+    dotnames <- rev(dotnames) # convention
+  }
+  u <- as.call(lapply(c("cbind", dotnames), as.name))
+  fmla <- eval(substitute(substitute(fom, list(.=u)), list(fom=fmla)))
+
+  # extract LHS and RHS
   lhs <- fmla[[2]]
   rhs <- fmla[[3]]
 
@@ -104,22 +116,28 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL,
 
   nplots <- ncol(lhsdata)
 
-  if(is.null(lty))
-    lty <- 1:nplots
-  else if(length(lty) == 1)
-    lty <- rep(lty, nplots)
-  else if(length(lty) != nplots)
-    stop("Length of \`lty\' does not match number of curves to be plotted")
-  
-  if(is.null(col))
-    col <- 1:nplots
-  else if(length(col) == 1)
-    col <- rep(col, nplots)
-  else if(length(col) != nplots)
-    stop("Length of \`col\' does not match number of curves to be plotted")
+  # process lty, col, lwd arguments
+
+  fixit <- function(a, n, a0) {
+    if(is.null(a))
+      return(a0)
+    else if(length(a) == 1)
+      return(rep(a, n))
+    else if(length(a) != n)
+      stop(paste("Length of", deparse(substitute(a)),
+                 "does not match number of curves to be plotted"))
+    else 
+      return(a)
+  }
+
+  lty <- fixit(lty, nplots, 1:nplots)
+  col <- fixit(col, nplots, 1:nplots)
+  lwd <- fixit(lwd, nplots, rep(1, nplots))
+
+  # plot lines
   
   for(i in 1:nplots)
-    lines(rhsdata, lhsdata[,i], lty=lty[i], col=col[i])
+    lines(rhsdata, lhsdata[,i], lty=lty[i], col=col[i], lwd=lwd[i])
 
   if(nplots == 1)
     return(invisible(NULL))

@@ -5,7 +5,8 @@
   Plot method for the class \code{"fv"}.
 }
 \usage{
-plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
+plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
+           xlim, ylim, xlab, ylab, \dots)
 }
 \arguments{
   \item{x}{
@@ -27,6 +28,10 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
   \item{col}{
     (optional) numeric vector of values of the graphical parameter
     \code{col} controlling the colour of each plot.
+  }
+  \item{lwd}{
+    (optional) numeric vector of values of the graphical parameter
+    \code{lwd} controlling the line width of each plot.
   }
   \item{xlim}{
     (optional) range of x axis
@@ -68,6 +73,9 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
   Each of the variables \code{y1,y2,\ldots,yn} in turn will be plotted
   against \code{x}. 
   See the examples.
+
+  The symbol \code{.} can be used in \code{fmla} to represent all
+  the function values. See the examples.
 }
 \examples{
    data(cells)
@@ -79,6 +87,11 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, xlim, ylim, xlab, ylab, \dots)
    plot(K, sqrt(iso/pi) ~ r)   # plots sqrt(iso/r)  against r
 
    plot(K, cbind(iso,theo) ~ r)   # plots iso against r  AND theo against r
+
+   plot(K, .  ~ r)            # plots all available estimates of K against r
+
+   plot(K, sqrt(./pi) ~ r)   # plots all estimates of L-function
+                             # L(r) = sqrt(K(r)/pi)
 
    plot(K, cbind(iso,theo) ~ r, col=c(2,3))
                                    # plots iso against r  in colour 2

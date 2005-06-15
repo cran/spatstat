@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.4 $  $Date: 2004/10/21 18:34:30 $
+# $Revision: 1.5 $  $Date: 2005/06/12 20:31:20 $
 #
 #
 
@@ -89,3 +89,44 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=TRUE,
   }
   return(invisible())
 }
+
+print.plotppm <- function(x, ...) {
+  verifyclass(x, "plotppm")
+  trend   <- x$trend
+  cif     <- x$cif
+  mrkvals <- attr(x, "mrkvals")
+  ntypes  <- length(mrkvals)
+  unmarked <- (ntypes == 1 )
+  cat("Object of class \`plotppm\'\n")
+  if(unmarked)
+    cat("Computed for an unmarked point process\n")
+  else {
+    cat("Computed for a marked point process, with mark values:\n")
+    print(mrkvals)
+  }
+  cat("Contains the following components:\n")
+  if(!is.null(trend)) {
+    cat("\n$trend:\tFitted trend.\n")
+    if(unmarked) {
+      cat("A list containing 1 image\n")
+      print(trend[[1]], ...)
+    } else {
+      cat(paste("A list of", ntypes, "images\n"))
+      cat("Typical details:\n")
+      print(trend[[1]], ...)
+    }
+  }
+  if(!is.null(cif)) {
+    cat("\n$cif:\tFitted conditional intensity.\n")
+    if(unmarked) {
+      cat("A list containing 1 image\n")
+      print(cif[[1]], ...)
+    } else {
+      cat(paste("A list of", ntypes, "images\n"))
+      cat("Typical details:\n")
+      print(cif[[1]], ...)
+    }
+  }
+  invisible(NULL)
+}
+

@@ -139,7 +139,8 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
                   "Kaplan-Meier estimate of G(r)",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
                   "uncorrected estimate of G(r)")
-        Z <- fv(Z, "r", "G(r)", "km", cbind(km, rs, theo) ~ r, alim, labl, desc)
+        Z <- fv(Z, "r", "G(r)", "km", . ~ r, alim, labl, desc)
+        attr(Z, "dotnames") <- c("km", "rs", "theo")
 	return(Z)
 }	
 

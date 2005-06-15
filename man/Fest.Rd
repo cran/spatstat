@@ -244,6 +244,10 @@ Fest(X, eps, breaks)
    # The empirical F is above the Poisson F
    # indicating an inhibited pattern
 
+   \dontrun{
+   plot(Fc, . ~ theo)
+   plot(Fc, asin(sqrt(.)) ~ asin(sqrt(theo)))
+   }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

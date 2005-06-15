@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.7 $	$Date: 2005/02/08 02:10:57 $
+#	$Revision: 1.8 $	$Date: 2005/06/08 18:09:25 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -139,16 +139,8 @@
                    "iso")
     }
 
-    # which corrections have been computed?
-    nama2 <- names(K)
-    corrxns <- rev(nama2[nama2 != "r"])
-
     # default is to display them all
-    attr(K, "fmla") <- deparse(as.formula(paste(
-                       "cbind(",
-                        paste(corrxns, collapse=","),
-                        ") ~ r")))
-
+    attr(K, "fmla") <- . ~ r
     return(K)
 }
 

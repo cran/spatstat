@@ -189,7 +189,7 @@ Baddeley, A.J. Spatial sampling and censoring.
  plot(K, main="K function for cells")
  # plot the L function
  plot(K, sqrt(iso/pi) ~ r)
- plot(K, cbind(r, sqrt(iso/pi)) ~ r, ylab="L(r)", main="L function for cells")
+ plot(K, sqrt(./pi) ~ r, ylab="L(r)", main="L function for cells")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
