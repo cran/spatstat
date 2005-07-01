@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.10 $  $Date: 2005/06/08 17:44:08 $
+#   $Revision: 1.12 $  $Date: 2005/06/30 07:59:55 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -11,30 +11,60 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                      start=NULL, control=list(nrep=1e5, expand=1.5)) {
 
   # determine type of simulation
-  if(inherits(Y, "ppm")) {
-    model <- Y
-    X <- data.ppm(model)
-    csr <- FALSE
-  } else if(inherits(Y, "ppp")) {
-    X <- Y
-    model <- ppm(Y, ~1, Poisson())
-    csr <- TRUE
-  } else 
-    stop("\`object\' should be a point process model or a point pattern")
-
-  metrop <- is.null(simulate)
-  if(!metrop) {
+  if(!is.null(simulate)) {
     csr <- FALSE
     model <- NULL
     if(!is.expression(simulate))
       stop("\`simulate\' should be an expression")
-  }
+    if(inherits(Y, "ppp"))
+      X <- Y
+    else if(inherits(Y, "ppm"))
+      X <- data.ppm(Y)
+    else stop("\`object\' should be a point process model or a point pattern")
+  } else if(inherits(Y, "ppm")) {
+    csr <- FALSE
+    model <- Y
+    X <- data.ppm(model)
+  } else if(inherits(Y, "ppp")) {
+    csr <- TRUE
+    X <- Y
+    rmhstuff <- !is.null(start) || !missing(control)
+    sY <- summary(Y)
+    Yintens <- sY$intensity
+    Ywin <- Y$window
+    Ymarx <- Y$marks
+    if(!is.marked(Y)) {
+      # unmarked point pattern
+      if(rmhstuff)
+        model <- ppm(Y, ~1, Poisson())
+      else {
+        model <- NULL
+        simulate <- expression(rpoispp(Yintens, win=Ywin))
+      }
+    } else {
+      if(rmhstuff) {
+        if(sY$is.multitype)
+          model <- ppm(Y, ~marks, Poisson())
+        else
+          stop("Sorry, ppm is not implemented for marked point patterns where the marks are not a factor")
+      } else {
+        model <- NULL
+        simulate <- expression({A <- rpoispp(Yintens, win=Ywin);
+                                A %mark% sample(Ymarx, A$n, replace=TRUE)})
+      }
+    }
+  } else 
+  stop("\`object\' should be a point process model or a point pattern")
 
+  metrop <- !is.null(model)
+  
   # validate other arguments
   if(is.character(fun))
     fun <- get(fun)
   if(!is.function(fun)) 
     stop("unrecognised format for function \`fun\'")
+  if(!("r" %in% names(formals(fun))))
+    stop("\`fun\' should have an argument called \`r\'")
 
   if((nrank %% 1) != 0)
     stop("nrank must be an integer")
@@ -49,14 +79,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   rvals <- funX[[argname]]
   fX    <- funX[[valname]]
 
-  # accelerate the simulations for the uniform Poisson process
-  if(csr && is.null(start) && is.null(control)) {
-    metrop <- FALSE
-    simulate <- expression(runifpoispp(lambda, win))
-    lambda <- summary(X)$intensity
-    win <- X$window
-  }
-  
   # initialise simulations
   if(metrop) {
     rmodel <- rmhmodel(model, verbose=FALSE)

@@ -7,7 +7,9 @@
 }
 \usage{
   Kinhom(X, lambda, r = NULL, breaks = NULL, slow = FALSE,
-    correction=c("border", "isotropic", "Ripley", "translate"), \dots)
+    correction=c("border", "bord.modif", "isotropic", "translate"),
+    \dots, lambda2
+)
 }
 \arguments{
   \item{X}{
@@ -20,8 +22,6 @@
   \item{lambda}{
     Vector of values of the estimated intensity function,
     evaluated at the points of the pattern \code{X}.
-    Alternatively this may be a matrix: 
-    see Details.
   }
   \item{r}{
     vector of values for the argument \eqn{r} at which
@@ -51,7 +51,14 @@
   \item{\dots}{
     Currently ignored.
   }
-} 
+  \item{lambda2}{
+    Advanced use only.
+    Matrix containing estimates of the products
+    \eqn{\lambda(x_i)\lambda(x_j)}{lambda(x[i]) * lambda(x[j])}
+    of the intensities at each pair of data points 
+    \eqn{x_i}{x[i]} and \eqn{x_j}{x[j]}. 
+  }
+}
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
   
@@ -111,16 +118,54 @@
   giving the (estimated) values of \eqn{\lambda(x_i)}{lambda(x[i])} for
   each point \eqn{x_i}{x[i]} of the pattern \eqn{x}.
 
-  Alternatively \code{lambda} may be a square matrix of dimensions
-  \eqn{n \times n}{n * n} where \eqn{n} is the number of points in
-  \code{X}. In this case \code{lambda[i,j]} will be interpreted
-  as an estimate of
-  \eqn{\lambda(x_i)\lambda(x_j)}{lambda(x[i]) * lambda(x[j])}.
-
   Edge corrections are used to correct bias in the estimation
-  of \eqn{K_{\rm inhom}}{Kinhom}, in exactly the same way
-  as for the classical \eqn{K} function.
-  See the documentation for \code{\link{Kest}}.
+  of \eqn{K_{\rm inhom}}{Kinhom}.
+  Each edge-corrected estimate of \eqn{K_{\rm inhom}(r)}{Kinhom(r)} is
+  of the form
+  \deqn{\widehat K_{\rm inhom}(r) = \sum_i \sum_j \frac{1\{d_{ij} \le
+      r\} e(x_i,x_j,r)}{\lambda(x_i)\lambda(x_j)}
+  }{K^inhom(r)= sum[i] sum[j] 1(d[i,j] <= r) * 
+    e(x[i],x[j],r)/(lambda(x[i]) * lambda(x[j]))
+  }
+  where \eqn{d_{ij}}{d[i,j]} is the distance between points
+  \eqn{x_i}{x[i]} and \eqn{x_j}{x[j]}, and
+  \eqn{e(x_i,x_j,r)}{e(x[i],x[j],r)} is
+  an edge correction factor. For the `border' correction,
+  \deqn{
+    e(x_i,x_j,r) =
+    \frac{1(b_i > r)}{\sum_j 1(b_j > r)/\lambda(x_j)}
+  }{
+    1(b[i] > r)/(sum[j] 1(b[j] > r)/lambda(x[j]))
+  }
+  where \eqn{b_i}{b[i]} is the distance from \eqn{x_i}{x[i]}
+  to the boundary of the window. For the `modified border'
+  correction, 
+  \deqn{
+    e(x_i,x_j,r) =
+    \frac{1(b_i > r)}{\mbox{area}(W \ominus r)}
+  }{
+    1(b[i] > r)/area(W [-] r)
+  }
+  where \eqn{W \ominus r}{W [-] r} is the eroded window obtained
+  by trimming a margin of width \eqn{r} from the border of the original
+  window.
+  For the `translation' correction,
+  \deqn{
+    e(x_i,x_j,r) =
+    \frac 1 {\mbox{area}(W \cap (W + (x_j - x_i)))}
+  }{
+    1/area(W intersect (W + x[j]-x[i]))
+  }
+  and for the `isotropic' correction,
+  \deqn{
+    e(x_i,x_j,r) =
+    \frac 1 {\mbox{area}(W) g(x_i,x_j)}
+  }{
+    1/(area(W) g(x[i],x[j]))
+  }
+  where \eqn{g(x_i,x_j)}{g(x[i],x[j])} is the fraction of the
+  circumference of the circle with centre \eqn{x_i}{x[i]} and radius
+  \eqn{||x_i - x_j||}{||x[i]-x[j]||} which lies inside the window.
   
   The pair correlation function can also be applied to the
   result of \code{Kinhom}; see \code{\link{pcf}}.

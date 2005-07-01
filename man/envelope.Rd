@@ -89,8 +89,15 @@
   
   The summary statistic \code{fun} is applied to each of these simulated
   patterns. Typically \code{fun} is one of the functions
-  \code{Kest}, \code{Gest}, \code{Fest}, \code{Jest} or \code{pcf}.
-  It can also be a home-made function; it should return an object
+  \code{Kest}, \code{Gest}, \code{Fest}, \code{Jest}, \code{pcf},
+  \code{Kcross}, \code{Kdot}, \code{Gcross}, \code{Gdot},
+  \code{Jcross}, \code{Jdot}, \code{Kmulti}, \code{Gmulti},
+  \code{Jmulti} or \code{Kinhom}. It may also be a character string
+  containing the name of one of these functions.
+
+  The statistic \code{fun} can also be a user-supplied function;
+  if so, then it must have arguments \code{X} and \code{r}
+  like those in the functions listed above, and it must return an object
   of class \code{"fv"}.
 
   Upper and lower pointwise envelopes are computed pointwise (i.e.
