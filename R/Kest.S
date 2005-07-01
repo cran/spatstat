@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.10 $	$Date: 2005/06/08 18:08:53 $
+#	$Revision: 5.11 $	$Date: 2005/06/20 16:50:49 $
 #
 #
 # -------- functions ----------------------------------------
@@ -50,9 +50,20 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         breaks <- handle.r.b.args(r, breaks, W)
         r <- breaks$r
 
+        correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
+        correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
+        correction.id <- pmatch(correction, correction.name)
+        if(any(nbg <- is.na(correction.id)))
+          stop(paste("unrecognised correction",
+                     if(sum(nbg) > 1) "s",
+                     ": ",
+                     paste(correction[nbg], collapse=", "),
+                     sep=""))
+        correction <- correction.list[correction.id]
+
         # available selection of edge corrections depends on window
         if(W$type != "rectangle") {
-           iso <- (correction == "isotropic") | (correction == "Ripley")
+           iso <- (correction == "isotropic") 
            if(any(iso)) {
              if(!missing(correction))
                warning("Isotropic correction not implemented for non-rectangular windows")
@@ -61,7 +72,9 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         }
 
         # recommended range of r values
-        alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+        alim <- c(0, min(max(r),
+                         diff(X$window$xrange)/4,
+                         diff(X$window$yrange)/4))
         
         # this will be the output data frame
         K <- data.frame(r=r, theo= pi * r^2)
@@ -108,7 +121,7 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
                          "translation-corrected estimate of K(r)",
                          "trans")
         }
-        if(any(correction == "isotropic" | correction == "Ripley")) {
+        if(any(correction == "isotropic")) {
           # Ripley isotropic correction
             edgewt <- edge.Ripley(X, d)
             wh <- whist(d[offdiag], breaks$val, edgewt[offdiag])

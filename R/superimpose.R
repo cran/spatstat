@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.4 $ $Date: 2004/08/26 08:36:55 $
+# $Revision: 1.5 $ $Date: 2005/07/01 07:30:25 $
 #
 # This has been taken out of ppp.S
 #
@@ -43,7 +43,7 @@
     if(is.null(nama) || any(nama == ""))
       return(OUT)
     # Patterns are named. Make marks from names.
-    len <- unlist(lapply(arglist, function(x) { x$n }))
+    len <- unlist(lapply(arglist, function(a) { length(a$x) }))
     M <- factor(rep(nama, len), levels=nama)
     OUT <- OUT %mark% M
     return(OUT)

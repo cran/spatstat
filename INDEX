@@ -23,6 +23,7 @@ bounding.box            Bounding Box of a Window
 bramblecanes            Hutchings' Bramble Canes data
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
+chorley                 Chorley-Ribble Cancer Data
 coef.ppm                Coefficients of Fitted Point Process Model
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors

@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.6 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 1.7 $	$Date: 2005/06/29 06:37:46 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -94,8 +94,9 @@ function(bmax, npos, bstep) {
     # it's a vector
       if(X[2] != 0)
         stop("breakpoints do not satisfy breaks[2] = 0")
+      # The following test for equal spacing is used in hist.default
       steps <- diff(X)
-      if(all(steps == mean(steps)))
+      if(diff(range(steps)) < 1e-07 * mean(steps))
         # equally spaced
         return(breakpts(X, max(X), TRUE, length(X)-2, steps[1]))
       else

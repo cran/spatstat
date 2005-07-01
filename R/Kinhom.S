@@ -1,12 +1,11 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.8 $	$Date: 2005/06/08 18:09:25 $
+#	$Revision: 1.10 $	$Date: 2005/06/29 07:30:00 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
-#       Currently uses border method and slow code...
-#                       
+#
 #       Reference:
 #            Non- and semiparametric estimation of interaction
 #	     in inhomogeneous point patterns
@@ -24,9 +23,7 @@
 #
 #	r		distance values at which to compute K	
 #
-#       lambda          either a vector of intensity values for points of X
-#                       or a matrix of two-point conditional intensities
-#                       for pairs of points of X
+#       lambda          vector of intensity values for points of X
 #
 # -------- standard output ------------------------------
 #      A data frame (class "fv") with columns named
@@ -49,7 +46,8 @@
 
 "Kinhom"<-
   function (X, lambda, r = NULL, breaks = NULL, slow=FALSE,
-         correction=c("border", "isotropic", "Ripley", "translate"), ...)
+         correction=c("border", "bord.modif", "isotropic", "translate"), ...,
+            lambda2=NULL)
 {
     verifyclass(X, "ppp")
     W <- X$window
@@ -57,16 +55,35 @@
     area <- area.owin(W)
     breaks <- handle.r.b.args(r, breaks, X$window)
     r <- breaks$r
-    if(is.vector(lambda)) {
-      if (length(lambda) != npoints) 
-        stop("The length of the vector \'lambda\' should equal the number of data points")
+    
+    if(!is.vector(lambda))
+      stop("\`lambda\' should be a vector")
+    if(length(lambda) != npoints) 
+      stop("The length of \'lambda\' should equal the number of data points")
+    if(is.null(lambda2))
       weight <- 1/outer(lambda, lambda, "*")
-    } else if(is.matrix(lambda)) {
-      if(any(dim(lambda) != npoints))
-        stop("The matrix \'lambda\' should be n x n where n is the number of data points")
-      weight <- 1/lambda
-    }
-
+    else {
+      if(!is.matrix(lambda2))
+        stop("lambda2 should be a matrix")
+      if(nrow(lambda2) != ncol(lambda2))
+        stop("lambda2 should be a square matrix")
+      if(nrow(lambda2) != npoints)
+        stop("Dimensions of lambda2 do not match number of data points")
+      weight <- 1/lambda2
+    } 
+    
+    # match corrections
+    correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
+    correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
+    correction.id <- pmatch(correction, correction.name)
+    if(any(nbg <- is.na(correction.id)))
+      stop(paste("unrecognised correction",
+                 if(sum(nbg) > 1) "s",
+                 ": ",
+                 paste(correction[nbg], collapse=", "),
+                 sep=""))
+    correction <- correction.list[correction.id]
+    
     # available selection of edge corrections depends on window
     if(W$type != "rectangle") {
       iso <- (correction == "isotropic") | (correction == "Ripley")
@@ -97,16 +114,15 @@
       # Ignore pairs (i,i)
       diag(d) <- Inf
       # apply reduced sample algorithm
-      RS <- Kwtsum(d, b, weight, breaks, slow)
+      RS <- Kwtsum(d, b, weight, 1/lambda, breaks, slow)
       if(any(correction == "border")) {
-        Kb <- area * RS$numerator/RS$denom.sum
+        Kb <- RS$ratio
         K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
                      "border-corrected estimate of K(r)",
                      "border")
       }
       if(any(correction == "bord.modif")) {
-        denom.area <- eroded.areas(W, r)
-        Kbm <- RS$numerator/denom.area
+        Kbm <- RS$numerator/eroded.areas(W, r)
         K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
                      "modified border-corrected estimate of K(r)",
                      "bord.modif")
@@ -145,14 +161,15 @@
 }
 
 
-Kwtsum <- function(d, b, weight, breaks, slow=FALSE) {
+Kwtsum <- function(d, b, weight, weightmargin, breaks, slow=FALSE) {
   #
-  # "internal" routine to compute border-correction estimate of Kinhom
+  # "internal" routine to compute border-correction estimates of Kinhom
   #
   # d : matrix of pairwise distances
   #                  (to exclude diagonal entries, set diag(d) = Inf)
   # b : column vector of distances to window boundary
   # weight: matrix of weights for x[i], x[j] pairs
+  # weightmargin: vector of weights for x[i]
   # breaks : breakpts object
   #
 
@@ -165,22 +182,20 @@ Kwtsum <- function(d, b, weight, breaks, slow=FALSE) {
   if(length(b) != nrow(d))
     stop("length(b) does not match nrow(d)")
   
-  weightmargin <- matrowsum(weight)
-
   if(slow) { ########## slow ##############
           
        r <- breaks$r
        
        nr <- length(r)
        numerator <- numeric(nr)
-       denom.sum <- numeric(nr)
+       denominator <- numeric(nr)
 
        for(i in 1:nr) {
          close <- (d <= r[i])
          numer <- matrowsum(close * weight) # assumes diag(d) set to Inf
          bok <- (b > r[i])
          numerator[i] <- sum(numer[bok])
-         denom.sum[i] <- sum(weightmargin[bok])
+         denominator[i] <- sum(weightmargin[bok])
        }
 	
   } else { ############# fast ####################
@@ -198,15 +213,16 @@ Kwtsum <- function(d, b, weight, breaks, slow=FALSE) {
         # go
         RS <- reduced.sample(nco, cen, ncc, show=TRUE)
         # extract results
-        numerator <- RS$numerator
-        denom.sum <- RS$denominator
+        numerator   <- RS$numerator
+        denominator <- RS$denominator
+        ratio        <- RS$numerator/RS$denominator
         # check
         if(length(numerator) != breaks$ncells)
           stop("internal error: length(numerator) != breaks$ncells")
-        if(length(denom.sum) != breaks$ncells)
+        if(length(denominator) != breaks$ncells)
           stop("internal error: length(denom.count) != breaks$ncells")
   }
   
-  return(list(numerator=numerator, denom.sum=denom.sum))
+  return(list(numerator=numerator, denominator=denominator, ratio=ratio))
 }
 	
