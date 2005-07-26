@@ -32,16 +32,12 @@
   \code{\link{im}}. They are also returned by the functions
   \code{\link{Kmeasure}} and
   \code{\link{setcov}}.
-
-  Image objects may be displayed using the methods
+  They may be displayed using the methods
   \code{\link{plot.im}}, \code{image.im}, \code{persp.im}
   and \code{contour.im}.
   Values of an image may be looked-up using
   \code{lookup.im} or using the subset operator \code{\link{[.im}}.
-  Calculations involving one or more images (for example,
-  subtracting one image from another) can often be done
-  easily using \code{\link{eval.im}}.
-  
+
   Note that the \bold{row} index of the matrix \code{v} corresponds
   to increasing \bold{y} coordinate, while the column index of \code{m}
   corresponds to increasing \bold{x} coordinate. Thus a correct
@@ -51,10 +47,7 @@
 \seealso{
   \code{\link{im}},
   \code{\link{Kmeasure}},
-  \code{\link{setcov}},
-  \code{\link{plot.im}},
-  \code{\link{eval.im}},
-  \code{\link{lookup.im}}
+  \code{\link{setcov}}
 }
 \section{Warnings}{
   The internal representation of images is likely to change in the

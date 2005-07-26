@@ -117,8 +117,6 @@ letterR                 Window in Shape of Letter R
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
-markstat                Summarise Marks in Every Neighbourhood in a
-                        Point Pattern
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model

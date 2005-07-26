@@ -1,16 +1,14 @@
 # 	applynbd.R
 #
-#     $Revision: 1.7 $     $Date: 2005/08/10 07:49:48 $
+#     $Revision: 1.5 $     $Date: 2005/05/19 23:40:11 $
 #
-#  applynbd()
+#
 # For each point, identify either
 #	 - all points within distance R
 #        - the closest N points  
 #        - those points satisfying some constraint
 # and apply the function FUN to them
 #
-#  markstat()
-#      simple application of applynbd
 #################################################################
 
 
@@ -71,18 +69,3 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
      return(result)
 }
 
-
-markstat <- function(X, fun, N, R, ...) {
-  verifyclass(X, "ppp")
-  stopifnot(is.function(fun))
-  if(!missing(R) && !missing(N))
-    stop("Do not specify both R and N")
-  if(missing(R) && missing(N))
-    stop("either R or N should be given")
-  statfun <- function(Y, current, dists, dranks, func, ...)
-    { func(Y$marks, ...) }
-  if(!missing(R))
-    applynbd(X, statfun, R=R, func=fun, ...)
-  else
-    applynbd(X, statfun, N=N, func=fun, ...)
-}

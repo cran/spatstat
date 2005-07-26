@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.13 $	$Date: 2005/09/08 09:47:34 $
+#	$Revision: 5.12 $	$Date: 2005/07/21 09:11:32 $
 #
 #
 # -------- functions ----------------------------------------
@@ -50,7 +50,6 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         breaks <- handle.r.b.args(r, breaks, W)
         r <- breaks$r
 
-        correction.given <- !missing(correction)
         correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
         correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
         correction.id <- pmatch(correction, correction.name)
@@ -66,7 +65,7 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         if(W$type != "rectangle") {
            iso <- (correction == "isotropic") 
            if(any(iso)) {
-             if(correction.given)
+             if(!missing(correction))
                warning("Isotropic correction not implemented for non-rectangular windows")
              correction <- correction[!iso]
            }

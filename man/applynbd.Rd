@@ -113,13 +113,10 @@
   with each argument named explicitly. Care is required when writing the
   function \code{FUN} to ensure that
   the arguments will match up. See the Examples.
-
-  See \code{\link{markstat}} for a common use of this function.
 }
 \seealso{
   \code{\link{ppp.object}},
-  \code{\link{apply}},
-  \code{\link{markstat}}
+  \code{\link{apply}}
 }
 \examples{
   data(redwood)
@@ -141,7 +138,6 @@
 	longleaf <- longleaf[seq(1, longleaf$n, by=80)]
   }
   # compute the median of the marks of all neighbours of a point
-  # (see also 'markstat')
   dbh.med <- applynbd(longleaf, R=40, exclude=TRUE,
                  function(Y, ...) { median(Y$marks)})
 

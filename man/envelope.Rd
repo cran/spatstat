@@ -124,10 +124,7 @@
   by running the Metropolis-Hastings algorithm \code{\link{rmh}}.
   Complete control over this algorithm is provided by the 
   arguments \code{start} and \code{control} which are passed
-  to \code{\link{rmh}}.
-
-  Selecting only a single edge
-  correction will make the code run much faster.
+  to \code{\link{rmh}}. 
 }
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.

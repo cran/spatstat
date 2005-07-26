@@ -227,7 +227,6 @@
 }
 \seealso{
  \code{\link{diagnose.ppm}},
- \code{\link{lurking}},
  \code{\link{residuals.ppm}},
  \code{\link{eem}},
  \code{\link{ppm.object}},
