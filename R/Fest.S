@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.9 $	$Date: 2005/06/08 18:01:03 $
+#	$Revision: 4.10 $	$Date: 2005/07/21 10:27:39 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -74,7 +74,7 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
                   "Kaplan-Meier estimate of F(r)",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
                   "uncorrected estimate of F(r)")
-        Z <- fv(Z, "r", "F(r)", "km", . ~ r, alim, labl, desc)
+        Z <- fv(Z, "r", substitute(F(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
 	return(Z)
 }

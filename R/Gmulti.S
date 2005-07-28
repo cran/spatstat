@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.7 $	$Date: 2005/05/05 01:18:21 $
+#	$Revision: 4.8 $	$Date: 2005/07/21 10:26:37 $
 #
 ################################################################################
 
@@ -33,7 +33,9 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
 	J <- (X$marks == j)
 	if(sum(J) == 0) stop("No points are of type j")
 #
-	Gmulti(X, I, J, r, breaks)
+	result <- Gmulti(X, I, J, r, breaks)
+        attr(result, "ylab") <- substitute(Gcross(r), NULL)
+        result
 }	
 
 "Gdot" <- 	
@@ -56,7 +58,9 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 	if(sum(I) == 0) stop("No points are of type i")
 	J <- rep(TRUE, X$n)	# i.e. all points
 # 
-	Gmulti(X, I, J, r, breaks)
+	result <- Gmulti(X, I, J, r, breaks)
+        attr(result, "ylab") <- substitute(Gdot(r), NULL)
+        result
 }	
 
 	
@@ -139,7 +143,7 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
                   "Kaplan-Meier estimate of G(r)",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
                   "uncorrected estimate of G(r)")
-        Z <- fv(Z, "r", "G(r)", "km", . ~ r, alim, labl, desc)
+        Z <- fv(Z, "r", substitute(Gmulti(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
 	return(Z)
 }	

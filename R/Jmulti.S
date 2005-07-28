@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.8 $	$Date: 2005/06/08 18:07:57 $
+#	$Revision: 4.10 $	$Date: 2005/07/21 10:29:01 $
 #
 #
 #
@@ -25,6 +25,7 @@ function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL) {
         I <- (X$marks == i)
         J <- (X$marks == j)
         result <- Jmulti(X, I, J, eps, r, breaks)
+        attr(result, "ylab") <- substitute(Jcross(r), NULL)
 	return(result)
 }
 
@@ -46,6 +47,7 @@ function(X, i=1, eps=NULL, r=NULL, breaks=NULL) {
         I <- (X$marks == i)
         J <- rep(TRUE, X$n)
         result <- Jmulti(X, I, J, eps, r, breaks)
+        attr(result, "ylab") <- substitute(Jdot(r), NULL)
 	return(result)
 }
 
@@ -81,17 +83,17 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
 	Jun <- ratio(1-GIJ$raw, 1-FJ$raw, NA)
         theo <- rep(1, length(FJ$r))
         
-	result <- data.frame(r=FJ$r,theo=theo,rs=Jrs,km=Jkm,un=Jun)
+	result <- data.frame(r=FJ$r,theo=theo,un=Jun,rs=Jrs,km=Jkm)
 
         alim <- range(result$r[FJ$km <= 0.9])
-        labl <- c("r", "Jpois(r)", "Jbord(r)", "Jkm(r)", "Jun(r)")
+        labl <- c("r", "Jpois(r)", "Jun(r)", "Jbord(r)", "Jkm(r)")
         desc <- c("distance argument r",
                   "theoretical Poisson J(r)=1",
+                  "uncorrected estimate of J(r)",
                   "border corrected estimate of J(r)",
-                  "Kaplan-Meier estimate of J(r)",
-                  "uncorrected estimate of J(r)")
+                  "Kaplan-Meier estimate of J(r)")
         Z <- fv(result,
-                "r", "J(r)", "km", . ~ r, alim, labl, desc)
+                "r", substitute(Jmulti(r), NULL), "km", . ~ r, alim, labl, desc)
         
         attr(Z, "G") <- GIJ
         attr(Z, "F") <- FJ

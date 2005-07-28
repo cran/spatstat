@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.11 $   $Date: 2005/02/08 02:11:39 $
+#    $Revision: 1.12 $   $Date: 2005/07/21 09:06:24 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -36,7 +36,8 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   stopifnot(is.data.frame(x))
   # check arguments
   stopifnot(is.character(argu))
-  if(!is.null(ylab)) stopifnot(is.character(ylab))
+  if(!is.null(ylab))
+    stopifnot(is.character(ylab) || is.language(ylab))
   stopifnot(is.character(valu))
   
   if(!(argu %in% names(x)))
@@ -102,8 +103,11 @@ print.fv <- function(x, ...) {
   nama <- names(x)
   a <- attributes(x)
   cat("Function value object (class \"fv\")\n")
-  if(!is.null(a$ylab))
-    cat(paste("for the function", a$argu, "->", a$ylab, "\n"))
+  if(!is.null(ylab <- a$ylab)) {
+    if(is.language(ylab))
+      ylab <- deparse(ylab)
+    cat(paste("for the function", a$argu, "->", ylab, "\n"))
+  }
   cat("Entries:\n")
   len <- nchar(a$labl)
   tabjump <- max(c(len, 5)) + 3

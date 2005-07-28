@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.8 $	$Date: 2005/06/08 18:10:21 $
+#	$Revision: 5.9 $	$Date: 2005/07/21 10:20:55 $
 #
 #
 # -------- functions ----------------------------------------
@@ -57,7 +57,9 @@ function(X, i=1, j=2, r=NULL, breaks=NULL,
 	if(!any(I)) stop(paste("No points have mark i =", i))
 	if(!any(J)) stop(paste("No points have mark j =", j))
 	
-	Kmulti(X, I, J, r, breaks)
+	result <- Kmulti(X, I, J, r, breaks)
+        attr(result, "ylab") <- substitute(Kcross(r), NULL)
+        result
 }
 
 "Kdot" <- 
@@ -73,7 +75,9 @@ function(X, i=1, r=NULL, breaks=NULL,
 	
 	if(!any(I)) stop(paste("No points have mark i =", i))
 	
-	Kmulti(X, I, J, r, breaks)
+	result <- Kmulti(X, I, J, r, breaks)
+        attr(result, "ylab") <- substitute(Kdot(r), NULL)
+        result
 }
 
 
@@ -125,7 +129,8 @@ function(X, I, J, r=NULL, breaks=NULL,
         # It will be given more columns later
         K <- data.frame(r=r, theo= pi * r^2)
         desc <- c("distance argument r", "theoretical Poisson K(r)")
-        K <- fv(K, "r", "K(r)", "theo", , alim, c("r","Kpois(r)"), desc)
+        K <- fv(K, "r", substitute(Kmulti(r), NULL),
+                "theo", , alim, c("r","Kpois(r)"), desc)
 
 # interpoint distances		
 	d <- crossdist(x[I], y[I], x[J], y[J])

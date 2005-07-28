@@ -12,7 +12,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips -o Intro.ps Intro.dvi
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2005.07.01:1619
+%DVIPSSource:  TeX output 2005.07.22:1529
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -4383,10 +4383,10 @@ rf /Fr 128[49 2[98 49 43 51 51 70 51 54 38 38 38 51 54
 139[41 41 43 14[46 58 51 31[79 65[{}7 90.9091 /CMBX10
 rf /Fw 139[62 62 2[62 14[62 55[62 62 40[{}6 119.552 /CMTT12
 rf /Fx 134[62 2[62 65 1[46 46 2[59 65 1[33 2[33 2[36
-52 65 2[59 12[85 1[86 15[83 88 9[59 59 4[59 2[33 39 45[{}22
-119.552 /CMR12 rf /Fy 139[89 89 2[89 14[89 97[{}4 172.188
-/CMTT12 rf /Fz 138[88 61 1[61 2[79 88 4[43 4[88 70 25[56
-73[{}9 172.188 /CMR17 rf end
+52 65 2[59 12[85 1[86 15[83 88 10[59 4[59 59 1[33 39
+45[{}22 119.552 /CMR12 rf /Fy 139[89 89 2[89 14[89 97[{}4
+172.188 /CMTT12 rf /Fz 138[88 61 1[61 2[79 88 4[43 4[88
+70 25[56 73[{}9 172.188 /CMR17 rf end
 %%EndProlog
 %%BeginSetup
 %%Feature: *Resolution 600dpi
@@ -4396,8 +4396,8 @@ TeXDict begin
 %%EndSetup
 %%Page: 1 1
 1 0 bop 1035 951 a Fz(In)l(tro)t(duction)52 b(to)g Fy(spatstat)1078
-1246 y Fx(Adrian)37 b(Baddeley)h(and)h(Rolf)f(T)-10 b(urner)1355
-1476 y Fw(spatstat)35 b Fx(v)m(ersion)i(1.6-7)1743 1844
+1246 y Fx(Adrian)37 b(Baddeley)h(and)h(Rolf)f(T)-10 b(urner)1326
+1476 y Fw(spatstat)35 b Fx(v)m(ersion)i(1.6-10)1743 1844
 y Fv(Abstract)704 2012 y Fu(spatstat)e Ft(is)j(a)g(library)f(in)g
 Fs(S-PLUS)p Ft(/)p Fs(R)f Ft(for)i(the)f(statistical)k(analysis)d(of)
 568 2125 y(p)s(oin)m(t)24 b(pattern)h(data.)40 b(This)24
@@ -6301,57 +6301,58 @@ W
 (of)g(p)s(oin)m(t)h(patterns)469 4139 y Fn(\017)49 b
 Fr(exploratory)33 b(data)f(analysis)469 4342 y Fn(\017)49
 b Fr(sim)m(ulation)33 b(of)g(p)s(oin)m(t)f(pro)s(cess)i(mo)s(dels)469
-4546 y Fn(\017)49 b Fr(parametric)33 b(mo)s(del-\014tting)324
-4749 y(The)38 b(p)s(oin)m(t)g(pro)s(cess)h(mo)s(dels)f(to)f(b)s(e)h
-(\014tted)g(ma)m(y)g(b)s(e)g(quite)g(general)g(Gibbs/Mark)m(o)m(v)324
-4869 y(mo)s(dels;)30 b(they)f(ma)m(y)g(include)g(spatial)g(trend,)g
-(dep)s(endence)i(on)c(co)m(v)-5 b(ariates,)30 b(and)e(in)m(ter-)324
-4990 y(p)s(oin)m(t)37 b(in)m(teractions)h(of)e(an)m(y)h(order)g(\(i.e.)
-g(not)g(restricted)h(to)e(pairwise)i(in)m(teractions\).)1918
+4546 y Fn(\017)49 b Fr(parametric)33 b(mo)s(del-\014tting)469
+4749 y Fn(\017)49 b Fr(residuals)34 b(and)e(diagnostic)i(plots)1918
 5251 y(2)p eop
 %%Page: 3 3
-3 2 bop 324 548 a Fr(Mo)s(dels)35 b(are)e(sp)s(eci\014ed)j(b)m(y)f(a)f
+3 2 bop 324 548 a Fr(The)38 b(p)s(oin)m(t)g(pro)s(cess)h(mo)s(dels)f
+(to)f(b)s(e)h(\014tted)g(ma)m(y)g(b)s(e)g(quite)g(general)g(Gibbs/Mark)
+m(o)m(v)324 668 y(mo)s(dels;)30 b(they)f(ma)m(y)g(include)g(spatial)g
+(trend,)g(dep)s(endence)i(on)c(co)m(v)-5 b(ariates,)30
+b(and)e(in)m(ter-)324 789 y(p)s(oin)m(t)37 b(in)m(teractions)h(of)e(an)
+m(y)h(order)g(\(i.e.)g(not)g(restricted)h(to)e(pairwise)i(in)m
+(teractions\).)324 909 y(Mo)s(dels)d(are)e(sp)s(eci\014ed)j(b)m(y)f(a)f
 Fp(formula)h Fr(in)f(the)h Fo(S)f Fr(language,)g(and)g(are)g(\014tted)g
-(using)h(a)324 668 y(single)e(function)g Fp(ppm)h Fr(analogous)e(to)g
-Fp(glm)i Fr(and)e Fp(gam)p Fr(.)470 789 y(This)k(do)s(cumen)m(t)f(is)g
+(using)h(a)324 1029 y(single)e(function)g Fp(ppm)h Fr(analogous)e(to)g
+Fp(glm)i Fr(and)e Fp(gam)p Fr(.)470 1150 y(This)k(do)s(cumen)m(t)f(is)g
 (an)f(in)m(tro)s(duction)h(to)f(the)h(main)f(features)h(of)f
-Fp(spatstat)i Fr(and)324 909 y(its)i(use.)59 b(Please)39
+Fp(spatstat)i Fr(and)324 1270 y(its)i(use.)59 b(Please)39
 b(see)g(the)f(\\)p Fp(spatstat)h Fr(Quic)m(k)g(Reference")g(page)e(for)
-g(an)h(annotated)324 1029 y(list)c(of)g(all)f(functions)i(in)f(the)g
+g(an)h(annotated)324 1391 y(list)c(of)g(all)f(functions)i(in)f(the)g
 (library)-8 b(.)48 b(See)35 b(the)f(online)h(help)f(or)g(prin)m(ted)h
-(man)m(ual)f(for)324 1150 y(detailed)f(information)g(ab)s(out)f(eac)m
-(h)h(function.)324 1439 y Fm(Demonstration)324 1623 y
+(man)m(ual)f(for)324 1511 y(detailed)f(information)g(ab)s(out)f(eac)m
+(h)h(function.)324 1800 y Fm(Demonstration)324 1985 y
 Fr(Y)-8 b(ou)42 b(ma)m(y)g(lik)m(e)i(to)d(try)i(the)f(follo)m(wing)g
 (quic)m(k)i(demonstration)f(of)f(the)g(pac)m(k)-5 b(age.)73
-b(A)324 1744 y(more)33 b(extensiv)m(e)i(demonstration)f(can)f(b)s(e)f
+b(A)324 2105 y(more)33 b(extensiv)m(e)i(demonstration)f(can)f(b)s(e)f
 (seen)i(b)m(y)g(t)m(yping)f Fp(demo\(spatstat\))p Fr(.)520
-1957 y Fp(library\(spatstat\))1096 b Fo(A)m(ttach)33
-b Fp(spatstat)i Fo(lib)m(ra)m(ry)520 2077 y Fp(data\(swedishpines\))
+2318 y Fp(library\(spatstat\))1096 b Fo(A)m(ttach)33
+b Fp(spatstat)i Fo(lib)m(ra)m(ry)520 2438 y Fp(data\(swedishpines\))
 1045 b Fo(Find)33 b(\\Sw)m(edish)g(Pines")g(dataset)520
-2198 y Fp(X)51 b(<-)h(swedishpines)1095 b Fo(Rename)32
-b(it)520 2318 y Fp(plot\(X\))1606 b Fo(Plot)32 b(it)520
-2438 y Fp(summary\(X\))1453 b Fo(Print)33 b(a)f(useful)h(summa)m(ry)g
-(of)f(it)520 2559 y Fp(K)51 b(<-)h(Kest\(X\))1350 b Fo(Estimate)33
-b(its)g Fl(K)40 b Fo(function)520 2679 y Fp(plot\(K\))1606
+2559 y Fp(X)51 b(<-)h(swedishpines)1095 b Fo(Rename)32
+b(it)520 2679 y Fp(plot\(X\))1606 b Fo(Plot)32 b(it)520
+2799 y Fp(summary\(X\))1453 b Fo(Print)33 b(a)f(useful)h(summa)m(ry)g
+(of)f(it)520 2920 y Fp(K)51 b(<-)h(Kest\(X\))1350 b Fo(Estimate)33
+b(its)g Fl(K)40 b Fo(function)520 3040 y Fp(plot\(K\))1606
 b Fo(Plot)32 b(the)h(estimated)h Fl(K)40 b Fo(function)520
-2799 y Fp(plot\(allstats\(X\)\))1096 b Fo(Plot)32 b(the)h
+3161 y Fp(plot\(allstats\(X\)\))1096 b Fo(Plot)32 b(the)h
 Fl(F)s(;)17 b(G;)g(J)41 b Fo(and)32 b Fl(K)40 b Fo(functions)520
-2920 y Fp(fit)52 b(<-)g(ppm\(X,)h(~1,)f(Strauss\(r=7\)\))377
+3281 y Fp(fit)52 b(<-)g(ppm\(X,)h(~1,)f(Strauss\(r=7\)\))377
 b Fo(Fit)33 b(a)f(Strauss)i(p)m(ro)s(cess)g(mo)s(del)520
-3040 y Fp(fit)1810 b Fo(Describ)s(e)34 b(the)f(\014tted)g(mo)s(del)520
-3161 y Fp(Xsim)52 b(<-)g(rmh\(model=fit,)930 3281 y
-(start=list\(n.start=X$n\),)930 3401 y(control=list\(nrep=1e4\)\))380
-b Fo(Simulate)33 b(from)f(\014tted)i(mo)s(del)520 3522
+3401 y Fp(fit)1810 b Fo(Describ)s(e)34 b(the)f(\014tted)g(mo)s(del)520
+3522 y Fp(Xsim)52 b(<-)g(rmh\(model=fit,)930 3642 y
+(start=list\(n.start=X$n\),)930 3762 y(control=list\(nrep=1e4\)\))380
+b Fo(Simulate)33 b(from)f(\014tted)i(mo)s(del)520 3883
 y Fp(plot\(Xsim\))1453 b Fo(Plot)32 b(simulated)h(pattern)520
-3642 y Fp(data\(demopat\))1300 b Fo(Arti\014cial)33 b(data)f(in)h
-(irregula)m(r)2483 3762 y(windo)m(w,)g(with)g(2)f(t)m(yp)s(es)h(of)f(p)
-s(oints)520 3883 y Fp(plot\(demopat,)55 b(box=FALSE\))735
-b Fo(Plot)32 b(the)h(pattern)520 4003 y Fp(plot\(alltypes\(demopat,)57
+4003 y Fp(data\(demopat\))1300 b Fo(Arti\014cial)33 b(data)f(in)h
+(irregula)m(r)2483 4124 y(windo)m(w,)g(with)g(2)f(t)m(yp)s(es)h(of)f(p)
+s(oints)520 4244 y Fp(plot\(demopat,)55 b(box=FALSE\))735
+b Fo(Plot)32 b(the)h(pattern)520 4364 y Fp(plot\(alltypes\(demopat,)57
 b("K"\)\))529 b Fo(Plot)32 b(a)m(rra)m(y)h(of)f(cross-t)m(yp)s(e)h
-Fl(K)40 b Fo(functions)520 4124 y Fp(pfit)52 b(<-)g(ppm\(demopat,)691
-4244 y(~marks)h(+)f(polynom\(x,2\),)i(Poisson\(\)\))103
+Fl(K)40 b Fo(functions)520 4485 y Fp(pfit)52 b(<-)g(ppm\(demopat,)691
+4605 y(~marks)h(+)f(polynom\(x,2\),)i(Poisson\(\)\))103
 b Fo(Fit)33 b(inhomogeneous)g(multit)m(yp)s(e)g(P)m(oisson)2515
-4364 y(p)s(oint)f(p)m(ro)s(cess)i(mo)s(del)520 4485 y
+4726 y(p)s(oint)f(p)m(ro)s(cess)i(mo)s(del)520 4846 y
 Fp(plot\(pfit\))1453 b Fo(Plot)32 b(the)h(\014tted)h(intensit)m(y)f
 (surface)1918 5251 y Fr(3)p eop
 %%Page: 4 4
@@ -90135,15 +90136,14 @@ b(ranslate)34 b(the)f(windo)m(w)h(in)e(the)h(plane)374
 (transformation)374 4031 y Fp(complement.owin)103 b Fr(In)m(v)m(ert)34
 b(\(inside)g Fn($)e Fr(outside\))374 4152 y Fp(is.subset.owin)154
 b Fr(T)-8 b(est)34 b(whether)g(one)f(windo)m(w)h(con)m(tains)f(another)
-374 4272 y Fp(trim.owin)409 b Fr(In)m(tersect)35 b(a)d(windo)m(w)i
-(with)f(a)g(rectangle)374 4392 y Fp(intersect.owin)154
-b Fr(In)m(tersection)35 b(of)d(t)m(w)m(o)h(windo)m(ws)374
-4513 y Fp(union.owin)358 b Fr(Union)33 b(of)f(t)m(w)m(o)h(windo)m(ws)
-374 4633 y Fp(ripras)562 b Fr(Estimate)34 b(the)f(windo)m(w,)h(giv)m
-(en)g(only)f(the)g(p)s(oin)m(ts)470 4747 y(Just)42 b(for)f(fun,)i(w)m
-(e)f(pro)m(vide)h(the)e(dataset)h Fp(letterR)p Fr(,)h(a)e(p)s(olygonal)
-g(windo)m(w)h(ap-)324 4867 y(pro)m(ximating)33 b(the)g(shap)s(e)g(of)f
-(the)h Fo(R)g Fr(logo.)1894 5251 y(15)p eop
+374 4272 y Fp(intersect.owin)154 b Fr(In)m(tersection)35
+b(of)d(t)m(w)m(o)h(windo)m(ws)374 4392 y Fp(union.owin)358
+b Fr(Union)33 b(of)f(t)m(w)m(o)h(windo)m(ws)374 4513
+y Fp(ripras)562 b Fr(Estimate)34 b(the)f(windo)m(w,)h(giv)m(en)g(only)f
+(the)g(p)s(oin)m(ts)470 4626 y(Just)42 b(for)f(fun,)i(w)m(e)f(pro)m
+(vide)h(the)e(dataset)h Fp(letterR)p Fr(,)h(a)e(p)s(olygonal)g(windo)m
+(w)h(ap-)324 4747 y(pro)m(ximating)33 b(the)g(shap)s(e)g(of)f(the)h
+Fo(R)g Fr(logo.)1894 5251 y(15)p eop
 %%Page: 16 16
 16 15 bop 324 548 a Fk(Digital)38 b(appro)m(ximations:)324
 733 y Fr(It)h(is)h(p)s(ossible)h(\(and)e(sometimes)i(necessary\))h(to)d
@@ -90825,7 +90825,7 @@ y Fr(F)-8 b(or)32 b(a)g(quic)m(k)j(\014rst)e(analysis)h(of)e(a)g(p)s
 631 3524 y Fp(plot\(allstats\(X\)\))324 3728 y Fr(whic)m(h)h(plots)e
 (estimates)i(of)e(the)h Fl(F)s(;)17 b(G;)g(J)39 b Fr(and)32
 b Fl(K)38 b Fr(functions)32 b(in)g(a)f(single)h(displa)m(y)-8
-b(.)45 b(See)324 3848 y(section)33 b(4.8)g(for)f(more)h(information)f
+b(.)45 b(See)324 3848 y(section)33 b(4.9)g(for)f(more)h(information)f
 (on)g Fp(allstats)p Fr(.)1894 5251 y(20)p eop
 %%Page: 21 21
 21 20 bop 762 3854 a @beginspecial 18 @llx 18 @lly 577
@@ -92144,77 +92144,91 @@ s(es)i(of)324 1827 y(the)d Fl(K)44 b Fr(functions)38
 b(for)f(99)f(sim)m(ulated)j(realisations)f(of)e(a)h(completely)i
 (random)e(\(uni-)324 1947 y(form)27 b(P)m(oisson\))i(p)s(oin)m(t)e(pro)
 s(cess.)43 b(This)29 b(can)e(b)s(e)h(done)g(with)f(the)h(command)g
-Fp(envelope)p Fr(.)324 2236 y Fm(4.6)135 b(Pixel)46 b(images)324
-2421 y Fr(Some)37 b(op)s(erations)g(in)h Fp(spatstat)h
-Fr(return)e(an)g(arra)m(y)g(of)f(n)m(umerical)j(v)-5
-b(alues)38 b(attac)m(hed)324 2541 y(to)c(a)f(\014ne)i(rectangular)g
+Fp(envelope)p Fr(.)324 2236 y Fm(4.6)135 b(Comparing)46
+b(and)e(com)l(bining)i(summary)f(functions)324 2421 y
+Fr(The)25 b(command)g Fp(eval.fv)h Fr(will)e(ev)-5 b(aluate)25
+b(an)m(y)g(expression)h(in)m(v)m(olving)g(summary)g(func-)324
+2541 y(tions.)43 b(F)-8 b(or)30 b(example,)j(y)m(ou)e(can)g(use)h(it)e
+(to)h(subtract)g(one)g Fl(K)38 b Fr(function)31 b(from)f(another:)631
+2745 y Fp(KX)52 b(<-)g(Kest\(X\))631 2865 y(KY)g(<-)g(Kest\(Y\))631
+2985 y(Kdiff)h(<-)f(eval.fv\(KX)i(-)d(KY\))631 3106 y(plot\(Kdiff\))324
+3309 y Fr(will)39 b(ev)-5 b(aluate)39 b(and)g(plot)f(the)h
+(di\013erence)h(b)s(et)m(w)m(een)h(the)e Fl(K)46 b Fr(functions)39
+b(of)f(t)m(w)m(o)h(p)s(oin)m(t)324 3429 y(patterns)33
+b Fp(X)g Fr(and)g Fp(Y)p Fr(.)324 3718 y Fm(4.7)135 b(Pixel)46
+b(images)324 3903 y Fr(Some)37 b(op)s(erations)g(in)h
+Fp(spatstat)h Fr(return)e(an)g(arra)m(y)g(of)f(n)m(umerical)j(v)-5
+b(alues)38 b(attac)m(hed)324 4023 y(to)c(a)f(\014ne)i(rectangular)g
 (grid)f(of)g(spatial)g(lo)s(cations.)48 b(In)35 b Fp(spatstat)h
-Fr(suc)m(h)g(an)e(arra)m(y)g(is)324 2662 y(called)g(a)f(`pixel)i
+Fr(suc)m(h)g(an)e(arra)m(y)g(is)324 4144 y(called)g(a)f(`pixel)i
 (image')e(and)h(is)g(represen)m(ted)h(b)m(y)g(an)e(ob)5
 b(ject)34 b(of)f(class)h Fp("im")p Fr(.)47 b(A)33 b(pixel)324
-2782 y(image)f(ma)m(y)h(b)s(e)f(visualised)i(on)e(the)h(screen)g(as)f
+4264 y(image)f(ma)m(y)h(b)s(e)f(visualised)i(on)e(the)h(screen)g(as)f
 (a)g(digital)g(image,)g(a)g(con)m(tour)h(map,)f(or)324
-2902 y(a)g(relief)h(surface.)45 b(F)-8 b(unctions)33
+4385 y(a)g(relief)h(surface.)45 b(F)-8 b(unctions)33
 b(whic)m(h)h(return)f(a)f(pixel)i(image)f(include)374
-3014 y Fp(Kmeasure)255 b Fr(reduced)34 b(second)g(momen)m(t)g(measure)g
-(of)e(p)s(oin)m(t)g(pattern)374 3135 y Fp(setcov)357
+4497 y Fp(Kmeasure)255 b Fr(reduced)34 b(second)g(momen)m(t)g(measure)g
+(of)e(p)s(oin)m(t)g(pattern)374 4617 y Fp(setcov)357
 b Fr(set)33 b(co)m(v)-5 b(ariance)34 b(function)f(of)f(spatial)h(windo)
-m(w)374 3255 y Fp(ksmooth.ppp)102 b Fr(k)m(ernel)34 b(smo)s(othing)f
-(of)f(p)s(oin)m(t)h(pattern)324 3369 y(F)-8 b(unctions)33
-b(whic)m(h)h(manipulate)g(a)e(pixel)i(image)e(include)520
-3481 y Fp(im)510 b Fr(create)33 b(a)g(pixel)g(image)520
-3601 y Fp(as.im)357 b Fr(con)m(v)m(ert)34 b(data)f(to)f(pixel)i(image)
-520 3721 y Fp(plot.im)255 b Fr(plot)33 b(a)f(pixel)i(image)f(on)f
-(screen)i(as)f(a)f(digital)h(image)520 3842 y Fp(contour.im)102
-b Fr(dra)m(w)33 b(con)m(tours)h(of)e(a)g(pixel)i(image)520
-3962 y Fp(persp.im)204 b Fr(dra)m(w)33 b(p)s(ersp)s(ectiv)m(e)i(plot)e
-(of)f(a)g(pixel)i(image)520 4082 y Fp([.im)408 b Fr(extract)34
-b(subset)g(of)e(pixel)i(image)520 4203 y Fp(shift.im)204
-b Fr(apply)33 b(v)m(ector)h(shift)f(to)f(pixel)i(image)520
-4323 y Fp(print.im)204 b Fr(prin)m(t)33 b(basic)h(information)e(ab)s
-(out)g(pixel)i(image)520 4444 y Fp(summary.im)102 b Fr(summary)34
-b(of)e(pixel)i(image)520 4564 y Fp(is.im)357 b Fr(test)33
-b(whether)h(an)f(ob)5 b(ject)33 b(is)g(a)g(pixel)g(image)1894
+m(w)374 4737 y Fp(ksmooth.ppp)102 b Fr(k)m(ernel)34 b(smo)s(othing)f
+(of)f(p)s(oin)m(t)h(pattern)324 4851 y(F)-8 b(unctions)33
+b(whic)m(h)h(manipulate)g(a)e(pixel)i(image)e(include)1894
 5251 y(22)p eop
 %%Page: 23 23
-23 22 bop 324 548 a Fm(4.7)135 b(Summary)45 b(statistics)i(for)e(a)g(m)
-l(ultit)l(yp)t(e)h(p)t(oin)l(t)f(pattern:)324 733 y Fr(Analogues)27
-b(of)f(the)h Fl(G;)17 b(J)36 b Fr(and)26 b Fl(K)34 b
-Fr(functions)28 b(ha)m(v)m(e)g(b)s(een)f(de\014ned)h(in)f(the)g
-(literature)g(for)324 853 y(\\m)m(ultit)m(yp)s(e")k(p)s(oin)m(t)e
-(patterns,)i(that)e(is,)i(patterns)f(in)g(whic)m(h)h(eac)m(h)f(p)s(oin)
-m(t)g(is)g(classi\014ed)324 973 y(as)i(b)s(elonging)g(to)g(one)g(of)g
-(a)g(\014nite)h(n)m(um)m(b)s(er)g(of)f(p)s(ossible)h(t)m(yp)s(es)h
-(\(e.g.)e(on/o\013,)g(sp)s(ecies,)324 1094 y(colour\).)51
-b(The)36 b(b)s(est)f(kno)m(wn)h(of)f(these)h(is)g(the)f(cross)h
-Fl(K)42 b Fr(function)36 b Fl(K)2897 1109 y Fe(ij)2957
-1094 y Fr(\()p Fl(r)s Fr(\))f(deriv)m(ed)i(b)m(y)324
-1214 y(coun)m(ting,)h(for)f(eac)m(h)g(p)s(oin)m(t)g(of)f(t)m(yp)s(e)i
+23 22 bop 520 533 a Fp(im)664 b Fr(create)33 b(a)g(pixel)g(image)520
+653 y Fp(as.im)511 b Fr(con)m(v)m(ert)34 b(data)e(to)h(pixel)g(image)
+520 773 y Fp(plot.im)409 b Fr(plot)33 b(a)f(pixel)i(image)e(on)h
+(screen)h(as)f(a)f(digital)h(image)520 894 y Fp(contour.im)256
+b Fr(dra)m(w)33 b(con)m(tours)h(of)e(a)g(pixel)i(image)520
+1014 y Fp(persp.im)358 b Fr(dra)m(w)33 b(p)s(ersp)s(ectiv)m(e)i(plot)e
+(of)f(a)g(pixel)i(image)520 1134 y Fp([.im)562 b Fr(extract)33
+b(subset)h(of)f(pixel)g(image)520 1255 y Fp(shift.im)358
+b Fr(apply)33 b(v)m(ector)h(shift)f(to)f(pixel)i(image)520
+1375 y Fp(print.im)358 b Fr(prin)m(t)33 b(basic)h(information)e(ab)s
+(out)g(pixel)i(image)520 1496 y Fp(summary.im)256 b Fr(summary)34
+b(of)e(pixel)i(image)520 1616 y Fp(is.im)511 b Fr(test)33
+b(whether)h(an)f(ob)5 b(ject)33 b(is)g(a)f(pixel)i(image)520
+1736 y Fp(compatible.im)103 b Fr(test)33 b(whether)h(t)m(w)m(o)f
+(images)h(ha)m(v)m(e)g(compatible)f(dimensions)520 1857
+y Fp(eval.im)409 b Fr(ev)-5 b(aluate)33 b(an)g(expression)h(in)m(v)m
+(olving)h(pixel)e(images)324 2124 y Fm(4.8)135 b(Summary)45
+b(statistics)i(for)e(a)g(m)l(ultit)l(yp)t(e)h(p)t(oin)l(t)f(pattern:)
+324 2308 y Fr(Analogues)27 b(of)f(the)h Fl(G;)17 b(J)36
+b Fr(and)26 b Fl(K)34 b Fr(functions)28 b(ha)m(v)m(e)g(b)s(een)f
+(de\014ned)h(in)f(the)g(literature)g(for)324 2429 y(\\m)m(ultit)m(yp)s
+(e")k(p)s(oin)m(t)e(patterns,)i(that)e(is,)i(patterns)f(in)g(whic)m(h)h
+(eac)m(h)f(p)s(oin)m(t)g(is)g(classi\014ed)324 2549 y(as)i(b)s
+(elonging)g(to)g(one)g(of)g(a)g(\014nite)h(n)m(um)m(b)s(er)g(of)f(p)s
+(ossible)h(t)m(yp)s(es)h(\(e.g.)e(on/o\013,)g(sp)s(ecies,)324
+2670 y(colour\).)51 b(The)36 b(b)s(est)f(kno)m(wn)h(of)f(these)h(is)g
+(the)f(cross)h Fl(K)42 b Fr(function)36 b Fl(K)2897 2685
+y Fe(ij)2957 2670 y Fr(\()p Fl(r)s Fr(\))f(deriv)m(ed)i(b)m(y)324
+2790 y(coun)m(ting,)h(for)f(eac)m(h)g(p)s(oin)m(t)g(of)f(t)m(yp)s(e)i
 Fl(i)p Fr(,)g(the)f(n)m(um)m(b)s(er)h(of)f(t)m(yp)s(e)g
-Fl(j)43 b Fr(p)s(oin)m(ts)37 b(lying)h(closer)324 1335
+Fl(j)43 b Fr(p)s(oin)m(ts)37 b(lying)h(closer)324 2910
 y(than)32 b Fl(r)k Fr(units)d(a)m(w)m(a)m(y)-8 b(.)520
-1548 y Fp(Gcross,Gdot,Gmulti)156 b Fr(m)m(ultit)m(yp)s(e)34
+3123 y Fp(Gcross,Gdot,Gmulti)156 b Fr(m)m(ultit)m(yp)s(e)34
 b(nearest)g(neigh)m(b)s(our)f(distributions)h Fl(G)3477
-1563 y Fe(ij)3537 1548 y Fl(;)17 b(G)3658 1563 y Fe(i)p
-Fc(\017)520 1668 y Fp(Kcross,Kdot,)54 b(Kmulti)102 b
+3138 y Fe(ij)3537 3123 y Fl(;)17 b(G)3658 3138 y Fe(i)p
+Fc(\017)520 3244 y Fp(Kcross,Kdot,)54 b(Kmulti)102 b
 Fr(m)m(ultit)m(yp)s(e)34 b Fl(K)7 b Fr(-functions)33
-b Fl(K)2664 1683 y Fe(ij)2725 1668 y Fl(;)17 b(K)2852
-1683 y Fe(i)p Fc(\017)520 1788 y Fp(Jcross,Jdot,Jmulti)156
+b Fl(K)2664 3259 y Fe(ij)2725 3244 y Fl(;)17 b(K)2852
+3259 y Fe(i)p Fc(\017)520 3364 y Fp(Jcross,Jdot,Jmulti)156
 b Fr(m)m(ultit)m(yp)s(e)34 b Fl(J)9 b Fr(-functions)33
-b Fl(J)2608 1803 y Fe(ij)2669 1788 y Fl(;)17 b(J)2767
-1803 y Fe(i)p Fc(\017)520 1909 y Fp(alltypes)666 b Fr(arra)m(y)32
-b(of)g(m)m(ultit)m(yp)s(e)j(functions)520 2029 y Fp(Iest)870
+b Fl(J)2608 3379 y Fe(ij)2669 3364 y Fl(;)17 b(J)2767
+3379 y Fe(i)p Fc(\017)520 3484 y Fp(alltypes)666 b Fr(arra)m(y)32
+b(of)g(m)m(ultit)m(yp)s(e)j(functions)520 3605 y Fp(Iest)870
 b Fr(m)m(ultit)m(yp)s(e)34 b Fl(I)8 b Fr(-function)324
-2148 y(These)37 b(functions)g(\(with)f(the)g(exception)h(of)e
+3724 y(These)37 b(functions)g(\(with)f(the)g(exception)h(of)e
 Fp(alltypes)p Fr(\))i(op)s(erate)f(in)g(a)f(v)m(ery)i(similar)324
-2318 y(w)m(a)m(y)32 b(to)f Fp(Gest,)52 b(Jest,)h(Kest)32
+3894 y(w)m(a)m(y)32 b(to)f Fp(Gest,)52 b(Jest,)h(Kest)32
 b Fr(with)g(additional)f(argumen)m(ts)h(sp)s(ecifying)h(the)e(t)m(yp)s
-(e\(s\))324 2439 y(of)h(p)s(oin)m(ts)h(to)f(b)s(e)h(studied.)470
-2559 y(T)-8 b(o)31 b(compute)i(and)e(plot)g(the)h(cross)g
-Fl(K)38 b Fr(function)32 b Fl(K)2384 2574 y Fe(ij)2444
-2559 y Fr(\()p Fl(r)s Fr(\))f(for)g(all)g(p)s(ossible)h(pairs)g(of)324
-2680 y(t)m(yp)s(es)i Fl(i)f Fr(and)f Fl(j)6 b Fr(,)631
-2883 y Fp(plot\(alltypes\(X,"K"\)\))324 3086 y Fr(See)33
+(e\(s\))324 4014 y(of)h(p)s(oin)m(ts)h(to)f(b)s(e)h(studied.)470
+4135 y(T)-8 b(o)31 b(compute)i(and)e(plot)g(the)h(cross)g
+Fl(K)38 b Fr(function)32 b Fl(K)2384 4150 y Fe(ij)2444
+4135 y Fr(\()p Fl(r)s Fr(\))f(for)g(all)g(p)s(ossible)h(pairs)g(of)324
+4255 y(t)m(yp)s(es)i Fl(i)f Fr(and)f Fl(j)6 b Fr(,)631
+4459 y Fp(plot\(alltypes\(X,"K"\)\))324 4662 y Fr(See)33
 b(the)g(next)h(section)f(for)f(further)h(information.)1894
 5251 y(23)p eop
 %%Page: 24 24
@@ -93007,7 +93021,7 @@ ep
 %%EOF
 
 %%EndDocument
- @endspecial 324 4143 a Fm(4.8)135 b(F)-11 b(unction)44
+ @endspecial 324 4143 a Fm(4.9)135 b(F)-11 b(unction)44
 b(arra)l(ys)324 4328 y Fr(A)31 b(function)i(arra)m(y)e(is)i(a)e
 (collection)i(of)e(functions)h Fl(f)2251 4343 y Fe(i;j)2332
 4328 y Fr(\()p Fl(r)s Fr(\))f(indexed)i(b)m(y)g(in)m(tegers)g
@@ -93056,12 +93070,12 @@ Fp(allstats)i Fr(is)f(a)e(2)20 b Fn(\002)h Fr(2)32 b(function)g(arra)m
 (y)g(con)m(taining)g(the)324 2868 y Fl(F)14 b Fr(,)32
 b Fl(G)p Fr(,)h Fl(J)41 b Fr(and)33 b Fl(K)40 b Fr(functions)33
 b(of)f(an)h(\(unmark)m(ed\))h(p)s(oin)m(t)f(pattern.)324
-3155 y Fm(4.9)135 b(Summary)30 b(functions)g(for)g(a)g(con)l(tin)l
-(uously)h(mark)l(ed)f(p)t(oin)l(t)630 3304 y(pattern)324
-3489 y Fr(Some)f(p)s(oin)m(t)g(patterns)g(are)g(mark)m(ed,)i(but)e(not)
-f(m)m(ultit)m(yp)s(e.)44 b(That)29 b(is,)h(the)g(p)s(oin)m(ts)f(ma)m(y)
-324 3609 y(carry)34 b(marks)h(that)e(do)h(not)f(b)s(elong)h(to)f(a)h
-(\014nite)g(list)g(of)g(p)s(ossible)h(t)m(yp)s(es.)48
+3155 y Fm(4.10)135 b(Summary)73 b(functions)g(for)g(a)g(con)l(tin)l
+(uously)g(mark)l(ed)697 3304 y(p)t(oin)l(t)46 b(pattern)324
+3489 y Fr(Some)29 b(p)s(oin)m(t)g(patterns)g(are)g(mark)m(ed,)i(but)e
+(not)f(m)m(ultit)m(yp)s(e.)44 b(That)29 b(is,)h(the)g(p)s(oin)m(ts)f
+(ma)m(y)324 3609 y(carry)34 b(marks)h(that)e(do)h(not)f(b)s(elong)h(to)
+f(a)h(\014nite)g(list)g(of)g(p)s(ossible)h(t)m(yp)s(es.)48
 b(The)35 b(marks)324 3730 y(migh)m(t)e(b)s(e)g(con)m(tin)m(uous)h(n)m
 (umerical)g(v)-5 b(alues,)34 b(complex)g(n)m(um)m(b)s(ers,)g(etc.)470
 3850 y(An)i(example)h(in)f Fp(spatstat)i Fr(is)e(the)g(dataset)g
@@ -93100,7 +93114,7 @@ b(t)m(w)m(o)f(subsets)i(will)e(b)s(e)g(treated)g(as)g(t)m(w)m(o)g
 b Fr(ignore)24 b(the)g(marks)h(\(use)g(the)f(function)g
 Fp(unmark)i Fr(to)d(remo)m(v)m(e)j(them\))e(and)g(analyse)568
 1797 y(only)33 b(the)g(lo)s(cations)f(of)h(the)g(p)s(oin)m(ts.)324
-2086 y Fm(4.10)135 b(Programming)46 b(to)t(ols)324 2271
+2086 y Fm(4.11)135 b(Programming)46 b(to)t(ols)324 2271
 y Fp(spatstat)35 b Fr(also)d(con)m(tains)i(some)g(programming)f(to)s
 (ols)f(to)h(help)g(y)m(ou)h(p)s(erform)e(calcu-)324 2391
 y(lations)42 b(with)g(p)s(oin)m(t)g(patterns.)72 b(One)42
@@ -93808,9 +93822,10 @@ y(fit)52 b(<-)g(ppm\(swedishpines,)k(~1,)c(Strauss\(7\),)i(rbord=7\))
 324 3783 y Fr(Then)28 b(the)f(adequacy)h(of)e(the)h(trend)g(in)g(the)g
 (\014tted)g(mo)s(del)g(can)g(b)s(e)g(assessed)i(b)m(y)e(calling)631
 3986 y Fp(diagnose.ppm\(fit\))631 4107 y(qqplot.ppm\(fit\))324
-4310 y Fr(and)32 b(insp)s(ecting)i(these)g(plots.)44
-b(See)34 b(the)f(help)g(\014les)h(for)e(further)g(information.)1894
-5251 y(38)p eop
+4310 y Fr(and)j(insp)s(ecting)h(these)g(plots.)43 b(See)31
+b(the)f(help)h(\014les)g(for)f(further)g(information,)g(or)g(t)m(yp)s
+(e)324 4430 y Fp(demo\(diagnose\))36 b Fr(for)c(a)g(demonstration)i(of)
+e(the)h(diagnostics)h(features.)1894 5251 y(38)p eop
 %%Page: 39 39
 39 38 bop 324 548 a Fq(7)161 b(W)-13 b(ork)l(ed)52 b(example)324
 767 y Fr(Supp)s(ose)31 b(w)m(e)h(ha)m(v)m(e)f(a)f(data)g(\014le)h

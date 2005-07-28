@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.10 $   $Date: 2005/04/19 00:31:35 $
+#   $Revision: 1.11 $   $Date: 2005/07/21 10:31:10 $
 #
 #
 #   calculate pair correlation function
@@ -53,7 +53,7 @@ pcf.ppp <- function(X, ...,
     if(is.null(out)) {
       df <- data.frame(r=r, theo=rep(1,length(r)), g)
       colnames(df)[3] <- key
-      out <- fv(df, "r", "g(r)", key, , alim, c("r","gPois(r)", symb),
+      out <- fv(df, "r", substitute(g(r), NULL), key, , alim, c("r","gPois(r)", symb),
                 c("distance argument r", "theoretical Poisson g(r)", desc))
     } else {
       df <- data.frame(g)
@@ -161,7 +161,7 @@ function(X, ..., method="c") {
 
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
-          "r", "pcf(r)", "pcf", cbind(pcf, theo) ~ r, alim,
+          "r", substitute(pcf(r), NULL), "pcf", cbind(pcf, theo) ~ r, alim,
           c("r", "pcf(r)", "1"),
           c("distance argument r",
             "estimate of pair correlation function pcf(r)",

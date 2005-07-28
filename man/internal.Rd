@@ -81,7 +81,6 @@
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
-\alias{multipair.family}
 \alias{nearest.pixel}
 \alias{no.trend.ppm}
 \alias{n.quad}               
@@ -250,7 +249,6 @@ mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, \dots)
 MultiPair.checkmatrix(mat, n, name)
-multipair.family
 nearest.pixel(x, y, im)
 no.trend.ppm(x)
 n.quad(Q)               

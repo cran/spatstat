@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.7 $    $Date: 2005/05/12 21:48:10 $
+#    $Revision: 1.9 $    $Date: 2005/07/27 06:32:39 $
 #
 #  (a) for matrices only:
 #
@@ -19,6 +19,7 @@
 #  (d) for matrices:
 #    matrixsample()
 #           subsamples or supersamples a matrix
+#
 #
 matrowsum <- function(x) {
   x %*% rep(1, ncol(x))

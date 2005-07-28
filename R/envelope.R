@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.12 $  $Date: 2005/06/30 07:59:55 $
+#   $Revision: 1.14 $  $Date: 2005/07/28 06:16:13 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -63,9 +63,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     fun <- get(fun)
   if(!is.function(fun)) 
     stop("unrecognised format for function \`fun\'")
-  if(!("r" %in% names(formals(fun))))
-    stop("\`fun\' should have an argument called \`r\'")
-
+  if(!any(c("r", "...") %in% names(formals(fun))))
+    stop("function \`fun\' should have an argument \`r\' or \`...\'")
+  
   if((nrank %% 1) != 0)
     stop("nrank must be an integer")
   stopifnot(nrank > 0 && nrank < nsim/2)

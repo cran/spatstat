@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.13 $    $Date: 2005/06/14 04:27:42 $
+#  $Revision: 1.15 $    $Date: 2005/07/21 14:32:59 $
 #
 #
 
@@ -74,7 +74,9 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # if we're using the default argument, use its recommended range
     if(rhs == attr(x, "argu")) {
       xlim <- attr(x,"alim")
-      ok <- is.finite(rhsdata) & rhsdata >= xlim[1] & rhsdata <= xlim[2]
+      rok <- is.finite(rhsdata) & rhsdata >= xlim[1] & rhsdata <= xlim[2]
+      lok <- apply(is.finite(lhsdata), 1, any)
+      ok <- lok & rok
       rhsdata <- rhsdata[ok]
       lhsdata <- lhsdata[ok, , drop=FALSE]
     } else { # actual range of values to be plotted
@@ -89,7 +91,7 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   }
   
   if(missing(ylim))
-    ylim <- range(lhsdata,na.rm=TRUE)
+    ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
 
   # work out how to label the plot
   if(missing(xlab))
@@ -107,6 +109,8 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         ylab <- as.character(fmla)[2]
     }
   }
+  if(is.language(ylab))
+    ylab <- deparse(ylab)
 
   # check for argument "add"=TRUE
   dotargs <- list(...)

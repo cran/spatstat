@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.11 $	$Date: 2005/06/20 16:50:49 $
+#	$Revision: 5.12 $	$Date: 2005/07/21 09:11:32 $
 #
 #
 # -------- functions ----------------------------------------
@@ -79,7 +79,8 @@ function(X, r=NULL, breaks=NULL, slow=FALSE,
         # this will be the output data frame
         K <- data.frame(r=r, theo= pi * r^2)
         desc <- c("distance argument r", "theoretical Poisson K(r)")
-        K <- fv(K, "r", "K(r)", "theo", , alim, c("r","Kpois(r)"), desc)
+        K <- fv(K, "r", substitute(K(r), NULL),
+                "theo", , alim, c("r","Kpois(r)"), desc)
 
         # pairwise distance
 	d <- pairdist(X$x, X$y)

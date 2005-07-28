@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.8 $     $Date: 2005/04/21 02:42:29 $
+  $Revision: 1.10 $     $Date: 2005/07/28 04:39:44 $
 
  */
 
@@ -71,7 +71,6 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
     }
   }
 }
-
 
 /* THE FOLLOWING CODE ASSUMES THAT y IS SORTED IN ASCENDING ORDER */
 

@@ -25,6 +25,9 @@ cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
 chorley                 Chorley-Ribble Cancer Data
 coef.ppm                Coefficients of Fitted Point Process Model
+compatible.fv           Test Whether Two Function Objects Are
+                        Compatible
+compatible.im           Test Whether Two Pixel Images Are Compatible
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
 copper                  Berman-Huntington points and lines data
@@ -52,6 +55,8 @@ eem                     Exponential Energy Marks
 envelope                Simulation envelopes of summary function
 eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
+eval.fv                 Evaluate Expression Involving Functions
+eval.im                 Evaluate Expression Involving Pixel Images
 expand.owin             Expand Window By Factor
 fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
@@ -213,6 +218,7 @@ shift.owin              Apply Vector Translation To Window
 shift.ppp               Apply Vector Translation To Point Pattern
 simdat                  Simulated Point Pattern
 Softcore                The Soft Core Point Process Model
+spatstat                The Spatstat Package
 spatstat.options        Internal Options in Spatstat Package
 split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
