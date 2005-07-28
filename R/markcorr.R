@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.5 $ $Date: 2005/04/27 01:26:35 $
+#     $Revision: 1.6 $ $Date: 2005/07/21 10:33:39 $
 #
 #    Estimate the mark correlation function
 #
@@ -44,7 +44,7 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
         desc <- c("distance argument r", "theoretical Poisson m(r)=1")
         alim <- c(0, min(diff(X$window$xrange),diff(X$window$yrange))/4)
         result <- fv(result,
-                     "r", "m(r)", "theo", , alim, c("r","mpois(r)"), desc)
+                     "r", substitute(m(r), NULL), "theo", , alim, c("r","mpois(r)"), desc)
 
 
         # pairwise distances

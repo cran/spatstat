@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.8 $	$Date: 2005/04/16 01:35:18 $
+#    $Revision: 1.9 $	$Date: 2005/07/27 06:24:32 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -28,6 +28,8 @@ pairwise.family <-
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
   #   Equal        logical matrix X[i] == U[j]             matrix or NULL
+  #                      (NB: equality only if marks are equal too)
+  #                      NULL means all comparisons are FALSE
   #   pairpot     potential function (see above)          function(d, p)
   #   potpars     auxiliary parameters for pairpot        list(......)
   #   correction  edge correction type                    (string)
@@ -38,12 +40,29 @@ pairwise.family <-
   #    The rows of this matrix correspond to the rows of U (the sample points);
   #    the k columns are the coordinates of the k-dimensional potential.
   #
+  ##########################################################################
+
   # Note:
-  # The pair potential function 'pairpot' will be called as
-  #    pairpot(M, potpars)   where M is a matrix of interpoint distances.
+  # The pair potential function 'pairpot' should be either
+  #    pairpot(d, par)            [for potentials that don't depend on marks]
+  # or
+  #    pairpot(d, tx, tu, par)    [for potentials that do depend on mark]
+  # where d is a matrix of interpoint distances,
+  # tx is the vector of types for the data points,
+  # tu is the vector of types for all quadrature points          
+  # and
+  #  par is a list of parameters for the potential.
+  #         
   # It must return a matrix with the same dimensions as M
   # or an array with its first two dimensions the same as the dimensions of M.
-  ##########################################################################
+
+fop <- names(formals(pairpot))
+if(identical(all.equal(fop, c("d", "par")), TRUE))
+  marx <- FALSE
+else if(identical(all.equal(fop, c("d", "tx", "tu", "par")), TRUE))
+  marx <- TRUE
+else 
+  stop("Formal arguments of pair potential function are not understood")
 
 # coercion should be unnecessary..
 # X <- as.ppp(X)
@@ -51,8 +70,13 @@ pairwise.family <-
 
 x <- X$x
 y <- X$y
+if(marx) 
+  m <- X$marks
+
 xx <- U$x
 yy <- U$y
+if(marx)
+  mm <- U$marks
 
 if(length(correction) > 1)
   stop("Only one edge correction allowed at a time!")
@@ -70,8 +94,8 @@ MY <- outer(y,yy,sqdif)
 
 if(correction=="periodic") {
 	if(X$window$type != "rectangle")
-		stop("Periodic edge correction can't be applied",
-                     "in an irregular window")
+		stop(paste("Periodic edge correction can't be applied",
+                     "in an irregular window"))
 	wide <- diff(X$window$xrange)
 	high <- diff(X$window$yrange)
 	MX1 <- outer(x,xx-wide,sqdif)
@@ -85,7 +109,11 @@ M <- sqrt(MX + MY)
 
 # Evaluate the pairwise potential 
 
-POT <- pairpot(M, potpars)
+if(!marx) 
+  POT <- pairpot(M, potpars)
+else
+  POT <- pairpot(M, m, mm, potpars)
+
 if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dim(M))) {
         whinge <- paste(
            "The pair potential function ",deparse(substitute(pairpot)),
@@ -179,3 +207,5 @@ return(V)
 ######### end of list
 
 class(pairwise.family) <- "isf"
+
+

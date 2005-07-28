@@ -50,11 +50,11 @@ which can then be fitted to point pattern data.
 }
 \examples{
    #This is the same as StraussHard(r=0.7,h=0.2)
-   strpot <- function(t,par) {
+   strpot <- function(d,par) {
          r <- par$r
          h <- par$h
-         value <- (t <= r)
-         value[t < h] <- -Inf
+         value <- (d <= r)
+         value[d < h] <- -Inf
          value
    }
    mySH <- Pairwise(strpot, "StraussHard", list(r=0.7,h=0.2),

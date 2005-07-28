@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.9 $    $Date: 2005/05/10 03:22:23 $
+#           $Revision: 1.10 $    $Date: 2005/07/21 10:23:48 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -175,7 +175,8 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   w <- X$window
   alim <- c(0, min(diff(w$xrange), diff(w$yrange))/4)
   out <- fv(result,
-            "r", "Kinhom(r)", "border",
+            "r", substitute(Kfft(r), NULL),
+            "border",
               cbind(border, theo) ~ r, alim,
               c("r", "Kpois(r)", "Kbord(r)"),
               c("distance argument r",

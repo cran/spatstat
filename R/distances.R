@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.9 $     $Date: 2005/04/21 02:29:37 $
+#      $Revision: 1.11 $     $Date: 2005/07/28 04:45:33 $
 #
 #
 #      Interpoint distances

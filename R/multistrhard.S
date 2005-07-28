@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.7 $	$Date: 2005/03/22 02:27:01 $
+#    $Revision: 2.8 $	$Date: 2005/07/27 06:26:01 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -26,7 +26,7 @@ MultiStraussHard <- function(types, iradii, hradii) {
   out <- 
   list(
          name     = "Multitype Strauss Hardcore process",
-         family    = multipair.family,
+         family    = pairwise.family,
          pot      = function(d, tx, tu, par) {
      # arguments:
      # d[i,j] distance between points X[i] and U[j]

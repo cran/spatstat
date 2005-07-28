@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.6 $	$Date: 2005/03/22 02:26:40 $
+#    $Revision: 2.7 $	$Date: 2005/07/27 06:26:16 $
 #
 #    The multitype Strauss process
 #
@@ -24,7 +24,7 @@ MultiStrauss <- function(types, radii) {
   out <- 
   list(
          name     = "Multitype Strauss process",
-         family    = multipair.family,
+         family    = pairwise.family,
          pot      = function(d, tx, tu, par) {
      # arguments:
      # d[i,j] distance between points X[i] and U[j]

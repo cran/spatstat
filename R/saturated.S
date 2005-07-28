@@ -2,7 +2,7 @@
 #
 #    saturated.S
 #
-#    $Revision: 1.2 $	$Date: 2001/08/07 11:52:17 $
+#    $Revision: 1.3 $	$Date: 2005/07/27 07:00:59 $
 #
 #    Saturated pairwise process with user-supplied potential
 #
@@ -18,6 +18,12 @@ Saturated <- function(pot, name) {
   if(missing(name))
     name <- "Saturated process with user-defined potential"
   
+  fop <- names(formals(pot))
+  if(!identical(all.equal(fop, c("d", "par")), TRUE)
+     && !identical(all.equal(fop, c("d", "tx", "tu", "par")), TRUE))
+    stop(paste("Formal arguments of pair potential function \`pot\'",
+               "must be either (d, par) or (d, tx, tu, par)"))
+
   out <- 
   list(
          name     = name,
