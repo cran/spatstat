@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.12 $	$Date: 2005/07/21 10:22:34 $
+#	$Revision: 1.13 $	$Date: 2005/09/08 09:47:51 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -70,9 +70,10 @@
       if(nrow(lambda2) != npoints)
         stop("Dimensions of lambda2 do not match number of data points")
       weight <- 1/lambda2
-    } 
+    }
     
     # match corrections
+    correction.given <- !missing(correction)
     correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
     correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
     correction.id <- pmatch(correction, correction.name)
@@ -88,7 +89,7 @@
     if(W$type != "rectangle") {
       iso <- (correction == "isotropic") | (correction == "Ripley")
       if(any(iso)) {
-        if(!missing(correction))
+        if(correction.given)
           warning("Isotropic correction not implemented for non-rectangular windows")
         correction <- correction[!iso]
       }

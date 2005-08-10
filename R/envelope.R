@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.14 $  $Date: 2005/07/28 06:16:13 $
+#   $Revision: 1.15 $  $Date: 2005/09/08 10:13:10 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -57,14 +57,19 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   stop("\`object\' should be a point process model or a point pattern")
 
   metrop <- !is.null(model)
+
+  # Name of function, for error messages
+  fname <- if(is.name(substitute(fun))) deparse(substitute(fun))
+           else if(is.character(fun)) fun else "fun"
+  fname <- sQuote(fname)
   
   # validate other arguments
   if(is.character(fun))
     fun <- get(fun)
   if(!is.function(fun)) 
-    stop("unrecognised format for function \`fun\'")
+    stop(paste("unrecognised format for function", fname))
   if(!any(c("r", "...") %in% names(formals(fun))))
-    stop("function \`fun\' should have an argument \`r\' or \`...\'")
+    stop(paste(fname, "should have an argument \`r\' or \`...\'"))
   
   if((nrank %% 1) != 0)
     stop("nrank must be an integer")
@@ -73,7 +78,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   # evaluate function for data pattern X
   funX <- fun(X, ...)
   if(!inherits(funX, "fv"))
-    stop("\`fun\' must return an object of class \"fv\"")
+    stop(paste(fname, "must return an object of class", sQuote("fv")))
   argname <- attr(funX, "argu")
   valname <- attr(funX, "valu")
   rvals <- funX[[argname]]
@@ -87,8 +92,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     rstart <- rmhstart(start)
     rcontr <- rmhcontrol(control)
   }
-  
-  simvals <- matrix(, nrow=nsim, ncol=length(rvals))
+
+  nrvals <- length(rvals)
+  simvals <- matrix(, nrow=nsim, ncol=nrvals)
 
   # simulate
   if(verbose)
@@ -102,9 +108,38 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     else {
       Xsim <- eval(simulate)
       if(!inherits(Xsim, "ppp"))
-        stop("Evaluating the expression \`simulate\' did not yield a point pattern")
+        stop(paste("Evaluating the expression", sQuote("simulate"),
+                   "did not yield a point pattern"))
     }
+    # apply function
     funXsim <- fun(Xsim, r=rvals, ...)
+    # sanity checks
+    if(!inherits(funXsim, "fv"))
+      stop(paste("When applied to a simulated pattern, the function",
+                 fname, "did not return an object of class",
+                 sQuote("fv")))
+    argname.sim <- attr(funXsim, "argu")
+    valname.sim <- attr(funXsim, "valu")
+    if(argname.sim != argname)
+      stop(paste("The objects returned by", fname,
+                 "when applied to a simulated pattern",
+                 "and to the data pattern",
+                 "are incompatible. They have different argument names",
+                 sQuote(argname.sim), "and", sQuote(argname), 
+                 "respectively"))
+    if(valname.sim != valname)
+      stop(paste("When", fname, "is applied to a simulated pattern",
+                 "it provides an estimate named", sQuote(valname.sim), 
+                 "whereas the estimate for the data pattern is named",
+                 sQuote(valname),
+                 ". Try using the argument", sQuote("correction"),
+                 "to make them compatible"))
+
+    # extract the values for simulation i
+    simvals.i <- funXsim[[valname]]
+    if(length(simvals.i) != nrvals)
+      stop("Vectors of function values have incompatible lengths")
+      
     simvals[i,] <- funXsim[[valname]]
     if(verbose)
       cat(paste(i, if(i < nsim) ", " else ".",

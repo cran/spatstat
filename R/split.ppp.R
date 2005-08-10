@@ -1,7 +1,7 @@
 #
 # split.R
 #
-# $Revision: 1.2 $ $Date: 2005/07/22 05:14:38 $
+# $Revision: 1.3 $ $Date: 2005/08/10 06:54:39 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -41,6 +41,11 @@ split.ppp <- function(x, f = x$marks, drop=FALSE, un=NULL, ...) {
   if(!all(unlist(lapply(value, is.ppp))))
     stop("Each entry of \`value\' must be a point pattern")
 
+  ismark <- unlist(lapply(value, is.marked))
+  if(any(ismark) && !all(ismark))
+    stop("Some entries of \`value\' are marked, and others are unmarked")
+  vmarked <- all(ismark)
+  
   if(!missing(f)) {
     if(!is.factor(f))
       stop("f must be a factor")
@@ -62,19 +67,24 @@ split.ppp <- function(x, f = x$marks, drop=FALSE, un=NULL, ...) {
   if(length(value) != length(lev))
       stop(paste("length of \`value\' should equal the number of",
                  levtype))
-  
-  if(is.null(names(value)))
-    names(value) <- paste(lev)
-  else if(!all(names(value) %in% paste(levels(f))))
-    stop("names of \`value\' should be levels of f")
 
-  out <- x
-  for(l in lev) {
-    v <- value[[paste(l)]]
-    if(un)
-      v <- v %mark% factor(l, levels=levels(f))
-    out[f == l] <- v
+  # ensure value[[i]] is associated with lev[i]
+  if(!is.null(names(value))) {
+    if(!all(names(value) %in% paste(levels(f))))
+      stop("names of \`value\' should be levels of f")
+    value <- value[lev]
+  }
+  names(value) <- NULL
+  
+  # restore the marks, if they were discarded
+  if(un && is.marked(x)) {
+    if(vmarked)
+      warning("\`value\' contains marked point patterns:\
+ this is inconsistent with un=TRUE; marks ignored.")
+    for(i in seq(value)) 
+      value[[i]] <- value[[i]] %mark% factor(lev[i], levels=levels(f))
   }
 
+  out <- superimpose(value)
   return(out)
 }

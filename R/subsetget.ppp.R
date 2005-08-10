@@ -21,10 +21,14 @@
       xsubok <- inside.owin(xsub$x, xsub$y, window)
       SUB <- SUB[xsubok]
     }
-    
+
     # anything to replace?
     if(length(SUB) == 0)
       return(x)
+
+    # sanity checks
+    if(any(is.na(SUB)))
+      stop("Invalid subset: the resulting subscripts include NA\'s")
     
     if(!is.marked.ppp(x) && is.marked.ppp(value))
       warning("The replacement points have marks -- ignored them")

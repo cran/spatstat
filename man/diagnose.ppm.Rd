@@ -287,8 +287,9 @@
   There are methods for \code{plot} and \code{print} for such objects.
   See the Examples.
   
-  See also the companion function \code{\link{qqplot.ppm}} which produces a
-  Q-Q plot of the residuals.
+  See also the companion functions \code{\link{qqplot.ppm}}, which produces a
+  Q-Q plot of the residuals, and \code{\link{lurking}}, which produces
+  lurking variable plots for any spatial covariate.
 
 }
 \references{
@@ -307,6 +308,7 @@
  \code{\link{eem}},
  \code{\link{ppm.object}},
  \code{\link{qqplot.ppm}},
+ \code{\link{lurking}},
  \code{\link{ppm}}
 }
 \examples{
