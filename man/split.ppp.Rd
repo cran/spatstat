@@ -9,11 +9,11 @@
   according to their marks, or according to any user-specified grouping.
 }
 \synopsis{
-  split.ppp(x, f = x$marks, drop=FALSE, un=NULL, \dots)
+  split.ppp(x, f = x$marks)
 }
 \usage{
-  split.ppp(x, f = x$marks, drop=FALSE, un=missing(f), \dots)
-  split(x, f, drop, un) <- value
+  split.ppp(x, f = x$marks)
+  split(x, f) <- value
 }
 \arguments{
   \item{x}{
@@ -22,18 +22,6 @@
   }
   \item{f}{
     Factor determining the grouping. 
-  }
-  \item{drop}{
-	Logical. Determines whether empty groups will
-	be deleted.
-  }
-  \item{un}{
-    Logical. Determines whether subpatterns will be unmarked
-    (i.e. whether marks will be removed	from the points in each
-    subpattern). 
-  }
-  \item{\dots}{
-    Other arguments are ignored.
   }
   \item{value}{
     List of point patterns.
@@ -64,22 +52,12 @@
   Then the effect is that the points of each type
   are separated into different point patterns.
 
-  Some of the sub-patterns created by the split
-  may be empty. If \code{drop=TRUE}, then empty sub-patterns will
-  be deleted from the list. If \code{drop=FALSE} then they are retained.
-
-  The argument \code{un} determines how to handle marks 
-  in the case where \code{x} is a marked point pattern.
-  If \code{un=TRUE} then the marks of the 
-  points will be discarded when they are split into groups,
-  while if \code{un=FALSE} then the marks will be retained.
-  
   The result of \code{split.ppp} has class \code{"splitppp"}
   and can be plotted using \code{\link{plot.splitppp}}.
 
   The assignment function \code{split<-.ppp} 
   updates the point pattern \code{x} so that
-  it satisfies \code{split(x, f, drop, un) = value}. The argument \code{value}
+  it satisfies \code{split(x, f) = value}. The argument \code{value}
   is expected to be a list of point patterns, one for each level of
   \code{f}. These point patterns are expected to be compatible in the sense
   that they all have the same window, and either they are all unmarked
@@ -99,19 +77,15 @@
  data(amacrine)
  u <- split(amacrine)
 
+# the following are equivalent:
+ amon <- amacrine[amacrine$marks == "on"]
+ amon <- split(amacrine)$on
+   
 # plot them
  plot(split(amacrine))
 
-# the following are equivalent:
- amon <- split(amacrine)$on
- amon <- unmark(amacrine[amacrine$marks == "on"])
-   
-# the following are equivalent:
- amon <- split(amacrine, un=FALSE)$on
- amon <- amacrine[amacrine$marks == "on"]
-   
 # Scramble the locations of the 'on' cells
- u <- split(amacrine)
+ u <- unmark(split(amacrine))
  u$on <- runifpoint(amon$n, amon$window)
  split(amacrine) <- u
 

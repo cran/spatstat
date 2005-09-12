@@ -183,12 +183,14 @@
 \examples{
   data(lansing)
   # inhomogeneous pattern of maples
-  X <- unmark(lansing[lansing$marks == "maple",])
+  X <- unmark(split(lansing)$maple)
   \testonly{
      sub <- sample(c(TRUE,FALSE), X$n, replace=TRUE, prob=c(0.1,0.9))
      X <- X[sub , ]
   }
-  # fit spatial trend
+
+  # (1) intensity function estimated by model-fitting
+  # Fit spatial trend: polynomial in x and y coordinates
   fit <- ppm(X, ~ polynom(x,y,2), Poisson())
   # predict intensity values at points themselves
   lambda <- predict(fit, locations=X, type="trend")
@@ -196,8 +198,15 @@
   Ki <- Kinhom(X, lambda)
   plot(Ki)
 
-  # SIMULATED DATA
-  # known intensity function
+  # (2) intensity function estimated by heavy smoothing
+  smo <- ksmooth.ppp(X, sigma=0.1)
+  # evaluate smoothed intensity at data points
+  lambda <- smo[X]
+  # inhomogeneous K function
+  Ki <- Kinhom(X, lambda)
+  plot(Ki)
+
+  # (3) simulated data: known intensity function
   lamfun <- function(x,y) { 100 * x }
   # inhomogeneous Poisson process
   Y <- rpoispp(lamfun, 100, owin())
@@ -206,6 +215,17 @@
   # inhomogeneous K function
   Ki <- Kinhom(Y, lambda)
   plot(Ki)
+
+  # How to make simulation envelopes:
+  #      Example shows method (2)
+  \dontrun{
+  smo <- ksmooth.ppp(X, sigma=0.1)
+  myKfun <- function(X, ..., lam) { Kinhom(X, lambda=lam[X], ...) }
+  Ken <- envelope(X, myKfun, nsim=99,
+                  simulate=expression(rpoispp(smo)),
+                  lam=smo, correction="trans")
+  plot(Ken)
+  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
