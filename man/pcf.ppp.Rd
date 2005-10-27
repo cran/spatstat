@@ -6,12 +6,16 @@
   a point pattern using kernel methods.
 }
 \usage{
- pcf.ppp(X, \dots, kernel="epanechnikov", bw=NULL, stoyan=0.15,
+ pcf.ppp(X, \dots, r = NULL, kernel="epanechnikov", bw=NULL, stoyan=0.15,
                     correction=c("translate", "ripley"))
 }
 \arguments{
   \item{X}{
     A point pattern (object of class \code{"ppp"}).
+  }
+  \item{r}{
+    Vector of values for the argument \eqn{r} at which \eqn{g(r)} 
+    should be evaluated. There is a sensible default.
   }
   \item{kernel}{
     Choice of smoothing kernel,
@@ -99,6 +103,14 @@
   See equation (15.16).
   If \code{bw} is missing, then this rule of thumb will be applied.
   The argument \code{stoyan} determines the value of \eqn{c}.
+
+  The argument \code{r} is the vector of values for the
+  distance \eqn{r} at which \eqn{g(r)} should be evaluated.
+  There is a sensible default.
+  If it is specified, \code{r} must be a vector of increasing numbers
+  starting from \code{r[1] = 0}, 
+  and \code{max(r)} must not exceed half the diameter of 
+  the window. 
 }
 \references{
   Stoyan, D. and Stoyan, H. (1994)

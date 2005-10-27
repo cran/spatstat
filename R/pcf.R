@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.11 $   $Date: 2005/07/21 10:31:10 $
+#   $Revision: 1.13 $   $Date: 2005/10/27 10:13:47 $
 #
 #
 #   calculate pair correlation function
@@ -14,10 +14,13 @@ pcf <- function(X, ...) {
   UseMethod("pcf")
 }
 
-pcf.ppp <- function(X, ..., 
+pcf.ppp <- function(X, ..., r=NULL,
                     kernel="epanechnikov", bw=NULL, stoyan=0.15,
-                    correction=c("translate", "ripley")) {
+                    correction=c("translate", "ripley"))
+{
   verifyclass(X, "ppp")
+  r.override <- !is.null(r)
+
   win <- X$window
   lambda <- X$n/area.owin(win)
 
@@ -35,18 +38,46 @@ pcf.ppp <- function(X, ...,
     bw <- h/sqrt(5)
   }
 
+  ########## r values ############################
   # recommended range of r values
-  alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+  alim <-
+    if(!r.override)
+      c(0, min(diff(win$xrange), diff(win$yrange))/4)
+    else
+      NULL
 
+  # handle arguments r and breaks 
+  breaks <- handle.r.b.args(r, NULL, win)
+  if(!(breaks$even))
+    stop("r values must be evenly spaced")
+  # extract r values
+  r <- breaks$r
+  # clip
+  if(r.override)
+    alim <- range(r)
+  else 
+    r <- r[r <= alim[2]]
+  
+  # arguments for 'density'
+  from <- 0
+  to <- max(r)
+  nr <- length(r)
+  #################################################
+  
+  
+  # compute pairwise distances
+  
   d <- pairdist(X)
 
-  doit <- function(w, d, out, symb, desc, key) {
+  # how to process the distances
+  
+  doit <- function(w, d, out, symb, desc, key, otherargs) {
     offdiag <- (row(d) != col(d))
     d <- d[offdiag]
     w <- w[offdiag]
     kden <- do.call("densityhack",
-                    resolve.defaults(list(x=d, weights=w, kernel=kernel),
-                                     list(bw=bw)))
+                    resolve.defaults(list(x=d, weights=w), otherargs))
+                                     
     r <- kden$x
     y <- kden$y
     g <- y/(2 * pi * r * lambda^2 * area.owin(win))
@@ -63,12 +94,18 @@ pcf.ppp <- function(X, ...,
     return(out)
   }
 
+  otherargs <- resolve.defaults(list(kernel=kernel, bw=bw),
+                                list(...),
+                                list(n=nr, from=from, to=to))
+
+  ###### compute #######
+  
   if(any(correction=="translate"))
     out <- doit(edge.Trans(X), d, NULL, "gTrans(r)",
-                "translation-corrected estimate of g", "trans")
+                "translation-corrected estimate of g", "trans", otherargs)
   if(any(correction=="ripley"))
     out <- doit(edge.Ripley(X,d), d, out, "gRipley(r)",
-                "Ripley-corrected estimate of g", "ripl")
+                "Ripley-corrected estimate of g", "ripl", otherargs)
   
   # which corrections have been computed?
   nama2 <- names(out)

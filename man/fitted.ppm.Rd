@@ -6,10 +6,11 @@
 \description{
   Given a point process model fitted to a point pattern,
   compute the fitted conditional intensity of the model
-  at the points of the quadrature scheme used to fit the model.
+  at the points of the pattern,
+  or at the points of the quadrature scheme used to fit the model.
 }
 \usage{
-  fitted.ppm(object, \dots, type="lambda")
+  fitted.ppm(object, \dots, type="lambda", dataonly=FALSE)
 }
 \arguments{
   \item{object}{
@@ -22,6 +23,12 @@
     String (partially matched) indicating whether the fitted value is the
     conditional intensity (\code{"lambda"}) or the trend
     (\code{"trend"}).
+  }
+  \item{dataonly}{
+    Logical. If \code{TRUE}, then values will only be computed
+    at the points of the data point pattern. If \code{FALSE}, then
+    values will be computed at all the points of the quadrature scheme
+    used to fit the model, including the points of the data point pattern.
   }
 }
 \value{
@@ -56,9 +63,9 @@
   explanatory variables.
 }
 \references{
-  Baddeley, A., Moller, J. and Turner, R. (2004)
-  Residuals for spatial point processes.
-  In preparation.
+  Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005).
+  Residual analysis for spatial point processes (with discussion).
+  To appear, Journal of the Royal Statistical Society, Series B.
 }
 \seealso{
  \code{\link{ppm.object}},
