@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.4 $	$Date: 2005/04/16 01:40:57 $
+#	$Revision: 2.6 $	$Date: 2005/10/14 08:58:33 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -122,7 +122,7 @@ coef.ppm <- function(object, ...) {
 }
 
 # method for 'fitted'
-fitted.ppm <- function(object, ..., type="lambda") {
+fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE) {
   verifyclass(object, "ppm")
   
   uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
@@ -152,6 +152,9 @@ fitted.ppm <- function(object, ..., type="lambda") {
     # at all quadrature points. If it is omitted then we would only get
     # predictions at the quadrature points j where glmdata$SUBSET[j]=TRUE.
   }
+
+  if(dataonly)
+    lambda <- lambda[is.data(quad.ppm(object))]
   
   return(lambda)
 }

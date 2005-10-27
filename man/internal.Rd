@@ -61,6 +61,7 @@
 \alias{is.stationary.ppm}    
 \alias{Kount}
 \alias{Kwtsum}               
+\alias{Kmulti.inhom}               
 \alias{killinteraction}
 \alias{least.common.multiple}
 \alias{lookup.im}
@@ -227,6 +228,12 @@ is.stationary.ppm(x)
 km.rs(o, cc, d, breaks)
 Kount(d, b, breaks, slow = FALSE)
 Kwtsum(d, b, weight, weightmargin, breaks, slow)
+Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
+         r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") ,
+         lambdaIJ=NULL,
+         Iname = "points satisfying condition I",
+         Jname = "points satisfying condition J")
 killinteraction(model)
 least.common.multiple(n,m)
 lookup.im(im, x, y, naok)

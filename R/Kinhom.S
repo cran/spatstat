@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.13 $	$Date: 2005/09/08 09:47:51 $
+#	$Revision: 1.14 $	$Date: 2005/09/12 07:01:40 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -100,7 +100,7 @@
         
     # this will be the output data frame
     K <- data.frame(r=r, theo= pi * r^2)
-    desc <- c("distance argument r", "theoretical Poisson K(r)")
+    desc <- c("distance argument r", "theoretical Poisson Kinhom(r)")
     K <- fv(K, "r", substitute(Kinhom(r), NULL),
             "theo", , alim, c("r","Kpois(r)"), desc)
         
@@ -120,13 +120,13 @@
       if(any(correction == "border")) {
         Kb <- RS$ratio
         K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
-                     "border-corrected estimate of K(r)",
+                     "border-corrected estimate of Kinhom(r)",
                      "border")
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
         K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
-                     "modified border-corrected estimate of K(r)",
+                     "modified border-corrected estimate of Kinhom(r)",
                      "bord.modif")
       }
       # reset diagonal to original values
@@ -141,7 +141,7 @@
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
-                   "translation-correction estimate of K(r)",
+                   "translation-correction estimate of Kinhom(r)",
                    "trans")
     }
     if(any(correction == "isotropic" | correction == "Ripley")) {
@@ -153,7 +153,7 @@
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
-                   "Ripley isotropic correction estimate of K(r)",
+                   "Ripley isotropic correction estimate of Kinhom(r)",
                    "iso")
     }
 

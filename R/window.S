@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.32 $	$Date: 2005/05/24 20:29:49 $
+#	$Revision: 4.34 $	$Date: 2005/09/23 09:08:24 $
 #
 #
 #	A window may be either
@@ -526,8 +526,10 @@ inside.owin <- function(x, y, w) {
   # test whether inside bounding rectangle
   xr <- w$xrange
   yr <- w$yrange
-  frameok <- (xr[1] <= x) & (x <= xr[2]) & (yr[1] <= y) & (y <= yr[2])
-
+  eps <- sqrt(.Machine$double.eps)
+  frameok <- (x >= xr[1] - eps) & (x <= xr[2] + eps) & 
+             (y >= yr[1] - eps) & (y <= yr[2] + eps)
+ 
   if(all(!frameok))  # all points OUTSIDE window - no further work needed
     return(frameok)
 
@@ -560,11 +562,7 @@ inside.owin <- function(x, y, w) {
            # map locations to raster (row,col) coordinates
            loc <- nearest.raster.point(xf,yf,w)
            # look up mask values
-           mas <- w$m
-           nf <- sum(frameok)
-           okf <- logical(nf)
-           for(i in 1:nf) 
-             okf[i] <- mas[loc$row[i],loc$col[i]]
+           okf <- (w$m)[cbind(loc$row, loc$col)]
            # insert into 'ok' vector
            ok[frameok] <- okf
            return(ok)

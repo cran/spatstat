@@ -27,6 +27,10 @@
 }
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
+
+  Additionally,  some intermediate results of the simulation are
+  returned as attributes of this point pattern.
+  See \code{\link{rNeymanScott}}.
 }
 \details{
   This algorithm generates a realisation of the

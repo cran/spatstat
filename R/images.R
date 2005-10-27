@@ -179,5 +179,3 @@ rastery.im <- function(x) {
 
 ##############
 
-
-

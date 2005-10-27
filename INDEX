@@ -40,8 +40,7 @@ data.ppm                Extract Original Data from a Fitted Point
                         Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
 demopat                 Artificial Data Point Pattern
-diagnose.ppm            Diagnostic Plots for Fitted Point Process
-                        Model
+diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window Frame
 DiggleGratton           Diggle-Gratton model
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
@@ -73,8 +72,7 @@ Gest                    Nearest Neighbour Distance Function G
 Geyer                   Geyer's Saturation Point Process Model
 Gmulti                  Marked Nearest Neighbour Distance Function
 gridcentres             Rectangular grid of points
-gridweights             Compute Quadrature Weights Based on Grid
-                        Counts
+gridweights             Compute Quadrature Weights Based on Grid Counts
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
 humberside              Humberside Data on Childhood Leukaemia and
@@ -102,13 +100,15 @@ Jest                    Estimate the J-function
 Jmulti                  Marked J Function
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
 Kcross                  Multitype K Function (Cross-type)
+Kcross.inhom            Inhomogeneous Cross K Function
 Kdot                    Multitype K Function (i-to-any)
+Kdot.inhom              Inhomogeneous Multitype K Dot Function
 Kest                    K-function
 Kest.fft                K-function using FFT
 Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
-km.rs                   Kaplan-Meier and Reduced Sample Estimator
-                        using Histograms
+km.rs                   Kaplan-Meier and Reduced Sample Estimator using
+                        Histograms
 Kmulti                  Marked K-Function
 ksmooth.ppp             Kernel Smoothed Intensity of Point Pattern
 lansing                 Lansing Woods Point Pattern
@@ -163,8 +163,8 @@ print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
 print.quad              Print a Quadrature Scheme
-qqplot.ppm              Q-Q Plot of Residuals from Fitted Point
-                        Process Model
+qqplot.ppm              Q-Q Plot of Residuals from Fitted Point Process
+                        Model
 quad.object             Class of Quadrature Schemes
 quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
@@ -196,8 +196,8 @@ rmh.default             Simulate Point Process Models using the
 rmhmodel                Define Point Process Model for
                         Metropolis-Hastings Simulation.
 rmh.ppm                 Simulate from a Fitted Point Process Model
-rmhstart                Determine Initial State for
-                        Metropolis-Hastings Simulation.
+rmhstart                Determine Initial State for Metropolis-Hastings
+                        Simulation.
 rmpoint                 Generate N Random Multitype Points
 rmpoispp                Generate Multitype Poisson Point Pattern
 rNeymanScott            Simulate Neyman-Scott Process

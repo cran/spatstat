@@ -1,0 +1,194 @@
+\name{Kdot.inhom}
+\alias{Kdot.inhom}
+\title{
+  Inhomogeneous Multitype K Dot Function
+}
+\description{
+  For a multitype point pattern, 
+  estimate the inhomogeneous version of the dot \eqn{K} function,
+  which counts the expected number of points of any type
+  within a given distance of a point of type \eqn{i},
+  adjusted for spatially varying intensity.
+}
+\synopsis{
+Kdot.inhom(X, i=1, lambdaI, lambdadot, \dots, lambdaIdot=NULL)
+}
+\usage{
+Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=NULL)
+}
+\arguments{
+  \item{X}{The observed point pattern, 
+    from which an estimate of the inhomogeneous cross type \eqn{K} function
+    \eqn{K_{i\bullet}(r)}{Ki.(r)} will be computed.
+    It must be a multitype point pattern (a marked point pattern
+    whose marks are a factor). See under Details.
+  }
+  \item{i}{Number or character string identifying the type (mark value)
+    of the points in \code{X} from which distances are measured.
+  }
+  \item{lambdaI}{
+    numeric vector giving the estimated intensity of the sub-process of
+    points of type \code{i}, evaluated at each of the type \code{i}
+    points in \code{X}. 
+    It should have length equal to the number of type \code{i} points in
+    \code{X}.
+  }
+  \item{lambdadot}{
+    numeric vector giving the estimated intensity of the entire process
+    (points of all types), evaluated at each point in \code{X}. 
+    It should have length equal to the number of points in
+    \code{X}.
+  }
+  \item{r}{
+      Optional. Numeric vector giving the values of the argument \eqn{r}
+      at which the dot K function
+      \eqn{K_{i\bullet}(r)}{Ki.(r)} should be evaluated.
+      There is a sensible default.
+      First-time users are strongly advised not to specify this argument.
+      See below for important conditions on \eqn{r}.
+  }
+  \item{breaks}{
+    Optional. An alternative to the argument \code{r}.
+    Not normally invoked by the user. See the \bold{Details} section.
+  }
+  \item{correction}{
+    A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    It specifies the edge correction(s) to be applied.
+  }
+  \item{\dots}{
+    Ignored.
+  }
+  \item{lambdaIdot}{
+    Optional. A matrix containing estimates of the
+    product of the intensities \code{lambdaI} and \code{lambdadot}
+    for each pair of points, the first point of type \code{i} and
+    the second of any type.
+  }
+}
+\value{
+  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+  Essentially a data frame containing numeric columns 
+  \item{r}{the values of the argument \eqn{r} 
+    at which the function \eqn{K_{i\bullet}(r)}{Ki.(r)} has been  estimated
+  }
+  \item{theo}{the theoretical value of  \eqn{K_{i\bullet}(r)}{Ki.(r)}
+    for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
+  }
+  together with a column or columns named 
+  \code{"border"}, \code{"bord.modif"},
+  \code{"iso"} and/or \code{"trans"},
+  according to the selected edge corrections. These columns contain
+  estimates of the function \eqn{K_{i\bullet}(r)}{Ki.(r)}
+  obtained by the edge corrections named.
+}
+\details{
+  This is a generalisation of the function \code{\link{Kdot}}
+  to include an adjustment for spatially inhomogeneous intensity,
+  in a manner similar to the function \code{\link{Kinhom}}.
+
+  Briefly, given a multitype point process, consider the points without
+  their types, and suppose this unmarked point process 
+  has intensity function
+  \eqn{\lambda(u)}{lambda(u)} at spatial locations \eqn{u}.
+  Suppose we place a mass of \eqn{1/\lambda(\zeta)}{1/lambda(z)}
+  at each point \eqn{\zeta}{z} of the process. Then the expected total
+  mass per unit area is 1. The
+  inhomogeneous ``dot-type'' \eqn{K} function 
+  \eqn{K_{i\bullet}^{\mbox{inhom}}(r)}{K[i.]inhom(r)} equals the expected
+  total mass within a radius \eqn{r} of a point of the process
+  of type \eqn{i}, discounting this point itself.
+  
+  If the process of type \eqn{i} points
+  were independent of the points of other types,
+  then \eqn{K_{i\bullet}^{\mbox{inhom}}(r)}{K[i.]inhom(r)}
+  would equal \eqn{\pi r^2}{pi * r^2}.
+  Deviations between the empirical \eqn{K_{i\bullet}}{Ki.} curve
+  and the theoretical curve \eqn{\pi r^2}{pi * r^2} 
+  suggest dependence between the points of types \eqn{i} and \eqn{j} for
+  \eqn{j\neq i}{j != i}.
+
+  The argument \code{X} must be a point pattern (object of class
+  \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
+  It must be a marked point pattern, and the mark vector
+  \code{X$marks} must be a factor.
+
+  The arguments \code{i} and \code{j} will be interpreted as
+  levels of the factor \code{X$marks}. (Warning: this means that
+  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
+  not the number 3). 
+
+  The argument \code{lambdaI} must be a vector containing estimated values of
+  the intensity of the sub-process of points of type \code{i} evaluated at the
+  points of type \code{i}.
+
+  The argument \code{lambdadot} should contain
+  estimated values of the intensity of the process of points of any type,
+  evaluated at the points of the process.
+  
+  The optional argument \code{lambdaIdot} is a matrix containing estimated
+  values of the products of these two intensities for each pair of
+  points, the first point of type \code{i} and the second of any type.
+  
+  The argument \code{r} is the vector of values for the
+  distance \eqn{r} at which \eqn{K_{i\bullet}(r)}{Ki.(r)} should be evaluated. 
+  The values of \eqn{r} must be increasing nonnegative numbers
+  and the maximum \eqn{r} value must exceed the radius of the
+  largest disc contained in the window.
+
+  The argument \code{correction} chooses the edge correction
+  as explained e.g. in \code{\link{Kest}}.
+
+  The pair correlation function can also be applied to the
+  result of \code{Kcross.inhom}; see \code{\link{pcf}}.
+}
+\references{
+  Moller, J. and Waagepetersen, R.
+  Statistical Inference and Simulation for Spatial Point Processes
+  Chapman and Hall/CRC
+  Boca Raton, 2003.
+}
+\section{Warnings}{
+  The argument \code{i} is interpreted as a
+  level of the factor \code{X$marks}. Beware of the usual
+  trap with factors: numerical values are not
+  interpreted in the same way as character values. 
+}
+\seealso{
+ \code{\link{Kdot}},
+ \code{\link{Kinhom}},
+ \code{\link{Kcross.inhom}},
+ \code{\link{pcf}}
+}
+\examples{
+    # Lansing Woods data
+    data(lansing)
+    lansing <- lansing[seq(1,lansing$n, by=10)]
+    ma <- split(lansing)$maple
+    lg <- unmark(lansing)
+
+    # Estimate intensities by nonparametric smoothing
+    lambdaM <- ksmooth.ppp(ma, sigma=0.15)
+    lambdadot <- ksmooth.ppp(lg, sigma=0.15)
+    K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM[ma],
+                                      lambdadot=lambdadot[lg])
+
+    # synthetic example: type A points have intensity 50,
+    #                    type B points have intensity 100 * x
+    lamB <- as.im(function(x,y){100 * x}, owin())
+    lamdot <- as.im(function(x,y) { 50 + 100 * x}, owin())
+    X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
+    XB <- split(X)$B
+    K <- Kdot.inhom(X, "B",
+        lambdaI=lamB[XB], lambdadot=lamdot[X])
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}

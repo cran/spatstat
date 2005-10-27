@@ -34,6 +34,9 @@
 }
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
+  
+  Additionally,  some intermediate results of the simulation are
+  returned as attributes of this point pattern: see Details.
 }
 \details{
   This algorithm generates a realisation of the
@@ -51,6 +54,8 @@
   Second, each parent point is
   replaced by a random cluster of points, created by calling the
   function \code{rcluster}.
+  These clusters are combined together to yield a single point pattern
+  which is then returned as the result of \code{rNeymanScott}.
 
   The function \code{rcluster} should expect to be called as
   \code{rcluster(xp[i],yp[i],\dots)} for each parent point at a location
@@ -58,6 +63,14 @@
   should be a list with elements
   \code{x,y} which are vectors of equal length giving the absolute
   \eqn{x} and \code{y} coordinates of the points in the cluster.
+
+  If required, the intermediate stages of the simulation (the parents
+  and the individual clusters) can also be extracted from
+  the return value of \code{rNeymanScott}
+  through the attributes \code{"parents"} and \code{"parentid"}.
+  The attribute \code{"parents"} is the point pattern of parent points.
+  The attribute \code{"parentid"} is an integer vector specifying
+  the parent for each of the points in the simulated pattern.
 }
 \seealso{
 \code{\link{rpoispp}},
