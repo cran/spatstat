@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.34 $	$Date: 2005/09/23 09:08:24 $
+#	$Revision: 4.36 $	$Date: 2005/11/24 05:47:30 $
 #
 #
 #	A window may be either
@@ -63,13 +63,15 @@
 owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
 
   ## Exterminate ambiguities
-  if(!missing(poly) && !is.null(poly) && !missing(mask) && !is.null(mask))
+  poly.given <- !is.null(poly)
+  mask.given <- !is.null(mask)
+  if(poly.given  && mask.given)
      stop("Ambiguous -- both polygonal boundary and digital mask supplied")
      
   if(missing(xrange) != missing(yrange))
     stop("If one of xrange, yrange is specified then both must be.")
 
-  if(missing(poly) && missing(mask)) {
+  if(!poly.given && !mask.given) {
     ######### rectangle #################
     if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
       stop("xrange should be a vector of length 2 giving (xmin, xmax)")
@@ -78,7 +80,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
     w <- list(type="rectangle", xrange=xrange, yrange=yrange)
     class(w) <- "owin"
     return(w)
-  } else if(!missing(poly)) {
+  } else if(poly.given) {
     ######### polygonal boundary ########
     #
     # test whether it's a single polygon or multiple polygons
@@ -126,7 +128,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
     class(w) <- "owin"
     return(w)
     
-  } else if(!missing(mask)) {
+  } else if(mask.given) {
     ######### digital mask #####################
     
     if(!is.matrix(mask))
@@ -178,38 +180,57 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
 
 is.owin <- function(x) { inherits(x, "owin") }
 
-as.owin <- function(W) {
-	# Tries to interpret data as an object of class 'window'
-	# W may be
-	#	an object of class 'window'
-	#	a structure with entries xrange, yrange
-	#	a four-element vector (interpreted xmin, xmax, ymin, ymax)
-	#	a structure with entries xl, xu, yl, yu
-	#	an object of class 'ppp'
-	#	an object of class 'im'
+#
+#-----------------------------------------------------------------------------
+#
 
-	if(verifyclass(W, "owin", fatal=FALSE))
-		return(W)
-        else if(verifyclass(W, "ppp", fatal=FALSE))
-		return(W$window)
-        else if(verifyclass(W, "im", fatal=FALSE))  {
-          out <- list(type     = "mask",
-                      xrange   = W$xrange,
-                      yrange   = W$yrange,
-                      dim      = W$dim,
-                      xstep    = W$xstep,
-                      ystep    = W$ystep,
-                      warnings = c(
+as.owin <- function(W) {
+  UseMethod("as.owin")
+}
+
+as.owin.owin <- function(W) {
+  if(verifyclass(W, "owin", fatal=fatal))
+    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m))
+  else
+    return(NULL)
+}
+
+as.owin.ppp <- function(W) {
+  if(verifyclass(W, "ppp", fatal=fatal))
+    return(W$window)
+  else
+    return(NULL)
+}
+
+as.owin.im <- function(W) {
+  if(!verifyclass(W, "im", fatal=fatal))
+    return(NULL)
+  out <- list(type     = "mask",
+              xrange   = W$xrange,
+              yrange   = W$yrange,
+              dim      = W$dim,
+              xstep    = W$xstep,
+              ystep    = W$ystep,
+              warnings = c(
 "Row index corresponds to increasing y coordinate; column to increasing x",
 "Transpose matrices to get the standard presentation in S",
 "Example: image(result$xcol,result$yrow,t(result$d))"
-                        ),
-                      xcol    = W$xcol,
-                      yrow    = W$yrow,
-                      m       = !is.na(W$v))
-          class(out) <- "owin"
-          return(out)
-        } else if(checkfields(W, c("xrange", "yrange"))) {
+                ),
+              xcol    = W$xcol,
+              yrow    = W$yrow,
+              m       = !is.na(W$v))
+  class(out) <- "owin"
+  return(out)
+}
+ 
+as.owin.default <- function(W) {
+	# Tries to interpret data as an object of class 'window'
+	# W may be
+	#	a structure with entries xrange, yrange
+	#	a four-element vector (interpreted xmin, xmax, ymin, ymax)
+	#	a structure with entries xl, xu, yl, yu
+
+        if(checkfields(W, c("xrange", "yrange"))) {
 		Z <- owin(W$xrange, W$yrange)
 		return(Z)
 	} else if(is.vector(W) && is.numeric(W) && length(W) == 4) {

@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.13 $   $Date: 2005/10/27 10:13:47 $
+#   $Revision: 1.16 $   $Date: 2005/11/24 03:56:30 $
 #
 #
 #   calculate pair correlation function
@@ -99,13 +99,21 @@ pcf.ppp <- function(X, ..., r=NULL,
                                 list(n=nr, from=from, to=to))
 
   ###### compute #######
-  
+
+  out <- NULL
+
   if(any(correction=="translate"))
-    out <- doit(edge.Trans(X), d, NULL, "gTrans(r)",
+    out <- doit(edge.Trans(X), d, out, "gTrans(r)",
                 "translation-corrected estimate of g", "trans", otherargs)
   if(any(correction=="ripley"))
     out <- doit(edge.Ripley(X,d), d, out, "gRipley(r)",
                 "Ripley-corrected estimate of g", "ripl", otherargs)
+
+  # sanity check
+  if(is.null(out)) {
+    warning("Nothing computed - no edge corrections chosen")
+    return(NULL)
+  }
   
   # which corrections have been computed?
   nama2 <- names(out)
@@ -171,7 +179,7 @@ function(X, ..., method="c") {
          },
          b = {
            y <- K/(2 * pi * r)
-           y[is.nan(y)] <- 0
+           y[!is.finite(y)] <- 0
            ss <- callmatched(smooth.spline,
                              list(x=r, y=y, ...))
            dy <- predict(ss, r, deriv=1)$y
@@ -179,7 +187,7 @@ function(X, ..., method="c") {
          },
          c = {
            z <- K/(pi * r^2)
-           z[is.nan(z)] <- 1
+           z[!is.finite(z)] <- 1
            ss <- callmatched(smooth.spline,
                              list(x=r, y=z, ...))
            dz <- predict(ss, r, deriv=1)$y
@@ -187,7 +195,7 @@ function(X, ..., method="c") {
          },
          d = {
            z <- sqrt(K)
-           z[is.na(z)] <- 0
+           z[!is.finite(z)] <- 0
            ss <- callmatched(smooth.spline,
                              list(x=r, y=z, ...))
            dz <- predict(ss, r, deriv=1)$y
