@@ -1,5 +1,9 @@
 \name{as.owin}
 \alias{as.owin}
+\alias{as.owin.owin}
+\alias{as.owin.ppp}
+\alias{as.owin.im}
+\alias{as.owin.default}
 \title{Convert Data To Class owin}
 \description{
 Converts data specifying an observation window
@@ -52,6 +56,10 @@ in any of several formats, into an object of class \code{"owin"}.
     lies outside the window, is transformed into the logical value
     \code{FALSE}, which is the corresponding convention for window masks.
   }
+  The function \code{as.owin} is generic, with methods for
+  \code{"owin"},
+  \code{"im"} and
+  \code{"ppp"} as well as the default method.
 }
 \seealso{
   \code{\link{owin.object}},

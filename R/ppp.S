@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.24 $	$Date: 2005/05/11 23:27:48 $
+#	$Revision: 4.25 $	$Date: 2005/11/24 04:16:51 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -62,27 +62,65 @@ ppp <- function(x, y, ..., window, marks ) {
 
 is.ppp <- function(x) { inherits(x, "ppp") }
 
-as.ppp <- function(X, W = NULL, fatal=TRUE) {
+#
+#--------------------------------------------------------------------------
+#
+
+as.ppp <- function(X, ..., fatal=TRUE) {
+  UseMethod("as.ppp")
+}
+
+as.ppp.ppp <- function(X, ..., fatal=TRUE) {
+  if(verifyclass(X, "ppp", fatal=fatal))
+    return(ppp(X$x, X$y, window=X$window, marks=X$marks))
+  else
+    return(NULL)
+}
+
+as.ppp.quad <- function(X, ..., fatal=TRUE) {
+  if(verifyclass(X, "quad", fatal=fatal))
+    return(union.quad(X))
+  else
+    return(NULL)
+}
+
+as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
+  if(!verifyclass(X, "matrix", fatal=fatal)
+     || !is.numeric(X)
+     || ncol(X) != 2) {
+    if(fatal)
+      stop("X must be a two-column matrix of numbers")
+    else
+      return(NULL)
+  }
+  if(is.null(W)) {
+    if(fatal)
+      stop("x,y coords given but no window specified")
+    else
+      return(NULL)
+  } 
+    
+  if(is.function(W))
+    return(cobble.ppp(X[,1], X[,2], W, fatal))
+
+  win <- as.owin(W)
+  Z <- ppp(X[,1], X[,2], window = win)
+  return(Z)
+}
+    
+as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
 	# tries to coerce data X to a point pattern
 	# X may be:
-	#	1. an object of class 'ppp'
-	#	2a. a structure with entries x, y, xl, xu, yl, yu
-	#	2b. a structure with entries x, y, area where
+	#	1. a structure with entries x, y, xl, xu, yl, yu
+	#	2. a structure with entries x, y, area where
         #                    'area' has entries xl, xu, yl, yu
-	#	3. a two-column matrix
-	#	4. a structure with entries x, y
-        #       5. a quadrature scheme (object of class 'quad')
-	# In cases 3 and 4, we need the second argument W
-	# which is coerced to an object of class 'owin' by the 
+	#	3. a structure with entries x, y
+	# The second argument W is coerced to an object of class 'owin' by the 
 	# function "as.owin" in window.S
-        # In cases 2 and 4, if X also has an entry X$marks
+        # If X also has an entry X$marks
         # then this will be interpreted as the marks vector for the pattern.
 	#
-	if(verifyclass(X, "ppp", fatal=FALSE))
-		return(X)
-        else if(verifyclass(X, "quad", fatal=FALSE))
-                return(union.quad(X))
-	else if(checkfields(X, 	c("x", "y", "xl", "xu", "yl", "yu"))) {
+	if(checkfields(X, c("x", "y", "xl", "xu", "yl", "yu"))) {
 		xrange <- c(X$xl, X$xu)
 		yrange <- c(X$yl, X$yu)
 		if(is.null(X$marks))
@@ -99,18 +137,6 @@ as.ppp <- function(X, W = NULL, fatal=TRUE) {
                 else
                   Z <- ppp(X$x, X$y, window=win, marks = X$marks)
                 return(Z)
-	} else if(is.matrix(X) && is.numeric(X) && ncol(X) == 2) {
-                if(is.function(W))
-                  return(cobble.ppp(X[,1], X[,2], W, fatal))
-		if(is.null(W)) {
-                  if(fatal)
-                    stop("x,y coords given but no window specified")
-                  else
-                    return(NULL)
-                } 
-                win <- as.owin(W)
-		Z <- ppp(X[,1], X[,2], window = win)
-		return(Z)
 	} else if(checkfields(X, c("x", "y"))) {
                 if(is.function(W))
                   return(cobble.xy(X$x, X$y, W, fatal))

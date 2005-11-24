@@ -1,5 +1,9 @@
 \name{as.ppp}
 \alias{as.ppp}
+\alias{as.ppp.ppp}
+\alias{as.ppp.quad}
+\alias{as.ppp.matrix}
+\alias{as.ppp.default}
 \title{Convert Data To Class ppp}
 \description{
 Tries to coerce any reasonable kind of data to a point pattern
@@ -7,16 +11,17 @@ Tries to coerce any reasonable kind of data to a point pattern
 for use by the \code{spatstat} package).
 }
 \synopsis{
-  as.ppp(X, W=NULL, fatal=TRUE)
+  as.ppp(X, \dots, fatal=TRUE)
 }
 \usage{
-  as.ppp(X)
-  as.ppp(X, W)
-  as.ppp(X, fatal=TRUE)
+  as.ppp(X, \dots, fatal=TRUE)
+  as.ppp(X, W, \dots, fatal=TRUE)
 }
 \arguments{
   \item{X}{Data which will be converted into a point pattern}
-  \item{W}{Data which define a default window for the pattern}
+  \item{W}{Data which define a window for the pattern
+    when \code{X} does not contain a window}
+  \item{\dots}{Ignored.}
   \item{fatal}{Logical value. See Details.}
 }
 \value{
@@ -25,12 +30,17 @@ for use by the \code{spatstat} package).
   The value \code{NULL} may also be returned; see Details.
 }
 \details{
-  This function tries to coerce the data \code{X} to a point pattern
+  Converts the dataset \code{X} to a point pattern
   (an object of class \code{"ppp"}; see \code{\link{ppp.object}} for
-  an overview).  The optional argument \code{W} is a default window for the
-  pattern; it is used only if a window is not specified in \code{X}.
+  an overview).
 
-  The data \code{X} may be:
+  This function is normally used to convert an existing point pattern
+  dataset, stored in another format, to the \code{"ppp"} format.
+  To create a new point pattern from raw data such as \eqn{x,y}
+  coordinates, it is normally easier to use the creator function
+  \code{\link{ppp}}.
+
+  The dataset \code{X} may be:
   \itemize{
     \item
     an object of class \code{"ppp"}  
@@ -74,6 +84,10 @@ for use by the \code{spatstat} package).
   giving the point coordinates, and \code{xl}, \code{xu}, \code{yl},
   \code{yu} are numbers giving the dimensions of a rectangular window.
 
+  The function \code{as.ppp} is generic, with methods for the
+  classes \code{"ppp"}, \code{"quad"}, \code{"matrix"}
+  and a default method.
+  
   Point pattern datasets can also be created by the function
   \code{\link{ppp}}.
 }
