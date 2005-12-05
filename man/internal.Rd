@@ -14,6 +14,7 @@
 \alias{cellmiddles}
 \alias{checkfields}          
 \alias{check.hist.lengths}
+\alias{clip.psp}
 \alias{cobble.xy}
 \alias{contour.im}
 \alias{countingweights}
@@ -28,6 +29,7 @@
 \alias{distppl}
 \alias{distppll}
 \alias{divisors}
+\alias{do.call.matched}
 \alias{edge.Ripley}
 \alias{edge.Trans}
 \alias{ensure2vector}
@@ -110,6 +112,7 @@
 \alias{print.rmhseed}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
+\alias{print.summary.psp}
 \alias{quad}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -175,6 +178,7 @@ cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
+clip.psp(x, window, check=TRUE)
 cobble.xy(x, y, f, fatal)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
@@ -192,6 +196,7 @@ distpl(p, l)
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 divisors(n)
+do.call.matched(fname, arglist, funargs)
 edge.Ripley(X, r, W)
 edge.Trans(X, Y, W, exact, trim)
 ensure2vector(x)
@@ -287,6 +292,7 @@ print.rmhstart(x, \dots)
 print.rmhseed(x, \dots)
 print.summary.owin(x, \dots)
 print.summary.ppp(x, \dots, dp=3)
+print.summary.psp(x, \dots)
 quad(data, dummy, w, param)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)

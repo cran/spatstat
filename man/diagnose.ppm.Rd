@@ -295,8 +295,8 @@
 \references{
   Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
-  Journal of the Royal Statistical Society, Series B.
-  to appear.
+  \emph{Journal of the Royal Statistical Society, Series B}
+  \bold{67}, 617--666.
 
   Stoyan, D. and Grabarnik, P. (1991)
   Second-order characteristics for stochastic structures connected with

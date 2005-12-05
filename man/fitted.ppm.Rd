@@ -65,7 +65,8 @@
 \references{
   Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005).
   Residual analysis for spatial point processes (with discussion).
-  To appear, Journal of the Royal Statistical Society, Series B.
+  \emph{Journal of the Royal Statistical Society, Series B}
+  \bold{67}, 617--666.
 }
 \seealso{
  \code{\link{ppm.object}},

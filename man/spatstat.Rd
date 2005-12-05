@@ -234,10 +234,9 @@ The Spatstat Package
 	\code{\link{is.subset.owin}}    \tab determine whether one window contains another 
       }
 
-    \bold{Pixel images}
-
+    \bold{Pixel images:}
     An object of class \code{"im"} represents a pixel image. 
-      Such objects are returned by some of the functions in
+    Such objects are returned by some of the functions in
       \code{spatstat} including \code{\link{Kmeasure}},
       \code{\link{setcov}} and \code{\link{ksmooth.ppp}}. 
       \tabular{ll}{
@@ -256,8 +255,31 @@ The Spatstat Package
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
       }
 
+    \bold{Line segment patterns}
+
+    An object of class \code{"psp"} represents a pattern of line
+    segments.
+    \tabular{ll}{
+      \code{\link{psp}} \tab create a line segment pattern \cr
+      \code{\link{as.psp}} \tab convert other data into a line segment pattern \cr
+      \code{\link{plot.psp}} \tab plot a line segment pattern \cr
+      \code{\link{print.psp}} \tab print basic information \cr
+      \code{\link{summary.psp}} \tab print summary information \cr
+      \code{\link{subset.psp}} \tab \cr
+      \code{\link{[.psp}}
+                  \tab extract a subset of a line segment pattern \cr
+      \code{\link{midpoints.psp}} \tab compute the midpoints of line segments \cr
+      \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
+      \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
+      \code{\link{rotate.psp}} \tab rotate a line segment pattern \cr      
+      \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
+      \code{\link{affine.psp}} \tab apply an affine transformation \cr      
+      \code{\link{distmap.psp}} \tab compute the distance map of a line
+      segment pattern
     }
-    
+
+  }
+  
 \section{II. EXPLORATORY DATA ANALYSIS}{
 
   \bold{Inspection of data:}

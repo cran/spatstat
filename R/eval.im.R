@@ -5,7 +5,7 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.3 $     $Date: 2005/07/28 06:11:44 $
+#     $Revision: 1.7 $     $Date: 2005/12/05 07:10:46 $
 #
 
 eval.im <- function(expr) {
@@ -32,16 +32,17 @@ eval.im <- function(expr) {
         stop(paste("Images", names(images)[1], "and", names(images)[i],
                    "are incompatible"))
   }
-  # replace each image by its matrix of pixel values, and evaluate 
-  imagevalues <- lapply(images, function(x) { x$v })
-  result <- images[[1]]
+  # replace each image by its matrix of pixel values, and evaluate
+  getvalues <- function(x) {
+    v <- as.vector(x$v)
+    if(x$type != "factor") return(v)
+    else return(factor(v, levels=seq(x$lev), labels=lev))
+  }
+  imagevalues <- lapply(images, getvalues)
+  template <- images[[1]]
   v <- eval(e, imagevalues)
-  # sanity check
-  if(!is.matrix(v))
-    stop("Evaluating the expression did not yield a matrix")
-  if(any(dim(v) != dim(result$v)))
-     stop("Expression yields a matrix with inappropriate dimensions")
-  result$v <- v
+  # reshape, etc
+  result <- im(v, template$xcol, template$yrow, levels(v))
   return(result)
 }
   

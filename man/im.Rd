@@ -6,11 +6,11 @@
   class \code{"im"} representing a two-dimensional pixel image.
 }
 \usage{
-  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)))
+  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), lev=levels(mat))
 }
 \arguments{
   \item{mat}{
-    matrix of grey level pixel values of the image.
+    matrix or vector containing the pixel values of the image.
   }
   \item{xcol}{
     vector of \eqn{x} coordinates for the pixels
@@ -18,12 +18,20 @@
   \item{yrow}{
     vector of \eqn{y} coordinates for the pixels
   }
+  \item{lev}{
+    possible factor levels, if \code{mat} should be interpreted
+    as a factor.
+  }
 }
 \details{
   This function creates an object of class \code{"im"} representing
   a two-dimensional pixel image. See \code{\link{im.object}}
   for details of this class.
 
+  If \code{mat} is not a matrix, it will first be converted into
+  a matrix with \code{nrow(mat) = length(yrow)} and
+  \code{ncol(mat) = length(xcol)}.
+  
   Note that the \bold{row} index of the matrix \code{mat} corresponds
   to increasing \bold{y} coordinate, while the column index of \code{mat}
   corresponds to increasing \bold{x} coordinate. Thus
