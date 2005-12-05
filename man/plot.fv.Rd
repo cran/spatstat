@@ -50,7 +50,8 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   }
 }
 \value{
-  none. Side effect is a plot.
+  Either \code{NULL}, or a data frame giving the meaning of the
+  different line types and colours.
 }
 \details{
   This is the \code{plot} method for the class \code{"fv"}.
@@ -74,8 +75,14 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   against \code{x}. 
   See the examples.
 
-  The symbol \code{.} can be used in \code{fmla} to represent all
-  the function values. See the examples.
+  A convenient abbreviation is the symbol \code{.} which
+  can be used in the formula to represent all
+  the variables in the data frame (other than the function argument
+  itself). See the examples.
+
+  The value returned by this plot function indicates the
+  meaning of the line types and colours in the plot. It can be used
+  to make a suitable legend for the plot. See the examples.
 }
 \examples{
    data(cells)
@@ -99,6 +106,10 @@ plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
    plot(K, iso ~ r, subset=quote(r < 0.2))
                                    # plots iso against r for r < 10
+
+   # making a legend
+   v <- plot(K, . ~ r, ylab="K(r)")
+   legend(0.05, 0.15, legend=row.names(v), lty=v$lty, col=v$col)
 }
 \seealso{
   \code{\link{fv.object}},

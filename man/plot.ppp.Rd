@@ -141,6 +141,9 @@ maxsize, markscale)
   (if \code{m} is negative). If \code{maxsize} is given, then the
   largest mark in absolute value, \code{mmax=max(abs(x$marks))},
   will be scaled to have physical size \code{maxsize}.
+
+  The value returned by this plot function can be used to make a
+  suitable legend, as shown in the examples.
 }
 \seealso{
   \code{\link{ppp.object}},
@@ -189,6 +192,11 @@ maxsize, markscale)
 
    # draw circles of diameter equal to nearest neighbour distance
    plot(cells \%mark\% (nndist(cells)/2), markscale=1)
+
+   # making the legend
+   data(amacrine)
+   v <- plot(amacrine)
+   legend(0.2, 1.2, pch=v, legend=names(v))
 }
 
 \author{Adrian Baddeley

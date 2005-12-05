@@ -1,11 +1,14 @@
 affine                  Apply Affine Transformation
 affine.owin             Apply Affine Transformation To Window
 affine.ppp              Apply Affine Transformation To Point Pattern
+affine.psp              Apply Affine Transformation To Line Segment
+                        Pattern
 allstats                Calculate four standard summary functions of a
                         point pattern.
 alltypes                Calculate Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
+angles.psp              Orientation Angles of Line Segments
 anova.ppm               ANOVA for Fitted Point Process Models
 ants                    Harkness-Isham ants' nests data
 applynbd                Apply Function to Every Neighbourhood in a
@@ -15,6 +18,7 @@ as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.owin                 Convert Data To Class owin
 as.ppp                  Convert Data To Class ppp
+as.psp                  Convert Data To Class psp
 as.rectangle            Window Frame
 bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
@@ -48,6 +52,7 @@ dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
 distmap                 Distance Map
 distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern
+distmap.psp             Distance Map of Line Segment Pattern
 dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
 eem                     Exponential Energy Marks
@@ -112,6 +117,7 @@ km.rs                   Kaplan-Meier and Reduced Sample Estimator using
 Kmulti                  Marked K-Function
 ksmooth.ppp             Kernel Smoothed Intensity of Point Pattern
 lansing                 Lansing Woods Point Pattern
+lengths.psp             Lengths of Line Segments
 LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
 longleaf                Longleaf Pines Point Pattern
@@ -119,6 +125,7 @@ lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
+midpoints.psp           Midpoints of Line Segment Pattern
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
@@ -150,6 +157,7 @@ plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
 plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
+plot.psp                plot a Spatial Line Segment Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 plot.splitppp           Plot a List of Point Patterns
 Poisson                 Poisson Point Process Model
@@ -162,7 +170,11 @@ print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
+print.psp               Print Brief Details of a Line Segment Pattern
+                        Dataset
 print.quad              Print a Quadrature Scheme
+psp                     Create a Line Segment Pattern
+psp.object              Class of Line Segment Patterns
 qqplot.ppm              Q-Q Plot of Residuals from Fitted Point Process
                         Model
 quad.object             Class of Quadrature Schemes
@@ -204,6 +216,7 @@ rNeymanScott            Simulate Neyman-Scott Process
 rotate                  Rotate
 rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
+rotate.psp              Rotate a Line Segment Pattern
 rpoint                  Generate N Random Points
 rpoispp                 Generate Poisson Point Pattern
 rSSI                    Simple Sequential Inhibition
@@ -218,6 +231,8 @@ shift                   Apply Vector Translation
 shift.im                Apply Vector Translation To Pixel Image
 shift.owin              Apply Vector Translation To Window
 shift.ppp               Apply Vector Translation To Point Pattern
+shift.psp               Apply Vector Translation To Line Segment
+                        Pattern
 simdat                  Simulated Point Pattern
 Softcore                The Soft Core Point Process Model
 spatstat                The Spatstat Package
@@ -233,11 +248,13 @@ subset.fasp             Extract Subset of Function Array
 subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image
 subset.ppp              Extract or Replace Subset of Point Pattern
+subset.psp              Extract Subset of Line Segment Pattern
 suffstat                Sufficient Statistic of Point Process Model
 summary.im              Summarizing a Pixel Image
 summary.owin            Summary of a Spatial Window
 summary.ppm             Summarizing a Fitted Point Process Model
 summary.ppp             Summary of a Point Pattern Dataset
+summary.psp             Summary of a Line Segment Pattern Dataset
 summary.quad            Summarizing a Quadrature Scheme
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern

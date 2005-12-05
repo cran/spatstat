@@ -41,7 +41,7 @@
   is replaced by a matrix containing the pixel values. The expression is
   then evaluated. The result should be a matrix; it is taken as
   the matrix of pixel values.
-
+  
   The expression \code{expr} must be vectorised.
   There must be at least one pixel image in the expression.
   All images must have compatible dimensions.

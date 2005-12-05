@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.1 $   $Date: 2004/01/06 10:13:58 $
+#    $Revision: 1.3 $   $Date: 2005/12/05 06:57:55 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -22,13 +22,33 @@ summary.im <- function(object, ...) {
   inside <- !is.na(v)
   v <- v[inside]
 
-  # summarise image values
-  y$integral <- sum(v) * pixelarea
-  y$mean <- mean(v)
-  y$range <- range(v)
-  y$min <- y$range[1]  
-  y$max <- y$range[2]  
+  # type of values?
+  y$type <- x$type
   
+  # factor-valued?
+  lev <- x$lev
+  if(fak <- !is.null(lev))
+    v <- factor(v, levels=seq(lev), labels=lev)
+
+  switch(x$type,
+         integer=,
+         real={
+           y$integral <- sum(v) * pixelarea
+           y$mean <- mean(v)
+           y$range <- range(v)
+           y$min <- y$range[1]  
+           y$max <- y$range[2]
+         },
+         factor={
+           y$levels <- lev
+           y$table <- table(v, dnn="")
+         },
+         {
+           # another unknown type
+           pixelvalues <- v
+           y$summary <- summary(pixelvalues)
+         })
+    
   # summarise pixel raster
   win <- as.owin(x)
   y$window <- summary.owin(win)
@@ -41,7 +61,7 @@ summary.im <- function(object, ...) {
 
 print.summary.im <- function(x, ...) {
   verifyclass(x, "summary.im")
-  cat("Pixel image\n")
+  cat(paste(x$type, "-valued pixel image\n", sep=""))
   di <- x$dim
   win <- x$window
   cat(paste(di[1], "x", di[2], "pixel array\n"))
@@ -62,26 +82,35 @@ print.summary.im <- function(x, ...) {
   cat(paste("Pixel values ",
             if(x$fullgrid) "" else "(inside window)",
             ":\n", sep=""))
-  cat(paste(
-      "\trange = [",
-      paste(x$range, collapse=","),
-      "]\n",
-      "\tintegral = ",
-      x$integral,
-      "\n",
-      "\tmean = ",
-      x$mean,
-      "\n",
-      sep=""))
+  switch(x$type,
+         integer=,
+         real={
+           cat(paste(
+                     "\trange = [",
+                     paste(x$range, collapse=","),
+                     "]\n",
+                     "\tintegral = ",
+                     x$integral,
+                     "\n",
+                     "\tmean = ",
+                     x$mean,
+                     "\n",
+                     sep=""))
+         },
+         factor={
+           print(x$table)
+         },
+         {
+           print(x$summary)
+         })
 
-  
   return(invisible(NULL))
 }
 
 
 
 print.im <- function(x, ...) {
-  cat("Pixel image\n")
+  cat(paste(x$type, "-valued pixel image\n", sep=""))
   di <- x$dim
   cat(paste(di[1], "x", di[2], "pixel array\n"))
   cat("enclosing rectangle: ")

@@ -11,6 +11,9 @@ plot(demopat, cols=c("green", "blue"), main="Multitype point pattern")
 data(longleaf)
 plot(longleaf, fg="blue", main="Marked point pattern")
 
+a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
+plot(a, main="Line segment pattern")
+
 data(lansing)
 plot(lansing, "Lansing Woods data")
 plot(split(lansing))
@@ -28,6 +31,13 @@ plot(X[subset])
 subwindow <- owin(poly=list(x=c(0,96,96,40,40,0),y=c(0,0,100,100,50,0)))
 plot(X[,subwindow])
 
+a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
+w <- owin(c(0.1,0.7), c(0.2, 0.8))
+b <- clip.psp(a, w)
+plot(a, main="Subset of a line segment pattern")
+plot(b, add=TRUE, col="red")
+
+plot(swedishpines)
 K <- Kest(swedishpines)
 plot(K)
 title(main="K function for Swedish Pines")
@@ -50,6 +60,10 @@ plot(swedishpines$window, main="Thresholded distance")
 dis$v <- (dis$v < 4.5)
 plot(dis, add=TRUE)
 points(swedishpines)
+
+a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
+contour(distmap(a), main="Distance map")
+plot(a, add=TRUE,col="red")
 
 plot(allstats(swedishpines))
 

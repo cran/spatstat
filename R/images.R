@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.13 $     $Date: 2005/01/25 23:58:22 $
+#         $Revision: 1.14 $     $Date: 2005/12/05 06:58:07 $
 #
 #      The class "im" of raster images
 #
@@ -24,13 +24,34 @@
 #
 #   creator 
 
-im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat))) {
-  nr <- nrow(mat)
-  nc <- ncol(mat)
-  if(length(xcol) != nc)
-    stop("Length of xcol does not match ncol(x)")
-  if(length(yrow) != nr)
-    stop("Length of yrow does not match nrow(x)")
+im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
+               lev=levels(mat)) {
+
+  typ <- typeof(mat)
+  if(typ == "double")
+    typ <- "real"
+  
+  if(is.matrix(mat)) {
+    nr <- nrow(mat)
+    nc <- ncol(mat)
+    if(length(xcol) != nc)
+      stop("Length of xcol does not match ncol(mat)")
+    if(length(yrow) != nr)
+      stop("Length of yrow does not match nrow(mat)")
+  } else {
+    if(missing(xcol) || missing(yrow))
+      stop(paste(sQuote("mat"),
+                 "is not a matrix and I can't guess its dimensions"))
+    stopifnot(length(mat) == length(xcol) * length(yrow))
+    nc <- length(xcol)
+    nr <- length(yrow)
+    if(!is.null(lev)) {
+      mat <- as.integer(factor(mat, levels=lev))
+      typ <- "factor"
+    }
+    mat <- matrix(mat, nrow=nr, ncol=nc)
+  }
+
   xstep <- diff(xcol)[1]
   ystep <- diff(yrow)[1]
   xrange <- range(xcol) + c(-1,1) * xstep/2
@@ -42,7 +63,9 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat))) {
               xstep    = xstep,
               ystep    = ystep,
               xcol    = xcol,
-              yrow    = yrow)
+              yrow    = yrow,
+              lev     = lev,
+              type    = typ)
   class(out) <- "im"
   return(out)
 }
@@ -66,6 +89,7 @@ shift.im <- function(X, vec=c(0,0), ...) {
 
 "[.im" <- subset.im <-
 function(x, i, j, drop=TRUE, ...) {
+  lev <- x$lev
   if(verifyclass(i, "ppp", fatal=FALSE) && missing(j)) {
     # 'i' is a point pattern
     # Look up the greyscale values for the points of the pattern
@@ -85,7 +109,10 @@ function(x, i, j, drop=TRUE, ...) {
       x$v[!inside] <- NA
       return(x)
     } else if(i$type != "rectangle") {
-      return(x$v[inside])
+      values <- x$v[inside]
+      if(!is.null(lev))
+        values <- factor(values, levels=seq(lev), labels=lev)
+      return(values)
     } else {
       disjoint <- function(r, s) { (r[2] < s[1]) || (r[1] > s[2])  }
       clip <- function(r, s) { c(max(r[1],s[1]), min(r[2],s[2])) }
@@ -97,7 +124,7 @@ function(x, i, j, drop=TRUE, ...) {
       yr <- clip(i$yrange, x$yrange)
       colsub <- inrange(x$xcol, xr)
       rowsub <- inrange(x$yrow, yr)
-      return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub]))
+      return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub], lev))
     } 
   }
   stop("The subset operation is undefined for this type of index")
@@ -158,7 +185,10 @@ lookup.im <- function(im, x, y, naok=FALSE) {
 
   if(!naok && any(is.na(value)))
     warning("Internal error: NA's generated")
-  
+
+  # return factor, if it's a factor valued image
+  if(!is.null(lev <- x$lev))
+      value <- factor(value, levels=seq(lev), labels=lev)
   return(value)
 }
   
