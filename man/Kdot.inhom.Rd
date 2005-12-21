@@ -170,8 +170,8 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     lg <- unmark(lansing)
 
     # Estimate intensities by nonparametric smoothing
-    lambdaM <- ksmooth.ppp(ma, sigma=0.15)
-    lambdadot <- ksmooth.ppp(lg, sigma=0.15)
+    lambdaM <- density.ppp(ma, sigma=0.15)
+    lambdadot <- density.ppp(lg, sigma=0.15)
     K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM[ma],
                                       lambdadot=lambdadot[lg])
 

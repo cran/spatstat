@@ -2,6 +2,7 @@
 \alias{affinexy}
 \alias{apply23sum}
 \alias{area.xypolygon}       
+\alias{AsymmHausdorff.psp}
 \alias{as.breakpts}
 \alias{as.fv}
 \alias{as.polygonal}
@@ -165,7 +166,8 @@
 \usage{
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
 apply23sum(x)
-area.xypolygon(polly)       
+area.xypolygon(polly)
+AsymmHausdorff.psp(X, Y, method="Fortran")
 as.breakpts(\dots)
 as.fv(x)
 as.polygonal(W)
@@ -254,7 +256,7 @@ matrowany(x)
 matrowsum(x)
 meanX.owin(w)            
 meanY.owin(w)
-mkcor(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500)
+mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 mpl.engine(Q, trend, interaction, covariates, correction,
 	 rbord, use.gam, forcefit)
 mpl.get.covariates(covariates, locations, type)

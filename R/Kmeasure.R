@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.10 $    $Date: 2005/07/21 10:23:48 $
+#           $Revision: 1.12 $    $Date: 2005/12/19 10:08:59 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -185,16 +185,21 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   return(out)
 }
 
-
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
+  .Deprecated("density.ppp", package="spatstat")
+  density.ppp(x, sigma, ..., edge=edge)
+}
+
+density.ppp <- function(x, sigma, ..., edge=TRUE) {
   verifyclass(x, "ppp")
   if(missing(sigma))
     sigma <- 0.1 * diameter(x$window)
   smo <- second.moment.calc(x, sigma=sigma, what="smooth", ...)
-  edg <- second.moment.calc(x, sigma, what="edge", ...)
   smo$v <- smo$v/(smo$xstep * smo$ystep)
-  if(edge)
-    smo$v <- smo$v/edg
+  if(edge) {
+    edg <- second.moment.calc(x, sigma, what="edge", ...)
+    smo <- eval.im(smo/edg)
+  }
   sub <- smo[x$window, drop=FALSE]
   return(sub)
 }

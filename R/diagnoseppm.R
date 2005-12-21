@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.7 $ $Date: 2005/05/18 19:04:48 $
+# $Revision: 1.8 $ $Date: 2005/12/19 15:05:25 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -61,9 +61,9 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
           Ujitter <- U
           Ujitter$x <- U$x + runif(U$n, -smallsigma, smallsigma)
           Ujitter$y <- U$y + runif(U$n, -smallsigma, smallsigma)
-          numerator <- ksmooth.ppp(Ujitter, smallsigma,
+          numerator <- density.ppp(Ujitter, smallsigma,
                                weights=Ycts$marks * Qweights, edge=TRUE, ...)
-          denominator <- ksmooth.ppp(Ujitter, smallsigma,
+          denominator <- density.ppp(Ujitter, smallsigma,
                                weights=Qweights, edge=TRUE, ...)
           Ydens <- numerator
           Ydens$v <- numerator$v/denominator$v
@@ -108,7 +108,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   if(opt$smooth | opt$xcumul | opt$ycumul | opt$xmargin | opt$ymargin) {
     if(is.null(sigma))
       sigma <- 0.1 * diameter(Wclip)  
-    Z <- ksmooth.ppp(Yclip, sigma, weights=Yclip$marks, edge=TRUE, ...)
+    Z <- density.ppp(Yclip, sigma, weights=Yclip$marks, edge=TRUE, ...)
   }
   if(opt$smooth)
     result$smooth <- list(Z = Z, sigma=sigma)

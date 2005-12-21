@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.4 $     $Date: 2005/07/28 06:11:36 $
+#     $Revision: 1.5 $     $Date: 2005/12/20 01:24:02 $
 #
 
 eval.fv <- function(expr) {
@@ -44,8 +44,12 @@ eval.fv <- function(expr) {
   ynames <- nam[nam != argname]
   # for each function estimate, evaluate expression
   for(yn in ynames) {
+    # extract corresponding estimates from each fv object
     funvalues <- lapply(funs, function(x, n) { x[[n]] }, n=yn)
-    result[[yn]] <- eval(e, funvalues)
+    # insert into list of argument values
+    vars[fvs] <- funvalues
+    # evaluate
+    result[[yn]] <- eval(e, vars)
   }
   # determine y axis label for the result
   ylabs <- lapply(funs, function(x) { attr(x, "ylab") })

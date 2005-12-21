@@ -171,8 +171,8 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
     wh <- split(lansing)$whiteoak
 
     # method (1): estimate intensities by nonparametric smoothing
-    lambdaM <- ksmooth.ppp(ma, sigma=0.15)
-    lambdaW <- ksmooth.ppp(wh, sigma=0.15)
+    lambdaM <- density.ppp(ma, sigma=0.15)
+    lambdaW <- density.ppp(wh, sigma=0.15)
     K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW[wh], lambdaM[ma])
 
     # method (2): fit parametric intensity model

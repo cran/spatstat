@@ -49,7 +49,7 @@
   }
   \item{\dots}{
     Extra arguments, controlling either the resolution of the smoothed image
-    (passed to \code{ksmooth.ppp}) or the appearance of the plots
+    (passed to \code{\link{density.ppp}}) or the appearance of the plots
     (passed to \code{plot.default}).
   }
   \item{rbord}{

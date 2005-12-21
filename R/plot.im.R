@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.6 $   $Date: 2005/12/05 08:40:40 $
+#  $Revision: 1.9 $   $Date: 2005/12/20 00:59:10 $
 #
 #  Plotting code for pixel images
 #
@@ -73,11 +73,16 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
     {
       # plot image without ribbon
       do.call.matched("image.default",
-               resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
-                                list(...),
-                                colourmap,
-                                list(xlab = "x", ylab = "y"),
-                                list(asp = 1, main = main)))
+                      resolve.defaults(
+                                       list(x=x$xcol, y=x$yrow, z=t(x$v)),
+                                       list(...),
+                                       colourmap,
+                                       list(xlab = "x", ylab = "y"),
+                                       list(asp = 1, main = main)
+                                       ),
+                      funargs=
+                      c(names(formals(image.default)), "main", "asp", "sub")
+                      )
       return(invisible(NULL))
     }
   # determine plot region

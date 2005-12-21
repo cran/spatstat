@@ -163,7 +163,7 @@ The Spatstat Package
 	translate pattern  \cr
 	\code{\link{affine}} \tab
 	apply affine transformation\cr
-	\code{\link{ksmooth.ppp}} \tab
+	\code{\link{density.ppp}} \tab
 	kernel smoothing\cr
 	\code{\link{identify.ppp}} \tab
 	interactively identify points 
@@ -238,7 +238,7 @@ The Spatstat Package
     An object of class \code{"im"} represents a pixel image. 
     Such objects are returned by some of the functions in
       \code{spatstat} including \code{\link{Kmeasure}},
-      \code{\link{setcov}} and \code{\link{ksmooth.ppp}}. 
+      \code{\link{setcov}} and \code{\link{density.ppp}}. 
       \tabular{ll}{
 	\code{\link{im}} \tab create a pixel image\cr
 	\code{\link{as.im}} \tab convert other data to a pixel image\cr
@@ -269,6 +269,7 @@ The Spatstat Package
       \code{\link{[.psp}}
                   \tab extract a subset of a line segment pattern \cr
       \code{\link{midpoints.psp}} \tab compute the midpoints of line segments \cr
+      \code{\link{endpoints.psp}} \tab extract the endpoints of line segments \cr
       \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
       \code{\link{rotate.psp}} \tab rotate a line segment pattern \cr      

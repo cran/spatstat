@@ -199,7 +199,7 @@
   plot(Ki)
 
   # (2) intensity function estimated by heavy smoothing
-  smo <- ksmooth.ppp(X, sigma=0.1)
+  smo <- density.ppp(X, sigma=0.1)
   # evaluate smoothed intensity at data points
   lambda <- smo[X]
   # inhomogeneous K function
@@ -219,7 +219,7 @@
   # How to make simulation envelopes:
   #      Example shows method (2)
   \dontrun{
-  smo <- ksmooth.ppp(X, sigma=0.1)
+  smo <- density.ppp(X, sigma=0.1)
   myKfun <- function(X, ..., lam) { Kinhom(X, lambda=lam[X], ...) }
   Ken <- envelope(X, myKfun, nsim=99,
                   simulate=expression(rpoispp(smo)),
