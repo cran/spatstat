@@ -1,14 +1,14 @@
-\name{ksmooth.ppp}
-\alias{ksmooth.ppp}
+\name{density.ppp}
+\alias{density.ppp}
 \title{Kernel Smoothed Intensity of Point Pattern}
 \description{
   Compute a kernel smoothed intensity function from a point pattern.
 }
 \synopsis{
-  ksmooth.ppp(x, sigma, ..., edge=TRUE)
+  density.ppp(x, sigma, \dots, edge=TRUE)
 }
 \usage{
-  ksmooth.ppp(x, sigma, weights, edge=TRUE)
+  density.ppp(x, sigma, \dots, weights, edge=TRUE)
 }
 \arguments{
   \item{x}{
@@ -21,6 +21,10 @@
     Optional vector of weights to be attached to the points.
     May include negative values. 
   }
+  \item{\dots}{
+    Arguments passed to \code{\link{as.mask}} to determine
+    the pixel resolution.
+  }
   \item{edge}{
     Logical flag: if \code{TRUE}, apply edge correction.
   }
@@ -29,14 +33,20 @@
   A pixel image (object of class \code{"im"}).
 }
 \details{
-  A kernel estimate of the intensity of the point pattern
+  This is a method for the generic function \code{density}.
+  
+  A kernel estimate of the intensity function of the point pattern
   is computed. The result is 
-  the convolution of the isotropic Gaussian kernel with
-  standard deviation \code{sigma} and point masses at each of the data
-  points.   The default is to assign
+  the convolution of the isotropic Gaussian kernel of
+  standard deviation \code{sigma} with point masses at each of the data
+  points. The default is to assign
   a unit weight to each point.
   If \code{weights} is present, the point masses have these
   weights (which may be signed real numbers).
+
+  If \code{edge=TRUE}, the intensity estimate is corrected for
+  edge effect bias by dividing it by the convolution of the
+  Gaussian kernel with the window of observation.
 
   Computation is performed using the Fast Fourier Transform.
 }
@@ -46,7 +56,7 @@
 }
 \examples{
   data(cells)
-  Z <- ksmooth.ppp(cells, 0.05)
+  Z <- density.ppp(cells, 0.05)
   plot(Z)
 }
 \author{Adrian Baddeley

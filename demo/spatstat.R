@@ -4,40 +4,61 @@ oldpar <- par(ask = interactive() &&
             (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
 oldoptions <- options(warn=-1)
 
+fanfare <- function(stuff) {
+  plot(c(0,1),c(0,1),type="n",axes=FALSE, xlab="", ylab="")
+  text(0.5,0.5, stuff, cex=3)
+}
+fanfare("Spatstat demonstration")
+fanfare("I. Types of data")
 data(swedishpines)
 plot(swedishpines, main="Point pattern")
+
 data(demopat)
 plot(demopat, cols=c("green", "blue"), main="Multitype point pattern")
+
 data(longleaf)
 plot(longleaf, fg="blue", main="Marked point pattern")
 
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 plot(a, main="Line segment pattern")
 
+plot(owin(), main="Rectangular window")
+data(letterR)
+plot(letterR, main="Polygonal window")
+plot(as.mask(letterR), main="Binary mask window")
+
+Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
+plot(Z, main="Pixel image")
+
+fanfare("II. Basic operations")
+X <- swedishpines
+subset <- 1:20
+plot(X[subset], main="subset operation: X[subset]")
+subwindow <- owin(poly=list(x=c(0,96,96,40,40,0),y=c(0,0,100,100,50,0)))
+plot(X[,subwindow], main="subset operation: X[, subwindow]")
+
 data(lansing)
 plot(lansing, "Lansing Woods data")
 plot(split(lansing))
 
-data(letterR)
-plot(letterR)
-lambda <- 10/area.owin(letterR)
-points(rpoispp(lambda, win=letterR))
-points(rpoispp(9 * lambda, win=letterR))
-points(rpoispp(90 * lambda, win=letterR))
-
-X <- swedishpines
-subset <- 1:20
-plot(X[subset])
-subwindow <- owin(poly=list(x=c(0,96,96,40,40,0),y=c(0,0,100,100,50,0)))
-plot(X[,subwindow])
-
-a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
+L <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 w <- owin(c(0.1,0.7), c(0.2, 0.8))
-b <- clip.psp(a, w)
-plot(a, main="Subset of a line segment pattern")
-plot(b, add=TRUE, col="red")
+S <- L[, w]
+plot(L, main="Subset of a line segment pattern")
+plot(S, add=TRUE, col="red")
 
-plot(swedishpines)
+fanfare("III. Exploratory data analysis")
+
+data(cells)
+Z <- density.ppp(cells, 0.07)
+plot(Z, main="Kernel smoothed intensity of point pattern")
+plot(cells, add=TRUE)
+
+D <- density(L, sigma=0.05)
+plot(D, main="Kernel smoothed intensity of line segment pattern")
+plot(L, add=TRUE)
+
+plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)
 plot(K)
 title(main="K function for Swedish Pines")
@@ -67,6 +88,7 @@ plot(a, add=TRUE,col="red")
 
 plot(allstats(swedishpines))
 
+fanfare("IV. Model-fitting")
 fit <- ppm(swedishpines, ~1, Strauss(r=7))
 print(fit)
 
@@ -82,8 +104,17 @@ plot(alltypes(demopat, "K"))
 fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit)
 
+fanfare("V. Simulation")
+
+data(letterR)
+plot(letterR, main="Poisson random points")
+lambda <- 10/area.owin(letterR)
+points(rpoispp(lambda, win=letterR))
+points(rpoispp(9 * lambda, win=letterR))
+points(rpoispp(90 * lambda, win=letterR))
 plot(rpoispp(100))
 plot(rpoispp(function(x,y){1000 * exp(-3*x)}, 1000))
+
 plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
@@ -93,6 +124,9 @@ Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
           control=list(nrep=1e4), start=list(n.start=200))
 plot(Xg, main=paste("Geyer saturation process\n",
                     "rmh() with cif=\"geyer\""))
+
+
+fanfare("VI. Programming tools")
 
 par(oldpar)
 
@@ -104,7 +138,7 @@ showoffK <- function(Y, current, ..., fullpicture,rad) {
 	points(u[1],u[2],pch="+",cex=3)
 	theta <- seq(0,2*pi,length=100)
 	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
-	text(u[1]+rad/3,u[2]+rad/2,Y$n-1,cex=3)
+	text(u[1]+rad/3,u[2]+rad/2,Y$n,cex=3)
 	Sys.sleep(if(runif(1) < 0.05) 1.2 else 0.25)
 	return(Y$n)
 }
@@ -112,3 +146,4 @@ data(redwood)
 applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2, exclude=TRUE)
 
 options(oldoptions)
+

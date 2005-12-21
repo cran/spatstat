@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.3 $ $Date: 2005/12/02 06:51:09 $
+#  $Revision: 1.5 $ $Date: 2005/12/20 09:38:15 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -116,6 +116,52 @@ print.psp <- function(x, ...) {
 ####################################################
 #    summary information
 ####################################################
+
+endpoints.psp <- function(x, which="both") {
+  verifyclass(x, "psp")
+  ends <- x$ends
+  n <- x$n
+  switch(which,
+         both={
+           first <- second <- rep(TRUE, n)
+         },
+         first={
+           first <- rep(TRUE, n)
+           second <- rep(FALSE, n)
+         },
+         second={
+           first <- rep(FALSE, n)
+           second <- rep(TRUE, n)
+         },
+         left={
+           first <- (ends$x0 < ends$x1)
+           second <- !first
+         },
+         right={
+           first <- (ends$x0 > ends$x1)
+           second <- !first
+         },
+         lower={
+           first <- (ends$y0 < ends$y1)
+           second <- !first
+         },
+         upper={
+           first <- (ends$y0 > ends$y1)
+           second <- !first
+         },
+         stop(paste("Unrecognised option: which=", sQuote(which)))
+         )
+  ok <- rbind(first, second)
+  xmat <- rbind(ends$x0, ends$x1)
+  ymat <- rbind(ends$y0, ends$y1)
+  idmat <- col(ok)
+  xx <- as.vector(xmat[ok])
+  yy <- as.vector(ymat[ok])
+  id <- as.vector(idmat[ok])
+  result <- ppp(xx, yy, window=x$window)
+  attr(result, "id") <- id
+  return(result)
+}
 
 midpoints.psp <- function(x) {
   verifyclass(x, "psp")

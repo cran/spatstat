@@ -2,14 +2,14 @@
 #
 #      distances.R
 #
-#      $Revision: 1.11 $     $Date: 2005/07/28 04:45:33 $
+#      $Revision: 1.13 $     $Date: 2005/12/21 00:57:57 $
 #
 #
 #      Interpoint distances
 #
 #
 
-pairdist <- function(X, ..., method="C") {
+pairdist <- function(X, ...) {
   UseMethod("pairdist")
 }
 
@@ -110,12 +110,13 @@ nndist.default <-
   invisible(nnd)
 }
 
-crossdist <- function(X, Y, ..., method="C") {
+crossdist <- function(X, Y, ...) {
   UseMethod("crossdist")
 }
 
 crossdist.ppp <- function(X, Y, ..., method="C") {
   verifyclass(X, "ppp")
+  Y <- as.ppp(Y)
   return(crossdist.default(X$x, X$y, Y$x, Y$y, method=method))
 }
 

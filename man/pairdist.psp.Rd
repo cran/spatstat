@@ -1,0 +1,64 @@
+\name{pairdist.psp}
+\alias{pairdist.psp}
+\title{Pairwise distances between line segments}
+\description{
+  Computes the matrix of distances between all pairs of line segments
+  in a line segment pattern.
+}
+\usage{
+  pairdist.psp(X, \dots, method="Fortran")
+}
+\arguments{
+  \item{X}{
+    A line segment pattern (object of class \code{"psp"}).
+  }
+  \item{\dots}{
+    Ignored.
+  }
+  \item{method}{
+    String specifying which method of calculation to use.
+    Values are \code{"Fortran"} and \code{"interpreted"}.
+    Usually not specified.
+  }
+}
+\value{
+  A square matrix whose \code{[i,j]} entry is the distance
+  between the line segments numbered \code{i} and \code{j}.
+}
+\details{
+  This function computes the distance between each pair of
+  line segments in \code{X}, and returns the matrix of distances.
+  
+  This is a method for the generic function \code{\link{pairdist}}
+  for the class \code{"psp"}.
+
+  Distances are calculated using the Hausdorff metric. The Hausdorff
+  distance between two line segments is the maximum distance
+  from any point on one of the segments to the nearest point on
+  the other segment.   
+  
+  The argument \code{method} is not normally used. It is
+  retained only for checking the validity of the software.
+  If \code{method = "interpreted"} then the distances are
+  computed using interpreted R code only. If \code{method="Fortran"}
+  (the default) then Fortran code is used. The Fortran code is somewhat faster.
+}
+\seealso{
+  \code{\link{crossdist}},
+  \code{\link{nndist}},
+  \code{\link{pairdist.ppp}}
+}
+\examples{
+   L <- psp(runif(10), runif(10), runif(10), runif(10), owin())
+   D <- pairdist(L)
+}
+\author{
+  Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}
+

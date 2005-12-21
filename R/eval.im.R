@@ -5,7 +5,7 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.7 $     $Date: 2005/12/05 07:10:46 $
+#     $Revision: 1.8 $     $Date: 2005/12/19 10:25:05 $
 #
 
 eval.im <- function(expr) {
@@ -40,7 +40,10 @@ eval.im <- function(expr) {
   }
   imagevalues <- lapply(images, getvalues)
   template <- images[[1]]
-  v <- eval(e, imagevalues)
+  # This bit has been repaired:
+  vars[ims] <- imagevalues
+  v <- eval(e, vars)
+  #
   # reshape, etc
   result <- im(v, template$xcol, template$yrow, levels(v))
   return(result)
