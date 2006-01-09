@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.5 $	$Date: 2005/04/29 20:28:48 $
+#	$Revision: 1.6 $	$Date: 2006/01/09 05:18:11 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -18,7 +18,7 @@ function(Q,
          forcefit=FALSE,
          nsim=100,
          nrmh=1e5,
-         start=list(n.start=X$n),
+         start=NULL,
          control=list(nrep=nrmh),
          verb=TRUE
 ) {

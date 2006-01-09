@@ -10,7 +10,7 @@
  ppm(Q, trend=~1, interaction=NULL, covariates=NULL,
  correction="border", rbord=0, use.gam=FALSE, method="mpl",
  forcefit=FALSE, nsim=100, nrmh=1e5,
-        start=list(n.start=X$n),
+        start=NULL,
          control=list(nrep=nrmh),
          verb=TRUE)
 }
@@ -295,10 +295,15 @@
       Simulated realisations are generated using \code{\link{rmh}}.
       The iterative behaviour of the Metropolis-Hastings algorithm
       is controlled by the arguments \code{start} and \code{control}
-      which are passed to \code{\link{rmh}}. As a shortcut, the argument
+      which are passed to \code{\link{rmh}}.
+
+      As a shortcut, the argument
       \code{nrmh} determines the number of Metropolis-Hastings
       iterations run to produce one simulated realisation (if
-      \code{control} is absent).
+      \code{control} is absent). Also
+      if \code{start} is absent or equal to \code{NULL}, it defaults to
+      \code{list(n.start=N)} where \code{N} is the number of points
+      in the data point pattern.
     }
     \item{Edge correction}{
       Edge correction should be applied to the sufficient statistics
