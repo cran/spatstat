@@ -98,7 +98,7 @@
   Stoyan and Stoyan (1994, page 285) recommend using the Epanechnikov
   kernel with support \eqn{[-h,h]} chosen by the rule of thumn
   \eqn{h = c/\sqrt{\lambda}}{h = c/sqrt(lambda)},
-  where \code{\lambda}{lambda} is the (estimated) intensity of the
+  where \eqn{\lambda}{lambda} is the (estimated) intensity of the
   point process, and \eqn{c} is a constant in the range from 0.1 to 0.2.
   See equation (15.16).
   If \code{bw} is missing, then this rule of thumb will be applied.

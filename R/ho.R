@@ -3,14 +3,17 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.1 $ $Date: 2005/04/28 00:49:57 $
+#  $Revision: 1.2 $ $Date: 2006/01/09 05:14:55 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
-                        start=list(n.start=X$n),
+                        start=NULL,
                         control=list(nrep=nrmh), verb=TRUE) {
   verifyclass(model, "ppm")
 
+  if(is.null(start)) 
+    start <- list(n.start=data.ppm(model)$n)
+  
   # check that the model can be simulated
   inte <- model$interaction
   valid <- is.null(inte) || inte$valid(coef(model), inte)
