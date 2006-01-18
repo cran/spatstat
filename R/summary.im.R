@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.3 $   $Date: 2005/12/05 06:57:55 $
+#    $Revision: 1.5 $   $Date: 2006/01/18 05:52:39 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -53,7 +53,7 @@ summary.im <- function(object, ...) {
   win <- as.owin(x)
   y$window <- summary.owin(win)
 
-  y$fullgrid <- all(inside & win$m)
+  y$fullgrid <- (rescue.rectangle(win)$type == "rectangle")
 
   class(y) <- "summary.im"
   return(y)

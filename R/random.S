@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.14 $   $Date: 2005/10/27 10:04:29 $
+#    $Revision: 4.16 $   $Date: 2006/01/18 06:11:20 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -150,12 +150,13 @@ rpoint <- function(n, f, fmax=NULL,
     if(n == 0)
       return(ppp(numeric(0), numeric(0), window=wf))
     w <- as.mask(wf)
+    M <- w$m
     dx <- w$xstep
     dy <- w$ystep
     # extract pixel coordinates and probabilities
-    xpix <- as.vector(raster.x(w)[w$m])
-    ypix <- as.vector(raster.y(w)[w$m])
-    ppix <- as.vector(f$v[w$m]) # not normalised - OK
+    xpix <- as.vector(raster.x(w)[M])
+    ypix <- as.vector(raster.y(w)[M])
+    ppix <- as.vector(f$v[M]) # not normalised - OK
     # select pixels
     id <- sample(length(xpix), n, replace=TRUE, prob=ppix)
     # extract pixel centres and randomise within pixels
@@ -226,7 +227,10 @@ rpoint <- function(n, f, fmax=NULL,
     #     win     default observation window (of class 'owin')
     #   ...       arguments passed to lambda(x, y, ...)
 
-    win <- if(is.im(lambda)) as.owin(lambda) else as.owin(win)
+    win <- if(is.im(lambda))
+      rescue.rectangle(as.owin(lambda))
+    else
+      as.owin(win)
     
     if(is.numeric(lambda)) 
       # uniform Poisson

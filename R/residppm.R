@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.2 $ $Date: 2005/05/11 23:44:18 $
+# $Revision: 1.3 $ $Date: 2006/01/18 03:59:59 $
 #
 
 residuals.ppm <- function(object, type="raw", ...,
@@ -34,10 +34,13 @@ residuals.ppm <- function(object, type="raw", ...,
   indicator <- (lambda > .Machine$double.eps)
 
   # Evaluate residual measure components
-  discrete <- Z * switch(type,
-                         raw     = 1,
-                         inverse = 1/lambda,
-                         pearson = 1/sqrt(lambda))
+  discrete <- ifelse(Z,
+                     switch(type,
+                            raw     = 1,
+                            inverse = 1/lambda,
+                            pearson = 1/sqrt(lambda)
+                            ),
+                     0)
   continuous <- switch(type,
                        raw     = -lambda,
                        inverse = -indicator,

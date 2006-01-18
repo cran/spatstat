@@ -20,8 +20,11 @@
     or in a format recognised by \code{\link{as.ppp}()}
   }
   \item{lambda}{
-    Vector of values of the estimated intensity function,
-    evaluated at the points of the pattern \code{X}.
+    Values of the estimated intensity function.
+    Either a vector giving the intensity values
+    at the points of the pattern \code{X},
+    or a pixel image (object of class \code{"im"}) giving the
+    intensity values at all locations.
   }
   \item{r}{
     vector of values for the argument \eqn{r} at which
@@ -113,10 +116,24 @@
   \eqn{K_{\rm inhom}(r) > \pi r^2}{Kinhom(r) > pi * r^2}
   are suggestive of clustering.
 
-  The argument \code{lambda} should be a vector of length equal to the
-  number of points in the pattern \code{X}. It will be interpreted as
-  giving the (estimated) values of \eqn{\lambda(x_i)}{lambda(x[i])} for
-  each point \eqn{x_i}{x[i]} of the pattern \eqn{x}.
+  The argument \code{lambda} must supply the
+  (estimated) values of the intensity function \eqn{\lambda}{lambda}.
+  It may be either
+  \describe{
+    \item{a numeric vector}{containing the values
+      of the intensity function at the points of the pattern \code{X}.
+      The length of the vector \code{lambda} should
+      be equal to the number of points in the pattern \code{X}.
+      The value \code{lambda[i]} is assumed to be the 
+      the (estimated) value of the intensity
+      \eqn{\lambda(x_i)}{lambda(x[i])} for
+      the point \eqn{x_i}{x[i]} of the pattern \eqn{X}.
+    }
+    \item{a pixel image}{(object of class \code{"im"})
+      assumed to contain the values of the intensity function
+      at all locations in the window.
+    }
+  }
 
   Edge corrections are used to correct bias in the estimation
   of \eqn{K_{\rm inhom}}{Kinhom}.

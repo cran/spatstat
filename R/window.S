@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.36 $	$Date: 2005/11/24 05:47:30 $
+#	$Revision: 4.39 $	$Date: 2006/01/18 06:02:12 $
 #
 #
 #	A window may be either
@@ -184,25 +184,25 @@ is.owin <- function(x) { inherits(x, "owin") }
 #-----------------------------------------------------------------------------
 #
 
-as.owin <- function(W) {
+as.owin <- function(W, ..., fatal=TRUE) {
   UseMethod("as.owin")
 }
 
-as.owin.owin <- function(W) {
+as.owin.owin <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "owin", fatal=fatal))
     return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m))
   else
     return(NULL)
 }
 
-as.owin.ppp <- function(W) {
+as.owin.ppp <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "ppp", fatal=fatal))
     return(W$window)
   else
     return(NULL)
 }
 
-as.owin.im <- function(W) {
+as.owin.im <- function(W, ..., fatal=TRUE) {
   if(!verifyclass(W, "im", fatal=fatal))
     return(NULL)
   out <- list(type     = "mask",
@@ -223,7 +223,7 @@ as.owin.im <- function(W) {
   return(out)
 }
  
-as.owin.default <- function(W) {
+as.owin.default <- function(W, ..., fatal=TRUE) {
 	# Tries to interpret data as an object of class 'window'
 	# W may be
 	#	a structure with entries xrange, yrange
@@ -245,8 +245,9 @@ as.owin.default <- function(W) {
                 V <- as.list(W$area)
                 Z <- owin(c(V$xl, V$xu),c(V$yl, V$yu))
                 return(Z)
-	} else
+	} else if(fatal)
 		stop("Can't interpret W as a window")
+        else return(NULL)
 }		
 
 #

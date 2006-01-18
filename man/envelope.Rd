@@ -156,7 +156,8 @@
   \code{\link{ppm}}
 }
 \examples{
- X <- rpoispp(42)
+ data(simdat)
+ X <- simdat
 
  # Envelope of K function under CSR
  \dontrun{
@@ -192,6 +193,29 @@
   plot(envelope(X, Gest, nsim=5))
  }
 
+ # Envelope of L function under CSR
+ #  L(r) = sqrt(K(r)/pi)
+ \dontrun{
+  E <- envelope(X, Kest)
+  plot(E, sqrt(./pi) ~ r)
+ }
+ \testonly{
+  E <- envelope(X, Kest, nsim=5)
+  plot(E, sqrt(./pi) ~ r)
+ }
+
+ # How to pass arguments needed to compute the summary functions:
+ # We want envelopes for Jcross(X, "A", "B") 
+ # where "A" and "B" are types of points in the dataset 'demopat'
+
+ data(demopat)
+ \dontrun{
+ plot(envelope(demopat, Jcross, i="A", j="B"))
+ }
+ \testonly{
+ plot(envelope(demopat, Jcross, i="A", j="B", nsim=5))
+ }
+ 
  # Use of `simulate'
  \dontrun{
  plot(envelope(X, Gest, simulate=expression(runifpoint(42))))
@@ -202,6 +226,17 @@
   plot(envelope(X, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=5))
  }
 
+ # Envelope of IMHOMOGENEOUS K-function with fitted trend
+ trend <- density.ppp(X, 1.5)
+ \dontrun{
+ plot(envelope(X, Kinhom, lambda=trend,
+         simulate=expression(rpoispp(trend))))
+ }
+ \testonly{
+ plot(envelope(X, Kinhom, lambda=trend,
+         simulate=expression(rpoispp(trend)), nsim=5))
+ }
+ 
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

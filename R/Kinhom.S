@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.14 $	$Date: 2005/09/12 07:01:40 $
+#	$Revision: 1.15 $	$Date: 2006/01/18 04:07:43 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -56,10 +56,16 @@
     breaks <- handle.r.b.args(r, breaks, X$window)
     r <- breaks$r
     
-    if(!is.vector(lambda))
-      stop("\`lambda\' should be a vector")
-    if(length(lambda) != npoints) 
-      stop("The length of \'lambda\' should equal the number of data points")
+    if(is.vector(lambda)) {
+      if(length(lambda) != npoints) 
+        stop("The length of \'lambda\' should equal the number of data points")
+    } else if(is.im(lambda)) 
+      lambda <- lambda[X]
+    else 
+      stop("\`lambda\' should be a vector or a pixel image")
+    if(any(is.na(lambda)))
+       stop("Some values of \`lambda\' are NA or NaN")
+    
     if(is.null(lambda2))
       weight <- 1/outer(lambda, lambda, "*")
     else {
