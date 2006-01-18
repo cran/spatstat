@@ -10,11 +10,16 @@ Converts data specifying an observation window
 in any of several formats, into an object of class \code{"owin"}.
 }
 \usage{
- as.owin(W)
+ as.owin(W, \dots, fatal=TRUE)
 }
 \arguments{
   \item{W}{Data specifying an observation window, in any of several formats
     described under \emph{Details} below.}
+  \item{fatal}{Logical flag determining what to do
+    if the data cannot be converted to an observation window.
+    See Details.
+  }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"owin"} (see \code{\link{owin.object}})
@@ -56,6 +61,11 @@ in any of several formats, into an object of class \code{"owin"}.
     lies outside the window, is transformed into the logical value
     \code{FALSE}, which is the corresponding convention for window masks.
   }
+  If the argument \code{W} is not in one of these formats
+  and cannot be converted to a window, then an error will
+  be generated (if \code{fatal=TRUE}) or a value of \code{NULL}
+  will be returned (if \code{fatal=FALSE}).
+
   The function \code{as.owin} is generic, with methods for
   \code{"owin"},
   \code{"im"} and
