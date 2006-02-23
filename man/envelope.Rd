@@ -76,6 +76,10 @@
     Complete Spatial Randomness (i.e. \code{nsim} simulated point patterns
     each being a realisation of the uniform Poisson point process)
     with the same intensity as the pattern \code{Y}.
+    (If \code{Y} is a multitype point pattern, then the simulated patterns
+    are also given independent random marks; the probability
+    distribution of the random marks is determined by the
+    relative frequencies of marks in \code{Y}.) 
     \item
     If \code{Y} is a fitted point process model (an object of class
     \code{"ppm"}) and \code{simulate=NULL},
@@ -226,7 +230,20 @@
   plot(envelope(X, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=5))
  }
 
- # Envelope of IMHOMOGENEOUS K-function with fitted trend
+ # Envelope under random toroidal shifts
+ data(amacrine)
+ \dontrun{
+ plot(envelope(amacrine, Kcross, i="on", j="off",
+               simulate=expression(rtoro(amacrine, radius=0.25)))) 
+ }
+ \testonly{
+ plot(envelope(amacrine, Kcross, i="on", j="off",
+               simulate=expression(rtoro(amacrine, radius=0.25)),
+               nsim=5))
+ }
+
+ 
+ # Envelope of INHOMOGENEOUS K-function with fitted trend
  trend <- density.ppp(X, 1.5)
  \dontrun{
  plot(envelope(X, Kinhom, lambda=trend,

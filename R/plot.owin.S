@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.9 $	$Date: 2002/07/18 10:18:45 $
+#	$Revision: 1.13 $	$Date: 2006/02/22 07:07:05 $
 #
 #
 #
@@ -31,9 +31,13 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
     plargs <- names(formals(plot.default))
     if(!is.null(plargs) && "asp" %in% plargs) {
 # set up plot with equal scales
-      plot(x, y, type="n", ...,
-           main=main, axes=FALSE, xlab="", ylab="", xaxs="i", yaxs="i",
-           asp=1.0)
+      do.call.matched("plot.default",
+                      resolve.defaults(list(x=x, y=y, type="n"),
+                                       list(...),
+                                       list(main=main, axes=FALSE,
+                                            xlab="", ylab="",
+                                            xaxs="i", yaxs="i",
+                                            asp=1.0)))
     } else {
 # D.I.Y.            
 # see 'help(par)' under 'xaxs': default is xaxs="r";
@@ -53,9 +57,12 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
       if(yscale > sc) ylim <- blowup(ylim, yscale/sc) 
 
 # Commit scales
-      plot(x, y, xlim=xlim, ylim=ylim, type="n", ...,
-           main=main, axes=FALSE, xlab="", ylab="", xaxs="i", yaxs="i")
-
+      do.call.matched("plot.default",
+                      resolve.defaults(list(x=x, y=y, type="n"),
+                                       list(...),
+                                       list(xlim=xlim, ylim=ylim, main=main,
+                                            axes=FALSE, xlab="", ylab="",
+                                            xaxs="i", yaxs="i")))
     }
   }
 # Draw window
@@ -67,31 +74,39 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
            p <- W$bdry
            if(exists("is.R") && is.R()) {
              for(i in seq(p))
-               polygon(p[[i]], ...)
+               do.call.matched("polygon",
+                               resolve.defaults(
+                                                list(x=p[[i]]),
+                                                list(...)))
            } else {
              for(i in seq(p))
-               polygon(p[[i]], density=0, ...)
+               do.call.matched("polygon",
+                               resolve.defaults(
+                                                list(x=p[[i]]),
+                                                list(...),
+                                                list(density=0)))
            }
          },
          mask = {
-           # image(W$xcol, W$yrow, !t(W$m), add=TRUE, ...)
-           arg1 <- list(W$xcol, W$yrow, !t(W$m), add=TRUE)
-           arg2 <- spatstat.options("par.binary")[[1]]
-           arg3 <- list(...)
-           argue <- append(arg1, append(arg2, arg3))
-           do.call("image", argue)
+           do.call.matched("image.default",
+                           resolve.defaults(
+                           list(x=W$xcol, y=W$yrow, z=!t(W$m), add=TRUE),
+                           list(...),
+                           spatstat.options("par.binary")[[1]]))
          },
-         stop("Don't know how to plot image type", W$type)
+         stop(paste("Don't know how to plot window of type", sQuote(W$type)))
          )
 
 # Draw surrounding box
   wantbox <- (!missing(box) && box) || (missing(box) && W$type == "rectangle")
   if(wantbox)
-    segments(x[c(1,2,2,1)],
-             y[c(1,1,2,2)],
-             x[c(2,2,1,1)],
-             y[c(1,2,2,1)], ...)
-
+    do.call.matched("segments",
+                    resolve.defaults(
+                                     list(x0=x[c(1,2,2,1)],
+                                          y0=y[c(1,1,2,2)],
+                                          x1=x[c(2,2,1,1)],
+                                          y1=y[c(1,2,2,1)]),
+                                     list(...)))
   invisible()
 }
 

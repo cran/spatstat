@@ -11,7 +11,8 @@
   qqplot.ppm(fit, nsim=100, expr=NULL, \dots, type="raw",
              style="mean", fast=TRUE, verbose=TRUE, plot.it=TRUE,
              dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
-             control=list(nrep=nrep,expand=default.expand(fit),periodic=TRUE),
+             control=list(nrep=nrep,expand=default.expand(fit),
+                          periodic=(default.expand(fit)$type=="rectangle")),
              saveall=FALSE)
 }
 \arguments{
@@ -145,9 +146,14 @@
   from an independent random starting state each time.
   The iterative and termination behaviour of the Metropolis-Hastings
   algorithm are governed by the argument \code{control}.
+  See \code{\link{rmhcontrol}} for information about this argument.
   As a shortcut, the argument \code{nrep} determines
   the number of Metropolis-Hastings iterations used to generate
   each simulated realisation, if \code{control} is absent.
+
+  By default, simulations are generated in an expanded
+  window. Use the argument \code{control} to change this,
+  as explained in the section on \emph{Warning messages}.
   
   The argument \code{type} selects the type of residual or weight
   that will be computed. For options, see \code{\link{diagnose.ppm}}.
@@ -214,6 +220,28 @@
 \section{Side Effects}{
 	Produces a Q-Q plot if \code{plot.it} is TRUE.
 }
+\section{Warning messages}{
+  A warning message will be issued if all, or many, of the
+  simulated point patterns are empty.
+  This usually indicates a problem with the simulation procedure.
+  
+  The default behaviour of \code{qqplot.ppm} is to simulate patterns 
+  on an expanded window (specified through the argument
+  \code{control}) in order to avoid edge effects.
+  The model's trend is extrapolated over this expanded
+  window. If the trend is strongly inhomogeneous, the 
+  extrapolated trend may have very large (or even infinite)
+  values. This can cause the simulation algorithm to 
+  produce empty patterns.
+
+  The only way to suppress this problem entirely is to
+  prohibit the expansion of the window, by setting
+  the \code{control} argument to something like
+  \code{control=list(nrep=1e6, expand=1)}. Here \code{expand=1}
+  means there will be no expansion. See \code{\link{rmhcontrol}}
+  for more information about the argument \code{control}.
+}
+
 \references{
   Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
@@ -232,7 +260,8 @@
  \code{\link{eem}},
  \code{\link{ppm.object}},
  \code{\link{ppm}},
- \code{\link{rmh}}
+ \code{\link{rmh}},
+ \code{\link{rmhcontrol}}
 }
 \examples{
     data(cells)

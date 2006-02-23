@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.15 $  $Date: 2005/09/08 10:13:10 $
+#   $Revision: 1.16 $  $Date: 2006/02/23 02:48:13 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -75,6 +75,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     stop("nrank must be an integer")
   stopifnot(nrank > 0 && nrank < nsim/2)
 
+  rgiven <- "r" %in% names(list(...))
+    
   # evaluate function for data pattern X
   funX <- fun(X, ...)
   if(!inherits(funX, "fv"))
@@ -112,7 +114,10 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                    "did not yield a point pattern"))
     }
     # apply function
-    funXsim <- fun(Xsim, r=rvals, ...)
+    if(rgiven) 
+      funXsim <- fun(Xsim, ...)
+    else
+      funXsim <- fun(Xsim, r=rvals, ...)
     # sanity checks
     if(!inherits(funXsim, "fv"))
       stop(paste("When applied to a simulated pattern, the function",

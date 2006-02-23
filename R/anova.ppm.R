@@ -1,7 +1,7 @@
 #
 #   anova.ppm.R
 #
-#  $Revision: 1.5 $   $Date: 2005/04/12 22:20:13 $
+#  $Revision: 1.6 $   $Date: 2006/02/21 09:37:17 $
 #
 
 anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
@@ -30,24 +30,32 @@ anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
 
   # Extract glmfit objects 
   fitz <- lapply(objex, getglmfit)
+
+  # Any trivial models? (uniform Poisson)
+  trivial <- unlist(lapply(fitz, is.null))
   
-  # Are any of them NULL (corresponding to uniform Poisson)
-  not.glm <- unlist(lapply(fitz, is.null))
-  if(any(not.glm)) {
-    # force them to be fitted using glm
-    objex[not.glm] <- lapply(objex[not.glm], update.ppm, forcefit=TRUE)
-    fitz[not.glm] <- lapply(objex[not.glm], getglmfit)
-  }
-  
-  # check whether all models fitted using GLM or all using GAM
-  isgam <- unlist(lapply(fitz[!is.null(fitz)],
+  # check whether all non-trivial models were fitted using same method
+  # (all using GLM or all using GAM)
+  isgam <- unlist(lapply(fitz[!trivial],
                          function(x) { inherits(x, "gam") }))
   if(any(isgam) && !all(isgam))
     warning("Some, but not all, models were fitted with use.gam=TRUE;",
             "anova may be incorrect.",
             "It is recommended to refit all models with use.gam=TRUE.")
+  usegam <- any(isgam)
+  
+  # Force any trivial models to be refitted using GLM or GAM
+  if(any(trivial)) {
+    # force them to be fitted using glm
+    objex[trivial] <- lapply(objex[trivial], update.ppm,
+                             forcefit=TRUE, use.gam=usegam)
+    fitz[trivial] <- lapply(objex[trivial], getglmfit)
+  }
+
+  # Finally do the appropriate ANOVA
   anovafun <- if(any(isgam)) "anova.gam" else "anova.glm"
   
   result <- do.call(anovafun, append(fitz, list(test=test, dispersion=1)))
+  
   return(result)
 }

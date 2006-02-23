@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.19 $	$Date: 2005/04/12 20:27:05 $
+#	$Revision: 5.20 $	$Date: 2006/02/21 07:28:51 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -56,7 +56,7 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=5,
                     release=7,
-                    date="$Date: 2005/04/12 20:27:05 $")
+                    date="$Date: 2006/02/21 07:28:51 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -68,7 +68,7 @@ if(!want.trend && !want.inter && !forcefit) {
   volume <- area.owin(X$window) * markspace.integral(X)
   lambda <- npts/volume
   theta <- list("log(lambda)"=log(lambda))
-  maxlogpl <- npts * (log(lambda) - 1)
+  maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1) 
   rslt <- list(
                method      = "mpl",
                theta       = theta,

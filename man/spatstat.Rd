@@ -132,6 +132,7 @@ The Spatstat Package
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
+	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
 	\code{\link{swedishpines}} \tab Strand-Ripley swedish pines data
@@ -166,7 +167,11 @@ The Spatstat Package
 	\code{\link{density.ppp}} \tab
 	kernel smoothing\cr
 	\code{\link{identify.ppp}} \tab
-	interactively identify points 
+	interactively identify points \cr
+	\code{\link{unique.ppp}} \tab
+	remove duplicate points \cr
+	\code{\link{duplicated.ppp}} \tab
+	determine which points are duplicates
       }
       See \code{\link{spatstat.options}} to control plotting behaviour.
       
@@ -197,6 +202,8 @@ The Spatstat Package
 	Find a tight bounding box for the window \cr
 	\code{\link{erode.owin}}	\tab
 	erode window by a distance r\cr
+	\code{\link{dilate.owin}}	\tab
+	dilate window by a distance r\cr
 	\code{\link{complement.owin}}	\tab
 	invert (swap inside and outside)\cr
 	\code{\link{rotate}} \tab rotate window  \cr
@@ -276,7 +283,8 @@ The Spatstat Package
       \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
       \code{\link{affine.psp}} \tab apply an affine transformation \cr      
       \code{\link{distmap.psp}} \tab compute the distance map of a line
-      segment pattern
+      segment pattern \cr
+      \code{\link{density.psp}} \tab kernel smoothing of line segments
     }
 
   }
@@ -314,9 +322,10 @@ The Spatstat Package
     \code{\link{nndist}} \tab nearest neighbour distances \cr
     \code{\link{pairdist}} \tab distances between all pairs of points\cr
     \code{\link{crossdist}} \tab distances between points in two patterns\cr
-    \code{\link{exactdt}} \tab distance from any location to nearest data point\cr
-    \code{\link{distmap}} \tab distance map image
-  }
+    \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
+    \code{\link{distmap}} \tab distance map image\cr
+    \code{\link{density.ppp}} \tab kernel smoothed density
+ }
 
   \bold{Summary statistics for a multitype point pattern:}
   A multitype point pattern is represented by an object \code{X}
@@ -466,9 +475,16 @@ The Spatstat Package
 
   Baddeley, A. and Turner, R. (2005b)
   Modelling spatial point patterns in R.
-  In: A. Baddeley, J. Mateu and D. Stoyan (eds.)
-  Case Studies in Spatial Point Pattern Modelling.
-  Springer-Verlag,  2005, to appear.
+  In: A. Baddeley, P. Gregori, J. Mateu, R. Stoica, and D. Stoyan,
+  editors, \emph{Case Studies in Spatial Point Pattern Modelling},
+  Lecture Notes in Statistics number 185. Pages 23--74.
+  Springer-Verlag, New York, 2006. 
+  ISBN: 0-387-28311-0.
+
+  Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
+  Residual analysis for spatial point processes.
+  \emph{Journal of the Royal Statistical Society, Series B}
+  \bold{67}, 617--666.
 }
 \section{Licence}{
   This library and its documentation are usable under the terms of the "GNU 
