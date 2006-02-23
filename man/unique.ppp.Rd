@@ -1,0 +1,54 @@
+\name{unique.ppp}
+\alias{unique.ppp}
+\title{Extract Unique Points from a Spatial Point Pattern}
+\description{
+  Removes any points that are identical to other points
+  in a spatial point pattern.
+}
+\usage{
+ unique.ppp(x, \dots)
+}
+\arguments{
+  \item{x}{
+    A spatial point pattern
+    (object of class \code{"ppp"}).
+  }
+  \item{\dots}{
+    Ignored.
+  }
+}
+\value{
+  Another point pattern object.
+}
+\details{
+  This is a method for the generic function \code{unique} for 
+  point pattern datasets (of class \code{"ppp"}, see \code{\link{ppp.object}}).
+
+  Two points in a point pattern are deemed to be identical
+  if their \eqn{x,y} coordinates are the same,
+  and their marks are also the same (if they carry marks).
+  The Examples section illustrates how it is possible for
+  a point pattern to contain a pair of identical points.
+
+  This function removes duplicate points in \code{x},
+  and returns a point pattern.
+}
+\seealso{
+  \code{\link{ppp.object}},
+  \code{\link{duplicated.ppp}},
+  \code{\link{multiplicity.ppp}}
+}
+\examples{
+   X <- ppp(c(1,1,0.5), c(2,2,1), window=square(3))
+   unique(X)
+}
+
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{rolf@math.unb.ca}
+  \url{http://www.math.unb.ca/~rolf}
+}
+\keyword{spatial}
+ 

@@ -3,15 +3,17 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.5 $   $Date: 2005/05/24 21:11:26 $
+#  $Revision: 1.7 $   $Date: 2006/02/22 08:51:04 $
 #
 
 qqplot.ppm <-
   function(fit, nsim=100, expr=NULL, ..., type="raw", style="mean",
            fast=TRUE, verbose=TRUE, plot.it=TRUE,
            dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
-           control=list(nrep=nrep, expand=default.expand(fit),
-           periodic=TRUE), saveall=FALSE)
+           control=list(nrep=nrep,
+             expand=default.expand(fit),
+             periodic=(default.expand(fit)$type=="rectangle")),
+           saveall=FALSE)
 {
   verifyclass(fit, "ppm")
 
@@ -64,6 +66,7 @@ qqplot.ppm <-
 
   ######  Perform simulations
   if(verbose) cat(paste("Simulating", nsim, "realisations... "))
+  simul.sizes <- numeric(nsim)
   for(i in 1:nsim) {
     ei <- eval(expr)
     fiti <-
@@ -75,6 +78,9 @@ qqplot.ppm <-
         refit(fit, ei)
       else
         stop("result of eval(expr) is not a ppm or ppp object")
+    # diagnostic info
+    simul.sizes[i] <- data.ppm(fiti)$n
+    # compute residual field
     resi <- residualfield(fiti, type=type, ..., dimyx=dimyx)
     if(i == 1)
       sim <- array(, dim=c(dim(resi), nsim))
@@ -83,6 +89,18 @@ qqplot.ppm <-
       cat(paste(i, ifelse(i %% 10 == 0, "\n", ", "), sep=""))
   }
 
+  ###### Report diagnostics
+  nempty <- sum(simul.sizes == 0)
+  if(nempty > 0)
+    cat(paste("\n\n**Alert:",
+              nempty, "out of", nsim,
+              "simulated patterns were empty.\n\n"))
+  else
+    cat(paste("\nDiagnostic info:\n",
+              "simulated patterns contained an average of",
+              mean(simul.sizes), "points.\n"))
+  if(nempty == nsim)
+    warning("All simulated patterns were empty")
   ############ Plot them
   switch(style,
          classical = {

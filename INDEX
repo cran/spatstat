@@ -54,6 +54,7 @@ density.psp             Kernel Smoothing of Line Segment Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window Frame
 DiggleGratton           Diggle-Gratton model
+dilate.owin             Dilate a Window
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
 distmap                 Distance Map
@@ -62,6 +63,8 @@ distmap.ppp             Distance Map of Point Pattern
 distmap.psp             Distance Map of Line Segment Pattern
 dummy.ppm               Extract Dummy Points Used to Fit a Point
                         Process Model
+duplicated.ppp          Determine Duplicated Points in a Spatial Point
+                        Pattern
 eem                     Exponential Energy Marks
 endpoints.psp           Endpoints of Line Segment Pattern
 envelope                Simulation envelopes of summary function
@@ -133,6 +136,7 @@ markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
 midpoints.psp           Midpoints of Line Segment Pattern
+multiplicity.ppp        Count Multiplicity of Duplicate Points
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
@@ -269,5 +273,7 @@ summary.quad            Summarizing a Quadrature Scheme
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
 union.quad              Union of Data and Dummy Points
+unique.ppp              Extract Unique Points from a Spatial Point
+                        Pattern
 unmark                  Remove Marks from a Marked Point Pattern
 update.ppm              Update a Fitted Point Process Model

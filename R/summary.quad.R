@@ -3,7 +3,7 @@
 #
 #  summary() method for class "quad"
 #
-#  $Revision: 1.3 $ $Date: 2004/01/27 07:06:14 $
+#  $Revision: 1.4 $ $Date: 2006/02/21 07:21:07 $
 #
 summary.quad <- function(object, ...) {
   verifyclass(object, "quad")
@@ -12,7 +12,10 @@ summary.quad <- function(object, ...) {
        dummy = summary.ppp(object$dummy),
        param = object$param)
   doit <- function(ww) {
-    return(list(range=range(ww), sum=sum(ww)))
+    if(length(ww) > 0) 
+      return(list(range=range(ww), sum=sum(ww)))
+    else
+      return(NULL)
   }
   w <- object$w
   Z <- is.data(object)
@@ -64,7 +67,12 @@ print.summary.quad <- function(x, ..., dp=3) {
     }
   }
   # Description of them
-  doit <- function(ww) {
+  doit <- function(ww, blah) {
+    cat(paste(blah, ":\n\t", sep=""))
+    if(is.null(ww)) {
+      cat("(None)\n")
+      return()
+    }
     cat(paste("range: ",
               "[",
               paste(signif(ww$range, digits=dp), collapse=", "),
@@ -73,12 +81,9 @@ print.summary.quad <- function(x, ..., dp=3) {
               signif(ww$sum, digits=dp),
               "\n", sep=""))
   }
-  cat("All weights:\n\t")
-  doit(x$w$all)
-  cat("Weights on data points:\n\t")
-  doit(x$w$data)
-  cat("Weights on dummy points:\n\t")
-  doit(x$w$dummy)
+  doit(x$w$all, "All weights")
+  doit(x$w$data, "Weights on data points")
+  doit(x$w$dummy, "Weights on dummy points")
 
   return(invisible(NULL))
 }

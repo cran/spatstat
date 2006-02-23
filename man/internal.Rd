@@ -119,6 +119,7 @@
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{rebound.owin}
 \alias{resid4plot}
 \alias{resid1plot}
 \alias{resid1panel}
@@ -149,8 +150,6 @@
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
-\alias{try.FGJKest}
-\alias{try.Kcross}           
 \alias{update.interact}
 \alias{validate.mask}        
 \alias{verifyclass}
@@ -300,10 +299,11 @@ quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
+rebound.owin(w, rect)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
-           spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL)
+           spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)
 resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
-              srange=NULL, monochrome=FALSE, main=NULL)
+              srange=NULL, monochrome=FALSE, main=NULL, \dots)
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots)
@@ -333,8 +333,6 @@ suffstat.poisson(model, X)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
-try.FGJKest(niter = 20, lambda = 25, r = seq(0, sqrt(2), 0.02), eps = 0.01, slow = FALSE)
-try.Kcross(niter = 20, lambda1 = 25, lambda2 = 25, r = seq(0, 1, 0.02), R = 0.2)           
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)

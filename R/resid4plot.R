@@ -5,12 +5,13 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.8 $    $Date: 2005/05/24 19:06:41 $
+#   $Revision: 1.9 $    $Date: 2006/02/22 06:06:46 $
 #
 #
 
 resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
-                       spacing=0.1, srange=NULL, monochrome=FALSE, main=NULL)
+                       spacing=0.1, srange=NULL, monochrome=FALSE, main=NULL,
+                       ...)
 {
   clip     <- RES$clip
   Yclip    <- RES$Yclip
@@ -54,26 +55,26 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   # pre-plot the window(s)
   if(!redundant) {
     if(!clip) 
-      plot(Ys$window, add=TRUE)
+      plot(Ys$window, add=TRUE, ...)
     else
-      ploterodewin(Ws, Ys$window, add=TRUE)
+      ploterodewin(Ws, Ys$window, add=TRUE, ...)
   }
 
   switch(plot.neg,
          discrete={
            neg <- (Ys$marks < 0)
            hackmax <- 0.5 * sqrt(area.owin(Wclip)/Yclip$n)
-           plot(Ys[neg], add=TRUE, maxsize=hackmax)
-           plot(Ys[!neg], add=TRUE)
+           plot(Ys[neg], add=TRUE, maxsize=hackmax, ...)
+           plot(Ys[!neg], add=TRUE, ...)
          },
          image={
            Yds <- shift(Ydens, vec)
            Yms <- shift(Ymass, vec)
            if(redundant)
-             ploterodeimage(Ws, Yds, rangeZ=srange, colsZ=cols)
+             ploterodeimage(Ws, Yds, rangeZ=srange, colsZ=cols, ...)
            else if(type != "eem") 
-             image(Yds, add=TRUE, ribbon=FALSE, col=cols, zlim=srange)
-           plot(Yms, add=TRUE)
+             image(Yds, add=TRUE, ribbon=FALSE, col=cols, zlim=srange, ...)
+           plot(Yms, add=TRUE, ...)
          }
          )
   # --------- plot smoothed surface (in bottom right panel) ------------
@@ -81,12 +82,12 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   Zs <- shift.im(Z, vec)
   switch(plot.smooth,
          image={
-           image(Zs, add=TRUE, col=cols, zlim=srange, ribbon=FALSE)},
-         contour={contour(Zs, add=TRUE)},
+           image(Zs, add=TRUE, col=cols, zlim=srange, ribbon=FALSE, ...)},
+         contour={contour(Zs, add=TRUE, ...)},
          persp={ warning("persp not available in 4-panel plot") },
          imagecontour={
-             image(Zs, add=TRUE, col=cols, zlim=srange, ribbon=FALSE)
-             contour(Zs, add=TRUE)
+             image(Zs, add=TRUE, col=cols, zlim=srange, ribbon=FALSE, ...)
+             contour(Zs, add=TRUE, ...)
            }
          )  
   lines(Zs$xrange[c(1,2,2,1,1)], Zs$yrange[c(1,1,2,2,1)])
@@ -191,7 +192,8 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
 
 resid1plot <- function(RES, opt,
                        plot.neg="image", plot.smooth="imagecontour",
-                       srange=NULL, monochrome=FALSE, main=NULL) {
+                       srange=NULL, monochrome=FALSE, main=NULL,
+                       ...) {
   clip  <- RES$clip
   Y     <- RES$Y
   Yclip <- RES$Yclip
@@ -228,27 +230,27 @@ resid1plot <- function(RES, opt,
       (plot.neg == "image") && (type != "eem") && (Yclip$window$type == "mask")
   # pre-plot the window(s)
     if(redundant)
-      plot(as.rectangle(W), box=FALSE, main="")
+      plot(as.rectangle(W), box=FALSE, main="", ...)
     else {
       if(!clip) 
-        plot(W, main="")
+        plot(W, main="", ...)
       else
-        ploterodewin(W, Wclip, main="")
+        ploterodewin(W, Wclip, main="", ...)
     }
 
     switch(plot.neg,
            discrete={
              neg <- (Y$marks < 0)
              hackmax <- 0.5 * sqrt(area.owin(W)/Y$n)
-             plot(Y[neg], add=TRUE, maxsize=hackmax)
-             plot(Y[!neg], add=TRUE)
+             plot(Y[neg], add=TRUE, maxsize=hackmax, ...)
+             plot(Y[!neg], add=TRUE, ...)
            },
          image={
            if(redundant)
-             ploterodeimage(W, Ydens, rangeZ=srange, colsZ=cols)
+             ploterodeimage(W, Ydens, rangeZ=srange, colsZ=cols, ...)
            else if(type != "eem") 
-             image(Ydens, col=cols, zlim=srange, add=TRUE, ribbon=FALSE)
-           plot(Ymass, add=TRUE)
+             image(Ydens, col=cols, zlim=srange, add=TRUE, ribbon=FALSE, ...)
+           plot(Ymass, add=TRUE, ...)
          }
          )
     title(main=main)
@@ -258,33 +260,33 @@ resid1plot <- function(RES, opt,
     if(!clip) {
       switch(plot.smooth,
            image={image(Z, main=main, axes=FALSE, xlab="", ylab="",
-                        col=cols, zlim=srange, ribbon=FALSE)},
-           contour={contour(Z, main=main, axes=FALSE, xlab="", ylab="")},
-           persp={persp(Z, main=main, axes=FALSE, xlab="", ylab="")},
+                        col=cols, zlim=srange, ribbon=FALSE, ...)},
+           contour={contour(Z, main=main, axes=FALSE, xlab="", ylab="", ...)},
+           persp={persp(Z, main=main, axes=FALSE, xlab="", ylab="", ...)},
            imagecontour={
              image(Z, main=main, axes=FALSE, xlab="", ylab="",
-                   col=cols, zlim=srange, ribbon=FALSE)
-             contour(Z, add=TRUE)
+                   col=cols, zlim=srange, ribbon=FALSE, ...)
+             contour(Z, add=TRUE, ...)
            }
            )
     } else {
       switch(plot.smooth,
            image={
-             plot(as.rectangle(W), box=FALSE, main=main)
-             ploterodeimage(W, Z, colsZ=cols, rangeZ=srange)
+             plot(as.rectangle(W), box=FALSE, main=main, ...)
+             ploterodeimage(W, Z, colsZ=cols, rangeZ=srange, ...)
            },
            contour={
-             plot(W, main=main)
-             contour(Z, add=TRUE)
+             plot(W, main=main, ...)
+             contour(Z, add=TRUE, ...)
            },
            persp={
-             persp(Z, main=main, axes=FALSE, xlab="", ylab="")
+             persp(Z, main=main, axes=FALSE, xlab="", ylab="", ...)
            # there is no 'add' option for 'persp'
            },
            imagecontour={
-             plot(as.rectangle(W), box=FALSE, main=main)
-             ploterodeimage(W, Z, colsZ=cols, rangeZ=srange)
-             contour(Z, add=TRUE)
+             plot(as.rectangle(W), box=FALSE, main=main, ...)
+             ploterodeimage(W, Z, colsZ=cols, rangeZ=srange, ...)
+             contour(Z, add=TRUE, ...)
            }
            )
     }

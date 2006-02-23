@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.9 $	$Date: 2005/07/27 06:24:32 $
+#    $Revision: 1.11 $	$Date: 2006/02/21 12:57:12 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -83,7 +83,7 @@ if(length(correction) > 1)
 
 if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley", "none")))
   stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
-          
+
 #  
 # Form the matrix of distances
 	
@@ -113,6 +113,15 @@ if(!marx)
   POT <- pairpot(M, potpars)
 else
   POT <- pairpot(M, m, mm, potpars)
+
+# Check errors and special cases
+
+if(!is.matrix(POT) && !is.array(POT)) {
+  if(length(POT) == 0 && X$n ==  0) # empty pattern
+    POT <- array(POT, dim=c(dim(M),1))
+  else
+    stop("Pair potential did not return a matrix or array")
+}
 
 if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dim(M))) {
         whinge <- paste(

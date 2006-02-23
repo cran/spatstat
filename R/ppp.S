@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.25 $	$Date: 2005/11/24 04:16:51 $
+#	$Revision: 4.26 $	$Date: 2006/02/22 11:11:08 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -337,6 +337,7 @@ summary.ppp <- function(object, ...) {
   result$n <- object$n
   result$window <- summary(object$window)
   result$intensity <- result$n/result$window$area
+  result$nduplicated <- sum(duplicated(object))
   if(result$is.marked) {
     mks <- object$marks
     result$is.multitype <- is.factor(mks)
@@ -365,6 +366,8 @@ print.summary.ppp <- function(x, ..., dp=3) {
             sep=""))
   cat(paste("Average intensity",
             signif(x$intensity,dp), "points per unit area\n"))
+  if(x$nduplicated > 0)
+    cat("\n*Pattern contains duplicated points*\n")
   if(x$is.marked)
     if(x$is.multitype) {
       cat("Marks:\n")

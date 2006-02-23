@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.6 $	$Date: 2005/05/14 02:13:45 $
+#	$Revision: 4.7 $	$Date: 2006/02/21 10:49:25 $
 #
 # -------- functions ----------------------------------------
 #
@@ -175,3 +175,57 @@ erode.owin <- function(w, r, shrink.frame=TRUE, ...) {
 
         return(wnew)
 }	
+
+rebound.owin <- function(w, rect) {
+  verifyclass(w, "owin")
+  verifyclass(rect, "owin")
+  bb <- bounding.box(w)
+  if(!is.subset.owin(bb, rect))
+    stop("The new rectangle \`rect\' does not contain the window \`win\'")
+  xr <- rect$xrange
+  yr <- rect$yrange
+  switch(w$type,
+         rectangle={
+           return(owin(xr, yr,
+                       poly=list(x=xr[c(1,2,2,1)], y=yr[c(1,1,2,2)])))
+         },
+         polygonal={
+           return(owin(xr, yr, poly=w$bdry))
+         },
+         mask={
+           newseq <- function(oldseq, newrange, dstep) {
+             oldends <- range(oldseq)
+             nleft <- max(0, floor((oldends[1] - newrange[1])/dstep))
+             nright <- max(0, floor((newrange[2] - oldends[2])/dstep))
+             newstart <- max(oldends[1] - nleft * dstep, newrange[1])
+             newend <- min(oldends[2] + nright * dstep, newrange[2])
+             seq(from=newstart, by=dstep, to=newend)
+           }
+           xcol <- newseq(w$xcol, xr, mean(diff(w$xcol)))
+           yrow <- newseq(w$yrow, yr, mean(diff(w$yrow)))
+           newmask <- as.mask(xy=list(x=xcol, y=yrow))
+           xx <- raster.x(newmask)
+           yy <- raster.y(newmask)
+           newmask$m <- inside.owin(xx, yy, w)
+           return(newmask)
+         }
+         )
+}
+  
+    
+dilate.owin <- function(w, r, ...) {
+  verifyclass(w, "owin")
+  if(w$type != "mask")
+    w <- as.mask(w, ...)
+  bb <- bounding.box(w)
+  newbox <- owin(bb$xrange + c(-r,r), bb$yrange + c(-r,r))
+  w <- rebound.owin(w, newbox)
+  distant <- distmap(w)
+  dil <- w
+  dil$m <- (distant$v <= r)
+  return(dil)
+}
+
+  
+  
+  

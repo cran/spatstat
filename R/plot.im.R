@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.9 $   $Date: 2005/12/20 00:59:10 $
+#  $Revision: 1.16 $   $Date: 2006/02/22 07:15:19 $
 #
 #  Plotting code for pixel images
 #
@@ -41,6 +41,18 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
            ribbonticks <- pretty(ribbonvalues)
            ribbonlabels <- paste(ribbonticks)
          },
+         logical = {
+           values <- as.integer(as.vector(x$v))
+           values <- values[!is.na(values)]
+           trivial <- (length(unique(values)) < 2)
+           vrange <- c(0,1)
+           imagebreaks <- c(-0.5, 0.5, 1.5)
+           ribbonvalues <- c(0,1)
+           ribbonrange <- range(imagebreaks)
+           ribbonbreaks <- imagebreaks
+           ribbonticks <- ribbonvalues
+           ribbonlabels <- c("FALSE", "TRUE")
+         },
          factor  = {
            lev <- x$lev
            nvalues <- length(lev)
@@ -67,22 +79,24 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
 
   add <- resolve.defaults(list(...), list(add=FALSE))$add
 
+  image.doit <- function(...) {
+    do.call.matched("image.default",
+                    resolve.defaults(...),
+                    funargs=c(names(formals(image.default)),
+                      "main", "asp", "sub"))
+  }
+  
   if(!identical(ribbon, TRUE)
      || identical(add, TRUE)
      || trivial)
     {
       # plot image without ribbon
-      do.call.matched("image.default",
-                      resolve.defaults(
-                                       list(x=x$xcol, y=x$yrow, z=t(x$v)),
-                                       list(...),
-                                       colourmap,
-                                       list(xlab = "x", ylab = "y"),
-                                       list(asp = 1, main = main)
-                                       ),
-                      funargs=
-                      c(names(formals(image.default)), "main", "asp", "sub")
-                      )
+      image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+                 list(...),
+                 colourmap,
+                 list(xlab = "x", ylab = "y"),
+                 list(asp = 1, main = main)
+                 )
       return(invisible(NULL))
     }
   # determine plot region
@@ -100,14 +114,12 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
                             xlim=bb.all$xrange, ylim=bb.all$yrange),
                            list(...), list(main=main, xlab="", ylab="")))
   # plot image
-    do.call.matched("image.default",
-                    resolve.defaults(
-                                     list(x=x$xcol, y=x$yrow, z=t(x$v)),
-                                     list(add=TRUE),
-                                     list(...),
-                                     colourmap,
-                                     list(xlab = "x", ylab = "y"),
-                                     list(asp = 1, main = main)))
+    image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+               list(add=TRUE),
+               list(...),
+               colourmap,
+               list(xlab = "x", ylab = "y"),
+               list(asp = 1, main = main))
   # axes for image
   imax <- resolve.defaults(list(...), list(axes=TRUE))$axes
   if(imax) {
@@ -120,13 +132,11 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
   # plot ribbon image containing the range of image values
   ycoords <- seq(bb.rib$yrange[1], bb.rib$yrange[2],
                  length=length(ribbonvalues)+1)
-  do.call.matched("image.default",
-                  resolve.defaults(
-                                   list(x=bb.rib$xrange, y=ycoords,
-                                        z=matrix(ribbonvalues, nrow=1),
-                                        add=TRUE),
-                                   list(...),
-                                   colourmap))
+  image.doit(list(x=bb.rib$xrange, y=ycoords,
+                  z=matrix(ribbonvalues, nrow=1),
+                  add=TRUE, main="", sub=""),
+             list(...),
+             colourmap)
   plot(as.owin(bb.rib), add=TRUE)
   # ticks for ribbon image
   scal <- diff(bb.rib$yrange)/diff(ribbonrange)
@@ -147,21 +157,24 @@ persp.im <- function(x, ...) {
   xname <- deparse(substitute(x))
   if(summary(x)$type == "factor")
     stop("Perspective plot is inappropriate for factor-valued image")
+  pop <- spatstat.options()$par.persp
   do.call.matched("persp",
                   resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                                    list(...),
+                                   pop,
                                    list(xlab="x", ylab="y", zlab=xname),
                                    list(main=xname)),
-                  funargs=list("x", "y", "z",
-                               "xlim", "ylim", "zlim",
-                               "xlab", "ylab", "zlab",
-                               "main", "sub",
-                               "theta", "phi", "r", "d", "scale",
-                               "expand", "col", "border",
-                               "ltheta", "lphi", "shade", "box",
-                               "axes", "nticks", "ticktype"))
+                  funargs=.Spatstat.persp.args)
 }
 
+.Spatstat.persp.args <- list("x", "y", "z",
+                             "xlim", "ylim", "zlim",
+                             "xlab", "ylab", "zlab",
+                             "main", "sub",
+                             "theta", "phi", "r", "d", "scale",
+                             "expand", "col", "border",
+                             "ltheta", "lphi", "shade", "box",
+                             "axes", "nticks", "ticktype")
 
 ######################################################################
 
@@ -170,11 +183,12 @@ contour.im <- function (x, ...)
   main <- deparse(substitute(x))
   add <- resolve.defaults(list(...), list(add=FALSE))$add
   if(!add) 
-    do.call("plot",
-            resolve.defaults(list(range(x$xcol), range(x$yrow), type="n"),
+    do.call.matched("plot.default",
+            resolve.defaults(list(x=range(x$xcol), y=range(x$yrow), type="n"),
                              list(...),
                              list(asp = 1, xlab="x", ylab="y", main=main)))
-  do.call("contour",
-          resolve.defaults(list(x$xcol, x$yrow, t(x$v), add=TRUE),
-                           list(...)))
+  do.call.matched("contour.default",
+                  resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+                                   list(add=TRUE),
+                                   list(...)))
 }

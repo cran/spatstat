@@ -118,15 +118,18 @@ Practical maximum pseudolikelihood for spatial point patterns.
 \emph{Australian and New Zealand Journal of Statistics}
 \bold{42}, 283--322.
  
-Baddeley, A. and Turner, R. (2005a)
-Spatstat: an R package for analysing spatial point patterns.
-Journal of Statistical Software 12:6 (2005) 1--42.
+  Baddeley, A. and Turner, R. (2005a)
+  Spatstat: an R package for analyzing spatial point patterns.
+  \emph{Journal of Statistical Software} \bold{12}:6, 1--42.
+  URL: \code{www.jstatsoft.org}, ISSN: 1548-7660.
 
-Baddeley, A. and Turner, R. (2005b)
-Modelling spatial point patterns in R.
-In A. Baddeley and J. Mateu and D. Stoyan (ed)
-Case Studies in Spatial Point Pattern Modelling.
-Springer-Verlag, 2005, to appear.
+  Baddeley, A. and Turner, R. (2005b)
+  Modelling spatial point patterns in R.
+  In: A. Baddeley, P. Gregori, J. Mateu, R. Stoica, and D. Stoyan,
+  editors, \emph{Case Studies in Spatial Point Pattern Modelling},
+  Lecture Notes in Statistics number 185. Pages 23--74.
+  Springer-Verlag, New York, 2006. 
+  ISBN: 0-387-28311-0.  
 
 Harkness, R.D. and Isham, V. (1983)
 A bivariate spatial point pattern of ants' nests.
