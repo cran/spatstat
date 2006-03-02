@@ -61,10 +61,12 @@
   s$name
   s$trend$value
 
+  \dontrun{
   # multitype pattern
   data(demopat)
   fit <- ppm(demopat, ~marks, Poisson())
   summary(fit)
+  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.9 $    $Date: 2006/02/22 06:06:46 $
+#   $Revision: 1.10 $    $Date: 2006/02/27 04:58:21 $
 #
 #
 
@@ -63,8 +63,12 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   switch(plot.neg,
          discrete={
            neg <- (Ys$marks < 0)
-           hackmax <- 0.5 * sqrt(area.owin(Wclip)/Yclip$n)
-           plot(Ys[neg], add=TRUE, maxsize=hackmax, ...)
+           if(any(c("maxsize", "markscale") %in% names(list(...))))
+             plot(Ys[neg], add=TRUE, ...)
+           else {
+             hackmax <- 0.5 * sqrt(area.owin(Wclip)/Yclip$n)
+             plot(Ys[neg], add=TRUE, maxsize=hackmax, ...)
+           }
            plot(Ys[!neg], add=TRUE, ...)
          },
          image={
@@ -241,8 +245,12 @@ resid1plot <- function(RES, opt,
     switch(plot.neg,
            discrete={
              neg <- (Y$marks < 0)
-             hackmax <- 0.5 * sqrt(area.owin(W)/Y$n)
-             plot(Y[neg], add=TRUE, maxsize=hackmax, ...)
+             if(any(c("maxsize", "markscale") %in% names(list(...))))
+               plot(Ys[neg], add=TRUE, ...)
+             else {
+               hackmax <- 0.5 * sqrt(area.owin(Wclip)/Yclip$n)
+               plot(Ys[neg], add=TRUE, maxsize=hackmax, ...)
+             }
              plot(Y[!neg], add=TRUE, ...)
            },
          image={

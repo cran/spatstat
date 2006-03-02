@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.12 $	$Date: 2005/03/10 02:32:52 $
+#	$Revision: 4.13 $	$Date: 2006/02/25 09:30:17 $
 #
 #
 #
@@ -252,3 +252,16 @@ expand.owin <- function(W, f=1) {
                yr + fff * c(-1,1) * diff(yr))
   return(Wexp)
 }
+
+trim.rectangle <- function(W, xmargin, ymargin=xmargin) {
+  if(W$type != "rectangle")
+    stop("Internal error: tried to trim margin off non-rectangular window")
+  if(2 * xmargin > diff(W$xrange))
+    stop(paste("window too small to cut off a margin of width", xmargin))
+  if(2 * ymargin > diff(W$yrange))
+    stop(paste("window too small to cut off a margin of height", ymargin))
+  owin(W$xrange + c(1,-1) * xmargin,
+       W$yrange + c(1,-1) * ymargin)
+}
+
+

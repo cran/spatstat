@@ -59,8 +59,9 @@
 
    plot(Q, main="NZ trees: quadrature scheme")
 
-   par(mfrow=c(2,1))
+   oldpar <- par(mfrow=c(2,1))
    plot(Q, main="NZ trees", dum=list(add=FALSE))
+   par(oldpar)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

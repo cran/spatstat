@@ -186,6 +186,8 @@
       density using the quadrature scheme of the fitted model)
       are plotted as squares centred at the dummy points
       with side lengths proportional to the (negative) residuals.
+      [To control the size of the circles and squares, use the argument
+      \code{maxsize}.]
     }
     \item{\code{"smooth"}:}{
       plot a kernel-smoothed version of the residual measure.

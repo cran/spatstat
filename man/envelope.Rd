@@ -168,7 +168,7 @@
  plot(envelope(X))
  }
  \testonly{
-  plot(envelope(X, nsim=5))
+  plot(envelope(X, nsim=4))
  }
 
  # Translation edge correction (this is also FASTER):
@@ -176,7 +176,7 @@
  plot(envelope(X, correction="translate"))
  }
  \testonly{
-  plot(envelope(X, nsim=5, correction="translate"))
+  plot(envelope(X, nsim=4, correction="translate"))
  }
 
  # Envelope of K function for simulations from model 
@@ -194,7 +194,7 @@
  plot(envelope(X, Gest))
  }
  \testonly{
-  plot(envelope(X, Gest, nsim=5))
+  plot(envelope(X, Gest, nsim=4))
  }
 
  # Envelope of L function under CSR
@@ -204,7 +204,7 @@
   plot(E, sqrt(./pi) ~ r)
  }
  \testonly{
-  E <- envelope(X, Kest, nsim=5)
+  E <- envelope(X, Kest, nsim=4)
   plot(E, sqrt(./pi) ~ r)
  }
 
@@ -217,7 +217,7 @@
  plot(envelope(demopat, Jcross, i="A", j="B"))
  }
  \testonly{
- plot(envelope(demopat, Jcross, i="A", j="B", nsim=5))
+ plot(envelope(demopat, Jcross, i="A", j="B", nsim=4))
  }
  
  # Use of `simulate'
@@ -226,8 +226,8 @@
  plot(envelope(X, Gest, simulate=expression(rMaternI(100,0.02))))
  }
  \testonly{
-  plot(envelope(X, Gest, simulate=expression(runifpoint(42)), nsim=5))
-  plot(envelope(X, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=5))
+  plot(envelope(X, Gest, simulate=expression(runifpoint(42)), nsim=4))
+  plot(envelope(X, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=4))
  }
 
  # Envelope under random toroidal shifts
@@ -239,7 +239,7 @@
  \testonly{
  plot(envelope(amacrine, Kcross, i="on", j="off",
                simulate=expression(rtoro(amacrine, radius=0.25)),
-               nsim=5))
+               nsim=4))
  }
 
  
@@ -251,7 +251,7 @@
  }
  \testonly{
  plot(envelope(X, Kinhom, lambda=trend,
-         simulate=expression(rpoispp(trend)), nsim=5))
+         simulate=expression(rpoispp(trend)), nsim=4))
  }
  
 }

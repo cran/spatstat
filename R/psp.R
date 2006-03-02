@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.5 $ $Date: 2005/12/20 09:38:15 $
+#  $Revision: 1.10 $ $Date: 2006/03/02 05:25:31 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -88,6 +88,18 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, fatal=TRUE) {
   return(NULL)
 }
 
+append.psp <- function(A,B) {
+  verifyclass(A, "psp")
+  verifyclass(B, "psp")
+  stopifnot(identical(A$window, B$window))
+  result <- list(ends=rbind(A$ends, B$ends),
+                 window=A$window,
+                 n=A$n + B$n,
+                 marks=c(A$marks, B$marks))
+  class(result) <- c("psp", class(result))
+  return(result)
+}
+
 #################################################
 #  plot and print methods
 #################################################
@@ -100,7 +112,9 @@ plot.psp <- function(x, ...) {
                                    list(main=deparse(substitute(x)))))
   if(!is.null(x$marks))
     warning("marks are currently ignored in plot.psp")
-  do.call.matched("segments", append(as.list(x$ends), list(...)))
+  if(x$n > 0)
+    do.call.matched("segments", append(as.list(x$ends), list(...)))
+  return(invisible(NULL))
 }
 
 print.psp <- function(x, ...) {
@@ -242,6 +256,7 @@ print.summary.psp <- function(x, ...) {
 }
   
 
+ 
 ########################################################
 # clipping operation (for subset)
 ########################################################
@@ -253,6 +268,10 @@ clip.psp <- function(x, window, check=TRUE) {
     warning("The clipping window is not a subset of the window containing the line segment pattern x")
   if(window$type != "rectangle")
     stop("sorry, clipping is only implemented for rectangular windows")
+  emptypattern <- psp(numeric(0), numeric(0), numeric(0), numeric(0),
+                      window=window)
+  if(x$n == 0)
+    return(emptypattern)
   ends <- x$ends
   marks <- x$marks
   # accept segments which are entirely inside the window
@@ -260,10 +279,11 @@ clip.psp <- function(x, window, check=TRUE) {
   in0 <- inside.owin(ends$x0, ends$y0, window)
   in1 <- inside.owin(ends$x1, ends$y1, window)
   ok <- in0 & in1
-  ends.inside <- ends[ok,]
+  ends.inside <- ends[ok, , drop=FALSE]
   marks.inside <- if(is.null(marks)) NULL else marks[ok]
+  x.inside <- as.psp(ends.inside, window=window, marks=marks.inside)
   # consider the rest
-  ends <- ends[!ok,]
+  ends <- ends[!ok, , drop=FALSE]
   in0 <- in0[!ok] 
   in1 <- in1[!ok]
   if(!is.null(marks)) marks <- marks[!ok]
@@ -285,8 +305,10 @@ clip.psp <- function(x, window, check=TRUE) {
   # discard segments which do not lie in the x range 
   nx <- apply(!is.na(tx), 1, sum)
   ok <- (nx >= 2)
-  ends <- ends[ok,]
-  tx   <- tx[ok,]
+  if(!any(ok))
+    return(x.inside)
+  ends <- ends[ok, , drop=FALSE]
+  tx   <- tx[ok, , drop=FALSE]
   in0  <- in0[ok]
   in1  <- in1[ok]
   if(!is.null(marks)) marks <- marks[ok]
@@ -310,8 +332,10 @@ clip.psp <- function(x, window, check=TRUE) {
   # discard segments which do not lie in the y range 
   ny <- apply(!is.na(ty), 1, sum)
   ok <- (ny >= 2)
-  ends <- ends[ok,]
-  ty   <- ty[ok,]
+  if(!any(ok))
+    return(x.inside)
+  ends <- ends[ok, , drop=FALSE]
+  ty   <- ty[ok, , drop=FALSE]
   in0  <- in0[ok]
   in1  <- in1[ok]
   if(!is.null(marks)) marks <- marks[ok]
