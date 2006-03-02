@@ -13,7 +13,9 @@
              dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
              control=list(nrep=nrep,expand=default.expand(fit),
                           periodic=(default.expand(fit)$type=="rectangle")),
-             saveall=FALSE)
+             saveall=FALSE,
+             monochrome=FALSE,
+             limcol=if(monochrome) "black" else "red")
 }
 \arguments{
   \item{fit}{
@@ -80,6 +82,15 @@
   \item{saveall}{
     Logical flag indicating whether to save all the intermediate
     calculations. 
+  }
+  \item{monochrome}{
+    Logical flag indicating whether the plot should be
+    in black and white (\code{monochrome=TRUE}), or in colour
+    (\code{monochrome=FALSE}).
+  }
+  \item{limcol}{
+    String. The colour to be used when plotting the 95-percent limit
+    curves.
   }
 }
 \value{
@@ -269,17 +280,17 @@
     fit <- ppm(cells, ~1, Poisson())
     diagnose.ppm(fit)  # no suggestion of departure from stationarity
     \dontrun{qqplot.ppm(fit, 80)  # strong evidence of non-Poisson interaction}
-    \testonly{qqplot.ppm(fit, 5)}
+    \testonly{qqplot.ppm(fit, 4)}
 
     \dontrun{diagnose.ppm(fit, type="pearson")  
     qqplot.ppm(fit, type="pearson")}
-    \testonly{qqplot.ppm(fit, 5, type="pearson")}
+    \testonly{qqplot.ppm(fit, 4, type="pearson")}
 
     ###########################################
     ## oops, I need the plot coordinates
     mypreciousdata <- .Last.value
     \dontrun{mypreciousdata <- qqplot.ppm(fit, type="pearson")}
-    \testonly{mypreciousdata <- qqplot.ppm(fit, 5, type="pearson")}
+    \testonly{mypreciousdata <- qqplot.ppm(fit, 4, type="pearson")}
     plot(mypreciousdata)
 
     ######################################################
@@ -289,7 +300,7 @@
     # Do this by setting rmhcontrol(p=1)
     fixit <- list(p=1)
     \dontrun{qqplot.ppm(fit, 100, control=fixit)}
-    \testonly{qqplot.ppm(fit, 5, control=fixit)}
+    \testonly{qqplot.ppm(fit, 4, control=fixit)}
 
     ######################################################
     # Inhomogeneous Poisson data
@@ -298,7 +309,7 @@
     # Inhomogeneous Poisson model
     fit <- ppm(X, ~x, Poisson())
     \dontrun{qqplot.ppm(fit, 100)}
-    \testonly{qqplot.ppm(fit, 10)}
+    \testonly{qqplot.ppm(fit, 4)}
     # conclusion: fitted inhomogeneous Poisson model looks OK
 
     ######################################################
@@ -308,7 +319,7 @@
     # 
     expr <- expression(rmh(fit, start=list(n.start=42), verbose=FALSE))
     \dontrun{qqplot.ppm(fit, 100, expr)}
-    \testonly{qqplot.ppm(fit, 5, expr)}
+    \testonly{qqplot.ppm(fit, 4, expr)}
 
 }
 \author{Adrian Baddeley

@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.7 $   $Date: 2006/02/22 08:51:04 $
+#  $Revision: 1.9 $   $Date: 2006/02/27 06:03:04 $
 #
 
 qqplot.ppm <-
@@ -13,7 +13,9 @@ qqplot.ppm <-
            control=list(nrep=nrep,
              expand=default.expand(fit),
              periodic=(default.expand(fit)$type=="rectangle")),
-           saveall=FALSE)
+           saveall=FALSE,
+           monochrome=FALSE,
+           limcol=if(monochrome) "black" else "red")
 {
   verifyclass(fit, "ppm")
 
@@ -155,8 +157,8 @@ qqplot.ppm <-
                      xlab="Mean quantile of simulations", ylab="data quantile",
                      xlim=rr, ylim=rr, asp=1.0)
                 abline(0,1)
-                lines(meanq, q.025, lty=2, col="red")
-                lines(meanq, q.975, lty=2, col="red")
+                lines(meanq, q.025, lty=2, col=limcol)
+                lines(meanq, q.975, lty=2, col=limcol)
                 title(sub=paste("Residuals:", type))
            }
            result <- list(x=meanq, y=dats, sdq=sdq,
@@ -188,7 +190,8 @@ qqplot.ppm <-
   return(invisible(result))
 }
 
-plot.qqppm <- function(x, ..., limits=TRUE) {
+plot.qqppm <- function(x, ..., limits=TRUE, monochrome=FALSE,
+                               limcol=if(monochrome) "black" else "red") {
   stopifnot(inherits(x, "qqppm"))
   default.type <- if(length(x$x) > 150) "l" else "p"
   myplot <- function(object,
@@ -200,11 +203,12 @@ plot.qqppm <- function(x, ..., limits=TRUE) {
     plot(object$x, object$y, xlab = xlab, ylab = ylab,
          xlim = xlim, ylim = ylim, asp = asp, type = type, ...)
     abline(0, 1)
+    
     if(limits) {
       if(!is.null(object$q.025))
-        lines(object$x, object$q.025, lty = 2, col="red")
+        lines(object$x, object$q.025, lty = 2, col=limcol)
       if(!is.null(object$q.975))
-        lines(object$x, object$q.975, lty = 2, col="red")
+        lines(object$x, object$q.975, lty = 2, col=limcol)
     }
     title(sub=paste("Residuals:", object$rtype))
   }

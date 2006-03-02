@@ -6,12 +6,15 @@
   \code{summary} method for class \code{"quad"}.
 }
 \usage{
-  summary.quad(object, \dots)
+  summary.quad(object, \dots, checkdup=FALSE)
   print.summary.quad(x, \dots, dp=3)
 }
 \arguments{
   \item{object}{A quadrature scheme.}
   \item{\dots}{Ignored.}
+  \item{checkdup}{
+    Logical value indicating whether to test for duplicated points.
+  }
   \item{dp}{Number of significant digits to print.} 
   \item{x}{Object of class \code{"summary.quad"} returned by
     \code{summary.quad}.}

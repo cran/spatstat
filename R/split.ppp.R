@@ -1,7 +1,7 @@
 #
 # split.R
 #
-# $Revision: 1.3 $ $Date: 2005/08/10 06:54:39 $
+# $Revision: 1.4 $ $Date: 2006/02/25 02:17:22 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -45,6 +45,9 @@ split.ppp <- function(x, f = x$marks, drop=FALSE, un=NULL, ...) {
   if(any(ismark) && !all(ismark))
     stop("Some entries of \`value\' are marked, and others are unmarked")
   vmarked <- all(ismark)
+
+  # evaluate `un' before assigning value of 'f'
+  un <- un
   
   if(!missing(f)) {
     if(!is.factor(f))

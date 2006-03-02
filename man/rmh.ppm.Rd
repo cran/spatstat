@@ -149,6 +149,7 @@
    Xsim <- rmh(fit, control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Strauss model")
 
+   \dontrun{
    # Strauss process simulated on a larger window
    # then clipped to original window
    Xsim <- rmh(fit, control=list(nrep=1e3, expand=2, periodic=TRUE))
@@ -176,7 +177,6 @@
    Xsim <- rmh(fit, start=list(n.start=cells$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Diggle-Gratton model")
 
-   \dontrun{
    X <- rSSI(0.05, 100)
    plot(X, main="new data")
 
@@ -184,7 +184,6 @@
    fit <- ppm(X, ~1, PairPiece(seq(0.02, 0.1, by=0.01)))
    Xsim <- rmh(fit, control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted pairwise model")
-   }
 
    # marked point pattern
    data(amacrine)
@@ -222,6 +221,7 @@
    fit <- ppm(Y,~marks*polynom(x,y,2), MS)
    Ysim <- rmh(fit, control=list(nrep=1e3))
    plot(Ysim, main="simulation from fitted inhomogeneous Multitype Strauss")
+   }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

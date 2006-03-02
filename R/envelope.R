@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.16 $  $Date: 2006/02/23 02:48:13 $
+#   $Revision: 1.18 $  $Date: 2006/03/02 01:23:16 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -29,7 +29,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     csr <- TRUE
     X <- Y
     rmhstuff <- !is.null(start) || !missing(control)
-    sY <- summary(Y)
+    sY <- summary(Y, checkdup=FALSE)
     Yintens <- sY$intensity
     Ywin <- Y$window
     Ymarx <- Y$marks
@@ -176,9 +176,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                argu="r",
                ylab=attr(funX, "ylab"),
                valu="obs",
-               fmla=
-               if(csr) deparse(cbind(obs, theo, lo, hi) ~ r)
-               else deparse(cbind(obs, mmean, lo, hi) ~ r),
+               fmla= deparse(. ~ r),
                alim=attr(funX, "alim"),
                labl=c("r", "obs(r)", if(csr) "theo(r)" else "mean(r)",
                  "lo(r)", "hi(r)"),
@@ -188,6 +186,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                  else "mean of simulations",
                  "lower envelope of simulations",
                  "upper envelope of simulations"))
+  attr(result, "dotnames") <- c("obs",
+                                if(csr) "theo" else "mmean",
+                                "hi", "lo")
   return(result)
 }
 

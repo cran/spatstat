@@ -2,7 +2,7 @@
 #
 #  density.psp.R
 #
-#  $Revision: 1.2 $    $Date: 2005/12/19 13:51:49 $
+#  $Revision: 1.3 $    $Date: 2006/02/24 09:42:17 $
 #
 #
 
@@ -31,5 +31,6 @@ density.psp <- function(x, sigma, ..., edge=TRUE) {
     edg <- second.moment.calc(midpoints.psp(x), sigma, what="edge", ...)
     dens <- eval.im(dens/edg)
   }
+  dens <- dens[x$window, drop=FALSE]
   return(dens)
 }

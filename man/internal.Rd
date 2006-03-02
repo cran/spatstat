@@ -48,6 +48,7 @@
 \alias{getglmfit}
 \alias{gridindex}            
 \alias{handle.r.b.args}
+\alias{handle.rshift.args}
 \alias{ho.engine}
 \alias{identical.formulae}
 \alias{inside.xypolygon}     
@@ -150,6 +151,7 @@
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
+\alias{trim.rectangle}
 \alias{update.interact}
 \alias{validate.mask}        
 \alias{verifyclass}
@@ -215,6 +217,7 @@ getfields(X, L, fatal = TRUE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
+handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
 inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")     
@@ -277,7 +280,8 @@ plot.diagppm(x, \dots, which, plot.neg="image",
                          plot.smooth="imagecontour",
                          plot.sd=TRUE, spacing=0.1,
                          srange=NULL, monochrome=FALSE, main=NULL)
-plot.qqppm(x, \dots, limits=TRUE)
+plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
+           limcol=if(monochrome) "black" else "red")
 polynom(x, \dots)
 primefactors(n, prmax)
 print.diagppm(x, \dots)
@@ -333,6 +337,7 @@ suffstat.poisson(model, X)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
+trim.rectangle(W, xmargin, ymargin=xmargin)
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)

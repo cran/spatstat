@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.10 $   $Date: 2005/04/29 20:31:04 $
+#    $Revision: 1.11 $   $Date: 2006/03/02 01:29:40 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -84,8 +84,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   ####### Summarise data ############################
 
-  y$data <- summary.ppp(DATA)
-  y$quad <- summary.quad(QUAD)
+  y$data <- summary.ppp(DATA, checkdup=FALSE)
+  y$quad <- summary.quad(QUAD, checkdup=FALSE)
 
   if(is.character(quick) && (quick == "no prediction"))
     return(y)

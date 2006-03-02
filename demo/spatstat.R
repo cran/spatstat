@@ -125,6 +125,7 @@ Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
 plot(Xg, main=paste("Geyer saturation process\n",
                     "rmh() with cif=\"geyer\""))
 
+plot(rpoisline(10))
 
 fanfare("VI. Programming tools")
 
@@ -139,7 +140,7 @@ showoffK <- function(Y, current, ..., fullpicture,rad) {
 	theta <- seq(0,2*pi,length=100)
 	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
 	text(u[1]+rad/3,u[2]+rad/2,Y$n,cex=3)
-	Sys.sleep(if(runif(1) < 0.05) 1.2 else 0.25)
+        if(runif(1) < 0.2) Sys.sleep(runif(1, max=0.4))
 	return(Y$n)
 }
 data(redwood)

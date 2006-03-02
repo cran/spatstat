@@ -11,6 +11,7 @@ amacrine                Hughes' Amacrine Cell Data
 angles.psp              Orientation Angles of Line Segments
 anova.ppm               ANOVA for Fitted Point Process Models
 ants                    Harkness-Isham ants' nests data
+append.psp              Combine Two Line Segment Patterns
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
@@ -232,7 +233,12 @@ rotate.owin             Rotate a Window
 rotate.ppp              Rotate a Point Pattern
 rotate.psp              Rotate a Line Segment Pattern
 rpoint                  Generate N Random Points
+rpoisline               Generate Poisson Random Line Process
 rpoispp                 Generate Poisson Point Pattern
+rshift                  Random Shift
+rshift.ppp              Randomly Shift a Point Pattern
+rshift.psp              Randomly Shift a Line Segment Pattern
+rshift.splitppp         Randomly Shift a List of Point Patterns
 rSSI                    Simple Sequential Inhibition
 rThomas                 Simulate Thomas Process
 rtoro                   Random Toroidal Shift of Point Pattern

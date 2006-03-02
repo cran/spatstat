@@ -3,13 +3,13 @@
 #
 #  summary() method for class "quad"
 #
-#  $Revision: 1.4 $ $Date: 2006/02/21 07:21:07 $
+#  $Revision: 1.6 $ $Date: 2006/03/01 08:25:01 $
 #
-summary.quad <- function(object, ...) {
+summary.quad <- function(object, ..., checkdup=FALSE) {
   verifyclass(object, "quad")
   s <- list(
-       data  = summary.ppp(object$data),
-       dummy = summary.ppp(object$dummy),
+       data  = summary.ppp(object$data, checkdup=checkdup),
+       dummy = summary.ppp(object$dummy, checkdup=checkdup),
        param = object$param)
   doit <- function(ww) {
     if(length(ww) > 0) 

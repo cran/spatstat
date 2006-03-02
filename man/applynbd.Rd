@@ -149,6 +149,7 @@
   # ANIMATION explaining the definition of the K function
   # (arguments `fullpicture' and 'rad' are passed to FUN)
 
+  \dontrun{
   showoffK <- function(Y, current, dists, dranks, fullpicture,rad) { 
 	plot(fullpicture, main="")
 	points(Y, cex=2)
@@ -180,6 +181,7 @@
 
   data(cells)
   applynbd(cells, N=1, showoffG, exclude=TRUE, fullpicture=cells)
+  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
