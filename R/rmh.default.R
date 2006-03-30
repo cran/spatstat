@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.24 2005/03/10 21:31:15 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.26 2006/03/20 23:14:13 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -121,6 +121,18 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
       stop("Expanded simulation window does not contain clipping window")
   }
 
+
+######### Store decisions
+
+  Model <- model
+  Start <- start
+  Control <- control
+
+  Model$w <- w.clip
+  Control$expand <- if(expanded) w.sim else 1
+  Control$force.exp <- expanded
+  Control$force.noexp <- !expanded
+    
 #######  Trend  ################################
   
 # Check that the expanded window fits inside the window
@@ -147,10 +159,11 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                       else "one of the trend windows.\n",
                       "Expanding to this trend window (only).\n"))
         w.sim <- iwindows[misfit]
+        Control$expand <- w.sim
       }
     }
   }
-
+  
 #######  Poisson case  ################################
 #
 #
@@ -172,7 +185,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
           rmpoint(n, intensity, win=w.sim, types=types, verbose=verbose)
       }
     Xclip <- Xsim[, w.clip]
-    attr(Xclip, "info") <- list(model=model, start=start, control=control)
+    attr(Xclip, "info") <- list(model=Model, start=Start, control=Control)
     return(Xclip)
   }
   
@@ -469,7 +482,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   xxx <- xxx[,w.clip]
 
 # Append to the result information about how it was generated.
-  attr(xxx, "info") <- list(model=model, start=start, control=control)
+  attr(xxx, "info") <- list(model=Model, start=Start, control=Control)
   return(xxx)
 }
 

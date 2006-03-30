@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.6 $  $Date: 2005/03/14 18:09:08 $
+#   $Revision: 1.8 $  $Date: 2006/03/20 23:00:31 $
 #
 #
 
@@ -86,10 +86,14 @@ print.rmhmodel <- function(x, ...) {
   cat(paste("Conditional intensity: cif=", x$cif, "\n"))
 
   if(!is.null(x$types)) {
-    cat("Multitype process with types =\n")
-    print(x$types)
-    if(!x$multitype.interact)
-      cat("Interaction does not depend on type\n")
+    if(x$types == 1)
+      cat("Univariate process.\n")
+    else {
+      cat("Multitype process with types =\n")
+      print(x$types)
+      if(!x$multitype.interact)
+        cat("Interaction does not depend on type\n")
+    }
   } else if(x$multitype.interact) 
     cat("Multitype process, types not yet specified.\n")
   

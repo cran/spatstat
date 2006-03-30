@@ -209,3 +209,23 @@ rastery.im <- function(x) {
 
 ##############
 
+# methods for other functions
+
+mean.im <- function(x, ...) {
+  verifyclass(x, "im")
+  return(mean.default(x$v, na.rm=TRUE, ...))
+}
+
+hist.im <- function(x, ...) {
+  verifyclass(x, "im")
+  v <- x$v
+  v <- v[!is.na(v)]
+  xname <- paste(deparse(substitute(x), 500), collapse="\n")
+  out <- do.call("hist.default",
+                 resolve.defaults(list(v),
+                                  list(...),
+                                  list(xlab=paste("Pixel value"),
+                                       main = paste("Histogram of", xname))))
+  return(invisible(out))
+}
+

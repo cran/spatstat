@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.1 $	$Date: 2005/10/14 09:40:20 $
+#	$Revision: 1.2 $	$Date: 2006/03/10 04:03:12 $
 #
 #
 # ------------------------------------------------------------------------
@@ -104,18 +104,34 @@ function(X, I, J, lambdaI, lambdaJ,
 	if(nI == 0) stop(paste("There are no", Iname))
 	if(nJ == 0) stop(paste("There are no", Jname))
 
-        # validate intensity vectors
-        if(!is.vector(lambdaI))
-          stop(paste(sQuote("lambdaI"), "should be a vector"))
-        if(length(lambdaI) != nI)
-          stop(paste("The length of", sQuote("lambdaI"),
-                     "should equal the number of", Iname))
+        # intensity data
+        if(is.im(lambdaI)) {
+          # look up intensity values
+          lambdaI <- lambdaI[X[I]]
+          if(any(is.na(lambdaI)))
+            stop(paste("Pixel value of", sQuote("lambdaI"),
+                       "was NA at some points of X"))
+        } else if(is.vector(lambdaI) && is.numeric(lambdaI)) {
+          # validate intensity vector
+          if(length(lambdaI) != nI)
+            stop(paste("The length of", sQuote("lambdaI"),
+                       "should equal the number of", Iname))
+        } else 
+        stop(paste(sQuote("lambdaI"), "should be a vector or an image"))
 
-        if(!is.vector(lambdaJ))
-          stop(paste(sQuote("lambdaJ"), "should be a vector"))
-        if(length(lambdaJ) != nJ)
-          stop(paste("The length of", sQuote("lambdaJ"),
-                     "should equal the number of", Jname))
+        if(is.im(lambdaJ)) {
+          # look up intensity values
+          lambdaJ <- lambdaJ[X[J]]
+          if(any(is.na(lambdaJ)))
+            stop(paste("Pixel value of", sQuote("lambdaJ"),
+                       "was NA at some points of X"))
+        } else if(is.vector(lambdaJ) && is.numeric(lambdaJ)) {
+          # validate intensity vector
+          if(length(lambdaJ) != nJ)
+            stop(paste("The length of", sQuote("lambdaJ"),
+                       "should equal the number of", Jname))
+        } else 
+        stop(paste(sQuote("lambdaJ"), "should be a vector or an image"))
 
         # Form weight for each pair
         if(is.null(lambdaIJ))

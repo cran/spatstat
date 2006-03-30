@@ -3,11 +3,11 @@
 #
 #   computes simulation envelopes (finally)
 #
-#   $Revision: 1.18 $  $Date: 2006/03/02 01:23:16 $
+#   $Revision: 1.21 $  $Date: 2006/03/10 05:17:09 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
-                     ..., simulate=NULL,
+                     ..., simulate=NULL, clipdata=TRUE,
                      start=NULL, control=list(nrep=1e5, expand=1.5)) {
 
   # determine type of simulation
@@ -56,7 +56,15 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   } else 
   stop("\`object\' should be a point process model or a point pattern")
 
+  # set up simulation parameters
   metrop <- !is.null(model)
+  if(metrop) {
+    rmodel <- rmhmodel(model, verbose=FALSE)
+    if(is.null(start))
+      start <- list(n.start=X$n)
+    rstart <- rmhstart(start)
+    rcontr <- rmhcontrol(control)
+  }
 
   # Name of function, for error messages
   fname <- if(is.name(substitute(fun))) deparse(substitute(fun))
@@ -76,9 +84,31 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   stopifnot(nrank > 0 && nrank < nsim/2)
 
   rgiven <- "r" %in% names(list(...))
+
+  # clip the data?
+  if(clipdata) {
+    # Generate one realisation
+    if(metrop)
+      Xsim <- rmh(rmodel, rstart, rcontr, verbose=FALSE)
+    else {
+      Xsim <- eval(simulate)
+      if(!inherits(Xsim, "ppp"))
+        stop(paste("Evaluating the expression", sQuote("simulate"),
+                   "did not yield a point pattern"))
+    }
+    # Extract window
+    clipwin <- Xsim$window
+    if(!is.subset.owin(clipwin, X$window))
+      warning("Window containing simulated patterns is not a subset of data window")
+  }
+  
+  
+  # evaluate function for data pattern X 
+  if(!clipdata)
+    funX <- fun(X, ...)
+  else
+    funX <- fun(X[,clipwin], ...)
     
-  # evaluate function for data pattern X
-  funX <- fun(X, ...)
   if(!inherits(funX, "fv"))
     stop(paste(fname, "must return an object of class", sQuote("fv")))
   argname <- attr(funX, "argu")
@@ -86,24 +116,16 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   rvals <- funX[[argname]]
   fX    <- funX[[valname]]
 
-  # initialise simulations
-  if(metrop) {
-    rmodel <- rmhmodel(model, verbose=FALSE)
-    if(is.null(start))
-      start <- list(n.start=X$n)
-    rstart <- rmhstart(start)
-    rcontr <- rmhcontrol(control)
-  }
 
-  nrvals <- length(rvals)
-  simvals <- matrix(, nrow=nsim, ncol=nrvals)
-
-  # simulate
+  ######### simulate #######################
   if(verbose)
     cat(paste("Generating", nsim, "simulations",
               if(csr) "of CSR" else if(metrop) "of model" else NULL,
               "...\n"))
+  nrvals <- length(rvals)
+  simvals <- matrix(, nrow=nsim, ncol=nrvals)
 
+  # start simulation loop 
   for(i in 1:nsim) {
     if(metrop)
       Xsim <- rmh(rmodel, rstart, rcontr, verbose=FALSE)
@@ -113,6 +135,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
         stop(paste("Evaluating the expression", sQuote("simulate"),
                    "did not yield a point pattern"))
     }
+    
     # apply function
     if(rgiven) 
       funXsim <- fun(Xsim, ...)
@@ -150,6 +173,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
       cat(paste(i, if(i < nsim) ", " else ".",
                 if(i %% 10 == 0) "\n", sep=""))
   }
+  ##  end simulation loop
+  
   if(verbose)
     cat("\nDone.\n")
 

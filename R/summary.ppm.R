@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.11 $   $Date: 2006/03/02 01:29:40 $
+#    $Revision: 1.12 $   $Date: 2006/03/24 06:45:49 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -52,6 +52,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
           INTERACT$name,
           sep="")
 
+  y$method <- x$method
+  
   if(is.logical(quick) && quick) {
     class(y) <- "summary.ppm"
     return(y)
@@ -198,7 +200,15 @@ print.summary.ppm <- function(x, ...) {
 
   # otherwise - full details
   cat("Point process model\n")
-  cat("fitted by maximum pseudolikelihood\n")
+  howfitted <-
+    if(is.null(x$method))
+      "unspecified method"
+    else
+      switch(x$method,
+             mpl="maximum pseudolikelihood (Berman-Turner approximation)",
+             ho="Huang-Ogata method (approximate maximum likelihood)",
+             paste("unrecognised method", sQuote(x$method)))
+  cat(paste("fitted by", howfitted, "\n"))
 
   cat("Call:\n")
   print(x$args$call)

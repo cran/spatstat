@@ -17,7 +17,8 @@
 
   These data were introduced and analysed by Berman (1986).
   They have also been studied by Berman and Turner (1992),
-  Baddeley and Turner (2000) and Foxall and Baddeley (2002).
+  Baddeley and Turner (2000, 2005), Foxall and Baddeley (2002)
+  and Baddeley et al (2005).
   
   Many analyses have been performed on the southern half of the data only.
   This subset is also provided.
@@ -25,11 +26,13 @@
 \format{
   \code{copper} is a list with the following entries:
   \describe{
-    \item{points}{an object of class \code{"ppp"}
+    \item{points}{a point pattern (object of class \code{"ppp"})
       representing the full point pattern of copper deposits.
       See \code{\link{ppp.object}} for details of the format.
     }
-    \item{lines}{the coordinates of the lineaments in the full dataset,
+    \item{lines}{a line segment pattern (object of class \code{"psp"})
+      representing the lineaments in the full dataset.
+      See \code{\link{psp.object}} for details of the format.
       given as a data frame with 4 columns (x1, y1, x2, y2).
     }
     \item{SouthWindow}{the window delineating the southern half of
@@ -39,14 +42,8 @@
       southern half of the study region. An object of class
       \code{"ppp"}.
     }
-    \item{SouthLines}{the coordinates of the lineaments in the
-      southern half of the study region. A data frame with 4 columns
-      in format (x1, y1, x2, y2).
-    }
-    \item{SouthDistance}{A function with no arguments. The return value
-      is a pixel image with greyscale value equal to the
-      distance to the nearest lineament. Computed only inside the
-      southern half of the dataset. An object of class \code{"im"}.
+    \item{SouthLines}{the line segment pattern of the lineaments in the
+      southern half of the study region. An object of class \code{"psp"}.
     }
   }
 }
@@ -58,16 +55,14 @@
   # Plot full dataset
 
   plot(copper$points)
-  cl <- copper$lines
-  segments(cl[,1], cl[,2], cl[,3], cl[,4])
+  plot(copper$lines, add=TRUE)
 
   # Plot southern half of data
   plot(copper$SouthPoints)
-  cl <- copper$SouthLines
-  segments(cl[,1], cl[,2], cl[,3], cl[,4])
+  plot(copper$SouthLines, add=TRUE)
 
   \dontrun{
-    Z <- copper$SouthDistance()
+    Z <- distmap(copper$SouthLines)
     plot(Z)
     X <- copper$SouthPoints
     ppm(X, ~D, covariates=list(D=Z))
@@ -84,6 +79,19 @@ Practical maximum pseudolikelihood for spatial point patterns.
 \emph{Australian and New Zealand Journal of Statistics}
 \bold{42}, 283--322.
  
+Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
+Residual analysis for spatial point processes.
+\emph{Journal of the Royal Statistical Society, Series B}
+\bold{67}, 617--666.
+
+Baddeley, A. and Turner, R. (2005)
+Modelling spatial point patterns in R.
+In: A. Baddeley, P. Gregori, J. Mateu, R. Stoica, and D. Stoyan,
+editors, \emph{Case Studies in Spatial Point Pattern Modelling},
+Lecture Notes in Statistics number 185. Pages 23--74.
+Springer-Verlag, New York, 2006. 
+ISBN: 0-387-28311-0.  
+
 Berman, M. (1986).
 Testing for spatial association between a point process and another
   stochastic process.

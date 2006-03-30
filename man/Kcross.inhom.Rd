@@ -31,18 +31,18 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
     of the points in \code{X} to which distances are measured.
   }
   \item{lambdaI}{
-    numeric vector giving the estimated intensity of the sub-process of
-    points of type \code{i}, evaluated at each of the type \code{i}
-    points in \code{X}. 
-    It should have length equal to the number of type \code{i} points in
-    \code{X}.
+    Values of the the estimated intensity of the sub-process of
+    points of type \code{i}.
+    Either a pixel image (object of class \code{"im"}),
+    or a numeric vector containing the intensity values
+    at each of the type \code{i} points in \code{X}. 
   }
   \item{lambdaJ}{
-    numeric vector giving the estimated intensity of the sub-process of
-    points of type \code{j}, evaluated at each of the type \code{j}
-    points in \code{X}. 
-    It should have length equal to the number of type \code{j} points in
-    \code{X}.
+    Values of the the estimated intensity of the sub-process of
+    points of type \code{j}.
+    Either a pixel image (object of class \code{"im"}),
+    or a numeric vector containing the intensity values
+    at each of the type \code{j} points in \code{X}. 
   }
   \item{r}{
       Optional. Numeric vector giving the values of the argument \eqn{r}
@@ -125,14 +125,28 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
   not the number 3). 
 
-  The argument \code{lambdaI} must be a vector containing estimated values of
-  the intensity of the sub-process of points of type \code{i} evaluated at the
-  points of type \code{i}. Similarly \code{lambdaJ} should contain
+  The argument \code{lambdaI} supplies the values
+  of the intensity of the sub-process of points of type \code{i}.
+  It may be either
+  \describe{
+    \item{a pixel image}{(object of class \code{"im"}) which
+      gives the values of the type \code{i} intensity
+      at all locations in the window containing \code{X};
+    }
+    \item{a numeric vector}{containing the values of the
+      type \code{i} intensity evaluated only
+      at the data points of type \code{i}. The length of this vector
+      must equal the number of type \code{i} points in \code{X}.
+    }
+  }
+  Similarly \code{lambdaJ} should contain
   estimated values of the intensity of the sub-process of points of
-  type \code{j}, evaluated at the points of type \code{j}.
-  The optional argument \code{lambdaIJ} is a matrix containing estimated
+  type \code{j}. It may be either a pixel image or a numeric vector.
+  
+  The optional argument \code{lambdaIJ} is for advanced use only.
+  It is a matrix containing estimated
   values of the products of these two intensities for each pair of
-  points of types \code{i} and \code{j} respectively.
+  data points of types \code{i} and \code{j} respectively.
   
   The argument \code{r} is the vector of values for the
   distance \eqn{r} at which \eqn{K_{ij}(r)}{Kij(r)} should be evaluated. 
@@ -174,6 +188,7 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
     lambdaM <- density.ppp(ma, sigma=0.15)
     lambdaW <- density.ppp(wh, sigma=0.15)
     K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW[wh], lambdaM[ma])
+    K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW,     lambdaM)
 
     # method (2): fit parametric intensity model
     fit <- ppm(lansing, ~marks * polynom(x,y,2))
@@ -193,6 +208,8 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
     XB <- split(X)$B
     K <- Kcross.inhom(X, "A", "B",
         lambdaI=rep(50, XA$n), lambdaJ=lamB[XB])
+    K <- Kcross.inhom(X, "A", "B",
+        lambdaI=as.im(50, X$window), lambdaJ=lamB)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

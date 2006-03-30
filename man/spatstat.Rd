@@ -107,7 +107,7 @@ The Spatstat Package
       \tabular{ll}{
 	\code{\link{rlabel}} \tab random (re)labelling of a multitype
 	point pattern \cr
-	\code{\link{rtoro}} \tab random toroidal shift
+	\code{\link{rshift}} \tab random shift (including toroidal shifts)
       }
 
       \bold{Standard point pattern datasets:}
@@ -256,6 +256,8 @@ The Spatstat Package
 	\code{\link{shift.im}} \tab apply vector shift to pixel image \cr
 	\code{X}	\tab	print very basic information about image \code{X}\cr
 	\code{\link{summary}(X)} \tab	summary of image \code{X} \cr
+	\code{\link{hist.im}} \tab	histogram of image \cr
+	\code{\link{mean.im}} \tab	mean pixel value of image  \cr
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr

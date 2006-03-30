@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.2 $	$Date: 2003/03/11 01:21:59 $
+#	$Revision: 1.3 $	$Date: 2006/03/24 06:22:08 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -29,7 +29,9 @@ rotxy <- function(X, angle=pi/2) {
            xr <- range(unlist(lapply(bdry, function(a) a$x)))
            yr <- range(unlist(lapply(bdry, function(a) a$y)))
            # wrap up
-           return(owin(xr, yr, poly=bdry))
+           W <- owin(xr, yr, poly=bdry)
+           W <- rescue.rectangle(W)
+           return(W)
          },
          mask={
            stop("Sorry, \'rotate.owin\' is not yet implemented for masks")

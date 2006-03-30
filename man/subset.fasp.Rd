@@ -51,17 +51,14 @@
 \examples{
  # Lansing woods data - multitype points with 6 types
  data(lansing)
- \dontrun{
- # compute 6 x 6 array of all cross-type K functions
-   a <- alltypes(lansing, "K")
-   plot(a)
- }
  \testonly{
  # smaller dataset
-   sub <- lansing[ seq(1,lansing$n,by=40), ]
-   a <- alltypes(sub, "K")
+   lansing <- lansing[ seq(1,lansing$n,by=45), ]
  }
- # first three marks only
+ # compute 6 x 6 array of all cross-type K functions
+ a <- alltypes(lansing, "K")
+
+ # extract first three marks only
  b <- a[1:3,1:3]
  \dontrun{plot(b)}
  # subset pertaining to hickories

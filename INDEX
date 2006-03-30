@@ -92,6 +92,7 @@ gridcentres             Rectangular grid of points
 gridweights             Compute Quadrature Weights Based on Grid Counts
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
+hist.im                 Histogram of Pixel Values in an Image
 humberside              Humberside Data on Childhood Leukaemia and
                         Lymphoma
 identify.ppp            Identify Points in a Point Pattern
@@ -136,6 +137,7 @@ lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
+mean.im                 Mean Pixel Value in an Image
 midpoints.psp           Midpoints of Line Segment Pattern
 multiplicity.ppp        Count Multiplicity of Duplicate Points
 MultiStrauss            The Multitype Strauss Point Process Model
@@ -241,7 +243,6 @@ rshift.psp              Randomly Shift a Line Segment Pattern
 rshift.splitppp         Randomly Shift a List of Point Patterns
 rSSI                    Simple Sequential Inhibition
 rThomas                 Simulate Thomas Process
-rtoro                   Random Toroidal Shift of Point Pattern
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
 scanpp                  Read Point Pattern From Data File

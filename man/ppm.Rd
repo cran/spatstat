@@ -317,12 +317,13 @@
       Not all edge corrections are implemented (or implementable)
       for arbitrary windows.
       Other options depend on the argument \code{interaction}, but these
-      generally include \code{"periodic"} (the periodic or toroidal edge
+      generally include \code{correction="periodic"} (the periodic or toroidal edge
       correction in which opposite edges of a rectangular window are
-      identified) and \code{"translate"} (the translation correction,
+      identified) and \code{correction="translate"} (the translation correction,
       see Baddeley 1998 and Baddeley and Turner 2000).
-      For pairwise interaction there is also Ripley's isotropic correction,
-      identified by \code{"isotropic"} or \code{"Ripley"}.
+      For pairwise interaction models
+      there is also Ripley's isotropic correction,
+      identified by \code{correction="isotropic"} or \code{"Ripley"}.
     }
   }
 }
@@ -491,7 +492,8 @@
  # using the periodic correction.
 
 # Huang-Ogata fit:
-\dontrun{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="mpl")}
+\dontrun{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="ho")}
+\testonly{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="ho", nsim=10)}
 
 
  # COVARIATES
