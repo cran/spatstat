@@ -6,7 +6,7 @@
   Plot a pixel image.
 }
 \usage{
-  \method{plot}{im}(x, \dots, ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024)
+ plot.im(x, \dots, ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024)
 }
 \arguments{
   \item{x}{

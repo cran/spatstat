@@ -8,8 +8,8 @@
 }
 \usage{
   reach(x, \dots)
-  \method{reach}{ppm}(x, \dots, epsilon=0)
-  \method{reach}{interact}(x, \dots)
+  reach.ppm(x, \dots, epsilon=0)
+  reach.interact(x, \dots)
 }
 \arguments{
   \item{x}{Either a fitted point process model (object of class

@@ -43,11 +43,12 @@ C Output from Public domain Ratfor, version 1.0
       call aru(1,zero,one,iseed,bp)
       if(bp.lt.a)then
       npts = npts + 1
+      if(npts .gt. npmax)then
+      mrep = irep
+      return
+      endif
       itype = 1
       endif
-      else
-      if(npts.eq.0)then
-      itype = 0
       else
       call aru(1,zero,one,iseed,xi)
       ix = 1 + int(npts*xi)
@@ -67,10 +68,6 @@ C Output from Public domain Ratfor, version 1.0
       itype = 2
       endif
       endif
-      endif
-      else
-      if(npts .eq. 0)then
-      itype = 0
       else
       call aru(1,zero,one,iseed,xi)
       ix = 1 + int(npts*xi)
@@ -108,7 +105,6 @@ C Output from Public domain Ratfor, version 1.0
       itype = 3
       endif
       endif
-      endif
       if(itype .gt. 0)then
       if(nmbr .eq. 8)then
       call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
@@ -119,10 +115,6 @@ C Output from Public domain Ratfor, version 1.0
       y(ix) = v
       if(marked)then
       marks(ix) = mrk
-      endif
-      if(npts .ge. npmax)then
-      mrep = irep+1
-      return
       endif
       else
       if(itype.eq.2)then
@@ -137,7 +129,6 @@ C Output from Public domain Ratfor, version 1.0
       endif
       endif
       irep = irep+1
-      mrep = irep
       goto 23000
       endif
 23001 continue

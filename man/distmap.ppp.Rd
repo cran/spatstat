@@ -8,7 +8,7 @@
   point in the given point pattern.
 }
 \usage{
-  \method{distmap}{ppp}(X, \dots)
+  distmap.ppp(X, \dots)
 }
 \arguments{
   \item{X}{A point pattern (object of class \code{"ppp"}).

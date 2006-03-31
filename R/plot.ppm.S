@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 2.3 $    $Date: 2006/04/12 11:56:26 $
+#    $Revision: 2.2 $    $Date: 2004/11/30 19:22:37 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by ppm().
@@ -10,7 +10,7 @@
 #
 plot.ppm <- function(x, ngrid = c(40,40),
 		     superimpose = TRUE,
-                     trend = TRUE, cif = TRUE, pause = interactive(),
+                     trend = TRUE, cif = TRUE, pause = TRUE,
                      how=c("persp","image", "contour"),
                      plot.it=TRUE,
                      locations=NULL, covariates=NULL, ...)

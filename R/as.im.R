@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.6 $   $Date: 2006/04/11 10:20:21 $
+#    $Revision: 1.5 $   $Date: 2005/12/05 07:41:08 $
 #
 #    as.im()
 #
@@ -71,27 +71,5 @@ as.im <- function(X, W, ...) {
     return(im(v, w$xcol, w$yrow, lev))
   }
 
-  if(is.list(x) && checkfields(x, c("x","y","z"))) {
-    stopifnot(is.matrix(x$z))
-    z <- x$z
-    y <- x$y
-    x <- x$x
-    # Usual S convention as in contour.default() and image.default()
-    # Rows of z correspond to x values.
-    nr <- nrow(z)
-    nc <- ncol(z)
-    lx <- length(x)
-    ly <- length(y)
-    if(lx == nr + 1)
-      x <- (x[-1] + x[-lx])/2
-    else if(lx != nr)
-      stop("length of x coordinate vector does not match number of rows of z")
-    if(ly == nc + 1)
-      y <- (y[-1] + y[-ly])/2
-    else if(ly != nc)
-      stop("length of y coordinate vector does not match number of columns of z")
-    return(im(t(z), x, y))
-  }
-    
   stop("Can't convert x to a pixel image")
 }

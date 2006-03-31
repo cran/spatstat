@@ -6,7 +6,7 @@
   taken from two different point patterns.
 }
 \usage{
-  \method{crossdist}{ppp}(X, Y, \dots, method="C")
+  crossdist.ppp(X, Y, \dots, method="C")
 }
 \arguments{
   \item{X,Y}{

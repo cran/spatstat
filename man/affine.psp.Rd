@@ -6,10 +6,10 @@
   plus vector shift) to a line segment pattern. 
 }
 \synopsis{
- \method{affine}{psp}(X, \dots)
+ affine.psp(X, \dots)
 }
 \usage{
- \method{affine}{psp}(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
+ affine.psp(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Line Segment pattern (object of class \code{"psp"}).}

@@ -5,7 +5,7 @@
   Prints a useful summary of a point pattern dataset.
 }
 \usage{
- \method{summary}{ppp}(object, \dots, checkdup=TRUE)
+ summary.ppp(object, \dots, checkdup=TRUE)
 }
 \arguments{
   \item{object}{

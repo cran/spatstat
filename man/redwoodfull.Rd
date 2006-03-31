@@ -1,7 +1,6 @@
 \name{redwoodfull}
 \alias{redwoodfull}
 \alias{redwoodfull.extra}
-\docType{data}
 \title{
   California Redwoods Point Pattern (Entire Dataset)
 }
@@ -36,7 +35,7 @@
   He rescaled the data to the unit square. 
   This has been re-analysed many times, and is the dataset usually known as
   ``the redwood data'' in the spatial statistics literature.
-  The exact dataset used by Ripley is supplied in the \pkg{spatstat}
+  The exact dataset used by Ripley is supplied in the \code{spatstat}
   library as \code{\link{redwood}}.
   There are some minor inconsistencies with
   \code{redwood} since it originates from a different digitisation.

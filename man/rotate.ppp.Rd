@@ -5,7 +5,7 @@
   Rotates a point pattern
 }
 \usage{
- \method{rotate}{ppp}(X, angle=pi/2, \dots)
+ rotate.ppp(X, angle=pi/2, \dots)
 }
 \arguments{
   \item{X}{A point pattern (object of class \code{"ppp"}).}

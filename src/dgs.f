@@ -11,12 +11,8 @@ C Output from Public domain Ratfor, version 1.0
       rho = par(2)
       r2 = par(3)
       a = two*atan(one)/rho
-      if(n.eq.0)then
-      cifval = beta
-      return
-      endif
       soglum = zero
-      do23002 j = 1,n 
+      do23000 j = 1,n 
       if(j .eq. ix)then
       sincr = zero
       else
@@ -32,8 +28,8 @@ C Output from Public domain Ratfor, version 1.0
       endif
       endif
       soglum = soglum + sincr
-23002 continue
-23003 continue
+23000 continue
+23001 continue
       cifval = beta*exp(soglum)
       return
       end

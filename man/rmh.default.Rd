@@ -7,7 +7,7 @@
   algorithm. 
 }
 
-\usage{\method{rmh}{default}(model, start, control, verbose=TRUE, \dots) }
+\usage{rmh.default(model, start, control, verbose=TRUE, \dots) }
 
 \arguments{
   \item{model}{Data specifying the point process model
@@ -248,7 +248,7 @@ trend corresponding to a particular type, there is still a component
   code for the new conditional intensity function, the user
   would have to modify the code in the files \code{cif.f} and
   \code{rmh.default.R} appropriately.  (And of course re-install
-  the \pkg{spatstat} package so as to update the dynamically
+  the \code{spatstat} package so as to update the dynamically
   loadable shared object \code{spatstat.so}.)
 
   Note that the \code{lookup} conditional intensity function

@@ -30,7 +30,7 @@
   These are numeric vectors of length \eqn{n}.
 }
 \details{
-  This function is needed mainly for internal use in \pkg{spatstat},
+  This function is needed mainly for internal use in \code{spatstat},
   but may be useful in other applications where you want to form the
   Kaplan-Meier estimator from a huge dataset.
 

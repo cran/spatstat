@@ -1,6 +1,5 @@
 \name{copper}
 \alias{copper}
-\docType{data}
 \title{
   Berman-Huntington points and lines data
 }

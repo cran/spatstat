@@ -34,7 +34,7 @@
   (see \code{\link{ppp.object}}).
 }
 \details{
-  In the \pkg{spatstat} library, a point pattern dataset is
+  In the \code{spatstat} library, a point pattern dataset is
   described by an object of class \code{"ppp"}. This function
   creates such objects.
 

@@ -6,7 +6,7 @@
   in the given window.
 }
 \usage{
-  \method{distmap}{owin}(X, \dots)
+  distmap.owin(X, \dots)
 }
 \arguments{
   \item{X}{

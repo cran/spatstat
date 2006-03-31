@@ -1,6 +1,5 @@
 \name{longleaf}
 \alias{longleaf}
-\docType{data}
 \title{
   Longleaf Pines Point Pattern
 }

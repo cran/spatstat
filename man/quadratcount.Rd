@@ -56,12 +56,6 @@
   contingency table. The \code{[i,j]} entry in the contingency table
   is the point count for the quadrat with coordinates
   \code{(xbreaks[i],xbreaks[i+1])} by \code{(ybreaks[i], ybreaks[i+1])}.
-
-  To perform a chi-squared test based on the quadrat counts,
-  use \code{\link{quadrat.test}}.
-}
-\seealso{
-  \code{\link{quadrat.test}}
 }
 \references{
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.

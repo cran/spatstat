@@ -73,7 +73,7 @@ Kcross(X, i=1, j=2, breaks)
 
   A multitype point pattern is a spatial pattern of
   points classified into a finite number of possible
-  ``colours'' or ``types''. In the \pkg{spatstat} package,
+  ``colours'' or ``types''. In the \code{spatstat} package,
   a multitype pattern is represented as a single 
   point pattern object in which the points carry marks,
   and the mark value attached to each point

@@ -1,13 +1,12 @@
 \name{residualspaper}
 \alias{residualspaper}
-\docType{data}
 \title{
   Data and Code From JRSS Discussion Paper on Residuals
 }
 \description{
   This dataset contains the point patterns
   used as examples in the paper of Baddeley et al (2005).
-  [Figure 2 is already available in \pkg{spatstat}
+  [Figure 2 is already available in \code{spatstat}
   as the \code{\link{copper}} dataset.] 
 
   R code is also provided to reproduce all

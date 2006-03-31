@@ -53,7 +53,7 @@
 }
 \section{Warnings}{
   The internal representation may change in the next few releases
-  of the \pkg{spatstat} package.
+  of the \code{spatstat} package.
 }
 \examples{
   data(cells)

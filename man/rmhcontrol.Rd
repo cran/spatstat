@@ -8,13 +8,13 @@
 }
 \synopsis{
    rmhcontrol(control, \dots)
-   \method{rmhcontrol}{default}(control=NULL, \dots, p=0.9, q=0.5, nrep=5e5,
+   rmhcontrol.default(control=NULL, \dots, p=0.9, q=0.5, nrep=5e5,
                       expand=NULL, periodic=FALSE, ptypes=NULL,
                       fixall=FALSE, nverb=0)
 }
 \usage{
    rmhcontrol(control)
-   \method{rmhcontrol}{default}(\dots, p=0.9, q=0.5, nrep=5e5,
+   rmhcontrol(\dots, p=0.9, q=0.5, nrep=5e5,
                       expand=NULL, periodic=FALSE, ptypes=NULL,
                       fixall=FALSE, nverb=0)
 }

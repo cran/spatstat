@@ -27,7 +27,7 @@ An object of class \code{"owin"}
 describing a window in the two-dimensional plane.
 }
 \details{
-  In the \pkg{spatstat} library, a point pattern dataset must include
+  In the \code{spatstat} library, a point pattern dataset must include
   information about the window of observation. This is represented by
   an object of class \code{"owin"}.
   See \code{\link{owin.object}} for an overview.

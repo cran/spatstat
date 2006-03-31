@@ -1,17 +1,15 @@
 #
 #   envelope.R
 #
-#   computes simulation envelopes 
+#   computes simulation envelopes (finally)
 #
-#   $Revision: 1.25 $  $Date: 2006/04/13 12:36:10 $
+#   $Revision: 1.21 $  $Date: 2006/03/10 05:17:09 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                      ..., simulate=NULL, clipdata=TRUE,
-                     start=NULL, control=list(nrep=1e5, expand=1.5),
-                     transform=NULL, global=FALSE, ginterval=NULL) {
-  cl <- match.call()
-  Yname <- deparse(substitute(Y))
+                     start=NULL, control=list(nrep=1e5, expand=1.5)) {
+
   # determine type of simulation
   if(!is.null(simulate)) {
     csr <- FALSE
@@ -87,17 +85,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
 
   rgiven <- "r" %in% names(list(...))
 
-  if(tran <- !is.null(transform)) {
-    transform.funX <- eval(substitute(substitute(
-                              eval(transform),
-                              list("."=as.name("funX")))))
-    transform.funXsim <- eval(substitute(substitute(
-                              eval(transform),
-                              list("."=as.name("funXsim")))))
-  }
-  if(!is.null(ginterval)) 
-    stopifnot(is.numeric(ginterval) && length(ginterval) == 2)
-
   # clip the data?
   if(clipdata) {
     # Generate one realisation
@@ -124,29 +111,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     
   if(!inherits(funX, "fv"))
     stop(paste(fname, "must return an object of class", sQuote("fv")))
-
   argname <- attr(funX, "argu")
   valname <- attr(funX, "valu")
-
-  if(tran) {
-    # extract only the recommended value
-    if(csr) 
-      funX <- funX[, c(argname, valname, "theo")]
-    else
-      funX <- funX[, c(argname, valname)]
-    # apply the transformation to it
-    funX <- do.call("eval.fv", list(transform.funX))
-  }
-
   rvals <- funX[[argname]]
   fX    <- funX[[valname]]
 
 
-  # default domain over which to maximise
-  alim <- attr(funX, "alim")
-  if(global && is.null(ginterval))
-    ginterval <- alim
-  
   ######### simulate #######################
   if(verbose)
     cat(paste("Generating", nsim, "simulations",
@@ -193,16 +163,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                  ". Try using the argument", sQuote("correction"),
                  "to make them compatible"))
 
-    if(tran) {
-      # extract only the recommended value
-      if(csr) 
-        funXsim <- funXsim[, c(argname, valname, "theo")]
-      else
-        funXsim <- funXsim[, c(argname, valname)]
-      # apply the transformation to it
-      funXsim <- do.call("eval.fv", list(transform.funXsim))
-    }
-      
     # extract the values for simulation i
     simvals.i <- funXsim[[valname]]
     if(length(simvals.i) != nrvals)
@@ -218,63 +178,25 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   if(verbose)
     cat("\nDone.\n")
 
-  # compute envelopes
+  # compute order statistics
   orderstat <- function(x, n) { sort(x)[n] }
-  if(!global) {
-    # POINTWISE ENVELOPES
-    lo <- apply(simvals, 2, orderstat, n=nrank)
-    hi <- apply(simvals, 2, orderstat, n=nsim-nrank+1)
-    lo.name <- paste("lower pointwise envelope of simulations")
-    hi.name <- paste("upper pointwise envelope of simulations")
-
-    if(csr) {
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            theo=funX[["theo"]],
-                            lo=lo,
-                            hi=hi)
-    } else {
-      m <- apply(simvals, 2, mean, na.rm=TRUE)
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            mmean=m,
-                            lo=lo,
-                            hi=hi)
-    }
+  lo <- apply(simvals, 2, orderstat, n=nrank)
+  hi <- apply(simvals, 2, orderstat, n=nsim-nrank+1)
+  if(csr) {
+    results <- data.frame(r=rvals,
+                          obs=fX,
+                          theo=funX[["theo"]],
+                          lo=lo,
+                          hi=hi)
   } else {
-    # SIMULTANEOUS ENVELOPES
-    domain <- (rvals >= ginterval[1]) & (rvals <= ginterval[2])
-    funX <- funX[domain, ]
-    simvals <- simvals[ , domain]
-    if(csr)
-      theory <- funX[["theo"]]
-    else
-      theory <- m <- apply(simvals, 2, mean, na.rm=TRUE)
-    # compute max absolute deviations
-    deviations <- sweep(simvals, 2, theory)
-    suprema <- apply(abs(deviations),  1, max, na.rm=TRUE)
-    # ranked deviations
-    dmax <- orderstat(suprema, n=nsim-nrank+1)
-    # simultaneous bands
-    lo <- theory - dmax
-    hi <- theory + dmax
-    lo.name <- "lower critical boundary"
-    hi.name <- "upper critical boundary"
-
-    if(csr)
-      results <- data.frame(r=rvals[domain],
-                            obs=fX[domain],
-                            theo=theory,
-                            lo=lo,
-                            hi=hi)
-    else
-      results <- data.frame(r=rvals[domain],
-                            obs=fX[domain],
-                            mmean=m,
-                            lo=lo,
-                            hi=hi)
+    m <- apply(simvals, 2, mean, na.rm=TRUE)
+    results <- data.frame(r=rvals,
+                          obs=fX,
+                          mmean=m,
+                          lo=lo,
+                          hi=hi)
   }
-  
+      
   result <- fv(results,
                argu="r",
                ylab=attr(funX, "ylab"),
@@ -287,81 +209,13 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                  "function value for data pattern",
                  if(csr) "theoretical value for CSR"
                  else "mean of simulations",
-                 lo.name, hi.name))
+                 "lower envelope of simulations",
+                 "upper envelope of simulations"))
   attr(result, "dotnames") <- c("obs",
                                 if(csr) "theo" else "mmean",
                                 "hi", "lo")
-  class(result) <- c("envelope", class(result))
-  attr(result, "einfo") <- list(call=cl,
-                                Yname=Yname,
-                                csr=csr,
-                                nrank=nrank,
-                                nsim=nsim,
-                                global=global)
   return(result)
 }
 
-
-print.envelope <- function(x, ...) {
-  e <- attr(x, "einfo")
-  g <- e$global
-  nr <- e$nrank
-  nsim <- e$nsim
-  csr <- e$csr
-  fname <- deparse(attr(x, "ylab"))
-  type <- if(g) "Simultaneous" else "Pointwise"
-  cat(paste(type, "critical envelopes for", fname, "\n"))
-  cat(paste("Obtained from", nsim,
-            "simulations of", if(csr) "CSR" else "fitted model", "\n"))
-  alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
-  cat(paste("Significance level of",
-            if(!g) "pointwise",
-            "Monte Carlo test:",
-            paste(if(g) nr else 2 * nr,
-                  "/", nsim+1, sep=""),
-            "=", alpha, "\n"))
-  cat(paste("Data:", e$Yname, "\n\n"))
-  NextMethod("print")
-}
-                  
-summary.envelope <- function(object, ...) {
-  e <- attr(object, "einfo")
-  g <- e$global
-  nr <- e$nrank
-  nsim <- e$nsim
-  csr <- e$csr
-  fname <- deparse(attr(object, "ylab"))
-  type <- if(g) "Simultaneous" else "Pointwise"
-  cat(paste(type, "critical envelopes for", fname, "\n"))
-  cat(paste("Obtained from", nsim,
-            "simulations of", if(csr) "CSR" else "fitted model", "\n"))
-  ordinal <- function(k) {
-    last <- k %% 10
-    ending <- if(last == 1) "st" else
-              if(last == 2) "nd" else
-              if(last== 3) "rd" else "th"
-    return(paste(k, ending, sep=""))
-  }
-  lo.ord <- if(nr == 1) "minimum" else paste(ordinal(nr), "smallest")
-  hi.ord <- if(nr == 1) "maximum" else paste(ordinal(nsim-nr+1), "largest")
-  if(g) 
-    cat(paste("Envelopes computed as",
-              if(csr) "theoretical curve" else "mean of simulations",
-              "plus/minus", hi.ord,
-              "simulated value of maximum absolute deviation\n"))
-  else {
-    cat(paste("Upper envelope: pointwise", hi.ord,"of simulated curves\n"))
-    cat(paste("Lower envelope: pointwise", lo.ord,"of simulated curves\n"))
-  }
-  alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
-  cat(paste("Significance level of Monte Carlo test:",
-            paste(if(g) nr else 2 * nr,
-                  "/", nsim+1, sep=""),
-            "=", alpha, "\n"))
-  cat(paste("Data:", e$Yname, "\n\n"))
-  return(invisible(NULL))
-}
-  
-  
   
   

@@ -1,6 +1,5 @@
 \name{japanesepines}
 \alias{japanesepines}
-\docType{data}
 \title{
   Japanese Pines Point Pattern
 }

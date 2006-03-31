@@ -5,7 +5,7 @@
   Applies a vector shift to a window
 }
 \usage{
- \method{shift}{owin}(X, vec=c(0,0), \dots)
+ shift.owin(X, vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Window (object of class \code{"owin"}).}

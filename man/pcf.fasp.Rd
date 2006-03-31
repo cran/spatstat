@@ -6,7 +6,7 @@
   a point pattern, given an array of (bivariate) K functions.
 }
 \usage{
- \method{pcf}{fasp}(X, \dots, method="c")
+ pcf.fasp(X, \dots, method="c")
 }
 \arguments{
   \item{X}{

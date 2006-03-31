@@ -1,7 +1,6 @@
 \name{chorley}
 \alias{chorley}
 \alias{chorley.extra}
-\docType{data}
 \title{Chorley-Ribble Cancer Data}
 \description{
   Spatial locations of cases of cancer of the larynx

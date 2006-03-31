@@ -1,7 +1,6 @@
 \name{betacells}
 \alias{betacells}
 \alias{betacells.extra}
-\docType{data}
 \title{Beta Ganglion Cells in Cat Retina} 
 \description{
   Point pattern of cells in the retina, each cell classified as `on' or `off'.
@@ -71,7 +70,7 @@
   and is provided in the dataset \code{betacells.extra}.
 
   Note that this is a corrected version of the \code{\link{ganglia}}  
-  dataset provided in earlier versions of \pkg{spatstat}.
+  dataset provided in earlier versions of \code{spatstat}.
   The earlier data \code{\link{ganglia}} were not faithful to the scale
   in the original paper and contain some scanning errors.
 }

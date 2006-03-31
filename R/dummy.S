@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.3 $     $Date: 2006/04/11 14:39:20 $
+#       $Revision: 5.2 $     $Date: 2005/05/11 17:53:27 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -41,8 +41,8 @@ stratrand <- function(window,nx,ny, k=1) {
 	
 	window <- as.owin(window)
 
-	wide  <- diff(window$xrange)/nx
-	high  <- diff(window$yrange)/ny
+	wide  <- diff(window$xrange)/(nx - 1)
+	high  <- diff(window$yrange)/(ny - 1)
         cent <- gridcentres(window, nx, ny)
 	cx <- rep(cent$x, k)
 	cy <- rep(cent$y, k)

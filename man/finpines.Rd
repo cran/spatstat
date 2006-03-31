@@ -1,7 +1,6 @@
 \name{finpines}
 \alias{finpines}
 \alias{finpines.extra}
-\docType{data}
 \title{
   Pine saplings in Finland.
 }

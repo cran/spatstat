@@ -6,12 +6,13 @@
   Extract a subset of a line segment pattern.
 }
 \synopsis{
-  \method{[}{psp}(x, subset, window, drop, \dots)
+  subset.psp(x, subset, window, drop, \dots)
 }
 \usage{
-  \method{[}{psp}(x, subset, window)
-  \method{[}{psp}(x, subset)
-  \method{[}{psp}(x, , window)
+  subset.psp(x, subset, window, drop, \dots)
+  subset.psp(x, subset, window)
+  x[subset]
+  x[subset,window]
 }
 \arguments{
   \item{x}{
@@ -25,7 +26,14 @@
     window (an object of class \code{"owin"})
     delineating a subset of the original observation window. 
   }
-  \item{ }{ }
+  \item{drop}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{\link{[}}.
+  }
+  \item{\dots}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{\link{[}}.
+  }
 } 
 \value{
   A line segment pattern (of class \code{"psp"}).

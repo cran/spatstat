@@ -5,7 +5,7 @@
   A class \code{owin} to define the ``observation window'' of a point pattern
 }
 \details{
-  In the \pkg{spatstat} library, a point pattern dataset must include
+  In the \code{spatstat} library, a point pattern dataset must include
   information about the window or region in which the pattern was
   observed. A window is described by an object of class \code{"owin"}.
   Windows of arbitrary shape are supported.

@@ -15,7 +15,7 @@
   This function is a wrapper to make it easier to perform
   pixel-by-pixel calculations in an image. 
 
-  Pixel images in \pkg{spatstat}
+  Pixel images in \code{spatstat}
   are represented by objects of class \code{"im"}
   (see \code{\link{im.object}}). These are essentially matrices of
   pixel values, with extra attributes recording the pixel dimensions,
@@ -31,7 +31,7 @@
   \code{eval.im(X + Y)} will add the corresponding pixel values in
   \code{X} and \code{Y}, and return the resulting pixel image.
 
-  In general, \code{expr} can be any expression in the R language involving
+  In general, \code{expr} can be any expression involving
   (a) the \emph{names} of pixel images, (b) scalar
   constants, and (c) functions which are vectorised.
   See the Examples.

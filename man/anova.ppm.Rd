@@ -5,7 +5,7 @@
 Performs analysis of deviance for two or more fitted point process models.
 }
 \usage{
-  \method{anova}{ppm}(object, \dots, test=NULL, override=FALSE)
+  anova.ppm(object, \dots, test=NULL, override=FALSE)
 }
 \arguments{
   \item{object}{A fitted point process model

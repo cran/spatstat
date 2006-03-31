@@ -1,6 +1,5 @@
 \name{cells}
 \alias{cells}
-\docType{data}
 \title{
   Biological Cells Point Pattern
 }

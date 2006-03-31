@@ -9,7 +9,7 @@
 }
 \usage{
 markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
-         slow=FALSE, correction=c("isotropic", "Ripley", "translate"),
+         slow=FALSE, correction=c("border", "isotropic", "Ripley", "translate"),
          method="density", \dots)
 }
 \arguments{
@@ -28,7 +28,8 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   }
   \item{correction}{
     A character vector containing any selection of the
-    options \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    options \code{"border"}, 
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
   }
   \item{method}{
@@ -67,6 +68,7 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     namely 1
   }
   together with a column or columns named 
+  \code{"border"}, 
   \code{"iso"} and/or \code{"trans"},
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{\rho_f(r)}{rho_f(r)}
@@ -135,6 +137,11 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   treated in the same manner as in \code{\link{Kest}}.
   The edge corrections implemented here are
   \describe{
+    \item{border}{the border method or
+      ``reduced sample'' estimator (see Ripley, 1988). This is
+      the least efficient (statistically) and the fastest to compute.
+      It can be computed for a window of arbitrary shape.
+    }
     \item{isotropic/Ripley}{Ripley's isotropic correction
       (see Ripley, 1988; Ohser, 1983).
       This is currently implemented only for rectangular windows.
@@ -158,16 +165,15 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     }
     \item{\code{"loess"}}{
       which uses the function \code{loess} in the
-      package \pkg{modreg};
+      package \code{modreg};
     }
     \item{\code{"sm"}}{
       which uses the function \code{sm.density} in the
-      package \pkg{sm} and is extremely slow;
+      package \code{sm} and is extremely slow;
     }
     \item{\code{"smrep"}}{
       which uses the function \code{sm.density} in the
-      package \pkg{sm} and is relatively fast, but may require manual
-      control of the smoothing parameter \code{hmult}.
+      package \code{sm} and is relatively fast.
     }
   }
 }
@@ -221,7 +227,7 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     data(betacells)
     betacells <- betacells[seq(1,betacells$n,by=3)]
     niets <- markcorr(betacells, function(m1,m2){m1 == m2}, method="loess")
-    niets <- markcorr(X, correction="isotropic", method="smrep", hmult=2)
+    niets <- markcorr(X, correction="isotropic", method="smrep")
     }
 }
 \author{Adrian Baddeley

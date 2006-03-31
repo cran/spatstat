@@ -6,7 +6,7 @@ oldoptions <- options(warn=-1)
 
 fanfare <- function(stuff) {
   plot(c(0,1),c(0,1),type="n",axes=FALSE, xlab="", ylab="")
-  text(0.5,0.5, stuff, cex=2.5)
+  text(0.5,0.5, stuff, cex=3)
 }
 fanfare("Spatstat demonstration")
 fanfare("I. Types of data")
@@ -49,12 +49,6 @@ plot(S, add=TRUE, col="red")
 
 fanfare("III. Exploratory data analysis")
 
-plot(swedishpines, main="Quadrat counts")
-tab <- quadratcount(swedishpines, 4)
-abline(v=attr(tab, "xbreaks"), lty=2)
-abline(h=attr(tab, "ybreaks"), lty=2)
-quadrat.test(swedishpines, 3)
-
 data(cells)
 Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
@@ -76,17 +70,16 @@ pc <- pcf(swedishpines)
 plot(pc)
 title(main="Pair correlation function")
 
-plot(swedishpines, main="nearest neighbours")
-m <- nnwhich(swedishpines)
-b <- swedishpines[m]
-arrows(swedishpines$x, swedishpines$y, b$x, b$y,
-       angle=12, length=0.1, col="red")
-
 plot(swedishpines %mark% (nndist(swedishpines)/2), markscale=1, main="Stienen diagram")
 
 plot(swedishpines$window, main="Distance map")
-Z <- distmap(swedishpines, dimyx=512)
-plot(Z, add=TRUE)
+dis <- distmap(swedishpines)
+plot(dis, add=TRUE)
+points(swedishpines)
+
+plot(swedishpines$window, main="Thresholded distance")
+dis$v <- (dis$v < 4.5)
+plot(dis, add=TRUE)
 points(swedishpines)
 
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
@@ -126,16 +119,6 @@ plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
-plot(rcell(nx=15))
-
-plot(rsyst(nx=5))
-abline(h=(1:4)/5, lty=2)
-abline(v=(1:4)/5, lty=2)
-
-plot(rstrat(nx=5))
-abline(h=(1:4)/5, lty=2)
-abline(v=(1:4)/5, lty=2)
-
 Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
                w=c(0,10,0,10)),
           control=list(nrep=1e4), start=list(n.start=200))
@@ -145,12 +128,6 @@ plot(Xg, main=paste("Geyer saturation process\n",
 plot(rpoisline(10))
 
 fanfare("VI. Programming tools")
-
-plot(Z, main="An image Z")
-plot(levelset(Z, 4))
-plot(cut(Z, 5))
-plot(eval.im(sqrt(Z) - 3))
-plot(solutionset(abs(Z - 6) <= 1))
 
 par(oldpar)
 

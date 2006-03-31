@@ -4,7 +4,7 @@
 \description{
   Allows the user to examine and reset the values
   of global parameters which control actions in the
-  \pkg{spatstat} package.
+  \code{spatstat} package.
 }
 \usage{
   spatstat.options(...)

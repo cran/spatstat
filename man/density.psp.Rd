@@ -5,7 +5,7 @@
   Compute a kernel smoothed intensity function from a line segment pattern.
 }
 \usage{
-  \method{density}{psp}(x, sigma, \dots, edge=TRUE)
+  density.psp(x, sigma, \dots, edge=TRUE)
 }
 \arguments{
   \item{x}{

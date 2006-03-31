@@ -5,7 +5,7 @@
   Rotates a window
 }
 \usage{
- \method{rotate}{owin}(X, angle=pi/2, \dots)
+ rotate.owin(X, angle=pi/2, \dots)
 }
 \arguments{
   \item{X}{A window (object of class \code{"owin"}).}

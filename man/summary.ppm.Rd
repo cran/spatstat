@@ -6,8 +6,8 @@
   \code{summary} method for class \code{"ppm"}.
 }
 \usage{
-  \method{summary}{ppm}(object, \dots, quick=FALSE)
-  \method{print.summary}{ppm}(x, \dots)
+  summary.ppm(object, \dots, quick=FALSE)
+  print.summary.ppm(x, \dots)
 }
 \arguments{
   \item{object}{A fitted point process model.}

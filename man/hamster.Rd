@@ -1,6 +1,5 @@
 \name{hamster}
 \alias{hamster}
-\docType{data}
 \title{Aherne's hamster tumour data} 
 \description{
   Point pattern of cell nuclei in hamster kidney, each nucleus classified as

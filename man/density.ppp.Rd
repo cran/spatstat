@@ -5,10 +5,10 @@
   Compute a kernel smoothed intensity function from a point pattern.
 }
 \synopsis{
-  \method{density}{ppp}(x, sigma, \dots, edge=TRUE)
+  density.ppp(x, sigma, \dots, edge=TRUE)
 }
 \usage{
-  \method{density}{ppp}(x, sigma, \dots, weights, edge=TRUE)
+  density.ppp(x, sigma, \dots, weights, edge=TRUE)
 }
 \arguments{
   \item{x}{

@@ -5,7 +5,7 @@
   Plot method for the class \code{"fv"}.
 }
 \usage{
- \method{plot}{fv}(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
+plot.fv(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim, ylim, xlab, ylab, \dots)
 }
 \arguments{

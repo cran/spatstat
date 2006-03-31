@@ -9,18 +9,15 @@
   points and/or or trimming the window.
 }
 \synopsis{
-  \method{[}{ppp}(x, subset, window, drop, \dots)
-  \method{[}{ppp}(x, subset, window) <- value
   subset.ppp(x, subset, window, drop, \dots)
 }
 \usage{
-  \method{[}{ppp}(x, subset, window)
-  \method{[}{ppp}(x, subset)
-  \method{[}{ppp}(x, , window)
-
-  \method{[}{ppp}(x, subset, window) <- value
-  \method{[}{ppp}(x, subset) <- value
-  \method{[}{ppp}(x, , window) <- value
+  subset.ppp(x, subset, window, drop, \dots)
+  subset.ppp(x, subset, window)
+  x[subset]
+  x[subset,window]
+  x[subset] <- value
+  x[subset, window] <- value
 }
 \arguments{
   \item{x}{
@@ -34,10 +31,17 @@
     window (an object of class \code{"owin"})
     delineating a subset of the original observation window. 
   }
+  \item{drop}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{\link{[}}.
+  }
+  \item{\dots}{
+    Ignored - this argument is required for consistency with other
+    methods for \code{\link{[}}.
+  }
   \item{value}{
     Replacement value for the subset. A point pattern.
   }
-  \item{ }{ }
 } 
 \value{
   A point pattern (of class \code{"ppp"}).

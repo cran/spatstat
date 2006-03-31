@@ -17,7 +17,6 @@ applynbd                Apply Function to Every Neighbourhood in a
 area.owin               Area of a Window
 as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
-as.matrix.im            Convert Pixel Image to Matrix
 as.owin                 Convert Data To Class owin
 as.ppp                  Convert Data To Class ppp
 as.psp                  Convert Data To Class psp
@@ -45,7 +44,6 @@ crossdist.ppp           Pairwise distances between two different point
                         patterns
 crossdist.psp           Pairwise distances between two different line
                         segment patterns
-cut.im                  Convert Pixel Image from Numeric to Factor
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
 data.ppm                Extract Original Data from a Fitted Point
@@ -134,7 +132,6 @@ lansing                 Lansing Woods Point Pattern
 lengths.psp             Lengths of Line Segments
 LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
-levelset                Level Set of a Pixel Image
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
@@ -147,10 +144,7 @@ MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
 nearest.raster.point    Find Pixel Nearest to a Given Point
-nncorr                  Nearest-Neighbour Correlation of Marked Point
-                        Pattern
 nndist                  Nearest neighbour distances
-nnwhich                 Nearest neighbour
 nztrees                 New Zealand Trees Point Pattern
 Ord                     Generic Ord Interaction model
 ord.family              Ord Interaction Process Family
@@ -204,13 +198,9 @@ quad.object             Class of Quadrature Schemes
 quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
 quadratcount            Quadrat counting for a point pattern
-quadrat.test            Chi-Squared Dispersion Test for Spatial Point
-                        Pattern Based on Quadrat Counts
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
-quantile.im             Sample Quantiles of Pixel Image
 raster.x                Cartesian Coordinates for a Pixel Raster
-rcell                   Simulate Baddeley-Silverman Cell Process
 reach                   Interaction Distance of a Point Process
 reduced.sample          Reduced Sample Estimator using Histogram Data
 redwood                 California Redwoods Point Pattern (Ripley's
@@ -252,8 +242,6 @@ rshift.ppp              Randomly Shift a Point Pattern
 rshift.psp              Randomly Shift a Line Segment Pattern
 rshift.splitppp         Randomly Shift a List of Point Patterns
 rSSI                    Simple Sequential Inhibition
-rstrat                  Stratified random point pattern
-rsyst                   Systematic random point pattern
 rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
@@ -268,15 +256,13 @@ shift.psp               Apply Vector Translation To Line Segment
                         Pattern
 simdat                  Simulated Point Pattern
 Softcore                The Soft Core Point Process Model
-solutionset             Evaluate Logical Expression Involving Pixel
-                        Images and Return Region Where Expression is
-                        True
 spatstat                The Spatstat Package
 spatstat.options        Internal Options in Spatstat Package
 split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
 spruces                 Spruces Point Pattern
 square                  Square Window
+stratrand               Stratified random point pattern
 Strauss                 The Strauss Point Process Model
 StraussHard             The Strauss / Hard Core Point Process Model
 subset.fasp             Extract Subset of Function Array
@@ -298,5 +284,3 @@ unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern
 unmark                  Remove Marks from a Marked Point Pattern
 update.ppm              Update a Fitted Point Process Model
-vcov.ppm                Variance-Covariance Matrix for a Fitted Point
-                        Process Model

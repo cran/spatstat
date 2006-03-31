@@ -5,7 +5,7 @@
   Applies a vector shift to a pixel image
 }
 \usage{
- \method{shift}{im}(X, vec=c(0,0), \dots)
+ shift.im(X, vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Pixel image (object of class \code{"im"}).}

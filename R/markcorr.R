@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.11 $ $Date: 2006/04/18 05:42:31 $
+#     $Revision: 1.6 $ $Date: 2005/07/21 10:33:39 $
 #
 #    Estimate the mark correlation function
 #
@@ -11,7 +11,7 @@
 
 "markcorr"<-
 function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
-         correction=c("isotropic", "Ripley", "translate"),
+         correction=c("border", "isotropic", "Ripley", "translate"),
          method="density", ...)
 {
 	verifyclass(X, "ppp")
@@ -62,6 +62,21 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
 
         Ef <- mean(ff)
         
+        if(any(correction == "border")) {
+          # border method
+          # Compute distances to boundary
+          b <- bdist.points(X)
+          bb <- matrix(b, nrow=npoints, ncol=npoints)
+          # set edge correction weight = 1 iff b > d
+          ok <- 1 * (bb > d)
+          # get smoothed estimate of mcf
+          Mborder <- mkcor(d[offdiag], ff[offdiag], ok[offdiag],
+                                 Ef, r, method, ...)
+          result <- bind.fv(result,
+                            data.frame(border=Mborder), "mbord(r)",
+                            "border-corrected estimate of m(r)",
+                            "border")
+        }
         if(any(correction == "translate")) {
           # translation correction
             edgewt <- edge.Trans(X, exact=slow)
@@ -102,19 +117,23 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
   wt <- as.vector(wt)
   switch(method,
          density={
+           # use replication to effect the weights
+           # (there's no weights argument to density()
+           nw <- round(nwtsteps * wt/max(wt))
+           drep.w <- rep(d, nw)
            fw <- ff * wt
-           sum.fw <- sum(fw)
-           sum.wt <- sum(wt)
+           nfw <- round(nwtsteps * fw/max(fw))
+           drep.fw <- rep(d, nfw)
            # smooth estimate of kappa_f
-           est <- density(d, weights=fw/sum.fw,
+           est <- density(drep.fw,
                           from=min(rvals), to=max(rvals), n=length(rvals),
                           ...)$y
-           numerator <- est * sum.fw
+           numerator <- est * sum(fw)/sum(est)
            # smooth estimate of kappa_1
-           est0 <- density(d, weights=wt/sum.wt, 
+           est0 <- density(drep.w,
                           from=min(rvals), to=max(rvals), n=length(rvals),
                           ...)$y
-           denominator <- est0 * Ef * sum.wt
+           denominator <- est0 * (sum(wt)/ sum(est0)) * Ef
            result <- numerator/denominator
          },
          sm={
@@ -135,18 +154,12 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
          },
          smrep={
            require(sm)
-
-           hstuff <- resolve.defaults(list(...), list(hmult=1, h.weights=NA))
-           if(hstuff$hmult == 1 && all(is.na(hstuff$h.weights)))
-             warning("default smoothing parameter may be inappropriate")
-           
            # use replication to effect the weights (it's faster)
            nw <- round(nwtsteps * wt/max(wt))
            drep.w <- rep(d, nw)
            fw <- ff * wt
            nfw <- round(nwtsteps * fw/max(fw))
            drep.fw <- rep(d, nfw)
-
            # smooth estimate of kappa_f
            est <- sm.density(drep.fw,
                              eval.points=rvals,

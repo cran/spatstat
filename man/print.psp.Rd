@@ -5,10 +5,10 @@
   Prints a very brief description of a line segment pattern dataset.
 }
 \synopsis{
-  \method{print}{psp}(x, \dots)
+  print.psp(x, \dots)
 }
 \usage{
- \method{print}{psp}(x)
+ print.psp(x)
  x
 }
 \arguments{

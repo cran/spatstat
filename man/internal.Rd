@@ -102,7 +102,6 @@
 \alias{polynom}
 \alias{primefactors}       
 \alias{print.diagppm}
-\alias{print.envelope}
 \alias{print.fasp}       
 \alias{print.fv}       
 \alias{print.interact}       
@@ -117,8 +116,6 @@
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
 \alias{quad}
-\alias{quadrat.breaks}
-\alias{quadrat.count.engine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
@@ -149,10 +146,8 @@
 \alias{spatstat.rawdata.location}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
-\alias{stratrand}
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
-\alias{summary.envelope}
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
@@ -290,7 +285,6 @@ plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
 polynom(x, \dots)
 primefactors(n, prmax)
 print.diagppm(x, \dots)
-print.envelope(x, \dots)
 print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
@@ -305,8 +299,6 @@ print.summary.owin(x, \dots)
 print.summary.ppp(x, \dots, dp=3)
 print.summary.psp(x, \dots)
 quad(data, dummy, w, param)
-quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
-quadrat.count.engine(x, y, xbreaks, ybreaks, weights)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
@@ -340,10 +332,8 @@ shiftxy(X, vec = c(0, 0))
 spatstat.rawdata.location(\dots)             
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)             
-stratrand(window, nx, ny, k = 1)
 suffstat.generic(model, X)
 suffstat.poisson(model, X)
-summary.envelope(object,\dots)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        

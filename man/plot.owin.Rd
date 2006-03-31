@@ -5,7 +5,7 @@
   Plot a two-dimensional window of observation for a spatial point pattern
 }
 \usage{
- \method{plot}{owin}(x, main, add=FALSE, \dots, box=TRUE, edge=0.04)
+ plot.owin(x, main, add=FALSE, \dots, box=TRUE, edge=0.04)
 }
 \arguments{
   \item{x}{

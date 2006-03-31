@@ -1,6 +1,5 @@
 \name{simdat}
 \alias{simdat}
-\docType{data}
 \title{
   Simulated Point Pattern
 }

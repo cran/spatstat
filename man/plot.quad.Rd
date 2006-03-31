@@ -5,7 +5,7 @@
   Plot a two-dimensional spatial quadrature scheme.
 }
 \usage{
-  \method{plot}{quad}(x, ..., main=deparse(substitute(x)), dum=list())
+ plot.quad(x, ..., main=deparse(substitute(x)), dum=list())
 }
 \arguments{
   \item{x}{

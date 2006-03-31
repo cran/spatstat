@@ -1,6 +1,5 @@
 \name{redwood}
 \alias{redwood}
-\docType{data}
 \title{
   California Redwoods Point Pattern (Ripley's Subset)
 }

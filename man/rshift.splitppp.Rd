@@ -5,10 +5,10 @@
   Randomly shifts each point pattern in a list of point patterns.
 }
 \synopsis{
-   \method{rshift}{splitppp}(X, \dots, which=seq(X))
+   rshift.splitppp(X, \dots, which=seq(X))
 }
 \usage{
-   \method{rshift}{splitppp}(X, \dots, radius, width, height, edge="torus", clip,
+   rshift.splitppp(X, \dots, radius, width, height, edge="torus", clip,
                         which)
                         
 }

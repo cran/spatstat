@@ -6,14 +6,15 @@
   Extract a subset or subregion of a pixel image.
 }
 \synopsis{
-  \method{[}{im}(x, i, j, drop=TRUE, \dots)
+  subset.im(x, i, j, drop=TRUE, \dots)
 }
 \usage{
-  \method{[}{im}(x, w)
-  \method{[}{im}(x, w, drop=TRUE)
+  subset.im(X, w)
+  X[w]
+  X[w, drop=TRUE]
 }
 \arguments{
-  \item{x}{
+  \item{X}{
     A two-dimensional pixel image.
     An object of class \code{"im"}.
   }

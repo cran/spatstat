@@ -1,6 +1,5 @@
 \name{spruces}
 \alias{spruces}
-\docType{data}
 \title{
   Spruces Point Pattern
 }

@@ -5,10 +5,10 @@
   Prints a very brief description of a window object.
 }
 \synopsis{
-  \method{print}{owin}(x, \dots)
+  print.owin(x, \dots)
 }
 \usage{
- \method{print}{owin}(x)
+ print.owin(x)
  x
 }
 \arguments{

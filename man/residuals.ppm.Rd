@@ -8,10 +8,10 @@
   compute residuals.
 }
 \synopsis{
-  \method{residuals}{ppm}(object, type="raw", \dots, fittedvalues=fitted.ppm(object))
+  residuals.ppm(object, type="raw", \dots, fittedvalues=fitted.ppm(object))
 }
 \usage{
-  \method{residuals}{ppm}(object, type="raw", \dots)
+  residuals.ppm(object, type="raw", \dots)
 }
 \arguments{
   \item{object}{

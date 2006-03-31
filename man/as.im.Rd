@@ -42,14 +42,6 @@
     a single numerical value. The result is an image
     with pixel entries equal to this numerical value
     inside the image \code{win}.
-    \item
-    a list with entries \code{x, y, z} in the format expected by
-    the standard \code{R} functions
-    \code{\link{contour.default}} and \code{\link{image.default}}.
-    That is, \code{z} is a matrix of pixel values, \code{x} and \code{y}
-    are vectors of \eqn{x} and \eqn{y} coordinates respectively,
-    and \code{z[i,j]} is the pixel value for the location
-    \code{(x[i],y[j])}. 
   }
 }
 \value{
@@ -74,10 +66,7 @@
   # Revisit the Sixties
   data(letterR)
   Z <- as.im(f, letterR, x0=2.5, y0=2)
-  image(Z)
-  # usual convention in S
-  stuff <- list(x=1:10, y=1:10, z=matrix(1:100, nrow=10))
-  Z <- as.im(stuff)
+  image(Z)  
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

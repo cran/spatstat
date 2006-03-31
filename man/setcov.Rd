@@ -5,16 +5,10 @@
   Computes the set covariance function of a window.
 }
 \usage{
- setcov(W, \dots)
+ setcov(W)
 }
 \arguments{
-  \item{W}{
-    A window (object of class \code{"owin"}.
-  }
-  \item{\dots}{
-    Optional arguments passed to \code{\link{as.mask}}
-    to control the pixel resolution.
-  }
+  \item{W}{A window (object of class \code{"owin"}.}
 }
 \value{
   A pixel image (an object of class \code{"im"}) representing the

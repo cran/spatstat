@@ -3,11 +3,11 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.6 $  $Date: 2006/04/12 11:56:12 $
+# $Revision: 1.5 $  $Date: 2005/06/12 20:31:20 $
 #
 #
 
-plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
+plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=TRUE,
                          how=c("persp","image","contour"), ...)
 {
   verifyclass(x,"plotppm")

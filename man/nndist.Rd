@@ -9,8 +9,8 @@
 }
 \usage{
   nndist(X, \dots, method="C")
-  \method{nndist}{ppp}(X, \dots, method="C")
-  \method{nndist}{default}(X, Y=NULL, \dots, method="C")
+  nndist.ppp(X, \dots, method="C")
+  nndist.default(X, Y=NULL, \dots, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -66,13 +66,6 @@
   then a nearest neighbour distance of \code{Inf} is returned.
   If there are no points (if \code{x} has length zero)
   a numeric vector of length zero is returned.
-
-  To identify \emph{which} point is the nearest neighbour of a given point,
-  use \code{\link{nnwhich}}.
-
-  To use the nearest neighbour distances for statistical inference,
-  it is often advisable to use the edge-corrected empirical distribution,
-  computed by \code{\link{Gest}}.
 }
 \section{Warnings}{
   An infinite value is returned if there is only one point
@@ -80,8 +73,7 @@
 }
 \seealso{
   \code{\link{pairdist}},
-  \code{\link{Gest}},
-  \code{\link{nnwhich}}.
+  \code{\link{Gest}}
 }
 \examples{
    data(cells)

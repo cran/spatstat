@@ -7,7 +7,7 @@
   carries out the actual plotting of these objects.
 }
 \usage{
-  \method{plot}{plotppm}(x, data = NULL, trend = TRUE, cif = TRUE, pause = interactive(),
+plot.plotppm(x, data = NULL, trend = TRUE, cif = TRUE, pause = TRUE,
              how = c("persp", "image", "contour"), ...)
 }
 \arguments{

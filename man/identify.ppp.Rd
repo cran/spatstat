@@ -1,5 +1,6 @@
 \name{identify.ppp}
 \alias{identify.ppp}
+\alias{identify}
 \title{Identify Points in a Point Pattern}
 \description{
   If a point pattern is plotted in the graphics window,
@@ -7,8 +8,12 @@
   the mouse position, and print its mark value (or its serial number
   if there is no mark).
 }
+\synopsis{
+  identify.ppp(x, \dots)
+}
 \usage{
-  \method{identify}{ppp}(x, \dots)
+  identify(x, \dots)
+  identify.ppp(x, \dots)
 }
 \arguments{
   \item{x}{

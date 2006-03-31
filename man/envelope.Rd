@@ -6,8 +6,7 @@
 }
 \usage{
   envelope(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE, \dots,
-  simulate=NULL, clipdata=TRUE, start=NULL,control=list(nrep=1e5,expand=1.5),
-  transform=NULL,global=FALSE,ginterval=NULL)
+  simulate=NULL, clipdata=TRUE, start=NULL, control=list(nrep=1e5, expand=1.5))
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
@@ -51,22 +50,6 @@
       of \code{rmh}, giving complete control over the
       simulation algorithm.
     }
-    \item{transform}{
-      Optional. A transformation to be applied to the
-      function values, before the envelopes are computed.
-      An expression object (see Details).
-    }
-    \item{global}{
-      Logical flag indicating whether envelopes should be pointwise
-      (\code{global=FALSE}) or simultaneous (\code{global=TRUE}).
-    }
-    \item{ginterval}{
-      Optional.
-      A vector of length 2 specifying
-      the interval of \eqn{r} values for the simultaneous critical
-      envelopes. Only relevant if \code{global=TRUE}.
-    }
-    
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -128,50 +111,15 @@
   like those in the functions listed above, and it must return an object
   of class \code{"fv"}.
 
-  Upper and lower critical envelopes are computed in one of the following ways:
-  \describe{
-    \item{pointwise:}{by default, envelopes are calculated pointwise
-      (i.e. for each value of the distance argument \eqn{r}), by sorting the
-      \code{nsim} simulated values, and taking the \code{m}-th lowest
-      and \code{m}-th highest values, where \code{m = nrank}.
-      For example if \code{nrank=1}, the upper and lower envelopes
-      are the pointwise maximum and minimum of the simulated values.
+  Upper and lower pointwise envelopes are computed pointwise (i.e.
+  for each value of the distance argument \eqn{r}), by sorting the
+  \code{nsim} simulated values, and taking the \code{m}-th lowest
+  and \code{m}-th highest values, where \code{m = nrank}.
+  For example if \code{nrank=1}, the upper and lower envelopes
+  are the pointwise maximum and minimum of the simulated values.
 
-      The pointwise envelopes are \bold{not} \dQuote{confidence bands}
-      for the true value of the function! Rather,
-      they specify the critical points for a Monte Carlo test
-      (Ripley, 1981). The test is constructed by choosing a
-      \emph{fixed} value of \eqn{r}, and rejecting the null hypothesis if the
-      observed function value
-      lies outside the envelope \emph{at this value of} \eqn{r}.
-      This test has exact significance level
-      \code{alpha = 2 * nrank/(1 + nsim)}.
-    }
-    \item{simultaneous:}{if \code{global=TRUE}, then the envelopes are
-      determined as follows. First we calculate the theoretical mean value of
-      the summary statistic (if we are testing CSR, the theoretical
-      value is supplied by \code{fun}; otherwise we compute the
-      average of all the simulated values and take this as an estimate
-      of the theoretical mean value). Then, for each simulation,
-      we compare the simulated curve to the theoretical curve, and compute the
-      maximum absolute difference between them (over the interval
-      of \eqn{r} values specified by \code{ginterval}). This gives a
-      deviation value \eqn{d_i}{d[i]} for each of the \code{nsim}
-      simulations. Finally we take the \code{m}-th largest of the
-      deviation values, where \code{m=nrank}, and call this
-      \code{dcrit}. Then the simultaneous envelopes are of the form
-      \code{lo = theo - dcrit} and \code{hi = theo + dcrit} where
-      \code{theo} is the theoretical mean value. Simultaneous critical
-      envelopes have constant width \code{2 * dcrit}.
-
-      The simultaneous critical envelopes allow us to perform a different
-      Monte Carlo test (Ripley, 1981). The test rejects the null
-      hypothesis if the graph of the observed function
-      lies outside the envelope \bold{at any value of} \eqn{r}.
-      This test has exact significance level
-      \code{alpha = nrank/(1 + nsim)}.
-    }
-  }
+  The significance level of the associated Monte Carlo test is
+  \code{alpha = 2 * nrank/(1 + nsim)}. 
   
   The return value is an object of class \code{"fv"} containing
   the summary function for the data point pattern
@@ -181,8 +129,6 @@
   Arguments can be passed to the function \code{fun} through
   \code{...}. This makes it possible to select the edge correction
   used to calculate the summary statistic. See the Examples.
-  Selecting only a single edge
-  correction will make the code run much faster.
 
   If \code{Y} is a fitted point process model, and \code{simulate=NULL},
   then the model is simulated
@@ -191,28 +137,8 @@
   arguments \code{start} and \code{control} which are passed
   to \code{\link{rmh}}.
 
-  For simultaneous critical envelopes (\code{global=TRUE})
-  the following options are also useful:
-  \describe{
-    \item{\code{ginterval}}{determines the interval of \eqn{r} values
-      over which the deviation between curves is calculated.
-      It should be a numeric vector of length 2.
-      There is a sensible default (namely, the recommended plotting
-      interval for \code{fun(X)}).
-    }
-    \item{\code{transform}}{specifies a transformation of the
-      summary function \code{fun} that will be carried out before the
-      deviations are computed. It must be an expression object
-      using the symbol \code{.} to represent the function value.
-      For example, 
-      the conventional way to normalise the \eqn{K} function
-      (Ripley, 1981) is to transform it to the \eqn{L} function
-      \eqn{L(r) = \sqrt{K(r)/\pi}}{L(r) = sqrt(K(r)/pi)}
-      and this is implemented by setting
-      \code{transform=expression(sqrt(./pi))}.
-      Such transforms are only useful if \code{global=TRUE}.
-    }
-  }
+  Selecting only a single edge
+  correction will make the code run much faster.
 }
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.
@@ -220,10 +146,6 @@
 
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.
   Arnold, 2003.
-
-  Ripley, B.D. (1981) 
-  \emph{Spatial statistics}.
-  John Wiley and Sons.
 
   Ripley, B.D. \emph{Statistical inference for spatial processes}.
   Cambridge University Press, 1988.
@@ -293,14 +215,6 @@
   plot(E, sqrt(./pi) ~ r)
  }
 
- # Simultaneous critical envelope for L function
- \dontrun{
-  plot(envelope(X, Kest, transform=expression(sqrt(./pi)), global=TRUE))
- }
- \testonly{
- plot(envelope(X, Kest, nsim=4,transform=expression(sqrt(./pi)), global=TRUE))
- }
-
  # How to pass arguments needed to compute the summary functions:
  # We want envelopes for Jcross(X, "A", "B") 
  # where "A" and "B" are types of points in the dataset 'demopat'
@@ -329,20 +243,35 @@
  plot(envelope(amacrine, Kcross, i="on", j="off",
                simulate=expression(rshift(amacrine, radius=0.25)))) 
  }
+ \testonly{
+ plot(envelope(amacrine, Kcross, i="on", j="off",
+               simulate=expression(rshift(amacrine, radius=0.25)),
+               nsim=4))
+ }
 
  # Envelope under random shifts with erosion
  \dontrun{
  plot(envelope(amacrine, Kcross, i="on", j="off",
               simulate=expression(rshift(amacrine, radius=0.1, edge="erode"))))
  }
-  
+ \testonly{
+ plot(envelope(amacrine, Kcross, i="on", j="off",
+               simulate=expression(rshift(amacrine, radius=0.1, edge="erode")),
+               nsim=4))
+ }
+
+ 
  # Envelope of INHOMOGENEOUS K-function with fitted trend
-\dontrun{
  trend <- density.ppp(X, 1.5)
+ \dontrun{
  plot(envelope(X, Kinhom, lambda=trend,
          simulate=expression(rpoispp(trend))))
  }
-  
+ \testonly{
+ plot(envelope(X, Kinhom, lambda=trend,
+         simulate=expression(rpoispp(trend)), nsim=4))
+ }
+ 
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

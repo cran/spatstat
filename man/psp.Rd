@@ -23,7 +23,7 @@
   (see \code{\link{psp.object}}).
 }
 \details{
-  In the \pkg{spatstat} library, a spatial pattern of line segments is
+  In the \code{spatstat} library, a spatial pattern of line segments is
   described by an object of class \code{"psp"}. This function
   creates such objects.
 

@@ -6,7 +6,7 @@
   are duplicates of previous points, and returns a logical vector.
 }
 \usage{
- \method{duplicated}{ppp}(x, \dots)
+ duplicated.ppp(x, \dots)
 }
 \arguments{
   \item{x}{

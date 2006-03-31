@@ -6,8 +6,8 @@
   \code{summary} method for class \code{"im"}.
 }
 \usage{
-  \method{summary}{im}(object, \dots)
-  \method{print.summary}{im}(x, \dots)
+  summary.im(object, \dots)
+  print.summary.im(x, \dots)
 }
 \arguments{
   \item{object}{A pixel image.}

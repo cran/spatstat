@@ -6,7 +6,7 @@
   in a point pattern.
 }
 \usage{
-  \method{pairdist}{ppp}(X, \dots, method="C")
+  pairdist.ppp(X, \dots, method="C")
 }
 \arguments{
   \item{X}{

@@ -5,7 +5,7 @@
   Plot a two-dimensional spatial point pattern
 }
 \usage{
- \method{plot}{ppp}(x, main, \dots, chars, cols, use.marks=TRUE, add=FALSE,
+ plot.ppp(x, main, \dots, chars, cols, use.marks=TRUE, add=FALSE,
 maxsize, markscale)
 }
 \arguments{

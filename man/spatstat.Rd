@@ -1,17 +1,15 @@
 \name{spatstat}
 \alias{spatstat}
-\alias{spatstat-package}
-\docType{package}
 \title{
 The Spatstat Package
 }
 \description{
   This is a summary of the features of 
-  \pkg{spatstat}, a package in \code{R}
+  \code{spatstat}, a package in \code{R}
   for the statistical analysis of spatial point patterns.
 }
 \details{
-  \pkg{spatstat} is a package for the statistical analysis
+  \code{spatstat} is a package for the statistical analysis
   of spatial data. Currently, it deals mainly with the analysis of
   patterns of points in the plane.  The points may carry `marks',
   and the spatial region in which the points were recorded 
@@ -23,7 +21,7 @@ The Spatstat Package
     \item exploratory data analysis 
     \item simulation of point process models
     \item parametric model-fitting
-    \item hypothesis tests and diagnostics
+    \item residuals and diagnostic plots
   }
   The point process models to be fitted
   may be quite general Gibbs/Markov models; they may include spatial trend,
@@ -47,7 +45,7 @@ The Spatstat Package
 }
 \section{FUNCTIONS AND DATASETS}{
   Following is a summary of the main functions and datasets
-  in the \pkg{spatstat} package.
+  in the \code{spatstat} package.
   Alternatively an alphabetical list of all functions and
   datasets is available by typing \code{library(help=spatstat)}.
 
@@ -88,10 +86,6 @@ The Spatstat Package
 	simulate the (in)homogeneous Poisson point process \cr
 	\code{\link{rmpoispp}} \tab
 	simulate the (in)homogeneous multitype Poisson point process \cr
-	\code{\link{rstrat}} \tab
-	stratified random sample of points \cr
-	\code{\link{rsyst}} \tab
-	systematic random sample of points \cr
 	\code{\link{rMaternI}}  \tab
 	simulate the Mat\'ern Model I inhibition process\cr
 	\code{\link{rMaternII}} \tab
@@ -104,8 +98,6 @@ The Spatstat Package
 	simulate the Mat\'ern Cluster process\cr
 	\code{\link{rThomas}} \tab
 	simulate the Thomas process  \cr
-	\code{\link{rcell}} \tab
-	simulate the Baddeley-Silverman cell process  \cr
 	\code{\link{rmh}} \tab
 	simulate Gibbs point process using Metropolis-Hastings 
       }
@@ -252,12 +244,11 @@ The Spatstat Package
     \bold{Pixel images:}
     An object of class \code{"im"} represents a pixel image. 
     Such objects are returned by some of the functions in
-      \pkg{spatstat} including \code{\link{Kmeasure}},
+      \code{spatstat} including \code{\link{Kmeasure}},
       \code{\link{setcov}} and \code{\link{density.ppp}}. 
       \tabular{ll}{
 	\code{\link{im}} \tab create a pixel image\cr
 	\code{\link{as.im}} \tab convert other data to a pixel image\cr
-	\code{\link{as.matrix.im}} \tab convert pixel image to matrix\cr
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr
 	\code{\link{persp.im}}	\tab draw perspective plot of a pixel image \cr
@@ -267,14 +258,10 @@ The Spatstat Package
 	\code{\link{summary}(X)} \tab	summary of image \code{X} \cr
 	\code{\link{hist.im}} \tab	histogram of image \cr
 	\code{\link{mean.im}} \tab	mean pixel value of image  \cr
-	\code{\link{quantile.im}} \tab	quantiles of image  \cr
-	\code{\link{cut.im}} \tab	convert numeric image to factor image \cr
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
-	\code{\link{levelset}} \tab level set of an image\cr
-	\code{\link{solutionset}} \tab region where an expression is true
       }
 
     \bold{Line segment patterns}
@@ -310,12 +297,12 @@ The Spatstat Package
   \tabular{ll}{
     \code{\link{summary}(X)} \tab
     print useful summary of point pattern \code{X}\cr
-    \code{X} \tab print basic description of point pattern \code{X} 
+    \code{X} \tab print basic description of point pattern \code{X}  \cr
+    \code{\link{quadratcount}} \tab Quadrat counts 
   }
 
   \bold{Summary statistics for a point pattern:}
   \tabular{ll}{
-    \code{\link{quadratcount}} \tab Quadrat counts \cr
     \code{\link{Fest}} \tab empty space function \eqn{F} \cr
     \code{\link{Gest}} \tab nearest neighbour distribution function \eqn{G} \cr
     \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
@@ -335,7 +322,6 @@ The Spatstat Package
     \code{\link{eval.fv}} \tab evaluate any expression involving
     summary functions\cr
     \code{\link{nndist}} \tab nearest neighbour distances \cr
-    \code{\link{nnwhich}} \tab find nearest neighbours \cr
     \code{\link{pairdist}} \tab distances between all pairs of points\cr
     \code{\link{crossdist}} \tab distances between points in two patterns\cr
     \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
@@ -384,7 +370,7 @@ The Spatstat Package
 \section{III. MODEL FITTING}{
   \bold{To fit a point process model:}
 
-  Model fitting in \pkg{spatstat} is performed by the function
+  Model fitting in \code{spatstat} is performed by the function
   \code{\link{ppm}}. Its result is an object of class \code{"ppm"}. 
 
   \bold{Manipulating the fitted model:}
@@ -397,7 +383,6 @@ The Spatstat Package
     \code{\link{coef.ppm}} \tab Extract the fitted model coefficients\cr
     \code{\link{fitted.ppm}} \tab Compute fitted conditional intensity at quadrature points \cr
     \code{\link{update.ppm}} \tab Update the fit \cr
-    \code{\link{vcov.ppm}} \tab Variance-covariance matrix of estimates\cr
     \code{\link{rmh.ppm}} \tab Simulate from fitted model  \cr
     \code{\link{print.ppm}} \tab Print basic information about a fitted model\cr
     \code{\link{summary.ppm}} \tab Summarise a fitted model\cr
@@ -449,7 +434,7 @@ The Spatstat Package
     \tab	for use by \code{ppm } \cr
     \code{\link{default.dummy}} \tab default pattern of dummy points \cr
     \code{\link{gridcentres}} \tab dummy points in a rectangular grid \cr
-    \code{\link{rstrat}} \tab stratified random dummy pattern \cr
+    \code{\link{stratrand}} \tab stratified random dummy pattern \cr
     \code{\link{spokes}} \tab radial pattern of dummy points  \cr
     \code{\link{corners}} \tab dummy points at corners of the window  \cr
     \code{\link{gridweights}} \tab quadrature weights by the grid-counting rule  \cr
@@ -459,43 +444,23 @@ The Spatstat Package
     \code{\link{summary}(Q)} \tab summary of quadrature scheme \code{Q}
   }
 
-  \bold{Simulation and goodness-of-fit for fitted models:}
+  \bold{Simulation and goodness-of-fit:}
   
   \tabular{ll}{
     \code{\link{rmh.ppm}} \tab simulate realisations of a fitted model \cr
-    \code{\link{envelope}} \tab compute simulation envelopes for a
-    fitted model 
+    \code{\link{envelope}} \tab compute simulation envelopes for a fitted model
   }
-}
-\section{IV. TESTS AND DIAGNOSTICS}{
 
-  \bold{Classical hypothesis tests:}
-  
-  \tabular{ll}{
-    \code{\link{quadrat.test}} \tab \eqn{\chi^2}{chi^2} goodness-of-fit
-    test on quadrat counts \cr
-    \code{\link{envelope}} \tab critical envelope for Monte Carlo
-    test of goodness-of-fit \cr
-    \code{\link{anova.ppm}} \tab Analysis of Deviance for
-    point process models 
-  }
-  
   \bold{Diagnostic plots:}
-  
-  Residuals for a fitted point process model, and diagnostic plots
-  based on the residuals, were introduced in Baddeley et al (2005).
   
   Type \code{demo(diagnose)}
   for a demonstration of the diagnostics features.
 
   \tabular{ll}{
     \code{\link{diagnose.ppm}} \tab diagnostic plots for spatial trend\cr
-    \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint interaction\cr
-    \code{\link{residualspaper}} \tab examples from Baddeley et al (2005)
+    \code{\link{qqplot.ppm}} \tab   diagnostic plot for interpoint interaction
   }
 }
-
-
 \section{Documentation}{
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
