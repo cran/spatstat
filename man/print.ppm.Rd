@@ -5,10 +5,10 @@
   Default \code{print} method for a fitted point process model.
 }
 \synopsis{
- print.ppm(x,\dots)
+ \method{print}{ppm}(x,\dots)
 }
 \usage{
- print.ppm(x)
+ \method{print}{ppm}(x)
  x
 }
 \arguments{

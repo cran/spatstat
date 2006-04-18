@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.13 $     $Date: 2005/12/21 00:57:57 $
+#      $Revision: 1.15 $     $Date: 2006/04/15 18:15:55 $
 #
 #
 #      Interpoint distances
@@ -108,6 +108,72 @@ nndist.default <-
          stop(paste("Unrecognised method \"", method, "\"", sep=""))
          )
   invisible(nnd)
+}
+
+nnwhich <- function(X, ..., method="C") {
+  UseMethod("nnwhich")
+}
+
+nnwhich.ppp <- function(X, ..., method="C") {
+  verifyclass(X, "ppp")
+  return(nnwhich.default(X$x, X$y, method="C"))
+}
+
+nnwhich.default <-
+  function(X, Y=NULL, ..., method="C")
+{
+	#  identifies nearest neighbour of each point in
+	#  the pattern of points (x[i],y[i])
+	#
+  xy <- xy.coords(X,Y)[c("x","y")]
+  x <- xy$x
+  y <- xy$y
+
+  # validate
+  n <- length(x)
+  if(length(y) != n)
+    stop("lengths of x and y do not match")
+
+  # special cases
+  if(n == 0)
+    return(numeric(0))
+  else if(n == 1)
+    return(NA)
+  
+  switch(method,
+         interpreted={
+           #  matrix of squared distances between all pairs of points
+           sq <- function(a, b) { (a-b)^2 }
+           squd <-  outer(x, x, sq) + outer(y, y, sq)
+           #  reset diagonal to a large value so it is excluded from minimum
+           diag(squd) <- Inf
+           #  nearest neighbour distances
+           nnwhich <- sqrt(apply(squd,1,which.min))
+         },
+         C={
+           n <- length(x)
+           nnd<-numeric(n)
+           nnwhich<-integer(n)
+           o <- order(y)
+           big <- sqrt(.Machine$double.xmax)
+           z<- .C("nnwhichsort",
+                  n= as.integer(n),
+                  x= as.double(x[o]), y= as.double(y[o]),
+                  nnd= as.double(nnd),
+                  nnwhich=as.integer(nnwhich),
+                  as.double(big),
+                  PACKAGE="spatstat")
+           # convert from C to R indexing
+           witch <- z$nnwhich + 1
+           if(any(witch <= 0))
+             stop("Internal error: non-positive index returned from C code")
+           if(any(witch > n))
+             stop("Internal error: index returned from C code exceeds n")
+           nnwhich[o] <- o[witch]
+         },
+         stop(paste("Unrecognised method \"", method, "\"", sep=""))
+         )
+  return(nnwhich)
 }
 
 crossdist <- function(X, Y, ...) {

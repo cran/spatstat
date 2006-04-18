@@ -6,7 +6,7 @@
   taken from two different line segment patterns.
 }
 \usage{
-  crossdist.psp(X, Y, \dots, method="Fortran")
+  \method{crossdist}{psp}(X, Y, \dots, method="Fortran")
 }
 \arguments{
   \item{X,Y}{

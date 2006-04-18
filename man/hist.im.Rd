@@ -6,7 +6,7 @@
   The \code{hist} method for class \code{"im"}.
 }
 \usage{
-  hist.im(x, \dots)
+  \method{hist}{im}(x, \dots)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}

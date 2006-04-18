@@ -7,16 +7,14 @@
   \code{"fasp"}).
 }
 \synopsis{
-  subset.fasp(x, I, J, drop,\dots)
+  \method{[}{fasp}(x, I, J, drop,\dots)
 }
 \usage{
-  subset.fasp(X, I, J, drop,\dots)
-  subset.fasp(X, I, J)
-  X[I]
-  X[I, J]
+  \method{[}{fasp}(x,I)
+  \method{[}{fasp}(x,I,J)
 }
 \arguments{
-  \item{X}{
+  \item{x}{
     A function array. An object of class \code{"fasp"}.
   }
   \item{I}{
@@ -24,14 +22,6 @@
   }
   \item{J}{
     any valid expression for a subset of the column indices of the array.
-  }
-  \item{drop}{
-    Ignored - this argument is required for consistency with other
-    methods for \code{subset}.
-  }
-  \item{\dots}{
-    Ignored - this argument is required for consistency with other
-    methods for \code{subset}.
   }
 } 
 \value{

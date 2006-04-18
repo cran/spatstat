@@ -1,5 +1,6 @@
 \name{demopat}
 \alias{demopat}
+\docType{data}
 \title{
    Artificial Data Point Pattern
 }

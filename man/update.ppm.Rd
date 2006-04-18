@@ -5,7 +5,7 @@
   \code{update} method for class \code{"ppm"}.
 }
 \usage{
-  update.ppm(object, \dots, fixdummy=TRUE)
+  \method{update}{ppm}(object, \dots, fixdummy=TRUE)
 
 }
 \arguments{

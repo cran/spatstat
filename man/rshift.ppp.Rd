@@ -5,10 +5,10 @@
   Randomly shifts the points of a point pattern.
 }
 \synopsis{
-   rshift.ppp(X, \dots, which=NULL, group)
+   \method{rshift}{ppp}(X, \dots, which=NULL, group)
 }
 \usage{
-   rshift.ppp(X, \dots, radius, width, height, edge="torus", clip,
+   \method{rshift}{ppp}(X, \dots, radius, width, height, edge="torus", clip,
                         group, which)
                         
 }

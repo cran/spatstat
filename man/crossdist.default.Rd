@@ -6,7 +6,7 @@
   taken from two different sets of points.
 }
 \usage{
-  crossdist.default(X, Y, x2, y2, \dots, method="C")
+  \method{crossdist}{default}(X, Y, x2, y2, \dots, method="C")
 }
 \arguments{
   \item{X,Y}{

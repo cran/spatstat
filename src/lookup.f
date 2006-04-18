@@ -12,8 +12,12 @@ C Output from Public domain Ratfor, version 1.0
       equisp = par(3) .gt. zero
       delta = par(4)
       rmax = par(5)
+      if(npts.eq.0)then
+      cifval = beta
+      return
+      endif
       some = zero
-      do23000 j = 1,npts 
+      do23002 j = 1,npts 
       if(j .eq. ix)then
       continue
       else
@@ -34,24 +38,24 @@ C Output from Public domain Ratfor, version 1.0
       rks = par(5+nlook+ks)
       if(rks .le. r1)then
       ksp1 = ks + 1
-      do23012 k = ksp1,nlook 
+      do23014 k = ksp1,nlook 
       rk = par(5+nlook+k)
       if(r1 .lt. rk)then
       k0 = k-1
-      goto 23013
+      goto 23015
       endif
-23012 continue
-23013 continue
+23014 continue
+23015 continue
       else
       ksm1 = ks - 1
-      do23016 k = ksm1,1,-1 
+      do23018 k = ksm1,1,-1 
       rk = par(5+nlook+k)
       if(r1 .ge. rk)then
       k0 = k
-      goto 23017
+      goto 23019
       endif
-23016 continue
-23017 continue
+23018 continue
+23019 continue
       endif
       endif
       endif
@@ -62,8 +66,8 @@ C Output from Public domain Ratfor, version 1.0
       endif
       some = some + log(hk0)
       endif
-23000 continue
-23001 continue
+23002 continue
+23003 continue
       cifval = beta*exp(some)
       return
       end

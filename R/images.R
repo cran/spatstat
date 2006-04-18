@@ -211,14 +211,18 @@ rastery.im <- function(x) {
 
 # methods for other functions
 
+as.matrix.im <- function(x) {
+  return(x$v)
+}
+
 mean.im <- function(x, ...) {
   verifyclass(x, "im")
-  return(mean.default(x$v, na.rm=TRUE, ...))
+  return(mean.default(as.matrix(x), na.rm=TRUE, ...))
 }
 
 hist.im <- function(x, ...) {
   verifyclass(x, "im")
-  v <- x$v
+  v <- as.numeric(as.matrix(x))
   v <- v[!is.na(v)]
   xname <- paste(deparse(substitute(x), 500), collapse="\n")
   out <- do.call("hist.default",
@@ -228,4 +232,18 @@ hist.im <- function(x, ...) {
                                        main = paste("Histogram of", xname))))
   return(invisible(out))
 }
+
+
+cut.im <- function(x, ...) {
+  verifyclass(x, "im")
+  vcut <- cut(as.numeric(as.matrix(x)), ...)
+  lev <- if(is.factor(vcut)) levels(vcut) else NULL
+  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev))
+}
+
+quantile.im <- function(x, ...) {
+  verifyclass(x, "im")
+  return(quantile(as.numeric(as.matrix(x)), ...))
+}
+
 

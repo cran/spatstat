@@ -34,7 +34,7 @@
 
   Note that we use the symbol \eqn{\kappa}{kappa}
   where Diggle and Gratton (1984) and Diggle, Gates and Stibbard (1987)
-  use \eqn{\beta}{beta}, since in \code{spatstat} we reserve the symbol
+  use \eqn{\beta}{beta}, since in \pkg{spatstat} we reserve the symbol
   \eqn{\beta}{beta} for an intensity parameter.
 
   The parameters must all be nonnegative,

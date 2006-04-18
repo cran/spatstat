@@ -5,10 +5,10 @@
   Prints a useful description of a window object.
 }
 \synopsis{
-  summary.owin(object, \dots)
+  \method{summary}{owin}(object, \dots)
 }
 \usage{
- summary.owin(object)
+ \method{summary}{owin}(object)
 }
 \arguments{
   \item{object}{Window (object of class \code{"owin"}).}

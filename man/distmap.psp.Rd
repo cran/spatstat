@@ -8,7 +8,7 @@
   line segment in the given line segment pattern.
 }
 \usage{
-  distmap.psp(X, \dots)
+  \method{distmap}{psp}(X, \dots)
 }
 \arguments{
   \item{X}{A line segment pattern (object of class \code{"psp"}).

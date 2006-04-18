@@ -6,7 +6,7 @@
   The \code{mean} method for class \code{"im"}.
 }
 \usage{
-  mean.im(x, \dots)
+  \method{mean}{im}(x, \dots)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}

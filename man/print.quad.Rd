@@ -5,10 +5,10 @@
   \code{print} method for a quadrature scheme.
 }
 \synopsis{
- print.quad(x,\dots)
+ \method{print}{quad}(x,\dots)
 }
 \usage{
- print.quad(x)
+ \method{print}{quad}(x)
  x
 }
 \arguments{

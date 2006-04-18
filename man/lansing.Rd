@@ -1,5 +1,6 @@
 \name{lansing}
 \alias{lansing}
+\docType{data}
 \title{
   Lansing Woods Point Pattern
 }

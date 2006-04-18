@@ -5,7 +5,7 @@
   Applies a vector shift to a point pattern. 
 }
 \usage{
- shift.ppp(X, vec=c(0,0), \dots)
+ \method{shift}{ppp}(X, vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Point pattern (object of class \code{"ppp"}).}

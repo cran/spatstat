@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.16 $   $Date: 2006/01/18 06:11:20 $
+#    $Revision: 4.17 $   $Date: 2006/04/11 15:21:01 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -406,3 +406,81 @@ is not large enough to contain the dilation of the window \'win\'")
   return(result)
 }
   
+rstrat <- function(win=square(1), nx, ny=nx, k=1) {
+  win <- as.owin(win)
+  stopifnot(nx >= 1 && ny >= 1)
+  stopifnot(k >= 1)
+  xy <- stratrand(win, nx, ny, k)
+  Xbox <- ppp(xy$x, xy$y, win$xrange, win$yrange)
+  X <- Xbox[, win]
+  return(X)
+}
+
+rsyst <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
+  win <- as.owin(win)
+  xr <- win$xrange
+  yr <- win$yrange
+  if(!missing(nx)) {
+    stopifnot(nx >= 1 && ny >= 1)
+    if(!is.null(dx) || !is.null(dy))
+      stop("Do not give both nx and dx")
+    dx <- diff(xr)/nx
+    dy <- diff(yr)/ny
+    x0 <- seq(xr[1], xr[2], length=nx+1)
+    y0 <- seq(yr[1], yr[2], length=ny+1)
+  } else if(!is.null(dx)) {
+    stopifnot(dx > 0 & dy > 0)
+    if(!is.null(nx) || !is.null(ny))
+      stop("Do not give both nx and dx")
+    x0 <- seq(xr[1], xr[2], by=dx)
+    y0 <- seq(yr[1], yr[2], by=dy)
+  } else stop("Either (nx, ny) or (dx, dy) should be given")
+  xy0 <- expand.grid(x=x0, y=y0)
+  x <- xy0$x + runif(1, min = 0, max = dx)
+  y <- xy0$y + runif(1, min = 0, max = dy)
+  Xbox <- ppp(x, y, xr, yr)
+  X <- Xbox[, win]
+  return(X)
+}
+
+
+rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
+  win <- as.owin(win)
+  xr <- win$xrange
+  yr <- win$yrange
+  if(!missing(nx)) {
+    stopifnot(nx >= 1 && ny >= 1)
+    if(!is.null(dx) || !is.null(dy))
+      stop("Do not give both nx and dx")
+    dx <- diff(xr)/nx
+    dy <- diff(yr)/ny
+    x0 <- seq(xr[1], xr[2], length=nx+1)
+    y0 <- seq(yr[1], yr[2], length=ny+1)
+  } else if(!is.null(dx)) {
+    stopifnot(dx > 0 & dy > 0)
+    if(!is.null(nx) || !is.null(ny))
+      stop("Do not give both nx and dx")
+    x0 <- seq(xr[1], xr[2], by=dx)
+    y0 <- seq(yr[1], yr[2], by=dy)
+  } else stop("Either (nx, ny) or (dx, dy) should be given")
+  mx <- length(x0)
+  my <- length(y0)
+  x <- numeric(0)
+  y <- numeric(0)
+  rcellnumber <- function(n) {
+    u <- runif(n, min=0, max=1)
+    k <- ifelse(u < 1/10, 0, ifelse(u < 89/90, 1, 10))
+    return(k)
+  }
+  for(ix in seq(mx))
+    for(iy in seq(my)) {
+      nij <- rcellnumber(1)
+      x <- c(x, x0[ix] + runif(nij, min=0, max=dx))
+      y <- c(y, y0[iy] + runif(nij, min=0, max=dy))
+    }
+  Xbox <- ppp(x, y, xr, yr)
+  X <- Xbox[, win]
+  return(X)
+}
+
+

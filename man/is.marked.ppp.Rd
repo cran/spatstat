@@ -6,7 +6,7 @@
   attached to the points.
 }
 \usage{
-  is.marked.ppp(X, na.action="warn", \dots) 
+  \method{is.marked}{ppp}(X, na.action="warn", \dots) 
 }
 \arguments{
   \item{X}{

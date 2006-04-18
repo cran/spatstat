@@ -5,10 +5,10 @@
   Rotates a line segment pattern
 }
 \synopsis{
- rotate.psp(X, \dots)
+ \method{rotate}{psp}(X, \dots)
 }
 \usage{
- rotate.psp(X, angle=pi/2, \dots)
+ \method{rotate}{psp}(X, angle=pi/2, \dots)
 }
 \arguments{
   \item{X}{A line segment pattern (object of class \code{"psp"}).}

@@ -6,7 +6,7 @@
   in a line segment pattern.
 }
 \usage{
-  pairdist.psp(X, \dots, method="Fortran")
+  \method{pairdist}{psp}(X, \dots, method="Fortran")
 }
 \arguments{
   \item{X}{

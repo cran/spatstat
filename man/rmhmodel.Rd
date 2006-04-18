@@ -9,11 +9,11 @@
 }
 \synopsis{
    rmhmodel(model, \dots)
-   rmhmodel.default(model, \dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
+   \method{rmhmodel}{default}(model, \dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
 }
 \usage{
    rmhmodel(model)
-   rmhmodel(\dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
+   \method{rmhmodel}{default}(\dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
 }
 \arguments{
   \item{model}{An existing description of the model in some
@@ -243,7 +243,7 @@
 	\code{r} are equally spaced.
 	    
 	[\bold{Note:} The usage of \code{r} and \code{h}
-	has \emph{changed} from the previous usage in \code{spatstat}
+	has \emph{changed} from the previous usage in \pkg{spatstat}
 	versions 1.4-7 to 1.5-1, in which ascending order was not required,
 	and in which the first entry of \code{r} had to be 0.]
 
@@ -334,7 +334,7 @@
 \section{Warnings in Respect of ``lookup''}{
 
 The syntax of \code{rmh.default} in respect of the \code{lookup} cif
-has \emph{changed} from the previous release of \code{spatstat}
+has \emph{changed} from the previous release of \pkg{spatstat}
 (versions 1.4-7 to 1.5-1).
 Read the \emph{Details} carefully. In particular it is now required
 that the first entry of the \code{r} component of \code{par}

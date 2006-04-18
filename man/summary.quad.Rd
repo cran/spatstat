@@ -6,8 +6,8 @@
   \code{summary} method for class \code{"quad"}.
 }
 \usage{
-  summary.quad(object, \dots, checkdup=FALSE)
-  print.summary.quad(x, \dots, dp=3)
+  \method{summary}{quad}(object, \dots, checkdup=FALSE)
+  \method{print.summary}{quad}(x, \dots, dp=3)
 }
 \arguments{
   \item{object}{A quadrature scheme.}

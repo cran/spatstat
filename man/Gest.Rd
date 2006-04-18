@@ -132,6 +132,10 @@ nearest.neighbour(X)
   However this is also returned by the algorithm, as it is sometimes 
   useful in other contexts. Care should be taken not to use the uncorrected
   empirical \eqn{G} as if it were an unbiased estimator of  \eqn{G}.
+
+  To simply compute the nearest neighbour distance for each point in the
+  pattern, use \code{\link{nndist}}. To determine which point is the
+  nearest neighbour of a given point, use \code{\link{nnwhich}}.
 }
 \references{
     Baddeley, A.J. Spatial sampling and censoring.
@@ -173,7 +177,9 @@ nearest.neighbour(X)
   but its maximum value may be less than \eqn{1}.
 }
 \seealso{
- \code{\link{Fest}},
+  \code{\link{nndist}},
+  \code{\link{nnwhich}},
+  \code{\link{Fest}},
   \code{\link{Jest}},
   \code{\link{Kest}},
   \code{\link{km.rs}},
