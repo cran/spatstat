@@ -5,10 +5,10 @@
   Prints a useful summary of a line segment pattern dataset.
 }
 \synopsis{
-  summary.psp(object, \dots)
+  \method{summary}{psp}(object, \dots)
 }
 \usage{
- summary.psp(object)
+ \method{summary}{psp}(object)
 }
 \arguments{
   \item{object}{Line segment pattern (object of class \code{"psp"}).}

@@ -34,6 +34,7 @@ function(Q,
                     forcefit=forcefit)
   fitMPL$call <- cl
 
+
   if(method == "mpl" || is.poisson.ppm(fitMPL))
     return(fitMPL)
 

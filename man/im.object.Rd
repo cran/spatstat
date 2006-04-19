@@ -35,9 +35,13 @@
 
   Image objects may be displayed using the methods
   \code{\link{plot.im}}, \code{image.im}, \code{persp.im}
-  and \code{contour.im}.
+  and \code{contour.im}. There are also methods 
+  \code{\link{summary.im}} for summarising an image,
+  \code{\link{mean.im}} for calculating the average pixel value, and
+  \code{\link{hist.im}} for plotting a histogram of pixel values.
   Values of an image may be looked-up using
   \code{lookup.im} or using the subset operator \code{\link{[.im}}.
+  
   Calculations involving one or more images (for example,
   subtracting one image from another) can often be done
   easily using \code{\link{eval.im}}.

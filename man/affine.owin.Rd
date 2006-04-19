@@ -6,7 +6,7 @@
   plus vector shift) to a window. 
 }
 \usage{
- affine.owin(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
+  \method{affine}{owin}(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Window (object of class \code{"owin"}).}

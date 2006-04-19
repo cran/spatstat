@@ -8,10 +8,14 @@
 \description{
 Tries to coerce any reasonable kind of data to a point pattern
 (an object of class \code{"ppp"})
-for use by the \code{spatstat} package).
+for use by the \pkg{spatstat} package).
 }
 \synopsis{
   as.ppp(X, \dots, fatal=TRUE)
+  \method{as.ppp}{ppp}(X, \dots, fatal=TRUE)
+  \method{as.ppp}{quad}(X, \dots, fatal=TRUE)
+  \method{as.ppp}{matrix}(X, W=NULL, \dots, fatal=TRUE)
+  \method{as.ppp}{default}(X, W=NULL, \dots, fatal=TRUE)
 }
 \usage{
   as.ppp(X, \dots, fatal=TRUE)

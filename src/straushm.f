@@ -9,9 +9,13 @@ C Output from Public domain Ratfor, version 1.0
       zero = 0.d0
       per = period(1) .gt. zero
       beta = par(mrk)
+      if(n.eq.0)then
+      cifval = beta
+      return
+      endif
       ind = ntypes
-      do23000 i = 1,mrk 
-      do23002 j = i,ntypes 
+      do23002 i = 1,mrk 
+      do23004 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
       gmma(i) = par(ind)
@@ -19,13 +23,13 @@ C Output from Public domain Ratfor, version 1.0
       if(i.eq.mrk .and. j.gt.mrk)then
       gmma(j) = par(ind)
       endif
+23004 continue
+23005 continue
 23002 continue
 23003 continue
-23000 continue
-23001 continue
       ind = ntypes + ntypes*(ntypes+1)/2
-      do23008 i = 1,mrk 
-      do23010 j = i,ntypes 
+      do23010 i = 1,mrk 
+      do23012 j = i,ntypes 
       ind = ind+1
       if(i.le.mrk .and. j.eq.mrk)then
       rint(i) = par(ind)
@@ -33,13 +37,13 @@ C Output from Public domain Ratfor, version 1.0
       if(i.eq.mrk .and. j.gt.mrk)then
       rint(j) = par(ind)
       endif
+23012 continue
+23013 continue
 23010 continue
 23011 continue
-23008 continue
-23009 continue
       ind = ntypes + ntypes*(ntypes+1)
-      do23016 i = 1,mrk 
-      do23018 j = i,ntypes 
+      do23018 i = 1,mrk 
+      do23020 j = i,ntypes 
       ind = ind+1
       if(j.eq.mrk)then
       rhc(i) = par(ind)
@@ -47,15 +51,15 @@ C Output from Public domain Ratfor, version 1.0
       if(i.eq.mrk .and. j.gt.mrk)then
       rhc(j) = par(ind)
       endif
+23020 continue
+23021 continue
 23018 continue
 23019 continue
-23016 continue
-23017 continue
-      do23024 i = 1,ntypes 
+      do23026 i = 1,ntypes 
       k(i) = 0
-23024 continue
-23025 continue
-      do23026 j = 1,n 
+23026 continue
+23027 continue
+      do23028 j = 1,n 
       if(j .eq. ix)then
       continue
       else
@@ -72,10 +76,10 @@ C Output from Public domain Ratfor, version 1.0
       k(marks(j)) = k(marks(j))+1
       endif
       endif
-23026 continue
-23027 continue
+23028 continue
+23029 continue
       cifval = zero
-      do23036 i=1,ntypes 
+      do23038 i=1,ntypes 
       if(gmma(i) .lt. eps)then
       if(k(i).gt.0)then
       cifval = zero
@@ -84,8 +88,8 @@ C Output from Public domain Ratfor, version 1.0
       else
       cifval = cifval + log(gmma(i))*dble(k(i))
       endif
-23036 continue
-23037 continue
+23038 continue
+23039 continue
       cifval = beta*exp(cifval)
       return
       end

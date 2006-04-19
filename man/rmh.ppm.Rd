@@ -7,7 +7,7 @@
   using the Metropolis-Hastings algorithm.
 }
 
-\usage{rmh.ppm(model,start=NULL,
+\usage{\method{rmh}{ppm}(model,start=NULL,
                control=rmhcontrol(),
                \dots, verbose=TRUE, project=TRUE) }
 

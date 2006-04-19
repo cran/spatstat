@@ -5,7 +5,7 @@
   Plots a list of point patterns.
 }
 \usage{
-  plot.splitppp(x, \dots, arrange=TRUE)
+  \method{plot}{splitppp}(x, \dots, arrange=TRUE)
 }
 \arguments{
   \item{x}{

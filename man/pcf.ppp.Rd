@@ -6,7 +6,7 @@
   a point pattern using kernel methods.
 }
 \usage{
- pcf.ppp(X, \dots, r = NULL, kernel="epanechnikov", bw=NULL, stoyan=0.15,
+  \method{pcf}{ppp}(X, \dots, r = NULL, kernel="epanechnikov", bw=NULL, stoyan=0.15,
                     correction=c("translate", "ripley"))
 }
 \arguments{

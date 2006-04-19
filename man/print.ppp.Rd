@@ -5,10 +5,10 @@
   Prints a very brief description of a point pattern dataset.
 }
 \synopsis{
-  print.ppp(x, \dots)
+  \method{print}{ppp}(x, \dots)
 }
 \usage{
- print.ppp(x)
+ \method{print}{ppp}(x)
  x
 }
 \arguments{

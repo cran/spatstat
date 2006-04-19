@@ -1,5 +1,6 @@
 \name{bramblecanes}
 \alias{bramblecanes}
+\docType{data}
 \title{Hutchings' Bramble Canes data}
 \description{
   Data giving the locations and ages of bramble canes in a field.

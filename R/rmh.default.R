@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.24 2005/03/10 21:31:15 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.29 2006/04/19 08:18:15 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -121,6 +121,18 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
       stop("Expanded simulation window does not contain clipping window")
   }
 
+
+######### Store decisions
+
+  Model <- model
+  Start <- start
+  Control <- control
+
+  Model$w <- w.clip
+  Control$expand <- if(expanded) w.sim else 1
+  Control$force.exp <- expanded
+  Control$force.noexp <- !expanded
+    
 #######  Trend  ################################
   
 # Check that the expanded window fits inside the window
@@ -147,10 +159,11 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                       else "one of the trend windows.\n",
                       "Expanding to this trend window (only).\n"))
         w.sim <- iwindows[misfit]
+        Control$expand <- w.sim
       }
     }
   }
-
+  
 #######  Poisson case  ################################
 #
 #
@@ -172,7 +185,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
           rmpoint(n, intensity, win=w.sim, types=types, verbose=verbose)
       }
     Xclip <- Xsim[, w.clip]
-    attr(Xclip, "info") <- list(model=model, start=start, control=control)
+    attr(Xclip, "info") <- list(model=Model, start=Start, control=Control)
     return(Xclip)
   }
   
@@ -272,8 +285,16 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
            if(expanded)
              n.start <- ceiling(n.start * area.owin(w.sim)/area.owin(w.clip))
            #
-           npts <- sum(n.start) # Redundant if n.start is scalar; no harm, but.
+           npts <- sum(n.start) # The ``sum()'' is redundant if n.start
+                                # is scalar; no harm, but.
          })
+
+# Check that we're not simulating the empty pattern.
+if(npts == 0 & control$conditioning != "none") {
+  warning("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern")
+  empty <- ppp(numeric(0), numeric(0), window=w.clip)
+  return(empty)
+}
 
 ########################################################################  
 #      S t a r t   s i m u l a t i o n
@@ -370,20 +391,21 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # process may grow.  We need to allow storage space for them to grow
 # in.  Unless we are conditioning on the number of points, we have no
 # real idea how big they will grow.  Hence we start off with storage
-# space which has twice the length of the ``initial state'', and
+# space which has at least twice the length of the ``initial state'', and
 # structure things so that the storage space may be incremented
 # without losing the ``state'' which has already been generated.
 
   if(cond == 1) {
-    x <- c(x,numeric(npts))
-    y <- c(y,numeric(npts))
-    if(ntypes>1) marks <- c(marks,numeric(npts))
-    if(need.aux) aux <- c(aux,numeric(npts))
-    nincr <- 2*npts
+    nincr <- npad <- max(npts, 50)
+    padding <- numeric(npad)
+    x <- c(x, padding)
+    y <- c(y, padding)
+    if(ntypes>1) marks <- c(marks, padding)
+    if(need.aux) aux   <- c(aux,   padding)
   } else {
-    nincr <- npts
+    nincr <- npad <- 0
   }
-  npmax <- 0
+  npmax <- npts + npad
   mrep  <- 1
 
   if(verbose)
@@ -408,7 +430,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # The repetition is to allow the storage space to be incremented if
 # necessary.
   repeat {
-    npmax <- npmax + nincr
 # Call the Metropolis-Hastings simulator:
     rslt <- .Fortran(
                      "methas",
@@ -437,25 +458,41 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                      PACKAGE="spatstat"
                      )
 
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 # If npts > npmax we've run out of storage space.  Tack some space
 # onto the end of the ``state'' already generated, increase npmax
 # correspondingly, and re-call the methas subroutine.  Note that
 # mrep is the number of the repetition on which things stopped due
 # to lack of storage; so we start again at the ***beginning*** of
 # the mrep repetition.
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+# If mrep > nrep we have completed the nrep Metropolis Hastings
+# steps.  Otherwise we came back early because we were on the cusp
+# of running out of storage space.  In the latter case, increase
+# the storage space and re-call the methas subroutine.
+
+    mrep <- rslt$mrep
+    if(mrep > nrep) break
+
+    # This is toadally unnecessary, but check that we
+    # at the storage limit:
     npts <- rslt$npts
-    if(npts <= npmax) break
+    if(npts < npmax)
+	stop(paste("Internal error; we have come back\n",
+                   "without completing nrep steps and without reaching\n",
+                   "the limit of storage capacity.\n"))
+    
     if(verbose) {
-      cat('Number of points greater than ',npmax,';\n',sep='')
+      cat('Number of points equal to ',npmax,';\n',sep='')
       cat('increasing storage space and continuing.\n')
     }
+    npmax <- npmax + nincr
     x     <- c(rslt$x,numeric(nincr))
     y     <- c(rslt$y,numeric(nincr))
     marks <- if(ntypes>1) c(rslt$marks,numeric(nincr)) else 0
     aux   <- if(need.aux) c(rslt$aux,numeric(nincr)) else 0
-    mrep  <- rslt$mrep
     iseed <- rslt$iseed
-    npts  <- npts-1
   }
 
   x <- rslt$x[1:npts]
@@ -469,7 +506,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   xxx <- xxx[,w.clip]
 
 # Append to the result information about how it was generated.
-  attr(xxx, "info") <- list(model=model, start=start, control=control)
+  attr(xxx, "info") <- list(model=Model, start=Start, control=Control)
   return(xxx)
 }
 

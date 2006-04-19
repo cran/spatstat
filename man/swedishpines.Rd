@@ -1,5 +1,6 @@
 \name{swedishpines}
 \alias{swedishpines}
+\docType{data}
 \title{
   Swedish Pines Point Pattern
 }

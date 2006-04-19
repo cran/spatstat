@@ -10,7 +10,7 @@
   or at the points of the quadrature scheme used to fit the model.
 }
 \usage{
-  fitted.ppm(object, \dots, type="lambda", dataonly=FALSE)
+  \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE)
 }
 \arguments{
   \item{object}{

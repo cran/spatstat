@@ -5,7 +5,7 @@
   Plot a two-dimensional line segment pattern
 }
 \usage{
- plot.psp(x, \dots)
+  \method{plot}{psp}(x, \dots)
 }
 \arguments{
   \item{x}{

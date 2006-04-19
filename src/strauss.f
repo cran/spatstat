@@ -10,7 +10,11 @@ C Output from Public domain Ratfor, version 1.0
       gamma = par(2)
       r = par(3)
       kount = 0
-      do23000 j = 1,n 
+      if(n.eq.0)then
+      cifval = beta
+      return
+      endif
+      do23002 j = 1,n 
       if(j .eq. ix)then
       continue
       else
@@ -23,8 +27,8 @@ C Output from Public domain Ratfor, version 1.0
       kount = kount+1
       endif
       endif
-23000 continue
-23001 continue
+23002 continue
+23003 continue
       if(gamma .lt. eps )then
       if(kount .gt. 0)then
       cifval = zero

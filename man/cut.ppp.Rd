@@ -1,17 +1,12 @@
 \name{cut.ppp}
 \alias{cut.ppp}
-\alias{cut}
 \title{Convert Point Pattern Marks from Numeric to Factor}
 \description{
   Transform the marks of a marked point pattern
   from numeric values into a factor.
 }
-\synopsis{
-  cut.ppp(x, \dots)
-}
 \usage{
-  cut(x, \dots)
-  cut.ppp(x, \dots)
+  \method{cut}{ppp}(x, \dots)
 }
 \arguments{
   \item{x}{
@@ -21,9 +16,9 @@
     be numerical values.
   }
   \item{\dots}{
-    Arguments passed to the generic \code{\link{cut}} function.
+    Arguments passed to \code{\link{cut.default}}.
     They determine the breakpoints for the mapping from numerical values to
-    factor values. See \code{\link{cut}}.
+    factor values. See \code{\link{cut.default}}.
   }
 } 
 \value{

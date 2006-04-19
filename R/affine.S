@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.3 $	$Date: 2003/03/11 01:20:27 $
+#	$Revision: 1.4 $	$Date: 2006/03/24 06:05:22 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -15,6 +15,10 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
 
 "affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "owin")
+  if(!is.vector(vec) || length(vec) != 2)
+    stop(paste(sQuote("vec"), "should be a vector of length 2"))
+  if(!is.matrix(mat) || any(dim(mat) != c(2,2)))
+    stop(paste(sQuote("mat"), "should be a 2 x 2 matrix"))
   # Inspect the determinant
   detmat <- det(mat)
   if(abs(detmat) < .Machine$double.eps)
@@ -22,12 +26,17 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
   #
   switch(X$type,
          rectangle={
-           # convert rectangle to polygon
-           P <- owin(X$xrange, X$yrange, poly=
-                     list(x=X$xrange[c(1,2,2,1)],
-                          y=X$yrange[c(1,1,2,2)]))
-           # call polygonal case
-           return(affine.owin(P, mat, vec))
+           if(all(mat == diag(diag(mat)))) {
+             # diagonal matrix - result is a rectangle
+             return(owin(mat[1,1] * X$xrange, mat[2,2] * X$yrange))
+           } else {
+             # convert rectangle to polygon
+             P <- owin(X$xrange, X$yrange, poly=
+                       list(x=X$xrange[c(1,2,2,1)],
+                            y=X$yrange[c(1,1,2,2)]))
+             # call polygonal case
+             return(affine.owin(P, mat, vec))
+           }
          },
          polygonal={
            # First transform the polygonal boundaries
@@ -38,8 +47,11 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            # Compute bounding box of new polygons
            xr <- range(unlist(lapply(bdry, function(a) a$x)))
            yr <- range(unlist(lapply(bdry, function(a) a$y)))
-           # wrap up
-           return(owin(xr, yr, poly=bdry))
+           # Compile result
+           W <- owin(xr, yr, poly=bdry)
+           # Result might be a rectangle: if so, convert to rectangle type
+           W <- rescue.rectangle(W)
+           return(W)
          },
          mask={
            stop("Sorry, \'affine.owin\' is not yet implemented for masks")

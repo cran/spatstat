@@ -27,17 +27,17 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     of the points in \code{X} from which distances are measured.
   }
   \item{lambdaI}{
-    numeric vector giving the estimated intensity of the sub-process of
-    points of type \code{i}, evaluated at each of the type \code{i}
-    points in \code{X}. 
-    It should have length equal to the number of type \code{i} points in
-    \code{X}.
+    Values of the the estimated intensity of the sub-process of
+    points of type \code{i}.
+    Either a pixel image (object of class \code{"im"}),
+    or a numeric vector containing the type \code{i} intensity values
+    at each of the type \code{i} points in \code{X}. 
   }
   \item{lambdadot}{
-    numeric vector giving the estimated intensity of the entire process
-    (points of all types), evaluated at each point in \code{X}. 
-    It should have length equal to the number of points in
-    \code{X}.
+    Values of the the estimated intensity of the entire point process,
+    Either a pixel image (object of class \code{"im"}),
+    or a numeric vector containing the intensity values
+    at each point in \code{X}. 
   }
   \item{r}{
       Optional. Numeric vector giving the values of the argument \eqn{r}
@@ -120,15 +120,27 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
   not the number 3). 
 
-  The argument \code{lambdaI} must be a vector containing estimated values of
-  the intensity of the sub-process of points of type \code{i} evaluated at the
-  points of type \code{i}.
-
+  The argument \code{lambdaI} supplies the values
+  of the intensity of the sub-process of points of type \code{i}.
+  It may be either
+  \describe{
+    \item{a pixel image}{(object of class \code{"im"}) which
+      gives the values of the type \code{i} intensity
+      at all locations in the window containing \code{X};
+    }
+    \item{a numeric vector}{containing the values of the
+      type \code{i} intensity evaluated only
+      at the data points of type \code{i}. The length of this vector
+      must equal the number of type \code{i} points in \code{X}.
+    }
+  }
   The argument \code{lambdadot} should contain
-  estimated values of the intensity of the process of points of any type,
-  evaluated at the points of the process.
-  
-  The optional argument \code{lambdaIdot} is a matrix containing estimated
+  estimated values of the intensity of the entire point process.
+  It may be either a pixel image, or a numeric vector of length equal
+  to the number of points in \code{X}.
+
+  For advanced use only, the optional argument \code{lambdaIdot}
+  is a matrix containing estimated
   values of the products of these two intensities for each pair of
   points, the first point of type \code{i} and the second of any type.
   
@@ -174,6 +186,9 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     lambdadot <- density.ppp(lg, sigma=0.15)
     K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM[ma],
                                       lambdadot=lambdadot[lg])
+    K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM,
+                                      lambdadot=lambdadot)
+
 
     # synthetic example: type A points have intensity 50,
     #                    type B points have intensity 100 * x
@@ -181,8 +196,8 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     lamdot <- as.im(function(x,y) { 50 + 100 * x}, owin())
     X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
     XB <- split(X)$B
-    K <- Kdot.inhom(X, "B",
-        lambdaI=lamB[XB], lambdadot=lamdot[X])
+    K <- Kdot.inhom(X, "B",  lambdaI=lamB[XB], lambdadot=lamdot[X])
+    K <- Kdot.inhom(X, "B",  lambdaI=lamB,     lambdadot=lamdot)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

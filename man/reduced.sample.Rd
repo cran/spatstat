@@ -36,7 +36,7 @@
   }
 }
 \details{
-  This function is needed mainly for internal use in \code{spatstat},
+  This function is needed mainly for internal use in \pkg{spatstat},
   but may be useful in other applications where you want to form the
   reduced sample estimator from a huge dataset.
 

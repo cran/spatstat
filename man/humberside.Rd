@@ -1,6 +1,7 @@
 \name{humberside}
 \alias{humberside}
 \alias{humberside.convex}
+\docType{data}
 \title{Humberside Data on Childhood Leukaemia and Lymphoma}
 \description{
   Spatial locations of cases of childhood leukaemia

@@ -7,16 +7,14 @@
   \code{"fasp"}).
 }
 \synopsis{
-  subset.fasp(x, I, J, drop,\dots)
+  \method{[}{fasp}(x, I, J, drop,\dots)
 }
 \usage{
-  subset.fasp(X, I, J, drop,\dots)
-  subset.fasp(X, I, J)
-  X[I]
-  X[I, J]
+  \method{[}{fasp}(x,I)
+  \method{[}{fasp}(x,I,J)
 }
 \arguments{
-  \item{X}{
+  \item{x}{
     A function array. An object of class \code{"fasp"}.
   }
   \item{I}{
@@ -24,14 +22,6 @@
   }
   \item{J}{
     any valid expression for a subset of the column indices of the array.
-  }
-  \item{drop}{
-    Ignored - this argument is required for consistency with other
-    methods for \code{subset}.
-  }
-  \item{\dots}{
-    Ignored - this argument is required for consistency with other
-    methods for \code{subset}.
   }
 } 
 \value{
@@ -51,17 +41,14 @@
 \examples{
  # Lansing woods data - multitype points with 6 types
  data(lansing)
- \dontrun{
- # compute 6 x 6 array of all cross-type K functions
-   a <- alltypes(lansing, "K")
-   plot(a)
- }
  \testonly{
  # smaller dataset
-   sub <- lansing[ seq(1,lansing$n,by=40), ]
-   a <- alltypes(sub, "K")
+   lansing <- lansing[ seq(1,lansing$n,by=45), ]
  }
- # first three marks only
+ # compute 6 x 6 array of all cross-type K functions
+ a <- alltypes(lansing, "K")
+
+ # extract first three marks only
  b <- a[1:3,1:3]
  \dontrun{plot(b)}
  # subset pertaining to hickories

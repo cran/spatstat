@@ -9,11 +9,11 @@
 }
 \synopsis{
    rmhstart(start, \dots)
-   rmhstart.default(start=NULL, \dots, n.start=NULL, x.start=NULL, iseed)
+   \method{rmhstart}{default}(start=NULL, \dots, n.start=NULL, x.start=NULL, iseed)
 }
 \usage{
    rmhstart(start)
-   rmhstart(\dots, n.start=NULL, x.start=NULL, iseed)
+   \method{rmhstart}{default}(\dots, n.start=NULL, x.start=NULL, iseed)
 }
 \arguments{
   \item{start}{An existing description of the initial state in some

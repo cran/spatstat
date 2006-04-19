@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.9 $   $Date: 2006/02/27 06:03:04 $
+#  $Revision: 1.10 $   $Date: 2006/03/24 06:31:07 $
 #
 
 qqplot.ppm <-
@@ -57,7 +57,7 @@ qqplot.ppm <-
 
     # prepare rmh arguments
     rcontrol <- rmhcontrol(control)
-    rmodel   <- rmhmodel(fit, control=rcontrol, project=TRUE, verbose=verbose)
+    rmodel   <- rmhmodel(fit, control=rcontrol, project=FALSE, verbose=verbose)
     rstart   <- rmhstart(n.start=data.ppm(fit)$n)
 
     # expression to be evaluated each time
