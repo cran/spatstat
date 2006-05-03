@@ -2,6 +2,7 @@
 \alias{reach}
 \alias{reach.ppm}
 \alias{reach.interact}
+\alias{reach.rmhmodel}
 \title{Interaction Distance of a Point Process}
 \description{
   Computes the interaction distance of a point process.
@@ -10,11 +11,13 @@
   reach(x, \dots)
   \method{reach}{ppm}(x, \dots, epsilon=0)
   \method{reach}{interact}(x, \dots)
+  \method{reach}{rmhmodel}(x, \dots)
 }
 \arguments{
   \item{x}{Either a fitted point process model (object of class
-    \code{"ppm"}) or an interpoint interaction (object of class
-    \code{"interact"}).
+    \code{"ppm"}), an interpoint interaction (object of class
+    \code{"interact"}) or a point process model for simulation
+    (object of class \code{"rmhmodel"}).
   }
   \item{epsilon}{
     Numerical threshold below which interaction is treated as zero.
@@ -46,7 +49,7 @@
   interact at any distance apart.
 
   The function \code{reach(x)} is generic, with methods
-  for the case where \code{x} is either
+  for the case where \code{x} is 
   \itemize{
     \item
     a fitted point process model
@@ -69,7 +72,10 @@
     \code{\link{Saturated}},
     \code{\link{OrdThresh}}
     or
-    \code{\link{Ord}}.
+    \code{\link{Ord}};
+    \item
+    a point process model for simulation (object of class
+    \code{"rmhmodel"}), usually obtained from \code{\link{rmhmodel}}.
   }
   When \code{x} is an \code{"interact"} object,
   \code{reach(x)} returns the maximum possible interaction range
@@ -108,7 +114,8 @@
     \code{\link{LennardJones}},
     \code{\link{Saturated}},
     \code{\link{OrdThresh}},
-    \code{\link{Ord}}
+    \code{\link{Ord}},
+    \code{\link{rmhmodel}}
 }
 \examples{
     reach(Poisson())

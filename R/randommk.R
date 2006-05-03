@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.8 $   $Date: 2005/03/08 21:29:51 $
+#   $Revision: 1.18 $   $Date: 2006/05/02 05:19:38 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -109,9 +109,17 @@
                       giveup = 1000, verbose = FALSE) {
   if(!is.numeric(n))
     stop("n must be a scalar or vector")
-
-  if(sum(n) == 0)
-    return(runifpoint(0, f=f, fmax=fmax, win=win) %mark% sample(types, 0))
+  if(any(ceiling(n) != floor(n)))
+     stop("n must be an integer or integers")
+  if(any(n < 0))
+     stop("n must be non-negative")
+            
+  if(sum(n) == 0) {
+    nopoints <- ppp(x=numeric(0), y=numeric(0), window=win)
+    nomarks <- factor(types[numeric(0)], levels=types)
+    empty <- nopoints %mark% nomarks
+    return(empty)
+  }         
 
   #############
   
@@ -140,7 +148,13 @@
   if(vector.arg && any(f < 0))
     stop("Some entries in the vector \'f\' are negative")
 
+  # cases where it's known that all types of points 
+  # have the same conditional density of location (x,y)
+  const.density <- vector.arg ||
+             (list.arg && all(unlist(lapply(f, is.constant))))
+  same.density <- const.density || (single.arg && !is.function(f))
 
+    
   ################   Determine & validate the set of possible types
   if(missing(types)) {
     if(single.arg && length(n) == 1)
@@ -184,8 +198,8 @@
 
   ## special algorithm for Model I when all f[[i]] are images
 
-  if(Model == "I" && all(unlist(lapply(f, is.im))))
-    return(rmpoint.I.allim(n, f, types))
+  if(Model == "I" && !same.density && all(unlist(lapply(flist, is.im))))
+    return(rmpoint.I.allim(n, flist, types))
 
   ## otherwise, first select types, then locations given types
   
@@ -204,16 +218,33 @@
     ptypes <- fintegrals/sum(fintegrals)
   }
 
-  # Generate number of points of each type
+  # Generate marks 
 
   if(Model == "I" || Model == "II") {
-    randomtypes <- sample(types, n, prob=ptypes, replace=TRUE)
-    nn <- table(randomtypes)
-  } else
+    # i.i.d.: n marks with distribution 'ptypes'
+    marques <- sample(factortype, n, prob=ptypes, replace=TRUE)
+    nn <- table(marques)
+  } else {
+    # multinomial: fixed number n[i] of types[i]
+    repmarks <- factor(rep(types, n), levels=types)
+    marques <- sample(repmarks)
     nn <- n
+  }
+  ntot <- sum(nn)
 
-  # Simulate !!!
-  # Invoke rpoint() for each type separately
+  ##############  SIMULATE !!!  #########################
+
+  # If all types have the same conditional density of location,
+  # generate the locations using rpoint, and return.
+  if(same.density) {
+    X <- rpoint(ntot, flist[[1]], maxes[[1]], win=win, ...,
+                giveup=giveup, verbose=verbose)
+    X <- X %mark% marques
+    return(X)
+  }
+  # Otherwise invoke rpoint() for each type separately
+  X <- ppp(numeric(ntot), numeric(ntot), window=win, marks=marques)
+
   for(i in 1:ntypes) {
     if(verbose) cat(paste("Type", i, "\n"))
     if(single.arg && is.function(f))
@@ -225,12 +256,10 @@
       Y <- rpoint(nn[i], flist[[i]], fmax=maxes[i], win=win,
                   ..., giveup=giveup, verbose=verbose)
     Y <- Y %mark% factortype[i]
-    X <- if(i == 1) Y else superimpose(X, Y)
+    X[marques == factortype[i]] <- Y
   }
   
-  # Randomly permute, in case the order is important
-  permu <- sample(X$n)
-  return(X[permu])
+  return(X)
 }
 
 rmpoint.I.allim <- function(n, f, types) {
@@ -278,10 +307,13 @@ rmpoint.I.allim <- function(n, f, types) {
 #
 #     wrapper for Rolf's function
 #
-rpoint.multi <- function (n, f, fmax=NULL, marks = NULL, win =
-                    unit.square(), giveup = 1000, verbose = FALSE) {
+rpoint.multi <- function (n, f, fmax=NULL, marks = NULL,
+                          win = unit.square(),
+                          giveup = 1000, verbose = FALSE) {
+  no.marks <- is.null(marks) ||
+               (is.factor(marks) && length(levels(marks)) == 1)
   # unmarked case
-  if (length(marks) <= 1) {
+  if (no.marks) {
     if(is.function(f))
       return(rpoint(n, f, fmax, win, giveup=giveup, verbose=verbose))
     else

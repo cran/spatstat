@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.29 2006/04/19 08:18:15 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.38 2006/05/01 10:06:49 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -52,6 +52,15 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
       control$expand <- 1
   }
 
+# Warn about a silly value of fixall:
+  if(control$fixall & ntypes==1) {
+    warning("control$fixall applies only to multitype processes. Ignored. \n")
+    control$fixall <- FALSE
+    if(control$conditioning == "n.each.type")
+      control$conditioning <- "n.total"
+  }
+
+  
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
 #     M O D E L   P A R A M E T E R S
@@ -85,8 +94,8 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     if(!is.null(model$w))
       model$w
     else if(control$expand == 1) {
-      if(start$given == "x" && is.ppp(start$x.start))
-        start$x.start$window
+      if(start$given == "x" && is.ppp(x.start))
+        x.start$window
       else if(is.owin(w.trend))
         w.trend
     } else NULL
@@ -132,7 +141,18 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   Control$expand <- if(expanded) w.sim else 1
   Control$force.exp <- expanded
   Control$force.noexp <- !expanded
-    
+
+  InfoList <- list(model=Model, start=Start, control=Control)
+
+#########  Make an empty pattern, to be returned in some cases
+
+  empty <- ppp(numeric(0), numeric(0), window=w.clip)
+  if(mtype) {
+    vide <- factor(types[integer(0)], levels=types)
+    empty <- empty %mark% vide
+  }
+  attr(empty, "info") <- InfoList
+  
 #######  Trend  ################################
   
 # Check that the expanded window fits inside the window
@@ -164,100 +184,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     }
   }
   
-#######  Poisson case  ################################
-#
-#
-  if(model$cif == 'poisson') {
-    intensity <- if(!trendy) model$par$beta else model$trend
-    Xsim <- 
-      if(control$conditioning == "none") {
-        # Poisson process 
-        if(!mtype)
-          rpoispp(intensity, win=w.sim, ...)
-        else
-          rmpoispp(intensity, win=w.sim, types=types)
-      } else {
-        # Binomial/multinomial process: fixed number(s) of points
-        n <- start$n.start  
-        if(!mtype) 
-          rpoint(sum(n), intensity, win=w.sim, verbose=verbose)
-        else
-          rmpoint(n, intensity, win=w.sim, types=types, verbose=verbose)
-      }
-    Xclip <- Xsim[, w.clip]
-    attr(Xclip, "info") <- list(model=Model, start=Start, control=Control)
-    return(Xclip)
-  }
-  
-#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
-#
-#     C O N T R O L    P A R A M E T E R S
-#
-#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
-
-###################  Periodic boundary conditions #########################
-  
-# If periodic is TRUE we have to be simulating in a rectangular window.
-
-  periodic <- control$periodic
-  
-  if(periodic && w.sim$type != "rectangle")
-      stop("Need rectangular window for periodic simulation.\n")
-
-# parameter passed to Fortran:  
-  period <-
-    if(periodic)
-      c(diff(w.sim$xrange), diff(w.sim$yrange))
-    else
-      c(-1,-1)
-
-
-
-########################################################################
-#  Normalising constant for proposal density
-# 
-# Integral of trend over the expanded window (or area of window):
-# Iota == Integral Of Trend (or) Area.
-  
-  if(trendy) {
-    if(verbose)
-      cat("Evaluating trend integral...")
-    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
-    tsummaries <- lapply(tlist,
-                         function(x, w) {
-                           tmp  <- as.im(x, w)[w, drop=FALSE]
-                           return(summary(tmp))
-                         },
-                         w=w.sim)
-    nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
-    if(any(nbg))
-      stop("Trend has negative values")
-    iota <- unlist(lapply(tsummaries, function(x) { x$integral }))
-    tmax <- unlist(lapply(tsummaries, function(x) { x$max }))
-  } else {
-    iota <- area.owin(w.sim)
-    tmax <- NULL
-  }
-
-#### vector of proposal probabilities 
-
-  if(!mtype) 
-    ptypes <- 1
-  else {
-    ptypes <- control$ptypes
-    if(is.null(ptypes)) {
-      # default values
-      ptypes <- switch(start$given,
-                       n = rep(1/ntypes,ntypes),
-                       x = table(x.start$marks)/x.start$n
-                       )
-    } else {
-      # Validate ptypes
-      if(length(ptypes) != ntypes | sum(ptypes) != 1)
-        stop("Argument ptypes is mis-specified.\n")
-    }
-  } 
-
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
 #     S T A R T I N G      S T A T E
@@ -287,14 +213,147 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
            #
            npts <- sum(n.start) # The ``sum()'' is redundant if n.start
                                 # is scalar; no harm, but.
-         })
+         },
+         stop("Internal error: start$given unrecognized"))
 
-# Check that we're not simulating the empty pattern.
-if(npts == 0 & control$conditioning != "none") {
-  warning("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern")
-  empty <- ppp(numeric(0), numeric(0), window=w.clip)
+# If we're simulating the empty pattern, return it now
+if(npts == 0 && control$conditioning != "none") {
+  if(verbose) 
+    cat("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern\n")
   return(empty)
 }
+
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+#
+#     C O N T R O L    P A R A M E T E R S
+#
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+###################  Periodic boundary conditions #########################
+  
+# If periodic is TRUE we have to be simulating in a rectangular window.
+
+  periodic <- control$periodic
+  
+  if(periodic && w.sim$type != "rectangle")
+      stop("Need rectangular window for periodic simulation.\n")
+
+# parameter passed to Fortran:  
+  period <-
+    if(periodic)
+      c(diff(w.sim$xrange), diff(w.sim$yrange))
+    else
+      c(-1,-1)
+
+
+
+#### vector of proposal probabilities 
+
+  if(!mtype) 
+    ptypes <- 1
+  else {
+    ptypes <- control$ptypes
+    if(is.null(ptypes)) {
+      # default values
+      ptypes <- switch(start$given,
+                       none = ,
+                       n = rep(1/ntypes,ntypes),
+                       x = table(x.start$marks)/x.start$n
+                       )
+    } else {
+      # Validate ptypes
+      if(length(ptypes) != ntypes | sum(ptypes) != 1)
+        stop("Argument ptypes is mis-specified.\n")
+    }
+  } 
+
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+#
+#     S I M U L A T I O N     
+#
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+####### a.s. empty pattern      ###############################
+#
+#  If beta = 0, the process is almost surely empty
+#  
+  
+  if(all(model$par[["beta"]] < .Machine$double.eps)) {
+    if(control$conditioning == "none") {
+      # return empty pattern
+      if(verbose)
+        cat("beta = 0 implies an empty pattern\n")
+      return(empty)
+    } else 
+      stop("beta = 0 implies an empty pattern, but we are simulating conditional on a nonzero number of points")
+  }
+    
+  
+#######  Poisson case  ################################
+#
+#
+  if(model$cif == 'poisson') {
+    intensity <- if(!trendy) model$par[["beta"]] else model$trend
+    Xsim <-
+      switch(control$conditioning,
+             none= {
+               # Poisson process 
+               if(!mtype)
+                 rpoispp(intensity, win=w.sim, ...)
+               else
+                 rmpoispp(intensity, win=w.sim, types=types)
+             },
+             n.total = {
+               # Binomial/multinomial process with fixed total number of points
+               if(!mtype) 
+                 rpoint(npts, intensity, win=w.sim, verbose=verbose)
+               else
+                 rmpoint(npts, intensity, win=w.sim, types=types,
+                         verbose=verbose)
+             },
+             n.each.type = {
+               # Multinomial process with fixed number of points of each type
+               npts.each <-
+                 switch(start$given,
+                        n = n.start,
+                        x = as.integer(table(x.start$marks)),
+  stop("No starting state given; can't condition on fixed number of points"))
+               rmpoint(npts.each, intensity, win=w.sim, types=types,
+                       verbose=verbose)
+             },
+             stop("Internal error: control$conditioning unrecognised")
+             )
+    Xclip <- Xsim[, w.clip]
+    attr(Xclip, "info") <- InfoList
+    return(Xclip)
+  }
+
+  
+########################################################################
+#  Normalising constant for proposal density
+# 
+# Integral of trend over the expanded window (or area of window):
+# Iota == Integral Of Trend (or) Area.
+  
+  if(trendy) {
+    if(verbose)
+      cat("Evaluating trend integral...")
+    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
+    tsummaries <- lapply(tlist,
+                         function(x, w) {
+                           tmp  <- as.im(x, w)[w, drop=FALSE]
+                           return(summary(tmp))
+                         },
+                         w=w.sim)
+    nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
+    if(any(nbg))
+      stop("Trend has negative values")
+    iota <- unlist(lapply(tsummaries, function(x) { x$integral }))
+    tmax <- unlist(lapply(tsummaries, function(x) { x$max }))
+  } else {
+    iota <- area.owin(w.sim)
+    tmax <- NULL
+  }
 
 ########################################################################  
 #      S t a r t   s i m u l a t i o n
@@ -346,8 +405,7 @@ if(npts == 0 & control$conditioning != "none") {
                runifpoint(npts, w.sim, ...)
              else
                rpoint.multi(npts, trend, tmax,
-                            factor(marks,levels=1:ntypes),
-                            w.sim, ...)
+                      factor(marks,levels=1:ntypes), w.sim, ...)
            x <- xy$x
            y <- xy$y
          })
@@ -362,6 +420,12 @@ if(npts == 0 & control$conditioning != "none") {
   par <- model$fortran.par
   nmbr <- model$fortran.id
 
+# Absorb the constants or vectors `iota' and 'ptypes' into the beta parameters
+# This assumes that the beta parameters are the first 'ntypes' entries
+# of the parameter vector passed to Fortran.
+
+  par[1:ntypes] <- (iota/ptypes) * par[1:ntypes]
+  
 # Algorithm control parameters
 
   nrep <- control$nrep
@@ -434,14 +498,13 @@ if(npts == 0 & control$conditioning != "none") {
     rslt <- .Fortran(
                      "methas",
                      nmbr=as.integer(nmbr),
-                     iota=as.double(iota),
                      par=as.double(par),
                      period=as.double(period),
                      xprop=as.double(xprop),
                      yprop=as.double(yprop),
                      mprop=as.integer(mprop),
                      ntypes=as.integer(ntypes),
-                     ptypes=as.double(ptypes),
+#                     ptypes=as.double(ptypes),
                      iseed=as.integer(start$seed$iseed),
                      nrep=as.integer(nrep),
                      mrep=as.integer(mrep),
@@ -458,30 +521,23 @@ if(npts == 0 & control$conditioning != "none") {
                      PACKAGE="spatstat"
                      )
 
-#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
-# If npts > npmax we've run out of storage space.  Tack some space
-# onto the end of the ``state'' already generated, increase npmax
-# correspondingly, and re-call the methas subroutine.  Note that
-# mrep is the number of the repetition on which things stopped due
-# to lack of storage; so we start again at the ***beginning*** of
-# the mrep repetition.
-#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
-
-# If mrep > nrep we have completed the nrep Metropolis Hastings
-# steps.  Otherwise we came back early because we were on the cusp
-# of running out of storage space.  In the latter case, increase
-# the storage space and re-call the methas subroutine.
-
+    npts <- rslt$npts
     mrep <- rslt$mrep
+    
+# If mrep > nrep we have completed the nrep Metropolis Hastings steps.
+# Exit the loop.
+    
     if(mrep > nrep) break
 
-    # This is toadally unnecessary, but check that we
-    # at the storage limit:
-    npts <- rslt$npts
+# If not, then we came back early because we were about to run out
+# of storage space.  Increase the storage space and re-call the
+# methas subroutine.
+
+    # Internal consistency check
     if(npts < npmax)
-	stop(paste("Internal error; we have come back\n",
-                   "without completing nrep steps and without reaching\n",
-                   "the limit of storage capacity.\n"))
+	stop(paste("Internal error; Fortran code exited unexpectedly\n",
+                   "(without completing nrep steps and without reaching\n",
+                   "the limit of storage capacity)\n"))
     
     if(verbose) {
       cat('Number of points equal to ',npmax,';\n',sep='')
@@ -495,18 +551,25 @@ if(npts == 0 & control$conditioning != "none") {
     iseed <- rslt$iseed
   }
 
-  x <- rslt$x[1:npts]
-  y <- rslt$y[1:npts]
+  ###### END OF LOOP ###################
+  
+  # Extract the point pattern returned from Fortran
+  
+  npts <- rslt$npts
+  indices <- if(npts == 0) numeric(0) else (1:npts)
+  x <- rslt$x[indices]
+  y <- rslt$y[indices]
+  xxx <- ppp(x=x, y=y, window=w.sim)
   if(mtype) {
-    marks <- factor(rslt$marks[1:npts],labels=types)
-    xxx <- ppp(x=x, y=y, window=as.owin(w.sim), marks=marks)
-  } else xxx <- ppp(x=x, y=y, window=as.owin(w.sim))
+    marx <- factor(rslt$marks[indices],levels=types)
+    xxx <- xxx %mark% marx
+  } 
 
 # Now clip the pattern to the ``clipping'' window:
   xxx <- xxx[,w.clip]
 
 # Append to the result information about how it was generated.
-  attr(xxx, "info") <- list(model=Model, start=Start, control=Control)
+  attr(xxx, "info") <- InfoList
   return(xxx)
 }
 

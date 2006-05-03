@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.18 $	$Date: 2005/07/27 08:41:32 $
+#    $Revision: 1.21 $	$Date: 2006/04/25 07:07:28 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -51,6 +51,7 @@ pairsat.family <-
   # or an array with its first two dimensions the same as the dimensions of M.
   ##########################################################################
 
+           
 # coercion should be unnecessary, but this is useful for debugging
 X <- as.ppp(X)
 U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
@@ -158,7 +159,8 @@ if(somemissing)
 return(V)
 
 },     ######### end of function $eval                            
-suffstat = function(model, X) {
+suffstat = function(model, X, callstring="pairsat.family$suffstat") {
+
 # for saturated pairwise models only  (possibly nonstationary)
   verifyclass(model, "ppm")
   verifyclass(X, "ppp")
@@ -174,7 +176,9 @@ suffstat = function(model, X) {
   Q     <- quad(X, Empty)
   prep  <- mpl.prepare(Q, X, X, trend, inter, covar,
                        correction=model$correction,
-                       rbord=model$rbord, halfway=TRUE)
+                       rbord=model$rbord, Pname="data points",
+                       callstring=callstring,
+                       halfway=TRUE)
   # halfway=TRUE is passed to inter$family$eval
   # and yields matrix of saturated potential sums 
   fmla    <- prep$fmla

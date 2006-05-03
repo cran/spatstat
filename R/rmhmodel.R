@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.8 $  $Date: 2006/03/20 23:00:31 $
+#   $Revision: 1.18 $  $Date: 2006/05/01 06:49:00 $
 #
 #
 
@@ -57,9 +57,15 @@ rmhmodel.default <- function(model=NULL, ...,
       # types vector not given - defer checking
       NULL
 
+  # ensure it's a numeric vector
+  fortran.par <- unlist(fortran.par)
+
   # Check that cif executable is actually loaded
   if(!is.na(fortran.id) && !is.loaded(symbol.For(cif)))
     stop(paste("executable is not loaded for cif \'",cif,"\'",sep=""))
+
+  # Calculate reach of model
+  mreach <- rules$reach(par)
 
 ###################################################################
 # return augmented list  
@@ -72,7 +78,8 @@ rmhmodel.default <- function(model=NULL, ...,
               fortran.par=fortran.par,
               check= if(is.null(fortran.par)) check else NULL,
               multitype.interact=rules$multitype,
-              need.aux=rules$need.aux
+              need.aux=rules$need.aux,
+              reach=mreach
               )
   class(out) <- c("rmhmodel", class(out))
   return(out)
@@ -86,7 +93,7 @@ print.rmhmodel <- function(x, ...) {
   cat(paste("Conditional intensity: cif=", x$cif, "\n"))
 
   if(!is.null(x$types)) {
-    if(x$types == 1)
+    if(length(x$types) == 1)
       cat("Univariate process.\n")
     else {
       cat("Multitype process with types =\n")
@@ -107,6 +114,13 @@ print.rmhmodel <- function(x, ...) {
 
 }
 
+reach.rmhmodel <- function(x, ...) {
+  if(length(list(...)) == 0)
+    return(x$reach)
+  rules <- .Spatstat.RmhTable[[x$cif]]
+  return(rules$reach(x$par, ...))
+}
+
 #####  Table of rules for handling rmh models ##################
 
 .Spatstat.RmhTable <-
@@ -119,7 +133,21 @@ print.rmhmodel <- function(x, ...) {
             fortran.id=NA,
             multitype=FALSE,
             need.aux=FALSE,
-            parhandler=function(par, ...) { return(par) }
+            parhandler=function(par, ...) {
+              pnames <- names(par)
+              ok <- ("beta" %in% pnames)
+              if(!any(ok))
+                stop("For the Poisson process, must specify beta")
+              if(any(!ok))
+                stop(paste("Unrecognised",
+                           ngettext(sum(!ok), "parameter", "parameters"),
+                           paste(sQuote(pnames[!ok]), collapse=", "),
+                           "for Poisson process"))
+              if(par[["beta"]] < 0)
+                stop("Negative value of beta for Poisson process")
+              return(par)
+            },
+            reach = function(par, ...) { return(0) }
             ),
 #       
 # 1. Strauss.
@@ -144,6 +172,11 @@ print.rmhmodel <- function(x, ...) {
 # Square the radius to avoid squaring in the Fortran code.
               par[[3]] <- par[[3]]^2
               return(par)
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g == 1) 0 else r)
             }
             ),
 #       
@@ -168,6 +201,12 @@ print.rmhmodel <- function(x, ...) {
 	      par[[3]] <- par[[3]]^2
 	      par[[4]] <- par[[4]]^2
               return(par)
+            },
+            reach = function(par, ...) {
+              h <- par[["hc"]]
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g == 1) h else r)
             }
             ),
 #       
@@ -191,7 +230,14 @@ print.rmhmodel <- function(x, ...) {
                   stop("For Softcore processes, kappa must be <= 1.")
                 par <- par[nms]
                 return(par)
-            }
+            },
+            reach = function(par, ..., epsilon=0) {
+              if(epsilon==0)
+                return(Inf)
+              kappa <- par[["kappa"]]
+              sigma <- par[["sigma"]]
+              return(sigma/(epsilon^(kappa/2)))
+            }                        
             ),
 #       
 # 4. Marked Strauss.
@@ -232,6 +278,12 @@ print.rmhmodel <- function(x, ...) {
 # Repack
 	      par <- c(beta,gamma,r)
               return(par)
+            }, 
+            reach = function(par, ...) {
+              r <- par$radii
+              g <- par$gamma
+              operative <- ! (is.na(r) | (g == 1))
+              return(max(0, r[operative]))
             }
             ),
 #       
@@ -285,6 +337,14 @@ print.rmhmodel <- function(x, ...) {
 # Repack.
               par <- c(beta,gamma,iradii,hradii)
               return(par)
+            },
+            reach=function(par, ...) {
+              r <- par$iradii
+              h <- par$hradii
+              g <- par$gamma
+              roperative <- ! (is.na(r) | (g == 1))
+              hoperative <- ! is.na(h)
+              return(max(0, r[roperative], h[hoperative]))
             }
             ),
 #       
@@ -309,6 +369,9 @@ print.rmhmodel <- function(x, ...) {
 # Now tack on rho-squared to avoid squaring in the Fortran code.
 	      par <- c(par,par[[2]]^2)
               return(par)
+            },
+            reach=function(par, ...) {
+              return(par[["rho"]])
             }
             ),
 #
@@ -336,6 +399,9 @@ print.rmhmodel <- function(x, ...) {
 # to avoid calculating them in  the Fortran code.
 	      par <- c(par,par[[3]]^2,par[[4]]^2,log(par[[4]]-par[[3]]))
               return(par)
+            },
+            reach=function(par, ...) {
+              return(par[["rho"]])
             }
             ),
 #       
@@ -361,6 +427,11 @@ print.rmhmodel <- function(x, ...) {
 # Square r to avoid squaring in the Fortran code.
               par[[3]] <- par[[3]]**2
               return(par)
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g == 1) 0 else r)
             }
             ),
 #       
@@ -444,6 +515,13 @@ print.rmhmodel <- function(x, ...) {
                
               }
               return(par) 
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              h <- par[["h"]]
+              if(is.null(r)) 
+                r <- knots(h)
+              return(max(r))
             }
             )
   )

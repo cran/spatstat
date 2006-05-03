@@ -374,12 +374,11 @@ trend corresponding to a particular type, there is still a component
                             nrep=nr,nverb=nv))
    
    # Multitype Strauss hardcore with trends for each type, given as images:
-   x <- seq(0,250,length=51)
-   xy <- expand.grid(x=x,y=x)
-   i1 <- im(matrix(tr3(xy$x,xy$y),nrow=51),x,x)
-   i2 <- im(matrix(tr4(xy$x,xy$y),nrow=51),x,x)
+   bigwin <- square(250)
+   i1 <- as.im(tr3, bigwin)
+   i2 <- as.im(tr4, bigwin)   
    mod11 <- list(cif="straushm",par=list(beta=beta,gamma=gmma,
-                 iradii=r,hradii=rhc),w=c(0,250,0,250),
+                 iradii=r,hradii=rhc),w=bigwin,
                  trend=list(i1,i2))
    X2.straushm.trend <- rmh(model=mod11,start=list(n.start=350),
                             control=list(ptypes=c(0.75,0.25),expand=1,

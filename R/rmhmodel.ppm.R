@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.13 $   $Date: 2005/03/10 21:09:39 $
+#  $Revision: 2.14 $   $Date: 2006/04/28 08:47:06 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -39,7 +39,7 @@ list(
        gamma <- inte$interpret(coeffs,inte)$param$gamma
        r <- inte$par$r
        return(list(cif = "strauss",
-                   par = list(gamma = gamma, r = r)))
+                   par = c(gamma = gamma, r = r)))
      },
      "Strauss - hard core process" =
      function(coeffs, inte) {

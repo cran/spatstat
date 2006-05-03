@@ -162,7 +162,7 @@
 	((t-delta)/(rho-delta))^kappa
       }
       for \eqn{\delta \le t < \rho}{delta <= t < rho},
-      and equal to 1 for \eqn{\delta \ge  \rho}{delta >= rho}.
+      and equal to 1 for \eqn{t \ge  \rho}{t >= rho}.
       Note that here we use the symbol
       \eqn{\kappa}{kappa} where Diggle, Gates, and Stibbard use
       \eqn{\beta}{beta} since we reserve the symbol \eqn{\beta}{beta}

@@ -85,10 +85,6 @@ rmhResolveTypes <- function(model, start, control) {
       stop("Marks of control$x.start do not match number of types.\n")
   }
   
-# Warn about a silly value of fixall:
-  if(control$fixall & ntypes==1)
-	warning("fixall = TRUE conflicts with ntypes = 1. Ignored. \n")
-
   return(types)
 }
 

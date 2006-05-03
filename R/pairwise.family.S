@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.11 $	$Date: 2006/02/21 12:57:12 $
+#    $Revision: 1.13 $	$Date: 2006/04/25 07:07:33 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -168,7 +168,7 @@ return(V)
 
 },
 ######### end of function $eval
-       suffstat = function(model, X) {
+       suffstat = function(model, X, callstring="pairwise.family$suffstat") {
 # for pairwise models only  (possibly nonstationary)
   verifyclass(model, "ppm")
   verifyclass(X, "ppp")
@@ -184,7 +184,8 @@ return(V)
   Q     <- quad(X, Empty)
   prep  <- mpl.prepare(Q, X, X, trend, inter, covar,
                        correction=model$correction,
-                       rbord=model$rbord)
+                       rbord=model$rbord, Pname="data points",
+                       callstring=callstring)
   fmla    <- prep$fmla
   glmdata <- prep$glmdata
 
