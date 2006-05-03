@@ -5,10 +5,10 @@
   Prints a very brief description of a pixel image object.
 }
 \synopsis{
-  print.im(x, \dots)
+  \method{print}{im}(x, \dots)
 }
 \usage{
- print.im(x)
+ \method{print}{im}(x)
  x
 }
 \arguments{

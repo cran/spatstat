@@ -1,5 +1,6 @@
 \name{nztrees}
 \alias{nztrees}
+\docType{data}
 \title{
    New Zealand Trees Point Pattern
 }

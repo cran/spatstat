@@ -9,6 +9,13 @@
 Converts data specifying an observation window
 in any of several formats, into an object of class \code{"owin"}.
 }
+\synopsis{
+ as.owin(W, \dots, fatal=TRUE)
+ \method{as.owin}{owin}(W, \dots, fatal=TRUE)
+ \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
+ \method{as.owin}{im}(W, \dots, fatal=TRUE)
+ \method{as.owin}{default}(W, \dots, fatal=TRUE)
+}
 \usage{
  as.owin(W, \dots, fatal=TRUE)
 }
@@ -30,7 +37,7 @@ in any of several formats, into an object of class \code{"owin"}.
   for a point pattern. See \code{\link{owin.object}} for an overview.
  
   This function converts data in any of several formats 
-  into an object of class \code{"owin"} for use by the \code{spatstat}
+  into an object of class \code{"owin"} for use by the \pkg{spatstat}
   package.  The argument \code{W} may be
   \itemize{
     \item

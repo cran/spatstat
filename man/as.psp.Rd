@@ -8,7 +8,7 @@
 \description{
   Tries to coerce any reasonable kind of data to a line segment pattern
   (an object of class \code{"psp"})
-  for use by the \code{spatstat} package.
+  for use by the \pkg{spatstat} package.
 }
 \synopsis{
   as.psp(x, \dots)

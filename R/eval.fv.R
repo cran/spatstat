@@ -10,9 +10,9 @@
 #
 
 eval.fv <- function(expr) {
-  # convert argument to expression
+  # convert syntactic expression to 'expression' object
   e <- as.expression(substitute(expr))
-  # convert argument to language object
+  # convert syntactic expression to call
   elang <- substitute(expr)
   # find names of all variables in the expression
   varnames <- all.vars(e)

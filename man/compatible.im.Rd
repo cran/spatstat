@@ -5,16 +5,21 @@
   Tests whether two pixel image objects have compatible dimensions.
 }
 \usage{
-compatible.im(A, B)
+compatible.im(A, B, tol=1e-6)
 }
 \arguments{
   \item{A,B}{Pixel images (objects of class \code{"im"}).}
+  \item{tol}{Tolerance factor}
 }
 \details{
   This function tests whether the pixel images \code{A} and \code{B}
   have compatible pixel dimensions. They are compatible if they have
   the same number of rows and columns, the same physical pixel
   dimensions, and occupy the same rectangle in the plane.
+
+  The argument \code{tol} specifies the maximum tolerated error
+  in the pixel coordinates, expressed as a
+  fraction of the dimensions of a single pixel.
 }
 \value{
   Logical value: \code{TRUE} if the images are compatible, and \code{FALSE}

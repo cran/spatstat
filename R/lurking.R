@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.3 $ $Date: 2005/05/14 02:45:44 $
+# $Revision: 1.4 $ $Date: 2006/04/24 11:24:10 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -108,11 +108,17 @@ lurking <- function(object, covariate, type="eem",
   # (A) EMPIRICAL CUMULATIVE FUNCTION
   # based on data points if type="eem", otherwise on quadrature points
 
+    # cumulative sums which ignore NA's
+    cumsumna <- function(x) {
+      x[is.na(x)] <- 0
+      return(cumsum(x))
+    }
+
       # Reorder the data/quad points in order of increasing covariate value
       # and then compute the cumulative sum of their residuals/marks
     o <- order(covres$marks)
     covsort <- covres$marks[o]
-    cummark <- cumsum(res$marks[o])
+    cummark <- cumsumna(res$marks[o])
       # we'll plot(covsort, cummark) in the cumulative case
 
   # (B) THEORETICAL MEAN CUMULATIVE FUNCTION
@@ -127,8 +133,7 @@ lurking <- function(object, covariate, type="eem",
       # cumulative area as function of covariate values
     covclass <- cut(covq$marks, breaks=cbreaks)
     increm <- tapply(wts, covclass, sum)
-    increm[is.na(increm)] <- 0
-    cumarea <- cumsum(increm)
+    cumarea <- cumsumna(increm)
       # compute theoretical mean (when model is true)
     mean0 <- if(type == "eem") cumarea else rep(0, length(cumarea))
       # we'll plot(cvalues, mean0) in the cumulative case

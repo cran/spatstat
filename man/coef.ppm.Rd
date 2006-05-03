@@ -9,7 +9,7 @@
   A method for \code{coef}.
 }
 \usage{
-  coef.ppm(object, \dots)
+  \method{coef}{ppm}(object, \dots)
 }
 \arguments{
   \item{object}{

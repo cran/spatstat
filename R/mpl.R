@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.20 $	$Date: 2006/02/21 07:28:51 $
+#	$Revision: 5.23 $	$Date: 2006/04/25 06:26:33 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -31,7 +31,8 @@ function(Q,
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
-         forcefit=FALSE
+         forcefit=FALSE,
+         callstring=""
 ) {
 #
 # Extract quadrature scheme 
@@ -54,9 +55,9 @@ want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.version <- list(major=1,
-                    minor=5,
-                    release=7,
-                    date="$Date: 2006/02/21 07:28:51 $")
+                    minor=8,
+                    release=10,
+                    date="$Date: 2006/04/25 06:26:33 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -81,7 +82,8 @@ if(!want.trend && !want.inter && !forcefit) {
                covariates  = NULL,
 	       correction  = correction,
                rbord       = rbord,
-               version     = the.version)
+               version     = the.version,
+               problems    = list())
   class(rslt) <- "ppm"
   return(rslt)
 }
@@ -90,12 +92,13 @@ if(!want.trend && !want.inter && !forcefit) {
 #################  P r e p a r e    D a t a   ######################
         
 prep <- mpl.prepare(Q, X, P, trend, interaction,
-                    covariates, want.trend, want.inter, correction, rbord)
+                    covariates, want.trend, want.inter, correction, rbord,
+                    "quadrature points", callstring)
 
 fmla <- prep$fmla
 glmdata <- prep$glmdata
+problems <- prep$problems
 
-        
 ################# F i t    i t   ####################################
 
 # Fit the generalized linear/additive model.
@@ -139,7 +142,8 @@ rslt <- list(
              covariates   = covariates,
              correction   = correction,
              rbord        = rbord,
-             version      = the.version)
+             version      = the.version,
+             problems     = problems)
 class(rslt) <- "ppm"
 return(rslt)
 }  
@@ -151,17 +155,22 @@ return(rslt)
 
 
 mpl.prepare <- function(Q, X, P, trend, interaction, covariates, 
-                        want.trend, want.inter, correction, rbord, ...) {
+                        want.trend, want.inter, correction, rbord,
+                        Pname="quadrature points", callstring="",
+                        ...) {
 
   if(missing(want.trend))
     want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
   if(missing(want.inter))
     want.inter <- !is.null(interaction) && !is.null(interaction$family)
     
-# Validate/evaluate covariates
-if(want.trend && !is.null(covariates))
-  covariates.df <- mpl.get.covariates(covariates, P, "quadrature points")
+# Extract covariate values
+  if(want.trend && !is.null(covariates)) 
+    covariates.df <- mpl.get.covariates(covariates, P, Pname)
 
+
+  problems <- list()
+  
 ################ C o m p u t e     d a t a  ####################
 
         
@@ -219,13 +228,42 @@ if(want.trend) {
   glmdata <- data.frame(glmdata, x=P$x, y=P$y)
   if(!is.null(.mpl$MARKS))
     glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
-  # 
+  #
+  # Check covariates
   if(!is.null(covariates)) {
 #   Check for duplication of reserved names
     cc <- check.clashes(reserved.names, names(covariates), "\'covariates\'")
     if(cc != "") stop(cc)
 #   Append `covariates.df' to `glmdata'
     glmdata <- data.frame(glmdata,covariates.df)
+#   Ignore any quadrature points that have NA values in covariates    
+    nbg <- is.na(covariates.df)
+    if(any(nbg)) {
+      offending <- matcolany(nbg)
+      covnames.na <- names(covariates.df)[offending]
+      quadpoints.na <- matrowany(nbg)
+      n.na <- sum(quadpoints.na)
+      n.tot <- length(quadpoints.na)
+      complaint <- paste("Values of the",
+                         ngettext(length(covnames.na),
+                                  "covariate", "covariates"),
+                         paste(sQuote(covnames.na), collapse=", "),
+                         "were NA or undefined at",
+                         paste(ceiling(100 * n.na/n.tot),
+                               "% (", n.na, " out of ", n.tot, ")",
+                               sep=""),
+                         "of the", Pname)
+      warning(paste(complaint,
+                    ". Occurred while executing: ",
+                    callstring, sep=""),
+              call. = FALSE)
+      .mpl$SUBSET <-  .mpl$SUBSET & !quadpoints.na
+      details <- list(covnames.na   = covnames.na,
+                      quadpoints.na = quadpoints.na,
+                      print         = complaint)
+      problems <- append(problems,
+                         list(na.covariates=details))
+    }
   }
 }
 
@@ -290,7 +328,16 @@ if(want.inter) {
 
 if(any(.mpl$Z & !.mpl$KEEP)) {
         howmany <- sum(.mpl$Z & !.mpl$KEEP)
-	warning(paste(howmany, "data point(s) are illegal (zero conditional intensity under the model)"))
+        complaint <- paste(howmany,
+                           "data point(s) are illegal",
+                           "(zero conditional intensity under the model)")
+        details <- list(illegal=howmany,
+                        print=complaint)
+        problems <- append(problems, list(zerolikelihood=details))
+        warning(paste(complaint,
+                      ". Occurred while executing: ",
+                      callstring, sep=""),
+                call. = FALSE)
 #	browser()
 }
 
@@ -318,7 +365,7 @@ fmla <- as.formula(fmla)
 
 #### 
 
-return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames))
+return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames, problems=problems))
 
 }
 
@@ -326,7 +373,7 @@ return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames))
 ####################################################################
 ####################################################################
 
-mpl.get.covariates <- function(covariates, locations, type="") {
+mpl.get.covariates <- function(covariates, locations, type="locations") {
   x <- locations$x
   y <- locations$y
   if(is.null(x) || is.null(y)) {

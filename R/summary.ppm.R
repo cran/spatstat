@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.12 $   $Date: 2006/03/24 06:45:49 $
+#    $Revision: 1.13 $   $Date: 2006/04/25 05:30:24 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -53,6 +53,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
           sep="")
 
   y$method <- x$method
+
+  y$problems <- x$problems
   
   if(is.logical(quick) && quick) {
     class(y) <- "summary.ppm"
@@ -293,6 +295,16 @@ print.summary.ppm <- function(x, ...) {
   cat("\nFitted exp(theta): \n")
   print(exp(unlist(theta)))
 
+  ##### Warnings issued #######
+
+  probs <- x$problems
+  if(!is.null(probs) && is.list(probs) && (length(probs) > 0)) 
+    lapply(probs,
+           function(a) {
+             if(is.list(a) && !is.null(p <- a$print))
+               cat(paste("Problem:\n", p, "\n\n"))
+           })
+          
   return(invisible(NULL))
 }
 

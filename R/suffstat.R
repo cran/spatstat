@@ -3,11 +3,14 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.1 $  $Date: 2005/04/28 00:47:30 $
+#  $Revision: 1.3 $  $Date: 2006/04/25 07:07:45 $
 #
 #
 
 suffstat <- function(model, X) {
+  cl <- sys.call()
+  callstring <- paste(deparse(cl), collapse=" ")
+  
   verifyclass(model, "ppm")
   verifyclass(X, "ppp")
 
@@ -20,15 +23,15 @@ suffstat <- function(model, X) {
           else
             suffstat.generic
 
-  return(func(model, X))
+  return(func(model, X, callstring))
 }
 
-suffstat.generic <- function(model, X) {
+suffstat.generic <- function(model, X, callstring="suffstat.generic") {
   # This should work for an arbitrary ppm
   # since it uses the fundamental relation between
   # conditional intensity and likelihood.
   # But it is computationally intensive.
-  
+
   verifyclass(model, "ppm")
   verifyclass(X, "ppp")
 
@@ -37,8 +40,9 @@ suffstat.generic <- function(model, X) {
     inter <- model$interaction
     covar <- model$covariates
     prep  <- mpl.prepare(Q, X, P, trend, inter, covar,
-                       correction=model$correction,
-                       rbord=model$rbord)
+                         correction=model$correction,
+                         rbord=model$rbord,
+                         Pname="data points", callstring=callstring)
     fmla    <- prep$fmla
     glmdata <- prep$glmdata
     mof <- model.frame(fmla, glmdata)
@@ -102,7 +106,7 @@ killinteraction <- function(model) {
   return(newmodel)
 }
 
-suffstat.poisson <- function(model, X) {
+suffstat.poisson <- function(model, X, callstring="suffstat.poisson") {
   verifyclass(model, "ppm")
   verifyclass(X, "ppp")
   
@@ -117,7 +121,8 @@ suffstat.poisson <- function(model, X) {
   Q     <- quad(X, Empty)
   prep  <- mpl.prepare(Q, X, X, trend, Poisson(), covar,
                        correction=model$correction,
-                       rbord=model$rbord)
+                       rbord=model$rbord, Pname="data points",
+                       callstring=callstring)
   fmla    <- prep$fmla
   glmdata <- prep$glmdata
 

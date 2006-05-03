@@ -1,6 +1,7 @@
 \name{ants}
 \alias{ants}
 \alias{ants.extra}
+\docType{data}
 \title{
   Harkness-Isham ants' nests data 
 }

@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.7 $    $Date: 2005/04/30 01:37:15 $
+#    $Revision: 1.9 $    $Date: 2006/04/26 03:55:51 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -24,7 +24,7 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   # pts:  list(x,y) points to be tested
   # polly: list(x,y) vertices of a single polygon (n joins to 1)
   # test01: logical - if TRUE, test whether all values in output are 0 or 1
-  verify.xypolygon(pts)
+  pts <- xy.coords(pts, NULL)
   verify.xypolygon(polly)
   
   x <- pts$x
@@ -70,8 +70,8 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
                xcriterion <- (x - x0) * (x - x1)
                consider <- (xcriterion <= 0)
                if(any(consider)) {
-                 ycriterion <- y[consider] * dx - x[consider] * dy
-                               + (x0 * dy - y0 * dx)
+                 ycriterion <-
+                   y[consider] * dx - x[consider] * dy +  x0 * dy - y0 * dx
                  # closed inequality
                  contrib <- (ycriterion >= 0) *
                              ifelse(xcriterion[consider] == 0, 1/2, 1)
@@ -86,8 +86,8 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
                xcriterion <- (x - x0) * (x - x1)
                consider <- (xcriterion <= 0)
                if(any(consider)) {
-                 ycriterion <- y[consider] * dx - x[consider] * dy
-                               + (x0 * dy - y0 * dx)
+                 ycriterion <-
+                   y[consider] * dx - x[consider] * dy + x0 * dy - y0 * dx
                  # open inequality
                  contrib <- (ycriterion < 0) *
                    ifelse(xcriterion[consider] == 0, 1/2, 1)

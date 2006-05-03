@@ -5,10 +5,10 @@
   Randomly shifts the segments in a line segment pattern.
 }
 \synopsis{
-   rshift.psp(X, \dots, group=NULL, which=NULL)
+   \method{rshift}{psp}(X, \dots, group=NULL, which=NULL)
 }
 \usage{
-   rshift.psp(X, \dots, radius, width, height, edge="erode", clip,
+   \method{rshift}{psp}(X, \dots, radius, width, height, edge="erode", clip,
                         group, which)
                         
 }

@@ -2,16 +2,16 @@
 #
 #     setcov.R
 #
-#     $Revision: 1.2 $ $Date: 2002/07/18 10:54:34 $
+#     $Revision: 1.3 $ $Date: 2006/04/11 13:26:53 $
 #
 #    Compute the set covariance function of a window
 #
 #
 
-setcov <- function(W) {
+setcov <- function(W, ...) {
   W <- as.owin(W)
   # pixel approximation
-  mW <- as.mask(W)
+  mW <- as.mask(W, ...)
   M <- mW$m
   # pad with zeroes
   nr <- nrow(M)

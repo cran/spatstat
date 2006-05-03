@@ -5,7 +5,7 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.8 $     $Date: 2005/12/19 10:25:05 $
+#     $Revision: 1.10 $     $Date: 2006/05/01 11:19:10 $
 #
 
 eval.im <- function(expr) {
@@ -49,16 +49,17 @@ eval.im <- function(expr) {
   return(result)
 }
   
-compatible.im <- function(A, B) {
+compatible.im <- function(A, B, tol=1e-6) {
   verifyclass(A, "im")
   verifyclass(B, "im")
-  agree <- function(x, y) { max(abs(x-y)) <= .Machine$double.eps }
-  return((all(A$dim == B$dim)) &&
-         agree(A$xrange, B$xrange) &&
-         agree(A$yrange, B$yrange) &&
-         agree(A$xstep, B$xstep) &&
-         agree(A$ystep, B$ystep) &&
-         agree(A$xcol, B$xcol) &&
-         agree(A$yrow, B$yrow))
+  xdiscrep <- max(abs(A$xrange - B$xrange),
+                 abs(A$xstep - B$xstep),
+                 abs(A$xcol - B$xcol))
+  ydiscrep <- max(abs(A$yrange - B$yrange),
+                 abs(A$ystep - B$ystep),
+                 abs(A$yrow - B$yrow))
+  xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
+  yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
+  return(xok && yok)
 }
 

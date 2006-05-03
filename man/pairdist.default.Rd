@@ -6,7 +6,7 @@
   in a set of points
 }
 \usage{
-  pairdist.default(X, Y=NULL, \dots, method="C")
+  \method{pairdist}{default}(X, Y=NULL, \dots, method="C")
 }
 \arguments{
   \item{X,Y}{

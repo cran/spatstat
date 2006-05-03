@@ -1,5 +1,6 @@
 \name{amacrine}
 \alias{amacrine}
+\docType{data}
 \title{Hughes' Amacrine Cell Data}
 \description{
 Austin Hughes' data: a point pattern 

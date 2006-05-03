@@ -1,6 +1,5 @@
 \name{plot.fasp}
 \alias{plot.fasp}
-\alias{plot}
 \title{Plot a Function Array}
 \description{
    Plots an array of summary functions, usually associated with a
@@ -9,14 +8,14 @@
 }
 
 \synopsis{
-   plot.fasp(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots, samex=TRUE)
+   \method{plot}{fasp}(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots, samex=TRUE)
 }
 
 \usage{
-plot(x)
-plot(x, formule=formule)
-plot(x, formule=formule, subset)
-plot(x, formule=formule, subset, lty, col, title, \dots, samex=TRUE)
+\method{plot}{fasp}(x)
+\method{plot}{fasp}(x, formule=formule)
+\method{plot}{fasp}(x, formule=formule, subset)
+\method{plot}{fasp}(x, formule=formule, subset, lty, col, title, \dots, samex=TRUE)
 }
 
 \arguments{

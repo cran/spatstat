@@ -6,7 +6,7 @@
   in a spatial point pattern.
 }
 \usage{
- unique.ppp(x, \dots)
+ \method{unique}{ppp}(x, \dots)
 }
 \arguments{
   \item{x}{

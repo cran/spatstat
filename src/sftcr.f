@@ -13,8 +13,12 @@ C Output from Public domain Ratfor, version 1.0
       oneomk = -one/kappa
       twook = two/kappa
       per = period(1) .gt. zero
+      if(n.eq.0)then
+      cifval = beta
+      return
+      endif
       sx = zero
-      do23000 j = 1,n 
+      do23002 j = 1,n 
       if(j .eq. ix)then
       continue
       else
@@ -25,8 +29,8 @@ C Output from Public domain Ratfor, version 1.0
       endif
       sx = sx + exp(oneomk*log(d2))
       endif
-23000 continue
-23001 continue
+23002 continue
+23003 continue
       cifval = beta*exp(-(sigma**twook)*sx)
       return
       end

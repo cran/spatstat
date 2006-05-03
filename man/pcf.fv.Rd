@@ -6,7 +6,7 @@
   a point pattern, given an estimate of the K function.
 }
 \usage{
- pcf.fv(X, \dots, method="c")
+  \method{pcf}{fv}(X, \dots, method="c")
 }
 \arguments{
   \item{X}{

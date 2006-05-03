@@ -6,7 +6,7 @@
   attached to the points.
 }
 \usage{
-  is.marked.ppm(X, \dots) 
+  \method{is.marked}{ppm}(X, \dots) 
 }
 \arguments{
   \item{X}{
@@ -48,7 +48,7 @@
 }
 \seealso{
   \code{\link{is.marked}},
-  \code{\link{is.marked.ppm}}
+  \code{\link{is.marked.ppp}}
 }
 \examples{
    data(lansing)

@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.12 $   $Date: 2005/07/21 09:06:24 $
+#    $Revision: 1.14 $   $Date: 2006/04/12 18:00:04 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -149,7 +149,7 @@ bind.fv <- function(x, y, labl, desc, preferred) {
 
 "[.fv" <- subset.fv <- function(x, i, j, ..., drop=FALSE)
 {
-  Nindices <- !missing(i) + !missing(j)
+  Nindices <- (!missing(i)) + (!missing(j))
   if(Nindices == 0)
     return(x)
   y <- as.data.frame(x)
@@ -159,6 +159,14 @@ bind.fv <- function(x, y, labl, desc, preferred) {
     z <- y[i, , drop=FALSE]
   else
     z <- y[ , j, drop=FALSE]
+
+  if(missing(j)) 
+    selected <- seq(ncol(x))
+  else {
+    nameindices <- seq(names(x))
+    names(nameindices) <- names(x)
+    selected <- as.vector(nameindices[j])
+  }
 
   nama <- names(z)
   argu <- attr(x, "argu")
@@ -175,14 +183,14 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   rang <- range(z[[argu]])
   alim <- c(max(alim[1], rang[1]),
             min(alim[2], rang[2]))
-  
+
   return(fv(z, argu=attr(x, "argu"),
                ylab=attr(x, "ylab"),
                valu=attr(x, "valu"),
                fmla=attr(x, "fmla"),
                alim=alim,
-               labl=attr(x, "labl"),
-               desc=attr(x, "desc")))
+               labl=attr(x, "labl")[selected],
+               desc=attr(x, "desc")[selected]))
 }  
 
 

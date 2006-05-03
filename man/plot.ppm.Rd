@@ -8,8 +8,8 @@
   surfaces.
 }
 \usage{
- plot.ppm(x, ngrid = c(40,40), superimpose = TRUE, 
-                  trend = TRUE, cif = TRUE, pause = TRUE,
+  \method{plot}{ppm}(x, ngrid = c(40,40), superimpose = TRUE, 
+                  trend = TRUE, cif = TRUE, pause = interactive(),
                   how=c("persp","image", "contour"), plot.it = TRUE,
                   locations = NULL, covariates=NULL, \dots)
 }
@@ -39,7 +39,7 @@
   \item{pause}{
     logical flag indicating whether to pause with a prompt 
     after each plot. Set \code{pause=FALSE} if plotting to a file.
-    Ignored if \code{plot=FALSE}.
+    (This flag is ignored if \code{plot=FALSE}).
   }
   \item{how}{
     character string or character vector indicating the style or styles of

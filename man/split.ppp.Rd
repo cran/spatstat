@@ -1,19 +1,18 @@
 \name{split.ppp}
 \alias{split.ppp}
 \alias{split<-.ppp}
-\alias{split}
-\alias{split<-}
 \title{Divide Point Pattern into Sub-patterns}
 \description{
   Divides a point pattern into several sub-patterns,
   according to their marks, or according to any user-specified grouping.
 }
 \synopsis{
-  split.ppp(x, f = x$marks, drop=FALSE, un=NULL, \dots)
+  \method{split}{ppp}(x, f = x$marks, drop=FALSE, un=NULL, \dots)
+  \method{split}{ppp}(x, f = x$marks, drop=FALSE, un=missing(f), \dots) <- value
 }
 \usage{
-  split.ppp(x, f = x$marks, drop=FALSE, un=missing(f), \dots)
-  split(x, f, drop, un) <- value
+  \method{split}{ppp}(x, f = x$marks, drop=FALSE, un=missing(f), \dots)
+  \method{split}{ppp}(x, f = x$marks, drop=FALSE, un=missing(f), \dots) <- value
 }
 \arguments{
   \item{x}{

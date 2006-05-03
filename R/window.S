@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.39 $	$Date: 2006/01/18 06:02:12 $
+#	$Revision: 4.41 $	$Date: 2006/05/01 12:56:50 $
 #
 #
 #	A window may be either
@@ -287,7 +287,9 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #
 # Pixel coordinates to be computed from other dimensions
 #
-    # determine row & column dimensions of output raster
+# First determine row & column dimensions
+    
+    # output raster dimensions 'dimyx'
     if(!is.null(dimyx)) {
       if(length(dimyx) == 1)
         dimyx <- rep(dimyx, 2)
@@ -299,7 +301,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
         nr <- ceiling(diff(w$yrange)/eps)
         nc <- ceiling(diff(w$xrange)/eps)
       } else {
-    # use spatstat defaults
+    # default to spatstat defaults
         np <- spatstat.options("npixel")[[1]]
         if(!is.numeric(np) || length(np) > 2)
           stop("Illegal value for spatstat.options(\"npixel\")")
@@ -545,6 +547,9 @@ inside.owin <- function(x, y, w) {
   
   verifyclass(w, "owin")
 
+  if(length(x)==0)
+    return(logical(0))
+  
   # test whether inside bounding rectangle
   xr <- w$xrange
   yr <- w$yrange

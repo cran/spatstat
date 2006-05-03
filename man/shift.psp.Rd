@@ -5,10 +5,10 @@
   Applies a vector shift to a line segment pattern. 
 }
 \synopsis{
- shift.psp(X, \dots)
+ \method{shift}{psp}(X, \dots)
 }
 \usage{
- shift.psp(X, vec=c(0,0), \dots)
+ \method{shift}{psp}(X, vec=c(0,0), \dots)
 }
 \arguments{
   \item{X}{Line Segment pattern (object of class \code{"psp"}).}

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.9 $	$Date: 2006/01/09 07:06:12 $
+#	$Revision: 2.10 $	$Date: 2006/04/25 05:23:35 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -97,7 +97,18 @@ print.ppm <- function(x, ...) {
           print(s$interaction$printable)
         }
 
-	invisible(NULL)
+
+        # ---- Warnings issued ----------------------------
+
+        probs <- s$problems
+        if(!is.null(probs) && is.list(probs) && (length(probs) > 0)) 
+          lapply(probs,
+                 function(x) {
+                   if(is.list(x) && !is.null(p <- x$print))
+                     cat(paste("Problem:\n", p, "\n\n"))
+                 })
+          
+	return(invisible(NULL))
 }
 
 quad.ppm <- function(object) {
