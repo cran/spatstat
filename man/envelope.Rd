@@ -352,5 +352,8 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{htest}
+\keyword{hplot}
+\keyword{iteration}
  
  

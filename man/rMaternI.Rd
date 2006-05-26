@@ -6,10 +6,10 @@
   Mat\'ern Model I inhibition process.
 }
 \usage{
- rMaternI(lambda, r, win = owin(c(0,1),c(0,1)))
+ rMaternI(kappa, r, win = owin(c(0,1),c(0,1)))
 }
 \arguments{
-  \item{lambda}{
+  \item{kappa}{
     Intensity of the Poisson process of proposal points.
     A single positive number.
   }
@@ -32,7 +32,7 @@
 
   The process is constructed by first
   generating a uniform Poisson point process of ``proposal'' points 
-  with intensity \code{lambda} inside the window.
+  with intensity \code{kappa} inside the window.
   A proposal point is deleted if it lies within \code{r} units' distance
   of another proposal point. Otherwise it is retained.
   The retained points constitute Mat\'ern's Model I.
@@ -52,3 +52,5 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

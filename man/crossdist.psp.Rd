@@ -65,3 +65,4 @@
 }
 \keyword{spatial}
 
+\keyword{math}

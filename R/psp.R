@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.10 $ $Date: 2006/03/02 05:25:31 $
+#  $Revision: 1.15 $ $Date: 2006/05/19 11:27:08 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -88,6 +88,41 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, fatal=TRUE) {
   return(NULL)
 }
 
+as.psp.owin <- function(x, ..., fatal=TRUE) {
+  verifyclass(x, "owin")
+  switch(x$type,
+         rectangle = {
+           xx <- x$xrange[c(1,2,2,1)]
+           yy <- x$yrange[c(1,1,2,2)]
+           nxt <- c(2,3,4,1)
+           out <- psp(xx, yy, xx[nxt], yy[nxt], window=x)
+           return(out)
+         },
+         polygonal = {
+           x0 <- y0 <- x1 <- y1 <- numeric(0)
+           bdry <- x$bdry
+           for(i in seq(bdry)) {
+             po <- bdry[[i]]
+             ni <- length(po$x)
+             nxt <- c(2:ni, 1)
+             x0 <- c(x0, po$x)
+             y0 <- c(y0, po$y)
+             x1 <- c(x1, po$x[nxt])
+             y1 <- c(y1, po$y[nxt])
+           }
+           out <- psp(x0, y0, x1, y1,  window=x)
+           return(out)
+         },
+         mask = {
+           if(fatal) stop("x is a mask")
+           else warning("x is a mask - no line segments returned")
+           return(psp(numeric(0), numeric(0), numeric(0), numeric(0),
+                      window=x))
+         })
+  return(NULL)
+}
+
+
 append.psp <- function(A,B) {
   verifyclass(A, "psp")
   verifyclass(B, "psp")
@@ -100,6 +135,13 @@ append.psp <- function(A,B) {
   return(result)
 }
 
+rebound.psp <- function(x, ...) {
+  verifyclass(x, "psp")
+  x$window <- rebound.owin(x$window, ...)
+  return(x)
+}
+
+  
 #################################################
 #  plot and print methods
 #################################################

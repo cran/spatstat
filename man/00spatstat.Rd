@@ -32,6 +32,8 @@ The Spatstat Package
   a \code{formula} in the \code{R} language, and are fitted using
   a single function \code{\link{ppm}} analogous to
   \code{\link{lm}} and \code{\link{glm}}.
+  It is also possible to fit cluster process models by the method of
+  minimum contrast.
 
 }
 \section{Getting Started}{
@@ -104,6 +106,7 @@ The Spatstat Package
 	simulate the Mat\'ern Cluster process\cr
 	\code{\link{rThomas}} \tab
 	simulate the Thomas process  \cr
+	\code{\link{rthin}} \tab  random thinning  \cr
 	\code{\link{rcell}} \tab
 	simulate the Baddeley-Silverman cell process  \cr
 	\code{\link{rmh}} \tab
@@ -299,7 +302,11 @@ The Spatstat Package
       \code{\link{affine.psp}} \tab apply an affine transformation \cr      
       \code{\link{distmap.psp}} \tab compute the distance map of a line
       segment pattern \cr
-      \code{\link{density.psp}} \tab kernel smoothing of line segments
+      \code{\link{density.psp}} \tab kernel smoothing of line segments\cr
+      \code{\link{selfcrossing.psp}} \tab find crossing points between
+      line segments \cr
+      \code{\link{crossing.psp}} \tab find crossing points between
+      two line segment patterns 
     }
 
   }
@@ -310,7 +317,10 @@ The Spatstat Package
   \tabular{ll}{
     \code{\link{summary}(X)} \tab
     print useful summary of point pattern \code{X}\cr
-    \code{X} \tab print basic description of point pattern \code{X} 
+    \code{X} \tab
+    print basic description of point pattern \code{X}  \cr
+    \code{any(duplicated(X))} \tab
+    check for duplicated points in pattern \code{X}
   }
 
   \bold{Summary statistics for a point pattern:}
@@ -381,10 +391,28 @@ The Spatstat Package
     \tab in a point pattern 
   }
 }
-\section{III. MODEL FITTING}{
-  \bold{To fit a point process model:}
 
-  Model fitting in \pkg{spatstat} is performed by the function
+\section{III. MODEL FITTING (CLUSTER MODELS)}{
+  Several kinds of clustered point process models can be fitted
+  using the Method of Minimum Contrast.
+  
+  \tabular{ll}{
+    \code{\link{thomas.estK}} \tab fit the Thomas process model \cr
+    \code{\link{matclust.estK}} \tab fit the Matern Cluster process model \cr
+    \code{\link{lgcp.estK}} \tab fit a log-Gaussian Cox process model\cr
+    \code{\link{mincontrast}} \tab general algorithm for fitting models
+    \cr \tab by the method of minimum contrast 
+  }
+
+  The Thomas and Matern models can also be simulated,
+  using \code{\link{rThomas}} and \code{\link{rMatClust}} respectively.
+}
+
+\section{IV. MODEL FITTING (GIBBS MODELS)}{
+  
+  \bold{To fit a Gibbs point process model:}
+
+  Model fitting in \pkg{spatstat} is performed mainly by the function
   \code{\link{ppm}}. Its result is an object of class \code{"ppm"}. 
 
   \bold{Manipulating the fitted model:}
@@ -467,7 +495,8 @@ The Spatstat Package
     fitted model 
   }
 }
-\section{IV. TESTS AND DIAGNOSTICS}{
+
+\section{V. TESTS AND DIAGNOSTICS}{
 
   \bold{Classical hypothesis tests:}
   
@@ -503,6 +532,8 @@ The Spatstat Package
   The paper by Baddeley and Turner (2005a) describes the package.
   Baddeley and Turner (2005b) is a more detailed explanation of
   how to fit point process models to data.
+
+  Type \code{citation("spatstat")} to get these references.
 }
 \references{
   Baddeley, A. and Turner, R. (2005a)
@@ -543,4 +574,5 @@ The Spatstat Package
   B.T. Scott, M. Stevenson, B. Turlach, and A. van Burgel.
 }
 \keyword{spatial}
+\keyword{package}
 

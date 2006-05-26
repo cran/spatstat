@@ -90,3 +90,4 @@
 }
 \keyword{spatial}
  
+ \keyword{hplot}

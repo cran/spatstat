@@ -71,4 +71,5 @@
   inhomogeneous populations. Biometrics 47 (1991) 1155-1163.
 } 
 \keyword{datasets}
+\keyword{spatial}
 

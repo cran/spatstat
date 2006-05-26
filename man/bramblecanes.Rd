@@ -62,4 +62,5 @@ vegetative reproduction''.
   \emph{Scandinavian Journal of Statistics} \bold{26}, 511--532.
 }
 \keyword{datasets}
+\keyword{spatial}
  

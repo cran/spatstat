@@ -46,3 +46,4 @@ pine forest in southern Georgia.
 \emph{Journal of the American Statistical Association} \bold{89}, 1164--1173.
 }
 \keyword{datasets}
+\keyword{spatial}

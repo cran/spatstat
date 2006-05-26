@@ -48,3 +48,4 @@ is.subset.owin(A, B)
    is.subset.owin(w2,w1)  # Returns FALSE.
 }
 \keyword{spatial}
+\keyword{math}

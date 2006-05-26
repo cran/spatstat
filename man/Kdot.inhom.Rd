@@ -207,3 +207,5 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}
+

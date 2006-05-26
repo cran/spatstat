@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.38 2006/05/01 10:06:49 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.39 2006/05/03 09:14:39 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -490,21 +490,22 @@ if(npts == 0 && control$conditioning != "none") {
 
   if(verbose)
     cat("Start simulation.\n")
+
+# Determine Fortran subroutine name (this is not very safe ...)
+  mhname <- paste("mh", nmbr, sep="")
   
 # The repetition is to allow the storage space to be incremented if
 # necessary.
   repeat {
 # Call the Metropolis-Hastings simulator:
     rslt <- .Fortran(
-                     "methas",
-                     nmbr=as.integer(nmbr),
+                     mhname,
                      par=as.double(par),
                      period=as.double(period),
                      xprop=as.double(xprop),
                      yprop=as.double(yprop),
                      mprop=as.integer(mprop),
                      ntypes=as.integer(ntypes),
-#                     ptypes=as.double(ptypes),
                      iseed=as.integer(start$seed$iseed),
                      nrep=as.integer(nrep),
                      mrep=as.integer(mrep),

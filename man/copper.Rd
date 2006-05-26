@@ -109,3 +109,4 @@ geological applications. \emph{Applied Statistics} \bold{51}, 165--182.
 
 }
 \keyword{datasets}
+\keyword{spatial}

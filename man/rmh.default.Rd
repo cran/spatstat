@@ -449,3 +449,4 @@ trend corresponding to a particular type, there is still a component
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}

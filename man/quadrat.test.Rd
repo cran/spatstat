@@ -93,3 +93,4 @@ quadrat.test(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL, fit)
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{htest}

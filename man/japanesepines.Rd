@@ -36,3 +36,4 @@
   \bold{3}, 28--48 (in Japanese).
 }
 \keyword{datasets}
+\keyword{spatial}

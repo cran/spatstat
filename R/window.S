@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.41 $	$Date: 2006/05/01 12:56:50 $
+#	$Revision: 4.43 $	$Date: 2006/05/22 06:53:46 $
 #
 #
 #	A window may be either
@@ -126,6 +126,12 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
 
     w <- list(type="polygonal", xrange=xrange, yrange=yrange, bdry=bdry)
     class(w) <- "owin"
+    # check for intersection or self-intersection
+    ok <- owinpolycheck(w)
+    if(!ok) {
+      errors <- attr(ok, "err")
+      stop(paste("Polygon data contain", commasep(errors)))
+    }
     return(w)
     
   } else if(mask.given) {

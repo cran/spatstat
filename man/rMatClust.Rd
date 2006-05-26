@@ -6,10 +6,10 @@
   Mat\'ern Cluster Process.
 }
 \usage{
- rMatClust(lambda, r, mu, win = owin(c(0,1),c(0,1)))
+ rMatClust(kappa, r, mu, win = owin(c(0,1),c(0,1)))
 }
 \arguments{
-  \item{lambda}{
+  \item{kappa}{
     Intensity of the Poisson process of cluster centres.
     A single positive number, a function, or a pixel image.
   }
@@ -36,7 +36,7 @@
   This algorithm generates a realisation of Mat\'ern's cluster process
   inside the window \code{win}. The process is constructed by first
   generating a Poisson point process of ``parent'' points 
-  with intensity \code{lambda}. Then each parent point is
+  with intensity \code{kappa}. Then each parent point is
   replaced by a random cluster of points, the number of points in each
   cluster being random with a Poisson (\code{mu}) distribution,
   and the points being placed independently and uniformly inside
@@ -61,3 +61,5 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

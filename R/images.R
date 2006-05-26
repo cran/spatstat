@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.14 $     $Date: 2005/12/05 06:58:07 $
+#         $Revision: 1.15 $     $Date: 2006/05/25 09:56:37 $
 #
 #      The class "im" of raster images
 #
@@ -155,16 +155,16 @@ nearest.pixel <- function(x,y,im) {
 # This function is a generalisation of inside.owin()
 # to images other than binary-valued images.
 
-lookup.im <- function(im, x, y, naok=FALSE) {
-  verifyclass(im, "im")
+lookup.im <- function(Z, x, y, naok=FALSE) {
+  verifyclass(Z, "im")
 
   if(length(x) != length(y))
     stop("x and y must be numeric vectors of equal length")
   value <- rep(NA, length(x))
                
   # test whether inside bounding rectangle
-  xr <- im$xrange
-  yr <- im$yrange
+  xr <- Z$xrange
+  yr <- Z$yrange
   eps <- sqrt(.Machine$double.eps)
   frameok <- (x >= xr[1] - eps) & (x <= xr[2] + eps) & 
              (y >= yr[1] - eps) & (y <= yr[2] + eps)
@@ -176,9 +176,9 @@ lookup.im <- function(im, x, y, naok=FALSE) {
   xf <- x[frameok]
   yf <- y[frameok]
   # map locations to raster (row,col) coordinates
-  loc <- nearest.pixel(xf,yf,im)
+  loc <- nearest.pixel(xf,yf,Z)
   # look up image values
-  vf <- im$v[cbind(loc$row, loc$col)]
+  vf <- Z$v[cbind(loc$row, loc$col)]
   
   # insert into 'ok' vector
   value[frameok] <- vf
@@ -187,7 +187,7 @@ lookup.im <- function(im, x, y, naok=FALSE) {
     warning("Internal error: NA's generated")
 
   # return factor, if it's a factor valued image
-  if(!is.null(lev <- x$lev))
+  if(!is.null(lev <- Z$lev))
       value <- factor(value, levels=seq(lev), labels=lev)
   return(value)
 }

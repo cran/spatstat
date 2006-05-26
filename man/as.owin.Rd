@@ -106,5 +106,6 @@ in any of several formats, into an object of class \code{"owin"}.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{manip}
  
  

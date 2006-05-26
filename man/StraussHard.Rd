@@ -111,3 +111,4 @@ which can then be fitted to point pattern data.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{models}

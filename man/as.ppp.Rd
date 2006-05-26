@@ -136,3 +136,4 @@ for use by the \pkg{spatstat} package).
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{manip}

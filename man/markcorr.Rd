@@ -232,5 +232,6 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}
 
 

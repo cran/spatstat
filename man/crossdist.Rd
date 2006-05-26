@@ -51,3 +51,4 @@
 }
 \keyword{spatial}
 
+\keyword{math}

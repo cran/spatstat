@@ -288,3 +288,5 @@ rmpoint(X$n, 1, types=levels(X$marks), win=X$window,
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

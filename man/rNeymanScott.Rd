@@ -6,10 +6,10 @@
   Neyman-Scott cluster process.
 }
 \usage{
- rNeymanScott(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), \dots, lmax=NULL)
+ rNeymanScott(kappa, rmax, rcluster, win = owin(c(0,1),c(0,1)), \dots, lmax=NULL)
 }
 \arguments{
-  \item{lambda}{
+  \item{kappa}{
     Intensity of the Poisson process of cluster centres.
     A single positive number, a function, or a pixel image.
   }
@@ -28,8 +28,8 @@
     Arguments passed to \code{rcluster}
   }
   \item{lmax}{
-    Optional. Upper bound on the values of \code{lambda}
-    when \code{lambda} is a function or pixel image.
+    Optional. Upper bound on the values of \code{kappa}
+    when \code{kappa} is a function or pixel image.
   }
 }
 \value{
@@ -46,8 +46,8 @@
 
   First, the algorithm
   generates a Poisson point process of ``parent'' points 
-  with intensity \code{lambda}. Here \code{lambda} may be a single
-  positive number, a function \code{lambda(x, y)}, or a pixel image
+  with intensity \code{kappa}. Here \code{kappa} may be a single
+  positive number, a function \code{kappa(x, y)}, or a pixel image
   object of class \code{"im"} (see \code{\link{im.object}}).
   See \code{\link{rpoispp}} for details.
   
@@ -90,3 +90,5 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

@@ -60,3 +60,4 @@
 
 }
 \keyword{datasets}
+\keyword{spatial}

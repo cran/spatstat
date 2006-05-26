@@ -156,3 +156,4 @@ Number 22 in Jyv\"askyl\"a Studies in Computer Science, Economics
 and Statistics. University of Jyv\"askyl\"a, Finland.
 }
 \keyword{datasets}
+\keyword{spatial}

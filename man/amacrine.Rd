@@ -39,4 +39,5 @@ rabbit: analysis of a bivariate spatial point pattern.
 \emph{J. Neurosci. Meth.} \bold{18}, 115--125.
 } 
 \keyword{datasets}
+\keyword{spatial}
 

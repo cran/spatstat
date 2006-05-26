@@ -72,3 +72,4 @@
 }
 \keyword{spatial}
  
+ \keyword{hplot}

@@ -89,3 +89,4 @@
         }
 }
 \keyword{spatial}
+\keyword{nonparametric}

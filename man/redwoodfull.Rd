@@ -92,3 +92,4 @@
   \emph{Biometrika} \bold{63}, 467--475.
 }
 \keyword{datasets}
+\keyword{spatial}
