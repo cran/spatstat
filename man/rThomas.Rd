@@ -6,10 +6,10 @@
   Thomas cluster process.
 }
 \usage{
- rThomas(lambda, sigma, mu, win = owin(c(0,1),c(0,1)))
+ rThomas(kappa, sigma, mu, win = owin(c(0,1),c(0,1)))
 }
 \arguments{
-  \item{lambda}{
+  \item{kappa}{
     Intensity of the Poisson process of cluster centres.
     A single positive number.
   }
@@ -38,7 +38,7 @@
   
   The algorithm 
   generates a uniform Poisson point process of ``parent'' points 
-  with intensity \code{lambda}. Then each parent point is
+  with intensity \code{kappa}. Then each parent point is
   replaced by a random cluster of points, the number of points
   per cluster being Poisson (\code{mu}) distributed, and their
   positions being isotropic Gaussian displacements from the
@@ -59,3 +59,5 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

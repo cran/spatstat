@@ -63,3 +63,4 @@
   Centrum voor Wiskunde en Informatica (CWI), Amsterdam, 2004.
 }
 \keyword{datasets}
+\keyword{spatial}

@@ -208,3 +208,4 @@ maxsize, markscale)
 }
 \keyword{spatial}
  
+ \keyword{hplot}

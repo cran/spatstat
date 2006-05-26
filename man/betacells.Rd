@@ -100,3 +100,4 @@ some functional considerations.
 \emph{Proc. Roy. Soc. London Ser. B} \bold{212}, 177--195.
 }
 \keyword{datasets}
+\keyword{spatial}

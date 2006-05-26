@@ -70,5 +70,7 @@ Performs analysis of deviance for two or more fitted point process models.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{models}
+\keyword{methods}
  
  

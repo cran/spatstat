@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.15 $	$Date: 2006/01/18 04:07:43 $
+#	$Revision: 1.18 $	$Date: 2006/05/25 09:59:10 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -45,11 +45,15 @@
 # ------------------------------------------------------------------------
 
 "Kinhom"<-
-  function (X, lambda, r = NULL, breaks = NULL, slow=FALSE,
-         correction=c("border", "bord.modif", "isotropic", "translate"), ...,
+  function (X, lambda, ..., r = NULL, breaks = NULL, 
+         correction=c("border", "bord.modif", "isotropic", "translate"),
+            nlarge = 500, 
             lambda2=NULL)
 {
     verifyclass(X, "ppp")
+    nlarge.given <- !missing(nlarge)
+    rfixed <- !missing(r) || !missing(breaks)
+    
     W <- X$window
     npoints <- X$n
     area <- area.owin(W)
@@ -60,7 +64,7 @@
       if(length(lambda) != npoints) 
         stop("The length of \'lambda\' should equal the number of data points")
     } else if(is.im(lambda)) 
-      lambda <- lambda[X]
+      lambda <- lambda[X, drop=FALSE]
     else 
       stop("\`lambda\' should be a vector or a pixel image")
     if(any(is.na(lambda)))
@@ -102,7 +106,45 @@
     }
 
     # recommended range of r values
-    alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+    alim <- c(0, min(diff(W$xrange)/4,
+                     diff(W$yrange)/4,
+                     sqrt(1000 * area/(pi * npoints))))
+        
+  ###########################################
+  # Efficient code for border method
+  # Usable only if r values are evenly spaced from 0 to rmax
+  # Invoked automatically if number of points is large
+
+    can.do.fast <- breaks$even  && missing(lambda2)
+    borderonly <- all(correction == "border" | correction == "bord.modif")
+    large.n    <- (npoints >= nlarge)
+    will.do.fast <- can.do.fast && (borderonly || large.n)
+    asked      <- borderonly || (nlarge.given && large.n)
+
+    if(will.do.fast && !asked)
+      message(paste("number of data points exceeds",
+                    nlarge, "- computing border estimate only"))
+
+    if(asked && !can.do.fast) {
+      whynot <-
+        if(!(breaks$even)) "r values not evenly spaced" else
+        if(!missing(lambda)) "matrix lambda2 was given" else ""
+      warning(paste("cannot use efficient code;", whynot))
+    }
+    
+    if(will.do.fast) {
+    # restrict r values to recommended range, unless specifically requested
+      if(!rfixed) {
+        rmax <- min(max(r), alim[2])
+        r <- seq(0, rmax, length=length(r))
+      }
+      return(Kborder.engine(X, max(r), length(r), correction, 1/lambda))
+    }
+
+  ###########################################
+  # Slower code
+  ###########################################
+        
         
     # this will be the output data frame
     K <- data.frame(r=r, theo= pi * r^2)
@@ -122,7 +164,7 @@
       # Ignore pairs (i,i)
       diag(d) <- Inf
       # apply reduced sample algorithm
-      RS <- Kwtsum(d, b, weight, 1/lambda, breaks, slow)
+      RS <- Kwtsum(d, b, weight, 1/lambda, breaks, slow=FALSE)
       if(any(correction == "border")) {
         Kb <- RS$ratio
         K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",

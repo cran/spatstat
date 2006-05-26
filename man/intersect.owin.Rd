@@ -80,3 +80,4 @@
    plot(B, add=TRUE)
 }
 \keyword{spatial}
+\keyword{math}

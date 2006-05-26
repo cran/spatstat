@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.9 $    $Date: 2006/04/26 03:55:51 $
+#    $Revision: 1.15 $    $Date: 2006/05/22 06:53:37 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -301,4 +301,134 @@ overlap.trapezium <- function(xa, ya, xb, yb, verb=FALSE) {
   # return area of intersection multiplied by signs 
   return(signfactor * areaT)
 }
+
+
+xypolygon2psp <- function(p, w) {
+  verify.xypolygon(p)
+  n <- length(p$x)
+  nxt <- c(2:n, 1)
+  return(psp(p$x, p$y, p$x[nxt], p$y[nxt], window=w))
+}
+         
+    
+xypolyselfint <- function(p, eps=.Machine$double.eps, proper=FALSE) {
+  verify.xypolygon(p)
+  n <- length(p$x)
+  x0 <- p$x
+  y0 <- p$y
+  dx <- diff(p$x[c(1:n,1)])
+  dy <- diff(p$y[c(1:n,1)])
+  out <- .C("xypolyselfint",
+            n=as.integer(n),
+            x0=as.double(x0),
+            y0=as.double(y0),
+            dx=as.double(dx),
+            dy=as.double(dy), 
+            eps=as.double(eps),
+            xx=as.double(numeric(n^2)),
+            yy=as.double(numeric(n^2)),
+            ti=as.double(numeric(n^2)),
+            tj=as.double(numeric(n^2)),
+            ok=as.integer(integer(n^2)),
+     PACKAGE="spatstat")
+
+  uhoh <- (matrix(out$ok, n, n) != 0)
+  if(proper) {
+    # ignore cases where two vertices coincide 
+    ti <- matrix(out$ti, n, n)[uhoh]
+    tj <- matrix(out$tj, n, n)[uhoh]
+    i.is.vertex <- (abs(ti) < eps) | (abs(ti - 1) < eps)
+    j.is.vertex <- (abs(tj) < eps) | (abs(tj - 1) < eps)
+    dup <- i.is.vertex & j.is.vertex
+    uhoh[uhoh] <- !dup
+  }
+  if(any(uhoh != t(uhoh)))
+    warning("Internal error: incidence matrix is not symmetric")
+  xx <- matrix(out$xx, n, n)
+  yy <- matrix(out$yy, n, n)
+  uptri <- (row(uhoh) < col(uhoh))
+  xx <- as.vector(xx[uhoh & uptri])
+  yy <- as.vector(yy[uhoh & uptri])
+  result <- list(x=xx, y=yy)
+  return(result)
+}
+  
+
+owinpolycheck <- function(W, verbose=TRUE) {
+  verifyclass(W, "owin")
+  stopifnot(W$type == "polygonal")
+
+  B <- W$bdry
+  npoly <- length(B)
+  outerframe <- owin(W$xrange, W$yrange)
+  # can't use as.rectangle here; we're still checking validity
+  
+  answer <- TRUE
+  notes <- character(0)
+  err <- character(0)
+  # check for duplicated points
+  dup <- unlist(lapply(B,
+                       function(p, f) {
+                         any(duplicated(ppp(p$x, p$y, window=f)))
+                       },
+                       f=outerframe))
+  if((ndup <- sum(dup)) > 0) {
+    whinge <- paste(ngettext(ndup, "Polygon", "Polygons"),
+                    if(npoly == 1) NULL else
+                    commasep(seq(dup)[dup]),
+                    ngettext(ndup, "contains", "contain"),
+                    "duplicated vertices")
+    notes <- c(notes, whinge)
+    err <- c(err, "duplicated vertices")
+    if(verbose) 
+      message(whinge)
+    answer <- FALSE
+  }
+  
+  # check for self-intersections
+  self <- unlist(lapply(B,
+                         function(p) {
+                           z <- xypolyselfint(p, proper=TRUE)
+                           return(length(z$x) > 0)
+                         }))
+  if((nself <- sum(self)) > 0) {
+    whinge <-  paste(ngettext(nself, "Polygon", "Polygons"),
+                     if(npoly == 1) NULL else
+                     commasep(seq(self)[self]),
+                     ngettext(nself, "is", "are"),
+                     "self-intersecting")
+    notes <- c(notes, whinge)
+    if(verbose) 
+      message(whinge)
+    err <- c(err, "self-intersection")
+    answer <- FALSE
+  }
+  # check for crossings between different polygons
+  cross <- matrix(FALSE, npoly, npoly)
+  if(npoly > 1) {
+    P <- lapply(B, xypolygon2psp, w=outerframe)
+    for(i in seq(npoly-1)) {
+      for(j in (i+1):npoly) {
+        X <- crossing.psp(P[[i]], P[[j]])
+        cross[i,j] <- cross[j,i] <- (X$n > 0)
+        if(cross[i,j]) {
+          answer <- FALSE
+          whinge <- paste("Polygons", i, "and", j, "cross over")
+          notes <- c(notes, whinge)
+          if(verbose) 
+            message(whinge)
+          err <- c(err, "overlaps between polygons")
+        }
+      }
+    }
+  }
+
+  err <- unique(err)
+  attr(answer, "notes") <- notes
+  attr(answer, "err") <-  err
+  return(answer)
+}
+
+      
+        
 

@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.8 $	$Date: 2004/06/01 11:14:42 $
+#	$Revision: 1.11 $	$Date: 2006/05/22 03:30:39 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical
@@ -30,6 +30,13 @@ termsinformula <- function(x) {
   if(class(x) != "formula")
     stop("argument is not a formula")
   attr(terms(x), "term.labels")
+}
+
+variablesinformula <- function(x) {
+  if(is.null(x)) return(character(0))
+  if(class(x) != "formula")
+    stop("argument is not a formula")
+  all.vars(as.expression(x))
 }
 
 sympoly <- function(x,y,n) {

@@ -15,8 +15,10 @@
 \alias{cellmiddles}
 \alias{checkfields}          
 \alias{check.hist.lengths}
+\alias{check.named.vector}
 \alias{clip.psp}
 \alias{cobble.xy}
+\alias{commasep}
 \alias{contour.im}
 \alias{countingweights}
 \alias{default.expand}
@@ -63,6 +65,7 @@
 \alias{is.prime}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
+\alias{Kborder.engine}
 \alias{Kount}
 \alias{Kwtsum}               
 \alias{Kmulti.inhom}               
@@ -92,12 +95,14 @@
 \alias{overlap.owin}
 \alias{overlap.trapezium}
 \alias{overlap.xypolygon}    
+\alias{owinpolycheck}
 \alias{param.quad}
 \alias{persp.im}
 \alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.diagppm}
+\alias{plot.minconfit}
 \alias{plot.qqppm}
 \alias{polynom}
 \alias{primefactors}       
@@ -107,6 +112,7 @@
 \alias{print.fv}       
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.minconfit}
 \alias{print.plotppm}
 \alias{print.qqppm}
 \alias{print.rmhcontrol}
@@ -123,6 +129,8 @@
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{rebound.ppp}
+\alias{rebound.psp}
 \alias{rebound.owin}
 \alias{resid4plot}
 \alias{resid1plot}
@@ -159,12 +167,15 @@
 \alias{trim.rectangle}
 \alias{update.interact}
 \alias{validate.mask}        
+\alias{variablesinformula}        
 \alias{verifyclass}
 \alias{verify.xypolygon}
 \alias{whist}               
 \alias{w.quad}               
 \alias{x.quad}
-\alias{y.quad}               
+\alias{y.quad}
+\alias{xypolygon2psp}
+\alias{xypolyselfint}
 \title{Internal spatstat functions}
 \description{
   Internal spatstat functions.
@@ -186,8 +197,10 @@ cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
+check.named.vector(x, nam)
 clip.psp(x, window, check=TRUE)
 cobble.xy(x, y, f, fatal)
+commasep(x)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 default.expand(object, m, epsilon)
@@ -240,6 +253,7 @@ is.poisson.ppm(x)
 is.prime(n)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
+Kborder.engine(X, rmax, nr, correction, weights)
 Kount(d, b, breaks, slow = FALSE)
 Kwtsum(d, b, weight, weightmargin, breaks, slow)
 Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
@@ -250,7 +264,7 @@ Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
          Jname = "points satisfying condition J")
 killinteraction(model)
 least.common.multiple(n,m)
-lookup.im(im, x, y, naok)
+lookup.im(Z, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
 markspace.integral(X)
 marks.quad(Q)           
@@ -276,7 +290,8 @@ no.trend.ppm(x)
 n.quad(Q)               
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
-overlap.xypolygon(P, Q)   
+overlap.xypolygon(P, Q)
+owinpolycheck(W, verbose=TRUE)
 param.quad(Q)
 persp.im(x, \dots)
 pixellate(x, \dots, weights)
@@ -286,6 +301,7 @@ plot.diagppm(x, \dots, which, plot.neg="image",
                          plot.smooth="imagecontour",
                          plot.sd=TRUE, spacing=0.1,
                          srange=NULL, monochrome=FALSE, main=NULL)
+plot.minconfit(x, \dots)
 plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
 polynom(x, \dots)
@@ -296,6 +312,7 @@ print.fasp(x, \dots)
 print.fv(x, \dots)
 print.interact(x, \dots)       
 print.isf(x, \dots)
+print.minconfit(x, \dots)
 print.plotppm(x, \dots)
 print.qqppm(x, \dots)
 print.rmhcontrol(x, \dots)
@@ -312,6 +329,8 @@ quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
+rebound.ppp(x, \dots)
+rebound.psp(x, \dots)
 rebound.owin(w, rect)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
            spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)
@@ -351,12 +370,15 @@ tilecentroids(W, nx, ny)
 trim.rectangle(W, xmargin, ymargin=xmargin)
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
+variablesinformula(x)
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
-whist(x,breaks,weights)
+whist(x,breaks,weights, trim)
 w.quad(Q)               
 x.quad(Q)
-y.quad(Q)               
+y.quad(Q)
+xypolyselfint(p, eps, proper)
+xypolygon2psp(p, w)
 }
 
 \details{

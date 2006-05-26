@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.28 $	$Date: 2006/03/01 08:22:09 $
+#	$Revision: 4.30 $	$Date: 2006/05/24 05:33:42 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -101,7 +101,7 @@ as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
   } 
     
   if(is.function(W))
-    return(cobble.ppp(X[,1], X[,2], W, fatal))
+    return(cobble.xy(X[,1], X[,2], W, fatal))
 
   win <- as.owin(W)
   Z <- ppp(X[,1], X[,2], window = win)
@@ -413,4 +413,9 @@ identify.ppp <- function(x, ...) {
   }
 }
 
+rebound.ppp <- function(x, ...) {
+  verifyclass(x, "ppp")
+  x$window <- rebound.owin(x$window, ...)
+  return(x)
+}
 

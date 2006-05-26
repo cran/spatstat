@@ -34,7 +34,7 @@ fanfare("II. Basic operations")
 X <- swedishpines
 subset <- 1:20
 plot(X[subset], main="subset operation: X[subset]")
-subwindow <- owin(poly=list(x=c(0,96,96,40,40,0),y=c(0,0,100,100,50,0)))
+subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
 plot(X[,subwindow], main="subset operation: X[, subwindow]")
 
 data(lansing)
@@ -46,6 +46,9 @@ w <- owin(c(0.1,0.7), c(0.2, 0.8))
 S <- L[, w]
 plot(L, main="Subset of a line segment pattern")
 plot(S, add=TRUE, col="red")
+
+plot(L, main="Self-crossing points")
+plot(selfcrossing.psp(L), add=TRUE, col="red")
 
 fanfare("III. Exploratory data analysis")
 
@@ -96,6 +99,16 @@ plot(a, add=TRUE,col="red")
 plot(allstats(swedishpines))
 
 fanfare("IV. Model-fitting")
+
+data(redwood)
+parsave <- par(mfrow=c(1,2))
+plot(redwood)
+fitT <- thomas.estK(redwood, c(kappa=10,sigma2=0.1))
+par(pty="s")
+plot(fitT, main="Thomas model\n fit by minimum contrast")
+par(parsave)
+
+plot(swedishpines)
 fit <- ppm(swedishpines, ~1, Strauss(r=7))
 print(fit)
 
@@ -126,6 +139,10 @@ plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
+
+plot(redwood, main="random thinning - rthin()")
+points(rthin(redwood, 0.8), col="green", cex=1.4)
+
 plot(rcell(nx=15))
 
 plot(rsyst(nx=5))
@@ -166,7 +183,6 @@ showoffK <- function(Y, current, ..., fullpicture,rad) {
         if(runif(1) < 0.2) Sys.sleep(runif(1, max=0.4))
 	return(Y$n)
 }
-data(redwood)
 applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2, exclude=TRUE)
 
 options(oldoptions)

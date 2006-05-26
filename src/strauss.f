@@ -9,26 +9,60 @@ C Output from Public domain Ratfor, version 1.0
       beta = par(1)
       gamma = par(2)
       r = par(3)
-      kount = 0
       if(n.eq.0)then
       cifval = beta
       return
       endif
-      do23002 j = 1,n 
-      if(j .eq. ix)then
-      continue
-      else
+      kount = 0
       if(per)then
+      ixm1 = ix - 1
+      ixp1 = max(1, ix + 1)
+      if(ixm1 .gt. 0)then
+      do23006 j = 1,ixm1 
       call dist2(u,v,x(j),y(j),period,d2)
-      else
-      d2 = (u-x(j))**2 + (v-y(j))**2
-      endif
       if(d2 .lt. r)then
       kount = kount+1
       endif
+23006 continue
+23007 continue
       endif
-23002 continue
-23003 continue
+      if(ixp1 .le. n)then
+      do23012 j = ixp1,n 
+      call dist2(u,v,x(j),y(j),period,d2)
+      if(d2 .lt. r)then
+      kount = kount+1
+      endif
+23012 continue
+23013 continue
+      endif
+      else
+      ixm1 = ix - 1
+      ixp1 = max(1, ix + 1)
+      if(ixm1 .gt. 0)then
+      do23018 j = 1,ixm1 
+      a = r - (u - x(j))**2
+      if(a .gt. 0)then
+      a = a - (v-y(j))**2
+      if(a .gt. 0)then
+      kount = kount+1
+      endif
+      endif
+23018 continue
+23019 continue
+      endif
+      if(ixp1 .le. n)then
+      do23026 j = ixp1,n 
+      a = r - (u - x(j))**2
+      if(a .gt. 0)then
+      a = a - (v-y(j))**2
+      if(a .gt. 0)then
+      kount = kount+1
+      endif
+      endif
+23026 continue
+23027 continue
+      endif
+      endif
       if(gamma .lt. eps )then
       if(kount .gt. 0)then
       cifval = zero

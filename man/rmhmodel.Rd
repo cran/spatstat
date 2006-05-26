@@ -189,6 +189,11 @@
       where \eqn{t(x_i,X)}{t(x[i],X)} denotes the number of
       ``\eqn{r}-close neighbours'' of \eqn{x_i}{x[i]} in the
       pattern \eqn{X}.
+
+      If the saturation threshold \eqn{s} is infinite,
+      the Geyer process reduces to a Strauss process
+      with interaction parameter \eqn{\gamma^2}{gamma^2}
+      rather than \eqn{\gamma}{gamma}.
     }
     
     \item{lookup:}{
@@ -440,3 +445,5 @@ otherwise an error is given.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

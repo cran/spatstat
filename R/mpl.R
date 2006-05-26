@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.23 $	$Date: 2006/04/25 06:26:33 $
+#	$Revision: 5.25 $	$Date: 2006/05/22 03:43:56 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -57,7 +57,7 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=8,
                     release=10,
-                    date="$Date: 2006/04/25 06:26:33 $")
+                    date="$Date: 2006/05/22 03:43:56 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -220,13 +220,16 @@ if(!is.null(zeroes))
   }
   
 if(want.trend) {
+  trendvariables <- variablesinformula(trend)
   # Check for use of internal names in trend
-  cc <- check.clashes(internal.names, termsinformula(trend),
-                      "the model formula")
+  cc <- check.clashes(internal.names, trendvariables, "the model formula")
   if(cc != "") stop(cc)
-  # Default explanatory variables for trend
-  glmdata <- data.frame(glmdata, x=P$x, y=P$y)
-  if(!is.null(.mpl$MARKS))
+  # Standard variables
+  if("x" %in% trendvariables)
+    glmdata <- data.frame(glmdata, x=P$x)
+  if("y" %in% trendvariables)
+    glmdata <- data.frame(glmdata, y=P$y)
+  if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS))
     glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
   #
   # Check covariates
@@ -234,13 +237,16 @@ if(want.trend) {
 #   Check for duplication of reserved names
     cc <- check.clashes(reserved.names, names(covariates), "\'covariates\'")
     if(cc != "") stop(cc)
-#   Append `covariates.df' to `glmdata'
-    glmdata <- data.frame(glmdata,covariates.df)
-#   Ignore any quadrature points that have NA values in covariates    
-    nbg <- is.na(covariates.df)
+#   Take only those covariates that are named in the trend formula
+    needed <- names(covariates.df) %in% trendvariables
+    covariates.needed <- covariates.df[, needed, drop=FALSE]
+#   Append to `glmdata'
+    glmdata <- data.frame(glmdata,covariates.needed)
+#   Ignore any quadrature points that have NA's in the covariates
+    nbg <- is.na(covariates.needed)
     if(any(nbg)) {
       offending <- matcolany(nbg)
-      covnames.na <- names(covariates.df)[offending]
+      covnames.na <- names(covariates.needed)[offending]
       quadpoints.na <- matrowany(nbg)
       n.na <- sum(quadpoints.na)
       n.tot <- length(quadpoints.na)

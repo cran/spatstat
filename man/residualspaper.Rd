@@ -89,3 +89,5 @@
   \bold{67}, 617--666.
 }
 \keyword{datasets}
+\keyword{spatial}
+\keyword{models}

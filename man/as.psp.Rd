@@ -3,6 +3,7 @@
 \alias{as.psp.psp}
 \alias{as.psp.data.frame}
 \alias{as.psp.matrix}
+\alias{as.psp.owin}
 \alias{as.psp.default}
 \title{Convert Data To Class psp}
 \description{
@@ -15,6 +16,7 @@
   as.psp.psp(x, \dots, fatal=TRUE)
   as.psp.data.frame(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
   as.psp.matrix(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
+  as.psp.owin(x, \dots, fatal=TRUE)
   as.psp.default(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
 }
 \usage{
@@ -65,6 +67,11 @@
     a structure with elements named  \code{x0, y0, x1, y1}
     or elements named \code{xmid, ymid, length, angle}
     which will be interpreted as above.
+    \item
+    an object of class \code{"owin"} representing a spatial window;
+    it must be of type \code{"rectangle"} or \code{"polygonal"}.
+    The boundary edges of the window will be extracted as a line segment
+    pattern.
   }
   The argument \code{window} is converted to a window object
   by the function \code{\link{as.owin}}.
@@ -105,3 +112,4 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{manip}

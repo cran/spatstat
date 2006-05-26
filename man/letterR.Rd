@@ -16,3 +16,4 @@
 }
 \source{Adrian Baddeley}
 \keyword{datasets}
+\keyword{spatial}

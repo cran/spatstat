@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.7 $	$Date: 2006/02/21 10:49:25 $
+#	$Revision: 4.8 $	$Date: 2006/05/18 03:30:49 $
 #
 # -------- functions ----------------------------------------
 #
@@ -187,7 +187,8 @@ rebound.owin <- function(w, rect) {
   switch(w$type,
          rectangle={
            return(owin(xr, yr,
-                       poly=list(x=xr[c(1,2,2,1)], y=yr[c(1,1,2,2)])))
+                       poly=list(x=w$xrange[c(1,2,2,1)],
+                                 y=w$yrange[c(1,1,2,2)])))
          },
          polygonal={
            return(owin(xr, yr, poly=w$bdry))

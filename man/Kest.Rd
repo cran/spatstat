@@ -6,36 +6,36 @@ Estimates the reduced second moment function \eqn{K(r)}
 from a point pattern in a window of arbitrary shape.
 }
 \synopsis{
-  Kest(X, r=NULL, breaks=NULL, slow,
-     correction=c("border", "isotropic", "Ripley", "translate"), \dots)
+  Kest(X, \dots, r=NULL, breaks=NULL, 
+     correction=c("border", "isotropic", "Ripley", "translate"),
+    nlarge=500)
 }
 \usage{
-  Kest(X)
-  Kest(X, r)
-  Kest(X, r, correction=c("border", "isotropic", "Ripley", "translate"))
-  Kest(X, breaks=breaks)
+  Kest(X, \dots, r, correction=c("border", "isotropic", "Ripley", "translate"),
+     nlarge=500)
 }
 \arguments{
   \item{X}{The observed point pattern, 
     from which an estimate of \eqn{K(r)} will be computed.
     An object of class \code{"ppp"}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
-    }
-    \item{r}{
-      vector of values for the argument \eqn{r} at which \eqn{K(r)} 
-      should be evaluated. There is a sensible default.
-    }
-    \item{breaks}{
-      An alternative to the argument \code{r}.
-      Not normally invoked by the user.
-      See Details.
-    }
-    \item{correction}{
-      A character vector containing any selection of the
-      options \code{"border"}, \code{"bord.modif"},
-      \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
-      It specifies the edge correction(s) to be applied.
-    }
+  }
+  \item{\dots}{Ignored.}
+  \item{r}{
+    Optional. Vector of values for the argument \eqn{r} at which \eqn{K(r)} 
+    should be evaluated. There is a sensible default.
+  }
+  \item{correction}{
+    Optional. A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    It specifies the edge correction(s) to be applied.
+  }
+  \item{nlarge}{
+    Optional. Efficiency threshold.
+    If the number of points exceeds \code{nlarge}, then only the
+    border correction will be computed, using a fast algorithm.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -109,6 +109,16 @@ from a point pattern in a window of arbitrary shape.
   homogeneous). For inhomogeneous point patterns, see
   \code{\link{Kinhom}}.
 
+  If the point pattern \code{X} contains more than about 1000 points,
+  the isotropic and translation edge corrections can be computationally
+  prohibitive. The computations for the border method are much faster,
+  and are statistically efficient when there are large numbers of
+  points. Accordingly, if the number of points in \code{X} exceeds
+  the threshold \code{nlarge}, then only the border correction will be
+  computed. Setting \code{nlarge=Inf} will prevent this from happening.
+  Setting \code{nlarge=0} is equivalent to selecting only the border
+  correction with \code{correction="border"}.
+
   The estimator \code{Kest} ignores marks.
   Its counterparts for multitype point patterns
   are \code{\link{Kcross}}, \code{\link{Kdot}},
@@ -124,7 +134,6 @@ from a point pattern in a window of arbitrary shape.
   }
   where \eqn{K'(r)} is the derivative of \eqn{K(r)}.
   See \code{\link{pcf}} on how to estimate this function.
-
 }
 \references{
 Baddeley, A.J. Spatial sampling and censoring.
@@ -199,5 +208,7 @@ Baddeley, A.J. Spatial sampling and censoring.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}
+
  
  

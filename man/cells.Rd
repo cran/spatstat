@@ -36,3 +36,4 @@ point pattern.
   John Wiley and Sons.
 }
 \keyword{datasets}
+\keyword{spatial}

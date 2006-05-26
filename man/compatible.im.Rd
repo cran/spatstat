@@ -34,3 +34,4 @@ compatible.im(A, B, tol=1e-6)
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{manip}

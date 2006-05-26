@@ -94,3 +94,4 @@ How many trees in a forest?
 
 }
 \keyword{datasets}
+\keyword{spatial}

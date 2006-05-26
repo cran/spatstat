@@ -6,10 +6,10 @@
   Mat\'ern Model II inhibition process.
 }
 \usage{
- rMaternII(lambda, r, win = owin(c(0,1),c(0,1)))
+ rMaternII(kappa, r, win = owin(c(0,1),c(0,1)))
 }
 \arguments{
-  \item{lambda}{
+  \item{kappa}{
     Intensity of the Poisson process of proposal points.
     A single positive number.
   }
@@ -32,7 +32,7 @@
 
   The process is constructed by first
   generating a uniform Poisson point process of ``proposal'' points 
-  with intensity \code{lambda} inside the window.
+  with intensity \code{kappa} inside the window.
   Then each proposal point is marked by an ``arrival time'', a number
   uniformly distributed in \eqn{[0,1]} independently of other variables.
   
@@ -61,3 +61,5 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{datagen}
+

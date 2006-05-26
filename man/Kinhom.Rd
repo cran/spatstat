@@ -6,10 +6,9 @@
   a non-stationary point pattern.
 }
 \usage{
-  Kinhom(X, lambda, r = NULL, breaks = NULL, slow = FALSE,
+  Kinhom(X, lambda, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
-    \dots, lambda2
-)
+    nlarge = 500, lambda2)
 }
 \arguments{
   \item{X}{
@@ -26,6 +25,9 @@
     or a pixel image (object of class \code{"im"}) giving the
     intensity values at all locations.
   }
+  \item{\dots}{
+    Ignored.
+  }
   \item{r}{
     vector of values for the argument \eqn{r} at which
     the inhomogeneous \eqn{K} function
@@ -37,22 +39,16 @@
     Not normally invoked by the user.
     See Details.
   }
-  \item{slow}{
-    Not normally given by the user. 
-    Logical flag which selects the algorithm used to compute the
-    inhomogeneous \eqn{K} function. The default (\code{slow=FALSE})
-    is faster than the alternative (\code{slow=TRUE}). The slow
-    algorithm is retained for internal purposes as a check on
-    validity.
-  }
   \item{correction}{
       A character vector containing any selection of the
       options \code{"border"}, \code{"bord.modif"},
       \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
       It specifies the edge correction(s) to be applied.
   }
-  \item{\dots}{
-    Currently ignored.
+  \item{nlarge}{
+    Optional. Efficiency threshold.
+    If the number of points exceeds \code{nlarge}, then only the
+    border correction will be computed, using a fast algorithm.
   }
   \item{lambda2}{
     Advanced use only.
@@ -183,7 +179,17 @@
   where \eqn{g(x_i,x_j)}{g(x[i],x[j])} is the fraction of the
   circumference of the circle with centre \eqn{x_i}{x[i]} and radius
   \eqn{||x_i - x_j||}{||x[i]-x[j]||} which lies inside the window.
-  
+
+  If the point pattern \code{X} contains more than about 1000 points,
+  the isotropic and translation edge corrections can be computationally
+  prohibitive. The computations for the border method are much faster,
+  and are statistically efficient when there are large numbers of
+  points. Accordingly, if the number of points in \code{X} exceeds
+  the threshold \code{nlarge}, then only the border correction will be
+  computed. Setting \code{nlarge=Inf} will prevent this from happening.
+  Setting \code{nlarge=0} is equivalent to selecting only the border
+  correction with \code{correction="border"}.
+
   The pair correlation function can also be applied to the
   result of \code{Kinhom}; see \code{\link{pcf}}.
 }
@@ -252,3 +258,4 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.17 $   $Date: 2006/04/11 15:21:01 $
+#    $Revision: 4.18 $   $Date: 2006/05/25 09:29:49 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -22,7 +22,7 @@
 #    rMatClust()       Mat'ern cluster process
 #    rThomas()         Thomas process
 #
-#
+#    rthin()           independent random thinning
 #
 #    Examples:
 #          u01 <- owin(0:1,0:1)
@@ -267,9 +267,9 @@ rpoint <- function(n, f, fmax=NULL,
 }
     
 "rMaternI" <-
-  function(lambda, r, win = owin(c(0,1),c(0,1)))
+  function(kappa, r, win = owin(c(0,1),c(0,1)))
 {
-    X <- rpoispp(lambda, win=win)
+    X <- rpoispp(kappa, win=win)
     if(X$n <= 1) return(X)
     d <- nndist(X$x, X$y)
     qq <- X[d > r]
@@ -277,9 +277,9 @@ rpoint <- function(n, f, fmax=NULL,
 }
     
 "rMaternII" <-
-  function(lambda, r, win = owin(c(0,1),c(0,1)))
+  function(kappa, r, win = owin(c(0,1),c(0,1)))
 {
-    X <- rpoispp(lambda, win=win)
+    X <- rpoispp(kappa, win=win)
     
     if(X$n <= 1) return(X)
     
@@ -328,7 +328,7 @@ rpoint <- function(n, f, fmax=NULL,
 }
 
 "rNeymanScott" <-
-  function(lambda, rmax, rcluster, win = owin(c(0,1),c(0,1)), ..., lmax=NULL)
+  function(kappa, rmax, rcluster, win = owin(c(0,1),c(0,1)), ..., lmax=NULL)
 {
   # Generic Neyman-Scott process
   # Implementation for bounded cluster radius
@@ -345,10 +345,13 @@ rpoint <- function(n, f, fmax=NULL,
   frame <- bounding.box(win)
   dilated <- owin(frame$xrange + c(-rmax, rmax),
                   frame$yrange + c(-rmax, rmax))
-  if(is.im(lambda) && !is.subset.owin(as.owin(lambda), dilated))
-    stop("The window in which the image \'lambda\' is defined\n\
-is not large enough to contain the dilation of the window \'win\'")
-  parents <- rpoispp(lambda, lmax=lmax, win=dilated)
+  if(is.im(kappa) && !is.subset.owin(as.owin(kappa), dilated))
+    stop(paste("The window in which the image",
+               sQuote("kappa"),
+               "is defined\n",
+               "is not large enough to contain the dilation of the window",
+               sQuote("win")))
+  parents <- rpoispp(kappa, lmax=lmax, win=dilated)
   #
   # initialise offspring pattern and offspring-to-parent map
   result <- ppp(numeric(0), numeric(0), window = win)
@@ -376,7 +379,7 @@ is not large enough to contain the dilation of the window \'win\'")
 }  
 
 "rMatClust" <-
-  function(lambda, r, mu, win = owin(c(0,1),c(0,1)))
+  function(kappa, r, mu, win = owin(c(0,1),c(0,1)))
 {
   # Matern Cluster Process with Poisson (mu) offspring distribution
   #
@@ -384,13 +387,13 @@ is not large enough to contain the dilation of the window \'win\'")
                            n <- rpois(1, mu)
                            return(runifdisc(n, radius, x0, y0))
                          }
-  result <- rNeymanScott(lambda, r, poisclus,
+  result <- rNeymanScott(kappa, r, poisclus,
                          win, radius=r, mu=mu)
   return(result)
 }
     
 "rThomas" <-
-  function(lambda, sigma, mu, win = owin(c(0,1),c(0,1)))
+  function(kappa, sigma, mu, win = owin(c(0,1),c(0,1)))
 {
   # Thomas process with Poisson(mu) number of offspring
   # at isotropic Normal(0,sigma^2) displacements from parent
@@ -401,7 +404,7 @@ is not large enough to contain the dilation of the window \'win\'")
                            y <- rnorm(n, mean=y0, sd=sigma)
                            return(list(x=x, y=y))
                          }
-  result <- rNeymanScott(lambda, 4 * sigma, thomclus,
+  result <- rNeymanScott(kappa, 4 * sigma, thomclus,
                          win, sigma=sigma, mu=mu)
   return(result)
 }
@@ -484,3 +487,46 @@ rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
 }
 
 
+rthin <- function(X, P, ...) {
+  verifyclass(X, "ppp")
+
+  if(is.numeric(P)) {
+    # vector of retention probabilities
+    pX <- P
+    if(length(pX) != X$n) {
+      if(length(pX) == 1)
+        pX <- rep(pX, X$n)
+      else 
+        stop("Length of vector P does not match number of points of X")
+    }
+    if(any(is.na(pX)))
+      stop("P contains NA's")
+  } else if(is.function(P)) {
+    # function - evaluate it at points of X
+    pX <- P(X$x, X$y, ...)
+    if(length(pX) != X$n)
+      stop("Function P returned a vector of incorrect length")
+    if(!is.numeric(pX))
+      stop("Function P returned non-numeric values")
+    if(any(is.na(pX)))
+      stop("Function P returned some NA values")
+    prange <- range(pX)
+  } else if(is.im(P)) {
+    # image - look it up
+    if(!(P$type %in% c("integer", "real")))
+      stop("Values of image P should be numeric")
+    pX <- P[X, drop=FALSE]
+    if(any(is.na(pX)))
+      stop("some points of X lie outside the domain of image P")
+  } else
+  stop("Unrecognised format for P")
+
+  if(min(pX) < 0) stop("some probabilities are negative")
+  if(max(pX) > 1) stop("some probabilities are greater than 1")
+
+  retain <- (runif(length(pX)) < pX)
+  return(X[retain])
+}
+
+  
+  

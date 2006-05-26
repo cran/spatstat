@@ -82,5 +82,6 @@ Reads a point pattern dataset from a text file.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{IO}
  
  

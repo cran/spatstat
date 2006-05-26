@@ -27,3 +27,4 @@
   \bold{42}, 283--322.
 }
 \keyword{datasets}
+\keyword{spatial}

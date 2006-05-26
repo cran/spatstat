@@ -197,3 +197,5 @@ lurking(object, covariate, type="eem",
   lurking(fit, expression(x), cumulative=FALSE)
 }
 \keyword{spatial}
+\keyword{models}
+\keyword{hplot}

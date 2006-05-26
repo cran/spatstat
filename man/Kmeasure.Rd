@@ -109,5 +109,6 @@ from a point pattern in a window of arbitrary shape.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}
  
  

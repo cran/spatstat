@@ -45,6 +45,7 @@ crossdist.ppp           Pairwise distances between two different point
                         patterns
 crossdist.psp           Pairwise distances between two different line
                         segment patterns
+crossing.psp            Crossing Points of Two Line Segment Patterns
 cut.im                  Convert Pixel Image from Numeric to Factor
 cut.ppp                 Convert Point Pattern Marks from Numeric to
                         Factor
@@ -135,13 +136,18 @@ lengths.psp             Lengths of Line Segments
 LennardJones            The Lennard-Jones Potential
 letterR                 Window in Shape of Letter R
 levelset                Level Set of a Pixel Image
+lgcp.estK               Fit a Log-Gaussian Cox Point Process by Minimum
+                        Contrast
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
+matclust.estK           Fit the Matern Cluster Point Process by Minimum
+                        Contrast
 mean.im                 Mean Pixel Value in an Image
 midpoints.psp           Midpoints of Line Segment Pattern
+mincontrast             Method of Minimum Contrast
 multiplicity.ppp        Count Multiplicity of Duplicate Points
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
@@ -254,10 +260,12 @@ rshift.splitppp         Randomly Shift a List of Point Patterns
 rSSI                    Simple Sequential Inhibition
 rstrat                  Stratified random point pattern
 rsyst                   Systematic random point pattern
+rthin                   Random Thinning
 rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
 scanpp                  Read Point Pattern From Data File
+selfcrossing.psp        Crossing Points in a Line Segment Pattern
 setcov                  Set Covariance of a Window
 setmarks                Set or Reset the Marks in a Point Pattern
 shift                   Apply Vector Translation
@@ -293,6 +301,8 @@ summary.psp             Summary of a Line Segment Pattern Dataset
 summary.quad            Summarizing a Quadrature Scheme
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
+thomas.estK             Fit the Thomas Point Process by Minimum
+                        Contrast
 union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.9 $    $Date: 2005/07/27 06:32:39 $
+#    $Revision: 1.12 $    $Date: 2006/05/25 04:40:22 $
 #
 #  (a) for matrices only:
 #
@@ -67,7 +67,13 @@ apply23sum <- function(x) {
 #
 
 whist <-
-  function(x, breaks, weights) {
+  function(x, breaks, weights, trim=TRUE) {
+    if(trim) {
+      ok <- (x >= min(breaks)) & (x <= max(breaks))
+      x <- x[ok]
+      if(!missing(weights))
+        weights <- weights[ok]
+    }
     if(missing(weights)) 
       h <- hist(x, breaks=breaks, plot=FALSE,probability=FALSE)$counts
     else {
@@ -121,3 +127,12 @@ matrixsample <- function(mat, newdim, phase=c(0,0)) {
 }
 
    
+commasep <- function(x) {
+  px <- paste(x)
+  nx <- length(px)
+  if(nx <= 1) return(px)
+  commas <- c(rep(", ", length(px)-2),
+              " and ", "")
+  return(paste(paste(px, commas, sep=""), collapse=""))
+}
+

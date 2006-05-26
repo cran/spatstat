@@ -106,5 +106,6 @@ using the Fast Fourier Transform.
   \url{http://www.math.unb.ca/~rolf}
 }
 \keyword{spatial}
+\keyword{nonparametric}
  
  
