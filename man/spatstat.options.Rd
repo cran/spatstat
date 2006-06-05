@@ -18,23 +18,16 @@
   }
 }
 \value{
-  A list of parameters and their values.
+  Either a list of parameters and their values,
+  or a single value. See Details.
 }
 \details{
-  This function is analogous to \code{\link{options}}
-  and calls the utility function \code{\link{check.options}}.
+  This function allows the user to examine and reset the values
+  of global parameters which control actions in the
+  \pkg{spatstat} package.
+  It is analogous to the system function \code{\link{options}}.
 
-  If no arguments are given, 
-  the current values of all parameters are returned.
-
-  If a succession of parameter names is given,
-  the current values of these parameters are returned.
-  
-  If \code{name=value} pairs are given, the named parameters
-  are reset to the given values, and the \bold{previous} values of
-  these parameters are returned.
-
-  The parameters are:
+  The global parameters are:
   \describe{
     \item{npixel}{
       Controls the number of pixels in the discrete approximation
@@ -61,13 +54,33 @@
       when displaying a real-valued image, such as the fitted surfaces
       in \code{\link{plot.ppm}}.
     }
+    \item{par.points}{
+      List of arguments controlling the plotting of point patterns
+      by \code{\link{plot.ppp}}.
+    }
   }
+  
+  If no arguments are given, 
+  the current values of all parameters are returned,
+  in a list.
 
+  If one parameter name is given, the current value of this
+  parameter is returned (\bold{not} in a list, just the value).
+  
+  If several parameter names are given,
+  the current values of these parameters are returned, in a list.
+  
+  If \code{name=value} pairs are given, the named parameters
+  are reset to the given values, and the \bold{previous} values of
+  these parameters are returned, in a list.
 }
 \seealso{
   \code{\link{options}}
 }
 \examples{
+  spatstat.options()
+
+  spatstat.options("npixel")
   spatstat.options(npixel=150)
   spatstat.options(npixel=c(100,200))
 

@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.6 $    $Date: 2004/11/27 05:47:39 $
+#    $Revision: 1.8 $    $Date: 2006/05/31 08:22:08 $
 #
 #    Translation edge correction weights
 #
@@ -13,12 +13,16 @@
 #                        (i.e. one point from X and one from Y)
 #                        in window W
 #
+#  edge.Trans(X, Y, W, paired=TRUE)
+#                        compute translation correction weights
+#                        for each corresponding pair X[i], Y[i].
+#
 #  To estimate the K-function see the idiom in "Kest.S"
 #
 #######################################################################
 
-edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
-                       trim=spatstat.options("maxedgewt")[[1]]) {
+edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
+                       trim=spatstat.options("maxedgewt")) {
 
   X <- as.ppp(X, W)
 
@@ -29,6 +33,9 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
   Y <- as.ppp(Y, W)
   xx <- Y$x
   yy <- Y$y
+
+  if(paired && (X$n != Y$n))
+    stop("X and Y should have equal length when paired=TRUE")
   
   # For irregular polygons, exact evaluation is very slow;
   # so use pixel approximation, unless exact=TRUE
@@ -40,36 +47,65 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE,
            # Fast code for this case
            wide <- diff(W$xrange)
            high <- diff(W$yrange)
-           DX <- abs(outer(x,xx,"-"))
-           DY <- abs(outer(y,yy,"-"))
+           if(!paired) {
+             DX <- abs(outer(x,xx,"-"))
+             DY <- abs(outer(y,yy,"-"))
+           } else {
+             DX <- abs(xx - x)
+             DY <- abs(yy - y)
+           }
            weight <- wide * high / ((wide - DX) * (high - DY))
          },
          polygonal={
            # This code is SLOW
            a <- area.owin(W)
-           weight <- matrix(, nrow=X$n, ncol=Y$n)
-           for(i in seq(X$n)) {
-             for(j in seq(Y$n)) {
-               shiftvector <- c(x[i],y[i]) - c(xx[j],yy[j])
-               Wshift <- shift(W, shiftvector)
-               b <- overlap.owin(W, Wshift)
-               weight[i,j] <- a/b
+           if(!paired) {
+             weight <- matrix(, nrow=X$n, ncol=Y$n)
+             if(X$n > 0 && Y$n > 0) {
+               for(i in seq(X$n)) {
+                 for(j in seq(Y$n)) {
+                   shiftvector <- c(x[i],y[i]) - c(xx[j],yy[j])
+                   Wshift <- shift(W, shiftvector)
+                   b <- overlap.owin(W, Wshift)
+                   weight[i,j] <- a/b
+                 }
+               }
+             }
+           } else {
+             weight <- numeric(X$n)
+             if(X$n > 0) {
+               for(i in seq(X$n)) {
+                 shiftvector <- c(x[i],y[i]) - c(xx[i],yy[i])
+                 Wshift <- shift(W, shiftvector)
+                 b <- overlap.owin(W, Wshift)
+                 weight[i] <- a/b
+               }
              }
            }
          },
          mask={
            # make difference vectors
-           DX <- outer(x,xx,"-")
-           DY <- outer(y,yy,"-")
+           if(!paired) {
+             DX <- outer(x,xx,"-")
+             DY <- outer(y,yy,"-")
+           } else {
+             DX <- x - xx
+             DY <- y - yy
+           }
            # compute set covariance of window
            g <- setcov(W)
            # evaluate set covariance at these vectors
            gvalues <- lookup.im(g, as.vector(DX), as.vector(DY), naok=TRUE)
-           # reshape
-           gvalues <- matrix(gvalues, nrow=X$n, ncol=Y$n)
+           if(!paired) 
+             # reshape
+             gvalues <- matrix(gvalues, nrow=X$n, ncol=Y$n)
            weight <- area.owin(W)/gvalues
          }
          )
-  weight <- matrix(pmin(weight, trim), nrow=X$n, ncol=Y$n)
+  # clip high values
+  if(length(weight) > 0)
+    weight <- pmin(weight, trim)
+  if(!paired) 
+    weight <- matrix(weight, nrow=X$n, ncol=Y$n)
   return(weight)
 }

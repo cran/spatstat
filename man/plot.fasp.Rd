@@ -7,15 +7,9 @@
    A method for \code{plot}.
 }
 
-\synopsis{
-   \method{plot}{fasp}(x,formule=NULL,subset=NULL,lty=NULL,col=NULL,title=NULL,\dots, samex=TRUE)
-}
-
 \usage{
-\method{plot}{fasp}(x)
-\method{plot}{fasp}(x, formule=formule)
-\method{plot}{fasp}(x, formule=formule, subset)
-\method{plot}{fasp}(x, formule=formule, subset, lty, col, title, \dots, samex=TRUE)
+   \method{plot}{fasp}(x,formule=NULL, \dots,
+                        subset=NULL, title=NULL, samex=TRUE)
 }
 
 \arguments{
@@ -33,13 +27,6 @@
     as \code{NULL}, then \code{plot.fasp} attempts to use the component
     \code{default.formula} of \code{x}.  If that component is NULL
     as well, it gives up.
-
-    In \bold{S-PLUS}, if this argument is given, then either it \bold{must}
-    be supplied in the ``name=value'' format, \bold{or} the name
-    of the plotting function \bold{must} be used explicitly.
-    I.e. the call must use the function name \code{plot.fasp}
-    and \bold{not} \code{plot}.  Otherwise the plotting function
-    falls over.  See \bold{Warnings}.  There is no problem in R.
   }
 
   \item{subset}{A logical vector, or a vector of indices, or an
@@ -50,27 +37,18 @@
      where \code{x$which[i,j]=k}.
   }
 
-  \item{lty}{A vector of integers indicating line types to be
-    used in forming the plot.
-  }
-
-  \item{col}{
-    A vector of integers indicating colours for the different
-    lines which form the plot.
-  }
-
   \item{title}{
     Overall title for the plot.
-  }
-  \item{\dots}{
-    Arguments passed to \code{\link{plot.default}} to control other
-    features of the individual plot panels.
   }
   \item{samex}{
     Logical flag indicating whether all individual plots should have the
     same x axis limits. This makes it easier to compare the plots.
     It can only be set to \code{FALSE} if you are using the default plot style
     (i.e. only when \code{formule} is missing).
+  }
+  \item{\dots}{
+    Arguments passed to \code{\link{plot.fv}} to control 
+    the individual plot panels. 
   }
 }
 
@@ -86,13 +64,20 @@
   individual panels.
 
   For information about the interpretation of the
-  arguments \code{formule}, \code{subset}, \code{lty} and \code{col},
+  arguments \code{formule} and \code{subset},
   see \code{\link{plot.fv}}.
+
+  Arguments that are often passed through \code{...} include
+  \code{col} to control the colours of the different lines in a panel,
+  and \code{lty} and \code{lwd} to control the line type and line width
+  of the different lines in a panel. See \code{\link{plot.fv}}.
 
   The argument \code{title}, if present, will determine the
   overall title of the plot. If it is absent, it defaults to \code{x$title}.
   Titles for the individual plot panels will be taken from
   \code{x$titles}.
+
+  
 }
 
 \value{None.}

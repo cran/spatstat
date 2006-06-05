@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.28 $	$Date: 2005/04/12 20:49:13 $
+#	$Revision: 1.29 $	$Date: 2006/06/02 08:29:02 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -13,7 +13,7 @@
 
 predict.ppm <-
 function(object, window, ngrid=NULL, locations=NULL,
-         covariates=NULL, type="trend", ...) {
+         covariates=NULL, type="trend", ..., check=TRUE) {
 #
 # guard against mistakes
   dotargs <- list(...)
@@ -28,6 +28,9 @@ function(object, window, ngrid=NULL, locations=NULL,
 #
   model <- object
   verifyclass(model, "ppm")
+#  
+  if(check && damaged.ppm(model))
+    stop("object format corrupted; try update(object, use.internal=TRUE)")
 #
 #       find out what kind of model it is
 #

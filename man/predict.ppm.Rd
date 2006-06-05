@@ -8,7 +8,7 @@ at new locations.
 }
 \usage{
    predict.ppm(object, window, ngrid=NULL, locations=NULL,
-   covariates=NULL, type="trend", \dots)
+   covariates=NULL, type="trend", \dots, check=TRUE)
 }
 \arguments{
   \item{object}{
@@ -45,6 +45,13 @@ at new locations.
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{object}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
   }
 }
 \value{

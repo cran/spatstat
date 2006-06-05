@@ -11,7 +11,7 @@
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
                rbord=reach(object), cumulative=TRUE,
                plot.it=TRUE, rv = NULL, compute.sd=TRUE,
-               compute.cts=TRUE, typename)
+               compute.cts=TRUE, typename, check=TRUE)
 }
 \usage{
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
@@ -19,7 +19,7 @@
                plot.it=TRUE,
                plot.neg="image", plot.smooth="imagecontour", plot.sd,
                rv = NULL, plot.sd, spacing=0.1,
-               srange=NULL, monochrome=FALSE)
+               srange=NULL, monochrome=FALSE, check=TRUE)
 }
 \arguments{
   \item{object}{
@@ -106,7 +106,14 @@
     Flag indicating whether images should be displayed in
     greyscale (suitable for publication) or in colour (suitable
     for the screen). The default is to display in colour.
-   }
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{object}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
+  }
 }
 \value{
   An object of class \code{"diagppm"} which contains

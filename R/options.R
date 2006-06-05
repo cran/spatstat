@@ -3,14 +3,15 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.2 $   $Date: 2003/07/22 18:23:31 $
+#    $Revision: 1.4 $   $Date: 2006/05/31 08:17:59 $
 #
 #
 ".Spatstat.Options" <-
   list(npixel = 100,
        maxedgewt=100.0,
        par.binary=list(),
-       par.persp=list()
+       par.persp=list(),
+       par.points=list()
        )
 
 "spatstat.options" <-
@@ -36,11 +37,12 @@ function (...)
 	if(all(ischar)) {
 		choices <- unlist(called)
 		ok <- choices %in% names(.Spatstat.Options)
-		if(all(ok))
-			return(.Spatstat.Options[choices])
-		else
-			stop(paste("Unrecognised option(s):",
-			called[!ok]))	
+		if(!all(ok))
+                  stop(paste("Unrecognised option(s):", called[!ok]))
+                if(length(called) == 1)
+                  return(.Spatstat.Options[[choices]])
+                else
+                  return(.Spatstat.Options[choices])
 	} else {
 	   wrong <- called[!ischar]
 	   offending <- unlist(lapply(wrong,

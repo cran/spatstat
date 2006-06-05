@@ -17,10 +17,13 @@
 \alias{check.hist.lengths}
 \alias{check.named.vector}
 \alias{clip.psp}
+\alias{closepairs}
+\alias{crosspairs}
 \alias{cobble.xy}
 \alias{commasep}
 \alias{contour.im}
 \alias{countingweights}
+\alias{damaged.ppm}
 \alias{default.expand}
 \alias{default.clipwindow}
 \alias{default.n.tiling}
@@ -97,12 +100,12 @@
 \alias{overlap.xypolygon}    
 \alias{owinpolycheck}
 \alias{param.quad}
-\alias{persp.im}
 \alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.diagppm}
 \alias{plot.minconfit}
+\alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{polynom}
 \alias{primefactors}       
@@ -114,6 +117,7 @@
 \alias{print.isf}
 \alias{print.minconfit}
 \alias{print.plotppm}
+\alias{print.profilepl}
 \alias{print.qqppm}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
@@ -137,6 +141,7 @@
 \alias{resid1panel}
 \alias{resolve.defaults}
 \alias{reverse.xypolygon}    
+\alias{rmax.rule}
 \alias{rotxy}
 \alias{runifdisc}
 \alias{runifpoispp}          
@@ -199,10 +204,13 @@ checkfields(X,L)
 check.hist.lengths(hist,breaks)
 check.named.vector(x, nam)
 clip.psp(x, window, check=TRUE)
+closepairs(X,rmax)
+crosspairs(X,Y,rmax)
 cobble.xy(x, y, f, fatal)
 commasep(x)
 contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
+damaged.ppm(object)
 default.expand(object, m, epsilon)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
@@ -219,14 +227,14 @@ distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 divisors(n)
 do.call.matched(fname, arglist, funargs)
 edge.Ripley(X, r, W)
-edge.Trans(X, Y, W, exact, trim)
+edge.Trans(X, Y, W, exact, paired, trim)
 ensure2vector(x)
 equals.quad(Q)          
 eratosthenes(nmax)
 erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
-exactPdt(im)
+exactPdt(w)
 fasp(fns, titles, formulae, which, dataname, title)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc)
@@ -234,7 +242,7 @@ greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
-handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL)
+handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
@@ -254,8 +262,8 @@ is.prime(n)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
 Kborder.engine(X, rmax, nr, correction, weights)
-Kount(d, b, breaks, slow = FALSE)
-Kwtsum(d, b, weight, weightmargin, breaks, slow)
+Kount(dIJ, bI, b, breaks)
+Kwtsum(dIJ, bI, wIJ, b, w, breaks)
 Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
          r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
@@ -293,7 +301,6 @@ overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
 owinpolycheck(W, verbose=TRUE)
 param.quad(Q)
-persp.im(x, \dots)
 pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
@@ -302,6 +309,7 @@ plot.diagppm(x, \dots, which, plot.neg="image",
                          plot.sd=TRUE, spacing=0.1,
                          srange=NULL, monochrome=FALSE, main=NULL)
 plot.minconfit(x, \dots)
+plot.profilepl(x, \dots, tag=TRUE)
 plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
 polynom(x, \dots)
@@ -314,6 +322,7 @@ print.interact(x, \dots)
 print.isf(x, \dots)
 print.minconfit(x, \dots)
 print.plotppm(x, \dots)
+print.profilepl(x, \dots)
 print.qqppm(x, \dots)
 print.rmhcontrol(x, \dots)
 print.rmhmodel(x, \dots)
@@ -339,7 +348,8 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots)
-reverse.xypolygon(p)    
+reverse.xypolygon(p)
+rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rmhResolveTypes(model, start, control)
 rmhcontrol.rmhcontrol(control, \dots)
@@ -373,7 +383,7 @@ validate.mask(w, fatal=TRUE)
 variablesinformula(x)
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
-whist(x,breaks,weights, trim)
+whist(x,breaks,weights, trim, right)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)

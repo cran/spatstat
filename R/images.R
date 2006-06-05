@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.15 $     $Date: 2006/05/25 09:56:37 $
+#         $Revision: 1.16 $     $Date: 2006/05/29 04:10:03 $
 #
 #      The class "im" of raster images
 #
@@ -243,7 +243,12 @@ cut.im <- function(x, ...) {
 
 quantile.im <- function(x, ...) {
   verifyclass(x, "im")
-  return(quantile(as.numeric(as.matrix(x)), ...))
+  q <- do.call("quantile",
+               resolve.defaults(list(as.numeric(as.matrix(x))),
+                                list(...),
+                                list(na.rm=TRUE)))
+  return(q)
 }
+
 
 

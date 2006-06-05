@@ -202,7 +202,7 @@ Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
     
     # synthetic example: type A points have intensity 50,
     #                    type B points have intensity 100 * x
-    lamB <- as.im(function(x,y){100 * x}, owin())
+    lamB <- as.im(function(x,y){50 + 100 * x}, owin())
     X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
     XA <- split(X)$A
     XB <- split(X)$B

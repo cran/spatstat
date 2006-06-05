@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.18 $	$Date: 2006/05/25 09:59:10 $
+#	$Revision: 1.20 $	$Date: 2006/05/31 02:33:00 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -47,7 +47,7 @@
 "Kinhom"<-
   function (X, lambda, ..., r = NULL, breaks = NULL, 
          correction=c("border", "bord.modif", "isotropic", "translate"),
-            nlarge = 500, 
+            nlarge = 1000, 
             lambda2=NULL)
 {
     verifyclass(X, "ppp")
@@ -57,7 +57,9 @@
     W <- X$window
     npoints <- X$n
     area <- area.owin(W)
-    breaks <- handle.r.b.args(r, breaks, X$window)
+
+    rmaxdefault <- rmax.rule("K", W, npoints/area)
+    breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
     r <- breaks$r
     
     if(is.vector(lambda)) {
@@ -70,16 +72,13 @@
     if(any(is.na(lambda)))
        stop("Some values of \`lambda\' are NA or NaN")
     
-    if(is.null(lambda2))
-      weight <- 1/outer(lambda, lambda, "*")
-    else {
+    if(!is.null(lambda2)) {
       if(!is.matrix(lambda2))
         stop("lambda2 should be a matrix")
       if(nrow(lambda2) != ncol(lambda2))
         stop("lambda2 should be a square matrix")
       if(nrow(lambda2) != npoints)
         stop("Dimensions of lambda2 do not match number of data points")
-      weight <- 1/lambda2
     }
     
     # match corrections
@@ -152,19 +151,31 @@
     K <- fv(K, "r", substitute(Kinhom(r), NULL),
             "theo", , alim, c("r","Kpois(r)"), desc)
         
-    # pairwise distance
-    d <- pairdist(X$x, X$y)
-    
-    offdiag <- (row(d) != col(d))
-        
+    # identify all close pairs
+    rmax <- max(r)
+    close <- closepairs(X, rmax)
+    dIJ <- close$d
+    # compute weights for these pairs
+    I <- close$i
+    J <- close$j
+    wI <- 1/lambda[I]
+    wIJ <- 
+      if(is.null(lambda2))
+        1/(lambda[I] * lambda[J])
+      else 
+        1/lambda2[cbind(I,J)]
+    # 
+    XI <- X[I]
+
+    # compute edge corrected estimates
     if(any(correction == "border" | correction == "bord.modif")) {
       # border method
       # Compute distances to boundary
       b <- bdist.points(X)
-      # Ignore pairs (i,i)
-      diag(d) <- Inf
+      I <- close$i
+      bI <- b[I]
       # apply reduced sample algorithm
-      RS <- Kwtsum(d, b, weight, 1/lambda, breaks, slow=FALSE)
+      RS <- Kwtsum(dIJ, bI, wIJ, b, w=1/lambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
         K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
@@ -177,14 +188,13 @@
                      "modified border-corrected estimate of Kinhom(r)",
                      "bord.modif")
       }
-      # reset diagonal to original values
-      diag(d) <- 0
     }
     if(any(correction == "translate")) {
       # translation correction
-      edgewt <- edge.Trans(X)
-      allweight <- edgewt * weight
-      wh <- whist(d[offdiag], breaks$val, allweight[offdiag])
+      XJ <- X[J]
+      edgewt <- edge.Trans(XI, XJ, paired=TRUE)
+      allweight <- edgewt * wIJ
+      wh <- whist(dIJ, breaks$val, allweight)
       Ktrans <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
@@ -194,9 +204,9 @@
     }
     if(any(correction == "isotropic" | correction == "Ripley")) {
       # Ripley isotropic correction
-      edgewt <- edge.Ripley(X, d)
-      allweight <- edgewt * weight
-      wh <- whist(d[offdiag], breaks$val, allweight[offdiag])
+      edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
+      allweight <- edgewt * wIJ
+      wh <- whist(dIJ, breaks$val, allweight)
       Kiso <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
@@ -211,68 +221,46 @@
 }
 
 
-Kwtsum <- function(d, b, weight, weightmargin, breaks, slow=FALSE) {
+Kwtsum <- function(dIJ, bI, wIJ, b, w, breaks) {
   #
   # "internal" routine to compute border-correction estimates of Kinhom
   #
-  # d : matrix of pairwise distances
-  #                  (to exclude diagonal entries, set diag(d) = Inf)
-  # b : column vector of distances to window boundary
-  # weight: matrix of weights for x[i], x[j] pairs
-  # weightmargin: vector of weights for x[i]
+  # dIJ:  vector containing pairwise distances for selected I,J pairs
+  # bI:   corresponding vector of boundary distances for I
+  # wIJ:  product weight for selected I, J pairs
+  #
+  # b:    vector of ALL distances to window boundary
+  # w:   weights for ALL points
+  #
   # breaks : breakpts object
   #
 
-  if(!is.matrix(d))
-    stop("\'d\' must be a matrix")
-  if(!is.matrix(weight))
-    stop("\'weight\' must be a matrix")
-  if(any(dim(d) != dim(weight)))
-    stop("matrices \'d\' and \'weight\' have different dimensions")
-  if(length(b) != nrow(d))
-    stop("length(b) does not match nrow(d)")
+  stopifnot(length(dIJ) == length(bI))
+  stopifnot(length(bI) == length(wIJ))
+  stopifnot(length(w) == length(b))
   
-  if(slow) { ########## slow ##############
-          
-       r <- breaks$r
-       
-       nr <- length(r)
-       numerator <- numeric(nr)
-       denominator <- numeric(nr)
-
-       for(i in 1:nr) {
-         close <- (d <= r[i])
-         numer <- matrowsum(close * weight) # assumes diag(d) set to Inf
-         bok <- (b > r[i])
-         numerator[i] <- sum(numer[bok])
-         denominator[i] <- sum(weightmargin[bok])
-       }
-	
-  } else { ############# fast ####################
-
-        # determine which distances d_{ij} were observed without censoring
-        bb <- matrix(b, nrow=nrow(d), ncol=ncol(d))
-        uncen <- (d <= bb)
-        #
-        # histogram of noncensored distances
-        nco <- whist(d[uncen], breaks$val, weight[uncen])
-        # histogram of censoring times for noncensored distances
-        ncc <- whist(bb[uncen], breaks$val, weight[uncen])
-        # histogram of censoring times (yes, this is a different total size)
-        cen <- whist(b, breaks$val, weightmargin)
-        # go
-        RS <- reduced.sample(nco, cen, ncc, show=TRUE)
-        # extract results
-        numerator   <- RS$numerator
-        denominator <- RS$denominator
-        ratio        <- RS$numerator/RS$denominator
-        # check
-        if(length(numerator) != breaks$ncells)
-          stop("internal error: length(numerator) != breaks$ncells")
-        if(length(denominator) != breaks$ncells)
-          stop("internal error: length(denom.count) != breaks$ncells")
-  }
-  
+  # determine which distances d_{ij} were observed without censoring
+  uncen <- (dIJ <= bI)
+  #
+  # histogram of noncensored distances
+  nco <- whist(dIJ[uncen], breaks$val, wIJ[uncen])
+  # histogram of censoring times for noncensored distances
+  ncc <- whist(bI[uncen], breaks$val, wIJ[uncen])
+  # histogram of censoring times (yes, this is a different total size)
+  cen <- whist(b, breaks$val, w)
+  # total weight of censoring times beyond rightmost breakpoint
+  uppercen <- sum(w[b > max(breaks$val)])
+  # go
+  RS <- reduced.sample(nco, cen, ncc, show=TRUE, uppercen=uppercen)
+  # extract results
+  numerator   <- RS$numerator
+  denominator <- RS$denominator
+  ratio        <- RS$numerator/RS$denominator
+  # check
+  if(length(numerator) != breaks$ncells)
+    stop("internal error: length(numerator) != breaks$ncells")
+  if(length(denominator) != breaks$ncells)
+    stop("internal error: length(denom.count) != breaks$ncells")
   return(list(numerator=numerator, denominator=denominator, ratio=ratio))
 }
 	

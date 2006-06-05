@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.16 $   $Date: 2005/11/24 03:56:30 $
+#   $Revision: 1.19 $   $Date: 2006/05/31 07:20:39 $
 #
 #
 #   calculate pair correlation function
@@ -22,7 +22,8 @@ pcf.ppp <- function(X, ..., r=NULL,
   r.override <- !is.null(r)
 
   win <- X$window
-  lambda <- X$n/area.owin(win)
+  area <- area.owin(win)
+  lambda <- X$n/area
 
   stopifnot(is.character(correction))
   if(!all(ok <- correction %in% c("translate", "ripley")))
@@ -39,25 +40,18 @@ pcf.ppp <- function(X, ..., r=NULL,
   }
 
   ########## r values ############################
-  # recommended range of r values
-  alim <-
-    if(!r.override)
-      c(0, min(diff(win$xrange), diff(win$yrange))/4)
-    else
-      NULL
-
   # handle arguments r and breaks 
-  breaks <- handle.r.b.args(r, NULL, win)
+
+  rmaxdefault <- rmax.rule("K", win, lambda)        
+  breaks <- handle.r.b.args(r, NULL, win, rmaxdefault=rmaxdefault)
   if(!(breaks$even))
     stop("r values must be evenly spaced")
   # extract r values
   r <- breaks$r
-  # clip
-  if(r.override)
-    alim <- range(r)
-  else 
-    r <- r[r <= alim[2]]
   
+  # recommended range of r values for plotting
+  alim <- c(0, min(max(r), rmaxdefault))
+
   # arguments for 'density'
   from <- 0
   to <- max(r)
@@ -67,20 +61,19 @@ pcf.ppp <- function(X, ..., r=NULL,
   
   # compute pairwise distances
   
-  d <- pairdist(X)
+  close <- closepairs(X, max(r))
+  dIJ <- close$d
+  XI <- ppp(close$xi, close$yi, window=win)
 
   # how to process the distances
   
-  doit <- function(w, d, out, symb, desc, key, otherargs) {
-    offdiag <- (row(d) != col(d))
-    d <- d[offdiag]
-    w <- w[offdiag]
+  doit <- function(w, d, out, symb, desc, key, otherargs, lambda, area) {
     kden <- do.call("densityhack",
                     resolve.defaults(list(x=d, weights=w), otherargs))
                                      
     r <- kden$x
     y <- kden$y
-    g <- y/(2 * pi * r * lambda^2 * area.owin(win))
+    g <- y/(2 * pi * r * (lambda^2) * area)
     if(is.null(out)) {
       df <- data.frame(r=r, theo=rep(1,length(r)), g)
       colnames(df)[3] <- key
@@ -102,13 +95,22 @@ pcf.ppp <- function(X, ..., r=NULL,
 
   out <- NULL
 
-  if(any(correction=="translate"))
-    out <- doit(edge.Trans(X), d, out, "gTrans(r)",
-                "translation-corrected estimate of g", "trans", otherargs)
-  if(any(correction=="ripley"))
-    out <- doit(edge.Ripley(X,d), d, out, "gRipley(r)",
-                "Ripley-corrected estimate of g", "ripl", otherargs)
-
+  if(any(correction=="translate")) {
+    # translation correction
+    XJ <- ppp(close$xj, close$yj, window=win)
+    edgewt <- edge.Trans(XI, XJ, paired=TRUE)
+    out <- doit(edgewt, dIJ, out, "gTrans(r)",
+                "translation-corrected estimate of g", "trans", otherargs,
+                lambda, area)
+  }
+  if(any(correction=="ripley")) {
+    # Ripley isotropic correction
+    edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
+    out <- doit(edgewt, dIJ, out, "gRipley(r)",
+                "Ripley-corrected estimate of g", "ripl", otherargs,
+                lambda, area)
+  }
+  
   # sanity check
   if(is.null(out)) {
     warning("Nothing computed - no edge corrections chosen")
@@ -213,5 +215,3 @@ function(X, ..., method="c") {
             "theoretical Poisson value, pcf(r) = 1"))
   return(Z)
 }
-
-

@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.10 $	$Date: 2005/07/21 10:27:39 $
+#	$Revision: 4.15 $	$Date: 2006/05/31 03:38:25 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -16,13 +16,17 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
 #       r:              (optional) values of argument r  
 #	breaks:		(optional) breakpoints for argument r
 #
+# Intensity estimate  
+        lambda <- X$n/area.owin(X$window)
 # First discretise
 	dwin <- as.mask(X$window, eps)
         dX <- ppp(X$x, X$y, window=dwin)
 #        
 # histogram breakpoints 
 #
-        breaks <- handle.r.b.args(r, breaks, dwin, eps)
+        rmaxdefault <- rmax.rule("F", dwin, lambda)
+        breaks <- handle.r.b.args(r, breaks, dwin, eps,
+                                  rmaxdefault=rmaxdefault)
 #
 #  compute distances and censoring distances
 	if(X$window$type == "rectangle") {
@@ -51,12 +55,12 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
 	result <- km.rs(o, bdry, d, breaks)
 
 # also calculate UNCORRECTED e.d.f. !!!! use with care
-        hh <- hist(dist,breaks=breaks$val,plot=FALSE)$counts
-        edf <- cumsum(hh)/sum(hh)
+        rightmost <- breaks$max
+        hh <- hist(dist[dist <= rightmost],breaks=breaks$val,plot=FALSE)$counts
+        edf <- cumsum(hh)/length(dist)
         result$raw <- edf
 
 # append theoretical value for Poisson
-        lambda <- X$n/area.owin(X$window)
         result$theo <- 1 - exp( - lambda * pi * result$r^2)
 
 # neaten up and return        

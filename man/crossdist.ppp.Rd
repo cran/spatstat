@@ -6,7 +6,7 @@
   taken from two different point patterns.
 }
 \usage{
-  \method{crossdist}{ppp}(X, Y, \dots, method="C")
+  \method{crossdist}{ppp}(X, Y, \dots, periodic=FALSE, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -14,6 +14,9 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{periodic}{
+    Logical. Specifies whether to apply a periodic edge correction.
   }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
@@ -38,6 +41,13 @@
   whose \code{[i,j]} entry is the distance from \code{X[i]} to
   \code{Y[j]}.
 
+  Alternatively if \code{periodic=TRUE}, then provided the windows
+  containing \code{X} and \code{Y} are identical and are rectangular,
+  then the distances will be computed in the `periodic'
+  sense (also known as `torus' distance): opposite edges of the
+  rectangle are regarded as equivalent.
+  This is meaningless if the window is not a rectangle.
+  
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -56,6 +66,7 @@
 \examples{
    data(cells)
    d <- crossdist(cells, runifpoint(6))
+   d <- crossdist(cells, runifpoint(6), periodic=TRUE)
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}

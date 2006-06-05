@@ -5,7 +5,7 @@
   \code{update} method for class \code{"ppm"}.
 }
 \usage{
-  \method{update}{ppm}(object, \dots, fixdummy=TRUE)
+  \method{update}{ppm}(object, \dots, fixdummy=TRUE, use.internal=NULL)
 
 }
 \arguments{
@@ -20,6 +20,12 @@
     Logical flag indicating whether the quadrature scheme for the
     call to \code{\link{ppm}} should use the same set of dummy points
     as that in the original call.
+  }
+  \item{use.internal}{
+    Optional. Logical flag indicating whether the model should be
+    refitted using the internally saved data (\code{use.internal=TRUE})
+    or by re-evaluating these data in the
+    current frame (\code{use.internal=FALSE}).
   }
 }
 \details{
@@ -75,6 +81,33 @@
   points for the quadrature scheme. Setting \code{fixdummy=TRUE}
   ensures that the re-fitting will be performed using the same set
   of dummy points. This is highly recommended.
+
+  The value of \code{use.internal} determines where to find data
+  to re-evaluate the model (data for the arguments mentioned in
+  the original call to \code{ppm} that are not overwritten by
+  arguments to \code{update.ppm}).
+  
+  If \code{use.internal=FALSE}, then arguments 
+  to \code{ppm} are \emph{re-evaluated} in the frame where you
+  call \code{update.ppm}. This is like the behaviour of the
+  other methods for \code{\link{update}}. This means that if you have changed
+  any of the objects referred to in the call, these changes will be
+  taken into account. Also if the original call to \code{ppm} included
+  any calls to random number generators, these calls will be recomputed,
+  so that you will get a different outcome of the random numbers.
+
+  If \code{use.internal=TRUE}, then arguments to \code{ppm} are extracted
+  from internal data stored inside the current fitted
+  model \code{object}. This is useful if you don't want to 
+  re-evaluate anything. It is also necessary if 
+  if \code{object} has been restored from a dump file
+  using \code{\link{load}} or \code{\link{source}}. In such cases,
+  we have lost the environment in which \code{object} was fitted,
+  and data cannot be re-evaluated.
+
+  By default, if \code{use.internal} is missing, \code{update.ppm} will
+  re-evaluate the arguments if this is possible, and use internal data
+  if not.
 }
 \value{
   Another fitted point process model (object of class \code{"ppm"}).
@@ -105,6 +138,14 @@
   fut <- update(fitS, nzsub)
 
   # WARNING: the point pattern argument is called 'Q'
+
+  ranfit <- ppm(rpoispp(42), ~1, Poisson())
+  ranfit
+  # different random data!  
+  update(ranfit)
+  # the original data
+  update(ranfit, use.internal=TRUE)  
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

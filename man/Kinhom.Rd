@@ -8,7 +8,7 @@
 \usage{
   Kinhom(X, lambda, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
-    nlarge = 500, lambda2)
+    nlarge = 1000, lambda2)
 }
 \arguments{
   \item{X}{
@@ -230,9 +230,9 @@
   plot(Ki)
 
   # (3) simulated data: known intensity function
-  lamfun <- function(x,y) { 100 * x }
+  lamfun <- function(x,y) { 50 + 100 * x }
   # inhomogeneous Poisson process
-  Y <- rpoispp(lamfun, 100, owin())
+  Y <- rpoispp(lamfun, 150, owin())
   # evaluate intensity at points of pattern
   lambda <- lamfun(Y$x, Y$y)
   # inhomogeneous K function

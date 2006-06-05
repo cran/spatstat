@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.7 $	$Date: 2005/06/29 06:37:46 $
+#	$Revision: 1.8 $	$Date: 2006/05/30 13:46:51 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -70,12 +70,14 @@ function(bmax, npos, bstep) {
           bstep <- bmax/npos
           val <- seq(0, bmax, length=npos+1)
           val <- c(-bstep,val)
+          right <- bmax
         } else {
-          val <- seq(0, bmax, by=bstep)
+          npos <- ceiling(bmax/bstep)
+          right <- bstep * npos
+          val <- seq(0, right, length=npos+1)
           val <- c(-bstep,val)
-          npos <- length(val) - 2
         }
-        breakpts(val, bmax, TRUE, npos, bstep)
+        breakpts(val, right, TRUE, npos, bstep)
 }
 
 "as.breakpts" <- function(...) {
@@ -140,7 +142,8 @@ breakpts.from.r <- function(r) {
         return(as.breakpts(b))
 }
 
-handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL) {
+handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL,
+                            rmaxdefault) {
 
         if(!is.null(r) && !is.null(breaks))
           stop("Do not specify both \'r\' and \'breaks\'")
@@ -151,14 +154,15 @@ handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL) {
           breaks <- breakpts.from.r(r)
 	} else {
           # both 'r' and 'breaks' are missing
+          rmax <- if(missing(rmaxdefault)) diameter(window) else rmaxdefault
           if(is.null(eps)) {
             if(!is.null(window$xstep))
-              eps <- window$xstep
+              eps <- window$xstep/4
             else 
-              eps <- diff(window$xrange)/100
+              eps <- rmax/100
           }
           # warning(paste("step size for argument \'r\' defaults to", eps/4))
-          breaks <- make.even.breaks( diameter(window), bstep=eps/4)
+          breaks <- make.even.breaks( rmax, bstep=eps)
         }
 
         return(breaks)

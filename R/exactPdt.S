@@ -2,29 +2,29 @@
 #	exactPdt.S
 #	S function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.4 $	$Date: 2004/11/15 19:29:16 $
+#	$Revision: 4.5 $	$Date: 2006/06/01 02:29:42 $
 #
 
 "exactPdt"<-
-function(im)
+function(w)
 {
 #
-        verifyclass(im, "owin")
-        if(im$type != "mask")
+        verifyclass(w, "owin")
+        if(w$type != "mask")
           stop("Input must be a window of type \'mask\'")
 #	
-	nr <- im$dim[1]
-	nc <- im$dim[2]
+	nr <- w$dim[1]
+	nc <- w$dim[2]
 # pad out the input image with a margin of width 1 on all sides
-	x <- im$m
+	x <- w$m
 	x <- cbind(FALSE, x, FALSE)
 	x <- rbind(FALSE, x, FALSE)
 #	
 	res <- .C("ps_exact_dt_R",
-		as.double(im$xrange[1]),
-		as.double(im$yrange[1]),
-		as.double(im$xrange[2]),
-		as.double(im$yrange[2]),
+		as.double(w$xrange[1]),
+		as.double(w$yrange[1]),
+		as.double(w$xrange[2]),
+		as.double(w$yrange[2]),
 		nr = as.integer(nr),
 		nc = as.integer(nc),
 		as.logical(t(x)),
@@ -43,8 +43,5 @@ function(im)
         rows <- rows + 1
         cols <- cols + 1
         
-	out <- im
-	out$m <- NULL
-	out <- append(out, list(d=dist,row=rows,col=cols,b=bdist))
-	invisible(out)
+	return(list(d=dist,row=rows,col=cols,b=bdist, w=w))
 }

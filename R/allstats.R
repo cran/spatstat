@@ -2,7 +2,7 @@
 #
 #   allstats.R
 #
-#   $Revision: 1.10 $   $Date: 2004/01/13 06:59:57 $
+#   $Revision: 1.11 $   $Date: 2006/05/31 03:25:31 $
 #
 #
 allstats <- function(pp,dataname=NULL,verb=FALSE) {
@@ -14,10 +14,6 @@ allstats <- function(pp,dataname=NULL,verb=FALSE) {
   if(is.marked(pp))
     stop("This function is applicable only to unmarked patterns.\n")
 
-# get sensible r values
-  brks <- handle.r.b.args(r=NULL, breaks=NULL, pp$window, eps=NULL)
-  r    <- brks$r
-
 # initialise  
   fns <- list()
   titles <- list()
@@ -25,7 +21,7 @@ allstats <- function(pp,dataname=NULL,verb=FALSE) {
   
 # estimate F, G and J 
   if(verb) cat("Calculating F, G, J ...")
-  Jout <- Jest(pp,eps=NULL,breaks=brks)
+  Jout <- Jest(pp)
   if(verb) cat("ok.\n")
 
 # extract empty space function F
@@ -51,7 +47,7 @@ allstats <- function(pp,dataname=NULL,verb=FALSE) {
   if(verb) cat("J done.\n")
 
 # compute second moment function K
-  fns[[4]] <- Kout <- Kest(pp,eps=NULL,breaks=brks)
+  fns[[4]] <- Kout <- Kest(pp)
   titles[[4]] <- "K function"
   deform[[4]] <- attr(Kout, "fmla")
   if(verb) cat("K done.\n")

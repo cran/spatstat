@@ -6,8 +6,11 @@
 #   $Revision: 1.2 $   $Date: 2006/01/09 07:09:02 $
 # 
 
-fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE) {
+fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE) {
   verifyclass(object, "ppm")
+
+  if(check && damaged.ppm(object))
+    stop("object format corrupted; try update(object, use.internal=TRUE)")
   
   uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
 

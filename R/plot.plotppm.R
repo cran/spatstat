@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.6 $  $Date: 2006/04/12 11:56:12 $
+# $Revision: 1.7 $  $Date: 2006/05/31 09:46:57 $
 #
 #
 
@@ -56,7 +56,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
                  do.call("persp",
                          resolve.defaults(list(xs[[i]]),
                                           list(...), 
-                                          spatstat.options("par.persp")[[1]],
+                                          spatstat.options("par.persp"),
                                           list(xlab="x", zlab=ttt, main=main)))
                },
                image = {

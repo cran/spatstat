@@ -6,7 +6,7 @@
   in a set of points
 }
 \usage{
-  \method{pairdist}{default}(X, Y=NULL, \dots, method="C")
+  \method{pairdist}{default}(X, Y=NULL, \dots, period=NULL, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -19,6 +19,9 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{period}{
+    Optional. Dimensions for periodic edge correction.
   }
   \item{method}{
     String specifying which method of calculation to use.
@@ -42,6 +45,13 @@
   \code{Y} may be omitted and \code{X} may be a list with two components
   named \code{x} and \code{y}, or a matrix or data frame with two columns.
   
+  Alternatively if \code{period} is given,
+  then the distances will be computed in the `periodic'
+  sense (also known as `torus' distance).
+  The points will be treated as if they are in a rectangle
+  of width \code{period[1]} and height \code{period[2]}.
+  Opposite edges of the rectangle are regarded as equivalent.
+  
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -58,6 +68,7 @@
    y <- runif(100)
    d <- pairdist(x, y)
    d <- pairdist(cbind(x,y))
+   d <- pairdist(x, y, period=c(1,1))
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}
