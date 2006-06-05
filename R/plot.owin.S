@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.13 $	$Date: 2006/02/22 07:07:05 $
+#	$Revision: 1.14 $	$Date: 2006/05/31 08:22:08 $
 #
 #
 #
@@ -92,7 +92,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
                            resolve.defaults(
                            list(x=W$xcol, y=W$yrow, z=!t(W$m), add=TRUE),
                            list(...),
-                           spatstat.options("par.binary")[[1]]))
+                           spatstat.options("par.binary")))
          },
          stop(paste("Don't know how to plot window of type", sQuote(W$type)))
          )

@@ -1,10 +1,10 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.12 $   $Date: 2005/05/06 03:32:43 $
+#   $Revision: 1.13 $   $Date: 2006/06/02 03:23:34 $
 #
-plot.fasp <- function(x, formule=NULL, subset=NULL,
-                      lty=NULL, col=NULL, title=NULL, ..., samex=TRUE) {
+plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
+                      title=NULL, samex=TRUE) {
 
 # If no formula is given, look for a default formula in x:
   defaultplot <- is.null(formule)
@@ -70,14 +70,11 @@ plot.fasp <- function(x, formule=NULL, subset=NULL,
         fun <- as.fv(x$fns[[k]])
         fmla <- formule[k] 
         sub <- if(msub) subset[[k]] else subset
-        if(is.null(xlim))
-          plot(fun, fmla, sub, lty,col, ...)
-        else
-          plot(fun, fmla, sub, lty,col, xlim=xlim, ...)
-
-# Add the (sub)title of each plot.
-        if(!is.null(x$titles[[k]]))
-          title(main=x$titles[[k]])
+        do.call("plot.fv",
+                resolve.defaults(list(x=fun, fmla=fmla, subset=sub),
+                                 list(...),
+                                 list(xlim=xlim),
+                                 list(main=x$titles[[k]])))
       }
     }
   }

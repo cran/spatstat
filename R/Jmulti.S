@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.10 $	$Date: 2005/07/21 10:29:01 $
+#	$Revision: 4.11 $	$Date: 2006/05/31 02:51:23 $
 #
 #
 #
@@ -70,7 +70,9 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
 #  
 #
         X <- as.ppp(X)
-        brks <- handle.r.b.args(r, breaks, X$window, eps)$val
+        W<- X$window
+        rmaxdefault <- rmax.rule("J", W)
+        brks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)$val
 	FJ <- Fest(X[J], eps, breaks=brks)
 	GIJ <- Gmulti(X, I, J, breaks=brks)
         ratio <- function(a, b, c) {

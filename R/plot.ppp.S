@@ -1,13 +1,14 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.17 $	$Date: 2005/04/20 20:37:37 $
+#	$Revision: 1.19 $	$Date: 2006/05/31 09:21:26 $
 #
 #
 #--------------------------------------------------------------------------
 
 plot.ppp <-
-  function(x, main, ..., chars, cols, use.marks=TRUE, add=FALSE, maxsize, markscale)
+  function(x, main, ..., chars, cols, use.marks=TRUE, add=FALSE,
+           maxsize=NULL, markscale=NULL)
 {
 #
 # Function plot.ppp.
@@ -24,13 +25,32 @@ plot.ppp <-
   if(x$n == 0)
     return(invisible())
 
-        
-  if(!is.marked(x) || !use.marks) {
+  # handle plot parameters
+  explicit <- list()
+  if(!missing(cols))
+    explicit <- append(explicit, list(cols=cols))
+  if(!missing(chars))
+    explicit <- append(explicit, list(chars=chars))
+    
+  defaults <- spatstat.options("par.points")
+
+  smartpoints <- function(..., col=NULL, pch=NULL, cols, chars) {
+    if(missing(col) && !missing(cols))
+      col <- cols[1]
+    if(missing(pch) && !missing(chars))
+      pch <- chars[1]
     do.call("points",
+            resolve.defaults(list(...),
+                             if(!is.null(col)) list(col=col) else NULL,
+                             if(!is.null(pch)) list(pch=pch) else NULL))
+  }
+
+  if(!is.marked(x) || !use.marks) {
+    do.call("smartpoints",
             resolve.defaults(list(x$x, x$y),
-                             if(!missing(cols)) list(col=cols[1]) else NULL,
-                             if(!missing(chars)) list(pch=chars[1]) else NULL,
-                             list(...)))
+                             explicit,
+                             list(...),
+                             spatstat.options("par.points")))
     return(invisible())
   }
 
@@ -42,29 +62,38 @@ plot.ppp <-
     # real-valued marks
     ok <- all(is.finite(marks))
     if(ok) {
+      # establish values of markscale, maxsize
+      if(!is.null(maxsize) && !is.null(markscale))
+        stop("Only one of maxsize and markscale should be given")
+      if(is.null(maxsize) && is.null(markscale)) {
+        # if BOTH are absent, enforce the spatstat defaults
+        # (which could also be null)
+        pop <- spatstat.options("par.points")
+        markscale <- pop$markscale
+        maxsize   <- pop$maxsize
+      }
       # examine spread of values
       mr <- range(marks)
       maxabs <- max(abs(mr))
       constant <- (diff(mr) < 4 * .Machine$double.eps)
       tiny <- (maxabs < 4 * .Machine$double.eps)
-      if(tiny && missing(markscale)) {
+      if(tiny && is.null(markscale)) {
         # data cannot be scaled successfully;
         # plot as points
-        do.call("points",
+        do.call("smartpoints",
                 resolve.defaults(list(x$x, x$y),
-                                 if(!missing(cols)) list(col=cols[1]) else NULL,
-                                 list(...)))
+                                 explicit,
+                                 list(...),
+                                 spatstat.options("par.points")))
         return(invisible())
       }
       # determine physical scale:
       #   plotted size = scal * (mark value) 
-      if(!missing(maxsize) && !missing(markscale))
-        stop("Only one of maxsize and markscale should be given")
-      if(!missing(markscale))
+      if(!is.null(markscale))
         scal <- markscale
       else {
         # scale to be determined indirectly
-        if(missing(maxsize)) {
+        if(is.null(maxsize)) {
           # guess appropriate max physical size of symbols
           maxsize <- 1.4/sqrt(pi * x$n/area.owin(x$window))
           maxsize <- min(maxsize, diameter(x$window) * 0.07)
@@ -132,11 +161,12 @@ plot.ppp <-
   for(i in seq(um)) {
     relevant <- (x$marks == um[i])
     if(any(relevant))
-      do.call("points",
+      do.call("smartpoints",
               resolve.defaults(list(x$x[relevant], x$y[relevant]),
                                list(pch = chars[i]),
-                               if(!missing(cols)) list(col=cols[i]) else NULL,
-                               list(...)))
+                               explicit,
+                               list(...),
+                               spatstat.options("par.points")))
   }
   names(chars) <- um
   if(length(chars) < 20)

@@ -9,11 +9,18 @@
   for the data points. 
 }
 \usage{
-  eem(fit)
+  eem(fit, check=TRUE)
 }
 \arguments{
   \item{fit}{
     The fitted point process model. An object of class \code{"ppm"}.
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{fit}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
   }
 }
 \value{

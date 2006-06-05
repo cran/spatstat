@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.22 $	$Date: 2006/05/25 09:59:05 $
+#	$Revision: 5.28 $	$Date: 2006/05/31 02:50:20 $
 #
 #
 # -------- functions ----------------------------------------
@@ -37,7 +37,7 @@
 "Kest"<-
 function(X, ..., r=NULL, breaks=NULL, 
          correction=c("border", "isotropic", "Ripley", "translate"),
-         nlarge=500)
+         nlarge=3000)
 {
   verifyclass(X, "ppp")
   nlarge.given <- !missing(nlarge)
@@ -49,7 +49,8 @@ function(X, ..., r=NULL, breaks=NULL,
   lambda <- npoints/area
   lambda2 <- (npoints * (npoints - 1))/(area^2)
 
-  breaks <- handle.r.b.args(r, breaks, W)
+  rmaxdefault <- rmax.rule("K", W, lambda)        
+  breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
 
   correction.given <- !missing(correction)
@@ -75,10 +76,7 @@ function(X, ..., r=NULL, breaks=NULL,
   }
 
   # recommended range of r values
-  alim <- c(0, min(max(r),
-                   diff(W$xrange)/4,
-                   diff(W$yrange)/4,
-                   sqrt(1000/(lambda * pi))))
+  alim <- c(0, rmaxdefault)
 
   ###########################################
   # Efficient code for border method
@@ -116,17 +114,20 @@ function(X, ..., r=NULL, breaks=NULL,
   K <- fv(K, "r", substitute(K(r), NULL),
           "theo", , alim, c("r","Kpois(r)"), desc)
 
-  # matrix of pairwise distances
-  d <- pairdist(X$x, X$y)
-
+  # identify all close pairs
+  rmax <- max(r)
+  close <- closepairs(X, rmax)
+  DIJ <- close$d
+  XI <- ppp(close$xi, close$yi, window=W)
+  
   if(any(correction == "border" | correction == "bord.modif")) {
   # border method
   # Compute distances to boundary
     b <- bdist.points(X)
-  # Ignore pairs (i,i)
-    diag(d) <- Inf
+    I <- close$i
+    bI <- b[I]
   # apply reduced sample algorithm
-    RS <- Kount(d, b, breaks, slow=FALSE)
+    RS <- Kount(DIJ, bI, b, breaks)
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(lambda2 * denom.area)
@@ -140,33 +141,27 @@ function(X, ..., r=NULL, breaks=NULL,
                    "border-corrected estimate of K(r)",
                    "border")
     }
-    # reset diagonal to original values
-    diag(d) <- 0
   }
 
-  if(any(c("translate", "isotropic") %in% correction)) {
-    offdiag <- (row(d) != col(d))
-    d.offdiag <- d[offdiag]
-  }
-  
   if(any(correction == "translate")) {
     # translation correction
-    edgewt <- edge.Trans(X)
-    wh <- whist(d.offdiag, breaks$val, edgewt[offdiag])
+    XJ <- ppp(close$xj, close$yj, window=W)
+    edgewt <- edge.Trans(XI, XJ, paired=TRUE)
+    wh <- whist(DIJ, breaks$val, edgewt)
     Ktrans <- cumsum(wh)/(lambda2 * area)
-    rmax <- diameter(W)/2
-    Ktrans[r >= rmax] <- NA
+    h <- diameter(W)/2
+    Ktrans[r >= h] <- NA
     K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
                  "translation-corrected estimate of K(r)",
                  "trans")
   }
   if(any(correction == "isotropic")) {
     # Ripley isotropic correction
-    edgewt <- edge.Ripley(X, d)
-    wh <- whist(d.offdiag, breaks$val, edgewt[offdiag])
+    edgewt <- edge.Ripley(XI, matrix(DIJ, ncol=1))
+    wh <- whist(DIJ, breaks$val, edgewt)
     Kiso <- cumsum(wh)/(lambda2 * area)
-    rmax <- diameter(W)/2
-    Kiso[r >= rmax] <- NA
+    h <- diameter(W)/2
+    Kiso[r >= h] <- NA
     K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
                  "Ripley isotropic correction estimate of K(r)",
                  "iso")
@@ -182,55 +177,39 @@ function(X, ..., r=NULL, breaks=NULL,
 #############  SUPPORTING ALGORITHMS ###########################
 ################################################################  
 
-Kount <- function(d, b, breaks, slow=FALSE) {
+Kount <- function(dIJ, bI, b, breaks) {
   #
   # "internal" routine to compute border-correction estimate of K or Kij
   #
-  # d : matrix of pairwise distances
-  #                  (to exclude diagonal entries, set diag(d) = Inf)
-  # b : column vector of distances to window boundary
+  # dIJ:  vector containing pairwise distances for selected I,J pairs
+  # bI:   corresponding vector of boundary distances for I
+  # b:    vector of ALL distances to window boundary
+  #
   # breaks : breakpts object
   #
 
-  if(slow) { ########## slow ##############
-          
-       r <- breaks$r
-       
-       nr <- length(r)
-       numerator <- numeric(nr)
-       denom.count <- numeric(nr)
-
-       for(i in 1:nr) {
-         close <- (d <= r[i])
-         nclose <- matrowsum(close) # assumes diag(d) set to Inf
-         bok <- (b > r[i])
-         numerator[i] <- sum(nclose[bok])
-         denom.count[i] <- sum(bok)
-       }
-	
-  } else { ############# fast ####################
-
-        # determine which distances d_{ij} were observed without censoring
-        bb <- matrix(b, nrow=nrow(d), ncol=ncol(d))
-        uncen <- (d <= bb)
-        #
-        # histogram of noncensored distances
-        nco <- whist(d[uncen], breaks$val)
-        # histogram of censoring times for noncensored distances
-        ncc <- whist(bb[uncen], breaks$val)
-        # histogram of censoring times (yes, this is a different total size)
-        cen <- whist(b, breaks$val)
-        # go
-        RS <- reduced.sample(nco, cen, ncc, show=TRUE)
-        # extract results
-        numerator <- RS$numerator
-        denom.count <- RS$denominator
-        # check
-        if(length(numerator) != breaks$ncells)
-          stop("internal error: length(numerator) != breaks$ncells")
-        if(length(denom.count) != breaks$ncells)
-          stop("internal error: length(denom.count) != breaks$ncells")
-  }
+  stopifnot(length(dIJ) == length(bI))
+  
+  # determine which distances d_{ij} were observed without censoring
+  uncen <- (dIJ <= bI)
+  # histogram of noncensored distances
+  nco <- whist(dIJ[uncen], breaks$val)
+  # histogram of censoring times for noncensored distances
+  ncc <- whist(bI[uncen], breaks$val)
+  # histogram of censoring times (yes, this is a different total size)
+  cen <- whist(b, breaks$val)
+  # count censoring times beyond rightmost breakpoint
+  uppercen <- sum(b > max(breaks$val))
+  # go
+  RS <- reduced.sample(nco, cen, ncc, show=TRUE, uppercen=uppercen)
+  # extract results
+  numerator <- RS$numerator
+  denom.count <- RS$denominator
+  # check
+  if(length(numerator) != breaks$ncells)
+    stop("internal error: length(numerator) != breaks$ncells")
+  if(length(denom.count) != breaks$ncells)
+    stop("internal error: length(denom.count) != breaks$ncells")
   
   return(list(numerator=numerator, denom.count=denom.count))
 }
@@ -335,3 +314,29 @@ Kborder.engine <- function(X, rmax, nr=100,
 
      
 
+rmax.rule <- function(fun="K", W, lambda) {
+  verifyclass(W, "owin")
+  switch(fun,
+         K = {
+           # Ripley's Rule
+           ripley <- min(diff(W$xrange), diff(W$yrange))/4
+           # Count at most 1000 neighbours per point
+           rlarge <- if(!missing(lambda)) sqrt(1000 /(pi * lambda)) else Inf
+           rmax <- min(rlarge, ripley)
+         },
+         F = ,
+         G = ,
+         J = {
+           # rule of thumb
+           rdiam  <- diameter(W)/2
+           # Poisson process has F(rlarge) = 1 - 10^(-5)
+           rlarge <-
+             if(!missing(lambda)) sqrt(log(10^5)/(pi * lambda)) else Inf
+           rmax <- min(rlarge, rdiam)
+         },
+         stop(paste("Unrecognised function type", sQuote(fun)))
+         )
+  return(rmax)
+}
+           
+           

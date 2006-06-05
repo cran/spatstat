@@ -6,7 +6,7 @@
   function, from histogram data
 }
 \usage{
-  kaplan.meier(obs, nco, breaks)
+  kaplan.meier(obs, nco, breaks, upperobs=0)
 }
 \arguments{
   \item{obs}{vector of \eqn{n} integers giving the histogram of
@@ -18,6 +18,9 @@
   }
   \item{breaks}{Vector of \eqn{n+1} breakpoints which were used to form
     both histograms.
+  }
+  \item{upperobs}{
+    Number of observations beyond the rightmost breakpoint, if any.
   }
 }
 \value{
@@ -62,6 +65,12 @@
   \code{F(breaks[k+1])}, and \code{lambda[k]} is an estimate of
   the average of \eqn{\lambda(t)}{lambda(t)} over the interval
   \code{(breaks[k],breaks[k+1])}.
+
+  The histogram breaks must include \eqn{0}.
+  If the histogram breaks do not span the range of the observations,
+  it is important to count how many survival times
+  \eqn{\tilde T_i}{T*[i]} exceed the rightmost breakpoint,
+  and give this as the value \code{upperobs}.
 }
 \seealso{
   \code{\link{reduced.sample}},

@@ -1,8 +1,8 @@
-#
+
 #
 #      distances.R
 #
-#      $Revision: 1.15 $     $Date: 2006/04/15 18:15:55 $
+#      $Revision: 1.16 $     $Date: 2006/05/26 09:02:40 $
 #
 #
 #      Interpoint distances
@@ -13,13 +13,23 @@ pairdist <- function(X, ...) {
   UseMethod("pairdist")
 }
 
-pairdist.ppp <- function(X, ..., method="C") {
+pairdist.ppp <- function(X, ..., periodic=FALSE, method="C") {
   verifyclass(X, "ppp")
-  return(pairdist.default(X$x, X$y, method="C"))
+  if(!periodic)
+    return(pairdist.default(X$x, X$y, method=method))
+  # periodic case
+  W <- X$window
+  if(W$type != "rectangle")
+    stop(paste("periodic edge correction can't be applied",
+               "in a non-rectangular window"))
+  wide <- diff(W$xrange)
+  high <- diff(W$yrange)
+  return(pairdist.default(X$x, X$y, period=c(wide,high), method=method))
 }
 
+
 pairdist.default <-
-  function(X, Y=NULL, ..., method="C")
+  function(X, Y=NULL, ..., period=NULL, method="C")
 {
   xy <- xy.coords(X,Y)[c("x","y")]
   x <- xy$x
@@ -34,18 +44,43 @@ pairdist.default <-
     return(matrix(numeric(0), nrow=0, ncol=0))
   else if(n == 1)
     return(matrix(0,nrow=1,ncol=1))
-  
+
+  if((periodic<- !is.null(period))) {
+    stopifnot(is.numeric(period))
+    stopifnot(length(period) == 2 || length(period) == 1)
+    stopifnot(all(period > 0))
+    if(length(period) == 1) period <- rep(period, 2)
+    wide <- period[1]
+    high <- period[2]
+  }
+
   switch(method,
          interpreted={
            xx <- matrix(rep(x, n), nrow = n)
            yy <- matrix(rep(y, n), nrow = n)
-           d <- sqrt((xx - t(xx))^2 + (yy - t(yy))^2)
+           if(!periodic) {
+             d <- sqrt((xx - t(xx))^2 + (yy - t(yy))^2)
+           } else {
+             dx <- xx - t(xx)
+             dy <- yy - t(yy)
+             dx2 <- pmin(dx^2, (dx + wide)^2, (dx - wide)^2)
+             dy2 <- pmin(dy^2, (dy + high)^2, (dy - high)^2)
+             d <- sqrt(dx2 + dy2)
+           }
          },
          C={
            d <- numeric( n * n)
-           z<- .C("pairdist", n = as.integer(n),
-                  x= as.double(x), y= as.double(y), d= as.double(d),
-                  PACKAGE="spatstat")
+           if(!periodic) {
+             z<- .C("pairdist", n = as.integer(n),
+                    x= as.double(x), y= as.double(y), d= as.double(d),
+                    PACKAGE="spatstat")
+           } else {
+             z<- .C("pairPdist", n = as.integer(n),
+                    x= as.double(x), y= as.double(y),
+                    xwidth=as.double(wide), yheight=as.double(high),
+                    d= as.double(d),
+                    PACKAGE="spatstat")
+           }
            d <- matrix(z$d, nrow=n, ncol=n)
          },
          stop(paste("Unrecognised method \"", method, "\"", sep=""))
@@ -59,7 +94,7 @@ nndist <- function(X, ..., method="C") {
 
 nndist.ppp <- function(X, ..., method="C") {
   verifyclass(X, "ppp")
-  return(nndist.default(X$x, X$y, method="C"))
+  return(nndist.default(X$x, X$y, method=method))
 }
 
 nndist.default <-
@@ -116,7 +151,7 @@ nnwhich <- function(X, ..., method="C") {
 
 nnwhich.ppp <- function(X, ..., method="C") {
   verifyclass(X, "ppp")
-  return(nnwhich.default(X$x, X$y, method="C"))
+  return(nnwhich.default(X$x, X$y, method=method))
 }
 
 nnwhich.default <-
@@ -180,14 +215,28 @@ crossdist <- function(X, Y, ...) {
   UseMethod("crossdist")
 }
 
-crossdist.ppp <- function(X, Y, ..., method="C") {
+crossdist.ppp <- function(X, Y, ..., periodic=FALSE, method="C") {
   verifyclass(X, "ppp")
   Y <- as.ppp(Y)
-  return(crossdist.default(X$x, X$y, Y$x, Y$y, method=method))
+  if(!periodic)
+    return(crossdist.default(X$x, X$y, Y$x, Y$y, method=method))
+  # periodic case
+  WX <- X$window
+  WY <- Y$window
+  if(WX$type != "rectangle" || WY$type != "rectangle")
+    stop(paste("periodic edge correction can't be applied",
+               "in non-rectangular windows"))
+  if(!is.subset.owin(WX,WY) || !is.subset.owin(WY, WX))
+    stop(paste("periodic edge correction is not implemented",
+               "for the case when X and Y lie in different rectangles"))
+  wide <- diff(WX$xrange)
+  high <- diff(WX$yrange)
+  return(crossdist.default(X$x, X$y, Y$x, Y$y,
+                           period=c(wide,high), method=method))
 }
 
 crossdist.default <-
-  function(X, Y, x2, y2, ..., method="C")
+  function(X, Y, x2, y2, ..., period=NULL, method="C")
 {
   x1 <- X
   y1 <- Y
@@ -200,25 +249,57 @@ crossdist.default <-
   n2 <- length(x2)
   if(n1 == 0 || n2 == 0)
     return(matrix(numeric(0), nrow=n1, ncol=n2))
-  switch(method,
+
+  if((periodic<- !is.null(period))) {
+    stopifnot(is.numeric(period))
+    stopifnot(length(period) == 2 || length(period) == 1)
+    stopifnot(all(period > 0))
+    if(length(period) == 1) period <- rep(period, 2)
+    wide <- period[1]
+    high <- period[2]
+  }
+
+   switch(method,
          interpreted = {
                  X1 <- matrix(rep(x1, n2), ncol = n2)
                  Y1 <- matrix(rep(y1, n2), ncol = n2)
                  X2 <- matrix(rep(x2, n1), ncol = n1)
                  Y2 <- matrix(rep(y2, n1), ncol = n1)
-                 d <- sqrt((X1 - t(X2))^2 + (Y1 - t(Y2))^2)
+                 if(!periodic) 
+                   d <- sqrt((X1 - t(X2))^2 + (Y1 - t(Y2))^2)
+                 else {
+                   dx <- X1 - t(X2)
+                   dy <- Y1 - t(Y2)
+                   dx2 <- pmin(dx^2, (dx + wide)^2, (dx - wide)^2)
+                   dy2 <- pmin(dy^2, (dy + high)^2, (dy - high)^2)
+                   d <- sqrt(dx2 + dy2)
+                 }
                  return(d)
                },
                C = {
-                 z<- .C("crossdist",
-                        nfrom = as.integer(n1),
-                        xfrom = as.double(x1),
-                        yfrom = as.double(y1),
-                        nto = as.integer(n2),
-                        xto = as.double(x2),
-                        yto = as.double(y2),
-                        d = as.double(matrix(0, nrow=n1, ncol=n2)),
-                        PACKAGE="spatstat")
+                 if(!periodic) {
+                   z<- .C("crossdist",
+                          nfrom = as.integer(n1),
+                          xfrom = as.double(x1),
+                          yfrom = as.double(y1),
+                          nto = as.integer(n2),
+                          xto = as.double(x2),
+                          yto = as.double(y2),
+                          d = as.double(matrix(0, nrow=n1, ncol=n2)),
+                          PACKAGE="spatstat")
+                 } else {
+                   z<- .C("crossPdist",
+                          nfrom = as.integer(n1),
+                          xfrom = as.double(x1),
+                          yfrom = as.double(y1),
+                          nto = as.integer(n2),
+                          xto = as.double(x2),
+                          yto = as.double(y2),
+                          xwidth = as.double(wide),
+                          yheight = as.double(high),
+                          d = as.double(matrix(0, nrow=n1, ncol=n2)),
+                          PACKAGE="spatstat")
+                 }
                  return(matrix(z$d, nrow=n1, ncol=n2))
                },
                stop(paste("Unrecognised method", method))

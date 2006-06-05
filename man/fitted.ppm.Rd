@@ -10,7 +10,7 @@
   or at the points of the quadrature scheme used to fit the model.
 }
 \usage{
-  \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE)
+  \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE, check=TRUE)
 }
 \arguments{
   \item{object}{
@@ -29,6 +29,13 @@
     at the points of the data point pattern. If \code{FALSE}, then
     values will be computed at all the points of the quadrature scheme
     used to fit the model, including the points of the data point pattern.
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{object}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
   }
 }
 \value{

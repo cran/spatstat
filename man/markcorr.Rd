@@ -9,7 +9,7 @@
 }
 \usage{
 markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
-         slow=FALSE, correction=c("isotropic", "Ripley", "translate"),
+         correction=c("isotropic", "Ripley", "translate"),
          method="density", \dots)
 }
 \arguments{
@@ -39,15 +39,6 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     \code{"sm"} and \code{"smrep"}.
   }
   
-  \item{slow}{
-    Logical vector indicating whether to use exact analytic geometry
-    to calculate 
-    the edge correction weights for the translation correction
-    in the case where the window of observation of \code{X}
-    is polygonal. These calculations are extremely slow and should
-    be avoided unless you are a developer investigating the
-    package.
-  }
   \item{\dots}{
     Arguments passed to the density estimation routine
     (\code{\link{density}}, \code{\link{loess}} or \code{sm.density})

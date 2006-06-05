@@ -4,13 +4,16 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.3 $ $Date: 2006/01/18 03:59:59 $
+# $Revision: 1.4 $ $Date: 2006/06/02 08:36:24 $
 #
 
-residuals.ppm <- function(object, type="raw", ...,
-                          fittedvalues = fitted.ppm(object)) {
+residuals.ppm <- function(object, type="raw", ..., check=TRUE, 
+                          fittedvalues = fitted.ppm(object, check=check)) {
   
   verifyclass(object, "ppm")
+
+  if(check && missing(fittedvalues) && damaged.ppm(object)) 
+    stop("object format corrupted; try update(object, use.internal=TRUE)")
 
   typetable <- c("inverse", "raw", "pearson", "Pearson")
   typemap <-   c("inverse", "raw", "pearson", "pearson")

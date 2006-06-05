@@ -142,6 +142,9 @@ maxsize, markscale)
   largest mark in absolute value, \code{mmax=max(abs(x$marks))},
   will be scaled to have physical size \code{maxsize}.
 
+  The user can set the default values of these plotting parameters
+  using \code{\link{spatstat.options}("par.points")}.
+  
   The value returned by this plot function can be used to make a
   suitable legend, as shown in the examples.
 }
@@ -157,8 +160,14 @@ maxsize, markscale)
    data(cells)
    plot(cells)
 
+   plot(cells, pch=16)
+
    # make the plotting symbols larger (for publication at reduced scale)
    plot(cells, cex=2)
+
+   # set it in spatstat.options
+   spatstat.options(par.points=list(cex=2))
+   plot(cells)
 
    # multitype 
    data(lansing)

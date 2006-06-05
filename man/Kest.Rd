@@ -8,11 +8,11 @@ from a point pattern in a window of arbitrary shape.
 \synopsis{
   Kest(X, \dots, r=NULL, breaks=NULL, 
      correction=c("border", "isotropic", "Ripley", "translate"),
-    nlarge=500)
+    nlarge=3000)
 }
 \usage{
   Kest(X, \dots, r, correction=c("border", "isotropic", "Ripley", "translate"),
-     nlarge=500)
+     nlarge=3000)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -109,7 +109,7 @@ from a point pattern in a window of arbitrary shape.
   homogeneous). For inhomogeneous point patterns, see
   \code{\link{Kinhom}}.
 
-  If the point pattern \code{X} contains more than about 1000 points,
+  If the point pattern \code{X} contains more than about 3000 points,
   the isotropic and translation edge corrections can be computationally
   prohibitive. The computations for the border method are much faster,
   and are statistically efficient when there are large numbers of

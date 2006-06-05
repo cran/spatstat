@@ -6,7 +6,7 @@
   function, from histogram data
 }
 \usage{
-  reduced.sample(nco, cen, ncc, show=FALSE)
+  reduced.sample(nco, cen, ncc, show=FALSE, uppercen=0)
 }
 \arguments{
   \item{nco}{vector of counts giving the histogram of
@@ -18,6 +18,10 @@
   }
   \item{ncc}{vector of counts giving the histogram of
     censoring times for the uncensored observations only 
+  }
+  \item{uppercen}{
+    number of censoring times greater than the rightmost
+    histogram breakpoint (if there are any)
   }
   \item{show}{Logical value controlling the amount of detail
     returned by the function value (see below)
@@ -69,6 +73,11 @@
   \code{rs[k]} is the reduced sample estimate of \code{F(breaks[k+1])}.
   The value is exact, i.e. the use of histograms does not introduce any
   approximation error.
+
+  Note that, for the results to be valid, either the histogram breaks
+  must span the censoring times, or the number of censoring times
+  that do not fall in a histogram cell must have been counted in
+  \code{uppercen}.
 }
 \seealso{
   \code{\link{kaplan.meier}},

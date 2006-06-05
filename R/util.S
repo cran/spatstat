@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.12 $    $Date: 2006/05/25 04:40:22 $
+#    $Revision: 1.13 $    $Date: 2006/05/31 06:35:24 $
 #
 #  (a) for matrices only:
 #
@@ -67,9 +67,14 @@ apply23sum <- function(x) {
 #
 
 whist <-
-  function(x, breaks, weights, trim=TRUE) {
-    if(trim) {
-      ok <- (x >= min(breaks)) & (x <= max(breaks))
+  function(x, breaks, weights, trim=TRUE, right) {
+    if(length(x) == 0)
+      return(rep(0, length(breaks)-1))
+    if(trim || !missing(right)) {
+      if(!missing(right))
+        ok <- (x <= right)
+      else
+        ok <- (x >= breaks[1]) & (x <= breaks[length(breaks)])
       x <- x[ok]
       if(!missing(weights))
         weights <- weights[ok]

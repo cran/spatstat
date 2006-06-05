@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.4 $     $Date: 2006/05/01 13:30:12 $
+#       $Revision: 5.5 $     $Date: 2006/05/31 08:22:08 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -241,7 +241,7 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
     npix <- ensure2print(npix, verbose)
 
   if(pixels) {
-    sonpixel <- spatstat.options("npixel")[[1]]
+    sonpixel <- spatstat.options("npixel")
     sonpixel <- ensure2print(sonpixel, verbose, "default")
   }
   

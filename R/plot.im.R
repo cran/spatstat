@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.16 $   $Date: 2006/02/22 07:15:19 $
+#  $Revision: 1.22 $   $Date: 2006/05/31 08:22:08 $
 #
 #  Plotting code for pixel images
 #
@@ -153,16 +153,54 @@ image.im <- plot.im
 
 ########################################################################
 
-persp.im <- function(x, ...) {
+persp.im <- function(x, ..., colmap=NULL) {
   xname <- deparse(substitute(x))
-  if(summary(x)$type == "factor")
+  xinfo <- summary(x)
+  if(xinfo$type == "factor")
     stop("Perspective plot is inappropriate for factor-valued image")
-  pop <- spatstat.options()$par.persp
+  pop <- spatstat.options("par.persp")
+  # colour map?
+  if(is.null(colmap))
+    colinfo <- list(col=NULL)
+  else {
+    # interpret colour map
+    if(is.list(colmap) && all(c("breaks", "col") %in% names(colmap))) {
+      breaks <- colmap$breaks
+      colvalues <- colmap$col
+    } else if(is.vector(colmap)) {
+      colvalues <- colmap
+      breaks <- quantile(x, seq(0,1,length=length(colvalues)+1))
+      if(!all(ok <- !duplicated(breaks))) {
+        breaks <- breaks[ok]
+        colvalues <- colvalues[ok[-1]]
+      }
+    } else warning("Unrecognised format for colour map")
+    # apply colour map to image values
+    colid <- cut.im(x, breaks=breaks, include.lowest=TRUE)
+    colval <- eval.im(colvalues[unclass(colid)])
+    colval <- t(as.matrix(colval))
+    nr <- nrow(colval)
+    nc <- ncol(colval)
+    colval <- colval[-1, -1]
+    colval[is.na(colval)] <- colvalues[1]
+    # pass colour matrix (and suppress lines)
+    colinfo <- list(col=colval, border=NA)
+  }
+
+  # get reasonable z scale while fixing x:y aspect ratio
+  if(xinfo$type %in% c("integer", "real")) {
+    xbox <- as.rectangle(x)
+    zscale <- 0.5 * mean(diff(xbox$xrange), diff(xbox$yrange))/diff(xinfo$range)
+  } else
+    zscale <- NULL
+  
   do.call.matched("persp",
                   resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                                    list(...),
                                    pop,
+                                   colinfo,
                                    list(xlab="x", ylab="y", zlab=xname),
+                                   list(scale=FALSE, expand=zscale),
                                    list(main=xname)),
                   funargs=.Spatstat.persp.args)
 }

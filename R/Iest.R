@@ -2,7 +2,7 @@
 #
 #	I function
 #
-#	$Revision: 1.1 $	$Date: 2005/06/07 18:42:13 $
+#	$Revision: 1.2 $	$Date: 2006/05/31 02:44:07 $
 #
 #
 #
@@ -24,7 +24,7 @@ Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
   rvals <- Jdotdot$r
   
   # J function of subpattern of each type i
-  Jii <- lapply(Y, Jest)
+  Jii <- lapply(Y, Jest, r=rvals)
   nrvals <- unlist(lapply(Jii, function(x) { length(x$r) }))
   if(length(unique(nrvals)) != 1 || nrvals[1] != length(rvals))
     stop("Internal error: J function objects have different lengths")

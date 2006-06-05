@@ -6,7 +6,7 @@
   taken from two different sets of points.
 }
 \usage{
-  \method{crossdist}{default}(X, Y, x2, y2, \dots, method="C")
+  \method{crossdist}{default}(X, Y, x2, y2, \dots, period=NULL, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -19,6 +19,9 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{period}{
+    Optional. Dimensions for periodic edge correction.
   }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
@@ -42,6 +45,13 @@
   The arguments \code{x2},\code{y2} specify the coordinates of the
   second set of points.
   
+  Alternatively if \code{period} is given,
+  then the distances will be computed in the `periodic'
+  sense (also known as `torus' distance).
+  The points will be treated as if they are in a rectangle
+  of width \code{period[1]} and height \code{period[2]}.
+  Opposite edges of the rectangle are regarded as equivalent.
+  
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -59,6 +69,7 @@
 }
 \examples{
    d <- crossdist(runif(7), runif(7), runif(12), runif(12))
+   d <- crossdist(runif(7), runif(7), runif(12), runif(12), period=c(1,1))
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}

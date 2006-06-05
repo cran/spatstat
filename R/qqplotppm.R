@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.10 $   $Date: 2006/03/24 06:31:07 $
+#  $Revision: 1.13 $   $Date: 2006/06/02 08:47:16 $
 #
 
 qqplot.ppm <-
@@ -18,9 +18,11 @@ qqplot.ppm <-
            limcol=if(monochrome) "black" else "red")
 {
   verifyclass(fit, "ppm")
-
+  if(damaged.ppm(fit))
+    stop("object format corrupted; try update(fit, use.internal=TRUE)")
+  
   if(fast) {
-    oldnpixel <- spatstat.options("npixel")[[1]]
+    oldnpixel <- spatstat.options("npixel")
     if(is.null(dimyx)) 
       dimyx <- pmin(40, oldnpixel)
     spatstat.options(npixel=dimyx)
@@ -31,7 +33,8 @@ qqplot.ppm <-
   # Quantiles of the residual field will be computed.
   residualfield <- function(fit, ...) {
     d <- diagnose.ppm(fit, which="smooth",
-                      plot.it=FALSE, compute.cts=FALSE, compute.sd=FALSE, ...)
+                      plot.it=FALSE, compute.cts=FALSE, compute.sd=FALSE,
+                      check=FALSE, ...)
     return(d$smooth$Z$v)
   }
 
@@ -40,7 +43,7 @@ qqplot.ppm <-
 
   # How to refit the model properly!
   refit <- function(fit, pattern) {
-    update.ppm(fit, Q=pattern)
+    update.ppm(fit, Q=pattern, use.internal=TRUE)
   }
   
   ##################  How to perform simulations?  #######################

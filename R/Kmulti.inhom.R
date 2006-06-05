@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.2 $	$Date: 2006/03/10 04:03:12 $
+#	$Revision: 1.4 $	$Date: 2006/05/31 03:59:42 $
 #
 #
 # ------------------------------------------------------------------------
@@ -64,9 +64,6 @@ function(X, I, J, lambdaI, lambdaJ,
         W <- X$window
 	area <- area.owin(W)
 
-        breaks <- handle.r.b.args(r, breaks, W)
-        r <- breaks$r
-
         # validate edge correction
         correction.given <- !missing(correction) && (correction != NULL)
         correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
@@ -104,6 +101,11 @@ function(X, I, J, lambdaI, lambdaJ,
 	if(nI == 0) stop(paste("There are no", Iname))
 	if(nJ == 0) stop(paste("There are no", Jname))
 
+        # r values 
+        rmaxdefault <- rmax.rule("K", W, nJ/area)
+        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
+        r <- breaks$r
+        
         # intensity data
         if(is.im(lambdaI)) {
           # look up intensity values
@@ -133,17 +135,14 @@ function(X, I, J, lambdaI, lambdaJ,
         } else 
         stop(paste(sQuote("lambdaJ"), "should be a vector or an image"))
 
-        # Form weight for each pair
-        if(is.null(lambdaIJ))
-          weight <- 1/outer(lambdaI, lambdaJ, "*")
-        else {
+        # Weight for each pair
+        if(!is.null(lambdaIJ)) {
           if(!is.matrix(lambdaIJ))
             stop("lambdaIJ should be a matrix")
           if(nrow(lambdaIJ) != nI)
             stop(paste("nrow(lambdaIJ) should equal the number of", Iname))
           if(ncol(lambdaIJ) != nJ)
             stop(paste("ncol(lambdaIJ) should equal the number of", Jname))
-          weight <- 1/lambdaIJ
         }
 
         # Recommended range of r values
@@ -156,34 +155,51 @@ function(X, I, J, lambdaI, lambdaJ,
         K <- fv(K, "r", substitute(Kmulti.inhom(r), NULL),
                 "theo", , alim, c("r","Kpois(r)"), desc)
 
-# interpoint distances		
-	d <- crossdist(x[I], y[I], x[J], y[J])
-# distances to boundary	
-	b <- (bdist.points(X))[I]
-        
-# Determine which interpoint distances d[i,j] refer to the same point
-# (not just which distances are zero)        
-        same <- matrix(FALSE, nrow=nI, ncol=nJ)
-        common <- I & J
-        if(any(common)) {
-          Irow <- cumsum(I)
-          Jcol <- cumsum(J)
-          icommon <- (1:npoints)[common]
-          for(i in icommon)
-            same[Irow[i], Jcol[i]] <- TRUE
+# identify close pairs of points
+        XI <- X[I]
+        XJ <- X[J]
+        close <- crosspairs(XI, XJ, max(r))
+# map (i,j) to original serial numbers in X
+        orig <- seq(npoints)
+        imap <- orig[I]
+        jmap <- orig[J]
+        iX <- imap[close$i]
+        jX <- jmap[close$j]
+# eliminate any identical pairs
+        if(any(I & J)) {
+          ok <- (iX != jX)
+          if(!all(ok)) {
+            close$i  <- close$i[ok]
+            close$j  <- close$j[ok]
+            close$xi <- close$xi[ok]
+            close$yi <- close$yi[ok]
+            close$xj <- close$xj[ok]
+            close$yj <- close$yj[ok]
+            close$dx <- close$dx[ok]
+            close$dy <- close$dy[ok]
+            close$d  <- close$d[ok]
+          }
         }
+# extract information for these pairs (relative to orderings of XI, XJ)
+        dclose <- close$d
+        icloseI  <- close$i
+        jcloseJ  <- close$j
+        
+# Form weight for each pair
+        if(is.null(lambdaIJ))
+          weight <- 1/(lambdaI[icloseI] * lambdaJ[jcloseJ])
+        else 
+          weight <- 1/lambdaIJ[cbind(icloseI, jcloseJ)]
 
 # Compute estimates by each of the selected edge corrections.
-        
+
         if(any(correction == "border" | correction == "bord.modif")) {
           # border method
           # Compute distances to boundary
-          b <- bdist.points(X[I])
-          # Distances corresponding to identical pairs
-          # are excluded from consideration
-          d[same] <- Inf
+          b <- bdist.points(XI)
+          bI <- b[icloseI]
           # apply reduced sample algorithm
-          RS <- Kwtsum(d, b, weight, 1/lambdaI, breaks, slow=FALSE)
+          RS <- Kwtsum(dclose, bI, weight, b, 1/lambdaI, breaks)
           if(any(correction == "border")) {
             Kb <- RS$ratio
             K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
@@ -196,14 +212,12 @@ function(X, I, J, lambdaI, lambdaJ,
                          "modified border-corrected estimate of Kmulti.inhom(r)",
                          "bord.modif")
           }
-          # reset identical pairs to original values
-          d[same] <- 0
         }
         if(any(correction == "translate")) {
           # translation correction
-            edgewt <- edge.Trans(X[I], X[J])
+            edgewt <- edge.Trans(XI[icloseI], XJ[jcloseJ], paired=TRUE)
             allweight <- edgewt * weight
-            wh <- whist(d[!same], breaks$val, allweight[!same])
+            wh <- whist(dclose, breaks$val, allweight)
             Ktrans <- cumsum(wh)/area
             rmax <- diameter(W)/2
             Ktrans[r >= rmax] <- NA
@@ -213,9 +227,9 @@ function(X, I, J, lambdaI, lambdaJ,
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
-            edgewt <- edge.Ripley(X[I], d)
+            edgewt <- edge.Ripley(XI[icloseI], matrix(dclose, ncol=1))
             allweight <- edgewt * weight
-            wh <- whist(d[!same], breaks$val, allweight[!same])
+            wh <- whist(dclose, breaks$val, allweight)
             Kiso <- cumsum(wh)/area
             rmax <- diameter(W)/2
             Kiso[r >= rmax] <- NA

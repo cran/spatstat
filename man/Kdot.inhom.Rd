@@ -191,9 +191,9 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
 
 
     # synthetic example: type A points have intensity 50,
-    #                    type B points have intensity 100 * x
-    lamB <- as.im(function(x,y){100 * x}, owin())
-    lamdot <- as.im(function(x,y) { 50 + 100 * x}, owin())
+    #                    type B points have intensity 50 + 100 * x
+    lamB <- as.im(function(x,y){50 + 100 * x}, owin())
+    lamdot <- as.im(function(x,y) { 100 + 100 * x}, owin())
     X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
     XB <- split(X)$B
     K <- Kdot.inhom(X, "B",  lambdaI=lamB[XB], lambdadot=lamdot[X])

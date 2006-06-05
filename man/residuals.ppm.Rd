@@ -8,10 +8,11 @@
   compute residuals.
 }
 \synopsis{
-  \method{residuals}{ppm}(object, type="raw", \dots, fittedvalues=fitted.ppm(object))
+  \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE,
+                fittedvalues=fitted.ppm(object, check=check))
 }
 \usage{
-  \method{residuals}{ppm}(object, type="raw", \dots)
+  \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE)
 }
 \arguments{
   \item{object}{
@@ -26,6 +27,13 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{object}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
   }
 }
 \value{

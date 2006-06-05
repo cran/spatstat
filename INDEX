@@ -179,6 +179,7 @@ pcf.fasp                Pair Correlation Function obtained from array
 pcf.fv                  Pair Correlation Function obtained from K
                         Function
 pcf.ppp                 Pair Correlation Function of Point Pattern
+persp.im                Perspective Plot of Pixel Image
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.im                 Plot a Pixel Image
@@ -202,6 +203,7 @@ print.ppp               Print Brief Details of a Point Pattern Dataset
 print.psp               Print Brief Details of a Line Segment Pattern
                         Dataset
 print.quad              Print a Quadrature Scheme
+profilepl               Profile Maximum Pseudolikelihood
 psp                     Create a Line Segment Pattern
 psp.object              Class of Line Segment Patterns
 qqplot.ppm              Q-Q Plot of Residuals from Fitted Point Process

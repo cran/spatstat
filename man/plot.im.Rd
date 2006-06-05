@@ -61,7 +61,9 @@
   \code{col}. See the examples in \code{\link{image.default}}.
 }
 \seealso{
-  \code{\link{im.object}}
+  \code{\link{im.object}},
+  \code{\link{contour.im}},
+  \code{\link{persp.im}}
 }
 \examples{
    # an image

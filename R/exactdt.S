@@ -2,7 +2,7 @@
 #	exactdt.S
 #	S function exactdt() for exact distance transform
 #
-#	$Revision: 4.4 $	$Date: 2004/11/15 19:28:30 $
+#	$Revision: 4.6 $	$Date: 2006/06/01 02:18:34 $
 #
 
 "exactdt"<-
@@ -36,6 +36,5 @@ function(X, ...)
 
         inde <- inde + 1    # convert from C to S indexing
         
-	result <- list(d = dist, i = inde, b = bdry)
-	append(result, w)
+        return(list(d = dist, i = inde, b = bdry, w=w))
 }

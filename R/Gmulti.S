@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.8 $	$Date: 2005/07/21 10:26:37 $
+#	$Revision: 4.11 $	$Date: 2006/05/31 07:20:50 $
 #
 ################################################################################
 
@@ -82,38 +82,57 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
 #	breaks:		(optional) breakpoints for argument r
 #
 	verifyclass(X, "ppp")
-	if(!is.marked(X))
-		stop("point pattern has no \'marks\'")
-	window <- X$window
-        brks <- handle.r.b.args(r, breaks, window)$val        
-# Extract points of group I and J
+	W <- X$window
+        npoints <- X$n
+        area <- area.owin(W)
+# check I and J
 	if(!is.logical(I) || !is.logical(J))
 		stop("I and J must be logical vectors")
 	if(length(I) != X$n || length(J) != X$n)
 		stop("length of I or J does not equal the number of points")
-	if(sum(I) == 0) stop("No points satisfy condition I")
-	xI <- X$x[I]
-	yI <- X$y[I]
-	if(sum(J) == 0) stop("No points satisfy condition J")
-	xJ <- X$x[J]
-	yJ <- X$y[J]
-#  compute squared distance from each type i point to
-#  the nearest other point of any type
-	xIm <- matrix(xI, nrow=length(xI), ncol=length(xJ))
-	yIm <- matrix(yI, nrow=length(yI), ncol=length(yJ))
-	xJm <- matrix(xJ, nrow=length(xJ), ncol=length(xI))
-	yJm <- matrix(yJ, nrow=length(yJ), ncol=length(yI))
-	squd <-  (xIm - t(xJm))^2 + (yIm - t(yJm))^2
-# identify which pairs in 'squd' correspond to identical points
-	dag <- (diag(1, X$n) != 0)
-	dag <- dag[I,J]
-#  reset this 'diagonal' to a large value
-	oo <- (diff(window$xrange) + diff(window$yrange) )^2
-	squd[dag] <- oo
+        nI <- sum(I)
+        nJ <- sum(J)
+	if(nI == 0) stop("No points satisfy condition I")
+	if(nJ == 0) stop("No points satisfy condition J")
+        lamJ <- nJ/area
+#  determine breakpoints for r values
+        rmaxdefault <- rmax.rule("G", W, lamJ)
+        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
+        brks <- breaks$val
+# find close pairs of points
+        XI <- X[I]
+        XJ <- X[J]
+        close <- crosspairs(XI, XJ, breaks$max)
+# close$i and close$j are serial numbers in XI and XJ respectively;        
+# map them to original serial numbers in X
+        orig <- seq(npoints)
+        imap <- orig[I]
+        jmap <- orig[J]
+        iX <- imap[close$i]
+        jX <- jmap[close$j]
+# eliminate any identical pairs
+        if(any(I & J)) {
+          ok <- (iX != jX)
+          if(!all(ok)) {
+            close$i  <- close$i[ok]
+            close$j  <- close$j[ok]
+            close$xi <- close$xi[ok]
+            close$yi <- close$yi[ok]
+            close$xj <- close$xj[ok]
+            close$yj <- close$yj[ok]
+            close$dx <- close$dx[ok]
+            close$dy <- close$dy[ok]
+            close$d  <- close$d[ok]
+          }
+        }
+# extract information for these pairs (relative to orderings of XI, XJ)
+        dcloseIJ <- close$d
+        icloseI  <- close$i
+        jcloseJ  <- close$j
 #  "type I to type J" nearest neighbour distances
-	nnd <- sqrt(apply(squd,1,min))
+	nnd <- tapply(dcloseIJ, icloseI, min)
 #  distance to boundary from each type i point
-        bdry <- bdist.points(X[I, ])
+        bdry <- bdist.points(XI)
 #  observations
 	o <- pmin(nnd,bdry)
 #  censoring indicators
@@ -124,11 +143,11 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
         result$breaks <- NULL
 
 #  UNCORRECTED e.d.f. of I-to-J nearest neighbour distances: use with care
-        hh <- hist(nnd,breaks=brks,plot=FALSE)$counts
-        result$raw <- cumsum(hh)/sum(hh)
+        rightmost <- breaks$max
+        hh <- hist(nnd[nnd <= rightmost],breaks=brks,plot=FALSE)$counts
+        result$raw <- cumsum(hh)/length(nnd)
 
 # theoretical value for marked Poisson processes
-        lamJ <- sum(J)/area.owin(window)
         result$theo <- 1 - exp( - lamJ * pi * result$r^2)
         
 # convert to class "fv"

@@ -368,7 +368,9 @@ The Spatstat Package
     \eqn{J_{ij}, J_{i\bullet}}{Jij,Ji.} \cr
     \code{\link{alltypes}} \tab  estimates of the above
     for all \eqn{i,j} pairs \cr
-    \code{\link{Iest}} \tab  multitype \eqn{I}-function
+    \code{\link{Iest}} \tab  multitype \eqn{I}-function\cr
+    \code{\link{Kcross.inhom},\link{Kdot.inhom}} \tab
+    inhomogeneous counterparts of \code{Kcross}, \code{Kdot}
   }
 
   \bold{Summary statistics for a marked point pattern:}

@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.11 $	$Date: 2005/07/21 10:25:13 $
+#	$Revision: 4.14 $	$Date: 2006/05/31 03:38:40 $
 #
 ################################################################################
 #
@@ -16,9 +16,14 @@ function(X, r=NULL, breaks=NULL, ...) {
 #	breaks:		(optional) breakpoints for argument r
 #
 	verifyclass(X, "ppp")
+        W <- X$window
+        npoints <-X$n
+# Intensity estimate  
+        lambda <- npoints/area.owin(W)
 
 #  determine breakpoints for r values
-        breaks <- handle.r.b.args(r, breaks, X$window)
+        rmaxdefault <- rmax.rule("G", W, lambda)
+        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
 
 # handle special case of empty pattern
         if(X$n == 0) {
@@ -38,8 +43,9 @@ function(X, r=NULL, breaks=NULL, ...) {
 	nnd <- nndist(X$x, X$y)
 		
 #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
-        hh <- hist(nnd,breaks=breaks$val,plot=FALSE)$counts
-        edf <- cumsum(hh)/sum(hh)
+        rightmost <- breaks$max
+        hh <- hist(nnd[nnd <= rightmost],breaks=breaks$val,plot=FALSE)$counts
+        edf <- cumsum(hh)/length(nnd)
 	
 #  distance to boundary
         bdry <- bdist.points(X)
@@ -55,7 +61,6 @@ function(X, r=NULL, breaks=NULL, ...) {
 # append uncorrected e.d.f.        
         result$raw <- edf
 # append theoretical value for Poisson
-        lambda <- X$n/area.owin(X$window)
         result$theo <- 1 - exp( - lambda * pi * result$r^2)
 
 # neaten up and return        

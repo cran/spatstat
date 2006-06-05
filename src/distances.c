@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.12 $     $Date: 2006/04/15 17:11:45 $
+  $Revision: 1.14 $     $Date: 2006/05/26 09:56:12 $
 
  */
 
@@ -135,6 +135,92 @@ void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
   }
 }
 
+
+
+/* distances with periodic correction */
+
+void pairPdist(n, x, y, xwidth, yheight, d)
+     int *n;
+     double *x, *y, *xwidth, *yheight, *d;
+{ 
+  int i, j, npoints; 
+  double *dp;
+  double xi, yi, dx, dy, dx2, dy2, dx2p, dy2p, dist, wide, high;
+
+  npoints = *n;
+  wide = *xwidth;
+  high = *yheight;
+
+  /* set d[0,0] = 0 */
+  *d = 0.0;
+
+  for (i=1; i < npoints; i++) 
+    {
+      xi = x[i];
+      yi = y[i];
+      /* point at the start of column i */
+      dp = d + i * npoints;
+      /* set diagonal to zero */
+      dp[i] = 0.0;
+      for (j=0; j < i; j++)
+	{
+	  dx = x[j] - xi;
+	  dy = y[j] - yi;
+	  dx2p = dx * dx;
+	  dy2p = dy * dy;
+	  dx2 = (dx - wide) * (dx - wide);
+	  dy2 = (dy - wide) * (dy - wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  dx2 = (dx + wide) * (dx + wide);
+	  dy2 = (dy + wide) * (dy + wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  dist = sqrt( dx2p + dy2p ); 
+	  /* upper triangle */
+	  *dp = dist;
+	  ++dp;
+	  /* lower triangle */
+	  d[ j * npoints + i] = dist;
+	}
+    }
+}
+
+void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
+     int *nto, *nfrom;
+     double *xfrom, *yfrom, *xto, *yto, *xwidth, *yheight, *d;
+{ 
+  int i, j, nf, nt; 
+  double *dptr;
+  double xj, yj, dx, dy, dx2, dy2, dx2p, dy2p, wide, high;
+
+  nf = *nfrom;
+  nt = *nto;
+  wide = *xwidth;
+  high = *yheight;
+
+  dptr = d;
+
+  for (j=0; j < nt; j++) {
+    xj = xto[j];
+    yj = yto[j];
+    for(i = 0; i < nf; i++, dptr++) {
+	dx = xj - xfrom[i];
+	dy = yj - yfrom[i];
+	  dx2p = dx * dx;
+	  dy2p = dy * dy;
+	  dx2 = (dx - wide) * (dx - wide);
+	  dy2 = (dy - wide) * (dy - wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  dx2 = (dx + wide) * (dx + wide);
+	  dy2 = (dy + wide) * (dy + wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  *dptr = sqrt( dx2p + dy2p ); 
+    }
+  }
+}
 
 /* THE FOLLOWING CODE ASSUMES THAT y IS SORTED IN ASCENDING ORDER */
 

@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.9 $	$Date: 2005/07/21 10:20:55 $
+#	$Revision: 5.12 $	$Date: 2006/05/31 03:57:02 $
 #
 #
 # -------- functions ----------------------------------------
@@ -93,9 +93,6 @@ function(X, I, J, r=NULL, breaks=NULL,
         W <- X$window
 	area <- area.owin(W)
 
-        breaks <- handle.r.b.args(r, breaks, W)
-        r <- breaks$r
-        
         # available selection of edge corrections depends on window
         if(W$type != "rectangle") {
            iso <- (correction == "isotropic") | (correction == "Ripley")
@@ -122,8 +119,13 @@ function(X, I, J, r=NULL, breaks=NULL,
 	lambdaI <- nI/area
 	lambdaJ <- nJ/area
 
+        # r values 
+        rmaxdefault <- rmax.rule("K", W, lambdaJ)
+        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
+        r <- breaks$r
+
         # recommended range of r values
-        alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+        alim <- c(0, rmaxdefault)
         
         # this will be the output data frame
         # It will be given more columns later
@@ -132,34 +134,47 @@ function(X, I, J, r=NULL, breaks=NULL,
         K <- fv(K, "r", substitute(Kmulti(r), NULL),
                 "theo", , alim, c("r","Kpois(r)"), desc)
 
-# interpoint distances		
-	d <- crossdist(x[I], y[I], x[J], y[J])
-# distances to boundary	
-	b <- (bdist.points(X))[I]
-        
-# Determine which interpoint distances d[i,j] refer to the same point
-# (not just which distances are zero)        
-        identical <- matrix(FALSE, nrow=nI, ncol=nJ)
-        common <- I & J
-        if(any(common)) {
-          Irow <- cumsum(I)
-          Jcol <- cumsum(J)
-          icommon <- (1:npoints)[common]
-          for(i in icommon)
-            identical[Irow[i], Jcol[i]] <- TRUE
+# find close pairs of points
+        XI <- X[I]
+        XJ <- X[J]
+        close <- crosspairs(XI, XJ, max(r))
+# close$i and close$j are serial numbers in XI and XJ respectively;        
+# map them to original serial numbers in X
+        orig <- seq(npoints)
+        imap <- orig[I]
+        jmap <- orig[J]
+        iX <- imap[close$i]
+        jX <- jmap[close$j]
+# eliminate any identical pairs
+        if(any(I & J)) {
+          ok <- (iX != jX)
+          if(!all(ok)) {
+            close$i  <- close$i[ok]
+            close$j  <- close$j[ok]
+            close$xi <- close$xi[ok]
+            close$yi <- close$yi[ok]
+            close$xj <- close$xj[ok]
+            close$yj <- close$yj[ok]
+            close$dx <- close$dx[ok]
+            close$dy <- close$dy[ok]
+            close$d  <- close$d[ok]
+          }
         }
-
+# extract information for these pairs (relative to orderings of XI, XJ)
+        dcloseIJ <- close$d
+        icloseI  <- close$i
+        jcloseJ  <- close$j
+        
 # Compute estimates by each of the selected edge corrections.
         
         if(any(correction == "border" | correction == "bord.modif")) {
           # border method
-          # Compute distances to boundary
-          b <- bdist.points(X[I])
-          # Distances corresponding to identical pairs
-          # are excluded from consideration
-          d[identical] <- Inf
+          # distance to boundary from each point of type I
+          bI <- bdist.points(XI)
+          # distance to boundary from first element of each (i, j) pair
+          bcloseI <- bI[icloseI]
           # apply reduced sample algorithm
-          RS <- Kount(d, b, breaks, slow=FALSE)
+          RS <- Kount(dcloseIJ, bcloseI, bI, breaks)
           if(any(correction == "bord.modif")) {
             denom.area <- eroded.areas(W, r)
             Kbm <- RS$numerator/(denom.area * nI * nJ)
@@ -173,13 +188,11 @@ function(X, I, J, r=NULL, breaks=NULL,
                          "border-corrected estimate of K(r)",
                          "border")
           }
-          # reset identical pairs to original values
-          d[identical] <- 0
         }
         if(any(correction == "translate")) {
           # translation correction
-            edgewt <- edge.Trans(X[I], X[J])
-            wh <- whist(d[!identical], breaks$val, edgewt[!identical])
+            edgewt <- edge.Trans(XI[icloseI], XJ[jcloseJ], paired=TRUE)
+            wh <- whist(dcloseIJ, breaks$val, edgewt)
             Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
             rmax <- diameter(W)/2
             Ktrans[r >= rmax] <- NA
@@ -189,8 +202,8 @@ function(X, I, J, r=NULL, breaks=NULL,
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
-            edgewt <- edge.Ripley(X[I], d)
-            wh <- whist(d[!identical], breaks$val, edgewt[!identical])
+            edgewt <- edge.Ripley(XI[icloseI], matrix(dcloseIJ, ncol=1))
+            wh <- whist(dcloseIJ, breaks$val, edgewt)
             Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
             rmax <- diameter(W)/2
             Kiso[r >= rmax] <- NA

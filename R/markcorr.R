@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.11 $ $Date: 2006/04/18 05:42:31 $
+#     $Revision: 1.12 $ $Date: 2006/05/31 05:56:30 $
 #
 #    Estimate the mark correlation function
 #
@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------
 
 "markcorr"<-
-function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
+function(X, f = function(m1,m2) { m1 * m2}, r=NULL, 
          correction=c("isotropic", "Ripley", "translate"),
          method="density", ...)
 {
@@ -21,9 +21,12 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
 	npoints <- X$n
         W <- X$window
 
-        breaks <- handle.r.b.args(r, NULL, W)
+        # r values 
+        rmaxdefault <- rmax.rule("K", W, npoints/area.owin(W))
+        breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
         r <- breaks$r
-
+        rmax <- breaks$max
+        
         if(length(method) > 1)
           stop("Select only one method, please")
         if(method=="density" && !breaks$even)
@@ -47,42 +50,40 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL, slow=FALSE,
                      "r", substitute(m(r), NULL), "theo", , alim, c("r","mpois(r)"), desc)
 
 
-        # pairwise distances
-	d <- pairdist(X$x, X$y)
-        offdiag <- (row(d) != col(d))
+        # find close pairs of points
+        close <- closepairs(X, rmax)
+        dIJ <- close$d
+        I   <- close$i
+        J   <- close$j
+        XI <- ppp(close$xi, close$yi, window=W)
 
         # apply f to each combination of marks
-        # mm[i,j] = mark[i]
-        mm <- matrix(X$marks,nrow=npoints,ncol=npoints)
-        mr <- as.vector(mm)
-        mc <- as.vector(t(mm))
-        ff <- f(mr, mc)
-        ff <- matrix(ff, nrow=npoints, ncol=npoints)
-        # so ff[i,j] = f(mark[i], mark[j])
+        #
+        marx <- X$marks
+        ff <- f(marx[I], marx[J])
 
         Ef <- mean(ff)
         
         if(any(correction == "translate")) {
           # translation correction
-            edgewt <- edge.Trans(X, exact=slow)
+          XJ <- ppp(close$xj, close$yj, window=W)
+          edgewt <- edge.Trans(XI, XJ, paired=TRUE)
           # get smoothed estimate of mark covariance
-            Mtrans <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
-                                  Ef, r, method, ...)
-            result <- bind.fv(result,
-                              data.frame(trans=Mtrans), "mtrans(r)",
-                              "translation-corrected estimate of m(r)",
-                              "trans")
+          Mtrans <- mkcor(dIJ, ff, edgewt, Ef, r, method, ...)
+          result <- bind.fv(result,
+                            data.frame(trans=Mtrans), "mtrans(r)",
+                            "translation-corrected estimate of m(r)",
+                            "trans")
         }
         if(any(correction == "isotropic" | correction == "Ripley")) {
           # Ripley isotropic correction
-            edgewt <- edge.Ripley(X, d)
+          edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
           # get smoothed estimate of mark covariance
-            Miso <- mkcor(d[offdiag], ff[offdiag], edgewt[offdiag],
-                                Ef, r, method, ...)
-            result <- bind.fv(result,
-                              data.frame(iso=Miso), "miso(r)",
-                              "Ripley isotropic correction estimate of m(r)",
-                              "iso")
+          Miso <- mkcor(dIJ, ff, edgewt, Ef, r, method, ...)
+          result <- bind.fv(result,
+                            data.frame(iso=Miso), "miso(r)",
+                            "Ripley isotropic correction estimate of m(r)",
+                            "iso")
         }
         # which corrections have been computed?
         nama2 <- names(result)

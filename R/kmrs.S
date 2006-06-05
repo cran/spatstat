@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.4 $	$Date: 2002/05/13 12:41:10 $
+#	$Revision: 3.8 $	$Date: 2006/05/31 06:39:15 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -17,11 +17,12 @@
 #
 
 "kaplan.meier" <-
-function(obs, nco, breaks) {
+function(obs, nco, breaks, upperobs=0) {
 #	obs: histogram of all observations : min(T_i,C_i)
 #	nco: histogram of noncensored observations : T_i such that T_i <= C_i
 # 	breaks: breakpoints (vector or 'breakpts' object, see breaks.S)
-#
+#       upperobs: number of observations beyond rightmost breakpoint
+#  
         breaks <- as.breakpts(breaks)
 
 	n <- length(obs)
@@ -31,7 +32,7 @@ function(obs, nco, breaks) {
 #
 #	
 #   reverse cumulative histogram of observations
-	d <- cumsum(obs[n:1])[n:1]
+	d <- cumsum(obs[n:1])[n:1] + upperobs
 #
 #  product integrand
 	s <- ifelse(d > 0, 1 - nco/d, 1)
@@ -48,7 +49,7 @@ function(obs, nco, breaks) {
 }
 
 "reduced.sample" <-
-function(nco, cen, ncc, show=FALSE)
+function(nco, cen, ncc, show=FALSE, uppercen=0)
 #	nco: histogram of noncensored observations: T_i such that T_i <= C_i
 #	cen: histogram of all censoring times: C_i
 #	ncc: histogram of censoring times for noncensored obs:
@@ -58,6 +59,10 @@ function(nco, cen, ncc, show=FALSE)
 #	     cen[k] = #{i: C_i \in I_k}
 #	     ncc[k] = #{i: T_i <= C_i, C_i \in I_k}.
 #
+#       The intervals I_k must span an interval [0,R] beginning at 0.
+#       If this interval did not include all censoring times,
+#       then `uppercen' must be the number of censoring times
+#       that were not counted in 'cen'.
 {
 	n <- length(nco)
 	if(n != length(cen) || n != length(ncc))
@@ -69,7 +74,7 @@ function(nco, cen, ncc, show=FALSE)
 #		cc[k] = #{i: C_i > breaks[k]}	
 #	except that > becomes >= for k=0.
 #
-	cc <- cumsum(cen[n:1])[n:1]
+	cc <- cumsum(cen[n:1])[n:1] + uppercen
 #
 #
 #	numerator
@@ -101,16 +106,20 @@ function(o, cc, d, breaks) {
 #	d: censoring indicators 1(T_i <= C_i)
 #	breaks: histogram breakpoints (vector or 'breakpts' object)
 #
-        breaks <- as.breakpts(breaks)
-# compile histograms
-	obs <- hist( o,		breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
-	nco <- hist( o[d], 	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
-	cen <- hist( cc,	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
-	ncc <- hist( cc[d],	breaks=breaks$val,plot=FALSE,probability=FALSE)$counts
+  breaks <- as.breakpts(breaks)
+# count any data outside range of breakpoints        
+  maxbreak <- breaks$max
+  uppercen <- sum(cc > maxbreak)
+  upperobs <- sum(o  > maxbreak)
+# compile histograms (breakpoints may not span data)
+  obs <- whist( o,     breaks=breaks$val, right=maxbreak)
+  nco <- whist( o[d],  breaks=breaks$val, right=maxbreak)
+  cen <- whist( cc,    breaks=breaks$val, right=maxbreak)
+  ncc <- whist( cc[d], breaks=breaks$val, right=maxbreak)
 # go
-	km <- kaplan.meier(obs, nco, breaks)
-	rs <- reduced.sample(nco, cen, ncc)
+  km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
+  rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
 #
-	return(list(rs=rs, km=km$km, hazard=km$lambda,
-                    r=breaks$val[-1], breaks=breaks$val))
+  return(list(rs=rs, km=km$km, hazard=km$lambda,
+              r=breaks$val[-1], breaks=breaks$val))
 }

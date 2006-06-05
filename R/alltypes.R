@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.11 $   $Date: 2005/06/07 19:08:30 $
+#   $Revision: 1.12 $   $Date: 2006/05/31 04:03:17 $
 #
 #
 alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
@@ -83,10 +83,6 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
       }
   }
 
-# get sensible 'r' values
-  brks <- handle.r.b.args(r=NULL, breaks=NULL, pp$window, eps=NULL)
-  r    <- brks$r
-
 # build 'fasp' object
   fns  <- list()
   deform <- list()
@@ -112,7 +108,7 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
           if(verb) cat("i =",i,"j =",j,"\n")
           k <- k+1
           fns[[k]] <- currentfv <-
-            Tij(pp, um[i], um[j], eps=NULL, breaks=brks)
+            Tij(pp, um[i], um[j], eps=NULL)
           deform[[k]] <- attr(currentfv, "fmla")
         }
       }

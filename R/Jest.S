@@ -3,14 +3,16 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.8 $	$Date: 2005/07/15 01:56:41 $
+#	$Revision: 4.9 $	$Date: 2006/05/31 02:49:15 $
 #
 #
 #
 "Jest" <-
 function(X, eps=NULL, r=NULL, breaks=NULL) {
         X <- as.ppp(X)
-        brks <-  handle.r.b.args(r, breaks, X$window)$val
+        W<- X$window
+        rmaxdefault <- rmax.rule("J", W)
+        brks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)$val
 	FF <- Fest(X, eps, breaks=brks)
 	G <- Gest(X, breaks=brks)
         ratio <- function(a, b, c) {

@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.12 $    $Date: 2005/12/19 10:08:59 $
+#           $Revision: 1.14 $    $Date: 2006/05/31 08:22:08 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -130,7 +130,7 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
     co <- Mod(co) 
     a <- sum(M)
     wt <- a/co
-    me <- spatstat.options("maxedgewt")[[1]]
+    me <- spatstat.options("maxedgewt")
     weight <- matrix(pmin(me, wt), ncol=2*nc, nrow=2*nr)
     if(debug) browser()
     mom <- mom * weight
@@ -160,7 +160,10 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
 
 Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   verifyclass(X, "ppp")
-  bk <- handle.r.b.args(r, breaks, X$window)
+  W <- X$window
+  lambda <- X$n/area.owin(W)
+  rmaxdefault <- rmax.rule("K", W, lambda)        
+  bk <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   breaks <- bk$val
   rvalues <- bk$r
   u <- Kmeasure(X, sigma)

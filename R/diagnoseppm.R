@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.9 $ $Date: 2006/02/22 06:06:24 $
+# $Revision: 1.11 $ $Date: 2006/06/02 08:43:17 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -24,11 +24,11 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   # Discretised residuals
   
   if(type == "eem") {
-    residu <- if(!is.null(rv)) rv else eem(object) 
+    residu <- if(!is.null(rv)) rv else eem(object, check=FALSE) 
     X <- data.ppm(object)
     Y <- X %mark% residu
   } else {
-    residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type)
+    residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type, check=FALSE)
     Y <- U %mark% as.numeric(residu)
   }
 
@@ -176,10 +176,14 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
                          rbord = reach(object), cumulative=TRUE,
                          plot.it = TRUE, rv = NULL, 
                          compute.sd=TRUE, compute.cts=TRUE,
-                         typename)
+                         typename, check=TRUE)
 {
   if(is.marked.ppm(object))
     stop("Sorry, this is not yet implemented for marked models")
+
+  if(check && damaged.ppm(object))
+    stop("object format corrupted; try update(object, use.internal=TRUE)")
+    
   # -------------  Interpret arguments --------------------------
 
   # edge effect avoidance

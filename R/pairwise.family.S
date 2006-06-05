@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.13 $	$Date: 2006/04/25 07:07:33 $
+#    $Revision: 1.14 $	$Date: 2006/05/26 09:55:09 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -66,7 +66,7 @@ else
 
 # coercion should be unnecessary..
 # X <- as.ppp(X)
-# U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
+U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
 
 x <- X$x
 y <- X$y
@@ -86,26 +86,8 @@ if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley"
 
 #  
 # Form the matrix of distances
-	
-sqdif <- function(u,v) {(u-v)^2}
 
-MX <- outer(x,xx,sqdif)
-MY <- outer(y,yy,sqdif)
-
-if(correction=="periodic") {
-	if(X$window$type != "rectangle")
-		stop(paste("Periodic edge correction can't be applied",
-                     "in an irregular window"))
-	wide <- diff(X$window$xrange)
-	high <- diff(X$window$yrange)
-	MX1 <- outer(x,xx-wide,sqdif)
-	MX2 <- outer(x,xx+wide,sqdif)
-	MX <- pmin(MX, MX1, MX2)
-	MY1 <- outer(y,yy-high,sqdif)
-	MY2 <- outer(y,yy+high,sqdif)
-	MY <- pmin(MY, MY1, MY2)
-}
-M <- sqrt(MX + MY)
+M <- crossdist(X, U, periodic=(correction=="periodic"))
 
 # Evaluate the pairwise potential 
 

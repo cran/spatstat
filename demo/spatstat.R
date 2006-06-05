@@ -69,15 +69,13 @@ plot(L, add=TRUE)
 
 plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)
-plot(K)
-title(main="K function for Swedish Pines")
+plot(K, main="K function for Swedish Pines")
 
 en <- envelope(swedishpines, fun=Kest, nsim=10, correction="translate")
 plot(en, main="Envelopes of K function based on CSR")
 
 pc <- pcf(swedishpines)
-plot(pc)
-title(main="Pair correlation function")
+plot(pc, main="Pair correlation function")
 
 plot(swedishpines, main="nearest neighbours")
 m <- nnwhich(swedishpines)
@@ -87,10 +85,13 @@ arrows(swedishpines$x, swedishpines$y, b$x, b$y,
 
 plot(swedishpines %mark% (nndist(swedishpines)/2), markscale=1, main="Stienen diagram")
 
-plot(swedishpines$window, main="Distance map")
 Z <- distmap(swedishpines, dimyx=512)
+plot(swedishpines$window, main="Distance map")
 plot(Z, add=TRUE)
 points(swedishpines)
+
+persp(Z, colmap=terrain.colors(128), shade=0.3, phi=30,theta=100,
+      main="perspective plot of pixel image")
 
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 contour(distmap(a), main="Distance map")
@@ -141,7 +142,7 @@ plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
 
 plot(redwood, main="random thinning - rthin()")
-points(rthin(redwood, 0.8), col="green", cex=1.4)
+points(rthin(redwood, 0.5), col="green", cex=1.4)
 
 plot(rcell(nx=15))
 

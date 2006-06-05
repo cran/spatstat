@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.16 $    $Date: 2006/03/28 16:57:32 $
+#  $Revision: 1.19 $    $Date: 2006/06/02 03:36:09 $
 #
 #
 
@@ -10,10 +10,13 @@ conspire <- function(...) {
   plot.fv(...)
 }
 
-plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
-                     xlim, ylim, xlab, ylab, ...) {
+plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
+                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL) {
 
+  xname <-
+    if(is.language(substitute(x))) deparse(substitute(x)) else ""
   verifyclass(x, "fv")
+
   indata <- as.data.frame(x)
 
   defaultplot <- missing(fmla)
@@ -66,7 +69,7 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   } 
 
   # determine x and y limits and clip data to these limits
-  if(!missing(xlim)) {
+  if(!is.null(xlim)) {
     ok <- (xlim[1] <= rhsdata & rhsdata <= xlim[2])
     rhsdata <- rhsdata[ok]
     lhsdata <- lhsdata[ok, , drop=FALSE]
@@ -90,14 +93,14 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     }
   }
   
-  if(missing(ylim))
+  if(is.null(ylim))
     ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
 
   # work out how to label the plot
-  if(missing(xlab))
+  if(is.null(xlab))
     xlab <- as.character(fmla)[3]
 
-  if(missing(ylab)) {
+  if(is.null(ylab)) {
     yl <- attr(x, "ylab")
     if(!is.null(yl) && defaultplot)
       ylab <- yl
@@ -112,11 +115,18 @@ plot.fv <- function(x, fmla, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   if(is.language(ylab))
     ylab <- deparse(ylab)
 
-  # check for argument "add"=TRUE
+  # check for argument "add" (defaults to FALSE)
   dotargs <- list(...)
   v <- match("add", names(dotargs))
-  if(is.na(v) || !(addit <- as.logical(dotargs[[v]])))
-    plot(xlim, ylim, type="n", xlab=xlab, ylab=ylab, ...)
+  addit <- if(is.na(v)) FALSE else as.logical(dotargs[[v]])
+  
+  # if add=FALSE, create new plot
+  if(!addit)
+    do.call("plot.default",
+            resolve.defaults(list(xlim, ylim, type="n"),
+                             list(xlab=xlab, ylab=ylab),
+                             list(...),
+                             list(main=xname)))
 
   nplots <- ncol(lhsdata)
 

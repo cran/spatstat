@@ -2,12 +2,12 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.8 $    $Date: 2005/04/29 21:22:04 $
+#  $Revision: 1.12 $    $Date: 2006/06/02 08:23:50 $
 #
 #
 #
 
-update.ppm <- function(object, ..., fixdummy=TRUE) {
+update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
   verifyclass(object, "ppm")
 
   # inspect model
@@ -18,10 +18,33 @@ update.ppm <- function(object, ..., fixdummy=TRUE) {
   if(!is.call(call))
     stop("Internal error - object$call is not of class \"call\"")
 
-  # arguments
+  undecided <- is.null(use.internal) || !is.logical(use.internal)
+  force.int   <- !undecided && use.internal
+  force.ext   <- !undecided && !use.internal
+  if(!force.int) {
+    # check for validity of format
+    badformat <- damaged.ppm(object)
+  }
+  if(undecided) {
+    use.internal <- badformat
+    if(badformat)
+      message("object format corrupted; repairing it")
+  } else if(force.ext && badformat)
+    warning("object format corrupted; try update(object, use.internal=TRUE)")
+  
+  if(use.internal) {
+    # reset the main arguments in the call using the internal data
+    call$Q <- data.ppm(object)
+    namobj <- names(call)
+    if("trend" %in% namobj) call$trend <- object$trend
+    if("interaction" %in% namobj) call$interaction <- object$interaction
+    if("covariates" %in% namobj) call$covariates <- object$covariates
+  }
+  
+  # handle arguments
   aargh <- list(...)
 
-  if(length(aargh) == 0)
+  if(length(aargh) == 0) 
     return(eval(call, parent.frame()))
 
   # split named and unnamed arguments
@@ -109,3 +132,15 @@ sp.foundclasses <- function(cnames, inlist, formalname, argsgiven) {
                formalname, "\"", sep=""))
 }
     
+
+damaged.ppm <- function(object) {
+  # guess whether the object format has been damaged
+  # e.g. by dump/restore
+  gf <- getglmfit(object)
+  badfit <- !is.null(gf) && !inherits(gf$terms, "terms")
+  if(badfit)
+    return(TRUE)
+  Q <- eval(object$call$Q)
+  badQ <- is.null(Q) || !(inherits(Q, "ppp") || inherits(Q,"quad"))
+  return(badQ)
+}
