@@ -5,7 +5,7 @@
   Plots a list of point patterns.
 }
 \usage{
-  \method{plot}{splitppp}(x, \dots, arrange=TRUE)
+  \method{plot}{splitppp}(x, \dots, main, arrange=TRUE)
 }
 \arguments{
   \item{x}{
@@ -15,6 +15,9 @@
   \item{\dots}{
     Arguments passed to \code{\link{plot.ppp}} which control the
     appearance of each plot panel.
+  }
+  \item{main}{
+    Overall heading for the plot.
   }
   \item{arrange}{
     Logical flag indicating whether to plot the point patterns

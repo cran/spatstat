@@ -166,8 +166,9 @@ maxsize, markscale)
    plot(cells, cex=2)
 
    # set it in spatstat.options
-   spatstat.options(par.points=list(cex=2))
+   oldopt <- spatstat.options(par.points=list(cex=2))
    plot(cells)
+   spatstat.options(oldopt)
 
    # multitype 
    data(lansing)

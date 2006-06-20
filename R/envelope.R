@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.25 $  $Date: 2006/04/13 12:36:10 $
+#   $Revision: 1.26 $  $Date: 2006/06/19 07:20:47 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -66,6 +66,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
       start <- list(n.start=X$n)
     rstart <- rmhstart(start)
     rcontr <- rmhcontrol(control)
+    # pre-digest arguments
+    rmhinfolist <- rmh(rmodel, rstart, rcontr, preponly=TRUE, verbose=FALSE)
   }
 
   # Name of function, for error messages
@@ -102,7 +104,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   if(clipdata) {
     # Generate one realisation
     if(metrop)
-      Xsim <- rmh(rmodel, rstart, rcontr, verbose=FALSE)
+      Xsim <- rmhEngine(rmhinfolist, verbose=FALSE)
     else {
       Xsim <- eval(simulate)
       if(!inherits(Xsim, "ppp"))

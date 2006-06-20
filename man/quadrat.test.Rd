@@ -63,6 +63,13 @@ quadrat.test(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL, fit)
   process specified by \code{fit}. Again this is a 
   \eqn{\chi^2}{chi^2} test of goodness-of-fit to the quadrat counts.
 
+  The return value is an object of class \code{"htest"}.
+  Printing the object gives comprehensible output
+  about the outcome of the test. The return value also belongs to
+  the special class \code{"quadrat.test"}. Plotting the object
+  will display the quadrats, annotated by their observed and expected
+  counts and the Pearson residuals. See the examples.
+
   To test the Poisson point process against a specific alternative
   point process model, use \code{\link{anova.ppm}}.
 }
@@ -73,6 +80,10 @@ quadrat.test(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL, fit)
 \value{
   An object of class \code{"htest"}. See \code{\link{chisq.test}}
   for explanation.
+
+  The return value is also an object of the special class
+  \code{"quadrat.test"}, and there is a plot method for this class.
+  See the examples.
 }
 \examples{
   data(simdat)
@@ -84,6 +95,19 @@ quadrat.test(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL, fit)
   # equivalent:
   quadrat.test(simdat, fit=fitx)
   quadrat.test(fitx)
+
+  te <- quadrat.test(simdat, 4)
+  residuals(te)  # Pearson residuals
+
+  plot(te)
+
+  plot(simdat, pch="+", col="green", cex=1.2, lwd=2)
+  plot(te, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
+
+  sublab <- eval(substitute(expression(p[chi^2]==z),
+                       list(z=signif(te$p.value,3))))
+  title(sub=sublab, cex.sub=3)
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

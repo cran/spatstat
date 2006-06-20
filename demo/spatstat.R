@@ -37,35 +37,39 @@ plot(X[subset], main="subset operation: X[subset]")
 subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
 plot(X[,subwindow], main="subset operation: X[, subwindow]")
 
-data(lansing)
-plot(lansing, "Lansing Woods data")
-plot(split(lansing))
-
-L <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
-w <- owin(c(0.1,0.7), c(0.2, 0.8))
-S <- L[, w]
-plot(L, main="Subset of a line segment pattern")
+L <- rpoisline(10, owin(c(1.5,4.5),c(0.2,3.6)))
+S <- L[, letterR]
+plot(L, main="subset operation: L[, subwindow]")
 plot(S, add=TRUE, col="red")
 
-plot(L, main="Self-crossing points")
-plot(selfcrossing.psp(L), add=TRUE, col="red")
+data(lansing)
+plot(lansing, "Lansing Woods data")
+plot(split(lansing), main="split operation: split(X)")
+
+plot(a, main="Self-crossing points")
+plot(selfcrossing.psp(a), add=TRUE, col="red")
 
 fanfare("III. Exploratory data analysis")
 
-plot(swedishpines, main="Quadrat counts")
+plot(swedishpines, main="Quadrat counts", pch="+")
 tab <- quadratcount(swedishpines, 4)
-abline(v=attr(tab, "xbreaks"), lty=2)
-abline(h=attr(tab, "ybreaks"), lty=2)
-quadrat.test(swedishpines, 3)
+plot(tab, add=TRUE, lty=2, cex=2, col="blue")
+
+plot(swedishpines, main="", pch="+")
+title(main=expression(chi^2 * " test"), cex.main=2)
+tes <- quadrat.test(swedishpines, 3)
+tes
+plot(tes, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
+title(sub=paste("p-value =", signif(tes$p.value,3)), cex.sub=1.4)
 
 data(cells)
 Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
 
-D <- density(L, sigma=0.05)
+D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
-plot(L, add=TRUE)
+plot(a, add=TRUE)
 
 plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)

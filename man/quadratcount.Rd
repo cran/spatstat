@@ -29,6 +29,9 @@
 \value{
   A contingency table containing the number of points in each
   quadrat.
+
+  The table is also an object of the special class \code{"quadratcount"}
+  and there is a plot method for this class.
 }
 \details{
   Quadrat counting is an elementary technique for analysing spatial
@@ -57,6 +60,11 @@
   is the point count for the quadrat with coordinates
   \code{(xbreaks[i],xbreaks[i+1])} by \code{(ybreaks[i], ybreaks[i+1])}.
 
+  The return value is a \code{table} which can be printed neatly.
+  The return value is also a member of the special class
+  \code{"quadratcount"}. Plotting the object will display the
+  quadrats, annotated by their counts. See the examples.
+  
   To perform a chi-squared test based on the quadrat counts,
   use \code{\link{quadrat.test}}.
 }
@@ -77,6 +85,11 @@
  quadratcount(X)
  quadratcount(X, 4, 5)
  quadratcount(X, xbreaks=c(0, 0.3, 1), ybreaks=c(0, 0.4, 0.8, 1))
+ qX <-  quadratcount(X, 4, 5)
+
+ # plotting:
+ plot(X, pch="+")
+ plot(qX, add=TRUE, col="red", cex=1.5, lty=2)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.21 $	$Date: 2006/04/25 07:07:28 $
+#    $Revision: 1.22 $	$Date: 2006/06/06 13:17:03 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -22,7 +22,7 @@ pairsat.family <-
                       cat("Saturated pairwise interaction family\n")
          },
          eval  = function(X,U,Equal,pairpot,potpars,correction,
-                          halfway=FALSE) {
+                          ..., halfway=FALSE) {
   #
   # This auxiliary function is not meant to be called by the user.
   # It computes the distances between points,
@@ -45,6 +45,7 @@ pairsat.family <-
   #    the k columns are the coordinates of the k-dimensional potential.
   #
   # Note:
+
   # The pair potential function 'pairpot' will be called as
   #    pairpot(M, potpars)   where M is a matrix of interpoint distances.
   # It must return a matrix with the same dimensions as M
@@ -61,7 +62,7 @@ saturate <- potpars$saturate
 
 if(is.null(saturate)) {
   # pairwise interaction 
-  V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction)
+  V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction, ...)
   return(V)
 }
 
@@ -80,8 +81,10 @@ if(somemissing) {
 
 # compute the pair potentials POT and the unsaturated potential sums V
 
-V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction)
+V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction, ...)
 POT <- attr(V, "POT")
+
+computed <- attr(V, "computed")   # could be NULL
 
 #
 # V is a matrix with rows = quadrature points,
@@ -155,6 +158,9 @@ V <- V.sat + V.delta.sum
 # remove any columns that were added
 if(somemissing)
       V <- V[originalcolumns, , drop=FALSE]
+
+### tack on the saved computations from pairwise.family$eval
+attr(V, "computed") <- computed
 
 return(V)
 

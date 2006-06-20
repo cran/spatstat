@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.19 $   $Date: 2006/05/31 07:20:39 $
+#   $Revision: 1.20 $   $Date: 2006/06/11 23:13:31 $
 #
 #
 #   calculate pair correlation function
@@ -48,9 +48,9 @@ pcf.ppp <- function(X, ..., r=NULL,
     stop("r values must be evenly spaced")
   # extract r values
   r <- breaks$r
-  
+  rmax <- breaks$max
   # recommended range of r values for plotting
-  alim <- c(0, min(max(r), rmaxdefault))
+  alim <- c(0, min(rmax, rmaxdefault))
 
   # arguments for 'density'
   from <- 0

@@ -44,18 +44,20 @@ mincontrast(observed, theoretical, startpar, \dots,
   by the Method of Minimum Contrast. If you want to fit the
   Thomas process, see \code{\link{thomas.estK}}.
   If you want to fit a log-Gaussian Cox process, see
-  \code{\link{lgcp.estK}}. 
+  \code{\link{lgcp.estK}}.  If you want to fit the Matern cluster
+  process, see \code{\link{matclust.estK}}.
 
-  The Method of Minimum Contrast is a general technique for fitting
+  The Method of Minimum Contrast (Diggle and Gratton, 1984)
+  is a general technique for fitting
   a point process model to point pattern data. First a summary function
   (typically the \eqn{K} function) is computed from the data point
   pattern. Second, the theoretical expected
   value of this summary statistic under the point process model
-  is derived (as an algebraic expression involving the
-  parameters of the model). 
+  is derived (if possible, as an algebraic expression involving the
+  parameters of the model) or estimated from simulations of the model. 
   Then the model is fitted by finding the optimal parameter values
   for the model to give the closest match between the theoretical
-  and empirical curves.
+  and empirical curves. 
 
   The argument \code{observed} should be an object of class \code{"fv"}
   (see \code{\link{fv.object}}) containing the values of a summary
@@ -89,7 +91,10 @@ mincontrast(observed, theoretical, startpar, \dots,
   \eqn{\hat F(r)}{Fhat(r)} is the observed value of the summary statistic
   computed from the data, \eqn{F_\theta(r)}{F(theta,r)} is the
   theoretical expected value of the summary statistic,
-  and \eqn{p,q} are two exponents.
+  and \eqn{p,q} are two exponents. The default is \code{q = 1/4},
+  \code{p=2} so that the contrast criterion is the integrated squared
+  difference between the fourth roots of the two functions
+  (Waagepetersen, 2006).
 
   The other arguments just make things print nicely.
   The argument \code{fvlab} contains labels for the component
@@ -110,10 +115,24 @@ mincontrast(observed, theoretical, startpar, \dots,
   \item{crtl }{The control parameters of the algorithm.}
   \item{info }{List of explanatory strings.}
 }
-\references{ ~put references to the literature/web site here ~ }
+\references{
+  Diggle, P.J. and Gratton, R.J. (1984)
+  Monte Carlo methods of inference for implicit statistical models.
+  \emph{Journal of the Royal Statistical Society, series B}
+  \bold{46}, 193 -- 212.
+
+  Moller, J. and Waagepetersen, R. (2003).
+  Statistical Inference and Simulation for Spatial Point Processes.
+  Chapman and Hall/CRC, Boca Raton.
+
+  Waagepetersen, R. (2006).
+  An estimation function approach to inference for inhomogeneous
+  Neyman-Scott processes. Submitted.
+}  
 \author{Rasmus Waagepetersen
-  \email{rw@math.auc.dk}
-  and Adrian Baddeley
+  \email{rw@math.auc.dk},
+  adapted for \pkg{spatstat} by
+  Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }

@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.8 $	$Date: 2006/05/30 13:46:51 $
+#	$Revision: 1.9 $	$Date: 2006/06/10 17:28:42 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -64,20 +64,22 @@ breakpts <- function(val, maxi, even=FALSE, npos=NULL, step=NULL) {
 
 "make.even.breaks" <- 
 function(bmax, npos, bstep) {
-        if(missing(bstep) && missing(npos))
-          stop("Must specify either \'bstep\' or \'npos\'")
-        if(!missing(npos)) {
-          bstep <- bmax/npos
-          val <- seq(0, bmax, length=npos+1)
-          val <- c(-bstep,val)
-          right <- bmax
-        } else {
-          npos <- ceiling(bmax/bstep)
-          right <- bstep * npos
-          val <- seq(0, right, length=npos+1)
-          val <- c(-bstep,val)
-        }
-        breakpts(val, right, TRUE, npos, bstep)
+  if(bmax <= 0)
+    stop("bmax must be positive")
+  if(missing(bstep) && missing(npos))
+    stop("Must specify either \'bstep\' or \'npos\'")
+  if(!missing(npos)) {
+    bstep <- bmax/npos
+    val <- seq(0, bmax, length=npos+1)
+    val <- c(-bstep,val)
+    right <- bmax
+  } else {
+    npos <- ceiling(bmax/bstep)
+    right <- bstep * npos
+    val <- seq(0, right, length=npos+1)
+    val <- c(-bstep,val)
+  }
+  breakpts(val, right, TRUE, npos, bstep)
 }
 
 "as.breakpts" <- function(...) {
@@ -135,11 +137,17 @@ check.hist.lengths <- function(hist, breaks) {
 }
 
 breakpts.from.r <- function(r) {
-        if(r[1] != 0)
-          stop("First r value must be 0")
-        dr <- r[2] - r[1]
-        b <- c(-dr, r)
-        return(as.breakpts(b))
+  if(!is.numeric(r) && !is.vector(r))
+    stop("r must be a numeric vector")
+  if(length(r) < 2)
+    stop(paste("r has length", length(r), "- must be at least 2"))
+  if(r[1] != 0)
+    stop("First r value must be 0")
+  if(any(diff(r) <= 0))
+    stop("successive values of r must be increasing")
+  dr <- r[2] - r[1]
+  b <- c(-dr, r)
+  return(as.breakpts(b))
 }
 
 handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL,
@@ -159,7 +167,7 @@ handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL,
             if(!is.null(window$xstep))
               eps <- window$xstep/4
             else 
-              eps <- rmax/100
+              eps <- rmax/512
           }
           # warning(paste("step size for argument \'r\' defaults to", eps/4))
           breaks <- make.even.breaks( rmax, bstep=eps)

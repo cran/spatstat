@@ -1,19 +1,54 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.5 $  $Date: 2006/04/12 09:54:08 $
+#  $Revision: 1.8 $  $Date: 2006/06/08 06:19:11 $
 #
 
 quadratcount <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL)  {
   verifyclass(X, "ppp")
 
-  xr <- X$window$xrange
-  yr <- X$window$yrange
+  W <- X$window
+  xr <- W$xrange
+  yr <- W$yrange
   b <- quadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
   Xcount <- quadrat.count.engine(X$x, X$y, b$xbreaks, b$ybreaks)
+  attr(Xcount, "window") <- W
+  class(Xcount) <- c("quadratcount", class(Xcount))
   return(Xcount)
 }
 
+plot.quadratcount <- function(x, ..., add=FALSE, entries=as.table(x), dx=0, dy=0) {
+  xname <- deparse(substitute(x))
+  W <- attr(x, "window")
+  if(!add)
+    do.call("plot.owin",
+            resolve.defaults(list(W),
+                             list(...),
+                             list(main=xname)))
+  xbk <- attr(x, "xbreaks")
+  ybk <- attr(x, "ybreaks")
+  xr <- W$xrange
+  yr <- W$yrange
+  do.call.matched("segments",
+                  resolve.defaults(list(x0=xbk, y0=yr[1], x1=xbk, y1=yr[2]),
+                                   list(...)))
+  do.call.matched("segments",
+                  resolve.defaults(list(x0=xr[1], y0=ybk, x1=xr[2], y1=ybk),
+                                   list(...)))
+  if(!is.null(entries)) {
+    labels <- paste(as.vector(entries))
+    xmid <- xbk[-1] - diff(xbk) * (1/2 - dx)
+    ymid <- ybk[-1] - diff(ybk) * (1/2 - dy)
+    xy <- expand.grid(x=xmid, y=ymid)
+    do.call.matched("text.default",
+                    resolve.defaults(list(x=xy$x, y = xy$y),
+                                     list(labels=labels),
+                                     list(...)))
+  }
+  invisible(NULL)
+}
+
+  
 quadrat.test <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL,
                          fit) {
   Xname <- deparse(substitute(X))
@@ -83,7 +118,32 @@ quadrat.test <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL,
                            expected = EXP,
                            residuals = (OBS - EXP)/sqrt(EXP)),
                       class = "htest")
+  class(result) <- c("quadrattest", class(result))
+  attr(result, "quadrats") <- Xcount
   return(result)
+}
+
+plot.quadrattest <- function(x, ...) {
+  xname <- deparse(substitute(x))
+  quads <- attr(x, "quadrats")
+  # plot observed counts
+  do.call("plot.quadratcount",
+          resolve.defaults(list(quads, dx=-0.3, dy=0.3),
+                           list(...),
+                           list(main=xname)))
+  # plot expected counts
+  do.call("plot.quadratcount",
+          resolve.defaults(list(quads, dx=0.3, dy=0.3),
+                           list(add=TRUE),
+                           list(entries=signif(x$expected,2)),
+                           list(...)))
+  # plot Pearson residuals
+  do.call("plot.quadratcount",
+          resolve.defaults(list(quads, dx=0, dy=-0.3),
+                           list(add=TRUE),
+                           list(entries=signif(x$residuals,2)),
+                           list(...)))
+  invisible(NULL)
 }
 
 quadrat.breaks <- function(xr, yr, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL) {

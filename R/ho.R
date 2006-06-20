@@ -3,7 +3,7 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.2 $ $Date: 2006/01/09 05:14:55 $
+#  $Revision: 1.4 $ $Date: 2006/06/14 14:48:40 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
@@ -28,13 +28,11 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   
   # generate 'nsim' realisations of the fitted model
   # and compute the sufficient statistics of the model
-  rmodel <- rmhmodel(model)
-  rstart <- rmhstart(start)
-  rcontrol <- rmhcontrol(control)
+  rmhinfolist <- rmh(model, start, control, preponly=TRUE, verbose=FALSE)
   if(verb) cat("Simulating... ")
   for(i in 1:nsim) {
     if(verb) cat(paste(i, " ", if(i %% 10 == 0) "\n", sep=""))
-    Xi <- rmh(rmodel, rstart, rcontrol, verbose=FALSE)
+    Xi <- rmhEngine(rmhinfolist, verbose=FALSE)
     v <- suffstat(model,Xi)
     if(i == 1) 
       svalues <- matrix(, nrow=nsim, ncol=length(v))

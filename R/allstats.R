@@ -2,10 +2,10 @@
 #
 #   allstats.R
 #
-#   $Revision: 1.11 $   $Date: 2006/05/31 03:25:31 $
+#   $Revision: 1.13 $   $Date: 2006/06/11 21:30:31 $
 #
 #
-allstats <- function(pp,dataname=NULL,verb=FALSE) {
+allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
 #
 # Function allstats --- to calculate the F, G, K, and J functions
 # for an unmarked point pattern.
@@ -21,7 +21,7 @@ allstats <- function(pp,dataname=NULL,verb=FALSE) {
   
 # estimate F, G and J 
   if(verb) cat("Calculating F, G, J ...")
-  Jout <- Jest(pp)
+  Jout <- do.call.matched("Jest",list(X=pp, ...))
   if(verb) cat("ok.\n")
 
 # extract empty space function F
@@ -47,7 +47,7 @@ allstats <- function(pp,dataname=NULL,verb=FALSE) {
   if(verb) cat("J done.\n")
 
 # compute second moment function K
-  fns[[4]] <- Kout <- Kest(pp)
+  fns[[4]] <- Kout <- do.call.matched("Kest", list(X=pp, ...))
   titles[[4]] <- "K function"
   deform[[4]] <- attr(Kout, "fmla")
   if(verb) cat("K done.\n")

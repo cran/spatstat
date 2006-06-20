@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.15 $    $Date: 2006/05/22 06:53:37 $
+#    $Revision: 1.19 $    $Date: 2006/06/16 03:12:09 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -366,6 +366,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
   answer <- TRUE
   notes <- character(0)
   err <- character(0)
+  
   # check for duplicated points
   dup <- unlist(lapply(B,
                        function(p, f) {
@@ -403,15 +404,32 @@ owinpolycheck <- function(W, verbose=TRUE) {
     err <- c(err, "self-intersection")
     answer <- FALSE
   }
+  # check whether one of the current boundary polygons
+  # is the bounding box itself (with + sign)
+  nvert <- unlist(lapply(B, function(a) { length(a$x) }))
+  area <- unlist(lapply(B, area.xypolygon))
+  boxarea.mineps <- area.owin(outerframe) * (1 - 0.00001)
+  is.box <- (nvert == 4 & area >= boxarea.mineps)
+  if((nbox <- sum(is.box)) > 1) {
+    answer <- FALSE
+    whinge <- paste("Polygons",
+                    commasep(seq(is.box)[is.box]),
+                    "coincide with the outer frame")
+    notes <- c(notes, whinge)
+    err <- c(err, "polygons duplicating the outer frame")
+  }
   # check for crossings between different polygons
   cross <- matrix(FALSE, npoly, npoly)
   if(npoly > 1) {
     P <- lapply(B, xypolygon2psp, w=outerframe)
     for(i in seq(npoly-1)) {
       for(j in (i+1):npoly) {
-        X <- crossing.psp(P[[i]], P[[j]])
-        cross[i,j] <- cross[j,i] <- (X$n > 0)
-        if(cross[i,j]) {
+        crosses <- if(is.box[i] || is.box[j]) FALSE else {
+          X <- crossing.psp(P[[i]], P[[j]])
+          X$n > 0
+        }
+        cross[i,j] <- cross[j,i] <- crosses
+        if(crosses) {
           answer <- FALSE
           whinge <- paste("Polygons", i, "and", j, "cross over")
           notes <- c(notes, whinge)

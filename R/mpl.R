@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.26 $	$Date: 2006/05/26 09:55:52 $
+#	$Revision: 5.27 $	$Date: 2006/06/07 07:45:16 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -20,34 +20,47 @@
 	 rbord = 0,
          use.gam=FALSE) {
    .Deprecated("ppm", package="spatstat")
-   ppm(Q, trend, interaction, data, correction, rbord, use.gam, method="mpl")
+   ppm(Q=Q, trend=trend, interaction=interaction,
+       covariates=data, correction=correction, rbord=rbord,
+       use.gam=use.gam, method="mpl")
 }
 
 "mpl.engine" <- 
 function(Q,
          trend = ~1,
 	 interaction = NULL,
+         ...,
          covariates = NULL,
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
          forcefit=FALSE,
-         callstring=""
+         callstring="",
+         precomputed=NULL,
+         savecomputed=FALSE
 ) {
+  if(!is.null(precomputed$Q)) {
+    Q <- precomputed$Q
+    X <- precomputed$X
+    P <- precomputed$U
+  } else {
 #
 # Extract quadrature scheme 
 #
-	if(verifyclass(Q, "ppp", fatal = FALSE)) {
-#		warning("using default quadrature scheme")
-		Q <- quadscheme(Q)   
-	} else if(!verifyclass(Q, "quad", fatal=FALSE))
-		stop("First argument Q should be a quadrature scheme")
+    if(verifyclass(Q, "ppp", fatal = FALSE)) {
+      Q <- quadscheme(Q)   
+    } else if(!verifyclass(Q, "quad", fatal=FALSE))
+      stop("First argument Q should be a point pattern or a quadrature scheme")
 #
 # Data points
-  X <- Q$data
+    X <- Q$data
 #
-# Data and dummy points together 
-  P <- union.quad(Q)
+# Data and dummy points together
+    P <- union.quad(Q)
+  }
+#
+#  
+  computed <- if(savecomputed) list(X=X, Q=Q, U=P) else NULL
 #
 #
 # Interpret the call
@@ -56,12 +69,13 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.version <- list(major=1,
                     minor=9,
-                    release=2,
-                    date="$Date: 2006/05/26 09:55:52 $")
+                    release=3,
+                    date="$Date: 2006/06/07 07:45:16 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
-        
+
+  
 if(!want.trend && !want.inter && !forcefit) {
   # the model is the uniform Poisson process
   # The MPLE (= MLE) can be evaluated directly
@@ -69,7 +83,7 @@ if(!want.trend && !want.inter && !forcefit) {
   volume <- area.owin(X$window) * markspace.integral(X)
   lambda <- npts/volume
   theta <- list("log(lambda)"=log(lambda))
-  maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1) 
+  maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
   rslt <- list(
                method      = "mpl",
                theta       = theta,
@@ -78,7 +92,7 @@ if(!want.trend && !want.inter && !forcefit) {
                interaction = NULL,
                Q           = Q,
                maxlogpl    = maxlogpl,
-               internal    = list(),
+               internal    = list(computed=computed),
                covariates  = NULL,
 	       correction  = correction,
                rbord       = rbord,
@@ -93,12 +107,13 @@ if(!want.trend && !want.inter && !forcefit) {
         
 prep <- mpl.prepare(Q, X, P, trend, interaction,
                     covariates, want.trend, want.inter, correction, rbord,
-                    "quadrature points", callstring)
+                    "quadrature points", callstring,
+                    precomputed=precomputed, savecomputed=savecomputed)
 
 fmla <- prep$fmla
 glmdata <- prep$glmdata
 problems <- prep$problems
-
+computed <- append(computed, prep$computed)
 ################# F i t    i t   ####################################
 
 # Fit the generalized linear/additive model.
@@ -138,7 +153,8 @@ rslt <- list(
              interaction  = if(want.inter) interaction else NULL,
              Q            = Q,
              maxlogpl     = maxlogpl, 
-             internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames),
+             internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
+               computed=computed),
              covariates   = covariates,
              correction   = correction,
              rbord        = rbord,
@@ -157,47 +173,63 @@ return(rslt)
 mpl.prepare <- function(Q, X, P, trend, interaction, covariates, 
                         want.trend, want.inter, correction, rbord,
                         Pname="quadrature points", callstring="",
-                        ...) {
+                        ..., 
+                        precomputed=NULL, savecomputed=FALSE) {
 
   if(missing(want.trend))
     want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
   if(missing(want.inter))
     want.inter <- !is.null(interaction) && !is.null(interaction$family)
     
-# Extract covariate values
-  if(want.trend && !is.null(covariates)) 
-    covariates.df <- mpl.get.covariates(covariates, P, Pname)
-
-
+  computed <- list()
   problems <- list()
   
+  names.precomputed <- names(precomputed)
+  
+
 ################ C o m p u t e     d a t a  ####################
 
+# Extract covariate values
+  if(want.trend && !is.null(covariates)) {
+    if("covariates.df" %in% names.precomputed)
+      covariates.df <- precomputed$covariates.df
+    else 
+      covariates.df <- mpl.get.covariates(covariates, P, Pname)
+    if(savecomputed)
+      computed$covariates.df <- covariates.df
+  }
         
 ### Form the weights and the ``response variable''.
 
-.mpl <- list()
-.mpl$W <- w.quad(Q)
-.mpl$Z <- is.data(Q)
-.mpl$Y <- .mpl$Z/.mpl$W
-.mpl$MARKS <- marks.quad(Q)  # is NULL for unmarked patterns
-
-glmdata <- data.frame(.mpl.W = .mpl$W,
-                      .mpl.Y = .mpl$Y)
-        
-n <- nrow(glmdata)
-.mpl$SUBSET <- rep(TRUE, n)
+  if("dotmplbase" %in% names.precomputed) 
+    .mpl <- precomputed$dotmplbase
+  else {
+    .mpl <- list()
+    .mpl$W <- w.quad(Q)
+    .mpl$Z <- is.data(Q)
+    .mpl$Y <- .mpl$Z/.mpl$W
+    .mpl$MARKS <- marks.quad(Q)  # is NULL for unmarked patterns
+    n <- n.quad(Q)
+    .mpl$SUBSET <- rep(TRUE, n)
 	
-internal.names <- c(".mpl.W", ".mpl.Y", ".mpl.Z", ".mpl.SUBSET",
-                    "SUBSET", ".mpl")
+    zeroes <- attr(.mpl$W, "zeroes")
+    if(!is.null(zeroes))
+      .mpl$SUBSET <-  !zeroes
+  }
 
-reserved.names <- c("x", "y", "marks", internal.names)
-                    
-zeroes <- attr(.mpl$W, "zeroes")
-if(!is.null(zeroes))
-	.mpl$SUBSET <-  !zeroes
-
+  if(savecomputed)
+    computed$dotmplbase <- .mpl
+  
+  glmdata <- data.frame(.mpl.W = .mpl$W,
+                        .mpl.Y = .mpl$Y)
+        
+    
 ####################### T r e n d ##############################
+
+  internal.names <- c(".mpl.W", ".mpl.Y", ".mpl.Z", ".mpl.SUBSET",
+                        "SUBSET", ".mpl")
+
+  reserved.names <- c("x", "y", "marks", internal.names)
 
   check.clashes <- function(forbidden, offered, where) {
     name.match <- outer(forbidden, offered, "==")
@@ -288,14 +320,31 @@ if(want.inter) {
   # The rows of V correspond to the rows of P (quadrature points)
   # while the column(s) of V are the regression variables (log-potentials)
 
-  V <- interaction$family$eval(X, P, E,
-                        interaction$pot,
-                        interaction$par,
-                        correction, ...)
+  evaluate <- interaction$family$eval
+  if("precomputed" %in% names(formals(evaluate))) {
+    # version 1.9-3 onward
+    V <- evaluate(X, P, E,
+                  interaction$pot,
+                  interaction$par,
+                  correction, ...,
+                  precomputed=precomputed,
+                  savecomputed=savecomputed)
+    # extract intermediate computation results 
+    if(savecomputed)
+      computed <- append(computed, attr(V, "computed"))
+  } else {
+    # Object created by earlier version of ppm.
+    # Cannot use precomputed data
+    V <- evaluate(X, P, E,
+                  interaction$pot,
+                  interaction$par,
+                  correction)
+  }
 
   if(!is.matrix(V))
     stop("interaction evaluator did not return a matrix")
 
+  
   # Augment data frame by appending the regression variables for interactions.
   #
   # If there are no names provided for the columns of V,
@@ -354,9 +403,17 @@ if(any(.mpl$Z & !.mpl$KEEP)) {
 # Determine the domain of integration for the pseudolikelihood.
 
 if(correction == "border") {
-	bd <- bdist.points(P)
-	.mpl$DOMAIN <- (bd >= rbord)
-	.mpl$SUBSET <- .mpl$DOMAIN & .mpl$SUBSET
+
+  if("bdP" %in% names.precomputed)
+    bd <- precomputed$bdP
+  else
+    bd <- bdist.points(P)
+
+  if(savecomputed)
+    computed$bdP <- bd
+  
+  .mpl$DOMAIN <- (bd >= rbord)
+  .mpl$SUBSET <- .mpl$DOMAIN & .mpl$SUBSET
 }
 
 glmdata <- data.frame(glmdata, .mpl.SUBSET=.mpl$SUBSET)
@@ -371,7 +428,8 @@ fmla <- as.formula(fmla)
 
 #### 
 
-return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames, problems=problems))
+return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames, problems=problems,
+            computed=computed))
 
 }
 

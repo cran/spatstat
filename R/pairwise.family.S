@@ -18,7 +18,8 @@ pairwise.family <-
          print = function(self) {
                       cat("Pairwise interaction family\n")
          },
-         eval  = function(X,U,Equal,pairpot,potpars,correction) {
+         eval  = function(X,U,Equal,pairpot,potpars,correction,
+           ..., precomputed=NULL, savecomputed=FALSE) {
   #
   # This auxiliary function is not meant to be called by the user.
   # It computes the distances between points,
@@ -64,19 +65,7 @@ else if(identical(all.equal(fop, c("d", "tx", "tu", "par")), TRUE))
 else 
   stop("Formal arguments of pair potential function are not understood")
 
-# coercion should be unnecessary..
-# X <- as.ppp(X)
-U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
-
-x <- X$x
-y <- X$y
-if(marx) 
-  m <- X$marks
-
-xx <- U$x
-yy <- U$y
-if(marx)
-  mm <- U$marks
+## edge correction argument
 
 if(length(correction) > 1)
   stop("Only one edge correction allowed at a time!")
@@ -84,17 +73,26 @@ if(length(correction) > 1)
 if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley", "none")))
   stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
 
-#  
-# Form the matrix of distances
+#### Compute basic data
 
-M <- crossdist(X, U, periodic=(correction=="periodic"))
+if(!is.null(precomputed)) {
+  # precomputed
+  X <- precomputed$X
+  U <- precomputed$U
+  Equal <- precomputed$E
+  M <- precomputed$M
+} else {
+  U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
+  # Form the matrix of distances
+  M <- crossdist(X, U, periodic=(correction=="periodic"))
+}
 
 # Evaluate the pairwise potential 
 
 if(!marx) 
   POT <- pairpot(M, potpars)
 else
-  POT <- pairpot(M, m, mm, potpars)
+  POT <- pairpot(M, X$marks, U$marks, potpars)
 
 # Check errors and special cases
 
@@ -146,6 +144,9 @@ V <- apply(POT, c(2,3), sum)
 # attach the original pair potentials
 attr(V, "POT") <- POT
 
+# pass computed information out the back door
+if(savecomputed)
+  attr(V, "computed") <- list(E=Equal, M=M)
 return(V)
 
 },

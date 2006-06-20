@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.15 $ $Date: 2006/05/19 11:27:08 $
+#  $Revision: 1.18 $ $Date: 2006/06/20 10:20:45 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -90,6 +90,8 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, fatal=TRUE) {
 
 as.psp.owin <- function(x, ..., fatal=TRUE) {
   verifyclass(x, "owin")
+  # can't use as.rectangle here; still testing validity
+  xframe <- owin(x$xrange, x$yrange)
   switch(x$type,
          rectangle = {
            xx <- x$xrange[c(1,2,2,1)]
@@ -110,14 +112,14 @@ as.psp.owin <- function(x, ..., fatal=TRUE) {
              x1 <- c(x1, po$x[nxt])
              y1 <- c(y1, po$y[nxt])
            }
-           out <- psp(x0, y0, x1, y1,  window=x)
+           out <- psp(x0, y0, x1, y1,  window=xframe)
            return(out)
          },
          mask = {
            if(fatal) stop("x is a mask")
            else warning("x is a mask - no line segments returned")
            return(psp(numeric(0), numeric(0), numeric(0), numeric(0),
-                      window=x))
+                      window=xframe))
          })
   return(NULL)
 }
@@ -146,12 +148,14 @@ rebound.psp <- function(x, ...) {
 #  plot and print methods
 #################################################
 
-plot.psp <- function(x, ...) {
+plot.psp <- function(x, ..., add=FALSE) {
   verifyclass(x, "psp")
-  do.call.matched("plot.owin", 
-                  resolve.defaults(list(x=x$window),
-                                   list(...),
-                                   list(main=deparse(substitute(x)))))
+  if(!add) {
+    do.call.matched("plot.owin", 
+                    resolve.defaults(list(x=x$window),
+                                     list(...),
+                                     list(main=deparse(substitute(x)))))
+  }
   if(!is.null(x$marks))
     warning("marks are currently ignored in plot.psp")
   if(x$n > 0)
@@ -298,105 +302,6 @@ print.summary.psp <- function(x, ...) {
 }
   
 
- 
-########################################################
-# clipping operation (for subset)
-########################################################
-
-clip.psp <- function(x, window, check=TRUE) {
-  verifyclass(x, "psp")
-  verifyclass(window, "owin")
-  if(check && !is.subset.owin(window, x$window))
-    warning("The clipping window is not a subset of the window containing the line segment pattern x")
-  if(window$type != "rectangle")
-    stop("sorry, clipping is only implemented for rectangular windows")
-  emptypattern <- psp(numeric(0), numeric(0), numeric(0), numeric(0),
-                      window=window)
-  if(x$n == 0)
-    return(emptypattern)
-  ends <- x$ends
-  marks <- x$marks
-  # accept segments which are entirely inside the window
-  # (by convexity)
-  in0 <- inside.owin(ends$x0, ends$y0, window)
-  in1 <- inside.owin(ends$x1, ends$y1, window)
-  ok <- in0 & in1
-  ends.inside <- ends[ok, , drop=FALSE]
-  marks.inside <- if(is.null(marks)) NULL else marks[ok]
-  x.inside <- as.psp(ends.inside, window=window, marks=marks.inside)
-  # consider the rest
-  ends <- ends[!ok, , drop=FALSE]
-  in0 <- in0[!ok] 
-  in1 <- in1[!ok]
-  if(!is.null(marks)) marks <- marks[!ok]
-  # first clip segments to the range x \in [xmin, xmax]
-  # use parametric coordinates
-  small <- function(x) { abs(x) <= .Machine$double.eps }
-  tvalue <- function(z0, z1, zt) {
-    y1 <- z1 - z0
-    yt <- zt - z0
-    tval <- ifelse(small(y1), 0.5, yt/y1)
-    betwee <- (yt * (zt - z1)) <= 0
-    return(ifelse(betwee, tval, NA))
-  }
-  between <- function(x, r) { ((x-r[1]) * (x-r[2])) <= 0 }
-  tx <- cbind(ifelse(between(ends$x0, window$xrange), 0, NA),
-              ifelse(between(ends$x1, window$xrange), 1, NA),
-              tvalue(ends$x0, ends$x1, window$xrange[1]),
-              tvalue(ends$x0, ends$x1, window$xrange[2]))
-  # discard segments which do not lie in the x range 
-  nx <- apply(!is.na(tx), 1, sum)
-  ok <- (nx >= 2)
-  if(!any(ok))
-    return(x.inside)
-  ends <- ends[ok, , drop=FALSE]
-  tx   <- tx[ok, , drop=FALSE]
-  in0  <- in0[ok]
-  in1  <- in1[ok]
-  if(!is.null(marks)) marks <- marks[ok]
-  # Clip the segments to the x range
-  tmin <- apply(tx, 1, min, na.rm=TRUE)
-  tmax <- apply(tx, 1, max, na.rm=TRUE)
-  dx <- ends$x1 - ends$x0
-  dy <- ends$y1 - ends$y0
-  ends.xclipped <- data.frame(x0=ends$x0 + tmin * dx,
-                             y0=ends$y0 + tmin * dy,
-                             x1=ends$x0 + tmax * dx,
-                             y1=ends$y0 + tmax * dy)
-  # Now clip the segments to the range y \in [ymin, ymax]
-  ends <- ends.xclipped
-  in0 <- inside.owin(ends$x0, ends$y0, window)
-  in1 <- inside.owin(ends$x1, ends$y1, window)
-  ty <- cbind(ifelse(in0, 0, NA),
-              ifelse(in1, 1, NA),
-              tvalue(ends$y0, ends$y1, window$yrange[1]),
-              tvalue(ends$y0, ends$y1, window$yrange[2]))
-  # discard segments which do not lie in the y range 
-  ny <- apply(!is.na(ty), 1, sum)
-  ok <- (ny >= 2)
-  if(!any(ok))
-    return(x.inside)
-  ends <- ends[ok, , drop=FALSE]
-  ty   <- ty[ok, , drop=FALSE]
-  in0  <- in0[ok]
-  in1  <- in1[ok]
-  if(!is.null(marks)) marks <- marks[ok]
-  # Clip the segments to the y range
-  tmin <- apply(ty, 1, min, na.rm=TRUE)
-  tmax <- apply(ty, 1, max, na.rm=TRUE)
-  dx <- ends$x1 - ends$x0
-  dy <- ends$y1 - ends$y0
-  ends.clipped <- data.frame(x0=ends$x0 + tmin * dx,
-                             y0=ends$y0 + tmin * dy,
-                             x1=ends$x0 + tmax * dx,
-                             y1=ends$y0 + tmax * dy)
-  marks.clipped <- marks
-  # OK - segments clipped
-  # Put them together with the unclipped ones
-  ends.all <- rbind(ends.inside, ends.clipped)
-  marks.all <- c(marks.inside, marks.clipped)
-  as.psp(ends.all, window=window, marks=marks)
-}
 
 #################################################
 #  distance map

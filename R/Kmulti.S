@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.12 $	$Date: 2006/05/31 03:57:02 $
+#	$Revision: 5.14 $	$Date: 2006/06/11 23:10:21 $
 #
 #
 # -------- functions ----------------------------------------
@@ -94,13 +94,13 @@ function(X, I, J, r=NULL, breaks=NULL,
 	area <- area.owin(W)
 
         # available selection of edge corrections depends on window
-        if(W$type != "rectangle") {
+        if(W$type == "mask") {
            iso <- (correction == "isotropic") | (correction == "Ripley")
            if(all(iso))
-             stop("Isotropic correction not implemented for non-rectangular windows")
+             stop("Isotropic correction not implemented for binary masks")
            if(any(iso)) {
              if(!missing(correction))
-               warning("Isotropic correction not implemented for non-rectangular windows")
+               warning("Isotropic correction not implemented for binary masks")
              correction <- correction[!iso]
            }
         }
@@ -123,9 +123,10 @@ function(X, I, J, r=NULL, breaks=NULL,
         rmaxdefault <- rmax.rule("K", W, lambdaJ)
         breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
         r <- breaks$r
-
+        rmax <- breaks$max
+        
         # recommended range of r values
-        alim <- c(0, rmaxdefault)
+        alim <- c(0, min(rmax, rmaxdefault))
         
         # this will be the output data frame
         # It will be given more columns later

@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.11 $	$Date: 2006/05/31 07:20:50 $
+#	$Revision: 4.12 $	$Date: 2006/06/08 09:03:47 $
 #
 ################################################################################
 
@@ -102,7 +102,8 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
 # find close pairs of points
         XI <- X[I]
         XJ <- X[J]
-        close <- crosspairs(XI, XJ, breaks$max)
+        rmax <- breaks$max
+        close <- crosspairs(XI, XJ, rmax)
 # close$i and close$j are serial numbers in XI and XJ respectively;        
 # map them to original serial numbers in X
         orig <- seq(npoints)
@@ -130,7 +131,10 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
         icloseI  <- close$i
         jcloseJ  <- close$j
 #  "type I to type J" nearest neighbour distances
-	nnd <- tapply(dcloseIJ, icloseI, min)
+	nnd <- tapply(dcloseIJ,
+                      factor(icloseI, levels=seq(nI)),
+                      min)
+        nnd[is.na(nnd)] <- rmax+1
 #  distance to boundary from each type i point
         bdry <- bdist.points(XI)
 #  observations

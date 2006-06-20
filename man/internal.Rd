@@ -17,6 +17,8 @@
 \alias{check.hist.lengths}
 \alias{check.named.vector}
 \alias{clip.psp}
+\alias{cliprect.psp}
+\alias{clippoly.psp}
 \alias{closepairs}
 \alias{crosspairs}
 \alias{cobble.xy}
@@ -74,6 +76,7 @@
 \alias{Kmulti.inhom}               
 \alias{killinteraction}
 \alias{least.common.multiple}
+\alias{levels<-.im}
 \alias{lookup.im}
 \alias{make.even.breaks}
 \alias{markspace.integral}
@@ -107,6 +110,8 @@
 \alias{plot.minconfit}
 \alias{plot.profilepl}
 \alias{plot.qqppm}
+\alias{plot.quadratcount}
+\alias{plot.quadrattest}
 \alias{polynom}
 \alias{primefactors}       
 \alias{print.diagppm}
@@ -149,6 +154,7 @@
 \alias{rmhResolveTypes}
 \alias{rmhcontrol.rmhcontrol}
 \alias{rmhcontrol.list}
+\alias{rmhEngine}
 \alias{rmhmodel.rmhmodel}
 \alias{rmhmodel.list}
 \alias{rmhseed}
@@ -204,6 +210,8 @@ checkfields(X,L)
 check.hist.lengths(hist,breaks)
 check.named.vector(x, nam)
 clip.psp(x, window, check=TRUE)
+cliprect.psp(x, window)
+clippoly.psp(s, window)
 closepairs(X,rmax)
 crosspairs(X,Y,rmax)
 cobble.xy(x, y, f, fatal)
@@ -225,8 +233,8 @@ distpl(p, l)
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 divisors(n)
-do.call.matched(fname, arglist, funargs)
-edge.Ripley(X, r, W)
+do.call.matched(fname, arglist, funargs, extrargs)
+edge.Ripley(X, r, W, method)
 edge.Trans(X, Y, W, exact, paired, trim)
 ensure2vector(x)
 equals.quad(Q)          
@@ -272,6 +280,7 @@ Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
          Jname = "points satisfying condition J")
 killinteraction(model)
 least.common.multiple(n,m)
+\method{levels}{im}(x) <- value
 lookup.im(Z, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
 markspace.integral(X)
@@ -286,12 +295,12 @@ matrowsum(x)
 meanX.owin(w)            
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
-mpl.engine(Q, trend, interaction, covariates, correction,
-	 rbord, use.gam, forcefit, callstring)
+mpl.engine(Q, trend, interaction, \dots, covariates, correction,
+	 rbord, use.gam, forcefit, callstring, precomputed, savecomputed)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, Pname,
-            callstring, \dots)
+            callstring, \dots, precomputed, savecomputed)
 MultiPair.checkmatrix(mat, n, name)
 nearest.pixel(x, y, im)
 no.trend.ppm(x)
@@ -309,9 +318,11 @@ plot.diagppm(x, \dots, which, plot.neg="image",
                          plot.sd=TRUE, spacing=0.1,
                          srange=NULL, monochrome=FALSE, main=NULL)
 plot.minconfit(x, \dots)
-plot.profilepl(x, \dots, tag=TRUE)
+plot.profilepl(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
 plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
+plot.quadratcount(x, \dots, add, entries, dx, dy)
+plot.quadrattest(x, \dots)
 polynom(x, \dots)
 primefactors(n, prmax)
 print.diagppm(x, \dots)
@@ -354,6 +365,7 @@ rotxy(X, angle = pi/2)
 rmhResolveTypes(model, start, control)
 rmhcontrol.rmhcontrol(control, \dots)
 rmhcontrol.list(control, \dots)
+rmhEngine(InfoList, \dots, verbose, reseed, kitchensink, preponly) 
 rmhmodel.rmhmodel(model, \dots)
 rmhmodel.list(model, \dots)
 rmhseed(iseed)

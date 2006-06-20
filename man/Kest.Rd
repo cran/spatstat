@@ -98,7 +98,8 @@ from a point pattern in a window of arbitrary shape.
     }
     \item{isotropic/Ripley}{Ripley's isotropic correction
       (see Ripley, 1988; Ohser, 1983).
-      This is currently implemented only for rectangular windows.
+      This is implemented for rectangular and polygonal windows
+      (not for binary masks).
     }
     \item{translate}{Translation correction (Ohser, 1983).
       Implemented for all window geometries, but slow for

@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.16 $     $Date: 2006/05/29 04:10:03 $
+#         $Revision: 1.20 $     $Date: 2006/06/21 04:00:14 $
 #
 #      The class "im" of raster images
 #
@@ -45,12 +45,17 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
     stopifnot(length(mat) == length(xcol) * length(yrow))
     nc <- length(xcol)
     nr <- length(yrow)
-    if(!is.null(lev)) {
-      mat <- as.integer(factor(mat, levels=lev))
-      typ <- "factor"
-    }
-    mat <- matrix(mat, nrow=nr, ncol=nc)
   }
+
+  # deal with factor case
+  if(!is.null(lev)) {
+    # convert to integer codes
+    mat <- as.integer(factor(mat, levels=lev))
+    typ <- "factor"
+  }
+  # finally coerce 'mat' to a matrix
+  if(!is.matrix(mat))
+    mat <- matrix(mat, nrow=nr, ncol=nc)
 
   xstep <- diff(xcol)[1]
   ystep <- diff(yrow)[1]
@@ -67,11 +72,19 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
               lev     = lev,
               type    = typ)
   class(out) <- "im"
+  attr(out, "levels") <- lev 
   return(out)
 }
 
 is.im <- function(x) {
-inherits(x,"im")
+  inherits(x,"im")
+}
+
+"levels<-.im" <- function(x, value) {
+  if(x$type != "factor") 
+    stop("image is not factor-valued")
+  attr(x, "levels") <- x$lev <- value
+  x
 }
 
 ################################################################

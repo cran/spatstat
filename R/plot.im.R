@@ -159,8 +159,11 @@ persp.im <- function(x, ..., colmap=NULL) {
   if(xinfo$type == "factor")
     stop("Perspective plot is inappropriate for factor-valued image")
   pop <- spatstat.options("par.persp")
+  # check for common error
+  if(!is.null(col <- list(...)$col) && !is.matrix(col))
+    warning("Argument col is not a matrix. Did you mean colmap?")
   # colour map?
-  if(is.null(colmap))
+  if(is.null(colmap)) 
     colinfo <- list(col=NULL)
   else {
     # interpret colour map

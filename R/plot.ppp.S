@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.19 $	$Date: 2006/05/31 09:21:26 $
+#	$Revision: 1.20 $	$Date: 2006/06/14 15:55:48 $
 #
 #
 #--------------------------------------------------------------------------
@@ -34,11 +34,11 @@ plot.ppp <-
     
   defaults <- spatstat.options("par.points")
 
-  smartpoints <- function(..., col=NULL, pch=NULL, cols, chars) {
+  smartpoints <- function(..., index=1, col=NULL, pch=NULL, cols, chars) {
     if(missing(col) && !missing(cols))
-      col <- cols[1]
+      col <- cols[index]
     if(missing(pch) && !missing(chars))
-      pch <- chars[1]
+      pch <- chars[index]
     do.call("points",
             resolve.defaults(list(...),
                              if(!is.null(col)) list(col=col) else NULL,
@@ -165,6 +165,7 @@ plot.ppp <-
               resolve.defaults(list(x$x[relevant], x$y[relevant]),
                                list(pch = chars[i]),
                                explicit,
+                               list(index=i),
                                list(...),
                                spatstat.options("par.points")))
   }

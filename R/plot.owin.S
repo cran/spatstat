@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.14 $	$Date: 2006/05/31 08:22:08 $
+#	$Revision: 1.15 $	$Date: 2006/06/05 09:32:53 $
 #
 #
 #
@@ -72,20 +72,13 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
          },
          polygonal = {
            p <- W$bdry
-           if(exists("is.R") && is.R()) {
-             for(i in seq(p))
-               do.call.matched("polygon",
-                               resolve.defaults(
-                                                list(x=p[[i]]),
-                                                list(...)))
-           } else {
-             for(i in seq(p))
-               do.call.matched("polygon",
-                               resolve.defaults(
-                                                list(x=p[[i]]),
-                                                list(...),
-                                                list(density=0)))
-           }
+           for(i in seq(p))
+             do.call.matched("polygon",
+                             resolve.defaults(
+                                              list(x=p[[i]]),
+                                              list(...),
+                                              list(density=0)),
+                             extrargs="lwd")
          },
          mask = {
            do.call.matched("image.default",
