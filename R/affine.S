@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.4 $	$Date: 2006/03/24 06:05:22 $
+#	$Revision: 1.5 $	$Date: 2006/06/16 03:10:05 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -31,9 +31,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
              return(owin(mat[1,1] * X$xrange, mat[2,2] * X$yrange))
            } else {
              # convert rectangle to polygon
-             P <- owin(X$xrange, X$yrange, poly=
-                       list(x=X$xrange[c(1,2,2,1)],
-                            y=X$yrange[c(1,1,2,2)]))
+             P <- as.polygonal(X)
              # call polygonal case
              return(affine.owin(P, mat, vec))
            }

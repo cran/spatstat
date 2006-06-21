@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.39 2006/05/03 09:14:39 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.41 2006/06/14 14:47:50 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -22,9 +22,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   start <- rmhstart(start)
   control <- rmhcontrol(control)
 
-  if(is.null(start$seed))
-    start$seed <- rmhseed()
-  
 #### Multitype models
   
 # Decide whether the model is multitype; if so, find the types.
@@ -131,28 +128,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   }
 
 
-######### Store decisions
-
-  Model <- model
-  Start <- start
-  Control <- control
-
-  Model$w <- w.clip
-  Control$expand <- if(expanded) w.sim else 1
-  Control$force.exp <- expanded
-  Control$force.noexp <- !expanded
-
-  InfoList <- list(model=Model, start=Start, control=Control)
-
-#########  Make an empty pattern, to be returned in some cases
-
-  empty <- ppp(numeric(0), numeric(0), window=w.clip)
-  if(mtype) {
-    vide <- factor(types[integer(0)], levels=types)
-    empty <- empty %mark% vide
-  }
-  attr(empty, "info") <- InfoList
-  
 #######  Trend  ################################
   
 # Check that the expanded window fits inside the window
@@ -179,10 +154,11 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                       else "one of the trend windows.\n",
                       "Expanding to this trend window (only).\n"))
         w.sim <- iwindows[misfit]
-        Control$expand <- w.sim
       }
     }
   }
+
+
   
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
@@ -216,12 +192,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
          },
          stop("Internal error: start$given unrecognized"))
 
-# If we're simulating the empty pattern, return it now
-if(npts == 0 && control$conditioning != "none") {
-  if(verbose) 
-    cat("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern\n")
-  return(empty)
-}
 
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
@@ -267,13 +237,52 @@ if(npts == 0 && control$conditioning != "none") {
     }
   } 
 
+
+  
+########################################################################
+#  Normalising constant for proposal density
+# 
+# Integral of trend over the expanded window (or area of window):
+# Iota == Integral Of Trend (or) Area.
+  
+  if(trendy) {
+    if(verbose)
+      cat("Evaluating trend integral...")
+    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
+    tsummaries <- lapply(tlist,
+                         function(x, w) {
+                           tmp  <- as.im(x, w)[w, drop=FALSE]
+                           return(summary(tmp))
+                         },
+                         w=w.sim)
+    nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
+    if(any(nbg))
+      stop("Trend has negative values")
+    iota <- unlist(lapply(tsummaries, function(x) { x$integral }))
+    tmax <- unlist(lapply(tsummaries, function(x) { x$max }))
+  } else {
+    iota <- area.owin(w.sim)
+    tmax <- NULL
+  }
+
+  
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
-#     S I M U L A T I O N     
+#     A.S. EMPTY PROCESS
 #
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
-####### a.s. empty pattern      ###############################
+  a.s.empty <- FALSE
+  
+#
+#  Empty pattern, simulated conditional on n
+#  
+  if(npts == 0 && control$conditioning != "none") {
+    if(verbose) 
+      cat("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern\n")
+    a.s.empty <- TRUE
+  } 
+
 #
 #  If beta = 0, the process is almost surely empty
 #  
@@ -283,15 +292,165 @@ if(npts == 0 && control$conditioning != "none") {
       # return empty pattern
       if(verbose)
         cat("beta = 0 implies an empty pattern\n")
-      return(empty)
+      a.s.empty <- TRUE
     } else 
       stop("beta = 0 implies an empty pattern, but we are simulating conditional on a nonzero number of points")
   }
-    
+
+  if(a.s.empty) {
+    # create empty pattern, to be returned
+    empty <- ppp(numeric(0), numeric(0), window=w.clip)
+    if(mtype) {
+      vide <- factor(types[integer(0)], levels=types)
+      empty <- empty %mark% vide
+    }
+  }
+
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+#
+#     PACKAGE UP
+#
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+######### Store decisions
+
+  Model <- model
+  Start <- start
+  Control <- control
+
+  Model$w <- w.clip
+  Model$types <- types
   
-#######  Poisson case  ################################
+  Control$expand <- if(expanded) w.sim else 1
+  Control$force.exp <- expanded
+  Control$force.noexp <- !expanded
+
+  Control$internal <- list(w.sim=w.sim,
+                           ptypes=ptypes,
+                           period=period)
+
+  Model$internal <- list(a.s.empty=a.s.empty,
+                         empty=if(a.s.empty) empty else NULL,
+                         mtype=mtype,
+                         trendy=trendy,
+                         iota=iota,
+                         tmax=tmax)
+
+  Start$internal <- list(npts=npts)
+
+  InfoList <- list(model=Model, start=Start, control=Control)
+  class(InfoList) <- c("rmhInfoList", class(InfoList))
+
+  # go
+  rmhEngine(InfoList, verbose=verbose, reseed=FALSE, kitchensink=TRUE, ...)
+}
+
+
+#---------------  rmhEngine -------------------------------------------
 #
+# This is the interface to the Fortran code.
 #
+# InfoList is a list of pre-digested, validated arguments
+# obtained from rmh.default.
+#
+# This function is called by rmh.default to generate one simulated
+# realisation of the model.
+# It's called repeatedly by ho.engine and qqplot.ppm to generate multiple
+# realisations (saving time by not repeating the argument checking
+# in rmh.default).
+
+# arguments:  
+# reseed:  whether to reset the random seed to a new, random value
+# kitchensink: whether to tack InfoList on to the return value as an attribute
+# preponly: whether to just return InfoList without simulating
+#
+#   rmh.default digests arguments and calls rmhEngine with kitchensink=T
+#
+#   qqplot.ppm first gets InfoList by calling rmh.default with preponly=T
+#              (which digests the model arguments and calls rmhEngine
+#               with preponly=T, returning InfoList),
+#              then repeatedly calls rmhEngine(InfoList) to simulate.
+#
+# -------------------------------------------------------
+
+rmhEngine <- function(InfoList, ...,
+                       verbose=FALSE, reseed=TRUE, kitchensink=FALSE,
+                       preponly=FALSE) {
+# Internal Use Only!
+# This is the interface to the Fortran code.
+
+  if(!inherits(InfoList, "rmhInfoList"))
+    stop("data not in correct format for internal function rmhEngine")
+
+  
+  if(preponly)
+    return(InfoList)
+
+  model <- InfoList$model
+  start <- InfoList$start
+  control <- InfoList$control
+
+  w.sim <- control$internal$w.sim
+  w.clip <- model$w
+
+  types <- model$types
+  ntypes <- length(types)
+  
+  ptypes <- control$internal$ptypes
+  period <- control$internal$period
+
+  mtype <- model$internal$mtype
+
+  trend <- model$trend
+  trendy <- model$internal$trendy
+  iota <- model$internal$iota
+  tmax <- model$internal$tmax
+
+  npts <- start$internal$npts
+
+  n.start <- start$n.start
+  x.start <- start$x.start
+  
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+#
+#     E M P T Y   P A T T E R N
+#
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+  if(model$internal$a.s.empty) {
+    empty <- model$internal$empty
+    attr(empty, "info") <- InfoList
+    return(empty)
+  }
+  
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+#
+#     S I M U L A T I O N     
+#
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+#############################################
+####  
+####  Random number initialisation
+####  
+#############################################  
+  
+  if(reseed || is.null(start$seed)) {
+    # generate a (new) random seed
+    ss <- start$seed <- rmhseed()
+    if(kitchensink)
+      InfoList$start$seed <- start$seed
+  }
+ 
+  set.seed(start$seed$build.seed)
+
+  
+#############################################
+####  
+####  Poisson case
+####  
+#############################################  
+  
   if(model$cif == 'poisson') {
     intensity <- if(!trendy) model$par[["beta"]] else model$trend
     Xsim <-
@@ -329,43 +488,13 @@ if(npts == 0 && control$conditioning != "none") {
   }
 
   
-########################################################################
-#  Normalising constant for proposal density
-# 
-# Integral of trend over the expanded window (or area of window):
-# Iota == Integral Of Trend (or) Area.
-  
-  if(trendy) {
-    if(verbose)
-      cat("Evaluating trend integral...")
-    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
-    tsummaries <- lapply(tlist,
-                         function(x, w) {
-                           tmp  <- as.im(x, w)[w, drop=FALSE]
-                           return(summary(tmp))
-                         },
-                         w=w.sim)
-    nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
-    if(any(nbg))
-      stop("Trend has negative values")
-    iota <- unlist(lapply(tsummaries, function(x) { x$integral }))
-    tmax <- unlist(lapply(tsummaries, function(x) { x$max }))
-  } else {
-    iota <- area.owin(w.sim)
-    tmax <- NULL
-  }
-
 ########################################################################  
-#      S t a r t   s i m u l a t i o n
+#      M e t r o p o l i s  H a s t i n g s    s i m u l a t i o n
 ########################################################################
 
   if(verbose)
     cat("Starting simulation.\nInitial state...")
   
-####  Random number initialisation
-  
-  set.seed(start$seed$build.seed)
-
 
 #### Build starting state
 
@@ -570,7 +699,9 @@ if(npts == 0 && control$conditioning != "none") {
   xxx <- xxx[,w.clip]
 
 # Append to the result information about how it was generated.
-  attr(xxx, "info") <- InfoList
+  if(kitchensink)
+    attr(xxx, "info") <- InfoList
+  
   return(xxx)
 }
 

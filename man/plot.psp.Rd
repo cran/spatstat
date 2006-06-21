@@ -5,7 +5,7 @@
   Plot a two-dimensional line segment pattern
 }
 \usage{
-  \method{plot}{psp}(x, \dots)
+  \method{plot}{psp}(x, \dots, add=FALSE)
 }
 \arguments{
   \item{x}{
@@ -19,6 +19,11 @@
     \code{\link{segments}} (to plot the segments)
     and 
     \code{\link{plot.owin}} (to plot the observation window).
+  }
+  \item{add}{
+    Logical. If \code{TRUE}, the current plot is not erased;
+    the segments are plotted on top of the
+    current plot, and the window is not plotted.
   }
 }
 \value{

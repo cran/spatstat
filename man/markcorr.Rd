@@ -128,7 +128,8 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   \describe{
     \item{isotropic/Ripley}{Ripley's isotropic correction
       (see Ripley, 1988; Ohser, 1983).
-      This is currently implemented only for rectangular windows.
+      This is implemented only for rectangular and polygonal windows
+      (not for binary masks).
     }
     \item{translate}{Translation correction (Ohser, 1983).
       Implemented for all window geometries, but slow for

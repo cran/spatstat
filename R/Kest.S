@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.28 $	$Date: 2006/05/31 02:50:20 $
+#	$Revision: 5.31 $	$Date: 2006/06/11 23:11:07 $
 #
 #
 # -------- functions ----------------------------------------
@@ -52,7 +52,8 @@ function(X, ..., r=NULL, breaks=NULL,
   rmaxdefault <- rmax.rule("K", W, lambda)        
   breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
-
+  rmax <- breaks$max
+  
   correction.given <- !missing(correction)
   correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
   correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
@@ -66,17 +67,17 @@ function(X, ..., r=NULL, breaks=NULL,
   correction <- correction.list[correction.id]
 
   # available selection of edge corrections depends on window
-  if(W$type != "rectangle") {
+  if(W$type == "mask") {
     iso <- (correction == "isotropic") 
     if(any(iso)) {
       if(correction.given)
-        warning("Isotropic correction not implemented for non-rectangular windows")
+        warning("Isotropic correction not implemented for binary masks")
       correction <- correction[!iso]
     }
   }
 
   # recommended range of r values
-  alim <- c(0, rmaxdefault)
+  alim <- c(0, min(rmax, rmaxdefault))
 
   ###########################################
   # Efficient code for border method
@@ -96,10 +97,8 @@ function(X, ..., r=NULL, breaks=NULL,
 
   if(will.do.fast) {
     # restrict r values to recommended range, unless specifically requested
-    if(!rfixed) {
-      rmax <- min(max(r), alim[2])
-      r <- seq(0, rmax, length=length(r))
-    }
+    if(!rfixed) 
+      r <- seq(0, alim[2], length=length(r))
     return(Kborder.engine(X, max(r), length(r), correction))
   }
 

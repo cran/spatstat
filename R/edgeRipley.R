@@ -1,7 +1,7 @@
 #
 #        edgeRipley.R
 #
-#    $Revision: 1.1 $    $Date: 2002/04/07 11:14:43 $
+#    $Revision: 1.3 $    $Date: 2006/06/07 16:46:12 $
 #
 #    Ripley isotropic edge correction weights
 #
@@ -12,80 +12,144 @@
 #
 #######################################################################
 
-edge.Ripley <- function(X, r, W=X$window) {
+edge.Ripley <- function(X, r, W=X$window, method="C") {
   # X is a point pattern, or equivalent
   X <- as.ppp(X, W)
   W <- X$window
-  if(W$type != "rectangle")
-	stop("sorry, Ripley isotropic correction is only implemented\
-for rectangular windows")
 
-  if(!is.matrix(r) || nrow(r) != X$n)
-    stop("r should be a matrix with nrow(r) = length(X$x)")
+  switch(W$type,
+         rectangle={},
+         polygonal={
+           if(method != "C")
+             stop(paste("Ripley isotropic correction for polygonal windows",
+                        "requires method = ", dQuote("C")))
+         },
+         mask={
+           stop(paste("sorry, Ripley isotropic correction",
+                      "is not implemented for binary masks"))
+         }
+         )
 
-  x <- X$x
-  y <- X$y
+  n <- X$n
 
-  # perpendicular distance from point to each edge of rectangle
-  # L = left, R = right, D = down, U = up
-  dL  <- x - W$xrange[1]
-  dR  <- W$xrange[2] - x
-  dD  <- y - W$yrange[1]
-  dU  <- W$yrange[2] - y
-
-  # detect whether any points are corners of the rectangle
-  small <- function(x) { abs(x) < .Machine$double.eps }
-  corner <- (small(dL) + small(dR) + small(dD) + small(dU) >= 2)
-  
-  # angle between (a) perpendicular to edge of rectangle
-  # and (b) line from point to corner of rectangle
-  bLU <- atan2(dU, dL)
-  bLD <- atan2(dD, dL)
-  bRU <- atan2(dU, dR)
-  bRD <- atan2(dD, dR)
-  bUL <- atan2(dL, dU)
-  bUR <- atan2(dR, dU)
-  bDL <- atan2(dL, dD)
-  bDR <- atan2(dR, dD)
-
- # The above are all vectors [i]
- # Now we compute matrices [i,j]
-
-  # half the angle subtended by the intersection between
-  # the circle of radius r[i,j] centred on point i
-  # and each edge of the rectangle (prolonged to an infinite line)
-
-  hang <- function(d, r) {
-    answer <- matrix(0, nrow=nrow(r), ncol=ncol(r))
-    # replicate d[i] over j index
-    d <- matrix(d, nrow=nrow(r), ncol=ncol(r))
-    hit <- (d < r)
-    answer[hit] <- acos(d[hit]/r[hit])
-    answer
+  if(is.matrix(r) && nrow(r) != n)
+    stop("the number of rows of r should match the number of points in X")
+  if(!is.matrix(r)) {
+    if(length(r) != n)
+      stop("length of r is incompatible with the number of points in X")
+    r <- matrix(r, nrow=n)
   }
 
-  aL <- hang(dL, r)
-  aR <- hang(dR, r)
-  aD <- hang(dD, r) 
-  aU <- hang(dU, r)
+  stopifnot(method %in% c("interpreted", "C"))
 
-  # apply maxima
-  # note: a* are matrices; b** are vectors;
-  # b** are implicitly replicated over j index
-  cL <- pmin(aL, bLU) + pmin(aL, bLD)
-  cR <- pmin(aR, bRU) + pmin(aR, bRD)
-  cU <- pmin(aU, bUL) + pmin(aU, bUR)
-  cD <- pmin(aD, bDL) + pmin(aD, bDR)
+  ##########
+  
+  x <- X$x
+  y <- X$y
+  
+  ############### interpreted R code for rectangular case ##############
+  
+  if(method == "interpreted") {
 
-  # total exterior angle
-  ext <- cL + cR + cU + cD
+    # perpendicular distance from point to each edge of rectangle
+    # L = left, R = right, D = down, U = up
+    dL  <- x - W$xrange[1]
+    dR  <- W$xrange[2] - x
+    dD  <- y - W$yrange[1]
+    dU  <- W$yrange[2] - y
 
-  # add pi/2 for corners 
-  if(any(corner))
+    # detect whether any points are corners of the rectangle
+    small <- function(x) { abs(x) < .Machine$double.eps }
+    corner <- (small(dL) + small(dR) + small(dD) + small(dU) >= 2)
+  
+    # angle between (a) perpendicular to edge of rectangle
+    # and (b) line from point to corner of rectangle
+    bLU <- atan2(dU, dL)
+    bLD <- atan2(dD, dL)
+    bRU <- atan2(dU, dR)
+    bRD <- atan2(dD, dR)
+    bUL <- atan2(dL, dU)
+    bUR <- atan2(dR, dU)
+    bDL <- atan2(dL, dD)
+    bDR <- atan2(dR, dD)
+
+    # The above are all vectors [i]
+    # Now we compute matrices [i,j]
+
+    # half the angle subtended by the intersection between
+    # the circle of radius r[i,j] centred on point i
+    # and each edge of the rectangle (prolonged to an infinite line)
+
+    hang <- function(d, r) {
+      answer <- matrix(0, nrow=nrow(r), ncol=ncol(r))
+      # replicate d[i] over j index
+      d <- matrix(d, nrow=nrow(r), ncol=ncol(r))
+      hit <- (d < r)
+      answer[hit] <- acos(d[hit]/r[hit])
+      answer
+    }
+
+    aL <- hang(dL, r)
+    aR <- hang(dR, r)
+    aD <- hang(dD, r) 
+    aU <- hang(dU, r)
+
+    # apply maxima
+    # note: a* are matrices; b** are vectors;
+    # b** are implicitly replicated over j index
+    cL <- pmin(aL, bLU) + pmin(aL, bLD)
+    cR <- pmin(aR, bRU) + pmin(aR, bRD)
+    cU <- pmin(aU, bUL) + pmin(aU, bUR)
+    cD <- pmin(aD, bDL) + pmin(aD, bDR)
+
+    # total exterior angle
+    ext <- cL + cR + cU + cD
+
+    # add pi/2 for corners 
+    if(any(corner))
     ext[corner,] <- ext[corner,] + pi/2
 
-  # OK, now compute weight
-  weight <- 1 / (1 - ext/(2 * pi))
+    # OK, now compute weight
+    weight <- 1 / (1 - ext/(2 * pi))
+    return(weight)
+  }
+  ############ C code #############################
 
+  switch(W$type,
+         rectangle={
+           z <- .C("ripleybox",
+                   nx=as.integer(n),
+                   x=as.double(x),
+                   y=as.double(y),
+                   rmat=as.double(r),
+                   nr=as.integer(ncol(r)),
+                   xmin=as.double(W$xrange[1]),
+                   ymin=as.double(W$yrange[1]),
+                   xmax=as.double(W$xrange[2]),
+                   ymax=as.double(W$yrange[2]),
+                   epsilon=as.double(.Machine$double.eps),
+                   out=as.double(numeric(length(r))),
+                   PACKAGE="spatstat")
+           weight <- matrix(z$out, nrow(r), ncol(r))
+         },
+         polygonal={
+           Y <- as.psp(W)
+           z <- .C("ripleypoly",
+                   nc=as.integer(n),
+                   xc=as.double(x),
+                   yc=as.double(y),
+                   nr=as.integer(ncol(r)),
+                   rmat=as.double(r),
+                   nseg=as.integer(Y$n),
+                   x0=as.double(Y$ends$x0),
+                   y0=as.double(Y$ends$y0),
+                   x1=as.double(Y$ends$x1),
+                   y1=as.double(Y$ends$y1),
+                   out=as.double(numeric(length(r))),
+                   PACKAGE="spatstat")
+           angles <- matrix(z$out, nrow(r), ncol(r))
+           weight <- 2 * pi/angles
+         }
+         )
   return(weight)
 }

@@ -10,6 +10,7 @@
 function(Q,
          trend = ~1,
 	 interaction = NULL,
+         ..., 
          covariates = NULL,
 	 correction="border",
 	 rbord = 0,
@@ -33,7 +34,8 @@ function(Q,
                     correction=correction,
                     rbord=rbord, use.gam=use.gam,
                     forcefit=forcefit,
-                    callstring=callstring)
+                    callstring=callstring,
+                       ...)
   fitMPL$call <- cl
 
 

@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.20 $	$Date: 2006/05/31 02:33:00 $
+#	$Revision: 1.21 $	$Date: 2006/06/11 23:10:52 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -61,6 +61,7 @@
     rmaxdefault <- rmax.rule("K", W, npoints/area)
     breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
     r <- breaks$r
+    rmax <- breaks$max
     
     if(is.vector(lambda)) {
       if(length(lambda) != npoints) 
@@ -95,19 +96,17 @@
     correction <- correction.list[correction.id]
     
     # available selection of edge corrections depends on window
-    if(W$type != "rectangle") {
+    if(W$type == "mask") {
       iso <- (correction == "isotropic") | (correction == "Ripley")
       if(any(iso)) {
         if(correction.given)
-          warning("Isotropic correction not implemented for non-rectangular windows")
+          warning("Isotropic correction not implemented for binary masks")
         correction <- correction[!iso]
       }
     }
 
     # recommended range of r values
-    alim <- c(0, min(diff(W$xrange)/4,
-                     diff(W$yrange)/4,
-                     sqrt(1000 * area/(pi * npoints))))
+    alim <- c(0, min(rmax, rmaxdefault))
         
   ###########################################
   # Efficient code for border method
@@ -133,10 +132,8 @@
     
     if(will.do.fast) {
     # restrict r values to recommended range, unless specifically requested
-      if(!rfixed) {
-        rmax <- min(max(r), alim[2])
-        r <- seq(0, rmax, length=length(r))
-      }
+      if(!rfixed) 
+        r <- seq(0, alim[2], length=length(r))
       return(Kborder.engine(X, max(r), length(r), correction, 1/lambda))
     }
 

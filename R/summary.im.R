@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.5 $   $Date: 2006/01/18 05:52:39 $
+#    $Revision: 1.6 $   $Date: 2006/06/21 03:33:06 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -111,6 +111,10 @@ print.summary.im <- function(x, ...) {
 
 print.im <- function(x, ...) {
   cat(paste(x$type, "-valued pixel image\n", sep=""))
+  if(x$type == "factor") {
+    cat("factor levels:\n")
+    print(levels(x))
+  }
   di <- x$dim
   cat(paste(di[1], "x", di[2], "pixel array\n"))
   cat("enclosing rectangle: ")

@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.4 $	$Date: 2006/05/31 03:59:42 $
+#	$Revision: 1.7 $	$Date: 2006/06/14 14:44:57 $
 #
 #
 # ------------------------------------------------------------------------
@@ -78,13 +78,13 @@ function(X, I, J, lambdaI, lambdaJ,
         correction <- correction.list[correction.id]
         
         # available selection of edge corrections depends on window
-        if(W$type != "rectangle") {
+        if(W$type == "mask") {
            iso <- (correction == "isotropic") | (correction == "Ripley")
            if(all(iso))
-             stop("Isotropic correction not implemented for non-rectangular windows")
+             stop("Isotropic correction not implemented for binary masks")
            if(any(iso)) {
              if(correction.given)
-               warning("Isotropic correction not implemented for non-rectangular windows")
+               warning("Isotropic correction not implemented for binary masks")
              correction <- correction[!iso]
            }
         }
@@ -105,6 +105,7 @@ function(X, I, J, lambdaI, lambdaJ,
         rmaxdefault <- rmax.rule("K", W, nJ/area)
         breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
         r <- breaks$r
+        rmax <- breaks$max
         
         # intensity data
         if(is.im(lambdaI)) {
@@ -146,7 +147,7 @@ function(X, I, J, lambdaI, lambdaJ,
         }
 
         # Recommended range of r values
-        alim <- c(0, min(diff(X$window$xrange), diff(X$window$yrange))/4)
+        alim <- c(0, min(rmax, rmaxdefault))
         
         # this will be the output data frame
         # It will be given more columns later

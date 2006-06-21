@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.12 $ $Date: 2006/05/31 05:56:30 $
+#     $Revision: 1.14 $ $Date: 2006/06/11 23:14:31 $
 #
 #    Estimate the mark correlation function
 #
@@ -33,11 +33,11 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
           stop("Evenly spaced r values are required if method=\"density\"")
         
         # available selection of edge corrections depends on window
-        if(W$type != "rectangle") {
+        if(W$type == "mask") {
           iso <- (correction == "isotropic") | (correction == "Ripley")
           if(any(iso)) {
             if(!missing(correction))
-              warning("Isotropic correction not implemented for non-rectangular windows")
+              warning("Isotropic correction not implemented for binary masks")
             correction <- correction[!iso]
           }
         }
@@ -45,7 +45,7 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
         # this will be the output data frame
         result <- data.frame(r=r, theo= rep(1,length(r)))
         desc <- c("distance argument r", "theoretical Poisson m(r)=1")
-        alim <- c(0, min(diff(X$window$xrange),diff(X$window$yrange))/4)
+        alim <- c(0, min(rmax, rmaxdefault))
         result <- fv(result,
                      "r", substitute(m(r), NULL), "theo", , alim, c("r","mpois(r)"), desc)
 

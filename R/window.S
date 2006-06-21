@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.44 $	$Date: 2006/05/31 08:22:08 $
+#	$Revision: 4.45 $	$Date: 2006/06/16 02:29:32 $
 #
 #
 #	A window may be either
@@ -499,50 +499,64 @@ bounding.box <- function(...) {
                )
 }
   
-complement.owin <- function(w) {
-	verifyclass(w, "owin")
-        switch(w$type,
-               mask = {
-                 w$m <- !(w$m)
-               },
-               polygonal = {
+complement.owin <- function(w, frame=as.rectangle(w)) {
+  wname <- deparse(substitute(w))
+  verifyclass(w, "owin")
 
-                 bdry <- w$bdry
+  if(reframe <- !missing(frame)) {
+    verifyclass(frame, "owin")
+    w <- rebound.owin(w, frame)
+    # if w was a rectangle, it's now polygonal
+  }
+
+  switch(w$type,
+         mask = {
+           w$m <- !(w$m)
+         },
+         rectangle = {
+           stop("window is a rectangle - its complement is empty")
+         },
+         polygonal = {
+           bdry <- w$bdry
+
+           # bounding box, in anticlockwise order
+           box <- list(x=w$xrange[c(1,2,2,1)],
+                       y=w$yrange[c(1,1,2,2)])
+           boxarea <- area.xypolygon(box)
                  
-                 # bounding box, in anticlockwise order
-                 box <- list(x=w$xrange[c(1,2,2,1)],
-                             y=w$yrange[c(1,1,2,2)])
-                 boxarea <- area.xypolygon(box)
+           # first check whether one of the current boundary polygons
+           # is the bounding box itself (with + sign)
+           if(reframe)
+             is.box <- rep(FALSE, length(bdry))
+           else {
+             nvert <- unlist(lapply(bdry, function(a) { length(a$x) }))
+             area <- unlist(lapply(bdry, area.xypolygon))
+             boxarea.mineps <- boxarea * (0.99999)
+             is.box <- (nvert == 4 & area >= boxarea.mineps)
+             if(sum(is.box) > 1)
+               stop("Internal error: multiple copies of bounding box")
+             if(all(is.box))
+               stop(paste("Complement is empty, for window", wname),
+                    call.=FALSE)
+           }
                  
-                 # first check whether one of the current boundary polygons
-                 # is the bounding box itself (with + sign)
-                 nvert <- unlist(lapply(bdry, function(a) { length(a$x) }))
-                 area <- unlist(lapply(bdry, area.xypolygon))
-                 boxarea.mineps <- boxarea * (1 - .Machine$single.eps)
-                 is.box <- (nvert == 4 & area >= boxarea.mineps)
-                 if(sum(is.box) > 1)
-                   stop("Internal error: multiple copies of bounding box")
+           # if box is present (with + sign), remove it
+           if(any(is.box))
+             bdry <- bdry[!is.box]
                  
-                 # if box is present (with + sign), remove it
-                 if(any(is.box))
-                   bdry <- bdry[!is.box]
-                 
-                 # reverse the direction of each polygon
-                 bdry <- lapply(bdry, reverse.xypolygon)
-                 
-                 # if box was absent, add it
-                 if(!any(is.box))
-                   bdry <- c(bdry, list(box))   # sic
-                 
-                 # put back into w
-                 w$bdry <- bdry
-               },
-               rectangle = {
-                 stop("window is a rectangle - its complement is empty")
-               },
-               stop("unrecognised window type", w$type)
-               )
-	return(w)
+           # now reverse the direction of each polygon
+           bdry <- lapply(bdry, reverse.xypolygon)
+
+           # if box was absent, add it
+           if(!any(is.box))
+             bdry <- c(bdry, list(box))   # sic
+
+           # put back into w
+           w$bdry <- bdry
+         },
+         stop("unrecognised window type", w$type)
+         )
+  return(w)
 }
 
 #-----------------------------------------------------------

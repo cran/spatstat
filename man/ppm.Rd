@@ -7,7 +7,7 @@
   Fits a point process model to an observed point pattern
 }
 \usage{
- ppm(Q, trend=~1, interaction=NULL, covariates=NULL,
+ ppm(Q, trend=~1, interaction=NULL, \dots, covariates=NULL,
  correction="border", rbord=0, use.gam=FALSE, method="mpl",
  forcefit=FALSE, nsim=100, nrmh=1e5,
         start=NULL,
@@ -32,6 +32,7 @@
     structure, or \code{NULL} indicating that a Poisson process (stationary
     or nonstationary) should be fitted.
   }
+  \item{\dots}{Ignored.}
   \item{covariates}{
     The values of any spatial covariates (other than the Cartesian
     coordinates) required by the model.

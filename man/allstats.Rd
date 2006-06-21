@@ -8,12 +8,17 @@
   \code{\link{fasp.object}}).
 }
 \usage{
-  allstats(pp, dataname=NULL, verb=FALSE)
+  allstats(pp, \dots, dataname=NULL, verb=FALSE)
 }
 \arguments{
   \item{pp}{The observed point pattern, for which summary function
     estimates are required.  An object of class \code{"ppp"}.
     It must not be marked.
+  }
+  \item{\dots}{
+    Optional arguments passed to the summary functions
+    \code{\link{Fest}}, \code{\link{Gest}}, \code{\link{Jest}}
+    and \code{\link{Kest}}.
   }
   \item{dataname}{A character string giving an optional (alternative)
     name for the point pattern.

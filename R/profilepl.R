@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.2 $  $Date: 2006/06/02 10:24:07 $
+#  $Revision: 1.5 $  $Date: 2006/06/17 04:49:39 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -63,8 +63,25 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
     fi <- do.call("f", as.list(s[i,]))
     if(!inherits(fi, "interact"))
       stop(paste("f did not yield an object of class", sQuote("interact")))
-    fiti <- ppm(interaction=fi, ..., rbord=rbord)
+    # fit model
+    if(i == 1) {
+      # fit from scratch
+      fiti <- ppm(interaction=fi, ..., rbord=rbord, savecomputed=TRUE)
+      # save intermediate computations (pairwise distances, etc)
+      precomp <- fiti$internal$computed
+    } else {
+      # use precomputed data
+      fiti <- ppm(interaction=fi, ..., rbord=rbord, precomputed=precomp)
+    }
+    # save log PL for each fit
     logmpl[i] <- fiti$maxlogpl
+    # save fitted coefficients for each fit
+    co <- coef(fiti)
+    if(i == 1) {
+      allcoef <- data.frame(matrix(co, nrow=1))
+      names(allcoef) <- names(co)
+    } else
+      allcoef <- rbind(allcoef, co)
   }
   if(verbose) message("done.")
   opti <- which.max(logmpl)
@@ -77,11 +94,16 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
                  fit=optfit,
                  rbord=rbord,
                  fname=fname,
+                 allcoef=allcoef,
                  otherstuff=list(...),
                  pseudocall=pseudocall)
   class(result) <- c("profilepl", class(result))
   return(result)
 }
+
+#
+#   print method
+#
 
 print.profilepl <- function(x, ...) {
   cat("Profile log pseudolikelihood values\n")
@@ -107,34 +129,73 @@ print.profilepl <- function(x, ...) {
   cat("\n")
 }
 
-plot.profilepl <- function(x, ..., tag=TRUE) {
+#
+#  plot method 
+#
+
+plot.profilepl <- function(x, ..., add=FALSE, main=NULL,
+                           tag=TRUE, coeff=NULL, xvariable=NULL) {
   para <- x$param
-  prof <- x$prof
   npara <- ncol(para)
-  first <- para[,1]
-  firstname <- names(para)[1]
-  plot(range(first), range(prof), type="n", ylab="log PL", xlab=firstname)
-  if(npara == 1) {
-    lines(first, prof)
+  # main header
+  if(is.null(main))
+    main <- deparse(x$pseudocall)
+  # x variable for plot
+  if(is.null(xvariable)) {
+    xvalues <- para[,1]
+    xname <- names(para)[1]
   } else {
-    other <- para[, -1, drop=FALSE]
-    tapply(1:nrow(para),
-           as.list(other),
-           function(z, first, prof, other, tag) {
-             fz <- first[z]
-             pz<- prof[z]
-             lines(fz, pz)
-             if(tag) {
-               oz <- other[z, , drop=FALSE]
-               uniques <- apply(oz, 2, unique)
-               labels <- paste(names(uniques), "=", uniques, sep="")
-               label <- paste(labels, sep=",")
-               ii <- which.max(pz)
-               text(fz[ii], pz[ii], label)
-             }
-           },
-           first=first, prof=prof, other=other, tag=tag)
+    stopifnot(is.character(xvariable))
+    if(!(xvariable %in% names(para)))
+      stop("There is no irregular parameter named", sQuote(xvariable))
+    xvalues <- para[[xvariable]]
+    xname <- xvariable
   }
-  abline(v = first[x$iopt], lty=2, col="green")
-  invisible(NULL)
+  # y variable for plot                  
+  if(is.null(coeff)) {
+    yvalues <- x$prof
+    ylab <- "log PL"
+  } else {
+    stopifnot(is.character(coeff))
+    allcoef <- x$allcoef
+    if(!(coeff %in% names(allcoef)))
+      stop(paste("There is no coefficient named", sQuote(coeff), "in the fitted model"))
+    yvalues <- allcoef[[coeff]]
+    ylab <- paste("coefficient:", coeff)
+  }
+  # start plot
+  if(!add)
+    do.call.matched("plot.default",
+                  resolve.defaults(list(x=range(xvalues), y=range(yvalues)),
+                                   list(type="n", main=main),
+                                   list(...),
+                                   list(ylab=ylab, xlab=xname)))
+  # single curve
+  if(npara == 1) {
+    do.call.matched("lines.default", list(x=xvalues, y=yvalues, ...))
+    abline(v = xvalues[x$iopt], lty=2, col="green")
+    return(invisible(NULL))
+  }
+
+  # multiple curves
+  other <- para[, -1, drop=FALSE]
+  tapply(1:nrow(para),
+         as.list(other),
+         function(z, xvalues, yvalues, other, tag) {
+           fz <- xvalues[z]
+           pz<- yvalues[z]
+           lines(fz, pz)
+           if(tag) {
+             oz <- other[z, , drop=FALSE]
+             uniques <- apply(oz, 2, unique)
+             labels <- paste(names(uniques), "=", uniques, sep="")
+             label <- paste(labels, sep=",")
+             ii <- which.max(pz)
+             text(fz[ii], pz[ii], label)
+           }
+         },
+         xvalues=xvalues, yvalues=yvalues, other=other, tag=tag)
+
+  abline(v = xvalues[x$iopt], lty=2, col="green")
+  return(invisible(NULL))
 }

@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.19 $    $Date: 2006/06/02 03:36:09 $
+#  $Revision: 1.20 $    $Date: 2006/06/08 02:01:50 $
 #
 #
 
@@ -112,7 +112,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         ylab <- as.character(fmla)[2]
     }
   }
-  if(is.language(ylab))
+  if(is.language(ylab) && !is.expression(ylab))
     ylab <- deparse(ylab)
 
   # check for argument "add" (defaults to FALSE)

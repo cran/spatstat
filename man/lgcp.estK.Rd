@@ -3,6 +3,7 @@
 \title{Fit a Log-Gaussian Cox Point Process by Minimum Contrast}
 \description{
   Fits a log-Gaussian Cox point process model
+  (with exponential covariance function)
   to a point pattern dataset by the Method of Minimum Contrast.
 }
 \usage{
@@ -102,7 +103,6 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL)
 
   The remaining arguments \code{rmin,rmax,q,p} control the
   method of minimum contrast; see \code{\link{mincontrast}}.
-
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing
@@ -118,10 +118,14 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL)
   Moller, J. and Waagepetersen, R. (2003).
   Statistical Inference and Simulation for Spatial Point Processes.
   Chapman and Hall/CRC, Boca Raton.
+
+  Waagepetersen, R. (2006).
+  An estimation function approach to inference for inhomogeneous
+  Neyman-Scott processes. Submitted.
 }
 \author{Rasmus Waagepetersen
   \email{rw@math.auc.dk}.
-  Modifications by Adrian Baddeley
+  Adapted for \pkg{spatstat} by Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }

@@ -123,10 +123,14 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   Moller, J. and Waagepetersen, R. (2003).
   Statistical Inference and Simulation for Spatial Point Processes.
   Chapman and Hall/CRC, Boca Raton.
+
+  Waagepetersen, R. (2006).
+  An estimation function approach to inference for inhomogeneous
+  Neyman-Scott processes. Submitted.
 }
 \author{Rasmus Waagepetersen
   \email{rw@math.auc.dk}
-  Modifications by Adrian Baddeley
+  Adapted for \pkg{spatstat} by Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
