@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.18 $ $Date: 2006/06/20 10:20:45 $
+#  $Revision: 1.20 $ $Date: 2006/06/30 09:01:38 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -39,7 +39,24 @@ psp <- function(x0, y0, x1, y1, window, marks=NULL) {
 #  conversion
 ######################################################
 
-as.psp <- function(x, ...) {
+as.psp <- function(x, ..., from=NULL, to=NULL) {
+  # special case: two point patterns
+  if(is.null(from) != is.null(to))
+    stop(paste("If one of", sQuote("from"), "and", sQuote("to"),
+               "is specified, then both must be specified"))
+  if(!is.null(from) && !is.null(to)) {
+    verifyclass(from, "ppp")
+    verifyclass(to, "ppp")
+    if(from$n != to$n)
+      stop(paste("point patterns", sQuote("from"), "and", sQuote("to"),
+                 "have different numbers of points"))
+    uni <- union.owin(from$window, to$window)
+    Y <- do.call("psp",
+                 resolve.defaults(list(from$x, from$y, to$x, to$y),
+                                  list(...),
+                                  list(window=uni)))
+    return(Y)
+  }
   UseMethod("as.psp")
 }
 

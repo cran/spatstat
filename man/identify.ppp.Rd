@@ -45,7 +45,8 @@
   or its mark value (if \code{x} is marked).
 }
 \seealso{
-  \code{\link{identify}}
+  \code{\link{identify}},
+  \code{\link{clickppp}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -4,7 +4,7 @@
        `Pseudoexact' distance transform of a discrete binary image
        (the closest counterpart to `exactdist.c')
        
-       $Revision: 1.6 $ $Date: 2004/11/15 19:19:06 $
+       $Revision: 1.8 $ $Date: 2006/06/28 11:06:54 $
 
        
 */
@@ -13,6 +13,7 @@
 #include "raster.h"
 
 void   dist_to_bdry();
+void   shape_raster();
 
 void
 ps_exact_dt(in, dist, row, col)
@@ -23,14 +24,12 @@ ps_exact_dt(in, dist, row, col)
 	/* rasters must have been dimensioned by shape_raster()
 	   and must all have identical dimensions and margins */
 {
-	int	i,j,k,l,m;
+	int	j,k;
 	double	d, x, y;
 	int	r, c;
 	double	dnew;
 	double  bdiag;
 	double  huge;
-	int  *ip; 
-	double *dp;
 	
 	    /* initialise */
 #define UNDEFINED -1
@@ -109,7 +108,7 @@ ps_exact_dt(in, dist, row, col)
 
 /* R interface */
 
-ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc,
+void ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc,
 	   in, distances, rows, cols, boundary)
 	double *xmin, *ymin, *xmax, *ymax;  	  /* x, y dimensions */
 	int *nr, *nc;	 	                  /* raster dimensions

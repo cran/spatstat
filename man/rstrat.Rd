@@ -1,6 +1,6 @@
 \name{rstrat}
 \alias{rstrat}
-\title{Stratified random point pattern}
+\title{Simulate Stratified Random Point Pattern}
 \description{
   Generates a ``stratified random'' pattern of points in a window,
   by dividing the window into rectangular tiles and placing
@@ -26,6 +26,10 @@
   A point pattern (object of class \code{"ppp"}).
 }
 \details{
+  This function generates a random pattern of points
+  in a ``stratified random'' sampling design. It can be useful
+  for generating random spatial sampling points.
+
   The bounding rectangle of \code{win} is divided into
   a regular \eqn{nx \times ny}{nx * ny} grid of rectangular tiles.
   In each tile, \code{k} random points are generated independently

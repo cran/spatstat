@@ -2,8 +2,8 @@
 \alias{rMaternI}
 \title{Simulate Matern Model I}
 \description{
-  Generate a random point pattern using the
-  Mat\'ern Model I inhibition process.
+  Generate a random point pattern, a simulated realisation of the
+  Mat\'ern Model I inhibition process model.
 }
 \usage{
  rMaternI(kappa, r, win = owin(c(0,1),c(0,1)))

@@ -24,12 +24,14 @@ as.psp                  Convert Data To Class psp
 as.rectangle            Window Frame
 bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
+bei                     Tropical rain forest trees
 betacells               Beta Ganglion Cells in Cat Retina
 bounding.box            Bounding Box of a Window
 bramblecanes            Hutchings' Bramble Canes data
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
 chorley                 Chorley-Ribble Cancer Data
+clickppp                Interactively Add Points
 coef.ppm                Coefficients of Fitted Point Process Model
 compatible.fv           Test Whether Two Function Objects Are
                         Compatible
@@ -155,6 +157,7 @@ MultiStraussHard        The Multitype/Hard Core Strauss Point Process
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nncorr                  Nearest-Neighbour Correlation of Marked Point
                         Pattern
+nncross                 Nearest Neighbour in Another Point Pattern
 nndist                  Nearest neighbour distances
 nnwhich                 Nearest neighbour
 nztrees                 New Zealand Trees Point Pattern
@@ -194,6 +197,7 @@ Poisson                 Poisson Point Process Model
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
+pppdist                 Optimal Match Between Two Point Patterns
 ppp.object              Class of Point Patterns
 predict.ppm             Prediction from a Fitted Point Process Model
 print.im                Print Brief Details of an Image
@@ -259,9 +263,10 @@ rshift                  Random Shift
 rshift.ppp              Randomly Shift a Point Pattern
 rshift.psp              Randomly Shift a Line Segment Pattern
 rshift.splitppp         Randomly Shift a List of Point Patterns
-rSSI                    Simple Sequential Inhibition
-rstrat                  Stratified random point pattern
-rsyst                   Systematic random point pattern
+rSSI                    Simulate Simple Sequential Inhibition
+rstrat                  Simulate Stratified Random Point Pattern
+rStrauss                Perfect Simulation of the Strauss Process
+rsyst                   Simulate systematic random point pattern
 rthin                   Random Thinning
 rThomas                 Simulate Thomas Process
 runifpoint              Generate N Uniform Random Points

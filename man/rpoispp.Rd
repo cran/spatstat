@@ -4,6 +4,7 @@
 \description{
   Generate a random point pattern using the
   (homogeneous or inhomogeneous) Poisson process.
+  Includes CSR (complete spatial randomness).
 }
 \usage{
  rpoispp(lambda, lmax, win, \dots)
@@ -34,7 +35,8 @@
 \details{
   If \code{lambda} is a single number,
   then this algorithm generates a realisation
-  of the uniform Poisson process inside the window \code{win} with 
+  of the uniform Poisson process (also known as 
+  Complete Spatial Randomness, CSR) inside the window \code{win} with 
   intensity \code{lambda} (points per unit area).
  
   If \code{lambda} is a function, then this algorithm generates a realisation

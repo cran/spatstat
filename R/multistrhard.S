@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.8 $	$Date: 2005/07/27 06:26:01 $
+#    $Revision: 2.11 $	$Date: 2006/06/29 00:18:13 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -57,6 +57,7 @@ MultiStraussHard <- function(types, iradii, hradii) {
      mark2 <- (lx[col(r)])[uptri]
      vname <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
      vname <- paste("mark", vname, sep="")
+     vname <- make.names(vname)  # converts illegal characters
      npairs <- length(vname)
      # list all ORDERED pairs of types to be checked
      # (to save writing the same code twice)
@@ -139,7 +140,8 @@ MultiStraussHard <- function(types, iradii, hradii) {
           # names of coefficients
           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
           thetaname <- paste("mark", basename, sep="")
-          npairs <- length(basename)
+          thetaname <- make.names(thetaname)  # converts illegal characters
+          npairs <- length(thetaname)
           # extract canonical parameters; shape them into a matrix
           gammas <- matrix(, ntypes, ntypes)
           dimnames(gammas) <- list(typ, typ)
@@ -198,7 +200,8 @@ MultiStraussHard <- function(types, iradii, hradii) {
            # names of coefficients
            basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
            thetaname <- paste("mark", basename, sep="")
-           npairs <- length(basename)
+           thetaname <- make.names(thetaname)
+           npairs <- length(thetaname)
            # reassign 
            coeffs[thetaname] <- log(gamma[uptri])
            return(coeffs)

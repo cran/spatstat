@@ -4,7 +4,7 @@
 
   Edge corrections
 
-  $Revision: 1.3 $     $Date: 2006/06/07 16:35:58 $
+  $Revision: 1.4 $     $Date: 2006/06/28 09:19:00 $
 
  */
 
@@ -33,7 +33,7 @@
   (BETWEEN(X,X0,X1) && UNDERNEATH(X, Y, X0, Y0, X1, Y1))
 
 
-ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
+void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
      int *nx, *nr;  /* dimensions */
      double *x, *y; /* coordinate vectors of length nx */
      double *rmat;  /* matrix nx by nr  */
@@ -142,7 +142,7 @@ ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
 }
 
 
-ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out) 
+void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out) 
      int *nc, *nr, *nseg;
      double *xc, *yc, *rmat;
      double *x0, *y0, *x1, *y1;

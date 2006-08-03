@@ -1,8 +1,8 @@
 \name{rSSI}
 \alias{rSSI}
-\title{Simple Sequential Inhibition}
+\title{Simulate Simple Sequential Inhibition}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a realisation of the
   Simple Sequential Inhibition (SSI) process.
 }
 \usage{

@@ -11,7 +11,7 @@
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
                rbord=reach(object), cumulative=TRUE,
                plot.it=TRUE, rv = NULL, compute.sd=TRUE,
-               compute.cts=TRUE, typename, check=TRUE)
+               compute.cts=TRUE, typename, check=TRUE, repair=TRUE)
 }
 \usage{
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
@@ -19,7 +19,7 @@
                plot.it=TRUE,
                plot.neg="image", plot.smooth="imagecontour", plot.sd,
                rv = NULL, plot.sd, spacing=0.1,
-               srange=NULL, monochrome=FALSE, check=TRUE)
+               srange=NULL, monochrome=FALSE, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -113,6 +113,10 @@
     has been restored from a dump file, or has otherwise lost track of
     the environment where it was originally computed, set
     \code{check=TRUE}. 
+  }
+  \item{repair}{
+    Logical value indicating whether to repair the internal format
+    of \code{object}, if it is found to be damaged. 
   }
 }
 \value{

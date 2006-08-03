@@ -88,6 +88,7 @@
 \alias{matrowall}
 \alias{matrowany}
 \alias{matrowsum}
+\alias{maxflow}
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{mkcor}
@@ -108,11 +109,14 @@
 \alias{ploterodeimage}
 \alias{plot.diagppm}
 \alias{plot.minconfit}
+\alias{plot.pppmatching}
 \alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
 \alias{polynom}
+\alias{pppdist.prohorov}
+\alias{pppmatching}
 \alias{primefactors}       
 \alias{print.diagppm}
 \alias{print.envelope}
@@ -122,6 +126,7 @@
 \alias{print.isf}
 \alias{print.minconfit}
 \alias{print.plotppm}
+\alias{print.pppmatching}
 \alias{print.profilepl}
 \alias{print.qqppm}
 \alias{print.rmhcontrol}
@@ -172,12 +177,14 @@
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summary.envelope}
+\alias{summary.pppmatching}
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
 \alias{trim.rectangle}
 \alias{update.interact}
 \alias{validate.mask}        
+\alias{validate.quad}        
 \alias{variablesinformula}        
 \alias{verifyclass}
 \alias{verify.xypolygon}
@@ -292,6 +299,7 @@ matrixsample(mat, newdim, phase)
 matrowall(x)
 matrowany(x)
 matrowsum(x)
+maxflow(costm)
 meanX.owin(w)            
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
@@ -318,12 +326,15 @@ plot.diagppm(x, \dots, which, plot.neg="image",
                          plot.sd=TRUE, spacing=0.1,
                          srange=NULL, monochrome=FALSE, main=NULL)
 plot.minconfit(x, \dots)
+plot.pppmatching(x, addmatch = NULL, main = NULL, \dots)
 plot.profilepl(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
 plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
 plot.quadratcount(x, \dots, add, entries, dx, dy)
 plot.quadrattest(x, \dots)
 polynom(x, \dots)
+pppdist.prohorov(X, Y, precision = 7)
+pppmatching(X, Y, am, ty = "generic")
 primefactors(n, prmax)
 print.diagppm(x, \dots)
 print.envelope(x, \dots)
@@ -333,6 +344,7 @@ print.interact(x, \dots)
 print.isf(x, \dots)
 print.minconfit(x, \dots)
 print.plotppm(x, \dots)
+print.pppmatching(x, \dots)
 print.profilepl(x, \dots)
 print.qqppm(x, \dots)
 print.rmhcontrol(x, \dots)
@@ -386,12 +398,14 @@ stratrand(window, nx, ny, k = 1)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summary.envelope(object,\dots)
+summary.pppmatching(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
 trim.rectangle(W, xmargin, ymargin=xmargin)
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
+validate.quad(Q, fatal, repair, announce)
 variablesinformula(x)
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)

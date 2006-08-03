@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.45 $	$Date: 2006/06/16 02:29:32 $
+#	$Revision: 4.47 $	$Date: 2006/06/29 08:26:13 $
 #
 #
 #	A window may be either
@@ -637,13 +637,13 @@ print.owin <- function(x, ...) {
          }
          )
     cat(paste("[",
-              x$xrange[1],
+              signif(x$xrange[1], 5),
               ",",
-              x$xrange[2],
+              signif(x$xrange[2], 5),
               "] x [",
-              x$yrange[1],
+              signif(x$yrange[1], 5),
               ",",
-              x$yrange[2],
+              signif(x$yrange[2], 5),
               "]\n"))
 }
 
@@ -696,7 +696,7 @@ print.summary.owin <- function(x, ...) {
              else if(x$nhole == 1) cat("1 hole)\n")
              else cat(paste(x$nhole, "holes)\n"))
              print(data.frame(vertices=x$nvertices,
-                              area=x$areas,
+                              area=signif(x$areas, 6),
                               relative.area=signif(x$areas/x$area,3),
                               row.names=paste("polygon",
                                 1:(x$npoly),
@@ -713,15 +713,15 @@ print.summary.owin <- function(x, ...) {
          }
          )
   cat(paste("[",
-            x$xrange[1],
+            signif(x$xrange[1], 5),
             ",",
-            x$xrange[2],
+            signif(x$xrange[2], 5),
             "] x [",
-            x$yrange[1],
+            signif(x$yrange[1], 5),
             ",",
-            x$yrange[2],
+            signif(x$yrange[2], 5),
             "]\n"))
-  cat(paste("Window area = ", x$area, "\n"))
+  cat(paste("Window area = ", signif(x$area, 6), "\n"))
   return(invisible(x))
 }
 

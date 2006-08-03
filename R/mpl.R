@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.27 $	$Date: 2006/06/07 07:45:16 $
+#	$Revision: 5.32 $	$Date: 2006/06/29 00:31:37 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -45,18 +45,24 @@ function(Q,
     P <- precomputed$U
   } else {
 #
-# Extract quadrature scheme 
+# Determine quadrature scheme from argument Q
 #
     if(verifyclass(Q, "ppp", fatal = FALSE)) {
+      # point pattern - create default quadrature scheme 
       Q <- quadscheme(Q)   
-    } else if(!verifyclass(Q, "quad", fatal=FALSE))
+    } else if(verifyclass(Q, "quad", fatal=FALSE)) {
+      # user-supplied quadrature scheme - validate it
+      validate.quad(Q, fatal=TRUE, repair=FALSE, announce=TRUE)
+    } else 
       stop("First argument Q should be a point pattern or a quadrature scheme")
+    
 #
-# Data points
+# Extract data points
     X <- Q$data
 #
 # Data and dummy points together
     P <- union.quad(Q)
+
   }
 #
 #  
@@ -69,8 +75,8 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.version <- list(major=1,
                     minor=9,
-                    release=3,
-                    date="$Date: 2006/06/07 07:45:16 $")
+                    release=4,
+                    date="$Date: 2006/06/29 00:31:37 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -360,6 +366,13 @@ if(want.inter) {
   # List of interaction variable names
   Vnames <- dimnames(V)[[2]]
   
+  # Check the names are valid as column names in a dataframe
+  okVnames <- make.names(Vnames)
+  if(any(Vnames != okVnames)) {
+    warning("internal error: names of interaction terms contained illegal characters; names have been repaired.")
+    Vnames <- okVnames
+  }
+    
   #   Check for name clashes between the interaction variables
   #   and the formula
   cc <- check.clashes(Vnames, termsinformula(trend), "model formula")
@@ -464,3 +477,5 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     stop("\`covariates\' must be either a data frame or a list of images")
 }
 
+  
+  

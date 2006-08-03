@@ -4,7 +4,7 @@
        Exact distance transform of a point pattern
        (used to estimate the empty space function F)
        
-       $Revision: 1.4 $ $Date: 2004/11/15 19:27:14 $
+       $Revision: 1.5 $ $Date: 2006/06/28 09:23:04 $
 
        Author: Adrian Baddeley
 
@@ -193,7 +193,7 @@ dist_to_bdry(d)		/* compute distance to boundary from each raster point */
 
 /* S interface */
 
-exact_dt_R(x, y, npt,
+void exact_dt_R(x, y, npt,
 	   xmin, ymin, xmax, ymax,
 	   nr, nc,
 	   distances, indices, boundary)

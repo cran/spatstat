@@ -3,15 +3,19 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.2 $   $Date: 2006/01/09 07:09:02 $
+#   $Revision: 1.4 $   $Date: 2006/06/29 07:51:28 $
 # 
 
-fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE) {
+fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, repair=TRUE) {
   verifyclass(object, "ppm")
 
-  if(check && damaged.ppm(object))
-    stop("object format corrupted; try update(object, use.internal=TRUE)")
-  
+  if(check && damaged.ppm(object)) {
+    if(!repair)
+      stop("object format corrupted; try update(object, use.internal=TRUE)")
+    message("object format corrupted; repairing it.")
+    object <- update(object, use.internal=TRUE)
+  }
+    
   uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
 
   typelist <- c("lambda", "cif",    "trend")

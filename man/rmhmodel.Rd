@@ -83,6 +83,8 @@
       intensity, the pair-wise interaction parameter and the
       interaction radius.  Note that \code{gamma} must be less than
       or equal to 1.
+      (Note that there is also an algorithm for perfect simulation
+      of the Strauss process, \code{\link{rStrauss}})
     }
     \item{straush:}{
       (Strauss process with hardcore.) A \bold{named} vector with
@@ -388,6 +390,7 @@ otherwise an error is given.
    a <- list(cif="strauss",par=c(beta=2,gamma=0.2,r=0.7),
                  w=c(0,10,0,10))
    mod01 <- rmhmodel(a)
+   # The above could also be simulated using 'rStrauss'
 
    # Strauss with hardcore:
    mod04 <- list(cif="straush",par=c(beta=2,gamma=0.2,r=0.7,hc=0.3),

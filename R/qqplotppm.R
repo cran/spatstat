@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.15 $   $Date: 2006/06/14 14:49:01 $
+#  $Revision: 1.17 $   $Date: 2006/06/29 07:59:12 $
 #
 
 qqplot.ppm <-
@@ -15,11 +15,17 @@ qqplot.ppm <-
              periodic=(default.expand(fit)$type=="rectangle")),
            saveall=FALSE,
            monochrome=FALSE,
-           limcol=if(monochrome) "black" else "red")
+           limcol=if(monochrome) "black" else "red",
+           check=TRUE, repair=TRUE)
 {
   verifyclass(fit, "ppm")
-  if(damaged.ppm(fit))
-    stop("object format corrupted; try update(fit, use.internal=TRUE)")
+
+  if(check && damaged.ppm(fit)) {
+    if(!repair)
+      stop("object format corrupted; try update(fit, use.internal=TRUE)")
+    message("object format corrupted; repairing it.")
+    fit <- update(fit, use.internal=TRUE)
+  }
   
   if(fast) {
     oldnpixel <- spatstat.options("npixel")

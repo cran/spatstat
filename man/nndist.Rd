@@ -73,6 +73,9 @@
   To use the nearest neighbour distances for statistical inference,
   it is often advisable to use the edge-corrected empirical distribution,
   computed by \code{\link{Gest}}.
+
+  To find the nearest neighbour distances from one point pattern
+  to another point pattern, use \code{\link{nncross}}.
 }
 \section{Warnings}{
   An infinite value is returned if there is only one point
@@ -81,7 +84,8 @@
 \seealso{
   \code{\link{pairdist}},
   \code{\link{Gest}},
-  \code{\link{nnwhich}}.
+  \code{\link{nnwhich}},
+  \code{\link{nncross}}.
 }
 \examples{
    data(cells)
