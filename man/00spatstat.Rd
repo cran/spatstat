@@ -73,6 +73,8 @@ The Spatstat Package
     \code{ppp(x, y, mask)} for binary image window \cr
     \code{\link{as.ppp}} \tab
     convert other types of data to a \code{ppp} object \cr
+    \code{\link{clickppp}} \tab
+    interactively add points to a plot \cr
     \code{\link{setmarks}}, \code{\%mark\%}  \tab
     attach/reassign marks to a point pattern
   }
@@ -100,6 +102,8 @@ The Spatstat Package
 	simulate the Mat\'ern Model II inhibition process\cr
 	\code{\link{rSSI}} \tab
 	simulate Simple Sequential Inhibition process\cr
+	\code{\link{rStrauss}} \tab
+	simulate Strauss process (perfect simulation)\cr
 	\code{\link{rNeymanScott}} \tab
 	simulate a general Neyman-Scott process\cr
 	\code{\link{rMatClust}} \tab
@@ -128,6 +132,7 @@ The Spatstat Package
       \tabular{ll}{
 	\code{\link{amacrine}} \tab Austin Hughes' rabbit amacrine cells \cr
 	\code{\link{ants}} \tab Harkness-Isham ant nests data\cr
+	\code{\link{bei}} \tab Tropical rainforest trees \cr
 	\code{\link{betacells}} \tab Waessle et al. cat retinal ganglia data \cr
 	\code{\link{bramblecanes}} \tab Bramble Canes data \cr
 	\code{\link{cells}} \tab Crick-Ripley biological cells data \cr
@@ -348,6 +353,7 @@ The Spatstat Package
     \code{\link{nnwhich}} \tab find nearest neighbours \cr
     \code{\link{pairdist}} \tab distances between all pairs of points\cr
     \code{\link{crossdist}} \tab distances between points in two patterns\cr
+    \code{\link{nncross}} \tab nearest neighbours between two point patterns \cr
     \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
     \code{\link{distmap}} \tab distance map image\cr
     \code{\link{density.ppp}} \tab kernel smoothed density
@@ -390,7 +396,9 @@ The Spatstat Package
   \bold{Programming tools:}
   \tabular{ll}{
     \code{\link{applynbd}} \tab apply function to every neighbourhood\cr
-    \tab in a point pattern 
+    \tab in a point pattern \cr
+    \code{\link{pppdist}} \tab find the optimal match between two point
+    patterns
   }
 }
 

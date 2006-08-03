@@ -15,7 +15,7 @@
                           periodic=(default.expand(fit)$type=="rectangle")),
              saveall=FALSE,
              monochrome=FALSE,
-             limcol=if(monochrome) "black" else "red")
+             limcol=if(monochrome) "black" else "red", check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{fit}{
@@ -91,6 +91,17 @@
   \item{limcol}{
     String. The colour to be used when plotting the 95-percent limit
     curves.
+  }
+  \item{check}{
+    Logical value indicating whether to check the internal format
+    of \code{fit}. If there is any possibility that this object
+    has been restored from a dump file, or has otherwise lost track of
+    the environment where it was originally computed, set
+    \code{check=TRUE}. 
+  }
+  \item{repair}{
+    Logical value indicating whether to repair the internal format
+    of \code{fit}, if it is found to be damaged. 
   }
 }
 \value{

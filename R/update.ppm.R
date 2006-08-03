@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.12 $    $Date: 2006/06/02 08:23:50 $
+#  $Revision: 1.13 $    $Date: 2006/06/29 07:38:15 $
 #
 #
 #
@@ -139,6 +139,9 @@ damaged.ppm <- function(object) {
   gf <- getglmfit(object)
   badfit <- !is.null(gf) && !inherits(gf$terms, "terms")
   if(badfit)
+    return(TRUE)
+  Qcall <- object$call$Q
+  if(is.name(Qcall) && !exists(paste(Qcall)))
     return(TRUE)
   Q <- eval(object$call$Q)
   badQ <- is.null(Q) || !(inherits(Q, "ppp") || inherits(Q,"quad"))

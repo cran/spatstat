@@ -12,11 +12,13 @@ CIF_FOR = dgs.f diggra.f geyer.f lookup.f sftcr.f \
 
 OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f initaux.f inxyp.f updaux.f
 
-C_SRC = closepair.c distances.c exactdist.c  exactPdist.c  fexitc.c  massdisthack.c 
+C_SRC = closepair.c corrections.c discarea.c done.c dinfty.c distances.c exactdist.c  exactPdist.c  fexitc.c  massdisthack.c xyseg.c
+
+CC_SRC = PerfectStrauss.cc
 
 C_TEMPLATES = Kborder.cpp Kborder.h
 
-HUMAN = $(MH_TEMPLATES) $(C_TEMPLATES) $(CIF_FOR) $(OTHER_FOR) $(C_SRC) raster.h Makefile
+HUMAN = $(MH_TEMPLATES) $(C_TEMPLATES) $(CIF_FOR) $(OTHER_FOR) $(C_SRC) $(CC_SRC) raster.h Makefile
 
 ##########################################################
 # Source to be generated automatically:

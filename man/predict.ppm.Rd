@@ -8,7 +8,7 @@ at new locations.
 }
 \usage{
    predict.ppm(object, window, ngrid=NULL, locations=NULL,
-   covariates=NULL, type="trend", \dots, check=TRUE)
+   covariates=NULL, type="trend", \dots, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -52,6 +52,10 @@ at new locations.
     has been restored from a dump file, or has otherwise lost track of
     the environment where it was originally computed, set
     \code{check=TRUE}. 
+  }
+  \item{repair}{
+    Logical value indicating whether to repair the internal format
+    of \code{object}, if it is found to be damaged. 
   }
 }
 \value{

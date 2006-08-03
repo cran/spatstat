@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.14 $     $Date: 2006/05/26 09:56:12 $
+  $Revision: 1.16 $     $Date: 2006/06/27 05:37:04 $
 
  */
 
@@ -324,34 +324,107 @@ void nnwhichsort(n, x, y, nnd, nnwhich, huge)
     xi = x[i];
     yi = y[i];
     /* search backward */
-    for(left = i - 1;
-        left >= 0 && (dy = (yi - y[left])) < dmin ;
-	--left)
-      {
-	dx = x[left] - xi;
-	d2 =  dx * dx + dy * dy;
-	if (d2 < d2min) {
-	  d2min = d2;
-	  dmin = sqrt(d2);
-	  which = left;
+    if(i > 0){
+      for(left = i - 1;
+	  left >= 0 && (dy = (yi - y[left])) < dmin ;
+	  --left)
+	{
+	  dx = x[left] - xi;
+	  d2 =  dx * dx + dy * dy;
+	  if (d2 < d2min) {
+	    d2min = d2;
+	    dmin = sqrt(d2);
+	    which = left;
+	  }
 	}
-      }
+    }
 
     /* search forward */
-    for(right = i + 1;
-	right < npoints && (dy = (y[right] - yi)) < dmin ;
-	++right)
-      {
-	dx = x[right] - xi;
-	d2 =  dx * dx + dy * dy;
-	if (d2 < d2min) {
-	  d2min = d2;
-	  dmin = sqrt(d2);
-	  which = right;
+    if(i < npoints - 1) {
+      for(right = i + 1;
+	  right < npoints && (dy = (y[right] - yi)) < dmin ;
+	  ++right)
+	{
+	  dx = x[right] - xi;
+	  d2 =  dx * dx + dy * dy;
+	  if (d2 < d2min) {
+	    d2min = d2;
+	    dmin = sqrt(d2);
+	    which = right;
+	  }
 	}
-      }
+    }
     nnd[i] = dmin;
     nnwhich[i] = which;
+  }
+}
+
+
+/* nnXwhich: for TWO different point patterns X and Y,
+   find for each x in X the nearest neighbour y in Y.
+
+   Requires both patterns to be sorted in order of increasing y coord
+*/
+
+void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
+     int *n1, *n2, *nnwhich;
+     double *x1, *y1, *x2, *y2, *nnd, *huge;
+{ 
+  int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich;
+  double d, dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
+
+  hu = *huge;
+  hu2 = hu * hu;
+
+  npoints1 = *n1;
+  npoints2 = *n2;
+
+  if(npoints1 == 0 || npoints2 == 0)
+    return;
+
+  lastjwhich = 0;
+
+  for(i = 0; i < npoints1; i++) {
+    dmin = hu;
+    d2min = hu2;
+    jwhich = -1;
+    x1i = x1[i];
+    y1i = y1[i];
+
+    /* search backward from previous nearest neighbour */
+    if(lastjwhich > 0) {
+      for(jleft = lastjwhich - 1;
+	  jleft >= 0 && (dy = (y1i - y2[jleft])) < dmin ;
+	  --jleft)
+	{
+	  dx = x2[jleft] - x1i;
+	  d2 =  dx * dx + dy * dy;
+	  if (d2 < d2min) {
+	    d2min = d2;
+	    dmin = sqrt(d2);
+	    jwhich = jleft;
+	  }
+	}
+    }
+
+    /* search forward from previous nearest neighbour  */
+    if(lastjwhich < npoints2) {
+      for(jright = lastjwhich;
+	  jright < npoints2 && (dy = (y2[jright] - y1i)) < dmin ;
+	  ++jright)
+	{
+	  dx = x2[jright] - x1i;
+	  d2 =  dx * dx + dy * dy;
+	  if (d2 < d2min) {
+	    d2min = d2;
+	    dmin = sqrt(d2);
+	    jwhich = jright;
+	  }
+	}
+    }
+    nnd[i] = dmin;
+    nnwhich[i] = jwhich;
+    lastjwhich = jwhich;
   }
 }
 

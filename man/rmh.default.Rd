@@ -230,6 +230,7 @@ trend corresponding to a particular type, there is still a component
 \seealso{
   \code{\link{rmh}},
   \code{\link{rmh.ppm}},
+  \code{\link{rStrauss}},
   \code{\link{ppp}},
   \code{\link{ppm}},
   \code{\link{Strauss}},

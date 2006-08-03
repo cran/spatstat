@@ -2,7 +2,7 @@
 \alias{rMatClust}
 \title{Simulate Matern Cluster Process}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a simulated realisation of the
   Mat\'ern Cluster Process.
 }
 \usage{

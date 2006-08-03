@@ -12,7 +12,7 @@
   for use by the \pkg{spatstat} package.
 }
 \synopsis{
-  as.psp(x, \dots)
+  as.psp(x, \dots, from=NULL, to=NULL)
   as.psp.psp(x, \dots, fatal=TRUE)
   as.psp.data.frame(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
   as.psp.matrix(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
@@ -20,7 +20,8 @@
   as.psp.default(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
 }
 \usage{
-  as.psp(x, \dots, window=, marks=, fatal=TRUE)
+  as.psp(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
+  as.psp(\dots, window=NULL, marks=NULL, from=NULL, to=NULL)
 }
 \arguments{
   \item{x}{Data which will be converted into a line segment pattern}
@@ -29,6 +30,10 @@
   \item{\dots}{Ignored.}
   \item{marks}{(Optional) vector of marks for the pattern}
   \item{fatal}{Logical value. See Details.}
+  \item{from,to}{Point patterns (object of class \code{"ppp"})
+    containing the first and second endpoints (respectively) of each
+    segment. Incompatible with \code{x}.
+  }
 }
 \value{
   An object of class \code{"psp"} (see \code{\link{psp.object}})
@@ -73,6 +78,10 @@
     The boundary edges of the window will be extracted as a line segment
     pattern.
   }
+  Alternatively, you may specify two point patterns
+  \code{from} and \code{to} containing the first and second endpoints
+  of the line segments.
+  
   The argument \code{window} is converted to a window object
   by the function \code{\link{as.owin}}.
 
@@ -103,6 +112,7 @@
                  length=rep(0.1, 10),
                  angle=runif(10, 0, 2 * pi))
    a <- as.psp(stuff, window=owin())
+   b <- as.psp(from=runifpoint(10), to=runifpoint(10))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

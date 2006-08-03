@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.6 $    $Date: 2004/01/27 07:04:36 $
+#      $Revision: 4.12 $    $Date: 2006/06/29 00:20:27 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -144,7 +144,7 @@ quadscheme.spatial <-
           stop("data$marks is not a factor")
         markset <- levels(data$marks)
         nmarks <- length(markset)
-        
+
         # replicate dummy points, one copy for each possible mark
         # -> dummy x {1,..,K}
         
@@ -196,3 +196,54 @@ function(pp, markset, fac=TRUE) {
     result$marks <- factor(result$marks, levels=markset)
   result
 }
+
+
+validate.quad <- function(Q, fatal=FALSE, repair=TRUE, announce=FALSE) {
+  X <- Q$data
+  D <- Q$dummy
+  mX <- is.marked(X)
+  mD <- is.marked(D)
+  nbg <- function(whinge, fatal=FALSE, announce=FALSE) {
+    if(fatal)
+      stop(whinge, call.=FALSE)
+    else {
+      if(announce)
+        warning(whinge, call.=FALSE)
+      return(FALSE)
+    }
+  }
+  if(mX != mD) {
+    whinge <-
+      if(mX)
+        "data points are marked, but dummy points are not"
+      else
+        "dummy points are marked, but data points are not"
+    return(nbg(whinge, fatal, announce))
+  }
+  if(!mX)
+    return(TRUE)
+  # marked points 
+  fX <- is.factor(Xmarx <- X$marks)
+  fD <- is.factor(Dmarx <- D$marks)
+  if(fX != fD) {
+    whinge <-
+      if(fX)
+        "data points are multitype, but dummy points are not"
+      else
+        "dummy points are multitype, but data points are not"
+    return(nbg(whinge, fatal, announce))
+  }
+  if(!fX)
+    return(TRUE)
+  # multitype points
+  lX <- levels(Xmarx)
+  lD <- levels(Dmarx)
+  if(length(lX) != length(lD) || any(lX != lD)) {
+    whinge <- "data and dummy points have different sets of possible marks"
+    return(nbg(whinge, fatal, announce))
+  }
+  return(TRUE)
+}
+
+    
+  

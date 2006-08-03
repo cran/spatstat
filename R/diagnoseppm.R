@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.11 $ $Date: 2006/06/02 08:43:17 $
+# $Revision: 1.12 $ $Date: 2006/06/29 07:54:53 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -176,13 +176,17 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
                          rbord = reach(object), cumulative=TRUE,
                          plot.it = TRUE, rv = NULL, 
                          compute.sd=TRUE, compute.cts=TRUE,
-                         typename, check=TRUE)
+                         typename, check=TRUE, repair=TRUE)
 {
   if(is.marked.ppm(object))
     stop("Sorry, this is not yet implemented for marked models")
 
-  if(check && damaged.ppm(object))
-    stop("object format corrupted; try update(object, use.internal=TRUE)")
+  if(check && damaged.ppm(object)) {
+    if(!repair)
+      stop("object format corrupted; try update(object, use.internal=TRUE)")
+    message("object format corrupted; repairing it.")
+    object <- update(object, use.internal=TRUE)
+  }
     
   # -------------  Interpret arguments --------------------------
 

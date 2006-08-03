@@ -2,9 +2,8 @@
 \alias{rcell}
 \title{Simulate Baddeley-Silverman Cell Process}
 \description{
-  Generates a random point pattern using the 
-  cell process. The \eqn{K} function of the cell process is
-  indistinguishable from the \eqn{K} function of Complete Spatial Randomness.
+  Generates a random point pattern, a simulated realisation of the
+  Baddeley-Silverman cell process model. 
 }
 \usage{
  rcell(win=square(1), nx, ny=nx, dx=NULL, dy=NULL)

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.7 $	$Date: 2005/07/27 06:26:16 $
+#    $Revision: 2.10 $	$Date: 2006/06/29 00:19:27 $
 #
 #    The multitype Strauss process
 #
@@ -54,6 +54,7 @@ MultiStrauss <- function(types, radii) {
      mark2 <- (lx[col(r)])[uptri]
      vname <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
      vname <- paste("mark", vname, sep="")
+     vname <- make.names(vname)  # converts illegal characters
      npairs <- length(vname)
      # list all ORDERED pairs of types to be checked
      # (to save writing the same code twice)
@@ -116,7 +117,8 @@ MultiStrauss <- function(types, radii) {
           # names of coefficients
           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
           thetaname <- paste("mark", basename, sep="")
-          npairs <- length(basename)
+          thetaname <- make.names(thetaname)  # converts illegal characters
+          npairs <- length(thetaname)
           # extract canonical parameters; shape them into a matrix
           gammas <- matrix(, ntypes, ntypes)
           dimnames(gammas) <- list(typ, typ)
@@ -162,7 +164,8 @@ MultiStrauss <- function(types, radii) {
            # names of coefficients
            basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
            thetaname <- paste("mark", basename, sep="")
-           npairs <- length(basename)
+           thetaname <- make.names(thetaname)  # converts illegal characters
+           npairs <- length(thetaname)
            # reassign 
            coeffs[thetaname] <- log(gamma[uptri])
            return(coeffs)

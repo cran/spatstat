@@ -2,7 +2,7 @@
 \alias{rMaternII}
 \title{Simulate Matern Model II}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a simulated realisation of the
   Mat\'ern Model II inhibition process.
 }
 \usage{

@@ -68,13 +68,17 @@
 
   To evaluate the \emph{distance} between a point and its nearest
   neighbour, use \code{\link{nndist}}.
+
+  To find the nearest neighbours from one point pattern
+  to another point pattern, use \code{\link{nncross}}.
 }
 \section{Warnings}{
   A value of \code{NA} is returned if there is only one point
   in the point pattern.
 }
 \seealso{
-  \code{\link{nndist}}
+  \code{\link{nndist}},
+  \code{\link{nncross}}
 }
 \examples{
    oldpar <- par(mfrow=c(2,1))

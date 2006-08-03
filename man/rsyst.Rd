@@ -1,6 +1,6 @@
 \name{rsyst}
 \alias{rsyst}
-\title{Systematic random point pattern}
+\title{Simulate systematic random point pattern}
 \description{
   Generates a ``systematic random'' pattern of points in a window,
   consisting of a grid of equally-spaced points with a random common

@@ -2,7 +2,7 @@
 \alias{rThomas}
 \title{Simulate Thomas Process}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a realisation of the
   Thomas cluster process.
 }
 \usage{

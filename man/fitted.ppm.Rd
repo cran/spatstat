@@ -10,7 +10,8 @@
   or at the points of the quadrature scheme used to fit the model.
 }
 \usage{
-  \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE, check=TRUE)
+  \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE,
+check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -36,6 +37,10 @@
     has been restored from a dump file, or has otherwise lost track of
     the environment where it was originally computed, set
     \code{check=TRUE}. 
+  }
+  \item{repair}{
+    Logical value indicating whether to repair the internal format
+    of \code{object}, if it is found to be damaged. 
   }
 }
 \value{

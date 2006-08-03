@@ -2,7 +2,7 @@
 \alias{rmpoispp}
 \title{Generate Multitype Poisson Point Pattern}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a realisation of the
   (homogeneous or inhomogeneous) multitype Poisson process.
 }
 \usage{

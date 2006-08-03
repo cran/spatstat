@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.30 $	$Date: 2006/05/24 05:33:42 $
+#	$Revision: 4.35 $	$Date: 2006/06/29 00:38:04 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -56,6 +56,7 @@ ppp <- function(x, y, ..., window, marks ) {
 	class(pp) <- "ppp"
 	pp
 }
+
 #
 #--------------------------------------------------------------------------
 #

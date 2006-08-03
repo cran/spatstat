@@ -2,7 +2,7 @@
 \alias{rNeymanScott}
 \title{Simulate Neyman-Scott Process}
 \description{
-  Generate a random point pattern using the
+  Generate a random point pattern, a realisation of the
   Neyman-Scott cluster process.
 }
 \usage{
