@@ -1,7 +1,7 @@
 #
 # pppmatch.R
 #
-# $Revision: 1.3 $  $Date: 2006/06/30 10:05:55 $
+# $Revision: 1.5 $  $Date: 2006/08/21 06:07:02 $
 #
 # From original code by Dominic Schuhmacher
 #
@@ -137,10 +137,20 @@ pppdist <- function(X, Y, q=1, precision=7,
     return()
   }
   n <- X$n
-  dfix <- crossdist(X, Y)
-  fact = ifelse(belowone, sqrt(2), 1)
-  d <- round((dfix/fact)^q*10^precision)
+  d <- dfix <- crossdist(X, Y)
+  if(belowone)
+    d <- d/max(d)
+  d <- round((d^q)*(10^precision))
+  if(any(d == 0 & dfix > 0))
+    warning("zeroes obtained, while rounding the q-th powers of distances")
+  if(any(d > .Machine$integer.max))
+    stop("integer overflow, while rounding the q-th powers of distances")
 
+  Lpmean <- function(x, p) {
+    f <- max(x)
+    return(f * mean((x/f)^p)^(1/p))
+  }
+    
   if (show.rprimal) {
       plot(pppmatching(X, Y, matrix(FALSE, n, n)))
       # initialization of dual variables
@@ -185,11 +195,11 @@ pppdist <- function(X, Y, q=1, precision=7,
       assig <- res$assignment
       am <- matrix(FALSE, n, n)
       am[cbind(1:n, assig[1:n])] <- TRUE
-      resdist = mean((dfix[am])^q)^(1/q)
+      resdist <- Lpmean(dfix[am], q)
       plot(pppmatching(X, Y, am), main = paste("p = ", q, ",  distance = ",
          format(resdist, digits=4), sep=""))
    }
-   resdist = mean((dfix[am])^q)^(1/q)
+   resdist = Lpmean(dfix[am], q)
    print(resdist)
    return(pppmatching(X, Y, am, paste("Wasserstein", q, sep="")))   
 }   
@@ -287,7 +297,11 @@ pppdist.prohorov <- function(X, Y, precision=7) {
    }
    n <- X$n
    dfix <- crossdist(X, Y)
-   d <- round(dfix*10^precision)
+   d <- round(dfix*(10^precision))
+   if(any(d == 0 & dfix > 0))
+     warning("zeroes obtained, while rounding distances")
+   if(any(d > .Machine$integer.max))
+     stop("integer overflow, while rounding distances")
    res <- .C("dinfty_R",
              as.integer(d),
              as.integer(n),

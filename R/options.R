@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.4 $   $Date: 2006/05/31 08:17:59 $
+#    $Revision: 1.5 $   $Date: 2006/08/14 04:29:38 $
 #
 #
 ".Spatstat.Options" <-
@@ -11,7 +11,8 @@
        maxedgewt=100.0,
        par.binary=list(),
        par.persp=list(),
-       par.points=list()
+       par.points=list(),
+       par.contour=list()
        )
 
 "spatstat.options" <-

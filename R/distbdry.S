@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.8 $	$Date: 2006/05/18 03:30:49 $
+#	$Revision: 4.9 $	$Date: 2006/08/09 09:56:44 $
 #
 # -------- functions ----------------------------------------
 #
@@ -26,6 +26,8 @@
 function(X)
 {
 	verifyclass(X, "ppp") 
+        if(X$n == 0)
+          return(numeric(0))
 	x <- X$x
 	y <- X$y
 	window <- X$window

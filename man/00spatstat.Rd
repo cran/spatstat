@@ -57,6 +57,17 @@ The Spatstat Package
   type \code{help(name)} where \code{name} is the name of the function
   or dataset.
 }
+\section{CONTENTS:}{
+  \tabular{ll}{
+    I. \tab Creating and manipulating data \cr
+    II. \tab Exploratory Data Analysis \cr
+    III. \tab Model fitting (cluster models) \cr
+    IV. \tab Model fitting (Gibbs models) \cr
+    V. \tab Tests and diagnostics\cr
+    VI. \tab Documentation
+  }
+}
+
 \section{I. CREATING AND MANIPULATING DATA}{
 
   \bold{To create a point pattern:}
@@ -419,6 +430,9 @@ The Spatstat Package
 }
 
 \section{IV. MODEL FITTING (GIBBS MODELS)}{
+
+  For a detailed explanation of how to fit models to point pattern data
+  using \pkg{spatstat}, see Baddeley and Turner (2005b).
   
   \bold{To fit a Gibbs point process model:}
 
@@ -535,7 +549,7 @@ The Spatstat Package
 }
 
 
-\section{Documentation}{
+\section{VI. DOCUMENTATION}{
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
   

@@ -23,7 +23,6 @@
 \alias{crosspairs}
 \alias{cobble.xy}
 \alias{commasep}
-\alias{contour.im}
 \alias{countingweights}
 \alias{damaged.ppm}
 \alias{default.expand}
@@ -223,7 +222,6 @@ closepairs(X,rmax)
 crosspairs(X,Y,rmax)
 cobble.xy(x, y, f, fatal)
 commasep(x)
-contour.im(x, \dots)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
 default.expand(object, m, epsilon)

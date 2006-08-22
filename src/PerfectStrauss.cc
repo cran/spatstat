@@ -548,7 +548,8 @@ class Sampler{
 		      struct Point *headLiving,
 		      struct Point *headDeleted,
 		      struct Point3 *headTransition);
-  void Sampler::Forward(long int TS, long int TT, char TX, char TY,
+  // WAS:  Sampler::Forward
+  void Forward(long int TS, long int TT, char TX, char TY,
 		      struct Point *Proposal, long int *DDD);
 };
 
@@ -929,8 +930,10 @@ extern "C" {
 		      double *yout,
 		      int *nout){
     int xcells, ycells;
-    xcells = (int) fmin(floor((*xmax-*xmin)/ *r),9.0);
-    ycells = (int) fmin(floor((*ymax-*ymin)/ *r),9.0);
+    xcells = (int) floor((*xmax-*xmin)/ *r);
+    if(xcells > 9) xcells = 9;
+    ycells = (int) floor((*ymax-*ymin)/ *r);
+    if(ycells > 9) ycells = 9;
     //printf("xcells %d   ycells %d\n",xcells,ycells);
     // Initalise point Strauss point process
     StraussProcess ExampleProcess(*xmin,*xmax,*ymin,*ymax,*beta,*gamma,*r);  
