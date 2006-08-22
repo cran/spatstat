@@ -38,6 +38,7 @@ compatible.fv           Test Whether Two Function Objects Are
 compatible.im           Test Whether Two Pixel Images Are Compatible
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
+contour.im              Contour plot of pixel image
 copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
 crossdist               Pairwise distances

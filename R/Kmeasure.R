@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.14 $    $Date: 2006/05/31 08:22:08 $
+#           $Revision: 1.15 $    $Date: 2006/08/09 10:01:59 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -21,6 +21,11 @@ pixellate <- function(x, ..., weights=NULL)
     namesargs <- names(dotargs)
     matched <- namesargs %in% names(formals(as.mask))
     w <- do.call("as.mask", append(list(x$window), dotargs[matched]))
+
+    if(x$n == 0) {
+      zeroimage <- as.im(double(0), w)
+      return(zeroimage)
+    }
     
     pixels <- nearest.raster.point(x$x, x$y, w)
     nr <- w$dim[1]

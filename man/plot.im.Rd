@@ -59,6 +59,8 @@
   directly to the function \code{\link{image.default}}.
   In particular, the colour map is controlled by the argument
   \code{col}. See the examples in \code{\link{image.default}}.
+
+  To suppress the axis tick marks and labels, set \code{axes=FALSE}.
 }
 \seealso{
   \code{\link{im.object}},
@@ -80,4 +82,4 @@
 }
 \keyword{spatial}
  
- \keyword{hplot}
+\keyword{hplot}

@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.22 $   $Date: 2006/05/31 08:22:08 $
+#  $Revision: 1.26 $   $Date: 2006/08/14 04:30:40 $
 #
 #  Plotting code for pixel images
 #
@@ -219,17 +219,38 @@ persp.im <- function(x, ..., colmap=NULL) {
 
 ######################################################################
 
-contour.im <- function (x, ...)
+contour.im <- function (x, ..., main, axes=TRUE, add=FALSE)
 {
-  main <- deparse(substitute(x))
-  add <- resolve.defaults(list(...), list(add=FALSE))$add
-  if(!add) 
-    do.call.matched("plot.default",
-            resolve.defaults(list(x=range(x$xcol), y=range(x$yrow), type="n"),
-                             list(...),
-                             list(asp = 1, xlab="x", ylab="y", main=main)))
+  defaultmain <- deparse(substitute(x))
+  sop <- spatstat.options("par.contour")
+  if(missing(main)) 
+    main <- resolve.defaults(sop, list(main=defaultmain))$main
+  if(missing(add))
+    add <- resolve.defaults(sop, list(add=FALSE))$add
+  if(missing(axes))
+     axes <- resolve.defaults(sop, list(axes=TRUE))$axes
+  if(!add) {
+    # new plot
+    if(axes) # with axes
+      do.call.matched("plot.default",
+                      resolve.defaults(
+                                       list(x = range(x$xcol),
+                                            y = range(x$yrow),
+                                            type = "n"),
+                                       list(...),
+                                       list(asp = 1, xlab = "x",
+                                            ylab = "y", main = main)))
+    else { # box without axes
+      rec <- owin(x$xrange, x$yrange)
+      do.call.matched("plot.owin",
+                      resolve.defaults(list(x=rec),
+                                       list(...),
+                                       list(main=main)))
+    }
+  }
   do.call.matched("contour.default",
                   resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                                    list(add=TRUE),
                                    list(...)))
 }
+

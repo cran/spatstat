@@ -58,6 +58,10 @@
       List of arguments controlling the plotting of point patterns
       by \code{\link{plot.ppp}}.
     }
+    \item{par.contour}{
+      List of arguments controlling contour plots of pixel images
+      by \code{\link{contour.im}}.
+    }
   }
   
   If no arguments are given, 

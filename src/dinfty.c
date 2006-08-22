@@ -2,68 +2,43 @@
 
    dinfty.c
 
-   $Revision: 1.1 $   $Date: 2006/06/30 09:50:00 $
+   $Revision: 1.4 $   $Date: 2006/08/22 02:23:02 $
 
    Code by Dominic Schuhmacher
+
+   Modified by Adrian Baddeley
 
 */
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <R.h>
 
-int intmax(int a, int b);
+#define COST(I,J) (d)[n * (J) + (I)]
+
 int arraymax(int *a, int n);
-void swap(int i, int j);
-int largestmobpos();
-
-/* external variables */
-int n, currmin;
-int *current, *travel, *mobile; 
-int **costm;
-
-/* ----------------------------- */
-/* --- Version of 01/03/2006 --- */
-/* ----------------------------- */
+void swap(int i, int j, int *a);
+int largestmobpos(int *mobile, int *current, int *collectvals, int n);
 
 /* ------------ The main function ----------------------------- */
 
 void dinfty_R(int *d, int *num, int *assignment) {
-   int *assig, *distrelev; 
    int i,j; /* indices */
    int lmp, lmq; /* largest mobile position and its neighbor */
    int oldcost, newmax;
+   int n, currmin;
+   int *current, *travel, *mobile, *assig, *distrelev, *collectvals;
 
    n = *num;
 
-/* dynamic allocation of travel, mobile, current, and assig */
-   travel = (int *)malloc(n * sizeof(int));
-   mobile = (int *)malloc(n * sizeof(int));
-   current = (int *)malloc(n * sizeof(int));
-   assig = (int *)malloc(n * sizeof(int));
-   distrelev = (int *)malloc(n * sizeof(int));
-   if (travel == NULL || mobile == NULL || current == NULL || assig == NULL || distrelev == NULL) {
-      printf("out of memory\n");
-      exit(1);
-   }
-   costm = malloc(n * sizeof(int *));
-   if (costm == NULL) {
-      printf("out of memory\n");
-      exit(1);
-   }
-   for (i = 0; i < n; i++) {
-      costm[i] = malloc(n * sizeof(int));
-      if(costm[i] == NULL) {
-         printf("out of memory\n");
-         exit(1);
-      }
-   }
+   /* scratch space */
+   assig = (int *) R_alloc((long) n, sizeof(int)); 
+   travel = (int *) R_alloc((long) n, sizeof(int)); 
+   mobile = (int *) R_alloc((long) n, sizeof(int)); 
+   current = (int *) R_alloc((long) n, sizeof(int)); 
+   distrelev = (int *) R_alloc((long) n, sizeof(int));
 
-/* Copy distance matrix obtained from R into costm */
-   for (i = 0; i < n; i++) {
-   for (j = 0; j < n; j++) {
-      costm[i][j] = d[n * j + i];
-   }
-   }
+   collectvals = (int *) R_alloc((long) (n * n), sizeof(int));
+
 
 /*                                                               */
 /* We use the Johnson-Trotter Algorithm for listing permutations */
@@ -75,15 +50,16 @@ void dinfty_R(int *d, int *num, int *assignment) {
       mobile[i] = 1;    /* all numbers mobile */
       current[i] = i;   /* current permutation is the identity */
       assig[i] = i;     /* best permutation up to now is the identity */
-      distrelev[i] = costm[i][i];   /* pick relevant entries in the cost matrix */
+      distrelev[i] = COST(i, i);   /* pick relevant entries in the cost matrix */
    }
    currmin = arraymax(distrelev, n);   /* minimal max up to now */
 
 /* The main loop */
    while(arraymax(mobile, n) == 1) {
-      lmp = largestmobpos();
+     lmp = largestmobpos(mobile, current, collectvals, n);
       lmq = lmp + travel[lmp];
-      swap(lmp, lmq);
+      swap(lmp, lmq, current);
+      swap(lmp, lmq, travel);
       for (i = 0; i < n; i++) {
          if (current[i] > current[lmq])
             travel[i] = -travel[i];
@@ -92,7 +68,7 @@ void dinfty_R(int *d, int *num, int *assignment) {
             mobile[i] = 0;
          else
             mobile[i] = 1;
-         distrelev[i] = costm[i][current[i]];
+         distrelev[i] = COST(i, current[i]);
       }
       /* Calculation of new maximal value */
       newmax = arraymax(distrelev, n);
@@ -111,55 +87,40 @@ void dinfty_R(int *d, int *num, int *assignment) {
       assignment[i] = assig[i] + 1;
    }
 
-/* Free the memory used by the dyn. allocated stuff */
-   for(i = 0; i < n; i++) {
-      free((void *)costm[i]);
-   }
-   free((void *)costm);
-   free(assig);
-   free(distrelev);
-   free(current);
-   free(travel);
-   free(mobile);
 }
 
 
-/* Maximum of two integers */
-int intmax(int a, int b) {
-   return(a > b ? a : b);
-}
+/* ------------------------------------------------------------*/
 
 
-/* Maximal element of an array */
+/* Maximal element of an integer array */
 int arraymax(int *a, int n) {
-   if (n == 1) return(a[0]);
-   else return(intmax(arraymax(a, n-1), a[n-1]));
+  int i, amax;
+  if(n < 1)
+    return(-1);
+  amax = a[0];
+  if(n > 1)
+    for(i = 0; i < n; i++)
+      if(a[i] > amax) amax = a[i];
+  return(amax);
 }
 
 
-/* Swap elements i and j in current and in travel */
-void swap(int i, int j) {
+/* Swap elements i and j in array a */
+
+void swap(int i, int j, int *a) {
    int v;
 
-   v = current[i];
-   current[i] = current[j];
-   current[j] = v;
-   v = travel[i];
-   travel[i] = travel[j];
-   travel[j] = v;
+   v = a[i];
+   a[i] = a[j];
+   a[j] = v;
 }
 
 
 /* Return index of largest mobile number in current */
-int largestmobpos() {
+int largestmobpos(int *mobile, int *current, int *collectvals, int n) {
    int i,j, maxval;
-   int *collectvals; /* probably program is a little faster if this is defined externally */
 
-   collectvals = (int *)malloc(n * n * sizeof(int));
-   if (collectvals == NULL) {
-      printf("out of memory\n");
-      exit(1);
-   }
    j = 0;
    for (i = 0; i < n; i++) {
       if (mobile[i] == 1) {
@@ -170,9 +131,8 @@ int largestmobpos() {
    maxval = arraymax(collectvals, j);
    for (i = 0; i < n; i++) {
       if (current[i] == maxval) {
-         free(collectvals);
          return(i);
       }
    }
-   printf("something's fishy...\n");
+   error("Internal error: largestmobpos failed");
 }

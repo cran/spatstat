@@ -35,7 +35,7 @@ clickppp <- function(n=NULL, win=square(1), types=NULL, ..., add=FALSE, main=NUL
   
   ##### multitype #######################
   
-  ftypes <- factor(types)
+  ftypes <- factor(types, levels=types)
   getem <- function(i, instr, ...) {
     main <- paste("Points of type", sQuote(i), "\n", instr)
     do.call("clickppp", resolve.defaults(list(...), list(main=main)))
