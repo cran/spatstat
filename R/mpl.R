@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.32 $	$Date: 2006/06/29 00:31:37 $
+#	$Revision: 5.34 $	$Date: 2006/09/20 02:34:49 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -34,6 +34,7 @@ function(Q,
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
+         famille=NULL,
          forcefit=FALSE,
          callstring="",
          precomputed=NULL,
@@ -76,7 +77,7 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=9,
                     release=4,
-                    date="$Date: 2006/06/29 00:31:37 $")
+                    date="$Date: 2006/09/20 02:34:49 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -124,14 +125,31 @@ computed <- append(computed, prep$computed)
 
 # Fit the generalized linear/additive model.
 
-if(want.trend && use.gam)
-  FIT  <- gam(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
-              data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
-              control=gam.control(maxit=50))
-else
-  FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
-              data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
-              control=glm.control(maxit=50))
+if(is.null(famille)) {
+  # the sanctioned technique, using `quasi' family
+  if(want.trend && use.gam)
+    FIT  <- gam(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
+                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                control=gam.control(maxit=50))
+  else
+    FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
+                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                control=glm.control(maxit=50))
+} else {
+  # for experimentation only!
+  if(is.function(famille))
+    famille <- famille()
+  stopifnot(inherits(famille, "family"))
+  if(want.trend && use.gam)
+    FIT  <- gam(fmla, family=famille, weights=.mpl.W,
+                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                control=gam.control(maxit=50))
+  else
+    FIT  <- glm(fmla, family=famille, weights=.mpl.W,
+                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                control=glm.control(maxit=50))
+}
+  
   
 ################  I n t e r p r e t    f i t   #######################
 

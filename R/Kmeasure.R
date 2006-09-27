@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.15 $    $Date: 2006/08/09 10:01:59 $
+#           $Revision: 1.18 $    $Date: 2006/09/27 09:12:51 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -47,7 +47,8 @@ Kmeasure <- function(X, sigma, edge=TRUE) {
 }
 
 second.moment.calc <- function(x, sigma, edge=TRUE,
-                               what="Kmeasure", debug=FALSE, ...) {
+                               what="Kmeasure", debug=FALSE, ..., varcov=NULL)
+{
   choices <- c("kernel", "smooth", "Kmeasure", "Bartlett", "edge")
   if(!(what %in% choices))
     stop(paste("Unknown choice: what = \"", what, "\"; available options are:", paste(choices, collapse=",")))
@@ -68,13 +69,24 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
   xcol.pad <- xw[1] + X$xstep * (1/2 + 0:(2*nc-1))
   yrow.pad <- yw[1] + X$ystep * (1/2 + 0:(2*nr-1))
   # set up Gauss kernel
-  if(max(abs(diff(xw)),abs(diff(yw))) < 6 * sigma)
-    warning("sigma is too large for this window")
   xcol.G <- X$xstep * c(0:(nc-1),-(nc:1))
   yrow.G <- X$ystep * c(0:(nr-1),-(nr:1))
   xx <- matrix(xcol.G[col(Ypad)], ncol=2*nc, nrow=2*nr)
   yy <- matrix(yrow.G[row(Ypad)], ncol=2*nc, nrow=2*nr)
-  Kern <- exp(-(xx^2 + yy^2)/(2 * sigma^2))/(2 * pi * sigma^2) * X$xstep * X$ystep
+  if(!is.null(sigma)) {
+    if(max(abs(diff(xw)),abs(diff(yw))) < 6 * sigma)
+      warning("sigma is too large for this window")
+    Kern <- exp(-(xx^2 + yy^2)/(2 * sigma^2))/(2 * pi * sigma^2) * X$xstep * X$ystep
+  } else if(!is.null(varcov)) {
+    # anisotropic kernel
+    detSigma <- det(varcov)
+    Sinv <- solve(varcov)
+    const <- X$xstep * X$ystep/(2 * pi * sqrt(detSigma))
+    Kern <- const * exp(-(xx * (xx * Sinv[1,1] + yy * Sinv[1,2])
+                          + yy * (xx * Sinv[2,1] + yy * Sinv[2,2]))/2)
+  } else 
+    stop("Must specify either sigma or varcov")
+
   if(what=="kernel") {
     # return the kernel
     # first rearrange it into spatially sensible order (monotone x and y)
@@ -198,17 +210,52 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
   density.ppp(x, sigma, ..., edge=edge)
 }
 
-density.ppp <- function(x, sigma, ..., edge=TRUE) {
+density.ppp <- function(x, sigma, ..., edge=TRUE, varcov=NULL) {
   verifyclass(x, "ppp")
-  if(missing(sigma))
-    sigma <- 0.1 * diameter(x$window)
-  smo <- second.moment.calc(x, sigma=sigma, what="smooth", ...)
+  sigma.given <- !missing(sigma) && !is.null(sigma)
+  varcov.given <- !is.null(varcov)
+  if(sigma.given) {
+    stopifnot(is.numeric(sigma))
+    stopifnot(length(sigma) %in% c(1,2))
+    stopifnot(all(sigma > 0))
+  }
+  if(varcov.given)
+    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )    
+  ngiven <- varcov.given + sigma.given
+  switch(ngiven+1,
+         {
+           # default
+           w <- x$window
+           sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
+         },
+         {
+           if(sigma.given && length(sigma) == 2) 
+             varcov <- diag(sigma^2)
+           if(!is.null(varcov))
+             sigma <- NULL
+         },
+         {
+           stop(paste("Give only one of the arguments",
+                      sQuote("sigma"), "and", sQuote("varcov")))
+         })
+      
+  smo <- second.moment.calc(x, sigma, what="smooth", ..., varcov=varcov)
   smo$v <- smo$v/(smo$xstep * smo$ystep)
+  raw <- smo
   if(edge) {
-    edg <- second.moment.calc(x, sigma, what="edge", ...)
+    edg <- second.moment.calc(x, sigma, what="edge", ..., varcov=varcov)
     smo <- eval.im(smo/edg)
   }
-  sub <- smo[x$window, drop=FALSE]
-  return(sub)
+  result <- smo[x$window, drop=FALSE]
+
+  # internal use only
+  spill <- list(...)$spill
+  if(!is.null(spill)) {
+    edg <- if(edge) im(edg, xcol=raw$xcol, yrow=raw$yrow) else NULL
+    return(list(sigma=sigma, varcov=varcov, raw = raw, edg=edg))
+  }
+
+  # normal return
+  return(result)
 }
   

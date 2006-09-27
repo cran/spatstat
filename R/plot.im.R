@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.26 $   $Date: 2006/08/14 04:30:40 $
+#  $Revision: 1.27 $   $Date: 2006/08/28 07:11:55 $
 #
 #  Plotting code for pixel images
 #
@@ -82,8 +82,7 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
   image.doit <- function(...) {
     do.call.matched("image.default",
                     resolve.defaults(...),
-                    funargs=c(names(formals(image.default)),
-                      "main", "asp", "sub"))
+                    extrargs=c("main", "asp", "sub", "axes", "ann"))
   }
   
   if(!identical(ribbon, TRUE)

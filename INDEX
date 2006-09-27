@@ -58,6 +58,8 @@ default.dummy           Generate a Default Pattern of Dummy Points
 demopat                 Artificial Data Point Pattern
 density.ppp             Kernel Smoothed Intensity of Point Pattern
 density.psp             Kernel Smoothing of Line Segment Pattern
+density.splitppp        Kernel Smoothed Intensity of Split Point
+                        Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window Frame
 DiggleGratton           Diggle-Gratton model
@@ -187,6 +189,7 @@ persp.im                Perspective Plot of Pixel Image
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.im                 Plot a Pixel Image
+plot.listof             Plot a List of Things
 plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
 plot.ppm                plot a Fitted Point Process Model
@@ -311,6 +314,7 @@ superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
 thomas.estK             Fit the Thomas Point Process by Minimum
                         Contrast
+trim.rectangle          Cut margins from rectangle
 union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern

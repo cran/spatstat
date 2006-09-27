@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.16 $	$Date: 2006/08/02 06:35:19 $
+#	$Revision: 1.17 $	$Date: 2006/08/30 09:12:06 $
 #
 #
 #
@@ -19,14 +19,18 @@ plot.owin <- function(x, main, add=FALSE, ..., box=TRUE, edge=0.04)
   verifyclass(W, "owin")
 
 ####
-  main <- paste(main)
-  if(length(main) > 1)
-    main <- paste(main, collapse="\n")
-  if(nchar(main) == 0)
-    nlines <- 0
-  else
-    nlines <- length(strsplit(main, "\n")[[1]])
-
+  if(is.expression(main)) 
+    nlines <- 1
+  else {
+    # convert to string and count number of lines
+    main <- paste(main)
+    if(length(main) > 1)
+      main <- paste(main, collapse="\n")
+    if(nchar(main) == 0)
+      nlines <- 0
+    else
+      nlines <- length(strsplit(main, "\n")[[1]])
+  }
 #########        
   xlim <- xr <- W$xrange
   ylim <- yr <- W$yrange

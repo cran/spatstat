@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.13 $    $Date: 2006/05/31 06:35:24 $
+#    $Revision: 1.16 $    $Date: 2006/09/14 07:19:54 $
 #
 #  (a) for matrices only:
 #
@@ -139,5 +139,24 @@ commasep <- function(x) {
   commas <- c(rep(", ", length(px)-2),
               " and ", "")
   return(paste(paste(px, commas, sep=""), collapse=""))
+}
+
+# equivalent to rev(cumsum(rev(x)))
+
+revcumsum <- function(x) {
+  n <- length(x)
+  if(identical(storage.mode(x), "integer")) {
+    z <- .C("irevcumsum",
+            x=as.integer(x),
+            as.integer(n),
+            PACKAGE="spatstat")
+    return(z$x)
+  } else {
+    z <- .C("drevcumsum",
+            x=as.double(x),
+            as.integer(n),
+            PACKAGE="spatstat")
+    return(z$x)
+  }
 }
 

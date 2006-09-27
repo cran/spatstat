@@ -47,8 +47,9 @@
   Poisson process on the infinite plane.
 }
 \seealso{
-\code{\link{rpoispp}},
-\code{\link{rNeymanScott}}
+  \code{\link{rpoispp}},
+  \code{\link{rThomas}},
+  \code{\link{rNeymanScott}}
 }
 \examples{
  pp <- rMatClust(10, 0.05, 4)

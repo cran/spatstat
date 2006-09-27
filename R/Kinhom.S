@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.21 $	$Date: 2006/06/11 23:10:52 $
+#	$Revision: 1.25 $	$Date: 2006/09/27 09:12:17 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -48,7 +48,8 @@
   function (X, lambda, ..., r = NULL, breaks = NULL, 
          correction=c("border", "bord.modif", "isotropic", "translate"),
             nlarge = 1000, 
-            lambda2=NULL)
+            lambda2=NULL,
+            sigma=NULL, varcov=NULL)
 {
     verifyclass(X, "ppp")
     nlarge.given <- !missing(nlarge)
@@ -62,16 +63,40 @@
     breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
     r <- breaks$r
     rmax <- breaks$max
-    
-    if(is.vector(lambda)) {
+
+    if(missing(lambda)) {
+      # Estimate density by leave-one-out kernel smoothing
+      kerndens <- density(X, ..., sigma=sigma, varcov=varcov, spill=TRUE)
+      sigma  <- kerndens$sigma
+      varcov <- kerndens$varcov
+      raw    <- kerndens$raw
+      edg    <- kerndens$edg
+      # Leave-one-out in numerator
+      SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
+      peakvalue <- 1/(2 * pi * SqrtDetSigma)
+      lambda <- raw[X] - rep(peakvalue, npoints)
+      # Edge correction if invoked
+      if(!is.null(edg)) 
+        lambda <- lambda/edg[X]
+      # validate
       if(length(lambda) != npoints) 
-        stop("The length of \'lambda\' should equal the number of data points")
-    } else if(is.im(lambda)) 
-      lambda <- lambda[X, drop=FALSE]
-    else 
-      stop("\`lambda\' should be a vector or a pixel image")
-    if(any(is.na(lambda)))
-       stop("Some values of \`lambda\' are NA or NaN")
+        stop("Internal error: incorrect number of lambda values computed")
+      if(any(is.na(lambda)))
+        stop("Internal error: NA or NaN generated in lambda")
+    } else {
+      # lambda values provided 
+      if(is.vector(lambda)) {
+        if(length(lambda) != npoints) 
+          stop(paste("The length of", sQuote("lambda"),
+                     "should equal the number of data points"))
+      } else if(is.im(lambda)) 
+        lambda <- lambda[X, drop=FALSE]
+      else 
+        stop(paste(sQuote("lambda"),
+                   "should be a vector or a pixel image"))
+      if(any(is.na(lambda)))
+        stop(paste("Some values of", sQuote("lambda"), "are NA or NaN"))
+    }
     
     if(!is.null(lambda2)) {
       if(!is.matrix(lambda2))

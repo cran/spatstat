@@ -8,7 +8,7 @@
 \usage{
   Kinhom(X, lambda, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
-    nlarge = 1000, lambda2)
+    nlarge = 1000, lambda2, sigma=NULL, varcov=NULL)
 }
 \arguments{
   \item{X}{
@@ -26,7 +26,8 @@
     intensity values at all locations.
   }
   \item{\dots}{
-    Ignored.
+    Extra arguments. Ignored if \code{lambda} is present.
+    Passed to \code{\link{density.ppp}} if \code{lambda} is omitted.
   }
   \item{r}{
     vector of values for the argument \eqn{r} at which
@@ -57,6 +58,11 @@
     of the intensities at each pair of data points 
     \eqn{x_i}{x[i]} and \eqn{x_j}{x[j]}. 
   }
+  \item{sigma,varcov}{
+    Optional arguments passed to  \code{\link{density.ppp}}
+    to control the smoothing bandwidth, when \code{lambda} is
+    estimated by kernel smoothing.
+    }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -112,7 +118,7 @@
   \eqn{K_{\rm inhom}(r) > \pi r^2}{Kinhom(r) > pi * r^2}
   are suggestive of clustering.
 
-  The argument \code{lambda} must supply the
+  The argument \code{lambda} should supply the
   (estimated) values of the intensity function \eqn{\lambda}{lambda}.
   It may be either
   \describe{
@@ -130,7 +136,16 @@
       at all locations in the window.
     }
   }
-
+  If \code{lambda} is omitted, then it will be estimated using
+  a `leave-one-out' kernel smoother, as described in
+  Baddeley et al (2000). The estimate \code{lambda[i]} for the
+  point \code{X[i]} is computed by removing \code{X[i]} from the
+  point pattern, applying kernel smoothing to the remaining points using
+  \code{\link{density.ppp}}, and evaluating the smoothed intensity
+  at the point \code{X[i]}. The smoothing kernel bandwidth is controlled
+  by the arguments \code{sigma} and \code{varcov}, which are passed to
+  \code{\link{density.ppp}} along with any extra arguments.
+  
   Edge corrections are used to correct bias in the estimation
   of \eqn{K_{\rm inhom}}{Kinhom}.
   Each edge-corrected estimate of \eqn{K_{\rm inhom}(r)}{Kinhom(r)} is
@@ -222,11 +237,7 @@
   plot(Ki)
 
   # (2) intensity function estimated by heavy smoothing
-  smo <- density.ppp(X, sigma=0.1)
-  # evaluate smoothed intensity at data points
-  lambda <- smo[X]
-  # inhomogeneous K function
-  Ki <- Kinhom(X, lambda)
+  Ki <- Kinhom(X, sigma=0.1)
   plot(Ki)
 
   # (3) simulated data: known intensity function
@@ -243,10 +254,9 @@
   #      Example shows method (2)
   \dontrun{
   smo <- density.ppp(X, sigma=0.1)
-  myKfun <- function(X, ..., lam) { Kinhom(X, lambda=lam[X], ...) }
-  Ken <- envelope(X, myKfun, nsim=99,
+  Ken <- envelope(X, Kinhom, nsim=99,
                   simulate=expression(rpoispp(smo)),
-                  lam=smo, correction="trans")
+                  sigma=0.1, correction="trans")
   plot(Ken)
   }
 }

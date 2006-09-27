@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.5 $  $Date: 2006/06/17 04:49:39 $
+#  $Revision: 1.6 $  $Date: 2006/08/30 09:46:00 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -128,6 +128,17 @@ print.profilepl <- function(x, ...) {
   cat(commasep(paste(names(popt), "=", popt)))
   cat("\n")
 }
+
+#
+#   summary method
+#
+
+summary.profilepl <- function(object, ...) {
+  print(object)
+  cat("\n\nOptimal model:\n")
+  print(object$fit)
+}
+
 
 #
 #  plot method 

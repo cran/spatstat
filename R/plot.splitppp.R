@@ -1,5 +1,5 @@
 #
-plot.splitppp <- function(x, ..., main, arrange=TRUE) {
+plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE) {
   xname <- deparse(substitute(x))
 
   if(!arrange) {
@@ -50,3 +50,8 @@ plot.splitppp <- function(x, ..., main, arrange=TRUE) {
   return(invisible(NULL))
 }
   
+density.splitppp <- function(x, ...) {
+  u <- lapply(x, density, ...)
+  class(u) <- c("listof", class(u))
+  return(u)
+}
