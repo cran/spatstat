@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.8 $	$Date: 2006/05/31 06:39:15 $
+#	$Revision: 3.9 $	$Date: 2006/09/14 04:01:39 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -32,7 +32,7 @@ function(obs, nco, breaks, upperobs=0) {
 #
 #	
 #   reverse cumulative histogram of observations
-	d <- cumsum(obs[n:1])[n:1] + upperobs
+	d <- revcumsum(obs) + upperobs
 #
 #  product integrand
 	s <- ifelse(d > 0, 1 - nco/d, 1)
@@ -74,7 +74,7 @@ function(nco, cen, ncc, show=FALSE, uppercen=0)
 #		cc[k] = #{i: C_i > breaks[k]}	
 #	except that > becomes >= for k=0.
 #
-	cc <- cumsum(cen[n:1])[n:1] + uppercen
+	cc <- revcumsum(cen) + uppercen
 #
 #
 #	numerator

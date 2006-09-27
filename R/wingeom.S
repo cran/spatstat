@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.13 $	$Date: 2006/02/25 09:30:17 $
+#	$Revision: 4.15 $	$Date: 2006/09/26 07:44:09 $
 #
 #
 #
@@ -52,7 +52,7 @@ eroded.areas <- function(w, r) {
                  # histogram of boundary distances
                  h <- hist(b, breaks=breaks, plot=FALSE, probability=FALSE)$counts
                  # reverse cumulative histogram
-                 H <- rev(cumsum(rev(h)))
+                 H <- revcumsum(h)
                  # drop first entry corresponding to r=-1
                  H <- H[-1]
                  # convert count to area
@@ -253,13 +253,19 @@ expand.owin <- function(W, f=1) {
   return(Wexp)
 }
 
-trim.rectangle <- function(W, xmargin, ymargin=xmargin) {
+trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
   if(W$type != "rectangle")
     stop("Internal error: tried to trim margin off non-rectangular window")
-  if(2 * xmargin > diff(W$xrange))
-    stop(paste("window too small to cut off a margin of width", xmargin))
-  if(2 * ymargin > diff(W$yrange))
-    stop(paste("window too small to cut off a margin of height", ymargin))
+  if(length(xmargin) == 1)
+    xmargin <- rep(xmargin, 2)
+  if(length(ymargin) == 1)
+    ymargin <- rep(ymargin, 2)
+  if(any(xmargin < 0) || any(ymargin < 0))
+    stop("values of xmargin, ymargin must be nonnegative")
+  if(sum(xmargin) > diff(W$xrange))
+    stop("window is too small to cut off margins of the width specified")
+  if(sum(ymargin) > diff(W$yrange))
+    stop("window is too small to cut off margins of the height specified")
   owin(W$xrange + c(1,-1) * xmargin,
        W$yrange + c(1,-1) * ymargin)
 }

@@ -150,6 +150,7 @@
 \alias{resid1panel}
 \alias{resolve.defaults}
 \alias{reverse.xypolygon}    
+\alias{revcumsum}    
 \alias{rmax.rule}
 \alias{rotxy}
 \alias{runifdisc}
@@ -176,11 +177,11 @@
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summary.envelope}
+\alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
-\alias{trim.rectangle}
 \alias{update.interact}
 \alias{validate.mask}        
 \alias{validate.quad}        
@@ -302,7 +303,8 @@ meanX.owin(w)
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
-	 rbord, use.gam, forcefit, callstring, precomputed, savecomputed)
+	 rbord, use.gam, famille,
+         forcefit, callstring, precomputed, savecomputed)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, Pname,
@@ -370,6 +372,7 @@ resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots)
 reverse.xypolygon(p)
+revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rmhResolveTypes(model, start, control)
@@ -387,7 +390,8 @@ rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, 
 runifdisc(n, r = 1, x = 0, y = 0)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
-second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE, \dots)
+second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE,
+\dots, varcov=NULL)
 shiftxy(X, vec = c(0, 0))
 spatstat.rawdata.location(\dots)             
 sp.foundclass(cname, inlist, formalname, argsgiven)             
@@ -396,11 +400,11 @@ stratrand(window, nx, ny, k = 1)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summary.envelope(object,\dots)
+summary.profilepl(object, \dots)
 summary.pppmatching(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
-trim.rectangle(W, xmargin, ymargin=xmargin)
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)

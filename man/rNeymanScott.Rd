@@ -73,8 +73,9 @@
   the parent for each of the points in the simulated pattern.
 }
 \seealso{
-\code{\link{rpoispp}},
-\code{\link{rMatClust}}
+  \code{\link{rpoispp}},
+  \code{\link{rThomas}},
+  \code{\link{rMatClust}}
 }
 \examples{
   nclust <-  function(x0, y0, radius, n) {

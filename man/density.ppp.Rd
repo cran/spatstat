@@ -5,10 +5,10 @@
   Compute a kernel smoothed intensity function from a point pattern.
 }
 \synopsis{
-  \method{density}{ppp}(x, sigma, \dots, edge=TRUE)
+  \method{density}{ppp}(x, sigma, \dots, edge=TRUE, varcov=NULL)
 }
 \usage{
-  \method{density}{ppp}(x, sigma, \dots, weights, edge=TRUE)
+  \method{density}{ppp}(x, sigma, \dots, weights, edge=TRUE, varcov=NULL)
 }
 \arguments{
   \item{x}{
@@ -27,6 +27,10 @@
   }
   \item{edge}{
     Logical flag: if \code{TRUE}, apply edge correction.
+  }
+  \item{varcov}{
+    Variance-covariance matrix of anisotropic Gaussian kernel.
+    Incompatible with \code{sigma}.
   }
 }
 \value{
@@ -48,7 +52,17 @@
   edge effect bias by dividing it by the convolution of the
   Gaussian kernel with the window of observation.
 
+  Instead of the isotropic Gaussian kernel with standard deviation
+  \code{sigma}, the smoothing kernel may be chosen to be any Gaussian
+  kernel, by giving the variance-covariance matrix \code{varcov}.
+  The arguments \code{sigma} and \code{varcov} are incompatible.
+  Also \code{sigma} may be a vector of length 2 giving the
+  standard deviations of two independent Gaussian coordinates,
+  thus equivalent to \code{varcov = diag(sigma^2)}.
+  
   Computation is performed using the Fast Fourier Transform.
+  Accuracy depends on the pixel resolution, controlled by the arguments
+  \code{\dots} passed to \code{\link{as.mask}}.
 }
 \seealso{
   \code{\link{ppp.object}},

@@ -46,6 +46,7 @@
 }
 \seealso{
 \code{\link{rpoispp}},
+\code{\link{rMatClust}},
 \code{\link{rNeymanScott}}
 }
 \examples{

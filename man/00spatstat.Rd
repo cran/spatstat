@@ -591,11 +591,16 @@ The Spatstat Package
   \url{http://www.math.unb.ca/~rolf}
 }
 \section{Acknowledgements}{
-  Marie-Colette van Lieshout made substantial contributions of code.
-  Contributions were also made by J.B. Chen, Y.C. Chin, S. Eglen,
-  P. Grabarnik, U. Hahn, M.B. Hansen, K. Hornik, J. Mateu, L.S. Nielsen,
-  B.D. Ripley, B. Rowlingson, A. Sarkka, K. Schladitz,
-  B.T. Scott, M. Stevenson, B. Turlach, and A. van Burgel.
+  Marie-Colette van Lieshout, Kasper Klitgaard Berthelsen
+  and Dominic Schuhmacher made substantial contributions of code.
+  Additional contributions by Colin Beale, Brad Biggerstaff,
+  Jianbao Chen, Y.C. Chin, Peter Diggle, Stephen Eglen,
+  Agnes Gault, Marc Genton, Pavel Grabarnik, C. Graf, Ute Hahn, Mandy Hering, 
+  Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik, Robert John-Chandran,
+  Jorge Mateu, Jesper Moller, Linda Stougaard Nielsen, Evgeni Parilov,
+  Matt Reiter, Brian Ripley, Barry Rowlingson, Aila Sarkka, Katja Schladitz,
+  Bryan Scott, Malte Spiess, Mark Stevenson, P. Surovy, Berwin Turlach, 
+  Andrew van Burgel and Selene Wong.
 }
 \keyword{spatial}
 \keyword{package}
