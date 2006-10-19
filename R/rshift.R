@@ -3,7 +3,7 @@
 #
 #   random shift with optional toroidal boundary
 #
-#   $Revision: 1.7 $   $Date: 2006/02/28 02:33:47 $
+#   $Revision: 1.11 $   $Date: 2006/10/17 09:09:01 $
 #
 #
 rshift <- function(X, ...) {
@@ -14,13 +14,14 @@ rshift.splitppp <- function(X, ..., which=seq(X))
 {
   verifyclass(X, "splitppp")
   if("group" %in% names(list(...)))
-    stop("argument \`group\' not implemented for splitppp objects")
+    stop(paste("argument", sQuote("group"),
+               "not implemented for splitppp objects"))
 
   if(is.null(which))
     which <- seq(X)
   Xsub <- X[which]
   if(length(Xsub) == 0)
-    stop("Argument \`which\' did not match any marks")
+    stop(paste("Argument", sQuote("which"), "did not match any marks"))
 
   # validate arguments and determine common clipping window
   arglist <- handle.rshift.args(X[[1]]$window, ..., edgedefault="torus")
@@ -30,7 +31,7 @@ rshift.splitppp <- function(X, ..., which=seq(X))
     X[which] <- "nyet" 
     X <- lapply(X,
                 function(z, clip) { if(identical(z, "nyet")) "nyet"
-                              else z[, window=clip] },
+                              else z[clip] },
                 clip=clip)
   }
   # perform shift on selected patterns
@@ -54,11 +55,12 @@ rshift.ppp <- function(X, ..., which=NULL, group)
   #   (NULL is not the default)
   #   (NULL means all points shifted in parallel)
   if(missing(group))
-    group <- if(is.marked(X) && is.factor(X$marks)) X$marks else NULL
+    group <- if(is.multitype(X)) marks(X) else NULL
 
   # if no grouping, use of `which' is undefined
   if(is.null(group) && !is.null(which))
-    stop("Cannot apply argument\`which\'; no grouping defined")
+    stop(paste("Cannot apply argument", sQuote("which"),
+               "; no grouping defined"))
 
   # if grouping, use split
   if(!is.null(group)) {
@@ -87,7 +89,7 @@ rshift.ppp <- function(X, ..., which=NULL, group)
   # generate random translation vector
   
   if(!is.null(radius)) 
-    jump <- runifdisc(1, r=radius)
+    jump <- runifdisc(1, radius=radius)
   else {
     jump <- list(x=runif(1, min=0, max=width),
                  y=runif(1, min=0, max=height))
@@ -113,7 +115,7 @@ rshift.ppp <- function(X, ..., which=NULL, group)
 
   # clip to window
   if(!is.null(clip))
-    X <- X[, clip]
+    X <- X[clip]
 
   return(X)
 }
@@ -133,7 +135,8 @@ handle.rshift.args <- function(W, ...,
   if(!is.null(radius)) {
     # radial generator
     if(!(is.null(width) && is.null(height)))
-    stop("\`radius\' is incompatible with \`width\' and \`height\'")
+    stop(paste(sQuote("radius"), "is incompatible with",
+               sQuote("width"), "and", sQuote("height")))
   } else {
     # rectangular generator
     if(is.null(width) != is.null(height))

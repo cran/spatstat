@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 2.3 $    $Date: 2006/04/12 11:56:26 $
+#    $Revision: 2.5 $    $Date: 2006/10/10 04:22:48 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by ppm().
@@ -33,7 +33,7 @@ plot.ppm <- function(x, ngrid = c(40,40),
     if(!multitype)
       stop("Not implemented for general marked point processes")
     else
-      mrkvals <- levels(data$marks)
+      mrkvals <- levels(marks(data))
   } else mrkvals <- 1
   ntypes <- length(mrkvals)
         
@@ -44,7 +44,8 @@ plot.ppm <- function(x, ngrid = c(40,40),
 #        Whether to plot trend, cif
         
   if(!trend && !cif) {
-    cat("Nothing plotted - both \'trend\' and \'cif\' are FALSE\n")
+    cat(paste("Nothing plotted - both", sQuote("trend"),
+              "and", sQuote("cif"), "are FALSE\n"))
     return(invisible(NULL))
   }
 #        Suppress uninteresting plots

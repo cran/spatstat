@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.4 $ $Date: 2006/06/02 08:36:24 $
+# $Revision: 1.5 $ $Date: 2006/10/09 03:47:45 $
 #
 
 residuals.ppm <- function(object, type="raw", ..., check=TRUE, 
@@ -19,7 +19,9 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE,
   typemap <-   c("inverse", "raw", "pearson", "pearson")
   
   if(is.na(m <- pmatch(type, typetable)))
-    stop(paste("Unrecognised choice of \'type\':", type))
+    stop(paste("Unrecognised choice of",
+               paste(sQuote("type"), ":", sep=""),
+               type))
   else
     type <- typemap[m]
 

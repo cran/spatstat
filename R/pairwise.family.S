@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.14 $	$Date: 2006/05/26 09:55:09 $
+#    $Revision: 1.16 $	$Date: 2006/10/10 04:22:48 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -71,7 +71,7 @@ if(length(correction) > 1)
   stop("Only one edge correction allowed at a time!")
 
 if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley", "none")))
-  stop(paste("Unrecognised edge correction \'", correction, "\'", sep=""))
+  stop(paste("Unrecognised edge correction", sQuote(correction)))
 
 #### Compute basic data
 
@@ -92,7 +92,7 @@ if(!is.null(precomputed)) {
 if(!marx) 
   POT <- pairpot(M, potpars)
 else
-  POT <- pairpot(M, X$marks, U$marks, potpars)
+  POT <- pairpot(M, marks(X), marks(U), potpars)
 
 # Check errors and special cases
 

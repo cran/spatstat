@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.3 $   $Date: 2006/06/16 00:38:39 $
+#    $Revision: 1.5 $   $Date: 2006/10/10 04:22:48 $
 #
 #
  
@@ -16,7 +16,7 @@ clip.psp <- function(x, window, check=TRUE) {
     warning("The clipping window is not a subset of the window containing the line segment pattern x")
   if(x$n == 0) {
     emptypattern <- psp(numeric(0), numeric(0), numeric(0), numeric(0),
-                      window=window)
+                      window=window, marks=x$marks)
     return(emptypattern)
   }
   switch(window$type,
@@ -34,20 +34,20 @@ cliprect.psp <- function(x, window) {
   verifyclass(x, "psp")
   verifyclass(window, "owin")
   ends <- x$ends
-  marks <- x$marks
+  marx <- marks(x)
   # accept segments which are entirely inside the window
   # (by convexity)
   in0 <- inside.owin(ends$x0, ends$y0, window)
   in1 <- inside.owin(ends$x1, ends$y1, window)
   ok <- in0 & in1
   ends.inside <- ends[ok, , drop=FALSE]
-  marks.inside <- if(is.null(marks)) NULL else marks[ok]
+  marks.inside <- marx %msub% ok
   x.inside <- as.psp(ends.inside, window=window, marks=marks.inside)
   # consider the rest
   ends <- ends[!ok, , drop=FALSE]
   in0 <- in0[!ok] 
   in1 <- in1[!ok]
-  if(!is.null(marks)) marks <- marks[!ok]
+  marx <- marx %msub% (!ok)
   # first clip segments to the range x \in [xmin, xmax]
   # use parametric coordinates
   small <- function(x) { abs(x) <= .Machine$double.eps }
@@ -72,7 +72,7 @@ cliprect.psp <- function(x, window) {
   tx   <- tx[ok, , drop=FALSE]
   in0  <- in0[ok]
   in1  <- in1[ok]
-  if(!is.null(marks)) marks <- marks[ok]
+  marx <- marx %msub% ok
   # Clip the segments to the x range
   tmin <- apply(tx, 1, min, na.rm=TRUE)
   tmax <- apply(tx, 1, max, na.rm=TRUE)
@@ -99,7 +99,7 @@ cliprect.psp <- function(x, window) {
   ty   <- ty[ok, , drop=FALSE]
   in0  <- in0[ok]
   in1  <- in1[ok]
-  if(!is.null(marks)) marks <- marks[ok]
+  marx <- marx %msub% ok
   # Clip the segments to the y range
   tmin <- apply(ty, 1, min, na.rm=TRUE)
   tmax <- apply(ty, 1, max, na.rm=TRUE)
@@ -109,12 +109,12 @@ cliprect.psp <- function(x, window) {
                              y0=ends$y0 + tmin * dy,
                              x1=ends$x0 + tmax * dx,
                              y1=ends$y0 + tmax * dy)
-  marks.clipped <- marks
+  marks.clipped <- marx
   # OK - segments clipped
   # Put them together with the unclipped ones
   ends.all <- rbind(ends.inside, ends.clipped)
   marks.all <- c(marks.inside, marks.clipped)
-  as.psp(ends.all, window=window, marks=marks)
+  as.psp(ends.all, window=window, marks=marks.all)
 }
 
 
@@ -127,7 +127,8 @@ clippoly.psp <- function(s, window) {
   verifyclass(s, "psp")
   verifyclass(window, "owin")
   stopifnot(window$type == "polygonal")
-  marx <- !is.null(s$marks)
+  marx <- marks(s)
+  has.marks <- !is.null(marx)
   
   eps <- .Machine$double.eps
 
@@ -193,8 +194,11 @@ clippoly.psp <- function(s, window) {
                             x1 = x0 + c(tvals,1) * dx,
                             y1 = y0 + c(tvals,1) * dy)
       chopped$ends <- rbind(chopped$ends, newones)
-      if(marx) 
-        chopped$marks <-  c(chopped$marks, rep(s$marks[seg], nrow(newones)))
+      if(has.marks) {
+        hitmarks <- marx %msub% seg
+        newmarks <- hitmarks %mrep% nrow(newones)
+        chopped$marks <-  (chopped$marks) %mapp% newmarks
+      }
     }
   }
 

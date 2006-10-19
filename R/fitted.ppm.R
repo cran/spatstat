@@ -3,7 +3,7 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.4 $   $Date: 2006/06/29 07:51:28 $
+#   $Revision: 1.5 $   $Date: 2006/10/09 02:25:33 $
 # 
 
 fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, repair=TRUE) {
@@ -21,7 +21,8 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, r
   typelist <- c("lambda", "cif",    "trend")
   typevalu <- c("lambda", "lambda", "trend")
   if(is.na(m <- pmatch(type, typelist)))
-    stop(paste("Unrecognised choice of \`type\':", type))
+    stop(paste("Unrecognised choice of ", sQuote("type"),
+               ": ", sQuote(type), sep=""))
   type <- typevalu[m]
 
   if(uniform) {

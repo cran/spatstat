@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.20 $     $Date: 2006/06/21 04:00:14 $
+#         $Revision: 1.22 $     $Date: 2006/10/18 04:18:58 $
 #
 #      The class "im" of raster images
 #
@@ -25,7 +25,7 @@
 #   creator 
 
 im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
-               lev=levels(mat)) {
+               lev=levels(mat), units=NULL) {
 
   typ <- typeof(mat)
   if(typ == "double")
@@ -61,6 +61,8 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   ystep <- diff(yrow)[1]
   xrange <- range(xcol) + c(-1,1) * xstep/2
   yrange <- range(yrow) + c(-1,1) * ystep/2
+  units <- as.units(units)
+  
   out <- list(v   = mat,
               dim = c(nr, nc),
               xrange   = xrange,
@@ -70,7 +72,8 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
               xcol    = xcol,
               yrow    = yrow,
               lev     = lev,
-              type    = typ)
+              type    = typ,
+              units   = units)
   class(out) <- "im"
   attr(out, "levels") <- lev 
   return(out)
@@ -137,7 +140,8 @@ function(x, i, j, drop=TRUE, ...) {
       yr <- clip(i$yrange, x$yrange)
       colsub <- inrange(x$xcol, xr)
       rowsub <- inrange(x$yrow, yr)
-      return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub], lev))
+      return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub],
+                lev=lev, units=x$units))
     } 
   }
   stop("The subset operation is undefined for this type of index")
@@ -233,16 +237,44 @@ mean.im <- function(x, ...) {
   return(mean.default(as.matrix(x), na.rm=TRUE, ...))
 }
 
-hist.im <- function(x, ...) {
+hist.im <- function(x, ..., probability=FALSE) {
   verifyclass(x, "im")
-  v <- as.numeric(as.matrix(x))
-  v <- v[!is.na(v)]
   xname <- paste(deparse(substitute(x), 500), collapse="\n")
-  out <- do.call("hist.default",
-                 resolve.defaults(list(v),
-                                  list(...),
-                                  list(xlab=paste("Pixel value"),
-                                       main = paste("Histogram of", xname))))
+  main <- paste("Histogram of", xname)
+  # default plot arguments
+  # extract pixel values
+  values <- as.vector(as.matrix(x))
+  if(x$type == "factor") {
+    values <- factor(values)
+    levels(values) <- x$lev
+  }
+  # barplot or histogram
+  if(x$type %in% c("logical", "factor")) {
+    tab <- table(values)
+    if(probability) {
+      tab <- tab/sum(tab)
+      ylab <- "Probability"
+    } else 
+       ylab <- "Number of pixels"
+    arglist <- 
+    out <- do.call("barplot",
+                   resolve.defaults(list(tab),
+                                    list(...),
+                                    list(xlab=paste("Pixel value"),
+                                         ylab=ylab,
+                                         main=main)))
+
+  } else {
+    values <- values[!is.na(values)]
+    ylab <- if(probability) "Probability density" else "Number of pixels"
+    out <- do.call("hist.default",
+                   resolve.defaults(list(values),
+                                    list(probability=probability),
+                                    list(...),
+                                    list(xlab=paste("Pixel value"),
+                                         ylab=ylab,
+                                         main=main)))
+  }
   return(invisible(out))
 }
 
@@ -251,7 +283,7 @@ cut.im <- function(x, ...) {
   verifyclass(x, "im")
   vcut <- cut(as.numeric(as.matrix(x)), ...)
   lev <- if(is.factor(vcut)) levels(vcut) else NULL
-  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev))
+  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev, units=units(x)))
 }
 
 quantile.im <- function(x, ...) {

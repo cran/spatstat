@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.9 $	$Date: 2006/08/09 09:56:44 $
+#	$Revision: 4.11 $	$Date: 2006/10/09 03:40:55 $
 #
 # -------- functions ----------------------------------------
 #
@@ -126,7 +126,7 @@ erode.mask <- function(w, r) {
   
 	verifyclass(w, "owin")
         if(w$type != "mask")
-          stop("window w is not of type \'mask\'")
+          stop(paste("window w is not of type", sQuote("mask")))
         
 	bb <- bdist.pixels(w, coords=FALSE)
 
@@ -183,7 +183,10 @@ rebound.owin <- function(w, rect) {
   verifyclass(rect, "owin")
   bb <- bounding.box(w)
   if(!is.subset.owin(bb, rect))
-    stop("The new rectangle \`rect\' does not contain the window \`win\'")
+    stop(paste("The new rectangle",
+               sQuote("rect"),
+               "does not contain the window",
+               sQuote("win")))
   xr <- rect$xrange
   yr <- rect$yrange
   switch(w$type,

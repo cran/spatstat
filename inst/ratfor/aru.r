@@ -1,4 +1,4 @@
-# $Id: aru.r,v 1.2 2005/03/08 20:18:22 rolf Exp $
+# $Id: aru.r,v 1.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine aru(n,a,b,iseed,rrr)
 implicit double precision(a-h,o-z)
 dimension iseed(3), rrr(n)

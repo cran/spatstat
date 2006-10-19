@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.20 $    $Date: 2006/06/08 02:01:50 $
+#  $Revision: 1.21 $    $Date: 2006/10/18 05:37:22 $
 #
 #
 
@@ -20,7 +20,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   indata <- as.data.frame(x)
 
   defaultplot <- missing(fmla)
-  if(defaultplot)
+  if(defaultplot) 
     fmla <- attr(x, "fmla")
 
   # This *is* the last possible moment, so...
@@ -97,8 +97,17 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
 
   # work out how to label the plot
-  if(is.null(xlab))
+  if(is.null(xlab)) {
+    # what is actually plotted on the x-axis
     xlab <- as.character(fmla)[3]
+    # if it's the default argument,
+    # add name of unit of length
+    if(xlab == attr(x, "argu")) {
+      au <- units(x)[2]
+      if(au != "units")
+        xlab <- paste(xlab, " (", au, ")", sep="")
+    }
+  }
 
   if(is.null(ylab)) {
     yl <- attr(x, "ylab")

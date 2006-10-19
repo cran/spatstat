@@ -1,4 +1,4 @@
-# $Id: straussm.r,v 1.3 2005/03/11 21:07:59 rolf Exp $
+# $Id: straussm.r,v 2.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine straussm(u,v,mrk,ix,x,y,marks,n,ntypes,par,period,cifval)
 #
 # Conditional intensity function for a marked Strauss process.

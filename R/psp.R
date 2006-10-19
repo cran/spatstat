@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.20 $ $Date: 2006/06/30 09:01:38 $
+#  $Revision: 1.23 $ $Date: 2006/10/13 09:38:04 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -24,6 +24,8 @@ psp <- function(x0, y0, x1, y1, window, marks=NULL) {
   ends <- data.frame(x0=x0,y0=y0,x1=x1,y1=y1)
   window <- as.owin(window)
   if(!is.null(marks)) {
+    if(is.data.frame(marks))
+      stop("Sorry, data frames of marks are not implemented for psp objects")
     stopifnot(is.vector(marks))
     stopifnot(length(marks) == length(x0))
   }
@@ -149,7 +151,7 @@ append.psp <- function(A,B) {
   result <- list(ends=rbind(A$ends, B$ends),
                  window=A$window,
                  n=A$n + B$n,
-                 marks=c(A$marks, B$marks))
+                 marks=c(marks(A), marks(B)))
   class(result) <- c("psp", class(result))
   return(result)
 }
@@ -160,7 +162,17 @@ rebound.psp <- function(x, ...) {
   return(x)
 }
 
-  
+
+marks.psp <- function(x, ..., dfok=FALSE) {
+  # data frames of marks are not implemented for psp
+  return(x$marks)
+}
+
+markformat.psp <- function(x) {
+  # data frames of marks are not implemented for psp
+  return(if(!is.null(marks(x))) "vector" else "none")
+}
+
 #################################################
 #  plot and print methods
 #################################################
@@ -173,7 +185,7 @@ plot.psp <- function(x, ..., add=FALSE) {
                                      list(...),
                                      list(main=deparse(substitute(x)))))
   }
-  if(!is.null(x$marks))
+  if(!is.null(marks(x, dfok=TRUE)))
     warning("marks are currently ignored in plot.psp")
   if(x$n > 0)
     do.call.matched("segments", append(as.list(x$ends), list(...)))
@@ -185,8 +197,9 @@ print.psp <- function(x, ...) {
   cat(paste("planar line segment pattern:",
             x$n, "line segments\n"))
   print(x$window)
-  if(!is.null(x$marks))
-    cat(paste("Marks vector of type", sQuote(typeof(x$marks)), "\n"))
+  marx <- marks(x, dfok=FALSE)
+  if(!is.null(marx))
+    cat(paste("Marks vector of type", sQuote(typeof(marx)), "\n"))
   return(invisible(NULL))
 }
 
@@ -296,27 +309,36 @@ print.summary.psp <- function(x, ...) {
 
 "[.psp" <-
 "subset.psp" <-
-  function(x, subset, window, drop, ...) {
+  function(x, i, j, drop, ...) {
 
-        verifyclass(x, "psp")
-
-        trim <- !missing(window)
-        thin <- !missing(subset)
-        if(!thin && !trim)
-          stop("Please specify a subset (to thin the pattern) or a window (to trim it)")
-
-        # thin first, according to 'subset'
-        if(thin)
-          x <- as.psp(x$ends[subset,],
-                       window=x$window,
-                       marks=if(is.null(x$marks)) NULL else x$marks[subset])
-
-        # now trim to window 
-        if(trim) 
-          x <- clip.psp(x, window=window)
+    verifyclass(x, "psp")
+    
+    if(missing(i) && missing(j))
+      return(x)
         
-        return(x)
-}
+    if(!missing(i)) {
+      style <- if(inherits(i, "owin")) "window" else "index"
+      switch(style,
+             window={
+               x <- clip.psp(x, window=i)
+             },
+             index={
+               subset <- i
+               marktype <- markformat(x)
+               x <- as.psp(x$ends[subset, ],
+                           window=x$window,
+                           marks=switch(marktype,
+                             none=NULL,
+                             vector=x$marks[subset],
+                             dataframe=x$marks[subset,]))
+             })
+    }
+
+    if(!missing(j))
+      x <- x[j] # invokes code above
+    
+    return(x)
+ }
   
 
 
@@ -349,7 +371,7 @@ affine.psp <- function(X,  ...) {
   E <- X$ends
   ends0 <- affinexy(list(x=E$x0,y=E$y0), ...)
   ends1 <- affinexy(list(x=E$x1,y=E$y1), ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=X$marks)
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
 shift.psp <- function(X, ...) {
@@ -358,7 +380,7 @@ shift.psp <- function(X, ...) {
   E <- X$ends
   ends0 <- shiftxy(list(x=E$x0,y=E$y0), ...)
   ends1 <- shiftxy(list(x=E$x1,y=E$y1), ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=X$marks)
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
 rotate.psp <- function(X, ...) {
@@ -367,7 +389,7 @@ rotate.psp <- function(X, ...) {
   E <- X$ends
   ends0 <- rotxy(list(x=E$x0,y=E$y0), ...)
   ends1 <- rotxy(list(x=E$x1,y=E$y1), ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=X$marks)
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
 

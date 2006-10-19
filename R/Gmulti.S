@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.12 $	$Date: 2006/06/08 09:03:47 $
+#	$Revision: 4.15 $	$Date: 2006/10/18 06:04:48 $
 #
 ################################################################################
 
@@ -25,12 +25,13 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
 #
 	X <- as.ppp(X)
 	if(!is.marked(X))
-		stop("point pattern has no \'marks\'")
+		stop(paste("point pattern has no", sQuote("marks")))
 	window <- X$window
-# 
-	I <- (X$marks == i)
+#
+        marx <- marks(X, dfok=FALSE)
+	I <- (marx == i)
 	if(sum(I) == 0) stop("No points are of type i")
-	J <- (X$marks == j)
+	J <- (marx == j)
 	if(sum(J) == 0) stop("No points are of type j")
 #
 	result <- Gmulti(X, I, J, r, breaks)
@@ -52,9 +53,9 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 	X <- as.ppp(X)
 
 	if(!is.marked(X))
-		stop("point pattern has no \'marks\'")
+		stop(paste("point pattern has no", sQuote("marks")))
 #
-	I <- (X$marks == i)
+	I <- (marks(X) == i)
 	if(sum(I) == 0) stop("No points are of type i")
 	J <- rep(TRUE, X$n)	# i.e. all points
 # 
@@ -168,6 +169,7 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
                   "uncorrected estimate of G(r)")
         Z <- fv(Z, "r", substitute(Gmulti(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
+        units(Z) <- units(X)
 	return(Z)
 }	
 

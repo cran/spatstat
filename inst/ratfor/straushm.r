@@ -1,4 +1,4 @@
-# $Id: straushm.r,v 1.4 2005/03/27 16:42:13 rolf Exp $
+# $Id: straushm.r,v 1.3 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine straushm(u,v,mrk,ix,x,y,marks,ntypes,n,par,period,cifval)
 #
 # Conditional intensity function for a marked

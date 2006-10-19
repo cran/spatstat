@@ -66,6 +66,7 @@ DiggleGratton           Diggle-Gratton model
 dilate.owin             Dilate a Window
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
+disc                    Circular Window
 distmap                 Distance Map
 distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern
@@ -113,6 +114,9 @@ is.im                   Test Whether An Object Is A Pixel Image
 is.marked               Test Whether Marks Are Present
 is.marked.ppm           Test Whether A Point Process Model is Marked
 is.marked.ppp           Test Whether A Point Pattern is Marked
+is.multitype            Test whether Object is Multitype
+is.multitype.ppm        Test Whether A Point Process Model is Multitype
+is.multitype.ppp        Test Whether A Point Pattern is Multitype
 is.owin                 Test Whether An Object Is A Window
 is.ppm                  Test Whether An Object Is A Fitted Point
                         Process Model
@@ -273,6 +277,7 @@ rStrauss                Perfect Simulation of the Strauss Process
 rsyst                   Simulate systematic random point pattern
 rthin                   Random Thinning
 rThomas                 Simulate Thomas Process
+runifdisc               Generate N Uniform Random Points in a Disc
 runifpoint              Generate N Uniform Random Points
 Saturated               Saturated Pairwise Interaction model
 scanpp                  Read Point Pattern From Data File
@@ -318,6 +323,7 @@ trim.rectangle          Cut margins from rectangle
 union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern
+units                   Name for Unit of Length
 unmark                  Remove Marks from a Marked Point Pattern
 update.ppm              Update a Fitted Point Process Model
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point

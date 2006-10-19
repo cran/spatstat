@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.14 $   $Date: 2006/04/12 18:00:04 $
+#    $Revision: 1.18 $   $Date: 2006/10/18 05:23:08 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -25,14 +25,16 @@
 #         labl       recommended xlab/ylab for each column
 #
 #         desc       longer description for each column
-#                     
+#
+#         units       name of unit of length for 'r'
+#
 #    Objects of this class are returned by Kest(), etc
 #
 ##################################################################
 # creator
 
 fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
-               alim=NULL, labl=names(x), desc=NULL) {
+               alim=NULL, labl=names(x), desc=NULL, units=NULL) {
   stopifnot(is.data.frame(x))
   # check arguments
   stopifnot(is.character(argu))
@@ -41,15 +43,15 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   stopifnot(is.character(valu))
   
   if(!(argu %in% names(x)))
-    stop("\`argu\' must be the name of a column of x")
+    stop(paste(sQuote("argu"), "must be the name of a column of x"))
 
   if(!(valu %in% names(x)))
-    stop("\`valu\' must be the name of a column of x")
+    stop(paste(sQuote("valu"), "must be the name of a column of x"))
 
   if(is.null(fmla))
     fmla <- as.formula(paste(valu, "~", argu))
   else if(!inherits(fmla, "formula") && !is.character(fmla))
-    stop("\`fmla\' should be a formula or a string")
+    stop(paste(sQuote("fmla"), "should be a formula or a string"))
   # convert to string
   fmla <- deparse(fmla)
 
@@ -58,9 +60,9 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
     xlim <- range(argue[is.finite(argue)], na.rm=TRUE)
   }
   if(!is.numeric(alim) || length(alim) != 2)
-    stop("\`alim\' should be a vector of length 2")
+    stop(paste(sQuote("alim"), "should be a vector of length 2"))
   if(!is.character(labl))
-    stop("\`labl\' should be a vector of strings")
+    stop(paste(sQuote("labl"), "should be a vector of strings"))
   stopifnot(length(labl) == ncol(x))
   if(is.null(desc))
     desc <- character(ncol(x))
@@ -78,6 +80,7 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   attr(x, "alim") <- alim
   attr(x, "labl") <- labl
   attr(x, "desc") <- desc
+  attr(x, "units") <- as.units(units)
   # 
   class(x) <- c("fv", class(x))
   return(x)
@@ -95,14 +98,15 @@ as.fv <- function(x) {
   else if(inherits(x, "fasp") && length(which) == 1)
     return(x$funs[[1]])
   else
-    stop("Don't know how to convert this to an \"fv\" object")
+    stop(paste("Don't know how to convert this to an object of class",
+               sQuote("fv")))
 }
 
 print.fv <- function(x, ...) {
   verifyclass(x, "fv")
   nama <- names(x)
   a <- attributes(x)
-  cat("Function value object (class \"fv\")\n")
+  cat(paste("Function value object (class", sQuote("fv"), "\n"))
   if(!is.null(ylab <- a$ylab)) {
     if(is.language(ylab))
       ylab <- deparse(ylab)
@@ -123,6 +127,9 @@ print.fv <- function(x, ...) {
   print.formula(as.formula(a$fmla))
   cat(paste("\nRecommended range of argument ", a$argu,
             ": [", a$alim[1], ", ", a$alim[2], "]\n", sep=""))
+  au <- as.units(a$units)[2]
+  if(au != "units")
+    cat(paste("Unit of length:", au, "\n"))
   invisible(NULL)
 }
 
@@ -132,18 +139,21 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   a <- attributes(x)
   
   if(length(labl) != ncol(y))
-    stop("length of \`labl\' does not match number of columns of y")
+    stop(paste("length of", sQuote("labl"),
+               "does not match number of columns of y"))
   if(missing(desc) || is.null(desc))
     desc <- character(ncol(y))
   else if(length(desc) != ncol(y))
-    stop("length of \`desc\' does not match number of columns of y")
+    stop(paste("length of", sQuote("desc"),
+               "does not match number of columns of y"))
   if(missing(preferred))
     preferred <- a$valu
 
   xy <- cbind(as.data.frame(x), y)
   z <- fv(xy, a$argu, a$ylab, preferred, a$fmla, a$alim,
           c(attr(x, "labl"), labl),
-          c(attr(x, "desc"), desc))
+          c(attr(x, "desc"), desc),
+          units=a$units)
   return(z)
 }
 
@@ -171,12 +181,11 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   nama <- names(z)
   argu <- attr(x, "argu")
   if(!(argu %in% nama))
-    stop(paste("The function argument \`", argu, "\' must not be removed",
-               sep=""))
+    stop(paste("The function argument", sQuote(argu), "must not be removed"))
   valu <- attr(x, "valu")
   if(!(valu %in% nama))
-    stop(paste("The default column of function values \'", valu,
-                  "\' must not be removed"))
+    stop(paste("The default column of function values",
+               sQuote(valu), "must not be removed"))
 
   # If range of argument was implicitly changed, adjust "alim"
   alim <- attr(x, "alim")
@@ -190,7 +199,8 @@ bind.fv <- function(x, y, labl, desc, preferred) {
                fmla=attr(x, "fmla"),
                alim=alim,
                labl=attr(x, "labl")[selected],
-               desc=attr(x, "desc")[selected]))
+               desc=attr(x, "desc")[selected],
+               units=attr(x, "units")))
 }  
 
 

@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.35 $	$Date: 2006/06/29 00:38:04 $
+#	$Revision: 4.42 $	$Date: 2006/10/18 02:31:05 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -44,15 +44,25 @@ ppp <- function(x, y, ..., window, marks ) {
 	pp <- list(window=window, n=n, x=x, y=y)
         # add marks if any
 	if(!missing(marks) && !is.null(marks)) {
-                if(is.matrix(marks) || is.data.frame(marks))
-                  stop(paste("Attempted to create point pattern with",
-                             ncol(marks), "columns of mark data;",
-                             "multidimensional marks are not yet implemented"))
-		if(length(marks) != n)
-			stop("length of marks vector != length of x and y")
-                names(marks) <- NULL
-		pp$marks <- marks
-	}
+          if(is.matrix(marks))
+            marks <- as.data.frame(marks)
+          if(is.data.frame(marks)) {
+            pp$markformat <- "dataframe"
+            if(.Spatstat.Forbids.Df)
+              stop("Sorry, not implemented for data frame of marks",
+                   call.=FALSE)
+            if(nrow(marks) != n)
+              stop("number of rows of marks != length of x and y")
+          } else {
+            pp$markformat <- "vector"
+            if(length(marks) != n)
+              stop("length of marks vector != length of x and y")
+            names(marks) <- NULL
+          }
+          pp$marks <- marks
+	} else {
+          pp$markformat <- "none"
+        }
 	class(pp) <- "ppp"
 	pp
 }
@@ -182,34 +192,39 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
 
 "[.ppp" <-
 "subset.ppp" <-
-  function(x, subset, window, drop, ...) {
+  function(x, i, j, drop, ...) {
 
         verifyclass(x, "ppp")
+        if(x$n == 0)
+          return(x)
 
-        trim <- !missing(window)
-        thin <- !missing(subset)
-        if(!thin && !trim)
-          stop("Please specify a subset (to thin the pattern) or a window (to trim it)")
+        if(missing(i) && missing(j))
+          return(x)
 
-        # thin first, according to 'subset'
-        if(!thin)
-          Y <- x
-        else
-          Y <- ppp(x$x[subset],
-                   x$y[subset],
-                   window=x$window,
-                   marks=if(is.null(x$marks)) NULL else x$marks[subset])
+        marktype <- markformat(x)
 
-        # now trim to window 
-        if(trim) {
-          ok <- inside.owin(Y$x, Y$y, window)
-          Y <- ppp(Y$x[ok], Y$y[ok],
-                   window=window,  # SIC
-                   marks=if(is.null(Y$marks)) NULL else Y$marks[ok])
+        if(!missing(i)) {
+          style <- if(inherits(i, "owin")) "window" else "index"
+          switch(style,
+                 index={
+                   subset <- i
+                   x <- ppp(x$x[subset], x$y[subset], window=x$window,
+                            marks=marksubset(x$marks, subset, marktype))
+                 },
+                 window={
+                    window <- i
+                    ok <- inside.owin(x$x, x$y, window)
+                    x <- ppp(x$x[ok], x$y[ok], window=window, #SIC
+                             marks=marksubset(x$marks, ok, marktype))
+                  })
         }
-        
-        return(Y)
+
+        if(!missing(j))
+          x <- x[j]   # invokes code above
+
+        return(x)
 }
+
 
 # ------------------------------------------------------------------
 
@@ -217,7 +232,7 @@ cut.ppp <- function(x, ...) {
   x <- as.ppp(x)
   if(!is.marked(x))
     stop("x has no marks to cut")
-  x$marks <- cut(x$marks, ...)
+  marks(x) <- cut(marks(x, dfok=FALSE), ...)
   return(x)
 }
 
@@ -252,56 +267,13 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
 
 #-------------------------------------------------------------------
 
-"is.marked.ppp" <-
-function(X, na.action="warn", ...) {
-    verifyclass(X, "ppp")
-    if(is.null(X$marks))
-      return(FALSE)
-    if(any(is.na(X$marks)))
-      switch(na.action,
-             warn = {
-               warning(paste("some mark values are NA in the point pattern",
-                    deparse(substitute(X))))
-             },
-             fatal = {
-               return(FALSE)
-             },
-             ignore = {
-               return(TRUE)
-             }
-      )
-    return(TRUE)
-}
-
-"is.marked" <-
-function(X, ...) {
-  UseMethod("is.marked")
-}
-
-"is.marked.default" <-
-  function(...) { return(FALSE) }
-
-"unmark" <-
-function(X) {
-  if(inherits(X, "ppp")) {
-    X$marks <- NULL
-    return(X)
-  } else if(inherits(X, "splitppp")) {
-    Y <- lapply(X, unmark)
-    class(Y) <- c("splitppp", class(Y))
-    return(Y)
-  } else
-    stop(paste("X must be a point pattern (class \"ppp\")\n",
-               "or a list of point patterns (class \"splitppp\")"))
-}
-
 "markspace.integral" <-
   function(X) {
   verifyclass(X, "ppp")
   if(!is.marked(X))
     return(1)
-  if(is.factor(X$marks))
-    return(length(levels(X$marks)))
+  if(is.multitype(X))
+    return(length(levels(marks(X))))
   else
     stop("Don't know how to compute total mass of mark space")
 }
@@ -310,21 +282,27 @@ function(X) {
 
 print.ppp <- function(x, ...) {
   verifyclass(x, "ppp")
-  ism <- is.marked(x)
+  ism <- is.marked(x, dfok=TRUE)
   cat(paste(if(ism) "marked" else NULL,
             "planar point pattern:",
             x$n,
-            "points\n"))
+            ngettext(x$n, "point", "points"),
+            "\n"))
   if(ism) {
-    mks <- x$marks
-    if(is.factor(mks)) {
-      cat("multitype, with ")
-      cat(paste("levels =", paste(levels(mks), collapse="\t"),"\n"))
+    mks <- marks(x, dfok=TRUE)
+    if(is.data.frame(mks)) {
+      # data frame of marks
+      cat(paste("Mark variables: ", paste(names(mks), collapse=", "), "\n"))
     } else {
-      cat(paste("marks are ",
-                if(is.numeric(mks)) "numeric, ",
-                "of type \"", typeof(mks),
-                "\"\n", sep=""))
+      # vector of marks
+      if(is.factor(mks)) {
+        cat("multitype, with ")
+        cat(paste("levels =", paste(levels(mks), collapse="\t"),"\n"))
+      } else {
+        cat(paste("marks are",
+                  if(is.numeric(mks)) "numeric,",
+                  "of type", sQuote(typeof(mks)), "\n"))
+      }
     }
   }
   print(x$window)
@@ -334,17 +312,25 @@ print.ppp <- function(x, ...) {
 summary.ppp <- function(object, ..., checkdup=TRUE) {
   verifyclass(object, "ppp")
   result <- list()
-  result$is.marked <- is.marked(object)
+  result$is.marked <- is.marked(object, dfok=TRUE)
   result$n <- object$n
   result$window <- summary(object$window)
   result$intensity <- result$n/result$window$area
   if(checkdup)
     result$nduplicated <- sum(duplicated(object))
   if(result$is.marked) {
-    mks <- object$marks
-    result$is.multitype <- is.factor(mks)
-    result$is.numeric <- is.numeric(mks)
-    result$marktype <- typeof(mks)
+    mks <- marks(object, dfok=TRUE)
+    if(result$multiple.marks <- is.data.frame(mks)) {
+      result$marknames <- names(mks)
+      result$is.numeric <- FALSE
+      result$marktype <- "dataframe"
+      result$is.multitype <- FALSE
+    } else {
+      result$is.numeric <- is.numeric(mks)
+      result$marknames <- "marks"
+      result$marktype <- typeof(mks)
+      result$is.multitype <- is.multitype(object)
+    }
     if(result$is.multitype) {
       tm <- as.vector(table(mks))
       tfp <- data.frame(frequency=tm,
@@ -367,22 +353,29 @@ print.summary.ppp <- function(x, ..., dp=3) {
             " points\n",
             sep=""))
   cat(paste("Average intensity",
-            signif(x$intensity,dp), "points per unit area\n"))
+            signif(x$intensity,dp),
+            "points per square",
+            x$window$units[1],
+            "\n"))
   ndup <- x$nduplicated
   if((!is.null(ndup)) && (ndup > 0))
     cat("\n*Pattern contains duplicated points*\n")
-  if(x$is.marked)
-    if(x$is.multitype) {
-      cat("Marks:\n")
+  if(x$is.marked) {
+    if(x$multiple.marks) {
+      cat(paste("Mark variables: ", paste(x$marknames, collapse=", "), "\n"))
+      cat("Summary:\n")
+      print(x$marks)
+    } else if(x$is.multitype) {
+      cat("Multitype:\n")
       print(signif(x$marks,dp))
     } else {
       cat(paste("marks are ",
                 if(x$is.numeric) "numeric, ",
-                "of type \"", x$marktype,
-                "\"\n", sep=""))
-      cat("summary:\n")
+                "of type", sQuote(x$marktype), "\n"))
+      cat("Summary:\n")
       print(x$marks)
     }
+  }
   cat("\n")
   print(x$window)
   return(invisible(x))
@@ -393,11 +386,27 @@ print.summary.ppp <- function(x, ..., dp=3) {
 "%mark%" <-
 setmarks <- function(X, m) {
   verifyclass(X, "ppp")
-  if(length(m) == 1) m <- rep(m, X$n)
-  else if(X$n == 0) m <- rep(m, 0) # ensures marked pattern is obtained
-  else if(length(m) != X$n) stop("number of points != number of marks")
+  if(is.null(m))
+    return(unmark(X))
+  if(!is.data.frame(m)) {
+    # vector of marks
+    if(length(m) == 1) m <- rep(m, X$n)
+    else if(X$n == 0) m <- rep(m, 0) # ensures marked pattern is obtained
+    else if(length(m) != X$n) stop("number of points != number of marks")
+    Y <- ppp(X$x,X$y,window=X$window,marks=m)
+    return(Y)
+  }
+  # data frame of marks
+  if(.Spatstat.Forbids.Df) 
+    stop("Sorry, not implemented for data frame of marks", call.=FALSE)
+  if(nrow(m) == 1 || X$n == 0) {
+    # replicate data frame
+    m <- as.data.frame(lapply(as.list(m),
+                              function(x, k) { rep(x, k) },
+                              k=X$n))
+  } else if(nrow(m) != X$n)
+    stop("number of rows of data frame != number of points")
   Y <- ppp(X$x,X$y,window=X$window,marks=m)
-  return(Y)
 }
 
 identify.ppp <- function(x, ...) {
@@ -405,7 +414,7 @@ identify.ppp <- function(x, ...) {
   if(!is.marked(x) || "labels" %in% names(list(...)))
     identify(x$x, x$y, ...)
   else {
-    marx <- x$marks
+    marx <- marks(x, dfok=FALSE)
     marques <- if(is.numeric(marx)) paste(signif(marx, 3)) else paste(marx)
     id <- identify(x$x, x$y, labels=marques, ...)
     mk <- marx[id]

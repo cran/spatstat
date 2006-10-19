@@ -7,7 +7,7 @@
   from the existing marks.
 }
 \usage{
-   rlabel(X, labels=X$marks, permute=TRUE)
+   rlabel(X, labels=marks(X), permute=TRUE)
 }
 \arguments{
   \item{X}{

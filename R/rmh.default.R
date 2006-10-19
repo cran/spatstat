@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.41 2006/06/14 14:47:50 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.45 2006/10/16 01:58:13 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -111,7 +111,8 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     else if(is.numeric(expand))
       expand.owin(w.clip, expand)
     else
-      stop("Internal error: unrecognised value of \`expand\'")
+      stop(paste("Internal error: unrecognised value of",
+                 sQuote("expand")))
 
   expanded <- (!is.numeric(expand) || (expand > 1))
 
@@ -228,7 +229,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
       ptypes <- switch(start$given,
                        none = ,
                        n = rep(1/ntypes,ntypes),
-                       x = table(x.start$marks)/x.start$n
+                       x = table(marks(x.start, dfok=FALSE))/x.start$n
                        )
     } else {
       # Validate ptypes
@@ -475,14 +476,14 @@ rmhEngine <- function(InfoList, ...,
                npts.each <-
                  switch(start$given,
                         n = n.start,
-                        x = as.integer(table(x.start$marks)),
+                        x = as.integer(table(marks(x.start, dfok=FALSE))),
   stop("No starting state given; can't condition on fixed number of points"))
                rmpoint(npts.each, intensity, win=w.sim, types=types,
                        verbose=verbose)
              },
              stop("Internal error: control$conditioning unrecognised")
              )
-    Xclip <- Xsim[, w.clip]
+    Xclip <- Xsim[w.clip]
     attr(Xclip, "info") <- InfoList
     return(Xclip)
   }
@@ -516,7 +517,7 @@ rmhEngine <- function(InfoList, ...,
              },
              x = {
                # x.start given
-               as.integer(x.start$marks)
+               as.integer(marks(x.start, dfok=FALSE))
              },
              stop("internal error: start$given unrecognised")
              )
@@ -696,7 +697,7 @@ rmhEngine <- function(InfoList, ...,
   } 
 
 # Now clip the pattern to the ``clipping'' window:
-  xxx <- xxx[,w.clip]
+  xxx <- xxx[w.clip]
 
 # Append to the result information about how it was generated.
   if(kitchensink)

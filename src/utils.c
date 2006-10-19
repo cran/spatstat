@@ -2,7 +2,7 @@
 
    utils.c
 
-   $Revision: 1.1 $  $Date: 2006/09/14 03:46:27 $
+   $Revision: 1.2 $  $Date: 2006/10/19 10:22:21 $
 
    Small utilities
 

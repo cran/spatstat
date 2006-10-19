@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.11 $	$Date: 2006/05/31 02:51:23 $
+#	$Revision: 4.14 $	$Date: 2006/10/18 06:05:24 $
 #
 #
 #
@@ -21,9 +21,10 @@ function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL) {
 #
         X <- as.ppp(X)
         if(!is.marked(X))
-          stop("point pattern has no \'marks\'")
-        I <- (X$marks == i)
-        J <- (X$marks == j)
+          stop(paste("point pattern has no", sQuote("marks")))
+        marx <- marks(X)
+        I <- (marx == i)
+        J <- (marx == j)
         result <- Jmulti(X, I, J, eps, r, breaks)
         attr(result, "ylab") <- substitute(Jcross(r), NULL)
 	return(result)
@@ -43,8 +44,8 @@ function(X, i=1, eps=NULL, r=NULL, breaks=NULL) {
 #
         X <- as.ppp(X)
         if(!is.marked(X))
-          stop("point pattern has no \'marks\'")
-        I <- (X$marks == i)
+          stop(paste("point pattern has no", sQuote("marks")))
+        I <- (marks(X) == i)
         J <- rep(TRUE, X$n)
         result <- Jmulti(X, I, J, eps, r, breaks)
         attr(result, "ylab") <- substitute(Jdot(r), NULL)
@@ -99,5 +100,6 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
         
         attr(Z, "G") <- GIJ
         attr(Z, "F") <- FJ
+        units(Z) <- units(X)
         return(Z)
 }

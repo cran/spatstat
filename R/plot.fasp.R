@@ -1,7 +1,7 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.13 $   $Date: 2006/06/02 03:23:34 $
+#   $Revision: 1.14 $   $Date: 2006/10/09 02:40:56 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                       title=NULL, samex=TRUE) {
@@ -23,7 +23,7 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
   if(nf == 1 && nfun > 1)
     formule <- rep(formule, nfun)
   else if(nf != nfun)
-    stop("Wrong number of entries in \`formule\'.\n")
+    stop(paste("Wrong number of entries in", sQuote("formule")))
 
 # Check on the length of the subset argument.
   ns <- length(subset)

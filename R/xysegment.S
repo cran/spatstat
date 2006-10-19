@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.5 $    $Date: 2002/07/25 10:45:35 $
+#     $Revision: 1.7 $    $Date: 2006/10/10 04:22:48 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -88,9 +88,10 @@ distppll <- function(p, l, mintype=0, method="Fortran", listit=FALSE) {
   xp <- p[,1]
   yp <- p[,2]
   if(is.na(match(mintype,0:2)))
-    stop("Argument \"mintype\" must be 0, 1 or 2.\n")
+    stop(paste("Argument", sQuote("mintype"), "must be 0, 1 or 2.\n"))
   if(is.na(match(method, c("Fortran", "interpreted"))))
-    stop("permitted options are \'Fortran\' and \'interpreted\'")
+    stop(paste("permitted options are", sQuote("Fortran"),
+               "and", sQuote("interpreted")))
 
   switch(method,
          interpreted={

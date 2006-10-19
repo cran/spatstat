@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.3 $	$Date: 2006/03/24 06:22:08 $
+#	$Revision: 1.5 $	$Date: 2006/10/10 04:22:48 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -34,7 +34,8 @@ rotxy <- function(X, angle=pi/2) {
            return(W)
          },
          mask={
-           stop("Sorry, \'rotate.owin\' is not yet implemented for masks")
+           stop(paste("Sorry,", sQuote("rotate.owin"),
+                      "is not yet implemented for masks"))
          },
          stop("Unrecognised window type")
          )
@@ -44,7 +45,7 @@ rotxy <- function(X, angle=pi/2) {
   verifyclass(X, "ppp")
   r <- rotxy(X, angle)
   w <- rotate.owin(X$window, angle)
-  return(ppp(r$x, r$y, window=w, marks=X$marks))
+  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE)))
 }
 
 

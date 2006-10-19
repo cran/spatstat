@@ -2,6 +2,9 @@
 plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE) {
   xname <- deparse(substitute(x))
 
+  if(is.null(names(x)))
+    names(x) <- paste("Component_", seq(length(x)), sep="")
+
   if(!arrange) {
     lapply(names(x),
            function(l, x, ...){plot(x[[l]], main=l, ...)},
@@ -20,13 +23,17 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE) {
   n <- length(x)
   nrows <- as.integer(floor(sqrt(n)))
   ncols <- as.integer(ceiling(n/nrows))
-  nblank <- n - ncols * nrows
+  nblank <- ncols * nrows - n
   # declare layout
   mat <- matrix(c(seq(n), rep(0, nblank)),
                 byrow=TRUE, ncol=ncols, nrow=nrows)
   heights <- rep(1, nrows)
   if(banner) {
-    mat <- rbind(rep(1,ncols), 1 + mat)
+    # Increment existing panel numbers
+    # New panel 1 is the banner
+    panels <- (mat > 0)
+    mat[panels] <- mat[panels] + 1
+    mat <- rbind(rep(1,ncols), mat)
     heights <- c(0.1 * (1 + nlines), heights)
   }
   layout(mat, heights=heights)

@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.5 $	$Date: 2006/06/16 03:10:05 $
+#	$Revision: 1.8 $	$Date: 2006/10/10 04:22:48 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -52,7 +52,8 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            return(W)
          },
          mask={
-           stop("Sorry, \'affine.owin\' is not yet implemented for masks")
+           stop(paste("Sorry,", sQuote("affine.owin"),
+                      "is not yet implemented for masks"))
          },
          stop("Unrecognised window type")
          )
@@ -62,7 +63,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
   verifyclass(X, "ppp")
   r <- affinexy(X, mat, vec)
   w <- affine.owin(X$window, mat, vec)
-  return(ppp(r$x, r$y, window=w, marks=X$marks))
+  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE)))
 }
 
 
@@ -108,7 +109,7 @@ shiftxy <- function(X, vec=c(0,0)) {
   verifyclass(X, "ppp")
   r <- shiftxy(X, vec)
   w <- shift.owin(X$window, vec)
-  return(ppp(r$x, r$y, window=w, marks=X$marks))
+  return(ppp(r$x, r$y, window=w, marks=marks(X)))
 }
 
 

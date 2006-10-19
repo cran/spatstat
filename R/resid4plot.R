@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.10 $    $Date: 2006/02/27 04:58:21 $
+#   $Revision: 1.11 $    $Date: 2006/10/16 01:57:30 $
 #
 #
 
@@ -21,7 +21,7 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   type     <- RES$type
   typename <- RES$typename
   Ydens    <- RES$Ydens[Wclip, drop=FALSE]
-  Ymass    <- RES$Ymass[, Wclip]
+  Ymass    <- RES$Ymass[Wclip]
   # set up 2 x 2 plot with space
   wide <- diff(W$xrange)
   high <- diff(W$yrange)
@@ -206,7 +206,7 @@ resid1plot <- function(RES, opt,
   Wclip <- Yclip$window
   type  <- RES$type
   Ydens <- RES$Ydens[Wclip, drop=FALSE]
-  Ymass <- RES$Ymass[, Wclip]
+  Ymass <- RES$Ymass[Wclip]
   # determine colour map
   if(opt$all || opt$marks || opt$smooth) {
     if(is.null(srange)) {

@@ -1,4 +1,4 @@
-# $Id: cif.r,v 1.2 2005/03/08 20:19:16 rolf Exp $
+# $Id: cif.r,v 2.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine cif(nmbr,u,v,mark,ix,x,y,marks,npts,ntypes,par,period,
                cifval,aux)
 #

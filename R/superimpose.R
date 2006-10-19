@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.5 $ $Date: 2005/07/01 07:30:25 $
+# $Revision: 1.7 $ $Date: 2006/10/10 07:09:37 $
 #
 # This has been taken out of ppp.S
 #
@@ -27,7 +27,14 @@
   OUT <- ppp(XY$x, XY$y, window=P$window)
   
   # find out whether the arguments are marked patterns
-  Mlist <- lapply(arglist, function(x) {x$marks})
+  getmarks <- function(x) {
+    if(is.ppp(x)) return(marks(x, dfok=FALSE))
+    m <- x$marks
+    if(is.data.frame(m))
+      stop("Sorry, not implemented for data frames of marks")
+    return(m)
+  }
+  Mlist <- lapply(arglist, getmarks)
   ismarked <- !unlist(lapply(Mlist, is.null))
   isfactor <- unlist(lapply(Mlist, is.factor))
 

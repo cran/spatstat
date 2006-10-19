@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.3 $     $Date: 2006/05/30 10:46:06 $
+  $Revision: 1.4 $     $Date: 2006/10/19 10:22:21 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 

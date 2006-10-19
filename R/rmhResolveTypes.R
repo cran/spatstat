@@ -2,7 +2,7 @@
 #
 #   rmhResolveTypes.R
 #
-#   $Revision: 1.1 $   $Date: 2005/03/05 01:11:00 $
+#   $Revision: 1.2 $   $Date: 2006/10/10 04:22:48 $
 #
 #
 rmhResolveTypes <- function(model, start, control) {
@@ -18,7 +18,7 @@ rmhResolveTypes <- function(model, start, control) {
 
   types.model <- model$types
   types.start <- if(start$given=="x" && is.marked(x.start <- start$x.start))
-                     levels(x.start$marks) else NULL
+                     levels(marks(x.start, dfok=FALSE)) else NULL
   
 # Check for inconsistencies  
   if(!is.null(types.model) && !is.null(types.start))

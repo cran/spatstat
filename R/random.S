@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.18 $   $Date: 2006/05/25 09:29:49 $
+#    $Revision: 4.23 $   $Date: 2006/10/17 09:08:09 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -44,12 +44,15 @@
 }
 
 "runifdisc" <-
-  function(n, r=1, x=0, y=0)
+  function(n, radius=1, centre=c(0,0), ...)
 {
   # i.i.d. uniform points in the disc of radius r and centre (x,y)
+  disque <- disc(centre=centre, radius=radius, ...)
   theta <- runif(n, min=0, max= 2 * pi)
-  s <- sqrt(runif(n, min=0, max=r^2))
-  return(list(x = x + s * cos(theta), y = y + s * sin(theta)))
+  s <- sqrt(runif(n, min=0, max=radius^2))
+  return(ppp(centre[1] + s * cos(theta),
+             centre[2] + s * sin(theta),
+             window=disque))
 }
 
 
@@ -93,7 +96,7 @@
                # generate trial points in batches of n
                qq <- runifrect(n, box) 
                # retain those which are inside 'win'
-               qq <- qq[, win]
+               qq <- qq[win]
                # add them to result
                X <- superimpose(X, qq)
                # if we have enough points, exit
@@ -127,7 +130,7 @@ function(lambda, win = owin(c(0,1),c(0,1))) {
 
     # trim to window
     if(win$type != "rectangle")
-      X <- X[, win]  
+      X <- X[win]  
 
     return(X)
 }
@@ -142,7 +145,9 @@ rpoint <- function(n, f, fmax=NULL,
   # non-uniform distribution....
   
   if(!is.function(f) && !is.im(f))
-    stop("\`f\' must be either a function or an \`im\' object")
+    stop(paste(sQuote("f"),
+               "must be either a function or an",
+               sQuote("im"), "object"))
   
   if(is.im(f)) {
     # ------------ PIXEL IMAGE ---------------------
@@ -193,7 +198,7 @@ rpoint <- function(n, f, fmax=NULL,
     # proposal points
     prop <- runifrect(n, box)
     if(irregular)
-      prop <- prop[, win]
+      prop <- prop[win]
     if(prop$n > 0) {
       fvalues <- f(prop$x, prop$y, ...)
       paccept <- fvalues/fmax
@@ -207,7 +212,7 @@ rpoint <- function(n, f, fmax=NULL,
           # we have enough!
           if(verbose)
             cat(paste("acceptance rate = ",
-                      round(100 * X$n/(ntries * n), 2), "\%\n"))
+                      round(100 * X$n/(ntries * n), 2), "%\n"))
           return(X[1:n])
         }
       }
@@ -263,7 +268,7 @@ rpoint <- function(n, f, fmax=NULL,
       X <- X[retain, ]
       return(X)
     }
-    stop("\'lambda\' must be a constant, a function or an image")
+    stop(paste(sQuote("lambda"), "must be a constant, a function or an image"))
 }
     
 "rMaternI" <-
@@ -364,7 +369,7 @@ rpoint <- function(n, f, fmax=NULL,
       cluster <- rcluster(parents$x[i], parents$y[i], ...)
       cluster <- ppp(cluster$x, cluster$y, window=frame)
       # trim to window
-      cluster <- cluster[,win]
+      cluster <- cluster[win]
       # add to pattern
       result <- superimpose(result, cluster)
       # update offspring-to-parent map
@@ -385,7 +390,8 @@ rpoint <- function(n, f, fmax=NULL,
   #
   poisclus <-  function(x0, y0, radius, mu) {
                            n <- rpois(1, mu)
-                           return(runifdisc(n, radius, x0, y0))
+                           return(runifdisc(n, centre=c(x0, y0),
+                                            radius=radius))
                          }
   result <- rNeymanScott(kappa, r, poisclus,
                          win, radius=r, mu=mu)
@@ -415,7 +421,7 @@ rstrat <- function(win=square(1), nx, ny=nx, k=1) {
   stopifnot(k >= 1)
   xy <- stratrand(win, nx, ny, k)
   Xbox <- ppp(xy$x, xy$y, win$xrange, win$yrange)
-  X <- Xbox[, win]
+  X <- Xbox[win]
   return(X)
 }
 
@@ -442,7 +448,7 @@ rsyst <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
   x <- xy0$x + runif(1, min = 0, max = dx)
   y <- xy0$y + runif(1, min = 0, max = dy)
   Xbox <- ppp(x, y, xr, yr)
-  X <- Xbox[, win]
+  X <- Xbox[win]
   return(X)
 }
 
@@ -482,7 +488,7 @@ rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
       y <- c(y, y0[iy] + runif(nij, min=0, max=dy))
     }
   Xbox <- ppp(x, y, xr, yr)
-  X <- Xbox[, win]
+  X <- Xbox[win]
   return(X)
 }
 

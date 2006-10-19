@@ -1,4 +1,4 @@
-# $Id: dist2.r,v 1.2 2005/03/08 20:22:06 rolf Exp $
+# $Id: dist2.r,v 1.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine dist2(u,v,x,y,period,d2)
 implicit double precision(a-h,o-z)
 dimension period(2)

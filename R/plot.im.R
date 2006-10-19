@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.27 $   $Date: 2006/08/28 07:11:55 $
+#  $Revision: 1.28 $   $Date: 2006/10/09 03:44:27 $
 #
 #  Plotting code for pixel images
 #
@@ -67,7 +67,7 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
            ribbonlabels <- paste(lev)
            vrange <- range(intlev)
          },
-         stop(paste("Don\'t know how to plot image of type", sQuote(sumry$type)))
+         stop(paste("Do not know how to plot image of type", sQuote(sumry$type)))
          )
 
   if(!is.null(imagebreaks))

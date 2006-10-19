@@ -1,7 +1,7 @@
 #
 # nncorr.R
 #
-# $Revision: 1.2 $  $Date: 2006/04/18 09:19:41 $
+# $Revision: 1.3 $  $Date: 2006/10/10 04:22:48 $
 #
 
 nncorr <- function(X, f = function(m1,m2) { m1 * m2}, ...,
@@ -15,7 +15,7 @@ nncorr <- function(X, f = function(m1,m2) { m1 * m2}, ...,
   f.is.default <- missing(f)
   stopifnot(is.function(f))
   # denominator
-  m  <- X$marks
+  m  <- marks(X, dfok=FALSE)
   Efmm <- mean(outer(m, m, f, ...))
   # border method
   nn <- nnwhich(X)
@@ -24,12 +24,12 @@ nncorr <- function(X, f = function(m1,m2) { m1 * m2}, ...,
     stop("Insufficient data")
   Y <- X[nn[ok]]
   X <- X[ok]
-  Efmk <- mean(f(X$marks, Y$marks, ...))
+  Efmk <- mean(f(marks(X), marks(Y), ...))
   #
   answer <- c(unnormalised=Efmk,
               normalised=Efmk/Efmm)
-  if(!is.factor(X$marks) && f.is.default) {
-    classic <- cor(X$marks, Y$marks, use=use, method=method)
+  if(!is.multitype(X) && f.is.default) {
+    classic <- cor(marks(X), marks(Y), use=use, method=method)
     answer <- c(answer, correlation=classic)
   }
   return(answer)

@@ -25,7 +25,7 @@ clickppp <- function(n=NULL, win=square(1), types=NULL, ..., add=FALSE, main=NUL
                     resolve.defaults(list(...),
                                      list(type="p")))
     X <- as.ppp(xy, W=win)
-    Y <- X[,win]
+    Y <- X[win]
     if((ndiff <- (X$n - Y$n)) > 0)
       message(paste("deleted", ndiff,
                     ngettext(ndiff, "point", "points"),

@@ -6,11 +6,14 @@
   The \code{hist} method for class \code{"im"}.
 }
 \usage{
-  \method{hist}{im}(x, \dots)
+  \method{hist}{im}(x, \dots, probability=FALSE)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}
-  \item{\dots}{Arguments passed to \code{\link{hist.default}}.}
+  \item{\dots}{Arguments passed to \code{\link{hist.default}}
+    or \code{\link{barplot}}.}
+  \item{probability}{Logical. If \code{TRUE}, the histogram will be
+    normalised to give probabilities or probability densities.
   }
 }
 \details{
@@ -24,7 +27,9 @@
   The function \code{hist.im} is a method for the generic
   function \code{\link{hist}} for the class \code{"im"}. 
   
-  Any arguments in \code{...} are passed to \code{\link{hist.default}}.
+  Any arguments in \code{...} are passed to \code{\link{hist.default}}
+  (for numeric valued images) or \code{\link{barplot}} (for factor or
+  logical images).
   For example, such arguments control the axes, and may be used to
   suppress the plotting.
 }
@@ -34,12 +39,14 @@
 \seealso{
   \code{\link{hist}},
   \code{\link{hist.default}},
+  \code{\link{barplot}},
   \code{\link{im.object}},
   \code{\link{summary.im}}.
 }
 \examples{
   X <- as.im(function(x,y) {x^2}, unit.square())
   hist(X)
+  hist(cut(X,3))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

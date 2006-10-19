@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.20 $   $Date: 2006/06/11 23:13:31 $
+#   $Revision: 1.21 $   $Date: 2006/10/09 03:23:56 $
 #
 #
 #   calculate pair correlation function
@@ -126,7 +126,7 @@ pcf.ppp <- function(X, ..., r=NULL,
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))
-  
+  units(out) <- units(X)
   return(out)
 }
 
@@ -203,7 +203,7 @@ function(X, ..., method="c") {
            dz <- predict(ss, r, deriv=1)$y
            g <- z * dz/(pi * r)
          },
-         stop(paste("unrecognised method \"", method, "\""))
+         stop(paste("unrecognised method", sQuote(method)))
          )
 
   # pack result into "fv" data frame
@@ -213,5 +213,6 @@ function(X, ..., method="c") {
           c("distance argument r",
             "estimate of pair correlation function pcf(r)",
             "theoretical Poisson value, pcf(r) = 1"))
+  units(Z) <- units(X)
   return(Z)
 }

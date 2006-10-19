@@ -1,4 +1,4 @@
-# $Id: sftcr.r,v 1.2 2005/03/08 20:28:19 rolf Exp $
+# $Id: sftcr.r,v 1.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine sftcr(u,v,ix,x,y,n,par,period,cifval)
 #
 # Conditional intensity function for a Soft Core process.

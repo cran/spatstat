@@ -3,7 +3,7 @@
     v <- read.dcf(file=system.file("DESCRIPTION", package="spatstat"),
                   fields="Version")
     cat(paste("\nspatstat", v, "\n"))
-    cat("Type \"help(spatstat)\" for information\n")
+    cat(paste("Type", sQuote("help(spatstat)"), "for information\n"))
 }
 
 

@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.47 $	$Date: 2006/06/29 08:26:13 $
+#	$Revision: 4.55 $	$Date: 2006/10/18 04:36:31 $
 #
 #
 #	A window may be either
@@ -60,7 +60,15 @@
 #
 #-----------------------------------------------------------------------------
 #
-owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
+owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL) {
+
+  if(!is.null(units)) {
+    if(!is.character(units)) stop("Units should be character string(s)")
+    if(length(units) == 1)
+      units <- rep(units, 2)
+    else if(length(units) != 2)
+      stop("Units should be a single character string, or 2 strings")
+  }
 
   ## Exterminate ambiguities
   poly.given <- !is.null(poly)
@@ -77,7 +85,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
       stop("xrange should be a vector of length 2 giving (xmin, xmax)")
     if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
       stop("yrange should be a vector of length 2 giving (ymin, ymax)")
-    w <- list(type="rectangle", xrange=xrange, yrange=yrange)
+    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=units)
     class(w) <- "owin"
     return(w)
   } else if(poly.given) {
@@ -124,7 +132,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
       stop("polygon's y coordinates outside yrange")
     }
 
-    w <- list(type="polygonal", xrange=xrange, yrange=yrange, bdry=bdry)
+    w <- list(type="polygonal",
+              xrange=xrange, yrange=yrange, bdry=bdry, units=units)
     class(w) <- "owin"
     # check for intersection or self-intersection
     ok <- owinpolycheck(w)
@@ -138,9 +147,9 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
     ######### digital mask #####################
     
     if(!is.matrix(mask))
-      stop("\`mask\' must be a matrix")
+      stop(paste(sQuote("mask"), "must be a matrix"))
     if(!is.logical(mask))
-      stop("The entries of \`mask\' must be logical")
+      stop(paste("The entries of", sQuote("mask"), "must be logical"))
     
     nc <- ncol(mask)
     nr <- nrow(mask)
@@ -172,7 +181,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL) {
                 ),
                 xcol    = seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc),
                 yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr),
-                m       = mask)
+                m       = mask,
+                units   = units)
     class(out) <- "owin"
     return(out)
   }
@@ -196,7 +206,7 @@ as.owin <- function(W, ..., fatal=TRUE) {
 
 as.owin.owin <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "owin", fatal=fatal))
-    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m))
+    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, units=W$units))
   else
     return(NULL)
 }
@@ -224,7 +234,8 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
                 ),
               xcol    = W$xcol,
               yrow    = W$yrow,
-              m       = !is.na(W$v))
+              m       = !is.na(W$v),
+              units   = units(W))
   class(out) <- "owin"
   return(out)
 }
@@ -262,7 +273,7 @@ as.owin.default <- function(W, ..., fatal=TRUE) {
 #
 as.rectangle <- function(...) {
         w <- as.owin(...)
-        return(owin(w$xrange, w$yrange))
+        return(owin(w$xrange, w$yrange, units=w$units))
 }
 
 #
@@ -277,8 +288,12 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 
   if(!missing(w)) {
     verifyclass(w, "owin")
-  } else if(is.null(xy))
-    stop("If w is missing, xy is required")
+    units <- units(w)
+  } else {
+    units <- as.units(NULL)
+    if(is.null(xy)) 
+      stop("If w is missing, xy is required")
+  }
 
   # If it's already a mask, and no other arguments specified,
   # just return it.
@@ -310,7 +325,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
     # default to spatstat defaults
         np <- spatstat.options("npixel")
         if(!is.numeric(np) || length(np) > 2)
-          stop("Illegal value for spatstat.options(\"npixel\")")
+          stop(paste("Illegal value for spatstat.options(",
+                     dQuote("npixel"), ")"))
         if(length(np) == 1)
           nr <- nc <- np[1]
         else {
@@ -327,7 +343,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 # Pixel coordinates given explicitly:
 #
     if(!checkfields(xy, c("x", "y")))
-      stop("\`xy\' should be a list containing two vectors x and y")
+      stop(paste(sQuote("xy"),
+                 "should be a list containing two vectors x and y"))
     x <- sort(unique(xy$x))
     y <- sort(unique(xy$y))
     # derive other parameters
@@ -382,7 +399,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
            value <- inside.owin(x, y, w)
            out$m <- matrix(value, nrow=nr, ncol=nc)
          })
-  
+
+  out$units <- units
   return(out)
 }
 
@@ -397,7 +415,8 @@ as.polygonal <- function(W) {
          rectangle = {
            xr <- W$xrange
            yr <- W$yrange
-           return(owin(xr, yr, poly=list(x=xr[c(1,2,2,1)],y=yr[c(1,1,2,2)])))
+           return(owin(xr, yr, poly=list(x=xr[c(1,2,2,1)],y=yr[c(1,1,2,2)]),
+                       units=W$units))
          },
          polygonal = {
            return(W)
@@ -637,18 +656,21 @@ print.owin <- function(x, ...) {
          },
          mask={
            cat("binary image mask\n")
+           di <- x$dim
+           cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
            cat("enclosing rectangle: ")
          }
          )
     cat(paste("[",
               signif(x$xrange[1], 5),
-              ",",
+              ", ",
               signif(x$xrange[2], 5),
               "] x [",
               signif(x$yrange[1], 5),
-              ",",
+              ", ",
               signif(x$yrange[2], 5),
-              "]\n"))
+              "] ",
+              units(x)[2], "\n", sep=""))
 }
 
 summary.owin <- function(object, ...) {
@@ -656,7 +678,8 @@ summary.owin <- function(object, ...) {
   result <- list(xrange=object$xrange,
                  yrange=object$yrange,
                  type=object$type,
-                 area=area.owin(object))
+                 area=area.owin(object),
+                 units=units(object))
   switch(object$type,
          rectangle={
          },
@@ -675,6 +698,8 @@ summary.owin <- function(object, ...) {
          },
          mask={
            result$npixels <- object$dim
+           result$xstep <- object$xstep
+           result$ystep <- object$ystep
          }
          )
   class(result) <- "summary.owin"
@@ -712,20 +737,24 @@ print.summary.owin <- function(x, ...) {
          mask={
            cat("binary image mask\n")
            di <- x$npixels
-           cat(paste(di[1], "x", di[2], "pixel array\n"))
+           cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
+           cat(paste("pixel size:",
+                     signif(x$xstep,3), "by", signif(x$ystep,3),
+                     x$units[2], "\n"))
            cat("enclosing rectangle: ")
          }
          )
-  cat(paste("[",
-            signif(x$xrange[1], 5),
-            ",",
-            signif(x$xrange[2], 5),
-            "] x [",
-            signif(x$yrange[1], 5),
-            ",",
-            signif(x$yrange[2], 5),
-            "]\n"))
-  cat(paste("Window area = ", signif(x$area, 6), "\n"))
+    cat(paste("[",
+              signif(x$xrange[1], 5),
+              ", ",
+              signif(x$xrange[2], 5),
+              "] x [",
+              signif(x$yrange[1], 5),
+              ", ",
+              signif(x$yrange[2], 5),
+              "] ",
+              x$units[2], "\n", sep=""))
+  cat(paste("Window area = ", signif(x$area, 6), "square", x$units[2], "\n"))
   return(invisible(x))
 }
 

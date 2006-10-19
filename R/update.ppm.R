@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.13 $    $Date: 2006/06/29 07:38:15 $
+#  $Revision: 1.16 $    $Date: 2006/10/16 04:47:26 $
 #
 #
 #
@@ -16,7 +16,8 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
     stop("Model was fitted by an old version of spatstat; cannot be updated")
   call <- object$call
   if(!is.call(call))
-    stop("Internal error - object$call is not of class \"call\"")
+    stop(paste("Internal error - object$call is not of class",
+               sQuote("call")))
 
   undecided <- is.null(use.internal) || !is.logical(use.internal)
   force.int   <- !undecided && use.internal
@@ -102,14 +103,14 @@ sp.foundclass <- function(cname, inlist, formalname, argsgiven) {
   ok <- unlist(lapply(inlist, inherits, what=cname))
   nok <- sum(ok)
   if(nok > 1)
-    stop(paste("I\'m confused: there are two unnamed arguments ",
-               "of class \"", cname, "\"", sep=""))
+    stop(paste("I am confused: there are two unnamed arguments",
+               "of class", sQuote(cname)))
   if(nok == 0) return(0)
   absent <- !(formalname %in% argsgiven)
   if(!absent)
-    stop(paste("I\'m confused: there is an unnamed argument ",
-               "of class \"", cname, "\" which conflicts with the",
-               "named argument \"", formalname, "\"", sep=""))
+    stop(paste("I am confused: there is an unnamed argument",
+               "of class", sQuote(cname), "which conflicts with the",
+               "named argument", sQuote(formalname)))
   theposition <- seq(ok)[ok]
   return(theposition)
 }
@@ -125,11 +126,11 @@ sp.foundclasses <- function(cnames, inlist, formalname, argsgiven) {
   else if(nfound == 1)
     return(pozzie[found])
   else
-    stop(paste("I\'m confused: there are ", nfound,
-               " unnamed arguments of different classes (\`",
-               paste(cnames(pozzie[found]), collapse="\', \`"),
-               "\') which could be interpreted as \"",
-               formalname, "\"", sep=""))
+    stop(paste("I am confused: there are", nfound,
+               "unnamed arguments of different classes (",
+               paste(sQuote(cnames(pozzie[found])), collapse=", "),
+               ") which could be interpreted as",
+               sQuote(formalname)))
 }
     
 
@@ -141,9 +142,18 @@ damaged.ppm <- function(object) {
   if(badfit)
     return(TRUE)
   Qcall <- object$call$Q
-  if(is.name(Qcall) && !exists(paste(Qcall)))
-    return(TRUE)
-  Q <- eval(object$call$Q)
+  cf <- object$callframe
+  if(is.null(cf)) {
+    # Old format of ppm objects
+    if(is.name(Qcall) && !exists(paste(Qcall)))
+      return(TRUE)
+    Q <- eval(Qcall)
+  } else {
+    # New format of ppm objects
+    if(is.name(Qcall) && !exists(paste(Qcall), cf))
+      return(TRUE)
+    Q <- eval(Qcall, cf)
+  }
   badQ <- is.null(Q) || !(inherits(Q, "ppp") || inherits(Q,"quad"))
   return(badQ)
 }

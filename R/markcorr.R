@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.14 $ $Date: 2006/06/11 23:14:31 $
+#     $Revision: 1.17 $ $Date: 2006/10/18 06:06:54 $
 #
 #    Estimate the mark correlation function
 #
@@ -30,7 +30,8 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
         if(length(method) > 1)
           stop("Select only one method, please")
         if(method=="density" && !breaks$even)
-          stop("Evenly spaced r values are required if method=\"density\"")
+          stop(paste("Evenly spaced r values are required if method=",
+                     sQuote("density"), sep=""))
         
         # available selection of edge corrections depends on window
         if(W$type == "mask") {
@@ -59,7 +60,7 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
 
         # apply f to each combination of marks
         #
-        marx <- X$marks
+        marx <- marks(X, dfok=FALSE)
         ff <- f(marx[I], marx[J])
 
         Ef <- mean(ff)
@@ -94,6 +95,7 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))
+        units(result) <- units(X)
         return(result)
 }
 	

@@ -7,16 +7,16 @@
 
 vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE) {
   verifyclass(object, "ppm")
-  if(!is.poisson.ppm(object))
+  if(what != "internals" && !is.poisson.ppm(object))
     stop("Sorry, vcov.ppm is only implemented for Poisson processes")
 
-  what.options <- c("vcov", "corr", "fisher", "Fisher")
-  what.map     <- c("vcov", "corr", "fisher", "fisher")
+  what.options <- c("vcov", "corr", "fisher", "Fisher", "internals")
+  what.map     <- c("vcov", "corr", "fisher", "fisher", "internals")
   if(is.na(m <- pmatch(what, what.options)))
     stop(paste("Unrecognised option: what=", sQuote(what)))
   what <- what.map[m]
   
-  fi <- fitted(object)
+  fi <- fitted(object, type="trend")
   wt <- quad.ppm(object)$w
   gf <- getglmfit(object)
   if(is.null(gf)) {
@@ -36,7 +36,8 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE) {
   for(i in 1:nrow(mom)) {
     ro <- mom[i, ]
     v <- outer(ro, ro, "*") * fi[i] * wt[i]
-    fisher <- fisher + v
+    if(!any(is.na(v)))
+      fisher <- fisher + v
   }
   momnames <- dimnames(mom)[[2]]
   dimnames(fisher) <- list(momnames, momnames)
@@ -48,5 +49,20 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE) {
            co <- solve(fisher)
            sd <- sqrt(diag(co))
            return(co / outer(sd, sd, "*"))
+         },
+         internals = {
+           nbg <- matrowany(is.na(gd))
+           if(any(nbg)) {
+             suff <- matrix( , nrow=nrow(gd), ncol=ncol(mom))
+             suff[nbg,] <- NA
+             suff[!nbg, ] <- mom
+           } else suff <- mom
+           return(list(fisher=fisher, vcov=solve(fisher),suff=suff))
          })
 }
+
+
+suffloc <- function(object) {
+  return(vcov.ppm(object, what="internals")$suff)
+}
+

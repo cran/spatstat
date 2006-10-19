@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.13 $	$Date: 2005/02/08 17:05:40 $
+#	$Revision: 1.16 $	$Date: 2006/10/09 03:17:44 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -79,7 +79,7 @@ fasp <- function(fns, titles, formulae, which,
 
 print.fasp <- function(x, ...) {
   verifyclass(x, "fasp")
-  cat("Function array (class \"fasp\")\n")
+  cat(paste("Function array (class", sQuote("fasp"), "\n"))
   dim <- dim(x$which)
   cat(paste("Dimensions: ", dim[1], "x", dim[2], "\n"))
   cat(paste("Title:", if(is.null(x$title)) "(None)" else x$title, "\n"))
@@ -94,8 +94,9 @@ FormatFaspFormulae <- function(f, argname) {
   zapit <- function(x, argname) {
     if(inherits(x, "formula")) deparse(x)
     else if(is.character(x)) x
-    else stop(paste("The entries of \`", argname,
-                    "\' must be formula objects or strings", sep=""))
+    else stop(paste("The entries of",
+                    sQuote(argname),
+                    "must be formula objects or strings"))
   }
 
   result <-
@@ -105,8 +106,9 @@ FormatFaspFormulae <- function(f, argname) {
       deparse(f)
     else if(is.list(f))
       unlist(lapply(f, zapit, argname=argname))
-    else stop(paste("\'", argname, "\' should be a formula,",
-                    "a list of formulae, or a character vector"))
+    else stop(paste(sQuote(argname),
+                    "should be a formula, a list of formulae,",
+                    "or a character vector"))
 
   return(result)
 }

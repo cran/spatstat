@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.16 $     $Date: 2006/05/26 09:02:40 $
+#      $Revision: 1.17 $     $Date: 2006/10/09 03:15:32 $
 #
 #
 #      Interpoint distances
@@ -83,7 +83,7 @@ pairdist.default <-
            }
            d <- matrix(z$d, nrow=n, ncol=n)
          },
-         stop(paste("Unrecognised method \"", method, "\"", sep=""))
+         stop(paste("Unrecognised method", sQuote(method)))
        )
   invisible(d)
 }
@@ -140,7 +140,7 @@ nndist.default <-
                   PACKAGE="spatstat")
            nnd[o] <- z$nnd
          },
-         stop(paste("Unrecognised method \"", method, "\"", sep=""))
+         stop(paste("Unrecognised method", sQuote(method)))
          )
   invisible(nnd)
 }
@@ -206,7 +206,7 @@ nnwhich.default <-
              stop("Internal error: index returned from C code exceeds n")
            nnwhich[o] <- o[witch]
          },
-         stop(paste("Unrecognised method \"", method, "\"", sep=""))
+         stop(paste("Unrecognised method", sQuote(method)))
          )
   return(nnwhich)
 }
