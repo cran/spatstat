@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.18 $    $Date: 2006/09/27 09:12:51 $
+#           $Revision: 1.21 $    $Date: 2006/10/18 05:48:17 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -23,7 +23,7 @@ pixellate <- function(x, ..., weights=NULL)
     w <- do.call("as.mask", append(list(x$window), dotargs[matched]))
 
     if(x$n == 0) {
-      zeroimage <- as.im(double(0), w)
+      zeroimage <- as.im(as.double(0), w)
       return(zeroimage)
     }
     
@@ -38,7 +38,7 @@ pixellate <- function(x, ..., weights=NULL)
                     col = factor(pixels$col, levels=1:nc)), sum)
         ta[is.na(ta)] <- 0
     }
-    out <- im(ta, xcol = w$xcol, yrow = w$yrow)
+    out <- im(ta, xcol = w$xcol, yrow = w$yrow, units=units(w))
     return(out)
 }
 
@@ -51,7 +51,9 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
 {
   choices <- c("kernel", "smooth", "Kmeasure", "Bartlett", "edge")
   if(!(what %in% choices))
-    stop(paste("Unknown choice: what = \"", what, "\"; available options are:", paste(choices, collapse=",")))
+    stop(paste("Unknown choice: what = ", sQuote(what),
+               "; available options are:",
+               paste(sQuote(choices), collapse=", ")))
   # convert list of points to mass distribution 
   X <- pixellate(x, ...)
   Y <- X$v
@@ -97,7 +99,7 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
         cat("something round the twist\n")
     }
     Kermit <- Kern[ rtwist, ctwist]
-    ker <- im(Kermit, xcol.G[ctwist], yrow.G[ rtwist])
+    ker <- im(Kermit, xcol.G[ctwist], yrow.G[ rtwist], units=units(x))
     return(ker)
   }
   # convolve using fft
@@ -110,7 +112,8 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
   }
   if(what=="smooth") {
     # return the smoothed point pattern
-    smo <- im(Re(sm)[1:nr, 1:nc], xcol.pad[1:nc], yrow.pad[1:nr])
+    smo <- im(Re(sm)[1:nr, 1:nc], xcol.pad[1:nc], yrow.pad[1:nr],
+              units=units(x))
     return(smo)
   }
 
@@ -171,7 +174,7 @@ second.moment.calc <- function(x, sigma, edge=TRUE,
   # divide by number of points * lambda
   mom <- mom * area.owin(x$window) / x$n^2
   # return it
-  mm <- im(mom, xcol.G[ctwist], yrow.G[rtwist])
+  mm <- im(mom, xcol.G[ctwist], yrow.G[rtwist], units=units(x))
   return(mm)
 }
 
@@ -201,7 +204,9 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
               c("r", "Kpois(r)", "Kbord(r)"),
               c("distance argument r",
                 "theoretical Poisson K(r)",
-                "border-corrected estimate of K(r)"))
+                "border-corrected estimate of K(r)"),
+              units=units(X)
+            )
   return(out)
 }
 

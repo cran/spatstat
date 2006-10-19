@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.10 $	$Date: 2006/06/29 00:19:27 $
+#    $Revision: 2.11 $	$Date: 2006/10/09 02:37:33 $
 #
 #    The multitype Strauss process
 #
@@ -14,7 +14,9 @@
 
 MultiStrauss <- function(types, radii) {
   if(length(types) == 1)
-    stop("The \`types\' argument should be a vector of all possible types")
+    stop(paste("The",
+               sQuote("types"),
+               "argument should be a vector of all possible types"))
   if(is.factor(types)) {
     types <- levels(types)
   } else {
@@ -91,7 +93,7 @@ MultiStrauss <- function(types, radii) {
          init     = function(self) {
                       r <- self$par$radii
                       nt <- length(self$par$types)
-                      MultiPair.checkmatrix(r, nt, "\`radii\'")
+                      MultiPair.checkmatrix(r, nt, sQuote("radii"))
                     },
          update = NULL,  # default OK
          print = function(self) {

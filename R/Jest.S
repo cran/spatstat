@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.9 $	$Date: 2006/05/31 02:49:15 $
+#	$Revision: 4.10 $	$Date: 2006/10/18 06:05:09 $
 #
 #
 #
@@ -40,6 +40,7 @@ function(X, eps=NULL, r=NULL, breaks=NULL) {
         attr(Z, "F") <- FF
         attr(Z, "G") <- G
 
+        units(Z) <- units(X)
         return(Z)
 }
 

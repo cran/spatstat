@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.11 $	$Date: 2006/06/29 00:18:13 $
+#    $Revision: 2.12 $	$Date: 2006/10/09 02:39:13 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -16,7 +16,8 @@
 
 MultiStraussHard <- function(types, iradii, hradii) {
   if(length(types) == 1)
-    stop("The \`types\' argument should be a vector of all possible types")
+    stop(paste("The", sQuote("types"),
+               "argument should be a vector of all possible types"))
   if(is.factor(types)) {
     types <- levels(types)
   } else {
@@ -102,13 +103,14 @@ MultiStraussHard <- function(types, iradii, hradii) {
                       h <- self$par$hradii
                       nt <- length(self$par$types)
 
-                      MultiPair.checkmatrix(r, nt, "\`iradii\'")
-                      MultiPair.checkmatrix(h, nt, "\`hradii\'")
+                      MultiPair.checkmatrix(r, nt, sQuote("iradii"))
+                      MultiPair.checkmatrix(h, nt, sQuote("hradii"))
 
                       ina <- is.na(iradii)
                       hna <- is.na(hradii)
                       if(all(ina))
-                        stop("All entries of \`iradii\' are NA")
+                        stop(paste("All entries of", sQuote("iradii"),
+                                   "are NA"))
                       both <- !ina & !hna
                       if(any(iradii[both] <= hradii[both]))
                         stop("iradii must be larger than hradii")

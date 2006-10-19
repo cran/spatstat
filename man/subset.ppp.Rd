@@ -8,37 +8,32 @@
   Extraction has the effect of thinning the 
   points and/or or trimming the window.
 }
-\synopsis{
-  \method{[}{ppp}(x, subset, window, drop, \dots)
-  \method{[}{ppp}(x, subset, window) <- value
-  subset.ppp(x, subset, window, drop, \dots)
-}
 \usage{
-  \method{[}{ppp}(x, subset, window)
-  \method{[}{ppp}(x, subset)
-  \method{[}{ppp}(x, , window)
-
-  \method{[}{ppp}(x, subset, window) <- value
-  \method{[}{ppp}(x, subset) <- value
-  \method{[}{ppp}(x, , window) <- value
+  \method{[}{ppp}(x, i, j, drop, ...)
+  \method{[}{ppp}(x, i, j) <- value
 }
 \arguments{
   \item{x}{
     A two-dimensional point pattern.
     An object of class \code{"ppp"}.
   }
-  \item{subset}{
-    logical vector indicating which points should be retained.
-  }
-  \item{window}{
-    window (an object of class \code{"owin"})
+  \item{i}{
+    Subset index. Either a valid subset index in the usual \R sense,
+   indicating which points should be retained, or a window
+   (an object of class \code{"owin"})
     delineating a subset of the original observation window. 
   }
   \item{value}{
     Replacement value for the subset. A point pattern.
   }
-  \item{ }{ }
-} 
+  \item{j}{
+   Redundant. Included for backward compatibility.
+  }
+  \item{drop, \dots}{
+    Ignored. These arguments are required for compatibility
+    with the generic function.
+  }
+}
 \value{
   A point pattern (of class \code{"ppp"}).
 }
@@ -53,10 +48,10 @@
   or ``\emph{trimming}'' (reducing the window of observation
   to a smaller subregion and retaining only
   those points which lie in the subregion) or both.
- 
+
   The pattern will be ``thinned''
-  if  \code{subset} is specified. The points designated by \code{subset}
-  will be retained. Here \code{subset} can be a numeric vector
+  if \code{i} is a subset index in the usual \R sense:
+  either a numeric vector
   of positive indices (identifying the points to be retained),
   a numeric vector of negative indices (identifying the points
   to be deleted) or a logical vector of length equal to the number
@@ -66,19 +61,16 @@
   will be deleted.
  
   The pattern will be ``trimmed''
-  if \code{window} is specified. This should
-  be an object of class \code{\link{owin}} specifying a window of observation
-  to which the point pattern \code{x} will be
-  trimmed. The points of \code{x} lying inside the new
+  if \code{i} is an object of class 
+  \code{"owin"} specifying a window of observation.
+  The points of \code{x} lying inside the new
   \code{window} will be retained.
  
-  Both ``thinning'' and ``trimming'' can be performed together.
-
   The function \code{[<-.ppp} is a method for \code{\link{[<-}} for the
   class \code{"ppp"}. It replaces the designated
   subset with the point pattern \code{value}.
   The subset of \code{x} to be replaced is designated by
-  the arguments \code{subset} and \code{window} as above.
+  the argument \code{i} as above.
 
   The replacement point pattern \code{value} must lie inside the
   window of the original pattern \code{x}.
@@ -86,6 +78,9 @@
   if the replacement pattern \code{value} has the same number of points
   as the subset to be replaced.  Otherwise the ordering is
   unpredictable.
+
+  If the original pattern \code{x} has marks, then the replacement
+  pattern \code{value} must also have marks, of the same type.
 
   Use the function \code{\link{unmark}} to remove marks from a
   marked point pattern.
@@ -117,7 +112,6 @@
  # adult trees defined to have diameter at least 30 cm
  adult <- (longleaf$marks >= 30)
  longadult <- longleaf[adult]
- # equivalent to: longadult <- subset.ppp(longleaf, subset=adult)
  \dontrun{
  plot(longadult)
  }
@@ -132,8 +126,7 @@
  }
  nzw <- owin(c(0,148),c(0,95)) # the subwindow
  # trim dataset to this subwindow
- nzsub <- nztrees[,nzw]
- # equivalent to: nzsub <- subset.ppp(nztrees, window=nzw)
+ nzsub <- nztrees[nzw]
  \dontrun{
  plot(nzsub)
  }
@@ -159,13 +152,16 @@
  \testonly{
     lansing <- lansing[seq(1, lansing$n, length=100)]
  }
- # hickory trees only
- hick <- lansing[lansing$marks == "hickory", ]
- # still a marked pattern -- remove marks
- hick <- unmark(hick)
 
- # scramble the hickories
- lansing[lansing$marks == "hickory"] <- scramble(hick)
+ # Hickory trees
+  hicks <- split(lansing)$hickory
+
+ # Trees in subwindow
+  win <- owin(c(0.3, 0.6),c(0.2, 0.5))
+  lsub <- lansing[win]
+
+ # Scramble the locations of trees in subwindow, retaining their marks
+  lansing[win] <- scramble(lsub) \%mark\% (lsub$marks)
   
 }
 \author{Adrian Baddeley

@@ -1,4 +1,4 @@
-# $Id: initaux.r,v 1.3 2005/03/27 16:06:37 rolf Exp $
+# $Id: initaux.r,v 1.4 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine initaux(nmbr,par,period,x,y,npts,aux)
 implicit double precision(a-h,o-z)
 dimension x(1), y(1), par(3), period(2)

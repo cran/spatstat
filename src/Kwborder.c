@@ -24,7 +24,7 @@
 
   Kborder.cpp
 
-  $Revision: 1.2 $     $Date: 2006/05/25 03:39:07 $
+  $Revision: 1.1 $     $Date: 2006/10/19 10:22:21 $
 
 */
 

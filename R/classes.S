@@ -2,7 +2,7 @@
 #
 #	classes.S
 #
-#	$Revision: 1.6 $	$Date: 2004/01/05 08:01:17 $
+#	$Revision: 1.7 $	$Date: 2006/10/09 03:38:14 $
 #
 #	Generic utilities for classes
 #
@@ -12,8 +12,8 @@
 verifyclass <- function(X, C, N=deparse(substitute(X)), fatal=TRUE) {
   if(!inherits(X, C)) {
     if(fatal) {
-        gripe <- paste("argument \'", N,
-                       "\' is not of class \'", C, "\'", sep="")
+        gripe <- paste("argument", sQuote(N),
+                       "is not of class", sQuote(C))
 	stop(gripe)
     } else 
 	return(FALSE)

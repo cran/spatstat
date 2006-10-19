@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.7 $	$Date: 2006/06/14 14:44:57 $
+#	$Revision: 1.8 $	$Date: 2006/10/10 04:22:48 $
 #
 #
 # ------------------------------------------------------------------------
@@ -12,9 +12,9 @@ function(X, i=1, j=2, lambdaI, lambdaJ, ..., lambdaIJ=NULL)
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
-	
-	I <- (X$marks == i)
-	J <- (X$marks == j)
+	marx <- marks(X)
+	I <- (marx == i)
+	J <- (marx == j)
         Iname <- paste("points with mark i =", i)
         Jname <- paste("points with mark j =", j)
 	result <- Kmulti.inhom(X, I, J, lambdaI, lambdaJ, ...,
@@ -30,7 +30,7 @@ function(X, i=1, lambdaI, lambdadot, ..., lambdaIdot=NULL)
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
 	
-	I <- (X$marks == i)
+	I <- (marks(X) == i)
 	J <- rep(TRUE, X$n)  # i.e. all points
         Iname <- paste("points with mark i =", i)
         Jname <- paste("points")
@@ -240,6 +240,7 @@ function(X, I, J, lambdaI, lambdaJ,
         }
         # default is to display them all
         attr(K, "fmla") <- . ~ r
+        units(K) <- units(X)
         return(K)
           
 }

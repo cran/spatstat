@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.20 $	$Date: 2006/06/14 15:55:48 $
+#	$Revision: 1.22 $	$Date: 2006/10/10 04:22:48 $
 #
 #
 #--------------------------------------------------------------------------
@@ -45,7 +45,8 @@ plot.ppp <-
                              if(!is.null(pch)) list(pch=pch) else NULL))
   }
 
-  if(!is.marked(x) || !use.marks) {
+  marked <- is.marked(x, dfok=TRUE)
+  if(!marked || !use.marks) {
     do.call("smartpoints",
             resolve.defaults(list(x$x, x$y),
                              explicit,
@@ -56,11 +57,15 @@ plot.ppp <-
 
   # marked point pattern
 
-  marks <- x$marks
+  marx <- marks(x, dfok=TRUE)
 
-  if(is.numeric(marks)) {
+  # if it's a data frame, take the first column
+  if(is.data.frame(marx))
+    marx <- marx[,1]
+
+  if(is.numeric(marx)) {
     # real-valued marks
-    ok <- all(is.finite(marks))
+    ok <- all(is.finite(marx))
     if(ok) {
       # establish values of markscale, maxsize
       if(!is.null(maxsize) && !is.null(markscale))
@@ -73,7 +78,7 @@ plot.ppp <-
         maxsize   <- pop$maxsize
       }
       # examine spread of values
-      mr <- range(marks)
+      mr <- range(marx)
       maxabs <- max(abs(mr))
       constant <- (diff(mr) < 4 * .Machine$double.eps)
       tiny <- (maxabs < 4 * .Machine$double.eps)
@@ -103,11 +108,11 @@ plot.ppp <-
       }
       # scale determined.
       # Apply the scaling
-      ms <- marks * scal 
+      ms <- marx * scal 
 
       # Finally, plot them..
       # plot positive values as circles
-      neg <- (marks < 0)
+      neg <- (marx < 0)
       if(any(!neg)) 
         do.call("symbols",
                 resolve.defaults(
@@ -135,10 +140,10 @@ plot.ppp <-
     }
   }
   
-  um <- if(is.factor(x$marks))
-    levels(x$marks)
+  um <- if(is.factor(marx))
+    levels(marx)
   else
-    sort(unique(x$marks))
+    sort(unique(marx))
 
   ntypes <- length(um)
   
@@ -146,20 +151,24 @@ plot.ppp <-
     chars <- seq(um)
   else if((nchars <- length(chars)) != ntypes) {
     if(nchars != 1)
-      stop("length of \`chars\' is not equal to the number of types")
+      stop(paste("length of",
+                 sQuote("chars"),
+                 "is not equal to the number of types"))
     else
       chars <- rep(chars, ntypes)
   }
 
   if(!missing(cols) && ((ncols <- length(cols)) != ntypes)) {
     if(ncols != 1)
-      stop("length of \`cols\' is not equal to the number of types")
+      stop(paste("length of",
+                 sQuote("cols"),
+                 "is not equal to the number of types"))
     else
       cols <- rep(cols, ntypes)
   }
     
   for(i in seq(um)) {
-    relevant <- (x$marks == um[i])
+    relevant <- (marx == um[i])
     if(any(relevant))
       do.call("smartpoints",
               resolve.defaults(list(x$x[relevant], x$y[relevant]),

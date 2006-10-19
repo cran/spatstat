@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.26 $  $Date: 2006/06/19 07:20:47 $
+#   $Revision: 1.31 $  $Date: 2006/10/18 10:51:31 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
@@ -17,12 +17,14 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     csr <- FALSE
     model <- NULL
     if(!is.expression(simulate))
-      stop("\`simulate\' should be an expression")
+      stop(paste(sQuote("simulate"),
+                 "should be an expression"))
     if(inherits(Y, "ppp"))
       X <- Y
     else if(inherits(Y, "ppm"))
       X <- data.ppm(Y)
-    else stop("\`object\' should be a point process model or a point pattern")
+    else stop(sQuote("object",
+                     "should be a point process model or a point pattern"))
   } else if(inherits(Y, "ppm")) {
     csr <- FALSE
     model <- Y
@@ -34,7 +36,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     sY <- summary(Y, checkdup=FALSE)
     Yintens <- sY$intensity
     Ywin <- Y$window
-    Ymarx <- Y$marks
+    Ymarx <- marks(Y, dfok=FALSE)
     if(!is.marked(Y)) {
       # unmarked point pattern
       if(rmhstuff)
@@ -56,7 +58,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
       }
     }
   } else 
-  stop("\`object\' should be a point process model or a point pattern")
+  stop(paste(sQuote("object"),
+             "should be a point process model or a point pattern"))
 
   # set up simulation parameters
   metrop <- !is.null(model)
@@ -81,7 +84,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   if(!is.function(fun)) 
     stop(paste("unrecognised format for function", fname))
   if(!any(c("r", "...") %in% names(formals(fun))))
-    stop(paste(fname, "should have an argument \`r\' or \`...\'"))
+    stop(paste(fname, "should have an argument",
+               sQuote("r"), "or", sQuote("...")))
   
   if((nrank %% 1) != 0)
     stop("nrank must be an integer")
@@ -122,7 +126,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   if(!clipdata)
     funX <- fun(X, ...)
   else
-    funX <- fun(X[,clipwin], ...)
+    funX <- fun(X[clipwin], ...)
     
   if(!inherits(funX, "fv"))
     stop(paste(fname, "must return an object of class", sQuote("fv")))
@@ -293,6 +297,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   attr(result, "dotnames") <- c("obs",
                                 if(csr) "theo" else "mmean",
                                 "hi", "lo")
+  units(result) <- units(funX)
+
   class(result) <- c("envelope", class(result))
   attr(result, "einfo") <- list(call=cl,
                                 Yname=Yname,

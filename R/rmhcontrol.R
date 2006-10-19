@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.4 $  $Date: 2005/03/10 17:29:10 $
+#   $Revision: 1.5 $  $Date: 2006/10/09 02:55:58 $
 #
 #
 
@@ -47,9 +47,10 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
   if(!is.logical(fixall) || length(fixall) != 1)
     stop("fixall should be a logical value")
   if(!is.logical(periodic) || length(periodic) != 1)
-    stop("\`periodic\' should be a logical value")
+    stop(paste(sQuote("periodic"), "should be a logical value"))
   if(!is.null(expand) && !(is.numeric(expand) || is.owin(expand)))
-    stop("\`expand\' should be either a number, a window, or NULL")
+    stop(paste(sQuote("expand"),
+               "should be either a number, a window, or NULL"))
 
 
 #################################################################
@@ -76,7 +77,7 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
     force.noexp <- FALSE
   } else if(is.numeric(expand)) {
     if(expand < 1) {
-      warning("parameter \'expand\' < 1 reset to 1")
+      warning(paste("parameter", sQuote("expand"), " < 1; reset to 1"))
       expand <- 1
     }
     force.exp <- (expand > 1)

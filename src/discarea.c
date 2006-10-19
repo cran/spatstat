@@ -4,7 +4,7 @@
 
   Area of intersection between disc and polygonal window
 
-  $Revision: 1.3 $     $Date: 2006/06/20 09:46:28 $
+  $Revision: 1.1 $     $Date: 2006/10/19 10:22:21 $
 
  */
 

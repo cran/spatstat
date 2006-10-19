@@ -79,7 +79,7 @@
 }
 \examples{
   nclust <-  function(x0, y0, radius, n) {
-                           return(runifdisc(n, radius, x0, y0))
+                           return(runifdisc(n, radius, centre=c(x0, y0)))
                          }
   X <- rNeymanScott(10, 0.2, nclust, radius=0.2, n=5)
 }

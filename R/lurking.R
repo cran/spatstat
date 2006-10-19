@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.4 $ $Date: 2006/04/24 11:24:10 $
+# $Revision: 1.8 $ $Date: 2006/10/17 03:27:43 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -10,7 +10,7 @@ lurking <- function(object, covariate, type="eem",
                     rv = NULL,
                     plot.sd, plot.it=TRUE,
                     typename,
-                    covname, ...) {
+                    covname, oldstyle=FALSE, ...) {
   # validate
   verifyclass(object, "ppm")
 
@@ -37,7 +37,7 @@ lurking <- function(object, covariate, type="eem",
       # default 
       glmdata <- data.frame(x=quadpoints$x, y=quadpoints$y)
       if(is.marked(quadpoints))
-        glmdata$marks <- quadpoints$marks
+        glmdata$marks <- marks(quadpoints)
     }
     # ensure x and y are in data frame 
     if(!all(c("x","y") %in% names(glmdata))) {
@@ -54,7 +54,8 @@ lurking <- function(object, covariate, type="eem",
     if(!is.numeric(covvalues))
       stop("The evaluated covariate is not numeric")
   } else 
-    stop("The \`covariate\' should be either a numeric vector or an expression")
+    stop(paste("The", sQuote("covariate"),
+               "should be either a numeric vector or an expression"))
 
   # Validate covariate values
   if(any(is.na(covvalues)))
@@ -97,9 +98,9 @@ lurking <- function(object, covariate, type="eem",
   clip <- !is.poisson.ppm(object) ||
               (!missing(clipwindow) && !is.null(clipwindow))
   if(clip) {
-    covq <- covq[, clipwindow]
-    res <- res[, clipwindow]
-    covres <- covres[, clipwindow]
+    covq <- covq[clipwindow]
+    res <- res[clipwindow]
+    covres <- covres[clipwindow]
     clipquad <- inside.owin(quadpoints$x, quadpoints$y, clipwindow)
     wts <- wts[ clipquad ]
   }
@@ -116,22 +117,24 @@ lurking <- function(object, covariate, type="eem",
 
       # Reorder the data/quad points in order of increasing covariate value
       # and then compute the cumulative sum of their residuals/marks
-    o <- order(covres$marks)
-    covsort <- covres$marks[o]
-    cummark <- cumsumna(res$marks[o])
+    markscovres <- marks(covres)
+    o <- order(markscovres)
+    covsort <- markscovres[o]
+    cummark <- cumsumna(marks(res)[o])
       # we'll plot(covsort, cummark) in the cumulative case
 
   # (B) THEORETICAL MEAN CUMULATIVE FUNCTION
   # based on all quadrature points
     
       # Range of covariate values
-    covrange <- range(covq$marks, na.rm=TRUE)
+    covqmarks <- marks(covq)
+    covrange <- range(covqmarks, na.rm=TRUE)
       # Suitable breakpoints
     cvalues <- seq(covrange[1], covrange[2], length=100)
     csmall <- cvalues[1] - diff(cvalues[1:2])
     cbreaks <- c(csmall, cvalues)
       # cumulative area as function of covariate values
-    covclass <- cut(covq$marks, breaks=cbreaks)
+    covclass <- cut(covqmarks, breaks=cbreaks)
     increm <- tapply(wts, covclass, sum)
     cumarea <- cumsumna(increm)
       # compute theoretical mean (when model is true)
@@ -173,35 +176,75 @@ lurking <- function(object, covariate, type="eem",
     else if(plot.sd && !is.poisson.ppm(object))
       warning("standard deviation is calculated for Poisson model; not valid for this model")
 
-    if(plot.sd && cumulative)
+    if(plot.sd && cumulative) {
+      # Fitted intensity at quadrature points
+      lambda <- fitted.ppm(object, type="trend")
+      # Asymptotic variance-covariance matrix of coefficients
+      asymp <- vcov(object,what="internals")
+      V <- asymp$vcov
+      # Local sufficient statistic at quadrature points
+      suff <- asymp$suff
+      # Clip if required
+      if(clip) {
+        lambda <- lambda[clipquad]
+        suff   <- suff[clipquad, , drop=FALSE]  # suff is a matrix
+      }
+      # First term: integral of lambda^(2p+1)
       switch(type,
              pearson={
-               theoretical$sd <- sqrt(cumarea)
+               varI <- cumarea
              },
              raw={
-               # Compute fitted conditional intensity at quadrature points
-               lambda <- fitted.ppm(object, type="trend")
-               if(clip) lambda <- lambda[clipquad]
                # Compute sum of w*lambda for quadrature points in each interval
                dvar <- tapply(wts * lambda, covclass, sum)
                # tapply() returns NA when the table is empty
                dvar[is.na(dvar)] <- 0
                # Cumulate
-               theoretical$sd <- sqrt(cumsum(dvar))
+               varI <- cumsum(dvar)
              },
              inverse=, # same as eem
              eem={
-               # Compute fitted conditional intensity at quadrature points
-               lambda <- fitted.ppm(object, type="trend")
-               if(clip) lambda <- lambda[clipquad]
                # Compute sum of w/lambda for quadrature points in each interval
                dvar <- tapply(wts / lambda, covclass, sum)
                # tapply() returns NA when the table is empty
                dvar[is.na(dvar)] <- 0
                # Cumulate
-               theoretical$sd <- sqrt(cumsum(dvar))
-             }
-     )
+               varI <- cumsum(dvar)
+             })
+      
+      # Second term: B' V B
+      if(oldstyle) {
+        varII <- 0
+      } else {
+        # lamp = lambda^(p + 1)
+        lamp <- switch(type,
+                       raw     = lambda, 
+                       pearson = sqrt(lambda),
+                       inverse =,
+                       eem     = ifelse(lambda > 0, 1, 0))
+        # Compute sum of w * lamp * suff for quad points in intervals
+        Bcontrib <- (wts * lamp) * suff
+        dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib))
+        for(j in seq(ncol(dB))) 
+          dB[,j] <- tapply(Bcontrib[,j], covclass, sum)
+        # tapply() returns NA when the table is empty
+        dB[is.na(dB)] <- 0
+        # Cumulate columns
+        B <- apply(dB, 2, cumsum)
+        # compute B' V B for each i 
+        varII <- diag(B %*% V %*% t(B))
+      }
+      #
+      # variance of residuals
+      varR <- varI - varII
+      # avoid numerical errors
+      if(any(nbg <- (varR < 0))) {
+        if(max(-varR[nbg]) > 1e-7)
+          warning("Internal error: negative variances generated")
+        varR[nbg] <- 0
+      }
+      theoretical$sd <- sqrt(varR)
+    }
 
     # ---------------  PLOT THEM  ----------------------------------
     if(plot.it) {

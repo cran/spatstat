@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.18 $   $Date: 2006/05/02 05:19:38 $
+#   $Revision: 1.21 $   $Date: 2006/10/10 04:22:48 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -42,32 +42,37 @@
     vector.arg <- !single.arg && is.numvector(lambda) 
     list.arg <- !single.arg && is.list(lambda)
     if(! (single.arg || vector.arg || list.arg))
-      stop("argument \'lambda\' not understood")
+      stop(paste("argument", sQuote("lambda"), "not understood"))
     
     if(list.arg && !all(unlist(lapply(lambda, checkone))))
-      stop("Each entry in the list \'lambda\' must be either a constant, a function or an image")
+      stop(paste("Each entry in the list",
+                 sQuote("lambda"),
+                 "must be either a constant, a function or an image"))
     if(vector.arg && any(lambda < 0))
-      stop("Some entries in the vector \'lambda\' are negative")
+      stop(paste("Some entries in the vector",
+                 sQuote("lambda"), "are negative"))
 
 
     # Determine & validate the set of possible types
     if(missing(types)) {
       if(single.arg)
-        stop("\'types\' must be given explicitly\
- when \'lambda\' is a constant, a function or an image")
+        stop(paste(sQuote("types"), "must be given explicitly when",
+                   sQuote("lambda"), "is a constant, a function or an image"))
       else
         types <- seq(lambda)
     } 
 
     ntypes <- length(types)
     if(!single.arg && (length(lambda) != ntypes))
-      stop("The lengths of \'lambda\' and \'types\' do not match")
+      stop(paste("The lengths of", sQuote("lambda"),
+                 "and", sQuote("types"), "do not match"))
 
     factortype <- factor(types, levels=types)
 
     # Validate `lmax'
     if(! (is.null(lmax) || is.numvector(lmax) || is.list(lmax) ))
-      stop("\'lmax\' should be a constant, a vector, a list or NULL")
+      stop(paste(sQuote("lmax"),
+                 "should be a constant, a vector, a list or NULL"))
        
     # coerce lmax to a vector, to save confusion
     if(is.null(lmax))
@@ -75,7 +80,9 @@
     else if(is.numvector(lmax) && length(lmax) == 1)
       maxes <- rep(lmax, ntypes)
     else if(length(lmax) != ntypes)
-      stop("The length of \'lmax\' does not match the number of possible types")
+      stop(paste("The length of",
+                 sQuote("lmax"),
+                 "does not match the number of possible types"))
     else if(is.list(lmax))
       maxes <- unlist(lmax)
     else maxes <- lmax
@@ -141,12 +148,14 @@
   vector.arg <- !single.arg && is.numvector(f) 
   list.arg <- !single.arg && is.list(f)
   if(! (single.arg || vector.arg || list.arg))
-    stop("argument \'f\' not understood")
+    stop(paste("argument", sQuote("f"), "not understood"))
     
   if(list.arg && !all(unlist(lapply(f, checkone))))
-    stop("Each entry in the list \'f\' must be either a constant, a function or an image")
+    stop(paste("Each entry in the list", sQuote("f"),
+               "must be either a constant, a function or an image"))
   if(vector.arg && any(f < 0))
-    stop("Some entries in the vector \'f\' are negative")
+    stop(paste("Some entries in the vector",
+               sQuote("f"), "are negative"))
 
   # cases where it's known that all types of points 
   # have the same conditional density of location (x,y)
@@ -158,9 +167,9 @@
   ################   Determine & validate the set of possible types
   if(missing(types)) {
     if(single.arg && length(n) == 1)
-      stop("\'types\' must be given explicitly\
- when \'f\' is a single number, a function or an image\
- and \`n\' is a single number")
+      stop(paste(sQuote("types"), "must be given explicitly when",
+                 sQuote("f"), "is a single number, a function or an image and",
+                 sQuote("n"), "is a single number"))
     else if(single.arg)
       types <- seq(n)
     else 
@@ -169,15 +178,20 @@
 
   ntypes <- length(types)
   if(!single.arg && (length(f) != ntypes))
-    stop("The lengths of \'f\' and \'types\' do not match")
+    stop(paste("The lengths of",
+               sQuote("f"), "and", sQuote("types"),
+               "do not match"))
   if(length(n) > 1 && ntypes != length(n))
-    stop("The lengths of \'n\' and \'types\' do not match")
+    stop(paste("The lengths of",
+               sQuote("n"), "and", sQuote("types"),
+               "do not match"))
 
   factortype <- factor(types, levels=types)
   
   #######################  Validate `fmax'
   if(! (is.null(fmax) || is.numvector(fmax) || is.list(fmax) ))
-    stop("\'fmax\' should be a constant, a vector, a list or NULL")
+    stop(paste(sQuote("fmax"),
+               "should be a constant, a vector, a list or NULL"))
        
   # coerce fmax to a vector, to save confusion
   if(is.null(fmax))
@@ -185,7 +199,8 @@
   else if(is.constant(fmax))
     maxes <- rep(fmax, ntypes)
   else if(length(fmax) != ntypes)
-    stop("The length of \'fmax\' does not match the number of possible types")
+    stop(paste("The length of", sQuote("fmax"),
+               "does not match the number of possible types"))
   else if(is.list(fmax))
     maxes <- unlist(fmax)
   else maxes <- fmax
@@ -330,13 +345,14 @@ rpoint.multi <- function (n, f, fmax=NULL, marks = NULL,
   nums <- table(marks)
   X <- rmpoint(nums, f, fmax, win=win, types=types,
                giveup=giveup, verbose=verbose)
-  if(any(table(X$marks) != nums))
+  if(any(table(marks(X)) != nums))
     stop("Internal error: output of rmpoint illegal")
   # reorder them to correspond to the desired 'marks' vector
   Y <- X
+  Xmarks <- marks(X)
   for(ty in types) {
     to   <- (marks == ty)
-    from <- (X$marks == ty)
+    from <- (Xmarks == ty)
     if(sum(to) != sum(from))
       stop(paste("Internal error: mismatch for mark =", ty))
     if(any(to)) {

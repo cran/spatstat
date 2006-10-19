@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.31 $	$Date: 2006/06/29 07:51:49 $
+#	$Revision: 1.36 $	$Date: 2006/10/10 07:09:37 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -19,7 +19,8 @@ function(object, window, ngrid=NULL, locations=NULL,
   dotargs <- list(...)
   nama <- names(dotargs)
   if(!is.null(nama) && any(nama == "newdata"))
-    warning("The use of the argument \`newdata\' is out-of-date. See help(predict.ppm)")
+    warning(paste("The use of the argument", sQuote("newdata"),
+                  "is out-of-date. See help(predict.ppm)"))
   else if(length(dotargs) > 0)
     warning("Some arguments were ignored by predict.ppm")
   
@@ -59,7 +60,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     if(!multitype)
       stop("Prediction not yet implemented for general marked point processes")
     else 
-      types <- levels(mod$entries$data$marks)
+      types <- levels(marks(mod$entries$data))
   }
 #
 #      determine what kind of output is required:
@@ -69,7 +70,9 @@ function(object, window, ngrid=NULL, locations=NULL,
 #         locations (other) ->  data frame
 #
   if(!is.null(ngrid) && !is.null(locations))
-    stop("Only one of \`ngrid\' and \`locations\' should be specified")
+    stop(paste("Only one of",
+               sQuote("ngrid"), "and", sQuote("locations"),
+               "should be specified"))
 
   if(is.null(ngrid) && is.null(locations)) 
     # use ngrid 
@@ -92,10 +95,11 @@ function(object, window, ngrid=NULL, locations=NULL,
       xpredict <- xy$y
     }
     if(is.null(xpredict) || is.null(ypredict))
-      stop("Don't know how to extract x,y coordinates from \`locations\'")
+      stop(paste("Don't know how to extract x,y coordinates from",
+                 sQuote("locations")))
     # marks if required
     if(marked)
-      mpredict <- locations$marks
+      mpredict <- locations$marks  # locations is a data frame
   } else {
     # (B) pixel grid of points
     #
@@ -248,8 +252,8 @@ function(object, window, ngrid=NULL, locations=NULL,
     U <- list(x=newdata$x, y=newdata$y)
     Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
     if(marked) {
-      U$marks <- newdata$marks
-      Equal <- Equal & outer(X$marks, U$marks, "==")
+      marks(U) <- newdata$marks
+      Equal <- Equal & outer(marks(X), marks(U), "==")
     }
   # compute values of potential at the new sample points
     Vnew <- inter$family$eval(X, U, Equal,
@@ -291,7 +295,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     
 #################################################################    
   } else
-     stop(paste("Unrecognised type \'", type, "\'\n", sep=""))
+     stop(paste("Unrecognised type", sQuote(type)))
 
 #################################################################
 #

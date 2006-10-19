@@ -11,7 +11,8 @@
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
                rbord=reach(object), cumulative=TRUE,
                plot.it=TRUE, rv = NULL, compute.sd=TRUE,
-               compute.cts=TRUE, typename, check=TRUE, repair=TRUE)
+               compute.cts=TRUE, typename, check=TRUE, repair=TRUE,
+               oldstyle=FALSE)
 }
 \usage{
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
@@ -19,7 +20,8 @@
                plot.it=TRUE,
                plot.neg="image", plot.smooth="imagecontour", plot.sd,
                rv = NULL, plot.sd, spacing=0.1,
-               srange=NULL, monochrome=FALSE, check=TRUE, repair=TRUE)
+               srange=NULL, monochrome=FALSE, check=TRUE, repair=TRUE,
+               oldstyle=FALSE)
 }
 \arguments{
   \item{object}{
@@ -117,6 +119,12 @@
   \item{repair}{
     Logical value indicating whether to repair the internal format
     of \code{object}, if it is found to be damaged. 
+  }
+  \item{oldstyle}{
+    Logical flag indicating whether error bounds should be plotted
+    using the approximation given in the original paper
+    (\code{oldstyle=TRUE}),
+    or using the correct asymptotic formula (\code{oldstyle=FALSE}).
   }
 }
 \value{
@@ -283,6 +291,16 @@
   The value of \code{rbord} should be greater than or equal to
   the range of interaction permitted in the model.
 
+  By default, the two-standard-deviation limits are calculated
+  from the exact formula for the asymptotic variance
+  of the residuals under the asymptotic normal approximation,
+  equation (37) of Baddeley et al (2006).
+  However, for compatibility with the original paper
+  of Baddeley et al (2005), if \code{oldstyle=TRUE},
+  the two-standard-deviation limits are calculated
+  using the innovation variance, an over-estimate of the true
+  variance of the residuals.
+
   The argument \code{rv} would normally be used only by experts.
   It enables the user to substitute arbitrary values for the
   residuals or marks, overriding the usual calculations.
@@ -311,6 +329,10 @@
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
 
+  Baddeley, A., Moller, J. and Pakes, A.G. (2006)
+  Properties of residuals for spatial point processes.
+  To appear.
+  
   Stoyan, D. and Grabarnik, P. (1991)
   Second-order characteristics for stochastic structures connected with
   Gibbs point processes.

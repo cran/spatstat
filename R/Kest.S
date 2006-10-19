@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.31 $	$Date: 2006/06/11 23:11:07 $
+#	$Revision: 5.34 $	$Date: 2006/10/19 09:32:24 $
 #
 #
 # -------- functions ----------------------------------------
@@ -169,6 +169,7 @@ function(X, ..., r=NULL, breaks=NULL,
 
   # default is to display them all
   attr(K, "fmla") <- . ~ r
+  units(K) <- units(X)
   return(K)
 }
 
@@ -235,7 +236,8 @@ Kborder.engine <- function(X, rmax, nr=100,
 
   ####### start computing ############
   # sort in ascending order of x coordinate
-  Xsort <- X[order(X$x)]
+  orderX <- order(X$x)
+  Xsort <- X[orderX]
   x <- Xsort$x
   y <- Xsort$y
   
@@ -280,12 +282,13 @@ Kborder.engine <- function(X, rmax, nr=100,
       weights <- wim[X, drop=FALSE]
       if(any(is.na(weights)))
         stop("domain of weights image does not contain all points of X")
-    } 
+    }
+    weights.Xsort <- weights[orderX]
     res <- .C("Kwborder",
               nxy=as.integer(npoints),
               x=as.double(x),
               y=as.double(y),
-              w=as.double(weights),
+              w=as.double(weights.Xsort),
               b=as.double(b),
               nr=as.integer(nr),
               rmax=as.double(rmax),
@@ -308,6 +311,7 @@ Kborder.engine <- function(X, rmax, nr=100,
   ##
   # default is to display them all
   attr(Kfv, "fmla") <- . ~ r
+  units(Kfv) <- units(X)
   return(Kfv)
 }
 

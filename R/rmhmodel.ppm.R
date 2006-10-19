@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.14 $   $Date: 2006/04/28 08:47:06 $
+#  $Revision: 2.15 $   $Date: 2006/10/09 03:30:22 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -141,8 +141,8 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       # Determine whether the model can be simulated using rmh
       siminfo <- .Spatstat.Rmhinfo[[inte$name]]
       if(is.null(siminfo))
-        stop(paste("Simulation of a fitted \'", inte$name,
-                   "\' has not yet been implemented"))
+        stop(paste("Simulation of a fitted", sQuote(inte$name),
+                   "has not yet been implemented"))
       
       # Get fitted model's canonical coefficients
       coeffs <- Y$entries$theta
@@ -189,7 +189,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       if(expand < 1)
         stop("expand must be >= 1")
       wsim <- if(expand == 1) win else expand.owin(win, expand)
-     } else stop("Unrecognised format for \"expand\"")
+     } else stop(paste("Unrecognised format for", sQuote("expand")))
       
     
     ###### Trend or Intensity ############

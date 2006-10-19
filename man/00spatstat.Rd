@@ -103,6 +103,8 @@ The Spatstat Package
 	simulate the (in)homogeneous Poisson point process \cr
 	\code{\link{rmpoispp}} \tab
 	simulate the (in)homogeneous multitype Poisson point process \cr
+	\code{\link{runifdisc}} \tab
+	generate \eqn{n} independent uniform random points in disc\cr
 	\code{\link{rstrat}} \tab
 	stratified random sample of points \cr
 	\code{\link{rsyst}} \tab
@@ -214,6 +216,8 @@ The Spatstat Package
 	\tab \code{owin(mask)} for binary image window \cr
 	\code{\link{as.owin}}	\tab
 	Convert other data to a window object \cr
+	\code{\link{square}}    \tab	make a square window \cr
+	\code{\link{disc}}    \tab	make a circular window \cr
 	\code{\link{ripras}}    \tab
 	Ripley-Rasson estimator of window, given only the points \cr
 	\code{\link{letterR}}    \tab
@@ -593,7 +597,7 @@ The Spatstat Package
 \section{Acknowledgements}{
   Marie-Colette van Lieshout, Kasper Klitgaard Berthelsen
   and Dominic Schuhmacher made substantial contributions of code.
-  Additional contributions by Colin Beale, Brad Biggerstaff,
+  Additional contributions by Colin Beale, Brad Biggerstaff, Florent Bonneu,
   Jianbao Chen, Y.C. Chin, Peter Diggle, Stephen Eglen,
   Agnes Gault, Marc Genton, Pavel Grabarnik, C. Graf, Ute Hahn, Mandy Hering, 
   Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik, Robert John-Chandran,

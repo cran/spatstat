@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.12 $    $Date: 2006/06/29 00:20:27 $
+#      $Revision: 4.14 $    $Date: 2006/10/10 04:22:48 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -95,7 +95,7 @@ quadscheme.spatial <-
 			w <- dirichlet.weights(both, window=dummy$window, ...)
 		},
 		{ 
-			stop(paste("unrecognised method \'", method, "\'")) 
+			stop(paste("unrecognised method", sQuote(method)))
 		}
 	)
 
@@ -140,9 +140,10 @@ quadscheme.spatial <-
 
         # find the set of all possible marks
 
-        if(!is.factor(data$marks))
-          stop("data$marks is not a factor")
-        markset <- levels(data$marks)
+        if(!is.multitype(data))
+          stop("data pattern is not multitype")
+        data.marks <- marks(data)
+        markset <- levels(data.marks)
         nmarks <- length(markset)
 
         # replicate dummy points, one copy for each possible mark
@@ -156,9 +157,9 @@ quadscheme.spatial <-
 
         dumdat <- cartesian(unmark(data), markset)
         Wdumdat <- rep(Wdat, nmarks)
-        Mdumdat <- dumdat$marks
+        Mdumdat <- marks(dumdat)
         
-        Mrepdat <- rep(data$marks, nmarks)
+        Mrepdat <- rep(data.marks, nmarks)
 
         ok <- (Mdumdat != Mrepdat)
         dumdat <- dumdat[ok,]
@@ -186,15 +187,14 @@ function(pp, markset, fac=TRUE) {
   # the Cartesian product, consisting of all pairs (u,k)
   # where u is a point of 'pp' and k is a mark in 'markset'
   nmarks <- length(markset)
-  result <- ppp(
-                rep(pp$x, nmarks),
+  result <- ppp(rep(pp$x, nmarks),
                 rep(pp$y, nmarks),
-                window=pp$window,
-                marks=rep(markset, rep(pp$n, nmarks))
-  )
+                window=pp$window)
+  marx <- rep(markset, rep(pp$n, nmarks))
   if(fac)
-    result$marks <- factor(result$marks, levels=markset)
-  result
+    marx <- factor(marx, levels=markset)
+  marks(result) <- marx
+  return(result)
 }
 
 
@@ -223,8 +223,8 @@ validate.quad <- function(Q, fatal=FALSE, repair=TRUE, announce=FALSE) {
   if(!mX)
     return(TRUE)
   # marked points 
-  fX <- is.factor(Xmarx <- X$marks)
-  fD <- is.factor(Dmarx <- D$marks)
+  fX <- is.factor(Xmarx <- marks(X))
+  fD <- is.factor(Dmarx <- marks(D))
   if(fX != fD) {
     whinge <-
       if(fX)

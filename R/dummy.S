@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.5 $     $Date: 2006/05/31 08:22:08 $
+#       $Revision: 5.6 $     $Date: 2006/10/16 01:53:34 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -145,7 +145,7 @@ spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault=1) {
 	yd    <- as.vector(outer(y, yt, "+"))
 	
         tmp <- list(x = xd, y = yd)
-        if(pat) return(as.ppp(tmp,W=w)[,w]) else return(tmp)
+        if(pat) return(as.ppp(tmp,W=w)[w]) else return(tmp)
 }
 	
 # concatenate any number of list(x,y) into a list(x,y)
@@ -185,10 +185,10 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
         dummy <- as.ppp(dummy, win)
         # restrict to window
         if(!(win$type == "rectangle" || periodsample))
-          dummy <- dummy[, win]
+          dummy <- dummy[win]
         # corner points
         corn <- as.ppp(corners(win), win)
-        corn <- corn[, win]
+        corn <- corn[win]
 	dummy <- superimpose(dummy, corn)
         if(dummy$n == 0)
           stop("None of the dummy points lies inside the window")

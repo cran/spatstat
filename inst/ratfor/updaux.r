@@ -1,4 +1,4 @@
-# $Id: updaux.r,v 1.3 2005/03/27 16:10:51 rolf Exp $
+# $Id: updaux.r,v 1.4 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine updaux(itype,x,y,u,v,npts,ix,par,period,aux)
 implicit double precision(a-h,o-z)
 dimension x(1), y(1), par(3), period(2)

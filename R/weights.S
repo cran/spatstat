@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.18 $	$Date: 2006/05/31 08:22:08 $
+#	$Revision: 4.19 $	$Date: 2006/10/09 03:51:29 $
 #
 #
 # Main functions:
@@ -217,7 +217,8 @@ dirichlet.weights <- function(X, window = NULL, exact=TRUE, ...) {
           delthere <- require(deldir,quietly=TRUE)
           options(old.op)
           if(!delthere) {
-            warning("\'deldir\' package not found; using discrete approximation\n")
+            warning(paste(dQuote("deldir"),
+                          "package not found; using discrete approximation\n"))
             exact <- FALSE
           }
         }

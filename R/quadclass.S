@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.7 $	$Date: 2004/01/27 07:03:53 $
+#	$Revision: 4.9 $	$Date: 2006/10/10 04:22:48 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -103,22 +103,61 @@ n.quad <- function(Q) {
   Q$data$n + Q$dummy$n
 }
 
-marks.quad <- function(Q) {
-  verifyclass(Q, "quad")
-  mdat <- Q$data$marks
-  mdum <- Q$dummy$marks
+marks.quad <- function(x, dfok=FALSE, ...) {
+  verifyclass(x, "quad")
+  dat <- x$data
+  dum <- x$dummy
+  if(dfok) warning("ignored dfok = TRUE; not implemented")
+  mdat <- marks(dat, dfok=FALSE, ...)
+  mdum <- marks(dum, dfok=FALSE, ...)
   if(is.null(mdat) && is.null(mdum))
     return(NULL)
   if(is.null(mdat))
-    mdat <- rep(NA, Q$data$n)
+    mdat <- rep(NA, dat$n)
   if(is.null(mdum))
-    mdum <- rep(NA, Q$dummy$n)
+    mdum <- rep(NA, dum$n)
   mall <- c(mdat, mdum)
   if(is.factor(mdat) && is.factor(mdum) && all(levels(mdat) == levels(mdum))) {
     mall <- factor(mall)
     levels(mall) <- levels(mdat)
   }
   return(mall)
+}
+
+is.marked.quad <- function(X, na.action="warn", ...) {
+  marx <- marks(X, ...)
+  if(is.null(marx))
+    return(FALSE)
+  if(any(is.na(marx)))
+    switch(na.action,
+           warn = {
+             warning(paste("some mark values are NA in the point pattern",
+                           deparse(substitute(X))))
+           },
+           fatal = {
+             return(FALSE)
+           },
+           ignore = {}
+           )
+  return(TRUE)
+}
+
+is.multitype.quad <- function(X, na.action="warn", ...) {
+  marx <- marks(x, ...)
+  if(is.null(marx))
+    return(FALSE)
+  if(any(is.na(marx)))
+    switch(na.action,
+           warn = {
+             warning(paste("some mark values are NA in the point pattern",
+                           deparse(substitute(X))))
+           },
+           fatal = {
+             return(FALSE)
+           },
+           ignore = {}
+           )
+  return(!is.data.frame(marx) && is.factor(marx))
 }
 
 is.data <- function(Q) {
@@ -164,15 +203,17 @@ plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
                                      main=paste(main, "\n dummy points")
                                      ),
                                 dum))
-  } else if(is.factor(data$marks)) {
+  } else if(is.multitype(data)) {
     oldpar <- par(ask = interactive() &&
             (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
     on.exit(par(oldpar))
-    types <- levels(data$marks)
+    data.marks <- marks(data)
+    dummy.marks <- marks(dummy)
+    types <- levels(data.marks)
     for(k in types) {
       maink <- paste(main, "\n mark = ", k, sep="")
-      plot(unmark(data[data$marks == k]), main=maink, ...)
-      do.call("dummyplot", append(list(unmark(dummy[dummy$marks == k])), dum))
+      plot(unmark(data[data.marks == k]), main=maink, ...)
+      do.call("dummyplot", append(list(unmark(dummy[dummy.marks == k])), dum))
     }
   } else {
     plot(data, ..., main=main)

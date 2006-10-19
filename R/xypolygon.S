@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.19 $    $Date: 2006/06/16 03:12:09 $
+#    $Revision: 1.20 $    $Date: 2006/10/09 03:33:35 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -111,7 +111,7 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
              }
            }
          },
-         stop("Unrecognised choice for \"method\"")
+         stop(paste("Unrecognised choice for", sQuote("method")))
          )
 
   #------------------- END SWITCH ------------------------------

@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.6 $   $Date: 2006/04/11 10:20:21 $
+#    $Revision: 1.7 $   $Date: 2006/10/18 04:15:47 $
 #
 #    as.im()
 #
@@ -28,7 +28,8 @@ as.im <- function(X, W, ...) {
                 xcol   = w$xcol,
                 yrow   = w$yrow,
                 lev    = NULL,
-                type    = "integer")
+                type    = "integer",
+                units  = units(x))
     class(out) <- "im"
     return(out)
   }
@@ -68,7 +69,7 @@ as.im <- function(X, W, ...) {
       v[m] <- values
       v[!m] <- NA
     }
-    return(im(v, w$xcol, w$yrow, lev))
+    return(im(v, w$xcol, w$yrow, lev, units=units(w)))
   }
 
   if(is.list(x) && checkfields(x, c("x","y","z"))) {

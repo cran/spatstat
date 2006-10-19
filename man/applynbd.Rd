@@ -142,7 +142,7 @@
   }
   # compute the median of the marks of all neighbours of a point
   # (see also 'markstat')
-  dbh.med <- applynbd(longleaf, R=40, exclude=TRUE,
+  dbh.med <- applynbd(longleaf, R=90, exclude=TRUE,
                  function(Y, ...) { median(Y$marks)})
 
 

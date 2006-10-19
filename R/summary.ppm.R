@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.13 $   $Date: 2006/04/25 05:30:24 $
+#    $Revision: 1.15 $   $Date: 2006/10/10 04:22:48 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -39,8 +39,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   y$poisson <- is.null(INTERACT$family)
 
   y$marked <- is.marked.ppp(DATA)
-  y$multitype <- y$marked && is.factor(DATA$marks)
-  if(y$marked) y$entries <- list(marks = DATA$marks)
+  y$multitype <- is.multitype.ppp(DATA)
+  if(y$marked) y$entries <- list(marks = marks(DATA))
 
   y$name <- paste(
           if(y$stationary) "Stationary " else "Nonstationary ",
@@ -131,7 +131,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       y$trend$value <- c(beta=exp(theta[[1]]))
     } else {
       # stationary, marked
-      mrk <- DATA$marks
+      mrk <- marks(DATA)
       y$trend$label <-
         if(y$poisson) "Fitted intensities" else "Fitted first order terms"
       # Use predict.ppm to evaluate the fitted intensities
@@ -215,7 +215,7 @@ print.summary.ppm <- function(x, ...) {
   cat("Call:\n")
   print(x$args$call)
 
-  cat(paste("Edge correction: \'", x$args$correction, "\'\n", sep=""))
+  cat(paste("Edge correction:", dQuote(x$args$correction)))
   if(x$args$rbord > 0)
     cat(paste("border correction distance r =", x$args$rbord,"\n"))
 
@@ -322,5 +322,9 @@ is.poisson.ppm <- function(x) {
 
 is.marked.ppm <- function(X, ...) {
   summary.ppm(X, quick=TRUE)$marked
+}
+
+is.multitype.ppm <- function(X, ...) {
+  summary.ppm(X, quick=TRUE)$multitype
 }
 

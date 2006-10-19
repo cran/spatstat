@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.15 $	$Date: 2006/09/26 07:44:09 $
+#	$Revision: 4.16 $	$Date: 2006/10/10 04:22:48 $
 #
 #
 #

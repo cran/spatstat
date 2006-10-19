@@ -2,7 +2,7 @@
 #	exactPdt.S
 #	S function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.5 $	$Date: 2006/06/01 02:29:42 $
+#	$Revision: 4.6 $	$Date: 2006/10/09 03:41:19 $
 #
 
 "exactPdt"<-
@@ -11,7 +11,7 @@ function(w)
 #
         verifyclass(w, "owin")
         if(w$type != "mask")
-          stop("Input must be a window of type \'mask\'")
+          stop(paste("Input must be a window of type", sQuote("mask")))
 #	
 	nr <- w$dim[1]
 	nc <- w$dim[2]

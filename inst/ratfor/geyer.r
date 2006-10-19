@@ -1,4 +1,4 @@
-# $Id: geyer.r,v 1.3 2005/03/11 21:03:00 rolf Exp $
+# $Id: geyer.r,v 1.3 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine geyer(u,v,ix,x,y,npts,par,period,cifval,aux)
 #
 # Conditional intensity function for a Geyer process.

@@ -35,11 +35,11 @@ X <- swedishpines
 subset <- 1:20
 plot(X[subset], main="subset operation: X[subset]")
 subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
-plot(X[,subwindow], main="subset operation: X[, subwindow]")
+plot(X[subwindow], main="subset operation: X[subwindow]")
 
 L <- rpoisline(10, owin(c(1.5,4.5),c(0.2,3.6)))
-S <- L[, letterR]
-plot(L, main="subset operation: L[, subwindow]")
+S <- L[letterR]
+plot(L, main="subset operation: L[subwindow]")
 plot(S, add=TRUE, col="red")
 
 data(lansing)

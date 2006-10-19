@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.18 $  $Date: 2006/05/01 06:49:00 $
+#   $Revision: 1.20 $  $Date: 2006/10/10 07:56:10 $
 #
 #
 
@@ -41,7 +41,7 @@ rmhmodel.default <- function(model=NULL, ...,
   # and look up the rules for this model
   rules <- .Spatstat.RmhTable[[cif]]
   if(is.null(rules))
-    stop(paste("Unrecognised cif: \'", cif, "\'", sep=""))
+    stop(paste("Unrecognised cif:", sQuote(cif)))
   
   # Turn the name of the cif into a number (for use in Fortran)
   fortran.id <- rules$fortran.id
@@ -61,8 +61,8 @@ rmhmodel.default <- function(model=NULL, ...,
   fortran.par <- unlist(fortran.par)
 
   # Check that cif executable is actually loaded
-  if(!is.na(fortran.id) && !is.loaded(symbol.For(cif)))
-    stop(paste("executable is not loaded for cif \'",cif,"\'",sep=""))
+  if(!is.na(fortran.id) && !is.loaded(cif))
+    stop(paste("executable is not loaded for cif", sQuote(cif)))
 
   # Calculate reach of model
   mreach <- rules$reach(par)
@@ -467,15 +467,16 @@ reach.rmhmodel <- function(x, ...) {
 		if(!is.cadlag(h.init))
                   stop(paste("The lookup pairwise interaction step",
 			     "function must be right continuous,\n",
-			     "i.e. built using the default values of",
-                             "the \"f\" and \"right\" arguments for stepfun."))
+			     "i.e. built using the default values of the",
+                             sQuote("f"), "and", sQuote("right"),
+                             "arguments for stepfun."))
 		r     <- knots(h.init)
 		h0    <- get("yleft",envir=environment(h.init))
 		h     <- h.init(r)
 		nlook <- length(r)
 		if(!identical(all.equal(h[nlook],1),TRUE))
                   stop(paste("The lookup interaction step function",
-                             "must be equal to 1 for \"large\"",
+                             "must be equal to 1 for", dQuote("large"),
                              "distances."))
 		if(r[1] <= 0)
                   stop(paste("The first jump point (knot) of the lookup",

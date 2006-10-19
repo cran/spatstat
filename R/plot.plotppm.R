@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.7 $  $Date: 2006/05/31 09:46:57 $
+# $Revision: 1.9 $  $Date: 2006/10/10 04:22:48 $
 #
 #
 
@@ -25,8 +25,10 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
   # marked point process?
   mrkvals <- attr(x,"mrkvals")
   marked <- (length(mrkvals) > 1)
+  if(marked)
+    data.marks <- marks(data)
   if(marked & superimpose) {
-    data.types <- levels(data$marks)
+    data.types <- levels(data.marks)
     if(any(sort(data.types) != sort(mrkvals)))
       stop(paste("Data marks are different from mark",
                  "values for argument x.\n"))
@@ -65,7 +67,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
                                           list(...),
                                           list(main=main)))
                  if(superimpose) {
-                   if(marked) plot(data[data$marks == level],
+                   if(marked) plot(data[data.marks == level],
                                    add = TRUE)
                    else plot(data,add=TRUE)
                  }
@@ -76,7 +78,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
                                           list(...),
                                           list(main=main)))
                  if (superimpose) {
-                   if(marked) plot(data[data$marks == level],
+                   if(marked) plot(data[data.marks == level],
                                    add = TRUE)
                    else plot(data,add=TRUE)
                  }
@@ -97,7 +99,7 @@ print.plotppm <- function(x, ...) {
   mrkvals <- attr(x, "mrkvals")
   ntypes  <- length(mrkvals)
   unmarked <- (ntypes == 1 )
-  cat("Object of class \`plotppm\'\n")
+  cat(paste("Object of class", sQuote("plotppm"), "\n"))
   if(unmarked)
     cat("Computed for an unmarked point process\n")
   else {

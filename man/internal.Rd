@@ -6,6 +6,7 @@
 \alias{as.breakpts}
 \alias{as.fv}
 \alias{as.polygonal}
+\alias{as.units}
 \alias{beachcolours}
 \alias{bind.fv}
 \alias{bdrylength.xypolygon} 
@@ -47,6 +48,7 @@
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{fasp}
+\alias{findmarktype}
 \alias{FormatFaspFormulae}
 \alias{fv}
 \alias{greatest.common.divisor}
@@ -66,6 +68,9 @@
 \alias{is.data}
 \alias{is.fv}
 \alias{is.marked.default}    
+\alias{is.marked.quad}    
+\alias{is.multitype.quad}    
+\alias{is.multitype.default}    
 \alias{is.prime}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
@@ -78,8 +83,23 @@
 \alias{levels<-.im}
 \alias{lookup.im}
 \alias{make.even.breaks}
+\alias{markformat}
+\alias{markformat.ppp}
+\alias{markformat.psp}
 \alias{markspace.integral}
+\alias{marks}           
+\alias{marks.ppp}           
+\alias{marks.psp}           
 \alias{marks.quad}           
+\alias{marks<-}           
+\alias{marks<-.ppp}           
+\alias{\%mapp\%}
+\alias{markappendop}
+\alias{marksubset}
+\alias{markreplicateop}
+\alias{\%mrep\%}
+\alias{marksubsetop}
+\alias{\%msub\%}
 \alias{matcolall}
 \alias{matcolany}
 \alias{matcolsum}
@@ -153,7 +173,6 @@
 \alias{revcumsum}    
 \alias{rmax.rule}
 \alias{rotxy}
-\alias{runifdisc}
 \alias{runifpoispp}          
 \alias{runifrect}
 \alias{rmhResolveTypes}
@@ -174,6 +193,7 @@
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
 \alias{stratrand}
+\alias{suffloc}
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summary.envelope}
@@ -182,6 +202,8 @@
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
+\alias{units.default}
+\alias{units<-.default}
 \alias{update.interact}
 \alias{validate.mask}        
 \alias{validate.quad}        
@@ -206,6 +228,7 @@ AsymmHausdorff.psp(X, Y, method="Fortran")
 as.breakpts(\dots)
 as.fv(x)
 as.polygonal(W)
+as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
 bind.fv(x, y, labl, desc, preferred)
 bdrylength.xypolygon(polly)
@@ -233,7 +256,7 @@ densityhack(x, bw, adjust, kernel, window, width,
              give.Rkern, n, from, to, cut, na.rm, weights)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
-                         compute.cts=TRUE, rv=NULL)
+                         compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
 discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)
@@ -250,8 +273,9 @@ even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(w)
 fasp(fns, titles, formulae, which, dataname, title)
+findmarktype(x)
 FormatFaspFormulae(f, argname)
-fv(x, argu, ylab, valu, fmla, alim, labl, desc)
+fv(x, argu, ylab, valu, fmla, alim, labl, desc, units)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmfit(object)
@@ -268,9 +292,10 @@ intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
 is.fv(x)
-is.marked(X, \dots)
 is.marked.default(\dots)  
-is.marked.ppp(X, na.action="warn", \dots)
+is.marked.quad(X, na.action="warn", \dots)
+is.multitype.default(\dots)  
+is.multitype.quad(X, na.action="warn", \dots)
 is.poisson.ppm(x)
 is.prime(n)
 is.stationary.ppm(x)    
@@ -289,8 +314,20 @@ least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 lookup.im(Z, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
+markformat(x)
+\method{markformat}{ppp}(x)
+\method{markformat}{psp}(x)
 markspace.integral(X)
-marks.quad(Q)           
+marks(x, \dots)
+marks.ppp(x, \dots, dfok)           
+marks.psp(x, \dots, dfok)
+marks.quad(x, dfok=FALSE, \dots)
+marks(x, \dots) <- value
+\method{marks}{ppp}(x, dfok, \dots) <- value
+markappendop(x, y)
+marksubset(x, index, format)
+marksubsetop(x, i)
+markreplicateop(x, n)
 matcolall(x)
 matcolany(x)
 matcolsum(x)            
@@ -304,7 +341,7 @@ meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 	 rbord, use.gam, famille,
-         forcefit, callstring, precomputed, savecomputed)
+         forcefit, callstring, precomputed, savecomputed, preponly)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, Pname,
@@ -387,7 +424,6 @@ rmhstart.list(start, \dots)
 rmhmodel.ppm(model, win, \dots, verbose, project, control)
 rmpoint.I.allim(n, f, types)
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
-runifdisc(n, r = 1, x = 0, y = 0)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE,
@@ -397,6 +433,7 @@ spatstat.rawdata.location(\dots)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)             
 stratrand(window, nx, ny, k = 1)
+suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summary.envelope(object,\dots)
@@ -405,6 +442,8 @@ summary.pppmatching(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        
+\method{units}{default}(x)
+\method{units}{default}(x) <- value
 update.interact(object, \dots)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)

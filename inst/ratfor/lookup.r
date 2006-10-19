@@ -1,4 +1,4 @@
-# $Id: lookup.r,v 1.2 2005/03/08 20:25:47 rolf Exp $
+# $Id: lookup.r,v 1.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine lookup(u,v,ix,x,y,npts,par,period,cifval)
 #
 # Conditional intensity function for a general pairwise

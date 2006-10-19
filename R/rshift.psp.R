@@ -1,7 +1,7 @@
 #
 # rshift.psp.R
 #
-#  $Revision: 1.1 $  $Date: 2006/02/28 01:36:31 $
+#  $Revision: 1.5 $  $Date: 2006/10/17 09:54:42 $
 #
 
 
@@ -19,7 +19,7 @@ rshift.psp <- function(X, ..., group=NULL, which=NULL) {
   if(W$type != "rectangle")
     stop("Not yet implemented for non-rectangular windows")
   if(edge != "erode")
-    stop("Only implemented for edge=\"erode\"")
+    stop(paste("Only implemented for edge=", dQuote("erode")))
 
   # split into groups
   if(is.null(group))
@@ -42,13 +42,13 @@ rshift.psp <- function(X, ..., group=NULL, which=NULL) {
     
     # generate random translation vector
     if(!is.null(radius)) 
-      jump <- runifdisc(1, r=radius)
+      jump <- runifdisc(1, radius=radius)
     else {
       jump <- list(x=runif(1, min=0, max=width),
                    y=runif(1, min=0, max=height))
     }
     # translate segments
-    Zsh <- shift(Z, unlist(jump))
+    Zsh <- shift(Z, c(jump$x, jump$y))
     Zsh$window <- W
 
     # append to result
@@ -57,7 +57,7 @@ rshift.psp <- function(X, ..., group=NULL, which=NULL) {
 
   # clip 
   if(!is.null(clip))
-   result <- result[, clip]
+   result <- result[clip]
 
   return(result)
 }

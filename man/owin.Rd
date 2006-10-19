@@ -5,22 +5,25 @@
   Creates an object of class \code{"owin"} representing 
   an observation window in the two-dimensional plane
 }
-\synopsis{
-  owin(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL)
-}
 \usage{
- owin()
- owin(xrange, yrange)
- owin(poly=xy)
- owin(xrange, yrange, poly=xy)
- owin(xrange, yrange, mask=mat)
- owin(mask=mat)
+  owin(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
 }
 \arguments{
   \item{xrange}{\eqn{x} coordinate limits of enclosing box}
   \item{yrange}{\eqn{y} coordinate limits of enclosing box}
-  \item{poly}{polygonal boundary of window}
-  \item{mask}{logical matrix giving binary image of window}
+  \item{poly}{
+    Optional. Polygonal boundary of window.
+    Incompatible with \code{mask}.
+  }
+  \item{mask}{
+    Optional. Logical matrix giving binary image of window.
+    Incompatible with \code{poly}.
+  }
+  \item{units}{
+    Optional. Name of unit of length. Either a single character string,
+    or a vector of two character strings giving the
+    singular and plural forms, respectively.
+  }
 }
 \value{
 An object of class \code{"owin"} 
@@ -89,8 +92,13 @@ describing a window in the two-dimensional plane.
   defined by inequalities in the Cartesian coordinates, 
   use \code{\link{raster.x}()} and \code{\link{raster.y}()}
   as in the examples below.
+
+  Functions \code{\link{square}} and \code{\link{disc}}
+  will create square and circular windows, respectively.
 }
 \seealso{
+  \code{\link{square}},
+  \code{\link{disc}},
   \code{\link{owin.object}},
   \code{\link{as.owin}},
   \code{\link{complement.owin}},
@@ -102,8 +110,8 @@ describing a window in the two-dimensional plane.
   w <- owin(c(0,1), c(0,1))
   # the unit square
 
-  w <- owin(c(10,20), c(10,30))
-  # a rectangle of dimensions 10 x 20 units
+  w <- owin(c(10,20), c(10,30), units=c("foot","feet"))
+  # a rectangle of dimensions 10 x 20 feet
   # with lower left corner at (10,10)
 
   # polygon (diamond shape)

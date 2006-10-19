@@ -3,13 +3,13 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.12 $ $Date: 2006/06/29 07:54:53 $
+# $Revision: 1.17 $ $Date: 2006/10/17 03:50:44 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
                               sigma=NULL,
                               rbord = reach(object), compute.sd=TRUE,
-                              compute.cts=TRUE, rv=NULL)
+                              compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
 {
   if(is.marked.ppm(object))
     stop("Sorry, this is not yet implemented for marked models")
@@ -82,9 +82,9 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   clip <- (rbord > 0)
   if(clip) {
     Wclip <- erode.owin(W, rbord)
-    Yclip <- Y[, Wclip]
+    Yclip <- Y[Wclip]
     if(!is.null(Ycts))
-      Ycts <- Ycts[, Wclip]
+      Ycts <- Ycts[Wclip]
     if(!is.null(Ydens))
       Ydens <- Ydens[Wclip, drop=FALSE]
   } else {
@@ -144,7 +144,8 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
-            covname="x coordinate")
+            covname="x coordinate",
+            oldstyle=oldstyle)
 
   if(opt$ycumul)
     result$ycumul <- 
@@ -155,7 +156,8 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
-            covname="y coordinate")
+            covname="y coordinate",
+            oldstyle=oldstyle)
 
   # -------------- summary numbers --------------
   
@@ -176,7 +178,7 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
                          rbord = reach(object), cumulative=TRUE,
                          plot.it = TRUE, rv = NULL, 
                          compute.sd=TRUE, compute.cts=TRUE,
-                         typename, check=TRUE, repair=TRUE)
+                         typename, check=TRUE, repair=TRUE, oldstyle=FALSE)
 {
   if(is.marked.ppm(object))
     stop("Sorry, this is not yet implemented for marked models")
@@ -193,9 +195,10 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
   # edge effect avoidance
   if(!is.finite(rbord)) {
     if(missing(rbord))
-      stop("\`rbord\' must be specified; the model has infinite range")
+      stop(paste(sQuote("rbord"),
+                 "must be specified; the model has infinite range"))
     else
-      stop("\`rbord\' is infinite")
+      stop(paste(sQuote("rbord"), "is infinite"))
   }
   
   # whether window should be clipped
@@ -209,9 +212,11 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
                  "Pearson residuals", "Pearson residuals")
   
   if(length(type) > 1)
-    stop("Only one \'type\' may be specified")
+    stop(paste("Only one", sQuote("type"), "may be specified"))
   if(is.na(m <- pmatch(type, typelist)))
-    stop(paste("Unrecognised choice of \'type\':", type))
+    stop(paste("Unrecognised choice of",
+               paste(sQuote("type"), ":", sep=""),
+               type))
 
   type <- typemap[m]
   if(missing(typename))
@@ -221,7 +226,8 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
   optionlist <- c("all", "marks", "smooth", "x", "y", "sum")
 
   if(!all(m <- which %in% optionlist))
-    stop(paste("Unrecognised choice(s) of \'which\':",
+    stop(paste("Unrecognised choice(s) of",
+               paste(sQuote("which"), ":", sep=""),
                paste(which[!m], collapse=", ")))
 
   opt <- list()
@@ -258,7 +264,7 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
                               opt=opt, sigma=sigma, rbord=rbord,
                               compute.sd=compute.sd,
                               compute.cts=compute.cts,
-                              rv=rv, ...)
+                              rv=rv, oldstyle=oldstyle, ...)
 
   RES$typename <- typename
   RES$opt <- opt

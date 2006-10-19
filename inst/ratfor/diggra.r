@@ -1,4 +1,4 @@
-# $Id: diggra.r,v 1.4 2005/03/11 21:20:42 rolf Exp $
+# $Id: diggra.r,v 1.3 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine diggra(u,v,ix,x,y,n,par,period,cifval)
 #
 # Conditional intensity function for a pairwise interaction point

@@ -28,8 +28,8 @@
   component \code{incin} is a list with entries \code{x} and \code{y}
   giving the location of the industrial incinerator.
 
-  Coordinates are in multiples of 1 kilometre, 
-  and the resolution is 100 metres.
+  Coordinates are given in kilometres,
+  and the resolution is 100 metres (0.1 km)
 }
 \usage{data(chorley)}
 \source{
@@ -63,8 +63,8 @@
   and the marks identifying whether each point is a case of
   laryngeal cancer or lung cancer.
 
-  Coordinates are in multiples of 1 kilometre, and the resolution is
-  100 metres.
+  Coordinates are in kilometres, and the resolution is
+  100 metres (0.1 km).
 
   The dataset \code{chorley} has a polygonal window with 132 edges
   which closely approximates the boundary of the Chorley and South

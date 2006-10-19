@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.9 $	$Date: 2006/06/10 17:28:42 $
+#	$Revision: 1.10 $	$Date: 2006/10/09 03:37:26 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -67,7 +67,8 @@ function(bmax, npos, bstep) {
   if(bmax <= 0)
     stop("bmax must be positive")
   if(missing(bstep) && missing(npos))
-    stop("Must specify either \'bstep\' or \'npos\'")
+    stop(paste("Must specify either", sQuote("bstep"),
+               "or", sQuote("npos")))
   if(!missing(npos)) {
     bstep <- bmax/npos
     val <- seq(0, bmax, length=npos+1)
@@ -154,7 +155,8 @@ handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL,
                             rmaxdefault) {
 
         if(!is.null(r) && !is.null(breaks))
-          stop("Do not specify both \'r\' and \'breaks\'")
+          stop(paste("Do not specify both",
+                     sQuote("r"), "and", sQuote("breaks")))
   
         if(!is.null(breaks)) {
           breaks <- as.breakpts(breaks)

@@ -11,7 +11,8 @@ lurking(object, covariate, type="eem",
                     rv,
                     plot.sd, plot.it=TRUE,
                     typename,
-                    covname, \dots)
+                    covname,
+                    oldstyle=FALSE, \dots)
 }
 \arguments{
   \item{object}{
@@ -67,6 +68,12 @@ lurking(object, covariate, type="eem",
   }
   \item{covname}{
     A string name for the covariate, to be used in axis labels of plots.
+  }
+  \item{oldstyle}{
+    Logical flag indicating whether error bounds should be plotted
+    using the approximation given in the original paper
+    (\code{oldstyle=TRUE}),
+    or using the correct asymptotic formula (\code{oldstyle=FALSE}).
   }
   \item{\dots}{
     Arguments passed to \code{smooth.spline} for the estimation of the
@@ -141,6 +148,16 @@ lurking(object, covariate, type="eem",
   for Poisson models and \code{plot.sd = FALSE} for non-Poisson
   models.
 
+  By default, the two-standard-deviation limits are calculated
+  from the exact formula for the asymptotic variance
+  of the residuals under the asymptotic normal approximation,
+  equation (37) of Baddeley et al (2006).
+  However, for compatibility with the original paper
+  of Baddeley et al (2005), if \code{oldstyle=TRUE},
+  the two-standard-deviation limits are calculated
+  using the innovation variance, an over-estimate of the true
+  variance of the residuals.
+
   The argument \code{object} must be a fitted point process model
   (object of class \code{"ppm"}) typically produced by the maximum
   pseudolikelihood fitting algorithm \code{\link{ppm}}).
@@ -180,11 +197,15 @@ lurking(object, covariate, type="eem",
  \code{\link{ppm}}
 }
 \references{
-  Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2004)
+  Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
 
+  Baddeley, A., Moller, J. and Pakes, A.G. (2006)
+  Properties of residuals for spatial point processes.
+  To appear.
+  
   Stoyan, D. and Grabarnik, P. (1991)
   Second-order characteristics for stochastic structures connected with
   Gibbs point processes.

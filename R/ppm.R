@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.8 $	$Date: 2006/04/25 07:11:41 $
+#	$Revision: 1.11 $	$Date: 2006/10/16 04:29:07 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -24,7 +24,7 @@ function(Q,
          verb=TRUE
 ) {
   if(!(method %in% c("mpl", "ho")))
-    stop(paste("Unrecognised fitting method \"", method, "\"", sep=""))
+    stop(paste("Unrecognised fitting method", sQuote(method)))
   cl <- match.call()
   callstring <- paste(deparse(sys.call()), collapse="")
   
@@ -36,8 +36,12 @@ function(Q,
                     forcefit=forcefit,
                     callstring=callstring,
                        ...)
+  # backdoor 
+  if(!inherits(fitMPL, "ppm"))
+    return(fitMPL)
+  
   fitMPL$call <- cl
-
+  fitMPL$callframe <- parent.frame()
 
   if(method == "mpl" || is.poisson.ppm(fitMPL))
     return(fitMPL)

@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.34 $	$Date: 2006/09/20 02:34:49 $
+#	$Revision: 5.40 $	$Date: 2006/10/18 06:46:36 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -38,7 +38,8 @@ function(Q,
          forcefit=FALSE,
          callstring="",
          precomputed=NULL,
-         savecomputed=FALSE
+         savecomputed=FALSE,
+         preponly=FALSE
 ) {
   if(!is.null(precomputed$Q)) {
     Q <- precomputed$Q
@@ -75,9 +76,9 @@ want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
 the.version <- list(major=1,
-                    minor=9,
-                    release=4,
-                    date="$Date: 2006/09/20 02:34:49 $")
+                    minor=10,
+                    release=0,
+                    date="$Date: 2006/10/18 06:46:36 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
@@ -117,6 +118,9 @@ prep <- mpl.prepare(Q, X, P, trend, interaction,
                     "quadrature points", callstring,
                     precomputed=precomputed, savecomputed=savecomputed)
 
+  # back door
+if(preponly) return(prep)
+  
 fmla <- prep$fmla
 glmdata <- prep$glmdata
 problems <- prep$problems
@@ -178,7 +182,7 @@ rslt <- list(
              Q            = Q,
              maxlogpl     = maxlogpl, 
              internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
-               computed=computed),
+                              fmla=fmla, computed=computed),
              covariates   = covariates,
              correction   = correction,
              rbord        = rbord,
@@ -261,15 +265,12 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
       is.matched <- apply(name.match, 2, any)
       matched.names <- (offered)[is.matched]
       if(sum(is.matched) == 1) {
-        return(paste("The variable \"",
-                   matched.names,
-                   "\" in ", where,
-                   " is a reserved name", sep=""))
+        return(paste("The variable",sQuote(matched.names),
+                   "in", where, "is a reserved name"))
       } else {
-        return(paste("The variables \"",
-                   paste(matched.names, collapse="\", \""),
-                   "\" in ", where,
-                   " are reserved names", sep=""))
+        return(paste("The variables",
+                   paste(sQuote(matched.names), collapse=", "),
+                   "in", where, "are reserved names"))
       }
     }
     return("")
@@ -291,40 +292,43 @@ if(want.trend) {
   # Check covariates
   if(!is.null(covariates)) {
 #   Check for duplication of reserved names
-    cc <- check.clashes(reserved.names, names(covariates), "\'covariates\'")
+    cc <- check.clashes(reserved.names, names(covariates),
+                        sQuote("covariates"))
     if(cc != "") stop(cc)
 #   Take only those covariates that are named in the trend formula
     needed <- names(covariates.df) %in% trendvariables
-    covariates.needed <- covariates.df[, needed, drop=FALSE]
+    if(any(needed)) {
+      covariates.needed <- covariates.df[, needed, drop=FALSE]
 #   Append to `glmdata'
-    glmdata <- data.frame(glmdata,covariates.needed)
+      glmdata <- data.frame(glmdata,covariates.needed)
 #   Ignore any quadrature points that have NA's in the covariates
-    nbg <- is.na(covariates.needed)
-    if(any(nbg)) {
-      offending <- matcolany(nbg)
-      covnames.na <- names(covariates.needed)[offending]
-      quadpoints.na <- matrowany(nbg)
-      n.na <- sum(quadpoints.na)
-      n.tot <- length(quadpoints.na)
-      complaint <- paste("Values of the",
-                         ngettext(length(covnames.na),
-                                  "covariate", "covariates"),
-                         paste(sQuote(covnames.na), collapse=", "),
-                         "were NA or undefined at",
-                         paste(ceiling(100 * n.na/n.tot),
-                               "% (", n.na, " out of ", n.tot, ")",
-                               sep=""),
-                         "of the", Pname)
-      warning(paste(complaint,
-                    ". Occurred while executing: ",
-                    callstring, sep=""),
-              call. = FALSE)
-      .mpl$SUBSET <-  .mpl$SUBSET & !quadpoints.na
-      details <- list(covnames.na   = covnames.na,
-                      quadpoints.na = quadpoints.na,
-                      print         = complaint)
-      problems <- append(problems,
-                         list(na.covariates=details))
+      nbg <- is.na(covariates.needed)
+      if(any(nbg)) {
+        offending <- matcolany(nbg)
+        covnames.na <- names(covariates.needed)[offending]
+        quadpoints.na <- matrowany(nbg)
+        n.na <- sum(quadpoints.na)
+        n.tot <- length(quadpoints.na)
+        complaint <- paste("Values of the",
+                           ngettext(length(covnames.na),
+                                    "covariate", "covariates"),
+                           paste(sQuote(covnames.na), collapse=", "),
+                           "were NA or undefined at",
+                           paste(ceiling(100 * n.na/n.tot),
+                                 "% (", n.na, " out of ", n.tot, ")",
+                                 sep=""),
+                           "of the", Pname)
+        warning(paste(complaint,
+                      ". Occurred while executing: ",
+                      callstring, sep=""),
+                call. = FALSE)
+        .mpl$SUBSET <-  .mpl$SUBSET & !quadpoints.na
+        details <- list(covnames.na   = covnames.na,
+                        quadpoints.na = quadpoints.na,
+                        print         = complaint)
+        problems <- append(problems,
+                           list(na.covariates=details))
+      }
     }
   }
 }
@@ -397,7 +401,7 @@ if(want.inter) {
   if(cc != "") stop(cc)
   #   and with the variables in 'covariates'
   if(!is.null(covariates)) {
-    cc <- check.clashes(Vnames, names(covariates), "\'covariates\'")
+    cc <- check.clashes(Vnames, names(covariates), sQuote("covariates"))
     if(cc != "") stop(cc)
   }
 
@@ -477,22 +481,26 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     y <- xy$y
   }
   if(is.null(x) || is.null(y))
-    stop("Can't interpret \`locations\' as x,y coordinates")
+    stop(paste("Can't interpret", sQuote("locations"), "as x,y coordinates"))
   n <- length(x)
   if(is.data.frame(covariates)) {
     if(nrow(covariates) != n)
-      stop(paste("Number of rows in \`covariates\' != number of", type))
+      stop(paste("Number of rows in", sQuote("covariates"),
+                 "does not equal the number of", type))
     return(covariates)
   } else if(is.list(covariates)) {
     if(!all(unlist(lapply(covariates, is.im))))
-      stop("Some entries in the list \`covariates\' are not images")
+      stop(paste("Some entries in the list",
+                 sQuote("covariates"), "are not images"))
     if(any(names(covariates) == ""))
-      stop("Some entries in the list \`covariates\' are un-named")
+      stop(paste("Some entries in the list",
+                 sQuote("covariates"), "are un-named"))
     # look up values of each covariate image at the quadrature points
     values <- lapply(covariates, lookup.im, x=x, y=y, naok=TRUE)
     return(as.data.frame(values))
   } else
-    stop("\`covariates\' must be either a data frame or a list of images")
+    stop(paste(sQuote("covariates"),
+               "must be either a data frame or a list of images"))
 }
 
   

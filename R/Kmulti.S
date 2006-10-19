@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.14 $	$Date: 2006/06/11 23:10:21 $
+#	$Revision: 5.16 $	$Date: 2006/10/18 05:49:23 $
 #
 #
 # -------- functions ----------------------------------------
@@ -50,9 +50,10 @@ function(X, i=1, j=2, r=NULL, breaks=NULL,
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
-	
-	I <- (X$marks == i)
-	J <- (X$marks == j)
+
+        marx <- marks(X)
+	I <- (marx == i)
+	J <- (marx == j)
 	
 	if(!any(I)) stop(paste("No points have mark i =", i))
 	if(!any(J)) stop(paste("No points have mark j =", j))
@@ -70,7 +71,7 @@ function(X, i=1, r=NULL, breaks=NULL,
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
 	
-	I <- (X$marks == i)
+	I <- (marks(X) == i)
 	J <- rep(TRUE, X$n)  # i.e. all points
 	
 	if(!any(I)) stop(paste("No points have mark i =", i))
@@ -214,6 +215,7 @@ function(X, I, J, r=NULL, breaks=NULL,
         }
         # default is to display them all
         attr(K, "fmla") <- . ~ r
+        units(K) <- units(X)
         return(K)
           
 }

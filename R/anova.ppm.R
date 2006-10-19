@@ -1,7 +1,7 @@
 #
 #   anova.ppm.R
 #
-#  $Revision: 1.6 $   $Date: 2006/02/21 09:37:17 $
+#  $Revision: 1.7 $   $Date: 2006/10/09 03:12:20 $
 #
 
 anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
@@ -9,7 +9,7 @@ anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
   # list of models
   objex <- append(list(object), list(...))
   if(!all(unlist(lapply(objex, is.ppm))))
-    stop("Arguments must all be \"ppm\" objects")
+    stop(paste("Arguments must all be", sQuote("ppm"), "objects"))
 
   # non-Poisson models?
   pois <- all(unlist(lapply(objex, is.poisson.ppm)))

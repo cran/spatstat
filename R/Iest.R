@@ -2,16 +2,17 @@
 #
 #	I function
 #
-#	$Revision: 1.2 $	$Date: 2006/05/31 02:44:07 $
+#	$Revision: 1.4 $	$Date: 2006/10/18 06:06:02 $
 #
 #
 #
 Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
 
   X <- as.ppp(X)
-  if(!is.marked(X) || !is.factor(X$marks))
+  if(!is.multitype(X))
     stop("Only applicable to multitype point patterns")
-  ntypes <- length(levels(X$marks))
+  marx <- marks(X, dfok=FALSE)
+  ntypes <- length(levels(marx))
 
   Y <- unmark(split(X))
   
@@ -50,7 +51,9 @@ Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
             "border corrected estimate of I(r)",
             "Kaplan-Meier estimate of I(r)",
             "uncorrected estimate of I(r)")
-  Z <- fv(rslt, "r", "I(r)", "km", cbind(km, rs, un, theo) ~ r, alim, labl, desc)
+  Z <- fv(rslt, "r", "I(r)", "km", cbind(km, rs, un, theo) ~ r,
+          alim, labl, desc)
+  units(Z) <- units(X)
   return(Z)
 }
 

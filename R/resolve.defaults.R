@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.3 $ $Date: 2006/06/05 09:29:35 $
+#  $Revision: 1.4 $ $Date: 2006/10/09 03:29:22 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -30,7 +30,7 @@ resolve.defaults <- function(...) {
 do.call.matched <- function(fname, arglist, funargs, extrargs=NULL) {
   fun <- get(fname)
   if(!is.function(fun))
-    stop(paste("internal error: function \"", fname, "\" not found",
+    stop(paste("internal error: function", sQuote(fname), "not found",
                sep=""))
   if(missing(funargs))
     funargs <- names(formals(fun))

@@ -5,27 +5,29 @@
 \description{
   Extract a subset of a line segment pattern.
 }
-\synopsis{
-  \method{[}{psp}(x, subset, window, drop, \dots)
-}
 \usage{
-  \method{[}{psp}(x, subset, window)
-  \method{[}{psp}(x, subset)
-  \method{[}{psp}(x, , window)
+  \method{[}{psp}(x, i, j, drop, ...)
 }
 \arguments{
   \item{x}{
     A two-dimensional line segment pattern.
     An object of class \code{"psp"}.
   }
-  \item{subset}{
-    logical vector indicating which line segments should be retained.
-  }
-  \item{window}{
-    window (an object of class \code{"owin"})
+  \item{i}{
+    Subset index. Either a valid subset index in the usual \R sense,
+   indicating which segments should be retained, or a window
+   (an object of class \code{"owin"})
     delineating a subset of the original observation window. 
   }
-  \item{ }{ }
+  \item{j}{
+   Redundant - included for backward compatibility.
+  }
+  \item{drop}{
+    Ignored. Required for compatibility with generic function.
+  }
+  \item{\dots}{
+    Ignored.
+  }
 } 
 \value{
   A line segment pattern (of class \code{"psp"}).

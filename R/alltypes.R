@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.12 $   $Date: 2006/05/31 04:03:17 $
+#   $Revision: 1.14 $   $Date: 2006/10/09 09:18:52 $
 #
 #
 alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
@@ -11,7 +11,7 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 #
   verifyclass(pp,"ppp")
   if(!is.character(fun))
-    stop("\`fun\' should be a character string")
+    stop(paste(sQuote("fun"), "should be a character string"))
   
   
 # select appropriate statistics
@@ -61,7 +61,7 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
            S  <- Kest
            Si <- Kdot
          },
-         stop(paste("Unrecognised function name: \`", fun, "\'\n"))
+         stop(paste("Unrecognised function name:", sQuote(fun)))
          )
 
 # inspect the possible types  
@@ -71,9 +71,10 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
     indices <- 0
     Tij <- function(X, i, j, ...) { S(X, ...) }
   } else {
-    if(!is.factor(pp$marks))
+    ma <- marks(pp)
+    if(!is.factor(ma))
       stop("the marks must be a factor")
-    um <- levels(pp$marks)
+    um <- levels(ma)
     nm <- length(um)
     if(indices == 1)
       Tij <- function(X, i, j, ...) { Si(X, i, ...) }

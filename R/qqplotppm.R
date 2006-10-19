@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.17 $   $Date: 2006/06/29 07:59:12 $
+#  $Revision: 1.19 $   $Date: 2006/10/09 03:28:38 $
 #
 
 qqplot.ppm <-
@@ -59,7 +59,7 @@ qqplot.ppm <-
   if(!simulate.from.fit) {
      # 'expr' will be evaluated 'nsim' times
     if(!is.expression(expr))
-      stop("Argument \'expr\' should be an expression")
+      stop(paste("Argument", sQuote("expr"), "should be an expression"))
   } else{
     # We will simulate from the fitted model 'nsim' times
     # and refit the model to these simulations
@@ -184,7 +184,7 @@ qqplot.ppm <-
                           expr=if(simulate.from.fit) NULL else deparse(expr),
                           simulate.from.fit=simulate.from.fit)
          },
-         stop("Unrecognised option for \"style\"")
+         stop(paste("Unrecognised option for", sQuote("style")))
        )
 
   # Throw out baggage if not wanted         
@@ -231,7 +231,7 @@ plot.qqppm <- function(x, ..., limits=TRUE, monochrome=FALSE,
 print.qqppm <- function(x, ...) {
   stopifnot(inherits(x, "qqppm"))
   cat(paste("Q-Q plot of point process residuals ",
-            "of type \`", x$rtype, "\'\n",
+            "of type", sQuote(x$rtype), "\n",
             "based on ", x$nsim, " simulations\n",
             sep=""))
   if(x$simulate.from.fit) {

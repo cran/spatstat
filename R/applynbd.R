@@ -1,6 +1,6 @@
 # 	applynbd.R
 #
-#     $Revision: 1.7 $     $Date: 2005/08/10 07:49:48 $
+#     $Revision: 1.10 $     $Date: 2006/10/10 04:22:48 $
 #
 #  applynbd()
 # For each point, identify either
@@ -18,9 +18,12 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
 
      nopt <- (!missing(N)) + (!missing(R)) + (!missing(criterion))
      if(nopt > 1)
-       stop("exactly one of the arguments \"N\", \"R\", \"criterion\" must be given")
+       stop(paste("exactly one of the arguments",
+                  paste(sQuote(c("N", "R", "criterion")), collapse=", "),
+                  "must be given"))
      else if(nopt == 0)
-       stop("must specify one of the arguments \"N\", \"R\" or \"criterion\"")
+       stop(paste("must specify one of the arguments",
+                  sQuote("N"), ",", sQuote("R"), "or", sQuote("criterion")))
      
      X <- as.ppp(X)
      npts <- X$n
@@ -80,7 +83,7 @@ markstat <- function(X, fun, N, R, ...) {
   if(missing(R) && missing(N))
     stop("either R or N should be given")
   statfun <- function(Y, current, dists, dranks, func, ...)
-    { func(Y$marks, ...) }
+    { func(marks(Y), ...) }
   if(!missing(R))
     applynbd(X, statfun, R=R, func=fun, ...)
   else

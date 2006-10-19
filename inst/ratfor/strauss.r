@@ -1,4 +1,4 @@
-# $Id: strauss.r,v 1.3 2005/03/11 21:05:17 rolf Exp $
+# $Id: strauss.r,v 1.2 2006/10/19 10:22:21 adrian Exp adrian $
 subroutine strauss(u,v,ix,x,y,n,par,period,cifval)
 #
 # Conditional intensity function for a Strauss process.

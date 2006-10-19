@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.6 $   $Date: 2006/06/21 03:33:06 $
+#    $Revision: 1.9 $   $Date: 2006/10/18 05:13:30 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -64,21 +64,25 @@ print.summary.im <- function(x, ...) {
   cat(paste(x$type, "-valued pixel image\n", sep=""))
   di <- x$dim
   win <- x$window
-  cat(paste(di[1], "x", di[2], "pixel array\n"))
+  cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
   cat("enclosing rectangle: ")
   cat(paste("[",
             paste(win$xrange, collapse=", "),
             "] x [",
             paste(win$yrange, collapse=", "),
-            "]\n"))
-  cat(paste("dimensions of each pixel:", x$xstep, "x", x$ystep, "\n"))
+            "] ",
+            win$units[2], "\n", sep=""))
+  cat(paste("dimensions of each pixel:",
+            signif(x$xstep, 3), "x", signif(x$ystep, 3),
+            win$units[2], "\n"))
   if(x$fullgrid) {
     cat("Image is defined on the full rectangular grid\n")
-    cat(paste("Frame area = ", win$area, "\n"))
+    whatpart <- "Frame"
   } else {
     cat("Image is defined on a subset of the rectangular grid\n")
-    cat(paste("Subset area = ", win$area, "\n"))
+    whatpart <- "Subset"
   }
+  cat(paste(whatpart, "area = ", win$area, "square", win$units[2], "\n"))
   cat(paste("Pixel values ",
             if(x$fullgrid) "" else "(inside window)",
             ":\n", sep=""))
@@ -116,12 +120,13 @@ print.im <- function(x, ...) {
     print(levels(x))
   }
   di <- x$dim
-  cat(paste(di[1], "x", di[2], "pixel array\n"))
+  cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
   cat("enclosing rectangle: ")
   cat(paste("[",
             paste(x$xrange, collapse=", "),
             "] x [",
             paste(x$yrange, collapse=", "),
-            "]\n"))
+            "] ",
+            units(x)[2], "\n", sep=""))
   return(invisible(NULL))
 }
