@@ -1,5 +1,6 @@
 \name{diagnose.ppm}
 \alias{diagnose.ppm}
+\alias{plot.diagppm}
 \title{
   Diagnostic Plots for Fitted Point Process Model
 }
@@ -7,21 +8,16 @@
   Given a point process model fitted to a point pattern,
   produce diagnostic plots based on residuals.
 }
-\synopsis{
+\usage{
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
                rbord=reach(object), cumulative=TRUE,
                plot.it=TRUE, rv = NULL, compute.sd=TRUE,
                compute.cts=TRUE, typename, check=TRUE, repair=TRUE,
                oldstyle=FALSE)
-}
-\usage{
-  diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
-               rbord=reach(object), cumulative=TRUE,
-               plot.it=TRUE,
-               plot.neg="image", plot.smooth="imagecontour", plot.sd,
-               rv = NULL, plot.sd, spacing=0.1,
-               srange=NULL, monochrome=FALSE, check=TRUE, repair=TRUE,
-               oldstyle=FALSE)
+  \method{plot}{diagppm}(x, \dots, which, 
+               plot.neg="image", plot.smooth="imagecontour", 
+               plot.sd=TRUE, spacing=0.1,
+               srange=NULL, monochrome=FALSE, main=NULL)
 }
 \arguments{
   \item{object}{
@@ -48,11 +44,6 @@
   }
   \item{sigma}{
     Bandwidth for kernel smoother in \code{"smooth"} option.
-  }
-  \item{\dots}{
-    Extra arguments, controlling either the resolution of the smoothed image
-    (passed to \code{\link{density.ppp}}) or the appearance of the plots
-    (passed to \code{plot.default}).
   }
   \item{rbord}{
     Width of border to avoid edge effects.
@@ -81,9 +72,9 @@
     or \code{"imagecontour"}
     indicating how the smoothed residual field should be plotted.
   }
-  \item{plot.sd}{
-    Logical value indicating whether 
-    error bounds should be added to the \code{"x"} and \code{"y"}
+  \item{compute.sd,plot.sd}{
+    Logical values indicating whether 
+    error bounds should be computed and added to the \code{"x"} and \code{"y"}
     plots. The default is \code{TRUE} for Poisson models and
     \code{FALSE} for non-Poisson models. See Details.
   }
@@ -126,6 +117,19 @@
     (\code{oldstyle=TRUE}),
     or using the correct asymptotic formula (\code{oldstyle=FALSE}).
   }
+  \item{x}{The value returned from a previous call to 
+  \code{diagnose.ppm}. An object of class \code{"diagppm"}.
+  }
+  \item{typename}{String to be used as the name of the residuals.}
+  \item{main}{Main title for the plot.}
+  \item{\dots}{
+    Extra arguments, controlling either the resolution of the smoothed image
+    (passed from \code{diagnose.ppm} to \code{\link{density.ppp}}) 
+    or the appearance of the plots
+    (passed from \code{diagnose.ppm} to \code{plot.diagppm} and from 
+    \code{plot.diagppm} to \code{\link{plot.default}}).
+  }
+  \item{compute.cts}{Advanced use only.}
 }
 \value{
   An object of class \code{"diagppm"} which contains

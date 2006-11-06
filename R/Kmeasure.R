@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.21 $    $Date: 2006/10/18 05:48:17 $
+#           $Revision: 1.22 $    $Date: 2006/10/24 03:02:02 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -30,7 +30,7 @@ pixellate <- function(x, ..., weights=NULL)
     pixels <- nearest.raster.point(x$x, x$y, w)
     nr <- w$dim[1]
     nc <- w$dim[2]
-    if(missing(weights)) {
+    if(is.null(weights)) {
     ta <- table(row = factor(pixels$row, levels = 1:nr), col = factor(pixels$col,
         levels = 1:nc))
     } else {
@@ -215,7 +215,7 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
   density.ppp(x, sigma, ..., edge=edge)
 }
 
-density.ppp <- function(x, sigma, ..., edge=TRUE, varcov=NULL) {
+density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
   verifyclass(x, "ppp")
   sigma.given <- !missing(sigma) && !is.null(sigma)
   varcov.given <- !is.null(varcov)
@@ -244,11 +244,11 @@ density.ppp <- function(x, sigma, ..., edge=TRUE, varcov=NULL) {
                       sQuote("sigma"), "and", sQuote("varcov")))
          })
       
-  smo <- second.moment.calc(x, sigma, what="smooth", ..., varcov=varcov)
+  smo <- second.moment.calc(x, sigma, what="smooth", ..., weights=weights, varcov=varcov)
   smo$v <- smo$v/(smo$xstep * smo$ystep)
   raw <- smo
   if(edge) {
-    edg <- second.moment.calc(x, sigma, what="edge", ..., varcov=varcov)
+    edg <- second.moment.calc(x, sigma, what="edge", ..., weights=weights, varcov=varcov)
     smo <- eval.im(smo/edg)
   }
   result <- smo[x$window, drop=FALSE]

@@ -5,28 +5,17 @@
   Creates an object of class \code{"ppp"} representing 
   a point pattern dataset in the two-dimensional plane.
 }
-\synopsis{
-  ppp(x,y, \dots, window, marks)
-}
 \usage{
-  ppp(x,y, xrange, yrange, marks)
-  ppp(x,y, window, marks)
-  ppp(x,y, poly, marks)
-  ppp(x,y, mask, marks)
-  ppp(x,y, \dots, marks)
+  ppp(x,y, \dots, window, marks)
 }
 \arguments{
   \item{x}{Vector of \eqn{x} coordinates of data points}
   \item{y}{Vector of \eqn{y} coordinates of data points}
-  \item{xrange}{\eqn{x} coordinate limits of enclosing box}
-  \item{yrange}{\eqn{y} coordinate limits of enclosing box}
-  \item{marks}{(optional) vector of mark values}
-  \item{poly}{vertices of polygonal boundary of window}
-  \item{mask}{logical matrix giving binary image of window}
   \item{window}{window of observation,
     an object of class \code{"owin"}}
   \item{\dots}{arguments passed to \code{\link{owin}} to create the
-    window}
+    window, if \code{window} is missing}
+  \item{marks}{(optional) vector of mark values}
 }
 \value{
   An object of class \code{"ppp"} 

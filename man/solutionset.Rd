@@ -7,14 +7,11 @@
   find all pixels where the expression is true,
   and assemble these pixels into a window.
 }
-\synopsis{
+\usage{
   solutionset(\dots)
 }
-\usage{
-  solutionset(expr)
-}
 \arguments{
-  \item{expr}{An expression in the R language, involving one or more
+  \item{\dots}{An expression in the \R language, involving one or more
     pixel images.}
 }
 \details{

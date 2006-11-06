@@ -4,15 +4,12 @@
 \description{
   Prints a very brief description of a line segment pattern dataset.
 }
-\synopsis{
-  \method{print}{psp}(x, \dots)
-}
 \usage{
- \method{print}{psp}(x)
- x
+  \method{print}{psp}(x, \dots)
 }
 \arguments{
   \item{x}{Line segment pattern (object of class \code{"psp"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A very brief description of the line segment pattern \code{x} is printed.

@@ -4,15 +4,12 @@
 \description{
   Prints a very brief description of a window object.
 }
-\synopsis{
-  \method{print}{owin}(x, \dots)
-}
 \usage{
- \method{print}{owin}(x)
- x
+  \method{print}{owin}(x, \dots)
 }
 \arguments{
   \item{x}{Window (object of class \code{"owin"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A very brief description of the window \code{x} is printed.

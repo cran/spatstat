@@ -7,12 +7,9 @@
   Given a point process model fitted to a point pattern,
   compute residuals.
 }
-\synopsis{
+\usage{
   \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE,
                 fittedvalues=fitted.ppm(object, check=check))
-}
-\usage{
-  \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE)
 }
 \arguments{
   \item{object}{
@@ -35,6 +32,12 @@
     the environment where it was originally computed, set
     \code{check=TRUE}. 
   }
+  \item{fittedvalues}{
+    Vector of fitted values for the conditional intensity at 
+    	the quadrature points,
+    from which the residuals will be computed. 
+    For expert use only.
+   }
 }
 \value{
   A vector containing the (discretised) residuals.

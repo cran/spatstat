@@ -4,14 +4,12 @@
 \description{
   Prints a useful summary of a line segment pattern dataset.
 }
-\synopsis{
-  \method{summary}{psp}(object, \dots)
-}
 \usage{
- \method{summary}{psp}(object)
+  \method{summary}{psp}(object, \dots)
 }
 \arguments{
   \item{object}{Line segment pattern (object of class \code{"psp"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A useful summary of the line segment pattern \code{object} is printed.

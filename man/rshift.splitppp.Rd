@@ -4,13 +4,8 @@
 \description{
   Randomly shifts each point pattern in a list of point patterns.
 }
-\synopsis{
-   \method{rshift}{splitppp}(X, \dots, which=seq(X))
-}
 \usage{
-   \method{rshift}{splitppp}(X, \dots, radius, width, height, edge="torus", clip,
-                        which)
-                        
+   \method{rshift}{splitppp}(X, \dots, which=seq(X))
 }
 \arguments{
   \item{X}{
@@ -18,24 +13,14 @@
     Basically a list of point patterns.
   }
   \item{\dots}{
-    Ignored.
-  }
-  \item{radius,width,height}{
-    Optional parameters controlling the generation of the
-    random shift vector. See Details.
-  }
-  \item{edge}{
-    String indicating how to deal with edges of the patterns.
-    Options are \code{"torus"}, \code{"erode"} and \code{"none"}.
-    See Details.
+    Parameters controlling the generation of the
+    random shift vector and the handling of edge effects.
+    See \code{\link{rshift.ppp}}.
   }
   \item{which}{
     Optional. Identifies which patterns will be shifted,
     while other patterns are not shifted.
     Any valid subset index for \code{X}.
-  }
-  \item{clip}{
-    Optional. Window to which the final point patterns should be clipped.
   }
 }
 \value{

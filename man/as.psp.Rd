@@ -11,17 +11,13 @@
   (an object of class \code{"psp"})
   for use by the \pkg{spatstat} package.
 }
-\synopsis{
-  as.psp(x, \dots, from=NULL, to=NULL)
-  as.psp.psp(x, \dots, fatal=TRUE)
-  as.psp.data.frame(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-  as.psp.matrix(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-  as.psp.owin(x, \dots, fatal=TRUE)
-  as.psp.default(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-}
 \usage{
-  as.psp(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-  as.psp(\dots, window=NULL, marks=NULL, from=NULL, to=NULL)
+  as.psp(x, \dots, from=NULL, to=NULL)
+  \method{as.psp}{psp}(x, \dots, fatal=TRUE)
+  \method{as.psp}{data.frame}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
+  \method{as.psp}{matrix}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
+  \method{as.psp}{owin}(x, \dots, fatal=TRUE)
+  \method{as.psp}{default}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
 }
 \arguments{
   \item{x}{Data which will be converted into a line segment pattern}

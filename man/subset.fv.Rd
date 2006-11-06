@@ -5,11 +5,8 @@
 \description{
   Extract a subset of an object of class \code{"fv"}.
 }
-\synopsis{
-  \method{[}{fv}(x, i, j, \dots, drop=FALSE)
-}
 \usage{
-  \method{[}{fv}(x, i, j)
+  \method{[}{fv}(x, i, j, \dots, drop=FALSE)
 }
 \arguments{
   \item{x}{
@@ -26,6 +23,7 @@
     any appropriate subset index for the columns of the data frame.
     Selects some of the functions present in \code{x}.
   }
+  \item{drop, \dots}{Ignored.}
 } 
 \value{
   A function value object (of class \code{"fv"}).

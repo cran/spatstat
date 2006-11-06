@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.36 $	$Date: 2006/10/10 07:09:37 $
+#	$Revision: 1.38 $	$Date: 2006/11/06 08:18:10 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -306,6 +306,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     else {
       # make an image of the right shape
       imago <- as.im(masque)
+      imago <- eval.im(as.double(imago))
       if(!marked) {
         # single image
         out <- imago

@@ -126,7 +126,6 @@
 \alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
-\alias{plot.diagppm}
 \alias{plot.minconfit}
 \alias{plot.pppmatching}
 \alias{plot.profilepl}
@@ -341,11 +340,11 @@ meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 	 rbord, use.gam, famille,
-         forcefit, callstring, precomputed, savecomputed, preponly)
+         forcefit, allcovar, callstring, precomputed, savecomputed, preponly)
 mpl.get.covariates(covariates, locations, type)
-mpl.prepare(Q, X, P, trend, interaction, covariates,
+mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
-            callstring, \dots, precomputed, savecomputed)
+            callstring, \dots, allcovar, precomputed, savecomputed)
 MultiPair.checkmatrix(mat, n, name)
 nearest.pixel(x, y, im)
 no.trend.ppm(x)
@@ -358,10 +357,6 @@ param.quad(Q)
 pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
-plot.diagppm(x, \dots, which, plot.neg="image",
-                         plot.smooth="imagecontour",
-                         plot.sd=TRUE, spacing=0.1,
-                         srange=NULL, monochrome=FALSE, main=NULL)
 plot.minconfit(x, \dots)
 plot.pppmatching(x, addmatch = NULL, main = NULL, \dots)
 plot.profilepl(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)

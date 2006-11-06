@@ -5,7 +5,7 @@
   Plot a two-dimensional window of observation for a spatial point pattern
 }
 \usage{
- \method{plot}{owin}(x, main, add=FALSE, \dots, box=TRUE, edge=0.04)
+ \method{plot}{owin}(x, main, add=FALSE, \dots, box, edge=0.04)
 }
 \arguments{
   \item{x}{
@@ -52,12 +52,24 @@
   colours) may be passed directly via the \code{...} arguments,
   or indirectly reset using 
   \code{\link{spatstat.options}}.
-  The parameter \code{par.binary} of \code{\link{spatstat.options}}
-  controls the display when \code{x} is of type \code{"mask"}.
+
+  When \code{x} is of type \code{"rectangle"} or \code{"polygonal"},
+  it is plotted by the \R function \code{\link{polygon}}. To control the
+  appearance (colour, fill density, line density etc) of the polygon
+  plot, determine the required argument of \code{\link{polygon}}
+  and pass it through \code{...}
+
+  When \code{x} is of type \code{"mask"}, it is plotted by
+  \code{\link{image.default}}. The appearance of the image plot
+  can be controlled by passing arguments to \code{\link{image.default}}
+  through \code{...}. The default appearance can also be changed
+  by setting the parameter \code{par.binary} of \code{\link{spatstat.options}}.
 }
 \seealso{
   \code{\link{owin.object}},
   \code{\link{plot.ppp}},
+  \code{\link{polygon}},
+  \code{\link{image.default}},
   \code{\link{spatstat.options}}
 }
 \examples{

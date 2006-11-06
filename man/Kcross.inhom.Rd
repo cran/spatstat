@@ -10,12 +10,10 @@
   within a given distance of a point of type \eqn{i},
   adjusted for spatially varying intensity.
 }
-\synopsis{
-Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ, \dots, lambdaIJ=NULL)
-}
 \usage{
-Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ,
-   r, breaks, correction, \dots, lambdaIJ=NULL)
+Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ, \dots,  r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") ,
+lambdaIJ=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 

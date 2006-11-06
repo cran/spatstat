@@ -5,14 +5,10 @@
 Estimates the reduced second moment function \eqn{K(r)} 
 from a point pattern in a window of arbitrary shape.
 }
-\synopsis{
+\usage{
   Kest(X, \dots, r=NULL, breaks=NULL, 
      correction=c("border", "isotropic", "Ripley", "translate"),
     nlarge=3000)
-}
-\usage{
-  Kest(X, \dots, r, correction=c("border", "isotropic", "Ripley", "translate"),
-     nlarge=3000)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -24,6 +20,10 @@ from a point pattern in a window of arbitrary shape.
   \item{r}{
     Optional. Vector of values for the argument \eqn{r} at which \eqn{K(r)} 
     should be evaluated. There is a sensible default.
+  }
+  \item{breaks}{
+    Optional. An alternative to the argument \code{r}.
+    Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{correction}{
     Optional. A character vector containing any selection of the

@@ -4,29 +4,15 @@
 \description{
   Randomly shifts the points of a point pattern.
 }
-\synopsis{
-   \method{rshift}{ppp}(X, \dots, which=NULL, group)
-}
 \usage{
-   \method{rshift}{ppp}(X, \dots, radius, width, height, edge="torus", clip,
-                        group, which)
-                        
+   \method{rshift}{ppp}(X, \dots, which=NULL, group)
 }
 \arguments{
   \item{X}{Point pattern to be subjected to a random shift.
     An object of class \code{"ppp"}
   }
   \item{\dots}{
-    Ignored.
-  }
-  \item{radius,width,height}{
-    Optional parameters controlling the generation of the
-    random shift vector. See Details.
-  }
-  \item{edge}{
-    String indicating how to deal with edges of the pattern.
-    Options are \code{"torus"}, \code{"erode"} and \code{"none"}.
-    See Details.
+    Arguments that determine the random shift. See Details.
   }
   \item{group}{
     Optional. Factor specifying a grouping of the points of \code{X},
@@ -40,9 +26,6 @@
   \item{which}{
     Optional. Identifies which groups of the pattern will be shifted,
     while other groups are not shifted. A vector of levels of \code{group}.
-  }
-  \item{clip}{
-    Optional. Window to which the final point pattern should be clipped.
   }
 }
 \value{
@@ -91,6 +74,21 @@
   The displacement vector, i.e. the vector
   by which the data points are shifted,
   is generated at random.
+  Parameters that control the randomisation
+  and the handling of edge effects are passed through
+  the \code{\dots} argument. They are
+  \describe{
+    \item{radius,width,height}{
+      Parameters of the random shift vector.
+    }
+  \item{edge}{
+    String indicating how to deal with edges of the pattern.
+    Options are \code{"torus"}, \code{"erode"} and \code{"none"}.
+  }
+  \item{clip}{
+    Optional. Window to which the final point pattern should be clipped.
+  }
+  }
   If the window is a rectangle, the \emph{default} behaviour is 
   to generate a displacement vector at random with equal probability
   for all possible displacements. This means that the \eqn{x} and

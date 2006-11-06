@@ -10,13 +10,8 @@
   points in subset \code{I}
   and those in subset \eqn{J}.
 }
-\synopsis{
-  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL)
-}
 \usage{
-Jmulti(X, I, J)
-Jmulti(X, I, J, eps, r)
-Jmulti(X, I, J, eps, breaks)
+  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 

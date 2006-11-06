@@ -9,13 +9,8 @@
   summarising the interpoint dependence between
   points of type \eqn{i} and of type \eqn{j}.
 }
-\synopsis{
-Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL)
-}
 \usage{
-Jcross(X, i=1, j=2)
-Jcross(X, i=1, j=2, eps, r)
-Jcross(X, i=1, j=2, eps, breaks)
+Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -34,7 +29,7 @@ Jcross(X, i=1, j=2, eps, breaks)
     The resolution of the discrete approximation to Euclidean
     distance (see below). There is a sensible default.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the function
     \eqn{J_{ij}(r)}{Jij(r)} should be evaluated.
     There is a sensible default.

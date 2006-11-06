@@ -4,15 +4,12 @@
 \description{
   Prints a very brief description of a pixel image object.
 }
-\synopsis{
-  \method{print}{im}(x, \dots)
-}
 \usage{
- \method{print}{im}(x)
- x
+  \method{print}{im}(x, \dots)
 }
 \arguments{
   \item{x}{Pixel image (object of class \code{"im"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A very brief description of the pixel image \code{x} is printed.

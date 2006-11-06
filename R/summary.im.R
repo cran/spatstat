@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.9 $   $Date: 2006/10/18 05:13:30 $
+#    $Revision: 1.10 $   $Date: 2006/11/03 09:55:42 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -42,6 +42,14 @@ summary.im <- function(object, ...) {
          factor={
            y$levels <- lev
            y$table <- table(v, dnn="")
+         },
+         complex={
+           y$integral <- sum(v) * pixelarea
+           y$mean <- mean(v)
+           rr <- range(Re(v))
+           y$Re <- list(range=rr, min=rr[1], max=rr[2])
+           ri <- range(Im(v))
+           y$Im <- list(range=ri, min=ri[1], max=ri[2])
          },
          {
            # another unknown type
@@ -103,6 +111,21 @@ print.summary.im <- function(x, ...) {
          },
          factor={
            print(x$table)
+         },
+         complex={
+           cat(paste(
+                     "\trange: Real [",
+                     paste(x$Re$range, collapse=","),
+                     "], Imaginary [",
+                     paste(x$Im$range, collapse=","),
+                     "]\n",
+                     "\tintegral = ",
+                     x$integral,
+                     "\n",
+                     "\tmean = ",
+                     x$mean,
+                     "\n",
+                     sep=""))
          },
          {
            print(x$summary)

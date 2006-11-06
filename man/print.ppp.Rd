@@ -4,15 +4,12 @@
 \description{
   Prints a very brief description of a point pattern dataset.
 }
-\synopsis{
-  \method{print}{ppp}(x, \dots)
-}
 \usage{
- \method{print}{ppp}(x)
- x
+  \method{print}{ppp}(x, \dots)
 }
 \arguments{
   \item{x}{Point pattern (object of class \code{"ppp"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A very brief description of the point pattern \code{x} is printed.

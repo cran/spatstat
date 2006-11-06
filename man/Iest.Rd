@@ -4,14 +4,8 @@
 \description{
   Estimates the summary function \eqn{I(r)} for a multitype point pattern.
 }
-\synopsis{
-  Iest(X, eps=NULL, r=NULL, breaks=NULL)
-}
 \usage{
-  Iest(X)
-  Iest(X, eps)
-  Iest(X, eps, r)
-  Iest(X, eps, breaks)
+  Iest(X, eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -23,7 +17,8 @@
     the resolution of the discrete approximation to Euclidean distance
     (see below). There is a sensible default.
   }
-  \item{r}{vector of values for the argument \eqn{r} at which \eqn{I(r)} 
+  \item{r}{Optional. Numeric vector of values for the argument \eqn{r}
+  	at which \eqn{I(r)} 
     should be evaluated. There is a sensible default.
     First-time users are strongly advised not to specify this argument.
     See below for important conditions on \code{r}.

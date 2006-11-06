@@ -5,13 +5,9 @@
   Allows the user to create a point pattern by
   point-and-click in the display.
 }
-\synopsis{
-  clickppp(n=NULL, win=square(1), types=NULL, \dots, add=FALSE,
-main=NULL, hook=NULL)
-}
 \usage{
   clickppp(n=NULL, win=square(1), types=NULL, \dots, add=FALSE,
-main=NULL)
+main=NULL, hook=NULL)
 }
 \arguments{
   \item{n}{
@@ -35,6 +31,7 @@ main=NULL)
   \item{main}{
     Main heading for plot.
   }
+  \item{hook}{For internal use only. Do not use this argument.}
 }
 \value{
   A point pattern (object of class \code{"ppp"}) inside the

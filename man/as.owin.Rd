@@ -9,15 +9,12 @@
 Converts data specifying an observation window
 in any of several formats, into an object of class \code{"owin"}.
 }
-\synopsis{
+\usage{
  as.owin(W, \dots, fatal=TRUE)
  \method{as.owin}{owin}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
-}
-\usage{
- as.owin(W, \dots, fatal=TRUE)
 }
 \arguments{
   \item{W}{Data specifying an observation window, in any of several formats

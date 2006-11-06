@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.40 $	$Date: 2006/10/18 06:46:36 $
+#	$Revision: 5.46 $	$Date: 2006/10/31 07:41:19 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -36,6 +36,7 @@ function(Q,
          use.gam=FALSE,
          famille=NULL,
          forcefit=FALSE,
+         allcovar=FALSE,
          callstring="",
          precomputed=NULL,
          savecomputed=FALSE,
@@ -78,13 +79,13 @@ want.inter <- !is.null(interaction) && !is.null(interaction$family)
 the.version <- list(major=1,
                     minor=10,
                     release=0,
-                    date="$Date: 2006/10/18 06:46:36 $")
+                    date="$Date: 2006/10/31 07:41:19 $")
 
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
 
   
-if(!want.trend && !want.inter && !forcefit) {
+if(!want.trend && !want.inter && !forcefit && !allcovar) {
   # the model is the uniform Poisson process
   # The MPLE (= MLE) can be evaluated directly
   npts <- X$n
@@ -114,12 +115,23 @@ if(!want.trend && !want.inter && !forcefit) {
 #################  P r e p a r e    D a t a   ######################
         
 prep <- mpl.prepare(Q, X, P, trend, interaction,
-                    covariates, want.trend, want.inter, correction, rbord,
+                    covariates, 
+                    want.trend, want.inter, correction, rbord,
                     "quadrature points", callstring,
+                    allcovar=allcovar,
                     precomputed=precomputed, savecomputed=savecomputed)
 
   # back door
-if(preponly) return(prep)
+if(preponly) {
+  # exit now, returning internal information
+  prep$info <- list(want.trend=want.trend,
+                    want.inter=want.inter,
+                    correction=correction,
+                    rbord=rbord,
+                    interaction=interaction)
+  return(prep)
+}
+  
   
 fmla <- prep$fmla
 glmdata <- prep$glmdata
@@ -201,7 +213,8 @@ return(rslt)
 mpl.prepare <- function(Q, X, P, trend, interaction, covariates, 
                         want.trend, want.inter, correction, rbord,
                         Pname="quadrature points", callstring="",
-                        ..., 
+                        ...,
+                        allcovar=FALSE,
                         precomputed=NULL, savecomputed=FALSE) {
 
   if(missing(want.trend))
@@ -218,7 +231,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
 ################ C o m p u t e     d a t a  ####################
 
 # Extract covariate values
-  if(want.trend && !is.null(covariates)) {
+  if((allcovar || want.trend) && !is.null(covariates)) {
     if("covariates.df" %in% names.precomputed)
       covariates.df <- precomputed$covariates.df
     else 
@@ -276,15 +289,15 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     return("")
   }
   
-if(want.trend) {
+if(allcovar || want.trend) {
   trendvariables <- variablesinformula(trend)
   # Check for use of internal names in trend
   cc <- check.clashes(internal.names, trendvariables, "the model formula")
   if(cc != "") stop(cc)
   # Standard variables
-  if("x" %in% trendvariables)
+  if(allcovar || "x" %in% trendvariables)
     glmdata <- data.frame(glmdata, x=P$x)
-  if("y" %in% trendvariables)
+  if(allcovar || "y" %in% trendvariables)
     glmdata <- data.frame(glmdata, y=P$y)
   if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS))
     glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
@@ -296,7 +309,10 @@ if(want.trend) {
                         sQuote("covariates"))
     if(cc != "") stop(cc)
 #   Take only those covariates that are named in the trend formula
-    needed <- names(covariates.df) %in% trendvariables
+    if(!allcovar) 
+      needed <- names(covariates.df) %in% trendvariables
+    else
+      needed <- rep(TRUE, ncol(covariates.df))
     if(any(needed)) {
       covariates.needed <- covariates.df[, needed, drop=FALSE]
 #   Append to `glmdata'

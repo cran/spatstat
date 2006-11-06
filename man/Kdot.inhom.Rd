@@ -10,11 +10,10 @@
   within a given distance of a point of type \eqn{i},
   adjusted for spatially varying intensity.
 }
-\synopsis{
-Kdot.inhom(X, i=1, lambdaI, lambdadot, \dots, lambdaIdot=NULL)
-}
 \usage{
-Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=NULL)
+Kdot.inhom(X, i=1, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") ,
+         lambdaIdot=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -39,10 +38,13 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     or a numeric vector containing the intensity values
     at each point in \code{X}. 
   }
+  \item{\dots}{
+    Ignored.
+  }
   \item{r}{
       Optional. Numeric vector giving the values of the argument \eqn{r}
-      at which the dot K function
-      \eqn{K_{i\bullet}(r)}{Ki.(r)} should be evaluated.
+      at which the cross K function
+      \eqn{K_{ij}(r)}{Kij(r)} should be evaluated.
       There is a sensible default.
       First-time users are strongly advised not to specify this argument.
       See below for important conditions on \eqn{r}.
@@ -56,9 +58,6 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, r, breaks, correction, \dots, lambdaIdot=
     options \code{"border"}, \code{"bord.modif"},
     \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
-  }
-  \item{\dots}{
-    Ignored.
   }
   \item{lambdaIdot}{
     Optional. A matrix containing estimates of the

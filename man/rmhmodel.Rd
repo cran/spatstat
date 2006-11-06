@@ -7,13 +7,9 @@
   for use in simulating the model by the Metropolis-Hastings
   algorithm. 
 }
-\synopsis{
+\usage{
    rmhmodel(model, \dots)
    \method{rmhmodel}{default}(model, \dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
-}
-\usage{
-   rmhmodel(model)
-   \method{rmhmodel}{default}(\dots, cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
 }
 \arguments{
   \item{model}{An existing description of the model in some

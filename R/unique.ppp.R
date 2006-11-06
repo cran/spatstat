@@ -1,7 +1,7 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.6 $  $Date: 2006/10/10 04:22:48 $
+# $Revision: 1.7 $  $Date: 2006/10/24 03:00:39 $
 #
 
 unique.ppp <- function(x, ...) {

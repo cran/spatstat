@@ -4,9 +4,6 @@
 \description{
   Compute a kernel smoothed intensity function from a point pattern.
 }
-\synopsis{
-  \method{density}{ppp}(x, sigma, \dots, edge=TRUE, varcov=NULL)
-}
 \usage{
   \method{density}{ppp}(x, sigma, \dots, weights, edge=TRUE, varcov=NULL)
 }

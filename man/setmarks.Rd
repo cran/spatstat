@@ -6,9 +6,6 @@
   Create a marked point pattern from given point locations
   and given marks.
 }
-\synopsis{
-  setmarks(X, m)
-}
 \usage{
   setmarks(X, m)
   X \%mark\% m

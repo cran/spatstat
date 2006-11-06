@@ -1,13 +1,16 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.8 $	$Date: 2006/10/10 04:22:48 $
+#	$Revision: 1.10 $	$Date: 2006/10/24 03:02:02 $
 #
 #
 # ------------------------------------------------------------------------
 
 "Kcross.inhom" <- 
-function(X, i=1, j=2, lambdaI, lambdaJ, ..., lambdaIJ=NULL)
+function(X, i=1, j=2, lambdaI, lambdaJ, ...,
+         r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") ,
+         lambdaIJ=NULL)
 {
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
@@ -18,13 +21,17 @@ function(X, i=1, j=2, lambdaI, lambdaJ, ..., lambdaIJ=NULL)
         Iname <- paste("points with mark i =", i)
         Jname <- paste("points with mark j =", j)
 	result <- Kmulti.inhom(X, I, J, lambdaI, lambdaJ, ...,
+                               r=r,breaks=breaks,correction=correction,
                                lambdaIJ=lambdaIJ, Iname=Iname, Jname=Jname)
         attr(result, "ylab") <- substitute(Kcross.inhom(r), NULL)
         result
 }
 
 "Kdot.inhom" <- 
-function(X, i=1, lambdaI, lambdadot, ..., lambdaIdot=NULL)
+function(X, i=1, lambdaI, lambdadot, ...,
+         r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate") ,
+         lambdaIdot=NULL)
 {
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
@@ -36,6 +43,7 @@ function(X, i=1, lambdaI, lambdadot, ..., lambdaIdot=NULL)
         Jname <- paste("points")
 	
 	result <- Kmulti.inhom(X, I, J, lambdaI, lambdadot, ...,
+                               r=r,breaks=breaks,correction=correction,
                          lambdaIJ=lambdaIdot,
                          Iname=Iname, Jname=Jname)
         attr(result, "ylab") <- substitute(Kdot.inhom(r), NULL)

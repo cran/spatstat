@@ -6,12 +6,8 @@
   Extract a subset of a function array (an object of class
   \code{"fasp"}).
 }
-\synopsis{
-  \method{[}{fasp}(x, I, J, drop,\dots)
-}
 \usage{
-  \method{[}{fasp}(x,I)
-  \method{[}{fasp}(x,I,J)
+  \method{[}{fasp}(x, I, J, drop,\dots)
 }
 \arguments{
   \item{x}{
@@ -23,6 +19,7 @@
   \item{J}{
     any valid expression for a subset of the column indices of the array.
   }
+  \item{drop, \dots}{Ignored.}
 } 
 \value{
   A function array (of class \code{"fasp"}).

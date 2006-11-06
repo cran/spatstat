@@ -4,14 +4,12 @@
 \description{
   Prints a useful description of a window object.
 }
-\synopsis{
-  \method{summary}{owin}(object, \dots)
-}
 \usage{
- \method{summary}{owin}(object)
+  \method{summary}{owin}(object, \dots)
 }
 \arguments{
   \item{object}{Window (object of class \code{"owin"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   A useful description of the window \code{object} is printed.

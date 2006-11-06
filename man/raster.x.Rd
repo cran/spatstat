@@ -6,9 +6,6 @@
   Returns a matrix giving the \eqn{x} (or \eqn{y}) coordinates
   of each pixel in a binary pixel image.
 }
-\synopsis{
-  raster.x(w)
-}
 \usage{
  raster.x(w)
  raster.y(w)

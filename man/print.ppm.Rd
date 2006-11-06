@@ -4,12 +4,8 @@
 \description{
   Default \code{print} method for a fitted point process model.
 }
-\synopsis{
- \method{print}{ppm}(x,\dots)
-}
 \usage{
- \method{print}{ppm}(x)
- x
+ \method{print}{ppm}(x,\dots)
 }
 \arguments{
   \item{x}{
@@ -17,6 +13,7 @@
     the model-fittingg algorithm \code{\link{ppm}}.
     An object of class \code{"ppm"}.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   none.

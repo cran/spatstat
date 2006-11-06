@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.21 $   $Date: 2006/10/09 03:23:56 $
+#   $Revision: 1.23 $   $Date: 2006/10/31 07:45:35 $
 #
 #
 #   calculate pair correlation function
@@ -152,10 +152,6 @@ pcf.ppp <- function(X, ..., r=NULL,
 "pcf.fv" <-
 function(X, ..., method="c") {
   verifyclass(X, "fv")
-  
-  if(!exists("R.Version") ||
-     ((virg <- R.Version())$major == "1" && as.numeric(virg$minor) < 9))
-    require(modreg)
   
   callmatched <- function(fun, argue) {
     formalnames <- names(formals(fun))

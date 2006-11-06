@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.22 $     $Date: 2006/10/18 04:18:58 $
+#         $Revision: 1.23 $     $Date: 2006/10/24 03:02:02 $
 #
 #      The class "im" of raster images
 #
@@ -104,15 +104,15 @@ shift.im <- function(X, vec=c(0,0), ...) {
 }
 
 "[.im" <- subset.im <-
-function(x, i, j, drop=TRUE, ...) {
+function(x, i, drop=TRUE, ...) {
   lev <- x$lev
-  if(verifyclass(i, "ppp", fatal=FALSE) && missing(j)) {
+  if(verifyclass(i, "ppp", fatal=FALSE)) {
     # 'i' is a point pattern
     # Look up the greyscale values for the points of the pattern
     values <- lookup.im(x, i$x, i$y, naok=TRUE)
     if(drop) return(values[!is.na(values)]) else return(values)
   }
-  if(verifyclass(i, "owin", fatal=FALSE) && missing(j)) {
+  if(verifyclass(i, "owin", fatal=FALSE)) {
     # 'i' is a window
     # if drop = FALSE, just set values outside window to NA
     # if drop = TRUE, extract values for all pixels inside window
