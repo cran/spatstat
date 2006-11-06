@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.17 $ $Date: 2006/10/18 06:06:54 $
+#     $Revision: 1.18 $ $Date: 2006/10/31 07:45:13 $
 #
 #    Estimate the mark correlation function
 #
@@ -163,9 +163,6 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
            result <- numerator/denominator
          },
          loess = {
-           if(!exists("R.Version") ||
-              ((virg <- R.Version())$major == "1" && as.numeric(virg$minor) < 9))
-             require(modreg)
            # set up data frame
            df <- data.frame(d=d, ff=ff, wt=wt)
            # fit curve to numerator using loess

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.16 $    $Date: 2006/09/14 07:19:54 $
+#    $Revision: 1.17 $    $Date: 2006/10/24 03:00:39 $
 #
 #  (a) for matrices only:
 #

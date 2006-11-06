@@ -6,12 +6,8 @@
   Divides a point pattern into several sub-patterns,
   according to their marks, or according to any user-specified grouping.
 }
-\synopsis{
-  \method{split}{ppp}(x, f = marks(x), drop=FALSE, un=NULL, \dots)
-  \method{split}{ppp}(x, f = marks(x), drop=FALSE, un=missing(f), \dots) <- value
-}
 \usage{
-  \method{split}{ppp}(x, f = marks(x), drop=FALSE, un=missing(f), \dots)
+  \method{split}{ppp}(x, f = marks(x), drop=FALSE, un=NULL, \dots)
   \method{split}{ppp}(x, f = marks(x), drop=FALSE, un=missing(f), \dots) <- value
 }
 \arguments{

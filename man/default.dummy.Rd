@@ -5,11 +5,8 @@
   Generates a default pattern of dummy points
   for use in a quadrature scheme.
 }
-\synopsis{
- default.dummy(X, nd, random=FALSE, ntile=NULL, npix=NULL, \dots, verbose=FALSE)
-}
 \usage{
- default.dummy(X, nd, random=FALSE, \dots, verbose=FALSE)
+ default.dummy(X, nd, random=FALSE, ntile=NULL, npix=NULL, \dots, verbose=FALSE)
 }
 \arguments{
   \item{X}{
@@ -18,13 +15,22 @@
     or in a format recognised by \code{\link{as.ppp}()}
   }
   \item{nd}{
-    Integer, or integer vector of length 2, specifying an
+    Optional. Integer, or integer vector of length 2, specifying an
     \code{nd * nd} or \code{nd[1] * nd[2]}
     rectangular array of dummy points. 
   }
   \item{random}{
     Logical value. If \code{TRUE}, the dummy points are
     randomised.
+  }
+  \item{ntile}{
+  	Optional. Integer or pair of integers specifying 
+	the number of rows and columns of tiles used in the counting rule.
+  }
+  \item{npix}{
+  	Optional. Integer or pair of integers specifying the
+	number of rows and columns of pixels used in computing
+	approximate areas.
   }
   \item{\dots}{
     Ignored.

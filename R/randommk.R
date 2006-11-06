@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.21 $   $Date: 2006/10/10 04:22:48 $
+#   $Revision: 1.22 $   $Date: 2006/10/24 08:51:16 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -220,17 +220,39 @@
   
   if(Model == "I") {
     # Compute approximate marginal distribution of type
-    integratexy <- function(f, win, ...) {
-      imag <- as.im(f, win, ...)
-      summ <- summary(imag)
-      summ$integral
+    if(vector.arg)
+      ptypes <- f/sum(f)
+    else if(list.arg) {
+      integratexy <- function(f, win, ...) {
+        imag <- as.im(f, win, ...)
+        summ <- summary(imag)
+        summ$integral
+      }
+      fintegrals <- unlist(lapply(flist, integratexy, win=win, ...))
+      ptypes <- fintegrals/sum(fintegrals)
+    } else {
+       #single argument
+      if(is.constant(f))
+        ptypes <- rep(1/ntypes, ntypes)
+      else {
+        # f is a function (x,y,m)
+        # create a counterpart of f that works when m is a single value
+        g <- function(xx, yy, ..., m, f) {
+          mm <- rep(m, length(xx))
+          f(xx, yy, mm, ...)
+        }
+        # then convert to images and integrate
+        fintegrals <-
+          unlist(lapply(types,
+                        function(typ, ..., win, g) {
+                          fim <- as.im(g, W=win, ..., m=typ)
+                          summary(fim)$integral
+                        },
+                        win=win, g=g, f=f))
+        # normalise
+        ptypes <- fintegrals/sum(fintegrals)
+      }
     }
-    integratexyi <- function(i, f, win, ...) { integratexy(f, win, i, ...) }
-    
-    fintegrals <- if(vector.arg) f * area.owin(win) else
-       if(list.arg) unlist(lapply(flist, integratexy, win=win, ...)) else
-       unlist(lapply(1:ntypes, integratexyi, f=f, win=win, ...))
-    ptypes <- fintegrals/sum(fintegrals)
   }
 
   # Generate marks 
@@ -262,11 +284,16 @@
 
   for(i in 1:ntypes) {
     if(verbose) cat(paste("Type", i, "\n"))
-    if(single.arg && is.function(f))
-      # call f(x,y,m, ...)
-      Y <- rpoint(nn[i], f, fmax=maxes[i], win=win,
-                  types[i], ..., giveup=giveup, verbose=verbose)
-    else
+    if(single.arg && is.function(f)) {
+      # want to call f(x,y,m, ...)
+      # create a counterpart of f that works when m is a single value
+      g <- function(xx, yy, ..., m, fun) {
+        mm <- rep(m, length(xx))
+        fun(xx, yy, mm, ...)
+      }
+      Y <- rpoint(nn[i], g, fmax=maxes[i], win=win,
+                  ..., m=factortype[i], fun=f, giveup=giveup, verbose=verbose)
+    } else
       # call f(x,y, ...) or use other formats
       Y <- rpoint(nn[i], flist[[i]], fmax=maxes[i], win=win,
                   ..., giveup=giveup, verbose=verbose)

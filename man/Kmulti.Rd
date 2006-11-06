@@ -1,21 +1,16 @@
 \name{Kmulti}
 \alias{Kmulti}
 \title{
-  Marked K-Function
+Marked K-Function
 }
 \description{
-  For a marked point pattern, 
-  estimate the multitype \eqn{K} function
-  which counts the expected number of points of subset \eqn{J}
-  within a given distance from a typical point in subset \code{I}.
-}
-\synopsis{
-Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots)
+For a marked point pattern, 
+estimate the multitype \eqn{K} function
+which counts the expected number of points of subset \eqn{J}
+within a given distance from a typical point in subset \code{I}.
 }
 \usage{
-Kmulti(X, I, J, correction=c("border", "isotropic", "Ripley", "translate"))
-Kmulti(X, I, J, r, correction=c("border", "isotropic", "Ripley", "translate"))
-Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate"))
+Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -24,10 +19,11 @@ Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate
     It must be a marked point pattern.
     See under Details.
   }
-  \item{I}{Subset of points of \code{X} from which distances are
-    measured. 
+  \item{I}{Subset index specifying the points of \code{X}
+    from which distances are measured. 
   }
-  \item{J}{Subset of points in \code{X} to which distances are measured.
+  \item{J}{Subset index specifying the points in \code{X} to which
+    distances are measured. 
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the multitype \eqn{K} function
@@ -45,86 +41,87 @@ Kmulti(X, I, J, breaks, correction=c("border", "isotropic", "Ripley", "translate
     \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
-  An object of class \code{"fv"} (see \code{\link{fv.object}}).
-  
-  Essentially a data frame containing numeric columns 
-  \item{r}{the values of the argument \eqn{r} 
-    at which the function \eqn{K_{IJ}(r)}{KIJ(r)} has been  estimated
-  }
-  \item{theo}{the theoretical value of  \eqn{K_{IJ}(r)}{KIJ(r)}
-    for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
-  }
-  together with a column or columns named 
-  \code{"border"}, \code{"bord.modif"},
-  \code{"iso"} and/or \code{"trans"},
-  according to the selected edge corrections. These columns contain
-  estimates of the function \eqn{K_{IJ}(r)}{KIJ(r)}
-  obtained by the edge corrections named.
+An object of class \code{"fv"} (see \code{\link{fv.object}}).
+
+Essentially a data frame containing numeric columns 
+\item{r}{the values of the argument \eqn{r} 
+at which the function \eqn{K_{IJ}(r)}{KIJ(r)} has been  estimated
+}
+\item{theo}{the theoretical value of  \eqn{K_{IJ}(r)}{KIJ(r)}
+for a marked Poisson process, namely \eqn{\pi r^2}{pi * r^2}
+}
+together with a column or columns named 
+\code{"border"}, \code{"bord.modif"},
+\code{"iso"} and/or \code{"trans"},
+according to the selected edge corrections. These columns contain
+estimates of the function \eqn{K_{IJ}(r)}{KIJ(r)}
+obtained by the edge corrections named.
 }
 \details{
-  The function \code{Kmulti}
-  generalises \code{\link{Kest}} (for unmarked point
-  patterns) and \code{\link{Kdot}} and \code{\link{Kcross}} (for
-  multitype point patterns) to arbitrary marked point patterns.
+The function \code{Kmulti}
+generalises \code{\link{Kest}} (for unmarked point
+patterns) and \code{\link{Kdot}} and \code{\link{Kcross}} (for
+multitype point patterns) to arbitrary marked point patterns.
 
-  Suppose \eqn{X_I}{X[I]}, \eqn{X_J}{X[J]} are subsets, possibly
-  overlapping, of a marked point process.
-  The multitype \eqn{K} function 
-  is defined so that
-  \eqn{\lambda_J K_{IJ}(r)}{lambda[J] KIJ(r)} equals the expected number of
-  additional random points of \eqn{X_J}{X[J]} 
-  within a distance \eqn{r} of a
-  typical point of  \eqn{X_I}{X[I]}.
-  Here \eqn{\lambda_J}{lambda[J]}
-  is the intensity of \eqn{X_J}{X[J]} 
-  i.e. the expected number of points of \eqn{X_J}{X[J]} per unit area.
-  The function \eqn{K_{IJ}}{KIJ} is determined by the 
-  second order moment properties of \eqn{X}.
+Suppose \eqn{X_I}{X[I]}, \eqn{X_J}{X[J]} are subsets, possibly
+overlapping, of a marked point process.
+The multitype \eqn{K} function 
+is defined so that
+\eqn{\lambda_J K_{IJ}(r)}{lambda[J] KIJ(r)} equals the expected number of
+additional random points of \eqn{X_J}{X[J]} 
+within a distance \eqn{r} of a
+typical point of  \eqn{X_I}{X[I]}.
+Here \eqn{\lambda_J}{lambda[J]}
+is the intensity of \eqn{X_J}{X[J]} 
+i.e. the expected number of points of \eqn{X_J}{X[J]} per unit area.
+The function \eqn{K_{IJ}}{KIJ} is determined by the 
+second order moment properties of \eqn{X}.
 
-  The argument \code{X} must be a point pattern (object of class
-  \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
+The argument \code{X} must be a point pattern (object of class
+\code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
 
-  The arguments \code{I} and \code{J} specify two subsets of the
-  point pattern. They may be logical vectors of length equal to
-  \code{X$n}, or integer vectors with entries in the range 1 to
-  \code{X$n}, etc.
+The arguments \code{I} and \code{J} specify two subsets of the
+point pattern. They may be logical vectors of length equal to
+\code{X$n}, or integer vectors with entries in the range 1 to
+\code{X$n}, etc.
 
-  The argument \code{r} is the vector of values for the
-  distance \eqn{r} at which \eqn{K_{IJ}(r)}{KIJ(r)} should be evaluated. 
-  It is also used to determine the breakpoints
-  (in the sense of \code{\link{hist}})
-  for the computation of histograms of distances.
+The argument \code{r} is the vector of values for the
+distance \eqn{r} at which \eqn{K_{IJ}(r)}{KIJ(r)} should be evaluated. 
+It is also used to determine the breakpoints
+(in the sense of \code{\link{hist}})
+for the computation of histograms of distances.
 
-  First-time users would be strongly advised not to specify \code{r}.
-  However, if it is specified, \code{r} must satisfy \code{r[1] = 0}, 
-  and \code{max(r)} must be larger than the radius of the largest disc 
-  contained in the window. 
+First-time users would be strongly advised not to specify \code{r}.
+However, if it is specified, \code{r} must satisfy \code{r[1] = 0}, 
+and \code{max(r)} must be larger than the radius of the largest disc 
+contained in the window. 
 
-  This algorithm assumes that \code{X} can be treated
-  as a realisation of a stationary (spatially homogeneous) 
-  random spatial point process in the plane, observed through
-  a bounded window.
-  The window (which is specified in \code{X} as \code{X$window})
-  may have arbitrary shape.
+This algorithm assumes that \code{X} can be treated
+as a realisation of a stationary (spatially homogeneous) 
+random spatial point process in the plane, observed through
+a bounded window.
+The window (which is specified in \code{X} as \code{X$window})
+may have arbitrary shape.
 
-  Biases due to edge effects are
-  treated in the same manner as in \code{\link{Kest}}.
-  The edge corrections implemented here are
-  \describe{
-    \item{border}{the border method or
-      ``reduced sample'' estimator (see Ripley, 1988). This is
-      the least efficient (statistically) and the fastest to compute.
-      It can be computed for a window of arbitrary shape.
-    }
-    \item{isotropic/Ripley}{Ripley's isotropic correction
-      (see Ripley, 1988; Ohser, 1983).
-      This is currently implemented only for rectangular windows.
-    }
-    \item{translate}{Translation correction (Ohser, 1983).
-      Implemented for all window geometries.
-    }
+Biases due to edge effects are
+treated in the same manner as in \code{\link{Kest}}.
+The edge corrections implemented here are
+\describe{
+\item{border}{the border method or
+``reduced sample'' estimator (see Ripley, 1988). This is
+the least efficient (statistically) and the fastest to compute.
+It can be computed for a window of arbitrary shape.
+}
+\item{isotropic/Ripley}{Ripley's isotropic correction
+(see Ripley, 1988; Ohser, 1983).
+This is currently implemented only for rectangular windows.
+}
+\item{translate}{Translation correction (Ohser, 1983).
+Implemented for all window geometries.
+}
   }
 
   The pair correlation function \code{\link{pcf}} can also be applied to the

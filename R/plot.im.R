@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.28 $   $Date: 2006/10/09 03:44:27 $
+#  $Revision: 1.29 $   $Date: 2006/11/03 09:37:09 $
 #
 #  Plotting code for pixel images
 #
@@ -19,15 +19,22 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
   imagebreaks <- NULL
   ribbonvalues <- ribbonbreaks <- NULL
 
+  clamp <- function(x, v, tol=0.02 * diff(v)) {
+    ok <- (x >= v[1] - tol) & (x <= v[2] + tol)
+    x[ok]
+  }
+  
   sumry <- summary(x)
   switch(sumry$type,
          real    = {
            vrange <- sumry$range
            trivial <- (diff(vrange) <= .Machine$double.eps)
-           ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
-           ribbonrange <- vrange
-           ribbonticks <- pretty(ribbonvalues)
-           ribbonlabels <- paste(ribbonticks)
+           if(!trivial) {
+             ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
+             ribbonrange <- vrange
+             ribbonticks <- clamp(pretty(ribbonvalues), vrange)
+             ribbonlabels <- paste(ribbonticks)
+           }
          },
          integer = {
            values <- as.vector(x$v)
@@ -36,10 +43,12 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
            vrange <- range(uv)
            nvalues <- length(uv)
            trivial <- (nvalues < 2)
-           ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
-           ribbonrange <- vrange
-           ribbonticks <- pretty(ribbonvalues)
-           ribbonlabels <- paste(ribbonticks)
+           if(!trivial){
+             ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
+             ribbonrange <- vrange
+             ribbonticks <- clamp(pretty(ribbonvalues), vrange)
+             ribbonlabels <- paste(ribbonticks)
+           }
          },
          logical = {
            values <- as.integer(as.vector(x$v))

@@ -9,14 +9,8 @@ Estimates the nearest neighbour distance distribution
 function \eqn{G(r)} from a point pattern in a 
 window of arbitrary shape.
 }
-\synopsis{
-Gest(X, r=NULL, breaks=NULL, \dots)
-}
 \usage{
-Gest(X)
-Gest(X, r)
-Gest(X, breaks)
-nearest.neighbour(X)
+Gest(X, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -24,7 +18,7 @@ nearest.neighbour(X)
     An object of class \code{ppp}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which \eqn{G(r)} should be evaluated. There is a sensible default.
     First-time users are strongly advised not to specify this argument.
     See below for important conditions on \eqn{r}.
@@ -32,6 +26,7 @@ nearest.neighbour(X)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},

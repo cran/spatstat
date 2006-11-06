@@ -5,9 +5,6 @@
   Applies any affine transformation of the plane (linear transformation
   plus vector shift) to a line segment pattern. 
 }
-\synopsis{
- \method{affine}{psp}(X, \dots)
-}
 \usage{
  \method{affine}{psp}(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
 }

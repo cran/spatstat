@@ -4,12 +4,8 @@
 \description{
   \code{print} method for a quadrature scheme.
 }
-\synopsis{
- \method{print}{quad}(x,\dots)
-}
 \usage{
- \method{print}{quad}(x)
- x
+ \method{print}{quad}(x,\dots)
 }
 \arguments{
   \item{x}{
@@ -17,6 +13,7 @@
     \code{\link{quadscheme}}.
     An object of class \code{"quad"}.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   none.

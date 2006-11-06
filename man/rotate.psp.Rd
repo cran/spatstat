@@ -4,9 +4,6 @@
 \description{
   Rotates a line segment pattern
 }
-\synopsis{
- \method{rotate}{psp}(X, \dots)
-}
 \usage{
  \method{rotate}{psp}(X, angle=pi/2, \dots)
 }

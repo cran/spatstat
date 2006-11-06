@@ -5,14 +5,8 @@
   Estimates the summary function \eqn{J(r)} for a point pattern in a 
   window of arbitrary shape.
 }
-\synopsis{
-  Jest(X, eps=NULL, r=NULL, breaks=NULL)
-}
 \usage{
-  Jest(X)
-  Jest(X, eps)
-  Jest(X, eps, r)
-  Jest(X, eps, breaks)
+  Jest(X, eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 

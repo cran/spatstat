@@ -9,13 +9,8 @@
   from a point of type \eqn{i}
   to the nearest other point of any type.
 }
-\synopsis{
-Gdot(X, i=1, r=NULL, breaks=NULL, \dots)
-}
 \usage{
-Gdot(X, i=1)
-Gdot(X, i=1, r)
-Gdot(X, i=1, breaks)
+Gdot(X, i=1, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -28,7 +23,7 @@ Gdot(X, i=1, breaks)
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the distribution function
     \eqn{G_{i\bullet}(r)}{Gi.(r)} should be evaluated.
     There is a sensible default.
@@ -38,6 +33,7 @@ Gdot(X, i=1, breaks)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

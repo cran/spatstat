@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.7 $   $Date: 2006/10/18 04:15:47 $
+#    $Revision: 1.9 $   $Date: 2006/10/24 06:25:48 $
 #
 #    as.im()
 #
@@ -34,7 +34,7 @@ as.im <- function(X, W, ...) {
     return(out)
   }
 
-  if(is.numeric(x) && length(x) == 1) {
+  if((is.vector(x) || is.factor(x)) && length(x) == 1) {
     xvalue <- x
     x <- function(xx, yy, ...) { rep(xvalue, length(xx)) }
   }
@@ -50,26 +50,20 @@ as.im <- function(X, W, ...) {
     yy <- raster.y(w)
     lev <- NULL
     
-    if(!funnywindow) {
-      values <- f(xx, yy, ...)
-      if(is.factor(values)) {
-        lev <- levels(values)
-        values <- as.integer(values)
-      }
-      v <- matrix(values, nrow=nrow(m), ncol=ncol(m))
-    } else {
-      xx <- xx[m]
-      yy <- yy[m]
-      values <- f(xx, yy, ...)
-      if(is.factor(values)) {
-        lev <- levels(values)
-        values <- as.integer(values)
-      }
-      v <- matrix(, nrow=nrow(m), ncol=ncol(m))
-      v[m] <- values
-      v[!m] <- NA
+    if(!funnywindow) 
+      values <- f(as.vector(xx), as.vector(yy), ...)
+    else {
+      valuesinside <- f(as.vector(xx[m]), as.vector(yy[m]), ...)
+      inside <- as.vector(m)
+      values <- vector(mode=typeof(valuesinside), length=length(m))
+      values[inside] <- valuesinside
+      values[!inside] <- NA
     }
-    return(im(v, w$xcol, w$yrow, lev, units=units(w)))
+
+    if(is.factor(values)) 
+        lev <- levels(values)
+
+    return(im(values, w$xcol, w$yrow, lev, units=units(w)))
   }
 
   if(is.list(x) && checkfields(x, c("x","y","z"))) {

@@ -4,29 +4,16 @@
 \description{
   Randomly shifts the segments in a line segment pattern.
 }
-\synopsis{
-   \method{rshift}{psp}(X, \dots, group=NULL, which=NULL)
-}
 \usage{
-   \method{rshift}{psp}(X, \dots, radius, width, height, edge="erode", clip,
-                        group, which)
-                        
+   \method{rshift}{psp}(X, \dots, group=NULL, which=NULL)
 }
 \arguments{
   \item{X}{Line segment pattern to be subjected to a random shift.
     An object of class \code{"psp"}.
   }
   \item{\dots}{
-    Ignored.
-  }
-  \item{radius,width,height}{
-    Optional parameters controlling the generation of the
-    random shift vector. See Details.
-  }
-  \item{edge}{
-    String indicating how to deal with edges of the pattern.
-    Currently the only option is \code{"erode"}.
-    See Details.
+    Arguments controlling the randomisation and the handling of edge
+    effects. See \code{\link{rshift.ppp}}.
   }
   \item{group}{
     Optional. Factor specifying a grouping of the line segments of \code{X},
@@ -37,9 +24,6 @@
   \item{which}{
     Optional. Identifies which groups of the pattern will be shifted,
     while other groups are not shifted. A vector of levels of \code{group}.
-  }
-  \item{clip}{
-    Optional. Window to which the final line segment pattern should be clipped.
   }
 }
 \value{

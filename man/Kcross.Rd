@@ -9,14 +9,8 @@
   which counts the expected number of points of type \eqn{j}
   within a given distance of a point of type \eqn{i}.
 }
-\synopsis{
-Kcross(X, i=1, j=2, r=NULL, breaks=NULL, correction, \dots)
-}
 \usage{
-Kcross(X, i=1, j=2)
-Kcross(X, i=1, j=2, correction=c("border", "isotropic", "Ripley", "translate"))
-Kcross(X, i=1, j=2, r, correction)
-Kcross(X, i=1, j=2, breaks)
+Kcross(X, i=1, j=2, r=NULL, breaks=NULL, correction, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -47,6 +41,7 @@ Kcross(X, i=1, j=2, breaks)
     \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

@@ -6,17 +6,14 @@
   to a geometrical object,
   such as a point pattern or a window. 
 }
-\synopsis{
-  shift(X, \dots)
-}
 \usage{
- shift(X, vec=c(0,0))
+  shift(X, \dots)
 }
 \arguments{
   \item{X}{Any suitable dataset representing a two-dimensional
     object, such as a point pattern (object of class \code{"ppp"}),
     or a window (object of class \code{"owin"}).}
-  \item{vec}{Vector of length 2 representing a translation.}
+  \item{\dots}{Arguments determining the shift vector.}
 }
 \value{
   Another object of the same type, representing the
@@ -34,14 +31,6 @@
   \code{\link{shift.owin}},
   \code{\link{rotate}},
   \code{\link{affine}}
-}
-\examples{
-  data(cells)
-  X <- shift(cells, c(2,3))
-  \dontrun{
-  plot(X)
-  # no discernible difference except coordinates are different
-  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

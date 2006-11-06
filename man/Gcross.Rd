@@ -9,13 +9,8 @@
   from a point of type \eqn{i}
   to the nearest point of type \eqn{j}.
 }
-\synopsis{
-Gcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
-}
 \usage{
-Gcross(X, i=1, j=2)
-Gcross(X, i=1, j=2, r)
-Gcross(X, i=1, j=2, breaks)
+Gcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -30,7 +25,7 @@ Gcross(X, i=1, j=2, breaks)
   \item{j}{Number or character string identifying the type (mark value)
     of the points in \code{X} to which distances are measured.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the distribution function
     \eqn{G_{ij}(r)}{Gij(r)} should be evaluated.
     There is a sensible default.
@@ -39,6 +34,9 @@ Gcross(X, i=1, j=2, breaks)
   }
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
+  }
+  \item{\dots}{
+  	Ignored.
   }
 }
 \value{

@@ -5,12 +5,8 @@
 Creates an instance of a pairwise interaction point process model
 which can then be fitted to point pattern data.
 }
-\synopsis{
-  Pairwise(pot, name, par, parnames, printfun)
-}
 \usage{
-  Pairwise(pot, name)
-  Pairwise(pot, name, par, parnames)
+  Pairwise(pot, name, par, parnames, printfun)
 }
 \arguments{
   \item{pot}{An S language function giving the user-supplied
@@ -18,6 +14,7 @@ which can then be fitted to point pattern data.
   \item{name}{Character string.}
   \item{par}{List of numerical values for irregular parameters}
   \item{parnames}{Vector of names of irregular parameters}
+  \item{printfun}{Do not specify this argument: for internal use only.}
 }
 \value{
   An object of class \code{"interact"}

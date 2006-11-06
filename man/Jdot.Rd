@@ -9,13 +9,8 @@
   summarising the interpoint dependence between
   the type \eqn{i} points and the points of any type.
 }
-\synopsis{
-Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL)
-}
 \usage{
-Jdot(X, i=1)
-Jdot(X, i=1, eps, r)
-Jdot(X, i=1, eps, breaks)
+Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 

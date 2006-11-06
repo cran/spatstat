@@ -9,13 +9,8 @@
   from a typical point in subset \code{I}
   to the nearest point of subset \eqn{J}.
 }
-\synopsis{
-Gmulti(X, I, J, r=NULL, breaks=NULL, \dots)
-}
 \usage{
-Gmulti(X, I, J)
-Gmulti(X, I, J, r)
-Gmulti(X, I, J, breaks)
+Gmulti(X, I, J, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -29,7 +24,7 @@ Gmulti(X, I, J, breaks)
   }
   \item{J}{Subset of points in \code{X} to which distances are measured.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the distribution function
     \eqn{G_{IJ}(r)}{GIJ(r)} should be evaluated.
     There is a sensible default.
@@ -39,6 +34,7 @@ Gmulti(X, I, J, breaks)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

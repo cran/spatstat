@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.23 $ $Date: 2006/10/13 09:38:04 $
+#  $Revision: 1.25 $ $Date: 2006/10/24 03:02:02 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -365,30 +365,30 @@ distmap.psp <- function(X, ...) {
 # affine transformations
 ####################################################
 
-affine.psp <- function(X,  ...) {
+affine.psp <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "psp")
-  W <- affine.owin(X$window, ...)
+  W <- affine.owin(X$window, mat=mat, vec=vec)
   E <- X$ends
-  ends0 <- affinexy(list(x=E$x0,y=E$y0), ...)
-  ends1 <- affinexy(list(x=E$x1,y=E$y1), ...)
+  ends0 <- affinexy(list(x=E$x0,y=E$y0), mat=mat, vec=vec)
+  ends1 <- affinexy(list(x=E$x1,y=E$y1), mat=mat, vec=vec)
   psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
-shift.psp <- function(X, ...) {
+shift.psp <- function(X, vec=c(0,0), ...) {
   verifyclass(X, "psp")
-  W <- shift.owin(X$window, ...)
+  W <- shift.owin(X$window, vec=vec, ...)
   E <- X$ends
-  ends0 <- shiftxy(list(x=E$x0,y=E$y0), ...)
-  ends1 <- shiftxy(list(x=E$x1,y=E$y1), ...)
+  ends0 <- shiftxy(list(x=E$x0,y=E$y0), vec=vec, ...)
+  ends1 <- shiftxy(list(x=E$x1,y=E$y1), vec=vec, ...)
   psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
-rotate.psp <- function(X, ...) {
+rotate.psp <- function(X, angle=pi/2, ...) {
   verifyclass(X, "psp")
-  W <- rotate.owin(X$window, ...)
+  W <- rotate.owin(X$window, angle=angle, ...)
   E <- X$ends
-  ends0 <- rotxy(list(x=E$x0,y=E$y0), ...)
-  ends1 <- rotxy(list(x=E$x1,y=E$y1), ...)
+  ends0 <- rotxy(list(x=E$x0,y=E$y0), angle=angle, ...)
+  ends1 <- rotxy(list(x=E$x1,y=E$y1), angle=angle, ...)
   psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 

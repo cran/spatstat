@@ -9,14 +9,8 @@
   which counts the expected number of other points of the process
   within a given distance of a point of type \eqn{i}.
 }
-\synopsis{
-Kdot(X, i=1, r=NULL, breaks=NULL, correction, \dots)
-}
 \usage{
-Kdot(X, i=1)
-Kdot(X, i=1, correction=c("border", "isotropic", "Ripley", "translate"))
-Kdot(X, i=1, r, correction)
-Kdot(X, i=1, breaks)
+Kdot(X, i=1, r=NULL, breaks=NULL, correction, ...)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -44,6 +38,7 @@ Kdot(X, i=1, breaks)
     \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

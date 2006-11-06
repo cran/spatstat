@@ -19,6 +19,7 @@
     or in a format recognised by \code{\link{as.ppp}()}
   }
   \item{lambda}{
+    Optional.
     Values of the estimated intensity function.
     Either a vector giving the intensity values
     at the points of the pattern \code{X},

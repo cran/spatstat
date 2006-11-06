@@ -4,9 +4,6 @@
 \description{
   Applies a vector shift to a line segment pattern. 
 }
-\synopsis{
- \method{shift}{psp}(X, \dots)
-}
 \usage{
  \method{shift}{psp}(X, vec=c(0,0), \dots)
 }

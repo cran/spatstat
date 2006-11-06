@@ -6,13 +6,8 @@
   Estimates the empty space function \eqn{F(r)} from a point pattern in a 
   window of arbitrary shape.
 }
-\synopsis{
-Fest(X, eps, r=NULL, breaks=NULL)
-}
 \usage{
-Fest(X, eps)
-Fest(X, eps, r)
-Fest(X, eps, breaks)
+Fest(X, eps, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -20,11 +15,11 @@ Fest(X, eps, breaks)
     An object of class \code{ppp}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
   }
-  \item{eps}{A positive number.
+  \item{eps}{Optional. A positive number.
     The resolution of the discrete approximation to Euclidean
     distance (see below). There is a sensible default.
   }
-  \item{r}{numeric vector. The values of the argument \eqn{r}
+  \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which \eqn{F(r)} should be evaluated. There is a sensible default.
     First-time users are strongly advised not to specify this argument.
     See below for important conditions on \eqn{r}.
