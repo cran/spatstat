@@ -8,7 +8,7 @@
   of a marked point pattern.
 }
 \usage{
-markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
+markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
          correction=c("isotropic", "Ripley", "translate"),
          method="density", \dots)
 }
@@ -18,7 +18,8 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     \code{\link{as.ppp}}. 
   }
   \item{f}{Function \eqn{f} used in the definition of the
-    mark correlation function.
+    mark correlation function. There is a sensible default
+    that depends on the kind of marks in \code{X}.
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the mark correlation function 
@@ -104,13 +105,24 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
   \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
   It must be a marked point pattern.
 
-  The argument \code{f}
-  must be a function, accepting two arguments \code{m1}
+  The argument \code{f} determines the function to be applied to
+  pairs of marks. It has a sensible default, which depends on the
+  kind of marks in \code{X}. If the marks
+  are numeric values, then \code{f <- function(m1, m2) { m1 * m2}}
+  computes the product of two marks.
+  If the marks are a factor (i.e. if \code{X} is a multitype point
+  pattern) then \code{f <- function(m1, m2) { m1 == m2}} yields
+  the value 1 when the two marks are equal, and 0 when they are unequal.
+  These are the conventional definitions for numerical
+  marks and multitype points respectively.
+
+  Alternatively the argument \code{f} may be specified by the user.
+  It must be a function, accepting two arguments \code{m1}
   and \code{m2} which are vectors of equal length containing mark
   values (of the same type as the marks of \code{X}).
   It must return a vector of numeric
   values of the same length as \code{m1} and \code{m2}.
-  The values must be non-negative.
+  The values must be non-negative, and \code{NA} values are not permitted.
 
   The argument \code{r} is the vector of values for the
   distance \eqn{r} at which \eqn{\rho_f(r)}{rho_f(r)} is estimated.
@@ -204,7 +216,7 @@ markcorr(X, f = function(m1,m2) { m1 * m2 }, r=NULL,
     # Note: kernel="epanechnikov" comes from help(density)
 
     # (4) Same again with explicit control over bandwidth
-    M <- markcorr(amacrine, function(m1,m2) {m1==m2},
+    M <- markcorr(amacrine, 
                   correction="translate", method="density",
                   kernel="epanechnikov", bw=0.02)
     # see help(density) for correct interpretation of 'bw'

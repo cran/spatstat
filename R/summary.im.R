@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.10 $   $Date: 2006/11/03 09:55:42 $
+#    $Revision: 1.11 $   $Date: 2006/11/17 12:42:15 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -63,6 +63,8 @@ summary.im <- function(object, ...) {
 
   y$fullgrid <- (rescue.rectangle(win)$type == "rectangle")
 
+  y$units <- units(x)
+  
   class(y) <- "summary.im"
   return(y)
 }
@@ -70,6 +72,8 @@ summary.im <- function(object, ...) {
 print.summary.im <- function(x, ...) {
   verifyclass(x, "summary.im")
   cat(paste(x$type, "-valued pixel image\n", sep=""))
+  unitinfo <- summary(x$units)
+  pluralunits <- unitinfo$plural
   di <- x$dim
   win <- x$window
   cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
@@ -79,10 +83,12 @@ print.summary.im <- function(x, ...) {
             "] x [",
             paste(win$yrange, collapse=", "),
             "] ",
-            win$units[2], "\n", sep=""))
+            pluralunits, "\n", sep=""))
   cat(paste("dimensions of each pixel:",
             signif(x$xstep, 3), "x", signif(x$ystep, 3),
-            win$units[2], "\n"))
+            pluralunits, "\n"))
+  if(!is.null(explain <- unitinfo$explain))
+    cat(paste(explain, "\n"))
   if(x$fullgrid) {
     cat("Image is defined on the full rectangular grid\n")
     whatpart <- "Frame"
@@ -90,7 +96,7 @@ print.summary.im <- function(x, ...) {
     cat("Image is defined on a subset of the rectangular grid\n")
     whatpart <- "Subset"
   }
-  cat(paste(whatpart, "area = ", win$area, "square", win$units[2], "\n"))
+  cat(paste(whatpart, "area = ", win$area, "square", pluralunits, "\n"))
   cat(paste("Pixel values ",
             if(x$fullgrid) "" else "(inside window)",
             ":\n", sep=""))
@@ -142,6 +148,7 @@ print.im <- function(x, ...) {
     cat("factor levels:\n")
     print(levels(x))
   }
+  unitinfo <- summary(units(x))
   di <- x$dim
   cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
   cat("enclosing rectangle: ")
@@ -150,6 +157,8 @@ print.im <- function(x, ...) {
             "] x [",
             paste(x$yrange, collapse=", "),
             "] ",
-            units(x)[2], "\n", sep=""))
+            unitinfo$plural,
+            " ", unitinfo$explain,
+            "\n", sep=""))
   return(invisible(NULL))
 }

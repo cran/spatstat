@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.8 $	$Date: 2006/10/10 04:22:48 $
+#	$Revision: 1.11 $	$Date: 2006/11/20 04:59:06 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -24,11 +24,17 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
   if(abs(detmat) < .Machine$double.eps)
     stop("Matrix of linear transformation is singular")
   #
+  diagonalmatrix <- all(mat == diag(diag(mat)))
+  scaletransform <- diagonalmatrix && (length(unique(diag(mat))) == 1)
+  newunits <- if(scaletransform) units(X) else as.units(NULL)
+  #
   switch(X$type,
          rectangle={
-           if(all(mat == diag(diag(mat)))) {
-             # diagonal matrix - result is a rectangle
-             return(owin(mat[1,1] * X$xrange, mat[2,2] * X$yrange))
+           if(diagonalmatrix) {
+             # result is a rectangle
+             Y <- owin(mat[1,1] * X$xrange, mat[2,2] * X$yrange)
+             units(Y) <- newunits
+             return(Y)
            } else {
              # convert rectangle to polygon
              P <- as.polygonal(X)
@@ -49,6 +55,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            W <- owin(xr, yr, poly=bdry)
            # Result might be a rectangle: if so, convert to rectangle type
            W <- rescue.rectangle(W)
+           units(W) <- newunits
            return(W)
          },
          mask={
@@ -102,6 +109,7 @@ shiftxy <- function(X, vec=c(0,0)) {
          },
          stop("Unrecognised window type")
          )
+  # units are unchanged
   return(X)
 }
 
@@ -111,5 +119,6 @@ shiftxy <- function(X, vec=c(0,0)) {
   w <- shift.owin(X$window, vec)
   return(ppp(r$x, r$y, window=w, marks=marks(X)))
 }
+
 
 

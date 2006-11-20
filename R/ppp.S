@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.42 $	$Date: 2006/10/18 02:31:05 $
+#	$Revision: 4.44 $	$Date: 2006/11/17 12:20:06 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -352,10 +352,12 @@ print.summary.ppp <- function(x, ..., dp=3) {
             x$n,
             " points\n",
             sep=""))
+  unitinfo <- summary(x$window$units)
   cat(paste("Average intensity",
             signif(x$intensity,dp),
             "points per square",
-            x$window$units[1],
+            unitinfo$singular,
+            unitinfo$explain,
             "\n"))
   ndup <- x$nduplicated
   if((!is.null(ndup)) && (ndup > 0))

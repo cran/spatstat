@@ -10,7 +10,7 @@
   points of type \eqn{i} and of type \eqn{j}.
 }
 \usage{
-Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL)
+Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -39,6 +39,7 @@ Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

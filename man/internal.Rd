@@ -83,6 +83,7 @@
 \alias{levels<-.im}
 \alias{lookup.im}
 \alias{make.even.breaks}
+\alias{makeunits}
 \alias{markformat}
 \alias{markformat.ppp}
 \alias{markformat.psp}
@@ -154,6 +155,8 @@
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
+\alias{print.summary.units}
+\alias{print.units}
 \alias{quad}
 \alias{quadrat.breaks}
 \alias{quadrat.count.engine}
@@ -164,6 +167,7 @@
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{rescale.units}
 \alias{resid4plot}
 \alias{resid1plot}
 \alias{resid1panel}
@@ -198,6 +202,7 @@
 \alias{summary.envelope}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
+\alias{summary.units}
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
@@ -313,6 +318,7 @@ least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 lookup.im(Z, x, y, naok)
 make.even.breaks(bmax, npos, bstep)
+makeunits(sing, plur, mul)
 markformat(x)
 \method{markformat}{ppp}(x)
 \method{markformat}{psp}(x)
@@ -368,24 +374,26 @@ polynom(x, \dots)
 pppdist.prohorov(X, Y, precision = 7)
 pppmatching(X, Y, am, ty = "generic")
 primefactors(n, prmax)
-print.diagppm(x, \dots)
-print.envelope(x, \dots)
-print.fasp(x, \dots)
-print.fv(x, \dots)
-print.interact(x, \dots)       
-print.isf(x, \dots)
-print.minconfit(x, \dots)
-print.plotppm(x, \dots)
-print.pppmatching(x, \dots)
-print.profilepl(x, \dots)
-print.qqppm(x, \dots)
-print.rmhcontrol(x, \dots)
-print.rmhmodel(x, \dots)
-print.rmhstart(x, \dots)
-print.rmhseed(x, \dots)
-print.summary.owin(x, \dots)
-print.summary.ppp(x, \dots, dp=3)
-print.summary.psp(x, \dots)
+\method{print}{diagppm}(x, \dots)
+\method{print}{envelope}(x, \dots)
+\method{print}{fasp}(x, \dots)
+\method{print}{fv}(x, \dots)
+\method{print}{interact}(x, \dots)       
+\method{print}{isf}(x, \dots)
+\method{print}{minconfit}(x, \dots)
+\method{print}{plotppm}(x, \dots)
+\method{print}{pppmatching}(x, \dots)
+\method{print}{profilepl}(x, \dots)
+\method{print}{qqppm}(x, \dots)
+\method{print}{rmhcontrol}(x, \dots)
+\method{print}{rmhmodel}(x, \dots)
+\method{print}{rmhstart}(x, \dots)
+\method{print}{rmhseed}(x, \dots)
+\method{print}{summary.owin}(x, \dots)
+\method{print}{summary.ppp}(x, \dots, dp=3)
+\method{print}{summary.psp}(x, \dots)
+\method{print}{summary.units}(x, \dots)
+\method{print}{units}(x, \dots)
 quad(data, dummy, w, param)
 quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 quadrat.count.engine(x, y, xbreaks, ybreaks, weights)
@@ -396,6 +404,7 @@ rastery.im(x)
 rebound.ppp(x, \dots)
 rebound.psp(x, \dots)
 rebound.owin(w, rect)
+\method{rescale}{units}(X,s)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
            spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)
 resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
@@ -431,9 +440,10 @@ stratrand(window, nx, ny, k = 1)
 suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
-summary.envelope(object,\dots)
-summary.profilepl(object, \dots)
-summary.pppmatching(object, \dots)
+\method{summary}{envelope}(object,\dots)
+\method{summary}{profilepl}(object, \dots)
+\method{summary}{pppmatching}(object, \dots)
+\method{summary}{units}(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
 tilecentroids(W, nx, ny)        

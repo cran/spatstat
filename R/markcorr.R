@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.18 $ $Date: 2006/10/31 07:45:13 $
+#     $Revision: 1.20 $ $Date: 2006/11/17 08:25:27 $
 #
 #    Estimate the mark correlation function
 #
@@ -10,15 +10,42 @@
 # ------------------------------------------------------------------------
 
 "markcorr"<-
-function(X, f = function(m1,m2) { m1 * m2}, r=NULL, 
+function(X, f = function(m1, m2) { m1 * m2 }, r=NULL, 
          correction=c("isotropic", "Ripley", "translate"),
          method="density", ...)
 {
 	verifyclass(X, "ppp")
-        if(!is.function(f))
-          stop("Second argument f must be a function")
+        stopifnot(is.marked(X))
 
-	npoints <- X$n
+        fmul <- function(m1, m2) { m1 * m2 }
+        fequ <- function(m1, m2) { m1 == m2 }
+        if(missing(f)) {
+          if(is.multitype(X)) {
+            f <- fequ
+            ftype <- "equality"
+          } else {
+            f <- fmul
+            ftype <- "multiplication"
+          }
+        } else {
+          if(!is.function(f))
+            stop("Argument f must be a function")
+          same <- function(f, g) {
+            environment(g) <- environment(f)
+            identical(f,g)
+          }
+          ftype <-
+            if(same(f, fmul)) "multiplication" else
+            if(same(f, fequ)) "equality" else "unknown"
+          if(ftype == "multiplication" && is.multitype(X))
+            stop(paste("Inappropriate choice of function f;",
+                       "point pattern is multitype;",
+                       "types cannot be multiplied."))
+        }
+
+        ##
+        
+        npoints <- X$n
         W <- X$window
 
         # r values 
@@ -58,12 +85,33 @@ function(X, f = function(m1,m2) { m1 * m2}, r=NULL,
         J   <- close$j
         XI <- ppp(close$xi, close$yi, window=W)
 
-        # apply f to each combination of marks
+        # apply f to marks of close pairs of points
         #
         marx <- marks(X, dfok=FALSE)
         ff <- f(marx[I], marx[J])
 
-        Ef <- mean(ff)
+        if(any(is.na(ff)))
+          stop("function f returned some NA values")
+        if(is.logical(ff))
+          ff <- as.numeric(ff)
+        else if(!is.numeric(ff))
+          stop("function f did not return numeric values")
+
+        # apply f to every possible pair of marks, and average
+        Ef <- switch(ftype,
+                     multiplication = {
+                       mean(marx)^2
+                     },
+                     equality = {
+                       mtable <- table(marx)
+                       sum(mtable^2)/sum(mtable)^2
+                     },
+                     unknown = {
+                       mean(outer(marx, marx, f))
+                     },
+                     stop("Internal error: invalid ftype"))
+
+        #### Compute estimates ##############
         
         if(any(correction == "translate")) {
           # translation correction

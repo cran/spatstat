@@ -3,12 +3,12 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.14 $	$Date: 2006/10/18 06:05:24 $
+#	$Revision: 4.15 $	$Date: 2006/11/13 06:08:24 $
 #
 #
 #
 "Jcross" <-
-function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL) {
+function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, ...) {
 #
 #       multitype J function J_{ij}(r)
 #  
@@ -25,13 +25,13 @@ function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL) {
         marx <- marks(X)
         I <- (marx == i)
         J <- (marx == j)
-        result <- Jmulti(X, I, J, eps, r, breaks)
+        result <- Jmulti(X, I, J, eps, r, breaks, disjoint=TRUE)
         attr(result, "ylab") <- substitute(Jcross(r), NULL)
 	return(result)
 }
 
 "Jdot" <-
-function(X, i=1, eps=NULL, r=NULL, breaks=NULL) {
+function(X, i=1, eps=NULL, r=NULL, breaks=NULL, ...) {
 #  
 #    multitype J function J_{i\dot}(r)
 #  
@@ -47,13 +47,13 @@ function(X, i=1, eps=NULL, r=NULL, breaks=NULL) {
           stop(paste("point pattern has no", sQuote("marks")))
         I <- (marks(X) == i)
         J <- rep(TRUE, X$n)
-        result <- Jmulti(X, I, J, eps, r, breaks)
+        result <- Jmulti(X, I, J, eps, r, breaks, disjoint=FALSE)
         attr(result, "ylab") <- substitute(Jdot(r), NULL)
 	return(result)
 }
 
 "Jmulti" <- 	
-function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
+function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL) {
 #  
 #    multitype J function (generic engine)
 #  
@@ -75,7 +75,7 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL) {
         rmaxdefault <- rmax.rule("J", W)
         brks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)$val
 	FJ <- Fest(X[J], eps, breaks=brks)
-	GIJ <- Gmulti(X, I, J, breaks=brks)
+	GIJ <- Gmulti(X, I, J, breaks=brks, disjoint=disjoint)
         ratio <- function(a, b, c) {
           result <- a/b
           result[ b == 0 ] <- c

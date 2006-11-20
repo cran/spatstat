@@ -141,7 +141,7 @@ function(x, i, drop=TRUE, ...) {
       colsub <- inrange(x$xcol, xr)
       rowsub <- inrange(x$yrow, yr)
       return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub],
-                lev=lev, units=x$units))
+                lev=lev, units=units(x)))
     } 
   }
   stop("The subset operation is undefined for this type of index")

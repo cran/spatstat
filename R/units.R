@@ -1,7 +1,7 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.7 $   $Date: 2006/10/18 05:25:15 $
+#   $Revision: 1.11 $   $Date: 2006/11/20 04:58:54 $
 #
 #
 
@@ -55,15 +55,88 @@ units.default <- function(x) {
 }
 
 
+###  class 'units'
+
+makeunits <- function(sing="unit", plur="units", mul = 1) {
+  if(!is.character(sing))
+    stop("First entry should be a character string")
+  if(!is.character(plur))
+    stop("Second entry should be a character string")
+  if(!is.numeric(mul) || length(mul) != 1 || mul <= 0)
+    stop("Third entry should be a positive number")
+  u <- list(singular=sing, plural=plur, multiplier=mul)
+  if(mul != 1 && (sing=="unit" || plur=="units"))
+    stop(paste("A multiplier is not allowed",
+               "if the unit does not have a specific name"))
+  class(u) <- "units"
+  return(u)
+}
   
 as.units <- function(s) {
-  if(is.null(s))
-    return(c("unit", "units"))
-  if(!is.character(s))
-    stop("unit name should be a character string or strings")
-  if(length(s) == 1)
-    s <- rep(s, 2)
-  else if(length(s) != 2)
-    stop("unit name should be a single character string, or 2 strings")
-  return(s)
+  s <- as.list(s)
+  n <- length(s)
+  if(n > 3)
+    stop(paste("Unit name should be a character string,",
+               "or a vector/list of 2 character strings,",
+               "or a list(character, character, numeric)"))
+  
+  out <- switch(n+1,
+                makeunits(),
+                makeunits(s[[1]], s[[1]]),
+                makeunits(s[[1]], s[[2]]),
+                makeunits(s[[1]], s[[2]], s[[3]]))
+  return(out)
 }
+
+print.units <- function(x, ...) {
+  mul <- x$multiplier
+  if(mul == 1)
+    cat(paste(x$singular, "/", x$plural, "\n"))
+  else 
+    cat(paste(mul, x$plural, "\n"))
+  return(invisible(NULL))
+}
+            
+summary.units <- function(object, ...) {
+  x <- object
+  scaled <- (x$multiplier != 1)
+  named  <- (x$singular != "unit")
+  vanilla <- !named && !scaled
+  out <-
+    if(vanilla) {
+      list(legend = NULL,
+           axis   = NULL, 
+           explain = NULL,
+           singular = "unit",
+           plural   = "units")
+    } else if(named & !scaled) {
+      list(legend = paste("Unit of length: 1", x$singular),
+           axis   = paste("(", x$plural, ")", sep=""),
+           explain = NULL,
+           singular = x$singular,
+           plural   = x$plural)
+    } else {
+      expanded <- paste(x$multiplier, x$plural)
+      list(legend = paste("Unit of length:", expanded),
+           axis   = paste("(one unit = ", expanded, ")", sep=""),
+           explain  = paste("(one unit = ", expanded, ")", sep=""),
+           singular = "unit",
+           plural   = "units")
+    }
+  out <- append(out, list(scaled  = scaled,
+                          named   = named,
+                          vanilla = vanilla))
+  class(out) <- "summary.units"
+  return(out)
+}
+
+print.summary.units <- function(x, ...) {
+  if(x$vanilla)
+    cat("Unit of length (unnamed)\n")
+  else
+    cat(paste(x$legend, "\n"))
+  invisible(NULL)
+}
+
+
+
