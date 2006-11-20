@@ -203,6 +203,17 @@ print.psp <- function(x, ...) {
   return(invisible(NULL))
 }
 
+units.psp <- function(x) {
+  return(units(x$window))
+}
+
+"units<-.psp" <- function(x, value) {
+  w <- x$window
+  units(w) <- value
+  x$window <- w
+  return(x)
+}
+
 ####################################################
 #    summary information
 ####################################################
@@ -281,7 +292,8 @@ summary.psp <- function(object, ...) {
               totlen = sum(len),
               ang= summary(angles.psp(object)),
               w = summary.owin(object$window),
-              marks=if(is.null(object$marks)) NULL else summary(object$marks))
+              marks=if(is.null(object$marks)) NULL else summary(object$marks),
+              unitinfo=summary(units(object)))
   class(out) <- c("summary.psp", class(out))
   return(out)
 }
@@ -290,7 +302,8 @@ print.summary.psp <- function(x, ...) {
   cat(paste(x$n, "line segments\n"))
   cat("Lengths:\n")
   print(x$len)
-  cat(paste("Total length:", x$totlen, "\n"))
+  unitblurb <- paste(x$unitinfo$plural, x$unitinfo$explain)
+  cat(paste("Total length:", x$totlen, unitblurb, "\n"))
   cat(paste("Length per unit area:", x$totlen/x$w$area, "\n"))
   cat("Angles (radians):\n")
   print(x$ang)
@@ -349,13 +362,14 @@ print.summary.psp <- function(x, ...) {
 distmap.psp <- function(X, ...) {
   verifyclass(X, "psp")
   W <- as.mask(X$window, ...)
+  uni <- units(W)
   P <- cbind(as.vector(raster.x(W)), as.vector(raster.y(W)))
   U <- distppll(P, X$ends, mintype=2)
   xc <- W$xcol
   yr <- W$yrow
-  Dist <- im(array(U$min.d, dim=W$dim), xc, yr)
-  Indx <- im(array(U$min.which, dim=W$dim), xc, yr)
-  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr)
+  Dist <- im(array(U$min.d, dim=W$dim), xc, yr, units=uni)
+  Indx <- im(array(U$min.which, dim=W$dim), xc, yr, units=uni)
+  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, units=uni)
   attr(Dist, "index") <- Indx
   attr(Dist, "bdry")  <- Bdry
   return(Dist)

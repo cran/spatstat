@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.15 $	$Date: 2006/10/18 06:04:48 $
+#	$Revision: 4.19 $	$Date: 2006/11/13 06:09:06 $
 #
 ################################################################################
 
@@ -34,7 +34,7 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
 	J <- (marx == j)
 	if(sum(J) == 0) stop("No points are of type j")
 #
-	result <- Gmulti(X, I, J, r, breaks)
+	result <- Gmulti(X, I, J, r, breaks, disjoint=(i!=j))
         attr(result, "ylab") <- substitute(Gcross(r), NULL)
         result
 }	
@@ -59,7 +59,7 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 	if(sum(I) == 0) stop("No points are of type i")
 	J <- rep(TRUE, X$n)	# i.e. all points
 # 
-	result <- Gmulti(X, I, J, r, breaks)
+	result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE)
         attr(result, "ylab") <- substitute(Gdot(r), NULL)
         result
 }	
@@ -68,7 +68,7 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 ##########
 
 "Gmulti" <- 	
-function(X, I, J, r=NULL, breaks=NULL, ...) {
+function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL) {
 #
 #  engine for computing the estimate of G_{ij} or G_{i\bullet}
 #  depending on selection of I, J
@@ -95,47 +95,25 @@ function(X, I, J, r=NULL, breaks=NULL, ...) {
         nJ <- sum(J)
 	if(nI == 0) stop("No points satisfy condition I")
 	if(nJ == 0) stop("No points satisfy condition J")
-        lamJ <- nJ/area
+        if(is.null(disjoint))
+          disjoint <- !any(I & J)
 #  determine breakpoints for r values
+        lamJ <- nJ/area
         rmaxdefault <- rmax.rule("G", W, lamJ)
         breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
         brks <- breaks$val
-# find close pairs of points
+        rmax <- breaks$max
+#  "type I to type J" nearest neighbour distances
         XI <- X[I]
         XJ <- X[J]
-        rmax <- breaks$max
-        close <- crosspairs(XI, XJ, rmax)
-# close$i and close$j are serial numbers in XI and XJ respectively;        
-# map them to original serial numbers in X
-        orig <- seq(npoints)
-        imap <- orig[I]
-        jmap <- orig[J]
-        iX <- imap[close$i]
-        jX <- jmap[close$j]
-# eliminate any identical pairs
-        if(any(I & J)) {
-          ok <- (iX != jX)
-          if(!all(ok)) {
-            close$i  <- close$i[ok]
-            close$j  <- close$j[ok]
-            close$xi <- close$xi[ok]
-            close$yi <- close$yi[ok]
-            close$xj <- close$xj[ok]
-            close$yj <- close$yj[ok]
-            close$dx <- close$dx[ok]
-            close$dy <- close$dy[ok]
-            close$d  <- close$d[ok]
-          }
+        if(disjoint) 
+          nnd <- nncross(XI, XJ)$dist
+        else {
+          seqnp <- seq(npoints)
+          iX <- seqnp[I]
+          iY <- seqnp[J]
+          nnd <- nncross(XI, XJ, iX, iY)$dist
         }
-# extract information for these pairs (relative to orderings of XI, XJ)
-        dcloseIJ <- close$d
-        icloseI  <- close$i
-        jcloseJ  <- close$j
-#  "type I to type J" nearest neighbour distances
-	nnd <- tapply(dcloseIJ,
-                      factor(icloseI, levels=seq(nI)),
-                      min)
-        nnd[is.na(nnd)] <- rmax+1
 #  distance to boundary from each type i point
         bdry <- bdist.points(XI)
 #  observations

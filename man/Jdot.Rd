@@ -10,7 +10,7 @@
   the type \eqn{i} points and the points of any type.
 }
 \usage{
-Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL)
+Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -36,6 +36,7 @@ Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

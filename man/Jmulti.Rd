@@ -11,7 +11,7 @@
   and those in subset \eqn{J}.
 }
 \usage{
-  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL)
+  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL, \dots, disjoint=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -39,6 +39,11 @@
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{\dots}{Ignored.}
+  \item{disjoint}{Optional flag indicating whether
+    the subsets \code{I} and \code{J} are disjoint.
+    If missing, this value will be computed by inspecting the
+    vectors \code{I} and \code{J}}.
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

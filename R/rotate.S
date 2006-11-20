@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.5 $	$Date: 2006/10/10 04:22:48 $
+#	$Revision: 1.6 $	$Date: 2006/11/17 23:17:17 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -18,7 +18,8 @@ rotxy <- function(X, angle=pi/2) {
            # convert rectangle to polygon
            P <- owin(X$xrange, X$yrange, poly=
                      list(x=X$xrange[c(1,2,2,1)],
-                          y=X$yrange[c(1,1,2,2)]))
+                          y=X$yrange[c(1,1,2,2)]),
+                     units=units(X))
            # call polygonal case
            return(rotate.owin(P, angle))
          },
@@ -29,7 +30,7 @@ rotxy <- function(X, angle=pi/2) {
            xr <- range(unlist(lapply(bdry, function(a) a$x)))
            yr <- range(unlist(lapply(bdry, function(a) a$y)))
            # wrap up
-           W <- owin(xr, yr, poly=bdry)
+           W <- owin(xr, yr, poly=bdry, units=units(X))
            W <- rescue.rectangle(W)
            return(W)
          },

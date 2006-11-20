@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.18 $   $Date: 2006/10/18 05:23:08 $
+#    $Revision: 1.20 $   $Date: 2006/11/18 01:30:09 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -127,9 +127,9 @@ print.fv <- function(x, ...) {
   print.formula(as.formula(a$fmla))
   cat(paste("\nRecommended range of argument ", a$argu,
             ": [", a$alim[1], ", ", a$alim[2], "]\n", sep=""))
-  au <- as.units(a$units)[2]
-  if(au != "units")
-    cat(paste("Unit of length:", au, "\n"))
+  ledge <- summary(units(x))$legend
+  if(!is.null(ledge))
+    cat(paste(ledge, "\n"))
   invisible(NULL)
 }
 
@@ -153,7 +153,7 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   z <- fv(xy, a$argu, a$ylab, preferred, a$fmla, a$alim,
           c(attr(x, "labl"), labl),
           c(attr(x, "desc"), desc),
-          units=a$units)
+          units=units(a))
   return(z)
 }
 

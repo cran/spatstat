@@ -10,7 +10,7 @@
   to the nearest point of subset \eqn{J}.
 }
 \usage{
-Gmulti(X, I, J, r=NULL, breaks=NULL, \dots)
+Gmulti(X, I, J, r=NULL, breaks=NULL, \dots, disjoint=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -35,6 +35,10 @@ Gmulti(X, I, J, r=NULL, breaks=NULL, \dots)
     Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{\dots}{Ignored.}
+  \item{disjoint}{Optional flag indicating whether
+    the subsets \code{I} and \code{J} are disjoint.
+    If missing, this value will be computed by inspecting the
+    vectors \code{I} and \code{J}}.
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).

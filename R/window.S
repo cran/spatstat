@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.55 $	$Date: 2006/10/18 04:36:31 $
+#	$Revision: 4.56 $	$Date: 2006/11/17 12:20:12 $
 #
 #
 #	A window may be either
@@ -62,13 +62,7 @@
 #
 owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL) {
 
-  if(!is.null(units)) {
-    if(!is.character(units)) stop("Units should be character string(s)")
-    if(length(units) == 1)
-      units <- rep(units, 2)
-    else if(length(units) != 2)
-      stop("Units should be a single character string, or 2 strings")
-  }
+  units <- as.units(units)
 
   ## Exterminate ambiguities
   poly.given <- !is.null(poly)
@@ -235,7 +229,7 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
               xcol    = W$xcol,
               yrow    = W$yrow,
               m       = !is.na(W$v),
-              units   = units(W))
+              units   = W$units)
   class(out) <- "owin"
   return(out)
 }
@@ -416,7 +410,7 @@ as.polygonal <- function(W) {
            xr <- W$xrange
            yr <- W$yrange
            return(owin(xr, yr, poly=list(x=xr[c(1,2,2,1)],y=yr[c(1,1,2,2)]),
-                       units=W$units))
+                       units=units(W)))
          },
          polygonal = {
            return(W)
@@ -645,6 +639,7 @@ inside.owin <- function(x, y, w) {
   
 print.owin <- function(x, ...) {
   verifyclass(x, "owin")
+  unitinfo <- summary(units(x))
   cat("window: ")
   switch(x$type,
          rectangle={
@@ -670,7 +665,9 @@ print.owin <- function(x, ...) {
               ", ",
               signif(x$yrange[2], 5),
               "] ",
-              units(x)[2], "\n", sep=""))
+              unitinfo$plural,
+              " ", unitinfo$explain,
+              "\n", sep=""))
 }
 
 summary.owin <- function(object, ...) {
@@ -708,6 +705,8 @@ summary.owin <- function(object, ...) {
 
 print.summary.owin <- function(x, ...) {
   verifyclass(x, "summary.owin")
+  unitinfo <- summary(x$units)
+  pluralunits <- unitinfo$plural
   cat("Window: ")
   switch(x$type,
          rectangle={
@@ -740,11 +739,11 @@ print.summary.owin <- function(x, ...) {
            cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
            cat(paste("pixel size:",
                      signif(x$xstep,3), "by", signif(x$ystep,3),
-                     x$units[2], "\n"))
+                     pluralunits, "\n"))
            cat("enclosing rectangle: ")
          }
          )
-    cat(paste("[",
+  cat(paste("[",
               signif(x$xrange[1], 5),
               ", ",
               signif(x$xrange[2], 5),
@@ -753,8 +752,10 @@ print.summary.owin <- function(x, ...) {
               ", ",
               signif(x$yrange[2], 5),
               "] ",
-              x$units[2], "\n", sep=""))
-  cat(paste("Window area = ", signif(x$area, 6), "square", x$units[2], "\n"))
+              pluralunits, "\n", sep=""))
+  cat(paste("Window area = ", signif(x$area, 6), "square", pluralunits, "\n"))
+  if(!is.null(ledge <- unitinfo$legend))
+    cat(paste(ledge, "\n"))
   return(invisible(x))
 }
 

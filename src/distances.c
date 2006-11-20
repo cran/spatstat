@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.16 $     $Date: 2006/06/27 05:37:04 $
+  $Revision: 1.18 $     $Date: 2006/11/13 04:57:56 $
 
  */
 
@@ -360,8 +360,11 @@ void nnwhichsort(n, x, y, nnd, nnwhich, huge)
 }
 
 
-/* nnXwhich: for TWO different point patterns X and Y,
-   find for each x in X the nearest neighbour y in Y.
+/* 
+   nnXwhich:  for TWO point patterns X and Y,
+              find the nearest neighbour 
+	      (from each point of X to the nearest point of Y)
+	      returning both the distance and the identifier
 
    Requires both patterns to be sorted in order of increasing y coord
 */
@@ -419,6 +422,86 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
 	    d2min = d2;
 	    dmin = sqrt(d2);
 	    jwhich = jright;
+	  }
+	}
+    }
+    nnd[i] = dmin;
+    nnwhich[i] = jwhich;
+    lastjwhich = jwhich;
+  }
+}
+
+/* 
+   nnXexclude:  similar to nnXwhich
+              but allows X and Y to include common points
+	      (which are not to be counted as neighbours)
+
+   Code numbers id1, id2 are attached to the patterns X and Y respectively, 
+   such that
+   x1[i], y1[i] and x2[j], y2[j] are the same point iff id1[i] = id2[j].
+
+   Requires both patterns to be sorted in order of increasing y coord
+*/
+
+void nnXexclude(n1, x1, y1, id1, n2, x2, y2, id2, nnd, nnwhich, huge)
+     int *n1, *n2, *nnwhich, *id1, *id2;
+     double *x1, *y1, *x2, *y2, *nnd, *huge;
+{ 
+  int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich, id1i;
+  double d, dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
+
+  hu = *huge;
+  hu2 = hu * hu;
+
+  npoints1 = *n1;
+  npoints2 = *n2;
+
+  if(npoints1 == 0 || npoints2 == 0)
+    return;
+
+  lastjwhich = 0;
+
+  for(i = 0; i < npoints1; i++) {
+    dmin = hu;
+    d2min = hu2;
+    jwhich = -1;
+    x1i = x1[i];
+    y1i = y1[i];
+    id1i = id1[i];
+
+    /* search backward from previous nearest neighbour */
+    if(lastjwhich > 0) {
+      for(jleft = lastjwhich - 1;
+	  jleft >= 0 && (dy = (y1i - y2[jleft])) < dmin ;
+	  --jleft)
+	{
+	  /* do not compare identical points */
+	  if(id2[jleft] != id1i) {
+	    dx = x2[jleft] - x1i;
+	    d2 =  dx * dx + dy * dy;
+	    if (d2 < d2min) {
+	      d2min = d2;
+	      dmin = sqrt(d2);
+	      jwhich = jleft;
+	    }
+	  }
+	}
+    }
+
+    /* search forward from previous nearest neighbour  */
+    if(lastjwhich < npoints2) {
+      for(jright = lastjwhich;
+	  jright < npoints2 && (dy = (y2[jright] - y1i)) < dmin ;
+	  ++jright)
+	{
+	  if(id2[jright] != id1i) {
+	    dx = x2[jright] - x1i;
+	    d2 =  dx * dx + dy * dy;
+	    if (d2 < d2min) {
+	      d2min = d2;
+	      dmin = sqrt(d2);
+	      jwhich = jright;
+	    }
 	  }
 	}
     }

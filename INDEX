@@ -237,6 +237,11 @@ redwood                 California Redwoods Point Pattern (Ripley's
                         Subset)
 redwoodfull             California Redwoods Point Pattern (Entire
                         Dataset)
+rescale                 Convert dataset to another unit of length
+rescale.owin            Convert Window to Another Unit of Length
+rescale.ppp             Convert Point Pattern to Another Unit of Length
+rescale.psp             Convert Line Segment Pattern to Another Unit of
+                        Length
 rescue.rectangle        Convert Window Back To Rectangle
 residualspaper          Data and Code From JRSS Discussion Paper on
                         Residuals

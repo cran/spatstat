@@ -1,10 +1,12 @@
 \name{units}
 \alias{units}
 \alias{units.owin}
+\alias{units.psp}
 \alias{units.ppp}
 \alias{units.im}
 \alias{units<-}
 \alias{units<-.ppp}
+\alias{units<-.psp}
 \alias{units<-.owin}
 \alias{units<-.im}
 \title{Name for Unit of Length}
@@ -15,21 +17,24 @@
 \usage{
 units(x)
 \method{units}{ppp}(x)
+\method{units}{psp}(x)
 \method{units}{owin}(x)
 \method{units}{im}(x)
 units(x) <- value
 \method{units}{ppp}(x) <- value
+\method{units}{psp}(x) <- value
 \method{units}{owin}(x) <- value
 \method{units}{im}(x) <- value
 }
 \arguments{
   \item{x}{A spatial dataset.
     Either a point pattern (object of class \code{"ppp"}),
+    a line segment pattern (object of class \code{"psp"}),
     a window (object of class \code{"owin"}) or
     a pixel image (object of class \code{"im"}).
   }
-  \item{value}{Character string, or vector of two character strings,
-    containing the name of the unit of length.
+  \item{value}{
+    Name of the unit of length. See Details.
   }
 }
 \details{
@@ -38,16 +43,23 @@ units(x) <- value
   when printing or plotting the dataset, and in some other
   applications. 
 
-  \code{units(x)} extracts this name as a character string,
+  \code{units(x)} extracts this name,
   and \code{units(x) <- value} sets the name to \code{value}.
 
-  A valid name is either a single character string,
-  or a vector of two character strings giving the
-  singular and plural forms.
+  A valid name is either
+  \itemize{
+    \item a single character string
+    \item a vector of two character strings giving the
+    singular and plural forms of the unit name
+    \item a list of length 3, containing two character strings
+    giving the singular and plural forms of the basic unit,
+    and a number specifying the multiple of this unit.
+  }
 }
 \value{
-  The value of \code{units(x)} is a character string
-  containing the name of the unit of length in \code{x}.
+  The return value of \code{units} is an object of class \code{"units"}
+  containing the name of the unit of length in \code{x}. There are
+  methods for \code{print} and \code{summary}.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
@@ -62,8 +74,13 @@ units(x) <- value
 }
 
 \examples{
-  data(bei)
-  units(bei) <- c("metre", "metres")
+  X <- runifpoint(20)
+
+  # if the unit of length is 1 metre:
+  units(X) <- c("metre", "metres")
+
+  # if the unit of length is 6 inches:
+  units(X) <- list("inch", "inches", 6)
 }
 \keyword{spatial}
 \keyword{manip}
