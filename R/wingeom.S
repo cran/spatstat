@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.16 $	$Date: 2006/10/10 04:22:48 $
+#	$Revision: 4.18 $	$Date: 2006/12/15 10:10:34 $
 #
 #
 #
@@ -140,35 +140,119 @@ overlap.owin <- function(A, B) {
 #  Intersection and union of windows
 #
 #
-intersect.owin <- function(A, B) {
+intersect.owin <- function(A, B, ...) {
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 
-  # chicken out 
-  if(A$type == "polygonal")
-    A <- as.mask(A)
-  if(B$type == "polygonal")
-    B <- as.mask(B)
+  Arect <- (A$type == "rectangle")
+  Brect <- (B$type == "rectangle")
+  Amask <- (A$type == "mask")
+  Bmask <- (B$type == "mask")
   
   # determine intersection of x and y ranges
-  intersect.ranges <- function(a, b) {
-    lo <- max(a[1],b[1])
-    hi <- min(a[2],b[2])
-    if(lo >= hi) stop("Intersection is empty")
-    return(c(lo, hi))
-  }
   xr <- intersect.ranges(A$xrange, B$xrange)
   yr <- intersect.ranges(A$yrange, B$yrange)
   C <- owin(xr, yr)
-  
-  Arect <- (A$type == "rectangle")
-  Brect <- (B$type == "rectangle")
 
+  # rectangular case
   if(Arect && Brect)
-    return(owin(xr, yr))
+    return(C)
 
-  # Otherwise, we'll need this
-  trim.mask <- function(M, R) {
+  # Trim any existing masks to the intersection of the two ranges
+  if(Amask)
+    A <- trim.mask(A, C)
+  if(Bmask)
+    B <- trim.mask(B, C)
+
+  # Did the user specify the pixel raster?
+  if(length(list(...)) > 0) {
+    # convert to masks with specified parameters, and intersect
+    if(Amask) {
+      A <- as.mask(A, ...)
+      return(restrict.mask(A, B))
+    } else {
+      B <- as.mask(B, ...)
+      return(restrict.mask(B, A))
+    }
+  } 
+  
+  # One mask and one rectangle?
+  if(Arect && Bmask)
+      return(B)
+  if(Amask && Brect)
+      return(A)
+
+  # One mask and one polygon?
+  if(Amask && !Bmask) 
+    return(restrict.mask(A, B))
+  if(!Amask && Bmask)
+    return(restrict.mask(B, A))
+
+  # Two existing masks?
+  if(Amask && Bmask) {
+    # choose the finer one
+    if(A$xstep <= B$xstep)
+      return(restrict.mask(A, B))
+    else
+      return(restrict.mask(B, A))
+  }
+  
+  # No existing masks.
+  # Convert A to a mask with default pixel raster, and intersect.
+  A <- as.mask(A)
+  return(restrict.mask(A, B))
+}
+
+
+union.owin <- function(A, B, ...) {
+  verifyclass(A, "owin")
+  verifyclass(B, "owin")
+
+  if(A$type == "rectangle" && B$type == "rectangle") {
+    if(is.subset.owin(A, B))
+      return(B)
+    else if (is.subset.owin(B,A))
+      return(A)
+  }
+
+  C <- owin(range(A$xrange, B$xrange),
+            range(A$yrange, B$yrange))
+
+  Amask <- (A$type == "mask")
+  Bmask <- (B$type == "mask")
+
+  # Determine pixel raster parameters
+  rasterinfo <- 
+    if((length(list(...)) > 0))
+      list(...)
+    else if(Amask)
+      list(xy=list(x=prolongseq(A$xcol, C$xrange),
+                   y=prolongseq(A$yrow, C$yrange)))
+    else if(Bmask)
+      list(xy=list(x=prolongseq(B$xcol, C$xrange),
+                   y=prolongseq(B$yrow, C$yrange)))
+    else
+      list()
+
+  # Convert C to mask
+  C <- do.call("as.mask", append(list(w=C), rasterinfo))
+      
+  x <- as.vector(raster.x(C))
+  y <- as.vector(raster.y(C))
+  ok <- inside.owin(x, y, A) | inside.owin(x, y, B)
+
+  if(!any(ok))
+    stop("Internal error: union is empty")
+
+  if(!all(ok))
+    C$m[] <- ok
+
+  return(C)
+}
+
+# auxiliary functions
+  
+trim.mask <- function(M, R) {
     # M is a mask,
     # R is a rectangle inside bounding.box(M)
     # Extract subset of image grid
@@ -185,58 +269,24 @@ intersect.owin <- function(A, B) {
     Z$m <- M$m[yrowok, xcolok]
     Z$dim <- dim(Z$m)
     return(Z)
-  }
-
-  if(!Arect && Brect)
-    return(trim.mask(A, C))
-  else if(Arect && !Brect) 
-    return(trim.mask(B, C))
-  else {
-    # both are masks
-    # First trim A 
-    D <- trim.mask(A, C)
-    # Then determine which pixels of D are inside B
-    x <- raster.x(D)
-    y <- raster.y(D)
-    ok <- inside.owin(x, y, B)
-    # 'and'
-    if(!all(ok))
-      D$m[!ok] <- FALSE
-    return(D)
-  }
-          
-  stop("Internal error")
 }
 
-
-union.owin <- function(A, B) {
-  verifyclass(A, "owin")
-  verifyclass(B, "owin")
-
-  if(A$type == "rectangle" && B$type == "rectangle") {
-    if(is.subset.owin(A, B))
-      return(B)
-    else if (is.subset.owin(B,A))
-      return(A)
-  }
-
-  C <- owin(range(A$xrange, B$xrange),
-            range(A$yrange, B$yrange))
+restrict.mask <- function(M, W) {
+  # M is a mask, W is any window
+  stopifnot(inherits(M, "owin") && M$type == "mask")
+  stopifnot(inherits(W, "owin"))
+  if(W$type == "rectangle")
+    return(trim.mask(M, W))
+  # Determine which pixels of M are inside W
+  Mm <- M$m
+  x <- as.vector(raster.x(M)[Mm])
+  y <- as.vector(raster.y(M)[Mm])
+  ok <- inside.owin(x, y, W)
+  Mm[Mm] <- ok
+  M$m <- Mm
+  return(M)
+}
   
-  C <- as.mask(C)
-  x <- raster.x(C)
-  y <- raster.y(C)
-  ok <- inside.owin(x, y, A) | inside.owin(x, y, B)
-
-  if(!any(ok))
-    stop("Internal error: union is empty")
-
-  if(!all(ok))
-    C$m[!ok] <- FALSE
-
-  return(C)
-}
-
 expand.owin <- function(W, f=1) {
   # expand bounding box of 'win'
   # by factor 'f' in **area**

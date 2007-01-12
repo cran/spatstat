@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.15 $   $Date: 2006/10/09 03:30:22 $
+#  $Revision: 2.20 $   $Date: 2007/01/10 06:00:58 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -123,19 +123,16 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
                 par=list())  # par is filled in later
     } else {
       # First check version number of ppm object
-      ver <- model$version
-      if(is.null(ver)
-         || is.character(ver)   # old style, version <= 1.3-4
-         || is.null(major <- ver$major)
-         || is.null(minor <- ver$minor)
-         || (major == 1 && minor < 4)) {
-        whinge <- paste(
-        "This model was fitted by an earlier version of spatstat;\n",
-        "simulation is not possible.\n",
-        "Re-fit the model using the current version of the package")
-        stop(whinge)
-      }
-      
+      if(Y$antiquated) 
+        stop(paste("This model was fitted by a very old version",
+                   "of the package: spatstat", Y$version,
+                   "; simulation is not possible.",
+                   "Re-fit the model using your original code"))
+      else if(Y$old)
+        warning(paste("This model was fitted by an old version",
+                      "of the package: spatstat", Y$version,
+                      ". Re-fit the model using update.ppm",
+                      "or your original code"))
       # Extract the interpoint interaction object
       inte <- Y$entries$interaction
       # Determine whether the model can be simulated using rmh
@@ -146,14 +143,19 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       
       # Get fitted model's canonical coefficients
       coeffs <- Y$entries$theta
+      if(newstyle.coeff.handling(inte)) {
+        # extract only the interaction coefficients
+        Vnames <- Y$entries$Vnames
+        coeffs <- coeffs[Vnames]
+      }
       # Ensure the fitted model is valid
       # (i.e. exists mathematically as a point process)
-      valid <- inte$valid(coeffs, inte)
-      # if not, 
-      if(!valid) {
+      if(!valid.ppm(model)) {
         if(project) {
           if(verbose)
             cat("Model is invalid - projecting it\n")
+          if(is.null(inte$project))
+            stop("Internal error: interaction has no projection operator")
           coeffs <- inte$project(coeffs, inte)
         }
         else

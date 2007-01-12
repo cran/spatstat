@@ -60,7 +60,7 @@ which can then be fitted to point pattern data.
    # prints a sensible description of itself
    data(betacells)
    r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   h <- 30.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
+   h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
    ppm(betacells, ~1, MultiStraussHard(c("off","on"), r, h), rbord=60.0)
    # fit the stationary multitype hardcore Strauss process to `betacells'
 }

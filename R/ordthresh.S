@@ -2,7 +2,7 @@
 #
 #    ordthresh.S
 #
-#    $Revision: 1.3 $	$Date: 2005/03/11 22:39:36 $
+#    $Revision: 1.6 $	$Date: 2007/01/11 03:36:02 $
 #
 #    Ord process with threshold potential
 #
@@ -18,6 +18,7 @@ OrdThresh <- function(r) {
   out <- 
   list(
          name     = "Ord process with threshold potential",
+         creator  = "OrdThresh",
          family    = ord.family,
          pot      = function(d, par) {
                          ifelse(d <= par$r, 1, 0)
@@ -32,7 +33,7 @@ OrdThresh <- function(r) {
          update = NULL,  # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- as.numeric(coeffs[1])
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
@@ -40,7 +41,8 @@ OrdThresh <- function(r) {
          },
          irange = function(...) {
            return(Inf)
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

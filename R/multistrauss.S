@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.11 $	$Date: 2006/10/09 02:37:33 $
+#    $Revision: 2.14 $	$Date: 2007/01/10 03:46:05 $
 #
 #    The multitype Strauss process
 #
@@ -26,6 +26,7 @@ MultiStrauss <- function(types, radii) {
   out <- 
   list(
          name     = "Multitype Strauss process",
+         creator  = "MultiStrauss",
          family    = pairwise.family,
          pot      = function(d, tx, tu, par) {
      # arguments:
@@ -95,7 +96,7 @@ MultiStrauss <- function(types, radii) {
                       nt <- length(self$par$types)
                       MultiPair.checkmatrix(r, nt, sQuote("radii"))
                     },
-         update = NULL,  # default OK
+         update = NULL, # default OK
          print = function(self) {
            print.isf(self$family)
            cat(paste("Interaction:\t", self$name, "\n"))
@@ -114,22 +115,15 @@ MultiStrauss <- function(types, radii) {
           r <- self$par$radii
           # list all unordered pairs of types
           uptri <- (row(r) <= col(r)) & (!is.na(r))
-          mark1 <- (typ[row(r)])[uptri]
-          mark2 <- (typ[col(r)])[uptri]
-          # names of coefficients
-          basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
-          thetaname <- paste("mark", basename, sep="")
-          thetaname <- make.names(thetaname)  # converts illegal characters
-          npairs <- length(thetaname)
+          index1 <- (row(r))[uptri]
+          index2 <- (col(r))[uptri]
+          npairs <- length(index1)
           # extract canonical parameters; shape them into a matrix
           gammas <- matrix(, ntypes, ntypes)
           dimnames(gammas) <- list(typ, typ)
-          for(i in 1:npairs) {
-            theta <- coeffs[thetaname[i]]
-            gamma <- exp(theta)
-            gammas[mark1[i], mark2[i]] <- gamma
-            gammas[mark2[i], mark1[i]] <- gamma
-          }
+          expcoef <- exp(coeffs)
+          gammas[ cbind(index1, index2) ] <- expcoef
+          gammas[ cbind(index2, index1) ] <- expcoef
           #
           return(list(param=list(gammas=gammas),
                       inames="interaction parameters gamma_ij",
@@ -153,23 +147,13 @@ MultiStrauss <- function(types, radii) {
            # constrain them
            gamma <- matrix(pmin(gamma, 1),
                            nrow=nrow(gamma), ncol=ncol(gamma))
-           # now put them back ... :-(
-           # get possible types
-           typ <- self$par$types
-           ntypes <- length(typ)
+           # now put them back 
            # get matrix of Strauss interaction radii
            r <- self$par$radii
            # list all unordered pairs of types
            uptri <- (row(r) <= col(r)) & (!is.na(r))
-           mark1 <- (typ[row(r)])[uptri]
-           mark2 <- (typ[col(r)])[uptri]
-           # names of coefficients
-           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
-           thetaname <- paste("mark", basename, sep="")
-           thetaname <- make.names(thetaname)  # converts illegal characters
-           npairs <- length(thetaname)
            # reassign 
-           coeffs[thetaname] <- log(gamma[uptri])
+           coeffs[] <- log(gamma[uptri])
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
@@ -181,7 +165,8 @@ MultiStrauss <- function(types, radii) {
              active <- active & (abs(log(gamma)) > epsilon)
            }
            if(any(active)) return(max(r[active])) else return(0)
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

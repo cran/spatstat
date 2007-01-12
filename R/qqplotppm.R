@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.19 $   $Date: 2006/10/09 03:28:38 $
+#  $Revision: 1.20 $   $Date: 2007/01/08 06:35:35 $
 #
 
 qqplot.ppm <-
@@ -12,10 +12,11 @@ qqplot.ppm <-
            dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
            control=list(nrep=nrep,
              expand=default.expand(fit),
-             periodic=(default.expand(fit)$type=="rectangle")),
+             periodic=(as.owin(fit)$type=="rectangle")),
            saveall=FALSE,
            monochrome=FALSE,
            limcol=if(monochrome) "black" else "red",
+           maxerr=max(100, ceiling(nsim/10)),
            check=TRUE, repair=TRUE)
 {
   verifyclass(fit, "ppm")
@@ -55,7 +56,10 @@ qqplot.ppm <-
   ##################  How to perform simulations?  #######################
 
   simulate.from.fit <- is.null(expr)
-  
+
+  how.simulating <- if(simulate.from.fit)
+    "simulating from fitted model" else paste("evaluating", sQuote("expr"))  
+
   if(!simulate.from.fit) {
      # 'expr' will be evaluated 'nsim' times
     if(!is.expression(expr))
@@ -80,9 +84,23 @@ qqplot.ppm <-
   ######  Perform simulations
   if(verbose) cat(paste("Simulating", nsim, "realisations... "))
   simul.sizes <- numeric(nsim)
-  for(i in 1:nsim) {
-    ei <- eval(expr)
-    fiti <-
+  i <- 0
+  ierr <- 0
+  repeat {
+    # protect from randomly-generated crashes in gam
+    ei <- try(eval(expr),silent=!verbose)
+    if(inherits(ei, "try-error")) {
+      # error encountered in evaluating 'expr'
+      ierr <- ierr + 1
+      if(ierr > maxerr) 
+        stop(paste("Exceeded maximum of", maxerr,
+                   "failures in", how.simulating,
+                   "after generating only", i, "realisations"))
+      else break
+    } else {
+      # simulation successful
+      i <- i + 1
+      fiti <-
       if(simulate.from.fit)
         ei
       else if(is.ppm(ei))
@@ -91,18 +109,24 @@ qqplot.ppm <-
         refit(fit, ei)
       else
         stop("result of eval(expr) is not a ppm or ppp object")
-    # diagnostic info
-    simul.sizes[i] <- data.ppm(fiti)$n
-    # compute residual field
-    resi <- residualfield(fiti, type=type, ..., dimyx=dimyx)
-    if(i == 1)
-      sim <- array(, dim=c(dim(resi), nsim))
-    sim[,,i] <- resi
-    if(verbose) 
-      cat(paste(i, ifelse(i %% 10 == 0, "\n", ", "), sep=""))
+      # diagnostic info
+      simul.sizes[i] <- data.ppm(fiti)$n
+      # compute residual field
+      resi <- residualfield(fiti, type=type, ..., dimyx=dimyx)
+      if(i == 1)
+        sim <- array(, dim=c(dim(resi), nsim))
+      sim[,,i] <- resi
+      if(verbose) 
+        cat(paste(i, ifelse(i %% 10 == 0, "\n", ", "), sep=""))
+      if(i >= nsim)
+        break
+    }
   }
 
   ###### Report diagnostics
+  if(ierr > 0)
+    cat(paste("\n\n**Alert:",
+              ierr, "failures occurred in", how.simulating, "\n\n"))
   nempty <- sum(simul.sizes == 0)
   if(nempty > 0)
     cat(paste("\n\n**Alert:",

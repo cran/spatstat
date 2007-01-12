@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.11 $	$Date: 2006/10/09 03:40:55 $
+#	$Revision: 4.13 $	$Date: 2006/12/18 09:28:10 $
 #
 # -------- functions ----------------------------------------
 #
@@ -221,8 +221,14 @@ rebound.owin <- function(w, rect) {
     
 dilate.owin <- function(w, r, ...) {
   verifyclass(w, "owin")
+  if(r < 0)
+    stop("r must be nonnegative")
+  if(r == 0)
+    return(w)
   if(w$type != "mask")
     w <- as.mask(w, ...)
+  epsilon <- sqrt(w$xstep^2 + w$ystep^2)
+  r <- max(r, epsilon)
   bb <- bounding.box(w)
   newbox <- owin(bb$xrange + c(-r,r), bb$yrange + c(-r,r))
   w <- rebound.owin(w, newbox)

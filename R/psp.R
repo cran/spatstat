@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.25 $ $Date: 2006/10/24 03:02:02 $
+#  $Revision: 1.27 $ $Date: 2006/12/12 09:12:56 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -259,7 +259,7 @@ endpoints.psp <- function(x, which="both") {
   xx <- as.vector(xmat[ok])
   yy <- as.vector(ymat[ok])
   id <- as.vector(idmat[ok])
-  result <- ppp(xx, yy, window=x$window)
+  result <- ppp(xx, yy, window=x$window, check=FALSE)
   attr(result, "id") <- id
   return(result)
 }
@@ -268,7 +268,14 @@ midpoints.psp <- function(x) {
   verifyclass(x, "psp")
   xm <- eval(expression((x0+x1)/2), envir=x$ends)
   ym <- eval(expression((y0+y1)/2), envir=x$ends)
-  ppp(x=xm, y=ym, window=x$window)
+  win <- x$window
+  ok <- inside.owin(xm, ym, win)
+  if(any(!ok)) {
+    warning(paste("Some segment midpoints lie outside the original window;",
+                  "window replaced by bounding box"))
+    win <- bounding.box(win)
+  }
+  ppp(x=xm, y=ym, window=win, check=FALSE)
 }
 
 lengths.psp <- function(x) {

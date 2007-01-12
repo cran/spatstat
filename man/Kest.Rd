@@ -27,7 +27,7 @@ from a point pattern in a window of arbitrary shape.
   }
   \item{correction}{
     Optional. A character vector containing any selection of the
-    options \code{"border"}, \code{"bord.modif"},
+    options \code{"none"}, \code{"border"}, \code{"bord.modif"},
     \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
     It specifies the edge correction(s) to be applied.
   }
@@ -120,6 +120,11 @@ from a point pattern in a window of arbitrary shape.
   Setting \code{nlarge=0} is equivalent to selecting only the border
   correction with \code{correction="border"}.
 
+  For instructional purposes, you can also set
+  \code{correction="none"} to compute an estimate of the \eqn{K}
+  function without edge correction. This estimate is biased and should
+  not be used for data analysis.
+  
   The estimator \code{Kest} ignores marks.
   Its counterparts for multitype point patterns
   are \code{\link{Kcross}}, \code{\link{Kdot}},

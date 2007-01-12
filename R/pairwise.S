@@ -2,7 +2,7 @@
 #
 #    pairwise.S
 #
-#    $Revision: 1.5 $	$Date: 2006/10/09 02:39:56 $
+#    $Revision: 1.7 $	$Date: 2007/01/11 03:36:02 $
 #
 #    Pairwise()    create a user-defined pairwise interaction process
 #                 [an object of class 'interact']
@@ -31,13 +31,21 @@ Pairwise <- function(pot, name = "user-defined pairwise interaction process",
   out <- 
   list(
          name     = name,
+         creator  = "Pairwise",
          family   = pairwise.family,
          pot      = pot,
          par      = par,
          parnames = parnames,
          init     = NULL,
-         update   = NULL,  
-         print    = printfun
+         update   = function(self, ...){
+           do.call(Pairwise,
+                   resolve.defaults(list(...),
+                                    list(pot=self$pot, name=self$name,
+                                         par=self$par, parnames=self$parnames,
+                                         printfun=self$print)))
+         } , 
+         print    = printfun,
+         version  = versionstring.spatstat()
   )
   class(out) <- "interact"
   return(out)

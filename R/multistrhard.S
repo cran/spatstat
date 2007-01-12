@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.12 $	$Date: 2006/10/09 02:39:13 $
+#    $Revision: 2.16 $	$Date: 2007/01/11 03:36:02 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -27,6 +27,7 @@ MultiStraussHard <- function(types, iradii, hradii) {
   out <- 
   list(
          name     = "Multitype Strauss Hardcore process",
+         creator  = "MultiStraussHard",
          family    = pairwise.family,
          pot      = function(d, tx, tu, par) {
      # arguments:
@@ -135,24 +136,17 @@ MultiStraussHard <- function(types, iradii, hradii) {
           # get matrices of interaction radii
           r <- self$par$iradii
           h <- self$par$hradii
-          # list all unordered pairs of types
+          # list all relevant unordered pairs of types
           uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
-          mark1 <- (typ[row(r)])[uptri]
-          mark2 <- (typ[col(r)])[uptri]
-          # names of coefficients
-          basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
-          thetaname <- paste("mark", basename, sep="")
-          thetaname <- make.names(thetaname)  # converts illegal characters
-          npairs <- length(thetaname)
+          index1 <- (row(r))[uptri]
+          index2 <- (col(r))[uptri]
+          npairs <- length(index1)
           # extract canonical parameters; shape them into a matrix
           gammas <- matrix(, ntypes, ntypes)
           dimnames(gammas) <- list(typ, typ)
-          for(i in 1:npairs) {
-            theta <- coeffs[thetaname[i]]
-            gamma <- exp(theta)
-            gammas[mark1[i], mark2[i]] <- gamma
-            gammas[mark2[i], mark1[i]] <- gamma
-          }
+          expcoef <- exp(coeffs)
+          gammas[ cbind(index1, index2) ] <- expcoef
+          gammas[ cbind(index2, index1) ] <- expcoef
           #
           return(list(param=list(gammas=gammas),
                       inames="interaction parameters gamma_ij",
@@ -188,24 +182,14 @@ MultiStraussHard <- function(types, iradii, hradii) {
            ihc <- (is.na(hradii) | hradii == 0)
            if(any(ihc & (gamma > 1))) 
                gamma[ihc] <- pmin(gamma[ihc], 1)
-           # now put them back... %^[
-           # get possible types
-           typ <- self$par$types
-           ntypes <- length(typ)
+           # now put them back..
            # get matrices of interaction radii
            r <- self$par$iradii
            h <- self$par$hradii
            # list all unordered pairs of types
            uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
-           mark1 <- (typ[row(r)])[uptri]
-           mark2 <- (typ[col(r)])[uptri]
-           # names of coefficients
-           basename <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
-           thetaname <- paste("mark", basename, sep="")
-           thetaname <- make.names(thetaname)
-           npairs <- length(thetaname)
            # reassign 
-           coeffs[thetaname] <- log(gamma[uptri])
+           coeffs[] <- log(gamma[uptri])
            return(coeffs)
         },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
@@ -222,7 +206,8 @@ MultiStraussHard <- function(types, iradii, hradii) {
              return(0)
            else
              return(max(c(r[ractive],h[hactive])))
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

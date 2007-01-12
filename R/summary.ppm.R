@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.15 $   $Date: 2006/10/10 04:22:48 $
+#    $Revision: 1.23 $   $Date: 2007/01/12 01:29:29 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -14,13 +14,6 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   x <- object
   y <- list()
 
-  #######  Check version #########################
-  
-  ver <- object$version 
-  antiquated <- is.null(ver) || !is.list(ver) ||
-                      (ver$major == 1 && ver$minor < 5)
-  y$antiquated <- antiquated
-  
   #######  Extract main data components #########################
 
   QUAD <- object$Q
@@ -30,13 +23,26 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   INTERACT <- x$interaction
   if(is.null(INTERACT)) INTERACT <- Poisson()
 
+  #######  Check version #########################
+
+  mpl.ver <- versionstring.ppm(object)
+  int.ver <- versionstring.interact(INTERACT)
+  current <- versionstring.spatstat()
+
+  virgin <- min(package_version(c(mpl.ver, int.ver)))
+
+  y$antiquated <- antiquated <- (virgin <= package_version("1.5"))
+  y$old        <- old        <- (virgin < majorminorversion(current))
+
+  y$version    <- as.character(virgin)
+                
   ####### Determine type of model ############################
   
   y$no.trend <- identical.formulae(TREND, NULL) || identical.formulae(TREND, ~1)
 
   y$stationary <- y$no.trend || identical.formulae(TREND, ~marks)
 
-  y$poisson <- is.null(INTERACT$family)
+  y$poisson <- is.poisson.interact(INTERACT)
 
   y$marked <- is.marked.ppp(DATA)
   y$multitype <- is.multitype.ppp(DATA)
@@ -64,7 +70,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   ######  Does it have external covariates?  ####################
 
   if(!antiquated) {
-    hc <- !is.null(x$covariates)
+    covars <- x$covariates
+    hc <- !is.null(covars) && (length(covars) > 0)
   } else {
     # Antiquated format
     # Interpret the function call instead
@@ -104,7 +111,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   y$entries$theta <- theta
 
   # corresponding internal names of regressor variables 
-  Vnames <- x$internal$Vnames
+  y$entries$Vnames <- Vnames <- x$internal$Vnames
 
   ######  Trend component #########################
 
@@ -173,8 +180,11 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   if(!y$poisson) {
     if(!is.null(INTERACT$interpret)) {
-      # invoke auto-interpretation feature 
-      sensible <- (INTERACT$interpret)(x$coef, INTERACT)
+      # invoke auto-interpretation feature
+      if(newstyle.coeff.handling(INTERACT))
+        sensible <- (INTERACT$interpret)(x$coef[Vnames], INTERACT)
+      else 
+        sensible <- (INTERACT$interpret)(x$coef, INTERACT)
       header <- paste("Fitted", sensible$inames)
       printable <- sensible$printable
     } else {
@@ -194,6 +204,9 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
 print.summary.ppm <- function(x, ...) {
 
+  if(x$old)
+    warning("Model was fitted by an older version of spatstat")
+  
   if(is.null(x$args)) {
     # this is the quick version
     cat(paste(x$name, "\n"))
@@ -215,6 +228,9 @@ print.summary.ppm <- function(x, ...) {
   cat("Call:\n")
   print(x$args$call)
 
+  if(x$old) 
+    cat(paste("** Executed by old spatstat version", x$version, " **\n"))
+  
   cat(paste("Edge correction:", dQuote(x$args$correction)))
   if(x$args$rbord > 0)
     cat(paste("border correction distance r =", x$args$rbord,"\n"))
@@ -240,7 +256,7 @@ print.summary.ppm <- function(x, ...) {
   markedpoisson <- poisson && markeddata
 
   # names of interaction variables if any
-  Vnames <- x$Vnames
+  Vnames <- x$entries$Vnames
   # their fitted coefficients
   theta <- x$theta
 

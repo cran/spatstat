@@ -6,7 +6,7 @@
   a point pattern dataset in the two-dimensional plane.
 }
 \usage{
-  ppp(x,y, \dots, window, marks)
+  ppp(x,y, \dots, window, marks, check=TRUE)
 }
 \arguments{
   \item{x}{Vector of \eqn{x} coordinates of data points}
@@ -16,6 +16,11 @@
   \item{\dots}{arguments passed to \code{\link{owin}} to create the
     window, if \code{window} is missing}
   \item{marks}{(optional) vector of mark values}
+  \item{check}{Logical flag indicating whether to check
+    that all the \eqn{(x,y)} points lie inside the specified window.
+    Do not set this to \code{FALSE} unless you are sure that this
+    check is unnecessary.
+  }
 }
 \value{
   An object of class \code{"ppp"} 

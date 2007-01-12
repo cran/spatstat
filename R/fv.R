@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.20 $   $Date: 2006/11/18 01:30:09 $
+#    $Revision: 1.22 $   $Date: 2006/12/14 07:24:07 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -106,7 +106,7 @@ print.fv <- function(x, ...) {
   verifyclass(x, "fv")
   nama <- names(x)
   a <- attributes(x)
-  cat(paste("Function value object (class", sQuote("fv"), "\n"))
+  cat(paste("Function value object (class ", sQuote("fv"), ")\n", sep=""))
   if(!is.null(ylab <- a$ylab)) {
     if(is.language(ylab))
       ylab <- deparse(ylab)
@@ -125,8 +125,9 @@ print.fv <- function(x, ...) {
   cat("--------------------------------------\n\n")
   cat("Default plot formula:\n\t")
   print.formula(as.formula(a$fmla))
+  alim <- signif(a$alim, 5)
   cat(paste("\nRecommended range of argument ", a$argu,
-            ": [", a$alim[1], ", ", a$alim[2], "]\n", sep=""))
+            ": [", alim[1], ", ", alim[2], "]\n", sep=""))
   ledge <- summary(units(x))$legend
   if(!is.null(ledge))
     cat(paste(ledge, "\n"))

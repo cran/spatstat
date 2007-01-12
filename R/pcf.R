@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.23 $   $Date: 2006/10/31 07:45:35 $
+#   $Revision: 1.24 $   $Date: 2006/12/12 08:42:35 $
 #
 #
 #   calculate pair correlation function
@@ -63,7 +63,7 @@ pcf.ppp <- function(X, ..., r=NULL,
   
   close <- closepairs(X, max(r))
   dIJ <- close$d
-  XI <- ppp(close$xi, close$yi, window=win)
+  XI <- ppp(close$xi, close$yi, window=win, check=FALSE)
 
   # how to process the distances
   
@@ -97,7 +97,7 @@ pcf.ppp <- function(X, ..., r=NULL,
 
   if(any(correction=="translate")) {
     # translation correction
-    XJ <- ppp(close$xj, close$yj, window=win)
+    XJ <- ppp(close$xj, close$yj, window=win, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
     out <- doit(edgewt, dIJ, out, "gTrans(r)",
                 "translation-corrected estimate of g", "trans", otherargs,

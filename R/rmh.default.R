@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.45 2006/10/16 01:58:13 adrian Exp $
+# $Id: rmh.default.R,v 1.46 2006/12/12 08:57:33 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -690,7 +690,7 @@ rmhEngine <- function(InfoList, ...,
   indices <- if(npts == 0) numeric(0) else (1:npts)
   x <- rslt$x[indices]
   y <- rslt$y[indices]
-  xxx <- ppp(x=x, y=y, window=w.sim)
+  xxx <- ppp(x=x, y=y, window=w.sim, check=FALSE)
   if(mtype) {
     marx <- factor(rslt$marks[indices],levels=types)
     xxx <- xxx %mark% marx

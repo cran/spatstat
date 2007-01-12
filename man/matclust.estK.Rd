@@ -136,6 +136,7 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
 }
 \seealso{
   \code{\link{lgcp.estK}},
+  \code{\link{thomas.estK}},
   \code{\link{mincontrast}},
   \code{\link{Kest}},
   \code{\link{rMatClust}} to simulate the fitted model.

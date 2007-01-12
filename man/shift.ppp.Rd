@@ -35,8 +35,8 @@
   plot(X)
   # no discernible difference except coordinates are different
   }
-  Y <- superimpose(cells, shift(cells, c(0.1,0.1)))
-  \dontrun{plot(Y)}
+  plot(cells, pch=16)
+  plot(shift(cells, c(0.03,0.03)), add=TRUE)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

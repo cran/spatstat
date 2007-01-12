@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.17 $    $Date: 2006/10/24 03:00:39 $
+#    $Revision: 1.19 $    $Date: 2006/12/15 09:55:24 $
 #
 #  (a) for matrices only:
 #
@@ -159,4 +159,39 @@ revcumsum <- function(x) {
     return(z$x)
   }
 }
-         
+
+prolongseq <- function(x, newrange) {
+  stopifnot(length(newrange) == 2 && newrange[1] < newrange[2])
+  stopifnot(length(x) >= 2)
+  dx <- diff(x)
+  if(any(dx <= 0))
+    stop("x must be an increasing sequence")
+  if(diff(range(dx)) > 0.01 * abs(mean(dx)))
+    stop("x must be evenly spaced")
+  dx <- mean(dx)
+
+  # add or trim data to left
+  if(x[1] > newrange[1]) {
+    leftbit <- seq(x[1], newrange[1], by= -dx) 
+    x <- c(rev(leftbit), x[-1])
+  } else 
+    x <- x[x >= newrange[1]]
+
+  # add or trim data to right
+  nx <- length(x)
+  if(newrange[2] > x[nx]) {
+    rightbit <- seq(x[nx], newrange[2], by= dx)
+    x <- c(x[-nx], rightbit)
+  } else 
+    x <- x[x <= newrange[2]]
+
+  return(x)
+}
+
+intersect.ranges <- function(a, b) {
+  lo <- max(a[1],b[1])
+  hi <- min(a[2],b[2])
+  if(lo >= hi) stop("Intersection is empty")
+  return(c(lo, hi))
+}
+

@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.6 $	$Date: 2006/11/17 23:17:17 $
+#	$Revision: 1.7 $	$Date: 2006/12/12 08:57:55 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -46,7 +46,7 @@ rotxy <- function(X, angle=pi/2) {
   verifyclass(X, "ppp")
   r <- rotxy(X, angle)
   w <- rotate.owin(X$window, angle)
-  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE)))
+  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 
 

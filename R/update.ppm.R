@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.16 $    $Date: 2006/10/16 04:47:26 $
+#  $Revision: 1.20 $    $Date: 2007/01/11 03:42:41 $
 #
 #
 #
@@ -11,9 +11,9 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
   verifyclass(object, "ppm")
 
   # inspect model
-  old <- summary(object, quick="no prediction")$antiquated
-  if(old)
-    stop("Model was fitted by an old version of spatstat; cannot be updated")
+  antique <- summary(object, quick="no prediction")$antiquated
+  if(antique)
+    stop("Model was fitted by a very old version of spatstat; cannot be updated")
   call <- object$call
   if(!is.call(call))
     stop(paste("Internal error - object$call is not of class",

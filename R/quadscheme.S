@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.14 $    $Date: 2006/10/10 04:22:48 $
+#      $Revision: 4.16 $    $Date: 2006/12/13 09:54:31 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -31,10 +31,13 @@ quadscheme <- function(data, dummy, method="grid", ...) {
     # extract recommended parameters for computing weights
     wp <- attr(dummy, "weight.parameters")
   } else {
-    # use existing dummy points
-    dummy <- as.ppp(dummy, data$window)
-		# note data$window is the DEFAULT quadrature window
-		# applicable when 'dummy' does not contain a window
+    # user-supplied dummy points
+    if(!is.ppp(dummy)) {
+      # convert to ppp object
+      dummy <- as.ppp(dummy, data$window, check=FALSE)
+      # confine dummy points to data window 
+      dummy <- dummy[data$window]
+    }
     dp <- NULL
     # use given weight parameters without inspection
     wp <- append(list(method=method), list(...))
@@ -44,9 +47,11 @@ quadscheme <- function(data, dummy, method="grid", ...) {
   mD <- is.marked(dummy)
 
   if(!mX && !mD)
-    Q <- do.call("quadscheme.spatial", append(list(data, dummy), wp))
+    Q <- do.call("quadscheme.spatial",
+                 append(list(data, dummy, check=FALSE), wp))
   else if(mX && !mD)
-    Q <- do.call("quadscheme.replicated", append(list(data, dummy), wp))
+    Q <- do.call("quadscheme.replicated",
+                 append(list(data, dummy, check=FALSE), wp))
   else if(!mX && mD)
     stop("dummy points are marked but data are unmarked")
   else
@@ -76,8 +81,10 @@ quadscheme.spatial <-
         # No two points should have the same spatial location
         # 
 
-	data <- as.ppp(data)
-        dummy <- as.ppp(dummy, data$window)
+    check <- resolve.defaults(list(...), list(check=TRUE))$check
+    
+	data <- as.ppp(data, check=check)
+        dummy <- as.ppp(dummy, data$window, check=check)
 		# note data$window is the DEFAULT quadrature window
 		# applicable when 'dummy' does not contain a window
 
@@ -86,7 +93,7 @@ quadscheme.spatial <-
         if(is.marked(dummy))
           warning("marks in dummy pattern - ignored")
         
-	both <- as.ppp(concatxy(data, dummy), dummy$window)
+	both <- as.ppp(concatxy(data, dummy), dummy$window, check=check)
 	switch(method,
 		grid={
 			w <- gridweights(both, window= dummy$window, ...)
@@ -121,8 +128,10 @@ quadscheme.spatial <-
         #
         # No two points in 'data'+'dummy' should have the same spatial location
 
-	data <- as.ppp(data)
-	dummy <- as.ppp(dummy, data$window)
+    check <- resolve.defaults(list(...), list(check=TRUE))$check
+
+    data <- as.ppp(data, check=check)
+    dummy <- as.ppp(dummy, data$window, check=check)
 		# note data$window is the DEFAULT quadrature window
 		# unless otherwise specified in 'dummy'
 
@@ -189,7 +198,8 @@ function(pp, markset, fac=TRUE) {
   nmarks <- length(markset)
   result <- ppp(rep(pp$x, nmarks),
                 rep(pp$y, nmarks),
-                window=pp$window)
+                window=pp$window,
+                check=FALSE)
   marx <- rep(markset, rep(pp$n, nmarks))
   if(fac)
     marx <- factor(marx, levels=markset)

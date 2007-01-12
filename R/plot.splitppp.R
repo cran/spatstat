@@ -1,5 +1,6 @@
 #
-plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE) {
+plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
+                                         nrows=NULL, ncols=NULL) {
   xname <- deparse(substitute(x))
 
   if(is.null(names(x)))
@@ -21,8 +22,14 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE) {
   # determine arrangement of plots
   # arrange like mfrow(nrows, ncols) plus a banner at the top
   n <- length(x)
-  nrows <- as.integer(floor(sqrt(n)))
-  ncols <- as.integer(ceiling(n/nrows))
+  if(is.null(nrows) && is.null(ncols)) {
+    nrows <- as.integer(floor(sqrt(n)))
+    ncols <- as.integer(ceiling(n/nrows))
+  } else if(!is.null(nrows) && is.null(ncols))
+    ncols <- as.integer(ceiling(n/nrows))
+  else if(is.null(nrows) && !is.null(ncols))
+    nrows <- as.integer(ceiling(n/ncols))
+  else stopifnot(nrows * ncols >= length(x))
   nblank <- ncols * nrows - n
   # declare layout
   mat <- matrix(c(seq(n), rep(0, nblank)),

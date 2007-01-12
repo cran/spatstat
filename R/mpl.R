@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.46 $	$Date: 2006/10/31 07:41:19 $
+#	$Revision: 5.56 $	$Date: 2007/01/12 01:37:59 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -71,16 +71,31 @@ function(Q,
 #  
   computed <- if(savecomputed) list(X=X, Q=Q, U=P) else NULL
 #
+# Validate main arguments
+  if(!is.null(trend) && !inherits(trend, "formula"))
+    stop(paste("Argument", sQuote("trend"), "must be a formula"))
+  if(!is.null(interaction) && !inherits(interaction, "interact"))
+    stop(paste("Argument", sQuote("interaction"), "has incorrect format"))
 #
 # Interpret the call
 want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 
-the.version <- list(major=1,
-                    minor=10,
-                    release=0,
-                    date="$Date: 2006/10/31 07:41:19 $")
+# Stamp with spatstat version number
+  
+spv <- package_version(versionstring.spatstat())
+the.version <- list(major=spv$major,
+                    minor=spv$minor,
+                    release=spv$patchlevel,
+                    date="$Date: 2007/01/12 01:37:59 $")
 
+if(want.inter) {
+  # ensure we're using the latest version of the interaction object
+  if(outdated.interact(interaction)) 
+    interaction <- update(interaction)
+}
+
+#  
 if(use.gam && exists("is.R") && is.R()) 
   require(mgcv)
 
@@ -119,11 +134,12 @@ prep <- mpl.prepare(Q, X, P, trend, interaction,
                     want.trend, want.inter, correction, rbord,
                     "quadrature points", callstring,
                     allcovar=allcovar,
-                    precomputed=precomputed, savecomputed=savecomputed)
+                    precomputed=precomputed, savecomputed=savecomputed,
+                    ...)
 
   # back door
 if(preponly) {
-  # exit now, returning internal information
+  # exit now, returning prepared data frame and internal information
   prep$info <- list(want.trend=want.trend,
                     want.inter=want.inter,
                     correction=correction,
@@ -215,7 +231,9 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
                         Pname="quadrature points", callstring="",
                         ...,
                         allcovar=FALSE,
-                        precomputed=NULL, savecomputed=FALSE) {
+                        precomputed=NULL, savecomputed=FALSE,
+                        vnamebase=c("Interaction", "Interact."),
+                        vnameprefix=NULL) {
 
   if(missing(want.trend))
     want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
@@ -226,8 +244,19 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
   problems <- list()
   
   names.precomputed <- names(precomputed)
-  
 
+
+  if(!missing(vnamebase)) {
+    if(length(vnamebase) == 1)
+      vnamebase <- rep(vnamebase, 2)
+    if(!is.character(vnamebase) || length(vnamebase) != 2)
+      stop("Internal error: illegal format of vnamebase")
+  }
+  if(!is.null(vnameprefix)) {
+    if(!is.character(vnameprefix) || length(vnameprefix) != 1)
+      stop("Internal error: illegal format of vnameprefix")
+  }
+      
 ################ C o m p u t e     d a t a  ####################
 
 # Extract covariate values
@@ -391,19 +420,26 @@ if(want.inter) {
   
   # Augment data frame by appending the regression variables for interactions.
   #
-  # If there are no names provided for the columns of V,
-  # call them "Interact.1", "Interact.2", ...
-
-  if(is.null(dimnames(V)[[2]])) {
-    # default names
+  # First determine the names of the variables
+  #
+  Vnames <- dimnames(V)[[2]]
+  if(is.null(Vnames)) {
+    # No names were provided for the columns of V.
+    # Give them default names.
+    # In ppm the names will be "Interaction" or "Interact.1", "Interact.2", ...
+    # In mppm an alternative tag will be specified by vnamebase.
     nc <- ncol(V)
-    dimnames(V) <- list(dimnames(V)[[1]], 
-      if(nc == 1) "Interaction" else paste("Interact.", 1:nc, sep=""))
+    Vnames <- if(nc == 1) vnamebase[1] else paste(vnamebase[2], 1:nc, sep="")
+    dimnames(V) <- list(dimnames(V)[[1]], Vnames)
+  
+  } else  if(!is.null(vnameprefix)) {
+    # Variable names were provided by the evaluator (e.g. MultiStrauss).
+    # Prefix the variable names by a string
+    # (typically required by mppm)
+    Vnames <- paste(vnameprefix, Vnames, sep="")
+    dimnames(V) <- list(dimnames(V)[[1]], Vnames)
   }
 
-  # List of interaction variable names
-  Vnames <- dimnames(V)[[2]]
-  
   # Check the names are valid as column names in a dataframe
   okVnames <- make.names(Vnames)
   if(any(Vnames != okVnames)) {
@@ -477,9 +513,12 @@ rhs <- paste(c(trendpart, Vnames), collapse= "+")
 fmla <- paste(".mpl.Y ", rhs)
 fmla <- as.formula(fmla)
 
+####  character string of trend formula (without Vnames)
+trendfmla <- paste(".mpl.Y ", trendpart)
 #### 
 
-return(list(fmla=fmla, glmdata=glmdata, Vnames=Vnames, problems=problems,
+return(list(fmla=fmla, trendfmla=trendfmla,
+            glmdata=glmdata, Vnames=Vnames, problems=problems,
             computed=computed))
 
 }
@@ -505,6 +544,8 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
                  "does not equal the number of", type))
     return(covariates)
   } else if(is.list(covariates)) {
+    if(length(covariates) == 0)
+      return(as.data.frame(matrix(, n, 0)))
     if(!all(unlist(lapply(covariates, is.im))))
       stop(paste("Some entries in the list",
                  sQuote("covariates"), "are not images"))

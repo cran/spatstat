@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.20 $    $Date: 2006/10/09 03:33:35 $
+#    $Revision: 1.21 $    $Date: 2006/12/12 08:59:59 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -370,7 +370,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
   # check for duplicated points
   dup <- unlist(lapply(B,
                        function(p, f) {
-                         any(duplicated(ppp(p$x, p$y, window=f)))
+                         any(duplicated(ppp(p$x, p$y, window=f, check=FALSE)))
                        },
                        f=outerframe))
   if((ndup <- sum(dup)) > 0) {

@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.6 $	$Date: 2005/03/12 01:17:43 $
+#    $Revision: 1.11 $	$Date: 2007/01/11 03:36:02 $
 #
 #    Lennard-Jones potential
 #
@@ -14,6 +14,7 @@ LennardJones <- function() {
   out <- 
   list(
          name     = "Lennard-Jones potential",
+         creator  = "LennardJones",
          family    = pairwise.family,
          pot      = function(d, par) {
                          array(c(d^{-12},-d^{-6}),dim=c(dim(d),2))
@@ -21,11 +22,11 @@ LennardJones <- function() {
          par      = list(),
          parnames = character(),
          init     = function(...){}, # do nothing
-         update = function(...){},  # default OK
+         update = NULL, # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           theta1 <- coeffs[["Interact.1"]]
-           theta2 <- coeffs[["Interact.2"]]
+           theta1 <- as.numeric(coeffs[1])
+           theta2 <- as.numeric(coeffs[2])
            if(theta1 <= 0) {
              # Fitted regular parameter sigma^12 is negative
              sigma <- NA
@@ -51,10 +52,11 @@ LennardJones <- function() {
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            if(any(is.na(coeffs)) || epsilon == 0)
              return(Inf)
-           theta1 <- abs(coeffs[["Interact.1"]])
-           theta2 <- abs(coeffs[["Interact.2"]])
+           theta1 <- abs(coeffs[1])
+           theta2 <- abs(coeffs[2])
            return(max((theta1/epsilon)^(1/12), (theta2/epsilon)^(1/6)))
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

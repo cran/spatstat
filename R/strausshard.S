@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.5 $	$Date: 2006/10/10 04:22:48 $
+#    $Revision: 2.8 $	$Date: 2007/01/11 03:36:02 $
 #
 #    The Strauss/hard core process
 #
@@ -17,6 +17,7 @@ StraussHard <- function(r, hc) {
   out <- 
   list(
          name   = "Strauss - hard core process",
+         creator = "StraussHard",
          family  = pairwise.family,
          pot    = function(d, par) {
            v <- ifelse(d <= par$r, 1, 0)
@@ -37,7 +38,7 @@ StraussHard <- function(r, hc) {
          update = NULL,       # default OK
          print = NULL,         # default OK
          interpret =  function(coeffs, self) {
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- as.numeric(coeffs[1])
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
@@ -50,10 +51,9 @@ StraussHard <- function(r, hc) {
          project = function(coeffs, self) {
            gamma <- (self$interpret)(coeffs, self)$param$gamma
            if(is.na(gamma)) 
-             coeffs[["Interaction"]] <- 0
+             coeffs[1] <- 0
            else if(!is.finite(gamma)) 
-             coeffs[["Interaction"]] <-
-               log(.Machine$double.xmax)
+             coeffs[1] <- log(.Machine$double.xmax)
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
@@ -61,12 +61,13 @@ StraussHard <- function(r, hc) {
            hc <- self$par$hc
            if(any(is.na(coeffs)))
              return(r)
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- coeffs[1]
            if(abs(loggamma) <= epsilon)
              return(hc)
            else
              return(r)
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   (out$init)(out)

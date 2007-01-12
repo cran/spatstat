@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.23 $   $Date: 2006/10/17 09:08:09 $
+#    $Revision: 4.25 $   $Date: 2006/12/12 08:56:16 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -40,7 +40,7 @@
   # no checking
       x <- runif(n, min=win$xrange[1], max=win$xrange[2])
       y <- runif(n, min=win$yrange[1], max=win$yrange[2])  
-      return(ppp(x, y, window=win))
+      return(ppp(x, y, window=win, check=FALSE))
 }
 
 "runifdisc" <-
@@ -52,7 +52,7 @@
   s <- sqrt(runif(n, min=0, max=radius^2))
   return(ppp(centre[1] + s * cos(theta),
              centre[2] + s * sin(theta),
-             window=disque))
+             window=disque, check=FALSE))
 }
 
 
@@ -78,7 +78,7 @@
              # extract pixel centres and randomise within pixels
              x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
              y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
-             return(ppp(x, y, window=win))
+             return(ppp(x, y, window=win, check=FALSE))
            },
            polygonal={
              # rejection method
@@ -167,7 +167,7 @@ rpoint <- function(n, f, fmax=NULL,
     # extract pixel centres and randomise within pixels
     x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
     y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
-    return(ppp(x, y, window=wf))
+    return(ppp(x, y, window=wf, check=FALSE))
   }
 
   # ------------ FUNCTION  ---------------------  
@@ -231,6 +231,13 @@ rpoint <- function(n, f, fmax=NULL,
     #     lmax     maximum possible value of lambda(x,y,...)
     #     win     default observation window (of class 'owin')
     #   ...       arguments passed to lambda(x, y, ...)
+
+    if(!(is.numeric(lambda) || is.function(lambda) || is.im(lambda)))
+      stop(paste(sQuote("lambda"),
+                 "must be a constant, a function or an image"))
+    if(is.numeric(lambda) && !(length(lambda) == 1 && lambda >= 0))
+      stop(paste(sQuote("lambda"),
+                 "must be a single, nonnegative number"))
 
     win <- if(is.im(lambda))
       rescue.rectangle(as.owin(lambda))
@@ -307,6 +314,8 @@ rpoint <- function(n, f, fmax=NULL,
 "rSSI" <-
   function(r, n, win = owin(c(0,1),c(0,1)), giveup = 1000)
 {
+  stopifnot(is.numeric(r) && length(r) == 1 && r >= 0)
+  stopifnot(is.numeric(n) && length(n) == 1 && n >= 0)
      # Simple Sequential Inhibition process
      # fixed number of points
      # Naive implementation, proposals are uniform
@@ -367,7 +376,7 @@ rpoint <- function(n, f, fmax=NULL,
     for(i in seq(parents$n)) {
       # generate random offspring of i-th parent point
       cluster <- rcluster(parents$x[i], parents$y[i], ...)
-      cluster <- ppp(cluster$x, cluster$y, window=frame)
+      cluster <- ppp(cluster$x, cluster$y, window=frame, check=FALSE)
       # trim to window
       cluster <- cluster[win]
       # add to pattern
@@ -388,6 +397,9 @@ rpoint <- function(n, f, fmax=NULL,
 {
   # Matern Cluster Process with Poisson (mu) offspring distribution
   #
+  stopifnot(is.numeric(r) && length(r) == 1 && r > 0)
+  stopifnot(is.numeric(mu) && length(mu) == 1 && mu >= 0)
+  
   poisclus <-  function(x0, y0, radius, mu) {
                            n <- rpois(1, mu)
                            return(runifdisc(n, centre=c(x0, y0),
@@ -404,6 +416,9 @@ rpoint <- function(n, f, fmax=NULL,
   # Thomas process with Poisson(mu) number of offspring
   # at isotropic Normal(0,sigma^2) displacements from parent
   #
+  stopifnot(is.numeric(sigma) && length(sigma) == 1 && sigma > 0)
+  stopifnot(is.numeric(mu) && length(mu) == 1 && mu >= 0)
+  
   thomclus <-  function(x0, y0, sigma, mu) {
                            n <- rpois(1, mu)
                            x <- rnorm(n, mean=x0, sd=sigma)
@@ -420,7 +435,7 @@ rstrat <- function(win=square(1), nx, ny=nx, k=1) {
   stopifnot(nx >= 1 && ny >= 1)
   stopifnot(k >= 1)
   xy <- stratrand(win, nx, ny, k)
-  Xbox <- ppp(xy$x, xy$y, win$xrange, win$yrange)
+  Xbox <- ppp(xy$x, xy$y, win$xrange, win$yrange, check=FALSE)
   X <- Xbox[win]
   return(X)
 }
@@ -447,7 +462,7 @@ rsyst <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
   xy0 <- expand.grid(x=x0, y=y0)
   x <- xy0$x + runif(1, min = 0, max = dx)
   y <- xy0$y + runif(1, min = 0, max = dy)
-  Xbox <- ppp(x, y, xr, yr)
+  Xbox <- ppp(x, y, xr, yr, check=FALSE)
   X <- Xbox[win]
   return(X)
 }
@@ -487,7 +502,7 @@ rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
       x <- c(x, x0[ix] + runif(nij, min=0, max=dx))
       y <- c(y, y0[iy] + runif(nij, min=0, max=dy))
     }
-  Xbox <- ppp(x, y, xr, yr)
+  Xbox <- ppp(x, y, xr, yr, check=FALSE)
   X <- Xbox[win]
   return(X)
 }

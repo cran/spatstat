@@ -147,6 +147,7 @@ letterR                 Window in Shape of Letter R
 levelset                Level Set of a Pixel Image
 lgcp.estK               Fit a Log-Gaussian Cox Point Process by Minimum
                         Contrast
+[.listof                Extract or Replace Subset of a List of Things
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
@@ -302,6 +303,7 @@ solutionset             Evaluate Logical Expression Involving Pixel
                         True
 spatstat                The Spatstat Package
 spatstat.options        Internal Options in Spatstat Package
+[.splitppp              Extract or Replace Sub-Patterns
 split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
 spruces                 Spruces Point Pattern
@@ -315,11 +317,13 @@ subset.ppp              Extract or Replace Subset of Point Pattern
 subset.psp              Extract Subset of Line Segment Pattern
 suffstat                Sufficient Statistic of Point Process Model
 summary.im              Summarizing a Pixel Image
+summary.listof          Summary of a List of Things
 summary.owin            Summary of a Spatial Window
 summary.ppm             Summarizing a Fitted Point Process Model
 summary.ppp             Summary of a Point Pattern Dataset
 summary.psp             Summary of a Line Segment Pattern Dataset
 summary.quad            Summarizing a Quadrature Scheme
+summary.splitppp        Summary of a Split Point Pattern
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
 thomas.estK             Fit the Thomas Point Process by Minimum

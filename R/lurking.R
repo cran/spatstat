@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.8 $ $Date: 2006/10/17 03:27:43 $
+# $Revision: 1.10 $ $Date: 2007/01/11 04:23:40 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -179,9 +179,9 @@ lurking <- function(object, covariate, type="eem",
     if(plot.sd && cumulative) {
       # Fitted intensity at quadrature points
       lambda <- fitted.ppm(object, type="trend")
-      # Asymptotic variance-covariance matrix of coefficients
+      # Fisher information for coefficients
       asymp <- vcov(object,what="internals")
-      V <- asymp$vcov
+      Fisher <- asymp$fisher
       # Local sufficient statistic at quadrature points
       suff <- asymp$suff
       # Clip if required
@@ -211,6 +211,13 @@ lurking <- function(object, covariate, type="eem",
                # Cumulate
                varI <- cumsum(dvar)
              })
+
+      # variance-covariance matrix of coefficients
+      V <- try(solve(Fisher), silent=TRUE)
+      if(inherits(V, "try-error")) {
+        warning("Fisher information is singular; reverting to oldstyle=TRUE")
+        oldstyle <- TRUE
+      }
       
       # Second term: B' V B
       if(oldstyle) {
@@ -223,7 +230,7 @@ lurking <- function(object, covariate, type="eem",
                        inverse =,
                        eem     = ifelse(lambda > 0, 1, 0))
         # Compute sum of w * lamp * suff for quad points in intervals
-        Bcontrib <- (wts * lamp) * suff
+        Bcontrib <- as.vector(wts * lamp) * suff
         dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib))
         for(j in seq(ncol(dB))) 
           dB[,j] <- tapply(Bcontrib[,j], covclass, sum)

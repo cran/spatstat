@@ -6,12 +6,15 @@
   Yields the intersection or union of two windows.
 }
 \usage{
-   intersect.owin(A, B)
-   union.owin(A,B)
+   intersect.owin(A, B, \dots)
+   union.owin(A,B, \dots)
 }
 \arguments{
   \item{A}{A window object (see Details).}
   \item{B}{A window object.}
+  \item{\dots}{Optional arguments passed to \code{\link{as.mask}}
+    to control the discretisation, if required.
+    }
 }
 \value{
   A window object.
@@ -28,7 +31,7 @@
   At present the intersection or union of two polygons
   is computed by discretising them, yielding a binary image mask.
   
-  If the intersection is empty, an error occurs.
+  If the intersection or union is empty, an error occurs.
 }
 
 \author{Adrian Baddeley
@@ -64,6 +67,11 @@
 # mask and rectangle
    intersect.owin(m, v)
    union.owin(m,v)
+
+# mask and polygon
+   p <- rotate(v, 0.2)
+   intersect.owin(m, p)
+   union.owin(m,p)
 #
    A <- letterR
    B <- rotate(letterR, 0.2)

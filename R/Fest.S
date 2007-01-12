@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.16 $	$Date: 2006/10/18 05:53:26 $
+#	$Revision: 4.17 $	$Date: 2006/12/12 08:40:39 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -20,7 +20,7 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
         lambda <- X$n/area.owin(X$window)
 # First discretise
 	dwin <- as.mask(X$window, eps)
-        dX <- ppp(X$x, X$y, window=dwin)
+        dX <- ppp(X$x, X$y, window=dwin, check=FALSE)
 #        
 # histogram breakpoints 
 #

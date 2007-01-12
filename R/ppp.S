@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.44 $	$Date: 2006/11/17 12:20:06 $
+#	$Revision: 4.47 $	$Date: 2006/12/12 08:56:49 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -24,7 +24,7 @@
 #			'marks' attached to the corresponding points.	
 #	
 #--------------------------------------------------------------------------
-ppp <- function(x, y, ..., window, marks ) {
+ppp <- function(x, y, ..., window, marks, check=TRUE ) {
 	# Constructs an object of class 'ppp'
 	#
         if(!missing(window))
@@ -40,6 +40,12 @@ ppp <- function(x, y, ..., window, marks ) {
         stopifnot(is.numeric(y))
         names(x) <- NULL
         names(y) <- NULL
+        # check (x,y) points lie inside window
+        if(check && n > 0) {
+          ok <- inside.owin(x, y, window)
+          if(any(!ok))
+            stop("Some (x,y) points lie outside the specified window")
+        }
         # initialise ppp object
 	pp <- list(window=window, n=n, x=x, y=y)
         # add marks if any
@@ -82,20 +88,16 @@ as.ppp <- function(X, ..., fatal=TRUE) {
 }
 
 as.ppp.ppp <- function(X, ..., fatal=TRUE) {
-  if(verifyclass(X, "ppp", fatal=fatal))
-    return(ppp(X$x, X$y, window=X$window, marks=X$marks))
-  else
-    return(NULL)
+  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  return(ppp(X$x, X$y, window=X$window, marks=X$marks, check=check))
 }
 
 as.ppp.quad <- function(X, ..., fatal=TRUE) {
-  if(verifyclass(X, "quad", fatal=fatal))
-    return(union.quad(X))
-  else
-    return(NULL)
+  return(union.quad(X))
 }
 
 as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
+  check <- resolve.defaults(list(...), list(check=TRUE))$check
   if(!verifyclass(X, "matrix", fatal=fatal)
      || !is.numeric(X)
      || ncol(X) != 2) {
@@ -115,7 +117,7 @@ as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
     return(cobble.xy(X[,1], X[,2], W, fatal))
 
   win <- as.owin(W)
-  Z <- ppp(X[,1], X[,2], window = win)
+  Z <- ppp(X[,1], X[,2], window = win, check=check)
   return(Z)
 }
     
@@ -131,22 +133,23 @@ as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
         # If X also has an entry X$marks
         # then this will be interpreted as the marks vector for the pattern.
 	#
-	if(checkfields(X, c("x", "y", "xl", "xu", "yl", "yu"))) {
+  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  if(checkfields(X, c("x", "y", "xl", "xu", "yl", "yu"))) {
 		xrange <- c(X$xl, X$xu)
 		yrange <- c(X$yl, X$yu)
 		if(is.null(X$marks))
-			Z <- ppp(X$x, X$y, xrange, yrange)
+			Z <- ppp(X$x, X$y, xrange, yrange, check=check)
 		else
 			Z <- ppp(X$x, X$y, xrange, yrange, 
-				marks=X$marks)
+				marks=X$marks, check=check)
 		return(Z)
         } else if(checkfields(X, c("x", "y", "area"))
                   && checkfields(X$area, c("xl", "xu", "yl", "yu"))) {
                 win <- as.owin(X$area)
                 if (is.null(X$marks))
-                  Z <- ppp(X$x, X$y, window=win)
+                  Z <- ppp(X$x, X$y, window=win, check=check)
                 else
-                  Z <- ppp(X$x, X$y, window=win, marks = X$marks)
+                  Z <- ppp(X$x, X$y, window=win, marks = X$marks, check=check)
                 return(Z)
 	} else if(checkfields(X, c("x", "y"))) {
                 if(is.function(W))
@@ -159,9 +162,9 @@ as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
                 }
 		win <- as.owin(W)
 		if(is.null(X$marks))
-                  Z <- ppp(X$x, X$y, window=win)
+                  Z <- ppp(X$x, X$y, window=win, check=check)
                 else
-                  Z <- ppp(X$x, X$y, window=win, marks=X$marks)
+                  Z <- ppp(X$x, X$y, window=win, marks=X$marks, check=check)
                 return(Z)
 	} else {
           if(fatal)
@@ -209,13 +212,15 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
                  index={
                    subset <- i
                    x <- ppp(x$x[subset], x$y[subset], window=x$window,
-                            marks=marksubset(x$marks, subset, marktype))
+                            marks=marksubset(x$marks, subset, marktype),
+                            check=FALSE)
                  },
                  window={
                     window <- i
                     ok <- inside.owin(x$x, x$y, window)
                     x <- ppp(x$x[ok], x$y[ok], window=window, #SIC
-                             marks=marksubset(x$marks, ok, marktype))
+                             marks=marksubset(x$marks, ok, marktype),
+                             check=FALSE)
                   })
         }
 
@@ -395,7 +400,7 @@ setmarks <- function(X, m) {
     if(length(m) == 1) m <- rep(m, X$n)
     else if(X$n == 0) m <- rep(m, 0) # ensures marked pattern is obtained
     else if(length(m) != X$n) stop("number of points != number of marks")
-    Y <- ppp(X$x,X$y,window=X$window,marks=m)
+    Y <- ppp(X$x,X$y,window=X$window,marks=m, check=FALSE)
     return(Y)
   }
   # data frame of marks
@@ -408,7 +413,7 @@ setmarks <- function(X, m) {
                               k=X$n))
   } else if(nrow(m) != X$n)
     stop("number of rows of data frame != number of points")
-  Y <- ppp(X$x,X$y,window=X$window,marks=m)
+  Y <- ppp(X$x,X$y,window=X$window,marks=m, check=FALSE)
 }
 
 identify.ppp <- function(x, ...) {
