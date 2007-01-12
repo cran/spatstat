@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 2.4 $   $Date: 2005/03/22 02:28:21 $
+#    $Revision: 2.7 $   $Date: 2007/01/11 03:34:51 $
 #
 #    Soft core processes.
 #
@@ -17,6 +17,7 @@ Softcore <- function(kappa) {
   out <- 
   list(
          name     = "Soft core process",
+         creator  = "Softcore",
          family   = pairwise.family,
          pot      = function(d, par) {
                         -d^(-2/par$kappa)
@@ -33,31 +34,32 @@ number less than 1")
          update = NULL,  # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           theta <- coeffs[["Interaction"]]
+           theta <- as.numeric(coeffs[1])
            sigma <- theta^(self$par$kappa/2)
            return(list(param=list(sigma=sigma),
                        inames="interaction parameter sigma",
                        printable=sigma))
          },
          valid = function(coeffs, self) {
-           theta <- coeffs[["Interaction"]]
+           theta <- coeffs[1]
            return(is.finite(theta) && (theta >= 0))
          },
          project = function(coeffs, self) {
-           theta <- coeffs[["Interaction"]]
+           theta <- coeffs[1]
            if(is.na(theta))
              theta <- 0
-           coeffs[["Interaction"]] <- max(0, theta)
+           coeffs[] <- max(0, theta)
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            # distance d beyond which log(interaction factor) <= epsilon
            if(any(is.na(coeffs)) || epsilon == 0)
              return(Inf)
-           theta <- coeffs[["Interaction"]]
+           theta <- as.numeric(coeffs[1])
            kappa <- self$par$kappa
            return((theta/epsilon)^(kappa/2))
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

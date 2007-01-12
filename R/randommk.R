@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.22 $   $Date: 2006/10/24 08:51:16 $
+#   $Revision: 1.23 $   $Date: 2006/12/12 08:53:30 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -122,7 +122,7 @@
      stop("n must be non-negative")
             
   if(sum(n) == 0) {
-    nopoints <- ppp(x=numeric(0), y=numeric(0), window=win)
+    nopoints <- ppp(x=numeric(0), y=numeric(0), window=win, check=FALSE)
     nomarks <- factor(types[numeric(0)], levels=types)
     empty <- nopoints %mark% nomarks
     return(empty)
@@ -280,7 +280,7 @@
     return(X)
   }
   # Otherwise invoke rpoint() for each type separately
-  X <- ppp(numeric(ntot), numeric(ntot), window=win, marks=marques)
+  X <- ppp(numeric(ntot), numeric(ntot), window=win, marks=marques, check=FALSE)
 
   for(i in 1:ntypes) {
     if(verbose) cat(paste("Type", i, "\n"))
@@ -343,7 +343,7 @@ rmpoint.I.allim <- function(n, f, types) {
   # compute types
   marx <- factor(types[tpix[id]],levels=types)
   # et voila!
-  return(ppp(x, y, window=as.owin(f[[1]]), marks=marx))
+  return(ppp(x, y, window=as.owin(f[[1]]), marks=marx, check=FALSE))
 }
 
 #

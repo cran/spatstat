@@ -2,7 +2,7 @@
 #
 #    strauss.S
 #
-#    $Revision: 2.5 $	$Date: 2006/10/10 04:22:48 $
+#    $Revision: 2.8 $	$Date: 2007/01/11 03:36:02 $
 #
 #    The Strauss process
 #
@@ -17,6 +17,7 @@ Strauss <- function(r) {
   out <- 
   list(
          name     = "Strauss process",
+         creator  = "Strauss",
          family    = pairwise.family,
          pot      = function(d, par) {
                          d <= par$r
@@ -31,7 +32,7 @@ Strauss <- function(r) {
          update = NULL,  # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- as.numeric(coeffs[1])
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
@@ -42,22 +43,21 @@ Strauss <- function(r) {
            return(is.finite(gamma) && (gamma <= 1))
          },
          project = function(coeffs, self) {
-           loggamma <- coeffs[["Interaction"]]
-           coeffs[["Interaction"]] <-
-             if(is.na(loggamma)) 0 else min(0, loggamma)
+           loggamma <- as.numeric(coeffs[1])
+           coeffs[1] <- if(is.na(loggamma)) 0 else min(0, loggamma)
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
            if(any(is.na(coeffs)))
              return(r)
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- coeffs[1]
            if(abs(loggamma) <= epsilon)
              return(0)
            else
              return(r)
-           
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

@@ -131,6 +131,7 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL)
 }
 \seealso{
   \code{\link{lgcp.estK}},
+  \code{\link{matclust.estK}},
   \code{\link{mincontrast}},
   \code{\link{Kest}}
 }

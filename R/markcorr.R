@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.20 $ $Date: 2006/11/17 08:25:27 $
+#     $Revision: 1.21 $ $Date: 2006/12/12 08:42:02 $
 #
 #    Estimate the mark correlation function
 #
@@ -83,7 +83,7 @@ function(X, f = function(m1, m2) { m1 * m2 }, r=NULL,
         dIJ <- close$d
         I   <- close$i
         J   <- close$j
-        XI <- ppp(close$xi, close$yi, window=W)
+        XI <- ppp(close$xi, close$yi, window=W, check=FALSE)
 
         # apply f to marks of close pairs of points
         #
@@ -115,7 +115,7 @@ function(X, f = function(m1, m2) { m1 * m2 }, r=NULL,
         
         if(any(correction == "translate")) {
           # translation correction
-          XJ <- ppp(close$xj, close$yj, window=W)
+          XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
           edgewt <- edge.Trans(XI, XJ, paired=TRUE)
           # get smoothed estimate of mark covariance
           Mtrans <- mkcor(dIJ, ff, edgewt, Ef, r, method, ...)

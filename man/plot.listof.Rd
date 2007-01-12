@@ -5,7 +5,7 @@
   Plots a list of things
 }
 \usage{
-  \method{plot}{listof}(x, \dots, main, arrange=TRUE)
+  \method{plot}{listof}(x, \dots, main, arrange=TRUE, nrows=NULL, ncols=NULL)
 }
 \arguments{
   \item{x}{
@@ -21,8 +21,14 @@
   }
   \item{arrange}{
     Logical flag indicating whether to plot the objects
-    side-by-side. Set this to \code{FALSE} if you want to control
-    the arrangement of the plots yourself.
+    side-by-side on a single page (\code{arrange=TRUE})
+    or plot them individually in a succession of frames
+    (\code{arrange=FALSE}).
+  }
+  \item{nrows,ncols}{
+    Optional. The number of rows/columns in the plot layout
+    (assuming \code{arrange=TRUE}).
+    You can specify either or both of these numbers.
   }
 }
 \value{
@@ -36,7 +42,7 @@
   The base R package defines a method for printing these objects,
   \code{\link{print.listof}}, but does not define a method for \code{plot}.
   So here we have provided a method for \code{plot}.
-  
+
   In the \pkg{spatstat} package, the function
   \code{\link{density.splitppp}} produces an object of
   class \code{"listof"}, essentially a list of pixel images.

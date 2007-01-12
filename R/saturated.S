@@ -2,7 +2,7 @@
 #
 #    saturated.S
 #
-#    $Revision: 1.4 $	$Date: 2006/10/09 03:00:17 $
+#    $Revision: 1.6 $	$Date: 2007/01/11 03:36:02 $
 #
 #    Saturated pairwise process with user-supplied potential
 #
@@ -28,18 +28,24 @@ Saturated <- function(pot, name) {
   out <- 
   list(
          name     = name,
+         creator  = "Saturated",
          family    = pairsat.family,
          pot      = pot,
          par      = NULL,
          parnames = NULL,
          init     = NULL,
-         update   = NULL, 
+         update   = function(self, ...){
+           do.call(Saturated,
+                   resolve.defaults(list(...),
+                                    list(pot=self$pot, name=self$name)))
+         } , 
          print = function(self) {
            cat(paste(self$name, "\n"))
            cat("Potential function:\n")
            print(self$pot)
            invisible()
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   return(out)

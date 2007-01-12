@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.26 $	$Date: 2006/10/18 05:40:28 $
+#	$Revision: 1.27 $	$Date: 2006/12/14 06:57:49 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -74,29 +74,68 @@
       # Leave-one-out in numerator
       SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
       peakvalue <- 1/(2 * pi * SqrtDetSigma)
-      lambda <- raw[X] - rep(peakvalue, npoints)
+      lambda <- raw[X, drop=FALSE] - rep(peakvalue, npoints)
+      # Check for pixellation effects
+      if(any(is.na(lambda))) {
+        # make windows compatible
+        Wnew <- intersect.owin(X$window, as.owin(raw))
+        Wnew <- rescue.rectangle(Wnew)
+        # trim X 
+        X <- X[Wnew]
+        warning(paste("Data trimmed to the boundary of the pixel image",
+                      "of the kernel-smoothed density;",
+                      npoints-X$n, "out of", npoints, "data points deleted"))
+        # recompute
+        W <- Wnew
+        npoints <- X$n
+        area <- area.owin(W)
+        lambda <- raw[X, drop=FALSE] - rep(peakvalue, npoints)
+      }
       # Edge correction if invoked
       if(!is.null(edg)) 
-        lambda <- lambda/edg[X]
+        lambda <- lambda/edg[X, drop=FALSE]
       # validate
       if(length(lambda) != npoints) 
-        stop("Internal error: incorrect number of lambda values computed")
-      if(any(is.na(lambda)))
-        stop("Internal error: NA or NaN generated in lambda")
-    } else {
-      # lambda values provided 
-      if(is.vector(lambda)) {
-        if(length(lambda) != npoints) 
-          stop(paste("The length of", sQuote("lambda"),
-                     "should equal the number of data points"))
-      } else if(is.im(lambda)) 
-        lambda <- lambda[X, drop=FALSE]
-      else 
-        stop(paste(sQuote("lambda"),
-                   "should be a vector or a pixel image"))
+        stop(paste("Internal error: incorrect number of lambda values",
+                   "in leave-one-out method:",
+                   "length(lambda) = ", length(lambda),
+                   "!=", npoints, "= npoints"))
+      if(any(is.na(lambda))) {
+        nwrong <- sum(is.na(lambda))
+        stop(paste("Internal error:", nwrong, "NA or NaN",
+                   ngettext(nwrong, "value", "values"),
+                   "generated in leave-one-out method"))
+      }
+    } else if(is.vector(lambda)) {
+      # vector of lambda values provided 
+      if(length(lambda) != npoints) 
+        stop(paste("The length of", sQuote("lambda"),
+                   "should equal the number of data points"))
       if(any(is.na(lambda)))
         stop(paste("Some values of", sQuote("lambda"), "are NA or NaN"))
-    }
+    } else if(is.im(lambda)) {
+      # lambda image provided
+      lambdavalues <- lambda[X, drop=FALSE]
+      if(any(is.na(lambdavalues))) {
+        # recompute, making windows compatible
+        Wnew <- intersect.owin(X$window, as.owin(lambda))
+        Wnew <- rescue.rectangle(Wnew)
+        X <- X[Wnew]
+        warning(paste("data window trimmed to fit the available image data;",
+                      npoints-X$n, "out of", npoints, "data points deleted"))
+        npoints <- X$n
+        W <- Wnew
+        area <- area.owin(W)
+        lambdavalues <- lambda[X, drop=FALSE]
+        if(any(is.na(lambda)))
+          stop(paste("Internal error: some values of", sQuote("lambda"),
+                     "are NA or NaN even after trimming the data"))
+      }
+      lambda <- lambdavalues
+    } else
+    stop(paste(sQuote("lambda"),
+               "should be a vector or a pixel image"))
+
     
     if(!is.null(lambda2)) {
       if(!is.matrix(lambda2))

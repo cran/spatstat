@@ -137,8 +137,9 @@ mincontrast(observed, theoretical, startpar, \dots,
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{lgcp.estK}},
+  \code{\link{matclust.estK}},
   \code{\link{thomas.estK}},
-  \code{\link{lgcp.estK}}
 }
 \keyword{spatial}
 \keyword{models}

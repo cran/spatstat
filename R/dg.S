@@ -1,7 +1,7 @@
 #
 #     dg.S
 #
-#    $Revision: 1.5 $	$Date: 2005/03/22 02:27:58 $
+#    $Revision: 1.8 $	$Date: 2007/01/11 03:36:02 $
 #
 #     Diggle-Gratton pair potential
 #
@@ -10,6 +10,7 @@ DiggleGratton <- function(delta, rho) {
   out <- 
   list(
          name     = "Diggle-Gratton process",
+         creator  = "DiggleGratton",
          family    = pairwise.family,
          pot      = function(d, par) {
                        delta <- par$delta
@@ -32,10 +33,10 @@ DiggleGratton <- function(delta, rho) {
                       stopifnot(rho > delta)
                       stopifnot(is.finite(rho))
                     },
-         update = NULL,  # default OK
+         update = NULL, # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           kappa <- coeffs[["Interaction"]]
+           kappa <- as.numeric(coeffs[1])
            return(list(param=list(kappa=kappa),
                        inames="exponent kappa",
                        printable=round(kappa,4)))
@@ -45,21 +46,21 @@ DiggleGratton <- function(delta, rho) {
            return(is.finite(kappa) && (kappa >= 0))
          },
          project = function(coeffs, self) {
-           kappa <- coeffs[["Interaction"]]
-           coeffs[["Interaction"]] <-
-             if(is.na(kappa)) 0 else max(0, kappa)
+           kappa <- as.numeric(coeffs[1])
+           coeffs[1] <- if(is.na(kappa)) 0 else max(0, kappa)
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            rho <- self$par$rho
            if(all(is.na(coeffs)))
              return(rho)
-           kappa <- coeffs[["Interaction"]]
+           kappa <- coeffs[1]
            delta <- self$par$delta
            if(abs(kappa) <= epsilon)
              return(delta)
            else return(rho)
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.10 $	$Date: 2005/03/22 02:28:55 $
+#    $Revision: 1.13 $	$Date: 2007/01/11 03:36:02 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -17,6 +17,7 @@ PairPiece <- function(r) {
   out <- 
   list(
          name     = "Piecewise constant pairwise interaction process",
+         creator  = "PairPiece",
          family    = pairwise.family,
          pot      = function(d, par) {
                        r <- par$r
@@ -44,10 +45,7 @@ PairPiece <- function(r) {
            r <- self$par$r
            npiece <- length(r)
            # extract coefficients
-           vnames <- if(npiece == 1) "Interaction" else
-                      paste("Interact.", 1:npiece, sep="")
-           thetas <- coeffs[vnames]
-           gammas <- exp(thetas)
+           gammas <- exp(as.numeric(coeffs))
            # name them
            gn <- gammas
            names(gn) <- paste("[", c(0,r[-npiece]),",", r, ")", sep="")
@@ -69,9 +67,7 @@ PairPiece <- function(r) {
            # clip to 1
            r <- self$par$r
            npiece <- length(r)
-           vnames <- if(npiece == 1) "Interaction" else
-                     paste("Interact.", 1:npiece, sep="")
-           coeffs[vnames] <- pmin(0, coeffs[vnames])
+           coeffs[] <- pmin(0, coeffs)
            return(coeffs)
         },
         irange = function(self, coeffs=NA, epsilon=0, ...) {
@@ -84,7 +80,8 @@ PairPiece <- function(r) {
           if(!any(active))
             return(0)
           else return(max(r[active]))
-        }
+        },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

@@ -2,7 +2,7 @@
 #
 #   rmhstart.R
 #
-#   $Revision: 1.4 $  $Date: 2005/03/10 17:29:47 $
+#   $Revision: 1.5 $  $Date: 2006/12/12 09:36:03 $
 #
 #
 
@@ -44,7 +44,7 @@ rmhstart.default <- function(start=NULL, ..., n.start=NULL, x.start=NULL,
   if(xgiven) {
     # We can't check x.start properly because we don't have the relevant window
     # Just check that it is INTERPRETABLE as a point pattern  
-    xx <- as.ppp(x.start, W=tightbox.xy, fatal=FALSE)
+    xx <- as.ppp(x.start, W=ripras, fatal=FALSE)
     if(is.null(xx))
       stop(paste("x.start should be a point pattern object,",
                  "or coordinate data in a format recognised by as.ppp"))

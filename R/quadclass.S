@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.9 $	$Date: 2006/10/10 04:22:48 $
+#	$Revision: 4.10 $	$Date: 2006/12/12 08:52:12 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -182,7 +182,8 @@ union.quad <- function(Q) {
   ppp(x= c(Q$data$x, Q$dummy$x),
       y= c(Q$data$y, Q$dummy$y),
       window=Q$dummy$window,
-      marks=marks.quad(Q))
+      marks=marks.quad(Q),
+      check=FALSE)
 }
 	
 #

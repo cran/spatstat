@@ -2,6 +2,7 @@
 \alias{as.owin}
 \alias{as.owin.owin}
 \alias{as.owin.ppp}
+\alias{as.owin.ppm}
 \alias{as.owin.im}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
@@ -13,6 +14,7 @@ in any of several formats, into an object of class \code{"owin"}.
  as.owin(W, \dots, fatal=TRUE)
  \method{as.owin}{owin}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
+ \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
@@ -64,6 +66,11 @@ in any of several formats, into an object of class \code{"owin"}.
     An image pixel value of \code{NA}, signifying that the pixel
     lies outside the window, is transformed into the logical value
     \code{FALSE}, which is the corresponding convention for window masks.
+    \item
+    an object of class \code{"ppm"} representing a fitted point process
+    model. In this case, \code{as.owin} extracts the  original point
+    pattern data to which the model was fitted, and returns the
+    observation window of this point pattern. 
   }
   If the argument \code{W} is not in one of these formats
   and cannot be converted to a window, then an error will

@@ -2,42 +2,38 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.4 $	$Date: 2005/03/22 02:27:09 $
+#    $Revision: 2.8 $	$Date: 2007/01/11 03:36:02 $
 #
 #    Geyer's saturation process
 #
 #    Geyer()    create an instance of Geyer's saturation process
 #                 [an object of class 'interact']
 #
-# ------------------------------------------------------------------
-#    Note: if you want to imitate this, remember that 'pairsat.family'
-#    expects the saturation parameter 'sat' to be called $par$saturate
-#    in this 'interact' object.
-# -------------------------------------------------------------------
 #	
 
 Geyer <- function(r, sat) {
   out <- 
   list(
          name     = "Geyer saturation process",
+         creator  = "Geyer",
          family    = pairsat.family,
          pot      = function(d, par) {
                          ifelse(d <= par$r, 1, 0)  # same as for Strauss
                     },
-         par      = list(r = r, saturate=sat),
+         par      = list(r = r, sat=sat),
          parnames = c("interaction distance","saturation parameter"),
          init     = function(self) {
                       r <- self$par$r
-                      sat <- self$par$saturate
+                      sat <- self$par$sat
                       if(!is.numeric(r) || length(r) != 1 || r <= 0)
                        stop("interaction distance r must be a positive number")
                       if(!is.numeric(sat) || length(sat) != 1 || sat < 1)
                        stop("saturation parameter sat must be a number >= 1")
                     },
-         update = NULL,  # default OK
+         update = NULL, # default OK
          print = NULL,    # default OK
          interpret =  function(coeffs, self) {
-           loggamma <- coeffs[["Interaction"]]
+           loggamma <- as.numeric(coeffs[1])
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
@@ -50,21 +46,21 @@ Geyer <- function(r, sat) {
          project = function(coeffs, self) {
            gamma <- (self$interpret)(coeffs, self)$param$gamma
            if(is.na(gamma)) 
-             coeffs[["Interaction"]] <- 0
+             coeffs[1] <- 0
            else if(!is.finite(gamma)) 
-             coeffs[["Interaction"]] <-
-               log(.Machine$double.xmax)/self$par$saturate
+             coeffs[1] <- log(.Machine$double.xmax)/self$par$sat
            return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
            if(any(!is.na(coeffs))) {
-             loggamma <- coeffs[["Interaction"]]
+             loggamma <- coeffs[1]
              if(!is.na(loggamma) && (abs(loggamma) <= epsilon))
                return(0)
            }
            return(r)
-         }
+         },
+       version=versionstring.spatstat()
   )
   class(out) <- "interact"
   out$init(out)

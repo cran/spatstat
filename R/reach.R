@@ -1,7 +1,7 @@
 #
 #   reach.R
 #
-#  $Revision: 1.2 $   $Date: 2005/03/15 20:01:15 $
+#  $Revision: 1.7 $   $Date: 2007/01/10 05:55:41 $
 #
 
 reach <- function(x, ...) {
@@ -23,19 +23,30 @@ reach.interact <- function(x, ...) {
 
 reach.ppm <- function(x, ..., epsilon=0) {
   verifyclass(x, "ppm")
-  coeffs <- coef(x)
-  inte <- x$interaction
+  
   # Poisson case
-  if(is.null(inte))
+  if(is.poisson.ppm(x))
     return(0)
+
+  # extract info
+  inte <- x$interaction
+  coeffs <- coef(x)
+
+  if(newstyle.coeff.handling(inte)) {
+    # extract only interaction coefficients
+    Vnames <- x$internal$Vnames
+    coeffs <- coeffs[Vnames]
+  } 
+  
+  # apply 'irange' function
   irange <- inte$irange
   if(is.null(irange))
-    return(NA)
-  if(!is.function(irange))
-    stop("Internal error - x$interaction$irange is not a function")
-  ir <- irange(inte, coeffs=coeffs, epsilon=epsilon)
+    return(Inf)
+  ir <- irange(inte, coeffs, epsilon=epsilon)
+
   if(is.na(ir))
     ir <- Inf
+
   return(ir)
 }
 

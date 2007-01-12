@@ -3,7 +3,7 @@
 #
 #    Intersections of line segments
 #    
-#    $Revision: 1.1 $   $Date: 2006/05/19 10:21:35 $
+#    $Revision: 1.2 $   $Date: 2006/12/12 08:43:09 $
 #
 #
 crossing.psp <- function(A,B) {
@@ -49,7 +49,7 @@ crossing.psp <- function(A,B) {
   yy <- matrix(out$yy, na, nb)
   xx <- as.vector(xx[ok])
   yy <- as.vector(yy[ok])
-  result <- ppp(xx, yy, window=intersect.owin(A$window, B$window))
+  result <- ppp(xx, yy, window=intersect.owin(A$window, B$window), check=FALSE)
   return(result)
 }
 
@@ -84,7 +84,7 @@ selfcrossing.psp <- function(A) {
   yy <- matrix(out$yy, n, n)
   xx <- as.vector(xx[ok])
   yy <- as.vector(yy[ok])
-  result <- ppp(xx, yy, window=A$window)
+  result <- ppp(xx, yy, window=A$window, check=FALSE)
   return(result)
 }
 

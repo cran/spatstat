@@ -3,7 +3,7 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.4 $ $Date: 2006/06/14 14:48:40 $
+#  $Revision: 1.7 $ $Date: 2007/01/11 05:55:37 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
@@ -15,10 +15,8 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
     start <- list(n.start=data.ppm(model)$n)
   
   # check that the model can be simulated
-  inte <- model$interaction
-  valid <- is.null(inte) || inte$valid(coef(model), inte)
-  if(!valid) {
-    warning("Fitted model cannot be simulated")
+  if(!valid.ppm(model)) {
+    warning("Fitted model is invalid - cannot be simulated")
     return(NULL)
   }
   
@@ -46,12 +44,15 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   # value of canonical parameter from MPL fit
   theta0 <- coef(model)
   # Newton-Raphson update
-  theta <- theta0 + as.vector(solve(svar) %*% (sobs - smean))
+  Vinverse <- solve(svar)
+  theta <- theta0 + as.vector(Vinverse %*% (sobs - smean))
   # update model  & return
   newmodel <- model
   newmodel$coef <- theta
   newmodel$coef.mpl <- theta0
   newmodel$method <- "ho"
+  newmodel$fisher <- svar
+  newmodel$varcov <- Vinverse
   return(newmodel)
 }
 

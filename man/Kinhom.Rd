@@ -123,23 +123,37 @@
   (estimated) values of the intensity function \eqn{\lambda}{lambda}.
   It may be either
   \describe{
-    \item{a numeric vector}{containing the values
+    \item{a numeric vector}{
+      containing the values
       of the intensity function at the points of the pattern \code{X}.
-      The length of the vector \code{lambda} should
-      be equal to the number of points in the pattern \code{X}.
-      The value \code{lambda[i]} is assumed to be the 
-      the (estimated) value of the intensity
-      \eqn{\lambda(x_i)}{lambda(x[i])} for
-      the point \eqn{x_i}{x[i]} of the pattern \eqn{X}.
     }
-    \item{a pixel image}{(object of class \code{"im"})
+    \item{a pixel image}{
+      (object of class \code{"im"})
       assumed to contain the values of the intensity function
-      at all locations in the window.
+      at all locations in the window. 
+    }
+    \item{omitted:}{
+      if \code{lambda} is omitted, then it will be estimated using
+      a `leave-one-out' kernel smoother.
     }
   }
+  If \code{lambda} is a numeric vector, then its length should
+  be equal to the number of points in the pattern \code{X}.
+  The value \code{lambda[i]} is assumed to be the 
+  the (estimated) value of the intensity
+  \eqn{\lambda(x_i)}{lambda(x[i])} for
+  the point \eqn{x_i}{x[i]} of the pattern \eqn{X}.
+  Each value must be a positive number; \code{NA}'s are not allowed.
+
+  If \code{lambda} is a pixel image, the domain of the image should
+  cover the entire window of the point pattern. If it does not (which
+  may occur through discretisation error), then the point pattern
+  will be trimmed to a smaller region where the
+  lambda values are defined. (A warning will be issued in this case.)
+
   If \code{lambda} is omitted, then it will be estimated using
-  a `leave-one-out' kernel smoother, as described in
-  Baddeley et al (2000). The estimate \code{lambda[i]} for the
+  a `leave-one-out' kernel smoother, as described in Baddeley, Moller
+  and Waagepetersen (2000).  The estimate \code{lambda[i]} for the
   point \code{X[i]} is computed by removing \code{X[i]} from the
   point pattern, applying kernel smoothing to the remaining points using
   \code{\link{density.ppp}}, and evaluating the smoothed intensity
@@ -225,15 +239,21 @@
   X <- unmark(split(lansing)$maple)
   \testonly{
      sub <- sample(c(TRUE,FALSE), X$n, replace=TRUE, prob=c(0.1,0.9))
-     X <- X[sub , ]
+     X <- X[sub]
   }
 
   # (1) intensity function estimated by model-fitting
   # Fit spatial trend: polynomial in x and y coordinates
   fit <- ppm(X, ~ polynom(x,y,2), Poisson())
-  # predict intensity values at points themselves
+  # (a) predict intensity values at points themselves,
+  #     obtaining a vector of lambda values
   lambda <- predict(fit, locations=X, type="trend")
   # inhomogeneous K function
+  Ki <- Kinhom(X, lambda)
+  plot(Ki)
+  # (b) predict intensity at all locations,
+  #     obtaining a pixel image
+  lambda <- predict(fit, type="trend")
   Ki <- Kinhom(X, lambda)
   plot(Ki)
 

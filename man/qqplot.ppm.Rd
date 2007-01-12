@@ -12,10 +12,12 @@
              style="mean", fast=TRUE, verbose=TRUE, plot.it=TRUE,
              dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
              control=list(nrep=nrep,expand=default.expand(fit),
-                          periodic=(default.expand(fit)$type=="rectangle")),
+                          periodic=(as.owin(fit)$type=="rectangle")),
              saveall=FALSE,
              monochrome=FALSE,
-             limcol=if(monochrome) "black" else "red", check=TRUE, repair=TRUE)
+             limcol=if(monochrome) "black" else "red",
+             maxerr=max(100, ceiling(nsim/10)),
+             check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{fit}{
@@ -91,6 +93,10 @@
   \item{limcol}{
     String. The colour to be used when plotting the 95-percent limit
     curves.
+  }
+  \item{maxerr}{
+    Maximum number of failures tolerated while generating
+    simulated realisations. See Details.
   }
   \item{check}{
     Logical value indicating whether to check the internal format
@@ -237,12 +243,31 @@
   smoothed residual field images for each of the \code{nsim} 
   realisations. When \code{saveall=TRUE}, the return value is an object of very
   large size, and should not be saved on disk.
+
+  Errors may occur during the simulation process, because
+  random data are generated. For example:
+  \itemize{
+    \item one of the simulated patterns may be empty.
+    \item one of the simulated patterns may 
+    cause an error in the code that fits the point process model.
+    \item the user-supplied argument \code{expr} may have a bug.
+  }
+  Empty point patterns do not cause a problem for the code,
+  but they are reported.
+  Other problems that would lead to a crash are trapped; 
+  the offending simulated data are discarded, and the simulation is
+  retried. The argument \code{maxerr} determines the maximum number of
+  times that such errors will be tolerated (mainly as a
+  safeguard against an infinite loop).
 }
 
 \section{Side Effects}{
 	Produces a Q-Q plot if \code{plot.it} is TRUE.
 }
 \section{Warning messages}{
+  A warning message will be issued if any of the simulations
+  trapped an error (a potential crash).
+  
   A warning message will be issued if all, or many, of the
   simulated point patterns are empty.
   This usually indicates a problem with the simulation procedure.

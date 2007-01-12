@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.8 $	$Date: 2005/03/12 02:08:54 $
+#	$Revision: 1.13 $	$Date: 2007/01/11 03:34:39 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -120,14 +120,16 @@ print.isf <- function(x, ...) {
   invisible(NULL)
 }
 
-print.interact <- function(x, ...) {
+print.interact <- function(x, ..., full=TRUE) {
   verifyclass(x, "interact")
   if(!is.null(x$print))
      (x$print)(x)
   else {
     # default
-    print.isf(x$family)
-    cat(paste("Interaction:", x$name, "\n"))
+    if(full) {
+      print.isf(x$family)
+      cat(paste("Interaction:", x$name, "\n"))
+    }
     # just print the parameter names and their values
     cat(paste(x$parnames, ":\t", x$par, "\n", sep=""))
   }
@@ -140,17 +142,22 @@ update.interact <- function(object, ...) {
     (object$update)(object, ...)
   else {
     # Default
+    # First update the version
+    if(outdated.interact(object))
+      object <- reincarnate.interact(object)
     # just match the arguments in "..."
     # with those in object$par and update them
     want <- list(...)
-    m <- match(names(want),names(object$par))
-    nbg <- is.na(m)
-    if(any(nbg)) {
+    if(length(want) > 0) {
+      m <- match(names(want),names(object$par))
+      nbg <- is.na(m)
+      if(any(nbg)) {
         which <- paste((names(want))[nbg])
         warning(paste("Arguments not matched: ", which))
+      }
+      m <- m[!nbg]
+      object$par[m] <- want
     }
-    m <- m[!nbg]
-    object$par[m] <- u
     # call object's own initialisation routine
     if(!is.null(object$init))
       (object$init)(object)
@@ -159,3 +166,122 @@ update.interact <- function(object, ...) {
 }
 
   
+is.poisson.interact <- function(x) {
+  verifyclass(x, "interact")
+  is.null(x$family)
+}
+
+
+# Test whether interact object was made by an older version of spatstat
+
+outdated.interact <- function(object) {
+  ver <- object$version
+  older <- is.null(ver) || (package_version(ver) < versionstring.spatstat())
+  return(older)
+}
+
+
+# Test whether the functions in the interaction object
+# expect the coefficient vector to contain ALL coefficients,
+# or only the interaction coefficients.
+# This change was introduced in 1.11-0, at the same time
+# as interact objects were given version numbers.
+
+newstyle.coeff.handling <- function(object) {
+  stopifnot(inherits(object, "interact"))  
+  ver <- object$version
+  old <- is.null(ver) || (package_version(ver) < "1.11")
+  return(!old)
+}
+
+# ######
+#
+# Re-create an interact object in the current version of spatstat
+#
+# 
+
+reincarnate.interact <- function(object) {
+  # re-creates an interact object in the current version of spatstat
+
+  if(!is.null(object$update)) {
+    newobject <- (object$update)(object)
+    return(newobject)
+  }
+  
+  par <- object$par
+  pot <- object$pot
+  name <- object$name
+  
+  # get creator function
+  creator <- object$creator
+  if(is.null(creator)) {
+    # old version: look up list
+    creator <- .Spatstat.Old.InteractionList[[name]]
+    if(is.null(creator))
+      stop(paste("Don't know how to update", sQuote(name),
+                 "to current version of spatstat"))
+  }
+  if(is.character(creator))
+    creator <- get(creator)
+  if(!is.function(creator) && !is.expression(creator))
+    stop("Internal error: creator is not a function or expression")
+
+  # call creator
+  if(is.expression(creator)) 
+    newobject <- eval(creator)
+  else {
+    # creator is a function
+  
+    # It's assumed that the creator function's arguments are
+    # either identical to components of 'par' (the usual case)
+    # or to one of the components of the object itself (Ord, Saturated)
+    # or to printfun=object$print (Pairwise).
+  
+    argnames <- names(formals(creator))
+    available <- append(par, object)
+    available <- append(available, list(printfun=object$print))
+    ok <- argnames %in% names(available)
+    if(!all(ok))
+      stop(paste("Internal error:",
+                 ngettext(sum(!ok), "argument", "arguments"),
+                 paste(sQuote(argnames[!ok]), collapse=", "),
+                 "in creator function were not understood"))
+    newobject <- do.call(creator, available[argnames])
+  }
+  
+  if(!inherits(newobject, "interact"))
+    stop("Internal error: creator did not return an object of class interact")
+
+  return(newobject)
+}
+
+
+# This list is necessary to deal with older formats of 'interact' objects
+# which did not include the creator name
+
+.Spatstat.Old.InteractionList <-
+  list("Diggle-Gratton process"    = "DiggleGratton",
+       "Geyer saturation process"  = "Geyer",
+       "Lennard-Jones potential"   = "LennardJones",
+       "Multitype Strauss process" = "MultiStrauss",
+       "Multitype Strauss Hardcore process" = "MultiStraussHard",
+       "Ord process with threshold potential"="OrdThresh",
+       "Piecewise constant pairwise interaction process"="PairPiece",
+       "Poisson process"           = "Poisson",
+       "Strauss process"           = "Strauss",
+       "Strauss - hard core process" = "StraussHard",
+       "Soft core process" = "Softcore",
+       # weird ones:
+       "Ord process with user-defined potential" = expression(Ord(object$pot)),
+       "Saturated process with user-defined potential"
+          =expression(Saturated(object$pot)),
+       "user-defined pairwise interaction process"=
+       expression(
+           Pairwise(object$pot,
+                    par=object$par,
+                    parnames=object$parnames,
+                    printfun=object$print))
+           
+     )
+       
+                                  

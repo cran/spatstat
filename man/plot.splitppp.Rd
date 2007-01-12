@@ -5,7 +5,7 @@
   Plots a list of point patterns.
 }
 \usage{
-  \method{plot}{splitppp}(x, \dots, main, arrange=TRUE)
+  \method{plot}{splitppp}(x, \dots, main, arrange=TRUE, nrows=NULL, ncols=NULL)
 }
 \arguments{
   \item{x}{
@@ -21,8 +21,14 @@
   }
   \item{arrange}{
     Logical flag indicating whether to plot the point patterns
-    side-by-side. Set this to \code{FALSE} if you want to control
-    the arrangement of the plots yourself.
+    side-by-side on a single page (\code{arrange=TRUE})
+    or plot them individually in a succession of frames
+    (\code{arrange=FALSE}).
+  }
+  \item{nrows,ncols}{
+    Optional. The number of rows/columns in the plot layout
+    (assuming \code{arrange=TRUE}).
+    You can specify either or both of these numbers.
   }
 }
 \value{

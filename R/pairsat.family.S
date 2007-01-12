@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.23 $	$Date: 2006/10/10 04:22:48 $
+#    $Revision: 1.24 $	$Date: 2007/01/11 02:18:39 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -36,7 +36,7 @@ pairsat.family <-
   #   potpars     auxiliary parameters for pairpot        list(......)
   #   correction  edge correction type                    (string)
   #
-  #   Note the Geyer saturation threshold must be given in 'potpars$saturate'
+  #   Note the Geyer saturation threshold must be given in 'potpars$sat'
   #
   # Value:
   #    matrix of values of the total pair potential
@@ -58,7 +58,7 @@ X <- as.ppp(X)
 U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
 
 # saturation parameter(s)
-saturate <- potpars$saturate
+saturate <- potpars$sat
 
 if(is.null(saturate)) {
   # pairwise interaction 

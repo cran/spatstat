@@ -1,7 +1,7 @@
 #
 # split.R
 #
-# $Revision: 1.6 $ $Date: 2006/10/10 04:22:48 $
+# $Revision: 1.7 $ $Date: 2006/12/06 02:28:22 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -95,3 +95,35 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
   out <- superimpose(value)
   return(out)
 }
+
+
+summary.splitppp <- function(object, ...) {
+  x <- lapply(object, summary, ...)
+  class(x) <- "summary.splitppp"
+  x
+}
+
+print.summary.splitppp <- function(x, ...) {
+  class(x) <- "listof"
+  print(x)
+  invisible(NULL)
+}
+
+"[.splitppp" <- function(x, i) {
+  # invoke list method
+  class(x) <- "list"
+  y <- x[i]
+  # then make it a 'splitppp' object too
+  class(y) <- c("splitppp", class(y))
+  y
+}
+
+"[<-.splitppp" <- function(x, i, value) {
+  # invoke list method
+  class(x) <- "list"
+  x[i] <- value
+  # then make it a 'splitppp' object too
+  class(x) <- c("splitppp", class(x))
+  x
+}
+  

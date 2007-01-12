@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.34 $	$Date: 2006/10/19 09:32:24 $
+#	$Revision: 5.36 $	$Date: 2007/01/08 07:07:08 $
 #
 #
 # -------- functions ----------------------------------------
@@ -55,8 +55,8 @@ function(X, ..., r=NULL, breaks=NULL,
   rmax <- breaks$max
   
   correction.given <- !missing(correction)
-  correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
-  correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
+  correction.name <- c("none", "border", "bord.modif", "isotropic", "Ripley", "translate")
+  correction.list <- c("none", "border", "bord.modif", "isotropic", "isotropic", "translate")
   correction.id <- pmatch(correction, correction.name)
   if(any(nbg <- is.na(correction.id)))
     stop(paste("unrecognised correction",
@@ -117,7 +117,16 @@ function(X, ..., r=NULL, breaks=NULL,
   rmax <- max(r)
   close <- closepairs(X, rmax)
   DIJ <- close$d
-  XI <- ppp(close$xi, close$yi, window=W)
+  XI <- ppp(close$xi, close$yi, window=W, check=FALSE)
+  
+  if(any(correction == "none")) {
+    # uncorrected! For demonstration purposes only!
+    wh <- whist(DIJ, breaks$val)  # no weights
+    Kun <- cumsum(wh)/(lambda2 * area)
+    K <- bind.fv(K, data.frame(un=Kun), "Kun(r)",
+                 "uncorrected estimate of K(r)",
+                 "un")
+  }
   
   if(any(correction == "border" | correction == "bord.modif")) {
   # border method
@@ -144,7 +153,7 @@ function(X, ..., r=NULL, breaks=NULL,
 
   if(any(correction == "translate")) {
     # translation correction
-    XJ <- ppp(close$xj, close$yj, window=W)
+    XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
     wh <- whist(DIJ, breaks$val, edgewt)
     Ktrans <- cumsum(wh)/(lambda2 * area)

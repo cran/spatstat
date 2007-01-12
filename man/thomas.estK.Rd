@@ -122,6 +122,7 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
 }
 \seealso{
   \code{\link{lgcp.estK}},
+  \code{\link{matclust.estK}},
   \code{\link{mincontrast}},
   \code{\link{Kest}},
   \code{\link{rThomas}} to simulate the fitted model.

@@ -60,6 +60,7 @@
 \alias{ho.engine}
 \alias{identical.formulae}
 \alias{inside.xypolygon}     
+\alias{intersect.ranges}     
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
 \alias{intY.owin}     
@@ -72,6 +73,7 @@
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
 \alias{is.prime}
+\alias{is.poisson.interact}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}    
 \alias{Kborder.engine}
@@ -82,6 +84,7 @@
 \alias{least.common.multiple}
 \alias{levels<-.im}
 \alias{lookup.im}
+\alias{majorminorversion}
 \alias{make.even.breaks}
 \alias{makeunits}
 \alias{markformat}
@@ -117,8 +120,10 @@
 \alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
 \alias{nearest.pixel}
+\alias{newstyle.coeff.handling}
 \alias{no.trend.ppm}
 \alias{n.quad}               
+\alias{outdated.interact}
 \alias{overlap.owin}
 \alias{overlap.trapezium}
 \alias{overlap.xypolygon}    
@@ -152,11 +157,14 @@
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhseed}
+\alias{print.summary.listof}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
+\alias{print.summary.splitppp}
 \alias{print.summary.units}
 \alias{print.units}
+\alias{prolongseq}
 \alias{quad}
 \alias{quadrat.breaks}
 \alias{quadrat.count.engine}
@@ -167,11 +175,13 @@
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{reincarnate.interact}
 \alias{rescale.units}
 \alias{resid4plot}
 \alias{resid1plot}
 \alias{resid1panel}
 \alias{resolve.defaults}
+\alias{restrict.mask}
 \alias{reverse.xypolygon}    
 \alias{revcumsum}    
 \alias{rmax.rule}
@@ -206,12 +216,17 @@
 \alias{sympoly}
 \alias{termsinformula}
 \alias{tilecentroids}        
+\alias{trim.mask}        
 \alias{units.default}
 \alias{units<-.default}
 \alias{update.interact}
+\alias{valid.ppm}        
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{variablesinformula}        
+\alias{versionstring.interact}
+\alias{versionstring.ppm}
+\alias{versionstring.spatstat}
 \alias{verifyclass}
 \alias{verify.xypolygon}
 \alias{whist}               
@@ -288,7 +303,8 @@ handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
-inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")     
+inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
+intersect.ranges(a,b)
 intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
@@ -296,10 +312,11 @@ intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
 is.fv(x)
-is.marked.default(\dots)  
-is.marked.quad(X, na.action="warn", \dots)
-is.multitype.default(\dots)  
-is.multitype.quad(X, na.action="warn", \dots)
+\method{is.marked}{default}(\dots)  
+\method{is.marked}{quad}(X, na.action="warn", \dots)
+\method{is.multitype}{default}(\dots)  
+\method{is.multitype}{quad}(X, na.action="warn", \dots)
+is.poisson.interact(x)
 is.poisson.ppm(x)
 is.prime(n)
 is.stationary.ppm(x)    
@@ -317,6 +334,7 @@ killinteraction(model)
 least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 lookup.im(Z, x, y, naok)
+majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
 makeunits(sing, plur, mul)
 markformat(x)
@@ -324,9 +342,9 @@ markformat(x)
 \method{markformat}{psp}(x)
 markspace.integral(X)
 marks(x, \dots)
-marks.ppp(x, \dots, dfok)           
-marks.psp(x, \dots, dfok)
-marks.quad(x, dfok=FALSE, \dots)
+\method{marks}{ppp}(x, \dots, dfok)           
+\method{marks}{psp}(x, \dots, dfok)
+\method{marks}{quad}(x, dfok=FALSE, \dots)
 marks(x, \dots) <- value
 \method{marks}{ppp}(x, dfok, \dots) <- value
 markappendop(x, y)
@@ -350,11 +368,14 @@ mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
-            callstring, \dots, allcovar, precomputed, savecomputed)
+            callstring, \dots, allcovar, precomputed, savecomputed,
+            vnamebase, vnameprefix)
 MultiPair.checkmatrix(mat, n, name)
 nearest.pixel(x, y, im)
+newstyle.coeff.handling(object)
 no.trend.ppm(x)
 n.quad(Q)               
+outdated.interact(object)
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
@@ -363,13 +384,13 @@ param.quad(Q)
 pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
-plot.minconfit(x, \dots)
-plot.pppmatching(x, addmatch = NULL, main = NULL, \dots)
-plot.profilepl(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
-plot.qqppm(x, \dots, limits=TRUE, monochrome=FALSE,
+\method{plot}{minconfit}(x, \dots)
+\method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
+\method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
+\method{plot}{qqppm}(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
-plot.quadratcount(x, \dots, add, entries, dx, dy)
-plot.quadrattest(x, \dots)
+\method{plot}{quadratcount}(x, \dots, add, entries, dx, dy)
+\method{plot}{quadrattest}(x, \dots)
 polynom(x, \dots)
 pppdist.prohorov(X, Y, precision = 7)
 pppmatching(X, Y, am, ty = "generic")
@@ -378,7 +399,7 @@ primefactors(n, prmax)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{fv}(x, \dots)
-\method{print}{interact}(x, \dots)       
+\method{print}{interact}(x, \dots, full=TRUE)       
 \method{print}{isf}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{plotppm}(x, \dots)
@@ -389,11 +410,14 @@ primefactors(n, prmax)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhseed}(x, \dots)
+\method{print}{summary.listof}(x, \dots)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp=3)
 \method{print}{summary.psp}(x, \dots)
+\method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.units}(x, \dots)
 \method{print}{units}(x, \dots)
+prolongseq(x, newrange)
 quad(data, dummy, w, param)
 quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 quadrat.count.engine(x, y, xbreaks, ybreaks, weights)
@@ -401,6 +425,7 @@ quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
+reincarnate.interact(object)
 rebound.ppp(x, \dots)
 rebound.psp(x, \dots)
 rebound.owin(w, rect)
@@ -412,20 +437,21 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots)
+restrict.mask(M, W)
 reverse.xypolygon(p)
 revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rmhResolveTypes(model, start, control)
-rmhcontrol.rmhcontrol(control, \dots)
-rmhcontrol.list(control, \dots)
+\method{rmhcontrol}{rmhcontrol}(control, \dots)
+\method{rmhcontrol}{list}(control, \dots)
 rmhEngine(InfoList, \dots, verbose, reseed, kitchensink, preponly) 
-rmhmodel.rmhmodel(model, \dots)
-rmhmodel.list(model, \dots)
+\method{rmhmodel}{rmhmodel}(model, \dots)
+\method{rmhmodel}{list}(model, \dots)
+\method{rmhmodel}{ppm}(model, win, \dots, verbose, project, control)
 rmhseed(iseed)
-rmhstart.rmhstart(start, \dots)
-rmhstart.list(start, \dots)
-rmhmodel.ppm(model, win, \dots, verbose, project, control)
+\method{rmhstart}{rmhstart}(start, \dots)
+\method{rmhstart}{list}(start, \dots)
 rmpoint.I.allim(n, f, types)
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
@@ -446,13 +472,18 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{units}(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
-tilecentroids(W, nx, ny)        
+tilecentroids(W, nx, ny)
+trim.mask(M, R)
 \method{units}{default}(x)
 \method{units}{default}(x) <- value
-update.interact(object, \dots)
+\method{update}{interact}(object, \dots)
+valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 variablesinformula(x)
+versionstring.interact(object)
+versionstring.ppm(object)
+versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
 whist(x,breaks,weights, trim, right)

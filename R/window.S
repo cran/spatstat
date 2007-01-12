@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.56 $	$Date: 2006/11/17 12:20:12 $
+#	$Revision: 4.58 $	$Date: 2007/01/08 05:43:20 $
 #
 #
 #	A window may be either
@@ -233,7 +233,13 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
   class(out) <- "owin"
   return(out)
 }
- 
+
+as.owin.ppm <- function(W, ..., fatal=TRUE) {
+  if(!verifyclass(W, "ppm", fatal=fatal))
+    return(NULL)
+  as.owin(data.ppm(W))
+}
+
 as.owin.default <- function(W, ..., fatal=TRUE) {
 	# Tries to interpret data as an object of class 'window'
 	# W may be
@@ -508,8 +514,8 @@ bounding.box <- function(...) {
                  m <- w$m
                  x <- raster.x(w)
                  y <- raster.y(w)
-                 xr <- range(x[m])
-                 yr <- range(y[m])
+                 xr <- range(x[m]) + c(-1,1) * w$xstep/2
+                 yr <- range(y[m]) + c(-1,1) * w$ystep/2
                  return(owin(xr, yr))
                },
                stop("unrecognised window type", w$type)

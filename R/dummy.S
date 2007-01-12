@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.6 $     $Date: 2006/10/16 01:53:34 $
+#       $Revision: 5.7 $     $Date: 2006/12/12 09:25:48 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -182,12 +182,12 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
                   stratrand(win, nd[1], nd[2], 1)
                 else
                   cellmiddles(win, nd[1], nd[2], npix)
-        dummy <- as.ppp(dummy, win)
+        dummy <- as.ppp(dummy, win, check=FALSE)
         # restrict to window
         if(!(win$type == "rectangle" || periodsample))
           dummy <- dummy[win]
         # corner points
-        corn <- as.ppp(corners(win), win)
+        corn <- as.ppp(corners(win), win, check=FALSE)
         corn <- corn[win]
 	dummy <- superimpose(dummy, corn)
         if(dummy$n == 0)

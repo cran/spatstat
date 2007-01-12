@@ -37,6 +37,6 @@ rStrauss <- function(beta, gamma=1, R=0, W=owin()) {
   if(nout<0)
     stop(paste("PerfectStrauss failed! nout>",nmax))
 
-  return(ppp(z$X[1:nout], z$Y[1:nout], window=W))
+  return(ppp(z$X[1:nout], z$Y[1:nout], window=W, check=FALSE))
 }
 

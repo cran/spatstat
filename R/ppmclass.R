@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.10 $	$Date: 2006/04/25 05:23:35 $
+#	$Revision: 2.12 $	$Date: 2007/01/11 04:09:28 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -107,7 +107,10 @@ print.ppm <- function(x, ...) {
                    if(is.list(x) && !is.null(p <- x$print))
                      cat(paste("Problem:\n", p, "\n\n"))
                  })
-          
+
+        if(s$old)
+          warning(paste("Model fitted by old spatstat version", s$version))
+        
 	return(invisible(NULL))
 }
 
@@ -138,11 +141,25 @@ getglmfit <- function(object) {
   glmfit <- object$internal$glmfit
   if(is.null(glmfit))
     return(NULL)
-  if(object$method == "ho")
+  if(object$method != "mpl")
     glmfit$coefficients <- object$coef
   return(glmfit)
 }
 
     
 # ??? method for 'effects' ???
+
+valid.ppm <- function(object, na.value=TRUE) {
+  verifyclass(object, "ppm")
+  inte <- object$interaction
+  if(is.null(inte))
+    return(TRUE)
+  checker <- inte$valid
+  if(is.null(checker))
+    return(na.value)
+  Vnames <- object$internal$Vnames
+  coeffs <- coef(object)
+  Icoeffs <- coeffs[Vnames]
+  return(checker(Icoeffs, inte))
+}
 
