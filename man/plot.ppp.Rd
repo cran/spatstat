@@ -96,7 +96,8 @@ maxsize, markscale)
   Plotting of the window \code{x$window} is performed by
   \code{\link{plot.owin}}. This plot may be modified 
   through the \code{...} arguments. In particular the
-  extra argument \code{col} determines the colour of the window.
+  extra argument \code{border} determines
+  the colour of the window.
 
   Plotting of the points themselves is performed
   by the function \code{\link{points}}, except for the case of
@@ -188,10 +189,10 @@ maxsize, markscale)
                         "blue","red","pink"))
    plot(longleaf, fg="blue")
 
-   # make points and window purple
-   plot(lansing, col="purple")
+   # make window purple
+   plot(lansing, border="purple")
    # make everything purple
-   plot(lansing, col="purple", col.main="purple")
+   plot(lansing, border="purple", cols="purple", col.main="purple")
  
    # controlling PLOT CHARACTERS
    plot(lansing, chars = 11:16)

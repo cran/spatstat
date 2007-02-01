@@ -159,6 +159,7 @@ The Spatstat Package
 	\code{\link{lansing}} \tab Lansing Woods data \cr
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
+	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr

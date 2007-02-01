@@ -5,10 +5,11 @@
   Convert a pixel image to a matrix
 }
 \usage{
-  \method{as.matrix}{im}(x)
+  \method{as.matrix}{im}(x, ...)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}
+  \item{\dots}{Ignored.}
 }
 \details{
   This function takes the pixel image \code{x}

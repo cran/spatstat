@@ -61,7 +61,7 @@ density.psp             Kernel Smoothing of Line Segment Pattern
 density.splitppp        Kernel Smoothed Intensity of Split Point
                         Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
-diameter                Diameter of a Window Frame
+diameter                Diameter of a Window
 DiggleGratton           Diggle-Gratton model
 dilate.owin             Dilate a Window
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
@@ -162,6 +162,7 @@ multiplicity.ppp        Count Multiplicity of Duplicate Points
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
+nbfires                 Point Patterns of New Brunswick Forest Fires
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nncorr                  Nearest-Neighbour Correlation of Marked Point
                         Pattern
@@ -217,6 +218,7 @@ print.psp               Print Brief Details of a Line Segment Pattern
                         Dataset
 print.quad              Print a Quadrature Scheme
 profilepl               Profile Maximum Pseudolikelihood
+progressreport          Print Progress Reports
 psp                     Create a Line Segment Pattern
 psp.object              Class of Line Segment Patterns
 qqplot.ppm              Q-Q Plot of Residuals from Fitted Point Process
@@ -337,3 +339,4 @@ unmark                  Remove Marks from a Marked Point Pattern
 update.ppm              Update a Fitted Point Process Model
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point
                         Process Model
+vertices                Vertices of a Window

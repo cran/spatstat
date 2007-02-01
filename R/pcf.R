@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.24 $   $Date: 2006/12/12 08:42:35 $
+#   $Revision: 1.25 $   $Date: 2007/01/19 01:08:24 $
 #
 #
 #   calculate pair correlation function
@@ -68,11 +68,12 @@ pcf.ppp <- function(X, ..., r=NULL,
   # how to process the distances
   
   doit <- function(w, d, out, symb, desc, key, otherargs, lambda, area) {
-    kden <- do.call("densityhack",
-                    resolve.defaults(list(x=d, weights=w), otherargs))
+    wtot <- sum(w)
+    kden <- do.call("density.default",
+                    append(list(x=d, weights=w/wtot), otherargs))
                                      
     r <- kden$x
-    y <- kden$y
+    y <- kden$y * wtot
     g <- y/(2 * pi * r * (lambda^2) * area)
     if(is.null(out)) {
       df <- data.frame(r=r, theo=rep(1,length(r)), g)

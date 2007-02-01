@@ -3,13 +3,14 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.31 $  $Date: 2006/10/18 10:51:31 $
+#   $Revision: 1.34 $  $Date: 2007/01/31 05:45:18 $
 #
 
-envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
-                     ..., simulate=NULL, clipdata=TRUE,
+envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
+                     ..., simulate=NULL, verbose=TRUE, clipdata=TRUE, 
                      start=NULL, control=list(nrep=1e5, expand=1.5),
-                     transform=NULL, global=FALSE, ginterval=NULL) {
+                     transform=NULL, global=FALSE, ginterval=NULL,
+                     saveall=FALSE) {
   cl <- match.call()
   Yname <- deparse(substitute(Y))
   # determine type of simulation
@@ -147,7 +148,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   rvals <- funX[[argname]]
   fX    <- funX[[valname]]
 
-
   # default domain over which to maximise
   alim <- attr(funX, "alim")
   if(global && is.null(ginterval))
@@ -159,7 +159,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
               if(csr) "of CSR" else if(metrop) "of model" else NULL,
               "...\n"))
   nrvals <- length(rvals)
-  simvals <- matrix(, nrow=nsim, ncol=nrvals)
+  simvals <- matrix(, nrow=nrvals, ncol=nsim)
 
   # start simulation loop 
   for(i in 1:nsim) {
@@ -214,10 +214,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     if(length(simvals.i) != nrvals)
       stop("Vectors of function values have incompatible lengths")
       
-    simvals[i,] <- funXsim[[valname]]
+    simvals[ , i] <- funXsim[[valname]]
     if(verbose)
-      cat(paste(i, if(i < nsim) ", " else ".",
-                if(i %% 10 == 0) "\n", sep=""))
+      progressreport(i, nsim)
   }
   ##  end simulation loop
   
@@ -228,8 +227,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
   orderstat <- function(x, n) { sort(x)[n] }
   if(!global) {
     # POINTWISE ENVELOPES
-    lo <- apply(simvals, 2, orderstat, n=nrank)
-    hi <- apply(simvals, 2, orderstat, n=nsim-nrank+1)
+    lo <- apply(simvals, 1, orderstat, n=nrank)
+    hi <- apply(simvals, 1, orderstat, n=nsim-nrank+1)
     lo.name <- paste("lower pointwise envelope of simulations")
     hi.name <- paste("upper pointwise envelope of simulations")
 
@@ -240,7 +239,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                             lo=lo,
                             hi=hi)
     } else {
-      m <- apply(simvals, 2, mean, na.rm=TRUE)
+      m <- apply(simvals, 1, mean, na.rm=TRUE)
       results <- data.frame(r=rvals,
                             obs=fX,
                             mmean=m,
@@ -251,14 +250,14 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
     # SIMULTANEOUS ENVELOPES
     domain <- (rvals >= ginterval[1]) & (rvals <= ginterval[2])
     funX <- funX[domain, ]
-    simvals <- simvals[ , domain]
+    simvals <- simvals[domain, ]
     if(csr)
       theory <- funX[["theo"]]
     else
-      theory <- m <- apply(simvals, 2, mean, na.rm=TRUE)
+      theory <- m <- apply(simvals, 1, mean, na.rm=TRUE)
     # compute max absolute deviations
-    deviations <- sweep(simvals, 2, theory)
-    suprema <- apply(abs(deviations),  1, max, na.rm=TRUE)
+    deviations <- sweep(simvals, 1, theory)
+    suprema <- apply(abs(deviations), 2, max, na.rm=TRUE)
     # ranked deviations
     dmax <- orderstat(suprema, n=nsim-nrank+1)
     # simultaneous bands
@@ -306,6 +305,23 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, verbose=TRUE,
                                 nrank=nrank,
                                 nsim=nsim,
                                 global=global)
+  if(saveall) {
+    alldata <- cbind(rvals, simvals)
+    simnames <- paste("sim", 1:nsim, sep="")
+    colnames(alldata) <- c("r", simnames)
+    alldata <- as.data.frame(alldata)
+    savedata <- fv(alldata,
+                   argu="r",
+                   ylab=attr(funX, "ylab"),
+                   valu="sim1",
+                   fmla= deparse(. ~ r),
+                   alim=attr(funX, "alim"),
+                   labl=names(alldata),
+                   desc=c("distance argument r",
+                     paste("Simulation ", 1:nsim, sep="")))
+    attr(savedata, "dotnames") <- simnames
+    attr(result, "savedata") <- savedata
+  }
   return(result)
 }
 
@@ -321,6 +337,8 @@ print.envelope <- function(x, ...) {
   cat(paste(type, "critical envelopes for", fname, "\n"))
   cat(paste("Obtained from", nsim,
             "simulations of", if(csr) "CSR" else "fitted model", "\n"))
+  if(!is.null(attr(x, "savedata"))) 
+    cat("(All simulated values are stored)\n")
   alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
   cat(paste("Significance level of",
             if(!g) "pointwise",
@@ -328,7 +346,7 @@ print.envelope <- function(x, ...) {
             paste(if(g) nr else 2 * nr,
                   "/", nsim+1, sep=""),
             "=", alpha, "\n"))
-  cat(paste("Data:", e$Yname, "\n\n"))
+  cat(paste("Data:", e$Yname, "\n"))
   NextMethod("print")
 }
                   
@@ -343,6 +361,9 @@ summary.envelope <- function(object, ...) {
   cat(paste(type, "critical envelopes for", fname, "\n"))
   cat(paste("Obtained from", nsim,
             "simulations of", if(csr) "CSR" else "fitted model", "\n"))
+  if(!is.null(attr(object, "savedata")))
+    cat(paste("(All", nsim, "simulated values",
+              "are stored in attr(,", dQuote("savedata"), ") )\n"))
   ordinal <- function(k) {
     last <- k %% 10
     ending <- if(last == 1) "st" else
@@ -366,7 +387,7 @@ summary.envelope <- function(object, ...) {
             paste(if(g) nr else 2 * nr,
                   "/", nsim+1, sep=""),
             "=", alpha, "\n"))
-  cat(paste("Data:", e$Yname, "\n\n"))
+  cat(paste("Data:", e$Yname, "\n"))
   return(invisible(NULL))
 }
   

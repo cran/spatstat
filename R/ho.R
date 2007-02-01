@@ -3,7 +3,7 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.7 $ $Date: 2007/01/11 05:55:37 $
+#  $Revision: 1.8 $ $Date: 2007/01/31 05:45:50 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
@@ -29,7 +29,7 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   rmhinfolist <- rmh(model, start, control, preponly=TRUE, verbose=FALSE)
   if(verb) cat("Simulating... ")
   for(i in 1:nsim) {
-    if(verb) cat(paste(i, " ", if(i %% 10 == 0) "\n", sep=""))
+    if(verb) progressreport(i, nsim)
     Xi <- rmhEngine(rmhinfolist, verbose=FALSE)
     v <- suffstat(model,Xi)
     if(i == 1) 

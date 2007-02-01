@@ -1,11 +1,9 @@
 #
 #       images.R
 #
-#         $Revision: 1.23 $     $Date: 2006/10/24 03:02:02 $
+#         $Revision: 1.26 $     $Date: 2007/01/15 05:35:04 $
 #
 #      The class "im" of raster images
-#
-# Temporary code until we sort out the class structure
 #
 #     im()     object creator
 #
@@ -228,7 +226,7 @@ rastery.im <- function(x) {
 
 # methods for other functions
 
-as.matrix.im <- function(x) {
+as.matrix.im <- function(x, ...) {
   return(x$v)
 }
 
@@ -250,6 +248,7 @@ hist.im <- function(x, ..., probability=FALSE) {
   }
   # barplot or histogram
   if(x$type %in% c("logical", "factor")) {
+    # barplot
     tab <- table(values)
     if(probability) {
       tab <- tab/sum(tab)
@@ -265,15 +264,27 @@ hist.im <- function(x, ..., probability=FALSE) {
                                          main=main)))
 
   } else {
+    # histogram
     values <- values[!is.na(values)]
-    ylab <- if(probability) "Probability density" else "Number of pixels"
-    out <- do.call("hist.default",
+    plotit <- resolve.defaults(list(...), list(plot=TRUE))$plot
+    if(plotit) {
+      ylab <- if(probability) "Probability density" else "Number of pixels"
+      out <- do.call("hist.default",
                    resolve.defaults(list(values),
+                                    list(...),
                                     list(probability=probability),
+                                    list(xlab=paste("Pixel value"),
+                                         ylab=ylab,
+                                         main=main)))
+    } else {
+      # plot.default whinges if `probability' given when plot=FALSE
+      out <- do.call("hist.default",
+                   resolve.defaults(list(values),
                                     list(...),
                                     list(xlab=paste("Pixel value"),
                                          ylab=ylab,
                                          main=main)))
+    }
   }
   return(invisible(out))
 }
