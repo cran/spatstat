@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.18 $	$Date: 2006/12/15 10:10:34 $
+#	$Revision: 4.19 $	$Date: 2007/01/15 05:26:54 $
 #
 #
 #
@@ -50,7 +50,7 @@ eroded.areas <- function(w, r) {
                  Bmax <- max(b, r)
                  breaks <- c(-1,r,Bmax+1)
                  # histogram of boundary distances
-                 h <- hist(b, breaks=breaks, plot=FALSE, probability=FALSE)$counts
+                 h <- hist(b, breaks=breaks, plot=FALSE)$counts
                  # reverse cumulative histogram
                  H <- revcumsum(h)
                  # drop first entry corresponding to r=-1
@@ -63,15 +63,6 @@ eroded.areas <- function(w, r) {
                )
 	areas
 }	
-
-diameter <- function(w) {
-	verifyclass(w, "owin")
-	
-        width <- abs(diff(w$xrange))
-        height <- abs(diff(w$yrange))
-        
-        sqrt(width^2 + height^2)
-}
 
 even.breaks.owin <- function(w) {
 	verifyclass(w, "owin")
@@ -320,4 +311,45 @@ trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
        W$yrange + c(1,-1) * ymargin)
 }
 
+
+bdry.mask <- function(W) {
+  verifyclass(W, "owin")
+  W <- as.mask(W)
+  m <- W$m
+  nr <- nrow(m)
+  nc <- ncol(m)
+  b <-     (m != rbind(FALSE,       m[-nr, ]))
+  b <- b | (m != rbind(m[-1, ], FALSE))
+  b <- b | (m != cbind(FALSE,       m[, -nc]))
+  b <- b | (m != cbind(m[, -1], FALSE))
+  W$m <- b
+  return(W)
+}
+
+vertices <- function(w) {
+  verifyclass(w, "owin")
+  switch(w$type,
+         rectangle={
+           xr <- w$xrange
+           yr <- w$yrange
+           vert <- list(x=xr[c(1,2,2,1)], y=yr[c(1,1,2,2)])
+         },
+         polygonal={
+           vert <- do.call("concatxy",w$bdry)
+         },
+         mask={
+           b <- bdry.mask(w)
+           xx <- raster.x(w)
+           yy <- raster.y(w)
+           vert <- list(x=as.vector(xx[b$m]),
+                        y=as.vector(yy[b$m]))
+         })
+  return(vert)
+}
+
+diameter <- function(w) {
+  vert <- vertices(w)
+  d <- pairdist(vert)
+  return(max(d))
+}
 

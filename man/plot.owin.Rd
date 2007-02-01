@@ -57,7 +57,8 @@
   it is plotted by the \R function \code{\link{polygon}}. To control the
   appearance (colour, fill density, line density etc) of the polygon
   plot, determine the required argument of \code{\link{polygon}}
-  and pass it through \code{...}
+  and pass it through \code{...} For example, to draw the 
+  polygon border in green, use the argument \code{border="green"}.
 
   When \code{x} is of type \code{"mask"}, it is plotted by
   \code{\link{image.default}}. The appearance of the image plot

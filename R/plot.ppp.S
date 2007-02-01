@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.23 $	$Date: 2006/10/24 03:00:39 $
+#	$Revision: 1.25 $	$Date: 2007/01/31 02:49:03 $
 #
 #
 #--------------------------------------------------------------------------
@@ -34,21 +34,23 @@ plot.ppp <-
     
   defaults <- spatstat.options("par.points")
 
-  smartpoints <- function(..., index=1, col=NULL, pch=NULL, cols, chars) {
+  smartpoints <- function(xx, yy, ...,
+                          index=1, col=NULL, pch=NULL, cols, chars) {
     if(missing(col) && !missing(cols))
       col <- cols[index]
     if(missing(pch) && !missing(chars))
       pch <- chars[index]
-    do.call("points",
-            resolve.defaults(list(...),
+    do.call.matched("points",
+            resolve.defaults(list(x=list(x=xx, y=yy), ...),
                              if(!is.null(col)) list(col=col) else NULL,
-                             if(!is.null(pch)) list(pch=pch) else NULL))
+                             if(!is.null(pch)) list(pch=pch) else NULL),
+                    extrargs=c("col", "pch", "type", "bg", "cex", "lwd"))
   }
 
   marked <- is.marked(x, dfok=TRUE)
   if(!marked || !use.marks) {
     do.call("smartpoints",
-            resolve.defaults(list(x$x, x$y),
+            resolve.defaults(list(xx=x$x, yy=x$y),
                              explicit,
                              list(...),
                              spatstat.options("par.points")))
@@ -63,82 +65,90 @@ plot.ppp <-
   if(is.data.frame(marx))
     marx <- marx[,1]
 
-  if(is.numeric(marx)) {
-    # real-valued marks
-    ok <- all(is.finite(marx))
-    if(ok) {
-      # establish values of markscale, maxsize
-      if(!is.null(maxsize) && !is.null(markscale))
-        stop("Only one of maxsize and markscale should be given")
-      if(is.null(maxsize) && is.null(markscale)) {
-        # if BOTH are absent, enforce the spatstat defaults
-        # (which could also be null)
-        pop <- spatstat.options("par.points")
-        markscale <- pop$markscale
-        maxsize   <- pop$maxsize
-      }
-      # examine spread of values
-      mr <- range(marx)
-      maxabs <- max(abs(mr))
-      constant <- (diff(mr) < 4 * .Machine$double.eps)
-      tiny <- (maxabs < 4 * .Machine$double.eps)
-      if(tiny && is.null(markscale)) {
-        # data cannot be scaled successfully;
-        # plot as points
-        do.call("smartpoints",
-                resolve.defaults(list(x$x, x$y),
-                                 explicit,
-                                 list(...),
-                                 spatstat.options("par.points")))
-        return(invisible())
-      }
-      # determine physical scale:
-      #   plotted size = scal * (mark value) 
-      if(!is.null(markscale))
-        scal <- markscale
-      else {
-        # scale to be determined indirectly
-        if(is.null(maxsize)) {
-          # guess appropriate max physical size of symbols
-          maxsize <- 1.4/sqrt(pi * x$n/area.owin(x$window))
-          maxsize <- min(maxsize, diameter(x$window) * 0.07)
-        }
-        # scale to [0,maxsize]
-        scal <- maxsize/maxabs
-      }
-      # scale determined.
-      # Apply the scaling
-      ms <- marx * scal 
+  ################  real-valued marks ############################
 
-      # Finally, plot them..
-      # plot positive values as circles
-      neg <- (marx < 0)
-      if(any(!neg)) 
-        do.call("symbols",
-                resolve.defaults(
-                                 list(x$x[!neg], x$y[!neg]),
-                                 list(circles = ms[!neg]),
-                                 list(inches = FALSE, add = TRUE),
-                                 if(!missing(cols)) list(fg=cols[1]) else NULL,
-                                 list(...)))
-      # plot negative values as squares
-      if(any(neg))
-        do.call("symbols",
-                resolve.defaults(
-                                 list(x$x[neg], x$y[neg]),
-                                 list(squares = - ms[neg]),
-                                 list(inches = FALSE, add = TRUE),
-                                 if(!missing(cols)) list(fg=cols[1]) else NULL,
-                                 list(...)))
-      # return a plottable scale bar
-      mp.value <- if(constant) mr[1] else pretty(mr)
-      mp.plotted <- mp.value * scal 
-      names(mp.plotted) <- paste(mp.value)
-      return(mp.plotted)
-    } else {
-      warning("Some marks are NA or Inf; treating marks as non-numeric")
+  if(is.numeric(marx)) {
+
+    ok <- is.finite(marx)
+
+    if(!all(ok)) {
+      warning(paste("Some marks are NA or Inf;",
+                    "corresponding points are omitted."))
+      x <- x[ok]
+      marx <- marx[ok]
     }
+
+    # establish values of markscale, maxsize
+    if(!is.null(maxsize) && !is.null(markscale))
+      stop("Only one of maxsize and markscale should be given")
+    if(is.null(maxsize) && is.null(markscale)) {
+      # if BOTH are absent, enforce the spatstat defaults
+      # (which could also be null)
+      pop <- spatstat.options("par.points")
+      markscale <- pop$markscale
+      maxsize   <- pop$maxsize
+    }
+    # examine spread of values
+    mr <- range(marx)
+    maxabs <- max(abs(mr))
+    constant <- (diff(mr) < 4 * .Machine$double.eps)
+    tiny <- (maxabs < 4 * .Machine$double.eps)
+    if(tiny && is.null(markscale)) {
+      # data cannot be scaled successfully;
+      # plot as points
+      do.call("smartpoints",
+              resolve.defaults(list(x$x, x$y),
+                               explicit,
+                               list(...),
+                               spatstat.options("par.points")))
+      return(invisible())
+    }
+    # determine physical scale:
+    #   plotted size = scal * (mark value) 
+    if(!is.null(markscale))
+      scal <- markscale
+    else {
+      # scale to be determined indirectly
+      if(is.null(maxsize)) {
+        # guess appropriate max physical size of symbols
+        maxsize <- 1.4/sqrt(pi * x$n/area.owin(x$window))
+        maxsize <- min(maxsize, diameter(x$window) * 0.07)
+      }
+      # scale to [0,maxsize]
+      scal <- maxsize/maxabs
+    }
+    # scale determined.
+    # Apply the scaling
+    ms <- marx * scal 
+
+    # Finally, plot them..
+    # plot positive values as circles
+    neg <- (marx < 0)
+    if(any(!neg)) 
+      do.call("symbols",
+              resolve.defaults(
+                               list(x$x[!neg], x$y[!neg]),
+                               list(circles = ms[!neg]),
+                               list(inches = FALSE, add = TRUE),
+                               if(!missing(cols)) list(fg=cols[1]) else NULL,
+                               list(...)))
+    # plot negative values as squares
+    if(any(neg))
+      do.call("symbols",
+              resolve.defaults(
+                               list(x$x[neg], x$y[neg]),
+                               list(squares = - ms[neg]),
+                               list(inches = FALSE, add = TRUE),
+                               if(!missing(cols)) list(fg=cols[1]) else NULL,
+                               list(...)))
+    # return a plottable scale bar
+    mp.value <- if(constant) mr[1] else pretty(mr)
+    mp.plotted <- mp.value * scal 
+    names(mp.plotted) <- paste(mp.value)
+    return(mp.plotted)
   }
+
+  ##################### non-numeric marks ###############################
   
   um <- if(is.factor(marx))
     levels(marx)
@@ -184,3 +194,4 @@ plot.ppp <-
   else
     return(invisible(chars))
 }
+

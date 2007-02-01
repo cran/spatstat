@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.6 $  $Date: 2006/08/30 09:46:00 $
+#  $Revision: 1.7 $  $Date: 2007/01/31 05:46:23 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -57,9 +57,7 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   if(verbose) message(paste("fitting", n, "models..."))
   for(i in 1:n) {
     if(verbose)
-      cat(paste(i,
-                if(i == n) ".\n" else ", ",
-                if(i %% 10 == 0) "\n" else NULL, sep=""))
+      progressreport(i, n)
     fi <- do.call("f", as.list(s[i,]))
     if(!inherits(fi, "interact"))
       stop(paste("f did not yield an object of class", sQuote("interact")))

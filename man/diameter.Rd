@@ -1,6 +1,6 @@
 \name{diameter}
 \alias{diameter}
-\title{Diameter of a Window Frame}
+\title{Diameter of a Window}
 \description{
   Computes the diameter of a window 
 }
@@ -14,13 +14,10 @@
   The numerical value of the diameter of the window. 
 }
 \details{
-  It is intended that this function compute the 
+  This function computes the 
   diameter of a window of arbitrary shape,
   i.e. the maximum distance between any two points
   in the window. 
-  The current implementation just computes 
-  the length of the diagonal of the rectangular frame
-  surrounding the window.
 
   The argument \code{w} should be a window (an object of class
   \code{"owin"}, see \code{\link{owin.object}} for details)
@@ -35,6 +32,8 @@
   w <- owin(c(0,1),c(0,1))
   diameter(w) 
   # returns sqrt(2)
+  data(letterR)
+  diameter(letterR)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

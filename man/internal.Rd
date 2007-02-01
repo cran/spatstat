@@ -10,6 +10,7 @@
 \alias{beachcolours}
 \alias{bind.fv}
 \alias{bdrylength.xypolygon} 
+\alias{bdry.mask} 
 \alias{breakpts}
 \alias{breakpts.from.r}
 \alias{cartesian}
@@ -30,7 +31,6 @@
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
-\alias{densityhack}
 \alias{diagnose.ppm.engine}
 \alias{discretise}
 \alias{distpl}               
@@ -251,6 +251,7 @@ as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
 bind.fv(x, y, labl, desc, preferred)
 bdrylength.xypolygon(polly)
+bdry.mask(W)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 cartesian(pp, markset, fac = TRUE)
@@ -271,8 +272,6 @@ default.expand(object, m, epsilon)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
-densityhack(x, bw, adjust, kernel, window, width,
-             give.Rkern, n, from, to, cut, na.rm, weights)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)

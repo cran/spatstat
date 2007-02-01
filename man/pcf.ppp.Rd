@@ -125,10 +125,10 @@
 }
 \examples{
   data(simdat)
-  p <- pcf(simdat)
   \testonly{
     simdat <- simdat[seq(1,simdat$n, by=4)]
   }
+  p <- pcf(simdat)
   plot(p, main="pair correlation function for simdat")
   # indicates inhibition at distances r < 0.3
 }

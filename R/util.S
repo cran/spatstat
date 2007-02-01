@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.19 $    $Date: 2006/12/15 09:55:24 $
+#    $Revision: 1.21 $    $Date: 2007/01/31 05:43:30 $
 #
 #  (a) for matrices only:
 #
@@ -80,7 +80,7 @@ whist <-
         weights <- weights[ok]
     }
     if(missing(weights)) 
-      h <- hist(x, breaks=breaks, plot=FALSE,probability=FALSE)$counts
+      h <- hist(x, breaks=breaks, plot=FALSE)$counts
     else {
       # Thanks to Peter Dalgaard
       cell <- cut(x, breaks, include.lowest=TRUE)
@@ -195,3 +195,21 @@ intersect.ranges <- function(a, b) {
   return(c(lo, hi))
 }
 
+progressreport <- function(i, n, every=max(1, ceiling(n/100)),
+                           nperline=min(charsperline, every * ceiling(charsperline /(every+3))),
+                           charsperline=60) {
+  if(i == n) 
+    cat(paste(n, ".\n", sep=""))
+  else if(every == 1 || i <= 3)
+    cat(paste(i, ",", if(i %% nperline == 0) "\n" else " ", sep=""))
+  else {
+    if(i %% every == 0) 
+      cat(i)
+    else
+      cat(".")
+    if(i %% nperline == 0)
+      cat("\n")
+  }
+  return(invisible(NULL))
+}
+  

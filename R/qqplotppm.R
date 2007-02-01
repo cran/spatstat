@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.20 $   $Date: 2007/01/08 06:35:35 $
+#  $Revision: 1.21 $   $Date: 2007/01/31 05:46:54 $
 #
 
 qqplot.ppm <-
@@ -117,7 +117,7 @@ qqplot.ppm <-
         sim <- array(, dim=c(dim(resi), nsim))
       sim[,,i] <- resi
       if(verbose) 
-        cat(paste(i, ifelse(i %% 10 == 0, "\n", ", "), sep=""))
+        progressreport(i, nsim)
       if(i >= nsim)
         break
     }
