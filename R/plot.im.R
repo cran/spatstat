@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.29 $   $Date: 2006/11/03 09:37:09 $
+#  $Revision: 1.30 $   $Date: 2007/02/16 09:00:23 $
 #
 #  Plotting code for pixel images
 #
@@ -200,19 +200,27 @@ persp.im <- function(x, ..., colmap=NULL) {
 
   # get reasonable z scale while fixing x:y aspect ratio
   if(xinfo$type %in% c("integer", "real")) {
-    xbox <- as.rectangle(x)
-    zscale <- 0.5 * mean(diff(xbox$xrange), diff(xbox$yrange))/diff(xinfo$range)
-  } else
-    zscale <- NULL
-  
+    zrange <- xinfo$range
+    if(diff(zrange) > 0) {
+      xbox <- as.rectangle(x)
+      zscale <- 0.5 * mean(diff(xbox$xrange), diff(xbox$yrange))/diff(zrange)
+      zlim <- zrange
+    } else {
+      zscale <- NULL
+      zlim <- c(0,2) * xinfo$mean
+    }
+  } else 
+    zscale <- zlim <- NULL
+
   do.call.matched("persp",
                   resolve.defaults(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                                    list(...),
                                    pop,
                                    colinfo,
                                    list(xlab="x", ylab="y", zlab=xname),
-                                   list(scale=FALSE, expand=zscale),
-                                   list(main=xname)),
+                                   list(scale=FALSE, expand=zscale, zlim=zlim),
+                                   list(main=xname),
+                                   .StripNull=TRUE),
                   funargs=.Spatstat.persp.args)
 }
 

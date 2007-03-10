@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.58 $	$Date: 2007/01/08 05:43:20 $
+#	$Revision: 4.60 $	$Date: 2007/03/07 02:51:08 $
 #
 #
 #	A window may be either
@@ -486,8 +486,24 @@ bounding.box <- function(...) {
         if(length(wins) == 0)
           stop("No arguments supplied")
 
+        # trap a particular misuse of this function
+        if(length(wins) == 2) {
+          w1 <- wins[[1]]
+          w2 <- wins[[2]]
+          if(is.vector(w1) && is.numeric(w1) &&
+             is.vector(w2) && is.numeric(w2) &&
+             length(w1) == length(w2)) 
+            stop(paste("bounding.box() was applied to two numeric vectors;",
+                       "you probably wanted bounding.box.xy()"))
+        }
+            
         if(length(wins) > 1) {
-          # multiple arguments -- compute bounding box for each
+          # multiple arguments -- compute bounding box for each argument.
+          # First trap any point patterns and extract bounding boxes of points
+          isppp <- unlist(lapply(wins, is.ppp))
+          if(any(isppp)) 
+            wins[isppp] <- lapply(wins[isppp], bounding.box.xy)
+          # then take bounding box of each window
           boxes <- lapply(wins, bounding.box)
           # take bounding box of these boxes
           xrange <- range(unlist(lapply(boxes, function(b){b$xrange})))
@@ -495,11 +511,12 @@ bounding.box <- function(...) {
           return(owin(xrange, yrange))
         }
 
+        # single argument
         w <- wins[[1]]
-          
-        # determine a tight bounding box for the window w
+        # convert to window
         w <- as.owin(w)
 
+        # determine a tight bounding box for the window w
         switch(w$type,
                rectangle = {
                  return(w)

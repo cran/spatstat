@@ -1,14 +1,14 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.4 $ $Date: 2006/10/09 03:29:22 $
+#  $Revision: 1.6 $ $Date: 2007/02/26 05:56:44 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
 #     resolve.defaults(list1, list2, list3, .......)
 # where the earlier lists have priority 
 #
-resolve.defaults <- function(...) {
+resolve.defaults <- function(..., .StripNull=FALSE) {
   arglist <- list(...)
   argue <- list()
   if((n <- length(arglist)) > 0)  {
@@ -23,12 +23,16 @@ resolve.defaults <- function(...) {
       arg.named <- arg.named[!discard]
     argue <- append(arg.unnamed, arg.named)
   }
+  if(.StripNull) {
+    isnull <- sapply(argue, is.null)
+    argue <- argue[!isnull]
+  }
   return(argue)
 }
 
 
 do.call.matched <- function(fname, arglist, funargs, extrargs=NULL) {
-  fun <- get(fname)
+  fun <- get(fname, mode="function")
   if(!is.function(fun))
     stop(paste("internal error: function", sQuote(fname), "not found",
                sep=""))

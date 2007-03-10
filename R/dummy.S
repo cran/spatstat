@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.7 $     $Date: 2006/12/12 09:25:48 $
+#       $Revision: 5.13 $     $Date: 2007/02/16 08:07:56 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -240,12 +240,11 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
   if(npix.given <- !is.null(npix)) 
     npix <- ensure2print(npix, verbose)
 
-  if(pixels) {
-    sonpixel <- spatstat.options("npixel")
-    sonpixel <- ensure2print(sonpixel, verbose, "default")
-  }
-  
-  ndminX <- max(25, 10 * ceiling(2 * sqrt(X$n)/10))
+  if(pixels) 
+    sonpixel <- ensure2print(spatstat.options("npixel"), verbose, "")
+
+  ndummy.min <- ensure2print(spatstat.options("ndummy.min"), verbose, "")
+  ndminX <- pmax(ndummy.min, 10 * ceiling(2 * sqrt(X$n)/10))
   ndminX <- ensure2vector(ndminX)
 
   minmultiple <- function(n, lo, hi) {
@@ -307,7 +306,7 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
       warning("number of dummy points nd exceeds maximum pixel dimensions")
     ntile <- min2div(nd, ndminX, nd)
   } else if(!nd.given && ntile.given) {
-    # ntile must be a multiple of ntile
+    # nd must be a multiple of ntile
     nd <- min2mul(ntile, ndminX, Nmin)
     if(any(nd >= Nmin))
       nd <- ntile
@@ -319,8 +318,11 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
      } else {
        # find suitable divisors of the number of pixels
        nd <- ntile <- min2div(Nmin, ndminX, Nmax)
-       if(any(nd >= Nmin))  # none suitable
+       if(any(nd >= Nmin)) { # none suitable
+         if(verbose)
+           cat("No suitable divisor of pixel dimensions\n")
          nd <- ntile <- ndminX
+       }
      }
   } else {
     # both nd, ntile were given

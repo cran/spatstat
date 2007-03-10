@@ -8,6 +8,7 @@ allstats                Calculate four standard summary functions of a
 alltypes                Calculate Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
+anemones                Beadlet Anemones Data
 angles.psp              Orientation Angles of Line Segments
 anova.ppm               ANOVA for Fitted Point Process Models
 ants                    Harkness-Isham ants' nests data
@@ -26,11 +27,13 @@ bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
 bei                     Tropical rain forest trees
 betacells               Beta Ganglion Cells in Cat Retina
-bounding.box            Bounding Box of a Window
+bounding.box            Bounding Box of a Window or Point Pattern
+bounding.box.xy         Convex Hull of Points
 bramblecanes            Hutchings' Bramble Canes data
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
 chorley                 Chorley-Ribble Cancer Data
+clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
 coef.ppm                Coefficients of Fitted Point Process Model
 compatible.fv           Test Whether Two Function Objects Are
@@ -39,6 +42,7 @@ compatible.im           Test Whether Two Pixel Images Are Compatible
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
 contour.im              Contour plot of pixel image
+convexhull.xy           Convex Hull of Points
 copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
 crossdist               Pairwise distances
@@ -82,6 +86,8 @@ eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
 eval.fv                 Evaluate Expression Involving Functions
 eval.im                 Evaluate Expression Involving Pixel Images
+ewcdf                   Weighted Empirical Cumulative Distribution
+                        Function
 expand.owin             Expand Window By Factor
 fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
@@ -107,6 +113,7 @@ humberside              Humberside Data on Childhood Leukaemia and
 identify.ppp            Identify Points in a Point Pattern
 Iest                    Estimate the I-function
 im                      Create a Pixel Image Object
+[<-.im                  Reset Values in Subset of Image
 im.object               Class of Images
 inside.owin             Test Whether Points Are Inside A Window
 intersect.owin          Intersection or Union of Two Windows
@@ -140,6 +147,7 @@ Kmeasure                Reduced Second Moment Measure
 km.rs                   Kaplan-Meier and Reduced Sample Estimator using
                         Histograms
 Kmulti                  Marked K-Function
+ks.test.ppm             Kolmogorov-Smirnov Test for Point Process Model
 lansing                 Lansing Woods Point Pattern
 lengths.psp             Lengths of Line Segments
 LennardJones            The Lennard-Jones Potential

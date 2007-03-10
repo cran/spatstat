@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.5 $   $Date: 2006/08/14 04:29:38 $
+#    $Revision: 1.6 $   $Date: 2007/02/16 07:14:30 $
 #
 #
 ".Spatstat.Options" <-
@@ -12,7 +12,8 @@
        par.binary=list(),
        par.persp=list(),
        par.points=list(),
-       par.contour=list()
+       par.contour=list(),
+       ndummy.min=25
        )
 
 "spatstat.options" <-

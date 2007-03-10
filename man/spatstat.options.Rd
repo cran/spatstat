@@ -62,6 +62,13 @@
       List of arguments controlling contour plots of pixel images
       by \code{\link{contour.im}}.
     }
+    \item{ndummy.min}{
+      Controls the number of dummy points in a quadrature scheme
+      created by \code{\link{default.dummy}}.
+      Either an integer or a pair of integers
+      giving the number of dummy points in the \code{x} and \code{y}
+      directions. 
+    }
   }
   
   If no arguments are given, 

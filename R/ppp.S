@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.47 $	$Date: 2006/12/12 08:56:49 $
+#	$Revision: 4.49 $	$Date: 2007/03/12 01:30:57 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -25,52 +25,77 @@
 #	
 #--------------------------------------------------------------------------
 ppp <- function(x, y, ..., window, marks, check=TRUE ) {
-	# Constructs an object of class 'ppp'
-	#
-        if(!missing(window))
-          verifyclass(window, "owin")
-        else
-          window <- owin(...)
+  # Constructs an object of class 'ppp'
+  #
+  if(!missing(window))
+    verifyclass(window, "owin")
+  else
+    window <- owin(...)
           
-	n <- length(x)
-	if(length(y) != n)
-		stop("coordinate vectors x and y are not of equal length")
-        # validate x, y coordinates
-        stopifnot(is.numeric(x))
-        stopifnot(is.numeric(y))
-        names(x) <- NULL
-        names(y) <- NULL
-        # check (x,y) points lie inside window
-        if(check && n > 0) {
-          ok <- inside.owin(x, y, window)
-          if(any(!ok))
-            stop("Some (x,y) points lie outside the specified window")
-        }
-        # initialise ppp object
-	pp <- list(window=window, n=n, x=x, y=y)
-        # add marks if any
-	if(!missing(marks) && !is.null(marks)) {
-          if(is.matrix(marks))
-            marks <- as.data.frame(marks)
-          if(is.data.frame(marks)) {
-            pp$markformat <- "dataframe"
-            if(.Spatstat.Forbids.Df)
-              stop("Sorry, not implemented for data frame of marks",
-                   call.=FALSE)
-            if(nrow(marks) != n)
-              stop("number of rows of marks != length of x and y")
-          } else {
-            pp$markformat <- "vector"
-            if(length(marks) != n)
-              stop("length of marks vector != length of x and y")
-            names(marks) <- NULL
-          }
-          pp$marks <- marks
-	} else {
-          pp$markformat <- "none"
-        }
-	class(pp) <- "ppp"
-	pp
+  n <- length(x)
+  if(length(y) != n)
+    stop("coordinate vectors x and y are not of equal length")
+  
+  # validate x, y coordinates
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(y))
+  names(x) <- NULL
+  names(y) <- NULL
+  
+  # check (x,y) points lie inside window
+  if(check && n > 0) {
+    ok <- inside.owin(x, y, window)
+    nout <- sum(!ok)
+    if(nout > 0) {
+      warning(paste(nout,
+                    ngettext(nout, "point was", "points were"),
+                    "rejected as lying outside the specified window"))
+      bb <- bounding.box.xy(x,y)
+      bb <- bounding.box(bb, window)
+      rr <- ripras(x,y)
+      rr <- rebound.owin(rr, bb)
+      rejects <- list(x=x[!ok], y=y[!ok], rr=rr, bb=bb)
+      x <- x[ok]
+      y <- y[ok]
+      n <- length(x)
+    }
+  } else nout <- 0
+  # initialise ppp object
+  pp <- list(window=window, n=n, x=x, y=y)
+  # add marks if any
+  if(!missing(marks) && !is.null(marks)) {
+    if(is.matrix(marks)) 
+      marks <- as.data.frame(marks)
+    if(is.data.frame(marks)) {
+      pp$markformat <- "dataframe"
+      if(.Spatstat.Forbids.Df)
+        stop("Sorry, not implemented for data frame of marks",
+             call.=FALSE)
+      if(nout > 0) {
+        marks <- marks[ok, ]
+        rejects$marks <- marks[!ok,]
+      }
+      if(nrow(marks) != n)
+        stop("number of rows of marks != length of x and y")
+    } else {
+      pp$markformat <- "vector"
+      if(nout > 0) {
+        marks <- marks[ok]
+        rejects$marks <- marks[!ok]
+      }
+      if(length(marks) != n)
+        stop("length of marks vector != length of x and y")
+      names(marks) <- NULL
+    }
+    pp$marks <- marks
+  } else {
+    pp$markformat <- "none"
+  }
+  class(pp) <- "ppp"
+  if(nout > 0) 
+    attr(pp, "rejects") <- ppp(rejects$x, rejects$y, window=rejects$rr,
+                               marks=rejects$marks)
+  pp
 }
 
 #
@@ -88,7 +113,7 @@ as.ppp <- function(X, ..., fatal=TRUE) {
 }
 
 as.ppp.ppp <- function(X, ..., fatal=TRUE) {
-  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  check <- resolve.defaults(list(...), list(check=FALSE))$check
   return(ppp(X$x, X$y, window=X$window, marks=X$marks, check=check))
 }
 
@@ -311,6 +336,15 @@ print.ppp <- function(x, ...) {
     }
   }
   print(x$window)
+  if(!is.null(rejects <- attr(x, "rejects"))) {
+    nrejects <- rejects$n
+    cat(paste("\n***",
+              nrejects,
+              ngettext(nrejects, "illegal point", "illegal points"),
+              "stored in",
+              paste("attr(,", dQuote("rejects"), ")", sep=""),
+              "***\n"))
+  }
   return(invisible(NULL))
 }
 
@@ -347,6 +381,8 @@ summary.ppp <- function(object, ..., checkdup=TRUE) {
       result$marks <- summary(mks)
   }
   class(result) <- "summary.ppp"
+  if(!is.null(rejects <- attr(object, "rejects"))) 
+    result$rejects <- rejects$n
   return(result)
 }
 
@@ -357,6 +393,8 @@ print.summary.ppp <- function(x, ..., dp=3) {
             x$n,
             " points\n",
             sep=""))
+  oneline <- resolve.defaults(list(...), list(oneline=FALSE))$oneline
+  if(oneline) return(invisible(NULL))
   unitinfo <- summary(x$window$units)
   cat(paste("Average intensity",
             signif(x$intensity,dp),
@@ -385,6 +423,13 @@ print.summary.ppp <- function(x, ..., dp=3) {
   }
   cat("\n")
   print(x$window)
+  if(!is.null(nrejects <- x$rejects)) 
+    cat(paste("\n***",
+              nrejects,
+              ngettext(nrejects, "illegal point", "illegal points"),
+              "stored in",
+              paste("attr(,", dQuote("rejects"), ")", sep=""),
+              "***\n"))
   return(invisible(x))
 }
 

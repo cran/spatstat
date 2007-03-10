@@ -3,51 +3,64 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.9 $   $Date: 2006/10/24 06:25:48 $
+#    $Revision: 1.10 $   $Date: 2007/02/19 05:24:23 $
 #
 #    as.im()
 #
-as.im <- function(X, W, ...) {
+as.im <- function(X, W=as.mask(as.owin(X), dimyx=dimyx), ..., dimyx=NULL) {
 
-  x <- X
-  
-  if(verifyclass(x, "im", fatal=FALSE))
-    return(x)
+  if(verifyclass(X, "im", fatal=FALSE)) {
+    if(missing(W) && is.null(dimyx))
+      return(X)
+    # reshape pixel raster
+    # invoke W = as.mask(X, dimyx)
+    Y <- as.im(W, dimyx=dimyx)
+    phase <- c((Y$xcol[1] - X$xcol[1])/X$xstep,
+               (Y$yrow[1] - X$yrow[1])/X$ystep)
+    Y$v <- matrixsample(X$v, Y$dim, phase=round(phase))
+    return(Y)
+  }
 
-  if(verifyclass(x, "owin", fatal=FALSE)) {
-    w <- as.mask(x)
-    m <- w$m
+  if(verifyclass(X, "owin", fatal=FALSE)) {
+    # if W is missing, the default is now evaluated, as above.
+    # if W is present, it may have to be converted
+    if(!missing(W)) {
+      stopifnot(is.owin(W))
+      if(W$type != "mask")
+        W <- as.mask(W, dimyx=dimyx)
+    }
+    m <- W$m
     v <- m * 1
     v[!m] <- NA
     out <- list(v = v, 
-                dim    = w$dim,
-                xrange = w$xrange,
-                yrange = w$yrange,
-                xstep  = w$xstep,
-                ystep  = w$ystep,
-                xcol   = w$xcol,
-                yrow   = w$yrow,
+                dim    = W$dim,
+                xrange = W$xrange,
+                yrange = W$yrange,
+                xstep  = W$xstep,
+                ystep  = W$ystep,
+                xcol   = W$xcol,
+                yrow   = W$yrow,
                 lev    = NULL,
                 type    = "integer",
-                units  = units(x))
+                units  = units(X))
     class(out) <- "im"
     return(out)
   }
 
-  if((is.vector(x) || is.factor(x)) && length(x) == 1) {
-    xvalue <- x
-    x <- function(xx, yy, ...) { rep(xvalue, length(xx)) }
+  if((is.vector(X) || is.factor(X)) && length(X) == 1) {
+    xvalue <- X
+    X <- function(xx, yy, ...) { rep(xvalue, length(xx)) }
   }
   
-  if(is.function(x)) {
-    f <- x 
-    w <- as.owin(W)
-    w <- as.mask(w)
-    m <- w$m
+  if(is.function(X)) {
+    f <- X
+    W <- as.owin(W)
+    W <- as.mask(W, dimyx=dimyx)
+    m <- W$m
     funnywindow <- !all(m)
 
-    xx <- raster.x(w)
-    yy <- raster.y(w)
+    xx <- raster.x(W)
+    yy <- raster.y(W)
     lev <- NULL
     
     if(!funnywindow) 
@@ -63,14 +76,14 @@ as.im <- function(X, W, ...) {
     if(is.factor(values)) 
         lev <- levels(values)
 
-    return(im(values, w$xcol, w$yrow, lev, units=units(w)))
+    return(im(values, W$xcol, W$yrow, lev, units=units(W)))
   }
 
-  if(is.list(x) && checkfields(x, c("x","y","z"))) {
-    stopifnot(is.matrix(x$z))
-    z <- x$z
-    y <- x$y
-    x <- x$x
+  if(is.list(X) && checkfields(X, c("x","y","z"))) {
+    stopifnot(is.matrix(X$z))
+    z <- X$z
+    y <- X$y
+    x <- X$x
     # Usual S convention as in contour.default() and image.default()
     # Rows of z correspond to x values.
     nr <- nrow(z)
@@ -85,8 +98,16 @@ as.im <- function(X, W, ...) {
       y <- (y[-1] + y[-ly])/2
     else if(ly != nc)
       stop("length of y coordinate vector does not match number of columns of z")
-    return(im(t(z), x, y))
+    # convert to class "im"
+    out <- im(t(z), x, y)
+    # now apply W and dimyx if present
+    if(missing(W) && is.null(dimyx))
+      return(out)
+    else if(missing(W))
+      return(as.im(out, dimyx=dimyx))
+    else
+      return(as.im(out, W=W, dimyx=dimyx))
   }
     
-  stop("Can't convert x to a pixel image")
+  stop("Can't convert X to a pixel image")
 }
