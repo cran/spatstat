@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.25 $	$Date: 2007/01/31 02:49:03 $
+#	$Revision: 1.29 $	$Date: 2007/03/12 01:31:09 $
 #
 #
 #--------------------------------------------------------------------------
@@ -17,11 +17,55 @@ plot.ppp <-
   if(missing(main))
     main <- deparse(substitute(x))
 
+# First handle `rejected' points
+  sick <- inherits(x, "ppp") && !is.null(rejects <- attr(x, "rejects"))
+  if(sick) {
+    # get any parameters
+    par.rejects <- resolve.defaults(list(...),
+                                    list(par.rejects=list(pch="+")))$par.rejects
+    par.direct <- list(main=main, use.marks=use.marks,
+                   maxsize=maxsize, markscale=markscale)
+    par.all <- resolve.defaults(par.rejects, par.direct)
+    rw <- resolve.defaults(list(...), list(rejectwindow=NULL))$rejectwindow
+    # determine window for rejects
+    rwin <-
+      if(is.null(rw))
+        rejects$window
+      else if(is.logical(rw) && rw)
+        rejects$window
+      else if(inherits(rw, "owin"))
+        rw
+      else if(is.character(rw)) {
+        switch(rw,
+               box={bounding.box(rejects)},
+               ripras={ripras(c(rejects$x, x$x), c(rejects$y, x$y))},
+               stop(paste("Unrecognised option: rejectwindow=", rw)))
+      } else stop("Unrecognised format for rejectwindow")
+    # Create suitable space
+    plot(rwin, add=add, type="n")
+    if(!add)
+      title(main=main)
+    # plot window if commanded
+    if(!is.null(rw)) {
+      rwinpardefault <- list(lty=2,lwd=1,border=1)
+      rwinpars <-
+        resolve.defaults(par.rejects, rwinpardefault)[names(rwinpardefault)]
+      do.call("plot.owin", append(list(rwin, add=TRUE), rwinpars))
+    }
+    # plot points
+    do.call("plot.ppp", append(list(rejects, add=TRUE), par.all))
+    plot.owin(x$window, add=TRUE, ...)
+    warning(paste(rejects$n, "illegal points also plotted"))
+    # the rest is added
+    add <- TRUE
+  }
+
+# Now convert to bona fide point pattern
   x <- as.ppp(x)
   
   if(!add)
     plot.owin(x$window, ..., main=main)
-
+    
   if(x$n == 0)
     return(invisible())
 

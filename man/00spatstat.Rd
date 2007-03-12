@@ -40,12 +40,11 @@ The Spatstat Package
   Type \code{demo(spatstat)} for an overall demonstration 
   of the package.
 
-  An introduction to the package is available in the
-  file \code{Intro.pdf} in the \code{doc} directory supplied in the
-  installation of the package. 
-
-  The package is described more fully in the paper by
+  For a readable introduction to \pkg{spatstat}, see the paper by
   Baddeley and Turner (2005a), available online.
+
+  Type \code{demo(data)} to see all the datasets
+  available in the package.
 }
 \section{FUNCTIONS AND DATASETS}{
   Following is a summary of the main functions and datasets
@@ -56,6 +55,9 @@ The Spatstat Package
   For further information on any of these,
   type \code{help(name)} where \code{name} is the name of the function
   or dataset.
+
+  Type \code{demo(data)} to see all the datasets
+  installed with the package.
 }
 \section{CONTENTS:}{
   \tabular{ll}{
@@ -144,6 +146,7 @@ The Spatstat Package
       
       \tabular{ll}{
 	\code{\link{amacrine}} \tab Austin Hughes' rabbit amacrine cells \cr
+	\code{\link{anemones}} \tab Upton-Fingleton sea anemones data\cr
 	\code{\link{ants}} \tab Harkness-Isham ant nests data\cr
 	\code{\link{bei}} \tab Tropical rainforest trees \cr
 	\code{\link{betacells}} \tab Waessle et al. cat retinal ganglia data \cr

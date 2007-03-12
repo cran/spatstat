@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.20 $	$Date: 2006/11/06 08:25:18 $
+#	$Revision: 1.21 $	$Date: 2007/03/09 08:32:00 $
 #
 #
 #
@@ -53,6 +53,10 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04)
                                      list(xlim=xlim, ylim=ylim,
                                           ann=FALSE, axes=FALSE,
                                           asp=1.0)))
+    type <- resolve.defaults(list(...), list(type=NULL))$type
+    if(!is.null(type) && type == "n")
+      return(invisible(NULL))
+    
     # add title in a reasonable place!
     if(nlines > 0) {
       parval <- resolve.defaults(list(...), par())

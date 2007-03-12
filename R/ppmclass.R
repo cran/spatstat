@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.12 $	$Date: 2007/01/11 04:09:28 $
+#	$Revision: 2.13 $	$Date: 2007/03/08 09:43:11 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -91,7 +91,7 @@ print.ppm <- function(x, ...) {
 
 	if(!poisson) {
           cat("\nInteraction:\n")
-          print(s$entries$interaction)
+          print(s$entries$interaction, family=FALSE)
         
           cat(paste(s$interaction$header, ":\n", sep=""))
           print(s$interaction$printable)

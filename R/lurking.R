@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.10 $ $Date: 2007/01/11 04:23:40 $
+# $Revision: 1.12 $ $Date: 2007/02/16 07:08:38 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -244,11 +244,19 @@ lurking <- function(object, covariate, type="eem",
       #
       # variance of residuals
       varR <- varI - varII
-      # avoid numerical errors
-      if(any(nbg <- (varR < 0))) {
-        if(max(-varR[nbg]) > 1e-7)
-          warning("Internal error: negative variances generated")
+      # trap numerical errors
+      nbg <- (varR < 0)
+      if(any(nbg)) {
+        ran <- range(varR)
         varR[nbg] <- 0
+        relerr <- abs(ran[1]/ran[2])
+        nerr <- sum(nbg)
+        if(relerr > 1e-6)
+          warning(paste(nerr, "negative",
+                        ngettext(nerr, "value (", "values (min="),
+                        signif(ran[1], 4), ")",
+                        "of residual variance reset to zero",
+                        "(out of", length(varR), "values)"))
       }
       theoretical$sd <- sqrt(varR)
     }

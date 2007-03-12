@@ -6,7 +6,7 @@ Estimates the reduced second moment measure \eqn{\kappa}{Kappa}
 from a point pattern in a window of arbitrary shape.
 }
 \usage{
-  Kmeasure(X, sigma, edge=TRUE)
+  Kmeasure(X, sigma, edge=TRUE, ..., varcov=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -15,12 +15,17 @@ from a point pattern in a window of arbitrary shape.
     in any format acceptable to \code{\link{as.ppp}()}.
     }
     \item{sigma}{
-      standard deviation \eqn{\sigma}{sigma} of the Gaussian
-      smoothing kernel.
+      Standard deviation \eqn{\sigma}{sigma} of the Gaussian
+      smoothing kernel. Incompatible with \code{varcov}.
     }
     \item{edge}{
       logical value indicating whether an edge correction
       should be applied.
+    }
+    \item{\dots}{Ignored.}
+    \item{varcov}{
+      Variance-covariance matrix of the Gaussian smoothing kernel.
+      Incompatible with \code{sigma}.
     }
 }
 \value{
@@ -57,12 +62,24 @@ from a point pattern in a window of arbitrary shape.
   observed inside a known, bounded window. Marks are ignored.
 
   The algorithm approximates the point pattern and its window by binary pixel
-  images, introduces an isotropic Gaussian smoothing kernel
+  images, introduces a Gaussian smoothing kernel
   and uses the Fast Fourier Transform \code{\link{fft}}
   to form a density estimate of \eqn{\kappa}{Kappa}. The calculation
   corresponds to the edge correction known as the ``translation
   correction''.
 
+  The Gaussian smoothing kernel may be specified by either of the
+  arguments \code{sigma} or \code{varcov}. If \code{sigma} is a single
+  number, this specifies an isotropic Gaussian kernel
+  with standard deviation \code{sigma} on each coordinate axis.
+  If \code{sigma} is a vector of two numbers, this specifies a Gaussian
+  kernel with standard deviation \code{sigma[1]} on the \eqn{x} axis,
+  standard deviation \code{sigma[2]} on the \eqn{y} axis, and zero
+  correlation between the \eqn{x} and \eqn{y} axes. If \code{varcov} is
+  given, this specifies the variance-covariance matrix of the
+  Gaussian kernel. There do not seem to be any well-established rules
+  for selecting the smoothing kernel in this context.
+  
   The density estimate of \eqn{\kappa}{Kappa}
   is returned in the form of a real-valued pixel image.
   Pixel values are estimates of the

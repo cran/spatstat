@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.12 $	$Date: 2006/12/12 08:40:17 $
+#	$Revision: 1.13 $	$Date: 2007/03/06 09:43:38 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -32,7 +32,8 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
          rectangle={
            if(diagonalmatrix) {
              # result is a rectangle
-             Y <- owin(mat[1,1] * X$xrange, mat[2,2] * X$yrange)
+             Y <- owin(range(mat[1,1] * X$xrange + vec[1]),
+                       range(mat[2,2] * X$yrange + vec[2]))
              units(Y) <- newunits
              return(Y)
            } else {

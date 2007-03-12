@@ -31,7 +31,9 @@
 }
 \details{
   This function extracts a subset of the pixel values in a
-  pixel image. The image \code{X} must be an object of class
+  pixel image. (To reassign the pixel values, see \code{\link{[<-.im}}).
+
+  The image \code{X} must be an object of class
   \code{"im"} representing a pixel image defined inside a
   rectangle in two-dimensional space (see \code{\link{im.object}}).
 
@@ -77,6 +79,7 @@
 }
 \seealso{
   \code{\link{im.object}},
+  \code{\link{[<-.im}},
   \code{\link{ppp.object}},
   \code{\link{owin.object}},
   \code{\link{plot.im}}

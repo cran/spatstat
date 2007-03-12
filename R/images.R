@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.26 $     $Date: 2007/01/15 05:35:04 $
+#         $Revision: 1.29 $     $Date: 2007/03/06 03:44:43 $
 #
 #      The class "im" of raster images
 #
@@ -142,10 +142,53 @@ function(x, i, drop=TRUE, ...) {
                 lev=lev, units=units(x)))
     } 
   }
+  if(verifyclass(i, "im", fatal=FALSE)) {
+    # logical images OK
+    if(i$type == "logical") {
+      # convert to window
+      w <- as.owin(eval.im(ifelse(i, 1, NA)))
+      return(x[w, drop=drop, ...])
+    } 
+  }
   stop("The subset operation is undefined for this type of index")
 }
 
 
+"[<-.im" <- function(x, i, value) {
+  lev <- x$lev
+  X <- x
+  W <- as.owin(X)
+  if(verifyclass(i, "ppp", fatal=FALSE)) {
+    # 'i' is a point pattern
+    # test whether all points are inside window
+    if(!all(inside.owin(i$x, i$y, W)))
+      stop("Some points are outside the domain of the image")
+    # determine row & column positions for each point 
+    loc <- nearest.pixel(i$x, i$y, X)
+    # set values
+    X$v[cbind(loc$row, loc$col)] <- value
+    return(X)
+  }
+  if(verifyclass(i, "owin", fatal=FALSE)) {
+    # 'i' is a window
+    xx <- as.vector(raster.x(W))
+    yy <- as.vector(raster.y(W))
+    ok <- inside.owin(xx, yy, i)
+    X$v[ok] <- value
+    return(X)
+  }
+  if(verifyclass(i, "im", fatal=FALSE) && i$type == "logical") {
+    # convert logical vector to window where entries are TRUE
+    i <- as.owin(eval.im(ifelse(i, 1, NA)))
+    # continue as above
+    xx <- as.vector(raster.x(W))
+    yy <- as.vector(raster.y(W))
+    ok <- inside.owin(xx, yy, i)
+    X$v[ok] <- value
+    return(X)
+  }
+  stop("The subset operation is undefined for this type of index")
+}
 
 ################################################################
 ########   other tools
@@ -280,10 +323,9 @@ hist.im <- function(x, ..., probability=FALSE) {
       # plot.default whinges if `probability' given when plot=FALSE
       out <- do.call("hist.default",
                    resolve.defaults(list(values),
-                                    list(...),
-                                    list(xlab=paste("Pixel value"),
-                                         ylab=ylab,
-                                         main=main)))
+                                    list(...)))
+      # hack!
+      out$xname <- xname
     }
   }
   return(invisible(out))

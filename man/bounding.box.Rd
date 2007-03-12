@@ -1,36 +1,49 @@
 \name{bounding.box}
 \alias{bounding.box}
-\title{Bounding Box of a Window}
+\title{Bounding Box of a Window or Point Pattern}
 \description{
   Find the smallest rectangle containing a given window(s)
+  or point pattern(s).
 }
 \usage{
  bounding.box(\dots)
 }
 \arguments{
-  \item{\dots}{One or more windows (objects of class \code{"owin"}).}
+  \item{\dots}{One or more windows (objects of class \code{"owin"}),
+    pixel images (objects of class \code{"im"}) or
+    point patterns (objects of class \code{"ppp"}).
+  }
 }
 \value{
   A window (object of class \code{"owin"})
   of type \code{"rectangle"} representing a rectangle.
 }
 \details{
-  If the argument is a single window object \code{w},
-  this function finds the smallest rectangle (with sides parallel to
-  the coordinate axes) containing \code{w}.
+  This function finds the smallest rectangle (with sides parallel to
+  the coordinate axes) that contains all the given objects.
 
-  If the argument is a list of windows, then
+  For a window (object of class \code{"owin"}), the bounding box
+  is the smallest rectangle that contains all the vertices of the
+  window (this is generally smaller than the enclosing frame,
+  which is returned by \code{\link{as.rectangle}}).
+
+  For a point pattern (object of class \code{"ppp"}), the bounding box
+  is the smallest rectangle that contains all the points of the pattern,
+  and is computed by \code{\link{bounding.box.xy}}.
+
+  For a pixel image (object of class \code{"im"}), the image will
+  be converted to a window using \code{\link{as.owin}},
+  and the bounding box of this window is obtained.
+  
+  If the argument is a list of several objects, then
   this function finds the smallest rectangle that contains
-  all of the windows.
-
-  Note that the bounding box of a window \code{w} is usually smaller than
-  the window frame (determined by \code{w$xrange} and
-  \code{w$yrange} and extracted by \code{\link{as.rectangle}}).
+  all the bounding boxes of the objects.
 }
 \seealso{
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{as.rectangle}}
+  \code{\link{bounding.box.xy}}
 }
 \examples{
   w <- owin(c(0,10),c(0,10), poly=list(x=c(1,2,3,2,1), y=c(2,3,4,6,7)))

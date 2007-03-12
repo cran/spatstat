@@ -27,11 +27,11 @@
 \format{
   \code{copper} is a list with the following entries:
   \describe{
-    \item{points}{a point pattern (object of class \code{"ppp"})
+    \item{Points}{a point pattern (object of class \code{"ppp"})
       representing the full point pattern of copper deposits.
       See \code{\link{ppp.object}} for details of the format.
     }
-    \item{lines}{a line segment pattern (object of class \code{"psp"})
+    \item{Lines}{a line segment pattern (object of class \code{"psp"})
       representing the lineaments in the full dataset.
       See \code{\link{psp.object}} for details of the format.
       given as a data frame with 4 columns (x1, y1, x2, y2).
@@ -55,8 +55,8 @@
 
   # Plot full dataset
 
-  plot(copper$points)
-  plot(copper$lines, add=TRUE)
+  plot(copper$Points)
+  plot(copper$Lines, add=TRUE)
 
   # Plot southern half of data
   plot(copper$SouthPoints)

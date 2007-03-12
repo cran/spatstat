@@ -45,7 +45,7 @@
 }
 \examples{
    data(copper)
-   X <- copper$lines
+   X <- copper$Lines
    X
    # data are in km
    # convert to metres

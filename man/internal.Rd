@@ -68,6 +68,7 @@
 \alias{is.cadlag}
 \alias{is.data}
 \alias{is.fv}
+\alias{is.interact}
 \alias{is.marked.default}    
 \alias{is.marked.quad}    
 \alias{is.multitype.quad}    
@@ -168,6 +169,7 @@
 \alias{quad}
 \alias{quadrat.breaks}
 \alias{quadrat.count.engine}
+\alias{quadrat.test.engine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
@@ -311,6 +313,7 @@ intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
 is.fv(x)
+is.interact(x)
 \method{is.marked}{default}(\dots)  
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 \method{is.multitype}{default}(\dots)  
@@ -398,7 +401,7 @@ primefactors(n, prmax)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{fv}(x, \dots)
-\method{print}{interact}(x, \dots, full=TRUE)       
+\method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{plotppm}(x, \dots)
@@ -420,6 +423,7 @@ prolongseq(x, newrange)
 quad(data, dummy, w, param)
 quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 quadrat.count.engine(x, y, xbreaks, ybreaks, weights)
+quadrat.test.engine(X, nx, ny, xbreaks, ybreaks, \dots, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
@@ -435,7 +439,7 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
               srange=NULL, monochrome=FALSE, main=NULL, \dots)
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
-resolve.defaults(\dots)
+resolve.defaults(\dots, .StripNull=FALSE)
 restrict.mask(M, W)
 reverse.xypolygon(p)
 revcumsum(x)
@@ -455,7 +459,7 @@ rmpoint.I.allim(n, f, types)
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
-second.moment.calc(x, sigma, edge=TRUE, what="Kmeasure", debug=FALSE,
+second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL)
 shiftxy(X, vec = c(0, 0))
 spatstat.rawdata.location(\dots)             

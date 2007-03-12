@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.22 $    $Date: 2006/10/24 03:02:02 $
+#           $Revision: 1.24 $    $Date: 2007/02/08 07:32:06 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -42,11 +42,35 @@ pixellate <- function(x, ..., weights=NULL)
     return(out)
 }
 
-Kmeasure <- function(X, sigma, edge=TRUE) {
-  second.moment.calc(X, sigma, edge, "Kmeasure")
+Kmeasure <- function(X, sigma, edge=TRUE, ..., varcov=NULL) {
+  stopifnot(is.ppp(X))
+  
+  sigma.given <- !missing(sigma) && !is.null(sigma)
+  varcov.given <- !is.null(varcov)
+  ngiven <- sigma.given + varcov.given
+  if(ngiven == 2)
+    stop(paste("Give only one of the arguments",
+               sQuote("sigma"), "and", sQuote("varcov")))
+  if(ngiven == 0)
+    stop(paste("Please specify smoothing bandwidth", sQuote("sigma"),
+               "or", sQuote("varcov")))
+  if(varcov.given) {
+    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )
+    sigma <- NULL
+  } else {
+    stopifnot(is.numeric(sigma))
+    stopifnot(length(sigma) %in% c(1,2))
+    stopifnot(all(sigma > 0))
+    if(length(sigma) == 2) {
+      varcov <- diag(sigma^2)
+      sigma <- NULL
+    }
+  }  
+
+  second.moment.calc(X, sigma=sigma, edge, "Kmeasure", varcov=varcov)
 }
 
-second.moment.calc <- function(x, sigma, edge=TRUE,
+second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
                                what="Kmeasure", debug=FALSE, ..., varcov=NULL)
 {
   choices <- c("kernel", "smooth", "Kmeasure", "Bartlett", "edge")
@@ -263,4 +287,5 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
   # normal return
   return(result)
 }
+  
   
