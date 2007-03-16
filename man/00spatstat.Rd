@@ -161,8 +161,8 @@ The Spatstat Package
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
 	\code{\link{lansing}} \tab Lansing Woods data \cr
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
-	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
+	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
@@ -288,7 +288,8 @@ The Spatstat Package
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr
 	\code{\link{persp.im}}	\tab draw perspective plot of a pixel image \cr
-	\code{\link{[.im}} 	\tab extract subset of pixel image\cr
+	\code{\link{[.im}} 	\tab extract a subset of a pixel image\cr
+	\code{\link{[<-.im}} 	\tab replace a subset of a pixel image\cr
 	\code{\link{shift.im}} \tab apply vector shift to pixel image \cr
 	\code{X}	\tab	print very basic information about image \code{X}\cr
 	\code{\link{summary}(X)} \tab	summary of image \code{X} \cr
@@ -297,6 +298,7 @@ The Spatstat Package
 	\code{\link{quantile.im}} \tab	quantiles of image  \cr
 	\code{\link{cut.im}} \tab	convert numeric image to factor image \cr
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
+	\code{\link{interp.im}} \tab interpolate a pixel image\cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
@@ -535,6 +537,7 @@ The Spatstat Package
   \tabular{ll}{
     \code{\link{quadrat.test}} \tab \eqn{\chi^2}{chi^2} goodness-of-fit
     test on quadrat counts \cr
+    \code{\link{ks.test}} \tab Kolmogorov-Smirnov goodness-of-fit test\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for
@@ -602,7 +605,7 @@ The Spatstat Package
   Marie-Colette van Lieshout, Kasper Klitgaard Berthelsen
   and Dominic Schuhmacher made substantial contributions of code.
   Additional contributions by Colin Beale, Brad Biggerstaff, Florent Bonneu,
-  Jianbao Chen, Y.C. Chin, Peter Diggle, Stephen Eglen,
+  Jianbao Chen, Y.C. Chin, Marcelino de la Cruz, Peter Diggle, Stephen Eglen,
   Agnes Gault, Marc Genton, Pavel Grabarnik, C. Graf, Ute Hahn, Mandy Hering, 
   Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik, Robert John-Chandran,
   Jorge Mateu, Jesper Moller, Linda Stougaard Nielsen, Evgeni Parilov,

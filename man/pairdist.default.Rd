@@ -6,7 +6,7 @@
   in a set of points
 }
 \usage{
-  \method{pairdist}{default}(X, Y=NULL, \dots, period=NULL, method="C")
+  \method{pairdist}{default}(X, Y=NULL, \dots, period=NULL, method="C", squared=FALSE)
 }
 \arguments{
   \item{X,Y}{
@@ -27,6 +27,10 @@
     String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
     Usually not specified.
+  }
+  \item{squared}{
+    Logical. If \code{squared=TRUE}, the squared distances are
+    returned instead (this computation is faster).
   }
 }
 \value{
@@ -52,6 +56,11 @@
   of width \code{period[1]} and height \code{period[2]}.
   Opposite edges of the rectangle are regarded as equivalent.
   
+  If \code{squared=TRUE} then the \emph{squared} Euclidean distances
+  \eqn{d^2} are returned, instead of the Euclidean distances \eqn{d}.
+  The squared distances are faster to calculate, and are sufficient for
+  many purposes (such as finding the nearest neighbour of a point).
+  
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -69,6 +78,7 @@
    d <- pairdist(x, y)
    d <- pairdist(cbind(x,y))
    d <- pairdist(x, y, period=c(1,1))
+   d <- pairdist(x, y, squared=TRUE)
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}

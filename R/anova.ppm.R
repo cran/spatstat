@@ -1,7 +1,7 @@
 #
 #   anova.ppm.R
 #
-#  $Revision: 1.7 $   $Date: 2006/10/09 03:12:20 $
+#  $Revision: 1.8 $   $Date: 2007/04/11 10:02:09 $
 #
 
 anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
@@ -48,7 +48,8 @@ anova.ppm <- function(object, ..., test=NULL, override=FALSE) {
   if(any(trivial)) {
     # force them to be fitted using glm
     objex[trivial] <- lapply(objex[trivial], update.ppm,
-                             forcefit=TRUE, use.gam=usegam)
+                             forcefit=TRUE, use.gam=usegam,
+                             envir=parent.frame())
     fitz[trivial] <- lapply(objex[trivial], getglmfit)
   }
 

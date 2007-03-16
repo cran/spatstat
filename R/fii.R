@@ -39,7 +39,7 @@ summary.fii <- function(object, ...) {
       # fallback
       sensible <- NULL
       header <- "Fitted interaction terms"
-      printable <-  exp(unlist(theta[Vnames]))
+      printable <-  exp(unlist(coefs[Vnames]))
     }
     y <- append(y, list(sensible=sensible,
                         header=header,
@@ -65,7 +65,7 @@ print.summary.fii <- function(x, ...) {
   if(x$poisson)
     cat("Poisson process\n")
   else {
-    print(x$interaction, family=secret$family, brief=brief)
+    print(x$interaction, family=secret$family, brief=TRUE)
     cat(paste(x$header, ":\n", sep=""))
     print(x$printable)
   }
@@ -76,4 +76,64 @@ print.summary.fii <- function(x, ...) {
   return(invisible(NULL))
   
 }
+
+reach.fii <- function(x, ..., epsilon=0) {
+  inte <- x$interaction
+  coeffs <- x$coefs
+  Vnames <- x$Vnames
+
+  if(is.poisson.interact(inte))
+    return(0)
+
+  # get 'irange' function from interaction object
+  irange <- inte$irange
+
+  if(is.null(irange))
+    return(Inf)
+
+  # apply 'irange' function using fitted coefficients
+  if(newstyle.coeff.handling(inte))
+    ir <- irange(inte, coeffs[Vnames], epsilon=epsilon)
+  else 
+    ir <- irange(inte, coeffs, epsilon=epsilon)
+  
+  if(is.na(ir))
+    ir <- Inf
+
+  return(ir)
+}
+
+plot.fii <- function(x, ...) {
+  if(is.poisson.interact(x$interaction)) {
+    message("Poisson interaction; nothing plotted")
+    return(invisible(NULL))
+  }
+  plfun <- x$interaction$family$plot
+  if(is.null(plfun)) 
+    stop("Plotting not implemented for this type of interaction")
+  plfun(x, ...)
+}
+
+
+fitin <- function(object) {
+  UseMethod("fitin")
+}
+
+fitin.ppm <- function(object) {
+  f <- object$fitin
+  if(!is.null(f))
+    return(f)
+  # For compatibility with older versions
+  inte <- object$interaction
+  if(is.null(inte)) 
+    f <- fii() # Poisson
+  else {
+    coefs <- coef(object)
+    Vnames <- object$internal$Vnames
+    # Internal names of regressor variables 
+    f <- fii(inte, coefs, Vnames)
+  }
+  return(f)
+}
+
 

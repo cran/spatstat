@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.22 $    $Date: 2007/03/19 10:07:08 $
+#    $Revision: 1.25 $    $Date: 2007/03/28 03:32:20 $
 #
 #  (a) for matrices only:
 #
@@ -142,6 +142,8 @@ commasep <- function(x) {
               " and ", "")
   return(paste(paste(px, commas, sep=""), collapse=""))
 }
+
+paren <- function(x) { paste("(", x, ")", sep="") }
 
 # equivalent to rev(cumsum(rev(x)))
 

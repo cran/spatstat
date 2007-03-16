@@ -1,7 +1,6 @@
 if(dev.cur() <= 1) get(getOption("device"))()
 
-oldpar <- par(ask = interactive() &&
-            (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
+oldpar <- par(ask = interactive() && dev.interactive(orNone=TRUE))
 oldoptions <- options(warn=-1)
 
 data(amacrine)
@@ -30,8 +29,8 @@ data(chorley)
 chorley.extra$plotit()
 
 data(copper)
-plot(copper$points, main="Copper")
-plot(copper$lines, add=TRUE)
+plot(copper$Points, main="Copper")
+plot(copper$Lines, add=TRUE)
 
 data(demopat)
 plot(demopat)

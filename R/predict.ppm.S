@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.38 $	$Date: 2006/11/06 08:18:10 $
+#	$Revision: 1.41 $	$Date: 2007/03/28 04:30:53 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -223,7 +223,7 @@ function(object, window, ngrid=NULL, locations=NULL,
   if(trivial) {
 #############  COMPUTE CONSTANT INTENSITY #####################
 
-    lambda <- exp(model$theta[[1]])
+    lambda <- exp(model$coef[[1]])
     z <- rep(lambda, nrow(newdata))
     
 ################################################################
@@ -321,12 +321,14 @@ function(object, window, ngrid=NULL, locations=NULL,
           outi$v[masque$m] <- z[newdata$marks == types[i]]
           out[[i]] <- outi
         }
+        names(out) <- paste("mark",types, sep="")
+        class(out) <- c("listof", class(out))
       }
     }
 
 ####################################################################
 #
 #  
-  invisible(out)
+  return(out)
 }
 

@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.12 $ $Date: 2007/02/16 07:08:38 $
+# $Revision: 1.13 $ $Date: 2007/03/28 06:06:17 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -10,7 +10,8 @@ lurking <- function(object, covariate, type="eem",
                     rv = NULL,
                     plot.sd, plot.it=TRUE,
                     typename,
-                    covname, oldstyle=FALSE, ...) {
+                    covname, oldstyle=FALSE,
+                    check=TRUE, ...) {
   # validate
   verifyclass(object, "ppm")
 
@@ -76,8 +77,8 @@ lurking <- function(object, covariate, type="eem",
 
   resvalues <- 
     if(!is.null(rv)) rv
-    else if(type=="eem") eem(object)
-    else residuals.ppm(object,type=type)
+    else if(type=="eem") eem(object, check=check)
+    else residuals.ppm(object, type=type, check=check)
   
   res <- (if(type == "eem") datapoints else quadpoints) %mark% resvalues
 
@@ -178,7 +179,7 @@ lurking <- function(object, covariate, type="eem",
 
     if(plot.sd && cumulative) {
       # Fitted intensity at quadrature points
-      lambda <- fitted.ppm(object, type="trend")
+      lambda <- fitted.ppm(object, type="trend", check=check)
       # Fisher information for coefficients
       asymp <- vcov(object,what="internals")
       Fisher <- asymp$fisher
@@ -251,12 +252,14 @@ lurking <- function(object, covariate, type="eem",
         varR[nbg] <- 0
         relerr <- abs(ran[1]/ran[2])
         nerr <- sum(nbg)
-        if(relerr > 1e-6)
+        if(relerr > 1e-6) {
+          browser()
           warning(paste(nerr, "negative",
                         ngettext(nerr, "value (", "values (min="),
                         signif(ran[1], 4), ")",
                         "of residual variance reset to zero",
                         "(out of", length(varR), "values)"))
+        }
       }
       theoretical$sd <- sqrt(varR)
     }
@@ -289,3 +292,4 @@ lurking <- function(object, covariate, type="eem",
 
   return(invisible(stuff))
 }
+

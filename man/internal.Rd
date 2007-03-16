@@ -13,6 +13,7 @@
 \alias{bdry.mask} 
 \alias{breakpts}
 \alias{breakpts.from.r}
+\alias{bt.frame}
 \alias{cartesian}
 \alias{cellmiddles}
 \alias{checkfields}          
@@ -131,9 +132,12 @@
 \alias{overlap.xypolygon}    
 \alias{owinpolycheck}
 \alias{param.quad}
+\alias{paren}
 \alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
+\alias{plot.fii}
+\alias{plot.kstest}
 \alias{plot.minconfit}
 \alias{plot.pppmatching}
 \alias{plot.profilepl}
@@ -144,6 +148,7 @@
 \alias{pppdist.prohorov}
 \alias{pppmatching}
 \alias{primefactors}       
+\alias{print.bt.frame}
 \alias{print.diagppm}
 \alias{print.envelope}
 \alias{print.fasp}       
@@ -171,12 +176,13 @@
 \alias{prolongseq}
 \alias{quad}
 \alias{quadrat.breaks}
-\alias{quadrat.count.engine}
-\alias{quadrat.test.engine}
+\alias{quadrat.countEngine}
+\alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{reach.fii}
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
@@ -259,6 +265,8 @@ bdrylength.xypolygon(polly)
 bdry.mask(W)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
+bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
+         correction="border", rbord=0, use.gam=FALSE, allcovar=FALSE)
 cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
@@ -387,9 +395,12 @@ overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
 owinpolycheck(W, verbose=TRUE)
 param.quad(Q)
+paren(x)
 pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
+\method{plot}{fii}(x, \dots)
+\method{plot}{kstest}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
@@ -401,6 +412,7 @@ polynom(x, \dots)
 pppdist.prohorov(X, Y, precision = 7)
 pppmatching(X, Y, am, ty = "generic")
 primefactors(n, prmax)
+\method{print}{bt.frame}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
@@ -428,16 +440,17 @@ primefactors(n, prmax)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)
 quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
-quadrat.count.engine(x, y, xbreaks, ybreaks, weights)
-quadrat.test.engine(X, nx, ny, xbreaks, ybreaks, \dots, fit=NULL, Xname=NULL, fitname=NULL)
+quadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+quadrat.testEngine(X, nx, ny, xbreaks, ybreaks, \dots, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 rasterx.im(x)
 rastery.im(x)
-reincarnate.interact(object)
+\method{reach}{fii}(x, \dots, epsilon)
 rebound.ppp(x, \dots)
 rebound.psp(x, \dots)
 rebound.owin(w, rect)
+reincarnate.interact(object)
 \method{rescale}{units}(X,s)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
            spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)

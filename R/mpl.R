@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.56 $	$Date: 2007/01/12 01:37:59 $
+#	$Revision: 5.62 $	$Date: 2007/03/28 04:14:04 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -87,7 +87,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2007/01/12 01:37:59 $")
+                    date="$Date: 2007/03/28 04:14:04 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -96,9 +96,6 @@ if(want.inter) {
 }
 
 #  
-if(use.gam && exists("is.R") && is.R()) 
-  require(mgcv)
-
   
 if(!want.trend && !want.inter && !forcefit && !allcovar) {
   # the model is the uniform Poisson process
@@ -106,14 +103,14 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   npts <- X$n
   volume <- area.owin(X$window) * markspace.integral(X)
   lambda <- npts/volume
-  theta <- list("log(lambda)"=log(lambda))
+  co <- list("log(lambda)"=log(lambda))
   maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
   rslt <- list(
                method      = "mpl",
-               theta       = theta,
-               coef        = theta,
+               coef        = co,
                trend       = NULL,
                interaction = NULL,
+               fitin       = fii(),
                Q           = Q,
                maxlogpl    = maxlogpl,
                internal    = list(computed=computed),
@@ -166,7 +163,7 @@ if(is.null(famille)) {
   else
     FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
                 data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
-                control=glm.control(maxit=50))
+                control=glm.control(maxit=50), model=FALSE)
 } else {
   # for experimentation only!
   if(is.function(famille))
@@ -179,7 +176,7 @@ if(is.null(famille)) {
   else
     FIT  <- glm(fmla, family=famille, weights=.mpl.W,
                 data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
-                control=glm.control(maxit=50))
+                control=glm.control(maxit=50), model=FALSE)
 }
   
   
@@ -187,26 +184,28 @@ if(is.null(famille)) {
 
 # Fitted coefficients
 
-co <- FIT$coef
-theta <- if(exists("is.R") && is.R()) NULL else dummy.coef(FIT)
+  co <- FIT$coef
 
-     W <- glmdata$.mpl.W
-SUBSET <- glmdata$.mpl.SUBSET        
-     Z <- is.data(Q)
-Vnames <- prep$Vnames
+# glm covariates
+  W <- glmdata$.mpl.W
+  SUBSET <- glmdata$.mpl.SUBSET        
+  Z <- is.data(Q)
+  Vnames <- prep$Vnames
         
 # attained value of max log pseudolikelihood
-maxlogpl <-  -(deviance(FIT)/2 + sum(log(W[Z & SUBSET])) + sum(Z & SUBSET))
+  maxlogpl <-  -(deviance(FIT)/2 + sum(log(W[Z & SUBSET])) + sum(Z & SUBSET))
 
+# fitted interaction object
+  fitin <- if(want.inter) fii(interaction, co, Vnames) else fii()
 ######################################################################
 # Clean up & return 
 
 rslt <- list(
              method       = "mpl",
-             theta        = theta,
              coef         = co,
              trend        = if(want.trend) trend       else NULL,
              interaction  = if(want.inter) interaction else NULL,
+             fitin        = fitin,
              Q            = Q,
              maxlogpl     = maxlogpl, 
              internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
@@ -560,5 +559,60 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
                "must be either a data frame or a list of images"))
 }
 
-  
+bt.frame <- function(Q, trend=~1, interaction=NULL,
+                      ...,
+                      covariates=NULL,
+                      correction="border", rbord=0,
+                      use.gam=FALSE, allcovar=FALSE) {
+  prep <- mpl.engine(Q=Q, trend=trend, interaction=interaction,
+                     ..., covariates=covariates,
+                     correction=correction, rbord=rbord,
+                     use.gam=use.gam, allcovar=allcovar,
+                     preponly=TRUE, forcefit=TRUE)
+  class(prep) <- c("bt.frame", class(prep))
+  return(prep)
+}
+
+
+print.bt.frame <- function(x, ...) {
+  cat("Model frame for Berman-Turner device\n")
+  df <- x$glmdata
+  cat(paste("$glmdata: Data frame with", nrow(df), "rows and",
+            ncol(df), "columns\n"))
+  cat("          Column names:\t")
+  cat(paste(paste(names(df),collapse="\t"), "\n"))
+  cat("Complete model formula ($fmla):\t")
+  print(x$fmla)
+  info <- x$info
+  if(info$want.trend) {
+    cat("Trend:\tyes\nTrend formula string ($trendfmla):\t")
+    cat(paste(x$trendfmla, "\n"))
+  } else cat("Trend:\tno\n")
+  cat("Interaction ($info$interaction):\t")
+  inte <- info$interaction
+  if(is.null(inte))
+    inte <- Poisson()
+  print(inte, family=FALSE, brief=TRUE)
+  if(!is.poisson.interact(inte)) {
+    cat("Internal names of interaction variables ($Vnames):\t")
+    cat(paste(x$Vnames, collapse="\t"))
+    cat("\n")
+  }
+  edge <- info$correction
+  if(edge == "border") {
+    if(info$rbord==0)
+      edge <- "none"
+    else
+      edge <- paste("border", paren(paste("rbord=", info$rbord)))
+  }
+  cat(paste("Edge correction ($info$correction):\t", edge, "\n"))
+  if(length(x$problems) > 0) {
+    cat("Problems:\n")
+    print(x$problems)
+  }
+  if(length(x$computed) > 0)
+    cat(paste("Frame contains saved computations for",
+              commasep(dQuote(names(x$computed)))))
+  return(invisible(NULL))
+}
   

@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.16 $	$Date: 2006/10/10 04:22:48 $
+#    $Revision: 1.17 $	$Date: 2007/04/16 08:42:53 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -14,11 +14,110 @@
 
 pairwise.family <-
   list(
-         name  = "pairwise",
-         print = function(self) {
-                      cat("Pairwise interaction family\n")
-         },
-         eval  = function(X,U,Equal,pairpot,potpars,correction,
+       name  = "pairwise",
+       print = function(self) {
+         cat("Pairwise interaction family\n")
+       },
+       plot = function(fint, ...) {
+         verifyclass(fint, "fii")
+         inter <- fint$interaction
+         if(is.null(inter) || is.null(inter$family)
+            || inter$family$name != "pairwise")
+           stop("Tried to plot the wrong kind of interaction")
+         coeff <- fint$coefs[fint$Vnames]
+         pairpot <- inter$pot
+         potpars <- inter$par
+         rmax <- reach(fint, epsilon=1e-6)
+         xlim <- list(...)$xlim
+         if(is.infinite(rmax)) {
+           if(!is.null(xlim))
+             rmax <- max(xlim)
+           else {
+             warning("Reach of interaction is infinite; need xlim to plot it")
+             return(invisible(NULL))
+           }
+         } 
+         dmax <- 1.25 * rmax
+         d <- seq(0, dmax, length=256)
+         if(is.null(xlim))
+           xlim <- c(0, dmax)
+         types <- potpars$types
+         if(is.null(types)) {
+           # compute potential function as `fv' object
+           dd <- matrix(d, nrow=256, ncol=1)
+           p <- pairpot(dd, potpars)
+           if(length(dim(p))==2)
+             p <- array(p, dim=c(dim(p),1), dimnames=NULL)
+           if(dim(p)[3] != length(coeff))
+             stop("Dimensions of potential do not match coefficient vector")
+           for(k in seq(dim(p)[3]))
+             p[,,k] <- p[,,k] * coeff[k]
+           y <- exp(apply(p, c(1,2), sum))
+           ylim <- range(c(0, 1.1, y))
+           fun <- fv(data.frame(r=d, h=y, one=1),
+                     "r", substitute(h(r), NULL), "h", cbind(h,one) ~ r,
+                     xlim, c("r", "h(r)", "1"),
+                     c("distance argument r",
+                       "pairwise interaction term h(r)",
+                       "reference value 1"))
+           do.call("plot.fv",
+                   resolve.defaults(list(fun),
+                                    list(...),
+                                    list(ylab="Pairwise interaction",
+                                         xlab="Distance",
+                                         ylim=ylim)))
+           return(invisible(fun))
+         } else{
+           # compute each potential and store in `fasp' object
+           types <- factor(types)
+           m <- length(types)
+           dd <- matrix(rep(d, m), nrow=256 * m, ncol=m)
+           tx <- rep(types, rep(256, m))
+           ty <- types
+           p <- pairpot(dd, tx, ty, potpars)
+           if(length(dim(p))==2)
+             p <- array(p, dim=c(dim(p),1), dimnames=NULL)
+           if(dim(p)[3] != length(coeff))
+             stop("Dimensions of potential do not match coefficient vector")
+           for(k in seq(dim(p)[3]))
+             p[,,k] <- p[,,k] * coeff[k]
+           y <- exp(apply(p, c(1,2), sum))
+           ylim <- range(c(0, 1.1, y))
+           fns <- titles <- vector(m^2, mode="list")
+           which <- matrix(, m, m)
+           for(i in seq(m)) {
+             for(j in seq(m)) {
+               # relevant position in matrix
+               ijpos <- i + (j-1) * m
+               which[i,j] <- ijpos
+               # extract values of potential
+               yy <- y[tx == types[i], j]
+               # make fv object
+               fns[[ijpos]] <- fv(data.frame(r=d, h=yy, one=1),
+                     "r", substitute(h(r), NULL), "h", cbind(h,one) ~ r,
+                     xlim, c("r", "h(r)", "1"),
+                     c("distance argument r",
+                       "pairwise interaction term h(r)",
+                       "reference value 1"))
+               #
+               titles[[ijpos]] <- paste("(", types[i], ", ", types[j], ")", sep="")
+             }
+           }
+           funz <- fasp(fns, titles=titles, which=which,
+                        formulae=list(cbind(h, one) ~ r),
+                        title="Fitted pairwise interactions")
+           do.call("plot.fasp",
+                   resolve.defaults(list(funz),
+                                    list(...),
+                                    list(ylim=ylim,
+                                         ylab="Pairwise interaction",
+                                         xlab="Distance")))
+           return(invisible(funz))
+         }
+       },
+       # end of function `plot'
+       # ----------------------------------------------------
+       eval  = function(X,U,Equal,pairpot,potpars,correction,
            ..., precomputed=NULL, savecomputed=FALSE) {
   #
   # This auxiliary function is not meant to be called by the user.

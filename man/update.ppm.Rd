@@ -5,7 +5,8 @@
   \code{update} method for class \code{"ppm"}.
 }
 \usage{
-  \method{update}{ppm}(object, \dots, fixdummy=TRUE, use.internal=NULL)
+  \method{update}{ppm}(object, \dots, fixdummy=TRUE, use.internal=NULL,
+                                      envir=parent.frame())
 
 }
 \arguments{
@@ -26,6 +27,9 @@
     refitted using the internally saved data (\code{use.internal=TRUE})
     or by re-evaluating these data in the
     current frame (\code{use.internal=FALSE}).
+  }
+  \item{envir}{
+    Environment in which to re-evaluate the call to \code{\link{ppm}}.
   }
 }
 \details{

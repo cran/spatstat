@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.7 $  $Date: 2007/02/13 08:06:56 $
+#  $Revision: 1.8 $  $Date: 2007/03/26 04:07:11 $
 #
 
 
@@ -12,7 +12,7 @@ quadrat.test <- function(X, ...) {
 quadrat.test.ppp <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
 {
   Xname <- deparse(substitute(X))
-  do.call("quadrat.test.engine",
+  do.call("quadrat.testEngine",
           resolve.defaults(list(X, nx=nx, ny=ny,
                                 xbreaks=xbreaks, ybreaks=ybreaks),
                            list(...), 
@@ -25,7 +25,7 @@ quadrat.test.ppm <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
   dataname <- paste("data from", fitname)
   if(!is.poisson.ppm(X))
     stop("Test is only defined for Poisson point process models")
-  do.call("quadrat.test.engine",
+  do.call("quadrat.testEngine",
           resolve.defaults(list(data.ppm(X), nx=nx, ny=ny,
                                 xbreaks=xbreaks, ybreaks=ybreaks, 
                                 fit=X),
@@ -33,7 +33,7 @@ quadrat.test.ppm <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
                            list(Xname=dataname, fitname=fitname)))
 }
 
-quadrat.test.engine <- function(X, nx, ny, xbreaks, ybreaks,
+quadrat.testEngine <- function(X, nx, ny, xbreaks, ybreaks,
                                 ..., fit=NULL, Xname=NULL, fitname=NULL) {
   if(length(list(...)) > 0) {
     nama <- names(list(...))
@@ -56,7 +56,7 @@ quadrat.test.engine <- function(X, nx, ny, xbreaks, ybreaks,
       W <- as.mask(W)
       xx <- as.vector(raster.x(W))[W$m]
       yy <- as.vector(raster.y(W))[W$m]
-      areas <- quadrat.count.engine(xx, yy, xbreaks, ybreaks)
+      areas <- quadrat.countEngine(xx, yy, xbreaks, ybreaks)
       fitmeans <- X$n * areas/sum(areas)
       df <- length(fitmeans) - 1
     }
@@ -70,7 +70,7 @@ quadrat.test.engine <- function(X, nx, ny, xbreaks, ybreaks,
     ww <- w.quad(Q)
     lambda <- fitted(fit)
     masses <- lambda * ww
-    fitmeans <- quadrat.count.engine(xx, yy, xbreaks, ybreaks, weights=masses)
+    fitmeans <- quadrat.countEngine(xx, yy, xbreaks, ybreaks, weights=masses)
     df <- length(fitmeans) - length(coef(fit))
   }
   OBS <- as.vector(Xcount)

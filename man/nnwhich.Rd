@@ -8,8 +8,8 @@
 }
 \usage{
   nnwhich(X, \dots, method="C")
-  \method{nnwhich}{ppp}(X, \dots, method="C")
-  \method{nnwhich}{default}(X, Y=NULL, \dots, method="C")
+  \method{nnwhich}{ppp}(X, \dots, k=1, method="C")
+  \method{nnwhich}{default}(X, Y=NULL, \dots, k=1, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -27,18 +27,23 @@
     Ignored by \code{nnwhich.ppp}
     and \code{nnwhich.default}.
   }
+  \item{k}{
+    Integer. The algorithm finds the \code{k}th nearest neighbour.
+  }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
   }
 }
 \value{
-  Integer vector giving, for each point, the index of its nearest neighour.
+  Integer vector giving, for each point, the index of its nearest
+  neighour (or \code{k}th nearest neighbour).
 }
 \details{
   For each point in the given point pattern, this function finds
   its nearest neighbour (the nearest other point of the pattern).
   It returns a vector giving, for each point, the index of the point's
-  nearest neghbour.
+  nearest neghbour. If \code{k} is specified, the algorithm finds
+  each point's \code{k}th nearest neighbour.
 
   The function \code{nnwhich} is generic, with
   a method for point patterns (objects of class \code{"ppp"})
@@ -60,11 +65,12 @@
   The C code is faster by two to three orders of magnitude
   and uses much less memory.
   
-  If there is only one point (if \code{x} has length 1),
-  then the nearest neighbour is undefined, and a value of \code{NA}
-  is returned.
   If there are no points (if \code{x} has length zero)
   a numeric vector of length zero is returned.
+  If there is only one point (if \code{x} has length 1),
+  then the nearest neighbour is undefined, and a value of \code{NA}
+  is returned. In general if the number of points is less than or equal
+  to \code{k}, then a vector of \code{NA}'s is returned.
 
   To evaluate the \emph{distance} between a point and its nearest
   neighbour, use \code{\link{nndist}}.
@@ -74,7 +80,7 @@
 }
 \section{Warnings}{
   A value of \code{NA} is returned if there is only one point
-  in the point pattern.
+  in the point pattern. 
 }
 \seealso{
   \code{\link{nndist}},
@@ -85,6 +91,7 @@
    data(cells)
    plot(cells)
    m <- nnwhich(cells)
+   m2 <- nnwhich(cells, k=2)
 
    # plot nearest neighbour links
    b <- cells[m]
