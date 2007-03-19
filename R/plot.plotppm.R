@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.9 $  $Date: 2006/10/10 04:22:48 $
+# $Revision: 1.10 $  $Date: 2007/03/16 08:28:50 $
 #
 #
 
@@ -13,7 +13,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
   verifyclass(x,"plotppm")
   
   # determine main plotting actions
-  superimpose <- !is.null(data)
+  superimposed <- !is.null(data)
   if(!missing(trend) && (trend & is.null(x[["trend"]])))
     stop("No trend to plot.\n")
   trend <- trend & !is.null(x[["trend"]])
@@ -27,7 +27,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
   marked <- (length(mrkvals) > 1)
   if(marked)
     data.marks <- marks(data)
-  if(marked & superimpose) {
+  if(marked & superimposed) {
     data.types <- levels(data.marks)
     if(any(sort(data.types) != sort(mrkvals)))
       stop(paste("Data marks are different from mark",
@@ -66,7 +66,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
                          resolve.defaults(list(xs[[i]]),
                                           list(...),
                                           list(main=main)))
-                 if(superimpose) {
+                 if(superimposed) {
                    if(marked) plot(data[data.marks == level],
                                    add = TRUE)
                    else plot(data,add=TRUE)
@@ -77,7 +77,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
                          resolve.defaults(list(xs[[i]]),
                                           list(...),
                                           list(main=main)))
-                 if (superimpose) {
+                 if (superimposed) {
                    if(marked) plot(data[data.marks == level],
                                    add = TRUE)
                    else plot(data,add=TRUE)

@@ -116,6 +116,7 @@ im                      Create a Pixel Image Object
 [<-.im                  Reset Values in Subset of Image
 im.object               Class of Images
 inside.owin             Test Whether Points Are Inside A Window
+interp.im               Interpolate a Pixel Image
 intersect.owin          Intersection or Union of Two Windows
 is.im                   Test Whether An Object Is A Pixel Image
 is.marked               Test Whether Marks Are Present
@@ -270,6 +271,12 @@ rmh.default             Simulate Point Process Models using the
                         Metropolis-Hastings Algorithm.
 rmhmodel                Define Point Process Model for
                         Metropolis-Hastings Simulation.
+rmhmodel.default        Build Point Process Model for
+                        Metropolis-Hastings Simulation.
+rmhmodel.list           Define Point Process Model for
+                        Metropolis-Hastings Simulation.
+rmhmodel.ppm            Interpret Fitted Model for Metropolis-Hastings
+                        Simulation.
 rmh.ppm                 Simulate from a Fitted Point Process Model
 rmhstart                Determine Initial State for Metropolis-Hastings
                         Simulation.

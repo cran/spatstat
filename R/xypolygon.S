@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.21 $    $Date: 2006/12/12 08:59:59 $
+#    $Revision: 1.28 $    $Date: 2007/03/19 04:48:00 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -311,13 +311,35 @@ xypolygon2psp <- function(p, w) {
 }
          
     
-xypolyselfint <- function(p, eps=.Machine$double.eps, proper=FALSE) {
+xypolyselfint <- function(p, eps=.Machine$double.eps,
+                          proper=FALSE, yesorno=FALSE, checkinternal=FALSE) {
   verify.xypolygon(p)
   n <- length(p$x)
+  verbose <- (n > 1000)
+  if(verbose)
+    cat(paste("[Checking polygon with", n, "edges..."))
   x0 <- p$x
   y0 <- p$y
-  dx <- diff(p$x[c(1:n,1)])
-  dy <- diff(p$y[c(1:n,1)])
+  dx <- diff(x0[c(1:n,1)])
+  dy <- diff(y0[c(1:n,1)])
+  if(yesorno) {
+    # get a yes-or-no answer
+    answer <- .C("xypsi",
+                 n=as.integer(n),
+                 x0=as.double(x0),
+                 y0=as.double(y0),
+                 dx=as.double(dx),
+                 dy=as.double(dy),
+                 xsep=as.double(2 * max(abs(dx))),
+                 ysep=as.double(2 * max(abs(dy))),
+                 eps=as.double(eps),
+                 proper=as.integer(proper),
+                 answer=as.integer(integer(1)),
+                 PACKAGE="spatstat")$answer
+    if(verbose)
+      cat("]\n")
+    return(answer != 0)
+  }
   out <- .C("xypolyselfint",
             n=as.integer(n),
             x0=as.double(x0),
@@ -342,7 +364,7 @@ xypolyselfint <- function(p, eps=.Machine$double.eps, proper=FALSE) {
     dup <- i.is.vertex & j.is.vertex
     uhoh[uhoh] <- !dup
   }
-  if(any(uhoh != t(uhoh)))
+  if(checkinternal && any(uhoh != t(uhoh)))
     warning("Internal error: incidence matrix is not symmetric")
   xx <- matrix(out$xx, n, n)
   yy <- matrix(out$yy, n, n)
@@ -350,6 +372,8 @@ xypolyselfint <- function(p, eps=.Machine$double.eps, proper=FALSE) {
   xx <- as.vector(xx[uhoh & uptri])
   yy <- as.vector(yy[uhoh & uptri])
   result <- list(x=xx, y=yy)
+  if(verbose)
+    cat("]\n")
   return(result)
 }
   
@@ -358,21 +382,47 @@ owinpolycheck <- function(W, verbose=TRUE) {
   verifyclass(W, "owin")
   stopifnot(W$type == "polygonal")
 
+  # extract stuff
   B <- W$bdry
   npoly <- length(B)
   outerframe <- owin(W$xrange, W$yrange)
   # can't use as.rectangle here; we're still checking validity
+  boxarea.mineps <- area.owin(outerframe) * (1 - 0.00001)
+
+  # detect very large datasets
+  BS <- object.size(B)
+  blowbyblow <- verbose & (BS > 1e4 || npoly > 20)
+  #
   
   answer <- TRUE
   notes <- character(0)
   err <- character(0)
   
-  # check for duplicated points
-  dup <- unlist(lapply(B,
-                       function(p, f) {
-                         any(duplicated(ppp(p$x, p$y, window=f, check=FALSE)))
-                       },
-                       f=outerframe))
+  # check for duplicated points, self-intersection, outer frame
+  if(blowbyblow)
+    cat(paste("Checking", npoly, "polygons..."))
+
+  dup <- self <- is.box <- logical(npoly)
+
+  for(i in 1:npoly) {
+    if(blowbyblow)
+      progressreport(i, npoly)
+    Bi <- B[[i]]
+    # check for duplicated vertices
+    dup[i] <- any(duplicated(ppp(Bi$x, Bi$y, window=outerframe, check=FALSE)))
+    if(dup[i] && blowbyblow)
+      message(paste("Polygon", i, "contains duplicated vertices"))
+    # check for self-intersection
+    self[i] <- xypolyselfint(B[[i]], proper=TRUE, yesorno=TRUE)
+    if(self[i] && blowbyblow)
+      message(paste("Polygon", i, "is self-intersecting"))
+    # check whether one of the current boundary polygons
+    # is the bounding box itself (with + sign)
+    is.box[i] <- (length(Bi$x) == 4) && (area.xypolygon(Bi) >= boxarea.mineps)
+  }
+  if(blowbyblow)
+    cat("done.\n")
+  
   if((ndup <- sum(dup)) > 0) {
     whinge <- paste(ngettext(ndup, "Polygon", "Polygons"),
                     if(npoly == 1) NULL else
@@ -386,12 +436,6 @@ owinpolycheck <- function(W, verbose=TRUE) {
     answer <- FALSE
   }
   
-  # check for self-intersections
-  self <- unlist(lapply(B,
-                         function(p) {
-                           z <- xypolyselfint(p, proper=TRUE)
-                           return(length(z$x) > 0)
-                         }))
   if((nself <- sum(self)) > 0) {
     whinge <-  paste(ngettext(nself, "Polygon", "Polygons"),
                      if(npoly == 1) NULL else
@@ -404,12 +448,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
     err <- c(err, "self-intersection")
     answer <- FALSE
   }
-  # check whether one of the current boundary polygons
-  # is the bounding box itself (with + sign)
-  nvert <- unlist(lapply(B, function(a) { length(a$x) }))
-  area <- unlist(lapply(B, area.xypolygon))
-  boxarea.mineps <- area.owin(outerframe) * (1 - 0.00001)
-  is.box <- (nvert == 4 & area >= boxarea.mineps)
+  
   if((nbox <- sum(is.box)) > 1) {
     answer <- FALSE
     whinge <- paste("Polygons",
@@ -418,15 +457,21 @@ owinpolycheck <- function(W, verbose=TRUE) {
     notes <- c(notes, whinge)
     err <- c(err, "polygons duplicating the outer frame")
   }
+  
   # check for crossings between different polygons
   cross <- matrix(FALSE, npoly, npoly)
   if(npoly > 1) {
+    if(blowbyblow)
+      cat(paste("Checking for cross-intersection between",
+                npoly, "polygons..."))
     P <- lapply(B, xypolygon2psp, w=outerframe)
     for(i in seq(npoly-1)) {
+      if(blowbyblow)
+        progressreport(i, npoly-1)
+      Pi <- P[[i]]
       for(j in (i+1):npoly) {
         crosses <- if(is.box[i] || is.box[j]) FALSE else {
-          X <- crossing.psp(P[[i]], P[[j]])
-          X$n > 0
+          test.crossing.psp(Pi, P[[j]])
         }
         cross[i,j] <- cross[j,i] <- crosses
         if(crosses) {
@@ -439,6 +484,8 @@ owinpolycheck <- function(W, verbose=TRUE) {
         }
       }
     }
+    if(blowbyblow)
+      cat("done.\n")
   }
 
   err <- unique(err)

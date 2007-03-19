@@ -79,6 +79,15 @@
   of another point pattern, or by manipulating such windows.
   See \code{\link{owin}} or the Examples below.
 
+  The points with coordinates \code{x} and \code{y}
+  \bold{must} lie inside the specified window, in order to
+  define a valid object of this class. 
+  Any points which do not lie inside the window will be
+  removed from the point pattern, and a warning will be issued.
+  The rejected points are still accessible,
+  as an attribute of the point pattern called \code{"rejects"},
+  but will be ignored by all other functions except \code{link{plot.ppp}}.
+  
   The optional argument \code{marks} is given if the point pattern
   is marked, i.e. if each data point carries additional information.
   For example, points which are classified into two or more different

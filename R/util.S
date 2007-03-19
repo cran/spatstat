@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.21 $    $Date: 2007/01/31 05:43:30 $
+#    $Revision: 1.22 $    $Date: 2007/03/19 10:07:08 $
 #
 #  (a) for matrices only:
 #
@@ -79,6 +79,8 @@ whist <-
       if(!missing(weights))
         weights <- weights[ok]
     }
+    if(length(x) == 0)
+      return(rep(0, length(breaks)-1))      
     if(missing(weights)) 
       h <- hist(x, breaks=breaks, plot=FALSE)$counts
     else {

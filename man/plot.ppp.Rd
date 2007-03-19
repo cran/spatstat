@@ -201,8 +201,8 @@ maxsize, markscale)
    # controlling MARK SCALE
    plot(longleaf, markscale=0.1)
 
-   # draw circles of diameter equal to nearest neighbour distance
-   plot(cells \%mark\% (nndist(cells)/2), markscale=1)
+   # draw circles of DIAMETER equal to nearest neighbour distance
+   plot(cells \%mark\% nndist(cells), markscale=1/2)
 
    # making the legend
    data(amacrine)

@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.4 $   $Date: 2006/05/30 13:10:31 $
+#   $Revision: 1.5 $   $Date: 2007/03/15 22:52:22 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -9,7 +9,7 @@
 #
 closepairs <- function(X, rmax) {
   verifyclass(X, "ppp")
-  stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax > 0)
+  stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   oo <- order(X$x)
   Xsort <- X[oo]
   npairs <- .C("paircount",
@@ -85,7 +85,7 @@ closepairs <- function(X, rmax) {
 crosspairs <- function(X, Y, rmax) {
   verifyclass(X, "ppp")
   verifyclass(Y, "ppp")
-  stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax > 0)
+  stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   ooX <- order(X$x)
   Xsort <- X[ooX]
   ooY <- order(Y$x)

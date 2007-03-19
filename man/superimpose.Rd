@@ -5,7 +5,7 @@
   Superimpose any number of point patterns.
 }
 \usage{
-  superimpose(\dots)
+  superimpose(\dots, W)
 }
 \arguments{
   \item{\dots}{
@@ -13,6 +13,11 @@
     Each argument must be either a point pattern
     object (of class \code{"ppp"}) or a structure
     containing elements \code{x} and \code{y}.
+  }
+  \item{W}{
+    Optional. Window for the resulting point pattern.
+    An object of class \code{"owin"}, or something
+    acceptable to \code{\link{as.owin}}.
   }
 }
 \value{
@@ -23,15 +28,15 @@
   This function is used to superimpose two or more point patterns
   (see also \code{\link{concatxy}}). 
   
-  It assumes that each of the arguments in
+  Each of the arguments in
   \code{\dots} is either a point pattern object (of class \code{"ppp"})
   or a structure containing (at least) the elements
-  \code{x} and \code{y}. All the point patterns are assumed to have
+  \code{x} and \code{y}. The point patterns are not required to have
   the same window of observation.
 
-  The first argument must be a point pattern
-  object, and it determines the observation window
-  for the result.
+  The window for the superimposed point pattern is
+  specified by \code{W}. Its default value is
+  the union of the windows of all the point patterns.
 
   If any of the arguments is a \emph{marked} point pattern,
   then all of them must be.

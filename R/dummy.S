@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.13 $     $Date: 2007/02/16 08:07:56 $
+#       $Revision: 5.14 $     $Date: 2007/03/16 08:24:46 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -189,7 +189,7 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
         # corner points
         corn <- as.ppp(corners(win), win, check=FALSE)
         corn <- corn[win]
-	dummy <- superimpose(dummy, corn)
+	dummy <- superimpose(dummy, corn, W=win)
         if(dummy$n == 0)
           stop("None of the dummy points lies inside the window")
         # pass parameters for computing weights

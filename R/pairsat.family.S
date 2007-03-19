@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.24 $	$Date: 2007/01/11 02:18:39 $
+#    $Revision: 1.26 $	$Date: 2007/03/16 08:35:55 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -71,7 +71,7 @@ missingdata <- !as.vector(matrowany(Equal))
 somemissing <- any(missingdata)
 if(somemissing) {
   # add the missing data points
-  U <- superimpose(U, X[missingdata])
+  U <- superimpose(U, X[missingdata], W=X$window)
   # extend the equality matrix to maintain Equal[i,j] = (X[i] == U[j])
   originalcolumns <- seq(ncol(Equal))
   sn <- seq(X$n)

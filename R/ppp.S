@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.49 $	$Date: 2007/03/12 01:30:57 $
+#	$Revision: 4.50 $	$Date: 2007/03/13 01:13:29 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -50,11 +50,13 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
       warning(paste(nout,
                     ngettext(nout, "point was", "points were"),
                     "rejected as lying outside the specified window"))
-      bb <- bounding.box.xy(x,y)
-      bb <- bounding.box(bb, window)
       rr <- ripras(x,y)
-      rr <- rebound.owin(rr, bb)
-      rejects <- list(x=x[!ok], y=y[!ok], rr=rr, bb=bb)
+      bb <- bounding.box.xy(x,y)
+      bb <- bounding.box(rr, bb, window)
+      rejectwindow <-
+        if(!is.null(rr)) rebound.owin(rr, bb) else bb
+      rejects <- ppp(x[!ok], y[!ok], window=rejectwindow, check=FALSE)
+      # discard illegal points
       x <- x[ok]
       y <- y[ok]
       n <- length(x)
@@ -73,7 +75,7 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
              call.=FALSE)
       if(nout > 0) {
         marks <- marks[ok, ]
-        rejects$marks <- marks[!ok,]
+        marks(rejects) <- marks[!ok,]
       }
       if(nrow(marks) != n)
         stop("number of rows of marks != length of x and y")
@@ -81,7 +83,7 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
       pp$markformat <- "vector"
       if(nout > 0) {
         marks <- marks[ok]
-        rejects$marks <- marks[!ok]
+        marks(rejects) <- marks[!ok]
       }
       if(length(marks) != n)
         stop("length of marks vector != length of x and y")
@@ -93,8 +95,7 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
   }
   class(pp) <- "ppp"
   if(nout > 0) 
-    attr(pp, "rejects") <- ppp(rejects$x, rejects$y, window=rejects$rr,
-                               marks=rejects$marks)
+    attr(pp, "rejects") <- rejects
   pp
 }
 

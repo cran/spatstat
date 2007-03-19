@@ -57,7 +57,7 @@
              vector={ x$marks[SUB] <- value$marks },
              dataframe={ x$marks[SUB,] <- value$marks })
     } else 
-      x <- superimpose(x[-SUB], value)
+      x <- superimpose(x[-SUB], value, W=x$window)
 
     if(!missing(j)) {
       warning("The use of argument j in [<-.ppp is deprecated; use argument i")

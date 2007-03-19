@@ -1,7 +1,7 @@
 #
 # split.R
 #
-# $Revision: 1.7 $ $Date: 2006/12/06 02:28:22 $
+# $Revision: 1.8 $ $Date: 2007/03/16 08:33:10 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -92,7 +92,7 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
       value[[i]] <- value[[i]] %mark% factor(lev[i], levels=levels(f))
   }
 
-  out <- superimpose(value)
+  out <- superimpose(value, W=x$window)
   return(out)
 }
 

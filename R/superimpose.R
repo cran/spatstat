@@ -1,30 +1,47 @@
 # superimpose.R
 #
-# $Revision: 1.7 $ $Date: 2006/10/10 07:09:37 $
+# $Revision: 1.8 $ $Date: 2007/03/16 03:31:37 $
 #
 # This has been taken out of ppp.S
 #
 ############################# 
 
 "superimpose" <-
-  function(...)
+  function(..., W=NULL)
 {
   # superimpose any number of point patterns
-  # ASSUMED TO BE IN THE SAME WINDOW
   
   arglist <- list(...)
 
+  if(length(arglist) == 0)
+    stop("No point patterns given")
+  
   if(length(arglist) == 1 && inherits(arglist[[1]], "list"))
     arglist <- arglist[[1]]
-  
+
+  # determine window
+  if(!is.null(W))
+    W <- as.owin(W)
+  else {
+    # extract windows from ppp objects
+    isppp <- unlist(lapply(arglist, is.ppp))
+    Wlist <- lapply(arglist[isppp], function(x) { x$window })
+    # compute bounding boxes of other arguments
+    Blist <- lapply(arglist[!isppp], bounding.box.xy)
+    Wlist <- append(Wlist, Blist)
+    # take the union of all the windows
+    W <- Wlist[[1]]
+    nW <- length(Wlist)
+    if(nW > 1)
+      for(i in 2:nW)
+        W <- union.owin(W, Wlist[[i]])
+  }
+     
   # concatenate lists of (x,y) coordinates
   XY <- do.call("concatxy", arglist)
 
-  # determine window
-  P <- arglist[[1]]
-  if(!verifyclass(P, "ppp", fatal=FALSE))
-    stop("The first argument is not a point pattern object")
-  OUT <- ppp(XY$x, XY$y, window=P$window)
+  # create the point pattern
+  OUT <- ppp(XY$x, XY$y, window=W)
   
   # find out whether the arguments are marked patterns
   getmarks <- function(x) {

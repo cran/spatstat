@@ -2,11 +2,11 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.20 $  $Date: 2006/10/10 07:56:10 $
+#   $Revision: 1.21 $  $Date: 2007/03/13 03:41:56 $
 #
 #
 
-rmhmodel <- function(model, ...) {
+rmhmodel <- function(...) {
   UseMethod("rmhmodel")
 }
 
@@ -20,10 +20,10 @@ rmhmodel.list <- function(model, ...) {
   do.call("rmhmodel.default", model[argnames[ok]])
 }
 
-rmhmodel.default <- function(model=NULL, ...,
+rmhmodel.default <- function(...,
                      cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
 {
-  if(!is.null(model) || length(list(...)) > 0)
+  if(length(list(...)) > 0)
     stop(paste("Syntax should be rmhmodel(cif, par, w, trend, types)\n",
                "with arguments given by name if they are present"))
   

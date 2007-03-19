@@ -103,6 +103,16 @@ plot(a, add=TRUE,col="red")
 
 plot(allstats(swedishpines))
 
+parsave <- par(mfrow=c(1,2))
+data(amacrine)
+plot(amacrine, main="Amacrine cells data")
+par(pty="s")
+mkc <- markcorr(amacrine, function(m1,m2) {m1==m2},
+                correction="translate", method="density",
+                kernel="epanechnikov")
+plot(mkc, main="Mark correlation function")
+par(parsave)
+
 fanfare("IV. Model-fitting")
 
 data(redwood)

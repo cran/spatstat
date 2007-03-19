@@ -74,6 +74,13 @@
   X <- rpoispp(15)
   plot(X, main="ripras(X)")
   plot(ripras(X), add=TRUE)
+
+  # two points insufficient
+  ripras(c(0,1),c(0,0))
+  # triangle
+  ripras(c(0,1,0.5), c(0,0,1))
+  # three collinear points
+  ripras(c(0,0,0), c(0,1,2))
 }
 \references{
   Ripley, B.D. and Rasson, J.-P. (1977)

@@ -19,8 +19,8 @@ ks.test.ppm(model, covariate, ...)
     or a function.
   }
   \item{\dots}{
-    Arguments passed to \code{\link{smooth.spline}}
-    to control the amount of smoothing.
+    Arguments passed to \code{\link{ks.test}}
+    to control the test.
   }
 }
 \details{

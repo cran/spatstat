@@ -1,7 +1,7 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.7 $  $Date: 2006/10/24 03:00:39 $
+# $Revision: 1.9 $  $Date: 2007/03/16 05:19:07 $
 #
 
 unique.ppp <- function(x, ...) {
@@ -12,32 +12,38 @@ unique.ppp <- function(x, ...) {
 
 duplicated.ppp <- function(x, ...) {
   verifyclass(x, "ppp")
+  n <- x$n
+  # marked points - split by mark value
+  if(is.marked(x)) {
+    m <- marks(x)
+    um <- unique(m)
+    xx <- unmark(x)
+    result <- logical(n)
+    for(markvalue in um) {
+      sub <- (m == markvalue)
+      result[sub] <- duplicated.ppp(xx[sub])
+    }
+    return(result)
+  }
+  # unmarked points
+  # check for duplication of x and y separately (a necessary condition)
   xx <- x$x
   yy <- x$y
-  duped <- rep(FALSE, x$n)
   possible <- duplicated(xx) & duplicated(yy)
-  ism <- is.marked(x, dfok=TRUE)
-  if(ism) {
-    mm <- marks(x, dfok=TRUE)
-    possible <- possible & duplicated(mm)
-  }
   if(!any(possible))
-    return(duped)
-  crossmatch <- function(a, j) { outer(a[j], a[!j], "==") }
-  equal <- crossmatch(xx, possible)
-  equal <- equal & crossmatch(yy, possible)
-  if(ism) {
-    if(!is.data.frame(mm))
-      equal <- equal & crossmatch(mm, possible)
-    else {
-      for(i in seq(ncol(mm)))
-        equal <- equal & crossmatch(mm[, i], possible)
-    }
+    return(possible)
+  # split by x coordinate of duplicated x values
+  result <- possible
+  xvals <- unique(xx[possible])
+  for(xvalue in xvals) {
+    sub <- (xx == xvalue)
+    # compare y values
+    result[sub] <- duplicated(yy[sub])
   }
-  duped[possible] <- apply(equal, 1, any)
-  return(duped)
+  return(result)
 }
 
+  
 multiplicity.ppp <- function(x) {
   verifyclass(x, "ppp")
   xx <- x$x

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.25 $   $Date: 2006/12/12 08:56:16 $
+#    $Revision: 4.26 $   $Date: 2007/03/16 08:31:44 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -98,7 +98,7 @@
                # retain those which are inside 'win'
                qq <- qq[win]
                # add them to result
-               X <- superimpose(X, qq)
+               X <- superimpose(X, qq, W=win)
                # if we have enough points, exit
                if(X$n > n) 
                  return(X[1:n])
@@ -207,7 +207,7 @@ rpoint <- function(n, f, fmax=NULL,
       Y <- prop[u < paccept]
       if(Y$n > 0) {
         # add to X
-        X <- superimpose(X, Y)
+        X <- superimpose(X, Y, W=win)
         if(X$n >= n) {
           # we have enough!
           if(verbose)
@@ -332,7 +332,7 @@ rpoint <- function(n, f, fmax=NULL,
        x <- qq$x[1]
        y <- qq$y[1]
        if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
-         X <- superimpose(X, qq)
+         X <- superimpose(X, qq, W=win)
        if(X$n == n)
          return(X)
      }
@@ -380,7 +380,7 @@ rpoint <- function(n, f, fmax=NULL,
       # trim to window
       cluster <- cluster[win]
       # add to pattern
-      result <- superimpose(result, cluster)
+      result <- superimpose(result, cluster, W=win)
       # update offspring-to-parent map
       parentid <- c(parentid, rep(i, cluster$n))
     }

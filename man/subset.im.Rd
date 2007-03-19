@@ -16,7 +16,9 @@
   \item{i}{
     Object defining the subregion or subset to be extracted.
     Either a spatial window (an object of class \code{"owin"})
-    or a point pattern (an object of class \code{"ppp"}).
+    or a point pattern (an object of class \code{"ppp"})
+    or something that can be converted to a point pattern
+    by \code{\link{as.ppp}}.
   }
   \item{\dots}{Ignored.}
   \item{drop}{
@@ -51,7 +53,9 @@
   values will be returned or omitted.
   It also influences the format of the return value. 
 
-  If \code{i} is a point pattern, 
+  If \code{i} is a point pattern (or something that can be
+  converted to a point pattern by \code{\link{as.ppp}} such as a
+  list of \code{x,y} coordinates), then
   \code{X[i, drop=FALSE]} is a numeric vector
   containing the pixel values at each of the points of the pattern.
   Its length is equal to the number of points in the pattern \code{i}.
@@ -81,6 +85,7 @@
   \code{\link{im.object}},
   \code{\link{[<-.im}},
   \code{\link{ppp.object}},
+  \code{\link{as.ppp}},
   \code{\link{owin.object}},
   \code{\link{plot.im}}
 }
@@ -103,6 +108,9 @@
  # a point pattern
  P <- rpoispp(20)
  Y <- X[P]
+
+ # look up a specified location
+ X[list(x=0.1,y=0.2)]
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

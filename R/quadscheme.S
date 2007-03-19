@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.16 $    $Date: 2006/12/13 09:54:31 $
+#      $Revision: 4.17 $    $Date: 2007/03/16 08:30:18 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -176,7 +176,7 @@ quadscheme.spatial <-
 
         # combine the two dummy patterns
 
-        dumb <- superimpose(dumdum, dumdat)
+        dumb <- superimpose(dumdum, dumdat, W=dummy$window)
         Wdumb <- c(Wdumdum, Wdumdat)
 
         # record the quadrature parameters

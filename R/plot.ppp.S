@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.29 $	$Date: 2007/03/12 01:31:09 $
+#	$Revision: 1.32 $	$Date: 2007/03/19 03:30:58 $
 #
 #
 #--------------------------------------------------------------------------
@@ -21,10 +21,12 @@ plot.ppp <-
   sick <- inherits(x, "ppp") && !is.null(rejects <- attr(x, "rejects"))
   if(sick) {
     # get any parameters
-    par.rejects <- resolve.defaults(list(...),
-                                    list(par.rejects=list(pch="+")))$par.rejects
     par.direct <- list(main=main, use.marks=use.marks,
                    maxsize=maxsize, markscale=markscale)
+    par.rejects.default <- list(pch="+")
+    par.rejects <- resolve.defaults(list(...),
+                                    list(par.rejects=par.rejects.default))$par.rejects
+    par.rejects <- resolve.defaults(par.rejects, par.rejects.default)
     par.all <- resolve.defaults(par.rejects, par.direct)
     rw <- resolve.defaults(list(...), list(rejectwindow=NULL))$rejectwindow
     # determine window for rejects
@@ -37,12 +39,14 @@ plot.ppp <-
         rw
       else if(is.character(rw)) {
         switch(rw,
-               box={bounding.box(rejects)},
+               box={bounding.box(rejects, x)},
                ripras={ripras(c(rejects$x, x$x), c(rejects$y, x$y))},
                stop(paste("Unrecognised option: rejectwindow=", rw)))
       } else stop("Unrecognised format for rejectwindow")
+    if(is.null(rwin))
+      stop("Selected window for rejects pattern is NULL")
     # Create suitable space
-    plot(rwin, add=add, type="n")
+    plot(rejects$window, add=add, type="n")
     if(!add)
       title(main=main)
     # plot window if commanded
