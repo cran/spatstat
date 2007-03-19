@@ -15,7 +15,9 @@
   \item{i}{
     Object defining the subregion or subset to be extracted.
     Either a spatial window (an object of class \code{"owin"})
-    or a point pattern (an object of class \code{"ppp"}).
+    or a point pattern (an object of class \code{"ppp"})
+    or something that can be converted into a point pattern
+    by \code{\link{as.ppp}}.
   }
   \item{value}{
      Vector of replacement values (short vectors will be
@@ -35,13 +37,15 @@
   If \code{i} is a spatial window (an object of class \code{"owin"}),
   the values of the image inside this window are changed.
   If \code{i} is a point pattern (an object of class
-  \code{"ppp"}), then the values of the pixel image at the points of
+  \code{"ppp"}, or something that can be converted into a point pattern
+  by \code{\link{as.ppp}}), then the values of the pixel image at the points of
   this pattern are changed.
 }
 \seealso{
   \code{\link{im.object}},
   \code{\link{[.im}},
   \code{\link{ppp.object}},
+  \code{\link{as.ppp}},
   \code{\link{owin.object}}
 }
 \examples{
@@ -64,6 +68,9 @@
  P <- rpoispp(20)
  X[P] <- 10
  plot(X)
+
+ # change pixel value at a specific location
+ X[list(x=0.1,y=0.2)] <- 7
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

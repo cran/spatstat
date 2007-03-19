@@ -24,13 +24,15 @@ clickppp <- function(n=NULL, win=square(1), types=NULL, ..., add=FALSE, main=NUL
       xy <- do.call("locator",
                     resolve.defaults(list(...),
                                      list(type="p")))
-    X <- as.ppp(xy, W=win)
-    Y <- X[win]
-    if((ndiff <- (X$n - Y$n)) > 0)
-      message(paste("deleted", ndiff,
-                    ngettext(ndiff, "point", "points"),
-                    "outside window"))
-    return(Y)
+    # check whether all points lie inside window
+    if((nout <- sum(!inside.owin(xy$x, xy$y, win))) > 0) {
+      warning(paste(nout,
+                    ngettext(nout, "point", "points"),
+                    "lying outside specified window; window was expanded"))
+      win <- bounding.box(win, bounding.box.xy(xy))
+    }
+    X <- ppp(xy$x, xy$y, window=win)
+    return(X)
   }
   
   ##### multitype #######################
@@ -44,13 +46,30 @@ clickppp <- function(n=NULL, win=square(1), types=NULL, ..., add=FALSE, main=NUL
   X <- getem(ftypes[1], instructions, n=n, win=win, add=add, ..., pch=1)
   X <- X %mark% ftypes[1]
   # input points of types 2, 3, ... in turn
+  naughty <- FALSE
   for(i in 2:length(types)) {
     Xi <- getem(ftypes[i], instructions, n=n, win=win, add=add, ..., hook=X, pch=i)
     Xi <- Xi %mark% ftypes[i]
-    X <- superimpose(X, Xi)
+    if(!naughty && identical(Xi$window, win)) {
+      # normal case
+      X <- superimpose(X, Xi, W=win)
+    } else {
+      # User has clicked outside original window.
+      naughty <- TRUE
+      # Use bounding box for simplicity
+      bb <- bounding.box(Xi$window, X$window)
+      X <- superimpose(X, Xi, W=bb)
+    } 
   }
-  if(!add)
-    plot(X, main="Final pattern")
+  if(!add) {
+    if(!naughty)
+      plot(X, main="Final pattern")
+    else {
+      plot(X$window, main="Final pattern (in expanded window)")
+      plot(win, add=TRUE)
+      plot(X, add=TRUE)
+    }
+  }
   return(X)
 
 }

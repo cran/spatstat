@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.4 $     $Date: 2006/10/19 10:22:21 $
+  $Revision: 1.9 $     $Date: 2007/03/16 05:05:20 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -62,7 +62,7 @@ void paircount(nxy, x, y, rmaxi, count)
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 < r2max) 
+	if(d2 <= r2max) 
 	  ++counted;
       }
     }
@@ -76,7 +76,7 @@ void paircount(nxy, x, y, rmaxi, count)
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 < r2max) 
+	if(d2 <= r2max) 
 	  ++counted;
       }
     }
@@ -141,7 +141,7 @@ void closepairs(nxy, x, y, r, noutmax,
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 < r2max) {
+	if(d2 <= r2max) {
 	  /* add this (i, j) pair to output */
 	  if(k >= kmax) {
 	    *nout = k;
@@ -171,7 +171,7 @@ void closepairs(nxy, x, y, r, noutmax,
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 < r2max) {
+	if(d2 <= r2max) {
 	  /* add this (i, j) pair to output */
 	  if(k >= kmax) {
 	    *nout = k;
@@ -244,7 +244,7 @@ void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count)
       dx = x2[j] - x1i;
       dy = y2[j] - y1i;
       d2= dx * dx + dy * dy;
-      if(d2 < r2max) 
+      if(d2 <= r2max) 
 	++counted;
     }
   }
@@ -308,7 +308,7 @@ void crosspairs(nn1, x1, y1, nn2, x2, y2, rmaxi, noutmax,
       dx = x2[j] - x1i;
       dy = y2[j] - y1i;
       d2= dx * dx + dy * dy;
-      if(d2 < r2max) {
+      if(d2 <= r2max) {
 	/* add this (i, j) pair to output */
 	if(k >= kmax) {
 	  *nout = k;
@@ -330,3 +330,30 @@ void crosspairs(nn1, x1, y1, nn2, x2, y2, rmaxi, noutmax,
   }
   *nout = k;
 }
+
+/*
+  Find duplicated locations
+
+   xx, yy are not sorted
+*/
+
+
+void duplicatedxy(n, x, y, out) 
+     int *n;
+     double *x, *y;
+     int *out;
+{
+  int m, i, j, outi;
+  double xi, yi;
+  m = *n;
+  for(i = 1; i < m; i++) {
+    xi = x[i];
+    yi = y[i];
+    for(j = 0; j < i; j++) 
+      if((x[j] == xi) && (y[j] == yi)) 
+	break;
+    if(j == i) out[i] = 0; else out[i] = 1;
+  }
+}
+
+

@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.60 $	$Date: 2007/03/07 02:51:08 $
+#	$Revision: 4.67 $	$Date: 2007/03/16 08:59:46 $
 #
 #
 #	A window may be either
@@ -60,7 +60,15 @@
 #
 #-----------------------------------------------------------------------------
 #
-owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL) {
+
+.Spatstat.Image.Warning <-
+  c("Row index corresponds to increasing y coordinate; column to increasing x",
+    "Transpose matrices to get the standard presentation in R",
+    "Example: image(result$xcol,result$yrow,t(result$d))")
+
+  
+owin <- function(xrange=c(0,1), yrange=c(0,1),
+                 ..., poly=NULL, mask=NULL, units=NULL) {
 
   units <- as.units(units)
 
@@ -73,13 +81,51 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
   if(missing(xrange) != missing(yrange))
     stop("If one of xrange, yrange is specified then both must be.")
 
+  # avoid re-checking if already checked
+  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  if(!check) {
+    area.w <- resolve.defaults(list(...), list(area=NULL))$area
+    if(!poly.given && !mask.given) 
+        w <- list(type="rectangle",
+                  xrange=xrange, yrange=yrange, units=units,
+                  area=
+                  if(!is.null(area.w)) area.w else (diff(xrange)*diff(yrange)))
+      else if(poly.given) 
+        w <- list(type="polygonal",
+                  xrange=xrange, yrange=yrange, bdry=poly, units=units,
+                  area=area.w)
+      else if(mask.given) {
+        nc <- ncol(mask)
+        nr <- nrow(mask)
+        xstep <- diff(xrange)/nc
+        ystep <- diff(yrange)/nr
+        xcol <- seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc)
+        yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr)
+        w <- list(type     = "mask",
+                  xrange   = xrange,
+                  yrange   = yrange,
+                  dim      = c(nr, nc),
+                  xstep    = xstep,
+                  ystep    = ystep,
+                  warnings = .Spatstat.Image.Warning,
+                  xcol     = xcol,
+                  yrow     = yrow,
+                  m        = mask,
+                  units    = units,
+                  area     = area.w)
+      }
+      class(w) <- "owin"
+      return(w)
+  }
+  
   if(!poly.given && !mask.given) {
     ######### rectangle #################
-    if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
+    if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] < xrange[1])
       stop("xrange should be a vector of length 2 giving (xmin, xmax)")
-    if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
+    if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
       stop("yrange should be a vector of length 2 giving (ymin, ymax)")
-    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=units)
+    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=units,
+              area=diff(xrange) * diff(yrange))
     class(w) <- "owin"
     return(w)
   } else if(poly.given) {
@@ -92,16 +138,18 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
       psingle <- FALSE
     else
       stop("poly must be either a list(x,y) or a list of list(x,y)")
-                  
+
     if(psingle) {
       # single boundary polygon
-      if(area.xypolygon(poly) < 0)
-        stop("Area of polygon is negative - maybe traversed in wrong direction?")
       bdry <- list(poly)
+      w.area <- area.xypolygon(poly)
+      if(w.area < 0)
+        stop("Area of polygon is negative - maybe traversed in wrong direction?")
     } else {
       # multiple boundary polygons
       bdry <- poly
-      if(sum(unlist(lapply(poly, area.xypolygon))) < 0)
+      w.area <- sum(unlist(lapply(poly, area.xypolygon)))
+      if(w.area < 0)
         stop(paste("Area of window is negative;\n",
              "check that all polygons were traversed in the right direction"))
     }
@@ -127,13 +175,16 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
     }
 
     w <- list(type="polygonal",
-              xrange=xrange, yrange=yrange, bdry=bdry, units=units)
+              xrange=xrange, yrange=yrange, bdry=bdry, units=units,
+              area=w.area)
     class(w) <- "owin"
     # check for intersection or self-intersection
-    ok <- owinpolycheck(w)
-    if(!ok) {
-      errors <- attr(ok, "err")
-      stop(paste("Polygon data contain", commasep(errors)))
+    if(check) { 
+      ok <- owinpolycheck(w)
+      if(!ok) {
+        errors <- attr(ok, "err")
+        stop(paste("Polygon data contain", commasep(errors)))
+      }
     }
     return(w)
     
@@ -161,6 +212,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
 
     xstep <- diff(xrange)/nc
     ystep <- diff(yrange)/nr
+
+    w.area <- sum(mask) * xstep * ystep
   
     out <- list(type     = "mask",
                 xrange   = xrange,
@@ -168,15 +221,12 @@ owin <- function(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
                 dim      = c(nr, nc),
                 xstep    = xstep,
                 ystep    = ystep,
-                warnings = c(
-"Row index corresponds to increasing y coordinate; column to increasing x",
-"Transpose matrices to get the standard presentation in S",
-"Example: image(result$xcol,result$yrow,t(result$d))"
-                ),
+                warnings = .Spatstat.Image.Warning,
                 xcol    = seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc),
                 yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr),
                 m       = mask,
-                units   = units)
+                units   = units,
+                area    = w.area)
     class(out) <- "owin"
     return(out)
   }
@@ -199,8 +249,8 @@ as.owin <- function(W, ..., fatal=TRUE) {
 }
 
 as.owin.owin <- function(W, ..., fatal=TRUE) {
-  if(verifyclass(W, "owin", fatal=fatal))
-    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, units=W$units))
+  if(verifyclass(W, "owin", fatal=fatal)) 
+    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, units=W$units, check=FALSE, area=W$area))
   else
     return(NULL)
 }
@@ -221,11 +271,7 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
               dim      = W$dim,
               xstep    = W$xstep,
               ystep    = W$ystep,
-              warnings = c(
-"Row index corresponds to increasing y coordinate; column to increasing x",
-"Transpose matrices to get the standard presentation in S",
-"Example: image(result$xcol,result$yrow,t(result$d))"
-                ),
+              warnings = .Spatstat.Image.Warning,
               xcol    = W$xcol,
               yrow    = W$yrow,
               m       = !is.na(W$v),
@@ -370,11 +416,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
                 dim      = c(nr, nc),
                 xstep    = xstep,
                 ystep    = ystep,
-                warnings = c(
-"Row index corresponds to increasing y coordinate; column to increasing x",
-"Transpose matrices to get the standard presentation in S",
-"Example: image(result$xcol,result$yrow,t(result$d))"
-                  ),
+                warnings = .Spatstat.Image.Warning,
                 xcol    = x, 
                 yrow    = y,
                 m       = m)
@@ -505,6 +547,9 @@ bounding.box <- function(...) {
             wins[isppp] <- lapply(wins[isppp], bounding.box.xy)
           # then take bounding box of each window
           boxes <- lapply(wins, bounding.box)
+          # discard NULL values
+          isnull <- unlist(lapply(boxes, is.null))
+          boxes <- boxes[!isnull]
           # take bounding box of these boxes
           xrange <- range(unlist(lapply(boxes, function(b){b$xrange})))
           yrange <- range(unlist(lapply(boxes, function(b){b$yrange})))
@@ -513,6 +558,13 @@ bounding.box <- function(...) {
 
         # single argument
         w <- wins[[1]]
+        if(is.null(w))
+          return(NULL)
+
+        # point pattern?
+        if(is.ppp(w))
+          return(bounding.box.xy(w))
+          
         # convert to window
         w <- as.owin(w)
 

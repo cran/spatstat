@@ -6,11 +6,12 @@
   an observation window in the two-dimensional plane
 }
 \usage{
-  owin(xrange=c(0,1), yrange=c(0,1), poly=NULL, mask=NULL, units=NULL)
+  owin(xrange=c(0,1), yrange=c(0,1), ..., poly=NULL, mask=NULL, units=NULL)
 }
 \arguments{
   \item{xrange}{\eqn{x} coordinate limits of enclosing box}
   \item{yrange}{\eqn{y} coordinate limits of enclosing box}
+  \item{\dots}{Ignored.}
   \item{poly}{
     Optional. Polygonal boundary of window.
     Incompatible with \code{mask}.

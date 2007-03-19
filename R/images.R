@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.29 $     $Date: 2007/03/06 03:44:43 $
+#         $Revision: 1.32 $     $Date: 2007/03/14 03:03:18 $
 #
 #      The class "im" of raster images
 #
@@ -104,11 +104,24 @@ shift.im <- function(X, vec=c(0,0), ...) {
 "[.im" <- subset.im <-
 function(x, i, drop=TRUE, ...) {
   lev <- x$lev
-  if(verifyclass(i, "ppp", fatal=FALSE)) {
-    # 'i' is a point pattern
+  if(!is.null(ip <- as.ppp(i, W=as.owin(x), fatal=FALSE, check=FALSE))) {
+    # 'i' is a point pattern 
     # Look up the greyscale values for the points of the pattern
-    values <- lookup.im(x, i$x, i$y, naok=TRUE)
-    if(drop) return(values[!is.na(values)]) else return(values)
+    values <- lookup.im(x, ip$x, ip$y, naok=TRUE)
+    if(drop) 
+      values <- values[!is.na(values)]
+    if(length(values) == 0) 
+      # ensure the zero-length vector is of the right type
+      values <- 
+      switch(x$type,
+             factor={ factor(, levels=levels(x)) },
+             integer = { integer(0) },
+             real = { numeric(0) },
+             complex = { complex(0) },
+             character = { character(0) },
+             { values }
+             )
+    return(values)
   }
   if(verifyclass(i, "owin", fatal=FALSE)) {
     # 'i' is a window
@@ -150,6 +163,7 @@ function(x, i, drop=TRUE, ...) {
       return(x[w, drop=drop, ...])
     } 
   }
+    
   stop("The subset operation is undefined for this type of index")
 }
 
@@ -158,13 +172,13 @@ function(x, i, drop=TRUE, ...) {
   lev <- x$lev
   X <- x
   W <- as.owin(X)
-  if(verifyclass(i, "ppp", fatal=FALSE)) {
+  if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
     # 'i' is a point pattern
     # test whether all points are inside window
-    if(!all(inside.owin(i$x, i$y, W)))
+    if(!all(inside.owin(ip$x, ip$y, W)))
       stop("Some points are outside the domain of the image")
     # determine row & column positions for each point 
-    loc <- nearest.pixel(i$x, i$y, X)
+    loc <- nearest.pixel(ip$x, ip$y, X)
     # set values
     X$v[cbind(loc$row, loc$col)] <- value
     return(X)

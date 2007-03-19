@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.10 $	$Date: 2002/08/05 14:18:50 $
+#    $Revision: 1.11 $	$Date: 2007/03/16 08:26:12 $
 #
 #    The Ord model (family of point process models)
 #
@@ -106,7 +106,7 @@ for(j in seq(X$n)) {
 #############################################################################
 
 for(j in seq(U$x)[!is.data]) {
-                Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]))
+                Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]), W=X$window)
                      #  compute Dirichlet tessellation (of these points only!)
                 Wplus <- dirichlet.weights(Xplus)
                      #  regressor is difference in total potential

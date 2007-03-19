@@ -1,0 +1,79 @@
+#
+# fii.R
+#
+# Class of fitted interpoint interactions
+#
+#
+fii <- function(interaction=NULL, coefs=numeric(0), Vnames=character(0)) {
+  if(is.null(interaction)) 
+    interaction <- Poisson()
+  stopifnot(is.interact(interaction))
+  if(is.poisson.interact(interaction)) {
+    if(length(Vnames) > 0)
+      stop("Coefficients inappropriate for Poisson process")
+  }
+  out <- list(interaction=interaction,
+              coefs=coefs,
+              Vnames=Vnames)
+  class(out) <- c("fii", class(out))
+  return(out)
+}
+
+summary.fii <- function(object, ...) {
+  y <- unclass(object)
+  INTERACT <- object$interaction
+  coefs    <- object$coefs
+  Vnames   <- object$Vnames
+  y$poisson <- is.poisson.interact(INTERACT)
+  if(!y$poisson) {
+    if(!is.null(INTERACT$interpret)) {
+      # invoke auto-interpretation feature
+      sensible <-  
+        if(newstyle.coeff.handling(INTERACT))
+          (INTERACT$interpret)(coefs[Vnames], INTERACT)
+        else 
+          (INTERACT$interpret)(coefs, INTERACT)
+      header <- paste("Fitted", sensible$inames)
+      printable <- sensible$printable
+    } else {
+      # fallback
+      sensible <- NULL
+      header <- "Fitted interaction terms"
+      printable <-  exp(unlist(theta[Vnames]))
+    }
+    y <- append(y, list(sensible=sensible,
+                        header=header,
+                        printable=printable))
+  }
+  class(y) <- c("summary.fii", class(y))
+  return(y)
+}
+
+print.fii <- function(x, ...) {
+  print(summary(x), brief=TRUE)
+  return(invisible(NULL))
+}
+
+print.summary.fii <- function(x, ...) {
+  secret <- resolve.defaults(list(...),
+                             list(prefix="Interaction:",
+                                  family=TRUE,
+                                  brief=FALSE))
+  brief <- secret$brief
+  if(!brief)
+    cat(secret$prefix)
+  if(x$poisson)
+    cat("Poisson process\n")
+  else {
+    print(x$interaction, family=secret$family, brief=brief)
+    cat(paste(x$header, ":\n", sep=""))
+    print(x$printable)
+  }
+  if(!brief) {
+    cat("Relevant coefficients:\n")
+    print(x$coefs[x$Vnames])
+  }
+  return(invisible(NULL))
+  
+}
+

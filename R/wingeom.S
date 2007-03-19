@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.19 $	$Date: 2007/01/15 05:26:54 $
+#	$Revision: 4.21 $	$Date: 2007/03/16 08:52:59 $
 #
 #
 #
@@ -10,6 +10,9 @@
 #-------------------------------------
 area.owin <- function(w) {
 	verifyclass(w, "owin")
+        # area may be precomputed
+        if(!is.null(w$area))
+          return(w$area)
         switch(w$type,
                rectangle = {
 		width <- abs(diff(w$xrange))
@@ -135,6 +138,9 @@ intersect.owin <- function(A, B, ...) {
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 
+  if(identical(A, B))
+    return(A)
+
   Arect <- (A$type == "rectangle")
   Brect <- (B$type == "rectangle")
   Amask <- (A$type == "mask")
@@ -198,6 +204,9 @@ intersect.owin <- function(A, B, ...) {
 union.owin <- function(A, B, ...) {
   verifyclass(A, "owin")
   verifyclass(B, "owin")
+
+  if(identical(A, B))
+    return(A)
 
   if(A$type == "rectangle" && B$type == "rectangle") {
     if(is.subset.owin(A, B))

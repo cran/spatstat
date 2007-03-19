@@ -34,8 +34,7 @@ main=NULL, hook=NULL)
   \item{hook}{For internal use only. Do not use this argument.}
 }
 \value{
-  A point pattern (object of class \code{"ppp"}) inside the
-  window \code{win}.
+  A point pattern (object of class \code{"ppp"}).
 }
 \details{
   This function allows the user to create a point pattern
@@ -48,9 +47,12 @@ main=NULL, hook=NULL)
   or when the middle mouse button is pressed.
 
   The return value is a point pattern
-  containing the locations of all the clicked points inside the
-  window \code{win}. Note that if any of the clicked locations were actually
-  outside the window \code{win}, they will be deleted.
+  containing the locations of all the clicked points
+  inside the original window \code{win},
+  provided that all of the clicked locations were
+  inside this window. Otherwise, the window is expanded to a box
+  large enough to contain all the points (as well as containing
+  the original window).
 
   If the argument \code{types} is given, then a multitype point pattern
   will be created. The user is

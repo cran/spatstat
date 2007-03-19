@@ -49,6 +49,7 @@
 \alias{exactPdt}
 \alias{fasp}
 \alias{findmarktype}
+\alias{fii}
 \alias{FormatFaspFormulae}
 \alias{fv}
 \alias{greatest.common.divisor}
@@ -146,6 +147,7 @@
 \alias{print.diagppm}
 \alias{print.envelope}
 \alias{print.fasp}       
+\alias{print.fii}       
 \alias{print.fv}       
 \alias{print.interact}       
 \alias{print.isf}
@@ -158,6 +160,7 @@
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhseed}
+\alias{print.summary.fii}
 \alias{print.summary.listof}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
@@ -195,11 +198,9 @@
 \alias{rmhcontrol.list}
 \alias{rmhEngine}
 \alias{rmhmodel.rmhmodel}
-\alias{rmhmodel.list}
 \alias{rmhseed}
 \alias{rmhstart.rmhstart}
 \alias{rmhstart.list}
-\alias{rmhmodel.ppm}
 \alias{rmpoint.I.allim}
 \alias{rpoint.multi}
 \alias{second.moment.calc}
@@ -212,11 +213,13 @@
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summary.envelope}
+\alias{summary.fii}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.units}
 \alias{sympoly}
 \alias{termsinformula}
+\alias{test.crossing.psp}
 \alias{tilecentroids}        
 \alias{trim.mask}        
 \alias{units.default}
@@ -294,6 +297,7 @@ exactdt(X, \dots)
 exactPdt(w)
 fasp(fns, titles, formulae, which, dataname, title)
 findmarktype(x)
+fii(interaction, coefs, Vnames)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, units)
 greatest.common.divisor(n,m)
@@ -400,6 +404,7 @@ primefactors(n, prmax)
 \method{print}{diagppm}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
+\method{print}{fii}(x, \dots)
 \method{print}{fv}(x, \dots)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
@@ -412,6 +417,7 @@ primefactors(n, prmax)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhseed}(x, \dots)
+\method{print}{summary.fii}(x, \dots)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp=3)
@@ -450,8 +456,6 @@ rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{list}(control, \dots)
 rmhEngine(InfoList, \dots, verbose, reseed, kitchensink, preponly) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
-\method{rmhmodel}{list}(model, \dots)
-\method{rmhmodel}{ppm}(model, win, \dots, verbose, project, control)
 rmhseed(iseed)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
@@ -470,11 +474,13 @@ suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 \method{summary}{envelope}(object,\dots)
+\method{summary}{fii}(object,\dots)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{units}(object, \dots)
 sympoly(x, y, n)
 termsinformula(x)
+test.crossing.psp(A,B)
 tilecentroids(W, nx, ny)
 trim.mask(M, R)
 \method{units}{default}(x)
@@ -493,7 +499,7 @@ whist(x,breaks,weights, trim, right)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)
-xypolyselfint(p, eps, proper)
+xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w)
 }
 

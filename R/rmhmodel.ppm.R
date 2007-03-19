@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.20 $   $Date: 2007/01/10 06:00:58 $
+#  $Revision: 2.21 $   $Date: 2007/03/13 01:10:06 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -23,7 +23,7 @@ list(
      function(coeffs, inte) {
        gamma <- inte$interpret(coeffs,inte)$param$gamma
        r <- inte$par$r
-       sat <- inte$par$saturate
+       sat <- inte$par$sat
        return(list(cif='geyer',
                    par=c(gamma=gamma,r=r,sat=sat)))
      },

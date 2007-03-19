@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.23 $   $Date: 2006/12/12 08:53:30 $
+#   $Revision: 1.24 $   $Date: 2007/03/16 08:30:43 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -100,7 +100,7 @@
         # call f(x,y, ...) or use other formats
         Y <- rpoispp(lam[[i]], lmax=maxes[i], win=win, ...)
       Y <- Y %mark% factortype[i]
-      X <- if(i == 1) Y else superimpose(X, Y)
+      X <- if(i == 1) Y else superimpose(X, Y, W=win)
     }
 
     # Randomly permute, just in case the order is important
