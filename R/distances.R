@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.17 $     $Date: 2006/10/09 03:15:32 $
+#      $Revision: 1.22 $     $Date: 2007/04/05 09:00:56 $
 #
 #
 #      Interpoint distances
@@ -13,10 +13,10 @@ pairdist <- function(X, ...) {
   UseMethod("pairdist")
 }
 
-pairdist.ppp <- function(X, ..., periodic=FALSE, method="C") {
+pairdist.ppp <- function(X, ..., periodic=FALSE, method="C", squared=FALSE) {
   verifyclass(X, "ppp")
   if(!periodic)
-    return(pairdist.default(X$x, X$y, method=method))
+    return(pairdist.default(X$x, X$y, method=method, squared=squared))
   # periodic case
   W <- X$window
   if(W$type != "rectangle")
@@ -24,12 +24,13 @@ pairdist.ppp <- function(X, ..., periodic=FALSE, method="C") {
                "in a non-rectangular window"))
   wide <- diff(W$xrange)
   high <- diff(W$yrange)
-  return(pairdist.default(X$x, X$y, period=c(wide,high), method=method))
+  return(pairdist.default(X$x, X$y, period=c(wide,high),
+                          method=method, squared=squared))
 }
 
 
 pairdist.default <-
-  function(X, Y=NULL, ..., period=NULL, method="C")
+  function(X, Y=NULL, ..., period=NULL, method="C", squared=FALSE)
 {
   xy <- xy.coords(X,Y)[c("x","y")]
   x <- xy$x
@@ -65,17 +66,21 @@ pairdist.default <-
              dy <- yy - t(yy)
              dx2 <- pmin(dx^2, (dx + wide)^2, (dx - wide)^2)
              dy2 <- pmin(dy^2, (dy + high)^2, (dy - high)^2)
-             d <- sqrt(dx2 + dy2)
+             d2 <- dx2 + dy2
+             if(!squared)
+               d <- sqrt(d2)
            }
          },
          C={
            d <- numeric( n * n)
            if(!periodic) {
-             z<- .C("pairdist", n = as.integer(n),
+             z<- .C(if(squared) "pair2dist" else "pairdist",
+                    n = as.integer(n),
                     x= as.double(x), y= as.double(y), d= as.double(d),
                     PACKAGE="spatstat")
            } else {
-             z<- .C("pairPdist", n = as.integer(n),
+             z<- .C(if(squared) "pairP2dist" else "pairPdist",
+                    n = as.integer(n),
                     x= as.double(x), y= as.double(y),
                     xwidth=as.double(wide), yheight=as.double(high),
                     d= as.double(d),
@@ -92,13 +97,19 @@ nndist <- function(X, ..., method="C") {
   UseMethod("nndist")
 }
 
-nndist.ppp <- function(X, ..., method="C") {
+nndist.ppp <- function(X, ..., k=1, method="C") {
   verifyclass(X, "ppp")
-  return(nndist.default(X$x, X$y, method=method))
+  if((narg <- length(list(...))) > 0) {
+    if(narg == 1) 
+      warning("Second argument ignored")
+    else
+      warning(paste("Arguments 2 to", narg+1, "ignored"))
+  }
+  return(nndist.default(X$x, X$y, k=k, method=method))
 }
 
 nndist.default <-
-  function(X, Y=NULL, ..., method="C")
+  function(X, Y=NULL, ..., k=1, method="C")
 {
 	#  computes the vector of nearest-neighbour distances 
 	#  for the pattern of points (x[i],y[i])
@@ -111,13 +122,40 @@ nndist.default <-
   n <- length(x)
   if(length(y) != n)
     stop("lengths of x and y do not match")
-
+  if(k != round(k) || k <= 0)
+    stop("k is not a positive integer")
+  k <- as.integer(k)
+  if(length(list(...)) > 0)
+    warning("Some arguments ignored")
+  
   # special cases
   if(n == 0)
     return(numeric(0))
-  else if(n == 1)
-    return(Inf)
-  
+  else if(n <= k)
+    return(rep(Inf, n))
+
+  # case k > 1
+  if(k != 1) {
+    if(n <= 1000) {
+      # form n x n matrix of squared distances
+      D2 <- pairdist.default(x, y, method=method, squared=TRUE)
+      # find k'th smallest squared distance
+      diag(D2) <- Inf
+      NND2 <- apply(D2, 1, function(z,k) { sort(z)[k] }, k=k)
+    } else {
+      # avoid creating huge matrix
+      # handle one row of D at a time
+      NND2 <- numeric(n)
+      for(i in seq(n)) {
+        D2i <- (x - x[i])^2 + (y - y[i])^2
+        D2i[i] <- Inf
+        NND2[i] <- sort(D2i)[k]
+      }
+    }
+    return(sqrt(NND2))
+  }
+
+  # case k = 1
   switch(method,
          interpreted={
            #  matrix of squared distances between all pairs of points
@@ -149,13 +187,19 @@ nnwhich <- function(X, ..., method="C") {
   UseMethod("nnwhich")
 }
 
-nnwhich.ppp <- function(X, ..., method="C") {
+nnwhich.ppp <- function(X, ..., k=1, method="C") {
   verifyclass(X, "ppp")
-  return(nnwhich.default(X$x, X$y, method=method))
+  if((narg <- length(list(...))) > 0) {
+    if(narg == 1) 
+      warning("Second argument ignored")
+    else
+      warning(paste("Arguments 2 to", narg+1, "ignored"))
+  }
+  return(nnwhich.default(X$x, X$y, k=k, method=method))
 }
 
 nnwhich.default <-
-  function(X, Y=NULL, ..., method="C")
+  function(X, Y=NULL, ..., k=1, method="C")
 {
 	#  identifies nearest neighbour of each point in
 	#  the pattern of points (x[i],y[i])
@@ -168,13 +212,40 @@ nnwhich.default <-
   n <- length(x)
   if(length(y) != n)
     stop("lengths of x and y do not match")
+  if(k != round(k) || k <= 0)
+    stop("k is not a positive integer")
+  k <- as.integer(k)
+  if(length(list(...)) > 0)
+    warning("Some arguments ignored")
 
   # special cases
   if(n == 0)
     return(numeric(0))
-  else if(n == 1)
-    return(NA)
-  
+  else if(n <= k)
+    return(rep(NA, n))
+
+  # case k > 1
+  if(k != 1) {
+    if(n <= 1000) {
+      # form n x n matrix of squared distances
+      D2 <- pairdist.default(x, y, method=method, squared=TRUE)
+      # find k'th smallest squared distance
+      diag(D2) <- Inf
+      NNW <- apply(D2, 1, function(z,k) { order(z)[k] }, k=k)
+    } else {
+      # avoid creating huge matrix
+      # handle one row of D at a time
+      NNW <- integer(n)
+      for(i in seq(n)) {
+        D2i <- (x - x[i])^2 + (y - y[i])^2
+        D2i[i] <- Inf
+        NNW[i] <- order(D2i)[k]
+      }      
+    }
+    return(NNW)
+  }
+
+  # case k = 1
   switch(method,
          interpreted={
            #  matrix of squared distances between all pairs of points

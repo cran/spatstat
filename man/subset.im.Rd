@@ -15,8 +15,9 @@
   }
   \item{i}{
     Object defining the subregion or subset to be extracted.
-    Either a spatial window (an object of class \code{"owin"})
-    or a point pattern (an object of class \code{"ppp"})
+    Either a spatial window (an object of class \code{"owin"}),
+    or a pixel image with logical values,
+    or a point pattern (an object of class \code{"ppp"}),
     or something that can be converted to a point pattern
     by \code{\link{as.ppp}}.
   }
@@ -43,7 +44,10 @@
   If \code{i} is a spatial window (an object of class \code{"owin"}),
   the values of the image inside this window are extracted
   (after first clipping the window to the spatial domain of the image
-  if necessary). If \code{i} is a point pattern (an object of class
+  if necessary). If \code{i} is a pixel image with logical values,
+  it is interpreted as a spatial window (with \code{TRUE} values
+  inside the window and \code{FALSE} outside).
+  If \code{i} is a point pattern (an object of class
   \code{"ppp"}), then the values of the pixel image at the points of
   this pattern are extracted.
   
@@ -64,7 +68,7 @@
   By contrast, \code{X[i]} or \code{X[i, drop=TRUE]} contains only those
   pixel values which are not \code{NA}. It may be shorter.
 
-  If \code{i} is a spatial window
+  If \code{i} is a spatial window 
   then \code{X[i, drop=FALSE]} is another pixel image
   of the same dimensions as \code{X} obtained by 
   setting all pixels outside the window \code{i} to have value
@@ -80,6 +84,7 @@
   with \code{i$type = "rectangle"}) then \code{X[i, drop=TRUE]}
   is a pixel image. The spatial domain of this image is the
   intersection of \code{i} with the spatial domain of \code{X}.
+
 }
 \seealso{
   \code{\link{im.object}},

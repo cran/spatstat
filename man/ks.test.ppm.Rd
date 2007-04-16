@@ -65,10 +65,25 @@ ks.test.ppm(model, covariate, ...)
 
   This test was apparently first described (in the context of
   spatial data) by Berman (1986). See also Baddeley et al (2005).
+
+  The return value is an object of class \code{"htest"} containing the
+  results of the hypothesis test. The print method for this class
+  gives an informative summary of the test outcome.
+
+  The return value also belongs to the class \code{"kstest"}
+  for which there is an (undocumented) plot method.
+  The plot method displays the empirical cumulative distribution
+  function of the covariate at the data points, and the predicted
+  cumulative distribution function of the covariate under the model,
+  plotted against the value of the covariate.
 }
 \value{
   An object of class \code{"htest"} containing the results of the
-  test. See \code{\link{ks.test}} for details.
+  test. See \code{\link{ks.test}} for details. The return value can be
+  printed to give an informative summary of the test.
+
+  The value also belongs to the class \code{"kstest"} for which there is
+  a plot method.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

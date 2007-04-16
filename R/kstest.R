@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.11 $  $Date: 2007/03/19 06:28:09 $
+#  $Revision: 1.16 $  $Date: 2007/04/11 11:30:10 $
 #
 #
 ks.test.ppm <- function(model, covariate, ...) {
@@ -28,6 +28,9 @@ ks.test.ppm <- function(model, covariate, ...) {
     W <- as.mask(W)
     # covariate in window
     Z <- as.im(covariate, W=W)
+    # collapse function body to single string
+    if(length(covname) > 1)
+      covname <- paste(covname, collapse="")
   } else
      stop("covariate should be an image or a function(x,y)")
 
@@ -37,15 +40,18 @@ ks.test.ppm <- function(model, covariate, ...) {
   lambda <- as.vector(predict(model, locations=W)[W, drop=TRUE])
   # form weighted cdf of Z values in window
   FZ <- ewcdf(Zvalues, lambda/sum(lambda))
-  # smooth out jumps
+  # Ensure support of cdf includes the range of the data
   xxx <- knots(FZ)
   yyy <- FZ(xxx)
-  xxx <- c(min(ZX), xxx, max(ZX))
-  yyy <- c(0, yyy, 1)
-  if(any(dup <- duplicated(xxx))) {
-    xxx <- xxx[!dup]
-    yyy <- yyy[!dup]
+  if(min(xxx) > min(ZX)) {
+    xxx <- c(min(ZX), xxx)
+    yyy <- c(0, yyy)
   }
+  if(max(xxx) < max(ZX)) {
+    xxx <- c(xxx, max(ZX))
+    yyy <- c(yyy, 1)
+  }
+  # make piecewise linear approximation of cdf
   FZ <- approxfun(xxx, yyy, rule=2)
   # now apply cdf
   U <- FZ(ZX)
@@ -54,8 +60,28 @@ ks.test.ppm <- function(model, covariate, ...) {
   result$data.name <-
     paste("predicted cdf of covariate", sQuote(paste(covname, collapse="")),
           "evaluated at data points of", sQuote(modelname))
+  class(result) <- c("kstest", class(result))
   attr(result, "prep") <-
-    list(Zvalues=Zvalues, lambda=lambda, ZX=ZX, U=U, type=type)
+    list(Zvalues=Zvalues, lambda=lambda, ZX=ZX, FZ=FZ, U=U, type=type)
+  attr(result, "info") <- list(modelname=modelname, covname=covname)
   return(result)        
+}
+
+plot.kstest <- function(x, ...) {
+  prep <- attr(x, "prep")
+  info <- attr(x, "info")
+  FZ <- prep$FZ
+  xxx <- get("x", environment(FZ))
+  main <- c(paste("Kolmogorov-Smirnov test of model", sQuote(info$modelname)),
+            paste("based on distribution of covariate", sQuote(info$covname)),
+            paste("p-value=", signif(x$p.value, 4)))
+  do.call("plot.default",
+          resolve.defaults(
+                           list(x=xxx, y=FZ(xxx), type="l"),
+                           list(...),
+                           list(xlab=info$covname, ylab="probability",
+                                main=main)))
+  plot(ecdf(prep$ZX), add=TRUE, do.points=FALSE)
+  return(invisible(NULL))
 }
 

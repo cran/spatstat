@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.21 $   $Date: 2007/03/13 01:10:06 $
+#  $Revision: 2.22 $   $Date: 2007/03/27 02:53:53 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -142,7 +142,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
                    "has not yet been implemented"))
       
       # Get fitted model's canonical coefficients
-      coeffs <- Y$entries$theta
+      coeffs <- Y$entries$coef
       if(newstyle.coeff.handling(inte)) {
         # extract only the interaction coefficients
         Vnames <- Y$entries$Vnames

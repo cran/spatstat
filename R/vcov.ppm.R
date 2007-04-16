@@ -3,7 +3,7 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.15 $  $Date: 2007/01/11 05:54:13 $
+#  $Revision: 1.18 $  $Date: 2007/04/02 06:04:51 $
 #
 
 vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
@@ -37,7 +37,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
       stop(paste("Sorry, vcov.ppm is not implemented for non-Poisson models",
                  "fitted using maximum pseudolikelihood"))
 
-    fi <- fitted(object, type="trend")
+    fi <- fitted(object, type="trend", check=FALSE)
     wt <- quad.ppm(object)$w
     gf <- getglmfit(object)
     if(is.null(gf)) {
@@ -92,14 +92,25 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
 
   ############## end of guts ####################################
   
-  # Derive variance-covariance from Fisher information unless given
-  if(is.null(varcov))
-    varcov <- solve(fisher)
 
   switch(what,
          fisher = { return(fisher) },
-         vcov   = { return(varcov) },
+         vcov   = {
+           # Derive variance-covariance from Fisher information unless given
+           if(is.null(varcov)) {
+             varcov <- try(solve(fisher))
+             if(inherits(varcov, "try-error"))
+               return(NULL)
+           }
+           return(varcov)
+         },
          corr={
+           # Derive variance-covariance from Fisher information unless given
+           if(is.null(varcov)) {
+             varcov <- try(solve(fisher))
+             if(inherits(varcov, "try-error"))
+               return(NULL)
+           }
            sd <- sqrt(diag(varcov))
            return(varcov / outer(sd, sd, "*"))
          },

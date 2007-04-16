@@ -5,12 +5,13 @@
 \title{Nearest neighbour distances}
 \description{
   Computes the distance from each point to its nearest neighbour
-  in a point pattern.
+  in a point pattern. Alternatively computes the distance to the
+  second nearest neighbour, or third nearest, etc.
 }
 \usage{
   nndist(X, \dots, method="C")
-  \method{nndist}{ppp}(X, \dots, method="C")
-  \method{nndist}{default}(X, Y=NULL, \dots, method="C")
+  \method{nndist}{ppp}(X, \dots, k=1, method="C")
+  \method{nndist}{default}(X, Y=NULL, \dots, k=1, method="C")
 }
 \arguments{
   \item{X,Y}{
@@ -28,21 +29,28 @@
     Ignored by \code{nndist.ppp}
     and \code{nndist.default}.
   }
+  \item{k}{
+    Integer. The algorithm will compute the distance to the
+    \code{k}th nearest neighbour.
+  }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
   }
 }
 \value{
-  Numeric vector of the nearest neighbour distances for each point.
+  Numeric vector of the (\code{k}th)
+  nearest neighbour distances for each point.
 }
 \details{
   This function computes the Euclidean distance from each point
   in a point pattern to its nearest neighbour (the nearest other
-  point of the pattern).
+  point of the pattern). If \code{k} is specified, it computes the
+  distance to the \code{k}th nearest neighbour.
 
   The function \code{nndist} is generic, with
-  a method for point patterns (objects of class \code{"ppp"})
-  and a default method.
+  a method for point patterns (objects of class \code{"ppp"}),
+  and a default method for coordinate vectors.
+  There is also a method for line segment patterns, \code{\link{nndist.psp}}.
 
   The method for point patterns expects a single
   point pattern argument \code{X} and returns the vector of its
@@ -79,9 +87,11 @@
 }
 \section{Warnings}{
   An infinite value is returned if there is only one point
-  in the point pattern.
+  in the point pattern (or in general if there are fewer than
+  \code{k+1} points).
 }
 \seealso{
+  \code{\link{nndist.psp}},
   \code{\link{pairdist}},
   \code{\link{Gest}},
   \code{\link{nnwhich}},
@@ -90,6 +100,7 @@
 \examples{
    data(cells)
    d <- nndist(cells)
+   d2 <- nndist(cells, k=2)
 
    x <- runif(100)
    y <- runif(100)

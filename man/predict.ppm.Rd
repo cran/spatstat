@@ -66,10 +66,10 @@ at new locations.
   \emph{If \code{ngrid} is given, or if \code{locations} is given
     and is a binary image mask:}
   If \code{object} is an unmarked point process,
-  the result is an image object (of class \code{"im"}, see
+  the result is a pixel image object (of class \code{"im"}, see
   \code{\link{im.object}}) containing the predictions. 
   If \code{object} is a multitype point process,
-  the result is a list of images, containing the predictions
+  the result is a list of pixel images, containing the predictions
   for each type at the same grid of locations.
 
   The ``predicted values'' are either values of the spatial trend

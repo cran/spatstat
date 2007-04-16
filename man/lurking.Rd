@@ -12,7 +12,7 @@ lurking(object, covariate, type="eem",
                     plot.sd, plot.it=TRUE,
                     typename,
                     covname,
-                    oldstyle=FALSE, \dots)
+                    oldstyle=FALSE, check=TRUE, \dots)
 }
 \arguments{
   \item{object}{
@@ -74,6 +74,10 @@ lurking(object, covariate, type="eem",
     using the approximation given in the original paper
     (\code{oldstyle=TRUE}),
     or using the correct asymptotic formula (\code{oldstyle=FALSE}).
+  }
+  \item{check}{
+    Logical flag indicating whether the integrity of the data structure
+    in \code{object} should be checked.
   }
   \item{\dots}{
     Arguments passed to \code{smooth.spline} for the estimation of the

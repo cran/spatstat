@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.23 $   $Date: 2007/01/12 01:29:29 $
+#    $Revision: 1.28 $   $Date: 2007/03/27 02:53:46 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -13,7 +13,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   x <- object
   y <- list()
-
+  
   #######  Extract main data components #########################
 
   QUAD <- object$Q
@@ -22,7 +22,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   INTERACT <- x$interaction
   if(is.null(INTERACT)) INTERACT <- Poisson()
-
+  
   #######  Check version #########################
 
   mpl.ver <- versionstring.ppm(object)
@@ -38,6 +38,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
                 
   ####### Determine type of model ############################
   
+  y$entries <- list()
   y$no.trend <- identical.formulae(TREND, NULL) || identical.formulae(TREND, ~1)
 
   y$stationary <- y$no.trend || identical.formulae(TREND, ~marks)
@@ -46,7 +47,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   y$marked <- is.marked.ppp(DATA)
   y$multitype <- is.multitype.ppp(DATA)
-  if(y$marked) y$entries <- list(marks = marks(DATA))
+  if(y$marked) y$entries$marks <- marks(DATA)
 
   y$name <- paste(
           if(y$stationary) "Stationary " else "Nonstationary ",
@@ -61,12 +62,26 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   y$method <- x$method
 
   y$problems <- x$problems
+
+  ######  Extract fitted model coefficients #########################
+
+  y$entries$coef <- COEFS <- x$coef
+
+  ###### Extract fitted interaction and summarise  #################
   
+  FITIN <- fitin(x)
+  y$interaction <- summary(FITIN)
+
+  y$entries$Vnames <- Vnames <- x$internal$Vnames
+
+  # Exit here if quick=TRUE
+    
   if(is.logical(quick) && quick) {
     class(y) <- "summary.ppm"
     return(y)
   }
   
+
   ######  Does it have external covariates?  ####################
 
   if(!antiquated) {
@@ -101,18 +116,6 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   if(is.character(quick) && (quick == "no prediction"))
     return(y)
   
-  ######  Extract fitted model coefficients #########################
-
-  if(exists("is.R") && is.R()) 
-    theta <- x$coef # result of coef(glm(...))
-  else
-    theta <- x$theta # result of dummy.coef(glm(....))
-
-  y$entries$theta <- theta
-
-  # corresponding internal names of regressor variables 
-  y$entries$Vnames <- Vnames <- x$internal$Vnames
-
   ######  Trend component #########################
 
   y$trend <- list()
@@ -122,7 +125,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   y$trend$formula <- if(y$no.trend) NULL else TREND
 
   if(y$poisson && y$no.trend) {
-    lambda <- exp(theta[[1]])
+    lambda <- exp(COEFS[[1]])
     if(!y$marked) { 
       y$trend$label <- "Uniform intensity"
       y$trend$value <- lambda
@@ -135,7 +138,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     if(!y$marked) {
       # stationary non-poisson non-marked
       y$trend$label <- "First order term"
-      y$trend$value <- c(beta=exp(theta[[1]]))
+      y$trend$value <- c(beta=exp(COEFS[[1]]))
     } else {
       # stationary, marked
       mrk <- marks(DATA)
@@ -154,11 +157,11 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     y$trend$label <- "Fitted coefficients for trend formula"
     # extract trend terms without trying to understand them much
     if(is.null(Vnames)) 
-      trendbits <- theta
+      trendbits <- COEFS
     else {
-      agree <- outer(names(theta), Vnames, "==")
+      agree <- outer(names(COEFS), Vnames, "==")
       whichbits <- apply(!agree, 1, all)
-      trendbits <- theta[whichbits]
+      trendbits <- COEFS[whichbits]
     }
     # decide whether there are 'labels within labels'
     unlabelled <- unlist(lapply(trendbits,
@@ -176,28 +179,6 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     }
   }
   
-  ######  Interaction component #########################
-
-  if(!y$poisson) {
-    if(!is.null(INTERACT$interpret)) {
-      # invoke auto-interpretation feature
-      if(newstyle.coeff.handling(INTERACT))
-        sensible <- (INTERACT$interpret)(x$coef[Vnames], INTERACT)
-      else 
-        sensible <- (INTERACT$interpret)(x$coef, INTERACT)
-      header <- paste("Fitted", sensible$inames)
-      printable <- sensible$printable
-    } else {
-      # fallback
-      sensible <- NULL
-      header <- "Fitted interaction terms"
-      printable <-  exp(unlist(theta[Vnames]))
-    }
-    y$interaction <- list(sensible=sensible,
-                          header=header,
-                          printable=printable)
-  }
-
   class(y) <- "summary.ppm"
   return(y)
 }
@@ -255,11 +236,6 @@ print.summary.ppm <- function(x, ...) {
         
   markedpoisson <- poisson && markeddata
 
-  # names of interaction variables if any
-  Vnames <- x$entries$Vnames
-  # their fitted coefficients
-  theta <- x$theta
-
   # ----------- Print model type -------------------
         
   cat(x$name)
@@ -295,21 +271,18 @@ print.summary.ppm <- function(x, ...) {
 
   if(!poisson) {
     cat("\n\n ---- Interaction: -----\n\n")
-    print(x$entries$interaction)
-    
-    cat(paste(x$interaction$header, ":\n", sep=""))
-    print(x$interaction$printable)
+    print(x$interaction)
   }
 
   ####### Gory details ###################################
   cat("\n\n----------- gory details -----\n")
-  theta <- x$entries$theta
-      
+  COEFS <- x$entries$coef
+  
   cat("\nFitted regular parameters (theta): \n")
-  print(theta)
+  print(COEFS)
 
   cat("\nFitted exp(theta): \n")
-  print(exp(unlist(theta)))
+  print(exp(unlist(COEFS)))
 
   ##### Warnings issued #######
 

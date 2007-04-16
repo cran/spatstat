@@ -6,7 +6,7 @@
   in a point pattern.
 }
 \usage{
-  \method{pairdist}{ppp}(X, \dots, periodic=FALSE, method="C")
+  \method{pairdist}{ppp}(X, \dots, periodic=FALSE, method="C", squared=FALSE)
 }
 \arguments{
   \item{X}{
@@ -22,6 +22,10 @@
     String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
     Usually not specified.
+  }
+  \item{squared}{
+    Logical. If \code{squared=TRUE}, the squared distances are
+    returned instead (this computation is faster).
   }
 }
 \value{
@@ -40,6 +44,11 @@
   sense (also known as `torus' distance): opposite edges of the
   rectangle are regarded as equivalent.
   This is meaningless if the window is not a rectangle.
+
+  If \code{squared=TRUE} then the \emph{squared} Euclidean distances
+  \eqn{d^2} are returned, instead of the Euclidean distances \eqn{d}.
+  The squared distances are faster to calculate, and are sufficient for
+  many purposes (such as finding the nearest neighbour of a point).
   
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
@@ -59,6 +68,7 @@
    data(cells)
    d <- pairdist(cells)
    d <- pairdist(cells, periodic=TRUE)
+   d <- pairdist(cells, squared=TRUE)
 }
 \author{Pavel Grabarnik
   \email{pavel.grabar@issp.serpukhov.su}

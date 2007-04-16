@@ -92,6 +92,8 @@ expand.owin             Expand Window By Factor
 fasp.object             Function Arrays for Spatial Patterns
 Fest                    Estimate the empty space function F
 finpines                Pine saplings in Finland.
+fitin.ppm               Extract the Interaction from a Fitted Point
+                        Process Model
 fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
 fv.object               Data Frames of Function Values
@@ -177,6 +179,8 @@ nncorr                  Nearest-Neighbour Correlation of Marked Point
                         Pattern
 nncross                 Nearest Neighbour in Another Point Pattern
 nndist                  Nearest neighbour distances
+nndist.psp              Nearest neighbour distances between line
+                        segments
 nnwhich                 Nearest neighbour
 nztrees                 New Zealand Trees Point Pattern
 Ord                     Generic Ord Interaction model

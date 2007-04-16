@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.13 $	$Date: 2007/03/08 09:43:11 $
+#	$Revision: 2.14 $	$Date: 2007/03/27 02:26:31 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -12,9 +12,6 @@
 #
 #            $coef             vector of fitted regular parameters
 #                              as given by coef(glm(....))
-#
-#            $theta            vector of fitted regular parameters
-#                              as given by dummy.coef(glm(....))
 #
 #            $trend            the trend formula
 #                              or NULL 
@@ -53,11 +50,6 @@ print.ppm <- function(x, ...) {
         
         markedpoisson <- poisson && markeddata
 
-        # names of interaction variables if any
-        Vnames <- s$Vnames
-        # their fitted coefficients
-        theta <- s$theta
-
         # ----------- Print model type -------------------
         
 	cat(s$name)
@@ -89,14 +81,8 @@ print.ppm <- function(x, ...) {
         
         # ---- Interaction ----------------------------
 
-	if(!poisson) {
-          cat("\nInteraction:\n")
-          print(s$entries$interaction, family=FALSE)
-        
-          cat(paste(s$interaction$header, ":\n", sep=""))
-          print(s$interaction$printable)
-        }
-
+	if(!poisson) 
+          print(s$interaction, family=FALSE)
 
         # ---- Warnings issued ----------------------------
 

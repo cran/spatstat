@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.11 $	$Date: 2006/10/16 04:29:07 $
+#	$Revision: 1.12 $	$Date: 2007/03/28 02:59:44 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -27,18 +27,16 @@ function(Q,
     stop(paste("Unrecognised fitting method", sQuote(method)))
   cl <- match.call()
   callstring <- paste(deparse(sys.call()), collapse="")
-  
+
   fitMPL <- mpl.engine(Q=Q, trend=trend,
-                    interaction=interaction,
-                    covariates=covariates,
-                    correction=correction,
-                    rbord=rbord, use.gam=use.gam,
-                    forcefit=forcefit,
-                    callstring=callstring,
+                       interaction=interaction,
+                       covariates=covariates,
+                       correction=correction,
+                       rbord=rbord, use.gam=use.gam,
+                       forcefit=forcefit,
+                       callstring=callstring,
+                       preponly=FALSE,
                        ...)
-  # backdoor 
-  if(!inherits(fitMPL, "ppm"))
-    return(fitMPL)
   
   fitMPL$call <- cl
   fitMPL$callframe <- parent.frame()

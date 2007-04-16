@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.18 $     $Date: 2006/11/13 04:57:56 $
+  $Revision: 1.19 $     $Date: 2007/04/05 08:41:43 $
 
  */
 
@@ -177,6 +177,55 @@ void pairPdist(n, x, y, xwidth, yheight, d)
 	  if(dx2 < dx2p) dx2p = dx2;
 	  if(dy2 < dy2p) dy2p = dy2;
 	  dist = sqrt( dx2p + dy2p ); 
+	  /* upper triangle */
+	  *dp = dist;
+	  ++dp;
+	  /* lower triangle */
+	  d[ j * npoints + i] = dist;
+	}
+    }
+}
+
+/* same function without the sqrt */
+
+void pairP2dist(n, x, y, xwidth, yheight, d)
+     int *n;
+     double *x, *y, *xwidth, *yheight, *d;
+{ 
+  int i, j, npoints; 
+  double *dp;
+  double xi, yi, dx, dy, dx2, dy2, dx2p, dy2p, dist, wide, high;
+
+  npoints = *n;
+  wide = *xwidth;
+  high = *yheight;
+
+  /* set d[0,0] = 0 */
+  *d = 0.0;
+
+  for (i=1; i < npoints; i++) 
+    {
+      xi = x[i];
+      yi = y[i];
+      /* point at the start of column i */
+      dp = d + i * npoints;
+      /* set diagonal to zero */
+      dp[i] = 0.0;
+      for (j=0; j < i; j++)
+	{
+	  dx = x[j] - xi;
+	  dy = y[j] - yi;
+	  dx2p = dx * dx;
+	  dy2p = dy * dy;
+	  dx2 = (dx - wide) * (dx - wide);
+	  dy2 = (dy - wide) * (dy - wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  dx2 = (dx + wide) * (dx + wide);
+	  dy2 = (dy + wide) * (dy + wide);
+	  if(dx2 < dx2p) dx2p = dx2;
+	  if(dy2 < dy2p) dy2p = dy2;
+	  dist = dx2p + dy2p; 
 	  /* upper triangle */
 	  *dp = dist;
 	  ++dp;

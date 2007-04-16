@@ -3,13 +3,14 @@
 #
 #  Hausdorff distances for psp objects
 #
-#  $Revision: 1.3 $ $Date: 2005/12/21 01:14:49 $
+#  $Revision: 1.4 $ $Date: 2007/04/04 03:29:39 $
 #
 #
 
 pairdist.psp <- function(X, ..., method="Fortran") {
   verifyclass(X, "psp")
-
+  if(X$n == 0)
+    return(matrix(, 0, 0))
   D12 <- AsymmHausdorff.psp(X, X, method=method)
   D <- array(pmax(D12, t(D12)), dim=dim(D12))
   return(D)
@@ -18,11 +19,29 @@ pairdist.psp <- function(X, ..., method="Fortran") {
 crossdist.psp <- function(X, Y, ..., method="Fortran") {
   verifyclass(X, "psp")
   Y <- as.psp(Y)
+  if(X$n * Y$n == 0)
+    return(matrix(, X$n, Y$n))
 
   DXY <- AsymmHausdorff.psp(X, Y, method=method)
   DYX <- AsymmHausdorff.psp(Y, X, method=method)
   D <- array(pmax(DXY, t(DYX)), dim=dim(DXY))
   return(D)
+}
+
+nndist.psp <- function(X, ..., k=1, method="Fortran") {
+  verifyclass(X, "psp")
+  n <- X$n
+  if(n == 0)
+    return(numeric(0))
+  else if(n <= k)
+    return(rep(Inf, n))
+  D <- pairdist.psp(X, ..., method=method)
+  diag(D) <- Inf
+  if(k == 1) 
+    NND <- apply(D, 1, min)
+  else
+    NND <- apply(D, 1, function(z,k) { sort(z)[k] }, k=k)
+  return(NND)
 }
 
 AsymmHausdorff.psp <- function(X, Y, method="Fortran") {

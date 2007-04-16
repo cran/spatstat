@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.18 $ $Date: 2007/03/19 06:12:14 $
+# $Revision: 1.19 $ $Date: 2007/03/28 06:07:19 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -141,24 +141,26 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     lurking(object, covariate=x.quad(quad.ppm(object)),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
-            rv=rv,
+            rv=residu,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
             covname="x coordinate",
-            oldstyle=oldstyle)
+            oldstyle=oldstyle,
+            check=FALSE)
 
   if(opt$ycumul)
     result$ycumul <- 
     lurking(object, covariate=y.quad(quad.ppm(object)),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
-            rv=rv,
+            rv=residu,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
             covname="y coordinate",
-            oldstyle=oldstyle)
+            oldstyle=oldstyle,
+            check=FALSE)
 
   # -------------- summary numbers --------------
   

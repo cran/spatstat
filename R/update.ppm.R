@@ -2,12 +2,13 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.20 $    $Date: 2007/01/11 03:42:41 $
+#  $Revision: 1.22 $    $Date: 2007/04/11 09:58:03 $
 #
 #
 #
 
-update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
+update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
+                                    envir=parent.frame()) {
   verifyclass(object, "ppm")
 
   # inspect model
@@ -46,7 +47,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
   aargh <- list(...)
 
   if(length(aargh) == 0) 
-    return(eval(call, parent.frame()))
+    return(eval(call, envir))
 
   # split named and unnamed arguments
   nama <- names(aargh)
@@ -96,7 +97,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL) {
   }
 
   # finally call ppm
-  return(eval(call, parent.frame()))
+  return(eval(call, envir))
 }
 
 sp.foundclass <- function(cname, inlist, formalname, argsgiven) {
@@ -141,6 +142,10 @@ damaged.ppm <- function(object) {
   badfit <- !is.null(gf) && !inherits(gf$terms, "terms")
   if(badfit)
     return(TRUE)
+  # escape clause for fake models
+  if(identical(object$fake, TRUE))
+    return(FALSE)
+  # otherwise it was made by ppm
   Qcall <- object$call$Q
   cf <- object$callframe
   if(is.null(cf)) {

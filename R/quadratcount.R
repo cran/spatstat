@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.9 $  $Date: 2007/02/12 02:21:59 $
+#  $Revision: 1.10 $  $Date: 2007/03/26 04:06:56 $
 #
 
 quadratcount <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL)  {
@@ -11,7 +11,7 @@ quadratcount <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL)  {
   xr <- W$xrange
   yr <- W$yrange
   b <- quadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
-  Xcount <- quadrat.count.engine(X$x, X$y, b$xbreaks, b$ybreaks)
+  Xcount <- quadrat.countEngine(X$x, X$y, b$xbreaks, b$ybreaks)
   attr(Xcount, "window") <- W
   class(Xcount) <- c("quadratcount", class(Xcount))
   return(Xcount)
@@ -62,7 +62,7 @@ quadrat.breaks <- function(xr, yr, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL) {
   return(list(xbreaks=xbreaks, ybreaks=ybreaks))
 }
 
-quadrat.count.engine <- function(x, y, xbreaks, ybreaks, weights) {
+quadrat.countEngine <- function(x, y, xbreaks, ybreaks, weights) {
   if(min(x) < min(xbreaks) || max(x) > max(xbreaks))
     stop("xbreaks do not span the actual range of x coordinates in data")
   if(min(y) < min(ybreaks) || max(y) > max(ybreaks))
