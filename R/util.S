@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.25 $    $Date: 2007/03/28 03:32:20 $
+#    $Revision: 1.27 $    $Date: 2007/05/09 13:06:37 $
 #
 #  (a) for matrices only:
 #
@@ -131,6 +131,16 @@ matrixsample <- function(mat, newdim, phase=c(0,0)) {
                      newdim[1], newdim[2])
     return(newmat)
   }
+}
+
+pointgrid <- function(W, ngrid) {
+  W <- as.owin(W)
+  masque <- as.mask(W, dimyx=ngrid)
+  xx <- raster.x(masque)
+  yy <- raster.y(masque)
+  xx <- xx[masque$m]
+  yy <- yy[masque$m]
+  return(ppp(xx, yy, W))
 }
 
    

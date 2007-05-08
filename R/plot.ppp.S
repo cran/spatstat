@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.32 $	$Date: 2007/03/19 03:30:58 $
+#	$Revision: 1.33 $	$Date: 2007/04/20 03:46:53 $
 #
 #
 #--------------------------------------------------------------------------
@@ -113,6 +113,26 @@ plot.ppp <-
   if(is.data.frame(marx))
     marx <- marx[,1]
 
+  # check there are some valid marks!
+  ok <- !is.na(marx)
+  if(all(!ok)) {
+    warning("All mark values are NA; plotting locations only.")
+    do.call("smartpoints",
+            resolve.defaults(list(xx=x$x, yy=x$y),
+                             explicit,
+                             list(...),
+                             spatstat.options("par.points")))
+    return(invisible())
+  }
+
+  # otherwise ignore invalid marks
+  if(!all(ok)) {
+    warning(paste("Some marks are NA;",
+                    "corresponding points are omitted."))
+    x <- x[ok]
+    marx <- marx[ok]
+  }
+
   ################  real-valued marks ############################
 
   if(is.numeric(marx)) {
@@ -120,7 +140,7 @@ plot.ppp <-
     ok <- is.finite(marx)
 
     if(!all(ok)) {
-      warning(paste("Some marks are NA or Inf;",
+      warning(paste("Some marks are infinite",
                     "corresponding points are omitted."))
       x <- x[ok]
       marx <- marx[ok]
@@ -197,7 +217,7 @@ plot.ppp <-
   }
 
   ##################### non-numeric marks ###############################
-  
+
   um <- if(is.factor(marx))
     levels(marx)
   else

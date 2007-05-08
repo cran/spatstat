@@ -133,6 +133,7 @@
 \alias{owinpolycheck}
 \alias{param.quad}
 \alias{paren}
+\alias{pickoption}
 \alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
@@ -180,6 +181,7 @@
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
+\alias{pointgrid}
 \alias{rasterx.im}
 \alias{rastery.im}
 \alias{reach.fii}
@@ -396,6 +398,8 @@ overlap.xypolygon(P, Q)
 owinpolycheck(W, verbose=TRUE)
 param.quad(Q)
 paren(x)
+pickoption(what="option", key, keymap, \dots,
+           exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
@@ -444,6 +448,7 @@ quadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 quadrat.testEngine(X, nx, ny, xbreaks, ybreaks, \dots, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
+pointgrid(W, ngrid)
 rasterx.im(x)
 rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
