@@ -2,10 +2,10 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.6 $     $Date: 2006/11/20 04:41:33 $
+#      $Revision: 1.8 $     $Date: 2007/05/10 17:35:00 $
 #
 #
-#     Distance transform
+#     Distance transforms
 #
 #
 distmap <- function(X, ...) {
@@ -50,5 +50,36 @@ distmap.owin <- function(X, ...) {
   B <- im(U$b, xc, yr, units=uni)
   attr(V, "bdry") <- B
   return(V)
+}
+
+distmap.psp <- function(X, ...) {
+  verifyclass(X, "psp")
+  W <- as.mask(X$window, ...)
+  uni <- units(W)
+  xp <- as.vector(raster.x(W))
+  yp <- as.vector(raster.y(W))
+  np <- length(xp)
+  E <- X$ends
+  z <- .C("distmap2segs",
+          xp=as.double(xp),
+          yp=as.double(yp),
+          npoints=as.integer(np),
+          x0=as.double(E$x0),
+          y0=as.double(E$y0),
+          x1=as.double(E$x1),
+          y1=as.double(E$y1),
+          nsegments=as.integer(nrow(E)),
+          epsilon=as.double(.Machine$double.eps),
+          dist2=as.double(numeric(np)),
+          index=as.integer(integer(np)),
+          PACKAGE="spatstat")
+  xc <- W$xcol
+  yr <- W$yrow
+  Dist <- im(array(sqrt(z$dist2), dim=W$dim), xc, yr, units=uni)
+  Indx <- im(array(z$index + 1, dim=W$dim), xc, yr, units=uni)
+  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, units=uni)
+  attr(Dist, "index") <- Indx
+  attr(Dist, "bdry")  <- Bdry
+  return(Dist)
 }
 

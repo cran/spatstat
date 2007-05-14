@@ -187,7 +187,7 @@ par(oldpar)
 
 showoffK <- function(Y, current, ..., fullpicture,rad) { 
 	plot(fullpicture,
-             main="Animation using \`applynbd\'\n explaining the K function")
+             main=c("Animation using `applynbd'", "explaining the K function"))
 	points(Y, cex=2)
         u <- current
 	points(u[1],u[2],pch="+",cex=3)

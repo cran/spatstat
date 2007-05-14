@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.41 $	$Date: 2007/03/28 04:30:53 $
+#	$Revision: 1.42 $	$Date: 2007/04/20 03:37:44 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -252,8 +252,9 @@ function(object, window, ngrid=NULL, locations=NULL,
     U <- list(x=newdata$x, y=newdata$y)
     Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
     if(marked) {
-      marks(U) <- newdata$marks
-      Equal <- Equal & outer(marks(X), marks(U), "==")
+      U <- as.ppp(U, X$window)
+      marks(U) <- Umarks <- newdata$marks
+      Equal <- Equal & outer(marks(X), Umarks, "==")
     }
   # compute values of potential at the new sample points
     Vnew <- inter$family$eval(X, U, Equal,

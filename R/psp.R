@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.27 $ $Date: 2006/12/12 09:12:56 $
+#  $Revision: 1.28 $ $Date: 2007/05/10 17:05:58 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -361,26 +361,6 @@ print.summary.psp <- function(x, ...) {
  }
   
 
-
-#################################################
-#  distance map
-#################################################
-
-distmap.psp <- function(X, ...) {
-  verifyclass(X, "psp")
-  W <- as.mask(X$window, ...)
-  uni <- units(W)
-  P <- cbind(as.vector(raster.x(W)), as.vector(raster.y(W)))
-  U <- distppll(P, X$ends, mintype=2)
-  xc <- W$xcol
-  yr <- W$yrow
-  Dist <- im(array(U$min.d, dim=W$dim), xc, yr, units=uni)
-  Indx <- im(array(U$min.which, dim=W$dim), xc, yr, units=uni)
-  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, units=uni)
-  attr(Dist, "index") <- Indx
-  attr(Dist, "bdry")  <- Bdry
-  return(Dist)
-}
 
 ####################################################
 # affine transformations
