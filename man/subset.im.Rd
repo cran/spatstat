@@ -6,7 +6,7 @@
   Extract a subset or subregion of a pixel image.
 }
 \usage{
-  \method{[}{im}(x, i, drop=TRUE, \dots)
+  \method{[}{im}(x, i, drop=TRUE, \dots, raster=NULL)
 }
 \arguments{
   \item{x}{
@@ -25,8 +25,12 @@
   \item{drop}{
     Logical value. 
     Locations in \code{w} that lie outside the spatial domain of the
-    image \code{X} return a pixel value of \code{NA} if
+    image \code{x} return a pixel value of \code{NA} if
     \code{drop=FALSE}, and are omitted if \code{drop=TRUE}.
+  }
+  \item{raster}{
+     Optional. An object of class \code{"owin"} or \code{"im"}
+     determining a pixel grid.
   }
 } 
 \value{
@@ -36,7 +40,7 @@
   This function extracts a subset of the pixel values in a
   pixel image. (To reassign the pixel values, see \code{\link{[<-.im}}).
 
-  The image \code{X} must be an object of class
+  The image \code{x} must be an object of class
   \code{"im"} representing a pixel image defined inside a
   rectangle in two-dimensional space (see \code{\link{im.object}}).
 
@@ -64,16 +68,16 @@
   containing the pixel values at each of the points of the pattern.
   Its length is equal to the number of points in the pattern \code{i}.
   It may contain \code{NA}s corresponding to points which lie outside
-  the spatial domain of the image \code{X}.
+  the spatial domain of the image \code{x}.
   By contrast, \code{X[i]} or \code{X[i, drop=TRUE]} contains only those
   pixel values which are not \code{NA}. It may be shorter.
 
   If \code{i} is a spatial window 
   then \code{X[i, drop=FALSE]} is another pixel image
-  of the same dimensions as \code{X} obtained by 
+  of the same dimensions as \code{x} obtained by 
   setting all pixels outside the window \code{i} to have value
   \code{NA}. When the result is displayed by \code{\link{plot.im}} the effect
-  is that the pixel image \code{X} is clipped to the window \code{i}.
+  is that the pixel image \code{x} is clipped to the window \code{i}.
 
   If \code{i} is a spatial window which is \emph{not} a rectangle
   (\code{i$type != "rectangle"}) then \code{X[i, drop=TRUE]}
@@ -83,8 +87,23 @@
   If \code{i} is a rectangle (a spatial window
   with \code{i$type = "rectangle"}) then \code{X[i, drop=TRUE]}
   is a pixel image. The spatial domain of this image is the
-  intersection of \code{i} with the spatial domain of \code{X}.
+  intersection of \code{i} with the spatial domain of \code{x}.
 
+  If the optional argument \code{raster} is given, then it should
+  be a binary image mask or a pixel image. Then
+  \code{x} will first be converted to an image defined on the
+  pixel grid implied by \code{raster}, before the subset operation
+  is carried out.
+  In particular, \code{x[i, raster=i, drop=FALSE]} will return
+  an image defined on the same pixel array as the object \code{i}.
+}
+\section{Warning}{
+  If \code{W} is a window or a pixel image,
+  then \code{x[W, drop=FALSE]} will return
+  an image defined on the same pixel array as the original image
+  \code{x}. If you want to obtain an image whose pixel
+  dimensions agree with those of \code{W},
+  use the \code{raster} argument, \code{x[W, raster=W, drop=FALSE]}.
 }
 \seealso{
   \code{\link{im.object}},
@@ -116,6 +135,15 @@
 
  # look up a specified location
  X[list(x=0.1,y=0.2)]
+
+ # 10 x 10 pixel array
+ X <- as.im(function(x,y) { x + y }, owin(c(-1,1),c(-1,1)), dimyx=10)
+ # 100 x 100 
+ W <- as.mask(disc(1, c(0,0)), dimyx=100)
+ # 10 x 10 raster
+ X[W,drop=FALSE]
+ # 100 x 100 raster
+ X[W, raster=W, drop=FALSE]
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

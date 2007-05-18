@@ -22,6 +22,9 @@
 #	
 
 identical.formulae <- function(x, y) {
+  # workaround for bug in all.equal.formula in R 2.5.0
+  if(is.null(y) && !is.null(x))
+    return(FALSE)
   return(identical(all.equal(x,y), TRUE))
 }
 

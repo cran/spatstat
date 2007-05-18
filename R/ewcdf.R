@@ -16,7 +16,7 @@ ewcdf <- function(x, weights=rep(1/length(x), length(x)))
   # find jump locations and match
   vals <- sort(unique(x))
   xmatch <- factor(match(x, vals), levels=seq(vals))
-  wmatch <- tapply(weights, xmatch, sum)
+  wmatch <- tapply(w, xmatch, sum)
   wmatch[is.na(wmatch)] <- 0
   rval <- approxfun(vals, cumsum(wmatch),
         method = "constant", yleft = 0, yright = sum(wmatch),
