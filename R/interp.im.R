@@ -1,7 +1,7 @@
 #
 # interp.im.R
 #
-#  $Revision: 1.1 $  $Date: 2007/03/13 10:03:20 $
+#  $Revision: 1.2 $  $Date: 2007/05/17 16:41:13 $
 #
 
 interp.im <- function(Z, x, y) {
@@ -46,7 +46,7 @@ interp.im <- function(Z, x, y) {
                    + (1-dx)*lukimyu(cc,rr+1,V,fallback)
                    + (1-dy)*lukimyu(cc+1,rr,V,fallback)
                     ))
-  result <- numeric(x)
+  result <- numeric(length(x))
   result[ok] <- values
   result[!ok] <- NA
   return(result)

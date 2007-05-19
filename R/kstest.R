@@ -16,10 +16,10 @@ ks.test.ppm <- function(model, covariate, ...) {
     type <- "im"
     # evaluate at data points by interpolation
     ZX <- interp.im(covariate, X$x, X$y)
-    # window
-    W <- as.owin(Z)
-    # covariate in window
+    # covariate values for pixels inside window
     Z <- covariate[W, drop=FALSE]
+    # corresponding mask
+    W <- as.owin(Z)
   } else if(is.function(covariate)) {
     type <- "function"
     # evaluate exactly at data points

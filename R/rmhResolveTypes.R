@@ -2,7 +2,7 @@
 #
 #   rmhResolveTypes.R
 #
-#   $Revision: 1.2 $   $Date: 2006/10/10 04:22:48 $
+#   $Revision: 1.3 $   $Date: 2007/05/17 16:47:53 $
 #
 #
 rmhResolveTypes <- function(model, start, control) {
@@ -31,7 +31,7 @@ rmhResolveTypes <- function(model, start, control) {
   
 # Different ways of specifying/implying the number of types
   
-  ntypes.beta <- length(model$par$beta)
+  ntypes.beta <- length(model$par[["beta"]])
   ntypes.ptypes <- length(control$ptypes)
   ntypes.nstart <- if(start$given == "n") length(start$n.start) else 0
   ntypes.trend <- if(is.list(model$trend)) length(model$trend) else 1

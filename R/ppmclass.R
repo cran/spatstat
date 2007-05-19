@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.14 $	$Date: 2007/03/27 02:26:31 $
+#	$Revision: 2.16 $	$Date: 2007/05/17 18:16:25 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -147,5 +147,16 @@ valid.ppm <- function(object, na.value=TRUE) {
   coeffs <- coef(object)
   Icoeffs <- coeffs[Vnames]
   return(checker(Icoeffs, inte))
+}
+
+
+logLik.ppm <- function(object, ...) {
+  if(!is.poisson.ppm(object)) 
+    warning(paste("log likelihood is not available for non-Poisson model;",
+                  "log-pseudolikelihood returned"))
+  ll <- object$maxlogpl
+  attr(ll, "df") <- length(coef(object))
+  class(ll) <- "logLik"
+  return(ll)
 }
 

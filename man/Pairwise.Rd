@@ -46,7 +46,7 @@ which can then be fitted to point pattern data.
   \code{\link{ppm.object}}
 }
 \examples{
-   #This is the same as StraussHard(r=0.7,h=0.2)
+   #This is the same as StraussHard(r=0.7,h=0.05)
    strpot <- function(d,par) {
          r <- par$r
          h <- par$h
@@ -54,7 +54,7 @@ which can then be fitted to point pattern data.
          value[d < h] <- -Inf
          value
    }
-   mySH <- Pairwise(strpot, "StraussHard", list(r=0.7,h=0.2),
+   mySH <- Pairwise(strpot, "StraussHard", list(r=0.7,h=0.05),
            c("interaction distance r", "hard core distance c"))
    data(cells)
    ppm(cells, ~ 1, mySH)

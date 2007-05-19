@@ -34,8 +34,8 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
        type="n", asp=1.0, axes=FALSE, xlab="", ylab="")
   # determine colour map
   if(is.null(srange)) {
-    Yrange <- summary(Ydens)$range
-    Zrange <- summary(Z)$range
+    Yrange <- if(!is.null(Ydens)) summary(Ydens)$range else NULL
+    Zrange <- if(!is.null(Z)) summary(Z)$range else NULL
     srange <- range(c(0, Yrange, Zrange), na.rm=TRUE)
   }
   cols <- beachcolours(srange, if(type=="eem") 1 else 0, monochrome)
@@ -210,8 +210,8 @@ resid1plot <- function(RES, opt,
   # determine colour map
   if(opt$all || opt$marks || opt$smooth) {
     if(is.null(srange)) {
-      Yrange <- summary(Ydens)$range
-      Zrange <- summary(Z)$range
+      Yrange <- if(!is.null(Ydens)) summary(Ydens)$range else NULL
+      Zrange <- if(!is.null(Z)) summary(Z)$range else NULL
       srange <- range(c(0, Yrange, Zrange), na.rm=TRUE)
     }
     cols <- beachcolours(srange, if(type=="eem") 1 else 0, monochrome)

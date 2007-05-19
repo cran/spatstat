@@ -102,7 +102,7 @@ shift.im <- function(X, vec=c(0,0), ...) {
 }
 
 "[.im" <- subset.im <-
-function(x, i, drop=TRUE, ...) {
+function(x, i, drop=TRUE, ..., raster=NULL) {
   lev <- x$lev
   if(!is.null(ip <- as.ppp(i, W=as.owin(x), fatal=FALSE, check=FALSE))) {
     # 'i' is a point pattern 
@@ -130,13 +130,19 @@ function(x, i, drop=TRUE, ...) {
     #                 as an image (if 'i' is a rectangle)
     #                 or as a vector (otherwise)
 
-    xy <- expand.grid(y=x$yrow,x=x$xcol)
+    out <- if(is.null(raster)) x else as.im(raster)
+    xy <- expand.grid(y=out$yrow,x=out$xcol)
+    if(!missing(raster)) {
+      # resample image on new pixel raster
+      values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
+      out <- im(values, out$yrow, out$xcol, units=units(out))
+    }
     inside <- inside.owin(xy$x, xy$y, i)
     if(!drop) { 
-      x$v[!inside] <- NA
-      return(x)
+      out$v[!inside] <- NA
+      return(out)
     } else if(i$type != "rectangle") {
-      values <- x$v[inside]
+      values <- out$v[inside]
       if(!is.null(lev))
         values <- factor(values, levels=seq(lev), labels=lev)
       return(values)
@@ -149,9 +155,9 @@ function(x, i, drop=TRUE, ...) {
         return(numeric(0))
       xr <- clip(i$xrange, x$xrange)
       yr <- clip(i$yrange, x$yrange)
-      colsub <- inrange(x$xcol, xr)
-      rowsub <- inrange(x$yrow, yr)
-      return(im(x$v[rowsub,colsub], x$xcol[colsub], x$yrow[rowsub],
+      colsub <- inrange(out$xcol, xr)
+      rowsub <- inrange(out$yrow, yr)
+      return(im(out$v[rowsub,colsub], out$xcol[colsub], out$yrow[rowsub],
                 lev=lev, units=units(x)))
     } 
   }
@@ -160,7 +166,7 @@ function(x, i, drop=TRUE, ...) {
     if(i$type == "logical") {
       # convert to window
       w <- as.owin(eval.im(ifelse(i, 1, NA)))
-      return(x[w, drop=drop, ...])
+      return(x[w, drop=drop, ..., raster=raster])
     } 
   }
     

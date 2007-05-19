@@ -159,6 +159,7 @@ levelset                Level Set of a Pixel Image
 lgcp.estK               Fit a Log-Gaussian Cox Point Process by Minimum
                         Contrast
 [.listof                Extract or Replace Subset of a List of Things
+logLik.ppm              Log Likelihood for Poisson Point Process Model
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
