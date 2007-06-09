@@ -33,7 +33,6 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{diagnose.ppm.engine}
-\alias{discretise}
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
@@ -57,6 +56,7 @@
 \alias{getfields}
 \alias{getglmfit}
 \alias{gridindex}            
+\alias{grid1index}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
 \alias{ho.engine}
@@ -290,7 +290,6 @@ default.ntile(X)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
-discretise(x, xrange, nx)
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
@@ -314,6 +313,7 @@ greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
+grid1index(x, xrange, nx)
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)

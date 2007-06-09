@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.27 $	$Date: 2006/12/14 06:57:49 $
+#	$Revision: 1.29 $	$Date: 2007/05/23 12:45:20 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -190,8 +190,8 @@
     if(asked && !can.do.fast) {
       whynot <-
         if(!(breaks$even)) "r values not evenly spaced" else
-        if(!missing(lambda)) "matrix lambda2 was given" else ""
-      warning(paste("cannot use efficient code;", whynot))
+        if(!missing(lambda)) "matrix lambda2 was given" else NULL
+      warning(paste(c("cannot use efficient code", whynot), sep="; "))
     }
     
     if(will.do.fast) {

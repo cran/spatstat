@@ -5,7 +5,8 @@
   Plot a two-dimensional window of observation for a spatial point pattern
 }
 \usage{
- \method{plot}{owin}(x, main, add=FALSE, \dots, box, edge=0.04)
+ \method{plot}{owin}(x, main, add=FALSE, \dots, box, edge=0.04,
+                      hatch=FALSE, angle=45, spacing=diameter(x)/50)
 }
 \arguments{
   \item{x}{
@@ -32,6 +33,18 @@
     that are \code{1 + edge}
     times as large as the limits of the rectangular box
     that encloses the pattern.
+  }
+  \item{hatch}{
+    logical flag; if \code{TRUE}, the interior of the window will
+    be shaded by a grid of parallel lines.
+  }
+  \item{angle}{
+    orientation of the shading lines (in degrees anticlockwise
+    from the \eqn{x} axis) when \code{hatch=TRUE}.
+  }
+  \item{spacing}{
+    spacing between the shading lines,
+    when \code{hatch=TRUE}.
   }
 }
 \value{
@@ -74,25 +87,22 @@
   \code{\link{spatstat.options}}
 }
 \examples{
-\dontrun{
   # rectangular window
    data(nztrees)
    plot(nztrees$window)
    abline(v=148, lty=2)
 
   # polygonal window
-  plot(c(0,1),c(0,1),type="n")
-  bdry <- locator()
-  # click the vertices of a polygon (anticlockwise)
-  w <- owin(c(0,1), c(0,1), poly=bdry)
+  data(demopat)
+  w <- demopat$window
   plot(w)
+  plot(w, hatch=TRUE, lwd=2)
 
   # binary mask
   we <- erode.owin(w, 0.05, FALSE)
   plot(we)
   spatstat.options(par.binary=list(col=grey(c(0.5,1))))
   plot(we)
-}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

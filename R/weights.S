@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.19 $	$Date: 2006/10/09 03:51:29 $
+#	$Revision: 4.20 $	$Date: 2007/06/07 15:08:54 $
 #
 #
 # Main functions:
@@ -31,7 +31,7 @@
 #			    grid of rectangular tiles. 
 #			    Compute tile membership for arbitrary x,y.
 #				    
-#       discretise()        1-dimensional analogue of gridindex()
+#       grid1index()        1-dimensional analogue of gridindex()
 #
 #
 #-------------------------------------------------------------------
@@ -73,13 +73,13 @@ gridindex <- function(x, y, xrange, yrange, nx, ny) {
 	# For each point (x[i], y[i]) compute the index (ix, iy)
 	# of the cell containing the point.
 	# 
-	ix <- discretise(x, xrange, nx)
-	iy <- discretise(y, yrange, ny)
+	ix <- grid1index(x, xrange, nx)
+	iy <- grid1index(y, yrange, ny)
 	#
 	return(list(ix=ix, iy=iy, index=(iy-1) * nx + ix))
 }
 
-discretise <- function(x, xrange, nx) {
+grid1index <- function(x, xrange, nx) {
 	i <- ceiling( nx * (x - xrange[1])/diff(xrange))
 	i <- pmax(1, i)
 	i <- pmin(i, nx)

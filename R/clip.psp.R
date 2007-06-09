@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.6 $   $Date: 2006/10/24 03:00:39 $
+#    $Revision: 1.7 $   $Date: 2007/06/06 11:59:30 $
 #
 #
  
@@ -174,7 +174,8 @@ clippoly.psp <- function(s, window) {
   # form all the chopped segments (whether in or out)
 
   chopped <- empty <- s[numeric(0)]
-
+  chopped$window <- bounding.box(s$window, window)
+    
   for(seg in seq(ns)) {
     segment <- s$ends[seg, , drop=FALSE]
     hit <- ok[seg, ]
@@ -201,11 +202,14 @@ clippoly.psp <- function(s, window) {
       }
     }
   }
-
+  chopped$n <- nrow(chopped$ends)
+  
   # select those chopped segments which are inside the window
   mid <- midpoints.psp(chopped)
   ins <- inside.owin(mid$x, mid$y, window)
-  return(chopped[ins])
+  retained <- chopped[ins]
+  retained$window <- window
+  return(retained)
 }
 
 

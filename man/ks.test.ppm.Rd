@@ -7,7 +7,7 @@
   and predicted distributions of the values of a spatial covariate.
 }
 \usage{
-ks.test.ppm(model, covariate, ...)
+ks.test.ppm(model, covariate, ..., jitter=TRUE)
 }
 \arguments{
   \item{model}{
@@ -21,6 +21,10 @@ ks.test.ppm(model, covariate, ...)
   \item{\dots}{
     Arguments passed to \code{\link{ks.test}}
     to control the test.
+  }
+  \item{jitter}{
+    Logical flag. If \code{jitter=TRUE}, values of the covariate
+    will be slightly perturbed at random, to avoid tied values in the test.
   }
 }
 \details{
@@ -76,6 +80,19 @@ ks.test.ppm(model, covariate, ...)
   function of the covariate at the data points, and the predicted
   cumulative distribution function of the covariate under the model,
   plotted against the value of the covariate.
+
+  The argument \code{jitter} controls whether covariate values are
+  randomly perturbed, in order to avoid ties.
+  If the original data contains any ties in the covariate (i.e. points
+  with equal values of the covariate), and if \code{jitter=FALSE}, then 
+  the Kolmogorov-Smirnov test implemented in \code{\link{ks.test}}
+  will issue a warning that it cannot calculate the exact \eqn{p}-value.
+  To avoid this, if \code{jitter=TRUE} each value of the covariate will
+  be perturbed by adding a small random value. The perturbations are
+  normally distributed with standard deviation equal to one hundredth of
+  the range of values of the covariate. This prevents ties, 
+  and the \eqn{p}-value is still correct. There is
+  a very slight loss of power.
 }
 \value{
   An object of class \code{"htest"} containing the results of the
