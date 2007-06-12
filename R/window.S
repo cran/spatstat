@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.67 $	$Date: 2007/03/16 08:59:46 $
+#	$Revision: 4.68 $	$Date: 2007/06/07 19:12:32 $
 #
 #
 #	A window may be either
@@ -834,4 +834,21 @@ print.summary.owin <- function(x, ...) {
   return(invisible(x))
 }
 
-  
+discretise <- function(X,eps=NULL,dimyx=NULL,xy=NULL) {
+  verifyclass(X,"ppp")
+  W <- X$window
+  ok <- inside.owin(X$x,X$y,W)
+  if(!all(ok))
+    stop("There are points of X outside the window of X")
+  all.null <- is.null(eps) & is.null(dimyx) & is.null(xy)
+  if(W$type=="mask" & all.null) return(X)
+  WM  <- as.mask(W,eps=eps,dimyx=dimyx,xy=xy)
+  nok <- !inside.owin(X$x,X$y,WM)
+  if(any(nok)) {
+    ifix <- nearest.raster.point(X$x[nok],X$y[nok], WM)
+    ifix <- cbind(ifix$row,ifix$col)
+    WM$m[ifix] <- TRUE
+  }
+  X$window <- WM
+  X
+}

@@ -33,6 +33,7 @@ bramblecanes            Hutchings' Bramble Canes data
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
 chorley                 Chorley-Ribble Cancer Data
+clarkevans              Clark and Evans Aggregation Index
 clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
 coef.ppm                Coefficients of Fitted Point Process Model
@@ -71,6 +72,8 @@ dilate.owin             Dilate a Window
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
 disc                    Circular Window
+discretise              Safely Convert Point Pattern Window to Binary
+                        Mask
 distmap                 Distance Map
 distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern
@@ -265,6 +268,8 @@ residualspaper          Data and Code From JRSS Discussion Paper on
 residuals.ppm           Residuals for Fitted Point Process Model
 ripras                  Estimate window from points alone
 rlabel                  Random Re-Labelling of Point Pattern
+rlinegrid               Generate grid of parallel lines with random
+                        displacement
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I
 rMaternII               Simulate Matern Model II

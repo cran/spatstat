@@ -3,12 +3,13 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.21 $	$Date: 2007/03/09 08:32:00 $
+#	$Revision: 1.22 $	$Date: 2007/06/06 12:00:17 $
 #
 #
 #
 
-plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04)
+plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
+                      hatch=FALSE, angle=45, spacing=diameter(x)/50)
 {
 #
 # Function plot.owin.  A method for plot.
@@ -89,6 +90,14 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04)
                            resolve.defaults(list(x=po),
                                             list(...)),
                            extrargs="lwd")
+           if(hatch) {
+             L <- rlinegrid(angle, spacing, W)
+             L <- L[W]
+             do.call.matched("plot.psp",
+                             resolve.defaults(list(x=L, add=TRUE),
+                                              list(...)),
+                             extrargs=c("lwd","lty","col"))
+           }
          },
          polygonal = {
            p <- W$bdry
@@ -98,6 +107,14 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04)
                                               list(x=p[[i]]),
                                               list(...)),
                              extrargs="lwd")
+           if(hatch) {
+             L <- rlinegrid(angle, spacing, W)
+             L <- L[W]
+             do.call.matched("plot.psp",
+                             resolve.defaults(list(x=L, add=TRUE),
+                                              list(...)),
+                             extrargs=c("lwd","lty","col"))
+           }
          },
          mask = {
            do.call.matched("image.default",
@@ -105,6 +122,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04)
                            list(x=W$xcol, y=W$yrow, z=!t(W$m), add=TRUE),
                            list(...),
                            spatstat.options("par.binary")))
+           warning("Hatching is not implemented for mask windows")
          },
          stop(paste("Don't know how to plot window of type", sQuote(W$type)))
          )

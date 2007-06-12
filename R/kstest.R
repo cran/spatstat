@@ -1,10 +1,10 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.16 $  $Date: 2007/04/11 11:30:10 $
+#  $Revision: 1.18 $  $Date: 2007/06/08 17:53:01 $
 #
 #
-ks.test.ppm <- function(model, covariate, ...) {
+ks.test.ppm <- function(model, covariate, ..., jitter=TRUE) {
   modelname <- deparse(substitute(model))
   covname <- deparse(substitute(covariate))
   stopifnot(is.ppm(model))
@@ -38,6 +38,14 @@ ks.test.ppm <- function(model, covariate, ...) {
   Zvalues <- as.vector(Z[W, drop=TRUE])
   # corresponding fitted intensity values
   lambda <- as.vector(predict(model, locations=W)[W, drop=TRUE])
+
+  # apply jittering to avoid ties
+  if(jitter) {
+    dZ <- 0.005 * diff(range(ZX, Zvalues))
+    ZX <- ZX + rnorm(length(ZX), sd=dZ)
+    Zvalues <- Zvalues + rnorm(length(Zvalues), sd=dZ)
+  }
+  
   # form weighted cdf of Z values in window
   FZ <- ewcdf(Zvalues, lambda/sum(lambda))
   # Ensure support of cdf includes the range of the data

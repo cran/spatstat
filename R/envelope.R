@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.34 $  $Date: 2007/01/31 05:45:18 $
+#   $Revision: 1.35 $  $Date: 2007/05/23 12:08:57 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
@@ -14,9 +14,13 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
   cl <- match.call()
   Yname <- deparse(substitute(Y))
   # determine type of simulation
+  #    'csr' = TRUE iff the model is uniform Poisson
+  #    model = NULL or a ppm object to be simulated
+  #    envir = environment in which to evaluate the expression `simulate'
   if(!is.null(simulate)) {
     csr <- FALSE
     model <- NULL
+    envir <- parent.frame()  
     if(!is.expression(simulate))
       stop(paste(sQuote("simulate"),
                  "should be an expression"))
@@ -45,6 +49,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
       else {
         model <- NULL
         simulate <- expression(rpoispp(Yintens, win=Ywin))
+        envir    <- sys.frame(sys.nframe())
       }
     } else {
       if(rmhstuff) {
@@ -56,12 +61,14 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
         model <- NULL
         simulate <- expression({A <- rpoispp(Yintens, win=Ywin);
                                 A %mark% sample(Ymarx, A$n, replace=TRUE)})
+        envir    <- sys.frame(sys.nframe())
       }
     }
   } else 
   stop(paste(sQuote("object"),
              "should be a point process model or a point pattern"))
 
+  
   # set up simulation parameters
   metrop <- !is.null(model)
   if(metrop) {
@@ -111,7 +118,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
     if(metrop)
       Xsim <- rmhEngine(rmhinfolist, verbose=FALSE)
     else {
-      Xsim <- eval(simulate)
+      Xsim <- eval(simulate, envir=envir)
       if(!inherits(Xsim, "ppp"))
         stop(paste("Evaluating the expression", sQuote("simulate"),
                    "did not yield a point pattern"))
@@ -166,7 +173,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
     if(metrop)
       Xsim <- rmh(rmodel, rstart, rcontr, verbose=FALSE)
     else {
-      Xsim <- eval(simulate)
+      Xsim <- eval(simulate, envir=envir)
       if(!inherits(Xsim, "ppp"))
         stop(paste("Evaluating the expression", sQuote("simulate"),
                    "did not yield a point pattern"))

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.14 $     $Date: 2007/03/16 08:24:46 $
+#       $Revision: 5.15 $     $Date: 2007/06/07 15:09:32 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -89,8 +89,8 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
       Mrow <- as.vector(row(M$m)[M$m])
       Mcol <- as.vector(col(M$m)[M$m])
       # this code matches 'gridindex'
-      imap <- discretise(M$yrow, M$yrange, ny)
-      jmap <- discretise(M$xcol, M$xrange, nx)
+      imap <- grid1index(M$yrow, M$yrange, ny)
+      jmap <- grid1index(M$xcol, M$xrange, nx)
       # apply this mapping to all pixels inside the window
       ii <- imap[Mrow]
       jj <- jmap[Mcol]

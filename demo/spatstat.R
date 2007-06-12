@@ -26,6 +26,8 @@ data(letterR)
 plot(letterR, main="Polygonal window")
 plot(as.mask(letterR), main="Binary mask window")
 
+plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with line shading")
+
 Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
 plot(Z, main="Pixel image")
 
@@ -60,6 +62,10 @@ tes <- quadrat.test(swedishpines, 3)
 tes
 plot(tes, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
 title(sub=paste("p-value =", signif(tes$p.value,3)), cex.sub=1.4)
+
+tesk <- ks.test.ppm(ppm(swedishpines), function(x,y){x})
+tesk
+plot(tesk)
 
 data(cells)
 Z <- density.ppp(cells, 0.07)
@@ -119,12 +125,21 @@ parsave <- par(mfrow=c(1,2))
 plot(redwood)
 fitT <- thomas.estK(redwood, c(kappa=10,sigma2=0.1))
 par(pty="s")
-plot(fitT, main="Thomas model\n fit by minimum contrast")
-par(parsave)
+plot(fitT, main=c("Thomas model","fit by minimum contrast"))
 
 plot(swedishpines)
 fit <- ppm(swedishpines, ~1, Strauss(r=7))
 print(fit)
+plot(fit, how="image", main=c("Strauss model",
+                               "fit by maximum pseudolikelihood",
+                               "Conditional intensity plot"))
+
+plot(swedishpines)
+fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
+plot(fitin(fit),
+     main=c("Pairwise interaction model",
+            "fit by maximum pseudolikelihood"))
+par(parsave)
 
 Xsim <- rmh(model=fit,
             start=list(n.start=80),
@@ -174,6 +189,8 @@ plot(Xg, main=paste("Geyer saturation process\n",
                     "rmh() with cif=\"geyer\""))
 
 plot(rpoisline(10))
+
+plot(rlinegrid(30, 0.1))
 
 fanfare("VI. Programming tools")
 
