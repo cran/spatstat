@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.22 $	$Date: 2007/06/06 12:00:17 $
+#	$Revision: 1.23 $	$Date: 2007/06/12 13:44:41 $
 #
 #
 #
@@ -122,7 +122,8 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                            list(x=W$xcol, y=W$yrow, z=!t(W$m), add=TRUE),
                            list(...),
                            spatstat.options("par.binary")))
-           warning("Hatching is not implemented for mask windows")
+           if(hatch)
+             warning("Hatching is not implemented for mask windows")
          },
          stop(paste("Don't know how to plot window of type", sQuote(W$type)))
          )

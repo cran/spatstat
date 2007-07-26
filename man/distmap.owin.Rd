@@ -33,6 +33,14 @@
   at a pixel \eqn{u} equals the distance from \eqn{u} to the nearest
   pixel in \code{X}.
 
+  For computational efficiency, the distances computed are not the
+  usual Euclidean distances. Instead the distance between two pixels
+  is measured by the length of the
+  shortest path connecting the two pixels. A path is a series of steps
+  between neighbouring pixels (each pixel has 8 neighbours). 
+  This is the standard `distance transform' algorithm of image
+  processing (Rosenfeld and Kak, 1968; Borgefors, 1986).
+
   Additionally, the return value 
   has an attribute \code{"bdry"} which is 
   also a pixel image. The grey values in \code{"bdry"} give the
@@ -56,6 +64,16 @@
   plot(U)
   plot(attr(U, "bdry"))
   }
+}
+\references{
+  Borgefors, G.
+  Distance transformations in digital images.
+  \emph{Computer Vision, Graphics and Image Processing} \bold{34}
+  (1986) 344--371.
+  
+  Rosenfeld, A. and Pfalz, J.L.
+  Distance functions on digital pictures.
+  \emph{Pattern Recognition} \bold{1} (1968) 33-61.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -45,9 +45,33 @@ distmap.owin <- function(X, ...) {
   uni <- units(X)
   xc <- X$xcol
   yr <- X$yrow
-  U <- exactPdt(X)
-  V <- im(U$d, xc, yr, units=uni)
-  B <- im(U$b, xc, yr, units=uni)
+  nr <- X$dim[1]
+  nc <- X$dim[2]
+# pad out the input image with a margin of width 1 on all sides
+  mat <- X$m
+  mat <- cbind(FALSE, mat, FALSE)
+  mat <- rbind(FALSE, mat, FALSE)
+# call C routine
+  res <- .C("distmapbin",
+            as.double(X$xrange[1]),
+            as.double(X$yrange[1]),
+            as.double(X$xrange[2]),
+            as.double(X$yrange[2]),
+            nr = as.integer(nr),
+            nc = as.integer(nc),
+            as.logical(t(mat)),
+            distances = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
+            boundary = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
+            PACKAGE="spatstat"
+            )
+  # strip off margins again
+  dist <- matrix(res$distances,
+                 ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+  bdist <- matrix(res$boundary,
+                  ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+  # cast as image objects
+  V <- im(dist,  xc, yr, units=uni)
+  B <- im(bdist, xc, yr, units=uni)
   attr(V, "bdry") <- B
   return(V)
 }
