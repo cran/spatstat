@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.22 $    $Date: 2007/04/11 09:58:03 $
+#  $Revision: 1.24 $    $Date: 2007/07/24 14:44:15 $
 #
 #
 #
@@ -49,6 +49,8 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
   if(length(aargh) == 0) 
     return(eval(call, envir))
 
+  Q.is.new <- FALSE
+  
   # split named and unnamed arguments
   nama <- names(aargh)
   named <- if(is.null(nama)) rep(FALSE, length(aargh)) else (nama != "")
@@ -61,37 +63,48 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
     # override their original values
     existing <- !is.na(match(nama, names(call)))
     for (a in nama[existing]) call[[a]] <- aargh[[a]]
-  
+
     # add any named arguments not present in the original call
     if (any(!existing)) {
       call <- c(as.list(call), namedargs[!existing])
       call <- as.call(call)
     }
+    # is the point pattern or quadscheme new ?
+    if("Q" %in% nama)
+      Q.is.new <- TRUE
   }
   if(any(!named)) {
     # some objects identified by their class
-    if(n <- sp.foundclasses(c("ppp", "quad"), unnamedargs, "Q", nama))
-       call$Q <- unnamedargs[[n]]
+    if(n <- sp.foundclasses(c("ppp", "quad"), unnamedargs, "Q", nama)) {
+      call$Q <- unnamedargs[[n]]
+      Q.is.new <- TRUE
+    }
     if(n<- sp.foundclass("interact", unnamedargs, "interaction", nama))
-       call$interaction <- unnamedargs[[n]]
+      call$interaction <- unnamedargs[[n]]
     if(n<- sp.foundclass("formula", unnamedargs, "trend", nama))
-       call$trend <- unnamedargs[[n]]
+      call$trend <- unnamedargs[[n]]
     if(n<- sp.foundclasses(c("data.frame", "im"), unnamedargs, "covariates", nama))
-       call$covariates <- unnamedargs[[n]]
+      call$covariates <- unnamedargs[[n]]
   }
   
   # *************************************************************
   # ****** Special action when Q is a point pattern *************
   # *************************************************************
-  if(fixdummy && inherits((X <- call$Q), "ppp")) {
+  if(Q.is.new && fixdummy && inherits((X <- eval(call$Q)), "ppp")) {
     # Instead of allowing default.dummy(X) to occur,
     # explicitly create a quadrature scheme from X,
     # using the same dummy points and weight parameters
     # as were used in the fitted model 
     Qold <- quad.ppm(object)
-    Dum <- Qold$dummy
-    wpar <- Qold$param$weight
-    Qnew <- do.call("quadscheme", append(list(X, Dum), wpar))
+    if(is.marked(Qold)) {
+      dpar <- Qold$param$dummy
+      wpar <- Qold$param$weight
+      Qnew <- do.call("quadscheme", append(list(X), append(dpar, wpar)))
+    } else {
+      Dum <- Qold$dummy
+      wpar <- Qold$param$weight
+      Qnew <- do.call("quadscheme", append(list(X, Dum), wpar))
+    }
     # replace X by new Q
     call$Q <- Qnew
   }

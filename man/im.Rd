@@ -37,7 +37,7 @@
   The matrix \code{mat} contains the \sQuote{greyscale} values
   for a rectangular grid of pixels.
   Note carefully that the entry \code{mat[i,j]}
-  gives the pixel value at the location \code{(xcol[j],yrow[i]}.
+  gives the pixel value at the location \code{(xcol[j],yrow[i])}.
   That is, the \bold{row} index of the matrix \code{mat} corresponds
   to increasing \bold{y} coordinate, while the column index of \code{mat}
   corresponds to increasing \bold{x} coordinate.
@@ -53,7 +53,7 @@
   a matrix with \code{nrow(mat) = length(yrow)} and
   \code{ncol(mat) = length(xcol)}.
 
-  \R{} does not allow a matrix to have
+  \R does not allow a matrix to have
   factor-valued entries. So to make a factor-valued image from raw data,
   you must supply \code{mat} as a factor vector and specify the arguments
   \code{xcol} and \code{yrow} to determine the dimensions of the image.

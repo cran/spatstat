@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.22 $   $Date: 2007/03/27 02:53:53 $
+#  $Revision: 2.23 $   $Date: 2007/06/12 12:53:56 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -212,7 +212,11 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       # all first order effects are subsumed in Z$trend
       Z$par[["beta"]] <- if(!Y$marked) 1 else rep(1, length(Z$types))
       # predict on window possibly larger than original data window
-      Z$trend <- predict(X, window=wsim, type="trend")
+      Z$trend <- 
+        if(control$conditioning != "none" && wsim$type == "mask")
+          predict(X, window=wsim, type="trend", locations=wsim)
+        else 
+          predict(X, window=wsim, type="trend")
     }
     if(verbose)
       cat("done.\n")

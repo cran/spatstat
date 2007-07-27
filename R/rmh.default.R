@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.47 2007/04/20 04:32:14 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.51 2007/06/12 13:31:13 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -698,7 +698,8 @@ rmhEngine <- function(InfoList, ...,
   } 
 
 # Now clip the pattern to the ``clipping'' window:
-  xxx <- xxx[w.clip]
+  if(!control$force.noexp)
+    xxx <- xxx[w.clip]
 
 # Append to the result information about how it was generated.
   if(kitchensink)

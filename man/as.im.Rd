@@ -5,7 +5,8 @@
   Converts various kinds of data to a pixel image
 }
 \usage{
-  as.im(X, W=as.mask(as.owin(X), dimyx=dimyx), \dots, dimyx=NULL)
+  as.im(X, W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL)
 }
 \arguments{
   \item{X}{Data to be converted to a pixel image.}
@@ -15,6 +16,9 @@
   \item{dimyx}{
     Optional. Dimensions for the pixel array.
     An integer, or vector of 2 integers \code{c(ny, nx)}.
+  }
+  \item{na.replace}{Optional value to replace \code{NA} entries in the
+    output image.
   }
 }
 \details{
@@ -34,7 +38,8 @@
     a single number (or a single logical, complex, factor or character
     value). The result is an image
     with all pixel entries equal to this constant value
-    inside the window \code{W} (and \code{NA} outside).
+    inside the window \code{W} (and \code{NA} outside, unless the
+    argument \code{na.replace} is given).
     Argument \code{W} is required.
     \item
     a function of the form \code{function(x, y, ...)}
@@ -79,6 +84,12 @@
   Note that if \code{dimyx} is given, this will override
   the pixel dimensions of \code{X} if it has them.
   Thus, \code{as.im} can be used to change an image's pixel dimensions.
+
+  If the argument \code{na.replace} is given, then all \code{NA} entries
+  in the image will be replaced by this value.  The resulting image is
+  then defined everwhere on the full rectangular domain, instead of a
+  smaller window. Here \code{na.replace} should be a single value,
+  of the same type as the other entries in the image. 
 }
 \value{
   An image object of class \code{"im"}.

@@ -18,7 +18,7 @@ clarkevans(X, correction=c("none", "Donnelly", "guard"),
     The type of edge correction(s) to be applied.
   }
   \item{clipregion}{
-    Optional. Clipping region for the guard area correction.
+    Clipping region for the guard area correction.
     A window (object of class \code{"owin"}).
     See Details.
   }
@@ -58,19 +58,10 @@ clarkevans(X, correction=c("none", "Donnelly", "guard"),
     }
     \item{"guard":}{
       Guard region or buffer area method.
-      The observd mean nearest neighbour distance
+      The observed mean nearest neighbour distance
       for the point pattern \code{X}
       is re-defined by averaging only over those points of \code{X}
-      that lie sufficiently far away from the edge of the window.
-      \itemize{
-	\item If the argument \code{clipregion} is supplied, then
-	the averaging will be confined to points of \code{X} that fall
-	inside this clipping region.
-	\item If \code{clipregion} is absent, then the
-	averaging will be confined to points of \code{X} whose nearest
-	neighbour distance is less than their distance to the edge of the
-	window.
-      }
+      that fall inside the sub-window \code{clipregion}.
     }
   }
 }

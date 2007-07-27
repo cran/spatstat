@@ -99,6 +99,10 @@ plot(swedishpines$window, main="Distance map")
 plot(Z, add=TRUE)
 points(swedishpines)
 
+W <- rebound.owin(letterR, square(5))
+plot(distmap(W), main="Distance map")
+plot(W, add=TRUE)
+
 persp(Z, colmap=terrain.colors(128), shade=0.3, phi=30,theta=100,
       main="perspective plot of pixel image")
 

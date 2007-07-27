@@ -16,6 +16,7 @@ append.psp              Combine Two Line Segment Patterns
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
+as.data.frame.ppp       Coerce Point Pattern to a Data Frame
 as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.matrix.im            Convert Pixel Image to Matrix

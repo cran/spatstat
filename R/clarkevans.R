@@ -47,17 +47,10 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
     answer <- c(answer, edge=Redge)
   }
   # guard area method
-  if("guard" %in% correction) {
-    if(!is.null(clipregion)) {
-      # use nn distances from points inside `clipregion'
-      clip <- as.owin(clipregion)
-      ok <- inside.owin(X$x, X$y, clip)
-    } else {
-      # use uncensored nn distances
-      bdistX <- bdist.points(X)
-      ok <- (nndistX < bdistX)
-    }
-    Dguard <- mean(nndistX[ok])
+  if("guard" %in% correction && !is.null(clipregion)) {
+    # use nn distances from points inside `clipregion'
+    clip <- as.owin(clipregion)
+    Dguard <- mean(nndistX[clip])
     Rguard <- Dguard/Dpois
     answer <- c(answer, guard=Rguard)
   }
