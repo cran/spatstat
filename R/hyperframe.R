@@ -1,0 +1,373 @@
+#
+#  hyperframe.R
+#
+# $Revision: 1.24 $  $Date: 2007/05/09 12:56:12 $
+#
+
+hyperframe <- function(...,
+                       row.names=NULL, check.rows=FALSE, check.names=TRUE,
+                       stringsAsFactors=default.stringsAsFactors()) {
+  aarg <- list(...)
+  nama <- names(aarg)
+
+  # number of columns (= variables)
+  nvars <- length(aarg)
+  
+  if(nvars == 0) {
+    # zero columns - return
+    result <- list(nvars=0,
+                   ncases=0,
+                   vname=character(0),
+                   vtype=factor(,
+                     levels=c("dfcolumn","hypercolumn","hyperatom")),
+                   vclass=character(0),
+                   df=data.frame(),
+                   hyperatoms=list(),
+                   hypercolumns=list())
+    class(result) <- c("hyperframe", class(result))
+    return(result)
+  }
+
+  # check column names
+  if(is.null(nama))
+    nama <- paste("V", 1:nvars, sep="")
+  else if(any(unnamed <- (nama == ""))) 
+    nama[unnamed] <- paste("V", seq(sum(unnamed)), sep="")
+  nama <- make.names(nama, unique=TRUE)
+  
+  # Each argument must be either
+  #    - a vector suitable as a column in a data frame
+  #    - a list of objects of the same class
+  #    - a single object of some class
+  
+  is.dfcolumn <- function(x) {
+    is.atomic(x) && (is.vector(x) || is.factor(x))
+  }
+  is.hypercolumn <- function(x) {
+    if(!is.list(x))
+      return(FALSE)
+    if(length(x) <= 1)
+      return(TRUE)
+    cla <- class(x[[1]])
+    all(sapply(x, function(xi,cla) { identical(class(xi), cla) }, cla=cla))
+  }
+  dfcolumns    <- sapply(aarg, is.dfcolumn)
+  hypercolumns <- sapply(aarg, is.hypercolumn)
+  hyperatoms   <- !(dfcolumns | hypercolumns)
+
+  # Determine number of rows (= cases) 
+  columns <- dfcolumns | hypercolumns
+  if(!any(columns)) 
+    ncases <- 1
+  else {
+    heights <- rep(1, nvars)
+    heights[columns] <-  unlist(lapply(aarg[columns], length))
+    u <- unique(heights)
+    if(length(u) > 1) {
+      u <- u[u != 1]
+      if(length(u) > 1)
+        stop(paste("Column lengths are inconsistent:",
+                   paste(u, collapse=",")))
+    }
+    ncases <- u
+    if(ncases > 1 && all(heights[dfcolumns] == 1)) 
+      # force the data frame to have 'ncases' rows
+      aarg[dfcolumns] <- lapply(aarg[dfcolumns], rep, ncases)
+  }
+
+  # Collect the data frame columns into a data frame
+  if(!any(dfcolumns))
+    df <- as.data.frame(matrix(, ncases, 0), row.names=row.names)
+  else {
+    df <- do.call("data.frame", append(aarg[dfcolumns],
+                                     list(row.names=row.names,
+                                          check.rows=check.rows,
+                                          check.names=check.names,
+                                          stringsAsFactors=stringsAsFactors)))
+    names(df) <- nama[dfcolumns]
+  }
+
+  # Storage type of each variable
+  vtype <- character(nvars)
+  vtype[dfcolumns] <- "dfcolumn"
+  vtype[hypercolumns] <- "hypercolumn"
+  vtype[hyperatoms] <- "hyperatom"
+  vtype=factor(vtype, levels=c("dfcolumn","hypercolumn","hyperatom"))
+
+  # Class of each variable
+  class1 <- function(x) { class(x)[1] }
+  vclass <- character(nvars)
+  if(any(dfcolumns))
+    vclass[dfcolumns] <- unlist(lapply(as.list(df), class1))
+  if(any(hyperatoms))
+    vclass[hyperatoms] <- unlist(lapply(aarg[hyperatoms], class1))
+  if(any(hypercolumns))
+    vclass[hypercolumns] <- unlist(lapply(aarg[hypercolumns],
+                                          function(x) { class1(x[[1]]) }))
+  
+  # Put the result together
+  result <- list(nvars=nvars,
+                 ncases=ncases,
+                 vname=nama,
+                 vtype=vtype,
+                 vclass=vclass,
+                 df=df,
+                 hyperatoms=aarg[hyperatoms],
+                 hypercolumns=aarg[hypercolumns])
+  
+    class(result) <- c("hyperframe", class(result))
+    return(result)
+}
+
+is.hyperframe <- function(x) inherits(x, "hyperframe")
+
+print.hyperframe <- function(x, ...) {
+  ux <- unclass(x)
+  nvars <- ux$nvars
+  ncases <- ux$ncases
+  if(nvars * ncases == 0) {
+    cat(paste("NULL hyperframe with", ncases,
+              ngettext(ncases, "row (=case)", "rows (=cases)"),
+              "and", nvars,
+              ngettext(nvars, "column (=variable)", "columns (=variables)"),
+              "\n"))
+  } else {
+    cat("Hyperframe:\n")
+    print(as.data.frame(x, discard=FALSE), ...)
+  }
+  return(invisible(NULL))
+}
+
+summary.hyperframe <- function(object, ..., brief=FALSE) {
+  x <- unclass(object)
+  y <- list(
+            nvars = x$nvars,
+            ncases = x$ncases,
+            dim = c(x$ncases, x$nvars),
+            typeframe = data.frame(VariableName=x$vname, Class=x$vclass),
+            storage = x$vtype,
+            col.names = x$vname)
+  classes <- x$vclass
+  names(classes) <- x$vname
+  y$classes <- classes
+  # Ordinary data frame columns
+  df <- x$df
+  y$dfnames <- names(df)
+  y$df <- if(length(df) > 0 && !brief) summary(df) else NULL
+  y$row.names <- row.names(df)
+  class(y) <- c("summary.hyperframe", class(y))
+  return(y)
+}
+
+print.summary.hyperframe <- function(x, ...) {
+  nvars <- x$nvars
+  ncases <- x$ncases
+  cat(paste(if(nvars * ncases == 0) "NULL" else NULL,
+            "hyperframe with", ncases,
+            ngettext(ncases, "row (=case)", "rows (=cases)"),
+            "and", nvars,
+            ngettext(nvars, "column (=variable)", "columns (=variables)"),
+            "\n"))
+  if(nvars == 0)
+    return(invisible(NULL))
+  # Variable names and types
+  print(x$typeframe)
+  # Ordinary data frame columns
+  if(!is.null(x$df)) {
+    cat("Summary of data frame columns:\n")
+    print(x$df, ...)
+  }
+  return(invisible(NULL))
+}
+
+names.hyperframe <- function(x) { unclass(x)$vname }
+
+"names<-.hyperframe" <- function(x, value) {
+  x <- unclass(x)
+  stopifnot(is.character(value))
+  value <- make.names(value)
+  if(length(value) != x$nvars)
+    stop("Incorrect length for vector of names")
+  x$vname <- value
+  names(x$df) <- value[x$vtype == "dfcolumn"]
+  class(x) <- c("hyperframe", class(x))
+  return(x)
+}
+
+row.names.hyperframe <- function(x) {
+  return(row.names(unclass(x)$df))
+}
+
+"row.names<-.hyperframe" <- function(x, value) {
+  y <- unclass(x)
+  df <- y$df
+  row.names(df) <- value
+  y$df <- df
+  class(y) <- c("hyperframe", class(y))
+  return(y)
+}
+
+
+as.data.frame.hyperframe <- function(x, row.names = NULL,
+                                     optional = FALSE, ...,
+                                     discard=TRUE, warn=TRUE) {
+  ux <- unclass(x)
+  if(is.null(row.names))
+    row.names <- row.names(ux$df)
+  vtype <- ux$vtype
+  vclass <- ux$vclass
+  dfcol <- (vtype == "dfcolumn")
+  if(discard) { 
+    nhyper <- sum(!dfcol)
+    if(nhyper > 0 && warn)
+      warning(paste(nhyper, 
+                    ngettext(nhyper, "variable", "variables"),
+                    "discarded in conversion to data frame"))
+    df <- as.data.frame(ux$df, row.names=row.names, optional=optional, ...)
+  } else {
+    lx <- as.list(x)
+    nrows <- ux$ncases
+    vclassstring <- paste("(", vclass, ")", sep="")
+    if(any(!dfcol)) 
+      lx[!dfcol] <- lapply(as.list(vclassstring[!dfcol]),
+                           function(x,n) { rep(x,n)}, n=nrows)
+    df <- do.call("data.frame", append(lx, list(row.names=row.names)))
+  }
+  return(df)
+}
+
+as.list.hyperframe <- function(x, ...) {
+  ux <- unclass(x)
+  nama <- ux$vname
+  names(nama) <- nama
+  out <- lapply(nama, function(nam, x) { x[, nam, drop=TRUE] }, x=x)
+  return(out)
+}
+  
+eval.hyper <- function(e, h, simplify=TRUE, ee=NULL) {
+  if(!inherits(h, "hyperframe"))
+    stop("h must be a hyperframe")
+  if(is.null(ee))
+    ee <- as.expression(substitute(e))
+  out <- list()
+  n <- unclass(h)$ncases
+  for(i in 1:n) {
+    hi <- h[i,, drop=FALSE]
+    out[[i]] <- eval(ee, as.list(hi))
+  }
+  if(simplify &&
+     all(unlist(lapply(out, is.vector))) &&
+     all(unlist(lapply(out, length)) == 1)) 
+    out <- unlist(out)
+  out <- hyperframe(out)[drop=TRUE]
+  return(out)
+}
+
+cbind.hyperframe <- function(...) {
+  aarg <- list(...)
+  narg <- length(aarg)
+  if(narg == 0)
+    return(hyperframe())
+  namarg <- names(aarg)
+  if(is.null(namarg))
+    namarg <- rep("", narg)
+  ishyper <- unlist(lapply(aarg, inherits, what="hyperframe"))
+  columns <- list()
+  for(i in 1:narg) {
+    if(ishyper[i]){
+      newcolumns <- as.list(aarg[[i]])
+      if(namarg[i] != "")
+        names(newcolumns) <- paste(namarg[i], ".", names(newcolumns), sep="")
+      columns <- append(columns, newcolumns)
+    } else {
+      nextcolumn <- list(aarg[[i]])
+      names(nextcolumn) <- namarg[i]
+      columns <- append(columns, nextcolumn)
+    }
+  }
+  result <- do.call("hyperframe", columns)
+  return(result)
+}
+
+plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
+                            nrows=NULL, ncols=NULL,
+                            parargs=list(mar=c(1,1,3,1) * marsize),
+                            marsize=0.1) {
+  xname <- deparse(substitute(x))
+  main <- if(!missing(main)) main else xname
+  ee <- as.expression(substitute(e))
+  
+  if(missing(e)) {
+    # default: plot first column that contains objects
+    ok <- (summary(x)$storage %in% c("hypercolumn", "hyperatom"))
+    if(any(ok)) {
+      j <- min(which(ok))
+      x <- x[,j, drop=TRUE]
+      class(x) <- c("listof", class(x))
+      plot(x, ..., main=main, arrange=arrange, nrows=nrows, ncols=ncols)
+      return(invisible(NULL))
+    } else {
+      # hyperframe does not contain any objects
+      # invoke plot.data.frame
+      x <- as.data.frame(x)
+      plot(x, ..., main=main)
+      return(invisible(NULL))
+    }
+  }
+
+  # No arrangement: just evaluate the plot expression 'nr' times
+  if(!arrange) {
+    eval.hyper(ee=ee, h=x)
+    return(invisible(NULL))
+  }
+
+  # Arrangement
+  # Decide whether to plot a main header
+  banner <- (sum(nchar(as.character(main))) > 0)
+  if(length(main) > 1)
+    main <- paste(main, collapse="\n")
+  nlines <- if(!is.character(main)) 1 else length(unlist(strsplit(main, "\n")))
+  # determine arrangement of plots
+  # arrange like mfrow(nrows, ncols) plus a banner at the top
+  n <- summary(x)$ncases
+  if(is.null(nrows) && is.null(ncols)) {
+    nrows <- as.integer(floor(sqrt(n)))
+    ncols <- as.integer(ceiling(n/nrows))
+  } else if(!is.null(nrows) && is.null(ncols))
+    ncols <- as.integer(ceiling(n/nrows))
+  else if(is.null(nrows) && !is.null(ncols))
+    nrows <- as.integer(ceiling(n/ncols))
+  else stopifnot(nrows * ncols >= length(x))
+  nblank <- ncols * nrows - n
+  # declare layout
+  mat <- matrix(c(seq(n), rep(0, nblank)),
+                byrow=TRUE, ncol=ncols, nrow=nrows)
+  heights <- rep(1, nrows)
+  if(banner) {
+    # Increment existing panel numbers
+    # New panel 1 is the banner
+    panels <- (mat > 0)
+    mat[panels] <- mat[panels] + 1
+    mat <- rbind(rep(1,ncols), mat)
+    heights <- c(0.1 * (1 + nlines), heights)
+  }
+  # initialise plot
+  layout(mat, heights=heights)
+  # plot banner
+  if(banner) {
+    opa <- par(mar=rep(0,4), xpd=TRUE)
+    plot(numeric(0),numeric(0),type="n",ann=FALSE,axes=FALSE,
+         xlim=c(-1,1),ylim=c(-1,1))
+    cex <- resolve.defaults(list(...), list(cex.title=2))$cex.title
+    text(0,0,main, cex=cex)
+  }
+  # plot panels
+  npa <- do.call("par", parargs)
+  if(!banner) opa <- npa
+  eval.hyper(ee=ee, h=x)
+  # revert
+  layout(1)
+  par(opa)
+  return(invisible(NULL))
+}
+  

@@ -309,6 +309,7 @@
  }
 
  # Simultaneous critical envelope for L function
+ # (alternatively, use Lest)
  \dontrun{
   plot(envelope(X, Kest, transform=expression(sqrt(./pi)), global=TRUE))
  }

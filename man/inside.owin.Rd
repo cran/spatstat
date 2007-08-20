@@ -44,6 +44,12 @@
   pixel closest to \code{(x[i],y[i])} is tested. The
   results may be incorrect for points lying within 
   one pixel diameter of the window boundary.
+
+  Normally \code{x} and \code{y} must be numeric vectors of
+  equal length (length zero is allowed) containing the coordinates
+  of points. Alternatively \code{x}
+  can be a point pattern (object of class \code{"ppp"}) while \code{y}
+  is missing; then the coordinates of the point pattern are extracted.
 }
 \seealso{
   \code{\link{owin.object}},

@@ -1,10 +1,16 @@
 \name{spatstat-internal}
+\alias{[.hyperframe}
+\alias{[<-.hyperframe}
+\alias{$.hyperframe}
+\alias{$<-.hyperframe}
 \alias{affinexy}
 \alias{apply23sum}
 \alias{area.xypolygon}       
 \alias{AsymmHausdorff.psp}
 \alias{as.breakpts}
+\alias{as.data.frame.hyperframe}
 \alias{as.fv}
+\alias{as.list.hyperframe}
 \alias{as.polygonal}
 \alias{as.units}
 \alias{beachcolours}
@@ -15,6 +21,7 @@
 \alias{breakpts.from.r}
 \alias{bt.frame}
 \alias{cartesian}
+\alias{cbind.hyperframe}
 \alias{cellmiddles}
 \alias{checkfields}          
 \alias{check.hist.lengths}
@@ -70,6 +77,7 @@
 \alias{is.cadlag}
 \alias{is.data}
 \alias{is.fv}
+\alias{is.hyperframe}
 \alias{is.interact}
 \alias{is.marked.default}    
 \alias{is.marked.quad}    
@@ -122,10 +130,13 @@
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
+\alias{names.hyperframe}
+\alias{names<-.hyperframe}
 \alias{nearest.pixel}
 \alias{newstyle.coeff.handling}
 \alias{no.trend.ppm}
-\alias{n.quad}               
+\alias{n.quad}
+\alias{numalign}
 \alias{outdated.interact}
 \alias{overlap.owin}
 \alias{overlap.trapezium}
@@ -155,6 +166,7 @@
 \alias{print.fasp}       
 \alias{print.fii}       
 \alias{print.fv}       
+\alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
 \alias{print.minconfit}
@@ -167,6 +179,7 @@
 \alias{print.rmhstart}
 \alias{print.rmhseed}
 \alias{print.summary.fii}
+\alias{print.summary.hyperframe}
 \alias{print.summary.listof}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
@@ -199,6 +212,8 @@
 \alias{revcumsum}    
 \alias{rmax.rule}
 \alias{rotxy}
+\alias{row.names.hyperframe}
+\alias{row.names<-.hyperframe}
 \alias{runifpoispp}          
 \alias{runifrect}
 \alias{rmhResolveTypes}
@@ -222,6 +237,7 @@
 \alias{suffstat.poisson}
 \alias{summary.envelope}
 \alias{summary.fii}
+\alias{summary.hyperframe}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.units}
@@ -253,12 +269,20 @@
   Internal spatstat functions.
 }
 \usage{
+\method{[}{hyperframe}(x, i, j, drop=FALSE, ...)
+\method{[}{hyperframe}(x, i, j) <- value
+\method{$}{hyperframe}(x, name)
+\method{$}{hyperframe}(x, i) <- value
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
 apply23sum(x)
 area.xypolygon(polly)
 AsymmHausdorff.psp(X, Y, method="Fortran")
 as.breakpts(\dots)
+\method{as.data.frame}{hyperframe}(x, row.names = NULL,
+                                  optional = FALSE, ..., 
+                                  discard=TRUE, warn=TRUE)
 as.fv(x)
+\method{as.list}{hyperframe}(x, ...)
 as.polygonal(W)
 as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
@@ -270,6 +294,7 @@ breakpts.from.r(r)
 bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
          correction="border", rbord=0, use.gam=FALSE, allcovar=FALSE)
 cartesian(pp, markset, fac = TRUE)
+cbind.hyperframe(...)
 cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
@@ -327,6 +352,7 @@ intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
 is.fv(x)
+is.hyperframe(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
 \method{is.marked}{quad}(X, na.action="warn", \dots)
@@ -387,10 +413,13 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             callstring, \dots, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix)
 MultiPair.checkmatrix(mat, n, name)
+\method{names}{hyperframe}(x)
+\method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, im)
 newstyle.coeff.handling(object)
 no.trend.ppm(x)
-n.quad(Q)               
+n.quad(Q)
+numalign(i, nmax, zero)
 outdated.interact(object)
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
@@ -422,6 +451,7 @@ primefactors(n, prmax)
 \method{print}{fasp}(x, \dots)
 \method{print}{fii}(x, \dots)
 \method{print}{fv}(x, \dots)
+\method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
 \method{print}{minconfit}(x, \dots)
@@ -434,6 +464,7 @@ primefactors(n, prmax)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhseed}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
+\method{print}{summary.hyperframe}(x, ...)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp=3)
@@ -478,6 +509,8 @@ rmhseed(iseed)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
 rmpoint.I.allim(n, f, types)
+\method{row.names}{hyperframe}(x)
+\method{row.names}{hyperframe}(x) <- value
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
@@ -493,6 +526,7 @@ suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 \method{summary}{envelope}(object,\dots)
 \method{summary}{fii}(object,\dots)
+\method{summary}{hyperframe}(object, ..., brief=FALSE)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{units}(object, \dots)

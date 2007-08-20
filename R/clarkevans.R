@@ -21,7 +21,9 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
 
   if(("Donnelly" %in% correction) && (W$type != "rectangle"))
     warning("Donnelly correction only available for rectangular windows")
-    
+  if(("guard" %in% correction) && is.null(clipregion))
+    warning("guard correction requires clipregion")
+  
   # Dobs = observed mean nearest neighbour distance
   nndistX <- nndist(X)
   Dobs <- mean(nndistX)
@@ -50,7 +52,8 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
   if("guard" %in% correction && !is.null(clipregion)) {
     # use nn distances from points inside `clipregion'
     clip <- as.owin(clipregion)
-    Dguard <- mean(nndistX[clip])
+    ok <- inside.owin(X, , clip)
+    Dguard <- mean(nndistX[ok])
     Rguard <- Dguard/Dpois
     answer <- c(answer, guard=Rguard)
   }

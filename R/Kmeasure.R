@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.24 $    $Date: 2007/02/08 07:32:06 $
+#           $Revision: 1.25 $    $Date: 2007/08/17 14:28:59 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -234,58 +234,3 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
   return(out)
 }
 
-ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
-  .Deprecated("density.ppp", package="spatstat")
-  density.ppp(x, sigma, ..., edge=edge)
-}
-
-density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
-  verifyclass(x, "ppp")
-  sigma.given <- !missing(sigma) && !is.null(sigma)
-  varcov.given <- !is.null(varcov)
-  if(sigma.given) {
-    stopifnot(is.numeric(sigma))
-    stopifnot(length(sigma) %in% c(1,2))
-    stopifnot(all(sigma > 0))
-  }
-  if(varcov.given)
-    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )    
-  ngiven <- varcov.given + sigma.given
-  switch(ngiven+1,
-         {
-           # default
-           w <- x$window
-           sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
-         },
-         {
-           if(sigma.given && length(sigma) == 2) 
-             varcov <- diag(sigma^2)
-           if(!is.null(varcov))
-             sigma <- NULL
-         },
-         {
-           stop(paste("Give only one of the arguments",
-                      sQuote("sigma"), "and", sQuote("varcov")))
-         })
-      
-  smo <- second.moment.calc(x, sigma, what="smooth", ..., weights=weights, varcov=varcov)
-  smo$v <- smo$v/(smo$xstep * smo$ystep)
-  raw <- smo
-  if(edge) {
-    edg <- second.moment.calc(x, sigma, what="edge", ..., weights=weights, varcov=varcov)
-    smo <- eval.im(smo/edg)
-  }
-  result <- smo[x$window, drop=FALSE]
-
-  # internal use only
-  spill <- list(...)$spill
-  if(!is.null(spill)) {
-    edg <- if(edge) im(edg, xcol=raw$xcol, yrow=raw$yrow) else NULL
-    return(list(sigma=sigma, varcov=varcov, raw = raw, edg=edg))
-  }
-
-  # normal return
-  return(result)
-}
-  
-  
