@@ -2,7 +2,7 @@
 \alias{Kest}
 \title{K-function}
 \description{
-Estimates the reduced second moment function \eqn{K(r)} 
+Estimates Ripley's reduced second moment function \eqn{K(r)} 
 from a point pattern in a window of arbitrary shape.
 }
 \usage{

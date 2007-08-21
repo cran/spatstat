@@ -76,6 +76,12 @@ D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
 plot(a, add=TRUE)
 
+data(longleaf)
+parsave <- par(mfrow=c(1,2))
+plot(longleaf, main="Longleaf Pines data")
+plot(smooth.ppp(longleaf, 10), main="Spatial smoothing of marks")
+par(parsave)
+
 plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)
 plot(K, main="K function for Swedish Pines")
@@ -85,6 +91,7 @@ plot(en, main="Envelopes of K function based on CSR")
 
 pc <- pcf(swedishpines)
 plot(pc, main="Pair correlation function")
+
 
 plot(swedishpines, main="nearest neighbours")
 m <- nnwhich(swedishpines)
@@ -112,7 +119,26 @@ plot(a, add=TRUE,col="red")
 
 plot(allstats(swedishpines))
 
+data(ponderosa)
+ponderosa.extra$plotit(main="Ponderosa Pines")
+
+L <- localL(ponderosa)
+plot(L, lty=1, col=1,
+     main="neighbourhood density functions for Ponderosa Pines")
+
 parsave <- par(mfrow=c(1,2))
+ponderosa.extra$plotit()
+par(pty="s")
+plot(L, iso007 ~ r, main="point B")
+
+ponderosa.extra$plotit()
+L12 <- localL(ponderosa, rvalue=12)
+P12 <- ponderosa %mark% L12
+Z12 <- smooth.ppp(P12, sigma=5, dimyx=128)
+plot(Z12, col=topo.colors(128), main="smoothed neighbourhood density")
+contour(Z12, add=TRUE)
+points(ponderosa, pch=16, cex=0.5)
+
 data(amacrine)
 plot(amacrine, main="Amacrine cells data")
 par(pty="s")
@@ -120,7 +146,9 @@ mkc <- markcorr(amacrine, function(m1,m2) {m1==m2},
                 correction="translate", method="density",
                 kernel="epanechnikov")
 plot(mkc, main="Mark correlation function")
+
 par(parsave)
+
 
 fanfare("IV. Model-fitting")
 

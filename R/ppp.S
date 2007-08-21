@@ -488,3 +488,4 @@ as.data.frame.ppp <- function(x, row.names=NULL, ...) {
   else
     data.frame(x=x$x, y=x$y, marks=x$marks, row.names=row.names)
 }
+

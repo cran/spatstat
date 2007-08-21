@@ -89,6 +89,8 @@ envelope                Simulation envelopes of summary function
 eroded.areas            Areas of Morphological Erosions
 erode.owin              Erode a Window
 eval.fv                 Evaluate Expression Involving Functions
+eval.hyper              Evaluate an Expression in Each Row of a
+                        Hyperframe
 eval.im                 Evaluate Expression Involving Pixel Images
 ewcdf                   Weighted Empirical Cumulative Distribution
                         Function
@@ -116,6 +118,7 @@ harmonic                Basis for Harmonic Functions
 hist.im                 Histogram of Pixel Values in an Image
 humberside              Humberside Data on Childhood Leukaemia and
                         Lymphoma
+hyperframe              Hyper Data Frame
 identify.ppp            Identify Points in a Point Pattern
 Iest                    Estimate the I-function
 im                      Create a Pixel Image Object
@@ -158,11 +161,13 @@ ks.test.ppm             Kolmogorov-Smirnov Test for Point Process Model
 lansing                 Lansing Woods Point Pattern
 lengths.psp             Lengths of Line Segments
 LennardJones            The Lennard-Jones Potential
+Lest                    L-function
 letterR                 Window in Shape of Letter R
 levelset                Level Set of a Pixel Image
 lgcp.estK               Fit a Log-Gaussian Cox Point Process by Minimum
                         Contrast
 [.listof                Extract or Replace Subset of a List of Things
+localK                  Neighbourhood density function
 logLik.ppm              Log Likelihood for Poisson Point Process Model
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
@@ -212,6 +217,7 @@ pcf.ppp                 Pair Correlation Function of Point Pattern
 persp.im                Perspective Plot of Pixel Image
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
+plot.hyperframe         Plot Entries in a Hyperframe
 plot.im                 Plot a Pixel Image
 plot.listof             Plot a List of Things
 plot.owin               Plot a Spatial Window
@@ -222,6 +228,7 @@ plot.psp                plot a Spatial Line Segment Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 plot.splitppp           Plot a List of Point Patterns
 Poisson                 Poisson Point Process Model
+ponderosa               Ponderosa Pine Tree Point Pattern
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
@@ -325,6 +332,8 @@ shift.ppp               Apply Vector Translation To Point Pattern
 shift.psp               Apply Vector Translation To Line Segment
                         Pattern
 simdat                  Simulated Point Pattern
+smooth.ppp              Spatial smoothing of observations at irregular
+                        points
 Softcore                The Soft Core Point Process Model
 solutionset             Evaluate Logical Expression Involving Pixel
                         Images and Return Region Where Expression is

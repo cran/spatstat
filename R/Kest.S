@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.36 $	$Date: 2007/01/08 07:07:08 $
+#	$Revision: 5.38 $	$Date: 2007/08/19 17:55:27 $
 #
 #
 # -------- functions ----------------------------------------
@@ -34,6 +34,38 @@
 #
 # ------------------------------------------------------------------------
 
+"Lest" <- function(...) {
+  K <- Kest(...)
+  L <- eval.fv(sqrt(K/pi))
+  # relabel the fv object
+  attr(L, "ylab") <- substitute(L(r), NULL)
+  nama <- names(L)
+  desc <- attr(L, "desc")
+  labl <- attr(L, "labl")
+  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
+  DESC <- c("theoretical Poisson L(r)",
+             "uncorrected estimate of L(r)",
+             "modified border-corrected estimate of L(r)",
+             "border-corrected estimate of L(r)",
+             "translation-corrected estimate of L(r)",
+             "Ripley isotropic correction estimate of L(r)")
+  LABL <- c("Lpois(r)",
+             "Lun(r)",
+             "Lbord*(r)",
+             "Lbord(r)",
+             "Ltrans(r)",
+             "Liso(r)")
+
+  for(i in seq(length(TAGS)))
+    if(!is.na(m <- match(TAGS[i], nama))) {
+      desc[m] <- DESC[i]
+      labl[m] <- LABL[i]
+    }
+  attr(L, "desc") <- desc
+  attr(L, "labl") <- labl
+  return(L)  
+}
+
 "Kest"<-
 function(X, ..., r=NULL, breaks=NULL, 
          correction=c("border", "isotropic", "Ripley", "translate"),
@@ -55,16 +87,14 @@ function(X, ..., r=NULL, breaks=NULL,
   rmax <- breaks$max
   
   correction.given <- !missing(correction)
-  correction.name <- c("none", "border", "bord.modif", "isotropic", "Ripley", "translate")
-  correction.list <- c("none", "border", "bord.modif", "isotropic", "isotropic", "translate")
-  correction.id <- pmatch(correction, correction.name)
-  if(any(nbg <- is.na(correction.id)))
-    stop(paste("unrecognised correction",
-               if(sum(nbg) > 1) "s",
-               ": ",
-               paste(correction[nbg], collapse=", "),
-               sep=""))
-  correction <- correction.list[correction.id]
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             "bord.modif"="bord.modif",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate"),
+                           multi=TRUE)
 
   # available selection of edge corrections depends on window
   if(W$type == "mask") {

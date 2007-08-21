@@ -163,6 +163,7 @@ The Spatstat Package
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
+	\code{\link{ponderosa}} \tab Getis-Franklin ponderosa pine trees data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
@@ -355,7 +356,10 @@ The Spatstat Package
     \code{\link{Fest}} \tab empty space function \eqn{F} \cr
     \code{\link{Gest}} \tab nearest neighbour distribution function \eqn{G} \cr
     \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
+    \code{\link{Lest}} \tab Ripley's \eqn{L}-function\cr
     \code{\link{Jest}} \tab \eqn{J}-function \eqn{J = (1-G)/(1-F)} \cr
+    \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr
+    \code{\link{localK}} \tab neighbourhood K-function\cr
     \code{\link{pcf}} \tab 	pair correlation function \cr
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
     \code{\link{Kest.fft}} \tab fast \eqn{K}-function using FFT for large datasets \cr
@@ -377,7 +381,8 @@ The Spatstat Package
     \code{\link{nncross}} \tab nearest neighbours between two point patterns \cr
     \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
     \code{\link{distmap}} \tab distance map image\cr
-    \code{\link{density.ppp}} \tab kernel smoothed density
+    \code{\link{density.ppp}} \tab kernel smoothed density\cr
+    \code{\link{smooth.ppp}} \tab spatial interpolation of marks  
  }
 
   \bold{Summary statistics for a multitype point pattern:}

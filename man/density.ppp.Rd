@@ -37,7 +37,7 @@
   This is a method for the generic function \code{density}.
   
   A kernel estimate of the intensity function of the point pattern
-  is computed. The result is 
+  is computed (Diggle, 1985). The result is 
   the convolution of the isotropic Gaussian kernel of
   standard deviation \code{sigma} with point masses at each of the data
   points. The default is to assign
@@ -60,16 +60,38 @@
   Computation is performed using the Fast Fourier Transform.
   Accuracy depends on the pixel resolution, controlled by the arguments
   \code{\dots} passed to \code{\link{as.mask}}.
+
+  To perform spatial interpolation of values that were observed
+  at the points of a point pattern, use \code{\link{smooth.ppp}}.
 }
 \seealso{
+  \code{\link{smooth.ppp}},
   \code{\link{ppp.object}},
   \code{\link{im.object}}
+}
+\section{Warning}{
+  The result of \code{density.ppp} is not a probability density!
+  It is an estimate of the \emph{intensity function} of the
+  underlying point process. The integral of this function over the
+  window is not equal to 1; it equals the expected number of points
+  falling in the window.
 }
 \examples{
   data(cells)
   Z <- density.ppp(cells, 0.05)
   plot(Z)
 }
+\references{
+  Diggle, P.J. (1985)
+  A kernel method for smoothing point process data.
+  \emph{Applied Statistics} (Journal of the Royal Statistical Society,
+  Series C) \bold{34} (1985) 138--147.
+
+  Diggle, P.J. (2003)
+  \emph{Statistical analysis of spatial point patterns},
+  Second edition. Arnold.
+}
+
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
