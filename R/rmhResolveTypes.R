@@ -2,7 +2,7 @@
 #
 #   rmhResolveTypes.R
 #
-#   $Revision: 1.3 $   $Date: 2007/05/17 16:47:53 $
+#   $Revision: 1.4 $   $Date: 2007/09/22 02:00:40 $
 #
 #
 rmhResolveTypes <- function(model, start, control) {
@@ -81,7 +81,7 @@ rmhResolveTypes <- function(model, start, control) {
   if(control$conditioning == "n.each.type") {
     if(start$given == "n" && ntypes.nstart != ntypes)
       stop("Length of control$n.start not equal to number of types.\n")
-    else if(start$given == "x" && ntypes.start != ntypes) 
+    else if(start$given == "x" && ntypes.nstart != ntypes) 
       stop("Marks of control$x.start do not match number of types.\n")
   }
   

@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.25 $   $Date: 2007/05/17 17:29:52 $
+#   $Revision: 1.26 $   $Date: 2007/09/22 02:03:03 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -287,11 +287,11 @@
     if(single.arg && is.function(f)) {
       # want to call f(x,y,m, ...)
       # create a counterpart of f that works when m is a single value
-      g <- function(xx, yy, ..., m, fun) {
+      gg <- function(xx, yy, ..., m, fun) {
         mm <- rep(m, length(xx))
         fun(xx, yy, mm, ...)
       }
-      Y <- rpoint(nn[i], g, fmax=maxes[i], win=win,
+      Y <- rpoint(nn[i], gg, fmax=maxes[i], win=win,
                   ..., m=factortype[i], fun=f, giveup=giveup, verbose=verbose)
     } else
       # call f(x,y, ...) or use other formats

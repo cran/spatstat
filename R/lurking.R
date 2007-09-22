@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.13 $ $Date: 2007/03/28 06:06:17 $
+# $Revision: 1.14 $ $Date: 2007/09/22 01:53:59 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -47,9 +47,9 @@ lurking <- function(object, covariate, type="eem",
     }
     # Evaluate expression
     evaluate <- function(a, b) {
-      if (exists("is.R") && is.R())
+#      if (exists("is.R") && is.R())
         eval(a, envir = b)
-      else eval(a, local = b)
+#      else eval(a, local = b)
     }
     covvalues <- evaluate(covariate, glmdata)
     if(!is.numeric(covvalues))

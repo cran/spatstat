@@ -3,7 +3,7 @@
 #
 # version numbers
 #
-# $Revision: 1.3 $  $Date: 2007/01/10 03:10:09 $
+# $Revision: 1.4 $  $Date: 2007/09/05 16:32:26 $
 #
 #####################
 
@@ -39,7 +39,5 @@ versionstring.spatstat <- function() {
 
 majorminorversion <- function(v) {
   vp <- package_version(v)
-  vmm <- list(major=vp$major,
-              minor=vp$minor)
-  return(package_version(vmm))
+  return(package_version(paste(vp$major, vp$minor, sep=".")))
 }

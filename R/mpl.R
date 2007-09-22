@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.62 $	$Date: 2007/03/28 04:14:04 $
+#	$Revision: 5.63 $	$Date: 2007/09/28 14:01:36 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -87,7 +87,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2007/03/28 04:14:04 $")
+                    date="$Date: 2007/09/28 14:01:36 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -150,10 +150,16 @@ fmla <- prep$fmla
 glmdata <- prep$glmdata
 problems <- prep$problems
 computed <- append(computed, prep$computed)
+
 ################# F i t    i t   ####################################
+
+# to avoid problem with package checker  
+.mpl.W <- glmdata$.mpl.W
+.mpl.SUBSET <- glmdata$.mpl.SUBSET
 
 # Fit the generalized linear/additive model.
 
+  
 if(is.null(famille)) {
   # the sanctioned technique, using `quasi' family
   if(want.trend && use.gam)

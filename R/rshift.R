@@ -3,7 +3,7 @@
 #
 #   random shift with optional toroidal boundary
 #
-#   $Revision: 1.11 $   $Date: 2006/10/17 09:09:01 $
+#   $Revision: 1.12 $   $Date: 2007/09/22 01:50:24 $
 #
 #
 rshift <- function(X, ...) {
@@ -161,7 +161,7 @@ handle.rshift.args <- function(W, ...,
                      else if(W$type == "rectangle")
                        trim.rectangle(W, width, height)
                      else
-                       erode.owin(X$window, max(width, height))
+                       erode.owin(W, max(width, height))
                    })
 
   return(list(radius=radius, width=width, height=height,

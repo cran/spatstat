@@ -5,7 +5,7 @@
   Extracts the log likelihood of a fitted Poisson point process model.
 }
 \usage{
-logLik.ppm(object, ...)
+\method{logLik}{ppm}(object, ...)
 }
 \arguments{
   \item{object}{Fitted point process model.

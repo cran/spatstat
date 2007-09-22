@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.51 $	$Date: 2007/07/24 16:12:12 $
+#	$Revision: 4.52 $	$Date: 2007/08/23 15:15:09 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -82,8 +82,8 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
     } else {
       pp$markformat <- "vector"
       if(nout > 0) {
-        marks <- marks[ok]
         marks(rejects) <- marks[!ok]
+        marks <- marks[ok]
       }
       if(length(marks) != n)
         stop("length of marks vector != length of x and y")

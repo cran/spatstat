@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.42 $	$Date: 2007/04/20 03:37:44 $
+#	$Revision: 1.43 $	$Date: 2007/09/22 01:56:43 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -205,10 +205,10 @@ function(object, window, ngrid=NULL, locations=NULL,
   if(!trivial) {
 	Vnames <- model$internal$Vnames
 
-        if(exists("is.R") && is.R())
+#        if(exists("is.R") && is.R())
 	    glmdata <- model$internal$glmdata
-        else        
-            assign("glmdata", model$internal$glmdata, f = 1)
+#        else        
+#            assign("glmdata", model$internal$glmdata, f = 1)
 
         glmfit <- getglmfit(model)
   }
