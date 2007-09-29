@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.26 $   $Date: 2007/03/16 08:31:44 $
+#    $Revision: 4.27 $   $Date: 2007/09/22 02:04:13 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -107,7 +107,7 @@
                # otherwise get bored eventually
                else if(ntries >= giveup)
                  stop(paste("Gave up after", giveup * n, "trials,",
-                            np, "points accepted"))
+                            X$n, "points accepted"))
              }
            })
     stop("Unrecognised window type")

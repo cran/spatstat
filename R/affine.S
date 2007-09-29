@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.13 $	$Date: 2007/03/06 09:43:38 $
+#	$Revision: 1.14 $	$Date: 2007/08/23 15:13:34 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -118,7 +118,7 @@ shiftxy <- function(X, vec=c(0,0)) {
   verifyclass(X, "ppp")
   r <- shiftxy(X, vec)
   w <- shift.owin(X$window, vec)
-  return(ppp(r$x, r$y, window=w, marks=marks(X), check=FALSE))
+  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 
 

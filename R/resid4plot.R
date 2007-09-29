@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.11 $    $Date: 2006/10/16 01:57:30 $
+#   $Revision: 1.12 $    $Date: 2007/09/22 01:58:45 $
 #
 #
 
@@ -246,10 +246,10 @@ resid1plot <- function(RES, opt,
            discrete={
              neg <- (Y$marks < 0)
              if(any(c("maxsize", "markscale") %in% names(list(...))))
-               plot(Ys[neg], add=TRUE, ...)
+               plot(Y[neg], add=TRUE, ...)
              else {
                hackmax <- 0.5 * sqrt(area.owin(Wclip)/Yclip$n)
-               plot(Ys[neg], add=TRUE, maxsize=hackmax, ...)
+               plot(Y[neg], add=TRUE, maxsize=hackmax, ...)
              }
              plot(Y[!neg], add=TRUE, ...)
            },

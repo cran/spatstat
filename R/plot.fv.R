@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.22 $    $Date: 2006/11/17 12:42:25 $
+#  $Revision: 1.23 $    $Date: 2007/09/22 01:55:55 $
 #
 #
 
@@ -43,10 +43,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   # evaluate expression a in data frame b
   evaluate <- function(a,b) {
-    if(exists("is.R") && is.R())
+#    if(exists("is.R") && is.R())
       eval(a, envir=b)
-    else
-      eval(a, local=b)
+#    else
+#      eval(a, local=b)
   }
   
   lhsdata <- evaluate(lhs, indata)

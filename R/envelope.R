@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.35 $  $Date: 2007/05/23 12:08:57 $
+#   $Revision: 1.37 $  $Date: 2007/09/22 01:48:22 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
@@ -28,8 +28,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
       X <- Y
     else if(inherits(Y, "ppm"))
       X <- data.ppm(Y)
-    else stop(sQuote("object",
-                     "should be a point process model or a point pattern"))
+    else stop(paste(sQuote("object"),
+                    "should be a point process model or a point pattern"))
   } else if(inherits(Y, "ppm")) {
     csr <- FALSE
     model <- Y

@@ -6,7 +6,7 @@
   and their marks if any, and returns them in a data frame.
 }
 \usage{
-as.data.frame.ppp(x, row.names = NULL, ...)
+\method{as.data.frame}{ppp}(x, row.names = NULL, ...)
 }
 \arguments{
   \item{x}{Point pattern (object of class \code{"ppp"}).}

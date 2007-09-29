@@ -36,7 +36,6 @@
 \examples{
   w <- owin(c(0,1),c(0,1))
   v <- dilate.owin(w, 0.1) 
-  # returns rectangle [-0.1, 1.1] x [-0.1, 1.1]
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
