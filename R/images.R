@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.32 $     $Date: 2007/03/14 03:03:18 $
+#         $Revision: 1.33 $     $Date: 2007/10/24 09:41:15 $
 #
 #      The class "im" of raster images
 #
@@ -23,7 +23,7 @@
 #   creator 
 
 im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
-               lev=levels(mat), units=NULL) {
+               lev=levels(mat), unitname=NULL) {
 
   typ <- typeof(mat)
   if(typ == "double")
@@ -59,7 +59,7 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   ystep <- diff(yrow)[1]
   xrange <- range(xcol) + c(-1,1) * xstep/2
   yrange <- range(yrow) + c(-1,1) * ystep/2
-  units <- as.units(units)
+  unitname <- as.units(unitname)
   
   out <- list(v   = mat,
               dim = c(nr, nc),
@@ -71,7 +71,7 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
               yrow    = yrow,
               lev     = lev,
               type    = typ,
-              units   = units)
+              units   = unitname)
   class(out) <- "im"
   attr(out, "levels") <- lev 
   return(out)
@@ -135,7 +135,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     if(!missing(raster)) {
       # resample image on new pixel raster
       values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
-      out <- im(values, out$yrow, out$xcol, units=units(out))
+      out <- im(values, out$yrow, out$xcol, unitname=unitname(out))
     }
     inside <- inside.owin(xy$x, xy$y, i)
     if(!drop) { 
@@ -158,7 +158,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       colsub <- inrange(out$xcol, xr)
       rowsub <- inrange(out$yrow, yr)
       return(im(out$v[rowsub,colsub], out$xcol[colsub], out$yrow[rowsub],
-                lev=lev, units=units(x)))
+                lev=lev, unitname=unitname(x)))
     } 
   }
   if(verifyclass(i, "im", fatal=FALSE)) {
@@ -356,7 +356,7 @@ cut.im <- function(x, ...) {
   verifyclass(x, "im")
   vcut <- cut(as.numeric(as.matrix(x)), ...)
   lev <- if(is.factor(vcut)) levels(vcut) else NULL
-  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev, units=units(x)))
+  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev, unitname=unitname(x)))
 }
 
 quantile.im <- function(x, ...) {

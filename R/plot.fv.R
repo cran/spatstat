@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.23 $    $Date: 2007/09/22 01:55:55 $
+#  $Revision: 1.24 $    $Date: 2007/10/24 09:41:15 $
 #
 #
 
@@ -103,7 +103,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # if it's the default argument,
     # add name of unit of length
     if(xlab == attr(x, "argu")) {
-      ax <- summary(units(x))$axis
+      ax <- summary(unitname(x))$axis
       xlab <- paste(xlab, ax)
     }
   }

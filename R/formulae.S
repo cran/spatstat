@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.11 $	$Date: 2006/05/22 03:30:39 $
+#	$Revision: 1.12 $	$Date: 2007/10/24 09:41:15 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical

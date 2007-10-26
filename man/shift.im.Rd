@@ -32,7 +32,6 @@
  Y <- shift(X, c(10,10))
  plot(Y)
  # no discernible difference except coordinates are different
-  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

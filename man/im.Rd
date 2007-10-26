@@ -7,7 +7,7 @@
 }
 \usage{
   im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), lev=levels(mat),
-   units=NULL)
+   unitname=NULL)
 }
 \arguments{
   \item{mat}{
@@ -23,7 +23,7 @@
     possible factor levels, if \code{mat} should be interpreted
     as a factor.
   }
-  \item{units}{
+  \item{unitname}{
     Optional. Name of unit of length. Either a single character string,
     or a vector of two character strings giving the
     singular and plural forms, respectively.

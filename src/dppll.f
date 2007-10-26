@@ -12,6 +12,9 @@ C Output from Public domain Ratfor, version 1.0
       if(alen .gt. eps)then
       co = dx/alen
       si = dy/alen
+      else
+      co = 0.5
+      si = 0.5
       endif
       do23004 i = 1, np 
       xpx1 = x(i) - l1(j)

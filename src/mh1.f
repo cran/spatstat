@@ -7,11 +7,19 @@ C Output from Public domain Ratfor, version 1.0
       dimension xprop(1), yprop(1), mprop(1)
       integer aux(1)
       logical verb, fixall
+      logical dummyl
+      integer dummyi
       one = 1.d0
       zero = 0.d0
       m1 = -1
       verb = .not.(nverb.eq.0)
       qnodds = (one - q)/q
+      dummyi = mprop(1) + ntypes + marks(1)
+      dummyl = fixall
+      dummyd = aux(1)
+      dummyi = dummyi + 1
+      dummyl = .not. dummyl
+      dummyd = dummyd * dummyd
       irep = mrep
 23000 if(irep .le. nrep)then
       if(verb .and. mod(irep,nverb).eq.0)then
@@ -82,6 +90,5 @@ C Output from Public domain Ratfor, version 1.0
       mrep = irep
       goto 23000
       endif
-23001 continue
       return
       end

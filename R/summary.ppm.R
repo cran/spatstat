@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.28 $   $Date: 2007/03/27 02:53:46 $
+#    $Revision: 1.29 $   $Date: 2007/10/23 08:57:25 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -143,7 +143,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       # stationary, marked
       mrk <- marks(DATA)
       y$trend$label <-
-        if(y$poisson) "Fitted intensities" else "Fitted first order terms"
+        if(y$poisson) "Intensities" else "First order terms"
       # Use predict.ppm to evaluate the fitted intensities
       lev <- factor(levels(mrk), levels=levels(mrk))
       nlev <- length(lev)

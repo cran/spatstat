@@ -22,7 +22,6 @@
   The argument \code{w} should be a window (an object of class
   \code{"owin"}, see \code{\link{owin.object}} for details)
   or can be given in any format acceptable to \code{\link{as.owin}()}.
-  }
 }
 \seealso{
   \code{\link{owin}},

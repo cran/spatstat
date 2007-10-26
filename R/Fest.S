@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.17 $	$Date: 2006/12/12 08:40:39 $
+#	$Revision: 4.18 $	$Date: 2007/10/24 09:41:15 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -80,7 +80,7 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
                   "uncorrected estimate of F(r)")
         Z <- fv(Z, "r", substitute(F(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
-        units(Z) <- units(X)
+        unitname(Z) <- unitname(X)
 	return(Z)
 }
 

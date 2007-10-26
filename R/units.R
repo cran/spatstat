@@ -1,55 +1,55 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.11 $   $Date: 2006/11/20 04:58:54 $
+#   $Revision: 1.13 $   $Date: 2007/10/24 09:16:26 $
 #
 #
 
-units <- function(x) {
-  UseMethod("units")
+unitname <- function(x) {
+  UseMethod("unitname")
 }
 
-units.owin <- function(x) {
+unitname.owin <- function(x) {
   u <- as.units(x$units)
   return(u)
 }
 
-units.ppp <- function(x) {
+unitname.ppp <- function(x) {
   u <- as.units(x$window$units)
   return(u)
 }
 
-units.im <- function(x) {
+unitname.im <- function(x) {
   u <- as.units(x$units)
   return(u)
 }
 
-units.default <- function(x) {
+unitname.default <- function(x) {
   return(as.units(attr(x, "units")))
 }
 
-"units<-" <- function(x, value) {
-  UseMethod("units<-")
+"unitname<-" <- function(x, value) {
+  UseMethod("unitname<-")
 }
 
-"units<-.owin" <- function(x, value) {
+"unitname<-.owin" <- function(x, value) {
   x$units <- as.units(value)
   return(x)
 }
 
-"units<-.ppp" <- function(x, value) {
+"unitname<-.ppp" <- function(x, value) {
   w <- x$window
-  units(w) <- value
+  unitname(w) <- value
   x$window <- w
   return(x)
 }
 
-"units<-.im" <- function(x, value) {
+"unitname<-.im" <- function(x, value) {
   x$units <- as.units(value)
   return(x)
 }
 
-"units<-.default" <- function(x, value) {
+"unitname<-.default" <- function(x, value) {
   attr(x, "units") <- as.units(value)
   return(x)
 }

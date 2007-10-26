@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.6 $   $Date: 2007/02/16 07:14:30 $
+#    $Revision: 1.7 $   $Date: 2007/10/24 09:41:15 $
 #
 #
 ".Spatstat.Options" <-

@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.22 $   $Date: 2006/12/14 07:24:07 $
+#    $Revision: 1.23 $   $Date: 2007/10/24 09:41:08 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -26,7 +26,7 @@
 #
 #         desc       longer description for each column
 #
-#         units       name of unit of length for 'r'
+#         unitname   name of unit of length for 'r'
 #
 #    Objects of this class are returned by Kest(), etc
 #
@@ -34,7 +34,7 @@
 # creator
 
 fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
-               alim=NULL, labl=names(x), desc=NULL, units=NULL) {
+               alim=NULL, labl=names(x), desc=NULL, unitname=NULL) {
   stopifnot(is.data.frame(x))
   # check arguments
   stopifnot(is.character(argu))
@@ -80,7 +80,7 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   attr(x, "alim") <- alim
   attr(x, "labl") <- labl
   attr(x, "desc") <- desc
-  attr(x, "units") <- as.units(units)
+  attr(x, "units") <- as.units(unitname)
   # 
   class(x) <- c("fv", class(x))
   return(x)
@@ -128,7 +128,7 @@ print.fv <- function(x, ...) {
   alim <- signif(a$alim, 5)
   cat(paste("\nRecommended range of argument ", a$argu,
             ": [", alim[1], ", ", alim[2], "]\n", sep=""))
-  ledge <- summary(units(x))$legend
+  ledge <- summary(unitname(x))$legend
   if(!is.null(ledge))
     cat(paste(ledge, "\n"))
   invisible(NULL)
@@ -154,7 +154,7 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   z <- fv(xy, a$argu, a$ylab, preferred, a$fmla, a$alim,
           c(attr(x, "labl"), labl),
           c(attr(x, "desc"), desc),
-          units=units(a))
+          unitname=unitname(a))
   return(z)
 }
 
@@ -201,7 +201,7 @@ bind.fv <- function(x, y, labl, desc, preferred) {
                alim=alim,
                labl=attr(x, "labl")[selected],
                desc=attr(x, "desc")[selected],
-               units=attr(x, "units")))
+               unitname=attr(x, "units")))
 }  
 
 

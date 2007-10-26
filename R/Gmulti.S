@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.19 $	$Date: 2006/11/13 06:09:06 $
+#	$Revision: 4.20 $	$Date: 2007/10/24 09:41:15 $
 #
 ################################################################################
 
@@ -147,7 +147,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL) {
                   "uncorrected estimate of G(r)")
         Z <- fv(Z, "r", substitute(Gmulti(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
-        units(Z) <- units(X)
+        unitname(Z) <- unitname(X)
 	return(Z)
 }	
 

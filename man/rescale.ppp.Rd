@@ -38,7 +38,7 @@
   equivalent to the original one, use \code{\link{affine}}.
 }
 \seealso{
-  \code{\link{units}},
+  \code{\link{unitname}},
   \code{\link{rescale}},
   \code{\link{rescale.owin}},
   \code{\link{affine}},

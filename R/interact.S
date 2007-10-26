@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.16 $	$Date: 2007/03/15 05:52:01 $
+#	$Revision: 1.17 $	$Date: 2007/10/23 09:14:45 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model

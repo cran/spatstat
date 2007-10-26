@@ -4,7 +4,7 @@
 
   Area of intersection between disc and polygonal window
 
-  $Revision: 1.1 $     $Date: 2006/10/19 10:22:21 $
+  $Revision: 1.2 $     $Date: 2007/10/26 15:24:00 $
 
  */
 
@@ -29,10 +29,9 @@ discareapoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, eps, out)
      double *eps;
      double *out;
 {
-  int n, m, i, j, k, l, nradperpt,csign;
+  int n, m, i, j, k, nradperpt;
   double radius, radius2, total, contrib;
   double xx0, xx1, yy0, yy1, xleft, xright, yleft, yright, xcentre, ycentre;
-  double xlo, xhi;
   double epsilon;
   double DiscContrib();
 

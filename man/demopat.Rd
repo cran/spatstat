@@ -19,7 +19,6 @@
 }
 \usage{data(demopat)}
 \source{Adrian Baddeley}
-}
 \keyword{datasets}
 \keyword{spatial}
 

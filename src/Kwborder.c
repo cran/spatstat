@@ -24,7 +24,7 @@
 
   Kborder.cpp
 
-  $Revision: 1.1 $     $Date: 2006/10/19 10:22:21 $
+  $Revision: 1.3 $     $Date: 2007/10/26 14:52:01 $
 
 */
 
@@ -40,9 +40,9 @@ void Kwborder(nxy, x, y, w, b, nr, rmax, numer, denom)
      double *numer, *denom;
 # 72 "Kborder.cpp"
 {
-  int i, j, k, l, n, nt, n1, nt1, lmin, lmax, lup;
+  int i, j, l, n, nt, n1, nt1, lmin, lmax, lup;
   double dt, tmax, tmax2, xi, yi, bi, bi2, maxsearch;
-  double xleft, xright, bratio, dratio, dij, dij2, dd, dx, dy;
+  double xleft, xright, bratio, dratio, dij, dij2, dx, dy;
 
 
   double wi, wj, wij;

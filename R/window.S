@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.69 $	$Date: 2007/08/17 16:04:08 $
+#	$Revision: 4.70 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 #	A window may be either
@@ -68,9 +68,9 @@
 
   
 owin <- function(xrange=c(0,1), yrange=c(0,1),
-                 ..., poly=NULL, mask=NULL, units=NULL) {
+                 ..., poly=NULL, mask=NULL, unitname=NULL) {
 
-  units <- as.units(units)
+  unitname <- as.units(unitname)
 
   ## Exterminate ambiguities
   poly.given <- !is.null(poly)
@@ -87,12 +87,12 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     area.w <- resolve.defaults(list(...), list(area=NULL))$area
     if(!poly.given && !mask.given) 
         w <- list(type="rectangle",
-                  xrange=xrange, yrange=yrange, units=units,
+                  xrange=xrange, yrange=yrange, units=unitname,
                   area=
                   if(!is.null(area.w)) area.w else (diff(xrange)*diff(yrange)))
       else if(poly.given) 
         w <- list(type="polygonal",
-                  xrange=xrange, yrange=yrange, bdry=poly, units=units,
+                  xrange=xrange, yrange=yrange, bdry=poly, units=unitname,
                   area=area.w)
       else if(mask.given) {
         nc <- ncol(mask)
@@ -111,7 +111,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                   xcol     = xcol,
                   yrow     = yrow,
                   m        = mask,
-                  units    = units,
+                  units    = unitname,
                   area     = area.w)
       }
       class(w) <- "owin"
@@ -124,7 +124,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
       stop("xrange should be a vector of length 2 giving (xmin, xmax)")
     if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
       stop("yrange should be a vector of length 2 giving (ymin, ymax)")
-    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=units,
+    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=unitname,
               area=diff(xrange) * diff(yrange))
     class(w) <- "owin"
     return(w)
@@ -175,7 +175,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     }
 
     w <- list(type="polygonal",
-              xrange=xrange, yrange=yrange, bdry=bdry, units=units,
+              xrange=xrange, yrange=yrange, bdry=bdry, units=unitname,
               area=w.area)
     class(w) <- "owin"
     # check for intersection or self-intersection
@@ -225,7 +225,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                 xcol    = seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc),
                 yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr),
                 m       = mask,
-                units   = units,
+                units   = unitname,
                 area    = w.area)
     class(out) <- "owin"
     return(out)
@@ -250,7 +250,7 @@ as.owin <- function(W, ..., fatal=TRUE) {
 
 as.owin.owin <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "owin", fatal=fatal)) 
-    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, units=W$units, check=FALSE, area=W$area))
+    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, unitname=unitname(W), check=FALSE, area=W$area))
   else
     return(NULL)
 }
@@ -275,7 +275,7 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
               xcol    = W$xcol,
               yrow    = W$yrow,
               m       = !is.na(W$v),
-              units   = W$units)
+              units   = unitname(W))
   class(out) <- "owin"
   return(out)
 }
@@ -319,7 +319,7 @@ as.owin.default <- function(W, ..., fatal=TRUE) {
 #
 as.rectangle <- function(...) {
         w <- as.owin(...)
-        return(owin(w$xrange, w$yrange, units=w$units))
+        return(owin(w$xrange, w$yrange, unitname=unitname(w)))
 }
 
 #
@@ -334,9 +334,9 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 
   if(!missing(w)) {
     verifyclass(w, "owin")
-    units <- units(w)
+    uname <- unitname(w)
   } else {
-    units <- as.units(NULL)
+    uname <- as.units(NULL)
     if(is.null(xy)) 
       stop("If w is missing, xy is required")
   }
@@ -442,7 +442,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
            out$m <- matrix(value, nrow=nr, ncol=nc)
          })
 
-  out$units <- units
+  unitname(out) <- uname
   return(out)
 }
 
@@ -458,7 +458,7 @@ as.polygonal <- function(W) {
            xr <- W$xrange
            yr <- W$yrange
            return(owin(xr, yr, poly=list(x=xr[c(1,2,2,1)],y=yr[c(1,1,2,2)]),
-                       units=units(W)))
+                       unitname=unitname(W)))
          },
          polygonal = {
            return(W)
@@ -717,7 +717,7 @@ inside.owin <- function(x, y, w) {
   
 print.owin <- function(x, ...) {
   verifyclass(x, "owin")
-  unitinfo <- summary(units(x))
+  unitinfo <- summary(unitname(x))
   cat("window: ")
   switch(x$type,
          rectangle={
@@ -754,7 +754,7 @@ summary.owin <- function(object, ...) {
                  yrange=object$yrange,
                  type=object$type,
                  area=area.owin(object),
-                 units=units(object))
+                 units=unitname(object))
   switch(object$type,
          rectangle={
          },

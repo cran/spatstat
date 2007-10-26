@@ -66,7 +66,7 @@
 
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J, and
-  \code{cbind(trans,theo) ~ r} for K.}
+  \code{cbind(trans,theo) ~ r} for K.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

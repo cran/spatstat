@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.38 $	$Date: 2007/08/19 17:55:27 $
+#	$Revision: 5.39 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 # -------- functions ----------------------------------------
@@ -208,7 +208,7 @@ function(X, ..., r=NULL, breaks=NULL,
 
   # default is to display them all
   attr(K, "fmla") <- . ~ r
-  units(K) <- units(X)
+  unitname(K) <- unitname(X)
   return(K)
 }
 
@@ -350,7 +350,7 @@ Kborder.engine <- function(X, rmax, nr=100,
   ##
   # default is to display them all
   attr(Kfv, "fmla") <- . ~ r
-  units(Kfv) <- units(X)
+  unitname(Kfv) <- unitname(X)
   return(Kfv)
 }
 

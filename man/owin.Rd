@@ -6,7 +6,7 @@
   an observation window in the two-dimensional plane
 }
 \usage{
-  owin(xrange=c(0,1), yrange=c(0,1), ..., poly=NULL, mask=NULL, units=NULL)
+  owin(xrange=c(0,1), yrange=c(0,1), ..., poly=NULL, mask=NULL, unitname=NULL)
 }
 \arguments{
   \item{xrange}{\eqn{x} coordinate limits of enclosing box}
@@ -20,7 +20,7 @@
     Optional. Logical matrix giving binary image of window.
     Incompatible with \code{poly}.
   }
-  \item{units}{
+  \item{unitname}{
     Optional. Name of unit of length. Either a single character string,
     or a vector of two character strings giving the
     singular and plural forms, respectively.
@@ -111,7 +111,7 @@ describing a window in the two-dimensional plane.
   w <- owin(c(0,1), c(0,1))
   # the unit square
 
-  w <- owin(c(10,20), c(10,30), units=c("foot","feet"))
+  w <- owin(c(10,20), c(10,30), unitname=c("foot","feet"))
   # a rectangle of dimensions 10 x 20 feet
   # with lower left corner at (10,10)
 

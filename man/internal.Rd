@@ -3,6 +3,8 @@
 \alias{[<-.hyperframe}
 \alias{$.hyperframe}
 \alias{$<-.hyperframe}
+\alias{acedist.show}
+\alias{acedist.noshow}
 \alias{affinexy}
 \alias{apply23sum}
 \alias{area.xypolygon}       
@@ -157,8 +159,8 @@
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
 \alias{polynom}
+\alias{pppdist.mat}
 \alias{pppdist.prohorov}
-\alias{pppmatching}
 \alias{primefactors}       
 \alias{print.bt.frame}
 \alias{print.diagppm}
@@ -246,8 +248,8 @@
 \alias{test.crossing.psp}
 \alias{tilecentroids}        
 \alias{trim.mask}        
-\alias{units.default}
-\alias{units<-.default}
+\alias{unitname.default}
+\alias{unitname<-.default}
 \alias{update.interact}
 \alias{valid.ppm}        
 \alias{validate.mask}        
@@ -273,6 +275,8 @@
 \method{[}{hyperframe}(x, i, j) <- value
 \method{$}{hyperframe}(x, name)
 \method{$}{hyperframe}(x, i) <- value
+acedist.show(X, Y, n, d, timelag = 0)
+acedist.noshow(X, Y, n, d)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
 apply23sum(x)
 area.xypolygon(polly)
@@ -333,7 +337,7 @@ fasp(fns, titles, formulae, which, dataname, title)
 findmarktype(x)
 fii(interaction, coefs, Vnames)
 FormatFaspFormulae(f, argname)
-fv(x, argu, ylab, valu, fmla, alim, labl, desc, units)
+fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmfit(object)
@@ -442,8 +446,8 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{quadratcount}(x, \dots, add, entries, dx, dy)
 \method{plot}{quadrattest}(x, \dots)
 polynom(x, \dots)
-pppdist.prohorov(X, Y, precision = 7)
-pppmatching(X, Y, am, ty = "generic")
+pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
+pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{diagppm}(x, \dots)
@@ -535,8 +539,8 @@ termsinformula(x)
 test.crossing.psp(A,B)
 tilecentroids(W, nx, ny)
 trim.mask(M, R)
-\method{units}{default}(x)
-\method{units}{default}(x) <- value
+\method{unitname}{default}(x)
+\method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)
 valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        

@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.15 $	$Date: 2006/11/13 06:08:24 $
+#	$Revision: 4.16 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 #
@@ -100,6 +100,6 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL) {
         
         attr(Z, "G") <- GIJ
         attr(Z, "F") <- FJ
-        units(Z) <- units(X)
+        unitname(Z) <- unitname(X)
         return(Z)
 }

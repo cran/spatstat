@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.9 $     $Date: 2007/03/16 05:05:20 $
+  $Revision: 1.10 $     $Date: 2007/10/26 14:55:32 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -23,7 +23,7 @@ void paircount(nxy, x, y, rmaxi, count)
      double *x, *y, *rmaxi;
      int *count;
 {
-  int n, k, kmax, i, j, jleft, jright, counted;
+  int n, i, j, jleft, jright, counted;
   double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
 
   n = *nxy;
@@ -343,7 +343,7 @@ void duplicatedxy(n, x, y, out)
      double *x, *y;
      int *out;
 {
-  int m, i, j, outi;
+  int m, i, j;
   double xi, yi;
   m = *n;
   for(i = 1; i < m; i++) {

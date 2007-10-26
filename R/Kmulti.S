@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.16 $	$Date: 2006/10/18 05:49:23 $
+#	$Revision: 5.17 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 # -------- functions ----------------------------------------
@@ -215,7 +215,7 @@ function(X, I, J, r=NULL, breaks=NULL,
         }
         # default is to display them all
         attr(K, "fmla") <- . ~ r
-        units(K) <- units(X)
+        unitname(K) <- unitname(X)
         return(K)
           
 }

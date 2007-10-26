@@ -87,6 +87,11 @@
   The rejected points are still accessible,
   as an attribute of the point pattern called \code{"rejects"},
   but will be ignored by all other functions except \code{link{plot.ppp}}.
+
+  The name of the unit of length for the \code{x} and \code{y} coordinates
+  can be specified in the dataset, using the argument \code{unitname}, which is
+  passed to \code{\link{owin}}. See the examples below, or the help file
+  for \code{\link{owin}}.
   
   The optional argument \code{marks} is given if the point pattern
   is marked, i.e. if each data point carries additional information.
@@ -127,6 +132,9 @@
   X <- ppp(x, y, c(0,1), c(0,1))
   X <- ppp(x, y)
   X <- ppp(x, y, window=owin(c(0,1),c(0,1)))
+
+  # specify that the coordinates are given in metres
+  X <- ppp(x, y, c(0,1), c(0,1), unitname=c("metre","metres"))
 
   \dontrun{plot(X)}
 
