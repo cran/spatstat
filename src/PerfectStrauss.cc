@@ -108,7 +108,7 @@ void Point2Pattern::Print(){
       TempCell = headCell[i][j]->next;
       while(TempCell->next != TempCell){
 	k++;
-	printf("%f %f %d %d %d=%d %d=%d UL0 %d UL1 %d %f\n",
+	printf("%f %f %ld %ld %ld=%d %ld=%d UL0 %d UL1 %d %f\n",
 	       TempCell->X,TempCell->Y,k,
 	       TempCell->No,
 	       i,int(TempCell->X/XCellDim),
@@ -220,7 +220,7 @@ void Point2Pattern::DumpToFile(char FileName[100]){
       //printf("%d %d:\n",i,j);
       TempCell = headCell[i][j]->next;
       while(TempCell->next != TempCell){
-	fprintf(out,"%f\t%f\t%d\n",
+	fprintf(out,"%f\t%f\t%ld\n",
 	       TempCell->X,TempCell->Y,TempCell->No);
 	TempCell = TempCell->next;
       }
@@ -232,7 +232,7 @@ void Point2Pattern::DumpToFile(char FileName[100]){
 
 void Point2Pattern::ReadFromFile(char FileName[100]){
   FILE *out;
-  long int i,j,k,XCell,YCell;
+  long int k,XCell,YCell;
   float f1,xs,ys;
   out = fopen(FileName,"r");
   struct Point2 *TempCell;
@@ -259,7 +259,7 @@ void Point2Pattern::ReadFromFile(char FileName[100]){
 
   }
   fclose(out);
-  printf("%d points loaded.\n",k);
+  printf("%ld points loaded.\n",k);
 
 }
 
@@ -298,7 +298,7 @@ class PointProcess {
 };
 
 double PointProcess::lnDens(Point2Pattern *p2p){  
-  double f1;
+  // double f1;
   long int xco,yco,xc,yc,fx,tx,fy,ty,ry,rx;
   double dy,dx, lnDens,dst;
   struct Point2 *TempCell, *TempCell2;
@@ -441,7 +441,7 @@ void StraussProcess::CalcBeta(long int xsidepomm, long int ysidepomm,
 		   double *betapomm){ 
   long int i,j,k;
   k=0;
-  printf("\ndiagnostic message: Strauss CalcBeta... %d %d\n",xsidepomm,ysidepomm);
+  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
   for(i=0; i<xsidepomm; i++){
     for(j=0; j<ysidepomm; j++){
       *(betapomm + i*ysidepomm + j) = this->beta;
@@ -455,14 +455,14 @@ void StraussProcess::CheckBeta(long int xsidepomm, long int ysidepomm,
   long int i,j,k;
   double d1;
   k=0;
-  printf("\ndiagnostic message: Strauss CalcBeta... %d %d\n",xsidepomm,ysidepomm);
+  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
   for(i=0; i<xsidepomm; i++){
     for(j=0; j<ysidepomm; j++){
       if((fabs(*(betapomm + i*ysidepomm + j)- beta)>0.001) && (k==0)){
-	printf("%f %f %f %d %d\n",fabs(*(betapomm + i*ysidepomm + j)- beta),
+	printf("%f %f %f %ld %ld\n",fabs(*(betapomm + i*ysidepomm + j)- beta),
 	       *(betapomm + i*ysidepomm + j),beta,i,j);
 	k++;
-	scanf("%f",&d1);
+	scanf("%lf",&d1);
       }
     }
   } 
@@ -519,8 +519,8 @@ void StraussProcess::Beta(struct Point2 *TempCell){
 }
 
 void StraussProcess::CalcBeta(Point2Pattern *p2p){
-  long int xco,yco,xcm,ycm,fx,tx,fy,ty,ry,rx;
-  double dy,dx;
+  long int xco,yco;
+  //  double dy,dx;
   struct Point2 *TempMother;
 
   for(xco = 0; xco <= p2p->MaxXCell; xco++){
@@ -557,7 +557,7 @@ class Sampler{
 void Sampler::Forward(long int TS, long int TT, char TX, char TY,
 		      struct Point *Proposal, long int *DDD){
 
-  long int i,j,k, NoN[2], XCell, YCell, XC, YC, DirectionN;
+  long int XCell, YCell, DirectionN;
   double dtmp,dtmpx,dtmpy, tmpR, TempGamma[2], TempI;
   struct Point2 *TempCell, *TempCell2;
   float f1;
@@ -628,7 +628,7 @@ void Sampler::Forward(long int TS, long int TT, char TX, char TY,
   }
   /* Death */
   if(TT==0){
-    TempCell=P2P->headCell[TX][TY];
+    TempCell=P2P->headCell[(int)TX][(int)TY];
     while(TempCell->next->No != *DDD){
       TempCell = TempCell->next;
       if(TempCell->next == TempCell) {
@@ -637,7 +637,7 @@ void Sampler::Forward(long int TS, long int TT, char TX, char TY,
       }
     };
     if(*DDD!=TempCell->next->No) 
-      printf("diagnostic message: multi cell:  !!DDD:%d TempUpper->No:%d ",
+      printf("diagnostic message: multi cell:  !!DDD:%ld TempUpper->No:%ld ",
 	     *DDD,TempCell->No);
     if(TempCell->next->InLower[0]==1)
       P2P->UpperLiving[0] = P2P->UpperLiving[0] -1;
@@ -657,9 +657,9 @@ long int Sampler::BirthDeath(long int TimeStep,
 		      struct Point *headLiving,
 		      struct Point *headDeleted,
 		      struct Point3 *headTransition){
-  long int i,k,j,n;
+  long int i,n;
   float f1,f2,f3,f4;
-  double min,tmp,xtemp,ytemp;
+  double xtemp,ytemp;
   char InWindow, Success;
   struct Point *TempPoint, *TempPoint2;
   struct Point3 *TempTransition;
@@ -723,10 +723,10 @@ long int Sampler::BirthDeath(long int TimeStep,
     f1 = LivingPoints; f2 = f1*slumptal()+1.0;
     n = int(f2);
     if(n>LivingPoints){
-      printf("diagnostic message: random integer n=%d > %d = number of living points\n", n,LivingPoints);
+      printf("diagnostic message: random integer n=%ld > %ld = number of living points\n", n,LivingPoints);
       n=LivingPoints;
     }
-    TempPoint = headLiving;
+    TempPoint2 = TempPoint = headLiving;
     for(i=1; i<=n; i++){ 
       TempPoint2 = TempPoint;
       TempPoint = TempPoint->next;
@@ -767,7 +767,7 @@ void Sampler::Sim(Point2Pattern *p2p) {
   if(dummyDeleted == NULL ) printf("error: malloc returned NULL!!\n");
   headDeleted->next = dummyDeleted; dummyDeleted->next = dummyDeleted;
 
-  struct Point2 *TempCell, *TempCell2;
+  struct Point2 *TempCell2;
 
   struct Point3 *headTransition, *dummyTransition;
   headTransition = (struct Point3 *) malloc(sizeof *headTransition);

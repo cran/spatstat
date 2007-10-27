@@ -1,12 +1,10 @@
 \name{subset.listof}
-\alias{[.listof}
 \alias{[<-.listof}
 \title{Extract or Replace Subset of a List of Things}
 \description{
-  Extract or replace a subset of a list of things.
+  Replace a subset of a list of things.
 }
 \usage{
-  \method{[}{listof}(x, i)
   \method{[}{listof}(x, i) <- value
 }
 \arguments{
@@ -25,13 +23,13 @@
   Another object of class \code{"listof"}.
 }
 \details{
-  These are subset methods for the class \code{"listof"}.
+  This is a subset replacement method for the class \code{"listof"}.
 
   The argument \code{x} should be an object of class \code{"listof"}
   representing a list of things that all belong to one class.
 
-  The methods extract or replace a designated
-  subset of \code{x}, and return an object of class \code{"listof"}.
+  The method replaces a designated
+  subset of \code{x}, and returns an object of class \code{"listof"}.
 }
 \seealso{
   \code{\link{plot.listof}},
@@ -40,7 +38,6 @@
 \examples{
    x <- list(A=runif(10), B=runif(10), C=runif(10))
    class(x) <- c("listof", class(x))
-   x[1:2]
    x[1] <- list(A=rnorm(10))
  }
 \author{Adrian Baddeley

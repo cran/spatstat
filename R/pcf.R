@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.25 $   $Date: 2007/01/19 01:08:24 $
+#   $Revision: 1.26 $   $Date: 2007/10/24 09:41:15 $
 #
 #
 #   calculate pair correlation function
@@ -127,7 +127,7 @@ pcf.ppp <- function(X, ..., r=NULL,
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))
-  units(out) <- units(X)
+  unitname(out) <- unitname(X)
   return(out)
 }
 
@@ -210,6 +210,6 @@ function(X, ..., method="c") {
           c("distance argument r",
             "estimate of pair correlation function pcf(r)",
             "theoretical Poisson value, pcf(r) = 1"))
-  units(Z) <- units(X)
+  unitname(Z) <- unitname(X)
   return(Z)
 }

@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "death.template"
-## $Id: deathu.r,v 1.1 2006/10/19 10:22:21 adrian Exp adrian $
+## $Id: death.r,v 1.2 2005/03/08 20:19:31 rolf Exp $
 
 # 1 "death.h" 1
 # 4 "death.template" 2

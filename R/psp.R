@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.28 $ $Date: 2007/05/10 17:05:58 $
+#  $Revision: 1.29 $ $Date: 2007/10/24 09:41:15 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -203,13 +203,13 @@ print.psp <- function(x, ...) {
   return(invisible(NULL))
 }
 
-units.psp <- function(x) {
-  return(units(x$window))
+unitname.psp <- function(x) {
+  return(unitname(x$window))
 }
 
-"units<-.psp" <- function(x, value) {
+"unitname<-.psp" <- function(x, value) {
   w <- x$window
-  units(w) <- value
+  unitname(w) <- value
   x$window <- w
   return(x)
 }
@@ -300,7 +300,7 @@ summary.psp <- function(object, ...) {
               ang= summary(angles.psp(object)),
               w = summary.owin(object$window),
               marks=if(is.null(object$marks)) NULL else summary(object$marks),
-              unitinfo=summary(units(object)))
+              unitinfo=summary(unitname(object)))
   class(out) <- c("summary.psp", class(out))
   return(out)
 }

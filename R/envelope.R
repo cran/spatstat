@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.37 $  $Date: 2007/09/22 01:48:22 $
+#   $Revision: 1.38 $  $Date: 2007/10/24 09:41:15 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
@@ -303,7 +303,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
   attr(result, "dotnames") <- c("obs",
                                 if(csr) "theo" else "mmean",
                                 "hi", "lo")
-  units(result) <- units(funX)
+  unitname(result) <- unitname(funX)
 
   class(result) <- c("envelope", class(result))
   attr(result, "einfo") <- list(call=cl,

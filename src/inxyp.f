@@ -2,11 +2,11 @@ C Output from Public domain Ratfor, version 1.0
       subroutine inxyp(x,y,xp,yp,npts,nedges,score,onbndry)
       implicit double precision(a-h,o-z)
       dimension x(npts), y(npts), xp(nedges), yp(nedges), score(npts)
-      logical first, onbndry(npts)
+      logical onbndry(npts)
       zero = 0.d0
       half = 0.5d0
       one = 1.d0
-      do23000 i = 1,nedges 
+      do 23000 i = 1,nedges 
       x0 = xp(i)
       y0 = yp(i)
       if(i .eq. nedges)then
@@ -18,7 +18,7 @@ C Output from Public domain Ratfor, version 1.0
       endif
       dx = x1 - x0
       dy = y1 - y0
-      do23004 j = 1,npts 
+      do 23004 j = 1,npts 
       xcrit = (x(j) - x0)*(x(j) - x1)
       if(xcrit .le. zero)then
       if(xcrit .eq. zero)then
@@ -41,8 +41,6 @@ C Output from Public domain Ratfor, version 1.0
       endif
       endif
 23004 continue
-23005 continue
 23000 continue
-23001 continue
       return
       end

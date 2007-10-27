@@ -36,9 +36,9 @@ Saturated               Saturated Pairwise Interaction model
 Softcore                The Soft Core Point Process Model
 Strauss                 The Strauss Point Process Model
 StraussHard             The Strauss / Hard Core Point Process Model
-[.listof                Extract or Replace Subset of a List of Things
 [.splitppp              Extract or Replace Sub-Patterns
 [<-.im                  Reset Values in Subset of Image
+[<-.listof              Extract or Replace Subset of a List of Things
 affine                  Apply Affine Transformation
 affine.owin             Apply Affine Transformation To Window
 affine.ppp              Apply Affine Transformation To Point Pattern
@@ -188,6 +188,7 @@ lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
+matchingdist            Distance for a Point Pattern Matching
 matclust.estK           Fit the Matern Cluster Point Process by Minimum
                         Contrast
 mean.im                 Mean Pixel Value in an Image
@@ -238,7 +239,9 @@ ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
 ppp.object              Class of Point Patterns
-pppdist                 Optimal Match Between Two Point Patterns
+pppdist                 Distance Between Two Point Patterns
+pppmatching             Create a Point Matching
+pppmatching.object      Class of Point Matchings
 predict.ppm             Prediction from a Fitted Point Process Model
 print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
@@ -369,7 +372,7 @@ trim.rectangle          Cut margins from rectangle
 union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern
-units                   Name for Unit of Length
+unitname                Name for Unit of Length
 unmark                  Remove Marks from a Marked Point Pattern
 update.ppm              Update a Fitted Point Process Model
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point

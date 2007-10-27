@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.10 $   $Date: 2007/02/19 05:24:23 $
+#    $Revision: 1.11 $   $Date: 2007/10/24 09:41:15 $
 #
 #    as.im()
 #
@@ -53,7 +53,7 @@ as.im <- function(X, W=as.mask(as.owin(X), dimyx=dimyx), ...,
                 yrow   = W$yrow,
                 lev    = NULL,
                 type    = "integer",
-                units  = units(X))
+                units  = unitname(X))
     class(out) <- "im"
     return(na.handle(out, na.replace))
   }
@@ -87,7 +87,7 @@ as.im <- function(X, W=as.mask(as.owin(X), dimyx=dimyx), ...,
     if(is.factor(values)) 
         lev <- levels(values)
 
-    out <- im(values, W$xcol, W$yrow, lev, units=units(W))
+    out <- im(values, W$xcol, W$yrow, lev, unitname=unitname(W))
     return(na.handle(out, na.replace))
   }
 

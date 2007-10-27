@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.5 $	$Date: 2007/08/19 22:47:44 $
+#	$Revision: 1.6 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 
@@ -149,7 +149,7 @@
   K <- fv(df, "r", substitute(K(r), NULL), "theo", , alim, labl, desc)
   # default is to display them all
   attr(K, "fmla") <- . ~ r
-  units(K) <- units(X)
+  unitname(K) <- unitname(X)
   return(K)
 }
 

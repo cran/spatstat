@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.5 $     $Date: 2007/03/16 12:49:51 $
+  $Revision: 1.6 $     $Date: 2007/10/26 15:27:41 $
 
  */
 
@@ -212,7 +212,7 @@ void xypolyselfint(n, x0, y0, dx, dy,
      double *xx, *yy, *ti, *tj;
      int *ok;
 { 
-  int i, j, m, mm1, mm2, mstop, ijpos, jipos, iipos;
+  int i, j, m, mm1, mm2, mstop, ijpos, jipos;
   double determinant, absdet, diffx, diffy, tti, ttj;
 
   m = *n;
@@ -301,7 +301,7 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
       for(i = j+2; i < mstop; i++) {
 	diffx = x0[j] - x0[i];
 	diffy = y0[j] - y0[i];
-	if(diffx < Xsep && diffx > -Xsep && diffy < Ysep & diffy > -Ysep) {
+	if(diffx < Xsep && diffx > -Xsep && diffy < Ysep && diffy > -Ysep) {
 	  determinant = dx[j] * dy[i] - dy[j] * dx[i];
 	  absdet = (determinant > 0) ? determinant : -determinant;
 	  if(absdet > *eps) {

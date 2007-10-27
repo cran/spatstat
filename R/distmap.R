@@ -2,7 +2,7 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.8 $     $Date: 2007/05/10 17:35:00 $
+#      $Revision: 1.9 $     $Date: 2007/10/24 09:41:15 $
 #
 #
 #     Distance transforms
@@ -16,19 +16,19 @@ distmap.ppp <- function(X, ...) {
   verifyclass(X, "ppp")
   e <- exactdt(X, ...)
   W <- e$w
-  uni <- units(W)
+  uni <- unitname(W)
   dmat <- e$d
   imat <- e$i
-  V <- im(dmat, W$xcol, W$yrow, units=uni)
-  I <- im(imat, W$xcol, W$yrow, units=uni)
+  V <- im(dmat, W$xcol, W$yrow, unitname=uni)
+  I <- im(imat, W$xcol, W$yrow, unitname=uni)
   if(X$window$type == "rectangle") {
     # distance to frame boundary
     bmat <- e$b
-    B <- im(bmat, W$xcol, W$yrow, units=uni)
+    B <- im(bmat, W$xcol, W$yrow, unitname=uni)
   } else {
     # distance to window boundary, not frame boundary
     bmat <- bdist.pixels(W, coords=FALSE)
-    B <- im(bmat, W$xcol, W$yrow, units=uni)
+    B <- im(bmat, W$xcol, W$yrow, unitname=uni)
     # clip all to window
     V <- V[W, drop=FALSE]
     I <- I[W, drop=FALSE]
@@ -42,7 +42,7 @@ distmap.ppp <- function(X, ...) {
 distmap.owin <- function(X, ...) {
   verifyclass(X, "owin")
   X <- as.mask(X, ...)
-  uni <- units(X)
+  uni <- unitname(X)
   xc <- X$xcol
   yr <- X$yrow
   nr <- X$dim[1]
@@ -70,8 +70,8 @@ distmap.owin <- function(X, ...) {
   bdist <- matrix(res$boundary,
                   ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
   # cast as image objects
-  V <- im(dist,  xc, yr, units=uni)
-  B <- im(bdist, xc, yr, units=uni)
+  V <- im(dist,  xc, yr, unitname=uni)
+  B <- im(bdist, xc, yr, unitname=uni)
   attr(V, "bdry") <- B
   return(V)
 }
@@ -79,7 +79,7 @@ distmap.owin <- function(X, ...) {
 distmap.psp <- function(X, ...) {
   verifyclass(X, "psp")
   W <- as.mask(X$window, ...)
-  uni <- units(W)
+  uni <- unitname(W)
   xp <- as.vector(raster.x(W))
   yp <- as.vector(raster.y(W))
   np <- length(xp)
@@ -99,9 +99,9 @@ distmap.psp <- function(X, ...) {
           PACKAGE="spatstat")
   xc <- W$xcol
   yr <- W$yrow
-  Dist <- im(array(sqrt(z$dist2), dim=W$dim), xc, yr, units=uni)
-  Indx <- im(array(z$index + 1, dim=W$dim), xc, yr, units=uni)
-  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, units=uni)
+  Dist <- im(array(sqrt(z$dist2), dim=W$dim), xc, yr, unitname=uni)
+  Indx <- im(array(z$index + 1, dim=W$dim), xc, yr, unitname=uni)
+  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, unitname=uni)
   attr(Dist, "index") <- Indx
   attr(Dist, "bdry")  <- Bdry
   return(Dist)

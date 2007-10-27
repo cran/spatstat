@@ -101,7 +101,6 @@ which can then be fitted to point pattern data.
    ppm(cells, ~ polynom(x,y,3), StraussHard(r=0.1, hc=0.05), rbord=0.1)
    # fit a nonstationary Strauss/hard core process
    # with log-cubic polynomial trend
-   }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

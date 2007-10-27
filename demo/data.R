@@ -53,13 +53,16 @@ plot(lansing)
 data(longleaf)
 plot(longleaf)
 
-data(nztrees)
-plot(nztrees)
-
 data(nbfires)
 plot(split(nbfires)$nbfires.00 %mark% factor(nbextras$extras.00$fire.type),
      main=c("New Brunswick fires 2000", "by fire type"),
      cols=c("red", "blue", "green", "cyan"))
+
+data(nztrees)
+plot(nztrees)
+
+data(ponderosa)
+ponderosa.extra$plotit()
 
 data(redwood)
 plot(redwood)

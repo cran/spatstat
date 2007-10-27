@@ -24,7 +24,7 @@ int largestmobpos(int *mobile, int *current, int *collectvals, int n);
 void dinfty_R(int *d, int *num, int *assignment) {
    int i,j; /* indices */
    int lmp, lmq; /* largest mobile position and its neighbor */
-   int oldcost, newmax;
+   int newmax;
    int n, currmin;
    int *current, *travel, *mobile, *assig, *distrelev, *collectvals;
 
@@ -135,4 +135,5 @@ int largestmobpos(int *mobile, int *current, int *collectvals, int n) {
       }
    }
    error("Internal error: largestmobpos failed");
+   return(0);
 }

@@ -11,7 +11,6 @@
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}
   \item{\dots}{Arguments passed to \code{\link{mean.default}}.}
-  }
 }
 \details{
   This function calculates the mean value of the pixels in the image

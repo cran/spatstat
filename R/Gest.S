@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.15 $	$Date: 2006/10/18 06:04:13 $
+#	$Revision: 4.16 $	$Date: 2007/10/24 09:41:15 $
 #
 ################################################################################
 #
@@ -36,7 +36,7 @@ function(X, r=NULL, breaks=NULL, ...) {
                          r      = rvalues,
                          raw    = zero,
                          theo   = zero)
-          units(result) <- units(X)
+          unitname(result) <- unitname(X)
           return(result)
         }
         
@@ -81,7 +81,7 @@ function(X, r=NULL, breaks=NULL, ...) {
                   "uncorrected estimate of G(r)")
         Z <- fv(Z, "r", substitute(G(r), NULL), "km", . ~ r, alim, labl, desc)
         attr(Z, "dotnames") <- c("km", "rs", "theo")
-        units(Z) <- units(X)
+        unitname(Z) <- unitname(X)
 	return(Z)
 }	
 

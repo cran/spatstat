@@ -1,4 +1,4 @@
- ## $Id: methas.template,v 1.1 2006/05/10 03:24:24 adrian Exp adrian $
+ ## $Id: methas.template,v 1.3 2007/10/26 17:10:00 adrian Exp adrian $
 
 #include "cif.h"
 #include "death.h"
@@ -12,12 +12,23 @@ dimension xprop(1), yprop(1), mprop(1)
 integer aux(1)
 logical verb, fixall
 
+logical dummyl
+integer dummyi
+
    ## Set up some constants
 one    = 1.d0
 zero   = 0.d0
 m1     = -1
 verb   = !(nverb==0)
 qnodds = (one - q)/q
+
+   ## Trivial assigments to placate the compiler
+dummyi = mprop(1) + ntypes + marks(1)
+dummyl = fixall
+dummyd = aux(1)
+dummyi = dummyi + 1
+dummyl = .not. dummyl
+dummyd = dummyd * dummyd
 
    ## Loop:
 irep = mrep

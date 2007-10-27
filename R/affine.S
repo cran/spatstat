@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.14 $	$Date: 2007/08/23 15:13:34 $
+#	$Revision: 1.15 $	$Date: 2007/10/24 09:41:15 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -26,7 +26,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
   #
   diagonalmatrix <- all(mat == diag(diag(mat)))
   scaletransform <- diagonalmatrix && (length(unique(diag(mat))) == 1)
-  newunits <- if(scaletransform) units(X) else as.units(NULL)
+  newunits <- if(scaletransform) unitname(X) else as.units(NULL)
   #
   switch(X$type,
          rectangle={
@@ -34,7 +34,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
              # result is a rectangle
              Y <- owin(range(mat[1,1] * X$xrange + vec[1]),
                        range(mat[2,2] * X$yrange + vec[2]))
-             units(Y) <- newunits
+             unitname(Y) <- newunits
              return(Y)
            } else {
              # convert rectangle to polygon
@@ -56,7 +56,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            W <- owin(xr, yr, poly=bdry)
            # Result might be a rectangle: if so, convert to rectangle type
            W <- rescue.rectangle(W)
-           units(W) <- newunits
+           unitname(W) <- newunits
            return(W)
          },
          mask={

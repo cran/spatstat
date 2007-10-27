@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.25 $    $Date: 2007/08/17 14:28:59 $
+#           $Revision: 1.26 $    $Date: 2007/10/24 09:41:15 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -38,7 +38,7 @@ pixellate <- function(x, ..., weights=NULL)
                     col = factor(pixels$col, levels=1:nc)), sum)
         ta[is.na(ta)] <- 0
     }
-    out <- im(ta, xcol = w$xcol, yrow = w$yrow, units=units(w))
+    out <- im(ta, xcol = w$xcol, yrow = w$yrow, unitname=unitname(w))
     return(out)
 }
 
@@ -123,7 +123,7 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
         cat("something round the twist\n")
     }
     Kermit <- Kern[ rtwist, ctwist]
-    ker <- im(Kermit, xcol.G[ctwist], yrow.G[ rtwist], units=units(x))
+    ker <- im(Kermit, xcol.G[ctwist], yrow.G[ rtwist], unitname=unitname(x))
     return(ker)
   }
   # convolve using fft
@@ -137,7 +137,7 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
   if(what=="smooth") {
     # return the smoothed point pattern
     smo <- im(Re(sm)[1:nr, 1:nc], xcol.pad[1:nc], yrow.pad[1:nr],
-              units=units(x))
+              unitname=unitname(x))
     return(smo)
   }
 
@@ -198,7 +198,7 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
   # divide by number of points * lambda
   mom <- mom * area.owin(x$window) / x$n^2
   # return it
-  mm <- im(mom, xcol.G[ctwist], yrow.G[rtwist], units=units(x))
+  mm <- im(mom, xcol.G[ctwist], yrow.G[rtwist], unitname=unitname(x))
   return(mm)
 }
 
@@ -229,7 +229,7 @@ Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
               c("distance argument r",
                 "theoretical Poisson K(r)",
                 "border-corrected estimate of K(r)"),
-              units=units(X)
+              unitname=unitname(X)
             )
   return(out)
 }

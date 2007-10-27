@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.11 $   $Date: 2006/11/17 12:42:15 $
+#    $Revision: 1.12 $   $Date: 2007/10/24 09:41:15 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -63,7 +63,7 @@ summary.im <- function(object, ...) {
 
   y$fullgrid <- (rescue.rectangle(win)$type == "rectangle")
 
-  y$units <- units(x)
+  y$units <- unitname(x)
   
   class(y) <- "summary.im"
   return(y)
@@ -148,7 +148,7 @@ print.im <- function(x, ...) {
     cat("factor levels:\n")
     print(levels(x))
   }
-  unitinfo <- summary(units(x))
+  unitinfo <- summary(unitname(x))
   di <- x$dim
   cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
   cat("enclosing rectangle: ")

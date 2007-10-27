@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.21 $ $Date: 2006/12/12 08:42:02 $
+#     $Revision: 1.22 $ $Date: 2007/10/24 09:41:15 $
 #
 #    Estimate the mark correlation function
 #
@@ -143,7 +143,7 @@ function(X, f = function(m1, m2) { m1 * m2 }, r=NULL,
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))
-        units(result) <- units(X)
+        unitname(result) <- unitname(X)
         return(result)
 }
 	

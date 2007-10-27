@@ -11,7 +11,10 @@ do j = 1,nl {
 	if(alen .gt. eps) {
 		co = dx/alen
 		si = dy/alen
-	}
+	} else {
+          co = 0.5
+          si = 0.5
+        }
 	do  i = 1, np {
 		xpx1 = x(i) - l1(j)
 		ypy1 = y(i) - l2(j)

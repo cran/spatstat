@@ -56,7 +56,7 @@ print.fii <- function(x, ...) {
 
 print.summary.fii <- function(x, ...) {
   secret <- resolve.defaults(list(...),
-                             list(prefix="Interaction:",
+                             list(prefix="Interaction: ",
                                   family=TRUE,
                                   brief=FALSE))
   brief <- secret$brief
@@ -66,11 +66,15 @@ print.summary.fii <- function(x, ...) {
     cat("Poisson process\n")
   else {
     print(x$interaction, family=secret$family, brief=TRUE)
-    cat(paste(x$header, ":\n", sep=""))
-    print(x$printable)
+    if(length(x$printable) == 1)
+      cat(paste(x$header, ":\t", x$printable, "\n", sep=""))
+    else {
+      cat(paste(x$header, ":\n", sep=""))
+      print(x$printable)
+    }
   }
   if(!brief) {
-    cat("Relevant coefficients:\n")
+    cat("\nRelevant coefficients:\n")
     print(x$coefs[x$Vnames])
   }
   return(invisible(NULL))

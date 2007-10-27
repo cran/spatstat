@@ -26,6 +26,12 @@
   The spatial coordinates in the dataset \code{X} will be re-expressed
   in terms of a new unit of length that is \code{s} times the current
   unit of length given in \code{X}.
+
+  For example if \code{X} is a dataset giving coordinates in metres,
+  then \code{rescale(X,1000)}
+  will divide the coordinate values by 1000 to obtain coordinates in
+  kilometres, and the unit name will be changed from \code{"metres"}
+  to \code{"1000 metres"}. 
 }
 \section{Note}{
   The result of this operation is equivalent to the original dataset.
@@ -34,7 +40,7 @@
   to the original one, use \code{\link{affine}}.
 }
 \seealso{
-  \code{\link{units}},
+  \code{\link{unitname}},
   \code{\link{rescale.ppp}},
   \code{\link{rescale.owin}},
   \code{\link{affine}},

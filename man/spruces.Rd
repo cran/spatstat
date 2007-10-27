@@ -57,7 +57,5 @@
   \emph{Stochastic Geometry and its Applications}.
   Wiley.
 }
-
-}
 \keyword{datasets}
 \keyword{spatial}

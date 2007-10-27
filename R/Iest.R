@@ -2,7 +2,7 @@
 #
 #	I function
 #
-#	$Revision: 1.4 $	$Date: 2006/10/18 06:06:02 $
+#	$Revision: 1.5 $	$Date: 2007/10/24 09:41:15 $
 #
 #
 #
@@ -53,7 +53,7 @@ Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
             "uncorrected estimate of I(r)")
   Z <- fv(rslt, "r", "I(r)", "km", cbind(km, rs, un, theo) ~ r,
           alim, labl, desc)
-  units(Z) <- units(X)
+  unitname(Z) <- unitname(X)
   return(Z)
 }
 

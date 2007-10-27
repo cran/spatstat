@@ -1,30 +1,30 @@
-\name{units}
-\alias{units}
-\alias{units.owin}
-\alias{units.psp}
-\alias{units.ppp}
-\alias{units.im}
-\alias{units<-}
-\alias{units<-.ppp}
-\alias{units<-.psp}
-\alias{units<-.owin}
-\alias{units<-.im}
+\name{unitname}
+\alias{unitname}
+\alias{unitname.owin}
+\alias{unitname.psp}
+\alias{unitname.ppp}
+\alias{unitname.im}
+\alias{unitname<-}
+\alias{unitname<-.ppp}
+\alias{unitname<-.psp}
+\alias{unitname<-.owin}
+\alias{unitname<-.im}
 \title{Name for Unit of Length}
 \description{
   Inspect or change the name of the unit of length
   in a spatial dataset.
 }
 \usage{
-units(x)
-\method{units}{ppp}(x)
-\method{units}{psp}(x)
-\method{units}{owin}(x)
-\method{units}{im}(x)
-units(x) <- value
-\method{units}{ppp}(x) <- value
-\method{units}{psp}(x) <- value
-\method{units}{owin}(x) <- value
-\method{units}{im}(x) <- value
+unitname(x)
+\method{unitname}{ppp}(x)
+\method{unitname}{psp}(x)
+\method{unitname}{owin}(x)
+\method{unitname}{im}(x)
+unitname(x) <- value
+\method{unitname}{ppp}(x) <- value
+\method{unitname}{psp}(x) <- value
+\method{unitname}{owin}(x) <- value
+\method{unitname}{im}(x) <- value
 }
 \arguments{
   \item{x}{A spatial dataset.
@@ -43,8 +43,8 @@ units(x) <- value
   when printing or plotting the dataset, and in some other
   applications. 
 
-  \code{units(x)} extracts this name,
-  and \code{units(x) <- value} sets the name to \code{value}.
+  \code{unitname(x)} extracts this name,
+  and \code{unitname(x) <- value} sets the name to \code{value}.
 
   A valid name is either
   \itemize{
@@ -57,7 +57,7 @@ units(x) <- value
   }
 }
 \value{
-  The return value of \code{units} is an object of class \code{"units"}
+  The return value of \code{unitname} is an object of class \code{"units"}
   containing the name of the unit of length in \code{x}. There are
   methods for \code{print} and \code{summary}.
 }
@@ -77,10 +77,10 @@ units(x) <- value
   X <- runifpoint(20)
 
   # if the unit of length is 1 metre:
-  units(X) <- c("metre", "metres")
+  unitname(X) <- c("metre", "metres")
 
   # if the unit of length is 6 inches:
-  units(X) <- list("inch", "inches", 6)
+  unitname(X) <- list("inch", "inches", 6)
 }
 \keyword{spatial}
 \keyword{manip}

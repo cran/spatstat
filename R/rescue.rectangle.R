@@ -1,13 +1,13 @@
 #
 #    rescue.rectangle.R
 # 
-#    $Revision: 1.4 $   $Date: 2006/11/17 23:18:33 $
+#    $Revision: 1.5 $   $Date: 2007/10/24 09:41:15 $
 #
 rescue.rectangle <- function(W) {
   verifyclass(W, "owin")
 
   if(W$type == "mask" && all(W$m))
-     return(owin(W$xrange, W$yrange, units=units(W)))
+     return(owin(W$xrange, W$yrange, unitname=unitname(W)))
 
   if(W$type == "polygonal" && length(W$bdry) == 1) {
     x <- W$bdry[[1]]$x
@@ -23,7 +23,7 @@ rescue.rectangle <- function(W) {
       ux <- veryunique(x)
       uy <- veryunique(y)
       if(length(ux) == 2 && length(uy) == 2)
-        return(owin(ux,uy, units=units(W)))
+        return(owin(ux,uy, unitname=unitname(W)))
     }
   }
   

@@ -4,7 +4,7 @@
 
   Edge corrections
 
-  $Revision: 1.4 $     $Date: 2006/06/28 09:19:00 $
+  $Revision: 1.5 $     $Date: 2007/10/26 14:57:53 $
 
  */
 
@@ -150,7 +150,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 {
   int n, m, i, j, k, l, nradperpt, ncut, nchanges;
   double xcentre, ycentre, xx0, yy0, xx1, yy1, xx01, yy01;
-  double x, y, radius, radius2, dx0, dx1, dy0, dy1;
+  double x, y, radius, radius2, dx0, dx1, dy0;
   double a, b, c, t, det, sqrtdet, tmp;
   double theta[6], delta[7], tmid[7];
   double xtest, ytest, contrib, total;

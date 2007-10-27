@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.19 $     $Date: 2007/04/05 08:41:43 $
+  $Revision: 1.20 $     $Date: 2007/10/26 15:25:54 $
 
  */
 
@@ -278,7 +278,7 @@ void nndistsort(n, x, y, nnd, huge)
      double *x, *y, *nnd, *huge;
 { 
   int npoints, i, left, right;
-  double d, dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
+  double dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
 
 #ifdef SPATSTAT_DEBUG
   FILE *out; 
@@ -359,7 +359,7 @@ void nnwhichsort(n, x, y, nnd, nnwhich, huge)
      double *x, *y, *nnd, *huge;
 { 
   int npoints, i, left, right, which;
-  double d, dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
+  double dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
 
   hu = *huge;
   hu2 = hu * hu;
@@ -423,7 +423,7 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
      double *x1, *y1, *x2, *y2, *nnd, *huge;
 { 
   int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich;
-  double d, dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
+  double dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
 
   hu = *huge;
   hu2 = hu * hu;
@@ -497,7 +497,7 @@ void nnXexclude(n1, x1, y1, id1, n2, x2, y2, id2, nnd, nnwhich, huge)
      double *x1, *y1, *x2, *y2, *nnd, *huge;
 { 
   int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich, id1i;
-  double d, dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
+  double dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
 
   hu = *huge;
   hu2 = hu * hu;

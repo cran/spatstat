@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "methas.template"
- ## $Id: mh4.r,v 1.1 2006/10/19 10:22:21 adrian Exp adrian $
+ ## $Id: methas.template,v 1.2 2007/10/26 16:51:15 adrian Exp adrian $
 
 # 1 "cif.h" 1
   ##
@@ -21,12 +21,23 @@ dimension xprop(1), yprop(1), mprop(1)
 integer aux(1)
 logical verb, fixall
 
+logical dummyl
+integer dummyi
+
    ## Set up some constants
 one = 1.d0
 zero = 0.d0
 m1 = -1
 verb = !(nverb==0)
 qnodds = (one - q)/q
+
+   ## Trivial assigments to placate the compiler
+dummyi = mprop(1) + ntypes + marks(1)
+dummyl = fixall
+dummyd = aux(1)
+dummyi = dummyi + 1
+dummyl = .not. dummyl
+dummyd = dummyd * dummyd
 
    ## Loop:
 irep = mrep
@@ -112,7 +123,7 @@ while(irep <= nrep) {
                      call aru(1,zero,one,iseed,sp)
                      if(sp*cvd < cvn) itype = 3 ## Shift occurs.
                    }
-# 122 "methas.template"
+# 133 "methas.template"
                }
         }
  if(itype > 0) {
