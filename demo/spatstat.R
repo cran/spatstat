@@ -119,6 +119,11 @@ plot(a, add=TRUE,col="red")
 
 plot(allstats(swedishpines))
 
+data(bramblecanes)
+plot(bramblecanes)
+bramblecanes <- rescale(bramblecanes, 1/9)
+plot(alltypes(bramblecanes, "K"), ylab="K(r)", mar.panel=c(4,4,2,2)+0.1)
+
 data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
 
@@ -178,10 +183,9 @@ Xsim <- rmh(model=fit,
             control=list(nrep=100))
 plot(Xsim, main="Simulation from fitted Strauss model")
 
+
 data(demopat)
 plot(demopat, cols=c("red", "blue"))
-plot(alltypes(demopat, "K"))
-
 fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit)
 

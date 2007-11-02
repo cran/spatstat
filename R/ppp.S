@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.52 $	$Date: 2007/08/23 15:15:09 $
+#	$Revision: 4.53 $	$Date: 2007/11/02 17:14:28 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -122,16 +122,15 @@ as.ppp.quad <- function(X, ..., fatal=TRUE) {
   return(union.quad(X))
 }
 
-as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
+as.ppp.data.frame <- function(X, W = NULL, ..., fatal=TRUE) {
   check <- resolve.defaults(list(...), list(check=TRUE))$check
-  if(!verifyclass(X, "matrix", fatal=fatal)
-     || !is.numeric(X)
-     || ncol(X) != 2) {
+  if(!(ncol(X) %in% 2:3)) {
     if(fatal)
-      stop("X must be a two-column matrix of numbers")
+      stop("X must be a two-column or three-column data frame")
     else
       return(NULL)
   }
+
   if(is.null(W)) {
     if(fatal)
       stop("x,y coords given but no window specified")
@@ -140,10 +139,53 @@ as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
   } 
     
   if(is.function(W))
-    return(cobble.xy(X[,1], X[,2], W, fatal))
+    Z <- cobble.xy(X[,1], X[,2], W, fatal)
+  else {
+    win <- as.owin(W)
+    Z <- ppp(X[,1], X[,2], window = win, check=check)
+  }
 
-  win <- as.owin(W)
-  Z <- ppp(X[,1], X[,2], window = win, check=check)
+  # add marks from third column
+  if(ncol(X) == 3)
+    Z <- Z %mark% X[,3]
+
+  return(Z)
+}
+    
+as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
+  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  if(!verifyclass(X, "matrix", fatal=fatal)
+     || !is.numeric(X)) {
+    if(fatal)
+      stop("X must be a two-column matrix of numbers")
+    else
+      return(NULL)
+  }
+  if(!(ncol(X) %in% 2:3)) {
+    if(fatal)
+      stop("X must be a two-column or three-column matrix of numbers")
+    else
+      return(NULL)
+  }
+
+  if(is.null(W)) {
+    if(fatal)
+      stop("x,y coords given but no window specified")
+    else
+      return(NULL)
+  } 
+    
+  if(is.function(W))
+    Z <- cobble.xy(X[,1], X[,2], W, fatal)
+  else {
+    win <- as.owin(W)
+    Z <- ppp(X[,1], X[,2], window = win, check=check)
+  }
+
+  # add marks from third column
+  if(ncol(X) == 3)
+    Z <- Z %mark% X[,3]
+
   return(Z)
 }
     

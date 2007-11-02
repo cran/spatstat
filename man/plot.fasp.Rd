@@ -9,7 +9,9 @@
 
 \usage{
    \method{plot}{fasp}(x,formule=NULL, \dots,
-                        subset=NULL, title=NULL, samex=TRUE)
+                        subset=NULL, title=NULL, samex=TRUE,
+                        banner=TRUE, outerlabels=TRUE,
+                        mar.panel=NULL)
 }
 
 \arguments{
@@ -28,7 +30,10 @@
     \code{default.formula} of \code{x}.  If that component is NULL
     as well, it gives up.
   }
-
+  \item{\dots}{
+    Arguments passed to \code{\link{plot.fv}} to control 
+    the individual plot panels. 
+  }
   \item{subset}{A logical vector, or a vector of indices, or an
      expression or a character string, or a \bold{list} of such,
      indicating a subset of the data to be included in each plot.
@@ -46,9 +51,16 @@
     It can only be set to \code{FALSE} if you are using the default plot style
     (i.e. only when \code{formule} is missing).
   }
-  \item{\dots}{
-    Arguments passed to \code{\link{plot.fv}} to control 
-    the individual plot panels. 
+  \item{banner}{Logical. If \code{TRUE}, the overall title is plotted.}
+  \item{outerlabels}{Logical.
+    If \code{TRUE}, the row and column names of the array of functions
+    are plotted in the margins of the array of plot panels.
+    If \code{FALSE}, each individual plot panel is labelled by its
+    row and column name.
+  }
+  \item{mar.panel}{Vector of length 4 giving the value of the
+    graphics parameter \code{mar} controlling the size of plot margins
+    for each individual plot panel. See \code{\link{par}}.
   }
 }
 
@@ -56,8 +68,7 @@
   An object of class \code{"fasp"} represents
   an array of summary functions, usually associated with a point
   pattern. See \code{\link{fasp.object}} for details.
-  Such an object might be created, for example, by \code{\link{alltypes}}
-  or \code{\link{allstats}}.
+  Such an object is created, for example, by \code{\link{alltypes}}.
 
   The function \code{plot.fasp} is
   a method for \code{plot}.  It calls \code{\link{plot.fv}} to plot the
@@ -100,7 +111,6 @@
 
 \seealso{
   \code{\link{alltypes}},
-  \code{\link{allstats}},
   \code{\link{plot.fv}},
   \code{\link{fasp.object}}
 }
@@ -117,14 +127,9 @@
                     asin(sqrt(theo))) ~ asin(sqrt(theo)))
        plot(X.G,fo=cbind(km-theo,0)~r,"r<=0.2")
 
-   # Swedish pines.
-   data(swedishpines)
-   X <- allstats(swedishpines,dataname="Swedish Pines")
-   plot(X,subset=list("r<=20","r<=20","r<=20","r<=50"))
-
    # Simulated data.
    pp <- runifpoint(350, owin(c(0,1),c(0,1)))
-   pp$marks <- factor(c(rep(1,50),rep(2,100),rep(3,200)))
+   pp <- pp \%mark\% factor(c(rep(1,50),rep(2,100),rep(3,200)))
    X.K <- alltypes(pp,type="K",verb=TRUE,dataname="Fake Data")
    plot(X.K,fo=cbind(border,theo)~theo,"theo<=0.75")
    }

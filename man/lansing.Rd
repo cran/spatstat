@@ -36,9 +36,6 @@
   point pattern object.
 }
 \usage{data(lansing)}
-\source{}
-\section{Notes}{
-}
 \references{
 Besag, J. (1978)
 Some methods of statistical analysis for spatial data.

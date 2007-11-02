@@ -3,6 +3,7 @@
 \alias{as.ppp.ppp}
 \alias{as.ppp.quad}
 \alias{as.ppp.matrix}
+\alias{as.ppp.data.frame}
 \alias{as.ppp.default}
 \title{Convert Data To Class ppp}
 \description{
@@ -15,6 +16,7 @@ for use by the \pkg{spatstat} package).
   \method{as.ppp}{ppp}(X, \dots, fatal=TRUE)
   \method{as.ppp}{quad}(X, \dots, fatal=TRUE)
   \method{as.ppp}{matrix}(X, W=NULL, \dots, fatal=TRUE)
+  \method{as.ppp}{data.frame}(X, W=NULL, \dots, fatal=TRUE)
   \method{as.ppp}{default}(X, W=NULL, \dots, fatal=TRUE)
 }
 \usage{
@@ -55,7 +57,7 @@ for use by the \pkg{spatstat} package).
     an object of class \code{"quad"} representing a quadrature scheme
     (see \code{\link{quad.object}})
     \item
-    a two-column matrix
+    a two-column or three-column matrix or data frame
     \item
     a structure with entries \code{x}, \code{y}
   }
@@ -64,6 +66,10 @@ for use by the \pkg{spatstat} package).
   by the function \code{\link{as.owin}}.
   In the first three cases, \code{W} will be ignored.
 
+  If \code{X} is a three-column matrix or data frame, the third column
+  will be interpreted as containing marks, and the result will be a
+  marked point pattern.
+  
   The argument \code{fatal} indicates what to do when 
   \code{W} is missing and \code{X} contains no
   information about the window. If \code{fatal=TRUE}, a fatal error

@@ -6,15 +6,18 @@
   point-and-click in the display.
 }
 \usage{
-  clickpoly(add=FALSE, n=NULL, ...)
+  clickpoly(add=FALSE, nv=NULL, np=1, ...)
 }
 \arguments{
   \item{add}{
     Logical value indicating whether to create a new plot
     (\code{add=FALSE}) or draw over the existing plot (\code{add=TRUE}).
   }
-  \item{n}{
+  \item{nv}{
     Number of vertices of the polygon (if this is predetermined).
+  }
+  \item{np}{
+    Number of polygons to create.
   }
   \item{\dots}{
     Arguments passed to \code{\link{locator}} to control the
@@ -31,19 +34,23 @@
   The user is prompted to point the mouse at any desired locations
   for the polygon vertices,
   and click the left mouse button to add each point.
-  Interactive input stops after \code{n} clicks (if \code{n} was given)
+  Interactive input stops after \code{nv} clicks (if \code{nv} was given)
   or when the middle mouse button is pressed.
 
   The return value is a window (object of class \code{"owin"})
   representing the polygon.
 
-  This function uses the \R{} command \code{\link{locator}} to
+  This function uses the \R command \code{\link{locator}} to
   input the mouse clicks. It only works on screen devices such as
   \sQuote{X11}, \sQuote{windows} and \sQuote{quartz}. Arguments that can be
   passed to \code{\link{locator}} through \code{\dots} include
   \code{pch} (plotting character), \code{cex} (character expansion
   factor) and \code{col} (colour). See \code{\link{locator}}
   and \code{\link{par}}.
+
+  Multiple polygons can also be drawn, by specifying
+  \code{np > 1}. The polygons must be disjoint. The result is 
+  a single window object consisting of all the polygons.
 }
 \seealso{
   \code{\link{identify.ppp}},

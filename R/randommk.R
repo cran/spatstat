@@ -90,12 +90,20 @@
     # coerce lambda to a list, to save confusion
     lam <- if(single.arg) lapply(1:ntypes, function(x, y){y}, y=lambda)
            else if(vector.arg) as.list(lambda) else lambda
+
+    # Ensure that m can be passed as a single value to function(x,y,m,...)
+    slice.fun <- function(x,y,fun,mvalue, ...) {
+      m <- if(length(mvalue) == 1) rep(mvalue, length(x)) else mvalue
+      result <- fun(x,y,m, ...)
+      return(result)
+    }
     
     # Simulate
     for(i in 1:ntypes) {
-      if(single.arg && is.function(lambda))
+      if(single.arg && is.function(lambda)) 
         # call f(x,y,m, ...)
-        Y <- rpoispp(lambda, lmax=maxes[i], win=win, types[i], ...)
+        Y <- rpoispp(slice.fun, lmax=maxes[i], win=win,
+                     fun=lambda, mvalue=types[i], ...)
       else
         # call f(x,y, ...) or use other formats
         Y <- rpoispp(lam[[i]], lmax=maxes[i], win=win, ...)

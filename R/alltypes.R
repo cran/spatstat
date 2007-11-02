@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.14 $   $Date: 2006/10/09 09:18:52 $
+#   $Revision: 1.15 $   $Date: 2007/10/30 17:15:35 $
 #
 #
 alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
@@ -13,6 +13,7 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
   if(!is.character(fun))
     stop(paste(sQuote("fun"), "should be a character string"))
   
+  if(is.null(dataname)) dataname <- deparse(substitute(pp))
   
 # select appropriate statistics
   
@@ -87,19 +88,17 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
 # build 'fasp' object
   fns  <- list()
   deform <- list()
-  
-  if(indices <= 1) {
-    witch <- matrix(1:nm,ncol=1,nrow=nm)
-    names(witch) <- um
-    titles <- if(nm > 1) as.list(paste("mark =", um)) else list("")
-  } else {
-    witch <- matrix(1:(nm^2),ncol=nm,nrow=nm,byrow=TRUE)
-    dimnames(witch) <- list(um, um)
-    titles <- if(nm > 1)
-      as.list(paste("(", um[t(row(witch))], ",", um[t(col(witch))], ")", sep=""))
-    else
-      list("")
-  }
+
+  marklabels <- paste(um)
+  witch <-
+    if(indices == 0) 
+      matrix(1, nrow=1, ncol=1, dimnames=list("", ""))
+    else if(indices == 1) 
+      matrix(1:nm, nrow=nm, ncol=1,
+             dimnames=list(marklabels, ""))
+    else 
+      matrix(1:(nm^2),ncol=nm,nrow=nm, byrow=TRUE,
+             dimnames <- list(marklabels, marklabels))
 
   # compute function array
   k   <- 0
@@ -115,14 +114,15 @@ alltypes <- function(pp, fun="K", dataname=NULL,verb=FALSE) {
       }
 
   # wrap up into 'fasp' object
-  if(is.null(dataname)) dataname <- deparse(substitute(pp))
-
   if(nm > 1)
 	title <- paste("Array of ",fun," functions for ",
               	dataname,".",sep="")
   else
 	title <- paste(fun," function for ",dataname,".",sep="")
 
-  rslt <- fasp(fns, titles, deform, witch, dataname, title)
+  rslt <- fasp(fns, which=witch,
+               formulae=deform,
+               dataname=dataname,
+               title=title)
   return(rslt)
 }

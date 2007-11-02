@@ -1,28 +1,29 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.16 $	$Date: 2006/10/09 03:17:44 $
+#	$Revision: 1.19 $	$Date: 2007/10/30 17:44:53 $
 #
 #
 #-----------------------------------------------------------------------------
 #
 
 # creator
-fasp <- function(fns, titles, formulae, which,
-                 dataname=NULL, title=NULL) {
-  stopifnot(is.matrix(which))
+fasp <- function(fns, which, formulae=NULL,
+                 dataname=NULL, title=NULL, rowNames=NULL, colNames=NULL) {
   stopifnot(is.list(fns))
+  stopifnot(is.matrix(which))
   stopifnot(length(fns) == length(which))
 
   fns <- lapply(fns, as.fv)
   n   <- length(which)
 
-  if(!missing(titles)) 
-    stopifnot(length(titles) == length(which))
-  else
-    titles <- lapply(seq(length(which)), function(i) NULL)
+  # set row and column labels
+  if(!is.null(rowNames))
+    rownames(which) <- rowNames
+  if(!is.null(colNames))
+    colnames(which) <- colNames
 
-  if(!missing(formulae)) {
+  if(!is.null(formulae)) {
     # verify format and convert to character vector
     formulae <- FormatFaspFormulae(formulae, "formulae")
     # ensure length matches length of "fns"
@@ -33,8 +34,9 @@ fasp <- function(fns, titles, formulae, which,
         stopifnot(length(formulae) == length(which))
   }
 
-  rslt <- list(fns=fns, titles=titles, default.formula=formulae,
-               which=which, dataname=dataname, title=title)
+  rslt <- list(fns=fns, 
+               which=which, default.formula=formulae,
+               dataname=dataname, title=title)
   class(rslt) <- "fasp"
   return(rslt)
 }
@@ -65,10 +67,11 @@ fasp <- function(fns, titles, formulae, which,
         newk <- cumsum(included)
         newwhich <- matrix(newk[whichIJ],
                            ncol=ncol(whichIJ), nrow=nrow(whichIJ))
+        rownames(newwhich) <- rownames(x$which)[I]
+        colnames(newwhich) <- colnames(x$which)[J]
 
         # create new fasp object
         Y <- fasp(fns      = x$fns[included],
-                  titles   = x$titles[included],
                   formulae = x$default.formula[included],
                   which    = newwhich,
                   dataname = x$dataname,
@@ -77,14 +80,31 @@ fasp <- function(fns, titles, formulae, which,
 }
 
 
+# print method
+
 print.fasp <- function(x, ...) {
   verifyclass(x, "fasp")
-  cat(paste("Function array (class", sQuote("fasp"), "\n"))
+  cat(paste("Function array (class", sQuote("fasp"), ")\n"))
   dim <- dim(x$which)
   cat(paste("Dimensions: ", dim[1], "x", dim[2], "\n"))
   cat(paste("Title:", if(is.null(x$title)) "(None)" else x$title, "\n"))
   invisible(NULL)
 }
+
+# other methods
+
+dimnames.fasp <- function(x) {
+  return(dimnames(x$which))
+}
+
+"dimnames<-.fasp" <- function(x, value) {
+  w <- x$which
+  dimnames(w) <- value
+  x$which <- w
+  return(x)
+}
+
+# other functions
 
 FormatFaspFormulae <- function(f, argname) {
   # f should be a single formula object, a list of formula objects,

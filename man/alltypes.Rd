@@ -136,7 +136,6 @@
 \seealso{
   \code{\link{plot.fasp}},
   \code{\link{fasp.object}},
-  \code{\link{allstats}},
   \code{\link{Fest}},
   \code{\link{Gest}},
   \code{\link{Jest}},

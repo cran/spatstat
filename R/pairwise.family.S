@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.17 $	$Date: 2007/04/16 08:42:53 $
+#    $Revision: 1.18 $	$Date: 2007/10/30 17:37:15 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -83,7 +83,7 @@ pairwise.family <-
              p[,,k] <- p[,,k] * coeff[k]
            y <- exp(apply(p, c(1,2), sum))
            ylim <- range(c(0, 1.1, y))
-           fns <- titles <- vector(m^2, mode="list")
+           fns <- vector(m^2, mode="list")
            which <- matrix(, m, m)
            for(i in seq(m)) {
              for(j in seq(m)) {
@@ -100,12 +100,12 @@ pairwise.family <-
                        "pairwise interaction term h(r)",
                        "reference value 1"))
                #
-               titles[[ijpos]] <- paste("(", types[i], ", ", types[j], ")", sep="")
              }
            }
-           funz <- fasp(fns, titles=titles, which=which,
+           funz <- fasp(fns, which=which,
                         formulae=list(cbind(h, one) ~ r),
-                        title="Fitted pairwise interactions")
+                        title="Fitted pairwise interactions",
+                        rowNames=paste(types), colNames=paste(types))
            do.call("plot.fasp",
                    resolve.defaults(list(funz),
                                     list(...),
