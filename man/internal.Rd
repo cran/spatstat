@@ -42,6 +42,8 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{diagnose.ppm.engine}
+\alias{dimnames.fasp}               
+\alias{dimnames<-.fasp}               
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
@@ -319,6 +321,8 @@ default.ntile(X)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
+\method{dimnames}{fasp}(x)
+\method{dimnames}{fasp}(x) <- value
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
@@ -333,7 +337,7 @@ erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(w)
-fasp(fns, titles, formulae, which, dataname, title)
+fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 fii(interaction, coefs, Vnames)
 FormatFaspFormulae(f, argname)

@@ -2,7 +2,7 @@
 #
 #   allstats.R
 #
-#   $Revision: 1.13 $   $Date: 2006/06/11 21:30:31 $
+#   $Revision: 1.14 $   $Date: 2007/10/30 17:15:35 $
 #
 #
 allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
@@ -14,53 +14,34 @@ allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
   if(is.marked(pp))
     stop("This function is applicable only to unmarked patterns.\n")
 
-# initialise  
-  fns <- list()
-  titles <- list()
-  deform <- list()
-  
 # estimate F, G and J 
   if(verb) cat("Calculating F, G, J ...")
   Jout <- do.call.matched("Jest",list(X=pp, ...))
   if(verb) cat("ok.\n")
 
-# extract empty space function F
+# extract F, G and J
   Fout <- attr(Jout, "F")
-  fns[[1]] <- Fout
-  titles[[1]] <- "F function"
-  deform[[1]] <- attr(Fout, "fmla")
-  if(verb) cat("F done.\n")
-
-# extract Nearest neighbour distance distribution function G
   Gout <- attr(Jout, "G")
-  fns[[2]] <- Gout
-  titles[[2]] <- "G function"
-  deform[[2]] <- attr(Gout, "fmla")
-  if(verb) cat("G done.\n")
-
-# extract J function
   attr(Jout, "F") <- NULL
   attr(Jout, "G") <- NULL
-  fns[[3]] <- Jout
-  titles[[3]] <- "J function"
-  deform[[3]] <- attr(Jout, "fmla")
-  if(verb) cat("J done.\n")
+  fns <- list("F function"=Fout,
+              "G function"=Gout,
+              "J function"=Jout)
 
 # compute second moment function K
-  fns[[4]] <- Kout <- do.call.matched("Kest", list(X=pp, ...))
-  titles[[4]] <- "K function"
-  deform[[4]] <- attr(Kout, "fmla")
-  if(verb) cat("K done.\n")
+  if(verb) cat("Calculating K function...")
+  Kout <- do.call.matched("Kest", list(X=pp, ...))
+  fns <- append(fns, list("K function"=Kout))
+  if(verb) cat("done.\n")
 
-# wrap into 'fasp' object
-  
-  witch <- matrix(1:4,2,2,byrow=TRUE)
-
+# add title
   if(is.null(dataname))
     dataname <- deparse(substitute(pp))
   title <- paste("Four summary functions for ",
               	dataname,".",sep="")
+  attr(fns, "title") <- title
 
-  rslt <- fasp(fns, titles, deform, witch, dataname, title)
-  return(rslt)
+#
+  class(fns) <- c("listof", class(fns))
+  return(fns)
 }

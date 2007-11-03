@@ -20,7 +20,8 @@ data(betacells)
 plot(betacells)
 
 data(bramblecanes)
-plot(bramblecanes)
+plot(bramblecanes, cols=1:3)
+plot(split(bramblecanes))
 
 data(cells)
 plot(cells)
@@ -49,6 +50,7 @@ plot(japanesepines)
 
 data(lansing)
 plot(lansing)
+plot(split(lansing))
 
 data(longleaf)
 plot(longleaf)
@@ -71,7 +73,11 @@ data(redwoodfull)
 redwoodfull.extra$plot()
 
 data(residualspaper)
-residualspaper$plotfig(1)
+plot(residualspaper$Fig1)
+plot(residualspaper$Fig4a)
+plot(residualspaper$Fig4b)
+plot(residualspaper$Fig4c)
+
 
 data(simdat)
 plot(simdat)

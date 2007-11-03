@@ -56,8 +56,6 @@ rthin(X, P, \dots)
 \value{
   A point pattern (object of class \code{"ppp"}).
 }
-\references{
-}
 \examples{
   data(redwood)
   plot(redwood, main="thinning")

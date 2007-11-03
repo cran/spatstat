@@ -26,12 +26,8 @@
   For multitype point patterns the command \code{\link{alltypes}}
   will compute arrays of summary functions for each possible
   type or for each possible pair of types.
-  For univariate (single-type) point patterns the command
-  \code{\link{allstats}} will compute an array of
-  different summary functions \eqn{F}, \eqn{G}, \eqn{J},
-  \eqn{K} for the same dataset.
-  Both \code{\link{alltypes}} and \code{\link{allstats}}
-  return an object of class \code{"fasp"}.
+  The function \code{\link{alltypes}} 
+  returns an object of class \code{"fasp"}.
 
   There are methods for \code{plot}, \code{print} and \code{"["} in this class.
   The plot method displays the entire array of functions.
@@ -66,22 +62,10 @@
 }
 \seealso{
   \code{\link{alltypes}},
-  \code{\link{allstats}},
   \code{\link{plot.fasp}},
   \code{\link{[.fasp}}
 }
 \examples{
-  # unmarked point pattern
-  data(swedishpines)
-  \testonly{
-	# smaller dataset
-	swedishpines <- swedishpines[1:30]
-  }
-  a <- allstats(swedishpines,dataname="Swedish Pines")
-  a
-  plot(a)
-  plot(a[1,])
-
   # multitype point pattern
   data(amacrine)
   a <- alltypes(amacrine, "G")

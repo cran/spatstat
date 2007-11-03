@@ -50,19 +50,18 @@
   for \code{pp} given in the call to \code{allstats}.
 }
 \value{
-  A function array (an object of class \code{"fasp"},
-  see \code{\link{fasp.object}}). This can be plotted
-  using \code{\link{plot.fasp}}.
+  A list of length 4 containing the \eqn{F}, \eqn{G}, \eqn{J} and
+  \eqn{K} functions respectively. 
 
-  The function array has dimensions \eqn{2 \times 2}{2 * 2}
-  with the entries at positions \code{[1,1]},
-  \code{[1,2]}, \code{[2,1]} and \code{[2,2]} 
-  representing \eqn{F(r)}, \eqn{G(r)}, \eqn{J(r)} and \eqn{K(r)} respectively.
-  
-  Each function entry \code{fns[[i]]} retains the format
+  The list can be plotted directly using \code{plot} (which dispatches to
+  \code{\link{plot.listof}}). 
+
+  Each list entry retains the format
   of the output of the relevant estimating routine
   \code{\link{Fest}}, \code{\link{Gest}}, \code{\link{Jest}} or
-  \code{\link{Kest}}. 
+  \code{\link{Kest}}. Thus each entry in the list is
+  a function value table (object of class \code{"fv"},
+  see \code{\link{fv.object}}).
 
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J, and
@@ -76,13 +75,13 @@
   \url{http://www.math.unb.ca/~rolf}
   }
 \seealso{
-         \code{\link{plot.fasp}},
-         \code{\link{fasp.object}},
+         \code{\link{plot.listof}},
+         \code{\link{plot.fv}},
+         \code{\link{fv.object}},
          \code{\link{Fest}},
          \code{\link{Gest}},
          \code{\link{Jest}},
-         \code{\link{Kest}},
-	 \code{\link{alltypes}}
+         \code{\link{Kest}}
 }
 
 \examples{
