@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.8 $ $Date: 2007/03/16 03:31:37 $
+# $Revision: 1.9 $ $Date: 2007/11/12 13:37:49 $
 #
 # This has been taken out of ppp.S
 #
@@ -27,7 +27,8 @@
     isppp <- unlist(lapply(arglist, is.ppp))
     Wlist <- lapply(arglist[isppp], function(x) { x$window })
     # compute bounding boxes of other arguments
-    Blist <- lapply(arglist[!isppp], bounding.box.xy)
+    isnull <- unlist(lapply(arglist, is.null))
+    Blist <- lapply(arglist[!isppp & !isnull], bounding.box.xy)
     Wlist <- append(Wlist, Blist)
     # take the union of all the windows
     W <- Wlist[[1]]

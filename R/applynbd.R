@@ -1,6 +1,6 @@
 # 	applynbd.R
 #
-#     $Revision: 1.10 $     $Date: 2006/10/10 04:22:48 $
+#     $Revision: 1.12 $     $Date: 2007/12/18 15:58:03 $
 #
 #  applynbd()
 # For each point, identify either
@@ -60,15 +60,30 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
      a <- array(c(included, dist, drank, row(included)), dim=c(npts,npts,4))
 
      # what to do with a[i, , ]
-     go <- function(ai, Z, fun, ...) { 
-	which <- as.logical(ai[,1])
-        distances <- ai[,2]
-	dranks <- ai[,3]
-        here <- ai[1,4]	
-	fun(Y=Z[which], current=c(x=Z$x[here], y=Z$y[here]),
-            dists=distances[which], dranks=dranks[which], ...) 
-     }
+     if(!is.marked(X)) 
+       go <- function(ai, Z, fun, ...) { 
+         which <- as.logical(ai[,1])
+         distances <- ai[,2]
+         dranks <- ai[,3]
+         here <- ai[1,4]
+         fun(Y=Z[which],
+             current=c(x=Z$x[here], y=Z$y[here]),
+             dists=distances[which], dranks=dranks[which],
+             ...) 
+       }
+     else
+       go <- function(ai, Z, fun, ...) { 
+         which <- as.logical(ai[,1])
+         distances <- ai[,2]
+         dranks <- ai[,3]
+         here <- ai[1,4]
+         fun(Y=Z[which],
+             current=Z[here],
+             dists=distances[which], dranks=dranks[which],
+             ...) 
+       }
 
+     # do it
      result <- apply(a, 1, go, Z=X, fun=FUN, ...)
   
      return(result)

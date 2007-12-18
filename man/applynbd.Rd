@@ -72,42 +72,65 @@
   Also the argument \code{exclude} determines whether
   the current point is excluded from its own neighbourhood.
 
-  If \code{N} is given, then the neighbours of the current
-  point are the \code{N} points of \code{X} which are closest to
-  the current point (including the current point itself
-  unless \code{exclude=TRUE}).
-  If \code{R} is given, then the neighbourhood of the current point
-  consists of all points of \code{X} which lie closer than a distance \code{R}
-  from the current point.
-  If \code{criterion} is given, then it must be a function
-  with two arguments \code{dist} and \code{drank} which will be
-  vectors of equal length.
-  The interpretation is that \code{dist[i]} will be the
-  distance of a point from the current point, and
-  \code{drank[i]} will be the rank of that distance (the three points
-  closest to the current point will have rank 1, 2 and 3).
-  This function must return a logical vector of the same length
-  as \code{dist} and \code{drank} whose \code{i}-th entry is
-  \code{TRUE} if the corresponding point should be included in
-  the neighbourhood. See the examples below.
+  \itemize{
+    \item 
+    If \code{N} is given, then the neighbours of the current
+    point are the \code{N} points of \code{X} which are closest to
+    the current point (including the current point itself
+    unless \code{exclude=TRUE}).
+    \item
+    If \code{R} is given, then the neighbourhood of the current point
+    consists of all points of \code{X} which lie closer than a distance \code{R}
+    from the current point.
+    \item 
+    If \code{criterion} is given, then it must be a function
+    with two arguments \code{dist} and \code{drank} which will be
+    vectors of equal length.
+    The interpretation is that \code{dist[i]} will be the
+    distance of a point from the current point, and
+    \code{drank[i]} will be the rank of that distance (the three points
+    closest to the current point will have rank 1, 2 and 3).
+    This function must return a logical vector of the same length
+    as \code{dist} and \code{drank} whose \code{i}-th entry is
+    \code{TRUE} if the corresponding point should be included in
+    the neighbourhood. See the examples below.
+  }
 
-  Each point of \code{X} is visited; the neighbourhood
-  of the current point is determined, and stored as a point pattern
-  \code{Y}; then the function \code{FUN} is called as:
+  When \code{applynbd} is executed, 
+  each point of \code{X} is visited, and the following happens
+  for each point:
+  \itemize{
+    \item
+    the neighbourhood of the current point is determined according
+    to the chosen rule, and stored as a point pattern \code{Y};
+    \item
+    the function \code{FUN} is called as:
   
-  \code{FUN(Y=Y, current=current, dists=dists, dranks=dranks, \dots)}
+    \code{FUN(Y=Y, current=current, dists=dists, dranks=dranks, \dots)}
 
-  where \code{current} is a vector of length 2 giving the coordinates of the
-  current point, \code{dists} is a vector of distances from the current
-  point to each of the points in \code{Y}, 
-  \code{dranks} is a vector of the ranks of these distances
-  with respect to the full point pattern \code{X},
-  and \code{\dots} are the arguments passed from the call to
-  \code{applynbd}.
-
+    where \code{current} is the location of the current point
+    (in a format explained below),
+    \code{dists} is a vector of distances from the current
+    point to each of the points in \code{Y}, 
+    \code{dranks} is a vector of the ranks of these distances
+    with respect to the full point pattern \code{X},
+    and \code{\dots} are the arguments passed from the call to
+    \code{applynbd};
+    \item
+    The result of the call to \code{FUN} is stored.
+  }
   The results of each call to \code{FUN} are collected and returned
   according to the usual rules for \code{\link{apply}} and its
-  relatives. See \bold{Value} above.
+  relatives. See the \bold{Value} section of this help file.
+
+  The format of the argument \code{current} is as follows.
+  If \code{X} is an unmarked point pattern, then \code{current} is a
+  vector of length 2 containing the coordinates of the current point.
+  If \code{X} is marked, then \code{current} is a point pattern
+  containing exactly one point, so that \code{current$x} is its
+  \eqn{x}-coordinate and \code{current$marks} is its mark value.
+  In either case, the coordinates of the current point can be referred to as
+  \code{current$x} and \code{current$y}.
 
   Note that \code{FUN} will be called exactly as described above,
   with each argument named explicitly. Care is required when writing the
@@ -154,10 +177,10 @@
 	plot(fullpicture, main="")
 	points(Y, cex=2)
         u <- current
-	points(u[1],u[2],pch="+",cex=3)
+	points(u$x,u$y,pch="+",cex=3)
 	theta <- seq(0,2*pi,length=100)
-	polygon(u[1]+ rad * cos(theta),u[2]+rad*sin(theta))
-	text(u[1]+rad/3,u[2]+rad/2,Y$n,cex=3)
+	polygon(u$x+ rad * cos(theta),u$y+rad*sin(theta))
+	text(u$x+rad/3,u$y+rad/2,Y$n,cex=3)
 	Sys.sleep(if(runif(1) < 0.1) 1.5 else 0.3)
 	return(Y$n - 1)
   }

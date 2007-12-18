@@ -3,14 +3,14 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.38 $  $Date: 2007/10/24 09:41:15 $
+#   $Revision: 1.39 $  $Date: 2007/12/18 17:02:34 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
                      ..., simulate=NULL, verbose=TRUE, clipdata=TRUE, 
                      start=NULL, control=list(nrep=1e5, expand=1.5),
                      transform=NULL, global=FALSE, ginterval=NULL,
-                     saveall=FALSE) {
+                     saveall=FALSE, nsim2=nsim) {
   cl <- match.call()
   Yname <- deparse(substitute(Y))
   # determine type of simulation
@@ -68,7 +68,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
   stop(paste(sQuote("object"),
              "should be a point process model or a point pattern"))
 
-  
   # set up simulation parameters
   metrop <- !is.null(model)
   if(metrop) {
@@ -159,17 +158,24 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
   alim <- attr(funX, "alim")
   if(global && is.null(ginterval))
     ginterval <- alim
+
+  #####
+  ## determine whether dual simulations are required
+  ## (one set of simulations to calculate the theoretical mean,
+  ##  another independent set of simulations to obtain the critical point.)
+  dual <- (global && !csr)
+  Nsim <- if(!dual) nsim else (nsim + nsim2)
   
   ######### simulate #######################
   if(verbose)
-    cat(paste("Generating", nsim, "simulations",
+    cat(paste("Generating", Nsim, "simulations",
               if(csr) "of CSR" else if(metrop) "of model" else NULL,
               "...\n"))
   nrvals <- length(rvals)
-  simvals <- matrix(, nrow=nrvals, ncol=nsim)
+  simvals <- matrix(, nrow=nrvals, ncol=Nsim)
 
   # start simulation loop 
-  for(i in 1:nsim) {
+  for(i in 1:Nsim) {
     if(metrop)
       Xsim <- rmh(rmodel, rstart, rcontr, verbose=FALSE)
     else {
@@ -223,7 +229,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
       
     simvals[ , i] <- funXsim[[valname]]
     if(verbose)
-      progressreport(i, nsim)
+      progressreport(i, Nsim)
   }
   ##  end simulation loop
   
@@ -260,8 +266,13 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
     simvals <- simvals[domain, ]
     if(csr)
       theory <- funX[["theo"]]
-    else
-      theory <- m <- apply(simvals, 1, mean, na.rm=TRUE)
+    else {
+      # use the first 'nsim' results to estimate the mean under H0
+      theory <- m <- apply(simvals[, 1:nsim], 1, mean, na.rm=TRUE)
+      # then discard them and use the remaining 'nsim2' simulations
+      # to construct the envelopes.
+      simvals <- simvals[, nsim + 1:nsim2]
+    }
     # compute max absolute deviations
     deviations <- sweep(simvals, 1, theory)
     suprema <- apply(abs(deviations), 2, max, na.rm=TRUE)
@@ -311,7 +322,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
                                 csr=csr,
                                 nrank=nrank,
                                 nsim=nsim,
-                                global=global)
+                                global=global,
+                                dual=dual,
+                                nsim2=nsim2)
   if(saveall) {
     alldata <- cbind(rvals, simvals)
     simnames <- paste("sim", 1:nsim, sep="")
@@ -336,14 +349,18 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
 print.envelope <- function(x, ...) {
   e <- attr(x, "einfo")
   g <- e$global
+  csr <- e$csr
   nr <- e$nrank
   nsim <- e$nsim
-  csr <- e$csr
   fname <- deparse(attr(x, "ylab"))
   type <- if(g) "Simultaneous" else "Pointwise"
   cat(paste(type, "critical envelopes for", fname, "\n"))
   cat(paste("Obtained from", nsim,
             "simulations of", if(csr) "CSR" else "fitted model", "\n"))
+  if(!is.null(e$dual) && e$dual) 
+    cat(paste("Theoretical (i.e. null) mean value of", fname,
+              "estimated from a separate set of",
+              e$nsim2, "simulations\n"))
   if(!is.null(attr(x, "savedata"))) 
     cat("(All simulated values are stored)\n")
   alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }

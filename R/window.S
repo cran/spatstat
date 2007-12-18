@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.70 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 4.71 $	$Date: 2007/11/13 22:33:29 $
 #
 #
 #	A window may be either
@@ -785,6 +785,7 @@ print.summary.owin <- function(x, ...) {
   verifyclass(x, "summary.owin")
   unitinfo <- summary(x$units)
   pluralunits <- unitinfo$plural
+  singularunits <- unitinfo$singular
   cat("Window: ")
   switch(x$type,
          rectangle={
@@ -831,7 +832,9 @@ print.summary.owin <- function(x, ...) {
               signif(x$yrange[2], 5),
               "] ",
               pluralunits, "\n", sep=""))
-  cat(paste("Window area = ", signif(x$area, 6), "square", pluralunits, "\n"))
+  Area <- signif(x$area, 6)
+  cat(paste("Window area = ", Area, "square",
+            if(Area == 1) singularunits else pluralunits, "\n"))
   if(!is.null(ledge <- unitinfo$legend))
     cat(paste(ledge, "\n"))
   return(invisible(x))

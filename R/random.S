@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.27 $   $Date: 2007/09/22 02:04:13 $
+#    $Revision: 4.28 $   $Date: 2007/11/11 15:05:11 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -238,7 +238,13 @@ rpoint <- function(n, f, fmax=NULL,
     if(is.numeric(lambda) && !(length(lambda) == 1 && lambda >= 0))
       stop(paste(sQuote("lambda"),
                  "must be a single, nonnegative number"))
-
+    if(!is.null(lmax)) {
+      if(!is.numeric(lmax))
+        stop("lmax should be a number")
+      if(length(lmax) > 1)
+        stop("lmax should be a single number")
+    }
+      
     win <- if(is.im(lambda))
       rescue.rectangle(as.owin(lambda))
     else
@@ -255,7 +261,7 @@ rpoint <- function(n, f, fmax=NULL,
       imag <- as.im(lambda, win, ...)
       summ <- summary(imag)
       lmax <- summ$max + 0.05 * diff(summ$range)
-    }
+    } 
 
     if(is.function(lambda)) {
       X <- runifpoispp(lmax, win)  # includes sanity checks on `lmax'

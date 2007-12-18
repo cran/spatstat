@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.22 $     $Date: 2007/04/05 09:00:56 $
+#      $Revision: 1.23 $     $Date: 2007/11/13 22:22:24 $
 #
 #
 #      Interpoint distances
@@ -90,7 +90,7 @@ pairdist.default <-
          },
          stop(paste("Unrecognised method", sQuote(method)))
        )
-  invisible(d)
+  return(d)
 }
 
 nndist <- function(X, ..., method="C") {
@@ -180,7 +180,7 @@ nndist.default <-
          },
          stop(paste("Unrecognised method", sQuote(method)))
          )
-  invisible(nnd)
+  return(nnd)
 }
 
 nnwhich <- function(X, ..., method="C") {
