@@ -1,7 +1,7 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.10 $  $Date: 2007/04/20 03:14:47 $
+# $Revision: 1.11 $  $Date: 2007/11/12 13:26:46 $
 #
 
 unique.ppp <- function(x, ...) {
@@ -16,7 +16,7 @@ duplicated.ppp <- function(x, ...) {
   # marked points - split by mark value
   if(is.marked(x)) {
     m <- marks(x)
-    um <- unique(m)
+    um <- if(is.factor(m)) levels(m) else unique(m)
     xx <- unmark(x)
     result <- logical(n)
     for(i in seq(um)) {

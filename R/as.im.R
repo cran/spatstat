@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.11 $   $Date: 2007/10/24 09:41:15 $
+#    $Revision: 1.12 $   $Date: 2007/11/11 13:56:27 $
 #
 #    as.im()
 #
@@ -70,17 +70,28 @@ as.im <- function(X, W=as.mask(as.owin(X), dimyx=dimyx), ...,
     m <- W$m
     funnywindow <- !all(m)
 
-    xx <- raster.x(W)
-    yy <- raster.y(W)
+    xx <- as.vector(raster.x(W))
+    yy <- as.vector(raster.y(W))
     lev <- NULL
-    
+
+    # evaluate function value at each pixel 
     if(!funnywindow) 
-      values <- f(as.vector(xx), as.vector(yy), ...)
+      values <- f(xx, yy, ...)
     else {
-      valuesinside <- f(as.vector(xx[m]), as.vector(yy[m]), ...)
+      # evaluate only inside window
       inside <- as.vector(m)
-      values <- vector(mode=typeof(valuesinside), length=length(m))
-      values[inside] <- valuesinside
+      val <- f(xx[inside], yy[inside], ...)
+      # create space for full matrix
+      msize <- length(m)
+      values <-
+        if(!is.factor(val))
+          vector(mode=typeof(val), length=msize)
+        else {
+          lev <- levels(val)
+          factor(rep(lev[1], msize), levels=lev)
+        }
+      # copy values, assigning NA outside window
+      values[inside] <- val
       values[!inside] <- NA
     }
 

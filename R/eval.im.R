@@ -5,7 +5,7 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.12 $     $Date: 2006/05/29 03:43:46 $
+#     $Revision: 1.14 $     $Date: 2007/11/11 13:32:37 $
 #
 
 eval.im <- function(expr) {
@@ -46,7 +46,8 @@ eval.im <- function(expr) {
   #
   # reshape, etc
   lev <- if(is.factor(v)) levels(v) else NULL
-  result <- im(v, template$xcol, template$yrow, lev=lev)
+  result <- im(v, template$xcol, template$yrow, lev=lev,
+               unitname=unitname(template))
   return(result)
 }
   
@@ -61,6 +62,7 @@ compatible.im <- function(A, B, tol=1e-6) {
                  abs(A$yrow - B$yrow))
   xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
   yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
-  return(xok && yok)
+  uok <- identical(all.equal(unitname(A), unitname(B)), TRUE)
+  return(xok && yok && uok)
 }
 

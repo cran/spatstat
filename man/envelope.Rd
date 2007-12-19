@@ -8,7 +8,8 @@
   envelope(Y, fun=Kest, nsim=99, nrank=1, \dots,
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
-  transform=NULL,global=FALSE,ginterval=NULL, saveall=FALSE)
+  transform=NULL,global=FALSE,ginterval=NULL, saveall=FALSE,
+  nsim2=nsim)
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
@@ -69,6 +70,11 @@
     }
     \item{saveall}{
       Logical flag indicating whether to save all the simulated curves.
+    }
+    \item{nsim2}{
+      Number of simulated point patterns to be generated when estimating
+      the theoretical mean of the function by simulation, in the case
+      \code{global=TRUE}.
     }
 }
 \value{
@@ -156,9 +162,10 @@
     \item{simultaneous:}{if \code{global=TRUE}, then the envelopes are
       determined as follows. First we calculate the theoretical mean value of
       the summary statistic (if we are testing CSR, the theoretical
-      value is supplied by \code{fun}; otherwise we compute the
-      average of all the simulated values and take this as an estimate
-      of the theoretical mean value). Then, for each simulation,
+      value is supplied by \code{fun}; otherwise we perform a separate
+      set of \code{nsim2} simulations, compute the
+      average of all these simulated values, and take this average
+      as an estimate of the theoretical mean value). Then, for each simulation,
       we compare the simulated curve to the theoretical curve, and compute the
       maximum absolute difference between them (over the interval
       of \eqn{r} values specified by \code{ginterval}). This gives a
@@ -284,9 +291,11 @@
  fit <- ppm(cells, ~1, Strauss(0.05))
  \dontrun{
  plot(envelope(fit))
+ plot(envelope(fit), global=TRUE)
  }
  \testonly{
   plot(envelope(fit, nsim=4))
+  plot(envelope(fit, nsim=4, global=TRUE))
  }
 
  # Envelope of G function under CSR
@@ -337,6 +346,10 @@
  \testonly{
   plot(envelope(cells, Gest, simulate=expression(runifpoint(42)), nsim=4))
   plot(envelope(cells, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=4))
+  plot(envelope(cells, Gest, simulate=expression(runifpoint(42)),
+nsim=4, global=TRUE))
+  plot(envelope(cells, Gest, simulate=expression(rMaternI(100, 0.02)),
+nsim=4, global=TRUE))
  }
 
  # Envelope under random toroidal shifts

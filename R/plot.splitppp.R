@@ -1,6 +1,7 @@
 #
 plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
-                                         nrows=NULL, ncols=NULL) {
+                                         nrows=NULL, ncols=NULL,
+                                         mar.panel=c(2,1,1,2)) {
   xname <- deparse(substitute(x))
 
   if(is.null(names(x)))
@@ -53,7 +54,7 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
     text(0,0,main, cex=cex)
   }
   # plot panels
-  npa <- par(mar=c(2,1,1,2))
+  npa <- par(mar=mar.panel)
   if(!banner) opa <- npa
   lapply(names(x),
          function(l, x, ...){plot(x[[l]], main=l, ...)},

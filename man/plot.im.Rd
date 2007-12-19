@@ -54,11 +54,15 @@
   maximum pixel values in the image \code{x}, rendered according to
   the chosen colour map.
   
-  Graphical parameters controlling the display of both the pixel image
+  The colour map for the image is controlled by the arguments
+  \code{zlim} (determining the range of pixel values to be mapped)
+  and \code{col} (determining the colour values for this range).
+  These arguments are passed to the function \code{\link{image.default}}.
+  For examples of the use of these arguments, see \code{\link{image.default}}.
+
+  Other graphical parameters controlling the display of both the pixel image
   and the ribbon are passed through the \code{...} arguments
   directly to the function \code{\link{image.default}}.
-  In particular, the colour map is controlled by the argument
-  \code{col}. See the examples in \code{\link{image.default}}.
 
   To suppress the axis tick marks and labels, set \code{axes=FALSE}.
 }
