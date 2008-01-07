@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.14 $ $Date: 2007/09/22 01:53:59 $
+# $Revision: 1.15 $ $Date: 2007/12/20 10:35:01 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -11,7 +11,7 @@ lurking <- function(object, covariate, type="eem",
                     plot.sd, plot.it=TRUE,
                     typename,
                     covname, oldstyle=FALSE,
-                    check=TRUE, ...) {
+                    check=TRUE, ..., splineargs=list()) {
   # validate
   verifyclass(object, "ppm")
 
@@ -147,11 +147,17 @@ lurking <- function(object, covariate, type="eem",
   #  Estimated by spline smoothing
     if(!cumulative) {
       # fit smoothing spline to (A) 
-      ss <- smooth.spline(covsort, cummark, ...)
+      ss <- do.call("smooth.spline",
+                    append(list(covsort, cummark),
+                           splineargs)
+                    )
       # estimate derivative of (A)
       derivmark <- predict(ss, covsort, deriv=1)$y 
       # similarly for (B) 
-      ss <- smooth.spline(cvalues, mean0, ...)
+      ss <- do.call("smooth.spline",
+                    append(list(cvalues, mean0),
+                           splineargs)
+                    )
       derivmean <- predict(ss, cvalues, deriv=1)$y
     }
   
@@ -274,16 +280,33 @@ lurking <- function(object, covariate, type="eem",
                     na.rm=TRUE)
 
       # start plot
-      plot(covrange, mr, type="n", xlab=covname,
-           ylab=paste(if(cumulative)"cumulative" else "marginal", typename))
+      vname <- paste(if(cumulative)"cumulative" else "marginal", typename)
+      do.call("plot",
+              resolve.defaults(
+                               list(covrange, mr),
+                               list(type="n"),
+                               list(...),
+                               list(xlab=covname, ylab=vname)))
       # (A)/(A') Empirical
-      lines(value ~ covariate, empirical)
+      lines(value ~ covariate, empirical, ...)
       # (B)/(B') Theoretical mean
-      lines(mean ~ covariate, theoretical, lty=2)
+      do.call("lines",
+              resolve.defaults(
+                               list(mean ~ covariate, theoretical),
+                               list(...),
+                               list(lty=2)))
       # (C) Standard deviation 
       if(!is.null(theoretical$sd)) {
-        lines(mean + 2 * sd ~ covariate, theoretical, lty=3)
-        lines(mean - 2 * sd ~ covariate, theoretical, lty=3)
+        do.call("lines",
+                resolve.defaults(
+                                 list(mean + 2 * sd ~ covariate, theoretical),
+                                 list(...),
+                                 list(lty=3)))
+        do.call("lines",
+                resolve.defaults(
+                                 list(mean - 2 * sd ~ covariate, theoretical),
+                                 list(...),
+                                 list(lty=3)))
       }
     }
   

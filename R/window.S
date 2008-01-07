@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.71 $	$Date: 2007/11/13 22:33:29 $
+#	$Revision: 4.74 $	$Date: 2008/01/07 10:27:24 $
 #
 #
 #	A window may be either
@@ -84,16 +84,12 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   # avoid re-checking if already checked
   check <- resolve.defaults(list(...), list(check=TRUE))$check
   if(!check) {
-    area.w <- resolve.defaults(list(...), list(area=NULL))$area
     if(!poly.given && !mask.given) 
         w <- list(type="rectangle",
-                  xrange=xrange, yrange=yrange, units=unitname,
-                  area=
-                  if(!is.null(area.w)) area.w else (diff(xrange)*diff(yrange)))
+                  xrange=xrange, yrange=yrange, units=unitname)
       else if(poly.given) 
         w <- list(type="polygonal",
-                  xrange=xrange, yrange=yrange, bdry=poly, units=unitname,
-                  area=area.w)
+                  xrange=xrange, yrange=yrange, bdry=poly, units=unitname)
       else if(mask.given) {
         nc <- ncol(mask)
         nr <- nrow(mask)
@@ -111,8 +107,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                   xcol     = xcol,
                   yrow     = yrow,
                   m        = mask,
-                  units    = unitname,
-                  area     = area.w)
+                  units    = unitname)
       }
       class(w) <- "owin"
       return(w)
@@ -124,8 +119,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
       stop("xrange should be a vector of length 2 giving (xmin, xmax)")
     if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
       stop("yrange should be a vector of length 2 giving (ymin, ymax)")
-    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=unitname,
-              area=diff(xrange) * diff(yrange))
+    w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=unitname)
     class(w) <- "owin"
     return(w)
   } else if(poly.given) {
@@ -175,8 +169,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     }
 
     w <- list(type="polygonal",
-              xrange=xrange, yrange=yrange, bdry=bdry, units=unitname,
-              area=w.area)
+              xrange=xrange, yrange=yrange, bdry=bdry, units=unitname)
     class(w) <- "owin"
     # check for intersection or self-intersection
     if(check) { 
@@ -213,8 +206,6 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     xstep <- diff(xrange)/nc
     ystep <- diff(yrange)/nr
 
-    w.area <- sum(mask) * xstep * ystep
-  
     out <- list(type     = "mask",
                 xrange   = xrange,
                 yrange   = yrange,
@@ -225,8 +216,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                 xcol    = seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc),
                 yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr),
                 m       = mask,
-                units   = unitname,
-                area    = w.area)
+                units   = unitname)
     class(out) <- "owin"
     return(out)
   }
@@ -250,7 +240,7 @@ as.owin <- function(W, ..., fatal=TRUE) {
 
 as.owin.owin <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "owin", fatal=fatal)) 
-    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, unitname=unitname(W), check=FALSE, area=W$area))
+    return(owin(W$xrange, W$yrange, poly=W$bdry, mask=W$m, unitname=unitname(W), check=FALSE))
   else
     return(NULL)
 }
@@ -577,7 +567,7 @@ bounding.box <- function(...) {
                  bdry <- w$bdry
                  xr <- range(unlist(lapply(bdry, function(a) a$x)))
                  yr <- range(unlist(lapply(bdry, function(a) a$y)))
-                 return(owin(xr, yr))
+                 return(owin(xr, yr, unitname=unitname(w)))
                },
                mask = {
                  m <- w$m
@@ -585,7 +575,7 @@ bounding.box <- function(...) {
                  y <- raster.y(w)
                  xr <- range(x[m]) + c(-1,1) * w$xstep/2
                  yr <- range(y[m]) + c(-1,1) * w$ystep/2
-                 return(owin(xr, yr))
+                 return(owin(xr, yr, unitname=unitname(w)))
                },
                stop("unrecognised window type", w$type)
                )

@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.21 $	$Date: 2007/03/16 08:52:59 $
+#	$Revision: 4.26 $	$Date: 2008/01/07 10:20:07 $
 #
 #
 #
@@ -10,9 +10,6 @@
 #-------------------------------------
 area.owin <- function(w) {
 	verifyclass(w, "owin")
-        # area may be precomputed
-        if(!is.null(w$area))
-          return(w$area)
         switch(w$type,
                rectangle = {
 		width <- abs(diff(w$xrange))
@@ -87,6 +84,11 @@ square <- function(r=1) {
 
 overlap.owin <- function(A, B) {
   # compute the area of overlap between two windows
+  
+  # check units
+  if(!compatible.units(unitname(A), unitname(B)))
+    warning("The two windows have incompatible units of length")
+  
   At <- A$type
   Bt <- B$type
   if(At=="rectangle" && Bt=="rectangle") {
@@ -141,6 +143,10 @@ intersect.owin <- function(A, B, ...) {
   if(identical(A, B))
     return(A)
 
+  # check units
+  if(!compatible.units(unitname(A), unitname(B)))
+    warning("The two windows have incompatible units of length")
+  
   Arect <- (A$type == "rectangle")
   Brect <- (B$type == "rectangle")
   Amask <- (A$type == "mask")
@@ -155,7 +161,11 @@ intersect.owin <- function(A, B, ...) {
   if(Arect && Brect)
     return(C)
 
-  # Trim any existing masks to the intersection of the two ranges
+  # Restrict domain where possible 
+  if(Arect)
+    A <- C
+  if(Brect)
+    B <- C
   if(Amask)
     A <- trim.mask(A, C)
   if(Bmask)
@@ -194,10 +204,15 @@ intersect.owin <- function(A, B, ...) {
       return(restrict.mask(B, A))
   }
   
-  # No existing masks.
-  # Convert A to a mask with default pixel raster, and intersect.
-  A <- as.mask(A)
-  return(restrict.mask(A, B))
+  # No existing masks. No clipping applied so far.
+  # Convert one window to a mask with default pixel raster, and intersect.
+  if(Arect) {
+    A <- as.mask(A)
+    return(restrict.mask(A, B))
+  } else {
+    B <- as.mask(B)
+    return(restrict.mask(B, A))
+  }
 }
 
 
@@ -208,6 +223,10 @@ union.owin <- function(A, B, ...) {
   if(identical(A, B))
     return(A)
 
+  # check units
+  if(!compatible.units(unitname(A), unitname(B)))
+    warning("The two windows have incompatible units of length")
+  
   if(A$type == "rectangle" && B$type == "rectangle") {
     if(is.subset.owin(A, B))
       return(B)
@@ -254,7 +273,11 @@ union.owin <- function(A, B, ...) {
   
 trim.mask <- function(M, R) {
     # M is a mask,
-    # R is a rectangle inside bounding.box(M)
+    # R is a rectangle
+  
+    # Ensure R is a subset of bounding rectangle of M
+    R <- owin(intersect.ranges(M$xrange, R$xrange),
+              intersect.ranges(M$yrange, R$yrange))
     # Extract subset of image grid
     within.range <- function(u, v) { (u >= v[1]) & (u <= v[2]) }
     yrowok <- within.range(M$yrow, R$yrange)
@@ -277,6 +300,7 @@ restrict.mask <- function(M, W) {
   stopifnot(inherits(W, "owin"))
   if(W$type == "rectangle")
     return(trim.mask(M, W))
+  M <- trim.mask(M, as.rectangle(W))
   # Determine which pixels of M are inside W
   Mm <- M$m
   x <- as.vector(raster.x(M)[Mm])
@@ -299,7 +323,8 @@ expand.owin <- function(W, f=1) {
   yr <- bb$yrange
   fff <- (sqrt(f) - 1)/2
   Wexp <- owin(xr + fff * c(-1,1) * diff(xr),
-               yr + fff * c(-1,1) * diff(yr))
+               yr + fff * c(-1,1) * diff(yr),
+               unitname=unitname(W))
   return(Wexp)
 }
 
@@ -317,7 +342,8 @@ trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
   if(sum(ymargin) > diff(W$yrange))
     stop("window is too small to cut off margins of the height specified")
   owin(W$xrange + c(1,-1) * xmargin,
-       W$yrange + c(1,-1) * ymargin)
+       W$yrange + c(1,-1) * ymargin,
+       unitname=unitname(W))
 }
 
 

@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.10 $  $Date: 2007/03/26 04:06:56 $
+#  $Revision: 1.11 $  $Date: 2007/12/19 17:53:02 $
 #
 
 quadratcount <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL)  {
@@ -23,8 +23,10 @@ plot.quadratcount <- function(x, ..., add=FALSE, entries=as.table(x), dx=0, dy=0
   if(!add)
     do.call("plot.owin",
             resolve.defaults(list(W),
+                             list(col=NULL),
                              list(...),
-                             list(main=xname)))
+                             list(main=xname),
+                             .StripNull=TRUE))
   xbk <- attr(x, "xbreaks")
   ybk <- attr(x, "ybreaks")
   xr <- W$xrange

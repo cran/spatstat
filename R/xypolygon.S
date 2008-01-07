@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.28 $    $Date: 2007/03/19 04:48:00 $
+#    $Revision: 1.29 $    $Date: 2007/12/19 17:11:14 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -35,6 +35,27 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   npts <- length(x)
   nedges <- length(xp)   # sic
 
+  # Check for points (x,y) that coincide with vertices (xp, yp)
+  # Handle them separately
+  z <- .C("matchxy",
+          na=as.integer(npts),
+          xa=as.double(x),
+          ya=as.double(y),
+          nb=as.integer(nedges),
+          xb=as.double(xp),
+          yb=as.double(yp),
+          match=as.integer(integer(npts)),
+          PACKAGE="spatstat")
+  is.vertex <- (z$match != 0)
+  retain <- !is.vertex
+  # Remove vertices from subsequent consideration; replace them later
+  if(vertices.present <- !all(retain)) {
+    x <- x[retain]
+    y <- y[retain]
+    npts <- sum(retain)
+  }
+
+  #-------------   MAIN ALGORITHM -------------------------------
   score <- rep(0, npts)
   on.boundary <- rep(FALSE, npts)
 
@@ -116,6 +137,22 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
 
   #------------------- END SWITCH ------------------------------
 
+  # replace any polygon vertices that were temporarily removed
+  if(vertices.present) {
+    full.npts <- length(retain)
+    full.score <- rep(0, full.npts)
+    full.on.boundary <- rep(FALSE, full.npts)
+    full.score[retain] <- score
+    full.score[is.vertex] <- 1
+    full.on.boundary[retain] <- on.boundary
+    full.on.boundary[is.vertex] <- TRUE
+    score       <- full.score
+    on.boundary <- full.on.boundary
+    npts        <- full.npts
+    
+  }
+    
+  #-------------------------------------------------
   
   # any point recognised as lying on the boundary gets score 1.
   score[on.boundary] <- 1

@@ -12,7 +12,7 @@ lurking(object, covariate, type="eem",
                     plot.sd, plot.it=TRUE,
                     typename,
                     covname,
-                    oldstyle=FALSE, check=TRUE, \dots)
+                    oldstyle=FALSE, check=TRUE, \dots, splineargs=list())
 }
 \arguments{
   \item{object}{
@@ -80,8 +80,12 @@ lurking(object, covariate, type="eem",
     in \code{object} should be checked.
   }
   \item{\dots}{
-    Arguments passed to \code{smooth.spline} for the estimation of the
-    derivatives in the case \code{cumulative=FALSE}.
+    Arguments passed to \code{\link{plot.default}}
+    and \code{\link{lines}} to control the plot behaviour.
+  }
+  \item{splineargs}{
+    A list of arguments passed to \code{smooth.spline}
+    for the estimation of the derivatives in the case \code{cumulative=FALSE}.
   }
 }
 \value{

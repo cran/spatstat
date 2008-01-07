@@ -79,7 +79,7 @@ quadrat.test(X, ...)
 \seealso{
   \code{\link{quadratcount}},
   \code{\link{chisq.test}},
-  \code{\link{ks.test.ppm}}.
+  \code{\link{kstest}}.
 
   To test a Poisson point process model against a specific alternative,
   use \code{\link{anova.ppm}}.
@@ -106,7 +106,7 @@ quadrat.test(X, ...)
 
   plot(te)
 
-  plot(simdat, pch="+", col="green", cex=1.2, lwd=2)
+  plot(simdat, pch="+", cols="green", cex=1.2, lwd=2)
   plot(te, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
 
   sublab <- eval(substitute(expression(p[chi^2]==z),

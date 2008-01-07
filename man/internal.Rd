@@ -35,6 +35,7 @@
 \alias{crosspairs}
 \alias{cobble.xy}
 \alias{commasep}
+\alias{compatible.units}
 \alias{countingweights}
 \alias{damaged.ppm}
 \alias{default.expand}
@@ -90,7 +91,8 @@
 \alias{is.prime}
 \alias{is.poisson.interact}
 \alias{is.poisson.ppm}
-\alias{is.stationary.ppm}    
+\alias{is.stationary.ppm}
+\alias{ks.test.ppm}
 \alias{Kborder.engine}
 \alias{Kount}
 \alias{Kwtsum}               
@@ -312,6 +314,7 @@ closepairs(X,rmax)
 crosspairs(X,Y,rmax)
 cobble.xy(x, y, f, fatal)
 commasep(x)
+compatible.units(x, y, coerce=TRUE)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
 default.expand(object, m, epsilon)
@@ -371,6 +374,7 @@ is.poisson.ppm(x)
 is.prime(n)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
+ks.test.ppm(\dots)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)

@@ -542,7 +542,7 @@ The Spatstat Package
   \tabular{ll}{
     \code{\link{quadrat.test}} \tab \eqn{\chi^2}{chi^2} goodness-of-fit
     test on quadrat counts \cr
-    \code{\link{ks.test}} \tab Kolmogorov-Smirnov goodness-of-fit test\cr
+    \code{\link{kstest}} \tab Kolmogorov-Smirnov goodness-of-fit test\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for

@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.12 $    $Date: 2007/09/22 01:58:45 $
+#   $Revision: 1.13 $    $Date: 2007/12/20 11:04:05 $
 #
 #
 
@@ -95,6 +95,14 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
            }
          )  
   lines(Zs$xrange[c(1,2,2,1,1)], Zs$yrange[c(1,1,2,2,1)])
+  # -------------- lurking variable plots -----------------------
+  do.lines <-
+    function(x, y, defaulty=1, ...) {
+      do.call("lines",
+              resolve.defaults(list(x, y),
+                               list(...),
+                               list(lty=defaulty)))
+    }
   # --------- lurking variable plot for x coordinate ------------------
   #           (cumulative or marginal)
   #           in bottom left panel
@@ -127,13 +135,15 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   rr <- range(c(0, observedV, theoreticalV, pV))
   yscale <- function(y) { high * (y - rr[1])/diff(rr) }
   xscale <- function(x) { x - W$xrange[1] }
-  lines(xscale(observedX), yscale(observedV))
-  lines(xscale(theoreticalX), yscale(theoreticalV), lty=2)
+  do.lines(xscale(observedX), yscale(observedV), 1, ...)
+  do.lines(xscale(theoreticalX), yscale(theoreticalV), 2, ...)
   if(!is.null(theoreticalSD)) {
-    lines(xscale(theoreticalX), yscale(theoreticalV + 2 * theoreticalSD),
-          lty=3)
-    lines(xscale(theoreticalX), yscale(theoreticalV - 2 * theoreticalSD),
-          lty=3)
+    do.lines(xscale(theoreticalX),
+             yscale(theoreticalV + 2 * theoreticalSD),
+             3, ...)
+    do.lines(xscale(theoreticalX),
+             yscale(theoreticalV - 2 * theoreticalSD),
+             3, ...)
   }
   axis(side=1, pos=0, at=xscale(pX), labels=pX)
   text(xscale(mean(theoreticalX)), - outerspace, "x coordinate")
@@ -172,11 +182,15 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
   rr <- range(c(0, observedV, theoreticalV, pV))
   yscale <- function(y) { y - W$yrange[1] + high + space}
   xscale <- function(x) { wide + space + wide * (rr[2] - x)/diff(rr) }
-  lines(xscale(observedV), yscale(observedY))
-  lines(xscale(theoreticalV), yscale(theoreticalY), lty=2)
+  do.lines(xscale(observedV), yscale(observedY), 1, ...)
+  do.lines(xscale(theoreticalV), yscale(theoreticalY), 2, ...)
   if(!is.null(theoreticalSD)) {
-    lines(xscale(theoreticalV+2*theoreticalSD), yscale(theoreticalY), lty=3)
-    lines(xscale(theoreticalV-2*theoreticalSD), yscale(theoreticalY), lty=3)
+    do.lines(xscale(theoreticalV+2*theoreticalSD),
+             yscale(theoreticalY),
+             3, ...)
+    do.lines(xscale(theoreticalV-2*theoreticalSD),
+             yscale(theoreticalY),
+             3, ...)
   }
   axis(side=4, pos=width, at=yscale(pY), labels=pY)
   text(width + outerspace, yscale(mean(theoreticalY)), "y coordinate", srt=90)
@@ -306,7 +320,7 @@ resid1plot <- function(RES, opt,
     theo <- a$theoretical
     resid1panel(obs$covariate, obs$value,
                theo$covariate, theo$mean, theo$sd,
-               "x coordinate", "cumulative mark", main=main)
+               "x coordinate", "cumulative mark", main=main, ...)
   }
   
   # ------------  cumulative y -----------------------------------------
@@ -316,19 +330,19 @@ resid1plot <- function(RES, opt,
     theo <- a$theoretical
     resid1panel(obs$covariate, obs$value,
                theo$covariate, theo$mean, theo$sd,
-               "y coordinate", "cumulative mark", main=main)
+               "y coordinate", "cumulative mark", main=main, ...)
   }
   # ------------  x margin -----------------------------------------
   if(opt$xmargin) {
     a <- RES$xmargin
     resid1panel(a$x, a$xZ, a$x, a$ExZ, NULL,
-               "x coordinate", "marginal of residuals", main=main)
+               "x coordinate", "marginal of residuals", main=main, ...)
   }
   # ------------  y margin -----------------------------------------
   if(opt$ymargin) {
     a <- RES$ymargin
     resid1panel(a$y, a$yZ, a$y, a$EyZ, NULL,
-               "y coordinate", "marginal of residuals", main=main)
+               "y coordinate", "marginal of residuals", main=main, ...)
   }
   
   return(invisible(NULL))
@@ -345,13 +359,21 @@ resid1panel <- function(observedX, observedV,
     if(!is.null(theoreticalSD))
         rV <- range(c(rV, theoreticalV + 2*theoreticalSD,
                           theoreticalV - 2*theoreticalSD))
+    # argument handling
+    do.lines <-
+      function(x, y, defaulty=1, ...) {
+        do.call("lines",
+                resolve.defaults(list(x, y),
+                                 list(...),
+                                 list(lty=defaulty)))
+      }
     # start plot
     plot(rX, rV, type="n", xlab=xlab, ylab=ylab, ...)
-    lines(observedX, observedV)
-    lines(theoreticalX, theoreticalV, lty=2)
+    do.lines(observedX, observedV, 1, ...)
+    do.lines(theoreticalX, theoreticalV, 2, ...)
     if(!is.null(theoreticalSD)) {
-      lines(theoreticalX, theoreticalV + 2 * theoreticalSD, lty=3)
-      lines(theoreticalX, theoreticalV - 2 * theoreticalSD, lty=3)
+      do.lines(theoreticalX, theoreticalV + 2 * theoreticalSD, 3, ...)
+      do.lines(theoreticalX, theoreticalV - 2 * theoreticalSD, 3, ...)
     }
 }
 
