@@ -1,7 +1,7 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.13 $   $Date: 2007/10/24 09:16:26 $
+#   $Revision: 1.14 $   $Date: 2008/01/04 17:09:20 $
 #
 #
 
@@ -138,5 +138,16 @@ print.summary.units <- function(x, ...) {
   invisible(NULL)
 }
 
-
-
+compatible.units <- function(x,y,coerce=TRUE) {
+  # `coerce' determines whether `vanilla' units are compatible with other units
+  stopifnot(inherits(x, "units"))
+  stopifnot(inherits(y, "units"))
+  xnull <- summary(x)$vanilla
+  ynull <- summary(y)$vanilla
+  if(xnull && ynull)
+    return(TRUE)
+  else if(!xnull && !ynull)
+    return(identical(all.equal(x,y), TRUE))
+  else
+    return(as.logical(coerce))
+}

@@ -1,5 +1,7 @@
-\name{ks.test.ppm}
-\alias{ks.test.ppm}
+\name{kstest.ppm}
+\alias{kstest}
+\alias{kstest.ppm}
+\alias{kstest.ppp}
 \title{Kolmogorov-Smirnov Test for Point Process Model} 
 \description{
   Performs a Kolmogorov-Smirnov test of goodness-of-fit
@@ -7,11 +9,16 @@
   and predicted distributions of the values of a spatial covariate.
 }
 \usage{
-ks.test.ppm(model, covariate, ..., jitter=TRUE)
+kstest(...)
+\method{kstest}{ppp}(X, covariate, ..., jitter=TRUE)
+\method{kstest}{ppm}(model, covariate, ..., jitter=TRUE)
 }
 \arguments{
   \item{model}{
     A fitted point process model (object of class \code{"ppm"}).
+  }
+  \item{X}{
+    A point pattern (object of class \code{"ppp"}).
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
@@ -28,15 +35,33 @@ ks.test.ppm(model, covariate, ..., jitter=TRUE)
   }
 }
 \details{
-  This function performs a goodness-of-fit test of
-  a fitted point process model. The observed distribution
+  These functions perform a goodness-of-fit test of a Poisson point
+  process model fitted to point pattern data. The observed distribution
   of the values of a spatial covariate at the data points,
   and the predicted distribution of the same values under the model,
   are compared using the Kolmogorov-Smirnov test. 
-  
-  The argument \code{model} should be a fitted point process model
-  (object of class \code{"ppm"}). It should be a Poisson point process.
 
+  The function \code{kstest} is generic, with methods for
+  point patterns (\code{"ppp"}) and point process models (\code{"ppm"}).
+  \itemize{
+    \item 
+    If \code{X} is a point pattern dataset (object of class \code{"ppp"}), then
+    \code{kstest(X, ...)} performs a goodness-of-fit test of the
+    uniform Poisson point process (Complete Spatial Randomness, CSR)
+    for this dataset.
+    \item
+    If \code{model} is a fitted point process model
+    (object of class \code{"ppm"}) then \code{kstest(model, ...)} performs
+    a test of goodness-of-fit for this fitted model. In this case,
+    \code{model} should be a Poisson point process.
+  }
+  
+  The test is performed by comparing the observed distribution
+  of the values of a spatial covariate at the data points,
+  and the predicted distribution of the same covariate under the model,
+  using the classical Kolmogorov-Smirnov test. Thus, you must nominate
+  a spatial covariate for this test.
+  
   The argument \code{covariate} should be either a \code{function(x,y)}
   or a pixel image (object of class \code{"im"} containing the values
   of a spatial function.
@@ -126,20 +151,31 @@ ks.test.ppm(model, covariate, ..., jitter=TRUE)
   \emph{Applied Statistics} \bold{35}, 54--62.
 }
 \examples{
-   # nonuniform Poisson process
+   # real data: Swedish Pines
+   data(swedishpines)
+
+   # test covariate = x coordinate
+   xcoord <- function(x,y) { x }
+
+   # test of CSR
+   kstest(swedishpines, xcoord)
+
+   # fit inhomogeneous Poisson model and test
+   model <- ppm(swedishpines, ~x + y)
+   kstest(model, xcoord)
+
+   # synthetic data: nonuniform Poisson process
    X <- rpoispp(function(x,y) { 100 * exp(x) }, win=square(1))
+
    # fit uniform Poisson process
    fit0 <- ppm(X, ~1)
    # fit correct nonuniform Poisson process
    fit1 <- ppm(X, ~x)
 
-   # test covariate = x coordinate
-   xcoord <- function(x,y) { x }
-
    # test wrong model
-   ks.test.ppm(fit0, xcoord)
+   kstest(fit0, xcoord)
    # test right model
-   ks.test.ppm(fit1, xcoord)
+   kstest(fit1, xcoord)
 }
 \keyword{htest}
 \keyword{spatial}

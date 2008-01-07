@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.19 $ $Date: 2007/03/28 06:07:19 $
+# $Revision: 1.20 $ $Date: 2007/12/20 11:04:21 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -147,7 +147,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
             typename=typename,
             covname="x coordinate",
             oldstyle=oldstyle,
-            check=FALSE)
+            check=FALSE, ...)
 
   if(opt$ycumul)
     result$ycumul <- 
@@ -160,7 +160,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
             typename=typename,
             covname="y coordinate",
             oldstyle=oldstyle,
-            check=FALSE)
+            check=FALSE, ...)
 
   # -------------- summary numbers --------------
   

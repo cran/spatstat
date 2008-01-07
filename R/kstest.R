@@ -1,10 +1,29 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.18 $  $Date: 2007/06/08 17:53:01 $
+#  $Revision: 1.21 $  $Date: 2007/12/20 12:00:29 $
 #
 #
-ks.test.ppm <- function(model, covariate, ..., jitter=TRUE) {
+
+# --------- old -------------
+
+ks.test.ppm <- function(...) {
+  .Deprecated("kstest.ppm", package="spatstat")
+  kstest.ppm(...)
+}
+
+# ---------------------------
+
+kstest <- function(...) {
+  UseMethod("kstest")
+}
+
+kstest.ppp <-
+  function(X, covariate, ..., jitter=TRUE) {
+    kstest.ppm(ppm(X), covariate, ..., jitter=jitter)
+}
+
+kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
   modelname <- deparse(substitute(model))
   covname <- deparse(substitute(covariate))
   stopifnot(is.ppm(model))

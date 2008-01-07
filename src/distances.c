@@ -4,7 +4,25 @@
 
   Distances between points
 
-  $Revision: 1.20 $     $Date: 2007/10/26 15:25:54 $
+  $Revision: 1.21 $     $Date: 2007/12/19 17:09:13 $
+
+  pairdist      Pairwise distances
+  pair2dist     Pairwise distances squared
+  pairPdist     Pairwise distances with periodic correction
+  pairP2dist    Pairwise distances squared, with periodic correction
+
+  crossdist     Pairwise distances for two sets of points
+  cross2dist    Pairwise distances squared, for two sets of points
+  crossPdist    Pairwise distances for two sets of points, periodic correction
+
+  matchxy       Find matches between two sets of points   
+
+  THE FOLLOWING FUNCTIONS ASSUME THAT y IS SORTED IN ASCENDING ORDER 
+
+  nndistsort    Nearest neighbour distances 
+  nnwhichsort   Nearest neighbours and their distances
+  nnXwhich      Nearest neighbour from one list to another
+  nnXexclude    Nearest neighbour from one list to another, with overlaps
 
  */
 
@@ -269,6 +287,38 @@ void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
 	  *dptr = sqrt( dx2p + dy2p ); 
     }
   }
+}
+
+/*
+
+  matchxy
+
+  Find matches between two lists of points
+
+ */
+
+void matchxy(na, xa, ya, nb, xb, yb, match)
+     int *na, *nb;
+     double *xa, *ya, *xb, *yb;
+     int *match;
+{ 
+  int i, j, Na, Nb; 
+  double xai, yai;
+
+  Na = *na;
+  Nb = *nb;
+
+  for (i=1; i < Na; i++) 
+    {
+      xai = xa[i];
+      yai = ya[i];
+      match[i] = 0;
+      for (j=0; j < Nb; j++) 
+	if(xai == xb[j] && yai == yb[j]) {
+	  match[i] = j;
+	  break;
+	}
+    }
 }
 
 /* THE FOLLOWING CODE ASSUMES THAT y IS SORTED IN ASCENDING ORDER */
