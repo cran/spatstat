@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.26 $	$Date: 2007/03/16 08:35:55 $
+#    $Revision: 1.27 $	$Date: 2008/02/01 18:06:56 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -24,32 +24,52 @@ pairsat.family <-
          eval  = function(X,U,Equal,pairpot,potpars,correction,
                           ..., halfway=FALSE) {
   #
-  # This auxiliary function is not meant to be called by the user.
-  # It computes the distances between points,
-  # evaluates the pair potential and applies edge corrections.
+  # This is the eval function for the `pairsat' family.
+  # 
+  # This internal function is not meant to be called by the user.
+  # It is called by mpl.prepare() during execution of ppm().
+  #         
+  # The eval functions perform all the manipulations that are common to
+  # a given class of interactions. 
   #
-  # Arguments:
+  # For the `pairsat' family of pairwise-interaction processes,
+  # this eval function computes the distances between points,
+  # invokes 'pairpot' to evaluate the potential between each pair of points,
+  # applies edge corrections, and then sums the pair potential terms
+  # applying the saturation threshold.
+  #
+  # ARGUMENTS:
+  #   All 'eval' functions have the following arguments 
+  #   which are called in sequence (without formal names)
+  #   by mpl.prepare():
+  #       
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
-  #   Equal       logical matrix X[i] == U[j]             matrix or NULL
-  #   pairpot     potential function (see above)          function(d, p)
-  #   potpars     auxiliary parameters for pairpot        list(......)
+  #   Equal        logical matrix X[i] == U[j]             matrix or NULL
+  #                      (NB: equality only if marks are equal too)
+  #                      NULL means all comparisons are FALSE
+  #   pot         potential function 
+  #   potpars     auxiliary parameters for pot            list(......)
   #   correction  edge correction type                    (string)
   #
-  #   Note the Geyer saturation threshold must be given in 'potpars$sat'
-  #
-  # Value:
-  #    matrix of values of the total pair potential
+  # VALUE:
+  #    All `eval' functions must return a        
+  #    matrix of values of the total potential
   #    induced by the pattern X at each location given in U.
   #    The rows of this matrix correspond to the rows of U (the sample points);
   #    the k columns are the coordinates of the k-dimensional potential.
+  #         
+  ########################################################################
   #
-  # Note:
-
+  # POTENTIAL:
   # The pair potential function 'pairpot' will be called as
   #    pairpot(M, potpars)   where M is a matrix of interpoint distances.
   # It must return a matrix with the same dimensions as M
   # or an array with its first two dimensions the same as the dimensions of M.
+  #           
+  # NOTE:
+  #   Note the Geyer saturation threshold must be given in 'potpars$sat'
+
   ##########################################################################
 
            

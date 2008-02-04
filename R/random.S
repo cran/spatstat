@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.28 $   $Date: 2007/11/11 15:05:11 $
+#    $Revision: 4.29 $   $Date: 2008/01/31 16:47:21 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -435,6 +435,26 @@ rpoint <- function(n, f, fmax=NULL,
                          win, sigma=sigma, mu=mu)
   return(result)
 }
+
+rGaussPoisson <-
+  function(kappa, r, p2, win=owin(c(0,1), c(0,1)))
+{
+  # Gauss-Poisson process
+  oneortwo <- function(x0, y0, radius, p2) {
+    if(runif(1) > p2) 
+      # one point
+      return(list(x=x0, y=y0))
+    # two points
+    theta <- runif(1, min=0, max=2*pi)
+    return(list(x=x0+c(-1,1)*radius*cos(theta),
+                y=y0+c(-1,1)*radius*sin(theta)))
+  }
+  result <- rNeymanScott(kappa, 1.05 * r, oneortwo,
+                         win, radius=r/2, p2=p2)
+  return(result)
+  
+}
+
   
 rstrat <- function(win=square(1), nx, ny=nx, k=1) {
   win <- as.owin(win)

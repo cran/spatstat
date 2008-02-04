@@ -1,0 +1,84 @@
+#
+#
+#    areainter.R
+#
+#    $Revision: 1.5 $	$Date: 2008/02/01 21:05:39 $
+#
+#    The area interaction
+#
+#    AreaInter()    create an instance of the area-interaction process
+#                 [an object of class 'interact']
+#	
+#
+# -------------------------------------------------------------------
+#
+
+AreaInter <- function(r) {
+ areapot <- 
+  function(X,U,Equal,pars,correction, ...) {
+    if(any(correction != "border"))
+      warning("Only the border correction is available - other options were ignored")
+    n <- U$n
+    answer <- numeric(n)
+    r <- pars$r
+    if(is.null(r)) stop("internal error: r parameter not found")
+    isdata <- apply(Equal, 2, any)
+    for(j in seq(n)) {
+      u <- c(U$x[j], U$y[j])
+      answer[j] <- 
+        if(!isdata[j]) 
+          -areadiff(u, X, r)
+        else
+          -areadiff(u, X[!Equal[,j]], r)
+    }             
+    return(answer/(pi * r^2))
+  }
+             
+  out <- 
+  list(
+         name     = "Area-interaction process",
+         creator  = "AreaInter",
+         family   = inforder.family,
+         pot      = areapot,
+         par      = list(r = r),
+         parnames = "disc radius",
+         init     = function(self) {
+                      r <- self$par$r
+                      if(!is.numeric(r) || length(r) != 1 || r <= 0)
+                       stop("disc radius r must be a positive number")
+                    },
+         update = NULL,  # default OK
+         print = NULL,    # default OK
+         interpret =  function(coeffs, self) {
+           logeta <- as.numeric(coeffs[1])
+           eta <- exp(logeta)
+           return(list(param=list(eta=eta),
+                       inames="interaction parameter eta",
+                       printable=round(eta,4)))
+         },
+         valid = function(coeffs, self) {
+           eta <- ((self$interpret)(coeffs, self))$param$eta
+           return(is.finite(eta))
+         },
+         project = function(coeffs, self) {
+           if(!(self$valid)(coeffs, self))
+             stop("Can't project to a valid model")
+           return(coeffs)
+         },
+         irange = function(self, coeffs=NA, epsilon=0, ...) {
+           r <- self$par$r
+           if(any(is.na(coeffs)))
+             return(2 * r)
+           logeta <- coeffs[1]
+           if(abs(logeta) <= epsilon)
+             return(0)
+           else
+             return(2 * r)
+         },
+       version=versionstring.spatstat()
+  )
+  class(out) <- "interact"
+  out$init(out)
+  return(out)
+}
+

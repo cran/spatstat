@@ -2,7 +2,8 @@
 \alias{pairwise.family}
 \title{Pairwise Interaction Process Family}
 \description{
-  An object describing the family of all pairwise interaction point processes
+  An object describing the family of all pairwise interaction Gibbs
+  point processes.
 }
 \details{
   \bold{Advanced Use Only!}
@@ -13,7 +14,7 @@
  
   If you need to create a specific pairwise interaction model for use in 
   modelling, use the function \code{\link{Pairwise}} or one of the existing
-  functions (listed below, starting with a capital letter).
+  functions listed below.
  
   Anyway, \code{pairwise.family} is an object of class \code{"isf"}
   containing a function \code{pairwise$eval} for
@@ -21,18 +22,25 @@
   point process model taking an exponential family form. 
 } 
 \seealso{
+  Other families: 
   \code{\link{pairsat.family}},
   \code{\link{ord.family}},
+  \code{\link{inforder.family}}.
+
+  Pairwise interactions:
   \code{\link{Poisson}},
   \code{\link{Pairwise}},
   \code{\link{PairPiece}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}},
-  \code{\link{Softcore}},
+  \code{\link{Softcore}}.
+
+  Other interactions:
+  \code{\link{AreaInter}},
   \code{\link{Geyer}},
   \code{\link{Saturated}},
   \code{\link{Ord}},
-  \code{\link{OrdThresh}}
+  \code{\link{OrdThresh}}.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

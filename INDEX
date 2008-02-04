@@ -1,3 +1,4 @@
+AreaInter               The Area Interaction Point Process Model
 DiggleGratton           Diggle-Gratton model
 Fest                    Estimate the empty space function F
 Gcross                  Multitype Nearest Neighbour Distance Function
@@ -23,6 +24,7 @@ Kmeasure                Reduced Second Moment Measure
 Kmulti                  Marked K-Function
 LennardJones            The Lennard-Jones Potential
 Lest                    L-function
+Linhom                  L-function
 MultiStrauss            The Multitype Strauss Point Process Model
 MultiStraussHard        The Multitype/Hard Core Strauss Point Process
                         Model
@@ -57,6 +59,7 @@ append.psp              Combine Two Line Segment Patterns
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
+areadiff                Difference of Disc Areas
 as.data.frame.ppp       Coerce Point Pattern to a Data Frame
 as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
@@ -154,6 +157,7 @@ hyperframe              Hyper Data Frame
 identify.ppp            Identify Points in a Point Pattern
 im                      Create a Pixel Image Object
 im.object               Class of Images
+inforder.family         Infinite Order Interaction Family
 inside.owin             Test Whether Points Are Inside A Window
 interp.im               Interpolate a Pixel Image
 intersect.owin          Intersection or Union of Two Windows
@@ -188,6 +192,8 @@ lurking                 Lurking variable plot
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
+marktable               Tabulate Marks in Neighbourhood of Every Point
+                        in a Point Pattern
 matchingdist            Distance for a Point Pattern Matching
 matclust.estK           Fit the Matern Cluster Point Process by Minimum
                         Contrast
@@ -265,6 +271,7 @@ quadratcount            Quadrat counting for a point pattern
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
 quantile.im             Sample Quantiles of Pixel Image
+rGaussPoisson           Simulate Gauss-Poisson Process
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I
 rMaternII               Simulate Matern Model II

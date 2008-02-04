@@ -6,6 +6,7 @@
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{affinexy}
+\alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{area.xypolygon}       
 \alias{AsymmHausdorff.psp}
@@ -250,6 +251,7 @@
 \alias{sympoly}
 \alias{termsinformula}
 \alias{test.crossing.psp}
+\alias{test.selfcrossing.psp}
 \alias{tilecentroids}        
 \alias{trim.mask}        
 \alias{unitname.default}
@@ -282,6 +284,7 @@
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
+anycrossing.psp(A,B)
 apply23sum(x)
 area.xypolygon(polly)
 AsymmHausdorff.psp(X, Y, method="Fortran")
@@ -545,6 +548,7 @@ suffstat.poisson(model, X, callstring)
 sympoly(x, y, n)
 termsinformula(x)
 test.crossing.psp(A,B)
+test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
 trim.mask(M, R)
 \method{unitname}{default}(x)

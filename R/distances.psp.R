@@ -1,30 +1,70 @@
 #
 #  distances.psp.R
 #
-#  Hausdorff distances for psp objects
+#  Hausdorff distance and Euclidean separation for psp objects
 #
 #  $Revision: 1.5 $ $Date: 2007/10/24 09:41:15 $
 #
 #
 
-pairdist.psp <- function(X, ..., method="Fortran") {
+pairdist.psp <- function(X, ..., method="Fortran", type="Hausdorff") {
   verifyclass(X, "psp")
   if(X$n == 0)
     return(matrix(, 0, 0))
+  type <- pickoption("type", type,
+                     c(Hausdorff="Hausdorff",
+                       hausdorff="Hausdorff",
+                       separation="separation"))
+
+  # Compute min dist from each endpoint of X to each segment of Y
   D12 <- AsymmHausdorff.psp(X, X, method=method)
-  D <- array(pmax(D12, t(D12)), dim=dim(D12))
+  
+  switch(type,
+         Hausdorff={
+           # maximum is Hausdorff metric
+           D <- array(pmax(D12, t(D12)), dim=dim(D12))
+         },
+         separation={
+           # first take minimum of endpoint-to-segment distances
+           D <- array(pmin(D12, t(D12)), dim=dim(D12))
+           # Identify pairs of segments which cross
+           cross <- test.selfcrossing.psp(X)
+           # Assign separation = 0 to such pairs
+           D[cross] <- 0
+         })
   return(D)
 }
 
-crossdist.psp <- function(X, Y, ..., method="Fortran") {
+crossdist.psp <- function(X, Y, ..., method="Fortran", type="Hausdorff") {
   verifyclass(X, "psp")
   Y <- as.psp(Y)
   if(X$n * Y$n == 0)
     return(matrix(, X$n, Y$n))
 
+  type <- pickoption("type", type,
+                     c(Hausdorff="Hausdorff",
+                       hausdorff="Hausdorff",
+                       separation="separation"))
+
+  
+  # Compute min dist from each endpoint of X to each segment of Y
   DXY <- AsymmHausdorff.psp(X, Y, method=method)
+  # Compute min dist from each endpoint of Y to each segment of X
   DYX <- AsymmHausdorff.psp(Y, X, method=method)
-  D <- array(pmax(DXY, t(DYX)), dim=dim(DXY))
+  
+  switch(type,
+         Hausdorff={
+           # maximum is Hausdorff metric
+           D <- array(pmax(DXY, t(DYX)), dim=dim(DXY))
+         },
+         separation={
+           # first take minimum of endpoint-to-segment distances
+           D <- array(pmin(DXY, t(DYX)), dim=dim(DXY))
+           # Identify pairs of segments which cross
+           cross <- test.crossing.psp(X, Y)
+           # Assign separation = 0 to such pairs
+           D[cross] <- 0
+         })
   return(D)
 }
 

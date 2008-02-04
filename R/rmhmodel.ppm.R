@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.23 $   $Date: 2007/06/12 12:53:56 $
+#  $Revision: 2.24 $   $Date: 2008/02/01 19:51:44 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -91,8 +91,13 @@ list(
 #
 #           OrdThresh                <none>
 #
+#           AreaInter                <none>
+#
 #  'dgs' has no canonical parameters (it's determined by its irregular
 #  parameter rho) so there can't be an interaction object for it.
+#
+#  We can implement rmh.default for the area interaction process
+#  with a bit of work.
 #
 #  Implementing rmh.default for the others is probably too hard.
 

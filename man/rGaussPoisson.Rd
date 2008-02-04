@@ -1,12 +1,12 @@
-\name{rMatClust}
-\alias{rMatClust}
-\title{Simulate Matern Cluster Process}
+\name{rGaussPoisson}
+\alias{rGaussPoisson}
+\title{Simulate Gauss-Poisson Process}
 \description{
   Generate a random point pattern, a simulated realisation of the
-  Mat\'ern Cluster Process.
+  Gauss-Poisson Process.
 }
 \usage{
- rMatClust(kappa, r, mu, win = owin(c(0,1),c(0,1)))
+ rGaussPoisson(kappa, r, p2, win = owin(c(0,1),c(0,1)))
 }
 \arguments{
   \item{kappa}{
@@ -14,10 +14,10 @@
     A single positive number, a function, or a pixel image.
   }
   \item{r}{
-    Radius parameter of the clusters.
+    Diameter of each cluster that consists of exactly 2 points.
   }
-  \item{mu}{
-    Mean number of points per cluster.
+  \item{p2}{
+    Probability that a cluster contains exactly 2 points.
   }
   \item{win}{
     Window in which to simulate the pattern.
@@ -28,19 +28,20 @@
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
 
-  Additionally,  some intermediate results of the simulation are
+  Additionally, some intermediate results of the simulation are
   returned as attributes of this point pattern.
   See \code{\link{rNeymanScott}}.
 }
 \details{
-  This algorithm generates a realisation of Mat\'ern's cluster process
-  inside the window \code{win}. The process is constructed by first
-  generating a Poisson point process of ``parent'' points 
-  with intensity \code{kappa}. Then each parent point is
-  replaced by a random cluster of points, the number of points in each
-  cluster being random with a Poisson (\code{mu}) distribution,
-  and the points being placed independently and uniformly inside
-  a disc of radius \code{r} centred on the parent point.
+  This algorithm generates a realisation of the Gauss-Poisson
+  point process inside the window \code{win}.
+  The process is constructed by first
+  generating a Poisson point process of parent points 
+  with intensity \code{kappa}. Then each parent point is either retained
+  (with probability \code{1 - p2})
+  or replaced by a pair of points at a fixed distance \code{r} apart
+  (with probability \code{p2}). In the case of clusters of 2 points,
+  the line joining the two points has uniform random orientation.
 
   In this implementation, parent points are not restricted to lie in the
   window; the parent process is effectively the uniform
@@ -49,11 +50,11 @@
 \seealso{
   \code{\link{rpoispp}},
   \code{\link{rThomas}},
-  \code{\link{rGaussPoisson}},
+  \code{\link{rMatClust}},
   \code{\link{rNeymanScott}}
 }
 \examples{
- pp <- rMatClust(10, 0.05, 4)
+ pp <- rGaussPoisson(30, 0.07, 0.5)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

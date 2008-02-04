@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.29 $    $Date: 2007/12/19 17:11:14 $
+#    $Revision: 1.31 $    $Date: 2008/02/04 11:23:21 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -508,7 +508,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
       Pi <- P[[i]]
       for(j in (i+1):npoly) {
         crosses <- if(is.box[i] || is.box[j]) FALSE else {
-          test.crossing.psp(Pi, P[[j]])
+          anycrossing.psp(Pi, P[[j]])
         }
         cross[i,j] <- cross[j,i] <- crosses
         if(crosses) {

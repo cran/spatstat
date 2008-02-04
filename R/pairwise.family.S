@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.18 $	$Date: 2007/10/30 17:37:15 $
+#    $Revision: 1.19 $	$Date: 2008/02/01 18:07:08 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -120,29 +120,44 @@ pairwise.family <-
        eval  = function(X,U,Equal,pairpot,potpars,correction,
            ..., precomputed=NULL, savecomputed=FALSE) {
   #
-  # This auxiliary function is not meant to be called by the user.
-  # It computes the distances between points,
-  # evaluates the pair potential and applies edge corrections.
+  # This is the eval function for the `pairwise' family.
+  # 
+  # This internal function is not meant to be called by the user.
+  # It is called by mpl.prepare() during execution of ppm().
+  #         
+  # The eval functions perform all the manipulations that are common to
+  # a given class of interactions. 
   #
-  # Arguments:
+  # For the `pairwise' family of pairwise-interaction processes,
+  # this eval function computes the distances between points,
+  # invokes 'pairpot' to evaluate the potential between each pair of points,
+  # applies edge corrections, and then sums the pair potential terms.
+  #
+  # ARGUMENTS:
+  #   All 'eval' functions have the following arguments 
+  #   which are called in sequence (without formal names)
+  #   by mpl.prepare():
+  #       
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
   #   Equal        logical matrix X[i] == U[j]             matrix or NULL
   #                      (NB: equality only if marks are equal too)
   #                      NULL means all comparisons are FALSE
-  #   pairpot     potential function (see above)          function(d, p)
-  #   potpars     auxiliary parameters for pairpot        list(......)
+  #   pot         potential function 
+  #   potpars     auxiliary parameters for pot            list(......)
   #   correction  edge correction type                    (string)
   #
-  # Value:
-  #    matrix of values of the total pair potential
+  # VALUE:
+  #    All `eval' functions must return a        
+  #    matrix of values of the total potential
   #    induced by the pattern X at each location given in U.
   #    The rows of this matrix correspond to the rows of U (the sample points);
   #    the k columns are the coordinates of the k-dimensional potential.
   #
   ##########################################################################
 
-  # Note:
+  # POTENTIAL:
+  #
   # The pair potential function 'pairpot' should be either
   #    pairpot(d, par)            [for potentials that don't depend on marks]
   # or
@@ -153,8 +168,8 @@ pairwise.family <-
   # and
   #  par is a list of parameters for the potential.
   #         
-  # It must return a matrix with the same dimensions as M
-  # or an array with its first two dimensions the same as the dimensions of M.
+  # It must return a matrix with the same dimensions as d
+  # or an array with its first two dimensions the same as the dimensions of d.
 
 fop <- names(formals(pairpot))
 if(identical(all.equal(fop, c("d", "par")), TRUE))
