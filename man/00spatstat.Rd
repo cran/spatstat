@@ -125,6 +125,8 @@ The Spatstat Package
 	simulate the Mat\'ern Cluster process\cr
 	\code{\link{rThomas}} \tab
 	simulate the Thomas process  \cr
+	\code{\link{rGaussPoisson}}  \tab
+	simulate the Gauss-Poisson cluster process\cr
 	\code{\link{rthin}} \tab  random thinning  \cr
 	\code{\link{rcell}} \tab
 	simulate the Baddeley-Silverman cell process  \cr
@@ -423,6 +425,10 @@ The Spatstat Package
   \tabular{ll}{
     \code{\link{applynbd}} \tab apply function to every neighbourhood\cr
     \tab in a point pattern \cr
+    \code{\link{markstat}} \tab apply function to the marks of neighbours\cr
+    \tab in a point pattern \cr
+    \code{\link{marktable}} \tab tabulate the marks of neighbours\cr
+    \tab in a point pattern \cr
     \code{\link{pppdist}} \tab find the optimal match between two point
     patterns
   }
@@ -497,6 +503,7 @@ The Spatstat Package
     \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
     \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr
     \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
+    \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
     \code{\link{OrdThresh}()} \tab		Ord process, threshold potential\cr

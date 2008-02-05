@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.6 $     $Date: 2007/10/26 15:27:41 $
+  $Revision: 1.7 $     $Date: 2008/02/04 11:06:39 $
 
  */
 
@@ -14,6 +14,11 @@
 #include <stdio.h>
 
 #define NIETS -1.0
+
+
+/* 
+         --------------- PAIRS OF PSP OBJECTS ----------------------
+*/
 
 /*  
    xysegint
@@ -90,7 +95,11 @@ void xysegint(na, x0a, y0a, dxa, dya,
       }
     }
 }
-	 
+
+/* 
+   Stripped-down version of xysegint that just returns logical matrix 
+*/
+
 void xysi(na, x0a, y0a, dxa, dya, 
               nb, x0b, y0b, dxb, dyb, 
 	      eps,
@@ -100,7 +109,49 @@ void xysi(na, x0a, y0a, dxa, dya,
      double *x0a, *y0a, *dxa, *dya, *x0b, *y0b, *dxb, *dyb;
      /* input (tolerance for determinant) */
      double *eps;  
-     /* output (logical) */
+     /* outputs (matrices) */
+     int *ok;
+{ 
+  int i, j, ma, mb, ijpos;
+  double determinant, absdet, diffx, diffy, tta, ttb;
+
+  ma = *na;
+  mb = *nb;
+  for (j=0; j < mb; j++) 
+    {
+      for(i = 0; i < ma; i++) {
+	ijpos = j * ma + i;
+	ok[ijpos] = 0;
+	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
+	absdet = (determinant > 0) ? determinant : -determinant;
+	if(absdet > *eps) {
+	  diffx = (x0b[j] - x0a[i])/determinant;
+	  diffy = (y0b[j] - y0a[i])/determinant;
+	  tta = - dyb[j] * diffx + dxb[j] * diffy;
+	  ttb = - dya[i] * diffx + dxa[i] * diffy;
+	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+	    /* intersection */
+	    ok[ijpos] = 1;
+	  }
+	}
+      }
+    }
+}
+
+/* 
+   Test whether there is at least one intersection
+*/
+
+void xysiANY(na, x0a, y0a, dxa, dya, 
+		nb, x0b, y0b, dxb, dyb, 
+		eps,
+		ok)
+     /* inputs (vectors of coordinates) */
+     int *na, *nb;
+     double *x0a, *y0a, *dxa, *dya, *x0b, *y0b, *dxb, *dyb;
+     /* input (tolerance for determinant) */
+     double *eps;  
+     /* output (single logical value) */
      int *ok;
 { 
   int i, j, ma, mb;
@@ -128,11 +179,17 @@ void xysi(na, x0a, y0a, dxa, dya,
       }
     }
 }
+
+
+
+/* 
+    -------------- ONE PSP OBJECT ----------------------------
+*/
 	 
 
 /*
 
-    Similar to above,
+    Similar to xysegint,
     but computes intersections between all pairs of segments
     in a single list, excluding the diagonal comparisons of course
 
@@ -190,6 +247,61 @@ void xysegXint(n, x0, y0, dx, dy,
   }
 
 }
+	 
+/*
+
+    Reduced version of xysegXint that returns logical matrix 'ok' only
+
+*/
+
+void xysxi(n, x0, y0, dx, dy, 
+	      eps,
+              ok)
+     /* inputs (vectors of coordinates) */
+     int *n;
+     double *x0, *y0, *dx, *dy;
+     /* input (tolerance for determinant) */
+     double *eps;  
+     /* outputs (matrices) */
+     int *ok;
+{ 
+  int i, j, m, mm1, ijpos, jipos, iipos;
+  double determinant, absdet, diffx, diffy, tti, ttj;
+
+  m = *n;
+ 
+  mm1 = m - 1;
+  for (j=0; j < mm1; j++) 
+    {
+      for(i = j+1; i < m; i++) {
+	ijpos = j * m + i;
+	jipos = i * m + j;
+	ok[ijpos] = ok[jipos] = 0;
+	determinant = dx[j] * dy[i] - dy[j] * dx[i];
+	absdet = (determinant > 0) ? determinant : -determinant;
+	if(absdet > *eps) {
+	  diffx = (x0[j] - x0[i])/determinant;
+	  diffy = (y0[j] - y0[i])/determinant;
+	  tti = - dy[j] * diffx + dx[j] * diffy;
+	  ttj = - dy[i] * diffx + dx[i] * diffy;
+	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	    ok[ijpos] = ok[jipos] = 1;
+	  }
+	}
+      }
+    }
+
+  /* assign diagonal */
+  for(i = 0; i < m; i++) {
+    iipos = i * m + i;
+    ok[iipos] = 0;
+  }
+
+}
+
+/*
+   ---------------------- ONE CLOSED POLYGON ------------------------
+*/
 	 
 /*
 

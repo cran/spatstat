@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.30 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 1.31 $	$Date: 2008/01/31 17:47:54 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -43,6 +43,38 @@
 #			(denominator = area of eroded window)
 #
 # ------------------------------------------------------------------------
+
+"Linhom" <- function(...) {
+  K <- Kinhom(...)
+  L <- eval.fv(sqrt(K/pi))
+  # relabel the fv object
+  attr(L, "ylab") <- substitute(Linhom(r), NULL)
+  nama <- names(L)
+  desc <- attr(L, "desc")
+  labl <- attr(L, "labl")
+  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
+  DESC <- c("theoretical Poisson L(r)",
+             "uncorrected estimate of Linhom(r)",
+             "modified border-corrected estimate of Linhom(r)",
+             "border-corrected estimate of Linhom(r)",
+             "translation-corrected estimate of Linhom(r)",
+             "Ripley isotropic correction estimate of Linhom(r)")
+  LABL <- c("Lpois(r)",
+             "Lun(r)",
+             "Lbord*(r)",
+             "Lbord(r)",
+             "Ltrans(r)",
+             "Liso(r)")
+
+  for(i in seq(length(TAGS)))
+    if(!is.na(m <- match(TAGS[i], nama))) {
+      desc[m] <- DESC[i]
+      labl[m] <- LABL[i]
+    }
+  attr(L, "desc") <- desc
+  attr(L, "labl") <- labl
+  return(L)  
+}
 
 "Kinhom"<-
   function (X, lambda, ..., r = NULL, breaks = NULL, 

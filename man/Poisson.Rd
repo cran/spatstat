@@ -15,18 +15,19 @@ which can then be fitted to point pattern data.
   (namely, there are no interactions).
 }
 \details{
-  The function \code{\link{ppm}()}, which fits point process models to 
+  The function \code{\link{ppm}}, which fits point process models to 
   point pattern data, requires an argument \code{interaction}
   of class \code{"interact"}
   describing the interpoint interaction structure
   of the model to be fitted. 
   The appropriate description of the Poisson process is 
-  provided by the value of the function \code{Poisson()}.
+  provided by the value of the function \code{Poisson}.
 
   This works for all types of Poisson processes including
   multitype and nonstationary Poisson processes.
 }
 \seealso{
+  \code{\link{ppm}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}}
 }

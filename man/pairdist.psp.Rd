@@ -6,7 +6,7 @@
   in a line segment pattern.
 }
 \usage{
-  \method{pairdist}{psp}(X, \dots, method="Fortran")
+  \method{pairdist}{psp}(X, \dots, method="Fortran", type="Hausdorff")
 }
 \arguments{
   \item{X}{
@@ -20,6 +20,10 @@
     Values are \code{"Fortran"} and \code{"interpreted"}.
     Usually not specified.
   }
+  \item{type}{
+    Type of distance to be computed. Options are
+    \code{"Hausdorff"} and \code{"separation"}. Partial matching is used.
+  }
 }
 \value{
   A square matrix whose \code{[i,j]} entry is the distance
@@ -32,10 +36,18 @@
   This is a method for the generic function \code{\link{pairdist}}
   for the class \code{"psp"}.
 
-  Distances are calculated using the Hausdorff metric. The Hausdorff
-  distance between two line segments is the maximum distance
-  from any point on one of the segments to the nearest point on
-  the other segment.   
+  The distances between line segments are measured in one of two ways:
+  \itemize{
+    \item if \code{type="Hausdorff"}, distances are computed
+    in the Hausdorff metric. The Hausdorff
+    distance between two line segments is the \emph{maximum} distance
+    from any point on one of the segments to the nearest point on
+    the other segment.
+    \item if \code{type="separation"}, distances are computed
+    as the \emph{minimum} distance from a point on one line segment to
+    a point on the other line segment. For example, line segments which
+    cross over each other have separation zero.
+  }
   
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
@@ -51,6 +63,7 @@
 \examples{
    L <- psp(runif(10), runif(10), runif(10), runif(10), owin())
    D <- pairdist(L)
+   S <- pairdist(L, type="sep")
 }
 \author{
   Adrian Baddeley

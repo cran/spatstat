@@ -204,6 +204,7 @@ plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
+plot(rGaussPoisson(30, 0.05, 0.5))
 
 plot(redwood, main="random thinning - rthin()")
 points(rthin(redwood, 0.5), col="green", cex=1.4)

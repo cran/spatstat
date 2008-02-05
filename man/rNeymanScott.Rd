@@ -75,6 +75,7 @@
 \seealso{
   \code{\link{rpoispp}},
   \code{\link{rThomas}},
+  \code{\link{rGaussPoisson}},
   \code{\link{rMatClust}}
 }
 \examples{

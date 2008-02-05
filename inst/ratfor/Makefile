@@ -12,7 +12,9 @@ CIF_FOR = dgs.f diggra.f geyer.f lookup.f sftcr.f \
 
 OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f initaux.f inxyp.f updaux.f
 
-C_SRC = closepair.c corrections.c discarea.c done.c dinfty.c distances.c exactdist.c  exactPdist.c  fexitc.c  massdisthack.c xyseg.c
+C_DOMINIC = dinfty.c dwpure.c 
+
+C_SRC = areadiff.c closepair.c corrections.c discarea.c distances.c exactdist.c  exactPdist.c  fexitc.c  massdisthack.c xyseg.c $(C_DOMINIC)
 
 CC_SRC = PerfectStrauss.cc
 
@@ -66,39 +68,34 @@ Kwborder.c:	Kborder.cpp
 
 deathm.r:  $(MH_TEMPLATES)
 	$(CPP) -DMARKED -o $@ death.template
-	
+
 deathu.r:  $(MH_TEMPLATES)
 	$(CPP) -o $@ death.template
 
-	
 mh1.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=1 -o $@ methas.template
-	
+
 mh2.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=2 -o $@ methas.template
-	
+
 mh3.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=3 -o $@ methas.template
-	
+
 mh4.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=4 -o $@ methas.template
-	
+
 mh5.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=5 -o $@ methas.template
-	
+
 mh6.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=6 -o $@ methas.template
-	
+
 mh7.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=7 -o $@ methas.template
-	
+
 mh8.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=8 -o $@ methas.template
-	
+
 mh9.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=9 -o $@ methas.template
-	
-
-
-
 

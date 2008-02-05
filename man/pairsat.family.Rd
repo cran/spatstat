@@ -35,18 +35,24 @@
   take an exponential family form. 
 } 
 \references{
-Geyer, C.J. (1999)
-Likelihood Inference for Spatial Point Processes.
-Chapter 3 in 
-O.E. Barndorff-Nielsen, W.S. Kendall and M.N.M. Van Lieshout (eds)
-\emph{Stochastic Geometry: Likelihood and Computation},
-Chapman and Hall / CRC, 
-Monographs on Statistics and Applied Probability, number 80.
-Pages 79--140.
+  Geyer, C.J. (1999)
+  Likelihood Inference for Spatial Point Processes.
+  Chapter 3 in 
+  O.E. Barndorff-Nielsen, W.S. Kendall and M.N.M. Van Lieshout (eds)
+  \emph{Stochastic Geometry: Likelihood and Computation},
+  Chapman and Hall / CRC, 
+  Monographs on Statistics and Applied Probability, number 80.
+  Pages 79--140.
 }
 \seealso{
-  \code{\link{pairwise.family}},
-  \code{\link{Geyer}}
+  \code{\link{Geyer}} to create the Geyer saturation process.
+
+  \code{\link{Saturated}} to create a more general saturation model.
+
+  Other families:
+  \code{\link{inforder.family}},
+  \code{\link{ord.family}},
+  \code{\link{pairwise.family}}.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

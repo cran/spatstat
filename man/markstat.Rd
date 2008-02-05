@@ -79,10 +79,13 @@
 
   This function is just a convenient wrapper for a common use of the
   function \code{\link{applynbd}}. For more complex tasks,
-  see \code{\link{applynbd}}. 
+  use \code{\link{applynbd}}. 
+  To simply tabulate the marks in every \code{R}-neighbourhood, use
+  \code{\link{marktable}}.
 }
 \seealso{
   \code{\link{applynbd}},
+  \code{\link{marktable}},
   \code{\link{ppp.object}},
   \code{\link{apply}}
 }

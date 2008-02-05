@@ -6,7 +6,7 @@
   taken from two different line segment patterns.
 }
 \usage{
-  \method{crossdist}{psp}(X, Y, \dots, method="Fortran")
+  \method{crossdist}{psp}(X, Y, \dots, method="Fortran", type="Hausdorff")
 }
 \arguments{
   \item{X,Y}{
@@ -17,6 +17,10 @@
   }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"Fortran"} and \code{"interpreted"}.
+  }
+  \item{type}{
+    Type of distance to be computed. Options are
+    \code{"Hausdorff"} and \code{"separation"}. Partial matching is used.
   }
 }
 \value{
@@ -32,11 +36,19 @@
   in the first pattern to each line segment in the second pattern,
   and returns a matrix containing these distances.
 
-  Distances are calculated using the Hausdorff metric.
-  The Hausdorff distance between two line segments is the maximum distance
-  from any point on one of the segments to the nearest point on
-  the other segment.     
-
+  The distances between line segments are measured in one of two ways:
+  \itemize{
+    \item if \code{type="Hausdorff"}, distances are computed
+    in the Hausdorff metric. The Hausdorff
+    distance between two line segments is the \emph{maximum} distance
+    from any point on one of the segments to the nearest point on
+    the other segment.
+    \item if \code{type="separation"}, distances are computed
+    as the \emph{minimum} distance from a point on one line segment to
+    a point on the other line segment. For example, line segments which
+    cross over each other have separation zero.
+  }
+  
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -53,7 +65,8 @@
    L1 <- psp(runif(5), runif(5), runif(5), runif(5), owin())
    L2 <- psp(runif(10), runif(10), runif(10), runif(10), owin())
    D <- crossdist(L1, L2)
-  #result is a 5 x 10 matrix
+   #result is a 5 x 10 matrix
+   S <- crossdist(L1, L2, type="sep")
 }
 \author{
   Adrian Baddeley
