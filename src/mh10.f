@@ -1,6 +1,6 @@
 C Output from Public domain Ratfor, version 1.0
-      subroutine mh1(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mre
-     *p,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
+      subroutine mh10(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mr
+     *ep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
       implicit double precision(a-h,o-z)
       dimension par(1), iseed(3)
       dimension x(1), y(1), marks(1), period(2)
@@ -33,7 +33,7 @@ C Output from Public domain Ratfor, version 1.0
       if(urq.gt.q)then
       u = xprop(irep)
       v = yprop(irep)
-      call strauss(u,v,m1,x,y,npts,par,period,cifval)
+      call areaint(u,v,m1,x,y,npts,par,period,cifval)
       anumer = cifval
       adenom = qnodds*(npts+1)
       call aru(1,zero,one,iseed,bp)
@@ -45,7 +45,7 @@ C Output from Public domain Ratfor, version 1.0
       if(npts .ne. 0)then
       call aru(1,zero,one,iseed,xi)
       ix = 1 + int(npts*xi)
-      call strauss(x(ix),y(ix),ix,x,y,npts,par,period,cifval)
+      call areaint(x(ix),y(ix),ix,x,y,npts,par,period,cifval)
       anumer = qnodds * npts
       adenom = cifval
       call aru(1,zero,one,iseed,dp)
@@ -60,8 +60,8 @@ C Output from Public domain Ratfor, version 1.0
       ix = 1 + int(npts*xi)
       u = xprop(irep)
       v = yprop(irep)
-      call strauss(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
-      call strauss(u,v,ix,x,y,npts,par,period,cvn)
+      call areaint(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
+      call areaint(u,v,ix,x,y,npts,par,period,cvn)
       call aru(1,zero,one,iseed,sp)
       if(sp*cvd .lt. cvn)then
       itype = 3

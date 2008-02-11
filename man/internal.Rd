@@ -93,7 +93,7 @@
 \alias{is.poisson.interact}
 \alias{is.poisson.ppm}
 \alias{is.stationary.ppm}
-\alias{ks.test.ppm}
+\alias{kstestEngine}
 \alias{Kborder.engine}
 \alias{Kount}
 \alias{Kwtsum}               
@@ -377,7 +377,7 @@ is.poisson.ppm(x)
 is.prime(n)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
-ks.test.ppm(\dots)
+kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)

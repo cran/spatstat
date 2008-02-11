@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "methas.template"
- ## $Id: methas.template,v 1.2 2007/10/26 16:51:15 adrian Exp adrian $
+ ## $Id: methas.template,v 1.3 2007/10/26 17:10:00 adrian Exp adrian $
 
 # 1 "cif.h" 1
   ##

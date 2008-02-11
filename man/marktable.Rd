@@ -38,7 +38,7 @@
   The result is a two-dimensional contingency table with one row for
   each point in the pattern, and one column for each possible mark
   value. The \code{[i,j]} entry in the table gives the number of
-  neighbours of point \code{j} that have mark \code{j}.
+  neighbours of point \code{i} that have mark \code{j}.
 
   To perform more complicated calculations on the neighbours of every
   point, use \code{\link{markstat}} or \code{\link{applynbd}}. 

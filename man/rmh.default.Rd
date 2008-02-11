@@ -329,6 +329,13 @@ trend corresponding to a particular type, there is still a component
                 w=c(0,10,0,10))
    X.sftcr <- rmh(model=mod07,start=list(n.start=70),
                   control=list(nrep=nr,nverb=nv))
+
+   # Area-interaction process:
+   mod42 <- rmhmodel(cif="areaint",par=c(beta=2,eta=1.6,r=0.7),
+                 w=c(0,10,0,10))
+   X.area <- rmh(model=mod42,start=list(n.start=70),
+                  control=list(nrep=nr,nverb=nv))
+
    
    # Multitype Strauss:
    beta <- c(0.027,0.008)

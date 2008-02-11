@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.23 $   $Date: 2007/10/24 09:41:08 $
+#    $Revision: 1.24 $   $Date: 2008/02/05 13:23:03 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -113,14 +113,16 @@ print.fv <- function(x, ...) {
     cat(paste("for the function", a$argu, "->", ylab, "\n"))
   }
   cat("Entries:\n")
-  len <- nchar(a$labl)
-  tabjump <- max(c(len, 5)) + 3
-  pad <- function(n) { paste(character(n),collapse=" ") }
-  cat("id\tlabel", pad(tabjump - 5), "description\n", sep="")
-  cat("--\t-----", pad(tabjump - 5), "-----------\n", sep="")
+  lablen <- nchar(a$labl)
+  labjump <- max(c(lablen,5)) + 3
+  idlen <- nchar(nama)
+  idjump <- max(c(idlen,5)) + 3
+  pad <- function(n) { paste(rep(" ", n), collapse="") }
+  cat("id", pad(idjump-2), "label", pad(labjump - 5), "description\n", sep="")
+  cat("--", pad(idjump-2), "-----", pad(labjump - 5), "-----------\n", sep="")
   for(j in seq(ncol(x))) 
-    cat(paste(nama[j],"\t",
-              a$labl[j],pad(tabjump - len[j]),
+    cat(paste(nama[j], pad(idjump - idlen[j]),
+              a$labl[j],pad(labjump - lablen[j]),
               a$desc[j],"\n", sep=""))
   cat("--------------------------------------\n\n")
   cat("Default plot formula:\n\t")

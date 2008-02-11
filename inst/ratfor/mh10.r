@@ -6,13 +6,13 @@
 
 # 1 "cif.h" 1
   ##
-  ## Map from 1 to conditional intensity functions etc
+  ## Map from 10 to conditional intensity functions etc
   ##
 # 4 "methas.template" 2
 # 1 "death.h" 1
 # 5 "methas.template" 2
 
-subroutine mh1(par,period,xprop,yprop,mprop,ntypes,
+subroutine mh10(par,period,xprop,yprop,mprop,ntypes,
                   iseed,nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
 implicit double precision(a-h,o-z)
 dimension par(1), iseed(3)
@@ -61,7 +61,7 @@ while(irep <= nrep) {
 
 
 
-   call strauss(u,v,m1,x,y,npts,par,period,cifval)
+   call areaint(u,v,m1,x,y,npts,par,period,cifval)
 
 
 
@@ -86,7 +86,7 @@ while(irep <= nrep) {
 
 
 
-    call strauss(x(ix),y(ix),ix,x,y,npts,par,period,cifval)
+    call areaint(x(ix),y(ix),ix,x,y,npts,par,period,cifval)
 
 
 
@@ -111,9 +111,9 @@ while(irep <= nrep) {
                  u = xprop(irep)
                  v = yprop(irep)
 # 118 "methas.template"
-                   call strauss(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
+                   call areaint(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
 
-                   call strauss(u,v,ix,x,y,npts,par,period,cvn)
+                   call areaint(u,v,ix,x,y,npts,par,period,cvn)
 # 130 "methas.template"
                    call aru(1,zero,one,iseed,sp)
                    if(sp*cvd < cvn) itype = 3 ## Shift occurs.

@@ -1,6 +1,7 @@
 \name{spatstat-deprecated}
 \alias{conspire}
 \alias{ksmooth.ppp}
+\alias{ks.test.ppm}
 \alias{mpl}
 \alias{rtoro}
 \title{Deprecated spatstat functions}
@@ -10,6 +11,7 @@
 \usage{
 conspire(\dots)
 ksmooth.ppp(x, sigma, \dots, edge=TRUE)
+ks.test.ppm(\dots)
 mpl(Q, trend, interaction, data, correction, rbord, use.gam)
 rtoro(X, which=NULL, radius=NULL, width=NULL, height=NULL) 
 }
@@ -21,6 +23,8 @@ rtoro(X, which=NULL, radius=NULL, width=NULL, height=NULL)
 
   \code{mpl} has been replaced by \code{\link{ppm}}.
 
+  \code{ks.test.ppm} has been replaced by \code{\link{kstest.ppm}}.
+  
   \code{rtoro} has been replaced by \code{\link{rshift}}.
 }
 \keyword{internal}

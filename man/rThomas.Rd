@@ -43,14 +43,52 @@
   per cluster being Poisson (\code{mu}) distributed, and their
   positions being isotropic Gaussian displacements from the
   cluster parent location.
+
+  This classical model can be fitted to data by the method of minimum contrast,
+  using \code{\link{thomas.estK}}.
+  
+  The algorithm can also generate spatially inhomogeneous versions of
+  the Thomas process:
+  \itemize{
+    \item The parent points can be spatially inhomogeneous.
+    If the argument \code{kappa} is a \code{function(x,y)}
+    or a pixel image (object of class \code{"im"}), then it is taken
+    as specifying the intensity function of an inhomogeneous Poisson
+    process that generates the parent points.
+    \item The offspring points can be inhomogeneous. If the
+    argument \code{mu} is a \code{function(x,y)}
+    or a pixel image (object of class \code{"im"}), then it is
+    interpreted as the reference density for offspring points,
+    in the sense of Waagepetersen (2006).
+    For a given parent point, the offspring constitute a Poisson process
+    with intensity function equal to \code{mu(x,y) * f(x,y)}
+    where \code{f} is the Gaussian density centred at the parent point.
+  }
+  When the parents are homogeneous (\code{kappa} is a single number)
+  and the offspring are inhomogeneous (\code{mu} is a
+  function or pixel image), the model can be fitted to data
+  using \code{\link{thomas.estK}} applied to the inhomogeneous
+  \eqn{K} function.
 }
 \seealso{
 \code{\link{rpoispp}},
 \code{\link{rMatClust}},
-\code{\link{rNeymanScott}}
+\code{\link{rGaussPoisson}},
+\code{\link{rNeymanScott}},
+\code{\link{thomas.estK}}
+}
+\references{
+  Waagepetersen, R. (2006)
+  An estimating function approach to inference for inhomogeneous
+  Neyman-Scott processes.
+  Submitted for publication.
 }
 \examples{
+  #homogeneous
   X <- rThomas(10, 0.2, 5)
+  #inhomogeneous
+  Z <- as.im(function(x,y){ 5 * exp(2 * x - 1) }, owin())
+  Y <- rThomas(10, 0.2, Z)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

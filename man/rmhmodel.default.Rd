@@ -51,11 +51,18 @@
     \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'lookup'}}{General isotropic pairwise interaction process,
       with the interaction function specified via a ``lookup table''.}
+    \item{\code{'areaint'}}{Area-interaction process.}
   }
 
   The argument \code{par} supplies parameter values appropriate to
   the conditional intensity function being invoked. These are:
   \describe{
+    \item{areaint:}{
+      (Area-interaction process.) A \bold{named} vector with components
+      \code{beta,eta,r} which are respectively the ``base''
+      intensity, the scaled interaction parameter and the
+      interaction radius.  
+    }
     \item{strauss:}{
       (Strauss process.) A \bold{named} vector with components
       \code{beta,gamma,r} which are respectively the ``base''
@@ -353,6 +360,7 @@ otherwise an error is given.
   \code{\link{rmhcontrol}},
   \code{\link{rmhstart}},
   \code{\link{ppm}},
+  \code{\link{AreaInter}},
   \code{\link{Strauss}},
   \code{\link{Softcore}},
   \code{\link{StraussHard}},
@@ -378,6 +386,10 @@ otherwise an error is given.
                      par=c(beta=0.8,sigma=0.1,kappa=0.5),
                      w=w)
    
+   # Area-interaction process:
+   mod42 <- rmhmodel(cif="areaint",par=c(beta=2,eta=1.6,r=0.7),
+                 w=c(0,10,0,10))
+
    # Multitype Strauss:
    beta <- c(0.027,0.008)
    gmma <- matrix(c(0.43,0.98,0.98,0.36),2,2)

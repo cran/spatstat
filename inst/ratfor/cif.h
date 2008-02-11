@@ -48,5 +48,10 @@
 #define MHNAME mh9
 #define CIF(u,v,mark,ix,x,y,marks,npts,ntypes,par,period,cifval,aux) \
 	 lookup(u,v,ix,x,y,npts,par,period,cifval)
+
+#elif (NMBR == 10) 
+#define MHNAME mh10
+#define CIF(u,v,mark,ix,x,y,marks,npts,ntypes,par,period,cifval,aux) \
+	 areaint(u,v,ix,x,y,npts,par,period,cifval)
 #endif
 

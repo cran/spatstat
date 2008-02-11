@@ -106,6 +106,7 @@
   \code{\link{rmhcontrol}},
   \code{\link{rmhstart}},
   \code{\link{ppm}},
+  \code{\link{AreaInter}},
   \code{\link{Strauss}},
   \code{\link{Softcore}},
   \code{\link{StraussHard}},

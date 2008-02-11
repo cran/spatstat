@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.21 $  $Date: 2007/12/20 12:00:29 $
+#  $Revision: 1.24 $  $Date: 2008/02/06 16:24:31 $
 #
 #
 
@@ -20,17 +20,47 @@ kstest <- function(...) {
 
 kstest.ppp <-
   function(X, covariate, ..., jitter=TRUE) {
-    kstest.ppm(ppm(X), covariate, ..., jitter=jitter)
+    Xname <- deparse(substitute(X))
+    covname <- deparse(substitute(covariate))
+    do.call("kstestEngine",
+            resolve.defaults(list(ppm(X), covariate, jitter=jitter),
+                             list(...),
+                             list(modelname="CSR",
+                                  covname=covname, dataname=Xname)))
 }
 
 kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
   modelname <- deparse(substitute(model))
   covname <- deparse(substitute(covariate))
-  stopifnot(is.ppm(model))
+  verifyclass(model, "ppm")
+  if(is.poisson.ppm(model) && is.stationary.ppm(model))
+    modelname <- "CSR"
+  do.call("kstestEngine",
+          resolve.defaults(list(model, covariate, jitter=jitter),
+                           list(...),
+                           list(modelname=modelname,
+                                covname=covname)))
+}
+
+kstestEngine <- function(model, covariate, ...,
+                         jitter=TRUE, 
+                         modelname, covname, dataname) {
+  verifyclass(model, "ppm")
+  csr <- is.poisson.ppm(model) && is.stationary.ppm(model)
+  
+  if(missing(modelname))
+    modelname <- if(csr) "CSR" else deparse(substitute(model))
+  if(missing(covname))
+    covname <- deparse(substitute(covariate))
+  if(missing(dataname))
+    dataname <- paste(model$call[[2]])
+
   if(!is.poisson.ppm(model))
     stop("Only implemented for Poisson point process models")
+
   X <- data.ppm(model)
   W <- as.owin(model)
+  
   if(is.im(covariate)) {
     type <- "im"
     # evaluate at data points by interpolation
@@ -84,13 +114,22 @@ kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
   U <- FZ(ZX)
   # Test uniformity of transformed values
   result <- ks.test(U, "punif", ...)
+
+  # modify the 'htest' entries
+  result$method <- paste("Spatial Kolmogorov-Smirnov test of",
+                         if(csr) "CSR" else "inhomogeneous Poisson process")
   result$data.name <-
-    paste("predicted cdf of covariate", sQuote(paste(covname, collapse="")),
-          "evaluated at data points of", sQuote(modelname))
+    paste("covariate", sQuote(paste(covname, collapse="")),
+          "evaluated at points of", sQuote(dataname), "\n\t",
+          "and transformed to uniform distribution under",
+          if(csr) modelname else sQuote(modelname))
+  
+  # additional class 'kstest'
   class(result) <- c("kstest", class(result))
   attr(result, "prep") <-
     list(Zvalues=Zvalues, lambda=lambda, ZX=ZX, FZ=FZ, U=U, type=type)
-  attr(result, "info") <- list(modelname=modelname, covname=covname)
+  attr(result, "info") <- list(modelname=modelname, covname=covname,
+                               dataname=dataname, csr=csr)
   return(result)        
 }
 
@@ -99,7 +138,7 @@ plot.kstest <- function(x, ...) {
   info <- attr(x, "info")
   FZ <- prep$FZ
   xxx <- get("x", environment(FZ))
-  main <- c(paste("Kolmogorov-Smirnov test of model", sQuote(info$modelname)),
+  main <- c(x$method,
             paste("based on distribution of covariate", sQuote(info$covname)),
             paste("p-value=", signif(x$p.value, 4)))
   do.call("plot.default",
