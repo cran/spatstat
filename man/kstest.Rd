@@ -14,11 +14,11 @@ kstest(...)
 \method{kstest}{ppm}(model, covariate, ..., jitter=TRUE)
 }
 \arguments{
-  \item{model}{
-    A fitted point process model (object of class \code{"ppm"}).
-  }
   \item{X}{
     A point pattern (object of class \code{"ppp"}).
+  }
+  \item{model}{
+    A fitted point process model (object of class \code{"ppm"}).
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
@@ -126,6 +126,13 @@ kstest(...)
 
   The value also belongs to the class \code{"kstest"} for which there is
   a plot method.
+}
+\section{Warning}{
+  The outcome of the test involves a small amount of random variability,
+  because (by default) the coordinates are randomly perturbed to
+  avoid tied values. Hence, if \code{kstest} is executed twice, the
+  \eqn{p}-values will not be exactly the same. To avoid this behaviour,
+  set \code{jitter=FALSE}.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

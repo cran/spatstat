@@ -8,7 +8,7 @@ CPP = /usr/bin/cpp
 MH_TEMPLATES = cif.h death.h methas.template death.template 
 
 CIF_FOR = dgs.f diggra.f geyer.f lookup.f sftcr.f \
-    straush.f straushm.f strauss.f straussm.f 
+    straush.f straushm.f strauss.f straussm.f areaint.f
 
 OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f initaux.f inxyp.f updaux.f
 
@@ -25,7 +25,7 @@ HUMAN = $(MH_TEMPLATES) $(C_TEMPLATES) $(CIF_FOR) $(OTHER_FOR) $(C_SRC) $(CC_SRC
 ##########################################################
 # Source to be generated automatically:
 
-MH_FOR = mh1.f mh2.f mh3.f mh4.f mh5.f mh6.f mh7.f mh8.f mh9.f
+MH_FOR = mh1.f mh2.f mh3.f mh4.f mh5.f mh6.f mh7.f mh8.f mh9.f mh10.f
 
 DEATH_FOR = deathu.f deathm.f
 
@@ -98,4 +98,8 @@ mh8.r:  $(MH_TEMPLATES)
 
 mh9.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=9 -o $@ methas.template
+
+mh10.r:  $(MH_TEMPLATES)
+	$(CPP) -DNMBR=10 -o $@ methas.template
+
 

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.29 $   $Date: 2008/01/31 16:47:21 $
+#    $Revision: 4.32 $   $Date: 2008/02/08 15:43:41 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -404,15 +404,29 @@ rpoint <- function(n, f, fmax=NULL,
   # Matern Cluster Process with Poisson (mu) offspring distribution
   #
   stopifnot(is.numeric(r) && length(r) == 1 && r > 0)
-  stopifnot(is.numeric(mu) && length(mu) == 1 && mu >= 0)
-  
-  poisclus <-  function(x0, y0, radius, mu) {
-                           n <- rpois(1, mu)
-                           return(runifdisc(n, centre=c(x0, y0),
-                                            radius=radius))
-                         }
-  result <- rNeymanScott(kappa, r, poisclus,
-                         win, radius=r, mu=mu)
+  #
+  if(is.numeric(mu)) {
+    # homogeneous
+    stopifnot(length(mu) == 1 && mu >= 0) 
+    poisclus <-
+      function(x0, y0, radius, mu) {
+        n <- rpois(1, mu)
+        return(runifdisc(n, centre=c(x0, y0), radius=radius))
+      }
+    result <- rNeymanScott(kappa, r, poisclus, win, radius=r, mu=mu)
+  } else {
+    # inhomogeneously modulated clusters a la Waagepetersen
+    mu <- as.im(mu, win)
+    poisclusinhom <-
+      function(x0, y0, radius, mu, mwin, insidedisc) {
+        disque <- as.im(function(x,y,x0,y0,rsq) { (x-x0)^2 + (y-y0)^2 < rsq },
+                        mwin, x0=x0,y0=y0, rsq=radius^2)
+        intens <- eval.im(mu * disque / (pi * radius^2))
+        clust <- rpoispp(intens)
+      }
+    result <- rNeymanScott(kappa, r, poisclusinhom, win, radius=r, mu=mu,
+                           mwin=as.owin(mu))
+  }
   return(result)
 }
     
@@ -423,16 +437,33 @@ rpoint <- function(n, f, fmax=NULL,
   # at isotropic Normal(0,sigma^2) displacements from parent
   #
   stopifnot(is.numeric(sigma) && length(sigma) == 1 && sigma > 0)
-  stopifnot(is.numeric(mu) && length(mu) == 1 && mu >= 0)
-  
-  thomclus <-  function(x0, y0, sigma, mu) {
+
+  if(is.numeric(mu)) {
+    # homogeneous
+    stopifnot(length(mu) == 1 && mu >= 0)
+    thomclus <-  function(x0, y0, sigma, mu) {
                            n <- rpois(1, mu)
                            x <- rnorm(n, mean=x0, sd=sigma)
                            y <- rnorm(n, mean=y0, sd=sigma)
                            return(list(x=x, y=y))
                          }
-  result <- rNeymanScott(kappa, 4 * sigma, thomclus,
+    result <- rNeymanScott(kappa, 4 * sigma, thomclus,
                          win, sigma=sigma, mu=mu)
+  } else {
+    # inhomogeneously modulated clusters a la Waagepetersen
+    mu <- as.im(mu, win)
+    gaussxy <- function(x,y,x0,y0,sigma) 
+      dnorm(x, mean=x0, sd=sigma) * dnorm(y, mean=y0, sd=sigma)
+    thomclusinhom <-  function(x0, y0, sigma, mu, gaussxy, mwin) {
+      gauss <- as.im(gaussxy, mwin, x0=x0,y0=y0,sigma=sigma)
+      mumeasure <- eval.im(gauss * mu)
+      clust <- rpoispp(mumeasure)
+      return(clust)
+    }
+    result <- rNeymanScott(kappa, 4 * sigma, thomclusinhom,
+                           win, sigma=sigma, mu=mu,
+                           gaussxy=gaussxy, mwin=as.owin(mu))
+  }
   return(result)
 }
 

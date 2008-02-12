@@ -17,7 +17,9 @@
     Radius parameter of the clusters.
   }
   \item{mu}{
-    Mean number of points per cluster.
+    Mean number of points per cluster (a single positive number)
+    or reference intensity for the cluster points (a function or
+    a pixel image).
   }
   \item{win}{
     Window in which to simulate the pattern.
@@ -45,15 +47,63 @@
   In this implementation, parent points are not restricted to lie in the
   window; the parent process is effectively the uniform
   Poisson process on the infinite plane.
+
+  This classical model can be fitted to data by the method of minimum contrast,
+  using \code{\link{matclust.estK}}.
+  
+  The algorithm can also generate spatially inhomogeneous versions of
+  the Mat\'ern cluster process:
+  \itemize{
+    \item The parent points can be spatially inhomogeneous.
+    If the argument \code{kappa} is a \code{function(x,y)}
+    or a pixel image (object of class \code{"im"}), then it is taken
+    as specifying the intensity function of an inhomogeneous Poisson
+    process that generates the parent points.
+    \item The offspring points can be inhomogeneous. If the
+    argument \code{mu} is a \code{function(x,y)}
+    or a pixel image (object of class \code{"im"}), then it is
+    interpreted as the reference density for offspring points,
+    in the sense of Waagepetersen (2006).
+    For a given parent point, the offspring constitute a Poisson process
+    with intensity function equal to the \emph{average} value of
+    \code{mu} inside the disc of radius \code{r} centred on the parent
+    point, and zero intensity outside this disc.
+  }
+  When the parents are homogeneous (\code{kappa} is a single number)
+  and the offspring are inhomogeneous (\code{mu} is a
+  function or pixel image), the model can be fitted to data
+  using \code{\link{matclust.estK}} applied to the inhomogeneous
+  \eqn{K} function.
 }
 \seealso{
   \code{\link{rpoispp}},
   \code{\link{rThomas}},
   \code{\link{rGaussPoisson}},
-  \code{\link{rNeymanScott}}
+  \code{\link{rNeymanScott}},
+  \code{\link{matclust.estK}}.
 }
 \examples{
- pp <- rMatClust(10, 0.05, 4)
+ # homogeneous
+ X <- rMatClust(10, 0.05, 4)
+ # inhomogeneous
+ Z <- as.im(function(x,y){ 4 * exp(2 * x - 1) }, owin())
+ Y <- rMatClust(10, 0.05, Z)
+}
+\references{
+  Mat\'ern, B. (1960)
+  \emph{Spatial Variation}.
+  Meddelanden fraan Statens Skogsforskningsinstitut,
+  volume 59, number 5.
+  Statens Skogsforskningsinstitut, Sweden.
+
+  Mat\'ern, B. (1986)
+  \emph{Spatial Variation}.
+  Lecture Notes in Statistics 36, Springer-Verlag, New York.
+
+  Waagepetersen, R. (2006)
+  An estimating function approach to inference for inhomogeneous
+  Neyman-Scott processes.
+  Submitted for publication.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.24 $   $Date: 2008/02/01 19:51:44 $
+#  $Revision: 2.27 $   $Date: 2008/02/07 12:32:33 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -75,6 +75,12 @@ list(
        gamma <- (inte$interpret)(coeffs, inte)$param$gammas
        h <- stepfun(r, c(gamma, 1))
        return(list(cif='lookup', par=list(h=h)))
+     },
+     "Area-interaction process" =
+     function(coeffs, inte) {
+       r <- inte$par$r
+       eta <- (inte$interpret)(coeffs, inte)$param$eta
+       return(list(cif='areaint', par=list(eta=eta,r=r)))
      }
 )
 
@@ -91,13 +97,8 @@ list(
 #
 #           OrdThresh                <none>
 #
-#           AreaInter                <none>
-#
 #  'dgs' has no canonical parameters (it's determined by its irregular
 #  parameter rho) so there can't be an interaction object for it.
-#
-#  We can implement rmh.default for the area interaction process
-#  with a bit of work.
 #
 #  Implementing rmh.default for the others is probably too hard.
 

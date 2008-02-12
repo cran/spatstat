@@ -131,6 +131,7 @@
   \code{\link{StraussHard}},
   \code{\link{Softcore}},
   \code{\link{Geyer}},
+  \code{\link{AreaInter}},
   \code{\link{DiggleGratton}}
 }
 
@@ -163,6 +164,11 @@
    fit <- ppm(X, ~1, Geyer(r=7,sat=2), rbord=7)
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Geyer model")
+
+   # Area-interaction process
+   fit <- ppm(X, ~1, AreaInter(r=7), rbord=14)
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
+   plot(Xsim, main="simulation from fitted area-interaction model")
 
    # soft core interaction process
    Q <- quadscheme(X, nd=50)

@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.21 $  $Date: 2007/03/13 03:41:56 $
+#   $Revision: 1.25 $  $Date: 2008/02/07 12:15:25 $
 #
 #
 
@@ -523,6 +523,37 @@ reach.rmhmodel <- function(x, ...) {
               if(is.null(r)) 
                 r <- knots(h)
               return(max(r))
+            }
+            ),
+#       
+# 10. Area interaction
+#       
+       'areaint'=
+       list(
+            fortran.id=10,
+            multitype=FALSE,
+            need.aux=FALSE,
+            parhandler=function(par, ...) {
+              nms <- c("beta","eta","r")
+              if(sum(!is.na(match(names(par),nms))) != 3) {
+		stop(paste("For the area interaction cif, par must be a named vector\n",
+                           "with components beta, eta, and r.\n",
+                           "Bailing out."))
+              }
+              if(any(par<0))
+		stop("Negative parameters for strauss cif.")
+              par <- unlist(par[nms])
+              # algorithm requires 1/eta in place of eta
+              etainv <- 1/par[2]
+              if(is.infinite(etainv))
+                etainv <- .Machine$double.xmax/2
+              par[2] <- etainv
+              return(par)
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              eta <- par[["eta"]]
+              return(if(eta == 1) 0 else (2 * r))
             }
             )
   )
