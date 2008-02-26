@@ -3,7 +3,7 @@
 \title{The Area Interaction Point Process Model}
 \description{
   Creates an instance of the Area Interaction point process model
-  (marginal Widom-Rowlinson model) 
+  (Widom-Rowlinson penetrable spheres model) 
   which can then be fitted to point pattern data.
 }
 \usage{
@@ -18,16 +18,29 @@
   structure of the area-interaction process with disc radius \eqn{r}.
 }
 \details{
-  The (stationary) area interaction process
-  (Baddeley and Van Lieshout, 1995) with disc radius \eqn{r},
-  intensity parameter \eqn{\beta}{beta} and interaction parameter
+  This function defines the interpoint interaction structure of a point
+  process called the Widom-Rowlinson penetrable sphere model
+  or area-interaction process. It can be used to fit this model to
+  point pattern data.
+
+  The function \code{\link{ppm}()}, which fits point process models to 
+  point pattern data, requires an argument 
+  of class \code{"interact"} describing the interpoint interaction
+  structure of the model to be fitted. 
+  The appropriate description of the area interaction structure is
+  yielded by the function \code{AreaInter()}. See the examples below.
+
+  In \bold{standard form}, the area-interaction process
+  (Widom and Rowlinson, 1970;
+  Baddeley and Van Lieshout, 1995) with disc radius \eqn{r},
+  intensity parameter \eqn{\kappa}{kappa} and interaction parameter
   \eqn{\gamma}{gamma} is a point process with probability density
   \deqn{
     f(x_1,\ldots,x_n) =
-    \alpha \beta^{n(x)} \gamma^{-A(x)}
+    \alpha \kappa^{n(x)} \gamma^{-A(x)}
   }{
-    f(x_1,\ldots,x_n) =
-    alpha . beta^n(x) gamma^(-A(x))
+    f(x[1],\ldots,x[n]) =
+    alpha . kappa^n(x) . gamma^(-A(x))
   }
   where 
   \eqn{x_1,\ldots,x_n}{x[1],\ldots,x[n]} represent the 
@@ -39,44 +52,77 @@
 
   The interaction parameter \eqn{\gamma}{gamma} can be any positive number.
   If \eqn{\gamma = 1}{gamma = 1} then the model reduces to a Poisson
-  process. If \eqn{\gamma < 1}{gamma < 1} then the process is regular,
+  process with intensity \eqn{\kappa}{kappa}.
+  If \eqn{\gamma < 1}{gamma < 1} then the process is regular,
   while if \eqn{\gamma > 1}{gamma > 1} the process is clustered.
-  The value \eqn{\gamma = 0}{eta = 0} corresponds to a hard core process
-  with hard core radius \eqn{r} (interaction distance \eqn{2r}).
+  Thus, an area interaction process can be used to model either
+  clustered or regular point patterns. Two points interact if the
+  distance between them is less than \eqn{2r}{2 * r}.
 
-  In \pkg{spatstat} this model is reparametrised so that the interaction
-  parameter is not affected by scale changes. In the new
-  parametrisation, the density is 
+  The standard form of the model, shown above, is a little
+  complicated to interpret in practical applications.
+  For example, each isolated point of the pattern \eqn{x} contributes a factor
+  \eqn{\kappa \gamma^{-\pi r^2}}{kappa * gamma^(-pi * r^2)}
+  to the probability density. 
+  
+  In \pkg{spatstat}, the model is parametrised in a different form,
+  which is easier to interpret.
+  In \bold{canonical scale-free form}, the probability density is rewritten as
   \deqn{
     f(x_1,\ldots,x_n) =
-    \alpha \beta^{n(x)} \eta^{-B(x)}
+    \alpha \beta^{n(x)} \eta^{-C(x)}
   }{
     f(x_1,\ldots,x_n) =
-    alpha . beta^n(x) eta^(-B(x))
+    alpha . beta^n(x) eta^(-C(x))
   }
-  where \eqn{\eta}{eta} is the new interaction parameter, and 
+  where \eqn{\beta}{beta} is the new intensity parameter,
+  \eqn{\eta}{eta} is the new interaction parameter, and
+  \eqn{C(x) = B(x) - n(x)} is the interaction potential. Here
   \deqn{
     B(x) = \frac{A(x)}{\pi r^2}
   }{
     B(x) = A(x)/(pi * r^2)
   }
   is the normalised area (so that the discs have unit area).
-  The value \eqn{\eta = 1}{eta = 1}
-  again corresponds to a Poisson process.
+  In this formulation, each isolated point of the pattern contributes a
+  factor \eqn{\beta}{beta} to the probability density (so the
+  first order trend is \eqn{\beta}{beta}). The quantity 
+  \eqn{C(x)} is a true interaction potential, in the sense that
+  \eqn{C(x) = 0} if the point pattern \eqn{x} does not contain any
+  points that lie close together (closer than \eqn{2r}{2*r} units
+  apart). 
+
+  The old parameters \eqn{\kappa,\gamma}{kappa,gamma} of the
+  standard form are related to
+  the new parameters \eqn{\beta,\eta}{beta,eta} of the canonical
+  scale-free form, by
+  \deqn{
+    \beta = \kappa \gamma^{-\pi r^2} = \kappa /\eta
+  }{
+    beta = kappa * gamma^(-pi r^2)= kappa / eta
+  }
+  and
+  \deqn{
+    \eta = \gamma^{\pi r^2}
+  }{
+    eta = gamma^(pi r^2)
+  }
+  provided \eqn{\gamma}{gamma} and \eqn{\kappa}{kappa} are positive and finite.
+
+  In the canonical scale-free form, the parameter \eqn{\eta}{eta}
+  can take any nonnegative value. The value \eqn{\eta = 1}{eta = 1}
+  again corresponds to a Poisson process, with intensity \eqn{\beta}{beta}.
+  If \eqn{\eta < 1}{eta < 1} then the process is regular,
+  while if \eqn{\eta > 1}{eta > 1} the process is clustered.
+  The value \eqn{\eta = 0}{eta = 0} corresponds to a hard core process
+  with hard core radius \eqn{r} (interaction distance \eqn{2r}).
   
   The \emph{nonstationary} area interaction process is similar except that 
   the contribution of each individual point \eqn{x_i}{x[i]}
   is a function \eqn{\beta(x_i)}{beta(x[i])}
   of location, rather than a constant beta. 
  
-  The function \code{\link{ppm}()}, which fits point process models to 
-  point pattern data, requires an argument 
-  of class \code{"interact"} describing the interpoint interaction
-  structure of the model to be fitted. 
-  The appropriate description of the area interaction structure is
-  yielded by the function \code{AreaInter()}. See the examples below.
- 
-  Note the only argument is the disc radius \code{r}.
+  Note the only argument of \code{AreaInter()} is the disc radius \code{r}.
   When \code{r} is fixed, the model becomes an exponential family.
   The canonical parameters \eqn{\log(\beta)}{log(beta)}
   and \eqn{\log(\eta)}{log(eta)}
@@ -94,24 +140,34 @@
   are closer than \code{2 * r} units apart.
 }
 \examples{
-   AreaInter(r=0.1)
    # prints a sensible description of itself
-   data(swedishpines)
-   # Fit the stationary area interaction process to Swedish Pines data   
-   ppm(swedishpines, ~1, AreaInter(r=2), rbord=4)
-   data(cells) 
-   # Fit the stationary area interaction process to `cells'
-   ppm(cells, ~1, AreaInter(r=0.03), rbord=0.06)
-   # Zero value of eta indicates hard core process.
+   AreaInter(r=0.1)
 
-   ppm(swedishpines, ~polynom(x/10,y/10,3), AreaInter(r=2), rbord=4)
-   # fit a nonstationary area interaction with log-cubic polynomial trend
+   # Note the reach is twice the radius
+   reach(AreaInter(r=1))
+
+   # Fit the stationary area interaction process to Swedish Pines data   
+   data(swedishpines)
+   ppm(swedishpines, ~1, AreaInter(r=7))
+
+   # Fit the stationary area interaction process to `cells'
+   data(cells) 
+   ppm(cells, ~1, AreaInter(r=0.06))
+   # eta=0 indicates hard core process.
+
+   # Fit a nonstationary area interaction with log-cubic polynomial trend
+   ppm(swedishpines, ~polynom(x/10,y/10,3), AreaInter(r=7))
 }
 \references{
   Baddeley, A.J. and Van Lieshout, M.N.M. (1995).
   Area-interaction point processes.
   \emph{Annals of the Institute of Statistical Mathematics}
   \bold{47} (1995) 601--619.
+
+  Widom, B. and Rowlinson, J.S. (1970).
+  New model for the study of liquid-vapor phase transitions.
+  \emph{The Journal of Chemical Physics}
+  \bold{52} (1970) 1670--1684.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
