@@ -6,7 +6,7 @@
   point process model is evaluated for a given point pattern.
 }
 \usage{
-  suffstat(model, X)
+  suffstat(model, X=data.ppm(model))
 }
 \arguments{
   \item{model}{A fitted point process model (object of class

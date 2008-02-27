@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.25 $  $Date: 2008/02/07 12:15:25 $
+#   $Revision: 1.26 $  $Date: 2008/02/25 15:01:40 $
 #
 #
 
@@ -543,11 +543,6 @@ reach.rmhmodel <- function(x, ...) {
               if(any(par<0))
 		stop("Negative parameters for strauss cif.")
               par <- unlist(par[nms])
-              # algorithm requires 1/eta in place of eta
-              etainv <- 1/par[2]
-              if(is.infinite(etainv))
-                etainv <- .Machine$double.xmax/2
-              par[2] <- etainv
               return(par)
             },
             reach = function(par, ...) {

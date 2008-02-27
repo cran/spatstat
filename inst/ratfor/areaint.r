@@ -1,9 +1,11 @@
-# $Id: areaint.r,v 1.8 2008/02/11 16:09:18 adrian Exp adrian $
+# $Id: areaint.r,v 1.11 2008/02/25 15:04:24 adrian Exp adrian $
 subroutine areaint(u,v,ix,x,y,n,par,period,cifval)
 #
 # Conditional intensity function for area-interaction process
 #
-# cif = beta * eta^(-area/pi r^2) = beta * etainv^(area/pi r^2)
+# cif = beta * eta^(1-B) 
+#
+#   where B = (uncovered area)/(pi r^2)
 #
 implicit double precision(a-h,o-z)
 dimension par(3), x(1), y(1), period(2)
@@ -16,18 +18,16 @@ logical neigh(n)
 ##
 eps  = 2.22d-16 # Essentially .Machine$double.eps 
 zero = 0.d0
-pi   = 3.14159265359d0
 ngrid = 64 
 
 per  = period(1) > zero
 
 beta   = par(1)
-etainv = par(2)
+eta    = par(2)
 r      = par(3)
 
 if(n==0) {
-  # uncovered area is pi r^2
-  cifval = beta * etainv
+  cifval = beta
   return
 }
 
@@ -65,14 +65,16 @@ if(.not. per) {
   }
   # scan a grid of points centred at (u,v)
   kount = 0
+  kdisc = 0
   xgrid0 = u - r - dx/2
   do kx=1,ngrid {
     xgrid = xgrid0 + dble(kx) * dx
-    my = int(dsqrt(r2 - (u - xgrid)**2)/dx)
+    my = int(dsqrt(r2 - (u - xgrid)**2)/dy)
     if(my >= 0) {
       do ky=-my,my {
         ygrid = v + dble(ky) * dy
-        # Grid point is inside disc of radius r centred at (u,v)
+        # Grid point (xgrid,ygrid) is inside disc of radius r centred at (u,v)
+        kdisc = kdisc + 1
         # Loop through all data points to determine
         # whether the grid point is covered by another disc
         covered = .false.
@@ -106,12 +108,14 @@ if(.not. per) {
             }
           }
         }
+        # finished scanning all data points j 
+        if(.not. covered)
+          kount = kount + 1
+        # finished consideration of grid point (xgrid, ygrid)
+42      continue
       }
     }
   }
-  if(.not. covered)
-    kount = kount + 1
-42 continue
 } else {
   # periodic distance
   # First identify which data points are neighbours of (u,v)
@@ -131,6 +135,7 @@ if(.not. per) {
   }
   # scan a grid of ngrid * ngrid points centred at (u,v)
   kount = 0
+  kdisc = 0
   xgrid0 = u - r - dx
   ygrid0 = v - r - dy
   do kx=1,ngrid {
@@ -141,6 +146,7 @@ if(.not. per) {
       call dist2(u,v,xgrid,ygrid,period,d2)
       if(d2 < r2) {
         # Grid point is inside disc of radius r centred at (u,v)
+        kdisc = kdisc + 1
         # Loop through all data points to determine
         # whether the grid point is covered by another disc
         covered = .false.
@@ -168,23 +174,27 @@ if(.not. per) {
             }
           }
         }
+        # finished scanning all data points j
         if(.not. covered)
           kount = kount + 1
 4242    continue
+        # finished considering grid point (xgrid,ygrid)
       }
     }
   }
 }
 
-# `kount' is the number of uncovered grid points
+# `kdisc' is the number of           grid points in the disc
+# `kount' is the number of UNCOVERED grid points in the disc
 
-if(etainv > eps) {
+if(eta > eps) {
   # usual calculation
-  area = dble(kount) * dx * dy
-  cifval = beta * exp(log(etainv) * area/(pi * r2))
+  # COVERED area fraction
+  covfrac = dble(kdisc - kount) / dble(kdisc)
+  cifval = beta * exp(log(eta) * covfrac)
 } else {
-  # etainv close to 0
-  if(kount == 0)
+  # etainv close to 0: enforce 0^0 = 0
+  if(kount == kdisc)
     cifval = beta
   else
     cifval = zero

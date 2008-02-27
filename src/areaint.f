@@ -7,14 +7,13 @@ C Output from Public domain Ratfor, version 1.0
       logical neigh(n)
       eps = 2.22d-16
       zero = 0.d0
-      pi = 3.14159265359d0
       ngrid = 64
       per = period(1) .gt. zero
       beta = par(1)
-      etainv = par(2)
+      eta = par(2)
       r = par(3)
       if(n.eq.0)then
-      cifval = beta * etainv
+      cifval = beta
       return
       endif
       r2 = r * r
@@ -51,13 +50,15 @@ C Output from Public domain Ratfor, version 1.0
 23015 continue
       endif
       kount = 0
+      kdisc = 0
       xgrid0 = u - r - dx/2
       do23020 kx=1,ngrid 
       xgrid = xgrid0 + dble(kx) * dx
-      my = int(dsqrt(r2 - (u - xgrid)**2)/dx)
+      my = int(dsqrt(r2 - (u - xgrid)**2)/dy)
       if(my .ge. 0)then
       do23024 ky=-my,my 
       ygrid = v + dble(ky) * dy
+      kdisc = kdisc + 1
       covered = .false.
       if(ixm1 .gt. 0)then
       do23028 j = 1,ixm1 
@@ -89,15 +90,15 @@ C Output from Public domain Ratfor, version 1.0
 23038 continue
 23039 continue
       endif
+      if(.not. covered)then
+      kount = kount + 1
+      endif
+42    continue
 23024 continue
 23025 continue
       endif
 23020 continue
 23021 continue
-      if(.not. covered)then
-      kount = kount + 1
-      endif
-42    continue
       else
       ixm1 = ix - 1
       ixp1 = max(1, ix + 1)
@@ -116,6 +117,7 @@ C Output from Public domain Ratfor, version 1.0
 23055 continue
       endif
       kount = 0
+      kdisc = 0
       xgrid0 = u - r - dx
       ygrid0 = v - r - dy
       do23056 kx=1,ngrid 
@@ -124,6 +126,7 @@ C Output from Public domain Ratfor, version 1.0
       ygrid = ygrid0 + dble(ky) * dy
       call dist2(u,v,xgrid,ygrid,period,d2)
       if(d2 .lt. r2)then
+      kdisc = kdisc + 1
       covered = .false.
       if(ixm1 .gt. 0)then
       do23064 j = 1,ixm1 
@@ -159,11 +162,11 @@ C Output from Public domain Ratfor, version 1.0
 23056 continue
 23057 continue
       endif
-      if(etainv .gt. eps)then
-      area = dble(kount) * dx * dy
-      cifval = beta * exp(log(etainv) * area/(pi * r2))
+      if(eta .gt. eps)then
+      covfrac = dble(kdisc - kount) / dble(kdisc)
+      cifval = beta * exp(log(eta) * covfrac)
       else
-      if(kount .eq. 0)then
+      if(kount .eq. kdisc)then
       cifval = beta
       else
       cifval = zero

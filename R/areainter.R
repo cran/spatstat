@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.5 $	$Date: 2008/02/01 21:05:39 $
+#    $Revision: 1.6 $	$Date: 2008/02/25 14:26:25 $
 #
 #    The area interaction
 #
@@ -31,7 +31,7 @@ AreaInter <- function(r) {
         else
           -areadiff(u, X[!Equal[,j]], r)
     }             
-    return(answer/(pi * r^2))
+    return(1 + answer/(pi * r^2))
   }
              
   out <- 

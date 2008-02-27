@@ -3,11 +3,11 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.4 $  $Date: 2006/10/10 04:22:48 $
+#  $Revision: 1.5 $  $Date: 2008/02/25 15:50:45 $
 #
 #
 
-suffstat <- function(model, X) {
+suffstat <- function(model, X=data.ppm(model)) {
   cl <- sys.call()
   callstring <- paste(deparse(cl), collapse=" ")
   
@@ -48,11 +48,14 @@ suffstat.generic <- function(model, X, callstring="suffstat.generic") {
     mof <- model.frame(fmla, glmdata)
     mom <- model.matrix(fmla, mof)
 
-    if(any(colnames(mom) != names(coef(model))))
+    coefnames <- names(coef(model))
+    if(!identical(all.equal(colnames(mom), coefnames), TRUE))
       warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
 
     dummy <- !is.data(Q)
+    # picks out one row
     mom <- mom[dummy, ]
+    names(mom) <- coefnames
     return(mom)
   }
   
