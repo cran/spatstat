@@ -153,6 +153,7 @@
 \alias{paren}
 \alias{pickoption}
 \alias{pixellate}
+\alias{pixelquad}
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.fii}
@@ -445,6 +446,7 @@ paren(x)
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 pixellate(x, \dots, weights)
+pixelquad(X, W = as.owin(X))
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{fii}(x, \dots)

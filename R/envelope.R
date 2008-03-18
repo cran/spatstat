@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.42 $  $Date: 2008/02/01 14:35:30 $
+#   $Revision: 1.44 $  $Date: 2008/03/18 10:54:04 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 

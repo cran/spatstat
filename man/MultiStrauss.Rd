@@ -68,9 +68,9 @@ which can then be fitted to point pattern data.
    # prints a sensible description of itself
    data(betacells)
    r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiStrauss(c("off","on"), r), rbord=60.0)
+   ppm(betacells, ~1, MultiStrauss(c("off","on"), r))
    # fit the stationary multitype Strauss process to `betacells'
-   ppm(betacells, ~polynom(x,y,3), MultiStrauss(c("off","on"), r), rbord=60.0)
+   ppm(betacells, ~polynom(x,y,3), MultiStrauss(c("off","on"), r))
    # fit a nonstationary Strauss process with log-cubic polynomial trend
 }
 \section{Warnings}{
@@ -87,8 +87,7 @@ which can then be fitted to point pattern data.
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

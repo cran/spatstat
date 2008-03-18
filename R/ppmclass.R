@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.17 $	$Date: 2007/10/23 09:14:19 $
+#	$Revision: 2.18 $	$Date: 2008/03/05 20:42:42 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -169,3 +169,45 @@ logLik.ppm <- function(object, ...) {
   return(ll)
 }
 
+#
+# method for model.matrix
+
+model.matrix.ppm <- function(object, ...) {
+  gf <- getglmfit(object)
+  if(is.null(gf)) {
+    newobject <- update(object, forcefit=TRUE)
+    gf <- getglmfit(newobject)
+    if(is.null(gf))
+      stop("internal error: unable to extract a glm fit")
+  }
+  mm <- model.matrix(gf, ...)
+  return(mm)
+}
+
+model.images <- function(object, W=as.owin(object), ...) {
+  X <- data.ppm(object)
+  # make a quadscheme with a dummy point at every pixel
+  Q <- pixelquad(X, W)
+  # construct Berman-Turner frame
+  needed <- c("trend", "interaction", "covariates", "correction", "rbord")
+  bt <- do.call("bt.frame", append(list(Q), object[needed]))
+  # compute model matrix
+  mf <- model.frame(bt$fmla, bt$glmdata, ...)
+  mm <- model.matrix(bt$fmla, mf, ...)
+  # retain only the entries for dummy points (pixels)
+  mm <- mm[!is.data(Q), ]
+  # create template image
+  Z <- as.im(attr(Q, "M"))
+  # make images
+  imagenames <- colnames(mm)
+  result <- lapply(imagenames,
+                   function(nama, Z, mm) {
+                     values <- mm[, nama]
+                     im(values, xcol=Z$xcol, yrow=Z$yrow,
+                       lev=Z$lev, unitname=unitname(Z))
+                   },
+                   Z=Z, mm=mm)
+  names(result) <- imagenames
+  class(result) <- c("listof", class(result))
+  return(result)
+}

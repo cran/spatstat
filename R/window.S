@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.74 $	$Date: 2008/01/07 10:27:24 $
+#	$Revision: 4.77 $	$Date: 2008/03/14 16:12:13 $
 #
 #
 #	A window may be either
@@ -248,6 +248,13 @@ as.owin.owin <- function(W, ..., fatal=TRUE) {
 as.owin.ppp <- function(W, ..., fatal=TRUE) {
   if(verifyclass(W, "ppp", fatal=fatal))
     return(W$window)
+  else
+    return(NULL)
+}
+
+as.owin.quad <- function(W, ..., fatal=TRUE) {
+  if(verifyclass(W, "quad", fatal=fatal))
+    return(W$data$window)
   else
     return(NULL)
 }

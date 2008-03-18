@@ -70,7 +70,7 @@
 }
 \examples{
     data(cells)
-    fit <- ppm(cells, ~x, Strauss(r=0.15), rbord=0.15)
+    fit <- ppm(cells, ~x, Strauss(r=0.15))
     ee <- eem(fit)
     sum(ee)/area.owin(cells$window) # should be about 1 if model is correct
     Y <- setmarks(cells, ee)
@@ -80,8 +80,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

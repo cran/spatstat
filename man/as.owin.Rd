@@ -3,6 +3,7 @@
 \alias{as.owin.owin}
 \alias{as.owin.ppp}
 \alias{as.owin.ppm}
+\alias{as.owin.quad}
 \alias{as.owin.im}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
@@ -15,6 +16,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{owin}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
+ \method{as.owin}{quad}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
@@ -58,6 +60,10 @@ in any of several formats, into an object of class \code{"owin"}.
     \item
     an object of class \code{"ppp"} representing a point pattern.
     In this case, the object's \code{window} structure will be
+    extracted.
+    \item
+    an object of class \code{"quad"} representing a quadrature scheme.
+    In this case, the window of the \code{data} component will be
     extracted.
     \item
     an object of class \code{"im"} representing a pixel image.
@@ -106,8 +112,7 @@ in any of several formats, into an object of class \code{"owin"}.
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{manip}

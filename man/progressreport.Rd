@@ -39,8 +39,7 @@ progressreport(i, n, every = max(1, ceiling(n/100)), nperline = min(charsperline
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \examples{
   for(i in 1:40) progressreport(i, 40)

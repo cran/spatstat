@@ -214,7 +214,7 @@ at new locations.
 }
 \examples{
   data(cells)
-  m <- ppm(cells, ~ polynom(x,y,2), Strauss(0.05), rbord=0.05)
+  m <- ppm(cells, ~ polynom(x,y,2), Strauss(0.05))
   trend <- predict(m, type="trend")
   \dontrun{
   image(trend)
@@ -229,8 +229,7 @@ at new locations.
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

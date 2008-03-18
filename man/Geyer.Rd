@@ -2,7 +2,7 @@
 \alias{Geyer}
 \title{Geyer's Saturation Point Process Model}
 \description{
-Creates an instance of Geyer's ``saturation point process'' model
+Creates an instance of Geyer's saturation point process model
 which can then be fitted to point pattern data.
 }
 \usage{
@@ -15,12 +15,12 @@ which can then be fitted to point pattern data.
 \value{
   An object of class \code{"interact"}
   describing the interpoint interaction
-  structure of Geyer's ``saturation point process''
+  structure of Geyer's saturation point process
   with interaction radius \eqn{r} and saturation threshold \code{sat}.
 }
 \details{
-  Geyer (1999) introduced the ``saturation process'', a modification of the
-  Strauss process (see \code{\link{Strauss}})
+  Geyer (1999) introduced the \dQuote{saturation process},
+  a modification of the Strauss process (see \code{\link{Strauss}})
   in which the total contribution
   to the potential  from each point (from its pairwise interaction with all 
   other points) is trimmed to a maximum value \eqn{s}. 
@@ -40,7 +40,7 @@ which can then be fitted to point pattern data.
   }
   to the probability density of the point pattern,
   where \eqn{t(x_i, X)}{t(x[i],X)} denotes the
-  number of ``close neighbours'' of \eqn{x_i}{x[i]} in the pattern
+  number of \sQuote{close neighbours} of \eqn{x_i}{x[i]} in the pattern
   \eqn{X}. A close neighbour of \eqn{x_i}{x[i]} is a point
   \eqn{x_j}{x[j]} with \eqn{j \neq i}{j != i}
   such that the distance between 
@@ -54,10 +54,10 @@ which can then be fitted to point pattern data.
   \eqn{\gamma}{gamma} may take any positive value (unlike the case
   of the Strauss process), with
   values \eqn{\gamma < 1}{gamma < 1}
-  describing an ``ordered'' or ``inhibitive'' pattern,
+  describing an \sQuote{ordered} or \sQuote{inhibitive} pattern,
   and 
   values \eqn{\gamma > 1}{gamma > 1}
-  describing a ``clustered or ``attractive'' pattern.
+  describing a \sQuote{clustered} or \sQuote{attractive} pattern.
  
   The nonstationary saturation process is similar except that 
   the value \eqn{\beta}{beta} 
@@ -87,7 +87,8 @@ which can then be fitted to point pattern data.
   \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
-  \code{\link{Strauss}}
+  \code{\link{Strauss}},
+  \code{\link{SatPiece}}
 }
 \references{
 Geyer, C.J. (1999)
@@ -102,15 +103,14 @@ Pages 79--140.
 
 \examples{
    data(cells) 
-   ppm(cells, ~1, Geyer(r=0.07, sat=2), rbord=0.07)
+   ppm(cells, ~1, Geyer(r=0.07, sat=2))
    # fit the stationary saturation process to `cells'
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

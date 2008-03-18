@@ -57,14 +57,13 @@ which can then be fitted to point pattern data.
    mySH <- Pairwise(strpot, "StraussHard", list(r=0.7,h=0.05),
            c("interaction distance r", "hard core distance c"))
    data(cells)
-   ppm(cells, ~ 1, mySH)
+   ppm(cells, ~ 1, mySH, correction="isotropic")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

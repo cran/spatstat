@@ -505,6 +505,7 @@ The Spatstat Package
     \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
+    \code{\link{SatPiece}()} \tab	Saturated pair model, piecewise  constant potential\cr
     \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
     \code{\link{OrdThresh}()} \tab		Ord process, threshold potential\cr
     \code{\link{Ord}()} \tab 		        Ord model, user-supplied potential \cr
@@ -610,8 +611,7 @@ The Spatstat Package
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \section{Acknowledgements}{
   Marie-Colette van Lieshout, Kasper Klitgaard Berthelsen
@@ -619,11 +619,13 @@ The Spatstat Package
   Additional contributions by Colin Beale, Brad Biggerstaff, Florent Bonneu,
   Jianbao Chen, Y.C. Chin, Marcelino de la Cruz, Peter Diggle, Stephen Eglen,
   Agnes Gault, Marc Genton, Pavel Grabarnik, C. Graf, Ute Hahn, Mandy Hering, 
-  Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik, Robert John-Chandran,
+  Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik,
+  Robert John-Chandran, Devin Johnson,
   Jorge Mateu, Jesper Moller, Linda Stougaard Nielsen, Evgeni Parilov,
+  Jeff Picka,
   Matt Reiter, Brian Ripley, Barry Rowlingson, Aila Sarkka, Katja Schladitz,
   Bryan Scott, Malte Spiess, Mark Stevenson, P. Surovy, Berwin Turlach, 
-  Andrew van Burgel and Selene Wong.
+  Andrew van Burgel, Hao Wang and Selene Wong.
 }
 \keyword{spatial}
 \keyword{package}

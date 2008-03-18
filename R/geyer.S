@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.8 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 2.10 $	$Date: 2008/03/14 14:19:59 $
 #
 #    Geyer's saturation process
 #
@@ -29,6 +29,9 @@ Geyer <- function(r, sat) {
                        stop("interaction distance r must be a positive number")
                       if(!is.numeric(sat) || length(sat) != 1 || sat < 1)
                        stop("saturation parameter sat must be a number >= 1")
+                      if(ceiling(sat) != floor(sat))
+                        warning(paste("saturation parameter sat",
+                                      "has a non-integer value"))
                     },
          update = NULL, # default OK
          print = NULL,    # default OK
@@ -58,7 +61,7 @@ Geyer <- function(r, sat) {
              if(!is.na(loggamma) && (abs(loggamma) <= epsilon))
                return(0)
            }
-           return(r)
+           return(2 * r)
          },
        version=versionstring.spatstat()
   )

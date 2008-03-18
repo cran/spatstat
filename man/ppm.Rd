@@ -7,8 +7,8 @@
   Fits a point process model to an observed point pattern
 }
 \usage{
- ppm(Q, trend=~1, interaction=NULL, \dots, covariates=NULL,
- correction="border", rbord=0, use.gam=FALSE, method="mpl",
+ ppm(Q, trend=~1, interaction=Poisson(), \dots, covariates=NULL,
+ correction="border", rbord=reach(interaction), use.gam=FALSE, method="mpl",
  forcefit=FALSE, nsim=100, nrmh=1e5,
         start=NULL,
          control=list(nrep=nrmh),
@@ -149,6 +149,7 @@
       \code{\link{PairPiece}},
       \code{\link{AreaInter}},
       \code{\link{Geyer}},
+      \code{\link{SatPiece}},
       \code{\link{LennardJones}},
       \code{\link{Saturated}},
       \code{\link{OrdThresh}}, and
@@ -495,8 +496,8 @@
  # using the periodic correction.
 
 # Huang-Ogata fit:
-\dontrun{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="ho")}
-\testonly{ppm(nztrees, ~1, Strauss(r=10), rbord=10, method="ho", nsim=10)}
+\dontrun{ppm(nztrees, ~1, Strauss(r=10), method="ho")}
+\testonly{ppm(nztrees, ~1, Strauss(r=10), method="ho", nsim=10)}
 
 
  # COVARIATES
@@ -540,8 +541,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

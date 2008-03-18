@@ -352,11 +352,11 @@
 }
 \examples{
     data(cells)
-    fit <- ppm(cells, ~x, Strauss(r=0.15), rbord=0.15)
-    diagnose.ppm(fit, rbord=0.15)
-    diagnose.ppm(fit, type="pearson", rbord=0.15)
-    diagnose.ppm(fit, rbord=0.15, which="marks")
-    diagnose.ppm(fit, rbord=0.15, type="raw", plot.neg="discrete")
+    fit <- ppm(cells, ~x, Strauss(r=0.15))
+    diagnose.ppm(fit)
+    diagnose.ppm(fit, type="pearson")
+    diagnose.ppm(fit, which="marks")
+    diagnose.ppm(fit, type="raw", plot.neg="discrete")
 
     # save the diagnostics and plot them later
     u <- diagnose.ppm(fit, rbord=0.15, plot.it=FALSE)
@@ -367,8 +367,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

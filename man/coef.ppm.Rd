@@ -60,7 +60,7 @@
     coef(poi)
     # This is the log of the fitted intensity of the Poisson process
 
-    stra <- ppm(cells, ~1, Strauss(r=0.07), rbord=0.07)
+    stra <- ppm(cells, ~1, Strauss(r=0.07))
     coef(stra)
 
     # The two entries "(Intercept)" and "Interaction"
@@ -72,8 +72,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

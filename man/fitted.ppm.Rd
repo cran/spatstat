@@ -87,7 +87,7 @@ check=TRUE, repair=TRUE)
 }
 \examples{
     data(cells)
-    str <- ppm(cells, ~x, Strauss(r=0.15), rbord=0.15)
+    str <- ppm(cells, ~x, Strauss(r=0.15))
     lambda <- fitted(str)
 
     # extract quadrature points in corresponding order
@@ -102,8 +102,7 @@ check=TRUE, repair=TRUE)
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{methods}
