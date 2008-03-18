@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.15 $ $Date: 2007/12/20 10:35:01 $
+# $Revision: 1.19 $ $Date: 2008/03/05 13:01:48 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -14,6 +14,20 @@ lurking <- function(object, covariate, type="eem",
                     check=TRUE, ..., splineargs=list()) {
   # validate
   verifyclass(object, "ppm")
+  # match type argument
+  type <- pickoption("type", type,
+                     c(eem="eem",
+                       raw="raw",
+                       inverse="inverse",
+                       pearson="pearson",
+                       Pearson="pearson"))
+  if(missing(typename))
+    typename <- switch(type,
+                       eem="exponential energy weights",
+                       raw="raw residuals",
+                       inverse="inverse-lambda residuals",
+                       pearson="Pearson residuals")
+
 
   # extract spatial locations 
   Q <- quad.ppm(object)
@@ -27,8 +41,8 @@ lurking <- function(object, covariate, type="eem",
 
   if(is.vector(covariate) && is.numeric(covariate)) 
     covvalues <- covariate
-  else if(is.im(covariate))
-    covvalues <- covariate[quadpoints]
+  else if(is.im(covariate)) 
+    covvalues <- covariate[quadpoints, drop=FALSE]
   else if(is.expression(covariate)) {
     # Evaluate the desired covariate at all quadrature points
     # Set up environment for evaluating expression
@@ -59,8 +73,18 @@ lurking <- function(object, covariate, type="eem",
                "should be either a numeric vector or an expression"))
 
   # Validate covariate values
-  if(any(is.na(covvalues)))
-    stop("covariate contains NA's")
+  if(any(nbg <- is.na(covvalues))) {
+    # too complicated to handle NA's
+    if(is.im(covariate))
+      stop(paste(sum(nbg), "out of", length(nbg),
+                  "quadrature points",
+                  ngettext(sum(nbg), "lies", "lie"),
+                 "outside the domain of the covariate image"))
+    else
+      stop(paste(sum(nbg), "out of", length(nbg),
+                 "covariate values",
+                 ngettext(sum(nbg), "is NA", "are NA")))
+  }
   if(any(is.infinite(covvalues) | is.nan(covvalues)))
     stop("covariate contains Inf or NaN values")
   if(length(covvalues) != quadpoints$n)
@@ -79,7 +103,7 @@ lurking <- function(object, covariate, type="eem",
     if(!is.null(rv)) rv
     else if(type=="eem") eem(object, check=check)
     else residuals.ppm(object, type=type, check=check)
-  
+
   res <- (if(type == "eem") datapoints else quadpoints) %mark% resvalues
 
   # ... and the same locations marked by the covariate

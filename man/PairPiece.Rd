@@ -82,17 +82,16 @@
    PairPiece(c(0.1,0.2))
    # prints a sensible description of itself
    data(cells) 
-   ppm(cells, ~1, PairPiece(r = c(0.05, 0.1, 0.2)), rbord=0.2)
+   ppm(cells, ~1, PairPiece(r = c(0.05, 0.1, 0.2)))
    # fit a stationary piecewise constant pairwise interaction process
-   ppm(cells, ~polynom(x,y,3), PairPiece(c(0.05, 0.1)), rbord=0.1)
+   ppm(cells, ~polynom(x,y,3), PairPiece(c(0.05, 0.1)))
    # nonstationary process with log-cubic polynomial trend
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

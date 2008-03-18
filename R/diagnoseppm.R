@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.20 $ $Date: 2007/12/20 11:04:21 $
+# $Revision: 1.21 $ $Date: 2008/03/05 11:11:45 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -207,23 +207,19 @@ diagnose.ppm <- function(object, ..., type="raw", which="all",
   # whether window should be clipped
   clip <- (rbord > 0)
 
-  # 'type' is a single choice with partial matching 
-  typelist <- c("eem", "raw", "inverse", "pearson", "Pearson")
-  typemap <- c("eem", "raw", "inverse", "pearson", "pearson")
-  typenames <- c("exponential energy weights", "raw residuals",
-                 "inverse-lambda residuals",
-                 "Pearson residuals", "Pearson residuals")
-  
-  if(length(type) > 1)
-    stop(paste("Only one", sQuote("type"), "may be specified"))
-  if(is.na(m <- pmatch(type, typelist)))
-    stop(paste("Unrecognised choice of",
-               paste(sQuote("type"), ":", sep=""),
-               type))
-
-  type <- typemap[m]
+  # match type argument
+  type <- pickoption("type", type,
+                     c(eem="eem",
+                       raw="raw",
+                       inverse="inverse",
+                       pearson="pearson",
+                       Pearson="pearson"))
   if(missing(typename))
-    typename <- typenames[m]
+    typename <- switch(type,
+                       eem="exponential energy weights",
+                       raw="raw residuals",
+                       inverse="inverse-lambda residuals",
+                       pearson="Pearson residuals")
 
   # 'which' is multiple choice with exact matching 
   optionlist <- c("all", "marks", "smooth", "x", "y", "sum")

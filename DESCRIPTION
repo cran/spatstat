@@ -1,19 +1,20 @@
 Package: spatstat
-Version: 1.12-8
-Date: 26 February 2008
+Version: 1.12-9
+Date: 18 March 2008
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
-	Rolf Turner <rolf@math.unb.ca>, with substantial contributions
+	Rolf Turner <r.turner@auckland.ac.nz>, with substantial contributions
 	of code by Marie-Colette van Lieshout, Rasmus Waagepetersen, Kasper 
 	Klitgaard Berthelsen and Dominic Schuhmacher. Additional contributions 
 	by C. Beale, B. Biggerstaff, R. Bivand, F. Bonneu, J.B. Chen, 
         Y.C. Chin, M. de la Cruz, P.J. Diggle, S. Eglen, A. Gault, M. Genton, 
 	P. Grabarnik, C. Graf, J. Franklin, U. Hahn, M. Hering, M.B. Hansen, 
 	M. Hazelton, J. Heikkinen, K. Hornik, R. Ihaka, R. John-Chandran, 
-	J. Mateu, P. McCullagh, X.C. Mi, J. Moller, L.S. Nielsen, E. Parilov, 
-	M. Reiter, B.D. Ripley, B. Rowlingson, J. Rudge, A. Sarkka, 
-	K. Schladitz, B.T. Scott, I.-M. Sintorn, M. Spiess, M. Stevenson, 
-	P. Surovy, B. Turlach, A. van Burgel and S. Wong.
+	D. Johnson, J. Mateu, P. McCullagh, X.C. Mi, J. Moller, L.S. Nielsen, 
+	E. Parilov, J. Picka, M. Reiter, B.D. Ripley, B. Rowlingson, J. Rudge, 
+	A. Sarkka, K. Schladitz, B.T. Scott, I.-M. Sintorn, M. Spiess, 
+	M. Stevenson, P. Surovy, B. Turlach, A. van Burgel, H. Wang
+	and S. Wong.
 Maintainer: Adrian Baddeley <adrian@maths.uwa.edu.au>
 Depends: R (>= 2.6.0), stats, graphics, mgcv
 Suggests: sm, deldir
@@ -37,4 +38,4 @@ Description: A package for analysing spatial data,
 	envelopes, residuals, residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: Tue Feb 26 22:19:55 2008; adrian
+Packaged: Tue Mar 18 19:05:24 2008; adrian

@@ -34,6 +34,8 @@ PairPiece               The Piecewise Constant Pairwise Interaction
                         Point Process Model
 Pairwise                Generic Pairwise Interaction model
 Poisson                 Poisson Point Process Model
+SatPiece                Piecewise Constant Saturated Pairwise
+                        Interaction Point Process Model
 Saturated               Saturated Pairwise Interaction model
 Softcore                The Soft Core Point Process Model
 Strauss                 The Strauss Point Process Model
@@ -200,6 +202,8 @@ matclust.estK           Fit the Matern Cluster Point Process by Minimum
 mean.im                 Mean Pixel Value in an Image
 midpoints.psp           Midpoints of Line Segment Pattern
 mincontrast             Method of Minimum Contrast
+model.images            Compute Images of Constructed Covariates
+model.matrix.ppm        Extract Design Matrix from Point Process Model
 multiplicity.ppp        Count Multiplicity of Duplicate Points
 nbfires                 Point Patterns of New Brunswick Forest Fires
 nearest.raster.point    Find Pixel Nearest to a Given Point

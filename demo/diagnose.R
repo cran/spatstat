@@ -73,9 +73,9 @@ diagnose.ppm(fitPoisson, type="pearson")
 qqplot.ppm(fitPoisson, 40) 
 # Q-Q plot DOES show strong evidence of departure from uniform Poisson.
 #
-fitStrauss <- ppm(cells, ~1, Strauss(r=0.15), rbord=0.15)
-diagnose.ppm(fitStrauss, rbord=0.15)
-diagnose.ppm(fitStrauss, type="pearson", rbord=0.15)
+fitStrauss <- ppm(cells, ~1, Strauss(r=0.15))
+diagnose.ppm(fitStrauss)
+diagnose.ppm(fitStrauss, type="pearson")
 qqplot.ppm(fitStrauss, 40) # TAKES A LOOOONG WHILE...
 # Conclusion: Strauss model seems OK
 # 

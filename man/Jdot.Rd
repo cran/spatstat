@@ -179,8 +179,7 @@ Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL, \dots)
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{nonparametric}

@@ -14,8 +14,8 @@
  
   If you need to create a specific interaction model for use in 
   spatial pattern analysis, use the function \code{\link{Saturated}()}
-  or the one existing implementation of a model in this family,
-  \code{\link{Geyer}()}.
+  or the two existing implementations of models in this family,
+  \code{\link{Geyer}()} and \code{\link{SatPiece}()}.
  
   Geyer (1999) introduced the ``saturation process'', a modification of the
   Strauss process in which the total contribution
@@ -47,6 +47,9 @@
 \seealso{
   \code{\link{Geyer}} to create the Geyer saturation process.
 
+  \code{\link{SatPiece}} to create a saturated process with
+  piecewise constant pair potential.
+
   \code{\link{Saturated}} to create a more general saturation model.
 
   Other families:
@@ -58,8 +61,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

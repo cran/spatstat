@@ -77,9 +77,10 @@
       Logical flag indicating whether to save all the simulated curves.
     }
     \item{nsim2}{
-      Number of simulated point patterns to be generated when estimating
-      the theoretical mean of the function by simulation, in the case
-      \code{global=TRUE}.
+      Number of extra simulated point patterns to be generated
+      if it is necessary to use simulation to estimate the theoretical
+      mean of the summary function. Only relevant when \code{global=TRUE}
+      and the simulations are not based on CSR.
     }
 }
 \value{
@@ -99,7 +100,18 @@
   \item{hi}{
     upper envelope of simulations
   }
-  If \code{saveall=TRUE}, the return value also has an attribute
+  and \emph{either}
+  \item{theo}{
+    theoretical value of the summary function under CSR
+    (Complete Spatial Randomness, a uniform Poisson point process)
+    if the simulations were generated according to CSR
+  }
+  \item{mmean}{
+    estimated theoretical value of the summary function,
+    computed by averaging simulated values, 
+    if the simulations were not generated according to CSR.
+  }
+  Additionally, if \code{saveall=TRUE}, the return value has an attribute
   \code{"savedata"} which contains the summary functions
   computed for each of the \code{nsim} simulated patterns.
 }
@@ -188,8 +200,10 @@
       simulations. Finally we take the \code{m}-th largest of the
       deviation values, where \code{m=nrank}, and call this
       \code{dcrit}. Then the simultaneous envelopes are of the form
-      \code{lo = theo - dcrit} and \code{hi = theo + dcrit} where
-      \code{theo} is the theoretical mean value. Simultaneous critical
+      \code{lo = expected - dcrit} and \code{hi = expected + dcrit} where
+      \code{expected} is either the theoretical mean value \code{theo}
+      (if we are testing CSR) or the estimated theoretical value
+      \code{mmean} (if we are testing another model). The simultaneous critical
       envelopes have constant width \code{2 * dcrit}.
 
       The simultaneous critical envelopes allow us to perform a different
@@ -202,9 +216,10 @@
   }
   
   The return value is an object of class \code{"fv"} containing
-  the summary function for the data point pattern
-  and the upper and lower simulation envelopes. It can be plotted
-  using \code{plot.fv}.
+  the summary function for the data point pattern,
+  the upper and lower simulation envelopes, and 
+  the theoretical expected value (exact or estimated) of the summary function 
+  for the model being tested. It can be plotted using \code{plot.fv}.
 
   Arguments can be passed to the function \code{fun} through
   \code{...}. This makes it possible to select the edge correction
@@ -397,8 +412,7 @@ nsim=4, global=TRUE))
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{htest}

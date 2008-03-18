@@ -105,15 +105,14 @@ which can then be fitted to point pattern data.
 }
 \examples{
    data(cells) 
-   ppm(cells, ~1, Softcore(kappa=0.5), rbord=0)
+   ppm(cells, ~1, Softcore(kappa=0.5), correction="isotropic")
    # fit the stationary Soft Core process to `cells'
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

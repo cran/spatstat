@@ -131,8 +131,8 @@
   fitS <- update(fit, interaction=Strauss(13))
   fitS <- update(fit, Strauss(13))
 
-  # oops, forgot the edge correction
-  fitS <- update(fitS, rbord=13)
+  # refit using a different edge correction
+  fitS <- update(fitS, correction="isotropic")
 
   # re-fit the model to a subset
   # of the original point pattern
@@ -155,8 +155,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{methods}

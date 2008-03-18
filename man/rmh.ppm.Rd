@@ -146,7 +146,7 @@
    plot(Xsim, main="simulation from fitted Poisson model")
 
    # Strauss process   
-   fit <- ppm(X, ~1, Strauss(r=7), rbord=7)
+   fit <- ppm(X, ~1, Strauss(r=7))
    Xsim <- rmh(fit, control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Strauss model")
 
@@ -156,23 +156,23 @@
    Xsim <- rmh(fit, control=list(nrep=1e3, expand=2, periodic=TRUE))
    
    # Strauss - hard core process
-   fit <- ppm(X, ~1, StraussHard(r=7,hc=2), rbord=7)
+   fit <- ppm(X, ~1, StraussHard(r=7,hc=2))
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Strauss hard core model")
 
    # Geyer saturation process
-   fit <- ppm(X, ~1, Geyer(r=7,sat=2), rbord=7)
+   fit <- ppm(X, ~1, Geyer(r=7,sat=2))
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Geyer model")
 
    # Area-interaction process
-   fit <- ppm(X, ~1, AreaInter(r=7), rbord=14)
+   fit <- ppm(X, ~1, AreaInter(r=7))
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted area-interaction model")
 
    # soft core interaction process
    Q <- quadscheme(X, nd=50)
-   fit <- ppm(Q, ~1, Softcore(kappa=0.1))
+   fit <- ppm(Q, ~1, Softcore(kappa=0.1), correction="isotropic")
    Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
    plot(Xsim, main="simulation from fitted Soft Core model")
 
@@ -233,8 +233,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

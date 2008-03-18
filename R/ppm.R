@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.12 $	$Date: 2007/03/28 02:59:44 $
+#	$Revision: 1.15 $	$Date: 2008/03/14 16:46:39 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -9,11 +9,11 @@
 "ppm" <- 
 function(Q,
          trend = ~1,
-	 interaction = NULL,
+	 interaction = Poisson(),
          ..., 
          covariates = NULL,
 	 correction="border",
-	 rbord = 0,
+	 rbord = reach(interaction),
          use.gam=FALSE,
          method = "mpl",
          forcefit=FALSE,
@@ -28,11 +28,43 @@ function(Q,
   cl <- match.call()
   callstring <- paste(deparse(sys.call()), collapse="")
 
+  if(is.null(interaction))
+    interaction <- Poisson()
+
+  # validate choice of edge correction
+  correction <- pickoption("correction", correction,
+                           c(border="border",
+                             periodic="periodic",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate",
+                             translation="translate",
+                             none="none"))
+  
+  # validate rbord for border correction
+  if(correction == "border") {
+    rbord.given <- !missing(rbord)
+    infin <- is.infinite(rbord)
+    too.large <- infin || (eroded.areas(as.owin(Q), rbord) == 0)
+    if(too.large) {
+      whinge <-
+        paste(if(rbord.given) "rbord" else "the reach of this interaction",
+              if(infin) "is infinite or unknown;"
+              else "is too large for this window;",
+              "please specify",
+              if(rbord.given) "a smaller value of",
+              "rbord, or use a different edge correction")
+      stop(whinge)
+    }
+  }
+  
+  # go
   fitMPL <- mpl.engine(Q=Q, trend=trend,
                        interaction=interaction,
                        covariates=covariates,
                        correction=correction,
-                       rbord=rbord, use.gam=use.gam,
+                       rbord=rbord,
+                       use.gam=use.gam,
                        forcefit=forcefit,
                        callstring=callstring,
                        preponly=FALSE,

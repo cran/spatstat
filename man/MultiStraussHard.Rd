@@ -61,7 +61,7 @@ which can then be fitted to point pattern data.
    data(betacells)
    r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiStraussHard(c("off","on"), r, h), rbord=60.0)
+   ppm(betacells, ~1, MultiStraussHard(c("off","on"), r, h))
    # fit the stationary multitype hardcore Strauss process to `betacells'
 }
 \section{Warnings}{
@@ -78,8 +78,7 @@ which can then be fitted to point pattern data.
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}

@@ -84,9 +84,7 @@
   define a valid object of this class. 
   Any points which do not lie inside the window will be
   removed from the point pattern, and a warning will be issued.
-  The rejected points are still accessible,
-  as an attribute of the point pattern called \code{"rejects"},
-  but will be ignored by all other functions except \code{link{plot.ppp}}.
+  See the section on Rejected Points.
 
   The name of the unit of length for the \code{x} and \code{y} coordinates
   can be specified in the dataset, using the argument \code{unitname}, which is
@@ -116,6 +114,26 @@
   but the functions \code{\link{as.ppp}} and 
   \code{scanpp} may sometimes be convenient.
 }
+\section{Rejected points}{
+  The points with coordinates \code{x} and \code{y}
+  \bold{must} lie inside the specified window, in order to
+  define a valid object of class \code{"ppp"}.
+  Any points which do not lie inside the window will be
+  removed from the point pattern, and a warning will be issued.
+
+  The rejected points are still accessible: they are stored
+  as an attribute of the point pattern called \code{"rejects"}
+  (which is an object of class \code{"ppp"} containing the rejected points
+  in a large window). However, rejected points in a point pattern
+  will be ignored by all other functions except
+  \code{\link{plot.ppp}}.
+
+  To remove the rejected points altogether,
+  use \code{\link{as.ppp}}. To include the rejected points,
+  you will need to find a larger window that contains them,
+  and use this larger window in a call to \code{ppp}.
+}
+
 \seealso{
   \code{\link{ppp.object}},
   \code{\link{as.ppp}},
@@ -156,8 +174,7 @@
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{datagen}

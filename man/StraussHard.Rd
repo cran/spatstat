@@ -95,10 +95,10 @@ which can then be fitted to point pattern data.
    # prints a sensible description of itself
 
    data(cells) 
-   ppm(cells, ~1, StraussHard(r=0.1, hc=0.05), rbord=0.1)
+   ppm(cells, ~1, StraussHard(r=0.1, hc=0.05))
    # fit the stationary Strauss/hard core  process to `cells'
 
-   ppm(cells, ~ polynom(x,y,3), StraussHard(r=0.1, hc=0.05), rbord=0.1)
+   ppm(cells, ~ polynom(x,y,3), StraussHard(r=0.1, hc=0.05))
    # fit a nonstationary Strauss/hard core process
    # with log-cubic polynomial trend
 }
@@ -106,8 +106,7 @@ which can then be fitted to point pattern data.
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{models}
