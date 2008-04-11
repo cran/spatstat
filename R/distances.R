@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.23 $     $Date: 2007/11/13 22:22:24 $
+#      $Revision: 1.25 $     $Date: 2008/04/02 13:40:52 $
 #
 #
 #      Interpoint distances
@@ -73,10 +73,12 @@ pairdist.default <-
          },
          C={
            d <- numeric( n * n)
+           DUP <- spatstat.options("dupC")
            if(!periodic) {
              z<- .C(if(squared) "pair2dist" else "pairdist",
                     n = as.integer(n),
                     x= as.double(x), y= as.double(y), d= as.double(d),
+                    DUP=DUP,
                     PACKAGE="spatstat")
            } else {
              z<- .C(if(squared) "pairP2dist" else "pairPdist",
@@ -84,6 +86,7 @@ pairdist.default <-
                     x= as.double(x), y= as.double(y),
                     xwidth=as.double(wide), yheight=as.double(high),
                     d= as.double(d),
+                    DUP=DUP,
                     PACKAGE="spatstat")
            }
            d <- matrix(z$d, nrow=n, ncol=n)
@@ -171,10 +174,12 @@ nndist.default <-
            nnd<-numeric(n)
            o <- order(y)
            big <- sqrt(.Machine$double.xmax)
+           DUP <- spatstat.options("dupC")
            z<- .C("nndistsort",
                   n= as.integer(n),
                   x= as.double(x[o]), y= as.double(y[o]), nnd= as.double(nnd),
                   as.double(big),
+                  DUP=DUP,
                   PACKAGE="spatstat")
            nnd[o] <- z$nnd
          },
@@ -262,12 +267,14 @@ nnwhich.default <-
            nnwhich<-integer(n)
            o <- order(y)
            big <- sqrt(.Machine$double.xmax)
+           DUP <- spatstat.options("dupC")
            z<- .C("nnwhichsort",
                   n= as.integer(n),
                   x= as.double(x[o]), y= as.double(y[o]),
                   nnd= as.double(nnd),
                   nnwhich=as.integer(nnwhich),
                   as.double(big),
+                  DUP=DUP,
                   PACKAGE="spatstat")
            # convert from C to R indexing
            witch <- z$nnwhich + 1
@@ -348,6 +355,7 @@ crossdist.default <-
                  return(d)
                },
                C = {
+                 DUP <- spatstat.options("dupC")
                  if(!periodic) {
                    z<- .C("crossdist",
                           nfrom = as.integer(n1),
@@ -357,6 +365,7 @@ crossdist.default <-
                           xto = as.double(x2),
                           yto = as.double(y2),
                           d = as.double(matrix(0, nrow=n1, ncol=n2)),
+                          DUP=DUP,
                           PACKAGE="spatstat")
                  } else {
                    z<- .C("crossPdist",
@@ -369,6 +378,7 @@ crossdist.default <-
                           xwidth = as.double(wide),
                           yheight = as.double(high),
                           d = as.double(matrix(0, nrow=n1, ncol=n2)),
+                          DUP=DUP,
                           PACKAGE="spatstat")
                  }
                  return(matrix(z$d, nrow=n1, ncol=n2))

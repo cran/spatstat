@@ -4,7 +4,7 @@
 
   Edge corrections
 
-  $Revision: 1.5 $     $Date: 2007/10/26 14:57:53 $
+  $Revision: 1.6 $     $Date: 2008/04/02 12:18:17 $
 
  */
 
@@ -34,11 +34,13 @@
 
 
 void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
+     /* inputs */
      int *nx, *nr;  /* dimensions */
      double *x, *y; /* coordinate vectors of length nx */
      double *rmat;  /* matrix nx by nr  */
      double *xmin, *ymin, *xmax, *ymax;  /* box dimensions */
-     double *epsilon; 
+     double *epsilon; /* threshold for proximity to corner */
+     /* output */
      double *out;  /* output matrix nx by nr */
 {
   int i, j, n, m, ijpos, ncor;
@@ -143,9 +145,11 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
 
 
 void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out) 
+     /* inputs */
      int *nc, *nr, *nseg;
      double *xc, *yc, *rmat;
      double *x0, *y0, *x1, *y1;
+     /* output */
      double *out;
 {
   int n, m, i, j, k, l, nradperpt, ncut, nchanges;

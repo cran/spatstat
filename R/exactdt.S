@@ -2,7 +2,7 @@
 #	exactdt.S
 #	S function exactdt() for exact distance transform
 #
-#	$Revision: 4.6 $	$Date: 2006/06/01 02:18:34 $
+#	$Revision: 4.8 $	$Date: 2008/04/02 13:42:59 $
 #
 
 "exactdt"<-
@@ -15,7 +15,8 @@ function(X, ...)
 #
 	nr <- w$dim[1]
 	nc <- w$dim[2]
-#	
+#
+        DUP <- spatstat.options("dupC")
 	res <- .C("exact_dt_R",
 		as.double(X$x),
 		as.double(X$y),
@@ -29,6 +30,7 @@ function(X, ...)
 		d = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		i = as.integer(matrix(0, ncol = nc + 2, nrow = nr + 2)),
 		b = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)),
+                DUP=DUP,
                 PACKAGE="spatstat")
 	dist <- matrix(res$d, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
 	inde <- matrix(res$i, ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]

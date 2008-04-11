@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.10 $     $Date: 2007/10/26 14:55:32 $
+  $Revision: 1.11 $     $Date: 2008/04/02 12:16:16 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -19,8 +19,11 @@
 double sqrt();
 
 void paircount(nxy, x, y, rmaxi, count) 
-     int *nxy;
-     double *x, *y, *rmaxi;
+     /* inputs */
+     int *nxy;         /* number of (x,y) points */
+     double *x, *y;    /* (x,y) coordinates */
+     double *rmaxi;    /* maximum distance */
+     /* output */
      int *count;
 {
   int n, i, j, jleft, jright, counted;
@@ -200,8 +203,10 @@ void closepairs(nxy, x, y, r, noutmax,
 */
 
 void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count) 
+     /* inputs */
      int *nn1, *nn2;
      double *x1, *y1, *x2, *y2, *rmaxi;
+     /* output */
      int *count;
 {
   int n1, n2, i, j, jleft, jright, counted;
@@ -339,9 +344,11 @@ void crosspairs(nn1, x1, y1, nn2, x2, y2, rmaxi, noutmax,
 
 
 void duplicatedxy(n, x, y, out) 
+     /* inputs */
      int *n;
      double *x, *y;
-     int *out;
+     /* output */
+     int *out;  /* logical vector */
 {
   int m, i, j;
   double xi, yi;

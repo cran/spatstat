@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.10 $	$Date: 2008/03/14 14:19:59 $
+#    $Revision: 2.13 $	$Date: 2008/04/08 10:06:39 $
 #
 #    Geyer's saturation process
 #
@@ -18,7 +18,7 @@ Geyer <- function(r, sat) {
          creator  = "Geyer",
          family    = pairsat.family,
          pot      = function(d, par) {
-                         ifelse(d <= par$r, 1, 0)  # same as for Strauss
+                         (d <= par$r)  # same as for Strauss
                     },
          par      = list(r = r, sat=sat),
          parnames = c("interaction distance","saturation parameter"),
