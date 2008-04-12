@@ -2,7 +2,7 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.9 $     $Date: 2007/10/24 09:41:15 $
+#      $Revision: 1.11 $     $Date: 2008/04/02 13:41:31 $
 #
 #
 #     Distance transforms
@@ -52,6 +52,7 @@ distmap.owin <- function(X, ...) {
   mat <- cbind(FALSE, mat, FALSE)
   mat <- rbind(FALSE, mat, FALSE)
 # call C routine
+  DUP <- spatstat.options("dupC")
   res <- .C("distmapbin",
             as.double(X$xrange[1]),
             as.double(X$yrange[1]),
@@ -62,6 +63,7 @@ distmap.owin <- function(X, ...) {
             as.logical(t(mat)),
             distances = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
             boundary = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
+            DUP=DUP,
             PACKAGE="spatstat"
             )
   # strip off margins again
@@ -84,6 +86,7 @@ distmap.psp <- function(X, ...) {
   yp <- as.vector(raster.y(W))
   np <- length(xp)
   E <- X$ends
+  DUP <- spatstat.options("dupC")
   z <- .C("distmap2segs",
           xp=as.double(xp),
           yp=as.double(yp),
@@ -96,6 +99,7 @@ distmap.psp <- function(X, ...) {
           epsilon=as.double(.Machine$double.eps),
           dist2=as.double(numeric(np)),
           index=as.integer(integer(np)),
+          DUP=DUP,
           PACKAGE="spatstat")
   xc <- W$xcol
   yr <- W$yrow

@@ -2,7 +2,7 @@
 #   nncross.R
 #
 #
-#    $Revision: 1.2 $  $Date: 2006/11/13 05:13:36 $
+#    $Revision: 1.4 $  $Date: 2008/04/02 13:43:38 $
 #
 
 
@@ -41,6 +41,8 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
   nndv <- numeric(X$n)
   nnwh <- integer(X$n)
 
+  DUP <- spatstat.options("dupC")
+  
   if(!exclude) 
     z <- .C("nnXwhich",
             n1=as.integer(X$n),
@@ -52,6 +54,7 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
             nnd=as.double(nndv),
             nnwhich=as.integer(nnwh),
             huge=as.double(diameter(X$window)),
+            DUP=DUP,
             PACKAGE="spatstat")
   else
     z <- .C("nnXexclude",
@@ -66,6 +69,7 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
             nnd=as.double(nndv),
             nnwhich=as.integer(nnwh),
             huge=as.double(diameter(X$window)),
+            DUP=DUP,
             PACKAGE="spatstat")
     
   # reinterpret in original ordering

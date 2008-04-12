@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.39 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 5.41 $	$Date: 2008/04/02 13:36:05 $
 #
 #
 # -------- functions ----------------------------------------
@@ -284,6 +284,8 @@ Kborder.engine <- function(X, rmax, nr=100,
   b <- bdist.points(Xsort)
 
   # call the C code
+  DUP <- spatstat.options("dupC")
+  
   if(missing(weights)) {
     res <- .C("Kborder",
               nxy=as.integer(npoints),
@@ -294,6 +296,7 @@ Kborder.engine <- function(X, rmax, nr=100,
               rmax=as.double(rmax),
               numer=as.integer(integer(nr)),
               denom=as.integer(integer(nr)),
+              DUP=DUP,
               PACKAGE="spatstat")
     area <- area.owin(W)
     if("bord.modif" %in% correction) {
@@ -333,6 +336,7 @@ Kborder.engine <- function(X, rmax, nr=100,
               rmax=as.double(rmax),
               numer=as.double(numeric(nr)),
               denom=as.double(numeric(nr)),
+              DUP=DUP,
               PACKAGE="spatstat")
     if("border" %in% correction) {
       bord <- res$numer/res$denom

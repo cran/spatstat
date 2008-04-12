@@ -2,7 +2,7 @@
 #
 #    ordthresh.S
 #
-#    $Revision: 1.6 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 1.8 $	$Date: 2008/04/08 10:06:23 $
 #
 #    Ord process with threshold potential
 #
@@ -21,7 +21,7 @@ OrdThresh <- function(r) {
          creator  = "OrdThresh",
          family    = ord.family,
          pot      = function(d, par) {
-                         ifelse(d <= par$r, 1, 0)
+                         (d <= par$r)
                     },
          par      = list(r = r),
          parnames = "threshold distance",

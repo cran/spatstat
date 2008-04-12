@@ -4,7 +4,7 @@
 
   Distances between points
 
-  $Revision: 1.21 $     $Date: 2007/12/19 17:09:13 $
+  $Revision: 1.22 $     $Date: 2008/04/02 12:26:21 $
 
   pairdist      Pairwise distances
   pair2dist     Pairwise distances squared
@@ -32,8 +32,11 @@
 double sqrt();
 
 void pairdist(n, x, y, d)
+     /* inputs */
      int *n;
-     double *x, *y, *d;
+     double *x, *y;
+     /* output */
+     double *d;
 { 
   int i, j, npoints; 
   double *dp;
@@ -69,8 +72,11 @@ void pairdist(n, x, y, d)
 /* squared distances */
 
 void pair2dist(n, x, y, d)
+     /* inputs */
      int *n;
-     double *x, *y, *d;
+     double *x, *y;
+     /* output */
+     double *d;
 { 
   int i, j, npoints; 
   double *dp;
@@ -104,8 +110,11 @@ void pair2dist(n, x, y, d)
 }
 
 void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
+     /* inputs */
      int *nto, *nfrom;
-     double *xfrom, *yfrom, *xto, *yto, *d;
+     double *xfrom, *yfrom, *xto, *yto;
+     /* output */
+     double *d;
 { 
   int i, j, nf, nt; 
   double *dptr;
@@ -130,8 +139,11 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
 /* squared distances */
 
 void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
+     /* inputs */
      int *nto, *nfrom;
-     double *xfrom, *yfrom, *xto, *yto, *d;
+     double *xfrom, *yfrom, *xto, *yto;
+     /* output */
+     double *d;
 { 
   int i, j, nf, nt; 
   double *dptr;
@@ -158,8 +170,11 @@ void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
 /* distances with periodic correction */
 
 void pairPdist(n, x, y, xwidth, yheight, d)
+     /* inputs */
      int *n;
-     double *x, *y, *xwidth, *yheight, *d;
+     double *x, *y, *xwidth, *yheight;
+     /* output */
+     double *d;
 { 
   int i, j, npoints; 
   double *dp;
@@ -207,8 +222,11 @@ void pairPdist(n, x, y, xwidth, yheight, d)
 /* same function without the sqrt */
 
 void pairP2dist(n, x, y, xwidth, yheight, d)
+     /* inputs */
      int *n;
-     double *x, *y, *xwidth, *yheight, *d;
+     double *x, *y, *xwidth, *yheight;
+     /* output */
+     double *d;
 { 
   int i, j, npoints; 
   double *dp;
@@ -254,8 +272,11 @@ void pairP2dist(n, x, y, xwidth, yheight, d)
 }
 
 void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
+     /* inputs */
      int *nto, *nfrom;
-     double *xfrom, *yfrom, *xto, *yto, *xwidth, *yheight, *d;
+     double *xfrom, *yfrom, *xto, *yto, *xwidth, *yheight;
+     /* output */
+     double *d;
 { 
   int i, j, nf, nt; 
   double *dptr;
@@ -298,9 +319,11 @@ void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
  */
 
 void matchxy(na, xa, ya, nb, xb, yb, match)
+     /* inputs */
      int *na, *nb;
      double *xa, *ya, *xb, *yb;
-     int *match;
+     /* output */
+     int *match; 
 { 
   int i, j, Na, Nb; 
   double xai, yai;
@@ -324,8 +347,11 @@ void matchxy(na, xa, ya, nb, xb, yb, match)
 /* THE FOLLOWING CODE ASSUMES THAT y IS SORTED IN ASCENDING ORDER */
 
 void nndistsort(n, x, y, nnd, huge)
+     /* inputs */
      int *n;
-     double *x, *y, *nnd, *huge;
+     double *x, *y, *huge;
+     /* output */
+     double *nnd;
 { 
   int npoints, i, left, right;
   double dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
@@ -405,8 +431,12 @@ void nndistsort(n, x, y, nnd, huge)
 */
 
 void nnwhichsort(n, x, y, nnd, nnwhich, huge)
-     int *n, *nnwhich;
-     double *x, *y, *nnd, *huge;
+     /* inputs */
+     int *n;
+     double *x, *y, *huge;
+     /* outputs */
+     double *nnd;
+     int *nnwhich;
 { 
   int npoints, i, left, right, which;
   double dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
@@ -469,8 +499,12 @@ void nnwhichsort(n, x, y, nnd, nnwhich, huge)
 */
 
 void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
-     int *n1, *n2, *nnwhich;
-     double *x1, *y1, *x2, *y2, *nnd, *huge;
+     /* inputs */
+     int *n1, *n2;
+     double *x1, *y1, *x2, *y2, *huge;
+     /* outputs */
+     double *nnd;
+     int *nnwhich;
 { 
   int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich;
   double dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;
@@ -543,8 +577,12 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
 */
 
 void nnXexclude(n1, x1, y1, id1, n2, x2, y2, id2, nnd, nnwhich, huge)
-     int *n1, *n2, *nnwhich, *id1, *id2;
-     double *x1, *y1, *x2, *y2, *nnd, *huge;
+     /* inputs */
+     int *n1, *n2, *id1, *id2;
+     double *x1, *y1, *x2, *y2, *huge;
+     /* outputs */
+     double *nnd;
+     int *nnwhich;
 { 
   int npoints1, npoints2, i, jleft, jright, jwhich, lastjwhich, id1i;
   double dmin, d2, d2min, x1i, y1i, dx, dy, hu, hu2;

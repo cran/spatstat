@@ -1,4 +1,5 @@
 AreaInter               The Area Interaction Point Process Model
+BadGey                  Hybrid Geyer Point Process Model
 DiggleGratton           Diggle-Gratton model
 Fest                    Estimate the empty space function F
 Gcross                  Multitype Nearest Neighbour Distance Function

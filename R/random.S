@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.32 $   $Date: 2008/02/08 15:43:41 $
+#    $Revision: 4.33 $   $Date: 2008/04/02 12:55:12 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -301,9 +301,9 @@ rpoint <- function(n, f, fmax=NULL,
     
     if(X$n <= 1) return(X)
     
-    # matrix of pairwise distances
-    d <- pairdist(X$x, X$y)
-    close <- (d <= r)
+    # matrix of squared pairwise distances
+    d2 <- pairdist(X$x, X$y, squared=TRUE)
+    close <- (d2 <= r^2)
 
     # random order 1:n
     age <- sample(seq(X$n), X$n, replace=FALSE)

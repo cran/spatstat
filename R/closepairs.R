@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.5 $   $Date: 2007/03/15 22:52:22 $
+#   $Revision: 1.7 $   $Date: 2008/04/02 13:38:54 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -12,12 +12,14 @@ closepairs <- function(X, rmax) {
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   oo <- order(X$x)
   Xsort <- X[oo]
+  DUP <- spatstat.options("dupC")
   npairs <- .C("paircount",
             nxy=as.integer(X$n),
             x=as.double(Xsort$x),
             y=as.double(Xsort$y),
             rmaxi=as.double(rmax),
             count=as.integer(integer(1)),
+            DUP=DUP,
             PACKAGE="spatstat")$count
   if(npairs <= 0)
     return(list(i=integer(0),
@@ -48,6 +50,7 @@ closepairs <- function(X, rmax) {
        dyout=as.double(numeric(npairs)),
        dout=as.double(numeric(npairs)),
        status=as.integer(integer(1)),
+       DUP=DUP,
        PACKAGE="spatstat")
   if(z$status != 0)
     stop(paste("Internal error: C routine complains that insufficient space was allocated:", npairs))
@@ -90,6 +93,7 @@ crosspairs <- function(X, Y, rmax) {
   Xsort <- X[ooX]
   ooY <- order(Y$x)
   Ysort <- Y[ooY]
+  DUP <- spatstat.options("dupC")
   npairs <- .C("crosscount",
                nn1=as.integer(X$n),
                x1=as.double(Xsort$x),
@@ -99,6 +103,7 @@ crosspairs <- function(X, Y, rmax) {
                y2=as.double(Ysort$y),
                rmaxi=as.double(rmax),
                count=as.integer(integer(1)),
+               DUP=DUP,
                PACKAGE="spatstat")$count
   if(npairs <= 0)
     return(list(i=integer(0),
@@ -132,6 +137,7 @@ crosspairs <- function(X, Y, rmax) {
        dyout=as.double(numeric(npairs)),
        dout=as.double(numeric(npairs)),
        status=as.integer(integer(1)),
+       DUP=DUP,
        PACKAGE="spatstat")
   if(z$status != 0)
     stop(paste("Internal error: C routine complains that insufficient space was allocated:", npairs))

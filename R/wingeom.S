@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.26 $	$Date: 2008/01/07 10:20:07 $
+#	$Revision: 4.27 $	$Date: 2008/04/02 12:56:32 $
 #
 #
 #
@@ -384,7 +384,7 @@ vertices <- function(w) {
 
 diameter <- function(w) {
   vert <- vertices(w)
-  d <- pairdist(vert)
-  return(max(d))
+  d <- pairdist(vert, squared=TRUE)
+  return(sqrt(max(d)))
 }
 

@@ -481,12 +481,14 @@ The Spatstat Package
   
   \bold{To specify a point process model:}
   
-  The first order ``trend'' of the model is written as an \code{R}
-  language formula.
+  The first order ``trend'' of the model is determined by an \code{R}
+  language formula. The formula specifies the form of the
+  \emph{logarithm} of the trend.
   
   \tabular{ll}{
     \code{~1}  \tab No trend (stationary) \cr
-    \code{~x}   \tab First order term  \eqn{\lambda(x,y) = \exp(\alpha + \beta x)} \cr
+    \code{~x}   \tab Loglinear trend
+      \eqn{\lambda(x,y) = \exp(\alpha + \beta x)}{lambda(x,y) =	exp(alpha + beta * x)} \cr
     \tab where \eqn{x,y} are Cartesian coordinates \cr
     \code{~polynom(x,y,3)}  \tab Log-cubic polynomial trend  \cr
     \code{~harmonic(x,y,2)}  \tab Log-harmonic polynomial trend 
@@ -505,6 +507,7 @@ The Spatstat Package
     \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
+    \code{\link{BadGey}()} \tab	multiscale Geyer process\cr
     \code{\link{SatPiece}()} \tab	Saturated pair model, piecewise  constant potential\cr
     \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
     \code{\link{OrdThresh}()} \tab		Ord process, threshold potential\cr

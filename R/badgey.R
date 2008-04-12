@@ -1,44 +1,41 @@
 #
 #
-#    satpiece.S
+#    badgey.S
 #
-#    $Revision: 1.9 $	$Date: 2008/04/11 15:17:30 $
+#    $Revision: 1.2 $	$Date: 2008/04/11 15:35:54 $
 #
-#    Saturated pairwise interaction process with piecewise constant potential
+#    Hybrid Geyer process
 #
-#    SatPiece()   create an instance of the process
+#    BadGey()   create an instance of the process
 #                 [an object of class 'interact']
 #	
 #
 # -------------------------------------------------------------------
 #	
 
-SatPiece <- function(r, sat) {
+BadGey <- function(r, sat) {
   out <- 
   list(
-         name     = "piecewise constant Saturated pairwise interaction process",
-         creator  = "SatPiece",
+         name     = "hybrid Geyer process",
+         creator  = "BadGey",
          family    = pairsat.family,
          pot      = function(d, par) {
                        r <- par$r
                        nr <- length(r)
                        out <- array(FALSE, dim=c(dim(d), nr))
-                       out[,,1] <- (d < r[1])
-                       if(nr > 1) {
-                         for(i in 2:nr) 
-                           out[,,i] <- (d >= r[i-1]) & (d < r[i])
-                       }
+                       for(i in 1:nr) 
+                         out[,,i] <- (d < r[i])
                        out
                     },
          par      = list(r = r, sat=sat),
-         parnames = c("interaction thresholds", "saturation parameters"),
+         parnames = c("interaction radii", "saturation parameters"),
          init     = function(self) {
                       r <- self$par$r
                       sat <- self$par$sat
                       if(!is.numeric(r) || !all(r > 0))
-                        stop("interaction thresholds r must be positive numbers")
+                        stop("interaction radii r must be positive numbers")
                       if(length(r) > 1 && !all(diff(r) > 0))
-                        stop("interaction thresholds r must be strictly increasing")
+                        stop("interaction radii r must be strictly increasing")
                       if(!is.numeric(sat) || any(sat < 0))
                         stop("saturation parameters must be nonnegative numbers")
                       if(any(ceiling(sat) != floor(sat)))
@@ -55,7 +52,7 @@ SatPiece <- function(r, sat) {
            gammas <- exp(as.numeric(coeffs))
            # name them
            gn <- gammas
-           names(gn) <- paste("[", c(0,r[-npiece]),",", r, ")", sep="")
+           names(gn) <- paste("[0,", r, ")", sep="")
            #
            return(list(param=list(gammas=gammas),
                        inames="interaction parameters gamma_i",

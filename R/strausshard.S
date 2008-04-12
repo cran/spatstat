@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.8 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 2.10 $	$Date: 2008/04/08 10:07:11 $
 #
 #    The Strauss/hard core process
 #
@@ -20,7 +20,7 @@ StraussHard <- function(r, hc) {
          creator = "StraussHard",
          family  = pairwise.family,
          pot    = function(d, par) {
-           v <- ifelse(d <= par$r, 1, 0)
+           v <- 1 * (d <= par$r)
            v[ d <= par$hc ] <-  (-Inf)
            v
          },

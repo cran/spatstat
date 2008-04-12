@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.13 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 1.16 $	$Date: 2008/04/08 10:10:34 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -23,13 +23,13 @@ PairPiece <- function(r) {
                        r <- par$r
                        nr <- length(r)
                        out <- array(FALSE, dim=c(dim(d), nr))
-                       out[,,1] <-  ifelse(d < r[1], 1, 0)
+                       out[,,1] <-  (d < r[1])
                        if(nr > 1) {
                          for(i in 2:nr) 
-                           out[,,i] <- ifelse((d >= r[i-1]) & (d < r[i]), 1, 0)
+                           out[,,i] <- (d >= r[i-1]) & (d < r[i])
                        }
                        out
-                    },
+                     },
          par      = list(r = r),
          parnames = "interaction thresholds",
          init     = function(self) {
