@@ -1,4 +1,4 @@
-clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
+clarkevans <- function(X, correction=c("none", "Donnelly", "cdf"),
                        clipregion=NULL)
 {
   verifyclass(X, "ppp")
@@ -16,13 +16,20 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
                            c(none="none",
                              Donnelly="Donnelly",
                              donnelly="Donnelly",
-                             guard="guard"),
+                             guard="guard",
+                             cdf="cdf"),
                            multi=TRUE)
 
   if(("Donnelly" %in% correction) && (W$type != "rectangle"))
     warning("Donnelly correction only available for rectangular windows")
-  if(("guard" %in% correction) && is.null(clipregion))
-    warning("guard correction requires clipregion")
+
+  # guard correction applied iff `clipregion' is present
+  askguard <- ("guard" %in% correction)
+  gaveguard <- !is.null(clipregion)
+  if(askguard && !gaveguard)
+    warning("guard correction not performed; clipregion not specified")
+  else if(gaveguard && !askguard)
+    correction <- c(correction, "guard")
   
   # Dobs = observed mean nearest neighbour distance
   nndistX <- nndist(X)
@@ -42,11 +49,11 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
      # Dedge = Edge corrected mean nearest neighbour distance, Donnelly 1978
     if(W$type == "rectangle") {
       perimeter <- 2*(diff(W$xrange) + diff(W$yrange))
-      Dedge  <- Dpois + (0.0514+0.0412/sqrt(npoints))*perimeter/npoints
-      Redge <- Dobs/Dedge
+      Dkevin  <- Dpois + (0.0514+0.0412/sqrt(npoints))*perimeter/npoints
+      Rkevin <- Dobs/Dkevin
     } else 
-      Redge <- NA
-    answer <- c(answer, edge=Redge)
+      Rkevin <- NA
+    answer <- c(answer, Donnelly=Rkevin)
   }
   # guard area method
   if("guard" %in% correction && !is.null(clipregion)) {
@@ -56,6 +63,15 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "guard"),
     Dguard <- mean(nndistX[ok])
     Rguard <- Dguard/Dpois
     answer <- c(answer, guard=Rguard)
+  }
+  if("cdf" %in% correction) {
+    # compute mean of estimated nearest-neighbour distance distribution G
+    G <- Gest(X)
+    numer <- stieltjes(function(x){x}, G)$km
+    denom <- stieltjes(function(x){rep(1, length(x))}, G)$km
+    Dcdf <- numer/denom
+    Rcdf <- Dcdf/Dpois
+    answer <- c(answer, cdf=Rcdf)
   }
   return(answer)
 }

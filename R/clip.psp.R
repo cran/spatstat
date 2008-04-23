@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.9 $   $Date: 2008/04/02 13:37:39 $
+#    $Revision: 1.10 $   $Date: 2008/04/16 11:11:40 $
 #
 #
  
@@ -35,15 +35,19 @@ cliprect.psp <- function(x, window) {
   verifyclass(window, "owin")
   ends <- x$ends
   marx <- marks(x)
-  # accept segments which are entirely inside the window
+  # find segments which are entirely inside the window
   # (by convexity)
   in0 <- inside.owin(ends$x0, ends$y0, window)
   in1 <- inside.owin(ends$x1, ends$y1, window)
   ok <- in0 & in1
+  # if all segments are inside, return them
+  if(all(ok))
+    return(as.psp(ends, window=window, marks=marx))
+  # otherwise, store those segments which are inside the window
   ends.inside <- ends[ok, , drop=FALSE]
   marks.inside <- marx %msub% ok
   x.inside <- as.psp(ends.inside, window=window, marks=marks.inside)
-  # consider the rest
+  # now consider the rest
   ends <- ends[!ok, , drop=FALSE]
   in0 <- in0[!ok] 
   in1 <- in1[!ok]

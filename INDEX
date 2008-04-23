@@ -362,6 +362,8 @@ split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
 spruces                 Spruces Point Pattern
 square                  Square Window
+stieltjes               Compute Integral of Function Against Cumulative
+                        Distribution
 subset.fasp             Extract Subset of Function Array
 subset.fv               Extract Subset of Function Values
 subset.im               Extract Subset of Image

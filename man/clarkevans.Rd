@@ -6,7 +6,7 @@
   \eqn{R} for a spatial point pattern.
 }
 \usage{
-clarkevans(X, correction=c("none", "Donnelly", "guard"),
+clarkevans(X, correction=c("none", "Donnelly", "cdf"),
               clipregion=NULL)
 }
 \arguments{
@@ -40,12 +40,13 @@ clarkevans(X, correction=c("none", "Donnelly", "guard"),
 
   The argument \code{correction} specifies an edge correction
   or several edge corrections to be applied. It is a character vector
-  containing one or more of the options \code{"none"}, \code{"Donnelly"}
-  and \code{"guard"} (which are recognised by partial matching).
+  containing one or more of the options
+  \code{"none"}, \code{"Donnelly"}, \code{"guard"} and \code{"cdf"}
+  (which are recognised by partial matching).
   These edge corrections are:
   \describe{
     \item{"none":}{
-      No edge correction is applied.
+      No edge correction is applied. 
     }
     \item{"Donnelly":}{
       Edge correction of Donnelly (1978), available for rectangular
@@ -63,14 +64,24 @@ clarkevans(X, correction=c("none", "Donnelly", "guard"),
       is re-defined by averaging only over those points of \code{X}
       that fall inside the sub-window \code{clipregion}.
     }
+    \item{"cdf":}{
+      Cumulative Distribution Function method.
+      The nearest neighbour distance distribution function \eqn{G(r)}
+      of the stationary point process is estimated by \code{\link{Gest}}
+      using the Kaplan-Meier type edge correction. Then the mean of the
+      distribution is calculated from the cdf. 
+    }
   }
+  If the argument \code{clipregion} is given, then the selected
+  edge corrections will be assumed to include \code{correction="guard"}.
 }
 \value{
   A numeric value or numeric vector, with named components
   \item{naive}{\eqn{R} without edge correction}
-  \item{edge}{\eqn{R} using Donnelly edge correction}
+  \item{Donnelly}{\eqn{R} using Donnelly edge correction}
   \item{guard}{\eqn{R} using guard region}
-  (as selected by \code{correction}). The value of the \code{edge}
+  \item{cdf}{\eqn{R} using cdf method}
+  (as selected by \code{correction}). The value of the \code{Donnelly}
   component will be \code{NA} if the window of \code{X} is not a rectangle.
 }
 \references{

@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.51 2007/06/12 13:31:13 adrian Exp $
+# $Id: rmh.default.R,v 1.52 2008/04/21 18:17:33 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -623,6 +623,9 @@ rmhEngine <- function(InfoList, ...,
 
 # Determine Fortran subroutine name (this is not very safe ...)
   mhname <- paste("mh", nmbr, sep="")
+
+# initialise state of Wichmann-Hill random number generator 
+  iseed <- start$seed$iseed
   
 # The repetition is to allow the storage space to be incremented if
 # necessary.
@@ -636,7 +639,7 @@ rmhEngine <- function(InfoList, ...,
                      yprop=as.double(yprop),
                      mprop=as.integer(mprop),
                      ntypes=as.integer(ntypes),
-                     iseed=as.integer(start$seed$iseed),
+                     iseed=as.integer(iseed),
                      nrep=as.integer(nrep),
                      mrep=as.integer(mrep),
                      p=as.double(control$p),

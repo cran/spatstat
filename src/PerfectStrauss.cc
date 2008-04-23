@@ -7,6 +7,8 @@
 #include <Rmath.h>
 #include <R_ext/Utils.h>
 
+//    #define DBGS 
+
 FILE *out;
 
 void R_CheckUserInterrupt(void);
@@ -22,24 +24,8 @@ struct Point3{ char Case; char XCell; char YCell; struct Point3 *next; };
 const float Pi=3.141593;
 
 double slumptal(void){
-  return(runif(0,1));
+  return(runif((double) 0.0, (double) 1.0));
 }
-
-void normal2(double *x, double *y, double sigma){
-
-  double v1,v2,rsq,fac;
-
-  do{
-    v1=2*slumptal()-1.0;
-    v2=2*slumptal()-1.0;
-    rsq=v1*v1+v2*v2;
-  }while (rsq >= 1.0 || rsq == 0.0);
-  fac=sqrt(-2.0*log(rsq)/rsq);
-
-  *x = v2*fac*sigma;
-  *y = v1*fac*sigma;
-}
-
 
 long int poisson(double lambda){
   return((long int)rpois(lambda));
@@ -70,8 +56,12 @@ public:
     DirX[7] = 0; DirY[7] = 1;
     DirX[8] = 1; DirY[8] = 1;    
     NoP = 0;
-    dummyCell = (struct Point2 *) malloc(sizeof *dummyCell);
-    if(dummyCell == NULL) printf("error: malloc returned NULL\n");
+    //
+    //    dummyCell = (struct Point2 *) malloc(sizeof *dummyCell);
+    //    if(dummyCell == NULL) printf("error: malloc returned NULL\n");
+    //    dummyCell = (struct Point2 *) R_alloc(1, sizeof(struct Point2));
+    dummyCell = Calloc(1, struct Point2);
+    //
     dummyCell->next = dummyCell;
     dummyCell->No = 0;
     MaxXCell = mxc; MaxYCell = myc;
@@ -79,9 +69,13 @@ public:
     if(MaxYCell>9) MaxYCell = 9;
     for(i=0;i<=MaxXCell;i++){
       for(j=0;j<=MaxYCell;j++){
-	headCell[i][j] = 
-	  (struct Point2 *) malloc(sizeof *headCell[i][j]);
-	if(headCell[i][j] == NULL) printf("error: malloc returned NULL\n");
+	//
+	//	headCell[i][j] = 
+	//	  (struct Point2 *) malloc(sizeof *headCell[i][j]);
+	//	if(headCell[i][j] == NULL) printf("error: malloc returned NULL\n");
+	//	headCell[i][j] = (struct Point2 *) R_alloc(1, sizeof(struct Point2));
+	headCell[i][j] = Calloc(1, struct Point2);
+	//
 	headCell[i][j]->next=dummyCell;
       }
     }
@@ -125,11 +119,16 @@ void Point2Pattern::Print(){
 void Point2Pattern::Return(double *X, double *Y, int *num, int maxnum){
   long int i,j,k;
   k =0; *num = 0;
+#ifdef DBGS
+	printf("executing Return()\n");
+#endif
   if(UpperLiving[0]<=maxnum){
     struct Point2 *TempCell;
     for(i=0;i<=MaxXCell;i++){
       for(j=0;j<=MaxYCell;j++){
-	//printf("%d %d:\n",i,j);
+#ifdef DBGS
+	//	printf("%d %d:\n",i,j);
+#endif
 	TempCell = headCell[i][j]->next;
 	while(TempCell->next != TempCell){
 	  X[k] = TempCell->X;
@@ -170,15 +169,21 @@ void Point2Pattern::Empty(){
   struct Point2 *TempCell, *TempCell2;
   long int i,j;
   
-  //k=0;
+#ifdef DBGS
+  long int k;
+  k=0;
+  printf("executing Empty()\n");
+#endif
 
   for(i=0; i<=this->MaxXCell; i++){
     for(j=0; j<=this->MaxYCell; j++){
       TempCell = headCell[i][j]->next;
       while(TempCell!=TempCell->next){	
-	//k++; printf("%d %d %d\n",i,j,k);
+#ifdef DBGS
+	//	k++; printf("%d %d %d\n",i,j,k);
+#endif
 	TempCell2 = TempCell->next;
-	free(TempCell);
+	Free(TempCell);
 	TempCell = TempCell2;
       }
       headCell[i][j]->next = dummyCell;
@@ -190,6 +195,10 @@ void Point2Pattern::Clean(){
   struct Point2 *TempCell, *TempCell2;
   long int i,j;
   
+#ifdef DBGS
+  printf("executing Clean()\n");
+#endif
+
   for(i=0; i<=MaxXCell; i++){
     for(j=0; j<=MaxYCell; j++){
       TempCell = headCell[i][j];
@@ -198,7 +207,7 @@ void Point2Pattern::Clean(){
 	TempCell2->No = 0;
 	if(TempCell2->InLower[0]==0){
 	  TempCell->next = TempCell2->next;
-	  free(TempCell2);
+	  Free(TempCell2);
 	  TempCell2 = TempCell->next;
 	}
 	else{
@@ -241,8 +250,12 @@ void Point2Pattern::ReadFromFile(char FileName[100]){
     k++;
     fscanf(out,"%f%f\n",&xs,&ys);
     //printf("%f %f\n",xs,ys);
-    TempCell = (struct Point2 *) malloc(sizeof *TempCell);
-    if(TempCell==NULL) printf("error: malloc returned NULL\n");
+    //
+    //    TempCell = (struct Point2 *) malloc(sizeof *TempCell);
+    //    if(TempCell==NULL) printf("error: malloc returned NULL\n");
+    //    TempCell = (struct Point2 *) R_alloc(1, sizeof(struct Point2));
+    TempCell = Calloc(1, struct Point2);
+    //
     TempCell->No = k;
     TempCell->X = xs;
     TempCell->Y = ys;
@@ -423,9 +436,13 @@ void StraussProcess::GeneratePoisson(Point *headPoint,
     //scanf("%f",&f1);
     xtemp = slumptal()*Xdim+Xmin;
     ytemp = slumptal()*Ydim+Ymin;
+    //
     //printf("Generating StraussProcess Poisson 3.2\n");
-    TempPoint = (struct Point *) malloc(sizeof *TempPoint);
-    if(TempPoint == NULL ) printf("error: malloc returned NULL\n");
+    //    TempPoint = (struct Point *) malloc(sizeof *TempPoint);
+    //    if(TempPoint == NULL ) printf("error: malloc returned NULL\n");
+    //    TempPoint = (struct Point *) R_alloc(1, sizeof(struct Point));
+    TempPoint = Calloc(1, struct Point);
+    //
     TempPoint->X = xtemp;
     TempPoint->Y = ytemp;
     TempPoint->No = i;
@@ -441,7 +458,7 @@ void StraussProcess::CalcBeta(long int xsidepomm, long int ysidepomm,
 		   double *betapomm){ 
   long int i,j,k;
   k=0;
-  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
+  //  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
   for(i=0; i<xsidepomm; i++){
     for(j=0; j<ysidepomm; j++){
       *(betapomm + i*ysidepomm + j) = this->beta;
@@ -455,7 +472,7 @@ void StraussProcess::CheckBeta(long int xsidepomm, long int ysidepomm,
   long int i,j,k;
   double d1;
   k=0;
-  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
+  //  printf("\ndiagnostic message: Strauss CalcBeta... %ld %ld\n",xsidepomm,ysidepomm);
   for(i=0; i<xsidepomm; i++){
     for(j=0; j<ysidepomm; j++){
       if((fabs(*(betapomm + i*ysidepomm + j)- beta)>0.001) && (k==0)){
@@ -568,9 +585,12 @@ void Sampler::Forward(long int TS, long int TT, char TX, char TY,
     if(XCell>P2P->MaxXCell) XCell = P2P->MaxXCell;
     f1 = (Proposal->Y-P2P->Ymin)/P2P->YCellDim;  YCell = int(f1);
     if(YCell>P2P->MaxYCell) YCell = P2P->MaxYCell;
-
-    TempCell = (struct Point2 *) malloc(sizeof *TempCell);
-    if(TempCell==NULL) printf("error: malloc returned NULL\n");
+    //
+    //    TempCell = (struct Point2 *) malloc(sizeof *TempCell);
+    //   if(TempCell==NULL) printf("error: malloc returned NULL\n");
+    //    TempCell = (struct Point2 *) R_alloc(1, sizeof(struct Point2));
+    TempCell = Calloc(1, struct Point2);
+    //
     TempCell->No = Proposal->No;
     TempCell->X = Proposal->X;
     TempCell->Y = Proposal->Y;
@@ -645,7 +665,7 @@ void Sampler::Forward(long int TS, long int TT, char TX, char TY,
       P2P->UpperLiving[1] = P2P->UpperLiving[1] -1;
     TempCell2 = TempCell->next;
     TempCell->next = TempCell2->next;
-    free(TempCell2);
+    Free(TempCell2);
     /* Common stuff */
     //KillCounter ++;
     *DDD = *DDD - 1;
@@ -682,14 +702,22 @@ long int Sampler::BirthDeath(long int TimeStep,
     //printf("Ping 2 (BD)\n");
     if(InWindow==1){
       Success = 1;
-      TempTransition = (struct Point3 *) malloc(sizeof *TempTransition);
-      if(TempTransition == NULL) printf("error: malloc returned NULL\n");
+      //
+      //      TempTransition = (struct Point3 *) malloc(sizeof *TempTransition);
+      //      if(TempTransition == NULL) printf("error: malloc returned NULL\n");
+      // TempTransition = (struct Point3 *) R_alloc(1, sizeof(struct Point3));
+      TempTransition = Calloc(1, struct Point3);
+      //
       //printf("Ping 3 (BD)\n");
       TempTransition->Case = 0;
       LivingPoints ++;
       GeneratedPoints ++;
-      TempPoint = (struct Point *) malloc(sizeof *TempPoint);
-      if(TempPoint == NULL) printf("error: malloc returned NULL\n");
+      //
+      //      TempPoint = (struct Point *) malloc(sizeof *TempPoint);
+      //      if(TempPoint == NULL) printf("error: malloc returned NULL\n");
+      //      TempPoint = (struct Point *) R_alloc(1, sizeof(struct Point));
+      TempPoint = Calloc(1, struct Point);
+      //
       TempPoint->X = xtemp;
       TempPoint->Y = ytemp;
       TempPoint->No = GeneratedPoints;
@@ -703,12 +731,12 @@ long int Sampler::BirthDeath(long int TimeStep,
       TempTransition->YCell = int(f1);
       //printf("X %f XCell %d\n",TempPoint->X,TempTransition->XCell);
       if(TempTransition->XCell>P2P->MaxXCell){
+	//	printf("diagnostic message: random X value exceeded limit\n");
 	TempTransition->XCell=P2P->MaxXCell;
-	printf("diagnostic message: random X value exceeded limit\n");
       }
       if(TempTransition->YCell>P2P->MaxYCell){ 
+	//	printf("diagnostic message: random Y value exceeded limit\n");
 	TempTransition->YCell=P2P->MaxYCell;
-	printf("diagnostic message: random Y value exceeded limit\n");
       }
       TempTransition->next = headTransition->next;
       headTransition->next = TempTransition;
@@ -717,13 +745,17 @@ long int Sampler::BirthDeath(long int TimeStep,
   /* Death */
   else{
     Success = 1;
-    TempTransition = (struct Point3 *) malloc(sizeof *TempTransition);
-    if(TempTransition == NULL) printf("error: malloc returned NULL\n");
+    //
+    //    TempTransition = (struct Point3 *) malloc(sizeof *TempTransition);
+    //    if(TempTransition == NULL) printf("error: malloc returned NULL\n");
+    //    TempTransition = (struct Point3 *) R_alloc(1, sizeof(struct Point3));
+    TempTransition = Calloc(1, struct Point3);
+    //
     TempTransition->Case = 1;
     f1 = LivingPoints; f2 = f1*slumptal()+1.0;
     n = int(f2);
     if(n>LivingPoints){
-      printf("diagnostic message: random integer n=%ld > %ld = number of living points\n", n,LivingPoints);
+      //      printf("diagnostic message: random integer n=%ld > %ld = number of living points\n", n,LivingPoints);
       n=LivingPoints;
     }
     TempPoint2 = TempPoint = headLiving;
@@ -755,25 +787,46 @@ void Sampler::Sim(Point2Pattern *p2p) {
   /* Initialising linked listed for backward simulation */
   struct Point *headDeleted, *headLiving, *dummyDeleted, *dummyLiving;
   struct Point *TempPoint;
-  headLiving = (struct Point *) malloc(sizeof *headLiving);
-  if(headLiving == NULL ) printf("error: malloc returned NULL!!\n");
-  dummyLiving = (struct Point *) malloc(sizeof *dummyLiving);  
-  if(dummyLiving == NULL ) printf("error: malloc returned NULL!!\n");
+  //
+  //  headLiving = (struct Point *) malloc(sizeof *headLiving);
+  //  if(headLiving == NULL ) printf("error: malloc returned NULL!!\n");
+  //  headLiving = (struct Point *) R_alloc(1, sizeof(struct Point));
+  headLiving = Calloc(1, struct Point);
+  //
+  //  dummyLiving = (struct Point *) malloc(sizeof *dummyLiving);  
+  //  if(dummyLiving == NULL ) printf("error: malloc returned NULL!!\n");
+  //  dummyLiving = (struct Point *) R_alloc(1, sizeof(struct Point));
+  dummyLiving = Calloc(1, struct Point);
+  //
   headLiving->next = dummyLiving; dummyLiving->next = dummyLiving;
 
-  headDeleted = (struct Point *) malloc(sizeof *headDeleted);
-  if(headDeleted == NULL ) printf("error: malloc returned NULL!!\n");
-  dummyDeleted = (struct Point *) malloc(sizeof *dummyDeleted);  
-  if(dummyDeleted == NULL ) printf("error: malloc returned NULL!!\n");
+  //
+  //  headDeleted = (struct Point *) malloc(sizeof *headDeleted);
+  //  if(headDeleted == NULL ) printf("error: malloc returned NULL!!\n");
+  //  headDeleted = (struct Point *) R_alloc(1, sizeof(struct Point));
+  headDeleted = Calloc(1, struct Point);
+  //
+  //  dummyDeleted = (struct Point *) malloc(sizeof *dummyDeleted);  
+  //  if(dummyDeleted == NULL ) printf("error: malloc returned NULL!!\n");
+  //  dummyDeleted = (struct Point *) R_alloc(1, sizeof(struct Point));
+  dummyDeleted = Calloc(1, struct Point);
+  //
   headDeleted->next = dummyDeleted; dummyDeleted->next = dummyDeleted;
 
   struct Point2 *TempCell2;
 
   struct Point3 *headTransition, *dummyTransition;
-  headTransition = (struct Point3 *) malloc(sizeof *headTransition);
-  if(headTransition == NULL) printf("error: malloc returned NULL\n");
-  dummyTransition = (struct Point3 *) malloc(sizeof *dummyTransition);
-  if(dummyTransition == NULL) printf("error: malloc returned NULL\n");
+  //
+  //  headTransition = (struct Point3 *) malloc(sizeof *headTransition);
+  //  if(headTransition == NULL) printf("error: malloc returned NULL\n");
+  //  headTransition = (struct Point3 *) R_alloc(1, sizeof(struct Point3));
+  headTransition = Calloc(1, struct Point3);
+  //
+  //  dummyTransition = (struct Point3 *) malloc(sizeof *dummyTransition);
+  //  if(dummyTransition == NULL) printf("error: malloc returned NULL\n");
+  //  dummyTransition = (struct Point3 *) R_alloc(1, sizeof(struct Point3));
+  dummyTransition = Calloc(1, struct Point3);
+  //
   headTransition->next = dummyTransition; 
   dummyTransition->next = dummyTransition;
   
@@ -833,8 +886,12 @@ void Sampler::Sim(Point2Pattern *p2p) {
     TempPoint = headLiving->next;
     while(TempPoint!=TempPoint->next){
       i++;
-      TempCell2 = (struct Point2 *) malloc(sizeof *TempCell2);
-      if(TempCell2 == NULL) printf("error: malloc returned NULL\n");
+      //
+      //      TempCell2 = (struct Point2 *) malloc(sizeof *TempCell2);
+      //      if(TempCell2 == NULL) printf("error: malloc returned NULL\n");
+      //      TempCell2 = (struct Point2 *) R_alloc(1, sizeof(struct Point2));
+      TempCell2 = Calloc(1, struct Point2);
+      //
       TempCell2->No = TempPoint->No;
       TempCell2->X = TempPoint->X;
       TempCell2->Y = TempPoint->Y;
@@ -882,22 +939,22 @@ void Sampler::Sim(Point2Pattern *p2p) {
   TempPoint2 = headLiving->next;
   while(TempPoint!=TempPoint->next){
     i++;
-    free(TempPoint);
+    Free(TempPoint);
     TempPoint = TempPoint2;
     TempPoint2 = TempPoint2->next;
   }
-  free(TempPoint);
+  Free(TempPoint);
   
   i = 0;
   TempPoint = headDeleted;
   TempPoint2 = headDeleted->next;
   while(TempPoint!=TempPoint->next){
     i++;
-    free(TempPoint);
+    Free(TempPoint);
     TempPoint = TempPoint2;
     TempPoint2 = TempPoint2->next;
   }
-  free(TempPoint);
+  Free(TempPoint);
   //printf("%d ",i);
 
   struct Point3 *TempTransition,*TempTransition2;
@@ -907,11 +964,11 @@ void Sampler::Sim(Point2Pattern *p2p) {
   TempTransition2 = headTransition->next;
   while(TempTransition!=TempTransition->next){
     i++;
-    free(TempTransition);
+    Free(TempTransition);
     TempTransition = TempTransition2;
     TempTransition2 = TempTransition2->next;
   }
-  free(TempTransition);
+  Free(TempTransition);
   //printf("%d ST: %d ET: %d\n",i,StartTime,EndTime);
   //scanf("%f",&f1);
 
@@ -934,20 +991,32 @@ extern "C" {
     if(xcells > 9) xcells = 9;
     ycells = (int) floor((*ymax-*ymin)/ *r);
     if(ycells > 9) ycells = 9;
-    //printf("xcells %d   ycells %d\n",xcells,ycells);
+#ifdef DBGS
+    printf("xcells %d   ycells %d\n",xcells,ycells);
+    printf("Initialising\n");
+#endif
     // Initalise point Strauss point process
     StraussProcess ExampleProcess(*xmin,*xmax,*ymin,*ymax,*beta,*gamma,*r);  
-    // Initalise point pattern
+    // Initialise point pattern
     Point2Pattern ExamplePattern(*xmin,*xmax,*ymin,*ymax, xcells, ycells);
+#ifdef DBGS
+    printf("Initialisation complete\n");
+#endif
     // parameters: min x, max x, min y, max y, "cells" in x and y direction
     // used for speeding up neighbour counting, 9 is max here
     
+    // Synchronise random number generator 
+    GetRNGstate();
+
     // Initalise perfect sampler
     Sampler PerfectSampler(&ExampleProcess);
     
     // Perform perfect samling
     PerfectSampler.Sim(&ExamplePattern);
     
+    // Synchronise random number generator 
+    PutRNGstate();
+
     ExamplePattern.Return(xout, yout, nout, *noutmax);
     
   }

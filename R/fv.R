@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.24 $   $Date: 2008/02/05 13:23:03 $
+#    $Revision: 1.25 $   $Date: 2008/04/23 15:22:51 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -206,4 +206,31 @@ bind.fv <- function(x, y, labl, desc, preferred) {
                unitname=attr(x, "units")))
 }  
 
+# stieltjes integration for fv objects
+
+stieltjes <- function(f, M, ...) {
+  # stieltjes integral of f(x) dM(x)
+  if(!is.fv(M))
+    stop("M must be an object of class fv")
+  if(!is.function(f))
+    stop("f must be a function")
+  # integration variable
+  argu <- attr(M, "argu")
+  x <- M[[argu]]
+  # values of integrand
+  fx <- f(x, ...)
+  # estimates of measure
+  valuenames <- names(M) [names(M) != argu]
+  Mother <- as.data.frame(M)[, valuenames]
+  # increments of measure
+  dM <- apply(Mother, 2, diff)
+  dM <- rbind(dM, 0)
+  dM[is.na(dM)] <- 0
+  # integrate f(x) dM(x)
+  results <- apply(fx * dM, 2, sum)
+  return(as.list(results))
+}
+
+
+  
 

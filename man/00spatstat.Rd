@@ -617,18 +617,57 @@ The Spatstat Package
   \email{r.turner@auckland.ac.nz}
 }
 \section{Acknowledgements}{
-  Marie-Colette van Lieshout, Kasper Klitgaard Berthelsen
-  and Dominic Schuhmacher made substantial contributions of code.
-  Additional contributions by Colin Beale, Brad Biggerstaff, Florent Bonneu,
-  Jianbao Chen, Y.C. Chin, Marcelino de la Cruz, Peter Diggle, Stephen Eglen,
-  Agnes Gault, Marc Genton, Pavel Grabarnik, C. Graf, Ute Hahn, Mandy Hering, 
-  Martin Bogsted Hansen, Martin Hazelton, Kurt Hornik,
-  Robert John-Chandran, Devin Johnson,
-  Jorge Mateu, Jesper Moller, Linda Stougaard Nielsen, Evgeni Parilov,
+  Marie-Colette van Lieshout, Rasmus Waagepetersen, 
+  Dominic Schuhmacher and Kasper Klitgaard Berthelsen
+  made substantial contributions of code.
+  Additional contributions by
+  Colin Beale,
+  Brad Biggerstaff,
+  Roger Bivand,
+  Florent Bonneu,
+  Jianbao Chen,
+  Y.C. Chin,
+  Marcelino de la Cruz,
+  Peter Diggle,
+  Stephen Eglen,
+  Agnes Gault,
+  Marc Genton,
+  Pavel Grabarnik,
+  C. Graf,
+  Janet Franklin,
+  Ute Hahn,
+  Mandy Hering, 
+  Martin Bogsted Hansen,
+  Martin Hazelton,
+  Juha Heikkinen,
+  Kurt Hornik,
+  Ross Ihaka,
+  Robert John-Chandran,
+  Devin Johnson,
+  Jeff Laake,
+  Jorge Mateu,
+  Peter McCullagh,
+  Mi Xiangcheng,
+  Jesper Moller,
+  Linda Stougaard Nielsen,
+  Evgeni Parilov,
   Jeff Picka,
-  Matt Reiter, Brian Ripley, Barry Rowlingson, Aila Sarkka, Katja Schladitz,
-  Bryan Scott, Malte Spiess, Mark Stevenson, P. Surovy, Berwin Turlach, 
-  Andrew van Burgel, Hao Wang and Selene Wong.
+  Matt Reiter,
+  Brian Ripley,
+  Barry Rowlingson,
+  John Rudge,
+  Aila Sarkka,
+  Katja Schladitz,
+  Bryan Scott,
+  Ida-Maria Sintorn,
+  Malte Spiess,
+  Mark Stevenson,
+  P. Surovy,
+  Berwin Turlach,
+  Andrew van Burgel,
+  Hao Wang
+  and
+  Selene Wong.
 }
 \keyword{spatial}
 \keyword{package}

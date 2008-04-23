@@ -7,11 +7,15 @@
   this function extracts the design matrix of the model.
 }
 \usage{
-   \method{model.matrix}{ppm}(object, ...)
+   \method{model.matrix}{ppm}(object, ..., keepNA=TRUE)
 }
 \arguments{
   \item{object}{
     The fitted point process model (an object of class \code{"ppm"}.)
+  }
+  \item{keepNA}{
+    Logical. Determines whether rows containing NA values will be
+    deleted or retained.
   }
   \item{\dots}{
     Other arguments (such as \code{na.action}) passed to
@@ -37,14 +41,22 @@
 
   The result is a matrix, with one row for every quadrature point
   in the fitting procedure, and one column for every constructed
-  covariate in the design matrix. 
+  covariate in the design matrix.
 
+  If there are \code{NA} values in the covariates,
+  the argument \code{keepNA} determines whether to retain or delete
+  the corresponding rows of the model matrix. The default
+  \code{keepNA=TRUE} is to retain them. Note that this differs from
+  the default behaviour of many other methods for \code{model.matrix},
+  which typically delete rows containing \code{NA}.
+  
   The quadrature points themselves can be extracted using
   \code{\link{quad.ppm}}.
 }
 \value{
   A matrix. Rows of the matrix correspond to quadrature points
-  in the fitting procedure. Columns are covariates in the model.
+  in the fitting procedure (provided \code{keepNA=TRUE}).
+  Columns are covariates in the model.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

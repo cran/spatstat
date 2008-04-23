@@ -27,28 +27,28 @@ C Output from Public domain Ratfor, version 1.0
       call intpr('irep/nverb=',-1,iprt,1)
       endif
       itype = 0
-      call aru(1,zero,one,iseed,urp)
+      call arand(iseed(1),iseed(2),iseed(3),urp)
       if(urp.gt.p)then
-      call aru(1,zero,one,iseed,urq)
+      call arand(iseed(1),iseed(2),iseed(3),urq)
       if(urq.gt.q)then
       u = xprop(irep)
       v = yprop(irep)
       call geyer(u,v,m1,x,y,npts,par,period,cifval,aux)
       anumer = cifval
       adenom = qnodds*(npts+1)
-      call aru(1,zero,one,iseed,bp)
+      call arand(iseed(1),iseed(2),iseed(3),bp)
       if(bp*adenom .lt. anumer)then
       npts = npts + 1
       itype = 1
       endif
       else
       if(npts .ne. 0)then
-      call aru(1,zero,one,iseed,xi)
+      call arand(iseed(1),iseed(2),iseed(3),xi)
       ix = 1 + int(npts*xi)
       call geyer(x(ix),y(ix),ix,x,y,npts,par,period,cifval,aux)
       anumer = qnodds * npts
       adenom = cifval
-      call aru(1,zero,one,iseed,dp)
+      call arand(iseed(1),iseed(2),iseed(3),dp)
       if(dp*adenom .lt. anumer)then
       itype = 2
       endif
@@ -56,13 +56,13 @@ C Output from Public domain Ratfor, version 1.0
       endif
       else
       if(npts .ne. 0)then
-      call aru(1,zero,one,iseed,xi)
+      call arand(iseed(1),iseed(2),iseed(3),xi)
       ix = 1 + int(npts*xi)
       u = xprop(irep)
       v = yprop(irep)
       call geyer(x(ix),y(ix),ix,x,y,npts,par,period,cvd,aux)
       call geyer(u,v,ix,x,y,npts,par,period,cvn,aux)
-      call aru(1,zero,one,iseed,sp)
+      call arand(iseed(1),iseed(2),iseed(3),sp)
       if(sp*cvd .lt. cvn)then
       itype = 3
       endif

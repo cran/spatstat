@@ -27,9 +27,9 @@ C Output from Public domain Ratfor, version 1.0
       call intpr('irep/nverb=',-1,iprt,1)
       endif
       itype = 0
-      call aru(1,zero,one,iseed,urp)
+      call arand(iseed(1),iseed(2),iseed(3),urp)
       if(urp.gt.p)then
-      call aru(1,zero,one,iseed,urq)
+      call arand(iseed(1),iseed(2),iseed(3),urq)
       if(urq.gt.q)then
       u = xprop(irep)
       v = yprop(irep)
@@ -37,21 +37,21 @@ C Output from Public domain Ratfor, version 1.0
       call straushm(u,v,mrk,m1,x,y,marks,ntypes,npts,par,period,cifval)
       anumer = cifval
       adenom = qnodds*(npts+1)
-      call aru(1,zero,one,iseed,bp)
+      call arand(iseed(1),iseed(2),iseed(3),bp)
       if(bp*adenom .lt. anumer)then
       npts = npts + 1
       itype = 1
       endif
       else
       if(npts .ne. 0)then
-      call aru(1,zero,one,iseed,xi)
+      call arand(iseed(1),iseed(2),iseed(3),xi)
       ix = 1 + int(npts*xi)
       mrki = marks(ix)
       call straushm(x(ix),y(ix),mrki,ix,x,y,marks,ntypes,npts,par,period
      *,cifval)
       anumer = qnodds * npts
       adenom = cifval
-      call aru(1,zero,one,iseed,dp)
+      call arand(iseed(1),iseed(2),iseed(3),dp)
       if(dp*adenom .lt. anumer)then
       itype = 2
       endif
@@ -59,7 +59,7 @@ C Output from Public domain Ratfor, version 1.0
       endif
       else
       if(npts .ne. 0)then
-      call aru(1,zero,one,iseed,xi)
+      call arand(iseed(1),iseed(2),iseed(3),xi)
       ix = 1 + int(npts*xi)
       u = xprop(irep)
       v = yprop(irep)
@@ -71,7 +71,7 @@ C Output from Public domain Ratfor, version 1.0
       call straushm(x(ix),y(ix),mrki,ix,x,y,marks,ntypes,npts,par,period
      *,cvd)
       call straushm(u,v,mrk,ix,x,y,marks,ntypes,npts,par,period,cvn)
-      call aru(1,zero,one,iseed,sp)
+      call arand(iseed(1),iseed(2),iseed(3),sp)
       if(sp*cvd .lt. cvn)then
       itype = 3
       endif
