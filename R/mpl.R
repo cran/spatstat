@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.63 $	$Date: 2007/09/28 14:01:36 $
+#	$Revision: 5.64 $	$Date: 2008/04/17 17:08:21 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -87,7 +87,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2007/09/28 14:01:36 $")
+                    date="$Date: 2008/04/17 17:08:21 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -359,13 +359,19 @@ if(allcovar || want.trend) {
         quadpoints.na <- matrowany(nbg)
         n.na <- sum(quadpoints.na)
         n.tot <- length(quadpoints.na)
+        errate <- n.na/n.tot
+        pcerror <- round(signif(100 * errate, 2), 2)
         complaint <- paste("Values of the",
                            ngettext(length(covnames.na),
                                     "covariate", "covariates"),
                            paste(sQuote(covnames.na), collapse=", "),
                            "were NA or undefined at",
-                           paste(ceiling(100 * n.na/n.tot),
-                                 "% (", n.na, " out of ", n.tot, ")",
+                           paste(pcerror, "%",
+                                 " (", 
+                                 n.na,
+                                 " out of ",
+                                 n.tot,
+                                 ")",
                                  sep=""),
                            "of the", Pname)
         warning(paste(complaint,

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.18 $	$Date: 2008/03/05 20:42:42 $
+#	$Revision: 2.20 $	$Date: 2008/04/21 17:49:06 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -141,6 +141,10 @@ getglmfit <- function(object) {
   return(glmfit)
 }
 
+getglmdata <- function(object) {
+  verifyclass(object, "ppm")
+  return(object$internal$glmdata)
+}
     
 # ??? method for 'effects' ???
 
@@ -172,7 +176,7 @@ logLik.ppm <- function(object, ...) {
 #
 # method for model.matrix
 
-model.matrix.ppm <- function(object, ...) {
+model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
   gf <- getglmfit(object)
   if(is.null(gf)) {
     newobject <- update(object, forcefit=TRUE)
@@ -181,6 +185,21 @@ model.matrix.ppm <- function(object, ...) {
       stop("internal error: unable to extract a glm fit")
   }
   mm <- model.matrix(gf, ...)
+  if(!keepNA)
+    return(mm)
+  gd <- getglmdata(object)
+  if(nrow(mm) != nrow(gd)) {
+    # can occur if covariates include NA's
+    isna <- matrowany(is.na(gd))
+    if(sum(isna) + nrow(mm) == nrow(gd)) {
+      # insert rows of NA's
+      mmplus <- matrix( , nrow(gd), ncol(mm))
+      mmplus[isna, ] <- NA
+      mmplus[!isna, ] <- mm
+      mm <- mmplus
+    } else 
+    stop("internal error: model matrix does not match glm data frame")
+  }
   return(mm)
 }
 

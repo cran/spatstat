@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "methas.template"
- ## $Id: methas.template,v 1.3 2007/10/26 17:10:00 adrian Exp adrian $
+ ## $Id: methas.template,v 1.4 2008/04/21 18:07:05 adrian Exp adrian $
 
 # 1 "cif.h" 1
   ##
@@ -47,12 +47,14 @@ while(irep <= nrep) {
   call intpr('irep/nverb=',-1,iprt,1)
  }
  itype = 0
- call aru(1,zero,one,iseed,urp)
+   ## call aru(1,zero,one,iseed,urp)
+ call arand(iseed(1),iseed(2),iseed(3),urp)
 
   ## Shift or birth/death:
  if(urp>p) {
   ## Birth/death:
-  call aru(1,zero,one,iseed,urq)
+   ## call aru(1,zero,one,iseed,urq)
+  call arand(iseed(1),iseed(2),iseed(3),urq)
   if(urq>q) {
 
    ## Propose birth:
@@ -71,7 +73,8 @@ while(irep <= nrep) {
 
    anumer = cifval
                         adenom = qnodds*(npts+1)
-   call aru(1,zero,one,iseed,bp)
+  ## call aru(1,zero,one,iseed,bp)
+   call arand(iseed(1),iseed(2),iseed(3),bp)
    if(bp*adenom < anumer) {
     npts = npts + 1
     itype = 1 ## Birth occurs.
@@ -81,7 +84,8 @@ while(irep <= nrep) {
 
   ## Propose death:
                        if(npts != 0) {
-    call aru(1,zero,one,iseed,xi)
+   ## call aru(1,zero,one,iseed,xi)
+    call arand(iseed(1),iseed(2),iseed(3),xi)
     ix = 1 + int(npts*xi)
 
 
@@ -96,7 +100,8 @@ while(irep <= nrep) {
 
                                 anumer = qnodds * npts
     adenom = cifval
-    call aru(1,zero,one,iseed,dp)
+   ## call aru(1,zero,one,iseed,dp)
+    call arand(iseed(1),iseed(2),iseed(3),dp)
     if(dp*adenom < anumer) itype = 2
                                                        ## Death occurs.
    }
@@ -106,16 +111,18 @@ while(irep <= nrep) {
 
    ## Propose shift:
                if(npts != 0) {
-                 call aru(1,zero,one,iseed,xi)
+        ## call aru(1,zero,one,iseed,xi)
+                 call arand(iseed(1),iseed(2),iseed(3),xi)
                  ix = 1 + int(npts*xi)
                  u = xprop(irep)
                  v = yprop(irep)
-# 118 "methas.template"
+# 125 "methas.template"
                    call dgs(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
 
                    call dgs(u,v,ix,x,y,npts,par,period,cvn)
-# 130 "methas.template"
-                   call aru(1,zero,one,iseed,sp)
+# 137 "methas.template"
+           ## call aru(1,zero,one,iseed,sp)
+                   call arand(iseed(1),iseed(2),iseed(3),sp)
                    if(sp*cvd < cvn) itype = 3 ## Shift occurs.
 
                }

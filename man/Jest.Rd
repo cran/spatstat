@@ -65,7 +65,7 @@
   Sizeable amounts of memory may be needed during the calculation.
 }
 \details{
-  The \eqn{J} function (Van Lieshout and Baddeley ,1996)
+  The \eqn{J} function (Van Lieshout and Baddeley, 1996)
   of a stationary point process is defined as 
   \deqn{J(r) = \frac{1-G(r)}{1-F(r)} }{ %
     J(r) = (1-G(r))/(1-F(r))}

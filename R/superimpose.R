@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.9 $ $Date: 2007/11/12 13:37:49 $
+# $Revision: 1.10 $ $Date: 2008/04/17 17:17:56 $
 #
 # This has been taken out of ppp.S
 #
@@ -41,8 +41,8 @@
   # concatenate lists of (x,y) coordinates
   XY <- do.call("concatxy", arglist)
 
-  # create the point pattern
-  OUT <- ppp(XY$x, XY$y, window=W)
+  # create the point pattern without checking
+  OUT <- ppp(XY$x, XY$y, window=W, check=FALSE)
   
   # find out whether the arguments are marked patterns
   getmarks <- function(x) {
@@ -66,12 +66,12 @@
     # If patterns are not named, return the superimposed point pattern.
     nama <- names(arglist)
     if(is.null(nama) || any(nama == ""))
-      return(OUT)
+      return(as.ppp(OUT, check=TRUE))
     # Patterns are named. Make marks from names.
     len <- unlist(lapply(arglist, function(a) { length(a$x) }))
     M <- factor(rep(nama, len), levels=nama)
     OUT <- OUT %mark% M
-    return(OUT)
+    return(as.ppp(OUT, check=TRUE))
   }
 
   # All patterns are marked.
@@ -88,6 +88,6 @@
     M <- factor(unlist(Mlist), levels=codesof(lev,lev), labels=lev)
   }
   OUT <- OUT %mark% M
-  return(OUT)
+  return(as.ppp(OUT, check=TRUE))
 }
 

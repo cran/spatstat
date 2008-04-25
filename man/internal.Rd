@@ -67,6 +67,7 @@
 \alias{fv}
 \alias{greatest.common.divisor}
 \alias{getfields}
+\alias{getglmdata}
 \alias{getglmfit}
 \alias{gridindex}            
 \alias{grid1index}
@@ -351,6 +352,7 @@ FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
+getglmdata(object)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)

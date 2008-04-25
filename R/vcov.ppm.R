@@ -3,7 +3,7 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.18 $  $Date: 2007/04/02 06:04:51 $
+#  $Revision: 1.22 $  $Date: 2008/04/21 17:12:10 $
 #
 
 vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
@@ -40,6 +40,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
     fi <- fitted(object, type="trend", check=FALSE)
     wt <- quad.ppm(object)$w
     gf <- getglmfit(object)
+    # we need a glm or gam
     if(is.null(gf)) {
       if(verbose) 
         warning("Refitting the model using GLM/GAM")
@@ -48,34 +49,23 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
       if(is.null(gf))
         stop("Internal error - refitting did not yield a glm object")
     }
-    if(!inherits(gf, "gam")) {
-      # model fitted by glm
-      gd <- object$internal$glmdata
-      fo <- object$trend
-      if(is.null(fo)) fo <- (~1)
-    } else {
-      # model fitted by gam
+    # if it's a gam, issue a warning
+    if(inherits(gf, "gam")) {
       switch(gamaction,
              fatal={
-               stop("Sorry, vcov.ppm is not implemented for models fitted by gam")
+               stop(paste("model was fitted by gam();",
+                          "execution halted because fatal=TRUE"),
+                    call.=FALSE)
              },
              warn={
                warning(paste("model was fitted by gam();",
-                             "asymptotic variance calculation ignores this"))
-               # proceed to Rolf's code
+                             "asymptotic variance calculation ignores this"),
+                       call.=FALSE)
              },
              silent={})
-      # Rolf's code
-      gd <- as.data.frame(predict(gf, type="terms"))
-      names(gd) <- gsub("\\)", "", gsub("\\(", "", names(gd)))
-      rhs <- paste(colnames(gd), collapse="+")
-      fo <- as.formula(paste("~", rhs))
-      the.rest <- object$internal$glmdata[, c(".mpl.W", ".mpl.Y", ".mpl.SUBSET")]
-      gd <- cbind(the.rest, gd)
     }
-    mof <- model.frame(fo, gd)
-    mom <- model.matrix(fo, mof)
-    
+    # extract model matrix
+    mom <- model.matrix(object)  #SIC
     # compute Fisher information if not known
     if(is.null(fisher)) {
       fisher <- 0
@@ -115,13 +105,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
            return(varcov / outer(sd, sd, "*"))
          },
          internals = {
-           nbg <- matrowany(is.na(gd))
-           if(any(nbg)) {
-             suff <- matrix( , nrow=nrow(gd), ncol=ncol(mom))
-             suff[nbg,] <- NA
-             suff[!nbg, ] <- mom
-           } else suff <- mom
-           return(list(fisher=fisher, suff=suff))
+           return(list(fisher=fisher, suff=mom))
          })
 }
 
