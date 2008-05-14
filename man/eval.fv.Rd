@@ -6,10 +6,11 @@
   and returns another object of the same kind.
 }
 \usage{
-  eval.fv(expr)
+  eval.fv(expr, envir)
 }
 \arguments{
   \item{expr}{An expression.}
+  \item{envir}{Optional. The environment in which to evaluate the expression.}
 }
 \details{
   This is a wrapper to make it easier to perform

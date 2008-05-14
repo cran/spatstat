@@ -29,11 +29,6 @@
   The function \code{\link{alltypes}} 
   returns an object of class \code{"fasp"}.
 
-  There are methods for \code{plot}, \code{print} and \code{"["} in this class.
-  The plot method displays the entire array of functions.
-  The method \code{\link{[.fasp}} selects a sub-array using the natural
-  indices \code{i,j}. 
-
   An object of class \code{"fasp"} is a list containing at least the
   following components:
   
@@ -60,20 +55,40 @@
   }
 
 }
+\section{Functions available}{
+  There are methods for \code{plot}, \code{print} and \code{"["}
+  for this class.
+
+  The plot method displays the entire array of functions.
+  The method \code{\link{[.fasp}} selects a sub-array using the natural
+  indices \code{i,j}.
+
+  The command \code{\link{eval.fasp}} can be used to apply
+  a transformation to each function in the array,
+  and to combine two arrays.
+}
 \seealso{
   \code{\link{alltypes}},
   \code{\link{plot.fasp}},
-  \code{\link{[.fasp}}
+  \code{\link{[.fasp}},
+  \code{\link{eval.fasp}}
 }
 \examples{
   # multitype point pattern
   data(amacrine)
-  a <- alltypes(amacrine, "G")
-  plot(a)
+  GG <- alltypes(amacrine, "G")
+  plot(GG)
 
   # select the row corresponding to cells of type "on"
-  b <- a["on", ]
-  plot(b)
+  Gon <- GG["on", ]
+  plot(Gon)
+
+  # extract the G function for i = "on", j = "off"
+  Gonoff <- GG["on", "off", drop=TRUE]
+
+  # Fisher variance stabilising transformation
+  GGfish <- eval.fasp(asin(sqrt(GG)))
+  plot(GGfish)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

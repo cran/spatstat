@@ -3,14 +3,14 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.44 $  $Date: 2008/03/18 10:54:04 $
+#   $Revision: 1.45 $  $Date: 2008/05/11 20:21:08 $
 #
 
-envelope <- function(Y, fun=Kest, nsim=99, nrank=1, 
-                     ..., simulate=NULL, verbose=TRUE, clipdata=TRUE, 
+envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
+                     simulate=NULL, verbose=TRUE, clipdata=TRUE, 
                      start=NULL, control=list(nrep=1e5, expand=1.5),
                      transform=NULL, global=FALSE, ginterval=NULL,
-                     saveall=FALSE, nsim2=nsim) {
+                     saveall=FALSE, nsim2=nsim, internal=NULL) {
   cl <- match.call()
   Yname <- deparse(substitute(Y))
   envir.user <- parent.frame()
@@ -85,6 +85,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
     # simulation is specified by argument `simulate'
     # which should be an expression, or a list of point patterns
     csr <- FALSE
+    # override
+    if(!is.null(internal$csr)) csr <- TRUE
     model <- NULL
     if(is.expression(simulate)) {
       # The user-supplied expression 'simulate' will be evaluated repeatedly
@@ -110,6 +112,57 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
       X <- data.ppm(Y)
     else stop(paste(sQuote("Y"),
                     "should be a point process model or a point pattern"))
+  }
+  #--------------------------------------------------------------------
+  # Determine number of simulations
+  #
+  #
+  ## determine whether dual simulations are required
+  ## (one set of simulations to calculate the theoretical mean,
+  ##  another independent set of simulations to obtain the critical point.)
+  dual <- (global && !csr)
+  Nsim <- if(!dual) nsim else (nsim + nsim2)
+
+  # if taking data from a list of point patterns,
+  # check there are enough of them
+  if(simtype == "list" && Nsim > length(SimDataList))
+    stop(paste("Number of simulations",
+               paren(if(!dual)
+                     paste(nsim) else
+                     paste(nsim, "+", nsim2, "=", Nsim)
+                     ),
+               "exceeds number of point pattern datasets supplied"))
+
+  # Undocumented secret exit
+  # ------------------------------------------------------------------
+  if(!is.null(internal$patterns)) {
+    # generate simulated realisations and return them 
+    if(verbose) {
+      action <- if(simtype == "list") "Extracting" else "Generating"
+      descrip <- switch(simtype,
+                        csr = "simulations of CSR",
+                        rmh = "simulated realisations of fitted model",
+                        expr = "simulations by evaluating expression",
+                        list = "point patterns from list")
+      cat(paste(action, Nsim, descrip, "...\n"))
+    }
+    XsimList <- list()
+  # start simulation loop 
+    for(i in 1:Nsim) {
+      if(verbose) progressreport(i, Nsim)
+      Xsim <- eval(simexpr, envir=envir)
+      if(!inherits(Xsim, "ppp"))
+        switch(simtype,
+               csr=stop("Internal error: ppp object not generated"),
+               rmh=stop("Internal error: rmh did not return a ppp object"),
+               expr=stop(paste("Evaluating the expression", sQuote("simulate"),
+                 "did not yield a point pattern")),
+               list=stop("Internal error: list entry was not a ppp object"))
+      XsimList[[i]] <- Xsim
+    }
+    if(verbose) cat(paste("Done.\n"))
+    attr(XsimList, "internal") <- list(csr=csr)
+    return(XsimList)
   }
   
   # ------------------------------------------------------------------
@@ -177,7 +230,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
     funX <- fun(X, ...)
   else
     funX <- fun(X[clipwin], ...)
-    
+
   if(!inherits(funX, "fv"))
     stop(paste("The function", fname,
                "must return an object of class", sQuote("fv")))
@@ -203,22 +256,6 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1,
   if(global && is.null(ginterval))
     ginterval <- alim
 
-  #####
-  ## determine whether dual simulations are required
-  ## (one set of simulations to calculate the theoretical mean,
-  ##  another independent set of simulations to obtain the critical point.)
-  dual <- (global && !csr)
-  Nsim <- if(!dual) nsim else (nsim + nsim2)
-
-  # if taking data from a list of point patterns,
-  # check there are enough of them
-  if(simtype =="list" && Nsim > length(SimDataList))
-    stop(paste("Number of simulations",
-               paren(if(!dual)
-                     paste(nsim) else
-                     paste(nsim, "+", nsim2, "=", Nsim)
-                     ),
-               "exceeds number of point pattern datasets supplied"))
   
   ######### simulate #######################
   if(verbose) {

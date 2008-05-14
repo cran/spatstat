@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.25 $   $Date: 2008/04/23 15:22:51 $
+#    $Revision: 1.28 $   $Date: 2008/05/02 18:50:39 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -95,8 +95,8 @@ as.fv <- function(x) {
     return(x)
   else if(inherits(x, "data.frame"))
     return(fv(x, names(x)[1], , names(x)[2]))
-  else if(inherits(x, "fasp") && length(which) == 1)
-    return(x$funs[[1]])
+  else if(inherits(x, "fasp") && length(x$which) == 1)
+    return(x$fns[[1]])
   else
     stop(paste("Don't know how to convert this to an object of class",
                sQuote("fv")))
@@ -206,6 +206,114 @@ bind.fv <- function(x, y, labl, desc, preferred) {
                unitname=attr(x, "units")))
 }  
 
+#   method for with()
+
+with.fv <- function(data, expr, ..., drop=TRUE) {
+  verifyclass(data, "fv")
+  # convert syntactic expression to 'expression' object
+  e <- as.expression(substitute(expr))
+  # convert syntactic expression to call
+  elang <- substitute(expr)
+  # expand "."
+  dotnames <- fvnames(data, ".")
+  xname <- fvnames(data, ".x")
+  yname <- fvnames(data, ".y")
+  ud <- as.call(lapply(c("cbind", dotnames), as.name))
+  ux <- as.name(xname)
+  uy <- as.name(yname)
+  elang <- eval(substitute(substitute(ee,
+                                      list(.=ud, .x=ux, .y=uy)),
+                           list(ee=elang)))
+  # evaluate expression
+  datadf <- as.data.frame(data)
+  results <- eval(elang, as.list(datadf))
+  # --------------------
+  # make sense of the results
+  #
+  nx <- nrow(datadf)
+  # 
+  if(!is.matrix(results) && !is.data.frame(results)) {
+    # result is a vector
+    if(length(results) != nx) {
+      # format not understood
+#      warning("Calculation produced a vector of the wrong length")
+      return(results)
+    }
+    # result is a vector of the right length
+    if(drop)
+      return(as.vector(results))
+    else
+      results <- matrix(results, nrow=nx, ncol=1)
+  }
+  # result is a matrix or data frame
+  if(nrow(results) != nx) {
+    # format not understood - dump the values
+#    warning("Calculation yielded a matrix or data frame of the wrong dimensions")
+    return(results)
+  }
+  # result is a matrix or data frame of the right dimensions
+  # make a new fv object
+  # ensure columns of results have names
+  if(is.null(colnames(results)))
+    colnames(results) <- paste("col", seq(ncol(results)), sep="")
+  resultnames <- colnames(results)
+  # get values of function argument
+  xvalues <- datadf[[xname]]
+  # tack onto result matrix
+  results <- cbind(xvalues, results)
+  colnames(results) <- c(xname, resultnames)
+  results <- data.frame(results)
+  # check for alteration of column names
+  oldnames <- resultnames
+  resultnames <- colnames(results)[-1]
+  if(any(resultnames != oldnames))
+    warning("some column names were illegal and have been changed")
+  # Build up fv object
+  # decide which of the columns should be the preferred value
+  newyname <- if(yname %in% resultnames) yname else resultnames[1]
+  # construct default plot formula
+  lhs <- resultnames
+  if(length(lhs) > 1)
+    lhs <- paste("cbind", paren(paste(lhs, collapse=", ")))
+  fmla <- as.formula(paste(lhs, "~", xname))
+  # construct description strings
+  desc <- c(attr(data, "desc")[1], paste("Computed value", resultnames))
+  # form fv object and return
+  out <- fv(results, argu=xname, valu=newyname,
+            desc=desc, alim=attr(data, "alim"), fmla=fmla, 
+            unitname=unitname(data))
+  return(out)
+}
+
+
+# translate obscure names
+
+fvnames <- function(X, a=".") {
+  verifyclass(X, "fv")
+  if(!is.character(a) || length(a) > 1)
+    stop("argument a must be a character string")
+  switch(a,
+         "." = {
+           dn <- attr(X, "dotnames")
+           if(is.null(dn)) {
+             argu <- attr(X, "argu")
+             allvars <- names(X)
+             dn <- allvars[allvars != argu]
+             dn <- rev(dn) # convention
+           }
+           return(dn)
+         },
+         ".y"={
+           return(attr(X, "valu"))
+         },
+         ".x"={
+           return(attr(X, "argu"))
+         },
+         stop(paste("Unrecognised abbreviation", dQuote(a)))
+       )
+}
+
+  
 # stieltjes integration for fv objects
 
 stieltjes <- function(f, M, ...) {

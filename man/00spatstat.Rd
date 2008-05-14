@@ -111,6 +111,8 @@ The Spatstat Package
 	stratified random sample of points \cr
 	\code{\link{rsyst}} \tab
 	systematic random sample of points \cr
+	\code{\link{rjitter}} \tab
+	apply random displacements to points in a pattern\cr
 	\code{\link{rMaternI}}  \tab
 	simulate the Mat\'ern Model I inhibition process\cr
 	\code{\link{rMaternII}} \tab
@@ -376,6 +378,10 @@ The Spatstat Package
     \code{\link{plot.fv}} \tab plot a summary function\cr
     \code{\link{eval.fv}} \tab evaluate any expression involving
     summary functions\cr
+    \code{\link{eval.fasp}} \tab evaluate any expression involving
+    an array of functions\cr
+    \code{\link{with.fv}} \tab evaluate an expression for a 
+    summary function\cr
     \code{\link{nndist}} \tab nearest neighbour distances \cr
     \code{\link{nnwhich}} \tab find nearest neighbours \cr
     \code{\link{pairdist}} \tab distances between all pairs of points\cr

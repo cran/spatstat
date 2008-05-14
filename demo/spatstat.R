@@ -30,6 +30,7 @@ plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with li
 
 Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
 plot(Z, main="Pixel image")
+plot(Z, main="Pixel image", col=topo.colors(256))
 
 fanfare("II. Basic operations")
 X <- swedishpines
@@ -123,6 +124,9 @@ data(bramblecanes)
 plot(bramblecanes)
 bramblecanes <- rescale(bramblecanes, 1/9)
 plot(alltypes(bramblecanes, "K"), ylab="K(r)", mar.panel=c(4,4,2,2)+0.1)
+
+data(amacrine)
+plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), ylab="L(r)")
 
 data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
@@ -218,6 +222,9 @@ abline(v=(1:4)/5, lty=2)
 plot(rstrat(nx=5))
 abline(h=(1:4)/5, lty=2)
 abline(v=(1:4)/5, lty=2)
+
+X <- rsyst(nx=10)
+plot(rjitter(X, 0.02))
 
 Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
                w=c(0,10,0,10)),

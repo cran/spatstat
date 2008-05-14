@@ -65,6 +65,7 @@
 \alias{fii}
 \alias{FormatFaspFormulae}
 \alias{fv}
+\alias{fvnames}
 \alias{greatest.common.divisor}
 \alias{getfields}
 \alias{getglmdata}
@@ -350,6 +351,7 @@ findmarktype(x)
 fii(interaction, coefs, Vnames)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
+fvnames(X, a)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmdata(object)

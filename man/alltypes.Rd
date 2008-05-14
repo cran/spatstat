@@ -1,31 +1,32 @@
 \name{alltypes}
 \alias{alltypes}
-\title{Calculate Statistic for All Types in a Multitype Point Pattern}
+\title{Calculate Summary Statistic for All Types in a Multitype Point Pattern}
 \description{
   Given a marked point pattern, this computes the estimates of
   a selected summary function (\eqn{F},\eqn{G}, \eqn{J} or \eqn{K})
-  of the pattern, for all possible combinations of marks.
-  It returns these functions in
-  a list (an object of class \code{"fasp"}) amenable to plotting
-  by \code{\link{plot.fasp}()}.
+  of the pattern, for all possible combinations of marks,
+  and returns these functions in an array.
 }
 
 \usage{
-  alltypes(pp, fun="K",dataname=NULL,verb=FALSE)
+  alltypes(X, fun="K", \dots, dataname=NULL,verb=FALSE,envelope=FALSE)
 }
 
 \arguments{
-  \item{pp}{The observed point pattern, for which summary function
+  \item{X}{The observed point pattern, for which summary function
     estimates are required.  An object of class \code{"ppp"}.
-    If the pattern is not marked, the resulting ``array'' has dimensions
-    \eqn{1 \times 1}{1 x 1}.
   }
 
-  \item{fun}{Character string indicating the summary function
+  \item{fun}{The summary function. Either an \R function,
+    or a character string indicating the summary function
     required.  Options are
     \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"},
     \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"},
     \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}.
+  }
+  \item{\dots}{
+    Arguments passed to the summary function
+    (and to the function \code{\link{envelope}} if appropriate)
   }
 
   \item{dataname}{Character string giving an optional (alternative)
@@ -33,27 +34,44 @@
     in the call.  This name, if supplied, may be used by
     \code{\link{plot.fasp}()} in forming the title of the plot.
     If not supplied it defaults to the parsing of the argument
-    supplied as \code{pp} in the call.
+    supplied as \code{X} in the call.
   }
 
-  \item{verb}{Logical value, meaning ``verbose''.  If verb is
-   true then terse ``progress reports'' (just the values of the
-   mark indices) are printed out when the calculations for that
-   combination of marks are completed. 
-   }
+  \item{verb}{
+    Logical value.  If \code{verb} is
+    true then terse ``progress reports'' (just the values of the
+    mark indices) are printed out when the calculations for that
+    combination of marks are completed. 
+  }
+  \item{envelope}{
+    Logical value. If \code{envelope} is true, then simulation envelopes
+    of the summary function will also be computed. See Details.
+  }
 }
 
 \details{
   This routine is a convenient way to analyse the dependence between
   types in a multitype point pattern.
+  It computes the estimates of a selected summary function of the
+  pattern, for all possible combinations of marks.
+  It returns these functions in an array
+  (an object of class \code{"fasp"}) amenable to plotting
+  by \code{\link{plot.fasp}()}.
+
+  The argument \code{fun} specifies the summary function that will
+  be evaluated for each type of point, or for each pair of types.
+  It may be either an \R function or a character string.
+  
   Suppose that the points have possible types \eqn{1,2,\ldots,m}
   and let \eqn{X_i}{X[i]} denote the pattern of points of type \eqn{i} only.
 
   If \code{fun="F"} then this routine
   calculates, for each possible type \eqn{i},
   an estimate of the Empty Space Function \eqn{F_i(r)} of
-  \eqn{X_i}{X[i]}. See \code{\link{Fest}} for explanation of the
-  empty space function.
+  \eqn{X_i}{X[i]}. See \code{\link{Fest}}
+  for explanation of the empty space function.
+  The estimate is computed by applying \code{\link{Fest}}
+  to \eqn{X_i}{X[i]} with the optional arguments \code{\dots}.
 
   If \code{fun} is
   \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
@@ -65,8 +83,13 @@
   dependence between 
   \eqn{X_i}{X[i]} and \eqn{X_j}{X[j]}.
   See \code{\link{Gcross}}, \code{\link{Jcross}}
-  or \code{\link{Kcross}} respectively for explanation of these functions.
-
+  or \code{\link{Kcross}} respectively for explanation of these
+  functions.
+  The estimate is computed by applying the relevant function
+  (\code{\link{Gcross}} etc)
+  to \code{X} using each possible value of the arguments \code{i,j},
+  together with the optional arguments \code{\dots}.
+  
   If \code{fun} is 
   \code{"Gdot"}, \code{"Jdot"} or \code{"Kdot"},
   the routine calculates, for each type \eqn{i},
@@ -77,20 +100,34 @@
   dependence between \eqn{X_i}{X[i]} and \eqn{X}{X}.
   See \code{\link{Gdot}}, \code{\link{Jdot}}
   or \code{\link{Kdot}} respectively for explanation of these functions.
+  The estimate is computed by applying the relevant function
+  (\code{\link{Gdot}} etc)
+  to \code{X} using each possible value of the argument \code{i},
+  together with the optional arguments \code{\dots}.
 
   The letters \code{"G"}, \code{"J"} and \code{"K"}
   are interpreted as abbreviations for \code{"Gcross"}, \code{"Jcross"}
-  and \code{"Kcross"} respectively, assumin the point pattern is
+  and \code{"Kcross"} respectively, assuming the point pattern is
   marked. If the point pattern is unmarked, the appropriate
   function \code{\link{Fest}}, \code{\link{Jest}}
   or \code{\link{Kest}} is invoked instead.
-  
+
+  If \code{envelope=TRUE}, then as well as computing the value of the
+  summary function for each combination of types, the algorithm also
+  computes simulation envelopes of the summary function for each
+  combination of types. The arguments \code{\dots} are passed to the function
+  \code{\link{envelope}} to control the number of
+  simulations, the random process generating the simulations,
+  the construction of envelopes, and so on. 
 }
 
 \value{
   A function array (an object of class \code{"fasp"},
   see \code{\link{fasp.object}}). This can be plotted
   using \code{\link{plot.fasp}}.
+
+  If the pattern is not marked, the resulting ``array'' has dimensions
+  \eqn{1 \times 1}{1 x 1}. Otherwise the following is true:
 
   If \code{fun="F"},
   the function array has dimensions \eqn{m \times 1}{m * 1}
@@ -103,8 +140,8 @@
   or \code{"Kdot"}, the function array
   again has dimensions \eqn{m \times 1}{m * 1}.
   The entry at position \code{[i,1]} in this array
-  is the result of \code{Gdot(pp, i)} or \code{Jdot(pp, i)}
-  or \code{Kdot(pp, i)} respectively.
+  is the result of \code{Gdot(X, i)} or \code{Jdot(X, i)}
+  or \code{Kdot(X, i)} respectively.
 
   If \code{fun} is \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
   (or their abbreviations \code{"G"}, \code{"J"} or \code{"K"}),
@@ -118,16 +155,19 @@
   applying the univariate function \code{\link{Gest}},
   \code{\link{Jest}} or \code{\link{Kest}} to the
   points of type \code{i} only.
-  
-  Each function entry \code{fns[[i]]} retains the format
+
+  If \code{envelope=FALSE}, then
+  each function entry \code{fns[[i]]} retains the format
   of the output of the relevant estimating routine
   \code{\link{Fest}}, \code{\link{Gest}}, \code{\link{Jest}},
   \code{\link{Kest}},  \code{Gcross}, \code{Jcross}, \code{Kcross},
   \code{Gdot}, \code{Jdot}, or \code{Kdot}.
-
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J functions, and
   \code{cbind(trans,theo) ~ r} for K functions.
+
+  If \code{envelope=TRUE}, then each function entry \code{fns[[i]]}
+  has the same format as the output of the \code{\link{envelope}} command.
 }
 \note{
   Sizeable amounts of memory may be needed during the calculation.
@@ -145,52 +185,27 @@
   \code{\link{Kcross}},
   \code{\link{Gdot}},
   \code{\link{Jdot}},
-  \code{\link{Kdot}}
+  \code{\link{Kdot}},
+  \code{\link{envelope}}.
 }
 \examples{
    # bramblecanes (3 marks).
    data(bramblecanes)
-   \dontrun{
-   X.F <- alltypes(bramblecanes,fun="F",verb=TRUE)
-   plot(X.F) 
-   X.G <- alltypes(bramblecanes,fun="G",verb=TRUE)
-   X.J <- alltypes(bramblecanes,fun="J",verb=TRUE)
-   X.K <- alltypes(bramblecanes,fun="K",verb=TRUE)
-   X.Gd <- alltypes(bramblecanes,fun="Gdot",verb=TRUE)
-   X.Jd <- alltypes(bramblecanes,fun="Jdot",verb=TRUE)
-   X.Kd <- alltypes(bramblecanes,fun="Kdot",verb=TRUE)
-   }
    \testonly{
-      # smaller dataset
-      bram <- bramblecanes[seq(1, bramblecanes$n, by=20), ]
-      X.F <- alltypes(bram,fun="F",verb=TRUE)
-      X.G <- alltypes(bram,fun="G",verb=TRUE)
-      X.J <- alltypes(bram,fun="J",verb=TRUE)
-      X.K <- alltypes(bram,fun="K",verb=TRUE)
-      X.Gd <- alltypes(bram,fun="Gdot",verb=TRUE)
-      X.Jd <- alltypes(bram,fun="Jdot",verb=TRUE)
-      X.Kd <- alltypes(bram,fun="Kdot",verb=TRUE)
+      bramblecanes <- bramblecanes[c(seq(1, 744, by=20), seq(745, 823, by=4))]
    }
+   bF <- alltypes(bramblecanes,"F",verb=TRUE)
+   plot(bF) 
+   plot(alltypes(bramblecanes,"G"))
+   plot(alltypes(bramblecanes,"Gdot"))
    
    # Swedishpines (unmarked).
    data(swedishpines)
    \testonly{
-	swedishpines <- swedishpines[1:25]
+     swedishpines <- swedishpines[1:25]
    }
-   X.K <- alltypes(swedishpines,fun="K")
-   X.F <- alltypes(swedishpines,fun="F")
-   X.G <- alltypes(swedishpines,fun="G")
-   X.J <- alltypes(swedishpines,fun="J")
-
-   # simulated data
-   \dontrun{
-   pp <- runifpoint(350, owin(c(0,1),c(0,1)))
-   pp$marks <- factor(c(rep(1,50),rep(2,100),rep(3,200)))
-   X.F <- alltypes(pp,fun="F",verb=TRUE,dataname="Fake Data")
-   X.G <- alltypes(pp,fun="G",verb=TRUE,dataname="Fake Data")
-   X.J <- alltypes(pp,fun="J",verb=TRUE,dataname="Fake Data")
-   X.K <- alltypes(pp,fun="K",verb=TRUE,dataname="Fake Data")
-   }
+   plot(alltypes(swedishpines,"K"))
+   plot(alltypes(swedishpines,"F"))
 
    # A setting where you might REALLY want to use dataname:
    \dontrun{
@@ -198,6 +213,14 @@
                 window=as.owin(c(5,20,15,50)),marks=clyde),
                 fun="F",verb=TRUE,dataname="Melvin")
    }
+
+   # envelopes
+   bKE <- alltypes(bramblecanes,"K",envelope=TRUE,nsim=19)
+   bFE <- alltypes(bramblecanes,"F",envelope=TRUE,nsim=19,global=TRUE)
+
+   # extract one entry
+   as.fv(bKE[1,1])
+   
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

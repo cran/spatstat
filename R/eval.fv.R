@@ -6,10 +6,10 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.6 $     $Date: 2006/10/10 04:22:48 $
+#     $Revision: 1.7 $     $Date: 2008/04/29 21:15:34 $
 #
 
-eval.fv <- function(expr) {
+eval.fv <- function(expr, envir) {
   # convert syntactic expression to 'expression' object
   e <- as.expression(substitute(expr))
   # convert syntactic expression to call
@@ -19,8 +19,9 @@ eval.fv <- function(expr) {
   if(length(varnames) == 0)
     stop("No variables in this expression")
   # get the actual variables
-  pe <- sys.parent()
-  vars <- lapply(as.list(varnames), function(x, e) get(x, envir=e), e=pe)
+  if(missing(envir))
+    envir <- sys.parent()
+  vars <- lapply(as.list(varnames), function(x, ee) get(x, envir=ee), ee=envir)
   names(vars) <- varnames
   # find out which ones are fv objects
   fvs <- unlist(lapply(vars, is.fv))
