@@ -23,6 +23,8 @@ Kest.fft                K-function using FFT
 Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
 Kmulti                  Marked K-Function
+Lcross                  Multitype L-function (cross-type)
+Ldot                    Multitype L-function (i-to-any)
 LennardJones            The Lennard-Jones Potential
 Lest                    L-function
 Linhom                  L-function
@@ -51,7 +53,7 @@ affine.psp              Apply Affine Transformation To Line Segment
                         Pattern
 allstats                Calculate four standard summary functions of a
                         point pattern.
-alltypes                Calculate Statistic for All Types in a
+alltypes                Calculate Summary Statistic for All Types in a
                         Multitype Point Pattern
 amacrine                Hughes' Amacrine Cell Data
 anemones                Beadlet Anemones Data
@@ -85,6 +87,7 @@ clarkevans              Clark and Evans Aggregation Index
 clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
 coef.ppm                Coefficients of Fitted Point Process Model
+compatible.fasp         Test Whether Two Function Arrays Are Compatible
 compatible.fv           Test Whether Two Function Objects Are
                         Compatible
 compatible.im           Test Whether Two Pixel Images Are Compatible
@@ -134,6 +137,7 @@ endpoints.psp           Endpoints of Line Segment Pattern
 envelope                Simulation envelopes of summary function
 erode.owin              Erode a Window
 eroded.areas            Areas of Morphological Erosions
+eval.fasp               Evaluate Expression Involving Function Arrays
 eval.fv                 Evaluate Expression Involving Functions
 eval.hyper              Evaluate an Expression in Each Row of a
                         Hyperframe
@@ -302,6 +306,7 @@ residuals.ppm           Residuals for Fitted Point Process Model
 residualspaper          Data and Code From JRSS Discussion Paper on
                         Residuals
 ripras                  Estimate window from points alone
+rjitter                 Random Perturbation of a Point Pattern
 rlabel                  Random Re-Labelling of Point Pattern
 rlinegrid               Generate grid of parallel lines with random
                         displacement
@@ -392,3 +397,4 @@ update.ppm              Update a Fitted Point Process Model
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point
                         Process Model
 vertices                Vertices of a Window
+with.fv                 Evaluate an Expression in a Function Table

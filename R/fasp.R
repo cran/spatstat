@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.19 $	$Date: 2007/10/30 17:44:53 $
+#	$Revision: 1.20 $	$Date: 2008/04/29 22:55:37 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ fasp <- function(fns, which, formulae=NULL,
 
 "[.fasp" <-
 "subset.fasp" <-
-  function(x, I, J, drop, ...) {
+  function(x, I, J, drop=TRUE, ...) {
 
         verifyclass(x, "fasp")
         
@@ -58,10 +58,14 @@ fasp <- function(fns, which, formulae=NULL,
         # determine index subset for lists 'fns', 'titles' etc
         included <- rep(FALSE, length(x$fns))
         w <- as.vector(x$which[I,J])
-        if(!any(w))
+        if(length(w) == 0)
           stop("result is empty")
         included[w] <- TRUE
 
+        # if only one cell selected, and drop=TRUE:
+        if((sum(included) == 1) && drop)
+          return(x$fns[included][[1]])
+        
         # determine positions in shortened lists
         whichIJ <- x$which[I,J,drop=FALSE]
         newk <- cumsum(included)
@@ -69,7 +73,7 @@ fasp <- function(fns, which, formulae=NULL,
                            ncol=ncol(whichIJ), nrow=nrow(whichIJ))
         rownames(newwhich) <- rownames(x$which)[I]
         colnames(newwhich) <- colnames(x$which)[J]
-
+          
         # create new fasp object
         Y <- fasp(fns      = x$fns[included],
                   formulae = x$default.formula[included],

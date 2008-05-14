@@ -5,11 +5,11 @@
   Computes simulation envelopes of a summary function.
 }
 \usage{
-  envelope(Y, fun=Kest, nsim=99, nrank=1, \dots,
+  envelope(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL, saveall=FALSE,
-  nsim2=nsim)
+  nsim2=nsim, internal=NULL)
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
@@ -81,6 +81,10 @@
       if it is necessary to use simulation to estimate the theoretical
       mean of the summary function. Only relevant when \code{global=TRUE}
       and the simulations are not based on CSR.
+    }
+    \item{internal}{
+      Do not use this argument.
+      It is used by the package's internal code.
     }
 }
 \value{
@@ -266,6 +270,12 @@
   functions named \code{sim1, sim2, ...} representing the \code{nsim}
   summary functions.
 }
+\section{Warning}{
+  An error may be generated if one of the simulations produces a
+  point pattern that is empty, or is otherwise unacceptable to the
+  function \code{fun}.
+}
+  
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.
     John Wiley and Sons, 1991.

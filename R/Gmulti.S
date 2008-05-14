@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.20 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 4.23 $	$Date: 2008/04/28 23:20:23 $
 #
 ################################################################################
 
@@ -31,11 +31,15 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
         marx <- marks(X, dfok=FALSE)
 	I <- (marx == i)
 	if(sum(I) == 0) stop("No points are of type i")
-	J <- (marx == j)
-	if(sum(J) == 0) stop("No points are of type j")
-#
-	result <- Gmulti(X, I, J, r, breaks, disjoint=(i!=j))
-        attr(result, "ylab") <- substitute(Gcross(r), NULL)
+        
+        if(i == j)
+          result <- Gest(X[I], r=r, breaks=breaks, ...)
+        else {
+          J <- (marx == j)
+          if(sum(J) == 0) stop("No points are of type j")
+          result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...)
+        }
+        attr(result, "ylab") <- substitute(Gcross[i,j](r), list(i=paste(i),j=paste(j)))
         result
 }	
 
@@ -59,8 +63,8 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 	if(sum(I) == 0) stop("No points are of type i")
 	J <- rep(TRUE, X$n)	# i.e. all points
 # 
-	result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE)
-        attr(result, "ylab") <- substitute(Gdot(r), NULL)
+	result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...)
+        attr(result, "ylab") <- substitute(Gdot[i](r), list(i=paste(i)))
         result
 }	
 

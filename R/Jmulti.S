@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.16 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 4.18 $	$Date: 2008/04/28 23:21:05 $
 #
 #
 #
@@ -22,11 +22,20 @@ function(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, ...) {
         X <- as.ppp(X)
         if(!is.marked(X))
           stop(paste("point pattern has no", sQuote("marks")))
+
         marx <- marks(X)
         I <- (marx == i)
-        J <- (marx == j)
-        result <- Jmulti(X, I, J, eps, r, breaks, disjoint=TRUE)
-        attr(result, "ylab") <- substitute(Jcross(r), NULL)
+        if(sum(I) == 0)
+          stop(paste("No points have mark = ", i))
+        
+        if(i == j)
+          result <- Jest(X[I], eps=eps, r=r, breaks=breaks)
+        else {
+          J <- (marx == j)
+          result <- Jmulti(X, I, J,
+                           eps=eps, r=r, breaks=breaks, disjoint=TRUE)
+        }
+        attr(result, "ylab") <- substitute(Jcross[i,j](r), list(i=paste(i),j=paste(j)))
 	return(result)
 }
 
@@ -46,9 +55,12 @@ function(X, i=1, eps=NULL, r=NULL, breaks=NULL, ...) {
         if(!is.marked(X))
           stop(paste("point pattern has no", sQuote("marks")))
         I <- (marks(X) == i)
+        if(sum(I) == 0)
+          stop(paste("No points have mark = ", i))          
         J <- rep(TRUE, X$n)
-        result <- Jmulti(X, I, J, eps, r, breaks, disjoint=FALSE)
-        attr(result, "ylab") <- substitute(Jdot(r), NULL)
+        result <- Jmulti(X, I, J,
+                         eps=eps, r=r, breaks=breaks, disjoint=FALSE)
+        attr(result, "ylab") <- substitute(Jdot[i](r), list(i=paste(i)))
 	return(result)
 }
 

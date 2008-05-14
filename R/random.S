@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.33 $   $Date: 2008/04/02 12:55:12 $
+#    $Revision: 4.35 $   $Date: 2008/05/05 18:35:27 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -23,6 +23,7 @@
 #    rThomas()         Thomas process
 #
 #    rthin()           independent random thinning
+#    rjitter()         random perturbation
 #
 #    Examples:
 #          u01 <- owin(0:1,0:1)
@@ -606,5 +607,38 @@ rthin <- function(X, P, ...) {
   return(X[retain])
 }
 
-  
-  
+
+# rjitter
+
+rjitter <- function(X, radius, retry=TRUE, giveup=10000) {
+  verifyclass(X, "ppp")
+  W <- X$window
+  if(!retry) {
+    # points outside window are lost
+    D <- runifdisc(X$n, radius=radius)
+    xnew <- X$x + D$x
+    ynew <- X$y + D$y
+    ok <- inside.owin(xnew, ynew, W)
+    return(ppp(xnew[ok], ynew[ok], window=W))
+  }
+  # retry = TRUE: condition on points being inside window
+  undone <- rep(TRUE, X$n)
+  while(any(undone)) {
+    giveup <- giveup - 1
+    if(giveup <= 0)
+      return(X)
+    Y <- X[undone]
+    D <- runifdisc(Y$n, radius=radius)
+    xnew <- Y$x + D$x
+    ynew <- Y$y + D$y
+    ok <- inside.owin(xnew, ynew, W)
+    if(any(ok)) {
+      changed <- seq(X$n)[undone][ok]
+      X$x[changed] <- xnew[ok]
+      X$y[changed] <- ynew[ok]
+      undone[ok] <- FALSE
+    }
+  }
+  return(X)
+}
+

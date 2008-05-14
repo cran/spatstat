@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.17 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 5.21 $	$Date: 2008/05/11 22:16:02 $
 #
 #
 # -------- functions ----------------------------------------
@@ -42,6 +42,71 @@
 #
 # ------------------------------------------------------------------------
 
+"Lcross" <- function(X, i, j, ...) {
+  K <- Kcross(X, i, j, ...)
+  L <- eval.fv(sqrt(K/pi))
+  # relabel the fv object
+  attr(L, "ylab") <- substitute(Lcross[i,j](r), list(i=paste(i),j=paste(j)))
+  nama <- names(L)
+  desc <- attr(L, "desc")
+  labl <- attr(L, "labl")
+  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
+  DESC <- c("theoretical Poisson Lcross(r)",
+             "uncorrected estimate of Lcross(r)",
+             "modified border-corrected estimate of Lcross(r)",
+             "border-corrected estimate of Lcross(r)",
+             "translation-corrected estimate of Lcross(r)",
+             "Ripley isotropic correction estimate of Lcross(r)")
+  LABL <- c("Lpois(r)",
+             "Lun(r)",
+             "Lbord*(r)",
+             "Lbord(r)",
+             "Ltrans(r)",
+             "Liso(r)")
+
+  for(i in seq(length(TAGS)))
+    if(!is.na(m <- match(TAGS[i], nama))) {
+      desc[m] <- DESC[i]
+      labl[m] <- LABL[i]
+    }
+  attr(L, "desc") <- desc
+  attr(L, "labl") <- labl
+  return(L)  
+}
+
+"Ldot" <- function(X, i, ...) {
+  K <- Kdot(X, i, ...)
+  L <- eval.fv(sqrt(K/pi))
+  # relabel the fv object
+  attr(L, "ylab") <- substitute(Ldot[i](r), list(i=paste(i)))
+  nama <- names(L)
+  desc <- attr(L, "desc")
+  labl <- attr(L, "labl")
+  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
+  DESC <- c("theoretical Poisson Ldot(r)",
+             "uncorrected estimate of Ldot(r)",
+             "modified border-corrected estimate of Ldot(r)",
+             "border-corrected estimate of Ldot(r)",
+             "translation-corrected estimate of Ldot(r)",
+             "Ripley isotropic correction estimate of Ldot(r)")
+  LABL <- c("Lpois(r)",
+             "Lun(r)",
+             "Lbord*(r)",
+             "Lbord(r)",
+             "Ltrans(r)",
+             "Liso(r)")
+
+  for(i in seq(length(TAGS)))
+    if(!is.na(m <- match(TAGS[i], nama))) {
+      desc[m] <- DESC[i]
+      labl[m] <- LABL[i]
+    }
+  attr(L, "desc") <- desc
+  attr(L, "labl") <- labl
+  return(L)  
+}
+
+
 "Kcross" <- 
 function(X, i=1, j=2, r=NULL, breaks=NULL,
          correction =c("border", "isotropic", "Ripley", "translate") , ...)
@@ -52,14 +117,21 @@ function(X, i=1, j=2, r=NULL, breaks=NULL,
 		stop("point pattern has no marks (no component 'marks')")
 
         marx <- marks(X)
-	I <- (marx == i)
-	J <- (marx == j)
-	
-	if(!any(I)) stop(paste("No points have mark i =", i))
-	if(!any(J)) stop(paste("No points have mark j =", j))
-	
-	result <- Kmulti(X, I, J, r, breaks)
-        attr(result, "ylab") <- substitute(Kcross(r), NULL)
+        I <- (marx == i)
+        if(!any(I))
+          stop(paste("No points have mark i =", i))
+
+        if(i == j) {
+          result <- Kest(X[I],
+                         r=r, breaks=breaks, correction=correction, ...)
+        } else {
+          J <- (marx == j)
+          if(!any(J))
+            stop(paste("No points have mark j =", j))
+          result <- Kmulti(X, I, J,
+                           r=r, breaks=breaks, correction=correction, ...)
+        }
+        attr(result, "ylab") <- substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j)))
         result
 }
 
@@ -76,8 +148,9 @@ function(X, i=1, r=NULL, breaks=NULL,
 	
 	if(!any(I)) stop(paste("No points have mark i =", i))
 	
-	result <- Kmulti(X, I, J, r, breaks)
-        attr(result, "ylab") <- substitute(Kdot(r), NULL)
+	result <- Kmulti(X, I, J,
+                         r=r, breaks=breaks, correction=correction, ...)
+        attr(result, "ylab") <- substitute(Kdot[i](r), list(i=paste(i)))
         result
 }
 

@@ -7,7 +7,7 @@
   \code{"fasp"}).
 }
 \usage{
-  \method{[}{fasp}(x, I, J, drop,\dots)
+  \method{[}{fasp}(x, I, J, drop=TRUE,\dots)
 }
 \arguments{
   \item{x}{
@@ -19,10 +19,21 @@
   \item{J}{
     any valid expression for a subset of the column indices of the array.
   }
-  \item{drop, \dots}{Ignored.}
+  \item{drop}{
+      Logical.
+      When the selected subset consists of only one cell of the array,
+      if \code{drop=FALSE} the result is still returned as a
+      \eqn{1 \times 1}{1 * 1} array of functions (class \code{"fasp"})
+      while if \code{drop=TRUE} it is returned as a
+      function (class \code{"fv"}).
+  }
+  \item{\dots}{Ignored.}
 } 
 \value{
   A function array (of class \code{"fasp"}).
+  Exceptionally, if the array has only one cell, and
+  if \code{drop=TRUE}, then the result is a function value table
+  (class \code{"fv"}).
 }
 \details{
   A function array can be regarded as a matrix whose entries
