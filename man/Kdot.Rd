@@ -10,7 +10,7 @@
   within a given distance of a point of type \eqn{i}.
 }
 \usage{
-Kdot(X, i=1, r=NULL, breaks=NULL, correction, ...)
+Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -75,10 +75,13 @@ Kdot(X, i=1, r=NULL, breaks=NULL, correction, ...)
   \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
   It must be a marked point pattern, and the mark vector
   \code{X$marks} must be a factor.
+
   The argument \code{i} will be interpreted as a
   level of the factor \code{X$marks}. (Warning: this means that
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
+  not the number 3).
+  If \code{i} is missing, it defaults to the first
+  level of the marks factor, \code{i = levels(X$marks)[1]}.
   
   The ``type \eqn{i} to any type'' multitype \eqn{K} function 
   of a stationary multitype point process \eqn{X} is defined so that

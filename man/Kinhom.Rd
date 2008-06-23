@@ -147,9 +147,12 @@
 
   If \code{lambda} is a pixel image, the domain of the image should
   cover the entire window of the point pattern. If it does not (which
-  may occur through discretisation error), then the point pattern
-  will be trimmed to a smaller region where the
-  lambda values are defined. (A warning will be issued in this case.)
+  may occur near the boundary because of discretisation error),
+  then the missing pixel values 
+  will be obtained by applying a Gaussian blur to \code{lambda} using
+  \code{\link{blur}}, then looking up the values of this blurred image
+  for the missing locations. 
+  (A warning will be issued in this case.)
 
   If \code{lambda} is omitted, then it will be estimated using
   a `leave-one-out' kernel smoother, as described in Baddeley, Moller

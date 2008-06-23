@@ -10,7 +10,7 @@
   within a given distance of a point of type \eqn{i}.
 }
 \usage{
-Kcross(X, i=1, j=2, r=NULL, breaks=NULL, correction, \dots)
+Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -78,10 +78,13 @@ Kcross(X, i=1, j=2, r=NULL, breaks=NULL, correction, \dots)
   \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
   It must be a marked point pattern, and the mark vector
   \code{X$marks} must be a factor.
+
   The arguments \code{i} and \code{j} will be interpreted as
   levels of the factor \code{X$marks}. (Warning: this means that
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
   not the number 3). 
+  If \code{i} and \code{j} are missing, they default to the first
+  and second level of the marks factor, respectively.
   
   The ``cross-type'' (type \eqn{i} to type \eqn{j})
   \eqn{K} function 

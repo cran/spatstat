@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.11 $     $Date: 2008/04/02 12:16:16 $
+  $Revision: 1.14 $     $Date: 2008/06/23 01:47:55 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -65,7 +65,7 @@ void paircount(nxy, x, y, rmaxi, count)
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 <= r2max) 
+	if(d2 <= r2max)
 	  ++counted;
       }
     }
@@ -79,7 +79,7 @@ void paircount(nxy, x, y, rmaxi, count)
 	dx = x[j] - xi;
 	dy = y[j] - yi;
 	d2= dx * dx + dy * dy;
-	if(d2 <= r2max) 
+	if(d2<= r2max)
 	  ++counted;
       }
     }
@@ -249,7 +249,7 @@ void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count)
       dx = x2[j] - x1i;
       dy = y2[j] - y1i;
       d2= dx * dx + dy * dy;
-      if(d2 <= r2max) 
+      if(d2 <= r2max)
 	++counted;
     }
   }

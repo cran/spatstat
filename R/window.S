@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.77 $	$Date: 2008/03/14 16:12:13 $
+#	$Revision: 4.79 $	$Date: 2008/06/15 15:03:00 $
 #
 #
 #	A window may be either
@@ -690,8 +690,16 @@ inside.owin <- function(x, y, w) {
            # any points identified as belonging to the boundary get score 1
            total[on.bdry] <- 1
            # check for sanity now..
-           if(any(total * (1-total) != 0)) 
-             stop("internal error: some total scores are neither 0 nor 1")
+           uhoh <- (total * (1-total) != 0)
+           if(any(uhoh)) {
+             nuh <- sum(uhoh)
+             warning(paste("point-in-polygon test had difficulty with",
+                           nuh,
+                           ngettext(nuh, "point", "points"),
+                           "(total score not 0 or 1)"),
+                     call.=FALSE)
+             total[uhoh] <- 0
+           }
            return(ok & (total != 0))
          },
          mask = {

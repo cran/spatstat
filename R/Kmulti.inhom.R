@@ -1,13 +1,13 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.11 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 1.14 $	$Date: 2008/06/18 21:06:51 $
 #
 #
 # ------------------------------------------------------------------------
 
 "Kcross.inhom" <- 
-function(X, i=1, j=2, lambdaI, lambdaJ, ...,
+function(X, i, j, lambdaI, lambdaJ, ...,
          r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
          lambdaIJ=NULL)
@@ -16,6 +16,10 @@ function(X, i=1, j=2, lambdaI, lambdaJ, ...,
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
 	marx <- marks(X)
+        if(missing(i))
+          i <- levels(marx)[1]
+        if(missing(j))
+          j <- levels(marx)[2]
 	I <- (marx == i)
 	J <- (marx == j)
         Iname <- paste("points with mark i =", i)
@@ -23,12 +27,13 @@ function(X, i=1, j=2, lambdaI, lambdaJ, ...,
 	result <- Kmulti.inhom(X, I, J, lambdaI, lambdaJ, ...,
                                r=r,breaks=breaks,correction=correction,
                                lambdaIJ=lambdaIJ, Iname=Iname, Jname=Jname)
-        attr(result, "ylab") <- substitute(Kcross.inhom(r), NULL)
+        attr(result, "ylab") <-
+          substitute(Kcross.inhom[i,j](r), list(i=paste(i), j=paste(j)))
         result
 }
 
 "Kdot.inhom" <- 
-function(X, i=1, lambdaI, lambdadot, ...,
+function(X, i, lambdaI, lambdadot, ...,
          r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
          lambdaIdot=NULL)
@@ -36,8 +41,12 @@ function(X, i=1, lambdaI, lambdadot, ...,
 	verifyclass(X, "ppp")
 	if(!is.marked(X))
 		stop("point pattern has no marks (no component 'marks')")
-	
-	I <- (marks(X) == i)
+
+	marx <- marks(X)
+        if(missing(i))
+          i <- levels(marx)[1]
+
+	I <- (marx == i)
 	J <- rep(TRUE, X$n)  # i.e. all points
         Iname <- paste("points with mark i =", i)
         Jname <- paste("points")
@@ -46,7 +55,8 @@ function(X, i=1, lambdaI, lambdadot, ...,
                                r=r,breaks=breaks,correction=correction,
                          lambdaIJ=lambdaIdot,
                          Iname=Iname, Jname=Jname)
-        attr(result, "ylab") <- substitute(Kdot.inhom(r), NULL)
+        attr(result, "ylab") <-
+          substitute(Kdot.inhom[i](r), list(i=paste(i)))
         result
 }
 
@@ -118,10 +128,7 @@ function(X, I, J, lambdaI, lambdaJ,
         # intensity data
         if(is.im(lambdaI)) {
           # look up intensity values
-          lambdaI <- lambdaI[X[I]]
-          if(any(is.na(lambdaI)))
-            stop(paste("Pixel value of", sQuote("lambdaI"),
-                       "was NA at some points of X"))
+          lambdaI <- safelookup(lambdaI, X[I])
         } else if(is.vector(lambdaI) && is.numeric(lambdaI)) {
           # validate intensity vector
           if(length(lambdaI) != nI)
@@ -132,10 +139,7 @@ function(X, I, J, lambdaI, lambdaJ,
 
         if(is.im(lambdaJ)) {
           # look up intensity values
-          lambdaJ <- lambdaJ[X[J]]
-          if(any(is.na(lambdaJ)))
-            stop(paste("Pixel value of", sQuote("lambdaJ"),
-                       "was NA at some points of X"))
+          lambdaJ <- safelookup(lambdaJ, X[J])
         } else if(is.vector(lambdaJ) && is.numeric(lambdaJ)) {
           # validate intensity vector
           if(length(lambdaJ) != nJ)

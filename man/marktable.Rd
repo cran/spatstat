@@ -52,8 +52,8 @@
 }
 \examples{
   data(amacrine)
-  marktable(amacrine, 0.1)
-  marktable(amacrine, 0.1, exclude=FALSE)
+  head(marktable(amacrine, 0.1))
+  head(marktable(amacrine, 0.1, exclude=FALSE))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
