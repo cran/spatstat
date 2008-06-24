@@ -77,6 +77,7 @@ bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
 bei                     Tropical rain forest trees
 betacells               Beta Ganglion Cells in Cat Retina
+blur                    Apply Gaussian Blur to a Pixel Image
 bounding.box            Bounding Box of a Window or Point Pattern
 bounding.box.xy         Convex Hull of Points
 bramblecanes            Hutchings' Bramble Canes data

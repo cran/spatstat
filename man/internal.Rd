@@ -63,6 +63,7 @@
 \alias{fasp}
 \alias{findmarktype}
 \alias{fii}
+\alias{fillNA}
 \alias{FormatFaspFormulae}
 \alias{fv}
 \alias{fvnames}
@@ -236,6 +237,7 @@
 \alias{rmhstart.list}
 \alias{rmpoint.I.allim}
 \alias{rpoint.multi}
+\alias{safelookup}
 \alias{second.moment.calc}
 \alias{shiftxy}              
 \alias{spatstat.rawdata.location}
@@ -349,6 +351,7 @@ exactPdt(w)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 fii(interaction, coefs, Vnames)
+fillNA(x, value)
 FormatFaspFormulae(f, argname)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
 fvnames(X, a)
@@ -535,6 +538,7 @@ rmpoint.I.allim(n, f, types)
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
+safelookup(Z, X, factor, warn)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL)
 shiftxy(X, vec = c(0, 0))

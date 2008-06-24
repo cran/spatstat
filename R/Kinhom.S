@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.31 $	$Date: 2008/01/31 17:47:54 $
+#	$Revision: 1.32 $	$Date: 2008/06/18 21:07:01 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -106,26 +106,10 @@
       # Leave-one-out in numerator
       SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
       peakvalue <- 1/(2 * pi * SqrtDetSigma)
-      lambda <- raw[X, drop=FALSE] - rep(peakvalue, npoints)
-      # Check for pixellation effects
-      if(any(is.na(lambda))) {
-        # make windows compatible
-        Wnew <- intersect.owin(X$window, as.owin(raw))
-        Wnew <- rescue.rectangle(Wnew)
-        # trim X 
-        X <- X[Wnew]
-        warning(paste("Data trimmed to the boundary of the pixel image",
-                      "of the kernel-smoothed density;",
-                      npoints-X$n, "out of", npoints, "data points deleted"))
-        # recompute
-        W <- Wnew
-        npoints <- X$n
-        area <- area.owin(W)
-        lambda <- raw[X, drop=FALSE] - rep(peakvalue, npoints)
-      }
+      lambda <- safelookup(raw, X) - rep(peakvalue, npoints)
       # Edge correction if invoked
       if(!is.null(edg)) 
-        lambda <- lambda/edg[X, drop=FALSE]
+        lambda <- lambda/safelookup(edg, X)
       # validate
       if(length(lambda) != npoints) 
         stop(paste("Internal error: incorrect number of lambda values",
@@ -147,23 +131,7 @@
         stop(paste("Some values of", sQuote("lambda"), "are NA or NaN"))
     } else if(is.im(lambda)) {
       # lambda image provided
-      lambdavalues <- lambda[X, drop=FALSE]
-      if(any(is.na(lambdavalues))) {
-        # recompute, making windows compatible
-        Wnew <- intersect.owin(X$window, as.owin(lambda))
-        Wnew <- rescue.rectangle(Wnew)
-        X <- X[Wnew]
-        warning(paste("data window trimmed to fit the available image data;",
-                      npoints-X$n, "out of", npoints, "data points deleted"))
-        npoints <- X$n
-        W <- Wnew
-        area <- area.owin(W)
-        lambdavalues <- lambda[X, drop=FALSE]
-        if(any(is.na(lambda)))
-          stop(paste("Internal error: some values of", sQuote("lambda"),
-                     "are NA or NaN even after trimming the data"))
-      }
-      lambda <- lambdavalues
+      lambda <- safelookup(lambda, X)
     } else
     stop(paste(sQuote("lambda"),
                "should be a vector or a pixel image"))

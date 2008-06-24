@@ -11,7 +11,7 @@
   adjusted for spatially varying intensity.
 }
 \usage{
-Kdot.inhom(X, i=1, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
+Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
          lambdaIdot=NULL)
 }
@@ -114,11 +114,13 @@ Kdot.inhom(X, i=1, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
   It must be a marked point pattern, and the mark vector
   \code{X$marks} must be a factor.
 
-  The arguments \code{i} and \code{j} will be interpreted as
-  levels of the factor \code{X$marks}. (Warning: this means that
+  The argument \code{i} will be interpreted as a
+  level of the factor \code{X$marks}. (Warning: this means that
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
-
+  not the number 3).
+  If \code{i} is missing, it defaults to the first
+  level of the marks factor, \code{i = levels(X$marks)[1]}.
+  
   The argument \code{lambdaI} supplies the values
   of the intensity of the sub-process of points of type \code{i}.
   It may be either

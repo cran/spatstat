@@ -1,7 +1,7 @@
 #
 #    rescue.rectangle.R
 # 
-#    $Revision: 1.5 $   $Date: 2007/10/24 09:41:15 $
+#    $Revision: 1.6 $   $Date: 2008/06/15 14:53:11 $
 #
 rescue.rectangle <- function(W) {
   verifyclass(W, "owin")
@@ -16,7 +16,8 @@ rescue.rectangle <- function(W) {
       # could be a rectangle
       veryunique <- function(z) {
         uz <- sort(unique(z))
-        close <- (diff(uz) < 2 * .Machine$double.eps)
+        epsilon <- 2 * .Machine$double.eps * diff(range(uz))
+        close <- (diff(uz) <= epsilon)
         uz <- uz[c(TRUE, !close)]
         return(uz)
       }

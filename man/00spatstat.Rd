@@ -304,6 +304,7 @@ The Spatstat Package
 	\code{\link{cut.im}} \tab	convert numeric image to factor image \cr
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
 	\code{\link{interp.im}} \tab interpolate a pixel image\cr
+	\code{\link{blur}} \tab apply Gaussian blur to image\cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr

@@ -11,7 +11,7 @@
   adjusted for spatially varying intensity.
 }
 \usage{
-Kcross.inhom(X, i=1, j=2, lambdaI, lambdaJ, \dots,  r=NULL, breaks=NULL,
+Kcross.inhom(X, i, j, lambdaI, lambdaJ, \dots,  r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
 lambdaIJ=NULL)
 }
@@ -122,6 +122,8 @@ lambdaIJ=NULL)
   levels of the factor \code{X$marks}. (Warning: this means that
   an integer value \code{i=3} will be interpreted as the 3rd smallest level,
   not the number 3). 
+  If \code{i} and \code{j} are missing, they default to the first
+  and second level of the marks factor, respectively.
 
   The argument \code{lambdaI} supplies the values
   of the intensity of the sub-process of points of type \code{i}.

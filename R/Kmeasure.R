@@ -78,8 +78,12 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
     stop(paste("Unknown choice: what = ", sQuote(what),
                "; available options are:",
                paste(sQuote(choices), collapse=", ")))
+  if(is.ppp(x)) 
   # convert list of points to mass distribution 
-  X <- pixellate(x, ...)
+    X <- pixellate(x, ...)
+  else if(is.im(x))
+    X <- x
+  else stop("internal error: unrecognised format for x")
   Y <- X$v
   xw <- X$xrange
   yw <- X$yrange
