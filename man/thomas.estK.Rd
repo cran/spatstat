@@ -94,6 +94,9 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
   method of minimum contrast; see \code{\link{mincontrast}}.
 
   The Thomas process can be simulated, using \code{\link{rThomas}}.
+
+  Homogeneous or inhomogeneous Thomas process models can also
+  be fitted using the function \code{\link{kppm}}.
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing
@@ -121,6 +124,7 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{kppm}},
   \code{\link{lgcp.estK}},
   \code{\link{matclust.estK}},
   \code{\link{mincontrast}},

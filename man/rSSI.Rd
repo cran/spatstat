@@ -45,7 +45,7 @@
 \seealso{
 \code{\link{rpoispp}},
 \code{\link{rMaternI}},
-\code{\link{rMaternII}}
+\code{\link{rMaternII}}.
 }
 \examples{
  pp <- rSSI(0.05, 200)

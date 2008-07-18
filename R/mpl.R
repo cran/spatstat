@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.64 $	$Date: 2008/04/17 17:08:21 $
+#	$Revision: 5.65 $	$Date: 2008/06/30 05:03:48 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -80,14 +80,15 @@ function(Q,
 # Interpret the call
 want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
-
+trend.formula <- if(want.trend) trend else (~1)
+  
 # Stamp with spatstat version number
   
 spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2008/04/17 17:08:21 $")
+                    date="$Date: 2008/06/30 05:03:48 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -117,6 +118,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
                covariates  = NULL,
 	       correction  = correction,
                rbord       = rbord,
+               terms       = terms(trend.formula),
                version     = the.version,
                problems    = list())
   class(rslt) <- "ppm"
@@ -219,6 +221,7 @@ rslt <- list(
              covariates   = covariates,
              correction   = correction,
              rbord        = rbord,
+             terms        = terms(trend.formula),
              version      = the.version,
              problems     = problems)
 class(rslt) <- "ppm"

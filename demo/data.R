@@ -88,5 +88,8 @@ plot(spruces, maxsize=min(nndist(spruces))/2)
 data(swedishpines)
 plot(swedishpines)
 
+data(urkiola)
+plot(urkiola, cex=0.5)
+
 par(oldpar)
 options(oldoptions)

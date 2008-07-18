@@ -18,7 +18,9 @@ lurking(object, covariate, type="eem",
   \item{object}{
     The fitted point process model (an object of class \code{"ppm"})
     for which diagnostics should be produced. This object
-    is usually obtained from \code{\link{ppm}}.
+    is usually obtained from \code{\link{ppm}}. Alternatively,
+    \code{object} may be a point pattern (object of class
+    \code{"ppp"}).
   }
   \item{covariate}{
     The covariate against which residuals should be plotted.

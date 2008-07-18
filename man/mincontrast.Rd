@@ -2,7 +2,7 @@
 \alias{mincontrast}
 \title{Method of Minimum Contrast}
 \description{
-  A general algorithm for fitting theoretical point process models
+  A general low-level algorithm for fitting theoretical point process models
   to point pattern data by the Method of Minimum Contrast.
 }
 \usage{
@@ -137,6 +137,7 @@ mincontrast(observed, theoretical, startpar, \dots,
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{kppm}},
   \code{\link{lgcp.estK}},
   \code{\link{matclust.estK}},
   \code{\link{thomas.estK}},

@@ -134,6 +134,8 @@ dummy.ppm               Extract Dummy Points Used to Fit a Point
 duplicated.ppp          Determine Duplicated Points in a Spatial Point
                         Pattern
 eem                     Exponential Energy Marks
+effectfun               Compute Fitted Effect of a Spatial Covariate in
+                        a Point Process Model
 endpoints.psp           Endpoints of Line Segment Pattern
 envelope                Simulation envelopes of summary function
 erode.owin              Erode a Window
@@ -154,6 +156,7 @@ fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
 fv.object               Data Frames of Function Values
 ganglia                 Beta Ganglion Cells in Cat Retina, Old Version
+gpc2owin                Convert Polygonal Region into Different Format
 gridcentres             Rectangular grid of points
 gridweights             Compute Quadrature Weights Based on Grid Counts
 hamster                 Aherne's hamster tumour data
@@ -186,6 +189,7 @@ japanesepines           Japanese Pines Point Pattern
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
 km.rs                   Kaplan-Meier and Reduced Sample Estimator using
                         Histograms
+kppm                    Fit cluster point process model
 kstest.ppm              Kolmogorov-Smirnov Test for Point Process Model
 lansing                 Lansing Woods Point Pattern
 lengths.psp             Lengths of Line Segments
@@ -242,6 +246,7 @@ plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.hyperframe         Plot Entries in a Hyperframe
 plot.im                 Plot a Pixel Image
+plot.kppm               Plot a fitted cluster point process
 plot.listof             Plot a List of Things
 plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
@@ -258,6 +263,8 @@ ppp.object              Class of Point Patterns
 pppdist                 Distance Between Two Point Patterns
 pppmatching             Create a Point Matching
 pppmatching.object      Class of Point Matchings
+predict.kppm            Prediction from a Fitted Cluster Point Process
+                        Model
 predict.ppm             Prediction from a Fitted Point Process Model
 print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
@@ -357,6 +364,7 @@ shift.ppp               Apply Vector Translation To Point Pattern
 shift.psp               Apply Vector Translation To Line Segment
                         Pattern
 simdat                  Simulated Point Pattern
+simulate.kppm           Simulate a fitted cluster point process model.
 smooth.ppp              Spatial smoothing of observations at irregular
                         points
 solutionset             Evaluate Logical Expression Involving Pixel
@@ -394,7 +402,9 @@ unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern
 unitname                Name for Unit of Length
 unmark                  Remove Marks from a Marked Point Pattern
+update.kppm             Update a Fitted Cluster Point Process Model
 update.ppm              Update a Fitted Point Process Model
+urkiola                 Urkiola Woods Point Pattern
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point
                         Process Model
 vertices                Vertices of a Window

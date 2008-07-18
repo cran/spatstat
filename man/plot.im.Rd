@@ -6,7 +6,8 @@
   Plot a pixel image.
 }
 \usage{
-  \method{plot}{im}(x, \dots, ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024)
+  \method{plot}{im}(x, \dots, col=NULL,
+                   ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) 
 }
 \arguments{
   \item{x}{
@@ -15,6 +16,10 @@
   }
   \item{\dots}{
     Extra arguments passed to \code{\link{image}} to control the plot.
+  }
+  \item{col}{
+    Colours representing the pixel values. A character vector representing
+    colours.
   }
   \item{ribbon}{
     Logical flag indicating whether to display a ribbon
@@ -53,13 +58,45 @@
   different numerical values, evenly spaced between the minimum and
   maximum pixel values in the image \code{x}, rendered according to
   the chosen colour map.
-  
-  The colour map for the image is controlled by the arguments
-  \code{zlim} (determining the range of pixel values to be mapped)
-  and \code{col} (determining the colour values for this range).
-  These arguments are passed to the function \code{\link{image.default}}.
-  For examples of the use of these arguments, see \code{\link{image.default}}.
 
+  The pixel values are displayed using the colours given in the
+  argument \code{col}. The mapping of pixel values to colours is
+  determined as follows.
+  \describe{
+    \item{logical-valued images:}{the values \code{FALSE} and
+      \code{TRUE} are mapped to the colours \code{col[1]} and
+      \code{col[2]} respectively.
+      The vector \code{col} should have length 2.
+    }
+    \item{factor-valued images:}{the factor levels \code{levels(x)}
+      are mapped to the entries of \code{col} in order. The vector
+      \code{col} should have the same length as \code{levels(x)}.
+    }
+    \item{numeric-valued images:}{
+      By default, the range of pixel values in \code{x}
+      is divided into \code{n = length(col)}
+      equal subintervals, which are mapped to the colours in \code{col}.
+      (If \code{col} was not specified, it defaults to a vector of 255
+      colours.)
+      
+      Alternatively if the argument \code{zlim} is given, it should be
+      a vector of length 2 specifying an interval of real numbers.
+      This interval will be used instead of the range of pixel
+      values. The interval from \code{zlim[1]} to \code{zlim[2]} will be
+      mapped to the colours in \code{col}. This facility enables the user to
+      plot several images using a consistent colour map.
+
+      Alternatively if the argument \code{breaks} is given, then this specifies
+      the endpoints of the subintervals that are mapped to each colour.
+      This is incompatible with \code{zlim}.
+      
+      The arguments \code{col} and \code{zlim} or \code{breaks}
+      are passed to the function \code{\link{image.default}}.
+      For examples of the use of these arguments,
+      see \code{\link{image.default}}.
+    }
+  }
+  
   Other graphical parameters controlling the display of both the pixel image
   and the ribbon are passed through the \code{...} arguments
   directly to the function \code{\link{image.default}}.
@@ -69,7 +106,9 @@
 \seealso{
   \code{\link{im.object}},
   \code{\link{contour.im}},
-  \code{\link{persp.im}}
+  \code{\link{persp.im}},
+  \code{\link{image.default}},
+  \code{\link{spatstat.options}}
 }
 \examples{
    # an image

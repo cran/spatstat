@@ -30,7 +30,7 @@ plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with li
 
 Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
 plot(Z, main="Pixel image")
-plot(Z, main="Pixel image", col=topo.colors(256))
+plot(Z, main="Pixel image", col=heat.colors(256))
 
 fanfare("II. Basic operations")
 X <- swedishpines

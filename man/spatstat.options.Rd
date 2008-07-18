@@ -69,6 +69,12 @@
       giving the number of dummy points in the \code{x} and \code{y}
       directions. 
     }
+    \item{image.colfun}{
+      Function determining the default colour map for
+      \code{\link{plot.im}}. When called with one integer argument
+      \code{n}, this function should return a character vector of length
+      \code{n} specifying \code{n} different colours.
+    }
   }
   
   If no arguments are given, 

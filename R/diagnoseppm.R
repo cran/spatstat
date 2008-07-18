@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.21 $ $Date: 2008/03/05 11:11:45 $
+# $Revision: 1.22 $ $Date: 2008/07/09 21:06:25 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -26,7 +26,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   if(type == "eem") {
     residu <- if(!is.null(rv)) rv else eem(object, check=FALSE) 
     X <- data.ppm(object)
-    Y <- X %mark% residu
+    Y <- X %mark% as.numeric(residu)
   } else {
     residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type, check=FALSE)
     Y <- U %mark% as.numeric(residu)

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.20 $	$Date: 2008/04/21 17:49:06 $
+#	$Revision: 2.21 $	$Date: 2008/06/30 05:33:55 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -172,6 +172,26 @@ logLik.ppm <- function(object, ...) {
   class(ll) <- "logLik"
   return(ll)
 }
+
+# more methods
+
+formula.ppm <- function(x, ...) {
+  f <- x$trend
+  if(is.null(f)) f <- ~1
+  return(f)
+}
+
+terms.ppm <- function(x, ...) {
+  terms(formula(x), ...)
+}
+
+extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
+{
+    edf <- length(coef(fit))
+    aic <- AIC(fit)
+    c(edf, aic + (k - 2) * edf)
+}
+
 
 #
 # method for model.matrix

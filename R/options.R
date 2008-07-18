@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.8 $   $Date: 2008/04/02 13:32:43 $
+#    $Revision: 1.10 $   $Date: 2008/07/01 23:22:21 $
 #
 #
 ".Spatstat.Options" <-
@@ -13,6 +13,7 @@
        par.persp=list(),
        par.points=list(),
        par.contour=list(),
+       image.colfun=function(n){topo.colors(n)},
        ndummy.min=25,
        dupC = FALSE
        )

@@ -5,8 +5,8 @@
 \title{Extract or Replace Subset of Point Pattern}
 \description{
   Extract or replace a subset of a point pattern.
-  Extraction has the effect of thinning the 
-  points and/or or trimming the window.
+  Extraction of a subset has the effect of thinning the 
+  points and/or trimming the window.
 }
 \usage{
   \method{[}{ppp}(x, i, j, drop, ...)
@@ -54,8 +54,8 @@
   either a numeric vector
   of positive indices (identifying the points to be retained),
   a numeric vector of negative indices (identifying the points
-  to be deleted) or a logical vector of length equal to the number
-  of points in the point pattern \code{x}. In the latter case,
+  to be deleted) or a logical vector of length equal to the number of
+  points in the point pattern \code{x}. In the latter case, 
   the points \code{(x$x[i], x$y[i])} for which 
   \code{subset[i]=TRUE} will be retained, and the others
   will be deleted.
@@ -64,7 +64,9 @@
   if \code{i} is an object of class 
   \code{"owin"} specifying a window of observation.
   The points of \code{x} lying inside the new
-  \code{window} will be retained.
+  \code{window} will be retained. Alternatively \code{i} may be a
+  pixel image (object of class \code{"im"}) with logical values;
+  the pixels with the value \code{TRUE} will be interpreted as a window.
  
   The function \code{[<-.ppp} is a method for \code{\link{[<-}} for the
   class \code{"ppp"}. It replaces the designated

@@ -6,10 +6,11 @@
   and returns a pixel image.
 }
 \usage{
-  eval.im(expr)
+  eval.im(expr, envir)
 }
 \arguments{
   \item{expr}{An expression.}
+  \item{envir}{Optional. The environment in which to evaluate the expression.}
 }
 \details{
   This function is a wrapper to make it easier to perform

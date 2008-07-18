@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.9 $   $Date: 2008/06/23 02:03:10 $
+#   $Revision: 1.11 $   $Date: 2008/07/02 00:51:35 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -11,22 +11,7 @@ closepairs <- function(X, rmax) {
   verifyclass(X, "ppp")
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   npoints <- X$n
-  # sort points by increasing x coordinate
-  oo <- order(X$x)
-  Xsort <- X[oo]
-  # First obtain an OVERESTIMATE of the number of pairs
-  # (to work around gcc bug #323)
-  rmaxplus <- 1.25 * rmax
-  DUP <- spatstat.options("dupC")
-  nsize <- .C("paircount",
-            nxy=as.integer(npoints),
-            x=as.double(Xsort$x),
-            y=as.double(Xsort$y),
-            rmaxi=as.double(rmaxplus),
-            count=as.integer(integer(1)),
-            DUP=DUP,
-            PACKAGE="spatstat")$count
-  if(nsize <= 0)
+  if(npoints == 0)
     return(list(i=integer(0),
                 j=integer(0),
                 xi=numeric(0),
@@ -36,9 +21,14 @@ closepairs <- function(X, rmax) {
                 dx=numeric(0),
                 dy=numeric(0),
                 d=numeric(0)))
-  # add a bit more
-  nsize <- ceiling(1.1 * nsize) + 2 * npoints
-  # now extract points
+  # sort points by increasing x coordinate
+  oo <- order(X$x)
+  Xsort <- X[oo]
+  # First make an OVERESTIMATE of the number of pairs
+  nsize <- ceiling(4 * pi * (npoints^2) * (rmax^2)/area.owin(X$window))
+  nsize <- max(1024, nsize)
+  # Now hopefully extract pairs
+  DUP <- spatstat.options("dupC")
   z <-
     .C("closepairs",
        nxy=as.integer(npoints),
@@ -59,9 +49,57 @@ closepairs <- function(X, rmax) {
        status=as.integer(integer(1)),
        DUP=DUP,
        PACKAGE="spatstat")
-  if(z$status != 0)
-    stop(paste("Internal error: C routine complains that insufficient space was allocated:", nsize))
 
+  if(z$status != 0) {
+    # Guess was insufficient
+    # Obtain an OVERCOUNT of the number of pairs
+    # (to work around gcc bug #323)
+    rmaxplus <- 1.25 * rmax
+    nsize <- .C("paircount",
+            nxy=as.integer(npoints),
+            x=as.double(Xsort$x),
+            y=as.double(Xsort$y),
+            rmaxi=as.double(rmaxplus),
+            count=as.integer(integer(1)),
+            DUP=DUP,
+            PACKAGE="spatstat")$count
+    if(nsize <= 0)
+      return(list(i=integer(0),
+                  j=integer(0),
+                  xi=numeric(0),
+                  yi=numeric(0),
+                  xj=numeric(0),
+                  yj=numeric(0),
+                  dx=numeric(0),
+                  dy=numeric(0),
+                  d=numeric(0)))
+    # add a bit more for safety
+    nsize <- ceiling(1.1 * nsize) + 2 * npoints
+    # now extract points
+    z <-
+      .C("closepairs",
+         nxy=as.integer(npoints),
+         x=as.double(Xsort$x),
+         y=as.double(Xsort$y),
+         r=as.double(rmax),
+         noutmax=as.integer(nsize), 
+         nout=as.integer(integer(1)),
+         iout=as.integer(integer(nsize)),
+         jout=as.integer(integer(nsize)), 
+         xiout=as.double(numeric(nsize)),
+         yiout=as.double(numeric(nsize)),
+         xjout=as.double(numeric(nsize)),
+         yjout=as.double(numeric(nsize)),
+         dxout=as.double(numeric(nsize)),
+         dyout=as.double(numeric(nsize)),
+         dout=as.double(numeric(nsize)),
+         status=as.integer(integer(1)),
+         DUP=DUP,
+         PACKAGE="spatstat")
+    if(z$status != 0)
+      stop(paste("Internal error: C routine complains that insufficient space was allocated:", nsize))
+  }
+  
   # trim vectors to the length indicated
   npairs <- z$nout
   if(npairs <= 0)
