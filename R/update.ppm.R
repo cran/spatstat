@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.24 $    $Date: 2007/07/24 14:44:15 $
+#  $Revision: 1.28 $    $Date: 2008/06/30 05:04:40 $
 #
 #
 #
@@ -11,6 +11,14 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
                                     envir=parent.frame()) {
   verifyclass(object, "ppm")
 
+  newformula <- function(old, change) {
+    if(is.null(old))
+      old <- (~1)
+    if(is.null(change))
+      change <- (~1)
+    update.formula(as.formula(old), as.formula(change))
+  }
+  
   # inspect model
   antique <- summary(object, quick="no prediction")$antiquated
   if(antique)
@@ -38,7 +46,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
     # reset the main arguments in the call using the internal data
     call$Q <- data.ppm(object)
     namobj <- names(call)
-    if("trend" %in% namobj) call$trend <- object$trend
+    if("trend" %in% namobj) call$trend <- newformula(call$trend, object$trend)
     if("interaction" %in% namobj) call$interaction <- object$interaction
     if("covariates" %in% namobj) call$covariates <- object$covariates
   }
@@ -81,10 +89,18 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
     }
     if(n<- sp.foundclass("interact", unnamedargs, "interaction", nama))
       call$interaction <- unnamedargs[[n]]
-    if(n<- sp.foundclass("formula", unnamedargs, "trend", nama))
-      call$trend <- unnamedargs[[n]]
     if(n<- sp.foundclasses(c("data.frame", "im"), unnamedargs, "covariates", nama))
       call$covariates <- unnamedargs[[n]]
+    if(n<- sp.foundclass("formula", unnamedargs, "trend", nama))
+      call$trend <- newformula(call$trend, unnamedargs[[n]])
+    else if(n <- sp.foundclass("character", unnamedargs, "trend", nama)) {
+      # string that might be interpreted as a formula
+      strg <- unnamedargs[[n]]
+      if(!is.na(charmatch("~", strg))) {
+        fo <- as.formula(strg)
+        call$trend <- newformula(call$trend, fo)
+      } 
+    }
   }
   
   # *************************************************************

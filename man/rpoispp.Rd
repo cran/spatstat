@@ -63,10 +63,30 @@
   then randomly deletes or retains each point, independently of other points,
   with retention probability
   \eqn{p(x,y) = \lambda(x,y)/\mbox{lmax}}{p(x,y) = lambda(x,y)/lmax}.
+
+  For \emph{marked} point patterns, use \code{\link{rmpoispp}}.
 }
 \seealso{
-\code{\link{ppp.object}},
-\code{\link{owin.object}}
+  \code{\link{rmpoispp}} for Poisson \emph{marked} point patterns,
+  \code{\link{runifpoint}} for a fixed number of independent
+  uniform random points;
+  \code{\link{rpoint}}, \code{\link{rmpoint}} for a fixed number of
+  independent random points with any distribution;
+  \code{\link{rMaternI}},
+  \code{\link{rMaternII}},
+  \code{\link{rSSI}},
+  \code{\link{rStrauss}},
+  \code{\link{rstrat}}
+  for random point processes with spatial inhibition
+  or regularity; 
+  \code{\link{rThomas}},
+  \code{\link{rGaussPoisson}},
+  \code{\link{rMatClust}},
+  \code{\link{rcell}}
+  for random point processes exhibiting clustering;
+  \code{\link{rmh.default}} for Gibbs processes.
+  See also \code{\link{ppp.object}},
+  \code{\link{owin.object}}.
 }
 \examples{
  # uniform Poisson process with intensity 100 in the unit square
@@ -88,7 +108,6 @@
  # pixel image
  Z <- as.im(function(x,y){100 * sqrt(x+y)}, unit.square())
  pp <- rpoispp(Z)
-
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

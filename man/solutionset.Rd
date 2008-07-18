@@ -8,11 +8,13 @@
   and assemble these pixels into a window.
 }
 \usage{
-  solutionset(\dots)
+  solutionset(\dots, envir)
 }
 \arguments{
   \item{\dots}{An expression in the \R language, involving one or more
     pixel images.}
+  \item{envir}{Optional. The environment in which to evaluate the
+    expression.}
 }
 \details{
   Given a logical expression involving one or more pixel images,

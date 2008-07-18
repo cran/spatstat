@@ -120,8 +120,10 @@
   \eqn{p(x,y,m) = \lambda(x,y,m)/\mbox{lmax}}{p(x,y,m) = lambda(x,y)/lmax}.
 }
 \seealso{
-\code{\link{ppp.object}},
-\code{\link{owin.object}}
+  \code{\link{rpoispp}} for unmarked Poisson point process;
+  \code{\link{rmpoint}} for a fixed number of random marked points;
+  \code{\link{ppp.object}},
+  \code{\link{owin.object}}.
 }
 \examples{
  # uniform bivariate Poisson process with total intensity 100 in unit square

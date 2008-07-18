@@ -49,7 +49,7 @@
   Poisson process on the infinite plane.
 
   This classical model can be fitted to data by the method of minimum contrast,
-  using \code{\link{matclust.estK}}.
+  using \code{\link{matclust.estK}} or \code{\link{kppm}}.
   
   The algorithm can also generate spatially inhomogeneous versions of
   the Mat\'ern cluster process:
@@ -72,15 +72,16 @@
   When the parents are homogeneous (\code{kappa} is a single number)
   and the offspring are inhomogeneous (\code{mu} is a
   function or pixel image), the model can be fitted to data
-  using \code{\link{matclust.estK}} applied to the inhomogeneous
-  \eqn{K} function.
+  using \code{\link{kppm}}, or using \code{\link{matclust.estK}}
+  applied to the inhomogeneous \eqn{K} function. 
 }
 \seealso{
   \code{\link{rpoispp}},
   \code{\link{rThomas}},
   \code{\link{rGaussPoisson}},
   \code{\link{rNeymanScott}},
-  \code{\link{matclust.estK}}.
+  \code{\link{matclust.estK}},
+  \code{\link{kppm}}.
 }
 \examples{
  # homogeneous

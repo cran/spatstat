@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.30 $   $Date: 2007/02/16 09:00:23 $
+#  $Revision: 1.38 $   $Date: 2008/07/16 16:59:59 $
 #
 #  Plotting code for pixel images
 #
@@ -12,7 +12,9 @@
 #
 ###########################################################################
 
-plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
+plot.im <- function(x, ...,
+                    col=NULL,
+                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
   verifyclass(x, "im")
   main <- deparse(substitute(x))
 
@@ -79,13 +81,25 @@ plot.im <- function(x, ..., ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
          stop(paste("Do not know how to plot image of type", sQuote(sumry$type)))
          )
 
-  if(!is.null(imagebreaks))
-    colourmap <- list(breaks=imagebreaks,
-                      col=heat.colors(length(imagebreaks) - 1))
-  else
-    colourmap <- NULL
-
-
+  # determine DEFAULT colour map
+  colfun <- spatstat.options("image.colfun")
+  if(!is.null(imagebreaks)) 
+    colourmap <- list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
+  else 
+    colourmap <- list(col=colfun(255))
+  # user-specified colour map
+  if(!is.null(col)) {
+    colourmap$col <- col
+    if(!is.null(colourmap$breaks)) {
+      # check consistency
+      if(length(col) != nvalues)
+        stop(paste("Length of argument", dQuote("col"),
+                   paren(paste(length(col))),
+                   "does not match the number of distinct values",
+                   paren(paste(nvalues))))
+    }
+  }
+  
   add <- resolve.defaults(list(...), list(add=FALSE))$add
 
   image.doit <- function(...) {

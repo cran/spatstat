@@ -114,6 +114,7 @@ is.multitype.ppp <- function(X, na.action="warn", ...) {
 function(X) {
   if(inherits(X, "ppp")) {
     X$marks <- NULL
+    X$markformat <- "none"
     return(X)
   } else if(inherits(X, "splitppp")) {
     Y <- lapply(X, unmark)
@@ -131,7 +132,7 @@ function(X) {
 
 findmarktype <- function(x) {
   if(is.null(x)) return("none")
-  if(is.vector(x)) return("vector")
+  if(is.vector(x) || is.factor(x)) return("vector")
   if(is.data.frame(x)) return("dataframe")
   if(inherits(x, "listof")) return("listof")
   stop("Internal error: unrecognised mark format")

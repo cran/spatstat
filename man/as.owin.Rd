@@ -5,6 +5,7 @@
 \alias{as.owin.ppm}
 \alias{as.owin.quad}
 \alias{as.owin.im}
+\alias{as.owin.gpc.poly}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
 \description{
@@ -18,6 +19,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
  \method{as.owin}{quad}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
+ \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
 \arguments{
@@ -55,8 +57,11 @@ in any of several formats, into an object of class \code{"owin"}.
     specifying the \eqn{x} and \eqn{y} dimensions of a rectangle
     as \code{(xmin, xmax) = (xl, xu)} and 
     \code{(ymin, ymax) = (yl, yu)}. This will accept objects of
-    class \code{spp} used in the Venables and Ripley \code{spatial}
+    class \code{spp} used in the Venables and Ripley \pkg{spatial}
     library.
+    \item
+    an object of class \code{"gpc.poly"} from the \pkg{gpclib} package,
+    representing a polygonal window.
     \item
     an object of class \code{"ppp"} representing a point pattern.
     In this case, the object's \code{window} structure will be
@@ -76,7 +81,7 @@ in any of several formats, into an object of class \code{"owin"}.
     an object of class \code{"ppm"} representing a fitted point process
     model. In this case, \code{as.owin} extracts the  original point
     pattern data to which the model was fitted, and returns the
-    observation window of this point pattern. 
+    observation window of this point pattern.
   }
   If the argument \code{W} is not in one of these formats
   and cannot be converted to a window, then an error will

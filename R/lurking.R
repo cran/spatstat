@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.19 $ $Date: 2008/03/05 13:01:48 $
+# $Revision: 1.22 $ $Date: 2008/07/16 17:29:26 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -13,6 +13,8 @@ lurking <- function(object, covariate, type="eem",
                     covname, oldstyle=FALSE,
                     check=TRUE, ..., splineargs=list()) {
   # validate
+  if(is.ppp(object))
+    object <- ppm(object, ~1, forcefit=TRUE)
   verifyclass(object, "ppm")
   # match type argument
   type <- pickoption("type", type,
@@ -92,7 +94,7 @@ lurking <- function(object, covariate, type="eem",
          quadpoints$n, ", number of quadrature points")
 
   # Quadrature points marked by covariate value
-  covq <- quadpoints %mark% covvalues
+  covq <- quadpoints %mark% as.numeric(covvalues)
 
   ################################################################
   # Residuals/marks attached to appropriate locations.
@@ -103,8 +105,8 @@ lurking <- function(object, covariate, type="eem",
     if(!is.null(rv)) rv
     else if(type=="eem") eem(object, check=check)
     else residuals.ppm(object, type=type, check=check)
-
-  res <- (if(type == "eem") datapoints else quadpoints) %mark% resvalues
+  
+  res <- (if(type == "eem") datapoints else quadpoints) %mark% as.numeric(resvalues)
 
   # ... and the same locations marked by the covariate
   covres <- if(type == "eem") covq[Z] else covq

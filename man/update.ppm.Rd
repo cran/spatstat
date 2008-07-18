@@ -68,7 +68,8 @@
     which will be interpreted as the named argument \code{Q};
     \item
     exactly one argument of class \code{"formula"}, which will be
-    interpreted as the named argument \code{trend};
+    interpreted as the named argument \code{trend} (or as specifying
+    a change to the trend formula);
     \item
     exactly one argument of class \code{"interact"}, which will be
     interpreted as the named argument \code{interaction};
@@ -77,6 +78,14 @@
     interpreted as the named argument \code{covariates}.
   }
 
+  The \code{trend} argument can be a formula that specifies a
+  \emph{change} to the current trend formula. For example, the
+  formula \code{~ . + Z} specifies that the additional covariate
+  \code{Z} will be added to the right hand side of the trend
+  formula in the existing \code{object}.
+
+  The argument \code{fixdummy=TRUE} ensures comparability of the
+  objects before and after updating.
   When \code{fixdummy=FALSE}, calling \code{update.ppm}
   is exactly the same as calling \code{ppm} with the updated
   arguments. However, the original and updated models
@@ -126,6 +135,11 @@
   # fit a nonstationary Poisson process
   fitP <- update(fit, trend=~x)
   fitP <- update(fit, ~x)
+
+  # change the trend formula: add another term to the trend
+  fitPxy <- update(fitP, ~ . + y)
+  # change the trend formula: remove the x variable
+  fitPy <- update(fitPxy, ~ . - x)
 
   # fit a stationary Strauss process
   fitS <- update(fit, interaction=Strauss(13))

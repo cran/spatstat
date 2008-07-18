@@ -1,6 +1,6 @@
 # levelset.R
 #
-#  $Revision: 1.2 $  $Date: 2006/04/06 14:20:30 $
+#  $Revision: 1.3 $  $Date: 2008/07/16 17:39:32 $
 #
 # level set of an image
 
@@ -22,8 +22,10 @@ levelset <- function(X, thresh, compare="<=") {
 
 # compute owin containing all pixels where image expression is TRUE
 
-solutionset <- function(...) {
-  A <- eval.im(...)
+solutionset <- function(..., envir) {
+  if(missing(envir))
+    envir <- parent.frame()
+  A <- eval.im(..., envir=envir)
   if(A$type != "logical")
     stop("Evaluating the expression did not yield a logical-valued image")
   W <- as.owin(eval.im(ifelse(A, 1, NA)))

@@ -60,11 +60,14 @@
 \alias{even.breaks.owin}
 \alias{exactdt}              
 \alias{exactPdt}
+\alias{extractAIC.ppm}
 \alias{fasp}
 \alias{findmarktype}
 \alias{fii}
 \alias{fillNA}
 \alias{FormatFaspFormulae}
+\alias{formula.ppm}
+\alias{formula.kppm}
 \alias{fv}
 \alias{fvnames}
 \alias{greatest.common.divisor}
@@ -180,6 +183,7 @@
 \alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.kppm}
 \alias{print.minconfit}
 \alias{print.plotppm}
 \alias{print.pppmatching}
@@ -254,6 +258,8 @@
 \alias{summary.pppmatching}
 \alias{summary.units}
 \alias{sympoly}
+\alias{terms.ppm}
+\alias{terms.kppm}
 \alias{termsinformula}
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
@@ -348,11 +354,14 @@ erode.mask(w,r)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(w)
+\method{extractAIC}{ppm}(fit, scale, k, \dots)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 fii(interaction, coefs, Vnames)
 fillNA(x, value)
 FormatFaspFormulae(f, argname)
+\method{formula}{ppm}(x, \dots)
+\method{formula}{kppm}(x, \dots)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
 fvnames(X, a)
 greatest.common.divisor(n,m)
@@ -478,6 +487,7 @@ primefactors(n, prmax)
 \method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
+\method{print}{kppm}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{pppmatching}(x, \dots)
@@ -556,6 +566,8 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{units}(object, \dots)
 sympoly(x, y, n)
+\method{terms}{ppm}(x, \dots)
+\method{terms}{kppm}(x, \dots)
 termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)

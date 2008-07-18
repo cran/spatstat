@@ -1,10 +1,8 @@
 \name{spatstat}
-\alias{spatstat}
 \alias{spatstat-package}
+\alias{spatstat}
 \docType{package}
-\title{
-The Spatstat Package
-}
+\title{The Spatstat Package}
 \description{
   This is a summary of the features of 
   \pkg{spatstat}, a package in \code{R}
@@ -37,12 +35,14 @@ The Spatstat Package
 
 }
 \section{Getting Started}{
-  Type \code{demo(spatstat)} for an overall demonstration 
-  of the package.
+  For a quick introduction to \pkg{spatstat}, see 
+  the paper by Baddeley and Turner (2005a).
+  For a complete 2-day course on using \code{spatstat}, see the workshop notes
+  by Baddeley (2008).
+  Both of these documents are available on the internet.
 
-  For a readable introduction to \pkg{spatstat}, see the paper by
-  Baddeley and Turner (2005a), available online.
-
+  Type \code{demo(spatstat)} for a demonstration 
+  of the package's capabilities.
   Type \code{demo(data)} to see all the datasets
   available in the package.
 }
@@ -55,9 +55,6 @@ The Spatstat Package
   For further information on any of these,
   type \code{help(name)} where \code{name} is the name of the function
   or dataset.
-
-  Type \code{demo(data)} to see all the datasets
-  installed with the package.
 }
 \section{CONTENTS:}{
   \tabular{ll}{
@@ -147,6 +144,8 @@ The Spatstat Package
       \bold{Standard point pattern datasets:}
       
       Remember to say \code{\link{data}(bramblecanes)} etc.
+      Type \code{demo(data)} to see all the datasets
+      installed with the package.
       
       \tabular{ll}{
 	\code{\link{amacrine}} \tab Austin Hughes' rabbit amacrine cells \cr
@@ -173,7 +172,8 @@ The Spatstat Package
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
-	\code{\link{swedishpines}} \tab Strand-Ripley swedish pines data
+	\code{\link{swedishpines}} \tab Strand-Ripley swedish pines data \cr
+	\code{\link{urkiola}} \tab Urkiola Woods data
       }
 
       \bold{To manipulate a point pattern:}
@@ -442,14 +442,27 @@ The Spatstat Package
 }
 
 \section{III. MODEL FITTING (CLUSTER MODELS)}{
-  Several kinds of clustered point process models can be fitted
-  using the Method of Minimum Contrast.
   
+  Cluster process models (with homogeneous or inhomogeneous intensity) 
+  can be fitted by the function \code{\link{kppm}}.
+  Its result is an object of class \code{"kppm"}.
+  The fitted model can be printed, plotted, predicted, simulated
+  and updated.
+
+  \tabular{ll}{
+    \code{\link{plot.kppm}} \tab  Plot the fitted model\cr
+    \code{\link{predict.kppm}} \tab Compute fitted intensity \cr
+    \code{\link{update.kppm}} \tab Update the model \cr
+    \code{\link{simulate.kppm}} \tab Generate simulated realisations
+  }
+  
+ Lower-level fitting functions include:
+
   \tabular{ll}{
     \code{\link{thomas.estK}} \tab fit the Thomas process model \cr
     \code{\link{matclust.estK}} \tab fit the Matern Cluster process model \cr
     \code{\link{lgcp.estK}} \tab fit a log-Gaussian Cox process model\cr
-    \code{\link{mincontrast}} \tab general algorithm for fitting models
+    \code{\link{mincontrast}} \tab low-level algorithm for fitting models
     \cr \tab by the method of minimum contrast 
   }
 
@@ -459,8 +472,8 @@ The Spatstat Package
 
 \section{IV. MODEL FITTING (GIBBS MODELS)}{
 
-  For a detailed explanation of how to fit models to point pattern data
-  using \pkg{spatstat}, see Baddeley and Turner (2005b).
+  For a detailed explanation of how to fit Gibbs models to point pattern data
+  using \pkg{spatstat}, see Baddeley and Turner (2005b) or Baddeley (2008).
   
   \bold{To fit a Gibbs point process model:}
 
@@ -475,16 +488,23 @@ The Spatstat Package
     \tab	and conditional intensity\cr
     \tab        of the fitted point process model \cr
     \code{\link{coef.ppm}} \tab Extract the fitted model coefficients\cr
+    \code{\link{formula.ppm}} \tab Extract the trend formula\cr
     \code{\link{fitted.ppm}} \tab Compute fitted conditional intensity at quadrature points \cr
+    \code{\link{residuals.ppm}} \tab Compute point process residuals at quadrature points \cr
     \code{\link{update.ppm}} \tab Update the fit \cr
     \code{\link{vcov.ppm}} \tab Variance-covariance matrix of estimates\cr
     \code{\link{rmh.ppm}} \tab Simulate from fitted model  \cr
     \code{\link{print.ppm}} \tab Print basic information about a fitted model\cr
     \code{\link{summary.ppm}} \tab Summarise a fitted model\cr
+    \code{\link{effectfun}} \tab Compute the fitted effect of one covariate\cr
+    \code{\link{logLik.ppm}} \tab log-likelihood or log-pseudolikelihood\cr
     \code{\link{anova.ppm}} \tab Analysis of deviance
   }
+  For model selection, you can also use 
+  the generic functions \code{\link{step}}, \code{\link{drop1}} 
+  and \code{\link{AIC}} on fitted point process models.
+  
   See \code{\link{spatstat.options}} to control plotting of fitted model.
-
   
   \bold{To specify a point process model:}
   
@@ -587,13 +607,20 @@ The Spatstat Package
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
   
-  The paper by Baddeley and Turner (2005a) describes the package.
+  The paper by Baddeley and Turner (2005a) is a brief overview of
+  the package. 
   Baddeley and Turner (2005b) is a more detailed explanation of
   how to fit point process models to data.
+  Baddeley (2008) is a complete set of notes from a 2-day workshop
+  on the use of \code{spatstat}.
 
   Type \code{citation("spatstat")} to get these references.
 }
 \references{
+  Baddeley, A. (2008) Analysing spatial point patterns in R.
+  Workshop notes. CSIRO online technical publication.
+  URL: \code{www.csiro.au/resources/pf16h.html}
+  
   Baddeley, A. and Turner, R. (2005a)
   Spatstat: an R package for analyzing spatial point patterns.
   \emph{Journal of Statistical Software} \bold{12}:6, 1--42.

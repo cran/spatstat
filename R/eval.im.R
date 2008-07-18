@@ -5,18 +5,19 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.14 $     $Date: 2007/11/11 13:32:37 $
+#     $Revision: 1.15 $     $Date: 2008/07/16 16:49:12 $
 #
 
-eval.im <- function(expr) {
+eval.im <- function(expr, envir) {
   e <- as.expression(substitute(expr))
   # get names of all variables in the expression
   varnames <- all.vars(e)
   if(length(varnames) == 0)
     stop("No variables in this expression")
   # get the values of the variables
-  pe <- sys.parent()
-  vars <- lapply(as.list(varnames), function(x, e) get(x, envir=e), e=pe)
+  if(missing(envir))
+    envir <- sys.parent()
+  vars <- lapply(as.list(varnames), function(x, e) get(x, envir=e), e=envir)
   names(vars) <- varnames
   # find out which are images
   ims <- unlist(lapply(vars, is.im))

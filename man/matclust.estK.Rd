@@ -107,7 +107,11 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   The remaining arguments \code{rmin,rmax,q,p} control the
   method of minimum contrast; see \code{\link{mincontrast}}.
 
-  The Matern Cluster process can be simulated, using \code{\link{rMatClust}}.
+  The Matern Cluster process can be simulated, using
+  \code{\link{rMatClust}}.
+
+  Homogeneous or inhomogeneous Matern Cluster models can also be
+  fitted using the function \code{\link{kppm}}.
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing
@@ -135,6 +139,7 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{kppm}},
   \code{\link{lgcp.estK}},
   \code{\link{thomas.estK}},
   \code{\link{mincontrast}},

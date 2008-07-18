@@ -17,7 +17,7 @@
     }
 }
 \value{
-  A window object.
+  A window (object of class \code{"owin"}).
 }
 \details{
   The function \code{intersect.owin} computes the intersection between the
@@ -28,9 +28,6 @@
   (either objects of class \code{"owin"}, or data that can be
   coerced to this class by \code{\link{as.owin}}).
 
-  At present the intersection or union of two polygons
-  is computed by discretising them, yielding a binary image mask.
-  
   If the intersection or union is empty, an error occurs.
 }
 
@@ -71,7 +68,8 @@
    p <- rotate(v, 0.2)
    intersect.owin(m, p)
    union.owin(m,p)
-#
+
+# two polygons
    A <- letterR
    B <- rotate(letterR, 0.2)
    plot(bounding.box(A,B), main="intersection")

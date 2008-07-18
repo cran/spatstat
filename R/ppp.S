@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.54 $	$Date: 2007/11/13 22:01:02 $
+#	$Revision: 4.57 $	$Date: 2008/07/16 17:04:07 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -268,30 +268,40 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
   function(x, i, j, drop, ...) {
 
         verifyclass(x, "ppp")
-        if(x$n == 0)
-          return(x)
-
+        
         if(missing(i) && missing(j))
           return(x)
 
-        marktype <- markformat(x)
-
         if(!missing(i)) {
-          style <- if(inherits(i, "owin")) "window" else "index"
-          switch(style,
-                 index={
-                   subset <- i
-                   x <- ppp(x$x[subset], x$y[subset], window=x$window,
-                            marks=marksubset(x$marks, subset, marktype),
-                            check=FALSE)
-                 },
-                 window={
-                    window <- i
-                    ok <- inside.owin(x$x, x$y, window)
-                    x <- ppp(x$x[ok], x$y[ok], window=window, #SIC
-                             marks=marksubset(x$marks, ok, marktype),
-                             check=FALSE)
-                  })
+          if(inherits(i, "owin")) {
+            # i is a window
+            window <- i
+            ok <- inside.owin(x$x, x$y, window)
+            x <- ppp(x$x[ok], x$y[ok], window=window, #SIC
+                     marks=marksubset(x$marks, ok),
+                     check=FALSE)
+          } else if(inherits(i, "im")) {
+            # i is an image
+            if(i$type != "logical")
+              stop(paste("Subset operator X[i] undefined",
+                         "when i is a pixel image",
+                         "unless it has logical values"), call.=FALSE)
+            # convert logical image to window
+            e <- sys.frame(sys.nframe())
+            window <- solutionset(i, e)
+            ok <- inside.owin(x$x, x$y, window)
+            x <- ppp(x$x[ok], x$y[ok], window=window, #SIC
+                     marks=marksubset(x$marks, ok),
+                     check=FALSE)
+          } else {
+            # assume i is a subset index
+            if(x$n == 0)
+              return(x)
+            subset <- i
+            x <- ppp(x$x[subset], x$y[subset], window=x$window,
+                     marks=marksubset(x$marks, subset),
+                     check=FALSE)
+          } 
         }
 
         if(!missing(j))
