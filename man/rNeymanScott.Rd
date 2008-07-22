@@ -64,6 +64,10 @@
   \code{x,y} which are vectors of equal length giving the absolute
   \eqn{x} and \code{y} coordinates of the points in the cluster.
 
+  If the return value of \code{rcluster} is a point pattern (object of
+  class \code{"ppp"}) then it may have marks. The result of
+  \code{rNeymanScott} will then be a marked point pattern.
+
   If required, the intermediate stages of the simulation (the parents
   and the individual clusters) can also be extracted from
   the return value of \code{rNeymanScott}
@@ -79,10 +83,18 @@
   \code{\link{rMatClust}}
 }
 \examples{
-  nclust <-  function(x0, y0, radius, n) {
-                           return(runifdisc(n, radius, centre=c(x0, y0)))
-                         }
-  X <- rNeymanScott(10, 0.2, nclust, radius=0.2, n=5)
+  nclust <- function(x0, y0, radius, n) {
+              return(runifdisc(n, radius, centre=c(x0, y0)))
+            }
+  plot(rNeymanScott(10, 0.2, nclust, radius=0.2, n=5))
+
+  nclust2 <- function(x0, y0, radius, n, types=c("a", "b")) {
+     X <- runifdisc(n, radius, centre=c(x0, y0))
+     M <- sample(types, n, replace=TRUE)
+     marks(X) <- M
+     return(X)
+  }
+  plot(rNeymanScott(15,0.1,nclust2, radius=0.1, n=5))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

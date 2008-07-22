@@ -3,6 +3,7 @@
 \alias{[<-.hyperframe}
 \alias{$.hyperframe}
 \alias{$<-.hyperframe}
+\alias{[.quad}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{affinexy}
@@ -294,6 +295,7 @@
 \method{[}{hyperframe}(x, i, j) <- value
 \method{$}{hyperframe}(x, name)
 \method{$}{hyperframe}(x, i) <- value
+\method{[}{quad}(x, ...)
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
@@ -368,7 +370,7 @@ fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
 fvnames(X, a)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
-getglmdata(object)
+getglmdata(object, drop=FALSE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)

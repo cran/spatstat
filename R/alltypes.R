@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.16 $   $Date: 2008/05/11 20:21:08 $
+#   $Revision: 1.18 $   $Date: 2008/07/29 03:16:17 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -46,20 +46,22 @@ alltypes <- function(X, fun="K", ...,
   estimator <- 
     if(is.function(fun))
       fun
-    else if(is.character(fun) && fun %in% c("F", "G", "J", "K")) {
+    else if(is.character(fun) && fun %in% c("F", "G", "J", "K", "pcf")) {
     # conventional abbreviations
       if(nmarks > 0) 
         switch(fun,
                F=Fest,
                G=Gcross,
                J=Jcross,
-               K=Kcross)
+               K=Kcross,
+               pcf=pcfcross)
       else
         switch(fun,
                F=Fest,
                G=Gest,
                J=Jest,
-               K=Kest)
+               K=Kest,
+               pcf=pcf)
     } else if(is.character(fun))
       get(fun, mode="function")
     else 
@@ -130,7 +132,7 @@ alltypes <- function(X, fun="K", ...,
   title <- paste(if(nmarks > 1) "array of " else NULL,
                  if(envelope) "envelopes of " else NULL,
                  fname,
-                 if(nmarks <= 2) " function " else " functions ",
+                 if(nmarks <= 1) " function " else " functions ",
                  "for ", dataname, ".", sep="")
   
   rslt <- fasp(fns, which=witch,

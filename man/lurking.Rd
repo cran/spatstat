@@ -12,7 +12,9 @@ lurking(object, covariate, type="eem",
                     plot.sd, plot.it=TRUE,
                     typename,
                     covname,
-                    oldstyle=FALSE, check=TRUE, \dots, splineargs=list())
+                    oldstyle=FALSE, check=TRUE,
+                    \dots,
+                    splineargs=list(spar=0.5))
 }
 \arguments{
   \item{object}{
@@ -197,6 +199,15 @@ lurking(object, covariate, type="eem",
   types of diagnostic plots. This function is more general in that it
   enables the user to plot the residuals against any chosen covariate
   that may have been present.
+
+  For advanced use, even the values of the residuals/weights
+  can be altered. If the argument \code{rv} is present,
+  the residuals will not be calculated from the fitted model
+  \code{object} but will instead be taken directly from \code{rv}.
+  The vector \code{rv} should be numeric, and its length should equal
+  the number of data points in the original point pattern
+  (if \code{type="eem"}) or the number of
+  quadrature points used to fit the model (otherwise).
 }
 \seealso{
  \code{\link{residuals.ppm}},

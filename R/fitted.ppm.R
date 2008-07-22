@@ -3,10 +3,10 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.5 $   $Date: 2006/10/09 02:25:33 $
+#   $Revision: 1.6 $   $Date: 2008/07/25 19:32:49 $
 # 
 
-fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, repair=TRUE) {
+fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, check=TRUE, repair=TRUE) {
   verifyclass(object, "ppm")
 
   if(check && damaged.ppm(object)) {
@@ -28,10 +28,10 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, r
   if(uniform) {
     fitcoef <- coef.ppm(object)
     lambda <- exp(fitcoef[[1]])
-    Q <- quad.ppm(object)
+    Q <- quad.ppm(object, drop=drop)
     lambda <- rep(lambda, n.quad(Q))
   } else {
-    glmdata <- object$internal$glmdata
+    glmdata <- getglmdata(object, drop=drop)
     glmfit  <- getglmfit(object)
     Vnames <- object$internal$Vnames
     interacting <- !is.null(Vnames)
@@ -55,7 +55,7 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, check=TRUE, r
     # Note: the `newdata' argument is necessary in order to obtain
     # predictions at all quadrature points. If it is omitted then
     # we would only get predictions at the quadrature points j
-    # where glmdata$SUBSET[j]=TRUE.
+    # where glmdata$SUBSET[j]=TRUE. Assuming drop=FALSE.
 
     if(interacting && type=="lambda") {
      # reinsert zeroes

@@ -173,6 +173,12 @@ plot(mkc, main="Mark correlation function")
 
 par(parsave)
 
+X <- runifpoint(42)
+plot(dirichlet(X))
+plot(X, add=TRUE)
+
+plot(delaunay(X))
+plot(X, add=TRUE)
 
 fanfare("IV. Model-fitting")
 
@@ -261,6 +267,19 @@ plot(cut(Z, 5))
 plot(eval.im(sqrt(Z) - 3))
 plot(solutionset(abs(Z - 6) <= 1))
 
+Z <- as.im(function(x,y) { 4 * x^2 + 3 * y }, letterR)
+plot(Z)
+plot(letterR, add=TRUE)
+
+plot(blur(Z, 0.3, bleed=TRUE))
+plot(letterR, add=TRUE)
+
+plot(blur(Z, 0.3, bleed=FALSE))
+plot(letterR, add=TRUE)
+          
+plot(blur(Z, 0.3, bleed=FALSE))
+plot(letterR, add=TRUE)
+          
 par(oldpar)
 
 showoffK <- function(Y, current, ..., fullpicture,rad) { 

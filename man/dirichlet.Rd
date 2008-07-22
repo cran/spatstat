@@ -2,29 +2,30 @@
 \alias{dirichlet}
 \title{Dirichlet Tessellation of Point Pattern}
 \description{
-  Computes the Dirichlet tessellation of a spatial point pattern.
+  Computes the Dirichlet/Voronoi tessellation of a spatial point pattern.
 }
 \usage{
-dirichlet(x)
+dirichlet(X)
 }
 \arguments{
-  \item{x}{Spatial point pattern (object of class \code{"ppp"}).}
+  \item{X}{Spatial point pattern (object of class \code{"ppp"}).}
 }
 \details{
-  In a spatial point pattern \code{x}, the Dirichlet tile associated
-  with a particular point \code{x[i]} is the region of space that is
-  closer to \code{x[i]} than to any other point in \code{x}. The
+  In a spatial point pattern \code{X}, the Dirichlet/Voronoi tile associated
+  with a particular point \code{X[i]} is the region of space that is
+  closer to \code{X[i]} than to any other point in \code{X}. The
   Dirichlet tiles divide the two-dimensional plane into disjoint
   regions, forming a tessellation.
 
   This function computes the Dirichlet tessellation (within the original
-  window of \code{x}).
+  window of \code{X}).
 }
 \value{
   A tessellation (object of class \code{"tess"}).
 }
 \seealso{
   \code{\link{tess}},
+  \code{\link{delaunay}},
   \code{\link{ppp}}
 }
 \examples{

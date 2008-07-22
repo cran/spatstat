@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.8 $  $Date: 2007/03/26 04:07:11 $
+#  $Revision: 1.9 $  $Date: 2008/07/25 19:48:53 $
 #
 
 
@@ -64,11 +64,11 @@ quadrat.testEngine <- function(X, nx, ny, xbreaks, ybreaks,
     testname <- paste("Chi-squared test of fitted model",
                       sQuote(fitname),
                       "using quadrat counts")
-    Q <- quad.ppm(fit)
+    Q <- quad.ppm(fit, drop=TRUE)
     xx <- x.quad(Q)
     yy <- y.quad(Q)
     ww <- w.quad(Q)
-    lambda <- fitted(fit)
+    lambda <- fitted(fit, drop=TRUE)
     masses <- lambda * ww
     fitmeans <- quadrat.countEngine(xx, yy, xbreaks, ybreaks, weights=masses)
     df <- length(fitmeans) - length(coef(fit))

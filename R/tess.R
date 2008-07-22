@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.2 $ $Date: 2008/07/22 22:47:45 $
+#   $Revision: 1.3 $ $Date: 2008/07/25 23:09:11 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   isrect <- !is.null(xgrid) && !is.null(ygrid)
@@ -177,13 +177,3 @@ tiles <- function(x) {
   class(out) <- c("listof", class(out))
   return(out)
 }
-
-dirichlet <- function(x) {
-  w <- x$window
-  dd <- deldir(x$x, x$y, rw=c(w$xrange,w$yrange))
-  pp <- lapply(tile.list(dd), function(z) { owin(poly=z[c("x","y")]) })
-  if(w$type != "rectangle")
-    pp <- lapply(pp, intersect.owin, B=w)
-  tess(tiles=pp)
-}
-

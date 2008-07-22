@@ -122,7 +122,7 @@
   fit <- ppm(cells, ~1, Strauss(0.07))
   mod1 <- rmhmodel(fit)
 
-  fit2 <- ppm(cells, ~1, Geyer(0.07, 2))
+  fit2 <- ppm(cells, ~x, Geyer(0.07, 2))
   mod2 <- rmhmodel(fit2)
 
  # Then rmh(mod1), etc

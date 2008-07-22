@@ -8,8 +8,8 @@
   compute residuals.
 }
 \usage{
-  \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE,
-                fittedvalues=fitted.ppm(object, check=check))
+  \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE, drop=FALSE,
+                fittedvalues=fitted.ppm(object, check=check, drop=drop))
 }
 \arguments{
   \item{object}{
@@ -31,6 +31,11 @@
     has been restored from a dump file, or has otherwise lost track of
     the environment where it was originally computed, set
     \code{check=TRUE}. 
+  }
+  \item{drop}{
+    Logical value determining whether to delete quadrature points
+    that were not used to fit the model. See \code{\link{quad.ppm}} for
+    explanation. 
   }
   \item{fittedvalues}{
     Vector of fitted values for the conditional intensity at 

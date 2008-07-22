@@ -3,7 +3,7 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.22 $  $Date: 2008/04/21 17:12:10 $
+#  $Revision: 1.24 $  $Date: 2008/07/25 21:25:24 $
 #
 
 vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
@@ -37,8 +37,6 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
       stop(paste("Sorry, vcov.ppm is not implemented for non-Poisson models",
                  "fitted using maximum pseudolikelihood"))
 
-    fi <- fitted(object, type="trend", check=FALSE)
-    wt <- quad.ppm(object)$w
     gf <- getglmfit(object)
     # we need a glm or gam
     if(is.null(gf)) {
@@ -64,8 +62,11 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
              },
              silent={})
     }
+    # compute related stuff
+    fi <- fitted(object, type="trend", check=FALSE, drop=TRUE)
+    wt <- quad.ppm(object, drop=TRUE)$w
     # extract model matrix
-    mom <- model.matrix(object)  #SIC
+    mom <- model.matrix(object, keepNA=FALSE) 
     # compute Fisher information if not known
     if(is.null(fisher)) {
       fisher <- 0

@@ -54,7 +54,22 @@
   as required.
 }
 \details{
-  The pair correlation function of a stationary point process is
+  The pair correlation function \eqn{g(r)} 
+  is a summary of the dependence between points in a spatial point
+  process. The best intuitive interpretation is the following: the probability
+  \eqn{p(r)} of finding two points at locations \eqn{x} and \eqn{y}
+  separated by a distance \eqn{r} is equal to
+  \deqn{
+    p(r) = \lambda^2 g(r) \,{\rm d}x \, {\rm d}y
+  }{
+    p(r) = lambda^2 * g(r) dx dy
+  }
+  where \eqn{\lambda}{lambda} is the intensity of the point process.
+  For a completely random (uniform Poisson) process,
+  \eqn{p(r) = \lambda^2}{p(r) = lambda^2} so \eqn{g(r) = 1}.
+
+  Formally, the pair correlation function of a stationary point process
+  is defined by 
   \deqn{
     g(r) = \frac{K'(r)}{2\pi r}
   }{
@@ -63,7 +78,9 @@
   where \eqn{K'(r)} is the derivative of \eqn{K(r)}, the
   reduced second moment function (aka ``Ripley's \eqn{K} function'')
   of the point process. See \code{\link{Kest}} for information
-  about \eqn{K(r)}. For a stationary Poisson process, the
+  about \eqn{K(r)}.
+
+  For a stationary Poisson process, the
   pair correlation function is identically equal to 1. Values
   \eqn{g(r) < 1} suggest inhibition between points;
   values greater than 1 suggest clustering.

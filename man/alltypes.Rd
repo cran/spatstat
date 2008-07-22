@@ -3,7 +3,7 @@
 \title{Calculate Summary Statistic for All Types in a Multitype Point Pattern}
 \description{
   Given a marked point pattern, this computes the estimates of
-  a selected summary function (\eqn{F},\eqn{G}, \eqn{J} or \eqn{K})
+  a selected summary function (\eqn{F},\eqn{G}, \eqn{J}, \eqn{K} etc)
   of the pattern, for all possible combinations of marks,
   and returns these functions in an array.
 }
@@ -19,8 +19,8 @@
 
   \item{fun}{The summary function. Either an \R function,
     or a character string indicating the summary function
-    required.  Options are
-    \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"},
+    required.  Options for strings are
+    \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"}, \code{"pcf"},
     \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"},
     \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}.
   }
@@ -90,6 +90,10 @@
   to \code{X} using each possible value of the arguments \code{i,j},
   together with the optional arguments \code{\dots}.
   
+  If \code{fun} is \code{"pcf"} the routine calculates
+  the cross-type pair correlation function \code{\link{pcfcross}}
+  between each pair of types.
+
   If \code{fun} is 
   \code{"Gdot"}, \code{"Jdot"} or \code{"Kdot"},
   the routine calculates, for each type \eqn{i},
@@ -206,6 +210,9 @@
    }
    plot(alltypes(swedishpines,"K"))
    plot(alltypes(swedishpines,"F"))
+
+   data(amacrine)
+   plot(alltypes(amacrine, "pcf"), ylim=c(0,1.3))
 
    # A setting where you might REALLY want to use dataname:
    \dontrun{
