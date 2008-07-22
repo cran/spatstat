@@ -5,8 +5,8 @@
   Plots a list of things
 }
 \usage{
-  \method{plot}{listof}(x, \dots, main, arrange=TRUE, nrows=NULL,
-ncols=NULL, mar.panel=c(2,1,1,2))
+  \method{plot}{listof}(x, \dots, main, arrange=TRUE,
+   nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel=c(2,1,1,2))
 }
 \arguments{
   \item{x}{
@@ -30,6 +30,10 @@ ncols=NULL, mar.panel=c(2,1,1,2))
     Optional. The number of rows/columns in the plot layout
     (assuming \code{arrange=TRUE}).
     You can specify either or both of these numbers.
+  }
+  \item{main.panel}{
+    Optional. A character string, or a vector of character strings,
+    giving the headings for each of the objects.
   }
   \item{mar.panel}{
     Value of the graphics parameter \code{mar} controlling the size

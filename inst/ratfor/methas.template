@@ -1,4 +1,4 @@
- ## $Id: methas.template,v 1.4 2008/04/21 18:07:05 adrian Exp adrian $
+ ## $Id: methas.template,v 1.5 2008/07/21 23:40:05 adrian Exp adrian $
 
 #include "cif.h"
 #include "death.h"
@@ -6,7 +6,12 @@
 subroutine MHNAME(par,period,xprop,yprop,mprop,ntypes,
                   iseed,nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
 implicit double precision(a-h,o-z)
-dimension par(1), iseed(3)
+#if (NMBR == 8 | NMBR == 11)
+	dimension par(2)
+#else
+	dimension par(1)
+#endif          
+dimension iseed(3)
 dimension x(1), y(1), marks(1), period(2)
 dimension xprop(1), yprop(1), mprop(1)
 integer aux(1)
@@ -21,6 +26,10 @@ zero   = 0.d0
 m1     = -1
 verb   = !(nverb==0)
 qnodds = (one - q)/q
+
+#if (NMBR == 8 | NMBR == 11)
+          ndisc = par(2)
+#endif          
 
    ## Trivial assigments to placate the compiler
 dummyi = mprop(1) + ntypes + marks(1)
@@ -141,8 +150,8 @@ while(irep <= nrep) {
                }
         }
 	if(itype > 0) {
-#if (NMBR == 8)
-	  call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
+#if (NMBR == 8 | NMBR == 11)
+	  call updaux(itype,x,y,u,v,npts,ix,par,period,ndisc,aux)
 #endif          
 		if(itype==1) {      ## Birth
 			ix    = npts

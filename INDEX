@@ -44,6 +44,7 @@ Softcore                The Soft Core Point Process Model
 Strauss                 The Strauss Point Process Model
 StraussHard             The Strauss / Hard Core Point Process Model
 [.splitppp              Extract or Replace Sub-Patterns
+[.tess                  Extract or Replace Subset of Tessellation
 [<-.im                  Reset Values in Subset of Image
 [<-.listof              Extract or Replace Subset of a List of Things
 affine                  Apply Affine Transformation
@@ -81,6 +82,8 @@ blur                    Apply Gaussian Blur to a Pixel Image
 bounding.box            Bounding Box of a Window or Point Pattern
 bounding.box.xy         Convex Hull of Points
 bramblecanes            Hutchings' Bramble Canes data
+by.ppp                  Apply a Function to a Point Pattern Broken Down
+                        by Factor
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
 chorley                 Chorley-Ribble Cancer Data
@@ -107,8 +110,7 @@ crossdist.psp           Pairwise distances between two different line
                         segment patterns
 crossing.psp            Crossing Points of Two Line Segment Patterns
 cut.im                  Convert Pixel Image from Numeric to Factor
-cut.ppp                 Convert Point Pattern Marks from Numeric to
-                        Factor
+cut.ppp                 Classify Points in a Point Pattern
 data.ppm                Extract Original Data from a Fitted Point
                         Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
@@ -120,6 +122,7 @@ density.splitppp        Kernel Smoothed Intensity of Split Point
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window
 dilate.owin             Dilate a Window
+dirichlet               Dirichlet Tessellation of Point Pattern
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
 disc                    Circular Window
@@ -255,6 +258,7 @@ plot.ppp                plot a Spatial Point Pattern
 plot.psp                plot a Spatial Line Segment Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 plot.splitppp           Plot a List of Point Patterns
+plot.tess               Plot a tessellation
 ponderosa               Ponderosa Pine Tree Point Pattern
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
@@ -394,8 +398,10 @@ summary.quad            Summarizing a Quadrature Scheme
 summary.splitppp        Summary of a Split Point Pattern
 superimpose             Superimpose Several Point Patterns
 swedishpines            Swedish Pines Point Pattern
+tess                    Create a Tessellation
 thomas.estK             Fit the Thomas Point Process by Minimum
                         Contrast
+tiles                   Extract List of Tiles in a Tessellation
 trim.rectangle          Cut margins from rectangle
 union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point

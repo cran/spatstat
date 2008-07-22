@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "methas.template"
- ## $Id: methas.template,v 1.4 2008/04/21 18:07:05 adrian Exp adrian $
+ ## $Id: methas.template,v 1.5 2008/07/21 23:40:05 adrian Exp adrian $
 
 # 1 "cif.h" 1
   ##
@@ -15,7 +15,12 @@
 subroutine mh4(par,period,xprop,yprop,mprop,ntypes,
                   iseed,nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
 implicit double precision(a-h,o-z)
-dimension par(1), iseed(3)
+
+
+
+ dimension par(1)
+
+dimension iseed(3)
 dimension x(1), y(1), marks(1), period(2)
 dimension xprop(1), yprop(1), mprop(1)
 integer aux(1)
@@ -30,6 +35,10 @@ zero = 0.d0
 m1 = -1
 verb = !(nverb==0)
 qnodds = (one - q)/q
+
+
+
+
 
    ## Trivial assigments to placate the compiler
 dummyi = mprop(1) + ntypes + marks(1)
@@ -130,7 +139,7 @@ while(irep <= nrep) {
                      call arand(iseed(1),iseed(2),iseed(3),sp)
                      if(sp*cvd < cvn) itype = 3 ## Shift occurs.
                    }
-# 141 "methas.template"
+# 150 "methas.template"
                }
         }
  if(itype > 0) {

@@ -63,8 +63,6 @@
   interaction is yielded by the function \code{BadGey()}.
   See the examples below.
 
-  Simulation of this point process model is not yet implemented.
-  
   The argument \code{r} specifies the vector of interaction distances.
   The entries of \code{r} must be strictly increasing, positive numbers.
 

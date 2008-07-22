@@ -69,6 +69,18 @@
 
 \section{I. CREATING AND MANIPULATING DATA}{
 
+  \bold{Types of spatial data:}
+
+  The main types of spatial data supported by \pkg{spatstat} are:
+
+  \tabular{ll}{
+    \code{\link{ppp}} \tab point pattern \cr
+    \code{\link{owin}} \tab window (spatial region) \cr
+    \code{\link{im}} \tab pixel image \cr
+    \code{\link{psp}} \tab line segment pattern \cr
+    \code{\link{tess}} \tab tessellation
+  }
+
   \bold{To create a point pattern:}
   
   \tabular{ll}{
@@ -188,8 +200,10 @@
 	\tab  \code{pp[, subwindow]} \cr
 	\code{\link{superimpose}} \tab
 	superimpose any number of point patterns  \cr
+	\code{\link{by.ppp}} \tab
+	apply a function to sub-patterns of a point pattern \cr
 	\code{\link{cut.ppp}} \tab
-	discretise the marks in a point pattern \cr
+	classify the points in a point pattern \cr
 	\code{\link{unmark}} \tab
 	remove marks  \cr
 	\code{\link{setmarks}} \tab
@@ -341,7 +355,18 @@
       two line segment patterns 
     }
 
-  }
+    \bold{Tessellations}
+
+    An object of class \code{"tess"} represents a tessellation.
+
+    \tabular{ll}{
+      \code{\link{tess}} \tab create a tessellation \cr
+      \code{\link{plot.tess}} \tab plot a tessellation \cr
+      \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
+      \code{\link{[.tess}} \tab extract a subset of a tessellation \cr
+      \code{\link{[<-.tess}} \tab change a subset of a tessellation
+    }
+}
   
 \section{II. EXPLORATORY DATA ANALYSIS}{
 

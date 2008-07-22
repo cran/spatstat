@@ -52,6 +52,7 @@
     \item{\code{'lookup'}}{General isotropic pairwise interaction process,
       with the interaction function specified via a ``lookup table''.}
     \item{\code{'areaint'}}{Area-interaction process.}
+    \item{\code{'badgey'}}{Baddeley-Geyer (hybrid Geyer) process.}
   }
 
   The argument \code{par} supplies parameter values appropriate to
@@ -63,10 +64,22 @@
       intensity, the scaled interaction parameter and the
       interaction radius.  
     }
+    \item{badgey:}{
+      (Baddeley-Geyer process.)
+      A \bold{name} list with components
+      \code{beta} (the ``base'' intensity), \code{gamma} (a vector
+      of non-negative interaction parameters), \code{r} (a vector
+      of interaction radii, of the same length as \code{gamma},
+      in \emph{increasing} order), and \code{sat} (the saturation
+      parameter(s); this may be a scalar, or a vector of the same
+      length as \code{gamma} and \code{r}; all values should be at
+      least 1).  Note that because of the presence of ``saturation''
+      the \code{gamma} values are permitted to be larger than 1.
+    }
     \item{strauss:}{
       (Strauss process.) A \bold{named} vector with components
       \code{beta,gamma,r} which are respectively the ``base''
-      intensity, the pair-wise interaction parameter and the
+      intensity, the pairwise interaction parameter and the
       interaction radius.  Note that \code{gamma} must be less than
       or equal to 1.
       (Note that there is also an algorithm for perfect simulation
@@ -326,21 +339,9 @@
 
 \section{Warnings in Respect of ``lookup''}{
 
-The syntax of \code{rmh.default} in respect of the \code{lookup} cif
-has \emph{changed} from the previous release of \pkg{spatstat}
-(versions 1.4-7 to 1.5-1).
-Read the \emph{Details} carefully. In particular it is now required
-that the first entry of the \code{r} component of \code{par}
-be \emph{strictly positive}.  (This is the opposite of what was
-required in the previous release, which was that this first entry
-had to be 0.)
-
-It is also now required that the entries of \code{r} be
-sorted into ascending order.  (In the previous release it
-was assumed that the entries of \code{r} and \code{h} were
-in corresponding order and the two vectors were sorted
-commensurately.  It was decided that this is dangerous sand
-unnecessary.)
+For the \code{lookup} cif, 
+the entries of the \code{r} component of \code{par}
+must be \emph{strictly positive} and sorted into ascending order.
 
 Note that if you specify the \code{lookup} pairwise interaction
 function via \code{\link{stepfun}()} the arguments \code{x}
@@ -389,6 +390,11 @@ otherwise an error is given.
    # Area-interaction process:
    mod42 <- rmhmodel(cif="areaint",par=c(beta=2,eta=1.6,r=0.7),
                  w=c(0,10,0,10))
+
+   # Baddeley-Geyer process:
+   mod99 <- rmhmodel(cif="badgey",par=list(beta=0.3,
+                     gamma=c(0.2,1.8,2.4),r=c(0.035,0.07,0.14),sat=5),
+                     w=unit.square())
 
    # Multitype Strauss:
    beta <- c(0.027,0.008)

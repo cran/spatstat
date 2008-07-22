@@ -1,16 +1,28 @@
 #
 plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
                                          nrows=NULL, ncols=NULL,
+                                         main.panel=NULL,
                                          mar.panel=c(2,1,1,2)) {
   xname <- deparse(substitute(x))
+  n <- length(x)
 
   if(is.null(names(x)))
-    names(x) <- paste("Component_", seq(length(x)), sep="")
+    names(x) <- paste("Component_", 1:n, sep="")
 
+  if(is.null(main.panel))
+    main.panel <- names(x)
+  else {
+    stopifnot(is.character(main.panel))
+    nmp <- length(main.panel)
+    if(nmp == 1)
+      main.panel <- rep(main.panel, n)
+    else if(nmp != n)
+      stop("Incorrect length for main.panel")
+  }
+  
   if(!arrange) {
-    lapply(names(x),
-           function(l, x, ...){plot(x[[l]], main=l, ...)},
-           x=x, ...) 
+    for(i in 1:n) 
+      plot(x[[i]], main=main.panel[i], ...)
     return(invisible(NULL))
   }
 
@@ -22,7 +34,6 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   nlines <- if(!is.character(main)) 1 else length(unlist(strsplit(main, "\n")))
   # determine arrangement of plots
   # arrange like mfrow(nrows, ncols) plus a banner at the top
-  n <- length(x)
   if(is.null(nrows) && is.null(ncols)) {
     nrows <- as.integer(floor(sqrt(n)))
     ncols <- as.integer(ceiling(n/nrows))
@@ -56,9 +67,8 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   # plot panels
   npa <- par(mar=mar.panel)
   if(!banner) opa <- npa
-  lapply(names(x),
-         function(l, x, ...){plot(x[[l]], main=l, ...)},
-         x=x, ...)
+  for(i in 1:n) 
+    plot(x[[i]], main=main.panel[i], ...)
   # revert
   layout(1)
   par(opa)

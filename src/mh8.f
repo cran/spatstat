@@ -2,7 +2,8 @@ C Output from Public domain Ratfor, version 1.0
       subroutine mh8(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mre
      *p,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
       implicit double precision(a-h,o-z)
-      dimension par(1), iseed(3)
+      dimension par(2)
+      dimension iseed(3)
       dimension x(1), y(1), marks(1), period(2)
       dimension xprop(1), yprop(1), mprop(1)
       integer aux(1)
@@ -14,6 +15,7 @@ C Output from Public domain Ratfor, version 1.0
       m1 = -1
       verb = .not.(nverb.eq.0)
       qnodds = (one - q)/q
+      ndisc = par(2)
       dummyi = mprop(1) + ntypes + marks(1)
       dummyl = fixall
       dummyd = aux(1)
@@ -69,7 +71,7 @@ C Output from Public domain Ratfor, version 1.0
       endif
       endif
       if(itype .gt. 0)then
-      call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
+      call updaux(itype,x,y,u,v,npts,ix,par,period,ndisc,aux)
       if(itype.eq.1)then
       ix = npts
       x(ix) = u

@@ -53,5 +53,10 @@
 #define MHNAME mh10
 #define CIF(u,v,mark,ix,x,y,marks,npts,ntypes,par,period,cifval,aux) \
 	 areaint(u,v,ix,x,y,npts,par,period,cifval)
+
+#elif (NMBR == 11) 
+#define MHNAME mh11
+#define CIF(u,v,mark,ix,x,y,marks,npts,ntypes,par,period,cifval,aux) \
+	 badgey(u,v,ix,x,y,npts,par,period,cifval,ndisc,aux)
 #endif
 

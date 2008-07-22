@@ -1,25 +1,27 @@
-# $Id: initaux.r,v 1.4 2006/10/19 10:22:21 adrian Exp adrian $
-subroutine initaux(nmbr,par,period,x,y,npts,aux)
+subroutine initaux(nmbr,par,period,x,y,npts,ndisc,aux)
 implicit double precision(a-h,o-z)
-dimension x(1), y(1), par(3), period(2)
-# Dimensioning par(3) is just a trick to keep g77 from bitching;
-# par(1) is really adequate.
-integer aux(1)
+dimension x(1), y(1), par(1), period(2)
+integer aux(ndisc,1)
 logical per
 
-if(nmbr != 8) return
+if(nmbr != 8 & nmbr != 11) return
+per   = period(1) > 0.d0
 
-zero = 0.d0
-per  = period(1) > zero
-r2   = par(3)  # Was squared already, `back in R'.
-
-do i = 1, npts {
-	aux(i) = 0
-	do j = 1,npts {
+do i=1,npts {
+	do k=1,ndisc {
+		aux(k,i) = 0
+	}
+	do j=1,npts {
 		if(j==i) next
 		if(per) call dist2(x(i),y(i),x(j),y(j),period,d2)
 		else d2 = (x(i)-x(j))**2 + (y(i)-y(j))**2
-		if(d2 < r2) aux(i) = aux(i) + 1
+		do k = ndisc,1,-1 {
+			r2 = par(3*k+1)
+			if(d2 < r2) {
+				aux(k,i) = aux(k,i) + 1
+			}
+			else break
+		}
 	}
 }
 

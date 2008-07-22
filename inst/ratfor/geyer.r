@@ -1,11 +1,11 @@
-# $Id: geyer.r,v 1.3 2006/10/19 10:22:21 adrian Exp adrian $
+# $Id: geyer.r,v 1.4 2008/07/21 23:40:05 adrian Exp adrian $
 subroutine geyer(u,v,ix,x,y,npts,par,period,cifval,aux)
 #
 # Conditional intensity function for a Geyer process.
 #
 
 implicit double precision(a-h,o-z)
-dimension par(4), x(1), y(1), period(2)
+dimension par(5), x(1), y(1), period(2)
 integer aux(1)
 logical per, newpt
 
@@ -15,9 +15,10 @@ one  = 1.d0
 per  = period(1) > zero
 
 beta  = par(1)
-gamma = par(2)
-r2    = par(3) # This is the ***squared*** radius; avoids needing square root.
-s     = par(4)
+# ndisc = par(2) = 1
+gamma = par(3)
+r2    = par(4) # This is the ***squared*** radius; avoids needing square root.
+s     = par(5)
 
 if(npts==0) {
 	cifval = beta
@@ -37,39 +38,52 @@ if(ix > 0) {
 	newpt = d2 > eps
 }
 else newpt = .true.
-
-if(newpt) c1 = zero
-else      c1 = dble(aux(ix))
-
-c2 = zero
-
-do j = 1,npts {
-	if(j == ix) next
-	if(ix > 0) {
-		if(per) call dist2(x(ix),y(ix),x(j),y(j),period,d2)
-		else d2 = (x(ix)-x(j))**2 + (y(ix)-y(j))**2
-		if(d2 < r2) a1 = one
-		else a1 = zero
-	}
-	else a1 = zero
-	if(newpt) {
+w = zero
+if(newpt) {
+	tee = zero
+	do j = 1,npts {
+		if(j == ix) next
 		if(per) call dist2(u,v,x(j),y(j),period,d2)
 		else d2 = (u-x(j))**2 + (v-y(j))**2
-		if(d2 < r2) a2 = one
-		else a2 = zero
-		c1 = c1 + a2
+		if(d2 < r2) {
+			tee = tee + one
+			a = aux(j)
+			if(ix > 0) { # Adjust
+				if(per) call dist2(x(ix),y(ix),x(j),y(j),period,dd2)
+				else dd2 = (x(ix)-x(j))**2 + (y(ix)-y(j))**2
+				if(dd2 < r2) a = a - one
+			}
+			b = a + one
+			if(a < s & s < b) {
+				w = w + s - a
+			}
+			else if(s >= b) w = w + one
+		}
 	}
-	else a2 = a1
-	a0 = dble(aux(j))
-	c2 = c2 + min(s,a0-a1+a2) - min(s,a0-a1)
-}
+} else {
+	tee = aux(ix)
+	do j = 1,npts {
+                if(j == ix) next
+                if(per) call dist2(u,v,x(j),y(j),period,d2)
+                else d2 = (u-x(j))**2 + (v-y(j))**2
+                if(d2 < r2) {
+                        a = aux(j) - 1
+                        b = a + one
+                        if(a < s & s < b) {
+                                w = w + s - a
+                        }
+                        else if(s >= b) w = w + one
+                }
+	}
 
+}
+w = w + min(tee,s)
 count = min(s,c1) + c2
 if(gamma < eps ) {
-	if(count > zero) cifval = zero
+	if(w > zero) cifval = zero
 	else cifval = beta
 }
-else cifval = beta*exp(log(gamma)*count)
+else cifval = beta*exp(log(gamma)*w)
 
 return
 end

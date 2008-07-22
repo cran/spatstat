@@ -32,6 +32,9 @@ Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
 plot(Z, main="Pixel image")
 plot(Z, main="Pixel image", col=heat.colors(256))
 
+X <- runifpoint(42)
+plot(dirichlet(X), main="Tessellation")
+
 fanfare("II. Basic operations")
 X <- swedishpines
 subset <- 1:20
@@ -47,6 +50,18 @@ plot(S, add=TRUE, col="red")
 data(lansing)
 plot(lansing, "Lansing Woods data")
 plot(split(lansing), main="split operation: split(X)")
+
+data(longleaf)
+plot(longleaf, main="Longleaf Pines data")
+plot(cut(longleaf, breaks=3),
+     main=c("cut by marks", "cut(longleaf, breaks=3)"))
+
+X <- runifpoint(100)
+Z <- dirichlet(runifpoint(16))
+plot(Z, main="cut by tessellation")
+plot(cut(X, Z), add=TRUE)
+
+plot(split(X, Z), main="split by tessellation")
 
 plot(a, main="Self-crossing points")
 plot(selfcrossing.psp(a), add=TRUE, col="red")
@@ -164,9 +179,11 @@ fanfare("IV. Model-fitting")
 data(redwood)
 parsave <- par(mfrow=c(1,2))
 plot(redwood)
-fitT <- thomas.estK(redwood, c(kappa=10,sigma2=0.1))
-par(pty="s")
+fitT <- kppm(redwood, ~1, clusters="Thomas")
+oop <- par(pty="s")
 plot(fitT, main=c("Thomas model","fit by minimum contrast"))
+par(parsave)
+plot(simulate(fitT)[[1]], main="simulation from fitted Thomas model")
 
 plot(swedishpines)
 fit <- ppm(swedishpines, ~1, Strauss(r=7))
