@@ -1,24 +1,29 @@
 \name{cut.ppp}
 \alias{cut.ppp}
-\title{Convert Point Pattern Marks from Numeric to Factor}
+\title{Classify Points in a Point Pattern}
 \description{
-  Transform the marks of a marked point pattern
-  from numeric values into a factor.
+  Classifies the points in a point pattern into distinct types
+  according to the numerical marks in the pattern, or according to
+  another variable.
 }
 \usage{
-  \method{cut}{ppp}(x, \dots)
+  \method{cut}{ppp}(x, z=marks(x), ...)
 }
 \arguments{
   \item{x}{
     A two-dimensional point pattern.
     An object of class \code{"ppp"}.
-    This should be a marked point pattern, and the marks would normally
-    be numerical values.
+  }
+  \item{z}{
+    Data determining the classification. A numeric vector,
+    a factor, a pixel image, or a tessellation.
+    Defaults to the vector of marks of the point pattern.
   }
   \item{\dots}{
     Arguments passed to \code{\link{cut.default}}.
-    They determine the breakpoints for the mapping from numerical values to
-    factor values. See \code{\link{cut.default}}.
+    They determine the breakpoints for the mapping from numerical values
+    in \code{z} to factor values in the output.
+    See \code{\link{cut.default}}.
   }
 } 
 \value{
@@ -26,18 +31,39 @@
   (of class \code{"ppp"}) with a \code{marks} vector that is a factor.
 }
 \details{
-  This simple function applies the generic \code{\link{cut}} operation
-  to the marks of the point pattern \code{x}. The range of values
+  This function has the effect of classifying each point in the point
+  pattern \code{x} into one of several possible types. The
+  classification is based on the dataset \code{z}, which may be either
+  \itemize{
+    \item
+    a factor (of length equal to the number of points in \code{z})
+    determining the classification of each point in \code{x}.
+    Levels of the factor determine the classification.
+    \item
+    a numeric vector (of length equal to the number of points in
+    \code{z}). The range of values of \code{z} will be divided into
+    bands (the number of bands is determined by \code{\dots})
+    and \code{z} will be converted to a factor using
+    \code{\link{cut.default}}.
+    \item
+    a pixel image (object of class \code{"im"}).
+    The value of \code{z} at each point of \code{x} will be
+    used as the classifying variable.
+    \item
+    a tessellation (object of class \code{"tess"}, see
+    \code{\link{tess}}). Each point of \code{x} will be classified
+    according to the tile of the tessellation into which it falls.
+  }
+  The default is to take \code{z} to be the vector of marks in
+  \code{x}. If the marks are numeric, then the range of values
   of the numerical marks is divided into several intervals, and each
   interval is associated with a level of a factor. 
   The result is a
   marked point pattern, with the same window and point locations as
   \code{x}, but with the numeric mark of each point discretised
-  by replacing it by the factor level. 
-
-  This function is a convenient
-  way to transform a marked point pattern which has numeric marks
-  into a multitype point pattern,
+  by replacing it by the factor level.
+  This is a convenient way to transform a marked point pattern
+  which has numeric marks into a multitype point pattern,
   for example to plot it or analyse it. See the examples.
 
   To select some points from a point pattern, use the subset operator
@@ -45,9 +71,12 @@
 }
 \seealso{
   \code{\link{cut}},
-  \code{\link{ppp.object}}
+  \code{\link{ppp.object}},
+  \code{\link{tess}}
 }
 \examples{
+ # (1) cutting based on numeric marks of point pattern
+ 
  data(longleaf)
  # Longleaf Pines data
  # the marks are positive real numbers indicating tree diameters.
@@ -61,7 +90,7 @@
  }
 
  # cut the range of tree diameters into three intervals
- long3 <- cut(longleaf, 3)
+ long3 <- cut(longleaf, breaks=3)
  \dontrun{
  plot(long3)
  }
@@ -70,6 +99,21 @@
  long2 <- cut(longleaf, breaks=c(0,30,100), labels=c("Sapling", "Adult"))
  plot(long2)
  plot(long2, cols=c("green","blue"))
+
+ # (2) cutting based on another numeric vector
+ # Divide Swedish Pines data into 3 classes
+ # according to nearest neighbour distance
+
+ data(swedishpines)
+ plot(cut(swedishpines, nndist(swedishpines), breaks=3))
+
+ # (3) cutting based on tessellation
+ # Divide Swedish Pines study region into a 4 x 4 grid of rectangles
+ # and classify points accordingly
+
+ tes <- tess(xgrid=seq(0,96,length=5),ygrid=seq(0,100,length=5))
+ plot(cut(swedishpines, tes))
+ plot(tes, lty=2, add=TRUE)
 }
 
 \author{Adrian Baddeley

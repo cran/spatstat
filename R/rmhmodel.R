@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.26 $  $Date: 2008/02/25 15:01:40 $
+#   $Revision: 1.29 $  $Date: 2008/07/22 00:55:35 $
 #
 #
 
@@ -67,6 +67,10 @@ rmhmodel.default <- function(...,
   # Calculate reach of model
   mreach <- rules$reach(par)
 
+# Determine the number of discs (only applies to
+# the badgey model.  (Well, sort of to geyer as well.)
+  ndisc <- rules$ndisc(par)
+
 ###################################################################
 # return augmented list  
   out <- list(cif=cif,
@@ -79,11 +83,12 @@ rmhmodel.default <- function(...,
               check= if(is.null(fortran.par)) check else NULL,
               multitype.interact=rules$multitype,
               need.aux=rules$need.aux,
-              reach=mreach
+              reach=mreach,
+	      ndisc=ndisc
               )
   class(out) <- c("rmhmodel", class(out))
   return(out)
-  }
+}
 
 print.rmhmodel <- function(x, ...) {
   verifyclass(x, "rmhmodel")
@@ -147,7 +152,8 @@ reach.rmhmodel <- function(x, ...) {
                 stop("Negative value of beta for Poisson process")
               return(par)
             },
-            reach = function(par, ...) { return(0) }
+            reach = function(par, ...) { return(0) },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 1. Strauss.
@@ -177,7 +183,8 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) 0 else r)
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 2. Strauss with hardcore.
@@ -207,7 +214,8 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) h else r)
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 3. Softcore.
@@ -237,7 +245,8 @@ reach.rmhmodel <- function(x, ...) {
               kappa <- par[["kappa"]]
               sigma <- par[["sigma"]]
               return(sigma/(epsilon^(kappa/2)))
-            }                        
+            },                        
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 4. Marked Strauss.
@@ -284,7 +293,8 @@ reach.rmhmodel <- function(x, ...) {
               g <- par$gamma
               operative <- ! (is.na(r) | (g == 1))
               return(max(0, r[operative]))
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 5. Marked Strauss with hardcore.
@@ -345,7 +355,8 @@ reach.rmhmodel <- function(x, ...) {
               roperative <- ! (is.na(r) | (g == 1))
               hoperative <- ! is.na(h)
               return(max(0, r[roperative], h[hoperative]))
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 6. Diggle-Gates-Stibbard interaction
@@ -372,7 +383,8 @@ reach.rmhmodel <- function(x, ...) {
             },
             reach=function(par, ...) {
               return(par[["rho"]])
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #
 # 7. Diggle-Gratton interaction 
@@ -402,7 +414,8 @@ reach.rmhmodel <- function(x, ...) {
             },
             reach=function(par, ...) {
               return(par[["rho"]])
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 8. Geyer saturation model
@@ -426,13 +439,18 @@ reach.rmhmodel <- function(x, ...) {
               par <- par[nms]
 # Square r to avoid squaring in the Fortran code.
               par[[3]] <- par[[3]]**2
+# Stick in a 1 = ndisc = number of discs at position 2 (after beta)
+# in par to make it consistent with the par for badgey; so that
+# initaux and updaux can be used consistently for both.
+              par <- append(par,1,after=1)
               return(par)
             },
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) 0 else r)
-            }
+            },
+            ndisc = function(par, ...) { return(1) }
             ),
 #       
 # 9. The ``lookup'' device.  This permits simulating, at least
@@ -523,7 +541,8 @@ reach.rmhmodel <- function(x, ...) {
               if(is.null(r)) 
                 r <- knots(h)
               return(max(r))
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
             ),
 #       
 # 10. Area interaction
@@ -549,6 +568,59 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               eta <- par[["eta"]]
               return(if(eta == 1) 0 else (2 * r))
-            }
+            },
+            ndisc = function(par, ...) { return(0) }
+            ),
+#
+# 11. The ``badgey'' (Baddeley-Geyer) model.
+#
+       'badgey' =
+       list(
+            fortran.id=11,
+            multitype=FALSE,
+            need.aux=TRUE,
+            parhandler=function(par, ...) {
+              nms <- c("beta","gamma","r","sat")
+              if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 4) {
+                stop(paste("For the badgey cif, par must be a named list\n",
+                           "with components beta, gamma, r, and sat.\n",
+                           "Bailing out."))
+              }
+              beta <- par[["beta"]]
+              if(beta < 0)
+                stop("Negative value of beta for badgey cif.")
+              gamma <- par[["gamma"]]
+              r     <- par[["r"]]
+              sat   <- par[["sat"]]
+              if(length(gamma) != length(r))
+                stop(paste("Mismatch between lengths of",
+                           dQuote("gamma"), "and", dQuote("r")))
+              if(length(sat)==1) sat <- rep(sat,length(gamma))
+              else if(length(gamma) != length(sat))
+                stop(paste("Mismatch between lengths of",
+                           dQuote("gamma"), "and", dQuote("sat")))
+              if(any(gamma<0))
+                stop(paste("Negative values amongst the",
+                           dQuote("gamma"), "parameters"))
+              if(any(r<0))
+                stop(paste("Negative values amongst the",
+                           dQuote("r"), "parameters"))
+              if(any(sat<0))
+                stop(paste("Negative values amongst the",
+                           dQuote("sat"), "parameters"))
+              r <- r^2 # Square to avoid needing to do so in C code.
+              mmm <- cbind(gamma,r,sat)
+              mmm <- mmm[order(r),]
+              ndisc <- length(r)
+              par <- c(par$beta,ndisc,as.vector(t(mmm)))
+              return(par)
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              gamma <- par[["gamma"]]
+              return(max(r[gamma != 1]))
+            },
+            ndisc = function(par, ...) { return(length(par[["gamma"]])) }
             )
-  )
+       # end of list '.Spatstat.RmhTable'
+       )

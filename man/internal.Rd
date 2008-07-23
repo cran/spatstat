@@ -193,6 +193,7 @@
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhseed}
+\alias{print.splitppp}
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
@@ -201,6 +202,7 @@
 \alias{print.summary.psp}
 \alias{print.summary.splitppp}
 \alias{print.summary.units}
+\alias{print.tess}
 \alias{print.units}
 \alias{prolongseq}
 \alias{quad}
@@ -497,6 +499,7 @@ primefactors(n, prmax)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhseed}(x, \dots)
+\method{print}{splitppp}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
 \method{print}{summary.listof}(x, \dots)
@@ -505,6 +508,7 @@ primefactors(n, prmax)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.units}(x, \dots)
+\method{print}{tess}(x, \dots)
 \method{print}{units}(x, \dots)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)

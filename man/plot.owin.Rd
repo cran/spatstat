@@ -111,5 +111,4 @@
   \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
- 
- \keyword{hplot}
+\keyword{hplot}

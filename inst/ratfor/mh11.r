@@ -6,19 +6,19 @@
 
 # 1 "cif.h" 1
   ##
-  ## Map from 2 to conditional intensity functions etc
+  ## Map from 11 to conditional intensity functions etc
   ##
 # 4 "methas.template" 2
 # 1 "death.h" 1
 # 5 "methas.template" 2
 
-subroutine mh2(par,period,xprop,yprop,mprop,ntypes,
+subroutine mh11(par,period,xprop,yprop,mprop,ntypes,
                   iseed,nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
 implicit double precision(a-h,o-z)
 
+ dimension par(2)
 
 
- dimension par(1)
 
 dimension iseed(3)
 dimension x(1), y(1), marks(1), period(2)
@@ -37,7 +37,7 @@ verb = !(nverb==0)
 qnodds = (one - q)/q
 
 
-
+          ndisc = par(2)
 
 
    ## Trivial assigments to placate the compiler
@@ -72,7 +72,7 @@ while(irep <= nrep) {
 
 
 
-   call straush(u,v,m1,x,y,npts,par,period,cifval)
+   call badgey(u,v,m1,x,y,npts,par,period,cifval,ndisc,aux)
 
 
 
@@ -99,7 +99,7 @@ while(irep <= nrep) {
 
 
 
-    call straush(x(ix),y(ix),ix,x,y,npts,par,period,cifval)
+    call badgey(x(ix),y(ix),ix,x,y,npts,par,period,cifval,ndisc,aux)
 
 
 
@@ -126,9 +126,9 @@ while(irep <= nrep) {
                  u = xprop(irep)
                  v = yprop(irep)
 # 134 "methas.template"
-                   call straush(x(ix),y(ix),ix,x,y,npts,par,period,cvd)
+                   call badgey(x(ix),y(ix),ix,x,y,npts,par,period,cvd,ndisc,aux)
 
-                   call straush(u,v,ix,x,y,npts,par,period,cvn)
+                   call badgey(u,v,ix,x,y,npts,par,period,cvn,ndisc,aux)
 # 146 "methas.template"
            ## call aru(1,zero,one,iseed,sp)
                    call arand(iseed(1),iseed(2),iseed(3),sp)
@@ -138,7 +138,7 @@ while(irep <= nrep) {
         }
  if(itype > 0) {
 
-
+   call updaux(itype,x,y,u,v,npts,ix,par,period,ndisc,aux)
 
   if(itype==1) { ## Birth
    ix = npts

@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.52 2008/04/21 18:17:33 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.54 2008/07/21 23:50:51 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -561,25 +561,25 @@ rmhEngine <- function(InfoList, ...,
   nrep <- control$nrep
   cond <- control$cond
   
-# If we are simulating a Geyer saturation process we need to set up some
-# ``auxiliary information''.
+# If we are simulating a saturation process (currently Geyer or
+# BadGey) we need to set up some ``auxiliary information''.
 
   need.aux <- model$need.aux
-  aux <-
-    if(!need.aux)
-      0
-    else
-      .Fortran(
-               "initaux",
-               nmbr=as.integer(nmbr),
-               par=as.double(par),
-               period=as.double(period),
-               x=as.double(x),
-               y=as.double(y),
-               npts=as.integer(npts),
-               aux=integer(npts),
-               PACKAGE="spatstat"
-               )$aux
+  if(need.aux) {
+    ndisc <- model$ndisc
+    aux <- .Fortran(
+                    "initaux",
+                    nmbr=as.integer(nmbr),
+                    par=as.double(par),
+                    period=as.double(period),
+                    x=as.double(x),
+                    y=as.double(y),
+                    npts=as.integer(npts),
+                    ndisc=as.integer(ndisc),
+                    aux=integer(npts*ndisc),
+                    PACKAGE="spatstat"
+                    )$aux
+  } else aux <- -1
 
 # The vectors x and y (and perhaps marks) which hold the generated
 # process may grow.  We need to allow storage space for them to grow
@@ -595,7 +595,7 @@ rmhEngine <- function(InfoList, ...,
     x <- c(x, padding)
     y <- c(y, padding)
     if(ntypes>1) marks <- c(marks, padding)
-    if(need.aux) aux   <- c(aux,   padding)
+    if(need.aux) aux   <- c(aux,rep(padding,ndisc))
   } else {
     nincr <- npad <- 0
   }
@@ -623,10 +623,10 @@ rmhEngine <- function(InfoList, ...,
 
 # Determine Fortran subroutine name (this is not very safe ...)
   mhname <- paste("mh", nmbr, sep="")
-
+  
 # initialise state of Wichmann-Hill random number generator 
   iseed <- start$seed$iseed
-  
+
 # The repetition is to allow the storage space to be incremented if
 # necessary.
   repeat {
@@ -681,7 +681,7 @@ rmhEngine <- function(InfoList, ...,
     x     <- c(rslt$x,numeric(nincr))
     y     <- c(rslt$y,numeric(nincr))
     marks <- if(ntypes>1) c(rslt$marks,numeric(nincr)) else 0
-    aux   <- if(need.aux) c(rslt$aux,numeric(nincr)) else 0
+    aux   <- if(need.aux) c(rslt$aux,numeric(nincr*ndisc)) else -1
     iseed <- rslt$iseed
   }
 

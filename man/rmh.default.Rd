@@ -444,10 +444,48 @@ trend corresponding to a particular type, there is still a component
    beta <- 0.3
    gmma <- 0.5
    r    <- 45
-   mod17 <- list(cif="strauss",par=c(beta=beta,gamma=gmma,r=r),w=c(0,250,0,250),
-                 trend=tr3)
+   mod17 <- list(cif="strauss",par=c(beta=beta,gamma=gmma,r=r),
+                 w=square(1), trend=tr3)
    X1.strauss.trend <- rmh(model=mod17,start=list(n.start=90),
                            control=list(nrep=nr,nverb=nv))
+   # Baddeley-Geyer
+   r <- seq(0,0.2,length=8)[-1]
+   gmma <- c(0.5,0.6,0.7,0.8,0.7,0.6,0.5)
+   mod18 <- list(cif="badgey",par=list(beta=4000, gamma=gmma,r=r,sat=5),
+                 w=square(1))
+   X1.badgey <- rmh(model=mod18,start=list(n.start=100),
+                    control=list(nrep=nr,nverb=nv))
+   mod19 <- list(cif="badgey",
+                 par=list(beta=4000, gamma=gmma,r=r,sat=1e4),
+                 w=square(1))
+   set.seed(1329)
+   X2.badgey <- rmh(model=mod18,start=list(n.start=100),
+                    control=list(nrep=nr,nverb=nv))
+
+   # Check:
+   h <- ((prod(gmma)/cumprod(c(1,gmma)))[-8])^2
+   hs <- stepfun(r,c(h,1))
+   mod20 <- list(cif="lookup",par=list(beta=4000,h=hs),w=square(1))
+   set.seed(1329)
+   X.check <- rmh(model=mod20,start=list(n.start=100),
+                      control=list(nrep=nr,nverb=nv))
+   # X2.badgey and X.check will be identical.
+
+   mod21 <- list(cif="badgey",par=list(beta=300,gamma=c(1,0.4,1),
+                 r=c(0.035,0.07,0.14),sat=5), w=square(1))
+   X3.badgey <- rmh(model=mod21,start=list(n.start=100),
+                    control=list(nrep=nr,nverb=nv))
+   # Same result as Geyer model with beta=300, gamma=0.4, r=0.07,
+   # sat = 5 (if seeds and control parameters are the same)
+
+   # Or more simply:
+   mod22 <- list(cif="badgey",
+                 par=list(beta=300,gamma=0.4,r=0.07, sat=5),
+                 w=square(1))
+   X4.badgey <- rmh(model=mod22,start=list(n.start=100),
+                    control=list(nrep=nr,nverb=nv))
+   # Same again --- i.e. the BadGey model includes the Geyer model.
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

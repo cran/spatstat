@@ -16,14 +16,15 @@
     An object of class \code{"ppp"}.
   }
   \item{f}{
-    Factor determining the grouping. 
+    Data determining the grouping. Either a factor, 
+    a pixel image with factor values, or a tessellation.
   }
   \item{drop}{
-	Logical. Determines whether empty groups will
-	be deleted.
+    Logical. Determines whether empty groups will
+    be deleted.
   }
   \item{un}{
-    Logical. Determines whether subpatterns will be unmarked
+    Logical. Determines whether the resulting subpatterns will be unmarked
     (i.e. whether marks will be removed	from the points in each
     subpattern). 
   }
@@ -44,16 +45,26 @@
 \details{
   The function \code{split.ppp}
   divides up the points of the point pattern \code{x}
-  into several sub-patterns according to the levels of the factor
-  \code{f}. The result is a list of point patterns, one for each
-  level of \code{f}.
-
-  If \code{f} is present, it must be a factor, and its length
-  must equal the number of points in \code{x}. The levels of \code{f}
-  determine the destination of each point in \code{x}.
-  The \code{i}th point of \code{x} will be placed in the sub-pattern
-  \code{split.ppp(x)$l} where \code{l = f[i]}.
-
+  into several sub-patterns according to the values of \code{f}.
+  The result is a list of point patterns.
+  
+  The argument \code{f} may be
+  \itemize{
+    \item
+    a factor, of length equal to the number of points in \code{x}.
+    The levels of \code{f}
+    determine the destination of each point in \code{x}.
+    The \code{i}th point of \code{x} will be placed in the sub-pattern
+    \code{split.ppp(x)$l} where \code{l = f[i]}.
+    \item
+    a pixel image (object of class \code{"im"}) with factor values.
+    The pixel value of \code{f}
+    at each point of \code{x} will be used as the classifying variable.
+    \item
+    a tessellation (object of class \code{"tess"}).
+    Each point of \code{x} will be classified according to
+    the tile of the tessellation into which it falls.
+  }
   If \code{f} is missing, then \code{x} must be a multitype point pattern
   (a marked point pattern whose marks vector is a factor).
   Then the effect is that the points of each type
@@ -76,9 +87,8 @@
   updates the point pattern \code{x} so that
   it satisfies \code{split(x, f, drop, un) = value}. The argument \code{value}
   is expected to be a list of point patterns, one for each level of
-  \code{f}. These point patterns are expected to be compatible in the sense
-  that they all have the same window, and either they are all unmarked
-  or they all have marks of the same kind. 
+  \code{f}. These point patterns are expected to be compatible with the
+  type of data in the original pattern \code{x}.
 
   Splitting can also be undone by the function \code{\link{superimpose}}.
 }
@@ -86,9 +96,13 @@
   \code{\link{cut.ppp}},
   \code{\link{plot.splitppp}},
   \code{\link{superimpose}},
+  \code{\link{im}},
+  \code{\link{tess}},
   \code{\link{ppp.object}}
 }
 \examples{
+
+# (1) Splitting by marks
 
 # Multitype point pattern: separate into types
  data(amacrine)
@@ -117,15 +131,22 @@
 	longleaf <- longleaf[seq(1, longleaf$n, by=80)]
  }
  # cut the range of tree diameters into three intervals
- long3 <- cut.ppp(longleaf, 3)
+ # using cut.ppp
+ long3 <- cut(longleaf, breaks=3)
  # now split them
  long3split <- split(long3)
+
+# (2) Splitting by a factor
 
 # Unmarked point pattern
   data(swedishpines)
 # cut & split according to nearest neighbour distance
   f <- cut(nndist(swedishpines), 3)
   u <- split(swedishpines, f)
+
+# (3) Splitting over a tessellation
+   tes <- tess(xgrid=seq(0,96,length=5),ygrid=seq(0,100,length=5))
+   v <- split(swedishpines, tes)
 }
 
 \author{Adrian Baddeley

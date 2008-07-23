@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.57 $	$Date: 2008/07/16 17:04:07 $
+#	$Revision: 4.58 $	$Date: 2008/07/22 21:17:05 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -310,16 +310,6 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
         return(x)
 }
 
-
-# ------------------------------------------------------------------
-
-cut.ppp <- function(x, ...) {
-  x <- as.ppp(x)
-  if(!is.marked(x))
-    stop("x has no marks to cut")
-  marks(x) <- cut(marks(x, dfok=FALSE), ...)
-  return(x)
-}
 
 # ------------------------------------------------------------------
 #

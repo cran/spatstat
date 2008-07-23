@@ -1,8 +1,8 @@
 C Output from Public domain Ratfor, version 1.0
-      subroutine mh5(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mre
-     *p,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
+      subroutine mh11(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mr
+     *ep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
       implicit double precision(a-h,o-z)
-      dimension par(1)
+      dimension par(2)
       dimension iseed(3)
       dimension x(1), y(1), marks(1), period(2)
       dimension xprop(1), yprop(1), mprop(1)
@@ -15,6 +15,7 @@ C Output from Public domain Ratfor, version 1.0
       m1 = -1
       verb = .not.(nverb.eq.0)
       qnodds = (one - q)/q
+      ndisc = par(2)
       dummyi = mprop(1) + ntypes + marks(1)
       dummyl = fixall
       dummyd = aux(1)
@@ -34,8 +35,7 @@ C Output from Public domain Ratfor, version 1.0
       if(urq.gt.q)then
       u = xprop(irep)
       v = yprop(irep)
-      mrk = mprop(irep)
-      call straushm(u,v,mrk,m1,x,y,marks,ntypes,npts,par,period,cifval)
+      call badgey(u,v,m1,x,y,npts,par,period,cifval,ndisc,aux)
       anumer = cifval
       adenom = qnodds*(npts+1)
       call arand(iseed(1),iseed(2),iseed(3),bp)
@@ -47,9 +47,7 @@ C Output from Public domain Ratfor, version 1.0
       if(npts .ne. 0)then
       call arand(iseed(1),iseed(2),iseed(3),xi)
       ix = 1 + int(npts*xi)
-      mrki = marks(ix)
-      call straushm(x(ix),y(ix),mrki,ix,x,y,marks,ntypes,npts,par,period
-     *,cifval)
+      call badgey(x(ix),y(ix),ix,x,y,npts,par,period,cifval,ndisc,aux)
       anumer = qnodds * npts
       adenom = cifval
       call arand(iseed(1),iseed(2),iseed(3),dp)
@@ -64,38 +62,30 @@ C Output from Public domain Ratfor, version 1.0
       ix = 1 + int(npts*xi)
       u = xprop(irep)
       v = yprop(irep)
-      mrki = marks(ix)
-      mrk = mprop(irep)
-      if(fixall .and. (mrk .ne. mrki))then
-      itype = 0
-      else
-      call straushm(x(ix),y(ix),mrki,ix,x,y,marks,ntypes,npts,par,period
-     *,cvd)
-      call straushm(u,v,mrk,ix,x,y,marks,ntypes,npts,par,period,cvn)
+      call badgey(x(ix),y(ix),ix,x,y,npts,par,period,cvd,ndisc,aux)
+      call badgey(u,v,ix,x,y,npts,par,period,cvn,ndisc,aux)
       call arand(iseed(1),iseed(2),iseed(3),sp)
       if(sp*cvd .lt. cvn)then
       itype = 3
       endif
       endif
       endif
-      endif
       if(itype .gt. 0)then
+      call updaux(itype,x,y,u,v,npts,ix,par,period,ndisc,aux)
       if(itype.eq.1)then
       ix = npts
       x(ix) = u
       y(ix) = v
-      marks(ix) = mrk
       if(npts .ge. npmax)then
       mrep = irep+1
       return
       endif
       else
       if(itype.eq.2)then
-      call deathm(x,y,marks,npts,ix)
+      call deathu(x,y,npts,ix)
       else
       x(ix) = u
       y(ix) = v
-      marks(ix) = mrk
       endif
       endif
       endif

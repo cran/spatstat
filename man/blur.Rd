@@ -43,12 +43,16 @@ blur(x, sigma = NULL, ..., normalise=FALSE, bleed = TRUE, varcov=NULL)
   (meaning that the image domain does not completely fill
   the rectangular frame) then these \code{NA} values are first reset to zero.
 
-  The algorithm then computes the convolution \eqn{x \ast G} of the (zero-padded) pixel
+  The algorithm then computes the convolution \eqn{x \ast G}{x * G}
+  of the (zero-padded) pixel
   image \eqn{x} with the specified Gaussian kernel \eqn{G}.
   
-  If \code{normalise=FALSE}, then this convolution \eqn{x\ast G} is returned.
-  If \code{normalise=TRUE}, then the convolution \eqn{x \ast G} is normalised by
-  dividing it by the convolution \eqn{w \ast G} of the image domain
+  If \code{normalise=FALSE}, then this convolution \eqn{x\ast G}{x * G}
+  is returned.
+  If \code{normalise=TRUE}, then the convolution \eqn{x \ast G}{x * G}
+  is normalised by
+  dividing it by the convolution \eqn{w \ast G}{w * G} of the image
+  domain \code{w}
   with the same Gaussian kernel. Normalisation ensures that the result
   can be interpreted as a weighted average of input pixel values,
   without edge effects due to the shape of the domain.

@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.29 $	$Date: 2008/07/18 01:40:08 $
+#	$Revision: 4.30 $	$Date: 2008/07/22 06:09:02 $
 #
 #
 #
@@ -440,7 +440,7 @@ gpc2owin <- function(x) {
       p <- lapply(p, rev)
     return(p)
   })
-  owin(bb$x, bb$y, poly=pp)
+  owin(bb$x, bb$y, poly=pp, check=FALSE)
 }
 
 owin2gpc <- function(x) {

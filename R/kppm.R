@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.4 $ $Date: 2008/07/18 04:28:53 $
+# $Revision: 1.7 $ $Date: 2008/07/23 04:36:46 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
@@ -88,12 +88,13 @@ print.kppm <- function(x, ...) {
 
 plot.kppm <- function(x, ...) {
   modelname <- deparse(substitute(x))
+  plotem <- function(x, ..., main=dmain, dmain) { plot(x, ..., main=main) }
   if(x$stationary)
-    plot(x$mcfit, main=c(modelname, "K-function"))
+    plotem(x$mcfit, ..., dmain=c(modelname, "K-function"))
   else {
     if(interactive()) opa <- par(ask=TRUE)
-    plot(x$po, main=c(modelname, "Intensity"), how="image")
-    plot(x$mcfit, main=c(modelname, "Inhomogeneous K-function"))
+    plotem(x$po, ..., dmain=c(modelname, "Intensity"), how="image")
+    plotem(x$mcfit, ..., dmain=c(modelname, "Inhomogeneous K-function"))
     if(interactive()) par(opa)
   }
   return(invisible(NULL))

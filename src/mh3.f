@@ -2,7 +2,8 @@ C Output from Public domain Ratfor, version 1.0
       subroutine mh3(par,period,xprop,yprop,mprop,ntypes, iseed,nrep,mre
      *p,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
       implicit double precision(a-h,o-z)
-      dimension par(1), iseed(3)
+      dimension par(1)
+      dimension iseed(3)
       dimension x(1), y(1), marks(1), period(2)
       dimension xprop(1), yprop(1), mprop(1)
       integer aux(1)

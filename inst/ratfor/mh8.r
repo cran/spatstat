@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command line>"
 # 1 "methas.template"
- ## $Id: methas.template,v 1.4 2008/04/21 18:07:05 adrian Exp adrian $
+ ## $Id: methas.template,v 1.5 2008/07/21 23:40:05 adrian Exp adrian $
 
 # 1 "cif.h" 1
   ##
@@ -15,7 +15,12 @@
 subroutine mh8(par,period,xprop,yprop,mprop,ntypes,
                   iseed,nrep,mrep,p,q,npmax,nverb,x,y,marks,aux,npts,fixall)
 implicit double precision(a-h,o-z)
-dimension par(1), iseed(3)
+
+ dimension par(2)
+
+
+
+dimension iseed(3)
 dimension x(1), y(1), marks(1), period(2)
 dimension xprop(1), yprop(1), mprop(1)
 integer aux(1)
@@ -30,6 +35,10 @@ zero = 0.d0
 m1 = -1
 verb = !(nverb==0)
 qnodds = (one - q)/q
+
+
+          ndisc = par(2)
+
 
    ## Trivial assigments to placate the compiler
 dummyi = mprop(1) + ntypes + marks(1)
@@ -116,11 +125,11 @@ while(irep <= nrep) {
                  ix = 1 + int(npts*xi)
                  u = xprop(irep)
                  v = yprop(irep)
-# 125 "methas.template"
+# 134 "methas.template"
                    call geyer(x(ix),y(ix),ix,x,y,npts,par,period,cvd,aux)
 
                    call geyer(u,v,ix,x,y,npts,par,period,cvn,aux)
-# 137 "methas.template"
+# 146 "methas.template"
            ## call aru(1,zero,one,iseed,sp)
                    call arand(iseed(1),iseed(2),iseed(3),sp)
                    if(sp*cvd < cvn) itype = 3 ## Shift occurs.
@@ -129,7 +138,7 @@ while(irep <= nrep) {
         }
  if(itype > 0) {
 
-   call updaux(itype,x,y,u,v,npts,ix,par,period,aux)
+   call updaux(itype,x,y,u,v,npts,ix,par,period,ndisc,aux)
 
   if(itype==1) { ## Birth
    ix = npts

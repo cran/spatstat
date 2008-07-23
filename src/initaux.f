@@ -1,31 +1,38 @@
 C Output from Public domain Ratfor, version 1.0
-      subroutine initaux(nmbr,par,period,x,y,npts,aux)
+      subroutine initaux(nmbr,par,period,x,y,npts,ndisc,aux)
       implicit double precision(a-h,o-z)
-      dimension x(1), y(1), par(3), period(2)
-      integer aux(1)
+      dimension x(1), y(1), par(1), period(2)
+      integer aux(ndisc,1)
       logical per
-      if(nmbr .ne. 8)then
+      if(nmbr .ne. 8 .and. nmbr .ne. 11)then
       return
       endif
-      zero = 0.d0
-      per = period(1) .gt. zero
-      r2 = par(3)
-      do23002 i = 1, npts 
-      aux(i) = 0
-      do23004 j = 1,npts 
+      per = period(1) .gt. 0.d0
+      do23002 i=1,npts 
+      do23004 k=1,ndisc 
+      aux(k,i) = 0
+23004 continue
+23005 continue
+      do23006 j=1,npts 
       if(j.eq.i)then
-      goto 23004
+      goto 23006
       endif
       if(per)then
       call dist2(x(i),y(i),x(j),y(j),period,d2)
       else
       d2 = (x(i)-x(j))**2 + (y(i)-y(j))**2
       endif
+      do23012 k = ndisc,1,-1 
+      r2 = par(3*k+1)
       if(d2 .lt. r2)then
-      aux(i) = aux(i) + 1
+      aux(k,i) = aux(k,i) + 1
+      else
+      goto 23013
       endif
-23004 continue
-23005 continue
+23012 continue
+23013 continue
+23006 continue
+23007 continue
 23002 continue
 23003 continue
       return

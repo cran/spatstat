@@ -5,8 +5,8 @@
   Plots a list of point patterns.
 }
 \usage{
-  \method{plot}{splitppp}(x, \dots, main, arrange=TRUE, nrows=NULL,
-ncols=NULL, mar.panel)
+  \method{plot}{splitppp}(x, \dots, main, arrange=TRUE,
+   nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel)
 }
 \arguments{
   \item{x}{
@@ -31,8 +31,12 @@ ncols=NULL, mar.panel)
     (assuming \code{arrange=TRUE}).
     You can specify either or both of these numbers.
   }
+  \item{main.panel}{
+    Optional. A character string, or a vector of character strings,
+    giving the headings for each of the point patterns. 
+  }
   \item{mar.panel}{
-    Value of the graphics parameter \code{mar} controlling the size
+    Optional value of the graphics parameter \code{mar} controlling the size
     of the margins outside each plot panel.
     See the help file for \code{\link{par}}.
   }

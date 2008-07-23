@@ -1,5 +1,6 @@
 
 RATFOR = /home/adrian/bin/ratfor77
+#RATFOR = /usr/local/bin/ratfor
 CPP = /usr/bin/cpp 
 
 ##########################################################
@@ -7,10 +8,11 @@ CPP = /usr/bin/cpp
 
 MH_TEMPLATES = cif.h death.h methas.template death.template 
 
-CIF_RAT = dgs.r diggra.r geyer.r lookup.r sftcr.r \
-    straush.r straushm.r strauss.r straussm.r areaint.r
+CIF_RAT = badgey.r dgs.r diggra.r geyer.r lookup.r sftcr.r \
+    straush.r straushm.r strauss.r straussm.r areaint.r \
+    initaux.r updaux.r
 
-OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f initaux.f inxyp.f updaux.f
+OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f inxyp.f 
 
 C_DOMINIC = dinfty.c dwpure.c 
 
@@ -25,10 +27,11 @@ HUMAN = $(MH_TEMPLATES) $(C_TEMPLATES) $(CIF_RAT) $(OTHER_FOR) $(C_SRC) $(CC_SRC
 ##########################################################
 # Source to be generated automatically:
 
-CIF_FOR = dgs.f diggra.f geyer.f lookup.f sftcr.f \
-    straush.f straushm.f strauss.f straussm.f areaint.f
+CIF_FOR = badgey.f dgs.f diggra.f geyer.f lookup.f sftcr.f \
+    straush.f straushm.f strauss.f straussm.f areaint.f \
+    initaux.f updaux.f
 
-MH_FOR = mh1.f mh2.f mh3.f mh4.f mh5.f mh6.f mh7.f mh8.f mh9.f mh10.f
+MH_FOR = mh1.f mh2.f mh3.f mh4.f mh5.f mh6.f mh7.f mh8.f mh9.f mh10.f mh11.f
 
 DEATH_FOR = deathu.f deathm.f
 
@@ -105,4 +108,5 @@ mh9.r:  $(MH_TEMPLATES)
 mh10.r:  $(MH_TEMPLATES)
 	$(CPP) -DNMBR=10 -o $@ methas.template
 
-
+mh11.r:  $(MH_TEMPLATES)
+	$(CPP) -DNMBR=11 -o $@ methas.template
