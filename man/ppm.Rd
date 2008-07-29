@@ -7,12 +7,16 @@
   Fits a point process model to an observed point pattern
 }
 \usage{
- ppm(Q, trend=~1, interaction=Poisson(), \dots, covariates=NULL,
- correction="border", rbord=reach(interaction), use.gam=FALSE, method="mpl",
- forcefit=FALSE, nsim=100, nrmh=1e5,
-        start=NULL,
-         control=list(nrep=nrmh),
-         verb=TRUE)
+   ppm(Q, trend=~1, interaction=Poisson(),
+       \dots,
+       covariates=NULL,
+       correction="border",
+       rbord=reach(interaction),
+       use.gam=FALSE,
+       method="mpl",
+       forcefit=FALSE,
+       nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
+       verb=TRUE)
 }
 \arguments{
   \item{Q}{
@@ -149,6 +153,7 @@
       \code{\link{PairPiece}},
       \code{\link{AreaInter}},
       \code{\link{Geyer}},
+      \code{\link{BadGey}},
       \code{\link{SatPiece}},
       \code{\link{LennardJones}},
       \code{\link{Saturated}},
@@ -382,6 +387,7 @@
   \code{\link{PairPiece}},
   \code{\link{AreaInter}},
   \code{\link{Geyer}},
+  \code{\link{BadGey}},
   \code{\link{LennardJones}},
   \code{\link{Saturated}},
   \code{\link{OrdThresh}},

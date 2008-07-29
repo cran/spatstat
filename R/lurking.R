@@ -1,21 +1,23 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.22 $ $Date: 2008/07/16 17:29:26 $
+# $Revision: 1.26 $ $Date: 2008/07/25 22:23:53 $
 #
 
 lurking <- function(object, covariate, type="eem",
                     cumulative=TRUE,
                     clipwindow=default.clipwindow(object),
                     rv = NULL,
-                    plot.sd, plot.it=TRUE,
+                    plot.sd=is.poisson.ppm(object), plot.it=TRUE,
                     typename,
                     covname, oldstyle=FALSE,
-                    check=TRUE, ..., splineargs=list()) {
-  # validate
+                    check=TRUE, ..., splineargs=list(spar=0.5)) {
+  
+  # validate object
   if(is.ppp(object))
     object <- ppm(object, ~1, forcefit=TRUE)
   verifyclass(object, "ppm")
+
   # match type argument
   type <- pickoption("type", type,
                      c(eem="eem",
@@ -30,9 +32,12 @@ lurking <- function(object, covariate, type="eem",
                        inverse="inverse-lambda residuals",
                        pearson="Pearson residuals")
 
-
+  # may need to refit the model
+  if(plot.sd && is.null(getglmfit(object)))
+    object <- update(object, forcefit=TRUE)
+  
   # extract spatial locations 
-  Q <- quad.ppm(object)
+  Q <- quad.ppm(object, drop=TRUE)
   datapoints <- Q$data
   quadpoints <- union.quad(Q)
   Z <- is.data(Q)
@@ -41,14 +46,29 @@ lurking <- function(object, covariate, type="eem",
   #################################################################
   # compute the covariate
 
-  if(is.vector(covariate) && is.numeric(covariate)) 
-    covvalues <- covariate
-  else if(is.im(covariate)) 
+  if(is.im(covariate)) {
     covvalues <- covariate[quadpoints, drop=FALSE]
-  else if(is.expression(covariate)) {
-    # Evaluate the desired covariate at all quadrature points
+  } else if(is.vector(covariate) && is.numeric(covariate)) {
+    covvalues <- covariate
+    if(length(covvalues) != quadpoints$n)
+      stop("Length of covariate vector,", length(covvalues), "!=",
+           quadpoints$n, ", number of quadrature points")
+  } else if(is.expression(covariate)) {
+    # Expression involving covariates in the model
     # Set up environment for evaluating expression
-    glmdata <- object$internal$glmdata
+    if(!is.null(object$covariates)) {
+      # Expression may involve an external covariate
+      # Recompute model, extracting all covariates 
+      object <- update(object, allcovar=TRUE)
+      # harmonise, just in case
+      Q <- quad.ppm(object, drop=TRUE)
+      datapoints <- Q$data
+      quadpoints <- union.quad(Q)
+      Z <- is.data(Q)
+      wts <- w.quad(Q)
+      # 
+    }
+    glmdata <- getglmdata(object, drop=TRUE)
     # Fix special cases
     if(is.null(glmdata)) {
       # default 
@@ -60,38 +80,41 @@ lurking <- function(object, covariate, type="eem",
     if(!all(c("x","y") %in% names(glmdata))) {
       glmdata$x <- quadpoints$x
       glmdata$y <- quadpoints$y
-    }
+    } 
     # Evaluate expression
-    evaluate <- function(a, b) {
-#      if (exists("is.R") && is.R())
-        eval(a, envir = b)
-#      else eval(a, local = b)
-    }
-    covvalues <- evaluate(covariate, glmdata)
+    sp <- parent.frame()
+    covvalues <- eval(covariate, envir= glmdata, enclos=sp)
     if(!is.numeric(covvalues))
       stop("The evaluated covariate is not numeric")
   } else 
-    stop(paste("The", sQuote("covariate"),
-               "should be either a numeric vector or an expression"))
+    stop(paste("The", sQuote("covariate"), "should be either",
+               "a pixel image, an expression or a numeric vector"))
 
+  #################################################################
   # Validate covariate values
-  if(any(nbg <- is.na(covvalues))) {
-    # too complicated to handle NA's
+
+  if(naughty <- any(nbg <- is.na(covvalues))) {
+    # remove NA's
     if(is.im(covariate))
-      stop(paste(sum(nbg), "out of", length(nbg),
-                  "quadrature points",
-                  ngettext(sum(nbg), "lies", "lie"),
+      warning(paste(sum(nbg), "out of", length(nbg),
+                  "quadrature points discarded because",
+                  ngettext(sum(nbg), "it lies", "they lie"),
                  "outside the domain of the covariate image"))
     else
-      stop(paste(sum(nbg), "out of", length(nbg),
-                 "covariate values",
-                 ngettext(sum(nbg), "is NA", "are NA")))
+      warning(paste(sum(nbg), "out of", length(nbg),
+                 "covariate values discarded because",
+                 ngettext(sum(nbg), "it is NA", "they are NA")))
+    # remove offending points
+    ok <- !nbg
+    Q <- Q[ok]
+    covvalues <- covvalues[ok]
+    quadpoints <- quadpoints[ok]
+    # adjust
+    Z <- is.data(Q)
+    wts <- w.quad(Q)
   }
   if(any(is.infinite(covvalues) | is.nan(covvalues)))
     stop("covariate contains Inf or NaN values")
-  if(length(covvalues) != quadpoints$n)
-    stop("Length of covariate vector,", length(covvalues), "!=",
-         quadpoints$n, ", number of quadrature points")
 
   # Quadrature points marked by covariate value
   covq <- quadpoints %mark% as.numeric(covvalues)
@@ -104,8 +127,10 @@ lurking <- function(object, covariate, type="eem",
   resvalues <- 
     if(!is.null(rv)) rv
     else if(type=="eem") eem(object, check=check)
-    else residuals.ppm(object, type=type, check=check)
-  
+    else residuals.ppm(object, type=type, drop=TRUE, check=check)
+  if(naughty && type != "eem")
+    resvalues <- resvalues[ok]
+
   res <- (if(type == "eem") datapoints else quadpoints) %mark% as.numeric(resvalues)
 
   # ... and the same locations marked by the covariate
@@ -170,7 +195,7 @@ lurking <- function(object, covariate, type="eem",
 
   # (A'),(B') DERIVATIVES OF (A) AND (B)
   #  Required if cumulative=FALSE  
-  #  Estimated by spline smoothing
+  #  Estimated by spline smoothing (with x values jittered)
     if(!cumulative) {
       # fit smoothing spline to (A) 
       ss <- do.call("smooth.spline",
@@ -204,19 +229,20 @@ lurking <- function(object, covariate, type="eem",
     # (currently implemented only for Poisson)
     # (currently implemented only for cumulative case)
 
-    if(missing(plot.sd))
-      plot.sd <- is.poisson.ppm(object)
-    else if(plot.sd && !is.poisson.ppm(object))
-      warning("standard deviation is calculated for Poisson model; not valid for this model")
+    if(plot.sd && !is.poisson.ppm(object))
+      warning(paste("standard deviation is calculated for Poisson model;",
+                    "not valid for this model"))
 
     if(plot.sd && cumulative) {
       # Fitted intensity at quadrature points
-      lambda <- fitted.ppm(object, type="trend", check=check)
+      lambda <- fitted.ppm(object, type="trend", drop=TRUE, check=check)
+      if(naughty) lambda <- lambda[ok]
       # Fisher information for coefficients
       asymp <- vcov(object,what="internals")
       Fisher <- asymp$fisher
       # Local sufficient statistic at quadrature points
       suff <- asymp$suff
+      if(naughty) suff <- suff[ok, ,drop=FALSE]
       # Clip if required
       if(clip) {
         lambda <- lambda[clipquad]

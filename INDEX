@@ -114,6 +114,7 @@ cut.ppp                 Classify Points in a Point Pattern
 data.ppm                Extract Original Data from a Fitted Point
                         Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
+delaunay                Delaunay Triangulation of Point Pattern
 demopat                 Artificial Data Point Pattern
 density.ppp             Kernel Smoothed Intensity of Point Pattern
 density.psp             Kernel Smoothing of Line Segment Pattern
@@ -244,6 +245,7 @@ pcf.fasp                Pair Correlation Function obtained from array
 pcf.fv                  Pair Correlation Function obtained from K
                         Function
 pcf.ppp                 Pair Correlation Function of Point Pattern
+pcfcross                Multitype pair correlation function
 persp.im                Perspective Plot of Pixel Image
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn

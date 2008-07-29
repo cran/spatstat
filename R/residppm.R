@@ -4,11 +4,11 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.5 $ $Date: 2006/10/09 03:47:45 $
+# $Revision: 1.6 $ $Date: 2008/07/25 19:37:05 $
 #
 
-residuals.ppm <- function(object, type="raw", ..., check=TRUE, 
-                          fittedvalues = fitted.ppm(object, check=check)) {
+residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
+                 fittedvalues = fitted.ppm(object, check=check, drop=drop)) {
   
   verifyclass(object, "ppm")
 
@@ -26,7 +26,7 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE,
     type <- typemap[m]
 
   # Extract quadrature points and weights
-  Q <- quad.ppm(object)
+  Q <- quad.ppm(object, drop=drop)
   U <- union.quad(Q) # quadrature points
   Z <- is.data(Q) # indicator data/dummy
   W <- w.quad(Q) # quadrature weights

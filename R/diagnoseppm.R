@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.22 $ $Date: 2008/07/09 21:06:25 $
+# $Revision: 1.24 $ $Date: 2008/07/25 21:27:21 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -15,7 +15,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     stop("Sorry, this is not yet implemented for marked models")
 
   # quadrature points
-  Q <- quad.ppm(object)
+  Q <- quad.ppm(object, drop=TRUE)
   U <- union.quad(Q)
   Qweights <- w.quad(Q)
   
@@ -28,7 +28,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     X <- data.ppm(object)
     Y <- X %mark% as.numeric(residu)
   } else {
-    residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type, check=FALSE)
+    residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type,drop=TRUE, check=FALSE)
     Y <- U %mark% as.numeric(residu)
   }
 
@@ -138,7 +138,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   
   if(opt$xcumul)
     result$xcumul <- 
-    lurking(object, covariate=x.quad(quad.ppm(object)),
+    lurking(object, covariate=x.quad(quad.ppm(object, drop=TRUE)),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
             rv=residu,
@@ -151,7 +151,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
 
   if(opt$ycumul)
     result$ycumul <- 
-    lurking(object, covariate=y.quad(quad.ppm(object)),
+    lurking(object, covariate=y.quad(quad.ppm(object, drop=TRUE)),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
             rv=residu,

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.21 $	$Date: 2008/06/30 05:33:55 $
+#	$Revision: 2.26 $	$Date: 2008/07/25 20:28:09 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -109,9 +109,15 @@ print.ppm <- function(x, ...) {
 	return(invisible(NULL))
 }
 
-quad.ppm <- function(object) {
+quad.ppm <- function(object, drop=FALSE) {
   verifyclass(object, "ppm")
-  object$Q
+  Q <- object$Q
+  if(!drop || is.null(Q))
+    return(Q)
+  ok <- object$internal$glmdata$.mpl.SUBSET
+  if(is.null(ok))
+    return(Q)
+  return(Q[ok])
 }
 
 data.ppm <- function(object) { 
@@ -119,9 +125,8 @@ data.ppm <- function(object) {
   object$Q$data
 }
 
-dummy.ppm <- function(object) { 
-  verifyclass(object, "ppm")
-  object$Q$dummy
+dummy.ppm <- function(object, drop=FALSE) { 
+  return(quad.ppm(object, drop=drop)$dummy)
 }
   
 # method for 'coef'
@@ -141,9 +146,11 @@ getglmfit <- function(object) {
   return(glmfit)
 }
 
-getglmdata <- function(object) {
+getglmdata <- function(object, drop=FALSE) {
   verifyclass(object, "ppm")
-  return(object$internal$glmdata)
+  gd <- object$internal$glmdata
+  if(!drop) return(gd)
+  return(gd[gd$.mpl.SUBSET,])
 }
     
 # ??? method for 'effects' ???

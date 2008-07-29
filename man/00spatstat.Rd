@@ -223,7 +223,11 @@
 	\code{\link{unique.ppp}} \tab
 	remove duplicate points \cr
 	\code{\link{duplicated.ppp}} \tab
-	determine which points are duplicates
+	determine which points are duplicates \cr
+	\code{\link{dirichlet}} \tab
+	compute Dirichlet-Voronoi tessellation \cr
+	\code{\link{delaunay}} \tab
+	compute Delaunay triangulation
       }
       See \code{\link{spatstat.options}} to control plotting behaviour.
       
@@ -425,13 +429,15 @@
   \tabular{ll}{
     \code{\link{Gcross},\link{Gdot},\link{Gmulti}} \tab
     multitype nearest neighbour distributions 
-    \eqn{G_{ij}, G_{i\bullet}}{Gij, Gi.} \cr
+    \eqn{G_{ij}, G_{i\bullet}}{G[i,j], G[i.]} \cr
     \code{\link{Kcross},\link{Kdot}, \link{Kmulti}} \tab
     multitype \eqn{K}-functions 
-    \eqn{K_{ij}, K_{i\bullet}}{Kij, Ki.} \cr
+    \eqn{K_{ij}, K_{i\bullet}}{K[i,j], K[i.]} \cr
     \code{\link{Jcross},\link{Jdot},\link{Jmulti}} \tab
     multitype \eqn{J}-functions
-    \eqn{J_{ij}, J_{i\bullet}}{Jij,Ji.} \cr
+    \eqn{J_{ij}, J_{i\bullet}}{J[i,j],J[i.]} \cr
+    \code{\link{pcfcross}} \tab
+    multitype pair correlation function \eqn{g_{ij}}{g[i,j]} \cr
     \code{\link{alltypes}} \tab  estimates of the above
     for all \eqn{i,j} pairs \cr
     \code{\link{Iest}} \tab  multitype \eqn{I}-function\cr

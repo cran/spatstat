@@ -11,7 +11,7 @@
 }
 \usage{
   \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE,
-check=TRUE, repair=TRUE)
+  drop=FALSE, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -30,6 +30,10 @@ check=TRUE, repair=TRUE)
     at the points of the data point pattern. If \code{FALSE}, then
     values will be computed at all the points of the quadrature scheme
     used to fit the model, including the points of the data point pattern.
+  }
+  \item{drop}{
+    Logical value determining whether to delete quadrature points
+    that were not used to fit the model.
   }
   \item{check}{
     Logical value indicating whether to check the internal format
@@ -70,6 +74,8 @@ check=TRUE, repair=TRUE)
   dataset \code{x}) and other ``dummy'' points 
   in the window of observation.
 
+  The argument \code{drop} is explained in \code{\link{quad.ppm}}.
+  
   Use \code{\link{predict.ppm}} to compute the fitted conditional
   intensity at other locations or with other values of the
   explanatory variables.

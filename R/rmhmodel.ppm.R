@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.28 $   $Date: 2008/07/21 23:49:56 $
+#  $Revision: 2.29 $   $Date: 2008/07/28 16:42:57 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -86,7 +86,7 @@ list(
      function(coeffs, inte) {
        r <- inte$par$r
        sat <- inte$par$sat
-       gamma <- (inte$interpred)(coeffs,inte)$param$gammas
+       gamma <- (inte$interpret)(coeffs,inte)$param$gammas
        return(list(cif='badgey',par=list(gamma=gamma,r=r,sat=sat)))
      }
 )

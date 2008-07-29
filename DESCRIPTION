@@ -1,5 +1,5 @@
 Package: spatstat
-Version: 1.14-0
+Version: 1.14-1
 Date: 22 July 2008
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
@@ -16,7 +16,7 @@ Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
 	I.-M. Sintorn, M. Spiess, M. Stevenson, P. Surovy, B. Turlach, 
 	A. van Burgel, H. Wang and S. Wong.
 Maintainer: Adrian Baddeley <adrian@maths.uwa.edu.au>
-Depends: R (>= 2.6.0), stats, graphics, mgcv, gpclib, deldir
+Depends: R (>= 2.6.0), stats, graphics, mgcv, gpclib, deldir (>= 0.0-7)
 Suggests: sm
 Description: A package for analysing spatial data,
 	mainly Spatial Point Patterns, including multitype/marked points
@@ -38,4 +38,4 @@ Description: A package for analysing spatial data,
 	envelopes, residuals, residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: Wed Jul 23 13:29:25 2008; adrian
+Packaged: Tue Jul 29 13:29:05 2008; adrian

@@ -7,11 +7,15 @@
   quadrature scheme used to fit the model.
 }
 \usage{
-  dummy.ppm(object)
+  dummy.ppm(object, drop=FALSE)
 }
 \arguments{
   \item{object}{
     fitted point process model (an object of class \code{"ppm"}).
+  }
+  \item{drop}{
+    Logical value determining whether to delete dummy points
+    that were not used to fit the model.
   }
 }
 \value{
@@ -22,7 +26,8 @@
   that has been fitted to data. It is typically produced by
   the model-fitting algorithm \code{\link{ppm}}.
   
-  The \code{\link{ppm}} algorithm approximates the pseudolikelihood
+  The maximum pseudolikelihood algorithm in \code{\link{ppm}}
+  approximates the pseudolikelihood
   integral by a sum over a finite set of quadrature points,
   which is constructed by augmenting
   the original data point pattern by a set of ``dummy'' points.
@@ -31,10 +36,17 @@
   See \code{\link{ppm}} or \code{\link{ppm.object}} for further
   information.
   
-  This function extracts the dummy points of the quadrature scheme.
+  This function \code{dummy.ppm}
+  extracts the dummy points of the quadrature scheme.
   A typical use of this function would be to count the number of dummy
   points, to gauge the accuracy of the approximation to the
   exact pseudolikelihood. 
+
+  It may happen that some dummy points are not actually used in
+  fitting the model (typically because the value of a covariate is \code{NA}
+  at these points). The argument \code{drop} specifies whether these
+  unused dummy points shall be deleted (\code{drop=TRUE}) or
+  retained (\code{drop=FALSE}) in the return value.
 
   See \code{\link{ppm.object}} for a list of all operations that can be
   performed on objects of class \code{"ppm"}.

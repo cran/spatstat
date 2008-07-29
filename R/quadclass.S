@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.11 $	$Date: 2007/09/22 01:51:26 $
+#	$Revision: 4.12 $	$Date: 2008/07/25 19:11:24 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -225,3 +225,17 @@ plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
   }
   invisible(NULL)
 }
+
+# subset operator
+
+"[.quad" <- function(x, ...) {
+  U <- union.quad(x)
+  Z <- is.data(x)
+  w <- w.quad(x)
+  U <- U[...]
+  Z <- Z[...]
+  w <- w[...]
+  quad(U[Z], U[!Z], w)
+}
+
+ 

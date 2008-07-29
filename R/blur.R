@@ -3,7 +3,7 @@
 #
 # apply Gaussian blur to an image
 #
-#    $Revision: 1.5 $   $Date: 2008/06/18 21:03:23 $
+#    $Revision: 1.6 $   $Date: 2008/07/25 18:56:11 $
 #
 fillNA <- function(x, value=0) {
   stopifnot(is.im(x))
@@ -29,8 +29,7 @@ blur <- function(x, sigma=NULL, ..., normalise=FALSE, bleed=TRUE, varcov=NULL) {
   ngiven <- varcov.given + sigma.given
   switch(ngiven + 1,
          {
-           stopifnot(is.owin(window))
-           sigma <- (1/8) * min(diff(window$xrange), diff(window$yrange))
+           sigma <- (1/8) * min(diff(x$xrange), diff(x$yrange))
          }, {
            if (sigma.given && length(sigma) == 2)
              varcov <- diag(sigma^2)

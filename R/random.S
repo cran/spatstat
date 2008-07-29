@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.35 $   $Date: 2008/05/05 18:35:27 $
+#    $Revision: 4.36 $   $Date: 2008/07/28 01:13:42 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -374,22 +374,29 @@ rpoint <- function(n, f, fmax=NULL,
                sQuote("win")))
   parents <- rpoispp(kappa, lmax=lmax, win=dilated)
   #
-  # initialise offspring pattern and offspring-to-parent map
-  result <- ppp(numeric(0), numeric(0), window = win)
-  parentid <- numeric(0)
-
+  result <- NULL
   # generate clusters
   if(parents$n > 0) {
     for(i in seq(parents$n)) {
       # generate random offspring of i-th parent point
       cluster <- rcluster(parents$x[i], parents$y[i], ...)
-      cluster <- ppp(cluster$x, cluster$y, window=frame, check=FALSE)
-      # trim to window
-      cluster <- cluster[win]
-      # add to pattern
-      result <- superimpose(result, cluster, W=win)
-      # update offspring-to-parent map
-      parentid <- c(parentid, rep(i, cluster$n))
+      if(!inherits(cluster, "ppp"))
+        cluster <- ppp(cluster$x, cluster$y, window=frame, check=FALSE)
+      # skip if cluster is empty
+      if(cluster$n > 0) {
+        # trim to window
+        cluster <- cluster[win]
+        if(is.null(result)) {
+          # initialise offspring pattern and offspring-to-parent map
+          result <- cluster
+          parentid <- rep(1, cluster$n)
+        } else {
+          # add to pattern
+          result <- superimpose(result, cluster, W=win)
+          # update offspring-to-parent map
+          parentid <- c(parentid, rep(i, cluster$n))
+        }
+      }
     }
   }
 
