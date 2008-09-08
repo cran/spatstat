@@ -34,7 +34,6 @@
     \item{Lines}{a line segment pattern (object of class \code{"psp"})
       representing the lineaments in the full dataset.
       See \code{\link{psp.object}} for details of the format.
-      given as a data frame with 4 columns (x1, y1, x2, y2).
     }
     \item{SouthWindow}{the window delineating the southern half of
       the study region. An object of class \code{"owin"}.

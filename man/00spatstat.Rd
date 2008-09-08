@@ -176,6 +176,7 @@
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
 	\code{\link{lansing}} \tab Lansing Woods data \cr
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
+	\code{\link{murchison}} \tab Murchison gold deposits \cr
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
 	\code{\link{ponderosa}} \tab Getis-Franklin ponderosa pine trees data \cr
@@ -577,22 +578,38 @@
   \bold{Finer control over model fitting:}
   
   A quadrature scheme is represented by an object of
-  class \code{"quad"}.
-
+  class \code{"quad"}. To create a quadrature scheme, typically
+  use \code{\link{quadscheme}}.
+  
   \tabular{ll}{
-    \code{\link{quadscheme}} \tab
-    generate a Berman-Turner quadrature scheme\cr
-    \tab	for use by \code{ppm } \cr
+    \code{\link{quadscheme}} \tab default quadrature scheme \cr
+                             \tab using rectangular cells or Dirichlet cells\cr
+    \code{\link{pixelquad}}  \tab quadrature scheme based on image pixels \cr
+    \code{\link{quad}}       \tab create an object of class \code{"quad"}
+  }
+  
+  To inspect a quadrature scheme:
+  \tabular{ll}{
+    \code{plot(Q)} \tab plot quadrature scheme \code{Q}\cr
+    \code{print(Q)} \tab print basic information about quadrature scheme \code{Q}\cr
+    \code{\link{summary}(Q)} \tab summary of quadrature scheme \code{Q}
+  }
+
+  A quadrature scheme consists of data points, dummy points, and
+  weights. To generate dummy points:
+  \tabular{ll}{
     \code{\link{default.dummy}} \tab default pattern of dummy points \cr
     \code{\link{gridcentres}} \tab dummy points in a rectangular grid \cr
     \code{\link{rstrat}} \tab stratified random dummy pattern \cr
     \code{\link{spokes}} \tab radial pattern of dummy points  \cr
-    \code{\link{corners}} \tab dummy points at corners of the window  \cr
+    \code{\link{corners}} \tab dummy points at corners of the window
+  }
+  
+  To compute weights:
+  \tabular{ll}{
     \code{\link{gridweights}} \tab quadrature weights by the grid-counting rule  \cr
-    \code{\link{dirichlet.weights}} \tab quadrature weights are Dirichlet tile areas \cr
-    \code{plot(Q)} \tab plot quadrature scheme \code{Q}\cr
-    \code{print(Q)} \tab print basic information about quadrature scheme \code{Q}\cr
-    \code{\link{summary}(Q)} \tab summary of quadrature scheme \code{Q}
+    \code{\link{dirichlet.weights}} \tab quadrature weights are
+    Dirichlet tile areas
   }
 
   \bold{Simulation and goodness-of-fit for fitted models:}

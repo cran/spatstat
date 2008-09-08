@@ -3,7 +3,7 @@
 \title{Prediction from a Fitted Point Process Model}
 \description{
 Given a fitted point process model obtained by \code{\link{ppm}},	
-evaluate the spatial trend and the conditional intensity of the model
+evaluate the spatial trend or the conditional intensity of the model
 at new locations.
 }
 \usage{
@@ -17,17 +17,19 @@ at new locations.
     class \code{"ppm"} (see \code{\link{ppm.object}}).
   }
   \item{window}{
-    window delimiting the locations where predictions
+    A window (object of class \code{"owin"})
+    delimiting the locations where predictions
     should be computed. Defaults to the window of the
     original data used to fit the model \code{object}.
   }
-  \item{ngrid}{dimensions (either (\code{ngrid[1]} by \code{ngrid[2]}
-    or \code{ngrid} by \code{ngrid}) of a rectangular grid of locations
-    inside \code{window} where predictions should be computed.
-    (Incompatible with \code{locations})
+  \item{ngrid}{Dimensions of a rectangular grid of locations
+    inside \code{window} where the predictions should be computed.
+    An integer, or an integer vector of length 2,
+    specifying the number of grid points in the \eqn{y} and \eqn{x}
+    directions. (Incompatible with \code{locations})
   }
   \item{locations}{
-    data giving the \eqn{x,y} coordinates (and marks, if required)
+    Data giving the \eqn{x,y} coordinates (and marks, if required)
     at which predictions should be computed. Either a data frame
     or a binary image mask.
     (Incompatible with \code{ngrid})
@@ -38,10 +40,11 @@ at new locations.
     See Details.
   }
   \item{type}{
-    character string.
+    Character string.
     Indicates which property of the fitted model should be predicted.
-    Options are \code{"trend"} for the spatial trend, and 
-    \code{"cif"} or \code{"lambda"} for the conditional intensity.
+    Options are \code{"trend"} for the spatial trend, 
+    \code{"cif"} or \code{"lambda"} for the conditional intensity,
+    and \code{"se"} for the standard error of the fitted spatial trend.
   }
   \item{\dots}{
     Ignored.
@@ -73,12 +76,15 @@ at new locations.
   for each type at the same grid of locations.
 
   The ``predicted values'' are either values of the spatial trend
-  (if \code{type="trend"}) or values of the conditional intensity
-  (if \code{type="cif"} or \code{type="lambda"}).
+  (if \code{type="trend"}), values of the conditional intensity
+  (if \code{type="cif"} or \code{type="lambda"}), or
+  estimates of standard error for the fitted spatial trend
+  (if \code{type="se"}).
 }
 \details{
-  This function computes the spatial trend
-  and the conditional intensity of a fitted spatial point process model.
+  This function computes the spatial trend 
+  and the conditional intensity of a fitted spatial point process model,
+  and the standard error of the estimate of spatial trend.
   See Baddeley and Turner (2000) for explanation and examples.
  
   Given a point pattern dataset, we may fit
@@ -93,30 +99,57 @@ at new locations.
 
   The default action is to create a rectangular grid of points
   in the observation window of the data point pattern, and evaluate
-  the spatial trend and conditional intensity at these locations.
+  the spatial trend at these locations.
 
-  Note that by ``spatial trend'' we mean the
-  (exponentiated) first order potential
+  The argument \code{type} specifies the values that are computed:
+  \describe{
+    \item{If \code{type="trend"}:}{
+      the ``spatial trend'' of the fitted model is evaluated at each
+      required spatial location \eqn{u}.
+    }
+    \item{If \code{type="cif"}:}{
+      the conditional intensity \eqn{\lambda(u, X)}{lambda(u,X)} of the
+      fitted model is evaluated at each required spatial location \eqn{u},
+      with respect to the data point pattern \eqn{X}.
+    }
+    \item{If \code{type="se"}:}{
+      the estimated (asymptotic) standard error of the
+      fitted spatial trend is evaluated at each required spatial location
+      \eqn{u}. This is available only for Poisson point process models.
+    }
+  }
+  Note that the ``spatial trend'' is the same as the intensity function
+  if the fitted model \code{object} is a Poisson point process.
+  However, if the model is not a Poisson process, then the
+  ``spatial trend'' is the (exponentiated) first order potential
   and not the intensity of the process. [For example if we fit the
   stationary Strauss process with parameters
   \eqn{\beta}{beta} and \eqn{\gamma}{gamma},
-  then the spatial trend is constant and equal to \eqn{\beta}{beta}. ]
-  The conditional intensity \eqn{\lambda(u, X)}{lambda(u,X)} of the
-  fitted model is evaluated at each required spatial location \eqn{u},
-  with respect to the data point pattern \eqn{X}.
+  then the spatial trend is constant and equal to \eqn{\beta}{beta},
+  while the intensity is a smaller value that is not easy to
+  compute. ]
 
-  If the argument \code{ngrid} is present, then
-  predictions are performed at an \code{ngrid} by \code{ngrid}
-  pixel grid of locations in the window \code{window}. 
-  The result of prediction will be a pixel image or images.
-  
-  If \code{locations} is present, then predictions
-  will be performed at the spatial locations given by
-  this dataset. The result of prediction will be either a
-  vector of values or a pixel image or a list of images, depending
-  on the format of \code{locations}. 
-
-  The argument \code{locations} may be either a data frame or list
+  The spatial locations where predictions are required,
+  are determined by the (incompatible)
+  arguments \code{ngrid} and \code{locations}.
+  \itemize{
+    \item 
+    If the argument \code{ngrid} is present, then
+    predictions are performed at a rectangular 
+    grid of locations in the window \code{window}. 
+    The result of prediction will be a pixel image or images.
+    \item 
+    If \code{locations} is present, then predictions
+    will be performed at the spatial locations given by
+    this dataset. These may be an arbitrary list of spatial locations,
+    or they may be a rectangular grid. 
+    The result of prediction will be either a numeric vector
+    or a pixel image or images.
+    \item 
+    If neither \code{ngrid} nor \code{locations} is given, then
+    \code{ngrid} is assumed. It defaults to 50.
+  }
+  The argument \code{locations} may be a data frame or list
   specifying arbitrary locations,
   or a binary image mask (an object of class \code{"owin"}
   with type \code{"mask"}) specifying (a subset of) a rectangular
@@ -141,9 +174,6 @@ at new locations.
   location, and the result of prediction will be a 
   list of images, one for each mark value.
   
-  If neither \code{ngrid} nor \code{locations} is given, then
-  \code{ngrid} is assumed. It defaults to 50.
-
   The argument \code{covariates} gives the values of any spatial covariates
   at the prediction locations.
   If the trend formula in the fitted model 
@@ -178,7 +208,6 @@ at new locations.
   generate a plot of the predicted values,
   it may be easier to use \code{\link{plot.ppm}} which calls
   this function and plots the results.
-
 }
 \references{
   Baddeley, A. and Turner, R.
@@ -224,6 +253,14 @@ at new locations.
   \dontrun{
   persp(cif)
   }
+  data(japanesepines)
+  mj <- ppm(japanesepines, ~harmonic(x,y,2))
+  se <- predict(mj, type="se")
+
+  # prediction at 5 arbitrary locations
+  X <- runifpoint(5, japanesepines$window)
+  predict(mj, locations=X)
+  predict(mj, locations=X, type="se")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

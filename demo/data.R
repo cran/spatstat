@@ -55,6 +55,11 @@ plot(split(lansing))
 data(longleaf)
 plot(longleaf)
 
+data(murchison)
+plot(murchison$greenstone, main="Murchison data", col="lightgreen")
+plot(murchison$gold, add=TRUE, pch="+",col="blue")
+plot(murchison$faults, add=TRUE, col="red")
+
 data(nbfires)
 plot(split(nbfires)$nbfires.00 %mark% factor(nbextras$extras.00$fire.type),
      main=c("New Brunswick fires 2000", "by fire type"),

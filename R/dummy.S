@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.15 $     $Date: 2007/06/07 15:09:32 $
+#       $Revision: 5.16 $     $Date: 2008/08/19 01:15:00 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -79,15 +79,16 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
     # and ensures that dummy points are generated only inside those tiles
     # that have nonzero digital area
     M   <- as.mask(W, dimyx=rev(npix))
+    Mm <- M$m
     if(gi) {
-      xx <- as.vector(raster.x(M)[M$m])
-      yy <- as.vector(raster.y(M)[M$m])
+      xx <- as.vector(raster.x(M)[Mm])
+      yy <- as.vector(raster.y(M)[Mm])
       pid <- gridindex(xx,yy,W$xrange,W$yrange,nx,ny)$index
     } else {
       # identify all pixels that are inside the window
       # by their row and column index
-      Mrow <- as.vector(row(M$m)[M$m])
-      Mcol <- as.vector(col(M$m)[M$m])
+      Mrow <- as.vector(row(Mm)[Mm])
+      Mcol <- as.vector(col(Mm)[Mm])
       # this code matches 'gridindex'
       imap <- grid1index(M$yrow, M$yrange, ny)
       jmap <- grid1index(M$xcol, M$xrange, nx)
@@ -101,15 +102,16 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
     ## For each tile, find middle point in list of pixels in each tile
     # (always inside tile, by construction)
     middle <- function(v) { n <- length(v);
-                            mid <- ceiling(n/2); v[mid]}
+                            mid <- ceiling(n/2);
+                            v[mid]}
+    midpix <- tapply(seq(along=pid), pid, middle)
     if(gi) {
-      x <- tapply(xx, pid, middle)
-      y <- tapply(yy, pid, middle)
+      x <- xx[midpix]
+      y <- yy[midpix]
     }
     else {
-      midcol   <- tapply(Mcol,pid,middle)
-      midrow   <- tapply(Mrow,pid,middle)
-    
+      midcol   <- Mcol[midpix]
+      midrow   <- Mrow[midpix]
       x <- M$xcol[midcol]
       y <- M$yrow[midrow]
     }

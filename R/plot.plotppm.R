@@ -3,11 +3,12 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.10 $  $Date: 2007/03/16 08:28:50 $
+# $Revision: 1.13 $  $Date: 2008/08/11 04:00:53 $
 #
 #
 
-plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
+plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,se=TRUE,
+                         pause=interactive(),
                          how=c("persp","image","contour"), ...)
 {
   verifyclass(x,"plotppm")
@@ -20,7 +21,10 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
   if(!missing(cif) && (cif & is.null(x[["cif"]])))
     stop("No cif to plot.\n")
   cif <- cif & !is.null(x[["cif"]])
-  surftypes <- c("trend", "cif")[c(trend, cif)]
+  if(!missing(se) && (se & is.null(x[["se"]])))
+    stop("No SE to plot.\n")
+  se <- se & !is.null(x[["se"]])
+  surftypes <- c("trend", "cif", "se")[c(trend, cif, se)]
 
   # marked point process?
   mrkvals <- attr(x,"mrkvals")
@@ -50,8 +54,9 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,pause=interactive(),
     xs <- x[[ttt]]
     for (i in seq(mrkvals)) {
       level <- mrkvals[i]
-      main <- paste("Fitted", ttt, "\n",
-                    if(marked) paste("mark =", level) else NULL)
+      main <- paste(if(ttt == "se") "Estimated" else "Fitted",
+                    ttt, 
+                    if(marked) paste("\n mark =", level) else NULL)
       for (style in how) {
         switch(style,
                persp = {

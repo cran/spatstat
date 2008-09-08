@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.17 $	$Date: 2008/01/07 10:28:29 $
+#	$Revision: 1.18 $	$Date: 2008/08/06 08:09:06 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -53,7 +53,7 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            xr <- range(unlist(lapply(bdry, function(a) a$x)))
            yr <- range(unlist(lapply(bdry, function(a) a$y)))
            # Compile result
-           W <- owin(xr, yr, poly=bdry)
+           W <- owin(xr, yr, poly=bdry, check=FALSE)
            # Compute its area indirectly
            # Result might be a rectangle: if so, convert to rectangle type
            W <- rescue.rectangle(W)

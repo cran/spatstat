@@ -87,6 +87,16 @@
   probably a reasonable approximation in many applications.
   If \code{gamaction="silent"}, the calculation proceeds without a warning.
 }
+\section{Error messages}{
+  An error message that reports
+  \emph{system is computationally singular} indicates that the
+  determinant of the Fisher information matrix was either too large 
+  or too small for reliable numerical calculation.
+  This can occur either because of numerical overflow or
+  because of collinearity in the covariates. Most commonly it occurs
+  because of numerical overflow: to check this, rescale the 
+  coordinates of the data points and refit the model. See the Examples.
+}
 \value{
   A square matrix.
 }
@@ -95,6 +105,17 @@
   fit <- ppm(X, ~ x + y)
   vcov(fit)
   vcov(fit, what="Fish")
+
+  # example of singular system
+  data(demopat)
+  m <- ppm(demopat, ~polynom(x,y,2))
+  \dontrun{
+    try(v <- vcov(m))
+  }
+  # rescale x, y coordinates to range [0,1] x [0,1] approximately
+  demopat <- rescale(demopat, 10000)
+  m <- ppm(demopat, ~polynom(x,y,2))
+  v <- vcov(m)  
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
@@ -105,3 +126,4 @@
 \keyword{spatial}
 \keyword{methods}
 \keyword{models}
+

@@ -3,7 +3,6 @@
 \alias{[<-.hyperframe}
 \alias{$.hyperframe}
 \alias{$<-.hyperframe}
-\alias{[.quad}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{affinexy}
@@ -38,6 +37,7 @@
 \alias{cobble.xy}
 \alias{commasep}
 \alias{compatible.units}
+\alias{conform.imagelist}
 \alias{countingweights}
 \alias{damaged.ppm}
 \alias{default.expand}
@@ -140,6 +140,7 @@
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{mkcor}
+\alias{model.se.image}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
@@ -160,7 +161,6 @@
 \alias{paren}
 \alias{pickoption}
 \alias{pixellate}
-\alias{pixelquad}
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.fii}
@@ -295,7 +295,6 @@
 \method{[}{hyperframe}(x, i, j) <- value
 \method{$}{hyperframe}(x, name)
 \method{$}{hyperframe}(x, i) <- value
-\method{[}{quad}(x, ...)
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
@@ -333,6 +332,7 @@ crosspairs(X,Y,rmax)
 cobble.xy(x, y, f, fatal)
 commasep(x)
 compatible.units(x, y, coerce=TRUE)
+conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
 default.expand(object, m, epsilon)
@@ -440,6 +440,7 @@ maxflow(costm)
 meanX.owin(w)            
 meanY.owin(w)
 mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
+model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 	 rbord, use.gam, famille,
          forcefit, allcovar, callstring, precomputed, savecomputed, preponly)
@@ -466,7 +467,6 @@ paren(x)
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 pixellate(x, \dots, weights)
-pixelquad(X, W = as.owin(X))
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{fii}(x, \dots)

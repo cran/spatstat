@@ -9,7 +9,7 @@
 }
 \usage{
   \method{plot}{ppm}(x, ngrid = c(40,40), superimpose = TRUE, 
-                  trend = TRUE, cif = TRUE, pause = interactive(),
+                  trend = TRUE, cif = TRUE, se = TRUE, pause = interactive(),
                   how=c("persp","image", "contour"), plot.it = TRUE,
                   locations = NULL, covariates=NULL, \dots)
 }
@@ -35,6 +35,10 @@
   \item{cif}{
     logical flag; if \code{TRUE}, the conditional intensity surface will be
     produced.
+  }
+  \item{se}{
+    logical flag; if \code{TRUE}, the estimated standard error of the
+    spatial trend surface will be produced.
   }
   \item{pause}{
     logical flag indicating whether to pause with a prompt 
