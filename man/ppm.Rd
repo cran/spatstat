@@ -246,8 +246,17 @@
       Finer quadrature schemes (i.e. those with more dummy
       points) generally yield a better approximation, at the
       expense of higher computational load. 
+
       Complete control over the quadrature scheme is possible.
       See \code{\link{quadscheme}} for an overview.
+      Use \code{quadscheme(X, D, method="dirichlet")} to compute
+      quadrature weights based on the Dirichlet tessellation,
+      or \code{\quadscheme(X, D, method="grid")} to compute
+      quadrature weights by counting points in grid squares,
+      where \code{X} and \code{D} are the patterns of data points
+      and dummy points respectively.
+      Alternatively use \code{\link{pixelquad}} to make a quadrature
+      scheme with a dummy point at every pixel in a pixel image.
 
       A practical advantage of quadrature schemes arises when we want to fit
       a model involving covariates (e.g. soil pH). Suppose we have only been

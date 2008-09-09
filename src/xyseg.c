@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.7 $     $Date: 2008/02/04 11:06:39 $
+  $Revision: 1.9 $     $Date: 2008/08/19 21:37:36 $
 
  */
 
@@ -180,6 +180,60 @@ void xysiANY(na, x0a, y0a, dxa, dya,
     }
 }
 
+
+/* 
+    Analogue of xysegint
+    when segments in list 'a' are infinite vertical lines
+*/
+
+void xysegVslice(na, xa,  
+		 nb, x0b, y0b, dxb, dyb, 
+		 eps,
+		 yy, ok)
+     /* inputs (vectors of coordinates) */
+     int *na, *nb;
+     double *xa, *x0b, *y0b, *dxb, *dyb;
+     /* input (tolerance for determinant) */
+     double *eps;  
+     /* outputs (matrices) */
+     double *yy;
+     int *ok;
+{ 
+  int i, j, ma, mb, ijpos;
+  double diffx0, diffx1, width, abswidth, epsilon;
+  int notvertical;
+
+  ma = *na;
+  mb = *nb;
+  epsilon = *eps;
+
+  for (j=0; j < mb; j++) {
+    /* determine whether segment j is nearly vertical */
+    width = dxb[j];
+    abswidth = (width > 0) ? width : -width;
+    notvertical = (abswidth <= epsilon);
+    
+    for(i = 0; i < ma; i++) {
+      ijpos = j * ma + i;
+      ok[ijpos] = 0;
+      yy[ijpos] = NIETS;
+      /* test whether vertical line i separates endpoints of segment j */
+      diffx0 = xa[i] - x0b[j];
+      diffx1 = diffx1 - width;
+      if(diffx0 * diffx1 <= 0) {
+	/* intersection */
+	ok[ijpos] = 1;
+	/* compute y-coordinate of intersection point */
+	if(notvertical) {
+	  yy[ijpos] = y0b[j] + diffx0 * dyb[j]/width;
+	} else {
+	  /* vertical or nearly-vertical segment: pick midpoint */	  
+	  yy[ijpos] = y0b[j] + dyb[j]/2.0;
+	}
+      }
+    }
+  }
+}
 
 
 /* 

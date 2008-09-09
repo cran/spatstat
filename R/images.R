@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.33 $     $Date: 2007/10/24 09:41:15 $
+#         $Revision: 1.37 $     $Date: 2008/08/15 06:48:28 $
 #
 #      The class "im" of raster images
 #
@@ -178,6 +178,13 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
   lev <- x$lev
   X <- x
   W <- as.owin(X)
+  if(missing(i)) {
+    # set all pixels to 'value'
+    v <- X$v
+    v[!is.na(v)] <- value
+    X$v <- v
+    return(X)
+  }
   if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
     # 'i' is a point pattern
     # test whether all points are inside window
@@ -368,5 +375,13 @@ quantile.im <- function(x, ...) {
   return(q)
 }
 
-
-
+conform.imagelist <- function(X, Zlist) {
+  # determine points of X where all images in Zlist are defined
+  ok <- rep(TRUE, length(X$x))
+  for(i in seq(Zlist)) {
+    Zi <- Zlist[[i]]
+    ZiX <- Zi[X, drop=FALSE]
+    ok <- ok & !is.na(ZiX)
+  }
+  return(ok)
+}

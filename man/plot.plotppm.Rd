@@ -7,7 +7,8 @@
   carries out the actual plotting of these objects.
 }
 \usage{
-  \method{plot}{plotppm}(x, data = NULL, trend = TRUE, cif = TRUE, pause = interactive(),
+  \method{plot}{plotppm}(x, data = NULL, trend = TRUE, cif = TRUE,
+     se = TRUE, pause = interactive(),
              how = c("persp", "image", "contour"), ...)
 }
 \arguments{
@@ -26,6 +27,10 @@
   \item{cif}{
     Logical scalar; should the complete conditional
     intensity of the fitted model be plotted?
+  }
+  \item{se}{
+    Logical scalar; should the estimated standard error
+    of the fitted intensity be plotted?
   }
   \item{pause}{
     Logical scalar indicating whether to pause with a prompt 

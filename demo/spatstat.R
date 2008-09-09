@@ -26,6 +26,7 @@ data(letterR)
 plot(letterR, main="Polygonal window")
 plot(as.mask(letterR), main="Binary mask window")
 
+plot(letterR, col="green", border="red", lwd=2, main="Polygonal window with colour fill")
 plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with line shading")
 
 Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
@@ -182,6 +183,18 @@ plot(X, add=TRUE)
 
 fanfare("IV. Model-fitting")
 
+data(japanesepines)
+plot(japanesepines)
+fit <- ppm(japanesepines, ~1)
+print(fit)
+fit <- ppm(japanesepines, ~polynom(x,y,2))
+print(fit)
+plot(fit, how="image", se=FALSE, main=c("Inhomogeneous Poisson model",
+                               "fit by maximum likelihood",
+                               "Fitted intensity"))
+plot(fit, how="image", trend=FALSE,
+     main="Standard error of fitted intensity")
+
 data(redwood)
 parsave <- par(mfrow=c(1,2))
 plot(redwood)
@@ -212,9 +225,13 @@ plot(Xsim, main="Simulation from fitted Strauss model")
 
 
 data(demopat)
+demopat <- rescale(demopat, 8)
+unitname(demopat) <- c("mile", "miles")
+demopat
+
 plot(demopat, cols=c("red", "blue"))
 fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
-plot(fit)
+plot(fit, trend=TRUE, se=TRUE)
 
 fanfare("V. Simulation")
 

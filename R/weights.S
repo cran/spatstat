@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.20 $	$Date: 2007/06/07 15:08:54 $
+#	$Revision: 4.21 $	$Date: 2008/08/15 07:03:13 $
 #
 #
 # Main functions:
@@ -105,7 +105,7 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE,
 	X <- as.ppp(X, window)
 	x <- X$x
 	y <- X$y
-	win <- X$window
+        win <- X$window
 
         # determine number of tiles
         if(is.null(ntile))

@@ -2,7 +2,7 @@
 #
 #   rescale.R
 #
-#   $Revision: 1.3 $ $Date: 2007/10/24 09:41:15 $
+#   $Revision: 1.4 $ $Date: 2008/08/06 08:44:04 $
 #
 #
 
@@ -18,6 +18,18 @@ rescale.ppp <- function(X, s) {
 
 rescale.owin <- function(X, s) {
   Y <- affine.owin(X, mat=diag(c(1/s,1/s)))
+  unitname(Y) <- rescale(unitname(X), s)
+  return(Y)
+}
+
+rescale.im <- function(X, s) {
+  Y <- X
+  Y$xrange <- X$xrange/s
+  Y$yrange <- X$yrange/s
+  Y$xstep  <- X$xstep/s
+  Y$ystep  <- X$ystep/s
+  Y$xcol   <- X$xcol/s
+  Y$yrow   <- X$yrow/s
   unitname(Y) <- rescale(unitname(X), s)
   return(Y)
 }

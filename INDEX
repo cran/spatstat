@@ -43,6 +43,7 @@ Saturated               Saturated Pairwise Interaction model
 Softcore                The Soft Core Point Process Model
 Strauss                 The Strauss Point Process Model
 StraussHard             The Strauss / Hard Core Point Process Model
+[.quad                  Subset of Quadrature Scheme
 [.splitppp              Extract or Replace Sub-Patterns
 [.tess                  Extract or Replace Subset of Tessellation
 [<-.im                  Reset Values in Subset of Image
@@ -219,6 +220,7 @@ mincontrast             Method of Minimum Contrast
 model.images            Compute Images of Constructed Covariates
 model.matrix.ppm        Extract Design Matrix from Point Process Model
 multiplicity.ppp        Count Multiplicity of Duplicate Points
+murchison               Murchison gold deposits
 nbfires                 Point Patterns of New Brunswick Forest Fires
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nncorr                  Nearest-Neighbour Correlation of Marked Point
@@ -247,6 +249,7 @@ pcf.fv                  Pair Correlation Function obtained from K
 pcf.ppp                 Pair Correlation Function of Point Pattern
 pcfcross                Multitype pair correlation function
 persp.im                Perspective Plot of Pixel Image
+pixelquad               Quadrature Scheme Based on Pixel Grid
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.hyperframe         Plot Entries in a Hyperframe
@@ -311,6 +314,7 @@ redwood                 California Redwoods Point Pattern (Ripley's
 redwoodfull             California Redwoods Point Pattern (Entire
                         Dataset)
 rescale                 Convert dataset to another unit of length
+rescale.im              Convert Pixel Image to Another Unit of Length
 rescale.owin            Convert Window to Another Unit of Length
 rescale.ppp             Convert Point Pattern to Another Unit of Length
 rescale.psp             Convert Line Segment Pattern to Another Unit of

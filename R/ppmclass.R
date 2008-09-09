@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.26 $	$Date: 2008/07/25 20:28:09 $
+#	$Revision: 2.27 $	$Date: 2008/08/07 09:01:50 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -241,7 +241,7 @@ model.images <- function(object, W=as.owin(object), ...) {
   mf <- model.frame(bt$fmla, bt$glmdata, ...)
   mm <- model.matrix(bt$fmla, mf, ...)
   # retain only the entries for dummy points (pixels)
-  mm <- mm[!is.data(Q), ]
+  mm <- mm[!is.data(Q), , drop=FALSE]
   # create template image
   Z <- as.im(attr(Q, "M"))
   # make images

@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.23 $	$Date: 2007/06/12 13:44:41 $
+#	$Revision: 1.24 $	$Date: 2008/08/11 02:37:03 $
 #
 #
 #
@@ -101,12 +101,38 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
          },
          polygonal = {
            p <- W$bdry
-           for(i in seq(p))
-             do.call.matched("polygon",
-                             resolve.defaults(
-                                              list(x=p[[i]]),
-                                              list(...)),
-                             extrargs="lwd")
+           holes <- (unlist(lapply(W$bdry, area.xypolygon)) < 0)
+           if(!any(holes)) {
+             # simply plot the polygons
+             for(i in which(!holes))
+               do.call.matched("polygon",
+                               resolve.defaults(
+                                                list(x=p[[i]]),
+                                                list(...)),
+                               extrargs="lwd")
+           } else {
+             # First fill the polygon's interior with colour
+             # Use gpclib to triangulate
+             txy <- triangulate(owin2gpc(W))
+             ntri <- floor(nrow(txy)/3)
+             # Fill triangles with colour
+             for(i in seq(ntri)) {
+               ri <- 3 * (i - 1) + 1:3
+               do.call.matched("polygon",
+                               resolve.defaults(
+                                                list(x=txy[ri,]),
+                                                list(border=NA),
+                                                list(...)))
+             }
+             # Now draw polygon boundaries
+             for(i in seq(p))
+               do.call.matched("polygon",
+                               resolve.defaults(
+                                                list(x=p[[i]]),
+                                                list(density=0, col=NA),
+                                                list(...)),
+                               extrargs="lwd")
+           }
            if(hatch) {
              L <- rlinegrid(angle, spacing, W)
              L <- L[W]

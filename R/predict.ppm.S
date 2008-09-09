@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.43 $	$Date: 2007/09/22 01:56:43 $
+#	$Revision: 1.48 $	$Date: 2008/08/12 07:24:04 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -13,9 +13,16 @@
 
 predict.ppm <-
 function(object, window, ngrid=NULL, locations=NULL,
-         covariates=NULL, type="trend", ..., check=TRUE, repair=TRUE) {
+         covariates=NULL, type="trend", 
+         ..., check=TRUE, repair=TRUE) {
 #
-# guard against mistakes
+#  options for `type'
+  type <- pickoption("type", type,
+                     c(trend="trend", cif="cif", lambda="cif",
+                       se="se", SE="se"))
+#
+#  guard against mistakes
+#  
   dotargs <- list(...)
   nama <- names(dotargs)
   if(!is.null(nama) && any(nama == "newdata"))
@@ -23,7 +30,6 @@ function(object, window, ngrid=NULL, locations=NULL,
                   "is out-of-date. See help(predict.ppm)"))
   else if(length(dotargs) > 0)
     warning("Some arguments were ignored by predict.ppm")
-  
 #
 #	'object' is the output of ppm()
 #
@@ -36,7 +42,6 @@ function(object, window, ngrid=NULL, locations=NULL,
     message("object format corrupted; repairing it.")
     object <- update(object, use.internal=TRUE)
   }
-    
 #
 #       find out what kind of model it is
 #
@@ -52,7 +57,6 @@ function(object, window, ngrid=NULL, locations=NULL,
 
   if(mod$antiquated)
     warning("The model was fitted by an out-of-date version of spatstat")
-  
 #
 #       determine mark space
 #  
@@ -62,6 +66,13 @@ function(object, window, ngrid=NULL, locations=NULL,
     else 
       types <- levels(marks(mod$entries$data))
   }
+#
+#
+#    Standard error only available for Poisson models
+#
+  if(type == "se" && !poisson)
+      stop(paste("Standard error calculation",
+                 "is only available for Poisson models"), call.=FALSE)
 #
 #      determine what kind of output is required:
 #      (arguments present)    (output)  
@@ -204,12 +215,7 @@ function(object, window, ngrid=NULL, locations=NULL,
 #
   if(!trivial) {
 	Vnames <- model$internal$Vnames
-
-#        if(exists("is.R") && is.R())
-	    glmdata <- model$internal$glmdata
-#        else        
-#            assign("glmdata", model$internal$glmdata, f = 1)
-
+        glmdata <- getglmdata(model)
         glmfit <- getglmfit(model)
   }
   
@@ -218,16 +224,26 @@ function(object, window, ngrid=NULL, locations=NULL,
 #   Compute the predicted value z[i] for each row of 'newdata'
 #   Store in a vector z and reshape it later
 #
-
-###############################################################  
+###############################################################
+  
   if(trivial) {
-#############  COMPUTE CONSTANT INTENSITY #####################
+#############  UNIFORM POISSON PROCESS #####################
 
     lambda <- exp(model$coef[[1]])
-    z <- rep(lambda, nrow(newdata))
+    switch(type,
+           cif=,
+           trend={
+             z <- rep(lambda, nrow(newdata))
+           },
+           se={
+             npoints <- data.ppm(model)$n
+             se.lambda <- lambda/sqrt(npoints)
+             z <- rep(se.lambda, nrow(newdata))
+           },
+           stop("Internal error: unrecognised type"))
     
 ################################################################
-  } else if(type == "trend" || poisson) {
+  } else if((type %in% c("trend","se")) || poisson) {
 #
 #############  COMPUTE TREND ###################################
 #	
@@ -239,7 +255,29 @@ function(object, window, ngrid=NULL, locations=NULL,
 #
 #   invoke predict.glm()
 #
-    z <- predict(glmfit, newdata, type="response")
+    lambda <- predict(glmfit, newdata, type="response")
+#
+    switch(type,
+           cif=,
+           trend={
+             z <- lambda
+           },
+           se={
+             # extract variance-covariance matrix of parameters
+             vc <- vcov(model)
+             # compute model matrix
+             mf <- model.frame(formula(model), newdata, ...)
+             mm <- model.matrix(formula(model), mf, ...)
+             # compute relative variance = diagonal of quadratic form
+             nr <- nrow(newdata)
+             vv <- numeric(nr)
+             for(i in 1:nr) {
+               mmi <- mm[i, ]
+               vv[i] <- mmi %*% vc %*% mmi
+             }
+             z <- lambda * sqrt(vv)
+           },
+           stop("Internal error: unrecognised type"))
 
 ##############################################################  
   } else if(type == "cif" || type =="lambda") {
@@ -326,10 +364,61 @@ function(object, window, ngrid=NULL, locations=NULL,
         class(out) <- c("listof", class(out))
       }
     }
-
-####################################################################
-#
+#  
+#  FINISHED
 #  
   return(out)
 }
 
+
+####################################################################
+#
+# compute pointwise uncertainty of fitted intensity
+#
+model.se.image <- function(fit, W=as.owin(fit), ..., what="sd") {
+  if(!is.poisson.ppm(fit))
+    stop("Only implemented for Poisson point process models", call.=FALSE)
+  what <- pickoption("option", what,
+                     c(sd="sd", var="var", cv="cv", CV="cv", ce="ce", CE="ce"))
+  W <- as.mask(as.owin(W))
+  # variance-covariance matrix of coefficients
+  vc <- vcov(fit)
+  np <- dim(vc)[1]
+  # extract sufficient statistic for each coefficient
+  mm <- model.images(fit, W, ...)
+  # compute fitted intensity 
+  lam <- predict(fit, locations=W)
+  # initialise resulting image
+  U <- as.im(W)
+  U[] <- 0
+  # compute pointwise matrix product, assuming vc is symmetric
+  for(i in 1:np) {
+    Si <- mm[[i]]
+    aii <- vc[i,i]
+    U <- eval.im(U + aii * Si^2)
+    if(i > 1) {
+      for(j in 1:(i-1)) {
+        Sj <- mm[[j]]
+        aij <- vc[i,j]
+        twoaij <- 2 * aij
+        U <- eval.im(U + twoaij * Si * Sj)
+      }
+    }
+  }
+  # the matrix product is the relative variance (CV)
+  if(what=="cv")
+    return(U)
+  # relative sd
+  if(what=="ce") {
+    U <- eval.im(sqrt(U))
+    return(U)
+  }
+  # multiply by squared intensity to obtain variance
+  U <- eval.im(U * lam^2)
+  # variance
+  if(what=="var")
+    return(U)
+  # compute SD and return
+  U <- eval.im(sqrt(U))
+  return(U)
+}

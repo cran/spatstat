@@ -1,7 +1,7 @@
 #
 #    plot.ppm.S
 #
-#    $Revision: 2.5 $    $Date: 2006/10/10 04:22:48 $
+#    $Revision: 2.8 $    $Date: 2008/08/12 08:26:45 $
 #
 #    plot.ppm()
 #         Plot a point process model fitted by ppm().
@@ -10,7 +10,8 @@
 #
 plot.ppm <- function(x, ngrid = c(40,40),
 		     superimpose = TRUE,
-                     trend = TRUE, cif = TRUE, pause = interactive(),
+                     trend=TRUE, cif=TRUE, se=TRUE, 
+                     pause = interactive(),
                      how=c("persp","image", "contour"),
                      plot.it=TRUE,
                      locations=NULL, covariates=NULL, ...)
@@ -41,11 +42,11 @@ plot.ppm <- function(x, ngrid = c(40,40),
 #        Interpret options
 #        -----------------
 #        
-#        Whether to plot trend, cif
+#        Whether to plot trend, cif, se
         
-  if(!trend && !cif) {
-    cat(paste("Nothing plotted - both", sQuote("trend"),
-              "and", sQuote("cif"), "are FALSE\n"))
+  if(!trend && !cif && !se) {
+    cat(paste("Nothing plotted;", sQuote("trend"), ",", sQuote("cif"),
+              "and", sQuote("se"), "are all FALSE\n"))
     return(invisible(NULL))
   }
 #        Suppress uninteresting plots
@@ -54,18 +55,29 @@ plot.ppm <- function(x, ngrid = c(40,40),
     trend <- !stationary
   if(missing(cif))
     cif <- !poisson
-        
-  if(!trend && !cif) {
-    cat("Nothing plotted -- all plots selected are flat surfaces.\n")
-    return(invisible())
+  if(missing(se))
+    se <- poisson && !stationary 
+  else if(se && !poisson) {
+      warning(paste("standard error calculation",
+                  "is only implemented for Poisson models"))
+      se <- FALSE
   }
-
+  if(!trend && !cif && !se) {
+    cat("Nothing plotted -- all plots selected are flat surfaces.\n")
+    return(invisible(NULL))
+  }
+#
+#  style of plot: suppress pseudo-default
+#  
+    if(missing(how))
+      how <- "image"
+#
 #
 #        Do the prediction
 #        ------------------
 
   out <- list()
-  surftypes <- c("trend","cif")[c(trend,cif)]
+  surftypes <- c("trend","cif","se")[c(trend,cif,se)]
   ng <- if(missing(ngrid) && !missing(locations)) NULL else ngrid
 
   for (ttt in surftypes) {
@@ -88,7 +100,7 @@ plot.ppm <- function(x, ngrid = c(40,40),
   if(plot.it) {
     if(!superimpose)
       data <- NULL
-    plot(out,data=data,trend=trend,cif=cif,how=how,pause=pause, ...)
+    plot(out,data=data,trend=trend,cif=cif,se=se,how=how,pause=pause, ...)
   }
 
   

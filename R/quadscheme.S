@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.18 $    $Date: 2008/03/05 20:42:49 $
+#      $Revision: 4.22 $    $Date: 2008/08/19 03:16:51 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -260,36 +260,40 @@ validate.quad <- function(Q, fatal=FALSE, repair=TRUE, announce=FALSE) {
 pixelquad <- function(X, W=as.owin(X)) {
   # make a quadscheme with a dummy point at every pixel
   verifyclass(X, "ppp")
-  verifyclass(W, "owin")
 
   # convert window to mask if not already one
+  W <- as.owin(W)
   M <- as.mask(W)
-
+  MM <- M$m
+  
   # create pixel coordinates and corresponding row, column indices
-  xx <- as.vector(raster.x(M))
-  yy <- as.vector(raster.y(M))
-  rr <- as.vector(col(M$m))
-  cc <- as.vector(row(M$m))
-  Nr <- nrow(M$m)
-  Nc <- ncol(M$m)
+  xx <- as.vector(raster.x(M)[MM])
+  yy <- as.vector(raster.y(M)[MM])
+  cc <- as.vector(col(MM)[MM])
+  rr <- as.vector(row(MM)[MM])
+  Nr <- M$dim[1]
+  Nc <- M$dim[2]
   
   # discretise data points
   ij <- nearest.raster.point(X$x, X$y, M)
-  # tabulate pixel locations 
-  Xtab <- table(row=factor(ij$row, levels=1:Nr),
-                col=factor(ij$col, levels=1:Nc))
+  ijrow <- ij$row
+  ijcol <- ij$col
+
+  # tabulate pixel locations of data points
+  Xtab <- table(row=factor(ijrow, levels=1:Nr),
+                col=factor(ijcol, levels=1:Nc))
 
   # every pixel contains exactly one dummy point,
   # so the total count of quadrature points in each pixel is:
   Qtab <- Xtab + 1
 
   # compute counting weights for data points
-  wdat <- 1/Qtab[cbind(ij$row, ij$col)]
+  wdat <- 1/Qtab[cbind(ijrow, ijcol)]
   # compute counting weights for dummy points
   wdum <- 1/Qtab[cbind(rr, cc)]
 
   # create quadrature scheme
-  dum <- ppp(xx, yy, window=W)
+  dum <- ppp(xx, yy, window=W, check=FALSE)
   Q <- quad(X, dum, c(wdat,wdum))
 
   attr(Q, "M") <- M
