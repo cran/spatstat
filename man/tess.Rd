@@ -36,7 +36,7 @@
       \code{y} axes. They may or may not have equal size and shape.
       The arguments \code{xgrid} and \code{ygrid} determine
       the positions of the vertical and horizontal grid lines,
-      respectively. 
+      respectively. (See \code{\link{quadrats}} for another way to do this.)
     }
     \item{tile list:}{
       tiles are arbitrary spatial regions.
@@ -68,7 +68,8 @@
   \code{\link{tiles}},
   \code{\link{split.ppp}},
   \code{\link{cut.ppp}},
-  \code{\link{by.ppp}}.
+  \code{\link{by.ppp}},
+  \code{\link{quadrats}}.
 }
 \examples{
   A <- tess(xgrid=0:4,ygrid=0:4)

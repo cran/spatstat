@@ -26,3 +26,19 @@ print.summary.listof <- function(x, ...) {
   print(x)
   invisible(NULL)
 }
+
+listof <- function(...) {
+  stuff <- list(...)
+  class(stuff) <- c("listof", class(stuff))
+  return(stuff)
+}
+
+as.listof <- function(x) {
+  if(!is.list(x))
+    x <- list(x)
+  class(x) <- c("listof", class(x))
+  return(x)
+}
+
+  
+  

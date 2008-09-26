@@ -14,6 +14,7 @@
 \alias{as.data.frame.hyperframe}
 \alias{as.fv}
 \alias{as.list.hyperframe}
+\alias{as.listof}
 \alias{as.polygonal}
 \alias{as.units}
 \alias{beachcolours}
@@ -108,6 +109,7 @@
 \alias{killinteraction}
 \alias{least.common.multiple}
 \alias{levels<-.im}
+\alias{listof}
 \alias{lookup.im}
 \alias{majorminorversion}
 \alias{make.even.breaks}
@@ -308,6 +310,7 @@ as.breakpts(\dots)
                                   discard=TRUE, warn=TRUE)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
+as.listof(x)
 as.polygonal(W)
 as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
@@ -411,6 +414,7 @@ Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
 killinteraction(model)
 least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
+listof(\dots)
 lookup.im(Z, x, y, naok)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
