@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.11 $  $Date: 2007/12/19 17:53:02 $
+#  $Revision: 1.12 $  $Date: 2008/09/25 00:49:04 $
 #
 
 quadratcount <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL)  {
@@ -50,8 +50,6 @@ plot.quadratcount <- function(x, ..., add=FALSE, entries=as.table(x), dx=0, dy=0
   invisible(NULL)
 }
 
-
-
 quadrat.breaks <- function(xr, yr, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL) {
   if(is.null(xbreaks))
     xbreaks <- seq(xr[1], xr[2], length=nx+1)
@@ -80,5 +78,16 @@ quadrat.countEngine <- function(x, y, xbreaks, ybreaks, weights) {
   }
   attr(sumz, "xbreaks") <- xbreaks
   attr(sumz, "ybreaks") <- ybreaks
+  attr(sumz, "quadrats") <- tess(xgrid=xbreaks, ygrid=ybreaks)
   return(sumz)
 }
+
+quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL) {
+  W <- as.owin(X)
+  xr <- W$xrange
+  yr <- W$yrange
+  b <- quadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
+  Z <- tess(xgrid=b$xbreaks, ygrid=b$ybreaks)
+  return(Z)
+}
+

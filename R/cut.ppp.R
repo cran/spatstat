@@ -1,4 +1,10 @@
-# replaces part of ppp.S
+#
+#  cut.ppp.R
+#
+#  cut method for ppp objects
+#
+#  $Revision: 1.3 $   $Date: 2008/09/24 17:15:26 $
+#
 
 cut.ppp <- function(x, z=marks(x), ...) {
   x <- as.ppp(x)
@@ -23,9 +29,18 @@ cut.ppp <- function(x, z=marks(x), ...) {
   # z is a tessellation 
   switch(z$type,
          rect={
-           fx <- cut(x$x, breaks=z$xgrid, include.lowest=TRUE)
-           fy <- cut(x$y, breaks=z$ygrid, include.lowest=TRUE)
-           m <- factor(paste(fx, fy, sep="x"))
+           jx <- findInterval(x$x, z$xgrid,
+                              rightmost.closed=TRUE, all.inside=TRUE)
+           iy <- findInterval(x$y, z$ygrid, 
+                              rightmost.closed=TRUE, all.inside=TRUE)
+           nrows    <- length(z$ygrid) - 1
+           ncols <- length(z$xgrid) - 1
+           jcol <- jx
+           irow <- nrows - iy + 1
+           ktile <- jcol + ncols * (irow - 1)
+           m <- factor(ktile, levels=seq(nrows*ncols))
+           ij <- expand.grid(j=seq(ncols),i=seq(nrows))
+           levels(m) <- paste("Tile row ", ij$i, ", col ", ij$j, sep="")
          },
          tiled={
            todo <- seq(x$n)

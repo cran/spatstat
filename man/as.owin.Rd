@@ -3,6 +3,7 @@
 \alias{as.owin.owin}
 \alias{as.owin.ppp}
 \alias{as.owin.ppm}
+\alias{as.owin.psp}
 \alias{as.owin.quad}
 \alias{as.owin.im}
 \alias{as.owin.gpc.poly}
@@ -17,6 +18,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{owin}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
  \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
+ \method{as.owin}{psp}(W, \dots, fatal=TRUE)
  \method{as.owin}{quad}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
@@ -64,6 +66,10 @@ in any of several formats, into an object of class \code{"owin"}.
     representing a polygonal window.
     \item
     an object of class \code{"ppp"} representing a point pattern.
+    In this case, the object's \code{window} structure will be
+    extracted.
+    \item
+    an object of class \code{"psp"} representing a line segment pattern.
     In this case, the object's \code{window} structure will be
     extracted.
     \item

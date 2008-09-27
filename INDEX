@@ -294,6 +294,8 @@ quad.ppm                Extract Quadrature Scheme Used to Fit a Point
 quadrat.test            Chi-Squared Dispersion Test for Spatial Point
                         Pattern Based on Quadrat Counts
 quadratcount            Quadrat counting for a point pattern
+quadratresample         Resample a Point Pattern by Resampling Quadrats
+quadrats                Divide Region into Quadrats
 quadscheme              Generate a Quadrature Scheme from a Point
                         Pattern
 quantile.im             Sample Quantiles of Pixel Image

@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.18 $	$Date: 2008/08/06 08:09:06 $
+#	$Revision: 1.21 $	$Date: 2008/09/25 02:17:08 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -91,8 +91,21 @@ shiftxy <- function(X, vec=c(0,0)) {
        y = X$y + vec[2])
 }
 
-"shift.owin" <- function(X,  vec=c(0,0), ...) {
+"shift.owin" <- function(X,  vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "owin")
+  if(!is.null(origin)) {
+    stopifnot(is.character(origin))
+    if(!missing(vec))
+      warning("argument vec ignored; overruled by argument origin")
+    origin <- pickoption("origin", origin, c(centroid="centroid",
+                                             midpoint="midpoint",
+                                             bottomleft="bottomleft"))
+    locn <- switch(origin,
+                   centroid={ unlist(centroid.owin(X)) },
+                   midpoint={ c(mean(X$xrange), mean(X$yrange)) },
+                   bottomleft={ c(X$xrange[1], X$yrange[1]) })
+    return(shift(X, -locn))
+  }
   # Shift the bounding box
   X$xrange <- X$xrange + vec[1]
   X$yrange <- X$yrange + vec[2]
@@ -115,8 +128,22 @@ shiftxy <- function(X, vec=c(0,0)) {
   return(X)
 }
 
-"shift.ppp" <- function(X, vec=c(0,0), ...) {
+"shift.ppp" <- function(X, vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "ppp")
+  if(!is.null(origin)) {
+    stopifnot(is.character(origin))
+    if(!missing(vec))
+      warning("argument vec ignored; overruled by argument origin")
+    origin <- pickoption("origin", origin, c(centroid="centroid",
+                                             midpoint="midpoint",
+                                             bottomleft="bottomleft"))
+    W <- X$window
+    locn <- switch(origin,
+                   centroid={ unlist(centroid.owin(W)) },
+                   midpoint={ c(mean(W$xrange), mean(W$yrange)) },
+                   bottomleft={ c(W$xrange[1], W$yrange[1]) })
+    vec <- -locn
+  }
   r <- shiftxy(X, vec)
   w <- shift.owin(X$window, vec)
   return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))

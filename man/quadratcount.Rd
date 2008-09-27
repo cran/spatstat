@@ -69,7 +69,9 @@
   use \code{\link{quadrat.test}}.
 }
 \seealso{
-  \code{\link{quadrat.test}}
+  \code{\link{quadrat.test}},
+  \code{\link{quadrats}},
+  \code{\link{quadratresample}}
 }
 \references{
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.

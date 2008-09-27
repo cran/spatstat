@@ -78,6 +78,8 @@ quadrat.test(X, ...)
 }
 \seealso{
   \code{\link{quadratcount}},
+  \code{\link{quadrats}},
+  \code{\link{quadratresample}},
   \code{\link{chisq.test}},
   \code{\link{kstest}}.
 

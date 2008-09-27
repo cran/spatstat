@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.37 $     $Date: 2008/08/15 06:48:28 $
+#         $Revision: 1.38 $     $Date: 2008/09/25 01:08:36 $
 #
 #      The class "im" of raster images
 #
@@ -92,8 +92,22 @@ is.im <- function(x) {
 ########   methods for class "im"
 ################################################################
 
-shift.im <- function(X, vec=c(0,0), ...) {
+shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "im")
+  if(!is.null(origin)) {
+    stopifnot(is.character(origin))
+    if(!missing(vec))
+      warning("argument vec ignored; overruled by argument origin")
+    origin <- pickoption("origin", origin, c(centroid="centroid",
+                                             midpoint="midpoint",
+                                             bottomleft="bottomleft"))
+    W <- as.owin(X)
+    locn <- switch(origin,
+                   centroid={ unlist(centroid.owin(W)) },
+                   midpoint={ c(mean(W$xrange), mean(W$yrange)) },
+                   bottomleft={ c(W$xrange[1], W$yrange[1]) })
+    return(shift(X, -locn))
+  }
   X$xrange <- X$xrange + vec[1]
   X$yrange <- X$yrange + vec[2]
   X$xcol <- X$xcol + vec[1]

@@ -369,7 +369,8 @@
       \code{\link{plot.tess}} \tab plot a tessellation \cr
       \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
       \code{\link{[.tess}} \tab extract a subset of a tessellation \cr
-      \code{\link{[<-.tess}} \tab change a subset of a tessellation
+      \code{\link{[<-.tess}} \tab change a subset of a tessellation \cr
+      \code{\link{quadrats}} \tab create a tessellation of rectangles
     }
 }
   
@@ -634,7 +635,7 @@
     \code{\link{anova.ppm}} \tab Analysis of Deviance for
     point process models 
   }
-  
+
   \bold{Diagnostic plots:}
   
   Residuals for a fitted point process model, and diagnostic plots
@@ -648,6 +649,18 @@
     \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint interaction\cr
     \code{\link{residualspaper}} \tab examples from Baddeley et al (2005)
   }
+
+
+  \bold{Resampling and randomisation procedures}
+
+  You can build your own tests based on randomisation
+  and resampling using the following capabilities:
+  
+  \tabular{ll}{
+    \code{\link{quadratresample}} \tab Spatial block resampling \cr
+    \code{\link{rshift}} \tab Random shifting of (subsets of) points
+  }
+  
 }
 
 

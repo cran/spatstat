@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.3 $ $Date: 2008/07/25 23:09:11 $
+#   $Revision: 1.4 $ $Date: 2008/09/24 17:15:26 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   isrect <- !is.null(xgrid) && !is.null(ygrid)
@@ -153,11 +153,12 @@ tiles <- function(x) {
            yg <- x$ygrid
            nx <- length(xg) - 1
            ny <- length(yg) - 1
-           for(i in seq(nx))
-             for(j in seq(ny)) {
+           for(j in rev(seq(ny)))
+             for(i in seq(nx)) {
                winij <- owin(xg[c(i,i+1)], yg[c(j,j+1)])
                dout <- list(winij)
-               names(dout) <- paste("Tile ", i, ", ", j, sep="")
+               names(dout) <- paste("Tile row ", ny-j+1, ", col ", i,
+                                    sep="")
                out <- append(out, dout)
              }
          },
