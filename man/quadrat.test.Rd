@@ -12,8 +12,8 @@
 }
 \usage{
 quadrat.test(X, ...)
-\method{quadrat.test}{ppp}(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
-\method{quadrat.test}{ppm}(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
+\method{quadrat.test}{ppp}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
+\method{quadrat.test}{ppm}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
 }
 \arguments{
   \item{X}{
@@ -26,6 +26,7 @@ quadrat.test(X, ...)
     Numbers of quadrats in the \eqn{x} and \eqn{y} directions.
     Incompatible with \code{xbreaks} and \code{ybreaks}.
   }
+  \item{\dots}{Ignored.}
   \item{xbreaks}{
     Optional. Numeric vector giving the \eqn{x} coordinates of the
     boundaries of the quadrats. Incompatible with \code{nx}.
@@ -34,7 +35,10 @@ quadrat.test(X, ...)
     Optional. Numeric vector giving the \eqn{y} coordinates of the
     boundaries of the quadrats. Incompatible with \code{ny}.
   }
-  \item{\dots}{Ignored.}
+  \item{tess}{
+    Tessellation (object of class \code{"tess"}) determining the
+    quadrats. Incompatible with \code{nx, ny, xbreaks, ybreaks}.
+  }
 }
 \details{
   These functions perform \eqn{\chi^2}{chi^2} tests of goodness-of-fit
@@ -60,8 +64,10 @@ quadrat.test(X, ...)
   }
 
   In both cases, the window of observation is divided
-  into rectangular tiles, and the number of data points in each tile is
+  into tiles, and the number of data points in each tile is
   counted, as described in \code{\link{quadratcount}}.
+  The quadrats are rectangular by default, or may be regions of arbitrary shape
+  specified by the argument \code{tess}.
   The expected number of points in each quadrat is also calculated,
   as determined by CSR (in the first case) or by the fitted model
   (in the second case). Then we perform the
@@ -97,7 +103,7 @@ quadrat.test(X, ...)
 \examples{
   data(simdat)
   quadrat.test(simdat)
-  quadrat.test(simdat, 4)
+  quadrat.test(simdat, 4, 3)
 
   # fitted model: inhomogeneous Poisson
   fitx <- ppm(simdat, ~x, Poisson())
@@ -115,6 +121,11 @@ quadrat.test(X, ...)
                        list(z=signif(te$p.value,3))))
   title(sub=sublab, cex.sub=3)
 
+  # quadrats of irregular shape
+  B <- dirichlet(runifpoint(6, simdat$window))
+  qB <- quadrat.test(simdat, tess=B)
+  plot(simdat, main="quadrat.test(simdat, tess=B)", pch="+")
+  plot(qB, add=TRUE, col="red", lwd=2, cex=1.3)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

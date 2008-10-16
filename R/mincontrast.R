@@ -214,7 +214,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL) {
   
-  dataname <- deparse(substitute(K))
+  dataname <- deparse(substitute(X))
   if(inherits(X, "fv")) {
     K <- X
   } else if(inherits(X, "ppp")) {

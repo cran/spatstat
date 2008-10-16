@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.38 $     $Date: 2008/09/25 01:08:36 $
+#         $Revision: 1.41 $     $Date: 2008/10/03 20:04:50 $
 #
 #      The class "im" of raster images
 #
@@ -118,6 +118,24 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
 "[.im" <- subset.im <-
 function(x, i, drop=TRUE, ..., raster=NULL) {
   lev <- x$lev
+  
+  if(missing(i)) {
+    # entire image 
+    out <- if(is.null(raster)) x else as.im(raster)
+    xy <- expand.grid(y=out$yrow,x=out$xcol)
+    if(!is.null(raster)) {
+      # resample image on new pixel raster
+      values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
+      out <- im(values, out$yrow, out$xcol, unitname=unitname(out))
+    }
+    if(!drop)
+      return(out)
+    else {
+      v <- out$v
+      return(v[!is.na(v)])
+    }
+  }
+  
   if(!is.null(ip <- as.ppp(i, W=as.owin(x), fatal=FALSE, check=FALSE))) {
     # 'i' is a point pattern 
     # Look up the greyscale values for the points of the pattern
@@ -146,7 +164,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
 
     out <- if(is.null(raster)) x else as.im(raster)
     xy <- expand.grid(y=out$yrow,x=out$xcol)
-    if(!missing(raster)) {
+    if(!is.null(raster)) {
       # resample image on new pixel raster
       values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
       out <- im(values, out$yrow, out$xcol, unitname=unitname(out))
@@ -316,7 +334,20 @@ as.matrix.im <- function(x, ...) {
 
 mean.im <- function(x, ...) {
   verifyclass(x, "im")
-  return(mean.default(as.matrix(x), na.rm=TRUE, ...))
+  xvalues <- x[drop=TRUE]
+  return(mean(xvalues))
+}
+
+median.im <- function(x, ...) {
+  verifyclass(x, "im")
+  xvalues <- x[drop=TRUE]
+  return(median(xvalues))
+}
+
+range.im <- function(x, ...) {
+  verifyclass(x, "im")
+  xvalues <- x[drop=TRUE]
+  return(range(xvalues))
 }
 
 hist.im <- function(x, ..., probability=FALSE) {
@@ -399,3 +430,36 @@ conform.imagelist <- function(X, Zlist) {
   }
   return(ok)
 }
+
+split.im <- function(x, f, ..., drop=FALSE) {
+  stopifnot(is.im(x))
+  if(inherits(f, "tess")) 
+    subsets <- tiles(f)
+  else if(is.im(f)) {
+    if(f$type != "factor")
+      f <- eval.im(factor(f))
+    subsets <- tiles(tess(image=f))
+  } else stop("f should be a tessellation or a factor-valued image")
+  if(!is.subset.owin(as.owin(x), as.owin(f)))
+    stop("f does not cover the window of x")
+  n <- length(subsets)
+  out <- vector(mode="list", length=n)
+  names(out) <- names(subsets)
+  for(i in 1:n)
+    out[[i]] <- x[subsets[[i]], drop=drop]
+  if(drop)
+    return(out)
+  else 
+    return(as.listof(out))
+}
+
+by.im <- function(data, INDICES, FUN, ...) {
+  stopifnot(is.im(data))
+  V <- split(data, INDICES)
+  U <- lapply(V, FUN, ...)
+  return(as.listof(U))
+}
+
+
+
+   

@@ -1,7 +1,7 @@
 #
 # randomseg.R
 #
-# $Revision: 1.5 $ $Date: 2007/06/06 11:59:13 $
+# $Revision: 1.6 $ $Date: 2008/10/15 19:02:19 $
 #
 
 rpoisline <- function(lambda, win=owin()) {
@@ -29,7 +29,7 @@ rpoisline <- function(lambda, win=owin()) {
            y0= ymid + p * si - q * co,
            x1= xmid + p * co - q * si,
            y1= ymid + p * si + q * co,
-           window=win)
+           window=win, check=FALSE)
   # clip to window
   X <- X[win]
   return(X)
@@ -49,7 +49,7 @@ rlinegrid <- function(angle=45, spacing=0.1, win=owin()) {
   u <- runif(1, min=0, max=spacing) - rmax
   if(u >= rmax)   
     return(psp(numeric(0), numeric(0), numeric(0), numeric(0),
-               window=win))
+               window=win, check=FALSE))
   p <- seq(u, rmax, by=spacing)
   # compute intersection points with circle
   q <- sqrt(rmax^2 - p^2)
@@ -60,7 +60,7 @@ rlinegrid <- function(angle=45, spacing=0.1, win=owin()) {
            y0= ymid + p * si - q * co,
            x1= xmid + p * co - q * si,
            y1= ymid + p * si + q * co,
-           window=owin(xmid+c(-1,1)*rmax, ymid+c(-1,1)*rmax))
+           window=owin(xmid+c(-1,1)*rmax, ymid+c(-1,1)*rmax), check=FALSE)
   # clip to window
   X <- X[win]
   return(X)

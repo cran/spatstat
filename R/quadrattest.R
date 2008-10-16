@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.9 $  $Date: 2008/07/25 19:48:53 $
+#  $Revision: 1.11 $  $Date: 2008/09/30 17:36:16 $
 #
 
 
@@ -9,17 +9,20 @@ quadrat.test <- function(X, ...) {
   UseMethod("quadrat.test")
 }
 
-quadrat.test.ppp <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
+quadrat.test.ppp <- function(X, nx=5, ny=nx, ...,
+                             xbreaks=NULL, ybreaks=NULL, tess=NULL)
 {
   Xname <- deparse(substitute(X))
   do.call("quadrat.testEngine",
           resolve.defaults(list(X, nx=nx, ny=ny,
-                                xbreaks=xbreaks, ybreaks=ybreaks),
+                                xbreaks=xbreaks, ybreaks=ybreaks,
+                                tess=tess),
                            list(...), 
                            list(Xname=Xname, fitname="CSR")))
 }
 
-quadrat.test.ppm <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
+quadrat.test.ppm <- function(X, nx=5, ny=nx, ...,
+                             xbreaks=NULL, ybreaks=NULL, tess=NULL)
 {
   fitname <- deparse(substitute(X))
   dataname <- paste("data from", fitname)
@@ -27,50 +30,59 @@ quadrat.test.ppm <- function(X, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL, ...)
     stop("Test is only defined for Poisson point process models")
   do.call("quadrat.testEngine",
           resolve.defaults(list(data.ppm(X), nx=nx, ny=ny,
-                                xbreaks=xbreaks, ybreaks=ybreaks, 
+                                xbreaks=xbreaks, ybreaks=ybreaks,
+                                tess=tess,
                                 fit=X),
                            list(...),
                            list(Xname=dataname, fitname=fitname)))
 }
 
-quadrat.testEngine <- function(X, nx, ny, xbreaks, ybreaks,
-                                ..., fit=NULL, Xname=NULL, fitname=NULL) {
+quadrat.testEngine <- function(X, nx, ny, ...,
+                               xbreaks=NULL, ybreaks=NULL, tess=NULL,
+                               fit=NULL, Xname=NULL, fitname=NULL) {
   if(length(list(...)) > 0) {
     nama <- names(list(...))
     warning(paste(ngettext(length(nama), "argument", "arguments"),
                   paste(dQuote(nama), collapse=", "),
                   "ignored"))
   }
-  Xcount <- quadratcount(X, nx, ny, xbreaks, ybreaks)
-  xbreaks <- attr(Xcount, "xbreaks")
-  ybreaks <- attr(Xcount, "ybreaks")
-  W <- X$window
+  Xcount <- quadratcount(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks,
+                         tess=tess)
+  tess <- attr(Xcount, "tess")
   # determine expected values under model
   if(is.null(fit)) {
     testname <- "Chi-squared test of CSR using quadrat counts"
-    if(W$type == "rectangle") {
-      areas <- outer(diff(xbreaks), diff(ybreaks), "*")
-      fitmeans <- X$n * areas/sum(areas)
-      df <- length(fitmeans) - 1
-    } else {
-      W <- as.mask(W)
-      xx <- as.vector(raster.x(W))[W$m]
-      yy <- as.vector(raster.y(W))[W$m]
-      areas <- quadrat.countEngine(xx, yy, xbreaks, ybreaks)
-      fitmeans <- X$n * areas/sum(areas)
-      df <- length(fitmeans) - 1
-    }
+    if(tess$type == "rect") 
+      areas <- outer(diff(tess$xgrid), diff(tess$ygrid), "*")
+    else 
+      areas <- unlist(lapply(tiles(tess), area.owin))
+    W <- as.owin(tess)
+    XW <- X[W]
+    fitmeans <- XW$n * areas/sum(areas)
+    df <- length(fitmeans) - 1
   } else {
     testname <- paste("Chi-squared test of fitted model",
                       sQuote(fitname),
                       "using quadrat counts")
     Q <- quad.ppm(fit, drop=TRUE)
-    xx <- x.quad(Q)
-    yy <- y.quad(Q)
     ww <- w.quad(Q)
     lambda <- fitted(fit, drop=TRUE)
     masses <- lambda * ww
-    fitmeans <- quadrat.countEngine(xx, yy, xbreaks, ybreaks, weights=masses)
+    # sum weights of quadrature points in each tile 
+    if(tess$type == "rect") {
+      xx <- x.quad(Q)
+      yy <- y.quad(Q)
+      xbreaks <- tess$xgrid
+      ybreaks <- tess$ygrid
+      fitmeans <- rectquadrat.countEngine(xx, yy, xbreaks, ybreaks,
+                                          weights=masses)
+      fitmeans <- as.vector(t(fitmeans))
+    } else {
+      U <- as.ppp(Q)
+      V <- marks(cut(U, tess))
+      fitmeans <- tapply(masses, list(tile=V), sum)
+      fitmeans[is.na(fitmeans)] <- 0
+    }
     df <- length(fitmeans) - length(coef(fit))
   }
   OBS <- as.vector(Xcount)
@@ -95,39 +107,44 @@ quadrat.testEngine <- function(X, nx, ny, xbreaks, ybreaks,
                            residuals = (OBS - EXP)/sqrt(EXP)),
                       class = "htest")
   class(result) <- c("quadrattest", class(result))
-  attr(result, "quadrats") <- Xcount
+  attr(result, "quadratcount") <- Xcount
   return(result)
 }
 
 
 plot.quadrattest <- function(x, ...) {
   xname <- deparse(substitute(x))
-  quads <- attr(x, "quadrats")
-  if(inherits(quads, "quadratcount")) {
-    # plot observed counts
-    do.call("plot.quadratcount",
-            resolve.defaults(list(quads, dx=-0.3, dy=0.3),
-                             list(...),
-                             list(main=xname)))
-    # plot expected counts
-    do.call("plot.quadratcount",
-            resolve.defaults(list(quads, dx=0.3, dy=0.3),
-                             list(add=TRUE),
-                             list(entries=signif(x$expected,2)),
-                             list(...)))
-    # plot Pearson residuals
-    do.call("plot.quadratcount",
-            resolve.defaults(list(quads, dx=0, dy=-0.3),
-                             list(add=TRUE),
-                             list(entries=signif(x$residuals,2)),
-                             list(...)))
-    return(invisible(NULL))
-  }
-  components <- attr(x, "components")
-  do.call("plot",
-          resolve.defaults(list(components),
+  Xcount <- attr(x, "quadratcount")
+  # plot tessellation
+  tess  <- attr(Xcount, "tess")
+  do.call("plot.tess",
+          resolve.defaults(list(tess),
                            list(...),
                            list(main=xname)))
+  # compute locations for text
+  til <- tiles(tess)
+  incircles <- lapply(til, incircle)
+  x0 <- unlist(lapply(incircles, function(z) { z$x }))
+  y0 <- unlist(lapply(incircles, function(z) { z$y }))
+  ra <- unlist(lapply(incircles, function(z) { z$r }))
+  #
+  dotext <- function(dx, dy, values, x0, y0, ra, ...) {
+    do.call.matched("text.default",
+                    resolve.defaults(list(x=x0 + dx * ra, y = y0 + dy * ra),
+                                     list(labels=paste(as.vector(values))),
+                                     list(...)))
+  }
+  # plot observed counts
+  cos30 <- sqrt(2)/2
+  sin30 <- 1/2
+  f <- 0.5
+  dotext(-f * cos30, f * sin30, as.table(Xcount), x0, y0, ra, adj=c(1,0))
+  # plot expected counts
+  dotext(f * cos30, f * sin30, signif(x$expected,2), x0, y0, ra, adj=c(0,0))
+  # plot Pearson residuals
+  dotext(0, -f,  signif(x$residuals,2),x0, y0, ra)
+
+  return(invisible(NULL))
 }
 
 

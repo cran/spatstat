@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.81 $	$Date: 2008/09/25 01:57:12 $
+#	$Revision: 4.82 $	$Date: 2008/09/28 02:35:58 $
 #
 #
 #	A window may be either
@@ -294,6 +294,12 @@ as.owin.gpc.poly <- function(W, ..., fatal=TRUE) {
   if(!verifyclass(W, "gpc.poly", fatal=fatal))
     return(NULL)
   gpc2owin(W)
+}
+
+as.owin.tess <- function(W, ..., fatal=TRUE) {
+  if(!verifyclass(W, "tess", fatal=fatal))
+    return(NULL)
+  return(W$window)
 }
 
 as.owin.default <- function(W, ..., fatal=TRUE) {

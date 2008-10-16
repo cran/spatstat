@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.30 $	$Date: 2008/07/22 06:09:02 $
+#	$Revision: 4.33 $	$Date: 2008/10/14 23:01:54 $
 #
 #
 #
@@ -234,6 +234,8 @@ intersect.owin <- function(A, B, ...) {
 
 
 union.owin <- function(A, B, ...) {
+  if(is.null(A)) return(B)
+  if(is.null(B)) return(A)
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 
@@ -426,6 +428,61 @@ diameter <- function(w) {
   return(sqrt(max(d)))
 }
 
+incircle <- function(W) {
+  # computes the largest circle contained in W
+  verifyclass(W, "owin")
+  if(W$type == "rectangle") {
+    xr <- W$xrange
+    yr <- W$yrange
+    x0 <- mean(xr)
+    y0 <- mean(yr)
+    radius <- min(diff(xr), diff(yr))/2
+    return(list(x=x0, y=y0, r=radius))
+  }
+  # compute distance to boundary
+  U <- as.mask(rebound.owin(W, expand.owin(as.rectangle(W), 1.2)))
+  D <- distmap(complement.owin(U))
+  D <- D[W, drop=FALSE]
+  # find maximum distance
+  v <- D$v
+  ok <- !is.na(v)
+  Dvalues <- as.vector(v[ok])
+  Dmax <- max(Dvalues)
+  # find location of maximum
+  locn <- which.max(Dvalues)
+  locrow <- as.vector(row(v)[ok])[locn]
+  loccol <- as.vector(col(v)[ok])[locn]
+  x0 <- D$xcol[loccol]
+  y0 <- D$yrow[locrow]
+  # radius could be one pixel diameter shorter than Dmax
+  Dpixel <- sqrt(D$xstep^2 + D$ystep^2)
+  radius <- max(0, Dmax - Dpixel)
+  return(list(x=x0, y=y0, r=radius))
+}
+
+inpoint <- function(W) {
+  # selects a point that is always inside the window.
+  verifyclass(W, "owin")
+  if(W$type == "rectangle")
+    return(c(mean(W$xrange), mean(W$yrange)))
+  if(W$type == "polygonal") {
+    xy <- centroid.owin(W)
+    if(inside.owin(xy$x, xy$y, W))
+      return(xy)
+  }
+  W <- as.mask(W)
+  Mm <- W$m
+  Mrow <- as.vector(row(Mm)[Mm])
+  Mcol <- as.vector(col(Mm)[Mm])
+  selectmiddle <- function(x) { x[ceiling(length(x)/2)] }
+  midcol <- selectmiddle(Mcol)
+  midrow <- selectmiddle(Mrow[Mcol==midcol])
+  x <- W$xcol[midcol]
+  y <- W$yrow[midrow]
+  return(c(x,y))
+}
+
+  
 #
 # interface to gpclib
 #

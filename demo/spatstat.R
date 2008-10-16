@@ -64,6 +64,11 @@ plot(cut(X, Z), add=TRUE)
 
 plot(split(X, Z), main="split by tessellation")
 
+W <- square(1)
+X <- as.im(function(x,y){sqrt(x^2+y^2)}, W)
+Y <- dirichlet(runifpoint(12, W))
+plot(split(X,Y), main="image split by tessellation")
+
 plot(a, main="Self-crossing points")
 plot(selfcrossing.psp(a), add=TRUE, col="red")
 
@@ -88,6 +93,12 @@ data(cells)
 Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
+
+data(bei)
+ZA <- adaptive.density(bei, 0.01, nrep=5)
+plot(ZA, main="Adaptive intensity of point pattern",
+     col=grey(seq(1,0,length=256)))
+plot(bei, add=TRUE, pch=".")
 
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")

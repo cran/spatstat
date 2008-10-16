@@ -6,7 +6,8 @@
   counts the numbers of points in each quadrat.
 }
 \usage{
-  quadratcount(X, nx=5, ny=nx, xbreaks, ybreaks)
+  quadratcount(X, nx=5, ny=nx, \dots,
+               xbreaks=NULL, ybreaks=NULL, tess=NULL)
 }
 \arguments{
   \item{X}{
@@ -14,16 +15,22 @@
     (object of class \code{"ppp"}).
     }
     \item{nx,ny}{
-      Numbers of quadrats in the \eqn{x} and \eqn{y} directions.
+      Numbers of rectangular quadrats in the \eqn{x} and \eqn{y} directions.
       Incompatible with \code{xbreaks} and \code{ybreaks}.
     }
+    \item{\dots}{Ignored.}
     \item{xbreaks}{
       Numeric vector giving the \eqn{x} coordinates of the
-      boundaries of the quadrats. Incompatible with \code{nx}.
+      boundaries of the rectangular quadrats. Incompatible with \code{nx}.
     }
     \item{ybreaks}{
       Numeric vector giving the \eqn{y} coordinates of the
-      boundaries of the quadrats. Incompatible with \code{ny}.
+      boundaries of the rectangular quadrats. Incompatible with \code{ny}.
+    }
+    \item{tess}{
+      Tessellation (object of class \code{"tess"})
+      determining the quadrats. Incompatible
+      with \code{nx,ny,xbreaks,ybreaks}.
     }
 }
 \value{
@@ -36,8 +43,8 @@
 \details{
   Quadrat counting is an elementary technique for analysing spatial
   point patterns. See Diggle (2003).
-  
-  The window containing the point pattern \code{X} is divided into
+
+  By default, the window containing the point pattern \code{X} is divided into
   an \code{nx * ny} grid of rectangular tiles or `quadrats'.
   The number of points of \code{X} falling in each quadrat is
   counted. These numbers are returned as a contingency table.
@@ -54,11 +61,13 @@
   equally spaced over the range of \eqn{y} coordinates in the window.
   The lengths of \code{xbreaks} and \code{ybreaks} may be different.
 
+  Alternatively, quadrats of any shape may be used.
+  The argument \code{tess} can be a tessellation (object of class
+  \code{"tess"}) whose tiles will serve as the quadrats.
+  
   The algorithm counts the number of points of \code{X}
   falling in each quadrat, and returns these counts as a
-  contingency table. The \code{[i,j]} entry in the contingency table
-  is the point count for the quadrat with coordinates
-  \code{(xbreaks[i],xbreaks[i+1])} by \code{(ybreaks[i], ybreaks[i+1])}.
+  contingency table. 
 
   The return value is a \code{table} which can be printed neatly.
   The return value is also a member of the special class
@@ -90,6 +99,12 @@
  qX <-  quadratcount(X, 4, 5)
 
  # plotting:
+ plot(X, pch="+")
+ plot(qX, add=TRUE, col="red", cex=1.5, lty=2)
+
+ # quadrats determined by tessellation:
+ B <- dirichlet(runifpoint(6))
+ qX <- quadratcount(X, tess=B)
  plot(X, pch="+")
  plot(qX, add=TRUE, col="red", cex=1.5, lty=2)
 }

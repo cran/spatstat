@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.4 $ $Date: 2008/09/24 17:15:26 $
+#   $Revision: 1.7 $ $Date: 2008/09/30 18:56:01 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   isrect <- !is.null(xgrid) && !is.null(ygrid)
@@ -77,38 +77,50 @@ print.tess <- function(x, ...) {
   invisible(NULL)
 }
 
-plot.tess <- function(x, ..., main) {
+plot.tess <- function(x, ..., main, add=FALSE, col=NULL) {
   xname <- deparse(substitute(x))
   if(missing(main))
     main <- xname
   switch(x$type,
          rect={
            win <- x$window
-           do.call.matched("plot.owin",
-                           resolve.defaults(list(x=win, main=main),
-                                            list(...)),
-                           extrargs=c("sub", "lty", "lwd"))
+           if(!add)
+             do.call.matched("plot.owin",
+                             resolve.defaults(list(x=win, main=main),
+                                              list(...)),
+                             extrargs=c("sub", "lty", "lwd"))
            xg <- x$xgrid
            yg <- x$ygrid
            do.call.matched("segments",
                            resolve.defaults(list(x0=xg, y0=win$yrange[1],
                                                  x1=xg, y1=win$yrange[2]),
-                                            list(...)))
+                                            list(col=col),
+                                            list(...),
+                                            .StripNull=TRUE))
            do.call.matched("segments",
                            resolve.defaults(list(x0=win$xrange[1], y0=yg,
                                                  x1=win$xrange[2], y1=yg),
-                                            list(...)))
+                                            list(col=col),
+                                            list(...),
+                                            .StripNull=TRUE))
          },
          tiled={
-           plotme <- function(z, ..., hatch) { plot(z, ..., hatch=FALSE) }
-           plotme(x$window, main=main, ...)
+           if(!add)
+             do.call.matched("plot.owin",
+                             resolve.defaults(list(x=x$window, main=main),
+                                              list(...)))
            til <- tiles(x)
-           lapply(til,
-                  function(z, add=TRUE, ...) { plot(z, add=add, ...) },
-                  ...)
+           plotem <- function(z, ..., col=NULL) {
+             if(is.null(col))
+               plot(z, ..., add=TRUE)
+             else if(z$type != "mask")
+               plot(z, ..., border=col, add=TRUE)
+             else plot(z, ..., col=col, add=TRUE)
+           }
+           lapply(til, plotem, ..., col=col)
          },
          image={
-           plot(x$image, main=main, ...)
+           plot(x$image, main=main, ..., add=add)
          })
   return(invisible(NULL))
 }
@@ -178,3 +190,46 @@ tiles <- function(x) {
   class(out) <- c("listof", class(out))
   return(out)
 }
+
+
+as.im.tess <- function(X,
+                       W=as.mask(as.owin(X), dimyx=dimyx), ...,
+                       dimyx=NULL, na.replace=NULL) {
+  # if W is missing, the default is now evaluated, as above.
+  # if W is present, it may have to be converted
+  if(!missing(W)) {
+    stopifnot(is.owin(W))
+    if(W$type != "mask")
+      W <- as.mask(W, dimyx=dimyx)
+  }
+  switch(X$type,
+         tess={
+           out <- as.im(X$image, W=W, dimyx=dimyx, na.replace=na.replace)
+         },
+         tiled={
+           til <- X$tiles
+           ntil <- length(til)
+           out <- as.im(W, na.replace=na.replace)
+           out <- eval.im(factor(out, levels=seq(ntil)))
+           for(i in seq(ntil))
+             out[til[[i]]] <- factor(i, levels=seq(ntil))
+         },
+         rect={
+           xg <- X$xgrid
+           yg <- X$ygrid
+           nrows <- length(yg) - 1
+           ncols <- length(xg) - 1
+           out <- as.im(W)
+           jx <- findInterval(out$xcol, xg, rightmost.closed=TRUE)
+           iy <- findInterval(out$yrow, yg, rightmost.closed=TRUE)
+           M <- as.matrix(out)
+           Jcol <- jx[col(M)]
+           Irow <- nrows - iy[row(M)] + 1
+           Ktile <- Jcol + ncols * (Irow - 1)
+           out <- im(Ktile, xcol=out$xcol, yrow=out$yrow,
+                     lev=seq(nrows * ncols), unitname=unitname(W))
+         }
+         )
+  return(out)
+}
+

@@ -48,6 +48,8 @@ StraussHard             The Strauss / Hard Core Point Process Model
 [.tess                  Extract or Replace Subset of Tessellation
 [<-.im                  Reset Values in Subset of Image
 [<-.listof              Extract or Replace Subset of a List of Things
+adaptive.density        Intensity Estimate of Point Pattern Using
+                        Tessellation
 affine                  Apply Affine Transformation
 affine.owin             Apply Affine Transformation To Window
 affine.ppp              Apply Affine Transformation To Point Pattern
@@ -83,6 +85,7 @@ blur                    Apply Gaussian Blur to a Pixel Image
 bounding.box            Bounding Box of a Window or Point Pattern
 bounding.box.xy         Convex Hull of Points
 bramblecanes            Hutchings' Bramble Canes data
+by.im                   Apply Function to Image Broken Down by Factor
 by.ppp                  Apply a Function to a Point Pattern Broken Down
                         by Factor
 cells                   Biological Cells Point Pattern
@@ -173,6 +176,7 @@ hyperframe              Hyper Data Frame
 identify.ppp            Identify Points in a Point Pattern
 im                      Create a Pixel Image Object
 im.object               Class of Images
+incircle                Find Largest Circle Inside Window
 inforder.family         Infinite Order Interaction Family
 inside.owin             Test Whether Points Are Inside A Window
 interp.im               Interpolate a Pixel Image
@@ -214,7 +218,8 @@ marktable               Tabulate Marks in Neighbourhood of Every Point
 matchingdist            Distance for a Point Pattern Matching
 matclust.estK           Fit the Matern Cluster Point Process by Minimum
                         Contrast
-mean.im                 Mean Pixel Value in an Image
+mean.im                 Mean, Median and Range of Pixel Values in an
+                        Image
 midpoints.psp           Midpoints of Line Segment Pattern
 mincontrast             Method of Minimum Contrast
 model.images            Compute Images of Constructed Covariates
@@ -384,6 +389,7 @@ solutionset             Evaluate Logical Expression Involving Pixel
                         True
 spatstat                The Spatstat Package
 spatstat.options        Internal Options in Spatstat Package
+split.im                Divide Image Into Sub-images
 split.ppp               Divide Point Pattern into Sub-patterns
 spokes                  Spokes pattern of dummy points
 spruces                 Spruces Point Pattern

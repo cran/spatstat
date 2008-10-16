@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.7 $ $Date: 2008/07/23 04:36:46 $
+# $Revision: 1.10 $ $Date: 2008/10/07 23:28:40 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
@@ -24,14 +24,22 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
   }
   switch(clusters,
          Thomas={
-           startpar <- c(kappa=1, sigma2 = 4 * mean(nndist(X))^2)
-           mcfit <- 
-               thomas.estK(Ki, startpar=startpar, lambda=lambda, ...)
+             startpar0 <- c(kappa=1, sigma2 = 4 * mean(nndist(X))^2)
+             mcfit <-
+               do.call("thomas.estK",
+                       resolve.defaults(
+                                        list(X=Ki, lambda=lambda),
+                                        list(...),
+                                        list(startpar=startpar0)))
          },
          MatClust={
-           startpar <- c(kappa=1, R = 2 * mean(nndist(X)))
-           mcfit <- 
-               matclust.estK(Ki, startpar=startpar, lambda=lambda, ...)
+           startpar0 <- c(kappa=1, R = 2 * mean(nndist(X)))
+             mcfit <-
+               do.call("matclust.estK",
+                       resolve.defaults(
+                                        list(X=Ki, lambda=lambda),
+                                        list(...),
+                                        list(startpar=startpar0)))
          })
   kappa <- mcfit$par[["kappa"]]
   mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
@@ -124,6 +132,7 @@ simulate.kppm <- function(object, nsim=1, ...) {
            for(i in 1:nsim)
              out[[i]] <- rMatClust(kappa,r,mu,win)
          })
+  names(out) <- paste("Simulation", 1:nsim)
   class(out) <- c("listof", class(out))
   return(out)
 }

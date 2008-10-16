@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.38 $   $Date: 2008/07/16 16:59:59 $
+#  $Revision: 1.41 $   $Date: 2008/10/15 18:12:11 $
 #
 #  Plotting code for pixel images
 #
@@ -25,11 +25,14 @@ plot.im <- function(x, ...,
     ok <- (x >= v[1] - tol) & (x <= v[2] + tol)
     x[ok]
   }
+
+  zlim <- list(...)$zlim
   
   sumry <- summary(x)
   switch(sumry$type,
          real    = {
            vrange <- sumry$range
+           vrange <- range(zlim, vrange)
            trivial <- (diff(vrange) <= .Machine$double.eps)
            if(!trivial) {
              ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
@@ -43,9 +46,11 @@ plot.im <- function(x, ...,
            values <- values[!is.na(values)]
            uv <- unique(values)
            vrange <- range(uv)
+           vrange <- range(zlim, vrange)
            nvalues <- length(uv)
            trivial <- (nvalues < 2)
            if(!trivial){
+             ribn <- min(ribn, diff(vrange)+1)
              ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
              ribbonrange <- vrange
              ribbonticks <- clamp(pretty(ribbonvalues), vrange)
@@ -117,7 +122,7 @@ plot.im <- function(x, ...,
                  list(...),
                  colourmap,
                  list(xlab = "x", ylab = "y"),
-                 list(asp = 1, main = main)
+                 list(asp = 1, main = main, axes=FALSE)
                  )
       return(invisible(NULL))
     }
@@ -143,7 +148,7 @@ plot.im <- function(x, ...,
                list(xlab = "x", ylab = "y"),
                list(asp = 1, main = main))
   # axes for image
-  imax <- resolve.defaults(list(...), list(axes=TRUE))$axes
+  imax <- resolve.defaults(list(...), list(axes=FALSE))$axes
   if(imax) {
     px <- pretty(bb$xrange)
     py <- pretty(bb$yrange)

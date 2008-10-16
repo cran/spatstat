@@ -63,12 +63,12 @@
   by(amacrine, FUN=density)
   by(amacrine, FUN=function(x) { min(nndist(x)) } )
 
-  # passing arguments to FUN
+  # how to pass additional arguments to FUN
   by(amacrine, FUN=clarkevans, correction=c("Donnelly","cdf"))
 
   # point pattern broken down by tessellation
   data(swedishpines)
-  tes <- tess(xgrid=seq(0,96,length=5),ygrid=seq(0,100,length=5))
+  tes <- quadrats(swedishpines, 5, 5)
   B <- by(swedishpines, tes, clarkevans, correction="Donnelly")
   unlist(lapply(B, as.numeric))
 }

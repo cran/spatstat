@@ -5,6 +5,7 @@
 \alias{as.owin.ppm}
 \alias{as.owin.psp}
 \alias{as.owin.quad}
+\alias{as.owin.tess}
 \alias{as.owin.im}
 \alias{as.owin.gpc.poly}
 \alias{as.owin.default}
@@ -20,6 +21,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
  \method{as.owin}{psp}(W, \dots, fatal=TRUE)
  \method{as.owin}{quad}(W, \dots, fatal=TRUE)
+ \method{as.owin}{tess}(W, \dots, fatal=TRUE)
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
@@ -70,6 +72,10 @@ in any of several formats, into an object of class \code{"owin"}.
     extracted.
     \item
     an object of class \code{"psp"} representing a line segment pattern.
+    In this case, the object's \code{window} structure will be
+    extracted.
+    \item
+    an object of class \code{"tess"} representing a tessellation.
     In this case, the object's \code{window} structure will be
     extracted.
     \item
