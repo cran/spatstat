@@ -75,6 +75,11 @@
       \code{n}, this function should return a character vector of length
       \code{n} specifying \code{n} different colours.
     }
+    \item{progress}{
+      Character string determining the style of progress reports
+      printed by \code{\link{progressreport}}. Either
+      \code{"tty"} or \code{"txtbar"}.
+    }
   }
   
   If no arguments are given, 

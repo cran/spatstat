@@ -68,7 +68,7 @@ function(X, na.action="warn", ...) {
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
-                           deparse(substitute(X))))
+                           deparse(substitute(X))), call.=FALSE)
            },
            fatal = {
              return(FALSE)

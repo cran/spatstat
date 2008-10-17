@@ -1,11 +1,30 @@
 \name{as.im}
 \alias{as.im}
+\alias{as.im.im}
+\alias{as.im.owin}
+\alias{as.im.tess}
+\alias{as.im.function}
+\alias{as.im.default}
 \title{Convert to Pixel Image}
 \description{
   Converts various kinds of data to a pixel image
 }
 \usage{
-  as.im(X, W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+  as.im(X, \dots)
+  \method{as.im}{im}(X,
+        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{owin}(X,
+        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{tess}(X,
+        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{function}(X,
+        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{default}(X,
+        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
         dimyx=NULL, na.replace=NULL)
 }
 \arguments{
@@ -24,6 +43,8 @@
 \details{
   This function converts the data \code{X} into a pixel image
   object of class \code{"im"} (see \code{\link{im.object}}).
+  The function \code{as.im} is generic, with methods for the classes
+  listed above.
 
   Currently \code{X} may be any of the following:
   \itemize{
@@ -34,6 +55,11 @@
     \code{\link{owin.object}}). The result is an image
     with all pixel entries equal to \code{1} inside the window \code{X},
     and \code{NA} outside.
+    \item
+    a tessellation (object of class \code{"tess"}).
+    The result is a factor-valued image, with one factor level
+    corresponding to each tile of the tessellation. Pixels are classified
+    according to the tile of the tessellation into which they fall.
     \item
     a single number (or a single logical, complex, factor or character
     value). The result is an image
@@ -119,6 +145,11 @@
   Z <- as.im(stuff)
   # convert to finer grid
   Z <- as.im(Z, dimyx=256)
+
+  # pixellate the Dirichlet tessellation
+  Di <- dirichlet(runifpoint(10))
+  plot(as.im(Di))
+  plot(Di, add=TRUE)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

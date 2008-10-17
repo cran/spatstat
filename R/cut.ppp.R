@@ -3,7 +3,7 @@
 #
 #  cut method for ppp objects
 #
-#  $Revision: 1.3 $   $Date: 2008/09/24 17:15:26 $
+#  $Revision: 1.6 $   $Date: 2008/09/29 05:40:59 $
 #
 
 cut.ppp <- function(x, z=marks(x), ...) {
@@ -29,10 +29,8 @@ cut.ppp <- function(x, z=marks(x), ...) {
   # z is a tessellation 
   switch(z$type,
          rect={
-           jx <- findInterval(x$x, z$xgrid,
-                              rightmost.closed=TRUE, all.inside=TRUE)
-           iy <- findInterval(x$y, z$ygrid, 
-                              rightmost.closed=TRUE, all.inside=TRUE)
+           jx <- findInterval(x$x, z$xgrid, rightmost.closed=TRUE)
+           iy <- findInterval(x$y, z$ygrid, rightmost.closed=TRUE)
            nrows    <- length(z$ygrid) - 1
            ncols <- length(z$xgrid) - 1
            jcol <- jx
@@ -45,7 +43,7 @@ cut.ppp <- function(x, z=marks(x), ...) {
          tiled={
            todo <- seq(x$n)
            nt <- length(z$tiles)
-           m <- integer(nt)
+           m <- integer(x$n)
            for(i in 1:nt) {
              ti <- z$tiles[[i]]
              hit <- inside.owin(x$x[todo], x$y[todo], ti)
@@ -61,7 +59,7 @@ cut.ppp <- function(x, z=marks(x), ...) {
          },
          image={
            zim <- z$image
-           m <- factor(zim[x], levels=levels(zim))
+           m <- factor(zim[x, drop=FALSE], levels=levels(zim))
          }
          )
   marks(x) <- m

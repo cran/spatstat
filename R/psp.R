@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.30 $ $Date: 2008/09/25 01:11:03 $
+#  $Revision: 1.34 $ $Date: 2008/10/15 19:01:11 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -9,7 +9,7 @@
 #################################################
 # creator
 #################################################
-psp <- function(x0, y0, x1, y1, window, marks=NULL) {
+psp <- function(x0, y0, x1, y1, window, marks=NULL, check=TRUE) {
   stopifnot(is.numeric(x0))
   stopifnot(is.numeric(y0))
   stopifnot(is.numeric(x1))
@@ -23,6 +23,12 @@ psp <- function(x0, y0, x1, y1, window, marks=NULL) {
   stopifnot(length(x0) == length(x1))
   ends <- data.frame(x0=x0,y0=y0,x1=x1,y1=y1)
   window <- as.owin(window)
+  if(check) {
+    ok <- inside.owin(x0,y0, window) & inside.owin(x1,y1,window)
+    if((nerr <- sum(!ok)) > 0)
+      stop(paste(nerr, ngettext(nerr, "segment does not", "segments do not"),
+                 "lie entirely inside the window"), call.=FALSE)
+  }
   if(!is.null(marks)) {
     if(is.data.frame(marks))
       stop("Sorry, data frames of marks are not implemented for psp objects")
@@ -73,10 +79,17 @@ as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL, fatal=TRUE) {
   if(checkfields(x, c("x0", "y0", "x1", "y1")))
     return(psp(x$x0, x$y0, x$x1, x$y1, window=window, marks=marks))
   else if(checkfields(x, c("xmid", "ymid", "length", "angle"))) {
-    dx <- cos(x$angle) * x$length/2
-    dy <- sin(x$angle) * x$length/2
-    return(psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
-                window=window, marks=marks))
+    rr <- x$length/2
+    dx <- cos(x$angle) * rr
+    dy <- sin(x$angle) * rr
+    window <- as.owin(window)
+    bb <- bounding.box(window)
+    rmax <- max(rr)
+    bigbox <- owin(bb$xrange + c(-1,1) * rmax, bb$yrange + c(-1,1) * rmax)
+    pattern <- psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
+                   window=bigbox, marks=marks, check=FALSE)
+    clipped <- pattern[window]
+    return(clipped)
   }
   else if(ncol(x) == 4)
     return(psp(x[,1], x[,2], x[,3], x[,4], window=window, marks=marks))
@@ -97,10 +110,17 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, fatal=TRUE) {
   if(checkfields(x, c("x0", "y0", "x1", "y1")))
     return(psp(x$x0, x$y0, x$x1, x$y1, window=window, marks=marks))
   else if(checkfields(x, c("xmid", "ymid", "length", "angle"))) {
-    dx <- cos(x$angle) * x$length/2
-    dy <- sin(x$angle) * x$length/2
-    return(psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
-                window=window, marks=marks))
+    rr <- x$length/2
+    dx <- cos(x$angle) * rr
+    dy <- sin(x$angle) * rr
+    window <- as.owin(window)
+    bb <- bounding.box(window)
+    rmax <- max(rr)
+    bigbox <- owin(bb$xrange + c(-1,1) * rmax, bb$yrange + c(-1,1) * rmax)
+    pattern <- psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
+                   window=bigbox, marks=marks, check=FALSE)
+    clipped <- pattern[window]
+    return(clipped)
   }
   else if(fatal)
     stop("Unable to interpret x as a line segment pattern")

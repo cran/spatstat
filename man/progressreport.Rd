@@ -5,9 +5,10 @@
   Prints Progress Reports during a loop or iterative calculation.
 }
 \usage{
-progressreport(i, n, every = max(1, ceiling(n/100)), nperline = min(charsperline, every * ceiling(charsperline/(every + 3))), charsperline = 60)
+progressreport(i, n, every = max(1, ceiling(n/100)), nperline =
+min(charsperline, every * ceiling(charsperline/(every + 3))),
+charsperline = 60, style=spatstat.options("progress"))
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{i}{
     Integer. The current iteration number (from 1 to \code{n}).
@@ -26,11 +27,22 @@ progressreport(i, n, every = max(1, ceiling(n/100)), nperline = min(charsperline
   \item{charsperline}{
     Optional integer. The number of characters in a line of output.
   }
+  \item{style}{
+    Character string determining the style of display.
+    See Details.
+  }
 }
 \details{
   This is a convenient function for reporting progress
   during an iterative sequence of calculations
-  or a suite of simulations. 
+  or a suite of simulations.
+
+  If \code{style="txtbar"} then \code{\link[utils]{txtProgressBar}} is
+  used to represent progress as a bar made of text characters in the
+  \R interpreter window.
+
+  If \code{style="tty"}, then progress reports are printed using
+  \code{cat}. This only seems to work well under Linux.
 }
 \value{
   Null.

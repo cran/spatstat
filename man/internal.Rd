@@ -82,6 +82,7 @@
 \alias{handle.rshift.args}
 \alias{ho.engine}
 \alias{identical.formulae}
+\alias{inpoint}
 \alias{inside.xypolygon}     
 \alias{intersect.ranges}     
 \alias{intX.owin}     
@@ -147,6 +148,7 @@
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
+\alias{na.handle.im}
 \alias{names.hyperframe}
 \alias{names<-.hyperframe}
 \alias{nearest.pixel}
@@ -209,8 +211,8 @@
 \alias{print.units}
 \alias{prolongseq}
 \alias{quad}
-\alias{quadrat.breaks}
-\alias{quadrat.countEngine}
+\alias{rectquadrat.breaks}
+\alias{rectquadrat.countEngine}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -381,6 +383,7 @@ handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
+inpoint(W)
 inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
 intersect.ranges(a,b)
 intX.owin(w)
@@ -454,6 +457,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             callstring, \dots, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix)
 MultiPair.checkmatrix(mat, n, name)
+na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, im)
@@ -518,9 +522,9 @@ primefactors(n, prmax)
 \method{print}{units}(x, \dots)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)
-quadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
-quadrat.countEngine(x, y, xbreaks, ybreaks, weights)
-quadrat.testEngine(X, nx, ny, xbreaks, ybreaks, \dots, fit=NULL, Xname=NULL, fitname=NULL)
+rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
+rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+quadrat.testEngine(X, nx, ny, \dots, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 pointgrid(W, ngrid)

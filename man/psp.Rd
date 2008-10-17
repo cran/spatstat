@@ -6,7 +6,7 @@
   a line segment pattern in the two-dimensional plane.
 }
 \usage{
-  psp(x0,y0, x1, y1, window, marks=NULL)
+  psp(x0,y0, x1, y1, window, marks=NULL, check=TRUE)
 }
 \arguments{
   \item{x0}{Vector of \eqn{x} coordinates of first endpoint of each segment}
@@ -16,6 +16,8 @@
   \item{window}{window of observation,
     an object of class \code{"owin"}}
   \item{marks}{(optional) vector of mark values}
+  \item{check}{Logical value indicating whether to check that the line segments
+    lie inside the window.}
 }
 \value{
   An object of class \code{"psp"} 

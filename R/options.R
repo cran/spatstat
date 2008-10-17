@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.10 $   $Date: 2008/07/01 23:22:21 $
+#    $Revision: 1.14 $   $Date: 2008/10/17 04:10:26 $
 #
 #
 ".Spatstat.Options" <-
@@ -15,7 +15,8 @@
        par.contour=list(),
        image.colfun=function(n){topo.colors(n)},
        ndummy.min=25,
-       dupC = FALSE
+       dupC = FALSE,
+       progress = "tty"
        )
 
 "spatstat.options" <-

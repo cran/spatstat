@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.28 $    $Date: 2007/08/19 19:08:43 $
+#    $Revision: 1.31 $    $Date: 2008/10/17 04:09:39 $
 #
 #  (a) for matrices only:
 #
@@ -209,21 +209,38 @@ intersect.ranges <- function(a, b) {
   return(c(lo, hi))
 }
 
+.Spatstat.ProgressBar <- NULL
+
 progressreport <- function(i, n, every=max(1, ceiling(n/100)),
-                           nperline=min(charsperline, every * ceiling(charsperline /(every+3))),
-                           charsperline=60) {
-  if(i == n) 
-    cat(paste(n, ".\n", sep=""))
-  else if(every == 1 || i <= 3)
-    cat(paste(i, ",", if(i %% nperline == 0) "\n" else " ", sep=""))
-  else {
-    if(i %% every == 0) 
-      cat(i)
-    else
-      cat(".")
-    if(i %% nperline == 0)
-      cat("\n")
-  }
+                           nperline=min(charsperline,
+                             every * ceiling(charsperline /(every+3))),
+                           charsperline=60,
+                           style=spatstat.options("progress")) {
+  switch(style,
+         txtbar={
+           if(i == 1)
+             .Spatstat.ProgressBar <<- txtProgressBar(1, n, 1, style=3)
+           setTxtProgressBar(.Spatstat.ProgressBar, i)
+           if(i == n)
+             close(.Spatstat.ProgressBar)
+         },
+         tty={
+           if(i == n) 
+             cat(paste(n, ".\n", sep=""))
+           else if(every == 1 || i <= 3)
+             cat(paste(i, ",", if(i %% nperline == 0) "\n" else " ", sep=""))
+           else {
+             if(i %% every == 0) 
+               cat(i)
+             else
+               cat(".")
+             if(i %% nperline == 0)
+               cat("\n")
+           }
+           flush.console()
+         },
+         stop(paste("Unrecognised option for style:", dQuote(style)))
+         )
   return(invisible(NULL))
 }
   
