@@ -28,9 +28,13 @@ quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
   }
 }
 \details{
-  The window \code{X} is divided into
+  If the window \code{X} is a rectangle, it is divided into
   an \code{nx * ny} grid of rectangular tiles or `quadrats'.
-  These tiles are returned as a tessellation (object of class
+  If \code{X} is not a rectangle, then the bounding rectangle of
+  \code{X} is first divided into an \code{nx * ny} grid of rectangular
+  tiles, and these tiles are then intersected with the window \code{X}.
+
+  The resulting tiles are returned as a tessellation (object of class
   \code{"tess"}) which can be plotted and used in other analyses.
 
   If \code{xbreaks} is given, it should be a numeric vector
@@ -53,6 +57,9 @@ quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
  W <- square(10)
  Z <- quadrats(W, 4, 5)
  plot(Z)
+
+ data(letterR)
+ plot(quadrats(letterR, 5, 7))
 }
 \seealso{
   \code{\link{tess}},

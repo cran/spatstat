@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.33 $	$Date: 2008/10/14 23:01:54 $
+#	$Revision: 4.34 $	$Date: 2008/10/24 01:42:51 $
 #
 #
 #
@@ -137,7 +137,7 @@ overlap.owin <- function(A, B) {
 #
 #
 
-intersect.owin <- function(A, B, ...) {
+intersect.owin <- function(A, B, ..., fatal=TRUE) {
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 
@@ -149,8 +149,10 @@ intersect.owin <- function(A, B, ...) {
     warning("The two windows have incompatible units of length")
   
   # determine intersection of x and y ranges
-  xr <- intersect.ranges(A$xrange, B$xrange)
-  yr <- intersect.ranges(A$yrange, B$yrange)
+  xr <- intersect.ranges(A$xrange, B$xrange, fatal=fatal)
+  yr <- intersect.ranges(A$yrange, B$yrange, fatal=fatal)
+  if(!fatal && (is.null(xr) || is.null(yr)))
+    return(NULL)
   C <- owin(xr, yr)
 
   # Determine type of intersection
@@ -490,7 +492,10 @@ inpoint <- function(W) {
 gpc2owin <- function(x) {
   verifyclass(x, "gpc.poly")
   bb <- get.bbox(x)
-  pp <- lapply(x@pts, function(g){
+  pts <- get.pts(x)
+  if(length(pts) == 0 || sum(unlist(lapply(pts, length))) == 0)
+    return(NULL)
+  pp <- lapply(pts, function(g){
     p <- g[c("x","y")]
     neg <- (area.xypolygon(p) < 0)
     if(g$hole != neg)

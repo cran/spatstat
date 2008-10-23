@@ -6,15 +6,19 @@
   Yields the intersection or union of two windows.
 }
 \usage{
-   intersect.owin(A, B, \dots)
+   intersect.owin(A, B, \dots, fatal=TRUE)
    union.owin(A,B, \dots)
 }
 \arguments{
   \item{A}{A window object (see Details).}
   \item{B}{A window object.}
-  \item{\dots}{Optional arguments passed to \code{\link{as.mask}}
+  \item{\dots}{
+    Optional arguments passed to \code{\link{as.mask}}
     to control the discretisation, if required.
-    }
+  }
+  \item{fatal}{Logical.
+    Determines what happens if the intersection is empty.
+  }
 }
 \value{
   A window (object of class \code{"owin"}).
@@ -28,7 +32,8 @@
   (either objects of class \code{"owin"}, or data that can be
   coerced to this class by \code{\link{as.owin}}).
 
-  If the intersection or union is empty, an error occurs.
+  If the intersection is empty, then if \code{fatal=FALSE}
+  the result is NULL, while if \code{fatal=TRUE} an error occurs.
 }
 
 \author{Adrian Baddeley

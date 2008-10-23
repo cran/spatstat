@@ -114,8 +114,8 @@ quadrat.test(X, ...)
 
   plot(te)
 
-  plot(simdat, pch="+", cols="green", cex=1.2, lwd=2)
-  plot(te, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
+  plot(simdat, pch="+", cols="green", lwd=2)
+  plot(te, add=TRUE, col="red", cex=1.4, lty=2, lwd=3)
 
   sublab <- eval(substitute(expression(p[chi^2]==z),
                        list(z=signif(te$p.value,3))))
@@ -125,7 +125,7 @@ quadrat.test(X, ...)
   B <- dirichlet(runifpoint(6, simdat$window))
   qB <- quadrat.test(simdat, tess=B)
   plot(simdat, main="quadrat.test(simdat, tess=B)", pch="+")
-  plot(qB, add=TRUE, col="red", lwd=2, cex=1.3)
+  plot(qB, add=TRUE, col="red", lwd=2, cex=1.2)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
