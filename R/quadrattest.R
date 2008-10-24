@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.11 $  $Date: 2008/09/30 17:36:16 $
+#  $Revision: 1.14 $  $Date: 2008/10/22 03:18:06 $
 #
 
 
@@ -85,7 +85,7 @@ quadrat.testEngine <- function(X, nx, ny, ...,
     }
     df <- length(fitmeans) - length(coef(fit))
   }
-  OBS <- as.vector(Xcount)
+  OBS <- as.vector(t(as.table(Xcount)))
   EXP <- as.vector(fitmeans)
   if(df < 1)
     stop(paste("Not enough quadrats: degrees of freedom df =", df))
@@ -137,12 +137,14 @@ plot.quadrattest <- function(x, ...) {
   # plot observed counts
   cos30 <- sqrt(2)/2
   sin30 <- 1/2
-  f <- 0.5
-  dotext(-f * cos30, f * sin30, as.table(Xcount), x0, y0, ra, adj=c(1,0))
+  f <- 0.4
+  dotext(-f * cos30, f * sin30, as.vector(t(as.table(Xcount))),
+         x0, y0, ra, adj=c(1,0), ...)
   # plot expected counts
-  dotext(f * cos30, f * sin30, signif(x$expected,2), x0, y0, ra, adj=c(0,0))
+  dotext(f * cos30, f * sin30, round(x$expected,1), x0, y0, ra, adj=c(0,0),
+         ...)
   # plot Pearson residuals
-  dotext(0, -f,  signif(x$residuals,2),x0, y0, ra)
+  dotext(0, -f,  signif(x$residuals,2),x0, y0, ra, ...)
 
   return(invisible(NULL))
 }

@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.7 $ $Date: 2008/09/30 18:56:01 $
+#   $Revision: 1.9 $ $Date: 2008/10/24 01:56:16 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   isrect <- !is.null(xgrid) && !is.null(ygrid)
@@ -233,3 +233,57 @@ as.im.tess <- function(X,
   return(out)
 }
 
+as.tess <- function(X) {
+  UseMethod("as.tess")
+}
+
+as.tess.tess <- function(X) {
+  fields <- 
+    switch(X$type,
+           rect={ c("xgrid", "ygrid") },
+           tiled={ "tiles" },
+           image={ "image" },
+           stop(paste("Unrecognised tessellation type", sQuote(X$type))))
+  fields <- c(c("type", "window"), fields)
+  X <- unclass(X)[fields]
+  class(X) <- c("tess", class(X))
+  return(X)
+}
+
+as.tess.im <- function(X) {
+  return(tess(image = X))
+}
+
+as.tess.quadratcount <- function(X) {
+  return(attr(X, "tess"))
+}
+
+as.tess.quadrattest <- function(X) {
+  Y <- attr(X, "quadratcount")
+  Z <- attr(Y, "tess")
+  return(Z)
+}
+
+as.tess.list <- function(X) {
+  W <- lapply(X, as.owin)
+  return(tess(tiles=W))
+}
+
+as.tess.owin <- function(X) {
+  return(tess(tiles=list(X)))
+}
+
+intersect.tess <- function(X, Y, ...) {
+  X <- as.tess(X)
+  Y <- as.tess(Y)
+  Xtiles <- tiles(X)
+  Ytiles <- tiles(Y)
+  Ztiles <- list()
+  for(i in seq(Xtiles))
+    for(j in seq(Ytiles)) {
+      Tij <- intersect.owin(Xtiles[[i]], Ytiles[[j]], ..., fatal=FALSE)
+      if(!is.null(Tij))
+        Ztiles <- append(Ztiles, list(Tij))
+    }
+  return(tess(tiles=Ztiles))
+}

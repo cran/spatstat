@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.31 $    $Date: 2008/10/17 04:09:39 $
+#    $Revision: 1.32 $    $Date: 2008/10/24 01:31:52 $
 #
 #  (a) for matrices only:
 #
@@ -202,10 +202,13 @@ prolongseq <- function(x, newrange) {
   return(x)
 }
 
-intersect.ranges <- function(a, b) {
+intersect.ranges <- function(a, b, fatal=TRUE) {
   lo <- max(a[1],b[1])
   hi <- min(a[2],b[2])
-  if(lo >= hi) stop("Intersection is empty")
+  if(lo >= hi) {
+    if(fatal) stop("Intersection is empty")
+    else return(NULL)
+  }
   return(c(lo, hi))
 }
 

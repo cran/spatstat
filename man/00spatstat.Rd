@@ -366,6 +366,7 @@
 
     \tabular{ll}{
       \code{\link{tess}} \tab create a tessellation \cr
+      \code{\link{as.tess}} \tab convert other data to a tessellation \cr
       \code{\link{plot.tess}} \tab plot a tessellation \cr
       \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
       \code{\link{[.tess}} \tab extract a subset of a tessellation \cr

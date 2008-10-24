@@ -46,6 +46,8 @@
 
   By default, the window containing the point pattern \code{X} is divided into
   an \code{nx * ny} grid of rectangular tiles or `quadrats'.
+  (If the window is not a rectangle, then these tiles are intersected
+  with the window.)
   The number of points of \code{X} falling in each quadrat is
   counted. These numbers are returned as a contingency table.
 

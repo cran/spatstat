@@ -65,7 +65,9 @@
 \seealso{
   \code{\link{plot.tess}},
   \code{\link{[.tess}},
+  \code{\link{as.tess}},
   \code{\link{tiles}},
+  \code{\link{intersect.tess}},
   \code{\link{split.ppp}},
   \code{\link{cut.ppp}},
   \code{\link{by.ppp}},

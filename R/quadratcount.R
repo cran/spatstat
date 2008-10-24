@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.16 $  $Date: 2008/09/30 17:35:41 $
+#  $Revision: 1.20 $  $Date: 2008/10/24 02:21:55 $
 #
 
 quadratcount <- function(X, nx=5, ny=nx, ...,
@@ -9,26 +9,34 @@ quadratcount <- function(X, nx=5, ny=nx, ...,
                          tess=NULL)  {
   verifyclass(X, "ppp")
   W <- X$window
+
+  # determine tessellation
   if(is.null(tess)) {
-    # rectangular quadrats - fast code
+    # rectangular boundaries 
     if(!is.numeric(nx))
       stop("nx should be numeric")
     tess <- quadrats(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks)
+  } else if(!inherits(tess, "tess"))
+    stop("The argument tess should be a tessellation", call.=FALSE)
+
+  if(tess$type == "rect") {
+    # rectangular quadrats - fast code
     Xcount <- rectquadrat.countEngine(X$x, X$y, tess$xgrid, tess$ygrid)
-  } else if(inherits(tess, "tess")) {
+  } else {
     # quadrats are another type of tessellation
     Y <- cut(X, tess)
     if(any(is.na(marks(Y))))
       warning("Tessellation does not contain all the points of X")
     Xcount <- table(tile=marks(Y))
-  } else stop("The argument tess should be a tessellation", call.=FALSE)
+  } 
   attr(Xcount, "tess") <- tess
   class(Xcount) <- c("quadratcount", class(Xcount))
   return(Xcount)
 }
 
 plot.quadratcount <- function(x, ...,
-                              add=FALSE, entries=as.table(x), dx=0, dy=0) {
+                              add=FALSE, entries=as.vector(t(as.table(x))),
+                              dx=0, dy=0) {
   xname <- deparse(substitute(x))
   tess <- attr(x, "tess")
   do.call("plot.tess",
@@ -92,6 +100,8 @@ quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL) {
   yr <- W$yrange
   b <- rectquadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
   Z <- tess(xgrid=b$xbreaks, ygrid=b$ybreaks)
+  if(W$type != "rectangle")
+    Z <- intersect.tess(Z, W)
   return(Z)
 }
 
