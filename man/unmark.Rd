@@ -1,28 +1,38 @@
 \name{unmark}
 \alias{unmark}
-\title{Remove Marks from a Marked Point Pattern}
+\alias{unmark.ppp}
+\alias{unmark.splitppp}
+\alias{unmark.psp}
+\title{Remove Marks}
 \description{
-  Removes the mark information from a marked point pattern
+  Remove the mark information from a spatial dataset. 
 }
 \usage{
  unmark(X)
+ \method{unmark}{ppp}(X)
+ \method{unmark}{splitppp}(X)
+ \method{unmark}{psp}(X)
 }
 \arguments{
-  \item{X}{A point pattern. Either an object of class \code{"ppp"}
-    or anything acceptable to \code{\link{as.ppp}}.
+  \item{X}{A point pattern (object of class \code{"ppp"}),
+    a split point pattern (object of class \code{"splitppp"}),
+    or a line segment pattern (object of class \code{"psp"}).
   }
 }
 \value{
-  A point pattern (of class \code{"ppp"})
+  An object of the same class as \code{X}
   with any mark information deleted.
 }
 \details{
-  This is simply a convenience for those occasions in which we want to
-  remove the marks from a marked point pattern.
+  A `mark' is a value attached to each point in a spatial point pattern,
+  or attached to each line segment in a line segment pattern, etc.
+  
+  The function \code{unmark} is a simple way to 
+  remove the marks from such a dataset.
 }
 \seealso{
   \code{\link{ppp.object}},
-  \code{\link{as.ppp}}
+  \code{\link{psp.object}}
 }
 \examples{
   data(lansing)

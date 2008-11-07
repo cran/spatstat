@@ -95,12 +95,14 @@
 \alias{is.hyperframe}
 \alias{is.interact}
 \alias{is.marked.default}    
+\alias{is.marked.psp}    
 \alias{is.marked.quad}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
-\alias{is.prime}
 \alias{is.poisson.interact}
 \alias{is.poisson.ppm}
+\alias{is.prime}
+\alias{is.psp}
 \alias{is.stationary.ppm}
 \alias{kstestEngine}
 \alias{Kborder.engine}
@@ -125,6 +127,7 @@
 \alias{marks.quad}           
 \alias{marks<-}           
 \alias{marks<-.ppp}           
+\alias{marks<-.psp}           
 \alias{\%mapp\%}
 \alias{markappendop}
 \alias{marksubset}
@@ -176,6 +179,7 @@
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
 \alias{polynom}
+\alias{ppllengine}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
 \alias{primefactors}       
@@ -396,12 +400,14 @@ is.fv(x)
 is.hyperframe(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
+\method{is.marked}{psp}(X, \dots)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 \method{is.multitype}{default}(\dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.poisson.interact(x)
 is.poisson.ppm(x)
 is.prime(n)
+is.psp(x)
 is.stationary.ppm(x)    
 km.rs(o, cc, d, breaks)
 kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
@@ -432,6 +438,7 @@ marks(x, \dots)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
 marks(x, \dots) <- value
 \method{marks}{ppp}(x, dfok, \dots) <- value
+\method{marks}{psp}(x, \dots) <- value
 markappendop(x, y)
 marksubset(x, index, format)
 marksubsetop(x, i)
@@ -487,6 +494,7 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{quadratcount}(x, \dots, add, entries, dx, dy)
 \method{plot}{quadrattest}(x, \dots)
 polynom(x, \dots)
+ppllengine(X, Y, action="project", check=FALSE)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 primefactors(n, prmax)

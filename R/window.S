@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.82 $	$Date: 2008/09/28 02:35:58 $
+#	$Revision: 4.83 $	$Date: 2008/10/29 20:01:32 $
 #
 #
 #	A window may be either
@@ -66,7 +66,6 @@
     "Transpose matrices to get the standard presentation in R",
     "Example: image(result$xcol,result$yrow,t(result$d))")
 
-  
 owin <- function(xrange=c(0,1), yrange=c(0,1),
                  ..., poly=NULL, mask=NULL, unitname=NULL) {
 
@@ -81,8 +80,10 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   if(missing(xrange) != missing(yrange))
     stop("If one of xrange, yrange is specified then both must be.")
 
-  # avoid re-checking if already checked
-  check <- resolve.defaults(list(...), list(check=TRUE))$check
+  # avoid re-checking if already checked, or if checking suppressed
+  checkdefault <- spatstat.options("checkpolygons")
+  check <- resolve.defaults(list(...), list(check=checkdefault))$check
+  
   if(!check) {
     if(!poly.given && !mask.given) 
         w <- list(type="rectangle",

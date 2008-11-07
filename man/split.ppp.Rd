@@ -38,6 +38,7 @@
 \value{
   The value of \code{split.ppp} is a list of point patterns.
   The components of the list are named by the levels of \code{f}.
+  The list also has the class \code{"splitppp"}.
 
   The assignment form \code{split<-.ppp} returns the updated
   point pattern \code{x}. 

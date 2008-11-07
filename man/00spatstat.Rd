@@ -333,18 +333,24 @@
 
     \bold{Line segment patterns}
 
-    An object of class \code{"psp"} represents a pattern of line
+    An object of class \code{"psp"} represents a pattern of straight line
     segments.
     \tabular{ll}{
       \code{\link{psp}} \tab create a line segment pattern \cr
       \code{\link{as.psp}} \tab convert other data into a line segment pattern \cr
+      \code{\link{is.psp}} \tab determine whether a dataset has class \code{"psp"} \cr
       \code{\link{plot.psp}} \tab plot a line segment pattern \cr
       \code{\link{print.psp}} \tab print basic information \cr
       \code{\link{summary.psp}} \tab print summary information \cr
       \code{\link{subset.psp}} \tab \cr
-      \code{\link{[.psp}}
-                  \tab extract a subset of a line segment pattern \cr
-      \code{\link{midpoints.psp}} \tab compute the midpoints of line segments \cr
+      \code{\link{[.psp}} \tab extract a subset of a line segment pattern \cr
+      \code{\link{as.data.frame.psp}} \tab
+      convert line segment pattern to data frame \cr
+      \code{\link{marks.psp}} \tab extract marks of line segments \cr
+      \code{\link{marks<-.psp}} \tab assign new marks to line segments \cr
+      \code{\link{unmark.psp}} \tab delete marks from line segments \cr
+      \code{\link{midpoints.psp}} \tab
+      compute the midpoints of line segments \cr
       \code{\link{endpoints.psp}} \tab extract the endpoints of line segments \cr
       \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
@@ -357,7 +363,11 @@
       \code{\link{selfcrossing.psp}} \tab find crossing points between
       line segments \cr
       \code{\link{crossing.psp}} \tab find crossing points between
-      two line segment patterns 
+      two line segment patterns \cr
+      \code{\link{nearestsegment}} \tab find line segment closest to a
+      given point \cr
+      \code{\link{project2segment}} \tab find location along a line segment
+      closest to a given point
     }
 
     \bold{Tessellations}

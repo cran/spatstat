@@ -80,6 +80,18 @@
       printed by \code{\link{progressreport}}. Either
       \code{"tty"} or \code{"txtbar"}.
     }
+    \item{checkpolygons}{
+      Logical flag indicating whether the functions
+      \code{\link{owin}} and \code{\link{as.owin}} should check
+      the validity of polygon data. It is advisable to leave this
+      set to \code{TRUE}. If you set \code{checkpolygons=FALSE},
+      no checking will be performed, making it possible to create
+      window objects whose topology is garbled. This can be useful
+      for inspecting spatial data that contain errors,
+      for example, when converting data from shapefiles.
+      However, other functions in \pkg{spatstat} may return
+      incorrect answers on these data.
+    }
   }
   
   If no arguments are given, 
