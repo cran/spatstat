@@ -1,7 +1,7 @@
 #
 # randomseg.R
 #
-# $Revision: 1.6 $ $Date: 2008/10/15 19:02:19 $
+# $Revision: 1.7 $ $Date: 2008/10/31 21:22:42 $
 #
 
 rpoisline <- function(lambda, win=owin()) {
@@ -9,11 +9,14 @@ rpoisline <- function(lambda, win=owin()) {
   if(win$type == "mask")
     stop("Not implemented for masks")
   # determine circumcircle
-  width <- diff(win$xrange)
-  height <- diff(win$yrange)
+  xr <- win$xrange
+  yr <- win$yrange
+  xmid <- mean(xr)
+  ymid <- mean(yr)
+  width <- diff(xr)
+  height <- diff(yr)
   rmax <- sqrt(width^2 + height^2)/2
-  xmid <- mean(win$xrange)
-  ymid <- mean(win$yrange)
+  boundbox <- owin(xmid + c(-1,1) * rmax, ymid + c(-1,1) * rmax)
   # generate poisson lines through circumcircle
   n <- rpois(1, lambda * 2 * pi * rmax)
   if(n == 0)
@@ -29,7 +32,7 @@ rpoisline <- function(lambda, win=owin()) {
            y0= ymid + p * si - q * co,
            x1= xmid + p * co - q * si,
            y1= ymid + p * si + q * co,
-           window=win, check=FALSE)
+           window=boundbox, check=FALSE)
   # clip to window
   X <- X[win]
   return(X)

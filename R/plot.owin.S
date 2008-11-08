@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.24 $	$Date: 2008/08/11 02:37:03 $
+#	$Revision: 1.25 $	$Date: 2008/10/28 00:43:41 $
 #
 #
 #
@@ -54,9 +54,6 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                                      list(xlim=xlim, ylim=ylim,
                                           ann=FALSE, axes=FALSE,
                                           asp=1.0)))
-    type <- resolve.defaults(list(...), list(type=NULL))$type
-    if(!is.null(type) && type == "n")
-      return(invisible(NULL))
     
     # add title in a reasonable place!
     if(nlines > 0) {
@@ -69,6 +66,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
            col=parval$col.main,
            font=parval$font.main)
     }
+
   }
   
 # Draw surrounding box
@@ -80,6 +78,13 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                                           x1=xr[c(2,2,1,1)],
                                           y1=yr[c(1,2,2,1)]),
                                      list(...)))
+  
+# If type = "n", do not plot the window.
+    type <- resolve.defaults(list(...), list(type=NULL))$type
+    if(!is.null(type) && type == "n")
+      return(invisible(NULL))
+
+  
 # Draw window
 
   switch(W$type,

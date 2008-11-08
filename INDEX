@@ -70,6 +70,7 @@ applynbd                Apply Function to Every Neighbourhood in a
 area.owin               Area of a Window
 areadiff                Difference of Disc Areas
 as.data.frame.ppp       Coerce Point Pattern to a Data Frame
+as.data.frame.psp       Coerce Line Segment Pattern to a Data Frame
 as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.matrix.im            Convert Pixel Image to Matrix
@@ -230,6 +231,7 @@ multiplicity.ppp        Count Multiplicity of Duplicate Points
 murchison               Murchison gold deposits
 nbfires                 Point Patterns of New Brunswick Forest Fires
 nearest.raster.point    Find Pixel Nearest to a Given Point
+nearestsegment          Find Line Segment Nearest to Each Point
 nncorr                  Nearest-Neighbour Correlation of Marked Point
                         Pattern
 nncross                 Nearest Neighbour in Another Point Pattern
@@ -291,6 +293,7 @@ print.psp               Print Brief Details of a Line Segment Pattern
 print.quad              Print a Quadrature Scheme
 profilepl               Profile Maximum Pseudolikelihood
 progressreport          Print Progress Reports
+project2segment         Move Point To Nearest Line
 psp                     Create a Line Segment Pattern
 psp.object              Class of Line Segment Patterns
 qqplot.ppm              Q-Q Plot of Residuals from Fitted Point Process
@@ -413,6 +416,7 @@ summary.psp             Summary of a Line Segment Pattern Dataset
 summary.quad            Summarizing a Quadrature Scheme
 summary.splitppp        Summary of a Split Point Pattern
 superimpose             Superimpose Several Point Patterns
+superimposePSP          Superimpose Several Line Segment Patterns
 swedishpines            Swedish Pines Point Pattern
 tess                    Create a Tessellation
 thomas.estK             Fit the Thomas Point Process by Minimum
@@ -423,7 +427,7 @@ union.quad              Union of Data and Dummy Points
 unique.ppp              Extract Unique Points from a Spatial Point
                         Pattern
 unitname                Name for Unit of Length
-unmark                  Remove Marks from a Marked Point Pattern
+unmark                  Remove Marks
 update.kppm             Update a Fitted Cluster Point Process Model
 update.ppm              Update a Fitted Point Process Model
 urkiola                 Urkiola Woods Point Pattern

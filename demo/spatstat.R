@@ -72,6 +72,15 @@ plot(split(X,Y), main="image split by tessellation")
 plot(a, main="Self-crossing points")
 plot(selfcrossing.psp(a), add=TRUE, col="red")
 
+a <- as.psp(matrix(runif(20), 5, 4), window=square(1))
+b <- rstrat(square(1), 5)
+plot(a, lwd=3, col="green", main="project points to segments")
+plot(b, add=TRUE, col="red", pch=16)
+v <- project2segment(b, a)
+Xproj <- v$Xproj
+plot(Xproj, add=TRUE, pch=16)
+arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
+
 fanfare("III. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")

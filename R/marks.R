@@ -110,23 +110,21 @@ is.multitype.ppp <- function(X, na.action="warn", ...) {
 
 # ------------------------------------------------------------------
 
-"unmark" <-
-function(X) {
-  if(inherits(X, "ppp")) {
-    X$marks <- NULL
-    X$markformat <- "none"
-    return(X)
-  } else if(inherits(X, "splitppp")) {
-    Y <- lapply(X, unmark)
-    class(Y) <- c("splitppp", class(Y))
-    return(Y)
-  } else
-    stop(paste("X must be a point pattern (class", dQuote("ppp"), ") ",
-               "or a list of point patterns (class", dQuote("splitppp"), ")",
-               sep=""))
+unmark <- function(X) {
+  UseMethod("unmark")
 }
 
+unmark.ppp <- function(X) {
+  X$marks <- NULL
+  X$markformat <- "none"
+  return(X)
+}
 
+unmark.splitppp <- function(X) {
+  Y <- lapply(X, unmark.ppp)
+  class(Y) <- c("splitppp", class(Y))
+  return(Y)
+}
 
 ##### utility functions for subsetting & combining marks #########
 

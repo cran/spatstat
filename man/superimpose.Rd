@@ -5,7 +5,7 @@
   Superimpose any number of point patterns.
 }
 \usage{
-  superimpose(\dots, W)
+  superimpose(\dots, W=NULL, check=TRUE)
 }
 \arguments{
   \item{\dots}{
@@ -18,6 +18,11 @@
     Optional. Window for the resulting point pattern.
     An object of class \code{"owin"}, or something
     acceptable to \code{\link{as.owin}}.
+  }
+  \item{check}{
+    Logical value (passed to \code{\link{ppp}})
+    determining whether to check the geometrical validity of the
+    resulting point pattern.
   }
 }
 \value{
@@ -49,7 +54,9 @@
 }
 \seealso{
   \code{\link{concatxy}},
-  \code{\link{quadscheme}}
+  \code{\link{quadscheme}}.
+
+  See \code{\link{superimposePSP}} for superimposing patterns of line segments.
 }
 \examples{
   dat <- runifrect(30)

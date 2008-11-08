@@ -13,11 +13,13 @@
 }
 \usage{
   as.psp(x, \dots, from=NULL, to=NULL)
-  \method{as.psp}{psp}(x, \dots, fatal=TRUE)
-  \method{as.psp}{data.frame}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-  \method{as.psp}{matrix}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
-  \method{as.psp}{owin}(x, \dots, fatal=TRUE)
-  \method{as.psp}{default}(x, \dots, window=NULL, marks=NULL, fatal=TRUE)
+  \method{as.psp}{psp}(x, \dots, check=TRUE, fatal=TRUE)
+  \method{as.psp}{data.frame}(x, \dots, window=NULL, marks=NULL, check=TRUE, fatal=TRUE)
+  \method{as.psp}{matrix}(x, \dots, window=NULL, marks=NULL, check=TRUE,
+fatal=TRUE)
+  \method{as.psp}{owin}(x, \dots, check=TRUE, fatal=TRUE)
+  \method{as.psp}{default}(x, \dots, window=NULL, marks=NULL,
+check=TRUE, fatal=TRUE)
 }
 \arguments{
   \item{x}{Data which will be converted into a line segment pattern}
@@ -25,6 +27,10 @@
     when \code{x} does not contain a window}
   \item{\dots}{Ignored.}
   \item{marks}{(Optional) vector of marks for the pattern}
+  \item{check}{
+    Logical value indicating whether to check the validity of the data,
+    e.g. to check that the line segments lie inside the window.
+  }
   \item{fatal}{Logical value. See Details.}
   \item{from,to}{Point patterns (object of class \code{"ppp"})
     containing the first and second endpoints (respectively) of each
@@ -54,7 +60,7 @@
     \item
     a data frame with columns named \code{x0, y0, x1, y1}
     that will be interpreted as the coordinates of the endpoints
-    of the segments
+    of the segments. 
     \item 
     a data frame or matrix with exactly 4 columns
     that will be interpreted as the coordinates \code{x0, y0, x1, y1}
@@ -74,6 +80,21 @@
     The boundary edges of the window will be extracted as a line segment
     pattern.
   }
+  If the argument \code{marks} is missing or \code{NULL}, then \code{x}
+  may also be:
+  \itemize{
+    \item
+    a data frame with columns named \code{x0, y0, x1, y1, marks}
+    \item 
+    a data frame or matrix with exactly 5 columns; the first 4 columns
+    will be interpreted as the coordinates \code{x0, y0, x1, y1}
+    of the endpoints of the segments, and the last column will
+    be interpreted as the marks.
+    \item
+    a structure with elements named  \code{x0, y0, x1, y1, marks}
+    which will be interpreted as above.
+  }
+
   Alternatively, you may specify two point patterns
   \code{from} and \code{to} containing the first and second endpoints
   of the line segments.
