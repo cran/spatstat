@@ -1,11 +1,13 @@
 \name{erode.owin}
 \alias{erode.owin}
+\alias{erosion.owin}
 \title{Erode a Window}
 \description{
   Perform morphological erosion of a window 
 }
 \usage{
- erode.owin(w, r, shrink.frame=TRUE, \dots)
+ erosion.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE)
+ erode.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}.}
@@ -14,6 +16,8 @@
     rectangle as well.}
   \item{\dots}{extra arguments to \code{\link{as.mask}}
     controlling the pixel resolution}
+  \item{strict}{Logical flag determining the fate of boundary pixels.
+    See details.}
 }
 \value{
   Another object of class \code{"owin"} representing the
@@ -27,11 +31,19 @@
   or equal to \eqn{r}. In other words it is the result of trimming
   a margin of width \eqn{r} off the set \eqn{W}.
 
-  This function computes the erosion of the window \code{w}.
+  The functions \code{erode.owin} and \code{erosion.owin} are
+  identical; they compute the erosion of the window \code{w}.
+
   If \code{w} is not
   a rectangle, it must be approximated by a binary pixel image,
   and the arguments \code{"\dots"} are passed to \code{\link{as.mask}}
   to determine the pixel resolution. There is a sensible default.
+
+  For non-rectangular windows, the erosion consists of all pixels
+  whose distance
+  from the boundary of \code{w} is strictly greater than \code{r} (if
+  \code{strict=TRUE}) or is greater than or equal to \code{r} (if
+  \code{strict=FALSE}).
   
   If \code{shrink.frame} is false, the resulting window is given the
   same outer, bounding rectangle as the original window \code{w}.
@@ -42,6 +54,8 @@
   use \code{\link{eroded.areas}}.
 }
 \seealso{
+  \code{\link{dilate.owin}} for the opposite operation.
+  
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{eroded.areas}}
@@ -52,7 +66,7 @@
   # returns rectangle [0.1, 0.9] x [0.1,0.9]
   \dontrun{
   v <- erode.owin(w, 0.6)
-  #fails - erosion is empty
+  # erosion is empty
   }
 }
 \author{Adrian Baddeley

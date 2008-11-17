@@ -1,3 +1,6 @@
+# ppmBadData.R
+# $Revision: 1.2 $ $Date: 2008/11/16 08:16:33 $
+
 require(spatstat)
 
 SEED <- 42

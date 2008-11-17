@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.2 $    $Date: 2007/10/24 09:41:15 $
+#  $Revision: 1.5 $    $Date: 2008/11/16 07:52:48 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -69,9 +69,19 @@ smooth.ppp <- function(X, ..., weights=rep(1,X$n)) {
   }
   else
     values <- rep(1, X$n)
+  
+  if(missing(weights)) {
+    # weights are identically 1
+    result <- density(X, ..., weights=values)
+    return(result)
+  } else {
+    # rescale weights to avoid numerical gremlins
+    weights <- weights/median(abs(weights))
+  }
   numerator <-   density(X, ..., weights= values * weights)
   denominator <- density(X, ..., weights= weights)
   ratio <- eval.im(numerator/denominator)
+  ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
   return(ratio)
 }
 

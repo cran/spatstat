@@ -36,7 +36,7 @@ do j = 1,nl {
 		else {
 				d3 = -one
 		}
-		if(d3 .gt. zero) {
+		if(d3 .ge. zero) {
 			dd = min(dd,d3)
 		}
 		sd =sqrt(dd)

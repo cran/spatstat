@@ -263,6 +263,10 @@
 	erode window by a distance r\cr
 	\code{\link{dilate.owin}}	\tab
 	dilate window by a distance r\cr
+	\code{\link{closing.owin}}	\tab
+	close window by a distance r\cr
+	\code{\link{opening.owin}}	\tab
+	open window by a distance r\cr
 	\code{\link{complement.owin}}	\tab
 	invert (swap inside and outside)\cr
 	\code{\link{rotate}} \tab rotate window  \cr
@@ -727,6 +731,7 @@
   Dominic Schuhmacher and Kasper Klitgaard Berthelsen
   made substantial contributions of code.
   Additional contributions by
+  Ang Qi Wei,
   Colin Beale,
   Brad Biggerstaff,
   Roger Bivand,

@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.13 $	$Date: 2006/12/18 09:28:10 $
+#	$Revision: 4.18 $	$Date: 2008/11/17 19:19:41 $
 #
 # -------- functions ----------------------------------------
 #
@@ -121,61 +121,73 @@ function(X)
           return(b)
 } 
 
-erode.mask <- function(w, r) {
+erode.mask <- function(w, r, strict=FALSE) {
   # erode a binary image mask without changing any other entries
   
-	verifyclass(w, "owin")
-        if(w$type != "mask")
-          stop(paste("window w is not of type", sQuote("mask")))
+  verifyclass(w, "owin")
+  if(w$type != "mask")
+    stop(paste("window w is not of type", sQuote("mask")))
+  if(!is.numeric(r) || length(r) != 1)
+    stop("r must be a single number")
+  if(r < 0)
+    stop("r must be nonnegative")
         
-	bb <- bdist.pixels(w, coords=FALSE)
+  bb <- bdist.pixels(w, coords=FALSE)
 
-        if(r > max(bb))
-          warning("eroded mask is empty")
+  if(r > max(bb))
+    warning("eroded mask is empty")
 
-        w$m <- (bb >= r)
-        return(w)
+  if(identical(strict, TRUE))
+    w$m <- (bb > r)
+  else 
+    w$m <- (bb >= r)
+  return(w)
 }
 
         
-erode.owin <- function(w, r, shrink.frame=TRUE, ...) {
-	verifyclass(w, "owin")
+erosion.owin <- erode.owin <-
+  function(w, r, shrink.frame=TRUE, ..., strict=FALSE) {
+  verifyclass(w, "owin")
+  if(!is.numeric(r) || length(r) != 1)
+    stop("r must be a single number")
+  if(r < 0)
+    stop("r must be nonnegative")
 
-        if(2 * r >= max(diff(w$xrange), diff(w$yrange)))
-          stop("erosion distance r too large for frame of window")
+  if(2 * r >= max(diff(w$xrange), diff(w$yrange)))
+    stop("erosion distance r too large for frame of window")
 
-        # compute the dimensions of the eroded frame
-        exr <- w$xrange + c(r, -r)
-        eyr <- w$yrange + c(r, -r)
-        ebox <- list(x=exr[c(1,2,2,1)], y=eyr[c(1,1,2,2)])
+  # compute the dimensions of the eroded frame
+  exr <- w$xrange + c(r, -r)
+  eyr <- w$yrange + c(r, -r)
+  ebox <- list(x=exr[c(1,2,2,1)], y=eyr[c(1,1,2,2)])
 
-        if(w$type == "rectangle") {
-          # result is a smaller rectangle
-          if(shrink.frame)
-            return(owin(exr, eyr))  # type 'rectangle' 
-          else
-            return(owin(w$xrange, w$yrange, poly=ebox)) # type 'polygonal'
-        }
+  if(w$type == "rectangle") {
+    # result is a smaller rectangle
+    if(shrink.frame)
+      return(owin(exr, eyr))  # type 'rectangle' 
+    else
+      return(owin(w$xrange, w$yrange, poly=ebox)) # type 'polygonal'
+  }
 
-        # otherwise erode the window in pixel image form
-        if(w$type != "mask") 
-          w <- as.mask(w, ...)
+  # otherwise erode the window in pixel image form
+  if(w$type != "mask") 
+    w <- as.mask(w, ...)
         
-        wnew <- erode.mask(w, r)
+  wnew <- erode.mask(w, r, strict=strict)
 
-        if(shrink.frame) {
-          # trim off some rows & columns of pixel raster
-          keepcol <- (wnew$xcol >= exr[1] & wnew$xcol <= exr[2])
-          keeprow <- (wnew$yrow >= eyr[1] & wnew$yrow <= eyr[2])
-          wnew$xcol <- w$xcol[keepcol]
-          wnew$yrow <- w$yrow[keeprow]
-          wnew$dim <- c(sum(keeprow), sum(keepcol))
-          wnew$m <- wnew$m[keeprow, keepcol]
-          wnew$xrange <- exr
-          wnew$yrange <- eyr
-        }
+  if(shrink.frame) {
+    # trim off some rows & columns of pixel raster
+    keepcol <- (wnew$xcol >= exr[1] & wnew$xcol <= exr[2])
+    keeprow <- (wnew$yrow >= eyr[1] & wnew$yrow <= eyr[2])
+    wnew$xcol <- w$xcol[keepcol]
+    wnew$yrow <- w$yrow[keeprow]
+    wnew$dim <- c(sum(keeprow), sum(keepcol))
+    wnew$m <- wnew$m[keeprow, keepcol]
+    wnew$xrange <- exr
+    wnew$yrange <- eyr
+  }
 
-        return(wnew)
+  return(wnew)
 }	
 
 rebound.owin <- function(w, rect) {
@@ -219,25 +231,41 @@ rebound.owin <- function(w, rect) {
 }
   
     
-dilate.owin <- function(w, r, ...) {
+dilation.owin <- dilate.owin <-
+  function(w, r, ...) {
   verifyclass(w, "owin")
+  if(!is.numeric(r) || length(r) != 1)
+    stop("r must be a single number")
   if(r < 0)
     stop("r must be nonnegative")
   if(r == 0)
     return(w)
   if(w$type != "mask")
     w <- as.mask(w, ...)
+  if(!any(w$m)) {
+    # w is empty
+    return(w)
+  }
   epsilon <- sqrt(w$xstep^2 + w$ystep^2)
   r <- max(r, epsilon)
   bb <- bounding.box(w)
   newbox <- owin(bb$xrange + c(-r,r), bb$yrange + c(-r,r))
   w <- rebound.owin(w, newbox)
   distant <- distmap(w)
-  dil <- w
-  dil$m <- (distant$v <= r)
+  dil <- levelset(distant, r, "<=")
   return(dil)
 }
 
-  
-  
+closing.owin <- function(w, r, ...) {
+  wplus <- dilate.owin(w, r, ...)
+  wclose <- erode.owin(wplus, r, strict=TRUE)
+  return(wclose)
+}
+
+opening.owin <- function(w, r, ...) {
+  wminus <- erode.owin(w, r, ...)
+  wopen <- dilate.owin(wminus, r)
+  return(wopen)
+}
+
   
