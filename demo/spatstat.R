@@ -298,6 +298,32 @@ plot(rlinegrid(30, 0.1))
 
 fanfare("VI. Programming tools")
 
+nopa <- par(mfrow=c(2,2))
+data(letterR)
+Rbox <- as.rectangle(letterR)
+Rmask <- as.mask(letterR, dimyx=256)
+
+v <- erode.owin(Rmask, 0.25)
+plot(Rbox, type="n", main="erode.owin")
+plot(v, add=TRUE)
+plot(letterR, add=TRUE)
+
+v <- dilate.owin(w, 0.3)
+plot(as.rectangle(v), type="n", main="dilate.owin")
+plot(v, add=TRUE)
+plot(letterR, add=TRUE)
+
+v <- closing.owin(w, 0.25)
+plot(Rbox, type="n", main="closing.owin")
+plot(v, add=TRUE)
+plot(letterR, add=TRUE)
+
+v <- opening.owin(w, 0.3)
+plot(Rbox, type="n", main="opening.owin")
+plot(v, add=TRUE)
+plot(letterR, add=TRUE)
+par(nopa)
+
 plot(Z, main="An image Z")
 plot(levelset(Z, 4))
 plot(cut(Z, 5))

@@ -96,6 +96,7 @@ chorley                 Chorley-Ribble Cancer Data
 clarkevans              Clark and Evans Aggregation Index
 clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
+closing.owin            Morphological Closing of a Window
 coef.ppm                Coefficients of Fitted Point Process Model
 compatible.fasp         Test Whether Two Function Arrays Are Compatible
 compatible.fv           Test Whether Two Function Objects Are
@@ -240,6 +241,7 @@ nndist.psp              Nearest neighbour distances between line
                         segments
 nnwhich                 Nearest neighbour
 nztrees                 New Zealand Trees Point Pattern
+opening.owin            Morphological Opening of a Window
 ord.family              Ord Interaction Process Family
 owin                    Create a Window
 owin.object             Class owin

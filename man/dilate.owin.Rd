@@ -1,10 +1,12 @@
 \name{dilate.owin}
 \alias{dilate.owin}
+\alias{dilation.owin}
 \title{Dilate a Window}
 \description{
   Perform morphological dilation of a window 
 }
 \usage{
+ dilation.owin(w, r, \dots)
  dilate.owin(w, r, \dots)
 }
 \arguments{
@@ -23,13 +25,16 @@
   away from \eqn{W}. Effectively, dilation adds a margin of width
   \eqn{r} onto the set \eqn{W}.
 
-  This function computes the dilation of the window \code{w}.
-  If \code{w} is not
-  a rectangle, it must be approximated by a binary pixel image,
+  The functions \code{dilate.owin} and \code{dilation.owin} are
+  identical, and compute the dilation of the window \code{w}.
+
+  The window \code{w} is first approximated by a binary pixel image,
   and the arguments \code{"\dots"} are passed to \code{\link{as.mask}}
   to determine the pixel resolution. There is a sensible default.
 }
 \seealso{
+  \code{\link{erode.owin}} for the opposite operation.
+  
   \code{\link{owin}},
   \code{\link{as.owin}}
 }

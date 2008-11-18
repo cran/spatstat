@@ -1,22 +1,22 @@
 Package: spatstat
-Version: 1.14-6
-Date: 07 November 2008
+Version: 1.14-7
+Date: 17 November 2008
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and
 	Rolf Turner <r.turner@auckland.ac.nz>, with substantial contributions
 	of code by Marie-Colette van Lieshout, Rasmus Waagepetersen, Kasper 
 	Klitgaard Berthelsen and Dominic Schuhmacher. Additional contributions 
-	by C. Beale, B. Biggerstaff, R. Bivand, F. Bonneu, J.B. Chen, 
-        Y.C. Chin, M. de la Cruz, P.J. Diggle, S. Eglen, A. Gault, M. Genton, 
-	P. Grabarnik, C. Graf, J. Franklin, U. Hahn, M. Hering, M.B. Hansen, 
-	M. Hazelton, J. Heikkinen, K. Hornik, R. Ihaka, R. John-Chandran, 
-	D. Johnson, J. Laake, J. Mateu, P. McCullagh, X.C. Mi, J. Moller, 
-	L.S. Nielsen, E. Parilov, J. Picka, M. Reiter, B.D. Ripley, 
-	B. Rowlingson, J. Rudge, A. Sarkka, K. Schladitz, B.T. Scott, 
-	I.-M. Sintorn, M. Spiess, M. Stevenson, P. Surovy, B. Turlach, 
-	A. van Burgel, H. Wang and S. Wong.
+	by Ang Qi Wei, C. Beale, B. Biggerstaff, R. Bivand, F. Bonneu, 
+	J.B. Chen, Y.C. Chin, M. de la Cruz, P.J. Diggle, S. Eglen, 
+	A. Gault, M. Genton, P. Grabarnik, C. Graf, J. Franklin, U. Hahn, 
+	M. Hering, M.B. Hansen, M. Hazelton, J. Heikkinen, K. Hornik, 
+	R. Ihaka, R. John-Chandran, D. Johnson, J. Laake, J. Mateu, 
+	P. McCullagh, X.C. Mi, J. Moller, L.S. Nielsen, E. Parilov, 
+	J. Picka, M. Reiter, B.D. Ripley, B. Rowlingson, J. Rudge, A. Sarkka, 
+	K. Schladitz, B.T. Scott, I.-M. Sintorn, M. Spiess, M. Stevenson, 
+	P. Surovy, B. Turlach, A. van Burgel, H. Wang and S. Wong.
 Maintainer: Adrian Baddeley <adrian@maths.uwa.edu.au>
-Depends: R (>= 2.6.0), stats, graphics, utils, mgcv, gpclib, deldir (>= 0.0-7)
+Depends: R (>= 2.7.0), stats, graphics, utils, mgcv, gpclib, deldir (>= 0.0-7)
 Suggests: sm, maptools
 Description: A package for analysing spatial data,
 	mainly Spatial Point Patterns, including multitype/marked points
@@ -38,4 +38,4 @@ Description: A package for analysing spatial data,
 	envelopes, residuals, residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: Sat Nov  8 04:03:51 2008; adrian
+Packaged: Tue Nov 18 03:26:00 2008; adrian

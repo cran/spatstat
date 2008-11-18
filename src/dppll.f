@@ -35,7 +35,7 @@ C Output from Public domain Ratfor, version 1.0
       else
       d3 = -one
       endif
-      if(d3 .gt. zero)then
+      if(d3 .ge. zero)then
       dd = min(dd,d3)
       endif
       sd =sqrt(dd)

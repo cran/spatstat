@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.13 $    $Date: 2007/12/20 11:04:05 $
+#   $Revision: 1.14 $    $Date: 2008/11/13 21:22:21 $
 #
 #
 
@@ -37,7 +37,11 @@ resid4plot <- function(RES, plot.neg="image", plot.smooth="imagecontour",
     Yrange <- if(!is.null(Ydens)) summary(Ydens)$range else NULL
     Zrange <- if(!is.null(Z)) summary(Z)$range else NULL
     srange <- range(c(0, Yrange, Zrange), na.rm=TRUE)
+  } else {
+    stopifnot(is.numeric(srange) && length(srange) == 2)
+    stopifnot(all(is.finite(srange)))
   }
+    
   cols <- beachcolours(srange, if(type=="eem") 1 else 0, monochrome)
                       
   # ------ plot residuals/marks (in top left panel) ------------
@@ -383,16 +387,18 @@ beachcolours <- function(heightrange, sealevel = 0, monochrome=FALSE,
                          ncolours=if(monochrome) 16 else 64) {
   if(monochrome)
     return(grey(seq(0,1,length=ncolours)))
+  stopifnot(is.numeric(heightrange) && length(heightrange) == 2)
+  stopifnot(all(is.finite(heightrange)))
   depths <- heightrange[1]
   peaks <- heightrange[2]
   dv <- diff(heightrange)/(ncolours - 1)
   epsilon <- dv/2
   lowtide <- max(sealevel - epsilon, depths)
   hightide <-  min(sealevel + epsilon, peaks)
-  countbetween <- function(a, b) { max(0, round((b-a)/dv)) }
-  nsea <- countbetween(depths, lowtide)
-  nbeach <- countbetween(lowtide,  hightide)
-  nland <- countbetween(hightide,  peaks)
+  countbetween <- function(a, b, delta) { max(0, round((b-a)/delta)) }
+  nsea <- countbetween(depths, lowtide, dv)
+  nbeach <- countbetween(lowtide,  hightide, dv)
+  nland <- countbetween(hightide,  peaks, dv)
   colours <- character(0)
   if(nsea > 0)  colours <- rev(rainbow(nsea, start=3/6,end=4/6)) # cyan/blue
   if(nbeach > 0)  colours <- c(colours,
