@@ -1,0 +1,73 @@
+\name{pixellate}
+\alias{pixellate}
+\alias{as.im.ppp}
+\title{Convert Point Pattern to Pixel Image}
+\description{
+  Converts a point pattern to a pixel image. The value in each pixel
+  is the number of points falling in that pixel, and is typically
+  either 0 or 1.
+}
+\usage{
+pixellate(x, \dots, weights = NULL, padzero=FALSE)
+
+\method{as.im}{ppp}(X, \dots)
+}
+\arguments{
+  \item{x,X}{Point pattern (object of class \code{"ppp"}).}
+  \item{\dots}{Arguments passed to \code{\link{as.mask}} to determine
+    the pixel resolution}
+  \item{weights}{Optional vector of weights associated with the points.}
+  \item{padzero}{Logical flag indicating whether to set pixel values
+    to zero outside the window. 
+  }
+}
+\details{
+  These functions convert a spatial point pattern \code{x} into a pixel
+  image, by counting the number of points (or the total weight of
+  points) falling in each pixel.
+
+  The function \code{as.im.ppp} is a method for the generic
+  function \code{\link{as.im}} for the class of point patterns. It is
+  equivalent to calling \code{pixellate} with its default
+  values. The function \code{pixellate} has additional arguments for
+  greater flexibility.
+
+  First, the window containing \code{x} is converted to a
+  binary pixel mask using \code{\link{as.mask}}.
+
+  If \code{weights} is \code{NULL}, then for each pixel
+  in the mask, the algorithm counts how many points in \code{x} fall
+  in the pixel. This count is usually either 0 (for a pixel with no data
+  points in it) or 1 (for a pixel containing one data point) but may be
+  greater than 1. The result is an image with these counts as its pixel values.
+
+  If \code{weights} is given, it should be a numeric vector of the same
+  length as the number of points in \code{x}. For each pixel, the
+  algorithm finds the total weight associated with points in \code{x} that fall
+  in the given pixel. The result is an image with these total weights
+  as its pixel values.
+
+  By default (if \code{zeropad=FALSE}) the resulting pixel image has the same
+  spatial domain as the window of the point pattern \code{x}. If
+  \code{zeropad=TRUE} then the resulting pixel image has a rectangular
+  domain; pixels outside the original window are assigned the value zero.
+}
+\value{
+  A pixel image (object of class \code{"im"}).
+}
+\seealso{
+  \code{\link{im}}, \code{\link{as.im}},
+  \code{\link{density.ppp}}, \code{\link{smooth.ppp}}.
+}
+\examples{
+  data(humberside)
+  plot(pixellate(humberside))
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{r.turner@auckland.ac.nz}
+}
+\keyword{spatial}
+\keyword{manip}

@@ -86,7 +86,10 @@
     That is, \code{z} is a matrix of pixel values, \code{x} and \code{y}
     are vectors of \eqn{x} and \eqn{y} coordinates respectively,
     and \code{z[i,j]} is the pixel value for the location
-    \code{(x[i],y[j])}. 
+    \code{(x[i],y[j])}.
+    \item
+    a point pattern (object of class \code{"ppp"}).
+    See the separate documentation for \code{\link{as.im.ppp}}.
   }
 
   The spatial domain (enclosing rectangle) of the pixel image
@@ -119,6 +122,9 @@
 }
 \value{
   An image object of class \code{"im"}.
+}
+\seealso{
+  Separate documentation for \code{\link{as.im.ppp}}
 }
 \examples{
   data(demopat)

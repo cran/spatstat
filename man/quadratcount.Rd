@@ -82,7 +82,8 @@
 \seealso{
   \code{\link{quadrat.test}},
   \code{\link{quadrats}},
-  \code{\link{quadratresample}}
+  \code{\link{quadratresample}},
+  \code{\link{miplot}}
 }
 \references{
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.

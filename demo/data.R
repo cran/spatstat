@@ -1,4 +1,8 @@
-if(dev.cur() <= 1) get(getOption("device"))()
+if(dev.cur() <= 1) {
+  dd <- getOption("device")
+  if(is.character(dd)) dd <- get(dd)
+  dd()
+}
 
 oldpar <- par(ask = interactive() && dev.interactive(orNone=TRUE))
 oldoptions <- options(warn=-1)

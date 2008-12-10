@@ -146,6 +146,10 @@ maxsize, markscale)
   The user can set the default values of these plotting parameters
   using \code{\link{spatstat.options}("par.points")}.
   
+  To zoom in (to view only a subset of the point pattern at higher
+  magnification), use the graphical arguments
+  \code{xlim} and \code{ylim} to specify the rectangular field of view.
+
   The value returned by this plot function can be used to make a
   suitable legend, as shown in the examples.
 }

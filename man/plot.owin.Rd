@@ -79,7 +79,14 @@
   \code{\link{image.default}}. The appearance of the image plot
   can be controlled by passing arguments to \code{\link{image.default}}
   through \code{...}. The default appearance can also be changed
-  by setting the parameter \code{par.binary} of \code{\link{spatstat.options}}.
+  by setting the parameter \code{par.binary} of
+  \code{\link{spatstat.options}}.
+
+  To zoom in (to view only a subset of the window at higher
+  magnification), use the graphical arguments
+  \code{xlim} and \code{ylim} to specify the desired rectangular field of
+  view. (The actual field of view may be larger, depending on the
+  graphics device).
 }
 \seealso{
   \code{\link{owin.object}},

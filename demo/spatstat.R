@@ -1,4 +1,8 @@
-if(dev.cur() <= 1) get(getOption("device"))()
+if(dev.cur() <= 1) {
+  dd <- getOption("device")
+  if(is.character(dd)) dd <- get(dd)
+  dd()
+}
 
 oldpar <- par(ask = interactive() && dev.interactive(orNone=TRUE))
 oldoptions <- options(warn=-1)
@@ -118,6 +122,11 @@ parsave <- par(mfrow=c(1,2))
 plot(longleaf, main="Longleaf Pines data")
 plot(smooth.ppp(longleaf, 10), main="Spatial smoothing of marks")
 par(parsave)
+
+data(cells)
+fryplot(cells, main=c("Fry plot","cells data"), pch="+")
+data(longleaf)
+miplot(longleaf, main="Morishita Index plot", pch=16, col="blue")
 
 plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)
@@ -308,17 +317,17 @@ plot(Rbox, type="n", main="erode.owin")
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
-v <- dilate.owin(w, 0.3)
+v <- dilate.owin(Rmask, 0.3)
 plot(as.rectangle(v), type="n", main="dilate.owin")
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
-v <- closing.owin(w, 0.25)
+v <- closing.owin(Rmask, 0.25)
 plot(Rbox, type="n", main="closing.owin")
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
-v <- opening.owin(w, 0.3)
+v <- opening.owin(Rmask, 0.3)
 plot(Rbox, type="n", main="opening.owin")
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
