@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.26 $    $Date: 2007/10/24 09:41:15 $
+#           $Revision: 1.29 $    $Date: 2008/12/05 19:48:30 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -13,7 +13,7 @@
 #
 #     This file uses the temporary 'image' class defined in images.R
 
-pixellate <- function(x, ..., weights=NULL)
+pixellate <- function(x, ..., weights=NULL, padzero=FALSE)
 {
     verifyclass(x, "ppp")
 
@@ -24,6 +24,8 @@ pixellate <- function(x, ..., weights=NULL)
 
     if(x$n == 0) {
       zeroimage <- as.im(as.double(0), w)
+      if(padzero) # map NA to 0
+        zeroimage <- na.handle.im(zeroimage, 0)
       return(zeroimage)
     }
     
@@ -39,6 +41,9 @@ pixellate <- function(x, ..., weights=NULL)
         ta[is.na(ta)] <- 0
     }
     out <- im(ta, xcol = w$xcol, yrow = w$yrow, unitname=unitname(w))
+    # clip to window of data
+    if(!padzero)
+      out <- out[w, drop=FALSE]
     return(out)
 }
 
@@ -80,7 +85,7 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
                paste(sQuote(choices), collapse=", ")))
   if(is.ppp(x)) 
   # convert list of points to mass distribution 
-    X <- pixellate(x, ...)
+    X <- pixellate(x, ..., padzero=TRUE)
   else if(is.im(x))
     X <- x
   else stop("internal error: unrecognised format for x")

@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.13 $   $Date: 2008/09/30 18:33:20 $
+#    $Revision: 1.15 $   $Date: 2008/12/05 20:08:09 $
 #
 #    as.im()
 #
@@ -140,6 +140,10 @@ as.im.default <- function(X,
     return(na.handle.im(out, na.replace))
   }
   stop("Can't convert X to a pixel image")
+}
+
+as.im.ppp <- function(X, ...) {
+  pixellate(X, ..., weights=NULL, zeropad=FALSE)
 }
 
 na.handle.im <- function(X, na.replace) {

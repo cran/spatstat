@@ -1,4 +1,8 @@
-if(dev.cur() <= 1) get(getOption("device"))()
+if(dev.cur() <= 1) {
+  dd <- getOption("device")
+  if(is.character(dd)) dd <- get(dd)
+  dd()
+}
 
 oldpar <- par(ask = interactive() &&
               (.Device %in% c("X11", "GTK", "windows", "Macintosh")))

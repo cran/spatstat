@@ -167,7 +167,6 @@
 \alias{param.quad}
 \alias{paren}
 \alias{pickoption}
-\alias{pixellate}
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.fii}
@@ -481,7 +480,6 @@ param.quad(Q)
 paren(x)
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
-pixellate(x, \dots, weights)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{fii}(x, \dots)

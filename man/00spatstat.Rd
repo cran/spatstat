@@ -401,6 +401,13 @@
     check for duplicated points in pattern \code{X}
   }
 
+  \bold{Classical exploratory tools:}
+  \tabular{ll}{
+    \code{\link{clarkevans}} \tab Clark and Evans aggregation index \cr
+    \code{\link{fryplot}} \tab Fry plot \cr
+    \code{\link{miplot}} \tab Morishita Index plot
+  }
+
   \bold{Summary statistics for a point pattern:}
   \tabular{ll}{
     \code{\link{quadratcount}} \tab Quadrat counts \cr
@@ -417,7 +424,7 @@
     \code{\link{Kmeasure}} \tab reduced second moment measure \cr
     \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
     \code{\link{envelope}} \tab simulation envelopes for a summary
-    function
+    function \cr
   }
 
   Related facilities:

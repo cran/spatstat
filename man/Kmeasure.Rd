@@ -107,6 +107,7 @@ from a point pattern in a window of arbitrary shape.
 } 
 \seealso{
   \code{\link{Kest}},
+  \code{\link{fryplot}},
   \code{\link{spatstat.options}},
   \code{\link{im.object}}
 }

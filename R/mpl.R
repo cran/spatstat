@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.73 $	$Date: 2008/08/15 06:48:20 $
+#	$Revision: 5.74 $	$Date: 2008/12/04 21:45:10 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -91,7 +91,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2008/08/15 06:48:20 $")
+                    date="$Date: 2008/12/04 21:45:10 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -169,11 +169,11 @@ if(is.null(famille)) {
   # the sanctioned technique, using `quasi' family
   if(want.trend && use.gam)
     FIT  <- gam(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
-                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                data=glmdata, subset=.mpl.SUBSET,
                 control=gam.control(maxit=50))
   else
     FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
-                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                data=glmdata, subset=.mpl.SUBSET,
                 control=glm.control(maxit=50), model=FALSE)
 } else {
   # for experimentation only!
@@ -182,11 +182,11 @@ if(is.null(famille)) {
   stopifnot(inherits(famille, "family"))
   if(want.trend && use.gam)
     FIT  <- gam(fmla, family=famille, weights=.mpl.W,
-                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                data=glmdata, subset=.mpl.SUBSET,
                 control=gam.control(maxit=50))
   else
     FIT  <- glm(fmla, family=famille, weights=.mpl.W,
-                data=glmdata, subset=(.mpl.SUBSET=="TRUE"),
+                data=glmdata, subset=.mpl.SUBSET,
                 control=glm.control(maxit=50), model=FALSE)
 }
   
@@ -520,7 +520,9 @@ if(correction == "border") {
   .mpl$SUBSET <- .mpl$DOMAIN & .mpl$SUBSET
 }
 
-glmdata <- data.frame(glmdata, .mpl.SUBSET=.mpl$SUBSET)
+glmdata <- cbind(glmdata,
+                 data.frame(.mpl.SUBSET=.mpl$SUBSET,
+                            stringsAsFactors=FALSE))
 
 #################  F o r m u l a   ##################################
 

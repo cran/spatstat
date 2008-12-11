@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.22 $    $Date: 2008/08/19 03:16:51 $
+#      $Revision: 4.23 $    $Date: 2008/12/04 22:10:57 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -265,6 +265,7 @@ pixelquad <- function(X, W=as.owin(X)) {
   W <- as.owin(W)
   M <- as.mask(W)
   MM <- M$m
+  pixelarea <- M$xstep * M$ystep
   
   # create pixel coordinates and corresponding row, column indices
   xx <- as.vector(raster.x(M)[MM])
@@ -292,9 +293,11 @@ pixelquad <- function(X, W=as.owin(X)) {
   # compute counting weights for dummy points
   wdum <- 1/Qtab[cbind(rr, cc)]
 
+  wboth <- pixelarea * c(wdat, wdum)
+  
   # create quadrature scheme
   dum <- ppp(xx, yy, window=W, check=FALSE)
-  Q <- quad(X, dum, c(wdat,wdum))
+  Q <- quad(X, dum, wboth)
 
   attr(Q, "M") <- M
   return(Q)

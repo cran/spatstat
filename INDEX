@@ -165,6 +165,7 @@ fitin.ppm               Extract the Interaction from a Fitted Point
                         Process Model
 fitted.ppm              Fitted Conditional Intensity for Point Process
                         Model
+fryplot                 Fry Plot of Point Pattern
 fv.object               Data Frames of Function Values
 ganglia                 Beta Ganglion Cells in Cat Retina, Old Version
 gpc2owin                Convert Polygonal Region into Different Format
@@ -226,6 +227,7 @@ mean.im                 Mean, Median and Range of Pixel Values in an
                         Image
 midpoints.psp           Midpoints of Line Segment Pattern
 mincontrast             Method of Minimum Contrast
+miplot                  Morishita Index Plot
 model.images            Compute Images of Constructed Covariates
 model.matrix.ppm        Extract Design Matrix from Point Process Model
 multiplicity.ppp        Count Multiplicity of Duplicate Points
@@ -260,6 +262,7 @@ pcf.fv                  Pair Correlation Function obtained from K
 pcf.ppp                 Pair Correlation Function of Point Pattern
 pcfcross                Multitype pair correlation function
 persp.im                Perspective Plot of Pixel Image
+pixellate               Convert Point Pattern to Pixel Image
 pixelquad               Quadrature Scheme Based on Pixel Grid
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
