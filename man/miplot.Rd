@@ -52,6 +52,17 @@ miplot(X, ...)
 \examples{
  data(longleaf)
  miplot(longleaf)
+ opa <- par(mfrow=c(2,3))
+ data(cells)
+ data(japanesepines)
+ data(redwood)
+ plot(cells)
+ plot(japanesepines)
+ plot(redwood)
+ miplot(cells)
+ miplot(japanesepines)
+ miplot(redwood)
+ par(opa)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

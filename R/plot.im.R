@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.41 $   $Date: 2008/10/15 18:12:11 $
+#  $Revision: 1.42 $   $Date: 2008/12/11 00:53:01 $
 #
 #  Plotting code for pixel images
 #
@@ -50,11 +50,22 @@ plot.im <- function(x, ...,
            nvalues <- length(uv)
            trivial <- (nvalues < 2)
            if(!trivial){
-             ribn <- min(ribn, diff(vrange)+1)
-             ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
-             ribbonrange <- vrange
-             ribbonticks <- clamp(pretty(ribbonvalues), vrange)
-             ribbonlabels <- paste(ribbonticks)
+             ribbonticks <- clamp(pretty(vrange), vrange)
+             ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
+             if(identical(all.equal(ribbonticks, vrange[1]:vrange[2]), TRUE)) {
+               # each possible value will be printed on ribbon label
+               ribbonvalues <- vrange[1]:vrange[2]
+               imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
+               ribbonrange <- range(imagebreaks)
+               ribbonticks <- ribbonvalues
+               ribbonlabels <- paste(ribbonticks)
+             } else {
+               # not all values will be printed on ribbon label
+               ribn <- min(ribn, diff(vrange)+1)
+               ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
+               ribbonrange <- vrange
+               ribbonlabels <- paste(ribbonticks)
+             }
            }
          },
          logical = {
