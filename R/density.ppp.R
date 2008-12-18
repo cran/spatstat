@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.5 $    $Date: 2008/11/16 07:52:48 $
+#  $Revision: 1.6 $    $Date: 2008/12/16 17:55:58 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -70,11 +70,7 @@ smooth.ppp <- function(X, ..., weights=rep(1,X$n)) {
   else
     values <- rep(1, X$n)
   
-  if(missing(weights)) {
-    # weights are identically 1
-    result <- density(X, ..., weights=values)
-    return(result)
-  } else {
+  if(!missing(weights)) {
     # rescale weights to avoid numerical gremlins
     weights <- weights/median(abs(weights))
   }

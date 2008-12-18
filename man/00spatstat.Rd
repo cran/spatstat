@@ -194,13 +194,12 @@
       \tabular{ll}{
 	\code{\link{plot.ppp}} \tab
 	plot a point pattern (e.g. \code{plot(X)}) \cr
-	\code{\link{subset.ppp}},
-	\code{"[.ppp"} \tab
+	\code{\link{subset.ppp}} \tab  \cr
+	\code{\link{[.ppp}} \tab
 	extract or replace a subset of a point pattern \cr
-        \tab \code{pp[subset]} \cr
-	\tab  \code{pp[, subwindow]} \cr
+        \tab \code{pp[subset]} or \code{pp[subwindow]} \cr
 	\code{\link{superimpose}} \tab
-	superimpose any number of point patterns  \cr
+	combine several point patterns  \cr
 	\code{\link{by.ppp}} \tab
 	apply a function to sub-patterns of a point pattern \cr
 	\code{\link{cut.ppp}} \tab
@@ -383,8 +382,8 @@
       \code{\link{as.tess}} \tab convert other data to a tessellation \cr
       \code{\link{plot.tess}} \tab plot a tessellation \cr
       \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
-      \code{\link{[.tess}} \tab extract a subset of a tessellation \cr
-      \code{\link{[<-.tess}} \tab change a subset of a tessellation \cr
+      \code{\link{[.tess}} \tab extract a subset of (tiles of) a tessellation \cr
+      \code{\link{[<-.tess}} \tab change a subset of (tiles of) a tessellation \cr
       \code{\link{quadrats}} \tab create a tessellation of rectangles
     }
 }
@@ -485,12 +484,12 @@
 
   \bold{Programming tools:}
   \tabular{ll}{
-    \code{\link{applynbd}} \tab apply function to every neighbourhood\cr
-    \tab in a point pattern \cr
-    \code{\link{markstat}} \tab apply function to the marks of neighbours\cr
-    \tab in a point pattern \cr
-    \code{\link{marktable}} \tab tabulate the marks of neighbours\cr
-    \tab in a point pattern \cr
+    \code{\link{applynbd}} \tab apply function to every neighbourhood
+    in a point pattern \cr
+    \code{\link{markstat}} \tab apply function to the marks of neighbours
+    in a point pattern \cr
+    \code{\link{marktable}} \tab tabulate the marks of neighbours
+    in a point pattern \cr
     \code{\link{pppdist}} \tab find the optimal match between two point
     patterns
   }
@@ -539,9 +538,9 @@
 
   \tabular{ll}{
     \code{\link{plot.ppm}} \tab 		Plot the fitted model\cr
-    \code{\link{predict.ppm}} \tab 		Compute the spatial trend \cr
-    \tab	and conditional intensity\cr
-    \tab        of the fitted point process model \cr
+    \code{\link{predict.ppm}}
+    \tab   Compute the spatial trend and conditional intensity\cr
+    \tab   of the fitted point process model \cr
     \code{\link{coef.ppm}} \tab Extract the fitted model coefficients\cr
     \code{\link{formula.ppm}} \tab Extract the trend formula\cr
     \code{\link{fitted.ppm}} \tab Compute fitted conditional intensity at quadrature points \cr
