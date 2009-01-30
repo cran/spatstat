@@ -1,12 +1,20 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.20 $  $Date: 2008/10/24 02:21:55 $
+#  $Revision: 1.22 $  $Date: 2009/01/30 00:39:28 $
 #
 
-quadratcount <- function(X, nx=5, ny=nx, ...,
-                         xbreaks=NULL, ybreaks=NULL,
-                         tess=NULL)  {
+quadratcount <- function(X, ...) {
+  UseMethod("quadratcount")
+}
+
+quadratcount.splitppp <- function(X, ...) {
+  as.listof(lapply(X, quadratcount, ...))
+}
+
+quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
+                             xbreaks=NULL, ybreaks=NULL,
+                             tess=NULL)  {
   verifyclass(X, "ppp")
   W <- X$window
 

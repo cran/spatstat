@@ -76,7 +76,5 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
 }
   
 density.splitppp <- function(x, ...) {
-  u <- lapply(x, density, ...)
-  class(u) <- c("listof", class(u))
-  return(u)
+  as.listof(lapply(x, density, ...))
 }

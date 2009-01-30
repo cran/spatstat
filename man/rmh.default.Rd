@@ -196,7 +196,7 @@
    A nonparametric estimator for pairwise-interaction point processes.
    Biometrika \bold{74}, 763 -- 770.
 
-   Geyer, C.J. and M{\o}ller, J. (1994)
+   Geyer, C.J. and Moller, J. (1994)
    Simulation procedures and likelihood inference for spatial
    point processes.
    \emph{Scandinavian Journal of Statistics} \bold{21}, 359--373.

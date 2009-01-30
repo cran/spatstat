@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.9 $ $Date: 2008/10/24 01:56:16 $
+#   $Revision: 1.10 $ $Date: 2009/01/30 00:49:27 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   isrect <- !is.null(xgrid) && !is.null(ygrid)
@@ -187,7 +187,7 @@ tiles <- function(x) {
              out[[i]] <- solutionset(ima == lev[i])
            names(out) <- paste(lev)
          })
-  class(out) <- c("listof", class(out))
+  out <- as.listof(out)
   return(out)
 }
 

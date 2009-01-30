@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.33 $	$Date: 2007/04/20 03:46:53 $
+#	$Revision: 1.34 $	$Date: 2009/01/28 23:42:13 $
 #
 #
 #--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ plot.ppp <-
     if(is.null(rwin))
       stop("Selected window for rejects pattern is NULL")
     # Create suitable space
-    plot(rejects$window, add=add, type="n")
+    plot(rejects$window, add=add, type="n", main="")
     if(!add)
       title(main=main)
     # plot window if commanded

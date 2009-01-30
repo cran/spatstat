@@ -2,7 +2,7 @@
 
    dinfty.c
 
-   $Revision: 1.4 $   $Date: 2006/08/22 02:23:02 $
+   $Revision: 1.5 $   $Date: 2009/01/27 18:59:18 $
 
    Code by Dominic Schuhmacher
 
@@ -80,7 +80,7 @@ void dinfty_R(int *d, int *num, int *assignment) {
       }
    }
 /* For testing: print distance from within C program
-   printf("Prohorov distance is %d\n", currmin);     /*
+   printf("Prohorov distance is %d\n", currmin);     */
 
 /* "Return" the final assignment */
    for (i = 0; i < n; i++) {

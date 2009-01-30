@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.10 $ $Date: 2008/10/07 23:28:40 $
+# $Revision: 1.11 $ $Date: 2009/01/30 00:45:01 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
@@ -132,8 +132,8 @@ simulate.kppm <- function(object, nsim=1, ...) {
            for(i in 1:nsim)
              out[[i]] <- rMatClust(kappa,r,mu,win)
          })
+  out <- as.listof(out)
   names(out) <- paste("Simulation", 1:nsim)
-  class(out) <- c("listof", class(out))
   return(out)
 }
 

@@ -2,7 +2,7 @@
 #
 #   allstats.R
 #
-#   $Revision: 1.14 $   $Date: 2007/10/30 17:15:35 $
+#   $Revision: 1.15 $   $Date: 2009/01/30 00:41:13 $
 #
 #
 allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
@@ -42,6 +42,6 @@ allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
   attr(fns, "title") <- title
 
 #
-  class(fns) <- c("listof", class(fns))
+  fns <- as.listof(fns)
   return(fns)
 }

@@ -1,0 +1,63 @@
+\name{quadrat.test.splitppp}
+\alias{quadrat.test.splitppp}
+\title{Chi-Squared Test of CSR for Split Point Pattern}
+\description{
+  Performs a chi-squared test of Complete Spatial Randomness
+  for each of the component patterns in a split point pattern.
+}
+\usage{
+\method{quadrat.test}{splitppp}(X, ...)
+}
+\arguments{
+  \item{X}{
+    A split point pattern (object of class \code{"splitppp"}),
+    each component of which will be subjected to the goodness-of-fit test.
+  }
+  \item{\dots}{Arguments passed to \code{\link{quadrat.test.ppp}}.}
+}
+\details{
+  The function \code{quadrat.test} is generic, with methods for
+  point patterns (class \code{"ppp"}), split point patterns
+  (class \code{"splitppp"}) and point process models
+  (class \code{"ppm"}).
+
+  If \code{X} is a split point pattern, then for each of the
+  component point patterns (taken separately) we test 
+  the null hypotheses of Complete Spatial Randomness.
+  The method \code{quadrat.test.ppp} is applied to each
+  component point pattern.
+
+  The return value is a list of objects, each giving the result of
+  one of the tests.
+}
+\seealso{
+  \code{\link{quadrat.test}},
+  \code{\link{quadratcount}},
+  \code{\link{quadrats}},
+  \code{\link{quadratresample}},
+  \code{\link{chisq.test}},
+  \code{\link{kstest}}.
+
+  To test a Poisson point process model against a specific alternative,
+  use \code{\link{anova.ppm}}.
+}
+\value{
+  A list of objects, each giving the result of one of the
+  hypothesis tests. Each component object is of class \code{"htest"}
+  and \code{"quadrat.test"}. The list itself is of class \code{"listof"}
+  so that it can be printed and plotted.
+}
+\examples{
+ data(humberside)
+ qH <- quadrat.test(split(humberside), 2, 3)
+ plot(qH)
+ qH
+}
+\author{Adrian Baddeley
+  \email{adrian@maths.uwa.edu.au}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Rolf Turner
+  \email{r.turner@auckland.ac.nz}
+}
+\keyword{spatial}
+\keyword{htest}

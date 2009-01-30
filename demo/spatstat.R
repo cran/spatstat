@@ -85,6 +85,9 @@ Xproj <- v$Xproj
 plot(Xproj, add=TRUE, pch=16)
 arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
 
+plot(a, main="pointsOnLines(L)")
+plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
+
 fanfare("III. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")
@@ -230,7 +233,8 @@ plot(redwood)
 fitT <- kppm(redwood, ~1, clusters="Thomas")
 oop <- par(pty="s")
 plot(fitT, main=c("Thomas model","fit by minimum contrast"))
-par(parsave)
+
+plot(redwood)
 plot(simulate(fitT)[[1]], main="simulation from fitted Thomas model")
 
 plot(swedishpines)
@@ -304,6 +308,13 @@ plot(Xg, main=paste("Geyer saturation process\n",
 plot(rpoisline(10))
 
 plot(rlinegrid(30, 0.1))
+
+L <- as.psp(matrix(runif(20), 5, 4), window=square(1))
+plot(L, main="runifpointOnLines(30, L)")
+plot(runifpointOnLines(30, L), add=TRUE, pch="+")
+
+plot(L, main="rpoisppOnLines(3, L)")
+plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
 
 fanfare("VI. Programming tools")
 

@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.24 $  $Date: 2007/05/09 12:56:12 $
+# $Revision: 1.25 $  $Date: 2009/01/30 00:43:29 $
 #
 
 hyperframe <- function(...,
@@ -303,7 +303,7 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
     if(any(ok)) {
       j <- min(which(ok))
       x <- x[,j, drop=TRUE]
-      class(x) <- c("listof", class(x))
+      x <- as.listof(x)
       plot(x, ..., main=main, arrange=arrange, nrows=nrows, ncols=ncols)
       return(invisible(NULL))
     } else {

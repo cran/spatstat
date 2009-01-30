@@ -142,7 +142,11 @@
 	\code{\link{rcell}} \tab
 	simulate the Baddeley-Silverman cell process  \cr
 	\code{\link{rmh}} \tab
-	simulate Gibbs point process using Metropolis-Hastings 
+	simulate Gibbs point process using Metropolis-Hastings \cr
+	\code{\link{runifpointOnLines}} \tab
+	generate \eqn{n} random points along specified line segments \cr
+	\code{\link{rpoisppOnLines}} \tab
+	generate Poisson random points along specified line segments 
       }
 
       \bold{To randomly change an existing point pattern:}
@@ -248,7 +252,7 @@
 	\code{\link{ripras}}    \tab
 	Ripley-Rasson estimator of window, given only the points \cr
 	\code{\link{letterR}}    \tab
-	polygonal window in the shape of the {\sf R} logo
+	polygonal window in the shape of the \R logo
       }
 
     \bold{To manipulate a window:}
@@ -370,7 +374,9 @@
       \code{\link{nearestsegment}} \tab find line segment closest to a
       given point \cr
       \code{\link{project2segment}} \tab find location along a line segment
-      closest to a given point
+      closest to a given point \cr
+      \code{\link{pointsOnLines}} \tab generate points evenly spaced
+      along line segment 
     }
 
     \bold{Tessellations}

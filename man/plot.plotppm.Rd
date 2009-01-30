@@ -18,7 +18,7 @@
   }.
   \item{data}{
     The point pattern (an object of class \code{ppp})
-    to which the point process model was fitted (by code{\link{ppm}()}).
+    to which the point process model was fitted (by \code{\link{ppm}}).
   }
   \item{trend}{
     Logical scalar; should the trend component of

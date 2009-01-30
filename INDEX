@@ -278,6 +278,7 @@ plot.psp                plot a Spatial Line Segment Pattern
 plot.quad               plot a Spatial Quadrature Scheme
 plot.splitppp           Plot a List of Point Patterns
 plot.tess               Plot a tessellation
+pointsOnLines           Place Points Evenly Along Specified Lines
 ponderosa               Ponderosa Pine Tree Point Pattern
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
@@ -308,6 +309,7 @@ quad.ppm                Extract Quadrature Scheme Used to Fit a Point
                         Process Model
 quadrat.test            Chi-Squared Dispersion Test for Spatial Point
                         Pattern Based on Quadrat Counts
+quadrat.test.splitppp   Chi-Squared Test of CSR for Split Point Pattern
 quadratcount            Quadrat counting for a point pattern
 quadratresample         Resample a Point Pattern by Resampling Quadrats
 quadrats                Divide Region into Quadrats
@@ -371,6 +373,7 @@ rotate.psp              Rotate a Line Segment Pattern
 rpoint                  Generate N Random Points
 rpoisline               Generate Poisson Random Line Process
 rpoispp                 Generate Poisson Point Pattern
+rpoisppOnLines          Generate Poisson Point Pattern on Line Segments
 rshift                  Random Shift
 rshift.ppp              Randomly Shift a Point Pattern
 rshift.psp              Randomly Shift a Line Segment Pattern
@@ -380,6 +383,8 @@ rsyst                   Simulate systematic random point pattern
 rthin                   Random Thinning
 runifdisc               Generate N Uniform Random Points in a Disc
 runifpoint              Generate N Uniform Random Points
+runifpointOnLines       Generate N Uniform Random Points On Line
+                        Segments
 scanpp                  Read Point Pattern From Data File
 selfcrossing.psp        Crossing Points in a Line Segment Pattern
 setcov                  Set Covariance of a Window

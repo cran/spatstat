@@ -44,7 +44,7 @@
   \bold{19}, 77-86
   
   Goulard, M., S\"arkk\"a, A. and Grabarnik, P. (1996)
-  Parameter estimation for marked {G}ibbs point
+  Parameter estimation for marked Gibbs point
   processes through the maximum pseudolikelihood method.
   \emph{Scandinavian Journal of Statistics}
   \bold{23}, 365--379.

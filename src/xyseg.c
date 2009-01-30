@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.9 $     $Date: 2008/08/19 21:37:36 $
+  $Revision: 1.10 $     $Date: 2009/01/27 19:03:02 $
 
  */
 
@@ -219,7 +219,7 @@ void xysegVslice(na, xa,
       yy[ijpos] = NIETS;
       /* test whether vertical line i separates endpoints of segment j */
       diffx0 = xa[i] - x0b[j];
-      diffx1 = diffx1 - width;
+      diffx1 = diffx0 - width;
       if(diffx0 * diffx1 <= 0) {
 	/* intersection */
 	ok[ijpos] = 1;

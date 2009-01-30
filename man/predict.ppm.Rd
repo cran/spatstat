@@ -257,10 +257,21 @@ at new locations.
   mj <- ppm(japanesepines, ~harmonic(x,y,2))
   se <- predict(mj, type="se")
 
-  # prediction at 5 arbitrary locations
+  # prediction at arbitrary locations
+  predict(mj, locations=data.frame(x=0.3, y=0.4))
+
   X <- runifpoint(5, japanesepines$window)
   predict(mj, locations=X)
   predict(mj, locations=X, type="se")
+
+  # multitype
+  data(amacrine)
+  ma <- ppm(amacrine, ~marks,
+     MultiStrauss(c("off","on"),matrix(0.06, 2, 2)))
+  predict(ma)
+  predict(ma, type="cif")
+  predict(ma, locations=data.frame(x=0.8, y=0.5,marks="on"), type="cif")
+
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

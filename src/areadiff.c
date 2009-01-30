@@ -4,7 +4,7 @@
 
   Area difference function
 
-  $Revision: 1.2 $ $Date: 2008/04/02 12:13:21 $
+  $Revision: 1.3 $ $Date: 2009/01/27 18:57:52 $
 
   A(u,x) = area of disc b(u,r) not covered by discs b(x_i,r) for x_i in x
 
@@ -32,7 +32,7 @@ areadiff(ux,uy,rad,x,y,nn,ngrid,answer)
      double *answer;   /* computed area */
 {
   double xu, yu, dx, dy, xg, yg, r, r2, xdif, ydif;
-  int i, j, k, m, jmax, n, count, found;
+  int i, j, k, m, n, count, found;
   xu = *ux;
   yu = *uy;
   r  = *rad;

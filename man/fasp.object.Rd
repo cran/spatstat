@@ -2,7 +2,7 @@
 \alias{fasp.object}
 \title{Function Arrays for Spatial Patterns}
 \description{
-  A class \code{"fasp"} to represent a ``matrix''
+  A class \code{"fasp"} to represent a \dQuote{matrix}
   of functions, amenable to plotting as a matrix of plot panels.
 }
 \details{
@@ -31,29 +31,30 @@
 
   An object of class \code{"fasp"} is a list containing at least the
   following components:
-  
-  \item{fns}{
-    A list of data frames, each representing one of the functions.
-  }
-  \item{which}{
-    A matrix representing the spatial arrangement of the
-    functions. If \code{which[i,j] = k}
-    then the function represented by \code{fns[[k]]} should be plotted
-    in the panel at position \eqn{(i,j)}. If \code{which[i,j] = NA}
-    then nothing is plotted in that position.
-  }
-  \item{titles}{
-    A list of character strings, providing suitable plotting titles
-    for the functions.
-    }
-  \item{default.formulae}{
-    A list of default formulae for plotting each of the functions.
-  }
-  \item{title}{
-    A character string, giving a default title for the array
-    when it is plotted.
-  }
 
+  \describe{
+    \item{fns}{
+      A list of data frames, each representing one of the functions.
+    }
+    \item{which}{
+      A matrix representing the spatial arrangement of the
+      functions. If \code{which[i,j] = k}
+      then the function represented by \code{fns[[k]]} should be plotted
+      in the panel at position \eqn{(i,j)}. If \code{which[i,j] = NA}
+      then nothing is plotted in that position.
+    }
+    \item{titles}{
+      A list of character strings, providing suitable plotting titles
+      for the functions.
+    }
+    \item{default.formulae}{
+      A list of default formulae for plotting each of the functions.
+    }
+    \item{title}{
+      A character string, giving a default title for the array
+      when it is plotted.
+    }
+  }
 }
 \section{Functions available}{
   There are methods for \code{plot}, \code{print} and \code{"["}

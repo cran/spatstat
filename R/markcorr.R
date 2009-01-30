@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.22 $ $Date: 2007/10/24 09:41:15 $
+#     $Revision: 1.24 $ $Date: 2009/01/30 01:43:05 $
 #
 #    Estimate the mark correlation function
 #
@@ -170,7 +170,13 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
          },
          sm={
            # This is slow!
-           require(sm)
+           oldopt <- options(warn=-1)
+           smok <- require(sm)
+           options(oldopt)
+           if(!smok)
+             stop(paste("Option method=sm requires package sm,",
+                        "which is not available"))
+
            # smooth estimate of kappa_f
            fw <- ff * wt
            est <- sm.density(d, weights=fw,
@@ -185,7 +191,12 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
            result <- numerator/denominator
          },
          smrep={
-           require(sm)
+           oldopt <- options(warn=-1)
+           smok <- require(sm)
+           options(oldopt)
+           if(!smok)
+             stop(paste("Option method=smrep requires package sm,",
+                  "which is not available"))
 
            hstuff <- resolve.defaults(list(...), list(hmult=1, h.weights=NA))
            if(hstuff$hmult == 1 && all(is.na(hstuff$h.weights)))

@@ -4,7 +4,7 @@
 #
 #  subset operations for hyperframes
 #
-#  $Revision: 1.2 $    $Date: 2007/05/09 12:56:38 $
+#  $Revision: 1.3 $    $Date: 2009/01/30 00:44:20 $
 #
 #
 
@@ -41,7 +41,7 @@
            hypercolumn = {
              hc <- x$hypercolumns[[1]]
              if(x$ncases > 1) {
-               class(hc) <- c("listof", class(hc))
+               hc <- as.listof(hc)
                names(hc) <- row.names(x$df)
                return(hc)
              } else {
@@ -59,7 +59,7 @@
                ha <- x$hyperatoms[1]
                names(ha) <- NULL
                hc <- rep(ha, x$ncases)
-               class(hc) <- c("listof", class(hc))
+               hc <- as.listof(hc)
                names(hc) <- row.names(x$df)
                return(hc)
              }

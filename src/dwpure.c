@@ -2,7 +2,7 @@
 
    dwpure.c
 
-   $Revision: 1.2 $   $Date: 2007/10/18 14:45:18 $
+   $Revision: 1.3 $   $Date: 2009/01/27 19:00:58 $
 
    Code by Dominic Schuhmacher
    
@@ -296,7 +296,8 @@ void updateduals(State *state)
 according to the row and column labels starting in column startcol */
 /* Adjust the surpluses while we're at it (first row and last col have -aug) */ 
 void augmentflow(int startcol, State *state) {
-   int i,j,k,l,aug,n1,n2;
+   int k,l,aug,n1;
+  /* int i,j,k,l,aug,n1,n2; */
 
    n1 = state->n1;
 

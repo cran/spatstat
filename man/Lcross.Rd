@@ -42,7 +42,7 @@
   the theoretical value of the L-function is
   \eqn{L_{ij}(r) = r}{Lij(r) = r}.
   The square root also has the effect of stabilising
-  the variance of the estimator, so that \code{L_{ij}}{Lij} is more appropriate
+  the variance of the estimator, so that \eqn{L_{ij}}{Lij} is more appropriate
   for use in simulation envelopes and hypothesis tests.
 }
 

@@ -1,0 +1,223 @@
+\documentclass[twoside,11pt]{article}
+
+% \VignetteIndexEntry{Handling shapefiles in the spatstat package}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage{color}
+
+\newcommand{\pkg}[1]{\texttt{#1}}
+\newcommand{\bold}[1]{{\bf {#1}}}
+\newcommand{\R}{{\sf R}}
+
+\begin{document}
+%\bibliographystyle{plain}
+\thispagestyle{empty}
+
+\title{Handling shapefiles in the \texttt{spatstat} package}
+\author{Adrian Baddeley}
+\date{27 January 2009}
+\maketitle
+
+This vignette explains how to read data into the \pkg{spatstat} package
+from files in the popular `shapefile' format. 
+
+This information applies to \pkg{spatstat} version \texttt{1.14-10}. 
+
+\section{Shapefiles}
+
+A shapefile represents a list of spatial objects 
+--- a list of points, a list of lines, or a list of polygons --- 
+and each object in the list may have additional variables attached to it.
+
+A dataset stored in shapefile format is actually stored in a
+collection of text files, for example
+\begin{verbatim}
+     mydata.shp
+     mydata.prj
+     mydata.sbn
+     mydata.dbf
+\end{verbatim}
+which all have the same base name \texttt{mydata} but different file extensions.
+To refer to this collection you will always use the filename with the 
+extension \texttt{shp}, for example \texttt{mydata.shp}. 
+
+\section{Helper packages}
+
+We'll use two other packages to handle shapefile data.
+
+The \pkg{maptools} package is designed specifically for handling
+file formats for spatial data. It contains 
+facilities for reading and writing files in shapefile format.
+
+The \pkg{sp} package supports a standard set of spatial data types
+in \R. These standard data types can be handled by many other packages,
+so it is useful to convert your spatial data into one of the 
+data types supported by \pkg{sp}.
+
+\section{How to read shapefiles into \pkg{spatstat}} 
+
+To read shapefile data into \pkg{spatstat}, you follow two steps:
+\begin{enumerate}
+\item 
+  using the facilities of \pkg{maptools}, read the shapefiles
+  and store the data in one of the standard formats supported by \pkg{sp}.
+\item 
+  convert the \pkg{sp} data type into one of the data types
+  supported by \pkg{spatstat}.
+\end{enumerate}
+
+\subsection{Read shapefiles using \pkg{maptools}} 
+
+Here's how to read shapefile data.
+
+\begin{enumerate}
+\item ensure that the package \pkg{maptools} is installed. You will need
+version \texttt{0.7-16} or later.
+\item start R and load the package: 
+<<eval=FALSE>>=
+library(maptools)
+@ 
+\item read the shapefile into an object in the \pkg{sp} package
+using \texttt{readShapeSpatial}, for example
+<<eval=FALSE>>=
+x <- readShapeSpatial("mydata.shp")
+@ 
+\item 
+To find out what kind of spatial objects are represented by the dataset,
+inspect its class:
+<<eval=FALSE>>=
+class(x)
+@ 
+The class may be either \texttt{SpatialPoints} indicating a point pattern, 
+\texttt{SpatialLines} indicating a list of line segments, or
+\texttt{SpatialPolygons} indicating a list of polygons. It may also be
+\texttt{SpatialPointsDataFrame},
+\texttt{SpatialLinesDataFrame} or 
+\texttt{SpatialPolygonsDataFrame} indicating that, in addition to the 
+spatial objects, there is a data frame of additional variables.
+\end{enumerate}
+
+Here are some examples, using the example shapefiles supplied in the
+\pkg{maptools} package itself.
+
+% fake data
+<<echo=FALSE,results=hide>>=
+baltim <- columbus <- fylk <- list()
+class(baltim) <- "SpatialPointsDataFrame"
+class(columbus) <- "SpatialPolygonsDataFrame"
+class(fylk) <- "SpatialLinesDataFrame"
+@ 
+<<eval=FALSE>>=
+setwd(system.file("shapes", package="maptools"))
+baltim   <- readShapeSpatial("baltim.shp")
+columbus <- readShapeSpatial("columbus.shp")
+fylk     <- readShapeSpatial("fylk-val.shp")
+@ 
+<<>>=
+class(baltim)
+class(columbus)
+class(fylk)
+@ 
+
+\subsection{Convert data to \pkg{spatstat} format}
+
+To convert the dataset to an object in the
+\pkg{spatstat} package, the procedure depends on the 
+type of data, as explained below. 
+
+\begin{description}
+\item[SpatialPoints:] 
+if the object \texttt{x} is of class \texttt{SpatialPoints},
+use \verb!as(x, "ppp")! or \texttt{as.ppp(x)} to convert it to a 
+spatial point pattern. 
+
+The window for the point pattern will be taken from
+the bounding box of the points. You will probably wish to change this window,
+usually by taking another dataset to provide the window information.
+Use \verb![.ppp! to change the window: if \texttt{X} is a point pattern
+object of class \verb!"ppp"! and \texttt{W} is a window object of class
+\verb!"owin"!, type
+<<eval=FALSE>>=
+X <- X[W]
+@ 
+
+\item[SpatialLines:] 
+if the object \texttt{x} is of class \texttt{SpatialLines},
+use \verb!as(x, "psp")! or \texttt{as.psp(x)} to convert it to a 
+spatial line segment pattern. 
+
+The window for the pattern can be specified
+as an argument \texttt{window} to these functions. Information about the
+connectivity of the lines is lost: 
+a \texttt{SpatialLines} object is a list,
+each element of which is a sequence of line segments
+forming a connected curve. The connectivity is ignored when this is converted
+to a \texttt{psp} object.
+
+\item[SpatialPolygons:] 
+if the object \texttt{x} is of class \texttt{SpatialPolygons},
+use \verb!as(x, "owin")! or \texttt{as.owin(x)} to convert it to a 
+window (object of class \texttt{"owin"}) in the \pkg{spatstat} package.
+
+This will generate an error if the polygons in \texttt{x} intersect each other,
+if they are self-intersecting, or if they violate
+other geometrical conditions. 
+An object of class \texttt{SpatialPolygons} is just a list of polygons,
+possibly self-intersecting or mutually intersecting,
+but an object of class \texttt{"owin"} is intended to specify a 
+well-defined region of space. 
+
+If an error occurs, the error message
+will usually specify which component polygons fail the test. 
+The best strategy is usually just to 
+plot the object \texttt{x} (using the plot facilities in \pkg{sp})
+to identify the problem. 
+
+It is possible to suppress the stringent checking of polygons in 
+\pkg{spatstat} during the conversion:
+<<eval=FALSE>>=
+spatstat.options(checkpolygons=FALSE)
+y <- as(x, "owin")
+spatstat.options(checkpolygons=TRUE)
+@ 
+The resulting object \texttt{y} should be inspected carefully and used
+circumspectly; it has not passed the stringent tests
+required for many algorithms in \pkg{spatstat}. 
+\end{description}
+
+An object \texttt{x} of class 
+\texttt{SpatialPointsDataFrame},
+\texttt{SpatialLinesDataFrame} or
+\texttt{SpatialPolygonsDataFrame}
+is effectively a list of spatial objects together with a data frame
+containing additional variables attached to the objects. The data frame
+of auxiliary data is extracted by \verb!x@data! or \verb!slot(x, "data")!.
+
+\begin{description}
+\item[SpatialLinesDataFrame:] if the object \texttt{x}
+is of class \texttt{SpatialLinesDataFrame}, 
+type something like
+<<eval=FALSE>>=
+y <- as(x, "SpatialPoints")
+z <- as(y, "ppp")
+@ 
+to extract the points.
+\item[SpatialLinesDataFrame:] if the object \texttt{x}
+is of class \texttt{SpatialLinesDataFrame},
+type something like
+<<eval=FALSE>>=
+y <- as(x, "SpatialLines")
+z <- as(y, "psp")
+@ 
+to extract the line segments.
+\item[SpatialPolygonsDataFrame:] if the object \texttt{x}
+is of class \texttt{SpatialPolygonsDataFrame},
+type something like
+<<eval=FALSE>>=
+y <- as(x, "SpatialPolygons")
+z <- as(y, "owin")
+@ 
+to extract the polygonal region(s).
+\end{description}
+\end{document}
+
