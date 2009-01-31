@@ -39,7 +39,7 @@
   the theoretical value of the L-function is
   \eqn{L_{i\bullet}(r) = r}{Li.(r) = r}.
   The square root also has the effect of stabilising
-  the variance of the estimator, so that \code{L_{i\bullet}}{Li.}
+  the variance of the estimator, so that \eqn{L_{i\bullet}}{Li.}
   is more appropriate
   for use in simulation envelopes and hypothesis tests.
 }

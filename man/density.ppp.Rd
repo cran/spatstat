@@ -9,7 +9,7 @@
 }
 \arguments{
   \item{x}{
-    Point pattern (object of class \code{"ppp"}) to be smoothed.
+    Point pattern (object of class \code{"ppp"}).
   }
   \item{sigma}{
     Standard deviation of isotropic Gaussian smoothing kernel.
@@ -31,19 +31,22 @@
   }
 }
 \value{
-  A pixel image (object of class \code{"im"}).
+  A pixel image (object of class \code{"im"}). 
+  Pixel values are estimated intensity values,
+  expressed in \dQuote{points per unit area}.
 }
 \details{
   This is a method for the generic function \code{density}.
+
+  It computes a fixed-bandwidth kernel estimate 
+  (Diggle, 1985) of the intensity function of the point process
+  that generated the point pattern \code{x}.
   
-  A kernel estimate of the intensity function of the point pattern
-  is computed (Diggle, 1985). The result is 
-  the convolution of the isotropic Gaussian kernel of
-  standard deviation \code{sigma} with point masses at each of the data
-  points. The default is to assign
-  a unit weight to each point.
-  If \code{weights} is present, the point masses have these
-  weights (which may be signed real numbers).
+  By default it computes the convolution of the
+  isotropic Gaussian kernel of standard deviation \code{sigma}
+  with point masses at each of the data points in \code{x}.
+  Each point has unit weight, unless the argument \code{weights} is
+  given (it should be a numeric vector; weights can be negative or zero).
 
   If \code{edge=TRUE}, the intensity estimate is corrected for
   edge effect bias by dividing it by the convolution of the
@@ -72,12 +75,29 @@
   \code{\link{ppp.object}},
   \code{\link{im.object}}
 }
-\section{Warning}{
-  The result of \code{density.ppp} is not a probability density!
+\note{
+  This function is often misunderstood.
+
+  The result of \code{density.ppp} is not a spatial smoothing 
+  of the marks or weights attached to the point pattern.
+  To perform spatial interpolation of values that were observed
+  at the points of a point pattern, use \code{\link{smooth.ppp}}.
+
+  The result of \code{density.ppp} is not a probability density.
   It is an estimate of the \emph{intensity function} of the
-  underlying point process. The integral of this function over the
-  window is not equal to 1; it equals the expected number of points
-  falling in the window.
+  point process that generated the point pattern data.
+  Intensity is the expected number of random points
+  per unit area.
+  The units of intensity are \dQuote{points per unit area}.
+  Intensity is usually a function of spatial location,
+  and it is this function which is estimated by \code{density.ppp}.
+  The integral of the intensity function over a spatial region gives the
+  expected number of points falling in this region.
+
+  Inspecting an estimate of the intensity function is usually the
+  first step in exploring a spatial point pattern dataset.
+  For more explanation, see the workshop notes (Baddeley, 2008)
+  or Diggle (2003).
 }
 \examples{
   data(cells)
@@ -85,6 +105,10 @@
   plot(Z)
 }
 \references{
+  Baddeley, A. (2008) Analysing spatial point patterns in R.
+  Workshop notes. CSIRO online technical publication.
+  URL: \code{www.csiro.au/resources/pf16h.html}
+
   Diggle, P.J. (1985)
   A kernel method for smoothing point process data.
   \emph{Applied Statistics} (Journal of the Royal Statistical Society,

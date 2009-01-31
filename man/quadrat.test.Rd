@@ -20,7 +20,7 @@ quadrat.test(X, ...)
     A point pattern (object of class \code{"ppp"})
     to be subjected to the goodness-of-fit test.
     Alternatively a fitted point process model (object of class
-    \code{"ppm"}) to be tested.
+    \code{"ppm"}) to be tested. 
   }
   \item{nx,ny}{
     Numbers of quadrats in the \eqn{x} and \eqn{y} directions.
@@ -45,14 +45,21 @@ quadrat.test(X, ...)
   for a point process model, based on quadrat counts.
 
   The function \code{quadrat.test} is generic, with methods for
-  point patterns (class \code{"ppp"}) and point process models
+  point patterns (class \code{"ppp"}), split point patterns
+  (class \code{"splitppp"}) and point process models
   (class \code{"ppm"}).
 
   \itemize{
     \item
     if \code{X} is a point pattern, we test the null hypothesis
     that the data pattern is a realisation of Complete Spatial
-    Randomness (the uniform Poisson point process).
+    Randomness (the uniform Poisson point process). Marks in the point
+    pattern are ignored.
+    \item 
+    if \code{X} is a split point pattern, then for each of the
+    component point patterns (taken separately) we test 
+    the null hypotheses of Complete Spatial Randomness.
+    See \code{\link{quadrat.test.splitppp}} for documentation.
     \item
     If \code{X} is a fitted point process model, then it should be
     a Poisson point process model. The 
@@ -63,7 +70,7 @@ quadrat.test(X, ...)
     process specified by \code{X}.
   }
 
-  In both cases, the window of observation is divided
+  In all cases, the window of observation is divided
   into tiles, and the number of data points in each tile is
   counted, as described in \code{\link{quadratcount}}.
   The quadrats are rectangular by default, or may be regions of arbitrary shape
@@ -83,6 +90,7 @@ quadrat.test(X, ...)
   counts and the Pearson residuals. See the examples.
 }
 \seealso{
+  \code{\link{quadrat.test.splitppp}},
   \code{\link{quadratcount}},
   \code{\link{quadrats}},
   \code{\link{quadratresample}},

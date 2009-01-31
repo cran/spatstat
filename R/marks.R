@@ -169,7 +169,7 @@ marksubset <- function(x, index, format=NULL) {
          listof = {
            z <- append(x,y)
            if(!inherits(z, "listof"))
-             class(z) <- c("listof", class(z))
+             z <- as.listof(z)
            return(z)
          },
          stop("Internal error: unrecognised format of marks"))

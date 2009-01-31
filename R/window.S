@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.83 $	$Date: 2008/10/29 20:01:32 $
+#	$Revision: 4.84 $	$Date: 2009/01/28 23:18:35 $
 #
 #
 #	A window may be either
@@ -80,6 +80,14 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   if(missing(xrange) != missing(yrange))
     stop("If one of xrange, yrange is specified then both must be.")
 
+  # convert data frames to vanilla lists
+  if(poly.given) {
+    if(is.data.frame(poly))
+      poly <- as.list(poly)
+    else if(is.list(poly) && any(unlist(lapply(poly, is.data.frame))))
+      poly <- lapply(poly, as.list)
+  }
+  
   # avoid re-checking if already checked, or if checking suppressed
   checkdefault <- spatstat.options("checkpolygons")
   check <- resolve.defaults(list(...), list(check=checkdefault))$check

@@ -1,50 +1,61 @@
 \name{quadratcount}
 \alias{quadratcount}
+\alias{quadratcount.ppp}
+\alias{quadratcount.splitppp}
 \title{Quadrat counting for a point pattern}
 \description{
   Divides window into quadrats and 
   counts the numbers of points in each quadrat.
 }
 \usage{
-  quadratcount(X, nx=5, ny=nx, \dots,
+  quadratcount(X, \dots)
+  \method{quadratcount}{ppp}(X, nx=5, ny=nx, \dots,
                xbreaks=NULL, ybreaks=NULL, tess=NULL)
+  \method{quadratcount}{splitppp}(X, \dots)
 }
 \arguments{
   \item{X}{
-    A point pattern
-    (object of class \code{"ppp"}).
-    }
-    \item{nx,ny}{
-      Numbers of rectangular quadrats in the \eqn{x} and \eqn{y} directions.
-      Incompatible with \code{xbreaks} and \code{ybreaks}.
-    }
-    \item{\dots}{Ignored.}
-    \item{xbreaks}{
-      Numeric vector giving the \eqn{x} coordinates of the
-      boundaries of the rectangular quadrats. Incompatible with \code{nx}.
-    }
-    \item{ybreaks}{
-      Numeric vector giving the \eqn{y} coordinates of the
-      boundaries of the rectangular quadrats. Incompatible with \code{ny}.
-    }
-    \item{tess}{
-      Tessellation (object of class \code{"tess"})
-      determining the quadrats. Incompatible
-      with \code{nx,ny,xbreaks,ybreaks}.
-    }
+    A point pattern (object of class \code{"ppp"})
+    or a split point pattern (object of class \code{"splitppp"}).
+  }
+  \item{nx,ny}{
+    Numbers of rectangular quadrats in the \eqn{x} and \eqn{y} directions.
+    Incompatible with \code{xbreaks} and \code{ybreaks}.
+  }
+  \item{\dots}{Additional arguments passed to \code{quadratcount.ppp}.}
+  \item{xbreaks}{
+    Numeric vector giving the \eqn{x} coordinates of the
+    boundaries of the rectangular quadrats. Incompatible with \code{nx}.
+  }
+  \item{ybreaks}{
+    Numeric vector giving the \eqn{y} coordinates of the
+    boundaries of the rectangular quadrats. Incompatible with \code{ny}.
+  }
+  \item{tess}{
+    Tessellation (object of class \code{"tess"})
+    determining the quadrats. Incompatible
+    with \code{nx,ny,xbreaks,ybreaks}.
+  }
 }
 \value{
-  A contingency table containing the number of points in each
-  quadrat.
-
-  The table is also an object of the special class \code{"quadratcount"}
+  The value of \code{quadratcount.ppp} is a 
+  contingency table containing the number of points in each
+  quadrat. The table is also an object of the
+  special class \code{"quadratcount"}
   and there is a plot method for this class.
+
+  The value of \code{quadratcount.splitppp} is a list of such
+  contingency tables, each containing the quadrat counts for one of the
+  component point patterns in \code{X}.
+  This list also has the class \code{"listof"} which has
+  print and plot methods.
 }
 \details{
   Quadrat counting is an elementary technique for analysing spatial
   point patterns. See Diggle (2003).
 
-  By default, the window containing the point pattern \code{X} is divided into
+  \bold{If \code{X} is a point pattern}, then 
+  by default, the window containing the point pattern \code{X} is divided into
   an \code{nx * ny} grid of rectangular tiles or `quadrats'.
   (If the window is not a rectangle, then these tiles are intersected
   with the window.)
@@ -75,7 +86,20 @@
   The return value is also a member of the special class
   \code{"quadratcount"}. Plotting the object will display the
   quadrats, annotated by their counts. See the examples.
-  
+
+  \bold{If \code{X} is a split point pattern} (object of class
+  \code{"splitppp"} then quadrat counting will be performed on
+  each of the components point patterns, and the resulting
+  contingency tables will be returned in a list. This list can be
+  printed or plotted.
+
+  Marks attached to the points are ignored by \code{quadratcount.ppp}.
+  To obtain a separate contingency table for each type of point
+  in a multitype point pattern,
+  first separate the different points using \code{\link{split.ppp}},
+  then apply \code{quadratcount.splitppp}. See the Examples.
+}
+\note{
   To perform a chi-squared test based on the quadrat counts,
   use \code{\link{quadrat.test}}.
 }
@@ -90,8 +114,8 @@
   Academic Press, 2003.
 
   Stoyan, D. and Stoyan, H. (1994)
-  Fractals, random shapes and point fields:
-  methods of geometrical statistics.
+  \emph{Fractals, random shapes and point fields:
+  methods of geometrical statistics.}
   John Wiley and Sons.
 } 
 \examples{
@@ -105,6 +129,15 @@
  plot(X, pch="+")
  plot(qX, add=TRUE, col="red", cex=1.5, lty=2)
 
+ # irregular window
+ data(humberside)
+ plot(humberside)
+ qH <- quadratcount(humberside, 2, 3)
+ plot(qH, add=TRUE, col="blue", cex=1.5, lwd=2)
+
+ # multitype - split
+ plot(quadratcount(split(humberside), 2, 3))
+ 
  # quadrats determined by tessellation:
  B <- dirichlet(runifpoint(6))
  qX <- quadratcount(X, tess=B)

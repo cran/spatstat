@@ -188,21 +188,23 @@
 
   The argument \code{style} determines the type of Q-Q plot. It is
   highly recommended to use the default, \code{style="mean"}.
-  \item{\code{style="classical"}}{
-    The quantiles of the residual field for the data (on the \eqn{y}
-    axis) are plotted against the
-    quantiles of the \bold{pooled} simulations (on the \eqn{x} axis).
-    This plot is biased, and therefore difficult to interpret,
-    because of strong autocorrelations in the residual field
-    and the large differences in sample size.
-  }
-  \item{\code{style="mean"}}{
-    The order statistics of the residual field for the data are plotted
-    against the sample means, over the \code{nsim} simulations,
-    of the corresponding order statistics of the residual field
-    for the simulated datasets.
-    Dotted lines show the 2.5 and 97.5 percentiles, over the
-    \code{nsim} simulations, of each order statistic.
+  \describe{
+    \item{\code{style="classical"}}{
+      The quantiles of the residual field for the data (on the \eqn{y}
+      axis) are plotted against the
+      quantiles of the \bold{pooled} simulations (on the \eqn{x} axis).
+      This plot is biased, and therefore difficult to interpret,
+      because of strong autocorrelations in the residual field
+      and the large differences in sample size.
+    }
+    \item{\code{style="mean"}}{
+      The order statistics of the residual field for the data are plotted
+      against the sample means, over the \code{nsim} simulations,
+      of the corresponding order statistics of the residual field
+      for the simulated datasets.
+      Dotted lines show the 2.5 and 97.5 percentiles, over the
+      \code{nsim} simulations, of each order statistic.
+    }
   }
 
   The argument \code{fast} is a simple way to control

@@ -49,8 +49,8 @@
   (actually, the centroid for the postal code)
   and the marks identifying cases and controls.
 
-  Coordinates are in multiples of 100 metres, and the resolution is
-  100 metres.
+  Coordinates are expressed in units of 100 metres, and the resolution is
+  100 metres. At this resolution, there are some duplicated points.
 
   Two versions of the dataset are supplied, both containing the
   same point coordinates, but using different windows.
@@ -58,17 +58,19 @@
   which closely approximates the Humberside region,
   while \code{humberside.convex} has a convex 5-sided polygonal window 
   originally used by Diggle and Chetwynd (1991) and shown in
-  Figure 1 of that paper.
+  Figure 1 of that paper. (This pentagon has been modified slightly
+  from the original data, by shifting two vertices horizontally by 1 unit,
+  so that the pentagon contains all the data points.)
 }
 \references{
   J. Cuzick and R. Edwards (1990)
   Spatial clustering for inhomogeneous populations.
-  Journal of the Royal Statistical Society, series B,
-  52 (1990) 73-104.
+  \emph{Journal of the Royal Statistical Society, series B},
+  \bold{52} (1990) 73-104.
 
   P.J. Diggle and A.G. Chetwynd (1991)
   Second-order analysis of spatial clustering for
-  inhomogeneous populations. Biometrics 47 (1991) 1155-1163.
+  inhomogeneous populations. \emph{Biometrics} 47 (1991) 1155-1163.
 } 
 \keyword{datasets}
 \keyword{spatial}

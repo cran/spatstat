@@ -240,6 +240,7 @@
 \alias{row.names.hyperframe}
 \alias{row.names<-.hyperframe}
 \alias{runifpoispp}          
+\alias{runifpoisppOnLines}          
 \alias{runifrect}
 \alias{rmhResolveTypes}
 \alias{rmhcontrol.rmhcontrol}
@@ -567,6 +568,7 @@ rmpoint.I.allim(n, f, types)
 \method{row.names}{hyperframe}(x) <- value
 rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
+runifpoisppOnLines(lambda, L)
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safelookup(Z, X, factor, warn)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,

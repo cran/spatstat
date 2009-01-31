@@ -14,6 +14,6 @@ by.ppp <- function(data, INDICES=marks(data), FUN, ...) {
   for(i in seq(along=y))
     z[[i]] <- FUN(y[[i]], ...)
   names(z) <- names(y)
-  class(z) <- c("listof", class(z))
+  z <- as.listof(z)
   return(z)
 }

@@ -1,12 +1,17 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.14 $  $Date: 2008/10/22 03:18:06 $
+#  $Revision: 1.19 $  $Date: 2009/01/30 01:13:58 $
 #
 
 
 quadrat.test <- function(X, ...) {
   UseMethod("quadrat.test")
+}
+
+quadrat.test.splitppp <- function(X, ...)
+{
+  as.listof(lapply(X, quadrat.test.ppp))
 }
 
 quadrat.test.ppp <- function(X, nx=5, ny=nx, ...,
@@ -28,6 +33,8 @@ quadrat.test.ppm <- function(X, nx=5, ny=nx, ...,
   dataname <- paste("data from", fitname)
   if(!is.poisson.ppm(X))
     stop("Test is only defined for Poisson point process models")
+  if(is.marked(X))
+    stop("Sorry, not yet implemented for marked point process models")
   do.call("quadrat.testEngine",
           resolve.defaults(list(data.ppm(X), nx=nx, ny=ny,
                                 xbreaks=xbreaks, ybreaks=ybreaks,
@@ -61,7 +68,13 @@ quadrat.testEngine <- function(X, nx, ny, ...,
     fitmeans <- XW$n * areas/sum(areas)
     df <- length(fitmeans) - 1
   } else {
-    testname <- paste("Chi-squared test of fitted model",
+    if(!is.ppm(fit))
+      stop("fit should be a ppm object")
+    if(!is.poisson.ppm(fit))
+      stop("Quadrat test only supported for Poisson point process models")
+    if(is.marked(fit))
+      stop("Sorry, not yet implemented for marked point process models")
+    testname <- paste("Chi-squared test of fitted Poisson model",
                       sQuote(fitname),
                       "using quadrat counts")
     Q <- quad.ppm(fit, drop=TRUE)

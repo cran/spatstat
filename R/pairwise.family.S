@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.19 $	$Date: 2008/02/01 18:07:08 $
+#    $Revision: 1.20 $	$Date: 2009/01/27 22:44:00 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -69,7 +69,8 @@ pairwise.family <-
            return(invisible(fun))
          } else{
            # compute each potential and store in `fasp' object
-           types <- factor(types)
+           if(!is.factor(types))
+             types <- factor(types, levels=types)
            m <- length(types)
            dd <- matrix(rep(d, m), nrow=256 * m, ncol=m)
            tx <- rep(types, rep(256, m))

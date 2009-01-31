@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.29 $    $Date: 2008/12/05 19:48:30 $
+#           $Revision: 1.31 $    $Date: 2008/12/19 19:43:30 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -13,25 +13,30 @@
 #
 #     This file uses the temporary 'image' class defined in images.R
 
-pixellate <- function(x, ..., weights=NULL, padzero=FALSE)
+pixellate <- function(x, ..., W=NULL, weights=NULL, padzero=FALSE)
 {
     verifyclass(x, "ppp")
 
-    dotargs <- list(...)
-    namesargs <- names(dotargs)
-    matched <- namesargs %in% names(formals(as.mask))
-    w <- do.call("as.mask", append(list(x$window), dotargs[matched]))
+    if(!is.null(W))
+      W <- as.mask(W)
+    else {
+      # determine W using as.mask
+      dotargs <- list(...)
+      namesargs <- names(dotargs)
+      matched <- namesargs %in% names(formals(as.mask))
+      W <- do.call("as.mask", append(list(x$window), dotargs[matched]))
+    } 
 
     if(x$n == 0) {
-      zeroimage <- as.im(as.double(0), w)
+      zeroimage <- as.im(as.double(0), W)
       if(padzero) # map NA to 0
         zeroimage <- na.handle.im(zeroimage, 0)
       return(zeroimage)
     }
     
-    pixels <- nearest.raster.point(x$x, x$y, w)
-    nr <- w$dim[1]
-    nc <- w$dim[2]
+    pixels <- nearest.raster.point(x$x, x$y, W)
+    nr <- W$dim[1]
+    nc <- W$dim[2]
     if(is.null(weights)) {
     ta <- table(row = factor(pixels$row, levels = 1:nr), col = factor(pixels$col,
         levels = 1:nc))
@@ -40,10 +45,10 @@ pixellate <- function(x, ..., weights=NULL, padzero=FALSE)
                     col = factor(pixels$col, levels=1:nc)), sum)
         ta[is.na(ta)] <- 0
     }
-    out <- im(ta, xcol = w$xcol, yrow = w$yrow, unitname=unitname(w))
+    out <- im(ta, xcol = W$xcol, yrow = W$yrow, unitname=unitname(W))
     # clip to window of data
     if(!padzero)
-      out <- out[w, drop=FALSE]
+      out <- out[W, drop=FALSE]
     return(out)
 }
 

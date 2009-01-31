@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.48 $	$Date: 2008/08/12 07:24:04 $
+#	$Revision: 1.50 $	$Date: 2009/01/30 00:48:04 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -109,8 +109,33 @@ function(object, window, ngrid=NULL, locations=NULL,
       stop(paste("Don't know how to extract x,y coordinates from",
                  sQuote("locations")))
     # marks if required
-    if(marked)
-      mpredict <- locations$marks  # locations is a data frame
+    if(marked) {
+      # extract marks from data frame `locations'
+      mpredict <- locations$marks 
+      if(is.null(mpredict))
+        stop(paste("The argument", sQuote("locations"),
+                   "does not contain a column of marks",
+                   "(required since the fitted model",
+                   "is a marked point process)"))
+      if(is.factor(mpredict)) {
+        # verify mark levels match those in model
+        if(!identical(all.equal(levels(mpredict), types), TRUE)) {
+          if(all(levels(mpredict) %in% types))
+            mpredict <- factor(mpredict, levels=types)
+          else 
+            stop(paste("The marks in", sQuote("locations"),
+                       "do not have the same levels as",
+                       "the marks in the model"))
+        }
+      } else {
+        # coerce to factor if possible
+        if(all(mpredict %in% types))
+          mpredict <- factor(mpredict, levels=types)
+        else
+          stop(paste("The marks in", sQuote("locations"),
+                     "do not have the same values as the marks in the model"))
+      }
+    }
   } else {
     # (B) pixel grid of points
     #
@@ -176,9 +201,11 @@ function(object, window, ngrid=NULL, locations=NULL,
       np <- length(xpredict)
       xpredict <- rep(xpredict,nt)
       ypredict <- rep(ypredict,nt)
+      mpredict <- rep(types, rep(np, nt))
+      mpredict <- factor(mpredict, levels=types)
       newdata <- data.frame(x = xpredict,
                             y = ypredict,
-                            marks=rep(types, rep(np, nt)))
+                            marks=mpredict)
     }
 
 #### Next the external covariates, if any
@@ -290,7 +317,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     U <- list(x=newdata$x, y=newdata$y)
     Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
     if(marked) {
-      U <- as.ppp(U, X$window)
+      U <- as.ppp(U, X$window, check=FALSE)
       marks(U) <- Umarks <- newdata$marks
       Equal <- Equal & outer(marks(X), Umarks, "==")
     }
@@ -360,8 +387,8 @@ function(object, window, ngrid=NULL, locations=NULL,
           outi$v[masque$m] <- z[newdata$marks == types[i]]
           out[[i]] <- outi
         }
-        names(out) <- paste("mark",types, sep="")
-        class(out) <- c("listof", class(out))
+        out <- as.listof(out)
+        names(out) <- paste("mark", types, sep="")
       }
     }
 #  

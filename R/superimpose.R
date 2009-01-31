@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.16 $ $Date: 2008/11/06 19:21:39 $
+# $Revision: 1.18 $ $Date: 2009/01/28 01:27:21 $
 #
 #
 ############################# 
@@ -15,6 +15,17 @@
   if(length(arglist) == 0)
     stop("No point patterns given")
   
+  # catch possible abuses
+  if(is.null(W) && any(suspicious <- (names(arglist) == "window"))) {
+    id <- min(which(suspicious))
+    Win <- arglist[[id]]
+    if(is.owin(Win) || is.null(Win)) {
+      W <- Win
+      arglist <- arglist[-id]
+    }
+  }
+
+  # unpack a list
   if(length(arglist) == 1) {
     X <- arglist[[1]]
     if(!inherits(X, "ppp") && inherits(X, "list"))
@@ -104,6 +115,17 @@ superimposePSP <-
   if(length(arglist) == 0)
     stop("No line segment patterns given")
   
+  # catch possible abuses
+  if(is.null(W) && any(suspicious <- (names(arglist) == "window"))) {
+    id <- min(which(suspicious))
+    Win <- arglist[[id]]
+    if(is.owin(Win) || is.null(Win)) {
+      W <- Win
+      arglist <- arglist[-id]
+    }
+  }
+
+  # unpack a list
   if(length(arglist) == 1) {
     X <- arglist[[1]]
     if(!inherits(X, "psp") && inherits(X, "list"))

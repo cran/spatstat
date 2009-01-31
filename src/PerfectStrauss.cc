@@ -113,7 +113,7 @@ void Point2Pattern::Print(){
       }
     }
   }
-  printf("Printed %d points.\n",k);
+  printf("Printed %ld points.\n",k);
 }
 
 void Point2Pattern::Return(double *X, double *Y, int *num, int maxnum){
