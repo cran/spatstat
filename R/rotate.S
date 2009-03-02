@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.10 $	$Date: 2008/01/07 10:28:11 $
+#	$Revision: 1.12 $	$Date: 2009/02/27 18:47:37 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -9,6 +9,12 @@ rotxy <- function(X, angle=pi/2) {
   si <- sin(angle)
   list(x = co * X$x - si * X$y,
        y = si * X$x + co * X$y)
+}
+
+rotxypolygon <- function(p, angle=pi/2) {
+  p[c("x","y")] <- rotxy(p, angle=angle)
+  # area and hole status are invariant under rotation
+  return(p)
 }
 
 "rotate.owin" <- function(X, angle=pi/2, ...) {
@@ -25,12 +31,9 @@ rotxy <- function(X, angle=pi/2) {
          },
          polygonal={
            # First rotate the polygonal boundaries
-           bdry <- lapply(X$bdry, rotxy, angle=angle)
-           # Compute bounding box of new polygons
-           xr <- range(unlist(lapply(bdry, function(a) a$x)))
-           yr <- range(unlist(lapply(bdry, function(a) a$y)))
+           bdry <- lapply(X$bdry, rotxypolygon, angle=angle)
            # wrap up
-           W <- owin(xr, yr, poly=bdry, unitname=unitname(X))
+           W <- owin(poly=bdry, unitname=unitname(X))
            W <- rescue.rectangle(W)
            return(W)
          },

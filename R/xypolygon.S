@@ -1,15 +1,14 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.33 $    $Date: 2008/04/02 13:46:02 $
+#    $Revision: 1.39 $    $Date: 2009/03/02 17:53:33 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
 verify.xypolygon <- function(p, fatal=TRUE) {
   whinge <- NULL
-  if(!is.list(p) || length(p) != 2 ||
-     length(names(p)) != 2 || any(sort(names(p)) != c("x","y")))
-    whinge <- "polygon must be a list with two components x and y"
+  if(!is.list(p) || !all(c("x","y") %in% names(p)))
+    whinge <- "polygon must be a list with components x and y"
   else if(is.null(p$x) || is.null(p$y) || !is.numeric(p$x) || !is.numeric(p$y))
     whinge <- "components x and y must be numeric vectors"
   else if(length(p$x) != length(p$y))
@@ -170,12 +169,24 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   return(score)
 }
 
+is.hole.xypolygon <- function(polly) {
+  h <- polly$hole
+  if(is.null(h))
+    h <- (area.xypolygon(polly) < 0)
+  return(h)
+}
+  
 area.xypolygon <- function(polly) {
   #
   # polly: list(x,y) vertices of a single polygon (n joins to 1)
   #
+
+  # area could be pre-calculated
+  if(!is.null(pa <- polly$area) && is.numeric(pa) && length(pa)==1)
+    return(pa)
+
+  # else calculate
   verify.xypolygon(polly)
-  
   xp <- polly$x
   yp <- polly$y
   
@@ -207,13 +218,17 @@ bdrylength.xypolygon <- function(polly) {
   sum(sqrt(dx^2 + dy^2))
 }
 
-reverse.xypolygon <- function(p) {
+reverse.xypolygon <- function(p, adjust=FALSE) {
   # reverse the order of vertices
   # (=> change sign of polygon)
-
   verify.xypolygon(p)
-  
-  return(lapply(p, rev))
+  p$x <- rev(p$x)
+  p$y <- rev(p$y)
+  if(adjust) {
+    if(!is.null(p$hole)) p$hole <- !p$hole
+    if(!is.null(p$area)) p$area <- -p$area
+  }
+  return(p)
 }
 
 overlap.xypolygon <- function(P, Q) {

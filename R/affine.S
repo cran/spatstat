@@ -1,7 +1,7 @@
 #
 #	affine.S
 #
-#	$Revision: 1.21 $	$Date: 2008/09/25 02:17:08 $
+#	$Revision: 1.30 $	$Date: 2009/03/02 18:02:30 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
@@ -13,6 +13,19 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
               y = ans[2,]))
 }
 
+affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
+                             detmat=det(mat)) {
+  # transform (x,y)
+  p[c("x","y")] <- affinexy(p, mat=mat, vec=vec)
+  # transform area
+  if(!is.null(p$area))
+    p$area <- p$area * detmat
+  # if map has negative sign, cyclic order was reversed; correct it
+  if(detmat < 0)
+    p <- reverse.xypolygon(p, adjust=TRUE)
+  return(p)
+}
+       
 "affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "owin")
   if(!is.vector(vec) || length(vec) != 2)
@@ -44,17 +57,10 @@ affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
            }
          },
          polygonal={
-           # First transform the polygonal boundaries
-           bdry <- lapply(X$bdry, affinexy, mat=mat, vec=vec)
-           # If determinant < 0, traverse polygons in reverse direction
-           if(detmat < 0)
-             bdry <- lapply(bdry, reverse.xypolygon)
-           # Compute bounding box of new polygons
-           xr <- range(unlist(lapply(bdry, function(a) a$x)))
-           yr <- range(unlist(lapply(bdry, function(a) a$y)))
+           # Transform the polygonal boundaries
+           bdry <- lapply(X$bdry, affinexypolygon, mat=mat, vec=vec)
            # Compile result
-           W <- owin(xr, yr, poly=bdry, check=FALSE)
-           # Compute its area indirectly
+           W <- owin(poly=bdry, check=FALSE)
            # Result might be a rectangle: if so, convert to rectangle type
            W <- rescue.rectangle(W)
            unitname(W) <- newunits
@@ -91,6 +97,12 @@ shiftxy <- function(X, vec=c(0,0)) {
        y = X$y + vec[2])
 }
 
+shiftxypolygon <- function(p, vec=c(0,0)) {
+  # transform (x,y), retaining other data
+  p[c("x","y")] <- shiftxy(p, vec=vec)
+  return(p)
+}
+
 "shift.owin" <- function(X,  vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "owin")
   if(!is.null(origin)) {
@@ -114,7 +126,7 @@ shiftxy <- function(X, vec=c(0,0)) {
          },
          polygonal={
            # Shift the polygonal boundaries
-           X$bdry <- lapply(X$bdry, shiftxy, vec=vec)
+           X$bdry <- lapply(X$bdry, shiftxypolygon, vec=vec)
          },
          mask={
            # Shift the pixel coordinates

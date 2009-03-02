@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.18 $   $Date: 2008/07/29 03:16:17 $
+#   $Revision: 1.20 $   $Date: 2009/02/10 18:21:15 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -94,8 +94,12 @@ alltypes <- function(X, fun="K", ...,
   # if computing envelopes, first generate simulated patterns
   # using undocumented feature of envelope()
   if(envelope) {
-    L <- envelope(X, fun=NULL, ..., verbose=verb,
-                  internal=list(patterns=TRUE))
+    L <- do.call("envelope",
+                 resolve.defaults(
+                                  list(X, fun=NULL),
+                                  list(internal=list(patterns=TRUE)),
+                                  list(...),
+                                  list(verbose=verb)))
     intern <- attr(L, "internal")
   }
 
@@ -108,22 +112,27 @@ alltypes <- function(X, fun="K", ...,
     Y <- if(apply.to.split) ppsplit[[i]] else X
     for(j in 1:ncol(witch)) {
       if(verb) cat("i =",i,"j =",j,"\n")
-      k <- k+1
-      fns[[k]] <- currentfv <- 
+      currentfv <- 
         if(!envelope) 
           switch(1+indices.expected,
                  estimator(Y, ...),
                  estimator(Y, i=ma[i], ...),
                  estimator(Y, i=ma[i], j=ma[j], ...))
         else
-          switch(1+indices.expected,
-                 envelope(Y, estimator, ...,
-                          verbose=FALSE, simulate=L, internal=intern),
-                 envelope(Y, estimator, i=ma[i], ...,
-                          verbose=FALSE, simulate=L, internal=intern),
-                 envelope(Y, estimator, i=ma[i], j=ma[j], ...,
-                          verbose=FALSE, simulate=L, internal=intern)
-                 )
+          do.call("envelope",
+                  resolve.defaults(
+                                   list(Y, estimator),
+                                   list(simulate=L, internal=intern),
+                                   list(verbose=FALSE),
+                                   list(...),
+                                   list(Yname=dataname),
+                                   switch(1+indices.expected,
+                                          NULL,
+                                          list(i=ma[i]),
+                                          list(i=ma[i], j=ma[j]),
+                                          NULL)))
+      k <- k+1
+      fns[[k]] <- currentfv 
       deform[[k]] <- attr(currentfv, "fmla")
     }
   }

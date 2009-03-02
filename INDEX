@@ -98,6 +98,7 @@ clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
 closing.owin            Morphological Closing of a Window
 coef.ppm                Coefficients of Fitted Point Process Model
+colourmap               Colour Lookup Tables
 compatible.fasp         Test Whether Two Function Arrays Are Compatible
 compatible.fv           Test Whether Two Function Objects Are
                         Compatible
@@ -215,6 +216,7 @@ localK                  Neighbourhood density function
 logLik.ppm              Log Likelihood for Poisson Point Process Model
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
+lut                     Lookup Tables
 markcorr                Mark Correlation Function
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
@@ -264,6 +266,7 @@ pcfcross                Multitype pair correlation function
 persp.im                Perspective Plot of Pixel Image
 pixellate               Convert Point Pattern to Pixel Image
 pixelquad               Quadrature Scheme Based on Pixel Grid
+plot.colourmap          Plot a Colour Map
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Valuesn
 plot.hyperframe         Plot Entries in a Hyperframe

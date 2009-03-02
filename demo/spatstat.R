@@ -12,6 +12,7 @@ fanfare <- function(stuff) {
   text(0.5,0.5, stuff, cex=2.5)
 }
 fanfare("Spatstat demonstration")
+
 fanfare("I. Types of data")
 data(swedishpines)
 plot(swedishpines, main="Point pattern")
@@ -30,17 +31,45 @@ data(letterR)
 plot(letterR, main="Polygonal window")
 plot(as.mask(letterR), main="Binary mask window")
 
-plot(letterR, col="green", border="red", lwd=2, main="Polygonal window with colour fill")
-plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with line shading")
-
 Z <- as.im(function(x,y){ sqrt((x - 1)^2 + (y-1)^2)}, square(2))
 plot(Z, main="Pixel image")
-plot(Z, main="Pixel image", col=heat.colors(256))
 
 X <- runifpoint(42)
 plot(dirichlet(X), main="Tessellation")
 
-fanfare("II. Basic operations")
+fanfare("II. Graphics")
+
+plot(letterR, col="green", border="red", lwd=2, main="Polygonal window with colour fill")
+plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with line shading")
+
+data(amacrine)
+plot(amacrine, chars=c(1,16),
+     main="plot(X, chars = c(1,16))")
+plot(amacrine, cols=c("red","blue"), chars=16,
+     main="plot(X, cols=c(\"red\", \"blue\"))")
+
+opa <- par(mfrow=c(1,2))
+plot(longleaf, markscale=0.03, main="markscale=0.03")
+plot(longleaf, markscale=0.09, main="markscale=0.09")           
+par(opa)
+           
+Z <- as.im(function(x,y) { r <- sqrt(x^2+y^2); r * exp(-r) },
+           owin(c(-5,5),c(-5,5)))
+plot(Z, main="pixel image: image plot")
+plot(Z, main="pixel image: image plot (heat colours)", col=heat.colors(256))
+contour(Z, main="pixel image: contour plot", axes=FALSE)
+plot(Z, main="pixel image: image + contour plot")
+contour(Z, add=TRUE)
+persp(Z, colmap=terrain.colors(128), shade=0.3, phi=30,theta=100,
+      main="pixel image: perspective plot")
+
+ct <- colourmap(rainbow(20), breaks=seq(-1,1,length=21))
+plot(ct, main="Colour map for real numbers")
+
+ca <- colourmap(rainbow(8), inputs=letters[1:8])
+plot(ca, main="Colour map for discrete values")
+
+fanfare("III. Basic operations")
 X <- swedishpines
 subset <- 1:20
 plot(X[subset], main="subset operation: X[subset]")
@@ -88,7 +117,7 @@ arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
 plot(a, main="pointsOnLines(L)")
 plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
 
-fanfare("III. Exploratory data analysis")
+fanfare("IV. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")
 tab <- quadratcount(swedishpines, 4)
@@ -159,9 +188,6 @@ W <- rebound.owin(letterR, square(5))
 plot(distmap(W), main="Distance map")
 plot(W, add=TRUE)
 
-persp(Z, colmap=terrain.colors(128), shade=0.3, phi=30,theta=100,
-      main="perspective plot of pixel image")
-
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 contour(distmap(a), main="Distance map")
 plot(a, add=TRUE,col="red")
@@ -213,7 +239,7 @@ plot(X, add=TRUE)
 plot(delaunay(X))
 plot(X, add=TRUE)
 
-fanfare("IV. Model-fitting")
+fanfare("V. Model-fitting")
 
 data(japanesepines)
 plot(japanesepines)
@@ -266,7 +292,7 @@ plot(demopat, cols=c("red", "blue"))
 fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit, trend=TRUE, se=TRUE)
 
-fanfare("V. Simulation")
+fanfare("VI. Simulation")
 
 data(letterR)
 plot(letterR, main="Poisson random points")
@@ -316,7 +342,7 @@ plot(runifpointOnLines(30, L), add=TRUE, pch="+")
 plot(L, main="rpoisppOnLines(3, L)")
 plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
 
-fanfare("VI. Programming tools")
+fanfare("VII. Programming tools")
 
 nopa <- par(mfrow=c(2,2))
 data(letterR)

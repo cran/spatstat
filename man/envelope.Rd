@@ -9,7 +9,7 @@
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL, saveall=FALSE,
-  nsim2=nsim, internal=NULL)
+  nsim2=nsim, Yname=NULL, internal=NULL)
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
@@ -81,6 +81,10 @@
       if it is necessary to use simulation to estimate the theoretical
       mean of the summary function. Only relevant when \code{global=TRUE}
       and the simulations are not based on CSR.
+    }
+    \item{Yname}{
+      Character string that should be used as the name of the 
+      data point pattern \code{Y} when printing or plotting the results.
     }
     \item{internal}{
       Do not use this argument.
