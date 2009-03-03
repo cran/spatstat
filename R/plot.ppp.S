@@ -1,13 +1,13 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.34 $	$Date: 2009/01/28 23:42:13 $
+#	$Revision: 1.36 $	$Date: 2009/02/24 04:51:40 $
 #
 #
 #--------------------------------------------------------------------------
 
 plot.ppp <-
-  function(x, main, ..., chars, cols, use.marks=TRUE, add=FALSE,
+  function(x, main, ..., chars=NULL, cols=NULL, use.marks=TRUE, add=FALSE,
            maxsize=NULL, markscale=NULL)
 {
 #
@@ -75,18 +75,18 @@ plot.ppp <-
 
   # handle plot parameters
   explicit <- list()
-  if(!missing(cols))
+  if(!is.null(cols))
     explicit <- append(explicit, list(cols=cols))
-  if(!missing(chars))
+  if(!is.null(chars))
     explicit <- append(explicit, list(chars=chars))
     
   defaults <- spatstat.options("par.points")
 
   smartpoints <- function(xx, yy, ...,
-                          index=1, col=NULL, pch=NULL, cols, chars) {
-    if(missing(col) && !missing(cols))
+                          index=1, col=NULL, pch=NULL, cols=NULL, chars=NULL) {
+    if(is.null(col) && !is.null(cols))
       col <- cols[index]
-    if(missing(pch) && !missing(chars))
+    if(is.null(pch) && !is.null(chars))
       pch <- chars[index]
     do.call.matched("points",
             resolve.defaults(list(x=list(x=xx, y=yy), ...),
@@ -179,8 +179,9 @@ plot.ppp <-
       # scale to be determined indirectly
       if(is.null(maxsize)) {
         # guess appropriate max physical size of symbols
-        maxsize <- 1.4/sqrt(pi * x$n/area.owin(x$window))
-        maxsize <- min(maxsize, diameter(x$window) * 0.07)
+        bb <- as.rectangle(x$window)
+        maxsize <- 1.4/sqrt(pi * x$n/area.owin(bb))
+        maxsize <- min(maxsize, diameter(bb) * 0.07)
       }
       # scale to [0,maxsize]
       scal <- maxsize/maxabs
@@ -198,7 +199,7 @@ plot.ppp <-
                                list(x$x[!neg], x$y[!neg]),
                                list(circles = ms[!neg]),
                                list(inches = FALSE, add = TRUE),
-                               if(!missing(cols)) list(fg=cols[1]) else NULL,
+                               if(!is.null(cols)) list(fg=cols[1]) else NULL,
                                list(...)))
     # plot negative values as squares
     if(any(neg))
@@ -207,7 +208,7 @@ plot.ppp <-
                                list(x$x[neg], x$y[neg]),
                                list(squares = - ms[neg]),
                                list(inches = FALSE, add = TRUE),
-                               if(!missing(cols)) list(fg=cols[1]) else NULL,
+                               if(!is.null(cols)) list(fg=cols[1]) else NULL,
                                list(...)))
     # return a plottable scale bar
     mp.value <- if(constant) mr[1] else pretty(mr)
@@ -225,7 +226,7 @@ plot.ppp <-
 
   ntypes <- length(um)
   
-  if(missing(chars))
+  if(is.null(chars))
     chars <- seq(um)
   else if((nchars <- length(chars)) != ntypes) {
     if(nchars != 1)
@@ -236,7 +237,7 @@ plot.ppp <-
       chars <- rep(chars, ntypes)
   }
 
-  if(!missing(cols) && ((ncols <- length(cols)) != ntypes)) {
+  if(!is.null(cols) && ((ncols <- length(cols)) != ntypes)) {
     if(ncols != 1)
       stop(paste("length of",
                  sQuote("cols"),

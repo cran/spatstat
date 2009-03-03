@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.84 $	$Date: 2009/01/28 23:18:35 $
+#	$Revision: 4.91 $	$Date: 2009/02/27 18:21:24 $
 #
 #
 #	A window may be either
@@ -91,43 +91,18 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   # avoid re-checking if already checked, or if checking suppressed
   checkdefault <- spatstat.options("checkpolygons")
   check <- resolve.defaults(list(...), list(check=checkdefault))$check
-  
-  if(!check) {
-    if(!poly.given && !mask.given) 
-        w <- list(type="rectangle",
-                  xrange=xrange, yrange=yrange, units=unitname)
-      else if(poly.given) 
-        w <- list(type="polygonal",
-                  xrange=xrange, yrange=yrange, bdry=poly, units=unitname)
-      else if(mask.given) {
-        nc <- ncol(mask)
-        nr <- nrow(mask)
-        xstep <- diff(xrange)/nc
-        ystep <- diff(yrange)/nr
-        xcol <- seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc)
-        yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr)
-        w <- list(type     = "mask",
-                  xrange   = xrange,
-                  yrange   = yrange,
-                  dim      = c(nr, nc),
-                  xstep    = xstep,
-                  ystep    = ystep,
-                  warnings = .Spatstat.Image.Warning,
-                  xcol     = xcol,
-                  yrow     = yrow,
-                  m        = mask,
-                  units    = unitname)
-      }
-      class(w) <- "owin"
-      return(w)
-  }
-  
+
+  # whether to calculate polygon areas
+  calculate <- resolve.defaults(list(...), list(calculate=check))$calculate
+
   if(!poly.given && !mask.given) {
     ######### rectangle #################
-    if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] < xrange[1])
-      stop("xrange should be a vector of length 2 giving (xmin, xmax)")
-    if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
-      stop("yrange should be a vector of length 2 giving (ymin, ymax)")
+    if(check) {
+      if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] < xrange[1])
+        stop("xrange should be a vector of length 2 giving (xmin, xmax)")
+      if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
+        stop("yrange should be a vector of length 2 giving (ymin, ymax)")
+    }
     w <- list(type="rectangle", xrange=xrange, yrange=yrange, units=unitname)
     class(w) <- "owin"
     return(w)
@@ -142,25 +117,33 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     else
       stop("poly must be either a list(x,y) or a list of list(x,y)")
 
+    w.area <- NULL
+    
     if(psingle) {
       # single boundary polygon
       bdry <- list(poly)
-      w.area <- area.xypolygon(poly)
-      if(w.area < 0)
-        stop("Area of polygon is negative - maybe traversed in wrong direction?")
+      if(check || calculate) {
+        w.area <- area.xypolygon(poly)
+        if(w.area < 0)
+          stop(paste("Area of polygon is negative -",
+                     "maybe traversed in wrong direction?"))
+      }
     } else {
       # multiple boundary polygons
       bdry <- poly
-      w.area <- sum(unlist(lapply(poly, area.xypolygon)))
-      if(w.area < 0)
-        stop(paste("Area of window is negative;\n",
-             "check that all polygons were traversed in the right direction"))
+      if(check || calculate) {
+        w.area <- unlist(lapply(poly, area.xypolygon))
+        if(sum(w.area) < 0)
+          stop(paste("Area of window is negative;\n",
+                     "check that all polygons were traversed",
+                     "in the right direction"))
+      }
     }
 
     actual.xrange <- range(unlist(lapply(bdry, function(a) a$x)))
     if(missing(xrange))
       xrange <- actual.xrange
-    else {
+    else if(check) {
       if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
         stop("xrange should be a vector of length 2 giving (xmin, xmax)")
       if(!all(xrange == range(c(xrange, actual.xrange))))
@@ -170,13 +153,20 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     actual.yrange <- range(unlist(lapply(bdry, function(a) a$y)))
     if(missing(yrange))
       yrange <- actual.yrange
-    else {
+    else if(check) {
       if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
         stop("yrange should be a vector of length 2 giving (ymin, ymax)")
       if(!all(yrange == range(c(yrange, actual.yrange))))
       stop("polygon's y coordinates outside yrange")
     }
 
+    if(!is.null(w.area)) {
+      # tack on area and hole data
+      holes <- (w.area < 0)
+      for(i in seq(bdry)) 
+        bdry[[i]] <- append(bdry[[i]], list(area=w.area[i], hole=holes[i]))
+    }
+    
     w <- list(type="polygonal",
               xrange=xrange, yrange=yrange, bdry=bdry, units=unitname)
     class(w) <- "owin"
@@ -205,7 +195,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
       # take pixels to be 1 x 1 unit
       xrange <- c(0,nc)
       yrange <- c(0,nr)
-    } else {
+    } else if(check) {
       if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
         stop("xrange should be a vector of length 2 giving (xmin, xmax)")
       if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
@@ -600,8 +590,8 @@ bounding.box <- function(...) {
                },
                polygonal = {
                  bdry <- w$bdry
-                 xr <- range(unlist(lapply(bdry, function(a) a$x)))
-                 yr <- range(unlist(lapply(bdry, function(a) a$y)))
+                 xr <- range(unlist(lapply(bdry, function(a) range(a$x))))
+                 yr <- range(unlist(lapply(bdry, function(a) range(a$y))))
                  return(owin(xr, yr, unitname=unitname(w)))
                },
                mask = {
@@ -662,7 +652,7 @@ complement.owin <- function(w, frame=as.rectangle(w)) {
              bdry <- bdry[!is.box]
                  
            # now reverse the direction of each polygon
-           bdry <- lapply(bdry, reverse.xypolygon)
+           bdry <- lapply(bdry, reverse.xypolygon, adjust=TRUE)
 
            # if box was absent, add it
            if(!any(is.box))

@@ -6,6 +6,7 @@
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{affinexy}
+\alias{affinexypolygon}
 \alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{area.xypolygon}       
@@ -92,6 +93,7 @@
 \alias{is.cadlag}
 \alias{is.data}
 \alias{is.fv}
+\alias{is.hole.xypolygon}
 \alias{is.hyperframe}
 \alias{is.interact}
 \alias{is.marked.default}    
@@ -183,6 +185,7 @@
 \alias{pppdist.prohorov}
 \alias{primefactors}       
 \alias{print.bt.frame}
+\alias{print.colourmap}
 \alias{print.diagppm}
 \alias{print.envelope}
 \alias{print.fasp}       
@@ -192,6 +195,7 @@
 \alias{print.interact}       
 \alias{print.isf}
 \alias{print.kppm}
+\alias{print.lut}
 \alias{print.minconfit}
 \alias{print.plotppm}
 \alias{print.pppmatching}
@@ -237,6 +241,7 @@
 \alias{revcumsum}    
 \alias{rmax.rule}
 \alias{rotxy}
+\alias{rotxypolygon}
 \alias{row.names.hyperframe}
 \alias{row.names<-.hyperframe}
 \alias{runifpoispp}          
@@ -255,6 +260,7 @@
 \alias{safelookup}
 \alias{second.moment.calc}
 \alias{shiftxy}              
+\alias{shiftxypolygon}              
 \alias{spatstat.rawdata.location}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
@@ -306,6 +312,7 @@
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
+affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
 area.xypolygon(polly)
@@ -397,6 +404,7 @@ intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
 is.fv(x)
+is.hole.xypolygon(polly)
 is.hyperframe(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
@@ -498,6 +506,7 @@ pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximati
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
+\method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
@@ -507,6 +516,7 @@ primefactors(n, prmax)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
 \method{print}{kppm}(x, \dots)
+\method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{pppmatching}(x, \dots)
@@ -551,10 +561,11 @@ resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots, .StripNull=FALSE)
 restrict.mask(M, W)
-reverse.xypolygon(p)
+reverse.xypolygon(p, adjust=FALSE)
 revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
+rotxypolygon(p, angle = pi/2)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(control, \dots)
 \method{rmhcontrol}{list}(control, \dots)
@@ -574,6 +585,7 @@ safelookup(Z, X, factor, warn)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL)
 shiftxy(X, vec = c(0, 0))
+shiftxypolygon(p, vec = c(0, 0))
 spatstat.rawdata.location(\dots)             
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)             

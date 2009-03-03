@@ -3,9 +3,13 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.10 $ $Date: 2009/01/30 00:49:27 $
+#   $Revision: 1.15 $ $Date: 2009/02/20 04:32:09 $
 #
-tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
+tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
+                 window=NULL) {
+  if(!is.null(window))
+    win <- as.owin(window)
+  else win <- NULL
   isrect <- !is.null(xgrid) && !is.null(ygrid)
   istiled <- !is.null(tiles)
   isimage <- !is.null(image)
@@ -14,23 +18,25 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL) {
   if(isrect) {
     stopifnot(is.numeric(xgrid) && all(diff(xgrid) > 0))
     stopifnot(is.numeric(ygrid) && all(diff(ygrid) > 0))
-    win <- owin(range(xgrid), range(ygrid))
+    if(is.null(win)) win <- owin(range(xgrid), range(ygrid))
     out <- list(type="rect", window=win, xgrid=xgrid, ygrid=ygrid)
   } else if(istiled) {
     stopifnot(is.list(tiles))
     if(!all(unlist(lapply(tiles, is.owin))))
       stop("tiles must be a list of owin objects")
-    for(i in seq(along=tiles)) {
-      if(i == 1)
-        win <- tiles[[1]]
-      else
-        win <- union.owin(win, tiles[[i]])
+    if(is.null(win)) {
+      for(i in seq(along=tiles)) {
+        if(i == 1)
+          win <- tiles[[1]]
+        else
+          win <- union.owin(win, tiles[[i]])
+      }
     }
     win <- rescue.rectangle(win)
     out <- list(type="tiled", window=win, tiles=tiles)
   } else if(isimage) {
     image <- eval.im(factor(image))
-    win <- as.owin(image)
+    if(is.null(win)) win <- as.owin(image)
     out <- list(type="image", window=win, image=image)
   } else stop("Internal error: unrecognised format")
   class(out) <- c("tess", class(out))
@@ -285,5 +291,8 @@ intersect.tess <- function(X, Y, ...) {
       if(!is.null(Tij))
         Ztiles <- append(Ztiles, list(Tij))
     }
-  return(tess(tiles=Ztiles))
+  Xwin <- as.owin(X)
+  Ywin <- as.owin(Y)
+  Zwin <- intersect.owin(Xwin, Ywin)
+  return(tess(tiles=Ztiles, window=Zwin))
 }

@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.25 $	$Date: 2008/10/28 00:43:41 $
+#	$Revision: 1.26 $	$Date: 2009/02/20 18:36:36 $
 #
 #
 #
@@ -106,10 +106,27 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
          },
          polygonal = {
            p <- W$bdry
-           holes <- (unlist(lapply(W$bdry, area.xypolygon)) < 0)
-           if(!any(holes)) {
+           # Determine whether user wants to fill the interior
+           col.poly <- resolve.defaults(list(...), list(col=NA))$col
+           den.poly <- resolve.defaults(list(...), list(density=NULL))$density
+           no.fill  <- is.null(den.poly) &&
+                       (is.null(col.poly) || is.na(col.poly))
+           # Determine whether we need to triangulate the interior.
+           # If it is required to fill the interior,
+           # this can be done directly using polygon() provided
+           # there are no holes. Otherwise we must triangulate the interior.
+           if(no.fill)
+             triangulate <- FALSE
+           else {
+             # Determine whether there are any holes
+             holes <- (unlist(lapply(p, area.xypolygon)) < 0)
+             triangulate <- any(holes)
+           }
+
+           if(!triangulate) {
+             # No triangulation required;
              # simply plot the polygons
-             for(i in which(!holes))
+             for(i in seq(p))
                do.call.matched("polygon",
                                resolve.defaults(
                                                 list(x=p[[i]]),

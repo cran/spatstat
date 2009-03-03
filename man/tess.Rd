@@ -6,7 +6,8 @@
   of a spatial region.
 }
 \usage{
-  tess(..., xgrid = NULL, ygrid = NULL, tiles = NULL, image = NULL)
+  tess(..., xgrid = NULL, ygrid = NULL, tiles = NULL, image = NULL,
+            window=NULL)
 }
 \arguments{
   \item{\dots}{Ignored.}
@@ -21,6 +22,11 @@
   \item{image}{
     Pixel image which specifies the tessellation.
     Incompatible with other arguments.
+  }
+  \item{window}{
+    Optional.
+    The spatial region which is tessellated (i.e. the union of all the tiles).
+    An object of class \code{"owin"}.
   }
 }
 \details{
@@ -51,6 +57,15 @@
       have a particular value of the factor constitute a tile. 
     }
   }
+
+  The optional argument \code{window} specifies the spatial region
+  formed by the union of all the tiles. In other words it specifies the
+  spatial region that is divided into tiles by the tessellation.
+  If this argument is missing or \code{NULL}, it will be determined by
+  computing the set union of all the tiles. This is a time-consuming
+  computation. For efficiency it is advisable to specify the window.
+  Note that the validity of the window will not be checked.
+  
   There are methods for \code{print}, \code{plot}, \code{[} and \code{[<-}
   for tessellations. Use \code{\link{tiles}} to extract the list of
   tiles in a tessellation.
@@ -58,6 +73,7 @@
   Tessellations can be used to classify the points of
   a point pattern, in \code{\link{split.ppp}}, \code{\link{cut.ppp}} and
   \code{\link{by.ppp}}.
+
 }
 \value{
   An object of class \code{"tess"} representing the tessellation.

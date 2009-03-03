@@ -2,7 +2,7 @@
 #	ripras.S	Ripley-Rasson estimator of domain
 #
 #
-#	$Revision: 1.8 $	$Date: 2007/03/14 03:44:59 $
+#	$Revision: 1.9 $	$Date: 2009/02/24 01:48:09 $
 #
 #
 #
@@ -12,7 +12,7 @@ bounding.box.xy <- function(x, y=NULL) {
   xy <- xy.coords(x,y)
   if(length(xy$x) == 0)
     return(NULL)
-  owin(range(xy$x), range(xy$y))
+  owin(range(xy$x), range(xy$y), check=FALSE)
 }
 
 convexhull.xy <- function(x, y=NULL) {
@@ -24,7 +24,7 @@ convexhull.xy <- function(x, y=NULL) {
   h <- rev(chull(x, y))  # must be anticlockwise
   if(length(h) < 3)
     return(NULL)
-  w <- owin(poly=list(x=x[h], y=y[h]))
+  w <- owin(poly=list(x=x[h], y=y[h]), check=FALSE)
   return(w)
 }
 

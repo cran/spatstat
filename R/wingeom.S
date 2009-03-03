@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.34 $	$Date: 2008/10/24 01:42:51 $
+#	$Revision: 4.39 $	$Date: 2009/02/27 03:24:41 $
 #
 #
 #
@@ -426,6 +426,11 @@ vertices <- function(w) {
 
 diameter <- function(w) {
   vert <- vertices(w)
+  if(length(vert$x) > 3) {
+    # extract convex hull
+    h <- with(vert, chull(x, y))
+    vert <- with(vert, list(x=x[h], y=y[h]))
+  }
   d <- pairdist(vert, squared=TRUE)
   return(sqrt(max(d)))
 }
@@ -495,21 +500,27 @@ gpc2owin <- function(x) {
   pts <- get.pts(x)
   if(length(pts) == 0 || sum(unlist(lapply(pts, length))) == 0)
     return(NULL)
-  pp <- lapply(pts, function(g){
-    p <- g[c("x","y")]
-    neg <- (area.xypolygon(p) < 0)
-    if(g$hole != neg)
-      p <- lapply(p, rev)
-    return(p)
-  })
-  owin(bb$x, bb$y, poly=pp, check=FALSE)
+  processpolygon <- 
+    function(p) {
+      area <- area.xypolygon(p)
+      neg  <- (area < 0)
+      if(p$hole != neg) {
+        p <- reverse.xypolygon(p)
+        area <- -area
+      }
+      p$area <- area
+      return(p)
+    }
+  pts <- lapply(pts, processpolygon)
+  w <- owin(bb$x, bb$y, poly=pts, check=FALSE)
+  return(w)
 }
 
 owin2gpc <- function(x) {
   x <- as.polygonal(x)
   b <- x$bdry
   g <- lapply(b, function(p) {
-    p$hole <- (area.xypolygon(p) < 0)
+    p$hole <- is.hole.xypolygon(p) 
     return(p)
   })
   new("gpc.poly", pts=g)

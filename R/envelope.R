@@ -3,20 +3,21 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.45 $  $Date: 2008/05/11 20:21:08 $
+#   $Revision: 1.47 $  $Date: 2009/02/10 18:20:00 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
                      simulate=NULL, verbose=TRUE, clipdata=TRUE, 
                      start=NULL, control=list(nrep=1e5, expand=1.5),
                      transform=NULL, global=FALSE, ginterval=NULL,
-                     saveall=FALSE, nsim2=nsim, internal=NULL) {
+                     saveall=FALSE, nsim2=nsim,
+                     Yname=NULL, internal=NULL) {
   cl <- match.call()
-  Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- deparse(substitute(Y))
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
   # -------------------------------------------------------------------
-  # Determine type of simulation
+  # Determine type of simulation 
   #  simtype =
   #           "csr": uniform Poisson process
   #           "rmh": simulated realisation of fitted model 
@@ -453,17 +454,19 @@ print.envelope <- function(x, ...) {
   fname <- deparse(attr(x, "ylab"))
   type <- if(g) "Simultaneous" else "Pointwise"
   cat(paste(type, "critical envelopes for", fname, "\n"))
+  # determine *actual* type of simulation
   descrip <-
-    if(!is.null(simtype)) {
+    if(csr) "simulations of CSR"
+    else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
              rmh="simulations of fitted model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list")
-    } else if(csr) "CSR" else "model"
+    } else "simulations of fitted model"
   #  
-  cat(paste("Obtained from", nsim,
-            "simulations of", descrip, "\n"))
+  cat(paste("Obtained from", nsim, descrip, "\n"))
+  #
   if(!is.null(e$dual) && e$dual) 
     cat(paste("Theoretical (i.e. null) mean value of", fname,
               "estimated from a separate set of",
@@ -491,17 +494,19 @@ summary.envelope <- function(object, ...) {
   fname <- deparse(attr(object, "ylab"))
   type <- if(g) "Simultaneous" else "Pointwise"
   cat(paste(type, "critical envelopes for", fname, "\n"))
+  # determine *actual* type of simulation
   descrip <-
-    if(!is.null(simtype)) {
+    if(csr) "simulations of CSR"
+    else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
              rmh="simulations of fitted model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list")
-    } else if(csr) "CSR" else "model"
+    } else "simulations of fitted model"
   #  
-  cat(paste("Obtained from", nsim,
-            "simulations of", descrip, "\n"))
+  cat(paste("Obtained from", nsim, descrip, "\n"))
+  #
   if(!is.null(attr(object, "savedata")))
     cat(paste("(All", nsim, "simulated values",
               "are stored in attr(,", dQuote("savedata"), ") )\n"))
