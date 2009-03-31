@@ -8,7 +8,7 @@ from a point pattern in a window of arbitrary shape.
 \usage{
   Kest(X, \dots, r=NULL, breaks=NULL, 
      correction=c("border", "isotropic", "Ripley", "translate"),
-    nlarge=3000)
+    nlarge=3000, domain=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -19,7 +19,8 @@ from a point pattern in a window of arbitrary shape.
   \item{\dots}{Ignored.}
   \item{r}{
     Optional. Vector of values for the argument \eqn{r} at which \eqn{K(r)} 
-    should be evaluated. There is a sensible default.
+    should be evaluated. Users are advised \emph{not} to specify this
+    argument; there is a sensible default.
   }
   \item{breaks}{
     Optional. An alternative to the argument \code{r}.
@@ -35,6 +36,10 @@ from a point pattern in a window of arbitrary shape.
     Optional. Efficiency threshold.
     If the number of points exceeds \code{nlarge}, then only the
     border correction will be computed, using a fast algorithm.
+  }
+  \item{domain}{
+    Optional. Calculations will be restricted to this subset
+    of the window. See Details.
   }
 }
 \value{
@@ -106,7 +111,27 @@ from a point pattern in a window of arbitrary shape.
       complex windows. 
     }
   }
-  Note that the estimator assumes the process is stationary (spatially
+  For instructional purposes, you can also set
+  \code{correction="none"} to compute an estimate of the \eqn{K}
+  function without edge correction. This estimate is biased and should
+  not be used for data analysis.
+
+  The estimates of \eqn{K(r)} are of the form
+  \deqn{
+    \hat K(r) = \frac a {(n-1) \pi} \sum_i \sum_j I(d_{ij}\le r) e_{ij}
+  }{
+    Kest(r) = (a/((n-1)* pi)) * sum[i,j] I(d[i,j] <= r) e[i,j])
+  }
+  where \eqn{a} is the area of the window, \eqn{n} is the number of
+  data points, and the sum is taken over all ordered pairs of points
+  \eqn{i} and \eqn{j} in \code{X}.
+  Here \eqn{d_{ij}}{d[i,j]} is the distance between the two points,
+  and \eqn{I(d_{ij} \le r)}{I(d[i,j] <= r)} is the indicator
+  that equals 1 if the distance is less than or equal to \eqn{r}.
+  The term \eqn{e_{ij}}{e[i,j]} is the edge correction weight (which
+  depends on the choice of edge correction listed above).
+
+  Note that this estimator assumes the process is stationary (spatially
   homogeneous). For inhomogeneous point patterns, see
   \code{\link{Kinhom}}.
 
@@ -120,11 +145,17 @@ from a point pattern in a window of arbitrary shape.
   Setting \code{nlarge=0} is equivalent to selecting only the border
   correction with \code{correction="border"}.
 
-  For instructional purposes, you can also set
-  \code{correction="none"} to compute an estimate of the \eqn{K}
-  function without edge correction. This estimate is biased and should
-  not be used for data analysis.
-  
+  If the argument \code{domain} is given, the calculations will
+  be restricted to a subset of the data. In the formula for \eqn{K(r)} above,
+  the \emph{first} point \eqn{i} will be restricted to lie inside
+  \code{domain}. The result is an approximately unbiased estimate
+  of \eqn{K(r)} based on pairs of points in which the first point lies
+  inside \code{domain} and the second point is unrestricted.
+  This is useful in bootstrap techniques. The argument \code{domain}
+  should be a window (object of class \code{"owin"}) or something acceptable to
+  \code{\link{as.owin}}. It must be a subset of the
+  window of the point pattern \code{X}.
+
   The estimator \code{Kest} ignores marks.
   Its counterparts for multitype point patterns
   are \code{\link{Kcross}}, \code{\link{Kdot}},
@@ -185,15 +216,24 @@ Baddeley, A.J. Spatial sampling and censoring.
   a problem in practice.
 }
 \seealso{
+  \code{\link{localK}} to extract individual summands in the \eqn{K}
+  function.
+
+  \code{\link{pcf}} for the pair correlation.
+
   \code{\link{Fest}},
   \code{\link{Gest}},
-  \code{\link{Jest}},
-  \code{\link{pcf}},
-  \code{\link{reduced.sample}},
+  \code{\link{Jest}}
+  for alternative summary functions.
+  
   \code{\link{Kcross}},
   \code{\link{Kdot}},
   \code{\link{Kinhom}},
-  \code{\link{Kmulti}}
+  \code{\link{Kmulti}} for counterparts of the \eqn{K} function
+  for multitype point patterns.
+  
+  \code{\link{reduced.sample}} for the calculation of reduced sample
+  estimators.
 }
 \examples{
  pp <- runifpoint(50)

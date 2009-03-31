@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.15 $   $Date: 2008/12/05 20:08:09 $
+#    $Revision: 1.20 $   $Date: 2009/03/05 08:15:57 $
 #
 #    as.im()
 #
@@ -13,7 +13,8 @@ as.im <- function(X, ...) {
 }
 
 as.im.im <- function(X,
-                     W=as.mask(as.owin(X), dimyx=dimyx), ...,
+                     W=as.mask(as.rectangle(X), dimyx=dimyx),
+                     ...,
                      dimyx=NULL, na.replace=NULL) {
 
   if(missing(W) && is.null(dimyx))
@@ -26,12 +27,18 @@ as.im.im <- function(X,
              (Y$yrow[1] - X$yrow[1])/X$ystep)
   Y$v <- matrixsample(X$v, Y$dim, phase=round(phase))
 
+  # inherit pixel data type from X
+  Y$type <- X$type
+  if(Y$type == "factor")
+    levels(Y) <- levels(X)
+
   return(na.handle.im(Y, na.replace))
 }
 
 as.im.owin <- function(X,
-                     W=as.mask(as.owin(X), dimyx=dimyx), ...,
-                     dimyx=NULL, na.replace=NULL) {
+                       W=as.mask(X, dimyx=dimyx),
+                       ...,
+                       dimyx=NULL, na.replace=NULL, value=1) {
 
     # if W is missing, the default is now evaluated, as above.
     # if W is present, it may have to be converted
@@ -41,7 +48,7 @@ as.im.owin <- function(X,
       W <- as.mask(W, dimyx=dimyx)
   }
   m <- W$m
-  v <- m * 1
+  v <- value * m
   v[!m] <- NA
   out <- list(v = v, 
               dim    = W$dim,
@@ -59,8 +66,7 @@ as.im.owin <- function(X,
 }
 
 
-as.im.function <- function(X,
-                          W=as.mask(as.owin(X), dimyx=dimyx), ...,
+as.im.function <- function(X, W, ...,
                           dimyx=NULL, na.replace=NULL) {
   f <- X
   W <- as.owin(W)
@@ -100,8 +106,7 @@ as.im.function <- function(X,
   return(na.handle.im(out, na.replace))
 }
 
-as.im.default <- function(X,
-                          W=as.mask(as.owin(X), dimyx=dimyx), ...,
+as.im.default <- function(X, W, ...,
                           dimyx=NULL, na.replace=NULL) {
 
   if((is.vector(X) || is.factor(X)) && length(X) == 1) {

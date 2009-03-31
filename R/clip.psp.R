@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.10 $   $Date: 2008/04/16 11:11:40 $
+#    $Revision: 1.11 $   $Date: 2009/04/01 02:00:28 $
 #
 #
  
@@ -42,11 +42,11 @@ cliprect.psp <- function(x, window) {
   ok <- in0 & in1
   # if all segments are inside, return them
   if(all(ok))
-    return(as.psp(ends, window=window, marks=marx))
+    return(as.psp(ends, window=window, marks=marx, check=FALSE))
   # otherwise, store those segments which are inside the window
   ends.inside <- ends[ok, , drop=FALSE]
   marks.inside <- marx %msub% ok
-  x.inside <- as.psp(ends.inside, window=window, marks=marks.inside)
+  x.inside <- as.psp(ends.inside, window=window, marks=marks.inside, check=FALSE)
   # now consider the rest
   ends <- ends[!ok, , drop=FALSE]
   in0 <- in0[!ok] 
@@ -118,7 +118,7 @@ cliprect.psp <- function(x, window) {
   # Put them together with the unclipped ones
   ends.all <- rbind(ends.inside, ends.clipped)
   marks.all <- c(marks.inside, marks.clipped)
-  as.psp(ends.all, window=window, marks=marks.all)
+  as.psp(ends.all, window=window, marks=marks.all, check=FALSE)
 }
 
 

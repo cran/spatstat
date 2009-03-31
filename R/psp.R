@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.44 $ $Date: 2008/11/06 01:08:47 $
+#  $Revision: 1.47 $ $Date: 2009/04/01 01:55:15 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -9,7 +9,8 @@
 #################################################
 # creator
 #################################################
-psp <- function(x0, y0, x1, y1, window, marks=NULL, check=TRUE) {
+psp <- function(x0, y0, x1, y1, window, marks=NULL,
+                check=spatstat.options("checksegments")) {
   stopifnot(is.numeric(x0))
   stopifnot(is.numeric(y0))
   stopifnot(is.numeric(x1))
@@ -70,7 +71,7 @@ as.psp <- function(x, ..., from=NULL, to=NULL) {
   UseMethod("as.psp")
 }
 
-as.psp.psp <- function(x, ..., check=TRUE, fatal=TRUE) {
+as.psp.psp <- function(x, ..., check=spatstat.options("checksegments"), fatal=TRUE) {
   if(!verifyclass(x, "psp", fatal=fatal))
     return(NULL)
   ends <- x$ends
@@ -79,15 +80,13 @@ as.psp.psp <- function(x, ..., check=TRUE, fatal=TRUE) {
 }
 
 as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL,
-                              check=TRUE, fatal=TRUE) {
+                              check=spatstat.options("checksegments"), fatal=TRUE) {
   if(is.null(marks) && checkfields(x, "marks"))
     marks <- x$marks
   if(checkfields(x, c("x0", "y0", "x1", "y1")))
     return(psp(x$x0, x$y0, x$x1, x$y1, window=window,
                marks=marks, check=check))
   else if(checkfields(x, c("xmid", "ymid", "length", "angle"))) {
-    if(missing(check))
-      check <- FALSE
     rr <- x$length/2
     dx <- cos(x$angle) * rr
     dy <- sin(x$angle) * rr
@@ -96,7 +95,7 @@ as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL,
     rmax <- max(rr)
     bigbox <- owin(bb$xrange + c(-1,1) * rmax, bb$yrange + c(-1,1) * rmax)
     pattern <- psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
-                   window=bigbox, marks=marks, check=check)
+                   window=bigbox, marks=marks, check=FALSE)
     clipped <- pattern[window]
     return(clipped)
   }
@@ -111,7 +110,7 @@ as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL,
   return(NULL)
 }
 
-as.psp.matrix <- function(x, ..., window=NULL, marks=NULL, check=TRUE, fatal=TRUE) {
+as.psp.matrix <- function(x, ..., window=NULL, marks=NULL, check=spatstat.options("checksegments"), fatal=TRUE) {
   if(ncol(x) == 4)
     return(psp(x[,1], x[,2], x[,3], x[,4], window=window, marks=marks, check=check))
   else if(fatal)
@@ -119,13 +118,11 @@ as.psp.matrix <- function(x, ..., window=NULL, marks=NULL, check=TRUE, fatal=TRU
   return(NULL)
 }
 
-as.psp.default <- function(x, ..., window=NULL, marks=NULL, check=TRUE, fatal=TRUE) {
+as.psp.default <- function(x, ..., window=NULL, marks=NULL, check=spatstat.options("checksegments"), fatal=TRUE) {
   if(checkfields(x, c("x0", "y0", "x1", "y1")))
     return(psp(x$x0, x$y0, x$x1, x$y1, window=window, marks=marks,
                check=check))
   else if(checkfields(x, c("xmid", "ymid", "length", "angle"))) {
-    if(missing(check))
-      check <- FALSE
     rr <- x$length/2
     dx <- cos(x$angle) * rr
     dy <- sin(x$angle) * rr
@@ -134,7 +131,7 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, check=TRUE, fatal=TR
     rmax <- max(rr)
     bigbox <- owin(bb$xrange + c(-1,1) * rmax, bb$yrange + c(-1,1) * rmax)
     pattern <- psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
-                   window=bigbox, marks=marks, check=check)
+                   window=bigbox, marks=marks, check=FALSE)
     clipped <- pattern[window]
     return(clipped)
   }
@@ -143,7 +140,7 @@ as.psp.default <- function(x, ..., window=NULL, marks=NULL, check=TRUE, fatal=TR
   return(NULL)
 }
 
-as.psp.owin <- function(x, ..., check=TRUE, fatal=TRUE) {
+as.psp.owin <- function(x, ..., check=spatstat.options("checksegments"), fatal=TRUE) {
   verifyclass(x, "owin")
   # can't use as.rectangle here; still testing validity
   xframe <- owin(x$xrange, x$yrange)

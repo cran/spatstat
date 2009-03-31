@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.32 $    $Date: 2008/10/24 01:31:52 $
+#    $Revision: 1.33 $    $Date: 2009/03/03 22:58:54 $
 #
 #  (a) for matrices only:
 #
@@ -249,7 +249,7 @@ progressreport <- function(i, n, every=max(1, ceiling(n/100)),
   
 numalign <- function(i, nmax, zero="0") {
   stopifnot(i <= nmax)
-  nplaces <- as.integer(ceiling(log10(nmax)))
+  nplaces <- as.integer(ceiling(log10(nmax+1)))
   out <- blank <- paste(rep(zero, nplaces), collapse="")
   istring <- paste(i)
   ilen <- nchar(istring)

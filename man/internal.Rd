@@ -166,6 +166,7 @@
 \alias{overlap.trapezium}
 \alias{overlap.xypolygon}    
 \alias{owinpolycheck}
+\alias{owinpoly2mask}
 \alias{param.quad}
 \alias{paren}
 \alias{pickoption}
@@ -417,7 +418,6 @@ is.poisson.ppm(x)
 is.prime(n)
 is.psp(x)
 is.stationary.ppm(x)    
-km.rs(o, cc, d, breaks)
 kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
@@ -485,6 +485,7 @@ overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
 owinpolycheck(W, verbose=TRUE)
+owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
 paren(x)
 pickoption(what="option", key, keymap, \dots,

@@ -44,6 +44,7 @@
 }
 \seealso{
   \code{\link{distmap}},
+  \code{\link{distmap.psp}},
   \code{\link{distmap.owin}}
 }
 \examples{

@@ -92,6 +92,13 @@
       However, other functions in \pkg{spatstat} may return
       incorrect answers on these data.
     }
+    \item{checksegments}{
+      Logical flag indicating whether the functions
+      \code{\link{psp}} and \code{\link{as.psp}} should check
+      the validity of line segment data (in particular, checking that
+      the endpoints of the line segments are inside the specified
+      window). It is advisable to leave this flag set to \code{TRUE}. 
+    }
   }
   
   If no arguments are given, 

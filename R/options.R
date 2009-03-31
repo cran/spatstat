@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.15 $   $Date: 2008/10/29 20:02:34 $
+#    $Revision: 1.16 $   $Date: 2009/04/01 01:32:57 $
 #
 #
 ".Spatstat.Options" <-
@@ -17,7 +17,8 @@
        ndummy.min=25,
        dupC = FALSE,
        progress = "tty",
-       checkpolygons = TRUE
+       checkpolygons = TRUE,
+       checksegments = TRUE
        )
 
 "spatstat.options" <-

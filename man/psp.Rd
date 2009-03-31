@@ -6,7 +6,8 @@
   a line segment pattern in the two-dimensional plane.
 }
 \usage{
-  psp(x0,y0, x1, y1, window, marks=NULL, check=TRUE)
+  psp(x0,y0, x1, y1, window, marks=NULL,
+        check=spatstat.options("checksegments"))
 }
 \arguments{
   \item{x0}{Vector of \eqn{x} coordinates of first endpoint of each segment}

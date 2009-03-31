@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.10 $	$Date: 2006/10/09 03:37:26 $
+#	$Revision: 1.11 $	$Date: 2009/03/26 09:40:10 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -164,7 +164,7 @@ handle.r.b.args <- function(r=NULL, breaks=NULL, window, eps=NULL,
           breaks <- breakpts.from.r(r)
 	} else {
           # both 'r' and 'breaks' are missing
-          rmax <- if(missing(rmaxdefault)) diameter(window) else rmaxdefault
+          rmax <- if(missing(rmaxdefault)) diameter(as.rectangle(window)) else rmaxdefault
           if(is.null(eps)) {
             if(!is.null(window$xstep))
               eps <- window$xstep/4

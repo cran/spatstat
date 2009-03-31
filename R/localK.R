@@ -1,24 +1,25 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.6 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 1.7 $	$Date: 2009/03/03 23:57:32 $
 #
 #
 
 "localL" <-
   function(X, ..., correction="Ripley", verbose=TRUE, rvalue=NULL)
 {
-  localK(X, L=TRUE, correction=correction, verbose=verbose, rvalue=rvalue)
+  localK(X, wantL=TRUE,
+         correction=correction, verbose=verbose, rvalue=rvalue)
 }
 
 "localK" <-
   function(X, ..., correction="Ripley", verbose=TRUE, rvalue=NULL)
 {
   verifyclass(X, "ppp")
-
-  wantL <- resolve.defaults(list(...), list(L=FALSE))$L
   
-  npoints <- X$n
+  wantL <- resolve.defaults(list(...), list(wantL = FALSE))$wantL
+
+  npoints <- X$n 
   W <- X$window
   area <- area.owin(W)
   lambda <- npoints/area
