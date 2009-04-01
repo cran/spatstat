@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.91 $	$Date: 2009/02/27 18:21:24 $
+#	$Revision: 4.102 $	$Date: 2009/03/24 12:05:49 $
 #
 #
 #	A window may be either
@@ -332,9 +332,15 @@ as.owin.default <- function(W, ..., fatal=TRUE) {
 #-----------------------------------------------------------------------------
 #
 #
-as.rectangle <- function(...) {
-        w <- as.owin(...)
-        return(owin(w$xrange, w$yrange, unitname=unitname(w)))
+as.rectangle <- function(w, ...) {
+  if(inherits(w, "owin"))
+    return(owin(w$xrange, w$yrange, unitname=unitname(w)))
+  else if(inherits(w, "im"))
+    return(owin(w$xrange, w$yrange, unitname=unitname(w)))
+  else {
+    w <- as.owin(w, ...)
+    return(owin(w$xrange, w$yrange, unitname=unitname(w)))
+  }
 }
 
 #
@@ -344,9 +350,6 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #	eps:		   grid mesh (pixel) size
 #	dimyx:		   dimensions of pixel raster
 #       xy:                coordinates of pixel raster  
-#
-#  NOTE: rows <=> y coordinate
-
   if(!missing(w)) {
     verifyclass(w, "owin")
     uname <- unitname(w)
@@ -355,23 +358,18 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
     if(is.null(xy)) 
       stop("If w is missing, xy is required")
   }
-
   # If it's already a mask, and no other arguments specified,
   # just return it.
   if(!missing(w) && w$type == "mask" &&
      is.null(eps) && is.null(dimyx) && is.null(xy))
     return(w)
   
-#
-#  First create pixel array
-#  
+##########################
+#  First determine pixel coordinates
+##########################
   if(is.null(xy)) {
-#
 # Pixel coordinates to be computed from other dimensions
-#
 # First determine row & column dimensions
-    
-    # output raster dimensions 'dimyx'
     if(!is.null(dimyx)) {
       if(length(dimyx) == 1)
         dimyx <- rep(dimyx, 2)
@@ -383,7 +381,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
         nr <- ceiling(diff(w$yrange)/eps)
         nc <- ceiling(diff(w$xrange)/eps)
       } else {
-    # default to spatstat defaults
+    # use spatstat defaults
         np <- spatstat.options("npixel")
         if(!is.numeric(np) || length(np) > 2)
           stop(paste("Illegal value for spatstat.options(",
@@ -396,71 +394,97 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
         }
       }
     }
-    # Initial mask with all entries True
-    out <- owin(w$xrange, w$yrange,
-                mask=matrix(TRUE, nrow=nr, ncol=nc))
+    # Initialise mask with all entries TRUE
+    rasta <- owin(w$xrange, w$yrange, mask=matrix(TRUE, nr, nc))
   } else {
-#
+# 
 # Pixel coordinates given explicitly:
+#    xy is an image, a mask, or a list(x,y)
 #
-    if(!checkfields(xy, c("x", "y")))
-      stop(paste(sQuote("xy"),
-                 "should be a list containing two vectors x and y"))
-    x <- sort(unique(xy$x))
-    y <- sort(unique(xy$y))
-    # derive other parameters
-    nr <- length(y)
-    nc <- length(x)
-    # x and y pixel sizes
-    dx <- diff(x)
-    if(diff(range(dx)) > 0.01 * mean(dx))
-      stop("x coordinates must be evenly spaced")
-    xstep <- mean(dx)
-    dy <- diff(y)
-    if(diff(range(dy)) > 0.01 * mean(dy))
-      stop("y coordinates must be evenly spaced")
-    ystep <- mean(dy)
-    # coordinate ranges
-    xrange <- range(x) + xstep * c(-1,1)/2
-    yrange <- range(y) + ystep * c(-1,1)/2
-    # Initial mask with all entries TRUE
-    m <- matrix(TRUE, nrow=nr, ncol=nc)
-    out <- list(type     = "mask",
-                xrange   = xrange,
-                yrange   = yrange,
-                dim      = c(nr, nc),
-                xstep    = xstep,
-                ystep    = ystep,
-                warnings = .Spatstat.Image.Warning,
-                xcol    = x, 
-                yrow    = y,
-                m       = m)
-    class(out) <- "owin"
+    if(is.im(xy)) {
+      rasta <- as.owin(xy)
+      rasta$m[] <- TRUE
+    } else if(is.owin(xy)) {
+      if(xy$type != "mask")
+        stop("argument xy does not contain raster coordinates.")
+      rasta <- xy
+      rasta$m[] <- TRUE
+    } else {
+      if(!checkfields(xy, c("x", "y")))
+        stop(paste(sQuote("xy"),
+                   "should be a list containing two vectors x and y"))
+      x <- sort(unique(xy$x))
+      y <- sort(unique(xy$y))
+      # derive other parameters
+      nr <- length(y)
+      nc <- length(x)
+      # x and y pixel sizes
+      dx <- diff(x)
+      if(diff(range(dx)) > 0.01 * mean(dx))
+        stop("x coordinates must be evenly spaced")
+      xstep <- mean(dx)
+      dy <- diff(y)
+      if(diff(range(dy)) > 0.01 * mean(dy))
+        stop("y coordinates must be evenly spaced")
+      ystep <- mean(dy)
+      xr <- range(x)
+      yr <- range(y)
+      xrange <-  xr + xstep * c(-1,1)/2
+      yrange <-  yr + ystep * c(-1,1)/2
+      # initialise mask with all entries TRUE
+      rasta <- list(type     = "mask",
+                    xrange   = xrange,
+                    yrange   = yrange,
+                    dim      = c(nr, nc),
+                    xstep    = xstep,
+                    ystep    = ystep,
+                    warnings = .Spatstat.Image.Warning,
+                    xcol    = seq(xr[1], xr[2], length=nc),
+                    yrow    = seq(yr[1], yr[2], length=nr),
+                    m       = matrix(TRUE, nr, nc),
+                    units   = uname)
+      class(rasta) <- "owin"
+    }
     # window may be implicit in this case.
     if(missing(w))
       w <- owin(xrange, yrange)
   }
 
-  # Second, intersect pixel raster with existing window
+################################  
+# Second, mask pixel raster with existing window
+################################  
   switch(w$type,
-         rectangle = { },
+         rectangle = {
+           out <- rasta
+           if(!all(w$xrange == rasta$xrange)
+              || !all(w$yrange == rasta$yrange)) {
+             xcol <- rasta$xcol
+             yrow <- rasta$yrow
+             wx <- w$xrange
+             wy <- w$yrange
+             badrow <- which(yrow > wy[2] | yrow < wy[1])
+             badcol <- which(xcol > wx[2] | xcol < wx[1])
+             out$m[badrow , ] <- FALSE
+             out$m[ , badcol] <- FALSE
+           }
+         },
          mask = {
-           phase <- c((out$xcol[1] - w$xcol[1])/w$xstep,
-                      (out$yrow[1] - w$yrow[1])/w$ystep)
+           out <- rasta
+           # resample existing mask on new raster
+           phase <- c((rasta$xcol[1] - w$xcol[1])/w$xstep,
+                      (rasta$yrow[1] - w$yrow[1])/w$ystep)
            out$m <- matrixsample(w$m, c(nr, nc), phase=round(phase))
          },
          polygonal = {
-           # test every pixel
-           x <- as.vector(raster.x(out))
-           y <- as.vector(raster.y(out))
-           value <- inside.owin(x, y, w)
-           out$m <- matrix(value, nrow=nr, ncol=nc)
+           # use C code
+           out <- owinpoly2mask(w, rasta, FALSE)
          })
 
   unitname(out) <- uname
   return(out)
 }
 
+#
 #
 #-----------------------------------------------------------------------------
 #

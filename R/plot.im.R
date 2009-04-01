@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.42 $   $Date: 2008/12/11 00:53:01 $
+#  $Revision: 1.43 $   $Date: 2009/03/05 17:25:27 $
 #
 #  Plotting code for pixel images
 #
@@ -132,7 +132,7 @@ plot.im <- function(x, ...,
       image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                  list(...),
                  colourmap,
-                 list(xlab = "x", ylab = "y"),
+                 list(xlab = "", ylab = ""),
                  list(asp = 1, main = main, axes=FALSE)
                  )
       return(invisible(NULL))
@@ -156,7 +156,7 @@ plot.im <- function(x, ...,
                list(add=TRUE),
                list(...),
                colourmap,
-               list(xlab = "x", ylab = "y"),
+               list(xlab = "", ylab = ""),
                list(asp = 1, main = main))
   # axes for image
   imax <- resolve.defaults(list(...), list(axes=FALSE))$axes

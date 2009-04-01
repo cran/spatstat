@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.15 $ $Date: 2009/02/20 04:32:09 $
+#   $Revision: 1.23 $ $Date: 2009/03/05 19:17:15 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -199,7 +199,7 @@ tiles <- function(x) {
 
 
 as.im.tess <- function(X,
-                       W=as.mask(as.owin(X), dimyx=dimyx), ...,
+                       W=as.mask(as.rectangle(X), dimyx=dimyx), ...,
                        dimyx=NULL, na.replace=NULL) {
   # if W is missing, the default is now evaluated, as above.
   # if W is present, it may have to be converted
@@ -215,10 +215,24 @@ as.im.tess <- function(X,
          tiled={
            til <- X$tiles
            ntil <- length(til)
-           out <- as.im(W, na.replace=na.replace)
-           out <- eval.im(factor(out, levels=seq(ntil)))
-           for(i in seq(ntil))
-             out[til[[i]]] <- factor(i, levels=seq(ntil))
+           xy <- list(x=W$xcol, y=W$yrow)
+           for(i in seq(ntil)) {
+             indic <- as.mask(til[[i]], xy=xy)
+             tag <- as.im(indic, value=i)
+             if(i == 1) {
+               out <- tag
+               outv <- out$v
+             } else {
+               outv <- pmin(outv, tag$v, na.rm=TRUE)
+             }
+           }
+           out$v    <- outv
+           out$type <- "factor"
+           nama <- names(til)
+           if(is.null(nama) || !all(nzchar(nama)))
+             nama <- paste(seq(ntil))
+           levels(out) <- nama
+           unitname(out) <- unitname(W)
          },
          rect={
            xg <- X$xgrid

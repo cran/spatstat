@@ -13,7 +13,8 @@
 \arguments{
   \item{X}{Any suitable dataset representing a two-dimensional
     object, such as a point pattern (object of class \code{"ppp"}),
-    or a window (object of class \code{"owin"}).
+    a window (object of class \code{"owin"}) or a
+    line segment pattern (object of class \code{"psp"}).
   }
   \item{\dots}{Arguments passed to \code{\link{as.mask}}
     to control pixel resolution.
@@ -24,7 +25,7 @@
   are the values of the distance map.
 }
 \details{
-  The ``distance map'' of a set of points \eqn{A} is the function
+  The \dQuote{distance map} of a set of points \eqn{A} is the function
   \eqn{f} whose value \code{f(x)} is defined for any two-dimensional
   location \eqn{x} as the shortest distance from \eqn{x} to \eqn{A}.
 
@@ -32,11 +33,13 @@
   and returns the distance map as a pixel image.
   
   This is generic. Methods are provided for
-  point patterns (\code{\link{distmap.ppp}})
+  point patterns (\code{\link{distmap.ppp}}),
+  line segment patterns  (\code{\link{distmap.psp}})
   and windows (\code{\link{distmap.owin}}).
 }
 \seealso{
   \code{\link{distmap.ppp}},
+  \code{\link{distmap.psp}},
   \code{\link{distmap.owin}}
 }
 \examples{

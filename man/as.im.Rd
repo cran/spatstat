@@ -11,20 +11,17 @@
 }
 \usage{
   as.im(X, \dots)
-  \method{as.im}{im}(X,
-        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+  \method{as.im}{im}(X, W=as.mask(as.rectangle(X), dimyx=dimyx), \dots,
         dimyx=NULL, na.replace=NULL)
-  \method{as.im}{owin}(X,
-        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
-        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{owin}(X, W=as.mask(X, dimyx=dimyx), \dots,
+        dimyx=NULL, na.replace=NULL, value=1)
   \method{as.im}{tess}(X,
-        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+        W=as.mask(as.rectangle(X), dimyx=dimyx), \dots,
         dimyx=NULL, na.replace=NULL)
-  \method{as.im}{function}(X,
-        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+  \method{as.im}{function}(X, W, \dots,
         dimyx=NULL, na.replace=NULL)
-  \method{as.im}{default}(X,
-        W=as.mask(as.owin(X), dimyx=dimyx), \dots,
+  \method{as.im}{default}(X, W, 
+        \dots,
         dimyx=NULL, na.replace=NULL)
 }
 \arguments{
@@ -38,6 +35,10 @@
   }
   \item{na.replace}{Optional value to replace \code{NA} entries in the
     output image.
+  }
+  \item{value}{Optional.
+    The value to be assigned to pixels inside the window,
+    if \code{X} is a window.
   }
 }
 \details{
@@ -53,7 +54,7 @@
     \item
     a window object, of class \code{"owin"} (see
     \code{\link{owin.object}}). The result is an image
-    with all pixel entries equal to \code{1} inside the window \code{X},
+    with all pixel entries equal to \code{value} inside the window \code{X},
     and \code{NA} outside.
     \item
     a tessellation (object of class \code{"tess"}).

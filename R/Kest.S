@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.41 $	$Date: 2008/04/02 13:36:05 $
+#	$Revision: 5.45 $	$Date: 2009/03/04 15:43:14 $
 #
 #
 # -------- functions ----------------------------------------
@@ -69,17 +69,36 @@
 "Kest"<-
 function(X, ..., r=NULL, breaks=NULL, 
          correction=c("border", "isotropic", "Ripley", "translate"),
-         nlarge=3000)
+         nlarge=3000, domain=NULL)
 {
   verifyclass(X, "ppp")
-  nlarge.given <- !missing(nlarge)
-  rfixed <- !missing(r) || !missing(breaks)
+  nlarge.given <- !missing(nlarge) && !is.null(nlarge)
+  rfixed <- !is.null(r) || !is.null(breaks)
         
   npoints <- X$n
   W <- X$window
   area <- area.owin(W)
   lambda <- npoints/area
   lambda2 <- (npoints * (npoints - 1))/(area^2)
+
+  if(!is.null(domain)) {
+    # estimate based on contributions from a subdomain
+    domain <- as.owin(domain)
+    if(!is.subset.owin(domain, X$window))
+      stop(paste(dQuote("domain"),
+                 "is not a subset of the window of X"))
+    # trick Kdot() into doing it
+    indom <- inside.owin(X$x, X$y, domain)
+    Kd <- Kdot(X %mark% indom, i="TRUE",
+               r=r, breaks=breaks, correction=correction)
+    # correct for estimate of intensity of type i
+    adj <- area/area.owin(domain)
+    Kd <- eval.fv(adj * Kd)
+    # neaten up 
+    attr(Kd, "ylab") <- substitute(K(r), NULL)
+    # RETURN
+    return(Kd)
+  }
 
   rmaxdefault <- rmax.rule("K", W, lambda)        
   breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)

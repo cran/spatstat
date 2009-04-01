@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.39 $    $Date: 2009/03/02 17:53:33 $
+#    $Revision: 1.43 $    $Date: 2009/03/05 07:45:11 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -167,6 +167,55 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   attr(score, "on.boundary") <- on.boundary
   
   return(score)
+}
+
+owinpoly2mask <- function(w, rasta, check=TRUE) {
+  if(check) {
+    verifyclass(w, "owin")
+    stopifnot(w$type == "polygonal")
+    verifyclass(rasta, "owin")
+    stopifnot(rasta$type == "mask")
+  }
+  
+  bdry <- w$bdry
+
+  x0    <- rasta$xcol[1]
+  y0    <- rasta$yrow[1]
+  xstep <- rasta$xstep
+  ystep <- rasta$ystep
+  dimyx <- rasta$dim
+  nx    <- dimyx[2]
+  ny    <- dimyx[1]
+
+  for(i in seq(bdry)) {
+    p <- bdry[[i]]
+    xp <- p$x
+    yp <- p$y
+    np <- length(p$x)
+    # repeat last vertex
+    xp <- c(xp, xp[1])
+    yp <- c(yp, yp[1])
+    np <- np + 1
+    # rescale so that pixels are at integer locations
+    xp <- (xp - x0)/xstep
+    yp <- (yp - y0)/ystep
+    # call C
+    z <- .C("poly2im",
+            xp=as.double(xp),
+            yp=as.double(yp),
+            np=as.integer(np),
+            nx=as.integer(nx),
+            ny=as.integer(ny),
+            out=as.integer(integer(nx * ny)),
+            PACKAGE="spatstat")
+    if(i == 1)
+      score <- z$out
+    else 
+      score <- score + z$out
+  }
+  status <- (score != 0)
+  out <- owin(rasta$xrange, rasta$yrange, mask=matrix(status, ny, nx))
+  return(out)
 }
 
 is.hole.xypolygon <- function(polly) {

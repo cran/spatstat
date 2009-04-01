@@ -46,6 +46,9 @@ plot(finpines %mark% finpines.extra$diameter, main="Finnish pines")
 data(hamster)
 plot(hamster)
 
+data(heather)
+plot(heather)
+
 data(humberside)
 plot(humberside)
 

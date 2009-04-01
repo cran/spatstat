@@ -55,7 +55,8 @@
 }
 \seealso{
   \code{\link{distmap}},
-  \code{\link{distmap.ppp}}
+  \code{\link{distmap.ppp}},
+  \code{\link{distmap.psp}}
 }
 \examples{
   data(letterR)

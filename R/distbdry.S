@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.18 $	$Date: 2008/11/17 19:19:41 $
+#	$Revision: 4.19 $	$Date: 2009/03/26 08:23:10 $
 #
 # -------- functions ----------------------------------------
 #
@@ -20,6 +20,10 @@
 #       erode.owin()    erode the window by a distance r
 #                       [yields a new window]
 #
+#       erosion.owin
+#       dilation.owin
+#       opening.owin
+#       closing.owin
 #
 # 
 "bdist.points"<-

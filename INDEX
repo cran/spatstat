@@ -9,6 +9,7 @@ Gdot                    Multitype Nearest Neighbour Distance Function
 Gest                    Nearest Neighbour Distance Function G
 Geyer                   Geyer's Saturation Point Process Model
 Gmulti                  Marked Nearest Neighbour Distance Function
+Hest                    Spherical Contact Distribution Function
 Iest                    Estimate the I-function
 Jcross                  Multitype J Function (i-to-j)
 Jdot                    Multitype J Function (i-to-any)
@@ -174,6 +175,7 @@ gridcentres             Rectangular grid of points
 gridweights             Compute Quadrature Weights Based on Grid Counts
 hamster                 Aherne's hamster tumour data
 harmonic                Basis for Harmonic Functions
+heather                 Diggle's Heather Data
 hist.im                 Histogram of Pixel Values in an Image
 humberside              Humberside Data on Childhood Leukaemia and
                         Lymphoma

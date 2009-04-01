@@ -69,8 +69,35 @@ plot(ct, main="Colour map for real numbers")
 ca <- colourmap(rainbow(8), inputs=letters[1:8])
 plot(ca, main="Colour map for discrete values")
 
-fanfare("III. Basic operations")
+fanfare("III. Conversion between types")
+
+data(chorley)
+W <- as.owin(chorley)
+plot(W, "window W")
+
+plot(as.mask(W))
+plot(as.mask(W, dimyx=1000))
+
+plot(as.im(W, value=3))
+plot(as.im(W, value=3, na.replace=0), ribbon=TRUE)
+
+plot(as.im(function(x,y) {x^2 + y}, W=square(1)),
+     main="as.im(function(x,y){x^2+y})")
+
+V <- delaunay(runifpoint(12))
+plot(V, main="Tessellation V")
+plot(as.im(V, dimyx=256), main="as.im(V)")
+plot(as.owin(V))
+
 X <- swedishpines
+plot(X, "point pattern X")
+
+plot(as.im(X), col=c("white","red"), ribbon=FALSE, xlab="", ylab="")
+plot(as.owin(X), add=TRUE)
+
+fanfare("IV. Basic operations")
+
+plot(X, "point pattern X")
 subset <- 1:20
 plot(X[subset], main="subset operation: X[subset]")
 subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
@@ -81,6 +108,7 @@ S <- L[letterR]
 plot(L, main="subset operation: L[subwindow]")
 plot(S, add=TRUE, col="red")
 
+
 data(lansing)
 plot(lansing, "Lansing Woods data")
 plot(split(lansing), main="split operation: split(X)")
@@ -88,14 +116,15 @@ plot(split(lansing), main="split operation: split(X)")
 data(longleaf)
 plot(longleaf, main="Longleaf Pines data")
 plot(cut(longleaf, breaks=3),
-     main=c("cut by marks", "cut(longleaf, breaks=3)"))
+     main=c("cut operation", "cut(longleaf, breaks=3)"))
 
-X <- runifpoint(100)
 Z <- dirichlet(runifpoint(16))
-plot(Z, main="cut by tessellation")
+X <- runifpoint(100)
+
+plot(Z, main="points cut by tessellation")
 plot(cut(X, Z), add=TRUE)
 
-plot(split(X, Z), main="split by tessellation")
+plot(split(X, Z), main="points split by tessellation")
 
 W <- square(1)
 X <- as.im(function(x,y){sqrt(x^2+y^2)}, W)
@@ -117,7 +146,7 @@ arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
 plot(a, main="pointsOnLines(L)")
 plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
 
-fanfare("IV. Exploratory data analysis")
+fanfare("V. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")
 tab <- quadratcount(swedishpines, 4)
@@ -239,7 +268,7 @@ plot(X, add=TRUE)
 plot(delaunay(X))
 plot(X, add=TRUE)
 
-fanfare("V. Model-fitting")
+fanfare("VI. Model-fitting")
 
 data(japanesepines)
 plot(japanesepines)
@@ -292,7 +321,7 @@ plot(demopat, cols=c("red", "blue"))
 fit <- ppm(demopat, ~marks + polynom(x,y,2), Poisson())
 plot(fit, trend=TRUE, se=TRUE)
 
-fanfare("VI. Simulation")
+fanfare("VII. Simulation")
 
 data(letterR)
 plot(letterR, main="Poisson random points")
@@ -342,7 +371,7 @@ plot(runifpointOnLines(30, L), add=TRUE, pch="+")
 plot(L, main="rpoisppOnLines(3, L)")
 plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
 
-fanfare("VII. Programming tools")
+fanfare("VIII. Programming tools")
 
 nopa <- par(mfrow=c(2,2))
 data(letterR)

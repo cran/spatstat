@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.18 $ $Date: 2009/01/28 01:27:21 $
+# $Revision: 1.19 $ $Date: 2009/03/31 02:59:43 $
 #
 #
 ############################# 
@@ -112,7 +112,8 @@ superimposePSP <-
   
   arglist <- list(...)
 
-  if(length(arglist) == 0)
+  nargue <- length(arglist)
+  if(nargue == 0)
     stop("No line segment patterns given")
   
   # catch possible abuses
@@ -122,11 +123,12 @@ superimposePSP <-
     if(is.owin(Win) || is.null(Win)) {
       W <- Win
       arglist <- arglist[-id]
+      nargue <- length(arglist)
     }
   }
 
   # unpack a list
-  if(length(arglist) == 1) {
+  if(nargue == 1) {
     X <- arglist[[1]]
     if(!inherits(X, "psp") && inherits(X, "list"))
       arglist <- X
@@ -135,13 +137,15 @@ superimposePSP <-
   if(!all(unlist(lapply(arglist, is.psp))))
     stop("Some of the arguments are not psp objects")
   
-  # convert segment coordinates to data frames
-  dflist <- lapply(arglist, as.data.frame)
+  # extract segment coordinates
+  matlist <- lapply(arglist, function(x) { as.matrix(x$ends) })
   # tack them together
-  df <- NULL
-  for(i in seq(arglist)) 
-    df <- rbind(df, dflist[[i]])
-  
+  mat <- do.call("rbind", matlist)
+
+  # extract marks if any
+  marxlist <- lapply(arglist, marks)
+  marx <- do.call("c", marxlist)
+
   # determine window
   if(!is.null(W))
     W <- as.owin(W)
@@ -154,6 +158,6 @@ superimposePSP <-
       W <- union.owin(W, Wlist[[i]])
   }
 
-  return(as.psp(df, window=W, check=check))
+  return(as.psp(mat, window=W, marks=marx, check=check))
 }
   
