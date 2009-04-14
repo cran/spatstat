@@ -10,7 +10,7 @@
   the type \eqn{i} points and the points of any type.
 }
 \usage{
-Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL, \dots)
+Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -21,6 +21,7 @@ Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL, \dots)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{eps}{A positive number.
     The resolution of the discrete approximation to Euclidean
@@ -171,8 +172,7 @@ Jdot(X, i=1, eps=NULL, r=NULL, breaks=NULL, \dots)
     plot(Jhh, add=TRUE)
 
     # synthetic example with two marks "a" and "b"
-    pp <- runifpoispp(50)
-    pp <- pp \%mark\% sample(c("a","b"), pp$n, replace=TRUE)
+    pp <- runifpoint(50) \%mark\% factor(sample(c("a","b"), 50, replace=TRUE))
     J <- Jdot(pp, "a")
 }
 \author{Adrian Baddeley

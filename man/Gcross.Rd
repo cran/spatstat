@@ -10,7 +10,7 @@
   to the nearest point of type \eqn{j}.
 }
 \usage{
-Gcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
+Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -21,9 +21,11 @@ Gcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{j}{Number or character string identifying the type (mark value)
     of the points in \code{X} to which distances are measured.
+    Defaults to the second level of \code{marks(X)}.
   }
   \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the distribution function
@@ -202,12 +204,14 @@ Gcross(X, i=1, j=2, r=NULL, breaks=NULL, \dots)
 \examples{
     data(betacells)
      # cat retina data
+    G01 <- Gcross(betacells)
+    # equivalent to:
     G01 <- Gcross(betacells, "off", "on") 
     plot(G01)
 
     # empty space function of `on' points
     \dontrun{
-       F1 <- Fest(betacells[betacells == "on"], r = G01$r, eps=10.0)
+       F1 <- Fest(split(betacells)$on, r = G01$r, eps=10.0)
        lines(F1$r, F1$km, lty=3)
     }
 

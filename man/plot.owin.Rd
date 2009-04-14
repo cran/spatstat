@@ -73,7 +73,8 @@
   and pass it through \code{...} For example, to paint the
   interior of the polygon in red, use the argument
   \code{col="red"}. To draw the polygon edges in green,
-  use \code{border="green"}. 
+  use \code{border="green"}. To suppress the drawing of polygon edges,
+  use \code{border=NA}.
 
   When \code{x} is of type \code{"mask"}, it is plotted by
   \code{\link{image.default}}. The appearance of the image plot

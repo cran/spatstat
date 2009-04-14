@@ -7,7 +7,7 @@
 }
 \usage{
   \method{pcf}{ppp}(X, \dots, r = NULL, kernel="epanechnikov", bw=NULL, stoyan=0.15,
-                    correction=c("translate", "ripley"))
+                    correction=c("translate", "Ripley"))
 }
 \arguments{
   \item{X}{
@@ -48,7 +48,7 @@
   \item{trans}{vector of values of \eqn{g(r)}
     estimated by translation correction
   }
-  \item{ripley}{vector of values of \eqn{g(r)}
+  \item{iso}{vector of values of \eqn{g(r)}
     estimated by Ripley isotropic correction
   }
   as required.
@@ -94,11 +94,11 @@
   is used. The estimate is given in equation (15.15), page 284 of
   Stoyan and Stoyan (1994).
 
-  If \code{correction="ripley"} then Ripley's isotropic edge correction
+  If \code{correction="Ripley"} then Ripley's isotropic edge correction
   is used; the estimate is given in equation (15.18), page 285
   of Stoyan and Stoyan (1994).
 
-  If \code{correction=c("translate", "ripley")} then both estimates
+  If \code{correction=c("translate", "Ripley")} then both estimates
   will be computed.
 
   The choice of smoothing kernel is controlled by the 

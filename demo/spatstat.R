@@ -146,6 +146,21 @@ arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
 plot(a, main="pointsOnLines(L)")
 plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
 
+parry <- par(mfrow=c(1,3))
+X <- tess(xgrid=seq(2, 4, length=10), ygrid=seq(0, 3.5, length=8))
+plot(X)
+data(letterR)
+plot(letterR)
+plot(intersect.tess(X, letterR))
+
+X <- dirichlet(runifpoint(10))
+plot(X)
+L <- infline(0.3,0.5)
+plot(owin(), main="L")
+plot(L, col="red", lwd=2)
+plot(chop.tess(X,L))
+par(parry)
+
 fanfare("V. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")
@@ -177,6 +192,13 @@ plot(bei, add=TRUE, pch=".")
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
 plot(a, add=TRUE)
+
+X <- runifpoint(42)
+plot(dirichlet(X))
+plot(X, add=TRUE)
+
+plot(delaunay(X))
+plot(X, add=TRUE)
 
 data(longleaf)
 parsave <- par(mfrow=c(1,2))
@@ -226,10 +248,11 @@ plot(allstats(swedishpines))
 data(bramblecanes)
 plot(bramblecanes)
 bramblecanes <- rescale(bramblecanes, 1/9)
-plot(alltypes(bramblecanes, "K"), ylab="K(r)", mar.panel=c(4,4,2,2)+0.1)
+plot(alltypes(bramblecanes, "K"), mar.panel=c(4,4,2,2)+0.1)
 
 data(amacrine)
-plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), ylab="L(r)")
+amacrine <- rescale(amacrine, 1/662)
+plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9))
 
 data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
@@ -251,22 +274,30 @@ plot(Z12, col=topo.colors(128), main="smoothed neighbourhood density")
 contour(Z12, add=TRUE)
 points(ponderosa, pch=16, cex=0.5)
 
-data(amacrine)
 plot(amacrine, main="Amacrine cells data")
 par(pty="s")
-mkc <- markcorr(amacrine, function(m1,m2) {m1==m2},
+mkc <- markcorr(amacrine, 
                 correction="translate", method="density",
                 kernel="epanechnikov")
 plot(mkc, main="Mark correlation function")
-
 par(parsave)
 
-X <- runifpoint(42)
-plot(dirichlet(X))
-plot(X, add=TRUE)
+plot(alltypes(amacrine, markconnect),
+     title="Mark connection functions for amacrine cells")
 
-plot(delaunay(X))
-plot(X, add=TRUE)
+parsave <- par(mfrow=c(1,2))
+data(spruces)
+plot(spruces, cex.main=0.75)
+par(pty="s")
+plot(markcorr(spruces), main="Mark correlation")
+
+plot(spruces, cex.main=0.75)
+plot(markvario(spruces), main="Mark variogram")
+par(parsave)
+
+plot(as.listof(list("Emark(spruces)"=Emark(spruces),
+                    "Vmark(spruces)"=Vmark(spruces))),
+     main="Independence diagnostics", ylim.covers=0)
 
 fanfare("VI. Model-fitting")
 
@@ -371,6 +402,14 @@ plot(runifpointOnLines(30, L), add=TRUE, pch="+")
 plot(L, main="rpoisppOnLines(3, L)")
 plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
 
+spatstat.options(npixel=256)
+X <- dirichlet(runifpoint(30))
+plot(rMosaicSet(X, 0.4), col="green", border=NA)
+plot(X, add=TRUE)
+plot(rMosaicField(X, runif))
+plot(rMosaicSet(rpoislinetess(3), 0.5), col="green", border=NA, main="Switzer's random set")
+spatstat.options(npixel=100)
+
 fanfare("VIII. Programming tools")
 
 nopa <- par(mfrow=c(2,2))
@@ -379,22 +418,22 @@ Rbox <- as.rectangle(letterR)
 Rmask <- as.mask(letterR, dimyx=256)
 
 v <- erode.owin(Rmask, 0.25)
-plot(Rbox, type="n", main="erode.owin")
+plot(Rbox, type="n", main="erode.owin", cex.main=0.75)
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
 v <- dilate.owin(Rmask, 0.3)
-plot(as.rectangle(v), type="n", main="dilate.owin")
+plot(as.rectangle(v), type="n", main="dilate.owin", cex.main=0.75)
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
 v <- closing.owin(Rmask, 0.25)
-plot(Rbox, type="n", main="closing.owin")
+plot(Rbox, type="n", main="closing.owin", cex.main=0.75)
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 
 v <- opening.owin(Rmask, 0.3)
-plot(Rbox, type="n", main="opening.owin")
+plot(Rbox, type="n", main="opening.owin", cex.main=0.75)
 plot(v, add=TRUE)
 plot(letterR, add=TRUE)
 par(nopa)

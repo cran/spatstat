@@ -1,7 +1,7 @@
 #
 #  pickoption.R
 #
-#  $Revision: 1.3 $  $Date: 2007/10/24 09:41:15 $
+#  $Revision: 1.4 $  $Date: 2009/04/07 23:34:11 $
 #
 
 pickoption <- function(what="option", key, keymap, ...,
@@ -14,6 +14,7 @@ pickoption <- function(what="option", key, keymap, ...,
                if(multi) "or strings" else NULL))
   if(length(key) == 0)
     stop(paste("Argument", sQuote(keyname), "has length zero"))
+  key <- unique(key)
   if(!multi && length(key) > 1)
     stop(paste("Must specify only one", what, sQuote(keyname)))
 

@@ -1,7 +1,7 @@
 #
 #  nearestsegment.R
 #
-#  $Revision: 1.2 $  $Date: 2008/11/07 19:44:34 $
+#  $Revision: 1.4 $  $Date: 2009/04/03 20:29:22 $
 #
 # Given a point pattern X and a line segment pattern Y,
 # for each point x of X, determine which segment of Y is closest to x
@@ -19,14 +19,17 @@ project2segment <- function(X, Y) {
 ppllengine <- function(X, Y, action="project", check=FALSE) {
   stopifnot(is.ppp(X))
   stopifnot(is.psp(Y))
-  stopifnot(action %in% c("identify", "project"))
+  stopifnot(action %in% c("distance", "identify", "project"))
   XX <- as.matrix(as.data.frame(unmark(X)))
   YY <- as.matrix(as.data.frame(unmark(Y)))
   # determine which segment lies closest to each point
-  d <- distppll(XX, YY, mintype=2)
+  d <- distppllmin(XX, YY)
   mapXY <- d$min.which
   if(action == "identify")
     return(mapXY)
+  else if(action == "distance") 
+    return(data.frame(dist=d$min.d, which=mapXY))
+  
   # combine relevant rows of data
   alldata <- as.data.frame(cbind(XX, YY[mapXY,]))
   colnames(alldata) <- c("x", "y", "x0", "y0", "x1", "y1")

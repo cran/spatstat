@@ -83,11 +83,13 @@
   \code{\link{rMatClust}}
 }
 \examples{
+  # each cluster consist of 10 points in a disc of radius 0.2
   nclust <- function(x0, y0, radius, n) {
               return(runifdisc(n, radius, centre=c(x0, y0)))
             }
   plot(rNeymanScott(10, 0.2, nclust, radius=0.2, n=5))
 
+  # multitype Neyman-Scott process (each cluster is a multitype process)
   nclust2 <- function(x0, y0, radius, n, types=c("a", "b")) {
      X <- runifdisc(n, radius, centre=c(x0, y0))
      M <- sample(types, n, replace=TRUE)

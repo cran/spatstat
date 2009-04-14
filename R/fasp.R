@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.20 $	$Date: 2008/04/29 22:55:37 $
+#	$Revision: 1.21 $	$Date: 2009/04/15 00:19:10 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -73,10 +73,13 @@ fasp <- function(fns, which, formulae=NULL,
                            ncol=ncol(whichIJ), nrow=nrow(whichIJ))
         rownames(newwhich) <- rownames(x$which)[I]
         colnames(newwhich) <- colnames(x$which)[J]
-          
+
+        # default plotting formulae - could be NULL
+        deform <- x$default.formula
+        
         # create new fasp object
         Y <- fasp(fns      = x$fns[included],
-                  formulae = x$default.formula[included],
+                  formulae = if(!is.null(deform)) deform[included] else NULL,
                   which    = newwhich,
                   dataname = x$dataname,
                   title    = x$title)

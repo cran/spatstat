@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.45 $	$Date: 2009/03/04 15:43:14 $
+#	$Revision: 5.47 $	$Date: 2009/04/07 04:21:18 $
 #
 #
 # -------- functions ----------------------------------------
@@ -38,31 +38,7 @@
   K <- Kest(...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
-  attr(L, "ylab") <- substitute(L(r), NULL)
-  nama <- names(L)
-  desc <- attr(L, "desc")
-  labl <- attr(L, "labl")
-  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
-  DESC <- c("theoretical Poisson L(r)",
-             "uncorrected estimate of L(r)",
-             "modified border-corrected estimate of L(r)",
-             "border-corrected estimate of L(r)",
-             "translation-corrected estimate of L(r)",
-             "Ripley isotropic correction estimate of L(r)")
-  LABL <- c("Lpois(r)",
-             "Lun(r)",
-             "Lbord*(r)",
-             "Lbord(r)",
-             "Ltrans(r)",
-             "Liso(r)")
-
-  for(i in seq(length(TAGS)))
-    if(!is.na(m <- match(TAGS[i], nama))) {
-      desc[m] <- DESC[i]
-      labl[m] <- LABL[i]
-    }
-  attr(L, "desc") <- desc
-  attr(L, "labl") <- labl
+  L <- rebadge.fv(L, substitute(L(r), NULL), "L")
   return(L)  
 }
 
@@ -158,9 +134,9 @@ function(X, ..., r=NULL, breaks=NULL,
         
   # this will be the output data frame
   K <- data.frame(r=r, theo= pi * r^2)
-  desc <- c("distance argument r", "theoretical Poisson K(r)")
+  desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(K(r), NULL),
-          "theo", , alim, c("r","Kpois(r)"), desc)
+          "theo", , alim, c("r","%spois(r)"), desc, fname="K")
 
   # identify all close pairs
   rmax <- max(r)
@@ -172,8 +148,8 @@ function(X, ..., r=NULL, breaks=NULL,
     # uncorrected! For demonstration purposes only!
     wh <- whist(DIJ, breaks$val)  # no weights
     Kun <- cumsum(wh)/(lambda2 * area)
-    K <- bind.fv(K, data.frame(un=Kun), "Kun(r)",
-                 "uncorrected estimate of K(r)",
+    K <- bind.fv(K, data.frame(un=Kun), "%sun(r)",
+                 "uncorrected estimate of %s",
                  "un")
   }
   
@@ -188,14 +164,14 @@ function(X, ..., r=NULL, breaks=NULL,
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(lambda2 * denom.area)
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
-                   "modified border-corrected estimate of K(r)",
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+                   "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if(any(correction == "border")) {
       Kb <- RS$numerator/(lambda * RS$denom.count)
-      K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
-                   "border-corrected estimate of K(r)",
+      K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+                   "border-corrected estimate of %s",
                    "border")
     }
   }
@@ -208,8 +184,8 @@ function(X, ..., r=NULL, breaks=NULL,
     Ktrans <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Ktrans[r >= h] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
-                 "translation-corrected estimate of K(r)",
+    K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+                 "translation-corrected estimate of %s",
                  "trans")
   }
   if(any(correction == "isotropic")) {
@@ -219,8 +195,8 @@ function(X, ..., r=NULL, breaks=NULL,
     Kiso <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Kiso[r >= h] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
-                 "Ripley isotropic correction estimate of K(r)",
+    K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+                 "Ripley isotropic correction estimate of %s",
                  "iso")
   }
    
@@ -288,9 +264,9 @@ Kborder.engine <- function(X, rmax, nr=100,
 
   # this will be the output data frame
   Kdf <- data.frame(r=r, theo= pi * r^2)
-  desc <- c("distance argument r", "theoretical Poisson K(r)")
+  desc <- c("distance argument r", "theoretical Poisson %s")
   Kfv <- fv(Kdf, "r", substitute(K(r), NULL),
-          "theo", , c(0,rmax), c("r","Kpois(r)"), desc)
+          "theo", , c(0,rmax), c("r","%spois(r)"), desc, fname="K")
 
   ####### start computing ############
   # sort in ascending order of x coordinate
@@ -322,15 +298,15 @@ Kborder.engine <- function(X, rmax, nr=100,
       lambda2 <- (npoints * (npoints - 1))/(area^2)
       denom.area <- eroded.areas(W, r)
       bordmod <- res$numer/(lambda2 * denom.area)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "Kbord*(r)",
-                   "modified border-corrected estimate of K(r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "%sbord*(r)",
+                   "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if("border" %in% correction) {
       lambda <- npoints/area
       bord <- res$numer/(lambda * res$denom)
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "Kbord(r)",
-                   "border-corrected estimate of K(r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%sbord(r)",
+                   "border-corrected estimate of %s",
                    "border")
     }
   } else {
@@ -359,14 +335,14 @@ Kborder.engine <- function(X, rmax, nr=100,
               PACKAGE="spatstat")
     if("border" %in% correction) {
       bord <- res$numer/res$denom
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "Kbord(r)",
-                     "border-corrected estimate of Kinhom(r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%sbord(r)",
+                     "border-corrected estimate of %sinhom(r)",
                      "border")
     }
     if("bord.modif" %in% correction) {
       bm <- res$numer/eroded.areas(W, r)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "Kbord*(r)",
-                     "modified border-corrected estimate of Kinhom(r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "%sbord*(r)",
+                     "modified border-corrected estimate of %s",
                      "bord.modif")
     }
   }

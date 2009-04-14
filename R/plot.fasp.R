@@ -1,11 +1,12 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.16 $   $Date: 2007/10/30 17:46:01 $
+#   $Revision: 1.21 $   $Date: 2009/04/15 00:34:47 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
-                      title=NULL, samex=TRUE, banner=TRUE, outerlabels=TRUE,
-                      mar.panel=NULL) {
+                      title=NULL, samex=TRUE, banner=TRUE, 
+                      mar.panel=NULL,
+                      outerlabels=TRUE, cex.outerlabels=1.25) {
 
 # Determine the overall title of the plot
   if(banner) {
@@ -27,23 +28,21 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
 
 # If no formula is given, look for a default formula in x:
   defaultplot <- is.null(formule)
-  if(defaultplot) {
-    if(is.null(x$default.formula))
-      stop("No formula supplied.\n")
+  if(defaultplot && !is.null(x$default.formula))
     formule <- x$default.formula
+
+  if(!is.null(formule)) {
+    # ensure formulae are given as character strings.
+    formule <- FormatFaspFormulae(formule, "formule")
+    # Number of formulae should match number of functions.
+    nf <- length(formule)
+    nfun <- length(x$fns)
+    if(nf == 1 && nfun > 1)
+      formule <- rep(formule, nfun)
+    else if(nf != nfun)
+      stop(paste("Wrong number of entries in", sQuote("formule")))
   }
-
-# ensure formulae are given as character strings.  
-  formule <- FormatFaspFormulae(formule, "formule")
-
-# Number of formulae should match number of functions.
-  nf <- length(formule)
-  nfun <- length(x$fns)
-  if(nf == 1 && nfun > 1)
-    formule <- rep(formule, nfun)
-  else if(nf != nfun)
-    stop(paste("Wrong number of entries in", sQuote("formule")))
-
+  
 # Check on the length of the subset argument.
   ns <- length(subset)
   if(ns > 1) {
@@ -117,7 +116,7 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                         ylim=c(0,1),axes=FALSE,xlab='',ylab='', ...)
       else {
         fun <- as.fv(x$fns[[k]])
-        fmla <- formule[k] 
+        fmla <- if(!is.null(formule)) formule[k] else NULL
         sub <- if(msub) subset[[k]] else subset
         main <- if(outerlabels) "" else
             paste("(", rowNames[i], ", ", colNames[j], ")", sep="")
@@ -139,13 +138,13 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
     for(j in 1:ncols) {
       plot(numeric(0),numeric(0),type="n",ann=FALSE,axes=FALSE,
            xlim=c(-1,1),ylim=c(-1,1))
-      text(0,0,colNames[j])
+      text(0,0,colNames[j], cex=cex.outerlabels)
     }
     # Plot the row labels
     for(i in 1:nrows) {
       plot(numeric(0),numeric(0),type="n",ann=FALSE,axes=FALSE,
            xlim=c(-1,1),ylim=c(-1,1))
-      text(0,0,rowNames[i], srt=90)
+      text(0,0,rowNames[i], srt=90, cex=cex.outerlabels)
     }
   }
   if(banner) {

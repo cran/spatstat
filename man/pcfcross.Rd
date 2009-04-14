@@ -90,8 +90,10 @@
   obtained by the edge corrections named.
 }
 \seealso{
-  \code{\link{pcf}},
-  \code{\link{pcf.ppp}},
+  Mark connection function \code{\link{markconnect}}.
+
+  Pair correlation \code{\link{pcf}},\code{\link{pcf.ppp}}.
+  
   \code{\link{Kcross}}
 }
 \examples{

@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.39 $	$Date: 2009/02/27 03:24:41 $
+#	$Revision: 4.40 $	$Date: 2009/04/05 18:33:08 $
 #
 #
 #
@@ -373,10 +373,8 @@ expand.owin <- function(W, f=1) {
 trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
   if(W$type != "rectangle")
     stop("Internal error: tried to trim margin off non-rectangular window")
-  if(length(xmargin) == 1)
-    xmargin <- rep(xmargin, 2)
-  if(length(ymargin) == 1)
-    ymargin <- rep(ymargin, 2)
+  xmargin <- ensure2vector(xmargin)
+  ymargin <- ensure2vector(ymargin)
   if(any(xmargin < 0) || any(ymargin < 0))
     stop("values of xmargin, ymargin must be nonnegative")
   if(sum(xmargin) > diff(W$xrange))
@@ -385,6 +383,16 @@ trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
     stop("window is too small to cut off margins of the height specified")
   owin(W$xrange + c(1,-1) * xmargin,
        W$yrange + c(1,-1) * ymargin,
+       unitname=unitname(W))
+}
+
+grow.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
+  xmargin <- ensure2vector(xmargin)
+  ymargin <- ensure2vector(ymargin)
+  if(any(xmargin < 0) || any(ymargin < 0))
+    stop("values of xmargin, ymargin must be nonnegative")
+  owin(W$xrange + c(-1,1) * xmargin,
+       W$yrange + c(-1,1) * ymargin,
        unitname=unitname(W))
 }
 
@@ -525,3 +533,4 @@ owin2gpc <- function(x) {
   })
   new("gpc.poly", pts=g)
 }
+

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.16 $     $Date: 2008/08/19 01:15:00 $
+#       $Revision: 5.17 $     $Date: 2009/04/05 18:27:58 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -348,16 +348,4 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
   
 }
 
-
-ensure2vector <- function(x) {
-  xname <- deparse(substitute(x))
-  if(!is.numeric(x))
-    stop(paste(xname, "is not numeric"))
-  n <- length(x)
-  if(n == 0 || n > 2)
-    stop(paste(xname, "should be of length 1 or 2"))
-  if(n == 1)
-    return(rep(x,2))
-  return(x)
-}
 

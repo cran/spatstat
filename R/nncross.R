@@ -2,19 +2,25 @@
 #   nncross.R
 #
 #
-#    $Revision: 1.4 $  $Date: 2008/04/02 13:43:38 $
+#    $Revision: 1.5 $  $Date: 2009/04/03 20:16:39 $
 #
 
 
 nncross <- function(X, Y, iX=NULL, iY=NULL) {
   verifyclass(X, "ppp")
-  verifyclass(Y, "ppp")
+  stopifnot(is.ppp(Y) || is.psp(Y))
+
+  # deal with null cases
   nX <- X$n
   nY <- Y$n
   if(nX == 0)
     return(data.frame(dist=numeric(0), which=integer(0)))
   if(nY == 0)
     return(data.frame(dist=rep(Inf, nX), which=rep(NA, nX)))
+
+  # Y is a line segment pattern 
+  if(is.psp(Y))
+    return(ppllengine(X,Y,"distance"))
 
   if(is.null(iX) != is.null(iY))
     stop("If one of iX, iY is given, then both must be given")

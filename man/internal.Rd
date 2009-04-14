@@ -31,6 +31,7 @@
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{check.named.vector}
+\alias{check.testfun}
 \alias{clip.psp}
 \alias{cliprect.psp}
 \alias{clippoly.psp}
@@ -52,6 +53,7 @@
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
+\alias{distppllmin}
 \alias{divisors}
 \alias{do.call.matched}
 \alias{edge.Ripley}
@@ -79,6 +81,7 @@
 \alias{getglmfit}
 \alias{gridindex}            
 \alias{grid1index}
+\alias{grow.rectangle}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
 \alias{ho.engine}
@@ -95,6 +98,7 @@
 \alias{is.fv}
 \alias{is.hole.xypolygon}
 \alias{is.hyperframe}
+\alias{is.infline}
 \alias{is.interact}
 \alias{is.marked.default}    
 \alias{is.marked.psp}    
@@ -106,6 +110,7 @@
 \alias{is.prime}
 \alias{is.psp}
 \alias{is.stationary.ppm}
+\alias{is.tess}
 \alias{kstestEngine}
 \alias{Kborder.engine}
 \alias{Kount}
@@ -147,7 +152,7 @@
 \alias{maxflow}
 \alias{meanX.owin}
 \alias{meanY.owin}
-\alias{mkcor}
+\alias{sewsmod}
 \alias{model.se.image}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
@@ -228,6 +233,7 @@
 \alias{rasterx.im}
 \alias{rastery.im}
 \alias{reach.fii}
+\alias{rebadge.fv}
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
@@ -283,6 +289,7 @@
 \alias{test.selfcrossing.psp}
 \alias{tilecentroids}        
 \alias{trim.mask}        
+\alias{tweak.fv.entry}        
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{update.interact}
@@ -341,6 +348,7 @@ cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 check.named.vector(x, nam)
+check.testfun(f, f1, X)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
@@ -364,6 +372,7 @@ diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
+distppllmin(p, l)
 divisors(n)
 do.call.matched(fname, arglist, funargs, extrargs)
 edge.Ripley(X, r, W, method)
@@ -383,7 +392,7 @@ fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
-fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname)
+fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname, fname, yexp)
 fvnames(X, a)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
@@ -391,6 +400,7 @@ getglmdata(object, drop=FALSE)
 getglmfit(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
+grow.rectangle(W, xmargin=0, ymargin=xmargin)
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
@@ -407,6 +417,7 @@ is.data(Q)
 is.fv(x)
 is.hole.xypolygon(polly)
 is.hyperframe(x)
+is.infline(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
 \method{is.marked}{psp}(X, \dots)
@@ -418,6 +429,7 @@ is.poisson.ppm(x)
 is.prime(n)
 is.psp(x)
 is.stationary.ppm(x)    
+is.tess(x)    
 kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
@@ -461,7 +473,7 @@ matrowsum(x)
 maxflow(costm)
 meanX.owin(w)            
 meanY.owin(w)
-mkcor(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
+sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 	 rbord, use.gam, famille,
@@ -549,6 +561,7 @@ pointgrid(W, ngrid)
 rasterx.im(x)
 rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
+rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl,new.yexp)
 rebound.ppp(x, \dots)
 rebound.psp(x, \dots)
 rebound.owin(w, rect)
@@ -608,6 +621,7 @@ test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
 trim.mask(M, R)
+tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)

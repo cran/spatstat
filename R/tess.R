@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.23 $ $Date: 2009/03/05 19:17:15 $
+#   $Revision: 1.25 $ $Date: 2009/04/05 22:41:32 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -19,7 +19,8 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
     stopifnot(is.numeric(xgrid) && all(diff(xgrid) > 0))
     stopifnot(is.numeric(ygrid) && all(diff(ygrid) > 0))
     if(is.null(win)) win <- owin(range(xgrid), range(ygrid))
-    out <- list(type="rect", window=win, xgrid=xgrid, ygrid=ygrid)
+    ntiles <- (length(xgrid)-1) * (length(ygrid)-1)
+    out <- list(type="rect", window=win, xgrid=xgrid, ygrid=ygrid, n=ntiles)
   } else if(istiled) {
     stopifnot(is.list(tiles))
     if(!all(unlist(lapply(tiles, is.owin))))
@@ -33,15 +34,17 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
       }
     }
     win <- rescue.rectangle(win)
-    out <- list(type="tiled", window=win, tiles=tiles)
+    out <- list(type="tiled", window=win, tiles=tiles, n=length(tiles))
   } else if(isimage) {
     image <- eval.im(factor(image))
     if(is.null(win)) win <- as.owin(image)
-    out <- list(type="image", window=win, image=image)
+    out <- list(type="image", window=win, image=image, n=length(levels(image)))
   } else stop("Internal error: unrecognised format")
   class(out) <- c("tess", class(out))
   return(out)
 }
+
+is.tess <- function(x) { inherits(x, "tess") }
 
 print.tess <- function(x, ...) {
   cat("Tessellation\n")

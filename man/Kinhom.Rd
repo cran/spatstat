@@ -8,7 +8,9 @@
 \usage{
   Kinhom(X, lambda, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
-    nlarge = 1000, lambda2, sigma=NULL, varcov=NULL)
+    nlarge = 1000,
+    lambda2=NULL, reciplambda=NULL, reciplambda2=NULL,
+    sigma=NULL, varcov=NULL)
 }
 \arguments{
   \item{X}{
@@ -56,6 +58,22 @@
     Advanced use only.
     Matrix containing estimates of the products
     \eqn{\lambda(x_i)\lambda(x_j)}{lambda(x[i]) * lambda(x[j])}
+    of the intensities at each pair of data points 
+    \eqn{x_i}{x[i]} and \eqn{x_j}{x[j]}. 
+  }
+  \item{reciplambda}{
+    Alternative to \code{lambda}.
+    Values of the estimated \emph{reciprocal} \eqn{1/\lambda}{1/lambda}
+    of the intensity function.
+    Either a vector giving the reciprocal intensity values
+    at the points of the pattern \code{X},
+    or a pixel image (object of class \code{"im"}) giving the
+    reciprocal intensity values at all locations.
+  }
+  \item{reciplambda2}{
+    Advanced use only. Alternative to \code{lambda2}.
+    A matrix giving values of the estimated \emph{reciprocal products}
+    \eqn{1/\lambda(x_i)\lambda(x_j)}{1/(lambda(x[i]) * lambda(x[j]))}
     of the intensities at each pair of data points 
     \eqn{x_i}{x[i]} and \eqn{x_j}{x[j]}. 
   }

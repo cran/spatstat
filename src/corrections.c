@@ -4,7 +4,7 @@
 
   Edge corrections
 
-  $Revision: 1.6 $     $Date: 2008/04/02 12:18:17 $
+  $Revision: 1.7 $     $Date: 2009/04/05 04:49:41 $
 
  */
 
@@ -377,7 +377,4 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
     }
   }
 }
-
-
-
 

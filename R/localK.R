@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.7 $	$Date: 2009/03/03 23:57:32 $
+#	$Revision: 1.8 $	$Date: 2009/04/07 07:18:55 $
 #
 #
 
@@ -138,16 +138,18 @@
   # function value table required
   # add r and theo
   if(!wantL) {
+    ylab <- substitute(localK(r), NULL)
     df <- cbind(df, data.frame(r=r, theo=pi * r^2))
-    desc <- c(desc, c("distance argument r", "theoretical Poisson K(r)"))
-    labl <- c(labl, c("r", "Kpois(r)"))
+    fnam <- "localK"
   } else {
+    ylab <- substitute(localL(r), NULL)
     df <- cbind(df, data.frame(r=r, theo=r))
-    desc <- c(desc, c("distance argument r", "theoretical Poisson L(r)"))
-    labl <- c(labl, c("r", "Lpois(r)"))
+    fnam <- "localL"
   }
+  desc <- c(desc, c("distance argument r", "theoretical Poisson %s"))
+  labl <- c(labl, c("r", "%spois(r)"))
   # create fv object
-  K <- fv(df, "r", substitute(K(r), NULL), "theo", , alim, labl, desc)
+  K <- fv(df, "r", ylab, "theo", , alim, labl, desc, fname=fnam)
   # default is to display them all
   attr(K, "fmla") <- . ~ r
   unitname(K) <- unitname(X)

@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.7 $    $Date: 2006/10/10 04:22:48 $
+#     $Revision: 1.8 $    $Date: 2009/04/03 20:06:04 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -172,5 +172,27 @@ distppll <- function(p, l, mintype=0, method="Fortran", listit=FALSE) {
     return(list(d=d, min.d=min.d, min.which=min.which))
 }
 
+# faster code if you don't want the n*m matrix 'd'
 
-
+distppllmin <- function(p, l) {
+  np <- nrow(p)
+  nl <- nrow(l)
+  DUP <- spatstat.options("dupC")
+  z <- .C("distmap2segs",
+          xp=as.double(p[,1]),
+          yp=as.double(p[,2]),
+          npoints=as.integer(np),
+          x0=as.double(l[,1]),
+          y0=as.double(l[,2]),
+          x1=as.double(l[,3]),
+          y1=as.double(l[,4]),
+          nsegments=as.integer(nl),
+          epsilon=as.double(.Machine$double.eps),
+          dist2=as.double(numeric(np)),
+          index=as.integer(integer(np)),
+          DUP=DUP,
+          PACKAGE="spatstat")
+  min.d <- sqrt(z$dist2)
+  min.which <- z$index+1
+  return(list(min.d=min.d, min.which=min.which))
+}

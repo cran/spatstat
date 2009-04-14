@@ -21,9 +21,11 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{j}{Number or character string identifying the type (mark value)
     of the points in \code{X} to which distances are measured.
+    Defaults to the second level of \code{marks(X)}.
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the distribution function
@@ -80,9 +82,7 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
   \code{X$marks} must be a factor.
 
   The arguments \code{i} and \code{j} will be interpreted as
-  levels of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
+  levels of the factor \code{X$marks}. 
   If \code{i} and \code{j} are missing, they default to the first
   and second level of the marks factor, respectively.
   

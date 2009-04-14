@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.26 $   $Date: 2007/10/24 09:41:15 $
+#   $Revision: 1.30 $   $Date: 2009/04/07 07:50:30 $
 #
 #
 #   calculate pair correlation function
@@ -16,7 +16,7 @@ pcf <- function(X, ...) {
 
 pcf.ppp <- function(X, ..., r=NULL,
                     kernel="epanechnikov", bw=NULL, stoyan=0.15,
-                    correction=c("translate", "ripley"))
+                    correction=c("translate", "Ripley"))
 {
   verifyclass(X, "ppp")
   r.override <- !is.null(r)
@@ -25,12 +25,11 @@ pcf.ppp <- function(X, ..., r=NULL,
   area <- area.owin(win)
   lambda <- X$n/area
 
-  stopifnot(is.character(correction))
-  if(!all(ok <- correction %in% c("translate", "ripley")))
-    stop(paste("unrecognised correction",
-               if(sum(!ok) > 1) "s", ": ",
-               paste(correction[!ok], collapse=", "),
-               sep=""))
+  correction <- pickoption("correction", correction,
+                           c(isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate"),
+                           multi=TRUE)
   
   if(is.null(bw) && kernel=="epanechnikov") {
     # Stoyan & Stoyan 1995, eq (15.16), page 285
@@ -78,8 +77,10 @@ pcf.ppp <- function(X, ..., r=NULL,
     if(is.null(out)) {
       df <- data.frame(r=r, theo=rep(1,length(r)), g)
       colnames(df)[3] <- key
-      out <- fv(df, "r", substitute(g(r), NULL), key, , alim, c("r","gPois(r)", symb),
-                c("distance argument r", "theoretical Poisson g(r)", desc))
+      out <- fv(df, "r", substitute(g(r), NULL), key, ,
+                alim, c("r","%sPois(r)", symb),
+                c("distance argument r", "theoretical Poisson %s", desc),
+                fname="g")
     } else {
       df <- data.frame(g)
       colnames(df) <- key
@@ -100,15 +101,15 @@ pcf.ppp <- function(X, ..., r=NULL,
     # translation correction
     XJ <- ppp(close$xj, close$yj, window=win, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
-    out <- doit(edgewt, dIJ, out, "gTrans(r)",
-                "translation-corrected estimate of g", "trans", otherargs,
+    out <- doit(edgewt, dIJ, out, "%sTrans(r)",
+                "translation-corrected estimate of %s", "trans", otherargs,
                 lambda, area)
   }
-  if(any(correction=="ripley")) {
+  if(any(correction=="isotropic")) {
     # Ripley isotropic correction
     edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
-    out <- doit(edgewt, dIJ, out, "gRipley(r)",
-                "Ripley-corrected estimate of g", "ripl", otherargs,
+    out <- doit(edgewt, dIJ, out, "%sRipley(r)",
+                "Ripley isotropic-corrected estimate of %s", "iso", otherargs,
                 lambda, area)
   }
   
@@ -206,10 +207,11 @@ function(X, ..., method="c") {
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
           "r", substitute(pcf(r), NULL), "pcf", cbind(pcf, theo) ~ r, alim,
-          c("r", "pcf(r)", "1"),
+          c("r", "%s(r)", "%stheo"),
           c("distance argument r",
-            "estimate of pair correlation function pcf(r)",
-            "theoretical Poisson value, pcf(r) = 1"))
+            "estimate of %s by numerical differentiation",
+            "theoretical Poisson value of %s"),
+          fname="g")
   unitname(Z) <- unitname(X)
   return(Z)
 }

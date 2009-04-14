@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.28 $   $Date: 2008/05/02 18:50:39 $
+#    $Revision: 1.37 $   $Date: 2009/04/14 08:49:49 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -24,7 +24,7 @@
 #
 #         labl       recommended xlab/ylab for each column
 #
-#         desc       longer description for each column
+#         desc       longer description for each column 
 #
 #         unitname   name of unit of length for 'r'
 #
@@ -34,12 +34,15 @@
 # creator
 
 fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
-               alim=NULL, labl=names(x), desc=NULL, unitname=NULL) {
+               alim=NULL, labl=names(x), desc=NULL, unitname=NULL,
+               fname=NULL, yexp=ylab) {
   stopifnot(is.data.frame(x))
   # check arguments
   stopifnot(is.character(argu))
   if(!is.null(ylab))
     stopifnot(is.character(ylab) || is.language(ylab))
+  if(!missing(yexp))
+    stopifnot(is.language(yexp))
   stopifnot(is.character(valu))
   
   if(!(argu %in% names(x)))
@@ -72,15 +75,19 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
     nbg <- is.na(desc)
     if(any(nbg)) desc[nbg] <- ""
   }
+  if(!is.null(fname))
+    stopifnot(is.character(fname) && length(fname) == 1)
   # pack attributes
   attr(x, "argu") <- argu
   attr(x, "valu") <- valu
   attr(x, "ylab") <- ylab
+  attr(x, "yexp") <- yexp
   attr(x, "fmla") <- fmla
   attr(x, "alim") <- alim
   attr(x, "labl") <- labl
   attr(x, "desc") <- desc
   attr(x, "units") <- as.units(unitname)
+  attr(x, "fname") <- fname
   # 
   class(x) <- c("fv", class(x))
   return(x)
@@ -112,8 +119,19 @@ print.fv <- function(x, ...) {
       ylab <- deparse(ylab)
     cat(paste("for the function", a$argu, "->", ylab, "\n"))
   }
+  # Descriptions ..
+  desc <- a$desc
+  # .. may require insertion of ylab
+  if(!is.null(ylab))
+    desc <- sprintf(desc, ylab)
+  # Labels ..
+  labl <- a$labl
+  # .. may require insertion of function name if it is known
+  if(!is.null(fname <- attr(x, "fname")))
+    labl <- sprintf(labl, fname)
+  # Start printing
   cat("Entries:\n")
-  lablen <- nchar(a$labl)
+  lablen <- nchar(labl)
   labjump <- max(c(lablen,5)) + 3
   idlen <- nchar(nama)
   idjump <- max(c(idlen,5)) + 3
@@ -122,8 +140,8 @@ print.fv <- function(x, ...) {
   cat("--", pad(idjump-2), "-----", pad(labjump - 5), "-----------\n", sep="")
   for(j in seq(ncol(x))) 
     cat(paste(nama[j], pad(idjump - idlen[j]),
-              a$labl[j],pad(labjump - lablen[j]),
-              a$desc[j],"\n", sep=""))
+              labl[j],pad(labjump - lablen[j]),
+              desc[j],"\n", sep=""))
   cat("--------------------------------------\n\n")
   cat("Default plot formula:\n\t")
   print.formula(as.formula(a$fmla))
@@ -156,8 +174,45 @@ bind.fv <- function(x, y, labl, desc, preferred) {
   z <- fv(xy, a$argu, a$ylab, preferred, a$fmla, a$alim,
           c(attr(x, "labl"), labl),
           c(attr(x, "desc"), desc),
-          unitname=unitname(a))
+          unitname=unitname(a),
+          fname=attr(x, "fname"))
   return(z)
+}
+
+# rename one of the columns of an fv object
+tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL) {
+  hit <- (names(x) == current.tag)
+  if(any(hit)) {
+    i <- min(which(hit))
+    if(!is.null(new.labl)) attr(x, "labl")[i] <- new.labl
+    if(!is.null(new.desc)) attr(x, "desc")[i] <- new.desc
+  }
+  return(x)
+}
+
+# change all the text in an fv object
+rebadge.fv <- function(x, new.ylab=NULL, new.fname=NULL,
+                       tags=NULL, new.desc=NULL, new.labl=NULL,
+                       new.yexp=new.ylab) {
+  if(!is.null(new.ylab))
+    attr(x, "ylab") <- new.ylab
+  if(!is.null(new.yexp))
+    attr(x, "yexp") <- new.yexp
+  if(!missing(new.fname))
+    attr(x, "fname") <- new.fname
+  if(!is.null(tags) && !(is.null(new.desc) && is.null(new.labl))) {
+    nama <- names(x)
+    desc <- attr(x, "desc")
+    labl <- attr(x, "labl")
+    for(i in seq(length(tags)))
+    if(!is.na(m <- match(tags[i], nama))) {
+      if(!is.null(new.desc)) desc[m] <- new.desc[i]
+      if(!is.null(new.labl)) labl[m] <- new.labl[i]
+    }
+    attr(x, "desc") <- desc
+    attr(x, "labl") <- labl
+  }
+  return(x)
 }
 
 "[.fv" <- subset.fv <- function(x, i, j, ..., drop=FALSE)
@@ -203,7 +258,8 @@ bind.fv <- function(x, y, labl, desc, preferred) {
                alim=alim,
                labl=attr(x, "labl")[selected],
                desc=attr(x, "desc")[selected],
-               unitname=attr(x, "units")))
+               unitname=attr(x, "units"),
+               fname=attr(x,"fname")))
 }  
 
 #   method for with()
@@ -281,7 +337,7 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   # form fv object and return
   out <- fv(results, argu=xname, valu=newyname,
             desc=desc, alim=attr(data, "alim"), fmla=fmla, 
-            unitname=unitname(data))
+            unitname=unitname(data), fname="?")
   return(out)
 }
 
