@@ -1,7 +1,7 @@
 #
 # randomOnLines.R
 #
-# $Revision$  $Date$
+# $Revision: 1.1 $  $Date: 2009/04/08 05:26:40 $
 #
 # Generate random points on specified lines
 #

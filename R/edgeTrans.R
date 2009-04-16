@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.8 $    $Date: 2006/05/31 08:22:08 $
+#    $Revision: 1.9 $    $Date: 2009/04/05 04:54:52 $
 #
 #    Translation edge correction weights
 #
@@ -63,8 +63,9 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
              weight <- matrix(, nrow=X$n, ncol=Y$n)
              if(X$n > 0 && Y$n > 0) {
                for(i in seq(X$n)) {
+                 X.i <- c(x[i], y[i])
                  for(j in seq(Y$n)) {
-                   shiftvector <- c(x[i],y[i]) - c(xx[j],yy[j])
+                   shiftvector <- X.i - c(xx[j],yy[j])
                    Wshift <- shift(W, shiftvector)
                    b <- overlap.owin(W, Wshift)
                    weight[i,j] <- a/b

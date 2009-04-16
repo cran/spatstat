@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.16 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 4.17 $	$Date: 2009/04/07 06:46:50 $
 #
 ################################################################################
 #
@@ -71,15 +71,16 @@ function(X, r=NULL, breaks=NULL, ...) {
         result <- as.data.frame(result)
         Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
         alim <- range(result$r[result$km <= 0.9])
-        labl <- c("r", "Gpois(r)", "Gbord(r)", "Gkm(r)",
-                  "lambda(r)", "Graw(r)")
+        labl <- c("r", "%spois(r)", "%sbord(r)", "%skm(r)",
+                  "lambda(r)", "%sraw(r)")
         desc <- c("distance argument r",
-                  "theoretical Poisson G(r)",
-                  "border corrected estimate of G(r)",
-                  "Kaplan-Meier estimate of G(r)",
+                  "theoretical Poisson %s",
+                  "border corrected estimate of %s",
+                  "Kaplan-Meier estimate of %s",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
-                  "uncorrected estimate of G(r)")
-        Z <- fv(Z, "r", substitute(G(r), NULL), "km", . ~ r, alim, labl, desc)
+                  "uncorrected estimate of %s")
+        Z <- fv(Z, "r", substitute(G(r), NULL), "km", . ~ r, alim, labl, desc,
+                fname="G")
         attr(Z, "dotnames") <- c("km", "rs", "theo")
         unitname(Z) <- unitname(X)
 	return(Z)

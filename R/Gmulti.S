@@ -8,12 +8,12 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.23 $	$Date: 2008/04/28 23:20:23 $
+#	$Revision: 4.26 $	$Date: 2009/04/14 23:27:43 $
 #
 ################################################################################
 
 "Gcross" <-		
-function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
+function(X, i, j, r=NULL, breaks=NULL, ...)
 {
 #	computes G_{ij} estimates
 #
@@ -23,28 +23,36 @@ function(X, i=1, j=2, r=NULL, breaks=NULL, ...)
 #       r:              (optional) values of argument r  
 #	breaks:		(optional) breakpoints for argument r
 #
-	X <- as.ppp(X)
-	if(!is.marked(X))
-		stop(paste("point pattern has no", sQuote("marks")))
-	window <- X$window
+  X <- as.ppp(X)
+  if(!is.marked(X))
+    stop(paste("point pattern has no", sQuote("marks")))
+  stopifnot(is.multitype(X))
 #
-        marx <- marks(X, dfok=FALSE)
-	I <- (marx == i)
-	if(sum(I) == 0) stop("No points are of type i")
+  marx <- marks(X, dfok=FALSE)
+  if(missing(i)) i <- levels(marx)[1]
+  if(missing(j)) j <- levels(marx)[2]
+#  
+  I <- (marx == i)
+  if(sum(I) == 0) stop("No points are of type i")
         
-        if(i == j)
-          result <- Gest(X[I], r=r, breaks=breaks, ...)
-        else {
-          J <- (marx == j)
-          if(sum(J) == 0) stop("No points are of type j")
-          result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...)
-        }
-        attr(result, "ylab") <- substitute(Gcross[i,j](r), list(i=paste(i),j=paste(j)))
-        result
+  if(i == j)
+    result <- Gest(X[I], r=r, breaks=breaks, ...)
+  else {
+    J <- (marx == j)
+    if(sum(J) == 0) stop("No points are of type j")
+    result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...)
+  }
+  result <-
+    rebadge.fv(result,
+               substitute(Gcross[i,j](r), list(i=paste(i),j=paste(j))),
+               "G*",
+               new.yexp=substitute(Gcross[list(i,j)](r),
+                                   list(i=paste(i),j=paste(j))))
+  return(result)
 }	
 
 "Gdot" <- 	
-function(X, i=1, r=NULL, breaks=NULL, ...) {
+function(X, i, r=NULL, breaks=NULL, ...) {
 #  Computes estimate of 
 #      G_{i\bullet}(t) = 
 #  P( a further point of pattern in B(0,t)| a type i point at 0 )
@@ -54,18 +62,22 @@ function(X, i=1, r=NULL, breaks=NULL, ...) {
 #       r:              (optional) values of argument r  
 #	breaks:		(optional) breakpoints for argument r
 #
-	X <- as.ppp(X)
-
-	if(!is.marked(X))
-		stop(paste("point pattern has no", sQuote("marks")))
+  X <- as.ppp(X)
+  if(!is.marked(X))
+    stop(paste("point pattern has no", sQuote("marks")))
+  stopifnot(is.multitype(X))
 #
-	I <- (marks(X) == i)
-	if(sum(I) == 0) stop("No points are of type i")
-	J <- rep(TRUE, X$n)	# i.e. all points
+  marx <- marks(X, dfok=FALSE)
+  if(missing(i)) i <- levels(marx)[1]
+  I <- (marx == i)
+  if(sum(I) == 0) stop("No points are of type i")
+  J <- rep(TRUE, X$n)	# i.e. all points
 # 
-	result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...)
-        attr(result, "ylab") <- substitute(Gdot[i](r), list(i=paste(i)))
-        result
+  result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...)
+  result <- rebadge.fv(result,
+                       substitute(Gdot[i](r), list(i=paste(i))),
+                       "Gm")
+  return(result)
 }	
 
 	
@@ -141,15 +153,16 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL) {
         result <- as.data.frame(result)
         Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
         alim <- range(result$r[result$km <= 0.9])
-        labl <- c("r", "Gpois(r)", "Gbord(r)", "Gkm(r)",
-                  "lambda(r)", "Graw(r)")
+        labl <- c("r", "%spois(r)", "%sbord(r)", "%skm(r)",
+                  "lambda(r)", "%sraw(r)")
         desc <- c("distance argument r",
-                  "theoretical Poisson G(r)",
-                  "border corrected estimate of G(r)",
-                  "Kaplan-Meier estimate of G(r)",
+                  "theoretical Poisson %s",
+                  "border corrected estimate of %s",
+                  "Kaplan-Meier estimate of %s",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
-                  "uncorrected estimate of G(r)")
-        Z <- fv(Z, "r", substitute(Gmulti(r), NULL), "km", . ~ r, alim, labl, desc)
+                  "uncorrected estimate of %s")
+        Z <- fv(Z, "r", substitute(Gmulti(r), NULL),
+                "km", . ~ r, alim, labl, desc, fname="Gm")
         attr(Z, "dotnames") <- c("km", "rs", "theo")
         unitname(Z) <- unitname(X)
 	return(Z)

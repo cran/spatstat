@@ -2,152 +2,376 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.24 $ $Date: 2009/01/30 01:43:05 $
+#     $Revision: 1.45 $ $Date: 2009/04/14 09:05:24 $
 #
 #    Estimate the mark correlation function
-#
-#
+#    and related functions 
+#    
 # ------------------------------------------------------------------------
 
-"markcorr"<-
-function(X, f = function(m1, m2) { m1 * m2 }, r=NULL, 
+"markvario" <-
+function(X, correction=c("isotropic", "Ripley", "translate"),
+         r=NULL, method="density", ..., normalise=FALSE) {
+  if(!is.marked(X))
+    stop("Point pattern has no marks")
+  else if(!is.numeric(m <- marks(X)))
+    stop("Marks are not numeric")
+  # Compute estimates
+  v <- markcorr(X, f=function(m1, m2) { (1/2) * (m1-m2)^2 },
+                r=r, correction=correction, method=method,
+                normalise=normalise, ...)
+  # adjust theoretical value
+  v$theo <- if(normalise) 1 else var(m)    
+  # fix labels
+  v <- rebadge.fv(v,
+                  substitute(gamma(r), NULL),
+                  "gamma")
+  return(v)
+}
+
+markconnect <-
+function(X, i, j, r=NULL, 
          correction=c("isotropic", "Ripley", "translate"),
-         method="density", ...)
+         method="density", ..., normalise=FALSE) {
+  stopifnot(is.ppp(X) && is.multitype(X))
+  marx <- marks(X)
+  lev  <- levels(marx)
+  if(missing(i)) i <- lev[1]
+  if(missing(j)) j <- lev[2]
+  indicateij <- function(m1, m2, i, j) { (m1 == i) & (m2 == j) }
+  # compute estimates
+  p <- markcorr(X, f=indicateij, r=r,
+                correction=correction, method=method,
+                ...,
+                fargs=list(i=i, j=j),
+                normalise=normalise)
+  # alter theoretical value and fix labels
+  if(!normalise) {
+    pipj <- mean(marx==i) * mean(marx==j) 
+    p$theo <- pipj
+  } else {
+    p$theo <- 1
+  }
+  p <- rebadge.fv(p,
+                  substitute(p[i,j](r), list(i=paste(i),j=paste(j))),
+                  "pij",
+                  new.yexp=substitute(p[list(i,j)](r),
+                                      list(i=paste(i),j=paste(j))))
+  return(p)
+}
+
+Emark <- function(X, r=NULL, 
+                  correction=c("isotropic", "Ripley", "translate"),
+                  method="density", ..., normalise=FALSE) {
+  stopifnot(is.ppp(X) && is.marked(X) && is.numeric(marks(X)))
+  f <- function(m1, m2) { m1 }
+  E <- markcorr(X, f, r=r,
+                correction=correction, method=method,
+                ..., normalise=normalise)
+  E <- rebadge.fv(E, substitute(E(r), NULL), "E")
+  return(E)
+}
+
+Vmark <- function(X, r=NULL, 
+                  correction=c("isotropic", "Ripley", "translate"),
+                  method="density", ..., normalise=FALSE) {
+  E <- Emark(X, r=r, correction=correction, method=method, ...,
+             normalise=FALSE)
+  f2 <- function(m1, m2) { m1^2 }
+  E2 <- markcorr(X, f2, r=E$r,
+                 correction=correction, method=method,
+                 ..., normalise=FALSE)
+  V <- eval.fv(E2 - E^2)
+  if(normalise) {
+    sig2 <- var(marks(X))
+    V <- eval.fv(V/sig2)
+  }
+  V <- rebadge.fv(V, substitute(V(r), NULL), "V")
+  return(V)
+}
+
+############## workhorses 'markcorr' and 'markcorrint' ####################
+
+markcorrint <-
+  function(X, f=NULL, r=NULL, 
+           correction=c("isotropic", "Ripley", "translate"), ...,
+           f1=NULL, normalise=TRUE, returnL=FALSE, fargs=NULL) {
+  # Computes the analogue of Kest(X)
+  # where each pair (x_i,x_j) is weighted by w(m_i,m_j)
+  #
+  # If multiplicative=TRUE then w(u,v) = f(u) f(v)
+  # If multiplicative=FALSE then w(u,v) = f(u, v)
+  #
+  stopifnot(is.ppp(X) && is.marked(X))
+  # validate test function
+  h <- check.testfun(f, f1, X)
+  f     <- h$f
+  f1    <- h$f1
+  ftype <- h$ftype
+  multiplicative <- ftype %in% c("mul", "product")
+  # 
+  # check corrections
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             "bord.modif"="bord.modif",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate"),
+                           multi=TRUE)
+  isborder  <- correction %in% c("border", "bord.modif")
+  if(any(isborder) && !multiplicative) {
+    whinge <- paste("Border correction is not valid unless",
+                    "test function is of the form f(u,v) = f1(u)*f1(v)")
+    correction <- correction[!isborder]
+    if(length(correction) == 0)
+      stop(whinge)
+    else
+      warning(whinge)
+  }
+  # estimated intensity
+  lambda <- X$n/area.owin(as.owin(X))
+  mX <- marks(X)
+  switch(ftype,
+         mul={
+           wt <- mX/lambda
+           K <- Kinhom(X, reciplambda=wt, correction=correction, ...)
+           Ef2 <- mean(mX)^2
+         },
+         equ={
+           fXX <- outer(mX, mX, "==")
+           wt <- fXX/lambda^2
+           K <- Kinhom(X, reciplambda2=wt, correction=correction, ...)
+           mtable <- table(mX)
+           Ef2 <- sum(mtable^2)/length(mX)^2
+         },
+         product={
+           f1X <- do.call(f1, append(list(mX), fargs))
+           wt <- f1X/lambda
+           K <- Kinhom(X, reciplambda=wt, correction=correction, ...)
+           Ef2 <- mean(f1X)^2
+         },
+         general={
+           fXX <- do.call("outer", append(list(mX, mX, f), fargs))
+           wt <- fXX/lambda^2
+           K <- Kinhom(X, reciplambda2=wt, correction=correction, ...)
+           Ef2 <- mean(fXX)
+         })
+  K$theo <- K$theo * Ef2
+  if(normalise)
+    K <- eval.fv(K/Ef2)
+  if(returnL)
+    K <- eval.fv(sqrt(K/pi))
+  if(normalise && !returnL) {
+    ylab <- substitute(K[f](r), NULL)
+    fnam <- "K[f]"
+  } else if(normalise && returnL) {
+    ylab <- substitute(L[f](r), NULL)
+    fnam <- "L[f]"
+  } else if(!normalise && !returnL) {
+    ylab <- substitute(C[f](r), NULL)
+    fnam <- "C[f]"
+  } else {
+    ylab <- substitute(sqrt(C[f](r)/pi), NULL)
+    fnam <- "sqrt(C[f]/pi)"
+  }
+  K <- rebadge.fv(K, ylab, fnam)
+  return(K)
+}
+
+markcorr <-
+  function(X, f = function(m1, m2) { m1 * m2}, r=NULL, 
+           correction=c("isotropic", "Ripley", "translate"),
+           method="density", ..., f1=NULL, normalise=TRUE, fargs=NULL)
 {
-	verifyclass(X, "ppp")
-        stopifnot(is.marked(X))
-
-        fmul <- function(m1, m2) { m1 * m2 }
-        fequ <- function(m1, m2) { m1 == m2 }
-        if(missing(f)) {
-          if(is.multitype(X)) {
-            f <- fequ
-            ftype <- "equality"
-          } else {
-            f <- fmul
-            ftype <- "multiplication"
-          }
-        } else {
-          if(!is.function(f))
-            stop("Argument f must be a function")
-          same <- function(f, g) {
-            environment(g) <- environment(f)
-            identical(f,g)
-          }
-          ftype <-
-            if(same(f, fmul)) "multiplication" else
-            if(same(f, fequ)) "equality" else "unknown"
-          if(ftype == "multiplication" && is.multitype(X))
-            stop(paste("Inappropriate choice of function f;",
-                       "point pattern is multitype;",
-                       "types cannot be multiplied."))
-        }
-
-        ##
+  # mark correlation function with test function f
+  stopifnot(is.ppp(X) && is.marked(X))
+  # validate test function
+  if(missing(f))
+    f <- NULL
+  h <- check.testfun(f, f1, X)
+  f     <- h$f
+  f1    <- h$f1
+  ftype <- h$ftype
+  #
+  # 
+  npoints <- X$n
+  W <- X$window
+  marx <- marks(X, dfok=FALSE)
+  
+  # determine r values 
+  rmaxdefault <- rmax.rule("K", W, npoints/area.owin(W))
+  breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
+  r <- breaks$r
+  rmax <- breaks$max
         
-        npoints <- X$n
-        W <- X$window
-
-        # r values 
-        rmaxdefault <- rmax.rule("K", W, npoints/area.owin(W))
-        breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
-        r <- breaks$r
-        rmax <- breaks$max
+  if(length(method) > 1)
+    stop("Select only one method, please")
+  if(method=="density" && !breaks$even)
+    stop(paste("Evenly spaced r values are required if method=",
+               sQuote("density"), sep=""))
         
-        if(length(method) > 1)
-          stop("Select only one method, please")
-        if(method=="density" && !breaks$even)
-          stop(paste("Evenly spaced r values are required if method=",
-                     sQuote("density"), sep=""))
+  # available selection of edge corrections depends on window
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             "bord.modif"="bord.modif",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate"),
+                           multi=TRUE)
+  if(W$type == "mask") {
+    iso <- (correction == "isotropic") 
+    if(any(iso)) {
+      if(!missing(correction))
+        warning("Isotropic correction not implemented for binary masks")
+      correction <- correction[!iso]
+    }
+  }
+
+  # Denominator
+  # Ef = Ef(M,M') when M, M' are independent
+  # Apply f to every possible pair of marks, and average
+  Ef <- switch(ftype,
+               mul = {
+                 mean(marx)^2
+               },
+               equ = {
+                 mtable <- table(marx)
+                 sum(mtable^2)/sum(mtable)^2
+               },
+               product={
+                 f1m <- do.call(f1, append(list(marx), fargs))
+                 mean(f1m)^2
+               },
+               general = {
+                 if(is.null(fargs))
+                   mean(outer(marx, marx, f))
+                 else
+                   mean(do.call("outer", append(list(marx,marx,f),fargs)))
+               },
+               stop("Internal error: invalid ftype"))
+
+  if(normalise) {
+    theory <- 1
+    Efdenom <- Ef
+  } else {
+    theory <- Ef
+    Efdenom <- 1
+  }
+  
+  # this will be the output data frame
+  result <- data.frame(r=r, theo= rep(theory,length(r)))
+  desc <- c("distance argument r",
+            "theoretical value (independent marks) for %s")
+  alim <- c(0, min(rmax, rmaxdefault))
+  # determine conventional name of function
+  if(ftype %in% c("mul", "equ")) {
+    if(normalise) {
+      ylab <- substitute(k[mm](r), NULL)
+      fnam <- "k[mm]"
+    } else {
+      ylab <- substitute(c[mm](r), NULL)
+      fnam <- "c[mm]"
+    }
+  } else {
+    if(normalise) {
+      ylab <- substitute(k[f](r), NULL)
+      fnam <- "k[f]"
+    } else {
+      ylab <- substitute(c[f](r), NULL)
+      fnam <- "c[f]"
+    }
+  }
+  result <- fv(result, "r", ylab, "theo", , alim,
+               c("r","%siid(r)"), desc, fname=fnam)
+
+  # find close pairs of points
+  close <- closepairs(X, rmax)
+  dIJ <- close$d
+  I   <- close$i
+  J   <- close$j
+  XI <- ppp(close$xi, close$yi, window=W, check=FALSE)
+
+  # apply f to marks of close pairs of points
+  #
+  mI <- marx[I]
+  mJ <- marx[J]
+  ff <- switch(ftype,
+               mul = mI * mJ,
+               equ = mI == mJ,
+               product={
+                 if(is.null(fargs)) {
+                   fI <- f1(mI)
+                   fJ <- f1(mJ)
+                 } else {
+                   fI <- do.call(f1, append(list(mI), fargs))
+                   fJ <- do.call(f1, append(list(mJ), fargs))
+                 }
+                 fI * fJ
+               },
+               general={
+                 if(is.null(fargs))
+                   f(marx[I], marx[J])
+                 else
+                   do.call(f, append(list(marx[I], marx[J]), fargs))
+               })
+
+  if(any(is.na(ff)))
+    stop("function f returned some NA values")
+  if(is.logical(ff))
+    ff <- as.numeric(ff)
+  else if(!is.numeric(ff))
+    stop("function f did not return numeric values")
+
+  #### Compute estimates ##############
         
-        # available selection of edge corrections depends on window
-        if(W$type == "mask") {
-          iso <- (correction == "isotropic") | (correction == "Ripley")
-          if(any(iso)) {
-            if(!missing(correction))
-              warning("Isotropic correction not implemented for binary masks")
-            correction <- correction[!iso]
-          }
-        }
-         
-        # this will be the output data frame
-        result <- data.frame(r=r, theo= rep(1,length(r)))
-        desc <- c("distance argument r", "theoretical Poisson m(r)=1")
-        alim <- c(0, min(rmax, rmaxdefault))
-        result <- fv(result,
-                     "r", substitute(m(r), NULL), "theo", , alim, c("r","mpois(r)"), desc)
+  if(any(correction == "translate")) {
+    # translation correction
+    XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
+    edgewt <- edge.Trans(XI, XJ, paired=TRUE)
+    # get smoothed estimate of mark covariance
+    Mtrans <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
+    result <- bind.fv(result,
+                      data.frame(trans=Mtrans), "%strans(r)",
+                      "translation-corrected estimate of %s",
+                      "trans")
+  }
+  if(any(correction == "isotropic")) {
+    # Ripley isotropic correction
+    edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
+    # get smoothed estimate of mark covariance
+    Miso <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
+    result <- bind.fv(result,
+                      data.frame(iso=Miso), "%siso(r)",
+                      "Ripley isotropic correction estimate of %s",
+                      "iso")
+  }
+  # which corrections have been computed?
+  nama2 <- names(result)
+  corrxns <- rev(nama2[nama2 != "r"])
 
-
-        # find close pairs of points
-        close <- closepairs(X, rmax)
-        dIJ <- close$d
-        I   <- close$i
-        J   <- close$j
-        XI <- ppp(close$xi, close$yi, window=W, check=FALSE)
-
-        # apply f to marks of close pairs of points
-        #
-        marx <- marks(X, dfok=FALSE)
-        ff <- f(marx[I], marx[J])
-
-        if(any(is.na(ff)))
-          stop("function f returned some NA values")
-        if(is.logical(ff))
-          ff <- as.numeric(ff)
-        else if(!is.numeric(ff))
-          stop("function f did not return numeric values")
-
-        # apply f to every possible pair of marks, and average
-        Ef <- switch(ftype,
-                     multiplication = {
-                       mean(marx)^2
-                     },
-                     equality = {
-                       mtable <- table(marx)
-                       sum(mtable^2)/sum(mtable)^2
-                     },
-                     unknown = {
-                       mean(outer(marx, marx, f))
-                     },
-                     stop("Internal error: invalid ftype"))
-
-        #### Compute estimates ##############
-        
-        if(any(correction == "translate")) {
-          # translation correction
-          XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
-          edgewt <- edge.Trans(XI, XJ, paired=TRUE)
-          # get smoothed estimate of mark covariance
-          Mtrans <- mkcor(dIJ, ff, edgewt, Ef, r, method, ...)
-          result <- bind.fv(result,
-                            data.frame(trans=Mtrans), "mtrans(r)",
-                            "translation-corrected estimate of m(r)",
-                            "trans")
-        }
-        if(any(correction == "isotropic" | correction == "Ripley")) {
-          # Ripley isotropic correction
-          edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
-          # get smoothed estimate of mark covariance
-          Miso <- mkcor(dIJ, ff, edgewt, Ef, r, method, ...)
-          result <- bind.fv(result,
-                            data.frame(iso=Miso), "miso(r)",
-                            "Ripley isotropic correction estimate of m(r)",
-                            "iso")
-        }
-        # which corrections have been computed?
-        nama2 <- names(result)
-        corrxns <- rev(nama2[nama2 != "r"])
-
-        # default is to display them all
-        attr(result, "fmla") <- deparse(as.formula(paste(
+  # default is to display them all
+  attr(result, "fmla") <- deparse(as.formula(paste(
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))
-        unitname(result) <- unitname(X)
-        return(result)
+  unitname(result) <- unitname(X)
+
+  return(result)
 }
-	
-mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
+
+sewsmod <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
+  # Smooth Estimate of Weighted Second Moment Density
+  # (engine for computing mark correlations, etc)
+  # ------
+  # Vectors containing one entry for each (close) pair of points
+  # d = interpoint distance
+  # ff = f(M1, M2) where M1, M2 are marks at the two points
+  # wt = edge correction weight
+  # -----
+  # Ef = E[f(M, M')] where M, M' are independent random marks
+  # 
   d <- as.vector(d)
   ff <- as.vector(ff)
   wt <- as.vector(wt)
@@ -237,3 +461,61 @@ mkcor <- function(d, ff, wt, Ef, rvals, method="smrep", ..., nwtsteps=500) {
   return(result)
 }
 
+############## user interface bits ##################################
+
+check.testfun <- function(f=NULL, f1=NULL, X) {
+  # Validate f or f1 as a test function for point pattern X
+  # Determine function type 'ftype' ("mul", "equ", "product" or "general")
+
+  fmul <- function(m1, m2) { m1 * m2 }
+  fequ <- function(m1, m2) { m1 == m2 }
+  f1id <- function(m) { m }
+
+  if(is.null(f) && is.null(f1)) {
+    # no functions given
+    # default depends on kind of marks
+    if(is.multitype(X)) {
+      f <- fequ
+      ftype <- "equ"
+    } else {
+      f1 <- f1id
+      ftype <- "mul"
+    }
+  } else if(!is.null(f1)) {
+    # f1 given
+    # specifies test function of the form f(u,v) = f1(u) f1(v)
+    if(!is.null(f))
+      warning("argument f ignored (overridden by f1)")
+    stopifnot(is.function(f1))
+    ftype <- "product"
+  } else {
+    # f given 
+    if(is.character(fname <- f)) {
+      switch(fname,
+           "mul"  = {
+             f1 <- f1id
+             ftype <- "mul"
+           },
+           "equ" = {
+             f <- fequ
+             ftype <- "equ"
+           },
+           {
+             f <- get(fname)
+             ftype <- "general"
+           })
+    } else if(is.function(f)) {
+      same <- function(f, g) {
+        environment(g) <- environment(f)
+        identical(f,g)
+      }
+      ftype <- if(same(f, fmul)) "mul" else if(same(f, fequ)) "equ" else "general"
+      if(ftype == "mul" && is.multitype(X))
+        stop(paste("Inappropriate choice of function f;",
+                   "point pattern is multitype;",
+                   "types cannot be multiplied."))
+    } else
+    stop("Argument f must be a function or the name of a function")
+  }
+  return(list(f=f, f1=f1, ftype=ftype))
+}

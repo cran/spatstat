@@ -10,7 +10,7 @@
   points of type \eqn{i} and of type \eqn{j}.
 }
 \usage{
-Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, \dots)
+Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -21,9 +21,11 @@ Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, \dots)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} \bold{from} which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{j}{Number or character string identifying the type (mark value)
     of the points in \code{X} \bold{to} which distances are measured.
+    Defaults to the second level of \code{marks(X)}.
   }
   \item{eps}{A positive number.
     The resolution of the discrete approximation to Euclidean
@@ -166,10 +168,9 @@ Jcross(X, i=1, j=2, eps=NULL, r=NULL, breaks=NULL, \dots)
     # diagnostic plot for independence between hickories and maples
     plot(Jhm)
 
-    # synthetic example with two marks "a" and "b"
-    pp <- runifpoispp(50)
-    pp <- pp \%mark\% sample(c("a","b"), pp$n, replace=TRUE)
-    J <- Jcross(pp, "a", "b")
+    # synthetic example with two types "a" and "b"
+    pp <- runifpoint(50) \%mark\% factor(sample(c("a","b"), 50, replace=TRUE))
+    J <- Jcross(pp)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

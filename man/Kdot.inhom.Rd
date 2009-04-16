@@ -24,6 +24,7 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{lambdaI}{
     Values of the the estimated intensity of the sub-process of

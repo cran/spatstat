@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.33 $    $Date: 2009/03/03 22:58:54 $
+#    $Revision: 1.35 $    $Date: 2009/04/14 03:27:00 $
 #
 #  (a) for matrices only:
 #
@@ -67,7 +67,7 @@ apply23sum <- function(x) {
 #
 
 whist <-
-  function(x, breaks, weights, trim=TRUE, right) {
+  function(x, breaks, weights=NULL, trim=TRUE, right) {
     if(length(x) == 0)
       return(rep(0, length(breaks)-1))
     if(trim || !missing(right)) {
@@ -76,12 +76,12 @@ whist <-
       else
         ok <- (x >= breaks[1]) & (x <= breaks[length(breaks)])
       x <- x[ok]
-      if(!missing(weights))
+      if(!is.null(weights))
         weights <- weights[ok]
     }
     if(length(x) == 0)
       return(rep(0, length(breaks)-1))      
-    if(missing(weights)) 
+    if(is.null(weights)) 
       h <- hist(x, breaks=breaks, plot=FALSE)$counts
     else {
       # Thanks to Peter Dalgaard
@@ -256,3 +256,16 @@ numalign <- function(i, nmax, zero="0") {
   substr(out, nplaces-ilen+1, nplaces) <- istring
   return(out)
 }
+
+ensure2vector <- function(x) {
+  xname <- deparse(substitute(x))
+  if(!is.numeric(x))
+    stop(paste(xname, "is not numeric"))
+  n <- length(x)
+  if(n == 0 || n > 2)
+    stop(paste(xname, "should be of length 1 or 2"))
+  if(n == 1)
+    return(rep(x,2))
+  return(x)
+}
+

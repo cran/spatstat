@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.32 $	$Date: 2008/06/18 21:07:01 $
+#	$Revision: 1.36 $	$Date: 2009/04/15 01:44:06 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -48,31 +48,7 @@
   K <- Kinhom(...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
-  attr(L, "ylab") <- substitute(Linhom(r), NULL)
-  nama <- names(L)
-  desc <- attr(L, "desc")
-  labl <- attr(L, "labl")
-  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
-  DESC <- c("theoretical Poisson L(r)",
-             "uncorrected estimate of Linhom(r)",
-             "modified border-corrected estimate of Linhom(r)",
-             "border-corrected estimate of Linhom(r)",
-             "translation-corrected estimate of Linhom(r)",
-             "Ripley isotropic correction estimate of Linhom(r)")
-  LABL <- c("Lpois(r)",
-             "Lun(r)",
-             "Lbord*(r)",
-             "Lbord(r)",
-             "Ltrans(r)",
-             "Liso(r)")
-
-  for(i in seq(length(TAGS)))
-    if(!is.na(m <- match(TAGS[i], nama))) {
-      desc[m] <- DESC[i]
-      labl[m] <- LABL[i]
-    }
-  attr(L, "desc") <- desc
-  attr(L, "labl") <- labl
+  L <- rebadge.fv(L, substitute(Linhom(r), NULL), "Linhom")
   return(L)  
 }
 
@@ -81,12 +57,14 @@
          correction=c("border", "bord.modif", "isotropic", "translate"),
             nlarge = 1000, 
             lambda2=NULL,
+            reciplambda=NULL, reciplambda2=NULL,
             sigma=NULL, varcov=NULL)
 {
     verifyclass(X, "ppp")
     nlarge.given <- !missing(nlarge)
     rfixed <- !missing(r) || !missing(breaks)
-    
+
+    # determine basic parameters
     W <- X$window
     npoints <- X$n
     area <- area.owin(W)
@@ -96,72 +74,20 @@
     r <- breaks$r
     rmax <- breaks$max
 
-    if(missing(lambda)) {
-      # Estimate density by leave-one-out kernel smoothing
-      kerndens <- density(X, ..., sigma=sigma, varcov=varcov, spill=TRUE)
-      sigma  <- kerndens$sigma
-      varcov <- kerndens$varcov
-      raw    <- kerndens$raw
-      edg    <- kerndens$edg
-      # Leave-one-out in numerator
-      SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
-      peakvalue <- 1/(2 * pi * SqrtDetSigma)
-      lambda <- safelookup(raw, X) - rep(peakvalue, npoints)
-      # Edge correction if invoked
-      if(!is.null(edg)) 
-        lambda <- lambda/safelookup(edg, X)
-      # validate
-      if(length(lambda) != npoints) 
-        stop(paste("Internal error: incorrect number of lambda values",
-                   "in leave-one-out method:",
-                   "length(lambda) = ", length(lambda),
-                   "!=", npoints, "= npoints"))
-      if(any(is.na(lambda))) {
-        nwrong <- sum(is.na(lambda))
-        stop(paste("Internal error:", nwrong, "NA or NaN",
-                   ngettext(nwrong, "value", "values"),
-                   "generated in leave-one-out method"))
-      }
-    } else if(is.vector(lambda)) {
-      # vector of lambda values provided 
-      if(length(lambda) != npoints) 
-        stop(paste("The length of", sQuote("lambda"),
-                   "should equal the number of data points"))
-      if(any(is.na(lambda)))
-        stop(paste("Some values of", sQuote("lambda"), "are NA or NaN"))
-    } else if(is.im(lambda)) {
-      # lambda image provided
-      lambda <- safelookup(lambda, X)
-    } else
-    stop(paste(sQuote("lambda"),
-               "should be a vector or a pixel image"))
-
-    
-    if(!is.null(lambda2)) {
-      if(!is.matrix(lambda2))
-        stop("lambda2 should be a matrix")
-      if(nrow(lambda2) != ncol(lambda2))
-        stop("lambda2 should be a square matrix")
-      if(nrow(lambda2) != npoints)
-        stop("Dimensions of lambda2 do not match number of data points")
-    }
-    
     # match corrections
-    correction.given <- !missing(correction)
-    correction.name <- c("border", "bord.modif", "isotropic", "Ripley", "translate")
-    correction.list <- c("border", "bord.modif", "isotropic", "isotropic", "translate")
-    correction.id <- pmatch(correction, correction.name)
-    if(any(nbg <- is.na(correction.id)))
-      stop(paste("unrecognised correction",
-                 if(sum(nbg) > 1) "s",
-                 ": ",
-                 paste(correction[nbg], collapse=", "),
-                 sep=""))
-    correction <- correction.list[correction.id]
+    correction.given <- !missing(correction) && !is.null(correction)
+    correction <- pickoption("correction", correction,
+                             c(none="none",
+                               border="border",
+                               "bord.modif"="bord.modif",
+                               isotropic="isotropic",
+                               Ripley="isotropic",
+                               translate="translate"),
+                             multi=TRUE)
     
     # available selection of edge corrections depends on window
     if(W$type == "mask") {
-      iso <- (correction == "isotropic") | (correction == "Ripley")
+      iso <- (correction == "isotropic") 
       if(any(iso)) {
         if(correction.given)
           warning("Isotropic correction not implemented for binary masks")
@@ -169,6 +95,96 @@
       }
     }
 
+    ###########################################################
+    # DETERMINE WEIGHTS AND VALIDATE
+    #
+    # The matrix 'lambda2' or 'reciplambda2' is sufficient information
+    # unless we want the border correction.
+    lambda2.given    <- !is.null(lambda2) || !is.null(reciplambda2)
+    lambda2.suffices <- !any(correction %in% c("bord", "bord.modif"))
+
+    validate.vector <- function(v, npoints) {
+      # vector of values for each point
+      vname <- sQuote(deparse(substitute(v)))
+      if(length(v) != npoints) 
+        stop(paste("The length of", vname,
+                   "should equal the number of data points"))
+      if(any(is.na(v)))
+        stop(paste("Some values of", vname, "are NA or NaN"))
+    }
+    validate.matrix <- function(m, npoints) {
+      # matrix of values for each pair of points
+      mname <- sQuote(deparse(substitute(m)))
+      if(!is.matrix(m))
+        stop(paste(mname, "should be a matrix"))
+      if(nrow(m) != ncol(m))
+        stop(paste(mname, "should be a square matrix"))
+      if(nrow(m) != npoints)
+        stop(paste("Dimensions of", mname,
+                   "do not match number of data points"))
+    }
+    
+    # Use matrix of weights if it was provided and if it is sufficient
+    if(lambda2.suffices && lambda2.given) {
+      if(!is.null(reciplambda2)) 
+        validate.matrix(reciplambda2, npoints)
+      else {
+        validate.matrix(lambda2, npoints)
+        reciplambda2 <- 1/lambda2
+      }
+    } else {
+      # Vector lambda or reciplambda is required
+      if(missing(lambda) && is.null(reciplambda)) {
+        # No intensity data provided
+        # Estimate density by leave-one-out kernel smoothing
+        kerndens <- density(X, ..., sigma=sigma, varcov=varcov, spill=TRUE)
+        sigma  <- kerndens$sigma
+        varcov <- kerndens$varcov
+        raw    <- kerndens$raw
+        edg    <- kerndens$edg
+        # Leave-one-out in numerator
+        SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
+        peakvalue <- 1/(2 * pi * SqrtDetSigma)
+        lambda <- safelookup(raw, X) - rep(peakvalue, npoints)
+        # Edge correction if invoked
+        if(!is.null(edg)) 
+          lambda <- lambda/safelookup(edg, X)
+        # validate
+        if(length(lambda) != npoints) 
+          stop(paste("Internal error: incorrect number of lambda values",
+                     "in leave-one-out method:",
+                     "length(lambda) = ", length(lambda),
+                     "!=", npoints, "= npoints"))
+        if(any(is.na(lambda))) {
+          nwrong <- sum(is.na(lambda))
+          stop(paste("Internal error:", nwrong, "NA or NaN",
+                     ngettext(nwrong, "value", "values"),
+                     "generated in leave-one-out method"))
+        }
+        reciplambda <- 1/lambda
+      } else if(!is.null(reciplambda)) {
+        # 1/lambda values provided
+        if(is.vector(reciplambda))
+          validate.vector(reciplambda, npoints)
+        else if(is.im(reciplambda)) 
+          reciplambda <- safelookup(reciplambda, X)
+        else stop(paste(sQuote("reciplambda"),
+                        "should be a vector or a pixel image"))
+      } else {
+        # lambda values provided
+        if(is.vector(lambda)) {
+          validate.vector(lambda, npoints)
+          reciplambda <- 1/lambda
+        } else if(is.im(lambda)) {
+          lambda <- safelookup(lambda, X)
+          reciplambda <- 1/lambda
+        } else
+        stop(paste(sQuote("lambda"),
+                   "should be a vector or a pixel image"))
+      }
+    }
+
+    
     # recommended range of r values
     alim <- c(0, min(rmax, rmaxdefault))
         
@@ -198,7 +214,7 @@
     # restrict r values to recommended range, unless specifically requested
       if(!rfixed) 
         r <- seq(0, alim[2], length=length(r))
-      return(Kborder.engine(X, max(r), length(r), correction, 1/lambda))
+      return(Kborder.engine(X, max(r), length(r), correction, reciplambda))
     }
 
   ###########################################
@@ -208,9 +224,9 @@
         
     # this will be the output data frame
     K <- data.frame(r=r, theo= pi * r^2)
-    desc <- c("distance argument r", "theoretical Poisson Kinhom(r)")
+    desc <- c("distance argument r", "theoretical Poisson %s")
     K <- fv(K, "r", substitute(Kinhom(r), NULL),
-            "theo", , alim, c("r","Kpois(r)"), desc)
+            "theo", , alim, c("r","%spois(r)"), desc, fname="Kinhom")
         
     # identify all close pairs
     rmax <- max(r)
@@ -219,12 +235,12 @@
     # compute weights for these pairs
     I <- close$i
     J <- close$j
-    wI <- 1/lambda[I]
+    wI <- reciplambda[I]
     wIJ <- 
       if(is.null(lambda2))
-        1/(lambda[I] * lambda[J])
+        reciplambda[I] * reciplambda[J]
       else 
-        1/lambda2[cbind(I,J)]
+        reciplambda2[cbind(I,J)]
     # 
     XI <- X[I]
 
@@ -236,17 +252,17 @@
       I <- close$i
       bI <- b[I]
       # apply reduced sample algorithm
-      RS <- Kwtsum(dIJ, bI, wIJ, b, w=1/lambda, breaks)
+      RS <- Kwtsum(dIJ, bI, wIJ, b, w=reciplambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
-        K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
-                     "border-corrected estimate of Kinhom(r)",
+        K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+                     "border-corrected estimate of %s",
                      "border")
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
-        K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
-                     "modified border-corrected estimate of Kinhom(r)",
+        K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+                     "modified border-corrected estimate of %s",
                      "bord.modif")
       }
     }
@@ -259,8 +275,8 @@
       Ktrans <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
-                   "translation-correction estimate of Kinhom(r)",
+      K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+                   "translation-correction estimate of %s",
                    "trans")
     }
     if(any(correction == "isotropic" | correction == "Ripley")) {
@@ -271,8 +287,8 @@
       Kiso <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
-                   "Ripley isotropic correction estimate of Kinhom(r)",
+      K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+                   "Ripley isotropic correction estimate of %s",
                    "iso")
     }
 

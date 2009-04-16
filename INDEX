@@ -1,6 +1,7 @@
 AreaInter               The Area Interaction Point Process Model
 BadGey                  Hybrid Geyer Point Process Model
 DiggleGratton           Diggle-Gratton model
+Emark                   Diagnostics for random marking
 Fest                    Estimate the empty space function F
 Gcross                  Multitype Nearest Neighbour Distance Function
                         (i-to-j)
@@ -93,10 +94,13 @@ by.ppp                  Apply a Function to a Point Pattern Broken Down
                         by Factor
 cells                   Biological Cells Point Pattern
 centroid.owin           Centroid of a window
+chop.tess               Subdivide a Window or Tessellation using a Set
+                        of Lines
 chorley                 Chorley-Ribble Cancer Data
 clarkevans              Clark and Evans Aggregation Index
 clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
+clip.infline            Intersect Infinite Straight Lines with a Window
 closing.owin            Morphological Closing of a Window
 coef.ppm                Coefficients of Fitted Point Process Model
 colourmap               Colour Lookup Tables
@@ -184,6 +188,7 @@ identify.ppp            Identify Points in a Point Pattern
 im                      Create a Pixel Image Object
 im.object               Class of Images
 incircle                Find Largest Circle Inside Window
+infline                 Infinite Straight Lines
 inforder.family         Infinite Order Interaction Family
 inside.owin             Test Whether Points Are Inside A Window
 interp.im               Interpolate a Pixel Image
@@ -219,11 +224,14 @@ logLik.ppm              Log Likelihood for Poisson Point Process Model
 longleaf                Longleaf Pines Point Pattern
 lurking                 Lurking variable plot
 lut                     Lookup Tables
+markconnect             Mark Connection Function
 markcorr                Mark Correlation Function
+markcorrint             Mark Correlation Integral
 markstat                Summarise Marks in Every Neighbourhood in a
                         Point Pattern
 marktable               Tabulate Marks in Neighbourhood of Every Point
                         in a Point Pattern
+markvario               Mark Variogram
 matchingdist            Distance for a Point Pattern Matching
 matclust.estK           Fit the Matern Cluster Point Process by Minimum
                         Contrast
@@ -241,7 +249,7 @@ nearest.raster.point    Find Pixel Nearest to a Given Point
 nearestsegment          Find Line Segment Nearest to Each Point
 nncorr                  Nearest-Neighbour Correlation of Marked Point
                         Pattern
-nncross                 Nearest Neighbour in Another Point Pattern
+nncross                 Nearest Neighbours Between Two Patterns
 nndist                  Nearest neighbour distances
 nndist.psp              Nearest neighbour distances between line
                         segments
@@ -325,6 +333,8 @@ rGaussPoisson           Simulate Gauss-Poisson Process
 rMatClust               Simulate Matern Cluster Process
 rMaternI                Simulate Matern Model I
 rMaternII               Simulate Matern Model II
+rMosaicField            Mosaic Random Field
+rMosaicSet              Mosaic Random Set
 rNeymanScott            Simulate Neyman-Scott Process
 rSSI                    Simulate Simple Sequential Inhibition
 rStrauss                Perfect Simulation of the Strauss Process
@@ -377,6 +387,7 @@ rotate.ppp              Rotate a Point Pattern
 rotate.psp              Rotate a Line Segment Pattern
 rpoint                  Generate N Random Points
 rpoisline               Generate Poisson Random Line Process
+rpoislinetess           Poisson Line Tessellation
 rpoispp                 Generate Poisson Point Pattern
 rpoisppOnLines          Generate Poisson Point Pattern on Line Segments
 rshift                  Random Shift

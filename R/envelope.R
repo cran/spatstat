@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.47 $  $Date: 2009/02/10 18:20:00 $
+#   $Revision: 1.48 $  $Date: 2009/04/15 00:07:01 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -407,7 +407,9 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                  "function value for data pattern",
                  if(csr) "theoretical value for CSR"
                  else "mean of simulations",
-                 lo.name, hi.name))
+                 lo.name, hi.name),
+               fname=attr(funX, "fname"),
+               yexp =attr(funX, "yexp"))
   attr(result, "dotnames") <- c("obs",
                                 if(csr) "theo" else "mmean",
                                 "hi", "lo")

@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.24 $    $Date: 2007/10/24 09:41:15 $
+#  $Revision: 1.28 $    $Date: 2009/04/15 00:23:06 $
 #
 #
 
@@ -11,7 +11,8 @@ conspire <- function(...) {
 }
 
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
-                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL) {
+                    xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
+                    ylim.covers=NULL) {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -19,7 +20,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   indata <- as.data.frame(x)
 
-  defaultplot <- missing(fmla)
+  defaultplot <- missing(fmla) || is.null(fmla)
   if(defaultplot) 
     fmla <- attr(x, "fmla")
 
@@ -95,6 +96,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   
   if(is.null(ylim))
     ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
+  if(!is.null(ylim.covers))
+    ylim <- range(ylim, ylim.covers)
 
   # work out how to label the plot
   if(is.null(xlab)) {
@@ -109,7 +112,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   }
 
   if(is.null(ylab)) {
-    yl <- attr(x, "ylab")
+    yl <- attr(x, "yexp")
     if(!is.null(yl) && defaultplot)
       ylab <- yl
     else {
@@ -121,7 +124,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     }
   }
   if(is.language(ylab) && !is.expression(ylab))
-    ylab <- deparse(ylab)
+    ylab <- as.expression(ylab)
 
   # check for argument "add" (defaults to FALSE)
   dotargs <- list(...)

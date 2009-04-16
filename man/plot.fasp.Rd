@@ -10,8 +10,8 @@
 \usage{
    \method{plot}{fasp}(x,formule=NULL, \dots,
                         subset=NULL, title=NULL, samex=TRUE,
-                        banner=TRUE, outerlabels=TRUE,
-                        mar.panel=NULL)
+                        banner=TRUE, mar.panel=NULL,
+                        outerlabels=TRUE, cex.outerlabels=1.25)
 }
 
 \arguments{
@@ -51,16 +51,22 @@
     It can only be set to \code{FALSE} if you are using the default plot style
     (i.e. only when \code{formule} is missing).
   }
-  \item{banner}{Logical. If \code{TRUE}, the overall title is plotted.}
+  \item{banner}{
+    Logical. If \code{TRUE}, the overall title is plotted.
+  }
+  \item{mar.panel}{
+    Vector of length 4 giving the value of the
+    graphics parameter \code{mar} controlling the size of plot margins
+    for each individual plot panel. See \code{\link{par}}.
+  }
   \item{outerlabels}{Logical.
     If \code{TRUE}, the row and column names of the array of functions
     are plotted in the margins of the array of plot panels.
     If \code{FALSE}, each individual plot panel is labelled by its
     row and column name.
   }
-  \item{mar.panel}{Vector of length 4 giving the value of the
-    graphics parameter \code{mar} controlling the size of plot margins
-    for each individual plot panel. See \code{\link{par}}.
+  \item{cex.outerlabels}{
+    Character expansion factor for row and column labels of array.
   }
 }
 
@@ -88,6 +94,7 @@
   Titles for the individual plot panels will be taken from
   \code{x$titles}.
 
+  
   
 }
 

@@ -10,7 +10,7 @@
   to the nearest other point of any type.
 }
 \usage{
-Gdot(X, i=1, r=NULL, breaks=NULL, \dots)
+Gdot(X, i, r=NULL, breaks=NULL, \dots)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -22,6 +22,7 @@ Gdot(X, i=1, r=NULL, breaks=NULL, \dots)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
     at which the distribution function

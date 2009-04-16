@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.18 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 4.19 $	$Date: 2009/04/07 06:44:35 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -70,15 +70,16 @@ function(X, eps = NULL, r=NULL, breaks=NULL) {
         result <- as.data.frame(result)
         Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
         alim <- range(result$r[result$km <= 0.9])
-        labl <- c("r", "Fpois(r)", "Fbord(r)", "Fkm(r)",
-                  "lambda(r)", "Fraw(r)")
+        labl <- c("r", "%spois(r)", "%sbord(r)", "%skm(r)",
+                  "lambda(r)", "%sraw(r)")
         desc <- c("distance argument r",
-                  "theoretical Poisson F(r)",
-                  "border corrected estimate of F(r)",
-                  "Kaplan-Meier estimate of F(r)",
+                  "theoretical Poisson %s",
+                  "border corrected estimate of %s",
+                  "Kaplan-Meier estimate of %s",
                   "Kaplan-Meier estimate of hazard function lambda(r)",
-                  "uncorrected estimate of F(r)")
-        Z <- fv(Z, "r", substitute(F(r), NULL), "km", . ~ r, alim, labl, desc)
+                  "uncorrected estimate of %s")
+        Z <- fv(Z, "r", substitute(F(r), NULL), "km", . ~ r, alim, labl, desc,
+                fname="F")
         attr(Z, "dotnames") <- c("km", "rs", "theo")
         unitname(Z) <- unitname(X)
 	return(Z)

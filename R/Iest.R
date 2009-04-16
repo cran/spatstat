@@ -2,7 +2,7 @@
 #
 #	I function
 #
-#	$Revision: 1.5 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 1.7 $	$Date: 2009/04/07 08:25:10 $
 #
 #
 #
@@ -45,14 +45,15 @@ Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
   rslt <- data.frame(r=rvals, theo=rep(0, length(rvals)),
                      rs=Irs, km=Ikm, un=Iun)
   alim <- attr(Jdotdot, "alim")
-  labl <- c("r", "Ipois(r)", "Ibord(r)", "Ikm(r)", "Iun(r)")
+  labl <- c("r", "%spois(r)", "%sbord(r)", "%skm(r)", "%sun(r)")
   desc <- c("distance argument r",
-            "theoretical Poisson I(r) = 0",
-            "border corrected estimate of I(r)",
-            "Kaplan-Meier estimate of I(r)",
-            "uncorrected estimate of I(r)")
-  Z <- fv(rslt, "r", "I(r)", "km", cbind(km, rs, un, theo) ~ r,
-          alim, labl, desc)
+            "theoretical Poisson %s",
+            "border corrected estimate of %s",
+            "Kaplan-Meier estimate of %s",
+            "uncorrected estimate of %s")
+  Z <- fv(rslt, "r", substitute(I(r), NULL), "km",
+          cbind(km, rs, un, theo) ~ r,
+          alim, labl, desc, fname="I")
   unitname(Z) <- unitname(X)
   return(Z)
 }

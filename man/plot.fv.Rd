@@ -6,7 +6,8 @@
 }
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
-           xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL)
+           xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
+           ylim.covers=NULL)
 }
 \arguments{
   \item{x}{
@@ -47,6 +48,11 @@
   }
   \item{\dots}{
     Extra arguments passed to \code{plot.default}.
+  }
+  \item{ylim.covers}{
+    Optional vector of \eqn{y} values that must be included in the
+    \eqn{y} axis. For example \code{ylim.covers=0} will ensure that the
+    \eqn{y} axis includes the origin.
   }
 }
 \value{

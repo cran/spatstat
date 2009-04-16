@@ -24,9 +24,11 @@ lambdaIJ=NULL)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{j}{Number or character string identifying the type (mark value)
     of the points in \code{X} to which distances are measured.
+    Defaults to the second level of \code{marks(X)}.
   }
   \item{lambdaI}{
     Values of the the estimated intensity of the sub-process of

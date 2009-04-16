@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.22 $	$Date: 2008/06/09 17:49:58 $
+#	$Revision: 5.24 $	$Date: 2009/04/14 09:01:26 $
 #
 #
 # -------- functions ----------------------------------------
@@ -48,31 +48,12 @@
   K <- Kcross(X, i, j, ...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
-  attr(L, "ylab") <- substitute(Lcross[i,j](r), list(i=paste(i),j=paste(j)))
-  nama <- names(L)
-  desc <- attr(L, "desc")
-  labl <- attr(L, "labl")
-  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
-  DESC <- c("theoretical Poisson Lcross(r)",
-             "uncorrected estimate of Lcross(r)",
-             "modified border-corrected estimate of Lcross(r)",
-             "border-corrected estimate of Lcross(r)",
-             "translation-corrected estimate of Lcross(r)",
-             "Ripley isotropic correction estimate of Lcross(r)")
-  LABL <- c("Lpois(r)",
-             "Lun(r)",
-             "Lbord*(r)",
-             "Lbord(r)",
-             "Ltrans(r)",
-             "Liso(r)")
-
-  for(i in seq(length(TAGS)))
-    if(!is.na(m <- match(TAGS[i], nama))) {
-      desc[m] <- DESC[i]
-      labl[m] <- LABL[i]
-    }
-  attr(L, "desc") <- desc
-  attr(L, "labl") <- labl
+  L <- rebadge.fv(L,
+                  substitute(L[i,j](r),
+                             list(i=paste(i),j=paste(j))),
+                  "Lcross",
+                  new.yexp=substitute(L[list(i,j)](r),
+                                      list(i=paste(i),j=paste(j))))
   return(L)  
 }
 
@@ -81,86 +62,71 @@
   K <- Kdot(X, i, ...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
-  attr(L, "ylab") <- substitute(Ldot[i](r), list(i=paste(i)))
-  nama <- names(L)
-  desc <- attr(L, "desc")
-  labl <- attr(L, "labl")
-  TAGS <- c("theo", "un", "bord.modif", "border", "trans", "iso")
-  DESC <- c("theoretical Poisson Ldot(r)",
-             "uncorrected estimate of Ldot(r)",
-             "modified border-corrected estimate of Ldot(r)",
-             "border-corrected estimate of Ldot(r)",
-             "translation-corrected estimate of Ldot(r)",
-             "Ripley isotropic correction estimate of Ldot(r)")
-  LABL <- c("Lpois(r)",
-             "Lun(r)",
-             "Lbord*(r)",
-             "Lbord(r)",
-             "Ltrans(r)",
-             "Liso(r)")
-
-  for(i in seq(length(TAGS)))
-    if(!is.na(m <- match(TAGS[i], nama))) {
-      desc[m] <- DESC[i]
-      labl[m] <- LABL[i]
-    }
-  attr(L, "desc") <- desc
-  attr(L, "labl") <- labl
+  L <- rebadge.fv(L,
+                  substitute(Ldot[i](r), list(i=paste(i))),
+                  "Ldot")
   return(L)  
 }
-
 
 "Kcross" <- 
 function(X, i, j, r=NULL, breaks=NULL,
          correction =c("border", "isotropic", "Ripley", "translate") , ...)
 {
-	verifyclass(X, "ppp")
-	if(!is.marked(X))
-		stop("point pattern has no marks (no component 'marks')")
-        marx <- marks(X)
-        if(missing(i))
-          i <- levels(marx)[1]
-        if(missing(j))
-          j <- levels(marx)[2]
-        I <- (marx == i)
-        if(!any(I))
-          stop(paste("No points have mark i =", i))
+  verifyclass(X, "ppp")
+  if(!is.marked(X))
+    stop("point pattern has no marks (no component 'marks')")
+  marx <- marks(X)
+  if(missing(i))
+    i <- levels(marx)[1]
+  if(missing(j))
+    j <- levels(marx)[2]
+  I <- (marx == i)
+  if(!any(I))
+    stop(paste("No points have mark i =", i))
 
-        if(i == j) {
-          result <- Kest(X[I],
-                         r=r, breaks=breaks, correction=correction, ...)
-        } else {
-          J <- (marx == j)
-          if(!any(J))
-            stop(paste("No points have mark j =", j))
-          result <- Kmulti(X, I, J,
-                           r=r, breaks=breaks, correction=correction, ...)
-        }
-        attr(result, "ylab") <- substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j)))
-        result
+  if(i == j) {
+    result <- Kest(X[I],
+                   r=r, breaks=breaks, correction=correction, ...)
+  } else {
+    J <- (marx == j)
+    if(!any(J))
+      stop(paste("No points have mark j =", j))
+    result <- Kmulti(X, I, J,
+                     r=r, breaks=breaks, correction=correction, ...)
+  }
+  result <-
+    rebadge.fv(result, 
+               substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j))),
+               "K",
+               new.yexp=substitute(K[list(i,j)](r),
+                                   list(i=paste(i),j=paste(j))))
+  return(result)
 }
 
 "Kdot" <- 
 function(X, i, r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") , ...)
 {
-	verifyclass(X, "ppp")
-	if(!is.marked(X))
-		stop("point pattern has no marks (no component 'marks')")
+  verifyclass(X, "ppp")
+  if(!is.marked(X))
+    stop("point pattern has no marks (no component 'marks')")
 
-        marx <- marks(X)
-        if(missing(i))
-          i <- levels(marx)[1]
+  marx <- marks(X)
+  if(missing(i))
+    i <- levels(marx)[1]
         
-	I <- (marx == i)
-	J <- rep(TRUE, X$n)  # i.e. all points
+  I <- (marx == i)
+  J <- rep(TRUE, X$n)  # i.e. all points
 	
-	if(!any(I)) stop(paste("No points have mark i =", i))
+  if(!any(I)) stop(paste("No points have mark i =", i))
 	
-	result <- Kmulti(X, I, J,
-                         r=r, breaks=breaks, correction=correction, ...)
-        attr(result, "ylab") <- substitute(Kdot[i](r), list(i=paste(i)))
-        result
+  result <- Kmulti(X, I, J,
+                   r=r, breaks=breaks, correction=correction, ...)
+  result <-
+    rebadge.fv(result,
+               substitute(Kdot[i](r), list(i=paste(i))),
+               "K.")
+  return(result)
 }
 
 
@@ -168,136 +134,144 @@ function(X, i, r=NULL, breaks=NULL,
 function(X, I, J, r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") , ...)
 {
-	verifyclass(X, "ppp")
+  verifyclass(X, "ppp")
 
-	npoints <- X$n
-	x <- X$x
-	y <- X$y
-        W <- X$window
-	area <- area.owin(W)
+  npoints <- X$n
+  x <- X$x
+  y <- X$y
+  W <- X$window
+  area <- area.owin(W)
 
-        # available selection of edge corrections depends on window
-        if(W$type == "mask") {
-           iso <- (correction == "isotropic") | (correction == "Ripley")
-           if(all(iso))
-             stop("Isotropic correction not implemented for binary masks")
-           if(any(iso)) {
-             if(!missing(correction))
-               warning("Isotropic correction not implemented for binary masks")
-             correction <- correction[!iso]
-           }
-        }
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             "bord.modif"="bord.modif",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate"),
+                           multi=TRUE)
+        
+  # available selection of edge corrections depends on window
+  if(W$type == "mask") {
+    iso <- (correction == "isotropic") 
+    if(all(iso))
+      stop("Isotropic correction not implemented for binary masks")
+    if(any(iso)) {
+      if(!missing(correction))
+        warning("Isotropic correction not implemented for binary masks")
+      correction <- correction[!iso]
+    }
+  }
          
-	if(!is.logical(I) || !is.logical(J))
-		stop("I and J must be logical vectors")
-	if(length(I) != npoints || length(J) != npoints)
-	     stop("The length of I and J must equal \
- the number of points in the pattern")
+  if(!is.logical(I) || !is.logical(J))
+    stop("I and J must be logical vectors")
+  if(length(I) != npoints || length(J) != npoints)
+    stop(paste("The length of I and J must equal",
+               "the number of points in the pattern"))
 	
-	if(!any(I)) stop("no points satisfy I")
-	if(!any(J)) stop("no points satisfy J")
+  if(!any(I)) stop("no points satisfy I")
+  if(!any(J)) stop("no points satisfy J")
 		
-	nI <- sum(I)
-	nJ <- sum(J)
-	lambdaI <- nI/area
-	lambdaJ <- nJ/area
+  nI <- sum(I)
+  nJ <- sum(J)
+  lambdaI <- nI/area
+  lambdaJ <- nJ/area
 
-        # r values 
-        rmaxdefault <- rmax.rule("K", W, lambdaJ)
-        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
-        r <- breaks$r
-        rmax <- breaks$max
+  # r values 
+  rmaxdefault <- rmax.rule("K", W, lambdaJ)
+  breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
+  r <- breaks$r
+  rmax <- breaks$max
         
-        # recommended range of r values
-        alim <- c(0, min(rmax, rmaxdefault))
+  # recommended range of r values
+  alim <- c(0, min(rmax, rmaxdefault))
         
-        # this will be the output data frame
-        # It will be given more columns later
-        K <- data.frame(r=r, theo= pi * r^2)
-        desc <- c("distance argument r", "theoretical Poisson K(r)")
-        K <- fv(K, "r", substitute(Kmulti(r), NULL),
-                "theo", , alim, c("r","Kpois(r)"), desc)
+  # this will be the output data frame
+  # It will be given more columns later
+  K <- data.frame(r=r, theo= pi * r^2)
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  K <- fv(K, "r", substitute(Kmulti(r), NULL),
+          "theo", , alim, c("r","%spois(r)"), desc, fname="Kmulti")
 
-# find close pairs of points
-        XI <- X[I]
-        XJ <- X[J]
-        close <- crosspairs(XI, XJ, max(r))
+  # find close pairs of points
+  XI <- X[I]
+  XJ <- X[J]
+  close <- crosspairs(XI, XJ, max(r))
 # close$i and close$j are serial numbers in XI and XJ respectively;        
 # map them to original serial numbers in X
-        orig <- seq(npoints)
-        imap <- orig[I]
-        jmap <- orig[J]
-        iX <- imap[close$i]
-        jX <- jmap[close$j]
+  orig <- seq(npoints)
+  imap <- orig[I]
+  jmap <- orig[J]
+  iX <- imap[close$i]
+  jX <- jmap[close$j]
 # eliminate any identical pairs
-        if(any(I & J)) {
-          ok <- (iX != jX)
-          if(!all(ok)) {
-            close$i  <- close$i[ok]
-            close$j  <- close$j[ok]
-            close$xi <- close$xi[ok]
-            close$yi <- close$yi[ok]
-            close$xj <- close$xj[ok]
-            close$yj <- close$yj[ok]
-            close$dx <- close$dx[ok]
-            close$dy <- close$dy[ok]
-            close$d  <- close$d[ok]
-          }
-        }
+  if(any(I & J)) {
+    ok <- (iX != jX)
+    if(!all(ok)) {
+      close$i  <- close$i[ok]
+      close$j  <- close$j[ok]
+      close$xi <- close$xi[ok]
+      close$yi <- close$yi[ok]
+      close$xj <- close$xj[ok]
+      close$yj <- close$yj[ok]
+      close$dx <- close$dx[ok]
+      close$dy <- close$dy[ok]
+      close$d  <- close$d[ok]
+    }
+  }
 # extract information for these pairs (relative to orderings of XI, XJ)
-        dcloseIJ <- close$d
-        icloseI  <- close$i
-        jcloseJ  <- close$j
+  dcloseIJ <- close$d
+  icloseI  <- close$i
+  jcloseJ  <- close$j
         
 # Compute estimates by each of the selected edge corrections.
         
-        if(any(correction == "border" | correction == "bord.modif")) {
-          # border method
-          # distance to boundary from each point of type I
-          bI <- bdist.points(XI)
-          # distance to boundary from first element of each (i, j) pair
-          bcloseI <- bI[icloseI]
-          # apply reduced sample algorithm
-          RS <- Kount(dcloseIJ, bcloseI, bI, breaks)
-          if(any(correction == "bord.modif")) {
-            denom.area <- eroded.areas(W, r)
-            Kbm <- RS$numerator/(denom.area * nI * nJ)
-            K <- bind.fv(K, data.frame(bord.modif=Kbm), "Kbord*(r)",
-                         "modified border-corrected estimate of K(r)",
-                         "bord.modif")
-          }
-          if(any(correction == "border")) {
-            Kb <- RS$numerator/(lambdaJ * RS$denom.count)
-            K <- bind.fv(K, data.frame(border=Kb), "Kbord(r)",
-                         "border-corrected estimate of K(r)",
-                         "border")
-          }
-        }
-        if(any(correction == "translate")) {
-          # translation correction
-            edgewt <- edge.Trans(XI[icloseI], XJ[jcloseJ], paired=TRUE)
-            wh <- whist(dcloseIJ, breaks$val, edgewt)
-            Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
-            rmax <- diameter(W)/2
-            Ktrans[r >= rmax] <- NA
-            K <- bind.fv(K, data.frame(trans=Ktrans), "Ktrans(r)",
-                         "translation-corrected estimate of K(r)",
-                         "trans")
-        }
-        if(any(correction == "isotropic" | correction == "Ripley")) {
-          # Ripley isotropic correction
-            edgewt <- edge.Ripley(XI[icloseI], matrix(dcloseIJ, ncol=1))
-            wh <- whist(dcloseIJ, breaks$val, edgewt)
-            Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
-            rmax <- diameter(W)/2
-            Kiso[r >= rmax] <- NA
-            K <- bind.fv(K, data.frame(iso=Kiso), "Kiso(r)",
-                         "Ripley isotropic correction estimate of K(r)",
-                         "iso")
-        }
-        # default is to display them all
-        attr(K, "fmla") <- . ~ r
-        unitname(K) <- unitname(X)
-        return(K)
-          
+  if(any(correction == "border" | correction == "bord.modif")) {
+    # border method
+    # distance to boundary from each point of type I
+    bI <- bdist.points(XI)
+    # distance to boundary from first element of each (i, j) pair
+    bcloseI <- bI[icloseI]
+    # apply reduced sample algorithm
+    RS <- Kount(dcloseIJ, bcloseI, bI, breaks)
+    if(any(correction == "bord.modif")) {
+      denom.area <- eroded.areas(W, r)
+      Kbm <- RS$numerator/(denom.area * nI * nJ)
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+                   "modified border-corrected estimate of %s",
+                   "bord.modif")
+    }
+    if(any(correction == "border")) {
+      Kb <- RS$numerator/(lambdaJ * RS$denom.count)
+      K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+                   "border-corrected estimate of %s",
+                   "border")
+    }
+  }
+  if(any(correction == "translate")) {
+    # translation correction
+    edgewt <- edge.Trans(XI[icloseI], XJ[jcloseJ], paired=TRUE)
+    wh <- whist(dcloseIJ, breaks$val, edgewt)
+    Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    rmax <- diameter(W)/2
+    Ktrans[r >= rmax] <- NA
+    K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+                 "translation-corrected estimate of %s",
+                 "trans")
+  }
+  if(any(correction == "isotropic")) {
+    # Ripley isotropic correction
+    edgewt <- edge.Ripley(XI[icloseI], matrix(dcloseIJ, ncol=1))
+    wh <- whist(dcloseIJ, breaks$val, edgewt)
+    Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    rmax <- diameter(W)/2
+    Kiso[r >= rmax] <- NA
+    K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+                 "Ripley isotropic correction estimate of %s",
+                 "iso")
+  }
+  # default is to display them all
+  attr(K, "fmla") <- . ~ r
+  unitname(K) <- unitname(X)
+  return(K)
 }

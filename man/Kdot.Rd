@@ -21,6 +21,7 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
   }
   \item{i}{Number or character string identifying the type (mark value)
     of the points in \code{X} from which distances are measured.
+    Defaults to the first level of \code{marks(X)}.
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the distribution function
@@ -77,9 +78,7 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
   \code{X$marks} must be a factor.
 
   The argument \code{i} will be interpreted as a
-  level of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3).
+  level of the factor \code{X$marks}. 
   If \code{i} is missing, it defaults to the first
   level of the marks factor, \code{i = levels(X$marks)[1]}.
   
@@ -181,7 +180,7 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
 
     # synthetic example with two marks "a" and "b"
     pp <- runifpoispp(50)
-    pp <- pp \%mark\% sample(c("a","b"), pp$n, replace=TRUE)
+    pp <- pp \%mark\% factor(sample(c("a","b"), pp$n, replace=TRUE))
     K <- Kdot(pp, "a")
 }
 \author{Adrian Baddeley

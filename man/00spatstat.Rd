@@ -62,8 +62,9 @@
     II. \tab Exploratory Data Analysis \cr
     III. \tab Model fitting (cluster models) \cr
     IV. \tab Model fitting (Gibbs models) \cr
-    V. \tab Tests and diagnostics\cr
-    VI. \tab Documentation
+    V. \tab Simulation \cr
+    VI. \tab Tests and diagnostics\cr
+    VII. \tab Documentation
   }
 }
 
@@ -371,12 +372,18 @@
       line segments \cr
       \code{\link{crossing.psp}} \tab find crossing points between
       two line segment patterns \cr
+      \code{\link{nncross}} \tab find distance to nearest line segment
+      from a given point\cr
       \code{\link{nearestsegment}} \tab find line segment closest to a
       given point \cr
       \code{\link{project2segment}} \tab find location along a line segment
       closest to a given point \cr
       \code{\link{pointsOnLines}} \tab generate points evenly spaced
-      along line segment 
+      along line segment \cr
+      \code{\link{rpoisline}} \tab generate a realisation of the
+      Poisson line process inside a window\cr
+      \code{\link{rlinegrid}} \tab generate a random array of parallel
+      lines through a window
     }
 
     \bold{Tessellations}
@@ -385,12 +392,19 @@
 
     \tabular{ll}{
       \code{\link{tess}} \tab create a tessellation \cr
+      \code{\link{quadrats}} \tab create a tessellation of rectangles\cr
       \code{\link{as.tess}} \tab convert other data to a tessellation \cr
       \code{\link{plot.tess}} \tab plot a tessellation \cr
       \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
-      \code{\link{[.tess}} \tab extract a subset of (tiles of) a tessellation \cr
-      \code{\link{[<-.tess}} \tab change a subset of (tiles of) a tessellation \cr
-      \code{\link{quadrats}} \tab create a tessellation of rectangles
+      \code{\link{[.tess}} \tab extract some tiles of a tessellation \cr
+      \code{\link{[<-.tess}} \tab change some tiles of a tessellation \cr
+      \code{\link{intersect.tess}} \tab intersect two tessellations \cr
+                              \tab or restrict a tessellation to a window \cr
+      \code{\link{chop.tess}} \tab subdivide a tessellation by a line \cr
+      \code{\link{dirichlet}} \tab compute Dirichlet-Voronoi tessellation of points\cr
+      \code{\link{delaunay}} \tab compute Delaunay triangulation of points\cr
+      \code{\link{rpoislinetess}} \tab generate tessellation using Poisson line
+      process 
     }
 }
   
@@ -467,6 +481,8 @@
     \eqn{J_{ij}, J_{i\bullet}}{J[i,j],J[i.]} \cr
     \code{\link{pcfcross}} \tab
     multitype pair correlation function \eqn{g_{ij}}{g[i,j]} \cr
+    \code{\link{markconnect}} \tab
+    marked connection function \eqn{p_{ij}}{p[i,j]} \cr
     \code{\link{alltypes}} \tab  estimates of the above
     for all \eqn{i,j} pairs \cr
     \code{\link{Iest}} \tab  multitype \eqn{I}-function\cr
@@ -478,9 +494,17 @@
   A marked point pattern is represented by an object \code{X}
   of class \code{"ppp"} with a component \code{X$marks}.
   The entries in the vector \code{X$marks} may be numeric, complex,
-  string or any other atomic type.
+  string or any other atomic type. For numeric marks, there are the
+  following functions:
   \tabular{ll}{
     \code{\link{markcorr}} \tab mark correlation function \cr
+    \code{\link{markvario}} \tab mark variogram \cr
+    \code{\link{markcorrint}} \tab mark correlation integral \cr
+    \code{\link{Emark}} \tab mark independence diagnostic \eqn{E(r)} \cr
+    \code{\link{Vmark}} \tab mark independence diagnostic \eqn{V(r)}
+  }
+  For marks of any type, there are the following:
+  \tabular{ll}{
     \code{\link{Gmulti}} \tab multitype nearest neighbour distribution \cr
     \code{\link{Kmulti}} \tab multitype \eqn{K}-function \cr
     \code{\link{Jmulti}} \tab multitype \eqn{J}-function 
@@ -649,7 +673,110 @@
   }
 }
 
-\section{V. TESTS AND DIAGNOSTICS}{
+\section{V. SIMULATION}{
+
+  There are many ways to generate a random point pattern,
+  line segment pattern, pixel image or tessellation
+  in \pkg{spatstat}. 
+
+  \bold{Random point patterns:}
+
+  \tabular{ll}{
+    \code{\link{runifpoint}} \tab
+    generate \eqn{n} independent uniform random points \cr
+    \code{\link{rpoint}} \tab
+    generate \eqn{n} independent random points \cr
+    \code{\link{rmpoint}} \tab
+    generate \eqn{n} independent multitype random points \cr
+    \code{\link{rpoispp}} \tab
+    simulate the (in)homogeneous Poisson point process \cr
+    \code{\link{rmpoispp}} \tab
+    simulate the (in)homogeneous multitype Poisson point process \cr
+    \code{\link{runifdisc}} \tab
+    generate \eqn{n} independent uniform random points in disc\cr
+    \code{\link{rstrat}} \tab
+    stratified random sample of points \cr
+    \code{\link{rsyst}} \tab
+    systematic random sample (grid) of points \cr
+    \code{\link{rMaternI}}  \tab
+    simulate the Mat\'ern Model I inhibition process\cr
+    \code{\link{rMaternII}} \tab
+    simulate the Mat\'ern Model II inhibition process\cr
+    \code{\link{rSSI}} \tab
+    simulate Simple Sequential Inhibition process\cr
+    \code{\link{rStrauss}} \tab
+    simulate Strauss process (perfect simulation)\cr
+    \code{\link{rNeymanScott}} \tab
+    simulate a general Neyman-Scott process\cr
+    \code{\link{rMatClust}} \tab
+    simulate the Mat\'ern Cluster process\cr
+    \code{\link{rThomas}} \tab
+    simulate the Thomas process  \cr
+    \code{\link{rGaussPoisson}}  \tab
+    simulate the Gauss-Poisson cluster process\cr
+    \code{\link{rcell}} \tab
+    simulate the Baddeley-Silverman cell process  \cr
+    \code{\link{runifpointOnLines}} \tab
+    generate \eqn{n} random points along specified line segments \cr
+    \code{\link{rpoisppOnLines}} \tab
+    generate Poisson random points along specified line segments 
+  }
+
+      
+  \bold{Resampling a point pattern:}
+
+  \tabular{ll}{
+    \code{\link{quadratresample}} \tab block resampling \cr
+    \code{\link{rjitter}} \tab
+    apply random displacements to points in a pattern\cr
+    \code{\link{rshift}} \tab random shifting of (subsets of) points\cr
+    \code{\link{rthin}} \tab  random thinning 
+  }
+  
+  \bold{Fitted point process models:}
+
+   If you have fitted a point process model to a point pattern dataset,
+   the fitted model can be simulated.
+
+   Cluster process models 
+   are fitted by the function \code{\link{kppm}} yielding an
+   object of class \code{"kppm"}. To generate one or more simulated
+   realisations of this fitted model, use 
+   \code{\link{simulate.kppm}}.
+
+   Gibbs point process models 
+   are fitted by the function \code{\link{ppm}} yielding an
+   object of class \code{"ppm"}. To generate one or more simulated
+   realisations of this fitted model, use \code{\link{rmh}}.
+
+   \bold{Other random patterns:}
+
+   \tabular{ll}{
+     \code{\link{rlinegrid}} \tab
+     generate a random array of parallel lines through a window \cr
+     \code{\link{rpoisline}} \tab
+     simulate the Poisson line process within a window \cr
+     \code{\link{rpoislinetess}} \tab
+     generate random tessellation using Poisson line process \cr
+     \code{\link{rMosaicSet}} \tab
+     generate random set by selecting some tiles of a tessellation \cr
+     \code{\link{rMosaicField}} \tab
+     generate random pixel image by assigning random values
+     in each tile of a tessellation
+   }
+
+   \bold{Simulation-based inference}
+
+   \tabular{ll}{
+    \code{\link{envelope}} \tab critical envelope for Monte Carlo
+    test of goodness-of-fit \cr
+    \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint
+    interaction
+  }
+}
+
+
+\section{VI. TESTS AND DIAGNOSTICS}{
 
   \bold{Classical hypothesis tests:}
   
@@ -684,14 +811,17 @@
   and resampling using the following capabilities:
   
   \tabular{ll}{
-    \code{\link{quadratresample}} \tab Spatial block resampling \cr
-    \code{\link{rshift}} \tab Random shifting of (subsets of) points
+    \code{\link{quadratresample}} \tab block resampling \cr
+    \code{\link{rjitter}} \tab
+    apply random displacements to points in a pattern\cr
+    \code{\link{rshift}} \tab random shifting of (subsets of) points\cr
+    \code{\link{rthin}} \tab  random thinning  
   }
   
 }
 
 
-\section{VI. DOCUMENTATION}{
+\section{VII. DOCUMENTATION}{
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
   

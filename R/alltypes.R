@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.20 $   $Date: 2009/02/10 18:21:15 $
+#   $Revision: 1.21 $   $Date: 2009/04/15 00:20:36 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -105,7 +105,6 @@ alltypes <- function(X, fun="K", ...,
 
   # compute function array and build up 'fasp' object
   fns  <- list()
-  deform <- list()
   k   <- 0
 
   for(i in 1:nrow(witch)) {
@@ -133,7 +132,6 @@ alltypes <- function(X, fun="K", ...,
                                           NULL)))
       k <- k+1
       fns[[k]] <- currentfv 
-      deform[[k]] <- attr(currentfv, "fmla")
     }
   }
 
@@ -145,7 +143,7 @@ alltypes <- function(X, fun="K", ...,
                  "for ", dataname, ".", sep="")
   
   rslt <- fasp(fns, which=witch,
-               formulae=deform,
+               formulae=NULL,
                dataname=dataname,
                title=title)
   return(rslt)
