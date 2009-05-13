@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.19 $	$Date: 2009/03/26 08:23:10 $
+#	$Revision: 4.22 $	$Date: 2009/04/25 06:57:24 $
 #
 # -------- functions ----------------------------------------
 #
@@ -174,17 +174,19 @@ erosion.owin <- erode.owin <-
   }
 
   # otherwise erode the window in pixel image form
-  if(w$type != "mask") 
-    w <- as.mask(w, ...)
+  if(w$type == "mask") 
+    wnew <- erode.mask(w, r, strict=strict)
+  else {
+    D <- distmap(w, invert=TRUE, ...)
+    wnew <- levelset(D, r, if(strict) ">" else ">=")
+  }
         
-  wnew <- erode.mask(w, r, strict=strict)
-
   if(shrink.frame) {
     # trim off some rows & columns of pixel raster
     keepcol <- (wnew$xcol >= exr[1] & wnew$xcol <= exr[2])
     keeprow <- (wnew$yrow >= eyr[1] & wnew$yrow <= eyr[2])
-    wnew$xcol <- w$xcol[keepcol]
-    wnew$yrow <- w$yrow[keeprow]
+    wnew$xcol <- wnew$xcol[keepcol]
+    wnew$yrow <- wnew$yrow[keeprow]
     wnew$dim <- c(sum(keeprow), sum(keepcol))
     wnew$m <- wnew$m[keeprow, keepcol]
     wnew$xrange <- exr
@@ -244,9 +246,7 @@ dilation.owin <- dilate.owin <-
     stop("r must be nonnegative")
   if(r == 0)
     return(w)
-  if(w$type != "mask")
-    w <- as.mask(w, ...)
-  if(!any(w$m)) {
+  if(w$type == "mask" && !any(w$m)) {
     # w is empty
     return(w)
   }
@@ -255,7 +255,7 @@ dilation.owin <- dilate.owin <-
   bb <- bounding.box(w)
   newbox <- owin(bb$xrange + c(-r,r), bb$yrange + c(-r,r))
   w <- rebound.owin(w, newbox)
-  distant <- distmap(w)
+  distant <- distmap(w, ...)
   dil <- levelset(distant, r, "<=")
   return(dil)
 }

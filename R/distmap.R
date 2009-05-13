@@ -2,7 +2,7 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.11 $     $Date: 2008/04/02 13:41:31 $
+#      $Revision: 1.15 $     $Date: 2009/04/25 08:30:19 $
 #
 #
 #     Distance transforms
@@ -39,43 +39,67 @@ distmap.ppp <- function(X, ...) {
   return(V)
 }
 
-distmap.owin <- function(X, ...) {
+distmap.owin <- function(X, ..., discretise=FALSE, invert=FALSE) {
   verifyclass(X, "owin")
-  X <- as.mask(X, ...)
   uni <- unitname(X)
-  xc <- X$xcol
-  yr <- X$yrow
-  nr <- X$dim[1]
-  nc <- X$dim[2]
+  if(X$type == "rectangle") {
+    M <- as.mask(X, ...)
+    Bdry <- im(bdist.pixels(M, coords=FALSE),
+               M$xcol, M$yrow, unitname=uni)
+    if(!invert)
+      Dist <- as.im(M, value=0)
+    else 
+      Dist <- Bdry
+  } else if(X$type == "polygonal" && !discretise) {
+    Edges <- as.psp(X)
+    Dist <- distmap(Edges, ...)
+    Bdry <- attr(Dist, "bdry")
+    if(!invert) 
+      Dist[X] <- 0
+    else {
+      bb <- as.rectangle(X)
+      bigbox <- grow.rectangle(bb, diameter(bb)/4)
+      Dist[complement.owin(X, bigbox)] <- 0
+    }
+  } else {
+    X <- as.mask(X, ...)
+    if(invert)
+      X <- complement.owin(X)
+    xc <- X$xcol
+    yr <- X$yrow
+    nr <- X$dim[1]
+    nc <- X$dim[2]
 # pad out the input image with a margin of width 1 on all sides
-  mat <- X$m
-  mat <- cbind(FALSE, mat, FALSE)
-  mat <- rbind(FALSE, mat, FALSE)
+    mat <- X$m
+    pad <- invert # boundary condition is opposite of value inside W
+    mat <- cbind(pad, mat, pad)
+    mat <- rbind(pad, mat, pad)
 # call C routine
-  DUP <- spatstat.options("dupC")
-  res <- .C("distmapbin",
-            as.double(X$xrange[1]),
-            as.double(X$yrange[1]),
-            as.double(X$xrange[2]),
-            as.double(X$yrange[2]),
-            nr = as.integer(nr),
-            nc = as.integer(nc),
-            as.logical(t(mat)),
-            distances = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
-            boundary = as.double (matrix(0, ncol = nc + 2, nrow = nr + 2)),
-            DUP=DUP,
-            PACKAGE="spatstat"
-            )
+    DUP <- spatstat.options("dupC")
+    res <- .C("distmapbin",
+              as.double(X$xrange[1]),
+              as.double(X$yrange[1]),
+              as.double(X$xrange[2]),
+              as.double(X$yrange[2]),
+              nr = as.integer(nr),
+              nc = as.integer(nc),
+              as.logical(t(mat)),
+              distances = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)),
+              boundary = as.double(matrix(0, ncol = nc + 2, nrow = nr + 2)),
+              DUP=DUP,
+              PACKAGE="spatstat"
+              )
   # strip off margins again
-  dist <- matrix(res$distances,
-                 ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
-  bdist <- matrix(res$boundary,
-                  ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+    dist <- matrix(res$distances,
+                   ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
+    bdist <- matrix(res$boundary,
+                    ncol = nc + 2, byrow = TRUE)[2:(nr + 1), 2:(nc +1)]
   # cast as image objects
-  V <- im(dist,  xc, yr, unitname=uni)
-  B <- im(bdist, xc, yr, unitname=uni)
-  attr(V, "bdry") <- B
-  return(V)
+    Dist <- im(dist,  xc, yr, unitname=uni)
+    Bdry <- im(bdist, xc, yr, unitname=uni)
+  }
+  attr(Dist, "bdry")  <- Bdry
+  return(Dist)
 }
 
 distmap.psp <- function(X, ...) {

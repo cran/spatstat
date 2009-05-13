@@ -7,7 +7,7 @@
   the spatial domain from which they came.
 }
 \usage{
- ripras(x, y=NULL, shape="convex")
+ ripras(x, y=NULL, shape="convex", f)
 }
 \arguments{
   \item{x}{
@@ -20,6 +20,9 @@
     if \code{x} is a vector.}
   \item{shape}{String indicating the type of window to be estimated:
     either \code{"convex"} or \code{"rectangle"}.
+  }
+  \item{f}{
+    (optional) scaling factor. See Details.
   }
 }
 \value{
@@ -47,6 +50,7 @@
   \eqn{1/sqrt(1 - m/n)}{1/\sqrt{1 - \frac m n}}
   where \eqn{n} is the number of data points and 
   \eqn{m} the number of vertices of the convex hull.
+  The scaling factor may be overridden using the argument \code{f}.
 
   If \code{shape="rectangle"}, the domain \eqn{D} is assumed
   to be a rectangle with sides parallel to the coordinate axes. The maximum
@@ -56,6 +60,7 @@
   with scaling factor \eqn{1/sqrt(1 - 4/n)}{1/\sqrt{1 - \frac 4 n}}
   where \eqn{n} is the number of data points,
   centred at the centroid of the bounding box.
+  The scaling factor may be overridden using the argument \code{f}.
 }
 \seealso{
   \code{\link{owin}},

@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.24 $	$Date: 2009/04/14 09:01:26 $
+#	$Revision: 5.25 $	$Date: 2009/04/29 17:13:19 $
 #
 #
 # -------- functions ----------------------------------------
@@ -226,6 +226,14 @@ function(X, I, J, r=NULL, breaks=NULL,
         
 # Compute estimates by each of the selected edge corrections.
         
+  if(any(correction == "none")) {
+    # uncorrected! 
+    wh <- whist(dcloseIJ, breaks$val)  # no weights
+    Kun <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    K <- bind.fv(K, data.frame(un=Kun), "%sun(r)",
+                 "uncorrected estimate of %s",
+                 "un")
+  }
   if(any(correction == "border" | correction == "bord.modif")) {
     # border method
     # distance to boundary from each point of type I

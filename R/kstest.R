@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.24 $  $Date: 2008/02/06 16:24:31 $
+#  $Revision: 1.26 $  $Date: 2009/05/13 06:38:25 $
 #
 #
 
@@ -90,7 +90,7 @@ kstestEngine <- function(model, covariate, ...,
 
   # apply jittering to avoid ties
   if(jitter) {
-    dZ <- 0.005 * diff(range(ZX, Zvalues))
+    dZ <- 0.3 * quantile(diff(sort(unique(c(ZX, Zvalues)))), 1/min(20, X$n))
     ZX <- ZX + rnorm(length(ZX), sd=dZ)
     Zvalues <- Zvalues + rnorm(length(Zvalues), sd=dZ)
   }

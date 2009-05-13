@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.12 $   $Date: 2007/10/24 09:41:15 $
+#    $Revision: 1.13 $   $Date: 2009/05/13 23:53:34 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -153,9 +153,9 @@ print.im <- function(x, ...) {
   cat(paste(di[1], "x", di[2], "pixel array (ny, nx)\n"))
   cat("enclosing rectangle: ")
   cat(paste("[",
-            paste(x$xrange, collapse=", "),
+            paste(signif(x$xrange, 5), collapse=", "),
             "] x [",
-            paste(x$yrange, collapse=", "),
+            paste(signif(x$yrange, 5), collapse=", "),
             "] ",
             unitinfo$plural,
             " ", unitinfo$explain,

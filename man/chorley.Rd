@@ -32,6 +32,10 @@
   and the resolution is 100 metres (0.1 km)
 }
 \usage{data(chorley)}
+\examples{
+    data(chorley)
+    chorley.extra$plotit()
+}
 \source{
   Coordinates of cases were provided by the
   Chorley and South Ribble Health Authority, and were

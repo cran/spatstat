@@ -28,6 +28,11 @@
   but contained in a larger, 5-sided convex polygon.
 }
 \usage{data(humberside)}
+\examples{
+   data(humberside)
+   plot(humberside)
+   plot(humberside.convex$window, add=TRUE, lty=2)
+}
 \source{
   Dr Ray Cartwright and Dr Freda Alexander.
   Published and analysed in Cuzick and Edwards (1990), see Table 1.

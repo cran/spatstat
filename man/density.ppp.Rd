@@ -5,7 +5,9 @@
   Compute a kernel smoothed intensity function from a point pattern.
 }
 \usage{
-  \method{density}{ppp}(x, sigma, \dots, weights, edge=TRUE, varcov=NULL)
+  \method{density}{ppp}(x, sigma, \dots,
+        weights, edge=TRUE, varcov=NULL,
+        at="pixels", leaveoneout=TRUE)
 }
 \arguments{
   \item{x}{
@@ -29,11 +31,25 @@
     Variance-covariance matrix of anisotropic Gaussian kernel.
     Incompatible with \code{sigma}.
   }
+  \item{at}{
+    String specifying whether to compute the intensity values
+    at a grid of pixel locations (\code{at="pixels"}) or
+    only at the points of \code{x} (\code{at="points"}).
+  }
+  \item{leaveoneout}{
+    Logical value indicating whether to compute a leave-one-out
+    estimator. Applicable only when \code{at="points"}.
+  }
 }
 \value{
-  A pixel image (object of class \code{"im"}). 
+  By default, the result is
+  a pixel image (object of class \code{"im"}). 
   Pixel values are estimated intensity values,
   expressed in \dQuote{points per unit area}.
+
+  If \code{at="points"}, the result is a numeric vector
+  of length equal to the number of points in \code{x}.
+  Values are estimated intensity values at the points of \code{x}.
 }
 \details{
   This is a method for the generic function \code{density}.
@@ -59,10 +75,43 @@
   Also \code{sigma} may be a vector of length 2 giving the
   standard deviations of two independent Gaussian coordinates,
   thus equivalent to \code{varcov = diag(sigma^2)}.
-  
+
+  Thus the intensity value at a point \eqn{u} is
+  \deqn{
+    \hat\lambda(u) = e(u) \sum_i k(x_i - u) w_i
+  }{
+    lambda(u) = e(u) sum[i] k(x[i] - u) w[i]
+  }
+  where \eqn{k} is the Gaussian smoothing kernel,
+  \eqn{e(u)} is an edge correction factor, 
+  and \eqn{x_i}{w[i]} are the weights.
+
+  By default the intensity values are
+  computed at every location \eqn{u} in a fine grid,
+  and are returned as a pixel image.
   Computation is performed using the Fast Fourier Transform.
   Accuracy depends on the pixel resolution, controlled by the arguments
   \code{\dots} passed to \code{\link{as.mask}}.
+
+  If \code{at="points"}, the intensity values are computed 
+  to high accuracy at the points of \code{x} only. Computation is
+  performed by directly evaluating and summing the Gaussian kernel
+  contributions without discretising the data. The result is a numeric
+  vector giving the density values.
+  The intensity value at a point \eqn{x_i}{x[i]} is
+  \deqn{
+    \hat\lambda(x_i) = e(x_i) \sum_j k(x_j - x_i) w_i
+  }{
+    lambda(x[i]) = e(x[i]) sum[j] k(x[j] - x[i]) w[i]
+  }
+  If \code{leaveoneout=TRUE} (the default), then the sum in the equation
+  is taken over all \eqn{j} not equal to \eqn{i},
+  so that the intensity value at a
+  data point is the sum of kernel contributions from
+  all \emph{other} data points.
+  If \code{leaveoneout=FALSE} then the sum is taken over all \eqn{j},
+  so that the intensity value at a data point includes a contribution
+  from the same point.
 
   To perform spatial interpolation of values that were observed
   at the points of a point pattern, use \code{\link{smooth.ppp}}.
@@ -101,8 +150,9 @@
 }
 \examples{
   data(cells)
-  Z <- density.ppp(cells, 0.05)
+  Z <- density(cells, 0.05)
   plot(Z)
+  density(cells, 0.05, at="points")
 }
 \references{
   Baddeley, A. (2008) Analysing spatial point patterns in R.

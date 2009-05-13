@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.40 $	$Date: 2009/04/05 18:33:08 $
+#	$Revision: 4.43 $	$Date: 2009/04/25 06:13:06 $
 #
 #
 #
@@ -455,8 +455,7 @@ incircle <- function(W) {
     return(list(x=x0, y=y0, r=radius))
   }
   # compute distance to boundary
-  U <- as.mask(rebound.owin(W, expand.owin(as.rectangle(W), 1.2)))
-  D <- distmap(complement.owin(U))
+  D <- distmap(W, invert=TRUE)
   D <- D[W, drop=FALSE]
   # find maximum distance
   v <- D$v
@@ -469,9 +468,11 @@ incircle <- function(W) {
   loccol <- as.vector(col(v)[ok])[locn]
   x0 <- D$xcol[loccol]
   y0 <- D$yrow[locrow]
-  # radius could be one pixel diameter shorter than Dmax
-  Dpixel <- sqrt(D$xstep^2 + D$ystep^2)
-  radius <- max(0, Dmax - Dpixel)
+  if(W$type == "mask") {
+    # radius could be one pixel diameter shorter than Dmax
+    Dpixel <- sqrt(D$xstep^2 + D$ystep^2)
+    radius <- max(0, Dmax - Dpixel)
+  } else radius <- Dmax
   return(list(x=x0, y=y0, r=radius))
 }
 

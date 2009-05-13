@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.6 $    $Date: 2008/12/16 17:55:58 $
+#  $Revision: 1.13 $    $Date: 2009/05/13 02:37:06 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -11,7 +11,8 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
   density.ppp(x, sigma, ..., edge=edge)
 }
 
-density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
+density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
+                        at="pixels", leaveoneout=TRUE) {
   verifyclass(x, "ppp")
   sigma.given <- !missing(sigma) && !is.null(sigma)
   varcov.given <- !is.null(varcov)
@@ -40,11 +41,64 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
                       sQuote("sigma"), "and", sQuote("varcov")))
          })
       
-  smo <- second.moment.calc(x, sigma, what="smooth", ..., weights=weights, varcov=varcov)
+  output <- pickoption("output location type", at,
+                       c(pixels="pixels",
+                         points="points"))
+  if(output == "points") {
+    # VALUES AT DATA POINTS ONLY
+    # identify pairs of distinct points that are close enough
+    # to have nonzero contribution.
+    # Anything closer than 'nsd' standard deviations
+    sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
+    cutoff <- 8 * sd
+    close <- closepairs(x, cutoff)
+    i <- close$i
+    j <- close$j
+    d <- close$d
+    # evaluate contribution from each close pair (i,j)
+    if(is.null(varcov)) {
+      const <- 1/(2 * pi * sigma^2)
+      contrib <- const * exp(-d^2/(2 * sigma^2))
+    } else {
+      # anisotropic kernel
+      dx <- close$dx
+      dy <- close$dy
+      detSigma <- det(varcov)
+      Sinv <- solve(varcov)
+      const <- 1/(2 * pi * sqrt(detSigma))
+      contrib <- const * exp(-(dx * (dx * Sinv[1,1] + dy * Sinv[1,2])
+                               + dy * (dx * Sinv[2,1] + dy * Sinv[2,2]))/2)
+    }
+    # multiply by weights
+    if(!is.null(weights))
+      contrib <- contrib * weights[j]
+    # sum
+    result <- tapply(contrib, factor(i, levels=1:(x$n)), sum)
+    result[is.na(result)] <- 0
+    #
+    if(!leaveoneout) {
+      # add contribution from point itself
+      self <- const
+      if(!is.null(weights))
+        self <- self * weights[i]
+      result <- result + self
+    }
+    #
+    if(edge) {
+      # edge correction
+      edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
+      result <- result/safelookup(edg, x)
+    }
+    return(as.numeric(result))
+  }
+  # VALUES AT PIXELS
+  smo <- second.moment.calc(x, sigma, what="smooth", ...,
+                            weights=weights, varcov=varcov)
   smo$v <- smo$v/(smo$xstep * smo$ystep)
   raw <- smo
   if(edge) {
-    edg <- second.moment.calc(x, sigma, what="edge", ..., weights=weights, varcov=varcov)
+    edg <- second.moment.calc(x, sigma, what="edge", ...,
+                              weights=weights, varcov=varcov)
     smo <- eval.im(smo/edg)
   }
   result <- smo[x$window, drop=FALSE]
@@ -52,7 +106,7 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
   # internal use only
   spill <- list(...)$spill
   if(!is.null(spill)) {
-    edg <- if(edge) im(edg, xcol=raw$xcol, yrow=raw$yrow) else NULL
+    if(!edge) edg <- NULL
     return(list(sigma=sigma, varcov=varcov, raw = raw, edg=edg))
   }
 
@@ -60,25 +114,43 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL) {
   return(result)
 }
 
-smooth.ppp <- function(X, ..., weights=rep(1,X$n)) {
+smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
   verifyclass(X, "ppp")
-  if(is.marked(X)) {
-    if(is.factor(marks(X)))
-      warning("Factor values were converted to integers")
-    values <- as.numeric(marks(X))
+  if(!is.marked(X))
+    stop("X should be a marked point pattern")
+  values <- marks(X, dfok=FALSE)
+  if(is.factor(values)) {
+    warning("Factor values were converted to integers")
+    values <- as.numeric(values)
   }
-  else
-    values <- rep(1, X$n)
-  
   if(!missing(weights)) {
     # rescale weights to avoid numerical gremlins
     weights <- weights/median(abs(weights))
   }
-  numerator <-   density(X, ..., weights= values * weights)
-  denominator <- density(X, ..., weights= weights)
-  ratio <- eval.im(numerator/denominator)
-  ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
+  numerator <- density(X, ..., at=at, weights= values * weights)
+  denominator <- density(X, ..., at=at, weights= weights)
+  at <- pickoption("output location type", at,
+                   c(pixels="pixels",
+                     points="points"))
+  switch(at,
+         pixels={
+           ratio <- eval.im(numerator/denominator)
+           ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
+         },
+         points= {
+           ratio <- numerator/denominator
+           ratio <- ifelse(is.infinite(ratio), NA, ratio)
+         })
   return(ratio)
 }
 
-  
+markmean <- function(X, ...) { smooth.ppp(X, ...) }
+
+markvar  <- function(X, ...) {
+  E1 <- smooth.ppp(X, ...)
+  X2 <- X %mark% marks(X)^2
+  E2 <- smooth.ppp(X2, ...)
+  V <- eval.im(E2 - E1^2)
+  return(V)
+}
+

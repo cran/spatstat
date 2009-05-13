@@ -4,7 +4,7 @@
        Distance transform of a discrete binary image
        (8-connected path metric)
        
-       $Revision: 1.3 $ $Date: 2007/07/26 17:58:05 $
+       $Revision: 1.4 $ $Date: 2009/04/25 06:06:15 $
 
        
 */
@@ -51,11 +51,15 @@ distmap_bin(in, dist)
 	dnew = STEP + DISTANCE(ROW, COL); \
         if(D > dnew) D = dnew
 
-	/* initialise edges */
-	for(j = rmin-1; j <= rmax+1; j++) 
-	  DISTANCE(j, cmin-1) = DISTANCE(j, cmax+1) = huge;
-	for(k = cmin-1; k <= cmax+1; k++) 
-	  DISTANCE(rmin-1, k) = DISTANCE(rmax+1, k) = huge;
+	/* initialise edges to boundary condition */
+	for(j = rmin-1; j <= rmax+1; j++) {
+	  DISTANCE(j, cmin-1) = (MASKTRUE(j, cmin-1)) ? 0.0 : huge;
+	  DISTANCE(j, cmax+1) = (MASKTRUE(j, cmax+1)) ? 0.0 : huge;
+	}
+	for(k = cmin-1; k <= cmax+1; k++) {
+	  DISTANCE(rmin-1, k) = (MASKTRUE(rmin-1, k)) ? 0.0 : huge;
+	  DISTANCE(rmax+1, k) = (MASKTRUE(rmax+1, k)) ? 0.0 : huge;
+	}
 	  
 	/* forward pass */
 

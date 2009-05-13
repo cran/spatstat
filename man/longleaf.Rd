@@ -34,6 +34,11 @@
   point pattern object.
 }
 \usage{data(longleaf)}
+\examples{
+    data(longleaf)
+    plot(longleaf)
+    plot(cut(longleaf, breaks=c(0,30,Inf), labels=c("Sapling","Adult")))
+}
 \source{Platt, Evans and Rathbun (1988)}
 \references{
 Platt, W. J., Evans, G. W. and Rathbun, S. L. (1988)

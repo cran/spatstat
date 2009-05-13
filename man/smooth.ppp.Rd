@@ -1,22 +1,35 @@
 \name{smooth.ppp}
 \alias{smooth.ppp}
+\alias{markmean}
+\alias{markvar}
 \title{Spatial smoothing of observations at irregular points}
 \description{
   Performs spatial smoothing of numeric values observed
   at a set of irregular locations. 
 }
 \usage{
-smooth.ppp(X, ..., weights = rep(1, X$n))
+smooth.ppp(X, ..., weights = rep(1, X$n), at="pixels")
+markmean(X, ...)
+markvar(X, ...)
 }
 \arguments{
   \item{X}{A marked point pattern (object of class \code{"ppp"}).}
   \item{\dots}{Arguments passed to \code{\link{density.ppp}}
-    to control the kernel smoothing.}
+    to control the kernel smoothing and
+    the pixel resolution of the result.}
   \item{weights}{Optional weights attached to the observations.}
+  \item{at}{
+    String specifying whether to compute the intensity values
+    at a grid of pixel locations (\code{at="pixels"}) or
+    only at the points of \code{x} (\code{at="points"}).
+  }
 }
 \details{
-  This function performs spatial smoothing of numeric values
-  observed at a set of irregular locations.
+  The function \code{smooth.ppp} performs spatial smoothing of numeric values
+  observed at a set of irregular locations. The functions
+  \code{markmean} and \code{markvar} are wrappers for \code{smooth.ppp}
+  which compute the spatially-varying mean and variance of the marks of
+  a point pattern.
 
   Smoothing is performed by Gaussian kernel weighting. If the
   observed values are \eqn{v_1,\ldots,v_n}{v[1],...,v[n]}
@@ -45,8 +58,13 @@ smooth.ppp(X, ..., weights = rep(1, X$n))
   in the equation above).
 }
 \value{
-  A pixel image (object of class \code{"im"}).
+  By default, the result is
+  a pixel image (object of class \code{"im"}). 
   Pixel values are values of the interpolated function.
+
+  If \code{at="points"}, the result is a numeric vector
+  of length equal to the number of points in \code{x}.
+  Entries are values of the interpolated function at the points of \code{x}.
 }
 \seealso{
   \code{\link{density.ppp}},
@@ -61,6 +79,8 @@ smooth.ppp(X, ..., weights = rep(1, X$n))
    Z <- smooth.ppp(longleaf)
    # Kernel bandwidth sigma=5
    plot(smooth.ppp(longleaf, 5))
+   # mark variance
+   plot(markvar(longleaf))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -2,7 +2,7 @@
 #	ripras.S	Ripley-Rasson estimator of domain
 #
 #
-#	$Revision: 1.9 $	$Date: 2009/02/24 01:48:09 $
+#	$Revision: 1.10 $	$Date: 2009/05/06 00:33:05 $
 #
 #
 #
@@ -28,7 +28,7 @@ convexhull.xy <- function(x, y=NULL) {
   return(w)
 }
 
-ripras <- function(x, y=NULL, shape="convex") {
+ripras <- function(x, y=NULL, shape="convex", f) {
   xy <- xy.coords(x, y)
   n <- length(xy$x)
   w <- switch(shape,
@@ -42,7 +42,10 @@ ripras <- function(x, y=NULL, shape="convex") {
               convex = summary(w)$nvertices,
               rectangle = 4)
   # expansion factor
-  f <- if(m < n) 1/sqrt(1 - m/n) else 2
+  if(!missing(f))
+    stopifnot(is.numeric(f) && length(f) == 1 && f >= 1)
+  else
+    f <- if(m < n) 1/sqrt(1 - m/n) else 2
   # centroid
   ce <- unlist(centroid.owin(w))
   # shift centroid to origin
