@@ -188,6 +188,7 @@
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
+	\code{\link{shapley}} \tab Galaxies in an astronomical survey \cr
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
 	\code{\link{swedishpines}} \tab Strand-Ripley swedish pines data \cr
@@ -300,6 +301,8 @@
 	\code{\link{inside.owin}}	\tab	determine whether a point is inside a window\cr
 	\code{\link{area.owin}}	\tab	compute window's area \cr
 	\code{\link{diameter}}	\tab	compute window frame's diameter\cr
+	\code{\link{incircle}}	\tab	find largest circle inside a window \cr
+	\code{\link{connected}}    \tab find connected components of window \cr
 	\code{\link{eroded.areas}}	\tab	compute areas of eroded windows\cr
 	\code{\link{bdist.points}}	\tab	compute distances from data points to window boundary \cr
 	\code{\link{bdist.pixels}}	\tab	compute distances from all pixels to window boundary \cr
@@ -332,6 +335,7 @@
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
 	\code{\link{interp.im}} \tab interpolate a pixel image\cr
 	\code{\link{blur}} \tab apply Gaussian blur to image\cr
+	\code{\link{connected}} \tab find connected components \cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
@@ -497,11 +501,15 @@
   string or any other atomic type. For numeric marks, there are the
   following functions:
   \tabular{ll}{
+    \code{\link{markmean}} \tab smoothed local average of marks \cr
+    \code{\link{markvar}} \tab smoothed local variance of marks \cr
     \code{\link{markcorr}} \tab mark correlation function \cr
     \code{\link{markvario}} \tab mark variogram \cr
     \code{\link{markcorrint}} \tab mark correlation integral \cr
     \code{\link{Emark}} \tab mark independence diagnostic \eqn{E(r)} \cr
-    \code{\link{Vmark}} \tab mark independence diagnostic \eqn{V(r)}
+    \code{\link{Vmark}} \tab mark independence diagnostic \eqn{V(r)} \cr
+    \code{\link{nnmean}} \tab nearest neighbour mean index \cr
+    \code{\link{nnvario}} \tab nearest neighbour mark variance index 
   }
   For marks of any type, there are the following:
   \tabular{ll}{

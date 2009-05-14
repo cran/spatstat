@@ -36,6 +36,12 @@
   point pattern object.
 }
 \usage{data(lansing)}
+\examples{
+     data(lansing)
+     plot(lansing)
+     plot(split(lansing))
+     plot(split(lansing)$maple)
+}
 \references{
 Besag, J. (1978)
 Some methods of statistical analysis for spatial data.

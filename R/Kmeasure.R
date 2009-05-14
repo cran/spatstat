@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.31 $    $Date: 2008/12/19 19:43:30 $
+#           $Revision: 1.32 $    $Date: 2009/05/13 01:45:46 $
 #
 #     pixellate()        convert a point pattern to a pixel image
 #
@@ -207,7 +207,9 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
     # return convolution of window with kernel
     # (evaluated inside window only)
     con <- fft(fM * fK, inverse=TRUE)/lengthMpad
-    return(Mod(con[1:nr, 1:nc]))
+    edg <- Mod(con[1:nr, 1:nc])
+    edg <- im(edg, xcol.pad[1:nc], yrow.pad[1:nr], unitname=unitname(x))
+    return(edg)
   }
   # divide by number of points * lambda
   mom <- mom * area.owin(x$window) / x$n^2

@@ -110,6 +110,7 @@ compatible.fv           Test Whether Two Function Objects Are
 compatible.im           Test Whether Two Pixel Images Are Compatible
 complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
+connected               Connected components of an image or window
 contour.im              Contour plot of pixel image
 convexhull.xy           Convex Hull of Points
 copper                  Berman-Huntington points and lines data
@@ -247,8 +248,8 @@ murchison               Murchison gold deposits
 nbfires                 Point Patterns of New Brunswick Forest Fires
 nearest.raster.point    Find Pixel Nearest to a Given Point
 nearestsegment          Find Line Segment Nearest to Each Point
-nncorr                  Nearest-Neighbour Correlation of Marked Point
-                        Pattern
+nncorr                  Nearest-Neighbour Correlation Indices of Marked
+                        Point Pattern
 nncross                 Nearest Neighbours Between Two Patterns
 nndist                  Nearest neighbour distances
 nndist.psp              Nearest neighbour distances between line
@@ -405,6 +406,7 @@ scanpp                  Read Point Pattern From Data File
 selfcrossing.psp        Crossing Points in a Line Segment Pattern
 setcov                  Set Covariance of a Window
 setmarks                Set or Reset the Marks in a Point Pattern
+shapley                 Galaxies in the Shapley Supercluster
 shift                   Apply Vector Translation
 shift.im                Apply Vector Translation To Pixel Image
 shift.owin              Apply Vector Translation To Window

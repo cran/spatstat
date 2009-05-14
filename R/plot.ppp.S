@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.36 $	$Date: 2009/02/24 04:51:40 $
+#	$Revision: 1.37 $	$Date: 2009/05/12 02:12:05 $
 #
 #
 #--------------------------------------------------------------------------
@@ -226,8 +226,20 @@ plot.ppp <-
 
   ntypes <- length(um)
   
-  if(is.null(chars))
-    chars <- seq(um)
+  if(is.null(chars)) {
+    if(ntypes <= 25) {
+      # numerical 'pch' 
+      chars <- 1:ntypes
+    } else if(ntypes <= 52) {
+      # letters
+      ltr <- c(letters, LETTERS)
+      chars <- ltr[1:ntypes]
+    } else {
+      # wrapped sequence of letters
+      warning("There are too many types to display every type as a different character")
+      chars <- ltr[1 + (0:(ntypes - 1) %% 52)]
+    }
+  }
   else if((nchars <- length(chars)) != ntypes) {
     if(nchars != 1)
       stop(paste("length of",

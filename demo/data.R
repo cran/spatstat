@@ -90,6 +90,8 @@ plot(residualspaper$Fig4a)
 plot(residualspaper$Fig4b)
 plot(residualspaper$Fig4c)
 
+data(shapley)
+shapley.extra$plotit(main="Shapley")
 
 data(simdat)
 plot(simdat)

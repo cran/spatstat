@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.19 $  $Date: 2009/01/30 01:13:58 $
+#  $Revision: 1.20 $  $Date: 2009/04/25 08:11:55 $
 #
 
 
@@ -11,7 +11,7 @@ quadrat.test <- function(X, ...) {
 
 quadrat.test.splitppp <- function(X, ...)
 {
-  as.listof(lapply(X, quadrat.test.ppp))
+  as.listof(lapply(X, quadrat.test.ppp, ...))
 }
 
 quadrat.test.ppp <- function(X, nx=5, ny=nx, ...,
@@ -136,7 +136,8 @@ plot.quadrattest <- function(x, ...) {
                            list(main=xname)))
   # compute locations for text
   til <- tiles(tess)
-  incircles <- lapply(til, incircle)
+  ok <- unlist(lapply(til, function(x) { !is.null(x) && area.owin(x) > 0 }))
+  incircles <- lapply(til[ok], incircle)
   x0 <- unlist(lapply(incircles, function(z) { z$x }))
   y0 <- unlist(lapply(incircles, function(z) { z$y }))
   ra <- unlist(lapply(incircles, function(z) { z$r }))
@@ -151,13 +152,13 @@ plot.quadrattest <- function(x, ...) {
   cos30 <- sqrt(2)/2
   sin30 <- 1/2
   f <- 0.4
-  dotext(-f * cos30, f * sin30, as.vector(t(as.table(Xcount))),
+  dotext(-f * cos30, f * sin30, as.vector(t(as.table(Xcount)))[ok],
          x0, y0, ra, adj=c(1,0), ...)
   # plot expected counts
-  dotext(f * cos30, f * sin30, round(x$expected,1), x0, y0, ra, adj=c(0,0),
+  dotext(f * cos30, f * sin30, round(x$expected,1)[ok], x0, y0, ra, adj=c(0,0),
          ...)
   # plot Pearson residuals
-  dotext(0, -f,  signif(x$residuals,2),x0, y0, ra, ...)
+  dotext(0, -f,  signif(x$residuals,2)[ok],x0, y0, ra, ...)
 
   return(invisible(NULL))
 }

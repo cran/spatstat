@@ -51,6 +51,12 @@
 \usage{
  data(murchison)
 }
+\examples{
+  data(murchison)
+  plot(murchison$greenstone, main="Murchison data", col="lightgreen")
+  plot(murchison$gold, add=TRUE, pch="+",col="blue")
+  plot(murchison$faults, add=TRUE, col="red")
+}
 \source{
   Data were kindly provided by Dr Carl Knox-Robinson of the
   Department of Geology and Geophysics, University of Western Australia.

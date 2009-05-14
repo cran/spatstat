@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.47 $	$Date: 2009/04/07 04:21:18 $
+#	$Revision: 5.48 $	$Date: 2009/04/29 17:08:19 $
 #
 #
 # -------- functions ----------------------------------------
@@ -70,9 +70,8 @@ function(X, ..., r=NULL, breaks=NULL,
     # correct for estimate of intensity of type i
     adj <- area/area.owin(domain)
     Kd <- eval.fv(adj * Kd)
-    # neaten up 
-    attr(Kd, "ylab") <- substitute(K(r), NULL)
-    # RETURN
+    # relabel and exit
+    Kd <- rebadge.fv(Kd, substitute(K(r), NULL), "K")
     return(Kd)
   }
 

@@ -6,7 +6,7 @@
   in the given window.
 }
 \usage{
-  \method{distmap}{owin}(X, \dots)
+  \method{distmap}{owin}(X, \dots, discretise=FALSE, invert=FALSE)
 }
 \arguments{
   \item{X}{
@@ -15,6 +15,14 @@
   \item{\dots}{
     Arguments passed to \code{\link{as.mask}}
     to control pixel resolution.
+  }
+  \item{discretise}{
+    Logical flag controlling the choice of algorithm when \code{X} is
+    a polygonal window. See Details.
+  }
+  \item{invert}{
+    If \code{TRUE}, compute the distance transform of the
+    complement of the window.
   }
 }
 \value{
@@ -33,7 +41,13 @@
   at a pixel \eqn{u} equals the distance from \eqn{u} to the nearest
   pixel in \code{X}.
 
-  For computational efficiency, the distances computed are not the
+  Additionally, the return value 
+  has an attribute \code{"bdry"} which is 
+  also a pixel image. The grey values in \code{"bdry"} give the
+  distance from each pixel to the bounding rectangle of the image.
+
+  If \code{X} is a binary pixel mask,
+  the distance values computed are not the
   usual Euclidean distances. Instead the distance between two pixels
   is measured by the length of the
   shortest path connecting the two pixels. A path is a series of steps
@@ -41,15 +55,13 @@
   This is the standard `distance transform' algorithm of image
   processing (Rosenfeld and Kak, 1968; Borgefors, 1986).
 
-  Additionally, the return value 
-  has an attribute \code{"bdry"} which is 
-  also a pixel image. The grey values in \code{"bdry"} give the
-  distance from each pixel to the bounding rectangle of the image.
+  If \code{X} is a polygonal window, then exact Euclidean distances
+  will be computed if \code{discretise=FALSE}. If \code{discretise=TRUE}
+  then the window will first be converted to a binary pixel mask
+  and the discrete path distances will be computed.
 
-  If the window \code{X} is not already a pixellated window
-  (a binary image mask), it is converted into one. The arguments
-  \code{...} control the pixel resolution in this case, but will
-  otherwise be ignored.
+  The arguments \code{\dots} are passed to \code{\link{as.mask}}
+  to control the pixel resolution.
   
   This function is a method for the generic \code{\link{distmap}}.
 }

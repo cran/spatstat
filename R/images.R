@@ -60,6 +60,11 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   xrange <- range(xcol) + c(-1,1) * xstep/2
   yrange <- range(yrow) + c(-1,1) * ystep/2
   unitname <- as.units(unitname)
+
+  # get rid of those annoying 8.67e-19 printouts
+  swat <- function(x) {ifelse(abs(x) < .Machine$double.eps, 0, x)}
+  xrange <- swat(xrange)
+  yrange <- swat(yrange)
   
   out <- list(v   = mat,
               dim = c(nr, nc),
