@@ -46,7 +46,8 @@
   \item{correction}{
       A character vector containing any selection of the
       options \code{"border"}, \code{"bord.modif"},
-      \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+      \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+      \code{"none"} or \code{"best"}.
       It specifies the edge correction(s) to be applied.
   }
   \item{nlarge}{

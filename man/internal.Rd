@@ -79,6 +79,7 @@
 \alias{getfields}
 \alias{getglmdata}
 \alias{getglmfit}
+\alias{getglmsubset}
 \alias{gridindex}            
 \alias{grid1index}
 \alias{grow.rectangle}
@@ -86,6 +87,7 @@
 \alias{handle.rshift.args}
 \alias{ho.engine}
 \alias{identical.formulae}
+\alias{implemented.for.K}
 \alias{inpoint}
 \alias{inside.xypolygon}     
 \alias{intersect.ranges}     
@@ -268,6 +270,7 @@
 \alias{second.moment.calc}
 \alias{shiftxy}              
 \alias{shiftxypolygon}              
+\alias{simplify.xypolygon}              
 \alias{spatstat.rawdata.location}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
@@ -398,6 +401,7 @@ greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
+getglmsubset(object)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
 grow.rectangle(W, xmargin=0, ymargin=xmargin)
@@ -405,6 +409,7 @@ handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
+implemented.for.K(correction, windowtype, explicit)
 inpoint(W)
 inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
 intersect.ranges(a,b,fatal)
@@ -600,6 +605,7 @@ second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
+simplify.xypolygon(p, dmin)
 spatstat.rawdata.location(\dots)             
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)             

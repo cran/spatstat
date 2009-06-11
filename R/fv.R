@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.37 $   $Date: 2009/04/14 08:49:49 $
+#    $Revision: 1.39 $   $Date: 2009/06/02 23:18:34 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -215,7 +215,9 @@ rebadge.fv <- function(x, new.ylab=NULL, new.fname=NULL,
   return(x)
 }
 
-"[.fv" <- subset.fv <- function(x, i, j, ..., drop=FALSE)
+# subset extraction operator
+"[.fv" <-
+  function(x, i, j, ..., drop=FALSE)
 {
   Nindices <- (!missing(i)) + (!missing(j))
   if(Nindices == 0)

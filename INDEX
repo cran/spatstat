@@ -45,6 +45,11 @@ Saturated               Saturated Pairwise Interaction model
 Softcore                The Soft Core Point Process Model
 Strauss                 The Strauss Point Process Model
 StraussHard             The Strauss / Hard Core Point Process Model
+[.fasp                  Extract Subset of Function Array
+[.fv                    Extract Subset of Function Values
+[.im                    Extract Subset of Image
+[.ppp                   Extract or Replace Subset of Point Pattern
+[.psp                   Extract Subset of Line Segment Pattern
 [.quad                  Subset of Quadrature Scheme
 [.splitppp              Extract or Replace Sub-Patterns
 [.tess                  Extract or Replace Subset of Tessellation
@@ -414,6 +419,7 @@ shift.ppp               Apply Vector Translation To Point Pattern
 shift.psp               Apply Vector Translation To Line Segment
                         Pattern
 simdat                  Simulated Point Pattern
+simplify.owin           Approximate a Polygon by a Simpler Polygon
 simulate.kppm           Simulate a fitted cluster point process model.
 smooth.ppp              Spatial smoothing of observations at irregular
                         points
@@ -429,11 +435,6 @@ spruces                 Spruces Point Pattern
 square                  Square Window
 stieltjes               Compute Integral of Function Against Cumulative
                         Distribution
-subset.fasp             Extract Subset of Function Array
-subset.fv               Extract Subset of Function Values
-subset.im               Extract Subset of Image
-subset.ppp              Extract or Replace Subset of Point Pattern
-subset.psp              Extract Subset of Line Segment Pattern
 suffstat                Sufficient Statistic of Point Process Model
 summary.im              Summarizing a Pixel Image
 summary.listof          Summary of a List of Things

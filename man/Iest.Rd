@@ -5,7 +5,7 @@
   Estimates the summary function \eqn{I(r)} for a multitype point pattern.
 }
 \usage{
-  Iest(X, eps=NULL, r=NULL, breaks=NULL)
+  Iest(X, ..., eps=NULL, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -13,6 +13,7 @@
     An object of class \code{"ppp"}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
   }
+  \item{\dots}{Ignored.}
   \item{eps}{
     the resolution of the discrete approximation to Euclidean distance
     (see below). There is a sensible default.

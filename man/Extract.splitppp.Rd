@@ -1,4 +1,4 @@
-\name{subset.splitppp}
+\name{Extract.splitppp}
 \alias{[.splitppp}
 \alias{[<-.splitppp}
 \title{Extract or Replace Sub-Patterns}

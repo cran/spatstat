@@ -200,7 +200,6 @@
       \tabular{ll}{
 	\code{\link{plot.ppp}} \tab
 	plot a point pattern (e.g. \code{plot(X)}) \cr
-	\code{\link{subset.ppp}} \tab  \cr
 	\code{\link{[.ppp}} \tab
 	extract or replace a subset of a point pattern \cr
         \tab \code{pp[subset]} or \code{pp[subwindow]} \cr
@@ -274,6 +273,8 @@
 	open window by a distance r\cr
 	\code{\link{complement.owin}}	\tab
 	invert (swap inside and outside)\cr
+	\code{\link{simplify.owin}}	\tab
+	approximate a window by a simple polygon  \cr
 	\code{\link{rotate}} \tab rotate window  \cr
 	\code{\link{shift} } \tab translate window  \cr
 	\code{\link{affine}} \tab apply affine transformation
@@ -354,7 +355,6 @@
       \code{\link{plot.psp}} \tab plot a line segment pattern \cr
       \code{\link{print.psp}} \tab print basic information \cr
       \code{\link{summary.psp}} \tab print summary information \cr
-      \code{\link{subset.psp}} \tab \cr
       \code{\link{[.psp}} \tab extract a subset of a line segment pattern \cr
       \code{\link{as.data.frame.psp}} \tab
       convert line segment pattern to data frame \cr

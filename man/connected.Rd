@@ -90,7 +90,7 @@ connected(X, background = NA, method="C")
   # number of components
   nc <- length(levels(Z))
   # plot with randomised colour map
-  plot(Z, col=rgb(runif(nc), runif(nc), runif(nc)))
+  plot(Z, col=hsv(h=sample(seq(0,1,length=nc), nc)))
 
   # how to extract the components as a list of windows
   W <- tiles(tess(image=Z))

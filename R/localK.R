@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.8 $	$Date: 2009/04/07 07:18:55 $
+#	$Revision: 1.10 $	$Date: 2009/06/10 00:44:57 $
 #
 #
 
@@ -43,16 +43,11 @@
                            c(none="none",
                              isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=FALSE)
 
-  # available selection of edge corrections depends on window
-  if(W$type == "mask") {
-    if(correction == "isotropic")
-      if(correction.given)
-        warning("Isotropic correction not implemented for binary masks")
-      correction <- "translate"
-  }
+  correction <- implemented.for.K(correction, W$type, correction.given)
 
   # recommended range of r values
   alim <- c(0, min(rmax, rmaxdefault))

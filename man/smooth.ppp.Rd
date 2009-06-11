@@ -44,9 +44,11 @@ markvar(X, ...)
   where \eqn{k} is a Gaussian kernel.
   
   The argument \code{X} must be a marked point pattern (object
-  of class \code{"ppp"}, see \code{\link{ppp.object}})
-  in which the points are the observation locations,
-  and the marks are the numeric values observed at each point.
+  of class \code{"ppp"}, see \code{\link{ppp.object}}).
+  The points of the pattern are taken to be the
+  observation locations \eqn{x_i}{x[i]}, and the marks of the pattern
+  are taken to be the numeric values \eqn{v_i}{v[i]} observed at these
+  locations.
   
   The numerator and denominator are computed by \code{\link{density.ppp}}.
   The arguments \code{...} control the smoothing kernel parameters
@@ -54,8 +56,15 @@ markvar(X, ...)
   See \code{\link{density.ppp}}.
 
   The optional argument \code{weights} allows numerical weights to
-  be applied to the data (the weights appear in both the sums
-  in the equation above).
+  be applied to the data. If a weight \eqn{w_i}{w[i]}
+  is associated with location \eqn{x_i}{x[i]}, then the smoothed
+  function is 
+  (ignoring edge corrections)
+  \deqn{
+    g(u) = \frac{\sum_i k(u-x_i) v_i w_i}{\sum_i k(u-x_i) w_i}
+  }{
+    g(u) = (sum of k(u-x[i]) v[i] w[i])/(sum of k(u-x[i]) w[i])
+  }
 }
 \value{
   By default, the result is

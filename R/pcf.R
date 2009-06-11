@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.30 $   $Date: 2009/04/07 07:50:30 $
+#   $Revision: 1.32 $   $Date: 2009/06/10 01:27:56 $
 #
 #
 #   calculate pair correlation function
@@ -25,11 +25,15 @@ pcf.ppp <- function(X, ..., r=NULL,
   area <- area.owin(win)
   lambda <- X$n/area
 
+  correction.given <- !missing(correction)
   correction <- pickoption("correction", correction,
                            c(isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=TRUE)
+
+  correction <- implemented.for.K(correction, win$type, correction.given)
   
   if(is.null(bw) && kernel=="epanechnikov") {
     # Stoyan & Stoyan 1995, eq (15.16), page 285

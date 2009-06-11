@@ -6,8 +6,8 @@
   Perform morphological erosion of a window 
 }
 \usage{
- erosion.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE)
- erode.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE)
+ erosion.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE, polygonal=TRUE)
+ erode.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE, polygonal=TRUE)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}.}
@@ -15,9 +15,14 @@
   \item{shrink.frame}{logical: if \code{TRUE}, erode the bounding
     rectangle as well.}
   \item{\dots}{extra arguments to \code{\link{as.mask}}
-    controlling the pixel resolution}
-  \item{strict}{Logical flag determining the fate of boundary pixels.
-    See details.}
+    controlling the pixel resolution, if pixel approximation is used.}
+  \item{strict}{Logical flag determining the fate of boundary pixels,
+    if pixel approximation is used. See details.}
+  \item{polygonal}{
+    Logical flag indicating whether to compute a polygonal
+    approximation to the erosion (\code{polygonal=TRUE}) or
+    a pixel grid approximation (\code{polygonal=FALSE}).
+  }
 }
 \value{
   Another object of class \code{"owin"} representing the
@@ -34,13 +39,17 @@
   The functions \code{erode.owin} and \code{erosion.owin} are
   identical; they compute the erosion of the window \code{w}.
 
-  If \code{w} is not
-  a rectangle, it must be approximated by a binary pixel image,
-  and the arguments \code{"\dots"} are passed to \code{\link{as.mask}}
+  If \code{w} is a rectangle, the result will be a rectangle, or empty.
+
+  If \code{w} is a polygonal window and \code{polygonal=TRUE},
+  a polygonal approximation to the eroded window will be computed.
+
+  Otherwise, \code{w} and its erosion will be approximated by
+  a binary pixel image. 
+  The arguments \code{"\dots"} are passed to \code{\link{as.mask}}
   to determine the pixel resolution. There is a sensible default.
 
-  For non-rectangular windows, the erosion consists of all pixels
-  whose distance
+  The erosion consists of all pixels whose distance
   from the boundary of \code{w} is strictly greater than \code{r} (if
   \code{strict=TRUE}) or is greater than or equal to \code{r} (if
   \code{strict=FALSE}).

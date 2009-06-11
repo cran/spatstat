@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.48 $	$Date: 2009/04/29 17:08:19 $
+#	$Revision: 5.55 $	$Date: 2009/06/10 01:40:20 $
 #
 #
 # -------- functions ----------------------------------------
@@ -79,27 +79,23 @@ function(X, ..., r=NULL, breaks=NULL,
   breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
   rmax <- breaks$max
-  
-  correction.given <- !missing(correction)
+
+  # choose correction(s)
+  correction.given <- !missing(correction) && !is.null(correction)
+  if(is.null(correction))
+    correction <- c("border", "isotropic", "Ripley", "translate")
   correction <- pickoption("correction", correction,
                            c(none="none",
                              border="border",
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=TRUE)
 
-  # available selection of edge corrections depends on window
-  if(W$type == "mask") {
-    iso <- (correction == "isotropic") 
-    if(any(iso)) {
-      if(correction.given)
-        warning("Isotropic correction not implemented for binary masks")
-      correction <- correction[!iso]
-    }
-  }
-
+  correction <- implemented.for.K(correction, W$type, correction.given)
+  
   # recommended range of r values
   alim <- c(0, min(rmax, rmaxdefault))
 
@@ -379,4 +375,24 @@ rmax.rule <- function(fun="K", W, lambda) {
   return(rmax)
 }
            
-           
+    
+implemented.for.K <- function(correction, windowtype, explicit) {
+  pixels <- (windowtype == "mask")
+  if(any(correction == "best")) {
+    # select best available correction
+    correction <- if(!pixels) "isotropic" else "translate"
+  } else {
+    # available selection of edge corrections depends on window
+    if(pixels) {
+      iso <- (correction == "isotropic") 
+      if(any(iso)) {
+        whinge <- "Isotropic correction not implemented for binary masks"
+        if(explicit) {
+          if(all(iso)) stop(whinge) else warning(whinge)
+        }
+        correction <- correction[!iso]
+      }
+    }
+  }
+  return(correction)
+}

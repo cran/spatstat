@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.25 $	$Date: 2009/04/29 17:13:19 $
+#	$Revision: 5.28 $	$Date: 2009/06/10 01:25:15 $
 #
 #
 # -------- functions ----------------------------------------
@@ -75,6 +75,8 @@ function(X, i, j, r=NULL, breaks=NULL,
   verifyclass(X, "ppp")
   if(!is.marked(X))
     stop("point pattern has no marks (no component 'marks')")
+  if(missing(correction))
+    correction <- NULL
   marx <- marks(X)
   if(missing(i))
     i <- levels(marx)[1]
@@ -110,6 +112,8 @@ function(X, i, r=NULL, breaks=NULL,
   verifyclass(X, "ppp")
   if(!is.marked(X))
     stop("point pattern has no marks (no component 'marks')")
+  if(missing(correction))
+    correction <- NULL
 
   marx <- marks(X)
   if(missing(i))
@@ -142,27 +146,22 @@ function(X, I, J, r=NULL, breaks=NULL,
   W <- X$window
   area <- area.owin(W)
 
+  correction.given <- !missing(correction) && !is.null(correction)
+  if(is.null(correction))
+    correction <- c("border", "isotropic", "Ripley", "translate")
+  
   correction <- pickoption("correction", correction,
                            c(none="none",
                              border="border",
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=TRUE)
-        
-  # available selection of edge corrections depends on window
-  if(W$type == "mask") {
-    iso <- (correction == "isotropic") 
-    if(all(iso))
-      stop("Isotropic correction not implemented for binary masks")
-    if(any(iso)) {
-      if(!missing(correction))
-        warning("Isotropic correction not implemented for binary masks")
-      correction <- correction[!iso]
-    }
-  }
-         
+
+  correction <- implemented.for.K(correction, W$type, correction.given)
+
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
   if(length(I) != npoints || length(J) != npoints)

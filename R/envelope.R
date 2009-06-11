@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.48 $  $Date: 2009/04/15 00:07:01 $
+#   $Revision: 1.52 $  $Date: 2009/06/11 20:32:48 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -226,11 +226,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   }
   
   # ---------------------------------------------------------------------
-  # Evaluate function for data pattern X 
-  if(!clipdata)
-    funX <- fun(X, ...)
-  else
-    funX <- fun(X[clipwin], ...)
+  # Evaluate function for data pattern X
+  Xarg <- if(!clipdata) X else X[clipwin]
+  funX <- do.call(fun,
+                  resolve.defaults(list(Xarg),
+                                   list(...),
+                                   list(correction="best")))
 
   if(!inherits(funX, "fv"))
     stop(paste("The function", fname,
@@ -255,7 +256,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   # default domain over which to maximise
   alim <- attr(funX, "alim")
   if(global && is.null(ginterval))
-    ginterval <- alim
+    ginterval <- if(rgiven) range(rvals) else alim
 
   
   ######### simulate #######################
@@ -283,10 +284,11 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
              list=stop("Internal error: list entry was not a ppp object"))
     
     # apply function
-    if(rgiven) 
-      funXsim <- fun(Xsim, ...)
-    else
-      funXsim <- fun(Xsim, r=rvals, ...)
+    funXsim <- do.call(fun,
+                       resolve.defaults(list(Xsim),
+                                        if(rgiven) NULL else list(r=rvals),
+                                        list(...),
+                                        list(correction="best")))
     # sanity checks
     if(!inherits(funXsim, "fv"))
       stop(paste("When applied to a simulated pattern, the function",
@@ -418,6 +420,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   class(result) <- c("envelope", class(result))
   attr(result, "einfo") <- list(call=cl,
                                 Yname=Yname,
+                                valname=valname,
                                 csr=csr,
                                 simtype=simtype,
                                 nrank=nrank,
@@ -456,6 +459,9 @@ print.envelope <- function(x, ...) {
   fname <- deparse(attr(x, "ylab"))
   type <- if(g) "Simultaneous" else "Pointwise"
   cat(paste(type, "critical envelopes for", fname, "\n"))
+  if(!is.null(valname <- e$valname))
+    cat(paste("Edge correction:",
+              dQuote(valname), "\n"))
   # determine *actual* type of simulation
   descrip <-
     if(csr) "simulations of CSR"

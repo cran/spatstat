@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.43 $	$Date: 2009/04/25 06:13:06 $
+#	$Revision: 4.44 $	$Date: 2009/06/12 22:28:22 $
 #
 #
 #
@@ -496,6 +496,15 @@ inpoint <- function(W) {
   x <- W$xcol[midcol]
   y <- W$yrow[midrow]
   return(c(x,y))
+}
+
+simplify.owin <- function(W, dmin) {
+  verifyclass(W, "owin")
+  if(W$type == "mask")
+    stop("simplify.owin is not yet implemented for masks")
+  W <- as.polygonal(W)
+  W$bdry <- lapply(W$bdry, simplify.xypolygon, dmin=dmin)
+  return(W)
 }
 
   

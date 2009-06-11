@@ -1,5 +1,4 @@
-\name{subset.fv}
-\alias{subset.fv}
+\name{Extract.fv}
 \alias{[.fv}
 \title{Extract Subset of Function Values}
 \description{

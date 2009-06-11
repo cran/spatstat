@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.45 $ $Date: 2009/04/14 09:05:24 $
+#     $Revision: 1.49 $ $Date: 2009/06/10 01:30:31 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -16,6 +16,8 @@ function(X, correction=c("isotropic", "Ripley", "translate"),
     stop("Point pattern has no marks")
   else if(!is.numeric(m <- marks(X)))
     stop("Marks are not numeric")
+  if(missing(correction))
+    correction <- NULL
   # Compute estimates
   v <- markcorr(X, f=function(m1, m2) { (1/2) * (m1-m2)^2 },
                 r=r, correction=correction, method=method,
@@ -34,6 +36,8 @@ function(X, i, j, r=NULL,
          correction=c("isotropic", "Ripley", "translate"),
          method="density", ..., normalise=FALSE) {
   stopifnot(is.ppp(X) && is.multitype(X))
+  if(missing(correction))
+    correction <- NULL
   marx <- marks(X)
   lev  <- levels(marx)
   if(missing(i)) i <- lev[1]
@@ -64,6 +68,8 @@ Emark <- function(X, r=NULL,
                   correction=c("isotropic", "Ripley", "translate"),
                   method="density", ..., normalise=FALSE) {
   stopifnot(is.ppp(X) && is.marked(X) && is.numeric(marks(X)))
+  if(missing(correction))
+    correction <- NULL
   f <- function(m1, m2) { m1 }
   E <- markcorr(X, f, r=r,
                 correction=correction, method=method,
@@ -75,6 +81,8 @@ Emark <- function(X, r=NULL,
 Vmark <- function(X, r=NULL, 
                   correction=c("isotropic", "Ripley", "translate"),
                   method="density", ..., normalise=FALSE) {
+  if(missing(correction))
+    correction <- NULL
   E <- Emark(X, r=r, correction=correction, method=method, ...,
              normalise=FALSE)
   f2 <- function(m1, m2) { m1^2 }
@@ -111,13 +119,17 @@ markcorrint <-
   multiplicative <- ftype %in% c("mul", "product")
   # 
   # check corrections
+  correction.given <- !missing(correction) && !is.null(correction)
+  if(is.null(correction))
+    correction <- c("isotropic", "Ripley", "translate")
   correction <- pickoption("correction", correction,
                            c(none="none",
                              border="border",
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=TRUE)
   isborder  <- correction %in% c("border", "bord.modif")
   if(any(isborder) && !multiplicative) {
@@ -212,22 +224,20 @@ markcorr <-
                sQuote("density"), sep=""))
         
   # available selection of edge corrections depends on window
+  correction.given <- !missing(correction) && !is.null(correction)
+  if(is.null(correction))
+    correction <- c("isotropic", "Ripley", "translate")
   correction <- pickoption("correction", correction,
                            c(none="none",
                              border="border",
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
-                             translate="translate"),
+                             translate="translate",
+                             best="best"),
                            multi=TRUE)
-  if(W$type == "mask") {
-    iso <- (correction == "isotropic") 
-    if(any(iso)) {
-      if(!missing(correction))
-        warning("Isotropic correction not implemented for binary masks")
-      correction <- correction[!iso]
-    }
-  }
+  
+  correction <- implemented.for.K(correction, W$type, correction.given)
 
   # Denominator
   # Ef = Ef(M,M') when M, M' are independent

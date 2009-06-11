@@ -249,7 +249,8 @@
       over which the deviation between curves is calculated.
       It should be a numeric vector of length 2.
       There is a sensible default (namely, the recommended plotting
-      interval for \code{fun(X)}).
+      interval for \code{fun(X)}, or the range of \code{r} values if
+      \code{r} is explicitly specified).
     }
     \item{\code{transform}}{specifies a transformation of the
       summary function \code{fun} that will be carried out before the

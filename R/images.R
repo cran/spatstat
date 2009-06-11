@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.43 $     $Date: 2009/03/04 22:55:11 $
+#         $Revision: 1.44 $     $Date: 2009/06/02 23:17:09 $
 #
 #      The class "im" of raster images
 #
@@ -120,7 +120,7 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
   return(X)
 }
 
-"[.im" <- subset.im <-
+"[.im" <- 
 function(x, i, drop=TRUE, ..., raster=NULL) {
   lev <- x$lev
   
@@ -131,7 +131,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     if(!is.null(raster)) {
       # resample image on new pixel raster
       values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
-      out <- im(values, out$yrow, out$xcol, unitname=unitname(out))
+      out <- im(values, out$xcol, out$yrow, unitname=unitname(out))
     }
     if(!drop)
       return(out)
@@ -172,7 +172,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     if(!is.null(raster)) {
       # resample image on new pixel raster
       values <- lookup.im(x, xy$x, xy$y, naok=TRUE)
-      out <- im(values, out$yrow, out$xcol, unitname=unitname(out))
+      out <- im(values, out$xcol, out$yrow, unitname=unitname(out))
     }
     inside <- inside.owin(xy$x, xy$y, i)
     if(!drop) { 

@@ -1,5 +1,4 @@
-\name{subset.im}
-\alias{subset.im}
+\name{Extract.im}
 \alias{[.im}
 \title{Extract Subset of Image}
 \description{

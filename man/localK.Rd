@@ -14,8 +14,9 @@
   \item{X}{A point pattern (object of class \code{"ppp"}).}
   \item{\dots}{Ignored.}
   \item{correction}{String specifying the edge correction to be applied.
-    Options are \code{"none"}, \code{"translate"}, \code{"Ripley"}
-    or \code{"isotropic"}. Only one correction may be specified.
+    Options are \code{"none"}, \code{"translate"}, \code{"Ripley"},
+    \code{"isotropic"} or \code{"best"}.
+    Only one correction may be specified.
   }
   \item{verbose}{Logical flag indicating whether to print progress
     reports during the calculation.

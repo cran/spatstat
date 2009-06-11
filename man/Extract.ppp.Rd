@@ -1,5 +1,4 @@
-\name{subset.ppp}
-\alias{subset.ppp}
+\name{Extract.ppp}
 \alias{[.ppp}
 \alias{[<-.ppp}
 \title{Extract or Replace Subset of Point Pattern}

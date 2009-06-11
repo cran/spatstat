@@ -3,12 +3,12 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.12 $	$Date: 2009/04/07 07:01:28 $
+#	$Revision: 4.13 $	$Date: 2009/06/10 00:42:05 $
 #
 #
 #
 "Jest" <-
-function(X, eps=NULL, r=NULL, breaks=NULL) {
+function(X, ..., eps=NULL, r=NULL, breaks=NULL) {
   X <- as.ppp(X)
   W<- X$window
   rmaxdefault <- rmax.rule("J", W)

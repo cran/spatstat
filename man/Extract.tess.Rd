@@ -1,4 +1,4 @@
-\name{[.tess}
+\name{Extract.tess}
 \alias{[.tess}
 \alias{[<-.tess}
 \title{Extract or Replace Subset of Tessellation}

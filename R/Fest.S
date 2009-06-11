@@ -8,7 +8,7 @@
 #
 "Fest" <- 	
 "empty.space" <-
-function(X, eps = NULL, r=NULL, breaks=NULL) {
+function(X, ..., eps = NULL, r=NULL, breaks=NULL) {
 #
 #	pp:		point pattern (an object of class 'ppp')
 #	eps:		raster grid mesh size for distance transform

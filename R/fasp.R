@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.21 $	$Date: 2009/04/15 00:19:10 $
+#	$Revision: 1.22 $	$Date: 2009/06/02 23:18:13 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -41,10 +41,9 @@ fasp <- function(fns, which, formulae=NULL,
   return(rslt)
 }
 
-# subset operator
+# subset extraction operator
 
 "[.fasp" <-
-"subset.fasp" <-
   function(x, I, J, drop=TRUE, ...) {
 
         verifyclass(x, "fasp")
