@@ -58,7 +58,6 @@
   \code{\link{as.ppp}}.
   
   They may be manipulated by the functions 
-  \code{\link{subset.ppp}},
   \code{\link{[.ppp}} and
   \code{\link{superimpose}}.
 

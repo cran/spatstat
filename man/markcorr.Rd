@@ -29,7 +29,8 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
   }
   \item{correction}{
     A character vector containing any selection of the
-    options \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    options \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+    \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }
   \item{method}{

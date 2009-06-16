@@ -2,11 +2,11 @@
 #
 #	I function
 #
-#	$Revision: 1.7 $	$Date: 2009/04/07 08:25:10 $
+#	$Revision: 1.8 $	$Date: 2009/06/10 00:43:43 $
 #
 #
 #
-Iest <- function(X, eps=NULL, r = NULL, breaks = NULL) {
+Iest <- function(X, ..., eps=NULL, r = NULL, breaks = NULL) {
 
   X <- as.ppp(X)
   if(!is.multitype(X))

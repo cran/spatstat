@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.58 $	$Date: 2008/07/22 21:17:05 $
+#	$Revision: 4.59 $	$Date: 2009/06/02 23:15:57 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -264,7 +264,6 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
 # --------------------------------------------------------------
 
 "[.ppp" <-
-"subset.ppp" <-
   function(x, i, j, drop, ...) {
 
         verifyclass(x, "ppp")

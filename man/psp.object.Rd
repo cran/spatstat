@@ -39,7 +39,7 @@
   dimensions from the line segments alone.
 
   Subsets of a line segment pattern may be obtained by the functions
-  \code{\link{subset.psp}}, \code{\link{[.psp}} and \code{\link{clip.psp}}.
+  \code{\link{[.psp}} and \code{\link{clip.psp}}.
 
   Line segment pattern objects can be plotted just by typing \code{plot(X)}
   which invokes the \code{plot} method for line segment pattern objects,
@@ -72,7 +72,7 @@
 # clipping
     w <- owin(c(0.1,0.7), c(0.2, 0.8))
     b <- clip.psp(a, w)
-    b <- a[, w]
+    b <- a[w]
 # the last two lines are equivalent.
 }
 \author{Adrian Baddeley

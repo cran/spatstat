@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.28 $	$Date: 2009/01/30 00:47:19 $
+#	$Revision: 2.31 $	$Date: 2009/06/11 00:35:10 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -152,7 +152,12 @@ getglmdata <- function(object, drop=FALSE) {
   if(!drop) return(gd)
   return(gd[gd$.mpl.SUBSET,])
 }
-    
+
+getglmsubset <- function(object) {
+  gd <- object$internal$glmdata
+  return(gd$.mpl.SUBSET)
+}
+
 # ??? method for 'effects' ???
 
 valid.ppm <- function(object, na.value=TRUE) {
@@ -216,8 +221,9 @@ model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
     return(mm)
   gd <- getglmdata(object)
   if(nrow(mm) != nrow(gd)) {
-    # can occur if covariates include NA's
-    isna <- matrowany(is.na(gd))
+    # can occur if covariates include NA's or interaction is -Inf
+    insubset <- getglmsubset(object)
+    isna <- is.na(insubset) | !insubset
     if(sum(isna) + nrow(mm) == nrow(gd)) {
       # insert rows of NA's
       mmplus <- matrix( , nrow(gd), ncol(mm))

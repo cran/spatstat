@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.36 $	$Date: 2009/04/15 01:44:06 $
+#	$Revision: 1.39 $	$Date: 2009/06/10 01:22:44 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -82,18 +82,11 @@
                                "bord.modif"="bord.modif",
                                isotropic="isotropic",
                                Ripley="isotropic",
-                               translate="translate"),
+                               translate="translate",
+                               best="best"),
                              multi=TRUE)
-    
-    # available selection of edge corrections depends on window
-    if(W$type == "mask") {
-      iso <- (correction == "isotropic") 
-      if(any(iso)) {
-        if(correction.given)
-          warning("Isotropic correction not implemented for binary masks")
-        correction <- correction[!iso]
-      }
-    }
+
+    correction <- implemented.for.K(correction, W$type, correction.given)
 
     ###########################################################
     # DETERMINE WEIGHTS AND VALIDATE

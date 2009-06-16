@@ -29,7 +29,8 @@ from a point pattern in a window of arbitrary shape.
   \item{correction}{
     Optional. A character vector containing any selection of the
     options \code{"none"}, \code{"border"}, \code{"bord.modif"},
-    \code{"isotropic"}, \code{"Ripley"} or \code{"translate"}.
+    \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+    \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }
   \item{nlarge}{
@@ -111,11 +112,16 @@ from a point pattern in a window of arbitrary shape.
       complex windows. 
     }
   }
-  For instructional purposes, you can also set
+  For instructional purposes, you can set
   \code{correction="none"} to compute an estimate of the \eqn{K}
   function without edge correction. This estimate is biased and should
   not be used for data analysis.
 
+  You can also set \code{correction="best"} to select the best 
+  correction that is available for the geometry of the window. Currently
+  this is Ripley's isotropic correction for a rectangular
+  or polygonal windows, and the translation correction for masks.
+  
   The estimates of \eqn{K(r)} are of the form
   \deqn{
     \hat K(r) = \frac a {(n-1) \pi} \sum_i \sum_j I(d_{ij}\le r) e_{ij}

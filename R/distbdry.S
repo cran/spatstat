@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.22 $	$Date: 2009/04/25 06:57:24 $
+#	$Revision: 4.26 $	$Date: 2009/06/12 23:33:12 $
 #
 # -------- functions ----------------------------------------
 #
@@ -150,7 +150,7 @@ erode.mask <- function(w, r, strict=FALSE) {
 
         
 erosion.owin <- erode.owin <-
-  function(w, r, shrink.frame=TRUE, ..., strict=FALSE) {
+  function(w, r, shrink.frame=TRUE, ..., strict=FALSE, polygonal=TRUE) {
   verifyclass(w, "owin")
   if(!is.numeric(r) || length(r) != 1)
     stop("r must be a single number")
@@ -173,6 +173,15 @@ erosion.owin <- erode.owin <-
       return(owin(w$xrange, w$yrange, poly=ebox)) # type 'polygonal'
   }
 
+  if(w$type == "polygonal" && polygonal) {
+    # compute polygonal region
+    cw <- complement.owin(w)
+    dcw <- dilate.owin(cw, r, polygonal=TRUE)
+    cdcw <- complement.owin(dcw)
+    wnew <- intersect.owin(cdcw, w)
+    return(wnew)
+  }
+  
   # otherwise erode the window in pixel image form
   if(w$type == "mask") 
     wnew <- erode.mask(w, r, strict=strict)
@@ -214,7 +223,7 @@ rebound.owin <- function(w, rect) {
                                  y=w$yrange[c(1,1,2,2)])))
          },
          polygonal={
-           return(owin(xr, yr, poly=w$bdry))
+           return(owin(xr, yr, poly=w$bdry, check=FALSE))
          },
          mask={
            newseq <- function(oldseq, newrange, dstep) {
@@ -238,7 +247,7 @@ rebound.owin <- function(w, rect) {
   
     
 dilation.owin <- dilate.owin <-
-  function(w, r, ...) {
+  function(w, r, ..., polygonal=TRUE, tight=TRUE) {
   verifyclass(w, "owin")
   if(!is.numeric(r) || length(r) != 1)
     stop("r must be a single number")
@@ -246,29 +255,84 @@ dilation.owin <- dilate.owin <-
     stop("r must be nonnegative")
   if(r == 0)
     return(w)
-  if(w$type == "mask" && !any(w$m)) {
+
+  ismask <- (w$type == "mask")
+  polygonal <- polygonal && !ismask
+
+  if(ismask && !any(w$m)) {
     # w is empty
     return(w)
   }
-  epsilon <- sqrt(w$xstep^2 + w$ystep^2)
-  r <- max(r, epsilon)
-  bb <- bounding.box(w)
-  newbox <- owin(bb$xrange + c(-r,r), bb$yrange + c(-r,r))
-  w <- rebound.owin(w, newbox)
-  distant <- distmap(w, ...)
-  dil <- levelset(distant, r, "<=")
-  return(dil)
+  
+  # bounding frame
+  bb <- if(tight) bounding.box(w) else as.rectangle(w)
+
+  # compute dilation
+  if(!polygonal) {
+    # compute pixel approximation
+    epsilon <- sqrt(w$xstep^2 + w$ystep^2)
+    r <- max(r, epsilon)
+    newbox <- grow.rectangle(bb, r)
+    w <- rebound.owin(w, newbox)
+    distant <- distmap(w, ...)
+    dil <- levelset(distant, r, "<=")
+    return(dil)
+  } else {
+    # compute polygonal approximation
+    newbox <- grow.rectangle(bb, r)
+    # extract individual edges
+    w <- as.polygonal(w)
+    edges <- as.psp(w)
+    ends   <- edges$ends
+    angles <- angles.psp(edges, directed=TRUE)
+    lengths <- lengths.psp(edges)
+
+    # initialise dilation = interior of w
+    out <- w
+    # dilate individual edges
+    halfcircle <- seq(0, pi, length=128)[-c(1,128)]
+    for(i in seq(edges$n)) {
+      seg <- ends[i,]
+      co <- cos(angles[i])
+      si <- sin(angles[i])
+      # draw sausage around i-th segment
+      xx <- c(seg$x0, seg$x1) + r * si
+      yy <- c(seg$y0, seg$y1) - r * co
+      rightcircle <- angles[i] - pi/2 + halfcircle
+      xx <- c(xx, seg$x1 + r * cos(rightcircle))
+      yy <- c(yy, seg$y1 + r * sin(rightcircle))
+      xx <- c(xx, c(seg$x1, seg$x0) - r * si)
+      yy <- c(yy, c(seg$y1, seg$y0) + r * co)
+      leftcircle <- angles[i] + pi/2 + halfcircle
+      xx <- c(xx, seg$x0 + r * cos(leftcircle))
+      yy <- c(yy, seg$y0 + r * sin(leftcircle))
+      sausage <- owin(newbox$xrange, newbox$yrange, poly=list(x=xx, y=yy))
+      # add to set
+      out <- union.owin(out, sausage)
+    }
+    return(out)
+  }
 }
 
-closing.owin <- function(w, r, ...) {
-  wplus <- dilate.owin(w, r, ...)
+closing.owin <- function(w, r, ..., polygonal=TRUE) {
+  if(missing(r))
+    stop("r is required")
+  wplus <- dilate.owin(w, r, ..., polygonal=polygonal, tight=FALSE)
+  if(wplus$type == "polygonal")
+    wplus <- simplify.owin(wplus, r/10)
   wclose <- erode.owin(wplus, r, strict=TRUE)
+  wclose <- rebound.owin(wclose, as.rectangle(w))
   return(wclose)
 }
 
-opening.owin <- function(w, r, ...) {
-  wminus <- erode.owin(w, r, ...)
-  wopen <- dilate.owin(wminus, r)
+opening.owin <- function(w, r, ..., polygonal=TRUE) {
+  if(missing(r))
+    stop("r is required")
+  wminus <- erode.owin(w, r, ..., polygonal=polygonal, shrink.frame=FALSE)
+  if(wminus$type == "polygonal")
+    wminus <- simplify.owin(wminus, r/10)
+  wopen <- dilate.owin(wminus, r, tight=FALSE)
+  wopen <- rebound.owin(wopen, as.rectangle(w))
   return(wopen)
 }
 

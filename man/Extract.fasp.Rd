@@ -1,5 +1,4 @@
-\name{subset.fasp}
-\alias{subset.fasp}
+\name{Extract.fasp}
 \alias{[.fasp}
 \title{Extract Subset of Function Array}
 \description{

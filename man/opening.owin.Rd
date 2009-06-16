@@ -5,13 +5,18 @@
   Perform morphological opening of a window 
 }
 \usage{
- opening.owin(w, r, \dots)
+ opening.owin(w, r, \dots, polygonal=TRUE)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}.}
   \item{r}{positive number: the radius of the opening.}
   \item{\dots}{extra arguments passed to \code{\link{as.mask}}
-    controlling the pixel resolution}
+    controlling the pixel resolution, if a pixel approximation is used}
+  \item{polygonal}{
+    Logical flag indicating whether to compute a polygonal
+    approximation to the erosion (\code{polygonal=TRUE}) or
+    a pixel grid approximation (\code{polygonal=FALSE}).
+  }
 }
 \value{
   Another object of class \code{"owin"} representing the

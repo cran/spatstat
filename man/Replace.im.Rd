@@ -1,4 +1,4 @@
-\name{subsetget.im}
+\name{Replace.im}
 \alias{[<-.im}
 \title{Reset Values in Subset of Image}
 \description{

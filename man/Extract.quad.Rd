@@ -1,4 +1,4 @@
-\name{[.quad}
+\name{Extract.quad}
 \alias{[.quad}
 \alias{[<-.quad}
 \title{Subset of Quadrature Scheme}

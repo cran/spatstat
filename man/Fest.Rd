@@ -7,7 +7,7 @@
   window of arbitrary shape.
 }
 \usage{
-Fest(X, eps, r=NULL, breaks=NULL)
+Fest(X, ..., eps, r=NULL, breaks=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -15,6 +15,7 @@ Fest(X, eps, r=NULL, breaks=NULL)
     An object of class \code{ppp}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
   }
+  \item{\dots}{Ignored.}
   \item{eps}{Optional. A positive number.
     The resolution of the discrete approximation to Euclidean
     distance (see below). There is a sensible default.

@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.18 $	$Date: 2009/04/15 02:10:46 $
+#	$Revision: 1.22 $	$Date: 2009/06/10 01:26:28 $
 #
 #
 # ------------------------------------------------------------------------
@@ -15,6 +15,8 @@ function(X, i, j, lambdaI, lambdaJ, ...,
   verifyclass(X, "ppp")
   if(!is.marked(X))
     stop("point pattern has no marks (no component 'marks')")
+  if(missing(correction))
+    correction <- NULL
   marx <- marks(X)
   if(missing(i))
     i <- levels(marx)[1]
@@ -45,6 +47,8 @@ function(X, i, lambdaI, lambdadot, ...,
   verifyclass(X, "ppp")
   if(!is.marked(X))
     stop("point pattern has no marks (no component 'marks')")
+  if(missing(correction))
+    correction <- NULL
 
   marx <- marks(X)
   if(missing(i))
@@ -90,27 +94,20 @@ function(X, I, J, lambdaI, lambdaJ,
 
   # validate edge correction
   correction.given <- !missing(correction) && !is.null(correction)
-  if(correction.given)
-    correction <- pickoption("correction", correction,
-                             c(none="none",
-                               border="border",
-                               "bord.modif"="bord.modif",
-                               isotropic="isotropic",
-                               Ripley="isotropic",
-                               translate="translate"),
-                             multi=TRUE)
-        
-  # available selection of edge corrections depends on window
-  if(W$type == "mask") {
-    iso <- (correction == "isotropic") | (correction == "Ripley")
-    if(all(iso))
-      stop("Isotropic correction not implemented for binary masks")
-    if(any(iso)) {
-      if(correction.given)
-        warning("Isotropic correction not implemented for binary masks")
-      correction <- correction[!iso]
-    }
-  }
+  if(is.null(correction))
+    correction <- c("border", "isotropic", "Ripley", "translate")
+
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             "bord.modif"="bord.modif",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             translate="translate",
+                             best="best"),
+                           multi=TRUE)
+
+  correction <- implemented.for.K(correction, W$type, correction.given)
 
   # validate I, J 
   if(!is.logical(I) || !is.logical(J))

@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.43 $    $Date: 2009/03/05 07:45:11 $
+#    $Revision: 1.46 $    $Date: 2009/06/12 22:59:02 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -600,6 +600,46 @@ owinpolycheck <- function(W, verbose=TRUE) {
   return(answer)
 }
 
-      
-        
+simplify.xypolygon <- function(p, dmin) {
+  verify.xypolygon(p)
+  x <- p$x
+  y <- p$y
+  n <- length(x)
+  if(n <= 3) return(p)
+  dmin2 <- dmin^2
+  # edge lengths: len2[i] is distance from i to i+1 
+  len2 <- (x - c(x[-1], x[1]))^2 + (y - c(y[-1],y[1]))^2
+  #
+  while(n > 3 && any(len2 < dmin2)) {
+    # delete the shortest edge
+    kill <- which.min(len2)
+    # edge from 'kill' to 'kill+1' will be removed 
+    # Replacement vertex is midpoint of segment
+    left <- if(kill == 1) n else (kill - 1)
+    killplus1 <- if(kill == n) 1 else (kill + 1)
+    right <- if(killplus1 == n) 1 else (killplus1 + 1)
+    xmid <- (x[kill]+x[killplus1])/2
+    ymid <- (y[kill]+y[killplus1])/2
+    d2leftmid <- (xmid-x[left])^2+(ymid-y[left])^2
+    d2midright <- (xmid-x[right])^2+(ymid-y[right])^2
+    # adjust vectors: first replace segment endpoints without deleting
+    x[kill] <- xmid
+    y[kill] <- ymid
+    x[killplus1] <- xmid
+    y[killplus1] <- ymid
+    len2[left] <- d2leftmid
+    len2[kill] <- 0
+    len2[killplus1] <- d2midright
+    # now delete 
+    x <- x[-kill]
+    y <- y[-kill]
+    len2 <- len2[-kill]
+    n <- n-1
+  }
+  #
+  p$x <- x
+  p$y <- y
+  p$area <- area.xypolygon(p[c("x","y")])
+  return(p)
+}
 

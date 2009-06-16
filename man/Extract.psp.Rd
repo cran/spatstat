@@ -1,5 +1,4 @@
-\name{subset.psp}
-\alias{subset.psp}
+\name{Extract.psp}
 \alias{[.psp}
 \title{Extract Subset of Line Segment Pattern}
 \description{

@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.47 $ $Date: 2009/04/01 01:55:15 $
+#  $Revision: 1.48 $ $Date: 2009/06/02 23:17:29 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -405,7 +405,6 @@ print.summary.psp <- function(x, ...) {
 ########################################################
 
 "[.psp" <-
-"subset.psp" <-
   function(x, i, j, drop, ...) {
 
     verifyclass(x, "psp")

@@ -1,4 +1,4 @@
-\name{subset.listof}
+\name{Extract.listof}
 \alias{[<-.listof}
 \title{Extract or Replace Subset of a List of Things}
 \description{

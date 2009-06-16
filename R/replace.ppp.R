@@ -1,3 +1,8 @@
+#
+# replace.ppp.R
+#
+
+
 "[<-.ppp" <-
   function(x, i, j, value) {
     verifyclass(x, "ppp")

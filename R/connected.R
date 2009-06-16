@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.3 $  $Date: 2009/05/14 04:39:33 $
+#    $Revision: 1.4 $  $Date: 2009/05/15 07:17:59 $
 #
 # Original code by Julian Burgos <jmburgos@u.washington.edu>
 # Adapted by Adrian Baddeley
@@ -38,7 +38,7 @@ connected <- function(X, background=NA, method="C") {
             nc=as.integer(nc),
             PACKAGE="spatstat")
     # unpack
-    Z <- matrix(z$mat, nr+2, nc+2, byrow=TRUE)
+    Z <- matrix(z$mat, nr+2, nc+2)
   } else {
 ################ INTERPRETED CODE #########################
 # by Julian Burgos

@@ -6,14 +6,27 @@
   Perform morphological dilation of a window 
 }
 \usage{
- dilation.owin(w, r, \dots)
- dilate.owin(w, r, \dots)
+ dilation.owin(w, r, \dots, polygonal=TRUE, tight=TRUE)
+ dilate.owin(w, r, \dots, polygonal=TRUE, tight=TRUE)
 }
 \arguments{
   \item{w}{A window (object of class \code{"owin"}.}
   \item{r}{positive number: the radius of dilation.}
   \item{\dots}{extra arguments to \code{\link{as.mask}}
-    controlling the pixel resolution}
+    controlling the pixel resolution, if the pixel approximation is
+    used.
+  }
+  \item{polygonal}{
+    Logical flag indicating whether to compute a polygonal
+    approximation to the erosion (\code{polygonal=TRUE}) or
+    a pixel grid approximation (\code{polygonal=FALSE}).
+  }
+  \item{tight}{
+    Logical flag indicating whether the bounding frame of the window
+    should be taken as the smallest rectangle enclosing the dilated region
+    (\code{tight=TRUE}), or should be the
+    dilation of the bounding frame of \code{w} (\code{tight=FALSE}).
+  }
 }
 \value{
   Another object of class \code{"owin"} representing the
@@ -28,7 +41,10 @@
   The functions \code{dilate.owin} and \code{dilation.owin} are
   identical, and compute the dilation of the window \code{w}.
 
-  The window \code{w} is first approximated by a binary pixel image,
+  If \code{polygonal=TRUE} and \code{w} is a rectangle or a polygonal
+  window, then a polygonal approximation to the dilation is computed.
+
+  Otherwise, the window \code{w} is first approximated by a binary pixel image,
   and the arguments \code{"\dots"} are passed to \code{\link{as.mask}}
   to determine the pixel resolution. There is a sensible default.
 }
