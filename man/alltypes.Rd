@@ -20,9 +20,9 @@
   \item{fun}{The summary function. Either an \R function,
     or a character string indicating the summary function
     required.  Options for strings are
-    \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"}, \code{"pcf"},
-    \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"},
-    \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}.
+    \code{"F"}, \code{"G"}, \code{"J"}, \code{"K"}, \code{"L"}, \code{"pcf"},
+    \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"}, \code{"Lcross"},
+    \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}, \code{"Ldot"}.
   }
   \item{\dots}{
     Arguments passed to the summary function
@@ -74,16 +74,17 @@
   to \eqn{X_i}{X[i]} with the optional arguments \code{\dots}.
 
   If \code{fun} is
-  \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
+  \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"} or \code{"Lcross"},
   the routine calculates, for each pair of types \eqn{(i,j)},
   an estimate of the ``\code{i}-to\code{j}'' cross-type function
   \eqn{G_{ij}(r)}{G[i,j](r)},
-  \eqn{J_{ij}(r)}{J[i,j](r)} or
-  \eqn{K_{ij}(r)}{K[i,j](r)} respectively describing the
+  \eqn{J_{ij}(r)}{J[i,j](r)},
+  \eqn{K_{ij}(r)}{K[i,j](r)} or
+  \eqn{L_{ij}(r)}{L[i,j](r)} respectively describing the
   dependence between 
   \eqn{X_i}{X[i]} and \eqn{X_j}{X[j]}.
-  See \code{\link{Gcross}}, \code{\link{Jcross}}
-  or \code{\link{Kcross}} respectively for explanation of these
+  See \code{\link{Gcross}}, \code{\link{Jcross}}, \code{\link{Kcross}}
+  or \code{\link{Lcross}} respectively for explanation of these
   functions.
   The estimate is computed by applying the relevant function
   (\code{\link{Gcross}} etc)
@@ -95,26 +96,28 @@
   between each pair of types.
 
   If \code{fun} is 
-  \code{"Gdot"}, \code{"Jdot"} or \code{"Kdot"},
+  \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"} or \code{"Ldot"},
   the routine calculates, for each type \eqn{i},
   an estimate of the ``\code{i}-to-any'' dot-type function
   \eqn{G_{i\bullet}(r)}{G[i.](r)},
   \eqn{J_{i\bullet}(r)}{J[i.](r)} or
-  \eqn{K_{i\bullet}(r)}{K[i.](r)} respectively describing the
+  \eqn{K_{i\bullet}(r)}{K[i.](r)} or
+  \eqn{L_{i\bullet}(r)}{L[i.](r)} respectively describing the
   dependence between \eqn{X_i}{X[i]} and \eqn{X}{X}.
-  See \code{\link{Gdot}}, \code{\link{Jdot}}
-  or \code{\link{Kdot}} respectively for explanation of these functions.
+  See \code{\link{Gdot}}, \code{\link{Jdot}}, \code{\link{Kdot}}
+  or \code{\link{Ldot}} respectively for explanation of these functions.
   The estimate is computed by applying the relevant function
   (\code{\link{Gdot}} etc)
   to \code{X} using each possible value of the argument \code{i},
   together with the optional arguments \code{\dots}.
 
-  The letters \code{"G"}, \code{"J"} and \code{"K"}
-  are interpreted as abbreviations for \code{"Gcross"}, \code{"Jcross"}
-  and \code{"Kcross"} respectively, assuming the point pattern is
+  The letters \code{"G"}, \code{"J"}, \code{"K"} and \code{"L"}
+  are interpreted as abbreviations for \code{\link{Gcross}},
+  \code{\link{Jcross}}, \code{\link{Kcross}} and \code{\link{Lcross}}
+  respectively, assuming the point pattern is
   marked. If the point pattern is unmarked, the appropriate
-  function \code{\link{Fest}}, \code{\link{Jest}}
-  or \code{\link{Kest}} is invoked instead.
+  function \code{\link{Fest}}, \code{\link{Jest}},
+  \code{\link{Kest}} or \code{\link{Lest}} is invoked instead.
 
   If \code{envelope=TRUE}, then as well as computing the value of the
   summary function for each combination of types, the algorithm also
@@ -140,35 +143,38 @@
   is the result of applying \code{\link{Fest}} to the
   points of type \code{i} only.
 
-  If \code{fun} is \code{"Gdot"}, \code{"Jdot"}
-  or \code{"Kdot"}, the function array
+  If \code{fun} is \code{"Gdot"}, \code{"Jdot"}, \code{"Kdot"}
+  or \code{"Ldot"}, the function array
   again has dimensions \eqn{m \times 1}{m * 1}.
   The entry at position \code{[i,1]} in this array
-  is the result of \code{Gdot(X, i)} or \code{Jdot(X, i)}
-  or \code{Kdot(X, i)} respectively.
+  is the result of \code{Gdot(X, i)}, \code{Jdot(X, i)}
+  \code{Kdot(X, i)} or \code{Ldot(X, i)} respectively.
 
-  If \code{fun} is \code{"Gcross"}, \code{"Jcross"} or \code{"Kcross"},
-  (or their abbreviations \code{"G"}, \code{"J"} or \code{"K"}),
+  If \code{fun} is \code{"Gcross"}, \code{"Jcross"}, \code{"Kcross"}
+  or \code{"Lcross"} 
+  (or their abbreviations \code{"G"}, \code{"J"}, \code{"K"} or \code{"L"}),
   the function array has dimensions \eqn{m \times m}{m * m}.
   The \code{[i,j]} entry of the function array
   (for \eqn{i \neq j}{i != j}) is the
   result of applying the function \code{\link{Gcross}},
-  \code{\link{Jcross}} or \code{\link{Kcross}} to
+  \code{\link{Jcross}}, \code{\link{Kcross}} or\code{\link{Lcross}} to
   the pair of types \code{(i,j)}. The diagonal
   \code{[i,i]} entry of the function array is the result of
   applying the univariate function \code{\link{Gest}},
-  \code{\link{Jest}} or \code{\link{Kest}} to the
+  \code{\link{Jest}}, \code{\link{Kest}} or \code{\link{Lest}} to the
   points of type \code{i} only.
 
   If \code{envelope=FALSE}, then
   each function entry \code{fns[[i]]} retains the format
   of the output of the relevant estimating routine
   \code{\link{Fest}}, \code{\link{Gest}}, \code{\link{Jest}},
-  \code{\link{Kest}},  \code{Gcross}, \code{Jcross}, \code{Kcross},
-  \code{Gdot}, \code{Jdot}, or \code{Kdot}.
+  \code{\link{Kest}},  \code{\link{Lest}}, \code{\link{Gcross}},
+  \code{\link{Jcross}} ,\code{\link{Kcross}}, \code{\link{Lcross}},
+  \code{\link{Gdot}}, \code{\link{Jdot}}, \code{\link{Kdot}} or
+  \code{\link{Ldot}}
   The default formulae for plotting these functions are 
   \code{cbind(km,theo) ~ r} for F, G, and J functions, and
-  \code{cbind(trans,theo) ~ r} for K functions.
+  \code{cbind(trans,theo) ~ r} for K and L functions.
 
   If \code{envelope=TRUE}, then each function entry \code{fns[[i]]}
   has the same format as the output of the \code{\link{envelope}} command.
@@ -184,9 +190,11 @@
   \code{\link{Gest}},
   \code{\link{Jest}},
   \code{\link{Kest}},
+  \code{\link{Lest}},
   \code{\link{Gcross}},
   \code{\link{Jcross}},
   \code{\link{Kcross}},
+  \code{\link{Lcross}},
   \code{\link{Gdot}},
   \code{\link{Jdot}},
   \code{\link{Kdot}},

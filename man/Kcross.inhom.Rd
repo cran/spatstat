@@ -188,10 +188,9 @@ lambdaIJ=NULL)
     wh <- split(lansing)$whiteoak
 
     # method (1): estimate intensities by nonparametric smoothing
-    lambdaM <- density.ppp(ma, sigma=0.15)
-    lambdaW <- density.ppp(wh, sigma=0.15)
-    K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW[wh], lambdaM[ma])
-    K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW,     lambdaM)
+    lambdaM <- density.ppp(ma, sigma=0.15, at="points")
+    lambdaW <- density.ppp(wh, sigma=0.15, at="points")
+    K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW, lambdaM)
 
     # method (2): fit parametric intensity model
     fit <- ppm(lansing, ~marks * polynom(x,y,2))
@@ -207,10 +206,6 @@ lambdaIJ=NULL)
     #                    type B points have intensity 100 * x
     lamB <- as.im(function(x,y){50 + 100 * x}, owin())
     X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
-    XA <- split(X)$A
-    XB <- split(X)$B
-    K <- Kcross.inhom(X, "A", "B",
-        lambdaI=rep(50, XA$n), lambdaJ=lamB[XB])
     K <- Kcross.inhom(X, "A", "B",
         lambdaI=as.im(50, X$window), lambdaJ=lamB)
 }

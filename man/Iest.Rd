@@ -5,7 +5,7 @@
   Estimates the summary function \eqn{I(r)} for a multitype point pattern.
 }
 \usage{
-  Iest(X, ..., eps=NULL, r=NULL, breaks=NULL)
+  Iest(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -28,6 +28,10 @@
     An alternative to the argument \code{r}. Not normally invoked by the user.
     See Details section.
   }
+  \item{correction}{
+    Optional. Vector of character strings specifying the edge correction(s)
+    to be used by \code{\link{Jest}}.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -41,6 +45,8 @@
 	      the border-corrected estimates of \eqn{J} functions}
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{I(r)} computed from
     the Kaplan-Meier estimates of \eqn{J} functions}
+  \item{han}{the Hanisch-style estimator of \eqn{I(r)} computed from
+    the Hanisch-style estimates of \eqn{J} functions}
   \item{un}{the uncorrected estimate of \eqn{I(r)}
              computed from the uncorrected estimates of \eqn{J}
   }

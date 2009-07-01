@@ -10,7 +10,7 @@ function \eqn{G(r)} from a point pattern in a
 window of arbitrary shape.
 }
 \usage{
-Gest(X, r=NULL, breaks=NULL, \dots)
+Gest(X, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -27,12 +27,21 @@ Gest(X, r=NULL, breaks=NULL, \dots)
     Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{\dots}{Ignored.}
+  \item{correction}{
+    Optional.
+    The edge correction(s) to be used to estimate \eqn{G(r)}.
+    A vector of character strings selected from
+    \code{"none"}, \code{"rs"}, \code{"km"}, \code{"Hanisch"}
+    and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
   which can be plotted directly using \code{\link{plot.fv}}.
 
-  Essentially a data frame containing six columns:
+  Essentially a data frame containing some or all of the following
+  columns:
+  
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{G(r)} has been  estimated
   }
@@ -48,6 +57,8 @@ Gest(X, r=NULL, breaks=NULL, \dots)
   i.e. the empirical distribution of the distances from 
   each point in the pattern \code{X} to the nearest other point of
   the pattern
+  }
+  \item{han}{the Hanisch correction estimator of \eqn{G(r)}
   }
   \item{theo}{the theoretical value of \eqn{G(r)}
   for a stationary Poisson process of the same estimated intensity.
@@ -94,17 +105,17 @@ Gest(X, r=NULL, breaks=NULL, \dots)
   The estimation of \eqn{G} is hampered by edge effects arising from 
   the unobservability of points of the random pattern outside the window. 
   An edge correction is needed to reduce bias (Baddeley, 1998; Ripley, 1988). 
-  The two edge corrections implemented here are the border method or
-  ``\emph{reduced sample}'' estimator, and the spatial Kaplan-Meier estimator
-  (Baddeley and Gill, 1997). 
+  The edge corrections implemented here are the border method or
+  ``\emph{reduced sample}'' estimator, the spatial Kaplan-Meier estimator
+  (Baddeley and Gill, 1997) and the Hanisch estimator (Hanisch, 1984).
 
   The argument \code{r} is the vector of values for the
   distance \eqn{r} at which \eqn{G(r)} should be evaluated. 
   It is also used to determine the breakpoints
   (in the sense of \code{\link{hist}})
-  for the computation of histograms of distances. The reduced-sample and
-  Kaplan-Meier estimators are computed from histogram counts. 
-  In the case of the Kaplan-Meier estimator this introduces a discretisation
+  for the computation of histograms of distances. The 
+  estimators are computed from histogram counts. 
+  This introduces a discretisation
   error which is controlled by the fineness of the breakpoints.
 
   First-time users would be strongly advised not to specify \code{r}.
@@ -123,9 +134,9 @@ Gest(X, r=NULL, breaks=NULL, \dots)
 
   The naive empirical distribution of distances from each point of
   the pattern \code{X} to the nearest other point of the pattern, 
-  is a biased estimate of \eqn{G}.
-  However this is also returned by the algorithm, as it is sometimes 
-  useful in other contexts. Care should be taken not to use the uncorrected
+  is a biased estimate of \eqn{G}. However it is sometimes useful.
+  It can be returned by the algorithm, by selecting \code{correction="none"}.
+  Care should be taken not to use the uncorrected
   empirical \eqn{G} as if it were an unbiased estimator of  \eqn{G}.
 
   To simply compute the nearest neighbour distance for each point in the
@@ -151,6 +162,11 @@ Gest(X, r=NULL, breaks=NULL, \dots)
   Diggle, P.J. \emph{Statistical analysis of spatial point patterns}.
     Academic Press, 1983.
 
+  Hanisch, K.-H. (1984) Some remarks on estimators of the distribution
+  function of nearest-neighbour distance in stationary spatial point
+  patterns. \emph{Mathematische Operationsforschung und Statistik,
+    series Statistics} \bold{15}, 409--412.
+  
   Ripley, B.D. \emph{Statistical inference for spatial processes}.
   Cambridge University Press, 1988.
 

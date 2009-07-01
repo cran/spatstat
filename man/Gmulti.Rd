@@ -10,7 +10,8 @@
   to the nearest point of subset \eqn{J}.
 }
 \usage{
-Gmulti(X, I, J, r=NULL, breaks=NULL, \dots, disjoint=NULL)
+Gmulti(X, I, J, r=NULL, breaks=NULL, \dots,
+        disjoint=NULL, correction=c("rs", "km", "han"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -38,7 +39,13 @@ Gmulti(X, I, J, r=NULL, breaks=NULL, \dots, disjoint=NULL)
   \item{disjoint}{Optional flag indicating whether
     the subsets \code{I} and \code{J} are disjoint.
     If missing, this value will be computed by inspecting the
-    vectors \code{I} and \code{J}}.
+    vectors \code{I} and \code{J}.
+  }
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -49,6 +56,8 @@ Gmulti(X, I, J, r=NULL, breaks=NULL, \dots, disjoint=NULL)
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
     estimator of \eqn{G_{IJ}(r)}{GIJ(r)}
+  }
+  \item{han}{the Hanisch-style estimator of \eqn{G_{IJ}(r)}{GIJ(r)}
   }
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{G_{IJ}(r)}{GIJ(r)}
   }

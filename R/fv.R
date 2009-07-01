@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.39 $   $Date: 2009/06/02 23:18:34 $
+#    $Revision: 1.43 $   $Date: 2009/06/27 00:44:11 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -41,8 +41,10 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   stopifnot(is.character(argu))
   if(!is.null(ylab))
     stopifnot(is.character(ylab) || is.language(ylab))
-  if(!missing(yexp))
-    stopifnot(is.language(yexp))
+  if(!missing(yexp)) {
+    if(is.null(yexp)) yexp <- ylab
+    else stopifnot(is.language(yexp))
+  }
   stopifnot(is.character(valu))
   
   if(!(argu %in% names(x)))
@@ -180,38 +182,57 @@ bind.fv <- function(x, y, labl, desc, preferred) {
 }
 
 # rename one of the columns of an fv object
-tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL) {
+tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL) {
   hit <- (names(x) == current.tag)
   if(any(hit)) {
     i <- min(which(hit))
     if(!is.null(new.labl)) attr(x, "labl")[i] <- new.labl
     if(!is.null(new.desc)) attr(x, "desc")[i] <- new.desc
+    if(!is.null(new.tag)) names(x)[i] <- new.tag
   }
   return(x)
 }
 
-# change all the text in an fv object
-rebadge.fv <- function(x, new.ylab=NULL, new.fname=NULL,
-                       tags=NULL, new.desc=NULL, new.labl=NULL,
-                       new.yexp=new.ylab) {
-  if(!is.null(new.ylab))
+
+# change some or all of the auxiliary text in an fv object
+rebadge.fv <- function(x, new.ylab, new.fname,
+                       tags, new.desc, new.labl,
+                       new.yexp=new.ylab, new.dotnames,
+                       new.preferred, new.formula) {
+  if(!missing(new.ylab)) 
     attr(x, "ylab") <- new.ylab
-  if(!is.null(new.yexp))
+  if(!missing(new.yexp) || !missing(new.ylab))
     attr(x, "yexp") <- new.yexp
   if(!missing(new.fname))
     attr(x, "fname") <- new.fname
-  if(!is.null(tags) && !(is.null(new.desc) && is.null(new.labl))) {
+  if(!missing(tags) && !(missing(new.desc) && missing(new.labl))) {
     nama <- names(x)
     desc <- attr(x, "desc")
     labl <- attr(x, "labl")
     for(i in seq(length(tags)))
     if(!is.na(m <- match(tags[i], nama))) {
-      if(!is.null(new.desc)) desc[m] <- new.desc[i]
-      if(!is.null(new.labl)) labl[m] <- new.labl[i]
+      if(!missing(new.desc)) desc[m] <- new.desc[i]
+      if(!missing(new.labl)) labl[m] <- new.labl[i]
     }
     attr(x, "desc") <- desc
     attr(x, "labl") <- labl
   }
+  if(!missing(new.dotnames)) {
+    if(any(nbg <- !(new.dotnames %in% names(x))))
+      stop(paste("new",
+                 ngettext(sum(nbg), "dotname", "dotnames"),
+                 commasep(dQuote(new.dotnames[nbg])),
+                 ngettext(sum(nbg),
+                          "is not a column of x", 
+                          "are not the names of columns in x")))
+    attr(x, "dotnames") <- new.dotnames
+  }
+  if(!missing(new.preferred)) {
+    stopifnot(new.preferred %in% names(x))
+    attr(x, "valu") <- new.preferred
+  }
+  if(!missing(new.formula))
+    attr(x, "fmla") <- new.formula
   return(x)
 }
 

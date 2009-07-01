@@ -251,7 +251,7 @@
       See \code{\link{quadscheme}} for an overview.
       Use \code{quadscheme(X, D, method="dirichlet")} to compute
       quadrature weights based on the Dirichlet tessellation,
-      or \code{\quadscheme(X, D, method="grid")} to compute
+      or \code{quadscheme(X, D, method="grid")} to compute
       quadrature weights by counting points in grid squares,
       where \code{X} and \code{D} are the patterns of data points
       and dummy points respectively.
@@ -480,9 +480,11 @@
  # fit the stationary Poisson process
  # to point pattern 'nztrees'
 
+ \dontrun{
  Q <- quadscheme(nztrees) 
  ppm(Q) 
  # equivalent.
+ }
 
  ppm(nztrees, ~ x)
  # fit the nonstationary Poisson process 
@@ -494,8 +496,10 @@
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx + cx^2)
 
+ \dontrun{
  library(splines)
  ppm(nztrees, ~ bs(x,df=3))
+ }
  #       WARNING: do not use predict.ppm() on this result
  # Fits the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(B(x))
@@ -504,7 +508,7 @@
  ppm(nztrees, ~1, Strauss(r=10), rbord=10)
  # Fit the stationary Strauss process with interaction range r=10
  # using the border method with margin rbord=10
-  
+
  ppm(nztrees, ~ x, Strauss(13), correction="periodic")
  # Fit the nonstationary Strauss process with interaction range r=13
  # and exp(first order potential) =  activity = beta(x,y) = exp(a+bx)

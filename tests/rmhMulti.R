@@ -4,7 +4,7 @@
 require(spatstat)
 
 if(!exists("nr"))
-   nr   <- 1e5
+   nr   <- 1e4
 
 if(!exists("nv"))
    nv   <- 0

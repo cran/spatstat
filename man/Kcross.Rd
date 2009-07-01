@@ -176,12 +176,14 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
     K01 <- Kcross(betacells, "off", "on") 
     plot(K01)
 
+    \dontrun{
     K10 <- Kcross(betacells, "on", "off")
 
     # synthetic example    
     pp <- runifpoispp(50)
     pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     K <- Kcross(pp, "0", "1") # note: "0" not 0
+    }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -267,8 +267,10 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
     # (2) simulated data with independent marks
     X <- rpoispp(100)
     X <- X \%mark\% runif(X$n)
+    \dontrun{
     Xc <- markcorr(X)
     plot(Xc)
+    }
     
     # MULTITYPE DATA:
     # Hughes' amacrine data
@@ -283,10 +285,12 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
     # Note: kernel="epanechnikov" comes from help(density)
 
     # (4) Same again with explicit control over bandwidth
+    \dontrun{
     M <- markcorr(amacrine, 
                   correction="translate", method="density",
                   kernel="epanechnikov", bw=0.02)
     # see help(density) for correct interpretation of 'bw'
+    }
 
    \testonly{
     data(betacells)

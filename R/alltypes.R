@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.21 $   $Date: 2009/04/15 00:20:36 $
+#   $Revision: 1.22 $   $Date: 2009/06/24 06:48:21 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -46,7 +46,7 @@ alltypes <- function(X, fun="K", ...,
   estimator <- 
     if(is.function(fun))
       fun
-    else if(is.character(fun) && fun %in% c("F", "G", "J", "K", "pcf")) {
+    else if(is.character(fun) && fun %in% c("F", "G", "J", "K", "L", "pcf")) {
     # conventional abbreviations
       if(nmarks > 0) 
         switch(fun,
@@ -54,6 +54,7 @@ alltypes <- function(X, fun="K", ...,
                G=Gcross,
                J=Jcross,
                K=Kcross,
+               L=Lcross,
                pcf=pcfcross)
       else
         switch(fun,
@@ -61,6 +62,7 @@ alltypes <- function(X, fun="K", ...,
                G=Gest,
                J=Jest,
                K=Kest,
+               L=Lest,
                pcf=pcf)
     } else if(is.character(fun))
       get(fun, mode="function")

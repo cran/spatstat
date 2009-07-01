@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.39 $	$Date: 2009/06/10 01:22:44 $
+#	$Revision: 1.41 $	$Date: 2009/06/30 02:49:54 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -46,7 +46,7 @@
 
 "Linhom" <- function(...) {
   K <- Kinhom(...)
-  L <- eval.fv(sqrt(K/pi))
+  L <- eval.fv(sqrt(pmax(K,0)/pi))
   # relabel the fv object
   L <- rebadge.fv(L, substitute(Linhom(r), NULL), "Linhom")
   return(L)  
@@ -130,18 +130,8 @@
       if(missing(lambda) && is.null(reciplambda)) {
         # No intensity data provided
         # Estimate density by leave-one-out kernel smoothing
-        kerndens <- density(X, ..., sigma=sigma, varcov=varcov, spill=TRUE)
-        sigma  <- kerndens$sigma
-        varcov <- kerndens$varcov
-        raw    <- kerndens$raw
-        edg    <- kerndens$edg
-        # Leave-one-out in numerator
-        SqrtDetSigma <- if(!is.null(sigma)) sigma^2 else sqrt(det(varcov))
-        peakvalue <- 1/(2 * pi * SqrtDetSigma)
-        lambda <- safelookup(raw, X) - rep(peakvalue, npoints)
-        # Edge correction if invoked
-        if(!is.null(edg)) 
-          lambda <- lambda/safelookup(edg, X)
+        lambda <- density(X, ..., sigma=sigma, varcov=varcov,
+                            at="points", leavoneout=TRUE)
         # validate
         if(length(lambda) != npoints) 
           stop(paste("Internal error: incorrect number of lambda values",

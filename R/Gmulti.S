@@ -8,12 +8,12 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.26 $	$Date: 2009/04/14 23:27:43 $
+#	$Revision: 4.27 $	$Date: 2009/06/21 01:18:24 $
 #
 ################################################################################
 
 "Gcross" <-		
-function(X, i, j, r=NULL, breaks=NULL, ...)
+function(X, i, j, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han"))
 {
 #	computes G_{ij} estimates
 #
@@ -40,7 +40,8 @@ function(X, i, j, r=NULL, breaks=NULL, ...)
   else {
     J <- (marx == j)
     if(sum(J) == 0) stop("No points are of type j")
-    result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...)
+    result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...,
+                     correction=correction)
   }
   result <-
     rebadge.fv(result,
@@ -52,7 +53,7 @@ function(X, i, j, r=NULL, breaks=NULL, ...)
 }	
 
 "Gdot" <- 	
-function(X, i, r=NULL, breaks=NULL, ...) {
+function(X, i, r=NULL, breaks=NULL, ..., correction=c("km","rs","han")) {
 #  Computes estimate of 
 #      G_{i\bullet}(t) = 
 #  P( a further point of pattern in B(0,t)| a type i point at 0 )
@@ -73,7 +74,8 @@ function(X, i, r=NULL, breaks=NULL, ...) {
   if(sum(I) == 0) stop("No points are of type i")
   J <- rep(TRUE, X$n)	# i.e. all points
 # 
-  result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...)
+  result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...,
+                   correction=correction)
   result <- rebadge.fv(result,
                        substitute(Gdot[i](r), list(i=paste(i))),
                        "Gm")
@@ -84,7 +86,8 @@ function(X, i, r=NULL, breaks=NULL, ...) {
 ##########
 
 "Gmulti" <- 	
-function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL) {
+function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
+         correction=c("rs", "km", "han")) {
 #
 #  engine for computing the estimate of G_{ij} or G_{i\bullet}
 #  depending on selection of I, J
@@ -98,74 +101,128 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL) {
 #       r:              (optional) values of argument r  
 #	breaks:		(optional) breakpoints for argument r
 #
-	verifyclass(X, "ppp")
-	W <- X$window
-        npoints <- X$n
-        area <- area.owin(W)
+  verifyclass(X, "ppp")
+  W <- X$window
+  npoints <- X$n
+  area <- area.owin(W)
 # check I and J
-	if(!is.logical(I) || !is.logical(J))
-		stop("I and J must be logical vectors")
-	if(length(I) != X$n || length(J) != X$n)
-		stop("length of I or J does not equal the number of points")
-        nI <- sum(I)
-        nJ <- sum(J)
-	if(nI == 0) stop("No points satisfy condition I")
-	if(nJ == 0) stop("No points satisfy condition J")
-        if(is.null(disjoint))
-          disjoint <- !any(I & J)
+  if(!is.logical(I) || !is.logical(J))
+    stop("I and J must be logical vectors")
+  if(length(I) != X$n || length(J) != X$n)
+    stop("length of I or J does not equal the number of points")
+  nI <- sum(I)
+  nJ <- sum(J)
+  if(nI == 0) stop("No points satisfy condition I")
+  if(nJ == 0) stop("No points satisfy condition J")
+  if(is.null(disjoint))
+    disjoint <- !any(I & J)
+# choose correction(s)
+  correction.given <- !missing(correction) && !is.null(correction)
+  if(is.null(correction))
+    correction <- c("rs", "km", "han")
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="rs",
+                             rs="rs",
+                             KM="km",
+                             km="km",
+                             Kaplan="km",
+                             han="han",
+                             Hanisch="han",
+                             best="km"),
+                           multi=TRUE)
 #  determine breakpoints for r values
-        lamJ <- nJ/area
-        rmaxdefault <- rmax.rule("G", W, lamJ)
-        breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
-        brks <- breaks$val
-        rmax <- breaks$max
+  lamJ <- nJ/area
+  rmaxdefault <- rmax.rule("G", W, lamJ)
+  breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
+  brks <- breaks$val
+  rmax <- breaks$max
+  rvals <- breaks$r
+  zeroes <- rep(0, length(rvals))
+# initialise fv object
+  df <- data.frame(r=rvals, theo=1-exp(-lamJ * pi * rvals^2))
+  Z <- fv(df, "r", substitute(Gmulti(r), NULL), "theo", . ~ r,
+          c(0,rmax),
+          c("r", "%spois(r)"), 
+          c("distance argument r", "theoretical Poisson %s"),
+          fname="Gm")
 #  "type I to type J" nearest neighbour distances
-        XI <- X[I]
-        XJ <- X[J]
-        if(disjoint) 
-          nnd <- nncross(XI, XJ)$dist
-        else {
-          seqnp <- seq(npoints)
-          iX <- seqnp[I]
-          iY <- seqnp[J]
-          nnd <- nncross(XI, XJ, iX, iY)$dist
-        }
+  XI <- X[I]
+  XJ <- X[J]
+  if(disjoint) 
+    nnd <- nncross(XI, XJ)$dist
+  else {
+    seqnp <- seq(npoints)
+    iX <- seqnp[I]
+    iY <- seqnp[J]
+    nnd <- nncross(XI, XJ, iX, iY)$dist
+  }
 #  distance to boundary from each type i point
-        bdry <- bdist.points(XI)
+  bdry <- bdist.points(XI)
 #  observations
-	o <- pmin(nnd,bdry)
+  o <- pmin(nnd,bdry)
 #  censoring indicators
-	d <- (nnd <= bdry)
+  d <- (nnd <= bdry)
 #
-# calculate
-	result <- km.rs(o, bdry, d, brks)
-        result$breaks <- NULL
+# calculate estimates
+  
+  if("none" %in% correction) {
+    #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
+    if(npoints == 0)
+      edf <- zeroes
+    else {
+      hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
+      edf <- cumsum(hh)/length(nnd)
+    }
+    Z <- bind.fv(Z, data.frame(raw=edf), "%sraw(r)",
+                 "uncorrected estimate of %s", "raw")
+  }
 
-#  UNCORRECTED e.d.f. of I-to-J nearest neighbour distances: use with care
-        rightmost <- breaks$max
-        hh <- hist(nnd[nnd <= rightmost],breaks=brks,plot=FALSE)$counts
-        result$raw <- cumsum(hh)/length(nnd)
-
-# theoretical value for marked Poisson processes
-        result$theo <- 1 - exp( - lamJ * pi * result$r^2)
-        
-# convert to class "fv"
-        result <- as.data.frame(result)
-        Z <- result[, c("r", "theo", "rs", "km", "hazard", "raw")]
-        alim <- range(result$r[result$km <= 0.9])
-        labl <- c("r", "%spois(r)", "%sbord(r)", "%skm(r)",
-                  "lambda(r)", "%sraw(r)")
-        desc <- c("distance argument r",
-                  "theoretical Poisson %s",
-                  "border corrected estimate of %s",
-                  "Kaplan-Meier estimate of %s",
-                  "Kaplan-Meier estimate of hazard function lambda(r)",
-                  "uncorrected estimate of %s")
-        Z <- fv(Z, "r", substitute(Gmulti(r), NULL),
-                "km", . ~ r, alim, labl, desc, fname="Gm")
-        attr(Z, "dotnames") <- c("km", "rs", "theo")
-        unitname(Z) <- unitname(X)
-	return(Z)
+  if("han" %in% correction) {
+    # Hanisch style estimator
+    if(npoints == 0)
+      G <- zeroes
+    else {
+      #  uncensored distances
+      x <- nnd[d]
+      #  weights
+      a <- eroded.areas(W, rvals)
+      # calculate Hanisch estimator
+      h <- hist(x[x <= rmax], breaks=breaks$val, plot=FALSE)$counts
+      G <- cumsum(h/a)
+      G <- G/max(G[is.finite(G)])
+    }
+    # add to fv object
+    Z <- bind.fv(Z, data.frame(han=G),
+                 "%shan(r)", 
+                 "Hanisch estimate of %s",
+                 "han")
+    # modify recommended plot range
+    attr(Z, "alim") <- range(rvals[G <= 0.9])
+  }
+  
+  if(any(correction %in% c("rs", "km"))) {
+    # calculate Kaplan-Meier and border correction (Reduced Sample) estimators
+    if(npoints == 0)
+      result <- data.frame(rs=zeroes, km=zeroes, hazard=zeroes)
+    else {
+      result <- km.rs(o, bdry, d, breaks)
+      result <- as.data.frame(result[c("rs", "km", "hazard")])
+    }
+    # add to fv object
+    Z <- bind.fv(Z, result,
+                 c("%sbord(r)", "%skm(r)", "hazard(r)"),
+                 c("border corrected estimate of %s",
+                   "Kaplan-Meier estimate of %s",
+                   "Kaplan-Meier estimate of hazard function lambda(r)"),
+                 "km")
+    # modify recommended plot range
+    attr(Z, "alim") <- range(rvals[result$km <= 0.9])
+  }
+  nama <- names(Z)
+  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  unitname(Z) <- unitname(X)
+  return(Z)
 }	
 
 

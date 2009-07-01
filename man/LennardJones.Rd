@@ -79,18 +79,6 @@
    ppm(X, ~1, LennardJones(), correction="translate")
    # Typically yields very small values for theta_1, theta_2
    # so the values of sigma, tau may not be sensible
-##########
-   # How to plot the pair potential function (exponentiated)
-   plotLJ <- function(sigma, tau) {
-        dmax <- 2 * sigma * max(1, tau)^(1/6)
-        d <- seq(dmax * 0.0001, dmax, length=1000)
-        plot(d, exp(- (sigma/d)^12 + tau * (sigma/d)^6), type="l",
-                ylab="Lennard-Jones",
-                main=substitute(list(sigma==s, tau==t),
-                     list(s=sigma,t=tau)))
-        abline(h=1, lty=2)
-   }
-   plotLJ(1,1)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -107,7 +107,7 @@
   # Spatially interpolate the values of L12
   # Compare Figure 5(b) of Getis and Franklin (1987)
   X12 <- X \%mark\% L12
-  Z <- smooth.ppp(X12, sigma=5, dimyx=256)
+  Z <- smooth.ppp(X12, sigma=5, dimyx=128)
 
   plot(Z, col=topo.colors(128), main="smoothed neighbourhood density")
   contour(Z, add=TRUE)

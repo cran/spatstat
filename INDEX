@@ -26,7 +26,9 @@ Kinhom                  Inhomogeneous K-function
 Kmeasure                Reduced Second Moment Measure
 Kmulti                  Marked K-Function
 Lcross                  Multitype L-function (cross-type)
+Lcross.inhom            Inhomogeneous Cross Type L Function
 Ldot                    Multitype L-function (i-to-any)
+Ldot.inhom              Inhomogeneous Multitype L Dot Function
 LennardJones            The Lennard-Jones Potential
 Lest                    L-function
 Linhom                  L-function
@@ -117,6 +119,7 @@ complement.owin         Take Complement of a Window
 concatxy                Concatenate x,y Coordinate Vectors
 connected               Connected components of an image or window
 contour.im              Contour plot of pixel image
+convexhull              Convex Hull
 convexhull.xy           Convex Hull of Points
 copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
@@ -200,6 +203,9 @@ inside.owin             Test Whether Points Are Inside A Window
 interp.im               Interpolate a Pixel Image
 intersect.owin          Intersection or Union of Two Windows
 intersect.tess          Intersection of Two Tessellations
+iplot                   Point and Click Interface for Displaying a
+                        Point Pattern
+is.convex               Test Whether a Window is Convex
 is.im                   Test Whether An Object Is A Pixel Image
 is.marked               Test Whether Marks Are Present
 is.marked.ppm           Test Whether A Point Process Model is Marked
@@ -213,6 +219,8 @@ is.ppm                  Test Whether An Object Is A Fitted Point
 is.ppp                  Test Whether An Object Is A Point Pattern
 is.subset.owin          Determine Whether One Window is Contained In
                         Another
+istat                   Point and Click Interface for Exploratory
+                        Analysis of Point Pattern
 japanesepines           Japanese Pines Point Pattern
 kaplan.meier            Kaplan-Meier Estimator using Histogram Data
 km.rs                   Kaplan-Meier and Reduced Sample Estimator using
@@ -284,7 +292,7 @@ pixellate               Convert Point Pattern to Pixel Image
 pixelquad               Quadrature Scheme Based on Pixel Grid
 plot.colourmap          Plot a Colour Map
 plot.fasp               Plot a Function Array
-plot.fv                 Plot Function Valuesn
+plot.fv                 Plot Function Values
 plot.hyperframe         Plot Entries in a Hyperframe
 plot.im                 Plot a Pixel Image
 plot.kppm               Plot a fitted cluster point process

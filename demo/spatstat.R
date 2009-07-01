@@ -258,7 +258,7 @@ data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
 
 L <- localL(ponderosa)
-plot(L, lty=1, col=1,
+plot(L, lty=1, col=1, legend=FALSE,
      main="neighbourhood density functions for Ponderosa Pines")
 
 parsave <- par(mfrow=c(1,2))
@@ -279,25 +279,25 @@ par(pty="s")
 mkc <- markcorr(amacrine, 
                 correction="translate", method="density",
                 kernel="epanechnikov")
-plot(mkc, main="Mark correlation function")
+plot(mkc, main="Mark correlation function", legend=FALSE)
 par(parsave)
 
-plot(alltypes(amacrine, markconnect),
+plot(alltypes(amacrine, markconnect), 
      title="Mark connection functions for amacrine cells")
 
 parsave <- par(mfrow=c(1,2))
 data(spruces)
 plot(spruces, cex.main=0.75)
 par(pty="s")
-plot(markcorr(spruces), main="Mark correlation")
+plot(markcorr(spruces), main="Mark correlation", legendpos="bottomright")
 
 plot(spruces, cex.main=0.75)
-plot(markvario(spruces), main="Mark variogram")
+plot(markvario(spruces), main="Mark variogram", legendpos="topright")
 par(parsave)
 
 plot(as.listof(list("Emark(spruces)"=Emark(spruces),
                     "Vmark(spruces)"=Vmark(spruces))),
-     main="Independence diagnostics", ylim.covers=0)
+     main="Independence diagnostics", ylim.covers=0, legendpos="bottom")
 
 fanfare("VI. Model-fitting")
 
@@ -332,7 +332,7 @@ plot(fit, how="image", main=c("Strauss model",
 
 plot(swedishpines)
 fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
-plot(fitin(fit),
+plot(fitin(fit), legend=FALSE,
      main=c("Pairwise interaction model",
             "fit by maximum pseudolikelihood"))
 par(parsave)

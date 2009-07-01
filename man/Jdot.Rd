@@ -10,7 +10,7 @@
   the type \eqn{i} points and the points of any type.
 }
 \usage{
-Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots)
+Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -38,6 +38,11 @@ Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots)
     Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{\dots}{Ignored.}
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"Hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -54,6 +59,9 @@ Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots)
     estimator of \eqn{J_{i\bullet}(r)}{Ji.(r)}
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
+    estimator of \eqn{J_{i\bullet}(r)}{Ji.(r)}
+  }
+  \item{han}{the Hanisch-style
     estimator of \eqn{J_{i\bullet}(r)}{Ji.(r)}
   }
   \item{un}{the ``uncorrected'' 
@@ -171,9 +179,11 @@ Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots)
     Jhh <- Jest(lansing[lansing$marks == "hickory", ])
     plot(Jhh, add=TRUE)
 
+    \dontrun{
     # synthetic example with two marks "a" and "b"
-    pp <- runifpoint(50) \%mark\% factor(sample(c("a","b"), 50, replace=TRUE))
+    pp <- runifpoint(30) \%mark\% factor(sample(c("a","b"), 30, replace=TRUE))
     J <- Jdot(pp, "a")
+    }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

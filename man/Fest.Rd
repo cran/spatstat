@@ -7,7 +7,7 @@
   window of arbitrary shape.
 }
 \usage{
-Fest(X, ..., eps, r=NULL, breaks=NULL)
+Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -28,12 +28,19 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
   \item{breaks}{An alternative to the argument \code{r}.
     Not normally invoked by the user. See the \bold{Details} section.
   }
+  \item{correction}{
+    Optional.
+    The edge correction(s) to be used to estimate \eqn{F(r)}.
+    A vector of character strings selected from
+    \code{"none"}, \code{"rs"}, \code{"km"}, \code{"cs"}
+    and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
   which can be plotted directly using \code{\link{plot.fv}}.
 
-  Essentially a data frame containing six columns:
+  Essentially a data frame containing up to seven columns:
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{F(r)} has been  estimated
   }
@@ -44,6 +51,8 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
   }
   \item{hazard}{the hazard rate \eqn{\lambda(r)}{lambda(r)}
     of \eqn{F(r)} by the spatial Kaplan-Meier method
+  }
+  \item{cs}{the Chiu-Stoyan estimator of \eqn{F(r)}
   }
   \item{raw}{the uncorrected estimate of \eqn{F(r)},
   i.e. the empirical distribution of the distance from 
@@ -98,9 +107,10 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
   The estimation of \eqn{F} is hampered by edge effects arising from 
   the unobservability of points of the random pattern outside the window. 
   An edge correction is needed to reduce bias (Baddeley, 1998; Ripley, 1988). 
-  The two edge corrections implemented here are the border method or
-  "\emph{reduced sample}" estimator, and the spatial Kaplan-Meier estimator
-  (Baddeley and Gill, 1997). 
+  The edge corrections implemented here are the border method or
+  "\emph{reduced sample}" estimator, the spatial Kaplan-Meier estimator
+  (Baddeley and Gill, 1997) and the Chiu-Stoyan estimator (Chiu and
+  Stoyan, 1998). 
 
   Our implementation makes essential use of the distance transform algorithm
   of image processing (Borgefors, 1986). A fine grid of pixels is 
@@ -128,9 +138,9 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
   distance \eqn{r} at which \eqn{F(r)} should be evaluated. 
   It is also used to determine the breakpoints
   (in the sense of \code{\link{hist}}
-  for the computation of histograms of distances. The reduced-sample and
-  Kaplan-Meier estimators are computed from histogram counts. 
-  In the case of the Kaplan-Meier estimator this introduces a discretisation
+  for the computation of histograms of distances. The 
+  estimators are computed from histogram counts. 
+  This introduces a discretisation
   error which is controlled by the fineness of the breakpoints.
 
   First-time users would be strongly advised not to specify \code{r}.
@@ -155,7 +165,8 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
 
   The naive empirical distribution of distances from each location
   in the window to the nearest point of the data pattern, is a biased
-  estimate of \eqn{F}. However this is also returned by the algorithm,
+  estimate of \eqn{F}. However this is also returned by the algorithm
+  (if \code{correction="none"}),
   as it is sometimes useful in other contexts.
   Care should be taken not to use the uncorrected
   empirical \eqn{F} as if it were an unbiased estimator of \eqn{F}.
@@ -186,6 +197,10 @@ Fest(X, ..., eps, r=NULL, breaks=NULL)
      \emph{Computer Vision, Graphics and Image Processing}
      \bold{34} (1986) 344-371.
 
+  Chiu, S.N. and Stoyan, D. (1998)
+  Estimators of distance distributions for spatial patterns.
+  \emph{Statistica Neerlandica} \bold{52}, 239--246.
+  
   Cressie, N.A.C. \emph{Statistics for spatial data}.
     John Wiley and Sons, 1991.
 

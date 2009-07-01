@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.19 $ $Date: 2009/03/31 02:59:43 $
+# $Revision: 1.20 $ $Date: 2009/06/29 05:41:34 $
 #
 #
 ############################# 
@@ -134,6 +134,9 @@ superimposePSP <-
       arglist <- X
   }
 
+  isnull <- unlist(lapply(arglist, is.null))
+  arglist <- arglist[!isnull]
+  
   if(!all(unlist(lapply(arglist, is.psp))))
     stop("Some of the arguments are not psp objects")
   

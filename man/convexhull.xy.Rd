@@ -28,6 +28,7 @@ convexhull.xy(x, y=NULL)
 \seealso{
   \code{\link{owin}},
   \code{\link{as.owin}},
+  \code{\link{convexhull}},
   \code{\link{bounding.box.xy}},
   \code{\link{ripras}}
 }

@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.6 $ $Date: 2009/02/20 19:14:02 $
+#  $Revision: 1.7 $ $Date: 2009/07/01 06:45:46 $
 #
 
 .Spatstat.use.trigraf <- TRUE
@@ -13,9 +13,10 @@ dirichlet <- function(X) {
   w <- X$window
   dd <- deldir(X$x, X$y, rw=c(w$xrange,w$yrange))
   pp <- lapply(tile.list(dd), function(z) { owin(poly=z[c("x","y")]) })
+  dir <- tess(tiles=pp, window=as.rectangle(w))
   if(w$type != "rectangle")
-    pp <- lapply(pp, intersect.owin, B=w)
-  tess(tiles=pp, window=w)
+    dir <- intersect.tess(dir, w)
+  return(dir)
 }
 
 delaunay <- function(X) {
@@ -114,7 +115,10 @@ delaunay <- function(X) {
   }
 
   wc <- convexhull.xy(x, y)
-  tess(tiles=tiles, window=wc)
+  del <- tess(tiles=tiles, window=wc)
+  if(w$type != "rectangle")
+    del <- intersect.tess(del, w)
+  return(del)
 }
 
   

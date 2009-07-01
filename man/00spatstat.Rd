@@ -200,6 +200,8 @@
       \tabular{ll}{
 	\code{\link{plot.ppp}} \tab
 	plot a point pattern (e.g. \code{plot(X)}) \cr
+	\code{\link{iplot}} \tab
+	plot a point pattern interactively \cr
 	\code{\link{[.ppp}} \tab
 	extract or replace a subset of a point pattern \cr
         \tab \code{pp[subset]} or \code{pp[subwindow]} \cr
@@ -232,7 +234,8 @@
 	\code{\link{dirichlet}} \tab
 	compute Dirichlet-Voronoi tessellation \cr
 	\code{\link{delaunay}} \tab
-	compute Delaunay triangulation
+	compute Delaunay triangulation \cr 
+	\code{\link{convexhull}} \tab compute convex hull
       }
       See \code{\link{spatstat.options}} to control plotting behaviour.
       
@@ -252,6 +255,7 @@
 	\code{\link{disc}}    \tab	make a circular window \cr
 	\code{\link{ripras}}    \tab
 	Ripley-Rasson estimator of window, given only the points \cr
+	\code{\link{convexhull}} \tab compute convex hull of something \cr 
 	\code{\link{letterR}}    \tab
 	polygonal window in the shape of the \R logo
       }
@@ -309,7 +313,10 @@
 	\code{\link{bdist.pixels}}	\tab	compute distances from all pixels to window boundary \cr
 	\code{\link{distmap.owin}}	\tab	distance transform image \cr
 	\code{\link{centroid.owin}}	\tab compute centroid (centre of mass) of window\cr
-	\code{\link{is.subset.owin}}    \tab determine whether one window contains another 
+	\code{\link{is.subset.owin}}    \tab determine whether one
+	window contains another \cr
+	\code{\link{is.convex}} \tab determine whether a window is convex \cr 
+	\code{\link{convexhull}} \tab compute convex hull 
       }
 
     \bold{Pixel images:}
@@ -421,7 +428,8 @@
     \code{X} \tab
     print basic description of point pattern \code{X}  \cr
     \code{any(duplicated(X))} \tab
-    check for duplicated points in pattern \code{X}
+    check for duplicated points in pattern \code{X} \cr
+    \code{\link{istat}(X)} \tab Interactive exploratory analysis 
   }
 
   \bold{Classical exploratory tools:}
@@ -443,6 +451,7 @@
     \code{\link{localK}} \tab neighbourhood K-function\cr
     \code{\link{pcf}} \tab 	pair correlation function \cr
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
+    \code{\link{Linhom}} \tab \eqn{L} for inhomogeneous point patterns \cr
     \code{\link{Kest.fft}} \tab fast \eqn{K}-function using FFT for large datasets \cr
     \code{\link{Kmeasure}} \tab reduced second moment measure \cr
     \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
@@ -480,6 +489,9 @@
     \code{\link{Kcross},\link{Kdot}, \link{Kmulti}} \tab
     multitype \eqn{K}-functions 
     \eqn{K_{ij}, K_{i\bullet}}{K[i,j], K[i.]} \cr
+    \code{\link{Lcross},\link{Ldot}} \tab
+    multitype \eqn{L}-functions 
+    \eqn{L_{ij}, L_{i\bullet}}{L[i,j], L[i.]} \cr
     \code{\link{Jcross},\link{Jdot},\link{Jmulti}} \tab
     multitype \eqn{J}-functions
     \eqn{J_{ij}, J_{i\bullet}}{J[i,j],J[i.]} \cr
@@ -491,7 +503,9 @@
     for all \eqn{i,j} pairs \cr
     \code{\link{Iest}} \tab  multitype \eqn{I}-function\cr
     \code{\link{Kcross.inhom},\link{Kdot.inhom}} \tab
-    inhomogeneous counterparts of \code{Kcross}, \code{Kdot}
+    inhomogeneous counterparts of \code{Kcross}, \code{Kdot} \cr
+    \code{\link{Lcross.inhom},\link{Ldot.inhom}} \tab
+    inhomogeneous counterparts of \code{Lcross}, \code{Ldot}
   }
 
   \bold{Summary statistics for a marked point pattern:}

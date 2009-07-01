@@ -1,12 +1,13 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.21 $   $Date: 2009/04/15 00:34:47 $
+#   $Revision: 1.22 $   $Date: 2009/07/01 19:00:03 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                       title=NULL, samex=TRUE, banner=TRUE, 
                       mar.panel=NULL,
-                      outerlabels=TRUE, cex.outerlabels=1.25) {
+                      outerlabels=TRUE, cex.outerlabels=1.25,
+                      legend=FALSE) {
 
 # Determine the overall title of the plot
   if(banner) {
@@ -123,7 +124,7 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
         do.call("plot.fv",
                 resolve.defaults(list(x=fun, fmla=fmla, subset=sub),
                                  list(...),
-                                 list(xlim=xlim, main=main),
+                                 list(xlim=xlim, main=main, legend=legend),
                                  list(ann=ann.def, axes=ann.def,
                                       frame.plot=TRUE)))
       }

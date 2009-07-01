@@ -93,7 +93,7 @@ using the Fast Fourier Transform.
  spatstat.options(npixel=512)
  }
  \testonly{
-  spatstat.options(npixel=256)
+  spatstat.options(npixel=125)
  }
  Kpp <- Kest.fft(pp, 0.01)
  plot(Kpp)

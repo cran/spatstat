@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.44 $	$Date: 2009/06/12 22:28:22 $
+#	$Revision: 4.50 $	$Date: 2009/06/21 23:45:55 $
 #
 #
 #
@@ -544,3 +544,48 @@ owin2gpc <- function(x) {
   new("gpc.poly", pts=g)
 }
 
+is.convex <- function(x) {
+  verifyclass(x, "owin")
+  switch(x$type,
+         rectangle={return(TRUE)},
+         polygonal={
+           b <- x$bdry
+           if(length(b) > 1)
+             return(FALSE)
+           b <- b[[1]]
+           x <- b$x
+           y <- b$y
+           n <- length(x)
+           ch <- chull(x,y)
+           return(all(ch==(n:1)))
+         },
+         mask={
+           v <- vertices(x)
+           v <- as.ppp(v, W=as.rectangle(x))
+           ch <- convexhull.xy(v)
+           edg <- as.psp(ch)
+           edgedist <- nncross(v, edg)$dist
+           pixdiam <- sqrt(x$xstep^2 + x$ystep^2)
+           return(all(edgedist <= pixdiam))
+         })
+  return(as.logical(NA))
+}
+
+convexhull <- function(x) {
+  if(inherits(x, "owin")) 
+    v <- vertices(x)
+  else if(inherits(x, "psp"))
+    v <- endpoints.psp
+  else if(inherits(x, "ppp"))
+    v <- x
+  else {
+    x <- as.owin(x)
+    v <- vertices(x)
+  }
+  ch <- convexhull.xy(v)
+  b <- as.rectangle(x)
+  out <- rebound.owin(ch, b)
+  return(out)
+}
+
+  

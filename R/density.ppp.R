@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.13 $    $Date: 2009/05/13 02:37:06 $
+#  $Revision: 1.15 $    $Date: 2009/06/30 04:25:28 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -86,29 +86,46 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
     #
     if(edge) {
       # edge correction
-      edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
-      result <- result/safelookup(edg, x)
+      win <- x$window
+      if(is.null(varcov) && win$type == "rectangle") {
+        # evaluate Gaussian probabilities directly
+        xr <- win$xrange
+        yr <- win$yrange
+        xx <- x$x
+        yy <- x$y
+        xprob <-
+          pnorm(xr[2], mean=xx, sd=sigma) - pnorm(xr[1], mean=xx, sd=sigma)
+        yprob <-
+          pnorm(yr[2], mean=yy, sd=sigma) - pnorm(yr[1], mean=yy, sd=sigma)
+        edgeweight <- xprob * yprob
+      } else {
+        edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
+        edgeweight <- safelookup(edg, x)
+      }
+      result <- result/edgeweight
     }
     return(as.numeric(result))
   }
   # VALUES AT PIXELS
-  smo <- second.moment.calc(x, sigma, what="smooth", ...,
-                            weights=weights, varcov=varcov)
-  smo$v <- smo$v/(smo$xstep * smo$ystep)
-  raw <- smo
-  if(edge) {
-    edg <- second.moment.calc(x, sigma, what="edge", ...,
+  if(!edge) {
+    raw <- second.moment.calc(x, sigma, what="smooth", ...,
                               weights=weights, varcov=varcov)
-    smo <- eval.im(smo/edg)
+    raw$v <- raw$v/(raw$xstep * raw$ystep)
+    smo <- raw
+  } else {
+    both <- second.moment.calc(x, sigma, what="smoothedge", ...,
+                              weights=weights, varcov=varcov)
+    raw <- both$smooth
+    edg <- both$edge
+    raw$v <- raw$v/(raw$xstep * raw$ystep)
+    smo <- eval.im(raw/edg)
   }
   result <- smo[x$window, drop=FALSE]
 
   # internal use only
   spill <- list(...)$spill
-  if(!is.null(spill)) {
-    if(!edge) edg <- NULL
+  if(!is.null(spill)) 
     return(list(sigma=sigma, varcov=varcov, raw = raw, edg=edg))
-  }
 
   # normal return
   return(result)

@@ -1,10 +1,36 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.22 $	$Date: 2009/06/10 01:26:28 $
+#	$Revision: 1.23 $	$Date: 2009/06/24 23:46:49 $
 #
 #
 # ------------------------------------------------------------------------
+
+Lcross.inhom <- function(X, i, j, ...) {
+  if(missing(i)) i <- levels(marks(X))[1]
+  if(missing(j)) j <- levels(marks(X))[2]
+  K <- Kcross.inhom(X, i, j, ...)
+  L <- eval.fv(sqrt(pmax(K,0)/pi))
+  # relabel the fv object
+  L <- rebadge.fv(L,
+                  substitute(Linhom[i,j](r),
+                             list(i=paste(i),j=paste(j))),
+                  "Lcross.inhom",
+                  new.yexp=substitute(Linhom[list(i,j)](r),
+                                      list(i=paste(i),j=paste(j))))
+  return(L)  
+}
+
+Ldot.inhom <- function(X, i, ...) {
+  if(missing(i)) i <- levels(marks(X))[1]
+  K <- Kdot.inhom(X, i, ...)
+  L <- eval.fv(sqrt(pmax(K,0)/pi))
+  # relabel the fv object
+  L <- rebadge.fv(L,
+                  substitute(Linhom[i](r), list(i=paste(i))),
+                  "Ldot.inhom")
+  return(L)  
+}
 
 "Kcross.inhom" <- 
 function(X, i, j, lambdaI, lambdaJ, ...,

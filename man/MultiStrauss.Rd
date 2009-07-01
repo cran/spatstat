@@ -70,8 +70,11 @@ which can then be fitted to point pattern data.
    r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    ppm(betacells, ~1, MultiStrauss(c("off","on"), r))
    # fit the stationary multitype Strauss process to `betacells'
+
+   \dontrun{
    ppm(betacells, ~polynom(x,y,3), MultiStrauss(c("off","on"), r))
    # fit a nonstationary Strauss process with log-cubic polynomial trend
+   }
 }
 \section{Warnings}{
   The argument \code{types} is interpreted as a
