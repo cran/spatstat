@@ -1,13 +1,13 @@
 \name{plot.fv}
 \alias{plot.fv}
-\title{Plot Function Valuesn}
+\title{Plot Function Values}
 \description{
   Plot method for the class \code{"fv"}.
 }
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-           ylim.covers=NULL)
+           ylim.covers=NULL, legend=TRUE, legendpos="topleft")
 }
 \arguments{
   \item{x}{
@@ -54,6 +54,16 @@
     \eqn{y} axis. For example \code{ylim.covers=0} will ensure that the
     \eqn{y} axis includes the origin.
   }
+  \item{legend}{
+    Logical flag or \code{NULL}. If \code{legend=TRUE}, the algorithm
+    plots a legend in the top left corner of the plot,
+    explaining the meaning of the different line types and colours.
+  }
+  \item{legendpos}{
+    The position of the legend. Either a character string keyword
+    (see \code{\link[graphics]{legend}} for keyword options)
+    or a pair of coordinates in the format \code{list(x,y)}.
+  }
 }
 \value{
   Either \code{NULL}, or a data frame giving the meaning of the
@@ -88,7 +98,8 @@
 
   The value returned by this plot function indicates the
   meaning of the line types and colours in the plot. It can be used
-  to make a suitable legend for the plot. See the examples.
+  to make a suitable legend for the plot if you want to do this
+  by hand. See the examples.
 }
 \examples{
    data(cells)
@@ -113,9 +124,9 @@
    plot(K, iso ~ r, subset=quote(r < 0.2))
                                    # plots iso against r for r < 10
 
-   # making a legend
-   v <- plot(K, . ~ r, ylab="K(r)")
-   legend(0.05, 0.15, legend=row.names(v), lty=v$lty, col=v$col)
+   # making a legend by hand
+   v <- plot(K, . ~ r, ylab="K(r)", legend=FALSE)
+   legend(0.05, 0.15, legend=v$meaning, lty=v$lty, col=v$col)
 }
 \seealso{
   \code{\link{fv.object}},

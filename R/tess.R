@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.25 $ $Date: 2009/04/05 22:41:32 $
+#   $Revision: 1.26 $ $Date: 2009/07/01 07:15:44 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -33,8 +33,22 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
           win <- union.owin(win, tiles[[i]])
       }
     }
-    win <- rescue.rectangle(win)
-    out <- list(type="tiled", window=win, tiles=tiles, n=length(tiles))
+    ismask <- function(x) {x$type == "mask"}
+    if(ismask(win) || any(unlist(lapply(tiles, ismask)))) {
+      # convert to pixel image tessellation
+      win <- as.mask(win)
+      ima <- as.im(win)
+      for(i in seq(along=tiles))
+        ima[tiles[[i]]] <- i
+      ima <- ima[win, drop=FALSE]
+      ima <- eval.im(factor(ima))
+      out <- list(type="image",
+                  window=win, image=ima, n=length(levels(ima)))
+    } else {
+      # tile list
+      win <- rescue.rectangle(win)
+      out <- list(type="tiled", window=win, tiles=tiles, n=length(tiles))
+    }
   } else if(isimage) {
     image <- eval.im(factor(image))
     if(is.null(win)) win <- as.owin(image)
@@ -298,6 +312,18 @@ as.tess.owin <- function(X) {
 
 intersect.tess <- function(X, Y, ...) {
   X <- as.tess(X)
+  if(is.owin(Y) && Y$type == "mask") {
+    # special case
+    # convert to pixel image 
+    result <- as.im(Y)
+    Xtiles <- tiles(X)
+    for(i in seq(Xtiles)) {
+      tilei <- Xtiles[[i]]
+      result[tilei] <- i
+    }
+    result <- result[Y, drop=FALSE]
+    return(tess(image=result, window=Y))
+  }
   Y <- as.tess(Y)
   Xtiles <- tiles(X)
   Ytiles <- tiles(Y)

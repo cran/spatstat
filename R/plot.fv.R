@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.28 $    $Date: 2009/04/15 00:23:06 $
+#  $Revision: 1.32 $    $Date: 2009/06/24 18:50:20 $
 #
 #
 
@@ -12,7 +12,7 @@ conspire <- function(...) {
 
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-                    ylim.covers=NULL) {
+                    ylim.covers=NULL, legend=TRUE, legendpos="topleft") {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -84,8 +84,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       rhsdata <- rhsdata[ok]
       lhsdata <- lhsdata[ok, , drop=FALSE]
     } else { # actual range of values to be plotted
-      xlim <- range(rhsdata[is.finite(rhsdata)],na.rm=TRUE)
-      rok <- is.finite(rhsdata) & rhsdata >= xlim[1] & rhsdata <= xlim[2]
+      rok <- is.finite(rhsdata) 
       lok <- apply(is.finite(lhsdata), 1, any)
       ok <- lok & rok
       rhsdata <- rhsdata[ok]
@@ -166,8 +165,21 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   if(nplots == 1)
     return(invisible(NULL))
-  else 
-    return(data.frame(lty=lty, col=col, row.names=colnames(lhsdata)))
+  else {
+    key <- colnames(lhsdata)
+    desc <- attr(x, "desc")
+    desc <- desc[match(key, names(x))]
+    ylab <- attr(x, "ylab")
+    if(!is.null(ylab)) {
+      if(is.language(ylab))
+        ylab <- deparse(ylab)
+      desc <- sprintf(desc, ylab)
+    }
+    if(!is.null(legend) && legend)
+      legend(legendpos, inset=0.05, lty=lty, col=col, legend=key)
+    return(data.frame(lty=lty, col=col, key=key,
+                      meaning=desc, row.names=key))
+  }
 }
 
 

@@ -93,7 +93,7 @@ Hest(X, ...)
    Y <- rpoisline(10)
    H <- Hest(Y)
    data(heather)
-   H <- Hest(heather$medium)
+   H <- Hest(heather$coarse)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

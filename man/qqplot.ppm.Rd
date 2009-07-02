@@ -320,8 +320,10 @@
     \dontrun{qqplot.ppm(fit, 80)  # strong evidence of non-Poisson interaction}
     \testonly{qqplot.ppm(fit, 4)}
 
-    \dontrun{diagnose.ppm(fit, type="pearson")  
-    qqplot.ppm(fit, type="pearson")}
+    \dontrun{
+     diagnose.ppm(fit, type="pearson")  
+     qqplot.ppm(fit, type="pearson")
+    }
     \testonly{qqplot.ppm(fit, 4, type="pearson")}
 
     ###########################################

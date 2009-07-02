@@ -10,7 +10,7 @@
   to the nearest point of type \eqn{j}.
 }
 \usage{
-Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
+Gcross(X, i, j, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -40,6 +40,11 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
   \item{\dots}{
   	Ignored.
   }
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -50,6 +55,8 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
     estimator of \eqn{G_{ij}(r)}{Gij(r)}
+  }
+  \item{han}{the Hanisch-style estimator of \eqn{G_{ij}(r)}{Gij(r)}
   }
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{G_{ij}(r)}{Gij(r)}
   }
@@ -205,8 +212,12 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
     data(betacells)
      # cat retina data
     G01 <- Gcross(betacells)
+
     # equivalent to:
-    G01 <- Gcross(betacells, "off", "on") 
+    \dontrun{
+    G01 <- Gcross(betacells, "off", "on")
+    }
+
     plot(G01)
 
     # empty space function of `on' points
@@ -216,7 +227,7 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots)
     }
 
     # synthetic example    
-    pp <- runifpoispp(50)
+    pp <- runifpoispp(30)
     pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     G <- Gcross(pp, "0", "1")   # note: "0" not 0
 }

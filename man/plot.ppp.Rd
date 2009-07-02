@@ -154,6 +154,7 @@ use.marks=TRUE, add=FALSE, maxsize=NULL, markscale=NULL)
   suitable legend, as shown in the examples.
 }
 \seealso{
+  \code{\link{iplot}},
   \code{\link{ppp.object}},
   \code{\link{plot}},
   \code{\link{par}},

@@ -66,9 +66,8 @@
 \examples{
  data(japanesepines)
  X <- japanesepines
- L <- Linhom(X)
- plot(L)
- plot(L, main="L function for Japanese Pines")
+ L <- Linhom(X, sigma=0.1)
+ plot(L, main="Inhomogeneous L function for Japanese Pines")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

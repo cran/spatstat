@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.37 $	$Date: 2009/05/12 02:12:05 $
+#	$Revision: 1.38 $	$Date: 2009/06/30 20:49:34 $
 #
 #
 #--------------------------------------------------------------------------
@@ -66,9 +66,10 @@ plot.ppp <-
 
 # Now convert to bona fide point pattern
   x <- as.ppp(x)
+  xwindow <- x$window
   
   if(!add)
-    plot.owin(x$window, ..., main=main)
+    plot.owin(xwindow, ..., main=main)
     
   if(x$n == 0)
     return(invisible())
@@ -146,22 +147,9 @@ plot.ppp <-
       marx <- marx[ok]
     }
 
-    # establish values of markscale, maxsize
-    if(!is.null(maxsize) && !is.null(markscale))
-      stop("Only one of maxsize and markscale should be given")
-    if(is.null(maxsize) && is.null(markscale)) {
-      # if BOTH are absent, enforce the spatstat defaults
-      # (which could also be null)
-      pop <- spatstat.options("par.points")
-      markscale <- pop$markscale
-      maxsize   <- pop$maxsize
-    }
-    # examine spread of values
-    mr <- range(marx)
-    maxabs <- max(abs(mr))
-    constant <- (diff(mr) < 4 * .Machine$double.eps)
-    tiny <- (maxabs < 4 * .Machine$double.eps)
-    if(tiny && is.null(markscale)) {
+    scal <- mark.scale.default(marx, xwindow,
+                               markscale=markscale, maxsize=maxsize)
+    if(is.na(scal)) {
       # data cannot be scaled successfully;
       # plot as points
       do.call("smartpoints",
@@ -170,21 +158,6 @@ plot.ppp <-
                                list(...),
                                spatstat.options("par.points")))
       return(invisible())
-    }
-    # determine physical scale:
-    #   plotted size = scal * (mark value) 
-    if(!is.null(markscale))
-      scal <- markscale
-    else {
-      # scale to be determined indirectly
-      if(is.null(maxsize)) {
-        # guess appropriate max physical size of symbols
-        bb <- as.rectangle(x$window)
-        maxsize <- 1.4/sqrt(pi * x$n/area.owin(bb))
-        maxsize <- min(maxsize, diameter(bb) * 0.07)
-      }
-      # scale to [0,maxsize]
-      scal <- maxsize/maxabs
     }
     # scale determined.
     # Apply the scaling
@@ -211,7 +184,8 @@ plot.ppp <-
                                if(!is.null(cols)) list(fg=cols[1]) else NULL,
                                list(...)))
     # return a plottable scale bar
-    mp.value <- if(constant) mr[1] else pretty(mr)
+    mr <- range(marx)
+    mp.value <- if(is.na(scal)) mr[1] else pretty(mr)
     mp.plotted <- mp.value * scal 
     names(mp.plotted) <- paste(mp.value)
     return(mp.plotted)
@@ -276,3 +250,36 @@ plot.ppp <-
     return(invisible(chars))
 }
 
+
+mark.scale.default <- function(marx, w, markscale=NULL, maxsize=NULL) {
+    # establish values of markscale, maxsize
+  if(!is.null(maxsize) && !is.null(markscale))
+    stop("Only one of maxsize and markscale should be given")
+  if(is.null(maxsize) && is.null(markscale)) {
+    # if BOTH are absent, enforce the spatstat defaults
+    # (which could also be null)
+    pop <- spatstat.options("par.points")
+    markscale <- pop$markscale
+    maxsize   <- pop$maxsize
+  }
+  # Now check whether markscale is fixed
+  if(!is.null(markscale)) {
+    stopifnot(markscale > 0)
+    return(markscale)
+  }
+  # Usual case: markscale is to be determined from maximum physical size
+  if(is.null(maxsize)) {
+      # guess appropriate max physical size of symbols
+    bb <- as.rectangle(w)
+    maxsize <- 1.4/sqrt(pi * length(marx)/area.owin(bb))
+    maxsize <- min(maxsize, diameter(bb) * 0.07)
+  } else stopifnot(maxsize > 0)
+  
+  # Examine mark values
+  maxabs <- max(abs(marx))
+  tiny <- (maxabs < 4 * .Machine$double.eps)
+  if(tiny)
+    return(NA)
+  else 
+    return(maxsize/maxabs)
+}

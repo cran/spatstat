@@ -110,8 +110,11 @@
    data(cells) 
    ppm(cells, ~1, SatPiece(c(0.07, 0.1, 0.13), 2))
    # fit a stationary piecewise constant Saturated pairwise interaction process
+
+   \dontrun{
    ppm(cells, ~polynom(x,y,3), SatPiece(c(0.07, 0.1, 0.13), 2))
    # nonstationary process with log-cubic polynomial trend
+   }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.26 $	$Date: 2009/06/12 23:33:12 $
+#	$Revision: 4.27 $	$Date: 2009/06/25 00:30:25 $
 #
 # -------- functions ----------------------------------------
 #
@@ -208,12 +208,14 @@ erosion.owin <- erode.owin <-
 rebound.owin <- function(w, rect) {
   verifyclass(w, "owin")
   verifyclass(rect, "owin")
-  bb <- bounding.box(w)
-  if(!is.subset.owin(bb, rect))
-    stop(paste("The new rectangle",
-               sQuote("rect"),
-               "does not contain the window",
-               sQuote("win")))
+  if(!is.subset.owin(as.rectangle(w), rect)) {
+    bb <- bounding.box(w)
+    if(!is.subset.owin(bb, rect))
+      stop(paste("The new rectangle",
+                 sQuote("rect"),
+                 "does not contain the window",
+                 sQuote("win")))
+  }
   xr <- rect$xrange
   yr <- rect$yrange
   switch(w$type,

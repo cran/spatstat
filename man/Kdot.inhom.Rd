@@ -185,10 +185,8 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
     lg <- unmark(lansing)
 
     # Estimate intensities by nonparametric smoothing
-    lambdaM <- density.ppp(ma, sigma=0.15)
-    lambdadot <- density.ppp(lg, sigma=0.15)
-    K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM[ma],
-                                      lambdadot=lambdadot[lg])
+    lambdaM <- density.ppp(ma, sigma=0.15, at="points")
+    lambdadot <- density.ppp(lg, sigma=0.15, at="points")
     K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM,
                                       lambdadot=lambdadot)
 
@@ -198,8 +196,6 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
     lamB <- as.im(function(x,y){50 + 100 * x}, owin())
     lamdot <- as.im(function(x,y) { 100 + 100 * x}, owin())
     X <- superimpose(A=runifpoispp(50), B=rpoispp(lamB))
-    XB <- split(X)$B
-    K <- Kdot.inhom(X, "B",  lambdaI=lamB[XB], lambdadot=lamdot[X])
     K <- Kdot.inhom(X, "B",  lambdaI=lamB,     lambdadot=lamdot)
 }
 \author{Adrian Baddeley

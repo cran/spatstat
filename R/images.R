@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.44 $     $Date: 2009/06/02 23:17:09 $
+#         $Revision: 1.47 $     $Date: 2009/06/30 01:42:51 $
 #
 #      The class "im" of raster images
 #
@@ -465,6 +465,45 @@ by.im <- function(data, INDICES, FUN, ...) {
   return(as.listof(U))
 }
 
-
-
-   
+rebound.im <- function(x, rect) {
+  stopifnot(is.im(x))
+  stopifnot(is.owin(rect))
+  rect <- as.rectangle(rect)
+  stopifnot(is.subset.owin(as.rectangle(x), rect))
+  # compute number of extra rows/columns
+  dx <- x$xstep
+  nleft  <- max(0, floor((x$xrange[1]-rect$xrange[1])/dx))
+  nright <- max(0, floor((rect$xrange[2]-x$xrange[2])/dx))
+  dy <- x$ystep
+  nbot <- max(0, floor((x$yrange[1]-rect$yrange[1])/dy))
+  ntop <- max(0, floor((rect$yrange[2]-x$yrange[2])/dy))
+  # expand pixel data matrix
+  nr <- x$dim[1]
+  nc <- x$dim[2]
+  nrnew <- nr + ntop + nbot
+  ncnew <- nc + nleft + nright
+  vnew <- cbind(matrix(NA, nr, nleft), x$v, matrix(NA, nr, nright))
+  vnew <- rbind(matrix(NA, nbot, ncnew), vnew, matrix(NA, ntop, ncnew))
+  # extend x, y coordinate vectors
+  xcolnew <- c(if(nleft > 0) x$xcol[1] - (nleft:1) * dx else NULL,
+               x$xcol,
+               if(nright > 0) x$xcol[nc] + (1:nright) * dx else NULL)
+  yrownew <- c(if(nbot > 0) x$yrow[1] - (nbot:1) * dy else NULL,
+               x$yrow,
+               if(ntop > 0) x$yrow[nr] + (1:ntop) * dy else NULL)
+  # rebuild image object
+  xnew <- list(v      = vnew,
+               dim    = c(nrnew, ncnew),
+               xrange = rect$xrange,
+               yrange = rect$yrange,
+               xstep  = dx,
+               ystep  = dy,
+               xcol   = xcolnew,
+               yrow   = yrownew,
+               lev    = x$lev,
+               type   = x$type,
+               units   = unitname(x))
+  class(xnew) <- "im"
+  attr(xnew, "levels") <- x$lev
+  return(xnew)
+}

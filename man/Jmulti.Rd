@@ -11,7 +11,8 @@
   and those in subset \eqn{J}.
 }
 \usage{
-  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL, \dots, disjoint=NULL)
+  Jmulti(X, I, J, eps=NULL, r=NULL, breaks=NULL, \dots, disjoint=NULL,
+         correction=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -43,7 +44,13 @@
   \item{disjoint}{Optional flag indicating whether
     the subsets \code{I} and \code{J} are disjoint.
     If missing, this value will be computed by inspecting the
-    vectors \code{I} and \code{J}}.
+    vectors \code{I} and \code{J}.
+  }
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"Hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -56,6 +63,8 @@
     estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
   }
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
+  }
+  \item{han}{the Hanisch-style estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
   }
   \item{un}{the uncorrected estimate of \eqn{J_{IJ}(r)}{JIJ(r)},
     formed by taking the ratio of uncorrected empirical estimators

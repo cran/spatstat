@@ -10,7 +10,7 @@
   points of type \eqn{i} and of type \eqn{j}.
 }
 \usage{
-Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots)
+Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -42,6 +42,11 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots)
     Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{\dots}{Ignored.}
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"Hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -58,6 +63,9 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots)
     estimator of \eqn{J_{ij}(r)}{Jij(r)}
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
+    estimator of \eqn{J_{ij}(r)}{Jij(r)}
+  }
+  \item{han}{the Hanisch-style
     estimator of \eqn{J_{ij}(r)}{Jij(r)}
   }
   \item{un}{the ``uncorrected'' 
@@ -169,7 +177,7 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots)
     plot(Jhm)
 
     # synthetic example with two types "a" and "b"
-    pp <- runifpoint(50) \%mark\% factor(sample(c("a","b"), 50, replace=TRUE))
+    pp <- runifpoint(30) \%mark\% factor(sample(c("a","b"), 30, replace=TRUE))
     J <- Jcross(pp)
 }
 \author{Adrian Baddeley

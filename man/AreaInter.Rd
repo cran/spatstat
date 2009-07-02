@@ -156,7 +156,9 @@
    # eta=0 indicates hard core process.
 
    # Fit a nonstationary area interaction with log-cubic polynomial trend
+   \dontrun{
    ppm(swedishpines, ~polynom(x/10,y/10,3), AreaInter(r=7))
+   }
 }
 \references{
   Baddeley, A.J. and Van Lieshout, M.N.M. (1995).

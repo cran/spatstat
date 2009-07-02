@@ -11,7 +11,8 @@
    \method{plot}{fasp}(x,formule=NULL, \dots,
                         subset=NULL, title=NULL, samex=TRUE,
                         banner=TRUE, mar.panel=NULL,
-                        outerlabels=TRUE, cex.outerlabels=1.25)
+                        outerlabels=TRUE, cex.outerlabels=1.25,
+                        legend=FALSE)
 }
 
 \arguments{
@@ -67,6 +68,9 @@
   }
   \item{cex.outerlabels}{
     Character expansion factor for row and column labels of array.
+  }
+  \item{legend}{
+    Logical flag determining whether to plot a legend in each panel.
   }
 }
 

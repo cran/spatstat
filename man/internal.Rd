@@ -56,6 +56,8 @@
 \alias{distppllmin}
 \alias{divisors}
 \alias{do.call.matched}
+\alias{do.iplot}
+\alias{do.istat}
 \alias{edge.Ripley}
 \alias{edge.Trans}
 \alias{ensure2vector}
@@ -129,6 +131,7 @@
 \alias{markformat}
 \alias{markformat.ppp}
 \alias{markformat.psp}
+\alias{mark.scale.default}
 \alias{markspace.integral}
 \alias{marks}           
 \alias{marks.ppp}           
@@ -236,6 +239,7 @@
 \alias{rastery.im}
 \alias{reach.fii}
 \alias{rebadge.fv}
+\alias{rebound.im}
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
@@ -268,6 +272,7 @@
 \alias{rpoint.multi}
 \alias{safelookup}
 \alias{second.moment.calc}
+\alias{second.moment.engine}
 \alias{shiftxy}              
 \alias{shiftxypolygon}              
 \alias{simplify.xypolygon}              
@@ -378,6 +383,8 @@ distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 distppllmin(p, l)
 divisors(n)
 do.call.matched(fname, arglist, funargs, extrargs)
+do.iplot(panel)
+do.istat(panel)
 edge.Ripley(X, r, W, method)
 edge.Trans(X, Y, W, exact, paired, trim)
 ensure2vector(x)
@@ -456,6 +463,7 @@ makeunits(sing, plur, mul)
 markformat(x)
 \method{markformat}{ppp}(x)
 \method{markformat}{psp}(x)
+mark.scale.default(marx, w, markscale=NULL, maxsize=NULL)
 markspace.integral(X)
 marks(x, \dots)
 \method{marks}{ppp}(x, \dots, dfok)           
@@ -566,7 +574,9 @@ pointgrid(W, ngrid)
 rasterx.im(x)
 rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
-rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl,new.yexp)
+rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl, new.yexp,
+new.dotnames, new.preferred, new.formula)
+rebound.im(x, rect)
 rebound.ppp(x, \dots)
 rebound.psp(x, \dots)
 rebound.owin(w, rect)
@@ -602,7 +612,9 @@ runifpoisppOnLines(lambda, L)
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safelookup(Z, X, factor, warn)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
-\dots, varcov=NULL)
+\dots, varcov=NULL, expand=FALSE)
+second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
+\dots, obswin=as.owin(x), varcov=NULL, npoints=NULL)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
@@ -627,7 +639,7 @@ test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
 trim.mask(M, R)
-tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL)
+tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)

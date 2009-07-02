@@ -6,7 +6,7 @@
   window of arbitrary shape.
 }
 \usage{
-  Jest(X, ..., eps=NULL, r=NULL, breaks=NULL)
+  Jest(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -28,6 +28,10 @@
     An alternative to the argument \code{r}. Not normally invoked by the user.
     See Details section.
   }
+  \item{correction}{
+    Optional. Character string specifying the choice of edge
+    correction(s) in \code{\link{Fest}} and \code{\link{Gest}}.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -43,6 +47,10 @@
 	      the border-corrected estimates of \eqn{F} and \eqn{G} }
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{J(r)} computed from
     the Kaplan-Meier estimates of \eqn{F} and \eqn{G} }
+  \item{han}{the Hanisch-style estimator of \eqn{J(r)} computed from
+    the Hanisch estimate of \eqn{G} and the Chiu-Stoyan estimate of
+    \eqn{F}
+  }
   \item{un}{the uncorrected estimate of \eqn{J(r)}
              computed from the uncorrected estimates of \eqn{F} and
 	     \eqn{G}

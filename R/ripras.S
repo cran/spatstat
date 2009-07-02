@@ -2,7 +2,7 @@
 #	ripras.S	Ripley-Rasson estimator of domain
 #
 #
-#	$Revision: 1.10 $	$Date: 2009/05/06 00:33:05 $
+#	$Revision: 1.12 $	$Date: 2009/06/21 23:17:48 $
 #
 #
 #

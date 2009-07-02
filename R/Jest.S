@@ -3,40 +3,73 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.13 $	$Date: 2009/06/10 00:42:05 $
+#	$Revision: 4.14 $	$Date: 2009/06/20 19:18:02 $
 #
 #
 #
 "Jest" <-
-function(X, ..., eps=NULL, r=NULL, breaks=NULL) {
+function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
   X <- as.ppp(X)
   W<- X$window
   rmaxdefault <- rmax.rule("J", W)
   brks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)$val
-  FF <- Fest(X, eps, breaks=brks)
-  G <- Gest(X, breaks=brks)
-  ratio <- function(a, b, c) {
+  # compute F and G 
+  FF <- Fest(X, eps, breaks=brks, correction=correction)
+  G <- Gest(X, breaks=brks, correction=correction)
+  # initialise fv object
+  rvals <- FF$r
+  rmax  <- max(rvals)
+  Fvals <- FF[[attr(FF, "valu")]]
+  Z <- fv(data.frame(r=rvals, theo=1),
+          "r", substitute(J(r), NULL),
+          "theo",
+          . ~ r,
+          c(0,rmax),
+          c("r", "%spois(r)"),
+          c("distance argument r", "theoretical Poisson %s"),
+          fname="J")
+  # compute J function estimates
+  # this has to be done manually because of the mismatch between names
+  ratio <- function(a, b) {
     result <- a/b
-    result[ b == 0 ] <- c
+    result[ b == 0 ] <- NA
     result
   }
-  Jrs <- ratio(1-G$rs, 1-FF$rs, NA)
-  Jkm <- ratio(1-G$km, 1-FF$km, NA)
-  Jun <- ratio(1-G$raw, 1-FF$raw, NA)
-  theo <- rep(1, length(FF$r))
+  Fnames <- names(FF)
+  Gnames <- names(G)
+  if("hazard" %in% Gnames && "hazard" %in% Fnames) {
+    Jhaz <- G$hazard - FF$hazard
+    Z <- bind.fv(Z, data.frame(hazard=Jhaz), "%shazard(r)",
+                 "derivative of log(%s)")
+  }
+  if("raw" %in% Gnames && "raw" %in% Fnames) {
+    Jun <- ratio(1-G$raw, 1-FF$raw)
+    Z <- bind.fv(Z, data.frame(un=Jun), "%sun(r)",
+                 "uncorrected estimate of %s", "un")
+    attr(Z, "alim") <- range(rvals[FF$raw <= 0.9])
+  }
+  if("rs" %in% Gnames && "rs" %in% Fnames) {
+    Jrs <- ratio(1-G$rs, 1-FF$rs)
+    Z <- bind.fv(Z, data.frame(rs=Jrs), "%srs(r)",
+                 "border corrected estimate of %s", "rs")
+    attr(Z, "alim") <- range(rvals[FF$rs <= 0.9])
+  }
+  if("han" %in% Gnames && "cs" %in% Fnames) {
+    Jhan <- ratio(1-G$han, 1-FF$cs)
+    Z <- bind.fv(Z, data.frame(han=Jhan), "%shan(r)",
+                 "Hanisch-style estimate of %s", "han")
+    attr(Z, "alim") <- range(rvals[FF$cs <= 0.9])
+  }
+  if("km" %in% Gnames && "km" %in% Fnames) {
+    Jkm <- ratio(1-G$km, 1-FF$km)
+    Z <- bind.fv(Z, data.frame(km=Jkm), "%skm(r)",
+                 "Kaplan-Meier estimate of %s", "km")
+    attr(Z, "alim") <- range(rvals[FF$km <= 0.9])
+  }
+# set default plotting values and order
+  nama <- names(Z)
+  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
   
-  rslt <- data.frame(r=FF$r, theo=theo, un=Jun, rs=Jrs, km=Jkm)
-# convert to class "fv"
-  alim <- range(rslt$r[FF$km <= 0.9])
-  labl <- c("r", "%spois(r)", "%sun(r)", "%sbord(r)", "%skm(r)")
-  desc <- c("distance argument r",
-            "theoretical Poisson %s",
-            "uncorrected estimate of %s",
-            "border corrected estimate of %s",
-            "Kaplan-Meier estimate of %s")
-  Z <- fv(rslt, "r", substitute(J(r), NULL),
-          "km", . ~ r, alim, labl, desc, fname="J")
-
 # add more info        
   attr(Z, "F") <- FF
   attr(Z, "G") <- G

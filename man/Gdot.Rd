@@ -10,7 +10,7 @@
   to the nearest other point of any type.
 }
 \usage{
-Gdot(X, i, r=NULL, breaks=NULL, \dots)
+Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -35,6 +35,11 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots)
     Not normally invoked by the user. See the \bold{Details} section.
   }
   \item{\dots}{Ignored.}
+  \item{correction}{
+    Optional. Character string specifying the edge correction(s)
+    to be used. Options are \code{"none"}, \code{"rs"}, \code{"km"},
+    \code{"hanisch"} and \code{"best"}.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -45,6 +50,8 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots)
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
     estimator of \eqn{G_{i\bullet}(r)}{Gi.(r)}
+  }
+  \item{han}{the Hanisch-style estimator of \eqn{G_{i\bullet}(r)}{Gi.(r)}
   }
   \item{km}{the spatial Kaplan-Meier estimator of \eqn{G_{i\bullet}(r)}{Gi.(r)}
   }
@@ -208,7 +215,7 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots)
     plot(G0.)
 
     # synthetic example    
-    pp <- runifpoispp(50)
+    pp <- runifpoispp(30)
     pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
     G <- Gdot(pp, "0") # note: "0" not 0
 }

@@ -60,7 +60,6 @@
 \examples{
  data(cells)
  L <- Lest(cells)
- plot(L)
  plot(L, main="L function for cells")
 }
 \author{Adrian Baddeley

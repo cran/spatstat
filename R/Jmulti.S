@@ -3,12 +3,12 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.22 $	$Date: 2009/04/14 23:31:15 $
+#	$Revision: 4.27 $	$Date: 2009/06/21 01:06:31 $
 #
 #
 #
 "Jcross" <-
-function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ...) {
+function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
 #
 #       multitype J function J_{ij}(r)
 #  
@@ -33,11 +33,12 @@ function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ...) {
     stop(paste("No points have mark = ", i))
 #        
   if(i == j)
-    result <- Jest(X[I], eps=eps, r=r, breaks=breaks)
+    result <- Jest(X[I], eps=eps, r=r, breaks=breaks, correction=correction)
   else {
     J <- (marx == j)
     result <- Jmulti(X, I, J,
-                     eps=eps, r=r, breaks=breaks, disjoint=TRUE)
+                     eps=eps, r=r, breaks=breaks, disjoint=TRUE,
+                     correction=correction)
   }
   result <-
     rebadge.fv(result,
@@ -49,7 +50,7 @@ function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ...) {
 }
 
 "Jdot" <-
-function(X, i, eps=NULL, r=NULL, breaks=NULL, ...) {
+function(X, i, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
 #  
 #    multitype J function J_{i\dot}(r)
 #  
@@ -74,7 +75,8 @@ function(X, i, eps=NULL, r=NULL, breaks=NULL, ...) {
   J <- rep(TRUE, X$n)
 #  
   result <- Jmulti(X, I, J,
-                   eps=eps, r=r, breaks=breaks, disjoint=FALSE)
+                   eps=eps, r=r, breaks=breaks, disjoint=FALSE,
+                   correction=correction)
   result <-
     rebadge.fv(result,
             substitute(Jdot[i](r), list(i=paste(i))),
@@ -83,7 +85,8 @@ function(X, i, eps=NULL, r=NULL, breaks=NULL, ...) {
 }
 
 "Jmulti" <- 	
-function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL) {
+function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL,
+         correction=NULL) {
 #  
 #    multitype J function (generic engine)
 #  
@@ -104,31 +107,54 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL) {
   W<- X$window
   rmaxdefault <- rmax.rule("J", W)
   brks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)$val
-  FJ <- Fest(X[J], eps, breaks=brks)
-  GIJ <- Gmulti(X, I, J, breaks=brks, disjoint=disjoint)
-  ratio <- function(a, b, c) {
+  FJ <- Fest(X[J], eps, breaks=brks, correction=correction)
+  GIJ <- Gmulti(X, I, J, breaks=brks, disjoint=disjoint, correction=correction)
+  rvals <- FJ$r
+  Fnames <- names(FJ)
+  Gnames <- names(GIJ)
+  bothnames <- Fnames[Fnames %in% Gnames]
+  # initialise fv object
+  alim <- attr(FJ, "alim")
+  Z <- fv(data.frame(r=rvals, theo=1),
+          "r", substitute(Jmulti(r), NULL), "theo",
+          . ~ r, alim,
+          c("r", "%spois(r)"),
+          c("distance argument r", "theoretical Poisson %s"),
+          fname="Jm")
+  # add pieces manually
+  ratio <- function(a, b) {
     result <- a/b
-    result[ b == 0 ] <- c
+    result[ b == 0 ] <- NA
     result
   }
-  Jkm <- ratio(1-GIJ$km, 1-FJ$km, NA)
-  Jrs <- ratio(1-GIJ$rs, 1-FJ$rs, NA)
-  Jun <- ratio(1-GIJ$raw, 1-FJ$raw, NA)
-  theo <- rep(1, length(FJ$r))
-        
-  result <- data.frame(r=FJ$r,theo=theo,un=Jun,rs=Jrs,km=Jkm)
-  
-  alim <- range(result$r[FJ$km <= 0.9])
-  labl <- c("r", "%spois(r)", "%sun(r)", "%sbord(r)", "%skm(r)")
-  desc <- c("distance argument r",
-            "theoretical Poisson %s",
-            "uncorrected estimate of %s",
-            "border corrected estimate of %s",
-            "Kaplan-Meier estimate of %s")
-  Z <- fv(result,
-          "r", substitute(Jmulti(r), NULL), "km", . ~ r, alim, labl, desc,
-          fname="Jm")
-        
+  if("raw" %in% bothnames) {
+    Jun <- ratio(1-GIJ$raw, 1-FJ$raw)
+    Z <- bind.fv(Z, data.frame(un=Jun), "%sun(r)",
+                 "uncorrected estimate of %s", "un")
+    attr(Z, "alim") <- range(rvals[FJ$raw <= 0.9])
+  }
+  if("rs" %in% bothnames) {
+    Jrs <- ratio(1-GIJ$rs, 1-FJ$rs)
+    Z <- bind.fv(Z, data.frame(rs=Jrs), "%srs(r)",
+                 "border corrected estimate of %s", "rs")
+    attr(Z, "alim") <- range(rvals[FJ$rs <= 0.9])
+  }
+  if("han" %in% Gnames && "cs" %in% Fnames) {
+    Jhan <- ratio(1-GIJ$han, 1-FJ$cs)
+    Z <- bind.fv(Z, data.frame(han=Jhan), "%shan(r)",
+                 "Hanisch-style estimate of %s", "han")
+    attr(Z, "alim") <- range(rvals[FJ$cs <= 0.9])
+  }
+  if("km" %in% bothnames) {
+    Jkm <- ratio(1-GIJ$km, 1-FJ$km)
+    Z <- bind.fv(Z, data.frame(km=Jkm), "%skm(r)",
+                 "Kaplan-Meier estimate of %s", "km")
+    attr(Z, "alim") <- range(rvals[FJ$km <= 0.9])
+  }
+# set default plotting values and order
+  nama <- names(Z)
+  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+# add other info
   attr(Z, "G") <- GIJ
   attr(Z, "F") <- FJ
   unitname(Z) <- unitname(X)

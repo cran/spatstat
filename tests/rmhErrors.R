@@ -4,7 +4,7 @@ require(spatstat)
 if(!exists("nv"))
   nv <- 0
 if(!exists("nr"))
-  nr   <- 1e5
+  nr   <- 1e3
 
 # Strauss with zero intensity and p = 1
 cat("\nStrauss with zero intensity\n")

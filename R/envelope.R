@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.52 $  $Date: 2009/06/11 20:32:48 $
+#   $Revision: 1.56 $  $Date: 2009/07/01 05:13:48 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -103,7 +103,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       simexpr <- expression(SimDataList[[i]])
       envir <- envir.here
       # ensure that `i' is defined
-      i <- 1 
+      i <- 1
+      # any messages?
+      if(!is.null(mess <- attr(simulate, "internal"))) {
+        # determine whether these point patterns are realisations of CSR
+        csr <- !is.null(mc <- mess$csr) && mc
+      }
     } else stop(paste(sQuote("simulate"),
                       "should be an expression, or a list of point patterns"))
     # extract data pattern X from argument Y
@@ -161,7 +166,10 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                list=stop("Internal error: list entry was not a ppp object"))
       XsimList[[i]] <- Xsim
     }
-    if(verbose) cat(paste("Done.\n"))
+    if(verbose) {
+      cat(paste("Done.\n"))
+      flush.console()
+    }
     attr(XsimList, "internal") <- list(csr=csr)
     return(XsimList)
   }
@@ -179,9 +187,11 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     fun <- get(fun)
   if(!is.function(fun)) 
     stop(paste("unrecognised format for function", fname))
-  if(!any(c("r", "...") %in% names(formals(fun))))
+  fargs <- names(formals(fun))
+  if(!any(c("r", "...") %in% fargs))
     stop(paste(fname, "should have an argument",
                sQuote("r"), "or", sQuote("...")))
+  usecorrection <- ("correction" %in% fargs)
 
   # ---------------------------------------------------------------------
   # validate other arguments
@@ -231,7 +241,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   funX <- do.call(fun,
                   resolve.defaults(list(Xarg),
                                    list(...),
-                                   list(correction="best")))
+                      if(usecorrection) list(correction="best") else NULL))
 
   if(!inherits(funX, "fv"))
     stop(paste("The function", fname,
@@ -288,7 +298,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                        resolve.defaults(list(Xsim),
                                         if(rgiven) NULL else list(r=rvals),
                                         list(...),
-                                        list(correction="best")))
+                       if(usecorrection) list(correction="best") else NULL))
     # sanity checks
     if(!inherits(funXsim, "fv"))
       stop(paste("When applied to a simulated pattern, the function",
@@ -332,13 +342,16 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   }
   ##  end simulation loop
   
-  if(verbose)
+  if(verbose) {
     cat("\nDone.\n")
+    flush.console()
+  }
 
   # compute envelopes
   orderstat <- function(x, n) { sort(x)[n] }
   if(!global) {
     # POINTWISE ENVELOPES
+    simvals[is.infinite(simvals)] <- NA
     lo <- apply(simvals, 1, orderstat, n=nrank)
     hi <- apply(simvals, 1, orderstat, n=nsim-nrank+1)
     lo.name <- paste("lower pointwise envelope of simulations")
@@ -363,6 +376,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     domain <- (rvals >= ginterval[1]) & (rvals <= ginterval[2])
     funX <- funX[domain, ]
     simvals <- simvals[domain, ]
+    simvals[is.infinite(simvals)] <- NA
     if(csr)
       theory <- funX[["theo"]]
     else {

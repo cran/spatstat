@@ -71,8 +71,10 @@ adaptive.density(X, f = 0.1, ..., nrep = 1)
 }
 
 \examples{
+  \dontrun{
   data(nztrees)
   plot(adaptive.density(nztrees))
+  }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

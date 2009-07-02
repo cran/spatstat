@@ -179,10 +179,12 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
     # diagnostic plot for independence between hickories and other trees
     plot(Kh.)
 
+    \dontrun{
     # synthetic example with two marks "a" and "b"
     pp <- runifpoispp(50)
     pp <- pp \%mark\% factor(sample(c("a","b"), pp$n, replace=TRUE))
     K <- Kdot(pp, "a")
+    }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

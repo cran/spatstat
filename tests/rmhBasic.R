@@ -1,12 +1,12 @@
 # Test examples for rmh.default
-# run to full length
+# run to reasonable length
 # and with tests for validity added
 # ----------------------------------------------------
 
 require(spatstat)
 
 if(!exists("nr"))
-   nr   <- 1e5
+   nr   <- 1e4
 
 if(!exists("nv"))
   nv <- 0
