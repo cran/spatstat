@@ -7,7 +7,7 @@
 }
 \usage{
 thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
-            q = 1/4, p = 2, rmin = NULL, rmax = NULL)
+            q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
 }
 \arguments{
   \item{X}{
@@ -27,6 +27,10 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
   }
   \item{rmin, rmax}{
     Optional. The interval of \eqn{r} values for the contrast criterion.
+  }
+  \item{\dots}{
+    Optional arguments passed to \code{\link[stats]{optim}}
+    to control the optimisation algorithm. See Details.
   }
 }
 \details{
@@ -97,6 +101,15 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
 
   Homogeneous or inhomogeneous Thomas process models can also
   be fitted using the function \code{\link{kppm}}.
+
+  The optimisation algorithm can be controlled through the
+  additional arguments \code{"..."} which are passed to the
+  optimisation function \code{\link[stats]{optim}}. For example,
+  to constrain the parameter values to a certain range,
+  use the argument \code{method="L-BFGS-B"} to select an optimisation
+  algorithm that respects box constraints, and use the arguments
+  \code{lower} and \code{upper} to specify (vectors of) minimum and
+  maximum values for each parameter.
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing

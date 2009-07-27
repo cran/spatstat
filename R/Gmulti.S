@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.27 $	$Date: 2009/06/21 01:18:24 $
+#	$Revision: 4.30 $	$Date: 2009/07/24 06:08:55 $
 #
 ################################################################################
 
@@ -46,7 +46,7 @@ function(X, i, j, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han"))
   result <-
     rebadge.fv(result,
                substitute(Gcross[i,j](r), list(i=paste(i),j=paste(j))),
-               "G*",
+               "Gcross",
                new.yexp=substitute(Gcross[list(i,j)](r),
                                    list(i=paste(i),j=paste(j))))
   return(result)
@@ -78,7 +78,7 @@ function(X, i, r=NULL, breaks=NULL, ..., correction=c("km","rs","han")) {
                    correction=correction)
   result <- rebadge.fv(result,
                        substitute(Gdot[i](r), list(i=paste(i))),
-                       "Gm")
+                       "Gdot")
   return(result)
 }	
 
@@ -143,9 +143,9 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   df <- data.frame(r=rvals, theo=1-exp(-lamJ * pi * rvals^2))
   Z <- fv(df, "r", substitute(Gmulti(r), NULL), "theo", . ~ r,
           c(0,rmax),
-          c("r", "%spois(r)"), 
+          c("r", "%s[pois](r)"), 
           c("distance argument r", "theoretical Poisson %s"),
-          fname="Gm")
+          fname="Gmulti")
 #  "type I to type J" nearest neighbour distances
   XI <- X[I]
   XJ <- X[J]
@@ -174,7 +174,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
       hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
       edf <- cumsum(hh)/length(nnd)
     }
-    Z <- bind.fv(Z, data.frame(raw=edf), "%sraw(r)",
+    Z <- bind.fv(Z, data.frame(raw=edf), "%s[raw](r)",
                  "uncorrected estimate of %s", "raw")
   }
 
@@ -194,7 +194,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
     }
     # add to fv object
     Z <- bind.fv(Z, data.frame(han=G),
-                 "%shan(r)", 
+                 "%s[han](r)", 
                  "Hanisch estimate of %s",
                  "han")
     # modify recommended plot range
@@ -211,7 +211,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("%sbord(r)", "%skm(r)", "hazard(r)"),
+                 c("%s[bord](r)", "%s[km](r)", "hazard(r)"),
                  c("border corrected estimate of %s",
                    "Kaplan-Meier estimate of %s",
                    "Kaplan-Meier estimate of hazard function lambda(r)"),

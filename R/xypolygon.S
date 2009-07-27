@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.46 $    $Date: 2009/06/12 22:59:02 $
+#    $Revision: 1.47 $    $Date: 2009/07/18 01:29:03 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -187,6 +187,8 @@ owinpoly2mask <- function(w, rasta, check=TRUE) {
   nx    <- dimyx[2]
   ny    <- dimyx[1]
 
+  score <- rep(0, nx*ny)
+  
   for(i in seq(bdry)) {
     p <- bdry[[i]]
     xp <- p$x

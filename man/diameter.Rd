@@ -24,6 +24,8 @@
   or can be given in any format acceptable to \code{\link{as.owin}()}.
 }
 \seealso{
+  \code{\link{area.owin}},
+  \code{\link{perimeter}},
   \code{\link{owin}},
   \code{\link{as.owin}}
 }

@@ -6,7 +6,7 @@
   displaying the fitted intensity and the fitted \eqn{K}-function.
 }
 \usage{
-  \method{plot}{kppm}(x, ...)
+  \method{plot}{kppm}(x, ..., what=c("intensity", "K"))
 }
 \arguments{
   \item{x}{
@@ -14,7 +14,11 @@
     An object of class \code{"kppm"}.
   }
   \item{\dots}{
-    Ignored.
+    Arguments passed to \code{\link{plot.ppm}}
+    and \code{\link{plot.fv}} to control the plot.
+  }
+  \item{what}{
+    Character vector determining what will be plotted.
   }
 }
 \details{
@@ -26,9 +30,16 @@
   (object of class \code{"kppm"}) obtained using
   the function \code{\link{kppm}}.
 
-  This command first plots the fitted intensity of the model,
-  using \code{\link{plot.ppm}}, then displays the empirical and fitted
-  inhomogeneous \eqn{K}-functions using \code{\link{plot.minconfit}}.
+  By default, this command will first plot the fitted intensity of the model,
+  using \code{\link{plot.ppm}}, and then plot the empirical and fitted
+  inhomogeneous \eqn{K}-functions, using \code{\link{plot.fv}}.
+
+  The choice of plots (and the order in which they are
+  displayed) is controlled by the argument \code{what}.
+  The options (partially matched) are \code{"intensity"} and \code{"K"}.
+
+  The option \code{what="intensity"} will be ignored if the
+  model is stationary.
 }
 \value{
   Null.

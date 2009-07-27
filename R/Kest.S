@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.55 $	$Date: 2009/06/10 01:40:20 $
+#	$Revision: 5.59 $	$Date: 2009/07/24 05:34:27 $
 #
 #
 # -------- functions ----------------------------------------
@@ -36,6 +36,10 @@
 
 "Lest" <- function(...) {
   K <- Kest(...)
+  # remove variance estimates
+  nama <- colnames(K)
+  K <- K[, !(nama %in% c("rip", "ls"))]
+  #
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
   L <- rebadge.fv(L, substitute(L(r), NULL), "L")
@@ -45,7 +49,7 @@
 "Kest"<-
 function(X, ..., r=NULL, breaks=NULL, 
          correction=c("border", "isotropic", "Ripley", "translate"),
-         nlarge=3000, domain=NULL)
+         nlarge=3000, domain=NULL, var.approx=FALSE)
 {
   verifyclass(X, "ppp")
   nlarge.given <- !missing(nlarge) && !is.null(nlarge)
@@ -131,7 +135,7 @@ function(X, ..., r=NULL, breaks=NULL,
   K <- data.frame(r=r, theo= pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(K(r), NULL),
-          "theo", , alim, c("r","%spois(r)"), desc, fname="K")
+          "theo", , alim, c("r","%s[pois](r)"), desc, fname="K")
 
   # identify all close pairs
   rmax <- max(r)
@@ -143,7 +147,7 @@ function(X, ..., r=NULL, breaks=NULL,
     # uncorrected! For demonstration purposes only!
     wh <- whist(DIJ, breaks$val)  # no weights
     Kun <- cumsum(wh)/(lambda2 * area)
-    K <- bind.fv(K, data.frame(un=Kun), "%sun(r)",
+    K <- bind.fv(K, data.frame(un=Kun), "%s[un](r)",
                  "uncorrected estimate of %s",
                  "un")
   }
@@ -159,13 +163,13 @@ function(X, ..., r=NULL, breaks=NULL,
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(lambda2 * denom.area)
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if(any(correction == "border")) {
       Kb <- RS$numerator/(lambda * RS$denom.count)
-      K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+      K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -179,7 +183,7 @@ function(X, ..., r=NULL, breaks=NULL,
     Ktrans <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Ktrans[r >= h] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+    K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
                  "translation-corrected estimate of %s",
                  "trans")
   }
@@ -190,14 +194,43 @@ function(X, ..., r=NULL, breaks=NULL,
     Kiso <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Kiso[r >= h] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+    K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
                  "Ripley isotropic correction estimate of %s",
                  "iso")
   }
-   
-
-  # default is to display them all
+  #
+  if(var.approx) {
+    # Compute variance approximations 
+    A <- area
+    P <- perimeter(W)
+    n <- npoints
+    # Ripley asymptotic approximation
+    rip <- 2 * ((A/(n-1))^2) * (pi * r^2/A + 0.96 * P * r^3/A^2
+                                + 0.13 * (n/A) * P * r^5/A^2)
+    K <- bind.fv(K, data.frame(rip=rip),
+                 "vR(r)", 
+                 "Ripley approximation to var(%s) under CSR",
+                 "iso")
+    if(W$type == "rectangle") {
+      # Lotwick-Silverman
+      a1r <- (0.21 * P * r^3 + 1.3 * r^4)/A^2
+      a2r <- (0.24 * P * r^5 + 2.62 * r^6)/A^3
+      # contains correction to typo on p52 of Diggle 2003
+      # cf Lotwick & Silverman 1982 eq (5)
+      br <- (pi * r^2/A) * (1 - pi * r^2/A) +
+        (1.0716 * P * r^3 + 2.2375 * r^4)/A^2
+      ls <- (2 * br - a1r + (n-2) * a2r)/(n*(n-1))
+      # add column 
+      K <- bind.fv(K, data.frame(ls=ls), "vLS(r)",
+                 "Lotwick-Silverman approx to var(%s) under CSR",
+                 "iso")
+    }
+  }
+  # default plot will display all edge corrections
   attr(K, "fmla") <- . ~ r
+  nama <- rev(colnames(K))
+  attr(K, "dotnames") <- nama[!(nama %in% c("r", "rip", "ls"))]
+  #
   unitname(K) <- unitname(X)
   return(K)
 }
@@ -261,7 +294,7 @@ Kborder.engine <- function(X, rmax, nr=100,
   Kdf <- data.frame(r=r, theo= pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
   Kfv <- fv(Kdf, "r", substitute(K(r), NULL),
-          "theo", , c(0,rmax), c("r","%spois(r)"), desc, fname="K")
+          "theo", , c(0,rmax), c("r","%s[pois](r)"), desc, fname="K")
 
   ####### start computing ############
   # sort in ascending order of x coordinate
@@ -293,14 +326,14 @@ Kborder.engine <- function(X, rmax, nr=100,
       lambda2 <- (npoints * (npoints - 1))/(area^2)
       denom.area <- eroded.areas(W, r)
       bordmod <- res$numer/(lambda2 * denom.area)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "%sbord*(r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "%s[bordm](r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if("border" %in% correction) {
       lambda <- npoints/area
       bord <- res$numer/(lambda * res$denom)
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%sbord(r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%s[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -330,13 +363,13 @@ Kborder.engine <- function(X, rmax, nr=100,
               PACKAGE="spatstat")
     if("border" %in% correction) {
       bord <- res$numer/res$denom
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%sbord(r)",
-                     "border-corrected estimate of %sinhom(r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%s[bord](r)",
+                     "border-corrected estimate of %s",
                      "border")
     }
     if("bord.modif" %in% correction) {
       bm <- res$numer/eroded.areas(W, r)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "%sbord*(r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "%s[bordm](r)",
                      "modified border-corrected estimate of %s",
                      "bord.modif")
     }

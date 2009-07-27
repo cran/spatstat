@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.49 $ $Date: 2009/06/10 01:30:31 $
+#     $Revision: 1.51 $ $Date: 2009/07/23 02:10:00 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -294,7 +294,7 @@ markcorr <-
     }
   }
   result <- fv(result, "r", ylab, "theo", , alim,
-               c("r","%siid(r)"), desc, fname=fnam)
+               c("r","%s[iid](r)"), desc, fname=fnam)
 
   # find close pairs of points
   close <- closepairs(X, rmax)
@@ -343,7 +343,7 @@ markcorr <-
     # get smoothed estimate of mark covariance
     Mtrans <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
     result <- bind.fv(result,
-                      data.frame(trans=Mtrans), "%strans(r)",
+                      data.frame(trans=Mtrans), "%s[trans](r)",
                       "translation-corrected estimate of %s",
                       "trans")
   }
@@ -353,7 +353,7 @@ markcorr <-
     # get smoothed estimate of mark covariance
     Miso <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
     result <- bind.fv(result,
-                      data.frame(iso=Miso), "%siso(r)",
+                      data.frame(iso=Miso), "%s[iso](r)",
                       "Ripley isotropic correction estimate of %s",
                       "iso")
   }

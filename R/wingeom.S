@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.50 $	$Date: 2009/06/21 23:45:55 $
+#	$Revision: 4.55 $	$Date: 2009/07/18 19:53:18 $
 #
 #
 #
@@ -27,6 +27,24 @@ area.owin <- function(w) {
                stop("Unrecognised window type")
         )
         return(area)
+}
+
+perimeter <- function(w) {
+  verifyclass(w, "owin")
+  switch(w$type,
+         rectangle = {
+           return(2*(diff(w$xrange)+diff(w$yrange)))
+         },
+         polygonal={
+           return(sum(lengths.psp(as.psp(w))))
+         },
+         mask={
+           p <- as.polygonal(w)
+           delta <- sqrt(w$xstep^2 + w$ystep^2)
+           p <- simplify.owin(p, delta * 1.15)
+           return(sum(lengths.psp(as.psp(p))))
+         })
+  return(NA)
 }
 
 eroded.areas <- function(w, r) {
@@ -147,14 +165,17 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
   # check units
   if(!compatible.units(unitname(A), unitname(B)))
     warning("The two windows have incompatible units of length")
-  
+
   # determine intersection of x and y ranges
   xr <- intersect.ranges(A$xrange, B$xrange, fatal=fatal)
   yr <- intersect.ranges(A$yrange, B$yrange, fatal=fatal)
   if(!fatal && (is.null(xr) || is.null(yr)))
     return(NULL)
-  C <- owin(xr, yr)
+  C <- owin(xr, yr, unitname=unitname(A))
 
+  if(is.empty(A) || is.empty(B))
+    return(emptywindow(C))
+           
   # Determine type of intersection
   
   Arect <- (A$type == "rectangle")
@@ -174,6 +195,8 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
     Bg <- owin2gpc(B)
     ABg <- intersect(Ag, Bg)
     AB <- gpc2owin(ABg)
+    if(is.null(AB))
+      return(emptywindow(C))
     return(AB)
   }
 
@@ -236,8 +259,8 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
 
 
 union.owin <- function(A, B, ...) {
-  if(is.null(A)) return(B)
-  if(is.null(B)) return(A)
+  if(is.null(A) || is.empty(A)) return(B)
+  if(is.null(B) || is.empty(B)) return(A)
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 
@@ -269,7 +292,8 @@ union.owin <- function(A, B, ...) {
   # Result is not rectangular
   
   C <- owin(range(A$xrange, B$xrange),
-            range(A$yrange, B$yrange))
+            range(A$yrange, B$yrange),
+            unitname=unitname(A))
 
   if(!Amask && !Bmask) {
     ####### Result is polygonal ############
@@ -413,6 +437,8 @@ bdry.mask <- function(W) {
 
 vertices <- function(w) {
   verifyclass(w, "owin")
+  if(is.empty(w))
+    return(NULL)
   switch(w$type,
          rectangle={
            xr <- w$xrange
@@ -433,6 +459,8 @@ vertices <- function(w) {
 }
 
 diameter <- function(w) {
+  if(is.empty(w))
+    return(NULL)
   vert <- vertices(w)
   if(length(vert$x) > 3) {
     # extract convex hull
@@ -446,6 +474,8 @@ diameter <- function(w) {
 incircle <- function(W) {
   # computes the largest circle contained in W
   verifyclass(W, "owin")
+  if(is.empty(W))
+    return(NULL)
   if(W$type == "rectangle") {
     xr <- W$xrange
     yr <- W$yrange
@@ -479,6 +509,8 @@ incircle <- function(W) {
 inpoint <- function(W) {
   # selects a point that is always inside the window.
   verifyclass(W, "owin")
+  if(is.empty(W))
+    return(NULL)
   if(W$type == "rectangle")
     return(c(mean(W$xrange), mean(W$yrange)))
   if(W$type == "polygonal") {
@@ -500,8 +532,8 @@ inpoint <- function(W) {
 
 simplify.owin <- function(W, dmin) {
   verifyclass(W, "owin")
-  if(W$type == "mask")
-    stop("simplify.owin is not yet implemented for masks")
+  if(is.empty(W))
+    return(W)
   W <- as.polygonal(W)
   W$bdry <- lapply(W$bdry, simplify.xypolygon, dmin=dmin)
   return(W)
@@ -546,6 +578,8 @@ owin2gpc <- function(x) {
 
 is.convex <- function(x) {
   verifyclass(x, "owin")
+  if(is.empty(x))
+    return(TRUE)
   switch(x$type,
          rectangle={return(TRUE)},
          polygonal={
@@ -582,10 +616,29 @@ convexhull <- function(x) {
     x <- as.owin(x)
     v <- vertices(x)
   }
-  ch <- convexhull.xy(v)
   b <- as.rectangle(x)
+  if(is.empty(x))
+    return(emptywindow(b))
+  ch <- convexhull.xy(v)
   out <- rebound.owin(ch, b)
   return(out)
 }
 
   
+is.empty <- function(x) { UseMethod("is.empty") }
+
+is.empty.default <- function(x) { length(x) == 0 }
+
+is.empty.owin <- function(x) {
+  switch(x$type,
+         rectangle=return(FALSE),
+         polygonal=return(length(x$bdry) == 0),
+         mask=return(!any(x$m)))
+  return(NA)
+}
+
+emptywindow <- function(w) {
+  stopifnot(is.owin(w))
+  out <- owin(w$xrange, w$yrange, poly=list(), unitname=unitname(w))
+  return(out)
+}

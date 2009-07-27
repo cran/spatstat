@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.41 $	$Date: 2009/06/30 02:49:54 $
+#	$Revision: 1.42 $	$Date: 2009/07/24 05:20:59 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -209,7 +209,7 @@
     K <- data.frame(r=r, theo= pi * r^2)
     desc <- c("distance argument r", "theoretical Poisson %s")
     K <- fv(K, "r", substitute(Kinhom(r), NULL),
-            "theo", , alim, c("r","%spois(r)"), desc, fname="Kinhom")
+            "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kinhom")
         
     # identify all close pairs
     rmax <- max(r)
@@ -238,13 +238,13 @@
       RS <- Kwtsum(dIJ, bI, wIJ, b, w=reciplambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
-        K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+        K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
                      "border-corrected estimate of %s",
                      "border")
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
-        K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+        K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
                      "modified border-corrected estimate of %s",
                      "bord.modif")
       }
@@ -258,7 +258,7 @@
       Ktrans <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+      K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
                    "translation-correction estimate of %s",
                    "trans")
     }
@@ -270,7 +270,7 @@
       Kiso <- cumsum(wh)/area
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+      K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
                    "Ripley isotropic correction estimate of %s",
                    "iso")
     }

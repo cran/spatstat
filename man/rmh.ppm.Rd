@@ -118,6 +118,7 @@
 }
 
 \seealso{
+  \code{\link{simulate.ppm}},
   \code{\link{rmh}},
   \code{\link{rmhmodel}},
   \code{\link{rmhcontrol}},

@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.47 $     $Date: 2009/06/30 01:42:51 $
+#         $Revision: 1.49 $     $Date: 2009/07/25 01:37:36 $
 #
 #      The class "im" of raster images
 #
@@ -224,9 +224,14 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
   }
   if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
     # 'i' is a point pattern
-    # test whether all points are inside window
-    if(!all(inside.owin(ip$x, ip$y, W)))
-      stop("Some points are outside the domain of the image")
+    # test whether all points are inside window FRAME
+    ok <- inside.owin(ip$x, ip$y, as.rectangle(W))
+    if(any(!ok)) {
+      warning("Some points are outside the outer frame of the image")
+      if(length(value) == ip$n)
+        value <- value[ok]
+      ip <- ip[ok]
+    }
     # determine row & column positions for each point 
     loc <- nearest.pixel(ip$x, ip$y, X)
     # set values

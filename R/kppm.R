@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.11 $ $Date: 2009/01/30 00:45:01 $
+# $Revision: 1.14 $ $Date: 2009/07/21 19:07:13 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
@@ -94,16 +94,30 @@ print.kppm <- function(x, ...) {
   invisible(NULL)
 }
 
-plot.kppm <- function(x, ...) {
+plot.kppm <- function(x, ..., what=c("intensity", "K")) {
   modelname <- deparse(substitute(x))
   plotem <- function(x, ..., main=dmain, dmain) { plot(x, ..., main=main) }
-  if(x$stationary)
+  what <- pickoption("plot type", what,
+                    c(K="K",
+                      intensity="intensity"),
+                    multi=TRUE)
+  if(x$stationary && ("K" %in% what))
     plotem(x$mcfit, ..., dmain=c(modelname, "K-function"))
   else {
-    if(interactive()) opa <- par(ask=TRUE)
-    plotem(x$po, ..., dmain=c(modelname, "Intensity"), how="image")
-    plotem(x$mcfit, ..., dmain=c(modelname, "Inhomogeneous K-function"))
-    if(interactive()) par(opa)
+    pauseit <- interactive() && (length(what) > 1)
+    if(pauseit) opa <- par(ask=TRUE)
+    for(style in what)
+      switch(style,
+             intensity={
+               plotem(x$po, ...,
+                      dmain=c(modelname, "Intensity"),
+                      how="image")
+             },
+             K={
+               plotem(x$mcfit, ...,
+                      dmain=c(modelname, "Inhomogeneous K-function"))
+             })
+    if(pauseit) par(opa)
   }
   return(invisible(NULL))
 }
@@ -112,7 +126,19 @@ predict.kppm <- function(object, ...) {
   predict(object$po, ...)
 }
 
-simulate.kppm <- function(object, nsim=1, ...) {
+simulate.kppm <- function(object, nsim=1, seed=NULL, ...) {
+  # .... copied from simulate.lm
+  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+    runif(1)
+  if (is.null(seed))
+    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+  else {
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)
+    set.seed(seed)
+    RNGstate <- structure(seed, kind = as.list(RNGkind()))
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+  }
+  # .....
   out <- list()
   win <- object$X$window
   switch(object$clusters,
@@ -134,6 +160,7 @@ simulate.kppm <- function(object, nsim=1, ...) {
          })
   out <- as.listof(out)
   names(out) <- paste("Simulation", 1:nsim)
+  attr(out, "seed") <- RNGstate
   return(out)
 }
 

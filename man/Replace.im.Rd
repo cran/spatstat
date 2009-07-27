@@ -34,12 +34,14 @@
   rectangle in two-dimensional space (see \code{\link{im.object}}).
 
   The subset to be changed is determined by the argument \code{i}.
+
   If \code{i} is a spatial window (an object of class \code{"owin"}),
   the values of the image inside this window are changed.
+
   If \code{i} is a point pattern (an object of class
   \code{"ppp"}, or something that can be converted into a point pattern
   by \code{\link{as.ppp}}), then the values of the pixel image at the points of
-  this pattern are changed.
+  this pattern are changed. 
 }
 \seealso{
   \code{\link{im.object}},

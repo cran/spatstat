@@ -36,14 +36,17 @@
   \code{\link{rotate}},
   \code{\link{shift}},
   \code{\link{affine}},
-  \code{\link{erode.owin}},
+  \code{\link{erosion}},
+  \code{\link{dilation}},
+  \code{\link{opening}}
   and
-  \code{erode.mask}.
+  \code{\link{closing}}.
 
   Geometrical calculations available for windows include
   \code{\link{area.owin}},
-  \code{\link{bounding.box}},
+  \code{\link{perimeter}},
   \code{\link{diameter}},
+  \code{\link{bounding.box}},
   \code{\link{eroded.areas}},
   \code{\link{bdist.points}},
   \code{\link{bdist.pixels}},
@@ -71,7 +74,10 @@
   \code{\link{summary.owin}},
   \code{\link{print.owin}},
   \code{\link{complement.owin}},
-  \code{\link{erode.owin}},
+  \code{\link{erosion}},
+  \code{\link{dilation}},
+  \code{\link{opening}},
+  \code{\link{closing}},
   \code{\link{affine.owin}},
   \code{\link{shift.owin}},
   \code{\link{rotate.owin}},

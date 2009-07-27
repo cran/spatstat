@@ -8,7 +8,7 @@ from a point pattern in a window of arbitrary shape.
 \usage{
   Kest(X, \dots, r=NULL, breaks=NULL, 
      correction=c("border", "isotropic", "Ripley", "translate"),
-    nlarge=3000, domain=NULL)
+    nlarge=3000, domain=NULL, var.approx=FALSE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -42,6 +42,10 @@ from a point pattern in a window of arbitrary shape.
     Optional. Calculations will be restricted to this subset
     of the window. See Details.
   }
+  \item{var.approx}{Logical. If \code{TRUE}, the approximate
+    variance of \eqn{\hat K(r)}{Kest(r)} under CSR
+    will also be computed.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -60,6 +64,10 @@ from a point pattern in a window of arbitrary shape.
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{K(r)} obtained by the edge corrections
   named.
+
+  If \code{var.approx=TRUE} then the return value
+  also has columns \code{rip} and \code{ls} containing approximations
+  to the variance of \eqn{\hat K(r)}{Kest(r)}.
 }
 \details{
   The \eqn{K} function (variously called ``Ripley's K-function''
@@ -151,6 +159,17 @@ from a point pattern in a window of arbitrary shape.
   Setting \code{nlarge=0} is equivalent to selecting only the border
   correction with \code{correction="border"}.
 
+  Approximations to the variance of \eqn{\hat K(r)}{Kest(r)}
+  are available, for the case of the isotropic edge correction estimator,
+  \emph{assuming complete spatial randomness}
+  (Ripley, 1988; Lotwick and Silverman, 1982; Diggle, 2003, pp 51-53).
+  If \code{var.approx=TRUE}, then the result of
+  \code{Kest} also has a column named \code{rip} 
+  values of Ripley's (1988) approximation to
+  \eqn{\mbox{var}(\hat K(r))}{var(Kest(r))},
+  and (if the window is a rectangle) a column named \code{ls} giving
+  values of Lotwick and Silverman's (1982) approximation.
+  
   If the argument \code{domain} is given, the calculations will
   be restricted to a subset of the data. In the formula for \eqn{K(r)} above,
   the \emph{first} point \eqn{i} will be restricted to lie inside

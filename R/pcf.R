@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.32 $   $Date: 2009/06/10 01:27:56 $
+#   $Revision: 1.33 $   $Date: 2009/07/24 05:43:57 $
 #
 #
 #   calculate pair correlation function
@@ -82,7 +82,7 @@ pcf.ppp <- function(X, ..., r=NULL,
       df <- data.frame(r=r, theo=rep(1,length(r)), g)
       colnames(df)[3] <- key
       out <- fv(df, "r", substitute(g(r), NULL), key, ,
-                alim, c("r","%sPois(r)", symb),
+                alim, c("r","%s[Pois](r)", symb),
                 c("distance argument r", "theoretical Poisson %s", desc),
                 fname="g")
     } else {
@@ -105,14 +105,14 @@ pcf.ppp <- function(X, ..., r=NULL,
     # translation correction
     XJ <- ppp(close$xj, close$yj, window=win, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
-    out <- doit(edgewt, dIJ, out, "%sTrans(r)",
+    out <- doit(edgewt, dIJ, out, "%s[Trans](r)",
                 "translation-corrected estimate of %s", "trans", otherargs,
                 lambda, area)
   }
   if(any(correction=="isotropic")) {
     # Ripley isotropic correction
     edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
-    out <- doit(edgewt, dIJ, out, "%sRipley(r)",
+    out <- doit(edgewt, dIJ, out, "%s[Ripley](r)",
                 "Ripley isotropic-corrected estimate of %s", "iso", otherargs,
                 lambda, area)
   }
@@ -211,7 +211,7 @@ function(X, ..., method="c") {
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
           "r", substitute(pcf(r), NULL), "pcf", cbind(pcf, theo) ~ r, alim,
-          c("r", "%s(r)", "%stheo"),
+          c("r", "%s(r)", "%s[theo]"),
           c("distance argument r",
             "estimate of %s by numerical differentiation",
             "theoretical Poisson value of %s"),

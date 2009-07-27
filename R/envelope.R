@@ -3,14 +3,14 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.56 $  $Date: 2009/07/01 05:13:48 $
+#   $Revision: 1.58 $  $Date: 2009/07/21 04:57:08 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
                      simulate=NULL, verbose=TRUE, clipdata=TRUE, 
                      start=NULL, control=list(nrep=1e5, expand=1.5),
                      transform=NULL, global=FALSE, ginterval=NULL,
-                     saveall=FALSE, nsim2=nsim,
+                     savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
                      Yname=NULL, internal=NULL) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
@@ -20,7 +20,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   # Determine type of simulation 
   #  simtype =
   #           "csr": uniform Poisson process
-  #           "rmh": simulated realisation of fitted model 
+  #           "rmh": simulated realisation of fitted Gibbs model 
+  #          "kppm": simulated realisation of fitted cluster model 
   #          "expr": result of evaluating a user-supplied expression
   #          "list": user-supplied list of point patterns
   #
@@ -29,7 +30,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   #
   # Working variables
   #    'csr' = TRUE iff the model is (known to be) uniform Poisson
-  #    model = NULL or a ppm object to be simulated
+  #    model = NULL or a ppm/kppm object to be simulated
   #    envir = environment in which to evaluate the expression `simexpr'
   #
   if(is.null(simulate)) {
@@ -77,6 +78,17 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       rmhinfolist <- rmh(rmodel, rstart, rcontr, preponly=TRUE, verbose=FALSE)
       # expression that will be evaluated
       simexpr <- expression(rmhEngine(rmhinfolist, verbose=FALSE))
+      envir <- envir.here
+    } else if(inherits(Y, "kppm")) {
+      # Simulated realisations of the fitted model Y
+      # will be generated using simulate.kppm
+      simtype <- "kppm"
+      csr <- FALSE
+      model <- Y
+      # Extract data pattern X from argument Y
+      X <- Y$X
+      # expression that will be evaluated
+      simexpr <- expression(simulate(model)[[1]])
       envir <- envir.here
     } else 
     stop(paste(sQuote("Y"),
@@ -147,7 +159,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       action <- if(simtype == "list") "Extracting" else "Generating"
       descrip <- switch(simtype,
                         csr = "simulations of CSR",
-                        rmh = "simulated realisations of fitted model",
+                        rmh = "simulated realisations of fitted Gibbs model",
+                        kppm = "simulated realisations of fitted cluster model",
                         expr = "simulations by evaluating expression",
                         list = "point patterns from list")
       cat(paste(action, Nsim, descrip, "...\n"))
@@ -161,6 +174,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
         switch(simtype,
                csr=stop("Internal error: ppp object not generated"),
                rmh=stop("Internal error: rmh did not return a ppp object"),
+               kppm=stop("Internal error: simulate.kppm did not return a ppp object"),
                expr=stop(paste("Evaluating the expression", sQuote("simulate"),
                  "did not yield a point pattern")),
                list=stop("Internal error: list entry was not a ppp object"))
@@ -214,7 +228,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
 
   # rmh parameters are only relevant when simtype = "rmh"
   if(simtype != "rmh" && (!is.null(start) || !missing(control)))
-      warning(paste("Poisson process simulation: arguments",
+      warning(paste("Arguments",
                     sQuote("start"),"and", sQuote("control"), "ignored"))
 
   # -------------------------------------------------------------------
@@ -226,6 +240,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       switch(simtype,
              csr=stop("Internal error: ppp object not generated"),
              rmh=stop("Internal error: rmh did not return a ppp object"),
+             kppm=stop("Internal error: simulate.kppm did not return a ppp object"),
              expr=stop(paste("Evaluating the expression", sQuote("simulate"),
                    "did not yield a point pattern")),
              list=stop("Internal error: list entry was not a ppp object"))
@@ -274,14 +289,19 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     action <- if(simtype == "list") "Extracting" else "Generating"
     descrip <- switch(simtype,
                       csr = "simulations of CSR",
-                      rmh = "simulated realisations of fitted model",
+                      rmh = "simulated realisations of fitted Gibbs model",
+                      kppm = "simulated realisations of fitted cluster model",
                       expr = "simulations by evaluating expression",
                       list = "point patterns from list")
     cat(paste(action, Nsim, descrip, "...\n"))
   }
+  # determine whether simulated point patterns should be saved
+  catchpatterns <- savepatterns && simtype != "list"
+  Caughtpatterns <- list()
+  # allocate space for computed function values
   nrvals <- length(rvals)
   simvals <- matrix(, nrow=nrvals, ncol=Nsim)
-
+  
   # start simulation loop 
   for(i in 1:Nsim) {
     Xsim <- eval(simexpr, envir=envir)
@@ -289,9 +309,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       switch(simtype,
              csr=stop("Internal error: ppp object not generated"),
              rmh=stop("Internal error: rmh did not return a ppp object"),
+             kppm=stop("Internal error: simulate.kppm did not return a ppp object"),
              expr=stop(paste("Evaluating the expression", sQuote("simulate"),
                    "did not yield a point pattern")),
              list=stop("Internal error: list entry was not a ppp object"))
+    if(catchpatterns)
+      Caughtpatterns[[i]] <- Xsim
     
     # apply function
     funXsim <- do.call(fun,
@@ -442,12 +465,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                                 global=global,
                                 dual=dual,
                                 nsim2=nsim2)
-  if(saveall) {
+  if(savefuns) {
     alldata <- cbind(rvals, simvals)
     simnames <- paste("sim", 1:nsim, sep="")
     colnames(alldata) <- c("r", simnames)
     alldata <- as.data.frame(alldata)
-    savedata <- fv(alldata,
+    simfuns <- fv(alldata,
                    argu="r",
                    ylab=attr(funX, "ylab"),
                    valu="sim1",
@@ -456,9 +479,12 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                    labl=names(alldata),
                    desc=c("distance argument r",
                      paste("Simulation ", 1:nsim, sep="")))
-    attr(savedata, "dotnames") <- simnames
-    attr(result, "savedata") <- savedata
+    attr(simfuns, "dotnames") <- simnames
+    attr(result, "simfuns") <- simfuns
   }
+  if(savepatterns)
+    attr(result, "simpatterns") <-
+      if(simtype == "list") SimDataList else Caughtpatterns  
   return(result)
 }
 
@@ -482,7 +508,8 @@ print.envelope <- function(x, ...) {
     else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
-             rmh="simulations of fitted model",
+             rmh="simulations of fitted Gibbs model",
+             kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list")
     } else "simulations of fitted model"
@@ -493,8 +520,10 @@ print.envelope <- function(x, ...) {
     cat(paste("Theoretical (i.e. null) mean value of", fname,
               "estimated from a separate set of",
               e$nsim2, "simulations\n"))
-  if(!is.null(attr(x, "savedata"))) 
-    cat("(All simulated values are stored)\n")
+  if(!is.null(attr(x, "simfuns"))) 
+    cat("(All simulated function values are stored)\n")
+  if(!is.null(attr(x, "simpatterns"))) 
+    cat("(All simulated point patterns are stored)\n")
   alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
   cat(paste("Significance level of",
             if(!g) "pointwise",
@@ -522,16 +551,20 @@ summary.envelope <- function(object, ...) {
     else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
-             rmh="simulations of fitted model",
+             rmh="simulations of fitted Gibbs model",
+             kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list")
     } else "simulations of fitted model"
   #  
   cat(paste("Obtained from", nsim, descrip, "\n"))
   #
-  if(!is.null(attr(object, "savedata")))
-    cat(paste("(All", nsim, "simulated values",
-              "are stored in attr(,", dQuote("savedata"), ") )\n"))
+  if(!is.null(attr(object, "simfuns")))
+    cat(paste("(All", nsim, "simulated function values",
+              "are stored in attr(,", dQuote("simfuns"), ") )\n"))
+  if(!is.null(attr(object, "simpatterns")))
+    cat(paste("(All", nsim, "simulated point patterns",
+              "are stored in attr(,", dQuote("simpatterns"), ") )\n"))
   ordinal <- function(k) {
     last <- k %% 10
     ending <- if(last == 1) "st" else

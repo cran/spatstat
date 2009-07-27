@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.14 $	$Date: 2009/06/20 19:18:02 $
+#	$Revision: 4.15 $	$Date: 2009/07/24 05:30:41 $
 #
 #
 #
@@ -25,7 +25,7 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
           "theo",
           . ~ r,
           c(0,rmax),
-          c("r", "%spois(r)"),
+          c("r", "%s[pois](r)"),
           c("distance argument r", "theoretical Poisson %s"),
           fname="J")
   # compute J function estimates
@@ -39,30 +39,30 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
   Gnames <- names(G)
   if("hazard" %in% Gnames && "hazard" %in% Fnames) {
     Jhaz <- G$hazard - FF$hazard
-    Z <- bind.fv(Z, data.frame(hazard=Jhaz), "%shazard(r)",
+    Z <- bind.fv(Z, data.frame(hazard=Jhaz), "hazard(r)",
                  "derivative of log(%s)")
   }
   if("raw" %in% Gnames && "raw" %in% Fnames) {
     Jun <- ratio(1-G$raw, 1-FF$raw)
-    Z <- bind.fv(Z, data.frame(un=Jun), "%sun(r)",
+    Z <- bind.fv(Z, data.frame(un=Jun), "%s[un](r)",
                  "uncorrected estimate of %s", "un")
     attr(Z, "alim") <- range(rvals[FF$raw <= 0.9])
   }
   if("rs" %in% Gnames && "rs" %in% Fnames) {
     Jrs <- ratio(1-G$rs, 1-FF$rs)
-    Z <- bind.fv(Z, data.frame(rs=Jrs), "%srs(r)",
+    Z <- bind.fv(Z, data.frame(rs=Jrs), "%s[rs](r)",
                  "border corrected estimate of %s", "rs")
     attr(Z, "alim") <- range(rvals[FF$rs <= 0.9])
   }
   if("han" %in% Gnames && "cs" %in% Fnames) {
     Jhan <- ratio(1-G$han, 1-FF$cs)
-    Z <- bind.fv(Z, data.frame(han=Jhan), "%shan(r)",
+    Z <- bind.fv(Z, data.frame(han=Jhan), "%s[han](r)",
                  "Hanisch-style estimate of %s", "han")
     attr(Z, "alim") <- range(rvals[FF$cs <= 0.9])
   }
   if("km" %in% Gnames && "km" %in% Fnames) {
     Jkm <- ratio(1-G$km, 1-FF$km)
-    Z <- bind.fv(Z, data.frame(km=Jkm), "%skm(r)",
+    Z <- bind.fv(Z, data.frame(km=Jkm), "%s[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
     attr(Z, "alim") <- range(rvals[FF$km <= 0.9])
   }

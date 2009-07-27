@@ -1,11 +1,11 @@
 \name{simulate.kppm}
 \alias{simulate.kppm}
-\title{Simulate a fitted cluster point process model.}
+\title{Simulate a Fitted Cluster Point Process Model}
 \description{
   Generates simulated realisations from a fitted cluster point process model.
 }
 \usage{
-  \method{simulate}{kppm}(object, nsim = 1, ...)
+  \method{simulate}{kppm}(object, nsim = 1, seed=NULL, ...)
 }
 \arguments{
   \item{object}{
@@ -14,19 +14,37 @@
   \item{nsim}{
     Number of simulated realisations.
   }
+  \item{seed}{
+    an object specifying whether and how to initialise
+    the random number generator. Either \code{NULL} or an integer that will
+    be used in a call to \code{\link[stats]{set.seed}} before simulating the
+    point patterns. 
+  }
   \item{\dots}{Ignored.}
 }
 \details{
   This function is a method for the generic function
-  \code{\link{simulate}} for the class \code{"kppm"} of fitted
+  \code{\link[stats]{simulate}} for the class \code{"kppm"} of fitted
   cluster point process models.
   
   Simulations are performed by \code{\link{rThomas}}
   or \code{\link{rMatClust}} depending on the cluster mechanism.
+
+  The return value is a list of point patterns.
+  It also carries an attribute \code{"seed"} that
+  captures the initial state of the random number generator.
+  This follows the convention used in
+  \code{simulate.lm} (see \code{\link[stats]{simulate}}).
+  It can be used to force a sequence of simulations to be
+  repeated exactly, as shown in the examples for \code{\link[stats]{simulate}}.
 }
 \value{
   A list of length \code{nsim} containing simulated point patterns
   (objects of class \code{"ppp"}).
+
+  The return value also carries an attribute \code{"seed"} that
+  captures the initial state of the random number generator.
+  See Details.
 }
 \examples{
   data(redwood)
@@ -35,8 +53,8 @@
 }
 \seealso{
   \code{\link{kppm}},
-  \code{\link{plot.ppm}},
-  \code{\link{plot.minconfit}}
+  \code{\link{simulate.ppm}},
+  \code{\link[stats]{simulate}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

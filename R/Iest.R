@@ -2,7 +2,7 @@
 #
 #	I function
 #
-#	$Revision: 1.10 $	$Date: 2009/06/21 01:43:07 $
+#	$Revision: 1.11 $	$Date: 2009/07/24 05:29:22 $
 #
 #
 #
@@ -35,7 +35,7 @@ Iest <- function(X, ..., eps=NULL, r = NULL, breaks = NULL, correction=NULL) {
   Z <- fv(data.frame(r=rvals, theo=0),
           "r", substitute(I(r), NULL), "theo",
           . ~ r, alim,
-          c("r", "%spois(r)"),
+          c("r", "%s[pois](r)"),
           c("distance argument r", "theoretical Poisson %s"),
           fname="I")
   
@@ -49,25 +49,25 @@ Iest <- function(X, ..., eps=NULL, r = NULL, breaks = NULL, correction=NULL) {
   if("un" %in% bothnames) {
     Jun <- matrix(extract(Jii, "un"), nrow=ntypes, byrow=TRUE)
     Iun <- apply(fi * Jun, 2, sum) - Jdotdot$un
-    Z <- bind.fv(Z, data.frame(un=Iun), "%sun(r)",
+    Z <- bind.fv(Z, data.frame(un=Iun), "%s[un](r)",
                  "uncorrected estimate of %s", "un")
   }
   if("rs" %in% bothnames) {
     Jrs <- matrix(extract(Jii, "rs"), nrow=ntypes, byrow=TRUE)
     Irs <- apply(fi * Jrs, 2, sum) - Jdotdot$rs    
-    Z <- bind.fv(Z, data.frame(rs=Irs), "%srs(r)",
+    Z <- bind.fv(Z, data.frame(rs=Irs), "%s[rs](r)",
                  "border corrected estimate of %s", "rs")
   }
   if("han" %in% bothnames) {
     Jhan <- matrix(extract(Jii, "han"), nrow=ntypes, byrow=TRUE)
     Ihan <- apply(fi * Jhan, 2, sum) - Jdotdot$han
-    Z <- bind.fv(Z, data.frame(han=Ihan), "%shan(r)",
+    Z <- bind.fv(Z, data.frame(han=Ihan), "%s[han](r)",
                  "Hanisch-style estimate of %s", "han")
   }
   if("km" %in% bothnames) {
     Jkm <- matrix(extract(Jii, "km"), nrow=ntypes, byrow=TRUE)
     Ikm <- apply(fi * Jkm, 2, sum) - Jdotdot$km
-    Z <- bind.fv(Z, data.frame(km=Ikm), "%skm(r)",
+    Z <- bind.fv(Z, data.frame(km=Ikm), "%s[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
   }
   unitname(Z) <- unitname(X)

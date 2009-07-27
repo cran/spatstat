@@ -43,7 +43,7 @@
 }
 \seealso{
   \code{\link{owin.object}},
-  \code{\link{erode.owin}},
+  \code{\link{erosion}},
   \code{\link{bdist.points}},
 }
 \examples{

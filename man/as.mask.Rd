@@ -60,6 +60,7 @@
 \seealso{
   \code{\link{owin.object}},
   \code{\link{as.rectangle}},
+  \code{\link{as.polygonal}},
   \code{\link{spatstat.options}}
 }
 \examples{

@@ -170,7 +170,7 @@ plot.minconfit <- function(x, ...) {
 
 
 thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
-                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL){
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...){
 
   dataname <- deparse(substitute(X))
 
@@ -185,7 +185,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 
   startpar <- check.named.vector(startpar, c("kappa","sigma2"))
 
-  theoret <- function(par,rvals){
+  theoret <- function(par,rvals, ...){
     if(any(par <= 0))
       return(rep(Inf, length(rvals)))
     pi*rvals^2+(1-exp(-rvals^2/(4*par[2])))/par[1]
@@ -195,7 +195,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
                         fvlab=list(label="Kfit(r)",
                           desc="minimum contrast fit of Thomas process"),
                         explain=list(dataname=dataname,
-                          fname="K", modelname="Thomas process"))
+                          fname="K", modelname="Thomas process"), ...)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "sigma2")
@@ -212,7 +212,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 
 
 lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
-                      lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL) {
+                      lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
   
   dataname <- deparse(substitute(X))
   if(inherits(X, "fv")) {
@@ -229,7 +229,7 @@ lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
   integrand<-function(r,par){
     2*pi*r*exp(par[1]*exp(-r/par[2]))
   }
-  theoret <- function(par, rvals) {
+  theoret <- function(par, rvals, ...) {
     if(any(par <= 0))
       return(rep(Inf, length(rvals)))
     th <- numeric(length(rvals))
@@ -245,7 +245,7 @@ lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
                           desc="minimum contrast fit of LGCP"),
                         explain=list(dataname=dataname,
                           fname="K",
-                          modelname="log-Gaussian Cox process"))
+                          modelname="log-Gaussian Cox process"), ...)
   # imbue with meaning
   par <- result$par
   names(par) <- c("sigma2", "alpha")
@@ -262,7 +262,7 @@ lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
 
 
 matclust.estK <- function(X, startpar=c(kappa=1,R=1),
-                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL){
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...){
 
   dataname <- deparse(substitute(X))
 
@@ -290,7 +290,7 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                            )
     return(h)
   }
-  theoret <- function(par,rvals){
+  theoret <- function(par,rvals, ...){
     if(any(par <= 0))
       return(rep(Inf, length(rvals)))
     pi * rvals^2 + (1/par[1]) * hfun(rvals/(2 * par[2]))
@@ -300,7 +300,7 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                         fvlab=list(label="Kfit(r)",
                           desc="minimum contrast fit of Matern Cluster process"),
                         explain=list(dataname=dataname,
-                          fname="K", modelname="Matern Cluster process"))
+                          fname="K", modelname="Matern Cluster process"), ...)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "R")

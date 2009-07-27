@@ -354,14 +354,18 @@
     data(cells)
     fit <- ppm(cells, ~x, Strauss(r=0.15))
     diagnose.ppm(fit)
+    \dontrun{
     diagnose.ppm(fit, type="pearson")
+    }
     diagnose.ppm(fit, which="marks")
     diagnose.ppm(fit, type="raw", plot.neg="discrete")
 
     # save the diagnostics and plot them later
     u <- diagnose.ppm(fit, rbord=0.15, plot.it=FALSE)
+    \dontrun{
     plot(u)
-    plot(u, which="marks") 
+    plot(u, which="marks")
+    }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

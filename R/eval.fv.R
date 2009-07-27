@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.8 $     $Date: 2009/04/07 03:16:49 $
+#     $Revision: 1.9 $     $Date: 2009/07/24 06:43:54 $
 #
 
 eval.fv <- function(expr, envir) {
@@ -56,7 +56,7 @@ eval.fv <- function(expr, envir) {
   ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
   attr(result, "ylab") <-
     eval(substitute(substitute(e, ylabs), list(e=elang)))
-  attr(result, "fname") <- "?"
+  attr(result, "fname") <- "eval"
   return(result)
 }
 

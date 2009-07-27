@@ -84,6 +84,7 @@ as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.matrix.im            Convert Pixel Image to Matrix
 as.owin                 Convert Data To Class owin
+as.polygonal            Convert a Window to a Polygonal Window
 as.ppp                  Convert Data To Class ppp
 as.psp                  Convert Data To Class psp
 as.rectangle            Window Frame
@@ -91,6 +92,7 @@ as.tess                 Convert Data To Tessellation
 bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
 bei                     Tropical rain forest trees
+bermantest              Berman's Tests for Point Process Model
 betacells               Beta Ganglion Cells in Cat Retina
 blur                    Apply Gaussian Blur to a Pixel Image
 bounding.box            Bounding Box of a Window or Point Pattern
@@ -108,7 +110,7 @@ clarkevans              Clark and Evans Aggregation Index
 clickpoly               Interactively Define a Polygon
 clickppp                Interactively Add Points
 clip.infline            Intersect Infinite Straight Lines with a Window
-closing.owin            Morphological Closing of a Window
+closing                 Morphological Closing
 coef.ppm                Coefficients of Fitted Point Process Model
 colourmap               Colour Lookup Tables
 compatible.fasp         Test Whether Two Function Arrays Are Compatible
@@ -144,7 +146,7 @@ density.splitppp        Kernel Smoothed Intensity of Split Point
                         Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window
-dilate.owin             Dilate a Window
+dilation                Morphological Dilation
 dirichlet               Dirichlet Tessellation of Point Pattern
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
@@ -164,8 +166,8 @@ effectfun               Compute Fitted Effect of a Spatial Covariate in
                         a Point Process Model
 endpoints.psp           Endpoints of Line Segment Pattern
 envelope                Simulation envelopes of summary function
-erode.owin              Erode a Window
 eroded.areas            Areas of Morphological Erosions
+erosion                 Morphological Erosion
 eval.fasp               Evaluate Expression Involving Function Arrays
 eval.fv                 Evaluate Expression Involving Functions
 eval.hyper              Evaluate an Expression in Each Row of a
@@ -206,6 +208,7 @@ intersect.tess          Intersection of Two Tessellations
 iplot                   Point and Click Interface for Displaying a
                         Point Pattern
 is.convex               Test Whether a Window is Convex
+is.empty                Test Whether An Object Is Empty
 is.im                   Test Whether An Object Is A Pixel Image
 is.marked               Test Whether Marks Are Present
 is.marked.ppm           Test Whether A Point Process Model is Marked
@@ -269,7 +272,7 @@ nndist.psp              Nearest neighbour distances between line
                         segments
 nnwhich                 Nearest neighbour
 nztrees                 New Zealand Trees Point Pattern
-opening.owin            Morphological Opening of a Window
+opening                 Morphological Opening
 ord.family              Ord Interaction Process Family
 owin                    Create a Window
 owin.object             Class owin
@@ -287,6 +290,7 @@ pcf.fv                  Pair Correlation Function obtained from K
                         Function
 pcf.ppp                 Pair Correlation Function of Point Pattern
 pcfcross                Multitype pair correlation function
+perimeter               Perimeter Length of Window
 persp.im                Perspective Plot of Pixel Image
 pixellate               Convert Point Pattern to Pixel Image
 pixelquad               Quadrature Scheme Based on Pixel Grid
@@ -296,6 +300,7 @@ plot.fv                 Plot Function Values
 plot.hyperframe         Plot Entries in a Hyperframe
 plot.im                 Plot a Pixel Image
 plot.kppm               Plot a fitted cluster point process
+plot.kstest             Plot a Spatial Kolmogorov-Smirnov Test
 plot.listof             Plot a List of Things
 plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
@@ -428,7 +433,8 @@ shift.psp               Apply Vector Translation To Line Segment
                         Pattern
 simdat                  Simulated Point Pattern
 simplify.owin           Approximate a Polygon by a Simpler Polygon
-simulate.kppm           Simulate a fitted cluster point process model.
+simulate.kppm           Simulate a Fitted Cluster Point Process Model
+simulate.ppm            Simulate a Fitted Gibbs Point Process Model
 smooth.ppp              Spatial smoothing of observations at irregular
                         points
 solutionset             Evaluate Logical Expression Involving Pixel

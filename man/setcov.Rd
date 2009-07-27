@@ -44,7 +44,7 @@
 \seealso{
   \code{\link{owin}},
   \code{\link{as.owin}},
-  \code{\link{erode.owin}}
+  \code{\link{erosion}}
 }
 \examples{
   w <- owin(c(0,1),c(0,1))

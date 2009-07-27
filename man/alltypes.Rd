@@ -217,7 +217,6 @@
      swedishpines <- swedishpines[1:25]
    }
    plot(alltypes(swedishpines,"K"))
-   plot(alltypes(swedishpines,"F"))
 
    data(amacrine)
    plot(alltypes(amacrine, "pcf"), ylim=c(0,1.3))
@@ -231,7 +230,9 @@
 
    # envelopes
    bKE <- alltypes(bramblecanes,"K",envelope=TRUE,nsim=19)
+   \dontrun{
    bFE <- alltypes(bramblecanes,"F",envelope=TRUE,nsim=19,global=TRUE)
+   }
 
    # extract one entry
    as.fv(bKE[1,1])

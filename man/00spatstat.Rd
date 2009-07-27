@@ -144,6 +144,8 @@
 	simulate the Baddeley-Silverman cell process  \cr
 	\code{\link{rmh}} \tab
 	simulate Gibbs point process using Metropolis-Hastings \cr
+	\code{\link{simulate.ppm}} \tab
+	simulate Gibbs point process using Metropolis-Hastings \cr
 	\code{\link{runifpointOnLines}} \tab
 	generate \eqn{n} random points along specified line segments \cr
 	\code{\link{rpoisppOnLines}} \tab
@@ -267,13 +269,13 @@
 	\tab		\code{plot(W)}\cr
 	\code{\link{bounding.box}} \tab
 	Find a tight bounding box for the window \cr
-	\code{\link{erode.owin}}	\tab
+	\code{\link{erosion}}	\tab
 	erode window by a distance r\cr
-	\code{\link{dilate.owin}}	\tab
+	\code{\link{dilation}}	\tab
 	dilate window by a distance r\cr
-	\code{\link{closing.owin}}	\tab
+	\code{\link{closing}}	\tab
 	close window by a distance r\cr
-	\code{\link{opening.owin}}	\tab
+	\code{\link{opening}}	\tab
 	open window by a distance r\cr
 	\code{\link{complement.owin}}	\tab
 	invert (swap inside and outside)\cr
@@ -294,7 +296,9 @@
 	\code{\link{raster.x}} \tab
 	raster x coordinates \cr
 	\code{\link{raster.y}} \tab
-	raster y coordinates 
+	raster y coordinates \cr
+	\code{\link{as.polygonal}} \tab
+	convert pixel mask to polygonal window
       }
       See \code{\link{spatstat.options}} to control the approximation
 
@@ -304,8 +308,9 @@
 	\code{\link{intersect.owin}}	\tab	intersection of two windows\cr
 	\code{\link{union.owin}}	\tab	union of two windows\cr
 	\code{\link{inside.owin}}	\tab	determine whether a point is inside a window\cr
-	\code{\link{area.owin}}	\tab	compute window's area \cr
-	\code{\link{diameter}}	\tab	compute window frame's diameter\cr
+	\code{\link{area.owin}}	\tab	compute area \cr
+	\code{\link{perimeter}}	\tab	compute perimeter length \cr
+	\code{\link{diameter}}	\tab	compute diameter\cr
 	\code{\link{incircle}}	\tab	find largest circle inside a window \cr
 	\code{\link{connected}}    \tab find connected components of window \cr
 	\code{\link{eroded.areas}}	\tab	compute areas of eroded windows\cr
@@ -316,7 +321,9 @@
 	\code{\link{is.subset.owin}}    \tab determine whether one
 	window contains another \cr
 	\code{\link{is.convex}} \tab determine whether a window is convex \cr 
-	\code{\link{convexhull}} \tab compute convex hull 
+	\code{\link{convexhull}} \tab compute convex hull \cr
+	\code{\link{as.mask}} \tab pixel approximation of window \cr
+	\code{\link{as.polygonal}} \tab polygonal approximation of window 
       }
 
     \bold{Pixel images:}
@@ -600,6 +607,7 @@
     \code{\link{update.ppm}} \tab Update the fit \cr
     \code{\link{vcov.ppm}} \tab Variance-covariance matrix of estimates\cr
     \code{\link{rmh.ppm}} \tab Simulate from fitted model  \cr
+    \code{\link{simulate.ppm}} \tab Simulate from fitted model  \cr
     \code{\link{print.ppm}} \tab Print basic information about a fitted model\cr
     \code{\link{summary.ppm}} \tab Summarise a fitted model\cr
     \code{\link{effectfun}} \tab Compute the fitted effect of one covariate\cr
@@ -690,6 +698,7 @@
   
   \tabular{ll}{
     \code{\link{rmh.ppm}} \tab simulate realisations of a fitted model \cr
+    \code{\link{simulate.ppm}} \tab simulate realisations of a fitted model \cr
     \code{\link{envelope}} \tab compute simulation envelopes for a
     fitted model 
   }
@@ -768,8 +777,10 @@
 
    Gibbs point process models 
    are fitted by the function \code{\link{ppm}} yielding an
-   object of class \code{"ppm"}. To generate one or more simulated
-   realisations of this fitted model, use \code{\link{rmh}}.
+   object of class \code{"ppm"}. To generate a simulated
+   realisation of this fitted model, use \code{\link{rmh}}.
+   To generate one or more simulated realisations of the fitted model,
+   use \code{\link{simulate.ppm}}.
 
    \bold{Other random patterns:}
 
@@ -806,6 +817,7 @@
     \code{\link{quadrat.test}} \tab \eqn{\chi^2}{chi^2} goodness-of-fit
     test on quadrat counts \cr
     \code{\link{kstest}} \tab Kolmogorov-Smirnov goodness-of-fit test\cr
+    \code{\link{bermantest}} \tab Berman's goodness-of-fit tests\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for

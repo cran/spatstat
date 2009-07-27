@@ -37,6 +37,9 @@ nearestsegment(X, Y)
 \seealso{
   \code{\link{project2segment}} to project each point of \code{X} to
   a point lying on one of the line segments.
+
+  Use \code{\link{distmap.psp}} to 
+  identify the nearest line segment for each pixel in a grid.
 }
 \examples{
   X <- runifpoint(3)
