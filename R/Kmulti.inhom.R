@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.23 $	$Date: 2009/06/24 23:46:49 $
+#	$Revision: 1.24 $	$Date: 2009/07/24 05:37:10 $
 #
 #
 # ------------------------------------------------------------------------
@@ -194,7 +194,7 @@ function(X, I, J, lambdaI, lambdaJ,
   K <- data.frame(r=r, theo= pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(Kmulti.inhom(r), NULL),
-          "theo", , alim, c("r","%spois(r)"), desc, fname="Kmi")
+          "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kmi")
 
 # identify close pairs of points
   XI <- X[I]
@@ -243,13 +243,13 @@ function(X, I, J, lambdaI, lambdaJ,
     RS <- Kwtsum(dclose, bI, weight, b, 1/lambdaI, breaks)
     if(any(correction == "border")) {
       Kb <- RS$ratio
-      K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+      K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
     if(any(correction == "bord.modif")) {
       Kbm <- RS$numerator/eroded.areas(W, r)
-            K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+            K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
                          "modified border-corrected estimate of %s",
                          "bord.modif")
           }
@@ -262,7 +262,7 @@ function(X, I, J, lambdaI, lambdaJ,
             Ktrans <- cumsum(wh)/area
             rmax <- diameter(W)/2
             Ktrans[r >= rmax] <- NA
-            K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+            K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
                          "translation-corrected estimate of %s",
                          "trans")
         }
@@ -274,7 +274,7 @@ function(X, I, J, lambdaI, lambdaJ,
             Kiso <- cumsum(wh)/area
             rmax <- diameter(W)/2
             Kiso[r >= rmax] <- NA
-            K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+            K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
                          "Ripley isotropic correction estimate of %s",
                          "iso")
         }

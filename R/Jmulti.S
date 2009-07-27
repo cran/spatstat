@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.27 $	$Date: 2009/06/21 01:06:31 $
+#	$Revision: 4.29 $	$Date: 2009/07/24 06:32:32 $
 #
 #
 #
@@ -43,7 +43,7 @@ function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
   result <-
     rebadge.fv(result,
                substitute(Jcross[i,j](r), list(i=paste(i),j=paste(j))),
-               "J*",
+               "Jcross",
                new.yexp=substitute(Jcross[list(i,j)](r),
                                    list(i=paste(i),j=paste(j))))
   return(result)
@@ -80,7 +80,7 @@ function(X, i, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
   result <-
     rebadge.fv(result,
             substitute(Jdot[i](r), list(i=paste(i))),
-            "J.")
+            "Jdot")
   return(result)
 }
 
@@ -118,9 +118,9 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL,
   Z <- fv(data.frame(r=rvals, theo=1),
           "r", substitute(Jmulti(r), NULL), "theo",
           . ~ r, alim,
-          c("r", "%spois(r)"),
+          c("r", "%s[pois](r)"),
           c("distance argument r", "theoretical Poisson %s"),
-          fname="Jm")
+          fname="Jmulti")
   # add pieces manually
   ratio <- function(a, b) {
     result <- a/b
@@ -129,25 +129,25 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL,
   }
   if("raw" %in% bothnames) {
     Jun <- ratio(1-GIJ$raw, 1-FJ$raw)
-    Z <- bind.fv(Z, data.frame(un=Jun), "%sun(r)",
+    Z <- bind.fv(Z, data.frame(un=Jun), "%s[un](r)",
                  "uncorrected estimate of %s", "un")
     attr(Z, "alim") <- range(rvals[FJ$raw <= 0.9])
   }
   if("rs" %in% bothnames) {
     Jrs <- ratio(1-GIJ$rs, 1-FJ$rs)
-    Z <- bind.fv(Z, data.frame(rs=Jrs), "%srs(r)",
+    Z <- bind.fv(Z, data.frame(rs=Jrs), "%s[rs](r)",
                  "border corrected estimate of %s", "rs")
     attr(Z, "alim") <- range(rvals[FJ$rs <= 0.9])
   }
   if("han" %in% Gnames && "cs" %in% Fnames) {
     Jhan <- ratio(1-GIJ$han, 1-FJ$cs)
-    Z <- bind.fv(Z, data.frame(han=Jhan), "%shan(r)",
+    Z <- bind.fv(Z, data.frame(han=Jhan), "%s[han](r)",
                  "Hanisch-style estimate of %s", "han")
     attr(Z, "alim") <- range(rvals[FJ$cs <= 0.9])
   }
   if("km" %in% bothnames) {
     Jkm <- ratio(1-GIJ$km, 1-FJ$km)
-    Z <- bind.fv(Z, data.frame(km=Jkm), "%skm(r)",
+    Z <- bind.fv(Z, data.frame(km=Jkm), "%s[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
     attr(Z, "alim") <- range(rvals[FJ$km <= 0.9])
   }

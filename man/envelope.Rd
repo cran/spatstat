@@ -8,13 +8,14 @@
   envelope(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
-  transform=NULL,global=FALSE,ginterval=NULL, saveall=FALSE,
+  transform=NULL,global=FALSE,ginterval=NULL,
+  savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, Yname=NULL, internal=NULL)
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
     \code{"ppp"}) or a fitted point process model
-    (object of class \code{"ppm"}).
+    (object of class \code{"ppm"} or \code{"kppm"}).
     }
     \item{fun}{
       Function that computes the desired summary statistic
@@ -73,8 +74,13 @@
       the interval of \eqn{r} values for the simultaneous critical
       envelopes. Only relevant if \code{global=TRUE}.
     }
-    \item{saveall}{
-      Logical flag indicating whether to save all the simulated curves.
+    \item{savefuns}{
+      Logical flag indicating whether to save all the simulated
+      function values.
+    }
+    \item{savepatterns}{
+      Logical flag indicating whether to save all the simulated
+      point patterns.
     }
     \item{nsim2}{
       Number of extra simulated point patterns to be generated
@@ -119,8 +125,11 @@
     computed by averaging simulated values, 
     if the simulations were not generated according to CSR.
   }
-  Additionally, if \code{saveall=TRUE}, the return value has an attribute
-  \code{"savedata"} which contains the summary functions
+  Additionally, if \code{savepatterns=TRUE}, the return value has an attribute
+  \code{"simpatterns"} which is a list containing the \code{nsim}
+  simulated patterns. If \code{savefuns=TRUE}, the return value
+  has an attribute \code{"simfuns"} which is an object of class
+  \code{"fv"} containing the summary functions
   computed for each of the \code{nsim} simulated patterns.
 }
 \details{
@@ -143,7 +152,7 @@
     relative frequencies of marks in \code{Y}.) 
     \item
     If \code{Y} is a fitted point process model (an object of class
-    \code{"ppm"}) and \code{simulate=NULL},
+    \code{"ppm"} or \code{"kppm"}) and \code{simulate=NULL},
     then this routine generates \code{nsim} simulated
     realisations of that model.
     \item
@@ -235,7 +244,13 @@
   Selecting only a single edge
   correction will make the code run much faster.
 
-  If \code{Y} is a fitted point process model, and \code{simulate=NULL},
+  If \code{Y} is a fitted cluster point process model (object of
+  class \code{"kppm"}), and \code{simulate=NULL},
+  then the model is simulated directly
+  using \code{\link{simulate.kppm}}.
+  
+  If \code{Y} is a fitted Gibbs point process model (object of
+  class \code{"ppm"}), and \code{simulate=NULL},
   then the model is simulated
   by running the Metropolis-Hastings algorithm \code{\link{rmh}}.
   Complete control over this algorithm is provided by the 
@@ -267,13 +282,18 @@
   }
 
   It is also possible to extract the summary functions for each of the
-  individual simulated point patterns, by setting \code{saveall=TRUE}.
+  individual simulated point patterns, by setting \code{savefuns=TRUE}.
   Then the return value also 
-  has an attribute \code{"savedata"} containing all the 
+  has an attribute \code{"simfuns"} containing all the 
   summary functions for the individual simulated patterns.
   It is an \code{"fv"} object containing
   functions named \code{sim1, sim2, ...} representing the \code{nsim}
   summary functions.
+
+  It is also possible to save the simulated point patterns themselves,
+  by setting \code{savepatterns=TRUE}. Then the return value also has
+  an attribute \code{"simpatterns"} which is a list of length
+  \code{nsim} containing all the simulated point patterns.
 }
 \section{Warning}{
   An error may be generated if one of the simulations produces a
@@ -331,7 +351,7 @@
   plot(envelope(X, nsim=4, correction="translate"))
  }
 
- # Envelope of K function for simulations from model 
+ # Envelope of K function for simulations from Gibbs model 
  data(cells)
  fit <- ppm(cells, ~1, Strauss(0.05))
  \dontrun{
@@ -341,6 +361,18 @@
  \testonly{
   plot(envelope(fit, nsim=4))
   plot(envelope(fit, nsim=4, global=TRUE))
+ }
+
+ # Envelope of K function for simulations from cluster model 
+ data(redwood)
+ fit <- kppm(redwood, ~1, "Thomas")
+ \dontrun{
+ plot(envelope(fit, Gest))
+ plot(envelope(fit, Gest, global=TRUE))
+ }
+ \testonly{
+  plot(envelope(fit, Gest, nsim=4))
+  plot(envelope(fit, Gest, nsim=4, global=TRUE))
  }
 
  # Envelope of G function under CSR

@@ -79,7 +79,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   # Erode window if required
   clip <- (rbord > 0)
   if(clip) {
-    Wclip <- erode.owin(W, rbord)
+    Wclip <- erosion.owin(W, rbord)
     Yclip <- Y[Wclip]
     if(!is.null(Ycts))
       Ycts <- Ycts[Wclip]

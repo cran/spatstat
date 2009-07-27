@@ -34,12 +34,12 @@
   Unless \code{w} is a rectangle, the computation is performed
   using a pixel raster approximation.
 
-  To compute the eroded window itself, use \code{\link{erode.owin}}.
+  To compute the eroded window itself, use \code{\link{erosion}}.
 }
 \seealso{
   \code{\link{owin}},
   \code{\link{as.owin}},
-  \code{\link{erode.owin}}
+  \code{\link{erosion}}
 }
 \examples{
   w <- owin(c(0,1),c(0,1))

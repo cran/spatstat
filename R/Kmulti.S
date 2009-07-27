@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.28 $	$Date: 2009/06/10 01:25:15 $
+#	$Revision: 5.30 $	$Date: 2009/07/24 06:08:22 $
 #
 #
 # -------- functions ----------------------------------------
@@ -99,7 +99,7 @@ function(X, i, j, r=NULL, breaks=NULL,
   result <-
     rebadge.fv(result, 
                substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j))),
-               "K",
+               "Kcross",
                new.yexp=substitute(K[list(i,j)](r),
                                    list(i=paste(i),j=paste(j))))
   return(result)
@@ -129,7 +129,7 @@ function(X, i, r=NULL, breaks=NULL,
   result <-
     rebadge.fv(result,
                substitute(Kdot[i](r), list(i=paste(i))),
-               "K.")
+               "Kdot")
   return(result)
 }
 
@@ -190,7 +190,7 @@ function(X, I, J, r=NULL, breaks=NULL,
   K <- data.frame(r=r, theo= pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(Kmulti(r), NULL),
-          "theo", , alim, c("r","%spois(r)"), desc, fname="Kmulti")
+          "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kmulti")
 
   # find close pairs of points
   XI <- X[I]
@@ -229,7 +229,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     # uncorrected! 
     wh <- whist(dcloseIJ, breaks$val)  # no weights
     Kun <- cumsum(wh)/(lambdaI * lambdaJ * area)
-    K <- bind.fv(K, data.frame(un=Kun), "%sun(r)",
+    K <- bind.fv(K, data.frame(un=Kun), "%s[un](r)",
                  "uncorrected estimate of %s",
                  "un")
   }
@@ -244,13 +244,13 @@ function(X, I, J, r=NULL, breaks=NULL,
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(denom.area * nI * nJ)
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%sbord*(r)",
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if(any(correction == "border")) {
       Kb <- RS$numerator/(lambdaJ * RS$denom.count)
-      K <- bind.fv(K, data.frame(border=Kb), "%sbord(r)",
+      K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -262,7 +262,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
     rmax <- diameter(W)/2
     Ktrans[r >= rmax] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "%strans(r)",
+    K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
                  "translation-corrected estimate of %s",
                  "trans")
   }
@@ -273,7 +273,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
     rmax <- diameter(W)/2
     Kiso[r >= rmax] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "%siso(r)",
+    K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
                  "Ripley isotropic correction estimate of %s",
                  "iso")
   }

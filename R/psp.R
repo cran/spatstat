@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.48 $ $Date: 2009/06/02 23:17:29 $
+#  $Revision: 1.49 $ $Date: 2009/07/18 02:20:40 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -483,4 +483,4 @@ rotate.psp <- function(X, angle=pi/2, ...) {
   psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
 }
 
-
+is.empty.psp <- function(x) { return(x$n == 0) } 

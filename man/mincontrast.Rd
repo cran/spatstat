@@ -26,7 +26,8 @@ mincontrast(observed, theoretical, startpar, \dots,
     point process model (passed to \code{theoretical}). 
   }
   \item{\dots}{
-    Additional arguments passed to the function \code{theoretical}.
+    Additional arguments passed to the function \code{theoretical}
+    and to the optimisation algorithm \code{\link[stats]{optim}}.
   }
   \item{ctrl}{
     Optional. List of arguments controlling the optimisation. See Details.
@@ -101,6 +102,13 @@ mincontrast(observed, theoretical, startpar, \dots,
   \code{fit} of the return value.
   The argument \code{explain} contains human-readable strings
   describing the data, the model and the summary statistic.
+
+  The \code{"..."} argument of \code{mincontrast} can be used to
+  pass extra arguments to the function \code{theoretical}
+  and/or to the optimisation function \code{\link[stats]{optim}}.
+  In this case, the function \code{theoretical}
+  should also have a \code{"..."} argument and should ignore it
+  (so that it ignores arguments intended for \code{\link[stats]{optim}}).
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing

@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.32 $    $Date: 2009/06/24 18:50:20 $
+#  $Revision: 1.35 $    $Date: 2009/07/23 02:48:19 $
 #
 #
 
@@ -27,6 +27,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # This *is* the last possible moment, so...
   fmla <- as.formula(fmla)
 
+  # Extract left hand side as given
+  lhs.original <- fmla[[2]]
+  
   # expand "."
   dotnames <- attr(x, "dotnames")
   if(is.null(dotnames)) {
@@ -99,27 +102,54 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     ylim <- range(ylim, ylim.covers)
 
   # work out how to label the plot
+  
+  # extract plot labels 
+  labl <- attr(x, "labl")
+  # expand plot labels
+  if(!is.null(fname <- attr(x, "fname")))
+    labl <- sprintf(labl, fname)
+  # construct mapping from identifiers to labels
+  map <- as.list(labl)
+  magic <- function(x) {
+    subx <- paste("substitute(", x, ", NULL)")
+    eval(parse(text=subx))
+  }
+  map <- lapply(map, magic)
+  names(map) <- colnames(x)
+  # also map "." to name of target function
+  if(!is.null(ye <- attr(x, "yexp")))
+        map <- append(map, list("."=ye))
+  # alternative version of map (vector of expressions)
+  mapvec <- sapply(as.list(labl), function(x) { parse(text=x) })
+  names(mapvec) <- colnames(x)
+
+  # ......... label for x axis ..................
+
   if(is.null(xlab)) {
-    # what is actually plotted on the x-axis
-    xlab <- as.character(fmla)[3]
-    # if it's the default argument,
-    # add name of unit of length
-    if(xlab == attr(x, "argu")) {
+    argname <- attr(x, "argu")
+    if(as.character(fmla)[3] == argname) {
+      # the x axis is the default function argument.
+      # Add name of unit of length
       ax <- summary(unitname(x))$axis
-      xlab <- paste(xlab, ax)
+      xlab <- paste(argname, ax)
+    } else {
+      # map ident to label
+      xlab <- eval(substitute(substitute(rh, mp), list(rh=rhs, mp=map)))
     }
   }
-
+  if(is.language(xlab) && !is.expression(xlab))
+    xlab <- as.expression(xlab)
+      
+  # ......... label for y axis ...................
+  
   if(is.null(ylab)) {
     yl <- attr(x, "yexp")
     if(!is.null(yl) && defaultplot)
-      ylab <- yl
+        ylab <- yl
     else {
-      yname <- paste(lhs)
-      if(length(yname) > 1 && yname[[1]] == "cbind")
-        ylab <- paste(yname[-1], collapse=" , ")
-      else
-        ylab <- as.character(fmla)[2]
+      # replace short identifiers by plot labels
+      ylab <- eval(substitute(substitute(le, mp),
+                                list(le=lhs.original, mp=map)))
     }
   }
   if(is.language(ylab) && !is.expression(ylab))
@@ -167,8 +197,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     return(invisible(NULL))
   else {
     key <- colnames(lhsdata)
-    desc <- attr(x, "desc")
-    desc <- desc[match(key, names(x))]
+    mat <- match(key, names(x))
+    desc <- attr(x, "desc")[mat]
+    labl <- labl[mat]
     ylab <- attr(x, "ylab")
     if(!is.null(ylab)) {
       if(is.language(ylab))
@@ -177,8 +208,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     }
     if(!is.null(legend) && legend)
       legend(legendpos, inset=0.05, lty=lty, col=col, legend=key)
-    return(data.frame(lty=lty, col=col, key=key,
-                      meaning=desc, row.names=key))
+    df <- data.frame(lty=lty, col=col, key=key, label=labl,
+                      meaning=desc, row.names=key)
+    return(df)
   }
 }
 

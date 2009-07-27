@@ -3,7 +3,7 @@
 #
 # apply Gaussian blur to an image
 #
-#    $Revision: 1.9 $   $Date: 2009/06/30 01:43:20 $
+#    $Revision: 1.10 $   $Date: 2009/07/07 01:02:45 $
 #
 fillNA <- function(x, value=0) {
   stopifnot(is.im(x))
@@ -68,6 +68,13 @@ safelookup <- function(Z, X, factor=2, warn=FALSE) {
   if(any(isna <- is.na(Zvals))) {
     XX <- X[isna]
     pixdiam <- sqrt(Z$xstep^2 + Z$ystep^2)
+    # expand domain of Z 
+    RX <- as.rectangle(X)
+    RZ <- as.rectangle(Z)
+    bb <- bounding.box(RX, RZ)
+    big <- grow.rectangle(bb, 2 * pixdiam)
+    Z <- rebound.im(Z, big)
+    # now blur
     Zblur <- blur(Z, factor * pixdiam, bleed=TRUE, normalise=TRUE)
     Bvals <- Zblur[XX, drop=FALSE]
     if(any(is.na(Bvals))) 

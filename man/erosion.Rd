@@ -1,16 +1,26 @@
-\name{erode.owin}
-\alias{erode.owin}
+\name{erosion}
+\alias{erosion}
 \alias{erosion.owin}
-\title{Erode a Window}
+\alias{erosion.ppp}
+\alias{erosion.psp}
+\title{Morphological Erosion}
 \description{
-  Perform morphological erosion of a window 
+  Perform morphological erosion of a window, a line segment pattern
+  or a point pattern.
 }
 \usage{
- erosion.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE, polygonal=TRUE)
- erode.owin(w, r, shrink.frame=TRUE, \dots, strict=FALSE, polygonal=TRUE)
+ erosion(w, r, \dots)
+ \method{erosion}{owin}(w, r, shrink.frame=TRUE, \dots,
+   strict=FALSE, polygonal=NULL)
+ \method{erosion}{ppp}(w, r,\dots)
+ \method{erosion}{psp}(w, r,\dots)
 }
 \arguments{
-  \item{w}{A window (object of class \code{"owin"}.}
+  \item{w}{
+    A window (object of class \code{"owin"}
+    or a line segment pattern (object of class \code{"psp"})
+    or a point pattern (object of class \code{"ppp"}).
+  }
   \item{r}{positive number: the radius of erosion.}
   \item{shrink.frame}{logical: if \code{TRUE}, erode the bounding
     rectangle as well.}
@@ -25,8 +35,9 @@
   }
 }
 \value{
-  Another object of class \code{"owin"} representing the
-  eroded window.
+  If \code{r > 0}, an object of class \code{"owin"} representing the
+  eroded region (or \code{NULL} if this region is empty).
+  If \code{r=0}, the result is identical to \code{w}.
 }
 \details{
   The morphological erosion of a set \eqn{W} by a distance \eqn{r > 0}
@@ -36,24 +47,22 @@
   or equal to \eqn{r}. In other words it is the result of trimming
   a margin of width \eqn{r} off the set \eqn{W}.
 
-  The functions \code{erode.owin} and \code{erosion.owin} are
-  identical; they compute the erosion of the window \code{w}.
-
-  If \code{w} is a rectangle, the result will be a rectangle, or empty.
-
-  If \code{w} is a polygonal window and \code{polygonal=TRUE},
-  a polygonal approximation to the eroded window will be computed.
-
-  Otherwise, \code{w} and its erosion will be approximated by
-  a binary pixel image. 
+  If \code{polygonal=TRUE} then a polygonal approximation
+  to the erosion is computed.
+  If \code{polygonal=FALSE} then a pixel approximation
+  to the erosion is computed from the distance map of \code{w}.
   The arguments \code{"\dots"} are passed to \code{\link{as.mask}}
-  to determine the pixel resolution. There is a sensible default.
-
+  to control the pixel resolution.
   The erosion consists of all pixels whose distance
   from the boundary of \code{w} is strictly greater than \code{r} (if
   \code{strict=TRUE}) or is greater than or equal to \code{r} (if
   \code{strict=FALSE}).
   
+  When \code{w} is a window, the default (when \code{polygonal=NULL})
+  is to compute a polygonal approximation if
+  \code{w} is a rectangle or polygonal window, and to compute a
+  pixel approximation if \code{w} is a window of type \code{"mask"}.
+
   If \code{shrink.frame} is false, the resulting window is given the
   same outer, bounding rectangle as the original window \code{w}.
   If \code{shrink.frame} is true, the original bounding rectangle
@@ -63,7 +72,7 @@
   use \code{\link{eroded.areas}}.
 }
 \seealso{
-  \code{\link{dilate.owin}} for the opposite operation.
+  \code{\link{dilation}} for the opposite operation.
   
   \code{\link{owin}},
   \code{\link{as.owin}},
@@ -71,10 +80,10 @@
 }
 \examples{
   w <- owin(c(0,1),c(0,1))
-  v <- erode.owin(w, 0.1) 
+  v <- erosion(w, 0.1) 
   # returns rectangle [0.1, 0.9] x [0.1,0.9]
   \dontrun{
-  v <- erode.owin(w, 0.6)
+  v <- erosion(w, 0.6)
   # erosion is empty
   }
 }

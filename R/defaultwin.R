@@ -2,7 +2,7 @@
 #
 #  defaultwin.R
 #
-#   $Revision: 1.3 $   $Date: 2006/02/21 23:45:29 $
+#   $Revision: 1.4 $   $Date: 2009/07/17 05:57:56 $
 #
 
 default.expand <- function(object, m=2, epsilon=1e-6) {
@@ -19,7 +19,7 @@ default.expand <- function(object, m=2, epsilon=1e-6) {
   if(w$type == "rectangle") 
     return(owin(w$xrange + c(-1,1) * mr, w$yrange + c(-1,1) * mr))
   else
-    return(dilate.owin(w, mr))
+    return(dilation.owin(w, mr))
 }
 
 default.clipwindow <- function(object, epsilon=1e-6) {
@@ -33,7 +33,7 @@ default.clipwindow <- function(object, epsilon=1e-6) {
   if(rr == 0)
     return(w)
   else
-    return(erode.owin(w, rr))
+    return(erosion.owin(w, rr))
 }
 
   

@@ -14,7 +14,7 @@
   }
 }
 \value{
-  The numerical value of the area of the window. 
+  A numerical value giving the area of the window. 
 }
 \details{
   If the window \code{W} is of type \code{"rectangle"} or \code{"polygonal"},
@@ -25,6 +25,8 @@
   pixel size.
 }
 \seealso{
+  \code{\link{perimeter}},
+  \code{\link{diameter}},
   \code{\link{owin.object}},
   \code{\link{as.owin}}
 }

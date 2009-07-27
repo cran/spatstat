@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.22 $	$Date: 2009/06/21 01:14:02 $
+#	$Revision: 4.23 $	$Date: 2009/07/24 05:27:14 $
 #
 ################################################################################
 #
@@ -52,7 +52,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
   df <- data.frame(r=rvals, theo=1-exp(-lambda * pi * rvals^2))
   Z <- fv(df, "r", substitute(G(r), NULL), "theo", . ~ r,
           c(0,rmax),
-          c("r", "%spois(r)"), 
+          c("r", "%s[pois](r)"), 
           c("distance argument r", "theoretical Poisson %s"),
           fname="G")
 
@@ -64,7 +64,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
       hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
       edf <- cumsum(hh)/length(nnd)
     }
-    Z <- bind.fv(Z, data.frame(raw=edf), "%sraw(r)",
+    Z <- bind.fv(Z, data.frame(raw=edf), "%s[raw](r)",
                  "uncorrected estimate of %s", "raw")
   }
   if("han" %in% correction) {
@@ -82,7 +82,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     }
     # add to fv object
     Z <- bind.fv(Z, data.frame(han=G),
-                 "%shan(r)", 
+                 "%s[han](r)", 
                  "Hanisch estimate of %s",
                  "han")
     # modify recommended plot range
@@ -99,7 +99,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("%sbord(r)", "%skm(r)", "hazard(r)"),
+                 c("%s[bord](r)", "%s[km](r)", "hazard(r)"),
                  c("border corrected estimate of %s",
                    "Kaplan-Meier estimate of %s",
                    "Kaplan-Meier estimate of hazard function lambda(r)"),

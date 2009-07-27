@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.59 $	$Date: 2009/06/02 23:15:57 $
+#	$Revision: 4.60 $	$Date: 2009/07/18 02:20:48 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -532,3 +532,4 @@ as.data.frame.ppp <- function(x, row.names=NULL, ...) {
     data.frame(x=x$x, y=x$y, marks=x$marks, row.names=row.names)
 }
 
+is.empty.ppp <- function(x) { return(x$n == 0) }

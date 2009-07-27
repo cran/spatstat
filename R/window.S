@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.102 $	$Date: 2009/03/24 12:05:49 $
+#	$Revision: 4.107 $	$Date: 2009/07/18 02:28:14 $
 #
 #
 #	A window may be either
@@ -13,7 +13,7 @@
 #                       (with sides parallel to the coordinate axes)
 #
 #		- polygonal:
-#			delineated by one or more non-self-intersecting
+#			delineated by 0, 1 or more non-self-intersecting
 #                       polygons, possibly including polygonal holes.
 #	
 #		- digital mask:
@@ -24,12 +24,14 @@
 #	Any window is an object of class 'owin', 
 #       containing at least the following entries:	
 #
-#		$type:	a string ("rectangle", "polygonal" or  "mask")
+#		$type:	a string ("rectangle", "polygonal" or "mask")
 #
 #		$xrange   
 #		$yrange
 #			vectors of length 2 giving the real dimensions 
-#			of the enclosing box.
+#			of the enclosing box
+#               $units
+#                       name of the unit of length
 #
 #	The 'rectangle' type has only these entries.
 #
@@ -108,7 +110,20 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     return(w)
   } else if(poly.given) {
     ######### polygonal boundary ########
-    #
+    if(length(poly) == 0) {
+      # empty polygon
+      if(check) {
+        if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] < xrange[1])
+          stop("xrange should be a vector of length 2 giving (xmin, xmax)")
+        if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] < yrange[1])
+          stop("yrange should be a vector of length 2 giving (ymin, ymax)")
+      }
+      w <- list(type="polygonal", xrange=xrange, yrange=yrange,
+                bdry=list(), units=unitname)
+      class(w) <- "owin"
+      return(w)
+    }
+    # nonempty polygon  
     # test whether it's a single polygon or multiple polygons
     if(verify.xypolygon(poly, fatal=FALSE))
       psingle <- TRUE
@@ -489,8 +504,6 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #-----------------------------------------------------------------------------
 #
 as.polygonal <- function(W) {
-  # the only sensible use of this function is to
-  # convert a rectangle to a polygon
   verifyclass(W, "owin")
   switch(W$type,
          rectangle = {
@@ -503,7 +516,40 @@ as.polygonal <- function(W) {
            return(W)
          },
          mask = {
-           stop("A mask cannot be converted to a polygon")
+           # This could take a while
+           M <- W$m
+           nr <- nrow(M)
+           notM <- !M
+           out <- NULL
+           xcol <- W$xcol
+           yrow <- W$yrow
+           xbracket <- 1.1 * c(-1,1) * W$xstep/2
+           ybracket <- 1.1 * c(-1,1) * W$ystep/2
+           # identify runs of TRUE entries in each column
+           start <- M & rbind(TRUE, notM[-nr, ])
+           finish <- M & rbind(notM[-1, ], TRUE)
+           for(j in 1:ncol(M)) {
+             xj <- xcol[j]
+             # identify start and end positions in column j
+             starts <- which(start[,j])
+             finishes <- which(finish[,j])
+             ns <- length(starts)
+             nf <- length(finishes)
+             if(ns != nf)
+               stop(paste("Internal error: length(starts)=", ns,
+                          ", length(finishes)=", nf))
+             if(ns > 0)
+               for(k in 1:ns) {
+                 yfrom <- yrow[starts[k]]
+                 yto   <- yrow[finishes[k]]
+                 yk <- sort(c(yfrom,yto))
+                 # make rectangle
+                 recto <- owin(xj+xbracket,yk+ybracket)
+                 # add to result
+                 out <- union.owin(out, recto)
+               }
+           }
+           return(out)
          }
          )
 }
@@ -614,6 +660,8 @@ bounding.box <- function(...) {
                },
                polygonal = {
                  bdry <- w$bdry
+                 if(length(bdry) == 0)
+                   return(NULL)
                  xr <- range(unlist(lapply(bdry, function(a) range(a$x))))
                  yr <- range(unlist(lapply(bdry, function(a) range(a$y))))
                  return(owin(xr, yr, unitname=unitname(w)))
@@ -645,11 +693,15 @@ complement.owin <- function(w, frame=as.rectangle(w)) {
            w$m <- !(w$m)
          },
          rectangle = {
-           stop("window is a rectangle - its complement is empty")
+           # return empty window
+           return(emptywindow(w))
          },
          polygonal = {
            bdry <- w$bdry
-
+           if(length(bdry) == 0) {
+             # w is empty
+             return(frame)
+           }
            # bounding box, in anticlockwise order
            box <- list(x=w$xrange[c(1,2,2,1)],
                        y=w$yrange[c(1,1,2,2)])
@@ -666,9 +718,9 @@ complement.owin <- function(w, frame=as.rectangle(w)) {
              is.box <- (nvert == 4 & area >= boxarea.mineps)
              if(sum(is.box) > 1)
                stop("Internal error: multiple copies of bounding box")
-             if(all(is.box))
-               stop(paste("Complement is empty, for window", wname),
-                    call.=FALSE)
+             if(all(is.box)) {
+               return(emptywindow(box))
+             }
            }
                  
            # if box is present (with + sign), remove it
@@ -772,6 +824,8 @@ print.owin <- function(x, ...) {
          },
          polygonal={
            cat("polygonal boundary\n")
+           if(length(x$bdry) == 0)
+             cat("window is empty\n")
            cat("enclosing rectangle: ")
          },
          mask={
@@ -808,7 +862,9 @@ summary.owin <- function(object, ...) {
          polygonal={
            poly <- object$bdry
            result$npoly <- npoly <- length(poly)
-           if(npoly == 1) {
+           if(npoly == 0) {
+             result$areas <- result$nvertices <- numeric(0)
+           } else if(npoly == 1) {
              result$areas <- area.xypolygon(poly[[1]])
              result$nvertices <- length(poly[[1]]$x)
            } else {
@@ -840,7 +896,9 @@ print.summary.owin <- function(x, ...) {
          },
          polygonal={
            cat("polygonal boundary\n")
-           if(x$npoly == 1) {
+           if(x$npoly == 0) {
+             cat("window is empty\n")
+           } else if(x$npoly == 1) {
              cat(paste("single connected closed polygon with",
                        x$nvertices, 
                        "vertices\n"))
@@ -849,13 +907,14 @@ print.summary.owin <- function(x, ...) {
              if(x$nhole == 0) cat("no holes)\n")
              else if(x$nhole == 1) cat("1 hole)\n")
              else cat(paste(x$nhole, "holes)\n"))
-             print(data.frame(vertices=x$nvertices,
-                              area=signif(x$areas, 6),
-                              relative.area=signif(x$areas/x$area,3),
-                              row.names=paste("polygon",
-                                1:(x$npoly),
-                                ifelse(x$areas < 0, "(hole)", "")
-                                )))
+             if(x$npoly > 0)
+               print(data.frame(vertices=x$nvertices,
+                                area=signif(x$areas, 6),
+                                relative.area=signif(x$areas/x$area,3),
+                                row.names=paste("polygon",
+                                  1:(x$npoly),
+                                  ifelse(x$areas < 0, "(hole)", "")
+                                  )))
            }
            cat("enclosing rectangle: ")
          },

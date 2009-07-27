@@ -32,7 +32,7 @@
 }
 \seealso{
   \code{\link{ppp.object}},
-  \code{\link{erode.owin}}
+  \code{\link{erosion}}
 }
 \examples{
   data(cells)

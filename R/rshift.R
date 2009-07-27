@@ -3,7 +3,7 @@
 #
 #   random shift with optional toroidal boundary
 #
-#   $Revision: 1.12 $   $Date: 2007/09/22 01:50:24 $
+#   $Revision: 1.13 $   $Date: 2009/07/17 05:57:22 $
 #
 #
 rshift <- function(X, ...) {
@@ -157,11 +157,11 @@ handle.rshift.args <- function(W, ...,
                    none= W,
                    erode={
                      if(!is.null(radius))
-                       erode.owin(W, radius)
+                       erosion.owin(W, radius)
                      else if(W$type == "rectangle")
                        trim.rectangle(W, width, height)
                      else
-                       erode.owin(W, max(width, height))
+                       erosion.owin(W, max(width, height))
                    })
 
   return(list(radius=radius, width=width, height=height,

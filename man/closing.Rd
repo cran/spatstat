@@ -1,14 +1,25 @@
-\name{closing.owin}
+\name{closing}
+\alias{closing}
 \alias{closing.owin}
-\title{Morphological Closing of a Window}
+\alias{closing.ppp}
+\alias{closing.psp}
+\title{Morphological Closing}
 \description{
-  Perform morphological closing of a window 
+  Perform morphological closing of a window, a line segment pattern
+  or a point pattern.
 }
 \usage{
- closing.owin(w, r, \dots, polygonal=TRUE)
+ closing(w, r, \dots)
+ \method{closing}{owin}(w, r, \dots, polygonal=NULL)
+ \method{closing}{ppp}(w, r, \dots, polygonal=TRUE)
+ \method{closing}{psp}(w, r, \dots, polygonal=TRUE)
 }
 \arguments{
-  \item{w}{A window (object of class \code{"owin"}.}
+  \item{w}{
+    A window (object of class \code{"owin"}
+    or a line segment pattern (object of class \code{"psp"})
+    or a point pattern (object of class \code{"ppp"}).
+  }
   \item{r}{positive number: the radius of the closing.}
   \item{\dots}{extra arguments passed to \code{\link{as.mask}}
     controlling the pixel resolution, if a pixel approximation is used}
@@ -19,8 +30,8 @@
   }
 }
 \value{
-  Another object of class \code{"owin"} representing the
-  closed window.
+  If \code{r > 0}, an object of class \code{"owin"} representing the
+  closed region. If \code{r=0}, the result is identical to \code{w}.
 }
 \details{
   The morphological closing (Serra, 1982)
@@ -38,19 +49,13 @@
   concave features in the boundary. For very large radii,
   the closed set \eqn{W*} becomes more and more convex.
 
-  This function computes the closing of the window \code{w}
-  as a binary pixel mask. If \code{w} is not already a mask, it is first
-  converted to a mask by \code{\link{as.mask}}. The arguments
-  \code{"\dots"} determine the pixel resolution. There is a sensible
-  default.
-
-  The algorithm simply applies \code{\link{dilate.owin}} followed by
-  \code{\link{erode.owin}}. 
+  The algorithm applies \code{\link{dilation}} followed by
+  \code{\link{erosion}}. 
 }
 \seealso{
-  \code{\link{opening.owin}} for the opposite operation.
+  \code{\link{opening}} for the opposite operation.
 
-  \code{\link{dilate.owin}}, \code{\link{erode.owin}} for the basic
+  \code{\link{dilation}}, \code{\link{erosion}} for the basic
   operations.  
   
   \code{\link{owin}},
@@ -58,8 +63,8 @@
 }
 \examples{
   data(letterR)
-  v <- closing.owin(letterR, 0.25, dimyx=256)
-  plot(v, main="closing.owin")
+  v <- closing(letterR, 0.25, dimyx=256)
+  plot(v, main="closing")
   plot(letterR, add=TRUE)
 }
 \references{

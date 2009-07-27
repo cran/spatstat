@@ -1,7 +1,7 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.2 $ $Date: 2008/07/04 06:01:07 $
+#   $Revision: 1.5 $ $Date: 2009/07/16 00:37:02 $
 #
 
 effectfun <- function(model, covname, ...) {
@@ -16,6 +16,18 @@ effectfun <- function(model, covname, ...) {
     stop("covname must be provided")
   if(!(covname %in% c(intern.names, extern.names)))
     stop(paste("model does not have a covariate called", sQuote(covname)))
+  # check that fixed values for all other covariates are provided 
+  given.covs <- names(list(...))
+  if(any(uhoh <- !(extern.names %in% c(given.covs, covname)))) {
+    nuh <- sum(uhoh)
+    stop(paste(ngettext(nuh,
+                        "A value for the covariate",
+                        "Values for the covariates"),
+               commasep(dQuote(extern.names[uhoh])),
+               "must be provided (as",
+               ngettext(nuh, "an argument", "arguments"),
+               "to effectfun)"))
+  }
   # establish type and range of covariate values
   N0 <- 256
   if(covname == "x") {
@@ -42,6 +54,10 @@ effectfun <- function(model, covname, ...) {
              real={
                Zr <- range(Z)
                Zvals <- seq(Zr[1], Zr[2], length=N0)
+             },
+             integer={
+               Zr <- range(Z)
+               Zvals <- seq(Zr[1], Zr[2], by=ceiling((diff(Zr)+1)/N0))
              },
              factor={
                Zvals <- levels(Z)

@@ -100,7 +100,7 @@ kstest(...)
   gives an informative summary of the test outcome.
 
   The return value also belongs to the class \code{"kstest"}
-  for which there is an (undocumented) plot method.
+  for which there is a plot method \code{\link{plot.kstest}}.
   The plot method displays the empirical cumulative distribution
   function of the covariate at the data points, and the predicted
   cumulative distribution function of the covariate under the model,
@@ -141,8 +141,10 @@ kstest(...)
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link{ks.test}},
+  \code{\link{plot.kstest}},
   \code{\link{quadrat.test}},
+  \code{\link{bermantest}},
+  \code{\link{ks.test}},
   \code{\link{ppm}}
 }
 \references{

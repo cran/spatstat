@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.26 $  $Date: 2009/05/13 06:38:25 $
+#  $Revision: 1.31 $  $Date: 2009/07/24 19:43:47 $
 #
 #
 
@@ -127,27 +127,37 @@ kstestEngine <- function(model, covariate, ...,
   # additional class 'kstest'
   class(result) <- c("kstest", class(result))
   attr(result, "prep") <-
-    list(Zvalues=Zvalues, lambda=lambda, ZX=ZX, FZ=FZ, U=U, type=type)
+    list(Zimage=Z,
+         Zvalues=Zvalues,
+         lambda=lambda,
+         ZX=ZX, FZ=FZ, FZX=ecdf(ZX),
+         U=U, type=type)
   attr(result, "info") <- list(modelname=modelname, covname=covname,
                                dataname=dataname, csr=csr)
   return(result)        
 }
 
-plot.kstest <- function(x, ...) {
+plot.kstest <- function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
+                                lwd0=lwd, col0=col, lty0=lty) {
   prep <- attr(x, "prep")
   info <- attr(x, "info")
   FZ <- prep$FZ
   xxx <- get("x", environment(FZ))
+  yyy <- get("y", environment(FZ))
   main <- c(x$method,
             paste("based on distribution of covariate", sQuote(info$covname)),
             paste("p-value=", signif(x$p.value, 4)))
   do.call("plot.default",
           resolve.defaults(
-                           list(x=xxx, y=FZ(xxx), type="l"),
+                           list(x=xxx, y=yyy, type="l"),
                            list(...),
+                           list(lwd=lwd0, col=col0, lty=lty0),
                            list(xlab=info$covname, ylab="probability",
                                 main=main)))
-  plot(ecdf(prep$ZX), add=TRUE, do.points=FALSE)
+  FZX <- prep$FZX
+  if(is.null(FZX))
+    FZX <- ecdf(prep$ZX)
+  plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
   return(invisible(NULL))
 }
 

@@ -17,7 +17,8 @@
   satellite images. 
 
   These data were introduced and analysed by Berman (1986).
-  They have also been studied by Berman and Turner (1992),
+  They have also been studied by Berman and Diggle (1989),
+  Berman and Turner (1992),
   Baddeley and Turner (2000, 2005), Foxall and Baddeley (2002)
   and Baddeley et al (2005).
   
@@ -96,6 +97,12 @@ Berman, M. (1986).
 Testing for spatial association between a point process and another
   stochastic process.
 \emph{Applied Statistics} \bold{35}, 54--62.
+
+Berman, M. and Diggle, P.J. (1989)
+Estimating Weighted Integrals of the Second-order Intensity of a
+Spatial Point Process.
+\emph{Journal of the Royal Statistical Society, series B}
+\bold{51}, 81--92.
 
 Berman, M. and Turner, T.R. (1992)
 Approximating point process likelihoods with GLIM.

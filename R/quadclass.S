@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.13 $	$Date: 2008/08/15 02:33:15 $
+#	$Revision: 4.14 $	$Date: 2009/07/28 00:55:25 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -176,6 +176,10 @@ equals.quad <- function(Q) {
     E
 }
 
+equalsfun.quad <- function(Q) {
+  stopifnot(inherits(Q, "quad"))
+  return(function(i,j) { i == j })
+}
   
 union.quad <- function(Q) {
   verifyclass(Q, "quad")

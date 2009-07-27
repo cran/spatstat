@@ -1,14 +1,25 @@
-\name{opening.owin}
+\name{opening}
+\alias{opening}
 \alias{opening.owin}
-\title{Morphological Opening of a Window}
+\alias{opening.psp}
+\alias{opening.ppp}
+\title{Morphological Opening}
 \description{
-  Perform morphological opening of a window 
+  Perform morphological opening of a window, a line segment pattern
+  or a point pattern.
 }
 \usage{
- opening.owin(w, r, \dots, polygonal=TRUE)
+ opening(w, r, \dots)
+ \method{opening}{owin}(w, r, \dots, polygonal=NULL)
+ \method{opening}{ppp}(w, r, \dots)
+ \method{opening}{psp}(w, r, \dots)
 }
 \arguments{
-  \item{w}{A window (object of class \code{"owin"}.}
+  \item{w}{
+    A window (object of class \code{"owin"}
+    or a line segment pattern (object of class \code{"psp"})
+    or a point pattern (object of class \code{"ppp"}).
+  }
   \item{r}{positive number: the radius of the opening.}
   \item{\dots}{extra arguments passed to \code{\link{as.mask}}
     controlling the pixel resolution, if a pixel approximation is used}
@@ -19,8 +30,8 @@
   }
 }
 \value{
-  Another object of class \code{"owin"} representing the
-  opened window.
+  If \code{r > 0}, an object of class \code{"owin"} representing the
+  opened region. If \code{r=0}, the result is identical to \code{w}.
 }
 \details{
   The morphological opening (Serra, 1982)
@@ -38,19 +49,13 @@
   \eqn{W}. For larger radii, the opening operation removes promontories
   in the boundary. For very large radii, the opened set is empty.
 
-  This function computes the opening of the window \code{w}
-  as a binary pixel mask. If \code{w} is not already a mask, it is first
-  converted to a mask by \code{\link{as.mask}}. The arguments
-  \code{"\dots"} determine the pixel resolution. There is a sensible
-  default.
-
-  The algorithm simply applies \code{\link{erode.owin}} followed by
-  \code{\link{dilate.owin}}. 
+  The algorithm applies \code{\link{erosion}} followed by
+  \code{\link{dilation}}. 
 }
 \seealso{
-  \code{\link{closing.owin}} for the opposite operation.
+  \code{\link{closing}} for the opposite operation.
 
-  \code{\link{dilate.owin}}, \code{\link{erode.owin}} for the basic
+  \code{\link{dilation}}, \code{\link{erosion}} for the basic
   operations.  
   
   \code{\link{owin}},
@@ -58,8 +63,8 @@
 }
 \examples{
   data(letterR)
-  v <- opening.owin(letterR, 0.3, dimyx=256)
-  plot(v, main="opening.owin")
+  v <- opening(letterR, 0.3, dimyx=256)
+  plot(v, main="opening")
   plot(letterR, add=TRUE)
 }
 \references{

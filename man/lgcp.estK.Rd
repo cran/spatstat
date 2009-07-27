@@ -8,7 +8,7 @@
 }
 \usage{
 lgcp.estK(X, startpar=list(sigma2=1,alpha=1), lambda=NULL,
-q = 1/4, p = 2, rmin = NULL, rmax = NULL)
+q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
 }
 \arguments{
   \item{X}{
@@ -28,6 +28,10 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL)
   }
   \item{rmin, rmax}{
     Optional. The interval of \eqn{r} values for the contrast criterion.
+  }
+  \item{\dots}{
+    Optional arguments passed to \code{\link[stats]{optim}}
+    to control the optimisation algorithm. See Details.
   }
 }
 \details{
@@ -103,6 +107,15 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL)
 
   The remaining arguments \code{rmin,rmax,q,p} control the
   method of minimum contrast; see \code{\link{mincontrast}}.
+
+  The optimisation algorithm can be controlled through the
+  additional arguments \code{"..."} which are passed to the
+  optimisation function \code{\link[stats]{optim}}. For example,
+  to constrain the parameter values to a certain range,
+  use the argument \code{method="L-BFGS-B"} to select an optimisation
+  algorithm that respects box constraints, and use the arguments
+  \code{lower} and \code{upper} to specify (vectors of) minimum and
+  maximum values for each parameter.
 }
 \value{
   An object of class \code{"minconfit"}. There are methods for printing

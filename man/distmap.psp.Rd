@@ -30,8 +30,9 @@
 
   This function computes the distance map of the line segment pattern \code{X}
   and returns the distance map as a pixel image. The greyscale value
-  at a pixel \eqn{u} equals the distance from \eqn{u} to the nearest
-  line segment of the pattern \code{X}.
+  at a pixel \eqn{u} equals the distance from \eqn{u}
+  to the nearest line segment of the pattern \code{X}.
+  Distances are computed using analytic geometry.
 
   Additionally, the return value 
   has two attributes, \code{"index"} and \code{"bdry"}, which are
@@ -41,11 +42,21 @@
   line segment of \code{X} is closest. 
   
   This is a method for the generic function \code{\link{distmap}}.
+
+  Note that this function gives the exact distance from the
+  centre of each pixel to the nearest line segment.
+  To compute the exact distance from the points in a point pattern
+  to the nearest line segment, use
+  \code{\link{nncross}}
+  or \code{\link{project2segment}}.
 }
 \seealso{
   \code{\link{distmap}},
   \code{\link{distmap.owin}},
-  \code{\link{distmap.ppp}}
+  \code{\link{distmap.ppp}},
+  \code{\link{nncross}},
+  \code{\link{nearestsegment}},
+  \code{\link{project2segment}}.
 }
 \examples{
     a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())

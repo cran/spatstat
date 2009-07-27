@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.22 $	$Date: 2009/06/20 19:47:55 $
+#	$Revision: 4.23 $	$Date: 2009/07/24 05:25:13 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -50,7 +50,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   df <- data.frame(r=rvals, theo=1-exp(-lambda * pi * rvals^2))
   Z <- fv(df, "r", substitute(F(r), NULL), "theo", . ~ r,
           c(0,rmax),
-          c("r", "%spois(r)"), 
+          c("r", "%s[pois](r)"), 
           c("distance argument r", "theoretical Poisson %s"),
           fname="F")
   zeroes <- rep(0, length(rvals))
@@ -88,7 +88,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
       hh <- hist(dist[dist <= rmax],breaks=breaks$val,plot=FALSE)$counts
       edf <- cumsum(hh)/length(dist)
     }
-    Z <- bind.fv(Z, data.frame(raw=edf), "%sraw(r)",
+    Z <- bind.fv(Z, data.frame(raw=edf), "%s[raw](r)",
                  "uncorrected estimate of %s", "raw")
   }
   
@@ -108,7 +108,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     }
     # add to fv object
     Z <- bind.fv(Z, data.frame(cs=cs),
-                 "%scs(r)", 
+                 "%s[cs](r)", 
                  "Chiu-Stoyan estimate of %s",
                  "cs")
     # modify recommended plot range
@@ -125,7 +125,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("%sbord(r)", "%skm(r)", "hazard(r)"),
+                 c("%s[bord](r)", "%s[km](r)", "hazard(r)"),
                  c("border corrected estimate of %s",
                    "Kaplan-Meier estimate of %s",
                    "Kaplan-Meier estimate of hazard function lambda(r)"),

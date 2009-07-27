@@ -16,9 +16,9 @@
 \alias{as.fv}
 \alias{as.list.hyperframe}
 \alias{as.listof}
-\alias{as.polygonal}
 \alias{as.units}
 \alias{beachcolours}
+\alias{bermantestEngine}
 \alias{bind.fv}
 \alias{bdrylength.xypolygon} 
 \alias{bdry.mask} 
@@ -48,6 +48,7 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{diagnose.ppm.engine}
+\alias{dilate.owin}
 \alias{dimnames.fasp}               
 \alias{dimnames<-.fasp}               
 \alias{distpl}               
@@ -60,10 +61,13 @@
 \alias{do.istat}
 \alias{edge.Ripley}
 \alias{edge.Trans}
+\alias{emptywindow}
 \alias{ensure2vector}
 \alias{equals.quad}          
+\alias{equalsfun.quad}          
 \alias{eratosthenes}
-\alias{erode.mask}
+\alias{erodemask}
+\alias{erode.owin}
 \alias{even.breaks.owin}
 \alias{exactdt}              
 \alias{exactPdt}
@@ -89,6 +93,7 @@
 \alias{handle.rshift.args}
 \alias{ho.engine}
 \alias{identical.formulae}
+\alias{idorempty}
 \alias{implemented.for.K}
 \alias{inpoint}
 \alias{inside.xypolygon}     
@@ -183,7 +188,6 @@
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.fii}
-\alias{plot.kstest}
 \alias{plot.minconfit}
 \alias{plot.pppmatching}
 \alias{plot.profilepl}
@@ -301,6 +305,7 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{update.interact}
+\alias{validradius}        
 \alias{valid.ppm}        
 \alias{validate.mask}        
 \alias{validate.quad}        
@@ -340,9 +345,9 @@ as.breakpts(\dots)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
 as.listof(x)
-as.polygonal(W)
 as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
+bermantestEngine(model, covariate, which, alternative, ..., modelname, covname, dataname)
 bind.fv(x, y, labl, desc, preferred)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
@@ -375,6 +380,7 @@ default.ntile(X)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
+dilate.owin(\dots)
 \method{dimnames}{fasp}(x)
 \method{dimnames}{fasp}(x) <- value
 distpl(p, l)               
@@ -387,10 +393,13 @@ do.iplot(panel)
 do.istat(panel)
 edge.Ripley(X, r, W, method)
 edge.Trans(X, Y, W, exact, paired, trim)
+emptywindow(w)
 ensure2vector(x)
 equals.quad(Q)          
+equalsfun.quad(Q)          
 eratosthenes(nmax)
-erode.mask(w,r,strict)
+erodemask(w,r,strict)
+erode.owin(\dots)
 even.breaks.owin(w)
 exactdt(X, \dots)              
 exactPdt(w)
@@ -416,6 +425,7 @@ handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 identical.formulae(x,y)
+idorempty(w, r, caller)
 implemented.for.K(correction, windowtype, explicit)
 inpoint(W)
 inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
@@ -518,7 +528,6 @@ pickoption(what="option", key, keymap, \dots,
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{fii}(x, \dots)
-\method{plot}{kstest}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
@@ -643,6 +652,7 @@ tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)
+validradius(r, caller)
 valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
