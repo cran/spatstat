@@ -113,9 +113,11 @@ bermantest(...)
   gives an informative summary of the test outcome.
 }
 \value{
-  An object of class \code{"htest"} containing the results of the
-  test. See \code{\link{ks.test}} for details. The return value can be
-  printed to give an informative summary of the test.
+  An object of class \code{"htest"} (hypothesis test)
+  and also of class \code{"bermantest"},
+  containing the results of the test. The return value can be
+  plotted (by \code{\link{plot.bermantest}}) or printed
+  to give an informative summary of the test.
 }
 \section{Warning}{
   The meaning of a one-sided test must be carefully scrutinised: see

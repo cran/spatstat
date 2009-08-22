@@ -1,4 +1,4 @@
-\name{spatstat}
+\name{spatstat-package}
 \alias{spatstat-package}
 \alias{spatstat}
 \docType{package}
@@ -237,7 +237,11 @@
 	compute Dirichlet-Voronoi tessellation \cr
 	\code{\link{delaunay}} \tab
 	compute Delaunay triangulation \cr 
-	\code{\link{convexhull}} \tab compute convex hull
+	\code{\link{convexhull}} \tab compute convex hull \cr
+	\code{\link{pixellate.ppp}} \tab approximate point pattern by 
+	pixel image \cr
+	\code{\link{as.im.ppp}} \tab approximate point pattern by 
+	pixel image 
       }
       See \code{\link{spatstat.options}} to control plotting behaviour.
       
@@ -283,7 +287,7 @@
 	approximate a window by a simple polygon  \cr
 	\code{\link{rotate}} \tab rotate window  \cr
 	\code{\link{shift} } \tab translate window  \cr
-	\code{\link{affine}} \tab apply affine transformation
+	\code{\link{affine}} \tab apply affine transformation 
       }
 
     \bold{Digital approximations:}
@@ -291,6 +295,8 @@
     \tabular{ll}{
 	\code{\link{as.mask}}	\tab
 	Make a discrete pixel approximation of a given window \cr
+	\code{\link{as.im.owin}} \tab convert window to pixel image \cr
+	\code{\link{pixellate.owin}} \tab convert window to pixel image \cr
 	\code{\link{nearest.raster.point}} \tab
 	map continuous coordinates to raster locations\cr
 	\code{\link{raster.x}} \tab
@@ -314,6 +320,7 @@
 	\code{\link{incircle}}	\tab	find largest circle inside a window \cr
 	\code{\link{connected}}    \tab find connected components of window \cr
 	\code{\link{eroded.areas}}	\tab	compute areas of eroded windows\cr
+	\code{\link{dilated.areas}}	\tab	compute areas of dilated windows\cr
 	\code{\link{bdist.points}}	\tab	compute distances from data points to window boundary \cr
 	\code{\link{bdist.pixels}}	\tab	compute distances from all pixels to window boundary \cr
 	\code{\link{distmap.owin}}	\tab	distance transform image \cr
@@ -334,6 +341,7 @@
       \tabular{ll}{
 	\code{\link{im}} \tab create a pixel image\cr
 	\code{\link{as.im}} \tab convert other data to a pixel image\cr
+	\code{\link{pixellate}} \tab convert other data to a pixel image\cr
 	\code{\link{as.matrix.im}} \tab convert pixel image to matrix\cr
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr

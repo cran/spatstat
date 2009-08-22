@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.22 $   $Date: 2009/06/24 06:48:21 $
+#   $Revision: 1.23 $   $Date: 2009/08/22 00:54:25 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -99,7 +99,7 @@ alltypes <- function(X, fun="K", ...,
     L <- do.call("envelope",
                  resolve.defaults(
                                   list(X, fun=NULL),
-                                  list(internal=list(patterns=TRUE)),
+                                  list(internal=list(eject="patterns")),
                                   list(...),
                                   list(verbose=verb)))
     intern <- attr(L, "internal")

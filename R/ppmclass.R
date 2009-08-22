@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.31 $	$Date: 2009/06/11 00:35:10 $
+#	$Revision: 2.32 $	$Date: 2009/08/12 04:43:30 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -219,6 +219,7 @@ model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
   mm <- model.matrix(gf, ...)
   if(!keepNA)
     return(mm)
+  cn <- colnames(mm)
   gd <- getglmdata(object)
   if(nrow(mm) != nrow(gd)) {
     # can occur if covariates include NA's or interaction is -Inf
@@ -233,6 +234,7 @@ model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
     } else 
     stop("internal error: model matrix does not match glm data frame")
   }
+  colnames(mm) <- cn
   return(mm)
 }
 

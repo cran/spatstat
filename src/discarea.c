@@ -4,7 +4,7 @@
 
   Area of intersection between disc and polygonal window
 
-  $Revision: 1.3 $     $Date: 2008/04/02 12:19:34 $
+  $Revision: 1.4 $     $Date: 2009/08/02 03:59:56 $
 
  */
 
@@ -174,8 +174,8 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
 	    slope, intercept, A, B, C, det);
 #endif
 
-  if(det < 0.0) {
-    /* no intersection between disc and infinite line */
+  if(det <= 0.0) {
+    /* no crossing between disc and infinite line */
     if(intercept < 0.0) 
       /* segment is below disc; intersection is empty */
       return(zero);

@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.26 $ $Date: 2009/07/01 07:15:44 $
+#   $Revision: 1.29 $ $Date: 2009/08/21 21:53:22 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -215,21 +215,23 @@ tiles <- function(x) {
 }
 
 
-as.im.tess <- function(X,
-                       W=as.mask(as.rectangle(X), dimyx=dimyx), ...,
-                       dimyx=NULL, na.replace=NULL) {
-  # if W is missing, the default is now evaluated, as above.
+as.im.tess <- function(X, W=NULL, ...,
+                       eps=NULL, dimyx=NULL, xy=NULL,
+                       na.replace=NULL) {
   # if W is present, it may have to be converted
-  if(!missing(W)) {
+  if(!is.null(W)) {
     stopifnot(is.owin(W))
     if(W$type != "mask")
-      W <- as.mask(W, dimyx=dimyx)
-  }
+      W <- as.mask(W, eps=eps, dimyx=dimyx, xy=xy)
+  } 
   switch(X$type,
          tess={
-           out <- as.im(X$image, W=W, dimyx=dimyx, na.replace=na.replace)
+           out <- as.im(X$image, W=W, eps=eps, dimyx=dimyx, xy=xy,
+                        na.replace=na.replace)
          },
          tiled={
+           if(is.null(W))
+             W <- as.mask(as.owin(X), eps=eps, dimyx=dimyx, xy=xy)
            til <- X$tiles
            ntil <- length(til)
            xy <- list(x=W$xcol, y=W$yrow)
@@ -252,11 +254,14 @@ as.im.tess <- function(X,
            unitname(out) <- unitname(W)
          },
          rect={
+           if(is.null(W))
+             out <- as.im(as.rectangle(X), eps=eps, dimyx=dimyx, xy=xy)
+           else
+             out <- as.im(W)
            xg <- X$xgrid
            yg <- X$ygrid
            nrows <- length(yg) - 1
            ncols <- length(xg) - 1
-           out <- as.im(W)
            jx <- findInterval(out$xcol, xg, rightmost.closed=TRUE)
            iy <- findInterval(out$yrow, yg, rightmost.closed=TRUE)
            M <- as.matrix(out)

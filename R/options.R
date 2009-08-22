@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.16 $   $Date: 2009/04/01 01:32:57 $
+#    $Revision: 1.17 $   $Date: 2009/08/22 06:16:31 $
 #
 #
 ".Spatstat.Options" <-
@@ -18,7 +18,8 @@
        dupC = FALSE,
        progress = "tty",
        checkpolygons = TRUE,
-       checksegments = TRUE
+       checksegments = TRUE,
+       ngrid.disc=128
        )
 
 "spatstat.options" <-
