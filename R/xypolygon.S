@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.47 $    $Date: 2009/07/18 01:29:03 $
+#    $Revision: 1.48 $    $Date: 2009/08/20 17:01:17 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -202,7 +202,7 @@ owinpoly2mask <- function(w, rasta, check=TRUE) {
     xp <- (xp - x0)/xstep
     yp <- (yp - y0)/ystep
     # call C
-    z <- .C("poly2im",
+    z <- .C("poly2imI",
             xp=as.double(xp),
             yp=as.double(yp),
             np=as.integer(np),

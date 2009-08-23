@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.6 $	$Date: 2008/02/25 14:26:25 $
+#    $Revision: 1.8 $	$Date: 2009/08/22 06:48:00 $
 #
 #    The area interaction
 #
@@ -23,14 +23,9 @@ AreaInter <- function(r) {
     r <- pars$r
     if(is.null(r)) stop("internal error: r parameter not found")
     isdata <- apply(Equal, 2, any)
-    for(j in seq(n)) {
-      u <- c(U$x[j], U$y[j])
-      answer[j] <- 
-        if(!isdata[j]) 
-          -areadiff(u, X, r)
-        else
-          -areadiff(u, X[!Equal[,j]], r)
-    }             
+    answer[!isdata] <- -areaGain(U[!isdata], X, r)
+    for(j in which(isdata)) 
+      answer[j] <- -areaGain(U[j], X[!Equal[,j]], r)
     return(1 + answer/(pi * r^2))
   }
              

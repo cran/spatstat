@@ -59,9 +59,13 @@ for use by the \pkg{spatstat} package).
     \item
     a two-column or three-column matrix or data frame
     \item
-    a structure with entries \code{x}, \code{y}
+    a structure with entries \code{x}, \code{y} which are numeric vectors
+    of equal length
+    \item
+    a numeric vector of length 2, interpreted as the coordinates
+    of a single point.
   }
-  In the last two cases, we need the second argument \code{W}
+  In the last three cases, we need the second argument \code{W}
   which is converted to a window object
   by the function \code{\link{as.owin}}.
   In the first three cases, \code{W} will be ignored.

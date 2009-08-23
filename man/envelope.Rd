@@ -10,7 +10,7 @@
   start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, Yname=NULL, internal=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
 }
 \arguments{
   \item{Y}{Either a point pattern (object of class
@@ -42,6 +42,8 @@
       If \code{simulate} is a list of point patterns, then the entries
       in this list will be treated as the simulated patterns from which
       the envelopes are computed.
+      Alternatively \code{simulate} may be an object produced by the
+      \code{envelope} command: see Details.
     }
     \item{verbose}{
       Logical flag indicating whether to print progress reports
@@ -87,6 +89,15 @@
       if it is necessary to use simulation to estimate the theoretical
       mean of the summary function. Only relevant when \code{global=TRUE}
       and the simulations are not based on CSR.
+    }
+    \item{VARIANCE}{
+      Logical. If \code{TRUE}, critical envelopes will be calculated
+      as sample mean plus or minus \code{nSD} times sample standard
+      deviation.
+    }
+    \item{nSD}{
+      Number of estimated standard deviations used to determine
+      the critical envelopes, if \code{VARIANCE=TRUE}.
     }
     \item{Yname}{
       Character string that should be used as the name of the 
@@ -167,7 +178,16 @@
       pattern consists of exactly 100 independent uniform random points.
       \item
       a list of point patterns.
-      The entries in this list wil be taken as the simulated patterns.
+      The entries in this list will be taken as the simulated patterns.
+      \item
+      an object of class \code{"envelope"}. This should have been
+      produced by calling \code{envelope} with the
+      argument \code{savepatterns=TRUE}.
+      The simulated point patterns that were saved in this object
+      will be extracted and used as the simulated patterns for the
+      new envelope computation. This makes it possible to plot envelopes
+      for two different summary functions based on exactly the same set of
+      simulated point patterns.
       }
   }
   
@@ -230,6 +250,17 @@
       This test has exact significance level
       \code{alpha = nrank/(1 + nsim)}.
     }
+    \item{based on sample moments:}{if \code{VARIANCE=TRUE},
+      the algorithm calculates the
+      (pointwise) sample mean and sample variance of
+      the simulated functions. Then the envelopes are computed
+      as mean plus or minus \code{nSD} standard deviations.
+      These envelopes do not have an exact significance interpretation.
+      They are a naive approximation to
+      the critical points of the Neyman-Pearson test
+      assuming the summary statistic is approximately Normally
+      distributed.
+    }
   }
   
   The return value is an object of class \code{"fv"} containing
@@ -237,6 +268,9 @@
   the upper and lower simulation envelopes, and 
   the theoretical expected value (exact or estimated) of the summary function 
   for the model being tested. It can be plotted using \code{plot.fv}.
+
+  If \code{VARIANCE=TRUE} then the return value also includes the
+  sample mean, sample variance and other quantities.
 
   Arguments can be passed to the function \code{fun} through
   \code{...}. This makes it possible to select the edge correction
@@ -454,6 +488,10 @@ nsim=4, global=TRUE))
  PatList <- list()
  for(i in 1:20) PatList[[i]] <- runifpoint(X$n)
  plot(envelope(X, Kest, nsim=20, simulate=PatList))
+
+# re-using the same point patterns
+ EK <- envelope(X, Kest, nsim=10, savepatterns=TRUE)
+ EG <- envelope(X, Kest, nsim=10, simulate=EK)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

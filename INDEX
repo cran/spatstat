@@ -77,7 +77,8 @@ append.psp              Combine Two Line Segment Patterns
 applynbd                Apply Function to Every Neighbourhood in a
                         Point Pattern
 area.owin               Area of a Window
-areadiff                Difference of Disc Areas
+areaGain                Difference of Disc Areas
+areaLoss                Difference of Disc Areas
 as.data.frame.ppp       Coerce Point Pattern to a Data Frame
 as.data.frame.psp       Coerce Line Segment Pattern to a Data Frame
 as.im                   Convert to Pixel Image
@@ -146,11 +147,13 @@ density.splitppp        Kernel Smoothed Intensity of Split Point
                         Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window
+dilated.areas           Areas of Morphological Dilations
 dilation                Morphological Dilation
 dirichlet               Dirichlet Tessellation of Point Pattern
 dirichlet.weights       Compute Quadrature Weights Based on Dirichlet
                         Tessellation
 disc                    Circular Window
+discpartarea            Area of Part of Disc
 discretise              Safely Convert Point Pattern Window to Binary
                         Mask
 distmap                 Distance Map
@@ -292,8 +295,11 @@ pcf.ppp                 Pair Correlation Function of Point Pattern
 pcfcross                Multitype pair correlation function
 perimeter               Perimeter Length of Window
 persp.im                Perspective Plot of Pixel Image
-pixellate               Convert Point Pattern to Pixel Image
+pixellate               Convert Spatial Object to Pixel Image
+pixellate.owin          Convert Window to Pixel Image
+pixellate.ppp           Convert Point Pattern to Pixel Image
 pixelquad               Quadrature Scheme Based on Pixel Grid
+plot.bermantest         Plot Result of Berman Test
 plot.colourmap          Plot a Colour Map
 plot.fasp               Plot a Function Array
 plot.fv                 Plot Function Values
@@ -440,7 +446,7 @@ smooth.ppp              Spatial smoothing of observations at irregular
 solutionset             Evaluate Logical Expression Involving Pixel
                         Images and Return Region Where Expression is
                         True
-spatstat                The Spatstat Package
+spatstat-package        The Spatstat Package
 spatstat.options        Internal Options in Spatstat Package
 split.im                Divide Image Into Sub-images
 split.ppp               Divide Point Pattern into Sub-patterns

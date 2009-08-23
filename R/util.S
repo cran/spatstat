@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.35 $    $Date: 2009/04/14 03:27:00 $
+#    $Revision: 1.37 $    $Date: 2009/08/21 23:32:01 $
 #
 #  (a) for matrices only:
 #
@@ -154,6 +154,18 @@ commasep <- function(x) {
 }
 
 paren <- function(x) { paste("(", x, ")", sep="") }
+
+ordinal <- function(k) {
+  last <- abs(k) %% 10
+  lasttwo <- abs(k) %% 100
+  isteen <- (lasttwo > 10 & lasttwo < 20)
+  ending <- ifelse(isteen, "th",
+                   ifelse(last == 1, "st",
+                          ifelse(last == 2, "nd",
+                                 ifelse(last == 3, "rd",
+                                        "th"))))
+  return(paste(k, ending, sep=""))
+}
 
 # equivalent to rev(cumsum(rev(x)))
 

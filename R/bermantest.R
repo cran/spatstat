@@ -3,7 +3,7 @@
 #
 # Test statistics from Berman (1986)
 #
-#  $Revision: 1.4 $  $Date: 2009/07/24 21:12:57 $
+#  $Revision: 1.5 $  $Date: 2009/08/20 18:57:03 $
 #
 #
 
@@ -100,8 +100,13 @@ bermantestEngine <- function(model, covariate,
            # sum of covariate values at data points
            Sn <- sum(ZX)
            # predicted mean and variance
-           ESn   <- summary(eval.im(lambda * Z  ))$integral
-           varSn <- summary(eval.im(lambda * Z^2))$integral
+           slamZ  <- summary(eval.im(lambda * Z))
+           slamZ2 <- summary(eval.im(lambda * Z^2))
+           ESn   <- slamZ$integral
+           varSn <- slamZ2$integral 
+           # working, for plot method
+           working <- list(meanZX=mean(ZX),
+                           meanZ=slamZ$mean)
            # standardise
            statistic <- (Sn - ESn)/sqrt(varSn)
            names(statistic) <- "Z1"
@@ -123,6 +128,7 @@ bermantestEngine <- function(model, covariate,
            method <- paste("Berman Z2 test of",
                            if(csr) "CSR" else "inhomogeneous Poisson process")
            statistic <- sqrt(12/npoints) * (sum(U) - npoints/2)
+           working <- list(meanU=mean(U))
            names(statistic) <- "Z2"
            p.value <- switch(alternative,
                             two.sided=2 * pnorm(-abs(statistic)),
@@ -144,10 +150,71 @@ bermantestEngine <- function(model, covariate,
               p.value=p.value,
               alternative=altblurb,
               method=method,
+              which=which,
+              working=working,
               data.name=valuename,
               ks=ksout)
-  class(out) <- "htest"
+  class(out) <- c("htest", "bermantest")
   return(out)
 }
+
+plot.bermantest <-
+  function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
+           lwd0=lwd, col0=col, lty0=lty)
+{
+  ks <- x$ks
+  prep <- attr(ks, "prep")
+  info <- attr(ks, "info")
+  work <- x$working
+  switch(x$which,
+         Z1={
+           # plot cdf's of Z
+           FZ <- prep$FZ
+           xxx <- get("x", environment(FZ))
+           yyy <- get("y", environment(FZ))
+           main <- c(x$method,
+                     paste("based on distribution of covariate",
+                           sQuote(info$covname)),
+                     paste("Z1 statistic =", signif(x$statistic, 4)),
+                     paste("p-value=", signif(x$p.value, 4)))
+           do.call("plot.default",
+                   resolve.defaults(
+                                    list(x=xxx, y=yyy, type="l"),
+                                    list(...),
+                                    list(lwd=lwd0, col=col0, lty=lty0),
+                                    list(xlab=info$covname,
+                                         ylab="probability",
+                                         main=main)))
+           FZX <- prep$FZX
+           if(is.null(FZX))
+             FZX <- ecdf(prep$ZX)
+           plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
+           abline(v=work$meanZ, lwd=lwd0,col=col0, lty=lty0)
+           abline(v=work$meanZX, lwd=lwd,col=col, lty=lty)
+         },
+         Z2={
+           # plot cdf of U
+           U <- prep$U
+           cdfU <- ecdf(U)
+           main <- c(x$method,
+                     paste("based on distribution of covariate",
+                           sQuote(info$covname)),
+                     paste("Z2 statistic =", signif(x$statistic, 4)),
+                     paste("p-value=", signif(x$p.value, 4)))
+           do.call("plot.ecdf",
+                   resolve.defaults(
+                                    list(cdfU),
+                                    list(...),
+                                    list(do.points=FALSE, asp=1),
+                                    list(lwd=lwd, col=col, lty=lty),
+                                    list(xlab="U", ylab="relative frequency"),
+                                    list(main=main)))
+           abline(0,1,lwd=lwd0,col=col0,lty=lty0)
+           abline(v=0.5, lwd=lwd0,col=col0,lty=lty0)
+           abline(v=work$meanU, lwd=lwd,col=col,lty=lty)
+         })
+  return(invisible(NULL))
+}
+
 
 

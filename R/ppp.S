@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.60 $	$Date: 2009/07/18 02:20:48 $
+#	$Revision: 4.61 $	$Date: 2009/08/01 21:25:51 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -198,6 +198,7 @@ as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
 	#	2. a structure with entries x, y, area where
         #                    'area' has entries xl, xu, yl, yu
 	#	3. a structure with entries x, y
+        #       4. a vector of length 2, interpreted as a single point.
 	# The second argument W is coerced to an object of class 'owin' by the 
 	# function "as.owin" in window.S
         # If X also has an entry X$marks
@@ -235,6 +236,10 @@ as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
                   Z <- ppp(X$x, X$y, window=win, check=check)
                 else
                   Z <- ppp(X$x, X$y, window=win, marks=X$marks, check=check)
+                return(Z)
+        } else if(is.vector(X) && length(X) == 2) {
+                win <- as.owin(W)
+                Z <- ppp(X[1], X[2], window=win, check=check)
                 return(Z)
 	} else {
           if(fatal)

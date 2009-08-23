@@ -11,27 +11,33 @@
 }
 \usage{
   as.im(X, \dots)
-  \method{as.im}{im}(X, W=as.mask(as.rectangle(X), dimyx=dimyx), \dots,
-        dimyx=NULL, na.replace=NULL)
-  \method{as.im}{owin}(X, W=as.mask(X, dimyx=dimyx), \dots,
-        dimyx=NULL, na.replace=NULL, value=1)
-  \method{as.im}{tess}(X,
-        W=as.mask(as.rectangle(X), dimyx=dimyx), \dots,
-        dimyx=NULL, na.replace=NULL)
-  \method{as.im}{function}(X, W, \dots,
-        dimyx=NULL, na.replace=NULL)
-  \method{as.im}{default}(X, W, 
-        \dots,
-        dimyx=NULL, na.replace=NULL)
+  \method{as.im}{im}(X, W=NULL, \dots,
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL)
+  \method{as.im}{owin}(X, W=NULL, \dots,
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL, value=1)
+  \method{as.im}{tess}(X, W=NULL, \dots, 
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL)
+  \method{as.im}{function}(X, W=NULL, \dots,
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL)
+  \method{as.im}{default}(X, W=NULL, \dots,
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL)
 }
 \arguments{
   \item{X}{Data to be converted to a pixel image.}
-  \item{W}{Window object which determines the spatial domain of the image}.
+  \item{W}{Window object which determines the spatial domain
+    and pixel array geometry.
+  }
   \item{\dots}{Additional arguments passed to \code{X} when \code{X}
     is a function.}
-  \item{dimyx}{
-    Optional. Dimensions for the pixel array.
-    An integer, or vector of 2 integers \code{c(ny, nx)}.
+  \item{eps,dimyx,xy}{
+    Optional parameters passed to \code{\link{as.mask}}
+    which determine the pixel array geometry.
+    See \code{\link{as.mask}}.
   }
   \item{na.replace}{Optional value to replace \code{NA} entries in the
     output image.
@@ -102,7 +108,7 @@
   The pixel array dimensions of the final resulting image are determined
   by (in priority order)
   \itemize{
-    \item the argument \code{dimyx} if present;
+    \item the argument \code{eps}, \code{dimyx} or \code{xy} if present;
     \item the pixel dimensions of the window \code{W}, if it is
     present and if it is a binary mask;
     \item the pixel dimensions of \code{X} if it is an image,
@@ -111,7 +117,8 @@
     controlled by \code{\link{spatstat.options}}.
   }
 
-  Note that if \code{dimyx} is given, this will override
+  Note that if \code{eps}, \code{dimyx} or \code{xy}
+  is given, this will override
   the pixel dimensions of \code{X} if it has them.
   Thus, \code{as.im} can be used to change an image's pixel dimensions.
 

@@ -1,9 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.38 $    $Date: 2009/06/30 17:52:03 $
-#
-#     pixellate()        convert a point pattern to a pixel image
+#           $Revision: 1.39 $    $Date: 2009/08/20 17:03:52 $
 #
 #     Kmeasure()         compute an estimate of the second order moment measure
 #
@@ -11,45 +9,6 @@
 #
 #     second.moment.calc()    underlying algorithm
 #
-
-pixellate <- function(x, ..., W=NULL, weights=NULL, padzero=FALSE)
-{
-    verifyclass(x, "ppp")
-
-    if(!is.null(W))
-      W <- as.mask(W)
-    else {
-      # determine W using as.mask
-      dotargs <- list(...)
-      namesargs <- names(dotargs)
-      matched <- namesargs %in% names(formals(as.mask))
-      W <- do.call("as.mask", append(list(x$window), dotargs[matched]))
-    } 
-
-    if(x$n == 0) {
-      zeroimage <- as.im(as.double(0), W)
-      if(padzero) # map NA to 0
-        zeroimage <- na.handle.im(zeroimage, 0)
-      return(zeroimage)
-    }
-    
-    pixels <- nearest.raster.point(x$x, x$y, W)
-    nr <- W$dim[1]
-    nc <- W$dim[2]
-    if(is.null(weights)) {
-    ta <- table(row = factor(pixels$row, levels = 1:nr), col = factor(pixels$col,
-        levels = 1:nc))
-    } else {
-        ta <- tapply(weights, list(row = factor(pixels$row, levels = 1:nr),
-                    col = factor(pixels$col, levels=1:nc)), sum)
-        ta[is.na(ta)] <- 0
-    }
-    out <- im(ta, xcol = W$xcol, yrow = W$yrow, unitname=unitname(W))
-    # clip to window of data
-    if(!padzero)
-      out <- out[W, drop=FALSE]
-    return(out)
-}
 
 Kmeasure <- function(X, sigma, edge=TRUE, ..., varcov=NULL) {
   stopifnot(is.ppp(X))

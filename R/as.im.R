@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.20 $   $Date: 2009/03/05 08:15:57 $
+#    $Revision: 1.26 $   $Date: 2009/08/21 19:49:28 $
 #
 #    as.im()
 #
@@ -12,17 +12,22 @@ as.im <- function(X, ...) {
   UseMethod("as.im")
 }
 
-as.im.im <- function(X,
-                     W=as.mask(as.rectangle(X), dimyx=dimyx),
-                     ...,
-                     dimyx=NULL, na.replace=NULL) {
-
-  if(missing(W) && is.null(dimyx))
-    return(na.handle.im(X, na.replace))
-
-  # reshape pixel raster
-  # invoke W = as.mask(X, dimyx)
-  Y <- as.im(W, dimyx=dimyx)
+as.im.im <- function(X, W=NULL, ...,
+                     eps=NULL, dimyx=NULL, xy=NULL,
+                     na.replace=NULL) {
+  if(is.null(W)) {
+    if(is.null(eps) && is.null(dimyx) && is.null(xy))
+      return(na.handle.im(X, na.replace))
+    # pixel raster determined by dimyx etc
+    W <- as.mask(as.rectangle(X), eps=eps, dimyx=dimyx, xy=xy)
+    # invoke as.im.owin
+    Y <- as.im(W)
+  } else {
+    # apply dimyx (etc) if present,
+    # otherwise use W to determine pixel raster
+    Y <- as.im(W, eps=eps, dimyx=dimyx, xy=xy)
+  }
+  # resample X onto raster of Y
   phase <- c((Y$xcol[1] - X$xcol[1])/X$xstep,
              (Y$yrow[1] - X$yrow[1])/X$ystep)
   Y$v <- matrixsample(X$v, Y$dim, phase=round(phase))
@@ -35,42 +40,69 @@ as.im.im <- function(X,
   return(na.handle.im(Y, na.replace))
 }
 
-as.im.owin <- function(X,
-                       W=as.mask(X, dimyx=dimyx),
-                       ...,
-                       dimyx=NULL, na.replace=NULL, value=1) {
-
-    # if W is missing, the default is now evaluated, as above.
-    # if W is present, it may have to be converted
-  if(!missing(W)) {
-    stopifnot(is.owin(W))
-    if(W$type != "mask")
-      W <- as.mask(W, dimyx=dimyx)
+as.im.owin <- function(X, W=NULL, ...,
+                       eps=NULL, dimyx=NULL, xy=NULL,
+                       na.replace=NULL, value=1) {
+  if(!(is.null(eps) && is.null(dimyx) && is.null(xy))) {
+    # raster dimensions determined by dimyx etc
+    # convert X to a mask 
+    M <- as.mask(X, eps=eps, dimyx=dimyx, xy=xy)
+    # convert mask to image
+    d <- M$dim
+    v <- matrix(value, d[1], d[2])
+    m <- M$m
+    v[!m] <- if(is.null(na.replace)) NA else na.replace
+    out <- im(v, M$xcol, M$yrow, unitname=unitname(X))
+    return(out)
   }
-  m <- W$m
-  v <- value * m
-  v[!m] <- NA
-  out <- list(v = v, 
-              dim    = W$dim,
-              xrange = W$xrange,
-              yrange = W$yrange,
-              xstep  = W$xstep,
-              ystep  = W$ystep,
-              xcol   = W$xcol,
-              yrow   = W$yrow,
-              lev    = NULL,
-              type    = "integer",
-              units  = unitname(X))
-  class(out) <- "im"
-  return(na.handle.im(out, na.replace))
+  if(!is.null(W) && is.owin(W) && W$type == "mask") {
+    # raster dimensions determined by W
+    # convert W to zero image
+    d <- W$dim
+    Z <- im(matrix(0, d[1], d[2]), W$xcol, W$yrow, unitname=unitname(X))    
+    # adjust values to indicator of X
+    Z[X] <- 1
+    if(missing(value) && is.null(na.replace)) {
+      # done
+      out <- Z
+    } else {
+      # map {0, 1} to {na.replace, value}
+      v <- matrix(ifelse(Z$v == 0, na.replace, value), d[1], d[2])
+      out <- im(v, W$xcol, W$yrow, unitname=unitname(X))
+    }
+    return(out)
+  }
+  if(X$type == "mask") {
+    # raster dimensions determined by X
+    # convert X to image
+    d <- X$dim
+    v <- matrix(value, d[1], d[2])
+    m <- X$m
+    v[!m] <- if(is.null(na.replace)) NA else na.replace
+    out <- im(v, X$xcol, X$yrow, unitname=unitname(X))
+    return(out)
+  }
+  # X is not a mask.
+  # W is either missing, or is not a mask.
+  # Convert X to a image using default settings
+  M <- as.mask(X)
+  # convert mask to image
+  d <- M$dim
+  v <- matrix(value, d[1], d[2])
+  m <- M$m
+  v[!m] <- if(is.null(na.replace)) NA else na.replace
+  out <- im(v, M$xcol, M$yrow, unitname=unitname(X))
+  return(out)
 }
 
-
-as.im.function <- function(X, W, ...,
-                          dimyx=NULL, na.replace=NULL) {
+as.im.function <- function(X, W=NULL, ...,
+                           eps=NULL, dimyx=NULL, xy=NULL,
+                           na.replace=NULL) {
   f <- X
+  if(is.null(W))
+    stop("A window W is required")
   W <- as.owin(W)
-  W <- as.mask(W, dimyx=dimyx)
+  W <- as.mask(W, eps=eps, dimyx=dimyx, xy=xy)
   m <- W$m
   funnywindow <- !all(m)
 
@@ -106,8 +138,9 @@ as.im.function <- function(X, W, ...,
   return(na.handle.im(out, na.replace))
 }
 
-as.im.default <- function(X, W, ...,
-                          dimyx=NULL, na.replace=NULL) {
+as.im.default <- function(X, W=NULL, ...,
+                          eps=NULL, dimyx=NULL, xy=NULL,
+                          na.replace=NULL) {
 
   if((is.vector(X) || is.factor(X)) && length(X) == 1) {
     # numerical value: interpret as constant function
@@ -138,10 +171,10 @@ as.im.default <- function(X, W, ...,
     # convert to class "im"
     out <- im(t(z), x, y)
     # now apply W and dimyx if present
-    if(missing(W) && !is.null(dimyx))
-      out <- as.im(out, dimyx=dimyx)
-    else if(!missing(W))
-      out <- as.im(out, W=W, dimyx=dimyx)
+    if(is.null(W) && !(is.null(eps) && is.null(dimyx) && is.null(xy)))
+      out <- as.im(out, eps=eps, dimyx=dimyx, xy=xy)
+    else if(!is.null(W))
+      out <- as.im(out, W=W, eps=eps, dimyx=dimyx, xy=xy)
     return(na.handle.im(out, na.replace))
   }
   stop("Can't convert X to a pixel image")

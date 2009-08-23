@@ -2,7 +2,7 @@
 #
 #   rmhResolveTypes.R
 #
-#   $Revision: 1.4 $   $Date: 2007/09/22 02:00:40 $
+#   $Revision: 1.8 $   $Date: 2009/08/14 02:25:01 $
 #
 #
 rmhResolveTypes <- function(model, start, control) {
@@ -14,7 +14,7 @@ rmhResolveTypes <- function(model, start, control) {
   verifyclass(start, "rmhstart")
   verifyclass(control, "rmhcontrol")
 
-# Different ways of specifying types
+# Different ways of specifying types directly
 
   types.model <- model$types
   types.start <- if(start$given=="x" && is.marked(x.start <- start$x.start))
@@ -23,53 +23,58 @@ rmhResolveTypes <- function(model, start, control) {
 # Check for inconsistencies  
   if(!is.null(types.model) && !is.null(types.start))
     if(!identical(all.equal(types.model, types.start), TRUE))
-      stop("marks in control$x.start do not match model$types")
+      stop("marks in start$x.start do not match model$types")
   
   types.given <- if(!is.null(types.model)) types.model else types.start
   types.given.source <-
     if(!is.null(types.model)) "model$types" else "marks of x.start"
   
-# Different ways of specifying/implying the number of types
+# Different ways of implying the number of types
   
   ntypes.beta <- length(model$par[["beta"]])
   ntypes.ptypes <- length(control$ptypes)
   ntypes.nstart <- if(start$given == "n") length(start$n.start) else 0
-  ntypes.trend <- if(is.list(model$trend)) length(model$trend) else 1
+  mot <- model$trend
+  ntypes.trend <-  if(is.null(mot)) 0 else
+                   if(is.im(mot)) 1 else
+                   if(is.list(mot) &&
+                      all(unlist(lapply(mot, is.im))))
+                     length(mot) else 0
   
-# Check for inconsistencies (only for numbers > 1)
+# Check for inconsistencies in implied number of types (only for numbers > 1)
 
-  nty <- c(ntypes.beta, ntypes.ptypes, ntypes.nstart)
+  nty <- c(ntypes.beta, ntypes.ptypes, ntypes.nstart, ntypes.trend)
   nam <- c("model$par$beta", "control$ptypes", "start$n.start", "model$trend")
-  give <- (nty > 1)
-  if(!any(give))
-    ntypes.given <- 1
+  implied <- (nty > 1)
+  if(!any(implied))
+    ntypes.implied <- 1
   else {
-    if(length(unique(nty[give])) > 1)
-      stop(paste("Mismatch in lengths of",
-               paste(nam[give], collapse=", ")))
-    ntypes.given <- unique(nty[give])
-    ntypes.given.source <- (nam[give])[1]
+    if(length(unique(nty[implied])) > 1)
+      stop(paste("Mismatch in numbers of types implied by",
+                 commasep(sQuote(nam[implied]))))
+    ntypes.implied <- unique(nty[implied])
+    ntypes.implied.source <- (nam[implied])[1]
   } 
 
-# Check types.given and ntypes.given 
+# Check consistency between types.given and ntypes.implied 
 
-  if(!is.null(types.given) && ntypes.given > 1)
-    if(length(types.given) != ntypes.given)
+  if(!is.null(types.given) && ntypes.implied > 1)
+    if(length(types.given) != ntypes.implied)
       stop(paste("Mismatch between number of types in",
                  types.given.source,
                  "and length of",
-                 ntypes.given.source))
+                 ntypes.implied.source))
 
 # Finally determine the types
   
   if(model$multitype.interact) {
     # There MUST be a types vector
     types <- if(!is.null(types.given)) types.given
-             else if(ntypes.given > 1) 1:ntypes.given
+             else if(ntypes.implied > 1) 1:ntypes.implied
              else stop("Cannot determine types for multitype process")
   } else {
     types <- if(!is.null(types.given)) types.given
-             else if(ntypes.given > 1) 1:ntypes.given
+             else if(ntypes.implied > 1) 1:ntypes.implied
              else 1
   }
 
@@ -80,9 +85,9 @@ rmhResolveTypes <- function(model, start, control) {
 
   if(control$conditioning == "n.each.type") {
     if(start$given == "n" && ntypes.nstart != ntypes)
-      stop("Length of control$n.start not equal to number of types.\n")
-    else if(start$given == "x" && ntypes.nstart != ntypes) 
-      stop("Marks of control$x.start do not match number of types.\n")
+      stop("Length of start$n.start not equal to number of types.\n")
+    else if(start$given == "x" && length(types.given) != ntypes) 
+      stop("Marks of start$x.start do not match number of types.\n")
   }
   
   return(types)

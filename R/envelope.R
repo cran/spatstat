@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.58 $  $Date: 2009/07/21 04:57:08 $
+#   $Revision: 1.62 $  $Date: 2009/08/22 02:58:03 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -11,6 +11,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                      start=NULL, control=list(nrep=1e5, expand=1.5),
                      transform=NULL, global=FALSE, ginterval=NULL,
                      savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
+                     VARIANCE=FALSE, nSD=2,
                      Yname=NULL, internal=NULL) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
@@ -96,11 +97,22 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   } else {
     # ...................................................
     # simulation is specified by argument `simulate'
-    # which should be an expression, or a list of point patterns
+    # which should be an expression, or a list of point patterns,
+    # or an envelope object.
     csr <- FALSE
     # override
-    if(!is.null(internal$csr)) csr <- TRUE
+    if(!is.null(icsr <- internal$csr)) csr <- icsr
     model <- NULL
+    if(inherits(simulate, "envelope")) {
+      # envelope object: see if it contains stored point patterns
+      simpat <- attr(simulate, "simpatterns")
+      if(!is.null(simpat))
+        simulate <- simpat
+      else
+        stop(paste("The argument", sQuote("simulate"),
+                   "is an envelope object but does not contain",
+                   "any saved point patterns."))
+    }
     if(is.expression(simulate)) {
       # The user-supplied expression 'simulate' will be evaluated repeatedly
       simtype <- "expr"
@@ -138,7 +150,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   ## determine whether dual simulations are required
   ## (one set of simulations to calculate the theoretical mean,
   ##  another independent set of simulations to obtain the critical point.)
-  dual <- (global && !csr)
+  dual <- (global && !csr && !VARIANCE)
   Nsim <- if(!dual) nsim else (nsim + nsim2)
 
   # if taking data from a list of point patterns,
@@ -153,8 +165,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
 
   # Undocumented secret exit
   # ------------------------------------------------------------------
-  if(!is.null(internal$patterns)) {
-    # generate simulated realisations and return them 
+  if(!is.null(eject <- internal$eject) && eject == "patterns") {
+    # generate simulated realisations and return only these patterns
     if(verbose) {
       action <- if(simtype == "list") "Extracting" else "Generating"
       descrip <- switch(simtype,
@@ -283,8 +295,21 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
   if(global && is.null(ginterval))
     ginterval <- if(rgiven) range(rvals) else alim
 
+  # capture main decision parameters
+  EnvelopeInfo <-  list(call=cl,
+                        Yname=Yname,
+                        valname=valname,
+                        csr=csr,
+                        simtype=simtype,
+                        nrank=nrank,
+                        nsim=nsim,
+                        global=global,
+                        dual=dual,
+                        nsim2=nsim2,
+                        VARIANCE=VARIANCE,
+                        nSD=nSD)
   
-  ######### simulate #######################
+  ######### SIMULATE #######################
   if(verbose) {
     action <- if(simtype == "list") "Extracting" else "Generating"
     descrip <- switch(simtype,
@@ -370,16 +395,83 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     flush.console()
   }
 
-  # compute envelopes
+  # ...........................................................
+  # save functions and/or patterns if so commanded
+
+  if(savefuns) {
+    alldata <- cbind(rvals, simvals)
+    simnames <- paste("sim", 1:nsim, sep="")
+    colnames(alldata) <- c("r", simnames)
+    alldata <- as.data.frame(alldata)
+    SimFuns <- fv(alldata,
+                   argu="r",
+                   ylab=attr(funX, "ylab"),
+                   valu="sim1",
+                   fmla= deparse(. ~ r),
+                   alim=attr(funX, "alim"),
+                   labl=names(alldata),
+                   desc=c("distance argument r",
+                     paste("Simulation ", 1:nsim, sep="")))
+    attr(SimFuns, "dotnames") <- simnames
+  } 
+  if(savepatterns)
+    SimPats <- if(simtype == "list") SimDataList else Caughtpatterns
+  
+
+  ######### COMPUTE ENVELOPES #######################
+  
   orderstat <- function(x, n) { sort(x)[n] }
-  if(!global) {
+
+  if(VARIANCE) {
+    # pointwise mean, variance etc
+    simvals[is.infinite(simvals)] <- NA
+    Ef   <- apply(simvals, 1, mean, na.rm=TRUE)
+    varf <- apply(simvals, 1, var, na.rm=TRUE)
+    # derived quantities
+    sd <- sqrt(varf)
+    stdres <- (fX-Ef)/sd
+    stdres[!is.finite(stdres)] <- NA
+    # critical limits
+    lo <- Ef + nSD * sd
+    hi <- Ef - nSD * sd
+    lo.name <- paste("lower", nSD, "sigma critical limit for %s")
+    hi.name <- paste("upper", nSD, "sigma critical limit for %s")
+    # put together
+    if(csr) {
+      results <- data.frame(r=rvals,
+                            obs=fX,
+                            theo=funX[["theo"]],
+                            lo=lo,
+                            hi=hi)
+      morestuff <- data.frame(mmean=Ef,
+                              var=varf,
+                              res=fX-Ef,
+                              stdres=stdres)
+      mslabl <- c("mean(r)", "var(r)", "res(r)", "stdres(r)")
+      msdesc <- c("sample mean of %s from simulations",
+                  "sample variance of %s from simulations",
+                  "raw residual", "standardised residual")
+    } else {
+      results <- data.frame(r=rvals,
+                            obs=fX,
+                            mmean=Ef,
+                            lo=lo,
+                            hi=hi)
+      morestuff <- data.frame(var=varf,
+                              res=fX-Ef,
+                              stdres=stdres)
+      mslabl <- c("var(r)", "res(r)", "stdres(r)")
+      msdesc <- c("sample variance of %s from simulations",
+                  "raw residual", "standardised residual")
+    }
+  } else if(!global) {
     # POINTWISE ENVELOPES
     simvals[is.infinite(simvals)] <- NA
     lo <- apply(simvals, 1, orderstat, n=nrank)
     hi <- apply(simvals, 1, orderstat, n=nsim-nrank+1)
-    lo.name <- paste("lower pointwise envelope of simulations")
-    hi.name <- paste("upper pointwise envelope of simulations")
-
+    lo.name <- paste("lower pointwise envelope of %s from simulations")
+    hi.name <- paste("upper pointwise envelope of %s from simulations")
+    #
     if(csr) {
       results <- data.frame(r=rvals,
                             obs=fX,
@@ -417,8 +509,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     # simultaneous bands
     lo <- theory - dmax
     hi <- theory + dmax
-    lo.name <- "lower critical boundary"
-    hi.name <- "upper critical boundary"
+    lo.name <- "lower critical boundary for %s"
+    hi.name <- "upper critical boundary for %s"
 
     if(csr)
       results <- data.frame(r=rvals[domain],
@@ -433,6 +525,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                             lo=lo,
                             hi=hi)
   }
+
+  ############  WRAP UP #########################
   
   result <- fv(results,
                argu="r",
@@ -443,48 +537,34 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                labl=c("r", "obs(r)", if(csr) "theo(r)" else "mean(r)",
                  "lo(r)", "hi(r)"),
                desc=c("distance argument r",
-                 "function value for data pattern",
-                 if(csr) "theoretical value for CSR"
-                 else "mean of simulations",
+                 "observed value of %s for data pattern",
+                 if(csr) "theoretical value of %s for CSR"
+                 else "sample mean of %s from simulations",
                  lo.name, hi.name),
                fname=attr(funX, "fname"),
                yexp =attr(funX, "yexp"))
   attr(result, "dotnames") <- c("obs",
                                 if(csr) "theo" else "mmean",
                                 "hi", "lo")
-  unitname(result) <- unitname(funX)
-
-  class(result) <- c("envelope", class(result))
-  attr(result, "einfo") <- list(call=cl,
-                                Yname=Yname,
-                                valname=valname,
-                                csr=csr,
-                                simtype=simtype,
-                                nrank=nrank,
-                                nsim=nsim,
-                                global=global,
-                                dual=dual,
-                                nsim2=nsim2)
-  if(savefuns) {
-    alldata <- cbind(rvals, simvals)
-    simnames <- paste("sim", 1:nsim, sep="")
-    colnames(alldata) <- c("r", simnames)
-    alldata <- as.data.frame(alldata)
-    simfuns <- fv(alldata,
-                   argu="r",
-                   ylab=attr(funX, "ylab"),
-                   valu="sim1",
-                   fmla= deparse(. ~ r),
-                   alim=attr(funX, "alim"),
-                   labl=names(alldata),
-                   desc=c("distance argument r",
-                     paste("Simulation ", 1:nsim, sep="")))
-    attr(simfuns, "dotnames") <- simnames
-    attr(result, "simfuns") <- simfuns
+  if(VARIANCE) {
+    # add more stuff
+    result <- bind.fv(result, morestuff, mslabl, msdesc)
+    if(csr) 
+      attr(result, "dotnames") <- c("obs", "mmean", "hi", "lo", "theo")
   }
+
+  unitname(result) <- unitname(funX)
+  class(result) <- c("envelope", class(result))
+
+  # tack on envelope information
+  attr(result, "einfo") <- EnvelopeInfo
+
+  # tack on functions and/or patterns if so commanded   
+  if(savefuns)
+    attr(result, "simfuns") <- SimFuns
   if(savepatterns)
-    attr(result, "simpatterns") <-
-      if(simtype == "list") SimDataList else Caughtpatterns  
+    attr(result, "simpatterns") <- SimPats
+  
   return(result)
 }
 
@@ -496,8 +576,10 @@ print.envelope <- function(x, ...) {
   simtype <- e$simtype
   nr <- e$nrank
   nsim <- e$nsim
+  V <- e$VARIANCE
   fname <- deparse(attr(x, "ylab"))
-  type <- if(g) "Simultaneous" else "Pointwise"
+  type <- if(V) paste("Pointwise", e$nSD, "sigma") else
+          if(g) "Simultaneous" else "Pointwise" 
   cat(paste(type, "critical envelopes for", fname, "\n"))
   if(!is.null(valname <- e$valname))
     cat(paste("Edge correction:",
@@ -525,12 +607,15 @@ print.envelope <- function(x, ...) {
   if(!is.null(attr(x, "simpatterns"))) 
     cat("(All simulated point patterns are stored)\n")
   alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
-  cat(paste("Significance level of",
-            if(!g) "pointwise",
-            "Monte Carlo test:",
-            paste(if(g) nr else 2 * nr,
-                  "/", nsim+1, sep=""),
-            "=", alpha, "\n"))
+  if(!V) {
+    # significance interpretation!
+    cat(paste("Significance level of",
+              if(!g) "pointwise",
+              "Monte Carlo test:",
+              paste(if(g) nr else 2 * nr,
+                    "/", nsim+1, sep=""),
+              "=", alpha, "\n"))
+  }
   cat(paste("Data:", e$Yname, "\n"))
   NextMethod("print")
 }
@@ -543,7 +628,9 @@ summary.envelope <- function(object, ...) {
   csr <- e$csr
   simtype <- e$simtype
   fname <- deparse(attr(object, "ylab"))
-  type <- if(g) "Simultaneous" else "Pointwise"
+  V <- e$VARIANCE
+  type <- if(V) paste("Pointwise", e$nSD, "sigma") else
+          if(g) "Simultaneous" else "Pointwise" 
   cat(paste(type, "critical envelopes for", fname, "\n"))
   # determine *actual* type of simulation
   descrip <-
@@ -565,29 +652,30 @@ summary.envelope <- function(object, ...) {
   if(!is.null(attr(object, "simpatterns")))
     cat(paste("(All", nsim, "simulated point patterns",
               "are stored in attr(,", dQuote("simpatterns"), ") )\n"))
-  ordinal <- function(k) {
-    last <- k %% 10
-    ending <- if(last == 1) "st" else
-              if(last == 2) "nd" else
-              if(last== 3) "rd" else "th"
-    return(paste(k, ending, sep=""))
-  }
-  lo.ord <- if(nr == 1) "minimum" else paste(ordinal(nr), "smallest")
-  hi.ord <- if(nr == 1) "maximum" else paste(ordinal(nsim-nr+1), "largest")
-  if(g) 
-    cat(paste("Envelopes computed as",
-              if(csr) "theoretical curve" else "mean of simulations",
-              "plus/minus", hi.ord,
-              "simulated value of maximum absolute deviation\n"))
-  else {
-    cat(paste("Upper envelope: pointwise", hi.ord,"of simulated curves\n"))
-    cat(paste("Lower envelope: pointwise", lo.ord,"of simulated curves\n"))
-  }
-  alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
-  cat(paste("Significance level of Monte Carlo test:",
-            paste(if(g) nr else 2 * nr,
-                  "/", nsim+1, sep=""),
-            "=", alpha, "\n"))
+  #
+  if(V) {
+    # nSD envelopes
+    cat(paste("Envelopes computed as sample mean plus/minus",
+              e$nSD, "sample standard deviations\n"))
+  } else {
+    # critical envelopes
+    lo.ord <- if(nr == 1) "minimum" else paste(ordinal(nr), "smallest")
+    hi.ord <- if(nr == 1) "maximum" else paste(ordinal(nsim-nr+1), "largest")
+    if(g) 
+      cat(paste("Envelopes computed as",
+                if(csr) "theoretical curve" else "mean of simulations",
+                "plus/minus", hi.ord,
+                "simulated value of maximum absolute deviation\n"))
+    else {
+      cat(paste("Upper envelope: pointwise", hi.ord,"of simulated curves\n"))
+      cat(paste("Lower envelope: pointwise", lo.ord,"of simulated curves\n"))
+    }
+    alpha <- if(g) { nr/(nsim+1) } else { 2 * nr/(nsim+1) }
+    cat(paste("Significance level of Monte Carlo test:",
+              paste(if(g) nr else 2 * nr,
+                    "/", nsim+1, sep=""),
+              "=", alpha, "\n"))
+  } 
   cat(paste("Data:", e$Yname, "\n"))
   return(invisible(NULL))
 }

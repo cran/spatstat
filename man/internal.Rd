@@ -176,6 +176,7 @@
 \alias{no.trend.ppm}
 \alias{n.quad}
 \alias{numalign}
+\alias{ordinal}
 \alias{outdated.interact}
 \alias{overlap.owin}
 \alias{overlap.trapezium}
@@ -515,6 +516,7 @@ newstyle.coeff.handling(object)
 no.trend.ppm(x)
 n.quad(Q)
 numalign(i, nmax, zero)
+ordinal(k)
 outdated.interact(object)
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)

@@ -1,7 +1,7 @@
 #
 # interactive analysis of point patterns
 #
-#   $Revision: 1.13 $   $Date: 2009/07/01 00:49:07 $
+#   $Revision: 1.14 $   $Date: 2009/08/22 00:53:51 $
 #
 #
 
@@ -11,7 +11,7 @@ istat <- function(x, xname) {
   verifyclass(x, "ppp")
   # generate simulations of CSR for use in envelopes
   simx <- envelope(x, fun=NULL, nsim=39,
-                   internal=list(csr=TRUE, patterns=TRUE))
+                   internal=list(csr=TRUE, eject="patterns"))
   # initial value of smoothing parameter
   sigma0 <- with(x$window, min(diff(xrange),diff(yrange)))/8
   # create panel
