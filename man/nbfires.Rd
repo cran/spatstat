@@ -76,7 +76,7 @@ by shifting the location of the ``outsider'' points slightly,
 or deleting them, as seemed appropriate.
 
 The columns of the data frames comprising \code{nbextras} are
-\itemize{
+\describe{
     \item{fire.type}{A code for the type of fire with 1 =
     forest, 2 = grass, 3 = dump, and 4 = other. }
     \item{dis.date}{The discovery date of the fire, which is the
@@ -99,7 +99,7 @@ The columns of the data frames comprising \code{nbextras} are
     1 = railroads,
     2 = unknown,
     3 = miscellaneous,
-    4 = lightening,
+    4 = lightning,
     5 = forest industry,
     6 = incendiary,
     7 = recreation,

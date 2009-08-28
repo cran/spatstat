@@ -6,7 +6,7 @@
   returns the quadrats as a tessellation.
 }
 \usage{
-quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
+quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL, keepempty=FALSE)
 }
 \arguments{
   \item{X}{
@@ -26,10 +26,15 @@ quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
     Numeric vector giving the \eqn{y} coordinates of the
     boundaries of the quadrats. Incompatible with \code{ny}.
   }
+  \item{keepempty}{
+    Logical value indicating whether to delete or retain
+    empty quadrats. See Details.
+  }
 }
 \details{
   If the window \code{X} is a rectangle, it is divided into
   an \code{nx * ny} grid of rectangular tiles or `quadrats'.
+
   If \code{X} is not a rectangle, then the bounding rectangle of
   \code{X} is first divided into an \code{nx * ny} grid of rectangular
   tiles, and these tiles are then intersected with the window \code{X}.
@@ -48,6 +53,14 @@ quadrats(X, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
   It defaults to a vector of \code{ny+1} values
   equally spaced over the range of \eqn{y} coordinates in the window.
   The lengths of \code{xbreaks} and \code{ybreaks} may be different.
+
+  By default (if \code{keepempty=FALSE}), any rectangular tile which
+  does not intersect the window \code{X} is
+  ignored, and only the non-empty intersections are treated as quadrats,
+  so the tessellation may consist of fewer than \code{nx * ny} tiles.
+  If \code{keepempty=TRUE}, empty intersections are retained,
+  and the tessellation always contains exactly \code{nx * ny} tiles,
+  some of which may be empty.
 }
 \value{
   A tessellation (object of class \code{"tess"}) as described under

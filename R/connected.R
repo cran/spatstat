@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.4 $  $Date: 2009/05/15 07:17:59 $
+#    $Revision: 1.5 $  $Date: 2009/10/06 07:11:35 $
 #
 # Original code by Julian Burgos <jmburgos@u.washington.edu>
 # Adapted by Adrian Baddeley
@@ -33,12 +33,12 @@ connected <- function(X, background=NA, method="C") {
     L[!M] <- 0
     # resolve labels
     z <- .C("concom",
-            mat=as.integer(L),
+            mat=as.integer(t(L)),
             nr=as.integer(nr),
             nc=as.integer(nc),
             PACKAGE="spatstat")
     # unpack
-    Z <- matrix(z$mat, nr+2, nc+2)
+    Z <- matrix(z$mat, nr+2, nc+2, byrow=TRUE)
   } else {
 ################ INTERPRETED CODE #########################
 # by Julian Burgos

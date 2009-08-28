@@ -66,7 +66,7 @@ colourmap(col, ..., breaks=NULL, inputs=NULL)
 \seealso{
   The plot method \code{\link{plot.colourmap}}.
   
-  See \code{\link[grDevices]{colours}} for information about the colours
+  See \code{\link[grDevices:colors]{colours}} for information about the colours
   that \R recognises, and how to manipulate them.
 
   See \code{\link{lut}} for lookup tables.

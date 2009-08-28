@@ -85,9 +85,9 @@
 
   Multiple curves may be specified by a single formula
   of the form 
-  \code{cbind(y1,y2,\ldots,yn) ~ x}, where \code{x,y1,y2,\ldots,yn} are
+  \code{cbind(y1,y2,\dots,yn) ~ x}, where \code{x,y1,y2,\dots,yn} are
   expressions involving the variables in the data frame.
-  Each of the variables \code{y1,y2,\ldots,yn} in turn will be plotted
+  Each of the variables \code{y1,y2,\dots,yn} in turn will be plotted
   against \code{x}. 
   See the examples.
 

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.37 $    $Date: 2009/08/21 23:32:01 $
+#    $Revision: 1.38 $    $Date: 2009/08/28 18:18:29 $
 #
 #  (a) for matrices only:
 #
@@ -281,3 +281,38 @@ ensure2vector <- function(x) {
   return(x)
 }
 
+check.nvector <- function(v, npoints, fatal=TRUE) {
+  # vector of numeric values for each point
+  vname <- sQuote(deparse(substitute(v)))
+  whinge <- NULL
+  if(!is.numeric(v))
+    whinge <- paste(vname, "is not numeric")
+  else if(length(v) != npoints)
+    whinge <- paste("The length of", vname,
+                    "should equal the number of data points")
+  else if(any(is.na(v)))
+    whinge <- paste("Some values of", vname, "are NA or NaN")
+  #
+  if(!is.null(whinge)) {
+    if(fatal) stop(whinge) else return(FALSE)
+  }
+  return(TRUE)
+}
+
+check.nmatrix <- function(m, npoints, fatal=TRUE) {
+  # matrix of values for each pair of points
+  mname <- sQuote(deparse(substitute(m)))
+  whinge <- NULL
+  if(!is.matrix(m))
+    whinge <- paste(mname, "should be a matrix")
+  else if(nrow(m) != ncol(m))
+    whinge <- paste(mname, "should be a square matrix")
+  else if(nrow(m) != npoints)
+    whinge <- paste("Dimensions of", mname,
+               "do not match number of data points")
+  #
+  if(!is.null(whinge)) {
+    if(fatal) stop(whinge) else return(FALSE)
+  }
+  return(TRUE)
+}

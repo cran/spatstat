@@ -25,8 +25,9 @@
     Values of the estimated intensity function.
     Either a vector giving the intensity values
     at the points of the pattern \code{X},
-    or a pixel image (object of class \code{"im"}) giving the
-    intensity values at all locations.
+    a pixel image (object of class \code{"im"}) giving the
+    intensity values at all locations, or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location.
   }
   \item{\dots}{
     Extra arguments. Ignored if \code{lambda} is present.
@@ -68,8 +69,10 @@
     of the intensity function.
     Either a vector giving the reciprocal intensity values
     at the points of the pattern \code{X},
-    or a pixel image (object of class \code{"im"}) giving the
-    reciprocal intensity values at all locations.
+    a pixel image (object of class \code{"im"}) giving the
+    reciprocal intensity values at all locations,
+    or a \code{function(x,y)} which can be evaluated to give the
+    reciprocal intensity value at any location.
   }
   \item{reciplambda2}{
     Advanced use only. Alternative to \code{lambda2}.
@@ -151,6 +154,10 @@
       assumed to contain the values of the intensity function
       at all locations in the window. 
     }
+    \item{a function}{
+      which can be evaluated to give values of the intensity at
+      any locations.
+    }
     \item{omitted:}{
       if \code{lambda} is omitted, then it will be estimated using
       a `leave-one-out' kernel smoother.
@@ -172,6 +179,11 @@
   \code{\link{blur}}, then looking up the values of this blurred image
   for the missing locations. 
   (A warning will be issued in this case.)
+
+  If \code{lambda} is a function, then it will be evaluated in the
+  form \code{lambda(x,y)} where \code{x} and \code{y} are vectors
+  of coordinates of the points of \code{X}. It should return a numeric
+  vector with length equal to the number of points in \code{X}.
 
   If \code{lambda} is omitted, then it will be estimated using
   a `leave-one-out' kernel smoother, as described in Baddeley, Moller

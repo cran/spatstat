@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.20 $	$Date: 2009/01/27 22:44:00 $
+#    $Revision: 1.22 $	$Date: 2009/10/07 02:37:09 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -266,48 +266,59 @@ return(V)
 
 },
 ######### end of function $eval
-       suffstat = function(model, X, callstring="pairwise.family$suffstat") {
+       suffstat = function(model, X=NULL, callstring="pairwise.family$suffstat") {
 # for pairwise models only  (possibly nonstationary)
   verifyclass(model, "ppm")
-  verifyclass(X, "ppp")
-
   if(!identical(model$interaction$family$name,"pairwise"))
     stop("Model is not a pairwise interaction process")
 
-  trend <- model$trend
-  inter <- model$interaction
-  covar <- model$covariates
- 
-  Empty <- X[rep(FALSE, X$n)]
-  Q     <- quad(X, Empty)
-  prep  <- mpl.prepare(Q, X, X, trend, inter, covar,
-                       correction=model$correction,
-                       rbord=model$rbord, Pname="data points",
-                       callstring=callstring)
-  fmla    <- prep$fmla
-  glmdata <- prep$glmdata
+  if(is.null(X)) {
+    X <- data.ppm(model)
+    modelX <- model
+  } else {
+    verifyclass(X, "ppp")
+    modelX <- update(model, X, method="mpl")
+  }
 
-  mof <- model.frame(fmla, glmdata)
-  mom <- model.matrix(fmla, mof)
+  # find data points which do not contribute to pseudolikelihood
+  mplsubset <- getglmdata(modelX)$.mpl.SUBSET
+  mpldata   <- is.data(quad.ppm(modelX))
+  contribute <- mplsubset[mpldata]
 
-  if(any(colnames(mom) != names(coef(model))))
-    warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
-     
-  order2  <- colnames(mom) %in% model$internal$Vnames
+  Xin  <- X[contribute]
+  Xout <- X[!contribute]
+  
+  # partial model matrix arising from ordered pairs of data points
+  # which both contribute to the pseudolikelihood
+  Empty <- X[numeric(0)]
+  momINxIN <- partialModelMatrix(Xin, Empty, model, "suffstat")
+
+  # partial model matrix arising from ordered pairs of data points
+  # the second of which does not contribute to the pseudolikelihood
+  mom <- partialModelMatrix(Xout, Xin, model, "suffstat")
+  indx <- Xout$n + (1:(Xin$n))
+  momINxOUT <- mom[indx, , drop=FALSE]
+
+  # parameters
+  order2  <- names(coef(model)) %in% model$internal$Vnames
   order1  <- !order2
 
+  result <- 0 * coef(model)
+  
   if(any(order1)) {
-    o1terms <- mom[, order1, drop=FALSE]
+    # first order contributions can be determined from INxIN
+    o1terms  <- momINxIN[ , order1, drop=FALSE]
     o1sum   <- apply(o1terms, 2, sum)
+    result[order1] <- o1sum
   }
   if(any(order2)) {
-    o2terms <- mom[, order2, drop=FALSE]
-    o2sum   <- apply(o2terms, 2, sum)/2
+    # adjust for double counting of ordered pairs in INxIN but not INxOUT
+    o2termsINxIN  <- momINxIN[, order2, drop=FALSE]
+    o2termsINxOUT <- momINxOUT[, order2, drop=FALSE]
+    o2sum   <- apply(o2termsINxIN, 2, sum)/2 + apply(o2termsINxOUT, 2, sum)
+    result[order2] <- o2sum
   }
 
-  result <- 0 * coef(model)
-  result[order1] <- o1sum
-  result[order2] <- o2sum
   return(result)
   }
 ######### end of function $suffstat

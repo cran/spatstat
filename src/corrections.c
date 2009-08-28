@@ -4,9 +4,11 @@
 
   Edge corrections
 
-  $Revision: 1.7 $     $Date: 2009/04/05 04:49:41 $
+  $Revision: 1.8 $     $Date: 2009/08/26 05:18:18 $
 
  */
+
+#include <Rmath.h>
 
 #undef DEBUG
 
@@ -16,8 +18,10 @@
 #include <stdio.h>
 #endif
 
+/* This constant is defined in Rmath.h */
+#define TWOPI M_2PI
+
 #define MIN(A,B) (((A) < (B)) ? (A) : (B))
-#define PI 3.1415926535898
 #define YES (0 == 0)
 #define NO  (0 == 1)
 
@@ -128,7 +132,7 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
 #endif
 
        /* total exterior angle over 2 pi */
-       extang = (cL + cR + cU + cD)/(2 * PI);
+       extang = (cL + cR + cU + cD)/TWOPI;
 
        /* add pi/2 for corners */
        if(corner) 
@@ -299,7 +303,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	if(ncut > 0) 
 	  for(l = 0; l < ncut; l++)
 	    if(theta[l] < 0) 
-	      theta[l] += 2 * PI;
+	      theta[l] += TWOPI;
 
 	/* sort angles */
 	if(ncut > 1) {
@@ -328,7 +332,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  xtest = xcentre + radius;
 	  ytest = ycentre;
 	  if(TESTINSIDE(xtest, ytest, xx0, yy0, xx1, yy1)) 
-	    contrib = 2 * PI;
+	    contrib = TWOPI;
 	  else 
 	    contrib = 0.0;
 	} else {
@@ -341,8 +345,8 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	      tmid[l] = (theta[l] + theta[l-1])/2;
 	    }
 	  }
-	  delta[ncut] = 2 * PI - theta[ncut - 1];
-	  tmid[ncut] = (2 * PI + theta[ncut-1])/2;
+	  delta[ncut] = TWOPI - theta[ncut - 1];
+	  tmid[ncut] = (TWOPI + theta[ncut-1])/2;
 	  contrib = 0.0;
 	  for(l = 0; l <= ncut; l++) {
 #ifdef DEBUG

@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.42 $	$Date: 2009/07/24 05:20:59 $
+#	$Revision: 1.43 $	$Date: 2009/08/28 18:26:56 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -96,33 +96,12 @@
     lambda2.given    <- !is.null(lambda2) || !is.null(reciplambda2)
     lambda2.suffices <- !any(correction %in% c("bord", "bord.modif"))
 
-    validate.vector <- function(v, npoints) {
-      # vector of values for each point
-      vname <- sQuote(deparse(substitute(v)))
-      if(length(v) != npoints) 
-        stop(paste("The length of", vname,
-                   "should equal the number of data points"))
-      if(any(is.na(v)))
-        stop(paste("Some values of", vname, "are NA or NaN"))
-    }
-    validate.matrix <- function(m, npoints) {
-      # matrix of values for each pair of points
-      mname <- sQuote(deparse(substitute(m)))
-      if(!is.matrix(m))
-        stop(paste(mname, "should be a matrix"))
-      if(nrow(m) != ncol(m))
-        stop(paste(mname, "should be a square matrix"))
-      if(nrow(m) != npoints)
-        stop(paste("Dimensions of", mname,
-                   "do not match number of data points"))
-    }
-    
     # Use matrix of weights if it was provided and if it is sufficient
     if(lambda2.suffices && lambda2.given) {
       if(!is.null(reciplambda2)) 
-        validate.matrix(reciplambda2, npoints)
+        check.nmatrix(reciplambda2, npoints)
       else {
-        validate.matrix(lambda2, npoints)
+        check.nmatrix(lambda2, npoints)
         reciplambda2 <- 1/lambda2
       }
     } else {
@@ -147,23 +126,26 @@
         reciplambda <- 1/lambda
       } else if(!is.null(reciplambda)) {
         # 1/lambda values provided
-        if(is.vector(reciplambda))
-          validate.vector(reciplambda, npoints)
+        if(is.vector(reciplambda)) 
+          check.nvector(reciplambda, npoints)
         else if(is.im(reciplambda)) 
           reciplambda <- safelookup(reciplambda, X)
+        else if(is.function(reciplambda))
+          reciplambda <- reciplambda(X$x, X$y)
         else stop(paste(sQuote("reciplambda"),
-                        "should be a vector or a pixel image"))
+                        "should be a vector, a pixel image, or a function"))
       } else {
         # lambda values provided
-        if(is.vector(lambda)) {
-          validate.vector(lambda, npoints)
-          reciplambda <- 1/lambda
-        } else if(is.im(lambda)) {
+        if(is.vector(lambda)) 
+          check.nvector(lambda, npoints)
+        else if(is.im(lambda)) 
           lambda <- safelookup(lambda, X)
-          reciplambda <- 1/lambda
-        } else
-        stop(paste(sQuote("lambda"),
-                   "should be a vector or a pixel image"))
+        else if(is.function(lambda)) 
+          lambda <- lambda(X$x, X$y)
+        else stop(paste(sQuote("lambda"),
+                          "should be a vector, a pixel image, or a function"))
+        # evaluate reciprocal
+        reciplambda <- 1/lambda
       }
     }
 

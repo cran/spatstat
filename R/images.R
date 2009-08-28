@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.49 $     $Date: 2009/07/25 01:37:36 $
+#         $Revision: 1.50 $     $Date: 2009/08/26 02:50:21 $
 #
 #      The class "im" of raster images
 #
@@ -240,6 +240,8 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
   }
   if(verifyclass(i, "owin", fatal=FALSE)) {
     # 'i' is a window
+    if(is.empty(i))
+      return(X)
     xx <- as.vector(raster.x(W))
     yy <- as.vector(raster.y(W))
     ok <- inside.owin(xx, yy, i)

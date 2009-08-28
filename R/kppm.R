@@ -126,8 +126,9 @@ predict.kppm <- function(object, ...) {
   predict(object$po, ...)
 }
 
-simulate.kppm <- function(object, nsim=1, seed=NULL, ...) {
-  # .... copied from simulate.lm
+simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
+                          window=NULL, covariates=NULL) {
+  # .... copied from simulate.lm ....
   if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
     runif(1)
   if (is.null(seed))
@@ -138,23 +139,33 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...) {
     RNGstate <- structure(seed, kind = as.list(RNGkind()))
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
   }
-  # .....
+  # ..................................
+  # determine parameters
+  if(is.null(window)) {
+    win <- object$X$window
+  } else {
+    stopifnot(is.owin(window))
+    win <- window
+  }
+  mp <- as.list(object$mcfit$modelpar)
+  kappa <- mp$kappa
+  if(is.null(covariates) && (object$stationary || is.null(window))) {
+    # use existing base intensity 'mu' (scalar or image)
+    mu <- object$mu
+  } else {
+    # compute new base intensity image 'mu' using new data
+    lambda <- predict(object, window=win, covariates=covariates)
+    mu <- eval.im(lambda/kappa)
+  }
   out <- list()
-  win <- object$X$window
   switch(object$clusters,
          Thomas={
-           mp <- as.list(object$mcfit$modelpar)
-           kappa <- mp$kappa
            sigma <- mp$sigma
-           mu    <- object$mu
            for(i in 1:nsim)
              out[[i]] <- rThomas(kappa,sigma,mu,win)
          },
          MatClust={
-           mp <- as.list(object$mcfit$modelpar)
-           kappa <- mp$kappa
            r <-     mp$R
-           mu    <- object$mu
            for(i in 1:nsim)
              out[[i]] <- rMatClust(kappa,r,mu,win)
          })

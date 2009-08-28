@@ -1,7 +1,7 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.11 $  $Date: 2007/11/12 13:26:46 $
+# $Revision: 1.12 $  $Date: 2009/10/06 07:22:01 $
 #
 
 unique.ppp <- function(x, ...) {
@@ -19,7 +19,7 @@ duplicated.ppp <- function(x, ...) {
     um <- if(is.factor(m)) levels(m) else unique(m)
     xx <- unmark(x)
     result <- logical(n)
-    for(i in seq(um)) {
+    for(i in seq(along=um)) {
       sub <- (m == um[i])
       result[sub] <- duplicated.ppp(xx[sub])
     }

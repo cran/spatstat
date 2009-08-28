@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.74 $	$Date: 2008/12/04 21:45:10 $
+#	$Revision: 5.80 $	$Date: 2009/10/13 02:30:30 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -34,6 +34,7 @@ function(Q,
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
+         gcontrol=list(),
          famille=NULL,
          forcefit=FALSE,
          allcovar=FALSE,
@@ -91,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2008/12/04 21:45:10 $")
+                    date="$Date: 2009/10/13 02:30:30 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -111,6 +112,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
   rslt <- list(
                method      = "mpl",
+               fitter      = "exact",
                coef        = co,
                trend       = NULL,
                interaction = NULL,
@@ -162,19 +164,23 @@ computed <- append(computed, prep$computed)
 .mpl.W <- glmdata$.mpl.W
 .mpl.SUBSET <- glmdata$.mpl.SUBSET
 
+# determine algorithm control parameters
+  if(is.null(gcontrol)) gcontrol <- list() else stopifnot(is.list(gcontrol))
+  gc <- if(use.gam) "gam.control" else "glm.control"
+  gcontrol <- do.call(gc, gcontrol)
+  
 # Fit the generalized linear/additive model.
 
-  
 if(is.null(famille)) {
   # the sanctioned technique, using `quasi' family
   if(want.trend && use.gam)
     FIT  <- gam(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
                 data=glmdata, subset=.mpl.SUBSET,
-                control=gam.control(maxit=50))
+                control=gcontrol)
   else
     FIT  <- glm(fmla, family=quasi(link=log, var=mu), weights=.mpl.W,
                 data=glmdata, subset=.mpl.SUBSET,
-                control=glm.control(maxit=50), model=FALSE)
+                control=gcontrol, model=FALSE)
 } else {
   # for experimentation only!
   if(is.function(famille))
@@ -183,11 +189,11 @@ if(is.null(famille)) {
   if(want.trend && use.gam)
     FIT  <- gam(fmla, family=famille, weights=.mpl.W,
                 data=glmdata, subset=.mpl.SUBSET,
-                control=gam.control(maxit=50))
+                control=gcontrol)
   else
     FIT  <- glm(fmla, family=famille, weights=.mpl.W,
                 data=glmdata, subset=.mpl.SUBSET,
-                control=glm.control(maxit=50), model=FALSE)
+                control=gcontrol, model=FALSE)
 }
   
   
@@ -213,6 +219,7 @@ if(is.null(famille)) {
 
 rslt <- list(
              method       = "mpl",
+             fitter       = if(use.gam) "gam" else "glm",
              coef         = co,
              trend        = if(want.trend) trend       else NULL,
              interaction  = if(want.inter) interaction else NULL,
@@ -245,7 +252,10 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
                         precomputed=NULL, savecomputed=FALSE,
                         vnamebase=c("Interaction", "Interact."),
                         vnameprefix=NULL) {
-
+# Q: quadrature scheme
+# X = data.quad(Q)
+# P = union.quad(Q)
+  
   if(missing(want.trend))
     want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
   if(missing(want.inter))
@@ -565,14 +575,22 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
   } else if(is.list(covariates)) {
     if(length(covariates) == 0)
       return(as.data.frame(matrix(, n, 0)))
-    if(!all(unlist(lapply(covariates, is.im))))
-      stop(paste("Some entries in the list",
-                 sQuote("covariates"), "are not images"))
+    is.number <- function(x) { is.numeric(x) && (length(x) == 1) }
+    isim  <- unlist(lapply(covariates, is.im))
+    isfun <- unlist(lapply(covariates, is.function))
+    isnum <- unlist(lapply(covariates, is.number))
+    if(!all(isim | isfun | isnum))
+      stop(paste("Each entry in the list", sQuote("covariates"),
+                 "should be an image, a function or a single number"))
     if(any(names(covariates) == ""))
       stop(paste("Some entries in the list",
                  sQuote("covariates"), "are un-named"))
-    # look up values of each covariate image at the quadrature points
-    values <- lapply(covariates, lookup.im, x=x, y=y, naok=TRUE)
+    # look up values of each covariate at the quadrature points
+    values <- covariates
+    evalfxy <- function(f, x, y) { f(x,y) }
+    values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y, naok=TRUE)
+    values[isfun] <- lapply(covariates[isfun], evalfxy, x=x, y=y)
+    values[isnum] <- lapply(covariates[isnum], rep, length(x))
     return(as.data.frame(values))
   } else
     stop(paste(sQuote("covariates"),
@@ -634,5 +652,29 @@ print.bt.frame <- function(x, ...) {
     cat(paste("Frame contains saved computations for",
               commasep(dQuote(names(x$computed)))))
   return(invisible(NULL))
+}
+  
+partialModelMatrix <- function(X, D, model, callstring="", ...) {
+  # X = 'data'
+  # D = 'dummy'
+  Q <- quad(X,D)
+  P <- union.quad(Q)
+  trend <- model$trend
+  inter <- model$interaction
+  covar <- model$covariates
+  prep  <- mpl.prepare(Q, X, P, trend, inter, covar,
+                       correction=model$correction,
+                       rbord=model$rbord,
+                       Pname="data points", callstring=callstring, ...)
+  fmla    <- prep$fmla
+  glmdata <- prep$glmdata
+  mof <- model.frame(fmla, glmdata)
+  mom <- model.matrix(fmla, mof)
+
+  if(!identical(all.equal(colnames(mom), names(coef(model))), TRUE))
+    warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
+
+  attr(mom, "mplsubset") <- glmdata$.mpl.SUBSET
+  return(mom)
 }
   

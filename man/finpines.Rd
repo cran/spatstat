@@ -36,6 +36,9 @@
   for initial experimentation. They have some strange features.
   For example, if the height is less than 1.3 metres then the diameter
   can be uncertain. Also there are some very close pairs of points.
+  Some pairs of trees (namely (58,59), (78,79), (96,97) and (102,103))
+  violate the requirement that the interpoint distance should be
+  greater than half the sum of their diameters.
 
   These data have subsequently been analysed by Van Lieshout (2004).
 } 
@@ -54,6 +57,8 @@
     plot(unmark(finpines), main="Finnish pines: locations")
     plot(finpines, main="locations and heights")
     plot(finpines \%mark\% finpines.extra$diameter, main="diameters")
+    plot(finpines \%mark\% finpines.extra$diameter,
+              main="diameters to scale", markscale=1/200)
 }
 \source{Prof Antti Penttinen}
 \references{

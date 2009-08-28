@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.22 $  $Date: 2009/01/30 00:39:28 $
+#  $Revision: 1.24 $  $Date: 2009/08/29 03:00:41 $
 #
 
 quadratcount <- function(X, ...) {
@@ -18,25 +18,43 @@ quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
   verifyclass(X, "ppp")
   W <- X$window
 
-  # determine tessellation
   if(is.null(tess)) {
     # rectangular boundaries 
     if(!is.numeric(nx))
       stop("nx should be numeric")
-    tess <- quadrats(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks)
-  } else if(!inherits(tess, "tess"))
-    stop("The argument tess should be a tessellation", call.=FALSE)
-
-  if(tess$type == "rect") {
-    # rectangular quadrats - fast code
+    # start with rectangular tessellation
+    tess <- quadrats(as.rectangle(W),
+                     nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks)
+    # fast code for counting points in rectangular grid
     Xcount <- rectquadrat.countEngine(X$x, X$y, tess$xgrid, tess$ygrid)
+    #
+    if(W$type != "rectangle") {
+      # intersections of rectangles with window including empty intersections
+      tess <- quadrats(X,
+                       nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks,
+                       keepempty=TRUE)
+      # now delete the empty quadrats and the corresponding counts
+      nonempty <- !unlist(lapply(tiles(tess), is.empty))
+      if(!all(nonempty)) {
+        Xcount <- Xcount[nonempty]
+        tess   <- tess[nonempty]
+      }
+    }
   } else {
-    # quadrats are another type of tessellation
-    Y <- cut(X, tess)
-    if(any(is.na(marks(Y))))
-      warning("Tessellation does not contain all the points of X")
-    Xcount <- table(tile=marks(Y))
-  } 
+    # user-supplied tessellation
+    if(!inherits(tess, "tess"))
+      stop("The argument tess should be a tessellation", call.=FALSE)
+    if(tess$type == "rect") {
+      # fast code for counting points in rectangular grid
+      Xcount <- rectquadrat.countEngine(X$x, X$y, tess$xgrid, tess$ygrid)
+    } else {
+      # quadrats are another type of tessellation
+      Y <- cut(X, tess)
+      if(any(is.na(marks(Y))))
+        warning("Tessellation does not contain all the points of X")
+      Xcount <- table(tile=marks(Y))
+    }
+  }
   attr(Xcount, "tess") <- tess
   class(Xcount) <- c("quadratcount", class(Xcount))
   return(Xcount)
@@ -102,14 +120,25 @@ rectquadrat.countEngine <- function(x, y, xbreaks, ybreaks, weights) {
   return(sumz)
 }
 
-quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL) {
+quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL,
+                     keepempty=FALSE) {
   W <- as.owin(X)
   xr <- W$xrange
   yr <- W$yrange
   b <- rectquadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
+  # rectangular tiles
   Z <- tess(xgrid=b$xbreaks, ygrid=b$ybreaks)
-  if(W$type != "rectangle")
-    Z <- intersect.tess(Z, W)
+  if(W$type != "rectangle") {
+    # intersect rectangular tiles with window W
+    if(!keepempty) {
+      Z <- intersect.tess(Z, W)
+    } else {
+      til <- tiles(Z)
+      for(i in seq(til))
+        til[[i]] <- intersect.owin(til[[i]], W)
+      Z <- tess(tiles=til, window=W)
+    }
+  }
   return(Z)
 }
 

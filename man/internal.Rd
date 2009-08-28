@@ -31,6 +31,8 @@
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{check.named.vector}
+\alias{check.nvector}
+\alias{check.nmatrix}
 \alias{check.testfun}
 \alias{clip.psp}
 \alias{cliprect.psp}
@@ -185,9 +187,11 @@
 \alias{owinpoly2mask}
 \alias{param.quad}
 \alias{paren}
+\alias{partialModelMatrix}
 \alias{pickoption}
 \alias{ploterodewin}
 \alias{ploterodeimage}
+\alias{plot.distfun}
 \alias{plot.fii}
 \alias{plot.minconfit}
 \alias{plot.pppmatching}
@@ -203,6 +207,7 @@
 \alias{print.bt.frame}
 \alias{print.colourmap}
 \alias{print.diagppm}
+\alias{print.distfun}
 \alias{print.envelope}
 \alias{print.fasp}       
 \alias{print.fii}       
@@ -362,6 +367,8 @@ cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 check.named.vector(x, nam)
+check.nvector(v, npoints, fatal=TRUE)
+check.nmatrix(m, npoints, fatal=TRUE)
 check.testfun(f, f1, X)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
@@ -500,7 +507,7 @@ meanY.owin(w)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
-	 rbord, use.gam, famille,
+	 rbord, use.gam, gcontrol, famille,
          forcefit, allcovar, callstring, precomputed, savecomputed, preponly)
 mpl.get.covariates(covariates, locations, type)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
@@ -525,10 +532,12 @@ owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
 paren(x)
+partialModelMatrix(X,D,model,callstring,\dots)
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
+\method{plot}{distfun}(x, \dots)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
@@ -545,6 +554,7 @@ primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
+\method{print}{distfun}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{fii}(x, \dots)

@@ -92,7 +92,7 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
   (see Stoyan and Stoyan (1994, p. 262)):
   \itemize{
     \item
-    For a point process eqn{X} with numeric marks,
+    For a point process \eqn{X} with numeric marks,
     Stoyan's mark correlation function \eqn{k_{mm}(r)}{k[mm](r)},
     is
     \deqn{

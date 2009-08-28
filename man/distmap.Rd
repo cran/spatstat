@@ -1,10 +1,10 @@
 \name{distmap}
 \alias{distmap}
 \title{
-  Distance Map
+  Distance Map 
 }
 \description{
-  Compute the distance map of an object.
+  Compute the distance map of an object, and return it as a pixel image.
   Generic.
 }
 \usage{
@@ -40,7 +40,8 @@
 \seealso{
   \code{\link{distmap.ppp}},
   \code{\link{distmap.psp}},
-  \code{\link{distmap.owin}}
+  \code{\link{distmap.owin}},
+  \code{\link{distfun}}
 }
 \examples{
   data(cells)

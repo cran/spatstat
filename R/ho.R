@@ -3,7 +3,7 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.8 $ $Date: 2007/01/31 05:45:50 $
+#  $Revision: 1.9 $ $Date: 2009/10/13 02:54:33 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
@@ -51,6 +51,7 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   newmodel$coef <- theta
   newmodel$coef.mpl <- theta0
   newmodel$method <- "ho"
+  newmodel$fitter <- "ho"
   newmodel$fisher <- svar
   newmodel$varcov <- Vinverse
   return(newmodel)

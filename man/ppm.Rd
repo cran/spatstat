@@ -15,6 +15,7 @@
        use.gam=FALSE,
        method="mpl",
        forcefit=FALSE,
+       gcontrol=list(),
        nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
        verb=TRUE)
 }
@@ -40,8 +41,8 @@
   \item{covariates}{
     The values of any spatial covariates (other than the Cartesian
     coordinates) required by the model.
-    Either a data frame, or a list of images.
-    See Details.
+    Either a data frame, or a list whose entries are images,
+    functions or single numbers. See Details.
   }
   \item{correction}{
     The name of the edge correction to be used. The default 
@@ -70,6 +71,11 @@
     If \code{forcefit=FALSE}, some trivial models will be
     fitted by a shortcut. If \code{forcefit=TRUE},
     the generic fitting method will always be used. 
+  }
+  \item{gcontrol}{
+    Optional. List of parameters passed to \code{\link{glm.control}}
+    (or passed to \code{\link{gam.control}} if \code{use.gam=TRUE})
+    controlling the model-fitting algorithm. 
   }
   \item{nsim}{
     Number of simulated realisations
@@ -184,23 +190,25 @@
       the covariate must also have been observed at other 
       locations in the window.
 
-      The argument \code{covariates}, if supplied, should be either
-      a list of images, or a data frame.
-  
-      Typically \code{covariates} is a list of images,
-      each image giving the values of a spatial covariate at 
-      a fine grid of locations. 
-      The argument \code{covariates} should then be a named list,
-      with the names corresponding to
-      the names of covariates in the model formula \code{trend}.
-      Each entry in the list must be an image object (of class \code{"im"},
-      see \code{\link{im.object}}).
-      The software will look up
+      Typically the argument \code{covariates} is a list,
+      with names corresponding to variables in the \code{trend} formula.
+      The entries in the list are pixel images
+      (giving the values of a spatial covariate at 
+      a fine grid of locations) or functions (which can be evaluated
+      at any location \code{(x,y)} to obtain the value of the spatial
+      covariate) or single numbers (indicating a covariate that is
+      constant in this dataset). 
+      Each entry in the list must be an image (object of class \code{"im"},
+      see \code{\link{im.object}}), or a \code{function(x,y)}, or
+      a single number. The software will look up
       the pixel values of each image at the required locations
       (quadrature points).
       In this case the argument \code{Q} may be either a quadrature
       scheme or a point pattern.
 
+      If \code{covariates} is a list,
+      the list entries should have names corresponding to
+      the names of covariates in the model formula \code{trend}.
       The variable names \code{x}, \code{y} and \code{marks}
       are reserved for the Cartesian 
       coordinates and the mark values,
@@ -522,13 +530,16 @@
  # COVARIATES
  #
  X <- rpoispp(42)
- weirdfunction <- function(x,y){ 10 * x^2 + runif(length(x))}
- Zimage <- as.im(weirdfunction, unit.square())
+ weirdfunction <- function(x,y){ 10 * x^2 + 5 * sin(10 * y) }
  #
- # (a) covariate values in pixel image
+ # (a) covariate values as function
+ ppm(X, ~ y + Z, covariates=list(Z=weirdfunction))
+ #
+ # (b) covariate values in pixel image
+ Zimage <- as.im(weirdfunction, unit.square())
  ppm(X, ~ y + Z, covariates=list(Z=Zimage))
  #
- # (b) covariate values in data frame
+ # (c) covariate values in data frame
  Q <- quadscheme(X)
  xQ <- x.quad(Q)
  yQ <- y.quad(Q)

@@ -36,7 +36,7 @@
 
   Strand, L. (1972). 
   A model for stand growth.
-  \emph{{IUFRO} Third Conference Advisory Group of Forest Statisticians},
+  \emph{IUFRO Third Conference Advisory Group of Forest Statisticians},
   INRA, Institut National de la Recherche Agronomique, Paris.
   Pages 207--216.
 

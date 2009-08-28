@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.29 $ $Date: 2009/08/21 21:53:22 $
+#   $Revision: 1.30 $ $Date: 2009/08/26 02:53:15 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -336,7 +336,7 @@ intersect.tess <- function(X, Y, ...) {
   for(i in seq(Xtiles))
     for(j in seq(Ytiles)) {
       Tij <- intersect.owin(Xtiles[[i]], Ytiles[[j]], ..., fatal=FALSE)
-      if(!is.null(Tij))
+      if(!is.null(Tij) && !is.empty(Tij))
         Ztiles <- append(Ztiles, list(Tij))
     }
   Xwin <- as.owin(X)
