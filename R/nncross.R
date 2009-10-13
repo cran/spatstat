@@ -2,12 +2,12 @@
 #   nncross.R
 #
 #
-#    $Revision: 1.5 $  $Date: 2009/04/03 20:16:39 $
+#    $Revision: 1.6 $  $Date: 2009/08/29 01:43:09 $
 #
 
 
 nncross <- function(X, Y, iX=NULL, iY=NULL) {
-  verifyclass(X, "ppp")
+  X <- as.ppp(X, W=bounding.box.xy)
   stopifnot(is.ppp(Y) || is.psp(Y))
 
   # deal with null cases

@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.61 $	$Date: 2009/08/01 21:25:51 $
+#	$Revision: 4.62 $	$Date: 2009/09/26 07:26:01 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -31,7 +31,10 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
     verifyclass(window, "owin")
   else
     window <- owin(...)
-          
+
+  if(missing(x) && missing(y)) 
+    x <- y <- numeric(0)
+  
   n <- length(x)
   if(length(y) != n)
     stop("coordinate vectors x and y are not of equal length")
@@ -323,10 +326,16 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
               paste(dir, filename, sep=.Platform$file.sep)
   df <- read.table(filename, header=header)
   if(header) {
+    # check whether there are columns named 'x' and 'y'
+    colnames <- dimnames(df)[[2]]
+    xycolumns <- match(c("x", "y"), colnames, 0)
+    named <- all(xycolumns > 0)
+  } else {
+    named <- FALSE
+  }
+  if(named) {
     x <- df$x
     y <- df$y
-    colnames <- dimnames(df)[[2]]
-    xycolumns <- match(colnames, c("x","y"), 0)
   } else {
     # assume x, y given in columns 1, 2 respectively
     x <- df[,1]

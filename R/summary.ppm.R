@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.29 $   $Date: 2007/10/23 08:57:25 $
+#    $Revision: 1.32 $   $Date: 2009/10/13 02:55:26 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -63,6 +63,12 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   y$problems <- x$problems
 
+  ######  Fitting algorithm ########################################
+
+  y$fitter <- x$fitter
+  if(y$fitter %in% c("glm", "gam"))
+    y$converged <- x$internal$glmfit$converged
+        
   ######  Extract fitted model coefficients #########################
 
   y$entries$coef <- COEFS <- x$coef
@@ -196,15 +202,26 @@ print.summary.ppm <- function(x, ...) {
 
   # otherwise - full details
   cat("Point process model\n")
-  howfitted <-
+  methodchosen <-
     if(is.null(x$method))
       "unspecified method"
-    else
+    else 
       switch(x$method,
              mpl="maximum pseudolikelihood (Berman-Turner approximation)",
              ho="Huang-Ogata method (approximate maximum likelihood)",
              paste("unrecognised method", sQuote(x$method)))
-  cat(paste("fitted by", howfitted, "\n"))
+  cat(paste("Fitting method:", methodchosen, "\n"))
+  howfitted <- switch(x$fitter,
+                      exact= "analytically",
+                      gam  = "using gam()",
+                      glm  = "using glm()",
+                      ho   = NULL,
+                      paste("using unrecognised fitter", sQuote(x$fitter)))
+  if(!is.null(howfitted)) cat(paste("Model was fitted", howfitted, "\n"))
+  if(x$fitter %in% c("glm", "gam")) {
+    if(x$converged) cat("Algorithm converged\n")
+    else cat("*** Algorithm did not converge ***\n")
+  }
 
   cat("Call:\n")
   print(x$args$call)

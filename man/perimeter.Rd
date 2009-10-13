@@ -12,7 +12,8 @@ perimeter(w)
 }
 \arguments{
   \item{w}{
-    A window (object of class \code{"owin"}).
+    A window (object of class \code{"owin"})
+    or data that can be converted to a window by \code{\link{as.owin}}.
   }
 }
 \details{

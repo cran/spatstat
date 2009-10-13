@@ -42,8 +42,8 @@
   For example, the stationary Poisson process has canonical sufficient
   statistic \eqn{S(x)=n(x)}, the number of points in \eqn{x}.
   The stationary Strauss process with interaction range \eqn{r}
-  (and no edge correction) has canonical sufficient statistic
-  \eqn{S(x)=(n(x),d(x))} where \eqn{d(x)} is the number of pairs
+  (and fitted with no edge correction) has canonical sufficient statistic
+  \eqn{S(x)=(n(x),s(x))} where \eqn{s(x)} is the number of pairs
   of points in \eqn{x} which are closer than a distance \eqn{r}
   to each other. 
 
@@ -58,8 +58,37 @@
   of the model. However it does depend on the irregular parameters
   which are fixed in the original call to \code{\link{ppm}}, for
   example, the interaction range \code{r} of the Strauss process.
+
   The sufficient statistic also depends on the edge correction that
-  was used to fit the model.
+  was used to fit the model. For example in a Strauss process,
+  \itemize{
+    \item
+    If the model is fitted with \code{correction="none"}, the sufficient
+    statistic is \eqn{S(x) = (n(x), s(x))} where \eqn{n(x)} is the
+    number of points and \eqn{s(x)} is the number of pairs of points
+    which are closer than \eqn{r} units apart.
+    \item
+    If the model is fitted with \code{correction="periodic"}, the sufficient
+    statistic is the same as above, except that distances are measured
+    in the periodic sense. 
+    \item
+    If the model is fitted with
+    \code{correction="translate"}, then \eqn{n(x)} is unchanged
+    but \eqn{s(x)} is replaced by a weighted sum (the sum of the translation
+    correction weights for all pairs of points which are closer than
+    \eqn{r} units apart).
+    \item
+    If the model is fitted with
+    \code{correction="border"} (the default), then points lying less than
+    \eqn{r} units from the boundary of the observation window are
+    treated as fixed. Thus \eqn{n(x)} is
+    replaced by the number \eqn{n_r(x)}{n[r](x)}
+    of points lying at least \eqn{r} units from
+    the boundary of the observation window, and \eqn{s(x)} is replaced by
+    the number \eqn{s_r(x)}{s[r](x)} of pairs of points, which are closer
+    than \eqn{r} units apart, and at least one of which lies
+    more than \eqn{r} units from the boundary of the observation window.
+  }
 
   Non-finite values of the sufficient statistic (\code{NA} or
   \code{-Inf}) may be returned if the point pattern \code{X} is

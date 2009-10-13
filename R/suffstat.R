@@ -3,16 +3,19 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.5 $  $Date: 2008/02/25 15:50:45 $
+#  $Revision: 1.12 $  $Date: 2009/10/07 02:36:51 $
 #
 #
 
 suffstat <- function(model, X=data.ppm(model)) {
   cl <- sys.call()
   callstring <- paste(deparse(cl), collapse=" ")
-  
+
   verifyclass(model, "ppm")
-  verifyclass(X, "ppp")
+  if(!missing(X))
+    verifyclass(X, "ppp")
+  else
+    X <- NULL
 
   ss <- model$interaction$family$suffstat
 
@@ -26,69 +29,52 @@ suffstat <- function(model, X=data.ppm(model)) {
   return(func(model, X, callstring))
 }
 
-suffstat.generic <- function(model, X, callstring="suffstat.generic") {
+suffstat.generic <- function(model, X=NULL, callstring="suffstat.generic") {
   # This should work for an arbitrary ppm
   # since it uses the fundamental relation between
   # conditional intensity and likelihood.
   # But it is computationally intensive.
 
   verifyclass(model, "ppm")
-  verifyclass(X, "ppp")
+  coefnames <- names(coef(model))
 
-  shazzam <- function(Q, X, P, model) {
-    trend <- model$trend
-    inter <- model$interaction
-    covar <- model$covariates
-    prep  <- mpl.prepare(Q, X, P, trend, inter, covar,
-                         correction=model$correction,
-                         rbord=model$rbord,
-                         Pname="data points", callstring=callstring)
-    fmla    <- prep$fmla
-    glmdata <- prep$glmdata
-    mof <- model.frame(fmla, glmdata)
-    mom <- model.matrix(fmla, mof)
-
-    coefnames <- names(coef(model))
-    if(!identical(all.equal(colnames(mom), coefnames), TRUE))
-      warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
-
-    dummy <- !is.data(Q)
-    # picks out one row
-    mom <- mom[dummy, ]
-    names(mom) <- coefnames
-    return(mom)
+  if(is.null(X)) {
+    X <- data.ppm(model)
+    modelX <- model
+  } else {
+    verifyclass(X, "ppp")
+    # refit the model to determine which points are used in pseudolikelihood
+    modelX <- update(model, X, method="mpl")
   }
   
-  n <- X$n
+  # find data points which do not contribute to pseudolikelihood
+  mplsubset <- getglmdata(modelX)$.mpl.SUBSET
+  mpldata   <- is.data(quad.ppm(modelX))
+  contribute <- mplsubset[mpldata]
 
-  # for i = 2, ..., n compute T(X[i], X[1:(i-1)])
-  # where conditional intensity lambda(u,X) = exp(theta T(u,X))
+  if(!any(contribute)) 
+    # result is zero vector
+    return(0 * coef(model))
 
-  for(i in 2:n) {
-    Xprior <- X[1:(i-1)]
-    Q <- quad(Xprior, X[i])
-    mom <- shazzam(Q, Xprior, X[1:i], model)
-    if(i == 2)
-      result <- mom
+  # Add points one-by-one
+  # If there are points which don't contribute, condition on them
+  use <- which(contribute)   
+  dontuse <- which(!contribute)
+  for(i in seq(length(use))) {
+    prior <- if(i == 1) c() else use[1:(i-1)]
+    prior <- c(dontuse, prior)
+    Xprior <- X[prior]
+    Xcurrent <- X[use[i]]
+    mom <- partialModelMatrix(Xprior, Xcurrent, model, "suffstat")
+    lastrow <- length(prior) + 1
+    momrow <- mom[lastrow, ]
+    names(momrow) <- coefnames
+    if(i == 1)
+      result <- momrow
     else
-      result <- mom + result
+      result <- momrow + result
   }
-
-  # to compute T(X[1], Empty) we know there are no interaction contributions
-  # so evaluate T for the corresponding Poisson model.
-  # This requires complicated surgery...
-  
-  poismodel <- killinteraction(model)
-  Empty <- X[rep(FALSE, n)]
-  Q <- quad(Empty, X[1])
-  mom1  <- shazzam(Q, Empty, X[1], poismodel)
-
-  # add to result
-  witch <- match(names(mom1), names(result))
-  if(any(is.na(witch)))
-    stop("Internal error: names in zero term do not match names in other terms")
-  result[witch] <- result[witch] + mom1
-
+  attr(result, "mplsubset") <- NULL
   return(result)
 }
 
@@ -105,32 +91,23 @@ killinteraction <- function(model) {
     newmodel$coef <- model$coef[!matches]
     newmodel$internal$Vnames <- NULL
   }
-  # the other 'internal' stuff may still be wrong
+  # the other 'internal' stuff may still be wrong (or `preserved')
   return(newmodel)
 }
 
 suffstat.poisson <- function(model, X, callstring="suffstat.poisson") {
   verifyclass(model, "ppm")
-  verifyclass(X, "ppp")
+  if(is.null(X))
+    X <- data.ppm(model)
+  else 
+    verifyclass(X, "ppp")
   
   su <- summary(model, quick=TRUE)
   if(!(su$poisson))
     stop("Model is not a Poisson process")
 
-  trend <- model$trend
-  covar <- model$covariates
- 
-  Empty <- X[rep(FALSE, X$n)]
-  Q     <- quad(X, Empty)
-  prep  <- mpl.prepare(Q, X, X, trend, Poisson(), covar,
-                       correction=model$correction,
-                       rbord=model$rbord, Pname="data points",
-                       callstring=callstring)
-  fmla    <- prep$fmla
-  glmdata <- prep$glmdata
-
-  mof <- model.frame(fmla, glmdata)
-  mom <- model.matrix(fmla, mof)
+  Empty <- X[numeric(0)]
+  mom <- partialModelMatrix(X, Empty, model, "suffstat")
 
   nmom <- ncol(mom)
   ncoef <- length(coef(model))

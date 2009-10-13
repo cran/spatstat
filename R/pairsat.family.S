@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.27 $	$Date: 2008/02/01 18:06:56 $
+#    $Revision: 1.30 $	$Date: 2009/10/07 02:37:27 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -185,52 +185,35 @@ attr(V, "computed") <- computed
 return(V)
 
 },     ######### end of function $eval                            
-suffstat = function(model, X, callstring="pairsat.family$suffstat") {
+suffstat = function(model, X=NULL, callstring="pairsat.family$suffstat") {
 
 # for saturated pairwise models only  (possibly nonstationary)
   verifyclass(model, "ppm")
-  verifyclass(X, "ppp")
-
   if(!identical(model$interaction$family$name,"saturated pairwise"))
-    stop("Model is not a saturated pairwise interaction process")
+    stop("Model is not a saturated pairwise interaction process") 
 
-  trend <- model$trend
-  inter <- model$interaction
-  covar <- model$covariates
- 
+  if(is.null(X)) {
+    X <- data.ppm(model)
+    modelX <- model
+  } else {
+    verifyclass(X, "ppp")
+    modelX <- update(model, X, method="mpl")
+  }
+
+  # find data points which do not contribute to pseudolikelihood
+  mplsubset <- getglmdata(modelX)$.mpl.SUBSET
+  mpldata   <- is.data(quad.ppm(modelX))
+  contribute <- mplsubset[mpldata]
+  
   Empty <- X[rep(FALSE, X$n)]
-  Q     <- quad(X, Empty)
-  prep  <- mpl.prepare(Q, X, X, trend, inter, covar,
-                       correction=model$correction,
-                       rbord=model$rbord, Pname="data points",
-                       callstring=callstring,
-                       halfway=TRUE)
-  # halfway=TRUE is passed to inter$family$eval
+  mom <- partialModelMatrix(X, Empty, model, "suffstat", halfway=TRUE)
+  # halfway=TRUE is passed to pairsat.family$eval
   # and yields matrix of saturated potential sums 
-  fmla    <- prep$fmla
-  glmdata <- prep$glmdata
 
-  mof <- model.frame(fmla, glmdata)
-  mom <- model.matrix(fmla, mof)
-
-  if(any(colnames(mom) != names(coef(model))))
-    warning("Internal error: mismatch between column names of model matrix and names of coefficient vector in fitted model")
-     
-  order2  <- colnames(mom) %in% model$internal$Vnames
-  order1  <- !order2
-
-  if(any(order1)) {
-    o1terms <- mom[, order1, drop=FALSE]
-    o1sum   <- apply(o1terms, 2, sum)
-  }
-  if(any(order2)) {
-    o2terms <- mom[, order2, drop=FALSE]
-    o2sum   <- apply(o2terms, 2, sum)/2
-  }
-
-  result <- 0 * coef(model)
-  result[order1] <- o1sum
-  result[order2] <- o2sum
+  # take only those terms that contribute to the pseudolikelihood
+  mom <- mom[contribute, , drop=FALSE]
+  
+  result <- apply(mom, 2, sum)
   return(result)
          
 

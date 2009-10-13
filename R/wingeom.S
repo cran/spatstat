@@ -2,14 +2,14 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.55 $	$Date: 2009/07/18 19:53:18 $
+#	$Revision: 4.56 $	$Date: 2009/09/04 03:24:37 $
 #
 #
 #
 #
 #-------------------------------------
 area.owin <- function(w) {
-	verifyclass(w, "owin")
+	w <- as.owin(w)
         switch(w$type,
                rectangle = {
 		width <- abs(diff(w$xrange))
@@ -30,7 +30,7 @@ area.owin <- function(w) {
 }
 
 perimeter <- function(w) {
-  verifyclass(w, "owin")
+  w <- as.owin(w)
   switch(w$type,
          rectangle = {
            return(2*(diff(w$xrange)+diff(w$yrange)))

@@ -282,7 +282,7 @@
   \describe{
     \item{trend given as a function:}{A trend
       function may be a function of any number of arguments,
-      but the first two must be the eqn{x,y} coordinates of
+      but the first two must be the \eqn{x,y} coordinates of
       a point.  Auxiliary arguments may be passed
       to the \code{trend} function at the time of simulation,
       via the \code{\dots} argument to \code{\link{rmh}}.

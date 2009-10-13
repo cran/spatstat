@@ -140,6 +140,7 @@ data.ppm                Extract Original Data from a Fitted Point
                         Process Model
 default.dummy           Generate a Default Pattern of Dummy Points
 delaunay                Delaunay Triangulation of Point Pattern
+deltametric             Delta Metric
 demopat                 Artificial Data Point Pattern
 density.ppp             Kernel Smoothed Intensity of Point Pattern
 density.psp             Kernel Smoothing of Line Segment Pattern
@@ -156,6 +157,7 @@ disc                    Circular Window
 discpartarea            Area of Part of Disc
 discretise              Safely Convert Point Pattern Window to Binary
                         Mask
+distfun                 Distance Map as a Function
 distmap                 Distance Map
 distmap.owin            Distance Map of Window
 distmap.ppp             Distance Map of Point Pattern

@@ -5,7 +5,8 @@
   Generates simulated realisations from a fitted cluster point process model.
 }
 \usage{
-  \method{simulate}{kppm}(object, nsim = 1, seed=NULL, ...)
+  \method{simulate}{kppm}(object, nsim = 1, seed=NULL, ...,
+         window=NULL, covariates=NULL)
 }
 \arguments{
   \item{object}{
@@ -17,10 +18,18 @@
   \item{seed}{
     an object specifying whether and how to initialise
     the random number generator. Either \code{NULL} or an integer that will
-    be used in a call to \code{\link[stats]{set.seed}} before simulating the
-    point patterns. 
+    be used in a call to \code{\link[base:Random]{set.seed}}
+    before simulating the point patterns. 
   }
   \item{\dots}{Ignored.}
+  \item{window}{
+    Optional. Window (object of class \code{"owin"}) in which the
+    model should be simulated.
+  }
+  \item{covariates}{
+    Optional. A named list containing new values for the covariates in the
+    model. 
+  }
 }
 \details{
   This function is a method for the generic function

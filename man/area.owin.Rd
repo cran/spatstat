@@ -43,10 +43,10 @@
   area.owin(mas)
       # returns approx area of k-gon
   
-  mas <- as.mask(w, eps=0.01)
+  mas <- as.mask(square(2), eps=0.01)
   X <- raster.x(mas)
   Y <- raster.y(mas)
-  mas$m <- ((X - 0.5)^2 + (Y - 0.5)^2 <= 1)
+  mas$m <- ((X - 1)^2 + (Y - 1)^2 <= 1)
   area.owin(mas)
        # returns 3.14 approx     
 

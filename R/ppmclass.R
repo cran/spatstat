@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.32 $	$Date: 2009/08/12 04:43:30 $
+#	$Revision: 2.34 $	$Date: 2009/10/13 05:27:48 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -93,8 +93,8 @@ print.ppm <- function(x, ...) {
 	if(!poisson) 
           print(s$interaction, family=FALSE)
 
-        # ---- Warnings issued ----------------------------
-
+        # ---- Warnings issued in mpl.prepare  ---------------------
+        
         probs <- s$problems
         if(!is.null(probs) && is.list(probs) && (length(probs) > 0)) 
           lapply(probs,
@@ -106,6 +106,14 @@ print.ppm <- function(x, ...) {
         if(s$old)
           warning(paste("Model fitted by old spatstat version", s$version))
         
+        # ---- Algorithm status ----------------------------
+
+        fitter <- s$fitter
+        converged <- s$converged
+        if(!is.null(fitter) && fitter %in% c("glm", "gam") && !converged)
+          cat(paste("*** Fitting algorithm for", sQuote(fitter),
+                    "did not converge ***\n"))
+
 	return(invisible(NULL))
 }
 

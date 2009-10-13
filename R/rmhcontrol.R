@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.5 $  $Date: 2006/10/09 02:55:58 $
+#   $Revision: 1.6 $  $Date: 2009/09/22 02:00:53 $
 #
 #
 
@@ -39,8 +39,8 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
      || q < 0 || q > 1)
     stop("q should be a number in [0,1]")
   if(!is.numeric(nrep) || length(nrep) != 1
-     || nrep <= 1)
-    stop("nrep should be an integer > 1")
+     || nrep < 1)
+    stop("nrep should be an integer >= 1")
   if(!is.numeric(nverb) || length(nverb) != 1
      || nverb < 0 || nverb > nrep)
     stop("nverb should be an integer <= nrep")
