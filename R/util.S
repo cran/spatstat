@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.38 $    $Date: 2009/08/28 18:18:29 $
+#    $Revision: 1.44 $    $Date: 2009/10/21 18:26:39 $
 #
 #  (a) for matrices only:
 #
@@ -314,5 +314,69 @@ check.nmatrix <- function(m, npoints, fatal=TRUE) {
   if(!is.null(whinge)) {
     if(fatal) stop(whinge) else return(FALSE)
   }
+  return(TRUE)
+}
+
+check.named.vector <- function(x, nam, context="", namopt=character(0)) {
+  xtitle <- deparse(substitute(x))
+  check.named.thing(x, nam, namopt, sQuote(xtitle),
+                    is.numeric(x), "vector", context)
+  opt <- namopt %in% names(x)
+  return(x[c(nam, namopt[opt])])
+}
+
+check.named.list <- function(x, nam, context="", namopt=character(0)) {
+  xtitle <- deparse(substitute(x))
+  check.named.thing(x, nam, namopt, sQuote(xtitle),
+                    is.list(x), "list", context)  
+  opt <- namopt %in% names(x)
+  return(x[c(nam, namopt[opt])])
+}
+
+check.named.thing <- function(x, nam, namopt=character(0), xtitle=NULL,
+                              valid=TRUE, type="object", context="",
+                              fatal=TRUE) {
+  if(is.null(xtitle))
+    xtitle <- sQuote(deparse(substitute(x)))
+  # check whether names(x) contains all obligatory names 'nam'
+  # and possibly some of the optional names 'namopt'
+  namesx <- names(x)
+  omitted <- !(nam %in% namesx)
+  foreign <- !(namesx %in% c(nam, namopt))
+  if(valid && !any(omitted) && !any(foreign))
+    return(character(0))
+  # some condition violated
+  if(nzchar(context))
+    xtitle <- paste(context, xtitle)
+  whinge <- paste(xtitle,
+                  "must be a named", paste(type, ",", sep=""),
+                  "with components", commasep(nam))
+  if(length(namopt) > 0)
+    whinge <- paste(whinge, paren(paste("and optionally", commasep(namopt))))
+  if(any(omitted)) {
+    grizzle <- paste(ngettext(sum(omitted), "parameter", "parameters"),
+                     commasep(nam[omitted]),
+                     "omitted")
+    whinge <- paste(whinge, grizzle, sep="; ")
+  }
+  if(any(foreign)) {
+    grizzle <- paste(ngettext(sum(foreign), "component", "components"),
+                     commasep(namesx[foreign]),
+                     "not recognised")
+    whinge <- paste(whinge, grizzle, sep="; ")
+  }
+  if(fatal)
+    stop(whinge, call.=FALSE)
+  return(whinge)
+}
+
+evenly.spaced <- function(x, tol=1e-07) {
+  # test whether x is evenly spaced and increasing
+  dx <- diff(x)
+  if(any(dx <= .Machine$double.eps))
+    return(FALSE)
+  # The following test for equal spacing is used in hist.default
+  if(diff(range(dx)) > tol * mean(dx))
+    return(FALSE)
   return(TRUE)
 }

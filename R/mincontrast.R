@@ -316,14 +316,3 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
 }
 
 
-check.named.vector <- function(x, nam) {
-  xname <- deparse(substitute(x))
-  if(!is.numeric(x) || length(x) != 2 || !all(nam %in% names(x))) {
-    whinge <- paste(xname,
-                    "must be a named vector, with components",
-                    commasep(nam))
-    stop(whinge)
-  }
-  return(x[nam])
-}
-

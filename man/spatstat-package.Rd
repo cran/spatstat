@@ -162,7 +162,7 @@
 
       \bold{Standard point pattern datasets:}
       
-      Remember to say \code{\link{data}(bramblecanes)} etc.
+      Remember to say \code{\link{data}(amacrine)} etc.
       Type \code{demo(data)} to see all the datasets
       installed with the package.
       
@@ -173,6 +173,7 @@
 	\code{\link{bei}} \tab Tropical rainforest trees \cr
 	\code{\link{betacells}} \tab Waessle et al. cat retinal ganglia data \cr
 	\code{\link{bramblecanes}} \tab Bramble Canes data \cr
+	\code{\link{bronzefilter}} \tab Bronze Filter Section data \cr
 	\code{\link{cells}} \tab Crick-Ripley biological cells data \cr
 	\code{\link{chorley}} \tab Chorley-Ribble cancer data \cr
 	\code{\link{copper}} \tab Berman-Huntington copper deposits data \cr
@@ -917,9 +918,11 @@
   Additional contributions by
   Ang Qi Wei,
   Colin Beale,
+  Ricardo Bernhardt,
   Brad Biggerstaff,
   Roger Bivand,
   Florent Bonneu,
+  Julian Burgos,
   Jianbao Chen,
   Y.C. Chin,
   Bjarke Christensen,
@@ -944,6 +947,7 @@
   Robert Mark,
   Jorge Mateu,
   Peter McCullagh,
+  Sebastian Wastl Meyer,
   Mi Xiangcheng,
   Jesper Moller,
   Linda Stougaard Nielsen,
@@ -965,7 +969,8 @@
   Berwin Turlach,
   Andrew van Burgel,
   Alexendre Villers,
-  Hao Wang
+  Hao Wang,
+  H. Wendrock
   and
   Selene Wong.
 }

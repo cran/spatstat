@@ -6,38 +6,36 @@ CPP = /usr/bin/cpp
 ##########################################################
 # Sources actually written by humans:
 
-MH_TEMPLATES = cif.h death.h methas.template death.template 
-
-CIF_RAT = badgey.r dgs.r diggra.r geyer.r lookup.r sftcr.r \
-    straush.r straushm.r strauss.r straussm.r areaint.r \
-    initaux.r updaux.r
-
-OTHER_FOR = arand.f aru.f dist2.f dppll.f fexitf.f inxyp.f 
+RAT_SRC = dppll.r inxyp.r 
 
 C_DOMINIC = dinfty.c dwpure.c 
 
-C_SRC = areadiff.c closepair.c corrections.c discarea.c distances.c exactdist.c  exactPdist.c  fexitc.c  massdisthack.c xyseg.c $(C_DOMINIC)
+C_MISC = raster.h areadiff.c closepair.c connect.c corrections.c \
+       discarea.c distances.c distmapbin.c distseg.c \
+       exactdist.c  exactPdist.c  \
+       massdisthack.c poly2im.c trigraf.c utils.c xyseg.c 
+
+C_MH = methas.h dist2.h areaint.c badgey.c dgs.c \
+	diggra.c dist2.c fexitc.c getcif.c geyer.c \
+	lookup.c methas.c stfcr.c \
+	straush.c straushm.c strauss.c straussm.c
+
+C_SRC = $(C_DOMINIC) $(C_MISC) $(C_MH)
 
 CC_SRC = PerfectStrauss.cc
 
 C_TEMPLATES = Kborder.cpp Kborder.h
 
-HUMAN = $(MH_TEMPLATES) $(C_TEMPLATES) $(CIF_RAT) $(OTHER_FOR) $(C_SRC) $(CC_SRC) raster.h Makefile
+HUMAN = $(C_TEMPLATES) $(RAT_SRC) $(C_SRC) $(CC_SRC)  Makefile
 
 ##########################################################
 # Source to be generated automatically:
 
-CIF_FOR = badgey.f dgs.f diggra.f geyer.f lookup.f sftcr.f \
-    straush.f straushm.f strauss.f straussm.f areaint.f \
-    initaux.f updaux.f
-
-MH_FOR = mh1.f mh2.f mh3.f mh4.f mh5.f mh6.f mh7.f mh8.f mh9.f mh10.f mh11.f
-
-DEATH_FOR = deathu.f deathm.f
+RAT_FOR = dppll.f inxyp.f 
 
 K_C = Kborder.c Kwborder.c
 
-GENERATED = $(CIF_FOR) $(MH_FOR) $(DEATH_FOR) $(K_C)
+GENERATED = $(K_C) $(RAT_FOR) 
 
 
 ######################################################
@@ -72,41 +70,3 @@ Kwborder.c:	Kborder.cpp
 	mv tmpw $@
 
 
-deathm.r:  $(MH_TEMPLATES)
-	$(CPP) -DMARKED -o $@ death.template
-
-deathu.r:  $(MH_TEMPLATES)
-	$(CPP) -o $@ death.template
-
-mh1.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=1 -o $@ methas.template
-
-mh2.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=2 -o $@ methas.template
-
-mh3.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=3 -o $@ methas.template
-
-mh4.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=4 -o $@ methas.template
-
-mh5.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=5 -o $@ methas.template
-
-mh6.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=6 -o $@ methas.template
-
-mh7.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=7 -o $@ methas.template
-
-mh8.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=8 -o $@ methas.template
-
-mh9.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=9 -o $@ methas.template
-
-mh10.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=10 -o $@ methas.template
-
-mh11.r:  $(MH_TEMPLATES)
-	$(CPP) -DNMBR=11 -o $@ methas.template

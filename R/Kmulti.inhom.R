@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.24 $	$Date: 2009/07/24 05:37:10 $
+#	$Revision: 1.28 $	$Date: 2009/10/16 06:26:03 $
 #
 #
 # ------------------------------------------------------------------------
@@ -33,9 +33,10 @@ Ldot.inhom <- function(X, i, ...) {
 }
 
 "Kcross.inhom" <- 
-function(X, i, j, lambdaI, lambdaJ, ...,
+function(X, i, j, lambdaI=NULL, lambdaJ=NULL, ...,
          r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
+         correction = c("border", "isotropic", "Ripley", "translate"),
+         sigma=NULL, varcov=NULL,
          lambdaIJ=NULL)
 {
   verifyclass(X, "ppp")
@@ -54,6 +55,7 @@ function(X, i, j, lambdaI, lambdaJ, ...,
   Jname <- paste("points with mark j =", j)
   result <- Kmulti.inhom(X, I, J, lambdaI, lambdaJ, ...,
                          r=r,breaks=breaks,correction=correction,
+                         sigma=sigma, varcov=varcov,
                          lambdaIJ=lambdaIJ, Iname=Iname, Jname=Jname)
   result <-
     rebadge.fv(result,
@@ -65,9 +67,10 @@ function(X, i, j, lambdaI, lambdaJ, ...,
 }
 
 "Kdot.inhom" <- 
-function(X, i, lambdaI, lambdadot, ...,
+function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
          r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
+         correction = c("border", "isotropic", "Ripley", "translate"),
+         sigma=NULL, varcov=NULL, 
          lambdaIdot=NULL)
 {
   verifyclass(X, "ppp")
@@ -87,6 +90,7 @@ function(X, i, lambdaI, lambdadot, ...,
 	
   result <- Kmulti.inhom(X, I, J, lambdaI, lambdadot, ...,
                          r=r,breaks=breaks,correction=correction,
+                         sigma=sigma, varcov=varcov,
                          lambdaIJ=lambdaIdot,
                          Iname=Iname, Jname=Jname)
   result <-
@@ -98,11 +102,12 @@ function(X, i, lambdaI, lambdadot, ...,
 
 
 "Kmulti.inhom"<-
-function(X, I, J, lambdaI, lambdaJ, 
+function(X, I, J, lambdaI=NULL, lambdaJ=NULL, 
          ...,
          r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
          lambdaIJ=NULL,
+         sigma=NULL, varcov=NULL,
          Iname = "points satisfying condition I",
          Jname = "points satisfying condition J")
 {
@@ -152,11 +157,19 @@ function(X, I, J, lambdaI, lambdaJ,
   breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
   rmax <- breaks$max
-        
+
   # intensity data
-  if(is.im(lambdaI)) {
+  if(is.null(lambdaI)) {
+    # estimate intensity
+    lambdaI <- density(X[I], ..., sigma=sigma, varcov=varcov,
+                       at="points", leavoneout=TRUE)
+  } else if(is.im(lambdaI)) {
     # look up intensity values
     lambdaI <- safelookup(lambdaI, X[I])
+  } else if(is.function(lambdaI)) {
+    # evaluate function at locations
+    XI <- X[I]
+    lambdaI <- lambdaI(XI$x, XI$y)
   } else if(is.vector(lambdaI) && is.numeric(lambdaI)) {
     # validate intensity vector
     if(length(lambdaI) != nI)
@@ -165,9 +178,17 @@ function(X, I, J, lambdaI, lambdaJ,
   } else 
   stop(paste(sQuote("lambdaI"), "should be a vector or an image"))
 
-  if(is.im(lambdaJ)) {
+  if(is.null(lambdaJ)) {
+    # estimate intensity
+    lambdaJ <- density(X[J], ..., sigma=sigma, varcov=varcov,
+                       at="points", leavoneout=TRUE)
+  } else if(is.im(lambdaJ)) {
     # look up intensity values
     lambdaJ <- safelookup(lambdaJ, X[J])
+  } else if(is.function(lambdaJ)) {
+    # evaluate function at locations
+    XJ <- X[J]
+    lambdaJ <- lambdaJ(XJ$x, XJ$y)
   } else if(is.vector(lambdaJ) && is.numeric(lambdaJ)) {
     # validate intensity vector
     if(length(lambdaJ) != nJ)

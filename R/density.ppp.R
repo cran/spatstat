@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.15 $    $Date: 2009/06/30 04:25:28 $
+#  $Revision: 1.16 $    $Date: 2009/10/16 04:22:26 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -104,7 +104,21 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
       }
       result <- result/edgeweight
     }
-    return(as.numeric(result))
+    result <- as.numeric(result)
+    # validate
+    npoints <- x$n
+    if(length(result) != npoints) 
+      stop(paste("Internal error: incorrect number of lambda values",
+                 "in leave-one-out method:",
+                 "length(lambda) = ", length(result),
+                 "!=", npoints, "= npoints"))
+    if(any(is.na(result))) {
+      nwrong <- sum(is.na(result))
+      stop(paste("Internal error:", nwrong, "NA or NaN",
+                 ngettext(nwrong, "value", "values"),
+                 "generated in leave-one-out method"))
+    }
+    return(result)
   }
   # VALUES AT PIXELS
   if(!edge) {

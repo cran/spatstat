@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.29 $   $Date: 2008/07/28 16:42:57 $
+#  $Revision: 2.30 $   $Date: 2009/10/21 02:44:22 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -80,7 +80,7 @@ list(
      function(coeffs, inte) {
        r <- inte$par$r
        eta <- (inte$interpret)(coeffs, inte)$param$eta
-       return(list(cif='areaint', par=list(eta=eta,r=r)))
+       return(list(cif='areaint', par=c(eta=eta,r=r)))
      },
      "hybrid Geyer process" =
      function(coeffs, inte) {

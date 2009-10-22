@@ -3,7 +3,7 @@
 #
 #  Hausdorff distance and Euclidean separation for psp objects
 #
-#  $Revision: 1.5 $ $Date: 2007/10/24 09:41:15 $
+#  $Revision: 1.7 $ $Date: 2009/10/22 00:25:00 $
 #
 #
 
@@ -16,18 +16,17 @@ pairdist.psp <- function(X, ..., method="Fortran", type="Hausdorff") {
                        hausdorff="Hausdorff",
                        separation="separation"))
 
-  # Compute min dist from each endpoint of X to each segment of Y
-  D12 <- AsymmHausdorff.psp(X, X, method=method)
-  
+  D12 <- AsymmDistance.psp(X, X, metric=type, method=method)
+
   switch(type,
          Hausdorff={
            # maximum is Hausdorff metric
            D <- array(pmax(D12, t(D12)), dim=dim(D12))
          },
          separation={
-           # first take minimum of endpoint-to-segment distances
+           # Take minimum of endpoint-to-segment distances
            D <- array(pmin(D12, t(D12)), dim=dim(D12))
-           # Identify pairs of segments which cross
+           # Identify any pairs of segments which cross
            cross <- test.selfcrossing.psp(X)
            # Assign separation = 0 to such pairs
            D[cross] <- 0
@@ -45,12 +44,9 @@ crossdist.psp <- function(X, Y, ..., method="Fortran", type="Hausdorff") {
                      c(Hausdorff="Hausdorff",
                        hausdorff="Hausdorff",
                        separation="separation"))
-
   
-  # Compute min dist from each endpoint of X to each segment of Y
-  DXY <- AsymmHausdorff.psp(X, Y, method=method)
-  # Compute min dist from each endpoint of Y to each segment of X
-  DYX <- AsymmHausdorff.psp(Y, X, method=method)
+  DXY <- AsymmDistance.psp(X, Y, metric=type, method=method)
+  DYX <- AsymmDistance.psp(Y, X, metric=type, method=method)
   
   switch(type,
          Hausdorff={
@@ -58,7 +54,7 @@ crossdist.psp <- function(X, Y, ..., method="Fortran", type="Hausdorff") {
            D <- array(pmax(DXY, t(DYX)), dim=dim(DXY))
          },
          separation={
-           # first take minimum of endpoint-to-segment distances
+           # Take minimum of endpoint-to-segment distances
            D <- array(pmin(DXY, t(DYX)), dim=dim(DXY))
            # Identify pairs of segments which cross
            cross <- test.crossing.psp(X, Y)
@@ -84,21 +80,48 @@ nndist.psp <- function(X, ..., k=1, method="Fortran") {
   return(NND)
 }
 
-AsymmHausdorff.psp <- function(X, Y, method="Fortran") {
+# .....  AsymmDistance.psp .....
+#
+# If metric="Hausdorff":
+#     this function computes, for each pair of segments A = X[i] and B = Y[j],
+#     the value max_{a in A} d(a,B) = max_{a in A} min_{b in B} ||a-b||
+#     which appears in the definition of the Hausdorff metric.
+#     Since the distance function d(a,B) of a segment B is a convex function,
+#     the maximum is achieved at an endpoint of A. So the algorithm
+#     actually computes h(A,B) = max (d(e_1,B), d(e_2,B)) where e_1, e_2
+#     are the endpoints of A. And H(A,B) = max(h(A,B),h(B,A)).
+#
+# If metric="separation":
+#     the function computes, for each pair of segments A = X[i] and B = Y[j],
+#     the MINIMUM distance from an endpoint of A to any point of B.
+#        t(A,B) = min (d(e_1,B), d(e_2,B))
+#     where e_1, e_2 are the endpoints of A.
+#     Define the separation distance
+#        s(A,B) = min_{a in A} min_{b in B} ||a-b||.
+#     The minimum (a*, b*) occurs either when a* is an endpoint of A,
+#     or when b* is an endpoint of B, or when a* = b* (so A and B intersect).
+#     (If A and B are parallel, the minimum is still achieved at an endpoint)
+#     Thus s(A,B) = min(t(A,B), t(B,A)) unless A and B intersect.
+
+
+AsymmDistance.psp <- function(X, Y, metric="Hausdorff", method="Fortran") {
   if(method != "Fortran" && method != "interpreted")
     stop(paste("Unrecognised method", sQuote(method)))
   # Extract endpoints of X
   EX <- endpoints.psp(X, "both")
   idX <- attr(EX, "id")
-  # compute min dist from each endpoint of X to each segment of Y
+  # compute shortest dist from each endpoint of X to each segment of Y
   DPL <- distppll(cbind(EX$x,EX$y), Y$ends, mintype=0, method=method)
-  # maximise over each pair of endpoints
+  # for each segment in X, maximise or minimise over the two endpoints
   Dist <- as.vector(DPL)
   Point <- as.vector(idX[row(DPL)])
   Segment <- as.vector(col(DPL))
-  DXY <- tapply(Dist, list(factor(Point), factor(Segment)), max)
+  switch(metric,
+         Hausdorff={
+           DXY <- tapply(Dist, list(factor(Point), factor(Segment)), max)
+         },
+         separation={
+           DXY <- tapply(Dist, list(factor(Point), factor(Segment)), min)
+           })
   return(DXY)
 }
-
-  
-

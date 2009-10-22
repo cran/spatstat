@@ -99,6 +99,7 @@ blur                    Apply Gaussian Blur to a Pixel Image
 bounding.box            Bounding Box of a Window or Point Pattern
 bounding.box.xy         Convex Hull of Points
 bramblecanes            Hutchings' Bramble Canes data
+bronzefilter            Bronze gradient filter data
 by.im                   Apply Function to Image Broken Down by Factor
 by.ppp                  Apply a Function to a Point Pattern Broken Down
                         by Factor

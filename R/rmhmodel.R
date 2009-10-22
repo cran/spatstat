@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.29 $  $Date: 2008/07/22 00:55:35 $
+#   $Revision: 1.32 $  $Date: 2009/10/16 20:33:51 $
 #
 #
 
@@ -28,8 +28,8 @@ rmhmodel.default <- function(...,
                "with arguments given by name if they are present"))
   
   # Validate parameters
-  if(is.null(cif)) stop("cif is missing")
-  if(is.null(par)) stop("par is missing")
+  if(is.null(cif)) stop("cif is missing or NULL")
+  if(is.null(par)) stop("par is missing or NULL")
 
   if(!is.null(w))
     w <- as.owin(w)
@@ -43,12 +43,26 @@ rmhmodel.default <- function(...,
   if(is.null(rules))
     stop(paste("Unrecognised cif:", sQuote(cif)))
   
-  # Turn the name of the cif into a number (for use in Fortran)
-  fortran.id <- rules$fortran.id
+  # Map the name of the cif from R to C
+  #      (the names are normally identical in R and C,
+  #      except "poisson" -> NA)
+  C.id <- rules$C.id
+  
+  # Check that the C name is recognised in C 
+  if(!is.na(C.id)) {
+    z <- .C("knownCif",
+            cifname=as.character(C.id),
+            answer=as.integer(0),
+            PACKAGE="spatstat")
+    ok <- as.logical(z$answer)
+    if(!ok)
+      stop(paste("Internal error: the cif", sQuote(C.id),
+                 "is not recognised in the C code"))
+  }
 
-  # Validate the model parameters and reformat them
+  # Validate the model parameters and reformat them 
   check <- rules$parhandler
-  fortran.par <-
+  C.par <-
     if(!rules$multitype)
       check(par)
     else if(!is.null(types))
@@ -58,18 +72,10 @@ rmhmodel.default <- function(...,
       NULL
 
   # ensure it's a numeric vector
-  fortran.par <- unlist(fortran.par)
-
-  # Check that cif executable is actually loaded
-  if(!is.na(fortran.id) && !is.loaded(cif))
-    stop(paste("executable is not loaded for cif", sQuote(cif)))
+  C.par <- unlist(C.par)
 
   # Calculate reach of model
   mreach <- rules$reach(par)
-
-# Determine the number of discs (only applies to
-# the badgey model.  (Well, sort of to geyer as well.)
-  ndisc <- rules$ndisc(par)
 
 ###################################################################
 # return augmented list  
@@ -78,13 +84,11 @@ rmhmodel.default <- function(...,
               w=w,
               trend=trend,
               types=types,
-              fortran.id=fortran.id,
-              fortran.par=fortran.par,
-              check= if(is.null(fortran.par)) check else NULL,
+              C.id=C.id,
+              C.par=C.par,
+              check= if(is.null(C.par)) check else NULL,
               multitype.interact=rules$multitype,
-              need.aux=rules$need.aux,
-              reach=mreach,
-	      ndisc=ndisc
+              reach=mreach
               )
   class(out) <- c("rmhmodel", class(out))
   return(out)
@@ -111,7 +115,7 @@ print.rmhmodel <- function(x, ...) {
   
   cat("Numerical parameters: par =\n")
   print(x$par)
-  if(is.null(x$fortran.par))
+  if(is.null(x$C.par))
     cat("Parameters have not yet been checked for compatibility with types.\n")
   if(is.owin(x$w)) print(x$w) else cat("Window: not specified.\n")
   cat("Trend: ")
@@ -135,78 +139,50 @@ reach.rmhmodel <- function(x, ...) {
 #
        'poisson'=
        list(
-            fortran.id=NA,
+            C.id=NA,
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              pnames <- names(par)
-              ok <- ("beta" %in% pnames)
-              if(!any(ok))
-                stop("For the Poisson process, must specify beta")
-              if(any(!ok))
-                stop(paste("Unrecognised",
-                           ngettext(sum(!ok), "parameter", "parameters"),
-                           paste(sQuote(pnames[!ok]), collapse=", "),
-                           "for Poisson process"))
+              check.named.thing(par, "beta", context="For the Poisson process")
               if(par[["beta"]] < 0)
                 stop("Negative value of beta for Poisson process")
               return(par)
             },
-            reach = function(par, ...) { return(0) },
-            ndisc = function(par, ...) { return(0) }
+            reach = function(par, ...) { return(0) }
             ),
 #       
 # 1. Strauss.
 #       
        'strauss'=
        list(
-            fortran.id=1,
+            C.id="strauss",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","gamma","r")
-              if(sum(!is.na(match(names(par),nms))) != 3) {
-		stop(paste("For the strauss cif, par must be a named vector\n",
-                           "with components beta, gamma, and r.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","gamma","r"),
+                                        "For the strauss cif")
               if(any(par<0))
 		stop("Negative parameters for strauss cif.")
               if(par["gamma"] > 1)
 		stop("For Strauss processes, gamma must be <= 1.")
-              par <- par[nms]
-# Square the radius to avoid squaring in the Fortran code.
-              par[[3]] <- par[[3]]^2
               return(par)
             },
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) 0 else r)
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
 # 2. Strauss with hardcore.
 #       
        'straush' =
        list(
-            fortran.id=2,
+            C.id="straush",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","gamma","r","hc")
-              if(sum(!is.na(match(names(par),nms))) != 4) {
-		stop(paste("For the straush cif, par must be a named vector\n",
-                           "with components beta, gamma, r, and hc.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","gamma","r","hc"),
+                                        "For the straush cif")
               if(any(par<0))
 		stop("Negative parameters for straush cif.")
-              par <- par[nms]
-# Square the radii to avoid squaring in the Fortran code.
-	      par[[3]] <- par[[3]]^2
-	      par[[4]] <- par[[4]]^2
               return(par)
             },
             reach = function(par, ...) {
@@ -214,30 +190,23 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) h else r)
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
 # 3. Softcore.
 #
        'sftcr' =
        list(
-            fortran.id=3,
+            C.id="sftcr",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              	nms <- c("beta","sigma","kappa")
-                if(sum(!is.na(match(names(par),nms))) != 3) {
-                  stop(paste("For the sftcr cif, par must be a named vector\n",
-                             "with components beta, sigma, and kappa.\n",
-                             "Bailing out."))
-                }
-                if(any(par<0))
-                  stop("Negative  parameters for sftcr cif.")
-                if(par["kappa"] > 1)
-                  stop("For Softcore processes, kappa must be <= 1.")
-                par <- par[nms]
-                return(par)
+              par <- check.named.vector(par, c("beta","sigma","kappa"),
+                                        "For the sftcr cif")
+              if(any(par<0))
+                stop("Negative  parameters for sftcr cif.")
+              if(par["kappa"] > 1)
+                stop("For Softcore processes, kappa must be <= 1.")
+              return(par)
             },
             reach = function(par, ..., epsilon=0) {
               if(epsilon==0)
@@ -245,23 +214,18 @@ reach.rmhmodel <- function(x, ...) {
               kappa <- par[["kappa"]]
               sigma <- par[["sigma"]]
               return(sigma/(epsilon^(kappa/2)))
-            },                        
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
-# 4. Marked Strauss.
+# 4. Multitype Strauss.
 #       
        'straussm' =
        list(
-            fortran.id=4,
+            C.id="straussm",
             multitype=TRUE,
-            need.aux=FALSE,
             parhandler=function(par, types) {
-              nms <- c("beta","gamma","radii")
-              if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 3) 
-		stop(paste("For the straussm cif, par must be a named list\n",
-                           "with components beta, gamma, and radii.\n",
-                           "Bailing out."))
+              par <- check.named.list(par, c("beta","gamma","radii"),
+                                      "For the straussm cif")
               beta <- par$beta
               if(any(is.na(beta)))
 		stop("Missing values not allowed in beta.")
@@ -269,23 +233,17 @@ reach.rmhmodel <- function(x, ...) {
               if(length(beta) != ntypes)
 		stop("Length of beta does not match ntypes.")
               gamma <- par$gamma
-              if(!is.matrix(gamma) || sum(dim(gamma) == ntypes) != 2)
-		stop("Component gamma of par is of wrong shape.")
+              MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
 	      gamma[is.na(gamma)] <- 0
+
               r <- par$radii
-              if(!is.matrix(r) || sum(dim(r) == ntypes) != 2)
-		stop("Component r of par is of wrong shape.")
+              MultiPair.checkmatrix(r, ntypes, "par$radii")
 	      r[is.na(r)] <- 0
-              gamma <- t(gamma)[row(gamma)>=col(gamma)]
-              r <- t(r)[row(r)>=col(r)]
-# Pack up just to check for negative values:
-              par <- c(beta,gamma,r)
-              if(any(par<0))
-		stop("Negative  parameters for straussm cif.")
-# Square the radii to avoid squaring in Fortran code:
-	      r <- r^2
-# Repack
+
+# Repack as flat vector
 	      par <- c(beta,gamma,r)
+              if(any(par<0))
+		stop("Some negative parameters for straussm cif.")
               return(par)
             }, 
             reach = function(par, ...) {
@@ -293,24 +251,18 @@ reach.rmhmodel <- function(x, ...) {
               g <- par$gamma
               operative <- ! (is.na(r) | (g == 1))
               return(max(0, r[operative]))
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
-# 5. Marked Strauss with hardcore.
+# 5. Multitype Strauss with hardcore.
 #       
        'straushm' = 
        list(
-            fortran.id=5,
+            C.id="straushm",
             multitype=TRUE,
-            need.aux=FALSE,
             parhandler=function(par, types) {
-              nms <- c("beta","gamma","iradii","hradii")
-              if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 4) {
-		stop(paste("For the straushm cif, par must be a named list",
-                           "with components beta, gamma, iradii, and hradii.",
-                           "\nBailing out."))
-              }
+              par <- check.named.list(par, c("beta","gamma","iradii","hradii"),
+                                      "For the straushm cif")
               beta <- par$beta
               ntypes <- length(types)
               if(length(beta) != ntypes)
@@ -319,33 +271,21 @@ reach.rmhmodel <- function(x, ...) {
 		stop("Missing values not allowed in beta.")
               
               gamma <- par$gamma
-              if(!is.matrix(gamma) || sum(dim(gamma) == ntypes) != 2)
-		stop("Component gamma of par is of wrong shape.")
+              MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
               gamma[is.na(gamma)] <- 1
 
               iradii <- par$iradii
-              if(!is.matrix(iradii) || sum(dim(iradii) == ntypes) != 2)
-		stop("Component iradii of par is of wrong shape.")
+              MultiPair.checkmatrix(iradii, ntypes, "par$iradii")
               iradii[is.na(iradii)] <- 0
 
               hradii <- par$hradii
-              if(!is.matrix(hradii) || sum(dim(hradii) == ntypes) != 2)
-		stop("Component hradii of par is of wrong shape.")
+              MultiPair.checkmatrix(hradii, ntypes, "par$hradii")
               hradii[is.na(hradii)] <- 0
 
-              gamma <- t(gamma)[row(gamma)>=col(gamma)]
-              iradii <- t(iradii)[row(iradii)>=col(iradii)]
-              hradii <- t(hradii)[row(hradii)>=col(hradii)]
-
-# Pack up just to check for negative values.
+# Repack as flat vector
               par <- c(beta,gamma,iradii,hradii)
               if(any(par<0))
-                  stop("Some parameters negative.")
-# Square the radii to avoid squaring them in the Fortran code.
-	      iradii <- iradii^2
-	      hradii <- hradii^2
-# Repack.
-              par <- c(beta,gamma,iradii,hradii)
+                  stop("Some negative parameters for straushm cif.")
               return(par)
             },
             reach=function(par, ...) {
@@ -355,8 +295,7 @@ reach.rmhmodel <- function(x, ...) {
               roperative <- ! (is.na(r) | (g == 1))
               hoperative <- ! is.na(h)
               return(max(0, r[roperative], h[hoperative]))
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
 # 6. Diggle-Gates-Stibbard interaction
@@ -364,27 +303,18 @@ reach.rmhmodel <- function(x, ...) {
        
        'dgs' = 
        list(
-            fortran.id=6,
+            C.id="dgs",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","rho")
-              if(sum(!is.na(match(names(par),nms))) != 2) {
-		stop(paste("For the dgs cif, par must be a named vector\n",
-                           "with components beta and rho.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","rho"),
+                                        "For the dgs cif")
               if(any(par<0))
 		stop("Negative parameters for dgs cif.")
-              par <- par[nms]
-# Now tack on rho-squared to avoid squaring in the Fortran code.
-	      par <- c(par,par[[2]]^2)
               return(par)
             },
             reach=function(par, ...) {
               return(par[["rho"]])
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #
 # 7. Diggle-Gratton interaction 
@@ -392,65 +322,42 @@ reach.rmhmodel <- function(x, ...) {
 
        'diggra' =
        list(
-            fortran.id=7,
+            C.id="diggra",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","kappa","delta","rho")
-              if(sum(!is.na(match(names(par),nms))) != 4) {
-		stop(paste("For the diggra cif, par must be a named vector\n",
-                           "with components beta, kappa, delta, and rho.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","kappa","delta","rho"),
+                                      "For the diggra cif")
               if(any(par<0))
 		stop("Negative parameters for diggra cif.")
               if(par["delta"] >= par["rho"])
 		stop("Radius delta must be less than radius rho.")
-              par <- par[nms]
-# Now tack on delta-squared, rho-squared, and log(rho-delta)
-# to avoid calculating them in  the Fortran code.
-	      par <- c(par,par[[3]]^2,par[[4]]^2,log(par[[4]]-par[[3]]))
               return(par)
             },
             reach=function(par, ...) {
               return(par[["rho"]])
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
 # 8. Geyer saturation model
 #       
        'geyer' = 
        list(
-            fortran.id=8,
+            C.id="geyer",
             multitype=FALSE,
-            need.aux=TRUE,
             parhandler=function(par, ...) {
-              nms <- c("beta","gamma","r","sat")
-              if(sum(!is.na(match(names(par),nms))) != 4) {
-		stop(paste("For the geyer cif, par must be a named vector\n",
-                           "with components beta, gamma, r, and sat.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","gamma","r","sat"),
+                                      "For the geyer cif")
               if(any(par<0))
 		stop("Negative parameters for geyer cif.")
               if(par["sat"] > .Machine$integer.max-100)
 		par["sat"] <- .Machine$integer.max-100
-              par <- par[nms]
-# Square r to avoid squaring in the Fortran code.
-              par[[3]] <- par[[3]]**2
-# Stick in a 1 = ndisc = number of discs at position 2 (after beta)
-# in par to make it consistent with the par for badgey; so that
-# initaux and updaux can be used consistently for both.
-              par <- append(par,1,after=1)
               return(par)
             },
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
               return(if(g == 1) 0 else r)
-            },
-            ndisc = function(par, ...) { return(1) }
+            }
             ),
 #       
 # 9. The ``lookup'' device.  This permits simulating, at least
@@ -458,20 +365,15 @@ reach.rmhmodel <- function(x, ...) {
 # with isotropic pair interaction (i.e. depending only on distance).
 # The pair interaction function is provided as a vector of
 # distances and corresponding function values which are used
-# as a ``lookup table'' by the Fortran code.
+# as a ``lookup table'' by the C code.
 #
        'lookup' = 
        list(
-            fortran.id=9,
+            C.id="lookup",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","h")
-              if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 2) {
-                stop(paste("For the lookup cif, par must be a named list\n",
-                           "with components beta and h (and optionally r).\n",
-                           "Bailing out."))
-              }
+              par <- check.named.list(par, c("beta","h"),
+                                      "For the lookup cif", "r")
               beta <- par[["beta"]]
               if(beta < 0)
 		stop("Negative value of beta for lookup cif.")
@@ -541,51 +443,38 @@ reach.rmhmodel <- function(x, ...) {
               if(is.null(r)) 
                 r <- knots(h)
               return(max(r))
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #       
 # 10. Area interaction
 #       
        'areaint'=
        list(
-            fortran.id=10,
+            C.id="areaint",
             multitype=FALSE,
-            need.aux=FALSE,
             parhandler=function(par, ...) {
-              nms <- c("beta","eta","r")
-              if(sum(!is.na(match(names(par),nms))) != 3) {
-		stop(paste("For the area interaction cif, par must be a named vector\n",
-                           "with components beta, eta, and r.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.vector(par, c("beta","eta","r"),
+                                        "For the area interaction cif")
               if(any(par<0))
 		stop("Negative parameters for strauss cif.")
-              par <- unlist(par[nms])
               return(par)
             },
             reach = function(par, ...) {
               r <- par[["r"]]
               eta <- par[["eta"]]
               return(if(eta == 1) 0 else (2 * r))
-            },
-            ndisc = function(par, ...) { return(0) }
+            }
             ),
 #
 # 11. The ``badgey'' (Baddeley-Geyer) model.
 #
        'badgey' =
        list(
-            fortran.id=11,
+            C.id="badgey",
             multitype=FALSE,
-            need.aux=TRUE,
             parhandler=function(par, ...) {
-              nms <- c("beta","gamma","r","sat")
-              if(!is.list(par) || sum(!is.na(match(names(par),nms))) != 4) {
-                stop(paste("For the badgey cif, par must be a named list\n",
-                           "with components beta, gamma, r, and sat.\n",
-                           "Bailing out."))
-              }
+              par <- check.named.list(par, c("beta","gamma","r","sat"),
+                                      "For the badgey cif")
               beta <- par[["beta"]]
               if(beta < 0)
                 stop("Negative value of beta for badgey cif.")
@@ -608,7 +497,6 @@ reach.rmhmodel <- function(x, ...) {
               if(any(sat<0))
                 stop(paste("Negative values amongst the",
                            dQuote("sat"), "parameters"))
-              r <- r^2 # Square to avoid needing to do so in C code.
               mmm <- cbind(gamma,r,sat)
               mmm <- mmm[order(r),]
               ndisc <- length(r)
@@ -619,8 +507,8 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               gamma <- par[["gamma"]]
               return(max(r[gamma != 1]))
-            },
-            ndisc = function(par, ...) { return(length(par[["gamma"]])) }
+            }
             )
        # end of list '.Spatstat.RmhTable'
        )
+
