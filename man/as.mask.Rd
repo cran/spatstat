@@ -8,7 +8,8 @@
  as.mask(w, eps=NULL, dimyx=NULL, xy=NULL)
 }
 \arguments{
-  \item{w}{A window (object of class \code{"owin"}).}
+  \item{w}{A window (object of class \code{"owin"}) or data acceptable
+    to \code{\link{as.owin}}.}
   \item{eps}{(optional) width and height of pixels.}
   \item{dimyx}{(optional) pixel array dimensions}
   \item{xy}{(optional) pixel coordinates}
@@ -55,7 +56,9 @@
   the pixel raster dimensions are obtained from
   \code{\link{spatstat.options}("npixel")}.
 
-  There is no inverse of this function!
+  There is no inverse of this function. However, the function
+  \code{\link{as.polygonal}} will compute a polygonal approximation
+  of a binary mask.
 }
 \seealso{
   \code{\link{owin.object}},

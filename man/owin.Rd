@@ -6,7 +6,8 @@
   an observation window in the two-dimensional plane
 }
 \usage{
-  owin(xrange=c(0,1), yrange=c(0,1), ..., poly=NULL, mask=NULL, unitname=NULL)
+  owin(xrange=c(0,1), yrange=c(0,1), ..., poly=NULL, mask=NULL,
+unitname=NULL, xy=NULL)
 }
 \arguments{
   \item{xrange}{\eqn{x} coordinate limits of enclosing box}
@@ -24,6 +25,10 @@
     Optional. Name of unit of length. Either a single character string,
     or a vector of two character strings giving the
     singular and plural forms, respectively.
+  }
+  \item{xy}{
+    Optional. List with components \code{x} and \code{y} specifying the
+    pixel coordinates for \code{mask}.
   }
 }
 \value{
@@ -87,8 +92,11 @@ describing a window in the two-dimensional plane.
     \eqn{y} coordinate, and columns to the \eqn{x} coordinate.
     Here \code{x} and \code{y} are vectors of \eqn{x} and \eqn{y}
     coordinates equally spaced over \code{xrange} and \code{yrange}
-    respectively. 
-    }    
+    respectively. The pixel coordinate vectors \code{x} and \code{y}
+    may be specified explicitly using the argument \code{xy}, which
+    should be a list containing components \code{x} and \code{y}.
+    Alternatively there is a sensible default.
+  }
   To create a window which is mathematically
   defined by inequalities in the Cartesian coordinates, 
   use \code{\link{raster.x}()} and \code{\link{raster.y}()}

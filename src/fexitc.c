@@ -1,8 +1,10 @@
-#include <R.h>
+# include <R.h>
+# include <stddef.h>
+# include <string.h>
 
-void F77_NAME(fexitc)(char *msg, int *nchar)
+void fexitc(const char *msg)
 {
-    int nc = *nchar;
+    size_t nc = strlen(msg);
     char buf[256];
     if(nc > 255) {
         warning("invalid character length in fexitc");

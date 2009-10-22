@@ -9,7 +9,7 @@
 }
 \usage{
    rmhstart(start, \dots)
-   \method{rmhstart}{default}(start=NULL, \dots, n.start=NULL, x.start=NULL, iseed)
+   \method{rmhstart}{default}(start=NULL, \dots, n.start=NULL, x.start=NULL)
 }
 \arguments{
   \item{start}{An existing description of the initial state in some
@@ -23,11 +23,6 @@
   \item{x.start}{
     Initial point pattern configuration.
     Incompatible with \code{n.start}.
-  }
-  \item{iseed}{
-    Vector of 3 integers determining the initial state of
-    the random number generator. This argument should not be
-    specified, in normal use.
   }
 }
 \value{
@@ -55,7 +50,7 @@
   \code{n.start}, \code{x.start} etc.
   
   If \code{start} is a list, then it should have components named 
-  \code{n.start} or \code{x.start} and optionally \code{iseed},
+  \code{n.start} or \code{x.start},
   with the same interpretation as described below.
 
   The arguments are:
@@ -92,27 +87,10 @@
 	simulation window (the argument \code{expand}
 	of \code{\link{rmhcontrol}}) is not permitted.
       }
-      \item{iseed}{Seed
-	for the random number generator. A vector of three integers.
-
-	If given, this seed will fix the initial state
-	of the random number generator in any subsequent call
-	to \code{\link{rmh}}.
-	
-	This should only be done 
-	if it is desired to repeat the algorithm with exactly
-	the same sequence of random numbers!
-      }
     }
     The parameters \code{n.start} and \code{x.start} are
     \emph{incompatible}.
 }  
-\section{Warnings}{
-  If \code{iseed} is specified, this will fix the initial state
-  of the random number generator in any subsequent call
-  to \code{\link{rmh}}. 
-}
-
 \seealso{
   \code{\link{rmh}},
   \code{\link{rmhcontrol}},
@@ -125,9 +103,6 @@
    # a particular point pattern
    data(cells)
    b <- rmhstart(x.start=cells)
-
-   # set the seed
-   d <- rmhstart(n.start=30, iseed=c(42, 4, 2))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

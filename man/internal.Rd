@@ -10,7 +10,7 @@
 \alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{area.xypolygon}       
-\alias{AsymmHausdorff.psp}
+\alias{AsymmDistance.psp}
 \alias{as.breakpts}
 \alias{as.data.frame.hyperframe}
 \alias{as.fv}
@@ -30,6 +30,8 @@
 \alias{cellmiddles}
 \alias{checkfields}          
 \alias{check.hist.lengths}
+\alias{check.named.list}
+\alias{check.named.thing}
 \alias{check.named.vector}
 \alias{check.nvector}
 \alias{check.nmatrix}
@@ -71,6 +73,7 @@
 \alias{erodemask}
 \alias{erode.owin}
 \alias{even.breaks.owin}
+\alias{evenly.spaced}
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{extractAIC.ppm}
@@ -225,7 +228,6 @@
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
-\alias{print.rmhseed}
 \alias{print.splitppp}
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
@@ -275,7 +277,6 @@
 \alias{rmhcontrol.list}
 \alias{rmhEngine}
 \alias{rmhmodel.rmhmodel}
-\alias{rmhseed}
 \alias{rmhstart.rmhstart}
 \alias{rmhstart.list}
 \alias{rmpoint.I.allim}
@@ -343,7 +344,7 @@ affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
 area.xypolygon(polly)
-AsymmHausdorff.psp(X, Y, method="Fortran")
+AsymmDistance.psp(X, Y, metric="Hausdorff", method="Fortran")
 as.breakpts(\dots)
 \method{as.data.frame}{hyperframe}(x, row.names = NULL,
                                   optional = FALSE, ..., 
@@ -366,7 +367,9 @@ cbind.hyperframe(...)
 cellmiddles(W, nx, ny, npix, gi)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
-check.named.vector(x, nam)
+check.named.list(x, nam, context, namopt)
+check.named.vector(x, nam, context, namopt)
+check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
 check.nvector(v, npoints, fatal=TRUE)
 check.nmatrix(m, npoints, fatal=TRUE)
 check.testfun(f, f1, X)
@@ -409,6 +412,7 @@ eratosthenes(nmax)
 erodemask(w,r,strict)
 erode.owin(\dots)
 even.breaks.owin(w)
+evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
 \method{extractAIC}{ppm}(fit, scale, k, \dots)
@@ -464,10 +468,10 @@ kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)
-Kmulti.inhom(X, I, J, lambdaI, lambdaJ, \dots,
+Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
          r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") ,
-         lambdaIJ=NULL,
+         lambdaIJ=NULL, sigma=NULL, varcov=NULL, 
          Iname = "points satisfying condition I",
          Jname = "points satisfying condition J")
 killinteraction(model)
@@ -514,7 +518,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             want.trend, want.inter, correction, rbord, Pname,
             callstring, \dots, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix)
-MultiPair.checkmatrix(mat, n, name)
+MultiPair.checkmatrix(mat, n, matname, naok, zerook)
 na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
@@ -572,7 +576,6 @@ primefactors(n, prmax)
 \method{print}{rmhcontrol}(x, \dots)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
-\method{print}{rmhseed}(x, \dots)
 \method{print}{splitppp}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
@@ -619,9 +622,8 @@ rotxypolygon(p, angle = pi/2)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(control, \dots)
 \method{rmhcontrol}{list}(control, \dots)
-rmhEngine(InfoList, \dots, verbose, reseed, kitchensink, preponly) 
+rmhEngine(InfoList, \dots, verbose, kitchensink, preponly) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
-rmhseed(iseed)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
 rmpoint.I.allim(n, f, types)

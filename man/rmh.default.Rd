@@ -34,6 +34,9 @@
   modified versions of the arguments
   \code{model}, \code{start}, and \code{control} which together specify
   the exact simulation procedure.
+
+  The value of \code{\link[base:Random]{.Random.seed}} at the start
+  of the simulations is also saved and returned as an attribute \code{seed}.
 }
 
 \details{
@@ -104,11 +107,6 @@
       In the first two cases, if \code{model$w} is also present,
       then the final simulated pattern will be clipped to
       the window \code{model$w}.
-    }
-    \item{iseed}{
-      (Optional) seed for random number generator.
-      A triple of integers. Should not be specified
-      in normal usage!
     }
   }
   For full details of these parameters, see \code{\link{rmhstart}}.
@@ -240,23 +238,36 @@ trend corresponding to a particular type, there is still a component
   \code{\link{MultiStraussHard}},
   \code{\link{DiggleGratton}}
 }
-\section{Extensions}{
-  The argument \code{model$cif} matches the name of a Fortran
-  subroutine which calculates the conditional intensity function
-  for the model.  It is intended that more options will be
-  added in the future.  The very brave user \bold{could} try
-  to add her own.  Note that in addition to writing Fortran
-  code for the new conditional intensity function, the user
-  would have to modify the code in the files \code{cif.f} and
-  \code{rmh.default.R} appropriately.  (And of course re-install
-  the \pkg{spatstat} package so as to update the dynamically
-  loadable shared object \code{spatstat.so}.)
+\section{Other models}{
+  In theory, any finite point process model can be simulated using
+  the Metropolis-Hastings algorithm, provided the conditional
+  intensity is uniformly bounded.
+
+  In practice, the list of point process models that can be simulated using
+  \code{rmh.default} is limited to those that have been implemented
+  in the package's internal C code. More options will be added in the future.
 
   Note that the \code{lookup} conditional intensity function
   permits the simulation (in theory, to any desired degree
   of approximation) of any pairwise interaction process for
   which the interaction depends only on the distance between
   the pair of points.
+}
+\section{Reproducible simulations}{
+  If the user wants the simulation to be exactly reproducible
+  (e.g. for a figure in a journal article, where it is useful to
+  have the figure consistent from draft to draft) then the state of
+  the random number generator should be set before calling
+  \code{rmh.default}. This can be done either by calling
+  \code{\link[base:Random]{set.seed}} or by assigning a value to
+  \code{\link[base:Random]{.Random.seed}}. In the examples below, we use
+  \code{\link[base:Random]{set.seed}}.  
+
+  If a simulation has been performed and the user now wants to 
+  repeat it exactly, the random seed should be extracted from
+  the simulated point pattern \code{X} by \code{seed <- attr(x, "seed")},
+  then assigned to the system random nunber state by
+  \code{.Random.seed <- seed} before calling \code{rmh.default}.
 }
 \examples{
    \dontrun{
@@ -281,7 +292,7 @@ trend corresponding to a particular type, there is still a component
    
    # Strauss process equal to pure hardcore:
    mod02 <- list(cif="strauss",par=c(beta=2,gamma=0,r=0.7),w=c(0,10,0,10))
-   X3.strauss <- rmh(model=mod02,start=list(n.start=60,iseed=c(42,17,69)),
+   X3.strauss <- rmh(model=mod02,start=list(n.start=60),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process in a polygonal window.
@@ -319,7 +330,7 @@ trend corresponding to a particular type, there is still a component
    # Pure hardcore (identical to X3.strauss).
    mod06 <- list(cif="straush",par=c(beta=2,gamma=1,r=1,hc=0.7),
                 w=c(0,10,0,10))
-   X3.straush <- rmh(model=mod06,start=list(n.start=60, iseed=c(42,17,69)),
+   X3.straush <- rmh(model=mod06,start=list(n.start=60),
                      control=list(nrep=nr,nverb=nv))
    
    # Soft core:

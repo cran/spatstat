@@ -22,7 +22,7 @@ Ldot.inhom(X, i, \dots)
     Defaults to the first level of \code{marks(X)}.
   }
   \item{\dots}{
-    Other arguments passed to \code{\link{Ldot.inhom}}.
+    Other arguments passed to \code{\link{Kdot.inhom}}.
   }
 }
 \value{

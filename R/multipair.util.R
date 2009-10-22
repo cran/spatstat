@@ -2,7 +2,7 @@
 #
 #    multipair.util.R
 #
-#    $Revision: 1.7 $	$Date: 2005/07/27 06:32:16 $
+#    $Revision: 1.11 $	$Date: 2009/10/16 20:50:51 $
 #
 #    Utilities for multitype pairwise interactions
 #	
@@ -11,18 +11,22 @@
 
 
 MultiPair.checkmatrix <-
-  function(mat, n, name) {
+  function(mat, n, matname, naok=TRUE, zerook=TRUE) {
+    if(missing(matname))
+      matname <- deparse(substitute(mat))
     if(!is.matrix(mat))
-      stop(paste(name, "must be a matrix"))
+      stop(paste(matname, "must be a matrix"))
     if(any(dim(mat) != rep(n,2)))
-      stop(paste(name, "must be a square matrix,",
+      stop(paste(matname, "must be a square matrix,",
                  "of size", n, "x", n))
     isna <- is.na(mat)
-    if(any(mat[!isna] <= 0))
-      stop(paste("Entries of", name,
-                 "must be positive numbers or NA"))
-    if(any(isna != t(isna)) ||
-       any(mat[!isna] != t(mat)[!isna]))
-      stop(paste(name, "must be a symmetric matrix"))
+    if(!naok && any(isna))
+      stop(paste("NA entries not allowed in", matname))
+    if(any(mat[!isna] < 0))
+      stop(paste("Negative entries not allowed in", matname))
+    if(!zerook && any(mat[!isna] == 0))
+      stop(paste("Zero entries not allowed in", matname))
+    if(!isSymmetric(mat))
+      stop(paste(matname, "must be a symmetric matrix"))
   }
 

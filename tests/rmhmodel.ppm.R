@@ -3,6 +3,7 @@
 #
 require(spatstat)
 data(cells)
+data(amacrine)
 
 f <- ppm(cells)
 m <- rmhmodel(f)
@@ -34,4 +35,20 @@ m <- rmhmodel(f)
 f <- ppm(cells, ~1, AreaInter(r=0.06))
 m <- rmhmodel(f)
 
+# multitype
 
+r <- matrix(0.07, 2, 2)
+f <- ppm(amacrine, ~1, MultiStrauss(c("off","on"),r))
+m <- rmhmodel(f)
+
+h <- matrix(min(nndist(amacrine))/2, 2, 2)
+f <- ppm(amacrine, ~1, MultiStraussHard(c("off","on"),r, h))
+m <- rmhmodel(f)
+
+diag(r) <- NA
+diag(h) <- NA
+f <- ppm(amacrine, ~1, MultiStrauss(c("off","on"),r))
+m <- rmhmodel(f)
+
+f <- ppm(amacrine, ~1, MultiStraussHard(c("off","on"),r, h))
+m <- rmhmodel(f)

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.14 $	$Date: 2007/01/10 03:46:05 $
+#    $Revision: 2.15 $	$Date: 2009/10/22 20:41:37 $
 #
 #    The multitype Strauss process
 #
@@ -137,7 +137,7 @@ MultiStrauss <- function(types, radii) {
            # parameters to estimate
            required <- !is.na(radii)
            gr <- gamma[required]
-           return(all(is.finite(gr) & gamma <= 1))
+           return(all(is.finite(gr) & gr <= 1))
          },
          project  = function(coeffs, self) {
            # interaction parameters gamma[i,j]

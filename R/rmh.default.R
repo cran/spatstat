@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.54 2008/07/21 23:50:51 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.58 2009/10/22 18:42:20 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -35,7 +35,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # and digest them
   
   if(mtype && !is.null(model$check)) 
-    model$fortran.par <- model$check(model$par, types)
+    model$C.par <- model$check(model$par, types)
 
   
 ######## Check for illegal combinations of model, start and control  ########
@@ -209,7 +209,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   if(periodic && w.sim$type != "rectangle")
       stop("Need rectangular window for periodic simulation.\n")
 
-# parameter passed to Fortran:  
+# parameter passed to C:  
   period <-
     if(periodic)
       c(diff(w.sim$xrange), diff(w.sim$yrange))
@@ -343,13 +343,13 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   class(InfoList) <- c("rmhInfoList", class(InfoList))
 
   # go
-  rmhEngine(InfoList, verbose=verbose, reseed=FALSE, kitchensink=TRUE, ...)
+  rmhEngine(InfoList, verbose=verbose, kitchensink=TRUE, ...)
 }
 
 
 #---------------  rmhEngine -------------------------------------------
 #
-# This is the interface to the Fortran code.
+# This is the interface to the C code.
 #
 # InfoList is a list of pre-digested, validated arguments
 # obtained from rmh.default.
@@ -361,7 +361,6 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # in rmh.default).
 
 # arguments:  
-# reseed:  whether to reset the random seed to a new, random value
 # kitchensink: whether to tack InfoList on to the return value as an attribute
 # preponly: whether to just return InfoList without simulating
 #
@@ -375,10 +374,10 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # -------------------------------------------------------
 
 rmhEngine <- function(InfoList, ...,
-                       verbose=FALSE, reseed=TRUE, kitchensink=FALSE,
+                       verbose=FALSE, kitchensink=FALSE,
                        preponly=FALSE) {
 # Internal Use Only!
-# This is the interface to the Fortran code.
+# This is the interface to the C code.
 
   if(!inherits(InfoList, "rmhInfoList"))
     stop("data not in correct format for internal function rmhEngine")
@@ -432,20 +431,16 @@ rmhEngine <- function(InfoList, ...,
 
 #############################################
 ####  
-####  Random number initialisation
+####  Random number seed: initialisation & capture
 ####  
 #############################################  
   
-  if(reseed || is.null(start$seed)) {
-    # generate a (new) random seed
-    ss <- start$seed <- rmhseed()
-    if(kitchensink)
-      InfoList$start$seed <- start$seed
-  }
- 
-  set.seed(start$seed$build.seed)
+  if(!exists(".Random.seed"))
+    runif(1)
 
+  saved.seed <- .Random.seed
   
+
 #############################################
 ####  
 ####  Poisson case
@@ -501,9 +496,11 @@ rmhEngine <- function(InfoList, ...,
 
 
 #### First the marks, if any.
-#### The marks must be integers 1 to ntypes, for passing to Fortran
+#### The marks must be integers 0 to (ntypes-1) for passing to C
+
+  Ctypes <- if(mtype) 0:(ntypes-1) else 0
   
-  marks <-
+  Cmarks <-
     if(!mtype)
       0
     else
@@ -511,13 +508,13 @@ rmhEngine <- function(InfoList, ...,
              n = {
                # n.start given
                if(control$conditioning=="n.each.type")
-                 rep(1:ntypes,n.start)
+                 rep(Ctypes,n.start)
                else
-                 sample(1:ntypes,npts,TRUE,ptypes)
+                 sample(Ctypes,npts,TRUE,ptypes)
              },
              x = {
                # x.start given
-               as.integer(marks(x.start, dfok=FALSE))
+               as.integer(marks(x.start, dfok=FALSE))-1
              },
              stop("internal error: start$given unrecognised")
              )
@@ -535,20 +532,23 @@ rmhEngine <- function(InfoList, ...,
                runifpoint(npts, w.sim, ...)
              else
                rpoint.multi(npts, trend, tmax,
-                      factor(marks,levels=1:ntypes), w.sim, ...)
+                      factor(Cmarks,levels=Ctypes), w.sim, ...)
            x <- xy$x
            y <- xy$y
          })
 
 
 #######################################################################
-#  Start to call Fortran
+#  Set up C call
 ######################################################################    
 
-# Get the parameters in Fortran-ese
+# Determine the name of the cif in the C code
+
+  C.id <- model$C.id
+  
+# Get the parameters in C-ese
     
-  par <- model$fortran.par
-  nmbr <- model$fortran.id
+  par <- model$C.par
 
 # Absorb the constants or vectors `iota' and 'ptypes' into the beta parameters
 # This assumes that the beta parameters are the first 'ntypes' entries
@@ -558,46 +558,28 @@ rmhEngine <- function(InfoList, ...,
   
 # Algorithm control parameters
 
-  nrep <- control$nrep
-  cond <- control$cond
+  p      <- control$p
+  q      <- control$q
+  nrep   <- control$nrep
+  cond   <- control$cond
+  fixall <- control$fixall
+  nverb  <- control$nverb
   
-# If we are simulating a saturation process (currently Geyer or
-# BadGey) we need to set up some ``auxiliary information''.
-
-  need.aux <- model$need.aux
-  if(need.aux) {
-    ndisc <- model$ndisc
-    aux <- .Fortran(
-                    "initaux",
-                    nmbr=as.integer(nmbr),
-                    par=as.double(par),
-                    period=as.double(period),
-                    x=as.double(x),
-                    y=as.double(y),
-                    npts=as.integer(npts),
-                    ndisc=as.integer(ndisc),
-                    aux=integer(npts*ndisc),
-                    PACKAGE="spatstat"
-                    )$aux
-  } else aux <- -1
-
 # The vectors x and y (and perhaps marks) which hold the generated
 # process may grow.  We need to allow storage space for them to grow
 # in.  Unless we are conditioning on the number of points, we have no
 # real idea how big they will grow.  Hence we start off with storage
-# space which has at least twice the length of the ``initial state'', and
-# structure things so that the storage space may be incremented
-# without losing the ``state'' which has already been generated.
+# space which has at least twice the length of the ``initial state''.
+# If more space is needed, it is re-allocated in the C code.
 
   if(cond == 1) {
-    nincr <- npad <- max(npts, 50)
+    npad <- max(npts, 50)
     padding <- numeric(npad)
     x <- c(x, padding)
     y <- c(y, padding)
-    if(ntypes>1) marks <- c(marks, padding)
-    if(need.aux) aux   <- c(aux,rep(padding,ndisc))
+    if(mtype) Cmarks <- c(Cmarks, padding)
   } else {
-    nincr <- npad <- 0
+    npad <- 0
   }
   npmax <- npts + npad
   mrep  <- 1
@@ -605,14 +587,13 @@ rmhEngine <- function(InfoList, ...,
   if(verbose)
     cat("Proposal points...")
            
-# If the pattern is multitype, generate the mark proposals.
-  mprop <- if(ntypes>1)
-    sample(1:ntypes,nrep,TRUE,prob=ptypes) else 0
+# If the pattern is multitype, generate the mark proposals (0 to ntypes-1)
+  Cmprop <- if(mtype) sample(Ctypes,nrep,TRUE,prob=ptypes) else 0
 		
 # Generate the ``proposal points'' in the expanded window.
   xy <-
     if(trendy)
-      rpoint.multi(nrep,trend,tmax,factor(mprop, levels=1:ntypes),w.sim,...)
+      rpoint.multi(nrep,trend,tmax,factor(Cmprop, levels=Ctypes),w.sim,...)
     else
       runifpoint(nrep,w.sim)
   xprop <- xy$x
@@ -621,94 +602,54 @@ rmhEngine <- function(InfoList, ...,
   if(verbose)
     cat("Start simulation.\n")
 
-# Determine Fortran subroutine name (this is not very safe ...)
-  mhname <- paste("mh", nmbr, sep="")
-  
-# initialise state of Wichmann-Hill random number generator 
-  iseed <- start$seed$iseed
-
-# The repetition is to allow the storage space to be incremented if
-# necessary.
-  repeat {
 # Call the Metropolis-Hastings simulator:
-    rslt <- .Fortran(
-                     mhname,
-                     par=as.double(par),
-                     period=as.double(period),
-                     xprop=as.double(xprop),
-                     yprop=as.double(yprop),
-                     mprop=as.integer(mprop),
-                     ntypes=as.integer(ntypes),
-                     iseed=as.integer(iseed),
-                     nrep=as.integer(nrep),
-                     mrep=as.integer(mrep),
-                     p=as.double(control$p),
-                     q=as.double(control$q),
-                     npmax=as.integer(npmax),
-                     nverb=as.integer(control$nverb),
-                     x=as.double(x),
-                     y=as.double(y),
-                     marks=as.integer(marks),
-                     aux=as.integer(aux),
-                     npts=as.integer(npts),
-                     fixall=as.logical(control$fixall),
-                     PACKAGE="spatstat"
-                     )
+  storage.mode(C.id) <- "character"
+  storage.mode(par) <- storage.mode(period) <- "double"
+  storage.mode(xprop) <- storage.mode(yprop) <- "double"
+  storage.mode(Cmprop) <- "integer"
+  storage.mode(ntypes) <- "integer"
+  storage.mode(nrep) <- "integer"
+  storage.mode(p) <- storage.mode(q) <- "double"
+  storage.mode(nverb) <- "integer"
+  storage.mode(x) <- storage.mode(y) <- "double"
+  storage.mode(Cmarks) <- "integer"
+  storage.mode(fixall) <- "integer"
 
-    npts <- rslt$npts
-    mrep <- rslt$mrep
-    
-# If mrep > nrep we have completed the nrep Metropolis Hastings steps.
-# Exit the loop.
-    
-    if(mrep > nrep) break
-
-# If not, then we came back early because we were about to run out
-# of storage space.  Increase the storage space and re-call the
-# methas subroutine.
-
-    # Internal consistency check
-    if(npts < npmax)
-	stop(paste("Internal error; Fortran code exited unexpectedly\n",
-                   "(without completing nrep steps and without reaching\n",
-                   "the limit of storage capacity)\n"))
-    
-    if(verbose) {
-      cat('Number of points equal to ',npmax,';\n',sep='')
-      cat('increasing storage space and continuing.\n')
-    }
-    npmax <- npmax + nincr
-    x     <- c(rslt$x,numeric(nincr))
-    y     <- c(rslt$y,numeric(nincr))
-    marks <- if(ntypes>1) c(rslt$marks,numeric(nincr)) else 0
-    aux   <- if(need.aux) c(rslt$aux,numeric(nincr*ndisc)) else -1
-    iseed <- rslt$iseed
-  }
-
-  ###### END OF LOOP ###################
+  out <- .Call("methas",
+               C.id,
+               par,
+               period,
+               xprop, yprop, Cmprop,
+               ntypes, nrep,
+               p, q,
+               nverb,
+               x, y,
+               Cmarks, fixall,
+               PACKAGE="spatstat")
   
-  # Extract the point pattern returned from Fortran
-  
-  npts <- rslt$npts
-  indices <- if(npts == 0) numeric(0) else (1:npts)
-  x <- rslt$x[indices]
-  y <- rslt$y[indices]
-  xxx <- ppp(x=x, y=y, window=w.sim, check=FALSE)
+  # Extract the point pattern returned from C
+
+  X <- ppp(x=out[[1]], y=out[[2]], window=w.sim, check=FALSE)
   if(mtype) {
-    marx <- factor(rslt$marks[indices],levels=1:ntypes)
+    # convert integer marks from C to R
+    marx <- factor(out[[3]]+1, levels=1:ntypes)
+    # then restore original type levels
     levels(marx) <- types
-    xxx <- xxx %mark% marx
-  } 
+    # glue to points
+    marks(X) <- marx
+  }
 
 # Now clip the pattern to the ``clipping'' window:
   if(!control$force.noexp)
-    xxx <- xxx[w.clip]
+    X <- X[w.clip]
 
 # Append to the result information about how it was generated.
-  if(kitchensink)
-    attr(xxx, "info") <- InfoList
+  if(kitchensink) {
+    attr(X, "info") <- InfoList
+    attr(X, "seed") <- saved.seed
+  }
   
-  return(xxx)
+  return(X)
 }
 
 

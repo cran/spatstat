@@ -24,7 +24,7 @@ if(!exists("nv"))
 
    # Strauss process equal to pure hardcore:
    mod02 <- list(cif="strauss",par=c(beta=2,gamma=0,r=0.7),w=c(0,10,0,10))
-   X3.strauss <- rmh(model=mod02,start=list(n.start=60,iseed=c(42,17,69)),
+   X3.strauss <- rmh(model=mod02,start=list(n.start=60),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process in a polygonal window.
@@ -63,7 +63,7 @@ if(!exists("nv"))
    # Pure hardcore (identical to X3.strauss).
    mod06 <- list(cif="straush",par=c(beta=2,gamma=1,r=1,hc=0.7),
                 w=c(0,10,0,10))
-   X3.straush <- rmh(model=mod06,start=list(n.start=60, iseed=c(42,17,69)),
+   X3.straush <- rmh(model=mod06,start=list(n.start=60),
                      control=list(nrep=nr,nverb=nv))
    
    # Soft core:

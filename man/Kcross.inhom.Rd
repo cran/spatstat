@@ -11,9 +11,10 @@
   adjusted for spatially varying intensity.
 }
 \usage{
-Kcross.inhom(X, i, j, lambdaI, lambdaJ, \dots,  r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
-lambdaIJ=NULL)
+Kcross.inhom(X, i, j, lambdaI=NULL, lambdaJ=NULL, \dots,  r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate"),
+         sigma=NULL, varcov=NULL,
+         lambdaIJ=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -31,18 +32,24 @@ lambdaIJ=NULL)
     Defaults to the second level of \code{marks(X)}.
   }
   \item{lambdaI}{
+    Optional.
     Values of the the estimated intensity of the sub-process of
     points of type \code{i}.
     Either a pixel image (object of class \code{"im"}),
-    or a numeric vector containing the intensity values
-    at each of the type \code{i} points in \code{X}. 
+    a numeric vector containing the intensity values
+    at each of the type \code{i} points in \code{X},
+    or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location.
   }
   \item{lambdaJ}{
+    Optional.
     Values of the the estimated intensity of the sub-process of
     points of type \code{j}.
     Either a pixel image (object of class \code{"im"}),
-    or a numeric vector containing the intensity values
-    at each of the type \code{j} points in \code{X}. 
+    a numeric vector containing the intensity values
+    at each of the type \code{j} points in \code{X},
+    or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location. 
   }
   \item{r}{
       Optional. Numeric vector giving the values of the argument \eqn{r}
@@ -65,6 +72,17 @@ lambdaIJ=NULL)
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{sigma}{
+    Standard deviation of isotropic Gaussian smoothing kernel,
+    used in computing leave-one-out kernel estimates of
+    \code{lambdaI}, \code{lambdadot} if they are omitted.
+  }
+  \item{varcov}{
+    Variance-covariance matrix of anisotropic Gaussian kernel,
+    used in computing leave-one-out kernel estimates of
+    \code{lambdaI}, \code{lambdadot} if they are omitted.
+    Incompatible with \code{sigma}.
   }
   \item{lambdaIJ}{
     Optional. A matrix containing estimates of the
@@ -141,10 +159,29 @@ lambdaIJ=NULL)
       at the data points of type \code{i}. The length of this vector
       must equal the number of type \code{i} points in \code{X}.
     }
+    \item{a function}{
+      which can be evaluated to give values of the intensity at
+      any locations.
+    }
+    \item{omitted:}{
+      if \code{lambdaI} is omitted then it will be estimated
+      using a leave-one-out kernel smoother. 
+    }
   }
+  If \code{lambdaI} is omitted, then it will be estimated using
+  a `leave-one-out' kernel smoother, as described in Baddeley, Moller
+  and Waagepetersen (2000).  The estimate of \code{lambdaI} for a given
+  point is computed by removing the point from the
+  point pattern, applying kernel smoothing to the remaining points using
+  \code{\link{density.ppp}}, and evaluating the smoothed intensity
+  at the point in question. The smoothing kernel bandwidth is controlled
+  by the arguments \code{sigma} and \code{varcov}, which are passed to
+  \code{\link{density.ppp}} along with any extra arguments.
+
   Similarly \code{lambdaJ} should contain
   estimated values of the intensity of the sub-process of points of
-  type \code{j}. It may be either a pixel image or a numeric vector.
+  type \code{j}. It may be either a pixel image, a function,
+  a numeric vector, or omitted.
   
   The optional argument \code{lambdaIJ} is for advanced use only.
   It is a matrix containing estimated
@@ -192,7 +229,10 @@ lambdaIJ=NULL)
     lambdaW <- density.ppp(wh, sigma=0.15, at="points")
     K <- Kcross.inhom(lansing, "whiteoak", "maple", lambdaW, lambdaM)
 
-    # method (2): fit parametric intensity model
+    # method (2): leave-one-out
+    K <- Kcross.inhom(lansing, "whiteoak", "maple", sigma=0.15)
+
+    # method (3): fit parametric intensity model
     fit <- ppm(lansing, ~marks * polynom(x,y,2))
     # evaluate fitted intensities at data points
     # (these are the intensities of the sub-processes of each type)

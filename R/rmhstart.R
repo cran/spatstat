@@ -2,7 +2,7 @@
 #
 #   rmhstart.R
 #
-#   $Revision: 1.5 $  $Date: 2006/12/12 09:36:03 $
+#   $Revision: 1.8 $  $Date: 2009/10/22 18:37:26 $
 #
 #
 
@@ -15,17 +15,14 @@ rmhstart.rmhstart <- function(start, ...) {
 }
 
 rmhstart.list <- function(start, ...) {
-  argnames <- c("x.start","n.start","iseed")
-  ok <- argnames %in% names(start) 
-  st <- do.call("rmhstart.default", start[argnames[ok]])
+  st <- do.call.matched("rmhstart.default", start)
   return(st)
 }
 
-rmhstart.default <- function(start=NULL, ..., n.start=NULL, x.start=NULL,
-                             iseed=NULL)
+rmhstart.default <- function(start=NULL, ..., n.start=NULL, x.start=NULL)
 {
  if(!is.null(start) || length(list(...)) > 0)
-    stop("Syntax should be rmhstart(n.start, x.start, iseed)")
+    stop("Syntax should be rmhstart(n.start) or rmhstart(x.start)")
  
   ngiven <- !is.null(n.start)
   xgiven <- !is.null(x.start)
@@ -51,18 +48,15 @@ rmhstart.default <- function(start=NULL, ..., n.start=NULL, x.start=NULL,
   } else
      xx <- NULL
 
- seed <- if(is.null(iseed)) NULL else rmhseed(iseed)
- 
 ###################################################################
 # return augmented list  
   out <- list(n.start=n.start,
               x.start=x.start,
-              seed=seed,
               given=given,
               xx=xx)
   class(out) <- c("rmhstart", class(out))
   return(out)
-  }
+}
 
 print.rmhstart <- function(x, ...) {
   verifyclass(x, "rmhstart")
@@ -89,9 +83,5 @@ print.rmhstart <- function(x, ...) {
                paste("(", paste(n.start, collapse=","), ")", sep="")
            cat(paste("number fixed at n.start =", nstring, "\n")) }
          )
-  if(is.null(x$seed))
-    cat("Random number seeds: not fixed (random state)\n")
-  else
-    print(x$seed)
 }
 

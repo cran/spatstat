@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.43 $	$Date: 2009/08/28 18:26:56 $
+#	$Revision: 1.45 $	$Date: 2009/10/16 04:22:04 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -53,7 +53,7 @@
 }
 
 "Kinhom"<-
-  function (X, lambda, ..., r = NULL, breaks = NULL, 
+  function (X, lambda=NULL, ..., r = NULL, breaks = NULL, 
          correction=c("border", "bord.modif", "isotropic", "translate"),
             nlarge = 1000, 
             lambda2=NULL,
@@ -111,18 +111,6 @@
         # Estimate density by leave-one-out kernel smoothing
         lambda <- density(X, ..., sigma=sigma, varcov=varcov,
                             at="points", leavoneout=TRUE)
-        # validate
-        if(length(lambda) != npoints) 
-          stop(paste("Internal error: incorrect number of lambda values",
-                     "in leave-one-out method:",
-                     "length(lambda) = ", length(lambda),
-                     "!=", npoints, "= npoints"))
-        if(any(is.na(lambda))) {
-          nwrong <- sum(is.na(lambda))
-          stop(paste("Internal error:", nwrong, "NA or NaN",
-                     ngettext(nwrong, "value", "values"),
-                     "generated in leave-one-out method"))
-        }
         reciplambda <- 1/lambda
       } else if(!is.null(reciplambda)) {
         # 1/lambda values provided

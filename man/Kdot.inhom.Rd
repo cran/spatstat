@@ -11,9 +11,9 @@
   adjusted for spatially varying intensity.
 }
 \usage{
-Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
-         lambdaIdot=NULL)
+Kdot.inhom(X, i, lambdaI=NULL, lambdadot=NULL, \dots, r=NULL, breaks=NULL,
+         correction = c("border", "isotropic", "Ripley", "translate"),
+         sigma=NULL, varcov=NULL, lambdaIdot=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -27,17 +27,22 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
     Defaults to the first level of \code{marks(X)}.
   }
   \item{lambdaI}{
-    Values of the the estimated intensity of the sub-process of
+    Optional.
+    Values of the estimated intensity of the sub-process of
     points of type \code{i}.
     Either a pixel image (object of class \code{"im"}),
-    or a numeric vector containing the type \code{i} intensity values
-    at each of the type \code{i} points in \code{X}. 
+    a numeric vector containing the intensity values
+    at each of the type \code{i} points in \code{X},
+    or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location.
   }
   \item{lambdadot}{
-    Values of the the estimated intensity of the entire point process,
+    Optional.
+    Values of the estimated intensity of the entire point process,
     Either a pixel image (object of class \code{"im"}),
-    or a numeric vector containing the intensity values
-    at each point in \code{X}. 
+    a numeric vector containing the intensity values at each of the 
+    points in \code{X}, or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location.
   }
   \item{\dots}{
     Ignored.
@@ -60,6 +65,17 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
     \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
     \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
+  }
+  \item{sigma}{
+    Standard deviation of isotropic Gaussian smoothing kernel,
+    used in computing leave-one-out kernel estimates of
+    \code{lambdaI}, \code{lambdadot} if they are omitted.
+  }
+  \item{varcov}{
+    Variance-covariance matrix of anisotropic Gaussian kernel,
+    used in computing leave-one-out kernel estimates of
+    \code{lambdaI}, \code{lambdadot} if they are omitted.
+    Incompatible with \code{sigma}.
   }
   \item{lambdaIdot}{
     Optional. A matrix containing estimates of the
@@ -136,11 +152,30 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
       at the data points of type \code{i}. The length of this vector
       must equal the number of type \code{i} points in \code{X}.
     }
+    \item{a function}{
+      of the form \code{function(x,y)}
+      which can be evaluated to give values of the intensity at
+      any locations.
+    }
+    \item{omitted:}{
+      if \code{lambdaI} is omitted then it will be estimated
+      using a leave-one-out kernel smoother. 
+    }
   }
-  The argument \code{lambdadot} should contain
+  If \code{lambdaI} is omitted, then it will be estimated using
+  a `leave-one-out' kernel smoother, as described in Baddeley, Moller
+  and Waagepetersen (2000).  The estimate of \code{lambdaI} for a given
+  point is computed by removing the point from the
+  point pattern, applying kernel smoothing to the remaining points using
+  \code{\link{density.ppp}}, and evaluating the smoothed intensity
+  at the point in question. The smoothing kernel bandwidth is controlled
+  by the arguments \code{sigma} and \code{varcov}, which are passed to
+  \code{\link{density.ppp}} along with any extra arguments.
+
+  Similarly the argument \code{lambdadot} should contain
   estimated values of the intensity of the entire point process.
-  It may be either a pixel image, or a numeric vector of length equal
-  to the number of points in \code{X}.
+  It may be either a pixel image, a numeric vector of length equal
+  to the number of points in \code{X}, a function, or omitted.
 
   For advanced use only, the optional argument \code{lambdaIdot}
   is a matrix containing estimated
@@ -190,6 +225,8 @@ Kdot.inhom(X, i, lambdaI, lambdadot, \dots, r=NULL, breaks=NULL,
     K <- Kdot.inhom(lansing, "maple", lambdaI=lambdaM,
                                       lambdadot=lambdadot)
 
+    # Equivalent
+    K <- Kdot.inhom(lansing, "maple", sigma=0.15)
 
     # synthetic example: type A points have intensity 50,
     #                    type B points have intensity 50 + 100 * x

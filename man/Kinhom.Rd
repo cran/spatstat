@@ -6,7 +6,7 @@
   a non-stationary point pattern.
 }
 \usage{
-  Kinhom(X, lambda, \dots, r = NULL, breaks = NULL,
+  Kinhom(X, lambda=NULL, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
     nlarge = 1000,
     lambda2=NULL, reciplambda=NULL, reciplambda2=NULL,

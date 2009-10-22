@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.107 $	$Date: 2009/07/18 02:28:14 $
+#	$Revision: 4.113 $	$Date: 2009/10/22 20:26:18 $
 #
 #
 #	A window may be either
@@ -69,7 +69,7 @@
     "Example: image(result$xcol,result$yrow,t(result$d))")
 
 owin <- function(xrange=c(0,1), yrange=c(0,1),
-                 ..., poly=NULL, mask=NULL, unitname=NULL) {
+                 ..., poly=NULL, mask=NULL, unitname=NULL, xy=NULL) {
 
   unitname <- as.units(unitname)
 
@@ -78,6 +78,9 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   mask.given <- !is.null(mask)
   if(poly.given  && mask.given)
      stop("Ambiguous -- both polygonal boundary and digital mask supplied")
+
+  if(!is.null(xy) && !mask.given)
+    warning("Argument xy ignored: it is only applicable when a mask is given")
      
   if(missing(xrange) != missing(yrange))
     stop("If one of xrange, yrange is specified then both must be.")
@@ -206,19 +209,48 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     nc <- ncol(mask)
     nr <- nrow(mask)
 
-    if(missing(xrange) && missing(yrange)) {
-      # take pixels to be 1 x 1 unit
-      xrange <- c(0,nc)
-      yrange <- c(0,nr)
-    } else if(check) {
-      if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
-        stop("xrange should be a vector of length 2 giving (xmin, xmax)")
-      if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
-        stop("yrange should be a vector of length 2 giving (ymin, ymax)")
+    if(!is.null(xy)) {
+      # pixel coordinates given explicitly
+      # validate dimensions
+      if(!is.list(xy) || !checkfields(xy, c("x","y")))
+        stop("xy should be a list with entries x and y")
+      xcol <- xy$x
+      yrow <- xy$y
+      if(length(xcol) != nc)
+        stop(paste("length of xy$x =", length(xcol),
+                   "!=", nc, "= number of columns of mask"))
+      if(length(yrow) != nr)
+        stop(paste("length of xy$y =", length(yrow),
+                   "!=", nr, "= number of rows of mask"))
+      # x and y should be evenly spaced
+      if(!evenly.spaced(xcol))
+        stop("xy$x is not evenly spaced")
+      if(!evenly.spaced(yrow))
+        stop("xy$y is not evenly spaced")
+      # determine other parameters
+      xstep <- diff(xcol)[1]
+      ystep <- diff(yrow)[1]
+      if(missing(xrange) && missing(yrange)) {
+        xrange <- range(xcol) + c(-1,1) * xstep/2
+        yrange <- range(yrow) + c(-1,1) * ystep/2
+      }
+    } else {
+      # determine pixel coordinates from xrange, yrange
+      if(missing(xrange) && missing(yrange)) {
+        # take pixels to be 1 x 1 unit
+        xrange <- c(0,nc)
+        yrange <- c(0,nr)
+      } else if(check) {
+        if(!is.vector(xrange) || length(xrange) != 2 || xrange[2] <= xrange[1])
+          stop("xrange should be a vector of length 2 giving (xmin, xmax)")
+        if(!is.vector(yrange) || length(yrange) != 2 || yrange[2] <= yrange[1])
+          stop("yrange should be a vector of length 2 giving (ymin, ymax)")
+      }
+      xstep <- diff(xrange)/nc
+      ystep <- diff(yrange)/nr
+      xcol  <- seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc)
+      yrow  <- seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr)
     }
-
-    xstep <- diff(xrange)/nc
-    ystep <- diff(yrange)/nr
 
     out <- list(type     = "mask",
                 xrange   = xrange,
@@ -227,8 +259,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                 xstep    = xstep,
                 ystep    = ystep,
                 warnings = .Spatstat.Image.Warning,
-                xcol    = seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc),
-                yrow    = seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr),
+                xcol    = xcol, 
+                yrow    = yrow,
                 m       = mask,
                 units   = unitname)
     class(out) <- "owin"
@@ -316,6 +348,35 @@ as.owin.tess <- function(W, ..., fatal=TRUE) {
   return(W$window)
 }
 
+as.owin.data.frame <- function(W, ..., fatal=TRUE) {
+  if(!verifyclass(W, "data.frame", fatal=fatal))
+    return(NULL)
+  if(ncol(W) != 3) {
+    whinge <- "need exactly 3 columns of data"
+    if(fatal) stop(whinge)
+    warning(whinge)
+    return(NULL)
+  }
+  mch <- match(c("x", "y"), names(W))
+  if(!any(is.na(mch))) {
+    ix <- mch[1]
+    iy <- mch[2]
+    iz <- (1:3)[-mch]
+  } else {
+    ix <- 1
+    iy <- 2
+    iz <- 3
+  }
+  df <- data.frame(x=W[,ix], y=W[,iy], z=as.logical(W[,iz]))
+  # convert data frame (x,y,z) to logical matrix
+  m <- with(df, tapply(z, list(y, x), any))
+  # extract pixel coordinates
+  xy <- with(df, list(x=sort(unique(x)), y=sort(unique(y))))
+  # make binary mask
+  out <- owin(mask=m, xy=xy)
+  return(out)
+}
+
 as.owin.default <- function(W, ..., fatal=TRUE) {
 	# Tries to interpret data as an object of class 'window'
 	# W may be
@@ -365,8 +426,10 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #	eps:		   grid mesh (pixel) size
 #	dimyx:		   dimensions of pixel raster
 #       xy:                coordinates of pixel raster  
-  if(!missing(w)) {
-    verifyclass(w, "owin")
+  if(!missing(w) && !is.null(w)) {
+    if(is.matrix(w))
+      return(owin(mask=w, xy=xy))
+    w <- as.owin(w)
     uname <- unitname(w)
   } else {
     uname <- as.units(NULL)
@@ -386,8 +449,7 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 # Pixel coordinates to be computed from other dimensions
 # First determine row & column dimensions
     if(!is.null(dimyx)) {
-      if(length(dimyx) == 1)
-        dimyx <- rep(dimyx, 2)
+      dimyx <- ensure2vector(dimyx)
       nr <- dimyx[1]
       nc <- dimyx[2]
     } else {
@@ -750,8 +812,8 @@ inside.owin <- function(x, y, w) {
   
   if(inherits(x, "ppp") && missing(y))
     return(inside.owin(x$x, x$y, w))
-    
-  verifyclass(w, "owin")
+
+  w <- as.owin(w)
 
   if(length(x)==0)
     return(logical(0))

@@ -27,6 +27,9 @@ data(bramblecanes)
 plot(bramblecanes, cols=1:3)
 plot(split(bramblecanes))
 
+data(bronzefilter)
+plot(bronzefilter,markscale=1)
+
 data(cells)
 plot(cells)
 

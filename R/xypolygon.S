@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.48 $    $Date: 2009/08/20 17:01:17 $
+#    $Revision: 1.50 $    $Date: 2009/10/16 03:43:56 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -187,6 +187,8 @@ owinpoly2mask <- function(w, rasta, check=TRUE) {
   nx    <- dimyx[2]
   ny    <- dimyx[1]
 
+  epsilon <- with(.Machine, double.base^floor(double.ulp.digits/2))
+
   score <- rep(0, nx*ny)
   
   for(i in seq(bdry)) {
@@ -198,9 +200,14 @@ owinpoly2mask <- function(w, rasta, check=TRUE) {
     xp <- c(xp, xp[1])
     yp <- c(yp, yp[1])
     np <- np + 1
-    # rescale so that pixels are at integer locations
+    # rescale coordinates so that pixels are at integer locations
     xp <- (xp - x0)/xstep
     yp <- (yp - y0)/ystep
+    # avoid exact integer locations for vertices
+    whole <- (ceiling(xp) == floor(xp))
+    xp[whole] <-  xp[whole] + epsilon
+    whole <- (ceiling(yp) == floor(yp))
+    yp[whole] <-  yp[whole] + epsilon
     # call C
     z <- .C("poly2imI",
             xp=as.double(xp),
