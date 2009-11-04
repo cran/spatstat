@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.58 2009/10/22 18:42:20 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.59 2009/10/31 01:52:54 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -53,8 +53,8 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   if(control$fixall & ntypes==1) {
     warning("control$fixall applies only to multitype processes. Ignored. \n")
     control$fixall <- FALSE
-    if(control$conditioning == "n.each.type")
-      control$conditioning <- "n.total"
+    if(control$fixing == "n.each.type")
+      control$fixing <- "n.total"
   }
 
   
@@ -84,7 +84,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     else if(is.list(trend) && any(ok <- unlist(lapply(trend, is.im))))
       as.owin((trend[ok])[[1]])
     else NULL
- 
+
 ##  Clipping window (for final result)
   
   w.clip <-
@@ -101,7 +101,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     stop("Unable to determine window for pattern")
 
   
-##  Simulation window
+##  Simulation window 
 
   expand <- control$expand
 
@@ -120,12 +120,12 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 
   if(expanded) {
 
-    if(control$conditioning != "none")
+    if(control$fixing != "none")
       stop(paste("If we're conditioning on the number of points,",
                  "we cannot clip the result to another window.\n"))
 
     if(!is.subset.owin(w.clip, w.sim))
-      stop("Expanded simulation window does not contain clipping window")
+      stop("Expanded simulation window does not contain model window")
   }
 
 
@@ -159,8 +159,62 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     }
   }
 
+##### .................. CONDITIONAL SIMULATION ...................
 
+#####  
+#||   Determine windows for conditional simulation
+#||
+#||      w.state  = window for the full configuration
+#||  
+#||      w.sim    = window for the 'free' (random) points
+#||
+
+  w.state <- w.sim
   
+  condtype <- control$condtype
+  x.cond   <- control$x.cond
+  n.cond   <- control$n.cond
+
+  switch(condtype,
+         none={
+           w.cond <- NULL
+         },
+         window={
+           # conditioning on the realisation inside a subwindow
+           w.cond <- as.owin(x.cond)
+           # subtract from w.sim
+           w.sim <- setminus.owin(w.state, w.cond)
+           if(is.empty(w.sim))
+             stop(paste("Conditional simulation is undefined;",
+                        "the conditioning window",
+                        sQuote("as.owin(control$x.cond)"),
+                        "covers the entire simulation window"))
+         },
+         Palm={
+           # Palm conditioning
+           w.cond <- NULL
+         })
+
+#####  
+#||   Convert conditioning points to appropriate format
+
+
+  x.condpp <- switch(condtype,
+                        none=NULL,
+                        window=x.cond,
+                        Palm=as.ppp(x.cond, w.state))
+
+# validate  
+  if(!is.null(x.condpp)) {
+    if(mtype) {
+      if(!is.marked(x.condpp))
+        stop("Model is multitype, but x.cond is unmarked")
+      if(!identical(all.equal(types, levels(marks(x.condpp))), TRUE))
+        stop("Types of points in x.cond do not match types in model")
+    }
+  }
+  
+         
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
 #     S T A R T I N G      S T A T E
@@ -168,6 +222,9 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
 ###################### Starting state data ############################
+
+# In the case of conditional simulation, the start data determine
+# the 'free' points (i.e. excluding x.cond) in the initial state.
 
   switch(start$given,
          none={
@@ -177,8 +234,22 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
            # x.start was given
            # coerce it to a ppp object
            if(!is.ppp(x.start))
-             x.start <- as.ppp(x.start, w.sim)
-           npts <- x.start$n
+             x.start <- as.ppp(x.start, w.state)
+           if(condtype == "window") {
+             # clip to simulation window
+             xs <- x.start[w.sim]
+             nlost <- x.start$n - xs$n
+             if(nlost > 0) 
+               warning(paste(nlost,
+                             ngettext(nlost, "point","points"),
+                             "of x.start",
+                             ngettext(nlost, "was", "were"),
+                             "removed because",
+                             ngettext(nlost, "it", "they"),
+                             "fell in the window of x.cond"))
+             x.start <- xs
+           }
+           npts.free <- x.start$n
          },
          n = {
            # n.start was given
@@ -188,11 +259,10 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
            if(expanded)
              n.start <- ceiling(n.start * area.owin(w.sim)/area.owin(w.clip))
            #
-           npts <- sum(n.start) # The ``sum()'' is redundant if n.start
+           npts.free <- sum(n.start) # The ``sum()'' is redundant if n.start
                                 # is scalar; no harm, but.
          },
          stop("Internal error: start$given unrecognized"))
-
 
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
@@ -206,13 +276,13 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 
   periodic <- control$periodic
   
-  if(periodic && w.sim$type != "rectangle")
+  if(periodic && w.state$type != "rectangle")
       stop("Need rectangular window for periodic simulation.\n")
 
 # parameter passed to C:  
   period <-
     if(periodic)
-      c(diff(w.sim$xrange), diff(w.sim$yrange))
+      c(diff(w.state$xrange), diff(w.state$yrange))
     else
       c(-1,-1)
 
@@ -271,6 +341,8 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
 #     A.S. EMPTY PROCESS
 #
+#         for conditional simulation, 'empty' means there are no 'free' points
+#  
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
   a.s.empty <- FALSE
@@ -278,32 +350,56 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
 #  Empty pattern, simulated conditional on n
 #  
-  if(npts == 0 && control$conditioning != "none") {
-    if(verbose) 
-      cat("Initial pattern has 0 points, and simulation is conditional on the number of points - returning an empty pattern\n")
+  if(npts.free == 0 && control$fixing != "none") {
     a.s.empty <- TRUE
-  } 
+    if(verbose) {
+      mess <- paste("Initial pattern has 0 random points,",
+                    "and simulation is conditional on the number of points -")
+      if(condtype == "none")
+        warning(paste(mess, "returning an empty pattern\n"))
+      else
+        warning(paste(mess, "returning a pattern with no random points\n"))
+    }
+  }
 
+  
 #
 #  If beta = 0, the process is almost surely empty
 #  
   
   if(all(model$par[["beta"]] < .Machine$double.eps)) {
-    if(control$conditioning == "none") {
+    if(control$fixing == "none" && condtype == "none") {
       # return empty pattern
       if(verbose)
-        cat("beta = 0 implies an empty pattern\n")
+        warning("beta = 0 implies an empty pattern\n")
       a.s.empty <- TRUE
     } else 
       stop("beta = 0 implies an empty pattern, but we are simulating conditional on a nonzero number of points")
   }
 
+#
+# If we're conditioning on the contents of a subwindow,
+# and the subwindow covers the clipping region,
+# the result is deterministic.  
+
+  if(condtype == "window" && is.subset.owin(w.clip, w.cond)) {
+    a.s.empty <- TRUE
+    warning(paste("Model window is a subset of conditioning window:",
+              "result is deterministic\n"))
+  }    
+
+#
+#  
   if(a.s.empty) {
     # create empty pattern, to be returned
-    empty <- ppp(numeric(0), numeric(0), window=w.clip)
-    if(mtype) {
-      vide <- factor(types[integer(0)], levels=types)
-      empty <- empty %mark% vide
+    if(!is.null(x.condpp)) 
+      empty <- x.condpp[w.clip]
+    else {
+      empty <- ppp(numeric(0), numeric(0), window=w.clip)
+      if(mtype) {
+        vide <- factor(types[integer(0)], levels=types)
+        empty <- empty %mark% vide
+      }
     }
   }
 
@@ -322,11 +418,13 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   Model$w <- w.clip
   Model$types <- types
   
-  Control$expand <- if(expanded) w.sim else 1
+  Control$expand <- if(expanded) w.state else 1
   Control$force.exp <- expanded
   Control$force.noexp <- !expanded
 
   Control$internal <- list(w.sim=w.sim,
+                           w.state=w.state,
+                           x.condpp=x.condpp,
                            ptypes=ptypes,
                            period=period)
 
@@ -337,7 +435,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                          iota=iota,
                          tmax=tmax)
 
-  Start$internal <- list(npts=npts)
+  Start$internal <- list(npts.free=npts.free)
 
   InfoList <- list(model=Model, start=Start, control=Control)
   class(InfoList) <- c("rmhInfoList", class(InfoList))
@@ -391,7 +489,11 @@ rmhEngine <- function(InfoList, ...,
   control <- InfoList$control
 
   w.sim <- control$internal$w.sim
+  w.state <- control$internal$w.state
   w.clip <- model$w
+
+  condtype <- control$condtype
+  x.condpp <- control$internal$x.condpp
 
   types <- model$types
   ntypes <- length(types)
@@ -406,10 +508,11 @@ rmhEngine <- function(InfoList, ...,
   iota <- model$internal$iota
   tmax <- model$internal$tmax
 
-  npts <- start$internal$npts
+  npts.free <- start$internal$npts.free
 
   n.start <- start$n.start
   x.start <- start$x.start
+
   
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
@@ -418,6 +521,7 @@ rmhEngine <- function(InfoList, ...,
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
   if(model$internal$a.s.empty) {
+    if(verbose) cat("\n")
     empty <- model$internal$empty
     attr(empty, "info") <- InfoList
     return(empty)
@@ -448,9 +552,10 @@ rmhEngine <- function(InfoList, ...,
 #############################################  
   
   if(model$cif == 'poisson') {
+    if(verbose) cat("\n")
     intensity <- if(!trendy) model$par[["beta"]] else model$trend
     Xsim <-
-      switch(control$conditioning,
+      switch(control$fixing,
              none= {
                # Poisson process 
                if(!mtype)
@@ -461,9 +566,9 @@ rmhEngine <- function(InfoList, ...,
              n.total = {
                # Binomial/multinomial process with fixed total number of points
                if(!mtype) 
-                 rpoint(npts, intensity, win=w.sim, verbose=verbose)
+                 rpoint(npts.free, intensity, win=w.sim, verbose=verbose)
                else
-                 rmpoint(npts, intensity, win=w.sim, types=types,
+                 rmpoint(npts.free, intensity, win=w.sim, types=types,
                          verbose=verbose)
              },
              n.each.type = {
@@ -476,8 +581,12 @@ rmhEngine <- function(InfoList, ...,
                rmpoint(npts.each, intensity, win=w.sim, types=types,
                        verbose=verbose)
              },
-             stop("Internal error: control$conditioning unrecognised")
+             stop("Internal error: control$fixing unrecognised")
              )
+    # if conditioning, add fixed points
+    if(condtype != "none")
+      Xsim <- superimpose(Xsim, x.condpp, W=w.state)
+    # clip result to output window
     Xclip <- Xsim[w.clip]
     attr(Xclip, "info") <- InfoList
     return(Xclip)
@@ -494,7 +603,11 @@ rmhEngine <- function(InfoList, ...,
 
 #### Build starting state
 
+  npts.cond  <- if(condtype != "none") x.condpp$n else 0
+  npts.total <- npts.free + npts.cond
 
+#### FIRST generate the 'free' points
+  
 #### First the marks, if any.
 #### The marks must be integers 0 to (ntypes-1) for passing to C
 
@@ -507,10 +620,10 @@ rmhEngine <- function(InfoList, ...,
       switch(start$given,
              n = {
                # n.start given
-               if(control$conditioning=="n.each.type")
+               if(control$fixing=="n.each.type")
                  rep(Ctypes,n.start)
                else
-                 sample(Ctypes,npts,TRUE,ptypes)
+                 sample(Ctypes,npts.free,TRUE,ptypes)
              },
              x = {
                # x.start given
@@ -519,7 +632,7 @@ rmhEngine <- function(InfoList, ...,
              stop("internal error: start$given unrecognised")
              )
 #
-# First the x, y coordinates
+# Then the x, y coordinates
 #
   switch(start$given,
          x = {
@@ -529,15 +642,23 @@ rmhEngine <- function(InfoList, ...,
          n = {
            xy <-
              if(!trendy)
-               runifpoint(npts, w.sim, ...)
+               runifpoint(npts.free, w.sim, ...)
              else
-               rpoint.multi(npts, trend, tmax,
+               rpoint.multi(npts.free, trend, tmax,
                       factor(Cmarks,levels=Ctypes), w.sim, ...)
            x <- xy$x
            y <- xy$y
          })
 
+## APPEND the free points AFTER the conditioning points
 
+  if(condtype != "none") {
+    x <- c(x.condpp$x, x)
+    y <- c(x.condpp$y, y)
+    if(mtype)
+      Cmarks <- c(as.integer(marks(x.condpp))-1, Cmarks)
+  }
+  
 #######################################################################
 #  Set up C call
 ######################################################################    
@@ -558,12 +679,13 @@ rmhEngine <- function(InfoList, ...,
   
 # Algorithm control parameters
 
-  p      <- control$p
-  q      <- control$q
-  nrep   <- control$nrep
-  cond   <- control$cond
-  fixall <- control$fixall
-  nverb  <- control$nverb
+  p       <- control$p
+  q       <- control$q
+  nrep    <- control$nrep
+  fixcode <- control$fixcode
+  fixing  <- control$fixing
+  fixall  <- control$fixall
+  nverb   <- control$nverb
   
 # The vectors x and y (and perhaps marks) which hold the generated
 # process may grow.  We need to allow storage space for them to grow
@@ -572,8 +694,8 @@ rmhEngine <- function(InfoList, ...,
 # space which has at least twice the length of the ``initial state''.
 # If more space is needed, it is re-allocated in the C code.
 
-  if(cond == 1) {
-    npad <- max(npts, 50)
+  if(fixing == "none") {
+    npad <- max(npts.total, 50)
     padding <- numeric(npad)
     x <- c(x, padding)
     y <- c(y, padding)
@@ -581,7 +703,7 @@ rmhEngine <- function(InfoList, ...,
   } else {
     npad <- 0
   }
-  npmax <- npts + npad
+  npmax <- npts.total + npad
   mrep  <- 1
 
   if(verbose)
@@ -614,8 +736,9 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(x) <- storage.mode(y) <- "double"
   storage.mode(Cmarks) <- "integer"
   storage.mode(fixall) <- "integer"
+  storage.mode(npts.cond) <- "integer"
 
-  out <- .Call("methas",
+  out <- .Call("xmethas",
                C.id,
                par,
                period,
@@ -624,12 +747,14 @@ rmhEngine <- function(InfoList, ...,
                p, q,
                nverb,
                x, y,
-               Cmarks, fixall,
+               Cmarks,
+               npts.cond,
+               fixall,
                PACKAGE="spatstat")
   
   # Extract the point pattern returned from C
 
-  X <- ppp(x=out[[1]], y=out[[2]], window=w.sim, check=FALSE)
+  X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
   if(mtype) {
     # convert integer marks from C to R
     marx <- factor(out[[3]]+1, levels=1:ntypes)
@@ -651,5 +776,4 @@ rmhEngine <- function(InfoList, ...,
   
   return(X)
 }
-
 

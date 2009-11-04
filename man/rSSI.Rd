@@ -6,7 +6,7 @@
   Simple Sequential Inhibition (SSI) process.
 }
 \usage{
- rSSI(r, n, win = owin(c(0,1),c(0,1)), giveup = 1000)
+ rSSI(r, n, win = owin(c(0,1),c(0,1)), giveup = 1000, x.init=NULL)
 }
 \arguments{
   \item{r}{
@@ -23,6 +23,10 @@
   \item{giveup}{
     Number of rejected proposals after which the algorithm should terminate.
   }
+  \item{x.init}{
+    Optional. Initial configuration of points. A point pattern
+    (object of class \code{"ppp"}).
+  }
 }
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
@@ -32,7 +36,8 @@
   Inhibition point process 
   inside the window \code{win}.
 
-  Starting with an empty window, the algorithm adds points
+  Starting with an empty window (or with the point pattern \code{x.init}
+  if specified), the algorithm adds points
   one-by-one. Each new point is generated uniformly in the window
   and independently of preceding points. If the new point lies
   closer than \code{r} units from an existing point, then it is rejected

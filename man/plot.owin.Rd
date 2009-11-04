@@ -110,7 +110,7 @@
   plot(w, hatch=TRUE, lwd=2)
 
   # binary mask
-  we <- erosion(w, 0.05, FALSE)
+  we <- erosion(w, 100, FALSE)
   plot(we)
   spatstat.options(par.binary=list(col=grey(c(0.5,1))))
   plot(we)

@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.23 $	$Date: 2009/07/24 05:25:13 $
+#	$Revision: 4.24 $	$Date: 2009/10/31 22:37:28 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -66,7 +66,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     # window is irregular..
     # Distance transform & boundary distance for all pixels
     e <- exactdt(dX)
-    b <- bdist.pixels(dX$window, coords=FALSE)
+    b <- bdist.pixels(dX$window, style="matrix")
     # select only those pixels inside mask
     mm <- dwin$m
     dist <- e$d[mm]

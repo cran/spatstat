@@ -42,8 +42,10 @@
 }
 \examples{
    data(letterR)
-   R <- owin2gpc(letterR)
-   L <- gpc2owin(R)
+   if(spatstat.options("gpclib") && require(gpclib)) {
+     R <- owin2gpc(letterR)
+     L <- gpc2owin(R)
+   } else cat("gpclib is not available\n")
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

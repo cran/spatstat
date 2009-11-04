@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.31 $ $Date: 2009/10/22 00:51:14 $
+#   $Revision: 1.33 $ $Date: 2009/11/05 21:44:02 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL) {
@@ -225,7 +225,7 @@ as.im.tess <- function(X, W=NULL, ...,
       W <- as.mask(W, eps=eps, dimyx=dimyx, xy=xy)
   } 
   switch(X$type,
-         tess={
+         image={
            out <- as.im(X$image, W=W, eps=eps, dimyx=dimyx, xy=xy,
                         na.replace=na.replace)
          },
@@ -345,3 +345,45 @@ intersect.tess <- function(X, Y, ...) {
   return(tess(tiles=Ztiles, window=Zwin))
 }
 
+
+bdist.tiles <- function(X) {
+  if(!is.tess(X))
+    stop("X must be a tessellation")
+  W <- as.owin(X)
+  switch(X$type,
+         rect=,
+         tiled={
+           tt <- tiles(X)
+           if(is.convex(W)) {
+             # distance is minimised at a tile vertex
+             vdist <- function(x,w) {
+               z <- as.ppp(vertices(x), W=w)
+               min(bdist.points(z))
+             }
+             d <- sapply(tt, vdist, w=W)
+           } else {
+             # coerce everything to polygons
+             W  <- as.polygonal(W)
+             tt <- lapply(tt, as.polygonal)
+             # compute min dist from tile edges to window edges
+             edist <- function(x,b) {
+               xd <- crossdist(as.psp(x), b, type="separation")
+               min(xd)
+             }
+             d <- sapply(tt, edist, b=as.psp(W))
+           }
+         },
+         image={
+           Xim <- X$image
+           # compute boundary distance for each pixel
+           bd <- bdist.pixels(as.owin(Xim), style="image")
+           bd <- bd[W, drop=FALSE]
+           # split over tiles
+           bX <- split(bd, X)
+           # compute minimum distance over each level of factor
+           d <- sapply(bX, function(z) { summary(z)$min })
+         }
+         )
+    
+  return(d)
+}

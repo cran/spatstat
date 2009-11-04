@@ -34,7 +34,17 @@
   suppress the plotting.
 }
 \value{
-  A single number.
+  For numeric-valued images, an object of class \code{"histogram"} as returned
+  by \code{\link[graphics:hist]{hist.default}}. This object can be
+  plotted.
+  
+  For factor-valued or logical images, an object of class
+  \code{"barplotdata"}, which can be plotted.
+  This is a list with components
+  called \code{counts} (contingency table of counts of the numbers of
+  pixels taking each possible value), \code{probs} (corresponding relative
+  frequencies) and \code{mids} (graphical \eqn{x}-coordinates of the
+  midpoints of the bars in the barplot). 
 }
 \seealso{
   \code{\link{hist}},

@@ -33,6 +33,10 @@
   It is also possible to fit cluster process models by the method of
   minimum contrast.
 
+  Apart from two-dimensional point patterns and point processes,
+  \pkg{spatstat} also supports patterns of line segments in two
+  dimensions, point patterns in three dimensions, and 
+  multidimensional space-time point patterns.
 }
 \section{Getting Started}{
   For a quick introduction to \pkg{spatstat}, see 
@@ -79,7 +83,8 @@
     \code{\link{owin}} \tab window (spatial region) \cr
     \code{\link{im}} \tab pixel image \cr
     \code{\link{psp}} \tab line segment pattern \cr
-    \code{\link{tess}} \tab tessellation
+    \code{\link{tess}} \tab tessellation \cr
+    \code{\link{pp3}} \tab three-dimensional point pattern
   }
 
   \bold{To create a point pattern:}
@@ -282,6 +287,8 @@
 	close window by a distance r\cr
 	\code{\link{opening}}	\tab
 	open window by a distance r\cr
+	\code{\link{border}}	\tab
+	difference between window and its erosion/dilation \cr 
 	\code{\link{complement.owin}}	\tab
 	invert (swap inside and outside)\cr
 	\code{\link{simplify.owin}}	\tab
@@ -314,6 +321,7 @@
     \tabular{ll}{
 	\code{\link{intersect.owin}}	\tab	intersection of two windows\cr
 	\code{\link{union.owin}}	\tab	union of two windows\cr
+	\code{\link{setminus.owin}}	\tab	set subtraction of two windows\cr
 	\code{\link{inside.owin}}	\tab	determine whether a point is inside a window\cr
 	\code{\link{area.owin}}	\tab	compute area \cr
 	\code{\link{perimeter}}	\tab	compute perimeter length \cr
@@ -324,6 +332,8 @@
 	\code{\link{dilated.areas}}	\tab	compute areas of dilated windows\cr
 	\code{\link{bdist.points}}	\tab	compute distances from data points to window boundary \cr
 	\code{\link{bdist.pixels}}	\tab	compute distances from all pixels to window boundary \cr
+	\code{\link{bdist.tiles}}	\tab
+	boundary distance for each tile in tessellation \cr
 	\code{\link{distmap.owin}}	\tab	distance transform image \cr
 	\code{\link{centroid.owin}}	\tab compute centroid (centre of mass) of window\cr
 	\code{\link{is.subset.owin}}    \tab determine whether one
@@ -432,6 +442,41 @@
       \code{\link{delaunay}} \tab compute Delaunay triangulation of points\cr
       \code{\link{rpoislinetess}} \tab generate tessellation using Poisson line
       process 
+    }
+
+
+    \bold{Three-dimensional point patterns}
+
+    An object of class \code{"pp3"} represents a three-dimensional
+    point pattern in a rectangular box. The box is represented by
+    an object of class \code{"box3"}.
+
+    \tabular{ll}{
+      \code{\link{pp3}} \tab create a 3-D point pattern \cr
+      \code{\link{plot.pp3}} \tab plot a 3-D point pattern \cr
+      \code{\link{coords}} \tab extract coordinates \cr
+      \code{\link{as.hyperframe}} \tab extract coordinates \cr
+      \code{\link{unitname.pp3}} \tab name of unit of length \cr
+      \code{\link{box3}} \tab create a 3-D rectangular box \cr
+      \code{\link{as.box3}} \tab convert data to 3-D rectangular box \cr
+      \code{\link{unitname.box3}} \tab name of unit of length \cr
+      \code{\link{diameter.box3}} \tab diameter of box \cr
+      \code{\link{volume.box3}} \tab volume of box \cr
+      \code{\link{shortside.box3}} \tab shortest side of box \cr
+      \code{\link{eroded.volumes}} \tab volumes of erosions of box 
+    }
+
+    \bold{Hyperframes}
+
+    A hyperframe is like a data frame, except that the entries
+    may be objects of any kind.
+
+    \tabular{ll}{
+      \code{\link{hyperframe}} \tab create a hyperframe \cr
+      \code{\link{as.hyperframe}} \tab convert data to hyperframe \cr
+      \code{\link{plot.hyperframe}} \tab plot hyperframe \cr
+      \code{\link{with.hyperframe}} \tab evaluate expression using each row
+      of hyperframe
     }
 }
   
@@ -560,6 +605,16 @@
     in a point pattern \cr
     \code{\link{pppdist}} \tab find the optimal match between two point
     patterns
+  }
+
+  \bold{Summary statistics for a three-dimensional point pattern:}
+
+  These are for 3-dimensional point pattern objects (class \code{pp3}).
+
+  \tabular{ll}{
+    \code{\link{F3est}} \tab empty space function \eqn{F} \cr
+    \code{\link{G3est}} \tab nearest neighbour function \eqn{G} \cr
+    \code{\link{K3est}} \tab \eqn{K}-function
   }
 }
 
@@ -860,7 +915,6 @@
     \code{\link{rshift}} \tab random shifting of (subsets of) points\cr
     \code{\link{rthin}} \tab  random thinning  
   }
-  
 }
 
 
@@ -968,6 +1022,7 @@
   P. Surovy,
   Berwin Turlach,
   Andrew van Burgel,
+  Tobias Verbeke,
   Alexendre Villers,
   Hao Wang,
   H. Wendrock

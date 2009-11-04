@@ -2,7 +2,7 @@
 #
 #   rmhResolveTypes.R
 #
-#   $Revision: 1.8 $   $Date: 2009/08/14 02:25:01 $
+#   $Revision: 1.9 $   $Date: 2009/10/31 01:52:54 $
 #
 #
 rmhResolveTypes <- function(model, start, control) {
@@ -83,7 +83,7 @@ rmhResolveTypes <- function(model, start, control) {
 # If we are conditioning on the number of points of each type,
 # make sure the starting state is appropriate
 
-  if(control$conditioning == "n.each.type") {
+  if(control$fixing == "n.each.type") {
     if(start$given == "n" && ntypes.nstart != ntypes)
       stop("Length of start$n.start not equal to number of types.\n")
     else if(start$given == "x" && length(types.given) != ntypes) 

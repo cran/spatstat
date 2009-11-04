@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.25 $  $Date: 2009/01/30 00:43:29 $
+# $Revision: 1.32 $  $Date: 2009/11/05 18:50:15 $
 #
 
 hyperframe <- function(...,
@@ -34,6 +34,7 @@ hyperframe <- function(...,
   else if(any(unnamed <- (nama == ""))) 
     nama[unnamed] <- paste("V", seq(sum(unnamed)), sep="")
   nama <- make.names(nama, unique=TRUE)
+  names(aarg) <- nama
   
   # Each argument must be either
   #    - a vector suitable as a column in a data frame
@@ -208,6 +209,42 @@ row.names.hyperframe <- function(x) {
 }
 
 
+## conversion to hyperframe
+
+as.hyperframe <- function(x, ...) {
+  UseMethod("as.hyperframe")
+}
+
+as.hyperframe.hyperframe <- function(x, ...) {
+  return(x)
+}
+
+as.hyperframe.data.frame <- function(x, ...) {
+  if(missing(x)) 
+    return(do.call("hyperframe", list(...)))
+  do.call("hyperframe",
+          resolve.defaults(
+                           as.list(x),
+                           list(...),
+                           list(row.names=rownames(x))))
+}
+
+as.hyperframe.listof <- function(x, ...) {
+  if(missing(x)) 
+    return(do.call("hyperframe", list(...)))
+  do.call("hyperframe",
+          resolve.defaults(
+                           list(x),
+                           list(...),
+                           list(row.names=names(x))))
+}
+
+as.hyperframe.default <- function(x, ...) {
+  as.hyperframe(as.data.frame(x, ...))
+}
+
+#### conversion to other types
+
 as.data.frame.hyperframe <- function(x, row.names = NULL,
                                      optional = FALSE, ...,
                                      discard=TRUE, warn=TRUE) {
@@ -243,17 +280,26 @@ as.list.hyperframe <- function(x, ...) {
   out <- lapply(nama, function(nam, x) { x[, nam, drop=TRUE] }, x=x)
   return(out)
 }
-  
+
+# evaluation
+
 eval.hyper <- function(e, h, simplify=TRUE, ee=NULL) {
-  if(!inherits(h, "hyperframe"))
-    stop("h must be a hyperframe")
+  .Deprecated("with.hyperframe", package="spatstat")
   if(is.null(ee))
     ee <- as.expression(substitute(e))
+  with.hyperframe(h, simplify=simplify, ee=ee)
+}
+
+with.hyperframe <- function(data, expr, ..., simplify=TRUE, ee=NULL) {
+  if(!inherits(data, "hyperframe"))
+    stop("data must be a hyperframe")
+  if(is.null(ee))
+    ee <- as.expression(substitute(expr))
   out <- list()
-  n <- unclass(h)$ncases
+  n <- unclass(data)$ncases
   for(i in 1:n) {
-    hi <- h[i,, drop=FALSE]
-    out[[i]] <- eval(ee, as.list(hi))
+    rowi <- data[i,, drop=FALSE]
+    out[[i]] <- eval(ee, as.list(rowi))
   }
   if(simplify &&
      all(unlist(lapply(out, is.vector))) &&
@@ -317,7 +363,7 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
 
   # No arrangement: just evaluate the plot expression 'nr' times
   if(!arrange) {
-    eval.hyper(ee=ee, h=x)
+    with(x, ee=ee)
     return(invisible(NULL))
   }
 
@@ -364,7 +410,7 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
   # plot panels
   npa <- do.call("par", parargs)
   if(!banner) opa <- npa
-  eval.hyper(ee=ee, h=x)
+  with(x, ee=ee)
   # revert
   layout(1)
   par(opa)

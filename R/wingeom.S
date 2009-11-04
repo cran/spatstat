@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.56 $	$Date: 2009/09/04 03:24:37 $
+#	$Revision: 4.59 $	$Date: 2009/11/05 22:49:58 $
 #
 #
 #
@@ -40,6 +40,7 @@ perimeter <- function(w) {
          },
          mask={
            p <- as.polygonal(w)
+           if(is.null(p)) return(NA)
            delta <- sqrt(w$xstep^2 + w$ystep^2)
            p <- simplify.owin(p, delta * 1.15)
            return(sum(lengths.psp(as.psp(p))))
@@ -63,7 +64,7 @@ eroded.areas <- function(w, r) {
                },
                mask = {
                  # distances from each pixel to window boundary
-                 b <- bdist.pixels(w, coords=FALSE)
+                 b <- bdist.pixels(w, style="matrix")
                  # histogram breaks to satisfy hist()
                  Bmax <- max(b, r)
                  breaks <- c(-1,r,Bmax+1)
@@ -190,14 +191,16 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
     return(C)
 
   if(!Amask && !Bmask) {
-    ####### Result is polygonal ############
-    Ag <- owin2gpc(A)
-    Bg <- owin2gpc(B)
-    ABg <- intersect(Ag, Bg)
-    AB <- gpc2owin(ABg)
-    if(is.null(AB))
-      return(emptywindow(C))
-    return(AB)
+    if(spatstat.options("gpclib") && require(gpclib)) {
+      ####### Result is polygonal ############
+      Ag <- owin2gpc(A)
+      Bg <- owin2gpc(B)
+      ABg <- intersect(Ag, Bg)
+      AB <- gpc2owin(ABg)
+      if(is.null(AB))
+        return(emptywindow(C))
+      return(AB)
+    } 
   }
 
   ######### Result is a mask ##############
@@ -245,7 +248,6 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
       return(restrict.mask(B, A))
   }
 
-  # CONTROL SHOULD NOT PASS TO HERE
   # No existing masks. No clipping applied so far.
   # Convert one window to a mask with default pixel raster, and intersect.
   if(Arect) {
@@ -296,12 +298,14 @@ union.owin <- function(A, B, ...) {
             unitname=unitname(A))
 
   if(!Amask && !Bmask) {
-    ####### Result is polygonal ############
-    Ag <- owin2gpc(A)
-    Bg <- owin2gpc(B)
-    ABg <- union(Ag, Bg)
-    AB <- gpc2owin(ABg)
-    return(AB)
+    if(spatstat.options("gpclib") && require(gpclib)) {
+      ####### Result is polygonal ############
+      Ag <- owin2gpc(A)
+      Bg <- owin2gpc(B)
+      ABg <- union(Ag, Bg)
+      AB <- gpc2owin(ABg)
+      return(AB)
+    }
   }
 
   ####### Result is a mask ############
@@ -326,36 +330,109 @@ union.owin <- function(A, B, ...) {
   y <- as.vector(raster.y(C))
   ok <- inside.owin(x, y, A) | inside.owin(x, y, B)
 
-  if(!any(ok))
-    stop("Internal error: union is empty")
-
   if(!all(ok))
     C$m[] <- ok
 
   return(C)
 }
 
+setminus.owin <- function(A, B, ...) {
+  if(is.null(A) || is.empty(A)) return(B)
+  if(is.null(B) || is.empty(B)) return(A)
+  verifyclass(A, "owin")
+  verifyclass(B, "owin")
+
+  if(identical(A, B))
+    return(emptywindow(as.rectangle(A)))
+
+  # check units
+  if(!compatible.units(unitname(A), unitname(B)))
+    warning("The two windows have incompatible units of length")
+  
+  # Determine type of arguments
+  
+  Arect <- (A$type == "rectangle")
+  Brect <- (B$type == "rectangle")
+  Apoly <- (A$type == "polygonal")
+  Bpoly <- (B$type == "polygonal")
+  Amask <- (A$type == "mask")
+  Bmask <- (B$type == "mask")
+
+  # Polygonal case
+
+  if(!Amask && !Bmask) {
+    if(spatstat.options("gpclib") && require(gpclib)) {
+      Ap <- as.polygonal(A)
+      Bp <- as.polygonal(B)
+      Ag <- owin2gpc(Ap)
+      Bg <- owin2gpc(Bp)
+      ABg <- setdiff(Ag, Bg)
+      AB <- gpc2owin(ABg)
+      AB <- rescue.rectangle(AB)
+      return(AB)
+    }
+  }
+
+  ####### Result is a mask ############
+
+  # Determine pixel raster parameters
+  rasterinfo <- 
+    if((length(list(...)) > 0))
+      list(...)
+    else if(Amask)
+      list(xy=list(x=A$xcol,
+                   y=A$yrow))
+    else if(Bmask)
+      list(xy=list(x=B$xcol,
+                   y=B$yrow))
+    else
+      list()
+
+  # Convert A to mask
+  AB <- do.call("as.mask", append(list(w=A), rasterinfo))
+      
+  x <- as.vector(raster.x(AB))
+  y <- as.vector(raster.y(AB))
+  ok <- inside.owin(x, y, A) & !inside.owin(x, y, B)
+
+  if(!all(ok))
+    AB$m[] <- ok
+  else
+    AB <- rescue.rectangle(AB)
+
+  return(AB)
+}
+
 # auxiliary functions
   
-trim.mask <- function(M, R) {
+trim.mask <- function(M, R, tolerant=TRUE) {
     # M is a mask,
     # R is a rectangle
-  
+
     # Ensure R is a subset of bounding rectangle of M
     R <- owin(intersect.ranges(M$xrange, R$xrange),
               intersect.ranges(M$yrange, R$yrange))
+    
+    # Deal with very thin rectangles
+    if(tolerant) {
+      R$xrange <- adjustthinrange(R$xrange, M$xstep, M$xrange)
+      R$yrange <- adjustthinrange(R$yrange, M$ystep, M$yrange)
+    }
+
     # Extract subset of image grid
     within.range <- function(u, v) { (u >= v[1]) & (u <= v[2]) }
     yrowok <- within.range(M$yrow, R$yrange)
     xcolok <- within.range(M$xcol, R$xrange)
-    if(sum(yrowok) == 0 || sum(xcolok) == 0)
-      stop("result is empty")
+    if((ny <- sum(yrowok)) == 0 || (nx <- sum(xcolok)) == 0) 
+      return(emptywindow(R))
     Z <- M
     Z$xrange <- R$xrange
     Z$yrange <- R$yrange
     Z$yrow <- M$yrow[yrowok]
     Z$xcol <- M$xcol[xcolok]
     Z$m <- M$m[yrowok, xcolok]
+    if(ny < 2 || nx < 2)
+      Z$m <- matrix(Z$m, nrow=ny, ncol=nx)
     Z$dim <- dim(Z$m)
     return(Z)
 }
@@ -545,6 +622,10 @@ simplify.owin <- function(W, dmin) {
 #
 
 gpc2owin <- function(x) {
+  if(!require("gpclib")) {
+    warning("Package gpclib is not available")
+    return(NULL)
+  }
   verifyclass(x, "gpc.poly")
   bb <- get.bbox(x)
   pts <- get.pts(x)
@@ -567,6 +648,10 @@ gpc2owin <- function(x) {
 }
 
 owin2gpc <- function(x) {
+  if(!require("gpclib")) {
+    warning("Package gpclib is not available")
+    return(NULL)
+  }
   x <- as.polygonal(x)
   b <- x$bdry
   g <- lapply(b, function(p) {

@@ -17,7 +17,7 @@ void fexitc(const char *msg);
 
 extern Cifns getcif(char *);
 
-SEXP methas(SEXP cifname,
+SEXP xmethas(SEXP cifname,
 	    SEXP par,
 	    SEXP period,
 	    SEXP xprop,
@@ -31,11 +31,13 @@ SEXP methas(SEXP cifname,
 	    SEXP x,
 	    SEXP y,
 	    SEXP marks,
+	    SEXP ncond,
 	    SEXP fixall)
 {
   char *cifstring;
   double cifval, cvd, cvn, qnodds, anumer, adenom;
   int verb, marked, needupd, itype;
+  int nfree;
   int irep, ix, j;
   long Nmore;
   double *xx, *yy, *xpropose, *ypropose;
@@ -65,8 +67,9 @@ SEXP methas(SEXP cifname,
   PROTECT(   y      = AS_NUMERIC(y)); 
   PROTECT( marks    = AS_INTEGER(marks)); 
   PROTECT(fixall    = AS_INTEGER(fixall)); 
+  PROTECT(ncond     = AS_INTEGER(ncond)); 
 
-                    /* that's 15 protected objects */
+                    /* that's 16 protected objects */
 
   /* =================== Translate arguments from R to C ================ */
 
@@ -78,6 +81,7 @@ SEXP methas(SEXP cifname,
   algo.p = *(NUMERIC_POINTER(p));
   algo.q = *(NUMERIC_POINTER(q));
   algo.fixall = ((*(INTEGER_POINTER(fixall))) == 1);
+  algo.ncond =  *(INTEGER_POINTER(ncond));
 
   /* copy model parameters without interpreting them */
   model.par = NUMERIC_POINTER(par);
@@ -162,6 +166,8 @@ SEXP methas(SEXP cifname,
 
     itype = REJECT;
 
+    nfree = state.npts - algo.ncond;  /* number of 'free' points */
+
     /* ................  generate proposal ..................... */
     /* Shift or birth/death: */
     if(unif_rand() > algo.p) {
@@ -184,7 +190,7 @@ SEXP methas(SEXP cifname,
 #endif
 	/* evaluate conditional intensity */
 	anumer = (*(cif.eval))(birthprop, state);
-	adenom = qnodds*(state.npts+1);
+	adenom = qnodds*(nfree+1);
 #ifdef MHDEBUG
 	Rprintf("cif = %lf, Hastings ratio = %lf\n", anumer, anumer/adenom);
 #endif
@@ -195,10 +201,12 @@ SEXP methas(SEXP cifname,
 #endif
 	  itype = BIRTH;  /* Birth proposal accepted. */
 	}
-      } else if(state.npts > 0) {
+      } else if(nfree > 0) {
 	/* Propose death: */
-	ix = floor(state.npts * unif_rand());
-	ix = (ix < 0) ? 0 : (ix >= state.npts) ? (state.npts - 1) : ix;
+	ix = floor(nfree * unif_rand());
+	if(ix < 0) ix = 0;
+	ix = algo.ncond + ix;
+	if(ix >= state.npts) ix = state.npts - 1;
 	deathprop.ix = ix;
 	deathprop.u  = state.x[ix];
 	deathprop.v  = state.y[ix];
@@ -214,7 +222,7 @@ SEXP methas(SEXP cifname,
 #endif
 	/* evaluate conditional intensity */
 	adenom = (*(cif.eval))(deathprop, state);
-	anumer = qnodds * state.npts;
+	anumer = qnodds * nfree;
 #ifdef MHDEBUG
 	Rprintf("cif = %lf, Hastings ratio = %lf\n", adenom, anumer/adenom);
 #endif
@@ -226,11 +234,13 @@ SEXP methas(SEXP cifname,
 	  itype = DEATH; /* Death proposal accepted. */
 	}
       }
-    } else if(state.npts > 0) {
+    } else if(nfree > 0) {
       /* Propose shift: */
       /* point to be shifted */
-      ix = floor(state.npts * unif_rand());
-      ix = (ix < 0) ? 0 : (ix >= state.npts) ? (state.npts - 1) : ix;
+      ix = floor(nfree * unif_rand());
+      if(ix < 0) ix = 0;
+      ix = algo.ncond + ix;
+      if(ix >= state.npts) ix = state.npts - 1;
       deathprop.ix = ix;
       deathprop.u  = state.x[ix];
       deathprop.v  = state.y[ix];
@@ -387,13 +397,13 @@ SEXP methas(SEXP cifname,
     PROTECT(out = NEW_LIST(2));
     SET_VECTOR_ELT(out, 0, xout);
     SET_VECTOR_ELT(out, 1, yout);
-    UNPROTECT(18);  /* 15 arguments plus xout, yout, out */
+    UNPROTECT(19);  /* 16 arguments plus xout, yout, out */
   } else {
     PROTECT(out = NEW_LIST(3)); 
     SET_VECTOR_ELT(out, 0, xout);
     SET_VECTOR_ELT(out, 1, yout); 
     SET_VECTOR_ELT(out, 2, mout);
-    UNPROTECT(19);  /* 15 arguments plus xout, yout, mout, out */
+    UNPROTECT(20);  /* 16 arguments plus xout, yout, mout, out */
   }
 
   return(out);

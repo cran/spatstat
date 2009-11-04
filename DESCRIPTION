@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.17-0
-Date: 22 october 2009
+Version: 1.17-1
+Date: 04 november 2009
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and Rolf Turner
         <r.turner@auckland.ac.nz>, with substantial contributions of
@@ -16,12 +16,11 @@ Author: Adrian Baddeley <adrian@maths.uwa.edu.au> and Rolf Turner
         Nielsen, F. Nunes, E. Parilov, J. Picka, M. Reiter, B.D.
         Ripley, B. Rowlingson, E. Rubak, J. Rudge, A. Sarkka, K.
         Schladitz, B.T. Scott, I.-M. Sintorn, M. Spiess, M. Stevenson,
-        P. Surovy, B. Turlach, A. van Burgel, A. Villers, H. Wang, H.
-        Wendrock and S. Wong.
+        P. Surovy, B. Turlach, A. van Burgel, T. Verbeke, A. Villers,
+        H. Wang, H. Wendrock and S. Wong.
 Maintainer: Adrian Baddeley <adrian@maths.uwa.edu.au>
-Depends: R (>= 2.9.0), stats, graphics, utils, mgcv, gpclib, deldir (>=
-        0.0-7)
-Suggests: sm, maptools, rpanel, tkrplot
+Depends: R (>= 2.10.0), stats, graphics, utils, mgcv, deldir (>= 0.0-7)
+Suggests: gpclib, sm, maptools, rpanel, tkrplot, scatterplot3d
 Description: A package for analysing spatial data, mainly Spatial Point
         Patterns, including multitype/marked points and spatial
         covariates, in any two-dimensional spatial region. Contains
@@ -40,6 +39,6 @@ Description: A package for analysing spatial data, mainly Spatial Point
         simulation envelopes, residuals, residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: 2009-10-22 20:51:58 UTC; adrian
+Packaged: 2009-11-06 03:02:06 UTC; adrian
 Repository: CRAN
-Date/Publication: 2009-10-22 18:37:53
+Date/Publication: 2009-11-06 10:18:11

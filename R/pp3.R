@@ -1,0 +1,104 @@
+#
+#   pp3.R
+#
+#  class of three-dimensional point patterns in rectangular boxes
+#
+#  $Revision: 1.1 $  $Date: 2009/11/04 23:57:34 $
+#
+
+box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
+  stopifnot(is.numeric(xrange) && length(xrange) == 2 && diff(xrange) > 0)
+  stopifnot(is.numeric(yrange) && length(yrange) == 2 && diff(yrange) > 0)
+  stopifnot(is.numeric(zrange) && length(zrange) == 2 && diff(zrange) > 0)
+  out <- list(xrange=xrange, yrange=yrange, zrange=zrange,
+              units=as.units(unitname))
+  class(out) <- "box3"
+  return(out)
+}
+
+as.box3 <- function(...) {
+  a <- list(...)
+  n <- length(a)
+  if(n == 0)
+    stop("No arguments given")
+  if(n == 1) {
+    a <- a[[1]]
+    if(inherits(a, "box3"))
+      return(a)
+    if(inherits(a, "pp3"))
+      return(a$domain)
+    if(is.numeric(a)) {
+      if(length(a) == 6)
+        return(box3(a[1:2], a[3:4], a[5:6]))
+      stop(paste("Don't know how to interpret", length(a), "numbers as a box"))
+    }
+    if(!is.list(a))
+      stop("Don't know how to interpret data as a box")
+  }
+  return(do.call("box3", a))
+}
+
+print.box3 <- function(x, ...) {
+  bracket <- function(z) paste("[",
+                               paste(signif(z, 5), collapse=", "),
+                               "]", sep="")
+  v <- paste(unlist(lapply(x[1:3], bracket)), collapse=" x ")
+  s <- summary(unitname(x))
+  cat(paste("Box:", v, s$plural, s$explain, "\n"))
+  invisible(NULL)
+}
+
+unitname.box3 <- function(x) { x$units }
+
+pp3 <- function(x, y, z, ...) {
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(y))
+  stopifnot(is.numeric(z)) 
+  b <- as.box3(...)
+  out <- ppx(data=data.frame(x=x,y=y,z=z), domain=b)
+  class(out) <- c("pp3", class(out))
+  return(out)
+}
+
+print.pp3 <- function(x, ...) {
+  cat("Three-dimensional point pattern\n")
+  sd <- summary(x$data)
+  np <- sd$ncases
+  cat(paste(np, ngettext(np, "point", "points"), "\n"))
+  print(x$domain)
+  invisible(NULL)
+}
+
+plot.pp3 <- function(x, ...) {
+  xname <- deparse(substitute(x))
+  if(!require("scatterplot3d"))
+    stop("Package scatterplot3d is needed to plot 3D point patterns\n")
+  coo <- coords(x)
+  cnam <- names(coo)
+  do.call("scatterplot3d",
+          resolve.defaults(list(x=coo[,1],
+                                y=coo[,2],
+                                z=coo[,3]),
+                           list(...),
+                           list(main=xname),
+                           list(xlab=cnam[1],
+                                ylab=cnam[2],
+                                zlab=cnam[3]),
+                           list(xlim=x$domain$xrange,
+                                ylim=x$domain$yrange,
+                                zlim=x$domain$zrange)))
+}
+
+unitname.pp3 <- function(x) { unitname(x$domain) }
+
+diameter.box3 <- function(x) {
+  stopifnot(inherits(x, "box3"))
+  with(x, sqrt(diff(xrange)^2+diff(yrange)^2+diff(zrange)^2))
+}
+
+volume.box3 <- function(x) {
+  stopifnot(inherits(x, "box3"))
+  with(x, prod(diff(xrange), diff(yrange), diff(zrange)))
+}
+
+

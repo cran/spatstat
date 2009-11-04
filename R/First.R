@@ -4,6 +4,8 @@
                 fields="Version")
   cat(paste("spatstat", v,
             " (Type", sQuote("help(spatstat)"), "for information)\n"))
+  reset.spatstat.options()
+  invisible(NULL)
 }
 
 

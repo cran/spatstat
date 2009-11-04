@@ -7,16 +7,13 @@
   of the Metropolis-Hastings algorithm. 
 }
 \usage{
-   rmhcontrol(control, \dots)
-   \method{rmhcontrol}{default}(control=NULL, \dots, p=0.9, q=0.5, nrep=5e5,
+   rmhcontrol(\dots)
+   \method{rmhcontrol}{default}(\dots, p=0.9, q=0.5, nrep=5e5,
                       expand=NULL, periodic=FALSE, ptypes=NULL,
-                      fixall=FALSE, nverb=0)
+                      x.cond=NULL, fixall=FALSE, nverb=0)
 }
 \arguments{
-  \item{control}{An existing list of control parameters
-    in some other format. Incompatible with the arguments listed below.
-  }
-  \item{\dots}{There should be no other arguments.}
+  \item{\dots}{Arguments passed to methods.}
   \item{p}{Probability of proposing a shift (as against a birth/death)}
   \item{q}{Conditional probability of proposing a death given that a
     birth or death will be proposed}
@@ -32,6 +29,7 @@
   \item{ptypes}{For multitype point processes, the distribution of
     the mark attached to a new random point (when a birth is
     proposed)}
+  \item{x.cond}{Conditioning points for conditional simulation.}
   \item{fixall}{(Logical) for multitype point processes,
     whether to fix the number of points of each type.}
   \item{nverb}{Progress reports will be printed every \code{nverb}
@@ -58,16 +56,6 @@
   (A separate function \code{\link{rmhstart}}
   determines the initial state of the algorithm,
   and \code{\link{rmhmodel}} determines the model to be simulated.)
-
-  The algorithm control parameters should be specified \bold{either} by the
-  first argument \code{control} \bold{or} by the other arguments
-  \code{p}, \code{q} etc.
-  
-  If \code{control} is specified, it may be a list of parameter values
-  (with components named \code{p}, \code{q} etc,
-  having the same interpretation as described below)
-  or an object of class \code{"rmhcontrol"} obtained by a previous
-  call to \code{rmhcontrol}.
 
   The parameters are as follows:
   
@@ -149,6 +137,16 @@
       relative frequencies of the types which will result from the
       simulation.
     }
+    \item{x.cond}{
+      If this argument is given,
+      then \emph{conditional simulation} will be performed,
+      and \code{x.cond} specifies the location of the
+      fixed points as well as the type of conditioning.
+      It should be either a point pattern
+      (object of class \code{"ppp"}) or a \code{list(x,y)}
+      or a \code{data.frame}.
+      See the section on Conditional Simulation.
+    }
     \item{fixall}{A logical scalar specifying whether to condition on
       the number of points of each type.  Meaningful only if a marked
       process is being simulated, and if \eqn{p = 1}.  A warning message
@@ -161,7 +159,70 @@
       the simulation proceeds silently.
     }
   }
-}  
+}
+\section{Conditional Simulation}{
+  For a Gibbs point process \eqn{X},
+  the Metropolis-Hastings algorithm easily accommodates several
+  kinds of conditional simulation:
+  \describe{
+    \item{conditioning on the total number of points:}{
+      We fix the total number of points \eqn{N(X)} to be equal to
+      \eqn{n}. We simulate from the conditional distribution of
+      \eqn{X} given \eqn{N(X) = n}. 
+    }
+    \item{conditioning on the number of points of each type:}{
+      In a multitype point process, where \eqn{Y_j}{Y[[j]]} denotes the
+      process of points of type \eqn{j}, we fix the number
+      \eqn{N(Y_j)}{N(Y[[j]])} of points of type \eqn{j} to be equal to
+      \eqn{n_j}{n[j]}, for \eqn{j=1,2,\ldots,m}{j=1,2,...,m}.
+      We simulate from the conditional distribution of \eqn{X}
+      given \eqn{N(Y_j)=n_j}{N(Y[[j]]) = n[j]} for
+      \eqn{j=1,2,\ldots,m}{j=1,2,...,m}. 
+    }
+    \item{conditioning on the realisation in a subwindow:}{
+      We require that the point process \eqn{X} should,
+      within a specified sub-window \eqn{V},
+      coincide with a specified point pattern \eqn{y}.
+      We simulate from the conditional distribution of \eqn{X}
+      given \eqn{X \cap V = y}{(X intersect V) = y}.
+    }
+    \item{Palm conditioning:}{
+      We require that the point process \eqn{X} include
+      a specified list of points \eqn{y}. We simulate from
+      the point process with probability density
+      \eqn{g(x) = c f(x \cup y)}{g(x) = c * f(x union y)}
+      where \eqn{f} is the probability density of the original
+      process \eqn{X}, and \eqn{c} is a normalising constant.
+    }
+  }
+  To achieve each of these types of conditioning we
+  do as follows:
+  \describe{
+    \item{conditioning on the total number of points:}{
+      Set \code{p=1}.
+      The number of points is determined by the initial state
+      of the simulation: see \code{\link{rmhstart}}.
+    }
+    \item{conditioning on the number of points of each type:}{
+      Set \code{p=1} and \code{fixall=TRUE}.
+      The number of points of each type is determined by the initial state
+      of the simulation: see \code{\link{rmhstart}}.
+    }
+    \item{conditioning on the realisation in a subwindow:}{
+      Set \code{x.cond} to be a point pattern (object of
+      class \code{"ppp"}). Its window \code{V=x.cond$window} becomes the
+      conditioning subwindow \eqn{V}.
+    }
+    \item{Palm conditioning:}{
+      Set \code{x.cond} to be a \code{list(x,y)} or \code{data.frame}
+      with two columns containing the coordinates of the points, or a 
+      \code{list(x,y,marks)} or \code{data.frame} with three columns
+      containing the coordinates and marks of the points.
+    }
+  }
+  The arguments \code{x.cond}, \code{p} and \code{fixall} can be
+  combined.   
+}
 \references{
    Geyer, C.J. (1999)
    Likelihood Inference for Spatial Point

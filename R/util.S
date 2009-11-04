@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.44 $    $Date: 2009/10/21 18:26:39 $
+#    $Revision: 1.45 $    $Date: 2009/11/05 21:17:43 $
 #
 #  (a) for matrices only:
 #
@@ -379,4 +379,12 @@ evenly.spaced <- function(x, tol=1e-07) {
   if(diff(range(dx)) > tol * mean(dx))
     return(FALSE)
   return(TRUE)
+}
+
+adjustthinrange <- function(ur,vstep,vr) {
+  if(diff(ur) >= vstep) return(ur)
+  ur <- mean(ur) + c(-1,1) * vstep/2
+  if(ur[1] < vr[1]) ur <- vr[1] + c(0,1)*vstep
+  if(ur[2] > vr[2]) ur <- vr[2] - c(1,0)*vstep
+  return(ur)
 }

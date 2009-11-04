@@ -2,33 +2,37 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.6 $  $Date: 2009/09/22 02:00:53 $
+#   $Revision: 1.7 $  $Date: 2009/10/31 01:52:54 $
 #
 #
 
-rmhcontrol <- function(control, ...) {
+rmhcontrol <- function(...) {
   UseMethod("rmhcontrol")
 }
 
-rmhcontrol.rmhcontrol <- function(control, ...) {
-  return(control)
+rmhcontrol.rmhcontrol <- function(...) {
+  argz <- list(...)
+  if(length(argz) == 1)
+    return(argz[[1]])
+  stop("Arguments not understood")
 }
 
-rmhcontrol.list <- function(control, ...) {
-  argnames <- c("p","q","nrep","expand","periodic",
-                "ptypes","fixall", "nverb")
-  ok <- argnames %in% names(control) 
-  co <- do.call("rmhcontrol.default", control[argnames[ok]])
-  return(co)
+rmhcontrol.list <- function(...) {
+  argz <- list(...)
+  nama <- names(argz)
+  if(length(argz) == 1 && !any(nzchar(nama)))
+    do.call("rmhcontrol.default", argz[[1]])
+  else
+    do.call.matched("rmhcontrol.default", argz)
 }
 
-rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
+rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
                         expand=NULL, periodic=FALSE, ptypes=NULL,
-                        fixall=FALSE, nverb=0)
+                        x.cond=NULL, fixall=FALSE, nverb=0)
 {
-  if(!is.null(control) || length(list(...)) > 0)
+  if(length(list(...)) > 0)
     stop(paste("Syntax should be rmhcontrol(",
-               "p, q, nrep, expand, periodic, ptypes, fixall, nverb",
+               "p, q, nrep, expand, periodic, ptypes, x.cond, fixall, nverb",
                ")\n with arguments given by name if present"))
   
   # validate arguments
@@ -52,16 +56,50 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
     stop(paste(sQuote("expand"),
                "should be either a number, a window, or NULL"))
 
-
 #################################################################
-# Conditioning on the number of points?
-#  
-# cond = 1 <--> no conditioning
-# cond = 2 <--> conditioning on n = number of points
-# cond = 3 <--> conditioning on the number of points of each type.
+# Conditioning on point configuration
+#
+# condtype = "none": no conditioning
+# condtype = "Palm": conditioning on the presence of specified points
+# condtype = "window": conditioning on the configuration in a subwindow
+#
+  if(is.null(x.cond)) {
+    condtype <- "none"
+    n.cond <- NULL
+  } else if(is.ppp(x.cond)) {
+    condtype <- "window"
+    n.cond <- x.cond$n
+  } else if(is.data.frame(x.cond)) {
+    if(ncol(x.cond) %in% c(2,3)) {
+      condtype <- "Palm"
+      n.cond <- nrow(x.cond)
+    } else stop("Wrong number of columns in data frame x.cond")
+  } else if(is.list(x.cond)) {
+    if(length(x.cond) %in% c(2,3)) {
+      x.cond <- as.data.frame(x.cond)
+      condtype <- "Palm"
+      n.cond <- nrow(x.cond)
+    } else stop("Wrong number of components in list x.cond")
+  } else stop("Unrecognised format for x.cond")
 
-  cond    <- 2 - (p<1) + fixall - fixall*(p<1)
-  conditioning <- switch(cond, "none", "n.total", "n.each.type")
+  if(condtype == "Palm" && n.cond == 0) {
+    warning(paste("Ignored empty configuration x.cond;",
+                  "conditional (Palm) simulation given an empty point pattern",
+                  "is equivalent to unconditional simulation"))
+    condtype <- "none"
+    x.cond <- NULL
+    n.cond <- NULL
+  }
+    
+#################################################################
+# Fixing the number of points?
+#  
+# fixcode = 1 <--> no conditioning
+# fixcode = 2 <--> conditioning on n = number of points
+# fixcode = 3 <--> conditioning on the number of points of each type.
+
+  fixcode    <- 2 - (p<1) + fixall - fixall*(p<1)
+  fixing <- switch(fixcode, "none", "n.total", "n.each.type")
   
 # Warn about silly combination
   if(fixall && p < 1)
@@ -88,7 +126,7 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
 # No expansion is permitted if we are conditioning on the
 # number of points
   
-  if(conditioning != "none") {
+  if(fixing != "none") {
     if(force.exp)
       stop(paste("When conditioning on the number of points,",
                  "no expansion may be done.\n"))
@@ -112,8 +150,10 @@ rmhcontrol.default <- function(control=NULL, ..., p=0.9, q=0.5, nrep=5e5,
               fixall=fixall,
               force.exp=force.exp,
               force.noexp=force.noexp,
-              cond=cond,
-              conditioning=conditioning)
+              fixcode=fixcode,
+              fixing=fixing,
+              condtype=condtype,
+              x.cond=x.cond)
   class(out) <- c("rmhcontrol", class(out))
   return(out)
 }
@@ -123,16 +163,27 @@ print.rmhcontrol <- function(x, ...) {
 
   cat("Metropolis-Hastings algorithm control parameters\n")
   cat(paste("Probability of shift proposal: p =", x$p, "\n"))
-  cat(paste("Conditional probability of death proposal: q =", x$q, "\n"))
-  switch(x$cond,
-         {},
-         cat("The total number of points is fixed\n"),
-         cat("The number of points of each type is fixed\n"))
-  if(!is.null(x$ptypes)) {
-    cat("Birth proposal probabilities for each type of point:\n")
-    print(x$ptypes)
+  if(x$fixing == "none") {
+    cat(paste("Conditional probability of death proposal: q =", x$q, "\n"))
+    if(!is.null(x$ptypes)) {
+      cat("Birth proposal probabilities for each type of point:\n")
+      print(x$ptypes)
+    }
   }
-
+  switch(x$fixing,
+         none={},
+         n.total=cat("The total number of points is fixed\n"),
+         n.each.type=cat("The number of points of each type is fixed\n"))
+  switch(x$condtype,
+         none={},
+         window={
+           cat(paste("Conditional simulation given the",
+                     "configuration in a subwindow\n"))
+           print(x$x.cond$window)
+         },
+         Palm={
+           cat("Conditional simulation of Palm type\n")
+         })
   cat(paste("Number of M-H iterations: nrep =", x$nrep, "\n"))
   if(x$nverb > 0)
     cat(paste("Progress report every nverb=", x$nverb, "iterations\n"))

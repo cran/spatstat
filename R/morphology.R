@@ -6,7 +6,7 @@
 #  generic functions
 #  and methods for owin, psp, ppp
 #
-#  $Revision: 1.14 $   $Date: 2009/07/21 02:24:34 $
+#  $Revision: 1.16 $   $Date: 2009/11/06 00:07:59 $
 #
 
 # ............ generic  ............................
@@ -51,8 +51,12 @@ erosion.owin <-
     polygonal <- !ismask
   else {
     stopifnot(is.logical(polygonal))
-    if(polygonal && ismask)
+    if(polygonal && ismask) {
+      # try to convert
       w <- as.polygonal(w)
+      if(w$type == "mask")
+        polygonal <- FALSE
+    }
   }
   
   if(w$type == "rectangle" && polygonal) {
@@ -117,8 +121,12 @@ dilation.owin <-
     polygonal <- !ismask
   else {
     stopifnot(is.logical(polygonal))
-    if(polygonal && ismask) 
+    if(polygonal && ismask) {
+      # try to convert
       w <- as.polygonal(w)
+      if(w$type == "mask")
+        polygonal <- FALSE
+    }
   }
   
   
@@ -176,6 +184,18 @@ opening.owin <- function(w, r, ..., polygonal=NULL) {
   return(wopen)
 }
 
+
+border <- function(w, r, outside=FALSE, ...) {
+  w <- as.owin(w)
+  if(!outside) {
+    e <- erosion(w, r, ...)
+    b <- setminus.owin(w, e)
+  } else {
+    d <- dilation(w, r, ...)
+    b <- setminus.owin(d, w)
+  }
+  return(b)
+}
 
 # ............ methods for class 'psp' ............................
 

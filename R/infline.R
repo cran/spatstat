@@ -3,7 +3,7 @@
 #
 # Infinite lines
 #
-# $Revision: 1.10 $ $Date: 2009/04/06 05:54:55 $
+# $Revision: 1.13 $ $Date: 2009/11/05 22:06:07 $
 #
 
 infline <- function(a=NULL, b=NULL, h=NULL, v=NULL, p=NULL, theta=NULL) {
@@ -107,7 +107,46 @@ chop.tess <- function(X, L) {
   stopifnot(is.infline(L))
   stopifnot(is.tess(X)||is.owin(X))
   X <- as.tess(X)
+
+  if(!spatstat.options("gpclib")) {
+    # polygonal computations unavailable
+    # convert to image tessellation
+    X <- tess(image=as.im(X))
+  }
   
+  if(X$type == "image") {
+    Xim <- X$image
+    xr <- Xim$xrange
+    yr <- Xim$yrange
+    # extract matrices of pixel values and x, y coordinates
+    Zmat <- as.matrix(Xim)
+    xmat <- rasterx.im(Xim)
+    ymat <- rastery.im(Xim)
+    # process lines
+    for(i in seq(nrow(L))) {
+      # line i chops window into two pieces
+      if(!is.na(h <- L[i, "h"])) {
+        # horizontal line
+        if(h > yr[1] && h < yr[2]) 
+          Zmat <- 2 * Zmat + (ymat > h)
+      } else if(!is.na(v <- L[i, "v"])) {
+        # vertical line
+        if(v > xr[1] && v < xr[2])
+          Zmat <- 2 * Zmat + (xmat < h)
+      } else {
+        # generic line y = a + bx
+        a <- L[i, "a"]
+        b <- L[i, "b"]
+        Zmat <- 2 * Zmat + (ymat > a + b * xmat)
+      }
+    }
+    # Now just put back as factor image
+    Zim <- im(Zmat, xcol=Xim$xcol, yrow=Xim$yrow, unitname=unitname(Xim))
+    Z <- tess(image=Zim)
+    return(Z)
+  }
+
+  #---- polygonal computation --------
   # get bounding box
   B <- as.rectangle(as.owin(X))
   xr <- B$xrange
@@ -156,4 +195,6 @@ chop.tess <- function(X, L) {
   }
   return(X)
 }
+
+
 
