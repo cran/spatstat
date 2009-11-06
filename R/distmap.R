@@ -2,7 +2,7 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.15 $     $Date: 2009/04/25 08:30:19 $
+#      $Revision: 1.16 $     $Date: 2009/10/31 22:32:56 $
 #
 #
 #     Distance transforms
@@ -27,7 +27,7 @@ distmap.ppp <- function(X, ...) {
     B <- im(bmat, W$xcol, W$yrow, unitname=uni)
   } else {
     # distance to window boundary, not frame boundary
-    bmat <- bdist.pixels(W, coords=FALSE)
+    bmat <- bdist.pixels(W, style="matrix")
     B <- im(bmat, W$xcol, W$yrow, unitname=uni)
     # clip all to window
     V <- V[W, drop=FALSE]
@@ -44,7 +44,7 @@ distmap.owin <- function(X, ..., discretise=FALSE, invert=FALSE) {
   uni <- unitname(X)
   if(X$type == "rectangle") {
     M <- as.mask(X, ...)
-    Bdry <- im(bdist.pixels(M, coords=FALSE),
+    Bdry <- im(bdist.pixels(M, style="matrix"),
                M$xcol, M$yrow, unitname=uni)
     if(!invert)
       Dist <- as.im(M, value=0)
@@ -129,7 +129,7 @@ distmap.psp <- function(X, ...) {
   yr <- W$yrow
   Dist <- im(array(sqrt(z$dist2), dim=W$dim), xc, yr, unitname=uni)
   Indx <- im(array(z$index + 1, dim=W$dim), xc, yr, unitname=uni)
-  Bdry <- im(bdist.pixels(W, coords=FALSE), xc, yr, unitname=uni)
+  Bdry <- im(bdist.pixels(W, style="matrix"), xc, yr, unitname=uni)
   attr(Dist, "index") <- Indx
   attr(Dist, "bdry")  <- Bdry
   return(Dist)

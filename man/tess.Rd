@@ -87,7 +87,8 @@
   \code{\link{split.ppp}},
   \code{\link{cut.ppp}},
   \code{\link{by.ppp}},
-  \code{\link{quadrats}}.
+  \code{\link{quadrats}},
+  \code{\link{bdist.tiles}}.
 }
 \examples{
   A <- tess(xgrid=0:4,ygrid=0:4)

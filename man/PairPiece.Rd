@@ -39,11 +39,13 @@
   points \eqn{x_i, x_j}{x[i], x[j]} contributes a factor
   \eqn{h(x_i,x_j)}{h(x[i], x[j])} to the density.
 
-  The pairwise interaction term \eqn{h(u, v)} is called piecewise constant
+  The pairwise interaction term \eqn{h(u, v)} is called
+  \emph{piecewise constant}
   if it depends only on the distance between \eqn{u} and \eqn{v},
   say \eqn{h(u,v) = H(||u-v||)}, and \eqn{H} is a piecewise constant
   function (a function which is constant except for jumps at a finite
-  number of places). 
+  number of places). The use of piecewise constant interaction terms
+  was first suggested by Takacs (1986).
  
   The function \code{\link{ppm}()}, which fits point process models to 
   point pattern data, requires an argument 
@@ -90,6 +92,11 @@
 
    ppm(cells, ~polynom(x,y,3), PairPiece(c(0.05, 0.1)))
    # nonstationary process with log-cubic polynomial trend
+}
+\references{
+  Takacs, R. (1986)
+  Estimator for the pair potential of a Gibbsian point process.
+  \emph{Statistics} \bold{17}, 429--433.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

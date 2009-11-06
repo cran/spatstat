@@ -1,7 +1,7 @@
 #
 #    discarea.R
 #
-#  $Revision: 1.11 $  $Date: 2009/08/12 00:14:13 $
+#  $Revision: 1.12 $  $Date: 2009/11/05 22:26:00 $
 #
 
 
@@ -59,9 +59,13 @@ dilated.areas <- function(X, r, W=NULL, ..., exact=FALSE) {
       stop("r should be a vector or single value")
     r <- as.vector(r)
   }
-  if(!is.ppp(X) && exact) {
+  if(exact && !is.ppp(X)) {
     exact <- FALSE
     warning("Option exact=TRUE is only available for ppp objects")
+  }
+  if(exact && !spatstat.options("gpclib")) {
+    exact <- FALSE
+    warning("Option exact=TRUE is unavailable without gpclib")
   }
   if(Wwasnull <- is.null(W)) {
     # unconstrained dilation

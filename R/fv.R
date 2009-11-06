@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.43 $   $Date: 2009/06/27 00:44:11 $
+#    $Revision: 1.44 $   $Date: 2009/10/28 02:39:26 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -190,6 +190,9 @@ tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag
     if(!is.null(new.desc)) attr(x, "desc")[i] <- new.desc
     if(!is.null(new.tag)) names(x)[i] <- new.tag
   }
+  # if the tweaked column is the preferred value, adjust accordingly
+  if(attr(x, "valu") == current.tag && !is.null(new.tag))
+    attr(x, "valu") <- new.tag
   return(x)
 }
 

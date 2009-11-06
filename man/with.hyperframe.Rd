@@ -1,44 +1,49 @@
-\name{eval.hyper}
-\alias{eval.hyper}
+\name{with.hyperframe}
+\alias{with.hyperframe}
 \title{Evaluate an Expression in Each Row of a Hyperframe}
 \description{
   An expression, involving the names of columns in a hyperframe,
   is evaluated separately for each row of the hyperframe.
 }
 \usage{
-eval.hyper(e, h, simplify = TRUE, ee = NULL)
+\method{with}{hyperframe}(data, expr, ..., simplify = TRUE, ee = NULL)
 }
 \arguments{
-  \item{e}{An \R language expression to be evaluated.}
-  \item{h}{A hyperframe (object of class \code{"hyperframe"})
+  \item{data}{A hyperframe (object of class \code{"hyperframe"})
     containing data.
   }
+  \item{expr}{An \R language expression to be evaluated.}
+  \item{\dots}{Ignored.}
   \item{simplify}{
     Logical. If \code{TRUE}, the return value
     will be simplified to a vector whenever possible.
   }
   \item{ee}{
-    Alternative form of \code{e}. See Details.
+    Alternative form of \code{expr}, as an object of class
+    \code{"expression"}.
   }
 }
 \details{
-  This function evaluates the expression \code{e} in each row
-  of the hyperframe \code{h}.
+  This function evaluates the expression \code{expr} in each row
+  of the hyperframe \code{data}. It is a method for the generic
+  function \code{\link{with}}.
   
-  The argument \code{e} should be an \R language expression
+  The argument \code{expr} should be an \R language expression
   in which each variable name is either the name of a column in the
-  hyperframe \code{h}, or the name of an object in the global environment.
+  hyperframe \code{data}, or the name of an object in the global
+  environment. The argument \code{ee} can be used as an alternative
+  to \code{expr} and should be an expression object (of
+  class \code{"expression"}).
   
-  For each row of \code{h}, the expression will be evaluated
-  so that variables which are column names of \code{h} are
+  For each row of \code{data}, the expression will be evaluated
+  so that variables which are column names of \code{data} are
   interpreted as the entries for those columns in the current row.
 
-  For example, if \code{h} has columns called \code{A} and \code{B},
-  then \code{eval.hyper(A != B, h)} inspects each row of \code{h} in turn,
+  For example, if a hyperframe \code{h} has columns
+  called \code{A} and \code{B}, then \code{with(h, A != B)} inspects
+  each row of \code{data} in turn,
   tests whether the entries in columns \code{A} and \code{B} are
   equal, and returns the \eqn{n} logical values.
-
-
 }
 \value{
   Normally a list of length
@@ -61,7 +66,7 @@ eval.hyper(e, h, simplify = TRUE, ee = NULL)
 \examples{
   # generate Poisson point patterns with intensities 10 to 100
    H <- hyperframe(L=seq(10,100, by=10))
-   X <- eval.hyper(rpoispp(L),H)
+   X <- with(H, rpoispp(L))
 }
 \keyword{spatial}
 \keyword{manip}

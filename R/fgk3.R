@@ -1,0 +1,374 @@
+#
+#	$Revision: 1.2 $	$Date: 2009/11/05 01:28:57 $
+#
+#	Estimates of F, G and K for three-dimensional point patterns
+#
+#
+#  ............ user interface .............................
+#
+
+K3est <- function(X, ...,
+                  rmax=NULL, nrval=128,
+                  correction=c("translation", "isotropic"))
+{
+  stopifnot(inherits(X, "pp3"))
+  correction <- pickoption("correction", correction,
+                           c(translation="translation",
+                             isotropic="isotropic"),
+                           multi=TRUE)
+  if(is.null(rmax))
+    rmax <- diameter.box3(X$domain)/2
+  r <- seq(0, rmax, length=nrval)
+
+  # this will be the output data frame
+  K <- data.frame(r=r, theo= (4/3) * pi * r^3)
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  K <- fv(K, "r", substitute(K3(r), NULL),
+          "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="K3")
+
+  # extract the x,y,z ranges as a vector of length 6
+  flatbox <- unlist(X$domain[1:3])
+
+  # extract coordinates
+  coo <- coords(X)
+  
+  if(any(correction %in% "translation")) {
+    u <- k3engine(coo$x, coo$y, coo$z, flatbox,
+                  rmax=rmax, nrval=nrval, correction="translation")
+    Kt <- u$f
+    K <- bind.fv(K, data.frame(trans=Kt), "%s[trans](r)",
+                 "translation-corrected estimate of %s",
+                 "trans")
+  }
+  if(any(correction %in% "isotropic")) {
+    u <- k3engine(coo$x, coo$y, coo$z, flatbox,
+                  rmax=rmax, nrval=nrval, correction="isotropic")
+    Ki <- u$f
+    K <- bind.fv(K, data.frame(iso=Ki), "%s[iso](r)",
+                 "isotropic-corrected estimate of %s",
+                 "iso")
+  }
+  # default is to display them all
+  attr(K, "fmla") <- . ~ r
+  unitname(K) <- unitname(X)
+  return(K)
+}
+                  
+G3est <- function(X, ...,
+                  rmax=NULL, nrval=128,
+                  correction=c("rs", "km", "Hanisch"))
+{
+  stopifnot(inherits(X, "pp3"))
+  correction <- pickoption("correction", correction,
+                           c(rs="rs",
+                             border="rs",
+                             km="km",
+                             KM="km",
+                             Hanisch="han",
+                             hanisch="han"),
+                           multi=TRUE)
+  if(is.null(rmax))
+    rmax <- diameter.box3(X$domain)/2
+  r <- seq(0, rmax, length=nrval)
+
+  coo <- coords(X)
+  lambda <- nrow(coo)/volume.box3(X$domain)
+  
+  # this will be the output data frame
+  G <- data.frame(r=r, theo= 1 - exp( - lambda * (4/3) * pi * r^3))
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  G <- fv(G, "r", substitute(G3(r), NULL),
+          "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="G3")
+
+  # extract the x,y,z ranges as a vector of length 6
+  flatbox <- unlist(X$domain[1:3])
+
+  # collect four histograms for censored data
+  u <- g3Cengine(coo$x, coo$y, coo$z, flatbox,
+                 rmax=rmax, nrval=nrval)
+
+  if("rs" %in% correction) 
+    G <- bind.fv(G, data.frame(rs=u$rs), "%s[rs](r)",
+                  "reduced sample estimate of %s",
+                  "rs")
+  if("km" %in% correction)
+    G <- bind.fv(G, data.frame(km=u$km), "%s[km](r)",
+                  "Kaplan-Meier estimate of %s",
+                  "km")
+  if("han" %in% correction) 
+    G <- bind.fv(G, data.frame(han=u$han), "%s[han](r)",
+                  "Normalised Hanisch estimate of %s",
+                  "han")
+  # default is to display them all
+  attr(G, "fmla") <- . ~ r
+  unitname(G) <- unitname(X)
+  return(G)
+}
+
+F3est <- function(X, ...,
+                  rmax=NULL, nrval=128, vside=NULL,
+                  correction=c("rs", "km", "cs"))
+{
+  stopifnot(inherits(X, "pp3"))
+  correction <- pickoption("correction", correction,
+                           c(rs="rs",
+                             border="rs",
+                             km="km",
+                             KM="km",
+                             Kaplan="km",
+                             cs="cs",
+                             CS="cs"),
+                           multi=TRUE)
+  if(is.null(rmax))
+    rmax <- diameter.box3(X$domain)/2
+  r <- seq(0, rmax, length=nrval)
+
+  coo <- coords(X)
+  lambda <- nrow(coo)/volume.box3(X$domain)
+
+  # determine voxel size
+  if(missing(vside)) {
+    shortside <- with(X$domain, min(diff(xrange),diff(yrange),diff(zrange)))
+    vside <- shortside/128
+  }
+  
+  # this will be the output data frame
+  FF <- data.frame(r=r, theo= 1 - exp( - lambda * (4/3) * pi * r^3))
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  FF <- fv(FF, "r", substitute(F3(r), NULL),
+          "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="F3")
+
+  # extract the x,y,z ranges as a vector of length 6
+  flatbox <- unlist(X$domain[1:3])
+
+  # go
+  u <- f3Cengine(coo$x, coo$y, coo$z, flatbox,
+                 rmax=rmax, nrval=nrval, vside=vside)
+
+  if("rs" %in% correction) 
+    FF <- bind.fv(FF, data.frame(rs=u$rs), "%s[rs](r)",
+                  "reduced sample estimate of %s",
+                  "rs")
+  if("km" %in% correction)
+    FF <- bind.fv(FF, data.frame(km=u$km), "%s[km](r)",
+                  "Kaplan-Meier estimate of %s",
+                  "km")
+  if("cs" %in% correction)
+    FF <- bind.fv(FF, data.frame(cs=u$cs), "%s[cs](r)",
+                  "Chiu-Stoyan estimate of %s",
+                  "cs")
+  # default is to display them all
+  attr(FF, "fmla") <- . ~ r
+  unitname(FF) <- unitname(X)
+  return(FF)
+}
+
+#  ............ low level code ..............................
+#
+k3engine <- function(x, y, z, box=c(0,1,0,1,0,1),
+                     rmax=1, nrval=100, correction="translation") 
+{
+	code <- switch(correction, translation=0, isotropic=1)
+	res <- .C("RcallK3",
+		as.double(x), as.double(y), as.double(z), 
+		as.integer(length(x)),
+		as.double(box[1]), as.double(box[2]), 
+		as.double(box[3]), as.double(box[4]), 
+		as.double(box[5]), as.double(box[6]), 
+		as.double(0), as.double(rmax), 
+		as.integer(nrval),
+		f = as.double(numeric(nrval)),
+		num = as.double(numeric(nrval)),
+		denom = as.double(numeric(nrval)),
+		as.integer(code),
+                  PACKAGE="spatstat"
+	)
+	return(list(range = c(0,rmax),
+                    f = res$f, num=res$num, denom=res$denom, 
+                    correction=correction))
+}
+#
+#
+#
+g3engine <- function(x, y, z, box=c(0,1,0,1,0,1), 
+                     rmax=1, nrval=10, correction="Hanisch G3") 
+{
+	code <- switch(correction, "minus sampling"=1, "Hanisch G3"=3)
+
+	res <- .C("RcallG3",
+		as.double(x), as.double(y), as.double(z), 
+		as.integer(length(x)),
+		as.double(box[1]), as.double(box[2]), 
+		as.double(box[3]), as.double(box[4]), 
+		as.double(box[5]), as.double(box[6]), 
+		as.double(0), as.double(rmax), 
+		as.integer(nrval),
+		f = as.double(numeric(nrval)),
+		num = as.double(numeric(nrval)),
+		denom = as.double(numeric(nrval)),
+		as.integer(code),
+                  PACKAGE="spatstat"
+	)
+	return(list(range = range, f = res$f, num=res$num, denom=res$denom, 
+		correction=correction))
+}
+#
+#
+f3engine <- function(x, y, z, box=c(0,1,0,1,0,1), 
+	vside=0.05, 
+	range=c(0,1.414), nval=25, correction="minus sampling") 
+	
+{
+#
+	code <- switch(correction, "minus sampling"=1, no=0)
+
+	res <- .C("RcallF3",
+		as.double(x), as.double(y), as.double(z), 
+		as.integer(length(x)),
+		as.double(box[1]), as.double(box[2]), 
+		as.double(box[3]), as.double(box[4]), 
+		as.double(box[5]), as.double(box[6]), 
+		as.double(vside), 
+		as.double(range[1]), as.double(range[2]),
+		m=as.integer(nval),
+		num = as.integer(integer(nval)),
+		denom = as.integer(integer(nval)),
+		as.integer(code),
+                  PACKAGE="spatstat"
+	)
+	r <- seq(range[1], range[2], length=nval)
+	f <- ifelse(res$denom > 0, res$num/res$denom, 1)
+
+	return(list(r = r, f = f, num=res$num, denom=res$denom, 
+		correction=correction))
+}
+
+f3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1), 
+	vside=0.05, rmax=1, nrval=25)
+{
+#
+  res <- .C("RcallF3cen",
+            as.double(x), as.double(y), as.double(z), 
+            as.integer(length(x)),
+            as.double(box[1]), as.double(box[2]), 
+            as.double(box[3]), as.double(box[4]), 
+            as.double(box[5]), as.double(box[6]), 
+            as.double(vside), 
+            as.double(0), as.double(rmax),
+            m=as.integer(nrval),
+            obs = as.integer(integer(nrval)),
+            nco = as.integer(integer(nrval)),
+            cen = as.integer(integer(nrval)),
+            ncc = as.integer(integer(nrval)),
+            upperobs = as.integer(integer(1)),
+            uppercen = as.integer(integer(1)),
+            PACKAGE="spatstat"
+            )
+  r <- seq(0, rmax, length=nrval)
+  #
+  obs <- res$obs
+  nco <- res$nco
+  cen <- res$cen
+  ncc <- res$ncc
+  upperobs <- res$upperobs
+  uppercen <- res$uppercen
+  #
+  breaks <- breakpts.from.r(r)
+  km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
+  rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
+  #
+  ero <- eroded.volumes(box, r)
+  H <- cumsum(nco/ero)
+  cs <- H/max(H[is.finite(H)])
+  #
+  return(list(rs=rs, km=km$km, hazard=km$lambda, cs=cs, r=r))
+}
+
+g3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1), 
+	rmax=1, nrval=25)
+{
+#
+  res <- .C("RcallG3cen",
+            as.double(x), as.double(y), as.double(z), 
+            as.integer(length(x)),
+            as.double(box[1]), as.double(box[2]), 
+            as.double(box[3]), as.double(box[4]), 
+            as.double(box[5]), as.double(box[6]), 
+            as.double(0), as.double(rmax),
+            m=as.integer(nrval),
+            obs = as.integer(integer(nrval)),
+            nco = as.integer(integer(nrval)),
+            cen = as.integer(integer(nrval)),
+            ncc = as.integer(integer(nrval)),
+            upperobs = as.integer(integer(1)),
+            uppercen = as.integer(integer(1)),
+            PACKAGE="spatstat"
+            )
+  r <- seq(0, rmax, length=nrval)
+  #
+  obs <- res$obs
+  nco <- res$nco
+  cen <- res$cen
+  ncc <- res$ncc
+  upperobs <- res$upperobs
+  uppercen <- res$uppercen
+  #
+  breaks <- breakpts.from.r(r)
+  km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
+  rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
+  #
+  ero <- eroded.volumes(box, r)
+  H <- cumsum(nco/ero)
+  han <- H/max(H[is.finite(H)])
+  return(list(rs=rs, km=km$km, hazard=km$lambda, han=han, r=r))
+}
+
+
+# ------------------------------------------------------------
+# volume of a sphere (exact and approximate)
+#
+
+sphere.volume <- function(range=c(0,1.414), nval=10) 
+{
+	return( (4/3) * pi * (seq(range[1],range[2], length=nval))^3 )
+}
+
+digital.volume <- function(range=c(0, 1.414),  nval=25, vside= 0.05) 
+{
+#	Calculate number of points in digital sphere 
+#	by performing distance transform for a single point
+#	in the middle of a suitably large box
+#
+#	This takes EIGHT TIMES AS LONG as the corresponding empirical F-hat !!!
+#
+	w <- 2 * range[2] + 2 * vside
+#
+	dvol <- .C("RcallF3",
+		as.double(w/2), as.double(w/2), as.double(w/2),
+		as.integer(1),
+		as.double(0), as.double(w), 
+		as.double(0), as.double(w), 
+		as.double(0), as.double(w), 
+		as.double(vside),
+		as.double(range[1]), as.double(range[2]),
+		as.integer(nval),
+		num = as.integer(integer(nval)),
+		denom = as.integer(integer(nval)),
+		as.integer(0),
+                   PACKAGE="spatstat"
+	)$num
+#	
+        (vside^3) * dvol 
+      }
+
+eroded.volumes <- function(x, r) {
+  b <- as.box3(x)
+  ax <- pmax(0, diff(b$xrange) - 2 * r)
+  ay <- pmax(0, diff(b$yrange) - 2 * r)
+  az <- pmax(0, diff(b$zrange) - 2 * r)
+  ax * ay * az
+}
+
+shortside.box3 <- function(x) {
+  min(diff(x$xrange), diff(x$yrange), diff(x$zrange))
+}

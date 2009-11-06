@@ -76,12 +76,12 @@
 }
 \seealso{
   \code{\link{hyperframe}},
-  \code{\link{eval.hyper}}
+  \code{\link{with.hyperframe}}
 }
 \examples{
    H <- hyperframe(id=1:10)
-   H$X <- eval.hyper(rpoispp(100),H)
-   H$D <- eval.hyper(distmap(X),  H)
+   H$X <- with(H, rpoispp(100))
+   H$D <- with(H, distmap(X))
    # points only
    plot(H[,"X"])
    plot(H, plot(X, main=id))

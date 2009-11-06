@@ -3,23 +3,110 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.17 $   $Date: 2009/08/22 06:16:31 $
+#    $Revision: 1.22 $   $Date: 2009/11/06 02:59:25 $
 #
 #
-".Spatstat.Options" <-
-  list(npixel = 100,
-       maxedgewt=100.0,
-       par.binary=list(),
-       par.persp=list(),
-       par.points=list(),
-       par.contour=list(),
-       image.colfun=function(n){topo.colors(n)},
-       ndummy.min=25,
-       dupC = FALSE,
-       progress = "tty",
-       checkpolygons = TRUE,
-       checksegments = TRUE,
-       ngrid.disc=128
+
+".Spatstat.Options" <- list()
+
+reset.spatstat.options <- function() {
+  .Spatstat.Options <<- lapply(.Spat.Stat.Opt.Table,
+                               function(z) { z$default })
+  invisible(.Spatstat.Options)  
+}
+
+".Spat.Stat.Opt.Table" <-
+  list(
+       npixel=list(
+         default=100,
+         check=function(x){
+           is.numeric(x) && (length(x) %in% c(1,2)) && is.finite(x) &&
+           all(x == ceiling(x)) && all(x > 1) 
+         },
+         valid="an integer, or a pair of integers, greater than 1"
+        ),
+       maxedgewt=list(
+         default=100,
+         check=function(x){
+           is.numeric(x) && length(x) == 1 && is.finite(x) && x >= 1
+         },
+         valid="a finite numeric value, not less than 1"
+       ),
+       par.binary=list(
+         default=list(),
+         check=is.list,
+         valid="a list"
+         ),
+       par.persp=list(
+         default=list(),
+         check=is.list,
+         valid="a list"
+         ),
+       par.points=list(
+         default=list(),
+         check=is.list,
+         valid="a list"
+         ),
+       par.contour=list(
+         default=list(),
+         check=is.list,
+         valid="a list"
+         ),
+       image.colfun=list(
+         default=function(n){topo.colors(n)},
+         check=function(x) {
+           is.function(x) && length(formals(x)) > 0 && all(is.character(x(42)))
+         },
+         valid="a function that returns character values"
+         ),
+       ndummy.min=list(
+         default=25,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1
+         },
+         valid="a single integer, greater than 1"
+       ),
+       dupC = list(
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1},
+         valid="a single logical value"
+         ),
+       progress = list(
+         default="tty",
+         check=function(x){ x %in% c("tty", "txtbar") },
+         valid=paste("one of the strings", dQuote("tty"),
+           "or", dQuote("txtbar"))
+         ),
+       checkpolygons = list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1},
+         valid="a single logical value"
+         ),
+       checksegments = list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1},
+         valid="a single logical value"
+         ),
+       ngrid.disc=list(
+         default=128,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1
+         },
+         valid="a single integer, greater than 1"
+       ),
+       gpclib=list(
+         default=FALSE,
+         check=function(x) {
+           if(!(is.logical(x) && length(x) == 1))
+             return(FALSE)
+           if(x && !require(gpclib)) {
+             warning("Cannot set gpclib=TRUE: package gpclib is unavailable")
+             return(FALSE)
+           }
+           return(TRUE)
+         },
+         valid="a single logical value"
+         )
        )
 
 "spatstat.options" <-
@@ -69,6 +156,16 @@ function (...)
     ok <- assignto %in% names(.Spatstat.Options)
     if(!all(ok))
 	stop(paste("Unrecognised option(s):", assignto[!ok]))
+# validate new values
+    for(i in seq(assignto)) {
+      nama <- assignto[i]
+      valo <- called[[i]]
+      entry <- .Spat.Stat.Opt.Table[[nama]]
+      ok <- do.call(entry$check, list(valo))
+      if(!ok)
+        stop(paste("Parameter", dQuote(nama), "should be",
+                   entry$valid))
+    }
 # reassign
     changed <- .Spatstat.Options[assignto]
     .Spatstat.Options[assignto] <<- called

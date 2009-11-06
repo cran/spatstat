@@ -53,11 +53,15 @@
   All columns (vectors, factors and lists) must be of the same length,
   if their length is greater than 1. 
 }
-\value{
-  An object of class \code{"hyperframe"}. There are methods for
-  \code{print}, \code{plot}, \code{summary}, \code{[}, \code{$},
+\section{Methods for Hyperframes}{
+  There are methods for
+  \code{print}, \code{plot}, \code{summary}, \code{with}, \code{[}, \code{$},
   \code{$<-}, \code{names}, \code{as.data.frame} and \code{as.list}
-  for this class. There is also a \code{\link{cbind.hyperframe}}.
+  for the class of hyperframes. There is also \code{\link{cbind.hyperframe}},
+  \code{\link{is.hyperframe}} and \code{\link{as.hyperframe}}.
+}
+\value{
+  An object of class \code{"hyperframe"}.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
@@ -66,11 +70,11 @@
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
+  \code{\link{as.hyperframe}},
   \code{\link{plot.hyperframe}},
-  \code{\link{eval.hyper}}
+  \code{\link{with.hyperframe}}
 }
 \examples{
-
  # equivalent to a data frame
   hyperframe(X=1:10, Y=3)
 

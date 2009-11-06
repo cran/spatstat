@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.113 $	$Date: 2009/10/22 20:26:18 $
+#	$Revision: 4.114 $	$Date: 2009/11/06 00:08:20 $
 #
 #
 #	A window may be either
@@ -578,6 +578,11 @@ as.polygonal <- function(W) {
            return(W)
          },
          mask = {
+           if(!(spatstat.options("gpclib") && require(gpclib))) {
+             warning(paste("Can't convert mask to polygon:",
+                        "gpclib is disabled/unavailable"))
+             return(W)
+           }
            # This could take a while
            M <- W$m
            nr <- nrow(M)

@@ -1,13 +1,15 @@
 \name{intersect.owin}
 \alias{intersect.owin}
 \alias{union.owin}
-\title{Intersection or Union of Two Windows}
+\alias{setminus.owin}
+\title{Intersection, Union or Set Subtraction of Two Windows}
 \description{
-  Yields the intersection or union of two windows.
+  Yields the intersection, union or set subtraction of two windows.
 }
 \usage{
    intersect.owin(A, B, \dots, fatal=TRUE)
    union.owin(A,B, \dots)
+   setminus.owin(A,B, \dots)
 }
 \arguments{
   \item{A}{A window object (see Details).}
@@ -27,6 +29,8 @@
   The function \code{intersect.owin} computes the intersection between the
   two windows \code{A} and \code{B}, while
   \code{union.owin} computes their union.
+  The function \code{setminus.owin} computes the intersection of
+  \code{A} with the complement of \code{B}.
 
   The arguments \code{A} and \code{B} must be window objects
   (either objects of class \code{"owin"}, or data that can be
@@ -60,32 +64,42 @@
 # two rectangles
    intersect.owin(u, v) 
    union.owin(u,v)
+   setminus.owin(u,v)
 
 # polygon and rectangle
    intersect.owin(letterR, v)
    union.owin(letterR,v)
+   setminus.owin(letterR,v)
 
 # mask and rectangle
    intersect.owin(m, v)
    union.owin(m,v)
+   setminus.owin(m,v)
 
 # mask and polygon
    p <- rotate(v, 0.2)
    intersect.owin(m, p)
    union.owin(m,p)
+   setminus.owin(m,p)
 
 # two polygons
    A <- letterR
    B <- rotate(letterR, 0.2)
    plot(bounding.box(A,B), main="intersection")
    w <- intersect.owin(A, B)
-   plot(w, add=TRUE)
+   plot(w, add=TRUE, col="lightblue")
    plot(A, add=TRUE)
    plot(B, add=TRUE)
 
    plot(bounding.box(A,B), main="union")
    w <- union.owin(A,B)
-   plot(w, add=TRUE)   
+   plot(w, add=TRUE, col="lightblue")   
+   plot(A, add=TRUE)
+   plot(B, add=TRUE)
+
+   plot(bounding.box(A,B), main="set minus")
+   w <- setminus.owin(A,B)
+   plot(w, add=TRUE, col="lightblue")   
    plot(A, add=TRUE)
    plot(B, add=TRUE)
 }

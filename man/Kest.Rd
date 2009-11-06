@@ -83,7 +83,7 @@ from a point pattern in a window of arbitrary shape.
  
   An estimate of \eqn{K} derived from a spatial point pattern dataset
   can be used in exploratory data analysis and formal inference
-  about the pattern (Cressie, 1991; Diggle, 1983; Ripley, 1988).
+  about the pattern (Cressie, 1991; Diggle, 1983; Ripley, 1977, 1988).
   In exploratory analyses, the estimate of \eqn{K} is a useful statistic 
   summarising aspects of inter-point ``dependence'' and ``clustering''.
   For inferential purposes, the estimate of \eqn{K} is usually compared to the 
@@ -216,6 +216,11 @@ Baddeley, A.J. Spatial sampling and censoring.
   point processes. \emph{Mathematische Operationsforschung und
   Statistik, series Statistics}, \bold{14}, 63 -- 71.
     
+  Ripley, B.D. (1977)
+  Modelling spatial patterns (with discussion).
+  \emph{Journal of the Royal Statistical Society, Series B},
+  \bold{39}, 172 -- 212.
+
   Ripley, B.D. \emph{Statistical inference for spatial processes}.
   Cambridge University Press, 1988.
 

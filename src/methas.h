@@ -38,6 +38,8 @@ typedef struct Algor {
   double p;         /* probability of proposing shift */
   double q;         /* conditional probability of proposing death */
   int fixall;       /* if TRUE, only shifts of location are feasible */
+  int ncond;        /* For conditional simulation, 
+		       the first 'ncond' points are fixed */
   int nrep;        /* number of iterations */
   int nverb;        /* print report every 'nverb' iterations */
 } Algor;

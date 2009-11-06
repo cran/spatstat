@@ -1,5 +1,6 @@
 \name{spatstat-deprecated}
 \alias{conspire}
+\alias{eval.hyper}
 \alias{ksmooth.ppp}
 \alias{ks.test.ppm}
 \alias{mpl}
@@ -14,6 +15,7 @@ ksmooth.ppp(x, sigma, \dots, edge=TRUE)
 ks.test.ppm(\dots)
 mpl(Q, trend, interaction, data, correction, rbord, use.gam)
 rtoro(X, which=NULL, radius=NULL, width=NULL, height=NULL) 
+eval.hyper(e, h, simplify=TRUE, ee=NULL)
 }
 
 \details{
@@ -26,5 +28,7 @@ rtoro(X, which=NULL, radius=NULL, width=NULL, height=NULL)
   \code{ks.test.ppm} has been replaced by \code{\link{kstest.ppm}}.
   
   \code{rtoro} has been replaced by \code{\link{rshift}}.
+
+  \code{eval.hyper} has been replaced by \code{\link{with.hyperframe}}.
 }
 \keyword{internal}

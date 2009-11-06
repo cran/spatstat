@@ -2,7 +2,7 @@
 #
 #    pairwise.S
 #
-#    $Revision: 1.7 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 1.8 $	$Date: 2009/11/02 19:07:46 $
 #
 #    Pairwise()    create a user-defined pairwise interaction process
 #                 [an object of class 'interact']
@@ -21,11 +21,26 @@ Pairwise <- function(pot, name = "user-defined pairwise interaction process",
                sQuote("pot"),
                "must be either (d, par) or (d, tx, tu, par)"))
 
+  if(!is.null(parnames)) {
+    stopifnot(is.character(parnames))
+    if(is.null(par) || length(par) != length(parnames))
+      stop("par does not match parnames")
+  }
   if(missing(printfun))
     printfun <- function(self) {
            cat(paste(self$name, "\n"))
            cat("Potential function:\n")
            print(self$pot)
+           if(!is.null(parnames <- self$parnames)) {
+             for(i in 1:length(parnames)) {
+               cat(paste(parnames[i], ":\t"))
+               pari <- self$par[[i]]
+               if(is.numeric(pari) && length(pari) == 1)
+                 cat(pari, "\n")
+               else 
+                 print(pari)
+             }
+           }
          }
 
   out <- 

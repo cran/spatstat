@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.31 $	$Date: 2009/07/18 02:30:37 $
+#	$Revision: 4.33 $	$Date: 2009/10/31 22:38:53 $
 #
 # -------- functions ----------------------------------------
 #
@@ -52,7 +52,7 @@ function(X)
                  }
                },
                mask = {
-                 b <- bdist.pixels(window, coords=FALSE)
+                 b <- bdist.pixels(window, style="matrix")
                  loc <- nearest.raster.point(x,y,window)
                  result <- b[cbind(loc$row, loc$col)]
                },
@@ -61,7 +61,7 @@ function(X)
         return(result)
 }
 
-"bdist.pixels" <- function(w, ..., coords=TRUE) {
+"bdist.pixels" <- function(w, ..., style="image") {
 	verifyclass(w, "owin")
 
         masque <- as.mask(w, ...)
@@ -109,13 +109,22 @@ function(X)
 
         # reshape it
         b <- matrix(b, nrow=masque$dim[1], ncol=masque$dim[2])
-        
-        if(coords)
-          # return in a format which can be plotted by image(), persp() etc
-          return(list(x=masque$xcol, y=masque$yrow, z=t(b)))
-        else
-          # return matrix (for internal use by package)
-          return(b)
+
+        switch(style,
+               coords={
+                 # format which can be plotted by image(), persp() etc
+                 return(list(x=masque$xcol, y=masque$yrow, z=t(b)))
+               },
+               matrix={
+                 # return matrix (for internal use by package)
+                 return(b)
+               },
+               image={
+                 bim <- im(b, xcol=masque$xcol, yrow=masque$yrow,
+                           unitname=unitname(masque))
+                 return(bim)
+               },
+               stop(paste("Unrecognised option for style:", style)))
 } 
 
 erodemask <- function(w, r, strict=FALSE) {
@@ -128,7 +137,7 @@ erodemask <- function(w, r, strict=FALSE) {
   if(r < 0)
     stop("r must be nonnegative")
         
-  bb <- bdist.pixels(w, coords=FALSE)
+  bb <- bdist.pixels(w, style="matrix")
 
   if(r > max(bb))
     warning("eroded mask is empty")

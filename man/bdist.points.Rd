@@ -31,6 +31,8 @@
   of one pixel in the mask.
 }
 \seealso{
+  \code{\link{bdist.pixels}},
+  \code{\link{bdist.tiles}},
   \code{\link{ppp.object}},
   \code{\link{erosion}}
 }

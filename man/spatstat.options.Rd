@@ -1,5 +1,6 @@
 \name{spatstat.options}
 \alias{spatstat.options}
+\alias{reset.spatstat.options}
 \title{Internal Options in Spatstat Package}
 \description{
   Allows the user to examine and reset the values
@@ -8,6 +9,7 @@
 }
 \usage{
   spatstat.options(...)
+  reset.spatstat.options()
 }
 \arguments{
   \item{\dots}{
@@ -22,11 +24,16 @@
   or a single value. See Details.
 }
 \details{
-  This function allows the user to examine and reset the values
+  The function \code{spatstat.options}
+  allows the user to examine and reset the values
   of global parameters which control actions in the
   \pkg{spatstat} package.
   It is analogous to the system function \code{\link{options}}.
 
+  The function \code{reset.spatstat.options} resets all the
+  global parameters in \pkg{spatstat} to their original,
+  default values.
+  
   The global parameters are:
   \describe{
     \item{npixel}{
@@ -99,8 +106,18 @@
       the endpoints of the line segments are inside the specified
       window). It is advisable to leave this flag set to \code{TRUE}. 
     }
+    \item{gpclib}{
+      Logical flag indicating whether the polygon clipping library
+      \code{gpclib} can be used. Default is \code{TRUE}. If it is set to
+      \code{FALSE} then certain polygon operations such as
+      intersection and union will be approximated by raster operations.
+      The licence
+      for \code{gpclib} is not Free Open Source and explicitly forbids
+      commercial use. See \code{library(help=gpclib)}. If you are using
+      \code{spatstat} for commercial purposes you will need to set
+      this option to \code{FALSE}.
+    }
   }
-  
   If no arguments are given, 
   the current values of all parameters are returned,
   in a list.

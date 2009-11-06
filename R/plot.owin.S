@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.26 $	$Date: 2009/02/20 18:36:36 $
+#	$Revision: 1.29 $	$Date: 2009/11/06 00:40:32 $
 #
 #
 #
@@ -133,18 +133,22 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                                                 list(...)),
                                extrargs="lwd")
            } else {
-             # First fill the polygon's interior with colour
-             # Use gpclib to triangulate
-             txy <- triangulate(owin2gpc(W))
-             ntri <- floor(nrow(txy)/3)
-             # Fill triangles with colour
-             for(i in seq(ntri)) {
-               ri <- 3 * (i - 1) + 1:3
-               do.call.matched("polygon",
-                               resolve.defaults(
-                                                list(x=txy[ri,]),
-                                                list(border=NA),
-                                                list(...)))
+             if(!(spatstat.options("gpclib") && require(gpclib)))
+               warning("Can't plot filled polygons: gpclib unavailable")
+             else {
+               # First fill the polygon's interior with colour
+               # Use gpclib to triangulate
+               txy <- triangulate(owin2gpc(W))
+               ntri <- floor(nrow(txy)/3)
+               # Fill triangles with colour
+               for(i in seq(ntri)) {
+                 ri <- 3 * (i - 1) + 1:3
+                 do.call.matched("polygon",
+                                 resolve.defaults(
+                                                  list(x=txy[ri,]),
+                                                  list(border=NA),
+                                                  list(...)))
+               }
              }
              # Now draw polygon boundaries
              for(i in seq(p))
@@ -165,9 +169,22 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
            }
          },
          mask = {
+           # capture 'col' argument and ensure it's at least 2 values
+           coldefault <- c(par("bg"), par("fg"))
+           col <- resolve.defaults(
+                                   list(...),
+                                   spatstat.options("par.binary"),
+                                   list(col=coldefault)
+                                   )$col
+           if(length(col) == 1) {
+             col <- unique(c(par("bg"), col))
+             if(length(col) == 1) 
+               col <- c(par("fg"), col)
+           }
            do.call.matched("image.default",
                            resolve.defaults(
-                           list(x=W$xcol, y=W$yrow, z=!t(W$m), add=TRUE),
+                           list(x=W$xcol, y=W$yrow, z=t(W$m), add=TRUE),
+                           list(col=col),       
                            list(...),
                            spatstat.options("par.binary")))
            if(hatch)

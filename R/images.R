@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.50 $     $Date: 2009/08/26 02:50:21 $
+#         $Revision: 1.54 $     $Date: 2009/10/29 23:58:26 $
 #
 #      The class "im" of raster images
 #
@@ -363,8 +363,8 @@ range.im <- function(x, ...) {
 }
 
 hist.im <- function(x, ..., probability=FALSE) {
-  verifyclass(x, "im")
   xname <- paste(deparse(substitute(x), 500), collapse="\n")
+  verifyclass(x, "im")
   main <- paste("Histogram of", xname)
   # default plot arguments
   # extract pixel values
@@ -377,19 +377,23 @@ hist.im <- function(x, ..., probability=FALSE) {
   if(x$type %in% c("logical", "factor")) {
     # barplot
     tab <- table(values)
+    probs <- tab/sum(tab)
     if(probability) {
-      tab <- tab/sum(tab)
+      heights <- probs
       ylab <- "Probability"
-    } else 
-       ylab <- "Number of pixels"
-    arglist <- 
-    out <- do.call("barplot",
-                   resolve.defaults(list(tab),
+    } else {
+      heights <- tab
+      ylab <- "Number of pixels"
+    }
+    mids <- do.call("barplot",
+                   resolve.defaults(list(heights),
                                     list(...),
                                     list(xlab=paste("Pixel value"),
                                          ylab=ylab,
                                          main=main)))
-
+    out <- list(counts=tab, probs=probs, heights=heights,
+                mids=mids, xname=xname)
+    class(out) <- "barplotdata"
   } else {
     # histogram
     values <- values[!is.na(values)]
@@ -403,6 +407,7 @@ hist.im <- function(x, ..., probability=FALSE) {
                                     list(xlab=paste("Pixel value"),
                                          ylab=ylab,
                                          main=main)))
+      out$xname <- xname
     } else {
       # plot.default whinges if `probability' given when plot=FALSE
       out <- do.call("hist.default",
@@ -415,6 +420,12 @@ hist.im <- function(x, ..., probability=FALSE) {
   return(invisible(out))
 }
 
+plot.barplotdata <- function(x, ...) {
+  do.call("barplot",
+          resolve.defaults(list(height=x$heights),
+                           list(...),
+                           list(main=paste("Histogram of ", x$xname))))
+}
 
 cut.im <- function(x, ...) {
   verifyclass(x, "im")

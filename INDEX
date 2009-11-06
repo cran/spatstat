@@ -2,7 +2,11 @@ AreaInter               The Area Interaction Point Process Model
 BadGey                  Hybrid Geyer Point Process Model
 DiggleGratton           Diggle-Gratton model
 Emark                   Diagnostics for random marking
+F3est                   Empty Space Function of a Three-Dimensional
+                        Point Pattern
 Fest                    Estimate the empty space function F
+G3est                   Nearest Neighbour Distance Distribution
+                        Function of a Three-Dimensional Point Pattern
 Gcross                  Multitype Nearest Neighbour Distance Function
                         (i-to-j)
 Gdot                    Multitype Nearest Neighbour Distance Function
@@ -16,6 +20,7 @@ Jcross                  Multitype J Function (i-to-j)
 Jdot                    Multitype J Function (i-to-any)
 Jest                    Estimate the J-function
 Jmulti                  Marked J Function
+K3est                   K-function of a Three-Dimensional Point Pattern
 Kcross                  Multitype K Function (Cross-type)
 Kcross.inhom            Inhomogeneous Cross K Function
 Kdot                    Multitype K Function (i-to-any)
@@ -79,8 +84,12 @@ applynbd                Apply Function to Every Neighbourhood in a
 area.owin               Area of a Window
 areaGain                Difference of Disc Areas
 areaLoss                Difference of Disc Areas
+as.box3                 Convert Data to Three-Dimensional Box
 as.data.frame.ppp       Coerce Point Pattern to a Data Frame
 as.data.frame.psp       Coerce Line Segment Pattern to a Data Frame
+as.hyperframe           Convert Data to Hyperframe
+as.hyperframe.ppx       Extract coordinates and marks of
+                        multidimensional point pattern
 as.im                   Convert to Pixel Image
 as.mask                 Pixel Image Approximation of a Window
 as.matrix.im            Convert Pixel Image to Matrix
@@ -92,12 +101,15 @@ as.rectangle            Window Frame
 as.tess                 Convert Data To Tessellation
 bdist.pixels            Distance to Boundary of Window
 bdist.points            Distance to Boundary of Window
+bdist.tiles             Distance to Boundary of Window
 bei                     Tropical rain forest trees
 bermantest              Berman's Tests for Point Process Model
 betacells               Beta Ganglion Cells in Cat Retina
 blur                    Apply Gaussian Blur to a Pixel Image
+border                  Border Region of a Window
 bounding.box            Bounding Box of a Window or Point Pattern
 bounding.box.xy         Convex Hull of Points
+box3                    Three-Dimensional Box
 bramblecanes            Hutchings' Bramble Canes data
 bronzefilter            Bronze gradient filter data
 by.im                   Apply Function to Image Broken Down by Factor
@@ -125,6 +137,8 @@ connected               Connected components of an image or window
 contour.im              Contour plot of pixel image
 convexhull              Convex Hull
 convexhull.xy           Convex Hull of Points
+coords                  Extract Coordinates of a Spatial or
+                        Spatiotemporal Point Pattern
 copper                  Berman-Huntington points and lines data
 corners                 Corners of a rectangle
 crossdist               Pairwise distances
@@ -149,6 +163,8 @@ density.splitppp        Kernel Smoothed Intensity of Split Point
                         Pattern
 diagnose.ppm            Diagnostic Plots for Fitted Point Process Model
 diameter                Diameter of a Window
+diameter.box3           Geometrical Calculations for Three-Dimensional
+                        Box
 dilated.areas           Areas of Morphological Dilations
 dilation                Morphological Dilation
 dirichlet               Dirichlet Tessellation of Point Pattern
@@ -176,8 +192,6 @@ eroded.areas            Areas of Morphological Erosions
 erosion                 Morphological Erosion
 eval.fasp               Evaluate Expression Involving Function Arrays
 eval.fv                 Evaluate Expression Involving Functions
-eval.hyper              Evaluate an Expression in Each Row of a
-                        Hyperframe
 eval.im                 Evaluate Expression Involving Pixel Images
 ewcdf                   Weighted Empirical Cumulative Distribution
                         Function
@@ -209,7 +223,8 @@ infline                 Infinite Straight Lines
 inforder.family         Infinite Order Interaction Family
 inside.owin             Test Whether Points Are Inside A Window
 interp.im               Interpolate a Pixel Image
-intersect.owin          Intersection or Union of Two Windows
+intersect.owin          Intersection, Union or Set Subtraction of Two
+                        Windows
 intersect.tess          Intersection of Two Tessellations
 iplot                   Point and Click Interface for Displaying a
                         Point Pattern
@@ -313,6 +328,7 @@ plot.kstest             Plot a Spatial Kolmogorov-Smirnov Test
 plot.listof             Plot a List of Things
 plot.owin               Plot a Spatial Window
 plot.plotppm            Plot a plotppm Object Created by plot.ppm
+plot.pp3                Plot a three-dimensional point pattern
 plot.ppm                plot a Fitted Point Process Model
 plot.ppp                plot a Spatial Point Pattern
 plot.psp                plot a Spatial Line Segment Pattern
@@ -321,6 +337,7 @@ plot.splitppp           Plot a List of Point Patterns
 plot.tess               Plot a tessellation
 pointsOnLines           Place Points Evenly Along Specified Lines
 ponderosa               Ponderosa Pine Tree Point Pattern
+pp3                     Three Dimensional Point Pattern
 ppm                     Fit Point Process Model to Data
 ppm.object              Class of Fitted Point Process Models
 ppp                     Create a Point Pattern
@@ -328,13 +345,18 @@ ppp.object              Class of Point Patterns
 pppdist                 Distance Between Two Point Patterns
 pppmatching             Create a Point Matching
 pppmatching.object      Class of Point Matchings
+ppx                     Multidimensional Space-Time Point Pattern
 predict.kppm            Prediction from a Fitted Cluster Point Process
                         Model
 predict.ppm             Prediction from a Fitted Point Process Model
+print.box3              Methods for Three-Dimensional Box
 print.im                Print Brief Details of an Image
 print.owin              Print Brief Details of a Spatial Window
+print.pp3               Methods for three-dimensional point patterns
 print.ppm               Print a Fitted Point Process Model
 print.ppp               Print Brief Details of a Point Pattern Dataset
+print.ppx               Methods for Multidimensional Space-Time Point
+                        Patterns
 print.psp               Print Brief Details of a Line Segment Pattern
                         Dataset
 print.quad              Print a Quadrature Scheme
@@ -487,3 +509,5 @@ vcov.ppm                Variance-Covariance Matrix for a Fitted Point
                         Process Model
 vertices                Vertices of a Window
 with.fv                 Evaluate an Expression in a Function Table
+with.hyperframe         Evaluate an Expression in Each Row of a
+                        Hyperframe

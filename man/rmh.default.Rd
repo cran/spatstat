@@ -112,7 +112,8 @@
   For full details of these parameters, see \code{\link{rmhstart}}.
 
   The third argument \code{control} controls the simulation
-  procedure, iterative behaviour, and termination of the
+  procedure (including \emph{conditional simulation}),
+  iterative behaviour, and termination of the
   Metropolis-Hastings algorithm. It is either a list, or an
   object of class \code{"rmhcontrol"}, with components:
   \describe{
@@ -155,25 +156,55 @@
       should be printed out.  If nverb is left at 0, the default,
       the simulation proceeds silently.
     }
+    \item{x.cond}{If this argument is present, then
+      \emph{conditional simulation} will be performed, and \code{x.cond}
+      specifies the conditioning points and the type of conditioning.
+    }
   }
   For full details of these parameters, see \code{\link{rmhcontrol}}.
-
-  It is possible to simulate the model conditionally upon the number of
-  points, or in the case of multitype processes, upon the number of
-  points of each type.  To condition upon the total number of points,
-  set \code{control$p} (the probability of a shift) equal to 1.
-  The number of points is then determined by the starting state, which
-  may be specified either by setting \code{start$n.start} to be a
-  scalar, or by setting the initial pattern \code{start$x.start}.
-
-  To condition upon the
-  number of points of each type, set \code{control$p} equal to 1
-  and \code{control$fixall} to be \code{TRUE}.
-  The number of points is then determined by the starting state, which
-  may be specified either by setting \code{start$n.start} to be an
-  integer vector, or by setting the initial pattern \code{start$x.start}.
+}
+\section{Conditional Simulation}{
+  There are several kinds of conditional simulation.
+  \itemize{
+    \item
+    Simulation \emph{conditional upon the number of points},
+    that is, holding the number of points fixed.
+    To do this, set \code{control$p} (the probability of a shift) equal to 1.
+    The number of points is then determined by the starting state, which
+    may be specified either by setting \code{start$n.start} to be a
+    scalar, or by setting the initial pattern \code{start$x.start}.
+    \item 
+    In the case of multitype processes, it is possible to simulate the
+    model \emph{conditionally upon the number of points of each type},
+    i.e. holding the number of points of each type
+    to be fixed. To do this, set \code{control$p} equal to 1
+    and \code{control$fixall} to be \code{TRUE}.
+    The number of points is then determined by the starting state, which
+    may be specified either by setting \code{start$n.start} to be an
+    integer vector, or by setting the initial pattern \code{start$x.start}.
+    \item
+    Simulation 
+    \emph{conditional on the configuration observed in a sub-window},
+    that is, requiring that, inside a specified sub-window \eqn{V},
+    the simulated pattern should agree with a specified point pattern
+    \eqn{y}.To do this, set \code{control$x.cond} to equal the
+    specified point pattern \eqn{y}, making sure that it is an object of class
+    \code{"ppp"} and that the window \code{as.owin(control$x.cond)}
+    is the conditioning window \eqn{V}.
+    \item
+    Simulation \emph{conditional on the presence of specified points},
+    that is, requiring that the simulated pattern should include a
+    specified set of points. This is simulation from the Palm
+    distribution of the point process given a pattern \eqn{y}.
+    To do this, set \code{control$x.cond} to be a
+    \code{data.frame} containing the coordinates (and marks,
+    if appropriate) of the specified points.
+  }
+  For further information, see \code{\link{rmhcontrol}}.
   
-  When we simulate conditionally, no expansion of the window is possible.
+  Note that, when we simulate conditionally on the number of points, or
+  conditionally on the number of points of each type,
+  no expansion of the window is possible.
 }
      
 \references{

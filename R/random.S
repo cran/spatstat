@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.36 $   $Date: 2008/07/28 01:13:42 $
+#    $Revision: 4.37 $   $Date: 2009/10/30 18:02:20 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -319,33 +319,38 @@ rpoint <- function(n, f, fmax=NULL,
 }
   
 "rSSI" <-
-  function(r, n, win = owin(c(0,1),c(0,1)), giveup = 1000)
+  function(r, n, win = owin(c(0,1),c(0,1)), 
+           giveup = 1000, x.init=NULL)
 {
   stopifnot(is.numeric(r) && length(r) == 1 && r >= 0)
   stopifnot(is.numeric(n) && length(n) == 1 && n >= 0)
      # Simple Sequential Inhibition process
      # fixed number of points
      # Naive implementation, proposals are uniform
-     win <- as.owin(win)
-     X <- ppp(numeric(0),numeric(0), window=win)
-     r2 <- r^2
-     if(n * pi * r2/4  > area.owin(win))
-       stop(paste("Window is too small to fit", n, "points",
-                  "at minimum separation", r))
-     ntries <- 0
-     while(ntries < giveup) {
-       ntries <- ntries + 1
-       qq <- runifpoint(1, win)
-       x <- qq$x[1]
-       y <- qq$y[1]
-       if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
-         X <- superimpose(X, qq, W=win)
-       if(X$n == n)
-         return(X)
-     }
-     warning(paste("Gave up after", giveup,
+  win <- as.owin(win)
+  if(is.null(x.init))
+    x.init <- ppp(numeric(0),numeric(0), window=win)
+  else
+    stopifnot(is.ppp(x.init))
+  X <- x.init
+  r2 <- r^2
+  if(n * pi * r2/4  > area.owin(win))
+    stop(paste("Window is too small to fit", n, "points",
+               "at minimum separation", r))
+  ntries <- 0
+  while(ntries < giveup) {
+    ntries <- ntries + 1
+    qq <- runifpoint(1, win)
+    x <- qq$x[1]
+    y <- qq$y[1]
+    if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
+      X <- superimpose(X, qq, W=win)
+    if(X$n == n)
+      return(X)
+  }
+  warning(paste("Gave up after", giveup,
                 "attempts with only", X$n, "points placed out of", n))
-     return(X)
+  return(X)
 }
 
 "rNeymanScott" <-

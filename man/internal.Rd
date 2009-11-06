@@ -5,6 +5,7 @@
 \alias{$<-.hyperframe}
 \alias{acedist.show}
 \alias{acedist.noshow}
+\alias{adjustthinrange}
 \alias{affinexy}
 \alias{affinexypolygon}
 \alias{anycrossing.psp}
@@ -52,6 +53,7 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{diagnose.ppm.engine}
+\alias{digital.volume}
 \alias{dilate.owin}
 \alias{dimnames.fasp}               
 \alias{dimnames<-.fasp}               
@@ -77,6 +79,8 @@
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{extractAIC.ppm}
+\alias{f3engine}
+\alias{f3Cengine}
 \alias{fasp}
 \alias{findmarktype}
 \alias{fii}
@@ -86,6 +90,8 @@
 \alias{formula.kppm}
 \alias{fv}
 \alias{fvnames}
+\alias{g3engine}
+\alias{g3Cengine}
 \alias{greatest.common.divisor}
 \alias{getfields}
 \alias{getglmdata}
@@ -125,6 +131,7 @@
 \alias{is.psp}
 \alias{is.stationary.ppm}
 \alias{is.tess}
+\alias{k3engine}
 \alias{kstestEngine}
 \alias{Kborder.engine}
 \alias{Kount}
@@ -194,6 +201,7 @@
 \alias{pickoption}
 \alias{ploterodewin}
 \alias{ploterodeimage}
+\alias{plot.barplotdata}
 \alias{plot.distfun}
 \alias{plot.fii}
 \alias{plot.minconfit}
@@ -290,6 +298,7 @@
 \alias{spatstat.rawdata.location}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
+\alias{sphere.volume}
 \alias{stratrand}
 \alias{suffloc}
 \alias{suffstat.generic}
@@ -339,6 +348,7 @@
 \method{$}{hyperframe}(x, i) <- value
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
+adjustthinrange(ur,vstep,vr)
 affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
 affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
@@ -391,6 +401,7 @@ default.ntile(X)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
+digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dimnames}{fasp}(x)
 \method{dimnames}{fasp}(x) <- value
@@ -416,6 +427,8 @@ evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
 \method{extractAIC}{ppm}(fit, scale, k, \dots)
+f3engine(x, y, z, box, vside, range, nval, correction)
+f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 fii(interaction, coefs, Vnames)
@@ -425,6 +438,8 @@ FormatFaspFormulae(f, argname)
 \method{formula}{kppm}(x, \dots)
 fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname, fname, yexp)
 fvnames(X, a)
+g3engine(x, y, z, box, rmax, nrval, correction)
+g3Cengine(x, y, z, box, rmax, nrval)
 greatest.common.divisor(n,m)
 getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
@@ -463,7 +478,8 @@ is.poisson.ppm(x)
 is.prime(n)
 is.psp(x)
 is.stationary.ppm(x)    
-is.tess(x)    
+is.tess(x)
+k3engine(x, y, z, box, rmax, nrval, correction)
 kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
@@ -541,6 +557,7 @@ pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
+\method{plot}{barplotdata}(x, \dots)
 \method{plot}{distfun}(x, \dots)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
@@ -620,8 +637,8 @@ rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
 rmhResolveTypes(model, start, control)
-\method{rmhcontrol}{rmhcontrol}(control, \dots)
-\method{rmhcontrol}{list}(control, \dots)
+\method{rmhcontrol}{rmhcontrol}(\dots)
+\method{rmhcontrol}{list}(\dots)
 rmhEngine(InfoList, \dots, verbose, kitchensink, preponly) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
 \method{rmhstart}{rmhstart}(start, \dots)
@@ -641,7 +658,8 @@ second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
-spatstat.rawdata.location(\dots)             
+spatstat.rawdata.location(\dots)
+sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)             
 stratrand(window, nx, ny, k = 1)
@@ -661,7 +679,7 @@ termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
-trim.mask(M, R)
+trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
