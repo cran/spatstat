@@ -59,7 +59,7 @@ double dist2either(u,v,x,y,period)
 int dist2thresh(u,v,x,y,period,r2)
      double u, v, x, y, *period, r2;
 {
-  double wide, high, amin, bmin, aa, bb, d2, residue, dx, dy;
+  double wide, high, amin, bmin, aa, bb, residue, dx, dy;
 
   wide = period[0];
   high = period[1];

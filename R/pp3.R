@@ -3,7 +3,7 @@
 #
 #  class of three-dimensional point patterns in rectangular boxes
 #
-#  $Revision: 1.1 $  $Date: 2009/11/04 23:57:34 $
+#  $Revision: 1.6 $  $Date: 2009/11/10 21:00:47 $
 #
 
 box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
@@ -50,6 +50,11 @@ print.box3 <- function(x, ...) {
 
 unitname.box3 <- function(x) { x$units }
 
+"unitname<-.box3" <- function(x, value) {
+  x$units <- as.units(value)
+  return(x)
+}
+
 pp3 <- function(x, y, z, ...) {
   stopifnot(is.numeric(x))
   stopifnot(is.numeric(y))
@@ -66,6 +71,21 @@ print.pp3 <- function(x, ...) {
   np <- sd$ncases
   cat(paste(np, ngettext(np, "point", "points"), "\n"))
   print(x$domain)
+  invisible(NULL)
+}
+
+summary.pp3 <- function(object, ...) {
+  cat("Three-dimensional point pattern\n")
+  sd <- summary(object$data)
+  np <- sd$ncases
+  cat(paste(np, ngettext(np, "point", "points"), "\n"))
+  dom <- object$domain
+  print(dom)
+  v <- volume.box3(dom)
+  u <- summary(unitname(dom))
+  cat(paste("Average intensity", np/v,
+            "points per cubic", u$singular, u$explain,
+            "\n"))
   invisible(NULL)
 }
 
@@ -91,6 +111,13 @@ plot.pp3 <- function(x, ...) {
 
 unitname.pp3 <- function(x) { unitname(x$domain) }
 
+"unitname<-.pp3" <- function(x, value) {
+  d <- x$domain
+  unitname(d) <- value
+  x$domain <- d
+  return(x)
+}
+
 diameter.box3 <- function(x) {
   stopifnot(inherits(x, "box3"))
   with(x, sqrt(diff(xrange)^2+diff(yrange)^2+diff(zrange)^2))
@@ -102,3 +129,19 @@ volume.box3 <- function(x) {
 }
 
 
+runifpoint3 <- function(n, domain=box3()) {
+  domain <- as.box3(domain)
+  x <- with(domain, runif(n, min=xrange[1], max=xrange[2]))
+  y <- with(domain, runif(n, min=yrange[1], max=yrange[2]))
+  z <- with(domain, runif(n, min=zrange[1], max=zrange[2]))
+  pp3(x,y,z,domain)
+}
+
+rpoispp3 <- function(lambda, domain=box3()) {
+  domain <- as.box3(domain)
+  v <- volume.box3(domain)
+  if(!(is.numeric(lambda) && length(lambda) == 1))
+    stop("lambda must be a single numeric value")
+  n <- rpois(1, lambda * v)
+  runifpoint3(n, domain=domain)
+}

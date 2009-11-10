@@ -3,7 +3,6 @@
 #include "geom3.h"
 #include "functable.h"
 
-
 #ifdef DEBUG
 #define DEBUGMESSAGE(S) Rprintf(S);
 #else
@@ -11,7 +10,7 @@
 #endif
 
 /*
-	$Revision: 1.1 $	$Date: 2009/11/04 23:54:15 $
+	$Revision: 1.2 $	$Date: 2009/11/10 17:53:59 $
 
 	3D distance transform
 
@@ -306,8 +305,10 @@ hist3dminus(v, vside, count)	/* minus sampling */
 	kval = MAX(kval, 0);
 
 #ifdef DEBUG
+	/*
 	Rprintf("border=%lf\tkbord=%d\tval=%lf\tkval=%d\n", 
 		vside * border, kbord, scale * val, kval);
+	*/
 #endif
 
 	  /* numerator counts all voxels with
@@ -330,8 +331,8 @@ hist3dCen(v, vside, count)	/* four censoring-related histograms */
      double	vside;
      H4table	*count;
 {
-  register int x, y, z, val, border, bx, by, bz, byz, j, kbord, kval;
-  register double scale, width, realborder, realval, realobs;
+  register int x, y, z, val, border, bx, by, bz, byz, kbord, kval;
+  register double scale, width, realborder, realval;
 
   DEBUGMESSAGE("inside hist3dCen\n")
 
@@ -360,12 +361,12 @@ hist3dCen(v, vside, count)	/* four censoring-related histograms */
 	val = VALUE((*v), x, y, z);
 	realval = scale * val;
 
-	kval = (int) ceil((val * scale - count->t0)/width);
+	kval = (int) ceil((realval - count->t0)/width);
 	kval = MIN(kval, count->n - 1);
 
 #ifdef DEBUG
 	Rprintf("border=%lf\tkbord=%d\tval=%lf\tkval=%d\n", 
-		vside * border, kbord, scale * val, kval);
+		realborder, kbord, realval, kval);
 #endif
 
 	if(realval <= realborder) {

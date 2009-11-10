@@ -66,6 +66,13 @@
 
   For \emph{marked} point patterns, use \code{\link{rmpoispp}}.
 }
+\section{Warning}{
+  Note that \code{lambda} is the \bold{intensity}, that is,
+  the expected number of points \bold{per unit area}.
+  The total number of points in the simulated
+  pattern will be random with expected value \code{mu = lambda * a}
+  where \code{a} is the area of the window \code{win}. 
+}
 \seealso{
   \code{\link{rmpoispp}} for Poisson \emph{marked} point patterns,
   \code{\link{runifpoint}} for a fixed number of independent

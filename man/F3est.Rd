@@ -116,8 +116,9 @@ F3est(X, ..., rmax = NULL, nrval = 128, vside = NULL, correction = c("rs", "km",
   \code{\link{K3est}}.
 }
 \examples{
-  X <- pp3(runif(42), runif(42), runif(42), box3(c(0,1)))
-  plot(F3est(X))
+  X <- rpoispp3(42)
+  Z <- F3est(X)
+  if(interactive()) plot(Z)
 }
 \keyword{spatial}
 \keyword{nonparametric}

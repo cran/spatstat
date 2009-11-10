@@ -8,6 +8,8 @@ extern Cifns AreaIntCifns, BadGeyCifns, DgsCifns, DiggraCifns,
              StraussCifns, StraussHardCifns, 
              MultiStraussCifns, MultiStraussHardCifns;
 
+Cifns NullCifns = NULL_CIFNS;
+
 typedef struct CifPair {
   char *name;
   Cifns *p;
@@ -39,6 +41,8 @@ Cifns getcif(cifname)
       return(*(cp.p));
   }
   fexitc("Unrecognised cif name; bailing out.\n");
+  /* control never passes to here, but compilers don't know that */
+  return(NullCifns);
 }
 
 /* R interface function, to check directly whether cif is recognised */
@@ -60,30 +64,3 @@ void knownCif(cifname, answer)
   return;
 }
 
-Cifns getcifold(cifname) 
-     char *cifname;
-{
-  if(strcmp(cifname, "strauss") == 0) 
-    return(StraussCifns);
-  if(strcmp(cifname, "straush") == 0) 
-    return(StraussHardCifns);
-  if(strcmp(cifname, "straussm") == 0) 
-    return(MultiStraussCifns);
-  if(strcmp(cifname, "straushm") == 0) 
-    return(MultiStraussHardCifns);
-  if(strcmp(cifname, "areaint") == 0)
-    return(AreaIntCifns);
-  if(strcmp(cifname, "geyer") == 0)
-    return(GeyerCifns);
-  if(strcmp(cifname, "dgs") == 0)
-    return(DgsCifns);
-  if(strcmp(cifname, "diggra") == 0)
-    return(DiggraCifns);
-  if(strcmp(cifname, "sftcr") == 0)
-    return(SoftcoreCifns);
-  if(strcmp(cifname, "lookup") == 0)
-    return(LookupCifns);
-  if(strcmp(cifname, "badgey") == 0)
-    return(BadGeyCifns);
-  fexitc("Unrecognised cif name; bailing out.\n");
-}

@@ -439,6 +439,8 @@ rpoint                  Generate N Random Points
 rpoisline               Generate Poisson Random Line Process
 rpoislinetess           Poisson Line Tessellation
 rpoispp                 Generate Poisson Point Pattern
+rpoispp3                Generate Poisson Point Pattern in Three
+                        Dimensions
 rpoisppOnLines          Generate Poisson Point Pattern on Line Segments
 rshift                  Random Shift
 rshift.ppp              Randomly Shift a Point Pattern
@@ -449,6 +451,8 @@ rsyst                   Simulate systematic random point pattern
 rthin                   Random Thinning
 runifdisc               Generate N Uniform Random Points in a Disc
 runifpoint              Generate N Uniform Random Points
+runifpoint3             Generate N Uniform Random Points in Three
+                        Dimensions
 runifpointOnLines       Generate N Uniform Random Points On Line
                         Segments
 scanpp                  Read Point Pattern From Data File

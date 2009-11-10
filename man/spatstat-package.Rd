@@ -36,7 +36,8 @@
   Apart from two-dimensional point patterns and point processes,
   \pkg{spatstat} also supports patterns of line segments in two
   dimensions, point patterns in three dimensions, and 
-  multidimensional space-time point patterns.
+  multidimensional space-time point patterns. It also supports
+  spatial tessellations and random sets.
 }
 \section{Getting Started}{
   For a quick introduction to \pkg{spatstat}, see 
@@ -457,6 +458,8 @@
       \code{\link{coords}} \tab extract coordinates \cr
       \code{\link{as.hyperframe}} \tab extract coordinates \cr
       \code{\link{unitname.pp3}} \tab name of unit of length \cr
+      \code{\link{runifpoint3}} \tab generate uniform random points in 3-D \cr
+      \code{\link{rpoispp3}} \tab generate Poisson random points in 3-D \cr
       \code{\link{box3}} \tab create a 3-D rectangular box \cr
       \code{\link{as.box3}} \tab convert data to 3-D rectangular box \cr
       \code{\link{unitname.box3}} \tab name of unit of length \cr

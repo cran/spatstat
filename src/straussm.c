@@ -92,9 +92,9 @@ double straussmcif(prop, state)
 {
   int npts, ntypes, kount, ix, ixp1, j, mrk, mrkj, m1, m2;
   int *marks;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v, lg;
-  double r2, d2, a, cifval;
+  double d2, a, cifval;
 
   u  = prop.u;
   v  = prop.v;
