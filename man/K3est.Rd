@@ -97,8 +97,9 @@ K3est(X, ..., rmax = NULL, nrval = 128, correction = c("translation", "isotropic
   \code{\link{G3est}}
 }
 \examples{
-  X <- pp3(runif(42), runif(42), runif(42), box3(c(0,1)))
-  plot(K3est(X))
+  X <- rpoispp3(42)
+  Z <- K3est(X)
+  if(interactive()) plot(Z)
 }
 \keyword{spatial}
 \keyword{nonparametric}

@@ -84,7 +84,7 @@ double areaintCif(prop, state)
   int npts, kount, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
-  double r, r2, d2, dx, dy, range2;
+  double r2, d2, dx, dy, range2;
   double a, xgrid0, ygrid, ygrid0, xgrid, covfrac, cifval;
   int kdisc, kx, my, ky, covered;
 

@@ -60,7 +60,7 @@ double dgscif(prop, state)
   int npts, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
-  double d2, r2, a, pairprod, cifval;
+  double d2, r2, pairprod, cifval;
 
   period = Dgs.period;
   r2 = Dgs.rho2;

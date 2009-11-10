@@ -46,11 +46,10 @@ double sftcrcif(prop, state)
      State state;
 {
   int npts, ix, ixp1, j;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v;
-  double d2, r2, a, pairsum, cifval, ook, stuk;
+  double d2, pairsum, cifval, ook, stuk;
 
-  period = Softcore.period;
   ook = Softcore.ook;
   stuk = Softcore.stuk;
 

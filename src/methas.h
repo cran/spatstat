@@ -74,6 +74,8 @@ typedef struct Cifns {
 
 #define NEED_UPDATE(X) ((X).update != (updafunptr) NULL)
 
+#define NULL_CIFNS { (initfunptr) NULL, (evalfunptr) NULL, (updafunptr) NULL, FALSE}
+
 /* miscellaneous macros */
 
 #ifndef TRUE

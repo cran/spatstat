@@ -35,7 +35,7 @@ SEXP xmethas(SEXP cifname,
 	    SEXP fixall)
 {
   char *cifstring;
-  double cifval, cvd, cvn, qnodds, anumer, adenom;
+  double cvd, cvn, qnodds, anumer, adenom;
   int verb, marked, needupd, itype;
   int nfree;
   int irep, ix, j;
@@ -119,8 +119,10 @@ SEXP xmethas(SEXP cifname,
   /* access proposal data */
   xpropose = NUMERIC_POINTER(xprop);
   ypropose = NUMERIC_POINTER(yprop);
-  if(marked)
-    mpropose = INTEGER_POINTER(mprop);
+  mpropose = INTEGER_POINTER(mprop);
+  /* we need to initialise 'mpropose' to keep compilers happy.
+     mpropose is only used for marked patterns.
+     Note 'mprop' is always a valid pointer */
 
 
   /* ================= Determine process to be simulated  ========== */

@@ -33,7 +33,7 @@ void geyerinit(state, model, algo)
      Algor algo;
 {
   int i, j;
-  double r, d2;
+  double d2;
   /* Interpret model parameters*/
   Geyer.beta   = model.par[0];
   Geyer.gamma  = model.par[1];
@@ -197,7 +197,7 @@ void geyerupd(state, prop)
      Propo prop;
 {
 /* Declare other variables */
-  int ix, npts, j, k;
+  int ix, npts, j;
   double u, v, xix, yix, r2, d2, d2old, d2new;
   double *x, *y;
   int *aux;

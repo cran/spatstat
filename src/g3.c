@@ -4,7 +4,7 @@
 #include "functable.h"
 
 /*
-	$Revision: 1.1 $	$Date: 2009/11/04 23:54:15 $
+	$Revision: 1.2 $	$Date: 2009/11/10 17:55:03 $
 
 	G function (nearest neighbour distribution) of 3D point pattern
 
@@ -68,15 +68,21 @@ nndist3(p, n, b)
      Box *b;
 {
   register int i, j;
-  register double dx, dy, dz, dist, nearest;
+  register double dx, dy, dz, dist, nearest, huge;
   Point *ip, *jp;
-  double	*nnd;
+  double *nnd;
 
   nnd = (double *) R_alloc(n, sizeof(double));
+
+  dx = b->x1 - b->x0;
+  dy = b->y1 - b->y0;
+  dz = b->z1 - b->z0;
+  huge = 2.0 * sqrt(dx * dx + dy * dy + dz * dz);
 	
   /* scan each point and find closest */
   for( i = 0; i < n; i++) {
     ip = p + i;
+    nearest = huge;
     for(j = 0; j < n; j++)
       if(j != i) {
 	jp = p + j;
@@ -84,8 +90,7 @@ nndist3(p, n, b)
 	dy = jp->y - ip->y;
 	dz = jp->z - ip->z;
 	dist = sqrt(dx * dx + dy * dy + dz * dz);
-	if(j == 0 || i == 0 && j == 1 
-	   || dist < nearest)
+	if(j == 0 || (i == 0 && j == 1) || dist < nearest)
 	  nearest = dist;
       }
     nnd[i] = nearest;
@@ -126,7 +131,7 @@ g3one(p, n, b, g)
      Box *b;
      Ftable *g;
 {
-  register int i, j, l, lbord, lnnd;
+  register int i, l, lbord, lnnd;
   double dt;
   double	*bord, *nnd;
 
@@ -167,7 +172,7 @@ g3three(p, n, b, g)
      Box *b;
      Ftable *g;
 {
-  register int i, j, l, lmin;
+  register int i, l, lmin;
   double dt;
   int	denom;
   double	*bord, *nnd;
@@ -210,7 +215,7 @@ g3cen(p, n, b, count)
      Box *b;
      H4table *count;
 {
-  register int i, j, lcen, lobs;
+  register int i, lcen, lobs;
   register double dt, cens, obsv;
   double	*bord, *nnd;
 

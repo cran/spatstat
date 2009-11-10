@@ -80,10 +80,10 @@ double lookupcif(prop, state)
      Propo prop;
      State state;
 {
-  int npts, nlook, nlook1, k, kk, ix, ixp1, j;
+  int npts, nlook, k, kk, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double r2max, d2, d, a, delta, cifval;
+  double r2max, d2, d, delta, cifval, ux, vy;
 
   r2max = Lookup.r2max;
   delta = Lookup.delta;
@@ -177,7 +177,9 @@ double lookupcif(prop, state)
     } else { /* Euclidean distance */
       if(ix > 0) {
 	for(j=0; j < ix; j++) {
-	  d = pythag(u - x[j], v-y[j]);
+	  ux = u - x[j];
+	  vy = v - y[j];
+	  d2 = ux * ux + vy * vy;
 	  if(d2 < r2max) {
 	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
 	      ;
@@ -188,7 +190,9 @@ double lookupcif(prop, state)
       }
       if(ixp1 < npts) {
 	for(j=ixp1; j<npts; j++) {
-	  d = pythag(u - x[j], v-y[j]);
+	  ux = u - x[j];
+	  vy = v - y[j];
+	  d2 = ux * ux + vy * vy;
 	  if(d2 < r2max) {
 	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
 	      ;

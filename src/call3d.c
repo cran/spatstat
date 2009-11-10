@@ -1,5 +1,5 @@
 /*
-	$Revision: 1.1 $ $Date: 2009/11/04 23:54:15 $
+	$Revision: 1.2 $ $Date: 2009/11/10 17:24:11 $
 
 	R interface
 
@@ -29,9 +29,10 @@
 #include "geom3.h"
 #include "functable.h"
 
+#define DEBUG 1
 
 #ifdef DEBUG
-#define DEBUGMESSAGE(S) Rprintf(S)
+#define DEBUGMESSAGE(S) Rprintf(S);
 #else 
 #define DEBUGMESSAGE(S) 
 #endif
@@ -118,6 +119,7 @@ int	n;
 {
   Point *p;
   p = (Point *) R_alloc(n, sizeof(Point));
+  return(p);
 }
 
 void freeParray(x) Point *x; { }
@@ -429,13 +431,13 @@ RcallG3cen(x,y,z, n, x0, x1, y0, y1, z0, z1,
   Box 	*b;
   H4table *count;
 	
-  DEBUGMESSAGE("Inside RcallG3cen\n");
+  DEBUGMESSAGE("Inside RcallG3cen\n")
   p = RtoPointarray(x, y, z, n);
   b = RtoBox(x0, x1, y0, y1, z0, z1);
   count = MakeH4table(t0, t1, m);
   g3cen(p, (int) *n, b, count);
-  H4tabletoR(count, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen)
-  DEBUGMESSAGE("Leaving RcallG3cen\n");
+  H4tabletoR(count, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen);
+  DEBUGMESSAGE("Leaving RcallG3cen\n")
 }
 
 void
@@ -462,7 +464,7 @@ RcallF3(x,y,z, n, x0, x1, y0, y1, z0, z1,
   Box 	*b;
   Itable *count;
 	
-  DEBUGMESSAGE("Inside Rcall_f3\n");
+  DEBUGMESSAGE("Inside Rcall_f3\n")
   p = RtoPointarray(x, y, z, n);
   b = RtoBox(x0, x1, y0, y1, z0, z1);
   count = MakeItable(t0, t1, m);	
@@ -480,7 +482,7 @@ RcallF3(x,y,z, n, x0, x1, y0, y1, z0, z1,
   }
 
   ItabletoR(count, t0, t1, m, num, denom);
-  DEBUGMESSAGE("Leaving Rcall_f3\n");
+  DEBUGMESSAGE("Leaving Rcall_f3\n")
 }
 
 void
@@ -506,11 +508,11 @@ RcallF3cen(x,y,z, n, x0, x1, y0, y1, z0, z1,
   Box 	*b;
   H4table *count;
 	
-  DEBUGMESSAGE("Inside Rcallf3cen\n");
+  DEBUGMESSAGE("Inside Rcallf3cen\n")
   p = RtoPointarray(x, y, z, n);
   b = RtoBox(x0, x1, y0, y1, z0, z1);
   count = MakeH4table(t0, t1, m);
   p3hat4(p, (int) *n, b, *vside, count);
-  H4tabletoR(count, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen)
-  DEBUGMESSAGE("Leaving Rcallf3cen\n");
+  H4tabletoR(count, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen);
+  DEBUGMESSAGE("Leaving Rcallf3cen\n")
 }
