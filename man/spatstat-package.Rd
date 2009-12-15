@@ -365,6 +365,7 @@
 	\code{\link{summary}(X)} \tab	summary of image \code{X} \cr
 	\code{\link{hist.im}} \tab	histogram of image \cr
 	\code{\link{mean.im}} \tab	mean pixel value of image  \cr
+	\code{\link{integral.im}} \tab	integral of pixel values  \cr
 	\code{\link{quantile.im}} \tab	quantiles of image  \cr
 	\code{\link{cut.im}} \tab	convert numeric image to factor image \cr
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
@@ -511,14 +512,15 @@
     \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
     \code{\link{Lest}} \tab Ripley's \eqn{L}-function\cr
     \code{\link{Jest}} \tab \eqn{J}-function \eqn{J = (1-G)/(1-F)} \cr
+    \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
     \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr
     \code{\link{localK}} \tab neighbourhood K-function\cr
     \code{\link{pcf}} \tab 	pair correlation function \cr
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
     \code{\link{Linhom}} \tab \eqn{L} for inhomogeneous point patterns \cr
+    \code{\link{pcfinhom}} \tab pair correlation for inhomogeneous patterns\cr
     \code{\link{Kest.fft}} \tab fast \eqn{K}-function using FFT for large datasets \cr
     \code{\link{Kmeasure}} \tab reduced second moment measure \cr
-    \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
     \code{\link{envelope}} \tab simulation envelopes for a summary
     function \cr
   }
@@ -561,6 +563,8 @@
     \eqn{J_{ij}, J_{i\bullet}}{J[i,j],J[i.]} \cr
     \code{\link{pcfcross}} \tab
     multitype pair correlation function \eqn{g_{ij}}{g[i,j]} \cr
+    \code{\link{pcfdot}} \tab
+    multitype pair correlation function \eqn{g_{i\bullet}}{g[i.]} \cr
     \code{\link{markconnect}} \tab
     marked connection function \eqn{p_{ij}}{p[i,j]} \cr
     \code{\link{alltypes}} \tab  estimates of the above
@@ -569,7 +573,9 @@
     \code{\link{Kcross.inhom},\link{Kdot.inhom}} \tab
     inhomogeneous counterparts of \code{Kcross}, \code{Kdot} \cr
     \code{\link{Lcross.inhom},\link{Ldot.inhom}} \tab
-    inhomogeneous counterparts of \code{Lcross}, \code{Ldot}
+    inhomogeneous counterparts of \code{Lcross}, \code{Ldot} \cr
+    \code{\link{pcfcross.inhom},\link{pcfdot.inhom}} \tab
+    inhomogeneous counterparts of \code{pcfcross}, \code{pcfdot} 
   }
 
   \bold{Summary statistics for a marked point pattern:}
@@ -970,7 +976,7 @@
 }
 \section{Acknowledgements}{
   Marie-Colette van Lieshout, Rasmus Waagepetersen, 
-  Dominic Schuhmacher and Kasper Klitgaard Berthelsen
+  Dominic Schuhmacher, Ege Rubak and Kasper Klitgaard Berthelsen
   made substantial contributions of code.
   Additional contributions by
   Ang Qi Wei,
@@ -984,6 +990,7 @@
   Y.C. Chin,
   Bjarke Christensen,
   Marcelino de la Cruz,
+  Peter Dalgaard,
   Peter Diggle,
   Stephen Eglen,
   Agnes Gault,
@@ -1014,7 +1021,6 @@
   Matt Reiter,
   Brian Ripley,
   Barry Rowlingson,
-  Ege Rubak,
   John Rudge,
   Aila Sarkka,
   Katja Schladitz,

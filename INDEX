@@ -222,6 +222,7 @@ incircle                Find Largest Circle Inside Window
 infline                 Infinite Straight Lines
 inforder.family         Infinite Order Interaction Family
 inside.owin             Test Whether Points Are Inside A Window
+integral.im             Integral of a Pixel Image
 interp.im               Interpolate a Pixel Image
 intersect.owin          Intersection, Union or Set Subtraction of Two
                         Windows
@@ -311,6 +312,13 @@ pcf.fv                  Pair Correlation Function obtained from K
                         Function
 pcf.ppp                 Pair Correlation Function of Point Pattern
 pcfcross                Multitype pair correlation function
+                        (cross-type)
+pcfcross.inhom          Inhomogeneous Multitype Pair Correlation
+                        Function (Cross-Type)
+pcfdot                  Multitype pair correlation function (i-to-any)
+pcfdot.inhom            Inhomogeneous Multitype Pair Correlation
+                        Function (Type-i-To-Any-Type)
+pcfinhom                Inhomogeneous Pair Correlation Function
 perimeter               Perimeter Length of Window
 persp.im                Perspective Plot of Pixel Image
 pixellate               Convert Spatial Object to Pixel Image
@@ -512,6 +520,7 @@ urkiola                 Urkiola Woods Point Pattern
 vcov.ppm                Variance-Covariance Matrix for a Fitted Point
                         Process Model
 vertices                Vertices of a Window
+whist                   Weighted Histogram
 with.fv                 Evaluate an Expression in a Function Table
 with.hyperframe         Evaluate an Expression in Each Row of a
                         Hyperframe

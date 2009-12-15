@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.33 $   $Date: 2009/07/24 05:43:57 $
+#   $Revision: 1.34 $   $Date: 2009/12/16 03:28:01 $
 #
 #
 #   calculate pair correlation function
@@ -24,6 +24,7 @@ pcf.ppp <- function(X, ..., r=NULL,
   win <- X$window
   area <- area.owin(win)
   lambda <- X$n/area
+  lambda2area <- area * lambda^2
 
   correction.given <- !missing(correction)
   correction <- pickoption("correction", correction,
@@ -59,8 +60,12 @@ pcf.ppp <- function(X, ..., r=NULL,
   from <- 0
   to <- max(r)
   nr <- length(r)
-  #################################################
   
+  denargs <- resolve.defaults(list(kernel=kernel, bw=bw),
+                              list(...),
+                              list(n=nr, from=from, to=to))
+  
+  #################################################
   
   # compute pairwise distances
   
@@ -68,53 +73,38 @@ pcf.ppp <- function(X, ..., r=NULL,
   dIJ <- close$d
   XI <- ppp(close$xi, close$yi, window=win, check=FALSE)
 
-  # how to process the distances
+  # initialise fv object
   
-  doit <- function(w, d, out, symb, desc, key, otherargs, lambda, area) {
-    wtot <- sum(w)
-    kden <- do.call("density.default",
-                    append(list(x=d, weights=w/wtot), otherargs))
-                                     
-    r <- kden$x
-    y <- kden$y * wtot
-    g <- y/(2 * pi * r * (lambda^2) * area)
-    if(is.null(out)) {
-      df <- data.frame(r=r, theo=rep(1,length(r)), g)
-      colnames(df)[3] <- key
-      out <- fv(df, "r", substitute(g(r), NULL), key, ,
-                alim, c("r","%s[Pois](r)", symb),
-                c("distance argument r", "theoretical Poisson %s", desc),
-                fname="g")
-    } else {
-      df <- data.frame(g)
-      colnames(df) <- key
-      out <- bind.fv(out, df, symb, desc, key)
-    }
-    return(out)
-  }
-
-  otherargs <- resolve.defaults(list(kernel=kernel, bw=bw),
-                                list(...),
-                                list(n=nr, from=from, to=to))
+  df <- data.frame(r=r, theo=rep(1,length(r)))
+  out <- fv(df, "r",
+            substitute(g(r), NULL), "theo", ,
+            alim,
+            c("r","%s[Pois](r)"),
+            c("distance argument r", "theoretical Poisson %s"),
+            fname="g")
 
   ###### compute #######
-
-  out <- NULL
 
   if(any(correction=="translate")) {
     # translation correction
     XJ <- ppp(close$xj, close$yj, window=win, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
-    out <- doit(edgewt, dIJ, out, "%s[Trans](r)",
-                "translation-corrected estimate of %s", "trans", otherargs,
-                lambda, area)
+    gT <- sewpcf(dIJ, edgewt, denargs, lambda2area)$g
+    out <- bind.fv(out,
+                   data.frame(trans=gT),
+                   "%s[Trans](r)",
+                   "translation-corrected estimate of %s",
+                   "trans")
   }
   if(any(correction=="isotropic")) {
     # Ripley isotropic correction
     edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
-    out <- doit(edgewt, dIJ, out, "%s[Ripley](r)",
-                "Ripley isotropic-corrected estimate of %s", "iso", otherargs,
-                lambda, area)
+    gR <- sewpcf(dIJ, edgewt, denargs, lambda2area)$g
+    out <- bind.fv(out,
+                   data.frame(iso=gR),
+                   "%s[Ripley](r)",
+                   "isotropic-corrected estimate of %s",
+                   "iso")
   }
   
   # sanity check
@@ -136,6 +126,25 @@ pcf.ppp <- function(X, ..., r=NULL,
   return(out)
 }
 
+# Smoothing Estimate of Weighted Pair Correlation
+# d = vector of relevant distances
+# w = vector of edge correction weights (in normal use)
+# denargs = arguments to density.default
+# lambda2area = constant lambda^2 * area (in normal use)
+
+sewpcf <- function(d, w, denargs, lambda2area) {
+  wtot <- sum(w)
+  kden <- do.call("density.default",
+                  append(list(x=d, weights=w/wtot), denargs))
+  r <- kden$x
+  y <- kden$y * wtot
+  g <- y/(2 * pi * r * lambda2area)
+  return(data.frame(r=r,g=g))
+}
+
+#
+#---------- OTHER METHODS FOR pcf --------------------
+#
 
 "pcf.fasp" <- function(X, ..., method="c") {
   verifyclass(X, "fasp")
@@ -211,7 +220,7 @@ function(X, ..., method="c") {
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
           "r", substitute(pcf(r), NULL), "pcf", cbind(pcf, theo) ~ r, alim,
-          c("r", "%s(r)", "%s[theo]"),
+          c("r", "%s(r)", "%s[pois](r)"),
           c("distance argument r",
             "estimate of %s by numerical differentiation",
             "theoretical Poisson value of %s"),

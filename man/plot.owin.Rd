@@ -6,7 +6,8 @@
 }
 \usage{
  \method{plot}{owin}(x, main, add=FALSE, \dots, box, edge=0.04,
-                      hatch=FALSE, angle=45, spacing=diameter(x)/50)
+                      hatch=FALSE, angle=45, spacing=diameter(x)/50,
+                      invert=FALSE)
 }
 \arguments{
   \item{x}{
@@ -46,6 +47,10 @@
     spacing between the shading lines,
     when \code{hatch=TRUE}.
   }
+  \item{invert}{
+    logical flag; when the window is a binary pixel mask,
+    the mask colours will be inverted if \code{invert=TRUE}.
+  }
 }
 \value{
   none.
@@ -81,7 +86,7 @@
   can be controlled by passing arguments to \code{\link{image.default}}
   through \code{...}. The default appearance can also be changed
   by setting the parameter \code{par.binary} of
-  \code{\link{spatstat.options}}.
+  \code{\link{spatstat.options}}. 
 
   To zoom in (to view only a subset of the window at higher
   magnification), use the graphical arguments

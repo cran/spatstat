@@ -85,7 +85,7 @@
     Optional arguments passed to  \code{\link{density.ppp}}
     to control the smoothing bandwidth, when \code{lambda} is
     estimated by kernel smoothing.
-    }
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -299,10 +299,8 @@
   lamfun <- function(x,y) { 50 + 100 * x }
   # inhomogeneous Poisson process
   Y <- rpoispp(lamfun, 150, owin())
-  # evaluate intensity at points of pattern
-  lambda <- lamfun(Y$x, Y$y)
   # inhomogeneous K function
-  Ki <- Kinhom(Y, lambda)
+  Ki <- Kinhom(Y, lamfun)
   plot(Ki)
 
   # How to make simulation envelopes:

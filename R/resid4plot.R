@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.14 $    $Date: 2008/11/13 21:22:21 $
+#   $Revision: 1.15 $    $Date: 2009/12/15 02:00:42 $
 #
 #
 
@@ -459,7 +459,7 @@ ploterodeimage <- function(W, Z, ..., Wcol=grey(0.75), rangeZ, colsZ) {
   # Look up Z-values of W-pixels
   xx <- as.vector(raster.x(W))
   yy <- as.vector(raster.y(W))
-  Zvalues <- lookup.im(Z, xx, yy, naok = TRUE)
+  Zvalues <- lookup.im(Z, xx, yy, naok = TRUE, strict=FALSE)
   # Overwrite pixels in Z
   inZ <- !is.na(Zvalues)
   X$v[inZ] <- Zvalues[inZ]

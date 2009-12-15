@@ -3,13 +3,14 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.29 $	$Date: 2009/11/06 00:40:32 $
+#	$Revision: 1.30 $	$Date: 2009/12/09 20:17:32 $
 #
 #
 #
 
 plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
-                      hatch=FALSE, angle=45, spacing=diameter(x)/50)
+                      hatch=FALSE, angle=45, spacing=diameter(x)/50,
+                      invert=FALSE)
 {
 #
 # Function plot.owin.  A method for plot.
@@ -181,6 +182,10 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
              if(length(col) == 1) 
                col <- c(par("fg"), col)
            }
+           # invert colours?
+           if(invert)
+             col <- rev(col)
+           
            do.call.matched("image.default",
                            resolve.defaults(
                            list(x=W$xcol, y=W$yrow, z=t(W$m), add=TRUE),

@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.50 $	$Date: 2009/01/30 00:48:04 $
+#	$Revision: 1.51 $	$Date: 2009/11/12 03:57:40 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -314,18 +314,52 @@ function(object, window, ngrid=NULL, locations=NULL,
   # set up arguments
     inter <- model$interaction
     X <- model$Q$data
-    U <- list(x=newdata$x, y=newdata$y)
-    Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
-    if(marked) {
-      U <- as.ppp(U, X$window, check=FALSE)
+    U <- ppp(newdata$x, y=newdata$y, window=X$window, check=FALSE)
+    if(marked) 
       marks(U) <- Umarks <- newdata$marks
-      Equal <- Equal & outer(marks(X), Umarks, "==")
+    # decide whether to split into blocks
+    nX <- X$n
+    nD <- U$n
+    nmat <- (nD + nX) * nX
+    nMAX <- spatstat.options("mplmaxmatrix")
+    #
+    if(nmat <= nMAX) {
+      # normal case
+      Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
+      if(marked) 
+        Equal <- Equal & outer(marks(X), Umarks, "==")
+      # compute values of potential at the new sample points
+      Vnew <- inter$family$eval(X, U, Equal,
+                                inter$pot, inter$par, model$correction)
+      if(!is.matrix(Vnew))
+        stop("internal error: eval.pair.inter() did not return a matrix")
+    } else {
+      # Too many dummy points: split into blocks
+      # Calculate no. of dummy points in largest permissible X * (X+D) matrix 
+      nperblock <- max(1, floor(nMAX/nX - nX))
+      # determine number of such blocks 
+      nblocks <- ceiling(nD/nperblock)
+      # announce
+      message(paste("predict.ppm: prediction required at",
+                    nD, "locations;",
+                    "split into", nblocks, "blocks",
+                    "to avoid memory size limits"))
+      Vnew <- NULL
+      for(iblock in 1:nblocks) {
+        first <- min(nD, (iblock - 1) * nperblock + 1)
+        last  <- min(nD, iblock * nperblock)
+        Ui <- U[first:last]
+        Ei <- outer(X$x, Ui$x, "==") & outer(X$y, Ui$y, "==")
+        if(marked) 
+          Ei <- Ei & outer(marks(X), marks(Ui), "==")
+        # compute values of potential at the new sample points
+        Vnewi <- inter$family$eval(X, Ui, Ei,
+                                   inter$pot, inter$par, model$correction)
+        if(!is.matrix(Vnewi))
+          stop("internal error: eval.pair.inter() did not return a matrix")
+        Vnew <- rbind(Vnew, Vnewi)
+      }
     }
-  # compute values of potential at the new sample points
-    Vnew <- inter$family$eval(X, U, Equal,
-                              inter$pot, inter$par, model$correction)
-    if(!is.matrix(Vnew))
-      stop("internal error: eval.pair.inter() did not return a matrix")
 
   # Negative infinite values signify cif = zero
     cif.equals.zero <- matrowany(Vnew == -Inf)

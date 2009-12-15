@@ -53,6 +53,39 @@ Performs analysis of deviance for two or more fitted point process models.
   ratios. The \code{override} option is provided for research purposes
   only!
 }
+\section{Errors and warnings}{
+  \describe{
+    \item{models not nested:}{
+      There may be an error message that the models are not \dQuote{nested}.
+      For an Analysis of Deviance the models must be nested, i.e. one model
+      must be a special case of the other. For example the point process
+      model with formula \code{~x} is a special case of the model with
+      formula \code{~x+y}, so these models are nested. However
+      the two point process
+      models with formulae \code{~x} and \code{~y} are not nested.
+      
+      If you get this error message and you believe that the models should
+      be nested, the problem may be the inability of \R to recognise that
+      the two formulae are nested. Try modifying the formulae to make
+      their relationship more obvious.
+    }
+    \item{different sizes of dataset:}{
+      There may be an error message from \code{anova.glmlist} that
+      \dQuote{models were not all fitted to the same size of dataset}.
+      This generally occurs when some of the point process models depend on
+      covariates, which were supplied as pixel images. The error arises
+      when one of the models does not depend on the covariates, or
+      when the pixel images do not have exactly the same domains.
+
+      To avoid this problem, the point process models should all be fitted
+      by calling \code{\link{ppm}}
+      \itemize{
+	\item with the argument \code{allcovar=TRUE}, and 
+	\item using exactly the same list of covariates in each case.
+      }
+    }
+  }
+}
 \seealso{
   \code{\link{ppm}}
 }

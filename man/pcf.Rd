@@ -106,7 +106,7 @@
 
   # fv object
   K <- Kest(simdat)
-  p2 <- pcf(K)
+  p2 <- pcf(K, spar=0.8, method="b")
   plot(p2)
 
   # multitype pattern; fasp object
@@ -114,8 +114,9 @@
   \testonly{
      betacells <- betacells[seq(1,betacells$n, by=10)]
   }
-  p <- pcf(alltypes(betacells, "K"))
-  plot(p)
+  betaK <- alltypes(betacells, "K")
+  betap <- pcf(betaK, spar=1, method="b")
+  plot(betap)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

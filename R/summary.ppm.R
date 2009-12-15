@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.32 $   $Date: 2009/10/13 02:55:26 $
+#    $Revision: 1.33 $   $Date: 2009/11/12 02:26:51 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -40,13 +40,16 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   
   y$entries <- list()
   y$no.trend <- identical.formulae(TREND, NULL) || identical.formulae(TREND, ~1)
-
-  y$stationary <- y$no.trend || identical.formulae(TREND, ~marks)
+  y$trendvar <- trendvar <- variablesinformula(TREND)
+  y$stationary <- y$no.trend || all(trendvar == "marks")
 
   y$poisson <- is.poisson.interact(INTERACT)
 
   y$marked <- is.marked.ppp(DATA)
   y$multitype <- is.multitype.ppp(DATA)
+  y$marktype <- if(y$multitype) "multitype" else
+                if(y$marked) "marked" else "unmarked"
+
   if(y$marked) y$entries$marks <- marks(DATA)
 
   y$name <- paste(
@@ -131,33 +134,39 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   y$trend$formula <- if(y$no.trend) NULL else TREND
 
   if(y$poisson && y$no.trend) {
-    lambda <- exp(COEFS[[1]])
-    if(!y$marked) { 
-      y$trend$label <- "Uniform intensity"
-      y$trend$value <- lambda
-    } else {
-      y$trend$label <- "Uniform intensity for each mark level"
-      y$trend$value <- lambda
-    }
-  } else # process is at least one of: marked, nonstationary, non-poisson
-  if(y$stationary) {
-    if(!y$marked) {
-      # stationary non-poisson non-marked
-      y$trend$label <- "First order term"
-      y$trend$value <- c(beta=exp(COEFS[[1]]))
-    } else {
-      # stationary, marked
-      mrk <- marks(DATA)
-      y$trend$label <-
-        if(y$poisson) "Intensities" else "First order terms"
-      # Use predict.ppm to evaluate the fitted intensities
-      lev <- factor(levels(mrk), levels=levels(mrk))
-      nlev <- length(lev)
-      marx <- list(x=rep(0, nlev), y=rep(0, nlev), marks=lev)
-      betas <- predict(x, locations=marx, type="trend")
-      names(betas) <- paste("beta_", as.character(lev), sep="")
-      y$trend$value <- betas
-    }
+    # uniform Poisson process
+    y$trend$value <- lambda <- exp(COEFS[[1]])
+    y$trend$label <- switch(y$marktype,
+                            unmarked="Uniform intensity",
+                            multitype="Uniform intensity for each mark level",
+                            marked="Uniform intensity in product space",
+                            "")
+  } else if(y$stationary) {
+    # stationary
+    switch(y$marktype,
+           unmarked={
+             # stationary non-poisson non-marked
+             y$trend$label <- "First order term"
+             y$trend$value <- c(beta=exp(COEFS[[1]]))
+           },
+           multitype={
+             # stationary, multitype
+             mrk <- marks(DATA)
+             y$trend$label <-
+               if(y$poisson) "Intensities" else "First order terms"
+             # Use predict.ppm to evaluate the fitted intensities
+             lev <- factor(levels(mrk), levels=levels(mrk))
+             nlev <- length(lev)
+             marx <- list(x=rep(0, nlev), y=rep(0, nlev), marks=lev)
+             betas <- predict(x, locations=marx, type="trend")
+             names(betas) <- paste("beta_", as.character(lev), sep="")
+             y$trend$value <- betas
+           },
+           marked={
+             # stationary, marked
+             y$trend$label <- "Fitted intensity coefficients"
+             y$trend$value <- blankcoefnames(COEFS)
+           })
   } else {
     # not stationary 
     y$trend$label <- "Fitted coefficients for trend formula"
@@ -169,20 +178,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       whichbits <- apply(!agree, 1, all)
       trendbits <- COEFS[whichbits]
     }
-    # decide whether there are 'labels within labels'
-    unlabelled <- unlist(lapply(trendbits,
-                                function(x) { is.null(names(x)) } ))
-    if(all(unlabelled))
-      y$trend$value <- unlist(trendbits)
-    else {
-      y$trend$value <- list()
-      for(i in seq(trendbits))
-          y$trend$value[[i]] <-
-            if(unlabelled[i])
-              unlist(trendbits[i])
-            else
-              trendbits[[i]]
-    }
+    y$trend$value <- blankcoefnames(trendbits)
   }
   
   class(y) <- "summary.ppm"
@@ -334,3 +330,17 @@ is.multitype.ppm <- function(X, ...) {
   summary.ppm(X, quick=TRUE)$multitype
 }
 
+blankcoefnames <- function(x) {
+  # remove name labels from ppm coefficients
+  # First decide whether there are 'labels within labels'
+  unlabelled <- unlist(lapply(x,
+                              function(z) { is.null(names(z)) } ))
+  if(all(unlabelled))
+    value <- unlist(x)
+  else {
+    value <- list()
+    for(i in seq(x))
+      value[[i]] <- if(unlabelled[i]) unlist(x[i]) else x[[i]]
+  }
+  return(value)
+} 

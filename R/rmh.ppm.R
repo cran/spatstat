@@ -1,7 +1,7 @@
 #
 # simulation of FITTED model
 #
-#  $Revision: 1.18 $ $Date: 2009/07/21 22:12:29 $
+#  $Revision: 1.19 $ $Date: 2009/12/16 19:24:45 $
 #
 #
 rmh.ppm <- function(model, start = NULL,
@@ -44,12 +44,19 @@ simulate.ppm <- function(object, nsim=1, ...,
   # go
   out <- list()
   if(nsim > 0) {
+    if(progress) {
+      cat(paste("Generating", nsim, "simulated", 
+                ngettext(nsim, "pattern", "patterns"),
+                "..."))
+      flush.console()
+    }
     for(i in 1:nsim) {
-      if(progress) progressreport(i, nsim)
       out[[i]] <- rmhEngine(rmhinfolist, verbose=verbose, ...)
+      if(progress) progressreport(i, nsim)
     }
   }
   out <- as.listof(out)
-  names(out) <- paste("Simulation", 1:nsim)
+  if(nsim > 0)
+    names(out) <- paste("Simulation", 1:nsim)
   return(out)
 }  

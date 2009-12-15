@@ -1,7 +1,7 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.22 $   $Date: 2009/07/01 19:00:03 $
+#   $Revision: 1.23 $   $Date: 2009/12/16 03:45:26 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                       title=NULL, samex=TRUE, banner=TRUE, 
@@ -117,7 +117,7 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                         ylim=c(0,1),axes=FALSE,xlab='',ylab='', ...)
       else {
         fun <- as.fv(x$fns[[k]])
-        fmla <- if(!is.null(formule)) formule[k] else NULL
+        fmla <- if(!defaultplot) formule[k] else NULL
         sub <- if(msub) subset[[k]] else subset
         main <- if(outerlabels) "" else
             paste("(", rowNames[i], ", ", colNames[j], ")", sep="")

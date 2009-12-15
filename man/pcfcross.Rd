@@ -1,6 +1,6 @@
 \name{pcfcross}
 \alias{pcfcross}
-\title{Multitype pair correlation function}
+\title{Multitype pair correlation function (cross-type)}
 \description{
   Calculates an estimate of the cross-type pair correlation function
   for a multitype point pattern.
@@ -69,6 +69,9 @@
 
   See \code{\link{pcf.ppp}} for a list of arguments that control
   the kernel estimation.
+
+  The companion function \code{\link{pcfdot}} computes the
+  corresponding analogue of \code{\link{Kdot}}.
 }
 
 \value{
@@ -92,6 +95,8 @@
 \seealso{
   Mark connection function \code{\link{markconnect}}.
 
+  Multitype pair correlation \code{\link{pcfdot}}.
+  
   Pair correlation \code{\link{pcf}},\code{\link{pcf.ppp}}.
   
   \code{\link{Kcross}}
@@ -99,6 +104,7 @@
 \examples{
  data(amacrine)
  p <- pcfcross(amacrine, "off", "on")
+ p <- pcfcross(amacrine, "off", "on", stoyan=0.1)
  plot(p)
 }
 \author{Adrian Baddeley

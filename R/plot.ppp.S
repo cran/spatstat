@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.39 $	$Date: 2009/10/06 19:40:18 $
+#	$Revision: 1.40 $	$Date: 2009/12/09 20:24:38 $
 #
 #
 #--------------------------------------------------------------------------
@@ -67,14 +67,19 @@ plot.ppp <-
 # Now convert to bona fide point pattern
   x <- as.ppp(x)
   xwindow <- x$window
-  
+  marked <- is.marked(x, dfok=TRUE)
+
+# Plot observation window
   if(!add)
-    plot.owin(xwindow, ..., main=main)
+    do.call("plot.owin",
+            resolve.defaults(list(xwindow),
+                             list(...),
+                             list(invert=TRUE, main=main)))
     
   if(x$n == 0)
     return(invisible())
 
-  # handle plot parameters
+# Handle plot parameters
   explicit <- list()
   if(!is.null(cols))
     explicit <- append(explicit, list(cols=cols))
@@ -83,6 +88,8 @@ plot.ppp <-
     
   defaults <- spatstat.options("par.points")
 
+# Prepare to plot points
+  
   smartpoints <- function(xx, yy, ...,
                           index=1, col=NULL, pch=NULL, cols=NULL, chars=NULL) {
     if(is.null(col) && !is.null(cols))
@@ -96,7 +103,6 @@ plot.ppp <-
                     extrargs=c("col", "pch", "type", "bg", "cex", "lwd"))
   }
 
-  marked <- is.marked(x, dfok=TRUE)
   if(!marked || !use.marks) {
     do.call("smartpoints",
             resolve.defaults(list(xx=x$x, yy=x$y),

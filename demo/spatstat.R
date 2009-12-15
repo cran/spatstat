@@ -221,7 +221,6 @@ plot(en, main="Envelopes of K function based on CSR")
 pc <- pcf(swedishpines)
 plot(pc, main="Pair correlation function")
 
-
 plot(swedishpines, main="nearest neighbours")
 m <- nnwhich(swedishpines)
 b <- swedishpines[m]
@@ -230,10 +229,16 @@ arrows(swedishpines$x, swedishpines$y, b$x, b$y,
 
 plot(swedishpines %mark% (nndist(swedishpines)/2), markscale=1, main="Stienen diagram")
 
+plot(Gest(swedishpines),
+     main=c("Nearest neighbour distance function G", "Gest(swedishpines)"))
+
 Z <- distmap(swedishpines, dimyx=512)
 plot(swedishpines$window, main="Distance map")
 plot(Z, add=TRUE)
 points(swedishpines)
+
+plot(Fest(swedishpines),
+     main=c("Empty space function F", "Fest(swedishpines)"))
 
 W <- rebound.owin(letterR, square(5))
 plot(distmap(W), main="Distance map")
@@ -243,7 +248,16 @@ a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 contour(distmap(a), main="Distance map")
 plot(a, add=TRUE,col="red")
 
+plot(Jest(swedishpines), main=c("J-function", "J(r)=(1-G(r))/(1-F(r))"))
+     
 plot(allstats(swedishpines))
+
+data(residualspaper)
+Fig4b <- residualspaper$Fig4b
+
+plot(Fig4b, main="Inhomogeneous point pattern")
+plot(Kinhom(Fig4b), main="Inhomogeneous K-function")
+plot(pcfinhom(Fig4b, stoyan=0.1), main="Inhomogeneous pair correlation")
 
 data(bramblecanes)
 plot(bramblecanes)

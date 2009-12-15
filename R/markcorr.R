@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.51 $ $Date: 2009/07/23 02:10:00 $
+#     $Revision: 1.53 $ $Date: 2009/12/10 01:08:27 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -269,6 +269,15 @@ markcorr <-
     theory <- Ef
     Efdenom <- 1
   }
+
+  if(normalise) {
+    # check validity of denominator
+    if(Efdenom == 0)
+      stop("Cannot normalise the mark correlation; the denominator is zero")
+    else if(Efdenom < 0)
+      warning(paste("Problem when normalising the mark correlation:",
+                    "the denominator is negative"))
+  }
   
   # this will be the output data frame
   result <- data.frame(r=r, theo= rep(theory,length(r)))
@@ -309,7 +318,7 @@ markcorr <-
   mJ <- marx[J]
   ff <- switch(ftype,
                mul = mI * mJ,
-               equ = mI == mJ,
+               equ = (mI == mJ),
                product={
                  if(is.null(fargs)) {
                    fI <- f1(mI)
@@ -327,13 +336,27 @@ markcorr <-
                    do.call(f, append(list(marx[I], marx[J]), fargs))
                })
 
-  if(any(is.na(ff)))
-    stop("function f returned some NA values")
+  # check values of f(M1, M2)
+  
   if(is.logical(ff))
     ff <- as.numeric(ff)
   else if(!is.numeric(ff))
     stop("function f did not return numeric values")
 
+  if(any(is.na(ff))) 
+    switch(ftype,
+           mul=,
+           equ=stop("some marks were NA"),
+           product=,
+           general=stop("function f returned some NA values"))
+    
+  if(any(ff < 0))
+    switch(ftype,
+           mul=,
+           equ=stop("negative marks are not permitted"),
+           product=,
+           general=stop("negative values of function f are not permitted"))
+    
   #### Compute estimates ##############
         
   if(any(correction == "translate")) {

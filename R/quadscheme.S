@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.23 $    $Date: 2008/12/04 22:10:57 $
+#      $Revision: 4.24 $    $Date: 2009/12/12 00:18:35 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -37,11 +37,16 @@ quadscheme <- function(data, dummy, method="grid", ...) {
       dummy <- as.ppp(dummy, data$window, check=FALSE)
       # confine dummy points to data window 
       dummy <- dummy[data$window]
-    }
-    dp <- NULL
-    # use given weight parameters without inspection
-    wp <- append(list(method=method), list(...))
+      wp <- dp <- list()
+    } else {
+      # if it's already a ppp, it may have been created by default.dummy
+     dp <- attr(dummy, "dummy.parameters")
+     wp <- attr(dummy, "weight.parameters")     
+   }
   }
+  # arguments supplied directly to quadscheme()
+  # override any arguments passed as attributes
+  wp <- resolve.defaults(list(method=method), list(...), wp)
   
   mX <- is.marked(data)
   mD <- is.marked(dummy)

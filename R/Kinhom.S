@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.45 $	$Date: 2009/10/16 04:22:04 $
+#	$Revision: 1.46 $	$Date: 2009/12/16 04:14:14 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -110,7 +110,7 @@
         # No intensity data provided
         # Estimate density by leave-one-out kernel smoothing
         lambda <- density(X, ..., sigma=sigma, varcov=varcov,
-                            at="points", leavoneout=TRUE)
+                            at="points", leaveoneout=TRUE)
         reciplambda <- 1/lambda
       } else if(!is.null(reciplambda)) {
         # 1/lambda values provided

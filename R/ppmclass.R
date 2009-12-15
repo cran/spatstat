@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.34 $	$Date: 2009/10/13 05:27:48 $
+#	$Revision: 2.35 $	$Date: 2009/11/11 02:50:35 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -70,20 +70,27 @@ print.ppm <- function(x, ...) {
 		cat("\nTrend formula: ")
 		print(s$trend$formula)
         }
-        
-        cat(paste("\n", s$trend$label, ":", sep=""))
+
+
 
         tv <- s$trend$value
-        if(is.list(tv)) {
-          cat("\n")
-          for(i in seq(tv))
-            print(tv[[i]])
-        } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv)))
-          # append to end of current line
-          cat("\t", paste(tv), "\n")
+
+        if(length(tv) == 0)
+          cat("\n[No trend coefficients]\n")
         else {
-          cat("\n")
-          print(tv)
+          cat(paste("\n", s$trend$label, ":", sep=""))
+          if(is.list(tv)) {
+            cat("\n")
+            for(i in seq(tv))
+              print(tv[[i]])
+          } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv))) {
+            # single number: append to end of current line
+            cat("\t", paste(tv), "\n")
+          } else {
+            # some other format 
+            cat("\n")
+            print(tv)
+          }
         }
 
         cat("\n")
