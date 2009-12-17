@@ -11,17 +11,13 @@ Tries to coerce any reasonable kind of data to a point pattern
 (an object of class \code{"ppp"})
 for use by the \pkg{spatstat} package).
 }
-\synopsis{
+\usage{
   as.ppp(X, \dots, fatal=TRUE)
   \method{as.ppp}{ppp}(X, \dots, fatal=TRUE)
   \method{as.ppp}{quad}(X, \dots, fatal=TRUE)
   \method{as.ppp}{matrix}(X, W=NULL, \dots, fatal=TRUE)
   \method{as.ppp}{data.frame}(X, W=NULL, \dots, fatal=TRUE)
   \method{as.ppp}{default}(X, W=NULL, \dots, fatal=TRUE)
-}
-\usage{
-  as.ppp(X, \dots, fatal=TRUE)
-  as.ppp(X, W, \dots, fatal=TRUE)
 }
 \arguments{
   \item{X}{Data which will be converted into a point pattern}
@@ -52,7 +48,7 @@ for use by the \pkg{spatstat} package).
     an object of class \code{"ppp"}  
     \item
     an object of class \code{"spp"} as defined in the 
-    \code{spatial} library
+    \pkg{spatial} library
     \item
     an object of class \code{"quad"} representing a quadrature scheme
     (see \code{\link{quad.object}})
@@ -81,7 +77,7 @@ for use by the \pkg{spatstat} package).
   value \code{NULL} is returned.
 
   An \code{spp} object is the representation of a point pattern
-  in the \code{spatial} library. Our implementation recognises
+  in the \pkg{spatial} library. Our implementation recognises
   the following formats:
   \itemize{
     \item
@@ -93,7 +89,7 @@ for use by the \pkg{spatstat} package).
     where \code{area} is a structure with entries
     \code{xl}, \code{xu}, \code{yl}, \code{yu}
   }
-  (used in \code{spatial} versions 1 to 6 and version 7.1 respectively)
+  (used in \pkg{spatial} versions 1 to 6 and version 7.1 respectively)
   where \code{x} and \code{y} are vectors of equal length
   giving the point coordinates, and \code{xl}, \code{xu}, \code{yl},
   \code{yu} are numbers giving the dimensions of a rectangular window.
@@ -113,9 +109,9 @@ for use by the \pkg{spatstat} package).
 }
 \section{Warnings}{
   If the format of \code{spp} objects
-  is changed in future versions of the \code{spatial} library,
+  is changed in future versions of the \pkg{spatial} library,
   then \code{as.ppp} may not be able to interpret them.
-  It currently handles all versions of \code{spatial} up to 7.1-4.
+  It currently handles all versions of \pkg{spatial} up to 7.1-4.
 }
 \examples{
  \dontrun{

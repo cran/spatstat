@@ -3,10 +3,10 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.33 $ $Date: 2009/11/05 21:44:02 $
+#   $Revision: 1.35 $ $Date: 2009/12/10 01:01:12 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
-                 window=NULL) {
+                 window=NULL, keepempty=FALSE) {
   if(!is.null(window))
     win <- as.owin(window)
   else win <- NULL
@@ -25,8 +25,19 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
     stopifnot(is.list(tiles))
     if(!all(unlist(lapply(tiles, is.owin))))
       stop("tiles must be a list of owin objects")
+    if(!keepempty) {
+      # remove empty tiles
+      isempty <- unlist(lapply(tiles, is.empty))
+      if(all(isempty))
+        stop("All tiles are empty")
+      if(any(isempty))
+        tiles <- tiles[!isempty]
+    }
+    ntiles <- length(tiles)
+    nam <- names(tiles)
+    lev <- if(!is.null(nam) && all(nzchar(nam))) nam else 1:ntiles
     if(is.null(win)) {
-      for(i in seq(along=tiles)) {
+      for(i in 1:ntiles) {
         if(i == 1)
           win <- tiles[[1]]
         else
@@ -38,19 +49,40 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
       # convert to pixel image tessellation
       win <- as.mask(win)
       ima <- as.im(win)
-      for(i in seq(along=tiles))
+      ima$v[] <- NA
+      for(i in 1:ntiles)
         ima[tiles[[i]]] <- i
       ima <- ima[win, drop=FALSE]
-      ima <- eval.im(factor(ima))
+      ima <- eval.im(factor(ima, levels=1:ntiles))
+      levels(ima) <- lev
       out <- list(type="image",
-                  window=win, image=ima, n=length(levels(ima)))
+                  window=win, image=ima, n=length(lev))
     } else {
       # tile list
       win <- rescue.rectangle(win)
       out <- list(type="tiled", window=win, tiles=tiles, n=length(tiles))
     }
   } else if(isimage) {
-    image <- eval.im(factor(image))
+    # convert to factor valued image
+    image <- as.im(image)
+    switch(image$type,
+           logical={
+             # convert to factor
+             if(keepempty) 
+               image <- eval.im(factor(image, levels=c(FALSE,TRUE)))
+             else
+               image <- eval.im(factor(image))
+           },
+           factor={
+             # eradicate unused levels
+             if(!keepempty) 
+               image <- eval.im(factor(image))
+           },
+           {
+             # convert to factor
+             image <- eval.im(factor(image))
+           })
+               
     if(is.null(win)) win <- as.owin(image)
     out <- list(type="image", window=win, image=image, n=length(levels(image)))
   } else stop("Internal error: unrecognised format")
@@ -214,6 +246,34 @@ tiles <- function(x) {
   return(out)
 }
 
+tilenames <- function(x) {
+  stopifnot(is.tess(x))
+  switch(x$type,
+         rect={
+           nx <- length(x$xgrid) - 1
+           ny <- length(x$ygrid) - 1
+           nam <- outer(rev(seq(ny)),
+                        seq(nx),
+                        function(j,i,ny) {
+                          paste("Tile row", ny-j+1, ", col ", i,
+                                sep="")},
+                        ny=ny)
+           return(nam)
+         },
+         tiled={
+           til <- x$tiles
+           if(!is.null(names(til)))
+             nam <- names(til)
+           else 
+             nam <- paste("Tile", seq(length(til)))
+         },
+         image={
+           ima <- x$image
+           lev <- levels(ima)
+           nam <- paste(lev)
+         })
+  return(nam)
+}
 
 as.im.tess <- function(X, W=NULL, ...,
                        eps=NULL, dimyx=NULL, xy=NULL,

@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.54 $     $Date: 2009/10/29 23:58:26 $
+#         $Revision: 1.59 $     $Date: 2009/12/15 01:58:29 $
 #
 #      The class "im" of raster images
 #
@@ -153,6 +153,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       switch(x$type,
              factor={ factor(, levels=levels(x)) },
              integer = { integer(0) },
+             logical = { logical(0) },
              real = { numeric(0) },
              complex = { complex(0) },
              character = { character(0) },
@@ -281,10 +282,48 @@ nearest.pixel <- function(x,y,im) {
   return(list(row=rr, col=cc))
 }
 
+# Explores the 3 x 3 neighbourhood of nearest.pixel
+# and finds the nearest pixel that is not NA
+
+nearest.valid.pixel <- function(x,y,im) {
+  rc <- nearest.pixel(x,y,im)
+  rr <- rc$row
+  cc <- rc$col
+  # check whether any pixels are outside image domain
+  outside <- is.na(im$v)
+  miss <- outside[cbind(rr, cc)]
+  if(!any(miss))
+    return(rc)
+  # for offending pixels, explore 3 x 3 neighbourhood
+  nr <- im$dim[1]
+  nc <- im$dim[2]
+  xcol <- im$xcol
+  yrow <- im$yrow
+  for(i in which(miss)) {
+    rows <- rr[i] + c(-1,0,1)
+    cols <- cc[i] + c(-1,0,1)
+    rows <- unique(pmax(1, pmin(rows, nr)))
+    cols <- unique(pmax(1, pmin(cols, nc)))
+    rcp <- expand.grid(row=rows, col=cols)
+    ok <- !outside[as.matrix(rcp)]
+    if(any(ok)) {
+      # At least one of the neighbours is valid
+      # Find the closest one
+      rcp <- rcp[ok,]
+      dsq <- with(rcp, (x[i] - xcol[col])^2 + (y[i] - yrow[row])^2)
+      j <- which.min(dsq)
+      rc$row[i] <- rcp$row[j]
+      rc$col[i] <- rcp$col[j]
+    }
+  }
+  return(rc)
+}
+  
+
 # This function is a generalisation of inside.owin()
 # to images other than binary-valued images.
 
-lookup.im <- function(Z, x, y, naok=FALSE) {
+lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   verifyclass(Z, "im")
 
   if(length(x) != length(y))
@@ -299,13 +338,16 @@ lookup.im <- function(Z, x, y, naok=FALSE) {
              (y >= yr[1] - eps) & (y <= yr[2] + eps)
   
   if(!any(frameok))  # all points OUTSIDE range - no further work needed
-    return(value)  # all zero
+    return(value)  # all NA
 
   # consider only those points which are inside the frame
   xf <- x[frameok]
   yf <- y[frameok]
   # map locations to raster (row,col) coordinates
-  loc <- nearest.pixel(xf,yf,Z)
+  if(strict)
+    loc <- nearest.pixel(xf,yf,Z)
+  else
+    loc <- nearest.valid.pixel(xf,yf,Z)
   # look up image values
   vf <- Z$v[cbind(loc$row, loc$col)]
   
@@ -441,6 +483,15 @@ quantile.im <- function(x, ...) {
                                 list(...),
                                 list(na.rm=TRUE)))
   return(q)
+}
+
+integral.im <- function(x, ...) {
+  verifyclass(x, "im")
+  typ <- x$type
+  if(!any(typ == c("integer", "real", "complex", "logical")))
+    stop(paste("Don't know how to integrate an image of type", sQuote(typ)))
+  a <- with(x, sum(v, na.rm=TRUE) * xstep * ystep)
+  return(a)
 }
 
 conform.imagelist <- function(X, Zlist) {

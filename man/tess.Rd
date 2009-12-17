@@ -7,7 +7,7 @@
 }
 \usage{
   tess(..., xgrid = NULL, ygrid = NULL, tiles = NULL, image = NULL,
-            window=NULL)
+            window=NULL, keepempty=FALSE)
 }
 \arguments{
   \item{\dots}{Ignored.}
@@ -27,6 +27,10 @@
     Optional.
     The spatial region which is tessellated (i.e. the union of all the tiles).
     An object of class \code{"owin"}.
+  }
+  \item{keepempty}{
+    Logical flag indicating whether empty tiles should be retained
+    or deleted.
   }
 }
 \details{
@@ -65,7 +69,14 @@
   computing the set union of all the tiles. This is a time-consuming
   computation. For efficiency it is advisable to specify the window.
   Note that the validity of the window will not be checked.
-  
+
+  Empty tiles may occur, either because one of the entries in the list
+  \code{tiles} is an empty window, or because one of the levels of the
+  factor-valued pixel image \code{image} does not occur in the pixel data.
+  When \code{keepempty=TRUE}, empty tiles are permitted. 
+  When \code{keepempty=FALSE} (the default), tiles are not allowed to be
+  empty, and any empty tiles will be removed from the tessellation.
+
   There are methods for \code{print}, \code{plot}, \code{[} and \code{[<-}
   for tessellations. Use \code{\link{tiles}} to extract the list of
   tiles in a tessellation.

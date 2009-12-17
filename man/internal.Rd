@@ -20,9 +20,10 @@
 \alias{as.units}
 \alias{beachcolours}
 \alias{bermantestEngine}
-\alias{bind.fv}
 \alias{bdrylength.xypolygon} 
 \alias{bdry.mask} 
+\alias{bind.fv}
+\alias{blankcoefnames}
 \alias{breakpts}
 \alias{breakpts.from.r}
 \alias{bt.frame}
@@ -174,6 +175,7 @@
 \alias{maxflow}
 \alias{meanX.owin}
 \alias{meanY.owin}
+\alias{sewpcf}
 \alias{sewsmod}
 \alias{model.se.image}
 \alias{mpl.engine}
@@ -184,6 +186,7 @@
 \alias{names.hyperframe}
 \alias{names<-.hyperframe}
 \alias{nearest.pixel}
+\alias{nearest.valid.pixel}
 \alias{newstyle.coeff.handling}
 \alias{no.trend.ppm}
 \alias{n.quad}
@@ -198,6 +201,7 @@
 \alias{param.quad}
 \alias{paren}
 \alias{partialModelMatrix}
+\alias{pcfmulti.inhom}
 \alias{pickoption}
 \alias{ploterodewin}
 \alias{ploterodeimage}
@@ -316,6 +320,7 @@
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
 \alias{tilecentroids}        
+\alias{tilenames}        
 \alias{trim.mask}        
 \alias{tweak.fv.entry}        
 \alias{unitname.default}
@@ -331,7 +336,6 @@
 \alias{versionstring.spatstat}
 \alias{verifyclass}
 \alias{verify.xypolygon}
-\alias{whist}               
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
@@ -365,9 +369,10 @@ as.listof(x)
 as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
 bermantestEngine(model, covariate, which, alternative, ..., modelname, covname, dataname)
-bind.fv(x, y, labl, desc, preferred)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
+bind.fv(x, y, labl, desc, preferred)
+blankcoefnames(x)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
@@ -494,7 +499,7 @@ killinteraction(model)
 least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 listof(\dots)
-lookup.im(Z, x, y, naok)
+lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
 makeunits(sing, plur, mul)
@@ -524,6 +529,7 @@ matrowsum(x)
 maxflow(costm)
 meanX.owin(w)            
 meanY.owin(w)
+sewpcf(d, w, denargs, lambda2area)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
@@ -539,6 +545,7 @@ na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, im)
+nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
 no.trend.ppm(x)
 n.quad(Q)
@@ -553,6 +560,13 @@ owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
 paren(x)
 partialModelMatrix(X,D,model,callstring,\dots)
+pcfmulti.inhom(X, I, J, lambdaI = NULL, lambdaJ = NULL, ...,
+               r = NULL, breaks = NULL,
+               kernel = "epanechnikov", bw = NULL, stoyan = 0.15,
+               correction = c("translate", "Ripley"),
+               sigma = NULL, varcov = NULL,
+               Iname = "points satisfying condition I",
+               Jname = "points satisfying condition J")
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
@@ -679,6 +693,7 @@ termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
+tilenames(x)
 trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
@@ -694,7 +709,6 @@ versionstring.ppm(object)
 versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
-whist(x,breaks,weights, trim, right)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)

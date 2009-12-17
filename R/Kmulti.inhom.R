@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.28 $	$Date: 2009/10/16 06:26:03 $
+#	$Revision: 1.29 $	$Date: 2009/12/16 04:14:04 $
 #
 #
 # ------------------------------------------------------------------------
@@ -162,7 +162,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   if(is.null(lambdaI)) {
     # estimate intensity
     lambdaI <- density(X[I], ..., sigma=sigma, varcov=varcov,
-                       at="points", leavoneout=TRUE)
+                       at="points", leaveoneout=TRUE)
   } else if(is.im(lambdaI)) {
     # look up intensity values
     lambdaI <- safelookup(lambdaI, X[I])
@@ -181,7 +181,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   if(is.null(lambdaJ)) {
     # estimate intensity
     lambdaJ <- density(X[J], ..., sigma=sigma, varcov=varcov,
-                       at="points", leavoneout=TRUE)
+                       at="points", leaveoneout=TRUE)
   } else if(is.im(lambdaJ)) {
     # look up intensity values
     lambdaJ <- safelookup(lambdaJ, X[J])

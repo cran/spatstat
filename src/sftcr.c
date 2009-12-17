@@ -13,8 +13,8 @@ struct {
   double beta;
   double sigma;
   double kappa;
-  double ook;  /*   1/kappa     */
-  double stuk; /* sigma^(2/kappa) */
+  double nook;  /*   -1/kappa     */
+  double stok; /* sigma^(2/kappa) */
   double *period;
   int per;
 } Softcore;
@@ -33,8 +33,8 @@ void sftcrinit(state, model, algo)
   Softcore.kappa  = model.par[2];
   Softcore.period = model.period;
   /* constants */
-  Softcore.ook = 1/Softcore.kappa;
-  Softcore.stuk = pow(Softcore.sigma, 2/Softcore.kappa);
+  Softcore.nook = -1/Softcore.kappa;
+  Softcore.stok = pow(Softcore.sigma, 2/Softcore.kappa);
   /* periodic boundary conditions? */
   Softcore.per    = (model.period[0] > 0.0);
 }
@@ -48,10 +48,10 @@ double sftcrcif(prop, state)
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double d2, pairsum, cifval, ook, stuk;
+  double d2, pairsum, cifval, nook, stok;
 
-  ook = Softcore.ook;
-  stuk = Softcore.stuk;
+  nook = Softcore.nook;
+  stok = Softcore.stok;
 
   u  = prop.u;
   v  = prop.v;
@@ -73,13 +73,13 @@ double sftcrcif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = dist2(u,v,x[j],y[j],Softcore.period);
-	pairsum += pow(d2, ook);
+	pairsum += pow(d2, nook);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = dist2(u,v,x[j],y[j],Softcore.period);
-	pairsum += pow(d2, ook);
+	pairsum += pow(d2, nook);
       }
     }
   }
@@ -87,18 +87,18 @@ double sftcrcif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = pow(u - x[j],2) + pow(v-y[j],2);
-	pairsum += pow(d2, ook);
+	pairsum += pow(d2, nook);
       }
     }  
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = pow(u - x[j],2) + pow(v-y[j],2);
-	pairsum += pow(d2, ook);
+	pairsum += pow(d2, nook);
       }
     }
   }
 
-  cifval *= exp(-stuk * pairsum);
+  cifval *= exp(-stok * pairsum);
   return cifval;
 }
 

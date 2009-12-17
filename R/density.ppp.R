@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.16 $    $Date: 2009/10/16 04:22:26 $
+#  $Revision: 1.17 $    $Date: 2009/12/15 02:06:56 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -100,7 +100,7 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
         edgeweight <- xprob * yprob
       } else {
         edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
-        edgeweight <- safelookup(edg, x)
+        edgeweight <- safelookup(edg, x, warn=FALSE)
       }
       result <- result/edgeweight
     }

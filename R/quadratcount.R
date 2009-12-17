@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.24 $  $Date: 2009/08/29 03:00:41 $
+#  $Revision: 1.26 $  $Date: 2009/12/10 00:42:34 $
 #
 
 quadratcount <- function(X, ...) {
@@ -35,9 +35,17 @@ quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
                        keepempty=TRUE)
       # now delete the empty quadrats and the corresponding counts
       nonempty <- !unlist(lapply(tiles(tess), is.empty))
+      if(!any(nonempty))
+        stop("All tiles are empty")
       if(!all(nonempty)) {
-        Xcount <- Xcount[nonempty]
+        ntiles <- sum(nonempty)
         tess   <- tess[nonempty]
+        Xcount <- t(Xcount)[nonempty]
+        # matrices and tables are in row-major order,
+        # tiles in a rectangular tessellation are in column-major order
+        Xcount <- array(Xcount,
+                        dimnames=list(tile=tilenames(tess)))
+        class(Xcount) <- "table"
       }
     }
   } else {
@@ -136,9 +144,8 @@ quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL,
       til <- tiles(Z)
       for(i in seq(til))
         til[[i]] <- intersect.owin(til[[i]], W)
-      Z <- tess(tiles=til, window=W)
+      Z <- tess(tiles=til, window=W, keepempty=TRUE)
     }
   }
   return(Z)
 }
-

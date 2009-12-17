@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.45 $    $Date: 2009/11/05 21:17:43 $
+#    $Revision: 1.50 $    $Date: 2009/12/15 23:57:21 $
 #
 #  (a) for matrices only:
 #
@@ -66,30 +66,25 @@ apply23sum <- function(x) {
 #    whist      weighted histogram
 #
 
-whist <-
-  function(x, breaks, weights=NULL, trim=TRUE, right) {
-    if(length(x) == 0)
-      return(rep(0, length(breaks)-1))
-    if(trim || !missing(right)) {
-      if(!missing(right))
-        ok <- (x <= right)
-      else
-        ok <- (x >= breaks[1]) & (x <= breaks[length(breaks)])
-      x <- x[ok]
-      if(!is.null(weights))
-        weights <- weights[ok]
-    }
-    if(length(x) == 0)
-      return(rep(0, length(breaks)-1))      
-    if(is.null(weights)) 
-      h <- hist(x, breaks=breaks, plot=FALSE)$counts
+whist <- function(x, breaks, weights=NULL) {
+    N <- length(breaks)
+    if(length(x) == 0) 
+      h <- rep(0, N+1)
     else {
-      # Thanks to Peter Dalgaard
-      cell <- cut(x, breaks, include.lowest=TRUE)
-      h <- tapply(weights, cell, sum)
-      h[is.na(h)] <- 0
+      # classify data into histogram cells (breaks need not span range of data)
+      cell <- findInterval(x, breaks, rightmost.closed=TRUE)
+      cell <- factor(cell, levels=0:N)
+      # compute weighted histogram
+      if(is.null(weights))
+        h <- table(cell)
+      else 
+        h <- unlist(lapply(split(weights, cell), sum, na.rm=TRUE))
     }
-    return(h)
+    h <- as.numeric(h)
+    y <- h[2:N]
+    attr(y, "low") <- h[1]
+    attr(y, "high") <- h[N+1]
+    return(y)
 }
 
 ######################

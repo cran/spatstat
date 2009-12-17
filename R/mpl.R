@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.80 $	$Date: 2009/10/13 02:30:30 $
+#	$Revision: 5.82 $	$Date: 2009/12/15 02:14:21 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2009/10/13 02:30:30 $")
+                    date="$Date: 2009/12/15 02:14:21 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -132,14 +132,61 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
 
         
 #################  P r e p a r e    D a t a   ######################
-        
-prep <- mpl.prepare(Q, X, P, trend, interaction,
+
+  
+  D <- Q$dummy
+  nD <- D$n
+  nX <- X$n
+  nmat <- (nD + nX) * nX
+  nMAX <- spatstat.options("mplmaxmatrix")
+  if(nmat <= nMAX || savecomputed) {
+    # normal case
+    prep <- mpl.prepare(Q, X, P, trend, interaction,
                     covariates, 
                     want.trend, want.inter, correction, rbord,
                     "quadrature points", callstring,
                     allcovar=allcovar,
                     precomputed=precomputed, savecomputed=savecomputed,
                     ...)
+  } else {
+    # Too many quadrature points: split into blocks
+    # Calculate number of dummy points in largest permissible X * (X+D) matrix 
+    nperblock <- max(1, floor(nMAX/nX - nX))
+    # determine number of such blocks 
+    nblocks <- ceiling(nD/nperblock)
+    # announce
+    message(paste("ppm: Large quadrature scheme",
+                  paren(paste(nD, "dummy points")),
+                  "split into", nblocks, "blocks",
+                  "to avoid memory size limits"))
+    # weights 
+    W <- w.quad(Q)
+    WX <- W[1:nX]
+    # 
+    for(iblock in 1:nblocks) {
+      first <- min(nD, (iblock - 1) * nperblock + 1)
+      last  <- min(nD, iblock * nperblock)
+      # extract dummy points and weights
+      Di <- D[first:last]
+      Wi <- W[nX + first:last]
+      # form partial quadrature scheme
+      Qi <- quad(X, Di, c(WX, Wi))
+      Pi <- union.quad(Qi)
+      #
+      prepi <-  mpl.prepare(Qi, X, Pi, trend, interaction,
+                      covariates, 
+                      want.trend, want.inter, correction, rbord,
+                      "quadrature points", callstring,
+                      allcovar=allcovar, ...)
+      if(iblock == 1) {
+        prep <- prepi
+      } else {
+        # tack on the glm variables for the extra DUMMY points only
+        prep$glmdata <- rbind(prep$glmdata, prepi$glmdata[-(1:nX), ])
+        prep$problems <- append(prep$problems, prepi$problems)
+      }
+    }
+  } 
 
   # back door
 if(preponly) {
@@ -588,7 +635,7 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     # look up values of each covariate at the quadrature points
     values <- covariates
     evalfxy <- function(f, x, y) { f(x,y) }
-    values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y, naok=TRUE)
+    values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y, naok=TRUE, strict=FALSE)
     values[isfun] <- lapply(covariates[isfun], evalfxy, x=x, y=y)
     values[isnum] <- lapply(covariates[isnum], rep, length(x))
     return(as.data.frame(values))

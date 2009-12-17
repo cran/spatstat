@@ -132,7 +132,7 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
   with two arguments which are possible marks of the pattern,
   and which returns a nonnegative real value.
   Common choices of \eqn{f} are:
-  for continuous real-valued marks,
+  for continuous nonnegative real-valued marks,
   \deqn{f(m_1,m_2) = m_1 m_2}{f(m1,m2)= m1 * m2}
   for discrete marks (multitype point patterns),
   \deqn{f(m_1,m_2) = 1(m_1 = m_2)}{f(m1,m2)= (m1 == m2)}

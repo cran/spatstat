@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.10 $	$Date: 2009/03/26 09:47:44 $
+#	$Revision: 3.13 $	$Date: 2009/12/15 23:21:39 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -107,20 +107,20 @@ function(o, cc, d, breaks) {
 #	breaks: histogram breakpoints (vector or 'breakpts' object)
 #
   breaks <- as.breakpts(breaks)
-# count any data outside range of breakpoints        
-  maxbreak <- breaks$max
-  uppercen <- sum(cc > maxbreak)
-  upperobs <- sum(o  > maxbreak)
+  bval <- breaks$val
 # compile histograms (breakpoints may not span data)
-  obs <- whist( o,     breaks=breaks$val, right=maxbreak)
-  nco <- whist( o[d],  breaks=breaks$val, right=maxbreak)
-  cen <- whist( cc,    breaks=breaks$val, right=maxbreak)
-  ncc <- whist( cc[d], breaks=breaks$val, right=maxbreak)
+  obs <- whist( o,     breaks=bval)
+  nco <- whist( o[d],  breaks=bval)
+  cen <- whist( cc,    breaks=bval)
+  ncc <- whist( cc[d], breaks=bval)
+# number of observations exceeding largest breakpoint
+  upperobs <- attr(obs, "high")
+  uppercen <- attr(cen, "high")
 # go
   km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
   rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
 #
   return(list(rs=rs, km=km$km, hazard=km$lambda,
-              r=breaks$val[-1], breaks=breaks$val))
+              r=breaks$r, breaks=bval))
 }
 
