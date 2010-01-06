@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.22 $	$Date: 2009/06/02 23:18:13 $
+#	$Revision: 1.23 $	$Date: 2009/12/22 01:58:22 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -85,6 +85,7 @@ fasp <- function(fns, which, formulae=NULL,
         return(Y)
 }
 
+dim.fasp <- function(x) { dim(x$which) }
 
 # print method
 

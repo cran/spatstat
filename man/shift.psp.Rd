@@ -41,6 +41,7 @@
   \code{\link{shift}},
   \code{\link{shift.owin}},
   \code{\link{shift.ppp}},
+  \code{\link{periodify}},
   \code{\link{rotate}},
   \code{\link{affine}}
 }

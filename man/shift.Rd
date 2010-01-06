@@ -30,7 +30,8 @@
   \code{\link{shift.ppp}},
   \code{\link{shift.owin}},
   \code{\link{rotate}},
-  \code{\link{affine}}
+  \code{\link{affine}},
+  \code{\link{periodify}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

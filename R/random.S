@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.37 $   $Date: 2009/10/30 18:02:20 $
+#    $Revision: 4.38 $   $Date: 2009/12/22 01:10:09 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -371,7 +371,7 @@ rpoint <- function(n, f, fmax=NULL,
   frame <- bounding.box(win)
   dilated <- owin(frame$xrange + c(-rmax, rmax),
                   frame$yrange + c(-rmax, rmax))
-  if(is.im(kappa) && !is.subset.owin(as.owin(kappa), dilated))
+  if(is.im(kappa) && !is.subset.owin(dilated, as.owin(kappa)))
     stop(paste("The window in which the image",
                sQuote("kappa"),
                "is defined\n",

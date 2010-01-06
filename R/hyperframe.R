@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.32 $  $Date: 2009/11/05 18:50:15 $
+# $Revision: 1.33 $  $Date: 2009/12/22 01:43:32 $
 #
 
 hyperframe <- function(...,
@@ -137,6 +137,10 @@ print.hyperframe <- function(x, ...) {
     print(as.data.frame(x, discard=FALSE), ...)
   }
   return(invisible(NULL))
+}
+
+dim.hyperframe <- function(x) {
+  with(unclass(x), c(ncases, nvars))
 }
 
 summary.hyperframe <- function(object, ..., brief=FALSE) {

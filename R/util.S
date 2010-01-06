@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.50 $    $Date: 2009/12/15 23:57:21 $
+#    $Revision: 1.51 $    $Date: 2009/12/30 18:18:32 $
 #
 #  (a) for matrices only:
 #
@@ -383,3 +383,16 @@ adjustthinrange <- function(ur,vstep,vr) {
   if(ur[2] > vr[2]) ur <- vr[2] - c(1,0)*vstep
   return(ur)
 }
+
+validposint <- function(n, caller, fatal=TRUE) {
+  nname <- deparse(substitute(n))
+  if(length(n) != 1 || n != round(n) || n <=0) {
+    if(!fatal)
+      return(FALSE)
+    prefix <- if(!missing(caller)) paste("In ", caller, ",", sep="") else NULL
+    stop(paste(prefix, nname, "should be a single positive integer"),
+         call.=FALSE)
+  }
+  return(TRUE)
+}
+

@@ -56,6 +56,8 @@
 \alias{diagnose.ppm.engine}
 \alias{digital.volume}
 \alias{dilate.owin}
+\alias{dim.fasp}               
+\alias{dim.hyperframe}               
 \alias{dimnames.fasp}               
 \alias{dimnames<-.fasp}               
 \alias{distpl}               
@@ -188,6 +190,7 @@
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
 \alias{newstyle.coeff.handling}
+%\alias{nncleanEngine}
 \alias{no.trend.ppm}
 \alias{n.quad}
 \alias{numalign}
@@ -330,6 +333,7 @@
 \alias{valid.ppm}        
 \alias{validate.mask}        
 \alias{validate.quad}        
+\alias{validposint}        
 \alias{variablesinformula}        
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
@@ -408,6 +412,8 @@ diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
 digital.volume(range, nval, vside)
 dilate.owin(\dots)
+\method{dim}{fasp}(x)
+\method{dim}{hyperframe}(x)
 \method{dimnames}{fasp}(x)
 \method{dimnames}{fasp}(x) <- value
 distpl(p, l)               
@@ -547,6 +553,7 @@ na.handle.im(X, na.replace)
 nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
+% nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
 no.trend.ppm(x)
 n.quad(Q)
 numalign(i, nmax, zero)
@@ -703,6 +710,7 @@ validradius(r, caller)
 valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
+validposint(n, caller, fatal)
 variablesinformula(x)
 versionstring.interact(object)
 versionstring.ppm(object)

@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.40 $	$Date: 2009/12/09 20:24:38 $
+#	$Revision: 1.42 $	$Date: 2010/01/01 20:43:11 $
 #
 #
 #--------------------------------------------------------------------------
@@ -49,16 +49,20 @@ plot.ppp <-
     plot(rejects$window, add=add, type="n", main="")
     if(!add)
       title(main=main)
-    # plot window if commanded
+    # plot rejects window if commanded
     if(!is.null(rw)) {
       rwinpardefault <- list(lty=2,lwd=1,border=1)
       rwinpars <-
         resolve.defaults(par.rejects, rwinpardefault)[names(rwinpardefault)]
       do.call("plot.owin", append(list(rwin, add=TRUE), rwinpars))
     }
+    # plot window of main pattern
+    do.call("plot.owin",
+            resolve.defaults(list(x$window, add=TRUE),
+                             list(...),
+                             list(invert=TRUE)))
     # plot points
     do.call("plot.ppp", append(list(rejects, add=TRUE), par.all))
-    plot.owin(x$window, add=TRUE, ...)
     warning(paste(rejects$n, "illegal points also plotted"))
     # the rest is added
     add <- TRUE

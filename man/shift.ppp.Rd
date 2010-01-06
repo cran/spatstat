@@ -40,6 +40,7 @@
 \seealso{
   \code{\link{shift}},
   \code{\link{shift.owin}},
+  \code{\link{periodify}},
   \code{\link{rotate}},
   \code{\link{affine}}
 }
