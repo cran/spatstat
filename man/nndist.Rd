@@ -9,7 +9,7 @@
   second nearest neighbour, or third nearest, etc.
 }
 \usage{
-  nndist(X, \dots, method="C")
+  nndist(X, \dots)
   \method{nndist}{ppp}(X, \dots, k=1, method="C")
   \method{nndist}{default}(X, Y=NULL, \dots, k=1, method="C")
 }
@@ -30,16 +30,30 @@
     and \code{nndist.default}.
   }
   \item{k}{
-    Integer. The algorithm will compute the distance to the
-    \code{k}th nearest neighbour.
+    Integer, or integer vector. The algorithm will compute the distance to the
+    \code{k}th nearest neighbour. 
   }
   \item{method}{String specifying which method of calculation to use.
     Values are \code{"C"} and \code{"interpreted"}.
   }
 }
 \value{
-  Numeric vector of the (\code{k}th)
+  Numeric vector or matrix containing the 
   nearest neighbour distances for each point.
+
+  If \code{k = 1} (the default), the return value is a
+  numeric vector \code{v} such that \code{v[i]} is the
+  nearest neighbour distance for the \code{i}th data point.
+  
+  If \code{k} is a single integer, then the return value is a
+  numeric vector \code{v} such that \code{v[i]} is the
+  \code{k}th nearest neighbour distance for the
+  \code{i}th data point.
+
+  If \code{k} is a vector, then the return value is a
+  matrix \code{m} such that \code{m[i,j]} is the
+  \code{k[j]}th nearest neighbour distance for the
+  \code{i}th data point.
 }
 \details{
   This function computes the Euclidean distance from each point
@@ -62,6 +76,10 @@
   \code{Y} may be omitted and \code{X} may be a list with two components
   named \code{x} and \code{y}, or a matrix or data frame with two columns.
   
+  The argument \code{k} may be a single integer, or an integer vector.
+  If it is a vector, then the \eqn{k}th nearest neighbour distances are
+  computed for each value of \eqn{k} specified in the vector.
+
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
   If \code{method = "interpreted"} then the distances are
@@ -69,7 +87,7 @@
   (the default) then C code is used. 
   The C code is faster by two to three orders of magnitude
   and uses much less memory.
-  
+
   If there is only one point (if \code{x} has length 1),
   then a nearest neighbour distance of \code{Inf} is returned.
   If there are no points (if \code{x} has length zero)
@@ -86,9 +104,9 @@
   to another point pattern, use \code{\link{nncross}}.
 }
 \section{Warnings}{
-  An infinite value is returned if there is only one point
-  in the point pattern (or in general if there are fewer than
-  \code{k+1} points).
+  An infinite or \code{NA} value is returned if the
+  distance is not defined (e.g. if there is only one point
+  in the point pattern).
 }
 \seealso{
   \code{\link{nndist.psp}},
@@ -99,8 +117,14 @@
 }
 \examples{
    data(cells)
+   # nearest neighbours
    d <- nndist(cells)
+
+   # second nearest neighbours
    d2 <- nndist(cells, k=2)
+
+   # first, second and third nearest
+   d1to3 <- nndist(cells, k=1:3)
 
    x <- runif(100)
    y <- runif(100)

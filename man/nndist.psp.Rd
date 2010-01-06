@@ -18,8 +18,8 @@
     Ignored.
   }
   \item{k}{
-    Integer. The algorithm will find
-    the distance to the \code{k}th nearest neighbour.
+    Integer, or integer vector. The algorithm will compute the distance to the
+    \code{k}th nearest neighbour. 
   }
   \item{method}{
     String specifying which method of calculation to use.
@@ -28,26 +28,41 @@
   }
 }
 \value{
-  A numeric vector whose \code{[i]} entry is the distance
-  from the line segment numbered \code{i} to the nearest other line
-  segment (or in general the distance to the \code{k}th nearest line segment).
+  Numeric vector or matrix containing the 
+  nearest neighbour distances for each line segment.
+
+  If \code{k = 1} (the default), the return value is a
+  numeric vector \code{v} such that \code{v[i]} is the
+  nearest neighbour distance for the \code{i}th segment.
+  
+  If \code{k} is a single integer, then the return value is a
+  numeric vector \code{v} such that \code{v[i]} is the
+  \code{k}th nearest neighbour distance for the
+  \code{i}th segment.
+
+  If \code{k} is a vector, then the return value is a
+  matrix \code{m} such that \code{m[i,j]} is the
+  \code{k[j]}th nearest neighbour distance for the
+  \code{i}th segment.
 }
 \details{
+  This is a method for the generic function \code{\link{nndist}}
+  for the class \code{"psp"}.
+
   If \code{k=1}, this function computes the distance from each line segment 
   to the nearest other line segment in \code{X}.
   In general it computes the distance from each line segment to the
   \code{k}th nearest other line segment.
-
-  This is a method for the generic function \code{\link{nndist}}
-  for the class \code{"psp"}.
+  The argument \code{k} can also be a vector, and this computation will
+  be performed for each value of \code{k}.
 
   Distances are calculated using the Hausdorff metric. The Hausdorff
   distance between two line segments is the maximum distance
   from any point on one of the segments to the nearest point on
   the other segment.   
 
-  If there are fewer than \code{k} line segments in the pattern,
-  the \code{k}th nearest neighbour distances will be infinite (\code{Inf}).
+  If there are fewer than \code{max(k)+1} line segments in the pattern,
+  some of the nearest neighbour distances will be infinite (\code{Inf}).
   
   The argument \code{method} is not normally used. It is
   retained only for checking the validity of the software.
@@ -62,6 +77,7 @@
 \examples{
    L <- psp(runif(10), runif(10), runif(10), runif(10), owin())
    D <- nndist(L)
+   D <- nndist(L, k=1:3)
 }
 \author{
   Adrian Baddeley

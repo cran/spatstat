@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.25 $     $Date: 2008/04/02 13:40:52 $
+#      $Revision: 1.32 $     $Date: 2010/01/05 06:26:30 $
 #
 #
 #      Interpoint distances
@@ -60,16 +60,18 @@ pairdist.default <-
            xx <- matrix(rep(x, n), nrow = n)
            yy <- matrix(rep(y, n), nrow = n)
            if(!periodic) {
-             d <- sqrt((xx - t(xx))^2 + (yy - t(yy))^2)
+             d2 <- (xx - t(xx))^2 + (yy - t(yy))^2
            } else {
              dx <- xx - t(xx)
              dy <- yy - t(yy)
              dx2 <- pmin(dx^2, (dx + wide)^2, (dx - wide)^2)
              dy2 <- pmin(dy^2, (dy + high)^2, (dy - high)^2)
              d2 <- dx2 + dy2
-             if(!squared)
-               d <- sqrt(d2)
            }
+           if(squared)
+             dout <- d2
+           else
+             dout <- sqrt(d2)
          },
          C={
            d <- numeric( n * n)
@@ -89,25 +91,23 @@ pairdist.default <-
                     DUP=DUP,
                     PACKAGE="spatstat")
            }
-           d <- matrix(z$d, nrow=n, ncol=n)
+           dout <- matrix(z$d, nrow=n, ncol=n)
          },
          stop(paste("Unrecognised method", sQuote(method)))
        )
-  return(d)
+  return(dout)
 }
 
-nndist <- function(X, ..., method="C") {
+nndist <- function(X, ...) {
   UseMethod("nndist")
 }
 
 nndist.ppp <- function(X, ..., k=1, method="C") {
   verifyclass(X, "ppp")
-  if((narg <- length(list(...))) > 0) {
-    if(narg == 1) 
-      warning("Second argument ignored")
-    else
-      warning(paste("Arguments 2 to", narg+1, "ignored"))
-  }
+  if((narg <- length(list(...))) > 0) 
+    warning(paste(narg, "unrecognised",
+                  ngettext(narg, "argument was", "arguments were"),
+                  "ignored"))
   return(nndist.default(X$x, X$y, k=k, method=method))
 }
 
@@ -125,41 +125,44 @@ nndist.default <-
   n <- length(x)
   if(length(y) != n)
     stop("lengths of x and y do not match")
-  if(k != round(k) || k <= 0)
-    stop("k is not a positive integer")
-  k <- as.integer(k)
-  if(length(list(...)) > 0)
-    warning("Some arguments ignored")
   
-  # special cases
-  if(n == 0)
-    return(numeric(0))
-  else if(n <= k)
-    return(rep(Inf, n))
-
-  # case k > 1
-  if(k != 1) {
-    if(n <= 1000) {
-      # form n x n matrix of squared distances
-      D2 <- pairdist.default(x, y, method=method, squared=TRUE)
-      # find k'th smallest squared distance
-      diag(D2) <- Inf
-      NND2 <- apply(D2, 1, function(z,k) { sort(z)[k] }, k=k)
-    } else {
-      # avoid creating huge matrix
-      # handle one row of D at a time
-      NND2 <- numeric(n)
-      for(i in seq(n)) {
-        D2i <- (x - x[i])^2 + (y - y[i])^2
-        D2i[i] <- Inf
-        NND2[i] <- sort(D2i)[k]
-      }
-    }
-    return(sqrt(NND2))
+  # other arguments ignored
+  if((narg <- length(list(...))) > 0) 
+    warning(paste(narg, "unrecognised",
+                  ngettext(narg, "argument was", "arguments were"),
+                  "ignored"))
+  
+  # k can be a single integer or an integer vector
+  if(length(k) == 0)
+    stop("k is an empty vector")
+  else if(length(k) == 1) {
+    if(k != round(k) || k <= 0)
+      stop("k is not a positive integer")
+  } else {
+    if(any(k != round(k)) || any(k <= 0))
+      stop(paste("some entries of the vector",
+           sQuote("k"), "are not positive integers"))
   }
+  k <- as.integer(k)
+  kmax <- max(k)
 
-  # case k = 1
-  switch(method,
+  # trivial cases
+  if(n <= 1) {
+    # empty pattern => return numeric(0)
+    # or pattern with only 1 point => return Inf
+    nnd <- matrix(Inf, nrow=n, ncol=kmax)
+    nnd <- nnd[,k, drop=TRUE]
+    return(nnd)
+  }
+  
+  # number of neighbours that are well-defined
+  kmaxcalc <- min(n-1, kmax)
+
+  # calculate k-nn distances for k <= kmaxcalc
+  
+  if(kmaxcalc == 1) {
+    # calculate nearest neighbour distance only
+    switch(method,
          interpreted={
            #  matrix of squared distances between all pairs of points
            sq <- function(a, b) { (a-b)^2 }
@@ -170,7 +173,6 @@ nndist.default <-
            nnd <- sqrt(apply(squd,1,min))
          },
          C={
-           n <- length(x)
            nnd<-numeric(n)
            o <- order(y)
            big <- sqrt(.Machine$double.xmax)
@@ -185,21 +187,75 @@ nndist.default <-
          },
          stop(paste("Unrecognised method", sQuote(method)))
          )
+  } else {
+    # case kmaxcalc > 1
+    switch(method,
+           interpreted={
+             if(n <= 1000) {
+               # form n x n matrix of squared distances
+               D2 <- pairdist.default(x, y, method=method, squared=TRUE)
+               # find k'th smallest squared distance
+               diag(D2) <- Inf
+               NND2 <- t(apply(D2, 1, sort))[, 1:kmaxcalc]
+               nnd <- sqrt(NND2)
+             } else {
+               # avoid creating huge matrix
+               # handle one row of D at a time
+               NND2 <- matrix(numeric(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
+               for(i in seq(n)) {
+                 D2i <- (x - x[i])^2 + (y - y[i])^2
+                 D2i[i] <- Inf
+                 NND2[i,] <- sort(D2i)[1:kmaxcalc]
+               }
+               nnd <- sqrt(NND2)
+             }
+           },
+           C={
+             nnd<-numeric(n * kmaxcalc)
+             o <- order(y)
+             big <- sqrt(.Machine$double.xmax)
+             DUP <- spatstat.options("dupC")
+             z<- .C("knndsort",
+                    n    = as.integer(n),
+                    kmax = as.integer(kmaxcalc),
+                    x    = as.double(x[o]),
+                    y    = as.double(y[o]),
+                    nnd  = as.double(nnd),
+                    huge = as.double(big),
+                    DUP=DUP,
+                    PACKAGE="spatstat")
+             nnd <- matrix(nnd, nrow=n, ncol=kmaxcalc)
+             nnd[o, ] <- matrix(z$nnd, nrow=n, ncol=kmaxcalc, byrow=TRUE)
+           },
+           stop(paste("Unrecognised method", sQuote(method)))
+           )
+  }
+
+  # post-processing
+  if(kmax > kmaxcalc) {
+    # add columns of Inf
+    nas <- matrix(Inf, nrow=n, ncol=kmax-kmaxcalc)
+    nnd <- cbind(nnd, nas)
+  }
+
+  if(length(k) < kmax) {
+    # select only the specified columns
+    nnd <- nnd[, k, drop=TRUE]
+  }
+  
   return(nnd)
 }
 
-nnwhich <- function(X, ..., method="C") {
+nnwhich <- function(X, ...) {
   UseMethod("nnwhich")
 }
 
 nnwhich.ppp <- function(X, ..., k=1, method="C") {
   verifyclass(X, "ppp")
-  if((narg <- length(list(...))) > 0) {
-    if(narg == 1) 
-      warning("Second argument ignored")
-    else
-      warning(paste("Arguments 2 to", narg+1, "ignored"))
-  }
+  if((narg <- length(list(...))) > 0) 
+    warning(paste(narg, "unrecognised",
+                  ngettext(narg, "argument was", "arguments were"),
+                  "ignored"))
   return(nnwhich.default(X$x, X$y, k=k, method=method))
 }
 
@@ -217,76 +273,139 @@ nnwhich.default <-
   n <- length(x)
   if(length(y) != n)
     stop("lengths of x and y do not match")
-  if(k != round(k) || k <= 0)
-    stop("k is not a positive integer")
+  
+  # other arguments ignored
+  if((narg <- length(list(...))) > 0) 
+    warning(paste(narg, "unrecognised",
+                  ngettext(narg, "argument was", "arguments were"),
+                  "ignored"))
+  
+  # k can be a single integer or an integer vector
+  if(length(k) == 0)
+    stop("k is an empty vector")
+  else if(length(k) == 1) {
+    if(k != round(k) || k <= 0)
+      stop("k is not a positive integer")
+  } else {
+    if(any(k != round(k)) || any(k <= 0))
+      stop(paste("some entries of the vector",
+           sQuote("k"), "are not positive integers"))
+  }
   k <- as.integer(k)
-  if(length(list(...)) > 0)
-    warning("Some arguments ignored")
+  kmax <- max(k)
 
   # special cases
-  if(n == 0)
-    return(numeric(0))
-  else if(n <= k)
-    return(rep(NA, n))
-
-  # case k > 1
-  if(k != 1) {
-    if(n <= 1000) {
-      # form n x n matrix of squared distances
-      D2 <- pairdist.default(x, y, method=method, squared=TRUE)
-      # find k'th smallest squared distance
-      diag(D2) <- Inf
-      NNW <- apply(D2, 1, function(z,k) { order(z)[k] }, k=k)
-    } else {
-      # avoid creating huge matrix
-      # handle one row of D at a time
-      NNW <- integer(n)
-      for(i in seq(n)) {
-        D2i <- (x - x[i])^2 + (y - y[i])^2
-        D2i[i] <- Inf
-        NNW[i] <- order(D2i)[k]
-      }      
-    }
-    return(NNW)
+  if(n <= 1) {
+    # empty pattern => return integer(0)
+    # or pattern with only 1 point => return NA
+    nnd <- matrix(as.integer(NA), nrow=n, ncol=kmax)
+    nnd <- nnd[,k, drop=TRUE]
+    return(nnd)
   }
 
-  # case k = 1
-  switch(method,
-         interpreted={
-           #  matrix of squared distances between all pairs of points
-           sq <- function(a, b) { (a-b)^2 }
-           squd <-  outer(x, x, sq) + outer(y, y, sq)
-           #  reset diagonal to a large value so it is excluded from minimum
-           diag(squd) <- Inf
-           #  nearest neighbour distances
-           nnwhich <- sqrt(apply(squd,1,which.min))
-         },
-         C={
-           n <- length(x)
-           nnd<-numeric(n)
-           nnwhich<-integer(n)
-           o <- order(y)
-           big <- sqrt(.Machine$double.xmax)
-           DUP <- spatstat.options("dupC")
-           z<- .C("nnwhichsort",
-                  n= as.integer(n),
-                  x= as.double(x[o]), y= as.double(y[o]),
-                  nnd= as.double(nnd),
-                  nnwhich=as.integer(nnwhich),
-                  as.double(big),
-                  DUP=DUP,
-                  PACKAGE="spatstat")
-           # convert from C to R indexing
-           witch <- z$nnwhich + 1
-           if(any(witch <= 0))
-             stop("Internal error: non-positive index returned from C code")
-           if(any(witch > n))
-             stop("Internal error: index returned from C code exceeds n")
-           nnwhich[o] <- o[witch]
-         },
-         stop(paste("Unrecognised method", sQuote(method)))
-         )
-  return(nnwhich)
+  # number of neighbours that are well-defined
+  kmaxcalc <- min(n-1, kmax)
+
+  # identify k-nn for k <= kmaxcalc
+
+  if(kmaxcalc == 1) {
+    # identify nearest neighbour only
+    switch(method,
+           interpreted={
+             #  matrix of squared distances between all pairs of points
+             sq <- function(a, b) { (a-b)^2 }
+             squd <-  outer(x, x, sq) + outer(y, y, sq)
+             #  reset diagonal to a large value so it is excluded from minimum
+             diag(squd) <- Inf
+             #  nearest neighbours
+             nnw <- apply(squd,1,which.min)
+           },
+           C={
+             nnw <- integer(n)
+             o <- order(y)
+             big <- sqrt(.Machine$double.xmax)
+             DUP <- spatstat.options("dupC")
+             z<- .C("nnwhichsort",
+                    n = as.integer(n),
+                    x = as.double(x[o]),
+                    y = as.double(y[o]),
+                    nnd = as.double(numeric(n)),
+                    nnwhich = as.integer(nnw),
+                    huge = as.double(big),
+                    DUP=DUP,
+                    PACKAGE="spatstat")
+             # convert from C to R indexing
+             witch <- z$nnwhich + 1
+             if(any(witch <= 0))
+               stop("Internal error: non-positive index returned from C code")
+             if(any(witch > n))
+               stop("Internal error: index returned from C code exceeds n")
+             nnw[o] <- o[witch]
+           },
+           stop(paste("Unrecognised method", sQuote(method)))
+           )
+  } else {
+    # case kmaxcalc > 1
+    switch(method,
+           interpreted={
+             if(n <= 1000) {
+               # form n x n matrix of squared distances
+               D2 <- pairdist.default(x, y, method=method, squared=TRUE)
+               # find k'th smallest squared distance
+               diag(D2) <- Inf
+               nnw <- t(apply(D2, 1, order))[, 1:kmaxcalc]
+             } else {
+               # avoid creating huge matrix
+               # handle one row of D at a time
+               nnw <- matrix(as.integer(NA), nrow=n, ncol=kmaxcalc)
+               for(i in seq(n)) {
+                 D2i <- (x - x[i])^2 + (y - y[i])^2
+                 D2i[i] <- Inf
+                 nnw[i,] <- order(D2i)[1:kmaxcalc]
+               }      
+             }
+           },
+           C={
+             nnw <- matrix(integer(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
+             o <- order(y)
+             big <- sqrt(.Machine$double.xmax)
+             DUP <- spatstat.options("dupC")
+             z<- .C("knnwhichsort",
+                    n = as.integer(n),
+                    kmax = as.integer(kmaxcalc),
+                    x = as.double(x[o]),
+                    y = as.double(y[o]),
+                    nnd = as.double(numeric(n * kmaxcalc)),
+                    nnwhich = as.integer(nnw),
+                    huge = as.double(big),
+                    DUP=DUP,
+                    PACKAGE="spatstat")
+             # convert from C to R indexing
+             witch <- z$nnwhich + 1
+             witch <- matrix(witch, nrow=n, ncol=kmaxcalc, byrow=TRUE)
+             if(any(witch <= 0))
+               stop("Internal error: non-positive index returned from C code")
+             if(any(witch > n))
+               stop("Internal error: index returned from C code exceeds n")
+             # convert back to original ordering
+             nnw[o,] <- matrix(o[witch], nrow=n, ncol=kmaxcalc)
+           },
+           stop(paste("Unrecognised method", sQuote(method)))
+           )
+  }
+  
+  # post-processing
+  if(kmax > kmaxcalc) {
+    # add columns of NA's
+    nas <- matrix(as.numeric(NA), nrow=n, ncol=kmax-kmaxcalc)
+    nnw <- cbind(nnw, nas)
+  }
+
+  if(length(k) < kmax) {
+    # select only the specified columns
+    nnw <- nnw[, k, drop=TRUE]
+  }
+  return(nnw)
 }
 
 crossdist <- function(X, Y, ...) {

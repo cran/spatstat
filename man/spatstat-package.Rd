@@ -230,6 +230,8 @@
 	rotate pattern  \cr
 	\code{\link{shift} } \tab
 	translate pattern  \cr
+	\code{\link{periodify} } \tab
+	make several translated copies  \cr
 	\code{\link{affine}} \tab
 	apply affine transformation\cr
 	\code{\link{density.ppp}} \tab
@@ -296,6 +298,7 @@
 	approximate a window by a simple polygon  \cr
 	\code{\link{rotate}} \tab rotate window  \cr
 	\code{\link{shift} } \tab translate window  \cr
+	\code{\link{periodify} } \tab make several translated copies  \cr
 	\code{\link{affine}} \tab apply affine transformation 
       }
 
@@ -403,6 +406,7 @@
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
       \code{\link{rotate.psp}} \tab rotate a line segment pattern \cr      
       \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
+      \code{\link{periodify}} \tab make several shifted copies \cr      
       \code{\link{affine.psp}} \tab apply an affine transformation \cr      
       \code{\link{distmap.psp}} \tab compute the distance map of a line
       segment pattern \cr
@@ -504,6 +508,11 @@
     \code{\link{miplot}} \tab Morishita Index plot
   }
 
+%  \bold{Modern exploratory tools:}
+%  \tabular{ll}{
+%    \code{\link{nnclean}} \tab Byers-Raftery feature detection 
+%  }
+
   \bold{Summary statistics for a point pattern:}
   \tabular{ll}{
     \code{\link{quadratcount}} \tab Quadrat counts \cr
@@ -542,7 +551,9 @@
     \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
     \code{\link{distmap}} \tab distance map image\cr
     \code{\link{density.ppp}} \tab kernel smoothed density\cr
-    \code{\link{smooth.ppp}} \tab spatial interpolation of marks  
+    \code{\link{smooth.ppp}} \tab spatial interpolation of marks  \cr
+    \code{\link{rknn}} \tab theoretical distribution of nearest
+    neighbour distance
  }
 
   \bold{Summary statistics for a multitype point pattern:}
@@ -624,6 +635,16 @@
     \code{\link{F3est}} \tab empty space function \eqn{F} \cr
     \code{\link{G3est}} \tab nearest neighbour function \eqn{G} \cr
     \code{\link{K3est}} \tab \eqn{K}-function
+  }
+
+  Related facilities:
+  \tabular{ll}{
+    \code{\link{pairdist.pp3}} \tab distances between all pairs of
+    points \cr
+    \code{\link{crossdist.pp3}} \tab distances between points in
+    two patterns \cr
+    \code{\link{nndist.pp3}} \tab nearest neighbour distances \cr
+    \code{\link{nnwhich.pp3}} \tab find nearest neighbours
   }
 }
 

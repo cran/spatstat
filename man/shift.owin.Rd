@@ -38,6 +38,7 @@
 \seealso{
   \code{\link{shift}},
   \code{\link{shift.ppp}},
+  \code{\link{periodify}},
   \code{\link{rotate}},
   \code{\link{affine}},
   \code{\link{centroid.owin}}

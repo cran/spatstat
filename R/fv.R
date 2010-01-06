@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.44 $   $Date: 2009/10/28 02:39:26 $
+#    $Revision: 1.45 $   $Date: 2010/01/06 01:38:28 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -156,20 +156,59 @@ print.fv <- function(x, ...) {
   invisible(NULL)
 }
 
-bind.fv <- function(x, y, labl, desc, preferred) {
+bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   verifyclass(x, "fv")
-  y <- as.data.frame(y)
   a <- attributes(x)
-  
-  if(length(labl) != ncol(y))
+
+  if(is.fv(y)) {
+    # y is already an fv object
+    # check compatibility of 'r' values
+    xr <- attr(x, "argu")
+    yr <- attr(y, "argu")
+    rx <- x[[xr]]
+    ry <- y[[yr]]
+    if((length(rx) != length(rx)) || 
+               (max(abs(rx-ry)) > .Machine$double.eps))
+      stop("fv objects x and y have incompatible domains")
+    # reduce y to data frame and strip off 'r' values
+    ystrip <- as.data.frame(y)
+    yrpos <- which(colnames(ystrip) == yr)
+    ystrip <- ystrip[, -yrpos]
+    # determine descriptors
+    if(is.null(labl)) labl <- attr(y, "labl")[-yrpos]
+    if(is.null(desc)) desc <- attr(y, "desc")[-yrpos]
+    #
+    y <- ystrip
+  } else {
+    # y is a matrix or data frame 
+    y <- as.data.frame(y)
+  }
+
+  # check for duplicated column names
+  allnames <- c(colnames(x), colnames(y))
+  if(any(dup <- duplicated(allnames))) {
+    nbg <- unique(allnames[dup])
+    nn <- length(nbg)
+    warning(paste("The column",
+                  ngettext(nn, "name", "names"),
+                  commasep(sQuote(nbg)),
+                  ngettext(nn, "was", "were"),
+                  "duplicated. Unique names were generated"))
+    allnames <- make.names(allnames, unique=TRUE, allow_ = FALSE)
+    colnames(y) <- allnames[ncol(x) + seq(ncol(y))]
+  }
+      
+  if(is.null(labl))
+    labl <- paste("%s[", colnames(y), "](r)", sep="")
+  else if(length(labl) != ncol(y))
     stop(paste("length of", sQuote("labl"),
                "does not match number of columns of y"))
-  if(missing(desc) || is.null(desc))
+  if(is.null(desc))
     desc <- character(ncol(y))
   else if(length(desc) != ncol(y))
     stop(paste("length of", sQuote("desc"),
                "does not match number of columns of y"))
-  if(missing(preferred))
+  if(is.null(preferred))
     preferred <- a$valu
 
   xy <- cbind(as.data.frame(x), y)

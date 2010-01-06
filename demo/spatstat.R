@@ -95,19 +95,13 @@ plot(X, "point pattern X")
 plot(as.im(X), col=c("white","red"), ribbon=FALSE, xlab="", ylab="")
 plot(as.owin(X), add=TRUE)
 
-fanfare("IV. Basic operations")
+fanfare("IV. Subsetting and splitting data")
 
 plot(X, "point pattern X")
 subset <- 1:20
 plot(X[subset], main="subset operation: X[subset]")
 subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
 plot(X[subwindow], main="subset operation: X[subwindow]")
-
-L <- rpoisline(10, owin(c(1.5,4.5),c(0.2,3.6)))
-S <- L[letterR]
-plot(L, main="subset operation: L[subwindow]")
-plot(S, add=TRUE, col="red")
-
 
 data(lansing)
 plot(lansing, "Lansing Woods data")
@@ -131,36 +125,6 @@ X <- as.im(function(x,y){sqrt(x^2+y^2)}, W)
 Y <- dirichlet(runifpoint(12, W))
 plot(split(X,Y), main="image split by tessellation")
 
-plot(a, main="Self-crossing points")
-plot(selfcrossing.psp(a), add=TRUE, col="red")
-
-a <- as.psp(matrix(runif(20), 5, 4), window=square(1))
-b <- rstrat(square(1), 5)
-plot(a, lwd=3, col="green", main="project points to segments")
-plot(b, add=TRUE, col="red", pch=16)
-v <- project2segment(b, a)
-Xproj <- v$Xproj
-plot(Xproj, add=TRUE, pch=16)
-arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
-
-plot(a, main="pointsOnLines(L)")
-plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
-
-parry <- par(mfrow=c(1,3))
-X <- tess(xgrid=seq(2, 4, length=10), ygrid=seq(0, 3.5, length=8))
-plot(X)
-data(letterR)
-plot(letterR)
-plot(intersect.tess(X, letterR))
-
-X <- dirichlet(runifpoint(10))
-plot(X)
-L <- infline(0.3,0.5)
-plot(owin(), main="L")
-plot(L, col="red", lwd=2)
-plot(chop.tess(X,L))
-par(parry)
-
 fanfare("V. Exploratory data analysis")
 
 plot(swedishpines, main="Quadrat counts", pch="+")
@@ -183,11 +147,9 @@ Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
 
-data(bei)
-ZA <- adaptive.density(bei, 0.01, nrep=5)
-plot(ZA, main="Adaptive intensity of point pattern",
-     col=grey(seq(1,0,length=256)))
-plot(bei, add=TRUE, pch=".")
+#data(shapley)
+#plot(nnclean(shapley, k=17), main="Nearest neighbour cleaning",
+#     chars=c(".", "+"), cols=1:2)
 
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
@@ -424,7 +386,65 @@ plot(rMosaicField(X, runif))
 plot(rMosaicSet(rpoislinetess(3), 0.5), col="green", border=NA, main="Switzer's random set")
 spatstat.options(npixel=100)
 
-fanfare("VIII. Programming tools")
+fanfare("VIII. Geometry")
+
+data(letterR)
+A <- letterR
+
+B <- shift(letterR, c(0.2,0.1))
+plot(bounding.box(A,B), main="shift", type="n")
+plot(A, add=TRUE)
+plot(B, add=TRUE, border="red")
+
+B <- rotate(letterR, 0.2)
+plot(bounding.box(A,B), main="rotate", type="n")
+plot(A, add=TRUE)
+plot(B, add=TRUE, border="red")
+
+mat <- matrix(c(1.1, 0, 0.3, 1), 2, 2)
+B <- affine(letterR, mat=mat, vec=c(0.2,-0.1))
+plot(bounding.box(A,B), main="affine", type="n")
+plot(A, add=TRUE)
+plot(B, add=TRUE, border="red")
+
+par1x2 <- par(mfrow=c(1,2))
+L <- rpoisline(10, owin(c(1.5,4.5),c(0.2,3.6)))
+plot(L, "Line segment pattern")
+plot(L$window, main="L[window]", type="n")
+plot(L[letterR], add=TRUE)
+plot(letterR, add=TRUE, border="red")
+par(par1x2)
+
+a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
+plot(a, main="Self-crossing points")
+plot(selfcrossing.psp(a), add=TRUE, col="red")
+
+a <- as.psp(matrix(runif(20), 5, 4), window=square(1))
+b <- rstrat(square(1), 5)
+plot(a, lwd=3, col="green", main="project points to segments")
+plot(b, add=TRUE, col="red", pch=16)
+v <- project2segment(b, a)
+Xproj <- v$Xproj
+plot(Xproj, add=TRUE, pch=16)
+arrows(b$x, b$y, Xproj$x, Xproj$y, angle=10, length=0.15, col="red")
+
+plot(a, main="pointsOnLines(L)")
+plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
+
+parry <- par(mfrow=c(1,3))
+X <- tess(xgrid=seq(2, 4, length=10), ygrid=seq(0, 3.5, length=8))
+plot(X)
+data(letterR)
+plot(letterR)
+plot(intersect.tess(X, letterR))
+
+X <- dirichlet(runifpoint(10))
+plot(X)
+L <- infline(0.3,0.5)
+plot(owin(), main="L")
+plot(L, col="red", lwd=2)
+plot(chop.tess(X,L))
+par(parry)
 
 data(chorley)
 W <- chorley$window
@@ -457,6 +477,8 @@ plot(letterR, add=TRUE, col="red")
 plot(v, add=TRUE, col="blue")
 par(nopa)
 
+fanfare("IX. Operations on pixel images")
+
 plot(Z, main="An image Z")
 plot(levelset(Z, 4))
 plot(cut(Z, 5))
@@ -485,6 +507,8 @@ plot(blur(Z, 0.3, bleed=FALSE))
 plot(letterR, add=TRUE)
           
 par(oldpar)
+
+fanfare("X. Programming tools")
 
 showoffK <- function(Y, current, ..., fullpicture,rad) { 
 	plot(fullpicture,

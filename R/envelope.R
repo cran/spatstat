@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.62 $  $Date: 2009/08/22 02:58:03 $
+#   $Revision: 1.64 $  $Date: 2009/12/18 20:33:03 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -432,8 +432,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     stdres <- (fX-Ef)/sd
     stdres[!is.finite(stdres)] <- NA
     # critical limits
-    lo <- Ef + nSD * sd
-    hi <- Ef - nSD * sd
+    lo <- Ef - nSD * sd
+    hi <- Ef + nSD * sd
     lo.name <- paste("lower", nSD, "sigma critical limit for %s")
     hi.name <- paste("upper", nSD, "sigma critical limit for %s")
     # put together
@@ -543,15 +543,17 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                  lo.name, hi.name),
                fname=attr(funX, "fname"),
                yexp =attr(funX, "yexp"))
-  attr(result, "dotnames") <- c("obs",
-                                if(csr) "theo" else "mmean",
-                                "hi", "lo")
+
+  # columns to be plotted by default
+  dotty <- c("obs", if(csr) "theo" else "mmean", "hi", "lo")
+
   if(VARIANCE) {
     # add more stuff
     result <- bind.fv(result, morestuff, mslabl, msdesc)
-    if(csr) 
-      attr(result, "dotnames") <- c("obs", "mmean", "hi", "lo", "theo")
+    if(csr) dotty <- c(dotty, "mmean")
   }
+
+  attr(result, "dotnames") <- dotty
 
   unitname(result) <- unitname(funX)
   class(result) <- c("envelope", class(result))
