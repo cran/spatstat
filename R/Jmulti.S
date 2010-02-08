@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.29 $	$Date: 2009/07/24 06:32:32 $
+#	$Revision: 4.30 $	$Date: 2010/01/08 23:21:49 $
 #
 #
 #
@@ -153,7 +153,7 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL,
   }
 # set default plotting values and order
   nama <- names(Z)
-  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
 # add other info
   attr(Z, "G") <- GIJ
   attr(Z, "F") <- FJ

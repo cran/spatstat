@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.62 $	$Date: 2009/09/26 07:26:01 $
+#	$Revision: 4.64 $	$Date: 2010/02/08 19:51:55 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -358,7 +358,7 @@ scanpp <- function(filename, window, header=TRUE, dir="", multitype=FALSE) {
 "markspace.integral" <-
   function(X) {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
+  if(!is.marked(X, dfok=TRUE))
     return(1)
   if(is.multitype(X))
     return(length(levels(marks(X))))
@@ -540,10 +540,15 @@ rebound.ppp <- function(x, ...) {
 }
 
 as.data.frame.ppp <- function(x, row.names=NULL, ...) {
-  if(!is.marked(x))
-    data.frame(x=x$x, y=x$y, row.names=row.names)
+  df <- data.frame(x=x$x, y=x$y, row.names=row.names)
+  marx <- marks(x, dfok=TRUE)
+  if(is.null(marx))
+    return(df)
+  if(is.data.frame(marx))
+    df <- cbind(df, marx)
   else
-    data.frame(x=x$x, y=x$y, marks=x$marks, row.names=row.names)
+    df <- data.frame(df, marks=marx)
+  return(df)
 }
 
 is.empty.ppp <- function(x) { return(x$n == 0) }

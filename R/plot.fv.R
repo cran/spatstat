@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.37 $    $Date: 2009/07/29 03:21:15 $
+#  $Revision: 1.39 $    $Date: 2010/01/08 23:28:06 $
 #
 #
 
@@ -31,9 +31,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   lhs.original <- fmla[[2]]
   
   # expand "."
-  dotnames <- attr(x, "dotnames")
+  dotnames <- fvnames(x, ".")
   if(is.null(dotnames)) {
-    argu <- attr(x, "argu")
+    argu <- fvnames(x, ".x")
     allvars <- names(x)
     dotnames <- allvars[allvars != argu]
     dotnames <- rev(dotnames) # convention
@@ -79,8 +79,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     lhsdata <- lhsdata[ok, , drop=FALSE]
   } else {
     # if we're using the default argument, use its recommended range
-    if(rhs == attr(x, "argu")) {
-      xlim <- attr(x,"alim")
+    if(rhs == fvnames(x, ".x")) {
+      xlim <- attr(x, "alim")
       rok <- is.finite(rhsdata) & rhsdata >= xlim[1] & rhsdata <= xlim[2]
       lok <- apply(is.finite(lhsdata), 1, any)
       ok <- lok & rok
@@ -126,7 +126,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # ......... label for x axis ..................
 
   if(is.null(xlab)) {
-    argname <- attr(x, "argu")
+    argname <- fvnames(x, ".x")
     if(as.character(fmla)[3] == argname) {
       # the x axis is the default function argument.
       # Add name of unit of length

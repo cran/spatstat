@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.49 $ $Date: 2009/07/18 02:20:40 $
+#  $Revision: 1.50 $ $Date: 2010/01/07 19:44:51 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -448,7 +448,8 @@ affine.psp <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
   E <- X$ends
   ends0 <- affinexy(list(x=E$x0,y=E$y0), mat=mat, vec=vec)
   ends1 <- affinexy(list(x=E$x1,y=E$y1), mat=mat, vec=vec)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE),
+      check=FALSE)
 }
 
 shift.psp <- function(X, vec=c(0,0), ..., origin=NULL) {
@@ -471,7 +472,8 @@ shift.psp <- function(X, vec=c(0,0), ..., origin=NULL) {
   E <- X$ends
   ends0 <- shiftxy(list(x=E$x0,y=E$y0), vec=vec, ...)
   ends1 <- shiftxy(list(x=E$x1,y=E$y1), vec=vec, ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE),
+      check=FALSE)
 }
 
 rotate.psp <- function(X, angle=pi/2, ...) {
@@ -480,7 +482,8 @@ rotate.psp <- function(X, angle=pi/2, ...) {
   E <- X$ends
   ends0 <- rotxy(list(x=E$x0,y=E$y0), angle=angle, ...)
   ends1 <- rotxy(list(x=E$x1,y=E$y1), angle=angle, ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE))
+  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE),
+      check=FALSE)
 }
 
 is.empty.psp <- function(x) { return(x$n == 0) } 

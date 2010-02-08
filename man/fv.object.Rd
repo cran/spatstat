@@ -17,7 +17,7 @@
   
   Objects of class \code{"fv"} are returned by
   \code{\link{Fest}}, \code{\link{Gest}},\code{\link{Jest}},
-  and \code{\link{Kest}}.
+  and \code{\link{Kest}} along with many other functions.
 }
 \seealso{
   \code{\link{Fest}},

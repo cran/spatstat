@@ -11,6 +11,10 @@
 \alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{area.xypolygon}       
+\alias{areaGain.diri}       
+\alias{areaGain.grid}       
+\alias{areaLoss.diri}       
+\alias{areaLoss.grid}       
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
 \alias{as.data.frame.hyperframe}
@@ -22,7 +26,6 @@
 \alias{bermantestEngine}
 \alias{bdrylength.xypolygon} 
 \alias{bdry.mask} 
-\alias{bind.fv}
 \alias{blankcoefnames}
 \alias{breakpts}
 \alias{breakpts.from.r}
@@ -91,8 +94,8 @@
 \alias{FormatFaspFormulae}
 \alias{formula.ppm}
 \alias{formula.kppm}
-\alias{fv}
 \alias{fvnames}
+\alias{fvnames<-}
 \alias{g3engine}
 \alias{g3Cengine}
 \alias{greatest.common.divisor}
@@ -143,6 +146,8 @@
 \alias{killinteraction}
 \alias{least.common.multiple}
 \alias{levels<-.im}
+\alias{licence.polygons}
+\alias{license.polygons}
 \alias{listof}
 \alias{lookup.im}
 \alias{majorminorversion}
@@ -157,9 +162,11 @@
 \alias{marks.ppp}           
 \alias{marks.psp}           
 \alias{marks.quad}           
+\alias{marks.ppx}           
 \alias{marks<-}           
 \alias{marks<-.ppp}           
 \alias{marks<-.psp}           
+\alias{marks<-.ppx}           
 \alias{\%mapp\%}
 \alias{markappendop}
 \alias{marksubset}
@@ -190,7 +197,7 @@
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
 \alias{newstyle.coeff.handling}
-%\alias{nncleanEngine}
+\alias{nncleanEngine}
 \alias{no.trend.ppm}
 \alias{n.quad}
 \alias{numalign}
@@ -362,6 +369,10 @@ affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
 area.xypolygon(polly)
+areaGain.diri(u, X, r, ..., W=as.owin(X))
+areaGain.grid(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.disc"))
+areaLoss.diri(X, r, ..., W=as.owin(X), subset=NULL)
+areaLoss.grid(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc"))
 AsymmDistance.psp(X, Y, metric="Hausdorff", method="Fortran")
 as.breakpts(\dots)
 \method{as.data.frame}{hyperframe}(x, row.names = NULL,
@@ -375,7 +386,6 @@ beachcolours(heightrange, sealevel, monochrome, ncolours)
 bermantestEngine(model, covariate, which, alternative, ..., modelname, covname, dataname)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
-bind.fv(x, y, labl, desc, preferred)
 blankcoefnames(x)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
@@ -447,8 +457,8 @@ fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
-fv(x, argu, ylab, valu, fmla, alim, labl, desc, unitname, fname, yexp)
 fvnames(X, a)
+fvnames(X, a) <- value
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
 greatest.common.divisor(n,m)
@@ -504,6 +514,8 @@ Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
 killinteraction(model)
 least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
+licence.polygons()
+license.polygons()
 listof(\dots)
 lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
@@ -518,9 +530,11 @@ marks(x, \dots)
 \method{marks}{ppp}(x, \dots, dfok)           
 \method{marks}{psp}(x, \dots, dfok)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
+\method{marks}{ppx}(x, \dots, drop=TRUE)
 marks(x, \dots) <- value
 \method{marks}{ppp}(x, dfok, \dots) <- value
 \method{marks}{psp}(x, \dots) <- value
+\method{marks}{ppx}(x, \dots) <- value
 markappendop(x, y)
 marksubset(x, index, format)
 marksubsetop(x, i)
@@ -553,7 +567,7 @@ na.handle.im(X, na.replace)
 nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
-% nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
+nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
 no.trend.ppm(x)
 n.quad(Q)
 numalign(i, nmax, zero)

@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.15 $	$Date: 2009/07/24 05:30:41 $
+#	$Revision: 4.16 $	$Date: 2010/01/08 23:21:49 $
 #
 #
 #
@@ -68,7 +68,7 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
   }
 # set default plotting values and order
   nama <- names(Z)
-  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
   
 # add more info        
   attr(Z, "F") <- FF

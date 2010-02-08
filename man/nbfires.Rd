@@ -21,27 +21,29 @@ of class \code{"ppp"}) consisting of all of the fires in the years
 consist of the last two digits of the years, with the string
 \code{nbfires.} prepended.  Patterns for individual years can
 be extracted using the function \code{\link{split.ppp}()}.  (See
-``Examples''.)
+\emph{Examples}.)
 
 The object \code{nbextras} is a list of data frames, with
 names \code{extras.87}, \ldots, \code{extras.03}.  The columns
-of these data frames provide ``extra'' information about the
-fires.  (See ``Details''.)
+of these data frames provide \sQuote{extra} information about the
+fires.  (See \emph{Details}.)
 
 The object \code{nbw.rect} is a rectangular window which covers
 central New Brunswick.  It is provided for use in illustrative and
-``practice'' calculations inasmuch as the use of a rectangular
+\sQuote{practice} calculations inasmuch as the use of a rectangular
 window simplifies some computations considerably.
 }
 \details{
-The coordinates of the fire locations were provided in terms of
-latitude and longitude, to the nearest minute of arc.  These were converted
-to New Brunswick stereographic projection coordinates (Thomson,
-Mephan and Steeves, 1977) which was the coordinate system in which
-the map of New Brunswick --- which constitutes the observation
-window for the pattern --- was obtained.  The conversion was done
-using a \code{C} program kindly provided by Jonathan Beaudoin of
-the Department of Geodesy and Geomatics, University of New Brunswick.
+  The data were described and analysed by Turner (2009).
+  
+  The coordinates of the fire locations were provided in terms of
+  latitude and longitude, to the nearest minute of arc.  These were converted
+  to New Brunswick stereographic projection coordinates (Thomson,
+  Mephan and Steeves, 1977) which was the coordinate system in which
+  the map of New Brunswick --- which constitutes the observation
+  window for the pattern --- was obtained.  The conversion was done
+  using a \code{C} program kindly provided by Jonathan Beaudoin of
+  the Department of Geodesy and Geomatics, University of New Brunswick.
 
 Finally the data and window were rescaled since the use of the
 New Brunswick stereographic projection coordinate system resulted
@@ -58,21 +60,21 @@ The window for the fire patterns comprises 6 polygonal components,
 consisting of mainland New Brunswick and the 5 largest islands.
 Some lakes which should form holes in the mainland component are
 currently missing; this problem will be remedied in future releases.
-The window was formed by ``simplifying'' the map that was originally
+The window was formed by \sQuote{simplifying} the map that was originally
 obtained.  The simplification consisted in reducing (using
 an interactive visual technique) the number of polygon edges in
 each component.  For instance the number of edges in the mainland
 component was reduced from over 138,000 to 500.
 
 For some purposes it is probably better to use a discretized
-(mask type) window.  See ``Examples''.
+(mask type) window.  See \emph{Examples}.
 
 Because of the coarseness of the coordinates of the original
 data (1 minute of longitude is approximately 1 kilometer at the
 latitude of New Brunswick), data entry errors, and the simplification
 of the observation window, many of the original fire locations
 appeared to be outside of the window.  This problem was addressed
-by shifting the location of the ``outsider'' points slightly,
+by shifting the location of the \sQuote{outsider} points slightly,
 or deleting them, as seemed appropriate.
 
 The columns of the data frames comprising \code{nbextras} are
@@ -87,14 +89,14 @@ The columns of the data frames comprising \code{nbextras} are
     a 24 hour clock.  These
     columns are of mode character and have the format \code{HH:MM}.}
     \item{dis.julian}{The discovery date and time of the fire, expressed
-    in ``Julian days'', i.e. as a decimal fraction representing the number
+    in \emph{Julian days}, i.e. as a decimal fraction representing the number
     of days since the beginning of the year (midnight 31 December).}
     \item{out.date}{The date on which the fire was judged to be
-    ``out''.}
+    \sQuote{out}.}
     \item{out.time}{The time of day on a 24 hour clock, at which
-    the fire was judged to be ``out''.}
+    the fire was judged to be \sQuote{out}.}
     \item{out.julian}{The date and time at which the fire was judged
-    to be ``out'', expressed in Julian days.}
+    to be \sQuote{out}, expressed in Julian days.}
     \item{cause}{General cause of the fire, coded as
     1 = railroads,
     2 = unknown,
@@ -105,11 +107,11 @@ The columns of the data frames comprising \code{nbextras} are
     7 = recreation,
     8 = resident,
     9 = other industry.
-    Causes 2, 4, and 6 are designated as ``final'' by the New
+    Causes 2, 4, and 6 are designated as \sQuote{final} by the New
     Brunswick Department of Natural Resources, meaning
-    (it seems) ``that's all there is to it''.  Other causes
+    (it seems) \dQuote{that's all there is to it}.  Other causes
     are apparently intended to be refined by being combined
-    with ``source of ignition''.}
+    with \dQuote{source of ignition}.}
     \item{ign.src}{Source of ignition, coded as
     1 = cigarette/match/pipe/ashes,
     2 = burning without a permit,
@@ -129,9 +131,9 @@ The columns of the data frames comprising \code{nbextras} are
     \item{fnl.size}{The final size of the fire (area burned)
     in hectares, to the nearest 10th hectare.}
 }
-Note that due to data entry errors some of the ``out dates'' and
-``out times'' in the original data sets were actually \emph{earlier}
-than the corresponding ``discovery dates'' and ``discover times''.
+Note that due to data entry errors some of the \dQuote{out dates} and
+\dQuote{out times} in the original data sets were actually \emph{earlier}
+than the corresponding \dQuote{discovery dates} and \dQuote{discover times}.
 In such cases all corresponding entries of the \code{extras} data
 frame (i.e. \code{dis.date}, \code{dis.time}, \code{dis.julian},
 \code{out.date}, \code{out.time}, and \code{out.julian}) were set
@@ -139,27 +141,28 @@ equal to \code{NA}.  Also, some of the dates and times were missing
 (equal to \code{NA}) in the original data sets.
 }
 \source{
-  The data were kindly provided by the New Brunswick Department
+  The original data were kindly provided by the New Brunswick Department
   of Natural Resources.  Special thanks are due to Jefferey Betts for
   a great deal of assistance.
 }
 \references{
-Turner, Rolf (2007)
-Point patterns of forest fire locations.
-To appear in \emph{Environmental and Ecological Statistics}.
-
 Thomson, D. B., Mephan, M. P., and Steeves, R. R. (1977)
 The stereographic double projection.
 Technical Report 46, University of New Brunswick,
 Fredericton, N. B., Canada
 URL: \code{gge.unb.ca/Pubs/Pubs.html}.
+
+Turner, Rolf (2009)
+Point patterns of forest fire locations.
+\emph{Environmental and Ecological Statistics} \bold{16}, 197--223.
+\code{doi: 10.1007/s10651-007-0085-1}
 }
 \examples{
 \dontrun{
 data(nbfires)
 X <- split(nbfires) # Create a list of yearly point patterns.
 attach(X)           # Make the individual point patterns accessible.
-attach(nbextras)    # Make the individual `extras' accessible.
+attach(nbextras)    # Make the individual \sQuote{extras} accessible.
 ftyp <- extras.00$fire.type
 Y.00 <- nbfires.00[ftyp==1 | ftyp==2] # Pick out forest and grass fires.
 stt  <- extras.00$dis.julian[ftyp==1 | ftyp==2] 

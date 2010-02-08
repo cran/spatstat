@@ -91,8 +91,8 @@ is.multitype <- function(X, ...) {
 is.multitype.default <- function(...) { return(FALSE) }
 
 is.multitype.ppp <- function(X, na.action="warn", ...) {
-  marx <- marks(X, ...)
-  if(is.null(marx))
+  marx <- marks(X, dfok=TRUE)
+  if(is.null(marx) || is.data.frame(marx) || !is.factor(marx))
     return(FALSE)
   if(any(is.na(marx)))
     switch(na.action,
@@ -105,7 +105,7 @@ is.multitype.ppp <- function(X, na.action="warn", ...) {
            },
            ignore = {}
            )
-  return(!is.data.frame(marx) && is.factor(marx))
+  return(TRUE)
 }
 
 # ------------------------------------------------------------------

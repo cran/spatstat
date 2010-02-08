@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.28 $    $Date: 2008/06/30 05:04:40 $
+#  $Revision: 1.29 $    $Date: 2010/01/25 19:37:34 $
 #
 #
 #
@@ -11,12 +11,12 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
                                     envir=parent.frame()) {
   verifyclass(object, "ppm")
 
-  newformula <- function(old, change) {
-    if(is.null(old))
-      old <- (~1)
-    if(is.null(change))
-      change <- (~1)
-    update.formula(as.formula(old), as.formula(change))
+  newformula <- function(old, change, eold=object$callframe, enew=envir) {
+    old <- if(is.null(old)) ~1 else eval(old, eold)
+    change <- if(is.null(change)) ~1 else eval(change, enew)
+    old <- as.formula(old, env=eold)
+    change <- as.formula(change, env=enew)
+    update.formula(old, change)
   }
   
   # inspect model
@@ -55,7 +55,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
   aargh <- list(...)
 
   if(length(aargh) == 0) 
-    return(eval(call, envir))
+    return(eval(call, as.list(envir), enclos=object$callframe))
 
   Q.is.new <- FALSE
   
@@ -126,7 +126,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
   }
 
   # finally call ppm
-  return(eval(call, envir))
+  return(eval(call, as.list(envir), enclos=object$callframe))
 }
 
 sp.foundclass <- function(cname, inlist, formalname, argsgiven) {

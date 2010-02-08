@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.45 $   $Date: 2010/01/06 01:38:28 $
+#    $Revision: 1.51 $   $Date: 2010/01/13 23:31:51 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -156,10 +156,80 @@ print.fv <- function(x, ...) {
   invisible(NULL)
 }
 
+# manipulating the names in fv objects
+
+fvnames <- function(X, a=".") {
+  verifyclass(X, "fv")
+  if(!is.character(a) || length(a) > 1)
+    stop("argument a must be a character string")
+  switch(a,
+         ".y"={
+           return(attr(X, "valu"))
+         },
+         ".x"={
+           return(attr(X, "argu"))
+         },
+         "." = {
+           dn <- attr(X, "dotnames")
+           if(is.null(dn)) {
+             allvars <- names(X)
+             argu <- attr(X, "argu")
+             dn <- allvars[allvars != argu]
+             dn <- rev(dn) # convention
+           }
+           return(dn)
+         },
+         stop(paste("Unrecognised abbreviation", dQuote(a)))
+       )
+}
+
+"fvnames<-" <- function(X, a=".", value) {
+  verifyclass(X, "fv")
+  if(!is.character(a) || length(a) > 1)
+    stop(paste("argument", sQuote("a"), "must be a character string"))
+  if(a == "." && length(value) == 0) {
+    # clear the dotnames
+    attr(X, "dotnames") <- NULL
+    return(X)
+  }
+  # validate the names
+  switch(a,
+         ".x"=,
+         ".y"={
+           if(!is.character(value) || length(value) != 1)
+             stop("value should be a single string")
+         },
+         "."={
+           if(!is.character(value))
+             stop("value should be a character vector")
+         },
+         stop(paste("Unrecognised abbreviation", dQuote(a)))
+       )
+  # check the names match existing column names
+  tags <- names(X)
+  if(any(nbg <- !(value %in% tags))) 
+    stop(paste(ngettext(sum(nbg), "The string", "The strings"),
+               commasep(dQuote(value[nbg])),
+               ngettext(sum(nbg),
+                        "does not match the name of any column of X", 
+                        "do not match the names of any columns of X")))
+  # reassign names
+  switch(a,
+         ".x"={
+           attr(X, "argu") <- value
+         },
+         ".y"={
+           attr(X, "valu") <- value
+         },
+         "."={
+           attr(X, "dotnames") <- value
+         })
+  return(X)
+}
+
 bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   verifyclass(x, "fv")
   a <- attributes(x)
-
   if(is.fv(y)) {
     # y is already an fv object
     # check compatibility of 'r' values
@@ -173,17 +243,17 @@ bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
     # reduce y to data frame and strip off 'r' values
     ystrip <- as.data.frame(y)
     yrpos <- which(colnames(ystrip) == yr)
-    ystrip <- ystrip[, -yrpos]
+    ystrip <- ystrip[, -yrpos, drop=FALSE]
     # determine descriptors
     if(is.null(labl)) labl <- attr(y, "labl")[-yrpos]
     if(is.null(desc)) desc <- attr(y, "desc")[-yrpos]
     #
     y <- ystrip
   } else {
-    # y is a matrix or data frame 
+    # y is a matrix or data frame
     y <- as.data.frame(y)
   }
-
+  
   # check for duplicated column names
   allnames <- c(colnames(x), colnames(y))
   if(any(dup <- duplicated(allnames))) {
@@ -220,18 +290,106 @@ bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   return(z)
 }
 
+cbind.fv <- function(...) {
+  a <- list(...)
+  n <- length(a)
+  if(n == 0)
+    return(NULL)
+  if(n == 1) {
+    # single argument - extract it
+    a <- a[[1]]
+    # could be an fv object 
+    if(is.fv(a))
+      return(a)
+    n <- length(a)
+  }
+  z <- a[[1]]
+  if(!is.fv(z))
+    stop("First argument should be an object of class fv")
+  if(n > 1)
+    for(i in 2:n) 
+      z <- bind.fv(z, a[[i]])
+  return(z)
+}
+
+collapse.fv <- function(..., same=NULL, different=NULL) {
+  x <- list(...)
+  n <- length(x)
+  if(n == 0)
+    return(NULL)
+  if(n == 1)  {
+    # single argument - could be a list - extract it
+    x1 <- x[[1]]
+    if(!is.fv(x1))
+      x <- x1
+  } 
+  if(!all(unlist(lapply(x, is.fv))))
+    stop("arguments should be objects of class fv")
+  if(is.null(same)) same <- character(0)
+  if(is.null(different)) different <- character(0)
+  if(any(duplicated(c(same, different))))
+    stop(paste("The arguments", sQuote("same"), "and", sQuote("different"),
+               "should not have entries in common"))
+  either <- c(same, different)
+  # names for different versions
+  versionnames <- names(x)
+  if(is.null(versionnames))
+    versionnames <- paste("x", seq(length(x)), sep="")
+  shortnames <- abbreviate(versionnames)
+  # extract the common values
+  y <- x[[1]]
+  if(!(fvnames(y, ".y") %in% same))
+    fvnames(y, ".y") <- same[1]
+  z <- y[, c(fvnames(y, ".x"), same)]
+  dotnames <- same
+  # now merge the different values
+  for(i in seq(length(x))) {
+    # extract values for i-th object
+    xi <- x[[i]]
+    wanted <- (names(xi) %in% different)
+    y <- as.data.frame(xi)[, wanted, drop=FALSE]
+    desc <- attr(xi, "desc")[wanted]
+    labl <- attr(xi, "labl")[wanted]
+    # relabel
+    prefix <- shortnames[i]
+    preamble <- versionnames[i]
+    names(y) <- if(ncol(y) == 1) prefix else paste(prefix,names(y),sep="")
+    dotnames <- c(dotnames, names(y))
+    # glue onto fv object
+    z <- bind.fv(z, y,
+                 labl=paste(prefix, labl, sep=""),
+                 desc=paste(preamble, desc))
+  }
+  fvnames(z, ".") <- dotnames
+  return(z)
+}
+
+
 # rename one of the columns of an fv object
 tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL) {
   hit <- (names(x) == current.tag)
-  if(any(hit)) {
-    i <- min(which(hit))
-    if(!is.null(new.labl)) attr(x, "labl")[i] <- new.labl
-    if(!is.null(new.desc)) attr(x, "desc")[i] <- new.desc
-    if(!is.null(new.tag)) names(x)[i] <- new.tag
+  if(!any(hit))
+    return(x)
+  # update descriptions of column
+  i <- min(which(hit))
+  if(!is.null(new.labl)) attr(x, "labl")[i] <- new.labl
+  if(!is.null(new.desc)) attr(x, "desc")[i] <- new.desc
+  # adjust column tag
+  if(!is.null(new.tag)) {
+    names(x)[i] <- new.tag
+    # update dotnames
+    dn <- fvnames(x, ".")
+    if(current.tag %in% dn ) {
+      dn[dn == current.tag] <- new.tag
+      fvnames(x, ".") <- dn
+    }
+    # if the tweaked column is the preferred value, adjust accordingly
+    if(attr(x, "valu") == current.tag)
+      attr(x, "valu") <- new.tag
+    # if the tweaked column is the function argument, adjust accordingly
+    if(attr(x, "argu") == current.tag)
+      attr(x, "valu") <- new.tag
   }
-  # if the tweaked column is the preferred value, adjust accordingly
-  if(attr(x, "valu") == current.tag && !is.null(new.tag))
-    attr(x, "valu") <- new.tag
   return(x)
 }
 
@@ -259,16 +417,8 @@ rebadge.fv <- function(x, new.ylab, new.fname,
     attr(x, "desc") <- desc
     attr(x, "labl") <- labl
   }
-  if(!missing(new.dotnames)) {
-    if(any(nbg <- !(new.dotnames %in% names(x))))
-      stop(paste("new",
-                 ngettext(sum(nbg), "dotname", "dotnames"),
-                 commasep(dQuote(new.dotnames[nbg])),
-                 ngettext(sum(nbg),
-                          "is not a column of x", 
-                          "are not the names of columns in x")))
-    attr(x, "dotnames") <- new.dotnames
-  }
+  if(!missing(new.dotnames))
+    fvnames(x, ".") <- new.dotnames
   if(!missing(new.preferred)) {
     stopifnot(new.preferred %in% names(x))
     attr(x, "valu") <- new.preferred
@@ -336,10 +486,10 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   # convert syntactic expression to call
   elang <- substitute(expr)
   # expand "."
-  dotnames <- fvnames(data, ".")
+  dnames <- fvnames(data, ".")
   xname <- fvnames(data, ".x")
   yname <- fvnames(data, ".y")
-  ud <- as.call(lapply(c("cbind", dotnames), as.name))
+  ud <- as.call(lapply(c("cbind", dnames), as.name))
   ux <- as.name(xname)
   uy <- as.name(yname)
   elang <- eval(substitute(substitute(ee,
@@ -406,33 +556,6 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   return(out)
 }
 
-
-# translate obscure names
-
-fvnames <- function(X, a=".") {
-  verifyclass(X, "fv")
-  if(!is.character(a) || length(a) > 1)
-    stop("argument a must be a character string")
-  switch(a,
-         "." = {
-           dn <- attr(X, "dotnames")
-           if(is.null(dn)) {
-             argu <- attr(X, "argu")
-             allvars <- names(X)
-             dn <- allvars[allvars != argu]
-             dn <- rev(dn) # convention
-           }
-           return(dn)
-         },
-         ".y"={
-           return(attr(X, "valu"))
-         },
-         ".x"={
-           return(attr(X, "argu"))
-         },
-         stop(paste("Unrecognised abbreviation", dQuote(a)))
-       )
-}
 
   
 # stieltjes integration for fv objects

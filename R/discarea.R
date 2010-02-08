@@ -1,10 +1,8 @@
 #
 #    discarea.R
 #
-#  $Revision: 1.12 $  $Date: 2009/11/05 22:26:00 $
+#  $Revision: 1.13 $  $Date: 2010/01/16 03:00:00 $
 #
-
-
 #
 #  Compute area of intersection between a disc and a window,
 #
@@ -50,10 +48,12 @@ discpartarea <- function(X, r, W=as.owin(X)) {
 }
 
 # Compute area of dilation of point pattern
-# using Dirichlet tessellation
+# using Dirichlet tessellation or distmap
 #  (areas of other dilations using distmap)
 
-dilated.areas <- function(X, r, W=NULL, ..., exact=FALSE) {
+dilated.areas <- function(X, r, W=as.owin(X), ...,
+                          constrained=TRUE,
+                          exact=FALSE) {
   if(is.matrix(r)) {
     if(sum(dim(r) > 1) > 1)
       stop("r should be a vector or single value")
@@ -67,7 +67,7 @@ dilated.areas <- function(X, r, W=NULL, ..., exact=FALSE) {
     exact <- FALSE
     warning("Option exact=TRUE is unavailable without gpclib")
   }
-  if(Wwasnull <- is.null(W)) {
+  if(!constrained) {
     # unconstrained dilation
     bb <- as.rectangle(X)
     W <- grow.rectangle(bb, max(r))
@@ -75,7 +75,7 @@ dilated.areas <- function(X, r, W=NULL, ..., exact=FALSE) {
       X <- rebound.owin(X, W)
     else
       X$window <- W
-  }
+  } else W <- as.owin(W)
   if(!exact) {
     D <- distmap(X)
     pixelarea <- D$xstep * D$ystep
@@ -94,12 +94,15 @@ dilated.areas <- function(X, r, W=NULL, ..., exact=FALSE) {
     return(rep(0, nr))
   else if(npoints == 1) 
     return(discpartarea(X, r, W))
+  samebox <- (W$type == "rectangle") &&
+              identical(all.equal(W, as.owin(X)), "TRUE")
+  needclip <- constrained && !samebox
   dd <- dirichlet(X)
   til <- tiles(dd)
   out <- matrix(0, npoints, nr)
   for(i in 1:npoints) {
     Ti <- til[[i]]
-    if(!Wwasnull)
+    if(needclip)
       Ti <- intersect.owin(Ti, W)
     out[i,] <- discpartarea(X[i], r, Ti)
   }

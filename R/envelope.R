@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.64 $  $Date: 2009/12/18 20:33:03 $
+#   $Revision: 1.66 $  $Date: 2010/01/08 23:28:06 $
 #
 
 envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
@@ -274,8 +274,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     stop(paste("The function", fname,
                "must return an object of class", sQuote("fv")))
 
-  argname <- attr(funX, "argu")
-  valname <- attr(funX, "valu")
+  argname <- fvnames(funX, ".x")
+  valname <- fvnames(funX, ".y")
 
   if(tran) {
     # extract only the recommended value
@@ -352,8 +352,8 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
       stop(paste("When applied to a simulated pattern, the function",
                  fname, "did not return an object of class",
                  sQuote("fv")))
-    argname.sim <- attr(funXsim, "argu")
-    valname.sim <- attr(funXsim, "valu")
+    argname.sim <- fvnames(funXsim, ".x")
+    valname.sim <- fvnames(funXsim, ".y")
     if(argname.sim != argname)
       stop(paste("The objects returned by", fname,
                  "when applied to a simulated pattern",
@@ -412,7 +412,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
                    labl=names(alldata),
                    desc=c("distance argument r",
                      paste("Simulation ", 1:nsim, sep="")))
-    attr(SimFuns, "dotnames") <- simnames
+    fvnames(SimFuns, ".") <- simnames
   } 
   if(savepatterns)
     SimPats <- if(simtype == "list") SimDataList else Caughtpatterns
@@ -553,7 +553,7 @@ envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ...,
     if(csr) dotty <- c(dotty, "mmean")
   }
 
-  attr(result, "dotnames") <- dotty
+  fvnames(result, ".") <- dotty
 
   unitname(result) <- unitname(funX)
   class(result) <- c("envelope", class(result))

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.35 $	$Date: 2009/11/11 02:50:35 $
+#	$Revision: 2.38 $	$Date: 2010/01/25 20:58:25 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -226,16 +226,21 @@ extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
 model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
   gf <- getglmfit(object)
   if(is.null(gf)) {
-    newobject <- update(object, forcefit=TRUE)
-    gf <- getglmfit(newobject)
+    object <- update(object, forcefit=TRUE)
+    gf <- getglmfit(object)
     if(is.null(gf))
       stop("internal error: unable to extract a glm fit")
   }
-  mm <- model.matrix(gf, ...)
-  if(!keepNA)
+  if(!keepNA) {
+    # extract model matrix of glm fit object
+    # restricting to its 'subset' 
+    mm <- model.matrix(gf, ...)
     return(mm)
+  }
+  # extract model matrix for all cases
+  mm <- model.matrix(gf, ..., subset=NULL)
   cn <- colnames(mm)
-  gd <- getglmdata(object)
+  gd <- getglmdata(object, drop=FALSE)
   if(nrow(mm) != nrow(gd)) {
     # can occur if covariates include NA's or interaction is -Inf
     insubset <- getglmsubset(object)

@@ -8,7 +8,7 @@
   Computes the areas of successive morphological dilations.
 }
 \usage{
-  dilated.areas(X, r, W=NULL, ..., exact = FALSE)
+  dilated.areas(X, r, W=as.owin(X), ..., constrained=TRUE, exact = FALSE)
 }
 \arguments{
   \item{X}{
@@ -21,11 +21,14 @@
     Numeric vector of radii for the dilations. 
   }
   \item{W}{
-    Optional. Window (object of class \code{"owin"}) inside which the areas
-    will be computed, or \code{NULL} indicating the entire area
-    should be computed.
+    Window (object of class \code{"owin"}) inside which the areas
+    will be computed, if \code{constrained=TRUE}.
   }
   \item{\dots}{Ignored.}
+  \item{constrained}{
+    Logical flag indicating whether areas should be restricted
+    to the window \code{W}.
+  }
   \item{exact}{
     Logical flag indicating whether areas should be computed
     using analytic geometry (which is slower but more accurate).
