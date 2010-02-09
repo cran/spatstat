@@ -35,10 +35,10 @@ mincontrast <- function(observed, theoretical, startpar,
     if(is.null(rmax)) rmax <- alim[2]
   }
   # extract vector of r values
-  argu <- attr(observed, "argu")
+  argu <- fvnames(observed, ".x")
   rvals <- observed[[argu]]
   # extract vector of observed values of statistic
-  valu <- attr(observed, "valu")
+  valu <- fvnames(observed, ".y")
   obs <- observed[[valu]]
   # restrict to [rmin, rmax]
   if(max(rvals) < rmax)

@@ -6,7 +6,9 @@
   that is not covered by other discs.
 }
 \usage{
-   areaLoss(X, r, ngrid=spatstat.options("ngrid.disc"), subset=NULL)
+   areaLoss(X, r, ..., W=as.owin(X), subset=NULL,
+                 exact=FALSE,
+                 ngrid=spatstat.options("ngrid.disc"))
 }
 \arguments{
   \item{X}{
@@ -16,13 +18,24 @@
   \item{r}{
     Disc radius, or vector of disc radii.
   }
-  \item{ngrid}{
-    Dimensions of the \code{ngrid * ngrid} array of test points
-    that will be used to estimate the uncovered area.
+  \item{\dots}{Ignored.}
+  \item{W}{
+    Optional. Window (object of class \code{"owin"})
+    inside which the area should be calculated.
   }
   \item{subset}{
     Optional. Index identifying a subset of the points of \code{X}
     for which the area difference should be computed.
+  }
+  \item{exact}{
+    Choice of algorithm.
+    If \code{exact=TRUE}, areas are computed exactly using
+    analytic geometry. If \code{exact=FALSE} then a faster algorithm
+    is used to compute a discrete approximation to the areas.
+  }
+  \item{ngrid}{
+    Integer. Number of points in the square grid used to compute
+    the discrete approximation, when \code{exact=FALSE}.
   }
 }
 \value{
@@ -41,17 +54,15 @@
 
   The result is a matrix, with one row for each point in \code{X}
   and one column for each entry of \code{r}. 
-
-  The area is calculated by discrete approximation, using an
-  \code{ngrid * ngrid} grid of test points. 
 }
 \seealso{
   \code{\link{AreaInter}},
-  \code{\link{areaGain}}
+  \code{\link{areaGain}},
+  \code{\link{dilated.areas}}
 }
 \examples{
    data(cells)
-   areaLoss(cells, 0.1, 32)
+   areaLoss(cells, 0.1)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

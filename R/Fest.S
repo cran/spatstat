@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.24 $	$Date: 2009/10/31 22:37:28 $
+#	$Revision: 4.25 $	$Date: 2010/01/08 23:21:29 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -136,7 +136,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   }
   
   nama <- names(Z)
-  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
   unitname(Z) <- unitname(X)
   return(Z)
 }

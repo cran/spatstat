@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.9 $     $Date: 2009/07/24 06:43:54 $
+#     $Revision: 1.10 $     $Date: 2010/01/08 23:28:06 $
 #
 
 eval.fv <- function(expr, envir) {
@@ -40,7 +40,7 @@ eval.fv <- function(expr, envir) {
   # copy first object as template
   result <- funs[[1]]
   # determine which function estimates are supplied
-  argname <- attr(result, "argu")
+  argname <- fvnames(result, ".x")
   nam <- names(result)
   ynames <- nam[nam != argname]
   # for each function estimate, evaluate expression
@@ -65,10 +65,10 @@ compatible.fv <- function(A, B) {
   verifyclass(B, "fv")
   namesmatch <-
     identical(all.equal(names(A),names(B)), TRUE) &&
-    (attr(A, "argu") == attr(B, "argu")) &&
-    (attr(A, "valu") == attr(B, "valu"))
-  rA <- A[[attr(A,"argu")]]
-  rB <- B[[attr(B,"argu")]]
+    (fvnames(A, ".x") == fvnames(B, ".x")) &&
+    (fvnames(A, ".y") == fvnames(B, ".y"))
+  rA <- with(A, .x)
+  rB <- with(B, .x)
   approx.equal <- function(x, y) { max(abs(x-y)) <= .Machine$double.eps }
   rmatch <- (length(rA) == length(rB)) && approx.equal(rA, rB)
   return(namesmatch && rmatch)

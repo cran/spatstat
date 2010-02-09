@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.1 $  $Date: 2009/11/04 23:57:34 $
+#  $Revision: 1.3 $  $Date: 2010/02/05 07:07:38 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -75,7 +75,9 @@ plot.ppx <- function(x, ...) {
   if(ncol(coo) != 2)
     stop(paste("Don't know how to plot a general point pattern in",
                ncol(coo), "dimensions"))
-  plot(x$domain, main=xname, ...)
+  do.call("plot", resolve.defaults(list(x$domain),
+                                   list(...),
+                                   list(main=xname)))
   do.call.matched("points",
                   append(list(x=coo), list(...)),
                   extrargs=c("type", "pch", "col", "bg", "cex", "lty", "lwd"))
@@ -97,4 +99,25 @@ coords.ppp <- function(x, ...) { data.frame(x=x$x,y=x$y) }
 as.hyperframe.ppx <- function(x, ...) { x$data }
 
 as.data.frame.ppx <- function(x, ...) { as.data.frame(x$data) } 
+
+marks.ppx <- function(x, ..., drop=TRUE) {
+  ctype <- x$ctype
+  chosen <- (ctype == "mark")
+  x$data[, chosen, drop=drop]
+}
+
+"marks<-.ppx" <- function(x, ..., value) {
+  ctype <- x$ctype
+  retain <- (ctype != "mark")
+  coorddata <- x$data[, retain, drop=TRUE]
+  if(!is.data.frame(value) && !is.hyperframe(value))
+    value <- data.frame(marks=value)
+  newdata <- cbind(coorddata, value)
+  newctype <- c(ctype, rep("mark", ncol(value)))
+  out <- list(data=newdata, ctype=newctype, domain=x$domain)
+  class(out) <- "ppx"
+  return(out)
+}
+
+  
 

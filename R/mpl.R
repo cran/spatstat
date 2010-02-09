@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.82 $	$Date: 2009/12/15 02:14:21 $
+#	$Revision: 5.83 $	$Date: 2010/01/25 19:55:01 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2009/12/15 02:14:21 $")
+                    date="$Date: 2010/01/25 19:55:01 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -108,7 +108,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   npts <- X$n
   volume <- area.owin(X$window) * markspace.integral(X)
   lambda <- npts/volume
-  co <- list("log(lambda)"=log(lambda))
+  co <- c("log(lambda)"=log(lambda))
   maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
   rslt <- list(
                method      = "mpl",

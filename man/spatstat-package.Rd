@@ -51,6 +51,16 @@
   Type \code{demo(data)} to see all the datasets
   available in the package.
 }
+\section{Updates}{
+  New versions of \pkg{spatstat} are produced about once a month.
+  Users are advised to update their installation of \pkg{spatstat}
+  regularly.
+  
+  Type \code{latest.news()} to read the news documentation about
+  changes to the current installed version of \pkg{spatstat}. Type
+  \code{news(package="spatstat")} to read news documentation about
+  all previous versions of the package.
+}
 \section{FUNCTIONS AND DATASETS}{
   Following is a summary of the main functions and datasets
   in the \pkg{spatstat} package.

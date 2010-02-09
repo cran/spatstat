@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.24 $   $Date: 2009/11/12 03:42:42 $
+#    $Revision: 1.25 $   $Date: 2010/02/08 18:01:41 $
 #
 #
 
@@ -100,7 +100,7 @@ reset.spatstat.options <- function() {
            if(!(is.logical(x) && length(x) == 1))
              return(FALSE)
            if(x && !require(gpclib)) {
-             warning("Cannot set gpclib=TRUE: package gpclib is unavailable")
+             warning("Cannot set gpclib=TRUE: package gpclib is not installed")
              return(FALSE)
            }
            return(TRUE)

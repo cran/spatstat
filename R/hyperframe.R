@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.33 $  $Date: 2009/12/22 01:43:32 $
+# $Revision: 1.39 $  $Date: 2010/02/01 23:35:48 $
 #
 
 hyperframe <- function(...,
@@ -294,22 +294,36 @@ eval.hyper <- function(e, h, simplify=TRUE, ee=NULL) {
   with.hyperframe(h, simplify=simplify, ee=ee)
 }
 
-with.hyperframe <- function(data, expr, ..., simplify=TRUE, ee=NULL) {
+with.hyperframe <- function(data, expr, ..., simplify=TRUE, ee=NULL,
+                            enclos=NULL) {
   if(!inherits(data, "hyperframe"))
     stop("data must be a hyperframe")
   if(is.null(ee))
     ee <- as.expression(substitute(expr))
-  out <- list()
-  n <- unclass(data)$ncases
+  if(is.null(enclos))
+    enclos <- parent.frame()
+  n <- nrow(data)
+  out <- vector(mode="list", length=n)
   for(i in 1:n) {
     rowi <- data[i,, drop=FALSE]
-    out[[i]] <- eval(ee, as.list(rowi))
+    outi <- eval(ee, as.list(rowi), enclos)
+    if(!is.null(outi))
+      out[[i]] <- outi
   }
-  if(simplify &&
-     all(unlist(lapply(out, is.vector))) &&
-     all(unlist(lapply(out, length)) == 1)) 
-    out <- unlist(out)
-  out <- hyperframe(out)[drop=TRUE]
+  names(out) <- row.names(data)
+  if(simplify && all(unlist(lapply(out, is.vector)))) {
+    # if all results are atomic vectors of equal length,
+    # return a matrix or vector.
+    lenfs <- unlist(lapply(out, length))
+    if(all(unlist(lapply(out, is.atomic))) &&
+            length(unique(lenfs)) == 1) {
+      out <- t(as.matrix(as.data.frame(out)))
+      row.names(out) <- row.names(data)
+      out <- out[,,drop=TRUE]
+      return(out)
+    }
+  }
+  out <- hyperframe(result=out, row.names=row.names(data))$result
   return(out)
 }
 
@@ -322,13 +336,16 @@ cbind.hyperframe <- function(...) {
   if(is.null(namarg))
     namarg <- rep("", narg)
   ishyper <- unlist(lapply(aarg, inherits, what="hyperframe"))
+  isdf <- unlist(lapply(aarg, inherits, what="data.frame"))
   columns <- list()
   for(i in 1:narg) {
-    if(ishyper[i]){
-      newcolumns <- as.list(aarg[[i]])
-      if(namarg[i] != "")
-        names(newcolumns) <- paste(namarg[i], ".", names(newcolumns), sep="")
-      columns <- append(columns, newcolumns)
+    if(ishyper[i] || isdf[i]){
+      if(ncol(aarg[[i]]) > 0) {
+        newcolumns <- as.list(aarg[[i]])
+        if(namarg[i] != "")
+          names(newcolumns) <- paste(namarg[i], ".", names(newcolumns), sep="")
+        columns <- append(columns, newcolumns)
+      }
     } else {
       nextcolumn <- list(aarg[[i]])
       names(nextcolumn) <- namarg[i]

@@ -6,7 +6,9 @@
   is evaluated separately for each row of the hyperframe.
 }
 \usage{
-\method{with}{hyperframe}(data, expr, ..., simplify = TRUE, ee = NULL)
+\method{with}{hyperframe}(data, expr, ...,
+                         simplify = TRUE,
+                         ee = NULL, enclos=NULL)
 }
 \arguments{
   \item{data}{A hyperframe (object of class \code{"hyperframe"})
@@ -22,6 +24,10 @@
     Alternative form of \code{expr}, as an object of class
     \code{"expression"}.
   }
+  \item{enclos}{
+    An environment in which to search for objects that are
+    not found in the hyperframe. Defaults to \code{\link{parent.frame}()}.
+  }
 }
 \details{
   This function evaluates the expression \code{expr} in each row
@@ -30,8 +36,9 @@
   
   The argument \code{expr} should be an \R language expression
   in which each variable name is either the name of a column in the
-  hyperframe \code{data}, or the name of an object in the global
-  environment. The argument \code{ee} can be used as an alternative
+  hyperframe \code{data}, or the name of an object in the parent frame
+  (the environment in which \code{with} was called.)
+  The argument \code{ee} can be used as an alternative
   to \code{expr} and should be an expression object (of
   class \code{"expression"}).
   

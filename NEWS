@@ -1,0 +1,74 @@
+	CHANGES IN spatstat VERSION 1.17-6
+
+ACKNOWLEDGEMENTS
+
+    o   We thank Simon Byers and Adrian Raftery for generous contributions.
+
+OVERVIEW
+
+    o 	Nearest neighbour clutter removal algorithm
+
+    o   New documentation for the 'fv' class.
+	
+    o	Minor improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o	nnclean: Nearest neighbour clutter removal for recognising features 
+	in spatial point patterns. Technique of Byers and Raftery (1998) 
+	[From original code by Simon Byers and Adrian Raftery,
+	adapted for spatstat.]
+
+    o	marks.ppx, marks<-.ppx: Methods for extracting and changing marks
+	in a multidimensional point pattern
+
+    o   latest.news: print news about the current version of the package
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   news: spatstat now has a NEWS file which can be printed by
+	typing news(package="spatstat").
+
+    o	areaGain, areaLoss: New algorithms in case exact=TRUE.
+	Syntax slightly modified.
+
+    o	with.hyperframe: 
+		- The result now inherits 'names' from the row names
+		of the hyperframe. 
+
+		- New argument 'enclos' controls the environment
+		in which the expression is evaluated.
+
+		- The algorithm is now smarter at simplifying the result
+		when simplify=TRUE.
+
+    o	update.ppm: Tweaked to improve the ability of ppm objects
+	to be re-fitted in different contexts.
+
+
+ADVANCED USERS ONLY
+   
+    o	Documentation for the class 'fv' of function value tables
+
+	- fv: Creates an object of class 'fv' 
+
+	- cbind.fv, collapse.fv: Combine objects of class 'fv'		
+
+	- bind.fv: Add additional columns of data to an 'fv' object
+
+		
+BUG FIXES
+
+    o	"$<-.hyperframe" destroyed the row names of the hyperframe.
+	Fixed.	
+
+    o	model.matrix.ppm had minor inconsistencies.
+	Fixed.		
+
+    o	ppm: The fitted coefficient vector had incorrect format
+	in the default case of a uniform Poisson process. 
+	Fixed.
+
+    o	plot.ppx: Crashed if the argument 'main' was given.
+	Fixed.
+

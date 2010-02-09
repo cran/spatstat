@@ -6,7 +6,8 @@
   that is not covered by other discs.
 }
 \usage{
-   areaGain(u, X, r, W=NULL, ngrid=spatstat.options("ngrid.disc"))
+   areaGain(u, X, r, ..., W=as.owin(X), exact=FALSE,
+                     ngrid=spatstat.options("ngrid.disc"))
 }
 \arguments{
   \item{u}{
@@ -21,14 +22,21 @@
   \item{r}{
     Disc radius, or vector of disc radii.
   }
+  \item{\dots}{Ignored.}
   \item{W}{
-    Optional. Window (object of class \code{"owin"})
+    Window (object of class \code{"owin"})
     in which the area should be computed.
   }
-  \item{ngrid}{
-    Dimensions of the \code{ngrid * ngrid} array of test points
-    that will be used to estimate the uncovered area.
+  \item{exact}{
+    Choice of algorithm.
+    If \code{exact=TRUE}, areas are computed exactly using
+    analytic geometry. If \code{exact=FALSE} then a faster algorithm
+    is used to compute a discrete approximation to the areas.
   }
+  \item{ngrid}{
+    Integer. Number of points in the square grid used to compute
+    the discrete approximation, when \code{exact=FALSE}.
+}
 }
 \value{
   A matrix with one row for each point in \code{u}
@@ -51,11 +59,7 @@
   centred at the points of the pattern \code{X}.
 
   If \code{W} is not \code{NULL}, then the areas are computed only
-  inside the window \code{W}. Currently this is implemented only for
-  rectangular windows.
-
-  The area is calculated by discrete approximation, using an
-  \code{ngrid * ngrid} grid of test points. 
+  inside the window \code{W}. 
 }
 \seealso{
   \code{\link{AreaInter}},

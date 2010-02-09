@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.59 $	$Date: 2009/07/24 05:34:27 $
+#	$Revision: 5.60 $	$Date: 2010/01/08 23:21:49 $
 #
 #
 # -------- functions ----------------------------------------
@@ -229,7 +229,7 @@ function(X, ..., r=NULL, breaks=NULL,
   # default plot will display all edge corrections
   attr(K, "fmla") <- . ~ r
   nama <- rev(colnames(K))
-  attr(K, "dotnames") <- nama[!(nama %in% c("r", "rip", "ls"))]
+  fvnames(K, ".") <- nama[!(nama %in% c("r", "rip", "ls"))]
   #
   unitname(K) <- unitname(X)
   return(K)

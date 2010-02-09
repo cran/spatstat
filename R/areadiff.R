@@ -1,14 +1,151 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.10 $  $Date: 2009/08/22 07:26:39 $
+#  $Revision: 1.13 $  $Date: 2010/01/16 01:49:14 $
 #
 # Computes sufficient statistic for area-interaction process
 #
 # Invokes areadiff.c
 #
+# areaLoss = area lost by removing X[i] from X
 
-areaGain <- function(u, X, r, W=NULL, ngrid=spatstat.options("ngrid.disc")) {
+areaLoss <- function(X, r, ..., W=as.owin(X),
+                     subset=NULL, exact=FALSE,
+                     ngrid=spatstat.options("ngrid.disc")) {
+  if(exact && !spatstat.options("gpclib")) {
+    exact <- FALSE
+    warning("Option exact=TRUE is unavailable without gpclib")
+  }
+  if(exact)
+    areaLoss.diri(X, r, ..., W=W, subset=subset)
+  else
+    areaLoss.grid(X, r, ..., W=W, subset=subset, ngrid=ngrid)
+}
+
+# areaGain = area gained by adding u[i] to X
+
+areaGain <- function(u, X, r, ..., W=as.owin(X), exact=FALSE,
+                     ngrid=spatstat.options("ngrid.disc")) {
+  if(exact && !spatstat.options("gpclib")) {
+    exact <- FALSE
+    warning("Option exact=TRUE is unavailable without gpclib")
+  }
+  if(exact)
+    areaGain.diri(u, X, r, ..., W=W)
+  else
+    areaGain.grid(u, X, r, W=W, ngrid=ngrid)
+}
+
+
+#////////////////////////////////////////////////////////////
+#    algorithms using Dirichlet tessellation
+#///////////////////////////////////////////////////////////
+
+areaLoss.diri <- function(X, r, ..., W=as.owin(X), subset=NULL) {
+  stopifnot(is.ppp(X))
+  npoints <- X$n
+  if(is.matrix(r)) {
+    if(sum(dim(r) > 1) > 1)
+      stop("r should be a vector or single value")
+    r <- as.vector(r)
+  }
+  nr <- length(r)
+  if(npoints == 0)
+    return(matrix(, nrow=0, ncol=nr))
+  else if(npoints == 1) 
+    return(matrix(discpartarea(X, r, W), nrow=1))
+  # set up output array
+  indices <- 1:npoints
+  if(!is.null(subset))
+    indices <- indices[subset]
+  out <- matrix(, nrow=length(indices), ncol=nr)
+  #
+  w <- X$window
+  pir2 <- pi * r^2
+  # dirichlet neighbour relation in entire pattern 
+  dd <- deldir(X$x, X$y, rw=c(w$xrange, w$yrange))
+  a <- dd$delsgs[,5]
+  b <- dd$delsgs[,6]
+  exact <- spatstat.options("gpclib")
+  for(k in seq(indices)) {
+    i <- indices[k]
+    # find all Delaunay neighbours of i 
+    jj <- c(b[a==i], a[b==i])
+    jj <- sort(unique(jj))
+    # extract only these points
+    Yminus <- X[jj]
+    Yplus  <- X[c(jj, i)]
+    # dilate
+    aplus <- dilated.areas(Yplus, r, W, exact=exact)
+    aminus <- dilated.areas(Yminus, r, W, exact=exact)
+    areas <- aplus - aminus
+    # area/(pi * r^2) must be positive and nonincreasing
+    y <- ifelse(r == 0, 1, areas/pir2)
+    y <- pmin(1, y)
+    ok <- is.finite(y)
+    y[ok] <- rev(cummax(rev(y[ok])))
+    areas <- pmax(0, y * pir2)
+    # save
+    out[k, ] <- areas
+  }
+  return(out)
+}
+
+areaGain.diri <- function(u, X, r, ..., W=as.owin(X)) {
+  stopifnot(is.ppp(X))
+  Y <- as.ppp(u, W=W)
+  nX <- X$n
+  nY <- Y$n
+  if(is.matrix(r)) {
+    if(sum(dim(r) > 1) > 1)
+      stop("r should be a vector or single value")
+    r <- as.vector(r)
+  }
+  nr <- length(r)
+  if(nY == 0)
+    return(matrix(, nrow=0, ncol=nr))
+  if(nX == 0)
+    return(matrix(pi * r^2, nrow=nY, ncol=nr, byrow=TRUE))
+  cat(paste("areaGain,", nY, "points,", nr, "r values\n"))
+  out <- matrix(0, nrow=nY, ncol=nr)
+  pir2 <- pi * r^2
+  wbox <- as.rectangle(as.owin(X))
+  exact <- spatstat.options("gpclib")
+  #
+  for(i in 1:nY) {
+    progressreport(i, nY)
+    V <- superimpose(Y[i], X, W=wbox, check=FALSE)
+    # Dirichlet neighbour relation for V
+    dd <- deldir(V$x, V$y, rw=c(wbox$xrange, wbox$yrange))
+    aa <- dd$delsgs[,5]
+    bb <- dd$delsgs[,6]
+    # find all Delaunay neighbours of Y[1] in V
+    jj <- c(bb[aa==1], aa[bb==1])
+    jj <- sort(unique(jj))
+    # extract only these points
+    Zminus <- V[jj]
+    Zplus  <- V[c(1, jj)]
+    # dilate
+    aplus <- dilated.areas(Zplus, r, W, exact=exact)
+    aminus <- dilated.areas(Zminus, r, W, exact=exact)
+    areas <- aplus - aminus
+    # area/(pi * r^2) must be in [0,1] and nonincreasing
+    y <- ifelse(r == 0, 1, areas/pir2)
+    y <- pmin(1, y)
+    ok <- is.finite(y)
+    y[ok] <- rev(cummax(rev(y[ok])))
+    areas <- pmax(0, y * pir2)
+    # save
+    out[i,] <- areas
+  }
+  return(out)
+}
+
+#////////////////////////////////////////////////////////////////////////
+#    alternative implementations using grid counting in C
+#////////////////////////////////////////////////////////////////////////
+
+areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.disc")) {
   verifyclass(X, "ppp")
   u <- as.ppp(u, W=as.owin(X))
   stopifnot(is.numeric(r) && all(is.finite(r)) && all(r >= 0))
@@ -71,10 +208,9 @@ areaGain <- function(u, X, r, W=NULL, ngrid=spatstat.options("ngrid.disc")) {
   return(result)
 }
 
-areaLoss <- function(X, r, ngrid=spatstat.options("ngrid.disc"), subset=NULL) {
+areaLoss.grid <- function(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc")) {
   verifyclass(X, "ppp")
   n <- X$n
-  W <- as.owin(X)
   indices <- if(is.null(subset)) 1:n else (1:n)[subset]
   answer <- matrix(, nrow=length(indices), ncol=length(r))
   for(k in seq(indices)) {

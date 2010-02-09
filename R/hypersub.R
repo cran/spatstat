@@ -4,7 +4,7 @@
 #
 #  subset operations for hyperframes
 #
-#  $Revision: 1.3 $    $Date: 2009/01/30 00:44:20 $
+#  $Revision: 1.4 $    $Date: 2010/01/14 19:40:17 $
 #
 #
 
@@ -77,12 +77,13 @@
 }
 
 "$<-.hyperframe" <- function(x, i, value) {
+  rown <- row.names(x)
   x <- as.list(x)
   dfcol <- is.atomic(value) && (is.vector(value) || is.factor(value))
   if(!dfcol && !is.null(value))
     value <- as.list(value)
   x[[i]] <- value
-  y <- do.call("hyperframe", x)
+  y <- do.call("hyperframe", append(x, list(row.names=rown)))
   return(y)
 }
 

@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.30 $	$Date: 2009/07/24 06:08:55 $
+#	$Revision: 4.31 $	$Date: 2010/01/08 23:21:49 $
 #
 ################################################################################
 
@@ -220,7 +220,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
     attr(Z, "alim") <- range(rvals[result$km <= 0.9])
   }
   nama <- names(Z)
-  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
   unitname(Z) <- unitname(X)
   return(Z)
 }	

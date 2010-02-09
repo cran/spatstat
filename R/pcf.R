@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.34 $   $Date: 2009/12/16 03:28:01 $
+#   $Revision: 1.35 $   $Date: 2010/01/08 23:28:06 $
 #
 #
 #   calculate pair correlation function
@@ -175,8 +175,8 @@ function(X, ..., method="c") {
   }
 
   # extract r and the recommended estimate of K
-  r <- X[[attr(X, "argu")]]
-  K <- X[[attr(X, "valu")]]
+  r <- with(X, .x)
+  K <- with(X, .y)
   alim <- attr(X, "alim")
 
   # remove NA's

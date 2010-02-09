@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.23 $	$Date: 2009/07/24 05:27:14 $
+#	$Revision: 4.24 $	$Date: 2010/01/08 23:21:49 $
 #
 ################################################################################
 #
@@ -109,7 +109,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     attr(Z, "alim") <- range(rvals[result$km <= 0.9])
   }
   nama <- names(Z)
-  attr(Z, "dotnames") <- rev(nama[!(nama %in% c("r", "hazard"))])
+  fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
   unitname(Z) <- unitname(X)
   return(Z)
 }	

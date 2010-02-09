@@ -49,7 +49,7 @@ Hest <- function(X, ...) {
             "Kaplan-Meier estimate of hazard function lambda(r)",
             "uncorrected estimate of F(r)")
   Z <- fv(Z, "r", substitute(F(r), NULL), "km", . ~ r, alim, labl, desc)
-  attr(Z, "dotnames") <- c("km", "rs")
+  fvnames(Z, ".") <- c("km", "rs")
   unitname(Z) <- unitname(X)
   return(Z)
 }
