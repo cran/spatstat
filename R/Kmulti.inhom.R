@@ -1,12 +1,14 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.29 $	$Date: 2009/12/16 04:14:04 $
+#	$Revision: 1.30 $	$Date: 2010/03/08 08:23:04 $
 #
 #
 # ------------------------------------------------------------------------
 
 Lcross.inhom <- function(X, i, j, ...) {
+  if(!is.multitype(X, dfok=FALSE))
+	stop("Point pattern must be multitype")
   if(missing(i)) i <- levels(marks(X))[1]
   if(missing(j)) j <- levels(marks(X))[2]
   K <- Kcross.inhom(X, i, j, ...)
@@ -22,6 +24,8 @@ Lcross.inhom <- function(X, i, j, ...) {
 }
 
 Ldot.inhom <- function(X, i, ...) {
+  if(!is.multitype(X, dfok=FALSE))
+	stop("Point pattern must be multitype")
   if(missing(i)) i <- levels(marks(X))[1]
   K <- Kdot.inhom(X, i, ...)
   L <- eval.fv(sqrt(pmax(K,0)/pi))
@@ -40,8 +44,8 @@ function(X, i, j, lambdaI=NULL, lambdaJ=NULL, ...,
          lambdaIJ=NULL)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  if(!is.multitype(X, dfok=FALSE))
+	stop("Point pattern must be multitype")
   if(missing(correction))
     correction <- NULL
   marx <- marks(X)
@@ -74,8 +78,8 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
          lambdaIdot=NULL)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  if(!is.multitype(X, dfok=FALSE))
+	stop("Point pattern must be multitype")
   if(missing(correction))
     correction <- NULL
 

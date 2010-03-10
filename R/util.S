@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.51 $    $Date: 2009/12/30 18:18:32 $
+#    $Revision: 1.52 $    $Date: 2010/03/09 01:55:49 $
 #
 #  (a) for matrices only:
 #
@@ -396,3 +396,21 @@ validposint <- function(n, caller, fatal=TRUE) {
   return(TRUE)
 }
 
+firstfactor <- function(x) {
+  stopifnot(is.data.frame(x))
+  isfac <- unlist(lapply(as.list(x), is.factor))
+  if(!any(isfac)) 
+    return(NULL)
+  return(x[, min(which(isfac))])
+}
+
+onecolumn <- function(m) {
+  switch(markformat(m),
+         none=stop("No marks provided"),
+         vector=m,
+         dataframe=m[,1],
+         NA)
+}
+
+  
+    

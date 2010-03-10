@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.59 $	$Date: 2009/11/05 22:49:58 $
+#	$Revision: 4.62 $	$Date: 2010/03/10 01:52:04 $
 #
 #
 #
@@ -49,38 +49,37 @@ perimeter <- function(w) {
 }
 
 eroded.areas <- function(w, r) {
-	verifyclass(w, "owin")
-	
-	switch(w$type,
-               rectangle = {
-                 width <- abs(diff(w$xrange))
-                 height <- abs(diff(w$yrange))
-                 areas <- pmax(width - 2 * r, 0) * pmax(height - 2 * r, 0)
-               },
-               polygonal = {
-                 # warning("Approximating polygonal window by digital image")
-                 w <- as.mask(w)
-                 areas <- eroded.areas(w, r)
-               },
-               mask = {
-                 # distances from each pixel to window boundary
-                 b <- bdist.pixels(w, style="matrix")
-                 # histogram breaks to satisfy hist()
-                 Bmax <- max(b, r)
-                 breaks <- c(-1,r,Bmax+1)
-                 # histogram of boundary distances
-                 h <- hist(b, breaks=breaks, plot=FALSE)$counts
-                 # reverse cumulative histogram
-                 H <- revcumsum(h)
-                 # drop first entry corresponding to r=-1
-                 H <- H[-1]
-                 # convert count to area
-                 pixarea <- w$xstep * w$ystep
-                 areas <- pixarea * H
-               },
- 	       stop("unrecognised window type")
-               )
-	areas
+  w <- as.owin(w)
+  switch(w$type,
+         rectangle = {
+           width <- abs(diff(w$xrange))
+           height <- abs(diff(w$yrange))
+           areas <- pmax(width - 2 * r, 0) * pmax(height - 2 * r, 0)
+         },
+         polygonal = {
+           # warning("Approximating polygonal window by digital image")
+           w <- as.mask(w)
+           areas <- eroded.areas(w, r)
+         },
+         mask = {
+           # distances from each pixel to window boundary
+           b <- bdist.pixels(w, style="matrix")
+           # histogram breaks to satisfy hist()
+           Bmax <- max(b, r)
+           breaks <- c(-1,r,Bmax+1)
+           # histogram of boundary distances
+           h <- hist(b, breaks=breaks, plot=FALSE)$counts
+           # reverse cumulative histogram
+           H <- revcumsum(h)
+           # drop first entry corresponding to r=-1
+           H <- H[-1]
+           # convert count to area
+           pixarea <- w$xstep * w$ystep
+           areas <- pixarea * H
+         },
+         stop("unrecognised window type")
+         )
+  areas
 }	
 
 even.breaks.owin <- function(w) {
@@ -536,6 +535,7 @@ vertices <- function(w) {
 }
 
 diameter <- function(w) {
+  w <- as.owin(w)
   if(is.empty(w))
     return(NULL)
   vert <- vertices(w)
@@ -723,7 +723,7 @@ is.empty.owin <- function(x) {
 }
 
 emptywindow <- function(w) {
-  stopifnot(is.owin(w))
+  w <- as.owin(w)
   out <- owin(w$xrange, w$yrange, poly=list(), unitname=unitname(w))
   return(out)
 }

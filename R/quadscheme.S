@@ -2,7 +2,7 @@
 #
 #      quadscheme.S
 #
-#      $Revision: 4.24 $    $Date: 2009/12/12 00:18:35 $
+#      $Revision: 4.25 $    $Date: 2010/03/08 08:23:04 $
 #
 #      quadscheme()    generate a quadrature scheme from 
 #		       data and dummy point patterns.
@@ -93,9 +93,9 @@ quadscheme.spatial <-
 		# note data$window is the DEFAULT quadrature window
 		# applicable when 'dummy' does not contain a window
 
-        if(is.marked(data))
+        if(is.marked(data, dfok=TRUE))
           warning("marks in data pattern - ignored")
-        if(is.marked(dummy))
+        if(is.marked(dummy, dfok=TRUE))
           warning("marks in dummy pattern - ignored")
         
 	both <- as.ppp(concatxy(data, dummy), dummy$window, check=check)
@@ -142,7 +142,7 @@ quadscheme.spatial <-
 
         if(!is.marked(data))
           stop("data pattern does not have marks")
-        if(is.marked(dummy))
+        if(is.marked(dummy, dfok=TRUE))
           warning("dummy points have marks --- ignored")
 
         # first, ignore marks and compute spatial weights

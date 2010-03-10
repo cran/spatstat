@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.17 $    $Date: 2009/12/15 02:06:56 $
+#  $Revision: 1.18 $    $Date: 2010/03/08 08:23:04 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -147,7 +147,7 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
 
 smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
+  if(!is.marked(X, dfok=FALSE))
     stop("X should be a marked point pattern")
   values <- marks(X, dfok=FALSE)
   if(is.factor(values)) {

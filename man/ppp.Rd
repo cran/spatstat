@@ -15,7 +15,8 @@
     an object of class \code{"owin"}}
   \item{\dots}{arguments passed to \code{\link{owin}} to create the
     window, if \code{window} is missing}
-  \item{marks}{(optional) vector of mark values}
+  \item{marks}{(optional) mark values for the points.
+    A vector or data frame.}
   \item{check}{Logical flag indicating whether to check
     that all the \eqn{(x,y)} points lie inside the specified window.
     Do not set this to \code{FALSE} unless you are sure that this
@@ -98,14 +99,23 @@
   which colour they are. Data recording the locations and heights of
   trees in a forest can be regarded as a marked point pattern where the
   mark is the tree height.
-
-  In the current implementation, \code{marks} must be a vector, of
-  the same length as \code{x} and \code{y}, which is interpreted so
-  that \code{marks[i]} is the mark attached to the point
-  \code{(x[i],y[i])}. If the mark is a real number then \code{marks}
-  should be a numeric vector, while if the mark takes only a finite
-  number of possible values (e.g. colours or types) then
-  \code{marks} should be a \code{factor}.
+  
+  The argument \code{marks} can be either
+  \itemize{
+    \item a vector, of
+    the same length as \code{x} and \code{y}, which is interpreted so
+    that \code{marks[i]} is the mark attached to the point
+    \code{(x[i],y[i])}. If the mark is a real number then \code{marks}
+    should be a numeric vector, while if the mark takes only a finite
+    number of possible values (e.g. colours or types) then
+    \code{marks} should be a \code{factor}.
+    \item
+    a data frame, with the number of rows equal to the number of points
+    in the point pattern. The \code{i}th row of the data frame is interpreted
+    as containing the mark values for the \code{i}th point in the point
+    pattern. The columns of the data frame correspond to different
+    mark variables (e.g. tree species and tree diameter).
+  }
   
   See \code{\link{ppp.object}} for a description of the
   class \code{"ppp"}.

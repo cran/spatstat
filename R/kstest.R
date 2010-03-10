@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.31 $  $Date: 2009/07/24 19:43:47 $
+#  $Revision: 1.35 $  $Date: 2010/03/08 03:50:57 $
 #
 #
 
@@ -22,10 +22,25 @@ kstest.ppp <-
   function(X, covariate, ..., jitter=TRUE) {
     Xname <- deparse(substitute(X))
     covname <- deparse(substitute(covariate))
+    if(!is.marked(X, dfok=TRUE)) {
+      # unmarked
+      model <- ppm(X)
+      modelname <- "CSR"
+    } else if(is.multitype(X)) {
+      # multitype
+      model <- ppm(X, ~marks)
+      modelname <- "CSRI"
+    } else {
+      # marked - general case
+      X <- unmark(X)
+      warning("marks ignored")
+      model <- ppm(X)
+      modelname <- "CSR"
+    }
     do.call("kstestEngine",
-            resolve.defaults(list(ppm(X), covariate, jitter=jitter),
+            resolve.defaults(list(model, covariate, jitter=jitter),
                              list(...),
-                             list(modelname="CSR",
+                             list(modelname=modelname,
                                   covname=covname, dataname=Xname)))
 }
 
@@ -60,33 +75,94 @@ kstestEngine <- function(model, covariate, ...,
 
   X <- data.ppm(model)
   W <- as.owin(model)
-  
-  if(is.im(covariate)) {
-    type <- "im"
-    # evaluate at data points by interpolation
-    ZX <- interp.im(covariate, X$x, X$y)
-    # covariate values for pixels inside window
-    Z <- covariate[W, drop=FALSE]
-    # corresponding mask
-    W <- as.owin(Z)
-  } else if(is.function(covariate)) {
-    type <- "function"
-    # evaluate exactly at data points
-    ZX <- covariate(X$x, X$y)
-    # window
-    W <- as.mask(W)
-    # covariate in window
-    Z <- as.im(covariate, W=W)
-    # collapse function body to single string
-    if(length(covname) > 1)
-      covname <- paste(covname, collapse="")
-  } else
-     stop("covariate should be an image or a function(x,y)")
 
-  # values of covariate in window
-  Zvalues <- as.vector(Z[W, drop=TRUE])
-  # corresponding fitted intensity values
-  lambda <- as.vector(predict(model, locations=W)[W, drop=TRUE])
+  if(!is.marked(model)) {
+    # ...................  unmarked .......................
+    if(is.im(covariate)) {
+      type <- "im"
+      # evaluate at data points by interpolation
+      ZX <- interp.im(covariate, X$x, X$y)
+      # covariate values for pixels inside window
+      Z <- covariate[W, drop=FALSE]
+      # corresponding mask
+      W <- as.owin(Z)
+    } else if(is.function(covariate)) {
+      type <- "function"
+      # evaluate exactly at data points
+      ZX <- covariate(X$x, X$y)
+      # window
+      W <- as.mask(W)
+      # covariate in window
+      Z <- as.im(covariate, W=W)
+      # collapse function body to single string
+      if(length(covname) > 1)
+        covname <- paste(covname, collapse="")
+    } else
+    stop("covariate should be an image or a function(x,y)")
+    # values of covariate in window
+    Zvalues <- as.vector(Z[W, drop=TRUE])
+    # corresponding fitted intensity values
+    lambda <- as.vector(predict(model, locations=W)[W, drop=TRUE])
+  } else {
+    # ...................  marked .......................
+    if(!is.multitype(model))
+      stop("Only implemented for multitype models (factor marks)")
+    marx <- marks(X, dfok=FALSE)
+    possmarks <- levels(marx)
+    npoints <- X$n
+    # single image: replicate 
+    if(is.im(covariate))
+      covariate <- lapply(possmarks, function(x,v){v}, v=covariate)
+    #
+    if(is.list(covariate) && all(unlist(lapply(covariate, is.im)))) {
+      # list of images
+      type <- "im"
+      if(length(covariate) != length(possmarks))
+        stop("Number of images does not match number of possible marks")
+      # evaluate covariate at each data point by interpolation
+      ZX <- numeric(npoints)
+      for(k in seq(possmarks)) {
+        ii <- (marx == possmarks[k])
+        ZX[ii] <- interp.im(covariate[[k]], x=X$x[ii], y=X$y[ii])
+      }
+      # restrict covariate images to window 
+      Z <- lapply(covariate, function(x,W){x[W, drop=FALSE]}, W=W)
+      # extract pixel locations and pixel values
+      Zframes <- lapply(Z, as.data.frame)
+      # covariate values at each pixel inside window
+      Zvalues <- unlist(lapply(Zframes, function(df) { df[ , 3] }))
+      # pixel locations 
+      locn <- lapply(Zframes, function(df) { df[ , 1:2] })
+      # tack on mark values
+      for(k in seq(possmarks))
+        locn[[k]] <- cbind(locn[[k]], data.frame(marks=possmarks[k]))
+      loc <- do.call("rbind", locn)
+      # corresponding fitted intensity values
+      lambda <- predict(model, locations=loc)
+    } else if(is.function(covariate)) {
+      type <- "function"
+      # evaluate exactly at data points
+      ZX <- covariate(X$x, X$y, marx)
+      # same window
+      W <- as.mask(W)
+      # covariate in window
+      Z <- list()
+      g <- function(x,y,m,f) { f(x,y,m) }
+      for(k in seq(possmarks))
+        Z[[k]] <- as.im(g, m=possmarks[k], f=covariate, W=W)
+      Zvalues <- unlist(lapply(Z, function(z) { as.data.frame(z)[,3] }))
+      # corresponding fitted intensity values
+      lambda <- predict(model, locations=W)
+      lambda <- unlist(lapply(lambda, function(z) { as.data.frame(z)[,3] }))
+      if(length(lambda) != length(Zvalues))
+        stop("Internal error: length(lambda) != length(Zvalues)")
+      # collapse function body to single string
+      if(length(covname) > 1)
+        covname <- paste(covname, collapse="")
+    } else
+    stop("covariate should be an image or a function(x,y)")
+  }    
+  # ..........................................................
 
   # apply jittering to avoid ties
   if(jitter) {

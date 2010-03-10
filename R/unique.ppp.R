@@ -1,7 +1,7 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.12 $  $Date: 2009/10/06 07:22:01 $
+# $Revision: 1.13 $  $Date: 2010/03/08 08:23:04 $
 #
 
 unique.ppp <- function(x, ...) {
@@ -13,6 +13,8 @@ unique.ppp <- function(x, ...) {
 duplicated.ppp <- function(x, ...) {
   verifyclass(x, "ppp")
   n <- x$n
+  if(markformat(x) == "dataframe")
+     return(duplicated(as.data.frame(x)))
   # marked points - split by mark value
   if(is.marked(x)) {
     m <- marks(x)

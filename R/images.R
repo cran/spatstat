@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.59 $     $Date: 2009/12/15 01:58:29 $
+#         $Revision: 1.60 $     $Date: 2010/03/08 02:01:44 $
 #
 #      The class "im" of raster images
 #
@@ -386,6 +386,18 @@ as.matrix.im <- function(x, ...) {
   return(x$v)
 }
 
+as.data.frame.im <- function(x, ...) {
+  verifyclass(x, "im")
+  v <- x$v
+  xx <- x$xcol[col(v)]
+  yy <- x$yrow[row(v)]
+  ok <- !is.na(v)
+  xx <- as.vector(xx[ok])
+  yy <- as.vector(yy[ok])
+  vv <- as.vector(v[ok])
+  data.frame(x=xx, y=yy, value=vv, ...)
+}
+  
 mean.im <- function(x, ...) {
   verifyclass(x, "im")
   xvalues <- x[drop=TRUE]

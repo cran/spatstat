@@ -9,9 +9,9 @@
   The data record the locations of 126 pine saplings
   in a Finnish forest, their heights and their diameters.
 
-  The main dataset \code{finpines} is a marked point pattern
-  containing the locations of the saplings marked by their heights.
-  Additional data in \code{finpines.extra} record the sapling diameters.
+  The dataset \code{finpines} is a marked point pattern
+  containing the locations of the saplings marked by their heights
+  and their diameters.
 
   Sapling locations are given in metres (to six significant digits);
   heights are in metres (rounded to the nearest 0.1 metre,
@@ -43,21 +43,18 @@
   These data have subsequently been analysed by Van Lieshout (2004).
 } 
 \format{
-  \code{finpines} is an object of class \code{"ppp"}
+  Object of class \code{"ppp"} 
   representing the point pattern of sapling locations marked by
-  their heights.
+  their heights and diameters.
   See \code{\link{ppp.object}} for details of the format.
-
-  \code{finpines.extra} is a list with one component \code{diameter}
-  which is a numeric vector containing the diameters of the points.
 }
 \usage{data(finpines)}
 \examples{
     data(finpines)
     plot(unmark(finpines), main="Finnish pines: locations")
-    plot(finpines, main="locations and heights")
-    plot(finpines \%mark\% finpines.extra$diameter, main="diameters")
-    plot(finpines \%mark\% finpines.extra$diameter,
+    plot(finpines, which.marks="height", main="heights")
+    plot(finpines, which.marks="diameter", main="diameters")
+    plot(finpines, which.marks="diameter", 
               main="diameters to scale", markscale=1/200)
 }
 \source{Prof Antti Penttinen}

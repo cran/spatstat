@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.114 $	$Date: 2009/11/06 00:08:20 $
+#	$Revision: 4.115 $	$Date: 2010/03/08 01:50:23 $
 #
 #
 #	A window may be either
@@ -672,6 +672,16 @@ nearest.raster.point <- function(x,y,w, indices=TRUE) {
           return(list(x=w$xcol[cc], y=w$yrow[rr]))
 }
 
+mask2df <- function(w) {
+  stopifnot(is.owin(w) && w$type == "mask")
+  xx <- raster.x(w)
+  yy <- raster.y(w)
+  ok <- w$m
+  xx <- as.vector(xx[ok])
+  yy <- as.vector(yy[ok])
+  return(data.frame(x=xx, y=yy))
+}
+
 #------------------------------------------------------------------
 		
 bounding.box <- function(...) {
@@ -747,7 +757,7 @@ bounding.box <- function(...) {
   
 complement.owin <- function(w, frame=as.rectangle(w)) {
   wname <- deparse(substitute(w))
-  verifyclass(w, "owin")
+  w <- as.owin(w)
 
   if(reframe <- !missing(frame)) {
     verifyclass(frame, "owin")

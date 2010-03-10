@@ -1,7 +1,7 @@
 #
 #  nearestsegment.R
 #
-#  $Revision: 1.5 $  $Date: 2009/05/14 23:23:54 $
+#  $Revision: 1.6 $  $Date: 2010/03/08 08:23:04 $
 #
 # Given a point pattern X and a line segment pattern Y,
 # for each point x of X, determine which segment of Y is closest to x

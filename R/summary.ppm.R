@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.33 $   $Date: 2009/11/12 02:26:51 $
+#    $Revision: 1.34 $   $Date: 2010/03/08 08:23:04 $
 #
 #    summary.ppm()
 #    print.summary.ppm()

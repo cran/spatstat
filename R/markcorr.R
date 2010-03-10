@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.53 $ $Date: 2009/12/10 01:08:27 $
+#     $Revision: 1.55 $ $Date: 2010/03/09 04:25:42 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -12,9 +12,8 @@
 "markvario" <-
 function(X, correction=c("isotropic", "Ripley", "translate"),
          r=NULL, method="density", ..., normalise=FALSE) {
-  if(!is.marked(X))
-    stop("Point pattern has no marks")
-  else if(!is.numeric(m <- marks(X)))
+  m <- onecolumn(marks(X))
+  if(!is.numeric(m))
     stop("Marks are not numeric")
   if(missing(correction))
     correction <- NULL
@@ -111,6 +110,7 @@ markcorrint <-
   # If multiplicative=FALSE then w(u,v) = f(u, v)
   #
   stopifnot(is.ppp(X) && is.marked(X))
+  is.marked(X, dfok=FALSE)
   # validate test function
   h <- check.testfun(f, f1, X)
   f     <- h$f

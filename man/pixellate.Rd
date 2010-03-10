@@ -16,8 +16,9 @@ pixellate(x, ...)
   \item{x}{
     Spatial object to be converted.
     A point pattern (object of class \code{"ppp"}),
-    a window (object of class \code{"owin"}) or
-    some other suitable data.
+    a window (object of class \code{"owin"}),
+    a line segment pattern (object of class \code{"psp"}),
+    or some other suitable data.
 }
   \item{\dots}{
     Arguments passed to methods.
@@ -34,8 +35,10 @@ pixellate(x, ...)
   of intersection of each pixel with the window.
 
   The function \code{pixellate} is generic, with methods for
-  point patterns (\code{\link{pixellate.ppp}})
-  and windows (\code{\link{pixellate.owin}}).
+  point patterns (\code{\link{pixellate.ppp}}),
+  windows (\code{\link{pixellate.owin}}),
+  and 
+  line segment patterns (\code{\link{pixellate.psp}}),
   See the separate documentation for these methods.
 
   The related function \code{\link{as.im}}
@@ -49,6 +52,7 @@ pixellate(x, ...)
 \seealso{
   \code{\link{pixellate.ppp}},
   \code{\link{pixellate.owin}},
+  \code{\link{pixellate.psp}},
   \code{\link{as.im}}
 }
 \author{Adrian Baddeley

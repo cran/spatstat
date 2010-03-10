@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.64 $	$Date: 2010/02/08 19:51:55 $
+#	$Revision: 4.66 $	$Date: 2010/03/10 01:37:44 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -73,9 +73,6 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
       marks <- as.data.frame(marks)
     if(is.data.frame(marks)) {
       pp$markformat <- "dataframe"
-      if(.Spatstat.Forbids.Df)
-        stop("Sorry, not implemented for data frame of marks",
-             call.=FALSE)
       if(nout > 0) {
         marks <- marks[ok, ]
         marks(rejects) <- marks[!ok,]
@@ -492,32 +489,6 @@ print.summary.ppp <- function(x, ..., dp=3) {
 }
 
 # ---------------------------------------------------------------
-
-"%mark%" <-
-setmarks <- function(X, m) {
-  verifyclass(X, "ppp")
-  if(is.null(m))
-    return(unmark(X))
-  if(!is.data.frame(m)) {
-    # vector of marks
-    if(length(m) == 1) m <- rep(m, X$n)
-    else if(X$n == 0) m <- rep(m, 0) # ensures marked pattern is obtained
-    else if(length(m) != X$n) stop("number of points != number of marks")
-    Y <- ppp(X$x,X$y,window=X$window,marks=m, check=FALSE)
-    return(Y)
-  }
-  # data frame of marks
-  if(.Spatstat.Forbids.Df) 
-    stop("Sorry, not implemented for data frame of marks", call.=FALSE)
-  if(nrow(m) == 1 || X$n == 0) {
-    # replicate data frame
-    m <- as.data.frame(lapply(as.list(m),
-                              function(x, k) { rep(x, k) },
-                              k=X$n))
-  } else if(nrow(m) != X$n)
-    stop("number of rows of data frame != number of points")
-  Y <- ppp(X$x,X$y,window=X$window,marks=m, check=FALSE)
-}
 
 identify.ppp <- function(x, ...) {
   verifyclass(x, "ppp")

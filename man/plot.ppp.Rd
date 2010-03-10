@@ -6,7 +6,7 @@
 }
 \usage{
  \method{plot}{ppp}(x, main, \dots, chars=NULL, cols=NULL,
-use.marks=TRUE, add=FALSE, maxsize=NULL, markscale=NULL)
+use.marks=TRUE, which.marks=1, add=FALSE, maxsize=NULL, markscale=NULL)
 }
 \arguments{
   \item{x}{
@@ -34,6 +34,12 @@ use.marks=TRUE, add=FALSE, maxsize=NULL, markscale=NULL)
     plotting symbol for each mark;
     if \code{FALSE}, only the locations of the points will be plotted,
     using \code{\link{points}()}.
+  }
+  \item{which.marks}{
+    Index determining which column of marks to use,
+    if the marks of \code{x} are a data frame.
+    A character string or an integer.
+    Defaults to \code{1} indicating the first column of marks.
   }
   \item{add}{
     logical flag; if \code{TRUE},
@@ -213,6 +219,10 @@ use.marks=TRUE, add=FALSE, maxsize=NULL, markscale=NULL)
    data(amacrine)
    v <- plot(amacrine)
    legend(0.2, 1.2, pch=v, legend=names(v))
+
+   # point pattern with multiple marks
+   data(finpines)
+   plot(finpines, which.marks="height")
 }
 
 \author{Adrian Baddeley

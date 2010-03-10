@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.14 $ $Date: 2009/07/21 19:07:13 $
+# $Revision: 1.15 $ $Date: 2010/03/08 08:23:04 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {

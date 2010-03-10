@@ -1,7 +1,7 @@
 #
 # randomOnLines.R
 #
-# $Revision: 1.1 $  $Date: 2009/04/08 05:26:40 $
+# $Revision: 1.3 $  $Date: 2010/03/06 02:25:04 $
 #
 # Generate random points on specified lines
 #
@@ -48,17 +48,26 @@ rpoisppOnLines <- function(lambda, L, lmax=NULL, ...) {
   if(!(is.numeric(lambda) || is.function(lambda) || is.im(lambda)))
     stop(paste(sQuote("lambda"),
                "must be a constant, a function or an image"))
-  if(is.numeric(lambda))
+  if(is.numeric(lambda)) 
     return(runifpoisppOnLines(lambda, L))
 
+  if(is.im(lambda)) {
+    if(!(lambda$type %in% c("real", "integer")))
+        stop("lambda must be numeric-valued or integer-valued")
+    slam <- summary(lambda)
+    if(any(is.infinite(slam$range)))
+      stop("Infinite pixel values not permitted")
+    if(slam$min < 0)
+      stop("Negative pixel values not permitted")
+  }
   if(is.null(lmax)) {
     # compute lmax
-    X <- pointsOnLines(L, np=10000)
-    if(is.function(lambda)) 
+    if(is.function(lambda)) {
+      X <- pointsOnLines(L, np=10000)
       lambdaX <- lambda(X$x, X$y, ...)
-    else
-      lambdaX <- lambda[cbind(X$x, X$y), drop=FALSE]
-    lmax <- max(lambdaX, na.rm=TRUE)
+      lmax <- max(lambdaX, na.rm=TRUE)
+    } else if(is.im(lambda)) 
+      lmax <- slam$max
     if(!is.finite(lmax))
       stop("Infinite values of lambda obtained")
   } 
@@ -72,7 +81,7 @@ rpoisppOnLines <- function(lambda, L, lmax=NULL, ...) {
   if(is.function(lambda)) 
     lambdaY <- lambda(Y$x, Y$y, ...)
   else
-    lambdaY <- lambda[cbind(Y$x, Y$y), drop=FALSE]
+    lambdaY <- safelookup(lambda, Y)
   lambdaY[is.na(lambdaY)] <- 0
   # accept/reject
   pY <- lambdaY/lmax

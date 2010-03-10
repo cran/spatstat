@@ -89,6 +89,7 @@
 \alias{f3Cengine}
 \alias{fasp}
 \alias{findmarktype}
+\alias{firstfactor}
 \alias{fii}
 \alias{fillNA}
 \alias{FormatFaspFormulae}
@@ -156,17 +157,12 @@
 \alias{markformat}
 \alias{markformat.ppp}
 \alias{markformat.psp}
+\alias{markformat.default}
 \alias{mark.scale.default}
 \alias{markspace.integral}
-\alias{marks}           
-\alias{marks.ppp}           
 \alias{marks.psp}           
 \alias{marks.quad}           
-\alias{marks.ppx}           
-\alias{marks<-}           
-\alias{marks<-.ppp}           
 \alias{marks<-.psp}           
-\alias{marks<-.ppx}           
 \alias{\%mapp\%}
 \alias{markappendop}
 \alias{marksubset}
@@ -174,6 +170,7 @@
 \alias{\%mrep\%}
 \alias{marksubsetop}
 \alias{\%msub\%}
+\alias{mask2df}
 \alias{matcolall}
 \alias{matcolany}
 \alias{matcolsum}
@@ -201,6 +198,7 @@
 \alias{no.trend.ppm}
 \alias{n.quad}
 \alias{numalign}
+\alias{onecolumn}
 \alias{ordinal}
 \alias{outdated.interact}
 \alias{overlap.owin}
@@ -452,6 +450,7 @@ f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
+firstfactor(x)
 fii(interaction, coefs, Vnames)
 fillNA(x, value)
 FormatFaspFormulae(f, argname)
@@ -524,21 +523,17 @@ makeunits(sing, plur, mul)
 markformat(x)
 \method{markformat}{ppp}(x)
 \method{markformat}{psp}(x)
+\method{markformat}{default}(x)
 mark.scale.default(marx, w, markscale=NULL, maxsize=NULL)
 markspace.integral(X)
-marks(x, \dots)
-\method{marks}{ppp}(x, \dots, dfok)           
-\method{marks}{psp}(x, \dots, dfok)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
-\method{marks}{ppx}(x, \dots, drop=TRUE)
-marks(x, \dots) <- value
-\method{marks}{ppp}(x, dfok, \dots) <- value
+\method{marks}{psp}(x, \dots, dfok=FALSE)
 \method{marks}{psp}(x, \dots) <- value
-\method{marks}{ppx}(x, \dots) <- value
 markappendop(x, y)
 marksubset(x, index, format)
 marksubsetop(x, i)
 markreplicateop(x, n)
+mask2df(w)
 matcolall(x)
 matcolany(x)
 matcolsum(x)            
@@ -571,6 +566,7 @@ nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
 no.trend.ppm(x)
 n.quad(Q)
 numalign(i, nmax, zero)
+onecolumn(m)
 ordinal(k)
 outdated.interact(object)
 overlap.owin(A,B)

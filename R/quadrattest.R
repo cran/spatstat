@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.21 $  $Date: 2009/08/29 03:01:49 $
+#  $Revision: 1.22 $  $Date: 2010/03/08 08:23:04 $
 #
 
 
@@ -92,7 +92,7 @@ quadrat.testEngine <- function(X, nx, ny, ...,
       fitmeans <- as.vector(t(fitmeans))
     } else {
       U <- as.ppp(Q)
-      V <- marks(cut(U, tess))
+      V <- marks(cut(U, tess), dfok=FALSE)
       fitmeans <- tapply(masses, list(tile=V), sum)
       fitmeans[is.na(fitmeans)] <- 0
     }

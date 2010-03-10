@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.26 $  $Date: 2009/12/10 00:42:34 $
+#  $Revision: 1.27 $  $Date: 2010/03/08 08:23:04 $
 #
 
 quadratcount <- function(X, ...) {

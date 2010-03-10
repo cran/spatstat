@@ -12,7 +12,7 @@
   \itemize{
     \item the locations of the points
     \item the window in which the pattern was observed
-    \item optionally, a ``mark'' attached to each point
+    \item optionally, ``marks'' attached to each point
       (extra information such as a type label).
     }
   If \code{X} is an object of type \code{ppp},
@@ -23,7 +23,7 @@
     \code{n} \tab number of points \cr
     \code{window} \tab window of observation \cr
                   \tab (an object of class \code{\link{owin}}) \cr
-    \code{marks} \tab optional vector of marks
+    \code{marks} \tab optional vector or data frame of marks
   }
   Users are strongly advised not to manipulate these entries
   directly.

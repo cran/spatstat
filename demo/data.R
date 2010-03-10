@@ -44,7 +44,8 @@ data(demopat)
 plot(demopat)
 
 data(finpines)
-plot(finpines %mark% finpines.extra$diameter, main="Finnish pines")
+plot(finpines, which.marks="diameter", main="Finnish pines (diameter)")
+plot(finpines, which.marks="height", main="Finnish pines (height)")
 
 data(hamster)
 plot(hamster)
@@ -71,9 +72,13 @@ plot(murchison$gold, add=TRUE, pch="+",col="blue")
 plot(murchison$faults, add=TRUE, col="red")
 
 data(nbfires)
-plot(split(nbfires)$nbfires.00 %mark% factor(nbextras$extras.00$fire.type),
-     main=c("New Brunswick fires 2000", "by fire type"),
-     cols=c("red", "blue", "green", "cyan"))
+plot(nbfires, use.marks=FALSE, pch=".")
+plot(split(nbfires), chars=".")
+a <- plot(split(nbfires)$"2000", which.marks="fire.type",
+          main=c("New Brunswick fires 2000", "by fire type"),
+          cols=c("red", "blue", "green", "cyan"))
+legend("bottomleft", title="Fire type",
+       legend=names(a), pch=a, col=c("red", "blue", "green", "cyan"))
 
 data(nztrees)
 plot(nztrees)
@@ -106,7 +111,7 @@ data(swedishpines)
 plot(swedishpines)
 
 data(urkiola)
-plot(urkiola, cex=0.5)
-
+a <- plot(urkiola, cex=0.5, cols=2:3)
+legend("bottomleft", legend=names(a), pch=a, col=2:3)
 par(oldpar)
 options(oldoptions)
