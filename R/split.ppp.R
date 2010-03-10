@@ -1,7 +1,7 @@
 #
 # split.ppp.R
 #
-# $Revision: 1.9 $ $Date: 2008/07/22 21:15:54 $
+# $Revision: 1.13 $ $Date: 2010/03/09 23:18:19 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -9,28 +9,50 @@
 
 split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
   verifyclass(x, "ppp")
+  mf <- markformat(x)
+  
   if(is.null(un))
-    un <- missing(f)
+    un <- missing(f) && (mf != "dataframe")
 
   if(missing(f)) {
     # f defaults to marks of x
-    if(!is.multitype(x)) 
-      stop("f is missing and there is no sensible default")
-    f <- fsplit <- marks(x)
+    switch(mf,
+           none={
+             stop("f is missing and there are no marks")
+           },
+           vector={
+             if(!is.multitype(x)) 
+               stop("f is missing and the pattern is not multitype")
+             f <- fsplit <- marks(x)
+           },
+           dataframe={
+             f <- fsplit <- firstfactor(marks(x))
+             if(is.null(f))
+               stop("Data frame of marks contains no factors")
+           })
   } else{
     # f was given
     fsplit <- f
-    # if f is a tessellation or image, determine the grouping
-    if(inherits(f, "im"))
-      fsplit <- f <- tess(image=f)
-    if(inherits(f, "tess")) {
-      f <- marks(cut(x, f))
-    } else {
-      if(!is.factor(f))
-        stop("f must be a factor")
-      if(length(f) != x$n)
-        stop("length(f) must equal the number of points in x")
+    if(inherits(f, "im")) {
+      # f is an image: determine the grouping
+      fsplit <- tess(image=f)
+      f <- marks(cut(x, fsplit))
+    } else if(inherits(f, "tess")) {
+      # f is a tessellation: determine the grouping
+      f <- marks(cut(x, fsplit))
+    } else if(is.character(f) && length(f) == 1) {
+      # f is the name of a column of marks
+      marx <- marks(x)
+      if(is.data.frame(marx) && (f %in% names(marx))) 
+        fsplit <- f <- marx[[f]]
+      else
+        stop(paste("The name", sQuote(f), "does not match any column of marks"))
     }
+    # validate
+    if(!is.factor(f))
+      stop("f must be a factor")
+    if(length(f) != x$n)
+      stop("length(f) must equal the number of points in x")
   }
 
   lev <- levels(f)

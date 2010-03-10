@@ -114,7 +114,7 @@
     convert other types of data to a \code{ppp} object \cr
     \code{\link{clickppp}} \tab
     interactively add points to a plot \cr
-    \code{\link{setmarks}}, \code{\%mark\%}  \tab
+    \code{\link{marks<-}}, \code{\%mark\%}  \tab
     attach/reassign marks to a point pattern
   }
       
@@ -232,7 +232,7 @@
 	classify the points in a point pattern \cr
 	\code{\link{unmark}} \tab
 	remove marks  \cr
-	\code{\link{setmarks}} \tab
+	\code{\link{marks}} \tab
 	attach marks or reset marks  \cr
 	\code{\link{split.ppp}} \tab
 	divide pattern into sub-patterns \cr
@@ -257,6 +257,7 @@
 	\code{\link{delaunay}} \tab
 	compute Delaunay triangulation \cr 
 	\code{\link{convexhull}} \tab compute convex hull \cr
+	\code{\link{discretise}} \tab discretise coordinates \cr
 	\code{\link{pixellate.ppp}} \tab approximate point pattern by 
 	pixel image \cr
 	\code{\link{as.im.ppp}} \tab approximate point pattern by 
@@ -368,6 +369,7 @@
 	\code{\link{as.im}} \tab convert other data to a pixel image\cr
 	\code{\link{pixellate}} \tab convert other data to a pixel image\cr
 	\code{\link{as.matrix.im}} \tab convert pixel image to matrix\cr
+	\code{\link{as.data.frame.im}} \tab convert pixel image to data frame\cr
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr
 	\code{\link{persp.im}}	\tab draw perspective plot of a pixel image \cr
@@ -418,6 +420,10 @@
       \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
       \code{\link{periodify}} \tab make several shifted copies \cr      
       \code{\link{affine.psp}} \tab apply an affine transformation \cr      
+      \code{\link{pixellate.psp}} \tab approximate line segment pattern
+    by pixel image \cr      
+      \code{\link{as.mask.psp}} \tab approximate line segment pattern
+    by binary mask \cr      
       \code{\link{distmap.psp}} \tab compute the distance map of a line
       segment pattern \cr
       \code{\link{density.psp}} \tab kernel smoothing of line segments\cr

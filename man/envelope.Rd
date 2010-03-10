@@ -1,11 +1,27 @@
 \name{envelope}
 \alias{envelope}
+\alias{envelope.ppp}
+\alias{envelope.ppm}
+\alias{envelope.kppm}
 \title{Simulation envelopes of summary function}
 \description{
   Computes simulation envelopes of a summary function.
 }
 \usage{
-  envelope(Y, fun=Kest, nsim=99, nrank=1, \dots, 
+  envelope(Y, fun, ...)
+  \method{envelope}{ppp}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
+  simulate=NULL, verbose=TRUE, clipdata=TRUE,
+  start=NULL,control=list(nrep=1e5,expand=1.5),
+  transform=NULL,global=FALSE,ginterval=NULL,
+  savefuns=FALSE, savepatterns=FALSE,
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
+  \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
+  simulate=NULL, verbose=TRUE, clipdata=TRUE,
+  start=NULL,control=list(nrep=1e5,expand=1.5),
+  transform=NULL,global=FALSE,ginterval=NULL,
+  savefuns=FALSE, savepatterns=FALSE,
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
+  \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL,
@@ -13,7 +29,8 @@
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
 }
 \arguments{
-  \item{Y}{Either a point pattern (object of class
+  \item{Y}{Object containing point pattern data.
+    Either a point pattern (object of class
     \code{"ppp"}) or a fitted point process model
     (object of class \code{"ppm"} or \code{"kppm"}).
     }

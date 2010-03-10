@@ -3,16 +3,21 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 1.66 $  $Date: 2010/01/08 23:28:06 $
+#   $Revision: 1.67 $  $Date: 2010/03/06 02:39:44 $
 #
 
-envelope <- function(Y, fun=Kest, nsim=99, nrank=1, ..., 
-                     simulate=NULL, verbose=TRUE, clipdata=TRUE, 
-                     start=NULL, control=list(nrep=1e5, expand=1.5),
-                     transform=NULL, global=FALSE, ginterval=NULL,
-                     savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
-                     VARIANCE=FALSE, nSD=2,
-                     Yname=NULL, internal=NULL) {
+envelope <- function(Y, fun, ...) {
+  UseMethod("envelope")
+}
+
+envelope.ppp <- envelope.ppm <- envelope.kppm <-
+  function(Y, fun=Kest, nsim=99, nrank=1, ..., 
+           simulate=NULL, verbose=TRUE, clipdata=TRUE, 
+           start=NULL, control=list(nrep=1e5, expand=1.5),
+           transform=NULL, global=FALSE, ginterval=NULL,
+           savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
+           VARIANCE=FALSE, nSD=2,
+           Yname=NULL, internal=NULL) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
   envir.user <- parent.frame()

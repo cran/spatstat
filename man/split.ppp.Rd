@@ -17,7 +17,8 @@
   }
   \item{f}{
     Data determining the grouping. Either a factor, 
-    a pixel image with factor values, or a tessellation.
+    a pixel image with factor values, a tessellation,
+    or the name of one of the columns of marks.
   }
   \item{drop}{
     Logical. Determines whether empty groups will
@@ -65,11 +66,25 @@
     a tessellation (object of class \code{"tess"}).
     Each point of \code{x} will be classified according to
     the tile of the tessellation into which it falls.
+    \item
+    a character string, matching the name of one of the columns of
+    marks, if \code{marks(x)} is a data frame. This column should
+    be a factor.
   }
-  If \code{f} is missing, then \code{x} must be a multitype point pattern
-  (a marked point pattern whose marks vector is a factor).
-  Then the effect is that the points of each type
-  are separated into different point patterns.
+  If \code{f} is missing, then it will be determined by the
+  marks of the point pattern. The pattern \code{x} can be either
+  \itemize{
+    \item 
+    a multitype point pattern
+    (a marked point pattern whose marks vector is a factor).
+    Then \code{f} is taken to be the marks vector.
+    The effect is that the points of each type
+    are separated into different point patterns.
+    \item 
+    a marked point pattern with a data frame of marks, containing at least one
+    column that is a factor. The first such column will be used to
+    determine the splitting factor \code{f}.
+  }
 
   Some of the sub-patterns created by the split
   may be empty. If \code{drop=TRUE}, then empty sub-patterns will
@@ -80,6 +95,11 @@
   If \code{un=TRUE} then the marks of the 
   points will be discarded when they are split into groups,
   while if \code{un=FALSE} then the marks will be retained.
+
+  If \code{f} and \code{un} are both missing,
+  then the default is \code{un=TRUE} for multitype point patterns
+  and \code{un=FALSE} for marked point patterns with a data frame of
+  marks.
   
   The result of \code{split.ppp} has class \code{"splitppp"}
   and can be plotted using \code{\link{plot.splitppp}}.

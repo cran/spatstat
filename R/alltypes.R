@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.23 $   $Date: 2009/08/22 00:54:25 $
+#   $Revision: 1.24 $   $Date: 2010/03/08 08:23:04 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -17,7 +17,7 @@ alltypes <- function(X, fun="K", ...,
 # --------------------------------------------------------------------  
 # First inspect marks
 
-  if(!is.marked(X)) {
+  if(!is.marked(X, dfok=FALSE)) {
     nmarks <- 0
     marklabels <- ""
   } else {

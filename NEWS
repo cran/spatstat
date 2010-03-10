@@ -1,3 +1,59 @@
+	CHANGES IN spatstat VERSION 1.18-0
+
+ACKNOWLEDGEMENTS
+
+    o   we thank Ege Rubak and Tyler Dean Rudolph for suggestions.
+
+HEADLINES
+
+    o   A point pattern is now allowed to have a data frame of marks
+        (previously the marks had to be a vector).
+
+    o   Extended capabilities for 'envelope' and 'kstest'.
+
+NEW FUNCTIONS
+
+    o	pixellate.psp,  as.mask.psp
+    	Convert a line segment pattern to a pixel image or binary mask
+
+    o   as.data.frame.im
+        Convert a pixel image to a data frame
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   A point pattern is now allowed to have a data frame of marks
+        (previously the marks had to be a vector).
+
+    o   Many functions in spatstat now handle point patterns with 
+        a data frame of marks. 
+	These include print.ppp, summary.ppp, plot.ppp, split.ppp.
+
+    o   finpines, nbfires, shapley:
+        The format of these datasets has changed. 
+        They are now point patterns with a data frame of marks.
+
+    o	envelope() is now generic, with methods for "ppp", "ppm" and "kppm".
+
+    o   kstest() now handles multitype point patterns and 
+        multitype point process models.
+
+    o   nnclean() now returns a point pattern with a data frame of marks.
+
+    o   plot.ppp() has new argument 'which.marks' to select one column
+        from a data frame of marks to be plotted. 
+
+    o   plot.ppp() now handles marks that are POSIX times.
+
+    o   complement.owin now handles any object acceptable to as.owin.
+
+BUG FIXES
+
+    o   erosion(w) and opening(w) crashed if w was not a window.
+        Fixed.
+
+    o   diameter() and eroded.areas() refused to work if w was not a window.
+        Fixed.
+
 	CHANGES IN spatstat VERSION 1.17-6
 
 ACKNOWLEDGEMENTS

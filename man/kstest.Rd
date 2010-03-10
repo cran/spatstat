@@ -22,8 +22,8 @@ kstest(...)
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
-    An image (object of class \code{"im"})
-    or a function.
+    A function, a pixel image (object of class \code{"im"})
+    or a list of pixel images.
   }
   \item{\dots}{
     Arguments passed to \code{\link{ks.test}}
@@ -45,24 +45,28 @@ kstest(...)
   point patterns (\code{"ppp"}) and point process models (\code{"ppm"}).
   \itemize{
     \item 
-    If \code{X} is a point pattern dataset (object of class \code{"ppp"}), then
-    \code{kstest(X, ...)} performs a goodness-of-fit test of the
+    If \code{X} is a point pattern dataset (object of class
+    \code{"ppp"}), then \code{kstest(X, ...)}
+    performs a goodness-of-fit test of the
     uniform Poisson point process (Complete Spatial Randomness, CSR)
     for this dataset.
+    For a multitype point pattern, the uniform intensity
+    is assumed to depend on the type of point (sometimes called
+    Complete Spatial Randomness and Independence, CSRI).
     \item
     If \code{model} is a fitted point process model
     (object of class \code{"ppm"}) then \code{kstest(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
   }
-  
   The test is performed by comparing the observed distribution
   of the values of a spatial covariate at the data points,
   and the predicted distribution of the same covariate under the model,
   using the classical Kolmogorov-Smirnov test. Thus, you must nominate
   a spatial covariate for this test.
   
-  The argument \code{covariate} should be either a \code{function(x,y)}
+  If \code{X} is a point pattern that does not have marks,
+  the argument \code{covariate} should be either a \code{function(x,y)}
   or a pixel image (object of class \code{"im"} containing the values
   of a spatial function.
   If \code{covariate} is an image, it should have numeric values,
@@ -70,8 +74,13 @@ kstest(...)
   \code{model}. If \code{covariate} is a function, it should expect
   two arguments \code{x} and \code{y} which are vectors of coordinates,
   and it should return a numeric vector of the same length
-  as \code{x} and \code{y}.  
-
+  as \code{x} and \code{y}.
+  
+  If \code{X} is a multitype point pattern, the argument \code{covariate}
+  can be either a \code{function(x,y,marks)},
+  or a pixel image, or a list of pixel images corresponding to
+  each possible mark value. 
+  
   First the original data point pattern is extracted from \code{model}.
   The values of the \code{covariate} at these data points are
   collected. 
@@ -184,6 +193,13 @@ kstest(...)
    kstest(fit0, xcoord)
    # test right model
    kstest(fit1, xcoord)
+
+   # multitype point pattern
+   data(amacrine)
+   kstest(amacrine, function(x,y,marks){x})
+   kstest(ppm(amacrine, ~marks+y), function(x,y,marks){x})
+   xcoordimage <- as.im(xcoord, W=as.owin(amacrine))
+   kstest(amacrine, xcoordimage)
 }
 \keyword{htest}
 \keyword{spatial}

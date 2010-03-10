@@ -1,13 +1,14 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.42 $	$Date: 2010/01/01 20:43:11 $
+#	$Revision: 1.45 $	$Date: 2010/03/09 23:49:55 $
 #
 #
 #--------------------------------------------------------------------------
 
 plot.ppp <-
-  function(x, main, ..., chars=NULL, cols=NULL, use.marks=TRUE, add=FALSE,
+  function(x, main, ..., chars=NULL, cols=NULL, use.marks=TRUE,
+           which.marks=1, add=FALSE,
            maxsize=NULL, markscale=NULL)
 {
 #
@@ -71,7 +72,7 @@ plot.ppp <-
 # Now convert to bona fide point pattern
   x <- as.ppp(x)
   xwindow <- x$window
-  marked <- is.marked(x, dfok=TRUE)
+  marked <- is.marked(x, dfok=TRUE, na.action="ignore")
 
 # Plot observation window
   if(!add)
@@ -120,9 +121,10 @@ plot.ppp <-
 
   marx <- marks(x, dfok=TRUE)
 
-  # if it's a data frame, take the first column
-  if(is.data.frame(marx))
-    marx <- marx[,1]
+  if(is.data.frame(marx)) {
+    # select column or take first colum
+    marx <- marx[, which.marks]
+  }
 
   # check there are some valid marks!
   ok <- !is.na(marx)
@@ -144,6 +146,16 @@ plot.ppp <-
     marx <- marx[ok]
   }
 
+  
+  ################  convert POSIX times to real numbers ###########
+
+  if(marks.are.times <- inherits(marx, "POSIXt")) {
+    marx <- as.POSIXct(marx)
+    tzone <- attr(marx, "tzone")
+    earliest.time <- min(marx)
+    marx <- as.numeric(marx - earliest.time)
+  }
+  
   ################  real-valued marks ############################
 
   if(is.numeric(marx)) {
@@ -196,7 +208,10 @@ plot.ppp <-
     # return a plottable scale bar
     mr <- range(marx)
     mp.value <- if(is.na(scal)) mr[1] else pretty(mr)
-    mp.plotted <- mp.value * scal 
+    mp.plotted <- mp.value * scal
+    if(marks.are.times)
+      mp.value <- as.POSIXct(mp.value,
+                             tz=tzone, origin=earliest.time)
     names(mp.plotted) <- paste(mp.value)
     return(mp.plotted)
   }
@@ -244,7 +259,7 @@ plot.ppp <-
       cols <- rep(cols, ntypes)
   }
     
-  for(i in seq(um)) {
+  for(i in seq(length(um))) {
     relevant <- (marx == um[i])
     if(any(relevant))
       do.call("smartpoints",

@@ -34,7 +34,21 @@
   Sky positions are given using the coordinates
   Right Ascension (degrees from 0 to 360) and
   Declination (degrees from -90 to 90).
-
+  
+  The point pattern has three mark variables:
+  \describe{
+    \item{Mag}{
+      Galaxy magnitude (a negative logarithmic measure of
+      visible brightness).
+    }
+    \item{V}{
+      Recession velocity (km/sec) inferred from redshift,
+      with corrections applied.
+    }
+    \item{SigV}{
+      Estimated standard error for \code{V}.
+    }
+  }
   The region covered by the survey was approximately the
   UKST's standard quadrilateral survey fields 382 to 384 and 443 to 446.
   However, a few of the galaxy positions lie outside these fields.

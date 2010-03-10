@@ -1,17 +1,19 @@
 #
 # nncorr.R
 #
-# $Revision: 1.4 $  $Date: 2009/04/18 03:38:03 $
+# $Revision: 1.6 $  $Date: 2010/03/09 04:25:51 $
 #
 
 nnmean <- function(X) {
   stopifnot(is.ppp(X) && is.marked(X))
-  m <- marks(X,dfok=FALSE)
-  mean(m[nnwhich(X)])/mean(m)
+  m <- as.data.frame(marks(X))
+  nw <- nnwhich(X)
+  meannum <- function(x) { if(!is.numeric(x)) NA else mean(x) }
+  unlist(lapply(m[nw,], meannum))/unlist(lapply(m, meannum))
 }
 
 nnvario <- function(X) {
-  m <- marks(X, dfok=FALSE)
+  m <- onecolumn(marks(X))
   f <- function(m1,m2) { ((m1-m2)^2)/2 }
   nncorr(X, f, denominator=var(m))
 }
@@ -20,13 +22,11 @@ nncorr <- function(X, f = function(m1,m2) { m1 * m2}, ...,
                    use = "all.obs",
                    method = c("pearson", "kendall", "spearman")) {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("X does not have marks")
   if(missing(method) || is.null(method))
     method <- "pearson"
   f.is.default <- missing(f) || is.null(f)
   stopifnot(is.function(f))
-  m  <- marks(X, dfok=FALSE)
+  m  <- onecolumn(marks(X))
   # denominator
   Efmm <-
     if(f.is.default)

@@ -3,16 +3,20 @@
 #
 #  cut method for ppp objects
 #
-#  $Revision: 1.6 $   $Date: 2008/09/29 05:40:59 $
+#  $Revision: 1.7 $   $Date: 2010/03/08 08:23:04 $
 #
 
 cut.ppp <- function(x, z=marks(x), ...) {
   x <- as.ppp(x)
   if(missing(z)) {
     # cut the marks of x
-    if(!is.marked(x))
+    if(!is.marked(x, dfok=TRUE))
       stop("x has no marks to cut")
-    z <- marks(x, dfok=FALSE)
+    z <- marks(x, dfok=TRUE)
+    if(is.data.frame(z)) {
+        # take first column
+	z <- z[,1]
+    }
     m <- if(is.numeric(z)) cut(z, ...) else factor(z)
     marks(x) <- m
     return(x)

@@ -1,7 +1,7 @@
 #
 #   pcfmulti.inhom.R
 #
-#   $Revision: 1.1 $   $Date: 2009/12/17 05:00:02 $
+#   $Revision: 1.2 $   $Date: 2010/03/08 08:23:04 $
 #
 #   inhomogeneous multitype pair correlation functions
 #
@@ -15,8 +15,7 @@ pcfcross.inhom <-
          sigma=NULL, varcov=NULL)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  stopifnot(is.multitype(X))
   if(missing(correction))
     correction <- NULL
   marx <- marks(X)
@@ -51,8 +50,7 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
          sigma=NULL, varcov=NULL)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  stopifnot(is.multitype(X))
   if(missing(correction))
     correction <- NULL
 

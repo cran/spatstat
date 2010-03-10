@@ -11,7 +11,7 @@
 }
 \usage{
   nnclean(X, k, ...)
-  \method{nnclean}{ppp}(X, k, ..., probs = FALSE,
+  \method{nnclean}{ppp}(X, k, ..., 
                      edge.correct = FALSE, wrap = 0.1,
                      convergence = 0.001, plothist = FALSE,
                      verbose = TRUE, maxit = 50)
@@ -31,10 +31,6 @@
   }
   \item{\dots}{
     Ignored.
-  }
-  \item{probs}{
-    Logical flag determining the type of value returned.
-    See Details.
   }
   \item{edge.correct}{
     Logical flag specifying whether periodic edge correction
@@ -77,37 +73,22 @@
   and three-dimensional point patterns (class \code{"pp3"})
   currently implemented.
 
-  For two-dimensional point patterns,
-  \itemize{
-    \item 
-    in the default case \code{probs=FALSE}, the result is a
-    binary classification. Each point is classified by maximum likelihood
-    as belonging either to the feature or the clutter.
-    The return value is a marked point pattern, where the marks are a factor
-    with levels \code{"noise"} and \code{"feature"} indicating the
-    classification of each point. 
-
-    If \code{probs=TRUE}, the result is a fuzzy or probabilistic
-    classification. The return value is a marked point pattern
-    with marks giving the estimated probabilities
-    that each point belongs to a feature.
+  The result is a point pattern (2D or 3D) with two additional
+  columns of marks:
+  \describe{
+    \item{class}{
+      A factor, with levels \code{"noise"} and \code{"feature"},
+      indicating the maximum likelihood classification of each point.
+    }
+    \item{prob}{
+      Numeric vector giving the estimated probabilities
+      that each point belongs to a feature.
+    }
   }
-
-  For three-dimensional point patterns, the result is a 3D point
-  pattern with two (additional) columns of marks, one containing the
-  probabilities, and one containing the binary classification.
 }
 \value{
   An object of the same kind as \code{X},
   obtained by attaching marks to the points of \code{X}.
-
-  If \code{probs=FALSE} (the default), the marks are a factor
-  with levels \code{"noise"} and \code{"feature"} indicating the
-  maximum likelihood classification of each point by the algorithm.
-
-  If \code{probs=TRUE}, the marks are numeric,
-  giving the estimated probabilities
-  that each point belongs to a feature. 
 }
 \references{
   Byers, S. and Raftery, A.E. (1998)
@@ -131,8 +112,8 @@
   plot(X, chars=c(".", "+"), cols=1:2)
   Y <- split(X)
   plot(Y, chars="+", cex=0.5)
-  Z <- nnclean(shapley, k=17, probs=TRUE)
-  plot(cut(Z, breaks=3), chars=c(".", "+", "+"), cols=1:3)
+  marks(X) <- marks(X)$prob
+  plot(cut(X, breaks=3), chars=c(".", "+", "+"), cols=1:3)
 }
 \keyword{spatial}
 \keyword{classif}

@@ -1,7 +1,7 @@
 #
 # interactive plot for ppp objects using rpanel
 #
-#   $Revision: 1.7 $   $Date: 2009/06/30 22:08:37 $
+#   $Revision: 1.8 $   $Date: 2010/03/08 08:23:04 $
 #
 #
 
@@ -27,6 +27,8 @@ iplot <- function(x, xname) {
   if(missing(xname))
     xname <- deparse(substitute(x))
   verifyclass(x, "ppp")
+  if(markformat(x) == "dataframe")
+	marks(x) <- marks(x)[,1]
   require(rpanel)
   mtype <- if(is.multitype(x)) "multitype" else if(is.marked(x)) "marked" else "unmarked"
 

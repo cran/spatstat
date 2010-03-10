@@ -5,8 +5,6 @@
 #
 #
 
-.Spatstat.Forbids.Df <- TRUE
-
 marks <- function(x, ...) {
   UseMethod("marks")
 }
@@ -14,7 +12,7 @@ marks <- function(x, ...) {
 # The 'dfok' switch is temporary
 # while we convert the code to accept data frames of marks
 
-marks.ppp <- function(x, ..., dfok=FALSE) {
+marks.ppp <- function(x, ..., dfok=TRUE) {
   ma <- x$marks
   if(is.data.frame(ma) && !dfok)
     stop("Sorry, not implemented when the marks are a data frame")
@@ -27,13 +25,37 @@ marks.ppp <- function(x, ..., dfok=FALSE) {
   UseMethod("marks<-")
 }
 
-"marks<-.ppp" <- function(x, dfok=FALSE, ..., value) {
+"marks<-.ppp" <- function(x, ..., dfok=TRUE, value) {
   if(is.data.frame(value) && !dfok)
     stop("Sorry, data frames of marks are not yet implemented")
-  x <- setmarks(x, value)
-  return(x)
+  if(is.null(value))
+    return(unmark(x))
+  m <- value
+  npoints <- x$n
+  if(!is.data.frame(m)) {
+    # vector of marks
+    if(length(m) == 1) m <- rep(m, npoints)
+    else if(npoints == 0) m <- rep(m, 0) # ensures marked pattern is obtained
+    else if(length(m) != npoints) stop("number of points != number of marks")
+    Y <- ppp(x$x,x$y,window=x$window,marks=m, check=FALSE)
+    return(Y)
+  }
+  # data frame of marks
+  if(nrow(m) == 1 || x$n == 0) {
+    # replicate data frame
+    m <- as.data.frame(lapply(as.list(m),
+                              function(x, k) { rep(x, k) },
+                              k=npoints))
+  } else if(nrow(m) != npoints)
+    stop("number of rows of data frame != number of points")
+  Y <- ppp(x$x,x$y,window=x$window,marks=m, check=FALSE)
+  return(Y)
 }
 
+"%mark%" <- setmarks <- function(x,value) {
+  marks(x) <- value
+  return(x)
+}
 
 # -------------------------------------------------
 
@@ -43,13 +65,16 @@ markformat <- function(x) {
 
 markformat.ppp <- function(x) {
   mf <- x$markformat
-  if(is.null(mf)) {
-    x <- as.ppp(x)
-    mf <- x$markformat
-    if(is.null(mf))
-      stop("Internal error: markformat.ppp failed")
-  }
+  if(is.null(mf)) 
+    mf <- markformat(marks(x))
   return(mf)
+}
+
+markformat.default <- function(x) {
+  if(is.null(x)) return("none")
+  if(is.vector(x) || is.factor(x)) return("vector")
+  if(is.data.frame(x)) return("dataframe")
+  stop("Mark format not understood")
 }
 
 # ------------------------------------------------------------------

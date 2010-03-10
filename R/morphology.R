@@ -6,7 +6,7 @@
 #  generic functions
 #  and methods for owin, psp, ppp
 #
-#  $Revision: 1.16 $   $Date: 2009/11/06 00:07:59 $
+#  $Revision: 1.17 $   $Date: 2010/03/10 01:50:00 $
 #
 
 # ............ generic  ............................
@@ -345,9 +345,9 @@ validradius <- function(r, caller="morphological operator") {
     stop(paste("for", paste(caller, ",", sep=""), whinge), call.=FALSE)
   }
   if(!is.numeric(r) || length(r) != 1)
-    groan("radius r must be a single number")
+    groan("radius r must be a single number", caller)
   if(r < 0)
-    groan("radius r must be nonnegative")
+    groan("radius r must be nonnegative", caller)
   return(TRUE)
 }
   

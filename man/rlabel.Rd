@@ -49,7 +49,7 @@
   a random sample from \code{labels} (with replacement).
 }
 \seealso{
-  \code{\link{setmarks}} to assign arbitrary marks.
+  \code{\link{marks<-}} to assign arbitrary marks.
 }
 \examples{
    data(amacrine)

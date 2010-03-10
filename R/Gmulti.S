@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.31 $	$Date: 2010/01/08 23:21:49 $
+#	$Revision: 4.32 $	$Date: 2010/03/08 08:23:04 $
 #
 ################################################################################
 
@@ -24,7 +24,7 @@ function(X, i, j, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han"))
 #	breaks:		(optional) breakpoints for argument r
 #
   X <- as.ppp(X)
-  if(!is.marked(X))
+  if(!is.marked(X, dfok=FALSE))
     stop(paste("point pattern has no", sQuote("marks")))
   stopifnot(is.multitype(X))
 #

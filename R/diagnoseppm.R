@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.25 $ $Date: 2008/11/16 06:40:30 $
+# $Revision: 1.26 $ $Date: 2010/03/08 08:23:04 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,

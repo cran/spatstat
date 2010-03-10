@@ -6,7 +6,7 @@
 # Adapted from statlib file NNclean.q
 # Authors: Simon Byers and Adrian Raftery
 #
-#  $Revision: 1.3 $   $Date: 2010/01/30 03:18:10 $
+#  $Revision: 1.4 $   $Date: 2010/03/08 08:23:04 $
 #
 
 nnclean <- function(X, k, ...) {
@@ -42,7 +42,6 @@ nnclean.pp3 <- function(X, k, ...,
 
 nnclean.ppp <-
   function(X, k, ...,
-           probs=FALSE,
            edge.correct = FALSE, wrap = 0.1,
            convergence = 0.001, plothist = FALSE,
            verbose=TRUE, maxit=50)
@@ -73,23 +72,25 @@ nnclean.ppp <-
                      tol=convergence, plothist=plothist,
                      verbose=verbose, maxit=maxit)
 
+  # extract results
   pp <- em$probs
   zz <- em$z
-  
+  zz <- factor(zz, levels=c(0,1))
+  levels(zz) <- c("noise", "feature")
+  df <- data.frame(class=zz,prob=pp) 
+
   if(edge.correct) {
     # trim back to original point pattern
-    pp <- pp[seq(X$n)]
-    zz <- zz[seq(X$n)]
+    df <- df[seq(X$n), ]
   }
   
-  # return as marked point pattern
-  if(probs) 
-    marx <- pp
-  else {
-    marx <- factor(zz, levels=c(0,1))
-    levels(marx) <- c("noise", "feature")
-  }
-  marks(X) <- marx
+  # tack on
+  marx <- marks(X, dfok=TRUE)
+  if(is.null(marx))
+    marks(X, dfok=TRUE) <- df
+  else 
+    marks(X, dfok=TRUE) <- cbind(df, marx)
+
   return(X)
 }
 

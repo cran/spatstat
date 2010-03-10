@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.30 $	$Date: 2009/07/24 06:08:22 $
+#	$Revision: 5.31 $	$Date: 2010/03/08 08:23:04 $
 #
 #
 # -------- functions ----------------------------------------
@@ -43,6 +43,8 @@
 # ------------------------------------------------------------------------
 
 "Lcross" <- function(X, i, j, ...) {
+  if(!is.multitype(X, dfok=FALSE)) 
+	stop("Point pattern must be multitype")
   if(missing(i)) i <- levels(marks(X))[1]
   if(missing(j)) j <- levels(marks(X))[2]
   K <- Kcross(X, i, j, ...)
@@ -58,6 +60,8 @@
 }
 
 "Ldot" <- function(X, i, ...) {
+  if(!is.multitype(X, dfok=FALSE)) 
+	stop("Point pattern must be multitype")
   if(missing(i)) i <- levels(marks(X))[1]
   K <- Kdot(X, i, ...)
   L <- eval.fv(sqrt(K/pi))
@@ -73,8 +77,8 @@ function(X, i, j, r=NULL, breaks=NULL,
          correction =c("border", "isotropic", "Ripley", "translate") , ...)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  if(!is.multitype(X, dfok=FALSE)) 
+	stop("Point pattern must be multitype")
   if(missing(correction))
     correction <- NULL
   marx <- marks(X)
@@ -110,8 +114,8 @@ function(X, i, r=NULL, breaks=NULL,
          correction = c("border", "isotropic", "Ripley", "translate") , ...)
 {
   verifyclass(X, "ppp")
-  if(!is.marked(X))
-    stop("point pattern has no marks (no component 'marks')")
+  if(!is.multitype(X, dfok=FALSE)) 
+	stop("Point pattern must be multitype")
   if(missing(correction))
     correction <- NULL
 

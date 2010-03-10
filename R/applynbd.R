@@ -1,6 +1,6 @@
 # 	applynbd.R
 #
-#     $Revision: 1.12 $     $Date: 2007/12/18 15:58:03 $
+#     $Revision: 1.13 $     $Date: 2010/03/08 08:23:04 $
 #
 #  applynbd()
 # For each point, identify either
@@ -98,7 +98,7 @@ markstat <- function(X, fun, N, R, ...) {
   if(missing(R) && missing(N))
     stop("either R or N should be given")
   statfun <- function(Y, current, dists, dranks, func, ...)
-    { func(marks(Y), ...) }
+    { func(marks(Y, dfok=TRUE), ...) }
   if(!missing(R))
     applynbd(X, statfun, R=R, func=fun, ...)
   else
