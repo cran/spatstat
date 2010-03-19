@@ -1,5 +1,5 @@
 /*
-	$Revision: 1.2 $ $Date: 2009/11/10 17:24:11 $
+	$Revision: 1.3 $ $Date: 2010/03/18 13:47:55 $
 
 	R interface
 
@@ -29,7 +29,7 @@
 #include "geom3.h"
 #include "functable.h"
 
-#define DEBUG 1
+#undef DEBUG 
 
 #ifdef DEBUG
 #define DEBUGMESSAGE(S) Rprintf(S);

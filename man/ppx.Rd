@@ -65,7 +65,8 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link{pp3}} 
+  \code{\link{pp3}},
+  \code{\link{print.ppx}} 
 }
 \examples{
    df <- data.frame(x=runif(4),y=runif(4),z=runif(4))

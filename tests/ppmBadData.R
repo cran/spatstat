@@ -19,4 +19,6 @@ set.seed(SEED)
 Y <- rpoispp(V)
 fY <- ppm(Y, ~cv + I(cv^2), covariates=list(cv=M), correction="translate")
 diagnose.ppm(fY)
+lurking(fY, covariate=as.im(function(x,y){x}, square(A)), type="raw")
+
 

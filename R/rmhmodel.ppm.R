@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.30 $   $Date: 2009/10/21 02:44:22 $
+#  $Revision: 2.33 $   $Date: 2010/03/15 07:26:38 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -17,7 +17,13 @@ list(
        delta <- inte$par$delta
        rho   <- inte$par$rho
        return(list(cif='diggra',
-                   par=c(kappa=kappa,delta=delta,rho=rho)))
+                   par=list(kappa=kappa,delta=delta,rho=rho)))
+     },
+     "Hard core process" =
+     function(coeffs, inte) {
+       hc <- inte$par$hc
+       return(list(cif='hardcore',
+                   par=list(hc=hc)))
      },
      "Geyer saturation process" =
      function(coeffs, inte) {
@@ -25,21 +31,21 @@ list(
        r <- inte$par$r
        sat <- inte$par$sat
        return(list(cif='geyer',
-                   par=c(gamma=gamma,r=r,sat=sat)))
+                   par=list(gamma=gamma,r=r,sat=sat)))
      },
      "Soft core process" =
      function(coeffs, inte) {
        kappa <- inte$par$kappa
        sigma <- inte$interpret(coeffs,inte)$param$sigma
        return(list(cif="sftcr",
-                   par=c(sigma=sigma,kappa=kappa)))
+                   par=list(sigma=sigma,kappa=kappa)))
      },
      "Strauss process" =
      function(coeffs, inte) {
        gamma <- inte$interpret(coeffs,inte)$param$gamma
        r <- inte$par$r
        return(list(cif = "strauss",
-                   par = c(gamma = gamma, r = r)))
+                   par = list(gamma = gamma, r = r)))
      },
      "Strauss - hard core process" =
      function(coeffs, inte) {
@@ -47,7 +53,7 @@ list(
        r <- inte$par$r
        hc <- inte$par$hc
        return(list(cif='straush',
-                   par=c(gamma=gamma,r=r,hc=hc)))
+                   par=list(gamma=gamma,r=r,hc=hc)))
      },
      "Multitype Strauss process" =
      function(coeffs, inte) {
@@ -80,7 +86,7 @@ list(
      function(coeffs, inte) {
        r <- inte$par$r
        eta <- (inte$interpret)(coeffs, inte)$param$eta
-       return(list(cif='areaint', par=c(eta=eta,r=r)))
+       return(list(cif='areaint', par=list(eta=eta,r=r)))
      },
      "hybrid Geyer process" =
      function(coeffs, inte) {
@@ -226,7 +232,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       Z$par[["beta"]] <- if(!Y$marked) 1 else rep(1, length(Z$types))
       # predict on window possibly larger than original data window
       Z$trend <- 
-        if(control$conditioning != "none" && wsim$type == "mask")
+        if(control$condtype != "none" && wsim$type == "mask")
           predict(X, window=wsim, type="trend", locations=wsim)
         else 
           predict(X, window=wsim, type="trend")

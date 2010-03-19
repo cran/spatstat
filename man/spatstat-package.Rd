@@ -481,6 +481,8 @@
       \code{\link{unitname.pp3}} \tab name of unit of length \cr
       \code{\link{runifpoint3}} \tab generate uniform random points in 3-D \cr
       \code{\link{rpoispp3}} \tab generate Poisson random points in 3-D \cr
+      \code{\link{envelope.pp3}} \tab generate simulation envelopes for
+      3-D pattern \cr
       \code{\link{box3}} \tab create a 3-D rectangular box \cr
       \code{\link{as.box3}} \tab convert data to 3-D rectangular box \cr
       \code{\link{unitname.box3}} \tab name of unit of length \cr
@@ -655,6 +657,7 @@
 
   Related facilities:
   \tabular{ll}{
+    \code{\link{envelope.pp3}} \tab simulation envelopes \cr
     \code{\link{pairdist.pp3}} \tab distances between all pairs of
     points \cr
     \code{\link{crossdist.pp3}} \tab distances between points in
@@ -749,22 +752,23 @@
   an object of class \code{"interact"}. Such objects are created by:
   \tabular{ll}{
     \code{\link{Poisson}()} \tab		the Poisson point process\cr
-    \code{\link{Strauss}()} \tab		the Strauss process \cr
-    \code{\link{StraussHard}()} \tab		the Strauss/hard core point process\cr
-    \code{\link{Softcore}()} \tab		pairwise interaction, soft core potential\cr
-    \code{\link{PairPiece}()} \tab		pairwise interaction, piecewise constant \cr
-    \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
-    \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr
-    \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
-    \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{BadGey}()} \tab	multiscale Geyer process\cr
-    \code{\link{SatPiece}()} \tab	Saturated pair model, piecewise  constant potential\cr
-    \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
+    \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
+    \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
+    \code{\link{Hardcore}()}	 \tab Hard core process\cr
+    \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr
+    \code{\link{MultiStrauss}()} \tab 		multitype Strauss process \cr
+    \code{\link{MultiStraussHard}()} \tab 	multitype Strauss/hard core process \cr
     \code{\link{OrdThresh}()} \tab		Ord process, threshold potential\cr
     \code{\link{Ord}()} \tab 		        Ord model, user-supplied potential \cr
-    \code{\link{MultiStrauss}()} \tab 		multitype Strauss process \cr
-    \code{\link{MultiStraussHard}()} \tab 	multitype Strauss/hard core process 
+    \code{\link{PairPiece}()} \tab		pairwise interaction, piecewise constant \cr
+    \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
+    \code{\link{SatPiece}()} \tab	Saturated pair model, piecewise  constant potential\cr
+    \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
+    \code{\link{Softcore}()} \tab pairwise interaction, soft core potential\cr
+    \code{\link{Strauss}()} \tab  Strauss process \cr
+    \code{\link{StraussHard}()} \tab Strauss/hard core point process
   }
   
   \bold{Finer control over model fitting:}

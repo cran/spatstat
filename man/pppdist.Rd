@@ -125,15 +125,26 @@
   is returned.
 }
 \references{
-  Hitchcock F.L. (1941), The distribution of a product from several sources to numerous localities, \emph{J. Math. Physics} \bold{20}, 224--230.
+  Hitchcock F.L. (1941)
+  The distribution of a product from several sources to numerous
+  localities. \emph{J. Math. Physics} \bold{20}, 224--230.
 
-  Luenberger D.G. (2003). \emph{Linear and nonlinear programming.} Second edition.
-  Kluwer.
+  Luenberger D.G. (2003). \emph{Linear and nonlinear programming.}
+  Second edition. Kluwer.
+
+  Schuhmacher, D. and Xia, A. (2008)
+  A new metric between distributions of point processes.
+  \emph{Advances in Applied Probability} \bold{40}, 651--672
+
+  Schuhmacher, D., Vo, B.-T. and Vo, B.-N. (2008)
+  A consistent metric for performance evaluation of multi-object
+  filters.
+  \emph{IEEE Transactions on Signal Processing} \bold{56}, 3447--3457.
 }
 \author{
   Dominic Schuhmacher
-  \email{dominic@maths.uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~dominic/}
+  \email{dominic.schuhmacher@stat.unibe.ch}
+  \url{http://www.dominic.schuhmacher.name}
 }
 \seealso{
   \code{\link{pppmatching.object}}

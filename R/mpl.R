@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.83 $	$Date: 2010/01/25 19:55:01 $
+#	$Revision: 5.87 $	$Date: 2010/03/16 07:01:00 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2010/01/25 19:55:01 $")
+                    date="$Date: 2010/03/16 07:01:00 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -203,8 +203,10 @@ if(preponly) {
 fmla <- prep$fmla
 glmdata <- prep$glmdata
 problems <- prep$problems
+likelihood.is.zero <- prep$likelihood.is.zero
 computed <- append(computed, prep$computed)
-
+IsOffset <- prep$IsOffset
+  
 ################# F i t    i t   ####################################
 
 # to avoid problem with package checker  
@@ -257,10 +259,12 @@ if(is.null(famille)) {
   Vnames <- prep$Vnames
         
 # attained value of max log pseudolikelihood
-  maxlogpl <-  -(deviance(FIT)/2 + sum(log(W[Z & SUBSET])) + sum(Z & SUBSET))
+  maxlogpl <-
+    if(likelihood.is.zero) { -Inf } else 
+    -(deviance(FIT)/2 + sum(log(W[Z & SUBSET])) + sum(Z & SUBSET))
 
 # fitted interaction object
-  fitin <- if(want.inter) fii(interaction, co, Vnames) else fii()
+  fitin <- if(want.inter) fii(interaction, co, Vnames, IsOffset) else fii()
 ######################################################################
 # Clean up & return 
 
@@ -274,7 +278,7 @@ rslt <- list(
              Q            = Q,
              maxlogpl     = maxlogpl, 
              internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
-                              fmla=fmla, computed=computed),
+                              IsOffset=IsOffset, fmla=fmla, computed=computed),
              covariates   = covariates,
              correction   = correction,
              rbord        = rbord,
@@ -313,7 +317,8 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
   
   names.precomputed <- names(precomputed)
 
-
+  likelihood.is.zero <- FALSE
+  
   if(!missing(vnamebase)) {
     if(length(vnamebase) == 1)
       vnamebase <- rep(vnamebase, 2)
@@ -386,35 +391,35 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     return("")
   }
   
-if(allcovar || want.trend) {
-  trendvariables <- variablesinformula(trend)
-  # Check for use of internal names in trend
-  cc <- check.clashes(internal.names, trendvariables, "the model formula")
-  if(cc != "") stop(cc)
-  # Standard variables
-  if(allcovar || "x" %in% trendvariables)
-    glmdata <- data.frame(glmdata, x=P$x)
-  if(allcovar || "y" %in% trendvariables)
-    glmdata <- data.frame(glmdata, y=P$y)
-  if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS))
-    glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
-  #
-  # Check covariates
-  if(!is.null(covariates)) {
-#   Check for duplication of reserved names
+  if(allcovar || want.trend) {
+    trendvariables <- variablesinformula(trend)
+    # Check for use of internal names in trend
+    cc <- check.clashes(internal.names, trendvariables, "the model formula")
+    if(cc != "") stop(cc)
+    # Standard variables
+    if(allcovar || "x" %in% trendvariables)
+      glmdata <- data.frame(glmdata, x=P$x)
+    if(allcovar || "y" %in% trendvariables)
+      glmdata <- data.frame(glmdata, y=P$y)
+    if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS))
+      glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
+    #
+    # Check covariates
+    if(!is.null(covariates)) {
+    # Check for duplication of reserved names
     cc <- check.clashes(reserved.names, names(covariates),
                         sQuote("covariates"))
     if(cc != "") stop(cc)
-#   Take only those covariates that are named in the trend formula
+    # Take only those covariates that are named in the trend formula
     if(!allcovar) 
       needed <- names(covariates.df) %in% trendvariables
     else
       needed <- rep(TRUE, ncol(covariates.df))
     if(any(needed)) {
       covariates.needed <- covariates.df[, needed, drop=FALSE]
-#   Append to `glmdata'
+    #  Append to `glmdata'
       glmdata <- data.frame(glmdata,covariates.needed)
-#   Ignore any quadrature points that have NA's in the covariates
+    #  Ignore any quadrature points that have NA's in the covariates
       nbg <- is.na(covariates.needed)
       if(any(nbg)) {
         offending <- matcolany(nbg)
@@ -454,150 +459,170 @@ if(allcovar || want.trend) {
 
 ###################### I n t e r a c t i o n ####################
 
-Vnames <- NULL
-
-if(want.inter) {
-
-  verifyclass(interaction, "interact")
+  Vnames <- NULL
+  IsOffset <- NULL
   
-  # Calculations require a matrix (data) x (data + dummy) indicating equality
-  E <- equals.quad(Q)
+  if(want.inter) {
+
+    verifyclass(interaction, "interact")
   
-  # Form the matrix of "regression variables" V.
-  # The rows of V correspond to the rows of P (quadrature points)
-  # while the column(s) of V are the regression variables (log-potentials)
-
-  evaluate <- interaction$family$eval
-  if("precomputed" %in% names(formals(evaluate))) {
-    # version 1.9-3 onward
-    V <- evaluate(X, P, E,
-                  interaction$pot,
-                  interaction$par,
-                  correction, ...,
-                  precomputed=precomputed,
-                  savecomputed=savecomputed)
-    # extract intermediate computation results 
-    if(savecomputed)
-      computed <- append(computed, attr(V, "computed"))
-  } else {
-    # Object created by earlier version of ppm.
-    # Cannot use precomputed data
-    V <- evaluate(X, P, E,
-                  interaction$pot,
-                  interaction$par,
-                  correction)
-  }
-
-  if(!is.matrix(V))
-    stop("interaction evaluator did not return a matrix")
-
+    # Calculations require a matrix (data) x (data + dummy) indicating equality
+    E <- equals.quad(Q)
   
-  # Augment data frame by appending the regression variables for interactions.
-  #
-  # First determine the names of the variables
-  #
-  Vnames <- dimnames(V)[[2]]
-  if(is.null(Vnames)) {
-    # No names were provided for the columns of V.
-    # Give them default names.
-    # In ppm the names will be "Interaction" or "Interact.1", "Interact.2", ...
-    # In mppm an alternative tag will be specified by vnamebase.
-    nc <- ncol(V)
-    Vnames <- if(nc == 1) vnamebase[1] else paste(vnamebase[2], 1:nc, sep="")
-    dimnames(V) <- list(dimnames(V)[[1]], Vnames)
-  
-  } else  if(!is.null(vnameprefix)) {
-    # Variable names were provided by the evaluator (e.g. MultiStrauss).
-    # Prefix the variable names by a string
-    # (typically required by mppm)
-    Vnames <- paste(vnameprefix, Vnames, sep="")
-    dimnames(V) <- list(dimnames(V)[[1]], Vnames)
-  }
+    # Form the matrix of "regression variables" V.
+    # The rows of V correspond to the rows of P (quadrature points)
+    # while the column(s) of V are the regression variables (log-potentials)
 
-  # Check the names are valid as column names in a dataframe
-  okVnames <- make.names(Vnames)
-  if(any(Vnames != okVnames)) {
-    warning("internal error: names of interaction terms contained illegal characters; names have been repaired.")
-    Vnames <- okVnames
-  }
+    evaluate <- interaction$family$eval
+    if("precomputed" %in% names(formals(evaluate))) {
+      # version 1.9-3 onward
+      V <- evaluate(X, P, E,
+                    interaction$pot,
+                    interaction$par,
+                    correction, ...,
+                    precomputed=precomputed,
+                    savecomputed=savecomputed)
+      # extract intermediate computation results 
+      if(savecomputed)
+        computed <- append(computed, attr(V, "computed"))
+    } else {
+      # Object created by earlier version of ppm.
+      # Cannot use precomputed data
+      V <- evaluate(X, P, E,
+                    interaction$pot,
+                    interaction$par,
+                    correction)
+    }
+
+    if(!is.matrix(V))
+      stop("interaction evaluator did not return a matrix")
+
+    # extract information about offsets
+    IsOffset <- attr(V, "IsOffset")
+    if(is.null(IsOffset)) IsOffset <- FALSE 
+  
+    # Augment data frame by appending the regression variables for interactions.
+    #
+    # First determine the names of the variables
+    #
+    Vnames <- dimnames(V)[[2]]
+    if(is.null(Vnames)) {
+      # No names were provided for the columns of V.
+      # Give them default names.
+      # In ppm the names will be "Interaction" or "Interact.1", "Interact.2", ...
+      # In mppm an alternative tag will be specified by vnamebase.
+      nc <- ncol(V)
+      Vnames <- if(nc == 1) vnamebase[1] else paste(vnamebase[2], 1:nc, sep="")
+      dimnames(V) <- list(dimnames(V)[[1]], Vnames)
+    } else if(!is.null(vnameprefix)) {
+      # Variable names were provided by the evaluator (e.g. MultiStrauss).
+      # Prefix the variable names by a string
+      # (typically required by mppm)
+      Vnames <- paste(vnameprefix, Vnames, sep="")
+      dimnames(V) <- list(dimnames(V)[[1]], Vnames)
+    }
+
+    # Check the names are valid as column names in a dataframe
+    okVnames <- make.names(Vnames)
+    if(any(Vnames != okVnames)) {
+      warning("internal error: names of interaction terms contained illegal characters; names have been repaired.")
+      Vnames <- okVnames
+    }
     
-  #   Check for name clashes between the interaction variables
-  #   and the formula
-  cc <- check.clashes(Vnames, termsinformula(trend), "model formula")
-  if(cc != "") stop(cc)
-  #   and with the variables in 'covariates'
-  if(!is.null(covariates)) {
-    cc <- check.clashes(Vnames, names(covariates), sQuote("covariates"))
+    #   Check for name clashes between the interaction variables
+    #   and the formula
+    cc <- check.clashes(Vnames, termsinformula(trend), "model formula")
     if(cc != "") stop(cc)
+    #   and with the variables in 'covariates'
+    if(!is.null(covariates)) {
+      cc <- check.clashes(Vnames, names(covariates), sQuote("covariates"))
+      if(cc != "") stop(cc)
+    }
+
+    # OK. append variables.
+    glmdata <- data.frame(glmdata, V)   
+
+    # check IsOffset matches Vnames
+    if(length(IsOffset) != length(Vnames)) {
+      if(length(IsOffset) == 1)
+        IsOffset <- rep(IsOffset, length(Vnames))
+      else
+        stop("Internal error: IsOffset has wrong length", call.=FALSE)
+    }
+  
+    # Keep only those quadrature points for which the
+    # conditional intensity is nonzero. 
+
+    #KEEP  <- apply(V != -Inf, 1, all)
+    .mpl$KEEP  <- matrowall(V != -Inf)
+
+    .mpl$SUBSET <- .mpl$SUBSET & .mpl$KEEP
+
+    if(any(.mpl$Z & !.mpl$KEEP)) {
+      howmany <- sum(.mpl$Z & !.mpl$KEEP)
+      complaint <- paste(howmany,
+                         "data point(s) are illegal",
+                         "(zero conditional intensity under the model)")
+      details <- list(illegal=howmany,
+                      print=complaint)
+      problems <- append(problems, list(zerolikelihood=details))
+      warning(paste(complaint,
+                    ". Occurred while executing: ",
+                    callstring, sep=""),
+              call. = FALSE)
+      likelihood.is.zero <- TRUE
+    }
   }
-
-  # OK. append variables.
-  glmdata <- data.frame(glmdata, V)   
-
-# Keep only those quadrature points for which the
-# conditional intensity is nonzero. 
-
-#KEEP  <- apply(V != -Inf, 1, all)
-.mpl$KEEP  <- matrowall(V != -Inf)
-
-.mpl$SUBSET <- .mpl$SUBSET & .mpl$KEEP
-
-if(any(.mpl$Z & !.mpl$KEEP)) {
-        howmany <- sum(.mpl$Z & !.mpl$KEEP)
-        complaint <- paste(howmany,
-                           "data point(s) are illegal",
-                           "(zero conditional intensity under the model)")
-        details <- list(illegal=howmany,
-                        print=complaint)
-        problems <- append(problems, list(zerolikelihood=details))
-        warning(paste(complaint,
-                      ". Occurred while executing: ",
-                      callstring, sep=""),
-                call. = FALSE)
-#	browser()
-}
-
-}
-
 ##################   D a t a    f r a m e   ###################
 
 # Determine the domain of integration for the pseudolikelihood.
 
-if(correction == "border") {
+  if(correction == "border") {
 
-  if("bdP" %in% names.precomputed)
-    bd <- precomputed$bdP
-  else
-    bd <- bdist.points(P)
+    if("bdP" %in% names.precomputed)
+      bd <- precomputed$bdP
+    else
+      bd <- bdist.points(P)
 
-  if(savecomputed)
-    computed$bdP <- bd
+    if(savecomputed)
+      computed$bdP <- bd
   
-  .mpl$DOMAIN <- (bd >= rbord)
-  .mpl$SUBSET <- .mpl$DOMAIN & .mpl$SUBSET
-}
+    .mpl$DOMAIN <- (bd >= rbord)
+    .mpl$SUBSET <- .mpl$DOMAIN & .mpl$SUBSET
+  }
 
-glmdata <- cbind(glmdata,
-                 data.frame(.mpl.SUBSET=.mpl$SUBSET,
-                            stringsAsFactors=FALSE))
+  glmdata <- cbind(glmdata,
+                   data.frame(.mpl.SUBSET=.mpl$SUBSET,
+                              stringsAsFactors=FALSE))
 
 #################  F o r m u l a   ##################################
 
-if(!want.trend) trend <- ~1 
-trendpart <- paste(as.character(trend), collapse=" ")
-rhs <- paste(c(trendpart, Vnames), collapse= "+")
-fmla <- paste(".mpl.Y ", rhs)
-fmla <- as.formula(fmla)
+  if(!want.trend) trend <- ~1 
+  trendpart <- paste(as.character(trend), collapse=" ")
+  if(!want.inter)
+    rhs <- trendpart
+  else {
+    VN <- Vnames
+    # enclose offset potentials in 'offset(.)'
+    if(any(IsOffset))
+      VN[IsOffset] <- paste("offset(", VN[IsOffset], ")", sep="")
+    rhs <- paste(c(trendpart, VN), collapse= "+")
+  }
+  fmla <- paste(".mpl.Y ", rhs)
+  fmla <- as.formula(fmla)
 
-####  character string of trend formula (without Vnames)
-trendfmla <- paste(".mpl.Y ", trendpart)
+  ####  character string of trend formula (without Vnames)
+  trendfmla <- paste(".mpl.Y ", trendpart)
+
 #### 
 
 return(list(fmla=fmla, trendfmla=trendfmla,
-            glmdata=glmdata, Vnames=Vnames, problems=problems,
+            glmdata=glmdata, Vnames=Vnames, IsOffset=IsOffset,
+            problems=problems, likelihood.is.zero=likelihood.is.zero,
             computed=computed))
 
 }
+
 
 
 ####################################################################

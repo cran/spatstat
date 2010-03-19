@@ -37,6 +37,10 @@ plot(Z, main="Pixel image")
 X <- runifpoint(42)
 plot(dirichlet(X), main="Tessellation")
 
+enable3d <- ("scatterplot3d" %in% row.names(installed.packages()))
+if(enable3d)
+  plot(rpoispp3(100), main="Three-dimensional point pattern")
+
 fanfare("II. Graphics")
 
 plot(letterR, col="green", border="red", lwd=2, main="Polygonal window with colour fill")
@@ -275,6 +279,16 @@ plot(as.listof(list("Emark(spruces)"=Emark(spruces),
                     "Vmark(spruces)"=Vmark(spruces))),
      main="Independence diagnostics", ylim.covers=0, legendpos="bottom")
 
+if(enable3d) {
+  par3 <- par(mfrow=c(1,2))
+  X <- rpoispp3(100)
+  plot(X, main="3D point pattern X")
+  plot(K3est(X), main="K-function in 3D")
+  plot(X, main="3D point pattern X")
+  plot(G3est(X), main="G-function in 3D", legendpos="bottomright")
+  par(par3)
+}
+
 fanfare("VI. Model-fitting")
 
 data(japanesepines)
@@ -361,7 +375,7 @@ abline(v=(1:4)/5, lty=2)
 X <- rsyst(nx=10)
 plot(rjitter(X, 0.02))
 
-Xg <- rmh(list(cif="geyer", par=c(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
+Xg <- rmh(list(cif="geyer", par=list(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
                w=c(0,10,0,10)),
           control=list(nrep=1e4), start=list(n.start=200))
 plot(Xg, main=paste("Geyer saturation process\n",

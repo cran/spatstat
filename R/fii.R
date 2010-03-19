@@ -4,7 +4,8 @@
 # Class of fitted interpoint interactions
 #
 #
-fii <- function(interaction=NULL, coefs=numeric(0), Vnames=character(0)) {
+fii <- function(interaction=NULL, coefs=numeric(0),
+                Vnames=character(0), IsOffset=NULL) {
   if(is.null(interaction)) 
     interaction <- Poisson()
   stopifnot(is.interact(interaction))
@@ -12,9 +13,16 @@ fii <- function(interaction=NULL, coefs=numeric(0), Vnames=character(0)) {
     if(length(Vnames) > 0)
       stop("Coefficients inappropriate for Poisson process")
   }
+  if(is.null(IsOffset))
+    IsOffset <- rep(FALSE, length(Vnames))
+  else {
+    stopifnot(is.logical(IsOffset))
+    stopifnot(length(IsOffset) == length(Vnames))
+  } 
   out <- list(interaction=interaction,
               coefs=coefs,
-              Vnames=Vnames)
+              Vnames=Vnames,
+              IsOffset=IsOffset)
   class(out) <- c("fii", class(out))
   return(out)
 }
@@ -24,6 +32,7 @@ summary.fii <- function(object, ...) {
   INTERACT <- object$interaction
   coefs    <- object$coefs
   Vnames   <- object$Vnames
+  IsOffset <- object$IsOffset
   y$poisson <- is.poisson.interact(INTERACT)
   if(!y$poisson) {
     if(!is.null(INTERACT$interpret)) {
@@ -33,13 +42,25 @@ summary.fii <- function(object, ...) {
           (INTERACT$interpret)(coefs[Vnames], INTERACT)
         else 
           (INTERACT$interpret)(coefs, INTERACT)
-      header <- paste("Fitted", sensible$inames)
-      printable <- sensible$printable
+      if(!is.null(sensible)) {
+        header <- paste("Fitted", sensible$inames)
+        printable <- sensible$printable
+      } else {
+        # no fitted interaction parameters (e.g. Hard Core)
+        header <- NULL
+        printable <- NULL
+      }
     } else {
       # fallback
       sensible <- NULL
-      header <- "Fitted interaction terms"
-      printable <-  exp(unlist(coefs[Vnames]))
+      VN <- Vnames[!IsOffset]
+      if(length(VN) > 0) {
+        header <- "Fitted interaction terms"
+        printable <-  exp(unlist(coefs[VN]))
+      } else {
+        header <- NULL
+        printable <- NULL
+      }
     }
     y <- append(y, list(sensible=sensible,
                         header=header,
@@ -66,16 +87,21 @@ print.summary.fii <- function(x, ...) {
     cat("Poisson process\n")
   else {
     print(x$interaction, family=secret$family, brief=TRUE)
-    if(length(x$printable) == 1)
-      cat(paste(x$header, ":\t", x$printable, "\n", sep=""))
-    else {
-      cat(paste(x$header, ":\n", sep=""))
-      print(x$printable)
+    if(!is.null(x$printable)) {
+      if(length(x$printable) == 1)
+        cat(paste(x$header, ":\t", x$printable, "\n", sep=""))
+      else {
+        cat(paste(x$header, ":\n", sep=""))
+        print(x$printable)
+      }
     }
   }
   if(!brief) {
-    cat("\nRelevant coefficients:\n")
-    print(x$coefs[x$Vnames])
+    co <- x$coefs[x$Vnames[!x$IsOffset]]
+    if(length(co) > 0) {
+      cat("\nRelevant coefficients:\n")
+      print(co)
+    }
   }
   return(invisible(NULL))
   
@@ -134,8 +160,9 @@ fitin.ppm <- function(object) {
   else {
     coefs <- coef(object)
     Vnames <- object$internal$Vnames
+    IsOffset <- object$internal$IsOffset
     # Internal names of regressor variables 
-    f <- fii(inte, coefs, Vnames)
+    f <- fii(inte, coefs, Vnames, IsOffset)
   }
   return(f)
 }

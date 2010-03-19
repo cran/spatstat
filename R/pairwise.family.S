@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.22 $	$Date: 2009/10/07 02:37:09 $
+#    $Revision: 1.23 $	$Date: 2010/03/13 01:30:19 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -209,6 +209,10 @@ if(!marx)
 else
   POT <- pairpot(M, marks(X), marks(U), potpars)
 
+# Determine whether each column of potential is an offset
+
+  IsOffset <- attr(POT, "IsOffset")
+
 # Check errors and special cases
 
 if(!is.matrix(POT) && !is.array(POT)) {
@@ -258,6 +262,9 @@ V <- apply(POT, c(2,3), sum)
 
 # attach the original pair potentials
 attr(V, "POT") <- POT
+
+# attach the offset identifier
+attr(V, "IsOffset") <- IsOffset
 
 # pass computed information out the back door
 if(savecomputed)

@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.32 $  $Date: 2009/10/16 20:33:51 $
+#   $Revision: 1.37 $  $Date: 2010/03/18 01:56:49 $
 #
 #
 
@@ -142,10 +142,10 @@ reach.rmhmodel <- function(x, ...) {
             C.id=NA,
             multitype=FALSE,
             parhandler=function(par, ...) {
-              check.named.thing(par, "beta", context="For the Poisson process")
-              if(par[["beta"]] < 0)
-                stop("Negative value of beta for Poisson process")
-              return(par)
+              ctxt <- "For the Poisson process"
+              par <- check.named.list(par, "beta", ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              return(unlist(par))
             },
             reach = function(par, ...) { return(0) }
             ),
@@ -157,13 +157,14 @@ reach.rmhmodel <- function(x, ...) {
             C.id="strauss",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","gamma","r"),
-                                        "For the strauss cif")
-              if(any(par<0))
-		stop("Negative parameters for strauss cif.")
-              if(par["gamma"] > 1)
-		stop("For Strauss processes, gamma must be <= 1.")
-              return(par)
+              ctxt <- "For the strauss cif"
+              par <- check.named.list(par, c("beta","gamma","r"), ctxt)
+              with(par, check.1.real(gamma, ctxt))
+              with(par, check.1.real(r,     ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(gamma >= 0 && gamma <= 1, ctxt))
+              with(par, explain.ifnot(r >= 0, ctxt))
+              return(unlist(par))
             },
             reach = function(par, ...) {
               r <- par[["r"]]
@@ -179,11 +180,18 @@ reach.rmhmodel <- function(x, ...) {
             C.id="straush",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","gamma","r","hc"),
-                                        "For the straush cif")
-              if(any(par<0))
-		stop("Negative parameters for straush cif.")
-              return(par)
+              ctxt <- "For the straush cif"
+              par <- check.named.list(par, c("beta","gamma","r","hc"), ctxt)
+              with(par, check.1.real(gamma, ctxt))
+              with(par, check.1.real(r,     ctxt))
+              with(par, check.1.real(hc,     ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(gamma >= 0, ctxt))
+              with(par, explain.ifnot(r >= 0, ctxt))
+              with(par, explain.ifnot(hc >= 0, ctxt))
+              with(par, explain.ifnot(hc <= r, ctxt))
+              with(par, explain.ifnot(hc > 0 || gamma <= 1, ctxt))
+              return(unlist(par))
             },
             reach = function(par, ...) {
               h <- par[["hc"]]
@@ -200,13 +208,14 @@ reach.rmhmodel <- function(x, ...) {
             C.id="sftcr",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","sigma","kappa"),
-                                        "For the sftcr cif")
-              if(any(par<0))
-                stop("Negative  parameters for sftcr cif.")
-              if(par["kappa"] > 1)
-                stop("For Softcore processes, kappa must be <= 1.")
-              return(par)
+              ctxt <- "For the sftcr cif"
+              par <- check.named.list(par, c("beta","sigma","kappa"), ctxt)
+              with(par, check.1.real(sigma, ctxt))
+              with(par, check.1.real(kappa, ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(sigma >= 0, ctxt))
+              with(par, explain.ifnot(kappa >= 0 && kappa <= 1, ctxt))
+              return(unlist(par))
             },
             reach = function(par, ..., epsilon=0) {
               if(epsilon==0)
@@ -231,7 +240,7 @@ reach.rmhmodel <- function(x, ...) {
 		stop("Missing values not allowed in beta.")
               ntypes <- length(types)
               if(length(beta) != ntypes)
-		stop("Length of beta does not match ntypes.")
+		stop("Length of beta does not match number of types.")
               gamma <- par$gamma
               MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
 	      gamma[is.na(gamma)] <- 0
@@ -266,7 +275,7 @@ reach.rmhmodel <- function(x, ...) {
               beta <- par$beta
               ntypes <- length(types)
               if(length(beta) != ntypes)
-		stop("Length of beta does not match ntypes.")
+		stop("Length of beta does not match number of types.")
               if(any(is.na(beta)))
 		stop("Missing values not allowed in beta.")
               
@@ -306,11 +315,12 @@ reach.rmhmodel <- function(x, ...) {
             C.id="dgs",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","rho"),
-                                        "For the dgs cif")
-              if(any(par<0))
-		stop("Negative parameters for dgs cif.")
-              return(par)
+              ctxt <- "For the dgs cif"
+              par <- check.named.list(par, c("beta","rho"), ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(rho, ctxt))
+              with(par, explain.ifnot(rho >= 0, ctxt))
+              return(unlist(par))
             },
             reach=function(par, ...) {
               return(par[["rho"]])
@@ -325,13 +335,18 @@ reach.rmhmodel <- function(x, ...) {
             C.id="diggra",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","kappa","delta","rho"),
-                                      "For the diggra cif")
-              if(any(par<0))
-		stop("Negative parameters for diggra cif.")
-              if(par["delta"] >= par["rho"])
-		stop("Radius delta must be less than radius rho.")
-              return(par)
+              ctxt <- "For the diggra cif"
+              par <- check.named.list(par, c("beta","kappa","delta","rho"),
+                                      ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(kappa, ctxt))
+              with(par, check.1.real(delta, ctxt))
+              with(par, check.1.real(rho,   ctxt))
+              with(par, explain.ifnot(kappa >= 0, ctxt))              
+              with(par, explain.ifnot(delta >= 0, ctxt))              
+              with(par, explain.ifnot(rho >= 0, ctxt))              
+              with(par, explain.ifnot(delta < rho, ctxt))              
+              return(unlist(par))
             },
             reach=function(par, ...) {
               return(par[["rho"]])
@@ -345,13 +360,14 @@ reach.rmhmodel <- function(x, ...) {
             C.id="geyer",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","gamma","r","sat"),
-                                      "For the geyer cif")
-              if(any(par<0))
-		stop("Negative parameters for geyer cif.")
-              if(par["sat"] > .Machine$integer.max-100)
-		par["sat"] <- .Machine$integer.max-100
-              return(par)
+              ctxt <- "For the geyer cif"
+              par <- check.named.list(par, c("beta","gamma","r","sat"), ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(gamma, ctxt))
+              with(par, check.1.real(r,     ctxt))
+              with(par, check.1.real(sat,   ctxt))
+              par <- within(par, sat <- min(sat, .Machine$integer.max-100))
+              return(unlist(par))
             },
             reach = function(par, ...) {
               r <- par[["r"]]
@@ -372,13 +388,12 @@ reach.rmhmodel <- function(x, ...) {
             C.id="lookup",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.list(par, c("beta","h"),
-                                      "For the lookup cif", "r")
-              beta <- par[["beta"]]
-              if(beta < 0)
-		stop("Negative value of beta for lookup cif.")
+              ctxt <- "For the lookup cif"
+              par <- check.named.list(par, c("beta","h"), ctxt, "r")
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              beta   <- par[["beta"]]
               h.init <- par[["h"]]
-              r <- par[["r"]]
+              r      <- par[["r"]]
               if(is.null(r)) {
 		if(!is.stepfun(h.init))
                   stop(paste("For cif=lookup, if component r of",
@@ -453,11 +468,14 @@ reach.rmhmodel <- function(x, ...) {
             C.id="areaint",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.vector(par, c("beta","eta","r"),
-                                        "For the area interaction cif")
-              if(any(par<0))
-		stop("Negative parameters for strauss cif.")
-              return(par)
+              ctxt <- "For the areaint cif"
+              par <- check.named.list(par, c("beta","eta","r"), ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(eta, ctxt))
+              with(par, check.1.real(r,   ctxt))
+              with(par, explain.ifnot(eta >= 0, ctxt))
+              with(par, explain.ifnot(r >= 0,   ctxt))
+              return(unlist(par))
             },
             reach = function(par, ...) {
               r <- par[["r"]]
@@ -473,30 +491,18 @@ reach.rmhmodel <- function(x, ...) {
             C.id="badgey",
             multitype=FALSE,
             parhandler=function(par, ...) {
-              par <- check.named.list(par, c("beta","gamma","r","sat"),
-                                      "For the badgey cif")
-              beta <- par[["beta"]]
-              if(beta < 0)
-                stop("Negative value of beta for badgey cif.")
+              ctxt <- "For the badgey cif"
+              par <- check.named.list(par, c("beta","gamma","r","sat"), ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(all(gamma >= 0), ctxt))
+              with(par, explain.ifnot(all(r >= 0), ctxt))
+              with(par, explain.ifnot(all(sat >= 0), ctxt))
+              with(par, explain.ifnot(length(gamma) == length(r), ctxt)) 
               gamma <- par[["gamma"]]
               r     <- par[["r"]]
               sat   <- par[["sat"]]
-              if(length(gamma) != length(r))
-                stop(paste("Mismatch between lengths of",
-                           dQuote("gamma"), "and", dQuote("r")))
               if(length(sat)==1) sat <- rep(sat,length(gamma))
-              else if(length(gamma) != length(sat))
-                stop(paste("Mismatch between lengths of",
-                           dQuote("gamma"), "and", dQuote("sat")))
-              if(any(gamma<0))
-                stop(paste("Negative values amongst the",
-                           dQuote("gamma"), "parameters"))
-              if(any(r<0))
-                stop(paste("Negative values amongst the",
-                           dQuote("r"), "parameters"))
-              if(any(sat<0))
-                stop(paste("Negative values amongst the",
-                           dQuote("sat"), "parameters"))
+              else explain.ifnot(length(sat) == length(gamma), ctxt)
               mmm <- cbind(gamma,r,sat)
               mmm <- mmm[order(r),]
               ndisc <- length(r)
@@ -507,6 +513,24 @@ reach.rmhmodel <- function(x, ...) {
               r <- par[["r"]]
               gamma <- par[["gamma"]]
               return(max(r[gamma != 1]))
+            }
+            ),
+#
+# 12. The hard core process
+       'hardcore' =
+       list(
+            C.id="hardcore",
+            multitype=FALSE,
+            parhandler=function(par, ...) {
+              ctxt <- "For the hardcore cif"
+              par <- check.named.list(par, c("beta", "hc"), ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(hc > 0, ctxt))
+              return(unlist(par))
+            },
+            reach = function(par, ...) {
+              hc <- par[["hc"]]
+              return(hc)
             }
             )
        # end of list '.Spatstat.RmhTable'

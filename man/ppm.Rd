@@ -147,24 +147,25 @@
       are defined by the argument \code{interaction}. This is an object of
       class \code{"interact"} which is initialised in a very similar way to the
       usage of family objects in \code{\link{glm}} and \code{gam}.
-      The families currently available are:
+      The models currently available are:
       \code{\link{Poisson}},
-      \code{\link{Strauss}},
-      \code{\link{StraussHard}},
+      \code{\link{AreaInter}},
+      \code{\link{BadGey}},
+      \code{\link{DiggleGratton}},
+      \code{\link{Geyer}},
+      \code{\link{Hardcore}},
+      \code{\link{LennardJones}},
       \code{\link{MultiStrauss}},
       \code{\link{MultiStraussHard}},
-      \code{\link{Softcore}},
-      \code{\link{DiggleGratton}},
+      \code{\link{OrdThresh}}, 
+      \code{\link{Ord}},
       \code{\link{Pairwise}},
       \code{\link{PairPiece}},
-      \code{\link{AreaInter}},
-      \code{\link{Geyer}},
-      \code{\link{BadGey}},
-      \code{\link{SatPiece}},
-      \code{\link{LennardJones}},
       \code{\link{Saturated}},
-      \code{\link{OrdThresh}}, and
-      \code{\link{Ord}}.
+      \code{\link{SatPiece}},
+      \code{\link{Softcore}},
+      \code{\link{Strauss}} and 
+      \code{\link{StraussHard}}.
       See the examples below.
  
       If \code{interaction} is missing or \code{NULL},
@@ -352,7 +353,41 @@
     }
   }
 }
+\section{Interaction parameters}{
+  Apart from the Poisson model, every point process model fitted by
+  \code{ppm} has parameters that determine the strength and
+  range of \sQuote{interaction} or dependence between points.
+  These parameters are of two types:
+  \describe{
+    \item{regular parameters:}{
+      A parameter \eqn{\theta}{theta} is called \emph{regular}
+      if the likelihood, when considered as a function of
+      \eqn{\theta}{theta}, is an exponential family.
+    }
+    \item{irregular parameters}{
+      Other parameters are called \emph{irregular}. 
+    }
+  }
+  Typically, regular parameters determine the \sQuote{strength}
+  of the interaction, while irregular parameters determine the
+  \sQuote{range} of the interaction. For example, the Strauss process
+  has a regular parameter \eqn{\gamma}{gamma} controlling the strength
+  of interpoint inhibition, and an irregular parameter \eqn{r}
+  determining the range of interaction.
 
+  The \code{ppm} command is only designed to estimate regular
+  parameters. It requires the values of any irregular parameters
+  to be fixed. For example, to fit a Strauss process model to the \code{cells}
+  dataset, you could type \code{ppm(cells, ~1, Strauss(r=0.07))}.
+  Note that the value of the irregular parameter \code{r} must be given.
+  The result of this command will be a fitted model in which the
+  regular parameter \eqn{\gamma}{gamma} has been estimated.
+
+  To determine the irregular parameters, there are several
+  practical techniques, but no general statistical theory available.
+  One useful technique is maximum profile pseudolikelihood, which
+  is implemented in the command \code{\link{profilepl}}.   
+}
 \references{
   Baddeley, A. and Turner, R.
   Practical maximum pseudolikelihood for spatial point patterns.
@@ -393,22 +428,27 @@
   \code{\link{ppp}}, 
   \code{\link{quadscheme}}, 
   \code{\link{ppm.object}},
-  \code{\link{Poisson}},
-  \code{\link{Strauss}},
-  \code{\link{StraussHard}},
-  \code{\link{MultiStrauss}},
-  \code{\link{MultiStraussHard}},
-  \code{\link{Softcore}},
-  \code{\link{DiggleGratton}},
-  \code{\link{Pairwise}},
-  \code{\link{PairPiece}},
-  \code{\link{AreaInter}},
-  \code{\link{Geyer}},
-  \code{\link{BadGey}},
-  \code{\link{LennardJones}},
-  \code{\link{Saturated}},
-  \code{\link{OrdThresh}},
-  \code{\link{Ord}}
+  \code{\link{profilepl}}.
+
+  Interactions: 
+      \code{\link{Poisson}},
+      \code{\link{AreaInter}},
+      \code{\link{BadGey}},
+      \code{\link{DiggleGratton}},
+      \code{\link{Geyer}},
+      \code{\link{Hardcore}},
+      \code{\link{LennardJones}},
+      \code{\link{MultiStrauss}},
+      \code{\link{MultiStraussHard}},
+      \code{\link{OrdThresh}}, 
+      \code{\link{Ord}},
+      \code{\link{Pairwise}},
+      \code{\link{PairPiece}},
+      \code{\link{Saturated}},
+      \code{\link{SatPiece}},
+      \code{\link{Softcore}},
+      \code{\link{Strauss}} and 
+      \code{\link{StraussHard}}.
 }
 \section{Warnings}{
   The implementation of the Huang-Ogata method is experimental.

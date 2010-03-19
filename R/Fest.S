@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.25 $	$Date: 2010/01/08 23:21:29 $
+#	$Revision: 4.26 $	$Date: 2010/03/12 00:51:35 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -53,7 +53,8 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
           c("r", "%s[pois](r)"), 
           c("distance argument r", "theoretical Poisson %s"),
           fname="F")
-  zeroes <- rep(0, length(rvals))
+  nr <- length(rvals)
+  zeroes <- rep(0, nr)
 #
 #  compute distances and censoring distances
   if(X$window$type == "rectangle") {
@@ -116,23 +117,29 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   }
 
   if(any(correction %in% c("rs", "km"))) {
-    # calculate Kaplan-Meier and border correction (Reduced Sample) estimators
-    if(npoints == 0)
-      result <- data.frame(rs=zeroes, km=zeroes, hazard=zeroes)
-    else {
-      result <- km.rs(o, bdry, d, breaks)
-      result <- as.data.frame(result[c("rs", "km", "hazard")])
+    # calculate Kaplan-Meier and/or border corrected (Reduced Sample) estimators
+    want.rs <- "rs" %in% correction
+    want.km <- "km" %in% correction
+    selection <- c(want.rs, want.km, want.km)
+    tags <- c("rs", "km", "hazard")[selection]
+    labels <- c("%s[bord](r)", "%s[km](r)", "hazard(r)")[selection]
+    descr <- c("border corrected estimate of %s",
+               "Kaplan-Meier estimate of %s",
+               "Kaplan-Meier estimate of hazard function lambda(r)")[selection]
+    if(npoints == 0) {
+      result <- as.data.frame(matrix(0, nr, length(tags)))
+      names(result) <- tags
+    } else {
+      result <- km.rs.opt(o, bdry, d, breaks, KM=want.km, RS=want.rs)
+      result <- as.data.frame(result[tags])
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("%s[bord](r)", "%s[km](r)", "hazard(r)"),
-                 c("border corrected estimate of %s",
-                   "Kaplan-Meier estimate of %s",
-                   "Kaplan-Meier estimate of hazard function lambda(r)"),
-                 "km")
+                 labels, descr, if(want.km) "km" else "rs")
     
     # modify recommended plot range
-    attr(Z, "alim") <- range(rvals[result$km <= 0.9])
+    bestF <- if(want.km) result$km else result$rs
+    attr(Z, "alim") <-  range(rvals[bestF <= 0.9]) 
   }
   
   nama <- names(Z)

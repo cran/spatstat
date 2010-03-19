@@ -38,6 +38,7 @@ pp3(x, y, z, ...)
 }
 \seealso{
   \code{\link{box3}}, 
+  \code{\link{print.pp3}}, 
   \code{\link{ppx}} 
 }
 \examples{

@@ -14,7 +14,8 @@ K3est <- function(X, ...,
   stopifnot(inherits(X, "pp3"))
   correction <- pickoption("correction", correction,
                            c(translation="translation",
-                             isotropic="isotropic"),
+                             isotropic="isotropic",
+                             best="isotropic"),
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
@@ -65,7 +66,8 @@ G3est <- function(X, ...,
                              km="km",
                              KM="km",
                              Hanisch="han",
-                             hanisch="han"),
+                             hanisch="han",
+                             best="km"),
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
@@ -117,7 +119,8 @@ F3est <- function(X, ...,
                              KM="km",
                              Kaplan="km",
                              cs="cs",
-                             CS="cs"),
+                             CS="cs",
+                             best="km"),
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2

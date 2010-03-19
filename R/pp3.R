@@ -3,7 +3,7 @@
 #
 #  class of three-dimensional point patterns in rectangular boxes
 #
-#  $Revision: 1.6 $  $Date: 2009/11/10 21:00:47 $
+#  $Revision: 1.8 $  $Date: 2010/03/18 02:45:56 $
 #
 
 box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
@@ -65,6 +65,10 @@ pp3 <- function(x, y, z, ...) {
   return(out)
 }
 
+is.pp3 <- function(x) { inherits(x, "pp3") }
+
+npoints.pp3 <- function(x) { nrow(x$data) }
+
 print.pp3 <- function(x, ...) {
   cat("Three-dimensional point pattern\n")
   sd <- summary(x$data)
@@ -75,15 +79,27 @@ print.pp3 <- function(x, ...) {
 }
 
 summary.pp3 <- function(object, ...) {
-  cat("Three-dimensional point pattern\n")
   sd <- summary(object$data)
   np <- sd$ncases
-  cat(paste(np, ngettext(np, "point", "points"), "\n"))
   dom <- object$domain
-  print(dom)
   v <- volume.box3(dom)
   u <- summary(unitname(dom))
-  cat(paste("Average intensity", np/v,
+  intens <- np/v
+  out <-  list(np=np, sumdat=sd, dom=dom, v=v, u=u, intensity=intens)
+  class(out) <- "summary.pp3"
+  return(out)
+}
+
+print.summary.pp3 <- function(x, ...) {
+  cat("Three-dimensional point pattern\n")
+  cat(paste(x$np, ngettext(x$np, "point", "points"), "\n"))
+  print(x$dom)
+  u <- x$u
+  v <- x$v
+  cat(paste("Volume", v, "cubic",
+            if(v == 1) u$singular else u$plural,
+            u$explain, "\n"))
+  cat(paste("Average intensity", x$intensity,
             "points per cubic", u$singular, u$explain,
             "\n"))
   invisible(NULL)

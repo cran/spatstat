@@ -3,7 +3,7 @@
 \alias{envelope.ppp}
 \alias{envelope.ppm}
 \alias{envelope.kppm}
-\title{Simulation envelopes of summary function}
+\title{Simulation Envelopes of Summary Function}
 \description{
   Computes simulation envelopes of a summary function.
 }
@@ -11,119 +11,115 @@
   envelope(Y, fun, ...)
   \method{envelope}{ppp}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
   \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  start=NULL,control=list(nrep=1e5,expand=1.5),
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, internal=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
 }
 \arguments{
-  \item{Y}{Object containing point pattern data.
-    Either a point pattern (object of class
+  \item{Y}{
+    Object containing point pattern data.
+    A point pattern (object of class
     \code{"ppp"}) or a fitted point process model
     (object of class \code{"ppm"} or \code{"kppm"}).
-    }
-    \item{fun}{
-      Function that computes the desired summary statistic
-      for a point pattern. 
-    }
-    \item{nsim}{
-      Number of simulated point patterns to be generated
-      when computing the envelopes.
-    }
-    \item{nrank}{
-      Integer. Rank of the envelope value amongst the \code{nsim} simulated
-      values. A rank of 1 means that the minimum and maximum
-      simulated values will be used.
-    }
-    \item{\dots}{
-      Extra arguments passed to \code{fun}.
-    }
-    \item{simulate}{
-      Optional. Specifies how to generate the simulated point patterns.
-      If \code{simulate} is an expression in the R language, then this
-      expression will be evaluated \code{nsim} times,
-      to obtain \code{nsim} point patterns which are taken as the
-      simulated patterns from which the envelopes are computed.
-      If \code{simulate} is a list of point patterns, then the entries
-      in this list will be treated as the simulated patterns from which
-      the envelopes are computed.
-      Alternatively \code{simulate} may be an object produced by the
-      \code{envelope} command: see Details.
-    }
-    \item{verbose}{
-      Logical flag indicating whether to print progress reports
-      during the simulations.
-    }
-    \item{clipdata}{
-      Logical flag indicating whether the data point pattern should be
-      clipped to the same window as the simulated patterns,
-      before the summary function for the data is computed.
-      This should usually be \code{TRUE} to ensure that the
-      data and simulations are properly comparable.
-    }
-    \item{start,control}{
-      Optional. These specify the arguments \code{start} and \code{control}
-      of \code{rmh}, giving complete control over the
-      simulation algorithm.
-    }
-    \item{transform}{
-      Optional. A transformation to be applied to the
-      function values, before the envelopes are computed.
-      An expression object (see Details).
-    }
-    \item{global}{
-      Logical flag indicating whether envelopes should be pointwise
-      (\code{global=FALSE}) or simultaneous (\code{global=TRUE}).
-    }
-    \item{ginterval}{
-      Optional.
-      A vector of length 2 specifying
-      the interval of \eqn{r} values for the simultaneous critical
-      envelopes. Only relevant if \code{global=TRUE}.
-    }
-    \item{savefuns}{
-      Logical flag indicating whether to save all the simulated
-      function values.
-    }
-    \item{savepatterns}{
-      Logical flag indicating whether to save all the simulated
-      point patterns.
-    }
-    \item{nsim2}{
-      Number of extra simulated point patterns to be generated
-      if it is necessary to use simulation to estimate the theoretical
-      mean of the summary function. Only relevant when \code{global=TRUE}
-      and the simulations are not based on CSR.
-    }
-    \item{VARIANCE}{
-      Logical. If \code{TRUE}, critical envelopes will be calculated
-      as sample mean plus or minus \code{nSD} times sample standard
-      deviation.
-    }
-    \item{nSD}{
-      Number of estimated standard deviations used to determine
-      the critical envelopes, if \code{VARIANCE=TRUE}.
-    }
-    \item{Yname}{
-      Character string that should be used as the name of the 
-      data point pattern \code{Y} when printing or plotting the results.
-    }
-    \item{internal}{
-      Do not use this argument.
-      It is used by the package's internal code.
-    }
+  }
+  \item{fun}{
+    Function that computes the desired summary statistic
+    for a point pattern. 
+  }
+  \item{nsim}{
+    Number of simulated point patterns to be generated
+    when computing the envelopes.
+  }
+  \item{nrank}{
+    Integer. Rank of the envelope value amongst the \code{nsim} simulated
+    values. A rank of 1 means that the minimum and maximum
+    simulated values will be used.
+  }
+  \item{\dots}{
+    Extra arguments passed to \code{fun}.
+  }
+  \item{simulate}{
+    Optional. Specifies how to generate the simulated point patterns.
+    If \code{simulate} is an expression in the R language, then this
+    expression will be evaluated \code{nsim} times,
+    to obtain \code{nsim} point patterns which are taken as the
+    simulated patterns from which the envelopes are computed.
+    If \code{simulate} is a list of point patterns, then the entries
+    in this list will be treated as the simulated patterns from which
+    the envelopes are computed.
+    Alternatively \code{simulate} may be an object produced by the
+    \code{envelope} command: see Details.
+  }
+  \item{verbose}{
+    Logical flag indicating whether to print progress reports
+    during the simulations.
+  }
+  \item{clipdata}{
+    Logical flag indicating whether the data point pattern should be
+    clipped to the same window as the simulated patterns,
+    before the summary function for the data is computed.
+    This should usually be \code{TRUE} to ensure that the
+    data and simulations are properly comparable.
+  }
+  \item{start,control}{
+    Optional. These specify the arguments \code{start} and \code{control}
+    of \code{rmh}, giving complete control over the simulation
+    algorithm. Applicable only when \code{Y} is a fitted model
+    of class \code{"ppm"}.
+  }
+  \item{transform}{
+    Optional. A transformation to be applied to the
+    function values, before the envelopes are computed.
+    An expression object (see Details).
+  }
+  \item{global}{
+    Logical flag indicating whether envelopes should be pointwise
+    (\code{global=FALSE}) or simultaneous (\code{global=TRUE}).
+  }
+  \item{ginterval}{
+    Optional.
+    A vector of length 2 specifying
+    the interval of \eqn{r} values for the simultaneous critical
+    envelopes. Only relevant if \code{global=TRUE}.
+  }
+  \item{savefuns}{
+    Logical flag indicating whether to save all the simulated
+    function values.
+  }
+  \item{savepatterns}{
+    Logical flag indicating whether to save all the simulated
+    point patterns.
+  }
+  \item{nsim2}{
+    Number of extra simulated point patterns to be generated
+    if it is necessary to use simulation to estimate the theoretical
+    mean of the summary function. Only relevant when \code{global=TRUE}
+    and the simulations are not based on CSR.
+  }
+  \item{VARIANCE}{
+    Logical. If \code{TRUE}, critical envelopes will be calculated
+    as sample mean plus or minus \code{nSD} times sample standard
+    deviation.
+  }
+  \item{nSD}{
+    Number of estimated standard deviations used to determine
+    the critical envelopes, if \code{VARIANCE=TRUE}.
+  }
+  \item{Yname}{
+    Character string that should be used as the name of the 
+    data point pattern \code{Y} when printing or plotting the results.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -161,23 +157,38 @@
   computed for each of the \code{nsim} simulated patterns.
 }
 \details{
-  Simulation envelopes can be used to assess the goodness-of-fit of
-  a point process model to point pattern data. See the References.
+  The \code{envelope} command performs simulations and
+  computes envelopes of a summary statistic based on the simulations.
+  The result is an object that can be plotted to display the envelopes.
+  The envelopes can be used to assess the goodness-of-fit of
+  a point process model to point pattern data.
 
-  This function first generates \code{nsim} random point patterns
+  For the most basic use, if you have a point pattern \code{X} and
+  you want to test Complete Spatial Randomness (CSR), type
+  \code{plot(envelope(X, Kest,nsim=39))} to see the \eqn{K} function
+  for \code{X} plotted together with the envelopes of the
+  \eqn{K} function for 39 simulations of CSR. 
+  
+  The \code{envelope} function is generic, with methods for
+  the classes \code{"ppp"}, \code{"ppm"} and \code{"kppm"}
+  described here. There is also a method for the class \code{"pp3"}
+  which is described separately as \code{\link{envelope.pp3}}.
+  
+  To create simulation envelopes, the command \code{envelope(Y, ...)} 
+  first generates \code{nsim} random point patterns
   in one of the following ways. 
   \itemize{
     \item 
     If \code{Y} is a point pattern (an object of class \code{"ppp"})
     and \code{simulate=NULL},
-    then this routine generates \code{nsim} simulations of
+    then we generate \code{nsim} simulations of
     Complete Spatial Randomness (i.e. \code{nsim} simulated point patterns
     each being a realisation of the uniform Poisson point process)
     with the same intensity as the pattern \code{Y}.
     (If \code{Y} is a multitype point pattern, then the simulated patterns
     are also given independent random marks; the probability
     distribution of the random marks is determined by the
-    relative frequencies of marks in \code{Y}.) 
+    relative frequencies of marks in \code{Y}.)
     \item
     If \code{Y} is a fitted point process model (an object of class
     \code{"ppm"} or \code{"kppm"}) and \code{simulate=NULL},

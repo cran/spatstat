@@ -45,8 +45,8 @@
 }
 \author{
   Dominic Schuhmacher
-  \email{dominic@maths.uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~dominic/}
+  \email{dominic.schuhmacher@stat.unibe.ch}
+  \url{http://www.dominic.schuhmacher.name}
 }
 \seealso{
   \code{\link{pppmatching.object}}

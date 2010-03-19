@@ -38,6 +38,10 @@
 
   If the intersection is empty, then if \code{fatal=FALSE}
   the result is NULL, while if \code{fatal=TRUE} an error occurs.
+
+  The intersection or union of more than two windows can also be
+  computed. For \code{intersect.owin} and \code{union.owin} the
+  arguments \code{\dots} can include additional window objects.
 }
 
 \author{Adrian Baddeley
@@ -102,6 +106,11 @@
    plot(w, add=TRUE, col="lightblue")   
    plot(A, add=TRUE)
    plot(B, add=TRUE)
+
+# intersection and union of three windows
+   C <- shift(B, c(0.2, 0.3))
+   plot(union.owin(A,B,C))
+   plot(intersect.owin(A,B,C))
 }
 \keyword{spatial}
 \keyword{math}
