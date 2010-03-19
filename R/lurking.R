@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.26 $ $Date: 2008/07/25 22:23:53 $
+# $Revision: 1.27 $ $Date: 2010/03/15 01:06:56 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -36,13 +36,16 @@ lurking <- function(object, covariate, type="eem",
   if(plot.sd && is.null(getglmfit(object)))
     object <- update(object, forcefit=TRUE)
   
-  # extract spatial locations 
-  Q <- quad.ppm(object, drop=TRUE)
+  # extract spatial locations
+  Q <- quad.ppm(object)
   datapoints <- Q$data
   quadpoints <- union.quad(Q)
   Z <- is.data(Q)
   wts <- w.quad(Q)
-
+  # subset of quadrature points used to fit model
+  subQset <- getglmsubset(object)
+  if(is.null(subQset)) subQset <- rep(TRUE, n.quad(Q))
+  
   #################################################################
   # compute the covariate
 
@@ -61,14 +64,16 @@ lurking <- function(object, covariate, type="eem",
       # Recompute model, extracting all covariates 
       object <- update(object, allcovar=TRUE)
       # harmonise, just in case
-      Q <- quad.ppm(object, drop=TRUE)
+      Q <- quad.ppm(object)
       datapoints <- Q$data
       quadpoints <- union.quad(Q)
       Z <- is.data(Q)
       wts <- w.quad(Q)
+      subQset <- getglmsubset(object)
+      if(is.null(subQset)) subQset <- rep(TRUE, n.quad(Q))
       # 
     }
-    glmdata <- getglmdata(object, drop=TRUE)
+    glmdata <- getglmdata(object)
     # Fix special cases
     if(is.null(glmdata)) {
       # default 
@@ -93,26 +98,26 @@ lurking <- function(object, covariate, type="eem",
   #################################################################
   # Validate covariate values
 
-  if(naughty <- any(nbg <- is.na(covvalues))) {
-    # remove NA's
+  nbg <- is.na(covvalues)
+  if(any(offending <- nbg && subQset)) {
     if(is.im(covariate))
-      warning(paste(sum(nbg), "out of", length(nbg),
-                  "quadrature points discarded because",
-                  ngettext(sum(nbg), "it lies", "they lie"),
-                 "outside the domain of the covariate image"))
+      warning(paste(sum(offending), "out of", length(offending),
+                    "quadrature points discarded because",
+                    ngettext(sum(offending), "it lies", "they lie"),
+                    "outside the domain of the covariate image"))
     else
-      warning(paste(sum(nbg), "out of", length(nbg),
+      warning(paste(sum(offending), "out of", length(offending),
                  "covariate values discarded because",
-                 ngettext(sum(nbg), "it is NA", "they are NA")))
-    # remove offending points
-    ok <- !nbg
-    Q <- Q[ok]
-    covvalues <- covvalues[ok]
-    quadpoints <- quadpoints[ok]
-    # adjust
-    Z <- is.data(Q)
-    wts <- w.quad(Q)
+                 ngettext(sum(offending), "it is NA", "they are NA")))
   }
+  # remove points
+  ok <- !nbg & subQset
+  Q <- Q[ok]
+  covvalues <- covvalues[ok]
+  quadpoints <- quadpoints[ok]
+  # adjust
+  Z <- is.data(Q)
+  wts <- w.quad(Q)
   if(any(is.infinite(covvalues) | is.nan(covvalues)))
     stop("covariate contains Inf or NaN values")
 
@@ -127,8 +132,8 @@ lurking <- function(object, covariate, type="eem",
   resvalues <- 
     if(!is.null(rv)) rv
     else if(type=="eem") eem(object, check=check)
-    else residuals.ppm(object, type=type, drop=TRUE, check=check)
-  if(naughty && type != "eem")
+    else residuals.ppm(object, type=type, check=check)
+  if(type != "eem")
     resvalues <- resvalues[ok]
 
   res <- (if(type == "eem") datapoints else quadpoints) %mark% as.numeric(resvalues)
@@ -235,14 +240,14 @@ lurking <- function(object, covariate, type="eem",
 
     if(plot.sd && cumulative) {
       # Fitted intensity at quadrature points
-      lambda <- fitted.ppm(object, type="trend", drop=TRUE, check=check)
-      if(naughty) lambda <- lambda[ok]
+      lambda <- fitted.ppm(object, type="trend", check=check)
+      lambda <- lambda[ok]
       # Fisher information for coefficients
       asymp <- vcov(object,what="internals")
       Fisher <- asymp$fisher
       # Local sufficient statistic at quadrature points
       suff <- asymp$suff
-      if(naughty) suff <- suff[ok, ,drop=FALSE]
+#      suff <- suff[ok, ,drop=FALSE]
       # Clip if required
       if(clip) {
         lambda <- lambda[clipquad]

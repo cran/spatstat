@@ -40,6 +40,7 @@
 \alias{check.named.vector}
 \alias{check.nvector}
 \alias{check.nmatrix}
+\alias{check.1.real}
 \alias{check.testfun}
 \alias{clip.psp}
 \alias{cliprect.psp}
@@ -75,6 +76,7 @@
 \alias{edge.Trans}
 \alias{emptywindow}
 \alias{ensure2vector}
+\alias{envelopeEngine}
 \alias{equals.quad}          
 \alias{equalsfun.quad}          
 \alias{eratosthenes}
@@ -84,6 +86,7 @@
 \alias{evenly.spaced}
 \alias{exactdt}              
 \alias{exactPdt}
+\alias{explain.ifnot}
 \alias{extractAIC.ppm}
 \alias{f3engine}
 \alias{f3Cengine}
@@ -134,6 +137,8 @@
 \alias{is.multitype.default}    
 \alias{is.poisson.interact}
 \alias{is.poisson.ppm}
+\alias{is.pp3}
+\alias{is.ppx}
 \alias{is.prime}
 \alias{is.psp}
 \alias{is.stationary.ppm}
@@ -145,6 +150,7 @@
 \alias{Kwtsum}               
 \alias{Kmulti.inhom}               
 \alias{killinteraction}
+\alias{km.rs.opt}
 \alias{least.common.multiple}
 \alias{levels<-.im}
 \alias{licence.polygons}
@@ -307,6 +313,7 @@
 \alias{shiftxy}              
 \alias{shiftxypolygon}              
 \alias{simplify.xypolygon}              
+\alias{simulrecipe}              
 \alias{spatstat.rawdata.location}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
@@ -399,6 +406,7 @@ check.named.vector(x, nam, context, namopt)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
 check.nvector(v, npoints, fatal=TRUE)
 check.nmatrix(m, npoints, fatal=TRUE)
+check.1.real(x, context, fatal)
 check.testfun(f, f1, X)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
@@ -436,6 +444,14 @@ edge.Ripley(X, r, W, method)
 edge.Trans(X, Y, W, exact, paired, trim)
 emptywindow(w)
 ensure2vector(x)
+envelopeEngine(X, fun, simul,
+           nsim=99, nrank=1, \dots, 
+           verbose=TRUE, clipdata=TRUE, 
+           transform=NULL, global=FALSE, ginterval=NULL,
+           savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
+           VARIANCE=FALSE, nSD=2,
+           Yname=NULL, internal=NULL, cl=NULL,
+           envir.user=envir.user)
 equals.quad(Q)          
 equalsfun.quad(Q)          
 eratosthenes(nmax)
@@ -445,13 +461,14 @@ even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
+explain.ifnot(expr, context)
 \method{extractAIC}{ppm}(fit, scale, k, \dots)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 firstfactor(x)
-fii(interaction, coefs, Vnames)
+fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
@@ -495,6 +512,8 @@ is.interact(x)
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.poisson.interact(x)
 is.poisson.ppm(x)
+is.pp3(x)
+is.ppx(x)
 is.prime(n)
 is.psp(x)
 is.stationary.ppm(x)    
@@ -511,6 +530,7 @@ Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
          Iname = "points satisfying condition I",
          Jname = "points satisfying condition J")
 killinteraction(model)
+km.rs.opt(o, cc, d, breaks, KM, RS)
 least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 licence.polygons()
@@ -689,10 +709,11 @@ second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
+simulrecipe(type, expr, envir, csr)
 spatstat.rawdata.location(\dots)
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
-sp.foundclasses(cnames, inlist, formalname, argsgiven)             
+sp.foundclasses(cnames, inlist, formalname, argsgiven)
 stratrand(window, nx, ny, k = 1)
 suffloc(object)
 suffstat.generic(model, X, callstring)

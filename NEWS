@@ -1,3 +1,81 @@
+	CHANGES IN spatstat VERSION 1.18-1
+
+ACKNOWLEDGEMENTS
+
+    o   we thank Andrew Bevan and Ege Rubak for suggestions.
+
+NEW FUNCTIONS
+
+    o   Hardcore: Hard core interaction (for use in ppm)
+
+    o   envelope.pp3: simulation envelopes for 3D point patterns
+
+    o   npoints: number of points in a point pattern of any kind
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   rmh.ppm, rmhmodel.ppm:
+    	It is now possible to simulate Gibbs point process models
+	that are fitted to multitype point patterns using a
+	non-multitype interaction, e.g.
+	     data(amacrine)
+	     fit <- ppm(amacrine, ~marks, Strauss(0.1))
+	     rmh(fit, ...)
+
+    o   rmh.ppm, rmhmodel.ppm, rmh.default, rmhmodel.default:
+    	Hard core models can be simulated.
+
+    o	rmh.default, rmhmodel.default:
+   	The argument 'par' is now required to be a list, in all cases
+	(previously it was sometimes a list and sometimes a vector).
+
+    o   Fest:
+        Calculation has been accelerated in some cases.
+
+    o   summary.pp3 now returns an object of class 'summary.pp3'
+    	containing useful summary information. It is plotted by
+	'plot.summary.pp3'.
+
+    o   F3est, G3est, K3est: these functions now accept 
+        'correction="best"' 
+
+    o   union.owin, intersect.owin: 
+    	these functions now handle any number of windows.
+
+    o   envelope.ppp, envelope.ppm, envelope.kppm: 
+        argument lists have changed slightly
+
+BUG FIXES
+
+    o   Fest: The result of Fest(X, correction="rs") had a slightly
+    	corrupted format, so that envelope(X, Fest, correction="rs")
+	in fact computed the envelopes based on the "km" correction.
+	(Spotted by Ege Rubak).
+	Fixed.
+
+    o   rmh (rmh.ppm, rmhmodel.ppm):
+	rmh sometimes failed for non-stationary point process models,
+	with a message about "missing value where TRUE/FALSE needed".
+	(Spotted by Andrew Bevan).
+	Fixed.
+
+    o   diagnose.ppm, lurking:
+        Calculations were not always correct if the model
+	had conditional intensity equal to zero at some locations.
+	Fixed.
+
+    o   ppm, profilepl:
+        If data points are illegal under the model (i.e. if any
+        data points have conditional intensity equal to zero)
+        the log pseudolikelihood should be -Inf but was sometimes
+	returned as a finite value. Thus profilepl did not always 
+	work correctly for models with a hard core.
+	Fixed.
+
+    o   F3est, G3est: 
+    	Debug messages were printed unnecessarily.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.18-0
 
 ACKNOWLEDGEMENTS

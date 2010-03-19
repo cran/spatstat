@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.62 $	$Date: 2010/03/10 01:52:04 $
+#	$Revision: 4.64 $	$Date: 2010/03/18 13:02:36 $
 #
 #
 #
@@ -158,7 +158,23 @@ overlap.owin <- function(A, B) {
 intersect.owin <- function(A, B, ..., fatal=TRUE) {
   verifyclass(A, "owin")
   verifyclass(B, "owin")
-
+  liszt <- list(...)
+  rasterinfo <- list()
+  if(length(liszt) > 0) {
+    # explicit arguments controlling raster info
+    israster <- names(liszt) %in% names(formals(as.mask))
+    rasterinfo <- liszt[israster]
+    # handle intersection of more than two windows
+    isowin <- unlist(lapply(liszt, is.owin))
+    nextra <- sum(isowin)
+    if(nextra > 0) {
+      windows <- liszt[isowin]
+      for(i in 1:nextra)
+        B <- do.call("intersect.owin",
+                     append(list(B, windows[[i]]), rasterinfo))
+    }
+  }
+  #
   if(identical(A, B))
     return(A)
 
@@ -215,13 +231,13 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
     B <- trim.mask(B, C)
 
   # Did the user specify the pixel raster?
-  if(length(list(...)) > 0) {
+  if(length(rasterinfo) > 0) {
     # convert to masks with specified parameters, and intersect
     if(Amask) {
-      A <- as.mask(A, ...)
+      A <- do.call("as.mask", append(list(A), rasterinfo))
       return(restrict.mask(A, B))
     } else {
-      B <- as.mask(B, ...)
+      B <- do.call("as.mask", append(list(B), rasterinfo))
       return(restrict.mask(B, A))
     }
   } 
@@ -260,6 +276,23 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
 
 
 union.owin <- function(A, B, ...) {
+  liszt <- list(...)
+  rasterinfo <- list()
+  if(length(liszt) > 0) {
+    # explicit arguments controlling raster info
+    israster <- names(liszt) %in% names(formals(as.mask))
+    rasterinfo <- liszt[israster]
+    # handle intersection of more than two windows
+    isowin <- unlist(lapply(liszt, is.owin))
+    nextra <- sum(isowin)
+    if(nextra > 0) {
+      windows <- liszt[isowin]
+      for(i in 1:nextra)
+        B <- do.call("union.owin",
+                     append(list(B, windows[[i]]), rasterinfo))
+    }
+  }
+  #
   if(is.null(A) || is.empty(A)) return(B)
   if(is.null(B) || is.empty(B)) return(A)
   verifyclass(A, "owin")
@@ -310,17 +343,17 @@ union.owin <- function(A, B, ...) {
   ####### Result is a mask ############
 
   # Determine pixel raster parameters
-  rasterinfo <- 
-    if((length(list(...)) > 0))
-      list(...)
-    else if(Amask)
-      list(xy=list(x=prolongseq(A$xcol, C$xrange),
-                   y=prolongseq(A$yrow, C$yrange)))
-    else if(Bmask)
-      list(xy=list(x=prolongseq(B$xcol, C$xrange),
-                   y=prolongseq(B$yrow, C$yrange)))
-    else
-      list()
+  if(length(rasterinfo) == 0) {
+    rasterinfo <-
+      if(Amask)
+        list(xy=list(x=prolongseq(A$xcol, C$xrange),
+               y=prolongseq(A$yrow, C$yrange)))
+      else if(Bmask)
+        list(xy=list(x=prolongseq(B$xcol, C$xrange),
+               y=prolongseq(B$yrow, C$yrange)))
+      else
+        list()
+  }
 
   # Convert C to mask
   C <- do.call("as.mask", append(list(w=C), rasterinfo))

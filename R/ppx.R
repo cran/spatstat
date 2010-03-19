@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.3 $  $Date: 2010/02/05 07:07:38 $
+#  $Revision: 1.4 $  $Date: 2010/03/18 02:45:45 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -45,6 +45,9 @@ ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
   return(out)
 }
 
+is.ppx <- function(x) { inherits(x, "ppx") }
+
+npoints.ppx <- function(x) { nrow(x$data) }
 
 print.ppx <- function(x, ...) {
   cat("Multidimensional point pattern\n")

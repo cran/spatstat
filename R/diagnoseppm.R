@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.26 $ $Date: 2010/03/08 08:23:04 $
+# $Revision: 1.29 $ $Date: 2010/03/15 00:20:13 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -15,7 +15,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     stop("Sorry, this is not yet implemented for marked models")
 
   # quadrature points
-  Q <- quad.ppm(object, drop=TRUE)
+  Q <- quad.ppm(object)
   U <- union.quad(Q)
   Qweights <- w.quad(Q)
   
@@ -28,8 +28,9 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     X <- data.ppm(object)
     Y <- X %mark% as.numeric(residu)
   } else {
-    residu <- if(!is.null(rv)) rv else residuals.ppm(object,type=type,drop=TRUE, check=FALSE)
+    residu <- if(!is.null(rv)) rv else residuals.ppm(object, type=type, check=FALSE)
     Y <- U %mark% as.numeric(residu)
+    Y <- Y
   }
 
   # Atoms and density of measure
@@ -50,6 +51,13 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
       if(!is.null(atoms) && !is.null(masses) && !is.null(cts)) {
         Ymass <- (U %mark% masses)[atoms]
         Ycts    <- U %mark% cts
+        # remove NAs (as opposed to zero cif points)
+        if(!all(ok <- is.finite(cts))) {
+          U <- U[ok]
+          Ycts <- Ycts[ok]
+          cts  <- cts[ok]
+          Qweights <- Qweights[ok]
+        }
         # interpolate continuous part to yield an image for plotting
         if(type == "inverse" && all(cts > 0)) {
           Ydens <- as.im(-1, Y$window)
@@ -133,10 +141,10 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   }
   
   # -------------- cumulative (lurking variable) plots --------------
-  
+
   if(opt$xcumul)
     result$xcumul <- 
-    lurking(object, covariate=x.quad(quad.ppm(object, drop=TRUE)),
+    lurking(object, covariate=x.quad(Q),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
             rv=residu,
@@ -149,7 +157,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
 
   if(opt$ycumul)
     result$ycumul <- 
-    lurking(object, covariate=y.quad(quad.ppm(object, drop=TRUE)),
+    lurking(object, covariate=y.quad(Q),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
             rv=residu,

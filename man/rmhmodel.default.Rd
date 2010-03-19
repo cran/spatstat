@@ -41,32 +41,33 @@
   The argument \code{cif} is a character string specifying the choice of
   interpoint interaction for the point process. The current options are
   \describe{
+    \item{\code{'areaint'}}{Area-interaction process.}
+    \item{\code{'badgey'}}{Baddeley-Geyer (hybrid Geyer) process.}
+    \item{\code{'dgs'}}{Diggle, Gates and Stibbard (1987) process}
+    \item{\code{'diggra'}}{Diggle and Gratton (1984) process}
+    \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
+    \item{\code{'hardcore'}}{Hard core process}
     \item{\code{'strauss'}}{The Strauss process}
     \item{\code{'straush'}}{The Strauss process with hard core}
     \item{\code{'sftcr'}}{The Softcore process}
     \item{\code{'straussm'}}{ The multitype Strauss process}
     \item{\code{'straushm'}}{Multitype Strauss process with hard core}
-    \item{\code{'dgs'}}{Diggle, Gates and Stibbard (1987) process}
-    \item{\code{'diggra'}}{Diggle and Gratton (1984) process}
-    \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'lookup'}}{General isotropic pairwise interaction process,
       with the interaction function specified via a ``lookup table''.}
-    \item{\code{'areaint'}}{Area-interaction process.}
-    \item{\code{'badgey'}}{Baddeley-Geyer (hybrid Geyer) process.}
   }
 
   The argument \code{par} supplies parameter values appropriate to
   the conditional intensity function being invoked. These are:
   \describe{
     \item{areaint:}{
-      (Area-interaction process.) A \bold{named} vector with components
+      (Area-interaction process.) A \bold{named} list with components
       \code{beta,eta,r} which are respectively the ``base''
       intensity, the scaled interaction parameter and the
       interaction radius.  
     }
     \item{badgey:}{
       (Baddeley-Geyer process.)
-      A \bold{name} list with components
+      A \bold{named} list with components
       \code{beta} (the ``base'' intensity), \code{gamma} (a vector
       of non-negative interaction parameters), \code{r} (a vector
       of interaction radii, of the same length as \code{gamma},
@@ -76,8 +77,76 @@
       least 1).  Note that because of the presence of ``saturation''
       the \code{gamma} values are permitted to be larger than 1.
     }
+    \item{dgs:}{
+      (Diggle, Gates, and Stibbard process.
+      See Diggle, Gates, and Stibbard (1987))
+      A \bold{named} list with components
+      \code{beta} and \code{rho}.  This process has pairwise interaction
+      function equal to
+      \deqn{
+	e(t) = \sin^2\left(\frac{\pi t}{2\rho}\right)
+      }{
+	e(t) = sin^2((pi * t)/(2 * rho))
+      }
+      for \eqn{t < \rho}{t < rho}, and equal to 1
+      for \eqn{t \ge \rho}{t >= rho}.
+    }
+    \item{diggra:}{
+      (Diggle-Gratton process. See Diggle and Gratton (1984)
+      and Diggle, Gates and Stibbard (1987).)
+      A \bold{named} list with components \code{beta},
+      \code{kappa}, \code{delta} and \code{rho}.  This process has
+      pairwise interaction function \eqn{e(t)} equal to 0
+      for \eqn{t < \delta}{t < delta}, equal to
+      \deqn{
+	\left(\frac{t-\delta}{\rho-\delta}\right)^\kappa
+      }{
+	((t-delta)/(rho-delta))^kappa
+      }
+      for \eqn{\delta \le t < \rho}{delta <= t < rho},
+      and equal to 1 for \eqn{t \ge  \rho}{t >= rho}.
+      Note that here we use the symbol
+      \eqn{\kappa}{kappa} where Diggle, Gates, and Stibbard use
+      \eqn{\beta}{beta} since we reserve the symbol \eqn{\beta}{beta}
+      for an intensity parameter.
+    }
+    \item{geyer:}{
+      (Geyer's saturation process. See Geyer (1999).)
+      A \bold{named} list
+      with components \code{beta}, \code{gamma}, \code{r}, and \code{sat}.
+      The components \code{beta}, \code{gamma}, \code{r} are as for
+      the Strauss model, and \code{sat} is the ``saturation''
+      parameter.  The model is Geyer's ``saturation'' point process
+      model, a modification of the Strauss process in which
+      we effectively impose an upper limit (\code{sat}) on the number of
+      neighbours which will be counted as close to a given point.
+      
+      Explicitly, a saturation point process with interaction
+      radius \eqn{r}, saturation threshold \eqn{s}, and
+      parameters \eqn{\beta}{beta} and \eqn{\gamma}{gamma},
+      is the point process in which each point \eqn{x_i}{x[i]}
+      in the pattern \eqn{X} contributes a factor
+      \deqn{\beta \gamma^{\min(s, t(x_i,X))}}{beta gamma^min(s,t(x[i],X))}
+      to the probability density of the point pattern,
+      where \eqn{t(x_i,X)}{t(x[i],X)} denotes the number of
+      ``\eqn{r}-close neighbours'' of \eqn{x_i}{x[i]} in the
+      pattern \eqn{X}.
+
+      If the saturation threshold \eqn{s} is infinite,
+      the Geyer process reduces to a Strauss process
+      with interaction parameter \eqn{\gamma^2}{gamma^2}
+      rather than \eqn{\gamma}{gamma}.
+    }
+    \item{hardcore:}{
+      (Hard core process.) A \bold{named} list
+      with components \code{beta} and \code{hc}
+      where \code{beta} is the base intensity and \code{hc} is the
+      hard core distance.
+      This process has pairwise interaction function \eqn{e(t)}
+      equal to 1 if \eqn{t > hc} and 0 if \eqn{t <= hc}.
+    }
     \item{strauss:}{
-      (Strauss process.) A \bold{named} vector with components
+      (Strauss process.) A \bold{named} list with components
       \code{beta,gamma,r} which are respectively the ``base''
       intensity, the pairwise interaction parameter and the
       interaction radius.  Note that \code{gamma} must be less than
@@ -86,14 +155,14 @@
       of the Strauss process, \code{\link{rStrauss}})
     }
     \item{straush:}{
-      (Strauss process with hardcore.) A \bold{named} vector with
+      (Strauss process with hardcore.) A \bold{named} list with
       entries \code{beta,gamma,r,hc} where \code{beta}, \code{gamma},
       and \code{r} are as for the Strauss process, and \code{hc} is
       the hardcore radius.  Of course \code{hc} must be less than
       \code{r}.
     }
     \item{sftcr:}{
-      (Softcore process.) A \bold{named} vector with components
+      (Softcore process.) A \bold{named} list with components
       \code{beta,sigma,kappa}.  Again \code{beta} is a ``base''
       intensity. The pairwise interaction between two points
       \eqn{u \neq v}{u != v} is
@@ -136,67 +205,6 @@
       corresponding entries
       of \code{iradii}.
     }
-    \item{dgs:}{
-      (Diggle, Gates, and Stibbard process.
-      See Diggle, Gates, and Stibbard (1987))
-      A \bold{named} vector with components
-      \code{beta} and \code{rho}.  This process has pairwise interaction
-      function equal to
-      \deqn{
-	e(t) = \sin^2\left(\frac{\pi t}{2\rho}\right)
-      }{
-	e(t) = sin^2((pi * t)/(2 * rho))
-      }
-      for \eqn{t < \rho}{t < rho}, and equal to 1
-      for \eqn{t \ge \rho}{t >= rho}.
-    }
-    \item{diggra:}{
-      (Diggle-Gratton process. See Diggle and Gratton (1984)
-      and Diggle, Gates and Stibbard (1987).)
-      A \bold{named} vector with components \code{beta},
-      \code{kappa}, \code{delta} and \code{rho}.  This process has
-      pairwise interaction function \eqn{e(t)} equal to 0
-      for \eqn{t < \delta}{t < delta}, equal to
-      \deqn{
-	\left(\frac{t-\delta}{\rho-\delta}\right)^\kappa
-      }{
-	((t-delta)/(rho-delta))^kappa
-      }
-      for \eqn{\delta \le t < \rho}{delta <= t < rho},
-      and equal to 1 for \eqn{t \ge  \rho}{t >= rho}.
-      Note that here we use the symbol
-      \eqn{\kappa}{kappa} where Diggle, Gates, and Stibbard use
-      \eqn{\beta}{beta} since we reserve the symbol \eqn{\beta}{beta}
-      for an intensity parameter.
-    }
-    \item{geyer:}{
-      (Geyer's saturation process. See Geyer (1999).)
-      A \bold{named} vector
-      with components \code{beta}, \code{gamma}, \code{r}, and \code{sat}.
-      The components \code{beta}, \code{gamma}, \code{r} are as for
-      the Strauss model, and \code{sat} is the ``saturation''
-      parameter.  The model is Geyer's ``saturation'' point process
-      model, a modification of the Strauss process in which
-      we effectively impose an upper limit (\code{sat}) on the number of
-      neighbours which will be counted as close to a given point.
-      
-      Explicitly, a saturation point process with interaction
-      radius \eqn{r}, saturation threshold \eqn{s}, and
-      parameters \eqn{\beta}{beta} and \eqn{\gamma}{gamma},
-      is the point process in which each point \eqn{x_i}{x[i]}
-      in the pattern \eqn{X} contributes a factor
-      \deqn{\beta \gamma^{\min(s, t(x_i,X))}}{beta gamma^min(s,t(x[i],X))}
-      to the probability density of the point pattern,
-      where \eqn{t(x_i,X)}{t(x[i],X)} denotes the number of
-      ``\eqn{r}-close neighbours'' of \eqn{x_i}{x[i]} in the
-      pattern \eqn{X}.
-
-      If the saturation threshold \eqn{s} is infinite,
-      the Geyer process reduces to a Strauss process
-      with interaction parameter \eqn{\gamma^2}{gamma^2}
-      rather than \eqn{\gamma}{gamma}.
-    }
-    
     \item{lookup:}{
       (Arbitrary pairwise interaction process with isotropic interaction.)
       A \bold{named} list with components
@@ -362,6 +370,8 @@ otherwise an error is given.
   \code{\link{rmhstart}},
   \code{\link{ppm}},
   \code{\link{AreaInter}},
+  \code{\link{Geyer}},
+  \code{\link{Hardcore}},
   \code{\link{Strauss}},
   \code{\link{Softcore}},
   \code{\link{StraussHard}},
@@ -372,23 +382,26 @@ otherwise an error is given.
 }
 \examples{
    # Strauss process:
-   mod01 <- rmhmodel(cif="strauss",par=c(beta=2,gamma=0.2,r=0.7),
+   mod01 <- rmhmodel(cif="strauss",par=list(beta=2,gamma=0.2,r=0.7),
                  w=c(0,10,0,10))
    # The above could also be simulated using 'rStrauss'
 
    # Strauss with hardcore:
-   mod04 <- rmhmodel(cif="straush",par=c(beta=2,gamma=0.2,r=0.7,hc=0.3),
+   mod04 <- rmhmodel(cif="straush",par=list(beta=2,gamma=0.2,r=0.7,hc=0.3),
                 w=owin(c(0,10),c(0,5)))
 
+   # Hard core:
+   mod05 <- rmhmodel(cif="hardcore",par=list(beta=2,hc=0.3),
+              w=square(5))
+
    # Soft core:
-   par3 <- c(0.8,0.1,0.5)
    w    <- square(10)
    mod07 <- rmhmodel(cif="sftcr",
-                     par=c(beta=0.8,sigma=0.1,kappa=0.5),
+                     par=list(beta=0.8,sigma=0.1,kappa=0.5),
                      w=w)
    
    # Area-interaction process:
-   mod42 <- rmhmodel(cif="areaint",par=c(beta=2,eta=1.6,r=0.7),
+   mod42 <- rmhmodel(cif="areaint",par=list(beta=2,eta=1.6,r=0.7),
                  w=c(0,10,0,10))
 
    # Baddeley-Geyer process:

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.52 $    $Date: 2010/03/09 01:55:49 $
+#    $Revision: 1.53 $    $Date: 2010/03/12 10:16:02 $
 #
 #  (a) for matrices only:
 #
@@ -412,5 +412,23 @@ onecolumn <- function(m) {
          NA)
 }
 
-  
-    
+check.1.real <- function(x, context="", fatal=TRUE) {
+  xname <- deparse(substitute(x))
+  if(!is.numeric(x) || length(x) != 1) {
+    whinge <-  paste(xname, "should be a single number")
+    if(nzchar(context)) whinge <- paste(context, whinge)
+    if(fatal)
+      stop(whinge, call.=FALSE)
+    warning(whinge, call.=FALSE)
+    return(FALSE)
+  }
+  return(TRUE)
+}
+   
+explain.ifnot <- function(expr, context) {
+  ex <- deparse(substitute(expr))
+  ans <- expr
+  if(!identical(ans, TRUE))
+    stop(paste(context, "it must be TRUE that", sQuote(ex)), call.=FALSE)
+}
+

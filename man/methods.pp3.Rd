@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \alias{print.pp3}
 \alias{summary.pp3}
+\alias{print.summary.pp3}
 \alias{unitname.pp3}
 \alias{unitname<-.pp3}
 \title{
@@ -12,6 +13,7 @@
 }
 \usage{
   \method{print}{pp3}(x, ...)
+  \method{print}{summary.pp3}(x, ...)
   \method{summary}{pp3}(object, ...)
   \method{unitname}{pp3}(x)
   \method{unitname}{pp3}(x) <- value

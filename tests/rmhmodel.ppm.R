@@ -17,6 +17,9 @@ m <- rmhmodel(f)
 f <- ppm(cells, ~1, StraussHard(r=0.1,hc=0.05))
 m <- rmhmodel(f)
 
+f <- ppm(cells, ~1, Hardcore(0.07))
+m <- rmhmodel(f)
+
 f <- ppm(cells, ~1, DiggleGratton(0.05,0.1))
 m <- rmhmodel(f)
 
@@ -52,3 +55,36 @@ m <- rmhmodel(f)
 
 f <- ppm(amacrine, ~1, MultiStraussHard(c("off","on"),r, h))
 m <- rmhmodel(f)
+
+# multitype data, interaction not dependent on type
+
+f <- ppm(amacrine, ~marks, Strauss(0.05))
+m <- rmhmodel(f)
+
+# trends
+
+f <- ppm(cells, ~x, Strauss(0.1))
+m <- rmhmodel(f)
+
+f <- ppm(cells, ~y, StraussHard(r=0.1,hc=0.05))
+m <- rmhmodel(f)
+
+f <- ppm(cells, ~x+y, Hardcore(0.07))
+m <- rmhmodel(f)
+
+f <- ppm(cells, ~polynom(x,y,2), Softcore(0.5), correction="isotropic")
+m <- rmhmodel(f)
+
+# covariates
+
+Z <- as.im(function(x,y){ x^2+y^2 }, as.owin(cells))
+f <- ppm(cells, ~z, covariates=list(z=Z))
+m <- rmhmodel(f)
+m <- rmhmodel(f, control=list(p=1))
+
+Z <- as.im(function(x,y){ x^2+y }, as.owin(amacrine))
+f <- ppm(amacrine, ~z + marks, covariates=list(z=Z))
+m <- rmhmodel(f)
+m <- rmhmodel(f, control=list(p=1))
+m <- rmhmodel(f, control=list(p=1,fixall=TRUE))
+

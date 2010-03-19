@@ -78,20 +78,19 @@
 }
 \examples{
    # Strauss process:
-   mod01 <- list(cif="strauss",par=c(beta=2,gamma=0.2,r=0.7),
+   mod01 <- list(cif="strauss",par=list(beta=2,gamma=0.2,r=0.7),
                  w=c(0,10,0,10))
    mod01 <- rmhmodel(mod01)
 
    # Strauss with hardcore:
-   mod04 <- list(cif="straush",par=c(beta=2,gamma=0.2,r=0.7,hc=0.3),
+   mod04 <- list(cif="straush",par=list(beta=2,gamma=0.2,r=0.7,hc=0.3),
                 w=owin(c(0,10),c(0,5)))
    mod04 <- rmhmodel(mod04)
 
    # Soft core:
-   par3 <- c(0.8,0.1,0.5)
    w    <- square(10)
    mod07 <- list(cif="sftcr",
-                     par=c(beta=0.8,sigma=0.1,kappa=0.5),
+                     par=list(beta=0.8,sigma=0.1,kappa=0.5),
                      w=w)
    mod07 <- rmhmodel(mod07)
    

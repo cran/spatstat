@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.13 $	$Date: 2009/12/15 23:21:39 $
+#	$Revision: 3.14 $	$Date: 2010/03/12 00:51:45 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -122,5 +122,33 @@ function(o, cc, d, breaks) {
 #
   return(list(rs=rs, km=km$km, hazard=km$lambda,
               r=breaks$r, breaks=bval))
+}
+
+"km.rs.opt" <-
+function(o, cc, d, breaks, KM=TRUE, RS=TRUE) {
+#	o: censored lifetimes min(T_i,C_i)
+#	cc: censoring times C_i
+#	d: censoring indicators 1(T_i <= C_i)
+#	breaks: histogram breakpoints (vector or 'breakpts' object)
+#
+  breaks <- as.breakpts(breaks)
+  bval <- breaks$val
+  out <- list(r=breaks$r, breaks=bval)
+  if(KM || RS)
+    nco <- whist( o[d],  breaks=bval)
+  if(KM) {
+    obs <- whist( o,     breaks=bval)
+    upperobs <- attr(obs, "high")
+    km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
+    out <- append(list(km=km$km, hazard=km$lambda), out)
+  }
+  if(RS) {
+    cen <- whist( cc,    breaks=bval)
+    ncc <- whist( cc[d], breaks=bval)
+    uppercen <- attr(cen, "high")
+    rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
+    out <- append(list(rs=rs), out)
+  }
+  return(out)
 }
 
