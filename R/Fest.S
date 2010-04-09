@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.26 $	$Date: 2010/03/12 00:51:35 $
+#	$Revision: 4.28 $	$Date: 2010/04/08 15:00:39 $
 #
 "Fest" <- 	
 "empty.space" <-

@@ -17,3 +17,14 @@ b <- distppll(p, l, mintype=2, method="Fortran")
 if(a$min.which != b$min.which)
   stop("conflict between Fortran and interpreted code in distppll")
 
+# test of pixellate.psp -> seg2pixL
+
+ns <- 50
+out <- numeric(ns)
+for(i in 1:ns) {
+  X <- psp(runif(1), runif(1), runif(1), runif(1), window=owin())
+  len <- lengths.psp(X)
+  dlen <- sum(pixellate(X)$v)
+  out[i] <- if(len > 0.05) dlen/len else 1
+}
+if(diff(range(out)) > 0.1) stop("More than 10 percent error in pixellate.psp")

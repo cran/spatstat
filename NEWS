@@ -1,3 +1,48 @@
+	CHANGES IN spatstat VERSION 1.18-2
+
+ACKNOWLEDGEMENTS
+
+    o   We thank Michael Sumner for contributions.    
+
+NEW FUNCTIONS
+
+    o   Gfox, Jfox:
+        Foxall's G and J functions
+
+    o   as.owin.distfun: 
+        New method for as.owin extracts the domain of a distfun object.
+    
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   distfun: objects of class 'distfun', when called as functions,
+        will now accept either two vectors (x,y) or a point pattern x.
+
+    o   Hest: this function can now compute the	Hanisch estimator. 
+        It now has arguments 'r', 'breaks' and 'correction', 
+	like other summary functions. 
+
+    o   Hest: new argument 'conditional'.
+
+BUG FIXES
+
+    o   pixellate.psp: Values were sometimes incorrect due to coding error.
+    	(Spotted by Michael Sumner)
+        Fixed.
+
+    o   kstest: Crashed if the covariate contained NA's.
+	Fixed.
+
+    o   kstest: Crashed if X was a multitype point pattern 
+	in which some mark values were unrepresented.
+	Fixed.
+
+    o   lurking: Minor bug in handling of NA values.
+    	Fixed.
+
+    o   Hest: labels of columns were incorrect. 
+        Fixed.
+
 	CHANGES IN spatstat VERSION 1.18-1
 
 ACKNOWLEDGEMENTS

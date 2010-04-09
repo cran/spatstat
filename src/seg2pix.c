@@ -1,6 +1,6 @@
 #include <R.h>
 
-#undef DEBUG 
+#undef DEBUG
 
 /*
 
@@ -38,6 +38,7 @@ void seg2pixI(ns,x0,y0,x1,y1,nx,ny,out)
 {
   int Ns, Nx, Ny, i, j, k, m, m0, m1, mmin, mmax;
   double x0i, x1i, y0i, y1i;
+  double leni;
   double xleft, yleft, xright, yright, slope;
   double xstart, ystart, xfinish, yfinish;
   int mleft, mright, kstart, kfinish, kmin, kmax;
@@ -55,11 +56,27 @@ void seg2pixI(ns,x0,y0,x1,y1,nx,ny,out)
     y0i = y0[i];
     x1i = x1[i];
     y1i = y1[i];   
+    leni = sqrt(pow(x1i - x0i, 2) + pow(y1i-y0i, 2));
 #ifdef DEBUG
       Rprintf("(%lf, %lf) to (%lf, %lf)\n",
 	      x0i, y0i, x1i, y1i);
 #endif
-    if(floor(y1i) == floor(y0i)) { /* horizontal */
+    if(leni < 0.001) { /* tiny segment */
+#ifdef DEBUG
+      Rprintf("tiny\n");
+#endif
+      k = clamp((int) floor(x0i), 0, Nx-1);
+      j = clamp((int) floor(y0i), 0, Ny-1);
+      V(j,k) = 1;
+    } else if(floor(x1i) == floor(x0i) && floor(y1i) == floor(y0i)) { 
+      /* contained in one cell */
+#ifdef DEBUG
+      Rprintf("contained in one cell\n");
+#endif
+      k = clamp((int) floor(x0i), 0, Nx-1);
+      j = clamp((int) floor(y0i), 0, Ny-1);
+      V(j,k) = 1;
+    } else if(floor(y1i) == floor(y0i)) { /* horizontal */
 #ifdef DEBUG
       Rprintf("horizontal\n");
 #endif
@@ -152,6 +169,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
 {
   int Ns, Nx, Ny, i, j, k, m, m0, m1, mmin, mmax;
   double x0i, x1i, y0i, y1i;
+  double leni;
   double xleft, yleft, xright, yright, slope, scalesecant;
   double xlow, xhigh, ylow, yhigh, invslope, scalecosecant;
   double xstart, ystart, xfinish, yfinish; 
@@ -186,11 +204,27 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
     x1i = x1[i];
     y1i = y1[i];   
     wti = weights[i];
+    leni = sqrt(pow(x1i - x0i, 2) + pow(y1i-y0i, 2));
 #ifdef DEBUG
-      Rprintf("(%lf, %lf) to (%lf, %lf)\n",
-	      x0i, y0i, x1i, y1i);
+    Rprintf("(%lf, %lf) to (%lf, %lf), length %lf\n",
+	    x0i, y0i, x1i, y1i, leni);
 #endif
-    if(floor(y1i) == floor(y0i)) { /* horizontal */
+    if(leni < 0.001) { /* tiny segment */
+#ifdef DEBUG
+      Rprintf("tiny\n");
+#endif
+      k = clamp((int) floor(x0i), 0, Nx-1);
+      j = clamp((int) floor(y0i), 0, Ny-1);
+      V(j,k) += leni;
+    } else if(floor(x1i) == floor(x0i) && floor(y1i) == floor(y0i)) { 
+      /* contained in one cell */
+#ifdef DEBUG
+      Rprintf("contained in one cell\n");
+#endif
+      k = clamp((int) floor(x0i), 0, Nx-1);
+      j = clamp((int) floor(y0i), 0, Ny-1);
+      V(j,k) += leni;
+    } else if(floor(y1i) == floor(y0i)) { /* horizontal */
 #ifdef DEBUG
       Rprintf("horizontal\n");
 #endif
@@ -315,8 +349,10 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
 	for(k = kmin; k <= kmax; k++) { 
 	  yyy0 = (k == kmin) ? ylow : k;
 	  yyy1 = (k == kmax) ? yhigh : (k+1);
+	  xxx0 = xstart + (yyy0 - ystart)/slope;
+	  xxx1 = xstart + (yyy1 - ystart)/slope;
 	  V(k, m) += wti * sqrt(pow(yyy1 - yyy0, 2) * pheight2 + 
-				pow(xfinish - xstart, 2) * pwidth2);
+				pow(xxx1 - xxx0, 2) * pwidth2);
 	}
       }
     }

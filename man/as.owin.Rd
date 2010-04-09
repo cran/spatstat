@@ -9,6 +9,7 @@
 \alias{as.owin.im}
 \alias{as.owin.gpc.poly}
 \alias{as.owin.data.frame}
+\alias{as.owin.distfun}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
 \description{
@@ -26,6 +27,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
  \method{as.owin}{data.frame}(W, \dots, fatal=TRUE)
+ \method{as.owin}{distfun}(W, \dots, fatal=TRUE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
 \arguments{
@@ -101,6 +103,10 @@ in any of several formats, into an object of class \code{"owin"}.
     data frame corresponds to one pixel. Each row contains the
     \eqn{x} and \eqn{y} coordinates of a pixel, and a logical value
     indicating whether the pixel lies inside the window.   
+    \item
+    an object of class \code{"distfun"} representing a
+    distance function. The spatial domain of the function will be
+    extracted.
   }
   If the argument \code{W} is not in one of these formats
   and cannot be converted to a window, then an error will

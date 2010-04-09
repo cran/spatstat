@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.24 $	$Date: 2010/01/08 23:21:49 $
+#	$Revision: 4.25 $	$Date: 2010/04/07 13:42:22 $
 #
 ################################################################################
 #
@@ -58,7 +58,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
 
   if("none" %in% correction) {
     #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
-    if(npoints == 0)
+    if(npoints <= 1)
       edf <- zeroes
     else {
       hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
@@ -68,7 +68,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
                  "uncorrected estimate of %s", "raw")
   }
   if("han" %in% correction) {
-    if(npoints == 0)
+    if(npoints <= 1)
       G <- zeroes
     else {
       #  uncensored distances
