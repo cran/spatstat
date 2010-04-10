@@ -3,7 +3,7 @@
 #
 # Test statistics from Berman (1986)
 #
-#  $Revision: 1.5 $  $Date: 2009/08/20 18:57:03 $
+#  $Revision: 1.6 $  $Date: 2010/04/08 10:18:40 $
 #
 #
 
@@ -74,19 +74,18 @@ bermantestEngine <- function(model, covariate,
   X <- data.ppm(model)
   npoints <- X$n
   
-  # ........... first do Kolmogorov-Smirnov ...............
-  ksout <- kstestEngine(model, covariate, ...,
-                        alternative=alternative,
+  # ........... first assemble data ...............
+  fram <- spatialCDFframe(model, covariate, ...,
                         modelname=modelname,
                         covname=covname,
                         dataname=dataname)
-  ksprep <- attr(ksout, "prep")
+  fprep <- fram$prep
   # covariate image
-  Z <- ksprep$Zimage
+  Z <- fprep$Zimage
   # values of covariate at data points
-  ZX <- ksprep$ZX
+  ZX <- fprep$ZX
   # transformed to Unif[0,1] under H0
-  U  <- ksprep$U
+  U  <- fprep$U
   # domain
   W <- as.owin(Z)
   # intensity of model
@@ -153,7 +152,7 @@ bermantestEngine <- function(model, covariate,
               which=which,
               working=working,
               data.name=valuename,
-              ks=ksout)
+              fram=fram)
   class(out) <- c("htest", "bermantest")
   return(out)
 }
@@ -162,9 +161,16 @@ plot.bermantest <-
   function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
            lwd0=lwd, col0=col, lty0=lty)
 {
-  ks <- x$ks
-  prep <- attr(ks, "prep")
-  info <- attr(ks, "info")
+  fram <- x$fram
+  if(!is.null(fram)) {
+    prep <- fram$prep
+    info <- fram$info
+  } else {
+    # old style
+    ks <- x$ks
+    prep <- attr(ks, "prep")
+    info <- attr(ks, "info")
+  }
   work <- x$working
   switch(x$which,
          Z1={

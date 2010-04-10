@@ -1,7 +1,7 @@
 #
 #	kmrs.S
 #
-#	S code for Kaplan-Meier and reduced sample
+#	S code for Kaplan-Meier, Reduced Sample and Hanisch
 #	estimates of a distribution function
 #	from _histograms_ of censored data.
 #
@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.14 $	$Date: 2010/03/12 00:51:45 $
+#	$Revision: 3.20 $	$Date: 2010/04/09 10:23:49 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -150,5 +150,67 @@ function(o, cc, d, breaks, KM=TRUE, RS=TRUE) {
     out <- append(list(rs=rs), out)
   }
   return(out)
+}
+
+
+censtimeCDFest <- function(o, cc, d, breaks, ...,
+                           KM=TRUE, RS=TRUE, HAN=TRUE, RAW=TRUE,
+                           han.denom=NULL, pmax=0.9) {
+# Histogram-based estimation of cumulative distribution function
+# of lifetimes subject to censoring.
+#	o: censored lifetimes min(T_i,C_i)
+#	cc: censoring times C_i
+#	d: censoring indicators 1(T_i <= C_i)
+#	breaks: histogram breakpoints (vector or 'breakpts' object)
+#       han.denom: denominator (eroded area) for each value of r
+  breaks <- as.breakpts(breaks)
+  bval <- breaks$val
+  rval <- breaks$r
+  rmax <- breaks$max
+  # Kaplan-Meier and/or Reduced Sample
+  out <- km.rs.opt(o, cc, d, breaks, KM=KM, RS=RS)
+  # convert to data frame
+  out$breaks <- NULL
+  df <- as.data.frame(out)
+  # Raw ecdf of observations
+  if(RAW) {
+    h <- whist(o[o <= rmax], breaks=bval)
+    df <- cbind(df, data.frame(raw=cumsum(h)/length(o)))
+  }
+  # Hanisch
+  if(HAN) {
+    if(is.null(han.denom))
+      stop("Internal error: missing denominator for Hanisch estimator")
+    if(length(han.denom) != length(rval))
+      stop(paste("Internal error:",
+                 "length(han.denom) =", length(han.denom),
+                 "!=", length(rval), "= length(rvals)"))
+    #  uncensored distances
+    x <- o[d]
+    # calculate Hanisch estimator
+    h <- whist(x[x <= rmax], breaks=bval)
+    H <- cumsum(h/han.denom)
+    df <- cbind(df, data.frame(han=H/max(H[is.finite(H)])))
+  }
+  # determine appropriate plotting range
+  bestest <- if(KM) "km" else if(HAN) "han" else if(RS) "rs" else "raw"
+  alim <- range(df$r[df[[bestest]] <= pmax])
+  # convert to fv object
+  nama <-  c("r",  "km", "hazard", "han", "rs", "raw")
+  avail <- c(TRUE,  KM,  KM,       HAN,   RS,   RAW)
+  iscdf <- c(FALSE, TRUE, FALSE,   TRUE,  TRUE, TRUE)
+  labl <- c("r", "%s[km](r)", "lambda(r)", "%s[han](r)", "%s[bord](r)", 
+            "%s[raw](r)")[avail]
+  desc <- c("distance argument r",
+            "Kaplan-Meier estimate of %s",
+            "Kaplan-Meier estimate of hazard function lambda(r)",
+            "Hanisch estimate of %s",
+            "border corrected estimate of %s",
+            "uncorrected estimate of %s")[avail]
+  df <- df[, nama[avail]]
+  Z <- fv(df, "r", substitute(CDF(r), NULL), bestest, . ~ r, alim, labl, desc,
+          fname="CDF")
+  fvnames(Z, ".") <- nama[iscdf & avail]
+  return(Z)
 }
 

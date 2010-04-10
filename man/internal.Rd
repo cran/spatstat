@@ -33,6 +33,7 @@
 \alias{cartesian}
 \alias{cbind.hyperframe}
 \alias{cellmiddles}
+\alias{censtimeCDFest}
 \alias{checkfields}          
 \alias{check.hist.lengths}
 \alias{check.named.list}
@@ -144,7 +145,6 @@
 \alias{is.stationary.ppm}
 \alias{is.tess}
 \alias{k3engine}
-\alias{kstestEngine}
 \alias{Kborder.engine}
 \alias{Kount}
 \alias{Kwtsum}               
@@ -315,6 +315,8 @@
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
 \alias{spatstat.rawdata.location}
+\alias{spatialCDFframe}
+\alias{spatialCDFtest}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
 \alias{sphere.volume}
@@ -399,6 +401,7 @@ bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
 cartesian(pp, markset, fac = TRUE)
 cbind.hyperframe(...)
 cellmiddles(W, nx, ny, npix, gi)
+censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom, pmax)
 checkfields(X,L)          
 check.hist.lengths(hist,breaks)
 check.named.list(x, nam, context, namopt)
@@ -519,7 +522,6 @@ is.psp(x)
 is.stationary.ppm(x)    
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
-kstestEngine(model, covariate, \dots, jitter, modelname, covname, dataname)
 Kborder.engine(X, rmax, nr, correction, weights)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)
@@ -711,6 +713,8 @@ shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr)
 spatstat.rawdata.location(\dots)
+spatialCDFframe(model, covariate, jitter, modelname, covname, dataname)
+spatialCDFtest(model, covariate, test, \dots, jitter, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)

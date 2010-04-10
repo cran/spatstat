@@ -234,6 +234,8 @@
 	remove marks  \cr
 	\code{\link{marks}} \tab
 	attach marks or reset marks  \cr
+	\code{\link{npoints}} \tab
+	count the number of points  \cr
 	\code{\link{split.ppp}} \tab
 	divide pattern into sub-patterns \cr
 	\code{\link{rotate}} \tab
@@ -479,6 +481,7 @@
       \code{\link{coords}} \tab extract coordinates \cr
       \code{\link{as.hyperframe}} \tab extract coordinates \cr
       \code{\link{unitname.pp3}} \tab name of unit of length \cr
+      \code{\link{npoints}} \tab count the number of points  \cr
       \code{\link{runifpoint3}} \tab generate uniform random points in 3-D \cr
       \code{\link{rpoispp3}} \tab generate Poisson random points in 3-D \cr
       \code{\link{envelope.pp3}} \tab generate simulation envelopes for
@@ -526,10 +529,10 @@
     \code{\link{miplot}} \tab Morishita Index plot
   }
 
-%  \bold{Modern exploratory tools:}
-%  \tabular{ll}{
-%    \code{\link{nnclean}} \tab Byers-Raftery feature detection 
-%  }
+  \bold{Modern exploratory tools:}
+  \tabular{ll}{
+    \code{\link{nnclean}} \tab Byers-Raftery feature detection 
+  }
 
   \bold{Summary statistics for a point pattern:}
   \tabular{ll}{
@@ -665,6 +668,19 @@
     \code{\link{nndist.pp3}} \tab nearest neighbour distances \cr
     \code{\link{nnwhich.pp3}} \tab find nearest neighbours
   }
+
+  \bold{Summary statistics for random sets:}
+  
+  These work for point patterns (class \code{ppp}),
+  line segment patterns (class \code{psp})
+  or windows (class \code{owin}).
+  
+  \tabular{ll}{
+    \code{\link{Hest}} \tab spherical contact distribution \eqn{H} \cr
+    \code{\link{Gfox}} \tab Foxall \eqn{G}-function \cr
+    \code{\link{Jfox}} \tab Foxall \eqn{J}-function
+  }
+  
 }
 
 \section{III. MODEL FITTING (CLUSTER MODELS)}{

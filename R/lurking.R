@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.27 $ $Date: 2010/03/15 01:06:56 $
+# $Revision: 1.28 $ $Date: 2010/03/25 00:22:02 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -297,7 +297,7 @@ lurking <- function(object, covariate, type="eem",
         Bcontrib <- as.vector(wts * lamp) * suff
         dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib))
         for(j in seq(ncol(dB))) 
-          dB[,j] <- tapply(Bcontrib[,j], covclass, sum)
+          dB[,j] <- tapply(Bcontrib[,j], covclass, sum, na.rm=TRUE)
         # tapply() returns NA when the table is empty
         dB[is.na(dB)] <- 0
         # Cumulate columns
