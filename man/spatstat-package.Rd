@@ -564,6 +564,7 @@
     an array of functions\cr
     \code{\link{with.fv}} \tab evaluate an expression for a 
     summary function\cr
+    \code{\link{smooth.fv}} \tab apply smoothing to a summary function\cr
     \code{\link{nndist}} \tab nearest neighbour distances \cr
     \code{\link{nnwhich}} \tab find nearest neighbours \cr
     \code{\link{pairdist}} \tab distances between all pairs of points\cr

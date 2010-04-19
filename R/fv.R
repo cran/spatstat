@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.51 $   $Date: 2010/01/13 23:31:51 $
+#    $Revision: 1.55 $   $Date: 2010/04/16 10:46:57 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -62,7 +62,7 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
 
   if(is.null(alim)) {
     argue <- x[[argu]]
-    xlim <- range(argue[is.finite(argue)], na.rm=TRUE)
+    alim <- range(argue[is.finite(argue)], na.rm=TRUE)
   }
   if(!is.numeric(alim) || length(alim) != 2)
     stop(paste(sQuote("alim"), "should be a vector of length 2"))
@@ -90,9 +90,31 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   attr(x, "desc") <- desc
   attr(x, "units") <- as.units(unitname)
   attr(x, "fname") <- fname
+  attr(x, "dotnames") <- NULL
   # 
   class(x) <- c("fv", class(x))
   return(x)
+}
+
+.Spatstat.FvAttrib <- c(
+                        "argu",
+                        "valu",
+                        "ylab",
+                        "yexp",
+                        "fmla",
+                        "alim",
+                        "labl",
+                        "desc",
+                        "units",
+                        "fname",
+                        "dotnames")
+
+as.data.frame.fv <- function(x, ...) {
+  stopifnot(is.fv(x))
+  fva <- .Spatstat.FvAttrib
+  attributes(x)[fva] <- NULL
+  class(x) <- "data.frame"
+  x
 }
 
 is.fv <- function(x) {
@@ -158,6 +180,12 @@ print.fv <- function(x, ...) {
 
 # manipulating the names in fv objects
 
+.Spatstat.FvAbbrev <- c(
+                        ".x",
+                        ".y",
+                        ".",
+                        "..")
+
 fvnames <- function(X, a=".") {
   verifyclass(X, "fv")
   if(!is.character(a) || length(a) > 1)
@@ -170,14 +198,19 @@ fvnames <- function(X, a=".") {
            return(attr(X, "argu"))
          },
          "." = {
+           # The specified 'dotnames'
            dn <- attr(X, "dotnames")
-           if(is.null(dn)) {
-             allvars <- names(X)
-             argu <- attr(X, "argu")
-             dn <- allvars[allvars != argu]
-             dn <- rev(dn) # convention
-           }
+           if(is.null(dn)) 
+             dn <- fvnames(X, "..")
            return(dn)
+         },
+         ".."={
+           # all column names other than the function argument
+           allvars <- names(X)
+           argu <- attr(X, "argu")
+           nam <- allvars[allvars != argu]
+           nam <- rev(nam) # convention
+           return(nam)
          },
          stop(paste("Unrecognised abbreviation", dQuote(a)))
        )
@@ -187,6 +220,10 @@ fvnames <- function(X, a=".") {
   verifyclass(X, "fv")
   if(!is.character(a) || length(a) > 1)
     stop(paste("argument", sQuote("a"), "must be a character string"))
+  if(a == "..") {
+    warning(paste("Cannot reset fvnames(x,", dQuote(".."), ")"))
+    return(X)
+  }
   if(a == "." && length(value) == 0) {
     # clear the dotnames
     attr(X, "dotnames") <- NULL

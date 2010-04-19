@@ -18,6 +18,7 @@
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
 \alias{as.data.frame.hyperframe}
+\alias{as.data.frame.fv}
 \alias{as.fv}
 \alias{as.list.hyperframe}
 \alias{as.listof}
@@ -83,6 +84,7 @@
 \alias{eratosthenes}
 \alias{erodemask}
 \alias{erode.owin}
+\alias{evalCovar}
 \alias{even.breaks.owin}
 \alias{evenly.spaced}
 \alias{exactdt}              
@@ -385,6 +387,7 @@ as.breakpts(\dots)
 \method{as.data.frame}{hyperframe}(x, row.names = NULL,
                                   optional = FALSE, ..., 
                                   discard=TRUE, warn=TRUE)
+\method{as.data.frame}{fv}(x, ...)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
 as.listof(x)
@@ -460,6 +463,7 @@ equalsfun.quad(Q)
 eratosthenes(nmax)
 erodemask(w,r,strict)
 erode.owin(\dots)
+evalCovar(model, covariate, jitter, modelname, covname, dataname)
 even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
@@ -713,7 +717,7 @@ shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr)
 spatstat.rawdata.location(\dots)
-spatialCDFframe(model, covariate, jitter, modelname, covname, dataname)
+spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots, jitter, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             

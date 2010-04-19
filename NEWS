@@ -1,3 +1,22 @@
+	CHANGES IN spatstat VERSION 1.18-3
+
+ACKNOWLEDGEMENTS
+
+    o   We thank Michael Sumner for contributions.    
+
+BUG FIXES
+
+    o   pixellate.psp: segments shorter than one pixel width
+    	were measured incorrectly. Fixed.
+
+    o   fv: 'alim' not handled correctly.  Fixed.
+
+NEW FUNCTIONS
+
+    o   smooth.fv:
+        Applies spline smoothing to the columns of an fv object.
+        
+
 	CHANGES IN spatstat VERSION 1.18-2
 
 ACKNOWLEDGEMENTS

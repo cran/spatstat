@@ -204,7 +204,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
     x1i = x1[i];
     y1i = y1[i];   
     wti = weights[i];
-    leni = sqrt(pow(x1i - x0i, 2) + pow(y1i-y0i, 2));
+    leni = sqrt(pwidth2 * pow(x1i - x0i, 2) + pheight2 * pow(y1i-y0i, 2));
 #ifdef DEBUG
     Rprintf("(%lf, %lf) to (%lf, %lf), length %lf\n",
 	    x0i, y0i, x1i, y1i, leni);
