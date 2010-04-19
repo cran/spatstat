@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.38 $  $Date: 2010/04/08 05:41:03 $
+#  $Revision: 1.41 $  $Date: 2010/04/14 07:49:56 $
 #
 #
 
@@ -70,22 +70,28 @@ kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
 spatialCDFtest <- function(model, covariate, test, ...,
                            jitter=TRUE, 
                            modelname=NULL, covname=NULL, dataname=NULL) {
+  # conduct test based on comparison of CDF's of covariate values
   test <- pickoption("test", test, c(ks="ks"))
   # compute the essential data
   fra <- spatialCDFframe(model, covariate,
                          jitter, modelname, covname, dataname)
-
+  values <- fra$values
+  info   <- fra$info
   # Test uniformity of transformed values
-  U <- fra$prep$U
+  U <- values$U
   switch(test,
          ks={ result <- ks.test(U, "punif", ...) },
          stop("Unrecognised test option"))
 
   # modify the 'htest' entries
-  csr <- fra$info$csr
+  csr <- info$csr
   result$method <- paste("Spatial Kolmogorov-Smirnov test of",
                          if(csr) "CSR" else "inhomogeneous Poisson process")
-  result$data.name <- fra$info$statname
+  result$data.name <-
+    paste("covariate", sQuote(paste(info$covname, collapse="")),
+          "evaluated at points of", sQuote(info$dataname), "\n\t",
+          "and transformed to uniform distribution under",
+          if(csr) info$modelname else sQuote(info$modelname))
   
   # additional class 'kstest'
   class(result) <- c("kstest", class(result))
@@ -93,25 +99,70 @@ spatialCDFtest <- function(model, covariate, test, ...,
   return(result)        
 }
 
-spatialCDFframe <- function(model, covariate, 
-                    jitter=TRUE, 
-                    modelname=NULL, covname=NULL, dataname=NULL) {
+spatialCDFframe <- function(model, covariate, ...) {
+  # evaluate CDF of covariate values at data points and at pixels
+  stuff <- evalCovar(model, covariate, ...)
+  # extract 
+  values <- stuff$values
+  info   <- stuff$info
+  Zimage  <- values$Zimage
+  Zvalues <- values$Zvalues
+  lambda  <- values$lambda
+  ZX      <- values$ZX
+  type    <- values$type
+  # compute empirical cdf of Z values at points of X
+  FZX <- ecdf(ZX)
+  # form weighted cdf of Z values in window
+  FZ <- ewcdf(Zvalues, lambda/sum(lambda))
+  # Ensure support of cdf includes the range of the data
+  xxx <- knots(FZ)
+  yyy <- FZ(xxx)
+  minZX <- min(ZX, na.rm=TRUE)
+  minxxx <- min(xxx, na.rm=TRUE)
+  if(minxxx > minZX) {
+    xxx <- c(minZX, xxx)
+    yyy <- c(0, yyy)
+  }
+  maxZX <- max(ZX, na.rm=TRUE)
+  maxxxx <- max(xxx, na.rm=TRUE)
+  if(maxxxx < maxZX) {
+    xxx <- c(xxx, maxZX)
+    yyy <- c(yyy, 1)
+  }
+  # make piecewise linear approximation of cdf
+  FZ <- approxfun(xxx, yyy, rule=2)
+  # now apply cdf
+  U <- FZ(ZX)
+
+  # pack up
+  stuff$values$FZ  <- FZ
+  stuff$values$FZX <- FZX
+  stuff$values$U   <- U
+  class(stuff) <- "spatialCDFframe"
+  return(stuff)
+}
+
+evalCovar <- function(model, covariate, 
+                      jitter=TRUE, 
+                      modelname=NULL, covname=NULL,
+                      dataname=NULL) {
+  # evaluate covariate values at data points and at pixels
   verifyclass(model, "ppm")
   if(!is.poisson.ppm(model))
     stop("Only implemented for Poisson point process models")
   csr <- is.poisson.ppm(model) && is.stationary.ppm(model)
 
+  # determine names
   if(is.null(modelname))
     modelname <- if(csr) "CSR" else deparse(substitute(model))
   if(is.null(covname))
     covname <- deparse(substitute(covariate))
   if(is.null(dataname))
     dataname <- paste(model$call[[2]])
-  statname <- paste("covariate", sQuote(paste(covname, collapse="")),
-                        "evaluated at points of", sQuote(dataname), "\n\t",
-                        "and transformed to uniform distribution under",
-                        if(csr) modelname else sQuote(modelname))
+  info <-  list(modelname=modelname, covname=covname,
+                dataname=dataname, csr=csr)
 
+  # evaluate covariate 
   X <- data.ppm(model)
   W <- as.owin(model)
 
@@ -210,59 +261,32 @@ spatialCDFframe <- function(model, covariate,
 
   # apply jittering to avoid ties
   if(jitter) {
-    dZ <- 0.3 * quantile(diff(sort(unique(c(ZX, Zvalues)))), 1/min(20, X$n))
-    ZX <- ZX + rnorm(length(ZX), sd=dZ)
+    nX <- length(ZX)
+    dZ <- 0.3 * quantile(diff(sort(unique(c(ZX, Zvalues)))), 1/min(20, nX))
+    ZX <- ZX + rnorm(nX, sd=dZ)
     Zvalues <- Zvalues + rnorm(length(Zvalues), sd=dZ)
   }
-  
-  # form weighted cdf of Z values in window
-  FZ <- ewcdf(Zvalues, lambda/sum(lambda))
-  # Ensure support of cdf includes the range of the data
-  xxx <- knots(FZ)
-  yyy <- FZ(xxx)
-  minZX <- min(ZX, na.rm=TRUE)
-  minxxx <- min(xxx, na.rm=TRUE)
-  if(minxxx > minZX) {
-    xxx <- c(minZX, xxx)
-    yyy <- c(0, yyy)
-  }
-  maxZX <- max(ZX, na.rm=TRUE)
-  maxxxx <- max(xxx, na.rm=TRUE)
-  if(maxxxx < maxZX) {
-    xxx <- c(xxx, maxZX)
-    yyy <- c(yyy, 1)
-  }
-  # make piecewise linear approximation of cdf
-  FZ <- approxfun(xxx, yyy, rule=2)
-  # now apply cdf
-  U <- FZ(ZX)
 
-  # pack up
-  prep <- list(Zimage=Z,
-               Zvalues=Zvalues,
-               lambda=lambda,
-               ZX=ZX, FZ=FZ, FZX=ecdf(ZX),
-               U=U, type=type)
-  info <-  list(modelname=modelname, covname=covname,
-                dataname=dataname, csr=csr, statname=statname)
-  fram <- list(prep=prep, info=info)
-  class(fram) <- "spatialCDFframe"
-  return(fram)
+  # wrap up 
+  values <- list(Zimage=Z,
+                 Zvalues=Zvalues,
+                 lambda=lambda,
+                 ZX=ZX, type=type)
+  return(list(values=values, info=info))
 }
-
 
 plot.kstest <- function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
                                 lwd0=lwd, col0=col, lty0=lty) {
   fram <- attr(x, "frame")
   if(!is.null(fram)) {
-    prep <- fram$prep
+    values <- fram$values
     info <- fram$info
   } else {
     # old style
-    prep <- attr(x, "prep")
+    values <- attr(x, "prep")
     info <- attr(x, "info")
   }
-  FZ <- prep$FZ
+  FZ <- values$FZ
   xxx <- get("x", environment(FZ))
   yyy <- get("y", environment(FZ))
   main <- c(x$method,
@@ -275,9 +299,9 @@ plot.kstest <- function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
                            list(lwd=lwd0, col=col0, lty=lty0),
                            list(xlab=info$covname, ylab="probability",
                                 main=main)))
-  FZX <- prep$FZX
+  FZX <- values$FZX
   if(is.null(FZX))
-    FZX <- ecdf(prep$ZX)
+    FZX <- ecdf(values$ZX)
   plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
   return(invisible(NULL))
 }

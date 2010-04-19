@@ -3,7 +3,7 @@
 #
 # Test statistics from Berman (1986)
 #
-#  $Revision: 1.6 $  $Date: 2010/04/08 10:18:40 $
+#  $Revision: 1.7 $  $Date: 2010/04/14 07:49:32 $
 #
 #
 
@@ -79,13 +79,13 @@ bermantestEngine <- function(model, covariate,
                         modelname=modelname,
                         covname=covname,
                         dataname=dataname)
-  fprep <- fram$prep
+  fvalues <- fram$values
   # covariate image
-  Z <- fprep$Zimage
+  Z <- fvalues$Zimage
   # values of covariate at data points
-  ZX <- fprep$ZX
+  ZX <- fvalues$ZX
   # transformed to Unif[0,1] under H0
-  U  <- fprep$U
+  U  <- fvalues$U
   # domain
   W <- as.owin(Z)
   # intensity of model
@@ -163,19 +163,19 @@ plot.bermantest <-
 {
   fram <- x$fram
   if(!is.null(fram)) {
-    prep <- fram$prep
+    values <- fram$values
     info <- fram$info
   } else {
     # old style
     ks <- x$ks
-    prep <- attr(ks, "prep")
+    values <- attr(ks, "prep")
     info <- attr(ks, "info")
   }
   work <- x$working
   switch(x$which,
          Z1={
            # plot cdf's of Z
-           FZ <- prep$FZ
+           FZ <- values$FZ
            xxx <- get("x", environment(FZ))
            yyy <- get("y", environment(FZ))
            main <- c(x$method,
@@ -191,16 +191,16 @@ plot.bermantest <-
                                     list(xlab=info$covname,
                                          ylab="probability",
                                          main=main)))
-           FZX <- prep$FZX
+           FZX <- values$FZX
            if(is.null(FZX))
-             FZX <- ecdf(prep$ZX)
+             FZX <- ecdf(values$ZX)
            plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
            abline(v=work$meanZ, lwd=lwd0,col=col0, lty=lty0)
            abline(v=work$meanZX, lwd=lwd,col=col, lty=lty)
          },
          Z2={
            # plot cdf of U
-           U <- prep$U
+           U <- values$U
            cdfU <- ecdf(U)
            main <- c(x$method,
                      paste("based on distribution of covariate",
