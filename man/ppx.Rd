@@ -47,13 +47,11 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
   The argument \code{spatial} determines which columns are interpreted
   as spatial coordinates: if it is present, \code{spatial} should be a
   character vector matching the names of columns of \code{data}. 
-  Similarly the argument \code{temporal} determines which columns are interpreted
-  as temporal coordinates.
-
-  If both \code{spatial} and \code{temporal} are missing or \code{NULL} then it is
-  assumed that all columns of \code{data} are spatial coordinates. 
-  If \code{temporal} is missing or \code{NULL} then it is assumed that
-  no columns of \code{data} are temporal coordinates.
+  Similarly the argument \code{temporal} determines which columns
+  are interpreted as temporal coordinates.
+  
+  By default,  columns of numerical data are assumed to represent
+  spatial coordinates.
 }
 \value{
   An object of class \code{"ppx"}.

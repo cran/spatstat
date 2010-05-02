@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.60 $     $Date: 2010/03/08 02:01:44 $
+#         $Revision: 1.61 $     $Date: 2010/04/20 12:03:02 $
 #
 #      The class "im" of raster images
 #
@@ -404,6 +404,12 @@ mean.im <- function(x, ...) {
   return(mean(xvalues))
 }
 
+sum.im <- function(x, ...) {
+  verifyclass(x, "im")
+  xvalues <- x[drop=TRUE]
+  return(sum(xvalues, ...))
+}
+
 median.im <- function(x, ...) {
   verifyclass(x, "im")
   xvalues <- x[drop=TRUE]
@@ -414,6 +420,18 @@ range.im <- function(x, ...) {
   verifyclass(x, "im")
   xvalues <- x[drop=TRUE]
   return(range(xvalues))
+}
+
+max.im <- function(x, ...) {
+  verifyclass(x, "im")
+  xvalues <- x[drop=TRUE]
+  return(max(xvalues, ...))
+}
+
+min.im <- function(x, ...) {
+  verifyclass(x, "im")
+  xvalues <- x[drop=TRUE]
+  return(min(xvalues, ...))
 }
 
 hist.im <- function(x, ..., probability=FALSE) {

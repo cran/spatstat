@@ -2,12 +2,15 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.64 $	$Date: 2010/03/18 13:02:36 $
+#	$Revision: 4.66 $	$Date: 2010/05/02 00:44:24 $
 #
 #
 #
 #
 #-------------------------------------
+
+volume.owin <- function(x) { area.owin(x) }
+
 area.owin <- function(w) {
 	w <- as.owin(w)
         switch(w$type,
@@ -567,8 +570,10 @@ vertices <- function(w) {
   return(vert)
 }
 
-diameter <- function(w) {
-  w <- as.owin(w)
+diameter <- function(x) { UseMethod("diameter") }
+
+diameter.owin <- function(x) {
+  w <- as.owin(x)
   if(is.empty(w))
     return(NULL)
   vert <- vertices(w)

@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.45 $	$Date: 2010/03/09 23:49:55 $
+#	$Revision: 1.47 $	$Date: 2010/04/23 09:50:28 $
 #
 #
 #--------------------------------------------------------------------------
@@ -9,7 +9,7 @@
 plot.ppp <-
   function(x, main, ..., chars=NULL, cols=NULL, use.marks=TRUE,
            which.marks=1, add=FALSE,
-           maxsize=NULL, markscale=NULL)
+           maxsize=NULL, markscale=NULL, zap=0.01)
 {
 #
 # Function plot.ppp.
@@ -186,13 +186,16 @@ plot.ppp <-
     ms <- marx * scal 
 
     # Finally, plot them..
+    absmarx <- abs(marx)
+    tiny <- (absmarx <= zap * max(absmarx))
+    neg <- (marx < 0) & !tiny
+    pos <- (marx > 0) & !tiny
     # plot positive values as circles
-    neg <- (marx < 0)
-    if(any(!neg)) 
+    if(any(pos)) 
       do.call("symbols",
               resolve.defaults(
-                               list(x$x[!neg], x$y[!neg]),
-                               list(circles = ms[!neg]),
+                               list(x$x[pos], x$y[pos]),
+                               list(circles = ms[pos]),
                                list(inches = FALSE, add = TRUE),
                                if(!is.null(cols)) list(fg=cols[1]) else NULL,
                                list(...)))

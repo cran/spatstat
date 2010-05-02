@@ -3,7 +3,7 @@
 #
 #  class of three-dimensional point patterns in rectangular boxes
 #
-#  $Revision: 1.8 $  $Date: 2010/03/18 02:45:56 $
+#  $Revision: 1.9 $  $Date: 2010/05/02 00:49:42 $
 #
 
 box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
@@ -53,6 +53,22 @@ unitname.box3 <- function(x) { x$units }
 "unitname<-.box3" <- function(x, value) {
   x$units <- as.units(value)
   return(x)
+}
+
+eroded.volumes <- function(x, r) { UseMethod("eroded.volumes") }
+
+eroded.volumes.box3 <- function(x, r) {
+  b <- as.box3(x)
+  ax <- pmax(0, diff(b$xrange) - 2 * r)
+  ay <- pmax(0, diff(b$yrange) - 2 * r)
+  az <- pmax(0, diff(b$zrange) - 2 * r)
+  ax * ay * az
+}
+
+shortside <- function(x) { UseMethod("shortside") }
+
+shortside.box3 <- function(x) {
+  min(diff(x$xrange), diff(x$yrange), diff(x$zrange))
 }
 
 pp3 <- function(x, y, z, ...) {
@@ -138,6 +154,8 @@ diameter.box3 <- function(x) {
   stopifnot(inherits(x, "box3"))
   with(x, sqrt(diff(xrange)^2+diff(yrange)^2+diff(zrange)^2))
 }
+
+volume <- function(x) { UseMethod("volume") }
 
 volume.box3 <- function(x) {
   stopifnot(inherits(x, "box3"))

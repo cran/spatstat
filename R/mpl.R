@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.87 $	$Date: 2010/03/16 07:01:00 $
+#	$Revision: 5.88 $	$Date: 2010/04/23 06:57:11 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2010/03/16 07:01:00 $")
+                    date="$Date: 2010/04/23 06:57:11 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -629,6 +629,8 @@ return(list(fmla=fmla, trendfmla=trendfmla,
 ####################################################################
 
 mpl.get.covariates <- function(covariates, locations, type="locations") {
+  covargname <- sQuote(deparse(substitute(covariates)))
+  locargname <- sQuote(deparse(substitute(locations)))
   x <- locations$x
   y <- locations$y
   if(is.null(x) || is.null(y)) {
@@ -637,11 +639,11 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     y <- xy$y
   }
   if(is.null(x) || is.null(y))
-    stop(paste("Can't interpret", sQuote("locations"), "as x,y coordinates"))
+    stop(paste("Can't interpret", locargname, "as x,y coordinates"))
   n <- length(x)
   if(is.data.frame(covariates)) {
     if(nrow(covariates) != n)
-      stop(paste("Number of rows in", sQuote("covariates"),
+      stop(paste("Number of rows in", covargname, 
                  "does not equal the number of", type))
     return(covariates)
   } else if(is.list(covariates)) {
@@ -652,11 +654,11 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     isfun <- unlist(lapply(covariates, is.function))
     isnum <- unlist(lapply(covariates, is.number))
     if(!all(isim | isfun | isnum))
-      stop(paste("Each entry in the list", sQuote("covariates"),
+      stop(paste("Each entry in the list", covargname, 
                  "should be an image, a function or a single number"))
     if(any(names(covariates) == ""))
       stop(paste("Some entries in the list",
-                 sQuote("covariates"), "are un-named"))
+                 covargname, "are un-named"))
     # look up values of each covariate at the quadrature points
     values <- covariates
     evalfxy <- function(f, x, y) { f(x,y) }
@@ -665,8 +667,7 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     values[isnum] <- lapply(covariates[isnum], rep, length(x))
     return(as.data.frame(values))
   } else
-    stop(paste(sQuote("covariates"),
-               "must be either a data frame or a list of images"))
+    stop(paste(covargname, "must be either a data frame or a list"))
 }
 
 bt.frame <- function(Q, trend=~1, interaction=NULL,

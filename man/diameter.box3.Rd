@@ -3,6 +3,8 @@
 \alias{diameter.box3}
 \alias{volume.box3}
 \alias{shortside.box3}
+\alias{eroded.volumes.box3}
+\alias{shortside}
 \alias{eroded.volumes}
 \title{
   Geometrical Calculations for Three-Dimensional Box
@@ -12,9 +14,11 @@
   or eroded volume of a three-dimensional box.
 }
 \usage{
-diameter.box3(x)
-volume.box3(x)
-shortside.box3(x)
+\method{diameter}{box3}(x)
+\method{volume}{box3}(x)
+\method{shortside}{box3}(x)
+\method{eroded.volumes}{box3}(x, r)
+shortside(x)
 eroded.volumes(x, r)
 }
 \arguments{
@@ -55,10 +59,10 @@ eroded.volumes(x, r)
 }
 \examples{
     X <- box3(c(0,10),c(0,10),c(0,5))
-    diameter.box3(X) 
-    volume.box3(X)
-    shortside.box3(X)
-    hd <- shortside.box3(X)/2
+    diameter(X) 
+    volume(X)
+    shortside(X)
+    hd <- shortside(X)/2
     eroded.volumes(X, seq(0,hd, length=10))
 }
 \keyword{spatial}

@@ -30,7 +30,7 @@ perimeter(w)
 }
 \seealso{
   \code{\link{area.owin}}
-  \code{\link{diameter}},
+  \code{\link{diameter.owin}},
   \code{\link{owin.object}},
   \code{\link{as.owin}}
 }

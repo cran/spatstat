@@ -6,7 +6,8 @@
 }
 \usage{
  \method{plot}{ppp}(x, main, \dots, chars=NULL, cols=NULL,
-use.marks=TRUE, which.marks=1, add=FALSE, maxsize=NULL, markscale=NULL)
+use.marks=TRUE, which.marks=1, add=FALSE,
+maxsize=NULL, markscale=NULL,zap=0.01)
 }
 \arguments{
   \item{x}{
@@ -57,6 +58,15 @@ use.marks=TRUE, which.marks=1, add=FALSE, maxsize=NULL, markscale=NULL)
     physical scale factor determining the sizes of the
     circles/squares plotted when \code{x} is a marked point pattern with 
     numerical marks. Incompatible with \code{maxsize}.
+  }
+  \item{zap}{
+    Fraction between 0 and 1.
+    When \code{x} is a marked point pattern with numerical marks,
+    \code{zap} is the smallest mark value
+    (expressed as a fraction of the maximum possible mark) that will
+    be plotted. 
+    Any points which have marks smaller in absolute value
+    than \code{zap * max(abs(marks(x)))} will not be plotted.
   }
 }
 \value{

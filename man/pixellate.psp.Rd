@@ -62,6 +62,8 @@
   X <- psp(runif(10),runif(10), runif(10), runif(10), window=owin())
   plot(pixellate(X))
   plot(X, add=TRUE)
+  sum(lengths.psp(X))
+  sum(pixellate(X))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

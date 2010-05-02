@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.53 $    $Date: 2010/03/12 10:16:02 $
+#    $Revision: 1.54 $    $Date: 2010/04/21 06:56:17 $
 #
 #  (a) for matrices only:
 #
@@ -148,8 +148,26 @@ commasep <- function(x) {
   return(paste(paste(px, commas, sep=""), collapse=""))
 }
 
-paren <- function(x) { paste("(", x, ")", sep="") }
+paren <- function(x, type="(") {
+  switch(type,
+         "(" = {
+           out <- paste("(", x, ")", sep="")
+         },
+         "[" = {
+           out <- paste("[", x, "]", sep="")
+         },
+         "{" = {
+           out <- paste("{", x, "}", sep="")
+         })
+  out
+}
 
+prange <- function(x) {
+  stopifnot(length(x) == 2)
+  paren(paste(x, collapse=", "), "[")
+}
+
+  
 ordinal <- function(k) {
   last <- abs(k) %% 10
   lasttwo <- abs(k) %% 100
@@ -432,3 +450,12 @@ explain.ifnot <- function(expr, context) {
     stop(paste(context, "it must be TRUE that", sQuote(ex)), call.=FALSE)
 }
 
+warn.ignored.args <- function(..., context=NULL) {
+  if((narg <- length(list(...))) > 0) {
+    whinge <- paste(narg, "unrecognised",
+                    ngettext(narg, "argument was", "arguments were"),
+                    "ignored")
+    if(!is.null(context)) whinge <- paste(context, whinge)
+    warning(context)
+  }
+}
