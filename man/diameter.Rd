@@ -1,40 +1,36 @@
 \name{diameter}
 \alias{diameter}
-\title{Diameter of a Window}
+\title{Diameter of an Object}
 \description{
-  Computes the diameter of a window 
+  Computes the diameter of an object such as a two-dimensional window
+  or three-dimensional box. 
 }
 \usage{
- diameter(w)
+ diameter(x)
 }
 \arguments{
-  \item{w}{A window, whose diameter will be computed.}
+  \item{x}{
+    A window or other object whose diameter will be computed.
+  }
 }
 \value{
-  The numerical value of the diameter of the window. 
+  The numerical value of the diameter of the object.
 }
 \details{
-  This function computes the 
-  diameter of a window of arbitrary shape,
-  i.e. the maximum distance between any two points
-  in the window. 
+  This function computes the diameter of an object
+  such as a two-dimensional window or a three-dimensional box. 
+  The diameter is the maximum distance 
+  between any two points in the object.
 
-  The argument \code{w} should be a window (an object of class
-  \code{"owin"}, see \code{\link{owin.object}} for details)
-  or can be given in any format acceptable to \code{\link{as.owin}()}.
+  The function \code{diameter} is generic, with methods for
+  the class \code{"owin"} (two-dimensional windows),
+  \code{"box3"} (three-dimensional boxes) and
+  \code{"boxx"} (multi-dimensional boxes).
 }
 \seealso{
-  \code{\link{area.owin}},
-  \code{\link{perimeter}},
-  \code{\link{owin}},
-  \code{\link{as.owin}}
-}
-\examples{
-  w <- owin(c(0,1),c(0,1))
-  diameter(w) 
-  # returns sqrt(2)
-  data(letterR)
-  diameter(letterR)
+  \code{\link{diameter.owin}},
+  \code{\link{diameter.box3}},
+  \code{\link{diameter.boxx}}
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

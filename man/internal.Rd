@@ -234,6 +234,7 @@
 \alias{ppllengine}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
+\alias{prange}
 \alias{primefactors}       
 \alias{print.bt.frame}
 \alias{print.colourmap}
@@ -356,6 +357,7 @@
 \alias{versionstring.spatstat}
 \alias{verifyclass}
 \alias{verify.xypolygon}
+\alias{warn.ignored.args}
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
@@ -601,7 +603,7 @@ overlap.xypolygon(P, Q)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
-paren(x)
+paren(x, type)
 partialModelMatrix(X,D,model,callstring,\dots)
 pcfmulti.inhom(X, I, J, lambdaI = NULL, lambdaJ = NULL, ...,
                r = NULL, breaks = NULL,
@@ -628,6 +630,7 @@ polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
+prange(x)
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{colourmap}(x, \dots)
@@ -756,6 +759,7 @@ versionstring.ppm(object)
 versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
+warn.ignored.args(\dots, context)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)

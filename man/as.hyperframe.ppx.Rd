@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \alias{as.hyperframe.ppx}
 \alias{as.data.frame.ppx}
+\alias{as.matrix.ppx}
 \title{
   Extract coordinates and marks of multidimensional point pattern
 }
@@ -12,6 +13,7 @@
 \usage{
 \method{as.hyperframe}{ppx}(x, ...)
 \method{as.data.frame}{ppx}(x, ...)
+\method{as.matrix}{ppx}(x, ...)
 }
 \arguments{
   \item{x}{
@@ -42,9 +44,15 @@
   with one row of data for each
   point in the pattern. This is a method for the generic
   function \code{\link{as.data.frame}}.
+
+  Finally \code{as.matrix(x)} is equivalent to
+  \code{as.matrix(as.data.frame(x))} for an object of class
+  \code{"ppx"}. Be warned that, if there are any columns of non-numeric
+  data (i.e. if there are mark variables that are factors),
+  the result will be a matrix of character values.
 }
 \value{
-  A \code{hyperframe} or \code{data.frame} as appropriate.
+  A \code{hyperframe}, \code{data.frame} or \code{matrix} as appropriate.
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -1,32 +1,39 @@
 \name{area.owin}
 \alias{area.owin}
+\alias{volume.owin}
 \title{Area of a Window}
 \description{
   Computes the area of a window 
 }
 \usage{
  area.owin(w)
+ \method{volume}{owin}(x)
 }
 \arguments{
   \item{w}{A window, whose area will be computed.
     This should be an object of class \code{\link{owin}},
     or can be given in any format acceptable to \code{\link{as.owin}()}.
   }
+  \item{x}{Object of class \code{\link{owin}}}
 }
 \value{
   A numerical value giving the area of the window. 
 }
 \details{
-  If the window \code{W} is of type \code{"rectangle"} or \code{"polygonal"},
+  If the window \code{w} is of type \code{"rectangle"} or \code{"polygonal"},
   the area of this rectangular window is computed by analytic geometry.
-  If \code{W} is of type \code{"mask"} 
+  If \code{w} is of type \code{"mask"} 
   the area of the discrete raster approximation of the window is
   computed by summing the binary image values and adjusting for
   pixel size.
+
+  The function \code{volume.owin} is identical to \code{area.owin}
+  except for the argument name. It is a method for the generic function
+  \code{volume}.
 }
 \seealso{
   \code{\link{perimeter}},
-  \code{\link{diameter}},
+  \code{\link{diameter.owin}},
   \code{\link{owin.object}},
   \code{\link{as.owin}}
 }

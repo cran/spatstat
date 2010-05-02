@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.2 $	$Date: 2009/11/05 01:28:57 $
+#	$Revision: 1.4 $	$Date: 2010/05/02 01:39:53 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -280,7 +280,7 @@ f3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1),
   km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
   rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
   #
-  ero <- eroded.volumes(box, r)
+  ero <- eroded.volumes(as.box3(box), r)
   H <- cumsum(nco/ero)
   cs <- H/max(H[is.finite(H)])
   #
@@ -320,7 +320,7 @@ g3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1),
   km <- kaplan.meier(obs, nco, breaks, upperobs=upperobs)
   rs <- reduced.sample(nco, cen, ncc, uppercen=uppercen)
   #
-  ero <- eroded.volumes(box, r)
+  ero <- eroded.volumes(as.box3(box), r)
   H <- cumsum(nco/ero)
   han <- H/max(H[is.finite(H)])
   return(list(rs=rs, km=km$km, hazard=km$lambda, han=han, r=r))
@@ -364,14 +364,3 @@ digital.volume <- function(range=c(0, 1.414),  nval=25, vside= 0.05)
         (vside^3) * dvol 
       }
 
-eroded.volumes <- function(x, r) {
-  b <- as.box3(x)
-  ax <- pmax(0, diff(b$xrange) - 2 * r)
-  ay <- pmax(0, diff(b$yrange) - 2 * r)
-  az <- pmax(0, diff(b$zrange) - 2 * r)
-  ax * ay * az
-}
-
-shortside.box3 <- function(x) {
-  min(diff(x$xrange), diff(x$yrange), diff(x$zrange))
-}

@@ -215,7 +215,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
 #endif
       k = clamp((int) floor(x0i), 0, Nx-1);
       j = clamp((int) floor(y0i), 0, Ny-1);
-      V(j,k) += leni;
+      V(j,k) += wti * leni;
     } else if(floor(x1i) == floor(x0i) && floor(y1i) == floor(y0i)) { 
       /* contained in one cell */
 #ifdef DEBUG
@@ -223,7 +223,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
 #endif
       k = clamp((int) floor(x0i), 0, Nx-1);
       j = clamp((int) floor(y0i), 0, Ny-1);
-      V(j,k) += leni;
+      V(j,k) += wti * leni;
     } else if(floor(y1i) == floor(y0i)) { /* horizontal */
 #ifdef DEBUG
       Rprintf("horizontal\n");

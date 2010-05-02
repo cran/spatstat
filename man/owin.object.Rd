@@ -45,7 +45,7 @@
   Geometrical calculations available for windows include
   \code{\link{area.owin}},
   \code{\link{perimeter}},
-  \code{\link{diameter}},
+  \code{\link{diameter.owin}},
   \code{\link{bounding.box}},
   \code{\link{eroded.areas}},
   \code{\link{bdist.points}},

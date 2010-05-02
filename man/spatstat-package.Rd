@@ -95,7 +95,8 @@
     \code{\link{im}} \tab pixel image \cr
     \code{\link{psp}} \tab line segment pattern \cr
     \code{\link{tess}} \tab tessellation \cr
-    \code{\link{pp3}} \tab three-dimensional point pattern
+    \code{\link{pp3}} \tab three-dimensional point pattern \cr
+    \code{\link{ppx}} \tab point pattern in any number of dimensions
   }
 
   \bold{To create a point pattern:}
@@ -342,7 +343,7 @@
 	\code{\link{inside.owin}}	\tab	determine whether a point is inside a window\cr
 	\code{\link{area.owin}}	\tab	compute area \cr
 	\code{\link{perimeter}}	\tab	compute perimeter length \cr
-	\code{\link{diameter}}	\tab	compute diameter\cr
+	\code{\link{diameter.owin}}	\tab	compute diameter\cr
 	\code{\link{incircle}}	\tab	find largest circle inside a window \cr
 	\code{\link{connected}}    \tab find connected components of window \cr
 	\code{\link{eroded.areas}}	\tab	compute areas of eroded windows\cr
@@ -493,6 +494,26 @@
       \code{\link{volume.box3}} \tab volume of box \cr
       \code{\link{shortside.box3}} \tab shortest side of box \cr
       \code{\link{eroded.volumes}} \tab volumes of erosions of box 
+    }
+
+    \bold{Multi-dimensional space-time point patterns}
+
+    An object of class \code{"ppx"} represents a 
+    point pattern in multi-dimensional space and/or time.
+
+    \tabular{ll}{
+      \code{\link{ppx}} \tab create a multidimensional space-time point pattern \cr
+      \code{\link{coords}} \tab extract coordinates \cr
+      \code{\link{as.hyperframe}} \tab extract coordinates \cr
+      \code{\link{unitname.ppx}} \tab name of unit of length \cr
+      \code{\link{npoints}} \tab count the number of points  \cr
+      \code{\link{runifpointx}} \tab generate uniform random points \cr
+      \code{\link{rpoisppx}} \tab generate Poisson random points \cr
+      \code{\link{boxx}} \tab define multidimensional box  \cr
+      \code{\link{diameter.boxx}} \tab diameter of box \cr
+      \code{\link{volume.boxx}} \tab volume of box \cr
+      \code{\link{shortside.boxx}} \tab shortest side of box \cr
+      \code{\link{eroded.volumes.boxx}} \tab volumes of erosions of box 
     }
 
     \bold{Hyperframes}
@@ -668,6 +689,20 @@
     two patterns \cr
     \code{\link{nndist.pp3}} \tab nearest neighbour distances \cr
     \code{\link{nnwhich.pp3}} \tab find nearest neighbours
+  }
+
+  \bold{Computations for multi-dimensional point pattern:}
+
+  These are for multi-dimensional space-time
+  point pattern objects (class \code{ppx}).
+
+  \tabular{ll}{
+    \code{\link{pairdist.ppx}} \tab distances between all pairs of
+    points \cr
+    \code{\link{crossdist.ppx}} \tab distances between points in
+    two patterns \cr
+    \code{\link{nndist.ppx}} \tab nearest neighbour distances \cr
+    \code{\link{nnwhich.ppx}} \tab find nearest neighbours
   }
 
   \bold{Summary statistics for random sets:}

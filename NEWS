@@ -1,3 +1,46 @@
+	CHANGES IN spatstat VERSION 1.18-4
+
+ACKNOWLEDGEMENTS
+
+    o   We thank Michael Sumner for contributions.    
+
+BUG FIXES
+
+    o   pixellate.psp: segments shorter than one pixel width
+    	were measured incorrectly if the 'weights' argument was present. 
+	Fixed.
+
+NEW FUNCTIONS
+
+    o   pairdist.ppx, crossdist.ppx, nndist.ppx, nnwhich.ppx:
+    	Methods for pairdist, crossdist, nndist, nnwhich 
+	for multidimensional point patterns (class 'ppx')
+
+    o	runifpointx, rpoisppx:
+	Random point patterns in any number of dimensions
+
+    o   boxx:
+	Multidimensional box in any number of dimensions
+
+    o   diameter.boxx, volume.boxx, shortside.boxx, eroded.volumes.boxx:
+        Geometrical computations for multidimensional boxes
+
+    o   sum.im, max.im, min.im: 
+        Methods for sum(), min(), max() for pixel images.
+
+    o   as.matrix.ppx:
+	Convert a multidimensional point pattern to a matrix
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   plot.ppp: New argument 'zap'
+
+    o   diameter: This function is now generic, 
+        with methods for "owin", "box3" and "boxx"
+
+    o   eroded.volumes: This function is now generic, 
+        with methods for "box3" and "boxx"
+
 	CHANGES IN spatstat VERSION 1.18-3
 
 ACKNOWLEDGEMENTS

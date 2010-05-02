@@ -1,23 +1,31 @@
 \name{mean.im}
+\alias{max.im}
+\alias{min.im}
 \alias{mean.im}
 \alias{median.im}
 \alias{range.im}
-\title{Mean, Median and Range of Pixel Values in an Image}
+\alias{sum.im}
+\title{Maximum, Minimum, Mean, Median, Range or Sum
+  of Pixel Values in an Image}
 \description{
-  Calculates the mean, median or range of the pixel values in a pixel image.
+  Calculates the mean, median, range, sum, maximum or minimum
+  of the pixel values in a pixel image.
 }
 \usage{
+  \method{max}{im}(x, \dots)
+  \method{min}{im}(x, \dots)
   \method{mean}{im}(x, \dots)
   \method{median}{im}(x, \dots)
   \method{range}{im}(x, \dots)
+  \method{sum}{im}(x, \dots)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}
   \item{\dots}{Arguments passed to \code{\link{mean.default}}.}
 }
 \details{
-  These functions calculate the mean, median and range of the pixel
-  values in the image
+  These functions calculate the mean, median, range, sum, maximum
+  or minimum of the pixel values in the image
   \code{x}.
 
   An object of class \code{"im"}
@@ -52,6 +60,7 @@
   \code{\link{mean}},
   \code{\link{median}},
   \code{\link{range}},
+  \code{\link{sum}},
   \code{\link{mean.default}},
   \code{\link{median.default}},
   \code{\link{range.default}},
