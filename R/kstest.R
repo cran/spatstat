@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.41 $  $Date: 2010/04/14 07:49:56 $
+#  $Revision: 1.43 $  $Date: 2010/05/13 01:06:44 $
 #
 #
 
@@ -70,6 +70,8 @@ kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
 spatialCDFtest <- function(model, covariate, test, ...,
                            jitter=TRUE, 
                            modelname=NULL, covname=NULL, dataname=NULL) {
+  if(!is.poisson.ppm(model))
+    stop("Only implemented for Poisson point process models")
   # conduct test based on comparison of CDF's of covariate values
   test <- pickoption("test", test, c(ks="ks"))
   # compute the essential data
@@ -148,8 +150,6 @@ evalCovar <- function(model, covariate,
                       dataname=NULL) {
   # evaluate covariate values at data points and at pixels
   verifyclass(model, "ppm")
-  if(!is.poisson.ppm(model))
-    stop("Only implemented for Poisson point process models")
   csr <- is.poisson.ppm(model) && is.stationary.ppm(model)
 
   # determine names
@@ -172,6 +172,9 @@ evalCovar <- function(model, covariate,
       type <- "im"
       # evaluate at data points by interpolation
       ZX <- interp.im(covariate, X$x, X$y)
+      # fix boundary glitches
+      if(any(uhoh <- is.na(ZX)))
+        ZX[uhoh] <- safelookup(covariate, X[uhoh])
       # covariate values for pixels inside window
       Z <- covariate[W, drop=FALSE]
       # corresponding mask
@@ -180,6 +183,8 @@ evalCovar <- function(model, covariate,
       type <- "function"
       # evaluate exactly at data points
       ZX <- covariate(X$x, X$y)
+      if(!all(is.finite(ZX)))
+        warning("covariate function returned NA or Inf values")
       # window
       W <- as.mask(W)
       # covariate in window

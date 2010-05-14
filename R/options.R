@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.25 $   $Date: 2010/02/08 18:01:41 $
+#    $Revision: 1.26 $   $Date: 2010/05/10 07:29:29 $
 #
 #
 
@@ -109,6 +109,13 @@ reset.spatstat.options <- function() {
          ),
        mplmaxmatrix=list(
          default=2^24, # 16,777,216
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1024
+         },
+         valid="a single integer, greater than 1024"
+       ),
+       huge.npoints=list(
+         default=1e6,
          check=function(x) {
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1024
          },

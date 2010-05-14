@@ -152,6 +152,7 @@
       \code{\link{AreaInter}},
       \code{\link{BadGey}},
       \code{\link{DiggleGratton}},
+      \code{\link{Fiksel}},
       \code{\link{Geyer}},
       \code{\link{Hardcore}},
       \code{\link{LennardJones}},
@@ -436,6 +437,7 @@
       \code{\link{BadGey}},
       \code{\link{DiggleGratton}},
       \code{\link{Geyer}},
+      \code{\link{Fiksel}},
       \code{\link{Hardcore}},
       \code{\link{LennardJones}},
       \code{\link{MultiStrauss}},
@@ -451,7 +453,8 @@
       \code{\link{StraussHard}}.
 }
 \section{Warnings}{
-  The implementation of the Huang-Ogata method is experimental.
+  The implementation of the Huang-Ogata method is experimental;
+  several bugs were fixed in \pkg{spatstat} 1.19-0.
   
   See the comments above about the possible inefficiency
   and bias of the maximum pseudolikelihood estimator.

@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.7 $  $Date: 2007/01/31 05:46:23 $
+#  $Revision: 1.8 $  $Date: 2010/05/07 11:08:25 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -72,7 +72,7 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
       fiti <- ppm(interaction=fi, ..., rbord=rbord, precomputed=precomp)
     }
     # save log PL for each fit
-    logmpl[i] <- fiti$maxlogpl
+    logmpl[i] <- as.numeric(logLik(fiti))
     # save fitted coefficients for each fit
     co <- coef(fiti)
     if(i == 1) {

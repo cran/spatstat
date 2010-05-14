@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.115 $	$Date: 2010/03/08 01:50:23 $
+#	$Revision: 4.117 $	$Date: 2010/05/10 07:24:12 $
 #
 #
 #	A window may be either
@@ -912,18 +912,12 @@ print.owin <- function(x, ...) {
            cat("enclosing rectangle: ")
          }
          )
-    cat(paste("[",
-              signif(x$xrange[1], 5),
-              ", ",
-              signif(x$xrange[2], 5),
-              "] x [",
-              signif(x$yrange[1], 5),
-              ", ",
-              signif(x$yrange[2], 5),
-              "] ",
+    cat(paste(prange(zapsmall(x$xrange)),
+              "x",
+              prange(zapsmall(x$yrange)),
               unitinfo$plural,
-              " ", unitinfo$explain,
-              "\n", sep=""))
+              unitinfo$explain,
+              "\n"))
 }
 
 summary.owin <- function(object, ...) {
@@ -1005,16 +999,10 @@ print.summary.owin <- function(x, ...) {
            cat("enclosing rectangle: ")
          }
          )
-  cat(paste("[",
-              signif(x$xrange[1], 5),
-              ", ",
-              signif(x$xrange[2], 5),
-              "] x [",
-              signif(x$yrange[1], 5),
-              ", ",
-              signif(x$yrange[2], 5),
-              "] ",
-              pluralunits, "\n", sep=""))
+  cat(paste(prange(zapsmall(x$xrange)),
+            "x",
+            prange(zapsmall(x$yrange)),
+            pluralunits, "\n", sep=""))
   Area <- signif(x$area, 6)
   cat(paste("Window area = ", Area, "square",
             if(Area == 1) singularunits else pluralunits, "\n"))
