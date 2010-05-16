@@ -1,3 +1,49 @@
+	CHANGES IN spatstat VERSION 1.19-0
+
+OVERVIEW
+
+    o   Numerous bugs fixed in the implementation of
+    	the Huang-Ogata approximate maximum likelihood method.
+
+    o   New interpoint interaction model.
+
+NEW FUNCTIONS
+
+    o   Fiksel: 
+        new interpoint interaction: Fiksel's double exponential model.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   runifpoint, rpoispp, envelope
+    	These functions now issue a warning if the number of random points
+	to be generated is very large. This traps a common error in
+	simulation experiments.
+
+BUG FIXES
+
+    o   predict.ppm, fitted.ppm:
+        Predictions and fitted values were incorrect for 
+	objects fitted using ppm(..., method="ho").
+	Fixed.
+
+    o   logLik, AIC:
+        Values of logLik() and AIC() were incorrect for 
+    	objects fitted using ppm(..., method="ho").
+	Fixed.
+
+    o   profilepl:
+    	Results were incorrect if the argument 'method="ho"' was used.
+	Fixed.
+
+    o   fitin
+        The result of fitin() was incorrect for 
+    	objects fitted using ppm(..., method="ho").
+	Fixed.
+
+    o   rmhcontrol: 
+    	rmhcontrol(NULL) generated an error.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.18-4
 
 ACKNOWLEDGEMENTS

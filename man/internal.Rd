@@ -110,6 +110,7 @@
 \alias{getglmdata}
 \alias{getglmfit}
 \alias{getglmsubset}
+\alias{GLMpredict}
 \alias{gridindex}            
 \alias{grid1index}
 \alias{grow.rectangle}
@@ -491,6 +492,7 @@ getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
 getglmsubset(object)
+GLMpredict(fit, data, coefs, changecoef)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
 grow.rectangle(W, xmargin=0, ymargin=xmargin)

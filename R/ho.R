@@ -3,7 +3,7 @@
 #
 #  Huang-Ogata method 
 #
-#  $Revision: 1.9 $ $Date: 2009/10/13 02:54:33 $
+#  $Revision: 1.13 $ $Date: 2010/05/07 12:18:59 $
 #
 
 ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
@@ -46,7 +46,7 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   # Newton-Raphson update
   Vinverse <- solve(svar)
   theta <- theta0 + as.vector(Vinverse %*% (sobs - smean))
-  # update model  & return
+  # update model
   newmodel <- model
   newmodel$coef <- theta
   newmodel$coef.mpl <- theta0
@@ -54,7 +54,9 @@ ho.engine <- function(model, ..., nsim=100, nrmh=1e5,
   newmodel$fitter <- "ho"
   newmodel$fisher <- svar
   newmodel$varcov <- Vinverse
+  # recompute fitted interaction  
+  newmodel$fitin <- NULL
+  newmodel$fitin <- fitin(newmodel)
   return(newmodel)
 }
-
 

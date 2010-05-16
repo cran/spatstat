@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.7 $  $Date: 2009/10/31 01:52:54 $
+#   $Revision: 1.9 $  $Date: 2010/05/06 15:22:54 $
 #
 #
 
@@ -30,11 +30,15 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
                         expand=NULL, periodic=FALSE, ptypes=NULL,
                         x.cond=NULL, fixall=FALSE, nverb=0)
 {
-  if(length(list(...)) > 0)
-    stop(paste("Syntax should be rmhcontrol(",
-               "p, q, nrep, expand, periodic, ptypes, x.cond, fixall, nverb",
-               ")\n with arguments given by name if present"))
-  
+  argh <- list(...)
+  nargh <- length(argh)
+  if(nargh > 0) {
+    # allow rmhcontrol(NULL), otherwise flag an error
+    if(!(nargh == 1 && is.null(argh[[1]])))
+      stop(paste("Unrecognised arguments; syntax should be rmhcontrol(",
+                 "p, q, nrep, expand, periodic, ptypes, x.cond, fixall, nverb",
+                 ") with arguments given explicitly by name"))
+  }
   # validate arguments
   if(!is.numeric(p) || length(p) != 1
      || p < 0 || p > 1)

@@ -807,6 +807,7 @@
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{BadGey}()} \tab	multiscale Geyer process\cr
     \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
+    \code{\link{Fiksel}()}	 \tab Fiksel pairwise interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{Hardcore}()}	 \tab Hard core process\cr
     \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr

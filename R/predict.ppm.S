@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.51 $	$Date: 2009/11/12 03:57:40 $
+#	$Revision: 1.54 $	$Date: 2010/05/07 12:44:55 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -280,9 +280,10 @@ function(object, window, ngrid=NULL, locations=NULL,
     for(vn in Vnames)    
       newdata[[vn]] <- zeroes
 #
-#   invoke predict.glm()
+#   predict
 #
-    lambda <- predict(glmfit, newdata, type="response")
+    lambda <- GLMpredict(glmfit, newdata, coef(object),
+                         changecoef=(object$method!="mpl"))
 #
     switch(type,
            cif=,
@@ -386,9 +387,10 @@ function(object, window, ngrid=NULL, locations=NULL,
         newdata[[vn]] <- Vnew[,vn]
       #
     }
-  # invoke predict.glm
-  z <- predict(glmfit, newdata, type="response")
-
+  # invoke predict.glm or compute prediction
+    z <- GLMpredict(glmfit, newdata, coef(object),
+                    changecoef=(object$method != "mpl"))
+    
   # reset to zero if potential was zero
   if(any(cif.equals.zero))
     z[cif.equals.zero] <- 0
@@ -482,4 +484,30 @@ model.se.image <- function(fit, W=as.owin(fit), ..., what="sd") {
   # compute SD and return
   U <- eval.im(sqrt(U))
   return(U)
+}
+
+GLMpredict <- function(fit, data, coefs, changecoef=TRUE) {
+  if(!changecoef) {
+    answer <- predict(fit, newdata=data, type="response")
+  } else {
+    # do it by hand
+    fmla <- formula(fit)
+    data$.mpl.Y <- 1
+    fram <- model.frame(fmla, data=data)
+    # linear predictor
+    mm <- model.matrix(fmla, data=fram)
+    eta <- mm %*% coefs
+    # offset
+    mo <- model.offset(fram)
+    if(!is.null(mo)) {
+      if(is.matrix(mo))
+        mo <- apply(mo, 1, sum)
+      eta <- mo + eta
+    }
+    # response
+    linkinv <- family(fit)$linkinv
+    answer <- linkinv(eta)
+  }
+  return(answer)
+
 }

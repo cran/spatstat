@@ -4,7 +4,8 @@ require(spatstat)
 
    if(!exists("nv"))
      nv <- 0
-   nr   <- 1e5
+   if(!exists("nr"))
+     nr   <- 5e3
 
    # Poisson process
    cat("Poisson\n")

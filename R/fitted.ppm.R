@@ -3,7 +3,7 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.6 $   $Date: 2008/07/25 19:32:49 $
+#   $Revision: 1.8 $   $Date: 2010/05/07 12:17:57 $
 # 
 
 fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, check=TRUE, repair=TRUE) {
@@ -51,7 +51,9 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, c
            })
 
     # Compute predicted [conditional] intensity values
-    lambda <- predict(glmfit, newdata=glmdata, type="response")
+    lambda <- GLMpredict(glmfit, glmdata, coef(object),
+                         changecoef=(object$method != "mpl"))
+    
     # Note: the `newdata' argument is necessary in order to obtain
     # predictions at all quadrature points. If it is omitted then
     # we would only get predictions at the quadrature points j

@@ -30,7 +30,6 @@ resolve.defaults <- function(..., .StripNull=FALSE) {
   return(argue)
 }
 
-
 do.call.matched <- function(fname, arglist, funargs, extrargs=NULL) {
   fun <- get(fname, mode="function")
   if(!is.function(fun))
@@ -43,5 +42,6 @@ do.call.matched <- function(fname, arglist, funargs, extrargs=NULL) {
   matched <- givenargs %in% funargs
   do.call(fname, arglist[matched])
 }
+
 
   

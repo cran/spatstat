@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.38 $	$Date: 2010/01/25 20:58:25 $
+#	$Revision: 2.39 $	$Date: 2010/05/07 11:03:32 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -194,7 +194,23 @@ logLik.ppm <- function(object, ...) {
   if(!is.poisson.ppm(object)) 
     warning(paste("log likelihood is not available for non-Poisson model;",
                   "log-pseudolikelihood returned"))
-  ll <- object$maxlogpl
+  method <- object$method
+  switch(method,
+         mpl={
+           ll <- object$maxlogpl
+         },
+         ho={
+           # evaluate the log pseudolikelihood
+           Q <- quad.ppm(object, drop=TRUE)
+           Z <- is.data(Q)
+           w <- w.quad(Q)
+           cif <- fitted(object, type="cif", drop=TRUE)
+           cifdata <- cif[Z]
+           ll <- sum(log(cifdata[cifdata > 0])) - sum(w * cif)
+         },
+         stop(paste("Internal error: unrecognised ppm method:",
+                    dQuote(method)))
+         )
   attr(ll, "df") <- length(coef(object))
   class(ll) <- "logLik"
   return(ll)
