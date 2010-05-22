@@ -304,31 +304,33 @@ trend corresponding to a particular type, there is still a component
    \dontrun{
    nr   <- 1e5
    nv  <- 5000
+   ns <- 200
    }
    \testonly{
    nr  <- 10
    nv <- 5
+   ns <- 20
    }
    set.seed(961018)
    
    # Strauss process.
    mod01 <- list(cif="strauss",par=list(beta=2,gamma=0.2,r=0.7),
                  w=c(0,10,0,10))
-   X1.strauss <- rmh(model=mod01,start=list(n.start=80),
+   X1.strauss <- rmh(model=mod01,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process, conditioning on n = 80:
-   X2.strauss <- rmh(model=mod01,start=list(n.start=80),
+   X2.strauss <- rmh(model=mod01,start=list(n.start=ns),
                      control=list(p=1,nrep=nr,nverb=nv))
    
    # Hard core process:
    mod02 <- list(cif="hardcore",par=list(beta=2,hc=0.7),w=c(0,10,0,10))
-   X3.hardcore <- rmh(model=mod02,start=list(n.start=60),
+   X3.hardcore <- rmh(model=mod02,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process equal to pure hardcore:
    mod02s <- list(cif="strauss",par=list(beta=2,gamma=0,r=0.7),w=c(0,10,0,10))
-   X3.strauss <- rmh(model=mod02s,start=list(n.start=60),
+   X3.strauss <- rmh(model=mod02s,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process in a polygonal window.
@@ -336,11 +338,11 @@ trend corresponding to a particular type, there is still a component
    y     <- c(0.20,0.27,0.68,0.99,0.80,0.61,0.45,0.28,0.33)
    mod03 <- list(cif="strauss",par=list(beta=2000,gamma=0.6,r=0.07),
                 w=owin(poly=list(x=x,y=y)))
-   X4.strauss <- rmh(model=mod03,start=list(n.start=90),
+   X4.strauss <- rmh(model=mod03,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Strauss process in a polygonal window, conditioning on n = 80.
-   X5.strauss <- rmh(model=mod03,start=list(n.start=90),
+   X5.strauss <- rmh(model=mod03,start=list(n.start=ns),
                      control=list(p=1,nrep=nr,nverb=nv))
    
    # Strauss process, starting off from X4.strauss, but with the
@@ -354,32 +356,32 @@ trend corresponding to a particular type, there is still a component
    # Strauss with hardcore:
    mod04 <- list(cif="straush",par=list(beta=2,gamma=0.2,r=0.7,hc=0.3),
                 w=c(0,10,0,10))
-   X1.straush <- rmh(model=mod04,start=list(n.start=70),
+   X1.straush <- rmh(model=mod04,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Another Strauss with hardcore (with a perhaps surprising result):
    mod05 <- list(cif="straush",par=list(beta=80,gamma=0.36,r=45,hc=2.5),
                 w=c(0,250,0,250))
-   X2.straush <- rmh(model=mod05,start=list(n.start=250),
+   X2.straush <- rmh(model=mod05,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Pure hardcore (identical to X3.strauss).
    mod06 <- list(cif="straush",par=list(beta=2,gamma=1,r=1,hc=0.7),
                 w=c(0,10,0,10))
-   X3.straush <- rmh(model=mod06,start=list(n.start=60),
+   X3.straush <- rmh(model=mod06,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
    # Soft core:
    w    <- c(0,10,0,10)
    mod07 <- list(cif="sftcr",par=list(beta=0.8,sigma=0.1,kappa=0.5),
                 w=c(0,10,0,10))
-   X.sftcr <- rmh(model=mod07,start=list(n.start=70),
+   X.sftcr <- rmh(model=mod07,start=list(n.start=ns),
                   control=list(nrep=nr,nverb=nv))
 
    # Area-interaction process:
    mod42 <- rmhmodel(cif="areaint",par=list(beta=2,eta=1.6,r=0.7),
                  w=c(0,10,0,10))
-   X.area <- rmh(model=mod42,start=list(n.start=70),
+   X.area <- rmh(model=mod42,start=list(n.start=ns),
                   control=list(nrep=nr,nverb=nv))
 
    
@@ -389,12 +391,12 @@ trend corresponding to a particular type, there is still a component
    r    <- matrix(c(45,45,45,45),2,2)
    mod08 <- list(cif="straussm",par=list(beta=beta,gamma=gmma,radii=r),
                 w=c(0,250,0,250))
-   X1.straussm <- rmh(model=mod08,start=list(n.start=80),
+   X1.straussm <- rmh(model=mod08,start=list(n.start=ns),
                       control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
    
    # Multitype Strauss conditioning upon the total number
    # of points being 80:
-   X2.straussm <- rmh(model=mod08,start=list(n.start=80),
+   X2.straussm <- rmh(model=mod08,start=list(n.start=ns),
                       control=list(p=1,ptypes=c(0.75,0.25),nrep=nr,
                                    nverb=nv))
    
@@ -408,7 +410,7 @@ trend corresponding to a particular type, there is still a component
    rhc  <- matrix(c(9.1,5.0,5.0,2.5),2,2)
    mod09 <- list(cif="straushm",par=list(beta=beta,gamma=gmma,
                 iradii=r,hradii=rhc),w=c(0,250,0,250))
-   X.straushm <- rmh(model=mod09,start=list(n.start=80),
+   X.straushm <- rmh(model=mod09,start=list(n.start=ns),
                      control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
    
    # Multitype Strauss hardcore with trends for each type:
@@ -423,7 +425,7 @@ trend corresponding to a particular type, there is still a component
    mod10 <- list(cif="straushm",par=list(beta=beta,gamma=gmma,
                  iradii=r,hradii=rhc),w=c(0,250,0,250),
                  trend=list(tr3,tr4))
-   X1.straushm.trend <- rmh(model=mod10,start=list(n.start=350),
+   X1.straushm.trend <- rmh(model=mod10,start=list(n.start=ns),
                             control=list(ptypes=c(0.75,0.25),
                             nrep=nr,nverb=nv))
    
@@ -434,26 +436,33 @@ trend corresponding to a particular type, there is still a component
    mod11 <- list(cif="straushm",par=list(beta=beta,gamma=gmma,
                  iradii=r,hradii=rhc),w=bigwin,
                  trend=list(i1,i2))
-   X2.straushm.trend <- rmh(model=mod11,start=list(n.start=350),
+   X2.straushm.trend <- rmh(model=mod11,start=list(n.start=ns),
                             control=list(ptypes=c(0.75,0.25),expand=1,
                             nrep=nr,nverb=nv))
    
    # Diggle, Gates, and Stibbard:
    mod12 <- list(cif="dgs",par=list(beta=3600,rho=0.08),w=c(0,1,0,1))
-   X.dgs <- rmh(model=mod12,start=list(n.start=300),
+   X.dgs <- rmh(model=mod12,start=list(n.start=ns),
                 control=list(nrep=nr,nverb=nv))
    
    # Diggle-Gratton:
    mod13 <- list(cif="diggra",
                  par=list(beta=1800,kappa=3,delta=0.02,rho=0.04),
                  w=square(1))
-   X.diggra <- rmh(model=mod13,start=list(n.start=300),
+   X.diggra <- rmh(model=mod13,start=list(n.start=ns),
+                   control=list(nrep=nr,nverb=nv))
+   
+   # Fiksel:
+   modFik <- list(cif="fiksel",
+                 par=list(beta=180,r=0.15,hc=0.07,kappa=2,a= -1.0),
+                 w=square(1))
+   X.diggra <- rmh(model=modFik,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
    
    # Geyer:
    mod14 <- list(cif="geyer",par=list(beta=1.25,gamma=1.6,r=0.2,sat=4.5),
                  w=c(0,10,0,10))
-   X1.geyer <- rmh(model=mod14,start=list(n.start=200),
+   X1.geyer <- rmh(model=mod14,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
    
    # Geyer; same as a Strauss process with parameters
@@ -461,7 +470,7 @@ trend corresponding to a particular type, there is still a component
    
    mod15 <- list(cif="geyer",par=list(beta=2.25,gamma=0.4,r=0.7,sat=10000),
                  w=c(0,10,0,10))
-   X2.geyer <- rmh(model=mod15,start=list(n.start=200),
+   X2.geyer <- rmh(model=mod15,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
    
    mod16 <- list(cif="geyer",par=list(beta=8.1,gamma=2.2,r=0.08,sat=3))
@@ -480,7 +489,7 @@ trend corresponding to a particular type, there is still a component
       h[r<0.05] <- 0
       h[r>0.10] <- 1
       mod17 <- list(cif="lookup",par=list(beta=4000,h=h,r=r),w=c(0,1,0,1))
-      X.lookup <- rmh(model=mod17,start=list(n.start=100),
+      X.lookup <- rmh(model=mod17,start=list(n.start=ns),
                       control=list(nrep=nr,nverb=nv))
                    
    # Strauss with trend
@@ -492,20 +501,20 @@ trend corresponding to a particular type, there is still a component
    r    <- 45
    mod17 <- list(cif="strauss",par=list(beta=beta,gamma=gmma,r=r),
                  w=square(1), trend=tr3)
-   X1.strauss.trend <- rmh(model=mod17,start=list(n.start=90),
+   X1.strauss.trend <- rmh(model=mod17,start=list(n.start=ns),
                            control=list(nrep=nr,nverb=nv))
    # Baddeley-Geyer
    r <- seq(0,0.2,length=8)[-1]
    gmma <- c(0.5,0.6,0.7,0.8,0.7,0.6,0.5)
    mod18 <- list(cif="badgey",par=list(beta=4000, gamma=gmma,r=r,sat=5),
                  w=square(1))
-   X1.badgey <- rmh(model=mod18,start=list(n.start=100),
+   X1.badgey <- rmh(model=mod18,start=list(n.start=ns),
                     control=list(nrep=nr,nverb=nv))
    mod19 <- list(cif="badgey",
                  par=list(beta=4000, gamma=gmma,r=r,sat=1e4),
                  w=square(1))
    set.seed(1329)
-   X2.badgey <- rmh(model=mod18,start=list(n.start=100),
+   X2.badgey <- rmh(model=mod18,start=list(n.start=ns),
                     control=list(nrep=nr,nverb=nv))
 
    # Check:
@@ -513,13 +522,13 @@ trend corresponding to a particular type, there is still a component
    hs <- stepfun(r,c(h,1))
    mod20 <- list(cif="lookup",par=list(beta=4000,h=hs),w=square(1))
    set.seed(1329)
-   X.check <- rmh(model=mod20,start=list(n.start=100),
+   X.check <- rmh(model=mod20,start=list(n.start=ns),
                       control=list(nrep=nr,nverb=nv))
    # X2.badgey and X.check will be identical.
 
    mod21 <- list(cif="badgey",par=list(beta=300,gamma=c(1,0.4,1),
                  r=c(0.035,0.07,0.14),sat=5), w=square(1))
-   X3.badgey <- rmh(model=mod21,start=list(n.start=100),
+   X3.badgey <- rmh(model=mod21,start=list(n.start=ns),
                     control=list(nrep=nr,nverb=nv))
    # Same result as Geyer model with beta=300, gamma=0.4, r=0.07,
    # sat = 5 (if seeds and control parameters are the same)
@@ -528,7 +537,7 @@ trend corresponding to a particular type, there is still a component
    mod22 <- list(cif="badgey",
                  par=list(beta=300,gamma=0.4,r=0.07, sat=5),
                  w=square(1))
-   X4.badgey <- rmh(model=mod22,start=list(n.start=100),
+   X4.badgey <- rmh(model=mod22,start=list(n.start=ns),
                     control=list(nrep=nr,nverb=nv))
    # Same again --- i.e. the BadGey model includes the Geyer model.
 

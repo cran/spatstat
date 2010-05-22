@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.39 $  $Date: 2010/02/01 23:35:48 $
+# $Revision: 1.40 $  $Date: 2010/05/20 14:20:26 $
 #
 
 hyperframe <- function(...,
@@ -354,6 +354,50 @@ cbind.hyperframe <- function(...) {
   }
   result <- do.call("hyperframe", columns)
   return(result)
+}
+
+rbind.hyperframe <- function(...) {
+  argh <- list(...)
+  if(length(argh) == 0)
+    return(NULL)
+  # convert them all to hyperframes
+  argh <- lapply(argh, as.hyperframe)
+  #
+  nargh <- length(argh)
+  if(nargh == 1)
+    return(argh[[1]])
+  # check for compatibility of dimensions & names
+  dfs <- lapply(argh, as.data.frame, discard=FALSE)
+  dfall <- do.call(rbind, dfs)
+  # check that data frame columns also match
+  dfs0 <- lapply(argh, as.data.frame, discard=TRUE, warn=FALSE)
+  df0all <- do.call(rbind, dfs0)
+  # assemble data
+  rslt <- list()
+  nam <- names(dfall) 
+  nam0 <- names(df0all)
+  for(k in seq(along=nam)) {
+    nama <- nam[k]
+    if(nama %in% nam0) {
+      # data frame column: already made
+      rslt[[k]] <- dfall[,k]
+    } else {
+      # hypercolumns or hyperatoms: extract them
+      hdata <- lapply(argh,
+                      function(x,nama) { x[, nama, drop=TRUE] },
+                      nama=nama)
+      # append them
+      hh <- hdata[[1]]
+      for(j in 2:nargh) {
+        hh <- append(hh, hdata[[j]])
+      }
+      rslt[[k]] <- hh
+    }
+  }
+  # make hyperframe
+  names(rslt) <- nam
+  out <- do.call(hyperframe, append(rslt, list(stringsAsFactors=FALSE)))
+  return(out)
 }
 
 plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,

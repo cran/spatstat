@@ -5,13 +5,17 @@
   Extracts the log likelihood of a fitted Poisson point process model.
 }
 \usage{
-\method{logLik}{ppm}(object, ...)
+\method{logLik}{ppm}(object, ..., warn=TRUE)
 }
 \arguments{
   \item{object}{Fitted point process model.
     An object of class \code{"ppm"}.
   }
   \item{\dots}{Ignored.}
+  \item{warn}{
+    If \code{TRUE}, a warning is given when the
+    pseudolikelihood is returned instead of the likelihood.
+  }
 }
 \details{
   The maximised value of the log likelihood for the fitted model
@@ -19,7 +23,7 @@
   is extracted.
 
   If \code{object} is not a Poisson process, the maximised log
-  \emph{pseudolikelihood} is returned, with a warning.
+  \emph{pseudolikelihood} is returned, with a warning (if \code{warn=TRUE}).
 }
 \value{
   A numerical value.

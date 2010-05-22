@@ -57,7 +57,8 @@ as.hyperframe(x, \dots)
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link{hyperframe}}
+  \code{\link{hyperframe}},
+  \code{\link{as.hyperframe.ppx}}
 }
 \examples{
    df <- data.frame(x=runif(4),y=letters[1:4])

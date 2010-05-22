@@ -17,7 +17,6 @@
 \alias{areaLoss.grid}       
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
-\alias{as.data.frame.hyperframe}
 \alias{as.data.frame.fv}
 \alias{as.fv}
 \alias{as.list.hyperframe}
@@ -32,7 +31,6 @@
 \alias{breakpts.from.r}
 \alias{bt.frame}
 \alias{cartesian}
-\alias{cbind.hyperframe}
 \alias{cellmiddles}
 \alias{censtimeCDFest}
 \alias{checkfields}          
@@ -197,6 +195,7 @@
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
 \alias{MultiPair.checkmatrix}
+\alias{multiply.only.finite.entries}
 \alias{na.handle.im}
 \alias{names.hyperframe}
 \alias{names<-.hyperframe}
@@ -387,9 +386,6 @@ areaLoss.diri(X, r, ..., W=as.owin(X), subset=NULL)
 areaLoss.grid(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc"))
 AsymmDistance.psp(X, Y, metric="Hausdorff", method="Fortran")
 as.breakpts(\dots)
-\method{as.data.frame}{hyperframe}(x, row.names = NULL,
-                                  optional = FALSE, ..., 
-                                  discard=TRUE, warn=TRUE)
 \method{as.data.frame}{fv}(x, ...)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
@@ -405,7 +401,6 @@ breakpts.from.r(r)
 bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
          correction="border", rbord=0, use.gam=FALSE, allcovar=FALSE)
 cartesian(pp, markset, fac = TRUE)
-cbind.hyperframe(...)
 cellmiddles(W, nx, ny, npix, gi)
 censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom, pmax)
 checkfields(X,L)          
@@ -586,6 +581,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             callstring, \dots, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook)
+multiply.only.finite.entries(x, a)
 na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value

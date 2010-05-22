@@ -204,6 +204,7 @@
 	\code{\link{murchison}} \tab Murchison gold deposits \cr
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
+	\code{\link{osteo}} \tab Osteocyte lacunae (3D, replicated) \cr
 	\code{\link{ponderosa}} \tab Getis-Franklin ponderosa pine trees data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
@@ -526,7 +527,11 @@
       \code{\link{as.hyperframe}} \tab convert data to hyperframe \cr
       \code{\link{plot.hyperframe}} \tab plot hyperframe \cr
       \code{\link{with.hyperframe}} \tab evaluate expression using each row
-      of hyperframe
+      of hyperframe \cr
+      \code{\link{cbind.hyperframe}} \tab combine hyperframes by columns\cr
+      \code{\link{rbind.hyperframe}} \tab combine hyperframes by rows\cr
+      \code{\link{as.data.frame.hyperframe}} \tab convert hyperframe to
+      data frame 
     }
 }
   

@@ -2,9 +2,9 @@
 \alias{hyperframe}
 \title{Hyper Data Frame}
 \description{
-  Create a two-dimensional array in which each column consists of
-  values of one type (as in a data frame) or consists of
-  objects of one class. 
+  Create a hyperframe: a two-dimensional array in which each column
+  consists of values of the same atomic type (like the columns
+  of a data frame) or objects of the same class. 
 }
 \usage{
    hyperframe(...,
@@ -31,7 +31,7 @@
   can be objects of any kind.
 
   A hyperframe is a two-dimensional array in which each column consists of
-  values of one type (as in a data frame) or consists of
+  values of one atomic type (as in a data frame) or consists of
   objects of one class.
 
   The arguments \code{\dots} are any number of arguments of
@@ -56,9 +56,9 @@
 \section{Methods for Hyperframes}{
   There are methods for
   \code{print}, \code{plot}, \code{summary}, \code{with}, \code{[}, \code{$},
-  \code{$<-}, \code{names}, \code{as.data.frame} and \code{as.list}
-  for the class of hyperframes. There is also \code{\link{cbind.hyperframe}},
-  \code{\link{is.hyperframe}} and \code{\link{as.hyperframe}}.
+  \code{$<-}, \code{names}, \code{as.data.frame} \code{as.list},
+  \code{cbind} and \code{rbind} for the class of hyperframes. There is also
+  \code{is.hyperframe} and \code{\link{as.hyperframe}}.
 }
 \value{
   An object of class \code{"hyperframe"}.
@@ -71,8 +71,12 @@
 }
 \seealso{
   \code{\link{as.hyperframe}},
+  \code{\link{as.hyperframe.ppx}},
   \code{\link{plot.hyperframe}},
-  \code{\link{with.hyperframe}}
+  \code{\link{with.hyperframe}},
+  \code{\link{as.data.frame.hyperframe}},
+  \code{\link{cbind.hyperframe}},
+  \code{\link{rbind.hyperframe}}
 }
 \examples{
  # equivalent to a data frame

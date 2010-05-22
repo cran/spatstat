@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.54 $    $Date: 2010/04/21 06:56:17 $
+#    $Revision: 1.56 $    $Date: 2010/05/19 05:21:08 $
 #
 #  (a) for matrices only:
 #
@@ -459,3 +459,9 @@ warn.ignored.args <- function(..., context=NULL) {
     warning(context)
   }
 }
+
+multiply.only.finite.entries <- function(x, a) {
+  # In ppm a potential value that is -Inf must remain -Inf
+  ifelse(is.finite(x), x * a, x)
+}
+

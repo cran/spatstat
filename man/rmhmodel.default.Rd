@@ -45,6 +45,7 @@
     \item{\code{'badgey'}}{Baddeley-Geyer (hybrid Geyer) process.}
     \item{\code{'dgs'}}{Diggle, Gates and Stibbard (1987) process}
     \item{\code{'diggra'}}{Diggle and Gratton (1984) process}
+    \item{\code{'fiksel'}}{Fiksel double exponential process (Fiksel, 1984).}
     \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'hardcore'}}{Hard core process}
     \item{\code{'strauss'}}{The Strauss process}
@@ -109,6 +110,20 @@
       \eqn{\kappa}{kappa} where Diggle, Gates, and Stibbard use
       \eqn{\beta}{beta} since we reserve the symbol \eqn{\beta}{beta}
       for an intensity parameter.
+    }
+    \item{fiksel:}{
+      (Fiksel double exponential process, see Fiksel (1984))
+      A \bold{named} list with components \code{beta},
+      \code{r}, \code{hc}, \code{kappa} and \code{a}.  This process has
+      pairwise interaction function \eqn{e(t)} equal to 0
+      for \eqn{t < hc}, equal to
+      \deqn{
+	\exp(a \exp(- \kappa t))
+      }{
+	exp(a * exp( - kappa * t))
+      }
+      for \eqn{hc \le t < r}{hc <= t < r},
+      and equal to 1 for \eqn{t \ge  r}{t >= r}.
     }
     \item{geyer:}{
       (Geyer's saturation process. See Geyer (1999).)
@@ -336,6 +351,12 @@
    A nonparametric estimator for pairwise-interaction point processes.
    Biometrika \bold{74}, 763 -- 770.
    \emph{Scandinavian Journal of Statistics} \bold{21}, 359--373.
+
+Fiksel, T. (1984)
+Estimation of parameterized pair potentials
+of marked and non-marked Gibbsian point processes.
+\emph{Electronische Informationsverabeitung und Kybernetika}
+\bold{20}, 270--278.
 
    Geyer, C.J. (1999)
    Likelihood Inference for Spatial Point
