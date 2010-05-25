@@ -30,7 +30,7 @@
   \eqn{c(u,v)} is equal to \eqn{0} if \eqn{d < h},
   equal to \eqn{1} if \eqn{d > r}, and
   equal to
-  \deqn{ \exp(a \exp(-\kappa d))}{exp(a\exp(-kappa * d))}
+  \deqn{ \exp(a \exp(-\kappa d))}{exp(a * exp(-kappa * d))}
   if \eqn{h \le d \le r}{h <= d <= r}, where
   \eqn{h,r,\kappa,a}{h,r,kappa,a} are parameters.
   
@@ -58,7 +58,7 @@
   pairwise interaction is
   yielded by the function \code{Fiksel()}. See the examples below.
   
-  The parameters \eqn{h}, \eqn{r} and\eqn{\kappa}{kappa} must be
+  The parameters \eqn{h}, \eqn{r} and \eqn{\kappa}{kappa} must be
   fixed and given in the call to \code{Fiksel}, while the canonical
   parameter \eqn{a} is estimated by \code{\link{ppm}()}.
   

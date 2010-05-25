@@ -83,6 +83,12 @@ legend("bottomleft", title="Fire type",
 data(nztrees)
 plot(nztrees)
 
+enable3d <- ("scatterplot3d" %in% row.names(installed.packages()))
+if(enable3d) {
+  data(osteo)
+  plot(osteo[1:10,], tick.marks=FALSE, xlab="", ylab="", zlab="")
+}
+
 data(ponderosa)
 ponderosa.extra$plotit()
 

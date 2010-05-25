@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.37 $  $Date: 2010/03/18 01:56:49 $
+#   $Revision: 1.38 $  $Date: 2010/05/19 09:42:10 $
 #
 #
 
@@ -525,12 +525,40 @@ reach.rmhmodel <- function(x, ...) {
               ctxt <- "For the hardcore cif"
               par <- check.named.list(par, c("beta", "hc"), ctxt)
               with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(hc, ctxt))
               with(par, explain.ifnot(hc > 0, ctxt))
               return(unlist(par))
             },
             reach = function(par, ...) {
               hc <- par[["hc"]]
               return(hc)
+            }
+            ),
+#
+# Lucky 13. Fiksel process
+       'fiksel' =
+       list(
+            C.id="fiksel",
+            multitype=FALSE,
+            parhandler=function(par, ...) {
+              ctxt <- "For the Fiksel cif"
+              par <- check.named.list(par,
+                                      c("beta", "r", "hc", "kappa", "a"),
+                                      ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(r, ctxt))
+              with(par, check.1.real(hc, ctxt))
+              with(par, check.1.real(kappa, ctxt))
+              with(par, check.1.real(a, ctxt))
+              with(par, explain.ifnot(hc >= 0, ctxt))
+              with(par, explain.ifnot(r > hc, ctxt))
+              return(unlist(par))
+            },
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              hc <- par[["hc"]]              
+              a <- par[["a"]]
+              return(if(a != 0) r else hc)
             }
             )
        # end of list '.Spatstat.RmhTable'

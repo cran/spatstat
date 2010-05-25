@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.33 $   $Date: 2010/03/15 07:26:38 $
+#  $Revision: 2.34 $   $Date: 2010/05/19 09:02:29 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -11,6 +11,15 @@
 
 .Spatstat.Rmhinfo <-
 list(
+     "Fiksel process" =
+     function(coeffs, inte) {
+       hc <- inte$par$hc
+       r  <- inte$par$r
+       kappa <- inte$par$kappa
+       a <- inte$interpret(coeffs,inte)$param$a
+       return(list(cif='fiksel',
+                   par=list(r=r,hc=hc,kappa=kappa,a=a)))
+     },
      "Diggle-Gratton process" =
      function(coeffs, inte) {
        kappa <- inte$interpret(coeffs,inte)$param$kappa

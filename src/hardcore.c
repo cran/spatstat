@@ -25,7 +25,7 @@ void hardcoreinit(state, model, algo)
 {
   /* Interpret model parameters*/
   Hardcore.beta   = model.par[0];
-  Hardcore.h      = model.par[3];
+  Hardcore.h      = model.par[1];
   Hardcore.h2     = pow(Hardcore.h, 2); 
   Hardcore.period = model.period;
   /* periodic boundary conditions? */
