@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.61 $     $Date: 2010/04/20 12:03:02 $
+#         $Revision: 1.69 $     $Date: 2010/06/01 05:12:12 $
 #
 #      The class "im" of raster images
 #
@@ -140,27 +140,6 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       return(v[!is.na(v)])
     }
   }
-  
-  if(!is.null(ip <- as.ppp(i, W=as.owin(x), fatal=FALSE, check=FALSE))) {
-    # 'i' is a point pattern 
-    # Look up the greyscale values for the points of the pattern
-    values <- lookup.im(x, ip$x, ip$y, naok=TRUE)
-    if(drop) 
-      values <- values[!is.na(values)]
-    if(length(values) == 0) 
-      # ensure the zero-length vector is of the right type
-      values <- 
-      switch(x$type,
-             factor={ factor(, levels=levels(x)) },
-             integer = { integer(0) },
-             logical = { logical(0) },
-             real = { numeric(0) },
-             complex = { complex(0) },
-             character = { character(0) },
-             { values }
-             )
-    return(values)
-  }
   if(verifyclass(i, "owin", fatal=FALSE)) {
     # 'i' is a window
     # if drop = FALSE, just set values outside window to NA
@@ -207,7 +186,57 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       return(x[w, drop=drop, ..., raster=raster])
     } 
   }
-    
+
+  # Try indexing as a matrix
+  y <- try(as.matrix(x)[i, drop=FALSE], silent=TRUE)
+  if(!inherits(y, "try-error")) {
+    # valid subset index for a matrix
+    # check whether it's a rectangular block, in correct order
+    RR <- row(x$v)
+    CC <- col(x$v)
+    rr <- RR[i]
+    cc <- CC[i]
+    rseq <- sort(unique(rr))
+    cseq <- sort(unique(cc))
+    if(all(diff(rseq) == 1) && all(diff(cseq) == 1) &&
+       all(rr == RR[rseq, cseq]) && all(cc == CC[rseq,cseq])) {
+      # yes - make image
+      y <- matrix(y, nrow=length(rseq), ncol=length(cseq))
+      Y <- x
+      Y$v <- y
+      Y$dim <- dim(y)
+      Y$xcol <- x$xcol[cseq]
+      Y$yrow <- x$yrow[rseq]
+      Y$xrange <- range(Y$xcol) + c(-1,1) * x$xstep/2
+      Y$yrange <- range(Y$yrow) + c(-1,1) * x$ystep/2
+      return(Y)
+    }
+    # return pixel values (possibly as matrix)
+    if(x$type == "factor")
+      y <- factor(y, levels=x$lev)
+    return(y)
+  }
+
+  if(!is.null(ip <- as.ppp(i, W=as.owin(x), fatal=FALSE, check=FALSE))) {
+    # 'i' is a point pattern 
+    # Look up the greyscale values for the points of the pattern
+    values <- lookup.im(x, ip$x, ip$y, naok=TRUE)
+    if(drop) 
+      values <- values[!is.na(values)]
+    if(length(values) == 0) 
+      # ensure the zero-length vector is of the right type
+      values <- 
+      switch(x$type,
+             factor={ factor(, levels=levels(x)) },
+             integer = { integer(0) },
+             logical = { logical(0) },
+             real = { numeric(0) },
+             complex = { complex(0) },
+             character = { character(0) },
+             { values }
+             )
+    return(values)
+  }
   stop("The subset operation is undefined for this type of index")
 }
 
@@ -221,22 +250,6 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     v <- X$v
     v[!is.na(v)] <- value
     X$v <- v
-    return(X)
-  }
-  if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
-    # 'i' is a point pattern
-    # test whether all points are inside window FRAME
-    ok <- inside.owin(ip$x, ip$y, as.rectangle(W))
-    if(any(!ok)) {
-      warning("Some points are outside the outer frame of the image")
-      if(length(value) == ip$n)
-        value <- value[ok]
-      ip <- ip[ok]
-    }
-    # determine row & column positions for each point 
-    loc <- nearest.pixel(ip$x, ip$y, X)
-    # set values
-    X$v[cbind(loc$row, loc$col)] <- value
     return(X)
   }
   if(verifyclass(i, "owin", fatal=FALSE)) {
@@ -257,6 +270,27 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     yy <- as.vector(raster.y(W))
     ok <- inside.owin(xx, yy, i)
     X$v[ok] <- value
+    return(X)
+  }
+  # try indexing as a matrix
+  out <- try(X$v[i] <- value, silent=TRUE)
+  if(!inherits(out, "try-error")) 
+    return(X)
+
+  if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
+    # 'i' is a point pattern
+    # test whether all points are inside window FRAME
+    ok <- inside.owin(ip$x, ip$y, as.rectangle(W))
+    if(any(!ok)) {
+      warning("Some points are outside the outer frame of the image")
+      if(length(value) == ip$n)
+        value <- value[ok]
+      ip <- ip[ok]
+    }
+    # determine row & column positions for each point 
+    loc <- nearest.pixel(ip$x, ip$y, X)
+    # set values
+    X$v[cbind(loc$row, loc$col)] <- value
     return(X)
   }
   stop("The subset operation is undefined for this type of index")
@@ -381,6 +415,8 @@ rastery.im <- function(x) {
 ##############
 
 # methods for other functions
+
+xtfrm.im <- function(x) { as.matrix.im(x) }
 
 as.matrix.im <- function(x, ...) {
   return(x$v)
@@ -606,3 +642,10 @@ rebound.im <- function(x, rect) {
   attr(xnew, "levels") <- x$lev
   return(xnew)
 }
+
+sort.im <- function(x, ...) {
+  verifyclass(x, "im")
+  sort(as.vector(as.matrix(x)), ...)
+}
+
+dim.im <- function(x) { x$dim }

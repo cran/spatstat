@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.26 $   $Date: 2010/05/10 07:29:29 $
+#    $Revision: 1.28 $   $Date: 2010/06/05 10:50:27 $
 #
 #
 
@@ -107,7 +107,7 @@ reset.spatstat.options <- function() {
          },
          valid="a single logical value"
          ),
-       mplmaxmatrix=list(
+       maxmatrix=list(
          default=2^24, # 16,777,216
          check=function(x) {
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1024
@@ -120,6 +120,13 @@ reset.spatstat.options <- function() {
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1024
          },
          valid="a single integer, greater than 1024"
+       ),
+       expand=list(
+         default=2,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && x > 1
+         },
+         valid="a single numeric value, greater than 1"
        )
        )
 

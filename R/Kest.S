@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.60 $	$Date: 2010/01/08 23:21:49 $
+#	$Revision: 5.62 $	$Date: 2010/06/07 13:22:22 $
 #
 #
 # -------- functions ----------------------------------------
@@ -97,7 +97,7 @@ function(X, ..., r=NULL, breaks=NULL,
                              translate="translate",
                              best="best"),
                            multi=TRUE)
-
+  best.wanted <- ("best" %in% correction)
   correction <- implemented.for.K(correction, W$type, correction.given)
   
   # recommended range of r values
@@ -110,9 +110,11 @@ function(X, ..., r=NULL, breaks=NULL,
 
   can.do.fast <- breaks$even
   large.n    <- (npoints >= nlarge)
+  demand.best <- correction.given && best.wanted
+  large.n.trigger <- large.n && !demand.best
   borderonly <- all(correction == "border" | correction == "bord.modif")
-  will.do.fast <- can.do.fast && (borderonly || large.n)
-  asked      <- borderonly || (nlarge.given && large.n)
+  will.do.fast <- can.do.fast && (borderonly || large.n.trigger)
+  asked      <- borderonly || (nlarge.given && large.n.trigger)
   if(will.do.fast && !asked)
         message(paste("number of data points exceeds",
                       nlarge, "- computing border estimate only"))

@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.34 $   $Date: 2010/03/08 08:23:04 $
+#    $Revision: 1.36 $   $Date: 2010/06/04 13:59:27 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -95,16 +95,18 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   if(!antiquated) {
     covars <- x$covariates
-    hc <- !is.null(covars) && (length(covars) > 0)
+    y$has.covars <- !is.null(covars) && (length(covars) > 0)
+    used <- (y$trendvar %in% names(covars))
+    y$covars.used <- y$trendvar[used]
+    y$uses.covars <- sum(used)
   } else {
     # Antiquated format
     # Interpret the function call instead
     callexpr <- parse(text=x$call)
     callargs <- names(as.list(callexpr[[1]]))
     # Data frame of covariates was called 'data' in versions up to 1.4-x
-    hc <- !is.null(callargs) && !is.na(pmatch("data", callargs))
+    y$has.covars <- !is.null(callargs) && !is.na(pmatch("data", callargs))
   }
-  y$has.covars <- hc
     
   ######  Arguments in call ####################################
   
@@ -267,8 +269,12 @@ print.summary.ppm <- function(x, ...) {
   if(!notrend) {
     cat("Trend formula: ")
     print(x$trend$formula)
-    if(x$has.covars)
-      cat("Model involves external covariates\n")
+    if(x$uses.covars) 
+      cat(paste("Model depends on external",
+                ngettext(length(x$covars.used), "covariate", "covariates"),
+                commasep(sQuote(x$covars.used)), "\n"))
+    else if(x$has.covars)
+      cat("Model object contains external covariates\n")
   }
         
   cat(paste("\n", x$trend$label, ":\n", sep=""))

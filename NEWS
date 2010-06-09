@@ -1,3 +1,121 @@
+	CHANGES IN spatstat VERSION 1.19-2
+
+ACKNOWLEDGEMENTS
+
+    o   We thank Jorge Mateu, Michael Sumner and Sebastian Luque
+        for contributions.    
+
+OVERVIEW
+
+    o   More support for fitted point process models and pixel images.
+
+    o   Improved plotting of pixel images and envelopes.
+        
+    o   Simulation algorithm for Lennard-Jones process.
+	
+    o   Improvements and bug fixes to envelopes. 
+	
+    o   Bug fixes to Metropolis-Hastings simulation.
+
+NEW FUNCTIONS
+
+    o   pairs.im
+    	Creates a scatterplot matrix for several pixel images.
+
+    o   model.frame.ppm
+    	Method for 'model.frame' for point process models.
+
+    o   sort.im
+        Method for 'sort' for pixel images.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   plot.fv, plot.fasp
+ 	New argument 'shade' enables confidence intervals
+        or significance bands to be displayed as filled grey shading.
+
+    o   LennardJones
+    	The parametrisation of this interaction function has been changed.
+
+    o   rmh, rmhmodel
+        These functions will now simulate a point process model
+	that was fitted using the LennardJones() interaction.
+
+    o   rmh.default, rmhmodel.default
+    	These functions will now simulate a point process model
+	with the Lennard-Jones interaction (cif='lennard').
+
+    o   ecdf
+    	This function now works for pixel images.
+
+    o   dim, row, col
+        These functions now work for pixel images.
+
+    o   order
+    	This function now works for pixel images.
+
+    o   [.im and [<-.im 
+    	The subset index can now be any valid subset index for a matrix.
+
+    o   density.ppp, smooth.ppp
+    	The return value now has attributes 'sigma' and 'varcov'
+	reporting the smoothing bandwidth.
+
+    o   plot.im
+        The argument 'col' can now be a 'colourmap' object.
+        This makes it possible to specify a fixed mapping between
+	numbers and colours (e.g. so that it is consistent between
+	plots of several different images).
+
+    o   rmh, spatstat.options
+    	spatstat.options now recognises the parameter 'expand' 
+	which determines the default window expansion factor in rmh.
+
+    o   rmh
+    	Improved handling of ppm objects with covariates.
+
+    o   kstest
+        The 'covariate' can now be one of the characters "x" or "y"
+	indicating the Cartesian coordinates.
+
+BUG FIXES
+
+    o   model.matrix.ppm
+    	For a fitted model that used a large number of quadrature points,
+	model.matrix.ppm sometimes reported an internal error about mismatch
+	between the model matrix and the quadrature scheme.
+	Fixed.
+
+    o   plot.ppx
+    	Minor bugs fixed.
+
+    o   rmh
+    	In rare cases, the simulated point pattern 
+	included multiple points at the origin (0,0).
+	(Bug introduced in spatstat 1.17-0.)
+	Fixed.
+
+    o   rmh, rmhmodel.ppm
+    	Crashed when applied to a fitted multitype point process model
+	if the model involved more than one covariate image.
+	(Spotted by Jorge Mateu)
+	Fixed.
+
+    o   density.psp
+    	If any segment had zero length, the result contained NaN values.
+	(Spotted by Michael Sumner and Sebastian Luque.)
+	Fixed.
+
+    o   envelope
+    	Crashed with fun=Lest or fun=Linhom if the number of points in 
+	a simulated pattern exceeded 3000.
+	Fixed.
+
+    o   plot.kstest
+    	Main title was corrupted if the covariate was a function.
+	Fixed.
+
+
 	CHANGES IN spatstat VERSION 1.19-1
 
 OVERVIEW
@@ -415,3 +533,6 @@ BUG FIXES
     o	plot.ppx: Crashed if the argument 'main' was given.
 	Fixed.
 
+    o   envelope.ppp: Crashed if the object returned by 'fun' 
+    	did not include a column called "theo".
+    	Fixed.

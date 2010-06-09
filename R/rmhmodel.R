@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.38 $  $Date: 2010/05/19 09:42:10 $
+#   $Revision: 1.39 $  $Date: 2010/06/04 04:30:18 $
 #
 #
 
@@ -559,6 +559,29 @@ reach.rmhmodel <- function(x, ...) {
               hc <- par[["hc"]]              
               a <- par[["a"]]
               return(if(a != 0) r else hc)
+            }
+            ),
+#
+# 14. Lennard-Jones
+       'lennard' =
+       list(
+            C.id="lennard",
+            multitype=FALSE,
+            parhandler=function(par, ...) {
+              ctxt <- "For the Lennard-Jones cif"
+              par <- check.named.list(par,
+                                      c("beta", "sigma", "epsilon"),
+                                      ctxt)
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.1.real(sigma, ctxt))
+              with(par, check.1.real(epsilon, ctxt))
+              with(par, explain.ifnot(sigma > 0, ctxt))
+              with(par, explain.ifnot(epsilon > 0, ctxt))
+              return(unlist(par))
+            },
+            reach = function(par, ...) {
+              sigma <- par[["sigma"]]
+              return(2.5 * sigma)
             }
             )
        # end of list '.Spatstat.RmhTable'

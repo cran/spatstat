@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.39 $    $Date: 2010/01/08 23:28:06 $
+#  $Revision: 1.41 $    $Date: 2010/06/08 08:25:12 $
 #
 #
 
@@ -12,7 +12,8 @@ conspire <- function(...) {
 
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-                    ylim.covers=NULL, legend=TRUE, legendpos="topleft") {
+                    ylim.covers=NULL, legend=TRUE, legendpos="topleft",
+                    shade=NULL, shadecol="grey") {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -188,9 +189,37 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   col <- fixit(col, nplots, 1:nplots)
   lwd <- fixit(lwd, nplots, rep(1, nplots))
 
-  # plot lines
+  allind <- 1:nplots
+
+  if(!is.null(shade)) {
+    # shade region between critical boundaries
+    # select columns by name or number
+    names(allind) <- colnames(lhsdata)
+    shind <- try(allind[shade])
+    if(inherits(shind, "try-error")) 
+      stop("The argument shade should be a valid subset index for columns of x")
+    # extract relevant columns
+    shdata <- lhsdata[, shind]
+    if(!is.matrix(shdata) || ncol(shdata) != 2) 
+      stop("The argument shade should select two columns of x")
+    # plot grey polygon between these limits
+    polygon(c(rhsdata, rev(rhsdata)),
+            c(shdata[,1],  rev(shdata[,2])),
+            border=shadecol, col=shadecol)
+    # overwrite graphical parameters
+    lty[shind] <- 1
+    # convert colours to hexadecimal and edit relevant values
+    rgb2hex <- function(x) { rgb(x[1], x[2], x[3], maxColorValue=255) }
+    col <- apply(col2rgb(col), 2, rgb2hex)
+    col[shind] <- rgb2hex(col2rgb(shadecol))
+    # remove these columns from further plotting
+    allind <- allind[-shind]
+    # 
+  }
   
-  for(i in 1:nplots)
+  # plot lines
+
+  for(i in allind)
     lines(rhsdata, lhsdata[,i], lty=lty[i], col=col[i], lwd=lwd[i])
 
   if(nplots == 1)

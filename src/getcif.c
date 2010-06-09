@@ -4,8 +4,9 @@
 void fexitc(const char *msg);
 
 extern Cifns AreaIntCifns, BadGeyCifns, DgsCifns, DiggraCifns, 
-  FikselCifns, GeyerCifns, HardcoreCifns, LookupCifns, SoftcoreCifns, 
-  StraussCifns, StraussHardCifns, 
+  FikselCifns, GeyerCifns, HardcoreCifns, 
+  LennardCifns, LookupCifns, 
+  SoftcoreCifns, StraussCifns, StraussHardCifns, 
   MultiStraussCifns, MultiStraussHardCifns;
 
 Cifns NullCifns = NULL_CIFNS;
@@ -24,6 +25,7 @@ CifPair CifTable[] = {
   {"fiksel",   &FikselCifns},
   {"hardcore", &HardcoreCifns},
   {"lookup",   &LookupCifns},
+  {"lennard",  &LennardCifns},
   {"sftcr",    &SoftcoreCifns},
   {"strauss",  &StraussCifns},
   {"straush",  &StraussHardCifns},

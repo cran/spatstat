@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.43 $  $Date: 2010/05/13 01:06:44 $
+#  $Revision: 1.46 $  $Date: 2010/06/08 10:02:40 $
 #
 #
 
@@ -21,7 +21,8 @@ kstest <- function(...) {
 kstest.ppp <-
   function(X, covariate, ..., jitter=TRUE) {
     Xname <- deparse(substitute(X))
-    covname <- deparse(substitute(covariate))
+    covname <- singlestring(deparse(substitute(covariate)))
+    if(is.character(covariate)) covname <- covariate
     if(!is.marked(X, dfok=TRUE)) {
       # unmarked
       model <- ppm(X)
@@ -55,7 +56,8 @@ kstest.ppp <-
 
 kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
   modelname <- deparse(substitute(model))
-  covname <- deparse(substitute(covariate))
+  covname <- singlestring(deparse(substitute(covariate)))
+  if(is.character(covariate)) covname <- covariate
   verifyclass(model, "ppm")
   if(is.poisson.ppm(model) && is.stationary.ppm(model))
     modelname <- "CSR"
@@ -90,7 +92,7 @@ spatialCDFtest <- function(model, covariate, test, ...,
   result$method <- paste("Spatial Kolmogorov-Smirnov test of",
                          if(csr) "CSR" else "inhomogeneous Poisson process")
   result$data.name <-
-    paste("covariate", sQuote(paste(info$covname, collapse="")),
+    paste("covariate", sQuote(singlestring(info$covname)),
           "evaluated at points of", sQuote(info$dataname), "\n\t",
           "and transformed to uniform distribution under",
           if(csr) info$modelname else sQuote(info$modelname))
@@ -155,17 +157,33 @@ evalCovar <- function(model, covariate,
   # determine names
   if(is.null(modelname))
     modelname <- if(csr) "CSR" else deparse(substitute(model))
-  if(is.null(covname))
-    covname <- deparse(substitute(covariate))
+  if(is.null(covname)) {
+    covname <- singlestring(deparse(substitute(covariate)))
+    if(is.character(covariate)) covname <- covariate
+  }
   if(is.null(dataname))
     dataname <- paste(model$call[[2]])
   info <-  list(modelname=modelname, covname=covname,
                 dataname=dataname, csr=csr)
 
+  
   # evaluate covariate 
   X <- data.ppm(model)
   W <- as.owin(model)
 
+  if(is.character(covariate)) {
+    # One of the characters 'x' or 'y'
+    # Turn it into a function.
+    ns <- length(covariate)
+    if(ns == 0) stop("covariate is empty")
+    if(ns > 1) stop("more than one covariate specified")
+    covname <- covariate
+    covariate <- switch(covariate,
+                     x=function(x,y,m){x},
+                     y=function(x,y,m){y},
+                     stop(paste("Unrecognised covariate", dQuote(covariate))))
+  } 
+  
   if(!is.marked(model)) {
     # ...................  unmarked .......................
     if(is.im(covariate)) {
@@ -190,10 +208,11 @@ evalCovar <- function(model, covariate,
       # covariate in window
       Z <- as.im(covariate, W=W)
       # collapse function body to single string
-      if(length(covname) > 1)
-        covname <- paste(covname, collapse="")
-    } else
-    stop("covariate should be an image or a function(x,y)")
+      covname <- singlestring(covname)
+    } else stop(paste("The covariate should be",
+                      "an image, a function(x,y)",
+                      "or one of the characters",
+                      sQuote("x"), "or", sQuote("y")))
     # values of covariate in window
     Zvalues <- as.vector(Z[W, drop=TRUE])
     # corresponding fitted intensity values
@@ -257,10 +276,12 @@ evalCovar <- function(model, covariate,
       if(length(lambda) != length(Zvalues))
         stop("Internal error: length(lambda) != length(Zvalues)")
       # collapse function body to single string
-      if(length(covname) > 1)
-        covname <- paste(covname, collapse="")
-    } else
-    stop("covariate should be an image or a function(x,y)")
+      covname <- singlestring(covname)
+    } else stop(paste("For a multitype point process model,",
+                      "the covariate should be an image, a list of images,",
+                      "a function(x,y,m)", 
+                      "or one of the characters",
+                      sQuote("x"), "or", sQuote("y")))
   }    
   # ..........................................................
 
@@ -294,8 +315,13 @@ plot.kstest <- function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
   FZ <- values$FZ
   xxx <- get("x", environment(FZ))
   yyy <- get("y", environment(FZ))
+  covname <- info$covname
+  covdescrip <- switch(covname,
+                       x="x coordinate",
+                       y="y coordinate",
+                       paste("covariate", dQuote(covname)))
   main <- c(x$method,
-            paste("based on distribution of covariate", sQuote(info$covname)),
+            paste("based on distribution of", covdescrip),
             paste("p-value=", signif(x$p.value, 4)))
   do.call("plot.default",
           resolve.defaults(

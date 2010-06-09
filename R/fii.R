@@ -39,7 +39,7 @@ summary.fii <- function(object, ...) {
       # invoke auto-interpretation feature
       sensible <-  
         if(newstyle.coeff.handling(INTERACT))
-          (INTERACT$interpret)(coefs[Vnames], INTERACT)
+          (INTERACT$interpret)(coefs[Vnames[!IsOffset]], INTERACT)
         else 
           (INTERACT$interpret)(coefs, INTERACT)
       if(!is.null(sensible)) {
@@ -88,12 +88,25 @@ print.summary.fii <- function(x, ...) {
   else {
     print(x$interaction, family=secret$family, brief=TRUE)
     if(!is.null(x$printable)) {
-      if(length(x$printable) == 1)
+      nvalues <- length(x$printable)
+      nheader <- length(x$header)
+      if(nvalues == 1) {
         cat(paste(x$header, ":\t", x$printable, "\n", sep=""))
-      else {
+      } else if(nvalues == nheader) {
+        for(i in 1:nheader) {
+          cat(x$header[i])
+          xpi <- x$printable[[i]]
+          if(!is.list(xpi) && length(xpi) == 1) {
+            cat(":\t", xpi, "\n")
+          } else {
+            cat(":\n")
+            print(xpi)
+          }
+        } 
+      } else {
         cat(paste(x$header, ":\n", sep=""))
         print(x$printable)
-      }
+      } 
     }
   }
   if(!brief) {

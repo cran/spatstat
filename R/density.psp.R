@@ -2,28 +2,34 @@
 #
 #  density.psp.R
 #
-#  $Revision: 1.3 $    $Date: 2006/02/24 09:42:17 $
+#  $Revision: 1.4 $    $Date: 2010/06/07 06:36:57 $
 #
 #
 
 density.psp <- function(x, sigma, ..., edge=TRUE) {
   verifyclass(x, "psp")
+  w <- x$window
   if(missing(sigma))
-    sigma <- 0.1 * diameter(x$window)
+    sigma <- 0.1 * diameter(w)
+  w <- as.mask(w, ...)
   len <- lengths.psp(x)
-  w <- as.mask(x$window, ...)
+  if(x$n == 0 || all(len == 0))
+    return(as.im(0, w))
+  #
+  ang <- angles.psp(x)
+  coz <- cos(ang)
+  zin <- sin(ang)
   xx <- as.vector(raster.x(w))
   yy <- as.vector(raster.y(w))
+  # compute matrix contribution from each segment 
   for(i in seq(x$n)) {
     en <- x$ends[i,]
-    coz <- (en$x1 - en$x0)/len[i]
-    zin <- (en$y1 - en$y0)/len[i]
     dx <- xx - en$x0
     dy <- yy - en$y0
-    u1 <- dx * coz + dy * zin
-    u2 <- - dx * zin + dy * coz
+    u1 <- dx * coz[i] + dy * zin[i]
+    u2 <- - dx * zin[i] + dy * coz[i]
     value <- dnorm(u2, sd=sigma) *
-             (pnorm(u1, sd=sigma) - pnorm(u1-len[i], sd=sigma))
+      (pnorm(u1, sd=sigma) - pnorm(u1-len[i], sd=sigma))
     totvalue <- if(i == 1) value else (value + totvalue)
   }
   dens <- im(totvalue, w$xcol, w$yrow)

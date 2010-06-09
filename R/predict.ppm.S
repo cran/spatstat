@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.54 $	$Date: 2010/05/07 12:44:55 $
+#	$Revision: 1.55 $	$Date: 2010/06/05 10:51:22 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -322,7 +322,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     nX <- X$n
     nD <- U$n
     nmat <- (nD + nX) * nX
-    nMAX <- spatstat.options("mplmaxmatrix")
+    nMAX <- spatstat.options("maxmatrix")
     #
     if(nmat <= nMAX) {
       # normal case

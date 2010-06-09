@@ -7,7 +7,8 @@
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-           ylim.covers=NULL, legend=TRUE, legendpos="topleft")
+           ylim.covers=NULL, legend=TRUE, legendpos="topleft",
+           shade=NULL, shadecol="grey")
 }
 \arguments{
   \item{x}{
@@ -64,6 +65,17 @@
     (see \code{\link[graphics]{legend}} for keyword options)
     or a pair of coordinates in the format \code{list(x,y)}.
   }
+  \item{shade}{
+    An index that identifies two columns of \code{x}. When the corresponding
+    curves are plotted, the region between the curves will be 
+    shaded in light grey. 
+    Often used for displaying simulation envelopes, by setting
+    \code{shade=c("hi", "lo")}.
+  }
+  \item{shadecol}{
+    The colour to be used in the \code{shade} plot.
+    A character string or an integer specifying a colour.
+  }
 }
 \value{
   Either \code{NULL}, or a data frame giving the meaning of the
@@ -100,6 +112,12 @@
   meaning of the line types and colours in the plot. It can be used
   to make a suitable legend for the plot if you want to do this
   by hand. See the examples.
+
+  The argument \code{shade} can be used to display critical bands
+  or confidence intervals. If it is not \code{NULL}, then it should be
+  a subset index for the columns of \code{x}, that identifies exactly
+  2 columns. When the corresponding curves are plotted, the region
+  between the curves will be shaded in light grey. See the Examples.
 }
 \examples{
    data(cells)
@@ -127,6 +145,10 @@
    # making a legend by hand
    v <- plot(K, . ~ r, ylab="K(r)", legend=FALSE)
    legend(0.05, 0.15, legend=v$meaning, lty=v$lty, col=v$col)
+
+   # significance bands
+   KE <- envelope(cells, Kest, nsim=19)
+   plot(KE, shade=c("hi", "lo"))
 }
 \seealso{
   \code{\link{fv.object}},

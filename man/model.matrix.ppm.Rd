@@ -7,11 +7,14 @@
   this function extracts the design matrix of the model.
 }
 \usage{
-   \method{model.matrix}{ppm}(object, ..., keepNA=TRUE)
+   \method{model.matrix}{ppm}(object, data=model.frame(object), ..., keepNA=TRUE)
 }
 \arguments{
   \item{object}{
     The fitted point process model (an object of class \code{"ppm"}.)
+  }
+  \item{data}{
+    A model frame, containing the data required for the Berman-Turner device.
   }
   \item{keepNA}{
     Logical. Determines whether rows containing NA values will be

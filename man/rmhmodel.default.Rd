@@ -48,6 +48,7 @@
     \item{\code{'fiksel'}}{Fiksel double exponential process (Fiksel, 1984).}
     \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'hardcore'}}{Hard core process}
+    \item{\code{'lennard'}}{Lennard-Jones process}
     \item{\code{'strauss'}}{The Strauss process}
     \item{\code{'straush'}}{The Strauss process with hard core}
     \item{\code{'sftcr'}}{The Softcore process}
@@ -159,6 +160,13 @@
       hard core distance.
       This process has pairwise interaction function \eqn{e(t)}
       equal to 1 if \eqn{t > hc} and 0 if \eqn{t <= hc}.
+    }
+    \item{lennard:}{
+      (Lennard-Jones process.) A \bold{named} list
+      with components \code{sigma} and \code{epsilon},
+      where \code{sigma} is the characteristic diameter
+      and \code{epsilon} is the well depth.
+      See \code{\link{LennardJones}} for explanation.
     }
     \item{strauss:}{
       (Strauss process.) A \bold{named} list with components

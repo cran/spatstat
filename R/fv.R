@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.55 $   $Date: 2010/04/16 10:46:57 $
+#    $Revision: 1.56 $   $Date: 2010/06/09 03:36:24 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -184,7 +184,7 @@ print.fv <- function(x, ...) {
                         ".x",
                         ".y",
                         ".",
-                        "..")
+                        "*")
 
 fvnames <- function(X, a=".") {
   verifyclass(X, "fv")
@@ -201,10 +201,10 @@ fvnames <- function(X, a=".") {
            # The specified 'dotnames'
            dn <- attr(X, "dotnames")
            if(is.null(dn)) 
-             dn <- fvnames(X, "..")
+             dn <- fvnames(X, "*")
            return(dn)
          },
-         ".."={
+         "*"={
            # all column names other than the function argument
            allvars <- names(X)
            argu <- attr(X, "argu")
@@ -220,8 +220,8 @@ fvnames <- function(X, a=".") {
   verifyclass(X, "fv")
   if(!is.character(a) || length(a) > 1)
     stop(paste("argument", sQuote("a"), "must be a character string"))
-  if(a == "..") {
-    warning(paste("Cannot reset fvnames(x,", dQuote(".."), ")"))
+  if(a == "*") {
+    warning(paste("Cannot reset fvnames(x,", dQuote("*"), ")"))
     return(X)
   }
   if(a == "." && length(value) == 0) {

@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.12 $	$Date: 2007/10/24 09:41:15 $
+#	$Revision: 1.13 $	$Date: 2010/05/26 08:22:24 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical
@@ -40,6 +40,16 @@ variablesinformula <- function(x) {
   if(class(x) != "formula")
     stop("argument is not a formula")
   all.vars(as.expression(x))
+}
+
+rhs.of.formula <- function(x) {
+  if(!inherits(x, "formula"))
+    stop("x must be a formula")
+  if(length(as.list(x)) == 3) {
+    # formula has a response: strip it
+    x <- x[-2]
+  }
+  return(x)
 }
 
 sympoly <- function(x,y,n) {
@@ -156,3 +166,4 @@ polynom <- function(x, ...) {
   }
   stop("Can't deal with more than 2 variables yet")
 }
+

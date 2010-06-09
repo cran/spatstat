@@ -10,6 +10,8 @@ if(!exists("nr"))
 
 if(!exists("nv"))
   nv <- 0
+
+spatstat.options(expand=1.1)
    
    # Strauss process.
    mod01 <- list(cif="strauss",par=list(beta=2,gamma=0.2,r=0.7),

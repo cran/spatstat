@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.9 $  $Date: 2010/05/06 15:22:54 $
+#   $Revision: 1.10 $  $Date: 2010/06/05 09:49:46 $
 #
 #
 
@@ -142,7 +142,8 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
 # not been specified we let it default to the numeric value 2.
 # However force.exp = force.noexp = FALSE
 # indicating that this was not the user's idea  
-  if(is.null(expand)) expand <- 2
+  if(is.null(expand))
+    expand <- spatstat.options("expand")
 
 ###################################################################
 # return augmented list  

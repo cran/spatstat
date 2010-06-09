@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.18 $    $Date: 2010/03/08 08:23:04 $
+#  $Revision: 1.19 $    $Date: 2010/06/01 05:24:07 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -118,8 +118,13 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
                  ngettext(nwrong, "value", "values"),
                  "generated in leave-one-out method"))
     }
+    # tack on bandwidth
+    attr(result, "sigma") <- sigma
+    attr(result, "varcov") <- varcov
+    # 
     return(result)
   }
+  
   # VALUES AT PIXELS
   if(!edge) {
     raw <- second.moment.calc(x, sigma, what="smooth", ...,
@@ -142,6 +147,8 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
     return(list(sigma=sigma, varcov=varcov, raw = raw, edg=edg))
 
   # normal return
+  attr(result, "sigma") <- sigma
+  attr(result, "varcov") <- varcov
   return(result)
 }
 
@@ -172,6 +179,8 @@ smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
            ratio <- numerator/denominator
            ratio <- ifelse(is.infinite(ratio), NA, ratio)
          })
+  attr(ratio, "sigma") <- attr(numerator, "sigma")
+  attr(ratio, "varcov") <- attr(numerator, "varcov")
   return(ratio)
 }
 

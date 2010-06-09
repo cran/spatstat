@@ -3,7 +3,7 @@
 #
 #   simulation envelopes for pp3 
 #
-#   $Revision: 1.1 $  $Date: 2010/03/18 03:14:03 $
+#   $Revision: 1.2 $  $Date: 2010/06/06 04:47:35 $
 #
 
 envelope.pp3 <-
@@ -12,7 +12,7 @@ envelope.pp3 <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL) {
+           Yname=NULL, maxnerr=nsim) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
 
@@ -60,7 +60,7 @@ envelope.pp3 <-
                  transform=transform, global=global, ginterval=ginterval,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, cl=cl,
+                 Yname=Yname, maxnerr=maxnerr, cl=cl,
                  envir.user=envir.user)
 }
 
