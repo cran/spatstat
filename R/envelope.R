@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.4 $  $Date: 2010/03/18 14:37:02 $
+#   $Revision: 2.8 $  $Date: 2010/06/09 04:46:53 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -44,7 +44,7 @@ envelope.ppp <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL) {
+           Yname=NULL, maxnerr=nsim) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
   envir.user <- parent.frame()
@@ -90,18 +90,18 @@ envelope.ppp <-
                  transform=transform, global=global, ginterval=ginterval,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, cl=cl,
+                 Yname=Yname, maxnerr=maxnerr, cl=cl,
                  envir.user=envir.user)
 }
 
 envelope.ppm <- 
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
-           start=NULL, control=list(nrep=1e5, expand=1.5),
+           start=NULL, control=list(nrep=1e5),
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL) {
+           Yname=NULL, maxnerr=nsim) {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
   envir.user <- parent.frame()
@@ -142,7 +142,7 @@ envelope.ppm <-
                  transform=transform, global=global, ginterval=ginterval,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, cl=cl,
+                 Yname=Yname, maxnerr=maxnerr, cl=cl,
                  envir.user=envir.user)
 }
 
@@ -151,7 +151,7 @@ envelope.kppm <-
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
-           VARIANCE=FALSE, nSD=2, Yname=NULL)
+           VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
 {
   cl <- match.call()
   if(is.null(Yname)) Yname <- deparse(substitute(Y))
@@ -184,7 +184,7 @@ envelope.kppm <-
                  transform=transform, global=global, ginterval=ginterval,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, cl=cl,
+                 Yname=Yname, maxnerr=maxnerr, cl=cl,
                  envir.user=envir.user)
 
 }
@@ -204,7 +204,7 @@ envelopeEngine <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, internal=NULL, cl=NULL,
+           Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user) {
   #
   envir.here <- sys.frame(sys.nframe())
@@ -359,7 +359,7 @@ envelopeEngine <-
   if(!any(c("r", "...") %in% fargs))
     stop(paste(fname, "should have an argument",
                sQuote("r"), "or", sQuote("...")))
-  usecorrection <- ("correction" %in% fargs)
+  usecorrection <- any(c("correction", "...") %in% fargs)
 
   # ---------------------------------------------------------------------
   # validate other arguments
@@ -427,10 +427,12 @@ envelopeEngine <-
 
   argname <- fvnames(funX, ".x")
   valname <- fvnames(funX, ".y")
+  has.theo <- "theo" %in% fvnames(funX, "*")
+  csr.theo <- csr && has.theo
 
   if(tran) {
     # extract only the recommended value
-    if(csr) 
+    if(csr.theo) 
       funX <- funX[, c(argname, valname, "theo")]
     else
       funX <- funX[, c(argname, valname)]
@@ -478,32 +480,51 @@ envelopeEngine <-
   # allocate space for computed function values
   nrvals <- length(rvals)
   simvals <- matrix(, nrow=nrvals, ncol=Nsim)
+
+  # arguments for function
+  funargs <-
+    resolve.defaults(if(rgiven) NULL else list(r=rvals),
+                     list(...),
+                     if(usecorrection) list(correction="best") else NULL)
   
-  # start simulation loop 
+  # start simulation loop
+  nerr <- 0
   for(i in 1:Nsim) {
-    Xsim <- eval(simexpr, envir=envir)
-    if(!inherits(Xsim, Xclass))
-      switch(simtype,
-             csr=stop(paste("Internal error:", Xobjectname, "not generated")),
-             rmh=stop(paste("Internal error: rmh did not return an",
-               Xobjectname)),
-             kppm=stop(paste("Internal error: simulate.kppm did not return an",
-               Xobjectname)),
-             expr=stop(paste("Evaluating the expression", sQuote("simulate"),
-               "did not yield an", Xobjectname)),
-             list=stop(paste("Internal error: list entry was not an",
-               Xobjectname)),
-             stop(paste("Internal error:", Xobjectname, "not generated"))
-             )
-    if(catchpatterns)
-      Caughtpatterns[[i]] <- Xsim
+    ok <- FALSE
+    # safely generate a random pattern and apply function
+    while(!ok) {
+      Xsim <- eval(simexpr, envir=envir)
+      # check valid point pattern
+      if(!inherits(Xsim, Xclass))
+        switch(simtype,
+               csr=stop(paste("Internal error:", Xobjectname, "not generated")),
+               rmh=stop(paste("Internal error: rmh did not return an",
+                 Xobjectname)),
+               kppm=stop(paste("Internal error:",
+                 "simulate.kppm did not return an",
+                 Xobjectname)),
+               expr=stop(paste("Evaluating the expression", sQuote("simulate"),
+                 "did not yield an", Xobjectname)),
+               list=stop(paste("Internal error: list entry was not an",
+                 Xobjectname)),
+               stop(paste("Internal error:", Xobjectname, "not generated"))
+               )
+      if(catchpatterns)
+        Caughtpatterns[[i]] <- Xsim
     
-    # apply function
-    funXsim <- do.call(fun,
-                       resolve.defaults(list(Xsim),
-                                        if(rgiven) NULL else list(r=rvals),
-                                        list(...),
-                       if(usecorrection) list(correction="best") else NULL))
+      # apply function safely
+      funXsim <- try(do.call(fun, append(list(Xsim), funargs)))
+
+      ok <- !inherits(funXsim, "try-error")
+      
+      if(!ok) {
+        nerr <- nerr + 1
+        if(nerr > maxnerr)
+          stop("Exceeded maximum number of errors")
+        cat("[retrying]\n")
+      } 
+    }
+
     # sanity checks
     if(!inherits(funXsim, "fv"))
       stop(paste("When applied to a simulated pattern, the function",
@@ -528,7 +549,7 @@ envelopeEngine <-
 
     if(tran) {
       # extract only the recommended value
-      if(csr) 
+      if(csr.theo) 
         funXsim <- funXsim[, c(argname, valname, "theo")]
       else
         funXsim <- funXsim[, c(argname, valname)]
@@ -594,7 +615,7 @@ envelopeEngine <-
     lo.name <- paste("lower", nSD, "sigma critical limit for %s")
     hi.name <- paste("upper", nSD, "sigma critical limit for %s")
     # put together
-    if(csr) {
+    if(csr.theo) {
       results <- data.frame(r=rvals,
                             obs=fX,
                             theo=funX[["theo"]],
@@ -629,7 +650,7 @@ envelopeEngine <-
     lo.name <- paste("lower pointwise envelope of %s from simulations")
     hi.name <- paste("upper pointwise envelope of %s from simulations")
     #
-    if(csr) {
+    if(csr.theo) {
       results <- data.frame(r=rvals,
                             obs=fX,
                             theo=funX[["theo"]],
@@ -649,7 +670,7 @@ envelopeEngine <-
     funX <- funX[domain, ]
     simvals <- simvals[domain, ]
     simvals[is.infinite(simvals)] <- NA
-    if(csr)
+    if(csr.theo)
       theory <- funX[["theo"]]
     else {
       # use the first 'nsim' results to estimate the mean under H0
@@ -669,7 +690,7 @@ envelopeEngine <-
     lo.name <- "lower critical boundary for %s"
     hi.name <- "upper critical boundary for %s"
 
-    if(csr)
+    if(csr.theo)
       results <- data.frame(r=rvals[domain],
                             obs=fX[domain],
                             theo=theory,
@@ -691,23 +712,23 @@ envelopeEngine <-
                valu="obs",
                fmla= deparse(. ~ r),
                alim=attr(funX, "alim"),
-               labl=c("r", "obs(r)", if(csr) "theo(r)" else "mean(r)",
+               labl=c("r", "obs(r)", if(csr.theo) "theo(r)" else "mean(r)",
                  "lo(r)", "hi(r)"),
                desc=c("distance argument r",
                  "observed value of %s for data pattern",
-                 if(csr) "theoretical value of %s for CSR"
+                 if(csr.theo) "theoretical value of %s for CSR"
                  else "sample mean of %s from simulations",
                  lo.name, hi.name),
                fname=attr(funX, "fname"),
                yexp =attr(funX, "yexp"))
 
   # columns to be plotted by default
-  dotty <- c("obs", if(csr) "theo" else "mmean", "hi", "lo")
+  dotty <- c("obs", if(csr.theo) "theo" else "mmean", "hi", "lo")
 
   if(VARIANCE) {
     # add more stuff
     result <- bind.fv(result, morestuff, mslabl, msdesc)
-    if(csr) dotty <- c(dotty, "mmean")
+    if(csr.theo) dotty <- c(dotty, "mmean")
   }
 
   fvnames(result, ".") <- dotty
@@ -785,6 +806,8 @@ summary.envelope <- function(object, ...) {
   nr <- e$nrank
   nsim <- e$nsim
   csr <- e$csr
+  has.theo <- "theo" %in% fvnames(object, "*")
+  csr.theo <- csr && has.theo
   simtype <- e$simtype
   fname <- deparse(attr(object, "ylab"))
   V <- e$VARIANCE
@@ -823,7 +846,7 @@ summary.envelope <- function(object, ...) {
     hi.ord <- if(nr == 1) "maximum" else paste(ordinal(nsim-nr+1), "largest")
     if(g) 
       cat(paste("Envelopes computed as",
-                if(csr) "theoretical curve" else "mean of simulations",
+                if(csr.theo) "theoretical curve" else "mean of simulations",
                 "plus/minus", hi.ord,
                 "simulated value of maximum absolute deviation\n"))
     else {

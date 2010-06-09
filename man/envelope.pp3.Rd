@@ -10,7 +10,7 @@
   simulate=NULL, verbose=TRUE, 
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
 }
 \arguments{
   \item{Y}{
@@ -90,6 +90,14 @@
   \item{Yname}{
     Character string that should be used as the name of the 
     data point pattern \code{Y} when printing or plotting the results.
+  }
+  \item{maxnerr}{
+    Maximum number of rejected patterns.
+    If \code{fun} yields an error when applied to a simulated point
+    pattern (for example, because the pattern is empty and \code{fun}
+    requires at least one point), the pattern will be rejected
+    and a new random point pattern will be generated. If this happens
+    more than \code{maxnerr} times, the algorithm will give up.
   }
 }
 \value{

@@ -74,6 +74,10 @@ markvar(X, ...)
   If \code{at="points"}, the result is a numeric vector
   of length equal to the number of points in \code{x}.
   Entries are values of the interpolated function at the points of \code{x}.
+  
+  In either case, the return value has attributes
+  \code{"sigma"} and \code{"varcov"} which report the smoothing
+  bandwidth that was used.
 }
 \seealso{
   \code{\link{density.ppp}},

@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.11 $  $Date: 2010/05/02 01:32:28 $
+#  $Revision: 1.16 $  $Date: 2010/05/24 13:00:34 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -97,18 +97,22 @@ plot.ppx <- function(x, ...) {
                                        list(...),
                                        list(main=xname)))
     } else {
-      # convert to ppp
-      x2 <- ppp(coo[,1], coo[,2], window=dom)
-      # invoke plot.ppp
-      do.call("plot", resolve.defaults(list(x2),
+      # plot domain, whatever it is
+      do.call("plot", resolve.defaults(list(dom),
                                        list(...),
                                        list(main=xname)))
+      # convert to ppp
+      x2 <- ppp(coo[,1], coo[,2], window=as.owin(dom), check=FALSE)
+      # invoke plot.ppp
+      do.call("plot", resolve.defaults(list(x2),
+                                       list(add=TRUE),
+                                       list(...)))
     }
   } else if(m == 3) {
     # convert to pp3
-    x3 <- pp3(coo[,1], coo[,2], coo[,3], domain=dom)
+    x3 <- pp3(coo[,1], coo[,2], coo[,3], domain=dom, check=FALSE)
     # invoke plot.pp3
-    do.call("plot", resolve.defaults(list(x$domain),
+    do.call("plot", resolve.defaults(list(x3),
                                      list(...),
                                      list(main=xname)))
   } else stop(paste("Don't know how to plot a general point pattern in",

@@ -310,6 +310,8 @@ trend corresponding to a particular type, there is still a component
    nr  <- 10
    nv <- 5
    ns <- 20
+   oldopt <- spatstat.options()
+   spatstat.options(expand=1.1)
    }
    set.seed(961018)
    
@@ -541,6 +543,9 @@ trend corresponding to a particular type, there is still a component
                     control=list(nrep=nr,nverb=nv))
    # Same again --- i.e. the BadGey model includes the Geyer model.
 
+   \testonly{
+   spatstat.options(oldopt)
+   }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

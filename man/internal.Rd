@@ -62,6 +62,7 @@
 \alias{dilate.owin}
 \alias{dim.fasp}               
 \alias{dim.hyperframe}               
+\alias{dim.im}               
 \alias{dimnames.fasp}               
 \alias{dimnames<-.fasp}               
 \alias{distpl}               
@@ -225,6 +226,7 @@
 \alias{plot.distfun}
 \alias{plot.fii}
 \alias{plot.minconfit}
+\alias{plot.plotpairsim}
 \alias{plot.pppmatching}
 \alias{plot.profilepl}
 \alias{plot.qqppm}
@@ -250,6 +252,7 @@
 \alias{print.kppm}
 \alias{print.lut}
 \alias{print.minconfit}
+\alias{print.plotpairsim}
 \alias{print.plotppm}
 \alias{print.pppmatching}
 \alias{print.profilepl}
@@ -261,6 +264,7 @@
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
+\alias{print.summary.lut}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
@@ -272,6 +276,7 @@
 \alias{quad}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
+\alias{rhs.of.formula}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -301,6 +306,7 @@
 \alias{runifpoispp}          
 \alias{runifpoisppOnLines}          
 \alias{runifrect}
+\alias{rmhResolveExpansion}
 \alias{rmhResolveTypes}
 \alias{rmhcontrol.rmhcontrol}
 \alias{rmhcontrol.list}
@@ -317,6 +323,8 @@
 \alias{shiftxypolygon}              
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
+\alias{singlestring}              
+\alias{sort.im}
 \alias{spatstat.rawdata.location}
 \alias{spatialCDFframe}
 \alias{spatialCDFtest}
@@ -330,6 +338,7 @@
 \alias{summary.envelope}
 \alias{summary.fii}
 \alias{summary.hyperframe}
+\alias{summary.lut}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.units}
@@ -361,6 +370,7 @@
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
+\alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
 \title{Internal spatstat functions}
@@ -434,6 +444,7 @@ digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dim}{fasp}(x)
 \method{dim}{hyperframe}(x)
+\method{dim}{im}(x)
 \method{dimnames}{fasp}(x)
 \method{dimnames}{fasp}(x) <- value
 distpl(p, l)               
@@ -454,7 +465,7 @@ envelopeEngine(X, fun, simul,
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, internal=NULL, cl=NULL,
+           Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user)
 equals.quad(Q)          
 equalsfun.quad(Q)          
@@ -619,6 +630,7 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
+\method{plot}{plotpairsim}(x, \dots)
 \method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
 \method{plot}{qqppm}(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
@@ -645,6 +657,7 @@ primefactors(n, prmax)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{plotppm}(x, \dots)
+\method{print}{plotpairsim}(x, \dots)
 \method{print}{pppmatching}(x, \dots)
 \method{print}{profilepl}(x, \dots)
 \method{print}{qqppm}(x, \dots)
@@ -666,6 +679,7 @@ prolongseq(x, newrange)
 quad(data, dummy, w, param)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+rhs.of.formula(x)
 quadrat.testEngine(X, nx, ny, \dots, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
@@ -694,6 +708,7 @@ revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
+rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(\dots)
 \method{rmhcontrol}{list}(\dots)
@@ -717,6 +732,8 @@ shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr)
+singlestring(s, coll)
+\method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots, jitter, modelname, covname, dataname)
@@ -761,6 +778,7 @@ warn.ignored.args(\dots, context)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)
+\method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w)
 }

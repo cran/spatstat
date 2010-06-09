@@ -155,7 +155,8 @@ from a point pattern in a window of arbitrary shape.
   and are statistically efficient when there are large numbers of
   points. Accordingly, if the number of points in \code{X} exceeds
   the threshold \code{nlarge}, then only the border correction will be
-  computed. Setting \code{nlarge=Inf} will prevent this from happening.
+  computed. Setting \code{nlarge=Inf} or \code{correction="best"}
+  will prevent this from happening.
   Setting \code{nlarge=0} is equivalent to selecting only the border
   correction with \code{correction="border"}.
 

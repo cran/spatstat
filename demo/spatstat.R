@@ -142,7 +142,8 @@ tes
 plot(tes, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
 title(sub=paste("p-value =", signif(tes$p.value,3)), cex.sub=1.4)
 
-tesk <- ks.test.ppm(ppm(swedishpines), function(x,y){x})
+data(nztrees)
+tesk <- kstest(nztrees, "x")
 tesk
 plot(tesk)
 
@@ -151,9 +152,9 @@ Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
 
-#data(shapley)
-#plot(nnclean(shapley, k=17), main="Nearest neighbour cleaning",
-#     chars=c(".", "+"), cols=1:2)
+data(shapley)
+plot(nnclean(shapley, k=17), main="Nearest neighbour cleaning",
+     chars=c(".", "+"), cols=1:2)
 
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
@@ -182,7 +183,7 @@ K <- Kest(swedishpines)
 plot(K, main="K function for Swedish Pines")
 
 en <- envelope(swedishpines, fun=Kest, nsim=10, correction="translate")
-plot(en, main="Envelopes of K function based on CSR")
+plot(en, main="Envelopes of K function based on CSR", shade=c("hi", "lo"))
 
 pc <- pcf(swedishpines)
 plot(pc, main="Pair correlation function")
@@ -232,14 +233,14 @@ plot(alltypes(bramblecanes, "K"), mar.panel=c(4,4,2,2)+0.1)
 
 data(amacrine)
 amacrine <- rescale(amacrine, 1/662)
-plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9))
+plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), shade=c("hi", "lo"))
 
 data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
 
 L <- localL(ponderosa)
-plot(L, lty=1, col=1, legend=FALSE,
-     main="neighbourhood density functions for Ponderosa Pines")
+pL <- plot(L, lty=1, col=1, legend=FALSE,
+           main="neighbourhood density functions for Ponderosa Pines")
 
 parsave <- par(mfrow=c(1,2))
 ponderosa.extra$plotit()

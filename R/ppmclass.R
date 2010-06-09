@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.40 $	$Date: 2010/05/19 10:01:42 $
+#	$Revision: 2.43 $	$Date: 2010/05/29 03:41:14 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -155,7 +155,7 @@ getglmfit <- function(object) {
   verifyclass(object, "ppm")
   glmfit <- object$internal$glmfit
   if(is.null(glmfit))
-    return(NULL)
+      return(NULL)
   if(object$method != "mpl")
     glmfit$coefficients <- object$coef
   return(glmfit)
@@ -237,11 +237,28 @@ extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
 
 
 #
-# method for model.matrix
+# method for model.frame
 
-model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
+model.frame.ppm <- function(formula, ...) {
+  object <- formula
   gf <- getglmfit(object)
   if(is.null(gf)) {
+    warning("Model re-fitted with forcefit=TRUE")
+    object <- update(object, forcefit=TRUE)
+    gf <- getglmfit(object)
+  }
+  gd <- getglmdata(object)
+  model.frame(gf, data=gd, ...)
+}
+
+#
+# method for model.matrix
+
+model.matrix.ppm <- function(object, data=model.frame(object),
+                             ..., keepNA=TRUE) {
+  gf <- getglmfit(object)
+  if(is.null(gf)) {
+    warning("Model re-fitted with forcefit=TRUE")
     object <- update(object, forcefit=TRUE)
     gf <- getglmfit(object)
     if(is.null(gf))
@@ -250,11 +267,11 @@ model.matrix.ppm <- function(object, ..., keepNA=TRUE) {
   if(!keepNA) {
     # extract model matrix of glm fit object
     # restricting to its 'subset' 
-    mm <- model.matrix(gf, ...)
+    mm <- model.matrix(gf, data, ...)
     return(mm)
   }
   # extract model matrix for all cases
-  mm <- model.matrix(gf, ..., subset=NULL)
+  mm <- model.matrix(gf, data, ..., subset=NULL)
   cn <- colnames(mm)
   gd <- getglmdata(object, drop=FALSE)
   if(nrow(mm) != nrow(gd)) {

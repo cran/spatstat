@@ -91,15 +91,14 @@
   Arguments that are often passed through \code{...} include
   \code{col} to control the colours of the different lines in a panel,
   and \code{lty} and \code{lwd} to control the line type and line width
-  of the different lines in a panel. See \code{\link{plot.fv}}.
-
+  of the different lines in a panel. The argument \code{shade}
+  can also be used to display confidence intervals or significance bands
+  as filled grey shading. See \code{\link{plot.fv}}.
+  
   The argument \code{title}, if present, will determine the
   overall title of the plot. If it is absent, it defaults to \code{x$title}.
   Titles for the individual plot panels will be taken from
   \code{x$titles}.
-
-  
-  
 }
 
 \value{None.}

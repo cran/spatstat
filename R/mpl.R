@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.88 $	$Date: 2010/04/23 06:57:11 $
+#	$Revision: 5.91 $	$Date: 2010/06/05 10:51:34 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2010/04/23 06:57:11 $")
+                    date="$Date: 2010/06/05 10:51:34 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -138,7 +138,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   nD <- D$n
   nX <- X$n
   nmat <- (nD + nX) * nX
-  nMAX <- spatstat.options("mplmaxmatrix")
+  nMAX <- spatstat.options("maxmatrix")
   if(nmat <= nMAX || savecomputed) {
     # normal case
     prep <- mpl.prepare(Q, X, P, trend, interaction,
@@ -244,7 +244,8 @@ if(is.null(famille)) {
                 data=glmdata, subset=.mpl.SUBSET,
                 control=gcontrol, model=FALSE)
 }
-  
+  environment(FIT$terms) <- sys.frame(sys.nframe())
+
   
 ################  I n t e r p r e t    f i t   #######################
 

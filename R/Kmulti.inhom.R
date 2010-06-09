@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.30 $	$Date: 2010/03/08 08:23:04 $
+#	$Revision: 1.31 $	$Date: 2010/06/01 05:40:05 $
 #
 #
 # ------------------------------------------------------------------------
@@ -174,7 +174,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
     # evaluate function at locations
     XI <- X[I]
     lambdaI <- lambdaI(XI$x, XI$y)
-  } else if(is.vector(lambdaI) && is.numeric(lambdaI)) {
+  } else if(is.numeric(lambdaI) && is.vector(as.numeric(lambdaI))) {
     # validate intensity vector
     if(length(lambdaI) != nI)
       stop(paste("The length of", sQuote("lambdaI"),
@@ -193,7 +193,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
     # evaluate function at locations
     XJ <- X[J]
     lambdaJ <- lambdaJ(XJ$x, XJ$y)
-  } else if(is.vector(lambdaJ) && is.numeric(lambdaJ)) {
+  } else if(is.numeric(lambdaJ) && is.vector(as.numeric(lambdaJ))) {
     # validate intensity vector
     if(length(lambdaJ) != nJ)
       stop(paste("The length of", sQuote("lambdaJ"),

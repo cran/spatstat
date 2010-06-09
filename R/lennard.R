@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.11 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 1.13 $	$Date: 2010/06/04 04:31:23 $
 #
 #    Lennard-Jones potential
 #
@@ -13,11 +13,13 @@
 LennardJones <- function() {
   out <- 
   list(
-         name     = "Lennard-Jones potential",
+         name     = "Lennard-Jones process",
          creator  = "LennardJones",
          family    = pairwise.family,
          pot      = function(d, par) {
-                         array(c(d^{-12},-d^{-6}),dim=c(dim(d),2))
+                         d6 <- d^{-6}
+                         p <- array(c(-d6^2,d6),dim=c(dim(d),2))
+                         return(p)
                     },
          par      = list(),
          parnames = character(),
@@ -27,27 +29,25 @@ LennardJones <- function() {
          interpret =  function(coeffs, self) {
            theta1 <- as.numeric(coeffs[1])
            theta2 <- as.numeric(coeffs[2])
-           if(theta1 <= 0) {
-             # Fitted regular parameter sigma^12 is negative
+           if(sign(theta1) * sign(theta2) == 1) {
+             sigma <- (theta1/theta2)^(1/6)
+             epsilon <- (theta2^2)/(4 * theta1)
+           } else {
              sigma <- NA
-             tau <- NA
+             epsilon <- NA
            }
-           else {
-             sigma <- theta1^(1/12)
-             tau <- theta2/sqrt(theta1)
-           }
-           return(list(param=list(sigma=sigma, tau=tau),
+           return(list(param=list(sigma=sigma, epsilon=epsilon),
                        inames="interaction parameters",
-                       printable=round(c(sigma=sigma,tau=tau),4)))
+                       printable=round(c(sigma=sigma,epsilon=epsilon),4)))
          },
          valid = function(coeffs, self) {
            p <- self$interpret(coeffs, self)$param
-           return(!any(is.na(p)))
+           return(all(!is.na(p) & (p > 0)))
          },
          project = function(coeffs, self) {
-           p <- self$interpret(coeffs, self)$param
-           if(any(is.na(p)))
-             stop("Don't know how to project Lennard-Jones models")
+           if(!self$valid(coeffs, self))
+             coeffs[] <- 0
+           return(coeffs)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            if(any(is.na(coeffs)) || epsilon == 0)

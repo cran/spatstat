@@ -18,8 +18,8 @@
     Extra arguments passed to \code{\link{image}} to control the plot.
   }
   \item{col}{
-    Colours representing the pixel values. A character vector representing
-    colours.
+    Colours for the pixel values. Either a character vector of colours,
+    or an object of class \code{\link{colourmap}}.
   }
   \item{ribbon}{
     Logical flag indicating whether to display a ribbon
@@ -60,8 +60,21 @@
   the chosen colour map.
 
   The pixel values are displayed using the colours given in the
-  argument \code{col}. The mapping of pixel values to colours is
-  determined as follows.
+  argument \code{col}. This may be either an explicit colour map
+  (an object of class \code{"colourmap"}, created by the function
+  \code{\link{colourmap}}) or a character vector or integer vector
+  that specifies a set of colours. 
+  
+  If \code{col} is an explicit colour map
+  (an object of class \code{"colourmap"}) then the same colour
+  always represents the same numeric value. For example this ensures
+  that when we plot different images, the colour maps are consistent.
+
+  If \code{col} is a character vector or integer vector that specifies
+  colours, then the colour mapping will be stretched to match the range of
+  pixel values in the image \code{x}. In this case, the mapping of pixel values
+  to colours is determined as follows.
+  
   \describe{
     \item{logical-valued images:}{the values \code{FALSE} and
       \code{TRUE} are mapped to the colours \code{col[1]} and
@@ -105,6 +118,7 @@
 }
 \seealso{
   \code{\link{im.object}},
+  \code{\link{colourmap}},
   \code{\link{contour.im}},
   \code{\link{persp.im}},
   \code{\link{image.default}},
@@ -114,7 +128,11 @@
    # an image
    Z <- setcov(owin())
    plot(Z)
+   # stretchable colour map
    plot(Z, col=terrain.colors(128), axes=FALSE)
+   # fixed colour map
+   tc <- colourmap(rainbow(128), breaks=seq(-1,2,length=129))
+   plot(Z, col=tc)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.59 2009/10/31 01:52:54 adrian Exp $
+# $Id: rmh.default.R,v 1.64 2010/06/05 09:57:43 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -73,8 +73,12 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   w.model <- model$w
   x.start <- start$x.start
   trend <- model$trend
-
   trendy <- !is.null(trend)
+
+  singletrend <- trendy && (is.im(trend) ||
+                            is.function(trend) ||
+                            (is.numeric(trend) && length(trend) == 1))
+  trendlist <- if(singletrend) list(trend) else trend
   
 # window implied by trend image, if any
   
@@ -103,18 +107,9 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   
 ##  Simulation window 
 
-  expand <- control$expand
-
-  w.sim <-
-    if(is.owin(expand))
-      expand
-    else if(is.numeric(expand))
-      expand.owin(w.clip, expand)
-    else
-      stop(paste("Internal error: unrecognised value of",
-                 sQuote("expand")))
-
-  expanded <- (!is.numeric(expand) || (expand > 1))
+  xpn <- rmhResolveExpansion(w.clip, control, trendlist, "trend")
+  w.sim <- xpn$wsim
+  expanded <- xpn$expanded
 
 ## Check the fine print   
 
@@ -136,7 +131,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # if any trend is given by an image.
 
   if(expanded && !is.null(trend)) {
-    trends <- if(!is.list(trend)) list(trend) else trend
+    trends <- if(is.im(trend)) list(trend) else trend
     images <- unlist(lapply(trends, is.im))
     if(any(images)) {
       iwindows <- lapply(trends[images], as.owin)
@@ -154,7 +149,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                       if(nimages == 1) "the trend window.\n"
                       else "one of the trend windows.\n",
                       "Expanding to this trend window (only).\n"))
-        w.sim <- iwindows[misfit]
+        w.sim <- iwindows[[which(misfit)]]
       }
     }
   }
@@ -687,25 +682,6 @@ rmhEngine <- function(InfoList, ...,
   fixall  <- control$fixall
   nverb   <- control$nverb
   
-# The vectors x and y (and perhaps marks) which hold the generated
-# process may grow.  We need to allow storage space for them to grow
-# in.  Unless we are conditioning on the number of points, we have no
-# real idea how big they will grow.  Hence we start off with storage
-# space which has at least twice the length of the ``initial state''.
-# If more space is needed, it is re-allocated in the C code.
-
-  if(fixing == "none") {
-    npad <- max(npts.total, 50)
-    padding <- numeric(npad)
-    x <- c(x, padding)
-    y <- c(y, padding)
-    if(mtype) Cmarks <- c(Cmarks, padding)
-  } else {
-    npad <- 0
-  }
-  npmax <- npts.total + npad
-  mrep  <- 1
-
   if(verbose)
     cat("Proposal points...")
            

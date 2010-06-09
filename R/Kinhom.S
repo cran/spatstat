@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.46 $	$Date: 2009/12/16 04:14:14 $
+#	$Revision: 1.48 $	$Date: 2010/06/07 13:22:49 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -86,6 +86,7 @@
                                best="best"),
                              multi=TRUE)
 
+    best.wanted <- ("best" %in% correction)
     correction <- implemented.for.K(correction, W$type, correction.given)
 
     ###########################################################
@@ -111,25 +112,26 @@
         # Estimate density by leave-one-out kernel smoothing
         lambda <- density(X, ..., sigma=sigma, varcov=varcov,
                             at="points", leaveoneout=TRUE)
+        lambda <- as.numeric(lambda)
         reciplambda <- 1/lambda
       } else if(!is.null(reciplambda)) {
         # 1/lambda values provided
-        if(is.vector(reciplambda)) 
-          check.nvector(reciplambda, npoints)
-        else if(is.im(reciplambda)) 
+        if(is.im(reciplambda)) 
           reciplambda <- safelookup(reciplambda, X)
         else if(is.function(reciplambda))
           reciplambda <- reciplambda(X$x, X$y)
+        else if(is.numeric(reciplambda) && is.vector(as.numeric(reciplambda)))
+          check.nvector(reciplambda, npoints)
         else stop(paste(sQuote("reciplambda"),
                         "should be a vector, a pixel image, or a function"))
       } else {
         # lambda values provided
-        if(is.vector(lambda)) 
-          check.nvector(lambda, npoints)
-        else if(is.im(lambda)) 
+        if(is.im(lambda)) 
           lambda <- safelookup(lambda, X)
         else if(is.function(lambda)) 
           lambda <- lambda(X$x, X$y)
+        else if(is.numeric(lambda) && is.vector(as.numeric(lambda)))
+          check.nvector(lambda, npoints)
         else stop(paste(sQuote("lambda"),
                           "should be a vector, a pixel image, or a function"))
         # evaluate reciprocal
@@ -149,8 +151,10 @@
     can.do.fast <- breaks$even  && missing(lambda2)
     borderonly <- all(correction == "border" | correction == "bord.modif")
     large.n    <- (npoints >= nlarge)
-    will.do.fast <- can.do.fast && (borderonly || large.n)
-    asked      <- borderonly || (nlarge.given && large.n)
+    demand.best <- correction.given && best.wanted
+    large.n.trigger <- large.n && !demand.best
+    will.do.fast <- can.do.fast && (borderonly || large.n.trigger)
+    asked      <- borderonly || (nlarge.given && large.n.trigger)
 
     if(will.do.fast && !asked)
       message(paste("number of data points exceeds",

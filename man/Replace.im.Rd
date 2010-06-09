@@ -17,7 +17,7 @@
     Either a spatial window (an object of class \code{"owin"})
     or a point pattern (an object of class \code{"ppp"})
     or something that can be converted into a point pattern
-    by \code{\link{as.ppp}}.
+    by \code{\link{as.ppp}}, or any type of index that applies to a matrix.
   }
   \item{value}{
      Vector of replacement values (short vectors will be
@@ -41,7 +41,11 @@
   If \code{i} is a point pattern (an object of class
   \code{"ppp"}, or something that can be converted into a point pattern
   by \code{\link{as.ppp}}), then the values of the pixel image at the points of
-  this pattern are changed. 
+  this pattern are changed.
+
+  If \code{i} does not satisfy any of the conditions above,
+  then it is assumed to be a valid index for
+  the matrix \code{as.matrix(x)}. 
 }
 \seealso{
   \code{\link{im.object}},

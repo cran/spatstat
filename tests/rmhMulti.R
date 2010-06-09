@@ -9,6 +9,8 @@ if(!exists("nr"))
 if(!exists("nv"))
    nv   <- 0
 
+spatstat.options(expand=1.1)
+
    # Multitype Poisson
    modp2 <- list(cif="poisson",
                  par=list(beta=2), types=letters[1:3], w = square(10))

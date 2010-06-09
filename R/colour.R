@@ -3,7 +3,7 @@
 #
 # support for colour maps and other lookup tables 
 #
-# $Revision: 1.7 $ $Date: 2009/02/27 06:06:11 $
+# $Revision: 1.10 $ $Date: 2010/06/01 10:17:14 $
 #
 
 colourmap <- function(col, ..., breaks=NULL, inputs=NULL) {
@@ -28,23 +28,27 @@ lut <- function(outputs, ..., breaks=NULL, inputs=NULL) {
     # discrete set of input values mapped to output values
     stopifnot(length(inputs) == length(outputs))
     stuff <- list(n=n, discrete=TRUE, inputs=inputs, outputs=outputs)
-    f <- function(x) {
+    f <- function(x, what="value") {
       m <- match(x, stuff$inputs)
+      if(what == "index")
+        return(m)
       cout <- stuff$outputs[m]
       return(cout)
     }
   } else {
-    # real line mapped to colours
+    # interval of real line mapped to colours
     stopifnot(is.numeric(breaks) && length(breaks) >= 2)
     stopifnot(length(breaks) == length(outputs) + 1)
     if(!all(diff(breaks) > 0))
       stop("breaks must be increasing")
     stuff <- list(n=n, discrete=FALSE, breaks=breaks, outputs=outputs)
-    f <- function(x) {
+    f <- function(x, what="value") {
       stopifnot(is.numeric(x))
       x <- as.vector(x)
       z <- findInterval(x, stuff$breaks,
-                        rightmost.closed=TRUE, all.inside=TRUE)
+                        rightmost.closed=TRUE)
+      if(what == "index")
+        return(z)
       cout <- stuff$outputs[z]
       return(cout)
     }
@@ -69,9 +73,7 @@ print.lut <- function(x, ...) {
     out <- data.frame(input=stuff$inputs, output=stuff$outputs)
   } else {
     b <- stuff$breaks
-    cat(paste(tablename, "for the range",
-              " [", b[1], ", ", b[n+1], "]\n",
-              sep=""))
+    cat(paste(tablename, "for the range", prange(b[c(1,n+1)]), "\n"))
     leftend  <- rep("[", n)
     rightend <- c(rep(")", n-1), "]")
     inames <- paste(leftend, b[-(n+1)], ", ", b[-1], rightend, sep="")
@@ -84,6 +86,36 @@ print.lut <- function(x, ...) {
 
 print.colourmap <- function(x, ...) {
   NextMethod("print")
+}
+
+summary.lut <- function(object, ...) {
+  s <- attr(object, "stuff")
+  if(inherits(object, "colourmap")) {
+    s$tablename <- "Colour map"
+    s$outputname <- "colour"
+  } else {
+    s$tablename  <- "Lookup table"
+    s$outputname <- "output"
+  }
+  class(s) <- "summary.lut"
+  return(s)
+}
+
+print.summary.lut <- function(x, ...) {
+  n <- x$n
+  if(x$discrete) {
+    cat(paste(x$tablename, "for discrete set of input values\n"))
+    out <- data.frame(input=x$inputs, output=x$outputs)
+  } else {
+    b <- x$breaks
+    cat(paste(x$tablename, "for the range", prange(b[c(1,n+1)]), "\n"))
+    leftend  <- rep("[", n)
+    rightend <- c(rep(")", n-1), "]")
+    inames <- paste(leftend, b[-(n+1)], ", ", b[-1], rightend, sep="")
+    out <- data.frame(interval=inames, output=x$outputs)
+  }
+  colnames(out)[2] <- x$outputname
+  print(out)  
 }
 
 plot.colourmap <- function(x, ..., main,

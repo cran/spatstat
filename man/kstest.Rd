@@ -22,8 +22,9 @@ kstest(...)
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
-    A function, a pixel image (object of class \code{"im"})
-    or a list of pixel images.
+    A function, a pixel image (object of class \code{"im"}),
+    a list of pixel images, or one of the characters
+    \code{"x"} or \code{"y"} indicating the Cartesian coordinates.
   }
   \item{\dots}{
     Arguments passed to \code{\link{ks.test}}
@@ -68,7 +69,8 @@ kstest(...)
   If \code{X} is a point pattern that does not have marks,
   the argument \code{covariate} should be either a \code{function(x,y)}
   or a pixel image (object of class \code{"im"} containing the values
-  of a spatial function.
+  of a spatial function, or one of the characters \code{"x"} or
+  \code{"y"} indicating the Cartesian coordinates.
   If \code{covariate} is an image, it should have numeric values,
   and its domain should cover the observation window of the
   \code{model}. If \code{covariate} is a function, it should expect
@@ -79,7 +81,8 @@ kstest(...)
   If \code{X} is a multitype point pattern, the argument \code{covariate}
   can be either a \code{function(x,y,marks)},
   or a pixel image, or a list of pixel images corresponding to
-  each possible mark value. 
+  each possible mark value, or one of the characters \code{"x"} or
+  \code{"y"} indicating the Cartesian coordinates. 
   
   First the original data point pattern is extracted from \code{model}.
   The values of the \code{covariate} at these data points are
@@ -168,18 +171,23 @@ kstest(...)
   \emph{Applied Statistics} \bold{35}, 54--62.
 }
 \examples{
-   # real data: Swedish Pines
-   data(swedishpines)
+   # real data: NZ trees
+   data(nztrees)
 
-   # test covariate = x coordinate
-   xcoord <- function(x,y) { x }
+   # test of CSR using x coordinate
+   kstest(nztrees, "x")
 
-   # test of CSR
-   kstest(swedishpines, xcoord)
+   # test of CSR using a function of x and y
+   fun <- function(x,y){2* x + y}
+   kstest(nztrees, fun)
+
+   # test of CSR using an image covariate
+   funimage <- as.im(fun, W=as.owin(nztrees))
+   kstest(nztrees, funimage)
 
    # fit inhomogeneous Poisson model and test
-   model <- ppm(swedishpines, ~x + y)
-   kstest(model, xcoord)
+   model <- ppm(nztrees, ~x)
+   kstest(model, "x")
 
    # synthetic data: nonuniform Poisson process
    X <- rpoispp(function(x,y) { 100 * exp(x) }, win=square(1))
@@ -190,16 +198,15 @@ kstest(...)
    fit1 <- ppm(X, ~x)
 
    # test wrong model
-   kstest(fit0, xcoord)
+   kstest(fit0, "x")
    # test right model
-   kstest(fit1, xcoord)
+   kstest(fit1, "x")
 
    # multitype point pattern
    data(amacrine)
-   kstest(amacrine, function(x,y,marks){x})
-   kstest(ppm(amacrine, ~marks+y), function(x,y,marks){x})
-   xcoordimage <- as.im(xcoord, W=as.owin(amacrine))
-   kstest(amacrine, xcoordimage)
+   kstest(amacrine, "x")
+   yimage <- as.im(function(x,y){y}, W=as.owin(amacrine))
+   kstest(ppm(amacrine, ~marks+y), yimage)
 }
 \keyword{htest}
 \keyword{spatial}

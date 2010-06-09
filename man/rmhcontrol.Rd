@@ -118,7 +118,8 @@
       argument \code{x.start} in \code{\link{rmhstart}}.
       In these cases \code{expand} defaults to 1.
 
-      Otherwise, \code{expand} defaults to 2.
+      Otherwise, \code{expand} defaults to
+      \code{\link{spatstat.options}("expand")} which defaults to 2.
     }
     \item{periodic}{A logical scalar; if \code{periodic} is \code{TRUE}
       we simulate a process on the torus formed by identifying
@@ -236,7 +237,8 @@
   \code{\link{rmh}},
   \code{\link{rmhmodel}},
   \code{\link{rmhstart}},
-  \code{\link{expand.owin}}
+  \code{\link{expand.owin}},
+  \code{\link{spatstat.options}}
 }
 \examples{
    # parameters given as named arguments

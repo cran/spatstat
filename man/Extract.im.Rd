@@ -18,7 +18,8 @@
     or a pixel image with logical values,
     or a point pattern (an object of class \code{"ppp"}),
     or something that can be converted to a point pattern
-    by \code{\link{as.ppp}}.
+    by \code{\link{as.ppp}},
+    or any type of index that applies to a matrix.
   }
   \item{\dots}{Ignored.}
   \item{drop}{
@@ -95,6 +96,11 @@
   is carried out.
   In particular, \code{x[i, raster=i, drop=FALSE]} will return
   an image defined on the same pixel array as the object \code{i}.
+
+  If \code{i} does not satisfy any of the conditions above,
+  then it is assumed to be a valid index for
+  the matrix \code{as.matrix(x)}. The result is a vector or matrix of
+  pixel values.
 }
 \section{Warning}{
   If \code{W} is a window or a pixel image,

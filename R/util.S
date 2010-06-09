@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.56 $    $Date: 2010/05/19 05:21:08 $
+#    $Revision: 1.57 $    $Date: 2010/06/08 08:51:01 $
 #
 #  (a) for matrices only:
 #
@@ -465,3 +465,11 @@ multiply.only.finite.entries <- function(x, a) {
   ifelse(is.finite(x), x * a, x)
 }
 
+singlestring <- function(s, coll="") {
+  s <- as.character(s)
+  if(length(s) > 1)
+    s <- paste(s, collapse=coll)
+  return(s)
+}
+
+  

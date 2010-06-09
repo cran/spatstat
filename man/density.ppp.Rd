@@ -50,6 +50,10 @@
   If \code{at="points"}, the result is a numeric vector
   of length equal to the number of points in \code{x}.
   Values are estimated intensity values at the points of \code{x}.
+
+  In either case, the return value has attributes
+  \code{"sigma"} and \code{"varcov"} which report the smoothing
+  bandwidth that was used.
 }
 \details{
   This is a method for the generic function \code{density}.

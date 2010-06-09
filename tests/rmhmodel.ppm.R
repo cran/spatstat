@@ -82,9 +82,16 @@ f <- ppm(cells, ~z, covariates=list(z=Z))
 m <- rmhmodel(f)
 m <- rmhmodel(f, control=list(p=1))
 
+Zim <- as.im(Z, as.owin(cells))
+f <- ppm(amacrine, ~z, covariates=list(z=Zim))
+m <- rmhmodel(f)
+
 Z <- as.im(function(x,y){ x^2+y }, as.owin(amacrine))
 f <- ppm(amacrine, ~z + marks, covariates=list(z=Z))
 m <- rmhmodel(f)
 m <- rmhmodel(f, control=list(p=1))
 m <- rmhmodel(f, control=list(p=1,fixall=TRUE))
 
+Zim <- as.im(Z, as.owin(amacrine))
+f <- ppm(amacrine, ~z + marks, covariates=list(z=Zim))
+m <- rmhmodel(f)

@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.43 $   $Date: 2009/03/05 17:25:27 $
+#  $Revision: 1.44 $   $Date: 2010/06/08 05:35:12 $
 #
 #  Plotting code for pixel images
 #
@@ -18,6 +18,8 @@ plot.im <- function(x, ...,
   verifyclass(x, "im")
   main <- deparse(substitute(x))
 
+  zlim <- list(...)$zlim
+
   imagebreaks <- NULL
   ribbonvalues <- ribbonbreaks <- NULL
 
@@ -26,13 +28,23 @@ plot.im <- function(x, ...,
     x[ok]
   }
 
-  zlim <- list(...)$zlim
+  colmap <- if(inherits(col, "colourmap")) col else NULL
   
   sumry <- summary(x)
+
   switch(sumry$type,
          real    = {
            vrange <- sumry$range
            vrange <- range(zlim, vrange)
+           if(!is.null(colmap)) {
+             # explicit colour map
+             s <- summary(colmap)
+             if(s$discrete)
+               stop("Discrete colour map is not applicable to real values")
+             imagebreaks <- s$breaks
+             vrange <- range(imagebreaks)
+             col <- s$outputs
+           }
            trivial <- (diff(vrange) <= .Machine$double.eps)
            if(!trivial) {
              ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
@@ -52,7 +64,8 @@ plot.im <- function(x, ...,
            if(!trivial){
              ribbonticks <- clamp(pretty(vrange), vrange)
              ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
-             if(identical(all.equal(ribbonticks, vrange[1]:vrange[2]), TRUE)) {
+             if(identical(all.equal(ribbonticks,
+                                    vrange[1]:vrange[2]), TRUE)) {
                # each possible value will be printed on ribbon label
                ribbonvalues <- vrange[1]:vrange[2]
                imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
@@ -67,11 +80,21 @@ plot.im <- function(x, ...,
                ribbonlabels <- paste(ribbonticks)
              }
            }
+           if(!is.null(colmap)) {
+             # explicit colour map
+             s <- summary(colmap)
+             if(!s$discrete)
+               imagebreaks <- s$breaks
+             else
+               imagebreaks <- c(s$inputs[1] - 0.5, s$inputs + 0.5)
+             col <- s$outputs
+           }
          },
          logical = {
            values <- as.integer(as.vector(x$v))
            values <- values[!is.na(values)]
-           trivial <- (length(unique(values)) < 2)
+           uv <- unique(values)
+           trivial <- (length(uv) < 2)
            vrange <- c(0,1)
            imagebreaks <- c(-0.5, 0.5, 1.5)
            ribbonvalues <- c(0,1)
@@ -79,13 +102,16 @@ plot.im <- function(x, ...,
            ribbonbreaks <- imagebreaks
            ribbonticks <- ribbonvalues
            ribbonlabels <- c("FALSE", "TRUE")
+           if(!is.null(colmap)) 
+             col <- colmap(c(FALSE,TRUE))
          },
          factor  = {
            lev <- x$lev
            nvalues <- length(lev)
            trivial <- (nvalues < 2)
            # ensure all factor levels plotted separately
-           intlev <- as.integer(factor(lev, levels=lev))
+           fac <- factor(lev, levels=lev)
+           intlev <- as.integer(fac)
            imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
            ribbonvalues <- intlev
            ribbonrange <- range(imagebreaks)
@@ -93,26 +119,36 @@ plot.im <- function(x, ...,
            ribbonticks <- ribbonvalues
            ribbonlabels <- paste(lev)
            vrange <- range(intlev)
+           if(!is.null(colmap)) 
+             col <- colmap(fac)
          },
          stop(paste("Do not know how to plot image of type", sQuote(sumry$type)))
          )
 
-  # determine DEFAULT colour map
-  colfun <- spatstat.options("image.colfun")
-  if(!is.null(imagebreaks)) 
-    colourmap <- list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
-  else 
-    colourmap <- list(col=colfun(255))
-  # user-specified colour map
-  if(!is.null(col)) {
-    colourmap$col <- col
-    if(!is.null(colourmap$breaks)) {
+  
+  # determine colour map
+  if(!is.null(colmap)) {
+    # explicit colour map object
+    colourinfo <- list(breaks=imagebreaks, col=col)
+  } else {
+    # compile colour information using default colour values
+    colfun <- spatstat.options("image.colfun")
+    if(!is.null(imagebreaks)) 
+      colourinfo <- list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
+    else 
+      colourinfo <- list(col=colfun(255))
+    # user-specified colour values
+    if(!is.null(col)) {
+      colourinfo$col <- col
+      if(!is.null(colourinfo$breaks)) {
       # check consistency
-      if(length(col) != nvalues)
-        stop(paste("Length of argument", dQuote("col"),
-                   paren(paste(length(col))),
-                   "does not match the number of distinct values",
-                   paren(paste(nvalues))))
+        nvalues <- length(colourinfo$breaks) - 1
+        if(length(col) != nvalues)
+          stop(paste("Length of argument", dQuote("col"),
+                     paren(paste(length(col))),
+                     "does not match the number of distinct values",
+                     paren(paste(nvalues))))
+      }
     }
   }
   
@@ -131,7 +167,7 @@ plot.im <- function(x, ...,
       # plot image without ribbon
       image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                  list(...),
-                 colourmap,
+                 colourinfo,
                  list(xlab = "", ylab = ""),
                  list(asp = 1, main = main, axes=FALSE)
                  )
@@ -155,7 +191,7 @@ plot.im <- function(x, ...,
     image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                list(add=TRUE),
                list(...),
-               colourmap,
+               colourinfo,
                list(xlab = "", ylab = ""),
                list(asp = 1, main = main))
   # axes for image
@@ -174,7 +210,7 @@ plot.im <- function(x, ...,
                   z=matrix(ribbonvalues, nrow=1),
                   add=TRUE, main="", sub=""),
              list(...),
-             colourmap)
+             colourinfo)
   plot(as.owin(bb.rib), add=TRUE)
   # ticks for ribbon image
   scal <- diff(bb.rib$yrange)/diff(ribbonrange)

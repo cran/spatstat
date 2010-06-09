@@ -7,9 +7,10 @@ if(!exists("nr"))
   nr   <- 1e3
 
 # Strauss with zero intensity and p = 1
-cat("\nStrauss with zero intensity\n")
 mod0S <- list(cif="strauss",par=list(beta=0,gamma=0.6,r=0.7), w = square(3))
-try(X0S   <- rmh(model=mod0S,start=list(n.start=80),
+out <- try(X0S   <- rmh(model=mod0S,start=list(n.start=80),
                control=list(p=1,nrep=nr,nverb=nv),verbose=FALSE))
+if(!inherits(out, "try-error"))
+  stop("Error not trapped (Strauss with zero intensity and p = 1) in tests/rmhErrors.R")
 
 

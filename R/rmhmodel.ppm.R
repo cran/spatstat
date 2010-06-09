@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.34 $   $Date: 2010/05/19 09:02:29 $
+#  $Revision: 2.37 $   $Date: 2010/06/05 03:41:28 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -11,6 +11,13 @@
 
 .Spatstat.Rmhinfo <-
 list(
+     "Lennard-Jones process" =
+     function(coeffs, inte) {
+       sigma   <- inte$par$sigma
+       epsilon <- inte$par$epsilon
+       return(list(cif='lennard',
+                   par=list(sigma=sigma, epsilon=epsilon)))
+     },
      "Fiksel process" =
      function(coeffs, inte) {
        hc <- inte$par$hc
@@ -115,8 +122,6 @@ list(
 #
 #           <none>                   dgs
 #
-#           LennardJones             <none>
-#
 #           OrdThresh                <none>
 #
 #  'dgs' has no canonical parameters (it's determined by its irregular
@@ -141,6 +146,10 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
     if(Y$marked && !Y$multitype)
       stop("Not implemented for marked point processes other than multitype")
 
+    if(Y$uses.covars && is.data.frame(X$covariates))
+      stop(paste("This model cannot be simulated, because the",
+                 "covariate values were given as a data frame."))
+    
     # enforce defaults for `control'
 
     control <- rmhcontrol(control)
@@ -210,18 +219,10 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
 
     ######## Expanded window for simulation?
 
-    expand <- control$expand
-    if(is.null(expand)) 
-      wsim <- win
-    else if(is.owin(expand))
-      wsim <- expand
-    else if(is.numeric(expand) && length(expand) == 1) {
-      if(expand < 1)
-        stop("expand must be >= 1")
-      wsim <- if(expand == 1) win else expand.owin(win, expand)
-     } else stop(paste("Unrecognised format for", sQuote("expand")))
-      
+    covims <- if(Y$uses.covars) X$covariates[Y$covars.used] else NULL
     
+    wsim <- rmhResolveExpansion(win, control, covims, "covariate")$wsim
+      
     ###### Trend or Intensity ############
 
     if(verbose)
@@ -230,13 +231,11 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
     if(Y$stationary) {
       # first order terms (beta or beta[i]) are carried in Z$par$beta
       Z$par[["beta"]] <- Y$trend$value
+      # Note the construction m[["name"]] <- value
+      # ensures that m does not need to be coerced from vector to list
       Z$trend <- NULL
     } else {
       # trend terms present
-      # cannot simulate if there are covariates given as data frame
-      if(Y$has.covars && is.data.frame(X$covariates))
-        stop(paste("This model cannot be simulated, because the",
-                   "covariates are given as a data frame."))
       # all first order effects are subsumed in Z$trend
       Z$par[["beta"]] <- if(!Y$marked) 1 else rep(1, length(Z$types))
       # predict on window possibly larger than original data window
@@ -248,12 +247,65 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
     }
     if(verbose)
       cat("done.\n")
-    # Note the construction m[["name"]] <-
-    # ensures that m does not need to be coerced from vector to list
     Z <- rmhmodel(Z)
     return(Z)
 }
 
+rmhResolveExpansion <- function(win, control, imagelist, itype="covariate") {
+  # Determine expansion window for simulation
 
+  if(control$force.noexp) {
+    # Expansion prohibited
+    return(list(wsim=win, expanded=FALSE))
+  }
+  
+  # Determine proposed expansion window
+  expand <- control$expand
+  if(is.null(expand)) {
+    want.expand <- FALSE
+    wexp <- win
+  } else if(is.owin(expand)) {
+    want.expand <- TRUE
+    wexp <- expand
+  } else if(is.numeric(expand) && length(expand) == 1) {
+    if(expand < 1)
+      stop("expand must be >= 1")
+    wexp <- if(expand == 1) win else expand.owin(win, expand)
+    want.expand <- (expand > 1)
+  } else stop(paste("Unrecognised format for", sQuote("expand")))
+    
+  # Decide whether to expand
 
+  if(!want.expand)
+    return(list(wsim=win, expanded=FALSE))
+
+  isim <- unlist(lapply(imagelist, is.im))
+  imagelist <- imagelist[isim]
+
+  if(length(imagelist) == 0) {
+    # Unlimited expansion is feasible
+    return(list(wsim=wexp, expanded=TRUE))
+  }
+
+  # Expansion is limited to domain of image data
+  # Determine maximum possible expansion window
+  wins <- lapply(imagelist, as.owin)
+  if(length(wins) == 1) {
+    cwin <- wins[[1]]
+  } else {
+    names(wins) <- NULL
+    cwin <- do.call("intersect.owin", wins)
+  }
+  
+  if(!is.subset.owin(wexp, cwin)) {
+    # Cannot expand to proposed window
+    if(control$force.exp)
+      stop(paste("Cannot expand the simulation window,",
+                 "because the", itype, "images do not cover",
+                 "the expanded window"))
+      # Take largest possible window
+    wexp <- intersect.owin(wexp, cwin)
+  }
+  return(list(wsim=wexp, expanded=TRUE))
+}
 
