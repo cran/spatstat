@@ -33,6 +33,7 @@ void lennardinit(state, model, algo)
   Lennard.epsilon = model.par[2];
   Lennard.period  = model.period;
   /* constants */
+  Lennard.sigma2  = pow(Lennard.sigma, 2);
   Lennard.foureps = 4 * Lennard.epsilon;
   /* periodic boundary conditions? */
   Lennard.per    = (model.period[0] > 0.0);
@@ -47,9 +48,8 @@ double lennardcif(prop, state)
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double d2, sigma2, ratio6, pairsum, cifval, foureps;
+  double d2, sigma2, ratio6, pairsum, cifval;
 
-  foureps = Lennard.foureps;
   sigma2 = Lennard.sigma2;
 
   u  = prop.u;
@@ -101,7 +101,7 @@ double lennardcif(prop, state)
     }
   }
 
-  cifval *= exp(foureps * pairsum);
+  cifval *= exp(Lennard.foureps * pairsum);
   return cifval;
 }
 

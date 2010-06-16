@@ -131,7 +131,7 @@
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
-  which can be plotted directly using \code{\link{plot.fv}}.
+  which can be printed and plotted directly.
 
   Essentially a data frame containing columns
   \item{r}{the vector of values of the argument \eqn{r} 
@@ -303,7 +303,8 @@
   the summary function for the data point pattern,
   the upper and lower simulation envelopes, and 
   the theoretical expected value (exact or estimated) of the summary function 
-  for the model being tested. It can be plotted using \code{plot.fv}.
+  for the model being tested. It can be plotted
+  using \code{\link{plot.envelope}}.
 
   If \code{VARIANCE=TRUE} then the return value also includes the
   sample mean, sample variance and other quantities.
@@ -365,9 +366,8 @@
   an attribute \code{"simpatterns"} which is a list of length
   \code{nsim} containing all the simulated point patterns.
 
-  See \code{link{plot.fv}} for information about how to plot
-  the envelopes. In particular the argument \code{shade=c("hi","lo")}
-  is useful. See the Examples below.
+  See \code{\link{plot.envelope}} and \code{link{plot.fv}}
+  for information about how to plot the envelopes. 
 }
 \section{Warning}{
   An error may be generated if one of the simulations produces a
@@ -396,6 +396,7 @@
 } 
 \seealso{
   \code{\link{fv.object}},
+  \code{\link{plot.envelope}},
   \code{\link{plot.fv}},
   \code{\link{Kest}},
   \code{\link{Gest}},
@@ -532,9 +533,6 @@ nsim=4, global=TRUE))
 # re-using the same point patterns
  EK <- envelope(X, Kest, nsim=10, savepatterns=TRUE)
  EG <- envelope(X, Kest, nsim=10, simulate=EK)
-
-# how to get nice shading: see help(plot.fv)
- plot(EG, shade=c("hi", "lo"))
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

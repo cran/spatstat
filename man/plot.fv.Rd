@@ -6,8 +6,8 @@
 }
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
-           xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-           ylim.covers=NULL, legend=TRUE, legendpos="topleft",
+           xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
+           legend=TRUE, legendpos="topleft", legendmath=FALSE,
            shade=NULL, shadecol="grey")
 }
 \arguments{
@@ -64,6 +64,11 @@
     The position of the legend. Either a character string keyword
     (see \code{\link[graphics]{legend}} for keyword options)
     or a pair of coordinates in the format \code{list(x,y)}.
+  }
+  \item{legendmath}{
+    Logical. If \code{TRUE}, the legend will display the
+    mathematical notation for each curve. If \code{FALSE}, the legend text
+    is the identifier (column name) for each curve.
   }
   \item{shade}{
     An index that identifies two columns of \code{x}. When the corresponding

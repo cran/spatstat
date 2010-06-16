@@ -1,9 +1,9 @@
 #
-# colour.R
+# colourtables.R
 #
-# support for colour maps and other lookup tables 
+# support for colour maps and other lookup tables
 #
-# $Revision: 1.10 $ $Date: 2010/06/01 10:17:14 $
+# $Revision: 1.13 $ $Date: 2010/06/14 12:07:20 $
 #
 
 colourmap <- function(col, ..., breaks=NULL, inputs=NULL) {
@@ -205,4 +205,3 @@ plot.colourmap <- function(x, ..., main,
   }
   invisible(NULL)
 }
-

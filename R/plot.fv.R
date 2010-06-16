@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.41 $    $Date: 2010/06/08 08:25:12 $
+#  $Revision: 1.45 $    $Date: 2010/06/16 04:28:46 $
 #
 #
 
@@ -13,7 +13,7 @@ conspire <- function(...) {
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
                     ylim.covers=NULL, legend=TRUE, legendpos="topleft",
-                    shade=NULL, shadecol="grey") {
+                    legendmath=FALSE, shade=NULL, shadecol="grey") {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -60,8 +60,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   if(is.vector(lhsdata))
     lhsdata <- matrix(lhsdata, ncol=1)
 
-  if(!is.vector(rhsdata))
-    stop("rhs of formula seems not to be a vector")
+  if(is.matrix(rhsdata))
+    stop("rhs of formula should yield a vector")
+  rhsdata <- as.numeric(rhsdata)
 
   # restrict data to subset if desired
   if(!is.null(subset)) {
@@ -208,10 +209,18 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
             border=shadecol, col=shadecol)
     # overwrite graphical parameters
     lty[shind] <- 1
-    # convert colours to hexadecimal and edit relevant values
-    rgb2hex <- function(x) { rgb(x[1], x[2], x[3], maxColorValue=255) }
-    col <- apply(col2rgb(col), 2, rgb2hex)
-    col[shind] <- rgb2hex(col2rgb(shadecol))
+    # try to preserve the same type of colour specification
+    if(is.character(col) && is.character(shadecol)) {
+      # character representations 
+      col[shind] <- shadecol
+    } else if(is.numeric(col) && !is.na(sc <- paletteindex(shadecol))) {
+      # indices in colour palette
+      col[shind] <- sc
+    } else {
+      # convert colours to hexadecimal and edit relevant values
+      col <- col2hex(col)
+      col[shind] <- col2hex(shadecol)
+    }
     # remove these columns from further plotting
     allind <- allind[-shind]
     # 
@@ -235,12 +244,21 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         ylab <- deparse(ylab)
       desc <- sprintf(desc, ylab)
     }
-    if(!is.null(legend) && legend)
-      legend(legendpos, inset=0.05, lty=lty, col=col, legend=key)
+    if(!is.null(legend) && legend) {
+      # do legend
+      legtxt <- key
+      if(legendmath) {
+        legtxt <- labl
+        # try to convert to expressions
+        fancy <- try(parse(text=labl))
+        if(!inherits(fancy, "try-error"))
+          legtxt <- fancy
+      }
+      legend(legendpos, inset=0.05, lty=lty, col=col, legend=legtxt)
+    }
     df <- data.frame(lty=lty, col=col, key=key, label=labl,
                       meaning=desc, row.names=key)
     return(df)
   }
 }
-
 
