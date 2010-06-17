@@ -180,7 +180,7 @@ miplot(longleaf, main="Morishita Index plot", pch=16, col="blue")
 
 plot(swedishpines, main="Swedish Pines data")
 K <- Kest(swedishpines)
-plot(K, main="K function for Swedish Pines")
+plot(K, main="K function for Swedish Pines", legendmath=TRUE)
 
 en <- envelope(swedishpines, fun=Kest, nsim=10, correction="translate")
 plot(en, main="Envelopes of K function based on CSR", shade=c("hi", "lo"))
@@ -197,7 +197,8 @@ arrows(swedishpines$x, swedishpines$y, b$x, b$y,
 plot(swedishpines %mark% (nndist(swedishpines)/2), markscale=1, main="Stienen diagram")
 
 plot(Gest(swedishpines),
-     main=c("Nearest neighbour distance function G", "Gest(swedishpines)"))
+     main=c("Nearest neighbour distance function G", "Gest(swedishpines)"),
+     legendmath=TRUE)
 
 Z <- distmap(swedishpines, dimyx=512)
 plot(swedishpines$window, main="Distance map")
@@ -205,7 +206,8 @@ plot(Z, add=TRUE)
 points(swedishpines)
 
 plot(Fest(swedishpines),
-     main=c("Empty space function F", "Fest(swedishpines)"))
+     main=c("Empty space function F", "Fest(swedishpines)"),
+     legendmath=TRUE)
 
 W <- rebound.owin(letterR, square(5))
 plot(distmap(W), main="Distance map")
@@ -233,7 +235,7 @@ plot(alltypes(bramblecanes, "K"), mar.panel=c(4,4,2,2)+0.1)
 
 data(amacrine)
 amacrine <- rescale(amacrine, 1/662)
-plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), shade=c("hi", "lo"))
+plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), . - r ~ r, ylim=c(-25, 5))
 
 data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")

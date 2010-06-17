@@ -100,6 +100,7 @@
 \alias{FormatFaspFormulae}
 \alias{formula.ppm}
 \alias{formula.kppm}
+\alias{fvlabel}
 \alias{fvnames}
 \alias{fvnames<-}
 \alias{g3engine}
@@ -489,6 +490,7 @@ fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
+fvlabel(x, id)
 fvnames(X, a)
 fvnames(X, a) <- value
 g3engine(x, y, z, box, rmax, nrval, correction)

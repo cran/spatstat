@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.16 $	$Date: 2009/10/13 02:16:29 $
+#	$Revision: 1.17 $	$Date: 2010/06/14 09:23:31 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -73,6 +73,7 @@ function(Q,
                        ...)
   
   fitMPL$call <- cl
+  fitMPL$callstring <- callstring
   fitMPL$callframe <- parent.frame()
 
   if(method == "mpl" || is.poisson.ppm(fitMPL))

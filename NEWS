@@ -1,3 +1,53 @@
+	CHANGES IN spatstat VERSION 1.19-3
+
+ACKNOWLEDGEMENTS
+
+    o   We thank David Dereudre for contributions.    
+
+OVERVIEW
+
+    o   Urgent bug fix to Metropolis-Hastings for Lennard-Jones model.
+
+    o   Miscellaneous additions to plotting and colour management.
+
+NEW FUNCTIONS
+
+    o   col2hex, rgb2hex, paletteindex, samecolour
+    	Functions for converting and comparing colours.
+
+    o   plot.envelope
+	New method for plotting envelopes.
+	By default the area between the upper and lower envelopes
+	is shaded in grey.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o	plot.fasp
+	If the entries in the array are envelopes,
+	they are plotted using plot.envelope
+	(hence the envelope region is shaded grey).
+
+    o   plot.fv
+        Now displays mathematical notation for each curve,
+	if legendmath=TRUE.
+
+    o   print.fv
+	Now prints the available range of 'r' values
+	as well as the recommended range of 'r' values.
+
+BUGS
+
+    o   rmh
+        Simulation of Lennard-Jones model was incorrect;
+	the simulations were effectively Poisson patterns.
+	(Spotted by David Dereudre.)
+	Fixed.
+
+    o   plot.fv
+	Did not correctly handle formulas that included I( )
+	Fixed.
+
+   
 	CHANGES IN spatstat VERSION 1.19-2
 
 ACKNOWLEDGEMENTS

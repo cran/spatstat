@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.8 $  $Date: 2010/06/09 04:46:53 $
+#   $Revision: 2.9 $  $Date: 2010/06/15 04:42:03 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -748,6 +748,27 @@ envelopeEngine <-
   return(result)
 }
 
+
+plot.envelope <- function(x, ..., shade=c("hi", "lo")) {
+  xname <- deparse(substitute(x))
+  argh <- list(...)
+  if(missing(shade) &&
+     length(argh) > 0 &&
+     any(isfo <- unlist(lapply(argh, inherits, what="formula")))) {
+    # the plot is specified by a formula;
+    # check whether columns 'hi' and 'lo' are used
+    fmla <- argh[[min(which(isfo))]]
+    vars <- variablesinformula(fmla)
+    hilo <- c("hi", "lo")
+    dotnames <- fvnames(x, ".")
+    present <- (all(hilo %in% vars) ||
+                (all(hilo %in% dotnames) && ("." %in% vars)))
+    if(!present)
+      shade <- NULL
+  }
+  do.call("plot.fv", resolve.defaults(list(x), list(...),
+                                      list(main=xname, shade=shade)))
+}
 
 print.envelope <- function(x, ...) {
   e <- attr(x, "einfo")

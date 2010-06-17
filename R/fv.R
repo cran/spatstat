@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.56 $   $Date: 2010/06/09 03:36:24 $
+#    $Revision: 1.58 $   $Date: 2010/06/16 03:58:41 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -141,7 +141,8 @@ print.fv <- function(x, ...) {
   if(!is.null(ylab <- a$ylab)) {
     if(is.language(ylab))
       ylab <- deparse(ylab)
-    cat(paste("for the function", a$argu, "->", ylab, "\n"))
+    xlab <- fvlabel(x, a$argu)
+    cat(paste("for the function", xlab, "->", ylab, "\n"))
   }
   # Descriptions ..
   desc <- a$desc
@@ -170,8 +171,11 @@ print.fv <- function(x, ...) {
   cat("Default plot formula:\n\t")
   print.formula(as.formula(a$fmla))
   alim <- signif(a$alim, 5)
+  rang <- signif(range(with(x, .x)), 5)
   cat(paste("\nRecommended range of argument ", a$argu,
-            ": [", alim[1], ", ", alim[2], "]\n", sep=""))
+            ": ", prange(alim), sep=""))
+  cat(paste("\n  Available range of argument ", a$argu,
+            ": ", prange(rang), "\n", sep=""))
   ledge <- summary(unitname(x))$legend
   if(!is.null(ledge))
     cat(paste(ledge, "\n"))
@@ -262,6 +266,12 @@ fvnames <- function(X, a=".") {
            attr(X, "dotnames") <- value
          })
   return(X)
+}
+
+fvlabel <- function(x, id) {
+  lab <- attr(x, "labl")
+  names(lab) <- names(x)
+  lab[[id]]
 }
 
 bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
