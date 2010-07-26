@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.10 $	$Date: 2008/04/08 10:07:11 $
+#    $Revision: 2.13 $	$Date: 2010/07/18 08:46:28 $
 #
 #    The Strauss/hard core process
 #
@@ -67,7 +67,25 @@ StraussHard <- function(r, hc) {
            else
              return(r)
          },
-       version=versionstring.spatstat()
+       version=versionstring.spatstat(),
+       # fast evaluation is available for the border correction only
+       can.do.fast=function(X,correction,par) {
+         return(all(correction %in% c("border", "none")))
+       },
+       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
+         # fast evaluator for StraussHard interaction
+         if(!all(correction %in% c("border", "none")))
+           return(NULL)
+         if(spatstat.options("fasteval") == "test")
+           message("Using fast eval for StraussHard")
+         r <- potpars$r
+         hc <- potpars$hc
+         hclose <- strausscounts(U, X, hc, EqualPairs)
+         rclose <- strausscounts(U, X, r,  EqualPairs)
+         answer <- ifelse(hclose == 0, rclose, -Inf)
+         return(matrix(answer, ncol=1))
+       }
+       
   )
   class(out) <- "interact"
   (out$init)(out)

@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.9 $  $Date: 2010/05/19 10:03:28 $
+#  $Revision: 1.10 $  $Date: 2010/06/28 04:32:41 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -53,7 +53,12 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
       else if(rbord < re)
         rbord <- re
     }
-  } 
+  }
+  # determine whether computations can be saved
+  fit0 <- ppm(..., rbord=rbord)
+  savecomp <- !oversize.quad(quad.ppm(fit0))
+  
+  # fit one model and extract quadscheme
   if(verbose) message(paste("fitting", n, "models..."))
   for(i in 1:n) {
     if(verbose)
@@ -64,7 +69,7 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
     # fit model
     if(i == 1) {
       # fit from scratch
-      fiti <- ppm(interaction=fi, ..., rbord=rbord, savecomputed=TRUE)
+      fiti <- ppm(interaction=fi, ..., rbord=rbord, savecomputed=savecomp)
       # save intermediate computations (pairwise distances, etc)
       precomp <- fiti$internal$computed
     } else {

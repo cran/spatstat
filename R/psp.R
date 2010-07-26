@@ -200,9 +200,9 @@ append.psp <- function(A,B) {
   return(result)
 }
 
-rebound.psp <- function(x, ...) {
+rebound.psp <- function(x, rect) {
   verifyclass(x, "psp")
-  x$window <- rebound.owin(x$window, ...)
+  x$window <- rebound.owin(x$window, rect)
   return(x)
 }
 

@@ -20,7 +20,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct Diggra {
   double beta;
   double kappa;
   double delta;
@@ -35,37 +35,45 @@ struct {
 
 /* initialiser function */
 
-void diggrainit(state, model, algo)
+Cdata *diggrainit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
+  Diggra *diggra;
+  diggra = (Diggra *) R_alloc(1, sizeof(Diggra));
+
   /* Interpret model parameters*/
-  Diggra.beta   = model.par[0];
-  Diggra.kappa  = model.par[1];
-  Diggra.delta  = model.par[2];
-  Diggra.rho    = model.par[3];
-  Diggra.period = model.period;
+  diggra->beta   = model.par[0];
+  diggra->kappa  = model.par[1];
+  diggra->delta  = model.par[2];
+  diggra->rho    = model.par[3];
+  diggra->period = model.period;
   /* constants */
-  Diggra.delta2 = pow(Diggra.delta, 2);
-  Diggra.rho2 = pow(Diggra.rho, 2);
-  Diggra.fac = 1/(Diggra.rho - Diggra.delta);
+  diggra->delta2 = pow(diggra->delta, 2);
+  diggra->rho2 = pow(diggra->rho, 2);
+  diggra->fac = 1/(diggra->rho - diggra->delta);
   /* periodic boundary conditions? */
-  Diggra.per    = (model.period[0] > 0.0);
+  diggra->per    = (model.period[0] > 0.0);
+  return((Cdata *) diggra);
 }
 
 /* conditional intensity evaluator */
 
-double diggracif(prop, state)
+double diggracif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
   double d2, pairprod, cifval;
+  Diggra *diggra;
 
-  period = Diggra.period;
+  diggra = (Diggra *) cdata;
+
+  period = diggra->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -74,7 +82,7 @@ double diggracif(prop, state)
   y  = state.y;
   npts = state.npts;
 
-  cifval = Diggra.beta;
+  cifval = diggra->beta;
 
   if(npts == 0) 
     return(cifval);
@@ -83,26 +91,26 @@ double diggracif(prop, state)
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(Diggra.per) { /* periodic distance */
+  if(diggra->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],Diggra.period);
-	if(d2 < Diggra.delta2) {
+	d2 = dist2(u,v,x[j],y[j],diggra->period);
+	if(d2 < diggra->delta2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Diggra.rho2) {
-	  pairprod *= Diggra.fac * (sqrt(d2)-Diggra.delta);
+	} else if(d2 < diggra->rho2) {
+	  pairprod *= diggra->fac * (sqrt(d2)-diggra->delta);
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Diggra.period);
-	if(d2 < Diggra.delta2) {
+	d2 = dist2(u,v,x[j],y[j],diggra->period);
+	if(d2 < diggra->delta2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Diggra.rho2) {
-	  pairprod *= Diggra.fac * (sqrt(d2)-Diggra.delta);
+	} else if(d2 < diggra->rho2) {
+	  pairprod *= diggra->fac * (sqrt(d2)-diggra->delta);
 	}
       }
     }
@@ -111,28 +119,28 @@ double diggracif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < Diggra.delta2) {
+	if(d2 < diggra->delta2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Diggra.rho2) {
-	  pairprod *= Diggra.fac * (sqrt(d2)-Diggra.delta);
+	} else if(d2 < diggra->rho2) {
+	  pairprod *= diggra->fac * (sqrt(d2)-diggra->delta);
 	}
       }
     }  
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < Diggra.delta2) {
+	if(d2 < diggra->delta2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Diggra.rho2) {
-	  pairprod *= Diggra.fac * (sqrt(d2)-Diggra.delta);
+	} else if(d2 < diggra->rho2) {
+	  pairprod *= diggra->fac * (sqrt(d2)-diggra->delta);
 	}
       }
     }
   }
 
-  cifval *= pow(pairprod, Diggra.kappa);
+  cifval *= pow(pairprod, diggra->kappa);
   return cifval;
 }
 

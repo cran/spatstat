@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.44 $   $Date: 2010/06/08 05:35:12 $
+#  $Revision: 1.45 $   $Date: 2010/07/16 04:24:49 $
 #
 #  Plotting code for pixel images
 #
@@ -106,7 +106,7 @@ plot.im <- function(x, ...,
              col <- colmap(c(FALSE,TRUE))
          },
          factor  = {
-           lev <- x$lev
+           lev <- levels(x)
            nvalues <- length(lev)
            trivial <- (nvalues < 2)
            # ensure all factor levels plotted separately

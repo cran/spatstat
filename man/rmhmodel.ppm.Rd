@@ -108,15 +108,19 @@
   \code{\link{ppm}},
   \code{\link{AreaInter}},
   \code{\link{BadGey}},
+  \code{\link{DiggleGatesStibbard}},
+  \code{\link{DiggleGratton}},
+  \code{\link{Fiksel}},
   \code{\link{Geyer}},
   \code{\link{Hardcore}},
-  \code{\link{Strauss}},
-  \code{\link{Softcore}},
-  \code{\link{StraussHard}},
+  \code{\link{LennardJones}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},
-  \code{\link{DiggleGratton}},
-  \code{\link{PairPiece}}
+  \code{\link{PairPiece}},
+  \code{\link{Poisson}},
+  \code{\link{Softcore}},
+  \code{\link{Strauss}},
+  \code{\link{StraussHard}}
 }
 \examples{
   data(cells)

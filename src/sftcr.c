@@ -9,7 +9,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct Softcore {
   double beta;
   double sigma;
   double kappa;
@@ -22,36 +22,44 @@ struct {
 
 /* initialiser function */
 
-void sftcrinit(state, model, algo)
+Cdata *sftcrinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
+  Softcore *softcore;
+  softcore = (Softcore *) R_alloc(1, sizeof(Softcore));
+
   /* Interpret model parameters*/
-  Softcore.beta   = model.par[0];
-  Softcore.sigma  = model.par[1];
-  Softcore.kappa  = model.par[2];
-  Softcore.period = model.period;
+  softcore->beta   = model.par[0];
+  softcore->sigma  = model.par[1];
+  softcore->kappa  = model.par[2];
+  softcore->period = model.period;
   /* constants */
-  Softcore.nook = -1/Softcore.kappa;
-  Softcore.stok = pow(Softcore.sigma, 2/Softcore.kappa);
+  softcore->nook = -1/softcore->kappa;
+  softcore->stok = pow(softcore->sigma, 2/softcore->kappa);
   /* periodic boundary conditions? */
-  Softcore.per    = (model.period[0] > 0.0);
+  softcore->per    = (model.period[0] > 0.0);
+  return((Cdata *) softcore);
 }
 
 /* conditional intensity evaluator */
 
-double sftcrcif(prop, state)
+double sftcrcif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
   double d2, pairsum, cifval, nook, stok;
+  Softcore *softcore;
 
-  nook = Softcore.nook;
-  stok = Softcore.stok;
+  softcore = (Softcore *) cdata;
+
+  nook = softcore->nook;
+  stok = softcore->stok;
 
   u  = prop.u;
   v  = prop.v;
@@ -60,7 +68,7 @@ double sftcrcif(prop, state)
   y  = state.y;
   npts = state.npts;
 
-  cifval = Softcore.beta;
+  cifval = softcore->beta;
 
   if(npts == 0) 
     return(cifval);
@@ -69,16 +77,16 @@ double sftcrcif(prop, state)
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(Softcore.per) { /* periodic distance */
+  if(softcore->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],Softcore.period);
+	d2 = dist2(u,v,x[j],y[j],softcore->period);
 	pairsum += pow(d2, nook);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Softcore.period);
+	d2 = dist2(u,v,x[j],y[j],softcore->period);
 	pairsum += pow(d2, nook);
       }
     }

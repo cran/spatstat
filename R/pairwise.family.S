@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.25 $	$Date: 2010/05/19 05:22:38 $
+#    $Revision: 1.28 $	$Date: 2010/07/20 09:24:55 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -24,7 +24,14 @@ pairwise.family <-
          if(is.null(inter) || is.null(inter$family)
             || inter$family$name != "pairwise")
            stop("Tried to plot the wrong kind of interaction")
-         coeff <- fint$coefs[fint$Vnames]
+         # get fitted coefficients of interaction terms
+         # and set coefficients of offset terms to 1
+         Vnames <- fint$Vnames
+         IsOffset <- fint$IsOffset
+         coeff <- rep(1, length(Vnames))
+         names(coeff) <- Vnames
+         coeff[!IsOffset] <- fint$coefs[Vnames[!IsOffset]]
+         # 
          pairpot <- inter$pot
          potpars <- inter$par
          rmax <- reach(fint, epsilon=1e-6)
@@ -118,7 +125,7 @@ pairwise.family <-
        },
        # end of function `plot'
        # ----------------------------------------------------
-       eval  = function(X,U,Equal,pairpot,potpars,correction,
+       eval  = function(X,U,EqualPairs,pairpot,potpars,correction,
            ..., precomputed=NULL, savecomputed=FALSE) {
   #
   # This is the eval function for the `pairwise' family.
@@ -141,9 +148,8 @@ pairwise.family <-
   #       
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
-  #   Equal        logical matrix X[i] == U[j]             matrix or NULL
-  #                      (NB: equality only if marks are equal too)
-  #                      NULL means all comparisons are FALSE
+  #   EqualPairs  two-column matrix of indices i, j such that X[i] == U[j]
+  #               (or NULL, meaning all comparisons are FALSE)
   #   pot         potential function 
   #   potpars     auxiliary parameters for pot            list(......)
   #   correction  edge correction type                    (string)
@@ -194,7 +200,7 @@ if(!is.null(precomputed)) {
   # precomputed
   X <- precomputed$X
   U <- precomputed$U
-  Equal <- precomputed$E
+  EqualPairs <- precomputed$E
   M <- precomputed$M
 } else {
   U <- as.ppp(U, X$window)   # i.e. X$window is DEFAULT window
@@ -253,8 +259,11 @@ if(correction == "translate") {
 }
 
 # No pair potential term between a point and itself
-if(!is.null(Equal) && any(Equal))
-  POT[Equal] <- 0
+if(!is.null(EqualPairs)) {
+  nplanes <- dim(POT)[3]
+  for(k in 1:nplanes)
+    POT[cbind(EqualPairs, k)] <- 0
+}
 
 # Sum the pairwise potentials 
 
@@ -268,7 +277,7 @@ attr(V, "IsOffset") <- IsOffset
 
 # pass computed information out the back door
 if(savecomputed)
-  attr(V, "computed") <- list(E=Equal, M=M)
+  attr(V, "computed") <- list(E=EqualPairs, M=M)
 return(V)
 
 },

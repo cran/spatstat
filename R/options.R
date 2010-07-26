@@ -127,6 +127,11 @@ reset.spatstat.options <- function() {
            is.numeric(x) && length(x) == 1 && x > 1
          },
          valid="a single numeric value, greater than 1"
+       ),
+       fasteval=list(
+         default="on",
+         check=function(x) { x %in% c("off", "on", "test") },
+         valid="one of the strings \'off\', \'on\' or \'test\'"
        )
        )
 

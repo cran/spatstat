@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.11 $	$Date: 2007/03/16 08:26:12 $
+#    $Revision: 1.12 $	$Date: 2010/07/10 10:22:09 $
 #
 #    The Ord model (family of point process models)
 #
@@ -18,7 +18,7 @@ ord.family <-
          print = function(self) {
                       cat("Ord model family\n")
          },
-         eval  = function(X, U, Equal, pot, pars, ...) {
+         eval  = function(X, U, EqualPairs, pot, pars, ...) {
   #
   # This auxiliary function is not meant to be called by the user.
   # It computes the distances between points,
@@ -27,7 +27,8 @@ ord.family <-
   # Arguments:
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
-  #   Equal       logical matrix X[i] == U[j]             matrix or NULL
+  #   EqualPairs  two-column matrix of indices i, j such that X[i] == U[j]
+  #               (or NULL, meaning all comparisons are FALSE)
   #   pot         potential function                      function(d, p)
   #   pars        auxiliary parameters for pot            list(......)
   #   ...         IGNORED                             
@@ -48,9 +49,8 @@ ord.family <-
 nall <- length(U$x)       # number of data + dummy points
 
 # determine which points in the combined list are data points
-if(!is.null(Equal))           
-  #is.data <- apply(Equal, 2, any)
-  is.data <- matcolany(Equal)
+if(!is.null(EqualPairs))           
+  is.data <- seq(nall) %in% EqualPairs[,2] 
 else
   is.data <- rep(FALSE, nall)
 

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.43 $	$Date: 2010/05/29 03:41:14 $
+#	$Revision: 2.44 $	$Date: 2010/07/16 05:19:06 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -311,7 +311,7 @@ model.images <- function(object, W=as.owin(object), ...) {
                    function(nama, Z, mm) {
                      values <- mm[, nama]
                      im(values, xcol=Z$xcol, yrow=Z$yrow,
-                       lev=Z$lev, unitname=unitname(Z))
+                        unitname=unitname(Z))
                    },
                    Z=Z, mm=mm)
   result <- as.listof(result)

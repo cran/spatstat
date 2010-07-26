@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.30 $	$Date: 2009/10/07 02:37:27 $
+#    $Revision: 1.32 $	$Date: 2010/07/14 00:58:13 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -21,8 +21,9 @@ pairsat.family <-
          print = function(self) {
                       cat("Saturated pairwise interaction family\n")
          },
-         eval  = function(X,U,Equal,pairpot,potpars,correction,
-                          ..., halfway=FALSE) {
+         eval  = function(X,U,EqualPairs,pairpot,potpars,correction,
+                          ..., precomputed=NULL, savecomputed=FALSE,
+                               halfway=FALSE) {
   #
   # This is the eval function for the `pairsat' family.
   # 
@@ -45,9 +46,8 @@ pairsat.family <-
   #       
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
-  #   Equal        logical matrix X[i] == U[j]             matrix or NULL
-  #                      (NB: equality only if marks are equal too)
-  #                      NULL means all comparisons are FALSE
+  #   EqualPairs  two-column matrix of indices i, j such that X[i] == U[j]
+  #               (or NULL, meaning all comparisons are FALSE)
   #   pot         potential function 
   #   potpars     auxiliary parameters for pot            list(......)
   #   correction  edge correction type                    (string)
@@ -82,26 +82,36 @@ saturate <- potpars$sat
 
 if(is.null(saturate)) {
   # pairwise interaction 
-  V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction, ...)
+  V <- pairwise.family$eval(X, U, EqualPairs,
+                            pairpot, potpars, correction, ...,
+                            precomputed=precomputed,
+                            savecomputed=savecomputed)
   return(V)
 }
 
-# first check that all data points are included in the quadrature points
-missingdata <- !as.vector(matrowany(Equal))
+# first ensure all data points are included in the quadrature points
+Xindex  <- seq(npoints(X))
+if(is.null(EqualPairs)) {
+  # no data points included 
+  missingdata <- Xindex
+} else {
+  Xused <- EqualPairs[,1]
+  missingdata <- !(Xindex %in% Xused)
+}
 somemissing <- any(missingdata)
 if(somemissing) {
   # add the missing data points
   U <- superimpose(U, X[missingdata], W=X$window)
-  # extend the equality matrix to maintain Equal[i,j] = (X[i] == U[j])
-  originalcolumns <- seq(ncol(Equal))
-  sn <- seq(X$n)
-  id <- outer(sn, sn[missingdata], "==")
-  Equal <- cbind(Equal, id)
+  # augment the list of equal pairs
+  n <- ncol(EqualPairs)
+  originalcolumns <- 1:n
+  Xneeded <- Xindex[missingdata]
+  EqualPairs <- rbind(EqualPairs, cbind(Xneeded, n + 1:length(Xneeded)))
 }
 
 # compute the pair potentials POT and the unsaturated potential sums V
 
-V <- pairwise.family$eval(X, U, Equal, pairpot, potpars, correction, ...)
+V <- pairwise.family$eval(X, U, EqualPairs, pairpot, potpars, correction, ...)
 POT <- attr(V, "POT")
 
 computed <- attr(V, "computed")   # could be NULL
@@ -139,8 +149,7 @@ if(halfway)
 # on the UNSATURATED potential sum of each data point i
 #
 # Identify data points
-     # is.data <- apply(Equal, 2, any)
-is.data <- as.vector(matcolany(Equal))  # logical vector corresp. to rows of V
+is.data <- seq(npoints(U)) %in% EqualPairs[,2] # logical vector corresp. to rows of V
 
 # Extract potential sums for data points only
 V.data <- V[is.data, , drop=FALSE]
@@ -180,7 +189,8 @@ if(somemissing)
       V <- V[originalcolumns, , drop=FALSE]
 
 ### tack on the saved computations from pairwise.family$eval
-attr(V, "computed") <- computed
+if(savecomputed)
+  attr(V, "computed") <- computed
 
 return(V)
 

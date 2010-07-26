@@ -7,7 +7,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct Hardcore {
   double beta;
   double h;   /* hard core distance */
   double h2;
@@ -18,33 +18,42 @@ struct {
 
 /* initialiser function */
 
-void hardcoreinit(state, model, algo)
+Cdata *hardcoreinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
+  Hardcore *hardcore;
+  hardcore = (Hardcore *) R_alloc(1, sizeof(Hardcore));
+
   /* Interpret model parameters*/
-  Hardcore.beta   = model.par[0];
-  Hardcore.h      = model.par[1];
-  Hardcore.h2     = pow(Hardcore.h, 2); 
-  Hardcore.period = model.period;
+  hardcore->beta   = model.par[0];
+  hardcore->h      = model.par[1];
+  hardcore->h2     = pow(hardcore->h, 2); 
+  hardcore->period = model.period;
   /* periodic boundary conditions? */
-  Hardcore.per    = (model.period[0] > 0.0);
+  hardcore->per    = (model.period[0] > 0.0);
+
+  return((Cdata *) hardcore);
 }
 
 /* conditional intensity evaluator */
 
-double hardcorecif(prop, state)
+double hardcorecif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, kount, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
   double d2, h2, a, cifval;
+  Hardcore *hardcore;
 
-  period = Hardcore.period;
-  h2     = Hardcore.h2;
+  hardcore = (Hardcore *) cdata;
+
+  period = hardcore->period;
+  h2     = hardcore->h2;
 
   u  = prop.u;
   v  = prop.v;
@@ -55,21 +64,21 @@ double hardcorecif(prop, state)
   npts = state.npts;
 
   if(npts == 0) 
-    return(Hardcore.beta);
+    return(hardcore->beta);
 
   kount = 0;
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(Hardcore.per) { /* periodic distance */
+  if(hardcore->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],Hardcore.period);
+	d2 = dist2(u,v,x[j],y[j],hardcore->period);
 	if(d2 < h2) return(0.0);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Hardcore.period);
+	d2 = dist2(u,v,x[j],y[j],hardcore->period);
 	if(d2 < h2) return(0.0);
       }
     }
@@ -97,7 +106,7 @@ double hardcorecif(prop, state)
     }
   }
 
-  cifval = Hardcore.beta;
+  cifval = hardcore->beta;
   
   return cifval;
 }

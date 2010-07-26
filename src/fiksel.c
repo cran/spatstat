@@ -18,7 +18,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct Fiksel {
   double beta;
   double r;
   double h;
@@ -33,37 +33,46 @@ struct {
 
 /* initialiser function */
 
-void fikselinit(state, model, algo)
+Cdata *fikselinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
+  Fiksel *fiksel;
+  fiksel = (Fiksel *) R_alloc(1, sizeof(Fiksel));
+
   /* Interpret model parameters*/
-  Fiksel.beta   = model.par[0];
-  Fiksel.r      = model.par[1];
-  Fiksel.h      = model.par[2];
-  Fiksel.kappa  = model.par[3];
-  Fiksel.a      = model.par[4];
-  Fiksel.period = model.period;
+  fiksel->beta   = model.par[0];
+  fiksel->r      = model.par[1];
+  fiksel->h      = model.par[2];
+  fiksel->kappa  = model.par[3];
+  fiksel->a      = model.par[4];
+  fiksel->period = model.period;
   /* constants */
-  Fiksel.h2 = pow(Fiksel.h, 2);
-  Fiksel.r2 = pow(Fiksel.r, 2);
+  fiksel->h2 = pow(fiksel->h, 2);
+  fiksel->r2 = pow(fiksel->r, 2);
   /* periodic boundary conditions? */
-  Fiksel.per    = (model.period[0] > 0.0);
+  fiksel->per    = (model.period[0] > 0.0);
+
+  return((Cdata *) fiksel);
 }
 
 /* conditional intensity evaluator */
 
-double fikselcif(prop, state)
+double fikselcif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
   double d2, pairpotsum, cifval;
+  Fiksel *fiksel;
 
-  period = Fiksel.period;
+  fiksel = (Fiksel *) cdata;
+
+  period = fiksel->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -81,26 +90,26 @@ double fikselcif(prop, state)
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(Fiksel.per) { /* periodic distance */
+  if(fiksel->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],Fiksel.period);
-	if(d2 < Fiksel.h2) {
+	d2 = dist2(u,v,x[j],y[j],fiksel->period);
+	if(d2 < fiksel->h2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Fiksel.r2) {
-	  pairpotsum += exp(-Fiksel.kappa * sqrt(d2));
+	} else if(d2 < fiksel->r2) {
+	  pairpotsum += exp(-fiksel->kappa * sqrt(d2));
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Fiksel.period);
-	if(d2 < Fiksel.h2) {
+	d2 = dist2(u,v,x[j],y[j],fiksel->period);
+	if(d2 < fiksel->h2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Fiksel.r2) {
-	  pairpotsum += exp(-Fiksel.kappa * sqrt(d2));
+	} else if(d2 < fiksel->r2) {
+	  pairpotsum += exp(-fiksel->kappa * sqrt(d2));
 	}
       }
     }
@@ -109,28 +118,28 @@ double fikselcif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < Fiksel.h2) {
+	if(d2 < fiksel->h2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Fiksel.r2) {
-	  pairpotsum += exp(-Fiksel.kappa * sqrt(d2));
+	} else if(d2 < fiksel->r2) {
+	  pairpotsum += exp(-fiksel->kappa * sqrt(d2));
 	}
       }
     }  
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < Fiksel.h2) {
+	if(d2 < fiksel->h2) {
 	  cifval = 0;
 	  return(cifval);
-	} else if(d2 < Fiksel.r2) {
-	  pairpotsum += exp(-Fiksel.kappa * sqrt(d2));
+	} else if(d2 < fiksel->r2) {
+	  pairpotsum += exp(-fiksel->kappa * sqrt(d2));
 	}
       }
     }
   }
 
-  cifval = Fiksel.beta * exp(Fiksel.a * pairpotsum);
+  cifval = fiksel->beta * exp(fiksel->a * pairpotsum);
   return cifval;
 }
 

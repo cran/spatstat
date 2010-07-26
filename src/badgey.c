@@ -20,7 +20,7 @@ void fexitc(const char *msg);
       ...
 */
 
-struct {
+typedef struct BadGey {
   /* model parameters */
   double beta;
   int ndisc;
@@ -40,67 +40,73 @@ struct {
   double *w;  /* vector[ndisc] : sum of changes in counts at other points */
 } BadGey;
 
-void badgeyinit(state, model, algo)
+Cdata *badgeyinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
   int i, j, k, i0, ndisc, nmatrix;
   double r, s, g, d2;
+  BadGey *badgey;
 
-  BadGey.beta   = model.par[0];
-  BadGey.ndisc  = ndisc = model.par[1];
+  /* create storage */
+  badgey = (BadGey *) R_alloc(1, sizeof(BadGey));
+
+  badgey->beta   = model.par[0];
+  badgey->ndisc  = ndisc = model.par[1];
   /* Allocate space for parameter vectors */
-  BadGey.gamma    = (double *) R_alloc((size_t) ndisc, sizeof(double));
-  BadGey.r        = (double *) R_alloc((size_t) ndisc, sizeof(double));
-  BadGey.s        = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->gamma    = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->r        = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->s        = (double *) R_alloc((size_t) ndisc, sizeof(double));
   /* Derived values */
-  BadGey.r2       = (double *) R_alloc((size_t) ndisc, sizeof(double));
-  BadGey.loggamma = (double *) R_alloc((size_t) ndisc, sizeof(double));
-  BadGey.hard     = (int *) R_alloc((size_t) ndisc, sizeof(int));
+  badgey->r2       = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->loggamma = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->hard     = (int *) R_alloc((size_t) ndisc, sizeof(int));
   /* copy and transform parameters */
   for(i=0; i < ndisc; i++) {
     i0 = 3*i + 2;
-    g = BadGey.gamma[i] = model.par[i0];
-    r = BadGey.r[i] =     model.par[i0 + 1];
-    s = BadGey.s[i] =     model.par[i0 + 2];
-    BadGey.r2[i] = r * r;
-    BadGey.hard[i] = (g < DOUBLE_EPS);
-    BadGey.loggamma[i] = (g < DOUBLE_EPS) ? 0 : log(g);
+    g = badgey->gamma[i] = model.par[i0];
+    r = badgey->r[i] =     model.par[i0 + 1];
+    s = badgey->s[i] =     model.par[i0 + 2];
+    badgey->r2[i] = r * r;
+    badgey->hard[i] = (g < DOUBLE_EPS);
+    badgey->loggamma[i] = (g < DOUBLE_EPS) ? 0 : log(g);
   }
   /* periodic boundary conditions? */
-  BadGey.period = model.period;
-  BadGey.per    = (model.period[0] > 0.0);
+  badgey->period = model.period;
+  badgey->per    = (model.period[0] > 0.0);
   /* Allocate scratch space */
-  BadGey.tee      = (int *) R_alloc((size_t) ndisc, sizeof(int));
-  BadGey.w        = (double *) R_alloc((size_t) ndisc, sizeof(double));
+  badgey->tee      = (int *) R_alloc((size_t) ndisc, sizeof(int));
+  badgey->w        = (double *) R_alloc((size_t) ndisc, sizeof(double));
   /* Allocate space for auxiliary counts */
   nmatrix = ndisc * state.npmax;
-  BadGey.aux      = (int *) R_alloc((size_t) nmatrix, sizeof(int));
+  badgey->aux      = (int *) R_alloc((size_t) nmatrix, sizeof(int));
   /* Initialise auxiliary counts */
   for(i = 0; i < nmatrix; i++)
-    BadGey.aux[i] = 0;
+    badgey->aux[i] = 0;
   for(i = 0; i < state.npts; i++) {
     for(j = 0; j < state.npts; j++) {
       if(j == i) continue;
       d2 = dist2either(state.x[i], state.y[i], state.x[j], state.y[j], 
-		       BadGey.period);
+		       badgey->period);
       for(k = 0; k < ndisc; k++) {
-	if(d2 < BadGey.r2[k])
-	  MAT(BadGey.aux, k, i, ndisc) += 1;
+	if(d2 < badgey->r2[k])
+	  MAT(badgey->aux, k, i, ndisc) += 1;
       }
     }
   }
 #ifdef DEBUG
   Rprintf("Finished initialiser; ndisc=%d\n", ndisc);
 #endif
+  return((Cdata *) badgey);
 }
 
 #define AUX(I,J) MAT(aux, I, J, ndisc)
 
-double badgeycif(prop, state)
+double badgeycif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int ix, j, k, npts, ndisc, tk;
   double u, v, d2;
@@ -108,13 +114,16 @@ double badgeycif(prop, state)
   double *x, *y;
   int *tee, *aux;
   double *w;
+  BadGey *badgey;
+
+  badgey = (BadGey *) cdata;
 
 #ifdef DEBUG
   Rprintf("Entering badgeycif\n");
 #endif
 
   npts = state.npts;
-  cifval = BadGey.beta;
+  cifval = badgey->beta;
   if(npts==0) return cifval;
 
   x = state.x;
@@ -123,10 +132,10 @@ double badgeycif(prop, state)
   v = prop.v;
   ix = prop.ix;
 
-  ndisc = BadGey.ndisc;
-  tee   = BadGey.tee;
-  aux   = BadGey.aux;
-  w     = BadGey.w;
+  ndisc = badgey->ndisc;
+  tee   = badgey->tee;
+  aux   = badgey->aux;
+  w     = badgey->w;
 
   /* 
      For disc k, 
@@ -139,14 +148,14 @@ double badgeycif(prop, state)
       tee[k] = 0;
       w[k] = 0.0;
     }
-    if(BadGey.per) {
+    if(badgey->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],BadGey.period);
+	d2 = dist2(u,v,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 	    tee[k]++;
-	    f = BadGey.s[k] - AUX(k,j);
+	    f = badgey->s[k] - AUX(k,j);
 	    if(f > 1) /* j is not saturated after addition of (u,v) */
 	      w[k] += 1; /* addition of (u,v) increases count by 1 */
 	    else if(f > 0) /* j becomes saturated by addition of (u,v) */
@@ -159,9 +168,9 @@ double badgeycif(prop, state)
       for(j=0; j<npts; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 	    tee[k]++;
-	    f = BadGey.s[k] - AUX(k,j);
+	    f = badgey->s[k] - AUX(k,j);
 	    if(f > 1) /* j is not saturated after addition of (u,v) */
 	      w[k] += 1; /* addition of (u,v) increases count by 1 */
 	    else if(f > 0) /* j becomes saturated by addition of (u,v) */
@@ -178,14 +187,14 @@ double badgeycif(prop, state)
       w[k] = 0.0;
     }
     /* compute change in counts for other points */
-    if(BadGey.per) {
+    if(badgey->per) {
       /* Periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2 = dist2(u,v,x[j],y[j],BadGey.period);
+	d2 = dist2(u,v,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
-	    f = BadGey.s[k] - AUX(k,j);
+	  if(d2 < badgey->r2[k]) {
+	    f = badgey->s[k] - AUX(k,j);
 	    if(f > 0) /* j is not saturated */
 	      w[k] += 1; /* deletion of 'ix' decreases count by 1 */
 	    else {
@@ -205,8 +214,8 @@ double badgeycif(prop, state)
 	if(j == ix) continue;
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
-	    f = BadGey.s[k] - AUX(k,j);
+	  if(d2 < badgey->r2[k]) {
+	    f = badgey->s[k] - AUX(k,j);
 	    if(f > 0) /* j is not saturated */
 	      w[k] += 1; /* deletion of 'ix' decreases count by 1 */
 	    else {
@@ -228,20 +237,20 @@ double badgeycif(prop, state)
       w[k] = 0.0;
     }
     /* Compute the cif at the new point, not the ratio of new/old */
-    if(BadGey.per) {
+    if(badgey->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2 = dist2(u,v,x[j],y[j],BadGey.period);
+	d2 = dist2(u,v,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  r2 = BadGey.r2[k];
+	  r2 = badgey->r2[k];
 	  if(d2 < r2) {
 	    /* shifted point is a neighbour of point j */
 	    tee[k]++;
 	    a = AUX(k,j);
-	    s = BadGey.s[k];
+	    s = badgey->s[k];
 	    /* Adjust */
-	    dd2 = dist2(x[ix],y[ix], x[j],y[j],BadGey.period);
+	    dd2 = dist2(x[ix],y[ix], x[j],y[j],badgey->period);
 	    if(dd2 < r2) a -= 1; 
 	    b = a + 1;
 	    /* b is the number of neighbours of point j in new state */
@@ -258,12 +267,12 @@ double badgeycif(prop, state)
 	if(j == ix) continue;
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  r2 = BadGey.r2[k];
+	  r2 = badgey->r2[k];
 	  if(d2 < r2) {
 	    /* shifted point is a neighbour of point j */
 	    tee[k]++;
 	    a = AUX(k,j);
-	    s = BadGey.s[k];
+	    s = badgey->s[k];
 	    /* Adjust */
 	    dd2 = pow(x[ix] - x[j], 2) + pow(y[ix] - y[j], 2);
 	    if(dd2 < r2) a -= 1; 
@@ -285,7 +294,7 @@ double badgeycif(prop, state)
 
   /* compute total change in saturated count */
   for(k = 0; k < ndisc; k++) {
-    s = BadGey.s[k];
+    s = badgey->s[k];
     tk = tee[k];
     w[k] += ((tk < s) ? tk : s);
 #ifdef DEBUG
@@ -296,31 +305,35 @@ double badgeycif(prop, state)
 
   /* evaluate cif */
   for(k = 0; k < ndisc; k++) {
-    if(BadGey.hard[k]) {
+    if(badgey->hard[k]) {
       if(tee[k] > 0) return(0.0);
       /* else cifval multiplied by 0^0 = 1 */
-    } else cifval *= exp(BadGey.loggamma[k] * w[k]);
+    } else cifval *= exp(badgey->loggamma[k] * w[k]);
   }
   
   return cifval;
 }
 
-void badgeyupd(state, prop) 
+void badgeyupd(state, prop, cdata) 
      State state;
      Propo prop;
+     Cdata *cdata;
 {
 /* Declare other variables */
   int ix, npts, ndisc, j, k;
   double u, v, xix, yix, r2, d2, d2old, d2new;
   double *x, *y;
   int *aux;
+  BadGey *badgey;
 
-  aux = BadGey.aux;
+  badgey = (BadGey *) cdata;
+
+  aux = badgey->aux;
   /* 'state' is current state before transition */
   x = state.x;
   y = state.y;
   npts = state.npts;      
-  ndisc = BadGey.ndisc;
+  ndisc = badgey->ndisc;
 
 #ifdef DEBUG
   Rprintf("start update ---- \n");
@@ -342,12 +355,12 @@ void badgeyupd(state, prop)
     for(k = 0; k < ndisc; k++)
       AUX(k, npts) = 0;
     /* update all auxiliary counters */
-    if(BadGey.per) {
+    if(badgey->per) {
       /* periodic distance */
       for(j=0; j < npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],BadGey.period);
+	d2 = dist2(u,v,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 	    AUX(k, j) += 1;
 	    AUX(k, npts) += 1;
 	  }
@@ -358,7 +371,7 @@ void badgeyupd(state, prop)
       for(j=0; j < npts; j++) {
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 	    AUX( k, j) += 1;
 	    AUX( k, npts) += 1;
 	  }
@@ -387,13 +400,13 @@ void badgeyupd(state, prop)
        Decrement auxiliary counter for each neighbour of deleted point,
        and remove entry corresponding to deleted point
     */
-    if(BadGey.per) {
+    if(badgey->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	d2 = dist2(u,v,x[j],y[j],BadGey.period);
+	d2 = dist2(u,v,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 	    if(j < ix) AUX(k,j) -= 1; 
 	    else AUX(k,j-1) = AUX(k,j) - 1;
 	  } else if(j >= ix) AUX(k,j-1) = AUX(k,j);
@@ -405,7 +418,7 @@ void badgeyupd(state, prop)
 	if(j==ix) continue;
 	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  if(d2 < BadGey.r2[k]) {
+	  if(d2 < badgey->r2[k]) {
 #ifdef DEBUG
 	    Rprintf("hit for point %d with radius r[%d]\n", j, k);
 #endif
@@ -440,13 +453,13 @@ void badgeyupd(state, prop)
     for(k = 0; k < ndisc; k++) 
       AUX(k,ix) = 0;
 
-    if(BadGey.per) {
+    if(badgey->per) {
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2new = dist2(u,v,x[j],y[j],BadGey.period);
-	d2old = dist2(xix,yix,x[j],y[j],BadGey.period);
+	d2new = dist2(u,v,x[j],y[j],badgey->period);
+	d2old = dist2(xix,yix,x[j],y[j],badgey->period);
 	for(k = 0; k < ndisc; k++) {
-	  r2 = BadGey.r2[k];
+	  r2 = badgey->r2[k];
 	  if(d2old >= r2 && d2new >= r2) continue;
 	  if(d2new < r2) {
 	    /* increment neighbour count for new point */
@@ -464,7 +477,7 @@ void badgeyupd(state, prop)
 	d2new = pow(u - x[j], 2) + pow(v - y[j], 2);
 	d2old = pow(x[ix] - x[j], 2) + pow(y[ix] - y[j], 2);
 	for(k = 0; k < ndisc; k++) {
-	  r2 = BadGey.r2[k];
+	  r2 = badgey->r2[k];
 	  if(d2old >= r2 && d2new >= r2) continue;
 	  if(d2new < r2) {
 #ifdef DEBUG

@@ -13,9 +13,9 @@
 
 */
 
-/* Storage of parameters and precomputed/auxiliary data */
+/* Format for storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct AreaInt {
   /* model parameters */
   double beta;
   double eta;
@@ -39,47 +39,53 @@ struct {
 
 /* initialiser function */
 
-void areaintInit(state, model, algo)
+Cdata *areaintInit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
   double r, dx, dy, x0;
   int i, my, kdisc;
+  AreaInt *areaint;
+
+  /* create storage */
+  areaint = (AreaInt *) R_alloc(1, sizeof(AreaInt));
   /* Interpret model parameters*/
-  AreaInt.beta   = model.par[0];
-  AreaInt.eta    = model.par[1];
-  AreaInt.r      = r = model.par[2]; 
-  AreaInt.r2     = r * r;
-  AreaInt.range2 = 4 * r * r;    /* square of interaction distance */
+  areaint->beta   = model.par[0];
+  areaint->eta    = model.par[1];
+  areaint->r      = r = model.par[2]; 
+  areaint->r2     = r * r;
+  areaint->range2 = 4 * r * r;    /* square of interaction distance */
   /* is the model numerically equivalent to hard core ? */
-  AreaInt.hard   = (AreaInt.eta < DOUBLE_EPS);
-  AreaInt.logeta = (AreaInt.hard) ? 0 : log(AreaInt.eta);
+  areaint->hard   = (areaint->eta < DOUBLE_EPS);
+  areaint->logeta = (areaint->hard) ? 0 : log(areaint->eta);
   /* periodic boundary conditions? */
-  AreaInt.period = model.period;
-  AreaInt.per    = (model.period[0] > 0.0);
+  areaint->period = model.period;
+  areaint->per    = (model.period[0] > 0.0);
   /* grid counting */
-  dx = dy = AreaInt.dx = (2 * r)/NGRID;
-  AreaInt.xgrid0 = -r + dx/2;
-  AreaInt.my = (int *) R_alloc((long) NGRID, sizeof(int));
+  dx = dy = areaint->dx = (2 * r)/NGRID;
+  areaint->xgrid0 = -r + dx/2;
+  areaint->my = (int *) R_alloc((long) NGRID, sizeof(int));
   kdisc = 0;
   for(i = 0; i < NGRID; i++) {
-    x0 = AreaInt.xgrid0 + i * dx;
+    x0 = areaint->xgrid0 + i * dx;
     my = floor(sqrt(r * r - x0 * x0)/dy);
     my = (my < 0) ? 0 : my;
-    AreaInt.my[i] = my;
+    areaint->my[i] = my;
     kdisc += 2 * my + 1;
   }
-  AreaInt.kdisc = kdisc;
+  areaint->kdisc = kdisc;
   /* allocate space for neighbour indicators */
-  AreaInt.neigh = (char*) R_alloc((long) state.npmax, sizeof(char));
+  areaint->neigh = (char*) R_alloc((long) state.npmax, sizeof(char));
+  return((Cdata *) areaint);
 }
 
 /* conditional intensity evaluator */
 
-double areaintCif(prop, state)
+double areaintCif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, kount, ix, ixp1, j;
   double *period, *x, *y;
@@ -87,9 +93,12 @@ double areaintCif(prop, state)
   double r2, d2, dx, dy, range2;
   double a, xgrid0, ygrid, ygrid0, xgrid, covfrac, cifval;
   int kdisc, kx, my, ky, covered;
+  AreaInt *areaint;
 
-  period = AreaInt.period;
-  r2     = AreaInt.r2;
+  areaint = (AreaInt *) cdata;
+
+  period = areaint->period;
+  r2     = areaint->r2;
 
   u  = prop.u;
   v  = prop.v;
@@ -98,13 +107,13 @@ double areaintCif(prop, state)
   y  = state.y;
 
   npts = state.npts;
-  if(npts == 0) return AreaInt.beta;
+  if(npts == 0) return areaint->beta;
 
-  r2 = AreaInt.r2;
-  dy = dx = AreaInt.dx;
-  range2 = AreaInt.r2;    /* square of interaction distance */
+  r2 = areaint->r2;
+  dy = dx = areaint->dx;
+  range2 = areaint->r2;    /* square of interaction distance */
 
-  if(!AreaInt.per) {
+  if(!areaint->per) {
     /*
       Euclidean distance
       First identify which data points are neighbours of (u,v)
@@ -114,31 +123,31 @@ double areaintCif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	a = range2 - pow(u - x[j], 2);
-	AreaInt.neigh[j] = FALSE;
+	areaint->neigh[j] = FALSE;
 	if(a > 0.) {
 	  a -= pow(v - y[j], 2);
 	  if(a > 0.)
-	    AreaInt.neigh[j] = TRUE;
+	    areaint->neigh[j] = TRUE;
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j < npts; j++) {
 	a = range2 - pow(u - x[j], 2);
-	AreaInt.neigh[j] = FALSE;
+	areaint->neigh[j] = FALSE;
 	if(a > 0.) {
 	  a -= pow(v - y[j], 2);
 	  if(a > 0.)
-	    AreaInt.neigh[j] = TRUE;
+	    areaint->neigh[j] = TRUE;
 	}
       }
     }
     /* scan a grid of points centred at (u,v) */
     kount = 0;
-    xgrid0 = u + AreaInt.xgrid0;
+    xgrid0 = u + areaint->xgrid0;
     for(kx=0; kx<NGRID; kx++) {
       xgrid = xgrid0 + kx * dx;
-      my = AreaInt.my[kx];
+      my = areaint->my[kx];
       for(ky=(-my); ky<=my; ky++) {
 	ygrid = v + ky * dy;
 	/*
@@ -151,7 +160,7 @@ double areaintCif(prop, state)
 	covered = FALSE;
 	if(ix > 0) {
 	  for(j=0; j < ix; j++) {
-	    if(AreaInt.neigh[j]) {
+	    if(areaint->neigh[j]) {
 	      a = r2 - pow(xgrid - x[j], 2);
 	      if(a > 0) {
 		a -= pow(ygrid - y[j], 2);
@@ -165,7 +174,7 @@ double areaintCif(prop, state)
 	}
 	if(!covered && ixp1 < npts) {
 	  for(j=ixp1; j<npts; j++) {
-	    if(AreaInt.neigh[j]) {
+	    if(areaint->neigh[j]) {
 	      a = r2 - pow(xgrid - x[j], 2);
 	      if(a > 0) {
 		a -= pow(ygrid - y[j], 2);
@@ -183,7 +192,7 @@ double areaintCif(prop, state)
 	/* finished consideration of grid point (xgrid, ygrid) */
       }
     }
-    kdisc = AreaInt.kdisc;
+    kdisc = areaint->kdisc;
   } else {
     /*
       periodic distance
@@ -193,20 +202,20 @@ double areaintCif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = dist2(u,v,x[j],y[j],period);
-	AreaInt.neigh[j] = (d2 < range2);
+	areaint->neigh[j] = (d2 < range2);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = dist2(u,v,x[j],y[j],period);
-	AreaInt.neigh[j] = (d2 < range2);
+	areaint->neigh[j] = (d2 < range2);
       }
     }
     /* scan a grid of ngrid * ngrid points centred at (u,v) */
     kount = 0;
     kdisc = 0;
-    xgrid0 = u + AreaInt.xgrid0;
-    ygrid0 = u + AreaInt.xgrid0;
+    xgrid0 = u + areaint->xgrid0;
+    ygrid0 = u + areaint->xgrid0;
     for(kx=0; kx<NGRID; kx++) {
       xgrid = xgrid0 + kx * dx;
       for(ky=0; ky<NGRID; ky++) {
@@ -223,7 +232,7 @@ double areaintCif(prop, state)
 	  covered = FALSE;
 	  if(ix > 0) {
 	    for(j=0; j< ix; j++) {
-	      if(AreaInt.neigh[j]) {
+	      if(areaint->neigh[j]) {
 		d2 = dist2(xgrid,ygrid,x[j],y[j],period);
 		if(d2 < r2) {
 		  /* point j covers grid point */
@@ -234,7 +243,7 @@ double areaintCif(prop, state)
 	  }
 	  if(!covered && ixp1 < npts) {
 	    for(j=ixp1; j<npts; j++) {
-	      if(AreaInt.neigh[j]) {
+	      if(areaint->neigh[j]) {
 		d2 = dist2(xgrid,ygrid,x[j],y[j],period);
 		if(d2 < r2) {
 		  /* point j covers grid point */
@@ -256,14 +265,14 @@ double areaintCif(prop, state)
     `kount' is the number of UNCOVERED grid points in the disc
   */
 
-  if(AreaInt.hard) {
-    if(kount == kdisc) cifval = AreaInt.beta;
+  if(areaint->hard) {
+    if(kount == kdisc) cifval = areaint->beta;
     else cifval = 0.0;
   } else {
     /* usual calculation
        COVERED area fraction */
     covfrac = ((double) kdisc - (double) kount)/((double) kdisc);
-    cifval = AreaInt.beta * exp(AreaInt.logeta * covfrac);
+    cifval = areaint->beta * exp(areaint->logeta * covfrac);
   }
 
   return cifval;

@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.30 $	$Date: 2009/12/09 20:17:32 $
+#	$Revision: 1.32 $	$Date: 2010/07/04 06:44:56 $
 #
 #
 #
@@ -120,7 +120,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
              triangulate <- FALSE
            else {
              # Determine whether there are any holes
-             holes <- (unlist(lapply(p, area.xypolygon)) < 0)
+             holes <- unlist(lapply(p, is.hole.xypolygon))
              triangulate <- any(holes)
            }
 
@@ -147,7 +147,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                  do.call.matched("polygon",
                                  resolve.defaults(
                                                   list(x=txy[ri,]),
-                                                  list(border=NA),
+                                                  list(border=col.poly),
                                                   list(...)))
                }
              }

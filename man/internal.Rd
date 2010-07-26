@@ -47,6 +47,8 @@
 \alias{clippoly.psp}
 \alias{closepairs}
 \alias{crosspairs}
+\alias{crosspaircounts}
+\alias{crossfikselterms}
 \alias{cobble.xy}
 \alias{commasep}
 \alias{compatible.units}
@@ -57,7 +59,9 @@
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
+\alias{dgsTerms}
 \alias{diagnose.ppm.engine}
+\alias{diggraterms}
 \alias{digital.volume}
 \alias{dilate.owin}
 \alias{dim.fasp}               
@@ -78,12 +82,17 @@
 \alias{emptywindow}
 \alias{ensure2vector}
 \alias{envelopeEngine}
+\alias{equalpairs}          
+\alias{equalpairs.quad}          
 \alias{equals.quad}          
 \alias{equalsfun.quad}          
 \alias{eratosthenes}
 \alias{erodemask}
 \alias{erode.owin}
 \alias{evalCovar}
+\alias{evalInteraction}
+\alias{evalInterEngine}
+\alias{evalInterNew}
 \alias{even.breaks.owin}
 \alias{evenly.spaced}
 \alias{exactdt}              
@@ -96,6 +105,7 @@
 \alias{findmarktype}
 \alias{firstfactor}
 \alias{fii}
+\alias{fikselterms}
 \alias{fillNA}
 \alias{FormatFaspFormulae}
 \alias{formula.ppm}
@@ -110,6 +120,7 @@
 \alias{getglmdata}
 \alias{getglmfit}
 \alias{getglmsubset}
+\alias{geyercounts}
 \alias{GLMpredict}
 \alias{gridindex}            
 \alias{grid1index}
@@ -155,6 +166,7 @@
 \alias{killinteraction}
 \alias{km.rs.opt}
 \alias{least.common.multiple}
+\alias{levels.im}
 \alias{levels<-.im}
 \alias{licence.polygons}
 \alias{license.polygons}
@@ -214,6 +226,7 @@
 \alias{overlap.owin}
 \alias{overlap.trapezium}
 \alias{overlap.xypolygon}    
+\alias{oversize.quad}    
 \alias{owinpolycheck}
 \alias{owinpoly2mask}
 \alias{param.quad}
@@ -286,10 +299,12 @@
 \alias{rastery.im}
 \alias{reach.fii}
 \alias{rebadge.fv}
+\alias{rebound}
 \alias{rebound.im}
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{repair.old.factor.image}
 \alias{reincarnate.interact}
 \alias{rescale.units}
 \alias{resid4plot}
@@ -333,6 +348,7 @@
 \alias{sp.foundclasses}
 \alias{sphere.volume}
 \alias{stratrand}
+\alias{strausscounts}
 \alias{suffloc}
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
@@ -428,6 +444,8 @@ cliprect.psp(x, window)
 clippoly.psp(s, window)
 closepairs(X,rmax)
 crosspairs(X,Y,rmax)
+crosspaircounts(X,Y,r)
+crossfikselterms(X,Y,r,kappa)
 cobble.xy(x, y, f, fatal)
 commasep(x)
 compatible.units(x, y, coerce=TRUE)
@@ -441,6 +459,8 @@ default.ntile(X)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
+dgsTerms(X, Y, idX, idY, rho)
+diggraterms(X, Y, idX, idY, delta, rho)
 digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dim}{fasp}(x)
@@ -468,12 +488,17 @@ envelopeEngine(X, fun, simul,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user)
+equalpairs(U, X, marked=FALSE)
+equalpairs.quad(Q)
 equals.quad(Q)          
 equalsfun.quad(Q)          
 eratosthenes(nmax)
 erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, jitter, modelname, covname, dataname)
+evalInteraction(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
+evalInterEngine(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
+evalInterNew(X,U,E,interaction,\dots)
 even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
@@ -486,6 +511,7 @@ fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findmarktype(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
+fikselterms(U,X,r,kappa,EqualPairs)
 fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
@@ -500,6 +526,7 @@ getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
 getglmsubset(object)
+geyercounts(U,X,r,sat,Xcounts,EqualPairs)
 GLMpredict(fit, data, coefs, changecoef)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
@@ -550,6 +577,7 @@ Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
 least.common.multiple(n,m)
+\method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 licence.polygons()
 license.polygons()
@@ -611,6 +639,7 @@ outdated.interact(object)
 overlap.owin(A,B)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
+oversize.quad(Q, \dots, nU, nX)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
@@ -691,10 +720,12 @@ rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
 rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl, new.yexp,
 new.dotnames, new.preferred, new.formula)
-rebound.im(x, rect)
-rebound.ppp(x, \dots)
-rebound.psp(x, \dots)
-rebound.owin(w, rect)
+rebound(x, rect)
+\method{rebound}{im}(x, rect)
+\method{rebound}{ppp}(x, rect)
+\method{rebound}{psp}(x, rect)
+\method{rebound}{owin}(x, rect)
+repair.old.factor.image(x)
 reincarnate.interact(object)
 \method{rescale}{units}(X,s)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
@@ -743,6 +774,7 @@ sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
 stratrand(window, nx, ny, k = 1)
+strausscounts(U,X,r,EqualPairs)
 suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)

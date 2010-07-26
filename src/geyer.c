@@ -10,7 +10,7 @@ void fexitc(const char *msg);
   Conditional intensity function for a Geyer saturation process.  
 */
 
-struct {
+typedef struct Geyer {
   /* model parameters */
   double beta;
   double gamma;
@@ -27,53 +27,63 @@ struct {
   int *aux;
 } Geyer;
 
-void geyerinit(state, model, algo)
+Cdata *geyerinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
   int i, j;
   double d2;
+  Geyer *geyer;
+
+  geyer = (Geyer *) R_alloc(1, sizeof(Geyer));
+
   /* Interpret model parameters*/
-  Geyer.beta   = model.par[0];
-  Geyer.gamma  = model.par[1];
-  Geyer.r      = model.par[2]; /* not squared any more */
-  Geyer.s      = model.par[3]; 
-  Geyer.r2     = Geyer.r * Geyer.r;
+  geyer->beta   = model.par[0];
+  geyer->gamma  = model.par[1];
+  geyer->r      = model.par[2]; /* not squared any more */
+  geyer->s      = model.par[3]; 
+  geyer->r2     = geyer->r * geyer->r;
   /* is the model numerically equivalent to hard core ? */
-  Geyer.hard   = (Geyer.gamma < DOUBLE_EPS);
-  Geyer.loggamma = (Geyer.hard) ? 0 : log(Geyer.gamma);
+  geyer->hard   = (geyer->gamma < DOUBLE_EPS);
+  geyer->loggamma = (geyer->hard) ? 0 : log(geyer->gamma);
   /* periodic boundary conditions? */
-  Geyer.period = model.period;
-  Geyer.per    = (model.period[0] > 0.0);
+  geyer->period = model.period;
+  geyer->per    = (model.period[0] > 0.0);
   /* allocate storage for auxiliary counts */
-  Geyer.aux = (int *) R_alloc((size_t) state.npmax, sizeof(int));
+  geyer->aux = (int *) R_alloc((size_t) state.npmax, sizeof(int));
   /* Initialise auxiliary counts */
   for(i = 0; i < state.npmax; i++) 
-    Geyer.aux[i] = 0;
+    geyer->aux[i] = 0;
 
   for(i = 0; i < state.npts; i++) {
     for(j = 0; j < state.npts; j++) {
       d2 = dist2either(state.x[i], state.y[i], state.x[j], state.y[j], 
-		       Geyer.period);
-      if(d2 < Geyer.r2)
-	Geyer.aux[i] += 1;
+		       geyer->period);
+      if(d2 < geyer->r2)
+	geyer->aux[i] += 1;
     }
   }
+
+  return((Cdata *) geyer);
 }
 
-double geyercif(prop, state)
+double geyercif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int ix, j, npts, tee;
   double u, v, d2, r2, s;
   double w, a, dd2, b, f, cifval;
   double *x, *y;
   int *aux;
+  Geyer *geyer;
+  
+  geyer = (Geyer *) cdata;
 
   npts = state.npts;
-  if(npts==0) return Geyer.beta;
+  if(npts==0) return geyer->beta;
 
   x = state.x;
   y = state.y;
@@ -81,10 +91,10 @@ double geyercif(prop, state)
   v = prop.v;
   ix = prop.ix;
 
-  r2 = Geyer.r2;
-  s = Geyer.s;
+  r2 = geyer->r2;
+  s = geyer->s;
 
-  aux = Geyer.aux;
+  aux = geyer->aux;
 
   /* 
      tee = neighbour count at the point in question;
@@ -93,10 +103,10 @@ double geyercif(prop, state)
   tee = w = 0.0;
 
   if(prop.itype == BIRTH) {
-    if(Geyer.per) {
+    if(geyer->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Geyer.period);
+	d2 = dist2(u,v,x[j],y[j],geyer->period);
 	if(d2 < r2) {
 	  tee++;
 	  f = s - aux[j];
@@ -122,11 +132,11 @@ double geyercif(prop, state)
     }
   } else if(prop.itype == DEATH) {
     tee = aux[ix];
-    if(Geyer.per) {
+    if(geyer->per) {
       /* Periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2 = dist2(u,v,x[j],y[j],Geyer.period);
+	d2 = dist2(u,v,x[j],y[j],geyer->period);
 	if(d2 < r2) {
 	  f = s - aux[j];
 	  if(f > 0) /* j is not saturated */
@@ -165,12 +175,12 @@ double geyercif(prop, state)
     /* Compute the cif at the new point, not the ratio of new/old */
     for(j=0; j<npts; j++) {
       if(j == ix) continue;
-      d2 = dist2either(u,v,x[j],y[j],Geyer.period);
+      d2 = dist2either(u,v,x[j],y[j],geyer->period);
       if(d2 < r2) {
 	tee++;
 	a = aux[j];
 	/* Adjust */
-	dd2 = dist2either(x[ix],y[ix], x[j],y[j],Geyer.period);
+	dd2 = dist2either(x[ix],y[ix], x[j],y[j],geyer->period);
 	if(dd2 < r2) a = a - 1;
 	b = a + 1;
 	if(a < s && s < b) {
@@ -183,27 +193,31 @@ double geyercif(prop, state)
 
   w = w + ((tee < s) ? tee : s);
 
- if(Geyer.hard) {
+ if(geyer->hard) {
     if(tee > 0) cifval = 0.0;
-    else cifval = Geyer.beta;
+    else cifval = geyer->beta;
   }
-  else cifval = Geyer.beta*exp(Geyer.loggamma*w);
+  else cifval = geyer->beta*exp(geyer->loggamma*w);
   
   return cifval;
 }
 
-void geyerupd(state, prop) 
+void geyerupd(state, prop, cdata) 
      State state;
      Propo prop;
+     Cdata *cdata;
 {
 /* Declare other variables */
   int ix, npts, j;
   double u, v, xix, yix, r2, d2, d2old, d2new;
   double *x, *y;
   int *aux;
+  Geyer *geyer;
 
-  aux = Geyer.aux;
-  r2 = Geyer.r2;
+  geyer = (Geyer *) cdata;
+
+  aux = geyer->aux;
+  r2 = geyer->r2;
   x = state.x;
   y = state.y;
   npts = state.npts;
@@ -215,10 +229,10 @@ void geyerupd(state, prop)
     /* initialise auxiliary counter for new point */
     aux[npts] = 0; 
     /* update all auxiliary counters */
-    if(Geyer.per) {
+    if(geyer->per) {
       /* periodic distance */
       for(j=0; j < npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],Geyer.period);
+	d2 = dist2(u,v,x[j],y[j],geyer->period);
 	if(d2 < r2) {
 	  aux[j] += 1;
 	  aux[npts] += 1;
@@ -242,11 +256,11 @@ void geyerupd(state, prop)
     u = x[ix];
     v = y[ix];
     /* decrement auxiliary counter for each point */
-    if(Geyer.per) {
+    if(geyer->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	d2 = dist2(u,v,x[j],y[j],Geyer.period);
+	d2 = dist2(u,v,x[j],y[j],geyer->period);
 	if(d2 < r2) {
 	  if(j < ix) aux[j] -= 1;
 	  else aux[j-1] = aux[j] - 1;
@@ -276,11 +290,11 @@ void geyerupd(state, prop)
     /* recompute auxiliary counter for point 'ix' */
     aux[ix] = 0;
     /* update auxiliary counters for other points */
-    if(Geyer.per) {
+    if(geyer->per) {
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2new = dist2(u,v,x[j],y[j],Geyer.period);
-	d2old = dist2(xix,yix,x[j],y[j],Geyer.period);
+	d2new = dist2(u,v,x[j],y[j],geyer->period);
+	d2old = dist2(xix,yix,x[j],y[j],geyer->period);
 	if(d2old >= r2 && d2new >= r2) continue;
 	if(d2new < r2) {
 	  /* increment neighbour count for new point */
