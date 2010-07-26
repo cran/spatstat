@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.22 $	$Date: 2009/01/30 01:29:16 $
+#	$Revision: 4.25 $	$Date: 2010/07/14 01:56:44 $
 #
 #
 # Main functions:
@@ -44,8 +44,9 @@ countingweights <- function(id, areas, check=TRUE) {
 	# areas:     areas of k cells 
 	#                     (length k)
 	#
-    id <- factor(id, levels=seq(areas))
-    counts <- table(id)
+    id <- as.integer(id)
+    fid <- factor(id, levels=seq(areas))
+    counts <- table(fid)
     w <- areas[id] / counts[id]     # ensures denominator > 0
     w <- as.vector(w)
 #	
@@ -76,7 +77,7 @@ gridindex <- function(x, y, xrange, yrange, nx, ny) {
 	ix <- grid1index(x, xrange, nx)
 	iy <- grid1index(y, yrange, ny)
 	#
-	return(list(ix=ix, iy=iy, index=(iy-1) * nx + ix))
+	return(list(ix=ix, iy=iy, index=as.integer((iy-1) * nx + ix)))
 }
 
 grid1index <- function(x, xrange, nx) {

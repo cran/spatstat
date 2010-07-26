@@ -3,7 +3,7 @@
 #
 # Infinite lines
 #
-# $Revision: 1.13 $ $Date: 2009/11/05 22:06:07 $
+# $Revision: 1.14 $ $Date: 2010/07/16 05:52:44 $
 #
 
 infline <- function(a=NULL, b=NULL, h=NULL, v=NULL, p=NULL, theta=NULL) {
@@ -119,7 +119,7 @@ chop.tess <- function(X, L) {
     xr <- Xim$xrange
     yr <- Xim$yrange
     # extract matrices of pixel values and x, y coordinates
-    Zmat <- as.matrix(Xim)
+    Zmat <- as.integer(as.matrix(Xim))
     xmat <- rasterx.im(Xim)
     ymat <- rastery.im(Xim)
     # process lines

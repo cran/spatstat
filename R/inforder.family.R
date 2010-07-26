@@ -2,7 +2,7 @@
 #
 #    inforder.family.R
 #
-#    $Revision: 1.1 $	$Date: 2008/02/01 18:22:22 $
+#    $Revision: 1.2 $	$Date: 2010/07/10 10:22:09 $
 #
 #    Family of `infinite-order' point process models
 #
@@ -20,7 +20,7 @@ inforder.family <-
        },
        plot = NULL,
        # ----------------------------------------------------
-       eval  = function(X,U,Equal,pot,pars,correction, ...) {
+       eval  = function(X,U,EqualPairs,pot,pars,correction, ...) {
   #
   # This is the eval function for the `inforder' family.
   # 
@@ -42,9 +42,8 @@ inforder.family <-
   #       
   #   X           data point pattern                      'ppp' object
   #   U           points at which to evaluate potential   list(x,y) suffices
-  #   Equal        logical matrix X[i] == U[j]             matrix or NULL
-  #                      (NB: equality only if marks are equal too)
-  #                      NULL means all comparisons are FALSE
+  #   EqualPairs  two-column matrix of indices i, j such that X[i] == U[j]
+  #               (or NULL, meaning all comparisons are FALSE)
   #   pot         potential function 
   #   potpars     auxiliary parameters for pairpot        list(......)
   #   correction  edge correction type                    (string)
@@ -60,7 +59,7 @@ inforder.family <-
 
   # POTENTIAL:
   # In this case the potential function 'pot' should have arguments
-  #    pot(X, U, Equal, pars, correction, ...)
+  #    pot(X, U, EqualPairs, pars, correction, ...)
   #         
   # It must return a vector with length equal to the number of points in U,
   # or a matrix with as many rows as there are points in U.
@@ -68,7 +67,7 @@ inforder.family <-
          if(!is.ppp(U))
            U <- ppp(U$x, U$y, window=X$window)
          
-         POT <- pot(X, U, Equal, pars, correction, ...)
+         POT <- pot(X, U, EqualPairs, pars, correction, ...)
 
          if(is.matrix(POT)) {
            if(nrow(POT) != U$n)

@@ -49,6 +49,7 @@ SEXP xmethas(SEXP cifname,
   Algor algo;
   Propo birthprop, deathprop, shiftprop;
   Cifns cif;
+  Cdata *cdata;
 
   /* =================== Protect R objects from garbage collector ======= */
 
@@ -141,7 +142,7 @@ SEXP xmethas(SEXP cifname,
   GetRNGstate();
 
   /* Interpret the model parameters and initialise auxiliary data */
-  (*(cif.init))(state, model, algo);
+  cdata = (*(cif.init))(state, model, algo);
 
   /* set the fixed elements of the proposal objects */
   birthprop.itype = BIRTH;
@@ -191,7 +192,7 @@ SEXP xmethas(SEXP cifname,
 	  Rprintf("propose birth at (%lf, %lf)\n", birthprop.u, birthprop.v);
 #endif
 	/* evaluate conditional intensity */
-	anumer = (*(cif.eval))(birthprop, state);
+	anumer = (*(cif.eval))(birthprop, state, cdata);
 	adenom = qnodds*(nfree+1);
 #ifdef MHDEBUG
 	Rprintf("cif = %lf, Hastings ratio = %lf\n", anumer, anumer/adenom);
@@ -223,7 +224,7 @@ SEXP xmethas(SEXP cifname,
 		  ix, deathprop.u, deathprop.v);
 #endif
 	/* evaluate conditional intensity */
-	adenom = (*(cif.eval))(deathprop, state);
+	adenom = (*(cif.eval))(deathprop, state, cdata);
 	anumer = qnodds * nfree;
 #ifdef MHDEBUG
 	Rprintf("cif = %lf, Hastings ratio = %lf\n", adenom, anumer/adenom);
@@ -264,8 +265,8 @@ SEXP xmethas(SEXP cifname,
 		ix, deathprop.u, deathprop.v, shiftprop.u, shiftprop.v);
 #endif
       /* evaluate cif in two stages */
-      cvd = (*(cif.eval))(deathprop, state);
-      cvn = (*(cif.eval))(shiftprop, state);
+      cvd = (*(cif.eval))(deathprop, state, cdata);
+      cvn = (*(cif.eval))(shiftprop, state, cdata);
 #ifdef MHDEBUG
 	Rprintf("cif[old] = %lf, cif[new] = %lf, Hastings ratio = %lf\n", 
 		cvd, cvn, cvn/cvd);
@@ -310,11 +311,11 @@ SEXP xmethas(SEXP cifname,
 	  state.npmax = Nmore;
 
 	  /* call the initialiser again, to allocate additional space */
-	  (*(cif.init))(state, model, algo);
+	  cdata = (*(cif.init))(state, model, algo);
 	} 
 	/* Update auxiliary variables first */
 	if(needupd)
-	  (*(cif.update))(state, birthprop);
+	  (*(cif.update))(state, birthprop, cdata);
 	/* Now add point */
 	state.x[state.npts] = birthprop.u;
 	state.y[state.npts] = birthprop.v;
@@ -328,7 +329,7 @@ SEXP xmethas(SEXP cifname,
 	/* Death transition */
 	/* delete point x[ix], y[ix] */
 	if(needupd)
-	  (*(cif.update))(state, deathprop);
+	  (*(cif.update))(state, deathprop, cdata);
 	ix = deathprop.ix;
 	state.npts = state.npts - 1;
 #ifdef MHDEBUG
@@ -364,7 +365,7 @@ SEXP xmethas(SEXP cifname,
 	Rprintf("\tnpts=%d\n", state.npts);
 #endif
 	if(needupd)
-	  (*(cif.update))(state, shiftprop);
+	  (*(cif.update))(state, shiftprop, cdata);
 	ix = shiftprop.ix;
 	state.x[ix] = shiftprop.u;
 	state.y[ix] = shiftprop.v;

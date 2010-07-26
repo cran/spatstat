@@ -16,7 +16,7 @@ density.psp <- function(x, sigma, ..., edge=TRUE) {
   if(x$n == 0 || all(len == 0))
     return(as.im(0, w))
   #
-  ang <- angles.psp(x)
+  ang <- angles.psp(x, directed=TRUE)
   coz <- cos(ang)
   zin <- sin(ang)
   xx <- as.vector(raster.x(w))

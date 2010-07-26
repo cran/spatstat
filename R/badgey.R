@@ -2,7 +2,7 @@
 #
 #    badgey.S
 #
-#    $Revision: 1.2 $	$Date: 2008/04/11 15:35:54 $
+#    $Revision: 1.5 $	$Date: 2010/07/18 08:46:28 $
 #
 #    Hybrid Geyer process
 #
@@ -24,7 +24,7 @@ BadGey <- function(r, sat) {
                        nr <- length(r)
                        out <- array(FALSE, dim=c(dim(d), nr))
                        for(i in 1:nr) 
-                         out[,,i] <- (d < r[i])
+                         out[,,i] <- (d <= r[i])
                        out
                     },
          par      = list(r = r, sat=sat),
@@ -96,7 +96,52 @@ BadGey <- function(r, sat) {
             return(0)
           else return(2 * max(r[active]))
         },
-       version=versionstring.spatstat()
+       version=versionstring.spatstat(),
+       # fast evaluation is available for the border correction only
+       can.do.fast=function(X,correction,par) {
+         return(all(correction %in% c("border", "none")))
+       },
+       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction,
+                         ..., halfway=FALSE) {
+         # fast evaluator for BadGey interaction
+         if(!all(correction %in% c("border", "none")))
+           return(NULL)
+         if(spatstat.options("fasteval") == "test")
+           message("Using fast eval for BadGey")
+         r  <- potpars$r
+         hc <- potpars$sat
+         # ensure r and sat have equal length
+         if(length(r) != length(sat)) {
+           if(length(r) == 1)
+             r <- rep(r, length(sat))
+           else if(length(sat) == 1)
+             sat <- rep(sat, length(r))
+           else stop("lengths or r and sat do not match")
+         }
+         nterms <- length(r)
+         answer <- matrix(, nrow=npoints(U), ncol=nterms)
+         for(k in 1:nterms) {
+           # first determine saturated pair counts
+           counts <- strausscounts(U, X, r[k], EqualPairs) 
+           satcounts <- pmin(sat[k], counts)
+           # trapdoor used by suffstat() 
+           if(halfway) 
+             answer[,k] <- satcounts
+           else if(sat[k] == Inf)
+             answer[,k] <- 2 * satcounts
+           else {
+             # extract counts for data points
+             Uindex <- EqualPairs[,2]
+             Xindex <- EqualPairs[,1]
+             Xcounts <- integer(npoints(X))
+             Xcounts[Xindex] <- counts[Uindex]
+             # evaluate change in saturated counts of other data points
+             change <- geyercounts(U, X, r[k], sat[k], Xcounts, EqualPairs)
+             answer[,k] <- satcounts + change
+           }
+         }
+         return(answer)
+       }
   )
   class(out) <- "interact"
   out$init(out)

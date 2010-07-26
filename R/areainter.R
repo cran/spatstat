@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.8 $	$Date: 2009/08/22 06:48:00 $
+#    $Revision: 1.9 $	$Date: 2010/07/10 10:22:09 $
 #
 #    The area interaction
 #
@@ -15,17 +15,20 @@
 
 AreaInter <- function(r) {
  areapot <- 
-  function(X,U,Equal,pars,correction, ...) {
+  function(X,U,EqualPairs,pars,correction, ...) {
     if(any(correction != "border"))
       warning("Only the border correction is available - other options were ignored")
     n <- U$n
     answer <- numeric(n)
     r <- pars$r
     if(is.null(r)) stop("internal error: r parameter not found")
-    isdata <- apply(Equal, 2, any)
-    answer[!isdata] <- -areaGain(U[!isdata], X, r)
-    for(j in which(isdata)) 
-      answer[j] <- -areaGain(U[j], X[!Equal[,j]], r)
+    dummies <- !(seq(n) %in% EqualPairs[,2])
+    answer[dummies] <- -areaGain(U[dummies], X, r)
+    for(k in seq(nrow(EqualPairs))) {
+      i <- EqualPairs[k,1]
+      j <- EqualPairs[k,2]
+      answer[j] <- -areaGain(U[j], X[-i], r)
+    }
     return(1 + answer/(pi * r^2))
   }
              

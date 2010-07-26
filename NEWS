@@ -1,3 +1,103 @@
+	CHANGES IN spatstat VERSION 1.20-1
+
+OVERVIEW
+
+    o   Further increases in speed and efficiency of ppm and rmh
+
+    o   New pairwise interaction model 
+
+
+NEW FUNCTIONS
+
+    o   DiggleGatesStibbard
+    	Diggle-Gates-Stibbard pairwise interaction for use in ppm()
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   ppm
+    	has been accelerated by a factor of 10 for the BadGey interaction.
+
+    o   rmh
+    	simulation of the Lennard-Jones model (cif='lennard')
+	has been greatly accelerated.
+
+    o   rmh, rmhmodel.ppm
+    	Point process models fitted by ppm() using the DiggleGatesStibbard
+	interaction can be simulated automatically using rmh.
+
+BUG FIXES
+
+    o   fitin
+    	The plot of a fitted Hardcore interaction was incorrect.
+	Fixed.
+
+	CHANGES IN spatstat VERSION 1.20-0
+
+OVERVIEW
+
+    o   spatstat now contains over 1000 functions.
+
+    o   Substantial increase in speed and efficiency 
+        of model-fitting code.
+
+    o   Changes to factor-valued images.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o	ppm
+	has been accelerated by a factor of 10,
+        and can handle datasets with 20,000 points,
+        for the following interactions: 
+	DiggleGratton, Fiksel, Geyer, Hardcore, Strauss, StraussHard
+
+    o   predict.ppm 
+        accelerated by a factor of 3 (when type = "cif")
+	with vastly reduced memory requirements
+	for the following interactions: 
+	DiggleGratton, Fiksel, Geyer, Hardcore, Strauss, StraussHard
+
+    o   pixel images (class "im")
+    	The internal representation of factor-valued images has changed.
+	Existing objects in the old format should still work.
+
+    o   im
+	The syntax for creating a factor-valued image has changed.
+    	Argument 'lev' has been deleted.
+
+    o   ppm 
+    	Some warnings have been reworded for greater clarity.
+
+BUG FIXES
+
+    o   [.im
+    	Mishandled some factor-valued images.
+	Fixed.
+
+    o   hist.im
+    	Produced slightly erroneous output for some factor-valued images.
+	Fixed.
+
+    o   plot.owin
+    	Filled polygons appeared to contain criss-cross lines
+	on some graphics drivers.
+	Fixed.
+
+    o   deltametric
+    	Did not handle windows with different enclosing frames
+	(error message: 'dA and dB are incompatible')
+	Fixed.
+
+    o   quadratcount
+    	Crashed if the pattern was empty and the window was a rectangle.
+	(Noticed by Sandro Azaele)
+	Fixed.
+
+    o   rNeymanScott
+    	Crashed if the parent process realisation was empty.
+	(Noticed by Sandro Azaele)
+	Fixed.
+
+
 	CHANGES IN spatstat VERSION 1.19-3
 
 ACKNOWLEDGEMENTS

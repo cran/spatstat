@@ -56,7 +56,7 @@
   \item{which}{Nearest neighbour index in \code{Y}}
 }
 \seealso{
-  \code{link{nndist}} for nearest neighbour
+  \code{\link{nndist}} for nearest neighbour
   distances in a single point pattern.
 }
 \examples{

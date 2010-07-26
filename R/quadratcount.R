@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.27 $  $Date: 2010/03/08 08:23:04 $
+#  $Revision: 1.28 $  $Date: 2010/07/12 08:27:30 $
 #
 
 quadratcount <- function(X, ...) {
@@ -106,10 +106,13 @@ rectquadrat.breaks <- function(xr, yr, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL) 
 }
 
 rectquadrat.countEngine <- function(x, y, xbreaks, ybreaks, weights) {
-  if(min(x) < min(xbreaks) || max(x) > max(xbreaks))
-    stop("xbreaks do not span the actual range of x coordinates in data")
-  if(min(y) < min(ybreaks) || max(y) > max(ybreaks))
-    stop("ybreaks do not span the actual range of y coordinates in data")
+  if(length(x) > 0) {
+    # check validity of breaks
+    if(min(x) < min(xbreaks) || max(x) > max(xbreaks))
+      stop("xbreaks do not span the actual range of x coordinates in data")
+    if(min(y) < min(ybreaks) || max(y) > max(ybreaks))
+      stop("ybreaks do not span the actual range of y coordinates in data")
+  }
   xg <- cut(x, breaks=xbreaks, include.lowest=TRUE)
   yg <- cut(y, breaks=ybreaks, include.lowest=TRUE)
   if(missing(weights)) 

@@ -11,7 +11,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct MultiStraussHard {
   int ntypes;
   double *beta;    /* beta[i]  for i = 0 ... ntypes-1 */
   double *gamma;   /* gamma[i,j] = gamma[i+ntypes*j] for i,j = 0... ntypes-1 */
@@ -30,15 +30,19 @@ struct {
 
 /* initialiser function */
 
-void straushminit(state, model, algo)
+Cdata *straushminit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
   int i, j, ntypes, n2, m, mm, hard;
   double g, r, h, r2, h2, logg;
+  MultiStraussHard *multistrausshard;
 
-  MultiStraussHard.ntypes = ntypes = model.ntypes;
+  multistrausshard = (MultiStraussHard *) R_alloc(1, sizeof(MultiStraussHard));
+
+
+  multistrausshard->ntypes = ntypes = model.ntypes;
   n2 = ntypes * ntypes;
 
 #ifdef DEBUG
@@ -46,24 +50,24 @@ void straushminit(state, model, algo)
 #endif
 
   /* Allocate space for parameters */
-  MultiStraussHard.beta     = (double *) R_alloc((size_t) ntypes, sizeof(double));
-  MultiStraussHard.gamma    = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.rad      = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.hc       = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->beta     = (double *) R_alloc((size_t) ntypes, sizeof(double));
+  multistrausshard->gamma    = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->rad      = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->hc       = (double *) R_alloc((size_t) n2, sizeof(double));
 
   /* Allocate space for transformed parameters */
-  MultiStraussHard.rad2     = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.hc2      = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.rad2hc2  = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.loggamma = (double *) R_alloc((size_t) n2, sizeof(double));
-  MultiStraussHard.hard     = (int *) R_alloc((size_t) n2, sizeof(int));
+  multistrausshard->rad2     = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->hc2      = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->rad2hc2  = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->loggamma = (double *) R_alloc((size_t) n2, sizeof(double));
+  multistrausshard->hard     = (int *) R_alloc((size_t) n2, sizeof(int));
 
   /* Allocate scratch space for counts of each pair of types */
-  MultiStraussHard.kount    = (int *) R_alloc((size_t) n2, sizeof(int));
+  multistrausshard->kount    = (int *) R_alloc((size_t) n2, sizeof(int));
 
   /* Copy and process model parameters*/
   for(i = 0; i < ntypes; i++)
-    MultiStraussHard.beta[i]   = model.par[i];
+    multistrausshard->beta[i]   = model.par[i];
 
   m = ntypes * (ntypes + 1);
   mm = m + ntypes * ntypes;
@@ -77,36 +81,41 @@ void straushminit(state, model, algo)
       h2 = h * h;
       hard = (g < DOUBLE_EPS);
       logg = (hard) ? 0 : log(g);
-      MAT(MultiStraussHard.gamma, i, j, ntypes) = g;
-      MAT(MultiStraussHard.rad, i, j, ntypes) = r;
-      MAT(MultiStraussHard.hc, i, j, ntypes) = h; 
-      MAT(MultiStraussHard.rad2, i, j, ntypes) = r2;
-      MAT(MultiStraussHard.hc2, i, j, ntypes) = h2;
-      MAT(MultiStraussHard.rad2hc2, i, j, ntypes) = r2-h2;
-      MAT(MultiStraussHard.hard, i, j, ntypes) = hard; 
-      MAT(MultiStraussHard.loggamma, i, j, ntypes) = logg;
+      MAT(multistrausshard->gamma, i, j, ntypes) = g;
+      MAT(multistrausshard->rad, i, j, ntypes) = r;
+      MAT(multistrausshard->hc, i, j, ntypes) = h; 
+      MAT(multistrausshard->rad2, i, j, ntypes) = r2;
+      MAT(multistrausshard->hc2, i, j, ntypes) = h2;
+      MAT(multistrausshard->rad2hc2, i, j, ntypes) = r2-h2;
+      MAT(multistrausshard->hard, i, j, ntypes) = hard; 
+      MAT(multistrausshard->loggamma, i, j, ntypes) = logg;
     }
   }
   /* periodic boundary conditions? */
-  MultiStraussHard.period = model.period;
-  MultiStraussHard.per    = (model.period[0] > 0.0);
+  multistrausshard->period = model.period;
+  multistrausshard->per    = (model.period[0] > 0.0);
 
 #ifdef DEBUG
   Rprintf("end initialiser\n");
 #endif
+  return((Cdata *) multistrausshard);
 }
 
 /* conditional intensity evaluator */
 
-double straushmcif(prop, state)
+double straushmcif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, ntypes, kount, ix, ixp1, j, mrk, mrkj, m1, m2;
   int *marks;
   double *x, *y;
   double u, v, lg;
   double d2, a, cifval;
+  MultiStraussHard *multistrausshard;
+
+  multistrausshard = (MultiStraussHard *) cdata;
 
   u  = prop.u;
   v  = prop.v;
@@ -122,12 +131,12 @@ double straushmcif(prop, state)
   Rprintf("computing cif: u=%lf, v=%lf, mrk=%d\n", u, v, mrk);
 #endif
 
-  cifval = MultiStraussHard.beta[mrk];
+  cifval = multistrausshard->beta[mrk];
 
   if(npts == 0) 
     return(cifval);
 
-  ntypes = MultiStraussHard.ntypes;
+  ntypes = multistrausshard->ntypes;
 
 #ifdef DEBUG
   Rprintf("initialising pair counts\n");
@@ -136,7 +145,7 @@ double straushmcif(prop, state)
   /* initialise pair counts */
   for(m1 = 0; m1 < ntypes; m1++)
     for(m2 = 0; m2 < ntypes; m2++)
-      MAT(MultiStraussHard.kount, m1, m2, ntypes) = 0;
+      MAT(multistrausshard->kount, m1, m2, ntypes) = 0;
 
   /* compile pair counts */
 
@@ -146,30 +155,30 @@ double straushmcif(prop, state)
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(MultiStraussHard.per) { /* periodic distance */
+  if(multistrausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],MultiStraussHard.period);
-	if(d2 < MAT(MultiStraussHard.rad2, mrk, mrkj, ntypes)) {
-	  if(d2 < MAT(MultiStraussHard.hc2, mrk, mrkj, ntypes)) {
+	d2 = dist2(u,v,x[j],y[j],multistrausshard->period);
+	if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	  if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
 	    cifval = 0;
 	    return(cifval);
 	  }
-	  MAT(MultiStraussHard.kount, mrk, mrkj, ntypes)++;
+	  MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],MultiStraussHard.period);
-	if(d2 < MAT(MultiStraussHard.rad2, mrk, mrkj, ntypes)) {
-	  if(d2 < MAT(MultiStraussHard.hc2, mrk, mrkj, ntypes)) {
+	d2 = dist2(u,v,x[j],y[j],multistrausshard->period);
+	if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	  if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
 	    cifval = 0;
 	    return(cifval);
 	  }
-	  MAT(MultiStraussHard.kount, mrk, mrkj, ntypes)++;
+	  MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	}
       }
     }
@@ -178,16 +187,16 @@ double straushmcif(prop, state)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	mrkj = marks[j];
-	a = MAT(MultiStraussHard.rad2, mrk, mrkj, ntypes); 
+	a = MAT(multistrausshard->rad2, mrk, mrkj, ntypes); 
 	a -= pow(u - x[j], 2);
 	if(a > 0) {
 	  a -= pow(v - y[j],2);
 	  if(a > 0) {
-	    if(a > MAT(MultiStraussHard.rad2hc2, mrk, mrkj, ntypes)) {
+	    if(a > MAT(multistrausshard->rad2hc2, mrk, mrkj, ntypes)) {
 	      cifval = 0;
 	      return(cifval);
 	    }
-	    MAT(MultiStraussHard.kount, mrk, mrkj, ntypes)++;
+	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
       }
@@ -195,16 +204,16 @@ double straushmcif(prop, state)
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	mrkj = marks[j];
-	a = MAT(MultiStraussHard.rad2, mrk, mrkj, ntypes); 
+	a = MAT(multistrausshard->rad2, mrk, mrkj, ntypes); 
 	a -= pow(u - x[j], 2);
 	if(a > 0) {
 	  a -= pow(v - y[j],2);
 	  if(a > 0) {
-	    if(a > MAT(MultiStraussHard.rad2hc2, mrk, mrkj, ntypes)) {
+	    if(a > MAT(multistrausshard->rad2hc2, mrk, mrkj, ntypes)) {
 	      cifval = 0;
 	      return(cifval);
 	    }
-	    MAT(MultiStraussHard.kount, mrk, mrkj, ntypes)++;
+	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
       }
@@ -217,14 +226,14 @@ double straushmcif(prop, state)
   /* multiply cif value by pair potential */
   for(m1 = 0; m1 < ntypes; m1++) {
     for(m2 = 0; m2 < ntypes; m2++) {
-      kount = MAT(MultiStraussHard.kount, m1, m2, ntypes);
-      if(MAT(MultiStraussHard.hard, m1, m2, ntypes)) {
+      kount = MAT(multistrausshard->kount, m1, m2, ntypes);
+      if(MAT(multistrausshard->hard, m1, m2, ntypes)) {
 	if(kount > 0) {
 	  cifval = 0.0;
 	  return(cifval);
 	}
       } else {
-	lg = MAT(MultiStraussHard.loggamma, m1, m2, ntypes);
+	lg = MAT(multistrausshard->loggamma, m1, m2, ntypes);
 	cifval *= exp(lg * kount);
       }
     }

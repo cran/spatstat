@@ -812,6 +812,7 @@
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{BadGey}()} \tab	multiscale Geyer process\cr
     \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
+    \code{\link{DiggleGatesStibbard}() } \tab Diggle-Gates-Stibbard potential \cr
     \code{\link{Fiksel}()}	 \tab Fiksel pairwise interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{Hardcore}()}	 \tab Hard core process\cr
@@ -1079,12 +1080,14 @@
   made substantial contributions of code.
   Additional contributions by
   Ang Qi Wei,
+  Sandro Azaele,
   Colin Beale,
   Ricardo Bernhardt,
   Brad Biggerstaff,
   Roger Bivand,
   Florent Bonneu,
   Julian Burgos,
+  S. Byers,
   Jianbao Chen,
   Y.C. Chin,
   Bjarke Christensen,
@@ -1108,7 +1111,7 @@
   Devin Johnson,
   Jeff Laake,
   Robert Mark,
-  Jorge Mateu,
+  Jorge Mateu Mahiques,
   Peter McCullagh,
   Sebastian Wastl Meyer,
   Mi Xiangcheng,
@@ -1117,6 +1120,7 @@
   Felipe Nunes,
   Evgeni Parilov,
   Jeff Picka,
+  Adrian Raftery,
   Matt Reiter,
   Brian Ripley,
   Barry Rowlingson,
@@ -1127,6 +1131,7 @@
   Ida-Maria Sintorn,
   Malte Spiess,
   Mark Stevenson,
+  Michael Sumner,
   P. Surovy,
   Berwin Turlach,
   Andrew van Burgel,

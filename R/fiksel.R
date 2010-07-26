@@ -2,7 +2,7 @@
 #
 #    fiksel.R
 #
-#    $Revision: 1.1 $	$Date: 2010/05/14 08:59:29 $
+#    $Revision: 1.4 $	$Date: 2010/07/18 08:46:28 $
 #
 #    Fiksel interaction 
 #    
@@ -68,9 +68,64 @@ Fiksel <- function(r, hc, kappa) {
            else
              return(r)
          },
-       version=versionstring.spatstat()
+       version=versionstring.spatstat(),
+       # fast evaluation is available for the border correction only
+       can.do.fast=function(X,correction,par) {
+         return(all(correction %in% c("border", "none")))
+       },
+       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
+         # fast evaluator for Fiksel interaction
+         if(!all(correction %in% c("border", "none")))
+           return(NULL)
+         if(spatstat.options("fasteval") == "test")
+           message("Using fast eval for Fiksel")
+         r <- potpars$r
+         hc <- potpars$hc
+         kappa <- potpars$kappa
+         hclose <- strausscounts(U, X, hc, EqualPairs)
+         fikselbit <- fikselterms(U, X, r, kappa, EqualPairs)
+         answer <- ifelse(hclose == 0, fikselbit, -Inf)
+         return(matrix(answer, ncol=1))
+       }
   )
   class(out) <- "interact"
   (out$init)(out)
   return(out)
+}
+
+fikselterms <- function(U, X, r, kappa, EqualPairs=NULL) {
+  answer <- crossfikselterms(U, X, r, kappa)
+  nU <- npoints(U)
+  # subtract contrinbutions from identical pairs (exp(-0) = 1 for each)
+  if(!is.null(EqualPairs)) {
+    idcount <- as.integer(table(factor(EqualPairs[,2], levels=1:nU)))
+    answer <- answer - idcount
+  }
+  return(answer)
+}
+
+crossfikselterms <- function(X, Y, r, kappa) {
+  stopifnot(is.numeric(r))
+  # sort in increasing order of x coordinate
+  oX <- order(X$x)
+  oY <- order(Y$x)
+  Xsort <- X[oX]
+  Ysort <- Y[oY]
+  nX <- npoints(X)
+  nY <- npoints(Y)
+  # call C routine
+  out <- .C("Efiksel",
+            nnsource = as.integer(nX),
+            xsource  = as.double(Xsort$x),
+            ysource  = as.double(Xsort$y),
+            nntarget = as.integer(nY),
+            xtarget  = as.double(Ysort$x),
+            ytarget  = as.double(Ysort$y),
+            rrmax    = as.double(r),
+            kkappa   = as.double(kappa),
+            values   = as.double(double(nX)),
+            PACKAGE  = "spatstat")
+  answer <- integer(nX)
+  answer[oX] <- out$values
+  return(answer)
 }

@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.26 $   $Date: 2009/08/21 19:49:28 $
+#    $Revision: 1.28 $   $Date: 2010/07/16 05:29:48 $
 #
 #    as.im()
 #
@@ -15,6 +15,7 @@ as.im <- function(X, ...) {
 as.im.im <- function(X, W=NULL, ...,
                      eps=NULL, dimyx=NULL, xy=NULL,
                      na.replace=NULL) {
+  X <- repair.old.factor.image(X)
   if(is.null(W)) {
     if(is.null(eps) && is.null(dimyx) && is.null(xy))
       return(na.handle.im(X, na.replace))
@@ -34,8 +35,10 @@ as.im.im <- function(X, W=NULL, ...,
 
   # inherit pixel data type from X
   Y$type <- X$type
-  if(Y$type == "factor")
-    levels(Y) <- levels(X)
+  if(Y$type == "factor") {
+    Y$v <- factor(Y$v, lev=levels(X))
+    dim(Y$v) <- Y$dim
+  }
 
   return(na.handle.im(Y, na.replace))
 }
@@ -108,7 +111,6 @@ as.im.function <- function(X, W=NULL, ...,
 
   xx <- as.vector(raster.x(W))
   yy <- as.vector(raster.y(W))
-  lev <- NULL
 
   # evaluate function value at each pixel 
   if(!funnywindow) 
@@ -131,10 +133,7 @@ as.im.function <- function(X, W=NULL, ...,
     values[!inside] <- NA
   }
   
-  if(is.factor(values)) 
-    lev <- levels(values)
-  
-  out <- im(values, W$xcol, W$yrow, lev, unitname=unitname(W))
+  out <- im(values, W$xcol, W$yrow, unitname=unitname(W))
   return(na.handle.im(out, na.replace))
 }
 
@@ -192,3 +191,21 @@ if(length(na.replace) != 1)
 X$v[is.na(X$v)] <- na.replace
 return(X)
 }
+
+repair.old.factor.image <- function(x) {
+  # convert from old to new representation of factor images
+  if(x$type != "factor")
+    return(x)
+  v <- x$v
+  isold <- !is.null(lev <- attr(x, "levels"))
+  isnew <- is.factor(v) && is.matrix(v)
+  if(isnew)
+    return(x)
+  if(!isold)
+    stop("Internal error: unrecognised format for factor-valued image")
+  v <- factor(v, levels=lev)
+  dim(v) <- x$dim
+  x$v <- v
+  return(x)
+}
+    

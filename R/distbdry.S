@@ -150,7 +150,8 @@ erodemask <- function(w, r, strict=FALSE) {
 }
 
         
-rebound.owin <- function(w, rect) {
+rebound.owin <- function(x, rect) {
+  w <- x
   verifyclass(rect, "owin")
   if(is.empty(w))
     return(emptywindow(rect))

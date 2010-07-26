@@ -5,6 +5,8 @@
 
    Model       Model parameters passed from R
 
+   Cdata       (pointer to) model parameters and precomputed data in C
+
    Algor       Algorithm parameters (p, q, nrep etc)
 
    Propo       Proposal in Metropolis-Hastings algorithm
@@ -32,6 +34,13 @@ typedef struct Model {
   double *period;  /* width & height of rectangle, if torus */
   int ntypes;      /* number of possible marks */
 } Model;
+
+/* 
+   A pointer to Cdata 
+   is a pointer to C storage for parameters of model
+*/
+
+typedef void Cdata;
 
 /* RMH Algorithm parameters */
 typedef struct Algor {
@@ -61,9 +70,9 @@ typedef struct Propo {
 
 /* conditional intensity functions */
 
-typedef void   (*initfunptr)(State state, Model model, Algor algo);
-typedef double (*evalfunptr)(Propo prop, State state);
-typedef void   (*updafunptr)(State state, Propo prop);
+typedef Cdata *   (*initfunptr)(State state, Model model, Algor algo);
+typedef double    (*evalfunptr)(Propo prop,  State state, Cdata *cdata);
+typedef void      (*updafunptr)(State state, Propo prop,  Cdata *cdata);
 
 typedef struct Cifns {
   initfunptr init;

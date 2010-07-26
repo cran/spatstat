@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.55 $	$Date: 2010/06/05 10:51:22 $
+#	$Revision: 1.59 $	$Date: 2010/07/18 09:21:58 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -318,49 +318,11 @@ function(object, window, ngrid=NULL, locations=NULL,
     U <- ppp(newdata$x, y=newdata$y, window=X$window, check=FALSE)
     if(marked) 
       marks(U) <- Umarks <- newdata$marks
-    # decide whether to split into blocks
-    nX <- X$n
-    nD <- U$n
-    nmat <- (nD + nX) * nX
-    nMAX <- spatstat.options("maxmatrix")
-    #
-    if(nmat <= nMAX) {
-      # normal case
-      Equal <- outer(X$x, U$x, "==") & outer(X$y, U$y, "==")
-      if(marked) 
-        Equal <- Equal & outer(marks(X), Umarks, "==")
-      # compute values of potential at the new sample points
-      Vnew <- inter$family$eval(X, U, Equal,
-                                inter$pot, inter$par, model$correction)
-      if(!is.matrix(Vnew))
-        stop("internal error: eval.pair.inter() did not return a matrix")
-    } else {
-      # Too many dummy points: split into blocks
-      # Calculate no. of dummy points in largest permissible X * (X+D) matrix 
-      nperblock <- max(1, floor(nMAX/nX - nX))
-      # determine number of such blocks 
-      nblocks <- ceiling(nD/nperblock)
-      # announce
-      message(paste("predict.ppm: prediction required at",
-                    nD, "locations;",
-                    "split into", nblocks, "blocks",
-                    "to avoid memory size limits"))
-      Vnew <- NULL
-      for(iblock in 1:nblocks) {
-        first <- min(nD, (iblock - 1) * nperblock + 1)
-        last  <- min(nD, iblock * nperblock)
-        Ui <- U[first:last]
-        Ei <- outer(X$x, Ui$x, "==") & outer(X$y, Ui$y, "==")
-        if(marked) 
-          Ei <- Ei & outer(marks(X), marks(Ui), "==")
-        # compute values of potential at the new sample points
-        Vnewi <- inter$family$eval(X, Ui, Ei,
-                                   inter$pot, inter$par, model$correction)
-        if(!is.matrix(Vnewi))
-          stop("internal error: eval.pair.inter() did not return a matrix")
-        Vnew <- rbind(Vnew, Vnewi)
-      }
-    }
+    # determine which prediction points are data points
+    E <- equalpairs(U, X, marked)
+    
+    # evaluate interaction
+    Vnew <- evalInterNew(X, U, E, inter, correction="none")
 
   # Negative infinite values signify cif = zero
     cif.equals.zero <- matrowany(Vnew == -Inf)
@@ -511,3 +473,18 @@ GLMpredict <- function(fit, data, coefs, changecoef=TRUE) {
   return(answer)
 
 }
+
+equalpairs <- function(U, X, marked=FALSE) {
+  nn <- nncross(U, X)
+  coincides <- (nn$dist == 0)
+  Xind <- nn$which[coincides]
+  Uind <- which(coincides)
+  if(marked) {
+    samemarks <- (marks(X)[Xind] == marks(U)[Uind])
+    Xind <- Xind[samemarks]
+    Uind <- Uind[samemarks]
+  }
+  return(cbind(Xind, Uind))
+}
+
+  

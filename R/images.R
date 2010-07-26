@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.69 $     $Date: 2010/06/01 05:12:12 $
+#         $Revision: 1.73 $     $Date: 2010/07/16 06:38:40 $
 #
 #      The class "im" of raster images
 #
@@ -23,12 +23,13 @@
 #   creator 
 
 im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
-               lev=levels(mat), unitname=NULL) {
+               unitname=NULL) {
 
   typ <- typeof(mat)
   if(typ == "double")
     typ <- "real"
-  
+
+  # determine dimensions
   if(is.matrix(mat)) {
     nr <- nrow(mat)
     nc <- ncol(mat)
@@ -46,15 +47,18 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   }
 
   # deal with factor case
-  if(!is.null(lev)) {
-    # convert to integer codes
-    mat <- as.integer(factor(mat, levels=lev))
+  if(is.factor(mat)) {
     typ <- "factor"
+  } else if(!is.null(lev <- levels(mat))) {
+    typ <- "factor"
+    mat <- factor(mat, levels=lev)
   }
-  # finally coerce 'mat' to a matrix
-  if(!is.matrix(mat))
-    mat <- matrix(mat, nrow=nr, ncol=nc)
 
+  # Ensure 'mat' is a matrix (without destroying factor information)
+  if(!is.matrix(mat))
+    dim(mat) <- c(nr, nc)
+
+  # set up coordinates
   xstep <- diff(xcol)[1]
   ystep <- diff(yrow)[1]
   xrange <- range(xcol) + c(-1,1) * xstep/2
@@ -74,11 +78,9 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
               ystep    = ystep,
               xcol    = xcol,
               yrow    = yrow,
-              lev     = lev,
               type    = typ,
               units   = unitname)
   class(out) <- "im"
-  attr(out, "levels") <- lev 
   return(out)
 }
 
@@ -86,10 +88,14 @@ is.im <- function(x) {
   inherits(x,"im")
 }
 
+levels.im <- function(x) {
+  levels(x$v)
+}
+
 "levels<-.im" <- function(x, value) {
   if(x$type != "factor") 
     stop("image is not factor-valued")
-  attr(x, "levels") <- x$lev <- value
+  levels(x$v) <- value
   x
 }
 
@@ -122,7 +128,6 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
 
 "[.im" <- 
 function(x, i, drop=TRUE, ..., raster=NULL) {
-  lev <- x$lev
   
   if(missing(i)) {
     # entire image 
@@ -160,8 +165,6 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       return(out)
     } else if(i$type != "rectangle") {
       values <- out$v[inside]
-      if(!is.null(lev))
-        values <- factor(values, levels=seq(lev), labels=lev)
       return(values)
     } else {
       disjoint <- function(r, s) { (r[2] < s[1]) || (r[1] > s[2])  }
@@ -175,7 +178,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       colsub <- inrange(out$xcol, xr)
       rowsub <- inrange(out$yrow, yr)
       return(im(out$v[rowsub,colsub], out$xcol[colsub], out$yrow[rowsub],
-                lev=lev, unitname=unitname(x)))
+                unitname=unitname(x)))
     } 
   }
   if(verifyclass(i, "im", fatal=FALSE)) {
@@ -184,7 +187,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       # convert to window
       w <- as.owin(eval.im(ifelse(i, 1, NA)))
       return(x[w, drop=drop, ..., raster=raster])
-    } 
+    } else stop("Subset argument \'i\' is an image, but not of logical type")
   }
 
   # Try indexing as a matrix
@@ -201,7 +204,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     if(all(diff(rseq) == 1) && all(diff(cseq) == 1) &&
        all(rr == RR[rseq, cseq]) && all(cc == CC[rseq,cseq])) {
       # yes - make image
-      y <- matrix(y, nrow=length(rseq), ncol=length(cseq))
+      dim(y) <- c(length(rseq), length(cseq))
       Y <- x
       Y$v <- y
       Y$dim <- dim(y)
@@ -212,8 +215,6 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
       return(Y)
     }
     # return pixel values (possibly as matrix)
-    if(x$type == "factor")
-      y <- factor(y, levels=x$lev)
     return(y)
   }
 
@@ -242,7 +243,6 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
 
 
 "[<-.im" <- function(x, i, value) {
-  lev <- x$lev
   X <- x
   W <- as.owin(X)
   if(missing(i)) {
@@ -360,6 +360,9 @@ nearest.valid.pixel <- function(x,y,im) {
 lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   verifyclass(Z, "im")
 
+  if(Z$type == "factor")
+    Z <- repair.old.factor.image(Z)
+  
   if(length(x) != length(y))
     stop("x and y must be numeric vectors of equal length")
   value <- rep(NA, length(x))
@@ -391,9 +394,6 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   if(!naok && any(is.na(value)))
     warning("Internal error: NA's generated")
 
-  # return factor, if it's a factor valued image
-  if(!is.null(lev <- Z$lev))
-      value <- factor(value, levels=seq(lev), labels=lev)
   return(value)
 }
   
@@ -416,7 +416,7 @@ rastery.im <- function(x) {
 
 # methods for other functions
 
-xtfrm.im <- function(x) { as.matrix.im(x) }
+xtfrm.im <- function(x) { as.numeric(as.matrix.im(x)) }
 
 as.matrix.im <- function(x, ...) {
   return(x$v)
@@ -430,7 +430,10 @@ as.data.frame.im <- function(x, ...) {
   ok <- !is.na(v)
   xx <- as.vector(xx[ok])
   yy <- as.vector(yy[ok])
-  vv <- as.vector(v[ok])
+  # extract pixel values without losing factor info
+  vv <- v[ok]
+  dim(vv) <- NULL
+  # 
   data.frame(x=xx, y=yy, value=vv, ...)
 }
   
@@ -476,11 +479,8 @@ hist.im <- function(x, ..., probability=FALSE) {
   main <- paste("Histogram of", xname)
   # default plot arguments
   # extract pixel values
-  values <- as.vector(as.matrix(x))
-  if(x$type == "factor") {
-    values <- factor(values)
-    levels(values) <- x$lev
-  }
+  values <- as.matrix(x)
+  dim(values) <- NULL
   # barplot or histogram
   if(x$type %in% c("logical", "factor")) {
     # barplot
@@ -538,8 +538,7 @@ plot.barplotdata <- function(x, ...) {
 cut.im <- function(x, ...) {
   verifyclass(x, "im")
   vcut <- cut(as.numeric(as.matrix(x)), ...)
-  lev <- if(is.factor(vcut)) levels(vcut) else NULL
-  return(im(vcut, xcol=x$xcol, yrow=x$yrow, lev=lev, unitname=unitname(x)))
+  return(im(vcut, xcol=x$xcol, yrow=x$yrow, unitname=unitname(x)))
 }
 
 quantile.im <- function(x, ...) {
@@ -635,11 +634,9 @@ rebound.im <- function(x, rect) {
                ystep  = dy,
                xcol   = xcolnew,
                yrow   = yrownew,
-               lev    = x$lev,
                type   = x$type,
                units   = unitname(x))
   class(xnew) <- "im"
-  attr(xnew, "levels") <- x$lev
   return(xnew)
 }
 

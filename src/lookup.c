@@ -15,7 +15,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct Lookup {
   double beta;
   int nlook;
   int equisp;   
@@ -32,23 +32,27 @@ struct {
 
 /* initialiser function */
 
-void lookupinit(state, model, algo)
+Cdata *lookupinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
   int i, nlook;
   double ri;
+  Lookup *lookup;
+
+  lookup = (Lookup *) R_alloc(1, sizeof(Lookup));
+
   /* Interpret model parameters*/
-  Lookup.beta   = model.par[0];
-  Lookup.nlook  = nlook = model.par[1];
-  Lookup.equisp = (model.par[2] > 0); 
-  Lookup.delta  = model.par[3];
-  Lookup.rmax   = model.par[4];
-  Lookup.r2max  = pow(Lookup.rmax, 2);
+  lookup->beta   = model.par[0];
+  lookup->nlook  = nlook = model.par[1];
+  lookup->equisp = (model.par[2] > 0); 
+  lookup->delta  = model.par[3];
+  lookup->rmax   = model.par[4];
+  lookup->r2max  = pow(lookup->rmax, 2);
   /* periodic boundary conditions? */
-  Lookup.period = model.period;
-  Lookup.per    = (model.period[0] > 0.0);
+  lookup->period = model.period;
+  lookup->per    = (model.period[0] > 0.0);
 /*
  If the r-values are equispaced only the h vector is included in
  ``par'' after ``rmax''; the entries of h then consist of
@@ -58,36 +62,42 @@ void lookupinit(state, model, algo)
  r[0] = par[5+nlook], r[1] = par[6+nlook], ..., r[k-1] = par[4+nlook+k],
  ..., r[nlook-1] = par[4+2*nlook].
 */
-  Lookup.h = (double *) R_alloc((size_t) nlook, sizeof(double));
+  lookup->h = (double *) R_alloc((size_t) nlook, sizeof(double));
   for(i = 0; i < nlook; i++)
-    Lookup.h[i] = model.par[5+i];
-  if(!(Lookup.equisp)) {
-    Lookup.r = (double *) R_alloc((size_t) nlook, sizeof(double));
-    Lookup.r2 = (double *) R_alloc((size_t) nlook, sizeof(double));
+    lookup->h[i] = model.par[5+i];
+  if(!(lookup->equisp)) {
+    lookup->r = (double *) R_alloc((size_t) nlook, sizeof(double));
+    lookup->r2 = (double *) R_alloc((size_t) nlook, sizeof(double));
     for(i = 0; i < nlook; i++) {
-      ri = Lookup.r[i] = model.par[5+nlook+i];
-      Lookup.r2[i] = ri * ri;
+      ri = lookup->r[i] = model.par[5+nlook+i];
+      lookup->r2[i] = ri * ri;
     }
   }
 #ifdef DEBUG
-  printf("Exiting lookupinit: nlook=%d, equisp=%d\n", nlook, Lookup.equisp);
+  printf("Exiting lookupinit: nlook=%d, equisp=%d\n", nlook, lookup->equisp);
 #endif
+  
+  return((Cdata *) lookup);
 }
 
 /* conditional intensity evaluator */
 
-double lookupcif(prop, state)
+double lookupcif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, nlook, k, kk, ix, ixp1, j;
   double *x, *y;
   double u, v;
   double r2max, d2, d, delta, cifval, ux, vy;
+  Lookup *lookup;
 
-  r2max = Lookup.r2max;
-  delta = Lookup.delta;
-  nlook = Lookup.nlook;
+  lookup = (Lookup *) cdata;
+
+  r2max = lookup->r2max;
+  delta = lookup->delta;
+  nlook = lookup->nlook;
 
   u  = prop.u;
   v  = prop.v;
@@ -97,33 +107,33 @@ double lookupcif(prop, state)
 
   npts = state.npts;
 
-  cifval = Lookup.beta;
+  cifval = lookup->beta;
   if(npts == 0) 
     return(cifval);
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
 
-  if(Lookup.equisp) {
+  if(lookup->equisp) {
     /* equispaced r values */
-    if(Lookup.per) { /* periodic distance */
+    if(lookup->per) { /* periodic distance */
       if(ix > 0) {
 	for(j=0; j < ix; j++) {
-	  d = sqrt(dist2(u,v,x[j],y[j],Lookup.period));
+	  d = sqrt(dist2(u,v,x[j],y[j],lookup->period));
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
       if(ixp1 < npts) {
 	for(j=ixp1; j<npts; j++) {
-	  d = sqrt(dist2(u,v,x[j],y[j],Lookup.period));
+	  d = sqrt(dist2(u,v,x[j],y[j],lookup->period));
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
@@ -134,7 +144,7 @@ double lookupcif(prop, state)
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
@@ -144,33 +154,33 @@ double lookupcif(prop, state)
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
     }
   } else {
     /* non-equispaced r values */
-    if(Lookup.per) { /* periodic distance */
+    if(lookup->per) { /* periodic distance */
       if(ix > 0) {
 	for(j=0; j < ix; j++) {
-	  d2 = dist2(u,v,x[j],y[j],Lookup.period);
+	  d2 = dist2(u,v,x[j],y[j],lookup->period);
 	  if(d2 < r2max) {
-	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
+	    for(kk = 0; kk < nlook && lookup->r2[kk] <= d2; kk++)
 	      ;
 	    k = (kk == 0) ? 0 : kk-1;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
       if(ixp1 < npts) {
 	for(j=ixp1; j<npts; j++) {
-	  d2 = dist2(u,v,x[j],y[j],Lookup.period);
+	  d2 = dist2(u,v,x[j],y[j],lookup->period);
 	  if(d2 < r2max) {
-	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
+	    for(kk = 0; kk < nlook && lookup->r2[kk] <= d2; kk++)
 	      ;
 	    k = (kk == 0) ? 0 : kk-1;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
@@ -181,10 +191,10 @@ double lookupcif(prop, state)
 	  vy = v - y[j];
 	  d2 = ux * ux + vy * vy;
 	  if(d2 < r2max) {
-	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
+	    for(kk = 0; kk < nlook && lookup->r2[kk] <= d2; kk++)
 	      ;
 	    k = (kk == 0) ? 0 : kk-1;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }
@@ -194,10 +204,10 @@ double lookupcif(prop, state)
 	  vy = v - y[j];
 	  d2 = ux * ux + vy * vy;
 	  if(d2 < r2max) {
-	    for(kk = 0; kk < nlook && Lookup.r2[kk] <= d2; kk++)
+	    for(kk = 0; kk < nlook && lookup->r2[kk] <= d2; kk++)
 	      ;
 	    k = (kk == 0) ? 0 : kk-1;
-	    cifval *= Lookup.h[k];
+	    cifval *= lookup->h[k];
 	  }
 	}
       }

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.37 $   $Date: 2010/06/05 03:41:28 $
+#  $Revision: 2.38 $   $Date: 2010/07/20 08:30:00 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -26,6 +26,12 @@ list(
        a <- inte$interpret(coeffs,inte)$param$a
        return(list(cif='fiksel',
                    par=list(r=r,hc=hc,kappa=kappa,a=a)))
+     },
+     "Diggle-Gates-Stibbard process" =
+     function(coeffs, inte) {
+       rho   <- inte$par$rho
+       return(list(cif='dgs',
+                   par=list(rho=rho)))
      },
      "Diggle-Gratton process" =
      function(coeffs, inte) {
@@ -120,12 +126,7 @@ list(
 #      interaction object           rmh.default 
 #      ------------------           -----------
 #
-#           <none>                   dgs
-#
 #           OrdThresh                <none>
-#
-#  'dgs' has no canonical parameters (it's determined by its irregular
-#  parameter rho) so there can't be an interaction object for it.
 #
 #  Implementing rmh.default for the others is probably too hard.
 

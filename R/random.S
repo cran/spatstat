@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.40 $   $Date: 2010/05/10 07:36:57 $
+#    $Revision: 4.41 $   $Date: 2010/07/12 08:36:57 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -407,6 +407,10 @@ rpoint <- function(n, f, fmax=NULL,
         }
       }
     }
+  } else {
+    # no parents - empty pattern
+    result <- ppp(numeric(0), numeric(0), window=win)
+    parentid <- integer(0)
   }
 
   attr(result, "parents") <- parents

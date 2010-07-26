@@ -2,7 +2,7 @@
 #
 #    hardcore.S
 #
-#    $Revision: 2.10 $	$Date: 2008/04/08 10:07:11 $
+#    $Revision: 1.4 $	$Date: 2010/07/18 08:46:28 $
 #
 #    The Hard core process
 #
@@ -47,7 +47,25 @@ Hardcore <- function(hc) {
            hc <- self$par$hc
            return(hc)
          },
-       version=versionstring.spatstat()
+       version=versionstring.spatstat(),
+       # fast evaluation is available for the border correction only
+       can.do.fast=function(X,correction,par) {
+         return(all(correction %in% c("border", "none")))
+       },
+       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
+         # fast evaluator for Hardcore interaction
+         if(!all(correction %in% c("border", "none")))
+           return(NULL)
+         if(spatstat.options("fasteval") == "test")
+           message("Using fast eval for Hardcore")
+         hc <- potpars$hc
+         # call evaluator for Strauss process
+         counts <- strausscounts(U, X, hc, EqualPairs)
+         # all counts should be zero
+         v <- matrix(ifelse(counts > 0, -Inf, 0), ncol=1)
+         attr(v, "IsOffset") <- TRUE
+         return(v)
+       }
   )
   class(out) <- "interact"
   (out$init)(out)

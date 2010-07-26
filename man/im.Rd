@@ -6,7 +6,7 @@
   class \code{"im"} representing a two-dimensional pixel image.
 }
 \usage{
-  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), lev=levels(mat),
+  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), 
    unitname=NULL)
 }
 \arguments{
@@ -18,10 +18,6 @@
   }
   \item{yrow}{
     vector of \eqn{y} coordinates for the pixel grid
-  }
-  \item{lev}{
-    possible factor levels, if \code{mat} should be interpreted
-    as a factor.
   }
   \item{unitname}{
     Optional. Name of unit of length. Either a single character string,
@@ -52,15 +48,29 @@
   If \code{mat} is not a matrix, it will be converted into
   a matrix with \code{nrow(mat) = length(yrow)} and
   \code{ncol(mat) = length(xcol)}.
-
-  \R does not allow a matrix to have
-  factor-valued entries. So to make a factor-valued image from raw data,
-  you must supply \code{mat} as a factor vector and specify the arguments
-  \code{xcol} and \code{yrow} to determine the dimensions of the image.
-  See the examples. (Alternatively you can use the functions
-  \code{\link{cut.im}} or \code{\link{eval.im}} to make factor-valued
-  images from other images).
-
+  
+  To make a factor-valued image, note that 
+  \R has a quirky way of handling matrices with
+  factor-valued entries. The command \code{\link{matrix}} cannot be used
+  directly, because it destroys factor information.
+  To make a factor-valued image, do one of the following:
+  \itemize{
+    \item
+    Create a \code{factor} containing the pixel values,
+    say \code{mat <- factor(.....)}, 
+    and then assign matrix dimensions to it by \code{dim(mat) <- c(nr, nc)}
+    where \code{nr, nc} are the numbers of rows and columns. The
+    resulting object \code{mat} is both a factor and a vector.
+    \item
+    Supply \code{mat} as a one-dimensional factor
+    and specify the arguments \code{xcol} and \code{yrow}
+    to determine the dimensions of the image.
+    \item
+    Use the functions
+    \code{\link{cut.im}} or \code{\link{eval.im}} to make factor-valued
+    images from other images).
+  }
+    
   For a description of the methods available for pixel image objects,
   see \code{\link{im.object}}.
 
@@ -88,11 +98,19 @@
    whitenoise <- im(vec, xcol=seq(0,1,length=40), yrow=seq(0,1,length=30))
    plot(whitenoise)
 
-   # FACTOR-VALUED IMAGES:
-   cutvec <- cut(mat, 3)
-   # although mat was a matrix, cutvec is a vector, with factor values
-   cutwhite <- im(cutvec, xcol=seq(0,1,length=40), yrow=seq(0,1,length=30))
-   # cutwhite is a factor-valued image
+   # Factor-valued images:
+   f <- factor(letters[1:12])
+   dim(f) <- c(3,4)
+   Z <- im(f)
+
+   # Factor image from other image:
+   cutwhite <- cut(whitenoise, 3)
+   plot(cutwhite)
+
+   # Factor image from raw data
+   cutmat <- cut(mat, 3)
+   dim(cutmat) <- c(30,40)
+   cutwhite <- im(cutmat)
    plot(cutwhite)
 }
 \author{Adrian Baddeley

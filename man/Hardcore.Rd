@@ -70,11 +70,11 @@ which can then be fitted to point pattern data.
 
    \dontrun{
    ppm(cells, ~1, Hardcore(0.05))
-   # fit the stationary hard core  process to `cells'
+   # fit the stationary hard core process to `cells'
    }
 
    ppm(cells, ~ polynom(x,y,3), Hardcore(0.05))
-   # fit a nonstationary Strauss/hard core process
+   # fit a nonstationary hard core process
    # with log-cubic polynomial trend
 }
 \author{Adrian Baddeley

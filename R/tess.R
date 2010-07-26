@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.36 $ $Date: 2010/03/08 08:23:04 $
+#   $Revision: 1.37 $ $Date: 2010/07/16 05:31:57 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, keepempty=FALSE) {
@@ -294,6 +294,9 @@ as.im.tess <- function(X, W=NULL, ...,
              W <- as.mask(as.owin(X), eps=eps, dimyx=dimyx, xy=xy)
            til <- X$tiles
            ntil <- length(til)
+           nama <- names(til)
+           if(is.null(nama) || !all(nzchar(nama)))
+             nama <- paste(seq(ntil))
            xy <- list(x=W$xcol, y=W$yrow)
            for(i in seq(ntil)) {
              indic <- as.mask(til[[i]], xy=xy)
@@ -305,12 +308,8 @@ as.im.tess <- function(X, W=NULL, ...,
                outv <- pmin(outv, tag$v, na.rm=TRUE)
              }
            }
-           out$v    <- outv
-           out$type <- "factor"
-           nama <- names(til)
-           if(is.null(nama) || !all(nzchar(nama)))
-             nama <- paste(seq(ntil))
-           levels(out) <- nama
+           out <- im(factor(outv, levels=nama),
+                     out$xcol, out$yrow)
            unitname(out) <- unitname(W)
          },
          rect={
@@ -328,8 +327,9 @@ as.im.tess <- function(X, W=NULL, ...,
            Jcol <- jx[col(M)]
            Irow <- nrows - iy[row(M)] + 1
            Ktile <- Jcol + ncols * (Irow - 1)
+           Ktile <- factor(Ktile, levels=seq(nrows * ncols))
            out <- im(Ktile, xcol=out$xcol, yrow=out$yrow,
-                     lev=seq(nrows * ncols), unitname=unitname(W))
+                     unitname=unitname(W))
          }
          )
   return(out)

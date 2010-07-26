@@ -3,11 +3,17 @@
 #
 #   Delta metric
 #
-#   $Revision: 1.1 $  $Date: 2009/08/28 05:44:58 $
+#   $Revision: 1.3 $  $Date: 2010/07/10 11:42:08 $
 #
 
 deltametric <- function(A, B, p=2, c=Inf, ...) {
   stopifnot(is.numeric(p) && length(p) == 1 && p > 0)
+  # ensure frames are identical
+  bb <- bounding.box(as.rectangle(A), as.rectangle(B))
+  # enforce identical frames
+  A <- rebound(A, bb)
+  B <- rebound(B, bb)
+  # compute distance functions
   dA <- distmap(A, ...)
   dB <- distmap(B, ...)
   if(!is.infinite(c)) {

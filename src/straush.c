@@ -7,7 +7,7 @@
 
 /* Storage of parameters and precomputed/auxiliary data */
 
-struct {
+typedef struct StraussHard {
   double beta;
   double gamma;
   double r;   /* interaction distance */
@@ -24,42 +24,50 @@ struct {
 
 /* initialiser function */
 
-void straushinit(state, model, algo)
+Cdata *straushinit(state, model, algo)
      State state;
      Model model;
      Algor algo;
 {
+  StraussHard *strausshard;
+  strausshard = (StraussHard *) R_alloc(1, sizeof(StraussHard));
+
   /* Interpret model parameters*/
-  StraussHard.beta   = model.par[0];
-  StraussHard.gamma  = model.par[1];
-  StraussHard.r      = model.par[2]; /* No longer passed as r^2 */
-  StraussHard.h      = model.par[3]; /* No longer passed as h^2 */
-  StraussHard.r2     = pow(StraussHard.r, 2);
-  StraussHard.h2     = pow(StraussHard.h, 2); 
-  StraussHard.r2h2   = StraussHard.r2 - StraussHard.h2;
-  StraussHard.period = model.period;
+  strausshard->beta   = model.par[0];
+  strausshard->gamma  = model.par[1];
+  strausshard->r      = model.par[2]; /* No longer passed as r^2 */
+  strausshard->h      = model.par[3]; /* No longer passed as h^2 */
+  strausshard->r2     = pow(strausshard->r, 2);
+  strausshard->h2     = pow(strausshard->h, 2); 
+  strausshard->r2h2   = strausshard->r2 - strausshard->h2;
+  strausshard->period = model.period;
   /* is the interaction numerically equivalent to hard core ? */
-  StraussHard.hard   = (StraussHard.gamma < DOUBLE_EPS);
-  StraussHard.loggamma = (StraussHard.hard) ? 0 : log(StraussHard.gamma);
+  strausshard->hard   = (strausshard->gamma < DOUBLE_EPS);
+  strausshard->loggamma = (strausshard->hard) ? 0 : log(strausshard->gamma);
   /* periodic boundary conditions? */
-  StraussHard.per    = (model.period[0] > 0.0);
+  strausshard->per    = (model.period[0] > 0.0);
+  return((Cdata *) strausshard);
 }
 
 /* conditional intensity evaluator */
 
-double straushcif(prop, state)
+double straushcif(prop, state, cdata)
      Propo prop;
      State state;
+     Cdata *cdata;
 {
   int npts, kount, ix, ixp1, j;
   double *period, *x, *y;
   double u, v;
   double r2, d2, h2, r2h2, a, cifval;
+  StraussHard *strausshard;
 
-  period = StraussHard.period;
-  r2     = StraussHard.r2;
-  h2     = StraussHard.h2;
-  r2h2   = StraussHard.r2h2;
+  strausshard = (StraussHard *) cdata;
+
+  period = strausshard->period;
+  r2     = strausshard->r2;
+  h2     = strausshard->h2;
+  r2h2   = strausshard->r2h2;
 
   u  = prop.u;
   v  = prop.v;
@@ -70,15 +78,15 @@ double straushcif(prop, state)
   npts = state.npts;
 
   if(npts == 0) 
-    return(StraussHard.beta);
+    return(strausshard->beta);
 
   kount = 0;
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
-  if(StraussHard.per) { /* periodic distance */
+  if(strausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],StraussHard.period);
+	d2 = dist2(u,v,x[j],y[j],strausshard->period);
 	if(d2 < r2) {
 	  if(d2 < h2) return(0.0);
 	  kount = kount+1;
@@ -87,7 +95,7 @@ double straushcif(prop, state)
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],StraussHard.period);
+	d2 = dist2(u,v,x[j],y[j],strausshard->period);
 	if(d2 < r2) {
 	  if(d2 < h2) return(0.0);
 	  kount = kount+1;
@@ -124,11 +132,11 @@ double straushcif(prop, state)
     }
   }
 
-  if(StraussHard.hard) {
+  if(strausshard->hard) {
     if(kount > 0) cifval = 0.0;
-    else cifval = StraussHard.beta;
+    else cifval = strausshard->beta;
   }
-  else cifval = StraussHard.beta*exp(StraussHard.loggamma*kount);
+  else cifval = strausshard->beta*exp(strausshard->loggamma*kount);
   
   return cifval;
 }

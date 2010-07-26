@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.67 $	$Date: 2010/03/18 02:37:32 $
+#	$Revision: 4.68 $	$Date: 2010/07/10 11:43:30 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -504,9 +504,13 @@ identify.ppp <- function(x, ...) {
   }
 }
 
-rebound.ppp <- function(x, ...) {
+rebound <- function(x, rect) {
+  UseMethod("rebound")
+}
+
+rebound.ppp <- function(x, rect) {
   verifyclass(x, "ppp")
-  x$window <- rebound.owin(x$window, ...)
+  x$window <- rebound.owin(x$window, rect)
   return(x)
 }
 
