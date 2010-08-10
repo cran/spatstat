@@ -42,7 +42,7 @@
     The values of any spatial covariates (other than the Cartesian
     coordinates) required by the model.
     Either a data frame, or a list whose entries are images,
-    functions or single numbers. See Details.
+    functions, windows or single numbers. See Details.
   }
   \item{correction}{
     The name of the edge correction to be used. The default 
@@ -195,11 +195,13 @@
 
       Typically the argument \code{covariates} is a list,
       with names corresponding to variables in the \code{trend} formula.
-      The entries in the list are pixel images
+      Each entry in the list is either a pixel image
       (giving the values of a spatial covariate at 
-      a fine grid of locations) or functions (which can be evaluated
+      a fine grid of locations), or a function (which can be evaluated
       at any location \code{(x,y)} to obtain the value of the spatial
-      covariate) or single numbers (indicating a covariate that is
+      covariate), or a window (interpreted as a logical variable
+      which is \code{TRUE} inside the window and \code{FALSE} outside it)
+      or a single number (indicating a covariate that is
       constant in this dataset). 
       Each entry in the list must be an image (object of class \code{"im"},
       see \code{\link{im.object}}), or a \code{function(x,y)}, or

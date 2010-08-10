@@ -16,7 +16,7 @@
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  start=NULL,control=list(nrep=1e5),
+  start=NULL,control=list(nrep=1e5, expand=default.expand(Y)),
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
@@ -404,7 +404,8 @@
   \code{\link{Jest}},
   \code{\link{pcf}},
   \code{\link{ppp}},
-  \code{\link{ppm}}
+  \code{\link{ppm}},
+  \code{\link{default.expand}}
 }
 \examples{
  data(simdat)

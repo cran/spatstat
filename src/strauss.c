@@ -35,6 +35,10 @@ Cdata *straussinit(state, model, algo)
   strauss->r      = model.par[2]; /* No longer passed as r^2 */
   strauss->r2     = strauss->r * strauss->r; 
   strauss->period = model.period;
+#ifdef MHDEBUG
+  Rprintf("Initialising Strauss beta=%lf, gamma=%lf, r=%lf\n", 
+	  strauss->beta, strauss->gamma, strauss->r);
+#endif
   /* is the model numerically equivalent to hard core ? */
   strauss->hard   = (strauss->gamma < DOUBLE_EPS);
   strauss->loggamma = (strauss->hard) ? 0 : log(strauss->gamma);

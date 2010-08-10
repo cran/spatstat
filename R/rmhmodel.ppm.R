@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.38 $   $Date: 2010/07/20 08:30:00 $
+#  $Revision: 2.42 $   $Date: 2010/08/10 01:10:55 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -16,7 +16,8 @@ list(
        sigma   <- inte$par$sigma
        epsilon <- inte$par$epsilon
        return(list(cif='lennard',
-                   par=list(sigma=sigma, epsilon=epsilon)))
+                   par=list(sigma=sigma, epsilon=epsilon),
+                   ntypes=1))
      },
      "Fiksel process" =
      function(coeffs, inte) {
@@ -25,13 +26,15 @@ list(
        kappa <- inte$par$kappa
        a <- inte$interpret(coeffs,inte)$param$a
        return(list(cif='fiksel',
-                   par=list(r=r,hc=hc,kappa=kappa,a=a)))
+                   par=list(r=r,hc=hc,kappa=kappa,a=a),
+                   ntypes=1))
      },
      "Diggle-Gates-Stibbard process" =
      function(coeffs, inte) {
        rho   <- inte$par$rho
        return(list(cif='dgs',
-                   par=list(rho=rho)))
+                   par=list(rho=rho),
+                   ntypes=1))
      },
      "Diggle-Gratton process" =
      function(coeffs, inte) {
@@ -39,13 +42,15 @@ list(
        delta <- inte$par$delta
        rho   <- inte$par$rho
        return(list(cif='diggra',
-                   par=list(kappa=kappa,delta=delta,rho=rho)))
+                   par=list(kappa=kappa,delta=delta,rho=rho),
+                   ntypes=1))
      },
      "Hard core process" =
      function(coeffs, inte) {
        hc <- inte$par$hc
        return(list(cif='hardcore',
-                   par=list(hc=hc)))
+                   par=list(hc=hc),
+                   ntypes=1))
      },
      "Geyer saturation process" =
      function(coeffs, inte) {
@@ -53,21 +58,24 @@ list(
        r <- inte$par$r
        sat <- inte$par$sat
        return(list(cif='geyer',
-                   par=list(gamma=gamma,r=r,sat=sat)))
+                   par=list(gamma=gamma,r=r,sat=sat),
+                   ntypes=1))
      },
      "Soft core process" =
      function(coeffs, inte) {
        kappa <- inte$par$kappa
        sigma <- inte$interpret(coeffs,inte)$param$sigma
        return(list(cif="sftcr",
-                   par=list(sigma=sigma,kappa=kappa)))
+                   par=list(sigma=sigma,kappa=kappa),
+                   ntypes=1))
      },
      "Strauss process" =
      function(coeffs, inte) {
        gamma <- inte$interpret(coeffs,inte)$param$gamma
        r <- inte$par$r
        return(list(cif = "strauss",
-                   par = list(gamma = gamma, r = r)))
+                   par = list(gamma = gamma, r = r),
+                   ntypes=1))
      },
      "Strauss - hard core process" =
      function(coeffs, inte) {
@@ -75,7 +83,8 @@ list(
        r <- inte$par$r
        hc <- inte$par$hc
        return(list(cif='straush',
-                   par=list(gamma=gamma,r=r,hc=hc)))
+                   par=list(gamma=gamma,r=r,hc=hc),
+                   ntypes=1))
      },
      "Multitype Strauss process" =
      function(coeffs, inte) {
@@ -84,7 +93,8 @@ list(
        # interaction parameters gamma[i,j]
        gamma <- (inte$interpret)(coeffs, inte)$param$gammas
        return(list(cif='straussm',
-                   par=list(gamma=gamma,radii=radii)))
+                   par=list(gamma=gamma,radii=radii),
+                   ntypes=ncol(radii)))
      },
      "Multitype Strauss Hardcore process" =
      function(coeffs, inte) {
@@ -95,27 +105,71 @@ list(
        # interaction parameters gamma[i,j]
        gamma <- (inte$interpret)(coeffs, inte)$param$gammas
        return(list(cif='straushm',
-                   par=list(gamma=gamma,iradii=iradii,hradii=hradii)))
+                   par=list(gamma=gamma,iradii=iradii,hradii=hradii),
+                   ntypes=ncol(iradii)))
      },
      "Piecewise constant pairwise interaction process" =
      function(coeffs, inte) {
        r <- inte$par$r
        gamma <- (inte$interpret)(coeffs, inte)$param$gammas
        h <- stepfun(r, c(gamma, 1))
-       return(list(cif='lookup', par=list(h=h)))
+       return(list(cif='lookup', par=list(h=h),
+                   ntypes=1))
      },
      "Area-interaction process" =
      function(coeffs, inte) {
        r <- inte$par$r
        eta <- (inte$interpret)(coeffs, inte)$param$eta
-       return(list(cif='areaint', par=list(eta=eta,r=r)))
+       return(list(cif='areaint', par=list(eta=eta,r=r), ntypes=1))
      },
      "hybrid Geyer process" =
      function(coeffs, inte) {
        r <- inte$par$r
        sat <- inte$par$sat
        gamma <- (inte$interpret)(coeffs,inte)$param$gammas
-       return(list(cif='badgey',par=list(gamma=gamma,r=r,sat=sat)))
+       return(list(cif='badgey',par=list(gamma=gamma,r=r,sat=sat), ntypes=1))
+     },
+     "Hybrid interaction"=
+     function(coeffs, inte){
+       # for hybrids, $par is a list of the component interactions
+       interlist <- inte$par
+       N <- length(interlist)
+       cifs <- character(N)
+       pars <- vector(mode="list", length=N)
+       ntyp <- integer(N)
+       for(i in 1:N) {
+         interI <- interlist[[i]]
+         # get RMH mapping for I-th component
+         siminfoI <- .Spatstat.Rmhinfo[[interI$name]]
+         if(is.null(siminfoI))
+           stop(paste("Simulation of a fitted", sQuote(interI$name),
+                      "has not yet been implemented"))
+         # nameI is the tag that identifies I-th component in hybrid
+         nameI  <- names(interlist)[[i]]
+         nameI. <- paste(nameI, ".", sep="")
+         # find coefficients with prefix that exactly matches nameI.
+         Cname  <- names(coeffs)
+         prefixlength <- nchar(nameI.)
+         Cprefix <- substr(Cname, 1, prefixlength)
+         relevant <- (Cprefix == nameI.)
+         if(any(relevant)) {
+           # extract coefficients
+           coeffsI <- coeffs[relevant]
+           names(coeffsI) <-
+             substr(Cname[relevant], prefixlength+1, max(nchar(Cname)))
+           # compute RMH info
+           ZI <- siminfoI(coeffsI, interI)
+           cifs[i] <- ZI$cif
+           pars[[i]] <- ZI$par
+           ntyp[i] <- ZI$ntypes
+         }
+       }
+       nt <- unique(ntyp[ntyp != 1])
+       if(length(nt) > 1)
+         stop(paste("Hybrid components have different numbers of types:",
+                    commasep(nt)))
+       Z <- list(cif=cifs, par=pars, ntypes=ntyp)
+       return(Z)
      }
 )
 
@@ -128,7 +182,6 @@ list(
 #
 #           OrdThresh                <none>
 #
-#  Implementing rmh.default for the others is probably too hard.
 
 
 rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
@@ -230,15 +283,13 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       cat("Evaluating trend...")
     
     if(Y$stationary) {
-      # first order terms (beta or beta[i]) are carried in Z$par$beta
-      Z$par[["beta"]] <- Y$trend$value
-      # Note the construction m[["name"]] <- value
-      # ensures that m does not need to be coerced from vector to list
+      # first order terms (beta or beta[i]) are carried in Z$par
+      beta <- as.numeric(Y$trend$value)
       Z$trend <- NULL
     } else {
       # trend terms present
       # all first order effects are subsumed in Z$trend
-      Z$par[["beta"]] <- if(!Y$marked) 1 else rep(1, length(Z$types))
+      beta <- if(!Y$marked) 1 else rep(1, length(Z$types))
       # predict on window possibly larger than original data window
       Z$trend <- 
         if(control$condtype != "none" && wsim$type == "mask")
@@ -246,9 +297,29 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
         else 
           predict(X, window=wsim, type="trend")
     }
+    
+    Ncif <- length(Z$cif)
+    if(Ncif == 1) {
+      # single interaction
+      Z$par[["beta"]] <- beta
+    } else {
+      # hybrid interaction
+      if(all(Z$ntypes == 1)) {
+        # unmarked model: scalar 'beta' is absorbed in first cif
+        absorb <- 1
+      } else {
+        # multitype model: vector 'beta' is absorbed in a multitype cif
+        absorb <- min(which(Z$ntypes > 1))
+      }
+      Z$par[[absorb]]$beta <- beta
+      # other cifs have par$beta = 1 
+      for(i in (1:Ncif)[-absorb])
+        Z$par[[i]]$beta <- rep(1, Z$ntypes[i])
+    }
+    
     if(verbose)
       cat("done.\n")
-    Z <- rmhmodel(Z)
+    Z <- rmhmodel(Z, ...)
     return(Z)
 }
 

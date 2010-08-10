@@ -3,7 +3,7 @@
 \title{Fit the Thomas Point Process by Minimum Contrast}
 \description{
   Fits the Thomas point process to a point pattern dataset by the Method of
-  Minimum Contrast.
+  Minimum Contrast using the K function.
 }
 \usage{
 thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
@@ -126,9 +126,10 @@ thomas.estK(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
   Statistical Inference and Simulation for Spatial Point Processes.
   Chapman and Hall/CRC, Boca Raton.
 
-  Waagepetersen, R. (2006).
-  An estimation function approach to inference for inhomogeneous
-  Neyman-Scott processes. Submitted.
+  Waagepetersen, R. (2007)
+  An estimating function approach to inference for
+  inhomogeneous Neyman-Scott processes.
+  \emph{Biometrics} \bold{63}, 252--258.
 }
 \author{Rasmus Waagepetersen
   \email{rw@math.auc.dk}

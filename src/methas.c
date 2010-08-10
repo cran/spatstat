@@ -5,9 +5,12 @@
 void fexitc(const char *msg);
 
 
-/* to switch on debugging code, 
-   insert the line: #define MHDEBUG 1
+/* To switch on debugging code, 
+   insert the line: #define MH_DEBUG TRUE
 */
+#ifndef MH_DEBUG
+#define MH_DEBUG FALSE
+#endif
 
 /* 
    This is the value of 'ix' when we are proposing a birth.
@@ -17,28 +20,34 @@ void fexitc(const char *msg);
 
 extern Cifns getcif(char *);
 
-SEXP xmethas(SEXP cifname,
-	    SEXP par,
-	    SEXP period,
-	    SEXP xprop,
-	    SEXP yprop,
-	    SEXP mprop,
-	    SEXP ntypes,
-            SEXP nrep,
-	    SEXP p,
-	    SEXP q,
-	    SEXP nverb,
-	    SEXP x,
-	    SEXP y,
-	    SEXP marks,
-	    SEXP ncond,
-	    SEXP fixall)
+SEXP xmethas(
+	     SEXP ncif,
+	     SEXP cifname,
+	     SEXP par,
+	     SEXP parlen,
+	     SEXP period,
+	     SEXP xprop,
+	     SEXP yprop,
+	     SEXP mprop,
+	     SEXP ntypes,
+	     SEXP nrep,
+	     SEXP p,
+	     SEXP q,
+	     SEXP nverb,
+	     SEXP x,
+	     SEXP y,
+	     SEXP marks,
+	     SEXP ncond,
+	     SEXP fixall)
 {
   char *cifstring;
   double cvd, cvn, qnodds, anumer, adenom;
-  int verb, marked, needupd, itype;
+  double *parvector;
+  int verb, marked, mustupdate, itype;
   int nfree;
   int irep, ix, j;
+  int Ncif; 
+  int *plength;
   long Nmore;
   double *xx, *yy, *xpropose, *ypropose;
   int    *mm,      *mpropose;
@@ -48,13 +57,23 @@ SEXP xmethas(SEXP cifname,
   Model model;
   Algor algo;
   Propo birthprop, deathprop, shiftprop;
-  Cifns cif;
-  Cdata *cdata;
+
+  /* The following variables are used only for a non-hybrid interaction */
+  Cifns thecif;     /* cif structure */
+  Cdata *thecdata;  /* pointer to initialised cif data block */
+
+  /* The following variables are used only for a hybrid interaction */
+  Cifns *cif;       /* vector of cif structures */
+  Cdata **cdata;    /* vector of pointers to initialised cif data blocks */
+  int *needupd;     /* vector of logical values */
+  int   k;          /* loop index for cif's */
 
   /* =================== Protect R objects from garbage collector ======= */
 
+  PROTECT(ncif      = AS_INTEGER(ncif)); 
   PROTECT(cifname   = AS_CHARACTER(cifname)); 
   PROTECT(par       = AS_NUMERIC(par)); 
+  PROTECT(parlen    = AS_INTEGER(parlen)); 
   PROTECT(period    = AS_NUMERIC(period)); 
   PROTECT(xprop     = AS_NUMERIC(xprop)); 
   PROTECT(yprop     = AS_NUMERIC(yprop)); 
@@ -70,11 +89,16 @@ SEXP xmethas(SEXP cifname,
   PROTECT(fixall    = AS_INTEGER(fixall)); 
   PROTECT(ncond     = AS_INTEGER(ncond)); 
 
-                    /* that's 16 protected objects */
+                    /* that's 18 protected objects */
 
   /* =================== Translate arguments from R to C ================ */
 
-  cifstring = (char *) STRING_VALUE(cifname);
+  /* 
+     Ncif is the number of cif's
+     plength[i] is the number of parameters in the i-th cif
+  */
+  Ncif = *(INTEGER_POINTER(ncif));
+  plength = INTEGER_POINTER(parlen);
 
   /* copy RMH algorithm parameters */
   algo.nrep   = *(INTEGER_POINTER(nrep));
@@ -85,7 +109,7 @@ SEXP xmethas(SEXP cifname,
   algo.ncond =  *(INTEGER_POINTER(ncond));
 
   /* copy model parameters without interpreting them */
-  model.par = NUMERIC_POINTER(par);
+  model.par = parvector = NUMERIC_POINTER(par);
   model.period = NUMERIC_POINTER(period);
   model.ntypes = *(INTEGER_POINTER(ntypes));
   marked = (model.ntypes > 1);
@@ -113,7 +137,7 @@ SEXP xmethas(SEXP cifname,
       state.marks[j] = mm[j];
     }
   }
-#ifdef MHDEBUG
+#if MH_DEBUG
   Rprintf("\tnpts=%d\n", state.npts);
 #endif
 
@@ -125,26 +149,50 @@ SEXP xmethas(SEXP cifname,
      mpropose is only used for marked patterns.
      Note 'mprop' is always a valid pointer */
 
+  /* ================= Allocate space for cifs etc ========== */
+
+  if(Ncif > 1) {
+    cif = (Cifns *) R_alloc(Ncif, sizeof(Cifns));
+    cdata = (Cdata **) R_alloc(Ncif, sizeof(Cdata *));
+    needupd = (int *) R_alloc(Ncif, sizeof(int));
+  }
 
   /* ================= Determine process to be simulated  ========== */
   
-  /* Get the three function pointers */
-  cif = getcif(cifstring);
-
-  needupd = NEED_UPDATE(cif);
-
-  if(cif.marked && !marked)
-    fexitc("cif is for a marked point process, but proposal data are not marked points; bailing out.");
+  /* Get the cif's */
+  if(Ncif == 1) {
+    cifstring = (char *) STRING_VALUE(cifname);
+    thecif = getcif(cifstring);
+    mustupdate = NEED_UPDATE(thecif);
+    if(thecif.marked && !marked)
+      fexitc("cif is for a marked point process, but proposal data are not marked points; bailing out.");
+  } else {
+    mustupdate = FALSE;
+    for(k = 0; k < Ncif; k++) {
+      cifstring = (char *) CHAR(STRING_ELT(cifname, k));
+      cif[k] = getcif(cifstring);
+      needupd[k] = NEED_UPDATE(cif[k]);
+      if(needupd[k])
+	mustupdate = TRUE;
+      if(cif[k].marked && !marked)
+	fexitc("component cif is for a marked point process, but proposal data are not marked points; bailing out.");
+    }
+  }
 
   /* ================= Initialise algorithm ==================== */
  
-  /* Initialise random number generator */
-  GetRNGstate();
-
   /* Interpret the model parameters and initialise auxiliary data */
-  cdata = (*(cif.init))(state, model, algo);
+  if(Ncif == 1) {
+    thecdata = (*(thecif.init))(state, model, algo);
+  } else {
+    for(k = 0; k < Ncif; k++) {
+      if(k > 0)
+	model.par += plength[k-1];
+      cdata[k] = (*(cif[k].init))(state, model, algo);
+    }
+  }
 
-  /* set the fixed elements of the proposal objects */
+  /* Set the fixed elements of the proposal objects */
   birthprop.itype = BIRTH;
   deathprop.itype = DEATH;
   shiftprop.itype = SHIFT;
@@ -158,229 +206,56 @@ SEXP xmethas(SEXP cifname,
 
   /* ============= Run Metropolis-Hastings  ================== */
 
-  for(irep = 0; irep < algo.nrep; irep++) {
+  /* Initialise random number generator */
+  GetRNGstate();
 
-#ifdef MHDEBUG
-    Rprintf("iteration %d\n", irep);
-#endif
+  if(Ncif == 1) {
+    /* single interaction */
+#define MH_SINGLE TRUE
+    if(marked) {
+      /* marked process */
+#define MH_MARKED TRUE
 
-    if(verb && ((irep+1)%algo.nverb == 0))
-      Rprintf("iteration %d\n", irep+1);
+      /* run loop */
+#include "mhloop.h"
 
-    itype = REJECT;
+    } else {
+      /* unmarked process */
+#undef MH_MARKED
+#define MH_MARKED FALSE
 
-    nfree = state.npts - algo.ncond;  /* number of 'free' points */
+      /* run loop */
+#include "mhloop.h"
 
-    /* ................  generate proposal ..................... */
-    /* Shift or birth/death: */
-    if(unif_rand() > algo.p) {
-#ifdef MHDEBUG
-    Rprintf("propose birth or death\n");
-#endif
-      /* Birth/death: */
-      if(unif_rand() > algo.q) {
-	/* Propose birth: */
-	birthprop.u = xpropose[irep];
-	birthprop.v = ypropose[irep];
-	if(marked)
-	  birthprop.mrk = mpropose[irep];
-#ifdef MHDEBUG
-	if(marked)
-	  Rprintf("propose birth at (%lf, %lf) with mark %d\n", 
-		  birthprop.u, birthprop.v, birthprop.mrk);
-	else 
-	  Rprintf("propose birth at (%lf, %lf)\n", birthprop.u, birthprop.v);
-#endif
-	/* evaluate conditional intensity */
-	anumer = (*(cif.eval))(birthprop, state, cdata);
-	adenom = qnodds*(nfree+1);
-#ifdef MHDEBUG
-	Rprintf("cif = %lf, Hastings ratio = %lf\n", anumer, anumer/adenom);
-#endif
-	/* accept/reject */
-	if(unif_rand() * adenom < anumer) {
-#ifdef MHDEBUG
-	  Rprintf("accepted birth\n");
-#endif
-	  itype = BIRTH;  /* Birth proposal accepted. */
-	}
-      } else if(nfree > 0) {
-	/* Propose death: */
-	ix = floor(nfree * unif_rand());
-	if(ix < 0) ix = 0;
-	ix = algo.ncond + ix;
-	if(ix >= state.npts) ix = state.npts - 1;
-	deathprop.ix = ix;
-	deathprop.u  = state.x[ix];
-	deathprop.v  = state.y[ix];
-	if(marked) 
-	  deathprop.mrk = state.marks[ix];
-#ifdef MHDEBUG
-	if(marked)
-	  Rprintf("propose death of point %d = (%lf, %lf) with mark %d\n", 
-		  ix, deathprop.u, deathprop.v, deathprop.mrk);
-	else 
-	  Rprintf("propose death of point %d = (%lf, %lf)\n", 
-		  ix, deathprop.u, deathprop.v);
-#endif
-	/* evaluate conditional intensity */
-	adenom = (*(cif.eval))(deathprop, state, cdata);
-	anumer = qnodds * nfree;
-#ifdef MHDEBUG
-	Rprintf("cif = %lf, Hastings ratio = %lf\n", adenom, anumer/adenom);
-#endif
-	/* accept/reject */
-	if(unif_rand() * adenom < anumer) {
-#ifdef MHDEBUG
-	  Rprintf("accepted death\n");
-#endif
-	  itype = DEATH; /* Death proposal accepted. */
-	}
-      }
-    } else if(nfree > 0) {
-      /* Propose shift: */
-      /* point to be shifted */
-      ix = floor(nfree * unif_rand());
-      if(ix < 0) ix = 0;
-      ix = algo.ncond + ix;
-      if(ix >= state.npts) ix = state.npts - 1;
-      deathprop.ix = ix;
-      deathprop.u  = state.x[ix];
-      deathprop.v  = state.y[ix];
-      if(marked) 
-	deathprop.mrk = state.marks[ix];
-      /* where to shift */
-      shiftprop.u = xpropose[irep]; 
-      shiftprop.v = ypropose[irep];
-      if(marked) 
-	shiftprop.mrk = (algo.fixall) ? deathprop.mrk : mpropose[irep];
-      shiftprop.ix = ix;
-#ifdef MHDEBUG
-      if(marked)
- 	Rprintf("propose shift of point %d = (%lf, %lf)[mark %d] to (%lf, %lf)[mark %d]\n", 
-		ix, deathprop.u, deathprop.v, deathprop.mrk, 
-		shiftprop.u, shiftprop.v, shiftprop.mrk);
-      else 
- 	Rprintf("propose shift of point %d = (%lf, %lf) to (%lf, %lf)\n", 
-		ix, deathprop.u, deathprop.v, shiftprop.u, shiftprop.v);
-#endif
-      /* evaluate cif in two stages */
-      cvd = (*(cif.eval))(deathprop, state, cdata);
-      cvn = (*(cif.eval))(shiftprop, state, cdata);
-#ifdef MHDEBUG
-	Rprintf("cif[old] = %lf, cif[new] = %lf, Hastings ratio = %lf\n", 
-		cvd, cvn, cvn/cvd);
-#endif
-      /* accept/reject */
-      if(unif_rand() * cvd < cvn) {
-#ifdef MHDEBUG
-	Rprintf("accepted shift\n");
-#endif
-	itype = SHIFT;          /* Shift proposal accepted . */
-      }
     }
-    if(itype != REJECT) {
-      /* ....... implement the transition ............  */
-      if(itype == BIRTH) {      
-	/* Birth transition */
-	/* add point at (u,v) */
-#ifdef MHDEBUG
-	if(marked)
-	  Rprintf("implementing birth at (%lf, %lf) with mark %d\n", 
-		  birthprop.u, birthprop.v, birthprop.mrk);
-	else
-	  Rprintf("implementing birth at (%lf, %lf)\n", 
-		  birthprop.u, birthprop.v);
-#endif
-	if(state.npts + 1 > state.npmax) {
-#ifdef MHDEBUG
-	  Rprintf("!!!!!!!!!!! storage overflow !!!!!!!!!!!!!!!!!\n");
-#endif
-	  /* storage overflow; allocate more storage */
-	  Nmore = 2 * state.npmax;
-	  state.x = (double *) S_realloc((char *) state.x, 
-					 Nmore,  state.npmax, 
-					 sizeof(double));
-	  state.y = (double *) S_realloc((char *) state.y, 
-					 Nmore,  state.npmax, 
-					 sizeof(double));
-	  if(marked)
-	    state.marks = (int *) S_realloc((char *) state.marks, 
-					    Nmore,  state.npmax, 
-					    sizeof(int));
-	  state.npmax = Nmore;
+  } else {
+    /* hybrid interaction */
+#undef MH_SINGLE
+#define MH_SINGLE FALSE
+    if(marked) {
+      /* marked process */
+#undef MH_MARKED
+#define MH_MARKED TRUE
 
-	  /* call the initialiser again, to allocate additional space */
-	  cdata = (*(cif.init))(state, model, algo);
-	} 
-	/* Update auxiliary variables first */
-	if(needupd)
-	  (*(cif.update))(state, birthprop, cdata);
-	/* Now add point */
-	state.x[state.npts] = birthprop.u;
-	state.y[state.npts] = birthprop.v;
-	if(marked) 
-	  state.marks[state.npts] = birthprop.mrk;
-	state.npts     = state.npts + 1;
-#ifdef MHDEBUG
-	Rprintf("\tnpts=%d\n", state.npts);
-#endif
-      } else if(itype==DEATH) { 
-	/* Death transition */
-	/* delete point x[ix], y[ix] */
-	if(needupd)
-	  (*(cif.update))(state, deathprop, cdata);
-	ix = deathprop.ix;
-	state.npts = state.npts - 1;
-#ifdef MHDEBUG
-	Rprintf("implementing death of point %d\n", ix);
-	Rprintf("\tnpts=%d\n", state.npts);
-#endif
-	if(ix < state.npts) {
-	  if(!marked) {
-	    for(j=ix; j < state.npts; j++) {
-	      state.x[j] = state.x[j+1];
-	      state.y[j] = state.y[j+1];
-	    }
-	  } else {
-	    for(j = ix; j < state.npts; j++) {
-	      state.x[j] = state.x[j+1];
-	      state.y[j] = state.y[j+1];
-	      state.marks[j] = state.marks[j+1];
-	    }
-	  }
-	}
-      } else {              
-	/* Shift transition */
-	/* Shift (x[ix], y[ix]) to (u,v) */
-#ifdef MHDEBUG
-	if(marked) 
-	  Rprintf("implementing shift from %d = (%lf, %lf)[%d] to (%lf, %lf)[%d]\n", 
-		  deathprop.ix, deathprop.u, deathprop.v, deathprop.mrk,
-		  shiftprop.u, shiftprop.v, shiftprop.mrk);
-	else 
-	  Rprintf("implementing shift from %d = (%lf, %lf) to (%lf, %lf)\n", 
-		  deathprop.ix, deathprop.u, deathprop.v,
-		  shiftprop.u, shiftprop.v);
-	Rprintf("\tnpts=%d\n", state.npts);
-#endif
-	if(needupd)
-	  (*(cif.update))(state, shiftprop, cdata);
-	ix = shiftprop.ix;
-	state.x[ix] = shiftprop.u;
-	state.y[ix] = shiftprop.v;
-	if(marked) 
-	  state.marks[ix] = shiftprop.mrk;
-      }
-    } 
-#ifdef MHDEBUG
-    else Rprintf("rejected\n");
-#endif
+      /* run loop */
+#include "mhloop.h"
+
+    } else {
+      /* unmarked process */
+#undef MH_MARKED
+#define MH_MARKED FALSE
+
+      /* run loop */
+#include "mhloop.h"
+
+    }
   }
 
   /* relinquish random number generator */
   PutRNGstate();
 
+  /* ============= Done  ================== */
+  
   /* return list(x,y) or list(x,y,marks) */
   PROTECT(xout = NEW_NUMERIC(state.npts));
   PROTECT(yout = NEW_NUMERIC(state.npts));
@@ -400,13 +275,13 @@ SEXP xmethas(SEXP cifname,
     PROTECT(out = NEW_LIST(2));
     SET_VECTOR_ELT(out, 0, xout);
     SET_VECTOR_ELT(out, 1, yout);
-    UNPROTECT(19);  /* 16 arguments plus xout, yout, out */
+    UNPROTECT(21);  /* 18 arguments plus xout, yout, out */
   } else {
     PROTECT(out = NEW_LIST(3)); 
     SET_VECTOR_ELT(out, 0, xout);
     SET_VECTOR_ELT(out, 1, yout); 
     SET_VECTOR_ELT(out, 2, mout);
-    UNPROTECT(20);  /* 16 arguments plus xout, yout, mout, out */
+    UNPROTECT(22);  /* 18 arguments plus xout, yout, mout, out */
   }
 
   return(out);

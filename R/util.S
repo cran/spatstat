@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.57 $    $Date: 2010/06/08 08:51:01 $
+#    $Revision: 1.58 $    $Date: 2010/08/09 07:13:00 $
 #
 #  (a) for matrices only:
 #
@@ -472,4 +472,31 @@ singlestring <- function(s, coll="") {
   return(s)
 }
 
-  
+verbalogic <- function(x, op="and") {
+  stopifnot(is.character(x))
+  istrue <- (x == "TRUE")
+  isfalse <- (x == "FALSE")
+  isvariable <- !istrue & !isfalse
+  y <- x[isvariable]
+  switch(op,
+         and={
+           if(any(isfalse))
+             return("FALSE")
+           if(all(istrue))
+             return("TRUE")
+           return(paste(y, collapse=" and "))
+         },
+         or={
+           if(all(isfalse))
+             return("FALSE")
+           if(any(istrue))
+             return("TRUE")
+           return(paste(y, collapse=" or "))
+         },
+         not={
+           x[isfalse] <- "TRUE"
+           x[istrue] <- "FALSE"
+           x[isvariable] <- paste("not {", y, "}")
+         },
+         stop(paste("Unrecognised operation", sQuote(op))))
+}

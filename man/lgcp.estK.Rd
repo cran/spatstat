@@ -7,7 +7,7 @@
   to a point pattern dataset by the Method of Minimum Contrast.
 }
 \usage{
-lgcp.estK(X, startpar=list(sigma2=1,alpha=1), lambda=NULL,
+lgcp.estK(X, startpar=c(sigma2=1,alpha=1), lambda=NULL,
 q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
 }
 \arguments{
@@ -127,14 +127,20 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
     statistic computed from the fitted model parameters.
   }
 }
+\note{
+  This function is considerably slower than \code{\link{lgcp.estpcf}}
+  because of the computation time required for the integral
+  in the \eqn{K}-function.
+}
 \references{
   Moller, J. and Waagepetersen, R. (2003).
   Statistical Inference and Simulation for Spatial Point Processes.
   Chapman and Hall/CRC, Boca Raton.
 
-  Waagepetersen, R. (2006).
-  An estimation function approach to inference for inhomogeneous
-  Neyman-Scott processes. Submitted.
+  Waagepetersen, R. (2007)
+  An estimating function approach to inference for
+  inhomogeneous Neyman-Scott processes.
+  \emph{Biometrics} \bold{63}, 252--258.
 }
 \author{Rasmus Waagepetersen
   \email{rw@math.auc.dk}.
@@ -149,10 +155,12 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
   \code{\link{Kest}}
 }
 \examples{
+  \donttest{
     data(redwood)
     u <- lgcp.estK(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
+  }
 }
 \keyword{spatial}
 \keyword{models}

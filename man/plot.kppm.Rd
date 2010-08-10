@@ -6,7 +6,7 @@
   displaying the fitted intensity and the fitted \eqn{K}-function.
 }
 \usage{
-  \method{plot}{kppm}(x, ..., what=c("intensity", "K"))
+  \method{plot}{kppm}(x, ..., what=c("intensity", "statistic"))
 }
 \arguments{
   \item{x}{
@@ -32,11 +32,11 @@
 
   By default, this command will first plot the fitted intensity of the model,
   using \code{\link{plot.ppm}}, and then plot the empirical and fitted
-  inhomogeneous \eqn{K}-functions, using \code{\link{plot.fv}}.
+  summary statistics, using \code{\link{plot.fv}}.
 
   The choice of plots (and the order in which they are
   displayed) is controlled by the argument \code{what}.
-  The options (partially matched) are \code{"intensity"} and \code{"K"}.
+  The options (partially matched) are \code{"intensity"} and \code{"statistic"}.
 
   The option \code{what="intensity"} will be ignored if the
   model is stationary.

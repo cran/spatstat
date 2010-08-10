@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.35 $   $Date: 2010/01/08 23:28:06 $
+#   $Revision: 1.36 $   $Date: 2010/08/05 03:01:31 $
 #
 #
 #   calculate pair correlation function
@@ -113,15 +113,9 @@ pcf.ppp <- function(X, ..., r=NULL,
     return(NULL)
   }
   
-  # which corrections have been computed?
-  nama2 <- names(out)
-  corrxns <- rev(nama2[nama2 != "r"])
-
-  # default is to display them all
-  attr(out, "fmla") <- deparse(as.formula(paste(
-                       "cbind(",
-                        paste(corrxns, collapse=","),
-                        ") ~ r")))
+  # default is to display all corrections
+  attr(out, "fmla") <- . ~ r
+  #
   unitname(out) <- unitname(X)
   return(out)
 }
@@ -219,7 +213,7 @@ function(X, ..., method="c") {
 
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
-          "r", substitute(pcf(r), NULL), "pcf", cbind(pcf, theo) ~ r, alim,
+          "r", substitute(pcf(r), NULL), "pcf", . ~ r, alim,
           c("r", "%s(r)", "%s[pois](r)"),
           c("distance argument r",
             "estimate of %s by numerical differentiation",

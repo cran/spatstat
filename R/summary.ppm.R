@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.36 $   $Date: 2010/06/04 13:59:27 $
+#    $Revision: 1.37 $   $Date: 2010/08/08 02:05:05 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -106,6 +106,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     callargs <- names(as.list(callexpr[[1]]))
     # Data frame of covariates was called 'data' in versions up to 1.4-x
     y$has.covars <- !is.null(callargs) && !is.na(pmatch("data", callargs))
+    # conservative guess
+    y$uses.covars <- y$has.covars
   }
     
   ######  Arguments in call ####################################

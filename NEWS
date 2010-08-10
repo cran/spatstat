@@ -1,3 +1,70 @@
+	CHANGES IN spatstat VERSION 1.20-2
+
+OVERVIEW
+
+    o   Extensions to minimum contrast estimation.
+
+    o   Bug fix in simulation of Lennard-Jones model.
+	
+    o	More support for distance functions.
+	
+    o	Changes to point process simulations.
+
+
+NEW FUNCTIONS
+
+    o   thomas.estpcf
+    	Fit Thomas process model by minimum contrast using the
+	pair correlation function (instead of the K-function).
+
+    o   matclust.estpcf
+    	Fit Matern Cluster model by minimum contrast using the
+	pair correlation function (instead of the K-function).
+
+    o   lgcp.estpcf
+    	Fit log-Gaussian Cox process model by minimum contrast using the
+	pair correlation function (instead of the K-function).
+
+    o   contour.distfun,  persp.distfun
+    	Methods for 'contour' and 'persp' for distance functions
+
+    o   default.expand
+        Computes default window for simulation of a fitted point process model.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   kppm
+    	Models can now be fitted using either the K-function
+	or the pair correlation function.
+
+    o   ppm
+    	The list of covariates can now include windows 
+	(objects of class 'owin'). A window will be treated
+	as a logical covariate that equals TRUE inside the window
+	and FALSE outside it.
+
+    o   plot.distfun
+    	Pixel resolution can now be controlled.
+
+    o   envelope.ppm, qqplot.ppm
+    	The default value of 'control' has changed;
+	simulation results may be slightly different.
+
+    o   rmh
+    	Slightly accelerated.
+
+BUGS
+
+    o   rmh
+    	Simulation of the Lennard-Jones model (cif = 'lennard') was incorrect
+	due to an obscure bug, introduced in spatstat 1.20-1.
+	Fixed.
+
+    o   thomas.estK, matclust.estK, lgcp.estK
+    	The value of 'lambda' (if given) 
+	was ignored if X was a point pattern.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.20-1
 
 OVERVIEW

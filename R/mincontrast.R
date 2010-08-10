@@ -27,7 +27,7 @@ mincontrast <- function(observed, theoretical, startpar,
   # determine range of r values
   rmin <- ctrl$rmin
   rmax <- ctrl$rmax
-  if(!is.null(rmin) && !is.null(rmax))
+  if(!is.null(rmin) && !is.null(rmax)) 
     stopifnot(rmin < rmax && rmin >= 0)
   else {
     alim <- attr(observed, "alim")
@@ -48,6 +48,26 @@ mincontrast <- function(observed, theoretical, startpar,
   sub <- (rvals >= rmin) & (rvals <= rmax)
   rvals <- rvals[sub]
   obs <- obs[sub]
+  # sanity clause
+  if(!all(ok <- is.finite(obs))) {
+    whinge <- paste("Some values of the empirical function",
+                    sQuote(explain$fname),
+                    "were infinite or NA.")
+    iMAX <- max(which(ok))
+    iMIN <- min(which(!ok)) + 1
+    if(iMAX > iMIN && all(ok[iMIN:iMAX])) {
+      rmin <- rvals[iMIN]
+      rmax <- rvals[iMAX]
+      obs   <- obs[iMIN:iMAX]
+      rvals <- rvals[iMIN:iMAX]
+      sub[sub] <- ok
+      warning(paste(whinge,
+                    "Range of r values was reset to",
+                    prange(c(rmin, rmax))),
+              call.=FALSE)
+    } else stop(paste(whinge, "Please choose a narrower range [rmin, rmax]"),
+                call.=FALSE)
+  }
   # for efficiency
   obsq <- obs^(ctrl$q)
   # define objective function
@@ -176,10 +196,13 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 
   if(inherits(X, "fv")) {
     K <- X
+    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+      warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)
     dataname <- paste("Kest(", dataname, ")", sep="")
-    lambda <- summary(X)$intensity
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
   } else 
     stop("Unrecognised format for argument X")
 
@@ -190,12 +213,14 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
       return(rep(Inf, length(rvals)))
     pi*rvals^2+(1-exp(-rvals^2/(4*par[2])))/par[1]
   }
+  
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
-                        fvlab=list(label="Kfit(r)",
+                        fvlab=list(label="%s[fit](r)",
                           desc="minimum contrast fit of Thomas process"),
                         explain=list(dataname=dataname,
-                          fname="K", modelname="Thomas process"), ...)
+                          fname=attr(K, "fname"),
+                          modelname="Thomas process"), ...)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "sigma2")
@@ -211,25 +236,28 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 }
 
 
-lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
+lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
   
   dataname <- deparse(substitute(X))
   if(inherits(X, "fv")) {
     K <- X
+    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+      warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)
     dataname <- paste("Kest(", dataname, ")", sep="")
-    lambda <- summary(X)$intensity
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
   } else 
     stop("Unrecognised format for argument X")
 
   startpar <- check.named.vector(startpar, c("sigma2","alpha"))
 
-  integrand<-function(r,par){
+  Integrand<-function(r,par){
     2*pi*r*exp(par[1]*exp(-r/par[2]))
   }
-  theoret <- function(par, rvals, ...) {
+  theoret <- function(par, rvals, ..., integrand) {
     if(any(par <= 0))
       return(rep(Inf, length(rvals)))
     th <- numeric(length(rvals))
@@ -241,11 +269,13 @@ lgcp.estK <- function(X, startpar=list(sigma2=1,alpha=1),
   }
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p, rmin=rmin, rmax=rmax),
-                        fvlab=list(label="Kfit(r)",
+                        fvlab=list(label="%s[fit](r)",
                           desc="minimum contrast fit of LGCP"),
                         explain=list(dataname=dataname,
-                          fname="K",
-                          modelname="log-Gaussian Cox process"), ...)
+                          fname=attr(K, "fname"),
+                          modelname="log-Gaussian Cox process"),
+                        ...,
+                        integrand=Integrand)
   # imbue with meaning
   par <- result$par
   names(par) <- c("sigma2", "alpha")
@@ -268,16 +298,19 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
 
   if(inherits(X, "fv")) {
     K <- X
+    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+      warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)
     dataname <- paste("Kest(", dataname, ")", sep="")
-    lambda <- summary(X)$intensity
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
   } else 
     stop("Unrecognised format for argument X")
 
   startpar <- check.named.vector(startpar, c("kappa","R"))
 
-  hfun <- function(zz) {
+  Hfun <- function(zz) {
     ok <- (zz < 1)
     h <- numeric(length(zz))
     h[!ok] <- 1
@@ -290,17 +323,20 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                            )
     return(h)
   }
-  theoret <- function(par,rvals, ...){
+  theoret <- function(par,rvals, ..., hfun){
     if(any(par <= 0))
       return(rep(Inf, length(rvals)))
     pi * rvals^2 + (1/par[1]) * hfun(rvals/(2 * par[2]))
   }
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
-                        fvlab=list(label="Kfit(r)",
+                        fvlab=list(label="%s[fit](r)",
                           desc="minimum contrast fit of Matern Cluster process"),
                         explain=list(dataname=dataname,
-                          fname="K", modelname="Matern Cluster process"), ...)
+                          fname=attr(K, "fname"),
+                          modelname="Matern Cluster process"),
+                        ...,
+                        hfun=Hfun)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "R")
@@ -315,4 +351,169 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
   return(result)
 }
 
+
+## versions using pcf (suggested by Jan Wild)
+
+thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
+                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
+                          pcfargs=list()){
+
+  dataname <- deparse(substitute(X))
+
+  if(inherits(X, "fv")) {
+    g <- X
+    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+      warning("Argument X does not appear to be a pair correlation function")
+  } else if(inherits(X, "ppp")) {
+    g <- do.call("pcf.ppp", append(list(X), pcfargs))
+    dataname <- paste("pcf(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","sigma2"))
+
+  theoret <- function(par,rvals, ...){
+    if(any(par <= 0))
+      return(rep(Inf, length(rvals)))
+    1 + exp(-rvals^2/(4 * par[2]))/(4 * pi * par[1] * par[2])
+  }
+  # avoid using g(0) as it may be infinite
+  argu <- fvnames(g, ".x")
+  rvals <- g[[argu]]
+  if(rvals[1] == 0 && (is.null(rmin) || rmin == 0)) {
+    rmin <- rvals[2]
+  }
+  result <- mincontrast(g, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(
+                          label="%s[fit](r)",
+                          desc="minimum contrast fit of Thomas process"),
+                        explain=list(
+                          dataname=dataname,
+                          fname=attr(g, "fname"),
+                          modelname="Thomas process"), ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "sigma2")
+  result$par <- par
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       sigma=sqrt(par[["sigma2"]]),
+                       mu=mu)
+  result$internal <- list(model="Thomas")
+  return(result)
+}
+
+matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
+                            lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
+                            pcfargs=list()){
+
+  dataname <- deparse(substitute(X))
+
+  if(inherits(X, "fv")) {
+    g <- X
+    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+      warning("Argument X does not appear to be a pair correlation function")
+  } else if(inherits(X, "ppp")) {
+    g <- do.call("pcf.ppp", append(list(X), pcfargs))
+    dataname <- paste("pcf(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","R"))
+
+  DOH <- function(zz) {
+    ok <- (zz < 1)
+    h <- numeric(length(zz))
+    h[!ok] <- 0
+    z <- zz[ok]
+    h[ok] <- (16/pi) * (z * acos(z) - (z^2) * sqrt(1 - z^2))
+    return(h)
+  }
+  theoret <- function(par,rvals, ..., doh){
+    if(any(par <= 0))
+      return(rep(Inf, length(rvals)))
+    1 + (1/(4 * pi * rvals * par[1] * par[2])) * doh(rvals/(2 * par[2]))
+  }
+  # avoid using g(0) as it may be infinite
+  argu <- fvnames(g, ".x")
+  rvals <- g[[argu]]
+  if(rvals[1] == 0 && (is.null(rmin) || rmin == 0)) {
+    rmin <- rvals[2]
+  }
+  result <- mincontrast(g, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)",
+                          desc="minimum contrast fit of Matern Cluster process"),
+                        explain=list(dataname=dataname,
+                          fname=attr(g, "fname"),
+                          modelname="Matern Cluster process"),
+                        ...,
+                        doh=DOH)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "R")
+  result$par <- par
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       R=par[["R"]],
+                       mu=mu)
+  result$internal <- list(model="MatClust")
+  return(result)
+}
+
+lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
+                        pcfargs=list()) {
+  
+  dataname <- deparse(substitute(X))
+  if(inherits(X, "fv")) {
+    g <- X
+    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+      warning("Argument X does not appear to be a pair correlation function")
+  } else if(inherits(X, "ppp")) {
+    g <- do.call("pcf.ppp", append(list(X), pcfargs))
+    dataname <- paste("pcf(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("sigma2","alpha"))
+
+  theoret <- function(par, rvals, ...) {
+    if(any(par <= 0))
+      return(rep(Inf, length(rvals)))
+    gtheo <- exp(par[1]*exp(-rvals/par[2]))
+    return(gtheo)
+  }
+  result <- mincontrast(g, theoret, startpar,
+                        ctrl=list(q=q, p=p, rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)",
+                          desc="minimum contrast fit of LGCP"),
+                        explain=list(dataname=dataname,
+                          fname=attr(g, "fname"),
+                          modelname="log-Gaussian Cox process"),
+                        ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("sigma2", "alpha")
+  result$par <- par
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1 && lambda > 0)
+           log(lambda) - par[["sigma2"]]/2 else NA
+  result$modelpar <- c(sigma2=par[["sigma2"]],
+                       alpha=par[["alpha"]],
+                       mu=mu)
+  result$internal <- list(model="lcgp")
+  return(result)
+}
 

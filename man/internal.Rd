@@ -55,7 +55,6 @@
 \alias{conform.imagelist}
 \alias{countingweights}
 \alias{damaged.ppm}
-\alias{default.expand}
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
@@ -74,6 +73,7 @@
 \alias{distppll}
 \alias{distppllmin}
 \alias{divisors}
+\alias{do.as.im}
 \alias{do.call.matched}
 \alias{do.iplot}
 \alias{do.istat}
@@ -152,6 +152,7 @@
 \alias{is.multitype.default}    
 \alias{is.poisson.interact}
 \alias{is.poisson.ppm}
+\alias{is.poisson.rmhmodel}
 \alias{is.pp3}
 \alias{is.ppx}
 \alias{is.prime}
@@ -237,7 +238,6 @@
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.barplotdata}
-\alias{plot.distfun}
 \alias{plot.fii}
 \alias{plot.minconfit}
 \alias{plot.plotpairsim}
@@ -255,7 +255,6 @@
 \alias{print.bt.frame}
 \alias{print.colourmap}
 \alias{print.diagppm}
-\alias{print.distfun}
 \alias{print.envelope}
 \alias{print.fasp}       
 \alias{print.fii}       
@@ -378,6 +377,7 @@
 \alias{validate.quad}        
 \alias{validposint}        
 \alias{variablesinformula}        
+\alias{verbalogic}
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
 \alias{versionstring.spatstat}
@@ -452,7 +452,6 @@ compatible.units(x, y, coerce=TRUE)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
-default.expand(object, m, epsilon)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
@@ -473,6 +472,7 @@ distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 distppllmin(p, l)
 divisors(n)
+do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
 do.call.matched(fname, arglist, funargs, extrargs)
 do.iplot(panel)
 do.istat(panel)
@@ -558,6 +558,7 @@ is.interact(x)
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.poisson.interact(x)
 is.poisson.ppm(x)
+is.poisson.rmhmodel(x)
 is.pp3(x)
 is.ppx(x)
 is.prime(n)
@@ -657,7 +658,6 @@ pickoption(what="option", key, keymap, \dots,
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{barplotdata}(x, \dots)
-\method{plot}{distfun}(x, \dots)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
@@ -676,7 +676,6 @@ primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
-\method{print}{distfun}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{fii}(x, \dots)
@@ -803,6 +802,7 @@ validate.mask(w, fatal=TRUE)
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
 variablesinformula(x)
+verbalogic(x, op)
 versionstring.interact(object)
 versionstring.ppm(object)
 versionstring.spatstat()

@@ -53,10 +53,12 @@
 \value{
   A \code{function} with arguments \code{x,y}.
   The function also belongs to the class \code{"distfun"} for which
-  there is a print method and a plot method.
+  there are methods for \code{print}, \code{plot},
+  \code{contour} and \code{persp}.
 }
 \seealso{
-  \code{\link{distmap}}
+  \code{\link{distmap}},
+  \code{\link{plot.distfun}}
 }
 \examples{
    data(letterR)

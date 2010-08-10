@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.112 $	$Date: 2010/07/18 09:36:11 $
+#	$Revision: 5.114 $	$Date: 2010/08/08 13:17:53 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -92,7 +92,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2010/07/18 09:36:11 $")
+                    date="$Date: 2010/08/08 13:17:53 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -583,19 +583,22 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
     is.number <- function(x) { is.numeric(x) && (length(x) == 1) }
     isim  <- unlist(lapply(covariates, is.im))
     isfun <- unlist(lapply(covariates, is.function))
+    iswin <- unlist(lapply(covariates, is.owin))
     isnum <- unlist(lapply(covariates, is.number))
-    if(!all(isim | isfun | isnum))
+    if(!all(isim | isfun | isnum | iswin))
       stop(paste("Each entry in the list", covargname, 
-                 "should be an image, a function or a single number"))
-    if(any(names(covariates) == ""))
+                 "should be an image, a function, a window or a single number"))
+    if(sum(nzchar(names(covariates))) < length(covariates))
       stop(paste("Some entries in the list",
                  covargname, "are un-named"))
     # look up values of each covariate at the quadrature points
     values <- covariates
     evalfxy <- function(f, x, y) { f(x,y) }
+    insidexy <- function(w, x, y) { inside.owin(x, y, w) }
     values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y, naok=TRUE, strict=FALSE)
     values[isfun] <- lapply(covariates[isfun], evalfxy, x=x, y=y)
     values[isnum] <- lapply(covariates[isnum], rep, length(x))
+    values[iswin] <- lapply(covariates[iswin], insidexy, x=x, y=y)
     return(as.data.frame(values))
   } else
     stop(paste(covargname, "must be either a data frame or a list"))
@@ -864,6 +867,7 @@ evalInterNew <- function(X, U, E, interaction, ...) {
   VQ <- evalInteraction(Q, X, union.quad(Q), interaction, ...)
   # extract values in correct places
   V <- matrix(, nU, ncol(VQ))
+  colnames(V) <- colnames(VQ)
   XfromU <- E[,1]
   # selected data points
   V[Udata,] <- VQ[XfromU, ]
