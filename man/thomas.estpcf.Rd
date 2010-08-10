@@ -1,23 +1,23 @@
-\name{matclust.estK}
-\alias{matclust.estK}
-\title{Fit the Matern Cluster Point Process by Minimum Contrast}
+\name{thomas.estpcf}
+\alias{thomas.estpcf}
+\title{Fit the Thomas Point Process by Minimum Contrast}
 \description{
-  Fits the Matern Cluster point process to a point pattern dataset
-  by the Method of Minimum Contrast.
+  Fits the Thomas point process to a point pattern dataset by the Method of
+  Minimum Contrast using the pair correlation function.
 }
 \usage{
-matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
-            q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
+thomas.estpcf(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
+            q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
 }
 \arguments{
   \item{X}{
-    Data to which the Matern Cluster model will be fitted.
+    Data to which the Thomas model will be fitted.
     Either a point pattern or a summary statistic.
     See Details.
   }
   \item{startpar}{
     Vector of starting values for the parameters of the
-    Matern Cluster process.
+    Thomas process.
   }
   \item{lambda}{
     Optional. An estimate of the intensity of the point process.
@@ -32,71 +32,63 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
     Optional arguments passed to \code{\link[stats]{optim}}
     to control the optimisation algorithm. See Details.
   }
+  \item{pcfargs}{
+    Optional list containing arguments passed to \code{\link{pcf.ppp}}
+    to control the smoothing in the estimation of the
+    pair correlation function.
+  }
 }
 \details{
-  This algorithm fits the Matern Cluster point process model
-  to a point pattern dataset
-  by the Method of Minimum Contrast, using the \eqn{K} function.
+  This algorithm fits the Thomas point process model to a point pattern dataset
+  by the Method of Minimum Contrast, using the pair correlation function
+  \code{\link{pcf}}.
 
   The argument \code{X} can be either
   \describe{
     \item{a point pattern:}{An object of class \code{"ppp"}
       representing a point pattern dataset. 
-      The \eqn{K} function of the point pattern will be computed
-      using \code{\link{Kest}}, and the method of minimum contrast
+      The pair correlation function of the point pattern will be computed
+      using \code{\link{pcf}}, and the method of minimum contrast
       will be applied to this.
     }
     \item{a summary statistic:}{An object of class \code{"fv"} containing
       the values of a summary statistic, computed for a point pattern
-      dataset. The summary statistic should be the \eqn{K} function,
+      dataset. The summary statistic should be the pair correlation function,
       and this object should have been obtained by a call to
-      \code{\link{Kest}} or one of its relatives.
+      \code{\link{pcf}} or one of its relatives.
     }
   }
 
-  The algorithm fits the Matern Cluster point process to \code{X},
-  by finding the parameters of the Matern Cluster model
+  The algorithm fits the Thomas point process to \code{X},
+  by finding the parameters of the Thomas model
   which give the closest match between the
-  theoretical \eqn{K} function of the Matern Cluster process
-  and the observed \eqn{K} function.
+  theoretical pair correlation function of the Thomas process
+  and the observed pair correlation function.
   For a more detailed explanation of the Method of Minimum Contrast,
   see \code{\link{mincontrast}}.
   
-  The Matern Cluster point process is described in Moller and Waagepetersen
-  (2003, p. 62). It is a cluster process formed by taking a 
+  The Thomas point process is described in Moller and Waagepetersen
+  (2003, pp. 61--62). It is a cluster process formed by taking a 
   pattern of parent points, generated according to a Poisson process
   with intensity \eqn{\kappa}{kappa}, and around each parent point,
   generating a random number of offspring points, such that the
   number of offspring of each parent is a Poisson random variable with mean
   \eqn{\mu}{mu}, and the locations of the offspring points of one parent
-  are independent and uniformly distributed inside a circle of radius
-  \eqn{R} centred on the parent point.
+  are independent and isotropically Normally distributed around the parent
+  point with standard deviation \eqn{\sigma}{sigma}.
 
-  The theoretical \eqn{K}-function of the Matern Cluster process is
+  The theoretical pair correlation function of the Thomas process is
   \deqn{
-    K(r) = \pi r^2 + \frac 1 \kappa h(\frac{r}{2R})
+    g(r) = 1 + \frac 1 {4\pi \kappa \sigma^2} \exp(-\frac{r^2}{4\sigma^2})).
   }{
-    K(r) = pi r^2 + h(r/(2*R))/kappa
+    g(r) = 1 + exp(-r^2/(4 * sigma^2)))/(4 * pi * kappa * sigma^2).
   }
-  where
-  \deqn{
-    h(z) = 2 + \frac 1 \pi [ ( 8 z^2 - 4 ) \mbox{arccos}(z)
-    - 2 \mbox{arcsin}(z)
-    + 4 z \sqrt{(1 - z^2)^3}
-    - 6 z \sqrt{1 - z^2}
-    ]
-  }{
-    h(z) = 2 + (1/pi) * ((8 * z^2 - 4) * arccos(z) - 2 * arcsin(z) 
-    + 4 * z * sqrt((1 - z^2)^3) - 6 * z * sqrt(1 - z^2))
-  }
-  for \eqn{z <= 1}, and \eqn{h(z) = 1} for \eqn{z > 1}.
   The theoretical intensity
-  of the Matern Cluster process
-  is \eqn{\lambda = \kappa \mu}{lambda=kappa* mu}.
+  of the Thomas process is \eqn{\lambda = \kappa \mu}{lambda=kappa* mu}.
 
   In this algorithm, the Method of Minimum Contrast is first used to find
   optimal values of the parameters \eqn{\kappa}{kappa}
-  and \eqn{R}{R}. Then the remaining parameter
+  and \eqn{\sigma^2}{sigma^2}. Then the remaining parameter
   \eqn{\mu}{mu} is inferred from the estimated intensity
   \eqn{\lambda}{lambda}.
 
@@ -111,11 +103,10 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   The remaining arguments \code{rmin,rmax,q,p} control the
   method of minimum contrast; see \code{\link{mincontrast}}.
 
-  The Matern Cluster process can be simulated, using
-  \code{\link{rMatClust}}.
+  The Thomas process can be simulated, using \code{\link{rThomas}}.
 
-  Homogeneous or inhomogeneous Matern Cluster models can also be
-  fitted using the function \code{\link{kppm}}.
+  Homogeneous or inhomogeneous Thomas process models can also
+  be fitted using the function \code{\link{kppm}}.
 
   The optimisation algorithm can be controlled through the
   additional arguments \code{"..."} which are passed to the
@@ -146,25 +137,24 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   inhomogeneous Neyman-Scott processes.
   \emph{Biometrics} \bold{63}, 252--258.
 }
-\author{Rasmus Waagepetersen
-  \email{rw@math.auc.dk}
-  Adapted for \pkg{spatstat} by Adrian Baddeley
+\author{
+  Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
-  \code{\link{kppm}},
-  \code{\link{lgcp.estK}},
-  \code{\link{thomas.estK}},
+  \code{\link{thomas.estK}}
   \code{\link{mincontrast}},
-  \code{\link{Kest}},
-  \code{\link{rMatClust}} to simulate the fitted model.
+  \code{\link{pcf}},
+  \code{\link{rThomas}} to simulate the fitted model.
 }
 \examples{
     data(redwood)
-    u <- matclust.estK(redwood, c(kappa=10, R=0.1))
+    u <- thomas.estpcf(redwood, c(kappa=10, sigma2=0.1))
     u
     plot(u)
+    u2 <- thomas.estpcf(redwood, c(kappa=10, sigma2=0.1),
+          pcfargs=list(stoyan=0.12))
 }
 \keyword{spatial}
 \keyword{models}

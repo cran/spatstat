@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.64 2010/06/05 09:57:43 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.69 2010/08/10 01:00:19 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -209,7 +209,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     }
   }
   
-         
+
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 #
 #     S T A R T I N G      S T A T E
@@ -357,12 +357,26 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
     }
   }
 
+# Extract the 'beta' parameters
+
+  ncif <- length(model$cif)
+  if(ncif == 1) {
+    beta <- model$par[["beta"]]
+    betalist <- list(beta)
+  } else {
+    # hybrid
+    betalist <- lapply(model$par, function(z) { z[["beta"]] })
+    # multiply betas for each component
+    beta <- betalist[[1]]
+    for(k in 2:ncif)
+      beta <- beta * betalist[[k]]
+  }
   
 #
 #  If beta = 0, the process is almost surely empty
-#  
+#
   
-  if(all(model$par[["beta"]] < .Machine$double.eps)) {
+  if(all(beta < .Machine$double.eps)) {
     if(control$fixing == "none" && condtype == "none") {
       # return empty pattern
       if(verbose)
@@ -427,6 +441,8 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
                          empty=if(a.s.empty) empty else NULL,
                          mtype=mtype,
                          trendy=trendy,
+                         betalist=betalist,
+                         beta=beta,
                          iota=iota,
                          tmax=tmax)
 
@@ -500,6 +516,8 @@ rmhEngine <- function(InfoList, ...,
 
   trend <- model$trend
   trendy <- model$internal$trendy
+  betalist <- model$internal$betalist
+  beta <- model$internal$beta
   iota <- model$internal$iota
   tmax <- model$internal$tmax
 
@@ -546,9 +564,9 @@ rmhEngine <- function(InfoList, ...,
 ####  
 #############################################  
   
-  if(model$cif == 'poisson') {
+  if(is.poisson.rmhmodel(model)) {
     if(verbose) cat("\n")
-    intensity <- if(!trendy) model$par[["beta"]] else model$trend
+    intensity <- if(!trendy) beta else model$trend
     Xsim <-
       switch(control$fixing,
              none= {
@@ -658,19 +676,30 @@ rmhEngine <- function(InfoList, ...,
 #  Set up C call
 ######################################################################    
 
-# Determine the name of the cif in the C code
+# Determine the name of the cif used in the C code
 
   C.id <- model$C.id
+  ncif <- length(C.id)
   
 # Get the parameters in C-ese
     
   par <- model$C.par
-
+  parlen <- model$C.parlen
+  if(is.null(parlen)) {
+    # old style rmhmodel (version 1.20-1 or earlier)
+    parlen <- length(par)
+  }
+  
 # Absorb the constants or vectors `iota' and 'ptypes' into the beta parameters
+  beta <- (iota/ptypes) * beta
+  
+# Insert back into C parameters  
 # This assumes that the beta parameters are the first 'ntypes' entries
-# of the parameter vector passed to Fortran.
-
-  par[1:ntypes] <- (iota/ptypes) * par[1:ntypes]
+# of the parameter vector passed to C
+# (in a hybrid model the component numbered i=absorb is used)
+  absorb <- model$absorb
+  startpos <- cumsum(c(0,parlen))[absorb]
+  par[startpos + (1:ntypes)] <- beta
   
 # Algorithm control parameters
 
@@ -701,22 +730,27 @@ rmhEngine <- function(InfoList, ...,
     cat("Start simulation.\n")
 
 # Call the Metropolis-Hastings simulator:
-  storage.mode(C.id) <- "character"
-  storage.mode(par) <- storage.mode(period) <- "double"
-  storage.mode(xprop) <- storage.mode(yprop) <- "double"
+  storage.mode(ncif)   <- "integer"
+  storage.mode(C.id)   <- "character"
+  storage.mode(par)    <- "double"
+  storage.mode(parlen) <- "integer"
+  storage.mode(period) <- "double"
+  storage.mode(xprop)  <- storage.mode(yprop) <- "double"
   storage.mode(Cmprop) <- "integer"
   storage.mode(ntypes) <- "integer"
-  storage.mode(nrep) <- "integer"
+  storage.mode(nrep)   <- "integer"
   storage.mode(p) <- storage.mode(q) <- "double"
-  storage.mode(nverb) <- "integer"
+  storage.mode(nverb)  <- "integer"
   storage.mode(x) <- storage.mode(y) <- "double"
   storage.mode(Cmarks) <- "integer"
   storage.mode(fixall) <- "integer"
   storage.mode(npts.cond) <- "integer"
 
   out <- .Call("xmethas",
+               ncif,
                C.id,
                par,
+               parlen,
                period,
                xprop, yprop, Cmprop,
                ntypes, nrep,
@@ -733,7 +767,7 @@ rmhEngine <- function(InfoList, ...,
   X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
   if(mtype) {
     # convert integer marks from C to R
-    marx <- factor(out[[3]]+1, levels=1:ntypes)
+    marx <- factor(out[[3]], levels=0:(ntypes-1))
     # then restore original type levels
     levels(marx) <- types
     # glue to points

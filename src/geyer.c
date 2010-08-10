@@ -44,6 +44,10 @@ Cdata *geyerinit(state, model, algo)
   geyer->r      = model.par[2]; /* not squared any more */
   geyer->s      = model.par[3]; 
   geyer->r2     = geyer->r * geyer->r;
+#ifdef MHDEBUG
+  Rprintf("Initialising Geyer beta=%lf, gamma=%lf, r=%lf, sat=%lf\n",
+	  geyer->beta, geyer->gamma, geyer->r, geyer->s);
+#endif
   /* is the model numerically equivalent to hard core ? */
   geyer->hard   = (geyer->gamma < DOUBLE_EPS);
   geyer->loggamma = (geyer->hard) ? 0 : log(geyer->gamma);

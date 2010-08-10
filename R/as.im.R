@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.28 $   $Date: 2010/07/16 05:29:48 $
+#    $Revision: 1.29 $   $Date: 2010/08/06 05:33:03 $
 #
 #    as.im()
 #
@@ -183,6 +183,16 @@ as.im.ppp <- function(X, ...) {
   pixellate(X, ..., weights=NULL, zeropad=FALSE)
 }
 
+# convert to image from some other format, then do something
+
+do.as.im <- function(x, action, ...,
+                     W = NULL, eps = NULL, dimyx = NULL, xy = NULL, 
+                     na.replace = NULL) {
+  Z <- as.im(x, W=W, eps=eps, dimyx=dimyx, xy=xy, na.replace=na.replace)
+  Y <- do.call(action, list(Z, ...))
+  return(Y)
+}
+
 na.handle.im <- function(X, na.replace) {
 if(is.null(na.replace))
   return(X)
@@ -208,4 +218,4 @@ repair.old.factor.image <- function(x) {
   x$v <- v
   return(x)
 }
-    
+

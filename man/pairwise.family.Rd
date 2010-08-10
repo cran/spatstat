@@ -17,7 +17,7 @@
   functions listed below.
  
   Anyway, \code{pairwise.family} is an object of class \code{"isf"}
-  containing a function \code{pairwise$eval} for
+  containing a function \code{pairwise.family$eval} for
   evaluating the sufficient statistics of any pairwise interaction
   point process model taking an exponential family form. 
 } 

@@ -2,14 +2,17 @@
 #
 #  defaultwin.R
 #
-#   $Revision: 1.4 $   $Date: 2009/07/17 05:57:56 $
+#   $Revision: 1.6 $   $Date: 2010/08/08 02:08:43 $
 #
 
 default.expand <- function(object, m=2, epsilon=1e-6) {
   verifyclass(object, "ppm")
   # data window
   w <- as.owin(data.ppm(object))
-  # interaction range of model
+  # no expansion if model depends on covariate data
+  if(summary(object)$uses.covars)
+    return(w)
+  # expand w by distance m * reach
   rr <- reach(object, epsilon=epsilon)
   if(!is.finite(rr))
     return(NULL)

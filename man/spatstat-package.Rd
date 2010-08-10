@@ -354,6 +354,7 @@
 	\code{\link{bdist.tiles}}	\tab
 	boundary distance for each tile in tessellation \cr
 	\code{\link{distmap.owin}}	\tab	distance transform image \cr
+	\code{\link{distfun.owin}}	\tab	distance transform \cr
 	\code{\link{centroid.owin}}	\tab compute centroid (centre of mass) of window\cr
 	\code{\link{is.subset.owin}}    \tab determine whether one
 	window contains another \cr
@@ -429,6 +430,8 @@
       \code{\link{as.mask.psp}} \tab approximate line segment pattern
     by binary mask \cr      
       \code{\link{distmap.psp}} \tab compute the distance map of a line
+      segment pattern \cr
+      \code{\link{distfun.psp}} \tab compute the distance map of a line
       segment pattern \cr
       \code{\link{density.psp}} \tab kernel smoothing of line segments\cr
       \code{\link{selfcrossing.psp}} \tab find crossing points between
@@ -598,6 +601,7 @@
     \code{\link{nncross}} \tab nearest neighbours between two point patterns \cr
     \code{\link{exactdt}} \tab distance from any location to nearest data point\cr 
     \code{\link{distmap}} \tab distance map image\cr
+    \code{\link{distfun}} \tab distance map function\cr
     \code{\link{density.ppp}} \tab kernel smoothed density\cr
     \code{\link{smooth.ppp}} \tab spatial interpolation of marks  \cr
     \code{\link{rknn}} \tab theoretical distribution of nearest
@@ -743,8 +747,11 @@
 
   \tabular{ll}{
     \code{\link{thomas.estK}} \tab fit the Thomas process model \cr
+    \code{\link{thomas.estpcf}} \tab fit the Thomas process model \cr
     \code{\link{matclust.estK}} \tab fit the Matern Cluster process model \cr
+    \code{\link{matclust.estpcf}} \tab fit the Matern Cluster process model \cr
     \code{\link{lgcp.estK}} \tab fit a log-Gaussian Cox process model\cr
+    \code{\link{lgcp.estpcf}} \tab fit a log-Gaussian Cox process model\cr
     \code{\link{mincontrast}} \tab low-level algorithm for fitting models
     \cr \tab by the method of minimum contrast 
   }

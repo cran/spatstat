@@ -6,7 +6,8 @@
   to a point pattern.
 }
 \usage{
-  kppm(X, trend = ~1, clusters = "Thomas", covariates = NULL, ...)
+  kppm(X, trend = ~1, clusters = "Thomas", covariates = NULL, ...,
+       statistic="K", statargs=list())
 }
 \arguments{
   \item{X}{
@@ -28,22 +29,51 @@
     A named list of pixel images.
   }
   \item{\dots}{
-    Arguments passed to \code{\link{thomas.estK}} or
-    \code{\link{matclust.estK}} controlling the minimum contrast
-    fitting algorithm.
+    Arguments passed to 
+    \code{\link{thomas.estK}} or
+    \code{\link{thomas.estpcf}} or
+    \code{\link{matclust.estK}} or
+    \code{\link{matclust.estpcf}} 
+    controlling the minimum contrast fitting algorithm.
+  }
+  \item{statistic}{
+    The choice of summary statistic: either \code{"K"} or \code{"pcf"}.
+  }
+  \item{statargs}{
+    Optional list of arguments to be used when calculating
+    the summary statistic. See Details.
   }
 }
 \details{
   This function fits a cluster point process model to the
   point pattern dataset \code{X}.
 
+  If the trend is constant (\code{~1})
+  then the model is \emph{homogeneous}.
+  The empirical \eqn{K}-function of the data is computed,
+  and the parameters of the cluster model are estimated by
+  the method of minimum contrast (matching the theoretical
+  \eqn{K}-function of the model to the empirical \eqn{K}-function
+  of the data, as explained in \code{\link{mincontrast}}).
+
+  Otherwise, the model is \emph{inhomogeneous}. 
   The algorithm first estimates the intensity function
   of the point process, by fitting a Poisson process with log intensity
   of the form specified by the formula \code{trend}.
-  Then the inhomogeneous \eqn{K} function is estimated using the
-  fitted intensity. Finally the parameters of the cluster model
+  Then the inhomogeneous \eqn{K} function is estimated
+  by \code{\link{Kinhom}} using this fitted intensity.
+  Finally the parameters of the cluster model
   are estimated by the method of minimum contrast using the
   inhomogeneous \eqn{K} function.
+  
+  If \code{statistic="pcf"} then instead of using the
+  \eqn{K}-function, the algorithm will use
+  the pair correlation function \code{\link{pcf}} for homogeneous
+  models and the inhomogeneous pair correlation function
+  \code{\link{pcfinhom}} for inhomogeneous models.
+  In this case, the smoothing parameters of the pair correlation
+  can be controlled using the argument \code{statargs},
+  as shown in the Examples.
 
   Currently the only options for the cluster mechanism
   are \code{clusters="Thomas"} for the Thomas process
@@ -61,18 +91,26 @@
   \code{\link{update.kppm}},
   \code{\link{thomas.estK}},
   \code{\link{matclust.estK}},
+  \code{\link{thomas.estpcf}},
+  \code{\link{matclust.estpcf}},
   \code{\link{mincontrast}},
+  \code{\link{Kest}},
   \code{\link{Kinhom}},
+  \code{\link{pcf}},
+  \code{\link{pcfinhom}},
   \code{\link{ppm}}
 }
 \references{
-  Waagepetersen, R. (2006). An estimation function approach to
-  inference for inhomogeneous Neyman-Scott processes. Submitted.  
+  Waagepetersen, R. (2007)
+  An estimating function approach to inference for
+  inhomogeneous Neyman-Scott processes.
+  \emph{Biometrics} \bold{63}, 252--258.
 }
 \examples{
   data(redwood)
   kppm(redwood, ~1, "Thomas")
   kppm(redwood, ~x, "MatClust") 
+  kppm(redwood, ~x, "MatClust", statistic="pcf", statargs=list(stoyan=0.2)) 
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

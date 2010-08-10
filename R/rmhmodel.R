@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.39 $  $Date: 2010/06/04 04:30:18 $
+#   $Revision: 1.45 $  $Date: 2010/08/10 00:54:10 $
 #
 #
 
@@ -17,15 +17,21 @@ rmhmodel.rmhmodel <- function(model, ...) {
 rmhmodel.list <- function(model, ...) {
   argnames <- c("cif","par","w","trend","types")
   ok <- argnames %in% names(model)
-  do.call("rmhmodel.default", model[argnames[ok]])
+  do.call("rmhmodel.default", append(model[argnames[ok]], list(...)))
 }
 
 rmhmodel.default <- function(...,
-                     cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
+                             cif=NULL, par=NULL, w=NULL, trend=NULL, types=NULL)
 {
-  if(length(list(...)) > 0)
-    stop(paste("Syntax should be rmhmodel(cif, par, w, trend, types)\n",
-               "with arguments given by name if they are present"))
+  extractsecret <- function(..., stopinvalid=TRUE) {
+    if(length(list(...)) > 0)
+      stop(paste("rmhmodel.default: syntax should be",
+                 "rmhmodel(cif, par, w, trend, types)",
+                 "with arguments given by name if they are present"),
+           call.=FALSE)
+    return(list(stopinvalid=stopinvalid))
+  }
+  stopinvalid <- extractsecret(...)$stopinvalid
   
   # Validate parameters
   if(is.null(cif)) stop("cif is missing or NULL")
@@ -34,8 +40,100 @@ rmhmodel.default <- function(...,
   if(!is.null(w))
     w <- as.owin(w)
   
-  if(!is.character(cif) || length(cif) != 1)
+  if(!is.character(cif))
     stop("cif should be a character string")
+
+  Ncif <- length(cif)
+  if(Ncif > 1) {
+    # hybrid 
+    models <- vector(mode="list", length=Ncif)
+    check <- vector(mode="list", length=Ncif)
+    for(i in 1:Ncif) {
+      cifi <- cif[i]
+      pari <- par[[i]]
+      models[[i]] <- rmhmodel(cif=cifi, par=pari, w=w, trend=NULL, types=types,
+                              stopinvalid=FALSE)
+    }
+    C.id  <- unlist(lapply(models, function(x){x$C.id}))
+    C.parlist <- lapply(models, function(x){x$C.par})
+    C.par     <- unlist(C.parlist)
+    C.parlen  <- unlist(lapply(C.parlist, length))
+    check <- lapply(models, function(x){x$check})
+    maxr <- max(unlist(lapply(models, function(x){x$reach})))
+    ismulti <- unlist(lapply(models, function(x){x$multitype.interact}))
+    multi <- any(ismulti)
+    # which model will absorb the adjustments to intensity
+    absorb <- if(multi) min(which(ismulti)) else 1
+    # determine whether model exists
+    integ <- unlist(lapply(models, function(x) { x$integrable }))
+    stabi <- unlist(lapply(models, function(x) { x$stabilising }))
+    integrable <- all(integ) || any(stabi)
+    stabilising <- any(stabi)
+    # string explanations of conditions for validity
+    integ.ex <- unlist(lapply(models, function(x){ x$explainvalid$integrable }))
+    stabi.ex <- unlist(lapply(models, function(x){ x$explainvalid$stabilising}))
+    stabi.oper <- !(stabi.ex %in% c("TRUE", "FALSE"))
+    integ.oper <- !(integ.ex %in% c("TRUE", "FALSE"))
+    compnames <- if(!any(duplicated(C.id))) paste("cif", sQuote(C.id)) else 
+         paste("component", 1:Ncif, paren(sQuote(C.id)))
+    if(!integrable && stopinvalid) {
+      # model is not integrable: explain why
+      ifail <- !integ & integ.oper
+      ireason <- paste(compnames[ifail], "should satisfy",
+                       paren(integ.ex[ifail], "{"))
+      ireason <- verbalogic(ireason, "and")
+      if(sum(ifail) <= 1) {
+        # There's only one offending cif, so stability is redundant
+        sreason <- "FALSE"
+      } else {
+        sfail <- !stabi & stabi.oper
+        sreason <- paste(compnames[sfail], "should satisfy",
+                         paren(stabi.ex[sfail], "{"))
+        sreason <- verbalogic(sreason, "or")
+      }
+      reason <- verbalogic(c(ireason, sreason), "or")
+      stop(paste("rmhmodel: hybrid model is not integrable; ", reason),
+           call.=FALSE)
+    } else {
+      # construct strings summarising conditions for validity
+      if(!any(integ.oper))
+        ireason <- as.character(integrable)
+      else {
+        ireason <- paste(compnames[integ.oper], "should satisfy",
+                         paren(integ.ex[integ.oper], "{"))
+        ireason <- verbalogic(ireason, "and")
+      }
+      if(!any(stabi.oper))
+        sreason <- as.character(stabilising)
+      else {
+        sreason <- paste(compnames[stabi.oper], "should satisfy",
+                         paren(stabi.ex[stabi.oper], "{"))
+        sreason <- verbalogic(sreason, "or")
+      }
+      ireason <- verbalogic(c(ireason, sreason), "or")
+      explainvalid <- list(integrable=ireason,
+                           stabilising=sreason)
+    }
+
+    ##
+    out <- list(cif=cif,
+                par=par,
+                w=w,
+                trend=trend,
+                types=types,
+                C.id=C.id,
+                C.par=C.par,
+                C.parlen=C.parlen,
+                absorb=absorb,
+                check=check,
+                multitype.interact=multi,
+                integrable=integrable,
+                stabilising=stabilising,
+                explainvalid=explainvalid,
+                reach=maxr)
+    class(out) <- c("rmhmodel", class(out))
+    return(out)
+  }
 
   # Check that this is a recognised model
   # and look up the rules for this model
@@ -74,9 +172,23 @@ rmhmodel.default <- function(...,
   # ensure it's a numeric vector
   C.par <- unlist(C.par)
 
+  # Determine whether model is integrable
+  integrable <- rules$validity(par, "integrable")
+  explainvalid  <- rules$explainvalid
+
+  if(!integrable && stopinvalid) 
+    stop(paste("rmhmodel: the model is not integrable; it should satisfy",
+               explainvalid$integrable),
+         call.=FALSE)
+  
+  # Determine whether cif is stabilising
+  # (i.e. any hybrid including this cif will be integrable)
+  stabilising <- rules$validity(par, "stabilising")
+
   # Calculate reach of model
   mreach <- rules$reach(par)
 
+  
 ###################################################################
 # return augmented list  
   out <- list(cif=cif,
@@ -86,8 +198,13 @@ rmhmodel.default <- function(...,
               types=types,
               C.id=C.id,
               C.par=C.par,
+              C.parlen=length(C.par),
+              absorb=1,
               check= if(is.null(C.par)) check else NULL,
               multitype.interact=rules$multitype,
+              integrable=integrable,
+              stabilising=stabilising,
+              explainvalid=explainvalid,
               reach=mreach
               )
   class(out) <- c("rmhmodel", class(out))
@@ -99,8 +216,11 @@ print.rmhmodel <- function(x, ...) {
 
   cat("Metropolis-Hastings algorithm, model parameters\n")
 
-  cat(paste("Conditional intensity: cif=", x$cif, "\n"))
-
+  Ncif <- length(x$cif)
+  cat(paste("Conditional intensity:",
+            if(Ncif == 1) "cif=" else "hybrid of cifs",
+            commasep(sQuote(x$cif)), "\n"))
+  
   if(!is.null(x$types)) {
     if(length(x$types) == 1)
       cat("Univariate process.\n")
@@ -120,7 +240,10 @@ print.rmhmodel <- function(x, ...) {
   if(is.owin(x$w)) print(x$w) else cat("Window: not specified.\n")
   cat("Trend: ")
   if(!is.null(x$trend)) print(x$trend) else cat("none.\n")
-
+  if(!is.null(x$integrable) && !x$integrable) {
+    cat("\n*Warning: model is not integrable and cannot be simulated*\n")
+  }
+  invisible(NULL)
 }
 
 reach.rmhmodel <- function(x, ...) {
@@ -128,6 +251,11 @@ reach.rmhmodel <- function(x, ...) {
     return(x$reach)
   rules <- .Spatstat.RmhTable[[x$cif]]
   return(rules$reach(x$par, ...))
+}
+
+is.poisson.rmhmodel <- function(x) {
+  verifyclass(x, "rmhmodel")
+  identical(x$cif, 'poisson')
 }
 
 #####  Table of rules for handling rmh models ##################
@@ -147,6 +275,12 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE",stabilising="FALSE"),
             reach = function(par, ...) { return(0) }
             ),
 #       
@@ -162,10 +296,20 @@ reach.rmhmodel <- function(x, ...) {
               with(par, check.1.real(gamma, ctxt))
               with(par, check.1.real(r,     ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
-              with(par, explain.ifnot(gamma >= 0 && gamma <= 1, ctxt))
+              with(par, explain.ifnot(gamma >= 0, ctxt))
               with(par, explain.ifnot(r >= 0, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              gamma <- par$gamma
+              switch(kind,
+                     integrable=(gamma <= 1),
+                     stabilising=(gamma == 0)
+                     )
+            },
+            explainvalid=list(
+              integrable="gamma <= 1",
+              stabilising="gamma == 0"),
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
@@ -190,9 +334,19 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(r >= 0, ctxt))
               with(par, explain.ifnot(hc >= 0, ctxt))
               with(par, explain.ifnot(hc <= r, ctxt))
-              with(par, explain.ifnot(hc > 0 || gamma <= 1, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              hc <- par$hc
+              gamma <- par$gamma
+              switch(kind,
+                     integrable=(hc > 0 || gamma <= 1),
+                     stabilising=(hc > 0)
+                   )
+            },
+            explainvalid=list(
+              integrable="hc > 0 or gamma <= 1",
+              stabilising="hc > 0"),
             reach = function(par, ...) {
               h <- par[["hc"]]
               r <- par[["r"]]
@@ -217,6 +371,12 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(kappa >= 0 && kappa <= 1, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE",stabilising="FALSE"),
             reach = function(par, ..., epsilon=0) {
               if(epsilon==0)
                 return(Inf)
@@ -243,7 +403,7 @@ reach.rmhmodel <- function(x, ...) {
 		stop("Length of beta does not match number of types.")
               gamma <- par$gamma
               MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
-	      gamma[is.na(gamma)] <- 0
+	      gamma[is.na(gamma)] <- 1
 
               r <- par$radii
               MultiPair.checkmatrix(r, ntypes, "par$radii")
@@ -255,6 +415,22 @@ reach.rmhmodel <- function(x, ...) {
 		stop("Some negative parameters for straussm cif.")
               return(par)
             }, 
+            validity=function(par, kind) {
+              gamma <- par$gamma
+              radii <- par$radii
+              dg <- diag(gamma)
+              dr <- diag(radii)
+              hard <-!is.na(dg) & (dg == 0) & !is.na(dr) & (dr > 0)
+              operative <- !is.na(gamma) & !is.na(radii) & (radii > 0)
+              switch(kind,
+                     stabilising=all(hard),
+                     integrable=all(hard) || all(gamma[operative] <= 1))
+            },
+            explainvalid=list(
+              integrable=paste(
+                "gamma[i,j] <= 1 for all i and j,",
+                "or gamma[i,i] = 0 for all i"),
+              stabilising="gamma[i,i] = 0 for all i"),
             reach = function(par, ...) {
               r <- par$radii
               g <- par$gamma
@@ -297,6 +473,28 @@ reach.rmhmodel <- function(x, ...) {
                   stop("Some negative parameters for straushm cif.")
               return(par)
             },
+            validity=function(par, kind) {
+              gamma <- par$gamma
+              iradii <- par$iradii
+              hradii <- par$hradii
+              dh <- diag(hradii)
+              dg <- diag(gamma)
+              dr <- diag(iradii)
+              hhard <- !is.na(dh) & (dh > 0)
+              ihard <- !is.na(dr) & (dr > 0) & !is.na(dg) & (dg == 0)
+              hard <- hhard | ihard
+              operative <- !is.na(gamma) & !is.na(iradii) & (iradii > 0)
+              switch(kind,
+                     stabilising=all(hard),
+                     integrable={
+                       all(hard) || all(gamma[operative] <= 1)
+                     })
+            },
+            explainvalid=list(
+              integrable=paste(
+                "hradii[i,i] > 0 or gamma[i,i] = 0 for all i, or",
+                "gamma[i,j] <= 1 for all i and j"),
+              stabilising="hradii[i,i] > 0 or gamma[i,i] = 0 for all i"),
             reach=function(par, ...) {
               r <- par$iradii
               h <- par$hradii
@@ -322,6 +520,12 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(rho >= 0, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE", stabilising="FALSE"),
             reach=function(par, ...) {
               return(par[["rho"]])
             }
@@ -348,6 +552,12 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(delta < rho, ctxt))              
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE",stabilising="FALSE"),
             reach=function(par, ...) {
               return(par[["rho"]])
             }
@@ -369,6 +579,12 @@ reach.rmhmodel <- function(x, ...) {
               par <- within(par, sat <- min(sat, .Machine$integer.max-100))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE", stabilising="FALSE"),
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
@@ -452,6 +668,19 @@ reach.rmhmodel <- function(x, ...) {
               }
               return(par) 
             },
+            validity=function(par, kind) {
+              h <- par$h
+              if(is.stepfun(h))
+                h <- eval(expression(c(yleft,y)),envir=environment(h))
+              switch(kind,
+                     integrable={
+                       (h[1] == 0) || all(h <= 1)
+                     },
+                     stabilising={ h[1] == 0 })
+            },
+            explainvalid=list(
+              integrable="h[1] == 0 or h[i] <= 1 for all i",
+              stabilising="h[1] == 0"),
             reach = function(par, ...) {
               r <- par[["r"]]
               h <- par[["h"]]
@@ -477,6 +706,12 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(r >= 0,   ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE", stabilising="FALSE"),
             reach = function(par, ...) {
               r <- par[["r"]]
               eta <- par[["eta"]]
@@ -509,6 +744,12 @@ reach.rmhmodel <- function(x, ...) {
               par <- c(par$beta,ndisc,as.vector(t(mmm)))
               return(par)
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=FALSE)
+            },
+            explainvalid=list(integrable="TRUE", stabilising="FALSE"),
             reach = function(par, ...) {
               r <- par[["r"]]
               gamma <- par[["gamma"]]
@@ -526,9 +767,15 @@ reach.rmhmodel <- function(x, ...) {
               par <- check.named.list(par, c("beta", "hc"), ctxt)
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(hc, ctxt))
-              with(par, explain.ifnot(hc > 0, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              hc <- par$hc
+              switch(kind,
+                     integrable=TRUE,
+                     stabilising=(hc > 0))
+            },
+            explainvalid=list(integrable="TRUE", stabilising="hc > 0"),
             reach = function(par, ...) {
               hc <- par[["hc"]]
               return(hc)
@@ -554,6 +801,16 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(r > hc, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              hc <- par$hc
+              a  <- par$a
+              switch(kind,
+                     integrable=(hc > 0 || a <= 0),
+                     stabilising=(hc > 0))
+            },
+            explainvalid=list(
+              integrable="hc > 0 or a <= 0",
+              stabilising="hc > 0"),
             reach = function(par, ...) {
               r <- par[["r"]]
               hc <- par[["hc"]]              
@@ -579,6 +836,14 @@ reach.rmhmodel <- function(x, ...) {
               with(par, explain.ifnot(epsilon > 0, ctxt))
               return(unlist(par))
             },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=(par$sigma > 0),
+                     stabilising=FALSE)
+            },
+            explainvalid=list(
+              integrable="sigma > 0",
+              stabilising="FALSE"),
             reach = function(par, ...) {
               sigma <- par[["sigma"]]
               return(2.5 * sigma)

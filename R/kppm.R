@@ -6,40 +6,49 @@
 # $Revision: 1.15 $ $Date: 2010/03/08 08:23:04 $
 #
 
-kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
+kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
+                 statistic="K", statargs=list()) {
   Xname <- deparse(substitute(X))
   clusters <- pickoption("cluster type", clusters,
                          c(Thomas="Thomas",
                            MatClust="MatClust"))
+  statistic <- pickoption("summary statistic", statistic,
+                          c(K="K", g="pcf", pcf="pcf"))
   if(is.marked(X))
     stop("Sorry, cannot handle marked point patterns")
   po <- ppm(X, trend=trend, covariates=covariates)
   stationary <- is.null(trend) || identical.formulae(trend, ~1)
   if(stationary) {
     lambda <- summary(po)$trend$value
-    Ki <- Kest(X)
+    StatFun <- if(statistic == "K") "Kest" else "pcf"
+    StatName <- if(statistic == "K") "K-function" else "pair correlation function"
+    Stat <- do.call(StatFun, append(list(X), statargs))
   } else {
     lambda <- predict(po, ngrid=spatstat.options("npixel"))
-    Ki <- Kinhom(X, lambda)
+    StatFun <- if(statistic == "K") "Kinhom" else "pcfinhom"
+    StatName <- if(statistic == "K") "inhomogeneous K-function" else "inhomogeneous pair correlation function"
+    Stat <- do.call(StatFun, append(list(X, lambda), statargs))
   }
   switch(clusters,
          Thomas={
-             startpar0 <- c(kappa=1, sigma2 = 4 * mean(nndist(X))^2)
-             mcfit <-
-               do.call("thomas.estK",
-                       resolve.defaults(
-                                        list(X=Ki, lambda=lambda),
-                                        list(...),
-                                        list(startpar=startpar0)))
+           startpar0 <- c(kappa=1, sigma2 = 4 * mean(nndist(X))^2)
+           FitFun <- if(statistic == "K") "thomas.estK" else "thomas.estpcf"
+           mcfit <-
+             do.call(FitFun,
+                     resolve.defaults(
+                                      list(X=Stat, lambda=lambda),
+                                      list(...),
+                                      list(startpar=startpar0)))
          },
          MatClust={
            startpar0 <- c(kappa=1, R = 2 * mean(nndist(X)))
-             mcfit <-
-               do.call("matclust.estK",
-                       resolve.defaults(
-                                        list(X=Ki, lambda=lambda),
-                                        list(...),
-                                        list(startpar=startpar0)))
+           FitFun <- if(statistic == "K") "matclust.estK" else "matclust.estpcf"
+           mcfit <-
+             do.call(FitFun,
+                     resolve.defaults(
+                                      list(X=Stat, lambda=lambda),
+                                      list(...),
+                                      list(startpar=startpar0)))
          })
   kappa <- mcfit$par[["kappa"]]
   mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
@@ -47,11 +56,13 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...) {
   out <- list(stationary=stationary,
               clusters=clusters,
               Xname=Xname,
+              statistic=statistic,
               X=X,
               po=po,
               lambda=lambda,
               mu=mu,
-              Ki=Ki,
+              Stat=Stat,
+              StatName=StatName,
               mcfit=mcfit)
   class(out) <- c("kppm", class(out))
   return(out)
@@ -67,6 +78,8 @@ print.kppm <- function(x, ...) {
 
   if(nchar(x$Xname) < 20)
     cat(paste("Fitted to point pattern dataset", sQuote(x$Xname), "\n"))
+
+  cat(paste("Fitted using the", x$StatName, "\n"))
 
   if(!x$stationary) {
     cat("Trend formula:")
@@ -94,15 +107,15 @@ print.kppm <- function(x, ...) {
   invisible(NULL)
 }
 
-plot.kppm <- function(x, ..., what=c("intensity", "K")) {
+plot.kppm <- function(x, ..., what=c("intensity", "statistic")) {
   modelname <- deparse(substitute(x))
   plotem <- function(x, ..., main=dmain, dmain) { plot(x, ..., main=main) }
   what <- pickoption("plot type", what,
-                    c(K="K",
+                    c(statistic="statistic",
                       intensity="intensity"),
                     multi=TRUE)
-  if(x$stationary && ("K" %in% what))
-    plotem(x$mcfit, ..., dmain=c(modelname, "K-function"))
+  if(x$stationary && ("statistic" %in% what))
+    plotem(x$mcfit, ..., dmain=c(modelname, x$StatName))
   else {
     pauseit <- interactive() && (length(what) > 1)
     if(pauseit) opa <- par(ask=TRUE)
@@ -113,9 +126,9 @@ plot.kppm <- function(x, ..., what=c("intensity", "K")) {
                       dmain=c(modelname, "Intensity"),
                       how="image")
              },
-             K={
+             statistic={
                plotem(x$mcfit, ...,
-                      dmain=c(modelname, "Inhomogeneous K-function"))
+                      dmain=c(modelname, x$StatName))
              })
     if(pauseit) par(opa)
   }

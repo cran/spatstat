@@ -1,23 +1,25 @@
-\name{matclust.estK}
-\alias{matclust.estK}
-\title{Fit the Matern Cluster Point Process by Minimum Contrast}
+\name{lgcp.estpcf}
+\alias{lgcp.estpcf}
+\title{Fit a Log-Gaussian Cox Point Process by Minimum Contrast}
 \description{
-  Fits the Matern Cluster point process to a point pattern dataset
-  by the Method of Minimum Contrast.
+  Fits a log-Gaussian Cox point process model
+  (with exponential covariance function)
+  to a point pattern dataset by the Method of Minimum Contrast
+  using the pair correlation function.
 }
 \usage{
-matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
-            q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
+lgcp.estpcf(X, startpar=c(sigma2=1,alpha=1), lambda=NULL,
+q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
 }
 \arguments{
   \item{X}{
-    Data to which the Matern Cluster model will be fitted.
+    Data to which the model will be fitted.
     Either a point pattern or a summary statistic.
     See Details.
   }
   \item{startpar}{
     Vector of starting values for the parameters of the
-    Matern Cluster process.
+    log-Gaussian Cox process model.
   }
   \item{lambda}{
     Optional. An estimate of the intensity of the point process.
@@ -32,71 +34,71 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
     Optional arguments passed to \code{\link[stats]{optim}}
     to control the optimisation algorithm. See Details.
   }
+  \item{pcfargs}{
+    Optional list containing arguments passed to \code{\link{pcf.ppp}}
+    to control the smoothing in the estimation of the
+    pair correlation function.
+  }
 }
 \details{
-  This algorithm fits the Matern Cluster point process model
+  This algorithm fits a log-Gaussian Cox point process model
   to a point pattern dataset
-  by the Method of Minimum Contrast, using the \eqn{K} function.
+  by the Method of Minimum Contrast, using the pair correlation function.
 
   The argument \code{X} can be either
   \describe{
     \item{a point pattern:}{An object of class \code{"ppp"}
       representing a point pattern dataset. 
-      The \eqn{K} function of the point pattern will be computed
-      using \code{\link{Kest}}, and the method of minimum contrast
+      The pair correlation function of the point pattern will be computed
+      using \code{\link{pcf}}, and the method of minimum contrast
       will be applied to this.
     }
     \item{a summary statistic:}{An object of class \code{"fv"} containing
       the values of a summary statistic, computed for a point pattern
-      dataset. The summary statistic should be the \eqn{K} function,
+      dataset. The summary statistic should be the pair correlation function,
       and this object should have been obtained by a call to
-      \code{\link{Kest}} or one of its relatives.
+      \code{\link{pcf}} or one of its relatives.
     }
   }
-
-  The algorithm fits the Matern Cluster point process to \code{X},
-  by finding the parameters of the Matern Cluster model
+  The algorithm fits a log-Gaussian Cox point process (LGCP)
+  model to \code{X},  by finding the parameters of the LGCP model
   which give the closest match between the
-  theoretical \eqn{K} function of the Matern Cluster process
-  and the observed \eqn{K} function.
+  theoretical pair correlation function of the LGCP model
+  and the observed pair correlation function.
   For a more detailed explanation of the Method of Minimum Contrast,
   see \code{\link{mincontrast}}.
-  
-  The Matern Cluster point process is described in Moller and Waagepetersen
-  (2003, p. 62). It is a cluster process formed by taking a 
-  pattern of parent points, generated according to a Poisson process
-  with intensity \eqn{\kappa}{kappa}, and around each parent point,
-  generating a random number of offspring points, such that the
-  number of offspring of each parent is a Poisson random variable with mean
-  \eqn{\mu}{mu}, and the locations of the offspring points of one parent
-  are independent and uniformly distributed inside a circle of radius
-  \eqn{R} centred on the parent point.
 
-  The theoretical \eqn{K}-function of the Matern Cluster process is
+  The model fitted is a stationary, isotropic log-Gaussian Cox process
+  with exponential covariance
+  (Moller and Waagepetersen, 2003, pp. 72-76).
+  To define this process we start with
+  a stationary Gaussian random field \eqn{Z} in the two-dimensional plane,
+  with constant mean \eqn{\mu}{mu} and covariance function
   \deqn{
-    K(r) = \pi r^2 + \frac 1 \kappa h(\frac{r}{2R})
+    c(r) = \sigma^2 e^{-r/\alpha}
   }{
-    K(r) = pi r^2 + h(r/(2*R))/kappa
+    c(r) = sigma^2 * exp(-r/alpha)
   }
-  where
-  \deqn{
-    h(z) = 2 + \frac 1 \pi [ ( 8 z^2 - 4 ) \mbox{arccos}(z)
-    - 2 \mbox{arcsin}(z)
-    + 4 z \sqrt{(1 - z^2)^3}
-    - 6 z \sqrt{1 - z^2}
-    ]
-  }{
-    h(z) = 2 + (1/pi) * ((8 * z^2 - 4) * arccos(z) - 2 * arcsin(z) 
-    + 4 * z * sqrt((1 - z^2)^3) - 6 * z * sqrt(1 - z^2))
-  }
-  for \eqn{z <= 1}, and \eqn{h(z) = 1} for \eqn{z > 1}.
-  The theoretical intensity
-  of the Matern Cluster process
-  is \eqn{\lambda = \kappa \mu}{lambda=kappa* mu}.
+  where \eqn{\sigma^2}{sigma^2} and \eqn{\alpha}{alpha} are parameters.
+  Given \eqn{Z}, we generate a Poisson point process \eqn{Y} with intensity
+  function \eqn{\lambda(u) = \exp(Z(u))}{lambda(u) = exp(Z(u))} at
+  location \eqn{u}. Then \eqn{Y} is a log-Gaussian Cox process.
 
+  The theoretical pair correlation function of the LGCP is
+  \deqn{
+    g(r) = \exp(\sigma^2 \exp(-r/\alpha))
+  }{
+    g(r) = exp(sigma^2 * exp(-r/alpha))
+  }
+  The theoretical intensity of the LGCP is 
+  \deqn{
+    \lambda = \exp(\mu + \frac{\sigma^2}{2}).
+  }{
+    lambda= exp(mu + sigma^2/2).
+  }
   In this algorithm, the Method of Minimum Contrast is first used to find
-  optimal values of the parameters \eqn{\kappa}{kappa}
-  and \eqn{R}{R}. Then the remaining parameter
+  optimal values of the parameters \eqn{\sigma^2}{sigma^2}
+  and \eqn{\alpha}{alpha^2}. Then the remaining parameter
   \eqn{\mu}{mu} is inferred from the estimated intensity
   \eqn{\lambda}{lambda}.
 
@@ -110,12 +112,6 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
 
   The remaining arguments \code{rmin,rmax,q,p} control the
   method of minimum contrast; see \code{\link{mincontrast}}.
-
-  The Matern Cluster process can be simulated, using
-  \code{\link{rMatClust}}.
-
-  Homogeneous or inhomogeneous Matern Cluster models can also be
-  fitted using the function \code{\link{kppm}}.
 
   The optimisation algorithm can be controlled through the
   additional arguments \code{"..."} which are passed to the
@@ -146,23 +142,21 @@ matclust.estK(X, startpar=c(kappa=1,R=1), lambda=NULL,
   inhomogeneous Neyman-Scott processes.
   \emph{Biometrics} \bold{63}, 252--258.
 }
-\author{Rasmus Waagepetersen
-  \email{rw@math.auc.dk}
-  Adapted for \pkg{spatstat} by Adrian Baddeley
+\author{
+  Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
-  \code{\link{kppm}},
   \code{\link{lgcp.estK}},
-  \code{\link{thomas.estK}},
+  \code{\link{thomas.estpcf}},
+  \code{\link{matclust.estpcf}},
   \code{\link{mincontrast}},
-  \code{\link{Kest}},
-  \code{\link{rMatClust}} to simulate the fitted model.
+  \code{\link{pcf}}
 }
 \examples{
     data(redwood)
-    u <- matclust.estK(redwood, c(kappa=10, R=0.1))
+    u <- lgcp.estpcf(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
 }

@@ -22,7 +22,7 @@ typedef struct Lennard {
 } Lennard;
 
 /* 
-   This is intended to be the largest x such that exp(-x) != 0 
+   MAXEXP is intended to be the largest x such that exp(-x) != 0 
    although the exact value is not needed
 */
 #define MAXEXP (-log(DOUBLE_XMIN))
@@ -36,6 +36,7 @@ Cdata *lennardinit(state, model, algo)
      Algor algo;
 {
   Lennard *lennard;
+  double sigma2, foureps, minfrac, maxfrac;
 
   lennard = (Lennard *) R_alloc(1, sizeof(Lennard));
 
@@ -45,10 +46,15 @@ Cdata *lennardinit(state, model, algo)
   lennard->epsilon = model.par[2];
   lennard->period  = model.period;
   /* constants */
-  lennard->sigma2  = pow(lennard->sigma, 2);
-  lennard->foureps = 4 * lennard->epsilon;
-  lennard->d2min   = lennard->sigma2 * pow(lennard->foureps/MAXEXP, 1/6);
-  lennard->d2max   = lennard->sigma2 * pow(lennard->foureps/MINEXP, 1/3);
+  lennard->sigma2  = sigma2 = pow(lennard->sigma, 2);
+  lennard->foureps = foureps = 4 * lennard->epsilon;
+  /* thresholds where the interaction becomes trivial */
+  minfrac = pow(foureps/MAXEXP, (double) 1.0/6.0);
+  if(minfrac > 0.5) minfrac = 0.5;
+  maxfrac = pow(foureps/MINEXP, (double) 1.0/3.0);
+  if(maxfrac < 2.0) maxfrac = 2.0;
+  lennard->d2min   = sigma2 * minfrac;
+  lennard->d2max   = sigma2 * maxfrac;
   /* periodic boundary conditions? */
   lennard->per    = (model.period[0] > 0.0);
 
@@ -98,7 +104,7 @@ double lennardcif(prop, state, cdata)
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
-	  pairsum += ratio6 - pow(ratio6, 2);
+	  pairsum += ratio6 * (1.0 - ratio6);
 	}
       }
     }
@@ -111,7 +117,7 @@ double lennardcif(prop, state, cdata)
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
-	  pairsum += ratio6 - pow(ratio6, 2);
+	  pairsum += ratio6 * (1.0 - ratio6);
 	}
       }
     }
@@ -126,7 +132,7 @@ double lennardcif(prop, state, cdata)
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
-	  pairsum += ratio6 - pow(ratio6, 2);
+	  pairsum += ratio6 * (1.0 - ratio6);
 	}
       }
     }  
@@ -139,7 +145,7 @@ double lennardcif(prop, state, cdata)
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
-	  pairsum += ratio6 - pow(ratio6, 2);
+	  pairsum += ratio6 * (1.0 - ratio6);
 	}
       }
     }
