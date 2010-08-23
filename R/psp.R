@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.50 $ $Date: 2010/01/07 19:44:51 $
+#  $Revision: 1.51 $ $Date: 2010/08/16 13:41:26 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -71,7 +71,7 @@ as.psp <- function(x, ..., from=NULL, to=NULL) {
   UseMethod("as.psp")
 }
 
-as.psp.psp <- function(x, ..., check=spatstat.options("checksegments"), fatal=TRUE) {
+as.psp.psp <- function(x, ..., check=FALSE, fatal=TRUE) {
   if(!verifyclass(x, "psp", fatal=fatal))
     return(NULL)
   ends <- x$ends

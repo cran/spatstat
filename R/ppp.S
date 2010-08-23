@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.68 $	$Date: 2010/07/10 11:43:30 $
+#	$Revision: 4.72 $	$Date: 2010/08/13 08:37:12 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -67,31 +67,51 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
   } else nout <- 0
   # initialise ppp object
   pp <- list(window=window, n=n, x=x, y=y)
-  # add marks if any
-  if(!missing(marks) && !is.null(marks)) {
-    if(is.matrix(marks)) 
-      marks <- as.data.frame(marks)
-    if(is.data.frame(marks)) {
-      pp$markformat <- "dataframe"
-      if(nout > 0) {
-        marks <- marks[ok, ]
-        marks(rejects) <- marks[!ok,]
-      }
-      if(nrow(marks) != n)
-        stop("number of rows of marks != length of x and y")
-    } else {
-      pp$markformat <- "vector"
-      if(nout > 0) {
-        marks(rejects) <- marks[!ok]
-        marks <- marks[ok]
-      }
-      if(length(marks) != n)
-        stop("length of marks vector != length of x and y")
-      names(marks) <- NULL
+  # coerce marks to appropriate forma
+  if(missing(marks))
+    marks <- NULL
+  if(is.hyperframe(marks)) 
+    stop("Hyperframes of marks are not implemented for ppp objects; use ppx")
+  if(is.matrix(marks)) 
+    marks <- as.data.frame(marks)
+  if(is.data.frame(marks)) {
+    nc <- ncol(marks)
+    if(nc == 0)
+      marks <- NULL
+    else if(nc == 1)
+      marks <- marks[,,drop=TRUE]
+  }
+  # attach marks 
+  if(is.null(marks)) {
+    # no marks
+    pp$markformat <- "none"
+  } else if(is.data.frame(marks)) {
+    # data frame of marks
+    pp$markformat <- "dataframe"
+    if(nout > 0) {
+      marks <- marks[ok, ]
+      marks(rejects) <- marks[!ok,]
     }
+    if(nrow(marks) != n)
+      stop("number of rows of marks != length of x and y")
     pp$marks <- marks
   } else {
-    pp$markformat <- "none"
+    # should be a vector or factor
+    # To recognise vector, strip attributes
+    if(!is.factor(marks))
+      attributes(marks) <- NULL
+    if(!(is.vector(marks) || is.factor(marks)))
+      stop("Format of marks not understood")
+    # OK, it's a vector or factor
+    pp$markformat <- "vector"
+    if(nout > 0) {
+      marks(rejects) <- marks[!ok]
+      marks <- marks[ok]
+    }
+    if(length(marks) != n)
+      stop("length of marks vector != length of x and y")
+    names(marks) <- NULL
+    pp$marks <- marks
   }
   class(pp) <- "ppp"
   if(check && any(duplicated(pp)))

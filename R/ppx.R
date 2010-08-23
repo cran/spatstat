@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.16 $  $Date: 2010/05/24 13:00:34 $
+#  $Revision: 1.21 $  $Date: 2010/08/17 07:20:43 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -76,7 +76,9 @@ print.ppx <- function(x, ...) {
 
 plot.ppx <- function(x, ...) {
   xname <- deparse(substitute(x))
-  coo <- coords(x)
+  coo <- coords(x, temporal=FALSE)
+  if(any(istime <- (x$ctype == "temporal")))
+    warning(paste(sum(istime), "time coordinate(s) ignored"))
   dom <- x$domain
   m <- ncol(coo)
   if(m == 1) {
@@ -102,11 +104,12 @@ plot.ppx <- function(x, ...) {
                                        list(...),
                                        list(main=xname)))
       # convert to ppp
-      x2 <- ppp(coo[,1], coo[,2], window=as.owin(dom), check=FALSE)
+      x2 <- ppp(coo[,1], coo[,2], window=as.owin(dom),
+                marks=as.data.frame(marks(x)), check=FALSE)
       # invoke plot.ppp
-      do.call("plot", resolve.defaults(list(x2),
-                                       list(add=TRUE),
-                                       list(...)))
+      return(do.call("plot", resolve.defaults(list(x2),
+                                              list(add=TRUE),
+                                              list(...))))
     }
   } else if(m == 3) {
     # convert to pp3
@@ -148,13 +151,28 @@ marks.ppx <- function(x, ..., drop=TRUE) {
   ctype <- x$ctype
   retain <- (ctype != "mark")
   coorddata <- x$data[, retain, drop=TRUE]
-  if(!is.data.frame(value) && !is.hyperframe(value))
-    value <- data.frame(marks=value)
-  newdata <- cbind(coorddata, value)
-  newctype <- c(ctype, rep("mark", ncol(value)))
+  if(is.null(value)) {
+    newdata <- coorddata
+    newctype <- ctype[retain]
+  } else {
+    if(!is.data.frame(value) && !is.hyperframe(value))
+      value <- data.frame(marks=value)
+    if(ncol(value) == 0) {
+      newdata <- coorddata
+      newctype <- ctype[retain]
+    } else {
+      newdata <- cbind(coorddata, value)
+      newctype <- c(ctype, rep("mark", ncol(value)))
+    }
+  }
   out <- list(data=newdata, ctype=newctype, domain=x$domain)
   class(out) <- "ppx"
   return(out)
+}
+
+unmark.ppx <- function(X) {
+  marks(X) <- NULL
+  return(X)
 }
 
 boxx <- function(..., unitname=NULL) {

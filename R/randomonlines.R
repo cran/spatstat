@@ -1,7 +1,7 @@
 #
 # randomOnLines.R
 #
-# $Revision: 1.3 $  $Date: 2010/03/06 02:25:04 $
+# $Revision: 1.4 $  $Date: 2010/08/14 03:34:17 $
 #
 # Generate random points on specified lines
 #
@@ -9,7 +9,8 @@
 runifpointOnLines <- function(n, L) {
   if(!is.numeric(n) || (length(n) != 1) || (n < 0) || (n %% 1 != 0))
     stop("n should be a single nonnegative integer")
-  L <- as.psp(L)
+  if(!is.psp(L))
+    L <- as.psp(L)
   if(n == 0)
     return(ppp(numeric(0), numeric(0), window=as.owin(L)))
   len <- lengths.psp(L)
@@ -37,7 +38,8 @@ runifpoisppOnLines <- function(lambda, L) {
   if(!(is.numeric(lambda) && (length(lambda) == 1)
        && is.finite(lambda) && (lambda >= 0)))
     stop("lambda should be a single, finite, nonnegative number")
-  L <- as.psp(L)
+  if(!is.psp(L))
+    L <- as.psp(L)
   mu <- lambda * sum(lengths.psp(L))
   n <- rpois(1, mu)
   out <- runifpointOnLines(n, L)

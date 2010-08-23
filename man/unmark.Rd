@@ -3,6 +3,7 @@
 \alias{unmark.ppp}
 \alias{unmark.splitppp}
 \alias{unmark.psp}
+\alias{unmark.ppx}
 \title{Remove Marks}
 \description{
   Remove the mark information from a spatial dataset. 
@@ -12,11 +13,14 @@
  \method{unmark}{ppp}(X)
  \method{unmark}{splitppp}(X)
  \method{unmark}{psp}(X)
+ \method{unmark}{ppx}(X)
 }
 \arguments{
   \item{X}{A point pattern (object of class \code{"ppp"}),
     a split point pattern (object of class \code{"splitppp"}),
-    or a line segment pattern (object of class \code{"psp"}).
+    a line segment pattern (object of class \code{"psp"})
+    or a multidimensional space-time point pattern
+    (object of class \code{"ppx"}).
   }
 }
 \value{

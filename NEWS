@@ -1,3 +1,22 @@
+	CHANGES IN spatstat VERSION 1.20-3
+
+OVERVIEW
+
+    o   minor improvements (mostly internal).
+
+NEW FUNCTIONS
+
+    o   unmark.ppx
+    	Method for 'unmark' for general space-time point patterns
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   plot.ppx
+    	Now handles marked patterns, in two-dimensional case
+
+    o   as.psp.psp
+    	Default value of argument 'check' set to FALSE
+
 	CHANGES IN spatstat VERSION 1.20-2
 
 OVERVIEW
