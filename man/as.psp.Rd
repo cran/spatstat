@@ -13,7 +13,7 @@
 }
 \usage{
   as.psp(x, \dots, from=NULL, to=NULL)
-  \method{as.psp}{psp}(x, \dots, check=spatstat.options("checksegments"), fatal=TRUE)
+  \method{as.psp}{psp}(x, \dots, check=FALSE, fatal=TRUE)
   \method{as.psp}{data.frame}(x, \dots, window=NULL, marks=NULL, check=spatstat.options("checksegments"), fatal=TRUE)
   \method{as.psp}{matrix}(x, \dots, window=NULL, marks=NULL, check=spatstat.options("checksegments"),
 fatal=TRUE)

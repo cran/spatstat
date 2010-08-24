@@ -31,24 +31,38 @@ marks.ppp <- function(x, ..., dfok=TRUE) {
   if(is.null(value))
     return(unmark(x))
   m <- value
-  npoints <- x$n
+  if(is.hyperframe(m)) 
+    stop("Hyperframes of marks are not supported in ppp objects")
+  np <- npoints(x)
   if(!is.data.frame(m)) {
     # vector of marks
-    if(length(m) == 1) m <- rep(m, npoints)
-    else if(npoints == 0) m <- rep(m, 0) # ensures marked pattern is obtained
-    else if(length(m) != npoints) stop("number of points != number of marks")
-    Y <- ppp(x$x,x$y,window=x$window,marks=m, check=FALSE)
-    return(Y)
+    if(length(m) == 1) m <- rep(m, np)
+    else if(np == 0) m <- rep(m, 0) # ensures marked pattern is obtained
+    else if(length(m) != np) stop("number of points != number of marks")
+    marx <- m
+  } else {
+    # data frame of marks
+    if(ncol(m) == 0) {
+      # no mark variables
+      marx <- NULL
+    } else {
+      # marks to be attached
+      if(nrow(m) == np) {
+        marx <- m
+      } else {
+        # lengths do not match
+        if(nrow(m) == 1 || np == 0) {
+          # replicate data frame
+          marx <- as.data.frame(lapply(as.list(m),
+                                       function(x, k) { rep(x, k) },
+                                       k=np))
+        } else
+        stop("number of rows of data frame != number of points")
+      }
+    }
   }
-  # data frame of marks
-  if(nrow(m) == 1 || x$n == 0) {
-    # replicate data frame
-    m <- as.data.frame(lapply(as.list(m),
-                              function(x, k) { rep(x, k) },
-                              k=npoints))
-  } else if(nrow(m) != npoints)
-    stop("number of rows of data frame != number of points")
-  Y <- ppp(x$x,x$y,window=x$window,marks=m, check=FALSE)
+  # attach/overwrite marks
+  Y <- ppp(x$x,x$y,window=x$window,marks=marx, check=FALSE)
   return(Y)
 }
 
@@ -89,7 +103,7 @@ function(X, na.action="warn", ...) {
   marx <- marks(X, ...)
   if(is.null(marx))
     return(FALSE)
-  if(any(is.na(marx)))
+  if((length(marx) > 0) && any(is.na(marx)))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
@@ -117,9 +131,13 @@ is.multitype.default <- function(...) { return(FALSE) }
 
 is.multitype.ppp <- function(X, na.action="warn", ...) {
   marx <- marks(X, dfok=TRUE)
-  if(is.null(marx) || is.data.frame(marx) || !is.factor(marx))
+  if(is.null(marx))
     return(FALSE)
-  if(any(is.na(marx)))
+  if(is.data.frame(marx) && ncol(marx) > 1)
+    return(FALSE)
+  if(!is.factor(marx))
+    return(FALSE)
+  if((length(marx) > 0) && any(is.na(marx)))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",

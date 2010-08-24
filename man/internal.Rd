@@ -172,6 +172,10 @@
 \alias{licence.polygons}
 \alias{license.polygons}
 \alias{listof}
+\alias{localpcfmatrix}
+\alias{print.localpcfmatrix}
+\alias{plot.localpcfmatrix}
+\alias{[.localpcfmatrix}
 \alias{lookup.im}
 \alias{majorminorversion}
 \alias{make.even.breaks}
@@ -583,6 +587,10 @@ least.common.multiple(n,m)
 licence.polygons()
 license.polygons()
 listof(\dots)
+localpcfmatrix(X, i, delta, rmax, \dots, nr, adjust)
+\method{print}{localpcfmatrix}(x, \dots)
+\method{plot}{localpcfmatrix}(x, \dots)
+\method{[}{localpcfmatrix}(x, i, ...)
 lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
