@@ -114,25 +114,18 @@ for use by the \pkg{spatstat} package).
   It currently handles all versions of \pkg{spatial} up to 7.1-4.
 }
 \examples{
- \dontrun{
- plot(c(0,1),c(0,1),type="n")
- xy <- locator(20) # click on 20 points in plot window
- pp <- as.ppp(xy, c(0,1,0,1))
- 
- w <- owin(c(0,1),c(0,1))
- plot(w)                      # neater
- xy <- locator(20)            # click on 20 points in plot window
- pp <- as.ppp(xy, w)
- } 
- 
  xy <- matrix(runif(40), ncol=2)
  pp <- as.ppp(xy, c(0,1,0,1))
  
  # Venables-Ripley format
- require(spatial)
- towns <- ppinit("towns.dat")
- pp <- as.ppp(towns)   # converted to our format
- detach(package:spatial)
+ # check for 'spatial' package
+ spatialpath <- .find.package("spatial", quiet=TRUE)
+ if(length(spatialpath) != 0) {
+   require(spatial)
+   towns <- ppinit("towns.dat")
+   pp <- as.ppp(towns)   # converted to our format
+   detach(package:spatial)
+ }
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}

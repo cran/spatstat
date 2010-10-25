@@ -250,6 +250,10 @@
 	apply affine transformation\cr
 	\code{\link{density.ppp}} \tab
 	kernel smoothing\cr
+	\code{\link{smooth.ppp}} \tab
+	interpolate pixel values\cr
+	\code{\link{sharpen.ppp}} \tab
+	data sharpening\cr
 	\code{\link{identify.ppp}} \tab
 	interactively identify points \cr
 	\code{\link{unique.ppp}} \tab
@@ -604,6 +608,7 @@
     \code{\link{distfun}} \tab distance map function\cr
     \code{\link{density.ppp}} \tab kernel smoothed density\cr
     \code{\link{smooth.ppp}} \tab spatial interpolation of marks  \cr
+    \code{\link{sharpen.ppp}} \tab data sharpening  \cr
     \code{\link{rknn}} \tab theoretical distribution of nearest
     neighbour distance
  }
@@ -686,7 +691,8 @@
   \tabular{ll}{
     \code{\link{F3est}} \tab empty space function \eqn{F} \cr
     \code{\link{G3est}} \tab nearest neighbour function \eqn{G} \cr
-    \code{\link{K3est}} \tab \eqn{K}-function
+    \code{\link{K3est}} \tab \eqn{K}-function \cr
+    \code{\link{pcf3est}} \tab pair correlation function
   }
 
   Related facilities:

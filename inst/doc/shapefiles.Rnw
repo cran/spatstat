@@ -41,7 +41,7 @@ from files in the popular `shapefile' format.
 This vignette is part of the documentation included in 
 \pkg{spatstat} version \texttt{\Sexpr{sversion}}.
 The information applies to 
-\pkg{spatstat} versions \texttt{1.14-10} and above. 
+\pkg{spatstat} versions \texttt{1.18-0} and above.
 
 \section{Shapefiles}
 
@@ -62,8 +62,9 @@ To refer to this collection you will always use the filename with the
 extension \texttt{shp}, for example \texttt{mydata.shp}. 
 
 \section{Helper packages}
+\label{S:helpers}
 
-We'll use two other packages to handle shapefile data.
+We'll use three other packages to handle shapefile data.
 
 The \pkg{maptools} package is designed specifically for handling
 file formats for spatial data. It contains 
@@ -73,6 +74,18 @@ The \pkg{sp} package supports a standard set of spatial data types
 in \R. These standard data types can be handled by many other packages,
 so it is useful to convert your spatial data into one of the 
 data types supported by \pkg{sp}.
+
+The \pkg{gpclib} package supports geometrical operations 
+on polygons --- such as union and intersection. 
+However, \pkg{gpclib} has a restrictive licence which 
+forbids its use for commercial activities. 
+Type \texttt{licence.polygons()} for more information.
+\underline{
+  {\bf By default,} \pkg{gpclib} {\bf is disabled. It must be
+  enabled }
+}
+by typing \verb!spatstat.options(gpclib=TRUE)! assuming you are
+covered by the licence.
 
 \section{How to read shapefiles into \pkg{spatstat}} 
 
@@ -165,23 +178,32 @@ X <- X[W]
 \subsubsection{Objects of class \texttt{SpatialPointsDataFrame }}
 
 An object \texttt{x} of class \texttt{SpatialPointsDataFrame}
-represents a pattern of points with additional variables attached to
+represents a pattern of points with additional variables (`marks') attached to
 each point. It includes an object of class \texttt{SpatialPoints} 
 giving the point locations, and a data frame containing the
 additional variables attached to the points. 
-The point locations are extracted by
+
+Use \verb!as(x, "ppp")! or \texttt{as.ppp(x)} to convert an
+object \texttt{x} of class \texttt{SpatialPointsDataFrame} to a 
+spatial point pattern in \pkg{spatstat}. In this conversion,
+the data frame of additional variables in \texttt{x} will 
+become the \texttt{marks} of the point pattern \texttt{z}.
+
 <<eval=FALSE>>=
-y <- as(x, "SpatialPoints")
-z <- as(y, "ppp")
+y <- as(x, "ppp")
 @ 
-The data frame of auxiliary data is extracted by 
+
+Before the conversion you can extract the
+data frame of auxiliary data by 
 \verb!df <- x@data! or \verb!df <- slot(x, "data")!.
+After the conversion you can extract these data by
+\verb!df <- marks(y)!. 
 
 For example:
 
 <<eval=FALSE>>=
-bpoints <- as(as(baltim, "SpatialPoints"), "ppp")
-bdata   <- slot(baltim, "data")
+balt <- as(baltim, "ppp")
+bdata <- slot(baltim, "data")
 @ 
 
 \subsubsection{Objects of class \texttt{SpatialLines}}

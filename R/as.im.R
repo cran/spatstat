@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.29 $   $Date: 2010/08/06 05:33:03 $
+#    $Revision: 1.30 $   $Date: 2010/10/20 05:41:41 $
 #
 #    as.im()
 #
@@ -135,6 +135,26 @@ as.im.function <- function(X, W=NULL, ...,
   
   out <- im(values, W$xcol, W$yrow, unitname=unitname(W))
   return(na.handle.im(out, na.replace))
+}
+
+as.im.matrix <- function(X, W=NULL, ...) {
+  nr <- nrow(X)
+  nc <- ncol(X)
+  if(is.null(W))
+    return(im(X, ...))
+  W <- as.owin(W)
+  if(W$type == "mask") {
+    xcol <- W$xcol
+    yrow <- W$yrow
+    # pixel coordinate information
+    if(length(xcol) == nc && length(yrow) == nr)
+      return(im(X, xcol, yrow, unitname=unitname(W)))
+  }
+  # range information
+  R <- as.rectangle(W)
+  xrange <- R$xrange
+  yrange <- R$yrange
+  return(im(X, xrange=xrange, yrange=yrange, unitname=unitname(W)))
 }
 
 as.im.default <- function(X, W=NULL, ...,

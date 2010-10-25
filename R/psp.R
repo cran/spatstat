@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.51 $ $Date: 2010/08/16 13:41:26 $
+#  $Revision: 1.53 $ $Date: 2010/09/10 06:57:59 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -487,3 +487,38 @@ rotate.psp <- function(X, angle=pi/2, ...) {
 }
 
 is.empty.psp <- function(x) { return(x$n == 0) } 
+
+identify.psp <- function(x, ..., labels=seq(x$n), n=x$n, plot=TRUE) {
+  Y <- x
+  W <- as.owin(Y)
+  mids <- midpoints.psp(Y)
+  if(!(is.numeric(n) && (length(n) == 1) && (n %% 1 == 0) && (n >= 0)))
+    stop("n should be a single integer")
+  out <- integer(0)
+  while(length(out) < n) {
+    xy <- locator(1)
+    # check for interrupt exit
+    if(length(xy$x) == 0)
+      return(out)
+    # find nearest segment
+    X <- ppp(xy$x, xy$y, window=W)
+    ident <- project2segment(X, Y)$mapXY
+    # add to list
+    if(ident %in% out) {
+      cat(paste("Segment", ident, "already selected\n"))
+    } else {
+      if(plot) {
+        # Display
+        mi <- mids[ident]
+        li <- labels[ident]
+        text(mi$x, mi$y, labels=li)
+      }
+      out <- c(out, ident)
+    }
+  }
+  # exit if max n reached
+  return(out)
+}
+
+  
+  

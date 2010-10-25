@@ -1,3 +1,84 @@
+	CHANGES IN spatstat VERSION 1.20-5
+
+OVERVIEW 
+
+    o   Accelerated computations of kernel smoothing.
+
+    o	Implemented Choi-Hall data sharpening.
+
+NEW FUNCTIONS
+
+    o   sharpen.ppp
+    	Performs Choi-Hall data sharpening of a point pattern
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   density.ppp, smooth.ppp
+    	Computation has been vastly accelerated 
+	for density(X, at="points") and smooth.ppp(X, at="points")
+
+    o   Kinhom
+    	Accelerated in case where lambda=NULL
+	
+    o   Vignette 'shapefiles' updated
+
+
+	CHANGES IN spatstat VERSION 1.20-4
+
+OVERVIEW
+
+    o   New functions for inhomogeneous point patterns
+    	and local analysis.
+
+    o   Pair correlation function for 3D point patterns
+
+    o   Minor improvements and bug fixes to simulation code and image functions
+
+
+NEW FUNCTIONS
+
+    o   pcf3est
+    	Pair correlation function for 3D point patterns.
+
+    o   Kscaled, Lscaled
+	Estimator of the template K function (and L-function)
+	for a locally-scaled point process.
+        
+    o   localpcf
+        Local version of pair correlation function
+
+    o   identify.psp
+    	Method for 'identify' for line segment patterns.
+
+    o   as.im.matrix
+    	Converts a matrix to a pixel image
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   rMaternI, rMaternII
+	New argument 'stationary=TRUE' controls whether the 
+	simulated process is stationary (inside the simulation window).
+	Default simulation behaviour has changed.
+
+    o   im
+        New arguments 'xrange', 'yrange' 
+
+    o   envelope
+	Improvements to robustness of code.
+
+BUGS
+
+   o    quadratcount
+   	If V was a tessellation created using a factor-valued image,
+	quadratcount(X, tess=V) crashed with the error
+	"Tessellation does not contain all the points of X".
+	Fixed.
+
+   o	[.im
+   	If Z was a factor valued image and X was a point pattern
+	then Z[X] was not a factor.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.20-3
 
 OVERVIEW

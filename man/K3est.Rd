@@ -94,7 +94,8 @@ K3est(X, ..., rmax = NULL, nrval = 128, correction = c("translation", "isotropic
 }
 \seealso{
   \code{\link{F3est}},
-  \code{\link{G3est}}
+  \code{\link{G3est}},
+  \code{\link{pcf3est}}
 }
 \examples{
   X <- rpoispp3(42)

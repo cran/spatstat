@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.19 $    $Date: 2010/06/01 05:24:07 $
+#  $Revision: 1.23 $    $Date: 2010/10/24 12:41:56 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -44,84 +44,12 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
   output <- pickoption("output location type", at,
                        c(pixels="pixels",
                          points="points"))
+
   if(output == "points") {
     # VALUES AT DATA POINTS ONLY
-    # identify pairs of distinct points that are close enough
-    # to have nonzero contribution.
-    # Anything closer than 'nsd' standard deviations
-    sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
-    cutoff <- 8 * sd
-    close <- closepairs(x, cutoff)
-    i <- close$i
-    j <- close$j
-    d <- close$d
-    # evaluate contribution from each close pair (i,j)
-    if(is.null(varcov)) {
-      const <- 1/(2 * pi * sigma^2)
-      contrib <- const * exp(-d^2/(2 * sigma^2))
-    } else {
-      # anisotropic kernel
-      dx <- close$dx
-      dy <- close$dy
-      detSigma <- det(varcov)
-      Sinv <- solve(varcov)
-      const <- 1/(2 * pi * sqrt(detSigma))
-      contrib <- const * exp(-(dx * (dx * Sinv[1,1] + dy * Sinv[1,2])
-                               + dy * (dx * Sinv[2,1] + dy * Sinv[2,2]))/2)
-    }
-    # multiply by weights
-    if(!is.null(weights))
-      contrib <- contrib * weights[j]
-    # sum
-    result <- tapply(contrib, factor(i, levels=1:(x$n)), sum)
-    result[is.na(result)] <- 0
-    #
-    if(!leaveoneout) {
-      # add contribution from point itself
-      self <- const
-      if(!is.null(weights))
-        self <- self * weights[i]
-      result <- result + self
-    }
-    #
-    if(edge) {
-      # edge correction
-      win <- x$window
-      if(is.null(varcov) && win$type == "rectangle") {
-        # evaluate Gaussian probabilities directly
-        xr <- win$xrange
-        yr <- win$yrange
-        xx <- x$x
-        yy <- x$y
-        xprob <-
-          pnorm(xr[2], mean=xx, sd=sigma) - pnorm(xr[1], mean=xx, sd=sigma)
-        yprob <-
-          pnorm(yr[2], mean=yy, sd=sigma) - pnorm(yr[1], mean=yy, sd=sigma)
-        edgeweight <- xprob * yprob
-      } else {
-        edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
-        edgeweight <- safelookup(edg, x, warn=FALSE)
-      }
-      result <- result/edgeweight
-    }
-    result <- as.numeric(result)
-    # validate
-    npoints <- x$n
-    if(length(result) != npoints) 
-      stop(paste("Internal error: incorrect number of lambda values",
-                 "in leave-one-out method:",
-                 "length(lambda) = ", length(result),
-                 "!=", npoints, "= npoints"))
-    if(any(is.na(result))) {
-      nwrong <- sum(is.na(result))
-      stop(paste("Internal error:", nwrong, "NA or NaN",
-                 ngettext(nwrong, "value", "values"),
-                 "generated in leave-one-out method"))
-    }
-    # tack on bandwidth
-    attr(result, "sigma") <- sigma
-    attr(result, "varcov") <- varcov
-    # 
+    result <- densitypointsEngine(x, sigma, varcov=varcov,
+                                  weights=weights, edge=edge,
+                                  leaveoneout=leaveoneout)
     return(result)
   }
   
@@ -149,6 +77,156 @@ density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
   # normal return
   attr(result, "sigma") <- sigma
   attr(result, "varcov") <- varcov
+  return(result)
+}
+
+densitypointsEngine <- function(x, sigma, ...,
+                                weights=NULL, edge=TRUE, varcov=NULL,
+                                leaveoneout=TRUE) {
+  if(is.null(varcov)) {
+    const <- 1/(2 * pi * sigma^2)
+  } else {
+    detSigma <- det(varcov)
+    Sinv <- solve(varcov)
+    const <- 1/(2 * pi * sqrt(detSigma))
+  }
+  # Leave-one-out computation
+  # contributions from pairs of distinct points
+  # closer than 8 standard deviations
+  sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
+  cutoff <- 8 * sd
+  if(spatstat.options("densityC")) {
+    # .................. new C code ...........................
+    npts <- npoints(x)
+    result <- numeric(npts)
+    # sort into increasing order of x coordinate (required by C code)
+    oo <- order(x$x)
+    xx <- x$x[oo]
+    yy <- x$y[oo]
+    if(is.null(varcov)) {
+      # isotropic kernel
+      if(is.null(weights)) {
+        zz <- .C("denspt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 rmaxi   = as.double(cutoff),
+                 sig     = as.double(sd),
+                 value   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$value
+      } else {
+        wtsort <- weights[oo]
+        zz <- .C("wtdenspt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 rmaxi   = as.double(cutoff),
+                 sig     = as.double(sd),
+                 weight  = as.double(wtsort),
+                 value   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$value
+      }
+    } else {
+      # anisotropic kernel
+      flatSinv <- as.vector(t(Sinv))
+      if(is.null(weights)) {
+        zz <- .C("adenspt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 rmaxi   = as.double(cutoff),
+                 detsigma = as.double(detSigma),
+                 sinv    = as.double(flatSinv),
+                 value   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$value
+      } else {
+        wtsort <- weights[oo]
+        zz <- .C("awtdenspt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 rmaxi   = as.double(cutoff),
+                 detsigma = as.double(detSigma),
+                 sinv    = as.double(flatSinv),
+                 weight  = as.double(wtsort),
+                 value   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$value
+      }
+    }
+  } else {
+      # ..... interpreted code .........................................
+    close <- closepairs(x, cutoff)
+    i <- close$i
+    j <- close$j
+    d <- close$d
+    # evaluate contribution from each close pair (i,j)
+    if(is.null(varcov)) {
+      contrib <- const * exp(-d^2/(2 * sigma^2))
+    } else {
+      # anisotropic kernel
+      dx <- close$dx
+      dy <- close$dy
+      contrib <- const * exp(-(dx * (dx * Sinv[1,1] + dy * Sinv[1,2])
+                               + dy * (dx * Sinv[2,1] + dy * Sinv[2,2]))/2)
+    }
+    # multiply by weights
+    if(!is.null(weights))
+      contrib <- contrib * weights[j]
+    # sum
+    result <- tapply(contrib, factor(i, levels=1:(x$n)), sum)
+    result[is.na(result)] <- 0
+    #
+  }
+  # ----- contribution from point itself ----------------
+  if(!leaveoneout) {
+    # add contribution from point itself
+    self <- const
+    if(!is.null(weights))
+      self <- self * weights
+    result <- result + self
+  }
+  # ........  Edge correction ........................................
+  if(edge) {
+    win <- x$window
+    if(is.null(varcov) && win$type == "rectangle") {
+      # evaluate Gaussian probabilities directly
+      xr <- win$xrange
+      yr <- win$yrange
+      xx <- x$x
+      yy <- x$y
+      xprob <-
+        pnorm(xr[2], mean=xx, sd=sigma) - pnorm(xr[1], mean=xx, sd=sigma)
+      yprob <-
+        pnorm(yr[2], mean=yy, sd=sigma) - pnorm(yr[1], mean=yy, sd=sigma)
+      edgeweight <- xprob * yprob
+    } else {
+      edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
+      edgeweight <- safelookup(edg, x, warn=FALSE)
+    }
+    result <- result/edgeweight
+  }
+  result <- as.numeric(result)
+  # ............. validate .................................
+  npts <- npoints(x)
+  if(length(result) != npts) 
+    stop(paste("Internal error: incorrect number of lambda values",
+               "in leave-one-out method:",
+               "length(lambda) = ", length(result),
+               "!=", npts, "= npoints"))
+  if(any(is.na(result))) {
+    nwrong <- sum(is.na(result))
+    stop(paste("Internal error:", nwrong, "NA or NaN",
+               ngettext(nwrong, "value", "values"),
+               "generated in leave-one-out method"))
+  }
+  # tack on bandwidth
+  attr(result, "sigma") <- sigma
+  attr(result, "varcov") <- varcov
+  # 
   return(result)
 }
 

@@ -120,10 +120,13 @@
   To perform spatial interpolation of values that were observed
   at the points of a point pattern, use \code{\link{smooth.ppp}}.
 
-  For adaptive nonparametric estimation, see \code{\link{adaptive.density}}.
+  For adaptive nonparametric estimation, see
+  \code{\link{adaptive.density}}.
+  For data sharpening, see \code{\link{sharpen.ppp}}.
 }
 \seealso{
   \code{\link{smooth.ppp}},
+  \code{\link{sharpen.ppp}},
   \code{\link{adaptive.density}},
   \code{\link{ppp.object}},
   \code{\link{im.object}}

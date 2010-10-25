@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.10 $  $Date: 2010/08/08 02:11:41 $
+#   $Revision: 2.12 $  $Date: 2010/09/10 10:05:13 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -209,13 +209,17 @@ envelopeEngine <-
   #
   envir.here <- sys.frame(sys.nframe())
 
+  # ----------------------------------------------------------
+  # Determine Simulation
+  # ----------------------------------------------------------
+  
   # Identify class of patterns to be simulated, from data pattern X
   Xclass <- if(is.ppp(X)) "ppp" else
             if(is.pp3(X)) "pp3" else
             if(is.ppx(X)) "ppx" else
             stop("Unrecognised class of point pattern")
   Xobjectname <- paste("point pattern of class", sQuote(Xclass))
-  
+
   # Identify type of simulation from argument 'simul'
   if(inherits(simul, "simulrecipe")) {
     # ..................................................
@@ -269,14 +273,127 @@ envelopeEngine <-
     } else stop(paste(sQuote("simulate"),
                       "should be an expression, or a list of point patterns"))
   }
+  # -------------------------------------------------------------------
+  # Determine clipping window
+  # ------------------------------------------------------------------
+
+  if(clipdata) {
+    # Generate one realisation
+    Xsim <- eval(simexpr, envir=envir)
+    if(!inherits(Xsim, Xclass))
+      switch(simtype,
+             csr=stop(paste("Internal error:", Xobjectname, "not generated")),
+             rmh=stop(paste("Internal error: rmh did not return an",
+               Xobjectname)),
+             kppm=stop(paste("Internal error: simulate.kppm did not return an",
+               Xobjectname)),
+             expr=stop(paste("Evaluating the expression", sQuote("simulate"),
+               "did not yield an", Xobjectname)),
+             list=stop(paste("Internal error: list entry was not an",
+               Xobjectname)),
+             stop(paste("Internal error:", Xobjectname, "not generated"))
+             )
+    # Extract window
+    clipwin <- Xsim$window
+    if(!is.subset.owin(clipwin, X$window))
+      warning("Window containing simulated patterns is not a subset of data window")
+  }
+  
+  # ------------------------------------------------------------------
+  # Summary function to be applied 
+  # ------------------------------------------------------------------
+
+  if(is.null(fun))
+    stop("Internal error: fun is NULL")
+
+  # Name of function, for error messages
+  fname <- if(is.name(substitute(fun))) deparse(substitute(fun))
+           else if(is.character(fun)) fun else "fun"
+  fname <- sQuote(fname)
+
+  # R function to apply
+  if(is.character(fun))
+    fun <- get(fun)
+  if(!is.function(fun)) 
+    stop(paste("unrecognised format for function", fname))
+  fargs <- names(formals(fun))
+  if(!any(c("r", "...") %in% fargs))
+    stop(paste(fname, "should have an argument",
+               sQuote("r"), "or", sQuote("...")))
+  usecorrection <- any(c("correction", "...") %in% fargs)
+
+  # ---------------------------------------------------------------------
+  # validate other arguments
+  if((nrank %% 1) != 0)
+    stop("nrank must be an integer")
+  stopifnot(nrank > 0 && nrank < nsim/2)
+
+  rgiven <- "r" %in% names(list(...))
+
+  if(tran <- !is.null(transform)) {
+    stopifnot(is.expression(transform))
+    # 'transform' is an expression 
+    aa <- substitute(substitute(tt, list(.=as.name("funX"))),
+                     list(tt=transform))
+    # 'aa' is a language expression invoking 'substitute'
+    bb <- eval(parse(text=deparse(aa)))
+    # 'bb' is an expression obtained by replacing "." by "funX" 
+    transform.funX <- as.call(bb)
+    transform.funX[[1]] <- as.name("eval.fv")
+    # 'transform.funX' is an unevaluated call to eval.fv
+    aa <- substitute(substitute(tt, list(.=as.name("funXsim"))),
+                     list(tt=transform))
+    bb <- eval(parse(text=deparse(aa)))
+    transform.funXsim <- as.call(bb)
+    transform.funXsim[[1]] <- as.name("eval.fv")
+  }
+  if(!is.null(ginterval)) 
+    stopifnot(is.numeric(ginterval) && length(ginterval) == 2)
+    
+  # ---------------------------------------------------------------------
+  # Evaluate function for data pattern X
+  # ------------------------------------------------------------------
+  Xarg <- if(!clipdata) X else X[clipwin]
+  funX <- do.call(fun,
+                  resolve.defaults(list(Xarg),
+                                   list(...),
+                                   if(usecorrection) list(correction="best") else NULL))
+    
+  if(!inherits(funX, "fv"))
+    stop(paste("The function", fname,
+               "must return an object of class", sQuote("fv")))
+
+  argname <- fvnames(funX, ".x")
+  valname <- fvnames(funX, ".y")
+  has.theo <- "theo" %in% fvnames(funX, "*")
+  csr.theo <- csr && has.theo
+
+  if(tran) {
+    # extract only the recommended value
+    if(csr.theo) 
+      funX <- funX[, c(argname, valname, "theo")]
+    else
+      funX <- funX[, c(argname, valname)]
+    # apply the transformation to it
+    funX <- eval(transform.funX)
+  }
+
+  rvals <- funX[[argname]]
+  fX    <- funX[[valname]]
+
+  # default domain over which to maximise
+  alim <- attr(funX, "alim")
+  if(global && is.null(ginterval))
+    ginterval <- if(rgiven) range(rvals) else alim
+
   #--------------------------------------------------------------------
   # Determine number of simulations
-  #
+  # ------------------------------------------------------------------
   #
   ## determine whether dual simulations are required
   ## (one set of simulations to calculate the theoretical mean,
   ##  another independent set of simulations to obtain the critical point.)
-  dual <- (global && !csr && !VARIANCE)
+  dual <- (global && !csr.theo && !VARIANCE)
   Nsim <- if(!dual) nsim else (nsim + nsim2)
 
   # if taking data from a list of point patterns,
@@ -342,127 +459,26 @@ envelopeEngine <-
     return(XsimList)
   }
   
-  # ------------------------------------------------------------------
-  # Summary function to be applied 
-  
-  # Name of function, for error messages
-  fname <- if(is.name(substitute(fun))) deparse(substitute(fun))
-           else if(is.character(fun)) fun else "fun"
-  fname <- sQuote(fname)
-
-  # R function to apply
-  if(is.character(fun))
-    fun <- get(fun)
-  if(!is.function(fun)) 
-    stop(paste("unrecognised format for function", fname))
-  fargs <- names(formals(fun))
-  if(!any(c("r", "...") %in% fargs))
-    stop(paste(fname, "should have an argument",
-               sQuote("r"), "or", sQuote("...")))
-  usecorrection <- any(c("correction", "...") %in% fargs)
-
-  # ---------------------------------------------------------------------
-  # validate other arguments
-  if((nrank %% 1) != 0)
-    stop("nrank must be an integer")
-  stopifnot(nrank > 0 && nrank < nsim/2)
-
-  rgiven <- "r" %in% names(list(...))
-
-  if(tran <- !is.null(transform)) {
-    stopifnot(is.expression(transform))
-    # 'transform' is an expression 
-    aa <- substitute(substitute(tt, list(.=as.name("funX"))),
-                    list(tt=transform))
-    # 'aa' is a language expression invoking 'substitute'
-    bb <- eval(parse(text=deparse(aa)))
-    # 'bb' is an expression obtained by replacing "." by "funX" 
-    transform.funX <- as.call(bb)
-    transform.funX[[1]] <- as.name("eval.fv")
-    # 'transform.funX' is an unevaluated call to eval.fv
-    aa <- substitute(substitute(tt, list(.=as.name("funXsim"))),
-                    list(tt=transform))
-    bb <- eval(parse(text=deparse(aa)))
-    transform.funXsim <- as.call(bb)
-    transform.funXsim[[1]] <- as.name("eval.fv")
-  }
-  if(!is.null(ginterval)) 
-    stopifnot(is.numeric(ginterval) && length(ginterval) == 2)
-
-  # -------------------------------------------------------------------
-  # Determine clipping window
-  if(clipdata) {
-    # Generate one realisation
-    Xsim <- eval(simexpr, envir=envir)
-    if(!inherits(Xsim, Xclass))
-      switch(simtype,
-             csr=stop(paste("Internal error:", Xobjectname, "not generated")),
-             rmh=stop(paste("Internal error: rmh did not return an",
-               Xobjectname)),
-             kppm=stop(paste("Internal error: simulate.kppm did not return an",
-               Xobjectname)),
-             expr=stop(paste("Evaluating the expression", sQuote("simulate"),
-               "did not yield an", Xobjectname)),
-             list=stop(paste("Internal error: list entry was not an",
-               Xobjectname)),
-             stop(paste("Internal error:", Xobjectname, "not generated"))
-             )
-    # Extract window
-    clipwin <- Xsim$window
-    if(!is.subset.owin(clipwin, X$window))
-      warning("Window containing simulated patterns is not a subset of data window")
-  }
-  
-  # ---------------------------------------------------------------------
-  # Evaluate function for data pattern X
-  Xarg <- if(!clipdata) X else X[clipwin]
-  funX <- do.call(fun,
-                  resolve.defaults(list(Xarg),
-                                   list(...),
-                      if(usecorrection) list(correction="best") else NULL))
-
-  if(!inherits(funX, "fv"))
-    stop(paste("The function", fname,
-               "must return an object of class", sQuote("fv")))
-
-  argname <- fvnames(funX, ".x")
-  valname <- fvnames(funX, ".y")
-  has.theo <- "theo" %in% fvnames(funX, "*")
-  csr.theo <- csr && has.theo
-
-  if(tran) {
-    # extract only the recommended value
-    if(csr.theo) 
-      funX <- funX[, c(argname, valname, "theo")]
-    else
-      funX <- funX[, c(argname, valname)]
-    # apply the transformation to it
-    funX <- eval(transform.funX)
-  }
-
-  rvals <- funX[[argname]]
-  fX    <- funX[[valname]]
-
-  # default domain over which to maximise
-  alim <- attr(funX, "alim")
-  if(global && is.null(ginterval))
-    ginterval <- if(rgiven) range(rvals) else alim
-
   # capture main decision parameters
   EnvelopeInfo <-  list(call=cl,
                         Yname=Yname,
                         valname=valname,
                         csr=csr,
+                        csr.theo=csr.theo,
                         simtype=simtype,
                         nrank=nrank,
                         nsim=nsim,
+                        Nsim=Nsim,
                         global=global,
                         dual=dual,
                         nsim2=nsim2,
                         VARIANCE=VARIANCE,
                         nSD=nSD)
-  
+
+  # ----------------------------------------
   ######### SIMULATE #######################
+  # ----------------------------------------
+
   if(verbose) {
     action <- if(simtype == "list") "Extracting" else "Generating"
     descrip <- switch(simtype,
@@ -673,11 +689,13 @@ envelopeEngine <-
     if(csr.theo)
       theory <- funX[["theo"]]
     else {
-      # use the first 'nsim' results to estimate the mean under H0
+      # use the first 'nsim' results to estimate the mean under H0 ...
       theory <- m <- apply(simvals[, 1:nsim], 1, mean, na.rm=TRUE)
-      # then discard them and use the remaining 'nsim2' simulations
-      # to construct the envelopes.
-      simvals <- simvals[, nsim + 1:nsim2]
+      if(dual) {
+        # ... then discard them and use the remaining 'nsim2' simulations
+        # to construct the envelopes.
+        simvals <- simvals[, -(1:nsim)]
+      }
     }
     # compute max absolute deviations
     deviations <- sweep(simvals, 1, theory)
