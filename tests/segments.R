@@ -1,5 +1,5 @@
 #  tests/segments.R
-#  $Revision: 1.5 $  $Date: 2010/04/20 11:54:26 $
+#  $Revision: 1.6 $  $Date: 2010/08/26 07:12:12 $
 
 require(spatstat)
 
@@ -7,6 +7,12 @@ require(spatstat)
 W <- owin()
 X <- psp(x0=.25,x1=.25,y0=0,y1=1,window=W)
 X[W]
+
+# migrated from 'lpp'
+
+X <- psp(runif(10),runif(10),runif(10),runif(10), window=owin())
+Z <- as.mask.psp(X)
+Z <- pixellate(X)
 
 # test of distppll pointed out by Ang Qi Wei
 

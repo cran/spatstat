@@ -6,7 +6,7 @@
   Mat\'ern Model I inhibition process model.
 }
 \usage{
- rMaternI(kappa, r, win = owin(c(0,1),c(0,1)))
+ rMaternI(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE)
 }
 \arguments{
   \item{kappa}{
@@ -21,20 +21,30 @@
     An object of class \code{"owin"}
     or something acceptable to \code{\link{as.owin}}.
   }
+  \item{stationary}{
+    Logical. Whether to start with a stationary process of proposal points
+    (\code{stationary=TRUE}) or to generate the
+    proposal points only inside the window (\code{stationary=FALSE}).
+  }
 }
 \value{
   The simulated point pattern (an object of class \code{"ppp"}).
 }
 \details{
   This algorithm generates a realisation of Mat\'ern's Model I
-  inhibition process 
-  inside the window \code{win}.
+  inhibition process inside the window \code{win}.
 
   The process is constructed by first
   generating a uniform Poisson point process of ``proposal'' points 
-  with intensity \code{kappa} inside the window.
-  A proposal point is deleted if it lies within \code{r} units' distance
+  with intensity \code{kappa}. If \code{stationary = TRUE} (the
+  default), the proposal points are generated in a window larger than
+  \code{win} that effectively means the proposals are stationary.
+  If \code{stationary=FALSE} then the proposal points are
+  only generated inside the window \code{win}.
+
+  A proposal point is then deleted if it lies within \code{r} units' distance
   of another proposal point. Otherwise it is retained.
+  
   The retained points constitute Mat\'ern's Model I.
 }
 \seealso{
@@ -42,11 +52,13 @@
 \code{\link{rMatClust}}
 }
 \examples{
- pp <- rMaternI(20, 0.05)
+ X <- rMaternI(20, 0.05)
+ Y <- rMaternI(20, 0.05, stationary=FALSE)
 }
 \author{Adrian Baddeley
   \email{adrian@maths.uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  \url{http://www.maths.uwa.edu.au/~adrian/},
+  Ute Hahn,
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}
 }

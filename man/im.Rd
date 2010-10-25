@@ -6,7 +6,8 @@
   class \code{"im"} representing a two-dimensional pixel image.
 }
 \usage{
-  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), 
+  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
+   xrange=NULL, yrange=NULL,
    unitname=NULL)
 }
 \arguments{
@@ -18,6 +19,11 @@
   }
   \item{yrow}{
     vector of \eqn{y} coordinates for the pixel grid
+  }
+  \item{xrange,yrange}{
+    Optional. Vectors of length 2 giving the \eqn{x} and \eqn{y}
+    limits of the enclosing rectangle.
+    (Ignored if \code{xcol}, \code{yrow} are present.)
   }
   \item{unitname}{
     Optional. Name of unit of length. Either a single character string,
@@ -94,6 +100,7 @@
    vec <- rnorm(1200)
    mat <- matrix(vec, nrow=30, ncol=40)
    whitenoise <- im(mat)
+   whitenoise <- im(mat, xrange=c(0,1), yrange=c(0,1))
    whitenoise <- im(mat, xcol=seq(0,1,length=40), yrow=seq(0,1,length=30))
    whitenoise <- im(vec, xcol=seq(0,1,length=40), yrow=seq(0,1,length=30))
    plot(whitenoise)

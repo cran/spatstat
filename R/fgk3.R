@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.4 $	$Date: 2010/05/02 01:39:53 $
+#	$Revision: 1.6 $	$Date: 2010/10/21 05:38:06 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -166,6 +166,70 @@ F3est <- function(X, ...,
   return(FF)
 }
 
+pcf3est <- function(X, ...,
+                    rmax=NULL, nrval=128,
+                    correction=c("translation", "isotropic"),
+                    delta=NULL, adjust=1, biascorrect=TRUE)
+{
+  stopifnot(inherits(X, "pp3"))
+  correction <- pickoption("correction", correction,
+                           c(translation="translation",
+                             isotropic="isotropic",
+                             best="isotropic"),
+                           multi=TRUE)
+  if(is.null(rmax))
+    rmax <- diameter.box3(X$domain)/2
+  r <- seq(0, rmax, length=nrval)
+
+  if(is.null(delta)) {
+    lambda <- npoints(X)/volume(X$domain)
+    delta <- adjust * 0.26/lambda^(1/3)
+  }
+  if(biascorrect) {
+    # bias correction
+    rondel <- r/delta
+    biasbit <- ifelse(rondel > 1, 1, (3/4)*(rondel + 2/3 - (1/3)*rondel^3))
+  }
+
+  # this will be the output data frame
+  g <- data.frame(r=r, theo=rep(1, length(r)))
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  g <- fv(g, "r", substitute(pcf3(r), NULL),
+          "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="pcf3")
+
+  # extract the x,y,z ranges as a vector of length 6
+  flatbox <- unlist(X$domain[1:3])
+
+  # extract coordinates
+  coo <- coords(X)
+  
+  if(any(correction %in% "translation")) {
+    u <- pcf3engine(coo$x, coo$y, coo$z, flatbox,
+                  rmax=rmax, nrval=nrval, correction="translation", delta=delta)
+    gt <- u$f
+    if(biascorrect)
+      gt <- gt/biasbit
+    g <- bind.fv(g, data.frame(trans=gt), "%s[trans](r)",
+                 "translation-corrected estimate of %s",
+                 "trans")
+  }
+  if(any(correction %in% "isotropic")) {
+    u <- pcf3engine(coo$x, coo$y, coo$z, flatbox,
+                  rmax=rmax, nrval=nrval, correction="isotropic", delta=delta)
+    gi <- u$f
+    if(biascorrect)
+      gi <- gi/biasbit
+    g <- bind.fv(g, data.frame(iso=gi), "%s[iso](r)",
+                 "isotropic-corrected estimate of %s",
+                 "iso")
+  }
+  # default is to display them all
+  attr(g, "fmla") <- . ~ r
+  unitname(g) <- unitname(X)
+  attr(g, "delta") <- delta
+  return(g)
+}
+
 #  ............ low level code ..............................
 #
 k3engine <- function(x, y, z, box=c(0,1,0,1,0,1),
@@ -326,7 +390,31 @@ g3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1),
   return(list(rs=rs, km=km$km, hazard=km$lambda, han=han, r=r))
 }
 
-
+pcf3engine <- function(x, y, z, box=c(0,1,0,1,0,1),
+                       rmax=1, nrval=100, correction="translation",
+                       delta=rmax/10) 
+{
+	code <- switch(correction, translation=0, isotropic=1)
+	res <- .C("Rcallpcf3",
+                  as.double(x), as.double(y), as.double(z), 
+                  as.integer(length(x)),
+                  as.double(box[1]), as.double(box[2]), 
+                  as.double(box[3]), as.double(box[4]), 
+                  as.double(box[5]), as.double(box[6]), 
+                  as.double(0), as.double(rmax), 
+                  as.integer(nrval),
+                  f = as.double(numeric(nrval)),
+                  num = as.double(numeric(nrval)),
+                  denom = as.double(numeric(nrval)),
+                  method=as.integer(code),
+                  delta=as.double(delta),
+                  PACKAGE="spatstat"
+	)
+	return(list(range = c(0,rmax),
+                    f = res$f, num=res$num, denom=res$denom, 
+                    correction=correction))
+}
+#
 # ------------------------------------------------------------
 # volume of a sphere (exact and approximate)
 #

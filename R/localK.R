@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.13 $	$Date: 2009/07/24 06:51:58 $
+#	$Revision: 1.14 $	$Date: 2010/10/19 09:11:43 $
 #
 #
 
@@ -19,12 +19,12 @@
   
   wantL <- resolve.defaults(list(...), list(wantL = FALSE))$wantL
 
-  npoints <- X$n 
+  npts <- npoints(X)
   W <- X$window
   area <- area.owin(W)
-  lambda <- npoints/area
-  lambda1 <- (npoints - 1)/area
-  lambda2 <- (npoints * (npoints - 1))/(area^2)
+  lambda <- npts/area
+  lambda1 <- (npts - 1)/area
+  lambda2 <- (npts * (npts - 1))/(area^2)
 
   if(is.null(rvalue)) 
     rmaxdefault <- rmax.rule("K", W, lambda)
@@ -60,8 +60,8 @@
   I <- close$i
 
   # initialise
-  df <- as.data.frame(matrix(NA, length(r), npoints))
-  labl <- desc <- character(npoints)
+  df <- as.data.frame(matrix(NA, length(r), npts))
+  labl <- desc <- character(npts)
   fname <- if(wantL) "L(r)" else "K(r)"
 
   bkt <- function(x) { paste("[", x, "]", sep="") }
@@ -70,16 +70,16 @@
          none={
            # uncorrected! For demonstration purposes only!
            ftag <- if(wantL) "L[un]" else "K[un]"
-           for(i in 1:npoints) {
+           for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val)  # no weights
              df[,i] <- cumsum(wh)/lambda1
-             icode <- numalign(i, npoints)
+             icode <- numalign(i, npts)
              names(df)[i] <- paste("un", icode, sep="")
              labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
              desc[i] <- paste("uncorrected estimate of", fname,
                               "for point", icode)
-             if(verbose) progressreport(i, npoints)
+             if(verbose) progressreport(i, npts)
            }
          },
          translate={
@@ -87,17 +87,17 @@
            ftag <- if(wantL) "L[trans]" else "K[trans]"
            XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
            edgewt <- edge.Trans(XI, XJ, paired=TRUE)
-           for(i in 1:npoints) {
+           for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val, edgewt[ii])
              Ktrans <- cumsum(wh)/lambda1
              df[,i] <- Ktrans
-             icode <- numalign(i, npoints)
+             icode <- numalign(i, npts)
              names(df)[i] <- paste("trans", icode, sep="")
              labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
              desc[i] <- paste("translation-corrected estimate of", fname,
                               "for point", icode)
-             if(verbose) progressreport(i, npoints)
+             if(verbose) progressreport(i, npts)
            }
            h <- diameter(W)/2
            df[r >= h, ] <- NA
@@ -106,17 +106,17 @@
            # Ripley isotropic correction
            ftag <- if(wantL) "L[iso]" else "K[iso]"
            edgewt <- edge.Ripley(XI, matrix(DIJ, ncol=1))
-           for(i in 1:npoints) {
+           for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val, edgewt[ii])
              Kiso <- cumsum(wh)/lambda1
              df[,i] <- Kiso
-             icode <- numalign(i, npoints)
+             icode <- numalign(i, npts)
              names(df)[i] <- paste("iso", icode, sep="")
              labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
              desc[i] <- paste("Ripley isotropic correction estimate of", fname,
                               "for point", icode)
-             if(verbose) progressreport(i, npoints)
+             if(verbose) progressreport(i, npts)
            }
            h <- diameter(W)/2
            df[r >= h, ] <- NA

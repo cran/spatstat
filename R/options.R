@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.28 $   $Date: 2010/06/05 10:50:27 $
+#    $Revision: 1.29 $   $Date: 2010/10/22 08:33:10 $
 #
 #
 
@@ -132,6 +132,11 @@ reset.spatstat.options <- function() {
          default="on",
          check=function(x) { x %in% c("off", "on", "test") },
          valid="one of the strings \'off\', \'on\' or \'test\'"
+       ),
+       densityC=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
        )
        )
 

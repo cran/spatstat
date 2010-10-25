@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.73 $     $Date: 2010/07/16 06:38:40 $
+#         $Revision: 1.75 $     $Date: 2010/10/21 03:26:05 $
 #
 #      The class "im" of raster images
 #
@@ -22,13 +22,17 @@
 #
 #   creator 
 
-im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
+im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), 
+               xrange=NULL, yrange=NULL,
                unitname=NULL) {
 
   typ <- typeof(mat)
   if(typ == "double")
     typ <- "real"
 
+  miss.xcol <- missing(xcol)
+  miss.yrow <- missing(yrow)
+  
   # determine dimensions
   if(is.matrix(mat)) {
     nr <- nrow(mat)
@@ -38,7 +42,7 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
     if(length(yrow) != nr)
       stop("Length of yrow does not match nrow(mat)")
   } else {
-    if(missing(xcol) || missing(yrow))
+    if(miss.xcol || miss.yrow)
       stop(paste(sQuote("mat"),
                  "is not a matrix and I can't guess its dimensions"))
     stopifnot(length(mat) == length(xcol) * length(yrow))
@@ -59,10 +63,24 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
     dim(mat) <- c(nr, nc)
 
   # set up coordinates
-  xstep <- diff(xcol)[1]
-  ystep <- diff(yrow)[1]
-  xrange <- range(xcol) + c(-1,1) * xstep/2
-  yrange <- range(yrow) + c(-1,1) * ystep/2
+  if(miss.xcol && !is.null(xrange)) {
+    # use 'xrange' 
+    xstep <- diff(xrange)/nc
+    xcol <- xrange[1] - xstep/2 + xstep * seq(nc)
+  } else {
+    # use 'xcol'
+    xstep <- diff(xcol)[1]
+    xrange <- range(xcol) + c(-1,1) * xstep/2
+  }
+  if(miss.yrow && !is.null(yrange)) {
+    # use 'yrange'
+    ystep <- diff(yrange)/nr
+    yrow <- yrange[1] - ystep/2 + ystep * seq(nr)
+  } else {
+    # use 'yrow'
+    ystep <- diff(yrow)[1]
+    yrange <- range(yrow) + c(-1,1) * ystep/2
+  }  
   unitname <- as.units(unitname)
 
   # get rid of those annoying 8.67e-19 printouts
@@ -365,7 +383,15 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   
   if(length(x) != length(y))
     stop("x and y must be numeric vectors of equal length")
-  value <- rep(NA, length(x))
+
+  # initialise answer to NA 
+  if(Z$type != "factor") {
+    niets <- NA
+    mode(niets) <- mode(Z$v)
+  } else {
+    niets <- factor(NA, levels=levels(Z))
+  }
+  value <- rep(niets, length(x))
                
   # test whether inside bounding rectangle
   xr <- Z$xrange
@@ -374,8 +400,12 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   frameok <- (x >= xr[1] - eps) & (x <= xr[2] + eps) & 
              (y >= yr[1] - eps) & (y <= yr[2] + eps)
   
-  if(!any(frameok))  # all points OUTSIDE range - no further work needed
+  if(!any(frameok)) {
+    # all points OUTSIDE range - no further work needed
+    if(!naok)
+      warning("Internal error: all values NA")
     return(value)  # all NA
+  }
 
   # consider only those points which are inside the frame
   xf <- x[frameok]
@@ -388,7 +418,7 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   # look up image values
   vf <- Z$v[cbind(loc$row, loc$col)]
   
-  # insert into 'ok' vector
+  # insert into answer
   value[frameok] <- vf
 
   if(!naok && any(is.na(value)))

@@ -1,5 +1,5 @@
 /*
-	$Revision: 1.3 $ $Date: 2010/03/18 13:47:55 $
+	$Revision: 1.5 $ $Date: 2010/10/24 10:57:02 $
 
 	R interface
 
@@ -42,6 +42,8 @@ void g3three(Point *p, int n, Box *b, Ftable *g);
 void g3cen(Point *p, int n, Box *b, H4table *count);
 void k3trans(Point *p, int n, Box *b, Ftable *k);
 void k3isot(Point *p, int n, Box *b, Ftable *k);
+void pcf3trans(Point *p, int n, Box *b, Ftable *pcf, double delta);
+void pcf3isot(Point *p, int n, Box *b, Ftable *pcf, double delta);
 void phatminus(Point *p, int n, Box *b, double vside, Itable *count);
 void phatnaive(Point *p, int n, Box *b, double vside, Itable *count);
 void p3hat4(Point *p, int n, Box *b, double vside, H4table *count);
@@ -332,7 +334,7 @@ H4tabletoR(tab, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen)
 /*
 	R CALLING INTERFACE 
 
-	These routines are called from S by 
+	These routines are called from R by 
 	> .C("routine-name", ....)
 */
 
@@ -516,3 +518,43 @@ RcallF3cen(x,y,z, n, x0, x1, y0, y1, z0, z1,
   H4tabletoR(count, t0, t1, m, obs, nco, cen, ncc, upperobs, uppercen);
   DEBUGMESSAGE("Leaving Rcallf3cen\n")
 }
+
+void
+Rcallpcf3(x,y,z, n, x0, x1, y0, y1, z0, z1, t0, t1, m, f, num, denom, method, 
+delta)
+
+     double *x, *y, *z;	/* points */
+     int    *n;
+
+     double *x0, *x1, 	/* box */
+            *y0, *y1, 
+            *z0, *z1;	
+
+     double *t0, *t1;	/* Ftable */
+     int    *m;
+     double *f, *num, *denom;
+
+     int    *method;
+
+     double *delta;    /* Epanechnikov kernel halfwidth */
+{
+  Point	*p;
+  Box 	*b;
+  Ftable	*tab;
+
+  p = RtoPointarray(x, y, z, n);
+  b = RtoBox(x0, x1, y0, y1, z0, z1);
+  tab = MakeFtable(t0, t1, m);	
+
+  switch((int) *method) {	
+  case 0:
+    pcf3trans(p, (int) *n, b, tab, (double) *delta); break;
+  case 1:
+    pcf3isot(p, (int) *n, b, tab, (double) *delta); break;
+  default:
+    Rprintf("Method %d not implemented: defaults to 0\n", *method);
+    pcf3trans(p, (int) *n, b, tab, (double) *delta); break;
+  }
+  FtabletoR(tab, t0, t1, m, f, num, denom);
+}
+

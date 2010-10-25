@@ -2,6 +2,7 @@
 \alias{as.im}
 \alias{as.im.im}
 \alias{as.im.owin}
+\alias{as.im.matrix}
 \alias{as.im.tess}
 \alias{as.im.function}
 \alias{as.im.default}
@@ -17,6 +18,7 @@
   \method{as.im}{owin}(X, W=NULL, \dots,
         eps=NULL, dimyx=NULL, xy=NULL,
         na.replace=NULL, value=1)
+  \method{as.im}{matrix}(X, W=NULL, \dots)
   \method{as.im}{tess}(X, W=NULL, \dots, 
         eps=NULL, dimyx=NULL, xy=NULL,
         na.replace=NULL)
@@ -63,6 +65,8 @@
     with all pixel entries equal to \code{value} inside the window \code{X},
     and \code{NA} outside.
     \item
+    a matrix. 
+    \item
     a tessellation (object of class \code{"tess"}).
     The result is a factor-valued image, with one factor level
     corresponding to each tile of the tessellation. Pixels are classified
@@ -102,7 +106,7 @@
   The spatial domain (enclosing rectangle) of the pixel image
   is determined by the argument \code{W}. If \code{W} is absent, 
   the spatial domain is determined by \code{X}.
-  When \code{X} is a function or a single numerical value,
+  When \code{X} is a function, a matrix, or a single numerical value,
   \code{W} is required.
   
   The pixel array dimensions of the final resulting image are determined

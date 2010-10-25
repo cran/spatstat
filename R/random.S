@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.41 $   $Date: 2010/07/12 08:36:57 $
+#    $Revision: 4.42 $   $Date: 2010/09/29 08:31:30 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -290,36 +290,54 @@ rpoint <- function(n, f, fmax=NULL,
 }
     
 "rMaternI" <-
-  function(kappa, r, win = owin(c(0,1),c(0,1)))
+  function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE)
 {
+  win <- as.owin(win)
+  stopifnot(is.numeric(r) && length(r) == 1)
+  if(stationary) {
+    # generate in a larger window
+    bigbox <- grow.rectangle(as.rectangle(win), r)
+    X <- rpoispp(kappa, win=bigbox)
+  } else {
     X <- rpoispp(kappa, win=win)
-    if(X$n <= 1) return(X)
-    d <- nndist(X$x, X$y)
-    qq <- X[d > r]
-    return(qq)
+  }
+  if(npoints(X) > 1) {
+    d <- nndist(X)
+    X <- X[d > r]
+  }
+  if(stationary)
+    X <- X[win]
+  return(X)
 }
     
 "rMaternII" <-
-  function(kappa, r, win = owin(c(0,1),c(0,1)))
+  function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE)
 {
+  win <- as.owin(win)
+  stopifnot(is.numeric(r) && length(r) == 1)
+  if(stationary) {
+    bigbox <- grow.rectangle(as.rectangle(win), r)
+    X <- rpoispp(kappa, win=bigbox)
+  } else {
     X <- rpoispp(kappa, win=win)
-    
-    if(X$n <= 1) return(X)
-    
+  }
+
+  nX <- npoints(X)
+  if(nX > 1) {
     # matrix of squared pairwise distances
-    d2 <- pairdist(X$x, X$y, squared=TRUE)
+    d2 <- pairdist(X, squared=TRUE)
     close <- (d2 <= r^2)
-
     # random order 1:n
-    age <- sample(seq(X$n), X$n, replace=FALSE)
+    age <- sample(seq(nX), nX, replace=FALSE)
     earlier <- outer(age, age, ">")
-
     conflict <- close & earlier
     # delete <- apply(conflict, 1, any)
     delete <- matrowany(conflict)
-    
-    qq <- X[ !delete]
-    return(qq)
+    X <- X[!delete]
+  }
+  if(stationary)
+    X <- X[win]
+  return(X)
 }
   
 "rSSI" <-

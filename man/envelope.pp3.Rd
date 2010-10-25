@@ -142,7 +142,7 @@
   
   The summary statistic \code{fun} is applied to each of these simulated
   patterns. Typically \code{fun} is one of the functions
-  \code{K3est}, \code{G3est}, or \code{F3est}.
+  \code{K3est}, \code{G3est}, \code{F3est} or \code{pcf3est}.
   It may also be a character string
   containing the name of one of these functions.
   
@@ -159,7 +159,8 @@
   \code{\link{rpoispp3}},
   \code{\link{K3est}},
   \code{\link{G3est}},
-  \code{\link{F3est}}.
+  \code{\link{F3est}},
+  \code{\link{pcf3est}}.
 }
 \examples{
    X <- rpoispp3(20, box3())

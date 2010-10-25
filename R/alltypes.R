@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.24 $   $Date: 2010/03/08 08:23:04 $
+#   $Revision: 1.25 $   $Date: 2010/09/10 10:05:03 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -98,7 +98,7 @@ alltypes <- function(X, fun="K", ...,
   if(envelope) {
     L <- do.call("envelope",
                  resolve.defaults(
-                                  list(X, fun=NULL),
+                                  list(X, fun=estimator),
                                   list(internal=list(eject="patterns")),
                                   list(...),
                                   list(verbose=verb)))

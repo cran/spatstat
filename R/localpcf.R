@@ -1,19 +1,50 @@
 #
 #   localpcf.R
 #
-#  $Revision: 1.4 $  $Date: 2010/08/24 06:36:37 $
+#  $Revision: 1.8 $  $Date: 2010/10/19 09:11:04 $
 #
 #
 
-localpcfmatrix <- function(X, i=seq(npoints(X)), delta, rmax,
-                           ..., nr=512, adjust=1) {
+localpcf <- function(X, ..., delta=NULL, rmax=NULL, nr=512, stoyan=0.15) {
+  if(length(list(...)) > 0)
+    warning("Additional arguments ignored")
+  m <- localpcfmatrix(X, delta=delta, rmax=rmax, nr=nr, stoyan=stoyan)
+  r <- attr(m, "r")
+  delta <- attr(m, "delta")
+  nX <- npoints(X)
+  # border correction
+  dbord <- bdist.points(X)
+  m[r[row(m)] > dbord[col(m)]] <- NA
+  #
+  df <- data.frame(m, r=r, theo=rep(1, length(r)))
+  icode <- unlist(lapply(seq(nX), numalign, nmax=nX))
+  nama <- paste("est", icode, sep="")
+  desc <- paste("estimate of %s for point", icode)
+  labl <- paste("%s[", icode, "](r)", sep="")
+  names(df) <- c(nama, "r", "theo")
+  desc <- c(desc, "distance argument r", "theoretical Poisson %s")
+  labl <- c(labl, "r", "%s[pois](r)")
+  # create fv object
+  g <- fv(df, "r", substitute(localg(r), NULL),
+          "theo", , c(0, max(r)), labl, desc, fname="localg")
+  # default is to display them all
+  attr(g, "fmla") <- . ~ r
+  fvnames(g, ".") <- names(df)[names(df) != "r"]
+  unitname(g) <- unitname(X)
+  attr(g, "delta") <- delta
+  return(g)
+}
+
+localpcfmatrix <- function(X, i=seq(npoints(X)), ...,
+                           delta=NULL, rmax=NULL,
+                           nr=512, stoyan=0.15) {
   missi <- missing(i)
   nX <- npoints(X)
   W <- as.owin(X)
   lambda <- nX/area.owin(W)
-  if(missing(delta)) 
-    delta <- adjust * 0.15/sqrt(lambda)
-  if(missing(rmax)) 
+  if(is.null(delta)) 
+    delta <- stoyan/sqrt(lambda)
+  if(is.null(rmax)) 
     rmax <- rmax.rule("K", W, lambda)
   # sort points in increasing order of x coordinate
   oX <- order(X$x)

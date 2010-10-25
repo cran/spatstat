@@ -58,6 +58,7 @@
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
+\alias{densitypointsEngine}
 \alias{dgsTerms}
 \alias{diagnose.ppm.engine}
 \alias{diggraterms}
@@ -237,6 +238,7 @@
 \alias{param.quad}
 \alias{paren}
 \alias{partialModelMatrix}
+\alias{pcf3engine}
 \alias{pcfmulti.inhom}
 \alias{pickoption}
 \alias{ploterodewin}
@@ -459,6 +461,7 @@ damaged.ppm(object)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
+densitypointsEngine(x, sigma, \dots, weights, edge, varcov, leaveoneout)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
@@ -587,7 +590,7 @@ least.common.multiple(n,m)
 licence.polygons()
 license.polygons()
 listof(\dots)
-localpcfmatrix(X, i, delta, rmax, \dots, nr, adjust)
+localpcfmatrix(X, i, \dots, delta, rmax, nr, stoyan)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 \method{[}{localpcfmatrix}(x, i, ...)
@@ -654,6 +657,7 @@ owinpoly2mask(w, rasta, check=TRUE)
 param.quad(Q)
 paren(x, type)
 partialModelMatrix(X,D,model,callstring,\dots)
+pcf3engine(x, y, z, box, rmax, nrval, correction, delta)
 pcfmulti.inhom(X, I, J, lambdaI = NULL, lambdaJ = NULL, ...,
                r = NULL, breaks = NULL,
                kernel = "epanechnikov", bw = NULL, stoyan = 0.15,
