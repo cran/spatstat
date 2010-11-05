@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.10 $  $Date: 2010/06/05 09:49:46 $
+#   $Revision: 1.11 $  $Date: 2010/11/04 04:18:52 $
 #
 #
 
@@ -209,4 +209,12 @@ print.rmhcontrol <- function(x, ...) {
     else 
       print(x$expand)
   }
+}
+
+default.rmhcontrol <- function(model, ...) {
+  stopifnot(is.ppm(model))
+  dflt <- list(expand=default.expand(model),
+               periodic=(as.owin(model)$type=="rectangle"))
+  ctrl <- resolve.defaults(list(...), dflt)
+  return(rmhcontrol(ctrl))
 }

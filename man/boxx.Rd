@@ -36,7 +36,7 @@ boxx(..., unitname = NULL)
   An object of class \code{"boxx"}. There is a print method for this class.
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

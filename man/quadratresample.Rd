@@ -52,7 +52,7 @@ quadratresample(X, nx, ny=nx, ..., replace = FALSE, nsamples = 1)
   list of point patterns (if \code{nsamples > 1}).
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

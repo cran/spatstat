@@ -1,3 +1,73 @@
+	CHANGES IN spatstat VERSION 1.21-0
+
+OVERVIEW 
+
+    o   Implemented Spatial Logistic Regression
+
+    o   Implemented nonparametric estimation of relative risk
+        with bandwidth selection by cross-validation.
+
+    o   Smoothing functions can handle a data frame of marks.
+
+    o   New options in Kinhom; default behaviour has changed.
+
+NEW FUNCTIONS
+
+    o   slrm
+    	Fit a spatial logistic regression model
+
+    o   anova.slrm, coef.slrm, fitted.slrm, logLik.slrm, plot.slrm, predict.slrm
+    	Methods for spatial logistic regression models
+
+    o   relrisk
+    	Nonparametric estimation of relative risk 
+
+    o   bw.relrisk
+    	Automatic bandwidth selection by cross-validation
+
+    o   default.rmhcontrol
+        Sets default values of Metropolis-Hastings parameters
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   smooth.ppp, markmean
+    	These functions now accept a data frame of marks.
+
+    o   Kinhom
+	Default behaviour has changed. 
+    	New argument 'renormalise=TRUE' determines scaling of estimator
+	and affects bias and variance in small samples.
+
+    o   residuals.ppm
+    	Now also computes the score residuals.
+
+    o   plot.im
+    	New argument 'ribscale'
+
+    o   plot.listof, plot.splitppp
+    	New arguments panel.begin, panel.end and panel.args
+
+    o   ppp
+    	Now checks for NA/NaN/Inf values in the coordinates
+
+    o   envelope.ppm
+    	Changed default value of 'control' 
+    	New argument 'nrep'
+    	
+    o   qqplot.ppm
+    	Changed default value of 'control' 
+
+BUGS
+
+    o   marks<-.ppp, setmarks, %mark%
+    	A matrix of marks was accepted by ppp() 
+	but not by these assignment functions. 
+	Fixed.
+
+    o   density.ppp, smooth.ppp, sharpen.ppp, markmean
+    	Crashed if the bandwidth was extremely small.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.20-5
 
 OVERVIEW 

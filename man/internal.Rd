@@ -100,6 +100,7 @@
 \alias{exactPdt}
 \alias{explain.ifnot}
 \alias{extractAIC.ppm}
+\alias{extractAIC.slrm}
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
@@ -111,6 +112,7 @@
 \alias{FormatFaspFormulae}
 \alias{formula.ppm}
 \alias{formula.kppm}
+\alias{formula.slrm}
 \alias{fvlabel}
 \alias{fvnames}
 \alias{fvnames<-}
@@ -158,6 +160,7 @@
 \alias{is.ppx}
 \alias{is.prime}
 \alias{is.psp}
+\alias{is.slrm}
 \alias{is.stationary.ppm}
 \alias{is.tess}
 \alias{k3engine}
@@ -210,6 +213,9 @@
 \alias{meanY.owin}
 \alias{sewpcf}
 \alias{sewsmod}
+\alias{slr.prepare}
+\alias{slrAssemblePixelData}
+\alias{model.matrix.slrm}
 \alias{model.se.image}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
@@ -244,6 +250,7 @@
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.barplotdata}
+\alias{plot.bw.relrisk}
 \alias{plot.fii}
 \alias{plot.minconfit}
 \alias{plot.plotpairsim}
@@ -259,6 +266,7 @@
 \alias{prange}
 \alias{primefactors}       
 \alias{print.bt.frame}
+\alias{print.bw.relrisk}
 \alias{print.colourmap}
 \alias{print.diagppm}
 \alias{print.envelope}
@@ -279,6 +287,7 @@
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
+\alias{print.slrm}
 \alias{print.splitppp}
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
@@ -316,6 +325,7 @@
 \alias{resid1plot}
 \alias{resid1panel}
 \alias{resolve.defaults}
+\alias{resolve.2D.kernel}
 \alias{restrict.mask}
 \alias{reverse.xypolygon}    
 \alias{revcumsum}    
@@ -367,6 +377,7 @@
 \alias{sympoly}
 \alias{terms.ppm}
 \alias{terms.kppm}
+\alias{terms.slrm}
 \alias{termsinformula}
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
@@ -377,12 +388,14 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{update.interact}
+\alias{update.slrm}
 \alias{validradius}        
 \alias{valid.ppm}        
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
-\alias{variablesinformula}        
+\alias{variablesinformula}
+\alias{vcov.slrm}
 \alias{verbalogic}
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
@@ -441,8 +454,8 @@ check.hist.lengths(hist,breaks)
 check.named.list(x, nam, context, namopt)
 check.named.vector(x, nam, context, namopt)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
-check.nvector(v, npoints, fatal=TRUE)
-check.nmatrix(m, npoints, fatal=TRUE)
+check.nvector(v, npoints, fatal=TRUE, things="data points")
+check.nmatrix(m, npoints, fatal=TRUE, things="data points")
 check.1.real(x, context, fatal)
 check.testfun(f, f1, X)
 clip.psp(x, window, check=TRUE)
@@ -512,6 +525,7 @@ exactdt(X, \dots)
 exactPdt(w)
 explain.ifnot(expr, context)
 \method{extractAIC}{ppm}(fit, scale, k, \dots)
+\method{extractAIC}{slrm}(fit, scale = 0, k = 2, ...)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
@@ -523,6 +537,7 @@ fillNA(x, value)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
+\method{formula}{slrm}(x, ...)
 fvlabel(x, id)
 fvnames(X, a)
 fvnames(X, a) <- value
@@ -570,6 +585,7 @@ is.pp3(x)
 is.ppx(x)
 is.prime(n)
 is.psp(x)
+is.slrm(x)
 is.stationary.ppm(x)    
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
@@ -624,6 +640,9 @@ meanX.owin(w)
 meanY.owin(w)
 sewpcf(d, w, denargs, lambda2area)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
+slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
+slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
+\method{model.matrix}{slrm}(object, ..., keepNA = TRUE)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, correction,
 	 rbord, use.gam, gcontrol, famille,
@@ -670,6 +689,7 @@ pickoption(what="option", key, keymap, \dots,
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{barplotdata}(x, \dots)
+\method{plot}{bw.relrisk}(x, \dots)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
@@ -686,6 +706,7 @@ pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE,
 prange(x)
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
+\method{print}{bw.relrisk}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{envelope}(x, \dots)
@@ -706,6 +727,7 @@ primefactors(n, prmax)
 \method{print}{rmhcontrol}(x, \dots)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
+\method{print}{slrm}(x, ...)
 \method{print}{splitppp}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
@@ -746,6 +768,7 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots, .StripNull=FALSE)
+resolve.2D.kernel(sigma, \dots, varcov, x, mindist)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
 revcumsum(x)
@@ -798,6 +821,7 @@ suffstat.poisson(model, X, callstring)
 sympoly(x, y, n)
 \method{terms}{ppm}(x, \dots)
 \method{terms}{kppm}(x, \dots)
+\method{terms}{slrm}(x, ...)
 termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
@@ -808,12 +832,14 @@ tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)
+\method{update}{slrm}(object, ..., evaluate = TRUE, env = parent.frame())
 validradius(r, caller)
 valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
 variablesinformula(x)
+\method{vcov}{slrm}(object, ...)
 verbalogic(x, op)
 versionstring.interact(object)
 versionstring.ppm(object)

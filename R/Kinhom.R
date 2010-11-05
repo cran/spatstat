@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.48 $	$Date: 2010/06/07 13:22:49 $
+#	$Revision: 1.50 $	$Date: 2010/11/04 04:07:13 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -55,6 +55,7 @@
 "Kinhom"<-
   function (X, lambda=NULL, ..., r = NULL, breaks = NULL, 
          correction=c("border", "bord.modif", "isotropic", "translate"),
+            renormalise=TRUE,
             nlarge = 1000, 
             lambda2=NULL,
             reciplambda=NULL, reciplambda2=NULL,
@@ -139,6 +140,8 @@
       }
     }
 
+    if(renormalise)
+      pseudoarea <- sum(reciplambda)
     
     # recommended range of r values
     alim <- c(0, min(rmax, rmaxdefault))
@@ -184,7 +187,7 @@
     desc <- c("distance argument r", "theoretical Poisson %s")
     K <- fv(K, "r", substitute(Kinhom(r), NULL),
             "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kinhom")
-        
+
     # identify all close pairs
     rmax <- max(r)
     close <- closepairs(X, rmax)
@@ -229,7 +232,7 @@
       edgewt <- edge.Trans(XI, XJ, paired=TRUE)
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Ktrans <- cumsum(wh)/area
+      Ktrans <- cumsum(wh)/(if(renormalise) pseudoarea else area)
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
@@ -241,7 +244,7 @@
       edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Kiso <- cumsum(wh)/area
+      Kiso <- cumsum(wh)/(if(renormalise) pseudoarea else area)
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",

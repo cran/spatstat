@@ -37,7 +37,7 @@ rMosaicSet(X, p=0.5)
   \emph{Annals of Mathematical Statistics} \bold{36} (1965) 1859--1863.
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

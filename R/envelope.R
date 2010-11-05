@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.12 $  $Date: 2010/09/10 10:05:13 $
+#   $Revision: 2.14 $  $Date: 2010/11/05 01:26:58 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -97,7 +97,7 @@ envelope.ppp <-
 envelope.ppm <- 
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
-           start=NULL, control=list(nrep=1e5, expand=default.expand(Y)),
+           start=NULL, control=default.rmhcontrol(Y, nrep=nrep), nrep=1e5, 
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,

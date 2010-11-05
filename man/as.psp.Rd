@@ -132,7 +132,7 @@ check=spatstat.options("checksegments"), fatal=TRUE)
    b <- as.psp(from=runifpoint(10), to=runifpoint(10))
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

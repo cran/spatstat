@@ -1,11 +1,11 @@
 #
 # simulation of FITTED model
 #
-#  $Revision: 1.19 $ $Date: 2009/12/16 19:24:45 $
+#  $Revision: 1.20 $ $Date: 2010/11/04 04:37:02 $
 #
 #
 rmh.ppm <- function(model, start = NULL,
-                    control = rmhcontrol(),
+                    control = default.rmhcontrol(model),
                     ..., verbose=TRUE, project=TRUE) {
   verifyclass(model, "ppm")
 
@@ -26,7 +26,7 @@ rmh.ppm <- function(model, start = NULL,
 
 simulate.ppm <- function(object, nsim=1, ...,
                          start = NULL,
-                         control = rmhcontrol(),
+                         control = default.rmhcontrol(object),
                          project=TRUE,
                          verbose=FALSE, progress=TRUE) {
   verifyclass(object, "ppm")

@@ -112,7 +112,7 @@
   Kasper Klitgaard Berthelsen
   \email{k.berthelsen@lancaster.ac.uk},
   adapted for \pkg{spatstat} by Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \examples{

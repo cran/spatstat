@@ -8,7 +8,7 @@
 }
 
 \usage{\method{rmh}{ppm}(model,start=NULL,
-               control=rmhcontrol(),
+               control=default.rmhcontrol(model),
                \dots, verbose=TRUE, project=TRUE) }
 
 \arguments{
@@ -122,6 +122,7 @@
   \code{\link{rmh}},
   \code{\link{rmhmodel}},
   \code{\link{rmhcontrol}},
+  \code{\link{default.rmhcontrol}},
   \code{\link{rmhstart}},
   \code{\link{rmh.default}},
   \code{\link{ppp.object}},
@@ -231,7 +232,7 @@
    }
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

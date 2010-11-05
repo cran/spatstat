@@ -46,7 +46,7 @@
 \details{
   The Metropolis-Hastings algorithm, implemented as \code{\link{rmh}},
   generates simulated realisations of point process models.
-  This function \code{rmhcontrol}
+  The function \code{rmhcontrol}
   sets up a list of parameters which control the 
   iterative behaviour
   and termination of the Metropolis-Hastings algorithm, for use in a
@@ -252,7 +252,7 @@
    c3 <- rmhcontrol(c1)
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

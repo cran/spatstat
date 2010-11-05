@@ -102,7 +102,7 @@ F3est(X, ..., rmax = NULL, nrval = 128, vside = NULL, correction = c("rs", "km",
 }
 \author{
   Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rana Moyeed.
 }

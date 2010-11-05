@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.58 $    $Date: 2010/08/09 07:13:00 $
+#    $Revision: 1.59 $    $Date: 2010/11/01 01:34:38 $
 #
 #  (a) for matrices only:
 #
@@ -294,15 +294,15 @@ ensure2vector <- function(x) {
   return(x)
 }
 
-check.nvector <- function(v, npoints, fatal=TRUE) {
-  # vector of numeric values for each point
+check.nvector <- function(v, npoints, fatal=TRUE, things="data points") {
+  # vector of numeric values for each point/thing
   vname <- sQuote(deparse(substitute(v)))
   whinge <- NULL
   if(!is.numeric(v))
     whinge <- paste(vname, "is not numeric")
   else if(length(v) != npoints)
     whinge <- paste("The length of", vname,
-                    "should equal the number of data points")
+                    "should equal the number of", things)
   else if(any(is.na(v)))
     whinge <- paste("Some values of", vname, "are NA or NaN")
   #
@@ -312,8 +312,8 @@ check.nvector <- function(v, npoints, fatal=TRUE) {
   return(TRUE)
 }
 
-check.nmatrix <- function(m, npoints, fatal=TRUE) {
-  # matrix of values for each pair of points
+check.nmatrix <- function(m, npoints, fatal=TRUE, things="data points") {
+  # matrix of values for each pair of points/things
   mname <- sQuote(deparse(substitute(m)))
   whinge <- NULL
   if(!is.matrix(m))
@@ -322,7 +322,7 @@ check.nmatrix <- function(m, npoints, fatal=TRUE) {
     whinge <- paste(mname, "should be a square matrix")
   else if(nrow(m) != npoints)
     whinge <- paste("Dimensions of", mname,
-               "do not match number of data points")
+               "do not match number of", things)
   #
   if(!is.null(whinge)) {
     if(fatal) stop(whinge) else return(FALSE)

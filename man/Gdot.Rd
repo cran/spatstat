@@ -220,7 +220,7 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
     G <- Gdot(pp, "0") # note: "0" not 0
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

@@ -2,6 +2,7 @@
 \alias{kstest}
 \alias{kstest.ppm}
 \alias{kstest.ppp}
+\alias{kstest.slrm}
 \title{Kolmogorov-Smirnov Test for Point Process Model} 
 \description{
   Performs a Kolmogorov-Smirnov test of goodness-of-fit
@@ -12,13 +13,15 @@
 kstest(...)
 \method{kstest}{ppp}(X, covariate, ..., jitter=TRUE)
 \method{kstest}{ppm}(model, covariate, ..., jitter=TRUE)
+\method{kstest}{slrm}(model, covariate, ..., modelname=NULL, covname=NULL)
 }
 \arguments{
   \item{X}{
     A point pattern (object of class \code{"ppp"}).
   }
   \item{model}{
-    A fitted point process model (object of class \code{"ppm"}).
+    A fitted point process model (object of class \code{"ppm"})
+    or fitted spatial logistic regression (object of class \code{"slrm"}).
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
@@ -34,6 +37,10 @@ kstest(...)
     Logical flag. If \code{jitter=TRUE}, values of the covariate
     will be slightly perturbed at random, to avoid tied values in the test.
   }
+  \item{modelname,covname}{
+    Character strings giving alternative names for \code{model}
+    and \code{covariate} to be used in labelling plot axes.
+  }
 }
 \details{
   These functions perform a goodness-of-fit test of a Poisson point
@@ -43,7 +50,8 @@ kstest(...)
   are compared using the Kolmogorov-Smirnov test. 
 
   The function \code{kstest} is generic, with methods for
-  point patterns (\code{"ppp"}) and point process models (\code{"ppm"}).
+  point patterns (\code{"ppp"}), point process models (\code{"ppm"})
+  and spatial logistic regression models (\code{"slrm"}).
   \itemize{
     \item 
     If \code{X} is a point pattern dataset (object of class
@@ -59,6 +67,10 @@ kstest(...)
     (object of class \code{"ppm"}) then \code{kstest(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
+    \item
+    If \code{model} is a fitted spatial logistic regression
+    (object of class \code{"slrm"}) then \code{kstest(model, ...)} performs
+    a test of goodness-of-fit for this fitted model. 
   }
   The test is performed by comparing the observed distribution
   of the values of a spatial covariate at the data points,
@@ -147,7 +159,7 @@ kstest(...)
   set \code{jitter=FALSE}.
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

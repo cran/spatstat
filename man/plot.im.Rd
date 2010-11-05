@@ -7,7 +7,8 @@
 }
 \usage{
   \method{plot}{im}(x, \dots, col=NULL,
-                   ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) 
+                   ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
+                   ribscale=1) 
 }
 \arguments{
   \item{x}{
@@ -33,6 +34,10 @@
   }
   \item{ribn}{
     Number of different values to display in the ribbon.
+  }
+  \item{ribscale}{
+    Rescaling factor for tick marks. The values on the numerical scale
+    printed beside the ribbon will be multiplied by this rescaling factor.
   }
 }
 \value{
@@ -135,7 +140,7 @@
    plot(Z, col=tc)
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

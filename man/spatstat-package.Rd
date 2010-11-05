@@ -76,10 +76,11 @@
     I. \tab Creating and manipulating data \cr
     II. \tab Exploratory Data Analysis \cr
     III. \tab Model fitting (cluster models) \cr
-    IV. \tab Model fitting (Gibbs models) \cr
-    V. \tab Simulation \cr
-    VI. \tab Tests and diagnostics\cr
-    VII. \tab Documentation
+    IV. \tab Model fitting (Poisson and Gibbs models) \cr
+    V. \tab Model fitting (spatial logistic regression)\cr
+    VI. \tab Simulation \cr
+    VII. \tab Tests and diagnostics\cr
+    VIII. \tab Documentation
   }
 }
 
@@ -766,15 +767,45 @@
   using \code{\link{rThomas}} and \code{\link{rMatClust}} respectively.
 }
 
-\section{IV. MODEL FITTING (GIBBS MODELS)}{
-
-  For a detailed explanation of how to fit Gibbs models to point pattern data
-  using \pkg{spatstat}, see Baddeley and Turner (2005b) or Baddeley (2008).
+\section{IV. MODEL FITTING (POISSON AND GIBBS MODELS)}{
   
-  \bold{To fit a Gibbs point process model:}
+  \bold{Types of models}
+  
+  Poisson point processes are the simplest models for point patterns.
+  A Poisson model assumes that the points are stochastically
+  independent. It may allow the points to have a non-uniform spatial
+  density. The special case of a Poisson process with a uniform
+  spatial density is often called Complete Spatial Randomness.
+  
+  Poisson point processes are included in the more general class of Gibbs point
+  process models. In a Gibbs model, there is \emph{interaction}
+  or dependence between points. Many different types of interaction
+  can be specified.
+  
+  For a detailed explanation of how to fit Poisson or
+  Gibbs point process models to point pattern data using \pkg{spatstat},
+  see Baddeley and Turner (2005b) or Baddeley (2008).
+  
+  \bold{To fit a Poison or Gibbs point process model:}
 
   Model fitting in \pkg{spatstat} is performed mainly by the function
-  \code{\link{ppm}}. Its result is an object of class \code{"ppm"}. 
+  \code{\link{ppm}}. Its result is an object of class \code{"ppm"}.
+  
+  Here are some examples, where \code{X} is a point pattern (class
+  \code{"ppp"}):
+  
+  \tabular{ll}{
+    \emph{command} \tab \emph{model} \cr
+    \code{ppm(X)} \tab Complete Spatial Randomness \cr
+    \code{ppm(X, ~1)} \tab Complete Spatial Randomness \cr
+    \code{ppm(X, ~x)} \tab Poisson process with \cr
+                             \tab intensity loglinear in \eqn{x} coordinate \cr
+    \code{ppm(X, ~1, Strauss(0.1))} \tab Stationary Strauss process \cr
+    \code{ppm(X, ~x, Strauss(0.1))} \tab Strauss process with \cr
+                              \tab conditional intensity loglinear in \eqn{x}
+  }
+  It is also possible to fit models that depend on
+  other covariates.
 
   \bold{Manipulating the fitted model:}
 
@@ -890,7 +921,70 @@
   }
 }
 
-\section{V. SIMULATION}{
+\section{V. MODEL FITTING (SPATIAL LOGISTIC REGRESSION)}{
+  
+  \bold{Logistic regression}
+  
+  Pixel-based spatial logistic regression is an alternative
+  technique for analysing spatial point patterns
+  that is widely used in Geographical Information Systems.
+  It is approximately equivalent to fitting a Poisson point process
+  model.
+  
+  In pixel-based logistic regression, the spatial domain is
+  divided into small pixels, the presence or absence of a
+  data point in each pixel is recorded, and logistic regression
+  is used to model the presence/absence indicators as a function
+  of any covariates.
+  
+  Facilities for performing spatial logistic regression are
+  provided in \pkg{spatstat} for comparison purposes.
+  
+  \bold{Fitting a spatial logistic regression}
+  
+  Spatial logistic regression is performed by the function
+  \code{\link{slrm}}. Its result is an object of class \code{"slrm"}.
+  There are many methods for this class, including methods for
+  \code{print}, \code{fitted}, \code{predict},
+  \code{anova}, \code{coef}, \code{logLik}, \code{terms},
+  \code{update}, \code{formula} and \code{vcov}. 
+  
+  For example, if \code{X} is a point pattern (class
+  \code{"ppp"}):
+  
+  \tabular{ll}{
+    \emph{command} \tab \emph{model} \cr
+    \code{slrm(X ~ 1)} \tab Complete Spatial Randomness \cr
+    \code{slrm(X ~ x)} \tab Poisson process with \cr
+                \tab intensity loglinear in \eqn{x} coordinate \cr
+    \code{slrm(X ~ Z)} \tab Poisson process with \cr
+                \tab intensity loglinear in covariate \code{Z}
+  }
+
+  \bold{Manipulating a fitted spatial logistic regression}
+  
+  \tabular{ll}{
+    \code{\link{anova.slrm}} \tab Analysis of deviance \cr
+    \code{\link{coef.slrm}}  \tab Extract fitted coefficients \cr
+    \code{vcov.slrm}  \tab Variance-covariance matrix of fitted coefficients \cr
+    \code{\link{fitted.slrm}} \tab Compute fitted probabilities or
+    intensity \cr
+    \code{\link{logLik.slrm}}   \tab Evalate loglikelihood of fitted
+    model \cr
+    \code{\link{plot.slrm}}    \tab Plot fitted probabilities or
+    intensity \cr
+    \code{\link{predict.slrm}} \tab Compute predicted probabilities or
+    intensity with new data 
+  }
+  
+  There are many other undocumented methods for this class,
+  including methods for \code{print}, \code{update}, \code{formula}
+  and \code{terms}. Stepwise model selection is
+  possible using \code{step} or \code{stepAIC}.
+}
+
+
+\section{VI. SIMULATION}{
 
   There are many ways to generate a random point pattern,
   line segment pattern, pixel image or tessellation
@@ -995,7 +1089,7 @@
 }
 
 
-\section{VI. TESTS AND DIAGNOSTICS}{
+\section{VII. TESTS AND DIAGNOSTICS}{
 
   \bold{Classical hypothesis tests:}
   
@@ -1040,7 +1134,7 @@
 }
 
 
-\section{VII. DOCUMENTATION}{
+\section{VIII. DOCUMENTATION}{
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
   
@@ -1082,7 +1176,7 @@
 }
 \author{
   Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}
@@ -1101,6 +1195,7 @@
   Florent Bonneu,
   Julian Burgos,
   S. Byers,
+  Ya-Mei Chang,
   Jianbao Chen,
   Y.C. Chin,
   Bjarke Christensen,
@@ -1114,6 +1209,7 @@
   C. Graf,
   Janet Franklin,
   Ute Hahn,
+  Andrew Hardegen,
   Mandy Hering, 
   Martin Bogsted Hansen,
   Martin Hazelton,
@@ -1142,6 +1238,7 @@
   Katja Schladitz,
   Bryan Scott,
   Ida-Maria Sintorn,
+  Yong Song, 
   Malte Spiess,
   Mark Stevenson,
   Michael Sumner,
@@ -1151,7 +1248,8 @@
   Tobias Verbeke,
   Alexendre Villers,
   Hao Wang,
-  H. Wendrock
+  H. Wendrock,
+  Jan Wild
   and
   Selene Wong.
 }
