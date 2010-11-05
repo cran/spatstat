@@ -19,7 +19,7 @@
   \item{type}{
     String indicating the type of residuals to be calculated.
     Current options are
-    \code{"raw"}, \code{"inverse"} and \code{"pearson"}.
+    \code{"raw"}, \code{"inverse"}, \code{"pearson"} and \code{"score"}.
     A partial match is adequate.
   }
   \item{\dots}{
@@ -45,10 +45,18 @@
    }
 }
 \value{
-  A vector containing the (discretised) residuals.
+  If \code{type} is \code{"raw"}, \code{"inverse"} or \code{"pearson"}:
+  a vector containing the discretised residuals.
+  Entries in this vector
+  correspond to the quadrature points (data or
+  dummy points) used to fit the model.
   
-  Entries in this vector correspond to the quadrature points (data or
-  dummy points) used to fit the model. The quadrature points can be
+  If \code{type = "score"}:
+  a matrix whose columns are components of the discretised
+  score residuals. Rows in this matrix 
+  correspond to the quadrature points used to fit the model.
+  
+  The quadrature points can be
   extracted from \code{object} by \code{union.quad(quad.ppm(object))}.
 }
 \details{
@@ -121,6 +129,17 @@
     then the sum of the Pearson residuals in a spatial region \eqn{B}
     has variance equal to the area of \eqn{B}.
   }
+  \item{\code{"score"}:}{
+    the score residuals (Baddeley et al, 2005)
+    \deqn{
+      r_j = (z_j - w_j \lambda_j) x_j
+    }{
+      r[j] = (z[j] - w[j] lambda[j]) * x[j,]
+    }
+    obtained by multiplying the raw residuals \eqn{r_j}{r[j]}
+    by the covariates \eqn{x_j}{x[j,]} for quadrature point \eqn{j}.
+    The score residuals always sum to zero.
+  }
   }
 
   Use \code{\link{diagnose.ppm}} to produce diagnostic plots
@@ -131,6 +150,11 @@
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
+
+  Baddeley, A., Moller, J. and Pakes, A.G. (2008) 
+  Properties of residuals for spatial point processes.
+  \emph{Annals of the Institute of Statistical Mathematics}
+  \bold{60}, 627--649.
 }
 \seealso{
  \code{\link{diagnose.ppm}},
@@ -152,7 +176,7 @@
     plot(quadmarked)
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

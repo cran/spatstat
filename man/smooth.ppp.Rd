@@ -21,7 +21,7 @@ markvar(X, ...)
   \item{at}{
     String specifying whether to compute the intensity values
     at a grid of pixel locations (\code{at="pixels"}) or
-    only at the points of \code{x} (\code{at="points"}).
+    only at the points of \code{X} (\code{at="points"}).
   }
 }
 \details{
@@ -49,6 +49,10 @@ markvar(X, ...)
   observation locations \eqn{x_i}{x[i]}, and the marks of the pattern
   are taken to be the numeric values \eqn{v_i}{v[i]} observed at these
   locations.
+
+  The marks are allowed to be a data frame (in \code{smooth.ppp}
+  and \code{markmean}). Then the smoothing procedure is applied to each
+  column of marks. 
   
   The numerator and denominator are computed by \code{\link{density.ppp}}.
   The arguments \code{...} control the smoothing kernel parameters
@@ -67,15 +71,31 @@ markvar(X, ...)
   }
 }
 \value{
-  By default, the result is
-  a pixel image (object of class \code{"im"}). 
-  Pixel values are values of the interpolated function.
-
-  If \code{at="points"}, the result is a numeric vector
-  of length equal to the number of points in \code{x}.
-  Entries are values of the interpolated function at the points of \code{x}.
-  
-  In either case, the return value has attributes
+  \emph{If \code{X} has a single column of marks:}
+  \itemize{
+    \item 
+    If \code{at="pixels"} (the default), the result is
+    a pixel image (object of class \code{"im"}). 
+    Pixel values are values of the interpolated function.
+    \item
+    If \code{at="points"}, the result is a numeric vector
+    of length equal to the number of points in \code{X}.
+    Entries are values of the interpolated function at the points of \code{X}.
+  }
+  \emph{If \code{X} has a data frame of marks:}
+  \itemize{
+    \item 
+    If \code{at="pixels"} (the default), the result is a named list of 
+    pixel images (object of class \code{"im"}). There is one
+    image for each column of marks. This list also belongs to
+    the class \code{listof}, for which there is a plot method.
+    \item
+    If \code{at="points"}, the result is a data frame
+    with one row for each point of \code{X},
+    and one column for each column of marks. 
+    Entries are values of the interpolated function at the points of \code{X}.
+  }
+  The return value has attributes
   \code{"sigma"} and \code{"varcov"} which report the smoothing
   bandwidth that was used.
 }
@@ -94,9 +114,12 @@ markvar(X, ...)
    plot(smooth.ppp(longleaf, 5))
    # mark variance
    plot(markvar(longleaf))
+   # data frame of marks: trees marked by diameter and height
+   data(finpines)
+   plot(smooth.ppp(finpines))
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

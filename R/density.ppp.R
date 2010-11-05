@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.23 $    $Date: 2010/10/24 12:41:56 $
+#  $Revision: 1.25 $    $Date: 2010/10/29 08:46:19 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -11,45 +11,29 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
   density.ppp(x, sigma, ..., edge=edge)
 }
 
-density.ppp <- function(x, sigma, ..., weights=NULL, edge=TRUE, varcov=NULL,
+density.ppp <- function(x, sigma=NULL, ...,
+                        weights=NULL, edge=TRUE, varcov=NULL,
                         at="pixels", leaveoneout=TRUE) {
   verifyclass(x, "ppp")
-  sigma.given <- !missing(sigma) && !is.null(sigma)
-  varcov.given <- !is.null(varcov)
-  if(sigma.given) {
-    stopifnot(is.numeric(sigma))
-    stopifnot(length(sigma) %in% c(1,2))
-    stopifnot(all(sigma > 0))
-  }
-  if(varcov.given)
-    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )    
-  ngiven <- varcov.given + sigma.given
-  switch(ngiven+1,
-         {
-           # default
-           w <- x$window
-           sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
-         },
-         {
-           if(sigma.given && length(sigma) == 2) 
-             varcov <- diag(sigma^2)
-           if(!is.null(varcov))
-             sigma <- NULL
-         },
-         {
-           stop(paste("Give only one of the arguments",
-                      sQuote("sigma"), "and", sQuote("varcov")))
-         })
-      
+
   output <- pickoption("output location type", at,
                        c(pixels="pixels",
                          points="points"))
+  
+  ker <- resolve.2D.kernel(sigma, ..., varcov=varcov, x=x)
+  sigma <- ker$sigma
+  varcov <- ker$varcov
 
   if(output == "points") {
     # VALUES AT DATA POINTS ONLY
     result <- densitypointsEngine(x, sigma, varcov=varcov,
                                   weights=weights, edge=edge,
                                   leaveoneout=leaveoneout)
+    if(!is.null(uhoh <- attr(result, "warnings"))) {
+      switch(uhoh,
+             underflow=warning("underflow due to very small bandwidth"),
+             warning(uhoh))
+    }
     return(result)
   }
   
@@ -95,6 +79,15 @@ densitypointsEngine <- function(x, sigma, ...,
   # closer than 8 standard deviations
   sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
   cutoff <- 8 * sd
+  # detect very small bandwidth
+  if(min(nndist(x)) > cutoff) {
+    npts <- npoints(x)
+    result <- if(leaveoneout) rep(0, npts) else rep(const, npts)
+    attr(result, "sigma") <- sigma
+    attr(result, "varcov") <- varcov
+    attr(result, "warnings") <- "underflow"
+    return(result)
+  }
   if(spatstat.options("densityC")) {
     # .................. new C code ...........................
     npts <- npoints(x)
@@ -232,43 +225,123 @@ densitypointsEngine <- function(x, sigma, ...,
 
 smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
   verifyclass(X, "ppp")
-  if(!is.marked(X, dfok=FALSE))
+  if(!is.marked(X, dfok=TRUE))
     stop("X should be a marked point pattern")
-  values <- marks(X, dfok=FALSE)
-  if(is.factor(values)) {
-    warning("Factor values were converted to integers")
-    values <- as.numeric(values)
-  }
+  at <- pickoption("output location type", at,
+                   c(pixels="pixels",
+                     points="points"))
+  # determine smoothing parameters
+  ker <- resolve.2D.kernel(..., x=X)
+  sigma <- ker$sigma
+  varcov <- ker$varcov
+  #
   if(!missing(weights)) {
     # rescale weights to avoid numerical gremlins
     weights <- weights/median(abs(weights))
   }
-  numerator <- density(X, ..., at=at, weights= values * weights)
-  denominator <- density(X, ..., at=at, weights= weights)
-  at <- pickoption("output location type", at,
-                   c(pixels="pixels",
-                     points="points"))
-  switch(at,
-         pixels={
-           ratio <- eval.im(numerator/denominator)
-           ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
-         },
-         points= {
-           ratio <- numerator/denominator
-           ratio <- ifelse(is.infinite(ratio), NA, ratio)
-         })
-  attr(ratio, "sigma") <- attr(numerator, "sigma")
-  attr(ratio, "varcov") <- attr(numerator, "varcov")
-  return(ratio)
+  # get marks
+  marx <- marks(X, dfok=TRUE)
+  nmarx <- if(!is.data.frame(marx)) 1 else ncol(marx)
+  if(nmarx > 1)
+    result <- list()
+  #
+  warned <- NULL
+  #
+  for(j in 1:nmarx) {
+    values <- if(nmarx > 1) marx[,j] else marx
+    if(is.factor(values)) {
+      warning("Factor valued marks were converted to integers")
+      values <- as.numeric(values)
+    }
+    # smooth
+    numerator <- do.call("density.ppp",
+                         resolve.defaults(list(x=X, at=at),
+                                          list(weights = values * weights),
+                                          list(sigma=sigma, varcov=varcov),
+                                          list(...)))
+    denominator <- do.call("density.ppp",
+                           resolve.defaults(list(x=X, at=at),
+                                            list(weights = weights),
+                                            list(sigma=sigma, varcov=varcov),
+                                            list(...)))
+    if(!is.null(uhoh <- attr(numerator, "warnings")))
+      warned <- uhoh
+    switch(at,
+           pixels={
+             ratio <- eval.im(numerator/denominator)
+             ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
+           },
+           points= {
+             if(is.null(uhoh)) {
+               ratio <- numerator/denominator
+               ratio <- ifelse(is.infinite(ratio), NA, ratio)
+             } else {
+               warning("returning original values")
+               ratio <- values
+             } 
+           })
+    if(nmarx == 1) {
+      result <- ratio
+    } else {
+      result[[j]] <- ratio
+    }
+  }
+  if(nmarx > 1) {
+    # wrap up
+    names(result) <- colnames(marx)
+    result <- switch(at,
+                     pixels=as.listof(result),
+                     points=as.data.frame(result))
+  }
+  attr(ratio, "sigma") <- sigma
+  attr(ratio, "varcov") <- varcov
+  attr(ratio, "warnings") <- warned
+  return(result)
 }
 
 markmean <- function(X, ...) { smooth.ppp(X, ...) }
 
 markvar  <- function(X, ...) {
+  if(!is.marked(X, dfok=FALSE))
+    stop("X should have (one column of) marks")
   E1 <- smooth.ppp(X, ...)
   X2 <- X %mark% marks(X)^2
   E2 <- smooth.ppp(X2, ...)
   V <- eval.im(E2 - E1^2)
   return(V)
+}
+
+resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL) {
+  sigma.given <- !is.null(sigma)
+  varcov.given <- !is.null(varcov)
+  if(sigma.given) {
+    stopifnot(is.numeric(sigma))
+    stopifnot(length(sigma) %in% c(1,2))
+    stopifnot(all(sigma > 0))
+  }
+  if(varcov.given)
+    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )    
+  ngiven <- varcov.given + sigma.given
+  switch(ngiven+1,
+         {
+           # default
+           w <- x$window
+           sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
+         },
+         {
+           if(sigma.given && length(sigma) == 2) 
+             varcov <- diag(sigma^2)
+           if(!is.null(varcov))
+             sigma <- NULL
+         },
+         {
+           stop(paste("Give only one of the arguments",
+                      sQuote("sigma"), "and", sQuote("varcov")))
+         })
+  sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
+  cutoff <- 8 * sd
+  uhoh <- if(!is.null(mindist) && mindist < cutoff) "underflow" else NULL
+  result <- list(sigma=sigma, varcov=varcov, cutoff=cutoff, warnings=uhoh)
+  return(result)
 }
 

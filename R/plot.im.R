@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.45 $   $Date: 2010/07/16 04:24:49 $
+#  $Revision: 1.46 $   $Date: 2010/11/03 03:28:31 $
 #
 #  Plotting code for pixel images
 #
@@ -14,7 +14,8 @@
 
 plot.im <- function(x, ...,
                     col=NULL,
-                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
+                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
+                    ribscale=1) {
   verifyclass(x, "im")
   main <- deparse(substitute(x))
 
@@ -49,8 +50,9 @@ plot.im <- function(x, ...,
            if(!trivial) {
              ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
              ribbonrange <- vrange
-             ribbonticks <- clamp(pretty(ribbonvalues), vrange)
-             ribbonlabels <- paste(ribbonticks)
+             ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
+                                  vrange)
+             ribbonlabels <- paste(ribbonticks * ribscale)
            }
          },
          integer = {
@@ -62,7 +64,7 @@ plot.im <- function(x, ...,
            nvalues <- length(uv)
            trivial <- (nvalues < 2)
            if(!trivial){
-             ribbonticks <- clamp(pretty(vrange), vrange)
+             ribbonticks <- clamp(pretty(vrange * ribscale)/ribscale, vrange)
              ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
              if(identical(all.equal(ribbonticks,
                                     vrange[1]:vrange[2]), TRUE)) {
@@ -71,13 +73,13 @@ plot.im <- function(x, ...,
                imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
                ribbonrange <- range(imagebreaks)
                ribbonticks <- ribbonvalues
-               ribbonlabels <- paste(ribbonticks)
+               ribbonlabels <- paste(ribbonticks * ribscale)
              } else {
                # not all values will be printed on ribbon label
                ribn <- min(ribn, diff(vrange)+1)
                ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
                ribbonrange <- vrange
-               ribbonlabels <- paste(ribbonticks)
+               ribbonlabels <- paste(ribbonticks * ribscale)
              }
            }
            if(!is.null(colmap)) {

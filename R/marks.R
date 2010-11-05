@@ -14,7 +14,7 @@ marks <- function(x, ...) {
 
 marks.ppp <- function(x, ..., dfok=TRUE) {
   ma <- x$marks
-  if(is.data.frame(ma) && !dfok)
+  if((is.data.frame(ma) || is.matrix(ma)) && !dfok)
     stop("Sorry, not implemented when the marks are a data frame")
   return(ma)
 }
@@ -26,7 +26,7 @@ marks.ppp <- function(x, ..., dfok=TRUE) {
 }
 
 "marks<-.ppp" <- function(x, ..., dfok=TRUE, value) {
-  if(is.data.frame(value) && !dfok)
+  if((is.data.frame(value) || is.matrix(value)) && !dfok)
     stop("Sorry, data frames of marks are not yet implemented")
   if(is.null(value))
     return(unmark(x))
@@ -34,13 +34,14 @@ marks.ppp <- function(x, ..., dfok=TRUE) {
   if(is.hyperframe(m)) 
     stop("Hyperframes of marks are not supported in ppp objects")
   np <- npoints(x)
-  if(!is.data.frame(m)) {
+  if(!is.data.frame(m) && !is.matrix(m)) {
     # vector of marks
     if(length(m) == 1) m <- rep(m, np)
     else if(np == 0) m <- rep(m, 0) # ensures marked pattern is obtained
     else if(length(m) != np) stop("number of points != number of marks")
     marx <- m
   } else {
+    m <- as.data.frame(m)
     # data frame of marks
     if(ncol(m) == 0) {
       # no mark variables

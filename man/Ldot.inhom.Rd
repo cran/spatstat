@@ -93,7 +93,7 @@ Ldot.inhom(X, i, \dots)
     L <- Ldot.inhom(X, "B",  lambdaI=lamB,     lambdadot=lamdot)
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

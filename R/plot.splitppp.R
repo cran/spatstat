@@ -2,7 +2,10 @@
 plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
                                          nrows=NULL, ncols=NULL,
                                          main.panel=NULL,
-                                         mar.panel=c(2,1,1,2)) {
+                                         mar.panel=c(2,1,1,2),
+                                         panel.begin=NULL,
+                                         panel.end=NULL,
+                                         panel.args=NULL) {
   xname <- deparse(substitute(x))
   n <- length(x)
 
@@ -12,17 +15,36 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   if(is.null(main.panel))
     main.panel <- names(x)
   else {
-    stopifnot(is.character(main.panel))
+    stopifnot(is.character(main.panel) || is.expression(main.panel))
     nmp <- length(main.panel)
     if(nmp == 1)
       main.panel <- rep(main.panel, n)
     else if(nmp != n)
       stop("Incorrect length for main.panel")
   }
+
+  extraplot <- function(nnn, ..., panel.args=NULL) {
+    if(is.null(panel.args)) {
+      plot(...)
+    } else {
+      xtra <- if(is.function(panel.args)) panel.args(nnn) else panel.args
+      if(!is.list(xtra)) stop("panel.args should be a list")
+      do.call("plot", append(list(...), xtra))
+    }
+  }
   
   if(!arrange) {
-    for(i in 1:n) 
-      plot(x[[i]], main=main.panel[i], ...)
+    for(i in 1:n) {
+      if(is.null(panel.begin)) {
+        extraplot(i, x[[i]], main=main.panel[i], ...,
+                  panel.args=panel.args)
+      } else {
+        panel.begin(i)
+        extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
+                  panel.args=panel.args)
+      }
+      if(!is.null(panel.end)) panel.end(i)
+    }
     return(invisible(NULL))
   }
 
@@ -67,8 +89,17 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   # plot panels
   npa <- par(mar=mar.panel)
   if(!banner) opa <- npa
-  for(i in 1:n) 
-    plot(x[[i]], main=main.panel[i], ...)
+  for(i in 1:n) {
+    if(is.null(panel.begin)) {
+      extraplot(i, x[[i]], main=main.panel[i], ...,
+                panel.args=panel.args)
+    } else {
+      panel.begin(i)
+      extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
+                panel.args=panel.args)
+    }
+    if(!is.null(panel.end)) panel.end(i)
+  }
   # revert
   layout(1)
   par(opa)

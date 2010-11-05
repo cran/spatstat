@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.72 $	$Date: 2010/08/13 08:37:12 $
+#	$Revision: 4.73 $	$Date: 2010/10/28 02:08:37 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -42,6 +42,17 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
   # validate x, y coordinates
   stopifnot(is.numeric(x))
   stopifnot(is.numeric(y))
+  ok <- is.finite(x) & is.finite(y)
+  if(any(!ok)) {
+    nbg <- is.na(x) | is.na(y)
+    if(any(nbg)) {
+      howmany <- if(all(nbg)) "all" else paste(sum(nbg),  "out of", length(nbg))
+      stop(paste(howmany, "coordinate values are NA or NaN"))
+    }
+    howmany <- if(!any(ok)) "all" else paste(sum(!ok),  "out of", length(ok))
+    stop(paste(howmany, "coordinate values are infinite"))
+  }
+
   names(x) <- NULL
   names(y) <- NULL
   

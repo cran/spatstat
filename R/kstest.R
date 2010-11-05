@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.46 $  $Date: 2010/06/08 10:02:40 $
+#  $Revision: 1.47 $  $Date: 2010/11/04 06:26:42 $
 #
 #
 
@@ -68,6 +68,67 @@ kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
                            list(modelname=modelname,
                                 covname=covname)))
 }
+
+
+kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
+  # get names
+  if(is.null(modelname))
+    modelname <- deparse(substitute(model))
+  if(is.null(covname))
+    covname <- deparse(substitute(covariate))
+  dataname <- model$CallInfo$responsename
+  #
+  stopifnot(is.slrm(model))
+  stopifnot(is.im(covariate))
+  # extract data
+  prob <- fitted(model)
+  covim <- as.im(covariate, W=as.owin(prob))
+  probvalu <- as.matrix(prob)
+  covvalu  <- as.matrix(covim)
+  ok <- !is.na(probvalu) & !is.na(covvalu)
+  probvalu <- as.vector(probvalu[ok])
+  covvalu <- as.vector(covvalu[ok])
+  # compile weighted cdf's
+  FZ <- ewcdf(covvalu, probvalu/sum(probvalu))
+  X <- model$Data$response
+  ZX <- safelookup(covim, X)
+  FZX <- ewcdf(ZX)
+  # Ensure support of cdf includes the range of the data
+  xxx <- knots(FZ)
+  yyy <- FZ(xxx)
+  if(min(xxx) > min(ZX)) {
+    xxx <- c(min(ZX), xxx)
+    yyy <- c(0, yyy)
+  }
+  if(max(xxx) < max(ZX)) {
+    xxx <- c(xxx, max(ZX))
+    yyy <- c(yyy, 1)
+  }
+  # make piecewise linear approximation of cdf
+  FZ <- approxfun(xxx, yyy, rule=2)
+  # now apply cdf
+  U <- FZ(ZX)
+  # Test uniformity of transformed values
+  result <- ks.test(U, "punif", ...)
+
+  # modify the 'htest' entries
+  result$method <- paste("Spatial Kolmogorov-Smirnov test of",
+                         "inhomogeneous Poisson process")
+  result$data.name <-
+    paste("covariate", sQuote(paste(covname, collapse="")),
+          "evaluated at points of", sQuote(dataname), "\n\t",
+          "and transformed to uniform distribution under model",
+          sQuote(modelname))
+  # additional class 'kstest'
+  class(result) <- c("kstest", class(result))
+  attr(result, "prep") <-
+    list(Zvalues=covvalu, ZX=ZX, FZ=FZ, FZX=ecdf(ZX), U=U)
+  attr(result, "info") <- list(modelname=modelname, covname=covname,
+                               dataname=dataname, csr=FALSE)
+  return(result)        
+}
+
+#.............  helper functions ........................#
 
 spatialCDFtest <- function(model, covariate, test, ...,
                            jitter=TRUE, 
@@ -336,4 +397,3 @@ plot.kstest <- function(x, ..., lwd=par("lwd"), col=par("col"), lty=par("lty"),
   plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
   return(invisible(NULL))
 }
-

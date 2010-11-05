@@ -8,6 +8,7 @@
 \usage{
   Kinhom(X, lambda=NULL, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
+    renormalise=TRUE, 
     nlarge = 1000,
     lambda2=NULL, reciplambda=NULL, reciplambda2=NULL,
     sigma=NULL, varcov=NULL)
@@ -45,11 +46,14 @@
     See Details.
   }
   \item{correction}{
-      A character vector containing any selection of the
-      options \code{"border"}, \code{"bord.modif"},
-      \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
-      \code{"none"} or \code{"best"}.
-      It specifies the edge correction(s) to be applied.
+    A character vector containing any selection of the
+    options \code{"border"}, \code{"bord.modif"},
+    \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+    \code{"none"} or \code{"best"}.
+    It specifies the edge correction(s) to be applied.
+  }
+  \item{renormalise}{
+    Logical. Whether to renormalise the estimate. See Details.
   }
   \item{nlarge}{
     Optional. Efficiency threshold.
@@ -92,7 +96,7 @@
   
   Essentially a data frame containing at least the following columns,
   \item{r}{the vector of values of the argument \eqn{r} 
-    at which the pair correlation function \eqn{g(r)} has been  estimated
+    at which \eqn{K_{\rm inhom}(r)}{Kinhom(r)} has been estimated
   }
   \item{theo}{vector of values of \eqn{\pi r^2}{pi * r^2},
     the theoretical value of \eqn{K_{\rm inhom}(r)}{Kinhom(r)}
@@ -126,7 +130,7 @@
   Define \eqn{K_{\rm inhom}(r)}{Kinhom(r)} to be the expected
   value, given that \eqn{u} is a point of \eqn{x},
   of the sum of all terms
-  \eqn{1/\lambda(u)\lambda(x_j)}{1/lambda(u)lambda(x[j])}
+  \eqn{1/\lambda(x_j)}{1/lambda(x[j])}
   over all points \eqn{x_j}{x[j]}
   in the process separated from \eqn{u} by a distance less than \eqn{r}.
   This reduces to the ordinary \eqn{K} function if
@@ -134,6 +138,13 @@
   If \eqn{x} is an inhomogeneous Poisson process with intensity
   function \eqn{\lambda(u)}{lambda(u)}, then
   \eqn{K_{\rm inhom}(r) = \pi r^2}{Kinhom(r) = pi * r^2}.
+  
+  Given a point pattern dataset, the 
+  inhomogeneous \eqn{K} function can be estimated
+  essentially by summing the values
+  \eqn{1/(\lambda(x_i)\lambda(x_j))}{1/(lambda(x[i]) * lambda(x[j]))}
+  for all pairs of points \eqn{x_i, x_j}{x[i], x[j]}
+  separated by a distance less than \eqn{r}.
 
   This allows us to inspect a point pattern for evidence of 
   interpoint interactions after allowing for spatial inhomogeneity
@@ -243,7 +254,14 @@
   where \eqn{g(x_i,x_j)}{g(x[i],x[j])} is the fraction of the
   circumference of the circle with centre \eqn{x_i}{x[i]} and radius
   \eqn{||x_i - x_j||}{||x[i]-x[j]||} which lies inside the window.
-
+  
+  If \code{renormalise=TRUE} (the default), then the
+  translation-correction and isotropic-correction estimates given above
+  are multiplied by 
+  \eqn{\mbox{area}(W)/\sum (1/\lambda(x_i))}{area(W)/sum[i] (1/lambda(x[i]))}.
+  This rescaling reduces the variability and bias of the estimate
+  in small samples.
+  
   If the point pattern \code{X} contains more than about 1000 points,
   the isotropic and translation edge corrections can be computationally
   prohibitive. The computations for the border method are much faster,
@@ -315,7 +333,7 @@
   }
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

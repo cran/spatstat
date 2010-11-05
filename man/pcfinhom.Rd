@@ -116,7 +116,7 @@ pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, st
   plot(pcfinhom(X, stoyan=0.2, sigma=0.1))
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

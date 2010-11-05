@@ -145,7 +145,7 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ...)
 \author{Rasmus Waagepetersen
   \email{rw@math.auc.dk}.
   Adapted for \pkg{spatstat} by Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{

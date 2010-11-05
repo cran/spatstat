@@ -3,16 +3,14 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.21 $   $Date: 2007/01/31 05:46:54 $
+#  $Revision: 1.22 $   $Date: 2010/11/05 01:22:00 $
 #
 
 qqplot.ppm <-
   function(fit, nsim=100, expr=NULL, ..., type="raw", style="mean",
            fast=TRUE, verbose=TRUE, plot.it=TRUE,
            dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
-           control=list(nrep=nrep,
-             expand=default.expand(fit),
-             periodic=(as.owin(fit)$type=="rectangle")),
+           control=default.rmhcontrol(fit, nrep=nrep),
            saveall=FALSE,
            monochrome=FALSE,
            limcol=if(monochrome) "black" else "red",

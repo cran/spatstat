@@ -11,18 +11,18 @@
   envelope(Y, fun, ...)
   \method{envelope}{ppp}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  transform=NULL,global=FALSE,ginterval=NULL,
+  transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  start=NULL,control=list(nrep=1e5, expand=default.expand(Y)),
-  transform=NULL,global=FALSE,ginterval=NULL,
+  start=NULL, control=default.rmhcontrol(Y, nrep=nrep), nrep=1e5,
+  transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
   \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  transform=NULL,global=FALSE,ginterval=NULL,
+  transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
 }
@@ -75,6 +75,11 @@
   \item{start,control}{
     Optional. These specify the arguments \code{start} and \code{control}
     of \code{rmh}, giving complete control over the simulation
+    algorithm. Applicable only when \code{Y} is a fitted model
+    of class \code{"ppm"}.
+  }
+  \item{nrep}{
+    Number of iterations in the Metropolis-Hastings simulation
     algorithm. Applicable only when \code{Y} is a fitted model
     of class \code{"ppm"}.
   }
@@ -536,7 +541,7 @@ nsim=4, global=TRUE))
  EG <- envelope(X, Kest, nsim=10, simulate=EK)
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

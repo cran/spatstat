@@ -6,7 +6,8 @@
 }
 \usage{
   \method{plot}{splitppp}(x, \dots, main, arrange=TRUE,
-   nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel)
+   nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel=c(2,1,1,2),
+   panel.begin=NULL, panel.end=NULL, panel.args=NULL)
 }
 \arguments{
   \item{x}{
@@ -40,6 +41,13 @@
     of the margins outside each plot panel.
     See the help file for \code{\link{par}}.
   }
+  \item{panel.begin,panel.end}{
+    Optional. Functions that will be executed before and after each panel is
+    plotted.
+  }
+  \item{panel.args}{
+    Internal use only.
+  }
 }
 \value{
   Null.
@@ -67,7 +75,7 @@
 }
 
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}

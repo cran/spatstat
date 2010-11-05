@@ -11,8 +11,7 @@
   qqplot.ppm(fit, nsim=100, expr=NULL, \dots, type="raw",
              style="mean", fast=TRUE, verbose=TRUE, plot.it=TRUE,
              dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
-             control=list(nrep=nrep,expand=default.expand(fit),
-                          periodic=(as.owin(fit)$type=="rectangle")),
+             control=default.rmhcontrol(fit, nrep=nrep),
              saveall=FALSE,
              monochrome=FALSE,
              limcol=if(monochrome) "black" else "red",
@@ -363,7 +362,7 @@
 
 }
 \author{Adrian Baddeley
-  \email{adrian@maths.uwa.edu.au}
+  \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}
