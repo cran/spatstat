@@ -209,6 +209,7 @@
 \alias{matrowany}
 \alias{matrowsum}
 \alias{maxflow}
+\alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{sewpcf}
@@ -264,6 +265,7 @@
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
 \alias{prange}
+\alias{prefixfv}
 \alias{primefactors}       
 \alias{print.bt.frame}
 \alias{print.bw.relrisk}
@@ -318,6 +320,7 @@
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{reconcile.fv}
 \alias{repair.old.factor.image}
 \alias{reincarnate.interact}
 \alias{rescale.units}
@@ -355,6 +358,7 @@
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
 \alias{singlestring}              
+\alias{smoothpointsEngine}              
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
 \alias{spatialCDFframe}
@@ -636,6 +640,7 @@ matrowall(x)
 matrowany(x)
 matrowsum(x)
 maxflow(costm)
+meanlistfv(z)
 meanX.owin(w)            
 meanY.owin(w)
 sewpcf(d, w, denargs, lambda2area)
@@ -704,6 +709,7 @@ ppllengine(X, Y, action="project", check=FALSE)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 prange(x)
+prefixfv(x, prefix, prephrase)
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{bw.relrisk}(x, \dots)
@@ -758,6 +764,7 @@ rebound(x, rect)
 \method{rebound}{ppp}(x, rect)
 \method{rebound}{psp}(x, rect)
 \method{rebound}{owin}(x, rect)
+reconcile.fv(\dots)
 repair.old.factor.image(x)
 reincarnate.interact(object)
 \method{rescale}{units}(X,s)
@@ -800,6 +807,7 @@ shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr)
 singlestring(s, coll)
+smoothpointsEngine(x, values, sigma, \dots, weights, varcov, leaveoneout)
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatialCDFframe(model, covariate, \dots)

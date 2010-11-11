@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.25 $    $Date: 2010/10/29 08:46:19 $
+#  $Revision: 1.33 $    $Date: 2010/11/08 05:44:39 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -105,9 +105,9 @@ densitypointsEngine <- function(x, sigma, ...,
                  y       = as.double(yy),
                  rmaxi   = as.double(cutoff),
                  sig     = as.double(sd),
-                 value   = as.double(double(npts)),
+                 result   = as.double(double(npts)),
                  PACKAGE = "spatstat")
-        result[oo] <- zz$value
+        result[oo] <- zz$result
       } else {
         wtsort <- weights[oo]
         zz <- .C("wtdenspt",
@@ -117,9 +117,9 @@ densitypointsEngine <- function(x, sigma, ...,
                  rmaxi   = as.double(cutoff),
                  sig     = as.double(sd),
                  weight  = as.double(wtsort),
-                 value   = as.double(double(npts)),
+                 result   = as.double(double(npts)),
                  PACKAGE = "spatstat")
-        result[oo] <- zz$value
+        result[oo] <- zz$result
       }
     } else {
       # anisotropic kernel
@@ -132,9 +132,9 @@ densitypointsEngine <- function(x, sigma, ...,
                  rmaxi   = as.double(cutoff),
                  detsigma = as.double(detSigma),
                  sinv    = as.double(flatSinv),
-                 value   = as.double(double(npts)),
+                 result   = as.double(double(npts)),
                  PACKAGE = "spatstat")
-        result[oo] <- zz$value
+        result[oo] <- zz$result
       } else {
         wtsort <- weights[oo]
         zz <- .C("awtdenspt",
@@ -145,9 +145,9 @@ densitypointsEngine <- function(x, sigma, ...,
                  detsigma = as.double(detSigma),
                  sinv    = as.double(flatSinv),
                  weight  = as.double(wtsort),
-                 value   = as.double(double(npts)),
+                 result   = as.double(double(npts)),
                  PACKAGE = "spatstat")
-        result[oo] <- zz$value
+        result[oo] <- zz$result
       }
     }
   } else {
@@ -223,7 +223,7 @@ densitypointsEngine <- function(x, sigma, ...,
   return(result)
 }
 
-smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
+smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
   verifyclass(X, "ppp")
   if(!is.marked(X, dfok=TRUE))
     stop("X should be a marked point pattern")
@@ -235,69 +235,256 @@ smooth.ppp <- function(X, ..., weights=rep(1,X$n), at="pixels") {
   sigma <- ker$sigma
   varcov <- ker$varcov
   #
-  if(!missing(weights)) {
+  if(weightsgiven <- !missing(weights)) {
+    check.nvector(weights, npoints(X)) 
     # rescale weights to avoid numerical gremlins
     weights <- weights/median(abs(weights))
   }
   # get marks
   marx <- marks(X, dfok=TRUE)
-  nmarx <- if(!is.data.frame(marx)) 1 else ncol(marx)
-  if(nmarx > 1)
-    result <- list()
   #
-  warned <- NULL
-  #
-  for(j in 1:nmarx) {
-    values <- if(nmarx > 1) marx[,j] else marx
+  if(!is.data.frame(marx)) {
+    # ........ vector of marks ...................
+    values <- marx
     if(is.factor(values)) {
       warning("Factor valued marks were converted to integers")
       values <- as.numeric(values)
     }
-    # smooth
-    numerator <- do.call("density.ppp",
-                         resolve.defaults(list(x=X, at=at),
-                                          list(weights = values * weights),
-                                          list(sigma=sigma, varcov=varcov),
-                                          list(...)))
-    denominator <- do.call("density.ppp",
-                           resolve.defaults(list(x=X, at=at),
-                                            list(weights = weights),
-                                            list(sigma=sigma, varcov=varcov),
-                                            list(...)))
-    if(!is.null(uhoh <- attr(numerator, "warnings")))
-      warned <- uhoh
     switch(at,
-           pixels={
-             ratio <- eval.im(numerator/denominator)
-             ratio <- eval.im(ifelse(is.infinite(ratio), NA, ratio))
+           points={
+             if(!weightsgiven)
+               weights <- NULL
+             result <-
+               do.call("smoothpointsEngine",
+                       resolve.defaults(list(x=X),
+                                        list(values=values, weights=weights),
+                                        list(sigma=sigma, varcov=varcov),
+                                        list(...)))
            },
-           points= {
-             if(is.null(uhoh)) {
-               ratio <- numerator/denominator
-               ratio <- ifelse(is.infinite(ratio), NA, ratio)
-             } else {
-               warning("returning original values")
-               ratio <- values
-             } 
+           pixels={
+             numerator <-
+               do.call("density.ppp",
+                       resolve.defaults(list(x=X, at="pixels"),
+                                        list(weights = values * weights),
+                                        list(sigma=sigma, varcov=varcov),
+                                        list(...),
+                                        list(edge=FALSE)))
+             denominator <-
+               do.call("density.ppp",
+                       resolve.defaults(list(x=X, at="pixels"),
+                                        list(weights = weights),
+                                        list(sigma=sigma, varcov=varcov),
+                                        list(...),
+                                        list(edge=FALSE)))
+             ratio <- eval.im(numerator/denominator)
+             result <- eval.im(ifelse(is.finite(ratio), ratio, NA))
+             attr(result, "warnings") <- attr(numerator, "warnings")
            })
-    if(nmarx == 1) {
-      result <- ratio
-    } else {
+  } else {
+    # ......... data frame of marks ..................
+    nmarx <- ncol(marx)
+    result <- list()
+    # compute denominator
+    denominator <-
+      do.call("density.ppp",
+              resolve.defaults(list(x=X, at=at),
+                               list(weights = weights),
+                               list(sigma=sigma, varcov=varcov),
+                               list(...),
+                               list(edge=FALSE)))
+    # smooth each column of marks in turn
+    for(j in 1:nmarx) {
+      values <- marx[,j] 
+      if(is.factor(values)) {
+        warning(paste("Factor valued marks in column", j,
+                      "were converted to integers"))
+        values <- as.numeric(values)
+      }
+      # compute j-th numerator
+      numerator <-
+        do.call("density.ppp",
+                resolve.defaults(list(x=X, at=at),
+                                 list(weights = values * weights),
+                                 list(sigma=sigma, varcov=varcov),
+                                 list(...),
+                                 list(edge=FALSE)))
+      switch(at,
+             points={
+               if(is.null(uhoh <- attr(numerator, "warnings"))) {
+                 ratio <- numerator/denominator
+                 ratio <- ifelse(is.finite(ratio), ratio, NA)
+               } else {
+                 warning("returning original values")
+                 ratio <- values
+                 attr(ratio, "warnings") <- uhoh
+               }
+             },
+             pixels={
+               ratio <- eval.im(numerator/denominator)
+               ratio <- eval.im(ifelse(is.finite(ratio), ratio, NA))
+               attr(ratio, "warnings") <- attr(numerator, "warnings")
+           })
+    # store results
       result[[j]] <- ratio
     }
-  }
-  if(nmarx > 1) {
     # wrap up
     names(result) <- colnames(marx)
     result <- switch(at,
                      pixels=as.listof(result),
                      points=as.data.frame(result))
+    attr(result, "warnings") <-
+      unlist(lapply(result, function(x){ attr(x, "warnings") }))
   }
-  attr(ratio, "sigma") <- sigma
-  attr(ratio, "varcov") <- varcov
-  attr(ratio, "warnings") <- warned
+  attr(result, "sigma") <- sigma
+  attr(result, "varcov") <- varcov
   return(result)
 }
+
+smoothpointsEngine <- function(x, values, sigma, ...,
+                               weights=NULL, varcov=NULL,
+                               leaveoneout=TRUE) {
+  if(is.null(varcov)) {
+    const <- 1/(2 * pi * sigma^2)
+  } else {
+    detSigma <- det(varcov)
+    Sinv <- solve(varcov)
+    const <- 1/(2 * pi * sqrt(detSigma))
+  }
+  # Contributions from pairs of distinct points
+  # closer than 8 standard deviations
+  sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
+  cutoff <- 8 * sd
+  # detect very small bandwidth
+  if(min(nndist(x)) > cutoff) {
+    npts <- npoints(x)
+    warning("Very small bandwidth; original values returned")
+    result <- values
+    attr(result, "sigma") <- sigma
+    attr(result, "varcov") <- varcov
+    attr(result, "warnings") <- "underflow"
+    return(result)
+  }
+  if(spatstat.options("densityC")) {
+    # .................. new C code ...........................
+    npts <- npoints(x)
+    result <- numeric(npts)
+    stopifnot(is.logical(leaveoneout))
+    # sort into increasing order of x coordinate (required by C code)
+    oo <- order(x$x)
+    xx <- x$x[oo]
+    yy <- x$y[oo]
+    vv <- values[oo]
+    if(is.null(varcov)) {
+      # isotropic kernel
+      if(is.null(weights)) {
+        zz <- .C("smoopt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 v       = as.double(vv),
+                 self    = as.integer(!leaveoneout),
+                 rmaxi   = as.double(cutoff),
+                 sig     = as.double(sd),
+                 result   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$result
+      } else {
+        wtsort <- weights[oo]
+        zz <- .C("wtsmoopt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 v       = as.double(vv),
+                 self    = as.integer(!leaveoneout),
+                 rmaxi   = as.double(cutoff),
+                 sig     = as.double(sd),
+                 weight  = as.double(wtsort),
+                 result   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$result
+      }
+    } else {
+      # anisotropic kernel
+      flatSinv <- as.vector(t(Sinv))
+      if(is.null(weights)) {
+        zz <- .C("asmoopt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 v       = as.double(vv),
+                 self    = as.integer(!leaveoneout),
+                 rmaxi   = as.double(cutoff),
+                 detsigma = as.double(detSigma),
+                 sinv    = as.double(flatSinv),
+                 result   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$result
+      } else {
+        wtsort <- weights[oo]
+        zz <- .C("awtsmoopt",
+                 nxy     = as.integer(npts),
+                 x       = as.double(xx),
+                 y       = as.double(yy),
+                 v       = as.double(vv),
+                 self    = as.integer(!leaveoneout),
+                 rmaxi   = as.double(cutoff),
+                 detsigma = as.double(detSigma),
+                 sinv    = as.double(flatSinv),
+                 weight  = as.double(wtsort),
+                 result   = as.double(double(npts)),
+                 PACKAGE = "spatstat")
+        result[oo] <- zz$result
+      }
+    }
+  } else {
+    # previous, partly interpreted code
+    # compute weighted densities
+    if(is.null(weights)) {
+      # weights are implicitly equal to 1
+      numerator <- do.call("density.ppp",
+                         resolve.defaults(list(x=x, at="points"),
+                                          list(weights = values),
+                                          list(sigma=sigma, varcov=varcov),
+                                          list(leaveoneout=leaveoneout),
+                                          list(...),
+                                          list(edge=FALSE)))
+      denominator <- do.call("density.ppp",
+                             resolve.defaults(list(x=x, at="points"),
+                                              list(sigma=sigma, varcov=varcov),
+                                              list(leaveoneout=leaveoneout),
+                                              list(...),
+                                              list(edge=FALSE)))
+    } else {
+      numerator <- do.call("density.ppp",
+                           resolve.defaults(list(x=x, at="points"),
+                                            list(weights = values * weights),
+                                            list(sigma=sigma, varcov=varcov),
+                                            list(leaveoneout=leaveoneout),
+                                            list(...),
+                                            list(edge=FALSE)))
+      denominator <- do.call("density.ppp",
+                             resolve.defaults(list(x=x, at="points"),
+                                              list(weights = weights),
+                                              list(sigma=sigma, varcov=varcov),
+                                              list(leaveoneout=leaveoneout),
+                                              list(...),
+                                              list(edge=FALSE)))
+    }
+    if(is.null(uhoh <- attr(numerator, "warnings"))) {
+      result <- numerator/denominator
+      result <- ifelse(is.finite(result), result, NA)
+    } else {
+      warning("returning original values")
+      result <- values
+      attr(result, "warnings") <- uhoh
+    }
+  }
+  # pack up and return
+  attr(result, "sigma") <- sigma
+  attr(result, "varcov") <- varcov
+  return(result)
+}
+
 
 markmean <- function(X, ...) { smooth.ppp(X, ...) }
 

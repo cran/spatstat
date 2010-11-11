@@ -67,7 +67,7 @@ from a point pattern in a window of arbitrary shape.
 
   If \code{var.approx=TRUE} then the return value
   also has columns \code{rip} and \code{ls} containing approximations
-  to the variance of \eqn{\hat K(r)}{Kest(r)}.
+  to the variance of \eqn{\hat K(r)}{Kest(r)} under CSR.
 }
 \details{
   The \eqn{K} function (variously called ``Ripley's K-function''
@@ -162,7 +162,7 @@ from a point pattern in a window of arbitrary shape.
 
   Approximations to the variance of \eqn{\hat K(r)}{Kest(r)}
   are available, for the case of the isotropic edge correction estimator,
-  \emph{assuming complete spatial randomness}
+  \bold{assuming complete spatial randomness}
   (Ripley, 1988; Lotwick and Silverman, 1982; Diggle, 2003, pp 51-53).
   If \code{var.approx=TRUE}, then the result of
   \code{Kest} also has a column named \code{rip} 
@@ -197,6 +197,13 @@ from a point pattern in a window of arbitrary shape.
   }
   where \eqn{K'(r)} is the derivative of \eqn{K(r)}.
   See \code{\link{pcf}} on how to estimate this function.
+}
+\section{Envelopes, significance bands and confidence intervals}{
+  To compute simulation envelopes for the \eqn{K}-function
+  under CSR, use \code{\link{envelope}}. 
+  
+  To compute a confidence interval for the true \eqn{K}-function,
+  use \code{\link{varblock}}.
 }
 \references{
 Baddeley, A.J. Spatial sampling and censoring.

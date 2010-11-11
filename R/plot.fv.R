@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.45 $    $Date: 2010/06/16 04:28:46 $
+#  $Revision: 1.48 $    $Date: 2010/11/10 06:57:38 $
 #
 #
 
@@ -57,8 +57,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   lhsdata <- evaluate(lhs, indata)
   rhsdata <- evaluate(rhs, indata)
   
-  if(is.vector(lhsdata))
+  if(is.vector(lhsdata)) {
     lhsdata <- matrix(lhsdata, ncol=1)
+    colnames(lhsdata) <- paste(lhs, collapse="")
+  }
 
   if(is.matrix(rhsdata))
     stop("rhs of formula should yield a vector")
@@ -199,13 +201,27 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     shind <- try(allind[shade])
     if(inherits(shind, "try-error")) 
       stop("The argument shade should be a valid subset index for columns of x")
+    if(any(nbg <- is.na(shind))) {
+      # columns not included in formula; get them
+      morelhs <- try(as.matrix(indata[ok, shade[nbg], drop=FALSE]))
+      if(inherits(morelhs, "try-error")) 
+        stop("The argument shade should be a valid subset index for columns of x")
+      nmore <- ncol(morelhs)
+      lhsdata <- cbind(lhsdata, morelhs)
+      shind[nbg] <- nplots + seq(nmore)
+      nplots <- nplots + nmore
+      lty <- c(lty, rep(lty[1], nmore))
+      col <- c(col, rep(col[1], nmore))
+      lwd <- c(lwd, rep(lwd[1], nmore))
+    }
     # extract relevant columns
     shdata <- lhsdata[, shind]
     if(!is.matrix(shdata) || ncol(shdata) != 2) 
       stop("The argument shade should select two columns of x")
     # plot grey polygon between these limits
-    polygon(c(rhsdata, rev(rhsdata)),
-            c(shdata[,1],  rev(shdata[,2])),
+    shadeOK <- is.finite(rhsdata) & apply(is.finite(shdata), 1, all)
+    polygon(c(rhsdata[shadeOK], rev(rhsdata[shadeOK])),
+            c(shdata[shadeOK,1],  rev(shdata[shadeOK,2])),
             border=shadecol, col=shadecol)
     # overwrite graphical parameters
     lty[shind] <- 1

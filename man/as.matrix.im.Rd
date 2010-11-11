@@ -1,25 +1,33 @@
 \name{as.matrix.im}
 \alias{as.matrix.im}
-\title{Convert Pixel Image to Matrix}
+\alias{as.array.im}
+\title{Convert Pixel Image to Matrix or Array}
 \description{
-  Convert a pixel image to a matrix
+  Converts a pixel image to a matrix or an array.
 }
 \usage{
   \method{as.matrix}{im}(x, ...)
+  \method{as.array}{im}(x, ...)
 }
 \arguments{
   \item{x}{A pixel image (object of class \code{"im"}).}
-  \item{\dots}{Ignored.}
+  \item{\dots}{See below.}
 }
 \details{
-  This function takes the pixel image \code{x}
-  and returns a matrix containing the pixel values.
-
+  The function \code{as.matrix.im} converts the pixel image \code{x}
+  into a matrix containing the pixel values.
   It is handy when you want to extract a summary of the pixel values.
   See the Examples.
+  
+  The function \code{as.array.im} converts the pixel image to an array.
+  By default this is a three-dimensional array of dimension \eqn{n} by
+  \eqn{m} by \eqn{1}. 
+  If the extra arguments \code{\dots} are given, they will be passed
+  to \code{\link{array}}, and they may change the dimensions of the
+  array.
 }
 \value{
-  A matrix.
+  A matrix or array.
 }
 \examples{
    # artificial image

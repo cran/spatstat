@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.75 $     $Date: 2010/10/21 03:26:05 $
+#         $Revision: 1.76 $     $Date: 2010/11/08 07:32:04 $
 #
 #      The class "im" of raster images
 #
@@ -450,6 +450,14 @@ xtfrm.im <- function(x) { as.numeric(as.matrix.im(x)) }
 
 as.matrix.im <- function(x, ...) {
   return(x$v)
+}
+
+as.array.im <- function(x, ...) {
+  m <- as.matrix(x)
+  a <- do.call(array, resolve.defaults(list(m),
+                                       list(...),
+                                       list(dim=c(dim(m), 1))))
+  return(a)
 }
 
 as.data.frame.im <- function(x, ...) {
