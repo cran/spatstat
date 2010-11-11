@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.30 $	$Date: 2010/01/08 23:21:49 $
+#	$Revision: 4.31 $	$Date: 2010/11/05 08:21:15 $
 #
 #
 #
@@ -150,6 +150,11 @@ function(X, I, J, eps=NULL, r=NULL, breaks=NULL, ..., disjoint=NULL,
     Z <- bind.fv(Z, data.frame(km=Jkm), "%s[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
     attr(Z, "alim") <- range(rvals[FJ$km <= 0.9])
+    if("hazard" %in% names(GIJ) && "hazard" %in% names(FJ)) {
+      Jhaz <- GIJ$hazard - FJ$hazard
+      Z <- bind.fv(Z, data.frame(hazard=Jhaz), "hazard(r)",
+                   "Kaplan-Meier estimate of derivative of log(%s)")
+    } 
   }
 # set default plotting values and order
   nama <- names(Z)

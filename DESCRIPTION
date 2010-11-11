@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.21-0
-Date: 2010-11-05
+Version: 1.21-1
+Date: 2010-11-11
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz>, with substantial contributions of
@@ -47,6 +47,6 @@ Description: A package for analysing spatial data, mainly Spatial Point
         residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: 2010-11-05 02:41:21 UTC; adrian
+Packaged: 2010-11-11 07:32:08 UTC; adrian
 Repository: CRAN
-Date/Publication: 2010-11-05 20:03:15
+Date/Publication: 2010-11-11 13:09:43

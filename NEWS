@@ -1,3 +1,58 @@
+	CHANGES IN spatstat VERSION 1.21-1
+
+OVERVIEW 
+
+    o   Confidence intervals for K-function and other statistics
+
+    o   Bug fixes for smoothing and relative risk estimation
+
+NEW FUNCTIONS
+
+    o   varblock
+    	Variance estimation (and confidence intervals)
+	for summary statistics such as Kest, using subdivision technique
+
+    o   bw.stoyan
+    	Bandwidth selection by Stoyan's rule of thumb.
+
+    o   which.max.im
+     	Applied to a list of images, this determines which image
+	has the largest value at each pixel.
+
+    o   as.array.im
+    	Convert image to array
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   smooth.ppp, markmean, sharpen.ppp, relrisk, bw.relrisk
+    	Further acceleration achieved.
+
+    o   Kest
+    	Argument 'correction' now explicitly overrides automatic defaults
+
+    o   plot.fv
+    	More robust handling of 'shade'
+
+BUGS
+
+    o   relrisk
+    	Format of relrisk(at="points") was incorrect.
+	Fixed.
+
+    o   bw.relrisk
+    	Result was incorrect in the default case method="likelihood"
+	because of previous bug.
+	Fixed.
+    	
+    o   Jdot, Jcross, Jmulti
+    	Return value did not include the hazard function, when correction="km"
+	Fixed.
+
+    o   Jdot, Jcross, Jmulti
+    	Format of output was incompatible with format of Jest.
+	Fixed.
+
+   
 	CHANGES IN spatstat VERSION 1.21-0
 
 OVERVIEW 

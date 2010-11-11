@@ -379,7 +379,11 @@
   point pattern that is empty, or is otherwise unacceptable to the
   function \code{fun}.
 }
-  
+\section{Confidence intervals}{
+  Simulation envelopes do \bold{not} compute confidence intervals;
+  they generate significance bands. 
+  If you really need a confidence interval, use \code{\link{varblock}}.
+}
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.
     John Wiley and Sons, 1991.

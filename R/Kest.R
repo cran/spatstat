@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.62 $	$Date: 2010/06/07 13:22:22 $
+#	$Revision: 5.63 $	$Date: 2010/11/10 06:56:43 $
 #
 #
 # -------- functions ----------------------------------------
@@ -111,7 +111,7 @@ function(X, ..., r=NULL, breaks=NULL,
   can.do.fast <- breaks$even
   large.n    <- (npoints >= nlarge)
   demand.best <- correction.given && best.wanted
-  large.n.trigger <- large.n && !demand.best
+  large.n.trigger <- large.n && !correction.given
   borderonly <- all(correction == "border" | correction == "bord.modif")
   will.do.fast <- can.do.fast && (borderonly || large.n.trigger)
   asked      <- borderonly || (nlarge.given && large.n.trigger)

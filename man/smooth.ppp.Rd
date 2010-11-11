@@ -8,7 +8,7 @@
   at a set of irregular locations. 
 }
 \usage{
-smooth.ppp(X, ..., weights = rep(1, X$n), at="pixels")
+smooth.ppp(X, ..., weights = rep(1, npoints(X)), at="pixels")
 markmean(X, ...)
 markvar(X, ...)
 }

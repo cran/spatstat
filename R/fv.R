@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.58 $   $Date: 2010/06/16 03:58:41 $
+#    $Revision: 1.60 $   $Date: 2010/11/10 10:44:47 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -630,6 +630,53 @@ stieltjes <- function(f, M, ...) {
   return(as.list(results))
 }
 
+prefixfv <- function(x, prefix, prephrase) {
+  # attach a prefix to fv information 
+  relevant <- names(x) %in% fvnames(x, "*")
+  names(x)[relevant] <- paste(prefix, names(x)[relevant], sep="")
+  fvnames(x, ".y")   <- paste(prefix, fvnames(x, ".y"), sep="")
+  att <- attributes(x)
+  x <- rebadge.fv(x,
+                  tags=names(x)[relevant],
+                  new.desc=paste(prephrase, att$desc[relevant]),
+                  new.labl=paste(prefix, att$labl[relevant], sep=""))
+  return(x)
+}
 
-  
-
+reconcile.fv <- function(...) {
+  # reconcile several fv objects by finding the columns they share in common
+  z <- list(...)
+  if(!all(unlist(lapply(z, is.fv)))) {
+    if(length(z) == 1 && is.list(z[[1]]) && all(unlist(lapply(z[[1]], is.fv))))
+      z <- z[[1]]
+    else    
+      stop("all arguments should be fv objects")
+  }
+  n <- length(z)
+  if(n <= 1) return(z)
+  # find columns that are common to all estimates
+  keepcolumns <- names(z[[1]])
+  keepvalues <- fvnames(z[[1]], "*")
+  for(i in 2:n) {
+    keepcolumns <- intersect(keepcolumns, names(z[[i]]))
+    keepvalues <- intersect(keepvalues, fvnames(z[[i]], "*"))
+  }
+  if(length(keepvalues) == 0)
+    stop("cannot reconcile fv objects: they have no columns in common")
+  # determine name of the 'preferred' column
+  prefs <- unlist(lapply(z, fvnames, a=".y"))
+  prefskeep <- prefs[prefs %in% keepvalues]
+  if(length(prefskeep) > 0) {
+    # pick the most popular
+    chosen <- unique(prefskeep)[which.max(table(prefskeep))]
+  } else {
+    # drat - pick a value arbitrarily
+    chosen <- keepvalues[1]
+  }
+  z <- lapply(z, rebadge.fv, new.preferred=chosen)
+  z <- lapply(z, "[.fv", j=keepcolumns)
+  # also clip to the same r values
+  rmax <- min(unlist(lapply(z, function(x) { max(with(x, .x)) })))
+  z <- lapply(z, function(x, rmax) { x[ with(x, .x) <= rmax, ] }, rmax=rmax)
+  return(z)
+}

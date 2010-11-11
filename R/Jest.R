@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.16 $	$Date: 2010/01/08 23:21:49 $
+#	$Revision: 4.17 $	$Date: 2010/11/05 08:29:32 $
 #
 #
 #
@@ -37,11 +37,6 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
   }
   Fnames <- names(FF)
   Gnames <- names(G)
-  if("hazard" %in% Gnames && "hazard" %in% Fnames) {
-    Jhaz <- G$hazard - FF$hazard
-    Z <- bind.fv(Z, data.frame(hazard=Jhaz), "hazard(r)",
-                 "derivative of log(%s)")
-  }
   if("raw" %in% Gnames && "raw" %in% Fnames) {
     Jun <- ratio(1-G$raw, 1-FF$raw)
     Z <- bind.fv(Z, data.frame(un=Jun), "%s[un](r)",
@@ -65,6 +60,11 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
     Z <- bind.fv(Z, data.frame(km=Jkm), "%s[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
     attr(Z, "alim") <- range(rvals[FF$km <= 0.9])
+  }
+  if("hazard" %in% Gnames && "hazard" %in% Fnames) {
+    Jhaz <- G$hazard - FF$hazard
+    Z <- bind.fv(Z, data.frame(hazard=Jhaz), "hazard(r)",
+                 "Kaplan-Meier estimate of derivative of log(%s)")
   }
 # set default plotting values and order
   nama <- names(Z)

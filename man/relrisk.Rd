@@ -6,7 +6,8 @@
 \description{
   Given a multitype point pattern, this function estimates the
   spatially-varying probability of each type of point, using
-  cross-validated kernel smoothing. 
+  kernel smoothing. The default smoothing bandwidth is selected by
+  cross-validation.
 }
 \usage{
 relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
@@ -35,15 +36,8 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
   }
 }
 \details{
-  If \code{X} is a multitype point pattern with \eqn{m > 2} types,
-  then this command computes, for each type \eqn{j},
-  a nonparametric estimate of
-  the spatially-varying risk of an event of type \eqn{j}.
-  This is the probability \eqn{p_j(u)}{p[j](u)}
-  that a point at spatial location \eqn{u}
-  will belong to type \eqn{j}. 
-  
-  If \code{X} consists of only two types of points,
+  If \code{X}  is a bivariate point pattern
+  (a multitype point pattern consisting of two types of points),
   then points of the first type (the first level of \code{marks(X)})
   are treated as controls or non-events, and points of the second type
   are treated as cases or events. Then this command computes
@@ -52,6 +46,14 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
   that a point at spatial location \eqn{u}
   will be a case.
 
+  If \code{X} is a multitype point pattern with \eqn{m > 2} types,
+  then this command computes, for each type \eqn{j},
+  a nonparametric estimate of
+  the spatially-varying risk of an event of type \eqn{j}.
+  This is the probability \eqn{p_j(u)}{p[j](u)}
+  that a point at spatial location \eqn{u}
+  will belong to type \eqn{j}. 
+  
   If \code{at = "pixels"} the calculation is performed for
   every spatial location \eqn{u} on a fine pixel grid, and the result
   is a pixel image representing the function \eqn{p(u)}
@@ -92,12 +94,21 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
 \seealso{
  \code{\link{bw.relrisk}},
  \code{\link{density.ppp}},
- \code{\link{smooth.ppp}}
+ \code{\link{smooth.ppp}},
+ \code{\link{eval.im}}.
+ \code{\link{which.max.im}}.
 }
 \examples{
    data(urkiola)
    p <- relrisk(urkiola, 20)
-   plot(p, main="proportion of oak")
+   if(interactive()) {
+      plot(p, main="proportion of oak")
+      plot(eval.im(p > 0.3), main="More than 30 percent oak")
+      data(lansing)
+      z <- relrisk(lansing)
+      plot(z, main="Lansing Woods")
+      plot(which.max.im(z), main="Most common species")
+   }
 }
 \references{
   Diggle, P.J. (2003)

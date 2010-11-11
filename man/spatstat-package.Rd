@@ -587,6 +587,8 @@
     \code{\link{Kmeasure}} \tab reduced second moment measure \cr
     \code{\link{envelope}} \tab simulation envelopes for a summary
     function \cr
+    \code{\link{varblock}} \tab variances and confidence intervals\cr
+                   \tab for a summary function 
   }
 
   Related facilities:
