@@ -28,7 +28,7 @@ simulate.ppm <- function(object, nsim=1, ...,
                          start = NULL,
                          control = default.rmhcontrol(object),
                          project=TRUE,
-                         verbose=FALSE, progress=TRUE) {
+                         verbose=FALSE, progress=(nsim > 1)) {
   verifyclass(object, "ppm")
 
   # Set up parameters for rmh

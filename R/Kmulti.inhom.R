@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.31 $	$Date: 2010/06/01 05:40:05 $
+#	$Revision: 1.32 $	$Date: 2010/11/21 04:21:24 $
 #
 #
 # ------------------------------------------------------------------------
@@ -121,7 +121,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   if(length(extras) > 0)
     warning(paste("Unrecognised arguments", names(extras)))
         
-  npoints <- X$n
+  npts <- npoints(X)
   x <- X$x
   y <- X$y
   W <- X$window
@@ -147,7 +147,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   # validate I, J 
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
-  if(length(I) != npoints || length(J) != npoints)
+  if(length(I) != npts || length(J) != npts)
     stop(paste("The length of I and J must equal",
                "the number of points in the pattern"))
 	
@@ -226,7 +226,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   XJ <- X[J]
   close <- crosspairs(XI, XJ, max(r))
 # map (i,j) to original serial numbers in X
-  orig <- seq(npoints)
+  orig <- seq(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

@@ -1,31 +1,37 @@
 #
 #  fryplot.R
 #
-#  $Revision: 1.2 $ $Date: 2008/12/09 22:13:31 $
+#  $Revision: 1.4 $ $Date: 2010/11/26 09:07:11 $
 #
 
 fryplot <- function(X, ..., width=NULL) {
   Xname <- deparse(substitute(X))
   X <- as.ppp(X)
   b <- as.rectangle(X)
-  bb <- owin(c(-1,1) * diff(b$xrange), c(-1,1) * diff(b$yrange))
-  if(!is.null(width)){
-    limits <- c(-1,1)*width/2
-    xylim <- list(xlim=limits, ylim=limits)
-  } else xylim <- NULL
+  halfspan <- with(b, c(diff(xrange), diff(yrange)))/2
+  if(!is.null(width)) {
+    halfwidth <- ensure2vector(width)/2
+    halfspan <- pmin(halfspan, halfwidth)
+  }
+  bb <- owin(c(-1,1) * halfspan[1], c(-1,1) * halfspan[2])
   do.call("plot.owin",
-          resolve.defaults(list(bb, type="n"),
+          resolve.defaults(list(bb),
                            list(...),
-                           xylim,
+                           list(invert=TRUE),
                            list(main=paste("Fry plot of", Xname))))
   n <- X$n
   xx <- X$x
   yy <- X$y
-  for(i in 1:n)
-    do.call.matched("points.default",
-                    append(list(x=xx[-i] - xx[i], y=yy[-i] - yy[i]),
-                           list(...)),
-                    extrargs=c("pch", "col", "bg", "cex", "lwd"))
+  for(i in 1:n) {
+    dxi <- xx[-i] - xx[i]
+    dyi <- yy[-i] - yy[i]
+    oki <- (abs(dxi) < halfspan[1]) & (abs(dyi) < halfspan[2])
+    if(any(oki)) 
+      do.call.matched("points.default",
+                      append(list(x=dxi[oki], y=dyi[oki]),
+                             list(...)),
+                      extrargs=c("pch", "col", "bg", "cex", "lwd"))
+  }
   return(invisible(NULL))
 }
 

@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.11 $   $Date: 2008/07/02 00:51:35 $
+#   $Revision: 1.12 $   $Date: 2010/11/21 04:17:12 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -10,8 +10,8 @@
 closepairs <- function(X, rmax) {
   verifyclass(X, "ppp")
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
-  npoints <- X$n
-  if(npoints == 0)
+  npts <- npoints(X)
+  if(npts == 0)
     return(list(i=integer(0),
                 j=integer(0),
                 xi=numeric(0),
@@ -25,13 +25,13 @@ closepairs <- function(X, rmax) {
   oo <- order(X$x)
   Xsort <- X[oo]
   # First make an OVERESTIMATE of the number of pairs
-  nsize <- ceiling(4 * pi * (npoints^2) * (rmax^2)/area.owin(X$window))
+  nsize <- ceiling(4 * pi * (npts^2) * (rmax^2)/area.owin(X$window))
   nsize <- max(1024, nsize)
   # Now hopefully extract pairs
   DUP <- spatstat.options("dupC")
   z <-
     .C("closepairs",
-       nxy=as.integer(npoints),
+       nxy=as.integer(npts),
        x=as.double(Xsort$x),
        y=as.double(Xsort$y),
        r=as.double(rmax),
@@ -56,7 +56,7 @@ closepairs <- function(X, rmax) {
     # (to work around gcc bug #323)
     rmaxplus <- 1.25 * rmax
     nsize <- .C("paircount",
-            nxy=as.integer(npoints),
+            nxy=as.integer(npts),
             x=as.double(Xsort$x),
             y=as.double(Xsort$y),
             rmaxi=as.double(rmaxplus),
@@ -74,11 +74,11 @@ closepairs <- function(X, rmax) {
                   dy=numeric(0),
                   d=numeric(0)))
     # add a bit more for safety
-    nsize <- ceiling(1.1 * nsize) + 2 * npoints
+    nsize <- ceiling(1.1 * nsize) + 2 * npts
     # now extract points
     z <-
       .C("closepairs",
-         nxy=as.integer(npoints),
+         nxy=as.integer(npts),
          x=as.double(Xsort$x),
          y=as.double(Xsort$y),
          r=as.double(rmax),

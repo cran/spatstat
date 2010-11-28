@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.59 $	$Date: 2010/07/18 09:21:58 $
+#	$Revision: 1.60 $	$Date: 2010/11/21 04:24:03 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -263,8 +263,8 @@ function(object, window, ngrid=NULL, locations=NULL,
              z <- rep(lambda, nrow(newdata))
            },
            se={
-             npoints <- data.ppm(model)$n
-             se.lambda <- lambda/sqrt(npoints)
+             npts <- npoints(data.ppm(model))
+             se.lambda <- lambda/sqrt(npts)
              z <- rep(se.lambda, nrow(newdata))
            },
            stop("Internal error: unrecognised type"))

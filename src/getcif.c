@@ -7,7 +7,7 @@ extern Cifns AreaIntCifns, BadGeyCifns, DgsCifns, DiggraCifns,
   FikselCifns, GeyerCifns, HardcoreCifns, 
   LennardCifns, LookupCifns, 
   SoftcoreCifns, StraussCifns, StraussHardCifns, 
-  MultiStraussCifns, MultiStraussHardCifns;
+  MultiStraussCifns, MultiStraussHardCifns, MultiHardCifns;
 
 Cifns NullCifns = NULL_CIFNS;
 
@@ -17,20 +17,21 @@ typedef struct CifPair {
 } CifPair;
 
 CifPair CifTable[] = { 
-  {"areaint",  &AreaIntCifns},
-  {"badgey",   &BadGeyCifns},
-  {"dgs",      &DgsCifns},
-  {"diggra",   &DiggraCifns},
-  {"geyer",    &GeyerCifns},
-  {"fiksel",   &FikselCifns},
-  {"hardcore", &HardcoreCifns},
-  {"lookup",   &LookupCifns},
-  {"lennard",  &LennardCifns},
-  {"sftcr",    &SoftcoreCifns},
-  {"strauss",  &StraussCifns},
-  {"straush",  &StraussHardCifns},
-  {"straussm", &MultiStraussCifns},
-  {"straushm", &MultiStraussHardCifns},
+  {"areaint",   &AreaIntCifns},
+  {"badgey",    &BadGeyCifns},
+  {"dgs",       &DgsCifns},
+  {"diggra",    &DiggraCifns},
+  {"geyer",     &GeyerCifns},
+  {"fiksel",    &FikselCifns},
+  {"hardcore",  &HardcoreCifns},
+  {"lookup",    &LookupCifns},
+  {"lennard",   &LennardCifns},
+  {"multihard", &MultiHardCifns},
+  {"sftcr",     &SoftcoreCifns},
+  {"strauss",   &StraussCifns},
+  {"straush",   &StraussHardCifns},
+  {"straussm",  &MultiStraussCifns},
+  {"straushm",  &MultiStraussHardCifns},
   {(char *) NULL, (Cifns *) NULL}
 };
 

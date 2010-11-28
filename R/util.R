@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.59 $    $Date: 2010/11/01 01:34:38 $
+#    $Revision: 1.65 $    $Date: 2010/11/24 06:28:57 $
 #
 #  (a) for matrices only:
 #
@@ -383,6 +383,27 @@ check.named.thing <- function(x, nam, namopt=character(0), xtitle=NULL,
   return(whinge)
 }
 
+forbidNA <- function(x, context, xname) {
+  if(missing(xname)) xname <- deparse(substitute(x))
+  if(any(is.na(x))) {
+    offence <- ngettext(length(x), "be NA", "contain NA values")
+    whinge <- paste(context, sQuote(xname), "must not", offence)
+    stop(whinge, call.=FALSE)
+  }
+  return(TRUE)
+}
+
+check.finite <- function(x, context, xname) {
+  if(missing(xname)) xname <- deparse(substitute(x))
+  forbidNA(x, context, xname)
+  if(any(!is.finite(x))) {
+    oblige <- ngettext(length(x), "be a finite value", "contain finite values")
+    whinge <- paste(context, sQuote(xname), "must", oblige)
+    stop(whinge, call.=FALSE)
+  }
+  return(TRUE)
+}
+
 evenly.spaced <- function(x, tol=1e-07) {
   # test whether x is evenly spaced and increasing
   dx <- diff(x)
@@ -430,15 +451,18 @@ onecolumn <- function(m) {
          NA)
 }
 
+complaining <- function(whinge, fatal=FALSE, value=NULL) {
+  if(fatal) stop(whinge, call.=FALSE)
+  warning(whinge, call.=FALSE)
+  return(value)
+}
+
 check.1.real <- function(x, context="", fatal=TRUE) {
   xname <- deparse(substitute(x))
   if(!is.numeric(x) || length(x) != 1) {
     whinge <-  paste(xname, "should be a single number")
     if(nzchar(context)) whinge <- paste(context, whinge)
-    if(fatal)
-      stop(whinge, call.=FALSE)
-    warning(whinge, call.=FALSE)
-    return(FALSE)
+    return(complaining(whinge, fatal=fatal, value=FALSE))
   }
   return(TRUE)
 }
@@ -499,4 +523,12 @@ verbalogic <- function(x, op="and") {
            x[isvariable] <- paste("not {", y, "}")
          },
          stop(paste("Unrecognised operation", sQuote(op))))
+}
+
+sensiblevarname <- function(guess, fallback, maxlen=12) {
+  out <- if(is.character(guess) &&
+            length(guess) == 1  &&
+            make.names(guess) == guess) guess else fallback
+  out <- substr(out, 1, maxlen)
+  return(out)
 }

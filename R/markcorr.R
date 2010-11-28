@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.55 $ $Date: 2010/03/09 04:25:42 $
+#     $Revision: 1.56 $ $Date: 2010/11/21 04:22:17 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -198,21 +198,40 @@ markcorr <-
 {
   # mark correlation function with test function f
   stopifnot(is.ppp(X) && is.marked(X))
+  
+  # set defaults to NULL
+  if(missing(f)) f <- NULL
+  if(missing(correction)) correction <- NULL
+  
+  # handle data frame of marks
+  marx <- marks(X, dfok=TRUE)
+  if(is.data.frame(marx)) {
+    nc <- ncol(marx)
+    result <- list()
+    for(j in 1:nc) {
+      Xj <- X %mark% marx[,j]
+      result[[j]] <- markcorr(Xj, f=f, r=r, correction=correction,
+                              method=method, ...,
+                              f1=f1, normalise=normalise, fargs=fargs)
+    }
+    result <- as.listof(result)
+    names(result) <- colnames(marx)
+    return(result)
+  }
+  
   # validate test function
-  if(missing(f))
-    f <- NULL
   h <- check.testfun(f, f1, X)
   f     <- h$f
   f1    <- h$f1
   ftype <- h$ftype
   #
   # 
-  npoints <- X$n
+  npts <- npoints(X)
   W <- X$window
-  marx <- marks(X, dfok=FALSE)
+
   
   # determine r values 
-  rmaxdefault <- rmax.rule("K", W, npoints/area.owin(W))
+  rmaxdefault <- rmax.rule("K", W, npts/area.owin(W))
   breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
   rmax <- breaks$max

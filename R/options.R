@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.29 $   $Date: 2010/10/22 08:33:10 $
+#    $Revision: 1.31 $   $Date: 2010/11/22 04:40:12 $
 #
 #
 
@@ -48,6 +48,11 @@ reset.spatstat.options <- function() {
          valid="a list"
          ),
        par.contour=list(
+         default=list(),
+         check=is.list,
+         valid="a list"
+         ),
+       par.fv=list(
          default=list(),
          check=is.list,
          valid="a list"

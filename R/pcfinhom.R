@@ -1,7 +1,7 @@
 #
 #   pcfinhom.R
 #
-#   $Revision: 1.1 $   $Date: 2009/12/16 05:34:21 $
+#   $Revision: 1.2 $   $Date: 2010/11/21 04:22:52 $
 #
 #   inhomogeneous pair correlation function of point pattern 
 #
@@ -17,7 +17,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
 
   win <- X$window
   area <- area.owin(win)
-  npoints <- X$n
+  npts <- npoints(X)
   
   correction.given <- !missing(correction)
   correction <- pickoption("correction", correction,
@@ -31,7 +31,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
   
   if(is.null(bw) && kernel=="epanechnikov") {
     # Stoyan & Stoyan 1995, eq (15.16), page 285
-    h <- stoyan /sqrt(npoints/area)
+    h <- stoyan /sqrt(npts/area)
     # conversion to standard deviation
     bw <- h/sqrt(5)
   }
@@ -46,7 +46,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
   } else {
     # lambda values provided
     if(is.vector(lambda)) 
-      check.nvector(lambda, npoints)
+      check.nvector(lambda, npts)
     else if(is.im(lambda)) 
       lambda <- safelookup(lambda, X)
     else if(is.function(lambda)) 

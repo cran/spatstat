@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.66 $	$Date: 2010/05/02 00:44:24 $
+#	$Revision: 4.67 $	$Date: 2010/11/22 04:25:34 $
 #
 #
 #
@@ -710,11 +710,10 @@ is.convex <- function(x) {
            if(length(b) > 1)
              return(FALSE)
            b <- b[[1]]
-           x <- b$x
-           y <- b$y
-           n <- length(x)
-           ch <- chull(x,y)
-           return(all(ch==(n:1)))
+           xx <- b$x
+           yy <- b$y
+           ch <- chull(xx,yy)
+           return(length(ch) == length(xx))
          },
          mask={
            v <- vertices(x)

@@ -4,7 +4,7 @@
 #
 #  subset operations for hyperframes
 #
-#  $Revision: 1.4 $    $Date: 2010/01/14 19:40:17 $
+#  $Revision: 1.5 $    $Date: 2010/11/23 12:15:08 $
 #
 #
 
@@ -106,35 +106,14 @@ function (x, i, j, value)
   }
   if(!missing(j)) {
     # x[, j] <- value
-    if(is.character(j)) {
-      if(length(j) != 1)
-        die("multiple columns")
-      y <- get("$<-.hyperframe")(x, j, value)
-      return(y)
-    } else if(is.numeric(j)) {
-      if(length(j) != 1 || any(j < 0))
-        die("multiple columns")
-      if(j <= dimx[2]) {
-        jname <- colnam[j]
-        y <- get("$<-.hyperframe")(x, j, value)
-        return(y)
-      } else if(j == dimx[2] + 1) {
-        y <- cbind.hyperframe(x, value)
-        return(y)
-      } else 
-        stop(paste("Illegal column index", j))
-    } else if(is.logical(j)) {
-      if(length(j) != dimx[2])
-        stop(paste("Length of logical vector", paren(length(j)),
-                   "does not match number of columns", paren(dimx[2])))
-      if(sum(j) != 1)
-        die("multiple columns")
-      jname <- colnam[j]
-      y <- get("$<-.hyperframe")(x, j, value)
-      return(y)
-    }
-    else stop("Index j not understood")
-  }
+    rown <- row.names(x)
+    xlist <- as.list(x)
+    vlist <- as.list(as.hyperframe(value))
+    # this construction accepts all indices including extra entries
+    xlist[j] <- vlist
+    y <- do.call("hyperframe", append(xlist, list(row.names=rown)))
+    return(y)
+  } 
   return(NULL)
 }
 

@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.63 $	$Date: 2010/11/10 06:56:43 $
+#	$Revision: 5.67 $	$Date: 2010/11/26 08:15:02 $
 #
 #
 # -------- functions ----------------------------------------
@@ -55,11 +55,11 @@ function(X, ..., r=NULL, breaks=NULL,
   nlarge.given <- !missing(nlarge) && !is.null(nlarge)
   rfixed <- !is.null(r) || !is.null(breaks)
         
-  npoints <- X$n
+  npts <- npoints(X)
   W <- X$window
   area <- area.owin(W)
-  lambda <- npoints/area
-  lambda2 <- (npoints * (npoints - 1))/(area^2)
+  lambda <- npts/area
+  lambda2 <- (npts * (npts - 1))/(area^2)
 
   if(!is.null(domain)) {
     # estimate based on contributions from a subdomain
@@ -68,12 +68,9 @@ function(X, ..., r=NULL, breaks=NULL,
       stop(paste(dQuote("domain"),
                  "is not a subset of the window of X"))
     # trick Kdot() into doing it
-    indom <- inside.owin(X$x, X$y, domain)
+    indom <- factor(inside.owin(X$x, X$y, domain), levels=c(FALSE,TRUE))
     Kd <- Kdot(X %mark% indom, i="TRUE",
                r=r, breaks=breaks, correction=correction)
-    # correct for estimate of intensity of type i
-    adj <- area/area.owin(domain)
-    Kd <- eval.fv(adj * Kd)
     # relabel and exit
     Kd <- rebadge.fv(Kd, substitute(K(r), NULL), "K")
     return(Kd)
@@ -109,7 +106,7 @@ function(X, ..., r=NULL, breaks=NULL,
   # Invoked automatically if number of points is large
 
   can.do.fast <- breaks$even
-  large.n    <- (npoints >= nlarge)
+  large.n    <- (npts >= nlarge)
   demand.best <- correction.given && best.wanted
   large.n.trigger <- large.n && !correction.given
   borderonly <- all(correction == "border" | correction == "bord.modif")
@@ -205,7 +202,7 @@ function(X, ..., r=NULL, breaks=NULL,
     # Compute variance approximations 
     A <- area
     P <- perimeter(W)
-    n <- npoints
+    n <- npts
     # Ripley asymptotic approximation
     rip <- 2 * ((A/(n-1))^2) * (pi * r^2/A + 0.96 * P * r^3/A^2
                                 + 0.13 * (n/A) * P * r^5/A^2)
@@ -221,7 +218,7 @@ function(X, ..., r=NULL, breaks=NULL,
       # cf Lotwick & Silverman 1982 eq (5)
       br <- (pi * r^2/A) * (1 - pi * r^2/A) +
         (1.0716 * P * r^3 + 2.2375 * r^4)/A^2
-      ls <- (2 * br - a1r + (n-2) * a2r)/(n*(n-1))
+      ls <- (A^2) * (2 * br - a1r + (n-2) * a2r)/(n*(n-1))
       # add column 
       K <- bind.fv(K, data.frame(ls=ls), "vLS(r)",
                  "Lotwick-Silverman approx to var(%s) under CSR",
@@ -285,7 +282,7 @@ Kborder.engine <- function(X, rmax, nr=100,
                            weights) 
 {
   verifyclass(X, "ppp")
-  npoints <- X$n
+  npts <- X$n
   W <- X$window
 
   if(missing(rmax))
@@ -313,7 +310,7 @@ Kborder.engine <- function(X, rmax, nr=100,
   
   if(missing(weights)) {
     res <- .C("Kborder",
-              nxy=as.integer(npoints),
+              nxy=as.integer(npts),
               x=as.double(x),
               y=as.double(y),
               b=as.double(b),
@@ -325,7 +322,7 @@ Kborder.engine <- function(X, rmax, nr=100,
               PACKAGE="spatstat")
     area <- area.owin(W)
     if("bord.modif" %in% correction) {
-      lambda2 <- (npoints * (npoints - 1))/(area^2)
+      lambda2 <- (npts * (npts - 1))/(area^2)
       denom.area <- eroded.areas(W, r)
       bordmod <- res$numer/(lambda2 * denom.area)
       Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "%s[bordm](r)",
@@ -333,7 +330,7 @@ Kborder.engine <- function(X, rmax, nr=100,
                    "bord.modif")
     }
     if("border" %in% correction) {
-      lambda <- npoints/area
+      lambda <- npts/area
       bord <- res$numer/(lambda * res$denom)
       Kfv <- bind.fv(Kfv, data.frame(border=bord), "%s[bord](r)",
                    "border-corrected estimate of %s",
@@ -352,7 +349,7 @@ Kborder.engine <- function(X, rmax, nr=100,
     }
     weights.Xsort <- weights[orderX]
     res <- .C("Kwborder",
-              nxy=as.integer(npoints),
+              nxy=as.integer(npts),
               x=as.double(x),
               y=as.double(y),
               w=as.double(weights.Xsort),

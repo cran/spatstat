@@ -147,14 +147,27 @@ tesk <- kstest(nztrees, "x")
 tesk
 plot(tesk)
 
+data(murchison)
+mur <- lapply(murchison, rescale, s=1000)
+X <- mur$gold
+D <- distfun(mur$faults)
+plot(rhohat(X, D),
+     main="Smoothed rate estimate",
+     xlab="Distance to nearest fault (km)",
+     legend=FALSE)
+
 data(cells)
 Z <- density.ppp(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
 
 data(shapley)
-plot(nnclean(shapley, k=17), main="Nearest neighbour cleaning",
+X <- unique(unmark(shapley))
+plot(X, "Shapley galaxy concentration", pch=".")
+plot(nnclean(X, k=17), main="Byers-Raftery nearest neighbour cleaning",
      chars=c(".", "+"), cols=1:2)
+Y <- sharpen(X, sigma=0.5, edgecorrect=TRUE)
+plot(Y, main="Choi-Hall data sharpening", pch=".")
 
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
@@ -227,6 +240,12 @@ Fig4b <- residualspaper$Fig4b
 plot(Fig4b, main="Inhomogeneous point pattern")
 plot(Kinhom(Fig4b), main="Inhomogeneous K-function")
 plot(pcfinhom(Fig4b, stoyan=0.1), main="Inhomogeneous pair correlation")
+
+data(bronzefilter)
+X <- unmark(bronzefilter)
+plot(X, "Bronze filter data")
+lam <- predict(ppm(X, ~x))
+plot(Kscaled(X, lam), xlim=c(0, 1.5), main="Locally-scaled K function")
 
 data(bramblecanes)
 plot(bramblecanes)

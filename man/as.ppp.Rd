@@ -53,7 +53,7 @@ for use by the \pkg{spatstat} package).
     an object of class \code{"quad"} representing a quadrature scheme
     (see \code{\link{quad.object}})
     \item
-    a two-column or three-column matrix or data frame
+    a matrix or data frame with at least two columns
     \item
     a structure with entries \code{x}, \code{y} which are numeric vectors
     of equal length
@@ -66,9 +66,9 @@ for use by the \pkg{spatstat} package).
   by the function \code{\link{as.owin}}.
   In the first three cases, \code{W} will be ignored.
 
-  If \code{X} is a three-column matrix or data frame, the third column
-  will be interpreted as containing marks, and the result will be a
-  marked point pattern.
+  If \code{X} is a matrix or data frame, the first and second columns will
+  be interpreted as the \eqn{x} and \eqn{y} coordinates respectively.
+  Any additional columns will be interpreted as marks.
   
   The argument \code{fatal} indicates what to do when 
   \code{W} is missing and \code{X} contains no
@@ -95,7 +95,7 @@ for use by the \pkg{spatstat} package).
   \code{yu} are numbers giving the dimensions of a rectangular window.
 
   The function \code{as.ppp} is generic, with methods for the
-  classes \code{"ppp"}, \code{"quad"}, \code{"matrix"}
+  classes \code{"ppp"}, \code{"quad"}, \code{"matrix"}, \code{"data.frame"}
   and a default method.
   
   Point pattern datasets can also be created by the function
@@ -126,6 +126,9 @@ for use by the \pkg{spatstat} package).
    pp <- as.ppp(towns)   # converted to our format
    detach(package:spatial)
  }
+
+ xyzt <- matrix(runif(40), ncol=4)
+ Z <- as.ppp(xyzt, square(1))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

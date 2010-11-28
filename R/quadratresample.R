@@ -3,10 +3,12 @@
 #
 # resample a point pattern by resampling quadrats
 #
-# $Revision: 1.3 $  $Date: 2008/09/26 19:51:53 $
+# $Revision: 1.5 $  $Date: 2010/11/25 02:58:49 $
 #
 
-quadratresample <- function(X, nx, ny=nx, ..., replace=FALSE, nsamples=1) {
+quadratresample <- function(X, nx, ny=nx, ...,
+                            replace=FALSE, nsamples=1,
+                            verbose=(nsamples > 1)) {
   stopifnot(is.ppp(X))
   if(X$window$type != "rectangle")
     stop("Resampling is only implemented for rectangular windows")
@@ -19,6 +21,8 @@ quadratresample <- function(X, nx, ny=nx, ..., replace=FALSE, nsamples=1) {
   V <- lapply(B, function(z) { w <- z$window;
                                c(w$xrange[1], w$yrange[1]) })
   out <- list()
+  if(verbose)
+    cat("Generating resampled patterns...")
   for(i in 1:nsamples) {
     # resample tiles
     ind <- sample(1:nq, nq, replace=replace)
@@ -30,6 +34,8 @@ quadratresample <- function(X, nx, ny=nx, ..., replace=FALSE, nsamples=1) {
     }
     split(Xresampled, A) <- Bresampled
     out[[i]] <- Xresampled
+    if(verbose)
+      progressreport(i, nsamples)
   }
   if(nsamples == 1)
     return(out[[1]])

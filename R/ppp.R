@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.73 $	$Date: 2010/10/28 02:08:37 $
+#	$Revision: 4.75 $	$Date: 2010/11/23 07:29:47 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -157,19 +157,13 @@ as.ppp.quad <- function(X, ..., fatal=TRUE) {
 
 as.ppp.data.frame <- function(X, W = NULL, ..., fatal=TRUE) {
   check <- resolve.defaults(list(...), list(check=TRUE))$check
-  if(!(ncol(X) %in% 2:3)) {
-    if(fatal)
-      stop("X must be a two-column or three-column data frame")
-    else
-      return(NULL)
-  }
+  if(ncol(X) < 2) 
+    return(complaining("X must have at least two columns",
+                       fatal, value=NULL))
 
-  if(is.null(W)) {
-    if(fatal)
-      stop("x,y coords given but no window specified")
-    else
-      return(NULL)
-  } 
+  if(is.null(W))
+    return(complaining("x,y coords given but no window specified",
+                       fatal, value=NULL))
     
   if(is.function(W))
     Z <- cobble.xy(X[,1], X[,2], W, fatal)
@@ -178,9 +172,9 @@ as.ppp.data.frame <- function(X, W = NULL, ..., fatal=TRUE) {
     Z <- ppp(X[,1], X[,2], window = win, check=check)
   }
 
-  # add marks from third column
-  if(ncol(X) == 3)
-    Z <- Z %mark% X[,3]
+  # add marks from other columns
+  if(ncol(X) > 2)
+    marks(Z) <- X[, -(1:2)]
 
   return(Z)
 }
@@ -188,25 +182,17 @@ as.ppp.data.frame <- function(X, W = NULL, ..., fatal=TRUE) {
 as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
   check <- resolve.defaults(list(...), list(check=TRUE))$check
   if(!verifyclass(X, "matrix", fatal=fatal)
-     || !is.numeric(X)) {
-    if(fatal)
-      stop("X must be a two-column matrix of numbers")
-    else
-      return(NULL)
-  }
-  if(!(ncol(X) %in% 2:3)) {
-    if(fatal)
-      stop("X must be a two-column or three-column matrix of numbers")
-    else
-      return(NULL)
-  }
+     || !is.numeric(X))
+    return(complaining("X must be a numeric matrix",
+                       fatal, value=NULL))
 
-  if(is.null(W)) {
-    if(fatal)
-      stop("x,y coords given but no window specified")
-    else
-      return(NULL)
-  } 
+  if(ncol(X) < 2)
+    return(complaining("X must have at least two columns",
+                       fatal, value=NULL))
+
+  if(is.null(W))
+    return(complaining("x,y coords given but no window specified",
+                       fatal, value=NULL))
     
   if(is.function(W))
     Z <- cobble.xy(X[,1], X[,2], W, fatal)
@@ -215,9 +201,9 @@ as.ppp.matrix <- function(X, W = NULL, ..., fatal=TRUE) {
     Z <- ppp(X[,1], X[,2], window = win, check=check)
   }
 
-  # add marks from third column
-  if(ncol(X) == 3)
-    Z <- Z %mark% X[,3]
+  # add marks from other columns
+  if(ncol(X) > 2)
+    marks(Z) <- X[, -(1:2)]
 
   return(Z)
 }

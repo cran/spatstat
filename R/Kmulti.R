@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.31 $	$Date: 2010/03/08 08:23:04 $
+#	$Revision: 5.32 $	$Date: 2010/11/21 04:21:05 $
 #
 #
 # -------- functions ----------------------------------------
@@ -144,7 +144,7 @@ function(X, I, J, r=NULL, breaks=NULL,
 {
   verifyclass(X, "ppp")
 
-  npoints <- X$n
+  npts <- npoints(X)
   x <- X$x
   y <- X$y
   W <- X$window
@@ -168,7 +168,7 @@ function(X, I, J, r=NULL, breaks=NULL,
 
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
-  if(length(I) != npoints || length(J) != npoints)
+  if(length(I) != npts || length(J) != npts)
     stop(paste("The length of I and J must equal",
                "the number of points in the pattern"))
 	
@@ -202,7 +202,7 @@ function(X, I, J, r=NULL, breaks=NULL,
   close <- crosspairs(XI, XJ, max(r))
 # close$i and close$j are serial numbers in XI and XJ respectively;        
 # map them to original serial numbers in X
-  orig <- seq(npoints)
+  orig <- seq(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

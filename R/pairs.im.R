@@ -1,19 +1,26 @@
 #
 #   pairs.im.R
 #
-#   $Revision: 1.3 $   $Date: 2010/05/26 09:05:50 $
+#   $Revision: 1.4 $   $Date: 2010/11/23 14:08:28 $
 #
 
-pairs.im <- function(..., plot=TRUE) {
+pairs.listof <-
+  pairs.im <- function(..., plot=TRUE) {
   argh <- list(...)
   cl <- match.call()
+  # unpack single argument which is a list of images
+  if(length(argh) == 1) {
+    arg1 <- argh[[1]]
+    if(is.list(arg1) && all(unlist(lapply(arg1, is.im))))
+      argh <- arg1
+  }
   # identify which arguments are images
   isim <- unlist(lapply(argh, is.im))
   nim <- sum(isim)
   if(nim == 0) 
     stop("No images provided")
-  # one image: plot histogram
   if(nim == 1) {
+    # one image: plot histogram
     h <- hist(..., plot=plot)
     return(invisible(h))
   }
@@ -61,3 +68,6 @@ print.plotpairsim <- function(x, ...) {
   cat(paste("contains pixel data for", commasep(sQuote(colnames(x))), "\n"))
   return(invisible(NULL))
 }
+
+
+  

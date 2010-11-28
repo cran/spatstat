@@ -37,14 +37,15 @@ varblock(X, fun = Kest, blocks = quadrats(X, nx = nx, ny = ny), ...,
   the summary statistic \code{fun(X)} from a single point pattern
   dataset \code{X} using a subdivision method.
   It can be used to plot \bold{confidence intervals}
-  for any functional summary statistic such as the \eqn{K}-function.
+  for the true value of a summary function such as the \eqn{K}-function.
   
   The window containing \code{X} is divided into pieces by
   an \code{nx * ny} array of rectangles
-  (or is divided into more general pieces
+  (or is divided into pieces of more general shape,
   according to the argument \code{blocks} if it is present).
-  The the summary statistic \code{fun} is applied to each of the
-  corresponding sub-patterns of \code{X}. Then the pointwise
+  The summary statistic \code{fun} is applied to each of the
+  corresponding sub-patterns of \code{X} as described below.
+  Then the pointwise
   sample mean, sample variance and sample standard deviation
   of these summary statistics are computed. The two-standard-deviation
   confidence intervals are computed.
@@ -52,11 +53,28 @@ varblock(X, fun = Kest, blocks = quadrats(X, nx = nx, ny = ny), ...,
   The variance is estimated by equation (4.21) of Diggle (2003, page 52).
   This assumes that the point pattern \code{X} is stationary.
   For further details see Diggle (2003, pp 52--53).
+  
+  The estimate of the summary statistic
+  from each block is computed as follows.
+  For most functions \code{fun},
+  the estimate from block \code{B}
+  is computed by finding the subset of \code{X} consisting of
+  points that fall inside \code{B},
+  and applying \code{fun} to these points, by calling \code{fun(X[B])}.
+
+  However if \code{fun} is the \eqn{K}-function \code{\link{Kest}},
+  or any function which has an argument called \code{domain},
+  the estimate for each block \code{B} is computed
+  by calling \code{fun(X, domain=B)}. In the case of the
+  \eqn{K}-function this means that the estimate from block \code{B}
+  is computed by counting pairs of
+  points in which the \emph{first} point lies in \code{B},
+  while the second point may lie anywhere. 
 }
 \section{Errors}{
   If the blocks are too small, there may be insufficient data
   in some blocks, and the function \code{fun} may report an error.
-  If this happens, you need to take fewer or larger blocks.
+  If this happens, you need to take larger blocks.
   
   An error message about incompatibility may occur.
   The different function estimates may be incompatible in some cases,
@@ -94,6 +112,7 @@ varblock(X, fun = Kest, blocks = quadrats(X, nx = nx, ny = ny), ...,
 }
 \examples{
    data(amacrine)
+   v <- varblock(amacrine, Kest, nx=4, ny=2)
    v <- varblock(amacrine, Kcross, nx=4, ny=2)
    if(interactive()) plot(v, iso ~ r, shade=c("hiiso", "loiso"))
 }

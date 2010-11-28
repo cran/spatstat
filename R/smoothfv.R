@@ -4,7 +4,7 @@
 #   $Revision: 1.4 $   $Date: 2010/04/16 12:47:43 $
 #
   
-smooth.fv <- function(x, which=".", ...) {
+smooth.fv <- function(x, which="*", ...) {
   stopifnot(is.character(which))
   if(length(which) == 1 && which %in% .Spatstat.FvAbbrev) {
     if(which == ".x")

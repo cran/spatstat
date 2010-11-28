@@ -60,7 +60,8 @@ which can then be fitted to point pattern data.
   \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
-  \code{\link{Strauss}}
+  \code{\link{Strauss}},
+  \code{\link{MultiHard}}
 }
 \examples{
    r <- matrix(c(1,2,2,1), nrow=2,ncol=2)

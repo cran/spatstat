@@ -1,3 +1,103 @@
+	CHANGES IN spatstat VERSION 1.21-2
+
+OVERVIEW 
+
+    o   New multitype hardcore interaction.
+
+    o   Nonparametric estimation of covariate effects on point patterns.
+
+    o   Output of 'Kmeasure' has been rescaled.
+
+    o   Numerous improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o   MultiHard
+    	multitype hard core interaction for use in ppm() 
+
+    o   coords<-
+    	Assign new coordinates to the points in a point pattern
+
+    o   rhohat
+    	Kernel estimate for the effect of a spatial covariate
+	on point process intensity
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   as.ppp.matrix, as.ppp.data.frame
+    	These methods for 'as.ppp' now accept a matrix or data frame
+	with any number of columns (>= 2) and interpret the additional
+	columns as marks.
+
+    o   Kmeasure
+    	The interpretation of the output has changed:
+	the pixel values are now density estimates.
+
+    o   rmh.ppm, rmhmodel.ppm
+    	These functions now accept a point process model
+	fitted with the 'MultiHard' interaction
+
+    o   rmh.default, rmhmodel.default
+    	These functions now accept the option: cif='multihard'
+	defining a multitype hard core interaction.	
+
+    o   markcorr
+    	Now handles a data frame of marks
+
+    o   varblock
+    	Improved estimate in the case of the K function
+
+    o   colourmap, lut
+    	New argument 'range' makes it easier to specify a colour map
+	or lookup table
+
+    o   [<-.hyperframe
+    	Now handles multiple columns
+
+    o   plot.fv
+    	Improved y axis labels
+
+    o   spatstat.options
+    	New option 'par.fv' controls default parameters for line plotting
+
+    o   rmhmodel
+    	More safety checks on parameter values.
+
+    o   quadratresample
+    	New argument 'verbose'
+
+    o   smooth.fv
+    	Default value of 'which' has been changed.
+
+BUGS
+
+    o   Kest
+    	If the argument 'domain' was used, the resulting estimate
+	was not correctly normalised.
+	Fixed.
+
+    o   Kest
+    	The Lotwick-Silverman variance approximation was incorrectly
+	calculated. (Spotted by Ian Dryden and Igor Chernayavsky).
+	Fixed.
+    	
+    o   plot.owin, plot.ppp
+    	Display of binary masks was garbled if the window was 
+	empty or if it was equivalent to a rectangle.
+	Fixed.
+
+    o   plot.bermantest
+    	One of the vertical lines for the Z1 test was in the wrong place.
+	Fixed.
+
+    o   marks<-.ppx
+    	Crashed in some cases.
+	Fixed.
+
+    o   is.convex
+    	An irrelevant warning was issued (for non-convex polygons).
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.21-1
 
 OVERVIEW 

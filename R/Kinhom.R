@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.50 $	$Date: 2010/11/04 04:07:13 $
+#	$Revision: 1.52 $	$Date: 2010/11/21 04:39:35 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -67,10 +67,10 @@
 
     # determine basic parameters
     W <- X$window
-    npoints <- X$n
+    npts <- npoints(X)
     area <- area.owin(W)
 
-    rmaxdefault <- rmax.rule("K", W, npoints/area)
+    rmaxdefault <- rmax.rule("K", W, npts/area)
     breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
     r <- breaks$r
     rmax <- breaks$max
@@ -101,9 +101,9 @@
     # Use matrix of weights if it was provided and if it is sufficient
     if(lambda2.suffices && lambda2.given) {
       if(!is.null(reciplambda2)) 
-        check.nmatrix(reciplambda2, npoints)
+        check.nmatrix(reciplambda2, npts)
       else {
-        check.nmatrix(lambda2, npoints)
+        check.nmatrix(lambda2, npts)
         reciplambda2 <- 1/lambda2
       }
     } else {
@@ -122,7 +122,7 @@
         else if(is.function(reciplambda))
           reciplambda <- reciplambda(X$x, X$y)
         else if(is.numeric(reciplambda) && is.vector(as.numeric(reciplambda)))
-          check.nvector(reciplambda, npoints)
+          check.nvector(reciplambda, npts)
         else stop(paste(sQuote("reciplambda"),
                         "should be a vector, a pixel image, or a function"))
       } else {
@@ -132,7 +132,7 @@
         else if(is.function(lambda)) 
           lambda <- lambda(X$x, X$y)
         else if(is.numeric(lambda) && is.vector(as.numeric(lambda)))
-          check.nvector(lambda, npoints)
+          check.nvector(lambda, npts)
         else stop(paste(sQuote("lambda"),
                           "should be a vector, a pixel image, or a function"))
         # evaluate reciprocal
@@ -153,7 +153,7 @@
 
     can.do.fast <- breaks$even  && missing(lambda2)
     borderonly <- all(correction == "border" | correction == "bord.modif")
-    large.n    <- (npoints >= nlarge)
+    large.n    <- (npts >= nlarge)
     demand.best <- correction.given && best.wanted
     large.n.trigger <- large.n && !demand.best
     will.do.fast <- can.do.fast && (borderonly || large.n.trigger)

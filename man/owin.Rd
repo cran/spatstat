@@ -61,9 +61,10 @@ describing a window in the two-dimensional plane.
     \itemize{
       \item
       \emph{single polygon:}
-      If \code{poly} is a structure with
-      two component vectors \code{x} and \code{y} of equal length,
-      then these vectors are interpreted as the cartesian coordinates
+      If \code{poly} is a matrix or data frame with two columns, or
+      a structure with two component vectors \code{x} and \code{y}
+      of equal length,
+      then these values are interpreted as the cartesian coordinates
       of the vertices of a polygon circumscribing the window.
       The vertices must be listed \emph{anticlockwise}.
       No vertex should be repeated (i.e. do not repeat the first
@@ -71,7 +72,8 @@ describing a window in the two-dimensional plane.
       \item
       \emph{multiple polygons or holes:}
       If \code{poly} is a list, each entry \code{poly[[i]]}
-      of which is a structure with
+      of which is a matrix or data frame with two columns
+      or a structure with
       two component vectors \code{x} and \code{y} of equal length,
       then the successive list members \code{poly[[i]]}
       are interpreted as separate polygons which together

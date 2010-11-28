@@ -49,6 +49,7 @@
     \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'hardcore'}}{Hard core process}
     \item{\code{'lennard'}}{Lennard-Jones process}
+    \item{\code{'multihard'}}{Multitype hardcore process}
     \item{\code{'strauss'}}{The Strauss process}
     \item{\code{'straush'}}{The Strauss process with hard core}
     \item{\code{'sftcr'}}{The Softcore process}
@@ -167,6 +168,13 @@
       where \code{sigma} is the characteristic diameter
       and \code{epsilon} is the well depth.
       See \code{\link{LennardJones}} for explanation.
+    }
+    \item{multihard:}{
+      (Multitype hard core process.) A \bold{named} list
+      with components \code{beta} and \code{hradii},
+      where \code{beta} is a vector of base intensities for each type
+      of point, and \code{hradii} is a matrix of hard core radii
+      between each pair of types. 
     }
     \item{strauss:}{
       (Strauss process.) A \bold{named} list with components
@@ -406,6 +414,7 @@ otherwise an error is given.
   \code{\link{Geyer}},
   \code{\link{Hardcore}},
   \code{\link{LennardJones}},
+  \code{\link{MultiHard}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},
   \code{\link{PairPiece}},
@@ -453,6 +462,13 @@ otherwise an error is given.
    # specify types
    mod09 <- rmhmodel(cif="straussm",
                      par=list(beta=beta,gamma=gmma,radii=r),
+                     w=square(250),
+                     types=c("A", "B"))
+
+   # Multitype Hardcore:
+   rhc  <- matrix(c(9.1,5.0,5.0,2.5),2,2)
+   mod08hard <- rmhmodel(cif="multihard",
+                     par=list(beta=beta,hradii=rhc),
                      w=square(250),
                      types=c("A", "B"))
 

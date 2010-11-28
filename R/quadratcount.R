@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.28 $  $Date: 2010/07/12 08:27:30 $
+#  $Revision: 1.31 $  $Date: 2010/11/24 10:35:36 $
 #
 
 quadratcount <- function(X, ...) {
@@ -70,14 +70,21 @@ quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
 
 plot.quadratcount <- function(x, ...,
                               add=FALSE, entries=as.vector(t(as.table(x))),
-                              dx=0, dy=0) {
+                              dx=0, dy=0, show.tiles=TRUE) {
   xname <- deparse(substitute(x))
   tess <- attr(x, "tess")
-  do.call("plot.tess",
-          resolve.defaults(list(tess),
-                           list(...),
-                           list(main=xname, add=add),
-                           .StripNull=TRUE))
+  # add=FALSE, show.tiles=TRUE  => plot tiles + numbers
+  # add=FALSE, show.tiles=FALSE => plot window (add=FALSE) + numbers
+  # add=TRUE,  show.tiles=TRUE  => plot tiles  (add=TRUE) + numbers
+  # add=TRUE,  show.tiles=FALSE => plot numbers
+  if(show.tiles || !add) {
+    context <- if(show.tiles) tess else as.owin(tess)
+    do.call("plot",
+            resolve.defaults(list(context, add=add),
+                             list(...),
+                             list(main=xname),
+                             .StripNull=TRUE))
+  }
   if(!is.null(entries)) {
     labels <- paste(as.vector(entries))
     til <- tiles(tess)

@@ -1,7 +1,7 @@
 #
 #      sharpen.R
 #
-#      $Revision: 1.4 $  $Date: 2010/10/25 02:30:23 $
+#      $Revision: 1.5 $  $Date: 2010/11/27 01:52:33 $
 #
 
 sharpen <- function(X, ...) {
@@ -15,6 +15,14 @@ sharpen.ppp <- function(X, sigma=NULL, ..., varcov=NULL,
                    at="points", sigma=sigma, varcov=varcov, edge=TRUE)
   Yy <- smooth.ppp(X %mark% X$y,
                    at="points", sigma=sigma, varcov=varcov, edge=TRUE)
+  # trap NaN etc
+  nbad <- sum(!(is.finite(Yx) & is.finite(Yy)))
+  if(nbad > 0)
+    stop(paste(nbad,
+               ngettext(nbad, "point is", "points are"),
+               "undefined due to numerical problems;",
+               "smoothing parameter is probably too small"))
+  #
   W <- as.owin(X)
   if(edgecorrect) {
     # convolve x and y coordinate functions with kernel

@@ -1,7 +1,7 @@
 #
 #   pcfmulti.inhom.R
 #
-#   $Revision: 1.2 $   $Date: 2010/03/08 08:23:04 $
+#   $Revision: 1.3 $   $Date: 2010/11/21 04:23:14 $
 #
 #   inhomogeneous multitype pair correlation functions
 #
@@ -90,7 +90,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
 
   win <- X$window
   area <- area.owin(win)
-  npoints <- X$n
+  npts <- npoints(X)
   
   correction.given <- !missing(correction) && !is.null(correction)
   if(is.null(correction))
@@ -106,7 +106,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
   
   if(is.null(bw) && kernel=="epanechnikov") {
     # Stoyan & Stoyan 1995, eq (15.16), page 285
-    h <- stoyan /sqrt(npoints/area)
+    h <- stoyan /sqrt(npts/area)
     # conversion to standard deviation
     bw <- h/sqrt(5)
   }
@@ -115,7 +115,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
   
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
-  if(length(I) != npoints || length(J) != npoints)
+  if(length(I) != npts || length(J) != npts)
     stop(paste("The length of I and J must equal",
                "the number of points in the pattern"))
 	
@@ -164,7 +164,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
   ########## r values ############################
   # handle arguments r and breaks 
 
-  rmaxdefault <- rmax.rule("K", win, npoints/area)        
+  rmaxdefault <- rmax.rule("K", win, npts/area)        
   breaks <- handle.r.b.args(r, breaks, win, rmaxdefault=rmaxdefault)
   if(!(breaks$even))
     stop("r values must be evenly spaced")
@@ -202,7 +202,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
 # identify close pairs of points
   close <- crosspairs(XI, XJ, max(r))
 # map (i,j) to original serial numbers in X
-  orig <- seq(npoints)
+  orig <- seq(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

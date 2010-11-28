@@ -3,28 +3,32 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.13 $ $Date: 2010/06/14 12:07:20 $
+# $Revision: 1.14 $ $Date: 2010/11/24 02:15:44 $
 #
 
-colourmap <- function(col, ..., breaks=NULL, inputs=NULL) {
+colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL) {
   stopifnot(is.character(col))
-  f <- lut(col, ..., breaks=breaks, inputs=inputs)
+  f <- lut(col, ..., range=range, breaks=breaks, inputs=inputs)
   class(f) <- c("colourmap", class(f))
   f
 }
 
-lut <- function(outputs, ..., breaks=NULL, inputs=NULL) {
+lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL) {
   n <- length(outputs)
-  switch(is.null(breaks) + is.null(inputs) + 1,
-         stop(paste("The arguments",
-                    sQuote("breaks"), "and", sQuote("inputs"),
-                    "are incompatible")),
-         {},
-         stop(paste("One of the arguments",
-                    sQuote("breaks"), "or", sQuote("inputs"),
-                    "should be given")))
-
-  if(is.null(breaks)) {
+  given <- c(!is.null(range), !is.null(breaks), !is.null(inputs))
+  names(given) <- c("range", "breaks", "inputs")
+  ngiven <- sum(given)
+  if(ngiven == 0)
+    stop(paste("One of the arguments",
+               sQuote("range"), ",", sQuote("breaks"), "or", sQuote("inputs"),
+               "should be given"))
+  if(ngiven > 1) {
+    offending <- names(breaks)[given]
+    stop(paste("The arguments",
+               commasep(sQuote(offending)),
+               "are incompatible"))
+  }
+  if(!is.null(inputs)) {
     # discrete set of input values mapped to output values
     stopifnot(length(inputs) == length(outputs))
     stuff <- list(n=n, discrete=TRUE, inputs=inputs, outputs=outputs)
@@ -37,10 +41,14 @@ lut <- function(outputs, ..., breaks=NULL, inputs=NULL) {
     }
   } else {
     # interval of real line mapped to colours
-    stopifnot(is.numeric(breaks) && length(breaks) >= 2)
-    stopifnot(length(breaks) == length(outputs) + 1)
-    if(!all(diff(breaks) > 0))
-      stop("breaks must be increasing")
+    if(is.null(breaks)) {
+      breaks <- seq(range[1], range[2], length=length(outputs)+1)
+    } else {
+      stopifnot(is.numeric(breaks) && length(breaks) >= 2)
+      stopifnot(length(breaks) == length(outputs) + 1)
+      if(!all(diff(breaks) > 0))
+        stop("breaks must be increasing")
+    }
     stuff <- list(n=n, discrete=FALSE, breaks=breaks, outputs=outputs)
     f <- function(x, what="value") {
       stopifnot(is.numeric(x))

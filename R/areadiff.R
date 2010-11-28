@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.14 $  $Date: 2010/03/08 08:23:04 $
+#  $Revision: 1.15 $  $Date: 2010/11/21 04:15:34 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -43,19 +43,19 @@ areaGain <- function(u, X, r, ..., W=as.owin(X), exact=FALSE,
 
 areaLoss.diri <- function(X, r, ..., W=as.owin(X), subset=NULL) {
   stopifnot(is.ppp(X))
-  npoints <- X$n
+  npts <- npoints(X)
   if(is.matrix(r)) {
     if(sum(dim(r) > 1) > 1)
       stop("r should be a vector or single value")
     r <- as.vector(r)
   }
   nr <- length(r)
-  if(npoints == 0)
+  if(npts == 0)
     return(matrix(, nrow=0, ncol=nr))
-  else if(npoints == 1) 
+  else if(npts == 1) 
     return(matrix(discpartarea(X, r, W), nrow=1))
   # set up output array
-  indices <- 1:npoints
+  indices <- 1:npts
   if(!is.null(subset))
     indices <- indices[subset]
   out <- matrix(, nrow=length(indices), ncol=nr)

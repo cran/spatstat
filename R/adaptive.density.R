@@ -1,19 +1,19 @@
 #
 #  adaptive.density.R
 #
-#  $Revision: 1.2 $   $Date: 2008/10/01 00:50:28 $
+#  $Revision: 1.3 $   $Date: 2010/11/21 04:15:02 $
 #
 #
 
 adaptive.density <- function(X, f=0.1, ..., nrep=1) {
   stopifnot(is.ppp(X))
-  npoints <- X$n
+  npts <- npoints(X)
   stopifnot(is.numeric(f) && length(f) == 1 && f > 0 & f < 1)
-  ntess <- floor(f * npoints)
+  ntess <- floor(f * npts)
   if(ntess == 0) {
     # naive estimate of intensity
     W <- X$window
-    lam <- npoints/area.owin(W)
+    lam <- npts/area.owin(W)
     return(as.im(lam, W, ...))
   }
   if(nrep > 1) {
@@ -26,9 +26,9 @@ adaptive.density <- function(X, f=0.1, ..., nrep=1) {
     average <- eval.im(total/nrep)
     return(average)
   }
-  ncount <- npoints - ntess
-  fcount <- ncount/npoints
-  itess <- sample(seq(npoints), ntess, replace=FALSE)
+  ncount <- npts - ntess
+  fcount <- ncount/npts
+  itess <- sample(seq(npts), ntess, replace=FALSE)
   Xtess <- X[itess]
   Xcount <- X[-itess]
   tes <- dirichlet(Xtess)

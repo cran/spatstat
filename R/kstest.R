@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.47 $  $Date: 2010/11/04 06:26:42 $
+#  $Revision: 1.48 $  $Date: 2010/11/21 04:21:50 $
 #
 #
 
@@ -284,7 +284,7 @@ evalCovar <- function(model, covariate,
       stop("Only implemented for multitype models (factor marks)")
     marx <- marks(X, dfok=FALSE)
     possmarks <- levels(marx)
-    npoints <- X$n
+    npts <- npoints(X)
     # single image: replicate 
     if(is.im(covariate))
       covariate <- lapply(possmarks, function(x,v){v}, v=covariate)
@@ -295,7 +295,7 @@ evalCovar <- function(model, covariate,
       if(length(covariate) != length(possmarks))
         stop("Number of images does not match number of possible marks")
       # evaluate covariate at each data point by interpolation
-      ZX <- numeric(npoints)
+      ZX <- numeric(npts)
       for(k in seq(possmarks)) {
         ii <- (marx == possmarks[k])
         covariate.k <- covariate[[k]]

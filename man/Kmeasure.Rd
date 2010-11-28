@@ -31,32 +31,50 @@ from a point pattern in a window of arbitrary shape.
 \value{
   A real-valued pixel image (an object of class \code{"im"},
   see \code{\link{im.object}}) whose pixel values are estimates
-  of the value of the reduced second moment measure for each pixel
-  (i.e. estimates of the integral of the second moment density
-  over each pixel).
+  of the density of the reduced second moment measure
+  at each location.
 }
 \details{
+  Given a point pattern dataset, 
+  this command computes an estimate of the reduced second moment
+  measure \eqn{\kappa}{Kappa} of the point process.
+  The result is a pixel image whose pixel values are estimates of
+  the density of the reduced second moment measure. 
+
   The reduced second moment measure \eqn{\kappa}{Kappa}
-  of a stationary point process \eqn{X} is defined so that,
+  can be regarded as a generalisation of the more familiar
+  \eqn{K}-function.
+  An estimate of \eqn{\kappa}{Kappa} derived from a spatial point
+  pattern dataset can be useful in exploratory data analysis.
+  Its advantage over the \eqn{K}-function is that it is also sensitive
+  to anisotropy and directional effects. 
+  
+  In a nutshell, the command \code{Kmeasure} computes a smoothed version
+  of the \emph{Fry plot}. 
+  As explained under \code{\link{fryplot}}, the Fry plot is a scatterplot of the
+  vectors joining all pairs of points in the pattern.
+  The reduced second moment measure is (essentially) defined as
+  the average of the Fry plot over different realisations of the point
+  process. The command \code{Kmeasure} effectively smooths the Fry plot
+  of a dataset to obtain an estimate of the reduced second moment measure.
+
+  In formal terms, the reduced second moment measure \eqn{\kappa}{Kappa}
+  of a stationary point process \eqn{X} is a measure defined on the
+  two-dimensional plane such that,
   for a `typical' point \eqn{x} of the process, 
   the expected number of other points \eqn{y} of the process
   such that the vector \eqn{y - x} lies in a region \eqn{A},
-  equals \eqn{\lambda \kappa(A)}{lambda Kappa(A)}.
+  equals \eqn{\lambda \kappa(A)}{lambda * Kappa(A)}.
   Here \eqn{\lambda}{lambda}
   is the intensity of the process,
   i.e. the expected number of points of \eqn{X} per unit area.
 
-  The more familiar
-  K-function \eqn{K(t)} is just the value of the reduced second moment measure
-  for each disc centred at the origin; that is,
+  The \eqn{K}-function is a special case. The function value \eqn{K(t)} is
+  the value of the reduced second moment measure
+  for the disc of radius \eqn{t} centred at the origin; that is,
   \eqn{K(t) = \kappa(b(0,t))}{K(t) = Kappa(b(0,t))}.
-
-  An estimate of \eqn{\kappa}{Kappa} derived from a spatial point
-  pattern dataset can be useful in exploratory data analysis.
-  Its advantage over the K-function is that it is also sensitive
-  to anisotropy and directional effects. 
-
-  This function computes an estimate of \eqn{\kappa}{Kappa}
+  
+  The command \code{Kmeasure} computes an estimate of \eqn{\kappa}{Kappa}
   from a point pattern dataset \code{X},
   which is assumed to be a realisation of a stationary point process,
   observed inside a known, bounded window. Marks are ignored.
@@ -82,18 +100,38 @@ from a point pattern in a window of arbitrary shape.
   
   The density estimate of \eqn{\kappa}{Kappa}
   is returned in the form of a real-valued pixel image.
-  Pixel values are estimates of the
-  integral of the second moment density over the pixel.
+  Pixel values are estimates of the normalised
+  second moment density at the centre of the pixel.
   (The uniform Poisson process would have values identically equal to
-  \eqn{a} where \eqn{a} is the area of a pixel.)
-  Sums of pixel values over a desired region \eqn{A} are estimates of the
-  value of \eqn{\kappa(A)}{Kappa(A)}. The image \code{x} and \code{y}
+  \eqn{1}.)
+  The image \code{x} and \code{y}
   coordinates are on the same scale as vector displacements in the
   original point pattern window. The point \code{x=0, y=0} corresponds
   to the `typical point'.
   A peak in the image near \code{(0,0)} suggests clustering;
   a dip in the image near \code{(0,0)} suggests inhibition;
   peaks or dips at other positions suggest possible periodicity.
+  
+  If desired, the value of \eqn{\kappa(A)}{Kappa(A)} for a region
+  \eqn{A} can be estimated by computing the integral of the pixel image
+  over the domain \eqn{A}, i.e.\ summing the pixel values and
+  multiplying by pixel area, using \code{\link{integral.im}}.
+  One possible application is to compute anisotropic counterparts of the
+  \eqn{K}-function (in which the disc of radius \eqn{t} is replaced
+  by another shape). See Examples.
+}
+\section{Warning}{
+  Some writers use the term \emph{reduced second moment measure}
+  when they mean the \eqn{K}-function. This has caused
+  confusion. 
+ 
+  As originally defined, the
+  reduced second moment measure is a measure, obtained by modifying
+  the second moment measure, while the \eqn{K}-function is a function
+  obtained by evaluating this measure for discs of increasing radius.
+  In \pkg{spatstat}, the \eqn{K}-function is computed by
+  \code{\link{Kest}} and the reduced second moment measure is computed
+  by \code{Kmeasure}.
 }
 \references{
   Stoyan, D, Kendall, W.S. and Mecke, J. (1995)
@@ -109,15 +147,23 @@ from a point pattern in a window of arbitrary shape.
   \code{\link{Kest}},
   \code{\link{fryplot}},
   \code{\link{spatstat.options}},
+  \code{\link{integral.im}},
   \code{\link{im.object}}
 }
 \examples{
  data(cells)
- image(Kmeasure(cells, 0.05))
+ plot(Kmeasure(cells, 0.05))
  # shows pronounced dip around origin consistent with strong inhibition
  data(redwood)
- image(Kmeasure(redwood, 0.03), col=grey(seq(1,0,length=32)))
+ plot(Kmeasure(redwood, 0.03), col=grey(seq(1,0,length=32)))
  # shows peaks at several places, reflecting clustering and ?periodicity
+ M <- Kmeasure(cells, 0.05)
+ # evaluate measure on a sector
+ W <- as.owin(M)
+ ang <- as.im(atan2, W)
+ rad <- as.im(function(x,y){sqrt(x^2+y^2)}, W)
+ sector <- solutionset(ang > 0 & ang < 1 & rad < 0.6)
+ integral.im(M[sector, drop=FALSE])
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

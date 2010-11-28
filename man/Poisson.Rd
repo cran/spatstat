@@ -28,8 +28,7 @@ which can then be fitted to point pattern data.
 }
 \seealso{
   \code{\link{ppm}},
-  \code{\link{Strauss}},
-  \code{\link{StraussHard}}
+  \code{\link{Strauss}}
 }
 \examples{
  data(nztrees)
