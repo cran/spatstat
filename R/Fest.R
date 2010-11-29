@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.28 $	$Date: 2010/04/08 15:00:39 $
+#	$Revision: 4.29 $	$Date: 2010/11/21 04:18:25 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -14,8 +14,8 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   
 # Intensity estimate
   W <- X$window
-  npoints <-X$n
-  lambda <- npoints/area.owin(W)
+  npts <- npoints(X)
+  lambda <- npts/area.owin(W)
   
 # First discretise
   dwin <- as.mask(W, eps)
@@ -83,7 +83,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   
   if("none" %in% correction) {
     #  UNCORRECTED e.d.f. of empty space distances
-    if(npoints == 0)
+    if(npts == 0)
       edf <- zeroes
     else {
       hh <- hist(dist[dist <= rmax],breaks=breaks$val,plot=FALSE)$counts
@@ -95,7 +95,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
   
   if("cs" %in% correction) {
     # Chiu-Stoyan correction
-    if(npoints == 0)
+    if(npts == 0)
       cs <- zeroes
     else {
       #  uncensored distances
@@ -126,7 +126,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     descr <- c("border corrected estimate of %s",
                "Kaplan-Meier estimate of %s",
                "Kaplan-Meier estimate of hazard function lambda(r)")[selection]
-    if(npoints == 0) {
+    if(npts == 0) {
       result <- as.data.frame(matrix(0, nr, length(tags)))
       names(result) <- tags
     } else {

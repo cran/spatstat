@@ -1,24 +1,25 @@
 Package: spatstat
-Version: 1.21-1
-Date: 2010-11-11
+Version: 1.21-2
+Date: 2010-11-28
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
-        <r.turner@auckland.ac.nz>, with substantial contributions of
-        code by Marie-Colette van Lieshout, Rasmus Waagepetersen,
-        Kasper Klitgaard Berthelsen, Dominic Schuhmacher and Ege Rubak.
-        Additional contributions by Q.W. Ang, S. Azaele, C. Beale, R.
-        Bernhardt, B. Biggerstaff, R. Bivand, F. Bonneu, J. Burgos, S.
-        Byers, Y.M. Chang, J.B. Chen, Y.C. Chin, B. Christensen, M. de
-        la Cruz, P. Dalgaard, P.J. Diggle, S. Eglen, A. Gault, M.
-        Genton, P. Grabarnik, C. Graf, J. Franklin, U. Hahn, A.
-        Hardegen, M. Hering, M.B. Hansen, M. Hazelton, J. Heikkinen, K.
-        Hornik, R. Ihaka, R. John-Chandran, D. Johnson, J. Laake, R.
-        Mark, J. Mateu, P. McCullagh, S. Meyer, X.C. Mi, J. Moller,
-        L.S. Nielsen, F. Nunes, E. Parilov, J. Picka, A. Raftery, M.
-        Reiter, B.D. Ripley, B. Rowlingson, J. Rudge, A. Sarkka, K.
-        Schladitz, B.T. Scott, I.-M. Sintorn, Y. Song, M. Spiess, M.
-        Stevenson, M. Sumner, P. Surovy, B. Turlach, A. van Burgel, T.
-        Verbeke, A. Villers, H. Wang, H. Wendrock, J. Wild and S. Wong.
+        <r.turner@auckland.ac.nz> with substantial contributions of
+        code by Kasper Klitgaard Berthelsen; Marie-Colette van
+        Lieshout; Dominic Schuhmacher; Ege Rubak; and Rasmus
+        Waagepetersen. Additional contributions by Q.W. Ang; S. Azaele;
+        C. Beale; R. Bernhardt; B. Biggerstaff; R. Bivand; F. Bonneu;
+        J. Burgos; S. Byers; Y.M. Chang; J.B. Chen; I. Chernayavsky;
+        Y.C. Chin; B. Christensen; M. de la Cruz; P. Dalgaard; P.J.
+        Diggle; I. Dryden; S. Eglen; A. Gault; M. Genton; P. Grabarnik;
+        C. Graf; J. Franklin; U. Hahn; A. Hardegen; M. Hering; M.B.
+        Hansen; M. Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; R.
+        John-Chandran; D. Johnson; J. Laake; R. Mark; J. Mateu; P.
+        McCullagh; S. Meyer; X.C. Mi; J. Moller; L.S. Nielsen; F.
+        Nunes; E. Parilov; J. Picka; A. Raftery; M. Reiter; T.O.
+        Richardson; B.D. Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K.
+        Schladitz; B.T. Scott; I.-M. Sintorn; Y. Song; M. Spiess; M.
+        Stevenson; M. Sumner; P. Surovy; B. Turlach; A. van Burgel; T.
+        Verbeke; A. Villers; H. Wang; H. Wendrock; J. Wild and S. Wong.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 Depends: R (>= 2.10.0), stats, graphics, utils, mgcv, deldir (>=
         0.0-10)
@@ -47,6 +48,6 @@ Description: A package for analysing spatial data, mainly Spatial Point
         residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: 2010-11-11 07:32:08 UTC; adrian
+Packaged: 2010-11-28 08:27:15 UTC; adrian
 Repository: CRAN
-Date/Publication: 2010-11-11 13:09:43
+Date/Publication: 2010-11-29 08:24:08

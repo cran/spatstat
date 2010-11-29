@@ -10,7 +10,7 @@
                          start = NULL,
                          control = default.rmhcontrol(object),
                          project=TRUE,
-                         verbose=FALSE, progress=TRUE)
+                         verbose=FALSE, progress=(nsim > 1))
 }
 \arguments{
   \item{object}{

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.42 $   $Date: 2010/08/10 01:10:55 $
+#  $Revision: 2.43 $   $Date: 2010/11/21 03:56:27 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -11,6 +11,14 @@
 
 .Spatstat.Rmhinfo <-
 list(
+     "Multitype Hardcore process" =
+     function(coeffs, inte) {
+       # hard core radii r[i,j]
+       hradii <- inte$par$hradii
+       return(list(cif='multihard',
+                   par=list(hradii=hradii),
+                   ntypes=ncol(hradii)))
+     },
      "Lennard-Jones process" =
      function(coeffs, inte) {
        sigma   <- inte$par$sigma

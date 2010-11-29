@@ -7,7 +7,9 @@
   resampling the list of quadrats. 
 }
 \usage{
-quadratresample(X, nx, ny=nx, ..., replace = FALSE, nsamples = 1)
+quadratresample(X, nx, ny=nx, ...,
+                replace = FALSE, nsamples = 1,
+                verbose = (nsamples > 1))
 }
 \arguments{
   \item{X}{
@@ -22,6 +24,7 @@ quadratresample(X, nx, ny=nx, ..., replace = FALSE, nsamples = 1)
     with or without replacement.
   }
   \item{nsamples}{Number of randomised point patterns to be generated.}
+  \item{verbose}{Logical value indicating whether to print progress reports.}
 }
 \details{
   This command implements a very simple bootstrap resampling procedure

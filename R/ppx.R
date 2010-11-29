@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.21 $  $Date: 2010/08/17 07:20:43 $
+#  $Revision: 1.24 $  $Date: 2010/11/28 07:25:49 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -74,6 +74,8 @@ print.ppx <- function(x, ...) {
   invisible(NULL)
 }
 
+summary.ppx <- function(object, ...) { print(object, ...) }
+
 plot.ppx <- function(x, ...) {
   xname <- deparse(substitute(x))
   coo <- coords(x, temporal=FALSE)
@@ -135,6 +137,31 @@ coords.ppx <- function(x, ..., spatial=TRUE, temporal=TRUE) {
 
 coords.ppp <- function(x, ...) { data.frame(x=x$x,y=x$y) }
 
+"coords<-" <- function(x, ..., value) {
+  UseMethod("coords<-")
+}
+
+"coords<-.ppp" <- function(x, ..., value) {
+  win <- x$window
+  if(is.null(value)) {
+    # empty pattern
+    return(ppp(window=win))
+  }
+  value <- as.data.frame(value)
+  if(ncol(value) != 2)
+    stop("Expecting a 2-column matrix or data frame, or two vectors")
+  result <- as.ppp(value, win)
+  marks(result) <- marks(x)
+  return(result)
+}
+
+"coords<-.ppx" <- function(x, ..., spatial=TRUE, temporal=TRUE, value) {
+  ctype <- x$ctype
+  chosen <- (ctype == "spatial" & spatial) | (ctype == "temporal" & temporal)
+  x$data[, chosen] <- value
+  return(x)
+}
+
 as.hyperframe.ppx <- function(x, ...) { x$data }
 
 as.data.frame.ppx <- function(x, ...) { as.data.frame(x$data, ...) } 
@@ -155,8 +182,12 @@ marks.ppx <- function(x, ..., drop=TRUE) {
     newdata <- coorddata
     newctype <- ctype[retain]
   } else {
-    if(!is.data.frame(value) && !is.hyperframe(value))
-      value <- data.frame(marks=value)
+    if(!is.data.frame(value) && !is.hyperframe(value)) 
+      value <- hyperframe(marks=value)
+    if(is.hyperframe(value) || is.hyperframe(coorddata)) {
+      value <- as.hyperframe(value)
+      coorddata <- as.hyperframe(coorddata)
+    }
     if(ncol(value) == 0) {
       newdata <- coorddata
       newctype <- ctype[retain]

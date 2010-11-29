@@ -235,10 +235,12 @@
 	classify the points in a point pattern \cr
 	\code{\link{unmark}} \tab
 	remove marks  \cr
-	\code{\link{marks}} \tab
-	attach marks or reset marks  \cr
 	\code{\link{npoints}} \tab
 	count the number of points  \cr
+	\code{\link{coords}} \tab
+	extract coordinates, change coordinates  \cr
+	\code{\link{marks}} \tab
+	extract marks, change marks or attach marks  \cr
 	\code{\link{split.ppp}} \tab
 	divide pattern into sub-patterns \cr
 	\code{\link{rotate}} \tab
@@ -863,6 +865,7 @@
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{Hardcore}()}	 \tab Hard core process\cr
     \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr
+    \code{\link{MultiHard}()} \tab 		multitype hard core process \cr
     \code{\link{MultiStrauss}()} \tab 		multitype Strauss process \cr
     \code{\link{MultiStraussHard}()} \tab 	multitype Strauss/hard core process \cr
     \code{\link{OrdThresh}()} \tab		Ord process, threshold potential\cr
@@ -1199,11 +1202,13 @@
   S. Byers,
   Ya-Mei Chang,
   Jianbao Chen,
+  Igor Chernayavsky,
   Y.C. Chin,
   Bjarke Christensen,
   Marcelino de la Cruz,
   Peter Dalgaard,
   Peter Diggle,
+  Ian Dryden,
   Stephen Eglen,
   Agnes Gault,
   Marc Genton,
@@ -1233,6 +1238,7 @@
   Jeff Picka,
   Adrian Raftery,
   Matt Reiter,
+  Tom Richardson,
   Brian Ripley,
   Barry Rowlingson,
   John Rudge,

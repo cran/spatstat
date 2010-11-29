@@ -47,7 +47,9 @@ which can then be fitted to point pattern data.
   yielded by the function \code{Hardcore()}. See the examples below.
 }
 \seealso{
+  \code{\link{Strauss}},
   \code{\link{StraussHard}},
+  \code{\link{MultiHard}},
   \code{\link{ppm}},
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}}

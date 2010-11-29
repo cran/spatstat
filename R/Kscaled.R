@@ -1,7 +1,7 @@
 #
 #	Kscaled.R	Estimation of K function for locally-scaled process
 #
-#	$Revision: 1.3 $	$Date: 2010/10/01 07:33:49 $
+#	$Revision: 1.4 $	$Date: 2010/11/25 04:34:38 $
 #
 
 "Lscaled" <- function(...) {
@@ -140,7 +140,7 @@
   nama <- rev(colnames(K))
   fvnames(K, ".") <- nama[!(nama %in% c("r", "rip", "ls"))]
   #
-  unitname(K) <- unitname(X)
+  unitname(K) <- c("normalised unit", "normalised units")
   return(K)
 }
 	

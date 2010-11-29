@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.45 $  $Date: 2010/08/10 00:54:10 $
+#   $Revision: 1.48 $  $Date: 2010/11/21 03:30:43 $
 #
 #
 
@@ -271,6 +271,7 @@ is.poisson.rmhmodel <- function(x) {
             multitype=FALSE,
             parhandler=function(par, ...) {
               ctxt <- "For the Poisson process"
+              with(par, forbidNA(beta, ctxt))
               par <- check.named.list(par, "beta", ctxt)
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               return(unlist(par))
@@ -293,6 +294,11 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the strauss cif"
               par <- check.named.list(par, c("beta","gamma","r"), ctxt)
+              # treat r=NA as absence of interaction
+              par <- within(par, if(is.na(r)) { r <- 0; gamma <- 1 })
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
               with(par, check.1.real(gamma, ctxt))
               with(par, check.1.real(r,     ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
@@ -326,6 +332,14 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the straush cif"
               par <- check.named.list(par, c("beta","gamma","r","hc"), ctxt)
+              # treat hc=NA as absence of hard core
+              par <- within(par, if(is.na(hc)) { hc <- 0 } )
+              # treat r=NA as absence of interaction
+              par <- within(par, if(is.na(r)) { r <- hc; gamma <- 1 } )
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.finite(hc, ctxt))
               with(par, check.1.real(gamma, ctxt))
               with(par, check.1.real(r,     ctxt))
               with(par, check.1.real(hc,     ctxt))
@@ -364,6 +378,9 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the sftcr cif"
               par <- check.named.list(par, c("beta","sigma","kappa"), ctxt)
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(sigma, ctxt))
+              with(par, check.finite(kappa, ctxt))
               with(par, check.1.real(sigma, ctxt))
               with(par, check.1.real(kappa, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
@@ -393,26 +410,34 @@ is.poisson.rmhmodel <- function(x) {
             C.id="straussm",
             multitype=TRUE,
             parhandler=function(par, types) {
-              par <- check.named.list(par, c("beta","gamma","radii"),
-                                      "For the straussm cif")
+              ctxt <- "For the straussm cif"
+              par <- check.named.list(par, c("beta","gamma","radii"), ctxt)
+
               beta <- par$beta
-              if(any(is.na(beta)))
-		stop("Missing values not allowed in beta.")
-              ntypes <- length(types)
-              if(length(beta) != ntypes)
-		stop("Length of beta does not match number of types.")
               gamma <- par$gamma
+              r <- par$radii
+              ntypes <- length(types)
+
+              check.finite(beta, ctxt)
+              check.nvector(beta, ntypes, TRUE, "types")
+
               MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
 	      gamma[is.na(gamma)] <- 1
+              check.finite(gamma, ctxt)
 
-              r <- par$radii
               MultiPair.checkmatrix(r, ntypes, "par$radii")
-	      r[is.na(r)] <- 0
+              if(any(nar <- is.na(r))) {
+                r[nar] <- 0
+                gamma[nar] <- 1
+              }
+              check.finite(r, ctxt)
 
-# Repack as flat vector
+              explain.ifnot(all(beta >= 0), ctxt)
+              explain.ifnot(all(gamma >= 0), ctxt)
+              explain.ifnot(all(r >= 0), ctxt)
+
+              # Repack as flat vector
 	      par <- c(beta,gamma,r)
-              if(any(par<0))
-		stop("Some negative parameters for straussm cif.")
               return(par)
             }, 
             validity=function(par, kind) {
@@ -446,31 +471,43 @@ is.poisson.rmhmodel <- function(x) {
             C.id="straushm",
             multitype=TRUE,
             parhandler=function(par, types) {
-              par <- check.named.list(par, c("beta","gamma","iradii","hradii"),
-                                      "For the straushm cif")
+              ctxt="For the straushm cif"
+              par <- check.named.list(par,
+                                      c("beta","gamma","iradii","hradii"),
+                                      ctxt)
+
               beta <- par$beta
-              ntypes <- length(types)
-              if(length(beta) != ntypes)
-		stop("Length of beta does not match number of types.")
-              if(any(is.na(beta)))
-		stop("Missing values not allowed in beta.")
-              
               gamma <- par$gamma
+              iradii <- par$iradii
+              hradii <- par$hradii
+              ntypes <- length(types)
+
+              check.nvector(beta, ntypes, TRUE, "types")
+              check.finite(beta, ctxt)
+              
               MultiPair.checkmatrix(gamma, ntypes, "par$gamma")
               gamma[is.na(gamma)] <- 1
+              check.finite(gamma, ctxt)
 
-              iradii <- par$iradii
               MultiPair.checkmatrix(iradii, ntypes, "par$iradii")
-              iradii[is.na(iradii)] <- 0
+              if(any(nar <- is.na(iradii))) {
+                iradii[nar] <- 0
+                gamma[nar] <- 1
+              }
+              check.finite(iradii, ctxt)
 
-              hradii <- par$hradii
               MultiPair.checkmatrix(hradii, ntypes, "par$hradii")
               hradii[is.na(hradii)] <- 0
+              check.finite(hradii, ctxt)
+
+              explain.ifnot(all(beta >= 0), ctxt)
+              explain.ifnot(all(gamma >= 0), ctxt)
+              explain.ifnot(all(iradii >= 0), ctxt)
+              explain.ifnot(all(hradii >= 0), ctxt)
+              explain.ifnot(all(iradii >= hradii), ctxt)
 
 # Repack as flat vector
               par <- c(beta,gamma,iradii,hradii)
-              if(any(par<0))
-                  stop("Some negative parameters for straushm cif.")
               return(par)
             },
             validity=function(par, kind) {
@@ -515,6 +552,8 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the dgs cif"
               par <- check.named.list(par, c("beta","rho"), ctxt)
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(rho, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(rho, ctxt))
               with(par, explain.ifnot(rho >= 0, ctxt))
@@ -542,6 +581,10 @@ is.poisson.rmhmodel <- function(x) {
               ctxt <- "For the diggra cif"
               par <- check.named.list(par, c("beta","kappa","delta","rho"),
                                       ctxt)
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(kappa, ctxt))
+              with(par, check.finite(delta, ctxt))
+              with(par, check.finite(rho, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(kappa, ctxt))
               with(par, check.1.real(delta, ctxt))
@@ -572,11 +615,16 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the geyer cif"
               par <- check.named.list(par, c("beta","gamma","r","sat"), ctxt)
-              with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(gamma, ctxt))
               with(par, check.1.real(r,     ctxt))
               with(par, check.1.real(sat,   ctxt))
               par <- within(par, sat <- min(sat, .Machine$integer.max-100))
+              par <- within(par, if(is.na(gamma)) { r <- 0; gamma <- 1 })
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.finite(sat, ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
               return(unlist(par))
             },
             validity=function(par, kind) {
@@ -606,6 +654,7 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the lookup cif"
               par <- check.named.list(par, c("beta","h"), ctxt, "r")
+              with(par, check.finite(beta, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               beta   <- par[["beta"]]
               h.init <- par[["h"]]
@@ -699,9 +748,13 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the areaint cif"
               par <- check.named.list(par, c("beta","eta","r"), ctxt)
+              par <- within(par, if(is.na(r)) { r <- 0 })
+              with(par, check.finite(beta, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(eta, ctxt))
               with(par, check.1.real(r,   ctxt))
+              with(par, check.finite(eta, ctxt))
+              with(par, check.finite(r,   ctxt))
               with(par, explain.ifnot(eta >= 0, ctxt))
               with(par, explain.ifnot(r >= 0,   ctxt))
               return(unlist(par))
@@ -728,6 +781,13 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the badgey cif"
               par <- check.named.list(par, c("beta","gamma","r","sat"), ctxt)
+              par <- within(par, sat <- pmin(sat, .Machine$integer.max-100))
+              par <- within(par, gamma[is.na(gamma) | is.na(r)] <- 1)
+              par <- within(par, r[is.na(r)] <- 0)
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.finite(sat, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, explain.ifnot(all(gamma >= 0), ctxt))
               with(par, explain.ifnot(all(r >= 0), ctxt))
@@ -765,6 +825,9 @@ is.poisson.rmhmodel <- function(x) {
             parhandler=function(par, ...) {
               ctxt <- "For the hardcore cif"
               par <- check.named.list(par, c("beta", "hc"), ctxt)
+              par <- within(par, if(is.na(hc)) { hc <- 0 })
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(hc, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(hc, ctxt))
               return(unlist(par))
@@ -792,11 +855,16 @@ is.poisson.rmhmodel <- function(x) {
               par <- check.named.list(par,
                                       c("beta", "r", "hc", "kappa", "a"),
                                       ctxt)
-              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.finite(hc, ctxt))
+              with(par, check.finite(kappa, ctxt))
+              with(par, check.finite(a, ctxt))
               with(par, check.1.real(r, ctxt))
               with(par, check.1.real(hc, ctxt))
               with(par, check.1.real(kappa, ctxt))
               with(par, check.1.real(a, ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, explain.ifnot(hc >= 0, ctxt))
               with(par, explain.ifnot(r > hc, ctxt))
               return(unlist(par))
@@ -829,6 +897,9 @@ is.poisson.rmhmodel <- function(x) {
               par <- check.named.list(par,
                                       c("beta", "sigma", "epsilon"),
                                       ctxt)
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(sigma, ctxt))
+              with(par, check.finite(epsilon, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(sigma, ctxt))
               with(par, check.1.real(epsilon, ctxt))
@@ -847,6 +918,53 @@ is.poisson.rmhmodel <- function(x) {
             reach = function(par, ...) {
               sigma <- par[["sigma"]]
               return(2.5 * sigma)
+            }
+            ),
+#       
+# 15. Multitype hardcore.
+#       
+       'multihard' = 
+       list(
+            C.id="multihard",
+            multitype=TRUE,
+            parhandler=function(par, types) {
+              ctxt="For the multihard cif"
+              par <- check.named.list(par,
+                                      c("beta","hradii"),
+                                      ctxt)
+
+              beta <- par$beta
+              hradii <- par$hradii
+              ntypes <- length(types)
+
+              check.nvector(beta, ntypes, TRUE, "types")
+              check.finite(beta, ctxt)
+              
+              MultiPair.checkmatrix(hradii, ntypes, "par$hradii")
+              hradii[is.na(hradii)] <- 0
+              check.finite(hradii, ctxt)
+
+              explain.ifnot(all(beta >= 0), ctxt)
+              explain.ifnot(all(hradii >= 0), ctxt)
+
+# Repack as flat vector
+              par <- c(beta,hradii)
+              return(par)
+            },
+            validity=function(par, kind) {
+              switch(kind,
+                     integrable=return(TRUE),
+                     stabilising={
+                       hself <- diag(par$hradii)
+                       repel <- !is.na(hself) & (hself > 0)
+                       return(all(repel))
+                     })
+            },
+            explainvalid=list(
+              integrable="TRUE",
+              stabilising="hradii[i,i] > 0 for all i"),
+            reach=function(par, ...) {
+              return(max(0, par$hradii, na.rm=TRUE))
             }
             )
        # end of list '.Spatstat.RmhTable'

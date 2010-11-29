@@ -456,6 +456,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 }
 
 
+
 #---------------  rmhEngine -------------------------------------------
 #
 # This is the interface to the C code.

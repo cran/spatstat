@@ -138,6 +138,9 @@
 }
 
 \examples{
+   live <- interactive() 
+   nrep <- if(live) 1e5 else 1e2
+
    data(swedishpines)
    X <- swedishpines
    plot(X, main="Swedish Pines data")
@@ -145,91 +148,89 @@
    # Poisson process
    fit <- ppm(X, ~1, Poisson())
    Xsim <- rmh(fit)
-   plot(Xsim, main="simulation from fitted Poisson model")
+   if(live) plot(Xsim, main="simulation from fitted Poisson model")
 
    # Strauss process   
    fit <- ppm(X, ~1, Strauss(r=7))
-   Xsim <- rmh(fit, control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted Strauss model")
+   Xsim <- rmh(fit, control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted Strauss model")
 
-   \dontrun{
    # Strauss process simulated on a larger window
    # then clipped to original window
-   Xsim <- rmh(fit, control=list(nrep=1e3, expand=2, periodic=TRUE))
+   Xsim <- rmh(fit, control=list(nrep=nrep, expand=2, periodic=TRUE))
    
    # Strauss - hard core process
    fit <- ppm(X, ~1, StraussHard(r=7,hc=2))
-   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted Strauss hard core model")
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted Strauss hard core model")
 
    # Geyer saturation process
    fit <- ppm(X, ~1, Geyer(r=7,sat=2))
-   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted Geyer model")
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted Geyer model")
 
    # Area-interaction process
    fit <- ppm(X, ~1, AreaInter(r=7))
-   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted area-interaction model")
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted area-interaction model")
 
    # soft core interaction process
    Q <- quadscheme(X, nd=50)
    fit <- ppm(Q, ~1, Softcore(kappa=0.1), correction="isotropic")
-   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted Soft Core model")
+   Xsim <- rmh(fit, start=list(n.start=X$n), control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted Soft Core model")
 
    data(cells)
-   plot(cells)
+   if(live) plot(cells)
    # Diggle-Gratton pairwise interaction model
    fit <- ppm(cells, ~1, DiggleGratton(0.05, 0.1))
-   Xsim <- rmh(fit, start=list(n.start=cells$n), control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted Diggle-Gratton model")
+   Xsim <- rmh(fit, start=list(n.start=cells$n), control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted Diggle-Gratton model")
 
    X <- rSSI(0.05, 100)
-   plot(X, main="new data")
+   if(live) plot(X, main="new data")
 
    # piecewise-constant pairwise interaction function
    fit <- ppm(X, ~1, PairPiece(seq(0.02, 0.1, by=0.01)))
-   Xsim <- rmh(fit, control=list(nrep=1e3))
-   plot(Xsim, main="simulation from fitted pairwise model")
+   Xsim <- rmh(fit, control=list(nrep=nrep))
+   if(live) plot(Xsim, main="simulation from fitted pairwise model")
 
    # marked point pattern
    data(amacrine)
    Y <- amacrine
-   plot(Y, main="Amacrine data")
+   if(live) plot(Y, main="Amacrine data")
 
    # marked Poisson models 
    fit <- ppm(Y)
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from ppm(Y)")
+   if(live) plot(Ysim, main="simulation from ppm(Y)")
 
    fit <- ppm(Y,~marks)
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from ppm(Y, ~marks)")
+   if(live) plot(Ysim, main="simulation from ppm(Y, ~marks)")
 
    fit <- ppm(Y,~polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from ppm(Y, ~polynom(x,y,2))")
+   if(live) plot(Ysim, main="simulation from ppm(Y, ~polynom(x,y,2))")
 
    fit <- ppm(Y,~marks+polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from ppm(Y, ~marks+polynom(x,y,2))")
+   if(live) plot(Ysim, main="simulation from ppm(Y, ~marks+polynom(x,y,2))")
 
    fit <- ppm(Y,~marks*polynom(x,y,2))
    Ysim <- rmh(fit)
-   plot(Ysim, main="simulation from ppm(Y, ~marks*polynom(x,y,2))")
+   if(live) plot(Ysim, main="simulation from ppm(Y, ~marks*polynom(x,y,2))")
 
    # multitype Strauss models
    MS <- MultiStrauss(types = levels(Y$marks),
                       radii=matrix(0.07, ncol=2, nrow=2))
    fit <- ppm(Y, ~marks, MS)
-   Ysim <- rmh(fit, control=list(nrep=1e3))
-   plot(Ysim, main="simulation from fitted Multitype Strauss")
+   Ysim <- rmh(fit, control=list(nrep=nrep))
+   if(live) plot(Ysim, main="simulation from fitted Multitype Strauss")
 
    fit <- ppm(Y,~marks*polynom(x,y,2), MS)
-   Ysim <- rmh(fit, control=list(nrep=1e3))
-   plot(Ysim, main="simulation from fitted inhomogeneous Multitype Strauss")
-   }
+   Ysim <- rmh(fit, control=list(nrep=nrep))
+   if(live) plot(Ysim, main="simulation from fitted inhomogeneous Multitype Strauss")
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

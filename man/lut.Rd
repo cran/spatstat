@@ -5,19 +5,26 @@
   Create a lookup table.
 }
 \usage{
-lut(outputs, ..., breaks=NULL, inputs=NULL)
+lut(outputs, ..., range=NULL, breaks=NULL, inputs=NULL)
 }
 \arguments{
   \item{outputs}{Vector of output values}
   \item{\dots}{Ignored.}
+  \item{range}{
+    Interval of numbers to be mapped.
+    A numeric vector of length 2, specifying the ends of the range of values
+    to be mapped.
+    Incompatible with \code{breaks} or \code{inputs}.
+  }
   \item{inputs}{
     Input values to which the output values are associated.
     A factor or vector of the same length as \code{outputs}.
-    Incompatible with \code{breaks}.
+    Incompatible with \code{breaks} or \code{range}.
   }
   \item{breaks}{
     Breakpoints for the lookup table.
     A numeric vector of length equal to \code{length(outputs)+1}.
+    Incompatible with \code{range} or \code{inputs}.
   }
 }
 \details{
@@ -33,7 +40,7 @@ lut(outputs, ..., breaks=NULL, inputs=NULL)
   any atomic type (e.g. numeric, logical, character, complex) or factor
   values. 
 
-  Exactly one of the arguments \code{inputs} and \code{breaks}
+  Exactly one of the arguments \code{range}, \code{inputs} or \code{breaks}
   must be specified by name.
 
   If \code{inputs} is given, then it should be a vector or factor,
@@ -41,6 +48,10 @@ lut(outputs, ..., breaks=NULL, inputs=NULL)
   any atomic type (e.g. numeric, logical, character, complex) or factor
   values. The resulting lookup table associates the value \code{inputs[i]}
   with the value \code{outputs[i]}.
+
+  If \code{range} is given, then it determines the interval of the real
+  number line that will be mapped. It should be a numeric vector of
+  length 2. 
 
   If \code{breaks} is given, then it determines intervals
   of the real number line

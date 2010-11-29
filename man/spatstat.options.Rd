@@ -69,6 +69,10 @@
       List of arguments controlling contour plots of pixel images
       by \code{\link{contour.im}}.
     }
+    \item{par.fv}{
+      List of arguments controlling the plotting of functions 
+      by \code{\link{plot.fv}} and its relatives.
+    }
     \item{ndummy.min}{
       Controls the number of dummy points in a quadrature scheme
       created by \code{\link{default.dummy}}.

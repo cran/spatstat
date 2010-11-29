@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.117 $	$Date: 2010/05/10 07:24:12 $
+#	$Revision: 4.119 $	$Date: 2010/11/23 08:52:01 $
 #
 #
 #	A window may be either
@@ -113,6 +113,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     return(w)
   } else if(poly.given) {
     ######### polygonal boundary ########
+    #
     if(length(poly) == 0) {
       # empty polygon
       if(check) {
@@ -125,6 +126,14 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
                 bdry=list(), units=unitname)
       class(w) <- "owin"
       return(w)
+    }
+    # convert matrix or data frame to list(x,y)
+    isxy <- function(x) { (is.matrix(x) || is.data.frame(x)) && ncol(x) == 2 }
+    asxy <- function(xy) { list(x=xy[,1], y=xy[,2]) }
+    if(isxy(poly)) {
+      poly <- asxy(poly)
+    } else if(is.list(poly) && all(unlist(lapply(poly, isxy)))) {
+      poly <- lapply(poly, asxy)
     }
     # nonempty polygon  
     # test whether it's a single polygon or multiple polygons

@@ -34,6 +34,7 @@
 \alias{cellmiddles}
 \alias{censtimeCDFest}
 \alias{checkfields}          
+\alias{check.finite}
 \alias{check.hist.lengths}
 \alias{check.named.list}
 \alias{check.named.thing}
@@ -46,6 +47,7 @@
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closepairs}
+\alias{complaining}
 \alias{crosspairs}
 \alias{crosspaircounts}
 \alias{crossfikselterms}
@@ -91,6 +93,7 @@
 \alias{erodemask}
 \alias{erode.owin}
 \alias{evalCovar}
+\alias{evalCovariate}
 \alias{evalInteraction}
 \alias{evalInterEngine}
 \alias{evalInterNew}
@@ -104,11 +107,13 @@
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
+\alias{findCovariate}
 \alias{findmarktype}
 \alias{firstfactor}
 \alias{fii}
 \alias{fikselterms}
 \alias{fillNA}
+\alias{forbidNA}
 \alias{FormatFaspFormulae}
 \alias{formula.ppm}
 \alias{formula.kppm}
@@ -212,6 +217,7 @@
 \alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
+\alias{sensiblevarname}
 \alias{sewpcf}
 \alias{sewsmod}
 \alias{slr.prepare}
@@ -242,6 +248,7 @@
 \alias{oversize.quad}    
 \alias{owinpolycheck}
 \alias{owinpoly2mask}
+\alias{pairs.listof}
 \alias{param.quad}
 \alias{paren}
 \alias{partialModelMatrix}
@@ -260,8 +267,10 @@
 \alias{plot.qqppm}
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
+\alias{plot.rhohat}
 \alias{polynom}
 \alias{ppllengine}
+\alias{ppmCovariates}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
 \alias{prange}
@@ -286,6 +295,7 @@
 \alias{print.pppmatching}
 \alias{print.profilepl}
 \alias{print.qqppm}
+\alias{print.rhohat}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
@@ -331,7 +341,7 @@
 \alias{resolve.2D.kernel}
 \alias{restrict.mask}
 \alias{reverse.xypolygon}    
-\alias{revcumsum}    
+\alias{revcumsum}
 \alias{rmax.rule}
 \alias{rotxy}
 \alias{rotxypolygon}
@@ -377,6 +387,7 @@
 \alias{summary.lut}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
+\alias{summary.ppx}
 \alias{summary.units}
 \alias{sympoly}
 \alias{terms.ppm}
@@ -454,6 +465,7 @@ cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, gi)
 censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom, pmax)
 checkfields(X,L)          
+check.finite(x, context, xname)
 check.hist.lengths(hist,breaks)
 check.named.list(x, nam, context, namopt)
 check.named.vector(x, nam, context, namopt)
@@ -466,6 +478,7 @@ clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
 closepairs(X,rmax)
+complaining(whinge, fatal, value)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 crossfikselterms(X,Y,r,kappa)
@@ -520,6 +533,7 @@ eratosthenes(nmax)
 erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, jitter, modelname, covname, dataname)
+evalCovariate(covariate, locations)
 evalInteraction(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
 evalInterNew(X,U,E,interaction,\dots)
@@ -533,11 +547,13 @@ explain.ifnot(expr, context)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
+findCovariate(covname, scope, scopename=NULL)
 findmarktype(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
 fikselterms(U,X,r,kappa,EqualPairs)
 fillNA(x, value)
+forbidNA(x, context, xname)
 FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
@@ -643,6 +659,7 @@ maxflow(costm)
 meanlistfv(z)
 meanX.owin(w)            
 meanY.owin(w)
+sensiblevarname(guess, fallback, maxlen)
 sewpcf(d, w, denargs, lambda2area)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
@@ -678,6 +695,7 @@ overlap.xypolygon(P, Q)
 oversize.quad(Q, \dots, nU, nX)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
+\method{pairs}{listof}(\dots, plot=TRUE)
 param.quad(Q)
 paren(x, type)
 partialModelMatrix(X,D,model,callstring,\dots)
@@ -702,10 +720,12 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
 \method{plot}{qqppm}(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
-\method{plot}{quadratcount}(x, \dots, add, entries, dx, dy)
+\method{plot}{quadratcount}(x, \dots, add, entries, dx, dy, show.tiles)
 \method{plot}{quadrattest}(x, \dots)
+\method{plot}{rhohat}(x, \dots, do.rug=TRUE)
 polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
+ppmCovariates(model)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 prange(x)
@@ -730,6 +750,7 @@ primefactors(n, prmax)
 \method{print}{pppmatching}(x, \dots)
 \method{print}{profilepl}(x, \dots)
 \method{print}{qqppm}(x, \dots)
+\method{print}{rhohat}(x, \dots)
 \method{print}{rmhcontrol}(x, \dots)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
@@ -801,7 +822,7 @@ safelookup(Z, X, factor, warn)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL, expand=FALSE)
 second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
-\dots, obswin=as.owin(x), varcov=NULL, npoints=NULL)
+\dots, obswin=as.owin(x), varcov=NULL, npts=NULL)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
@@ -825,6 +846,7 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{hyperframe}(object, ..., brief=FALSE)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
+\method{summary}{ppx}(object, \dots)
 \method{summary}{units}(object, \dots)
 sympoly(x, y, n)
 \method{terms}{ppm}(x, \dots)

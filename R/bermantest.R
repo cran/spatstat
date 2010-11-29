@@ -3,7 +3,7 @@
 #
 # Test statistics from Berman (1986)
 #
-#  $Revision: 1.7 $  $Date: 2010/04/14 07:49:32 $
+#  $Revision: 1.9 $  $Date: 2010/11/28 02:43:49 $
 #
 #
 
@@ -72,7 +72,7 @@ bermantestEngine <- function(model, covariate,
 
   # data point pattern
   X <- data.ppm(model)
-  npoints <- X$n
+  npts <- npoints(X)
   
   # ........... first assemble data ...............
   fram <- spatialCDFframe(model, covariate, ...,
@@ -99,13 +99,12 @@ bermantestEngine <- function(model, covariate,
            # sum of covariate values at data points
            Sn <- sum(ZX)
            # predicted mean and variance
-           slamZ  <- summary(eval.im(lambda * Z))
-           slamZ2 <- summary(eval.im(lambda * Z^2))
-           ESn   <- slamZ$integral
-           varSn <- slamZ2$integral 
+           En    <- integral.im(lambda)
+           ESn   <- integral.im(eval.im(lambda * Z))
+           varSn <- integral.im(eval.im(lambda * Z^2))
            # working, for plot method
            working <- list(meanZX=mean(ZX),
-                           meanZ=slamZ$mean)
+                           meanZ=ESn/En)
            # standardise
            statistic <- (Sn - ESn)/sqrt(varSn)
            names(statistic) <- "Z1"
@@ -126,7 +125,7 @@ bermantestEngine <- function(model, covariate,
            #......... Berman Z2 statistic .....................
            method <- paste("Berman Z2 test of",
                            if(csr) "CSR" else "inhomogeneous Poisson process")
-           statistic <- sqrt(12/npoints) * (sum(U) - npoints/2)
+           statistic <- sqrt(12/npts) * (sum(U) - npts/2)
            working <- list(meanU=mean(U))
            names(statistic) <- "Z2"
            p.value <- switch(alternative,

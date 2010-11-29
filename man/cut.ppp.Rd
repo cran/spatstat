@@ -16,8 +16,8 @@
   }
   \item{z}{
     Data determining the classification. A numeric vector,
-    a factor, a pixel image, or a tessellation.
-    Defaults to the vector of marks of the point pattern.
+    a factor, a pixel image, a tessellation, or a string
+    giving the name of a column of marks.
   }
   \item{\dots}{
     Arguments passed to \code{\link{cut.default}}.
@@ -53,9 +53,13 @@
     a tessellation (object of class \code{"tess"}, see
     \code{\link{tess}}). Each point of \code{x} will be classified
     according to the tile of the tessellation into which it falls.
+    \item
+    a character string, giving the name of one of the columns
+    of \code{marks(x)}, if this is a data frame.
   }
   The default is to take \code{z} to be the vector of marks in
-  \code{x}. If the marks are numeric, then the range of values
+  \code{x} (or the first column in the data frame of marks of \code{x},
+  if it is a data frame). If the marks are numeric, then the range of values
   of the numerical marks is divided into several intervals, and each
   interval is associated with a level of a factor. 
   The result is a
@@ -114,6 +118,10 @@
  tes <- tess(xgrid=seq(0,96,length=5),ygrid=seq(0,100,length=5))
  plot(cut(swedishpines, tes))
  plot(tes, lty=2, add=TRUE)
+
+ # (4) multivariate marks
+ data(finpines)
+ cut(finpines, "height", breaks=4)
 }
 
 \author{Adrian Baddeley

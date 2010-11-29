@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.32 $	$Date: 2010/03/08 08:23:04 $
+#	$Revision: 4.33 $	$Date: 2010/11/21 04:19:28 $
 #
 ################################################################################
 
@@ -103,7 +103,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
 #
   verifyclass(X, "ppp")
   W <- X$window
-  npoints <- X$n
+  npts <- npoints(X)
   area <- area.owin(W)
 # check I and J
   if(!is.logical(I) || !is.logical(J))
@@ -152,7 +152,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   if(disjoint) 
     nnd <- nncross(XI, XJ)$dist
   else {
-    seqnp <- seq(npoints)
+    seqnp <- seq(npts)
     iX <- seqnp[I]
     iY <- seqnp[J]
     nnd <- nncross(XI, XJ, iX, iY)$dist
@@ -168,7 +168,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   
   if("none" %in% correction) {
     #  UNCORRECTED e.d.f. of nearest neighbour distances: use with care
-    if(npoints == 0)
+    if(npts == 0)
       edf <- zeroes
     else {
       hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
@@ -180,7 +180,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
 
   if("han" %in% correction) {
     # Hanisch style estimator
-    if(npoints == 0)
+    if(npts == 0)
       G <- zeroes
     else {
       #  uncensored distances
@@ -203,7 +203,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   
   if(any(correction %in% c("rs", "km"))) {
     # calculate Kaplan-Meier and border correction (Reduced Sample) estimators
-    if(npoints == 0)
+    if(npts == 0)
       result <- data.frame(rs=zeroes, km=zeroes, hazard=zeroes)
     else {
       result <- km.rs(o, bdry, d, breaks)

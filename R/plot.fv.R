@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.48 $    $Date: 2010/11/10 06:57:38 $
+#  $Revision: 1.50 $    $Date: 2010/11/22 04:40:28 $
 #
 #
 
@@ -148,12 +148,24 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   
   if(is.null(ylab)) {
     yl <- attr(x, "yexp")
-    if(!is.null(yl) && defaultplot)
-        ylab <- yl
-    else {
+    if(defaultplot && !is.null(yl)) {
+      ylab <- yl
+    } else {
+      # make y axis label from original LHS
+      leftside <- lhs.original
+      if(ncol(lhsdata) > 1) {
+        # replace 'cbind(....)' by '.' for labelling purposes only
+        leftside <- paste(as.expression(leftside))
+        cb <- paste("cbind(",
+                    paste(colnames(lhsdata), collapse=", "),
+                    ")", sep="")
+        leftside <- gsub(cb, ".", leftside, fixed=TRUE)
+        # convert back to language
+        leftside <- as.formula(paste(leftside, "~1"))[[2]]
+      }
       # replace short identifiers by plot labels
       ylab <- eval(substitute(substitute(le, mp),
-                                list(le=lhs.original, mp=map)))
+                                list(le=leftside, mp=map)))
     }
   }
   if(is.language(ylab) && !is.expression(ylab))
@@ -176,10 +188,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   # process lty, col, lwd arguments
 
-  fixit <- function(a, n, a0) {
+  fixit <- function(a, n, a0, a00) {
     if(is.null(a))
-      return(a0)
-    else if(length(a) == 1)
+      a <- if(!is.null(a0)) a0 else a00
+    if(length(a) == 1)
       return(rep(a, n))
     else if(length(a) != n)
       stop(paste("Length of", deparse(substitute(a)),
@@ -188,9 +200,11 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       return(a)
   }
 
-  lty <- fixit(lty, nplots, 1:nplots)
-  col <- fixit(col, nplots, 1:nplots)
-  lwd <- fixit(lwd, nplots, rep(1, nplots))
+  opt0 <- spatstat.options("par.fv")
+  
+  lty <- fixit(lty, nplots, opt0$lty, 1:nplots)
+  col <- fixit(col, nplots, opt0$col, 1:nplots)
+  lwd <- fixit(lwd, nplots, opt0$lwd, 1)
 
   allind <- 1:nplots
 

@@ -62,9 +62,11 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
   }
 }
 \value{
-  An object of class \code{"fv"} (see \code{\link{fv.object}}).
+  A function value table (object of class \code{"fv"})
+  or a list of function value tables, one for each column of marks.
   
-  Essentially a data frame containing numeric columns 
+  An object of class \code{"fv"} (see \code{\link{fv.object}})
+  is essentially a data frame containing numeric columns 
   \item{r}{the values of the argument \eqn{r} 
     at which the mark correlation function \eqn{k_f(r)}{k[f](r)}
     has been  estimated

@@ -4,11 +4,11 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "cdf"),
   verifyclass(X, "ppp")
   W <- X$window
   area <- area.owin(W)
-  npoints <- X$n
-  intensity <- npoints/area
+  npts <- npoints(X)
+  intensity <- npts/area
 
   # R undefined for empty point pattern
-  if(npoints == 0)
+  if(npts == 0)
     return(NA)
 
   # validate correction argument
@@ -49,7 +49,7 @@ clarkevans <- function(X, correction=c("none", "Donnelly", "cdf"),
      # Dedge = Edge corrected mean nearest neighbour distance, Donnelly 1978
     if(W$type == "rectangle") {
       perimeter <- 2*(diff(W$xrange) + diff(W$yrange))
-      Dkevin  <- Dpois + (0.0514+0.0412/sqrt(npoints))*perimeter/npoints
+      Dkevin  <- Dpois + (0.0514+0.0412/sqrt(npts))*perimeter/npts
       Rkevin <- Dobs/Dkevin
     } else 
       Rkevin <- NA

@@ -31,6 +31,12 @@
   \code{\link{Poisson}},
   \code{\link{Pairwise}},
   \code{\link{PairPiece}},
+  \code{\link{Fiksel}},
+  \code{\link{Hardcore}},
+  \code{\link{LennardJones}},
+  \code{\link{MultiHard}},
+  \code{\link{MultiStrauss}},
+  \code{\link{MultiStraussHard}},
   \code{\link{Strauss}},
   \code{\link{StraussHard}},
   \code{\link{Softcore}}.

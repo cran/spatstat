@@ -62,17 +62,17 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
     if(is.ppp(x)) {
       # pixellate first (to preserve pixel resolution)
       X <- pixellate(x, ..., padzero=TRUE)
-      npoints <- x$n
+      np <- npoints(x)
     } else if(is.im(x)) {
       X <- x
-      npoints <- NULL
+      np <- NULL
     } else stop("x should be an image or a point pattern")
     # now expand 
     X <- rebound.im(X, bigger)
     X <- na.handle.im(X, 0)
     out <- second.moment.engine(X, sigma=sigma, edge=edge,
                                 what=what, debug=debug, ...,
-                                obswin=win, varcov=varcov, npoints=npoints)
+                                obswin=win, varcov=varcov, npts=np)
     # now clip it
     fbox <- shift(rec, origin="midpoint")
     result <- switch(what,
@@ -96,7 +96,7 @@ second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
 second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
                                  what="Kmeasure", debug=FALSE, ...,
                                  obswin = as.owin(x), varcov=NULL,
-                                 npoints=NULL)
+                                 npts=NULL)
 {
   stopifnot(what %in% c("kernel", "smooth", "Kmeasure",
                         "Bartlett", "edge", "all", "smoothedge"))
@@ -110,8 +110,8 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
   if(!missing(obswin))
     obswin <- rebound.owin(obswin, as.rectangle(X))
   #
-  if(is.null(npoints) && is.ppp(x))
-      npoints <- x$n
+  if(is.null(npts) && is.ppp(x))
+      npts <- npoints(x)
   # go to work
   Y <- X$v
   xw <- X$xrange
@@ -174,9 +174,9 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
     if(debug) {
       cat(paste("smooth: maximum imaginary part=",
                 signif(max(Im(sm)),3), "\n"))
-      if(!is.null(npoints))
+      if(!is.null(npts))
         cat(paste("smooth: mass error=",
-                  signif(sum(Mod(sm))-npoints,3), "\n"))
+                  signif(sum(Mod(sm))-npts,3), "\n"))
     }
   }
   if(what %in% c("smooth", "all", "smoothedge")) {
@@ -212,15 +212,15 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
     if(debug) {
       cat(paste("2nd moment measure: maximum imaginary part=",
                 signif(max(Im(mom)),3), "\n"))
-      if(!is.null(npoints))
+      if(!is.null(npts))
         cat(paste("2nd moment measure: mass error=",
-                  signif(sum(Mod(mom))-npoints^2, 3), "\n"))
+                  signif(sum(Mod(mom))-npts^2, 3), "\n"))
     }
     mom <- Mod(mom)
-    # subtract (delta_0 * kernel) * npoints
-    if(is.null(npoints))
-      stop("Internal error: second moment measure requires npoints")
-    mom <- mom - npoints* Kern
+    # subtract (delta_0 * kernel) * npts
+    if(is.null(npts))
+      stop("Internal error: second moment measure requires npts")
+    mom <- mom - npts* Kern
   }
   # edge correction
   if(edge || what %in% c("edge", "all", "smoothedge")) {
@@ -268,8 +268,10 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
   }
   if(what == "smoothedge")
     return(result)
-  # divide by number of points * lambda
-  mom <- mom * area.owin(obswin) / npoints^2
+  # Second moment measure, density estimate
+  # Divide by number of points * lambda and convert mass to density
+  pixarea <- with(X, xstep * ystep)
+  mom <- mom * area.owin(obswin) / (pixarea * npts^2)
   # this is the second moment measure
   mm <- im(mom, xcol.G[ctwist], yrow.G[rtwist], unitname=unitname(x))
   if(what == "Kmeasure")

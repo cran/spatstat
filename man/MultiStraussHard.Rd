@@ -51,6 +51,7 @@ which can then be fitted to point pattern data.
   \code{\link{pairwise.family}},
   \code{\link{ppm.object}},
   \code{\link{MultiStrauss}},
+  \code{\link{MultiHard}},
   \code{\link{Strauss}}
 }
 \examples{

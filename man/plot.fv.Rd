@@ -123,6 +123,9 @@
   a subset index for the columns of \code{x}, that identifies exactly
   2 columns. When the corresponding curves are plotted, the region
   between the curves will be shaded in light grey. See the Examples.
+
+  The default values of \code{lty}, \code{col} and \code{lwd} can
+  be changed using \code{\link{spatstat.options}("plot.fv")}.
 }
 \examples{
    data(cells)

@@ -5,19 +5,26 @@
   Create a colour map (colour lookup table).
 }
 \usage{
-colourmap(col, ..., breaks=NULL, inputs=NULL)
+colourmap(col, ..., range=NULL, breaks=NULL, inputs=NULL)
 }
 \arguments{
   \item{col}{Character vector specifying colours}
   \item{\dots}{Ignored.}
+  \item{range}{
+    Interval to be mapped.
+    A numeric vector of length 2, specifying the endpoints of the
+    range of values to be mapped.
+    Incompatible with \code{breaks} or \code{inputs}.
+  }
   \item{inputs}{
     Values to which the colours are associated.
     A factor or vector of the same length as \code{col}.
-    Incompatible with \code{breaks}.
+    Incompatible with \code{breaks} or \code{range}.
   }
   \item{breaks}{
     Breakpoints for the colour map.
     A numeric vector of length equal to \code{length(col)+1}.
+    Incompatible with \code{range} or \code{inputs}.
   }
 }
 \details{
@@ -33,7 +40,7 @@ colourmap(col, ..., breaks=NULL, inputs=NULL)
   data values will be mapped. It should be a character vector
   whose entries can be interpreted as colours.
 
-  Exactly one of the arguments \code{inputs} and \code{breaks}
+  Exactly one of the arguments \code{range}, \code{inputs} or \code{breaks}
   must be specified by name.
 
   If \code{inputs} is given, then it should be a vector or factor,
@@ -42,7 +49,11 @@ colourmap(col, ..., breaks=NULL, inputs=NULL)
   values. The resulting colour map associates the value \code{inputs[i]}
   with the colour \code{col[i]}.
 
-  If \code{breaks} is given, then it determines intervals
+  If \code{range} is given, then it determines the interval of the real
+  number line that will be mapped. It should be a numeric vector of
+  length 2. 
+
+  If \code{breaks} is given, then it determines the precise intervals
   of the real number line
   which are mapped to each colour. It should be a numeric vector,
   of length at least 2, with entries that are in increasing order.
@@ -66,9 +77,13 @@ colourmap(col, ..., breaks=NULL, inputs=NULL)
 \seealso{
   The plot method \code{\link{plot.colourmap}}.
   
-  See \code{\link[grDevices:colors]{colours}} for information about the colours
+  See the \R help file on
+  \code{\link[grDevices:colors]{colours}} for information about the colours
   that \R recognises, and how to manipulate them.
-
+  
+  See \code{\link[spatstat:colourtools]{colourtools}}
+  for more tools to manipulate colours.
+  
   See \code{\link{lut}} for lookup tables.
 }
 \examples{
@@ -78,7 +93,7 @@ colourmap(col, ..., breaks=NULL, inputs=NULL)
   cr(3.2)
   cr(c(3,5,7))
   # a large colour map
-  co <- colourmap(rainbow(100), breaks=seq(-1,1,length=101))
+  co <- colourmap(rainbow(100), range=c(-1,1))
   co(0.2)
   # colour map for discrete set of values
   ct <- colourmap(c("red", "green"), inputs=c(FALSE, TRUE))
