@@ -1,3 +1,80 @@
+	CHANGES IN spatstat VERSION 1.21-3
+
+OVERVIEW 
+
+    o	Point process model covariates may now depend on additional parameters.
+
+    o	New class of signed measures, for residual analysis.
+
+    o   Miscellaneous improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o   clarkevans.test
+    	Classical Clark-Evans test of randomness
+
+    o   msr
+	New class 'msr' of signed measures and vector-valued measures
+	supporting residual analysis.
+
+    o   quadrat.test.quadratcount
+	Method for 'quadrat.test' for objects of class 'quadratcount'
+	(allows a chi-squared test to be performed on quadrat counts
+	rather than recomputing from the original data)
+
+    o   tile.areas
+	Computes areas of tiles in a tessellation (efficiently)
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   ppm
+	The spatial trend can now depend on additional parameters.
+	This is done by allowing spatial covariate functions
+	to have	additional parameters: function(x, y, ...)
+	where ... is controlled by the new argument 'covfunargs' to ppm
+
+    o   profilepl
+	Can now maximise over trend parameters as well as interaction parameters
+
+    o   residuals.ppm
+    	The value returned by residuals.ppm is now an object 
+	of class 'msr'. It can be plotted directly.
+
+    o   eval.im
+	When the argument 'envir' is used, eval.im() now recognises
+	functions as well as variables in 'envir'
+
+    o   colourmap
+	The argument 'col' can now be any kind of colour data
+
+    o   persp.im
+	The 'colmap' argument can now be a 'colourmap' object
+
+    o   ppm
+    	The print and summary methods for 'ppm' objects 
+	now show standard errors for parameter estimates
+	if the model is Poisson.
+
+    o   quadrat.test
+	The print method for 'quadrattest' objects
+	now displays information about the quadrats
+
+    o   lurking
+    	Improved format of x axis label
+
+    o   distmap.ppp
+   	Internal code is more robust.
+BUGS
+
+    o  im
+	Did not correctly handle 1 x 1 arrays.
+	Fixed.
+
+    o   as.mask, pixellate.ppp
+    	Weird things happened if the argument 'eps' was set
+	to a value greater than the size of the window.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.21-2
 
 OVERVIEW 

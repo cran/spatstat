@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.119 $	$Date: 2010/11/23 08:52:01 $
+#	$Revision: 4.120 $	$Date: 2010/12/13 09:10:04 $
 #
 #
 #	A window may be either
@@ -464,8 +464,12 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
     } else {
     # use pixel size 'eps'
       if(!is.null(eps)) {
-        nr <- ceiling(diff(w$yrange)/eps)
-        nc <- ceiling(diff(w$xrange)/eps)
+        nr <- diff(w$yrange)/eps
+        nc <- diff(w$xrange)/eps
+        if(nr < 1 || nc < 1)
+          warning("pixel size parameter eps > size of window")
+        nr <- ceiling(nr)
+        nc <- ceiling(nc)
       } else {
     # use spatstat defaults
         np <- spatstat.options("npixel")

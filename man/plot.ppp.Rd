@@ -169,6 +169,14 @@ maxsize=NULL, markscale=NULL,zap=0.01)
   The value returned by this plot function can be used to make a
   suitable legend, as shown in the examples.
 }
+\section{Removing White Space Around The Plot}{
+  A frequently-asked question is: How do I remove the white space around
+  the plot? Currently \code{plot.ppp} uses the base graphics system of
+  \R, so the space around the plot is controlled by parameters 
+  to \code{\link{par}}. To reduce the white space, change the
+  parameter \code{mar}. Typically, \code{par(mar=rep(0.5, 4))} is
+  adequate, if there are no annotations or titles outside the window.
+}
 \seealso{
   \code{\link{iplot}},
   \code{\link{ppp.object}},

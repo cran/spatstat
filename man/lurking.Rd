@@ -49,9 +49,9 @@ lurking(object, covariate, type="eem",
   }
   \item{rv}{
     Usually absent. 
-    If this argument is present, the values of the residuals will not be
-    calculated from the fitted model \code{object} but will instead
-    be taken directly from this vector.
+    If this argument is present, the point process residuals will not be
+    calculated from the fitted model \code{object},
+    but will instead be taken directly from \code{rv}. 
   }
   \item{plot.sd}{
     Logical value indicating whether 
@@ -203,11 +203,14 @@ lurking(object, covariate, type="eem",
   For advanced use, even the values of the residuals/weights
   can be altered. If the argument \code{rv} is present,
   the residuals will not be calculated from the fitted model
-  \code{object} but will instead be taken directly from \code{rv}.
-  The vector \code{rv} should be numeric, and its length should equal
-  the number of data points in the original point pattern
-  (if \code{type="eem"}) or the number of
-  quadrature points used to fit the model (otherwise).
+  \code{object} but will instead be taken directly from the object \code{rv}.
+  If \code{type = "eem"} then \code{rv} should be similar to the
+  return value of \code{\link{eem}}, namely, a numeric vector
+  with length equal to the number of data points in the original point
+  pattern. Otherwise, \code{rv} should be
+  similar to the return value of \code{\link{residuals.ppm}},
+  that is, \code{rv} should be an object of class
+  \code{"msr"} (see \code{\link{msr}}) representing a signed measure.
 }
 \seealso{
  \code{\link{residuals.ppm}},

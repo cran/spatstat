@@ -3,11 +3,12 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.14 $ $Date: 2010/11/24 02:15:44 $
+# $Revision: 1.15 $ $Date: 2010/12/13 03:10:40 $
 #
 
 colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL) {
-  stopifnot(is.character(col))
+  # validate colour data 
+  h <- col2hex(col)
   f <- lut(col, ..., range=range, breaks=breaks, inputs=inputs)
   class(f) <- c("colourmap", class(f))
   f

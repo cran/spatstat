@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.8 $ $Date: 2010/11/01 03:31:48 $
+# $Revision: 1.13 $ $Date: 2011/01/15 03:14:47 $
 #
 
 residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
@@ -21,12 +21,17 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
                        pearson="pearson",
                        Pearson="pearson",
                        score="score"))
-  
+  typenames <- c(inverse="inverse-lambda residuals",
+                 raw="raw residuals",
+                 pearson="Pearson residuals",
+                 score="score residuals")
+  typename <- typenames[[type]]
+
   # Extract quadrature points and weights
   Q <- quad.ppm(object, drop=drop)
   U <- union.quad(Q) # quadrature points
   Z <- is.data(Q) # indicator data/dummy
-  W <- w.quad(Q) # quadrature weights
+#  W <- w.quad(Q) # quadrature weights
 
   # Compute fitted conditional intensity at quadrature points
   lambda <- fittedvalues
@@ -46,11 +51,12 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
   }
       
   # Evaluate residual measure components
+
   discrete <- switch(type,
-                     raw     = as.integer(Z),
-                     inverse = ifelse(Z, 1/lambda, 0),
-                     pearson = ifelse(Z, 1/sqrt(lambda), 0),
-                     score   = Z * X
+                     raw     = rep(1, sum(Z)), 
+                     inverse = 1/lambda[Z],
+                     pearson = 1/sqrt(lambda[Z]),
+                     score   = X[Z, ]
                      )
 
   continuous <- switch(type,
@@ -59,19 +65,13 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
                        pearson = -indicator * sqrt(lambda),
                        score   = -lambda * X)
 
-  # Discretised residual measure (return value)
-  res <- discrete + W * continuous
+  # Residual measure (return value)
+  res <- msr(Q, discrete, continuous)
 
   # name the residuals
   attr(res, "type") <- type
-  attr(res, "typename") <- paste(if(type == "pearson") "Pearson" else type,
-                                 "residuals")
+  attr(res, "typename") <- typename
 
-  # also give the components of the exact residual measure
-  attr(res, "discrete") <- discrete
-  attr(res, "continuous") <-  continuous
-  attr(res, "atoms") <- as.logical(Z)
-  
   return(res)
 }
 

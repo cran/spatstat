@@ -15,7 +15,7 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
   \item{f}{
     Function (such as \code{\link{Strauss}})
     that generates an interpoint interaction object, given
-    the values of the irregular parameters.
+    values of the irregular parameters.
   }
   \item{\dots}{
     Data passed to \code{\link{ppm}} to fit the model.
@@ -38,26 +38,61 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
   This function \code{profilepl} is a wrapper which finds the values of the
   irregular parameters that give the best fit. It uses the method of
   maximum profile pseudolikelihood. 
-
-  The argument \code{f} would typically be one of the functions
-  \code{\link{Strauss}},
-  \code{\link{StraussHard}},
-  \code{\link{Softcore}},
-  \code{\link{DiggleGratton}},
-  \code{\link{Geyer}},
-  \code{\link{LennardJones}}
-  or \code{\link{OrdThresh}}.
-  For the moment, assume this is so.
   
   The argument \code{s} must be a data frame whose columns contain
-  values of the irregular parameters. The names of the columns of
-  \code{s} must match the argument names of \code{f}.
+  values of the irregular parameters over which the maximisation is
+  to be performed.
+
+  An irregular parameter may affect either the interpoint interaction
+  or the spatial trend. 
+  
+  \describe{
+    \item{interaction parameters:}{
+      in a call to \code{\link{ppm}}, the argument \code{interaction}
+      determines the interaction between points. It is usually
+      a call to a function such as \code{\link{Strauss}}. The
+      arguments of this call are irregular parameters.
+      For example, the interaction radius parameter \eqn{r} of the Strauss
+      process, determined by the argument \code{r}
+      to the function \code{\link{Strauss}}, is an irregular parameter.
+    }
+    \item{trend parameters:}{
+      in a call to \code{\link{ppm}}, the spatial trend may depend on
+      covariates, which are supplied by the argument \code{covariates}.
+      These covariates may be functions written by the user,
+      of the form \code{function(x,y,...)}, and the extra arguments
+      \code{\dots} are irregular parameters.
+    }
+  }
+      
+  The argument \code{f} determines the interaction
+  for each model to be fitted. It would typically be one of the functions
+  \code{\link{Poisson}},
+  \code{\link{AreaInter}},
+  \code{\link{BadGey}},
+  \code{\link{DiggleGatesStibbard}},
+  \code{\link{DiggleGratton}},
+  \code{\link{Fiksel}},
+  \code{\link{Geyer}},
+  \code{\link{Hardcore}},
+  \code{\link{LennardJones}},
+  \code{\link{OrdThresh}}, 
+  \code{\link{Softcore}},
+  \code{\link{Strauss}} or
+  \code{\link{StraussHard}}.
+  Alternatively it could be a function written by the user.
+
+  Columns of \code{s} which match the names of arguments of \code{f}
+  will be interpreted as interaction parameters. Other columns will be
+  interpreted as trend parameters.
 
   To apply the method of profile maximum pseudolikelihood,
-  each row of \code{s} will be taken in turn; the parameter values in this row
-  will be passed to \code{f}, resulting in an interaction object.
+  each row of \code{s} will be taken in turn. Interaction parameters in this
+  row will be passed to \code{f}, resulting in an interaction object. 
   Then \code{\link{ppm}} will be applied to the data \code{...}
-  using this interaction; this results in a fitted point process model.
+  using this interaction. Any trend parameters will be passed to
+  \code{\link{ppm}} through the argument \code{covfunargs}.
+  This results in a fitted point process model.
   The value of the log pseudolikelihood from this model is stored.
   After all rows of \code{s} have been processed in this way, the
   row giving the maximum value of log pseudolikelihood will be found.
@@ -81,6 +116,7 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
   The components of the object include
   \item{fit}{Best-fitting model}
   \item{param}{The data frame \code{s}}
+  \item{iopt}{Row index of the best-fitting parameters in \code{s}}
 }
 \examples{
     data(cells)

@@ -1,7 +1,7 @@
 #
 #           pixellate.R
 #
-#           $Revision: 1.3 $    $Date: 2009/08/20 18:13:33 $
+#           $Revision: 1.4 $    $Date: 2010/12/13 09:05:01 $
 #
 #     pixellate            convert an object to a pixel image
 #
@@ -48,7 +48,13 @@ pixellate.ppp <- function(x, W=NULL, ..., weights=NULL, padzero=FALSE)
                     col = factor(pixels$col, levels=1:nc)), sum)
         ta[is.na(ta)] <- 0
     }
-    out <- im(ta, xcol = W$xcol, yrow = W$yrow, unitname=unitname(W))
+    if(nr == 1 || nc == 1) {
+      # 1 x 1 image: need to specify xrange, yrange explicitly
+      out <- im(ta, xrange = W$xrange, yrange = W$yrange, unitname=unitname(W))
+    } else {
+      # normal case: use exact xcol, yrow values
+      out <- im(ta, xcol = W$xcol, yrow = W$yrow, unitname=unitname(W))
+    }
     # clip to window of data
     if(!padzero)
       out <- out[W, drop=FALSE]

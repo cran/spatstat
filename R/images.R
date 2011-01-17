@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.76 $     $Date: 2010/11/08 07:32:04 $
+#         $Revision: 1.77 $     $Date: 2010/12/13 09:12:44 $
 #
 #      The class "im" of raster images
 #
@@ -69,6 +69,8 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
     xcol <- xrange[1] - xstep/2 + xstep * seq(nc)
   } else {
     # use 'xcol'
+    if(length(xcol) <= 1)
+      stop("Only 1 column of pixels - cannot determine pixel width")
     xstep <- diff(xcol)[1]
     xrange <- range(xcol) + c(-1,1) * xstep/2
   }
@@ -78,6 +80,8 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
     yrow <- yrange[1] - ystep/2 + ystep * seq(nr)
   } else {
     # use 'yrow'
+    if(length(yrow) <= 1)
+      stop("Only 1 row of pixels - cannot determine pixel height")
     ystep <- diff(yrow)[1]
     yrange <- range(yrow) + c(-1,1) * ystep/2
   }  

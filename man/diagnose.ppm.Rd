@@ -79,10 +79,10 @@
     \code{FALSE} for non-Poisson models. See Details.
   }
   \item{rv}{
-    Usually absent. 
+    Usually absent. Advanced use only.
     If this argument is present, the values of the residuals will not be
     calculated from the fitted model \code{object} but will instead
-    be taken directly from this vector.
+    be taken directly from \code{rv}.
   }
   \item{spacing}{
     The spacing between plot panels (when a four-panel plot
@@ -309,23 +309,25 @@
   It enables the user to substitute arbitrary values for the
   residuals or marks, overriding the usual calculations.
   If \code{rv} is present, then instead of calculating the residuals from
-  the fitted model, the algorithm takes the entries of the vector
-  \code{rv} to be the values of the residuals or marks,
-  and plots them in the manner appropriate to the type of residual
-  or mark selected by \code{type}. The length of \code{rv} must equal
-  the number of points in the original data point pattern
-  (if \code{type="eem"}) or the number of quadrature (data and dummy)
-  points used to fit the model (if \code{type="raw"},
-  \code{type="inverse"} or \code{type="pearson"}).
+  the fitted model, the algorithm takes the residuals from the object
+  \code{rv}, and plots them in the manner appropriate to the type of residual
+  or mark selected by \code{type}. If \code{type ="eem"} then
+  \code{rv} should be similar to the return value of \code{\link{eem}},
+  namely, a numeric vector of length equal to
+  the number of points in the original data point pattern.
+  Otherwise, \code{rv} should be similar to the return value of
+  \code{\link{residuals.ppm}}, that is, it should be an object of
+  class \code{"msr"} (see \code{\link{msr}}) representing a signed
+  measure.
 
-  The return value is an object of class \code{"diagppm"}.
+  The return value of \code{diagnose.ppm}
+  is an object of class \code{"diagppm"}.
   There are methods for \code{plot} and \code{print} for such objects.
   See the Examples.
   
   See also the companion functions \code{\link{qqplot.ppm}}, which produces a
   Q-Q plot of the residuals, and \code{\link{lurking}}, which produces
   lurking variable plots for any spatial covariate.
-
 }
 \references{
   Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
@@ -333,9 +335,10 @@
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
 
-  Baddeley, A., Moller, J. and Pakes, A.G. (2006)
+  Baddeley, A., Moller, J. and Pakes, A.G. (2008) 
   Properties of residuals for spatial point processes.
-  To appear.
+  \emph{Annals of the Institute of Statistical Mathematics}
+  \bold{60}, 627--649.
   
   Stoyan, D. and Grabarnik, P. (1991)
   Second-order characteristics for stochastic structures connected with

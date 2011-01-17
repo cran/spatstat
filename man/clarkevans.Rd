@@ -74,6 +74,9 @@ clarkevans(X, correction=c("none", "Donnelly", "cdf"),
   }
   If the argument \code{clipregion} is given, then the selected
   edge corrections will be assumed to include \code{correction="guard"}.
+
+  To perform a test based on the Clark-Evans index,
+  see \code{\link{clarkevans.test}}.
 }
 \value{
   A numeric value or numeric vector, with named components
@@ -104,6 +107,7 @@ with modifications by
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{clarkevans.test}},
   \code{\link{nndist}},
   \code{\link{Gest}}
 }

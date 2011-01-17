@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.46 $   $Date: 2010/11/03 03:28:31 $
+#  $Revision: 1.47 $   $Date: 2010/12/13 04:47:50 $
 #
 #  Plotting code for pixel images
 #
@@ -223,6 +223,7 @@ plot.im <- function(x, ...,
   return(invisible(NULL))
 } 
 
+
 ########################################################################
 
 image.im <- plot.im
@@ -239,10 +240,26 @@ persp.im <- function(x, ..., colmap=NULL) {
   if(!is.null(col <- list(...)$col) && !is.matrix(col))
     warning("Argument col is not a matrix. Did you mean colmap?")
   # colour map?
-  if(is.null(colmap)) 
+  if(is.null(colmap)) {
     colinfo <- list(col=NULL)
-  else {
-    # interpret colour map
+  } else if(inherits(colmap, "colourmap")) {
+    # colour map object
+    # apply colour function to image data
+    colval <- eval.im(colmap(x))
+    colval <- t(as.matrix(colval))
+    # strip one row and column for input to persp.default
+    colval <- colval[-1, -1]
+    # replace NA by arbitrary value
+    isna <- is.na(colval)
+    if(any(isna)) {
+      stuff <- attr(colmap, "stuff")
+      colvalues <- stuff$outputs
+      colval[isna] <- colvalues[1]
+    }
+    # pass colour matrix (and suppress lines)
+    colinfo <- list(col=colval, border=NA)
+  } else {
+    # interpret 'colmap' as colour map
     if(is.list(colmap) && all(c("breaks", "col") %in% names(colmap))) {
       breaks <- colmap$breaks
       colvalues <- colmap$col

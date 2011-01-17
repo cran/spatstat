@@ -3,6 +3,7 @@
 \alias{[<-.hyperframe}
 \alias{$.hyperframe}
 \alias{$<-.hyperframe}
+\alias{[.localpcfmatrix}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{adjustthinrange}
@@ -43,6 +44,7 @@
 \alias{check.nmatrix}
 \alias{check.1.real}
 \alias{check.testfun}
+\alias{clarkevansCalc}
 \alias{clip.psp}
 \alias{cliprect.psp}
 \alias{clippoly.psp}
@@ -69,8 +71,10 @@
 \alias{dim.fasp}               
 \alias{dim.hyperframe}               
 \alias{dim.im}               
+\alias{dim.msr}
 \alias{dimnames.fasp}               
-\alias{dimnames<-.fasp}               
+\alias{dimnames<-.fasp}
+\alias{dimnames.msr}
 \alias{distpl}               
 \alias{distppl}
 \alias{distppll}
@@ -184,7 +188,6 @@
 \alias{localpcfmatrix}
 \alias{print.localpcfmatrix}
 \alias{plot.localpcfmatrix}
-\alias{[.localpcfmatrix}
 \alias{lookup.im}
 \alias{majorminorversion}
 \alias{make.even.breaks}
@@ -290,10 +293,12 @@
 \alias{print.kppm}
 \alias{print.lut}
 \alias{print.minconfit}
+\alias{print.msr}
 \alias{print.plotpairsim}
 \alias{print.plotppm}
 \alias{print.pppmatching}
 \alias{print.profilepl}
+\alias{print.quadrattest}
 \alias{print.qqppm}
 \alias{print.rhohat}
 \alias{print.rmhcontrol}
@@ -470,10 +475,11 @@ check.hist.lengths(hist,breaks)
 check.named.list(x, nam, context, namopt)
 check.named.vector(x, nam, context, namopt)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
-check.nvector(v, npoints, fatal=TRUE, things="data points")
-check.nmatrix(m, npoints, fatal=TRUE, things="data points")
+check.nvector(v, npoints, fatal=TRUE, things="data points", naok=FALSE)
+check.nmatrix(m, npoints, fatal=TRUE, things="data points", naok=FALSE, squarematrix=TRUE)
 check.1.real(x, context, fatal)
 check.testfun(f, f1, X)
+clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
@@ -502,8 +508,10 @@ dilate.owin(\dots)
 \method{dim}{fasp}(x)
 \method{dim}{hyperframe}(x)
 \method{dim}{im}(x)
+\method{dim}{msr}(x)
 \method{dimnames}{fasp}(x)
 \method{dimnames}{fasp}(x) <- value
+\method{dimnames}{msr}(x)
 distpl(p, l)               
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
@@ -666,13 +674,13 @@ slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
 slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 \method{model.matrix}{slrm}(object, ..., keepNA = TRUE)
 model.se.image(fit, W, \dots, what)
-mpl.engine(Q, trend, interaction, \dots, covariates, correction,
+mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
 	 rbord, use.gam, gcontrol, famille,
          forcefit, allcovar, callstring, precomputed, savecomputed, preponly)
-mpl.get.covariates(covariates, locations, type)
+mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
-            callstring, \dots, allcovar, precomputed, savecomputed,
+            callstring, \dots, covfunargs, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook)
 multiply.only.finite.entries(x, a)
@@ -745,10 +753,12 @@ primefactors(n, prmax)
 \method{print}{kppm}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
+\method{print}{msr}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{plotpairsim}(x, \dots)
 \method{print}{pppmatching}(x, \dots)
 \method{print}{profilepl}(x, \dots)
+\method{print}{quadrattest}(x, \dots)
 \method{print}{qqppm}(x, \dots)
 \method{print}{rhohat}(x, \dots)
 \method{print}{rmhcontrol}(x, \dots)
@@ -764,14 +774,14 @@ primefactors(n, prmax)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.units}(x, \dots)
-\method{print}{tess}(x, \dots)
+\method{print}{tess}(x, \dots, brief=FALSE)
 \method{print}{units}(x, \dots)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 rhs.of.formula(x)
-quadrat.testEngine(X, nx, ny, \dots, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
+quadrat.testEngine(X, nx, ny, \dots, Xcount, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 pointgrid(W, ngrid)

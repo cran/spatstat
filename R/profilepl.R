@@ -11,12 +11,18 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   n <- nrow(s)
   fname <- deparse(substitute(f))
   stopifnot(is.function(f))
-  fargs <- names(formals(f))
+  # validate 's'
   parms <- names(s)
+  fargs <- names(formals(f))
   if(!all(fargs %in% parms))
     stop("Some arguments of f are not provided in s")
-  if(!all(parms %in% fargs))
-    stop("Some variables in s are not arguments of f")
+  # extra columns in 's' are assumed to be parameters of covariate functions
+  is.farg <- parms %in% fargs
+  pass.cfa <- any(!is.farg)
+  got.cfa <- "covfunargs" %in% names(list(...))
+  if(pass.cfa && got.cfa)
+    stop("Some columns in s are superfluous")
+  #
   interlist <- list()
   logmpl <- numeric(n)
   # make a fake call
@@ -40,11 +46,11 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   namcal[namcal=="f"] <- "interaction"
   names(pseudocall) <- namcal
   # determine border correction distance
-  if(missing(rbord)) {
+  if(is.null(rbord)) {
     # compute rbord = max reach of interactions
     if(verbose) message("(computing rbord)")
     for(i in 1:n) {
-      fi <- do.call("f", as.list(s[i,]))
+      fi <- do.call("f", as.list(s[i, is.farg, drop=FALSE]))
       if(!inherits(fi, "interact"))
         stop(paste("f did not yield an object of class", sQuote("interact")))
       re <- reach(fi)
@@ -55,26 +61,36 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
     }
   }
   # determine whether computations can be saved
-  fit0 <- ppm(..., rbord=rbord)
-  savecomp <- !oversize.quad(quad.ppm(fit0))
+  if(pass.cfa || got.cfa) {
+    savecomp <- FALSE
+  } else {
+    fit0 <- ppm(..., rbord=rbord)
+    savecomp <- !oversize.quad(quad.ppm(fit0))
+  }
   
   # fit one model and extract quadscheme
   if(verbose) message(paste("fitting", n, "models..."))
   for(i in 1:n) {
     if(verbose)
       progressreport(i, n)
-    fi <- do.call("f", as.list(s[i,]))
+    fi <- do.call("f", as.list(s[i, is.farg, drop=FALSE]))
     if(!inherits(fi, "interact"))
       stop(paste("f did not yield an object of class", sQuote("interact")))
+    if(pass.cfa)
+      cfai <- list(covfunargs=as.list(s[i, !is.farg, drop=FALSE])) 
     # fit model
     if(i == 1) {
       # fit from scratch
-      fiti <- ppm(interaction=fi, ..., rbord=rbord, savecomputed=savecomp)
+      arg1 <- list(interaction=fi, ..., rbord=rbord, savecomputed=savecomp)
+      if(pass.cfa) arg1 <- append(arg1, cfai)
+      fiti <- do.call(ppm, arg1)
       # save intermediate computations (pairwise distances, etc)
       precomp <- fiti$internal$computed
     } else {
       # use precomputed data
-      fiti <- ppm(interaction=fi, ..., rbord=rbord, precomputed=precomp)
+      argi <- list(interaction=fi, ..., rbord=rbord, precomputed=precomp)
+      if(pass.cfa) argi <- append(argi, cfai)
+      fiti <- do.call(ppm, argi)
     }
     # save log PL for each fit
     logmpl[i] <- as.numeric(logLik(fiti, warn=FALSE))
@@ -88,9 +104,13 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   }
   if(verbose) message("done.")
   opti <- which.max(logmpl)
-  optint <- do.call("f", as.list(s[opti,, drop=FALSE]))
-  optfit <- do.call("ppm",
-                    list(interaction=optint, ..., rbord=rbord))
+  optint <- do.call("f", as.list(s[opti, is.farg, drop=FALSE]))
+  optarg <- list(interaction=optint, ..., rbord=rbord)
+  if(pass.cfa) {
+    optcfa <- list(covfunargs=as.list(s[opti, !is.farg, drop=FALSE]))
+    optarg <- append(optarg, optcfa)
+  } 
+  optfit <- do.call("ppm", optarg)
   result <- list(param=s,
                  prof=logmpl,
                  iopt=opti,

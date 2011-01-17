@@ -4,7 +4,7 @@
        Exact distance transform of a point pattern
        (used to estimate the empty space function F)
        
-       $Revision: 1.5 $ $Date: 2006/06/28 09:23:04 $
+       $Revision: 1.10 $ $Date: 2010/12/22 12:03:09 $
 
        Author: Adrian Baddeley
 
@@ -23,7 +23,7 @@
 	    shape_raster()     initialise a Raster structure
                           
        The appropriate calling sequence for exact_dt_R() 
-       is exemplified in 'exactdt.S'
+       is exemplified in 'exactdt.R'
      
 */
 
@@ -191,31 +191,40 @@ dist_to_bdry(d)		/* compute distance to boundary from each raster point */
 	}
 }
 
-/* S interface */
+/* R interface */
 
 void exact_dt_R(x, y, npt,
-	   xmin, ymin, xmax, ymax,
-	   nr, nc,
-	   distances, indices, boundary)
+		xmin, ymin, xmax, ymax,
+		nr, nc, mr, mc, 
+		distances, indices, boundary)
 	double *x, *y;		/* input data points */
 	int	*npt;
 	double *xmin, *ymin,
 		*xmax, *ymax;  	/* guaranteed bounding box */
 	int *nr, *nc;		/* desired raster dimensions
-				   EXCLUDING margin of 1 on each side */
+				   EXCLUDING margins */
+	int *mr, *mc;           /* margins */
 	     /* output arrays */
 	double *distances;	/* distance to nearest point */
 	int   *indices;	        /* index to nearest point */
 	double	*boundary;	/* distance to boundary */
 {
 	Raster dist, index, bdist;
+	int mrow, mcol, nrow, ncol;
 
-	shape_raster( &dist, (char *) distances,*xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
-	shape_raster( &index, (char *) indices, *xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
-	shape_raster( &bdist, (char *) boundary, *xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
+	mrow = *mr;
+	mcol = *mc;
+
+	/* full dimensions */
+	nrow = *nr + 2 * mrow;
+	ncol = *nc + 2 * mcol;
+	
+	shape_raster( &dist, (void *) distances,*xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &index, (void *) indices, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &bdist, (void *) boundary, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
 	
 	exact_dt(x, y, (int) *npt, &dist, &index);
 	dist_to_bdry(&bdist);

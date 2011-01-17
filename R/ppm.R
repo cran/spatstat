@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.17 $	$Date: 2010/06/14 09:23:31 $
+#	$Revision: 1.22 $	$Date: 2011/01/17 02:46:06 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -12,6 +12,7 @@ function(Q,
 	 interaction = Poisson(),
          ..., 
          covariates = NULL,
+         covfunargs = list(),
 	 correction="border",
 	 rbord = reach(interaction),
          use.gam=FALSE,
@@ -32,6 +33,10 @@ function(Q,
   if(is.null(interaction))
     interaction <- Poisson()
 
+  if(is.ppp(Q) && is.marked(Q) && !is.multitype(Q)) 
+    stop(paste("ppm is not yet implemented for marked point patterns,",
+               "other than multitype patterns."))
+  
   # validate choice of edge correction
   correction <- pickoption("correction", correction,
                            c(border="border",
@@ -44,7 +49,9 @@ function(Q,
   
   # validate rbord for border correction
   if(correction == "border") {
-    rbord.given <- !missing(rbord)
+    rbord.given <- !missing(rbord) && !is.null(rbord)
+    if(is.null(rbord))
+      rbord <- reach(interaction)
     infin <- is.infinite(rbord)
     too.large <- infin || (eroded.areas(as.owin(Q), rbord) == 0)
     if(too.large) {
@@ -63,6 +70,7 @@ function(Q,
   fitMPL <- mpl.engine(Q=Q, trend=trend,
                        interaction=interaction,
                        covariates=covariates,
+                       covfunargs=covfunargs,
                        correction=correction,
                        rbord=rbord,
                        use.gam=use.gam,

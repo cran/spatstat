@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.114 $	$Date: 2010/08/08 13:17:53 $
+#	$Revision: 5.118 $	$Date: 2011/01/17 02:36:38 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -31,6 +31,7 @@ function(Q,
 	 interaction = NULL,
          ...,
          covariates = NULL,
+         covfunargs = list(),
 	 correction="border",
 	 rbord = 0,
          use.gam=FALSE,
@@ -92,7 +93,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2010/08/08 13:17:53 $")
+                    date="$Date: 2011/01/17 02:36:38 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -109,6 +110,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   volume <- area.owin(X$window) * markspace.integral(X)
   lambda <- npts/volume
   co <- c("log(lambda)"=log(lambda))
+  se <- 1/sqrt(npts)
   maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
   rslt <- list(
                method      = "mpl",
@@ -119,8 +121,9 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
                fitin       = fii(),
                Q           = Q,
                maxlogpl    = maxlogpl,
-               internal    = list(computed=computed),
+               internal    = list(computed=computed, se=se),
                covariates  = covariates,  # covariates are still retained!
+               covfunargs  = covfunargs,
 	       correction  = correction,
                rbord       = rbord,
                terms       = terms(trend.formula),
@@ -140,6 +143,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
                       "quadrature points", callstring,
                       allcovar=allcovar,
                       precomputed=precomputed, savecomputed=savecomputed,
+                      covfunargs=covfunargs,
                       ...)
   # back door
 if(preponly) {
@@ -234,6 +238,7 @@ rslt <- list(
              internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
                               IsOffset=IsOffset, fmla=fmla, computed=computed),
              covariates   = covariates,
+             covfunargs   = covfunargs,
              correction   = correction,
              rbord        = rbord,
              terms        = terms(trend.formula),
@@ -252,6 +257,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
                         want.trend, want.inter, correction, rbord,
                         Pname="quadrature points", callstring="",
                         ...,
+                        covfunargs=list(),
                         allcovar=FALSE,
                         precomputed=NULL, savecomputed=FALSE,
                         vnamebase=c("Interaction", "Interact."),
@@ -290,7 +296,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     if("covariates.df" %in% names.precomputed)
       covariates.df <- precomputed$covariates.df
     else 
-      covariates.df <- mpl.get.covariates(covariates, P, Pname)
+      covariates.df <- mpl.get.covariates(covariates, P, Pname, covfunargs)
     if(savecomputed)
       computed$covariates.df <- covariates.df
   }
@@ -559,9 +565,12 @@ return(list(fmla=fmla, trendfmla=trendfmla,
 ####################################################################
 ####################################################################
 
-mpl.get.covariates <- function(covariates, locations, type="locations") {
+mpl.get.covariates <- function(covariates, locations, type="locations",
+                               covfunargs=list()) {
   covargname <- sQuote(deparse(substitute(covariates)))
   locargname <- sQuote(deparse(substitute(locations)))
+  if(is.null(covfunargs)) covfunargs <- list()
+  #
   x <- locations$x
   y <- locations$y
   if(is.null(x) || is.null(y)) {
@@ -593,10 +602,19 @@ mpl.get.covariates <- function(covariates, locations, type="locations") {
                  covargname, "are un-named"))
     # look up values of each covariate at the quadrature points
     values <- covariates
-    evalfxy <- function(f, x, y) { f(x,y) }
+    evalfxy <- function(f, x, y, extra) {
+      if(length(extra) == 0)
+        return(f(x,y))
+      # extra arguments must be matched explicitly by name
+      ok <- names(extra) %in% names(formals(f))
+      z <- do.call(f, append(list(x,y), extra[ok]))
+      return(z)
+    }
     insidexy <- function(w, x, y) { inside.owin(x, y, w) }
-    values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y, naok=TRUE, strict=FALSE)
-    values[isfun] <- lapply(covariates[isfun], evalfxy, x=x, y=y)
+    values[isim] <- lapply(covariates[isim], lookup.im, x=x, y=y,
+                           naok=TRUE, strict=FALSE)
+    values[isfun] <- lapply(covariates[isfun], evalfxy, x=x, y=y,
+                            extra=covfunargs)
     values[isnum] <- lapply(covariates[isnum], rep, length(x))
     values[iswin] <- lapply(covariates[iswin], insidexy, x=x, y=y)
     return(as.data.frame(values))

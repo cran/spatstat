@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.30 $   $Date: 2010/10/20 05:41:41 $
+#    $Revision: 1.31 $   $Date: 2010/12/13 10:04:19 $
 #
 #    as.im()
 #
@@ -132,8 +132,16 @@ as.im.function <- function(X, W=NULL, ...,
     values[inside] <- val
     values[!inside] <- NA
   }
-  
-  out <- im(values, W$xcol, W$yrow, unitname=unitname(W))
+
+  nc <- length(W$xcol)
+  nr <- length(W$yrow)
+  if(nr == 1 || nc == 1) {
+    # exception: can't determine pixel width/height from centres
+    out <- im(matrix(values, nr, nc),
+              xrange=W$xrange, yrange=W$yrange, unitname=unitname(W))
+  } else {
+    out <- im(values, W$xcol, W$yrow, unitname=unitname(W))
+  }
   return(na.handle.im(out, na.replace))
 }
 

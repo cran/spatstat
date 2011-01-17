@@ -39,32 +39,23 @@
   }
   \item{fittedvalues}{
     Vector of fitted values for the conditional intensity at 
-    	the quadrature points,
+    the quadrature points,
     from which the residuals will be computed. 
     For expert use only.
    }
 }
 \value{
-  If \code{type} is \code{"raw"}, \code{"inverse"} or \code{"pearson"}:
-  a vector containing the discretised residuals.
-  Entries in this vector
-  correspond to the quadrature points (data or
-  dummy points) used to fit the model.
-  
-  If \code{type = "score"}:
-  a matrix whose columns are components of the discretised
-  score residuals. Rows in this matrix 
-  correspond to the quadrature points used to fit the model.
-  
-  The quadrature points can be
-  extracted from \code{object} by \code{union.quad(quad.ppm(object))}.
+  An object of class \code{"msr"} 
+  representing a signed measure or vector-valued measure
+  (see \code{\link{msr}}). This object can be plotted.
 }
 \details{
   This function computes several kinds of residuals for the fit of
   a point process model to a spatial point pattern dataset
   (Baddeley et al, 2005).
-  Use \code{\link{diagnose.ppm}} to produce diagnostic plots
-  based on these residuals.
+  Use \code{\link{plot.msr}} to plot the residuals directly,
+  or \code{\link{diagnose.ppm}}
+  to produce diagnostic plots based on these residuals.
 
   The argument \code{object} must be a fitted point process model
   (object of class \code{"ppm"}). Such objects are produced by the maximum
@@ -142,7 +133,8 @@
   }
   }
 
-  Use \code{\link{diagnose.ppm}} to produce diagnostic plots
+  Use \code{\link{plot.msr}} to plot the residuals directly,
+  or \code{\link{diagnose.ppm}} to produce diagnostic plots
   based on these residuals.
 }
 \references{
@@ -157,6 +149,7 @@
   \bold{60}, 627--649.
 }
 \seealso{
+ \code{\link{msr}},
  \code{\link{diagnose.ppm}},
  \code{\link{ppm.object}},
  \code{\link{ppm}}
@@ -165,15 +158,9 @@
     data(cells)
     fit <- ppm(cells, ~x, Strauss(r=0.15))
 
+    # Pearson residuals
     rp <- residuals.ppm(fit, type="pe")
-    sum(rp) # should be close to 0
-
-    # extract quadrature points to which the residuals correspond
-    quadpoints <- union.quad(quad.ppm(fit))
-
-    # plot residuals as marks attached to the quadrature points 
-    quadmarked <- setmarks(quadpoints, rp)
-    plot(quadmarked)
+    rp
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

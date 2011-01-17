@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.28 $ $Date: 2010/03/25 00:22:02 $
+# $Revision: 1.30 $ $Date: 2011/01/17 01:19:22 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -133,6 +133,14 @@ lurking <- function(object, covariate, type="eem",
     if(!is.null(rv)) rv
     else if(type=="eem") eem(object, check=check)
     else residuals.ppm(object, type=type, check=check)
+  
+  if(inherits(resvalues, "msr")) {
+    # signed or vector-valued measure
+    resvalues <- resvalues$val
+    if(ncol(as.matrix(resvalues)) > 1)
+      stop("Not implemented for vector measures; use [.msr to split into separate components")
+  }
+
   if(type != "eem")
     resvalues <- resvalues[ok]
 
@@ -144,10 +152,10 @@ lurking <- function(object, covariate, type="eem",
   # NAMES OF THINGS
   # name of the covariate
   if(missing(covname)) 
-    covname <- if(is.expression(covariate)) paste(covariate) else "covariate"
+    covname <- if(is.expression(covariate)) covariate else "covariate"
   # type of residual/mark
   if(missing(typename)) 
-    typename <- if(!is.null(rv)) "rv" else attr(resvalues, "typename")
+    typename <- if(!is.null(rv)) "rv" else ""
 
   #######################################################################
   # START ANALYSIS

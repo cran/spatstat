@@ -4,7 +4,7 @@
        `Pseudoexact' distance transform of a discrete binary image
        (the closest counterpart to `exactdist.c')
        
-       $Revision: 1.8 $ $Date: 2006/06/28 11:06:54 $
+       $Revision: 1.11 $ $Date: 2010/12/22 12:02:52 $
 
        
 */
@@ -108,12 +108,13 @@ ps_exact_dt(in, dist, row, col)
 
 /* R interface */
 
-void ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc,
-	   in, distances, rows, cols, boundary)
+void ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc, mr, mc, 
+	   inp, distances, rows, cols, boundary)
 	double *xmin, *ymin, *xmax, *ymax;  	  /* x, y dimensions */
 	int *nr, *nc;	 	                  /* raster dimensions
-				                     EXCLUDING margin of 1 on each side */
-	int   *in;              /* input:  binary image */
+				                     EXCLUDING margins */
+	int *mr, *mc;                             /* margins */
+	int   *inp;              /* input:  binary image */
 	double *distances;	/* output: distance to nearest point */
 	int   *rows;	        /* output: row of nearest point (start= 0) */
 	int   *cols;	        /* output: column of nearest point (start = 0) */
@@ -121,17 +122,25 @@ void ps_exact_dt_R(xmin, ymin, xmax, ymax, nr, nc,
 	/* all images must have identical dimensions including a margin of 1 on each side */
 {
 	Raster data, dist, row, col, bdist;
+	int mrow, mcol, nrow, ncol;
 
-	shape_raster( &data, (char *) in, *xmin,*ymin,*xmax,*ymax,
-			    *nr+2, *nc+2, 1, 1);
-	shape_raster( &dist, (char *) distances,*xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
-	shape_raster( &row, (char *) rows, *xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
-	shape_raster( &col, (char *) cols, *xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
-	shape_raster( &bdist, (char *) boundary, *xmin,*ymin,*xmax,*ymax,
-			   *nr+2,*nc+2,1,1);
+	mrow = *mr;
+	mcol = *mc;
+
+	/* full dimensions */
+	nrow = *nr + 2 * mrow;
+	ncol = *nc + 2 * mcol;
+
+	shape_raster( &data, (void *) inp, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &dist, (void *) distances, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &row, (void *) rows, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &col, (void *) cols, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
+	shape_raster( &bdist, (void *) boundary, *xmin,*ymin,*xmax,*ymax,
+		      nrow, ncol, mrow, mcol);
 	
 	ps_exact_dt(&data, &dist, &row, &col);
 

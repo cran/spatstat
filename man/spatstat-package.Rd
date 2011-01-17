@@ -477,7 +477,11 @@
       \code{\link{dirichlet}} \tab compute Dirichlet-Voronoi tessellation of points\cr
       \code{\link{delaunay}} \tab compute Delaunay triangulation of points\cr
       \code{\link{rpoislinetess}} \tab generate tessellation using Poisson line
-      process 
+      process \cr
+      \code{\link{tile.areas}}	\tab
+      area of each tile in tessellation \cr
+      \code{\link{bdist.tiles}}	\tab
+      boundary distance for each tile in tessellation 
     }
 
 
@@ -1101,6 +1105,7 @@
   \tabular{ll}{
     \code{\link{quadrat.test}} \tab \eqn{\chi^2}{chi^2} goodness-of-fit
     test on quadrat counts \cr
+    \code{\link{clarkevans.test}} \tab Clark and Evans test \cr
     \code{\link{kstest}} \tab Kolmogorov-Smirnov goodness-of-fit test\cr
     \code{\link{bermantest}} \tab Berman's goodness-of-fit tests\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo

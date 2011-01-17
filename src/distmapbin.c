@@ -4,7 +4,7 @@
        Distance transform of a discrete binary image
        (8-connected path metric)
        
-       $Revision: 1.4 $ $Date: 2009/04/25 06:06:15 $
+       $Revision: 1.5 $ $Date: 2010/12/22 08:58:10 $
 
        
 */
@@ -106,11 +106,11 @@ void distmapbin(xmin, ymin, xmax, ymax, nr, nc,
 {
 	Raster data, dist, bdist;
 
-	shape_raster( &data, (char *) in, *xmin,*ymin,*xmax,*ymax,
+	shape_raster( &data, (void *) in, *xmin,*ymin,*xmax,*ymax,
 			    *nr+2, *nc+2, 1, 1);
-	shape_raster( &dist, (char *) distances,*xmin,*ymin,*xmax,*ymax,
+	shape_raster( &dist, (void *) distances,*xmin,*ymin,*xmax,*ymax,
 			   *nr+2,*nc+2,1,1);
-	shape_raster( &bdist, (char *) boundary, *xmin,*ymin,*xmax,*ymax,
+	shape_raster( &bdist, (void *) boundary, *xmin,*ymin,*xmax,*ymax,
 			   *nr+2,*nc+2,1,1);
 	
 	distmap_bin(&data, &dist);

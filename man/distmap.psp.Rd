@@ -46,14 +46,15 @@
   Note that this function gives the exact distance from the
   centre of each pixel to the nearest line segment.
   To compute the exact distance from the points in a point pattern
-  to the nearest line segment, use
-  \code{\link{nncross}}
+  to the nearest line segment, use \code{\link{distfun}} or one of the
+  low-level functions \code{\link{nncross}}
   or \code{\link{project2segment}}.
 }
 \seealso{
   \code{\link{distmap}},
   \code{\link{distmap.owin}},
   \code{\link{distmap.ppp}},
+  \code{\link{distfun}},
   \code{\link{nncross}},
   \code{\link{nearestsegment}},
   \code{\link{project2segment}}.

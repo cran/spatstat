@@ -8,7 +8,7 @@
 colourmap(col, ..., range=NULL, breaks=NULL, inputs=NULL)
 }
 \arguments{
-  \item{col}{Character vector specifying colours}
+  \item{col}{Vector of values specifying colours}
   \item{\dots}{Ignored.}
   \item{range}{
     Interval to be mapped.
@@ -37,8 +37,12 @@ colourmap(col, ..., range=NULL, breaks=NULL, inputs=NULL)
   colour assigned to any data value. 
 
   The argument \code{col} specifies the colours to which
-  data values will be mapped. It should be a character vector
-  whose entries can be interpreted as colours.
+  data values will be mapped. It should be a vector
+  whose entries can be interpreted as colours by the standard
+  \R graphics system. The entries can be string names of colours
+  like \code{"red"}, or integers that refer to
+  colours in the standard palette, or strings containing
+  six-letter hexadecimal codes like \code{"#F0A0FF"}. 
 
   Exactly one of the arguments \code{range}, \code{inputs} or \code{breaks}
   must be specified by name.
