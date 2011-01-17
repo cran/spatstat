@@ -12,6 +12,8 @@ eval.im <- function(expr, envir) {
   e <- as.expression(substitute(expr))
   # get names of all variables in the expression
   varnames <- all.vars(e)
+  allnames <- all.names(e, unique=TRUE)
+  funnames <- allnames[!(allnames %in% varnames)]
   if(length(varnames) == 0)
     stop("No variables in this expression")
   # get the values of the variables
@@ -19,7 +21,9 @@ eval.im <- function(expr, envir) {
     envir <- sys.parent()
   vars <- lapply(as.list(varnames), function(x, e) get(x, envir=e), e=envir)
   names(vars) <- varnames
-  # find out which are images
+  funs <- lapply(as.list(funnames), function(x, e) get(x, envir=e), e=envir)
+  names(funs) <- funnames
+  # find out which variables are images
   ims <- unlist(lapply(vars, is.im))
   if(!any(ims))
     stop("No images in this expression")
@@ -43,7 +47,7 @@ eval.im <- function(expr, envir) {
   template <- images[[1]]
   # This bit has been repaired:
   vars[ims] <- imagevalues
-  v <- eval(e, vars)
+  v <- eval(e, append(vars, funs))
   #
   # reshape, etc
   result <- im(v, template$xcol, template$yrow, 

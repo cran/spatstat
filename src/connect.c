@@ -4,7 +4,7 @@
        Connected component transform of a discrete binary image
        (8-connected topology)
        
-       $Revision: 1.1 $ $Date: 2009/05/14 03:48:40 $
+       $Revision: 1.2 $ $Date: 2010/12/22 08:57:40 $
 
        
 */
@@ -75,7 +75,7 @@ void concom(mat, nr, nc)
 {
   Raster im;
 
-  shape_raster( &im, (char *) mat, 
+  shape_raster( &im, (void *) mat, 
 		(double) 1, (double) 1,
 		(double) *nc, (double) *nr, 
 		*nr+2, *nc+2, 1, 1);

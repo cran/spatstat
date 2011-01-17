@@ -41,11 +41,21 @@
   point of \code{X} is closest. 
   
   This is a method for the generic function \code{\link{distmap}}.
+  
+  Note that this function gives the distance from the
+  \emph{centre of each pixel} to the nearest data point.
+  To compute the exact distance from a given spatial location
+  to the nearest data point in \code{X}, use \code{\link{distfun}} or 
+  \code{\link{nncross}}.
 }
 \seealso{
-  \code{\link{distmap}},
+  Generic function \code{\link{distmap}} and other methods
   \code{\link{distmap.psp}},
-  \code{\link{distmap.owin}}
+  \code{\link{distmap.owin}}.
+  
+  Generic function \code{\link{distfun}}.
+
+  Nearest neighbour distance \code{\link{nncross}}
 }
 \examples{
   data(cells)

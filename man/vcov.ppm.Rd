@@ -6,7 +6,8 @@
   parameters of a fitted point process model.
 }
 \usage{
-  \method{vcov}{ppm}(object, \dots, what = "vcov", verbose = TRUE, gamaction="warn")
+  \method{vcov}{ppm}(object, \dots, what = "vcov", verbose = TRUE,
+gamaction="warn", hessian=FALSE)
 }
 \arguments{
   \item{object}{A fitted point process model (an object of class \code{"ppm"}.)}
@@ -24,6 +25,10 @@
   \item{gamaction}{String indicating what to do if \code{object} was
     fitted by \code{gam}. Options are \code{"fatal"}, \code{"warn"} and
     \code{"silent"}.
+  }
+  \item{hessian}{
+    Logical. Use the negative Hessian matrix
+    of the log pseudolikelihood instead of the Fisher information.
   }
 }
 \details{
@@ -85,7 +90,14 @@
   If \code{gamaction="warn"}, a warning is issued and the calculation
   proceeds using the incorrect theory for the parametric case, which is
   probably a reasonable approximation in many applications.
-  If \code{gamaction="silent"}, the calculation proceeds without a warning.
+  If \code{gamaction="silent"}, the calculation proceeds without a
+  warning.
+  
+  If \code{hessian=TRUE} then the negative Hessian (second derivative)
+  matrix of the log pseudolikelihood, and its inverse,
+  will be computed.
+  For non-Poisson models, this is not a valid estimate of variance,
+  but is useful for other calculations.
 }
 \section{Error messages}{
   An error message that reports

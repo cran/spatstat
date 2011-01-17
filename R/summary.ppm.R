@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.37 $   $Date: 2010/08/08 02:05:05 $
+#    $Revision: 1.39 $   $Date: 2010/12/19 03:08:13 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -96,9 +96,47 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   if(!antiquated) {
     covars <- x$covariates
     y$has.covars <- !is.null(covars) && (length(covars) > 0)
+    y$covnames <- names(covars)
     used <- (y$trendvar %in% names(covars))
     y$covars.used <- y$trendvar[used]
-    y$uses.covars <- sum(used)
+    y$uses.covars <- any(used)
+    # describe covariates
+    covtype <- function(x) {
+      if(is.im(x)) "im" else
+      if(inherits(x, "distfun")) "distfun" else
+      if(is.function(x)) "function" else
+      if(is.owin(x)) "owin" else
+      if(is.numeric(x) && length(x) == 1) "number" else "unknown"
+    }
+    y$covar.type <- ctype <- unlist(lapply(covars, covtype))
+    y$covar.descrip <- y$covar.type
+    # are there any functions?
+    y$has.funcs <- any(isfun <- (ctype == "function"))
+    # do covariates depend on additional arguments?
+    if(y$has.funcs) {
+      y$covfunargs <- x$covfunargs
+      funs <- covars[isfun]
+      fdescrip <- function(f) {
+        alist <- paste(names(formals(f)), collapse=", ")
+        paste("function(", alist, ")", sep="")
+      }
+      y$covar.descrip[isfun] <- unlist(lapply(funs, fdescrip))
+      # find any extra arguments (after args 1 & 2) explicitly named
+      xargs <- function(f) {
+        ar <- names(formals(f))[-(1:2)]
+        return(ar[ar != "..."])
+      }
+      fargs <- lapply(funs, xargs)
+      nxargs <- unlist(lapply(fargs, length))
+      y$has.xargs <- any(nxargs > 0)
+      if(y$has.xargs) {
+        # identify which function arguments are fixed in the call
+        fmap <- data.frame(Covariate=rep(names(funs), nxargs),
+                                 Argument=unlist(fargs))
+        fmap$Given <- (fmap$Argument %in% names(y$covfunargs))
+        y$xargmap <- fmap
+      }
+    } 
   } else {
     # Antiquated format
     # Interpret the function call instead
@@ -108,6 +146,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     y$has.covars <- !is.null(callargs) && !is.na(pmatch("data", callargs))
     # conservative guess
     y$uses.covars <- y$has.covars
+    y$covfunargs <- NULL
   }
     
   ######  Arguments in call ####################################
@@ -183,6 +222,27 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       trendbits <- COEFS[whichbits]
     }
     y$trend$value <- blankcoefnames(trendbits)
+  }
+  
+  # ----- parameters with SE --------------------------
+  if(y$poisson && (length(COEFS) > 0)) {
+    # compute standard errors
+    se <- x$internal$se
+    if(is.null(se))
+      se <- try(sqrt(diag(vcov(x))), silent=TRUE)
+    if(!inherits(se, "try-error")) {
+      two <- qnorm(0.975)
+      lo <- COEFS - two * se
+      hi <- COEFS + two * se
+      pval <- 2 * pnorm(abs(COEFS)/se, lower.tail=FALSE)
+      psig <- cut(pval, c(0,0.001, 0.01, 0.05, 1),
+                  labels=c("***", "**", "*", " "))
+      notapplic <- names(COEFS) %in% c("(Intercept)", "log(lambda)")
+      psig[notapplic] <- " "
+      # table of coefficient estimates with SE and 95% CI
+      y$coefs.SE.CI <- data.frame(Estimate=COEFS, S.E.=se, Ztest=psig,
+                                  CI95.lo=lo, CI95.hi=hi)
+    }
   }
   
   class(y) <- "summary.ppm"
@@ -275,10 +335,28 @@ print.summary.ppm <- function(x, ...) {
       cat(paste("Model depends on external",
                 ngettext(length(x$covars.used), "covariate", "covariates"),
                 commasep(sQuote(x$covars.used)), "\n"))
-    else if(x$has.covars)
-      cat("Model object contains external covariates\n")
   }
-        
+  if(x$has.covars) {
+    if(notrend || !x$uses.covars)
+      cat("Model object contains external covariates\n")
+    if(!is.null(cd <- x$covar.descrip)) {
+      # print description of each covariate
+      cat("\nCovariates provided:\n")
+      for(i in seq(length(cd)))
+        cat(paste("\t", names(cd)[i], ": ", cd[i], "\n", sep=""))
+    }
+    if(!is.null(cfa <- x$covfunargs && length(cfa) > 0)) {
+      cat("Covariate function arguments (covfunargs) provided:\n")
+      for(i in seq(along=cfa)) {
+        cat(paste(names(cfa)[i], "= "))
+        cfai <- cfa[[i]]
+        if(is.numeric(cfai) && length(cfai) == 1) {
+          cat(paste(cfai, "\n"))
+        } else print(cfa[[i]])
+      }
+    }
+  }
+
   cat(paste("\n", x$trend$label, ":\n", sep=""))
   
   tv <- x$trend$value
@@ -287,7 +365,13 @@ print.summary.ppm <- function(x, ...) {
   else 
     for(i in seq(tv))
       print(tv[[i]])
-        
+
+  # table of coefficient estimates with SE and 95% CI
+  if(!is.null(cose <- x$coefs.SE.CI)) {
+    cat("\n")
+    print(cose)
+  }
+  
   # ---- Interaction ----------------------------
 
   if(!poisson) {

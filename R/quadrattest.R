@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.22 $  $Date: 2010/03/08 08:23:04 $
+#  $Revision: 1.26 $  $Date: 2010/12/13 07:44:31 $
 #
 
 
@@ -44,7 +44,16 @@ quadrat.test.ppm <- function(X, nx=5, ny=nx, ...,
                            list(Xname=dataname, fitname=fitname)))
 }
 
-quadrat.testEngine <- function(X, nx, ny, ...,
+quadrat.test.quadratcount <- function(X, ...) {
+  if((nxtra <- length(list(...))) > 0) {
+    warning(paste(ngettext(nxtra, "argument", "arguments"),
+                  "ignored"))
+  }
+  quadrat.testEngine(Xcount=X)
+}
+
+
+quadrat.testEngine <- function(X, nx, ny, ..., Xcount=NULL,
                                xbreaks=NULL, ybreaks=NULL, tess=NULL,
                                fit=NULL, Xname=NULL, fitname=NULL) {
   if(length(list(...)) > 0) {
@@ -53,8 +62,9 @@ quadrat.testEngine <- function(X, nx, ny, ...,
                   paste(dQuote(nama), collapse=", "),
                   "ignored"))
   }
-  Xcount <- quadratcount(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks,
-                         tess=tess)
+  if(is.null(Xcount))
+    Xcount <- quadratcount(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks,
+                           tess=tess)
   tess <- attr(Xcount, "tess")
   # determine expected values under model
   if(is.null(fit)) {
@@ -63,9 +73,7 @@ quadrat.testEngine <- function(X, nx, ny, ...,
       areas <- outer(diff(tess$xgrid), diff(tess$ygrid), "*")
     else 
       areas <- unlist(lapply(tiles(tess), area.owin))
-    W <- as.owin(tess)
-    XW <- X[W]
-    fitmeans <- XW$n * areas/sum(areas)
+    fitmeans <- sum(Xcount) * areas/sum(areas)
     df <- length(fitmeans) - 1
   } else {
     if(!is.ppm(fit))
@@ -124,6 +132,15 @@ quadrat.testEngine <- function(X, nx, ny, ...,
   return(result)
 }
 
+print.quadrattest <- function(x, ...) {
+  NextMethod("print")
+  pm <- function(te, ..., brief=TRUE) {
+    print(te, ..., brief=brief)
+  }
+  cat("Quadrats: ")
+  pm(as.tess(x), ...)
+  return(invisible(NULL))
+}
 
 plot.quadrattest <- function(x, ...) {
   xname <- deparse(substitute(x))

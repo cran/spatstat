@@ -34,14 +34,21 @@
 
   The optional argument \code{colmap} gives an easy way to display
   different altitudes in different colours (if this is what you
-  want). If \code{colmap} is a character vector, then the range of
-  altitudes in the perspective plot will be divided into
-  \code{length(colmap)} intervals, and those parts of the surface
-  which lie in a particular altitude range will be assigned
-  the corresponding colour from \code{colmap}. Alternatively if
-  \code{colmap} is a list with entries \code{breaks} and \code{col},
-  then \code{colmap$breaks} determines the breakpoints of the altitude
-  intervals, and \code{colmap$col} provides the corresponding colours.
+  want).
+  \itemize{
+    \item If \code{colmap} is a colour map (object of class \code{"colourmap"},
+    created by the function \code{\link{colourmap}})
+    then this colour map will be used to associate
+    altitudes with colours.
+    \item If \code{colmap} is a character vector, then the range of
+    altitudes in the perspective plot will be divided into
+    \code{length(colmap)} intervals, and those parts of the surface
+    which lie in a particular altitude range will be assigned
+    the corresponding colour from \code{colmap}.
+    \item If \code{colmap} is a list with entries \code{breaks} and \code{col},
+    then \code{colmap$breaks} determines the breakpoints of the altitude
+    intervals, and \code{colmap$col} provides the corresponding colours.
+  }
   
   Graphical parameters controlling the perspective plot
   are passed through the \code{...} arguments
@@ -57,7 +64,9 @@
 \examples{
    # an image
    Z <- setcov(owin())
-   persp(Z, colmap=terrain.colors(128), axes=FALSE, shade=0.3)
+   persp(Z, colmap=terrain.colors(128))
+   co <- colourmap(range=c(0,1), col=rainbow(128))
+   persp(Z, colmap=co, axes=FALSE, shade=0.3)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

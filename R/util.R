@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.65 $    $Date: 2010/11/24 06:28:57 $
+#    $Revision: 1.67 $    $Date: 2011/01/14 10:04:28 $
 #
 #  (a) for matrices only:
 #
@@ -294,7 +294,8 @@ ensure2vector <- function(x) {
   return(x)
 }
 
-check.nvector <- function(v, npoints, fatal=TRUE, things="data points") {
+check.nvector <- function(v, npoints, fatal=TRUE, things="data points",
+                          naok=FALSE) {
   # vector of numeric values for each point/thing
   vname <- sQuote(deparse(substitute(v)))
   whinge <- NULL
@@ -303,7 +304,7 @@ check.nvector <- function(v, npoints, fatal=TRUE, things="data points") {
   else if(length(v) != npoints)
     whinge <- paste("The length of", vname,
                     "should equal the number of", things)
-  else if(any(is.na(v)))
+  else if(!naok && any(is.na(v)))
     whinge <- paste("Some values of", vname, "are NA or NaN")
   #
   if(!is.null(whinge)) {
@@ -312,17 +313,20 @@ check.nvector <- function(v, npoints, fatal=TRUE, things="data points") {
   return(TRUE)
 }
 
-check.nmatrix <- function(m, npoints, fatal=TRUE, things="data points") {
-  # matrix of values for each pair of points/things
+check.nmatrix <- function(m, npoints, fatal=TRUE, things="data points",
+                          naok=FALSE, squarematrix=TRUE) {
+  # matrix of values for each thing or each pair of things
   mname <- sQuote(deparse(substitute(m)))
   whinge <- NULL
   if(!is.matrix(m))
     whinge <- paste(mname, "should be a matrix")
-  else if(nrow(m) != ncol(m))
+  else if(squarematrix && (nrow(m) != ncol(m)))
     whinge <- paste(mname, "should be a square matrix")
+  else if(!naok && any(is.na(m)))
+    whinge <- paste("Some values of", mname, "are NA or NaN")
   else if(nrow(m) != npoints)
-    whinge <- paste("Dimensions of", mname,
-               "do not match number of", things)
+    whinge <- paste("Number of rows in", mname,
+               "does not match number of", things)
   #
   if(!is.null(whinge)) {
     if(fatal) stop(whinge) else return(FALSE)

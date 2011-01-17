@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.29 $ $Date: 2010/03/15 00:20:13 $
+# $Revision: 1.31 $ $Date: 2011/01/14 11:31:06 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -22,15 +22,21 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   # -------------- Calculate residuals/weights -------------------
 
   # Discretised residuals
-  
+
   if(type == "eem") {
-    residu <- if(!is.null(rv)) rv else eem(object, check=FALSE) 
+    residval <- if(!is.null(rv)) rv else eem(object, check=FALSE)
+    residval <- as.numeric(residval)
     X <- data.ppm(object)
-    Y <- X %mark% as.numeric(residu)
+    Y <- X %mark% residval
   } else {
-    residu <- if(!is.null(rv)) rv else residuals.ppm(object, type=type, check=FALSE)
-    Y <- U %mark% as.numeric(residu)
-    Y <- Y
+    if(!is.null(rv) && !inherits(rv, "msr"))
+      stop("rv should be a measure (object of class msr)")
+    residobj <-
+      if(!is.null(rv)) rv else residuals.ppm(object, type=type, check=FALSE)
+    residval <- residobj$val
+    if(ncol(as.matrix(residval)) > 1)
+      stop("Not implemented for vector-valued residuals; use [.msr to split into separate components")
+    Y <- U %mark% residval
   }
 
   # Atoms and density of measure
@@ -45,9 +51,9 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
       Ycts  <- U %mark% (-1)
       Ydens <- as.im(-1, Y$window)
     } else {
-      atoms <- attr(residu, "atoms")
-      masses <- attr(residu, "discrete")
-      cts <- attr(residu, "continuous")
+      atoms <- residobj$atoms
+      masses <- residobj$discrete
+      cts <- residobj$continuous
       if(!is.null(atoms) && !is.null(masses) && !is.null(cts)) {
         Ymass <- (U %mark% masses)[atoms]
         Ycts    <- U %mark% cts
@@ -89,6 +95,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   if(clip) {
     Wclip <- erosion.owin(W, rbord)
     Yclip <- Y[Wclip]
+    Qweightsclip <- Qweights[inside.owin(U, , Wclip)]
     if(!is.null(Ycts))
       Ycts <- Ycts[Wclip]
     if(!is.null(Ydens))
@@ -147,7 +154,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     lurking(object, covariate=x.quad(Q),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
-            rv=residu,
+            rv=residval,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
@@ -160,7 +167,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
     lurking(object, covariate=y.quad(Q),
             type=type,
             clipwindow= if(clip) Wclip else NULL,
-            rv=residu,
+            rv=residval,
             plot.sd=compute.sd,
             plot.it=FALSE,
             typename=typename,
@@ -171,9 +178,10 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
   # -------------- summary numbers --------------
   
   if(opt$sum) 
-    result$sum <- list(marksum=sum(Yclip$marks),
-                       area=area.owin(Wclip),
-                       range=if(!is.null(Z)) range(Z$v, na.rm=TRUE) else NULL)
+    result$sum <- list(marksum=sum(Yclip$marks, na.rm=TRUE),
+                       area.Wclip=area.owin(Wclip),
+                       area.quad=if(clip) sum(Qweightsclip) else sum(Qweights),
+                       range=if(!is.null(Z)) range(Z) else NULL)
 
   return(invisible(result))
 }
@@ -356,11 +364,14 @@ print.diagppm <- function(x, ...) {
   cat(paste("\t", paste(avail, collapse="\n\t"), "\n", sep=""))
   
   if(opt$sum) {
+    xs <- x$sum
     windowname <- if(x$clip) "clipped window" else "entire window"
     cat(paste("sum of", typename, "in", windowname, "=",
-              signif(sum(x$Yclip$marks),4), "\n"))
+              signif(sum(xs$marksum),4), "\n"))
     cat(paste("area of", windowname, "=",
-              signif(area.owin(x$Yclip$window), 4), "\n"))
+              signif(xs$area.Wclip, 4), "\n"))
+    cat(paste("quadrature area =",
+              signif(xs$area.quad, 4), "\n"))
   }
   if(opt$smooth) 
     cat(paste("range of smoothed field = [",

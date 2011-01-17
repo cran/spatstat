@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.31 $   $Date: 2010/11/22 04:40:12 $
+#    $Revision: 1.32 $   $Date: 2010/12/23 09:28:30 $
 #
 #
 
@@ -140,6 +140,11 @@ reset.spatstat.options <- function() {
        ),
        densityC=list(
          default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       exactdt.checks.data=list(
+         default=FALSE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        )

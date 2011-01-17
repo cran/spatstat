@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.37 $ $Date: 2010/07/16 05:31:57 $
+#   $Revision: 1.41 $ $Date: 2010/12/13 09:36:39 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, keepempty=FALSE) {
@@ -92,43 +92,49 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
 
 is.tess <- function(x) { inherits(x, "tess") }
 
-print.tess <- function(x, ...) {
-  cat("Tessellation\n")
+print.tess <- function(x, ..., brief=FALSE) {
+  full <- !brief
+  if(full) cat("Tessellation\n")
   win <- x$window
-  unitinfo <- summary(unitname(win))
   switch(x$type,
          rect={
-           equispaced <- function(z) {
-             dz <- diff(z)
-             diff(range(dz))/mean(dz) < 0.01
+           if(full) {
+             unitinfo <- summary(unitname(win))
+             equispaced <- function(z) {
+               dz <- diff(z)
+               diff(range(dz))/mean(dz) < 0.01
+             }
+             if(equispaced(x$xgrid) && equispaced(x$ygrid)) 
+               cat(paste("Tiles are equal rectangles, of dimension",
+                         signif(mean(diff(x$xgrid)), 5),
+                         "x",
+                         signif(mean(diff(x$ygrid)), 5),
+                         unitinfo$plural, " ", unitinfo$explain,
+                         "\n"))
+             else
+               cat(paste("Tiles are unequal rectangles\n"))
            }
-           if(equispaced(x$xgrid) && equispaced(x$ygrid)) 
-             cat(paste("Tiles are equal rectangles, of dimension",
-                       signif(mean(diff(x$xgrid)), 5),
-                       "x",
-                       signif(mean(diff(x$ygrid)), 5),
-                       unitinfo$plural, " ", unitinfo$explain,
-                       "\n"))
-           else
-             cat(paste("Tiles are unequal rectangles\n"))
-           cat(paste(paren(paste(length(x$xgrid)-1, "by",
-                                 length(x$ygrid)-1,
-                                 "array of tiles")),
-                     "\n"))
+           cat(paste(length(x$xgrid)-1, "by", length(x$ygrid)-1,
+                     "grid of tiles", "\n"))
          },
          tiled={
-           if(win$type == "polygonal")
-             cat("Tiles are irregular polygons\n")
-           else
-             cat("Tiles are windows of general type\n")
-           cat(paste(length(x$tiles), "tiles\n"))
+           if(full) {
+             if(win$type == "polygonal")
+               cat("Tiles are irregular polygons\n")
+             else
+               cat("Tiles are windows of general type\n")
+           }
+           cat(paste(length(x$tiles), "tiles (irregular windows)\n"))
          },
          image={
-           cat(paste("Tessellation is determined by",
-                     "a factor-valued image",
-                     "with", length(levels(x$image)), "levels\n"))
+           nlev <- length(levels(x$image))
+           if(full) {
+             cat(paste("Tessellation is determined by",
+                       "a factor-valued image",
+                       "with", nlev, "levels\n"))
+           } else cat(paste(nlev, "tiles (levels of a pixel image)\n"))
          })
-  print(win)
+  if(full) print(win)
   invisible(NULL)
 }
 
@@ -255,7 +261,7 @@ tilenames <- function(x) {
            nam <- outer(rev(seq(ny)),
                         seq(nx),
                         function(j,i,ny) {
-                          paste("Tile row", ny-j+1, ", col ", i,
+                          paste("Tile row ", ny-j+1, ", col ", i,
                                 sep="")},
                         ny=ny)
            return(nam)
@@ -275,6 +281,29 @@ tilenames <- function(x) {
   return(nam)
 }
 
+tile.areas <- function(x) {
+  stopifnot(is.tess(x))
+  switch(x$type,
+         rect={
+           xg <- x$xgrid
+           yg <- x$ygrid
+           nx <- length(xg) - 1 
+           ny <- length(yg) - 1
+           a <- outer(rev(diff(yg)), diff(xg), "*")
+           a <- as.vector(t(a))
+           names(a) <- as.vector(t(tilenames(x)))
+         },
+         tiled={
+           a <- lapply(x$tiles, area.owin)
+         },
+         image={
+           z <- x$image
+           a <- table(z$v) * z$xstep * z$ystep
+         })
+  return(a)
+}
+
+         
 as.im.tess <- function(X, W=NULL, ...,
                        eps=NULL, dimyx=NULL, xy=NULL,
                        na.replace=NULL) {

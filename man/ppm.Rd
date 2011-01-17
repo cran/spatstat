@@ -10,6 +10,7 @@
    ppm(Q, trend=~1, interaction=Poisson(),
        \dots,
        covariates=NULL,
+       covfunargs = list(),
        correction="border",
        rbord=reach(interaction),
        use.gam=FALSE,
@@ -43,6 +44,10 @@
     coordinates) required by the model.
     Either a data frame, or a list whose entries are images,
     functions, windows or single numbers. See Details.
+  }
+  \item{covfunargs}{
+    A named list containing the values of any additional arguments
+    required by covariate functions.
   }
   \item{correction}{
     The name of the edge correction to be used. The default 
@@ -204,11 +209,12 @@
       or a single number (indicating a covariate that is
       constant in this dataset). 
       Each entry in the list must be an image (object of class \code{"im"},
-      see \code{\link{im.object}}), or a \code{function(x,y)}, or
-      a single number. The software will look up
+      see \code{\link{im.object}}), or a \code{function(x, y, ...)}, or
+      a single number.   The software will look up
       the pixel values of each image at the required locations
-      (quadrature points).
-      In this case the argument \code{Q} may be either a quadrature
+      (quadrature points). In the case of a \code{function(x, y, ...)},
+      any additional arguments \code{\dots} should be given in
+      \code{covfunargs}. The argument \code{Q} may be either a quadrature
       scheme or a point pattern.
 
       If \code{covariates} is a list,

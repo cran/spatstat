@@ -3,10 +3,11 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.24 $  $Date: 2008/07/25 21:25:24 $
+#  $Revision: 1.26 $  $Date: 2010/12/15 05:50:33 $
 #
 
-vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
+vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn",
+                     hessian=FALSE) {
   verifyclass(object, "ppm")
 
   stopifnot(length(what) == 1 && is.character(what))
@@ -33,8 +34,9 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn") {
   ############## guts ##############################
 
   if(needguts) {
-    if(!is.poisson.ppm(object))
-      stop(paste("Sorry, vcov.ppm is not implemented for non-Poisson models",
+    if(!is.poisson.ppm(object) && !hessian)
+      stop(paste("Sorry, asymptotic variances are not available",
+                 "for non-Poisson models",
                  "fitted using maximum pseudolikelihood"))
 
     gf <- getglmfit(object)

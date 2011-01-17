@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.44 $	$Date: 2010/07/16 05:19:06 $
+#	$Revision: 2.47 $	$Date: 2010/12/19 03:08:00 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -67,11 +67,9 @@ print.ppm <- function(x, ...) {
 #       cat(paste("\n", s$trend$name, ":\n", sep=""))
 
 	if(!notrend) {
-		cat("\nTrend formula: ")
-		print(s$trend$formula)
+          cat("\nTrend formula: ")
+          print(s$trend$formula)
         }
-
-
 
         tv <- s$trend$value
 
@@ -94,6 +92,21 @@ print.ppm <- function(x, ...) {
         }
 
         cat("\n")
+
+        if(!is.null(cfa <- s$covfunargs) && length(cfa) > 0) {
+          cat("Covariate function arguments (covfunargs) provided:\n")
+          for(i in seq(along=cfa)) {
+            cat(paste(names(cfa)[i], "= "))
+            cfai <- cfa[[i]]
+            if(is.numeric(cfai) && length(cfai) == 1) {
+              cat(paste(cfai, "\n"))
+            } else print(cfa[[i]])
+          }
+        }
+        
+        # ----- parameter estimates with SE and 95% CI --------------------
+        if(!is.null(cose <- s$coefs.SE.CI))
+          print(cose)
         
         # ---- Interaction ----------------------------
 

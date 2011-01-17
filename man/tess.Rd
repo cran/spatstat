@@ -79,12 +79,12 @@
 
   There are methods for \code{print}, \code{plot}, \code{[} and \code{[<-}
   for tessellations. Use \code{\link{tiles}} to extract the list of
-  tiles in a tessellation.
+  tiles in a tessellation, or \code{\link{tile.areas}} to compute their
+  areas.
 
   Tessellations can be used to classify the points of
   a point pattern, in \code{\link{split.ppp}}, \code{\link{cut.ppp}} and
   \code{\link{by.ppp}}.
-
 }
 \value{
   An object of class \code{"tess"} representing the tessellation.
@@ -99,7 +99,8 @@
   \code{\link{cut.ppp}},
   \code{\link{by.ppp}},
   \code{\link{quadrats}},
-  \code{\link{bdist.tiles}}.
+  \code{\link{bdist.tiles}},
+  \code{\link{tile.areas}}.
 }
 \examples{
   A <- tess(xgrid=0:4,ygrid=0:4)

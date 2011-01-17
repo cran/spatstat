@@ -2,6 +2,7 @@
 \alias{quadrat.test}
 \alias{quadrat.test.ppp}
 \alias{quadrat.test.ppm}
+\alias{quadrat.test.quadratcount}
 \title{Chi-Squared Dispersion Test for Spatial Point Pattern Based on
   Quadrat Counts}
 \description{
@@ -14,13 +15,16 @@
 quadrat.test(X, ...)
 \method{quadrat.test}{ppp}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
 \method{quadrat.test}{ppm}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
+\method{quadrat.test}{quadratcount}(X, ...)
 }
 \arguments{
   \item{X}{
     A point pattern (object of class \code{"ppp"})
     to be subjected to the goodness-of-fit test.
     Alternatively a fitted point process model (object of class
-    \code{"ppm"}) to be tested. 
+    \code{"ppm"}) to be tested.
+    Alternatively \code{X} can be the result of applying
+    \code{\link{quadratcount}} to a point pattern.
   }
   \item{nx,ny}{
     Numbers of quadrats in the \eqn{x} and \eqn{y} directions.
@@ -46,8 +50,8 @@ quadrat.test(X, ...)
 
   The function \code{quadrat.test} is generic, with methods for
   point patterns (class \code{"ppp"}), split point patterns
-  (class \code{"splitppp"}) and point process models
-  (class \code{"ppm"}).
+  (class \code{"splitppp"}), point process models
+  (class \code{"ppm"}) and quadrat count tables (class \code{"quadratcount"}).
 
   \itemize{
     \item
@@ -113,6 +117,10 @@ quadrat.test(X, ...)
   quadrat.test(simdat)
   quadrat.test(simdat, 4, 3)
 
+  # quadrat counts
+  qS <- quadratcount(simdat, 4, 3)
+  quadrat.test(qS)
+
   # fitted model: inhomogeneous Poisson
   fitx <- ppm(simdat, ~x, Poisson())
   quadrat.test(fitx)
@@ -134,6 +142,7 @@ quadrat.test(X, ...)
   qB <- quadrat.test(simdat, tess=B)
   plot(simdat, main="quadrat.test(simdat, tess=B)", pch="+")
   plot(qB, add=TRUE, col="red", lwd=2, cex=1.2)
+
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
