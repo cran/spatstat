@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.28 $	$Date: 2010/07/20 09:24:55 $
+#    $Revision: 1.31 $	$Date: 2011/01/19 07:07:37 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -18,7 +18,7 @@ pairwise.family <-
        print = function(self) {
          cat("Pairwise interaction family\n")
        },
-       plot = function(fint, ...) {
+       plot = function(fint, ..., d=NULL, plotit=TRUE) {
          verifyclass(fint, "fii")
          inter <- fint$interaction
          if(is.null(inter) || is.null(inter$family)
@@ -43,9 +43,16 @@ pairwise.family <-
              warning("Reach of interaction is infinite; need xlim to plot it")
              return(invisible(NULL))
            }
-         } 
-         dmax <- 1.25 * rmax
-         d <- seq(0, dmax, length=256)
+         }
+         if(is.null(d)) {
+           dmax <- 1.25 * rmax
+           d <- seq(0, dmax, length=256)
+         } else {
+           stopifnot(is.numeric(d) &&
+                     all(is.finite(d)) &&
+                     all(diff(d) > 0))
+           dmax <- max(d)
+         }
          if(is.null(xlim))
            xlim <- c(0, dmax)
          types <- potpars$types
@@ -67,12 +74,13 @@ pairwise.family <-
                      c("distance argument r",
                        "pairwise interaction term h(r)",
                        "reference value 1"))
-           do.call("plot.fv",
-                   resolve.defaults(list(fun),
-                                    list(...),
-                                    list(ylab="Pairwise interaction",
-                                         xlab="Distance",
-                                         ylim=ylim)))
+           if(plotit)
+             do.call("plot.fv",
+                     resolve.defaults(list(fun),
+                                      list(...),
+                                      list(ylab="Pairwise interaction",
+                                           xlab="Distance",
+                                           ylim=ylim)))
            return(invisible(fun))
          } else{
            # compute each potential and store in `fasp' object
@@ -114,12 +122,13 @@ pairwise.family <-
                         formulae=list(cbind(h, one) ~ r),
                         title="Fitted pairwise interactions",
                         rowNames=paste(types), colNames=paste(types))
-           do.call("plot.fasp",
-                   resolve.defaults(list(funz),
-                                    list(...),
-                                    list(ylim=ylim,
-                                         ylab="Pairwise interaction",
-                                         xlab="Distance")))
+           if(plotit)
+             do.call("plot.fasp",
+                     resolve.defaults(list(funz),
+                                      list(...),
+                                      list(ylim=ylim,
+                                           ylab="Pairwise interaction",
+                                           xlab="Distance")))
            return(invisible(funz))
          }
        },

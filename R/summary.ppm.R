@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.39 $   $Date: 2010/12/19 03:08:13 $
+#    $Revision: 1.42 $   $Date: 2011/01/20 01:56:21 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -289,9 +289,9 @@ print.summary.ppm <- function(x, ...) {
   if(x$old) 
     cat(paste("** Executed by old spatstat version", x$version, " **\n"))
   
-  cat(paste("Edge correction:", dQuote(x$args$correction)))
-  if(x$args$rbord > 0)
-    cat(paste("border correction distance r =", x$args$rbord,"\n"))
+  cat(paste("Edge correction:", dQuote(x$args$correction), "\n"))
+  if(x$args$correction == "border")
+    cat(paste("\t[border correction distance r =", x$args$rbord,"]\n"))
 
   cat("\n----------------------------------------------------\n")
 
@@ -345,7 +345,7 @@ print.summary.ppm <- function(x, ...) {
       for(i in seq(length(cd)))
         cat(paste("\t", names(cd)[i], ": ", cd[i], "\n", sep=""))
     }
-    if(!is.null(cfa <- x$covfunargs && length(cfa) > 0)) {
+    if(!is.null(cfa <- x$covfunargs) && length(cfa) > 0) {
       cat("Covariate function arguments (covfunargs) provided:\n")
       for(i in seq(along=cfa)) {
         cat(paste(names(cfa)[i], "= "))

@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.30 $ $Date: 2011/01/17 01:19:22 $
+# $Revision: 1.31 $ $Date: 2011/01/19 07:11:33 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -324,7 +324,6 @@ lurking <- function(object, covariate, type="eem",
         relerr <- abs(ran[1]/ran[2])
         nerr <- sum(nbg)
         if(relerr > 1e-6) {
-          browser()
           warning(paste(nerr, "negative",
                         ngettext(nerr, "value (", "values (min="),
                         signif(ran[1], 4), ")",

@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.39 $    $Date: 2009/08/20 17:03:52 $
+#           $Revision: 1.40 $    $Date: 2011/01/19 07:12:30 $
 #
 #     Kmeasure()         compute an estimate of the second order moment measure
 #
@@ -238,7 +238,8 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
       wt <- a/co
       me <- spatstat.options("maxedgewt")
       weight <- matrix(pmin(me, wt), ncol=2*nc, nrow=2*nr)
-      if(debug) browser()
+#      if(debug) browser()
+      #
       # apply edge correction
       mom <- mom * weight
       # set to NA outside 'reasonable' region
