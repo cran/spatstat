@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.67 $    $Date: 2011/01/14 10:04:28 $
+#    $Revision: 1.68 $    $Date: 2011/01/19 06:06:44 $
 #
 #  (a) for matrices only:
 #
@@ -490,7 +490,8 @@ warn.ignored.args <- function(..., context=NULL) {
 
 multiply.only.finite.entries <- function(x, a) {
   # In ppm a potential value that is -Inf must remain -Inf
-  ifelse(is.finite(x), x * a, x)
+  # and a potential value that is 0 multiplied by NA remains 0
+  ifelse(is.finite(x) & x != 0, x * a, x)
 }
 
 singlestring <- function(s, coll="") {

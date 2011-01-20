@@ -1,3 +1,16 @@
+	CHANGES IN spatstat VERSION 1.21-4
+
+OVERVIEW 
+
+    o	Urgent bug fix
+
+BUGS
+ 
+    o   print.summary.ppm exited with an error message,
+    	if the model had external covariates.
+    	Fixed.
+
+
 	CHANGES IN spatstat VERSION 1.21-3
 
 OVERVIEW 

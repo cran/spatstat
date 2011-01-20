@@ -67,6 +67,10 @@
   fit <- ppm(demopat, ~marks, Poisson())
   summary(fit)
   }
+
+  # model with external covariates
+  fitX <- ppm(X, ~Z, covariates=list(Z=function(x,y){x+y}))
+  summary(fitX)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
