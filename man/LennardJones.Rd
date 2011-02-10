@@ -6,12 +6,18 @@
    which can then be fitted to point pattern data.
 }
 \usage{
-  LennardJones()
+  LennardJones(sigma0=NA)
 }
 \value{
   An object of class \code{"interact"}
   describing the Lennard-Jones interpoint interaction
   structure.
+}
+\arguments{
+  \item{sigma0}{
+    Optional. Initial estimate of the parameter \eqn{\sigma}{sigma}.
+    A positive number.
+  }
 }
 \details{
   In a pairwise interaction point process with the
@@ -20,7 +26,7 @@
   a distance \eqn{d} apart,
   contributes a factor
   \deqn{
-    \exp \left\{
+    v(d) = \exp \left\{
     -
     4\epsilon
     \left[
@@ -34,7 +40,7 @@
     \right]
     \right\}
   }{
-    exp( - 4 * epsilon * ((sigma/d)^12 - (sigma/d)^6))
+    v(d) = exp( - 4 * epsilon * ((sigma/d)^12 - (sigma/d)^6))
   }
   to the probability density,
   where \eqn{\sigma}{sigma} and \eqn{\epsilon}{epsilon} are
@@ -67,23 +73,38 @@
   The appropriate description of the Lennard-Jones pairwise interaction is
   yielded by the function \code{LennardJones()}.
   See the examples below.
- 
-  The ``canonical regular parameters'' estimated by \code{\link{ppm}} are
-  \eqn{\theta_1 = 4 \epsilon \sigma^{12}}{theta1 = 4 * epsilon * sigma^12}
-  and 
-  \eqn{\theta_2 = 4 \epsilon \sigma^6}{theta2 = 4 * epsilon * sigma^6}.
 }
-\section{Warnings}{
+\section{Rescaling}{
+  To avoid numerical instability,
+  the interpoint distances \code{d} are rescaled
+  when fitting the model.
+  
+  Distances are rescaled by dividing by \code{sigma0}.
+  In the formula for \eqn{v(d)} above,
+  the interpoint distance \eqn{d} will be replaced by \code{d/sigma0}.
+
+  The rescaling happens automatically by default.
+  If the argument \code{sigma0} is missing or \code{NA} (the default),
+  then \code{sigma0} is taken to be the minimum
+  nearest-neighbour distance in the data point pattern (in the
+  call to \code{\link{ppm}}). 
+  
+  If the argument \code{sigma0} is given, it should be a positive
+  number, and it should be a rough estimate of the
+  parameter \eqn{\sigma}{sigma}. 
+  
+  The ``canonical regular parameters'' estimated by \code{\link{ppm}} are
+  \eqn{\theta_1 = 4 \epsilon (\sigma/\sigma_0)^{12}}{theta1 = 4 * epsilon * (sigma/sigma0)^12}
+  and 
+  \eqn{\theta_2 = 4 \epsilon (\sigma/\sigma_0)^6}{theta2 = 4 * epsilon * (sigma/sigma0)^6}.
+}
+\section{Warnings and Errors}{
   Fitting the Lennard-Jones model is extremely unstable, because
   of the strong dependence between the functions \eqn{d^{-12}}{d^(-12)}
-  and \eqn{d^{-6}}{d^(-6)}. The fitting algorithm often fails to converge.
-  
-  The fitting algorithm may also fail to converge 
-  when the spatial window of the point pattern dataset has dimensions
-  that are much greater than 1 unit or much less than 1 unit,
-  leading to overflow or underflow in the 12th power of the coordinates.
-  To fix this problem, rescale the coordinates so that the window is
-  close to the unit square (see Examples).
+  and \eqn{d^{-6}}{d^(-6)}. The fitting algorithm often fails to
+  converge. Try increasing the number of
+  iterations of the GLM fitting algorithm, by setting
+  \code{gcontrol=list(maxit=1e3)} in the call to \code{\link{ppm}}.
   
   Errors are likely to occur if this model is fitted to a point pattern dataset
   which does not exhibit both short-range inhibition and
@@ -105,11 +126,11 @@
 \examples{
    data(demopat)
    demopat
-   X <- rescale(unmark(demopat), 5000)
+   X <- unmark(demopat)
    X
-   fit <- ppm(X, ~1, LennardJones(), rbord=0.1)
+   fit <- ppm(X, ~1, LennardJones(), rbord=500)
    fit
-   plot(fitin(fit), xlim=c(0,0.01))
+   plot(fitin(fit), xlim=c(0,50))
 }
 \references{
   Lennard-Jones, J.E. (1924) On the determination of molecular fields.

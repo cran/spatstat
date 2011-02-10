@@ -3,10 +3,11 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.26 $  $Date: 2010/12/15 05:50:33 $
+#  $Revision: 1.27 $  $Date: 2011/01/24 05:58:45 $
 #
 
-vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn",
+vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
+                     gam.action="warn", matrix.action="warn",
                      hessian=FALSE) {
   verifyclass(object, "ppm")
 
@@ -51,7 +52,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn",
     }
     # if it's a gam, issue a warning
     if(inherits(gf, "gam")) {
-      switch(gamaction,
+      switch(gam.action,
              fatal={
                stop(paste("model was fitted by gam();",
                           "execution halted because fatal=TRUE"),
@@ -85,25 +86,25 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE, gamaction="warn",
 
   ############## end of guts ####################################
   
-
+  if(what %in% c("vcov", "corr") && is.null(varcov)) {
+    # Need variance-covariance matrix.
+    # Derive from Fisher information
+    msilent <- (matrix.action == "silent")
+    mfatal  <- (matrix.action == "fatal")
+    varcov <- try(solve(fisher), silent=msilent)
+    if(inherits(varcov, "try-error")) {
+      if(mfatal)
+        stop("Inverse of matrix not available")
+      return(NULL)
+    }
+  }
+         
   switch(what,
          fisher = { return(fisher) },
          vcov   = {
-           # Derive variance-covariance from Fisher information unless given
-           if(is.null(varcov)) {
-             varcov <- try(solve(fisher))
-             if(inherits(varcov, "try-error"))
-               return(NULL)
-           }
            return(varcov)
          },
          corr={
-           # Derive variance-covariance from Fisher information unless given
-           if(is.null(varcov)) {
-             varcov <- try(solve(fisher))
-             if(inherits(varcov, "try-error"))
-               return(NULL)
-           }
            sd <- sqrt(diag(varcov))
            return(varcov / outer(sd, sd, "*"))
          },

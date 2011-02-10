@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.120 $	$Date: 2010/12/13 09:10:04 $
+#	$Revision: 4.121 $	$Date: 2011/02/07 06:23:37 $
 #
 #
 #	A window may be either
@@ -473,9 +473,6 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
       } else {
     # use spatstat defaults
         np <- spatstat.options("npixel")
-        if(!is.numeric(np) || length(np) > 2)
-          stop(paste("Illegal value for spatstat.options(",
-                     dQuote("npixel"), ")"))
         if(length(np) == 1)
           nr <- nc <- np[1]
         else {

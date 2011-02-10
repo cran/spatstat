@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.15 $ $Date: 2010/03/08 08:23:04 $
+# $Revision: 1.16 $ $Date: 2011/02/07 06:18:06 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -24,7 +24,7 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
     StatName <- if(statistic == "K") "K-function" else "pair correlation function"
     Stat <- do.call(StatFun, append(list(X), statargs))
   } else {
-    lambda <- predict(po, ngrid=spatstat.options("npixel"))
+    lambda <- predict(po, ngrid=rev(spatstat.options("npixel")))
     StatFun <- if(statistic == "K") "Kinhom" else "pcfinhom"
     StatName <- if(statistic == "K") "inhomogeneous K-function" else "inhomogeneous pair correlation function"
     Stat <- do.call(StatFun, append(list(X, lambda), statargs))

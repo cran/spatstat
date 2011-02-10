@@ -86,8 +86,8 @@ function(object, window, ngrid=NULL, locations=NULL,
                "should be specified"))
 
   if(is.null(ngrid) && is.null(locations)) 
-    # use ngrid 
-    ngrid <- 50
+    # use regular grid
+    ngrid <- rev(spatstat.options("npixel"))
     
   want.image <- is.null(locations) ||
                     (is.owin(locations) && locations$type == "mask")

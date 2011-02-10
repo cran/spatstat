@@ -1,3 +1,41 @@
+	CHANGES IN spatstat VERSION 1.21-5
+
+OVERVIEW 
+
+    o	Increased numerical stability.
+	
+    o	New 'self-starting' feature of interpoint interactions.
+	
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o 	ppm
+        Interaction objects may now be 'self-starting'
+    	i.e. initial parameter estimates can be computed
+	from the point pattern dataset. 
+	So far, only the LennardJones() interaction 
+	has a self-starting feature.
+
+    o   LennardJones
+	Increased numerical stability.
+	New (optional) scaling argument 'sigma0'.
+	Interpoint distances are automatically rescaled
+	using 'self-starting' feature. 
+		
+    o	vcov.ppm
+	New argument 'matrix.action' controls what happens when
+	the matrix is ill-conditioned.
+	Changed name of argument 'gamaction' to 'gam.action'
+
+    o   rmhmodel.ppm
+	Default resolution of trend image has been increased.
+
+    o   is.poisson.ppm
+	Accelerated.
+
+    o   ppm, kppm, qqplot.ppm
+	Improved robustness to numerical error
+
+
 	CHANGES IN spatstat VERSION 1.21-4
 
 OVERVIEW 

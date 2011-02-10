@@ -37,11 +37,10 @@
   The global parameters are:
   \describe{
     \item{npixel}{
-      Controls the number of pixels in the discrete approximation
-      of an irregular window by a binary pixel image as created by
-      \code{\link{as.mask}}. Either an integer or a pair of integers
+      Default number of pixels in a binary mask or pixel image.
+      Either an integer, or a pair of integers,
       giving the number of pixels in the \code{x} and \code{y}
-      directions.
+      directions respectively.
     }
     \item{maxedgewt}{
       Edge correction weights will be trimmed
@@ -112,14 +111,18 @@
     }
     \item{gpclib}{
       Logical flag indicating whether the polygon clipping library
-      \code{gpclib} can be used. Default is \code{TRUE}. If it is set to
-      \code{FALSE} then certain polygon operations such as
-      intersection and union will be approximated by raster operations.
+      \pkg{gpclib} can be used. The default is \code{FALSE}, which means
+      that the package \pkg{gpclib} is not loaded, and
+      certain polygon operations (such as the intersection and union
+      of polygons) will be approximated by raster operations.
+      If this option is re-set to \code{TRUE}, then the package
+      \pkg{gpclib} will be loaded, and polygon operations such as the
+      union and intersection of polygons will result in a polygon.
       The licence
       for \code{gpclib} is not Free Open Source and explicitly forbids
       commercial use. See \code{library(help=gpclib)}. If you are using
-      \code{spatstat} for commercial purposes you will need to set
-      this option to \code{FALSE}.
+      \code{spatstat} for commercial purposes, this option should remain
+      set to \code{FALSE}.
     }
     \item{maxmatrix}{
       The maximum permitted size (rows times columns)

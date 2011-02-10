@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.118 $	$Date: 2011/01/17 02:36:38 $
+#	$Revision: 5.120 $	$Date: 2011/02/08 09:10:12 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -82,6 +82,12 @@ function(Q,
   if(!is.null(interaction) && !inherits(interaction, "interact"))
     stop(paste("Argument", sQuote("interaction"), "has incorrect format"))
 #
+# Self-starting interaction?
+#
+  if(!is.null(ss <- interaction$selfstart)) 
+    interaction <- ss(X, interaction)
+  
+#
 # Interpret the call
 want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
@@ -93,7 +99,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/01/17 02:36:38 $")
+                    date="$Date: 2011/02/08 09:10:12 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object

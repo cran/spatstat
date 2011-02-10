@@ -7,7 +7,7 @@
 }
 \usage{
   \method{vcov}{ppm}(object, \dots, what = "vcov", verbose = TRUE,
-gamaction="warn", hessian=FALSE)
+gam.action="warn", matrix.action="warn", hessian=FALSE)
 }
 \arguments{
   \item{object}{A fitted point process model (an object of class \code{"ppm"}.)}
@@ -22,8 +22,13 @@ gamaction="warn", hessian=FALSE)
   \item{verbose}{Logical. If \code{TRUE}, a message will be printed
     if various minor problems are encountered.
   }
-  \item{gamaction}{String indicating what to do if \code{object} was
+  \item{gam.action}{String indicating what to do if \code{object} was
     fitted by \code{gam}. Options are \code{"fatal"}, \code{"warn"} and
+    \code{"silent"}.
+  }
+  \item{matrix.action}{String indicating what to do if the matrix
+    is ill-conditioned (so that its inverse cannot be calculated).
+    Options are \code{"fatal"}, \code{"warn"} and
     \code{"silent"}.
   }
   \item{hessian}{

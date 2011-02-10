@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.42 $   $Date: 2011/01/20 01:56:21 $
+#    $Revision: 1.44 $   $Date: 2011/01/24 06:06:06 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -228,9 +228,12 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   if(y$poisson && (length(COEFS) > 0)) {
     # compute standard errors
     se <- x$internal$se
-    if(is.null(se))
-      se <- try(sqrt(diag(vcov(x))), silent=TRUE)
-    if(!inherits(se, "try-error")) {
+    if(is.null(se)) {
+      vc <- vcov(x, matrix.action="silent")
+      if(!is.null(vc))
+        se <- sqrt(diag(vc))
+    }
+    if(!is.null(se)) {
       two <- qnorm(0.975)
       lo <- COEFS - two * se
       hi <- COEFS + two * se
@@ -411,7 +414,10 @@ is.stationary.ppm <- function(x) {
 }
 
 is.poisson.ppm <- function(x) {
-  summary.ppm(x, quick=TRUE)$poisson
+  stopifnot(is.ppm(x))
+  y <- x$interaction
+  if(is.null(y)) y <- Poisson()
+  is.poisson.interact(y)
 }
 
 is.marked.ppm <- function(X, ...) {

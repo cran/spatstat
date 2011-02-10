@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.43 $   $Date: 2010/11/21 03:56:27 $
+#  $Revision: 2.44 $   $Date: 2011/02/07 05:35:12 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -300,7 +300,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       beta <- if(!Y$marked) 1 else rep(1, length(Z$types))
       # predict on window possibly larger than original data window
       Z$trend <- 
-        if(control$condtype != "none" && wsim$type == "mask")
+        if(wsim$type == "mask")
           predict(X, window=wsim, type="trend", locations=wsim)
         else 
           predict(X, window=wsim, type="trend")
