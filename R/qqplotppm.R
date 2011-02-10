@@ -3,7 +3,7 @@
 #
 #  qqplot.ppm()       QQ plot (including simulation)
 #
-#  $Revision: 1.22 $   $Date: 2010/11/05 01:22:00 $
+#  $Revision: 1.23 $   $Date: 2011/02/07 06:20:06 $
 #
 
 qqplot.ppm <-
@@ -29,8 +29,8 @@ qqplot.ppm <-
   if(fast) {
     oldnpixel <- spatstat.options("npixel")
     if(is.null(dimyx)) 
-      dimyx <- pmin(40, oldnpixel)
-    spatstat.options(npixel=dimyx)
+      dimyx <- pmin(40, rev(oldnpixel))
+    spatstat.options(npixel=rev(dimyx))
   } 
     
   ################   How to evaluate residuals ##########################
