@@ -140,7 +140,7 @@ double lookupcif(prop, state, cdata)
     } else { /* Euclidean distance */
       if(ix > 0) {
 	for(j=0; j < ix; j++) {
-	  d = pythag(u - x[j], v-y[j]);
+	  d = hypot(u - x[j], v-y[j]);
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
@@ -150,7 +150,7 @@ double lookupcif(prop, state, cdata)
       }
       if(ixp1 < npts) {
 	for(j=ixp1; j<npts; j++) {
-	  d = pythag(u - x[j], v-y[j]);
+	  d = hypot(u - x[j], v-y[j]);
 	  k = floor(d/delta);
 	  if(k < nlook) {
 	    if(k < 0) k = 0;
