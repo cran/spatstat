@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.68 $    $Date: 2011/01/19 06:06:44 $
+#    $Revision: 1.69 $    $Date: 2011/03/25 03:37:53 $
 #
 #  (a) for matrices only:
 #
@@ -537,3 +537,13 @@ sensiblevarname <- function(guess, fallback, maxlen=12) {
   out <- substr(out, 1, maxlen)
   return(out)
 }
+
+cat.factor <- function (..., recursive=FALSE) {
+  lll <- list(...)
+  chk <- sapply(lll,is.factor)
+  if(!all(chk))
+    stop("First argument is a factor and at least one other argument is not.\n")
+  lll <- lapply(lll,as.data.frame,nm="v1")
+  return(do.call(rbind,lll)[,1])
+}
+

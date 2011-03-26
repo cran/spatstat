@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.50 $    $Date: 2010/11/22 04:40:28 $
+#  $Revision: 1.51 $    $Date: 2011/03/01 01:26:35 $
 #
 #
 
@@ -232,10 +232,24 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     shdata <- lhsdata[, shind]
     if(!is.matrix(shdata) || ncol(shdata) != 2) 
       stop("The argument shade should select two columns of x")
-    # plot grey polygon between these limits
-    shadeOK <- is.finite(rhsdata) & apply(is.finite(shdata), 1, all)
+    # determine plot limits for shaded bands
+    shdata1 <- shdata[,1]
+    shdata2 <- shdata[,2]
+    rhsOK <- is.finite(rhsdata)
+    shade1OK <- rhsOK & is.finite(shdata1)
+    shade2OK <- rhsOK & is.finite(shdata2)
+    shadeOK <- shade1OK & shade2OK
+    # work out which one is the upper limit
+    up1 <- all(shdata1[shadeOK] > shdata2[shadeOK])
+    # half-infinite intervals
+    if(!is.null(ylim)) {
+      shdata1[shade2OK & !shade1OK] <- if(up1) ylim[2] else ylim[1]
+      shdata2[shade1OK & !shade2OK] <- if(up1) ylim[1] else ylim[2]
+      shadeOK <- shade1OK | shade2OK
+    } 
+    # plot grey polygon 
     polygon(c(rhsdata[shadeOK], rev(rhsdata[shadeOK])),
-            c(shdata[shadeOK,1],  rev(shdata[shadeOK,2])),
+            c(shdata1[shadeOK],  rev(shdata2[shadeOK])),
             border=shadecol, col=shadecol)
     # overwrite graphical parameters
     lty[shind] <- 1

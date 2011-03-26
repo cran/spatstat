@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.13 $ $Date: 2011/01/15 03:14:47 $
+# $Revision: 1.14 $ $Date: 2011/02/15 07:24:08 $
 #
 
 residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
@@ -59,14 +59,14 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
                      score   = X[Z, ]
                      )
 
-  continuous <- switch(type,
-                       raw     = -lambda,
-                       inverse = -indicator,
-                       pearson = -indicator * sqrt(lambda),
-                       score   = -lambda * X)
+  density <- switch(type,
+                    raw     = -lambda,
+                    inverse = -indicator,
+                    pearson = -indicator * sqrt(lambda),
+                    score   = -lambda * X)
 
   # Residual measure (return value)
-  res <- msr(Q, discrete, continuous)
+  res <- msr(Q, discrete, density)
 
   # name the residuals
   attr(res, "type") <- type

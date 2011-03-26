@@ -17,11 +17,16 @@
   This is a method for the generic function \code{\link{as.data.frame}}
   for the class \code{"psp"} of line segment patterns.
 
-  It extracts the coordinates of the endpoints of the line segments, and 
-  returns them as columns named \code{x0}, \code{y0}, \code{x1} and
-  \code{y1} in a data frame. If the line segments were marked,
-  the marks are returned as a column named \code{marks} in the data
-  frame, with the same type as in the line segment pattern dataset.
+  It extracts the coordinates of the endpoints of the line segments,
+  and returns them as columns named \code{x0}, \code{y0}, \code{x1}
+  and \code{y1} in a data frame. If the line segments were marked,
+  the marks are appended as an extra column or columns to the
+  data frame which is returned.  If the marks are a vector then a
+  single column named \code{marks} is appended. in the data frame,
+  with the same type as in the line segment pattern dataset.  If the
+  marks are a data frame, then the columns of this data frame are
+  appended (retaining their names).
+
 }
 \value{
   A data frame with 4 or 5 columns.

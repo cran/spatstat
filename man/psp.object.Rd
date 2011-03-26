@@ -24,7 +24,10 @@
     \code{window} \tab window of observation \cr
                   \tab (an object of class \code{\link{owin}}) \cr
     \code{n} \tab number of line segments \cr
-    \code{marks} \tab optional vector of marks
+    \code{marks} \tab optional vector or data frame of marks \cr
+    \code{markformat} \tab character string specifying the format of the \cr
+                      \tab marks; \dQuote{none}, \dQuote{vector}, or
+                      \dQuote{dataframe}
   }
   Users are strongly advised not to manipulate these entries
   directly.

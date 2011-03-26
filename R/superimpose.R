@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.20 $ $Date: 2009/06/29 05:41:34 $
+# $Revision: 1.21 $ $Date: 2011/03/25 04:01:58 $
 #
 #
 ############################# 
@@ -147,7 +147,15 @@ superimposePSP <-
 
   # extract marks if any
   marxlist <- lapply(arglist, marks)
-  marx <- do.call("c", marxlist)
+  mkfmt <- markformat(marxlist[[1]])
+  marx <- switch(mkfmt,
+                 none = NULL,
+                 vector = {
+                   marxlist <- lapply(marxlist,
+                                      function(x){as.data.frame(x,nm="v1")})
+                   do.call("rbind", marxlist)[,1]
+                 },
+                 dataframe = do.call("rbind", marxlist))
 
   # determine window
   if(!is.null(W))
@@ -163,4 +171,3 @@ superimposePSP <-
 
   return(as.psp(mat, window=W, marks=marx, check=check))
 }
-  

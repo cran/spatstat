@@ -1,3 +1,53 @@
+	CHANGES IN spatstat VERSION 1.21-6
+
+OVERVIEW 
+
+    o   A line segment pattern can now have a data frame of marks.
+
+    o	Various minor extensions and alterations in behaviour
+
+NEW FUNCTIONS
+
+    o   nsegments
+    	Number of segments in a line segment pattern
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o   psp class
+        A line segment pattern (object of class 'psp') can now have a 
+	data frame of marks. 
+
+    o   density.ppp
+    	New argument 'adjust' makes it easy to adjust the smoothing bandwidth
+
+    o   plot.envelope
+    	If the upper envelope is NA but the lower envelope is finite,
+	the upper limit is now treated as +Infinity
+
+    o 	msr
+        Argument 'continuous' renamed 'density'
+
+BUG FIXES    
+
+    o   [.psp 
+        In X[W] if X is a line segment pattern and W is a polygonal window,
+	marks were sometimes discarded, leading to an error.
+	Fixed.
+
+    o   [.psp 
+        In X[W] if X is a line segment pattern and W is a rectangular window,
+	if the marks of X were factor values, they were converted to integers.
+	Fixed.
+
+    o   superimposePSP
+    	If the marks were a factor, they were mistakenly converted to integers.
+	Fixed.
+
+    o   is.marked.ppp 
+    	Did not generate a fatal error when na.action="fatal" as described
+	in the help file. 
+	Fixed. 
+
 	CHANGES IN spatstat VERSION 1.21-5
 
 OVERVIEW 

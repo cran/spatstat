@@ -3,9 +3,9 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.15 $  $Date: 2011/01/15 03:16:06 $
+#  $Revision: 1.18 $  $Date: 2011/02/15 08:08:27 $
 #
-msr <- function(qscheme, discrete, continuous, check=TRUE) {
+msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
     stop("qscheme should be a quadrature scheme")
   nquad <- n.quad(qscheme)
@@ -14,32 +14,32 @@ msr <- function(qscheme, discrete, continuous, check=TRUE) {
   Z <- is.data(qscheme)
   ndata <- sum(Z)
   # ensure conformable vectors/matrices
-  if(is.vector(discrete) && is.vector(continuous)) {
+  if(is.vector(discrete) && is.vector(density)) {
     if(check) {
-      check.nvector(discrete,   ndata, things="data points", naok=TRUE)
-      check.nvector(continuous, nquad, things="quadrature points", naok=TRUE)
+      check.nvector(discrete, ndata, things="data points", naok=TRUE)
+      check.nvector(density,  nquad, things="quadrature points", naok=TRUE)
     }
     discretepad <- rep(0, nquad)
     discretepad[Z] <- discrete
   } else {
     discrete <- as.matrix(discrete)
-    continuous <- as.matrix(continuous)
+    density <- as.matrix(density)
     if(check) {
       check.nmatrix(discrete, ndata, things="data points",
                     naok=TRUE, squarematrix=FALSE)
-      check.nmatrix(continuous, nquad, things="quadrature points",
+      check.nmatrix(density,  nquad, things="quadrature points",
                     naok=TRUE, squarematrix=FALSE)
     }
     nd <- ncol(discrete)
-    nc <- ncol(continuous)
+    nc <- ncol(density)
     if(nd != nc) {
       if(nd == 1) {
         discrete <- matrix(rep(discrete, nc), ndata, nc)
       } else if(nc == 1) {
-        continuous <- matrix(rep(continuous, nd), nquad, nd)
+        density <- matrix(rep(density, nd), nquad, nd)
       } else stop(paste("Incompatible numbers of columns in",
                         sQuote("discrete"), paren(nd), "and",
-                        sQuote("continuous"), paren(nc)))
+                        sQuote("density"), paren(nc)))
     }
     discretepad <- matrix(0, nquad, max(nd, nc))
     discretepad[Z, ] <- discrete
@@ -48,16 +48,44 @@ msr <- function(qscheme, discrete, continuous, check=TRUE) {
   #
   #
   # Discretised measure (value of measure for each quadrature tile)
-  val <- discretepad + W * continuous
+  val <- discretepad + W * density
   #
   out <- list(loc = U,
               val = val,
               atoms = Z,
               discrete = discretepad,
-              continuous = continuous,
+              density = density,
               wt = W)
   class(out) <- "msr"
   return(out)
+}
+
+# Translation table for usage of measures
+#
+#           e.g. res <- residuals(fit, ...)
+#
+#     OLD                               NEW           
+#     res[ ]                       res$val[ ]       with(res, "increment")
+#     attr(res, "atoms")           res$atoms        with(res, "is.atom")
+#     attr(res, "discrete")        res$discrete     with(res, "discrete")
+#     attr(res, "continuous")      res$density      with(res, "density")
+#     w.quad(quad.ppm(fit))        res$wt           with(res, "qweights")
+#     union.quad(quad.ppm(fit))    res$loc          with(res, "qlocations")
+# .................................................
+
+with.msr <- function(data, expr, ...) {
+  stopifnot(inherits(data, "msr"))
+  stopifnot(is.character(expr)) 
+  y <- switch(expr,
+              increment  = { data$val },
+              is.atom    = { data$atoms },
+              discrete   = { data$discrete },
+              density    = { data$density },
+              continuous = { data$density * data$wt },
+              qweights   = { data$wt },
+              qlocations = { data$loc },
+              stop("Unrecognised option in entry.msr", call.=FALSE))
+  return(y)
 }
 
 print.msr <- function(x, ...) {
@@ -72,16 +100,16 @@ print.msr <- function(x, ...) {
   cat(paste(sum(x$atoms), "atoms\n"))
   cat(paste("Total mass:\n"))
   if(d == 1) {
-    cat(paste("discrete =", signif(sum(x$discrete), 5),
-              "\tcontinuous =", signif(sum(x$wt * x$continuous), 5),
-              "\ttotal =", signif(sum(x$val), 5), "\n"))
+    cat(paste("discrete =", signif(sum(with(x, "discrete")), 5),
+              "\tcontinuous =", signif(sum(with(x, "continuous")), 5),
+              "\ttotal =", signif(sum(with(x, "increment")), 5), "\n"))
   } else {
     if(is.null(cn)) cn <- paste("component", 1:d)
     for(j in 1:d) {
       cat(paste(cn[j], ":\t",
-                "discrete =", signif(sum(x$discrete[,j]), 5),
-                "\tcontinuous =", signif(sum((x$wt * x$continuous)[,j]), 5),
-                "\ttotal =", signif(sum(x$val[,j]), 5), "\n"))
+                "discrete =", signif(sum(with(x, "discrete")[,j]), 5),
+                "\tcontinuous =", signif(sum(with(x, "continuous")[,j]), 5),
+                "\ttotal =", signif(sum(with(x, "increment")[,j]), 5), "\n"))
     }
   }
   return(invisible(NULL))
@@ -91,7 +119,7 @@ plot.msr <- function(x, ...) {
   xname <- deparse(substitute(x))
   d <- ncol(as.matrix(x$val))  
   if(d == 1) {
-    smo <- smooth.ppp(x$loc %mark% x$continuous, sigma=max(nndist(x$loc)), ...)
+    smo <- smooth.ppp(x$loc %mark% x$density, sigma=max(nndist(x$loc)), ...)
     xtra <- unique(c(names(formals(plot.default)),
                      names(formals(image.default))))
     do.call.matched("plot.im",
@@ -125,14 +153,14 @@ plot.msr <- function(x, ...) {
 "[.msr" <- function(x, i, j, ...) {
   valu  <- as.matrix(x$val)
   disc  <- as.matrix(x$discrete)
-  cont  <- as.matrix(x$continuous)
+  dens  <- as.matrix(x$density)
   wt    <- x$wt
   atoms <- x$atoms
   #
   if(!missing(j)) {
     valu <- valu[, j]
     disc <- disc[, j]
-    cont <- cont[, j]
+    dens <- dens[, j]
   }
   loc <- x$loc
   if(!missing(i)) {
@@ -144,7 +172,7 @@ plot.msr <- function(x, ...) {
     # extract
     valu  <- valu[id, ]
     disc  <- disc[id, ]
-    cont  <- cont[id, ]
+    dens  <- dens[id, ]
     wt    <- wt[id]
     atoms <- atoms[id]
   }
@@ -152,7 +180,7 @@ plot.msr <- function(x, ...) {
               val=valu,
               atoms=atoms,
               discrete=disc,
-              continuous=cont,
+              density=dens,
               wt=wt)
   class(out) <- "msr"
   return(out)    
