@@ -371,13 +371,20 @@
   an attribute \code{"simpatterns"} which is a list of length
   \code{nsim} containing all the simulated point patterns.
 
-  See \code{\link{plot.envelope}} and \code{link{plot.fv}}
+  See \code{\link{plot.envelope}} and \code{\link{plot.fv}}
   for information about how to plot the envelopes. 
 }
-\section{Warning}{
+\section{Errors and warnings}{
   An error may be generated if one of the simulations produces a
   point pattern that is empty, or is otherwise unacceptable to the
   function \code{fun}.
+  
+  The upper envelope may be \code{NA} (plotted as plus or minus
+  infinity) if some of the function values
+  computed for the simulated point patterns are \code{NA}.
+  Whether this occurs will depend on the function \code{fun},
+  but it usually happens when the simulated point pattern does not contain
+  enough points to compute a meaningful value.
 }
 \section{Confidence intervals}{
   Simulation envelopes do \bold{not} compute confidence intervals;

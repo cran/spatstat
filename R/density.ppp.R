@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.33 $    $Date: 2010/11/08 05:44:39 $
+#  $Revision: 1.34 $    $Date: 2011/03/02 03:51:37 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -13,14 +13,15 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
 
 density.ppp <- function(x, sigma=NULL, ...,
                         weights=NULL, edge=TRUE, varcov=NULL,
-                        at="pixels", leaveoneout=TRUE) {
+                        at="pixels", leaveoneout=TRUE,
+                        adjust=1) {
   verifyclass(x, "ppp")
 
   output <- pickoption("output location type", at,
                        c(pixels="pixels",
                          points="points"))
   
-  ker <- resolve.2D.kernel(sigma, ..., varcov=varcov, x=x)
+  ker <- resolve.2D.kernel(sigma, ..., varcov=varcov, x=x, adjust=adjust)
   sigma <- ker$sigma
   varcov <- ker$varcov
 
@@ -498,7 +499,8 @@ markvar  <- function(X, ...) {
   return(V)
 }
 
-resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL) {
+resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL,
+                              adjust=1) {
   sigma.given <- !is.null(sigma)
   varcov.given <- !is.null(varcov)
   if(sigma.given) {
@@ -507,7 +509,8 @@ resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL) {
     stopifnot(all(sigma > 0))
   }
   if(varcov.given)
-    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )    
+    stopifnot(is.matrix(varcov) && nrow(varcov) == 2 && ncol(varcov)==2 )
+  # reconcile
   ngiven <- varcov.given + sigma.given
   switch(ngiven+1,
          {
@@ -525,6 +528,10 @@ resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL) {
            stop(paste("Give only one of the arguments",
                       sQuote("sigma"), "and", sQuote("varcov")))
          })
+  # apply adjustments 
+  if(!is.null(sigma))  sigma <- adjust * sigma
+  if(!is.null(varcov)) varcov <- sqrt(adjust) * sigma
+  #
   sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
   cutoff <- 8 * sd
   uhoh <- if(!is.null(mindist) && mindist < cutoff) "underflow" else NULL

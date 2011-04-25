@@ -3,7 +3,7 @@
 #
 # Makes diagnostic plots based on residuals or energy weights
 #
-# $Revision: 1.31 $ $Date: 2011/01/14 11:31:06 $
+# $Revision: 1.32 $ $Date: 2011/02/15 07:41:16 $
 #
 
 diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
@@ -33,7 +33,7 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
       stop("rv should be a measure (object of class msr)")
     residobj <-
       if(!is.null(rv)) rv else residuals.ppm(object, type=type, check=FALSE)
-    residval <- residobj$val
+    residval <- with(residobj, "increment")
     if(ncol(as.matrix(residval)) > 1)
       stop("Not implemented for vector-valued residuals; use [.msr to split into separate components")
     Y <- U %mark% residval
@@ -51,9 +51,9 @@ diagnose.ppm.engine <- function(object, ..., type="eem", typename, opt,
       Ycts  <- U %mark% (-1)
       Ydens <- as.im(-1, Y$window)
     } else {
-      atoms <- residobj$atoms
-      masses <- residobj$discrete
-      cts <- residobj$continuous
+      atoms <- with(residobj, "is.atom")
+      masses <- with(residobj, "discrete")
+      cts    <- with(residobj, "density")
       if(!is.null(atoms) && !is.null(masses) && !is.null(cts)) {
         Ymass <- (U %mark% masses)[atoms]
         Ycts    <- U %mark% cts

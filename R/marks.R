@@ -1,6 +1,8 @@
 #
 # marks.R
 #
+#   $Revision: 1.26 $   $Date: 2011/03/25 04:34:06 $
+#
 # stuff for handling marks
 #
 #
@@ -104,17 +106,15 @@ function(X, na.action="warn", ...) {
   marx <- marks(X, ...)
   if(is.null(marx))
     return(FALSE)
-  if((length(marx) > 0) && any(is.na(marx)))
+  if((length(marx) > 0) && any(is.na(marx))) {
+    gripe <- paste("some mark values are NA in the point pattern",
+                   deparse(substitute(X)))
     switch(na.action,
-           warn = {
-             warning(paste("some mark values are NA in the point pattern",
-                           deparse(substitute(X))), call.=FALSE)
-           },
-           fatal = {
-             return(FALSE)
-           },
+           warn = warning(gripe, call.=FALSE),
+           fatal = stop(gripe, call.=FALSE),
            ignore = {}
            )
+  }
   return(TRUE)
 }
 
@@ -205,11 +205,21 @@ marksubset <- function(x, index, format=NULL) {
 }
 
 "%mapp%" <- markappendop <- function(x,y) { 
-  format <- findmarktype(x)
-  switch(format,
-         none={return(NULL)},
-         vector={ return(c(x,y)) },
-         dataframe={ return(rbind(x,y)) },
+  fx <- findmarktype(x)
+  fy <- findmarktype(y)
+  agree <- (fx == fy)
+  if(fx == "data.frame")
+    agree <- agree && identical(names(x),names(y)) 
+  if(!agree)
+    stop("Attempted to concatenate marks that are not compatible")
+  switch(fx,
+         none   = { return(NULL) },
+         vector = {
+           if(is.factor(x) || is.factor(y))
+             return(cat.factor(x,y))
+           else return(c(x,y))
+         },
+         dataframe = { return(rbind(x,y)) },
          listof = {
            z <- append(x,y)
            if(!inherits(z, "listof"))

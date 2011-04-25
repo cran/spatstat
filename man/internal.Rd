@@ -32,6 +32,7 @@
 \alias{breakpts.from.r}
 \alias{bt.frame}
 \alias{cartesian}
+\alias{cat.factor}
 \alias{cellmiddles}
 \alias{censtimeCDFest}
 \alias{checkfields}          
@@ -198,9 +199,7 @@
 \alias{markformat.default}
 \alias{mark.scale.default}
 \alias{markspace.integral}
-\alias{marks.psp}           
 \alias{marks.quad}           
-\alias{marks<-.psp}           
 \alias{\%mapp\%}
 \alias{markappendop}
 \alias{marksubset}
@@ -423,6 +422,7 @@
 \alias{verifyclass}
 \alias{verify.xypolygon}
 \alias{warn.ignored.args}
+\alias{with.msr}
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
@@ -467,6 +467,7 @@ breakpts.from.r(r)
 bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
          correction="border", rbord=0, use.gam=FALSE, allcovar=FALSE)
 cartesian(pp, markset, fac = TRUE)
+cat.factor(\dots, recursive=FALSE)
 cellmiddles(W, nx, ny, npix, gi)
 censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom, pmax)
 checkfields(X,L)          
@@ -649,8 +650,6 @@ markformat(x)
 mark.scale.default(marx, w, markscale=NULL, maxsize=NULL)
 markspace.integral(X)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
-\method{marks}{psp}(x, \dots, dfok=FALSE)
-\method{marks}{psp}(x, \dots) <- value
 markappendop(x, y)
 marksubset(x, index, format)
 marksubsetop(x, i)
@@ -806,7 +805,7 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots, .StripNull=FALSE)
-resolve.2D.kernel(sigma, \dots, varcov, x, mindist)
+resolve.2D.kernel(sigma, \dots, varcov, x, mindist, adjust)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
 revcumsum(x)
@@ -887,6 +886,7 @@ versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
 warn.ignored.args(\dots, context)
+\method{with}{msr}(data, expr, \dots)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)

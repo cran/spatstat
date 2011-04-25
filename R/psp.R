@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.53 $ $Date: 2010/09/10 06:57:59 $
+#  $Revision: 1.54 $ $Date: 2011/03/25 04:02:26 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -23,23 +23,40 @@ psp <- function(x0, y0, x1, y1, window, marks=NULL,
   stopifnot(length(x1) == length(y1))
   stopifnot(length(x0) == length(x1))
   ends <- data.frame(x0=x0,y0=y0,x1=x1,y1=y1)
-  window <- as.owin(window)
+  if(!missing(window))
+    verifyclass(window,"owin")
   if(check) {
     ok <- inside.owin(x0,y0, window) & inside.owin(x1,y1,window)
     if((nerr <- sum(!ok)) > 0)
       stop(paste(nerr, ngettext(nerr, "segment does not", "segments do not"),
-                 "lie entirely inside the window"), call.=FALSE)
-  }
-  if(!is.null(marks)) {
-    if(is.data.frame(marks))
-      stop("Sorry, data frames of marks are not implemented for psp objects")
-    stopifnot(is.vector(marks) || is.factor(marks))
-    stopifnot(length(marks) == length(x0))
+                 "lie entirely inside the window.\n"), call.=FALSE)
   }
   out <- list(ends=ends,
               window=window,
-              n = nrow(ends),
-              marks = marks)
+              n = nrow(ends))
+
+# add marks if any
+  if(!is.null(marks)) {
+    if(is.matrix(marks))
+      marks <- as.data.frame(marks)
+    if(is.data.frame(marks)) {
+      omf <- "dataframe"
+      nmarks <- nrow(marks)
+      rownames(marks) <- seq(length=nmarks)
+      whinge <- "The number of rows of marks"
+    } else {
+      omf <- "vector"
+      names(marks) <- NULL
+      nmarks <- length(marks)
+      whinge <- "The length of the marks vector"
+    }
+    if(nmarks != out$n) stop(paste(whinge, "!= length of x and y.\n"))
+    out$marks <- marks
+    out$markformat <- omf
+  } else {
+    out$markformat <- "none"
+  }
+
   class(out) <- c("psp", class(out))
   return(out)
 }
@@ -54,13 +71,13 @@ as.psp <- function(x, ..., from=NULL, to=NULL) {
   # special case: two point patterns
   if(is.null(from) != is.null(to))
     stop(paste("If one of", sQuote("from"), "and", sQuote("to"),
-               "is specified, then both must be specified"))
+               "is specified, then both must be specified.\n"))
   if(!is.null(from) && !is.null(to)) {
     verifyclass(from, "ppp")
     verifyclass(to, "ppp")
     if(from$n != to$n)
-      stop(paste("point patterns", sQuote("from"), "and", sQuote("to"),
-                 "have different numbers of points"))
+      stop(paste("The point patterns", sQuote("from"), "and", sQuote("to"),
+                 "have different numbers of points.\n"))
     uni <- union.owin(from$window, to$window)
     Y <- do.call("psp",
                  resolve.defaults(list(from$x, from$y, to$x, to$y),
@@ -81,44 +98,71 @@ as.psp.psp <- function(x, ..., check=FALSE, fatal=TRUE) {
 
 as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL,
                               check=spatstat.options("checksegments"), fatal=TRUE) {
-  if(is.null(marks) && checkfields(x, "marks"))
-    marks <- x$marks
-  if(checkfields(x, c("x0", "y0", "x1", "y1")))
-    return(psp(x$x0, x$y0, x$x1, x$y1, window=window,
-               marks=marks, check=check))
+  window <- suppressWarnings(as.owin(window,fatal=FALSE))
+  if(!is.owin(window)) {
+    if(fatal) stop("Cannot interpret \"window\" as an object of class owin.\n")
+    return(NULL)
+  }
+
+  if(checkfields(x,"marks")) {
+    if(is.null(marks)) marks <- x$marks
+    else warning(paste("Column named \"marks\" ignored;\n",
+                       "argument named \"marks\" has precedence.\n",sep=""))
+    x$marks <- NULL
+  }
+
+  if(checkfields(x, c("x0", "y0", "x1", "y1"))) {
+    out <- psp(x$x0, x$y0, x$x1, x$y1, window=window,
+               check=check)
+    x <- x[-match(c("x0","y0","x1","y1"),names(x))]
+  }
   else if(checkfields(x, c("xmid", "ymid", "length", "angle"))) {
     rr <- x$length/2
     dx <- cos(x$angle) * rr
     dy <- sin(x$angle) * rr
-    window <- as.owin(window)
     bb <- bounding.box(window)
     rmax <- max(rr)
     bigbox <- owin(bb$xrange + c(-1,1) * rmax, bb$yrange + c(-1,1) * rmax)
     pattern <- psp(x$x - dx, x$y - dy, x$x + dx, x$y + dy,
-                   window=bigbox, marks=marks, check=FALSE)
-    clipped <- pattern[window]
-    return(clipped)
+                   window=bigbox,check=FALSE)
+    out <- pattern[window]
+    x <- x[-match(c("xmid","ymid","length","angle"),names(x))]
   }
-  else if(ncol(x) == 4)
-    return(psp(x[,1], x[,2], x[,3], x[,4], window=window, marks=marks,
-               check=check))
-  else if(ncol(x) == 5)
-    return(psp(x[,1], x[,2], x[,3], x[,4], window=window, marks=x[,5],
-               check=check))
+  else if(ncol(x) >= 4) {
+    out <- psp(x[,1], x[,2], x[,3], x[,4], window=window,
+               check=check)
+    x <- x[-(1:4)]
+  }
   else if(fatal)
-    stop("Unable to interpret x as a line segment pattern")
-  return(NULL)
+    stop("Unable to interpret x as a line segment pattern.\n")
+  else out <- NULL
+
+  if(!is.null(out)) {
+    if(is.null(marks) & ncol(x) > 0) marks <- x
+    if(is.null(marks)) {
+       out$markformat <- "none"
+    } else {
+       out$marks <- marks
+       out$markformat <- if(is.data.frame(marks)) "dataframe" else "vector"
+       out <- as.psp(out,check=FALSE)
+    }
+  }
+  return(out)
 }
 
-as.psp.matrix <- function(x, ..., window=NULL, marks=NULL, check=spatstat.options("checksegments"), fatal=TRUE) {
-  if(ncol(x) == 4)
-    return(psp(x[,1], x[,2], x[,3], x[,4], window=window, marks=marks, check=check))
-  else if(fatal)
-    stop("Unable to interpret x as a line segment pattern")
-  return(NULL)
+as.psp.matrix <- function(x, ..., window=NULL, marks=NULL,
+                          check=spatstat.options("checksegments"), fatal=TRUE) {
+   x <- as.data.frame(x)
+   as.psp(x,...,window=window,marks=marks,check=check,fatal=fatal)
 }
 
-as.psp.default <- function(x, ..., window=NULL, marks=NULL, check=spatstat.options("checksegments"), fatal=TRUE) {
+as.psp.default <- function(x, ..., window=NULL, marks=NULL,
+                           check=spatstat.options("checksegments"), fatal=TRUE) {
+  if(checkfields(c,"marks")) {
+	if(is.null(marks)) marks <- x$marks
+	else warning(paste("Component of \"x\" named \"marks\" ignored;\n",
+                             "argument named \"marks\" has precedence.\n",sep=""))
+  }
   if(checkfields(x, c("x0", "y0", "x1", "y1")))
     return(psp(x$x0, x$y0, x$x1, x$y1, window=window, marks=marks,
                check=check))
@@ -182,7 +226,8 @@ as.psp.owin <- function(x, ..., check=spatstat.options("checksegments"), fatal=T
 as.data.frame.psp <- function(x, row.names=NULL, ...) {
   df <- as.data.frame(x$ends, row.names=row.names)
   if(is.marked(x))
-    df <- cbind(df, data.frame(marks=marks(x)))
+    df <- cbind(df, if(x$markformat=="dataframe") marks(x)
+                    else data.frame(marks=marks(x)))
   return(df)
 }
 
@@ -192,12 +237,10 @@ append.psp <- function(A,B) {
   verifyclass(A, "psp")
   verifyclass(B, "psp")
   stopifnot(identical(A$window, B$window))
-  result <- list(ends=rbind(A$ends, B$ends),
-                 window=A$window,
-                 n=A$n + B$n,
-                 marks=c(marks(A), marks(B)))
-  class(result) <- c("psp", class(result))
-  return(result)
+  marks <- marks(A) %mapp% marks(B)
+  ends <- rbind(A$ends, B$ends)
+  out  <- as.psp(ends,window=A$window,marks=marks,check=FALSE)
+  return(out)
 }
 
 rebound.psp <- function(x, rect) {
@@ -216,37 +259,67 @@ is.marked.psp <- function(X, ...) {
   return(!is.null(marx))
 }
 
-marks.psp <- function(x, ..., dfok=FALSE) {
-  # data frames of marks are not implemented for psp
-  return(x$marks)
+marks.psp <- function(x, ..., dfok = TRUE) {
+  # data frames of marks are as of 19/March 2011 implemented for psp
+    ma <- x$marks
+    if ((is.data.frame(ma) || is.matrix(ma)) && !dfok) 
+        stop("Sorry, not implemented when the marks are a data frame.\n")
+    return(ma)
 }
 
 "marks<-.psp" <- function(x, ..., value) {
   stopifnot(is.psp(x))
   if(is.null(value)) {
-    x$marks <- NULL
-    return(x)
+    return(unmark(x))
   }
-  if(!(is.vector(value) || is.factor(value)))
+  m <- value
+  if(!(is.vector(m) || is.factor(m) || is.data.frame(m) || is.matrix(m)))
     stop("Incorrect format for marks")
 
-  n <- x$n
-  if(length(value) == n) {
-    x$marks <- value
-    return(x)
-  } else if(length(value) == 1) {
-    x$marks <- rep(value, n)
-    return(x)
-  } else stop("Replacement vector of marks has wrong length")
+    if (is.hyperframe(m)) 
+        stop("Hyperframes of marks are not supported in psp objects.\n")
+    nseg <- nsegments(x)
+    if (!is.data.frame(m) && !is.matrix(m)) {
+        if (length(m) == 1) 
+            m <- rep(m, nseg)
+        else if (nseg == 0) 
+            m <- rep(m, 0)
+        else if (length(m) != nseg) 
+            stop("Number of marks != number of line segments.\n")
+        marx <- m
+    }
+    else {
+        m <- as.data.frame(m)
+        if (ncol(m) == 0) {
+            marx <- NULL
+        }
+        else {
+            if (nrow(m) == nseg) {
+                marx <- m
+            }
+            else {
+                if (nrow(m) == 1 || nseg == 0) {
+                  marx <- as.data.frame(lapply(as.list(m),function(x,k) {
+                    rep(x, k)}, k = nseg))
+                }
+                else stop("Number of rows of data frame != number of points.\n")
+            }
+        }
+    }
+    Y <- as.psp(x$ends, window = x$window, marks = marx, check = FALSE)
+    return(Y)
 }
 
 markformat.psp <- function(x) {
-  # data frames of marks are not implemented for psp
-  return(if(!is.null(marks(x))) "vector" else "none")
+    mf <- x$markformat
+    if(is.null(mf)) 
+      mf <- markformat(marks(x))
+    return(mf)
 }
 
 unmark.psp <- function(X) {
   X$marks <- NULL
+  X$markformat <- "none"
   return(X)
 }
 
@@ -270,14 +343,33 @@ plot.psp <- function(x, ..., add=FALSE) {
 }
 
 print.psp <- function(x, ...) {
-  verifyclass(x, "psp")
-  cat(paste("planar line segment pattern:",
-            x$n, "line segments\n"))
-  print(x$window)
-  marx <- marks(x, dfok=FALSE)
-  if(!is.null(marx))
-    cat(paste("Marks vector of type", sQuote(typeof(marx)), "\n"))
-  return(invisible(NULL))
+   verifyclass(x, "psp")
+    ism <- is.marked(x, dfok = TRUE)
+    cat(paste(if(ism)
+        "marked"
+    else NULL, "planar line segment pattern:", x$n, "line", ngettext(x$n, "segment",
+        "segments"), "\n"))
+    if (ism) {
+        mks <- marks(x, dfok = TRUE)
+        if (is.data.frame(mks)) {
+            cat(paste("Mark variables: ", paste(names(mks), collapse = ", "),
+                "\n"))
+        }
+        else {
+            if (is.factor(mks)) {
+                cat("multitype, with ")
+                cat(paste("levels =", paste(levels(mks), collapse = "\t"), 
+                  "\n"))
+            }
+            else {
+                cat(paste("marks are", if (is.numeric(mks)) 
+                  "numeric,", "of type", sQuote(typeof(mks)), 
+                  "\n"))
+            }
+        }
+    }
+    print(x$window)
+    return(invisible(NULL))
 }
 
 unitname.psp <- function(x) {
@@ -420,10 +512,10 @@ print.summary.psp <- function(x, ...) {
              },
              index={
                subset <- i
-               marktype <- markformat(x)
+               markformat <- markformat(x)
                x <- as.psp(x$ends[subset, ],
                            window=x$window,
-                           marks=switch(marktype,
+                           marks=switch(markformat,
                              none=NULL,
                              vector=x$marks[subset],
                              dataframe=x$marks[subset,]))
@@ -457,7 +549,7 @@ shift.psp <- function(X, vec=c(0,0), ..., origin=NULL) {
   if(!is.null(origin)) {
     stopifnot(is.character(origin))
     if(!missing(vec))
-      warning("argument vec ignored; overruled by argument origin")
+      warning("Argument vec ignored; argument origin has precedence.\n")
     origin <- pickoption("origin", origin, c(centroid="centroid",
                                              midpoint="midpoint",
                                              bottomleft="bottomleft"))
@@ -520,5 +612,10 @@ identify.psp <- function(x, ..., labels=seq(x$n), n=x$n, plot=TRUE) {
   return(out)
 }
 
-  
-  
+nsegments <- function(x) {
+	UseMethod("nsegments")
+}
+
+nsegments.psp <- function(x) {
+   x$n
+}

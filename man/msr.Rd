@@ -8,7 +8,7 @@
   measure on a spatial domain.
 }
 \usage{
-  msr(qscheme, discrete, continuous, check=TRUE)
+  msr(qscheme, discrete, density, check=TRUE)
 }
 \arguments{
   \item{qscheme}{
@@ -19,9 +19,9 @@
     Vector or matrix containing the values (masses) of the discrete component
     of the measure, for each of the data points in \code{qscheme}.
   }
-  \item{continuous}{
-    Vector or matrix containing values of the \emph{density} of the
-    continuous component of the measure, for each of the
+  \item{density}{
+    Vector or matrix containing values of the density of the
+    diffuse component of the measure, for each of the
     quadrature points in \code{qscheme}.
   }
   \item{check}{
@@ -69,18 +69,18 @@
   data point, or a numeric matrix with one row
   for each data point. 
 
-  The argument \code{continuous} gives the values of the \emph{density}
+  The argument \code{density} gives the values of the \emph{density}
   of the diffuse component of the measure, at each
   \emph{quadrature point} in \code{qscheme}.
   It should be either a numeric vector with one entry for each
   quadrature point, or a numeric matrix with one row
   for each quadrature point. 
 
-  If both \code{discrete} and \code{continuous} are vectors
+  If both \code{discrete} and \code{density} are vectors
   (or one-column matrices) then the result is a signed (real-valued) measure.
   Otherwise, the result is a vector-valued measure, with the dimension
   of the vector space being determined by the number of columns
-  in the matrices \code{discrete} and/or \code{continuous}.
+  in the matrices \code{discrete} and/or \code{density}.
   (If one of these is a \eqn{k}-column matrix and the other
   is a 1-column matrix, then the latter is replicated to \eqn{k} columns).
   
@@ -133,7 +133,7 @@
    lambda <- fitted(fit)
    slam <- sqrt(lambda)
    Z <- is.data(Q)
-   m <- msr(Q, discrete=1/slam[Z], continuous = -slam)
+   m <- msr(Q, discrete=1/slam[Z], density = -slam)
    m
 }
 \keyword{spatial}

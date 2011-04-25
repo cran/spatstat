@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.12 $   $Date: 2010/03/08 08:23:04 $
+#    $Revision: 1.13 $   $Date: 2011/03/25 03:43:41 $
 #
 #
  
@@ -117,7 +117,7 @@ cliprect.psp <- function(x, window) {
   # OK - segments clipped
   # Put them together with the unclipped ones
   ends.all <- rbind(ends.inside, ends.clipped)
-  marks.all <- c(marks.inside, marks.clipped)
+  marks.all <- marks.inside %mapp% marks.clipped
   as.psp(ends.all, window=window, marks=marks.all, check=FALSE)
 }
 
@@ -188,6 +188,7 @@ clippoly.psp <- function(s, window) {
     if(!any(hit)) {
       # no intersection with boundary - add single segment
       chopped$ends <- rbind(chopped$ends, segment)
+    if(has.marks) chopped$marks <- (chopped$marks) %mapp% (marx %msub% seg)
     } else {
       # crosses boundary - add several pieces
       tvals <- ts[seg,]

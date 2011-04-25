@@ -16,7 +16,7 @@
   \item{y1}{Vector of \eqn{y} coordinates of second endpoint of each segment}
   \item{window}{window of observation,
     an object of class \code{"owin"}}
-  \item{marks}{(optional) vector of mark values}
+  \item{marks}{(optional) vector or data frame of mark values}
   \item{check}{Logical value indicating whether to check that the line segments
     lie inside the window.}
 }
@@ -55,16 +55,17 @@
   types, or colours, may be regarded as having a mark which identifies
   which colour they are. 
 
-  In the current implementation, \code{marks} must be a vector, of
-  the same length as \code{x0}, which is interpreted so
-  that \code{marks[i]} is the mark attached to the \eqn{i}th line segment.
-  If the mark is a real number then \code{marks}
-  should be a numeric vector, while if the mark takes only a finite
-  number of possible values (e.g. colours or types) then
-  \code{marks} should be a \code{factor}.
-  
-  See \code{\link{psp.object}} for a description of the
-  class \code{"psp"}.
+  The object \code{marks} must be a vector of the same length
+  as \code{x0}, or a data frame with number of rows equal to the
+  length of \code{x0}.  The interpretation is that \code{marks[i]}
+  or \code{marks[i,]} is the mark attached to the \eqn{i}th line
+  segment.  If the marks are real numbers then \code{marks} should
+  be a numeric vector, while if the marks takes only a finite number
+  of possible values (e.g. colours or types) then \code{marks}
+  should be a \code{factor}.
+
+  See \code{\link{psp.object}} for a description of the class
+  \code{"psp"}.
 
   Users would normally invoke \code{psp} to create a line segment pattern,
   and the function \code{\link{as.psp}} to convert data in another
@@ -75,10 +76,13 @@
   \code{\link{as.psp}},
   \code{\link{owin.object}},
   \code{\link{owin}},
-  \code{\link{as.owin}}
+  \code{\link{as.owin}},
+  \code{\link{marks.psp}}
 }
 \examples{
-  X <- psp(runif(20), runif(20), runif(20), runif(20),  window=owin())
+  X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin())
+  m <- data.frame(A=1:10, B=letters[1:10])
+  X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin(), marks=m)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

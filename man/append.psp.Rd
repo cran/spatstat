@@ -21,7 +21,9 @@
   
   The two patterns must have \bold{identical} windows. If one
   pattern has marks, then the other must also have marks
-  of the same type.
+  of the same type.  It the marks are data frames then the
+  number of columns of these data frames, and the names of
+  the columns must be identical.
 
   (To combine two point patterns, see \code{superimpose}).
 }

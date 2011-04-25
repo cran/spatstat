@@ -7,7 +7,7 @@
 \alias{as.psp.default}
 \title{Convert Data To Class psp}
 \description{
-  Tries to coerce any reasonable kind of data to a line segment pattern
+  Tries to coerce any reasonable kind of data object to a line segment pattern
   (an object of class \code{"psp"})
   for use by the \pkg{spatstat} package.
 }
@@ -26,7 +26,7 @@ check=spatstat.options("checksegments"), fatal=TRUE)
   \item{window}{Data which define a window for the pattern
     when \code{x} does not contain a window}
   \item{\dots}{Ignored.}
-  \item{marks}{(Optional) vector of marks for the pattern}
+  \item{marks}{(Optional) vector or data frame of marks for the pattern}
   \item{check}{
     Logical value indicating whether to check the validity of the data,
     e.g. to check that the line segments lie inside the window.
@@ -58,42 +58,56 @@ check=spatstat.options("checksegments"), fatal=TRUE)
     \item
     an object of class \code{"psp"}  
     \item
-    a data frame with columns named \code{x0, y0, x1, y1}
-    that will be interpreted as the coordinates of the endpoints
-    of the segments. 
-    \item 
-    a data frame or matrix with exactly 4 columns
-    that will be interpreted as the coordinates \code{x0, y0, x1, y1}
-    of the endpoints of the segments
-    \item
-    a data frame with columns named \code{xmid, ymid, length, angle}
-    that will be interpreted as the coordinates of the segment
-    midpoints, the lengths of the segments, and the orientations of the
-    segments in radians
-    \item
-    a structure with elements named  \code{x0, y0, x1, y1}
-    or elements named \code{xmid, ymid, length, angle}
-    which will be interpreted as above.
+    a data frame with at least 4 columns
+    \item a structure (list) with elements named  \code{x0, y0,
+    x1, y1} or elements named \code{xmid, ymid, length, angle}
+    and possibly a fifth element named \code{marks}
     \item
     an object of class \code{"owin"} representing a spatial window;
     it must be of type \code{"rectangle"} or \code{"polygonal"}.
-    The boundary edges of the window will be extracted as a line segment
-    pattern.
+    The boundary edges of the window will be extracted as a line
+    segment pattern.
   }
-  If the argument \code{marks} is missing or \code{NULL}, then \code{x}
-  may also be:
+  If \code{x} is a data frame the interpretation of its columns is
+  as follows:
   \itemize{
     \item
-    a data frame with columns named \code{x0, y0, x1, y1, marks}
-    \item 
-    a data frame or matrix with exactly 5 columns; the first 4 columns
-    will be interpreted as the coordinates \code{x0, y0, x1, y1}
-    of the endpoints of the segments, and the last column will
-    be interpreted as the marks.
+    If there are columns named \code{x0, y0, x1, y1} then these
+    will be interpreted as the coordinates of the endpoints of
+    the segments and used to form the \code{ends} component of
+    the \code{psp} object to be returned.
     \item
-    a structure with elements named  \code{x0, y0, x1, y1, marks}
-    which will be interpreted as above.
+    If there are columns named \code{xmid, ymid, length, angle}
+    then these will be interpreted as the coordinates of the segment
+    midpoints, the lengths of the segments, and the orientations
+    of the segments in radians and used to form the \code{ends}
+    component of the \code{psp} object to be returned.
+    \item
+    If there is a column named \code{marks} then this will
+    be interpreted as the marks of the pattern provided that
+    the argument \code{marks} of this function is \code{NULL}.
+    If argument \code{marks} is not \code{NULL} then the value
+    of this argument is taken to be the marks of the pattern and
+    the column named \code{marks} is ignored (with a warning).
+    In either case the column named marks is deleted and omitted
+    from further consideration.
+    \item
+    If there is no column named \code{marks} and if the \code{marks}
+    argument of this function is \code{NULL}, and if after
+    interpreting 4 columns of \code{x} as determining the \code{ends}
+    component of the \code{psp} object to be returned, there remain
+    other columns of \code{x}, then these remaining columns will be
+    taken to form a data frame of marks for the \code{psp} object
+    to be returned.
   }
+
+  If \code{x} is a structure (list) with elements named \code{x0,
+  y0, x1, y1, marks} or \code{xmid, ymid, length, angle, marks},
+  then the element named \code{marks} will be interpreted as the
+  marks of the pattern provide that the argument \code{marks} of
+  this function is \code{NULL}.  If this argument is non-\code{NULL}
+  then it is interpreted as the marks of the pattern and the element
+  \code{marks} of \code{x} is ignored --- with a warning.
 
   Alternatively, you may specify two point patterns
   \code{from} and \code{to} containing the first and second endpoints
@@ -115,6 +129,20 @@ check=spatstat.options("checksegments"), fatal=TRUE)
   Point pattern datasets can also be created by the function
   \code{\link{psp}}.
 }
+\section{Warnings}{
+If only a proper subset of the names \code{x0,y0,x1,y1} or
+\code{xmid,ymid,length,angle} appear amongst the names of the
+columns of \code{x} where \code{x} is a data frame, then these
+special names are ignored.
+
+For example if the names of the columns were
+\code{xmid,ymid,length,degrees}, then these columns would be
+interpreted as if the represented \code{x0,y0,x1,y1} in that order.
+
+Whether it gets used or not, column named \code{marks} is
+\emph{always} removed from \code{x} before any attempt to form the
+\code{ends} component of the \code{psp} object that is returned.
+}
 \seealso{
   \code{\link{psp}},
   \code{\link{psp.object}},
@@ -123,7 +151,11 @@ check=spatstat.options("checksegments"), fatal=TRUE)
 }
 \examples{
    mat <- matrix(runif(40), ncol=4)
-   a <- as.psp(mat, window=owin())
+   mx <- data.frame(v1=sample(1:4,10,TRUE),
+                    v2=factor(sample(letters[1:4],10,TRUE),levels=letters[1:4]))
+   a <- as.psp(mat, window=owin(),marks=mx)
+   mat <- cbind(as.data.frame(mat),mx)
+   b <- as.psp(mat, window=owin()) # a and b are identical.
    stuff <- list(xmid=runif(10),
                  ymid=runif(10),
                  length=rep(0.1, 10),

@@ -7,7 +7,8 @@
 \usage{
   \method{density}{ppp}(x, sigma, \dots,
         weights, edge=TRUE, varcov=NULL,
-        at="pixels", leaveoneout=TRUE)
+        at="pixels", leaveoneout=TRUE,
+        adjust=1)
 }
 \arguments{
   \item{x}{
@@ -40,6 +41,9 @@
     Logical value indicating whether to compute a leave-one-out
     estimator. Applicable only when \code{at="points"}.
   }
+  \item{adjust}{
+    Optional. Adjustment factor for the smoothing parameter.
+  }
 }
 \value{
   By default, the result is
@@ -71,15 +75,7 @@
   If \code{edge=TRUE}, the intensity estimate is corrected for
   edge effect bias by dividing it by the convolution of the
   Gaussian kernel with the window of observation.
-
-  Instead of the isotropic Gaussian kernel with standard deviation
-  \code{sigma}, the smoothing kernel may be chosen to be any Gaussian
-  kernel, by giving the variance-covariance matrix \code{varcov}.
-  The arguments \code{sigma} and \code{varcov} are incompatible.
-  Also \code{sigma} may be a vector of length 2 giving the
-  standard deviations of two independent Gaussian coordinates,
-  thus equivalent to \code{varcov = diag(sigma^2)}.
-
+  
   Thus the intensity value at a point \eqn{u} is
   \deqn{
     \hat\lambda(u) = e(u) \sum_i k(x_i - u) w_i
@@ -89,6 +85,22 @@
   where \eqn{k} is the Gaussian smoothing kernel,
   \eqn{e(u)} is an edge correction factor, 
   and \eqn{x_i}{w[i]} are the weights.
+
+  Instead of the isotropic Gaussian kernel with standard deviation
+  \code{sigma}, the smoothing kernel may be chosen to be any Gaussian
+  kernel, by giving the variance-covariance matrix \code{varcov}.
+  The arguments \code{sigma} and \code{varcov} are incompatible.
+  Also \code{sigma} may be a vector of length 2 giving the
+  standard deviations of two independent Gaussian coordinates,
+  thus equivalent to \code{varcov = diag(sigma^2)}.
+  
+  The smoothing parameter \code{sigma} has a default value
+  calculated by a simple rule of thumb
+  that depends only on the size of the window. 
+  The argument \code{adjust} makes it easy for the user to change this
+  default. The value of \code{sigma} will be multiplied by
+  the factor \code{adjust}. To double the smoothing parameter, set
+  \code{adjust=2}.
 
   By default the intensity values are
   computed at every location \eqn{u} in a fine grid,
