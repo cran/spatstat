@@ -135,11 +135,15 @@
   For adaptive nonparametric estimation, see
   \code{\link{adaptive.density}}.
   For data sharpening, see \code{\link{sharpen.ppp}}.
+
+  To compute a relative risk surface or probability map for
+  two (or more) types of points, use \code{\link{relrisk}}.
 }
 \seealso{
   \code{\link{smooth.ppp}},
   \code{\link{sharpen.ppp}},
   \code{\link{adaptive.density}},
+  \code{\link{relrisk}},
   \code{\link{ppp.object}},
   \code{\link{im.object}}
 }
@@ -166,6 +170,10 @@
   first step in exploring a spatial point pattern dataset.
   For more explanation, see the workshop notes (Baddeley, 2008)
   or Diggle (2003).
+
+  If you have two (or more) types of points, and you want a
+  probability map or relative risk surface (the spatially-varying
+  probability of a given type), use \code{\link{relrisk}}.
 }
 \examples{
   data(cells)

@@ -3,7 +3,7 @@
 #
 # replicate a pattern periodically
 #
-#  $Revision: 1.2 $  $Date: 2010/01/01 22:59:05 $
+#  $Revision: 1.3 $  $Date: 2011/04/17 05:52:50 $
 #
 
 periodify <- function(X, ...) {
@@ -38,11 +38,11 @@ periodify.ppp <- function(X, nx=1, ny=1, ...,
     Xshift[[i]] <- shift(X, vec=as.numeric(shifts[i, ]))
   if(!combine)
     return(Xshift)
-  if(isrect) {
-    Wnew <-  owin(range(range(W$xrange) + range(shifts[,1])),
-                  range(range(W$yrange) + range(shifts[,2])))
-    Z <- do.call("superimpose", append(Xshift, list(W=Wnew, check=check)))
-  } else Z <- superimpose(Xshift, check=check)
+  Wnew <- if(isrect) {
+    owin(range(range(W$xrange) + range(shifts[,1])),
+         range(range(W$yrange) + range(shifts[,2])))
+  } else NULL
+  Z <- do.call(superimpose, append(Xshift, list(W=Wnew, check=check)))
   return(Z)
 }
 
@@ -74,11 +74,11 @@ periodify.psp <- function(X, nx=1, ny=1, ...,
     Xshift[[i]] <- shift(X, vec=as.numeric(shifts[i, ]))
   if(!combine)
     return(Xshift)
-  if(isrect) {
-    Wnew <-  owin(range(range(W$xrange) + range(shifts[,1])),
-                  range(range(W$yrange) + range(shifts[,2])))
-    Z <- do.call("superimposePSP", append(Xshift, list(W=Wnew, check=check)))
-  } else Z <- superimposePSP(Xshift, check=check)
+  Wnew <- if(isrect) {
+    owin(range(range(W$xrange) + range(shifts[,1])),
+         range(range(W$yrange) + range(shifts[,2])))
+  } else NULL
+  Z <- do.call(superimpose, append(Xshift, list(W=Wnew, check=check)))
   return(Z)
 }
 

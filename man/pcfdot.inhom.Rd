@@ -134,7 +134,7 @@ pcfdot.inhom(X, i, lambdaI = NULL, lambdadot = NULL, ...,
 }
 \examples{
   data(amacrine)
-  plot(pcfdot.inhom(amacrine, "on", stoyan=0.1))
+  plot(pcfdot.inhom(amacrine, "on", stoyan=0.1), legendpos="bottom")
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

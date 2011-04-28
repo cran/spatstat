@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.23 $  $Date: 2010/11/24 06:29:12 $
+#  $Revision: 1.24 $  $Date: 2011/04/04 09:28:40 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -128,7 +128,7 @@ rhohat <- function(object, covariate, ...,
              desc=desc,
 #             unitname=unitname(data.ppm(model)),
              fname="rho",
-             yexp=as.expression(substitute(rho(X), list(X=covname))))
+             yexp=substitute(rho(X), list(X=as.name(covname))))
   attr(rslt, "dotnames") <- c("rho", "hi", "lo")
   # pack up
   class(rslt) <- c("rhohat", class(rslt))
@@ -167,7 +167,7 @@ print.rhohat <- function(x, ...) {
 plot.rhohat <- function(x, ..., do.rug=TRUE) {
   xname <- deparse(substitute(x))
   s <- attr(x, "stuff")
-  covname <- x$covname
+  covname <- s$covname
   asked.rug <- !missing(do.rug) && identical(rug, TRUE)
   do.call("plot.fv", resolve.defaults(list(x), list(...),
                                       list(main=xname, shade=c("hi", "lo"))))
@@ -177,6 +177,7 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
     argh <- list(...)
     isfo <- unlist(lapply(argh, inherits, what="formula"))
     if(any(isfo)) {
+      # a plot formula was given; inspect RHS
       fmla <- argh[[min(which(isfo))]]
       rhs <- rhs.of.formula(fmla)
       vars <- variablesinformula(rhs)
@@ -192,8 +193,14 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
         rugx <- NULL
       }
     } 
-    if(!is.null(rugx))
-      rug(rugx)
+    if(!is.null(rugx)) {
+      # restrict to x limits, if given
+      if(!is.null(xlim <- list(...)$xlim))
+        rugx <- rugx[rugx >= xlim[1] & rugx <= xlim[2]]
+      # finally plot the rug
+      if(length(rugx) > 0)
+        rug(rugx)
+    }
   }
   invisible(NULL)
 }

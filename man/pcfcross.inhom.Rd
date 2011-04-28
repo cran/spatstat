@@ -133,7 +133,8 @@ pcfcross.inhom(X, i, j, lambdaI = NULL, lambdaJ = NULL, ...,
 }
 \examples{
   data(amacrine)
-  plot(pcfcross.inhom(amacrine, "on", "off", stoyan=0.1))
+  plot(pcfcross.inhom(amacrine, "on", "off", stoyan=0.1),
+       legendpos="bottom")
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

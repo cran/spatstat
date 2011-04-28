@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.52 $	$Date: 2010/11/21 04:39:35 $
+#	$Revision: 1.54 $	$Date: 2011/04/19 02:43:59 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -174,7 +174,13 @@
     # restrict r values to recommended range, unless specifically requested
       if(!rfixed) 
         r <- seq(0, alim[2], length=length(r))
-      return(Kborder.engine(X, max(r), length(r), correction, reciplambda))
+      K <- Kborder.engine(X, max(r), length(r), correction, reciplambda)
+      # tweak labels
+      K <- rebadge.fv(K, substitute(K[inhom](r), NULL), "K[inhom]")
+      K <- tweak.fv.entry(K, "theo", new.labl="{%s^{pois}}(r)")
+      K <- tweak.fv.entry(K, "border", new.labl="hat(%s^{bord})(r)")
+      K <- tweak.fv.entry(K, "bord.modif", new.labl="hat(%s^{bordm})(r)")
+      return(K)
     }
 
   ###########################################
@@ -185,8 +191,8 @@
     # this will be the output data frame
     K <- data.frame(r=r, theo= pi * r^2)
     desc <- c("distance argument r", "theoretical Poisson %s")
-    K <- fv(K, "r", substitute(Kinhom(r), NULL),
-            "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kinhom")
+    K <- fv(K, "r", substitute(K[inhom](r), NULL),
+            "theo", , alim, c("r","{%s^{pois}}(r)"), desc, fname="K[inhom]")
 
     # identify all close pairs
     rmax <- max(r)
@@ -215,13 +221,13 @@
       RS <- Kwtsum(dIJ, bI, wIJ, b, w=reciplambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
-        K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
+        K <- bind.fv(K, data.frame(border=Kb), "hat(%s^{bord})(r)",
                      "border-corrected estimate of %s",
                      "border")
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
-        K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
+        K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s^{bordm})(r)",
                      "modified border-corrected estimate of %s",
                      "bord.modif")
       }
@@ -235,7 +241,7 @@
       Ktrans <- cumsum(wh)/(if(renormalise) pseudoarea else area)
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
+      K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s^{trans})(r)",
                    "translation-correction estimate of %s",
                    "trans")
     }
@@ -247,7 +253,7 @@
       Kiso <- cumsum(wh)/(if(renormalise) pseudoarea else area)
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
+      K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s^{iso})(r)",
                    "Ripley isotropic correction estimate of %s",
                    "iso")
     }

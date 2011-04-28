@@ -196,7 +196,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 
   if(inherits(X, "fv")) {
     K <- X
-    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+    if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
       warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)
@@ -242,7 +242,7 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
   dataname <- deparse(substitute(X))
   if(inherits(X, "fv")) {
     K <- X
-    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+    if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
       warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)
@@ -298,7 +298,7 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
 
   if(inherits(X, "fv")) {
     K <- X
-    if(!(attr(K, "fname") %in% c("K", "Kinhom")))
+    if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
       warning("Argument X does not appear to be a K-function")
   } else if(inherits(X, "ppp")) {
     K <- Kest(X)

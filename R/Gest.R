@@ -3,7 +3,7 @@
 #
 #	Compute estimates of nearest neighbour distance distribution function G
 #
-#	$Revision: 4.26 $	$Date: 2010/11/21 04:18:57 $
+#	$Revision: 4.27 $	$Date: 2011/04/19 02:14:33 $
 #
 ################################################################################
 #
@@ -64,7 +64,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
       hh <- hist(nnd[nnd <= rmax],breaks=breaks$val,plot=FALSE)$counts
       edf <- cumsum(hh)/length(nnd)
     }
-    Z <- bind.fv(Z, data.frame(raw=edf), "%s[raw](r)",
+    Z <- bind.fv(Z, data.frame(raw=edf), "hat(%s)[raw](r)",
                  "uncorrected estimate of %s", "raw")
   }
   if("han" %in% correction) {
@@ -82,7 +82,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     }
     # add to fv object
     Z <- bind.fv(Z, data.frame(han=G),
-                 "%s[han](r)", 
+                 "hat(%s)[han](r)", 
                  "Hanisch estimate of %s",
                  "han")
     # modify recommended plot range
@@ -99,7 +99,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("%s[bord](r)", "%s[km](r)", "hazard(r)"),
+                 c("hat(%s)[bord](r)", "hat(%s)[km](r)", "hazard(r)"),
                  c("border corrected estimate of %s",
                    "Kaplan-Meier estimate of %s",
                    "Kaplan-Meier estimate of hazard function lambda(r)"),

@@ -80,6 +80,7 @@
 \alias{distppl}
 \alias{distppll}
 \alias{distppllmin}
+\alias{dist2dpath}
 \alias{divisors}
 \alias{do.as.im}
 \alias{do.call.matched}
@@ -123,7 +124,9 @@
 \alias{formula.ppm}
 \alias{formula.kppm}
 \alias{formula.slrm}
-\alias{fvlabel}
+\alias{fvlabels}
+\alias{fvlabelmap}
+\alias{fvlegend}
 \alias{fvnames}
 \alias{fvnames<-}
 \alias{g3engine}
@@ -193,12 +196,15 @@
 \alias{majorminorversion}
 \alias{make.even.breaks}
 \alias{makeunits}
+\alias{markappend}
+\alias{markcbind}
 \alias{markformat}
 \alias{markformat.ppp}
 \alias{markformat.psp}
 \alias{markformat.default}
 \alias{mark.scale.default}
 \alias{markspace.integral}
+\alias{marks.default}           
 \alias{marks.quad}           
 \alias{\%mapp\%}
 \alias{markappendop}
@@ -239,6 +245,10 @@
 \alias{newstyle.coeff.handling}
 \alias{nncleanEngine}
 \alias{no.trend.ppm}
+\alias{nobjects}
+\alias{nobjects.ppp}
+\alias{nobjects.ppx}
+\alias{nobjects.psp}
 \alias{n.quad}
 \alias{numalign}
 \alias{onecolumn}
@@ -393,6 +403,7 @@
 \alias{summary.pppmatching}
 \alias{summary.ppx}
 \alias{summary.units}
+\alias{superimposeMarks}
 \alias{sympoly}
 \alias{terms.ppm}
 \alias{terms.kppm}
@@ -517,6 +528,7 @@ distpl(p, l)
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 distppllmin(p, l)
+dist2dpath(dist, method="C")
 divisors(n)
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
 do.call.matched(fname, arglist, funargs, extrargs)
@@ -567,7 +579,9 @@ FormatFaspFormulae(f, argname)
 \method{formula}{ppm}(x, \dots)
 \method{formula}{kppm}(x, \dots)
 \method{formula}{slrm}(x, ...)
-fvlabel(x, id)
+fvlabels(x, expand=FALSE)
+fvlabelmap(x, dot=TRUE)
+fvlegend(object, elang)
 fvnames(X, a)
 fvnames(X, a) <- value
 g3engine(x, y, z, box, rmax, nrval, correction)
@@ -643,12 +657,15 @@ lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
 makeunits(sing, plur, mul)
+markappend(\dots)
+markcbind(\dots)
 markformat(x)
 \method{markformat}{ppp}(x)
 \method{markformat}{psp}(x)
 \method{markformat}{default}(x)
 mark.scale.default(marx, w, markscale=NULL, maxsize=NULL)
 markspace.integral(X)
+\method{marks}{default}(x, \dots)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
 markappendop(x, y)
 marksubset(x, index, format)
@@ -691,6 +708,10 @@ nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
 nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
 no.trend.ppm(x)
+nobjects(x)
+\method{nobjects}{ppp}(x)
+\method{nobjects}{ppx}(x)
+\method{nobjects}{psp}(x)
 n.quad(Q)
 numalign(i, nmax, zero)
 onecolumn(m)
@@ -857,6 +878,7 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{units}(object, \dots)
+superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
 \method{terms}{ppm}(x, \dots)
 \method{terms}{kppm}(x, \dots)

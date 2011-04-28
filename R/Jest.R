@@ -3,7 +3,7 @@
 #	Usual invocation to compute J function
 #	if F and G are not required 
 #
-#	$Revision: 4.17 $	$Date: 2010/11/05 08:29:32 $
+#	$Revision: 4.18 $	$Date: 2011/04/19 02:14:27 $
 #
 #
 #
@@ -39,25 +39,25 @@ function(X, ..., eps=NULL, r=NULL, breaks=NULL, correction=NULL) {
   Gnames <- names(G)
   if("raw" %in% Gnames && "raw" %in% Fnames) {
     Jun <- ratio(1-G$raw, 1-FF$raw)
-    Z <- bind.fv(Z, data.frame(un=Jun), "%s[un](r)",
+    Z <- bind.fv(Z, data.frame(un=Jun), "hat(%s)[un](r)",
                  "uncorrected estimate of %s", "un")
     attr(Z, "alim") <- range(rvals[FF$raw <= 0.9])
   }
   if("rs" %in% Gnames && "rs" %in% Fnames) {
     Jrs <- ratio(1-G$rs, 1-FF$rs)
-    Z <- bind.fv(Z, data.frame(rs=Jrs), "%s[rs](r)",
+    Z <- bind.fv(Z, data.frame(rs=Jrs), "hat(%s)[rs](r)",
                  "border corrected estimate of %s", "rs")
     attr(Z, "alim") <- range(rvals[FF$rs <= 0.9])
   }
   if("han" %in% Gnames && "cs" %in% Fnames) {
     Jhan <- ratio(1-G$han, 1-FF$cs)
-    Z <- bind.fv(Z, data.frame(han=Jhan), "%s[han](r)",
+    Z <- bind.fv(Z, data.frame(han=Jhan), "hat(%s)[han](r)",
                  "Hanisch-style estimate of %s", "han")
     attr(Z, "alim") <- range(rvals[FF$cs <= 0.9])
   }
   if("km" %in% Gnames && "km" %in% Fnames) {
     Jkm <- ratio(1-G$km, 1-FF$km)
-    Z <- bind.fv(Z, data.frame(km=Jkm), "%s[km](r)",
+    Z <- bind.fv(Z, data.frame(km=Jkm), "hat(%s)[km](r)",
                  "Kaplan-Meier estimate of %s", "km")
     attr(Z, "alim") <- range(rvals[FF$km <= 0.9])
   }

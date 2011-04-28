@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.56 $ $Date: 2010/11/21 04:22:17 $
+#     $Revision: 1.58 $ $Date: 2011/04/19 02:40:31 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -57,7 +57,7 @@ function(X, i, j, r=NULL,
   }
   p <- rebadge.fv(p,
                   substitute(p[i,j](r), list(i=paste(i),j=paste(j))),
-                  "pij",
+                  sprintf("p[list(%s, %s)]", i, j),
                   new.yexp=substitute(p[list(i,j)](r),
                                       list(i=paste(i),j=paste(j))))
   return(p)
@@ -94,6 +94,7 @@ Vmark <- function(X, r=NULL,
     V <- eval.fv(V/sig2)
   }
   V <- rebadge.fv(V, substitute(V(r), NULL), "V")
+  attr(V, "labl") <- attr(E, "labl")
   return(V)
 }
 
@@ -170,10 +171,12 @@ markcorrint <-
            Ef2 <- mean(fXX)
          })
   K$theo <- K$theo * Ef2
+  labl <- attr(K, "labl")
   if(normalise)
     K <- eval.fv(K/Ef2)
   if(returnL)
     K <- eval.fv(sqrt(K/pi))
+  attr(K, "labl") <- labl
   if(normalise && !returnL) {
     ylab <- substitute(K[f](r), NULL)
     fnam <- "K[f]"
@@ -322,7 +325,7 @@ markcorr <-
     }
   }
   result <- fv(result, "r", ylab, "theo", , alim,
-               c("r","%s[iid](r)"), desc, fname=fnam)
+               c("r","{%s^{iid}}(r)"), desc, fname=fnam)
 
   # find close pairs of points
   close <- closepairs(X, rmax)
@@ -385,7 +388,7 @@ markcorr <-
     # get smoothed estimate of mark covariance
     Mtrans <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
     result <- bind.fv(result,
-                      data.frame(trans=Mtrans), "%s[trans](r)",
+                      data.frame(trans=Mtrans), "hat(%s^{trans})(r)",
                       "translation-corrected estimate of %s",
                       "trans")
   }
@@ -395,7 +398,7 @@ markcorr <-
     # get smoothed estimate of mark covariance
     Miso <- sewsmod(dIJ, ff, edgewt, Efdenom, r, method, ...)
     result <- bind.fv(result,
-                      data.frame(iso=Miso), "%s[iso](r)",
+                      data.frame(iso=Miso), "hat(%s^{iso})(r)",
                       "Ripley isotropic correction estimate of %s",
                       "iso")
   }
@@ -404,12 +407,10 @@ markcorr <-
   corrxns <- rev(nama2[nama2 != "r"])
 
   # default is to display them all
-  attr(result, "fmla") <- deparse(as.formula(paste(
-                       "cbind(",
-                        paste(corrxns, collapse=","),
-                        ") ~ r")))
+  attr(result, "fmla") <- (. ~ r)
+  fvnames(result, ".") <- corrxns
+  #
   unitname(result) <- unitname(X)
-
   return(result)
 }
 

@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.54 $ $Date: 2011/03/25 04:02:26 $
+#  $Revision: 1.57 $ $Date: 2011/04/17 05:49:52 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -158,7 +158,7 @@ as.psp.matrix <- function(x, ..., window=NULL, marks=NULL,
 
 as.psp.default <- function(x, ..., window=NULL, marks=NULL,
                            check=spatstat.options("checksegments"), fatal=TRUE) {
-  if(checkfields(c,"marks")) {
+  if(checkfields(x,"marks")) {
 	if(is.null(marks)) marks <- x$marks
 	else warning(paste("Component of \"x\" named \"marks\" ignored;\n",
                              "argument named \"marks\" has precedence.\n",sep=""))
@@ -616,6 +616,15 @@ nsegments <- function(x) {
 	UseMethod("nsegments")
 }
 
-nsegments.psp <- function(x) {
+nobjects.psp <- nsegments.psp <- function(x) {
    x$n
 }
+
+as.ppp.psp <- function (X, ..., fatal=TRUE) 
+{
+  Y <- endpoints.psp(X, which="both")
+  m  <- marks(X)
+  marks(Y) <- markappend(m, m)
+  return(Y)
+}
+

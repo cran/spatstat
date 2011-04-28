@@ -96,11 +96,11 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
   
   df <- data.frame(r=r, theo=rep(1,length(r)))
   out <- fv(df, "r",
-            substitute(ginhom(r), NULL), "theo", ,
+            substitute(g[inhom](r), NULL), "theo", ,
             alim,
-            c("r","%s[Pois](r)"),
+            c("r","{%s^{Pois}}(r)"),
             c("distance argument r", "theoretical Poisson %s"),
-            fname="ginhom")
+            fname="g[inhom]")
 
   ###### compute #######
 
@@ -111,7 +111,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
     gT <- sewpcf(dIJ, edgewt * wIJ, denargs, area)$g
     out <- bind.fv(out,
                    data.frame(trans=gT),
-                   "%s[Trans](r)",
+                   "hat(%s^{Trans})(r)",
                    "translation-corrected estimate of %s",
                    "trans")
   }
@@ -121,7 +121,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
     gR <- sewpcf(dIJ, edgewt * wIJ, denargs, area)$g
     out <- bind.fv(out,
                    data.frame(iso=gR),
-                   "%s[Ripley](r)",
+                   "hat(%s^{Ripley})(r)",
                    "isotropic-corrected estimate of %s",
                    "iso")
   }

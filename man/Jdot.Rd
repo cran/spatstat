@@ -177,7 +177,7 @@ Jdot(X, i, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
     plot(Jh.)
     # diagnostic plot for independence between hickories and other trees
     Jhh <- Jest(lansing[lansing$marks == "hickory", ])
-    plot(Jhh, add=TRUE)
+    plot(Jhh, add=TRUE, legendpos="bottom")
 
     \dontrun{
     # synthetic example with two marks "a" and "b"

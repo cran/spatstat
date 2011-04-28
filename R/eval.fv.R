@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.10 $     $Date: 2010/01/08 23:28:06 $
+#     $Revision: 1.13 $     $Date: 2011/04/12 12:17:17 $
 #
 
 eval.fv <- function(expr, envir) {
@@ -25,10 +25,10 @@ eval.fv <- function(expr, envir) {
   names(vars) <- varnames
   # find out which ones are fv objects
   fvs <- unlist(lapply(vars, is.fv))
-  if(!any(fvs))
+  nfuns <- sum(fvs)
+  if(nfuns == 0)
     stop("No fv objects in this expression")
   funs <- vars[fvs]
-  nfuns <- length(funs)
   # test whether the fv objects are compatible
   if(nfuns > 1) {
     # test compatibility
@@ -39,6 +39,7 @@ eval.fv <- function(expr, envir) {
   }
   # copy first object as template
   result <- funs[[1]]
+  labl <- attr(result, "labl")
   # determine which function estimates are supplied
   argname <- fvnames(result, ".x")
   nam <- names(result)
@@ -52,11 +53,53 @@ eval.fv <- function(expr, envir) {
     # evaluate
     result[[yn]] <- eval(e, vars)
   }
-  # determine y axis label for the result
+  # determine mathematical labels.
+  # 'yexp' determines y axis label
+  # 'ylab' determines y label in printing and description
+  # 'fname' is sprintf-ed into 'labl' for legend
+  getfname <- function(x) { if(!is.null(y <- attr(x, "fname"))) y else "" }
+  yexps <- lapply(funs, function(x) { attr(x, "yexp") })
   ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
-  attr(result, "ylab") <-
-    eval(substitute(substitute(e, ylabs), list(e=elang)))
-  attr(result, "fname") <- "eval"
+  fnames <- unlist(lapply(funs, getfname))
+  # Remove duplication
+  # Typically occurs when combining several K functions, etc.
+  # Tweak fv objects so their function names are their object names
+  # as used in the expression
+  if(any(duplicated(fnames))) {
+    newfnames <- names(funs)
+    for(i in 1:nfuns)
+      funs[[i]] <- rebadge.fv(funs[[i]], new.fname=newfnames[i])
+    fnames <- newfnames
+  }
+  if(any(duplicated(ylabs))) {
+    for(i in 1:nfuns)
+      funs[[i]] <- rebadge.fv(funs[[i]], 
+                              new.ylab=substitute(f(r), list(f=as.name(fnames[i]))))
+    ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
+  }
+  if(any(duplicated(yexps))) {
+    for(i in 1:nfuns)
+      funs[[i]] <- rebadge.fv(funs[[i]], 
+                              new.yexp=substitute(f(r), list(f=as.name(newfnames[i]))))
+    yexps <- lapply(funs, function(x) { attr(x, "yexp") })
+  }
+  # now compute y axis labels for the result
+  attr(result, "yexp") <- eval(substitute(substitute(e, yexps), list(e=elang)))
+  attr(result, "ylab") <- eval(substitute(substitute(e, ylabs), list(e=elang)))
+  # compute fname equivalent to expression
+  flatten <- function(x) { paste(x, collapse=" ") }
+  attr(result, "fname") <- paren(flatten(deparse(elang)))
+  # now compute the [modified] y labels
+  labelmaps <- lapply(funs, fvlabelmap, dot=FALSE)
+  for(yn in ynames) {
+    # labels for corresponding columns of each argument
+    funlabels <- lapply(labelmaps, function(x, n) { x[[n]] }, n=yn)
+    # form expression involving these columns
+    labl[match(yn, names(result))] <-
+      flatten(deparse(eval(substitute(substitute(e, f),
+                                      list(e=elang, f=funlabels)))))
+  }
+  attr(result, "labl") <- labl
   return(result)
 }
 

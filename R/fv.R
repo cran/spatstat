@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.60 $   $Date: 2010/11/10 10:44:47 $
+#    $Revision: 1.64 $   $Date: 2011/04/14 02:56:45 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -141,7 +141,7 @@ print.fv <- function(x, ...) {
   if(!is.null(ylab <- a$ylab)) {
     if(is.language(ylab))
       ylab <- deparse(ylab)
-    xlab <- fvlabel(x, a$argu)
+    xlab <- fvlabels(x)[[a$argu]]
     cat(paste("for the function", xlab, "->", ylab, "\n"))
   }
   # Descriptions ..
@@ -268,11 +268,82 @@ fvnames <- function(X, a=".") {
   return(X)
 }
 
-fvlabel <- function(x, id) {
+fvlabels <- function(x, expand=FALSE) {
   lab <- attr(x, "labl")
   names(lab) <- names(x)
-  lab[[id]]
+  if(expand) {
+    # expand plot labels
+    if(!is.null(fname <- attr(x, "fname")))
+      lab <- sprintf(lab, fname)
+  }
+  return(lab)
 }
+
+fvlabelmap <- function(x, dot=TRUE) {
+  labl <- fvlabels(x, expand=TRUE)
+  # construct mapping from identifiers to labels
+  map <- as.list(labl)
+  magic <- function(x) {
+    subx <- paste("substitute(", x, ", NULL)")
+    eval(parse(text=subx))
+  }
+  map <- lapply(map, magic)
+  names(map) <- colnames(x)
+  if(dot) {
+    # also map "." to name of target function
+    if(!is.null(ye <- attr(x, "yexp")))
+      map <- append(map, list("."=ye))
+    # map other fvnames to their corresponding labels
+    map <- append(map, list(".x"=map[[fvnames(x, ".x")]],
+                            ".y"=map[[fvnames(x, ".y")]]))
+  }
+#    # alternative version of map (vector of expressions)
+#  mapvec <- sapply(as.list(labl), function(x) { parse(text=x) })
+#  names(mapvec) <- colnames(x)
+  return(map)
+}
+
+fvlegend <- function(object, elang) {
+  # Compute mathematical legend for each column in fv object 
+  # transformed by language expression 'elang'
+  # The result is an expression vector.
+  # The j-th entry of the vector is an expression for the
+  # j-th column of function values.
+  # It is formed from the LHS of the plot formula,
+  # by replacing "." by labl[j] and replacing any column names
+  # by their corresponding expressions labl[k].
+  map <-  fvlabelmap(object, dot=TRUE)
+  map0 <- fvlabelmap(object, dot=FALSE)
+  replacedot <- function(x, LHS, fullmap) {
+    # modify map so that "." is mapped to x
+    fullmap[["."]] <- x
+    z <- try(eval(substitute(substitute(yy, mp),
+                              list(yy=LHS, mp=fullmap))))
+    if(!inherits(z, "try-error") &&
+       is.language(z) && !is.expression(z))
+      z <- as.expression(z)
+    z
+  }
+  # transform each column label 
+  fancy <- lapply(map0, replacedot, LHS=elang, fullmap=map)
+  # (except the function argument)
+  xname <- fvnames(object, ".x")
+  hit <- names(map0) %in% c(xname, ".x")
+  fancy[hit] <- as.expression(substitute(expression(r),
+                                         list(r=as.name(xname))))
+  # check replacement worked
+  if(!any(unlist(lapply(fancy, inherits, what="try-error")))) {
+    # OK
+    # convert list to expression vector
+    fancy <- do.call("c", unname(fancy))
+    if(is.expression(fancy))
+      return(fancy)
+  }
+  # didn't work
+  fallback <- fvlabels(object, expand=TRUE)
+  return(fallback)
+}
+
 
 bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   verifyclass(x, "fv")
@@ -527,24 +598,26 @@ rebadge.fv <- function(x, new.ylab, new.fname,
 #   method for with()
 
 with.fv <- function(data, expr, ..., drop=TRUE) {
+  cl <- match.call()
   verifyclass(data, "fv")
   # convert syntactic expression to 'expression' object
   e <- as.expression(substitute(expr))
   # convert syntactic expression to call
   elang <- substitute(expr)
-  # expand "."
-  dnames <- fvnames(data, ".")
+  # map "." etc to names of columns of data
+  datanames <- names(data)
   xname <- fvnames(data, ".x")
   yname <- fvnames(data, ".y")
+  dnames <- datanames[datanames %in% fvnames(data, ".")]
   ud <- as.call(lapply(c("cbind", dnames), as.name))
   ux <- as.name(xname)
   uy <- as.name(yname)
-  elang <- eval(substitute(substitute(ee,
+  expandelang <- eval(substitute(substitute(ee,
                                       list(.=ud, .x=ux, .y=uy)),
                            list(ee=elang)))
   # evaluate expression
   datadf <- as.data.frame(data)
-  results <- eval(elang, as.list(datadf))
+  results <- eval(expandelang, as.list(datadf))
   # --------------------
   # make sense of the results
   #
@@ -586,20 +659,40 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   resultnames <- colnames(results)[-1]
   if(any(resultnames != oldnames))
     warning("some column names were illegal and have been changed")
+  # determine mapping (if any) from columns of output to columns of input
+  namemap <- match(colnames(results), names(datadf))
+  okmap <- !is.na(namemap)
   # Build up fv object
   # decide which of the columns should be the preferred value
   newyname <- if(yname %in% resultnames) yname else resultnames[1]
   # construct default plot formula
-  lhs <- resultnames
-  if(length(lhs) > 1)
-    lhs <- paste("cbind", paren(paste(lhs, collapse=", ")))
-  fmla <- as.formula(paste(lhs, "~", xname))
+  fmla <- as.formula(paste(". ~", xname))
+  dotnames <- resultnames
   # construct description strings
-  desc <- c(attr(data, "desc")[1], paste("Computed value", resultnames))
+  desc <- character(ncol(results))
+  desc[okmap] <- attr(data, "desc")[namemap[okmap]]
+  desc[!okmap] <- paste("Computed value", resultnames[!okmap])
+  # function name
+  fname <- deparse(cl)
+  # construct mathematical expression for function (yexp)
+  oldyexp <- attr(data, "yexp")
+  if(is.null(oldyexp))
+    yexp <- substitute(f(xname), list(f=as.name(fname), xname=as.name(xname)))
+  else {
+    labmap <- fvlabelmap(data, dot=TRUE)
+    labmap[["."]] <- oldyexp
+    yexp <- eval(substitute(substitute(ee, ff), 
+                            list(ee=elang, ff=labmap)))
+  }
+  # construct mathematical labels
+  mathsmap <- as.character(fvlegend(data, elang))
+  labl <- colnames(results)
+  labl[okmap] <- mathsmap[namemap[okmap]]
   # form fv object and return
-  out <- fv(results, argu=xname, valu=newyname,
-            desc=desc, alim=attr(data, "alim"), fmla=fmla, 
-            unitname=unitname(data), fname="?")
+  out <- fv(results, argu=xname, valu=newyname, labl=labl,
+            desc=desc, alim=attr(data, "alim"), fmla=fmla,
+            unitname=unitname(data), fname=fname, yexp=yexp, ylab=yexp)
+  fvnames(out, ".") <- dotnames
   return(out)
 }
 

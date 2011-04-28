@@ -92,7 +92,7 @@ pcf.ppp <- function(X, ..., r=NULL,
     gT <- sewpcf(dIJ, edgewt, denargs, lambda2area)$g
     out <- bind.fv(out,
                    data.frame(trans=gT),
-                   "%s[Trans](r)",
+                   "hat(%s)[Trans](r)",
                    "translation-corrected estimate of %s",
                    "trans")
   }
@@ -102,7 +102,7 @@ pcf.ppp <- function(X, ..., r=NULL,
     gR <- sewpcf(dIJ, edgewt, denargs, lambda2area)$g
     out <- bind.fv(out,
                    data.frame(iso=gR),
-                   "%s[Ripley](r)",
+                   "hat(%s)[Ripley](r)",
                    "isotropic-corrected estimate of %s",
                    "iso")
   }
@@ -213,7 +213,7 @@ function(X, ..., method="c") {
 
   # pack result into "fv" data frame
   Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
-          "r", substitute(pcf(r), NULL), "pcf", . ~ r, alim,
+          "r", substitute(g(r), NULL), "pcf", . ~ r, alim,
           c("r", "%s(r)", "%s[pois](r)"),
           c("distance argument r",
             "estimate of %s by numerical differentiation",

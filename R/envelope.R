@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.14 $  $Date: 2010/11/05 01:26:58 $
+#   $Revision: 2.15 $  $Date: 2011/04/27 06:09:16 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -630,6 +630,14 @@ envelopeEngine <-
     hi <- Ef + nSD * sd
     lo.name <- paste("lower", nSD, "sigma critical limit for %s")
     hi.name <- paste("upper", nSD, "sigma critical limit for %s")
+    # confidence interval 
+    loCI <- Ef - nSD * sd/sqrt(nsim)
+    hiCI <- Ef + nSD * sd/sqrt(nsim)
+    loCI.name <- paste("lower", nSD, "sigma confidence bound",
+                       "for mean of simulated %s")
+    hiCI.name <- paste("upper", nSD, "sigma confidence bound",
+                       "for mean of simulated %s")
+
     # put together
     if(csr.theo) {
       results <- data.frame(r=rvals,
@@ -640,11 +648,19 @@ envelopeEngine <-
       morestuff <- data.frame(mmean=Ef,
                               var=varf,
                               res=fX-Ef,
-                              stdres=stdres)
-      mslabl <- c("mean(r)", "var(r)", "res(r)", "stdres(r)")
+                              stdres=stdres,
+                              loCI=loCI,
+                              hiCI=hiCI)
+      mslabl <- c("bar(%s)(r)",
+                  "paste(var,%s)(r)",
+                  "paste(res,%s)(r)",
+                  "paste(stdres,%s)(r)",
+                  "%s[loCI](r)", "%s[hiCI](r)")
       msdesc <- c("sample mean of %s from simulations",
                   "sample variance of %s from simulations",
-                  "raw residual", "standardised residual")
+                  "raw residual",
+                  "standardised residual",
+                  loCI.name, hiCI.name)
     } else {
       results <- data.frame(r=rvals,
                             obs=fX,
@@ -653,10 +669,17 @@ envelopeEngine <-
                             hi=hi)
       morestuff <- data.frame(var=varf,
                               res=fX-Ef,
-                              stdres=stdres)
-      mslabl <- c("var(r)", "res(r)", "stdres(r)")
+                              stdres=stdres,
+                              loCI=loCI,
+                              hiCI=hiCI)
+      mslabl <- c("paste(var,%s)(r)",
+                  "paste(res,%s)(r)",
+                  "paste(stdres,%s)(r)",
+                  "%s[loCI](r)", "%s[hiCI](r)")
       msdesc <- c("sample variance of %s from simulations",
-                  "raw residual", "standardised residual")
+                  "raw residual",
+                  "standardised residual",
+                  loCI.name, hiCI.name)
     }
   } else if(!global) {
     # POINTWISE ENVELOPES
@@ -730,8 +753,9 @@ envelopeEngine <-
                valu="obs",
                fmla= deparse(. ~ r),
                alim=attr(funX, "alim"),
-               labl=c("r", "obs(r)", if(csr.theo) "theo(r)" else "mean(r)",
-                 "lo(r)", "hi(r)"),
+               labl=c("r", "%s[obs](r)",
+                 if(csr.theo) "%s[theo](r)" else "bar(%s)(r)",
+                 "%s[lo](r)", "%s[hi](r)"),
                desc=c("distance argument r",
                  "observed value of %s for data pattern",
                  if(csr.theo) "theoretical value of %s for CSR"

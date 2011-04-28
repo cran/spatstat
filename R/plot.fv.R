@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.51 $    $Date: 2011/03/01 01:26:35 $
+#  $Revision: 1.64 $    $Date: 2011/04/27 03:11:33 $
 #
 #
 
@@ -13,7 +13,8 @@ conspire <- function(...) {
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
                     ylim.covers=NULL, legend=TRUE, legendpos="topleft",
-                    legendmath=FALSE, shade=NULL, shadecol="grey") {
+                    legendmath=TRUE, legendargs=list(),
+                    shade=NULL, shadecol="grey") {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -21,6 +22,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   indata <- as.data.frame(x)
 
+  # ---------------- determine plot formula ----------------
+  
   defaultplot <- missing(fmla) || is.null(fmla)
   if(defaultplot) 
     fmla <- attr(x, "fmla")
@@ -42,40 +45,74 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   u <- as.call(lapply(c("cbind", dotnames), as.name))
   fmla <- eval(substitute(substitute(fom, list(.=u)), list(fom=fmla)))
 
-  # extract LHS and RHS
+  
+  # ------------------- extract data for plot ---------------------
+  
+  # extract LHS and RHS of formula
   lhs <- fmla[[2]]
   rhs <- fmla[[3]]
 
-  # evaluate expression a in data frame b
-  evaluate <- function(a,b) {
-#    if(exists("is.R") && is.R())
-      eval(a, envir=b)
-#    else
-#      eval(a, local=b)
-  }
-  
-  lhsdata <- evaluate(lhs, indata)
-  rhsdata <- evaluate(rhs, indata)
-  
+  # extract data 
+  lhsdata <- eval(lhs, envir=indata)
+  rhsdata <- eval(rhs, envir=indata)
+
+  # reformat
   if(is.vector(lhsdata)) {
     lhsdata <- matrix(lhsdata, ncol=1)
-    colnames(lhsdata) <- paste(lhs, collapse="")
+    colnames(lhsdata) <- paste(deparse(lhs), collapse="")
   }
+  # check lhs names exist
+  lnames <- colnames(lhsdata)
+  nc <- ncol(lhsdata)
+  lnames0 <- paste("V", seq(nc), sep="")
+  if(length(lnames) != nc)
+    colnames(lhsdata) <- lnames0
+  else if(any(uhoh <- !nzchar(lnames)))
+    colnames(lhsdata)[uhoh] <- lnames0[uhoh]
 
+  # check rhs data
   if(is.matrix(rhsdata))
     stop("rhs of formula should yield a vector")
   rhsdata <- as.numeric(rhsdata)
 
+  nplots <- ncol(lhsdata)
+  allind <- 1:nplots
+
+  # extra plots may be implied by 'shade'
+  
+  if(!is.null(shade)) {
+    # select columns by name or number
+    names(allind) <- colnames(lhsdata)
+    shind <- try(allind[shade])
+    if(inherits(shind, "try-error")) 
+      stop("The argument shade should be a valid subset index for columns of x")
+    if(any(nbg <- is.na(shind))) {
+      # columns not included in formula; get them
+      morelhs <- try(as.matrix(indata[ , shade[nbg], drop=FALSE]))
+      if(inherits(morelhs, "try-error")) 
+        stop("The argument shade should be a valid subset index for columns of x")
+      nmore <- ncol(morelhs)
+      lhsdata <- cbind(lhsdata, morelhs)
+      shind[nbg] <- nplots + seq(nmore)
+      nplots <- nplots + nmore
+      lty <- c(lty, rep(lty[1], nmore))
+      col <- c(col, rep(col[1], nmore))
+      lwd <- c(lwd, rep(lwd[1], nmore))
+    }
+  }
+  
   # restrict data to subset if desired
   if(!is.null(subset)) {
     keep <- if(is.character(subset))
-		evaluate(parse(text=subset), indata)
+		eval(parse(text=subset), envir=indata)
             else
-                evaluate(subset, indata)
+                eval(subset, envir=indata)
     lhsdata <- lhsdata[keep, , drop=FALSE]
     rhsdata <- rhsdata[keep]
   } 
 
+  # -------------------- determine plotting limits ----------------------
+  
   # determine x and y limits and clip data to these limits
   if(!is.null(xlim)) {
     ok <- (xlim[1] <= rhsdata & rhsdata <= xlim[2])
@@ -99,33 +136,21 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       xlim <- range(rhsdata)
     }
   }
-  
+
   if(is.null(ylim))
     ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
   if(!is.null(ylim.covers))
     ylim <- range(ylim, ylim.covers)
 
-  # work out how to label the plot
-  
+  # -------------  work out how to label the plot --------------------
+
   # extract plot labels 
   labl <- attr(x, "labl")
   # expand plot labels
   if(!is.null(fname <- attr(x, "fname")))
     labl <- sprintf(labl, fname)
-  # construct mapping from identifiers to labels
-  map <- as.list(labl)
-  magic <- function(x) {
-    subx <- paste("substitute(", x, ", NULL)")
-    eval(parse(text=subx))
-  }
-  map <- lapply(map, magic)
-  names(map) <- colnames(x)
-  # also map "." to name of target function
-  if(!is.null(ye <- attr(x, "yexp")))
-        map <- append(map, list("."=ye))
-  # alternative version of map (vector of expressions)
-  mapvec <- sapply(as.list(labl), function(x) { parse(text=x) })
-  names(mapvec) <- colnames(x)
+  # create plot label map (key -> algebraic expression)
+  map <- fvlabelmap(x) 
 
   # ......... label for x axis ..................
 
@@ -143,33 +168,38 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   }
   if(is.language(xlab) && !is.expression(xlab))
     xlab <- as.expression(xlab)
-      
-  # ......... label for y axis ...................
   
+  # ......... label for y axis ...................
+
+  leftside <- lhs.original
+  if(ncol(lhsdata) > 1) {
+    # For labelling purposes only, simplify the LHS by 
+    # replacing 'cbind(.....)' by '.'
+    # even if not all columns are included.
+    leftside <- paste(as.expression(leftside))
+    cb <- paste("cbind(",
+                paste(colnames(lhsdata), collapse=", "),
+                ")", sep="")
+    leftside <- gsub(cb, ".", leftside, fixed=TRUE)
+    # convert back to language
+    leftside <- as.formula(paste(leftside, "~1"))[[2]]
+  }
+
+  # construct label for y axis
   if(is.null(ylab)) {
     yl <- attr(x, "yexp")
     if(defaultplot && !is.null(yl)) {
       ylab <- yl
     } else {
-      # make y axis label from original LHS
-      leftside <- lhs.original
-      if(ncol(lhsdata) > 1) {
-        # replace 'cbind(....)' by '.' for labelling purposes only
-        leftside <- paste(as.expression(leftside))
-        cb <- paste("cbind(",
-                    paste(colnames(lhsdata), collapse=", "),
-                    ")", sep="")
-        leftside <- gsub(cb, ".", leftside, fixed=TRUE)
-        # convert back to language
-        leftside <- as.formula(paste(leftside, "~1"))[[2]]
-      }
-      # replace short identifiers by plot labels
+      # replace "." and short identifiers by plot labels
       ylab <- eval(substitute(substitute(le, mp),
                                 list(le=leftside, mp=map)))
     }
   }
   if(is.language(ylab) && !is.expression(ylab))
     ylab <- as.expression(ylab)
+
+  # ------------------ start plotting ---------------------------
 
   # check for argument "add" (defaults to FALSE)
   dotargs <- list(...)
@@ -184,7 +214,6 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                              list(...),
                              list(main=xname)))
 
-  nplots <- ncol(lhsdata)
 
   # process lty, col, lwd arguments
 
@@ -206,29 +235,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   col <- fixit(col, nplots, opt0$col, 1:nplots)
   lwd <- fixit(lwd, nplots, opt0$lwd, 1)
 
-  allind <- 1:nplots
-
   if(!is.null(shade)) {
     # shade region between critical boundaries
-    # select columns by name or number
-    names(allind) <- colnames(lhsdata)
-    shind <- try(allind[shade])
-    if(inherits(shind, "try-error")) 
-      stop("The argument shade should be a valid subset index for columns of x")
-    if(any(nbg <- is.na(shind))) {
-      # columns not included in formula; get them
-      morelhs <- try(as.matrix(indata[ok, shade[nbg], drop=FALSE]))
-      if(inherits(morelhs, "try-error")) 
-        stop("The argument shade should be a valid subset index for columns of x")
-      nmore <- ncol(morelhs)
-      lhsdata <- cbind(lhsdata, morelhs)
-      shind[nbg] <- nplots + seq(nmore)
-      nplots <- nplots + nmore
-      lty <- c(lty, rep(lty[1], nmore))
-      col <- c(col, rep(col[1], nmore))
-      lwd <- c(lwd, rep(lwd[1], nmore))
-    }
-    # extract relevant columns
+    # extract relevant columns for shaded bands
     shdata <- lhsdata[, shind]
     if(!is.matrix(shdata) || ncol(shdata) != 2) 
       stop("The argument shade should select two columns of x")
@@ -270,39 +279,53 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # 
   }
   
-  # plot lines
+  # ----------------- plot lines ------------------------------
 
   for(i in allind)
     lines(rhsdata, lhsdata[,i], lty=lty[i], col=col[i], lwd=lwd[i])
 
+  # determine legend 
   if(nplots == 1)
     return(invisible(NULL))
   else {
     key <- colnames(lhsdata)
     mat <- match(key, names(x))
-    desc <- attr(x, "desc")[mat]
-    labl <- labl[mat]
+    keyok <- !is.na(mat)
+    matok <- mat[keyok]
+    legdesc <- rep("constructed variable", length(key))
+    legdesc[keyok] <- attr(x, "desc")[matok]
+    leglabl <- lnames0
+    leglabl[keyok] <- labl[matok]
     ylab <- attr(x, "ylab")
     if(!is.null(ylab)) {
       if(is.language(ylab))
         ylab <- deparse(ylab)
-      desc <- sprintf(desc, ylab)
+      legdesc <- sprintf(legdesc, ylab)
     }
     if(!is.null(legend) && legend) {
       # do legend
       legtxt <- key
       if(legendmath) {
-        legtxt <- labl
-        # try to convert to expressions
-        fancy <- try(parse(text=labl))
-        if(!inherits(fancy, "try-error"))
-          legtxt <- fancy
+        legtxt <- leglabl
+        if(defaultplot) {
+          # try to convert individual labels to expressions
+          fancy <- try(parse(text=leglabl))
+          if(!inherits(fancy, "try-error"))
+            legtxt <- fancy
+        } else {
+          legtxt[keyok] <- fvlegend(x, leftside)[matok]
+        }
       }
-      legend(legendpos, inset=0.05, lty=lty, col=col, legend=legtxt)
+      do.call("legend",
+              resolve.defaults(legendargs,
+                               list(x=legendpos, legend=legtxt, lty=lty, col=col),
+                               list(inset=0.05, y.intersp=if(legendmath) 1.3 else 1),
+                               .StripNull=TRUE))
     }
-    df <- data.frame(lty=lty, col=col, key=key, label=labl,
-                      meaning=desc, row.names=key)
+    df <- data.frame(lty=lty, col=col, key=key, label=leglabl,
+                      meaning=legdesc, row.names=key)
     return(df)
   }
 }
+
 

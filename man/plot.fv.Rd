@@ -7,7 +7,7 @@
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
-           legend=TRUE, legendpos="topleft", legendmath=FALSE,
+           legend=TRUE, legendpos="topleft", legendmath=TRUE, legendargs=list(),
            shade=NULL, shadecol="grey")
 }
 \arguments{
@@ -69,6 +69,10 @@
     Logical. If \code{TRUE}, the legend will display the
     mathematical notation for each curve. If \code{FALSE}, the legend text
     is the identifier (column name) for each curve.
+  }
+  \item{legendargs}{
+    Named list containing additional arguments to be passed to
+    \code{\link{legend}} controlling the appearance of the legend.
   }
   \item{shade}{
     An index that identifies two columns of \code{x}. When the corresponding

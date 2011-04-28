@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.29 $	$Date: 2010/11/21 04:18:25 $
+#	$Revision: 4.30 $	$Date: 2011/04/19 02:12:58 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -89,7 +89,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
       hh <- hist(dist[dist <= rmax],breaks=breaks$val,plot=FALSE)$counts
       edf <- cumsum(hh)/length(dist)
     }
-    Z <- bind.fv(Z, data.frame(raw=edf), "%s[raw](r)",
+    Z <- bind.fv(Z, data.frame(raw=edf), "hat(%s)[raw](r)",
                  "uncorrected estimate of %s", "raw")
   }
   
@@ -109,7 +109,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     }
     # add to fv object
     Z <- bind.fv(Z, data.frame(cs=cs),
-                 "%s[cs](r)", 
+                 "hat(%s)[cs](r)", 
                  "Chiu-Stoyan estimate of %s",
                  "cs")
     # modify recommended plot range
@@ -122,7 +122,7 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     want.km <- "km" %in% correction
     selection <- c(want.rs, want.km, want.km)
     tags <- c("rs", "km", "hazard")[selection]
-    labels <- c("%s[bord](r)", "%s[km](r)", "hazard(r)")[selection]
+    labels <- c("hat(%s)[bord](r)", "hat(%s)[km](r)", "hazard(r)")[selection]
     descr <- c("border corrected estimate of %s",
                "Kaplan-Meier estimate of %s",
                "Kaplan-Meier estimate of hazard function lambda(r)")[selection]

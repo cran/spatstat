@@ -1,6 +1,7 @@
 \name{as.ppp}
 \alias{as.ppp}
 \alias{as.ppp.ppp}
+\alias{as.ppp.psp}
 \alias{as.ppp.quad}
 \alias{as.ppp.matrix}
 \alias{as.ppp.data.frame}
@@ -14,6 +15,7 @@ for use by the \pkg{spatstat} package).
 \usage{
   as.ppp(X, \dots, fatal=TRUE)
   \method{as.ppp}{ppp}(X, \dots, fatal=TRUE)
+  \method{as.ppp}{psp}(X, \dots, fatal=TRUE)
   \method{as.ppp}{quad}(X, \dots, fatal=TRUE)
   \method{as.ppp}{matrix}(X, W=NULL, \dots, fatal=TRUE)
   \method{as.ppp}{data.frame}(X, W=NULL, \dots, fatal=TRUE)
@@ -47,6 +49,8 @@ for use by the \pkg{spatstat} package).
     \item
     an object of class \code{"ppp"}  
     \item
+    an object of class \code{"psp"}
+    \item
     an object of class \code{"spp"} as defined in the 
     \pkg{spatial} library
     \item
@@ -64,7 +68,13 @@ for use by the \pkg{spatstat} package).
   In the last three cases, we need the second argument \code{W}
   which is converted to a window object
   by the function \code{\link{as.owin}}.
-  In the first three cases, \code{W} will be ignored.
+  In the first four cases, \code{W} will be ignored.
+
+  If \code{X} is a line segment pattern (an object of class \code{psp})
+  the point pattern returned consists of the endpoints of the segments.
+  If \code{X} is marked then the point pattern returned will also be
+  marked, the mark associated with a point being the mark of the segment
+  of which that point was an endpoint.
 
   If \code{X} is a matrix or data frame, the first and second columns will
   be interpreted as the \eqn{x} and \eqn{y} coordinates respectively.
@@ -95,35 +105,30 @@ for use by the \pkg{spatstat} package).
   \code{yu} are numbers giving the dimensions of a rectangular window.
 
   The function \code{as.ppp} is generic, with methods for the
-  classes \code{"ppp"}, \code{"quad"}, \code{"matrix"}, \code{"data.frame"}
-  and a default method.
-  
+  classes \code{"ppp"}, \code{"psp"}, \code{"quad"}, \code{"matrix"},
+  \code{"data.frame"} and a default method.
+
   Point pattern datasets can also be created by the function
   \code{\link{ppp}}.
-}
-\seealso{
-  \code{\link{ppp}},
-  \code{\link{ppp.object}},
-  \code{\link{as.owin}},
+} \seealso{
+  \code{\link{ppp}}, \code{\link{ppp.object}}, \code{\link{as.owin}},
   \code{\link{owin.object}}
-}
-\section{Warnings}{
-  If the format of \code{spp} objects
-  is changed in future versions of the \pkg{spatial} library,
-  then \code{as.ppp} may not be able to interpret them.
-  It currently handles all versions of \pkg{spatial} up to 7.1-4.
-}
-\examples{
+} \section{Warnings}{
+  If the format of \code{spp} objects is changed in future versions
+  of the \pkg{spatial} library, then \code{as.ppp} may not be able to
+  interpret them.  It currently handles all versions of \pkg{spatial}
+  up to 7.1-4.
+} \examples{
  xy <- matrix(runif(40), ncol=2)
  pp <- as.ppp(xy, c(0,1,0,1))
- 
+
  # Venables-Ripley format
  # check for 'spatial' package
  spatialpath <- .find.package("spatial", quiet=TRUE)
  if(length(spatialpath) != 0) {
    require(spatial)
    towns <- ppinit("towns.dat")
-   pp <- as.ppp(towns)   # converted to our format
+   pp <- as.ppp(towns) # converted to our format
    detach(package:spatial)
  }
 
