@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.32 $	$Date: 2010/11/21 04:21:05 $
+#	$Revision: 5.33 $	$Date: 2011/04/19 01:37:30 $
 #
 #
 # -------- functions ----------------------------------------
@@ -53,9 +53,10 @@
   L <- rebadge.fv(L,
                   substitute(L[i,j](r),
                              list(i=paste(i),j=paste(j))),
-                  "Lcross",
+                  sprintf("L[list(%s,%s)]", i, j),
                   new.yexp=substitute(L[list(i,j)](r),
                                       list(i=paste(i),j=paste(j))))
+  attr(L, "labl") <- attr(K, "labl")
   return(L)  
 }
 
@@ -67,8 +68,10 @@
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
   L <- rebadge.fv(L,
-                  substitute(Ldot[i](r), list(i=paste(i))),
-                  "Ldot")
+                  substitute(L[i ~ dot](r), list(i=paste(i))),
+                  paste("L[", i, "~ symbol(\"\\267\")]"),
+                  new.yexp=substitute(L[i ~ symbol("\267")](r), list(i=paste(i))))
+  attr(L, "labl") <- attr(K, "labl")
   return(L)  
 }
 
@@ -103,7 +106,7 @@ function(X, i, j, r=NULL, breaks=NULL,
   result <-
     rebadge.fv(result, 
                substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j))),
-               "Kcross",
+               sprintf("K[list(%s,%s)]", i, j),
                new.yexp=substitute(K[list(i,j)](r),
                                    list(i=paste(i),j=paste(j))))
   return(result)
@@ -132,8 +135,9 @@ function(X, i, r=NULL, breaks=NULL,
                    r=r, breaks=breaks, correction=correction, ...)
   result <-
     rebadge.fv(result,
-               substitute(Kdot[i](r), list(i=paste(i))),
-               "Kdot")
+               substitute(K[i ~ dot](r), list(i=paste(i))),
+               paste("K[", i, "~ symbol(\"\\267\")]"),
+               new.yexp=substitute(K[i ~ symbol("\267")](r), list(i=paste(i))))
   return(result)
 }
 
@@ -194,7 +198,7 @@ function(X, I, J, r=NULL, breaks=NULL,
   K <- data.frame(r=r, theo= pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(Kmulti(r), NULL),
-          "theo", , alim, c("r","%s[pois](r)"), desc, fname="Kmulti")
+          "theo", , alim, c("r","{%s^{pois}}(r)"), desc, fname="K[multi]")
 
   # find close pairs of points
   XI <- X[I]
@@ -233,7 +237,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     # uncorrected! 
     wh <- whist(dcloseIJ, breaks$val)  # no weights
     Kun <- cumsum(wh)/(lambdaI * lambdaJ * area)
-    K <- bind.fv(K, data.frame(un=Kun), "%s[un](r)",
+    K <- bind.fv(K, data.frame(un=Kun), "hat(%s^{un})(r)",
                  "uncorrected estimate of %s",
                  "un")
   }
@@ -248,13 +252,13 @@ function(X, I, J, r=NULL, breaks=NULL,
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(denom.area * nI * nJ)
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s^{bordm})(r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if(any(correction == "border")) {
       Kb <- RS$numerator/(lambdaJ * RS$denom.count)
-      K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
+      K <- bind.fv(K, data.frame(border=Kb), "hat(%s^{bord})(r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -266,7 +270,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
     rmax <- diameter(W)/2
     Ktrans[r >= rmax] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
+    K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s^{trans})(r)",
                  "translation-corrected estimate of %s",
                  "trans")
   }
@@ -277,7 +281,7 @@ function(X, I, J, r=NULL, breaks=NULL,
     Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
     rmax <- diameter(W)/2
     Kiso[r >= rmax] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
+    K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s^{iso})(r)",
                  "Ripley isotropic correction estimate of %s",
                  "iso")
   }

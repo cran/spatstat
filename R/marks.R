@@ -1,7 +1,7 @@
 #
 # marks.R
 #
-#   $Revision: 1.26 $   $Date: 2011/03/25 04:34:06 $
+#   $Revision: 1.28 $   $Date: 2011/04/17 04:38:44 $
 #
 # stuff for handling marks
 #
@@ -10,6 +10,8 @@
 marks <- function(x, ...) {
   UseMethod("marks")
 }
+
+marks.default <- function(x, ...) { NULL }
 
 # The 'dfok' switch is temporary
 # while we convert the code to accept data frames of marks
@@ -177,7 +179,7 @@ findmarktype <- function(x) {
   if(is.vector(x) || is.factor(x)) return("vector")
   if(is.data.frame(x)) return("dataframe")
   if(inherits(x, "listof")) return("listof")
-  stop("Internal error: unrecognised mark format")
+  stop("Unrecognised mark format")
 }
 
 marksubset <- function(x, index, format=NULL) {
@@ -229,3 +231,65 @@ marksubset <- function(x, index, format=NULL) {
          stop("Internal error: unrecognised format of marks"))
 }
 
+markappend <- function(...) {
+  # combine marks from any number of patterns
+  marxlist <- list(...)
+  # check on compatibility of marks
+  mkfmt <- sapply(marxlist,findmarktype)
+  if(length(unique(mkfmt))>1)
+    stop(paste("Marks of some patterns are of different format",
+               "from those of other patterns."))
+  mkfmt <- mkfmt[1]
+  # combine the marks
+  switch(mkfmt,
+         none = {
+           return(NULL)
+         },
+         vector = {
+           marxlist <- lapply(marxlist,
+                              function(x){as.data.frame.vector(x,nm="v1")})
+           marx <- do.call("rbind", marxlist)[,1]
+           return(marx)
+         },
+         dataframe = {
+           # check compatibility of data frames
+           # (this is redundant but gives more helpful message)
+           nama <- lapply(marxlist, names)
+           dims <- unlist(lapply(nama, length))
+           if(length(unique(dims)) != 1)
+             stop("Data frames of marks have different column dimensions.")
+           samenames <- unlist(lapply(nama,
+                                      function(x,y) { identical(x,y) },
+                                      y=nama[[1]]))
+           if(!all(samenames))
+             stop("Data frames of marks have different names.\n")
+           marx <- do.call("rbind", marxlist)
+           return(marx)
+         },
+         listof = {
+           marx <- do.call(c, marxlist)
+           if(!inherits(marx, "listof"))
+             marx <- as.listof(marx)
+           return(marx)
+         })
+  stop("Unrecognised mark format")
+}
+
+markcbind <- function(...) {
+  # cbind several columns of marks
+  marxlist <- list(...)
+  # convert each to data frame
+  to.df <- function(z) {
+    switch(findmarktype(z),
+           listof = ,
+           none = NULL,
+           vector = as.data.frame.vector(z),
+           dataframe = z)
+  }
+  dflist <- unname(lapply(marxlist, to.df))
+  ok <- !sapply(dflist, is.null)
+  marx <- do.call(data.frame, dflist[ok])
+  return(marx)
+}
+
+  

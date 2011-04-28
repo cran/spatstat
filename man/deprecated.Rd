@@ -5,6 +5,7 @@
 \alias{ks.test.ppm}
 \alias{mpl}
 \alias{rtoro}
+\alias{superimposePSP}
 \title{Deprecated spatstat functions}
 \description{
   Deprecated spatstat functions.
@@ -16,6 +17,7 @@ ks.test.ppm(\dots)
 mpl(Q, trend, interaction, data, correction, rbord, use.gam)
 rtoro(X, which=NULL, radius=NULL, width=NULL, height=NULL) 
 eval.hyper(e, h, simplify=TRUE, ee=NULL)
+superimposePSP(\dots, W=NULL, check=TRUE)
 }
 
 \details{
@@ -30,5 +32,8 @@ eval.hyper(e, h, simplify=TRUE, ee=NULL)
   \code{rtoro} has been replaced by \code{\link{rshift}}.
 
   \code{eval.hyper} has been replaced by \code{\link{with.hyperframe}}.
+  
+  \code{superimposePSP} has been replaced by \code{\link{superimpose.psp}}
+  which is a method for the generic function \code{\link{superimpose}}.
 }
 \keyword{internal}

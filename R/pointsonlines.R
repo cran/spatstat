@@ -26,7 +26,7 @@ pointsOnLines <- function(X, eps=NULL, np=1000) {
     ss <- (brks[-1] + brks[-nbrks])/2
     x <- with(Xdf, x0[i] + (ss/leni) * (x1[i]-x0[i]))
     y <- with(Xdf, y0[i] + (ss/leni) * (y1[i]-y0[i]))
-    Zi <- list(x=x, y=y)
+    Zi <- ppp(x=x, y=y, window=win)
     Z <- superimpose(Z, Zi, W=win, check=FALSE)
   }
   return(Z)

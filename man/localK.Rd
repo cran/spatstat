@@ -96,7 +96,7 @@
   L <- localL(X)
 
   # plot all the local L functions against r
-  plot(L, main="local L functions for ponderosa")
+  plot(L, main="local L functions for ponderosa", legend=FALSE)
 
   # plot only the local L function for point number 7
   plot(L, iso007 ~ r)

@@ -35,10 +35,11 @@ pcfcross.inhom <-
                            Iname=Iname, Jname=Jname)
   result <-
     rebadge.fv(result,
-               substitute(gcross.inhom[i,j](r), list(i=paste(i), j=paste(j))),
-               "g*i",
-               new.yexp=substitute(gcross.inhom[list(i,j)](r),
-                                   list(i=paste(i), j=paste(j))))
+               substitute(g[inhom,i,j](r),
+                          list(i=paste(i),j=paste(j))),
+               sprintf("g[list(inhom,%s,%s)]", i, j),
+               new.yexp=substitute(g[list(inhom,i,j)](r),
+                                   list(i=paste(i),j=paste(j))))
   return(result)
 }
 
@@ -71,8 +72,10 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
                            Iname=Iname, Jname=Jname)
   result <-
     rebadge.fv(result,
-               substitute(gdot.inhom[i](r), list(i=paste(i))),
-               "g.i")
+               substitute(g[inhom, i ~ dot](r), list(i=paste(i))),
+               paste("g[list(inhom,", i, "~symbol(\"\\267\"))]"),
+               new.yexp=substitute(g[list(inhom, i ~ symbol("\267"))](r),
+                 list(i=paste(i))))
   return(result)
 }
 
@@ -178,11 +181,11 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
   
   df <- data.frame(r=r, theo=rep(1,length(r)))
   out <- fv(df, "r",
-            substitute(gmulti.inhom(r), NULL), "theo", ,
+            substitute(g[inhom,multi](r), NULL), "theo", ,
             alim,
-            c("r","%s[Pois](r)"),
+            c("r","{%s^{Pois}}(r)"),
             c("distance argument r", "theoretical Poisson %s"),
-            fname="gmi")
+            fname="g[list(inhom, multi)]")
   
   ########## smoothing parameters for pcf ############################  
   # arguments for 'density'
@@ -238,7 +241,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
     gT <- sewpcf(dclose, edgewt * weight, denargs, area)$g
     out <- bind.fv(out,
                    data.frame(trans=gT),
-                   "%s[Trans](r)",
+                   "hat(%s^{Trans})(r)",
                    "translation-corrected estimate of %s",
                    "trans")
   }
@@ -248,7 +251,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
     gR <- sewpcf(dclose, edgewt * weight, denargs, area)$g
     out <- bind.fv(out,
                    data.frame(iso=gR),
-                   "%s[Ripley](r)",
+                   "hat(%s^{Ripley})(r)",
                    "isotropic-corrected estimate of %s",
                    "iso")
   }

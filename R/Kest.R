@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.67 $	$Date: 2010/11/26 08:15:02 $
+#	$Revision: 5.68 $	$Date: 2011/04/11 05:38:44 $
 #
 #
 # -------- functions ----------------------------------------
@@ -146,7 +146,7 @@ function(X, ..., r=NULL, breaks=NULL,
     # uncorrected! For demonstration purposes only!
     wh <- whist(DIJ, breaks$val)  # no weights
     Kun <- cumsum(wh)/(lambda2 * area)
-    K <- bind.fv(K, data.frame(un=Kun), "%s[un](r)",
+    K <- bind.fv(K, data.frame(un=Kun), "hat(%s)[un](r)",
                  "uncorrected estimate of %s",
                  "un")
   }
@@ -162,13 +162,13 @@ function(X, ..., r=NULL, breaks=NULL,
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
       Kbm <- RS$numerator/(lambda2 * denom.area)
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "%s[bordm](r)",
+      K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s)[bordm](r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if(any(correction == "border")) {
       Kb <- RS$numerator/(lambda * RS$denom.count)
-      K <- bind.fv(K, data.frame(border=Kb), "%s[bord](r)",
+      K <- bind.fv(K, data.frame(border=Kb), "hat(%s)[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -182,7 +182,7 @@ function(X, ..., r=NULL, breaks=NULL,
     Ktrans <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Ktrans[r >= h] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "%s[trans](r)",
+    K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s)[trans](r)",
                  "translation-corrected estimate of %s",
                  "trans")
   }
@@ -193,7 +193,7 @@ function(X, ..., r=NULL, breaks=NULL,
     Kiso <- cumsum(wh)/(lambda2 * area)
     h <- diameter(W)/2
     Kiso[r >= h] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "%s[iso](r)",
+    K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s)[iso](r)",
                  "Ripley isotropic correction estimate of %s",
                  "iso")
   }
@@ -325,14 +325,14 @@ Kborder.engine <- function(X, rmax, nr=100,
       lambda2 <- (npts * (npts - 1))/(area^2)
       denom.area <- eroded.areas(W, r)
       bordmod <- res$numer/(lambda2 * denom.area)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "%s[bordm](r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bordmod), "hat(%s)[bordm](r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
     }
     if("border" %in% correction) {
       lambda <- npts/area
       bord <- res$numer/(lambda * res$denom)
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%s[bord](r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "hat(%s)[bord](r)",
                    "border-corrected estimate of %s",
                    "border")
     }
@@ -362,13 +362,13 @@ Kborder.engine <- function(X, rmax, nr=100,
               PACKAGE="spatstat")
     if("border" %in% correction) {
       bord <- res$numer/res$denom
-      Kfv <- bind.fv(Kfv, data.frame(border=bord), "%s[bord](r)",
+      Kfv <- bind.fv(Kfv, data.frame(border=bord), "hat(%s)[bord](r)",
                      "border-corrected estimate of %s",
                      "border")
     }
     if("bord.modif" %in% correction) {
       bm <- res$numer/eroded.areas(W, r)
-      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "%s[bordm](r)",
+      Kfv <- bind.fv(Kfv, data.frame(bord.modif=bm), "hat(%s)[bordm](r)",
                      "modified border-corrected estimate of %s",
                      "bord.modif")
     }

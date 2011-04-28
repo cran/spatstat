@@ -1,3 +1,100 @@
+	CHANGES IN spatstat VERSION 1.22-0
+
+OVERVIEW 
+
+    o  support for point patterns on a linear network
+
+    o  'superimpose' is now generic
+
+    o  improved mathematical labels when plotting functions
+
+NEW CLASSES
+
+    o linnet
+      An object of class 'linnet' represents a linear network,
+      i.e. a connected network of line segments, such as a road network.
+      Methods for this class include plot, print, summary etc.
+
+    o lpp
+      An object of class 'lpp' represents a point pattern on a linear network,
+      such as a record of the locations of road accidents on a road network.
+      Methods for this class include plot, print, summary etc.
+
+NEW FUNCTIONS
+
+    o runiflpp
+      Uniformly distributed random points on a linear network
+
+    o rpoislpp
+      Poisson point process on a linear network
+
+    o clickjoin
+      Interactive graphics to create a linear network
+    
+    o superimpose
+      The function 'superimpose' is now generic, with methods
+      for ppp, psp and a default method.
+
+    o as.ppp.psp 
+      New method for as.ppp extracts the endpoints and marks
+      from a line segment pattern
+
+NEW DATASETS
+
+    o simplenet
+      Simple example of a linear network
+
+SIGNIFICANT USER-VISIBLE CHANGES
+  
+    o superimposePSP 
+      This function is now deprecated in favour of 'superimpose'
+
+    o superimpose
+      Now handles data frames of marks.
+
+    o plot.fv
+      Argument 'legendmath' now defaults to TRUE.
+      New argument 'legendargs' gives more control over appearance of legend.
+      Increased default spacing between lines in legend.
+
+    o eval.fv, with.fv
+      Functions computed using eval.fv or with.fv
+      now have better labels when plotted.
+
+    o summary functions
+    (Kest, Kest.fft, Kcross, Kdot, Kmulti,
+    Kinhom, Kcross.inhom, Kdot.inhom, Kmulti.inhom,
+    Lest, Lcross, Ldot, 
+    pcf, pcfcross, pcfdot, pcfinhom, pcfcross.inhom, pcfdot.inhom,
+    Fest, Gest, Gcross, Gdot, Gmulti,
+    Jest, Jcross, Jdot, Jmulti, Iest,
+    localL, localK,
+    markcorr, markvario, markconnect, Emark, Vmark, 
+    allstats, alltypes)
+         Improved plot labels.
+
+BUG FIXES
+
+    o superimpose
+      If the marks components of patterns consisted of character
+      vectors (rather than factors or non-factor numeric vectors)
+      an error was triggered.
+      Fixed.
+
+    o plot.fv
+      The y axis limits did not always cover the range of values
+      if the argument 'shade' was used.
+      Fixed.
+
+    o plot.rhohat
+      The y axis label was sometimes incorrect.
+      Fixed.
+
+    o plot.rhohat
+      If argument 'xlim' was used, a warning was generated from 'rug'.
+      Fixed.
+
+
 	CHANGES IN spatstat VERSION 1.21-6
 
 OVERVIEW 

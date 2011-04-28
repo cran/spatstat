@@ -1,115 +1,161 @@
 # superimpose.R
 #
-# $Revision: 1.21 $ $Date: 2011/03/25 04:01:58 $
+# $Revision: 1.23 $ $Date: 2011/04/17 10:35:34 $
 #
 #
 ############################# 
 
-"superimpose" <-
-  function(..., W=NULL, check=TRUE)
-{
-  # superimpose any number of point patterns
-  
+superimpose <- function(...) {
+  # remove any NULL arguments
   arglist <- list(...)
-
-  if(length(arglist) == 0)
-    stop("No point patterns given")
-  
-  # catch possible abuses
-  if(is.null(W) && any(suspicious <- (names(arglist) == "window"))) {
-    id <- min(which(suspicious))
-    Win <- arglist[[id]]
-    if(is.owin(Win) || is.null(Win)) {
-      W <- Win
-      arglist <- arglist[-id]
-    }
-  }
-
-  # unpack a list
-  if(length(arglist) == 1) {
-    X <- arglist[[1]]
-    if(!inherits(X, "ppp") && inherits(X, "list"))
-      arglist <- X
-  }
-
-  # determine window
-  if(!is.null(W))
-    W <- as.owin(W)
-  else {
-    # extract windows from ppp objects
-    isppp <- unlist(lapply(arglist, is.ppp))
-    Wlist <- lapply(arglist[isppp], function(x) { x$window })
-    # compute bounding boxes of other arguments
-    isnull <- unlist(lapply(arglist, is.null))
-    if(any(!isppp & !isnull)) {
-      Blist <- lapply(arglist[!isppp & !isnull], bounding.box.xy)
-      Bisnull <- unlist(lapply(Blist, is.null))
-      Wlist <- append(Wlist, Blist[!Bisnull])
-    }
-    # take the union of all the windows
-    W <- NULL
-    for(i in seq(Wlist))
-      W <- union.owin(W, Wlist[[i]])
-  }
-     
-  # concatenate lists of (x,y) coordinates
-  XY <- do.call("concatxy", arglist)
-
-  # create the point pattern without checking
-  OUT <- ppp(XY$x, XY$y, window=W, check=FALSE)
-  
-  # find out whether the arguments are marked patterns
-  getmarks <- function(x) {
-    if(is.ppp(x)) return(marks(x, dfok=FALSE))
-    m <- x$marks
-    if(is.data.frame(m))
-      stop("Sorry, not implemented for data frames of marks")
-    return(m)
-  }
-  Mlist <- lapply(arglist, getmarks)
-  ismarked <- !unlist(lapply(Mlist, is.null))
-  isfactor <- unlist(lapply(Mlist, is.factor))
-
-  if(any(ismarked) && !all(ismarked))
-    warning("Some, but not all, patterns contain marks -- ignored.")
-  if(any(isfactor) && !all(isfactor))
-    stop("Patterns have incompatible marks - some are factors, some are not")
-
-  if(!all(ismarked)) {
-    # Assume all patterns unmarked.
-    # If patterns are not named, return the superimposed point pattern.
-    nama <- names(arglist)
-    if(is.null(nama) || any(nama == ""))
-      return(as.ppp(OUT, check=check))
-    # Patterns are named. Make marks from names.
-    len <- unlist(lapply(arglist, function(a) { length(a$x) }))
-    M <- factor(rep(nama, len), levels=nama)
-    OUT <- OUT %mark% M
-    return(as.ppp(OUT, check=check))
-  }
-
-  # All patterns are marked.
-  # Concatenate vectors of marks
-  if(!all(isfactor))
-    # continuous marks
-    M <- unlist(Mlist)
-  else {
-    # multitype
-    Llist <- lapply(Mlist, levels)
-    lev <- unique(unlist(Llist))
-    codesof <- function(x, lev) { as.integer(factor(x, levels=lev)) }
-    Mlist <- lapply(Mlist, codesof, lev=lev)
-    M <- factor(unlist(Mlist), levels=codesof(lev,lev), labels=lev)
-  }
-  OUT <- OUT %mark% M
-  return(as.ppp(OUT, check=check))
+  if(any(isnull <- sapply(arglist, is.null)))
+    return(do.call("superimpose", arglist[!isnull]))
+  UseMethod("superimpose")
 }
 
+superimpose.ppp <- superimpose.default <- function(..., W=NULL, check=TRUE) {
+  arglist <- list(...)
+  # Check that all "..." arguments have x, y coordinates
+  hasxy <- unlist(lapply(arglist, checkfields, L=c("x", "y")))
+  if(!all(hasxy)) {
+    nbad <- sum(bad <- !hasxy)
+    stop(paste(ngettext(nbad, "Argument", "Arguments"),
+               commasep(which(bad)),
+               ngettext(nbad, "does not", "do not"),
+               "have components x and y"))
+  }
+  
+  # concatenate lists of (x,y) coordinates
+  XY <- do.call("concatxy", arglist)
+  needcheck <- TRUE
+
+  # determine whether there is any window information
+  if(!is.owin(W)) {
+    # we have to compute the final window
+    WXY <- NULL
+    Wppp <- NULL
+    if(any(isppp <- unlist(lapply(arglist, is.ppp)))) {
+      # extract windows from ppp objects
+      wins <- unname(lapply(arglist[isppp], as.owin))
+      # take union
+      Wppp <- if(length(wins) == 1) wins[[1]] else do.call(union.owin, wins)
+    } 
+    if(is.function(W)) {
+      # W is a function like bounding.box.xy or ripras
+      # Apply function to the x,y coordinates; it should return an owin
+      WXY <- W(XY)
+      if(!is.owin(WXY))
+        stop("Function W did not return an owin object")
+    }
+    if(is.character(W)) {
+      # character string identifies a function
+      pW <- pmatch(W, c("convex", "rectangle", "bbox", "none"))
+      if(is.na(pW))
+        stop(paste("Unrecognised option W=", sQuote(W)))
+      WXY <- switch(pW,
+                    convex=ripras(XY),
+                    rectangle=ripras(XY, shape="rectangle"),
+                    bbox=bounding.box.xy(XY),
+                    none=NULL)
+      # in these cases we don't need to verify that the points are inside.
+      needcheck <- !is.null(WXY)
+    }
+    if(is.null(WXY) && is.null(Wppp)) {
+      # no window information
+      return(XY)
+    }
+    W <- union.owin(WXY, Wppp)
+  }
+  # extract the marks if any
+  nobj <- sapply(arglist, function(x) { length(x$x) })
+  marx  <- superimposeMarks(arglist, nobj)
+  #
+  ppp(XY$x, XY$y, window=W, marks=marx, check=check & needcheck)
+}
+
+
+
+superimpose.psp <- function(..., W=NULL, check=TRUE) {
+  # superimpose any number of line segment patterns
+  arglist <- list(...)
+
+  if(!all(sapply(arglist, is.psp)))
+    stop("Patterns to be superimposed must all be psp objects")
+
+  # extract segment coordinates
+  matlist <- lapply(arglist, function(x) { as.matrix(x$ends) })
+  # tack them together
+  mat <- do.call("rbind", matlist)
+
+  # determine whether there is any window information
+  needcheck <- FALSE
+  if(!is.owin(W)) {
+    # we have to compute the final window
+    WXY <- NULL
+    Wpsp <- NULL
+    if(any(ispsp <- unlist(lapply(arglist, is.psp)))) {
+      # extract windows from psp objects
+      wins <- unname(lapply(arglist[ispsp], as.owin))
+      # take union
+      Wppp <- if(length(wins) == 1) wins[[1]] else do.call(union.owin, wins)
+    }
+    if(is.function(W) || is.character(W)) {
+      # guess window from x, y coordinates
+      XY <- list(x=cbind(mat[,1], mat[,3]),
+                 y=cbind(mat[,2], mat[,4]))
+      if(is.function(W)) {
+        # W is a function like bounding.box.xy or ripras
+        # Apply function to the x,y coordinates; it should return an owin
+        WXY <- W(XY)
+        if(!is.owin(WXY))
+          stop("Function W did not return an owin object")
+      }
+      if(is.character(W)) {
+        # character string identifies a function
+        pW <- pmatch(W, c("convex", "rectangle", "bbox", "none"))
+        if(is.na(pW))
+          stop(paste("Unrecognised option W=", sQuote(W)))
+        WXY <- switch(pW,
+                      convex=ripras(XY),
+                      rectangle=ripras(XY, shape="rectangle"),
+                      bbox=bounding.box.xy(XY),
+                      none=NULL)
+      # in these cases we don't need to verify that the points are inside.
+        needcheck <- !is.null(WXY)
+      }
+    }
+    W <- union.owin(WXY, Wppp)
+  }
+  
+  # extract marks, if any
+  nobj <- sapply(arglist, nsegments)
+  marx <- superimposeMarks(arglist, nobj)
+
+  return(as.psp(mat, window=W, marks=marx, check=check))
+}
+
+superimposeMarks <- function(arglist, nobj) {
+  # combine marks from the objects in the argument list
+  marxlist <- lapply(arglist, marks)
+  marx <- do.call(markappend, unname(marxlist))
+  nama <- names(arglist)
+  if(length(nama) == length(arglist) && all(nzchar(nama))) {
+    # arguments are named: use names as (extra) marks
+    newmarx <- factor(rep(nama, nobj))
+    marx <- markcbind(marx, newmarx)
+  }
+  return(marx)
+}
+
+#==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
+
+  # This function is now deprecated.
 superimposePSP <-
   function(..., W=NULL, check=TRUE)
 {
-  # superimpose any number of line segment patterns
+  .Deprecated("superimpose","spatstat")
   
+  # superimpose any number of line segment patterns
   arglist <- list(...)
 
   nargue <- length(arglist)
@@ -147,12 +193,30 @@ superimposePSP <-
 
   # extract marks if any
   marxlist <- lapply(arglist, marks)
-  mkfmt <- markformat(marxlist[[1]])
+
+  # check on compatibility of marks
+  mkfmt <- sapply(marxlist,markformat)
+  if(length(unique(mkfmt))>1)
+	stop(paste("Marks of some patterns are of different format\n",
+                   "  from those of other patterns.\n",sep=""))
+  mkfmt <- mkfmt[1]
+  if(mkfmt=="dataframe") {
+	mcnms <- lapply(marxlist,names)
+	cdim  <- sapply(mcnms,length)
+	OK    <- length(unique(cdim)) == 1
+	if(OK) {
+		allInOne <- sapply(mcnms,paste,collapse="")
+		OK <- length(unique(allInOne)) == 1
+		if(!OK) stop("Data frames of marks have different names.\n")
+	} else stop("Data frames of marks have different column dimensions.\n")
+  }
+ 
+  # combine the marks
   marx <- switch(mkfmt,
                  none = NULL,
                  vector = {
                    marxlist <- lapply(marxlist,
-                                      function(x){as.data.frame(x,nm="v1")})
+                                      function(x){as.data.frame.vector(x,nm="v1")})
                    do.call("rbind", marxlist)[,1]
                  },
                  dataframe = do.call("rbind", marxlist))
@@ -171,3 +235,4 @@ superimposePSP <-
 
   return(as.psp(mat, window=W, marks=marx, check=check))
 }
+

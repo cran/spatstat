@@ -1,10 +1,10 @@
 #
-#	ppp.S
+#	ppp.R
 #
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.75 $	$Date: 2010/11/23 07:29:47 $
+#	$Revision: 4.79 $	$Date: 2011/04/17 05:50:13 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -549,4 +549,10 @@ npoints <- function(x) {
   UseMethod("npoints")
 }
 
-npoints.ppp <- function(x) { x$n }
+nobjects <- function(x) {
+  UseMethod("nobjects")
+}
+
+nobjects.ppp <- npoints.ppp <- function(x) { x$n }
+
+

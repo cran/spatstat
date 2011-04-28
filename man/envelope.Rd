@@ -389,7 +389,8 @@
 \section{Confidence intervals}{
   Simulation envelopes do \bold{not} compute confidence intervals;
   they generate significance bands. 
-  If you really need a confidence interval, use \code{\link{varblock}}.
+  If you really need a confidence interval for the true mean
+  of the data pattern, use \code{\link{varblock}}.
 }
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.

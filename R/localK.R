@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.14 $	$Date: 2010/10/19 09:11:43 $
+#	$Revision: 1.15 $	$Date: 2011/04/18 00:42:20 $
 #
 #
 
@@ -62,29 +62,26 @@
   # initialise
   df <- as.data.frame(matrix(NA, length(r), npts))
   labl <- desc <- character(npts)
-  fname <- if(wantL) "L(r)" else "K(r)"
 
   bkt <- function(x) { paste("[", x, "]", sep="") }
   
   switch(correction,
          none={
            # uncorrected! For demonstration purposes only!
-           ftag <- if(wantL) "L[un]" else "K[un]"
            for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val)  # no weights
              df[,i] <- cumsum(wh)/lambda1
              icode <- numalign(i, npts)
              names(df)[i] <- paste("un", icode, sep="")
-             labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
-             desc[i] <- paste("uncorrected estimate of", fname,
+             labl[i] <- paste("%s", bkt(icode), "(r)", sep="")
+             desc[i] <- paste("uncorrected estimate of %s",
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
          },
          translate={
            # Translation correction
-           ftag <- if(wantL) "L[trans]" else "K[trans]"
            XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
            edgewt <- edge.Trans(XI, XJ, paired=TRUE)
            for(i in 1:npts) {
@@ -94,8 +91,8 @@
              df[,i] <- Ktrans
              icode <- numalign(i, npts)
              names(df)[i] <- paste("trans", icode, sep="")
-             labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
-             desc[i] <- paste("translation-corrected estimate of", fname,
+             labl[i] <- paste("%s", bkt(icode), "(r)", sep="")
+             desc[i] <- paste("translation-corrected estimate of %s",
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
@@ -104,7 +101,6 @@
          },
          isotropic={
            # Ripley isotropic correction
-           ftag <- if(wantL) "L[iso]" else "K[iso]"
            edgewt <- edge.Ripley(XI, matrix(DIJ, ncol=1))
            for(i in 1:npts) {
              ii <- (I == i)
@@ -113,8 +109,8 @@
              df[,i] <- Kiso
              icode <- numalign(i, npts)
              names(df)[i] <- paste("iso", icode, sep="")
-             labl[i] <- paste(ftag, bkt(icode), "(r)", sep="")
-             desc[i] <- paste("Ripley isotropic correction estimate of", fname,
+             labl[i] <- paste("%s", bkt(icode), "(r)", sep="")
+             desc[i] <- paste("Ripley isotropic correction estimate of %s", 
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
@@ -135,13 +131,13 @@
   # function value table required
   # add r and theo
   if(!wantL) {
-    ylab <- substitute(localK(r), NULL)
+    ylab <- substitute(K[loc](r), NULL)
     df <- cbind(df, data.frame(r=r, theo=pi * r^2))
-    fnam <- "localK"
+    fnam <- "K[loc][',']"
   } else {
-    ylab <- substitute(localL(r), NULL)
+    ylab <- substitute(L[loc](r), NULL)
     df <- cbind(df, data.frame(r=r, theo=r))
-    fnam <- "localL"
+    fnam <- "L[loc][',']"
   }
   desc <- c(desc, c("distance argument r", "theoretical Poisson %s"))
   labl <- c(labl, c("r", "%s[pois](r)"))

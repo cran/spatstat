@@ -546,4 +546,3 @@ cat.factor <- function (..., recursive=FALSE) {
   lll <- lapply(lll,as.data.frame,nm="v1")
   return(do.call(rbind,lll)[,1])
 }
-

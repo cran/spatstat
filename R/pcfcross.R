@@ -14,8 +14,20 @@ pcfcross <- function(X, i, j, ...) {
   Xsplit <- split(X)
   Xi <- Xsplit[[i]]
   Xj <- Xsplit[[j]]
-  if(i == j) 
-    return(pcf(Xi, ...))
+  if(i == j)  {
+    p.ii <- pcf(Xi, ...)
+    p.ii <- rebadge.fv(p.ii,
+                     new.ylab=substitute(g[i,i](r),
+                       list(i=paste(i))),
+                     new.fname=sprintf("g[list(%s,%s)]", i, i),
+                     new.yexp=substitute(g[list(i,i)](r),
+                                      list(i=paste(i))))
+    p.ii <- tweak.fv.entry(p.ii, "theo", new.labl="{%s^{pois}}(r)")
+    p.ii <- tweak.fv.entry(p.ii, "trans", new.labl="hat(%s^{trans})(r)")
+    p.ii <- tweak.fv.entry(p.ii, "iso", new.labl="hat(%s^{iso})(r)")
+    return(p.ii)
+  }
+
   Xall <- superimpose(Xi, Xj, W=X$window)
   # estimate intensities
   lambda.i <- summary(Xi)$intensity
@@ -36,8 +48,16 @@ pcfcross <- function(X, i, j, ...) {
   p.ij <- eval.fv((p.all * lambda.all^2
                    - p.ii * lambda.i^2
                    - p.jj * lambda.j^2)/(2 * lambda.i * lambda.j))
-  #
-  attr(p.ij, "ylab") <- substitute(g[i,j](r), list(i=paste(i),j=paste(j)))
+  # rebadge
+  p.ij <- rebadge.fv(p.ij,
+                     new.ylab=substitute(g[i,j](r),
+                                         list(i=paste(i), j=paste(j))),
+                     new.fname=sprintf("g[list(%s,%s)]", i, j),
+                     new.yexp=substitute(g[list(i,j)](r),
+                                         list(i=paste(i), j=paste(j))))
+  p.ij <- tweak.fv.entry(p.ij, "theo", new.labl="{%s^{pois}}(r)")
+  p.ij <- tweak.fv.entry(p.ij, "trans", new.labl="hat(%s^{trans})(r)")
+  p.ij <- tweak.fv.entry(p.ij, "iso", new.labl="hat(%s^{iso})(r)")
   return(p.ij)
 }
 
@@ -67,9 +87,15 @@ pcfdot <- function(X, i, ...) {
   # add
   p.idot <- eval.fv((p.in * lambda.n + p.ii * lambda.i)/lambda.all)
   #
-  attr(p.idot, "ylab") <- substitute(gdot[i](r), list(i=paste(i)))
+  # rebadge
+  p.idot <- rebadge.fv(p.idot,
+                  substitute(g[i ~ dot](r), list(i=paste(i))),
+                  new.fname=paste("g[", i, "~ symbol(\"\\267\")]"),
+                  new.yexp=substitute(g[i ~ symbol("\267")](r),
+                                      list(i=paste(i))))
+  p.idot <- tweak.fv.entry(p.idot, "theo", new.labl="{%s^{pois}}(r)")
+  p.idot <- tweak.fv.entry(p.idot, "trans", new.labl="hat(%s^{trans})(r)")
+  p.idot <- tweak.fv.entry(p.idot, "iso", new.labl="hat(%s^{iso})(r)")
   return(p.idot)
 }
-
-  
 

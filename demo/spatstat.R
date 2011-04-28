@@ -11,6 +11,9 @@ fanfare <- function(stuff) {
   plot(c(0,1),c(0,1),type="n",axes=FALSE, xlab="", ylab="")
   text(0.5,0.5, stuff, cex=2.5)
 }
+
+par(mar=c(1,1,2,1)+0.1)
+
 fanfare("Spatstat demonstration")
 
 fanfare("I. Types of data")
@@ -40,6 +43,12 @@ plot(dirichlet(X), main="Tessellation")
 enable3d <- ("scatterplot3d" %in% row.names(installed.packages()))
 if(enable3d)
   plot(rpoispp3(100), main="Three-dimensional point pattern")
+
+data(simplenet)
+plot(simplenet, main="Linear network (linnet)")
+
+X <- rpoislpp(20, simplenet)
+plot(X, main="Point pattern on linear network (lpp)")
 
 fanfare("II. Graphics")
 
@@ -131,9 +140,13 @@ plot(split(X,Y), main="image split by tessellation")
 
 fanfare("V. Exploratory data analysis")
 
+par(mar=c(3,3,3,2)+0.1)
+
 plot(swedishpines, main="Quadrat counts", pch="+")
 tab <- quadratcount(swedishpines, 4)
 plot(tab, add=TRUE, lty=2, cex=2, col="blue")
+
+par(mar=c(5,3,3,2)+0.1)
 
 plot(swedishpines, main="", pch="+")
 title(main=expression(chi^2 * " test"), cex.main=2)
@@ -141,6 +154,8 @@ tes <- quadrat.test(swedishpines, 3)
 tes
 plot(tes, add=TRUE, col="red", cex=1.5, lty=2, lwd=3)
 title(sub=paste("p-value =", signif(tes$p.value,3)), cex.sub=1.4)
+
+par(mar=c(4,4,3,2)+0.1)
 
 data(nztrees)
 tesk <- kstest(nztrees, "x")
@@ -250,7 +265,7 @@ plot(Kscaled(X, lam), xlim=c(0, 1.5), main="Locally-scaled K function")
 data(bramblecanes)
 plot(bramblecanes)
 bramblecanes <- rescale(bramblecanes, 1/9)
-plot(alltypes(bramblecanes, "K"), mar.panel=c(4,4,2,2)+0.1)
+plot(alltypes(bramblecanes, "K"), mar.panel=c(4,5,2,2)+0.1)
 
 data(amacrine)
 amacrine <- rescale(amacrine, 1/662)
@@ -542,7 +557,6 @@ plot(letterR, add=TRUE)
 plot(blur(Z, 0.3, bleed=FALSE))
 plot(letterR, add=TRUE)
           
-par(oldpar)
 
 fanfare("X. Programming tools")
 
@@ -558,7 +572,9 @@ showoffK <- function(Y, current, ..., fullpicture,rad) {
         if(runif(1) < 0.2) Sys.sleep(runif(1, max=0.4))
 	return(Y$n)
 }
+par(ask=FALSE)
 applynbd(redwood, R=0.2, showoffK, fullpicture=redwood, rad=0.2, exclude=TRUE)
 
+par(oldpar)
 options(oldoptions)
 

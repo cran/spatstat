@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.12 $	$Date: 2010/07/10 10:22:09 $
+#    $Revision: 1.13 $	$Date: 2011/04/17 05:52:50 $
 #
 #    The Ord model (family of point process models)
 #
@@ -59,6 +59,7 @@ else
 # and its total potential (which could be vector-valued)
 #############################################################################
 
+marks(X) <- NULL
 Wdata <- dirichlet.weights(X)   # sic - these are the tile areas.
 Pdata <- pot(Wdata, pars)
 summa <- function(P) {
@@ -106,11 +107,11 @@ for(j in seq(X$n)) {
 #############################################################################
 
 for(j in seq(U$x)[!is.data]) {
-                Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]), W=X$window)
-                     #  compute Dirichlet tessellation (of these points only!)
-                Wplus <- dirichlet.weights(Xplus)
-                     #  regressor is difference in total potential
-                V[rowV == j] <- summa(pot(Wplus, pars)) - total.data.potential
+  Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]), W=X$window)
+  #  compute Dirichlet tessellation (of these points only!)
+  Wplus <- dirichlet.weights(Xplus)
+  #  regressor is difference in total potential
+  V[rowV == j] <- summa(pot(Wplus, pars)) - total.data.potential
 }
 
 cat("dim(V) = \n")
