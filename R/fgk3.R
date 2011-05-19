@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.6 $	$Date: 2010/10/21 05:38:06 $
+#	$Revision: 1.8 $	$Date: 2011/05/18 02:04:06 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -19,7 +19,7 @@ K3est <- function(X, ...,
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
 
   # this will be the output data frame
   K <- data.frame(r=r, theo= (4/3) * pi * r^3)
@@ -71,7 +71,7 @@ G3est <- function(X, ...,
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
 
   coo <- coords(X)
   lambda <- nrow(coo)/volume.box3(X$domain)
@@ -124,7 +124,7 @@ F3est <- function(X, ...,
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
 
   coo <- coords(X)
   lambda <- nrow(coo)/volume.box3(X$domain)
@@ -179,7 +179,7 @@ pcf3est <- function(X, ...,
                            multi=TRUE)
   if(is.null(rmax))
     rmax <- diameter.box3(X$domain)/2
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
 
   if(is.null(delta)) {
     lambda <- npoints(X)/volume(X$domain)
@@ -303,7 +303,7 @@ f3engine <- function(x, y, z, box=c(0,1,0,1,0,1),
 		as.integer(code),
                   PACKAGE="spatstat"
 	)
-	r <- seq(range[1], range[2], length=nval)
+	r <- seq(from=range[1], to=range[2], length.out=nval)
 	f <- ifelse(res$denom > 0, res$num/res$denom, 1)
 
 	return(list(r = r, f = f, num=res$num, denom=res$denom, 
@@ -331,7 +331,7 @@ f3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1),
             uppercen = as.integer(integer(1)),
             PACKAGE="spatstat"
             )
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
   #
   obs <- res$obs
   nco <- res$nco
@@ -371,7 +371,7 @@ g3Cengine <- function(x, y, z, box=c(0,1,0,1,0,1),
             uppercen = as.integer(integer(1)),
             PACKAGE="spatstat"
             )
-  r <- seq(0, rmax, length=nrval)
+  r <- seq(from=0, to=rmax, length.out=nrval)
   #
   obs <- res$obs
   nco <- res$nco
@@ -421,7 +421,8 @@ pcf3engine <- function(x, y, z, box=c(0,1,0,1,0,1),
 
 sphere.volume <- function(range=c(0,1.414), nval=10) 
 {
-	return( (4/3) * pi * (seq(range[1],range[2], length=nval))^3 )
+  rr <- seq(from=range[1], to=range[2], length.out=nval)
+  return( (4/3) * pi * rr^3)
 }
 
 digital.volume <- function(range=c(0, 1.414),  nval=25, vside= 0.05) 

@@ -6,7 +6,7 @@
 # Adapted from statlib file NNclean.q
 # Authors: Simon Byers and Adrian Raftery
 #
-#  $Revision: 1.4 $   $Date: 2010/03/08 08:23:04 $
+#  $Revision: 1.5 $   $Date: 2011/05/18 08:08:21 $
 #
 
 nnclean <- function(X, k, ...) {
@@ -81,7 +81,7 @@ nnclean.ppp <-
 
   if(edge.correct) {
     # trim back to original point pattern
-    df <- df[seq(X$n), ]
+    df <- df[seq_len(X$n), ]
   }
   
   # tack on
@@ -158,7 +158,7 @@ nncleanEngine <-
   if(plothist) {
     xlim <- c(0, max(kthNND))
     barheights <- hist(kthNND, nclass=40, plot=FALSE)$density
-    support <- seq(xlim[1], xlim[2], length = 200.)
+    support <- seq(from=xlim[1], to=xlim[2], length.out = 200.)
     fittedy <- p * dknn(support, lambda=lambda1, k = k, d = d) +
       (1. - p) * dknn(support, lambda=lambda2, k = k, d = d)
     ylim <- range(c(0, barheights, fittedy))

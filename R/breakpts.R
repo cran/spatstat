@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.11 $	$Date: 2009/03/26 09:40:10 $
+#	$Revision: 1.12 $	$Date: 2011/05/18 01:27:46 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -71,13 +71,13 @@ function(bmax, npos, bstep) {
                "or", sQuote("npos")))
   if(!missing(npos)) {
     bstep <- bmax/npos
-    val <- seq(0, bmax, length=npos+1)
+    val <- seq(from=0, to=bmax, length.out=npos+1)
     val <- c(-bstep,val)
     right <- bmax
   } else {
     npos <- ceiling(bmax/bstep)
     right <- bstep * npos
-    val <- seq(0, right, length=npos+1)
+    val <- seq(from=0, to=right, length.out=npos+1)
     val <- c(-bstep,val)
   }
   breakpts(val, right, TRUE, npos, bstep)

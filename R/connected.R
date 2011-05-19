@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.5 $  $Date: 2009/10/06 07:11:35 $
+#    $Revision: 1.6 $  $Date: 2011/05/18 01:35:12 $
 #
 # Original code by Julian Burgos <jmburgos@u.washington.edu>
 # Adapted by Adrian Baddeley
@@ -29,7 +29,7 @@ connected <- function(X, background=NA, method="C") {
     M <- cbind(FALSE, M, FALSE)
     # assign unique label to each foreground pixel 
     L <- M
-    L[M] <- seq(sum(M))
+    L[M] <- seq_len(sum(M))
     L[!M] <- 0
     # resolve labels
     z <- .C("concom",
@@ -124,7 +124,7 @@ connected <- function(X, background=NA, method="C") {
   mapped <- (Z != 0)
   usedlabs <- sort(unique(as.vector(Z[mapped])))
   nlabs <- length(usedlabs)
-  labtable <- cumsum(seq(max(usedlabs)) %in% usedlabs)
+  labtable <- cumsum(seq_len(max(usedlabs)) %in% usedlabs)
   Z[mapped] <- labtable[Z[mapped]]
 
   # banish zeroes

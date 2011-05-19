@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.64 $    $Date: 2011/04/27 03:11:33 $
+#  $Revision: 1.66 $    $Date: 2011/05/18 08:20:18 $
 #
 #
 
@@ -64,7 +64,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # check lhs names exist
   lnames <- colnames(lhsdata)
   nc <- ncol(lhsdata)
-  lnames0 <- paste("V", seq(nc), sep="")
+  lnames0 <- paste("V", seq_len(nc), sep="")
   if(length(lnames) != nc)
     colnames(lhsdata) <- lnames0
   else if(any(uhoh <- !nzchar(lnames)))
@@ -93,7 +93,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         stop("The argument shade should be a valid subset index for columns of x")
       nmore <- ncol(morelhs)
       lhsdata <- cbind(lhsdata, morelhs)
-      shind[nbg] <- nplots + seq(nmore)
+      shind[nbg] <- nplots + seq_len(nmore)
       nplots <- nplots + nmore
       lty <- c(lty, rep(lty[1], nmore))
       col <- c(col, rep(col[1], nmore))
@@ -158,9 +158,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     argname <- fvnames(x, ".x")
     if(as.character(fmla)[3] == argname) {
       # the x axis is the default function argument.
-      # Add name of unit of length
+      # Add name of unit of length 
       ax <- summary(unitname(x))$axis
-      xlab <- paste(argname, ax)
+      xlab <- if(!is.null(ax)) paste(argname, ax) else as.expression(as.name(argname)) 
     } else {
       # map ident to label
       xlab <- eval(substitute(substitute(rh, mp), list(rh=rhs, mp=map)))

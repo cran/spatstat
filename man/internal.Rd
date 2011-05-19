@@ -125,6 +125,7 @@
 \alias{formula.kppm}
 \alias{formula.slrm}
 \alias{fvlabels}
+\alias{fvlabels<-}
 \alias{fvlabelmap}
 \alias{fvlegend}
 \alias{fvnames}
@@ -580,6 +581,7 @@ FormatFaspFormulae(f, argname)
 \method{formula}{kppm}(x, \dots)
 \method{formula}{slrm}(x, ...)
 fvlabels(x, expand=FALSE)
+fvlabels(x) <- value
 fvlabelmap(x, dot=TRUE)
 fvlegend(object, elang)
 fvnames(X, a)

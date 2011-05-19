@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.16 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 2.17 $	$Date: 2011/05/17 13:21:11 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -14,16 +14,19 @@
 # -------------------------------------------------------------------
 #	
 
-MultiStraussHard <- function(types, iradii, hradii) {
-  if(length(types) == 1)
-    stop(paste("The", sQuote("types"),
-               "argument should be a vector of all possible types"))
-  if(is.factor(types)) {
-    types <- levels(types)
-  } else {
-    types <- levels(factor(types, levels=types))
-  }
-  dimnames(iradii) <- dimnames(hradii) <- list(types, types)
+MultiStraussHard <- function(types=NA, iradii, hradii) {
+  nt <- length(types)
+  if(nt > 1) {
+    if(is.factor(types)) {
+      types <- levels(types)
+    } else {
+      types <- levels(factor(types, levels=types))
+    }
+    dimnames(iradii) <- list(types, types)
+    dimnames(hradii) <- list(types, types)
+  } else if((nt == 0) || !is.na(types))
+    stop(paste("The", sQuote("types"),"argument should",
+                           "either be a vector of all possible types or \"NA\".\n"))
   out <- 
   list(
          name     = "Multitype Strauss Hardcore process",
@@ -99,22 +102,29 @@ MultiStraussHard <- function(types, iradii, hradii) {
      #       
          par      = list(types=types, iradii = iradii, hradii = hradii),
          parnames = c("possible types", "interaction distances", "hardcore distances"),
+         selfstart = function(X, self) {
+		if(length(self$par$types) > 1) return(self)
+                types <- levels(marks(X))
+                MultiStraussHard(types=types,iradii=self$par$iradii,
+                                 hradii=self$par$hradii)
+	 },
          init     = function(self) {
-                      r <- self$par$iradii
-                      h <- self$par$hradii
                       nt <- length(self$par$types)
-
-                      MultiPair.checkmatrix(r, nt, sQuote("iradii"))
-                      MultiPair.checkmatrix(h, nt, sQuote("hradii"))
-
-                      ina <- is.na(iradii)
-                      hna <- is.na(hradii)
-                      if(all(ina))
-                        stop(paste("All entries of", sQuote("iradii"),
-                                   "are NA"))
-                      both <- !ina & !hna
-                      if(any(iradii[both] <= hradii[both]))
-                        stop("iradii must be larger than hradii")
+                      chk <- (nt != 1)# || !is.na(self$par$types)
+                      if(chk) {
+                        r <- self$par$iradii
+                        h <- self$par$hradii
+                        MultiPair.checkmatrix(r, nt, sQuote("iradii"))
+                        MultiPair.checkmatrix(h, nt, sQuote("hradii"))
+                        ina <- is.na(iradii)
+                        hna <- is.na(hradii)
+                        if(all(ina))
+                          stop(paste("All entries of", sQuote("iradii"),
+                                     "are NA"))
+                        both <- !ina & !hna
+                        if(any(iradii[both] <= hradii[both]))
+                          stop("iradii must be larger than hradii")
+                      }
                     },
          update = NULL,  # default OK
          print = function(self) {

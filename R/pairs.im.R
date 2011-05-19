@@ -1,7 +1,7 @@
 #
 #   pairs.im.R
 #
-#   $Revision: 1.4 $   $Date: 2010/11/23 14:08:28 $
+#   $Revision: 1.5 $   $Date: 2011/05/18 08:16:11 $
 #
 
 pairs.listof <-
@@ -31,7 +31,7 @@ pairs.listof <-
   imnames <- names(imlist)
   backupnames <- paste(cl)[c(FALSE, isim, FALSE)]
   if(length(backupnames) != nim)
-    backupnames <- paste("V", seq(nim), sep="")
+    backupnames <- paste("V", seq_len(nim), sep="")
   if(length(imnames) != nim)
     imnames <- backupnames
   else if(any(needname <- !nzchar(imnames)))

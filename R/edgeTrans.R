@@ -1,7 +1,7 @@
 #
 #        edgeTrans.R
 #
-#    $Revision: 1.10 $    $Date: 2009/12/15 02:00:21 $
+#    $Revision: 1.11 $    $Date: 2011/05/18 01:51:52 $
 #
 #    Translation edge correction weights
 #
@@ -29,12 +29,14 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
   W <- X$window
   x <- X$x
   y <- X$y
-
+  nX <- X$n
+  
   Y <- as.ppp(Y, W)
   xx <- Y$x
   yy <- Y$y
-
-  if(paired && (X$n != Y$n))
+  nY <- Y$n
+  
+  if(paired && (nX != nY))
     stop("X and Y should have equal length when paired=TRUE")
   
   # For irregular polygons, exact evaluation is very slow;
@@ -60,11 +62,11 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
            # This code is SLOW
            a <- area.owin(W)
            if(!paired) {
-             weight <- matrix(, nrow=X$n, ncol=Y$n)
-             if(X$n > 0 && Y$n > 0) {
-               for(i in seq(X$n)) {
+             weight <- matrix(, nrow=nX, ncol=nY)
+             if(nX > 0 && nY > 0) {
+               for(i in seq_len(nX)) {
                  X.i <- c(x[i], y[i])
-                 for(j in seq(Y$n)) {
+                 for(j in seq_len(nY)) {
                    shiftvector <- X.i - c(xx[j],yy[j])
                    Wshift <- shift(W, shiftvector)
                    b <- overlap.owin(W, Wshift)
@@ -73,9 +75,9 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
                }
              }
            } else {
-             weight <- numeric(X$n)
-             if(X$n > 0) {
-               for(i in seq(X$n)) {
+             weight <- numeric(nX)
+             if(nX > 0) {
+               for(i in seq_len(nX)) {
                  shiftvector <- c(x[i],y[i]) - c(xx[i],yy[i])
                  Wshift <- shift(W, shiftvector)
                  b <- overlap.owin(W, Wshift)
@@ -100,7 +102,7 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
                                 naok=TRUE, strict=FALSE)
            if(!paired) 
              # reshape
-             gvalues <- matrix(gvalues, nrow=X$n, ncol=Y$n)
+             gvalues <- matrix(gvalues, nrow=nX, ncol=nY)
            weight <- area.owin(W)/gvalues
          }
          )
@@ -108,6 +110,6 @@ edge.Trans <- function(X, Y=X, W=X$window, exact=FALSE, paired=FALSE,
   if(length(weight) > 0)
     weight <- pmin(weight, trim)
   if(!paired) 
-    weight <- matrix(weight, nrow=X$n, ncol=Y$n)
+    weight <- matrix(weight, nrow=nX, ncol=nY)
   return(weight)
 }

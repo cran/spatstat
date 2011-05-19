@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.31 $ $Date: 2011/01/19 07:11:33 $
+# $Revision: 1.32 $ $Date: 2011/05/18 08:04:29 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -195,7 +195,7 @@ lurking <- function(object, covariate, type="eem",
     covqmarks <- marks(covq)
     covrange <- range(covqmarks, na.rm=TRUE)
       # Suitable breakpoints
-    cvalues <- seq(covrange[1], covrange[2], length=100)
+    cvalues <- seq(from=covrange[1], to=covrange[2], length.out=100)
     csmall <- cvalues[1] - diff(cvalues[1:2])
     cbreaks <- c(csmall, cvalues)
       # cumulative area as function of covariate values
@@ -304,7 +304,7 @@ lurking <- function(object, covariate, type="eem",
         # Compute sum of w * lamp * suff for quad points in intervals
         Bcontrib <- as.vector(wts * lamp) * suff
         dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib))
-        for(j in seq(ncol(dB))) 
+        for(j in seq_len(ncol(dB))) 
           dB[,j] <- tapply(Bcontrib[,j], covclass, sum, na.rm=TRUE)
         # tapply() returns NA when the table is empty
         dB[is.na(dB)] <- 0

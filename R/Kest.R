@@ -1,7 +1,7 @@
 #
 #	Kest.S		Estimation of K function
 #
-#	$Revision: 5.68 $	$Date: 2011/04/11 05:38:44 $
+#	$Revision: 5.69 $	$Date: 2011/05/18 07:58:19 $
 #
 #
 # -------- functions ----------------------------------------
@@ -121,7 +121,7 @@ function(X, ..., r=NULL, breaks=NULL,
   if(will.do.fast) {
     # restrict r values to recommended range, unless specifically requested
     if(!rfixed) 
-      r <- seq(0, alim[2], length=length(r))
+      r <- seq(from=0, to=alim[2], length.out=length(r))
     return(Kborder.engine(X, max(r), length(r), correction))
   }
 
@@ -287,7 +287,7 @@ Kborder.engine <- function(X, rmax, nr=100,
 
   if(missing(rmax))
     rmax <- diameter(W)/4
-  r <- seq(0, rmax, length=nr)
+  r <- seq(from=0, to=rmax, length.out=nr)
 
   # this will be the output data frame
   Kdf <- data.frame(r=r, theo= pi * r^2)

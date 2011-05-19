@@ -3,7 +3,7 @@
 #
 #    summary() method for class "im"
 #
-#    $Revision: 1.14 $   $Date: 2010/07/16 04:25:40 $
+#    $Revision: 1.15 $   $Date: 2011/05/18 09:15:30 $
 #
 #    summary.im()
 #    print.summary.im()
@@ -28,7 +28,7 @@ summary.im <- function(object, ...) {
   # factor-valued?
   lev <- levels(x)
   if(fak <- !is.null(lev))
-    v <- factor(v, levels=seq(lev), labels=lev)
+    v <- factor(v, levels=seq_along(lev), labels=lev)
 
   switch(x$type,
          integer=,

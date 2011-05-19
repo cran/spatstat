@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.42 $   $Date: 2010/09/29 08:31:30 $
+#    $Revision: 4.43 $   $Date: 2011/05/18 08:58:44 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -79,7 +79,7 @@
              xpix <- as.vector(raster.x(win)[win$m])
              ypix <- as.vector(raster.y(win)[win$m])
              # select pixels with equal probability
-             id <- sample(seq(xpix), n, replace=TRUE)
+             id <- sample(seq_along(xpix), n, replace=TRUE)
              # extract pixel centres and randomise within pixels
              x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
              y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
@@ -328,7 +328,7 @@ rpoint <- function(n, f, fmax=NULL,
     d2 <- pairdist(X, squared=TRUE)
     close <- (d2 <= r^2)
     # random order 1:n
-    age <- sample(seq(nX), nX, replace=FALSE)
+    age <- sample(seq_len(nX), nX, replace=FALSE)
     earlier <- outer(age, age, ">")
     conflict <- close & earlier
     # delete <- apply(conflict, 1, any)
@@ -403,10 +403,13 @@ rpoint <- function(n, f, fmax=NULL,
   #
   result <- NULL
   # generate clusters
-  if(parents$n > 0) {
-    for(i in seq(parents$n)) {
+  np <- parents$n
+  if(np > 0) {
+    xparent <- parents$x
+    yparent <- parents$y
+    for(i in seq_len(np)) {
       # generate random offspring of i-th parent point
-      cluster <- rcluster(parents$x[i], parents$y[i], ...)
+      cluster <- rcluster(xparent[i], yparent[i], ...)
       if(!inherits(cluster, "ppp"))
         cluster <- ppp(cluster$x, cluster$y, window=frame, check=FALSE)
       # skip if cluster is empty
@@ -546,14 +549,14 @@ rsyst <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
       stop("Do not give both nx and dx")
     dx <- diff(xr)/nx
     dy <- diff(yr)/ny
-    x0 <- seq(xr[1], xr[2], length=nx+1)
-    y0 <- seq(yr[1], yr[2], length=ny+1)
+    x0 <- seq(from=xr[1], to=xr[2], length.out=nx+1)
+    y0 <- seq(from=yr[1], to=yr[2], length.out=ny+1)
   } else if(!is.null(dx)) {
     stopifnot(dx > 0 & dy > 0)
     if(!is.null(nx) || !is.null(ny))
       stop("Do not give both nx and dx")
-    x0 <- seq(xr[1], xr[2], by=dx)
-    y0 <- seq(yr[1], yr[2], by=dy)
+    x0 <- seq(from=xr[1], to=xr[2], by=dx)
+    y0 <- seq(from=yr[1], to=yr[2], by=dy)
   } else stop("Either (nx, ny) or (dx, dy) should be given")
   xy0 <- expand.grid(x=x0, y=y0)
   x <- xy0$x + runif(1, min = 0, max = dx)
@@ -574,14 +577,14 @@ rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
       stop("Do not give both nx and dx")
     dx <- diff(xr)/nx
     dy <- diff(yr)/ny
-    x0 <- seq(xr[1], xr[2], length=nx+1)
-    y0 <- seq(yr[1], yr[2], length=ny+1)
+    x0 <- seq(from=xr[1], to=xr[2], length.out=nx+1)
+    y0 <- seq(from=yr[1], to=yr[2], length.out=ny+1)
   } else if(!is.null(dx)) {
     stopifnot(dx > 0 & dy > 0)
     if(!is.null(nx) || !is.null(ny))
       stop("Do not give both nx and dx")
-    x0 <- seq(xr[1], xr[2], by=dx)
-    y0 <- seq(yr[1], yr[2], by=dy)
+    x0 <- seq(from=xr[1], to=xr[2], by=dx)
+    y0 <- seq(from=yr[1], to=yr[2], by=dy)
   } else stop("Either (nx, ny) or (dx, dy) should be given")
   mx <- length(x0)
   my <- length(y0)
@@ -592,8 +595,8 @@ rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
     k <- ifelse(u < 1/10, 0, ifelse(u < 89/90, 1, 10))
     return(k)
   }
-  for(ix in seq(mx))
-    for(iy in seq(my)) {
+  for(ix in seq_len(mx))
+    for(iy in seq_len(my)) {
       nij <- rcellnumber(1)
       x <- c(x, x0[ix] + runif(nij, min=0, max=dx))
       y <- c(y, y0[iy] + runif(nij, min=0, max=dy))
@@ -650,17 +653,18 @@ rthin <- function(X, P, ...) {
 
 rjitter <- function(X, radius, retry=TRUE, giveup=10000) {
   verifyclass(X, "ppp")
+  nX <- npoints(X)
   W <- X$window
   if(!retry) {
     # points outside window are lost
-    D <- runifdisc(X$n, radius=radius)
+    D <- runifdisc(nX, radius=radius)
     xnew <- X$x + D$x
     ynew <- X$y + D$y
     ok <- inside.owin(xnew, ynew, W)
     return(ppp(xnew[ok], ynew[ok], window=W))
   }
   # retry = TRUE: condition on points being inside window
-  undone <- rep(TRUE, X$n)
+  undone <- rep(TRUE, nX)
   while(any(undone)) {
     giveup <- giveup - 1
     if(giveup <= 0)
@@ -671,7 +675,7 @@ rjitter <- function(X, radius, retry=TRUE, giveup=10000) {
     ynew <- Y$y + D$y
     ok <- inside.owin(xnew, ynew, W)
     if(any(ok)) {
-      changed <- seq(X$n)[undone][ok]
+      changed <- seq_len(nX)[undone][ok]
       X$x[changed] <- xnew[ok]
       X$y[changed] <- ynew[ok]
       undone[ok] <- FALSE

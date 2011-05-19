@@ -2,7 +2,7 @@
 #
 #    dgs.R
 #
-#    $Revision: 1.1 $	$Date: 2010/07/20 08:23:41 $
+#    $Revision: 1.2 $	$Date: 2011/05/18 01:43:21 $
 #
 #    Diggle-Gates-Stibbard process
 #
@@ -57,7 +57,7 @@ DiggleGatesStibbard <- function(rho) {
          if(spatstat.options("fasteval") == "test")
            message("Using fast eval for DiggleGatesStibbard")
          rho <- potpars$rho
-         idX <- seq(npoints(X))
+         idX <- seq_len(npoints(X))
          idU <- rep(-1, npoints(U))
          idU[EqualPairs[,2]] <- EqualPairs[,1]
          v <- dgsTerms(U, X, idU, idX, rho)

@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.31 $  $Date: 2010/11/24 10:35:36 $
+#  $Revision: 1.32 $  $Date: 2011/05/18 08:47:19 $
 #
 
 quadratcount <- function(X, ...) {
@@ -102,11 +102,11 @@ plot.quadratcount <- function(x, ...,
 
 rectquadrat.breaks <- function(xr, yr, nx=5, ny=nx, xbreaks=NULL, ybreaks=NULL) {
   if(is.null(xbreaks))
-    xbreaks <- seq(xr[1], xr[2], length=nx+1)
+    xbreaks <- seq(from=xr[1], to=xr[2], length.out=nx+1)
   else if(min(xbreaks) > xr[1] || max(xbreaks) < xr[2])
     stop("xbreaks do not span the range of x coordinates in the window")
   if(is.null(ybreaks))
-    ybreaks <- seq(yr[1], yr[2], length=ny+1)
+    ybreaks <- seq(from=yr[1], to=yr[2], length.out=ny+1)
   else if(min(ybreaks) > yr[1] || max(ybreaks) < yr[2])
     stop("ybreaks do not span the range of y coordinates in the window")
   return(list(xbreaks=xbreaks, ybreaks=ybreaks))
@@ -130,7 +130,7 @@ rectquadrat.countEngine <- function(x, y, xbreaks, ybreaks, weights) {
       sumz[nbg] <- 0
   }
   # reverse order of y 
-  sumz <- sumz[rev(seq(nrow(sumz))), ]
+  sumz <- sumz[rev(seq_len(nrow(sumz))), ]
   sumz <- as.table(sumz)
   #
   attr(sumz, "xbreaks") <- xbreaks
@@ -152,7 +152,7 @@ quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL,
       Z <- intersect.tess(Z, W)
     } else {
       til <- tiles(Z)
-      for(i in seq(til))
+      for(i in seq_along(til))
         til[[i]] <- intersect.owin(til[[i]], W)
       Z <- tess(tiles=til, window=W, keepempty=TRUE)
     }

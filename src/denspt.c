@@ -4,7 +4,7 @@
 
   denspt.c
 
-  $Revision: 1.6 $     $Date: 2010/11/07 09:33:13 $
+  $Revision: 1.7 $     $Date: 2011/05/17 12:18:53 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -373,7 +373,7 @@ void smoopt(nxy, x, y, v, self, rmaxi, sig, result)
 {
   int n, i, j, jleft, jright, countself;
   double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
-  double sigma, coef, twosig2;
+  double sigma, twosig2;
   double numer, denom, wij; 
 
   n = *nxy;
@@ -382,7 +382,6 @@ void smoopt(nxy, x, y, v, self, rmaxi, sig, result)
   countself = *self;
 
   twosig2 = 2.0 * sigma * sigma;
-  coef = 1.0/(TWOPI * sigma * sigma);
 
   r2max = rmax * rmax;
 
@@ -469,7 +468,7 @@ void wtsmoopt(nxy, x, y, v, self, rmaxi, sig, weight, result)
 {
   int n, i, j, jleft, jright, countself;
   double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
-  double sigma, coef, twosig2;
+  double sigma, twosig2;
   double numer, denom, wij; 
 
   n = *nxy;
@@ -478,7 +477,6 @@ void wtsmoopt(nxy, x, y, v, self, rmaxi, sig, weight, result)
   countself = *self;
 
   twosig2 = 2.0 * sigma * sigma;
-  coef = 1.0/(TWOPI * sigma * sigma);
 
   r2max = rmax * rmax;
 
@@ -564,7 +562,7 @@ void asmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, result)
      double *result;   /* vector of smoothed values */
 {
   int n, i, j, jleft, jright, countself;
-  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2, coef;
+  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
   double detsig, s11, s12, s21, s22;
   double numer, denom, wij; 
 
@@ -579,7 +577,6 @@ void asmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, result)
   s22 = sinv[3];
 
   r2max = rmax * rmax;
-  coef = 1.0/(TWOPI * sqrt(detsig));
 
   if(n == 0) 
     return;
@@ -665,7 +662,7 @@ void awtsmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, weight, result)
      double *result;    /* vector of smoothed values */
 {
   int n, i, j, jleft, jright, countself;
-  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2, coef;
+  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
   double detsig, s11, s12, s21, s22;
   double numer, denom, wij; 
 
@@ -680,7 +677,6 @@ void awtsmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, weight, result)
   s22 = sinv[3];
 
   r2max = rmax * rmax;
-  coef = 1.0/(TWOPI * sqrt(detsig));
 
   if(n == 0) 
     return;

@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.29 $    $Date: 2010/01/25 19:37:34 $
+#  $Revision: 1.30 $    $Date: 2011/05/18 09:22:02 $
 #
 #
 #
@@ -141,13 +141,14 @@ sp.foundclass <- function(cname, inlist, formalname, argsgiven) {
     stop(paste("I am confused: there is an unnamed argument",
                "of class", sQuote(cname), "which conflicts with the",
                "named argument", sQuote(formalname)))
-  theposition <- seq(ok)[ok]
+  theposition <- seq_along(ok)[ok]
   return(theposition)
 }
 
 sp.foundclasses <- function(cnames, inlist, formalname, argsgiven) {
-  pozzie <- logical(length(cnames))
-  for(i in seq(cnames))
+  ncn <- length(cnames)
+  pozzie <- logical(ncn)
+  for(i in seq_len(ncn))
     pozzie[i] <- sp.foundclass(cnames[i],  inlist, formalname, argsgiven)
   found <- (pozzie > 0)
   nfound <- sum(found)

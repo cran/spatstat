@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.57 $ $Date: 2011/04/17 05:49:52 $
+#  $Revision: 1.61 $ $Date: 2011/05/19 06:14:18 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -42,7 +42,7 @@ psp <- function(x0, y0, x1, y1, window, marks=NULL,
     if(is.data.frame(marks)) {
       omf <- "dataframe"
       nmarks <- nrow(marks)
-      rownames(marks) <- seq(length=nmarks)
+      rownames(marks) <- seq_len(nmarks)
       whinge <- "The number of rows of marks"
     } else {
       omf <- "vector"
@@ -199,7 +199,7 @@ as.psp.owin <- function(x, ..., check=spatstat.options("checksegments"), fatal=T
          polygonal = {
            x0 <- y0 <- x1 <- y1 <- numeric(0)
            bdry <- x$bdry
-           for(i in seq(bdry)) {
+           for(i in seq_along(bdry)) {
              po <- bdry[[i]]
              ni <- length(po$x)
              nxt <- c(2:ni, 1)
@@ -327,19 +327,84 @@ unmark.psp <- function(X) {
 #  plot and print methods
 #################################################
 
-plot.psp <- function(x, ..., add=FALSE) {
+plot.psp <- function(x, ..., add=FALSE, which.marks=1,
+                     ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
+  main <- deparse(substitute(x))
   verifyclass(x, "psp")
+  #
+  n <- nsegments(x)
+  marx <- marks(x)
+  #
+  use.colour <- !is.null(marx) && (n != 0)
+  do.ribbon <- identical(ribbon, TRUE) && use.colour && !add
+  #
   if(!add) {
-    do.call.matched("plot.owin", 
-                    resolve.defaults(list(x=x$window),
-                                     list(...),
-                                     list(main=deparse(substitute(x)))))
+    # create plot region
+    if(!do.ribbon) {
+      # window of x
+      do.call.matched("plot.owin", 
+                      resolve.defaults(list(x=x$window),
+                                       list(...),
+                                       list(main=deparse(substitute(x)))))
+    } else {
+      # enlarged window with room for colour ribbon
+      # x at left, ribbon at right
+      bb <- as.rectangle(as.owin(x))
+      xwidth <- diff(bb$xrange)
+      xheight <- diff(bb$yrange)
+      xsize <- max(xwidth, xheight)
+      bb.rib <- owin(bb$xrange[2] + c(ribsep, ribsep+ribwid) * xsize,
+                     bb$yrange)
+      bb.all <- bounding.box(bb.rib, bb)
+      # establish coordinate system
+      do.call.matched("plot.default",
+                      resolve.defaults(list(x=0, y=0, type="n",
+                                            axes=FALSE, asp=1,
+                                            xlim=bb.all$xrange,
+                                            ylim=bb.all$yrange),
+                                       list(...),
+                                       list(main=main, xlab="", ylab="")))
+      # now plot window of x
+      do.call.matched("plot.owin", 
+                      resolve.defaults(list(x=x$window, add=TRUE),
+                                       list(...)))
+    }
   }
-  if(!is.null(marks(x, dfok=TRUE)))
-    warning("marks are currently ignored in plot.psp")
-  if(x$n > 0)
-    do.call.matched("segments", append(as.list(x$ends), list(...)))
-  return(invisible(NULL))
+
+  # plot segments
+  if(n == 0)
+    return(invisible(NULL))
+  
+  # determine colours if any
+  if(!use.colour) {
+    # black
+    col <- colmap <- NULL
+  } else {
+    # multicoloured 
+    marx <- as.data.frame(marx)[, which.marks]
+    if(is.character(marx) || length(unique(marx)) == 1)
+      marx <- factor(marx)
+    if(is.factor(marx)) {
+      lev <- levels(marx)
+      colmap <- colourmap(col=rainbow(length(lev)), inputs=factor(lev))
+    } else {
+      colmap <- colourmap(col=rainbow(ribn), range=range(marx))
+    }
+    col <- colmap(marx)
+  }
+  # plot segments
+  do.call("segments",
+          resolve.defaults(as.list(x$ends),
+                           list(...),
+                           list(col=col),
+                           .StripNull=TRUE))
+  # plot ribbon
+  if(do.ribbon) 
+    plot(colmap, vertical=TRUE, add=TRUE,
+         xlim=bb.rib$xrange, ylim=bb.rib$yrange)
+  
+  # return colour map
+  return(invisible(colmap))
 }
 
 print.psp <- function(x, ...) {
@@ -580,7 +645,7 @@ rotate.psp <- function(X, angle=pi/2, ...) {
 
 is.empty.psp <- function(x) { return(x$n == 0) } 
 
-identify.psp <- function(x, ..., labels=seq(x$n), n=x$n, plot=TRUE) {
+identify.psp <- function(x, ..., labels=seq_len(nsegments(x)), n=nsegments(x), plot=TRUE) {
   Y <- x
   W <- as.owin(Y)
   mids <- midpoints.psp(Y)

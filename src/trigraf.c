@@ -2,7 +2,7 @@
 
   trigraf.c
 
-  $Revision: 1.2 $     $Date: 2009/02/20 19:24:30 $
+  $Revision: 1.3 $     $Date: 2011/05/17 13:01:42 $
 
   trigraf()  Form list of all triangles in a planar graph, given list of edges
 
@@ -117,12 +117,15 @@ void trigrafS(nv, ne, ie, je, nt, it, jt, kt)
      int *nt;              /* number of triangles (assumed <= ne) */
      int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
 {
-  int Nv, Ne, Nt;
+  int Ne, Nt;
   int m, i, j, k, mj, mk;
   int firstedge, lastedge;
   
-  Nv = *nv;
   Ne = *ne;
+
+  /* nv is not used, but retained for harmony with trigraf */
+  /* Avoid compiler warnings */
+  Nt = *nv;
 
   /* initialise output */
   Nt = 0;

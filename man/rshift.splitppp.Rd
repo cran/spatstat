@@ -5,7 +5,7 @@
   Randomly shifts each point pattern in a list of point patterns.
 }
 \usage{
-   \method{rshift}{splitppp}(X, \dots, which=seq(X))
+   \method{rshift}{splitppp}(X, \dots, which=seq_along(X))
 }
 \arguments{
   \item{X}{

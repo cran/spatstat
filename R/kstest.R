@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.48 $  $Date: 2010/11/21 04:21:50 $
+#  $Revision: 1.49 $  $Date: 2011/05/18 08:01:58 $
 #
 #
 
@@ -296,7 +296,7 @@ evalCovar <- function(model, covariate,
         stop("Number of images does not match number of possible marks")
       # evaluate covariate at each data point by interpolation
       ZX <- numeric(npts)
-      for(k in seq(possmarks)) {
+      for(k in seq_along(possmarks)) {
         ii <- (marx == possmarks[k])
         covariate.k <- covariate[[k]]
         values <- interp.im(covariate.k, x=X$x[ii], y=X$y[ii])
@@ -314,7 +314,7 @@ evalCovar <- function(model, covariate,
       # pixel locations 
       locn <- lapply(Zframes, function(df) { df[ , 1:2] })
       # tack on mark values
-      for(k in seq(possmarks))
+      for(k in seq_along(possmarks))
         locn[[k]] <- cbind(locn[[k]], data.frame(marks=possmarks[k]))
       loc <- do.call("rbind", locn)
       # corresponding fitted intensity values
@@ -328,7 +328,7 @@ evalCovar <- function(model, covariate,
       # covariate in window
       Z <- list()
       g <- function(x,y,m,f) { f(x,y,m) }
-      for(k in seq(possmarks))
+      for(k in seq_along(possmarks))
         Z[[k]] <- as.im(g, m=possmarks[k], f=covariate, W=W)
       Zvalues <- unlist(lapply(Z, function(z) { as.data.frame(z)[,3] }))
       # corresponding fitted intensity values

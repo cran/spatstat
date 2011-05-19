@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.121 $	$Date: 2011/02/07 06:23:37 $
+#	$Revision: 4.122 $	$Date: 2011/05/18 09:25:12 $
 #
 #
 #	A window may be either
@@ -190,7 +190,7 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     if(!is.null(w.area)) {
       # tack on area and hole data
       holes <- (w.area < 0)
-      for(i in seq(bdry)) 
+      for(i in seq_along(bdry)) 
         bdry[[i]] <- append(bdry[[i]], list(area=w.area[i], hole=holes[i]))
     }
     
@@ -257,8 +257,8 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
       }
       xstep <- diff(xrange)/nc
       ystep <- diff(yrange)/nr
-      xcol  <- seq(xrange[1]+xstep/2, xrange[2]-xstep/2, length=nc)
-      yrow  <- seq(yrange[1]+ystep/2, yrange[2]-ystep/2, length=nr)
+      xcol  <- seq(from=xrange[1]+xstep/2, to=xrange[2]-xstep/2, length.out=nc)
+      yrow  <- seq(from=yrange[1]+ystep/2, to=yrange[2]-ystep/2, length.out=nr)
     }
 
     out <- list(type     = "mask",
@@ -526,8 +526,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
                     xstep    = xstep,
                     ystep    = ystep,
                     warnings = .Spatstat.Image.Warning,
-                    xcol    = seq(xr[1], xr[2], length=nc),
-                    yrow    = seq(yr[1], yr[2], length=nr),
+                    xcol    = seq(from=xr[1], to=xr[2], length.out=nc),
+                    yrow    = seq(from=yr[1], to=yr[2], length.out=nr),
                     m       = matrix(TRUE, nr, nc),
                     units   = uname)
       class(rasta) <- "owin"
@@ -863,7 +863,7 @@ inside.owin <- function(x, y, w) {
            bdry <- w$bdry
            total <- rep(0, length(x))
            on.bdry <- rep(FALSE, length(x))
-           for(i in seq(bdry)) {
+           for(i in seq_along(bdry)) {
              score <- inside.xypolygon(xy, bdry[[i]], test01=FALSE)
              total <- total + score
              on.bdry <- on.bdry | attr(score, "on.boundary")

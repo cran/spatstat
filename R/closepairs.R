@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.12 $   $Date: 2010/11/21 04:17:12 $
+#   $Revision: 1.13 $   $Date: 2011/05/18 01:31:38 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -112,7 +112,7 @@ closepairs <- function(X, rmax) {
                 dx=numeric(0),
                 dy=numeric(0),
                 d=numeric(0)))
-  actual <- seq(npairs)
+  actual <- seq_len(npairs)
   i  <- z$iout[actual] + 1
   j  <- z$jout[actual] + 1
   xi <- z$xiout[actual]
@@ -216,7 +216,7 @@ crosspairs <- function(X, Y, rmax) {
                 dx=numeric(0),
                 dy=numeric(0),
                 d=numeric(0)))
-  actual <- seq(npairs)
+  actual <- seq_len(npairs)
   i  <- z$iout[actual] + 1
   j  <- z$jout[actual] + 1
   xi <- z$xiout[actual]

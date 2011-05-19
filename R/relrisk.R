@@ -3,7 +3,7 @@
 #
 #   Estimation of relative risk
 #
-#  $Revision: 1.4 $  $Date: 2010/11/08 08:46:42 $
+#  $Revision: 1.5 $  $Date: 2011/05/18 09:02:00 $
 #
 
 relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels") {
@@ -65,7 +65,7 @@ relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels") {
              npts <- npoints(X)
              # dummy variable matrix
              dumm <- matrix(0, npts, ntypes)
-             dumm[cbind(seq(npts), imarks)] <- 1
+             dumm[cbind(seq_len(npts), imarks)] <- 1
              colnames(dumm) <- lev
              # compute probability of each type
              Z <- X %mark% dumm
@@ -118,7 +118,7 @@ bw.relrisk <- function(X, method="likelihood",nh=32) {
   # determine a range of bandwidth values 
   hmin <- max(min(nndist(unique(X))), stoyan/5)
   hmax <- max(d/4, stoyan * 5)
-  h <- exp(seq(log(hmin), log(hmax), length=nh))
+  h <- exp(seq(from=log(hmin), to=log(hmax), length.out=nh))
   # 
   # compute cross-validation criterion
   cv <- numeric(nh)
@@ -131,7 +131,7 @@ bw.relrisk <- function(X, method="likelihood",nh=32) {
       y01   <- as.integer(indic)
     } else {
       indic <- matrix(FALSE, n, ntypes)
-      indic[cbind(seq(n), imarks)] <- TRUE
+      indic[cbind(seq_len(n), imarks)] <- TRUE
       y01  <- indic * 1
     }
     X01 <- X %mark% y01
@@ -141,7 +141,7 @@ bw.relrisk <- function(X, method="likelihood",nh=32) {
            # for efficiency, only compute the estimate of p_j(x_i)
            # when j = m_i = mark of x_i.
            Dthis <- numeric(n)
-           for(i in seq(h)) {
+           for(i in seq_len(nh)) {
              Dall <- density.ppp(X, sigma=h[i], at="points", edge=FALSE)
              Deach <- density.splitppp(Y, sigma=h[i], at="points", edge=FALSE)
              split(Dthis, marx) <- Deach
@@ -150,7 +150,7 @@ bw.relrisk <- function(X, method="likelihood",nh=32) {
            }
          },
          leastsquares={
-           for(i in seq(h)) {
+           for(i in seq_len(nh)) {
              phat <- smooth.ppp(X01, sigma=h[i], at="points", leaveoneout=TRUE)
              cv[i] <- mean((y01 - phat)^2)
            }
@@ -161,7 +161,7 @@ bw.relrisk <- function(X, method="likelihood",nh=32) {
            phat0 <- smooth.ppp(X01, sigma=h0, at="points", leaveoneout=TRUE)
            var0 <- phat0 * (1-phat0)
            var0 <- pmax(0, 1e-6)
-           for(i in seq(h)) {
+           for(i in seq_len(nh)) {
              phat <- smooth.ppp(X01, sigma=h[i], at="points", leaveoneout=TRUE)
              cv[i] <- mean((y01 - phat)^2/var0)
            }

@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.69 2010/08/10 01:00:19 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.71 2011/05/17 13:21:11 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 #
@@ -251,8 +251,10 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
            n.start <- start$n.start
            # Adjust the number of points in the starting state in accordance
            # with the expansion that has occurred.  
-           if(expanded)
-             n.start <- ceiling(n.start * area.owin(w.sim)/area.owin(w.clip))
+           if(expanded) {
+	     holnum <- if(spatstat.options()$scalable) round else ceiling
+             n.start <- holnum(n.start * area.owin(w.sim)/area.owin(w.clip))
+           }
            #
            npts.free <- sum(n.start) # The ``sum()'' is redundant if n.start
                                 # is scalar; no harm, but.

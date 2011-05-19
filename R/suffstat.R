@@ -3,7 +3,7 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.12 $  $Date: 2009/10/07 02:36:51 $
+#  $Revision: 1.13 $  $Date: 2011/05/18 09:15:04 $
 #
 #
 
@@ -60,7 +60,7 @@ suffstat.generic <- function(model, X=NULL, callstring="suffstat.generic") {
   # If there are points which don't contribute, condition on them
   use <- which(contribute)   
   dontuse <- which(!contribute)
-  for(i in seq(length(use))) {
+  for(i in seq_along(use)) {
     prior <- if(i == 1) c() else use[1:(i-1)]
     prior <- c(dontuse, prior)
     Xprior <- X[prior]

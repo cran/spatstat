@@ -1,7 +1,7 @@
 #
 #     dg.S
 #
-#    $Revision: 1.11 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 1.12 $	$Date: 2011/05/18 01:42:53 $
 #
 #     Diggle-Gratton pair potential
 #
@@ -73,7 +73,7 @@ DiggleGratton <- function(delta, rho) {
            message("Using fast eval for DiggleGratton")
          delta <- potpars$delta
          rho   <- potpars$rho
-         idX <- seq(npoints(X))
+         idX <- seq_len(npoints(X))
          idU <- rep(-1, npoints(U))
          idU[EqualPairs[,2]] <- EqualPairs[,1]
          answer <- diggraterms(U, X, idU, idX, delta, rho)

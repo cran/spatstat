@@ -3,14 +3,14 @@
 #
 #   random shift with optional toroidal boundary
 #
-#   $Revision: 1.13 $   $Date: 2009/07/17 05:57:22 $
+#   $Revision: 1.14 $   $Date: 2011/05/18 09:10:50 $
 #
 #
 rshift <- function(X, ...) {
   UseMethod("rshift")
 }
 
-rshift.splitppp <- function(X, ..., which=seq(X))
+rshift.splitppp <- function(X, ..., which=seq_along(X))
 {
   verifyclass(X, "splitppp")
   if("group" %in% names(list(...)))
@@ -18,7 +18,7 @@ rshift.splitppp <- function(X, ..., which=seq(X))
                "not implemented for splitppp objects"))
 
   if(is.null(which))
-    which <- seq(X)
+    which <- seq_along(X)
   Xsub <- X[which]
   if(length(Xsub) == 0)
     stop(paste("Argument", sQuote("which"), "did not match any marks"))

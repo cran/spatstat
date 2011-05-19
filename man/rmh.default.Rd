@@ -553,6 +553,22 @@ trend corresponding to a particular type, there is still a component
                     control=list(nrep=nr,nverb=nv))
    # Same again --- i.e. the BadGey model includes the Geyer model.
 
+   # Illustrating scalability.
+   \dontrun{
+    M1 <- rmhmodel(cif="strauss",par=list(beta=60,gamma=0.5,r=0.04),w=owin())
+    set.seed(496)
+    X1 <- rmh(model=M1,start=list(n.start=300))
+    M2 <- rmhmodel(cif="strauss",par=list(beta=0.6,gamma=0.5,r=0.4),
+              w=owin(c(0,10),c(0,10)))
+    set.seed(496)
+    X2  <- rmh(model=M2,start=list(n.start=300))
+    chk <- affine(X1,mat=diag(c(10,10)))
+    all.equal(chk,X2,check.attribute=FALSE)
+    # Under the default spatstat options the foregoing all.equal()
+    # will yield TRUE.  Setting spatstat.options(scalable=FALSE) and
+    # re-running the code will reveal differences between X1 and X2.
+}
+
    \testonly{
    spatstat.options(oldopt)
    }

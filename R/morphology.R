@@ -6,7 +6,7 @@
 #  generic functions
 #  and methods for owin, psp, ppp
 #
-#  $Revision: 1.17 $   $Date: 2010/03/10 01:50:00 $
+#  $Revision: 1.18 $   $Date: 2011/05/18 08:06:53 $
 #
 
 # ............ generic  ............................
@@ -226,8 +226,8 @@ dilation.psp <- function(w, r, ..., polygonal=TRUE, tight=TRUE) {
     lengths <- lengths.psp(x)
     out <- NULL
     # dilate individual segments
-    halfcircle <- seq(0, pi, length=128)[-c(1,128)]
-    for(i in seq(x$n)) {
+    halfcircle <- seq(from=0, to=pi, length.out=128)[-c(1,128)]
+    for(i in seq_len(x$n)) {
       seg <- ends[i,]
       co <- cos(angles[i])
       si <- sin(angles[i])
@@ -301,7 +301,7 @@ dilation.ppp <- function(w, r, ..., polygonal=TRUE, tight=TRUE) {
     # compute polygonal approximation
     # generate discs
     out <- NULL
-    for(i in seq(x$n)) {
+    for(i in seq_len(x$n)) {
       balli <- disc(r, c(x$x[i], x$y[i]))
       out <- union.owin(out, balli)
     }

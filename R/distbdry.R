@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.33 $	$Date: 2009/10/31 22:38:53 $
+#	$Revision: 4.34 $	$Date: 2011/05/18 01:45:44 $
 #
 # -------- functions ----------------------------------------
 #
@@ -40,7 +40,7 @@ function(X)
                  xy <- cbind(x,y)
                  result <- rep(Inf, X$n)
                  bdry <- window$bdry
-                 for(i in seq(bdry)) {
+                 for(i in seq_along(bdry)) {
                    polly <- bdry[[i]]
                    nsegs <- length(polly$x)
                    for(j in 1:nsegs) {
@@ -92,7 +92,7 @@ function(X)
                  xy <- cbind(x[inside], y[inside])
                  dxy <- rep(Inf, sum(inside))
                  bdry <- w$bdry
-                 for(i in seq(bdry)) {
+                 for(i in seq_along(bdry)) {
                    polly <- bdry[[i]]
                    nsegs <- length(polly$x)
                    for(j in 1:nsegs) {

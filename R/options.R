@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.32 $   $Date: 2010/12/23 09:28:30 $
+#    $Revision: 1.34 $   $Date: 2011/05/18 08:09:16 $
 #
 #
 
@@ -17,6 +17,11 @@ reset.spatstat.options <- function() {
 
 ".Spat.Stat.Opt.Table" <-
   list(
+       scalable = list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1},
+         valid="a single logical value"
+         ),
        npixel=list(
          default=100,
          check=function(x){
@@ -198,7 +203,7 @@ function (...)
     if(!all(ok))
 	stop(paste("Unrecognised option(s):", assignto[!ok]))
 # validate new values
-    for(i in seq(assignto)) {
+    for(i in seq_along(assignto)) {
       nama <- assignto[i]
       valo <- called[[i]]
       entry <- .Spat.Stat.Opt.Table[[nama]]

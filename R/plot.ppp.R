@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.47 $	$Date: 2010/04/23 09:50:28 $
+#	$Revision: 1.48 $	$Date: 2011/05/18 08:40:06 $
 #
 #
 #--------------------------------------------------------------------------
@@ -262,7 +262,7 @@ plot.ppp <-
       cols <- rep(cols, ntypes)
   }
     
-  for(i in seq(length(um))) {
+  for(i in seq_along(um)) {
     relevant <- (marx == um[i])
     if(any(relevant))
       do.call("smartpoints",

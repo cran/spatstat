@@ -167,7 +167,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
      int *nx, *ny;
      double *out;  /* output matrix */
 {
-  int Ns, Nx, Ny, i, j, k, m, m0, m1, mmin, mmax;
+  int Ns, Nx, Ny, i, j, k, m, mmin, mmax;
   double x0i, x1i, y0i, y1i;
   double leni;
   double xleft, yleft, xright, yright, slope, scalesecant;

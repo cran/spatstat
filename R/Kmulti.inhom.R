@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.32 $	$Date: 2010/11/21 04:21:24 $
+#	$Revision: 1.33 $	$Date: 2011/05/18 07:59:12 $
 #
 #
 # ------------------------------------------------------------------------
@@ -232,7 +232,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
   XJ <- X[J]
   close <- crosspairs(XI, XJ, max(r))
 # map (i,j) to original serial numbers in X
-  orig <- seq(npts)
+  orig <- seq_len(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

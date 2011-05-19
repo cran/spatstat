@@ -7,7 +7,7 @@
 
   poly2imA     pixel value = area of intersection between pixel and polygon
 
-  $Revision: 1.1 $ $Date: 2009/08/20 17:00:09 $
+  $Revision: 1.2 $ $Date: 2011/05/17 12:41:47 $
 
 */
 #undef DEBUG
@@ -27,7 +27,7 @@ poly2imI(xp, yp, np, nx, ny, out)
      int *nx, *ny; /* INTEGER raster points from (0,0) to (nx-1, ny-1) */
      int *out;  /* output matrix [ny, nx], initialised to zero */
 {
-  int Np, Nx, Ny, Nxy;
+  int Np, Nx, Ny;
   int i, j, k;
   double x0, y0, x1, y1, xleft, xright, yleft, yright;
   double dx, dy, y, slope, intercept;
@@ -37,7 +37,7 @@ poly2imI(xp, yp, np, nx, ny, out)
   Np = *np;
   Nx = *nx;
   Ny = *ny;
-  Nxy = Nx * Ny;
+  /*  Nxy = Nx * Ny; */
 
   /* run through polygon edges */
   for(k = 0; k < Np-1; k++) {

@@ -55,14 +55,13 @@ double strausscif(prop, state, cdata)
      Cdata *cdata;
 {
   int npts, kount, ix, ixp1, j;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v;
   double r2, d2, a, cifval;
   Strauss *strauss;
 
   strauss = (Strauss *) cdata;
 
-  period = strauss->period;
   r2     = strauss->r2;
 
   u  = prop.u;

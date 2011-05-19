@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.32 $	$Date: 2010/07/14 00:58:13 $
+#    $Revision: 1.33 $	$Date: 2011/05/18 08:15:31 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -90,7 +90,7 @@ if(is.null(saturate)) {
 }
 
 # first ensure all data points are included in the quadrature points
-Xindex  <- seq(npoints(X))
+Xindex  <- seq_len(npoints(X))
 if(is.null(EqualPairs)) {
   # no data points included 
   missingdata <- Xindex
@@ -149,7 +149,7 @@ if(halfway)
 # on the UNSATURATED potential sum of each data point i
 #
 # Identify data points
-is.data <- seq(npoints(U)) %in% EqualPairs[,2] # logical vector corresp. to rows of V
+is.data <- seq_len(npoints(U)) %in% EqualPairs[,2] # logical vector corresp. to rows of V
 
 # Extract potential sums for data points only
 V.data <- V[is.data, , drop=FALSE]

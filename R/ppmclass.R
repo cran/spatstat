@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.47 $	$Date: 2010/12/19 03:08:00 $
+#	$Revision: 2.48 $	$Date: 2011/05/18 08:41:40 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -79,7 +79,7 @@ print.ppm <- function(x, ...) {
           cat(paste("\n", s$trend$label, ":", sep=""))
           if(is.list(tv)) {
             cat("\n")
-            for(i in seq(tv))
+            for(i in seq_along(tv))
               print(tv[[i]])
           } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv))) {
             # single number: append to end of current line
@@ -95,7 +95,7 @@ print.ppm <- function(x, ...) {
 
         if(!is.null(cfa <- s$covfunargs) && length(cfa) > 0) {
           cat("Covariate function arguments (covfunargs) provided:\n")
-          for(i in seq(along=cfa)) {
+          for(i in seq_along(cfa)) {
             cat(paste(names(cfa)[i], "= "))
             cfai <- cfa[[i]]
             if(is.numeric(cfai) && length(cfai) == 1) {

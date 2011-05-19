@@ -36,6 +36,14 @@
   
   The global parameters are:
   \describe{
+    \item{scalable}{
+      Logical flag indicating whether the new code in \code{rmh.default}
+      which makes the results scalable (invariant to change of units)
+      should be used.  In order to recover former behaviour (so that
+      previous results can be reproduced) set this option equal to
+      \code{FALSE}.  See the \dQuote{Warning} section in the help for
+      \code{\link{rmh}()} for more detail.
+    }
     \item{npixel}{
       Default number of pixels in a binary mask or pixel image.
       Either an integer, or a pair of integers,

@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.40 $  $Date: 2010/05/20 14:20:26 $
+# $Revision: 1.41 $  $Date: 2011/05/18 07:54:11 $
 #
 
 hyperframe <- function(...,
@@ -32,7 +32,7 @@ hyperframe <- function(...,
   if(is.null(nama))
     nama <- paste("V", 1:nvars, sep="")
   else if(any(unnamed <- (nama == ""))) 
-    nama[unnamed] <- paste("V", seq(sum(unnamed)), sep="")
+    nama[unnamed] <- paste("V", seq_len(sum(unnamed)), sep="")
   nama <- make.names(nama, unique=TRUE)
   names(aarg) <- nama
   
@@ -376,7 +376,7 @@ rbind.hyperframe <- function(...) {
   rslt <- list()
   nam <- names(dfall) 
   nam0 <- names(df0all)
-  for(k in seq(along=nam)) {
+  for(k in seq_along(nam)) {
     nama <- nam[k]
     if(nama %in% nam0) {
       # data frame column: already made
@@ -451,7 +451,7 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
   else stopifnot(nrows * ncols >= length(x))
   nblank <- ncols * nrows - n
   # declare layout
-  mat <- matrix(c(seq(n), rep(0, nblank)),
+  mat <- matrix(c(seq_len(n), rep(0, nblank)),
                 byrow=TRUE, ncol=ncols, nrow=nrows)
   heights <- rep(1, nrows)
   if(banner) {

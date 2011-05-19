@@ -57,14 +57,13 @@ double straushcif(prop, state, cdata)
      Cdata *cdata;
 {
   int npts, kount, ix, ixp1, j;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v;
   double r2, d2, h2, r2h2, a, cifval;
   StraussHard *strausshard;
 
   strausshard = (StraussHard *) cdata;
 
-  period = strausshard->period;
   r2     = strausshard->r2;
   h2     = strausshard->h2;
   r2h2   = strausshard->r2h2;

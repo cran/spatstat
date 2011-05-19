@@ -6,7 +6,7 @@
 #
 #        compatible.fasp()       Check whether two fasp objects are compatible
 #
-#     $Revision: 1.1 $     $Date: 2008/04/29 21:15:34 $
+#     $Revision: 1.2 $     $Date: 2011/05/18 01:59:25 $
 #
 
 eval.fasp <- function(expr, envir) {
@@ -45,14 +45,14 @@ eval.fasp <- function(expr, envir) {
   # create environment for evaluation
   fenv <- new.env()
   # for each [i,j] extract fv objects and evaluate expression
-  for(i in seq(nr))
-    for(j in seq(nc)) {
+  for(i in seq_len(nr))
+    for(j in seq_len(nc)) {
       # extract fv objects at position [i,j]
       funs <- lapply(fasps, function(x, i, j) { as.fv(x[i,j]) }, i=i, j=j)
       # insert into list of argument values
       vars[isfasp] <- funs
       # assign them into the right environment
-      for(k in seq(length(vars))) 
+      for(k in seq_along(vars)) 
         assign(varnames[k], vars[[k]], envir=fenv)
       # evaluate
       resultij <- eval(substitute(eval.fv(ee,ff), list(ee=e, ff=fenv)))
@@ -70,8 +70,8 @@ compatible.fasp <- function(A, B) {
   dimB <- dim(B$which)
   if(!all(dimA == dimB))
     return(FALSE)
-  for(i in seq(dimA[1])) 
-    for(j in seq(dimA[2])) {
+  for(i in seq_len(dimA[1])) 
+    for(j in seq_len(dimA[2])) {
       Aij <- as.fv(A[i,j])
       Bij <- as.fv(B[i,j])
       if(!compatible.fv(Aij, Bij))

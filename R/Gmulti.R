@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.34 $	$Date: 2011/04/19 02:21:16 $
+#	$Revision: 4.35 $	$Date: 2011/05/18 07:53:01 $
 #
 ################################################################################
 
@@ -153,7 +153,7 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   if(disjoint) 
     nnd <- nncross(XI, XJ)$dist
   else {
-    seqnp <- seq(npts)
+    seqnp <- seq_len(npts)
     iX <- seqnp[I]
     iY <- seqnp[J]
     nnd <- nncross(XI, XJ, iX, iY)$dist

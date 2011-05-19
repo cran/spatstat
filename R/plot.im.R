@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.47 $   $Date: 2010/12/13 04:47:50 $
+#  $Revision: 1.49 $   $Date: 2011/05/19 01:49:22 $
 #
 #  Plotting code for pixel images
 #
@@ -13,14 +13,69 @@
 ###########################################################################
 
 plot.im <- function(x, ...,
-                    col=NULL,
+                    col=NULL, valuesAreColours=NULL,
                     ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
                     ribscale=1) {
-  verifyclass(x, "im")
   main <- deparse(substitute(x))
-
+  verifyclass(x, "im")
   zlim <- list(...)$zlim
 
+  xtype <- x$type
+
+  # determine whether pixel values are to be treated as colours
+  if(!is.null(valuesAreColours)) {
+    # argument given - validate
+    stopifnot(is.logical(valuesAreColours))
+    if(valuesAreColours) {
+      # pixel values must be factor or character
+      if(!xtype %in% c("factor", "character")) {
+        warning(paste("Pixel values of type", sQuote(xtype),
+                      "are not interpretable as colours"))
+        valuesAreColours <- FALSE
+      } else {
+        # colour values do not need a colour map
+        if(!is.null(col))
+          warning(paste("Pixel values are taken to be colour values,",
+                        "because valuesAreColours=TRUE;", 
+                        "the colour map (argument col) is ignored"),
+                  call.=FALSE)
+      }
+    }
+  } else if(!is.null(col)) {
+    # argument 'col' controls colours
+    valuesAreColours <- FALSE
+  } else {
+    # default : determine whether pixel values are colours
+    strings <- switch(xtype,
+                      character = { as.vector(x$v) },
+                      factor    = { levels(x) },
+                      { NULL })
+    valuesAreColours <- is.character(strings) && 
+      !inherits(try(col2rgb(strings), silent=TRUE), "try-error")
+    if(valuesAreColours)
+      cat("Interpreting pixel values as colours\n")
+  }
+  # 
+  if(valuesAreColours) {
+    # colour-valued images are plotted using the code for factor images
+    # with the colour map equal to the levels of the factor
+    switch(xtype,
+           factor = {
+             col <- levels(x)
+           },
+           character = {
+             x <- eval.im(factor(x))
+             xtype <- "factor"
+             col <- levels(x)
+           },
+           {
+             warning(paste("Pixel values of type", sQuote(xtype),
+                           "are not interpretable as colours"))
+           })
+    # colours not suitable for ribbon
+    ribbon <- FALSE
+  } 
+    
   imagebreaks <- NULL
   ribbonvalues <- ribbonbreaks <- NULL
 
@@ -30,12 +85,10 @@ plot.im <- function(x, ...,
   }
 
   colmap <- if(inherits(col, "colourmap")) col else NULL
-  
-  sumry <- summary(x)
 
-  switch(sumry$type,
+  switch(xtype,
          real    = {
-           vrange <- sumry$range
+           vrange <- range(x)
            vrange <- range(zlim, vrange)
            if(!is.null(colmap)) {
              # explicit colour map
@@ -48,7 +101,7 @@ plot.im <- function(x, ...,
            }
            trivial <- (diff(vrange) <= .Machine$double.eps)
            if(!trivial) {
-             ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
+             ribbonvalues <- seq(from=vrange[1], to=vrange[2], length.out=ribn)
              ribbonrange <- vrange
              ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
                                   vrange)
@@ -77,7 +130,7 @@ plot.im <- function(x, ...,
              } else {
                # not all values will be printed on ribbon label
                ribn <- min(ribn, diff(vrange)+1)
-               ribbonvalues <- seq(vrange[1], vrange[2], length=ribn)
+               ribbonvalues <- seq(from=vrange[1], to=vrange[2], length.out=ribn)
                ribbonrange <- vrange
                ribbonlabels <- paste(ribbonticks * ribscale)
              }
@@ -124,7 +177,25 @@ plot.im <- function(x, ...,
            if(!is.null(colmap)) 
              col <- colmap(fac)
          },
-         stop(paste("Do not know how to plot image of type", sQuote(sumry$type)))
+         character  = {
+           x <- eval.im(factor(x))
+           lev <- levels(x)
+           nvalues <- length(lev)
+           trivial <- (nvalues < 2)
+           # ensure all factor levels plotted separately
+           fac <- factor(lev, levels=lev)
+           intlev <- as.integer(fac)
+           imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
+           ribbonvalues <- intlev
+           ribbonrange <- range(imagebreaks)
+           ribbonbreaks <- imagebreaks
+           ribbonticks <- ribbonvalues
+           ribbonlabels <- paste(lev)
+           vrange <- range(intlev)
+           if(!is.null(colmap)) 
+             col <- colmap(fac)
+         },
+         stop(paste("Do not know how to plot image of type", sQuote(xtype)))
          )
 
   
@@ -206,8 +277,8 @@ plot.im <- function(x, ...,
     rect(x$xrange[1], x$yrange[1], x$xrange[2], x$yrange[2])
   }
   # plot ribbon image containing the range of image values
-  ycoords <- seq(bb.rib$yrange[1], bb.rib$yrange[2],
-                 length=length(ribbonvalues)+1)
+  ycoords <- seq(from=bb.rib$yrange[1], to=bb.rib$yrange[2],
+                 length.out=length(ribbonvalues)+1)
   image.doit(list(x=bb.rib$xrange, y=ycoords,
                   z=matrix(ribbonvalues, nrow=1),
                   add=TRUE, main="", sub=""),
@@ -265,7 +336,7 @@ persp.im <- function(x, ..., colmap=NULL) {
       colvalues <- colmap$col
     } else if(is.vector(colmap)) {
       colvalues <- colmap
-      breaks <- quantile(x, seq(0,1,length=length(colvalues)+1))
+      breaks <- quantile(x, seq(from=0,to=1,length.out=length(colvalues)+1))
       if(!all(ok <- !duplicated(breaks))) {
         breaks <- breaks[ok]
         colvalues <- colvalues[ok[-1]]

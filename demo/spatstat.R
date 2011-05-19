@@ -28,6 +28,10 @@ plot(longleaf, fg="blue", main="Marked point pattern")
 
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
 plot(a, main="Line segment pattern")
+marks(a) <- sample(letters[1:4], 20, replace=TRUE)
+plot(a, main="Multitype line segment pattern")
+marks(a) <- runif(20)
+plot(a, main="Marked line segment pattern")
 
 plot(owin(), main="Rectangular window")
 data(letterR)
@@ -81,6 +85,18 @@ plot(ct, main="Colour map for real numbers")
 
 ca <- colourmap(rainbow(8), inputs=letters[1:8])
 plot(ca, main="Colour map for discrete values")
+
+data(letterR)
+W <- owin(c(1,5),c(0,4.5))
+Lout <- scaletointerval(distmap(rebound.owin(letterR, W)))
+Lin <- scaletointerval(distmap(complement.owin(letterR, W)))
+L <- scaletointerval(eval.im(Lin-Lout))
+D <- scaletointerval(density(runifpoint(30, W), adjust=0.3))
+X <- scaletointerval(as.im(function(x,y){ x }, W=W))
+plot(listof(L=L, D=D, X=X), main="Multiple images")
+pairs(L, D, X, main="Multiple images: pairs plot")
+plot(rgbim(D,X,L,maxColorValue=1), valuesAreColours=TRUE, main="Three images: RGB display")
+plot(hsvim(D,L,X), valuesAreColours=TRUE, main="Three images: HSV display")
 
 fanfare("III. Conversion between types")
 
@@ -460,7 +476,7 @@ plot(B, add=TRUE, border="red")
 
 par1x2 <- par(mfrow=c(1,2))
 L <- rpoisline(10, owin(c(1.5,4.5),c(0.2,3.6)))
-plot(L, "Line segment pattern")
+plot(L, main="Line segment pattern")
 plot(L$window, main="L[window]", type="n")
 plot(L[letterR], add=TRUE)
 plot(letterR, add=TRUE, border="red")

@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.41 $ $Date: 2010/12/13 09:36:39 $
+#   $Revision: 1.42 $ $Date: 2011/05/18 09:20:08 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, keepempty=FALSE) {
@@ -226,8 +226,8 @@ tiles <- function(x) {
            yg <- x$ygrid
            nx <- length(xg) - 1
            ny <- length(yg) - 1
-           for(j in rev(seq(ny)))
-             for(i in seq(nx)) {
+           for(j in rev(seq_len(ny)))
+             for(i in seq_len(nx)) {
                winij <- owin(xg[c(i,i+1)], yg[c(j,j+1)])
                dout <- list(winij)
                names(dout) <- paste("Tile row ", ny-j+1, ", col ", i,
@@ -238,13 +238,13 @@ tiles <- function(x) {
          tiled={
            out <- x$tiles
            if(is.null(names(out)))
-             names(out) <- paste("Tile", seq(length(out)))
+             names(out) <- paste("Tile", seq_along(out))
          },
          image={
            out <- list()
            ima <- x$image
            lev <- levels(ima)
-           for(i in seq(lev))
+           for(i in seq_along(lev))
              out[[i]] <- solutionset(ima == lev[i])
            names(out) <- paste(lev)
          })
@@ -258,8 +258,8 @@ tilenames <- function(x) {
          rect={
            nx <- length(x$xgrid) - 1
            ny <- length(x$ygrid) - 1
-           nam <- outer(rev(seq(ny)),
-                        seq(nx),
+           nam <- outer(rev(seq_len(ny)),
+                        seq_len(nx),
                         function(j,i,ny) {
                           paste("Tile row ", ny-j+1, ", col ", i,
                                 sep="")},
@@ -271,7 +271,7 @@ tilenames <- function(x) {
            if(!is.null(names(til)))
              nam <- names(til)
            else 
-             nam <- paste("Tile", seq(length(til)))
+             nam <- paste("Tile", seq_along(til))
          },
          image={
            ima <- x$image
@@ -325,9 +325,9 @@ as.im.tess <- function(X, W=NULL, ...,
            ntil <- length(til)
            nama <- names(til)
            if(is.null(nama) || !all(nzchar(nama)))
-             nama <- paste(seq(ntil))
+             nama <- paste(seq_len(ntil))
            xy <- list(x=W$xcol, y=W$yrow)
-           for(i in seq(ntil)) {
+           for(i in seq_len(ntil)) {
              indic <- as.mask(til[[i]], xy=xy)
              tag <- as.im(indic, value=i)
              if(i == 1) {
@@ -356,7 +356,7 @@ as.im.tess <- function(X, W=NULL, ...,
            Jcol <- jx[col(M)]
            Irow <- nrows - iy[row(M)] + 1
            Ktile <- Jcol + ncols * (Irow - 1)
-           Ktile <- factor(Ktile, levels=seq(nrows * ncols))
+           Ktile <- factor(Ktile, levels=seq_len(nrows * ncols))
            out <- im(Ktile, xcol=out$xcol, yrow=out$yrow,
                      unitname=unitname(W))
          }
@@ -411,7 +411,7 @@ intersect.tess <- function(X, Y, ...) {
     # convert to pixel image 
     result <- as.im(Y)
     Xtiles <- tiles(X)
-    for(i in seq(Xtiles)) {
+    for(i in seq_along(Xtiles)) {
       tilei <- Xtiles[[i]]
       result[tilei] <- i
     }
@@ -422,8 +422,8 @@ intersect.tess <- function(X, Y, ...) {
   Xtiles <- tiles(X)
   Ytiles <- tiles(Y)
   Ztiles <- list()
-  for(i in seq(Xtiles))
-    for(j in seq(Ytiles)) {
+  for(i in seq_along(Xtiles))
+    for(j in seq_along(Ytiles)) {
       Tij <- intersect.owin(Xtiles[[i]], Ytiles[[j]], ..., fatal=FALSE)
       if(!is.null(Tij) && !is.empty(Tij))
         Ztiles <- append(Ztiles, list(Tij))

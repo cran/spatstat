@@ -3,7 +3,7 @@
 #
 #  cut method for ppp objects
 #
-#  $Revision: 1.8 $   $Date: 2010/11/25 06:06:05 $
+#  $Revision: 1.9 $   $Date: 2011/05/18 01:36:08 $
 #
 
 cut.ppp <- function(x, z=marks(x), ...) {
@@ -48,12 +48,12 @@ cut.ppp <- function(x, z=marks(x), ...) {
              jcol <- jx
              irow <- nrows - iy + 1
              ktile <- jcol + ncols * (irow - 1)
-             m <- factor(ktile, levels=seq(nrows*ncols))
-             ij <- expand.grid(j=seq(ncols),i=seq(nrows))
+             m <- factor(ktile, levels=seq_len(nrows*ncols))
+             ij <- expand.grid(j=seq_len(ncols),i=seq_len(nrows))
              levels(m) <- paste("Tile row ", ij$i, ", col ", ij$j, sep="")
            },
            tiled={
-             todo <- seq(x$n)
+             todo <- seq_len(x$n)
              nt <- length(z$tiles)
              m <- integer(x$n)
              for(i in 1:nt) {
@@ -67,7 +67,7 @@ cut.ppp <- function(x, z=marks(x), ...) {
                  break
              }
              m[m == 0] <- NA
-             m <- factor(m, levels=seq(nt))
+             m <- factor(m, levels=seq_len(nt))
            },
            image={
              zim <- z$image

@@ -1,6 +1,6 @@
 # 	applynbd.R
 #
-#     $Revision: 1.13 $     $Date: 2010/03/08 08:23:04 $
+#     $Revision: 1.14 $     $Date: 2011/05/18 01:19:12 $
 #
 #  applynbd()
 # For each point, identify either
@@ -32,7 +32,7 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
      dist <- pairdist(X$x,X$y)	
 
      # compute row ranks (avoid ties)
-     rankit <- function(x) {  u <- numeric(length(x)); u[order(x)] <- seq(x); return(u) }
+     rankit <- function(x) {  u <- numeric(length(x)); u[order(x)] <- seq_along(x); return(u) }
      drank <- t(apply(dist, 1, rankit)) - 1
 
      if(!missing(R)) {

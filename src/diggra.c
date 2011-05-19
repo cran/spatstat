@@ -66,14 +66,12 @@ double diggracif(prop, state, cdata)
      Cdata *cdata;
 {
   int npts, ix, ixp1, j;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v;
   double d2, pairprod, cifval;
   Diggra *diggra;
 
   diggra = (Diggra *) cdata;
-
-  period = diggra->period;
 
   u  = prop.u;
   v  = prop.v;

@@ -66,7 +66,7 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   else stopifnot(nrows * ncols >= length(x))
   nblank <- ncols * nrows - n
   # declare layout
-  mat <- matrix(c(seq(n), rep(0, nblank)),
+  mat <- matrix(c(seq_len(n), rep(0, nblank)),
                 byrow=TRUE, ncol=ncols, nrow=nrows)
   heights <- rep(1, nrows)
   if(banner) {

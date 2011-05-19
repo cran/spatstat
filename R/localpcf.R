@@ -1,7 +1,7 @@
 #
 #   localpcf.R
 #
-#  $Revision: 1.8 $  $Date: 2010/10/19 09:11:04 $
+#  $Revision: 1.9 $  $Date: 2011/05/18 08:03:13 $
 #
 #
 
@@ -17,7 +17,7 @@ localpcf <- function(X, ..., delta=NULL, rmax=NULL, nr=512, stoyan=0.15) {
   m[r[row(m)] > dbord[col(m)]] <- NA
   #
   df <- data.frame(m, r=r, theo=rep(1, length(r)))
-  icode <- unlist(lapply(seq(nX), numalign, nmax=nX))
+  icode <- unlist(lapply(seq_len(nX), numalign, nmax=nX))
   nama <- paste("est", icode, sep="")
   desc <- paste("estimate of %s for point", icode)
   labl <- paste("%s[", icode, "](r)", sep="")
@@ -35,7 +35,7 @@ localpcf <- function(X, ..., delta=NULL, rmax=NULL, nr=512, stoyan=0.15) {
   return(g)
 }
 
-localpcfmatrix <- function(X, i=seq(npoints(X)), ...,
+localpcfmatrix <- function(X, i=seq_len(npoints(X)), ...,
                            delta=NULL, rmax=NULL,
                            nr=512, stoyan=0.15) {
   missi <- missing(i)
@@ -85,7 +85,7 @@ localpcfmatrix <- function(X, i=seq(npoints(X)), ...,
     out[, oY] <- out
   }
   out <- out/(2 * pi * lambda)
-  attr(out, "r") <- seq(0, rmax, length=nr)
+  attr(out, "r") <- seq(from=0, to=rmax, length.out=nr)
   attr(out, "delta") <- delta
   class(out) <- c("localpcfmatrix", class(out))
   return(out)

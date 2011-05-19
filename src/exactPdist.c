@@ -4,7 +4,7 @@
        `Pseudoexact' distance transform of a discrete binary image
        (the closest counterpart to `exactdist.c')
        
-       $Revision: 1.11 $ $Date: 2010/12/22 12:02:52 $
+       $Revision: 1.12 $ $Date: 2011/05/17 12:27:20 $
 
        
 */
@@ -28,8 +28,8 @@ ps_exact_dt(in, dist, row, col)
 	double	d, x, y;
 	int	r, c;
 	double	dnew;
-	double  bdiag;
 	double  huge;
+	/*	double  bdiag; */
 	
 	    /* initialise */
 #define UNDEFINED -1
@@ -59,7 +59,7 @@ ps_exact_dt(in, dist, row, col)
 	y = Ypos(*in, ROW); \
 	d = Entry(*dist,ROW,COL,double); 
 
-#define COMPARE(ROW,COL,RR,CC,BOUND) \
+#define COMPARE(ROW,COL,RR,CC) \
 	r = Entry(*row,RR,CC,int); \
 	c = Entry(*col,RR,CC,int); \
 	if(Is_Defined(r) && Is_Defined(c) \
@@ -74,17 +74,17 @@ ps_exact_dt(in, dist, row, col)
 	}
 
 	/* bound on diagonal step distance squared */
-	bdiag = (in->xstep * in->xstep + in->ystep * in->ystep);
+	/* bdiag = (in->xstep * in->xstep + in->ystep * in->ystep); */
 	
 	/* forward pass */
 
 	for(j = in->rmin; j <= in->rmax; j++)
 	for(k = in->cmin; k <= in->cmax; k++) {
 	        GETVALUES(j, k)
-		COMPARE(j,k, j-1,k-1, bdiag)
-		COMPARE(j,k, j-1,  k, in->ystep)
-		COMPARE(j,k, j-1,k+1, bdiag)
-		COMPARE(j,k, j,  k-1, in->xstep)
+		COMPARE(j,k, j-1,k-1)
+		COMPARE(j,k, j-1,  k)
+		COMPARE(j,k, j-1,k+1)
+		COMPARE(j,k, j,  k-1)
 		  }
 
 	/* backward pass */
@@ -92,10 +92,10 @@ ps_exact_dt(in, dist, row, col)
 	for(j = in->rmax; j >= in->rmin; j--) 
 	for(k = in->cmax; k >= in->cmin; k--) {
 	        GETVALUES(j, k)
-		COMPARE(j,k, j+1,k+1, bdiag)
-		COMPARE(j,k, j+1,  k, in->ystep)
-		COMPARE(j,k, j+1,k-1, bdiag)
-		COMPARE(j,k, j,  k+1, in->xstep)
+		COMPARE(j,k, j+1,k+1)
+		COMPARE(j,k, j+1,  k)
+		COMPARE(j,k, j+1,k-1)
+		COMPARE(j,k, j,  k+1)
 		  } 
 
 	/* take square roots of distances^2 */

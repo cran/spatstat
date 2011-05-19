@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.24 $  $Date: 2011/04/04 09:28:40 $
+#  $Revision: 1.26 $  $Date: 2011/05/18 09:09:41 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -92,7 +92,7 @@ rhohat <- function(object, covariate, ...,
     qhat <- density(GZX,bw=bw,adjust=adjust,n=n,from=0, to=1, ...)
     qhatfun <- interpolate(qhat)
     # edge effect correction
-    one <- density(seq(0,1,length=512),
+    one <- density(seq(from=0,to=1,length.out=512),
                     bw=qhat$bw, adjust=1, n=n,from=0, to=1, ...)
     onefun <- interpolate(one)
     # apply to transformed values
@@ -122,9 +122,9 @@ rhohat <- function(object, covariate, ...,
              alim=c(from,to),
              labl=c(covname,
                paste("%s", paren(covname), sep=""),
-               paste("var", paren(covname), sep=""),
-               paste("hi", paren(covname), sep=""),
-               paste("lo", paren(covname), sep="")),
+               paste("bold(Var)~%s", paren(covname), sep=""),
+               paste("%s[hi]", paren(covname), sep=""),
+               paste("%s[lo]", paren(covname), sep="")),
              desc=desc,
 #             unitname=unitname(data.ppm(model)),
              fname="rho",

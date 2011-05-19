@@ -3,7 +3,7 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.15 $ $Date: 2010/12/13 03:10:40 $
+# $Revision: 1.16 $ $Date: 2011/05/18 01:34:03 $
 #
 
 colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL) {
@@ -43,7 +43,7 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL) {
   } else {
     # interval of real line mapped to colours
     if(is.null(breaks)) {
-      breaks <- seq(range[1], range[2], length=length(outputs)+1)
+      breaks <- seq(from=range[1], to=range[2], length.out=length(outputs)+1)
     } else {
       stopifnot(is.numeric(breaks) && length(breaks) >= 2)
       stopifnot(length(breaks) == length(outputs) + 1)
@@ -140,7 +140,7 @@ plot.colourmap <- function(x, ..., main,
   if(!discrete) {
     bks <- stuff$breaks
     rr <- range(bks)
-    v <- seq(rr[1], rr[2], length=max(n+1, 1024))
+    v <- seq(from=rr[1], to=rr[2], length.out=max(n+1, 1024))
   } else {
     v <- (1:n) - 0.5
     bks <- 0:n

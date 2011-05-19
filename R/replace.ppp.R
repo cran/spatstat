@@ -45,7 +45,7 @@
     # vector index
     # determine index subset
     n <- x$n
-    SUB <- seq(n)[i]
+    SUB <- seq_len(n)[i]
     # anything to replace?
     if(length(SUB) == 0)
       return(x)

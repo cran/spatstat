@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.28 $   $Date: 2010/07/21 09:46:29 $
+#   $Revision: 1.29 $   $Date: 2011/05/18 08:51:51 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -59,7 +59,7 @@
         stop(paste(sQuote("types"), "must be given explicitly when",
                    sQuote("lambda"), "is a constant, a function or an image"))
       else
-        types <- seq(lambda)
+        types <- seq_along(lambda)
     } 
 
     ntypes <- length(types)
@@ -179,9 +179,9 @@
                  sQuote("f"), "is a single number, a function or an image and",
                  sQuote("n"), "is a single number"))
     else if(single.arg)
-      types <- seq(n)
+      types <- seq_len(n)
     else 
-      types <- seq(f)
+      types <- seq_along(f)
   }
 
   ntypes <- length(types)
@@ -339,7 +339,7 @@ rmpoint.I.allim <- function(n, f, types) {
   dy <- unlist(lapply(stuff, function(z) { z$dy }))
   # replicate types
   numpix <- unlist(lapply(stuff, function(z) { z$npix }))
-  tpix <- rep(seq(types), numpix)
+  tpix <- rep(seq_along(types), numpix)
   #
   # sample pixels from union of all images
   #

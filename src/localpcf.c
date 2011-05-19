@@ -5,7 +5,7 @@
 
   localpcf.c
 
-  $Revision: 1.14 $     $Date: 2008/06/23 01:47:55 $
+  $Revision: 1.1 $     $Date: 2011/05/17 12:33:48 $
 
   Assumes point patterns are sorted in increasing order of x coordinate
 
@@ -25,7 +25,7 @@ void locpcfx(nn1, x1, y1, id1,
 		      for each point of first pattern */
 {
   int n1, n2, nr, i, j, k, jleft, jright, kmin, kmax, id1i;
-  double x1i, y1i, rmax, r2max, delta, xleft, xright, dx, dy;
+  double x1i, y1i, rmax, delta, xleft, xright, dx, dy;
   double d2, d2max, dmax, d;
   double rstep, rvalue, frac, contrib, weight, coef;
 
@@ -36,7 +36,6 @@ void locpcfx(nn1, x1, y1, id1,
   delta = *del;
 
   dmax = rmax + delta; /* maximum relevant value of interpoint distance */
-  r2max = rmax * rmax;
   d2max = dmax * dmax;
   rstep = rmax/(nr-1);
   coef  = 3.0 /(4.0 * delta);

@@ -6,7 +6,7 @@
   class \code{"im"} representing a two-dimensional pixel image.
 }
 \usage{
-  im(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
+  im(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)),
    xrange=NULL, yrange=NULL,
    unitname=NULL)
 }

@@ -9,7 +9,7 @@ which can then be fitted to point pattern data.
   MultiStraussHard(types, iradii, hradii)
 }
 \arguments{
-  \item{types}{Vector of all possible types (i.e. the possible levels
+  \item{types}{Optional; vector of all possible types (i.e. the possible levels
     of the \code{marks} variable in the data)}
   \item{iradii}{Matrix of interaction radii}
   \item{hradii}{Matrix of hard core radii}
@@ -32,6 +32,12 @@ which can then be fitted to point pattern data.
   \eqn{r_{ij}}{r[i,j]} units apart, it
   contributes a factor
   \eqn{\gamma_{ij}}{gamma[i,j]} to the probability density.
+
+  The argument \code{types} need not usually be specified.
+  The \code{types} will be automatically be determined from
+  the data set to which the interaction object created by this
+  function is applied.  This argument is included mainly for
+  backward compatibility.
 
   The matrices \code{iradii} and \code{hradii}
   must be symmetric, with entries
@@ -57,24 +63,24 @@ which can then be fitted to point pattern data.
 \examples{
    r <- matrix(3, nrow=2,ncol=2)
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
-   MultiStraussHard(1:2, r, h)
+   MultiStraussHard(iradii=r,hradii=h)
    # prints a sensible description of itself
    data(betacells)
    r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiStraussHard(c("off","on"), r, h))
+   ppm(betacells, ~1, MultiStraussHard(,r,h))
    # fit the stationary multitype hardcore Strauss process to `betacells'
+   # Note the comma; needed since "types" is not specified.
 }
 \section{Warnings}{
-  The argument \code{types} is interpreted as a
-  set of factor levels. That is,
-  in order that \code{\link{ppm}} can fit the multitype Strauss model
-  correctly to a point pattern \code{X},
-  this must be a marked point pattern; the mark vector
-  \code{X$marks} must be a factor; and 
-  the argument \code{types} must
-  equal \code{levels(X$marks)}.
+  In order that \code{\link{ppm}} can fit the multitype/hard core
+  Strauss model correctly to a point pattern \code{X}, this pattern
+  must be marked, with \code{markformat} equal to \code{vector}
+  and the mark vector \code{marks(X)} must be a factor.  If the
+  argument \code{types} is specified it is interpreted as a set of
+  factor levels and this set must equal \code{levels(marks(X))}.
 }
+
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}

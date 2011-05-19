@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.120 $	$Date: 2011/02/08 09:10:12 $
+#	$Revision: 5.121 $	$Date: 2011/05/18 08:07:25 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -99,7 +99,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/02/08 09:10:12 $")
+                    date="$Date: 2011/05/18 08:07:25 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -882,7 +882,7 @@ evalInterNew <- function(X, U, E, interaction, ...) {
   # determine which evaluation points are data points
   Udata <- E[,2]
   # hence which are non-data points
-  Uall <- seq(nU)
+  Uall <- seq_len(nU)
   Unondata <- if(length(Udata) > 0) Uall[-Udata] else Uall
   # form quadscheme in different order
   D <- U[Unondata]
@@ -896,7 +896,7 @@ evalInterNew <- function(X, U, E, interaction, ...) {
   # selected data points
   V[Udata,] <- VQ[XfromU, ]
   # all non-data points
-  V[Unondata,] <- VQ[ - seq(nX), ]
+  V[Unondata,] <- VQ[ - seq_len(nX), ]
   return(V)
 }
 

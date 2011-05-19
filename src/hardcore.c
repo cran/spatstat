@@ -44,15 +44,14 @@ double hardcorecif(prop, state, cdata)
      State state;
      Cdata *cdata;
 {
-  int npts, kount, ix, ixp1, j;
-  double *period, *x, *y;
+  int npts, ix, ixp1, j;
+  double *x, *y;
   double u, v;
   double d2, h2, a, cifval;
   Hardcore *hardcore;
 
   hardcore = (Hardcore *) cdata;
 
-  period = hardcore->period;
   h2     = hardcore->h2;
 
   u  = prop.u;
@@ -66,7 +65,6 @@ double hardcorecif(prop, state, cdata)
   if(npts == 0) 
     return(hardcore->beta);
 
-  kount = 0;
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
   if(hardcore->per) { /* periodic distance */
