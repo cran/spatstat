@@ -2,18 +2,19 @@
 #
 #  density.psp.R
 #
-#  $Revision: 1.4 $    $Date: 2010/06/07 06:36:57 $
+#  $Revision: 1.5 $    $Date: 2011/05/18 01:42:11 $
 #
 #
 
 density.psp <- function(x, sigma, ..., edge=TRUE) {
   verifyclass(x, "psp")
   w <- x$window
+  n <- x$n
   if(missing(sigma))
     sigma <- 0.1 * diameter(w)
   w <- as.mask(w, ...)
   len <- lengths.psp(x)
-  if(x$n == 0 || all(len == 0))
+  if(n == 0 || all(len == 0))
     return(as.im(0, w))
   #
   ang <- angles.psp(x, directed=TRUE)
@@ -22,7 +23,7 @@ density.psp <- function(x, sigma, ..., edge=TRUE) {
   xx <- as.vector(raster.x(w))
   yy <- as.vector(raster.y(w))
   # compute matrix contribution from each segment 
-  for(i in seq(x$n)) {
+  for(i in seq_len(n)) {
     en <- x$ends[i,]
     dx <- xx - en$x0
     dy <- yy - en$y0

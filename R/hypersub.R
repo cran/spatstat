@@ -4,7 +4,7 @@
 #
 #  subset operations for hyperframes
 #
-#  $Revision: 1.5 $    $Date: 2010/11/23 12:15:08 $
+#  $Revision: 1.6 $    $Date: 2011/05/18 07:54:41 $
 #
 #
 
@@ -19,7 +19,7 @@
   }
   if(!missing(j)) {
     y <- x
-    patsy <- seq(y$nvars)
+    patsy <- seq_len(y$nvars)
     names(patsy) <- y$vname
     jj <- patsy[j]
     names(jj) <- NULL

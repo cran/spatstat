@@ -3,7 +3,7 @@
 #
 # Infinite lines
 #
-# $Revision: 1.14 $ $Date: 2010/07/16 05:52:44 $
+# $Revision: 1.15 $ $Date: 2011/05/18 07:57:31 $
 #
 
 infline <- function(a=NULL, b=NULL, h=NULL, v=NULL, p=NULL, theta=NULL) {
@@ -53,7 +53,7 @@ infline <- function(a=NULL, b=NULL, h=NULL, v=NULL, p=NULL, theta=NULL) {
 is.infline <- function(x) { inherits(x, "infline") }
 
 plot.infline <- function(x, ...) {
-  for(i in seq(nrow(x))) {
+  for(i in seq_len(nrow(x))) {
     xi <- x[i, 1:4]
     xi <- lapply(as.list(xi), function(z){if(is.na(z)) NULL else z})
     do.call("abline", append(xi, list(...)))
@@ -123,7 +123,7 @@ chop.tess <- function(X, L) {
     xmat <- rasterx.im(Xim)
     ymat <- rastery.im(Xim)
     # process lines
-    for(i in seq(nrow(L))) {
+    for(i in seq_len(nrow(L))) {
       # line i chops window into two pieces
       if(!is.na(h <- L[i, "h"])) {
         # horizontal line
@@ -153,7 +153,7 @@ chop.tess <- function(X, L) {
   yr <- B$yrange
 
   # get coordinates
-  for(i in seq(nrow(L))) {
+  for(i in seq_len(nrow(L))) {
     # line i chops box B into two pieces
     if(!is.na(h <- L[i, "h"])) {
       # horizontal line

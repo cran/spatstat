@@ -1,7 +1,7 @@
 #
 #  adaptive.density.R
 #
-#  $Revision: 1.3 $   $Date: 2010/11/21 04:15:02 $
+#  $Revision: 1.4 $   $Date: 2011/05/18 01:24:50 $
 #
 #
 
@@ -19,7 +19,7 @@ adaptive.density <- function(X, f=0.1, ..., nrep=1) {
   if(nrep > 1) {
     # estimate is the average of nrep randomised estimates
     total <- 0
-    for(i in seq(nrep)) {
+    for(i in seq_len(nrep)) {
       estimate <- adaptive.density(X, f, ..., nrep=1)
       total <- eval.im(total + estimate)
     }
@@ -28,7 +28,7 @@ adaptive.density <- function(X, f=0.1, ..., nrep=1) {
   }
   ncount <- npts - ntess
   fcount <- ncount/npts
-  itess <- sample(seq(npts), ntess, replace=FALSE)
+  itess <- sample(seq_len(npts), ntess, replace=FALSE)
   Xtess <- X[itess]
   Xcount <- X[-itess]
   tes <- dirichlet(Xtess)

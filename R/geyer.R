@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.16 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 2.17 $	$Date: 2011/05/18 02:06:52 $
 #
 #    Geyer's saturation process
 #
@@ -122,9 +122,9 @@ geyercounts <- function(U, X, r, sat, Xcounts, EqualPairs) {
   Xcountsort <- Xcounts[oX]
   # inverse: data point i has sorted position i' = rankX[i]
   rankX <- integer(nX)
-  rankX[oX] <- seq(nX)
+  rankX[oX] <- seq_len(nX)
   rankU <- integer(nU)
-  rankU[oU] <- seq(nU)
+  rankU[oU] <- seq_len(nU)
   # map from quadrature points to data points
   Uindex <- EqualPairs[,2]
   Xindex <- EqualPairs[,1]

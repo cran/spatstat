@@ -1,3 +1,49 @@
+	CHANGES IN spatstat VERSION 1.22-1
+
+OVERVIEW 
+
+    o  marked line segment patterns can now be plotted
+
+    o  multitype point process models are now 'self-starting'
+
+    o  new functions to manipulate colour images
+
+NEW FUNCTIONS
+
+    o rgbim, hsvim
+      Specify three colour channels.
+      These functions convert three pixel images with numeric values
+      into a single image whose pixel values are strings representing colours.
+
+    o scaletointerval
+      Generic utility function to rescale data (including spatial data)
+      to a specified interval
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o plot.im
+      Can now plot images whose pixel values are strings representing colours.
+      New argument 'valuesAreColours'
+  
+    o plot.psp
+      Now handles marked line segment patterns 
+      and plots the marks as colours.
+
+    o MultiHard, MultiStrauss, MultiStraussHard
+      The argument 'types' can now be omitted;
+      it will be inferred from the point pattern data.
+
+    o rhohat
+      Improved mathematical labels (when the result of rhohat is plotted)
+
+    o plot.fv
+      Minor improvements in graphics
+
+BUG FIXES
+
+    o  several minor bug fixes and improvements to satisfy R-devel
+
+
 	CHANGES IN spatstat VERSION 1.22-0
 
 OVERVIEW 

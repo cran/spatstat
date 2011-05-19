@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.13 $	$Date: 2011/04/17 05:52:50 $
+#    $Revision: 1.14 $	$Date: 2011/05/18 08:14:44 $
 #
 #    The Ord model (family of point process models)
 #
@@ -46,13 +46,17 @@ ord.family <-
   # or a matrix with number of rows equal to the length of M
   ##########################################################################
 
-nall <- length(U$x)       # number of data + dummy points
+nX <- npoints(X)
+nU <- length(U$x)       # number of data + dummy points
+
+seqX <- seq_len(nX)
+seqU <- seq_len(nU)
 
 # determine which points in the combined list are data points
 if(!is.null(EqualPairs))           
-  is.data <- seq(nall) %in% EqualPairs[,2] 
+  is.data <- seqU %in% EqualPairs[,2] 
 else
-  is.data <- rep(FALSE, nall)
+  is.data <- rep(FALSE, nU)
 
 #############################################################################
 # First compute Dirichlet tessellation of data
@@ -77,13 +81,13 @@ total.data.potential <- summa(Pdata)
 dimpot <- dim(Pdata)[-1]  # dimension of each value of the potential function
                           # (= numeric(0) if potential is a scalar)
 
-dimV <- c(nall, dimpot)
+dimV <- c(nU, dimpot)
 if(length(dimV) == 1)
   dimV <- c(dimV, 1)
 
 V <- array(0, dim=dimV)
 
-rowV <- array(1:nall, dim=dimV)
+rowV <- array(seqU, dim=dimV)
 
 #################### Next, evaluate V for the data points.  ###############
 # For each data point, compute Dirichlet tessellation
@@ -92,7 +96,7 @@ rowV <- array(1:nall, dim=dimV)
 #############################################################################
 
 
-for(j in seq(X$n)) {
+for(j in seq_len(nX)) {
         #  Dirichlet tessellation of data without point j
   Wminus <- dirichlet.weights(X[-j])
         #  regressor is the difference in total potential
@@ -106,7 +110,7 @@ for(j in seq(X$n)) {
 # Take difference of total potential.
 #############################################################################
 
-for(j in seq(U$x)[!is.data]) {
+for(j in seqU[!is.data]) {
   Xplus <- superimpose(X, list(x=U$x[j], y=U$y[j]), W=X$window)
   #  compute Dirichlet tessellation (of these points only!)
   Wplus <- dirichlet.weights(Xplus)

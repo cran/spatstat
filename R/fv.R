@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.64 $   $Date: 2011/04/14 02:56:45 $
+#    $Revision: 1.67 $   $Date: 2011/05/18 02:06:11 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -163,7 +163,7 @@ print.fv <- function(x, ...) {
   pad <- function(n) { paste(rep(" ", n), collapse="") }
   cat("id", pad(idjump-2), "label", pad(labjump - 5), "description\n", sep="")
   cat("--", pad(idjump-2), "-----", pad(labjump - 5), "-----------\n", sep="")
-  for(j in seq(ncol(x))) 
+  for(j in seq_len(ncol(x))) 
     cat(paste(nama[j], pad(idjump - idlen[j]),
               labl[j],pad(labjump - lablen[j]),
               desc[j],"\n", sep=""))
@@ -279,6 +279,15 @@ fvlabels <- function(x, expand=FALSE) {
   return(lab)
 }
 
+"fvlabels<-" <- function(x, value) {
+  stopifnot(is.fv(x))
+  stopifnot(is.character(value))
+  stopifnot(length(value) == length(fvlabels(x)))
+  attr(x, "labl") <- value
+  return(x)
+}
+
+
 fvlabelmap <- function(x, dot=TRUE) {
   labl <- fvlabels(x, expand=TRUE)
   # construct mapping from identifiers to labels
@@ -347,12 +356,21 @@ fvlegend <- function(object, elang) {
 
 bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   verifyclass(x, "fv")
-  a <- attributes(x)
+  ax <- attributes(x)
   if(is.fv(y)) {
     # y is already an fv object
+    ay <- attributes(y)
+    if(ax$fname != ay$fname) {
+      # x and y represent different functions
+      # expand the labels separately 
+      fvlabels(x) <- fvlabels(x, expand=TRUE)
+      fvlabels(y) <- fvlabels(y, expand=TRUE)
+      ax <- attributes(x)
+      ay <- attributes(y)
+    }
     # check compatibility of 'r' values
-    xr <- attr(x, "argu")
-    yr <- attr(y, "argu")
+    xr <- ax$argu
+    yr <- ay$argu
     rx <- x[[xr]]
     ry <- y[[yr]]
     if((length(rx) != length(rx)) || 
@@ -383,7 +401,7 @@ bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
                   ngettext(nn, "was", "were"),
                   "duplicated. Unique names were generated"))
     allnames <- make.names(allnames, unique=TRUE, allow_ = FALSE)
-    colnames(y) <- allnames[ncol(x) + seq(ncol(y))]
+    colnames(y) <- allnames[ncol(x) + seq_len(ncol(y))]
   }
       
   if(is.null(labl))
@@ -397,14 +415,14 @@ bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
     stop(paste("length of", sQuote("desc"),
                "does not match number of columns of y"))
   if(is.null(preferred))
-    preferred <- a$valu
+    preferred <- ax$valu
 
   xy <- cbind(as.data.frame(x), y)
-  z <- fv(xy, a$argu, a$ylab, preferred, a$fmla, a$alim,
-          c(attr(x, "labl"), labl),
-          c(attr(x, "desc"), desc),
-          unitname=unitname(a),
-          fname=attr(x, "fname"))
+  z <- fv(xy, ax$argu, ax$ylab, preferred, ax$fmla, ax$alim,
+          c(ax$labl, labl),
+          c(ax$desc, desc),
+          unitname=unitname(x),
+          fname=ax$fname)
   return(z)
 }
 
@@ -452,7 +470,7 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
   # names for different versions
   versionnames <- names(x)
   if(is.null(versionnames))
-    versionnames <- paste("x", seq(length(x)), sep="")
+    versionnames <- paste("x", seq_along(x), sep="")
   shortnames <- abbreviate(versionnames)
   # extract the common values
   y <- x[[1]]
@@ -461,7 +479,7 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
   z <- y[, c(fvnames(y, ".x"), same)]
   dotnames <- same
   # now merge the different values
-  for(i in seq(length(x))) {
+  for(i in seq_along(x)) {
     # extract values for i-th object
     xi <- x[[i]]
     wanted <- (names(xi) %in% different)
@@ -481,7 +499,6 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
   fvnames(z, ".") <- dotnames
   return(z)
 }
-
 
 # rename one of the columns of an fv object
 tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL) {
@@ -527,7 +544,7 @@ rebadge.fv <- function(x, new.ylab, new.fname,
     nama <- names(x)
     desc <- attr(x, "desc")
     labl <- attr(x, "labl")
-    for(i in seq(length(tags)))
+    for(i in seq_along(tags))
     if(!is.na(m <- match(tags[i], nama))) {
       if(!missing(new.desc)) desc[m] <- new.desc[i]
       if(!missing(new.labl)) labl[m] <- new.labl[i]
@@ -562,9 +579,9 @@ rebadge.fv <- function(x, new.ylab, new.fname,
     z <- y[ , j, drop=FALSE]
 
   if(missing(j)) 
-    selected <- seq(ncol(x))
+    selected <- seq_len(ncol(x))
   else {
-    nameindices <- seq(names(x))
+    nameindices <- seq_along(names(x))
     names(nameindices) <- names(x)
     selected <- as.vector(nameindices[j])
   }
@@ -646,7 +663,7 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   # make a new fv object
   # ensure columns of results have names
   if(is.null(colnames(results)))
-    colnames(results) <- paste("col", seq(ncol(results)), sep="")
+    colnames(results) <- paste("col", seq_len(ncol(results)), sep="")
   resultnames <- colnames(results)
   # get values of function argument
   xvalues <- datadf[[xname]]

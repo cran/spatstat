@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.50 $    $Date: 2009/10/16 03:43:56 $
+#    $Revision: 1.51 $    $Date: 2011/05/18 09:27:37 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -191,7 +191,7 @@ owinpoly2mask <- function(w, rasta, check=TRUE) {
 
   score <- rep(0, nx*ny)
   
-  for(i in seq(bdry)) {
+  for(i in seq_along(bdry)) {
     p <- bdry[[i]]
     xp <- p$x
     yp <- p$y
@@ -541,7 +541,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
   if((ndup <- sum(dup)) > 0) {
     whinge <- paste(ngettext(ndup, "Polygon", "Polygons"),
                     if(npoly == 1) NULL else
-                    commasep(seq(dup)[dup]),
+                    commasep(which(dup)), 
                     ngettext(ndup, "contains", "contain"),
                     "duplicated vertices")
     notes <- c(notes, whinge)
@@ -554,7 +554,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
   if((nself <- sum(self)) > 0) {
     whinge <-  paste(ngettext(nself, "Polygon", "Polygons"),
                      if(npoly == 1) NULL else
-                     commasep(seq(self)[self]),
+                     commasep(which(self)),
                      ngettext(nself, "is", "are"),
                      "self-intersecting")
     notes <- c(notes, whinge)
@@ -567,7 +567,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
   if((nbox <- sum(is.box)) > 1) {
     answer <- FALSE
     whinge <- paste("Polygons",
-                    commasep(seq(is.box)[is.box]),
+                    commasep(which(is.box)),
                     "coincide with the outer frame")
     notes <- c(notes, whinge)
     err <- c(err, "polygons duplicating the outer frame")
@@ -580,7 +580,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
       cat(paste("Checking for cross-intersection between",
                 npoly, "polygons..."))
     P <- lapply(B, xypolygon2psp, w=outerframe)
-    for(i in seq(npoly-1)) {
+    for(i in seq_len(npoly-1)) {
       if(blowbyblow)
         progressreport(i, npoly-1)
       Pi <- P[[i]]

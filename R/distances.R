@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.32 $     $Date: 2010/01/05 06:26:30 $
+#      $Revision: 1.33 $     $Date: 2011/05/18 01:44:34 $
 #
 #
 #      Interpoint distances
@@ -202,7 +202,7 @@ nndist.default <-
                # avoid creating huge matrix
                # handle one row of D at a time
                NND2 <- matrix(numeric(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
-               for(i in seq(n)) {
+               for(i in seq_len(n)) {
                  D2i <- (x - x[i])^2 + (y - y[i])^2
                  D2i[i] <- Inf
                  NND2[i,] <- sort(D2i)[1:kmaxcalc]
@@ -358,7 +358,7 @@ nnwhich.default <-
                # avoid creating huge matrix
                # handle one row of D at a time
                nnw <- matrix(as.integer(NA), nrow=n, ncol=kmaxcalc)
-               for(i in seq(n)) {
+               for(i in seq_len(n)) {
                  D2i <- (x - x[i])^2 + (y - y[i])^2
                  D2i[i] <- Inf
                  nnw[i,] <- order(D2i)[1:kmaxcalc]

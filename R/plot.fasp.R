@@ -1,7 +1,7 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.24 $   $Date: 2010/06/15 04:47:35 $
+#   $Revision: 1.25 $   $Date: 2011/05/18 08:19:30 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
                       title=NULL, samex=TRUE, banner=TRUE, 
@@ -69,7 +69,7 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
   ncols  <- ncol(which)
   n <- nrows * ncols
 # panels 1..n = plot panels
-  codes <- matrix(seq(n), byrow=TRUE, ncol=ncols, nrow=nrows)
+  codes <- matrix(seq_len(n), byrow=TRUE, ncol=ncols, nrow=nrows)
   heights <- rep(1, nrows)
   widths  <- rep(1, ncols)
 # annotation as chosen

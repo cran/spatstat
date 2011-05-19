@@ -1,7 +1,7 @@
 #
 #           pixellate.R
 #
-#           $Revision: 1.4 $    $Date: 2010/12/13 09:05:01 $
+#           $Revision: 1.5 $    $Date: 2011/05/18 08:19:08 $
 #
 #     pixellate            convert an object to a pixel image
 #
@@ -83,7 +83,7 @@ pixellate.owin <- function(x, W=NULL, ...) {
   # process each component polygon  
   B <- P$bdry
   DUP <- spatstat.options("dupC")
-  for(i in seq(B)) {
+  for(i in seq_along(B)) {
     PP <- B[[i]]
     # transform so that pixels become unit squares
     QQ <- affinexypolygon(PP, vec = c(-x0, -y0))

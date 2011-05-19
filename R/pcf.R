@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.36 $   $Date: 2010/08/05 03:01:31 $
+#   $Revision: 1.37 $   $Date: 2011/05/18 08:18:43 $
 #
 #
 #   calculate pair correlation function
@@ -147,7 +147,7 @@ sewpcf <- function(d, w, denargs, lambda2area) {
                    if(!is.null(X$dataname)) "for",
                    X$dataname)
   # go to work on each function
-  for(i in seq(X$fns)) {
+  for(i in seq_along(X$fns)) {
     Xi <- X$fns[[i]]
     PCFi <- pcf.fv(Xi, ..., method=method)
     Y$fns[[i]] <- as.fv(PCFi)

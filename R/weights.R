@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.26 $	$Date: 2011/02/07 06:22:12 $
+#	$Revision: 4.27 $	$Date: 2011/05/18 09:24:01 $
 #
 #
 # Main functions:
@@ -45,7 +45,7 @@ countingweights <- function(id, areas, check=TRUE) {
 	#                     (length k)
 	#
     id <- as.integer(id)
-    fid <- factor(id, levels=seq(areas))
+    fid <- factor(id, levels=seq_along(areas))
     counts <- table(fid)
     w <- areas[id] / counts[id]     # ensures denominator > 0
     w <- as.vector(w)
@@ -149,7 +149,7 @@ gridweights <- function(X, ntile=NULL, ..., window=NULL, verbose=FALSE,
 	    # classify all pixels into tiles
             pixelid <- gridindex(xx, yy, 
                                  win$xrange, win$yrange, nx, ny)$index
-            pixelid <- factor(pixelid, levels=seq(nx * ny))
+            pixelid <- factor(pixelid, levels=seq_len(nx * ny))
                                 
 	    # compute digital areas of tiles
             tilepixels <- as.vector(table(pixelid))
@@ -229,7 +229,7 @@ dirichlet.weights <- function(X, window = NULL, exact=TRUE, ...) {
 			# Restrict to window (result is a vector - OK)
 			tileid <- tileid[win$m]
 		# Count pixels in each tile
-		id <- factor(tileid, levels=seq(X$n))
+		id <- factor(tileid, levels=seq_len(X$n))
 		counts <- table(id)
                 # turn off the christmas lights
                 class(counts) <- NULL

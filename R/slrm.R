@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.31 $   $Date: 2009/08/28 18:40:06 $
+#  $Revision: 1.1 $   $Date: 2011/05/18 09:12:18 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -279,7 +279,7 @@ slrAssemblePixelData <- function(Y, Yname, W,
       v <- as.vector(as.matrix(z))
       if(z$type != "factor") return(v)
       lev <- levels(z)
-      return(factor(v, levels=seq(lev), labels=lev))
+      return(factor(v, levels=seq_along(lev), labels=lev))
     }
   pixdata <- lapply(allimages, pixelvalues)
   df <- as.data.frame(pixdata)

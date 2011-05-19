@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.33 $	$Date: 2011/04/19 01:37:30 $
+#	$Revision: 5.34 $	$Date: 2011/05/18 07:59:30 $
 #
 #
 # -------- functions ----------------------------------------
@@ -206,7 +206,7 @@ function(X, I, J, r=NULL, breaks=NULL,
   close <- crosspairs(XI, XJ, max(r))
 # close$i and close$j are serial numbers in XI and XJ respectively;        
 # map them to original serial numbers in X
-  orig <- seq(npts)
+  orig <- seq_len(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

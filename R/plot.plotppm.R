@@ -3,7 +3,7 @@
 #
 # engine of plot method for ppm
 #
-# $Revision: 1.13 $  $Date: 2008/08/11 04:00:53 $
+# $Revision: 1.14 $  $Date: 2011/05/18 08:39:26 $
 #
 #
 
@@ -52,7 +52,7 @@ plot.plotppm <- function(x,data=NULL,trend=TRUE,cif=TRUE,se=TRUE,
   
   for(ttt in surftypes) {
     xs <- x[[ttt]]
-    for (i in seq(mrkvals)) {
+    for (i in seq_along(mrkvals)) {
       level <- mrkvals[i]
       main <- paste(if(ttt == "se") "Estimated" else "Fitted",
                     ttt, 

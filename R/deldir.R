@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.7 $ $Date: 2009/07/01 06:45:46 $
+#  $Revision: 1.8 $ $Date: 2011/05/18 01:39:11 $
 #
 
 .Spatstat.use.trigraf <- TRUE
@@ -22,7 +22,8 @@ dirichlet <- function(X) {
 delaunay <- function(X) {
   stopifnot(is.ppp(X))
   X <- unique(X)
-  if(X$n < 3) return(NULL)
+  nX <- npoints(X)
+  if(nX < 3) return(NULL)
   w <- X$window
   dd <- deldir(X$x, X$y, rw=c(w$xrange, w$yrange))
   a <- dd$delsgs[,5]
@@ -40,7 +41,7 @@ delaunay <- function(X) {
     a <- a[o]
     b <- b[o]
     # 
-    nv <- X$n
+    nv <- nX
     ne <- length(a)
     z <- .C("trigrafS",
             nv = as.integer(nv),
@@ -54,7 +55,7 @@ delaunay <- function(X) {
             PACKAGE="spatstat")
     tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
   } else if(.Spatstat.use.trigraf) {
-    nv <- X$n
+    nv <- nX
     ne <- length(a)
     z <- .C("trigraf",
             nv = as.integer(nv),
@@ -70,7 +71,7 @@ delaunay <- function(X) {
     tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
   } else {
     tlist <- matrix(integer(0), 0, 3)
-    for(i in seq(X$n)) {
+    for(i in seq_len(nX)) {
       # find all Delaunay neighbours of i 
       jj <- c(b[a==i], a[b==i])
       jj <- sort(unique(jj))
@@ -109,7 +110,7 @@ delaunay <- function(X) {
   }
   # make tile list
   tiles <- list()
-  for(m in seq(nrow(tlist))) {
+  for(m in seq_len(nrow(tlist))) {
     p <- list(x=xtri[m,], y=ytri[m,])
     tiles[[m]] <- owin(poly=p, check=FALSE)
   }

@@ -7,7 +7,7 @@
   the mouse position, and print its serial number.
 }
 \usage{
-  \method{identify}{psp}(x, \dots, labels=seq(x$n), n=x$n, plot=TRUE)
+  \method{identify}{psp}(x, \dots, labels=seq_len(nsegments(x)), n=nsegments(x), plot=TRUE)
 }
 \arguments{
   \item{x}{

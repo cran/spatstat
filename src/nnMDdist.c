@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances in m dimensions
 
-  $Revision: 1.2 $     $Date: 2010/05/01 01:30:46 $
+  $Revision: 1.3 $     $Date: 2011/05/17 12:40:09 $
 
   Argument x is an m * n matrix 
   with columns corresponding to points
@@ -44,12 +44,12 @@ void nndMD(n, m, x, nnd, huge)
 { 
   int npoints, mdimen, i, j, left, right, leftpos, rightpos;
   double dmin, d2, d2min, hu, hu2, xi0, dx0, dxj;
-  double *xi, *dx;
+  double *xi;
 
   npoints = *n;
   mdimen  = *m;
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
 #ifdef SPATSTAT_DEBUG
   FILE *out; 
@@ -168,12 +168,12 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
 { 
   int npoints, mdimen, i, j, left, right, leftpos, rightpos, which;
   double dmin, d2, d2min, hu, hu2, xi0, dx0, dxj;
-  double *xi, *dx;
+  double *xi;
 
   npoints = *n;
   mdimen  = *m;
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
 #ifdef SPATSTAT_DEBUG
   FILE *out; 
@@ -287,7 +287,7 @@ void nnXwMD(m, n1, x1, n2, x2, nnd, nnwhich, huge)
 { 
   int mdimen, npoints1, npoints2, i, ell, jleft, jright, jwhich, lastjwhich;
   double dmin, d2, d2min, x1i0, dx0, dxell, hu, hu2;
-  double *x1i, *dx;
+  double *x1i;
 
   hu = *huge;
   hu2 = hu * hu;
@@ -300,7 +300,7 @@ void nnXwMD(m, n1, x1, n2, x2, nnd, nnwhich, huge)
     return;
 
   x1i = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx  = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx  = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
   lastjwhich = 0;
 
@@ -382,7 +382,7 @@ void nnXxMD(m, n1, x1, id1, n2, x2, id2, nnd, nnwhich, huge)
 { 
   int mdimen, npoints1, npoints2, i, ell, jleft, jright, jwhich, lastjwhich, id1i;
   double dmin, d2, d2min, x1i0, dx0, dxell, hu, hu2;
-  double *x1i, *dx;
+  double *x1i;
 
   hu = *huge;
   hu2 = hu * hu;
@@ -395,7 +395,7 @@ void nnXxMD(m, n1, x1, id1, n2, x2, id2, nnd, nnwhich, huge)
     return;
 
   x1i = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx  = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx  = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
   lastjwhich = 0;
 
@@ -477,7 +477,7 @@ void knndMD(n, m, kmax, x, nnd, huge)
 { 
   int npoints, mdimen, nk, nk1, i, j, k, k1, left, right, unsorted;
   double d2, dminK, d2minK, xi0, dx0, dxj, hu, hu2, tmp, tmp2;
-  double *dmin, *d2min, *xi, *dx;
+  double *dmin, *d2min, *xi;
 
 #ifdef SPATSTAT_DEBUG
   FILE *out; 
@@ -507,7 +507,7 @@ void knndMD(n, m, kmax, x, nnd, huge)
      scratch space
   */
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
   /* loop over points */
 
@@ -708,7 +708,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 { 
   int npoints, mdimen, nk, nk1, i, j, k, k1, left, right, unsorted, itmp;
   double d2, dminK, d2minK, xi0, dx0, dxj, hu, hu2, tmp, tmp2;
-  double *dmin, *d2min, *xi, *dx;
+  double *dmin, *d2min, *xi;
   int *which;
 
 #ifdef SPATSTAT_DEBUG
@@ -740,7 +740,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
      scratch space
   */
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
-  dx = (double *) R_alloc((size_t) mdimen, sizeof(double));
+  /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
   /* loop over points */
 

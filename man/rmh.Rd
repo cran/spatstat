@@ -49,6 +49,23 @@
   of being easy to implement for a wide range of models.
 }
 
+\section{Warning}{
+As of version 1.22-1 of \code{spatstat} a subtle change was
+made to \code{rmh.default()}.  We had noticed that the results
+produced were sometimes not ``scalable'' in that two models,
+differing in effect only by the units in which distances are
+measured and starting from the same seed, gave different results.
+This was traced to an idiosyncracy of floating point arithmetic.
+The code of \code{rmh.default()} has been changed so that the
+results produced by \code{rmh} are now scalable.  The downside of
+this is that code which users previously ran may now give results
+which are different from what they formerly were.
+
+In order to recover former behaviour (so that previous results
+can be reproduced) set \code{spatstat.options(scalable=FALSE)}.
+See the last example in the help for \code{\link{rmh.default}}.
+}
+
 \value{
   A point pattern, in the form of an object of class \code{"ppp"}.
   See \code{\link{rmh.default}} for details.

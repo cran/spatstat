@@ -1,7 +1,7 @@
 #
 # clip.psp.R
 #
-#    $Revision: 1.13 $   $Date: 2011/03/25 03:43:41 $
+#    $Revision: 1.14 $   $Date: 2011/05/18 01:30:59 $
 #
 #
  
@@ -182,7 +182,7 @@ clippoly.psp <- function(s, window) {
   chopped <- empty <- s[numeric(0)]
   chopped$window <- bounding.box(s$window, window)
     
-  for(seg in seq(ns)) {
+  for(seg in seq_len(ns)) {
     segment <- s$ends[seg, , drop=FALSE]
     hit <- ok[seg, ]
     if(!any(hit)) {

@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.18 $     $Date: 2011/02/07 06:17:09 $
+#       $Revision: 5.19 $     $Date: 2011/05/18 01:49:35 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -27,8 +27,8 @@ gridcentres <- function(window, nx, ny) {
 	window <- as.owin(window)
 	xr <- window$xrange
 	yr <- window$yrange
-	x <- seq(xr[1], xr[2], length = 2 * nx + 1)[2 * (1:nx)]
-	y <- seq(yr[1], yr[2], length = 2 * ny + 1)[2 * (1:ny)]
+	x <- seq(from=xr[1], to=xr[2], length.out = 2 * nx + 1)[2 * (1:nx)]
+	y <- seq(from=yr[1], to=yr[2], length.out = 2 * ny + 1)[2 * (1:ny)]
 	x <- rep(x, ny)
 	y <- rep(y, rep(nx, ny))
 	return(list(x=x, y=y))
@@ -104,7 +104,7 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
     middle <- function(v) { n <- length(v);
                             mid <- ceiling(n/2);
                             v[mid]}
-    midpix <- tapply(seq(along=pid), pid, middle)
+    midpix <- tapply(seq_along(pid), pid, middle)
     if(gi) {
       x <- xx[midpix]
       y <- yy[midpix]
@@ -266,7 +266,7 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
     ok <- (d >= lo)
     if(any(ok)) return(min(d[ok]))
     m <- floor(Nbig/N)
-    d <- unlist(lapply(as.list(seq(m) * N), divisors))
+    d <- unlist(lapply(as.list(seq_len(m) * N), divisors))
     d <- sort(unique(d))
     ok <- (d >= lo)
     if(any(ok)) return(min(d[ok]))

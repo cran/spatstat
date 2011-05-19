@@ -42,7 +42,7 @@
   plot(X, main="original")
   # shear transformation
   Y <- affine(X, matrix(c(1,0,0.6,1),ncol=2))
-  plot(Y, "transformed")
+  plot(Y, main="transformed")
   par(oldpar)
   # 
   # rescale y coordinates by factor 0.2

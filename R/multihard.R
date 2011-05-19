@@ -2,7 +2,7 @@
 #
 #    multihard.R
 #
-#    $Revision: 1.1 $	$Date: 2010/11/21 03:43:16 $
+#    $Revision: 1.2 $	$Date: 2011/05/17 13:21:11 $
 #
 #    The Hard core process
 #
@@ -13,16 +13,18 @@
 # -------------------------------------------------------------------
 #	
 
-MultiHard <- function(types, hradii) {
-  if(length(types) == 1)
-    stop(paste("The", sQuote("types"),
-               "argument should be a vector of all possible types"))
-  if(is.factor(types)) {
-    types <- levels(types)
-  } else {
-    types <- levels(factor(types, levels=types))
-  }
-  dimnames(hradii) <- list(types, types)
+MultiHard <- function(types=NA, hradii) {
+  nt <- length(types)
+  if(nt > 1) {
+    if(is.factor(types)) {
+      types <- levels(types)
+    } else {
+      types <- levels(factor(types, levels=types))
+    }
+    dimnames(hradii) <- list(types, types)
+  } else if((nt == 0) || !is.na(types))
+    stop(paste("The", sQuote("types"),"argument should",
+                           "either be a vector of all possible types or \"NA\".\n"))
   out <- 
   list(
          name     = "Multitype Hardcore process",
@@ -94,11 +96,18 @@ MultiHard <- function(types, hradii) {
      #       
          par      = list(types=types, hradii = hradii),
          parnames = c("possible types", "hardcore distances"),
+         selfstart = function(X, self) {
+		if(length(self$par$types) > 1) return(self)
+                types <- levels(marks(X))
+                MultiHard(types=types,hradii=self$par$hradii)
+	 },
          init     = function(self) {
-                      h <- self$par$hradii
                       nt <- length(self$par$types)
-
-                      MultiPair.checkmatrix(h, nt, sQuote("hradii"))
+                      chk <- (nt != 1)# || is.na(self$par$types)
+                      if(chk) {
+                        h <- self$par$hradii
+                        MultiPair.checkmatrix(h, nt, sQuote("hradii"))
+                      }
                     },
          update = NULL,  # default OK
          print = function(self) {

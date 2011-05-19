@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.44 $   $Date: 2011/01/24 06:06:06 $
+#    $Revision: 1.45 $   $Date: 2011/05/18 09:18:09 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -345,13 +345,15 @@ print.summary.ppm <- function(x, ...) {
     if(!is.null(cd <- x$covar.descrip)) {
       # print description of each covariate
       cat("\nCovariates provided:\n")
-      for(i in seq(length(cd)))
-        cat(paste("\t", names(cd)[i], ": ", cd[i], "\n", sep=""))
+      namescd <- names(cd)
+      for(i in seq_along(cd))
+        cat(paste("\t", namescd[i], ": ", cd[i], "\n", sep=""))
     }
     if(!is.null(cfa <- x$covfunargs) && length(cfa) > 0) {
       cat("Covariate function arguments (covfunargs) provided:\n")
-      for(i in seq(along=cfa)) {
-        cat(paste(names(cfa)[i], "= "))
+      namescfa <- names(cfa)
+      for(i in seq_along(cfa)) {
+        cat(paste(namescfa[i], "= "))
         cfai <- cfa[[i]]
         if(is.numeric(cfai) && length(cfai) == 1) {
           cat(paste(cfai, "\n"))
@@ -366,7 +368,7 @@ print.summary.ppm <- function(x, ...) {
   if(!is.list(tv))
     print(tv)
   else 
-    for(i in seq(tv))
+    for(i in seq_along(tv))
       print(tv[[i]])
 
   # table of coefficient estimates with SE and 95% CI
@@ -437,7 +439,7 @@ blankcoefnames <- function(x) {
     value <- unlist(x)
   else {
     value <- list()
-    for(i in seq(x))
+    for(i in seq_along(x))
       value[[i]] <- if(unlabelled[i]) unlist(x[i]) else x[[i]]
   }
   return(value)

@@ -3,7 +3,7 @@
 #
 # kluster point process models
 #
-# $Revision: 1.16 $ $Date: 2011/02/07 06:18:06 $
+# $Revision: 1.17 $ $Date: 2011/05/18 08:00:28 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -88,7 +88,7 @@ print.kppm <- function(x, ...) {
     tv <- ps$trend$value
     if (is.list(tv)) {
       cat("\n")
-      for (i in seq(tv)) print(tv[[i]])
+      for (i in seq_along(tv)) print(tv[[i]])
     }
     else if (is.numeric(tv) && length(tv) == 1 && is.null(names(tv)))
       cat("\t", paste(tv), "\n")

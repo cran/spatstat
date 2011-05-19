@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.31 $	$Date: 2011/01/19 07:07:37 $
+#    $Revision: 1.32 $	$Date: 2011/05/18 08:17:10 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -46,7 +46,7 @@ pairwise.family <-
          }
          if(is.null(d)) {
            dmax <- 1.25 * rmax
-           d <- seq(0, dmax, length=256)
+           d <- seq(from=0, to=dmax, length.out=256)
          } else {
            stopifnot(is.numeric(d) &&
                      all(is.finite(d)) &&
@@ -64,7 +64,7 @@ pairwise.family <-
              p <- array(p, dim=c(dim(p),1), dimnames=NULL)
            if(dim(p)[3] != length(coeff))
              stop("Dimensions of potential do not match coefficient vector")
-           for(k in seq(dim(p)[3])) 
+           for(k in seq_len(dim(p)[3])) 
              p[,,k] <- multiply.only.finite.entries( p[,,k] , coeff[k] )
            y <- exp(apply(p, c(1,2), sum))
            ylim <- range(0, 1.1, y, finite=TRUE)
@@ -95,14 +95,14 @@ pairwise.family <-
              p <- array(p, dim=c(dim(p),1), dimnames=NULL)
            if(dim(p)[3] != length(coeff))
              stop("Dimensions of potential do not match coefficient vector")
-           for(k in seq(dim(p)[3]))
+           for(k in seq_len(dim(p)[3]))
              p[,,k] <- multiply.only.finite.entries( p[,,k] , coeff[k] )
            y <- exp(apply(p, c(1,2), sum))
            ylim <- range(0, 1.1, y, finite=TRUE)
            fns <- vector(m^2, mode="list")
            which <- matrix(, m, m)
-           for(i in seq(m)) {
-             for(j in seq(m)) {
+           for(i in seq_len(m)) {
+             for(j in seq_len(m)) {
                # relevant position in matrix
                ijpos <- i + (j-1) * m
                which[i,j] <- ijpos

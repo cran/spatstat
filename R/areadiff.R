@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.15 $  $Date: 2010/11/21 04:15:34 $
+#  $Revision: 1.16 $  $Date: 2011/05/18 01:21:06 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -67,7 +67,7 @@ areaLoss.diri <- function(X, r, ..., W=as.owin(X), subset=NULL) {
   a <- dd$delsgs[,5]
   b <- dd$delsgs[,6]
   exact <- spatstat.options("gpclib")
-  for(k in seq(indices)) {
+  for(k in seq_along(indices)) {
     i <- indices[k]
     # find all Delaunay neighbours of i 
     jj <- c(b[a==i], a[b==i])
@@ -213,7 +213,7 @@ areaLoss.grid <- function(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.o
   n <- X$n
   indices <- if(is.null(subset)) 1:n else (1:n)[subset]
   answer <- matrix(, nrow=length(indices), ncol=length(r))
-  for(k in seq(indices)) {
+  for(k in seq_along(indices)) {
     i <- indices[k]
     answer[k,] <- areaGain(X[i], X[-i], r, W=W, ngrid=ngrid)
   }

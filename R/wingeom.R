@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.67 $	$Date: 2010/11/22 04:25:34 $
+#	$Revision: 4.68 $	$Date: 2011/05/18 09:25:48 $
 #
 #
 #
@@ -128,8 +128,8 @@ overlap.owin <- function(A, B) {
     AA <- as.polygonal(A)$bdry
     BB <- as.polygonal(B)$bdry
     area <- 0
-    for(i in seq(AA))
-      for(j in seq(BB))
+    for(i in seq_along(AA))
+      for(j in seq_along(BB))
         area <- area + overlap.xypolygon(AA[[i]], BB[[j]])
     return(area)
   }

@@ -12,17 +12,18 @@
 # -------------------------------------------------------------------
 #	
 
-MultiStrauss <- function(types, radii) {
-  if(length(types) == 1)
-    stop(paste("The",
-               sQuote("types"),
-               "argument should be a vector of all possible types"))
-  if(is.factor(types)) {
-    types <- levels(types)
-  } else {
-    types <- levels(factor(types, levels=types))
-  }
-  dimnames(radii) <- list(types, types)
+MultiStrauss <- function(types=NA, radii) {
+  nt <- length(types)
+  if(nt > 1) {
+    if(is.factor(types)) {
+      types <- levels(types)
+    } else {
+      types <- levels(factor(types, levels=types))
+    }
+    dimnames(radii) <- list(types, types)
+  } else if((nt == 0) || !is.na(types))
+    stop(paste("The", sQuote("types"),"argument should",
+                           "either be a vector of all possible types or \"NA\".\n"))
   out <- 
   list(
          name     = "Multitype Strauss process",
@@ -91,10 +92,18 @@ MultiStrauss <- function(types, radii) {
      #       
          par      = list(types=types, radii = radii),
          parnames = c("possible types", "interaction distances"),
+         selfstart = function(X, self) {
+		if(length(self$par$types) > 1) return(self)
+                types <- levels(marks(X))
+                MultiStrauss(types=types,radii=self$par$radii)
+	 },
          init     = function(self) {
-                      r <- self$par$radii
                       nt <- length(self$par$types)
-                      MultiPair.checkmatrix(r, nt, sQuote("radii"))
+                      chk <- (nt != 1)# || is.na(self$par$types)
+                      if(chk) {
+                        h <- self$par$radii
+                        MultiPair.checkmatrix(h, nt, sQuote("radii"))
+                      }
                     },
          update = NULL, # default OK
          print = function(self) {

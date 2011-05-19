@@ -6,10 +6,10 @@ Creates an instance of the multitype hard core point process model
 which can then be fitted to point pattern data.
 }
 \usage{
-  MultiHard(types, hradii)
+  MultiHard(types=NA, hradii)
 }
 \arguments{
-  \item{types}{Vector of all possible types (i.e. the possible levels
+  \item{types}{Optional; vector of all possible types (i.e. the possible levels
     of the \code{marks} variable in the data)}
   \item{hradii}{Matrix of hard core radii}
 }
@@ -24,6 +24,12 @@ which can then be fitted to point pattern data.
   A pair of points
   of types \eqn{i} and \eqn{j}
   must not lie closer than \eqn{h_{ij}}{h[i,j]} units apart.
+
+  The argument \code{types} need not usually be specified.
+  The \code{types} will be automatically be determined from
+  the data set to which the interaction object created by this
+  function is applied.  This argument is included mainly for
+  backward compatibility.
 
   The matrix \code{hradii}
   must be symmetric, with entries
@@ -47,22 +53,21 @@ which can then be fitted to point pattern data.
 }
 \examples{
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
-   MultiHard(1:2, h)
+   MultiHard(hradii=h)
    # prints a sensible description of itself
    data(betacells)
    h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiHard(c("off","on"), h))
+   ppm(betacells, ~1, MultiHard(,h))
    # fit the stationary multitype hardcore process to `betacells'
+   # Note the comma; needed since "types" is not specified.
 }
 \section{Warnings}{
-  The argument \code{types} is interpreted as a
-  set of factor levels. That is,
-  in order that \code{\link{ppm}} can fit the multitype hard core model
-  correctly to a point pattern \code{X},
-  this must be a marked point pattern; the mark vector
-  \code{marks(X)} must be a factor; and 
-  the argument \code{types} must
-  equal \code{levels(marks(X))}.
+  In order that \code{\link{ppm}} can fit the multitype hard core
+  model correctly to a point pattern \code{X}, this pattern must
+  be marked, with \code{markformat} equal to \code{vector} and the
+  mark vector \code{marks(X)} must be a factor.  If the argument
+  \code{types} is specified it is interpreted as a set of factor
+  levels and this set must equal \code{levels(marks(X))}.
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

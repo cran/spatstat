@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.33 $	$Date: 2010/11/15 08:49:35 $
+#	$Revision: 1.34 $	$Date: 2011/05/18 08:38:52 $
 #
 #
 #
@@ -127,7 +127,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
            if(!triangulate) {
              # No triangulation required;
              # simply plot the polygons
-             for(i in seq(p))
+             for(i in seq_along(p))
                do.call.matched("polygon",
                                resolve.defaults(
                                                 list(x=p[[i]]),
@@ -142,7 +142,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                txy <- triangulate(owin2gpc(W))
                ntri <- floor(nrow(txy)/3)
                # Fill triangles with colour
-               for(i in seq(ntri)) {
+               for(i in seq_len(ntri)) {
                  ri <- 3 * (i - 1) + 1:3
                  do.call.matched("polygon",
                                  resolve.defaults(
@@ -152,7 +152,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                }
              }
              # Now draw polygon boundaries
-             for(i in seq(p))
+             for(i in seq_along(p))
                do.call.matched("polygon",
                                resolve.defaults(
                                                 list(x=p[[i]]),

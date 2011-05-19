@@ -4,7 +4,7 @@
        Exact distance transform of a point pattern
        (used to estimate the empty space function F)
        
-       $Revision: 1.10 $ $Date: 2010/12/22 12:03:09 $
+       $Revision: 1.11 $ $Date: 2011/05/17 12:30:02 $
 
        Author: Adrian Baddeley
 
@@ -72,7 +72,7 @@ exact_dt(x, y, npt, dist, index)
 	double	d;
 	int	ii;
 	double	dd;
-	double  bdiag;
+	/*	double  bdiag; */
 	
 	    /* initialise rasters */
 #define UNDEFINED -1
@@ -121,7 +121,7 @@ exact_dt(x, y, npt, dist, index)
 */			
 	/* how to update the distance values */
 	
-#define COMPARE(ROW,COL,RR,CC,BOUND) \
+#define COMPARE(ROW,COL,RR,CC) \
 	d = Entry(*dist,ROW,COL,double); \
 	ii = Entry(*index,RR,CC,int); \
 	/* printf(" %lf\t (%ld,%ld) |-> %ld\n", d, RR, CC, ii); */ \
@@ -138,27 +138,27 @@ exact_dt(x, y, npt, dist, index)
 
 
 	/* bound on diagonal step distance */
-	bdiag = sqrt(index->xstep * index->xstep + index->ystep * index->ystep);
+	/*	bdiag = sqrt(index->xstep * index->xstep + index->ystep * index->ystep); */
 	
 	/* forward pass */
 
 	for(j = index->rmin; j <= index->rmax; j++)
 	for(k = index->cmin; k <= index->cmax; k++) {
 		/* printf("Neighbourhood of (%ld,%ld):\n", j,k); */
-		COMPARE(j,k, j-1,k-1, bdiag)
-		COMPARE(j,k, j-1,  k, index->ystep)
-		COMPARE(j,k, j-1,k+1, bdiag)
-		COMPARE(j,k, j,  k-1, index->xstep)
+		COMPARE(j,k, j-1,k-1)
+		COMPARE(j,k, j-1,  k)
+		COMPARE(j,k, j-1,k+1)
+		COMPARE(j,k, j,  k-1)
 	}
 
 	/* backward pass */
 
 	for(j = index->rmax; j >= index->rmin; j--)
 	for(k = index->cmax; k >= index->cmin; k--) {
-		COMPARE(j,k, j+1,k+1, bdiag)
-		COMPARE(j,k, j+1,  k, index->ystep)
-		COMPARE(j,k, j+1,k-1, bdiag)
-		COMPARE(j,k, j,  k+1, index->xstep)
+		COMPARE(j,k, j+1,k+1)
+		COMPARE(j,k, j+1,  k)
+		COMPARE(j,k, j+1,k-1)
+		COMPARE(j,k, j,  k+1)
 	}
 
 	/* take square roots of the distances^2 */

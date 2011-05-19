@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.77 $     $Date: 2010/12/13 09:12:44 $
+#         $Revision: 1.81 $     $Date: 2011/05/19 04:21:39 $
 #
 #      The class "im" of raster images
 #
@@ -22,7 +22,7 @@
 #
 #   creator 
 
-im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)), 
+im <- function(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)), 
                xrange=NULL, yrange=NULL,
                unitname=NULL) {
 
@@ -66,7 +66,7 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   if(miss.xcol && !is.null(xrange)) {
     # use 'xrange' 
     xstep <- diff(xrange)/nc
-    xcol <- xrange[1] - xstep/2 + xstep * seq(nc)
+    xcol <- xrange[1] - xstep/2 + xstep * seq_len(nc)
   } else {
     # use 'xcol'
     if(length(xcol) <= 1)
@@ -77,7 +77,7 @@ im <- function(mat, xcol=seq(ncol(mat)), yrow=seq(nrow(mat)),
   if(miss.yrow && !is.null(yrange)) {
     # use 'yrange'
     ystep <- diff(yrange)/nr
-    yrow <- yrange[1] - ystep/2 + ystep * seq(nr)
+    yrow <- yrange[1] - ystep/2 + ystep * seq_len(nr)
   } else {
     # use 'yrow'
     if(length(yrow) <= 1)
@@ -604,7 +604,7 @@ integral.im <- function(x, ...) {
 conform.imagelist <- function(X, Zlist) {
   # determine points of X where all images in Zlist are defined
   ok <- rep(TRUE, length(X$x))
-  for(i in seq(Zlist)) {
+  for(i in seq_along(Zlist)) {
     Zi <- Zlist[[i]]
     ZiX <- Zi[X, drop=FALSE]
     ok <- ok & !is.na(ZiX)
@@ -688,3 +688,31 @@ sort.im <- function(x, ...) {
 }
 
 dim.im <- function(x) { x$dim }
+
+# colour images
+rgbim <- function(R, G, B, maxColorValue=255) {
+  eval.im(factor(rgb(as.vector(R), as.vector(G), as.vector(B),
+                     maxColorValue=maxColorValue)))
+}
+
+hsvim <- function(H, S, V) {
+  eval.im(factor(hsv(as.vector(H), as.vector(S), as.vector(V))))
+}
+
+scaletointerval <- function(x, from=0, to=1) {
+  UseMethod("scaletointerval")
+}
+
+scaletointerval.default <- function(x, from=0, to=1) {
+  rr <- range(x)
+  b <- (to - from)/diff(rr)
+  y <- from + b * (x - rr[1])
+  return(y)
+}
+
+scaletointerval.im <- function(x, from=0, to=1) {
+  v <- scaletointerval(x$v, from, to)
+  y <- im(v, x$xcol, x$yrow, x$xrange, x$yrange, unitname(x))
+  return(y)
+}
+

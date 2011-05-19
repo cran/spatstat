@@ -46,7 +46,7 @@ Cdata *badgeyinit(state, model, algo)
      Algor algo;
 {
   int i, j, k, i0, ndisc, nmatrix;
-  double r, s, g, d2;
+  double r, g, d2;
   BadGey *badgey;
 
   /* create storage */
@@ -67,7 +67,7 @@ Cdata *badgeyinit(state, model, algo)
     i0 = 3*i + 2;
     g = badgey->gamma[i] = model.par[i0];
     r = badgey->r[i] =     model.par[i0 + 1];
-    s = badgey->s[i] =     model.par[i0 + 2];
+        badgey->s[i] =     model.par[i0 + 2];
     badgey->r2[i] = r * r;
     badgey->hard[i] = (g < DOUBLE_EPS);
     badgey->loggamma[i] = (g < DOUBLE_EPS) ? 0 : log(g);

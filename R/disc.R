@@ -1,7 +1,7 @@
 #
 # disc.R
 #
-# $Revision: 1.3 $ $Date: 2006/10/17 08:48:29 $
+# $Revision: 1.4 $ $Date: 2011/05/18 01:43:54 $
 #
 #
 
@@ -12,7 +12,7 @@ disc <- function(radius=1, centre=c(0,0), ..., mask=FALSE, npoly=128) {
   stopifnot(length(npoly) == 1)
   stopifnot(npoly > 2)
   if(!mask) {
-    theta <- seq(0, 2*pi, length=npoly+1)[-(npoly+1)]
+    theta <- seq(from=0, to=2*pi, length.out=npoly+1)[-(npoly+1)]
     x <- centre[1] + radius * cos(theta)
     y <- centre[2] + radius * sin(theta)
     W <- owin(poly=list(x=x, y=y))

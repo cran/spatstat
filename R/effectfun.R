@@ -1,7 +1,7 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.5 $ $Date: 2009/07/16 00:37:02 $
+#   $Revision: 1.6 $ $Date: 2011/05/18 01:58:13 $
 #
 
 effectfun <- function(model, covname, ...) {
@@ -34,12 +34,12 @@ effectfun <- function(model, covname, ...) {
     covtype <- "real"
     W <- as.owin(data.ppm(model))
     Zr <- W$xrange
-    Zvals <- seq(Zr[1], Zr[2], length=N0)
+    Zvals <- seq(from=Zr[1], to=Zr[2], length.out=N0)
   } else if(covname == "y") {
     covtype <- "real"
     W <- as.owin(data.ppm(model))
     Zr <- W$yrange
-    Zvals <- seq(Zr[1], Zr[2], length=N0)
+    Zvals <- seq(from=Zr[1], to=Zr[2], length.out=N0)
   } else if(covname == "marks") {
     covtype <- "factor"
     Zvals <- levels(marks(data.ppm(model)))
@@ -53,11 +53,11 @@ effectfun <- function(model, covname, ...) {
       switch(covtype,
              real={
                Zr <- range(Z)
-               Zvals <- seq(Zr[1], Zr[2], length=N0)
+               Zvals <- seq(from=Zr[1], to=Zr[2], length.out=N0)
              },
              integer={
                Zr <- range(Z)
-               Zvals <- seq(Zr[1], Zr[2], by=ceiling((diff(Zr)+1)/N0))
+               Zvals <- seq(from=Zr[1], to=Zr[2], by=ceiling((diff(Zr)+1)/N0))
              },
              factor={
                Zvals <- levels(Z)
@@ -73,7 +73,7 @@ effectfun <- function(model, covname, ...) {
       switch(covtype,
              real={
                Zr <- summary(Z)$range
-               Zvals <- seq(Zr[1], Zr[2], length=N0)
+               Zvals <- seq(from=Zr[1], to=Zr[2], length.out=N0)
              },
              factor={
                Zvals <- levels(Z)

@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.54 $	$Date: 2011/04/19 02:43:59 $
+#	$Revision: 1.55 $	$Date: 2011/05/18 07:58:48 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -173,7 +173,7 @@
     if(will.do.fast) {
     # restrict r values to recommended range, unless specifically requested
       if(!rfixed) 
-        r <- seq(0, alim[2], length=length(r))
+        r <- seq(from=0, to=alim[2], length.out=length(r))
       K <- Kborder.engine(X, max(r), length(r), correction, reciplambda)
       # tweak labels
       K <- rebadge.fv(K, substitute(K[inhom](r), NULL), "K[inhom]")

@@ -4,7 +4,7 @@
 #	Tabulate mark frequencies in r-neighbourhood of each point 
 #	for multitype point patterns
 #
-#	$Revision: 1.4 $	$Date: 2010/03/08 08:23:04 $
+#	$Revision: 1.5 $	$Date: 2011/05/18 08:05:13 $
 #
 #       Requested by Ian Robertson <igr@stanford.edu>
 
@@ -34,7 +34,7 @@ function(X, R, exclude=TRUE)
         }
 
         # tabulate
-        i <- factor(pi, levels=seq(X$n))
+        i <- factor(pi, levels=seq_len(X$n))
         mj <- m[pj]
         mat <- table(point=i, mark=mj)
 

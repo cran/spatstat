@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.6 $ $Date: 2007/02/26 05:56:44 $
+#  $Revision: 1.7 $ $Date: 2011/05/18 09:08:44 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -9,14 +9,10 @@
 # where the earlier lists have priority 
 #
 resolve.defaults <- function(..., .StripNull=FALSE) {
-  arglist <- list(...)
-  argue <- list()
-  if((n <- length(arglist)) > 0)  {
-    for(i in seq(n))
-      argue <- append(argue, arglist[[i]])
-  }
+  # Each argument is a list. Append them.
+  argue <- c(...)
   if(!is.null(nam <- names(argue))) {
-    named <- (nam != "")
+    named <- nzchar(nam)
     arg.unnamed <- argue[!named]
     arg.named <-   argue[named]
     if(any(discard <- duplicated(names(arg.named)))) 

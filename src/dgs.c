@@ -64,14 +64,13 @@ double dgscif(prop, state, cdata)
      Cdata *cdata;
 {
   int npts, ix, ixp1, j;
-  double *period, *x, *y;
+  double *x, *y;
   double u, v;
   double d2, r2, pairprod, cifval;
   Dgs *dgs;
 
   dgs = (Dgs *) cdata;
 
-  period = dgs->period;
   r2 = dgs->rho2;
 
   u  = prop.u;

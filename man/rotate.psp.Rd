@@ -35,7 +35,7 @@
   X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin())
   plot(X, main="original")
   Y <- rotate(X, pi/4)
-  plot(Y, "rotated")
+  plot(Y, main="rotated")
   par(oldpar)
 }
 \author{Adrian Baddeley

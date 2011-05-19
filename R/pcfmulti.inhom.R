@@ -1,7 +1,7 @@
 #
 #   pcfmulti.inhom.R
 #
-#   $Revision: 1.3 $   $Date: 2010/11/21 04:23:14 $
+#   $Revision: 1.4 $   $Date: 2011/05/18 08:17:52 $
 #
 #   inhomogeneous multitype pair correlation functions
 #
@@ -205,7 +205,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
 # identify close pairs of points
   close <- crosspairs(XI, XJ, max(r))
 # map (i,j) to original serial numbers in X
-  orig <- seq(npts)
+  orig <- seq_len(npts)
   imap <- orig[I]
   jmap <- orig[J]
   iX <- imap[close$i]

@@ -1,7 +1,7 @@
 #
 # rshift.psp.R
 #
-#  $Revision: 1.5 $  $Date: 2006/10/17 09:54:42 $
+#  $Revision: 1.6 $  $Date: 2011/05/18 09:10:12 $
 #
 
 
@@ -36,7 +36,7 @@ rshift.psp <- function(X, ..., group=NULL, which=NULL) {
   result <- psp(numeric(0), numeric(0), numeric(0), numeric(0),
                 X$window)
   
-  for(i in seq(Y)) {
+  for(i in seq_along(Y)) {
     
     Z <- Y[[i]]
     

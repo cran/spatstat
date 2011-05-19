@@ -1,6 +1,6 @@
 # superimpose.R
 #
-# $Revision: 1.23 $ $Date: 2011/04/17 10:35:34 $
+# $Revision: 1.24 $ $Date: 2011/05/18 09:18:35 $
 #
 #
 ############################# 
@@ -229,7 +229,7 @@ superimposePSP <-
     Wlist <- lapply(arglist, as.owin)
     # take the union of all the windows
     W <- NULL
-    for(i in seq(Wlist))
+    for(i in seq_along(Wlist))
       W <- union.owin(W, Wlist[[i]])
   }
 

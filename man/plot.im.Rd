@@ -6,7 +6,7 @@
   Plot a pixel image.
 }
 \usage{
-  \method{plot}{im}(x, \dots, col=NULL,
+  \method{plot}{im}(x, \dots, col=NULL, valuesAreColours=NULL,
                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
                    ribscale=1) 
 }
@@ -19,8 +19,13 @@
     Extra arguments passed to \code{\link{image}} to control the plot.
   }
   \item{col}{
-    Colours for the pixel values. Either a character vector of colours,
+    Colours for displaying the pixel values.
+    Either a character vector of colour values,
     or an object of class \code{\link{colourmap}}.
+  }
+  \item{valuesAreColours}{
+    Logical value. If \code{TRUE}, the pixel values of \code{x}
+    are to be interpreted as colour values.
   }
   \item{ribbon}{
     Logical flag indicating whether to display a ribbon
@@ -64,7 +69,7 @@
   maximum pixel values in the image \code{x}, rendered according to
   the chosen colour map.
 
-  The pixel values are displayed using the colours given in the
+  Normally the pixel values are displayed using the colours given in the
   argument \code{col}. This may be either an explicit colour map
   (an object of class \code{"colourmap"}, created by the function
   \code{\link{colourmap}}) or a character vector or integer vector
@@ -119,6 +124,26 @@
   and the ribbon are passed through the \code{...} arguments
   directly to the function \code{\link{image.default}}.
 
+  Alternatively, the pixel values could be directly 
+  interpretable as colour values in \R. That is, the pixel values
+  could be character strings that represent colours, or
+  values of a factor whose levels are character strings representing
+  colours.
+  \itemize{
+    \item If \code{valuesAreColours=TRUE}, then the pixel values will
+    be interpreted as colour values and displayed using these colours.
+    \item If \code{valuesAreColours=FALSE}, then the pixel values will
+    \emph{not} be interpreted as colour values, even if they could be.
+    \item If \code{valuesAreColours=NULL}, the algorithm will guess
+    what it should do. If the argument \code{col} is given,
+    the pixel values will \emph{not} be interpreted as colour values. Otherwise,
+    if all the pixel values are strings that represent colours, then
+    they will be interpreted and displayed as colours.
+  }
+  If pixel values are interpreted as colours, 
+  the arguments \code{col} and \code{ribbon} will be ignored,
+  and a ribbon will not be plotted.
+  
   To suppress the axis tick marks and labels, set \code{axes=FALSE}.
 }
 \seealso{

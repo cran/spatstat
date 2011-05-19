@@ -76,7 +76,7 @@ double multihardcif(prop, state, cdata)
      State state;
      Cdata *cdata;
 {
-  int npts, ntypes, kount, ix, ixp1, j, mrk, mrkj, m1, m2;
+  int npts, ntypes, ix, ixp1, j, mrk, mrkj;
   int *marks;
   double *x, *y;
   double u, v;

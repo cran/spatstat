@@ -1,7 +1,7 @@
 #
 # split.ppp.R
 #
-# $Revision: 1.14 $ $Date: 2011/04/17 05:52:50 $
+# $Revision: 1.15 $ $Date: 2011/05/18 09:14:29 $
 #
 # split.ppp and "split<-.ppp"
 #
@@ -70,7 +70,7 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
      out <- lapply(out, unmark)
   if(inherits(fsplit, "tess")) {
     til <- tiles(fsplit)
-    for(i in seq(along=out))
+    for(i in seq_along(out))
       out[[i]]$window <- til[[i]]
   }
   class(out) <- c("splitppp", class(out))
@@ -136,7 +136,7 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
     if(vmarked)
       warning(paste(sQuote("value"), "contains marked point patterns:",
                     "this is inconsistent with un=TRUE; marks ignored."))
-    for(i in seq(value)) 
+    for(i in seq_along(value)) 
       value[[i]] <- value[[i]] %mark% factor(lev[i], levels=levels(f))
   }
 
@@ -152,7 +152,7 @@ print.splitppp <- function(x, ...) {
             if(inherits(f, "tess")) "tessellation" else "factor",
             "\n"))
   nam <- names(x)
-  for(i in seq(length(x))) {
+  for(i in seq_along(x)) {
     cat(paste("\n", nam[i], ":\n", sep=""))
     print(x[[i]])
   }

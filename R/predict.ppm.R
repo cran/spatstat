@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.60 $	$Date: 2010/11/21 04:24:03 $
+#	$Revision: 1.61 $	$Date: 2011/05/18 08:43:05 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -338,7 +338,7 @@ function(object, window, ngrid=NULL, locations=NULL,
       # with unnamed components.
       # Assign the components, in order of their appearance,
       # to the columns of newdata labelled Vnames[1], Vnames[2],... 
-      for(i in seq(Vnames))
+      for(i in seq_along(Vnames))
         newdata[[Vnames[i] ]] <- Vnew[,i]
       #
     } else {
@@ -379,7 +379,7 @@ function(object, window, ngrid=NULL, locations=NULL,
       } else {
         # list of images
         out <- list()
-        for(i in seq(types)) {
+        for(i in seq_along(types)) {
           outi <- imago
           # set entries
           outi$v[masque$m] <- z[newdata$marks == types[i]]

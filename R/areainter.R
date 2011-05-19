@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.9 $	$Date: 2010/07/10 10:22:09 $
+#    $Revision: 1.10 $	$Date: 2011/05/18 01:23:01 $
 #
 #    The area interaction
 #
@@ -22,9 +22,9 @@ AreaInter <- function(r) {
     answer <- numeric(n)
     r <- pars$r
     if(is.null(r)) stop("internal error: r parameter not found")
-    dummies <- !(seq(n) %in% EqualPairs[,2])
+    dummies <- !(seq_len(n) %in% EqualPairs[,2])
     answer[dummies] <- -areaGain(U[dummies], X, r)
-    for(k in seq(nrow(EqualPairs))) {
+    for(k in seq_len(nrow(EqualPairs))) {
       i <- EqualPairs[k,1]
       j <- EqualPairs[k,2]
       answer[j] <- -areaGain(U[j], X[-i], r)

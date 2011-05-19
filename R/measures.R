@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.18 $  $Date: 2011/02/15 08:08:27 $
+#  $Revision: 1.19 $  $Date: 2011/05/18 08:05:47 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
@@ -165,7 +165,7 @@ plot.msr <- function(x, ...) {
   loc <- x$loc
   if(!missing(i)) {
     # use [.ppp to identify which points are retained
-    locn  <- loc %mark% seq(npoints(loc))
+    locn  <- loc %mark% seq_len(npoints(loc))
     loci  <- locn[i]
     loc   <- unmark(loci)
     id    <- marks(loci)

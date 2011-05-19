@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.69 $    $Date: 2011/03/25 03:37:53 $
+#    $Revision: 1.70 $    $Date: 2011/05/18 09:23:01 $
 #
 #  (a) for matrices only:
 #
@@ -99,8 +99,8 @@ matrixsample <- function(mat, newdim, phase=c(0,0)) {
     # new matrix is periodic subsample of old matrix
     ratio <- olddim/newdim
     phase <- pmin(pmax(phase, 0), ratio-1)
-    ii <- seq(1+phase[1], olddim[1], by=ratio[1])
-    jj <- seq(1+phase[2], olddim[2], by=ratio[2])
+    ii <- seq(from=1+phase[1], to=olddim[1], by=ratio[1])
+    jj <- seq(from=1+phase[2], to=olddim[2], by=ratio[2])
     return(mat[ii,jj])
   } else if(all(olddim <= newdim) && all(newdim %% olddim == 0)) {
     # new matrix is repetition of old matrix
@@ -211,7 +211,7 @@ prolongseq <- function(x, newrange) {
 
   # add or trim data to left
   if(x[1] > newrange[1]) {
-    leftbit <- seq(x[1], newrange[1], by= -dx) 
+    leftbit <- seq(from=x[1], to=newrange[1], by= -dx) 
     x <- c(rev(leftbit), x[-1])
   } else 
     x <- x[x >= newrange[1]]
@@ -219,7 +219,7 @@ prolongseq <- function(x, newrange) {
   # add or trim data to right
   nx <- length(x)
   if(newrange[2] > x[nx]) {
-    rightbit <- seq(x[nx], newrange[2], by= dx)
+    rightbit <- seq(from=x[nx], to=newrange[2], by= dx)
     x <- c(x[-nx], rightbit)
   } else 
     x <- x[x <= newrange[2]]
@@ -546,3 +546,4 @@ cat.factor <- function (..., recursive=FALSE) {
   lll <- lapply(lll,as.data.frame,nm="v1")
   return(do.call(rbind,lll)[,1])
 }
+

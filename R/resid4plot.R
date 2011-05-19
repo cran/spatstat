@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.15 $    $Date: 2009/12/15 02:00:42 $
+#   $Revision: 1.16 $    $Date: 2011/05/18 09:03:25 $
 #
 #
 
@@ -386,7 +386,7 @@ resid1panel <- function(observedX, observedV,
 beachcolours <- function(heightrange, sealevel = 0, monochrome=FALSE,
                          ncolours=if(monochrome) 16 else 64) {
   if(monochrome)
-    return(grey(seq(0,1,length=ncolours)))
+    return(grey(seq(from=0,to=1,length.out=ncolours)))
   stopifnot(is.numeric(heightrange) && length(heightrange) == 2)
   stopifnot(all(is.finite(heightrange)))
   depths <- heightrange[1]
@@ -447,7 +447,7 @@ ploterodeimage <- function(W, Z, ..., Wcol=grey(0.75), rangeZ, colsZ) {
   # (1) Add the desired colour of W to the colour map
   pseudocols <- c(Wcol, colsZ)
   # (2) Breakpoints
-  bks <- seq(rangeZ[1], rangeZ[2], length=length(colsZ)+1)
+  bks <- seq(from=rangeZ[1], to=rangeZ[2], length=length(colsZ)+1)
   dZ <- diff(bks)[1]
   pseudobreaks <- c(rangeZ[1] - dZ, bks)
   # (3) Determine a fake value for pixels in W

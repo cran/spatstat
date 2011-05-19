@@ -3,7 +3,7 @@
 #
 # Random tessellations
 #
-# $Revision: 1.5 $  $Date: 2009/04/08 05:38:30 $
+# $Revision: 1.6 $  $Date: 2011/05/18 09:00:01 $
 #
 
 # Poisson line tessellation
@@ -42,7 +42,7 @@ rMosaicSet <- function(X, p=0.5) {
   if(length(Y) == 0)
     return(NULL)
   Z <- NULL
-  for(i in seq(Y))
+  for(i in seq_along(Y))
     Z <- union.owin(Z, Y[[i]])
   return(Z)
 }

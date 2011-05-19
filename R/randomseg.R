@@ -1,7 +1,7 @@
 #
 # randomseg.R
 #
-# $Revision: 1.7 $ $Date: 2008/10/31 21:22:42 $
+# $Revision: 1.8 $ $Date: 2011/05/18 08:59:23 $
 #
 
 rpoisline <- function(lambda, win=owin()) {
@@ -53,7 +53,7 @@ rlinegrid <- function(angle=45, spacing=0.1, win=owin()) {
   if(u >= rmax)   
     return(psp(numeric(0), numeric(0), numeric(0), numeric(0),
                window=win, check=FALSE))
-  p <- seq(u, rmax, by=spacing)
+  p <- seq(from=u, to=rmax, by=spacing)
   # compute intersection points with circle
   q <- sqrt(rmax^2 - p^2)
   theta <- pi * ((angle - 90)/180)
