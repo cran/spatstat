@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.61 $	$Date: 2011/05/18 08:43:05 $
+#	$Revision: 1.62 $	$Date: 2011/06/08 04:47:30 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -322,7 +322,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     E <- equalpairs(U, X, marked)
     
     # evaluate interaction
-    Vnew <- evalInterNew(X, U, E, inter, correction="none")
+    Vnew <- evalInteraction(X, U, E, inter, correction="none")
 
   # Negative infinite values signify cif = zero
     cif.equals.zero <- matrowany(Vnew == -Inf)

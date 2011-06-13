@@ -43,7 +43,10 @@
   class \code{"kppm"}.
 }
 \seealso{
-  \code{\link{kppm}}
+  \code{\link{kppm}},  \code{\link{plot.kppm}},
+  \code{\link{predict.kppm}}, \code{\link{simulate.kppm}},
+  \code{\link[spatstat:methods.kppm]{methods.kppm}},
+  \code{\link{vcov.kppm}}
 }
 \examples{
  data(redwood)

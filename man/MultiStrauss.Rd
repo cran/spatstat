@@ -6,7 +6,7 @@ Creates an instance of the multitype Strauss point process model
 which can then be fitted to point pattern data.
 }
 \usage{
-  MultiStrauss(types, radii)
+  MultiStrauss(types=NULL, radii)
 }
 \arguments{
   \item{types}{Optional; vector of all possible types (i.e. the possible levels
@@ -45,11 +45,13 @@ which can then be fitted to point pattern data.
   Strauss process pairwise interaction is
   yielded by the function \code{MultiStrauss()}. See the examples below.
 
-  The argument \code{types} need not usually be specified.
-  The \code{types} will be automatically be determined from
-  the data set to which the interaction object created by this
-  function is applied.  This argument is included mainly for
-  backward compatibility.
+  The argument \code{types} need not be specified in normal use.
+  It will be determined automatically from the point pattern data set
+  to which the MultiStrauss interaction is applied,
+  when the user calls \code{\link{ppm}}. 
+  However, the user should be confident that
+  the ordering of types in the dataset corresponds to the ordering of
+  rows and columns in the matrix \code{radii}.
 
   The matrix \code{radii} must be symmetric, with entries
   which are either positive numbers or \code{NA}. 

@@ -7,7 +7,8 @@
   algorithm. 
 }
 
-\usage{\method{rmh}{default}(model, start, control, verbose=TRUE, \dots) }
+\usage{\method{rmh}{default}(model, start, control, verbose=TRUE,
+track=FALSE, \dots) }
 
 \arguments{
   \item{model}{Data specifying the point process model
@@ -21,6 +22,9 @@
   }
   \item{verbose}{Logical flag indicating whether to print progress
     reports.
+  }
+  \item{track}{Logical flag indicating whether to save the transition
+    history of the simulations.
   }
   \item{\dots}{Further arguments which will be passed to
     any trend functions in \code{model}.
@@ -36,7 +40,15 @@
   the exact simulation procedure.
 
   The value of \code{\link[base:Random]{.Random.seed}} at the start
-  of the simulations is also saved and returned as an attribute \code{seed}.
+  of the simulations is also saved and returned as an attribute
+  \code{seed}.
+
+  If \code{track=TRUE}, the transition history of the algorithm
+  is saved, and returned as an attribute \code{history}. The transition
+  history is a data frame containing a factor \code{proposaltype}
+  identifying the proposal type (Birth, Death or Shift) and
+  a logical vector \code{accepted} indicating whether the proposal was
+  accepted.
 }
 
 \details{
@@ -334,6 +346,13 @@ trend corresponding to a particular type, there is still a component
    # Strauss process, conditioning on n = 80:
    X2.strauss <- rmh(model=mod01,start=list(n.start=ns),
                      control=list(p=1,nrep=nr,nverb=nv))
+
+   \testonly{
+     X1.strauss <- rmh(model=mod01,start=list(n.start=ns),
+                     control=list(nrep=nr,nverb=nv), track=TRUE)
+     X2.strauss <- rmh(model=mod01,start=list(n.start=ns),
+                     control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
+   }
    
    # Hard core process:
    mod02 <- list(cif="hardcore",par=list(beta=2,hc=0.7),w=c(0,10,0,10))

@@ -1,7 +1,7 @@
 #
 #  kstest.R
 #
-#  $Revision: 1.49 $  $Date: 2011/05/18 08:01:58 $
+#  $Revision: 1.52 $  $Date: 2011/05/24 16:38:09 $
 #
 #
 
@@ -131,6 +131,7 @@ kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
 #.............  helper functions ........................#
 
 spatialCDFtest <- function(model, covariate, test, ...,
+                           dimyx=NULL, eps=NULL,
                            jitter=TRUE, 
                            modelname=NULL, covname=NULL, dataname=NULL) {
   if(!is.poisson.ppm(model))
@@ -139,7 +140,9 @@ spatialCDFtest <- function(model, covariate, test, ...,
   test <- pickoption("test", test, c(ks="ks"))
   # compute the essential data
   fra <- spatialCDFframe(model, covariate,
-                         jitter, modelname, covname, dataname)
+                         dimyx=dimyx, eps=eps,
+                         jitter=jitter, modelname=modelname,
+                         covname=covname, dataname=dataname)
   values <- fra$values
   info   <- fra$info
   # Test uniformity of transformed values
@@ -207,7 +210,8 @@ spatialCDFframe <- function(model, covariate, ...) {
   return(stuff)
 }
 
-evalCovar <- function(model, covariate, 
+evalCovar <- function(model, covariate, ...,
+                      dimyx=NULL, eps=NULL,
                       jitter=TRUE, 
                       modelname=NULL, covname=NULL,
                       dataname=NULL) {
@@ -228,10 +232,14 @@ evalCovar <- function(model, covariate,
                 dataname=dataname, csr=csr)
 
   
-  # evaluate covariate 
   X <- data.ppm(model)
   W <- as.owin(model)
 
+  # explicit control of pixel resolution
+  if(!is.null(dimyx) || !is.null(eps))
+    W <- as.mask(W, dimyx=dimyx, eps=eps)
+
+  # evaluate covariate 
   if(is.character(covariate)) {
     # One of the characters 'x' or 'y'
     # Turn it into a function.

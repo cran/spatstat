@@ -1,11 +1,12 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.6 $ $Date: 2011/05/18 01:58:13 $
+#   $Revision: 1.7 $ $Date: 2011/05/27 21:35:28 $
 #
 
 effectfun <- function(model, covname, ...) {
   stopifnot(is.ppm(model))
+  dotargs <- list(...)
   # determine names of covariates involved
   intern.names <-
     if(is.marked.ppm(model)) c("x", "y", "marks") else c("x", "y")
@@ -17,7 +18,7 @@ effectfun <- function(model, covname, ...) {
   if(!(covname %in% c(intern.names, extern.names)))
     stop(paste("model does not have a covariate called", sQuote(covname)))
   # check that fixed values for all other covariates are provided 
-  given.covs <- names(list(...))
+  given.covs <- names(dotargs)
   if(any(uhoh <- !(extern.names %in% c(given.covs, covname)))) {
     nuh <- sum(uhoh)
     stop(paste(ngettext(nuh,
@@ -88,29 +89,32 @@ effectfun <- function(model, covname, ...) {
   # set up data frames of fake data for predict method
   # First set up default, constant value for each covariate
   N <- length(Zvals)
-  fakeloc <- resolve.defaults(list(...),
+  fakeloc <- resolve.defaults(dotargs,
                               list(x=0, y=0))[c("x","y")]
   if(is.marked.ppm(model)) {
     lev <- levels(marks(data.ppm(model)))
     fakeloc$marks <- lev[1]
   }
   fakeloc <- lapply(fakeloc, function(x,N) { rep(x[1],N)}, N=N)
-  fakecov <- lapply(list(...), function(x,N) { rep(x[1],N)}, N=N)
+  fakecov <- lapply(dotargs, function(x,N) { rep(x[1],N)}, N=N)
   # Overwrite value for covariate of interest
   if(covname %in% intern.names)
     fakeloc[[covname]] <- Zvals
   else fakecov[[covname]] <- Zvals
   # convert to data frame
   fakeloc <- do.call("data.frame", fakeloc)
-  fakecov <- do.call("data.frame", fakecov)
+  fakecov <- if(length(fakecov) > 0) do.call("data.frame", fakecov) else NULL
   #
   # Now predict
   lambda <- predict(model, locations=fakeloc, covariates=fakecov)
   #
-  dfin <- cbind(fakeloc, fakecov)[covname]
+  dfin <- if(!is.null(fakecov)) cbind(fakeloc, fakecov) else fakeloc 
+  dfin <- dfin[covname]
   df <- cbind(dfin, data.frame(lambda=lambda))
   if(covtype == "real") {
-    f <- fv(df, argu=covname, ylab="lambda", valu="lambda", alim=Zr,
+    f <- fv(df, argu=covname, ylab=substitute(lambda, NULL),
+            labl=c(covname,"lambda"),
+            valu="lambda", alim=Zr,
             desc=c(paste("value of covariate", covname),
               "fitted intensity"))
     return(f)

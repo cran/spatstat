@@ -1,7 +1,8 @@
 #
-# $Id: rmh.default.R,v 1.71 2011/05/17 13:21:11 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.74 2011/05/24 15:16:32 adrian Exp adrian $
 #
-rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
+rmh.default <- function(model,start=NULL,control=NULL,
+                        verbose=TRUE, track=FALSE, ...) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
 # patterns, given the conditional intensity function of the 
@@ -15,13 +16,15 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   
   if(verbose)
     cat("Checking arguments..")
-  
+
 # validate arguments and fill in the defaults
   
   model <- rmhmodel(model)
   start <- rmhstart(start)
   control <- rmhcontrol(control)
 
+  stopifnot(is.logical(track))
+  
 #### Multitype models
   
 # Decide whether the model is multitype; if so, find the types.
@@ -454,7 +457,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
   class(InfoList) <- c("rmhInfoList", class(InfoList))
 
   # go
-  rmhEngine(InfoList, verbose=verbose, kitchensink=TRUE, ...)
+  rmhEngine(InfoList, verbose=verbose, track=track, kitchensink=TRUE, ...)
 }
 
 
@@ -486,7 +489,7 @@ rmh.default <- function(model,start=NULL,control=NULL, verbose=TRUE, ...) {
 # -------------------------------------------------------
 
 rmhEngine <- function(InfoList, ...,
-                       verbose=FALSE, kitchensink=FALSE,
+                       verbose=FALSE, track=FALSE, kitchensink=FALSE,
                        preponly=FALSE) {
 # Internal Use Only!
 # This is the interface to the C code.
@@ -748,6 +751,7 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(Cmarks) <- "integer"
   storage.mode(fixall) <- "integer"
   storage.mode(npts.cond) <- "integer"
+  storage.mode(track) <- "integer"
 
   out <- .Call("xmethas",
                ncif,
@@ -763,6 +767,7 @@ rmhEngine <- function(InfoList, ...,
                Cmarks,
                npts.cond,
                fixall,
+               track,
                PACKAGE="spatstat")
   
   # Extract the point pattern returned from C
@@ -786,7 +791,14 @@ rmhEngine <- function(InfoList, ...,
     attr(X, "info") <- InfoList
     attr(X, "seed") <- saved.seed
   }
-  
+  if(track) {
+    # append transition history
+    usedout <- if(mtype) 3 else 2
+    proptype <- factor(out[[usedout+1]], levels=1:3,
+                       labels=c("Birth", "Death", "Shift"))
+    accepted <- as.logical(out[[usedout+2]])
+    attr(X, "history") <- data.frame(proposaltype=proptype, accepted=accepted)
+  }
   return(X)
 }
 

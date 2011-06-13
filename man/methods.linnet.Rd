@@ -1,4 +1,6 @@
 \name{methods.linnet}
+\alias{methods.linnet}
+\Rdversion{1.1}
 \alias{as.linnet}
 \alias{as.linnet.linnet}
 \alias{as.linnet.lpp}

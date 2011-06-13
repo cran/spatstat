@@ -1,6 +1,6 @@
 \name{fv.object}
 \alias{fv.object}
-\title{Data Frames of Function Values}
+\title{Function Value Table}
 \description{
   A class \code{"fv"} to support the convenient plotting
   of several estimates of the same function.
@@ -20,10 +20,22 @@
   and \code{\link{Kest}} along with many other functions.
 }
 \seealso{
-  \code{\link{Fest}},
-  \code{\link{Gest}},
-  \code{\link{Jest}},
-  \code{\link{Kest}}
+  Objects of class \code{"fv"} are returned by
+  \code{\link{Fest}}, \code{\link{Gest}},\code{\link{Jest}},
+  and \code{\link{Kest}} along with many other functions.
+  
+  See \code{\link{plot.fv}} for plotting an \code{"fv"} object.
+
+  See \code{\link{as.function.fv}} to convert an \code{"fv"} object
+  to an \R function.
+  
+  Use \code{\link{cbind.fv}} to combine several \code{"fv"} objects.
+  Use \code{\link{bind.fv}} to glue additional columns onto an existing
+  \code{"fv"} object.
+
+  \emph{Undocumented} functions for modifying an \code{"fv"} object
+  include \code{fvnames}, \code{fvnames<-},
+  \code{tweak.fv.entry} and \code{rebadge.fv}.
 }
 \examples{
     data(cells)

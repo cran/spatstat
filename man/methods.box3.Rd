@@ -1,5 +1,6 @@
 \name{methods.box3}
 \Rdversion{1.1}
+\alias{methods.box3}
 \alias{print.box3}
 \alias{unitname.box3}
 \alias{unitname<-.box3}

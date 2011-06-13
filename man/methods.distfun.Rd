@@ -1,4 +1,5 @@
 \name{methods.distfun}
+\alias{methods.distfun}
 \alias{contour.distfun}
 \alias{persp.distfun}
 \alias{plot.distfun}

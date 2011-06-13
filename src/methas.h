@@ -11,12 +11,15 @@
 
    Propo       Proposal in Metropolis-Hastings algorithm
 
+   History     Transition history of MH algorithm
+
    Cifns       Set of functions for computing the conditional intensity
                for a point process model. 
 	       This consists of three functions
                     init(State, Model, Algor) .... initialises auxiliary data
 		    eval(State, Propo) ........... evaluates cif
 		    update(State,Propo) .......... updates auxiliary data
+
  */
 
 /* Current state of point pattern */
@@ -67,6 +70,14 @@ typedef struct Propo {
 #define BIRTH 1
 #define DEATH 2
 #define SHIFT 3
+
+/* Record of transition history */
+typedef struct History {
+  int nmax;              /* length of vectors */
+  int n;                 /* number of events recorded */
+  int *proptype;         /* vector: proposal type */
+  int *accepted;         /* vector: 0 for reject, 1 for accept */
+} History;
 
 /* conditional intensity functions */
 

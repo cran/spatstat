@@ -1,3 +1,130 @@
+	CHANGES IN spatstat VERSION 1.22-2
+
+OVERVIEW 
+
+    o  Fitting and simulation of log-Gaussian Cox processes
+       with any covariance function
+
+    o  More support for 'kppm' and 'rhohat' objects
+
+    o  K-function for point patterns on a linear network
+
+    o  Metropolis-Hastings algorithm now saves its transition history
+
+    o  Easier control of dummy points in ppm
+
+    o  Convert an 'fv' object to an R function 
+
+    o  spatstat now depends on the package 'RandomFields'
+
+    o  We thank Abdollah Jalilian, Shen Guochun, Rasmus Waagepetersen,
+       Ege Rubak and Ang Qi Wei for contributions.
+
+NEW FUNCTIONS
+
+    o linearK
+      Computes the Okabe-Yamada network K-function 
+      for a point pattern on a linear network.
+
+    o pairdist.lpp
+      Shortest-path distances between each pair of points 
+      on a linear network.
+
+    o vcov.kppm
+      Asymptotic variance-covariance matrix for regression parameters
+      in kppm object. 
+      [Contributed by Abdollah Jalilian and Rasmus Waagepetersen]
+
+    o rLGCP
+      Simulation of log-Gaussian Cox processes
+      [Contributed by Abdollah Jalilian and Rasmus Waagepetersen]
+
+    o predict.rhohat
+      Method for 'predict' for objects of class 'rhohat'
+      Computes a pixel image of the predicted intensity.
+
+    o Kmodel, pcfmodel
+      Generic functions that compute the K-function or pair correlation function
+      of a point process *model*. 
+      So far the only methods are for the class 'kppm'.
+
+    o as.function.fv
+      Converts a function value table (class 'fv') to a function in R
+
+    o coef.kppm
+      Method for 'coef' for objects of class 'kppm'
+
+    o unitname, unitname<- 
+      These generic functions now have methods for fitted model objects
+      (classes ppm, slrm, kppm, minconfit) and quadrature schemes (quad).
+
+    o nobs.ppm
+      Method for 'nobs' for class 'ppm'.
+      Returns the number of points in the original data.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o kppm
+      Can now fit a log-Gaussian Cox process
+
+    o simulate.kppm
+      Can now simulate a fitted log-Gaussian Cox process
+
+    o lgcp.estK, lgcp.estpcf
+      These functions previously fitted a log-Gaussian Cox process
+      with exponential covariance. They can now fit a log-Gaussian Cox process
+      with any covariance function implemented by the RandomFields package.
+
+    o rmh
+      If track=TRUE, the history of transitions of the Metropolis-Hastings
+      algorithm is saved and returned.
+
+    o ppm
+      New argument 'nd' controls the number of dummy points.
+
+    o as.fv
+      Now handles objects of class kppm or minconfit.
+
+    o rhohat
+      If covariate = "x" or "y", the resulting object has the same
+      'unitname' as the original point pattern data.
+
+    o rhohat
+      Now has arguments 'eps, 'dimyx' to control pixel resolution.
+
+    o MultiStrauss, MultiHard, MultiStraussHard
+      Default value of 'types' has been changed to NULL.
+
+    o data(ants)
+      The auxiliary data 'ants.extra' now includes a function called 'side'
+      determining whether a given location is in the scrub or field region.
+      Can be used as a covariate in ppm, kppm, slrm.
+
+    o print.ppm
+      Now has argument 'what' to allow only selected information to be printed.
+
+BUG FIXES
+
+    o profilepl
+      Crashed in some cases involving multitype interactions.
+      Fixed.
+
+    o plot.splitppp
+      Behaved incorrectly if 'main' was an expression.
+      Fixed.
+
+    o effectfun
+      Crashed in trivial cases.
+      Fixed.
+
+    o kppm, thomas.estpcf, matclust.estpcf, lgcp.estpcf
+      Gave a spurious warning message.
+      Fixed.
+
+    o step
+      When applied to ppm objects this gave a spurious warning.
+      Fixed.
+    
 	CHANGES IN spatstat VERSION 1.22-1
 
 OVERVIEW 

@@ -8,8 +8,11 @@
   using the pair correlation function.
 }
 \usage{
-lgcp.estpcf(X, startpar=c(sigma2=1,alpha=1), lambda=NULL,
-q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
+lgcp.estpcf(X,
+            startpar=c(sigma2=1,alpha=1),
+            covmodel=list(model="exponential"),
+            lambda=NULL,
+            q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
 }
 \arguments{
   \item{X}{
@@ -20,6 +23,10 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
   \item{startpar}{
     Vector of starting values for the parameters of the
     log-Gaussian Cox process model.
+  }
+  \item{covmodel}{
+    Specification of the covariance model
+    for the log-Gaussian field. See Details.
   }
   \item{lambda}{
     Optional. An estimate of the intensity of the point process.
@@ -69,39 +76,73 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
   see \code{\link{mincontrast}}.
 
   The model fitted is a stationary, isotropic log-Gaussian Cox process
-  with exponential covariance
   (Moller and Waagepetersen, 2003, pp. 72-76).
   To define this process we start with
   a stationary Gaussian random field \eqn{Z} in the two-dimensional plane,
-  with constant mean \eqn{\mu}{mu} and covariance function
-  \deqn{
-    c(r) = \sigma^2 e^{-r/\alpha}
-  }{
-    c(r) = sigma^2 * exp(-r/alpha)
-  }
-  where \eqn{\sigma^2}{sigma^2} and \eqn{\alpha}{alpha} are parameters.
+  with constant mean \eqn{\mu}{mu} and covariance function \eqn{C(r)}.
   Given \eqn{Z}, we generate a Poisson point process \eqn{Y} with intensity
   function \eqn{\lambda(u) = \exp(Z(u))}{lambda(u) = exp(Z(u))} at
   location \eqn{u}. Then \eqn{Y} is a log-Gaussian Cox process.
 
   The theoretical pair correlation function of the LGCP is
   \deqn{
-    g(r) = \exp(\sigma^2 \exp(-r/\alpha))
+    g(r) = \exp(C(s))
   }{
-    g(r) = exp(sigma^2 * exp(-r/alpha))
+    g(r) = exp(C(s))
   }
-  The theoretical intensity of the LGCP is 
+  The intensity of the LGCP is 
   \deqn{
-    \lambda = \exp(\mu + \frac{\sigma^2}{2}).
+    \lambda = \exp(\mu + \frac{C(0)}{2}).
   }{
-    lambda= exp(mu + sigma^2/2).
+    lambda= exp(mu + C(0)/2).
   }
+  
+  The covariance function \eqn{C(r)} takes the form
+  \deqn{
+    C(r) = \sigma^2 c(r/\alpha)
+  }{
+    C(r) = sigma^2 * c(-r/alpha)
+  }
+  where \eqn{\sigma^2}{sigma^2} and \eqn{\alpha}{alpha} are parameters
+  controlling the strength and the scale of autocorrelation,
+  respectively, and \eqn{c(r)} is a known covariance function
+  determining the shape of the covariance. 
+  The strength and scale parameters
+  \eqn{\sigma^2}{sigma^2} and \eqn{\alpha}{alpha}
+  will be estimated by the algorithm.
+  The template covariance function \eqn{c(r)} must be specified
+  as explained below.
+  
   In this algorithm, the Method of Minimum Contrast is first used to find
   optimal values of the parameters \eqn{\sigma^2}{sigma^2}
   and \eqn{\alpha}{alpha^2}. Then the remaining parameter
   \eqn{\mu}{mu} is inferred from the estimated intensity
   \eqn{\lambda}{lambda}.
 
+  The template covariance function \eqn{c(r)} is specified
+  using the argument \code{covmodel}. It may be any of the
+  covariance functions recognised by the command
+  \code{\link[RandomFields:CovarianceFct]{Covariance}} in the
+  \pkg{RandomFields} package. The default is the exponential covariance
+  \eqn{c(r) = e^{-r}}{c(r) = e^(-r)}
+  so that the scaled covariance is 
+  \deqn{
+    C(r) = \sigma^2 e^{-r/\alpha}.
+  }{
+    C(r) = sigma^2 * exp(-r/alpha).
+  }
+  The argument \code{covmodel} should be of the form
+  \code{list(model="modelname", \dots)} where
+  \code{modelname} is the string name of one of the covariance models
+  recognised by the command
+  \code{\link[RandomFields:CovarianceFct]{Covariance}} in the
+  \pkg{RandomFields} package, and \code{\dots} are arguments of the
+  form \code{tag=value} giving the values of parameters controlling the
+  shape of these models. For example the exponential covariance is
+  specified by \code{covmodel=list(model="exponential")} while the
+  Matern covariance with exponent \eqn{\nu=0.3}{nu = 0.3} is specified
+  by \code{covmodel=list(model="matern", nu=0.3)}. 
+  
   If the argument \code{lambda} is provided, then this is used
   as the value of \eqn{\lambda}{lambda}. Otherwise, if \code{X} is a
   point pattern, then  \eqn{\lambda}{lambda}
@@ -133,6 +174,10 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
   }
 }
 \references{
+  Moller, J, Syversveen, A. and Waagepetersen, R. (1998)
+  Log Gaussian Cox Processes.
+  \emph{Scandinavian Journal of Statistics} \bold{25}, 451--482.
+  
   Moller, J. and Waagepetersen, R. (2003).
   Statistical Inference and Simulation for Spatial Point Processes.
   Chapman and Hall/CRC, Boca Raton.
@@ -145,20 +190,32 @@ q = 1/4, p = 2, rmin = NULL, rmax = NULL, ..., pcfargs=list())
 \author{
   Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  \url{http://www.maths.uwa.edu.au/~adrian/},
+  with modifications by Shen Guochun and 
+  Rasmus Waagepetersen
+  \email{rw@math.auc.dk}
 }
 \seealso{
-  \code{\link{lgcp.estK}},
-  \code{\link{thomas.estpcf}},
+  \code{\link{lgcp.estK}} for alternative method of fitting LGCP.
+  
   \code{\link{matclust.estpcf}},
-  \code{\link{mincontrast}},
-  \code{\link{pcf}}
+  \code{\link{thomas.estpcf}} for other models.
+  
+  \code{\link{mincontrast}} for the generic minimum contrast
+  fitting algorithm, including important parameters that affect
+  the accuracy of the fit.
+  
+  \code{\link[RandomFields:CovarianceFct]{Covariance}} in the
+  \pkg{RandomFields} package, for covariance function models.
+  
+  \code{\link{pcf}} for the pair correlation function.
 }
 \examples{
     data(redwood)
     u <- lgcp.estpcf(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
+    lgcp.estpcf(redwood, covmodel=list(model="matern", nu=0.3))
 }
 \keyword{spatial}
 \keyword{models}

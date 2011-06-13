@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.121 $	$Date: 2011/05/18 08:07:25 $
+#	$Revision: 5.130 $	$Date: 2011/06/08 04:59:56 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -38,6 +38,7 @@ function(Q,
          gcontrol=list(),
          famille=NULL,
          forcefit=FALSE,
+         nd = NULL,
          allcovar=FALSE,
          callstring="",
          precomputed=NULL,
@@ -60,7 +61,7 @@ function(Q,
       validate.quad(Q, fatal=TRUE, repair=FALSE, announce=TRUE)
     } else if(verifyclass(Q, "ppp", fatal = FALSE)) {
       # point pattern - create default quadrature scheme
-      Q <- quadscheme(Q)
+      Q <- quadscheme(Q, nd=nd)
     } else 
       stop("First argument Q should be a point pattern or a quadrature scheme")
     
@@ -99,7 +100,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/05/18 08:07:25 $")
+                    date="$Date: 2011/06/08 04:59:56 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -433,12 +434,16 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     # The rows of V correspond to the rows of P (quadrature points)
     # while the column(s) of V are the regression variables (log-potentials)
 
-    V <- evalInteraction(Q, X, P, interaction, correction,
+    E <- equalpairs.quad(Q)
+    V <- evalInteraction(X, P, E, interaction, correction,
                          ...,
                          precomputed=precomputed,
                          savecomputed=savecomputed)
     if(!is.matrix(V))
       stop("interaction evaluator did not return a matrix")
+    # extract intermediate computation results 
+    if(savecomputed)
+      computed <- append(computed, attr(V, "computed"))
 
     # extract information about offsets
     IsOffset <- attr(V, "IsOffset")
@@ -728,7 +733,7 @@ oversize.quad <- function(Q, ..., nU, nX) {
 # function that should be called to evaluate interaction terms
 # between quadrature points and data points
 
-evalInteraction <- function(Q, X, P,
+evalInteraction <- function(X, P, E, 
                             interaction, correction,
                             ...,
                             precomputed=NULL,
@@ -737,7 +742,6 @@ evalInteraction <- function(Q, X, P,
   # evaluate the interaction potential
   # (does not assign/touch the variable names)
 
-  verifyclass(Q, "quad")
   verifyclass(interaction, "interact")
   
   # determine whether to use fast evaluation in C
@@ -765,7 +769,7 @@ evalInteraction <- function(Q, X, P,
   
   if(!dosplit) {
     # normal case
-    V <- evalInterEngine(Q=Q, X=X, P=P, 
+    V <- evalInterEngine(X=X, P=P, E=E,
                          interaction=interaction,
                          correction=correction,
                          ...,
@@ -773,36 +777,46 @@ evalInteraction <- function(Q, X, P,
                          savecomputed=savecomputed)
   } else {
     # Too many quadrature points: split into blocks
-    D <- Q$dummy
-    nD <- D$n
-    nX <- X$n
+    nX <- npoints(X)
+    nP <- npoints(P)
+    # Determine which evaluation points are data points
+    Pdata <- E[,2]
+    # hence which are dummy points
+    Pall <- seq_len(nP)
+    Pdummy <- if(length(Pdata) > 0) Pall[-Pdata] else Pall
+    nD <- length(Pdummy)
+    # size of full matrix
     nmat <- (nD + nX) * nX
     nMAX <- spatstat.options("maxmatrix")
     # Calculate number of dummy points in largest permissible X * (X+D) matrix 
     nperblock <- max(1, floor(nMAX/nX - nX))
     # determine number of such blocks 
     nblocks <- ceiling(nD/nperblock)
+    nfull <- nblocks - 1
     # announce
-    message(paste("Large quadrature scheme",
-                  "split into blocks to avoid memory size limits;",
-                  nD, "dummy points",
-                  "split into", nblocks, "blocks, each containing",
-                  nperblock, "dummy", ngettext(nperblock, "point", "points")))
-    # weights 
-    W <- w.quad(Q)
-    WX <- W[1:nX]
-    # 
+    if(nblocks > 1) 
+      message(paste("Large quadrature scheme",
+                    "split into blocks to avoid memory size limits;",
+                    nD, "dummy points",
+                    "split into", nblocks, "blocks,",
+                    "the first",
+                    if(nfull > 1) paste(nfull, "blocks") else "block",
+                    "containing",
+                    nperblock, "dummy", ngettext(nperblock, "point", "points"),
+                    "and the last block containing",
+                    nD - nperblock * nfull, "dummy points"))
+    #
+    #
+    Ei <- cbind(1:nX, 1:nX)
+    #
     for(iblock in 1:nblocks) {
       first <- min(nD, (iblock - 1) * nperblock + 1)
       last  <- min(nD, iblock * nperblock)
-      # extract dummy points and weights
-      Di <- D[first:last]
-      Wi <- W[nX + first:last]
-      # form partial quadrature scheme
-      Qi <- quad(X, Di, c(WX, Wi))
-      Pi <- union.quad(Qi)
-      #
-      Vi <- evalInterEngine(Q=Qi, X=X, P=Pi,
+      # extract dummy points  
+      Di <- P[Pdummy[first:last]]
+      Pi <- superimpose(X, Di, check=FALSE, W=X$window)
+      # evaluate potential
+      Vi <- evalInterEngine(X=X, P=Pi, E=Ei, 
                             interaction=interaction,
                             correction=correction,
                             ...,
@@ -820,14 +834,12 @@ evalInteraction <- function(Q, X, P,
 
 # workhorse function that actually calls relevant code to evaluate interaction
 
-evalInterEngine <- function(Q, X, P,
+evalInterEngine <- function(X, P, E, 
                             interaction, correction,
                             ...,
                             precomputed=NULL,
                             savecomputed=FALSE) {
 
-  E <- equalpairs.quad(Q)
-  
   # fast evaluator (C code) may exist
   fasteval <- interaction$fasteval
   cando    <- interaction$can.do.fast
@@ -856,9 +868,6 @@ evalInterEngine <- function(Q, X, P,
                     correction, ...,
                     precomputed=precomputed,
                     savecomputed=savecomputed)
-      # extract intermediate computation results 
-      if(savecomputed)
-        computed <- append(computed, attr(V, "computed"))
     } else {
       # Cannot use precomputed data
       # Object created by earlier version of ppm
@@ -873,30 +882,4 @@ evalInterEngine <- function(Q, X, P,
   return(V)
 }
 
-# function to be called to evaluate interaction terms at new points
-# e.g. by predict.ppm
-
-evalInterNew <- function(X, U, E, interaction, ...) {
-  nU <- npoints(U)
-  nX <- npoints(X)
-  # determine which evaluation points are data points
-  Udata <- E[,2]
-  # hence which are non-data points
-  Uall <- seq_len(nU)
-  Unondata <- if(length(Udata) > 0) Uall[-Udata] else Uall
-  # form quadscheme in different order
-  D <- U[Unondata]
-  Q <- quad(X, D)
-  # evaluate interaction
-  VQ <- evalInteraction(Q, X, union.quad(Q), interaction, ...)
-  # extract values in correct places
-  V <- matrix(, nU, ncol(VQ))
-  colnames(V) <- colnames(VQ)
-  XfromU <- E[,1]
-  # selected data points
-  V[Udata,] <- VQ[XfromU, ]
-  # all non-data points
-  V[Unondata,] <- VQ[ - seq_len(nX), ]
-  return(V)
-}
 

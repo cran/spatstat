@@ -1,9 +1,9 @@
 #
 # kppm.R
 #
-# kluster point process models
+# kluster/kox point process models
 #
-# $Revision: 1.17 $ $Date: 2011/05/18 08:00:28 $
+# $Revision: 1.36 $ $Date: 2011/06/08 11:53:35 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -11,7 +11,8 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
   Xname <- deparse(substitute(X))
   clusters <- pickoption("cluster type", clusters,
                          c(Thomas="Thomas",
-                           MatClust="MatClust"))
+                           MatClust="MatClust",
+                           LGCP="LGCP"))
   statistic <- pickoption("summary statistic", statistic,
                           c(K="K", g="pcf", pcf="pcf"))
   if(is.marked(X))
@@ -38,7 +39,12 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
                      resolve.defaults(
                                       list(X=Stat, lambda=lambda),
                                       list(...),
-                                      list(startpar=startpar0)))
+                                      list(startpar=startpar0, dataname=Xname)))
+           # kappa = mean number of points per cluster
+           kappa <- mcfit$par[["kappa"]]
+           # mu = intensity of parents
+           mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
+           isPCP <- TRUE
          },
          MatClust={
            startpar0 <- c(kappa=1, R = 2 * mean(nndist(X)))
@@ -48,13 +54,32 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
                      resolve.defaults(
                                       list(X=Stat, lambda=lambda),
                                       list(...),
-                                      list(startpar=startpar0)))
+                                      list(startpar=startpar0, dataname=Xname)))
+           # kappa = mean number of points per cluster
+           kappa <- mcfit$par[["kappa"]]
+           # mu = intensity of parents
+           mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
+           isPCP <- TRUE
+         },
+         LGCP={
+           startpar0 <- c(sigma2=1, alpha=2 * mean(nndist(X)))
+           FitFun <- if(statistic == "K") "lgcp.estK" else "lgcp.estpcf"
+           mcfit <-
+             do.call(FitFun,
+                     resolve.defaults(
+                                      list(X=Stat, lambda=lambda),
+                                      list(...),
+                                      list(startpar=startpar0, dataname=Xname)))
+           sigma2 <- mcfit$par[["sigma2"]]
+           # mu = mean of log intensity 
+           mu <- if(stationary) log(lambda) - sigma2/2 else eval.im(log(lambda) - sigma2/2)
+           isPCP <- FALSE
          })
-  kappa <- mcfit$par[["kappa"]]
-  mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
+
 
   out <- list(stationary=stationary,
               clusters=clusters,
+              isPCP=isPCP,
               Xname=Xname,
               statistic=statistic,
               X=X,
@@ -69,40 +94,59 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
 }
 
 print.kppm <- function(x, ...) {
-  ps <- summary(x$po)
 
-  if(x$stationary)
-    cat("Stationary cluster point process model\n")
-  else 
-    cat("Inhomogeneous cluster point process model\n")
+  isPCP <- x$isPCP
+  # handle outdated objects - which were all cluster processes
+  if(is.null(isPCP)) isPCP <- TRUE
+  
+  cat(paste(if(x$stationary) "Stationary" else "Inhomogeneous",
+            if(isPCP) "cluster" else "Cox",
+            "point process model\n"))
 
   if(nchar(x$Xname) < 20)
     cat(paste("Fitted to point pattern dataset", sQuote(x$Xname), "\n"))
 
   cat(paste("Fitted using the", x$StatName, "\n"))
 
-  if(!x$stationary) {
-    cat("Trend formula:")
-    print(ps$trend$formula)
-    cat(paste("\n", ps$trend$label, ":", sep = ""))
-    tv <- ps$trend$value
-    if (is.list(tv)) {
-      cat("\n")
-      for (i in seq_along(tv)) print(tv[[i]])
-    }
-    else if (is.numeric(tv) && length(tv) == 1 && is.null(names(tv)))
-      cat("\t", paste(tv), "\n")
-    else {
-      cat("\n")
-      print(tv)
+  # ............... trend .........................
+
+  print(x$po, what="trend")
+
+  # ..................... clusters ................
+  
+  mcfit <- x$mcfit
+  cat(paste(if(isPCP) "Cluster" else "Cox",
+            "model:", mcfit$info$modelname, "\n"))
+  cm <- mcfit$covmodel
+  if(!is.null(cm)) {
+    # Covariance model - LGCP only
+    cat(paste("\tCovariance model:", cm$model, "\n"))
+    margs <- cm$margs
+    if(!is.null(margs)) {
+      nama <- names(margs)
+      tags <- ifelse(nzchar(nama), paste(nama, "="), "")
+      tagvalue <- paste(tags, margs)
+      cat(paste("\tCovariance parameters:",
+                paste(tagvalue, collapse=", "),
+                "\n"))
     }
   }
-  mcfit <- x$mcfit
-  cat(paste("Cluster model:", mcfit$info$modelname, "\n"))
-  mp <- mcfit$modelpar
-  if (!is.null(mp)) {
-    cat("Fitted parameters:\n")
-    print(mp[!is.na(mp)])
+  pa <- mcfit$par
+  if (!is.null(pa)) {
+    cat(paste("Fitted",
+              if(isPCP) "cluster" else "correlation",
+              "parameters:\n"))
+    print(pa)
+  }
+
+  if(!is.null(mu <- x$mu)) {
+    if(isPCP) {
+      cat("Mean cluster size: ")
+      if(!is.im(mu)) cat(mu, "points\n") else cat("[pixel image]\n")
+    } else {
+      cat("Fitted mean of log of random intensity: ")
+      if(!is.im(mu)) cat(mu, "\n") else cat("[pixel image]\n")
+    }
   }
   invisible(NULL)
 }
@@ -161,26 +205,56 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
     win <- window
   }
   mp <- as.list(object$mcfit$modelpar)
-  kappa <- mp$kappa
+
+  # parameter 'mu'
+  # = parent intensity of cluster process
+  # = mean log intensity of log-Gaussian Cox process
+  
   if(is.null(covariates) && (object$stationary || is.null(window))) {
-    # use existing base intensity 'mu' (scalar or image)
+    # use existing 'mu' (scalar or image)
     mu <- object$mu
   } else {
-    # compute new base intensity image 'mu' using new data
-    lambda <- predict(object, window=win, covariates=covariates)
-    mu <- eval.im(lambda/kappa)
+    # recompute 'mu' using new data
+    switch(object$clusters,
+           Thomas=,
+           MatClust={
+             # Poisson cluster process
+             kappa <- mp$kappa
+             lambda <- predict(object, window=win, covariates=covariates)
+             mu <- eval.im(lambda/kappa)
+           },
+           LGCP={
+             # log-Gaussian Cox process
+             sigma2 <- mp$sigma2
+             lambda <- predict(object, window=win, covariates=covariates)
+             mu <- eval.im(log(lambda) - sigma2/2)
+           }
+           )
   }
+  
   out <- list()
   switch(object$clusters,
          Thomas={
+           kappa <- mp$kappa
            sigma <- mp$sigma
            for(i in 1:nsim)
              out[[i]] <- rThomas(kappa,sigma,mu,win)
          },
          MatClust={
+           kappa <- mp$kappa
            r <-     mp$R
            for(i in 1:nsim)
              out[[i]] <- rMatClust(kappa,r,mu,win)
+         },
+         LGCP={
+           sigma2 <- mp$sigma2
+           alpha  <- mp$alpha
+           cm <- object$mcfit$covmodel
+           model <- cm$model
+           margs <- cm$margs
+           param <- c(0, sigma2, 0, alpha, unlist(margs))
+           for(i in 1:nsim)
+             out[[i]] <- rLGCP(model=model, mu=mu, param=param, ..., win=win)
          })
   out <- as.listof(out)
   names(out) <- paste("Simulation", 1:nsim)
@@ -197,10 +271,63 @@ terms.kppm <- function(x, ...) {
 }
 
 update.kppm <- function(object, trend=~1, ..., clusters=NULL) {
-  trend <- update(formula(object), trend)
+  if(!missing(trend))
+    trend <- update(formula(object), trend)
   if(is.null(clusters))
     clusters <- object$clusters
-  out <- kppm(object$X, trend, clusters, ...)
+  out <- do.call(kppm,
+                 resolve.defaults(list(trend=trend, clusters=clusters),
+                                  list(...),
+                                  list(X=object$X)))
   out$Xname <- object$Xname
   return(out)
 }
+
+unitname.kppm <- function(x) {
+  return(unitname(x$X))
+}
+
+"unitname<-.kppm" <- function(x, value) {
+  unitname(x$X) <- value
+  unitname(x$mcfit) <- value
+  return(x)
+}
+
+coef.kppm <- function(object, ...) {
+  return(coef(object$po))
+}
+
+
+Kmodel.kppm <- function(model, ...) {
+  Kpcf.kppm(model, what="K")
+}
+
+pcfmodel.kppm <- function(model, ...) {
+  Kpcf.kppm(model, what="pcf")
+}
+
+Kpcf.kppm <- function(model, what=c("K", "pcf")) {
+  what <- match.arg(what)
+  # Extract function definition from internal table
+  clusters <- model$clusters
+  tableentry <- .Spatstat.ClusterModelInfo[[clusters]]
+  if(is.null(tableentry))
+    stop("No information available for", sQuote(clusters), "cluster model")
+  fun <- tableentry[[what]]
+  if(is.null(fun))
+    stop("No expression available for", what, "for", sQuote(clusters),
+         "cluster model")
+  # Extract model parameters
+  par <- model$mcfit$par
+  # Extract auxiliary definitions (if applicable)
+  funaux <- tableentry$funaux
+  # Extract covariance model (if applicable)
+  cm <- model$mcfit$covmodel
+  model <- cm$model
+  margs <- cm$margs
+  #
+  f <- function(r) as.numeric(fun(par=par, rvals=r,
+                                  funaux=funaux, model=model, margs=margs))
+  return(f)
+}
+

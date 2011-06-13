@@ -12,18 +12,20 @@
 # -------------------------------------------------------------------
 #	
 
-MultiStrauss <- function(types=NA, radii) {
-  nt <- length(types)
-  if(nt > 1) {
+MultiStrauss <- function(types=NULL, radii) {
+  if(!is.null(types)) {
+    if(length(types) == 0)
+      stop(paste("The", sQuote("types"),"argument should be",
+                 "either NULL or a vector of all possible types"))
+    if(any(is.na(types)))
+      stop("NA's not allowed in types")
     if(is.factor(types)) {
       types <- levels(types)
     } else {
       types <- levels(factor(types, levels=types))
     }
     dimnames(radii) <- list(types, types)
-  } else if((nt == 0) || !is.na(types))
-    stop(paste("The", sQuote("types"),"argument should",
-                           "either be a vector of all possible types or \"NA\".\n"))
+  } 
   out <- 
   list(
          name     = "Multitype Strauss process",
@@ -93,15 +95,15 @@ MultiStrauss <- function(types=NA, radii) {
          par      = list(types=types, radii = radii),
          parnames = c("possible types", "interaction distances"),
          selfstart = function(X, self) {
-		if(length(self$par$types) > 1) return(self)
+		if(!is.null(self$par$types)) return(self)
                 types <- levels(marks(X))
                 MultiStrauss(types=types,radii=self$par$radii)
 	 },
          init     = function(self) {
-                      nt <- length(self$par$types)
-                      chk <- (nt != 1)# || is.na(self$par$types)
-                      if(chk) {
+                      types <- self$par$types
+                      if(!is.null(types)) {
                         h <- self$par$radii
+                        nt <- length(types)
                         MultiPair.checkmatrix(h, nt, sQuote("radii"))
                       }
                     },
@@ -109,9 +111,13 @@ MultiStrauss <- function(types=NA, radii) {
          print = function(self) {
            print.isf(self$family)
            cat(paste("Interaction:\t", self$name, "\n"))
-           cat(paste(length(self$par$types), "types of points\n"))
-           cat("Possible types: \n")
-           print(self$par$types)
+           radii <- self$par$radii
+           cat(paste(nrow(radii), "types of points\n"))
+           types <- self$par$types
+           if(!is.null(types)) {
+             cat("Possible types: \n")
+             print(types)
+           } else cat("Possible types:\t not yet determined\n")
            cat("Interaction radii:\n")
            print(self$par$radii)
            invisible()

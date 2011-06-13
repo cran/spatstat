@@ -38,7 +38,8 @@ SEXP xmethas(
 	     SEXP y,
 	     SEXP marks,
 	     SEXP ncond,
-	     SEXP fixall)
+	     SEXP fixall,
+             SEXP track)
 {
   char *cifstring;
   double cvd, cvn, qnodds, anumer, adenom;
@@ -50,13 +51,15 @@ SEXP xmethas(
   int *plength;
   long Nmore;
   double *xx, *yy, *xpropose, *ypropose;
-  int    *mm,      *mpropose;
-  SEXP out, xout, yout, mout;
+  int    *mm,      *mpropose, *pp, *aa;
+  SEXP out, xout, yout, mout, pout, aout;
+  int tracking;
 
   State state;
   Model model;
   Algor algo;
   Propo birthprop, deathprop, shiftprop;
+  History history;
 
   /* The following variables are used only for a non-hybrid interaction */
   Cifns thecif;     /* cif structure */
@@ -88,8 +91,9 @@ SEXP xmethas(
   PROTECT( marks    = AS_INTEGER(marks)); 
   PROTECT(fixall    = AS_INTEGER(fixall)); 
   PROTECT(ncond     = AS_INTEGER(ncond)); 
+  PROTECT(track     = AS_INTEGER(track)); 
 
-                    /* that's 18 protected objects */
+                    /* that's 19 protected objects */
 
   /* =================== Translate arguments from R to C ================ */
 
@@ -149,6 +153,7 @@ SEXP xmethas(
      mpropose is only used for marked patterns.
      Note 'mprop' is always a valid pointer */
 
+  
   /* ================= Allocate space for cifs etc ========== */
 
   if(Ncif > 1) {
@@ -177,6 +182,15 @@ SEXP xmethas(
       if(cif[k].marked && !marked)
 	fexitc("component cif is for a marked point process, but proposal data are not marked points; bailing out.");
     }
+  }
+  /* ============= Initialise transition history ========== */
+
+  tracking = (*(INTEGER_POINTER(track)) != 0);
+  if(tracking) {
+    history.nmax = algo.nrep;
+    history.n = 0;
+    history.proptype = (int *) R_alloc(algo.nrep, sizeof(int));
+    history.accepted = (int *) R_alloc(algo.nrep, sizeof(int));
   }
 
   /* ================= Initialise algorithm ==================== */
@@ -209,45 +223,96 @@ SEXP xmethas(
   /* Initialise random number generator */
   GetRNGstate();
 
-  if(Ncif == 1) {
-    /* single interaction */
+  if(tracking) {
+    /* saving transition history */
+#define MH_TRACKING TRUE
+    if(Ncif == 1) {
+      /* single interaction */
 #define MH_SINGLE TRUE
-    if(marked) {
-      /* marked process */
+      if(marked) {
+	/* marked process */
 #define MH_MARKED TRUE
 
-      /* run loop */
+	/* run loop */
 #include "mhloop.h"
 
-    } else {
-      /* unmarked process */
+      } else {
+	/* unmarked process */
 #undef MH_MARKED
 #define MH_MARKED FALSE
 
-      /* run loop */
+	/* run loop */
 #include "mhloop.h"
 
-    }
-  } else {
-    /* hybrid interaction */
+      }
+    } else {
+      /* hybrid interaction */
 #undef MH_SINGLE
 #define MH_SINGLE FALSE
-    if(marked) {
-      /* marked process */
+      if(marked) {
+	/* marked process */
 #undef MH_MARKED
 #define MH_MARKED TRUE
 
-      /* run loop */
+	/* run loop */
 #include "mhloop.h"
 
-    } else {
-      /* unmarked process */
+      } else {
+	/* unmarked process */
 #undef MH_MARKED
 #define MH_MARKED FALSE
 
-      /* run loop */
+	/* run loop */
 #include "mhloop.h"
 
+      }
+    }
+  } else {
+    /* not saving transition history */
+#undef MH_TRACKING
+#define MH_TRACKING FALSE
+    if(Ncif == 1) {
+      /* single interaction */
+#undef MH_SINGLE
+#define MH_SINGLE TRUE
+      if(marked) {
+	/* marked process */
+#undef MH_MARKED
+#define MH_MARKED TRUE
+
+	/* run loop */
+#include "mhloop.h"
+
+      } else {
+	/* unmarked process */
+#undef MH_MARKED
+#define MH_MARKED FALSE
+
+	/* run loop */
+#include "mhloop.h"
+
+      }
+    } else {
+      /* hybrid interaction */
+#undef MH_SINGLE
+#define MH_SINGLE FALSE
+      if(marked) {
+	/* marked process */
+#undef MH_MARKED
+#define MH_MARKED TRUE
+
+	/* run loop */
+#include "mhloop.h"
+
+      } else {
+	/* unmarked process */
+#undef MH_MARKED
+#define MH_MARKED FALSE
+
+	/* run loop */
+#include "mhloop.h"
+
+      }
     }
   }
 
@@ -271,18 +336,48 @@ SEXP xmethas(
     for(j = 0; j < state.npts; j++) 
       mm[j] = state.marks[j];
   }
-  if(!marked) {
-    PROTECT(out = NEW_LIST(2));
-    SET_VECTOR_ELT(out, 0, xout);
-    SET_VECTOR_ELT(out, 1, yout);
-    UNPROTECT(21);  /* 18 arguments plus xout, yout, out */
-  } else {
-    PROTECT(out = NEW_LIST(3)); 
-    SET_VECTOR_ELT(out, 0, xout);
-    SET_VECTOR_ELT(out, 1, yout); 
-    SET_VECTOR_ELT(out, 2, mout);
-    UNPROTECT(22);  /* 18 arguments plus xout, yout, mout, out */
+  if(tracking) {
+    PROTECT(pout = NEW_INTEGER(algo.nrep));
+    PROTECT(aout = NEW_INTEGER(algo.nrep));
+    pp = INTEGER_POINTER(pout);
+    aa = INTEGER_POINTER(aout);
+    for(j = 0; j < algo.nrep; j++) {
+      pp[j] = history.proptype[j];
+      aa[j] = history.accepted[j];
+    }
   }
-
+  if(!tracking) {
+    /* no transition history */
+    if(!marked) {
+      PROTECT(out = NEW_LIST(2));
+      SET_VECTOR_ELT(out, 0, xout);
+      SET_VECTOR_ELT(out, 1, yout);
+      UNPROTECT(22);  /* 19 arguments plus xout, yout, out */
+    } else {
+      PROTECT(out = NEW_LIST(3)); 
+      SET_VECTOR_ELT(out, 0, xout);
+      SET_VECTOR_ELT(out, 1, yout); 
+      SET_VECTOR_ELT(out, 2, mout);
+      UNPROTECT(23);  /* 19 arguments plus xout, yout, mout, out */
+    }
+  } else {
+    /* transition history */
+    if(!marked) {
+      PROTECT(out = NEW_LIST(4));
+      SET_VECTOR_ELT(out, 0, xout);
+      SET_VECTOR_ELT(out, 1, yout);
+      SET_VECTOR_ELT(out, 2, pout);
+      SET_VECTOR_ELT(out, 3, aout);
+      UNPROTECT(24);  /* 19 arguments plus xout, yout, out, pout, aout */
+    } else {
+      PROTECT(out = NEW_LIST(5)); 
+      SET_VECTOR_ELT(out, 0, xout);
+      SET_VECTOR_ELT(out, 1, yout); 
+      SET_VECTOR_ELT(out, 2, mout);
+      SET_VECTOR_ELT(out, 3, pout);
+      SET_VECTOR_ELT(out, 4, aout);
+      UNPROTECT(25);  /* 19 arguments plus xout, yout, mout, out, pout, aout */
+    }
+  }
   return(out);
 }

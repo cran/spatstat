@@ -51,6 +51,8 @@
 \alias{clippoly.psp}
 \alias{closepairs}
 \alias{complaining}
+\alias{compileK}
+\alias{compilepcf}
 \alias{crosspairs}
 \alias{crosspaircounts}
 \alias{crossfikselterms}
@@ -102,13 +104,11 @@
 \alias{evalCovariate}
 \alias{evalInteraction}
 \alias{evalInterEngine}
-\alias{evalInterNew}
 \alias{even.breaks.owin}
 \alias{evenly.spaced}
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{explain.ifnot}
-\alias{extractAIC.ppm}
 \alias{extractAIC.slrm}
 \alias{f3engine}
 \alias{f3Cengine}
@@ -121,8 +121,6 @@
 \alias{fillNA}
 \alias{forbidNA}
 \alias{FormatFaspFormulae}
-\alias{formula.ppm}
-\alias{formula.kppm}
 \alias{formula.slrm}
 \alias{fvlabels}
 \alias{fvlabels<-}
@@ -133,6 +131,7 @@
 \alias{g3engine}
 \alias{g3Cengine}
 \alias{greatest.common.divisor}
+\alias{getdataname}
 \alias{getfields}
 \alias{getglmdata}
 \alias{getglmfit}
@@ -182,6 +181,7 @@
 \alias{Kount}
 \alias{Kwtsum}               
 \alias{Kmulti.inhom}               
+\alias{Kpcf.kppm}               
 \alias{killinteraction}
 \alias{km.rs.opt}
 \alias{least.common.multiple}
@@ -280,7 +280,6 @@
 \alias{plot.qqppm}
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
-\alias{plot.rhohat}
 \alias{polynom}
 \alias{ppllengine}
 \alias{ppmCovariates}
@@ -300,7 +299,6 @@
 \alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
-\alias{print.kppm}
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
@@ -310,7 +308,6 @@
 \alias{print.profilepl}
 \alias{print.quadrattest}
 \alias{print.qqppm}
-\alias{print.rhohat}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
@@ -406,8 +403,6 @@
 \alias{summary.units}
 \alias{superimposeMarks}
 \alias{sympoly}
-\alias{terms.ppm}
-\alias{terms.kppm}
 \alias{terms.slrm}
 \alias{termsinformula}
 \alias{test.crossing.psp}
@@ -498,6 +493,8 @@ cliprect.psp(x, window)
 clippoly.psp(s, window)
 closepairs(X,rmax)
 complaining(whinge, fatal, value)
+compileK(D, r, weights, denom, check)
+compilepcf(D, r, weights, denom, check, endcorrect, \dots)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 crossfikselterms(X,Y,r,kappa)
@@ -554,17 +551,16 @@ equalsfun.quad(Q)
 eratosthenes(nmax)
 erodemask(w,r,strict)
 erode.owin(\dots)
-evalCovar(model, covariate, jitter, modelname, covname, dataname)
+evalCovar(model, covariate, \dots,
+          dimyx, eps, jitter, modelname, covname, dataname)
 evalCovariate(covariate, locations)
-evalInteraction(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
-evalInterEngine(Q,X,P,interaction,correction,\dots,precomputed,savecomputed)
-evalInterNew(X,U,E,interaction,\dots)
+evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
+evalInterEngine(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
 explain.ifnot(expr, context)
-\method{extractAIC}{ppm}(fit, scale, k, \dots)
 \method{extractAIC}{slrm}(fit, scale = 0, k = 2, ...)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
@@ -577,8 +573,6 @@ fikselterms(U,X,r,kappa,EqualPairs)
 fillNA(x, value)
 forbidNA(x, context, xname)
 FormatFaspFormulae(f, argname)
-\method{formula}{ppm}(x, \dots)
-\method{formula}{kppm}(x, \dots)
 \method{formula}{slrm}(x, ...)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
@@ -589,6 +583,7 @@ fvnames(X, a) <- value
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
 greatest.common.divisor(n,m)
+getdataname(defaultvalue, \dots, dataname)
 getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
@@ -643,6 +638,7 @@ Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
          lambdaIJ=NULL, sigma=NULL, varcov=NULL, 
          Iname = "points satisfying condition I",
          Jname = "points satisfying condition J")
+Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
 least.common.multiple(n,m)
@@ -694,7 +690,7 @@ slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
 	 rbord, use.gam, gcontrol, famille,
-         forcefit, allcovar, callstring, precomputed, savecomputed, preponly)
+         forcefit, nd, allcovar, callstring, precomputed, savecomputed, preponly)
 mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
@@ -752,7 +748,6 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
            limcol=if(monochrome) "black" else "red")
 \method{plot}{quadratcount}(x, \dots, add, entries, dx, dy, show.tiles)
 \method{plot}{quadrattest}(x, \dots)
-\method{plot}{rhohat}(x, \dots, do.rug=TRUE)
 polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
@@ -772,7 +767,6 @@ primefactors(n, prmax)
 \method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
-\method{print}{kppm}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{msr}(x, \dots)
@@ -782,7 +776,6 @@ primefactors(n, prmax)
 \method{print}{profilepl}(x, \dots)
 \method{print}{quadrattest}(x, \dots)
 \method{print}{qqppm}(x, \dots)
-\method{print}{rhohat}(x, \dots)
 \method{print}{rmhcontrol}(x, \dots)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
@@ -839,7 +832,7 @@ rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(\dots)
 \method{rmhcontrol}{list}(\dots)
-rmhEngine(InfoList, \dots, verbose, kitchensink, preponly) 
+rmhEngine(InfoList, \dots, verbose, track, kitchensink, preponly) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
@@ -864,7 +857,7 @@ smoothpointsEngine(x, values, sigma, \dots, weights, varcov, leaveoneout)
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatialCDFframe(model, covariate, \dots)
-spatialCDFtest(model, covariate, test, \dots, jitter, modelname, covname, dataname)
+spatialCDFtest(model, covariate, test, \dots, dimyx, eps, jitter, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
@@ -882,8 +875,6 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{units}(object, \dots)
 superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
-\method{terms}{ppm}(x, \dots)
-\method{terms}{kppm}(x, \dots)
 \method{terms}{slrm}(x, ...)
 termsinformula(x)
 test.crossing.psp(A,B)

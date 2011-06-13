@@ -117,8 +117,22 @@ print.minconfit <- function(x, ...) {
   mo <- x$info$modelname
   fu <- x$info$fname
   da <- x$info$dataname
+  cm <- x$covmodel
   if(!is.null(mo))
     cat(paste("Model:", mo, "\n"))
+  if(!is.null(cm)) {
+    # Covariance model - LGCP only
+    cat(paste("\tCovariance model:", cm$model, "\n"))
+    margs <- cm$margs
+    if(!is.null(margs)) {
+      nama <- names(margs)
+      tags <- ifelse(nzchar(nama), paste(nama, "="), "")
+      tagvalue <- paste(tags, margs)
+      cat(paste("\tCovariance parameters:",
+                paste(tagvalue, collapse=", "),
+                "\n"))
+    }
+  }
   if(!is.null(fu) && !is.null(da))
     cat(paste("Fitted by matching theoretical", fu, "function to", da))
   else {
@@ -185,14 +199,136 @@ plot.minconfit <- function(x, ...) {
                            list(main=xname)))
 }
 
+unitname.minconfit <- function(x) {
+  unitname(x$fit)
+}
+
+"unitname<-.minconfit" <- function(x, value) {
+  unitname(x$fit) <- value
+  return(x)
+}
+
 
 ############### applications (specific models) ##################
 
 
-thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
-                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...){
+# table of explicitly-known K functions and pcf
 
-  dataname <- deparse(substitute(X))
+.Spatstat.ClusterModelInfo <-
+  list(
+       Thomas=list(
+         # Thomas process: par = (kappa, sigma2)
+         K = function(par,rvals, ...){
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           pi*rvals^2+(1-exp(-rvals^2/(4*par[2])))/par[1]
+         },
+         pcf= function(par,rvals, ...){
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           1 + exp(-rvals^2/(4 * par[2]))/(4 * pi * par[1] * par[2])
+         }
+         ),
+       MatClust=list(
+         # Matern Cluster process: par = (kappa, R)
+         K = function(par,rvals, ..., funaux){
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           hfun <- funaux$Hfun
+           pi * rvals^2 + (1/par[1]) * hfun(rvals/(2 * par[2]))
+         },
+         pcf= function(par,rvals, ..., funaux){
+             if(any(par <= 0))
+               return(rep(Inf, length(rvals)))
+             doh <- funaux$DOH
+             y <- (1/(4*pi*rvals * par[1] * par[2])) * doh(rvals/(2 * par[2]))
+             ifelse(rvals < .Machine$double.eps, 1, 1+y)
+           },
+         funaux=list(
+           Hfun=function(zz) {
+             ok <- (zz < 1)
+             h <- numeric(length(zz))
+             h[!ok] <- 1
+             z <- zz[ok]
+             h[ok] <- 2 + (1/pi) * (
+                                    (8 * z^2 - 4) * acos(z)
+                                    - 2 * asin(z)
+                                    + 4 * z * sqrt((1 - z^2)^3)
+                                    - 6 * z * sqrt(1 - z^2)
+                                    )
+             return(h)
+           },
+           DOH=function(zz) {
+             ok <- (zz < 1)
+             h <- numeric(length(zz))
+             h[!ok] <- 0
+             z <- zz[ok]
+             h[ok] <- (16/pi) * (z * acos(z) - (z^2) * sqrt(1 - z^2))
+             return(h)
+           })
+
+         ),
+       LGCP=list(
+         # Log Gaussian Cox process: par = (sigma2, alpha)
+         # calls Covariance() from RandomFields package
+         K = function(par, rvals, ..., model, margs) {
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           if(model == "exponential") {
+             # For efficiency
+             integrand <- function(r,par,...) 2*pi*r*exp(par[1]*exp(-r/par[2]))
+           } else {
+             integrand <- function(r,par,model,margs)
+               2*pi *r *exp(Covariance(r,model=model,
+                                       param=c(0.0,par[1],0.0,par[2],margs)))
+           }
+           th <- numeric(length(rvals))
+           th[1] <- if(rvals[1] == 0) 0 else 
+                    integrate(integrand,lower=0,upper=rvals[1],
+                              par=par,model=model,margs=margs)$value
+           for (i in 2:length(rvals)) {
+             delta <- integrate(integrand,
+                                lower=rvals[i-1],upper=rvals[i],
+                                par=par,model=model,margs=margs)
+             th[i]=th[i-1]+delta$value
+           }
+           return(th)
+         },
+         pcf= function(par, rvals, ..., model, margs) {
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           if(model == "exponential") {
+             # For efficiency and to avoid need for RandomFields package
+             gtheo <- exp(par[1]*exp(-rvals/par[2]))
+           } else {
+             gtheo <- exp(Covariance(rvals,model=model,
+                                     param=c(0.0,par[1],0.0,par[2],margs)))
+           }
+           return(gtheo)
+         },
+         parhandler=function(model, ...) {
+           if(!is.character(model))
+             stop("Covariance function model should be specified by name")
+           margs <- c(...)
+           if(model != "exponential") {
+             # check validity
+             ok <- try(Covariance(0, model=model,param=c(0,1,0,1,margs)))
+             if(inherits(ok, "try-error"))
+               stop("Error in evaluating Covariance")
+           }
+           return(list(model=model, margs=margs))
+         }
+         )
+  )
+
+getdataname <- function(defaultvalue, ..., dataname=NULL) {
+  if(!is.null(dataname)) dataname else defaultvalue
+}
+  
+thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
+
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -208,11 +344,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
 
   startpar <- check.named.vector(startpar, c("kappa","sigma2"))
 
-  theoret <- function(par,rvals, ...){
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    pi*rvals^2+(1-exp(-rvals^2/(4*par[2])))/par[1]
-  }
+  theoret <- .Spatstat.ClusterModelInfo$Thomas$K
   
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
@@ -235,11 +367,12 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
   return(result)
 }
 
-
 lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
+                      covmodel=list(model="exponential"), 
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
+
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
   
-  dataname <- deparse(substitute(X))
   if(inherits(X, "fv")) {
     K <- X
     if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
@@ -254,19 +387,12 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
 
   startpar <- check.named.vector(startpar, c("sigma2","alpha"))
 
-  Integrand<-function(r,par){
-    2*pi*r*exp(par[1]*exp(-r/par[2]))
-  }
-  theoret <- function(par, rvals, ..., integrand) {
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    th <- numeric(length(rvals))
-    th[1] <- if(rvals[1] == 0) 0 else 
-             integrate(integrand,lower=0,upper=rvals[1],par=par)$value
-    for (i in 2:length(rvals))
-      th[i]=th[i-1]+integrate(integrand,lower=rvals[i-1],upper=rvals[i],par=par)$value
-    return(th)
-  }
+  # digest parameters of Covariance model and test validity
+  ph <- .Spatstat.ClusterModelInfo$LGCP$parhandler
+  cmodel <- do.call(ph, covmodel)
+  
+  theoret <- .Spatstat.ClusterModelInfo$LGCP$K
+
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p, rmin=rmin, rmax=rmax),
                         fvlab=list(label="%s[fit](r)",
@@ -275,26 +401,29 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
                           fname=attr(K, "fname"),
                           modelname="log-Gaussian Cox process"),
                         ...,
-                        integrand=Integrand)
+                        model=cmodel$model,
+                        margs=cmodel$margs)
   # imbue with meaning
   par <- result$par
   names(par) <- c("sigma2", "alpha")
   result$par <- par
+  result$covmodel <- cmodel
   # infer model parameters
   mu <- if(is.numeric(lambda) && length(lambda) == 1 && lambda > 0)
            log(lambda) - par[["sigma2"]]/2 else NA
   result$modelpar <- c(sigma2=par[["sigma2"]],
                        alpha=par[["alpha"]],
                        mu=mu)
-  result$internal <- list(model="lcgp")
+  result$internal <- list(model="lgcp")
   return(result)
 }
 
 
-matclust.estK <- function(X, startpar=c(kappa=1,R=1),
-                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...){
 
-  dataname <- deparse(substitute(X))
+matclust.estK <- function(X, startpar=c(kappa=1,R=1),
+                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
+
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -310,24 +439,9 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
 
   startpar <- check.named.vector(startpar, c("kappa","R"))
 
-  Hfun <- function(zz) {
-    ok <- (zz < 1)
-    h <- numeric(length(zz))
-    h[!ok] <- 1
-    z <- zz[ok]
-    h[ok] <- 2 + (1/pi) * (
-                           (8 * z^2 - 4) * acos(z)
-                           - 2 * asin(z)
-                           + 4 * z * sqrt((1 - z^2)^3)
-                           - 6 * z * sqrt(1 - z^2)
-                           )
-    return(h)
-  }
-  theoret <- function(par,rvals, ..., hfun){
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    pi * rvals^2 + (1/par[1]) * hfun(rvals/(2 * par[2]))
-  }
+  theoret <- .Spatstat.ClusterModelInfo$MatClust$K
+  funaux <- .Spatstat.ClusterModelInfo$MatClust$funaux
+  
   result <- mincontrast(K, theoret, startpar,
                         ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
                         fvlab=list(label="%s[fit](r)",
@@ -336,7 +450,7 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                           fname=attr(K, "fname"),
                           modelname="Matern Cluster process"),
                         ...,
-                        hfun=Hfun)
+                        funaux=funaux)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "R")
@@ -358,11 +472,11 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                           pcfargs=list()){
 
-  dataname <- deparse(substitute(X))
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     g <- X
-    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+    if(!(attr(g, "fname") %in% c("g", "g[inhom]")))
       warning("Argument X does not appear to be a pair correlation function")
   } else if(inherits(X, "ppp")) {
     g <- do.call("pcf.ppp", append(list(X), pcfargs))
@@ -374,11 +488,8 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
 
   startpar <- check.named.vector(startpar, c("kappa","sigma2"))
 
-  theoret <- function(par,rvals, ...){
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    1 + exp(-rvals^2/(4 * par[2]))/(4 * pi * par[1] * par[2])
-  }
+  theoret <- .Spatstat.ClusterModelInfo$Thomas$pcf
+  
   # avoid using g(0) as it may be infinite
   argu <- fvnames(g, ".x")
   rvals <- g[[argu]]
@@ -412,11 +523,11 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
                             lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                             pcfargs=list()){
 
-  dataname <- deparse(substitute(X))
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     g <- X
-    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+    if(!(attr(g, "fname") %in% c("g", "g[inhom]")))
       warning("Argument X does not appear to be a pair correlation function")
   } else if(inherits(X, "ppp")) {
     g <- do.call("pcf.ppp", append(list(X), pcfargs))
@@ -428,19 +539,9 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
 
   startpar <- check.named.vector(startpar, c("kappa","R"))
 
-  DOH <- function(zz) {
-    ok <- (zz < 1)
-    h <- numeric(length(zz))
-    h[!ok] <- 0
-    z <- zz[ok]
-    h[ok] <- (16/pi) * (z * acos(z) - (z^2) * sqrt(1 - z^2))
-    return(h)
-  }
-  theoret <- function(par,rvals, ..., doh){
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    1 + (1/(4 * pi * rvals * par[1] * par[2])) * doh(rvals/(2 * par[2]))
-  }
+  theoret <- .Spatstat.ClusterModelInfo$MatClust$pcf
+  funaux <- .Spatstat.ClusterModelInfo$MatClust$funaux
+  
   # avoid using g(0) as it may be infinite
   argu <- fvnames(g, ".x")
   rvals <- g[[argu]]
@@ -455,7 +556,7 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
                           fname=attr(g, "fname"),
                           modelname="Matern Cluster process"),
                         ...,
-                        doh=DOH)
+                        funaux=funaux)
   # imbue with meaning
   par <- result$par
   names(par) <- c("kappa", "R")
@@ -471,13 +572,15 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
 }
 
 lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
+                      covmodel=list(model="exponential"), 
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                         pcfargs=list()) {
   
-  dataname <- deparse(substitute(X))
+  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  
   if(inherits(X, "fv")) {
     g <- X
-    if(!(attr(g, "fname") %in% c("g", "ginhom")))
+    if(!(attr(g, "fname") %in% c("g", "g[inhom]")))
       warning("Argument X does not appear to be a pair correlation function")
   } else if(inherits(X, "ppp")) {
     g <- do.call("pcf.ppp", append(list(X), pcfargs))
@@ -489,12 +592,12 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
 
   startpar <- check.named.vector(startpar, c("sigma2","alpha"))
 
-  theoret <- function(par, rvals, ...) {
-    if(any(par <= 0))
-      return(rep(Inf, length(rvals)))
-    gtheo <- exp(par[1]*exp(-rvals/par[2]))
-    return(gtheo)
-  }
+  # digest parameters of Covariance model and test validity
+  ph <- .Spatstat.ClusterModelInfo$LGCP$parhandler
+  cmodel <- do.call(ph, covmodel)
+  
+  theoret <- .Spatstat.ClusterModelInfo$LGCP$pcf
+  
   result <- mincontrast(g, theoret, startpar,
                         ctrl=list(q=q, p=p, rmin=rmin, rmax=rmax),
                         fvlab=list(label="%s[fit](r)",
@@ -502,18 +605,22 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
                         explain=list(dataname=dataname,
                           fname=attr(g, "fname"),
                           modelname="log-Gaussian Cox process"),
-                        ...)
+                        ...,
+                        model=cmodel$model,
+                        margs=cmodel$margs)
   # imbue with meaning
   par <- result$par
   names(par) <- c("sigma2", "alpha")
   result$par <- par
+  result$covmodel <- cmodel
   # infer model parameters
   mu <- if(is.numeric(lambda) && length(lambda) == 1 && lambda > 0)
            log(lambda) - par[["sigma2"]]/2 else NA
   result$modelpar <- c(sigma2=par[["sigma2"]],
                        alpha=par[["alpha"]],
                        mu=mu)
-  result$internal <- list(model="lcgp")
+  result$internal <- list(model="lgcp")
   return(result)
 }
+
 

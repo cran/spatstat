@@ -6,7 +6,7 @@ Creates an instance of the multitype/hard core Strauss point process model
 which can then be fitted to point pattern data.
 }
 \usage{
-  MultiStraussHard(types, iradii, hradii)
+  MultiStraussHard(types=NULL, iradii, hradii)
 }
 \arguments{
   \item{types}{Optional; vector of all possible types (i.e. the possible levels
@@ -33,11 +33,13 @@ which can then be fitted to point pattern data.
   contributes a factor
   \eqn{\gamma_{ij}}{gamma[i,j]} to the probability density.
 
-  The argument \code{types} need not usually be specified.
-  The \code{types} will be automatically be determined from
-  the data set to which the interaction object created by this
-  function is applied.  This argument is included mainly for
-  backward compatibility.
+  The argument \code{types} need not be specified in normal use.
+  It will be determined automatically from the point pattern data set
+  to which the MultiStraussHard interaction is applied,
+  when the user calls \code{\link{ppm}}. 
+  However, the user should be confident that
+  the ordering of types in the dataset corresponds to the ordering of
+  rows and columns in the matrices \code{iradii} and \code{hradii}.
 
   The matrices \code{iradii} and \code{hradii}
   must be symmetric, with entries

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.44 $   $Date: 2011/02/07 05:35:12 $
+#  $Revision: 2.45 $   $Date: 2011/05/27 22:00:25 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -147,6 +147,9 @@ list(
        ntyp <- integer(N)
        for(i in 1:N) {
          interI <- interlist[[i]]
+         # forbid hybrids-of-hybrids
+         if(interI$name == "Hybrid interaction")
+           stop("Simulation of a hybrid-of-hybrid interaction is not implemented")
          # get RMH mapping for I-th component
          siminfoI <- .Spatstat.Rmhinfo[[interI$name]]
          if(is.null(siminfoI))

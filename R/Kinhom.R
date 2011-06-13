@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.55 $	$Date: 2011/05/18 07:58:48 $
+#	$Revision: 1.56 $	$Date: 2011/06/01 17:24:56 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -282,6 +282,9 @@ Kwtsum <- function(dIJ, bI, wIJ, b, w, breaks) {
   stopifnot(length(dIJ) == length(bI))
   stopifnot(length(bI) == length(wIJ))
   stopifnot(length(w) == length(b))
+
+  if(!is.finite(sum(w, wIJ)))
+    stop("Weights in K-function were infinite or NA")
   
   # determine which distances d_{ij} were observed without censoring
   uncen <- (dIJ <= bI)

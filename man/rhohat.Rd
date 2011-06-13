@@ -4,11 +4,13 @@
   Smoothing Estimate of Covariate Transformation
 }
 \description{
-  Computes smoothing estimate of covariate transformation
+  Computes a smoothing estimate of the intensity of a point process,
+  as a function of a spatial covariate.
 }
 \usage{
 rhohat(object, covariate, ...,
        transform=FALSE,
+       dimyx=NULL, eps=NULL,
        n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
        bwref=bw,
        covname)
@@ -28,6 +30,10 @@ rhohat(object, covariate, ...,
   }
   \item{transform}{
     Logical value determining the smoothing method. See Details.
+  }
+  \item{dimyx,eps}{
+    Arguments passed to \code{\link{as.mask}} to control the pixel
+    resolution at which the covariate will be evaluated.
   }
   \item{bw}{
     Smoothing bandwidth or bandwidth rule
@@ -90,7 +96,8 @@ rhohat(object, covariate, ...,
   containing the estimated values of \eqn{\rho}{rho} for a sequence
   of values of \eqn{Z}.
   Also belongs to the class \code{"rhohat"}
-  which has special methods for \code{print} and \code{plot}.
+  which has special methods for \code{print}, \code{plot}
+  and \code{predict}.
 }
 \references{
   Baddeley, A. and Chang, Y.-M. and Song, Y. and Turner, R. 
@@ -113,11 +120,17 @@ rhohat(object, covariate, ...,
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}
 }
+\seealso{
+  \code{\link[spatstat:methods.rhohat]{methods.rhohat}}
+}
 \examples{
   X <-  rpoispp(function(x,y){exp(3+3*x)})
+  rho <- rhohat(X, "x")
   rho <- rhohat(X, function(x,y){x})
   plot(rho)
   curve(exp(3+3*x), lty=3, col=2, add=TRUE)
+  fit <- ppm(X, ~x)
+  rr <- rhohat(fit, "y")
 }
 \keyword{spatial}
 \keyword{models}
