@@ -182,10 +182,12 @@ data(murchison)
 mur <- lapply(murchison, rescale, s=1000)
 X <- mur$gold
 D <- distfun(mur$faults)
-plot(rhohat(X, D),
+rh <- rhohat(X,D, dimyx=256)
+plot(rh,
      main="Smoothed rate estimate",
      xlab="Distance to nearest fault (km)",
      legend=FALSE)
+plot(predict(rh), main="predict(rhohat(X,D))")
 
 data(cells)
 Z <- density.ppp(cells, 0.07)
@@ -342,6 +344,12 @@ if(enable3d) {
   par(par3)
 }
 
+par2 <- par(mfrow=c(1,2))
+X <- rpoislpp(20, simplenet)
+plot(X, main="Points on a network")
+plot(linearK(X), main="Network K-function")
+par(par2)
+
 fanfare("VI. Model-fitting")
 
 data(japanesepines)
@@ -411,6 +419,12 @@ plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
 plot(rGaussPoisson(30, 0.05, 0.5))
+param <- c(0, variance=0.2, nugget=0, scale=.1)
+mu <- 4
+plot(rLGCP("exp", mu, param))
+X <- rLGCP("exp", mu, param)
+plot(attr(X, "Lambda"), main="log-Gaussian Cox process")
+plot(X, add=TRUE, pch=16)
 
 plot(redwood, main="random thinning - rthin()")
 points(rthin(redwood, 0.5), col="green", cex=1.4)

@@ -36,8 +36,9 @@
   \code{\link[stats]{simulate}} for the class \code{"kppm"} of fitted
   cluster point process models.
   
-  Simulations are performed by \code{\link{rThomas}}
-  or \code{\link{rMatClust}} depending on the cluster mechanism.
+  Simulations are performed by \code{\link{rThomas}},
+  \code{\link{rMatClust}} or \code{\link{rLGCP}}
+  depending on the model.
 
   The return value is a list of point patterns.
   It also carries an attribute \code{"seed"} that
@@ -62,6 +63,9 @@
 }
 \seealso{
   \code{\link{kppm}},
+  \code{\link{rThomas}},
+  \code{\link{rMatClust}},
+  \code{\link{rLGCP}},
   \code{\link{simulate.ppm}},
   \code{\link[stats]{simulate}}
 }

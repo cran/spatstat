@@ -6,7 +6,7 @@ Creates an instance of the multitype hard core point process model
 which can then be fitted to point pattern data.
 }
 \usage{
-  MultiHard(types=NA, hradii)
+  MultiHard(types=NULL, hradii)
 }
 \arguments{
   \item{types}{Optional; vector of all possible types (i.e. the possible levels
@@ -25,11 +25,13 @@ which can then be fitted to point pattern data.
   of types \eqn{i} and \eqn{j}
   must not lie closer than \eqn{h_{ij}}{h[i,j]} units apart.
 
-  The argument \code{types} need not usually be specified.
-  The \code{types} will be automatically be determined from
-  the data set to which the interaction object created by this
-  function is applied.  This argument is included mainly for
-  backward compatibility.
+  The argument \code{types} need not be specified in normal use.
+  It will be determined automatically from the point pattern data set
+  to which the MultiStrauss interaction is applied,
+  when the user calls \code{\link{ppm}}. 
+  However, the user should be confident that
+  the ordering of types in the dataset corresponds to the ordering of
+  rows and columns in the matrix \code{hradii}.
 
   The matrix \code{hradii}
   must be symmetric, with entries

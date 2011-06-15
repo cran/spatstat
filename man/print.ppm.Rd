@@ -5,13 +5,18 @@
   Default \code{print} method for a fitted point process model.
 }
 \usage{
- \method{print}{ppm}(x,\dots)
+ \method{print}{ppm}(x,\dots,
+     what=c("all", "model", "trend", "interaction", "se", "errors"))
 }
 \arguments{
   \item{x}{
     A fitted point process model, typically obtained from
     the model-fittingg algorithm \code{\link{ppm}}.
     An object of class \code{"ppm"}.
+  }
+  \item{what}{
+    Character vector (partially-matched) indicating what information
+    should be printed.
   }
   \item{\dots}{Ignored.}
 }

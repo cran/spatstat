@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.34 $   $Date: 2011/05/18 08:09:16 $
+#    $Revision: 1.35 $   $Date: 2011/06/10 08:44:11 $
 #
 #
 
@@ -150,6 +150,11 @@ reset.spatstat.options <- function() {
        ),
        exactdt.checks.data=list(
          default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       closepairs.newcode=list(
+         default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        )

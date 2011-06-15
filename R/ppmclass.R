@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.48 $	$Date: 2011/05/18 08:41:40 $
+#	$Revision: 2.51 $	$Date: 2011/06/09 07:37:45 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -37,104 +37,122 @@
 
 is.ppm <- function(x) { inherits(x, "ppm") }
 
-print.ppm <- function(x, ...) {
-	verifyclass(x, "ppm")
+print.ppm <-
+function(x, ...,
+         what=c("all", "model", "trend", "interaction", "se", "errors")) {
 
-        s <- summary.ppm(x)
-        
-        notrend <-    s$no.trend
-	stationary <- s$stationary
-	poisson <-    s$poisson
-        markeddata <- s$marked
-        multitype  <- s$multitype
-        
-        markedpoisson <- poisson && markeddata
+  verifyclass(x, "ppm")
 
-        # ----------- Print model type -------------------
+  opts <- c("model", "trend", "interaction", "se", "errors")
+  what <- match.arg(what, c("all", opts), several.ok=TRUE)
+  if("all" %in% what) what <- opts
+  
+  s <- summary.ppm(x)
         
-	cat(s$name)
-        cat("\n")
+  notrend <-    s$no.trend
+  stationary <- s$stationary
+  poisson <-    s$poisson
+  markeddata <- s$marked
+  multitype  <- s$multitype
         
-        if(markeddata) mrk <- s$entries$marks
-        if(multitype) {
-            cat("Possible marks: \n")
-            cat(paste(levels(mrk)))
-            cat("\n")
-          }
+  markedpoisson <- poisson && markeddata
 
-        # ----- trend --------------------------
+  # ----------- Print model type -------------------
 
+  if("model" %in% what) {
+    cat(s$name)
+    cat("\n")
+        
+    if(markeddata) mrk <- s$entries$marks
+    if(multitype) {
+      cat("Possible marks: \n")
+      cat(paste(levels(mrk)))
+      cat("\n")
+    }
+  }
+  
+  # ----- trend --------------------------
+
+  if("trend" %in% what) {
+    
 #       cat(paste("\n", s$trend$name, ":\n", sep=""))
 
-	if(!notrend) {
-          cat("\nTrend formula: ")
-          print(s$trend$formula)
-        }
+    if(!notrend) {
+      cat("\nTrend formula: ")
+      print(s$trend$formula)
+    }
 
-        tv <- s$trend$value
+    tv <- s$trend$value
 
-        if(length(tv) == 0)
-          cat("\n[No trend coefficients]\n")
-        else {
-          cat(paste("\n", s$trend$label, ":", sep=""))
-          if(is.list(tv)) {
-            cat("\n")
-            for(i in seq_along(tv))
-              print(tv[[i]])
-          } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv))) {
-            # single number: append to end of current line
-            cat("\t", paste(tv), "\n")
-          } else {
-            # some other format 
-            cat("\n")
-            print(tv)
-          }
-        }
-
+    if(length(tv) == 0)
+      cat("\n[No trend coefficients]\n")
+    else {
+      cat(paste("\n", s$trend$label, ":", sep=""))
+      if(is.list(tv)) {
         cat("\n")
+        for(i in seq_along(tv))
+          print(tv[[i]])
+      } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv))) {
+        # single number: append to end of current line
+        cat("\t", paste(tv), "\n")
+      } else {
+        # some other format 
+        cat("\n")
+        print(tv)
+      }
+    }
 
-        if(!is.null(cfa <- s$covfunargs) && length(cfa) > 0) {
-          cat("Covariate function arguments (covfunargs) provided:\n")
-          for(i in seq_along(cfa)) {
-            cat(paste(names(cfa)[i], "= "))
-            cfai <- cfa[[i]]
-            if(is.numeric(cfai) && length(cfai) == 1) {
-              cat(paste(cfai, "\n"))
-            } else print(cfa[[i]])
-          }
-        }
+    cat("\n")
+
+    if(!is.null(cfa <- s$covfunargs) && length(cfa) > 0) {
+      cat("Covariate function arguments (covfunargs) provided:\n")
+      for(i in seq_along(cfa)) {
+        cat(paste(names(cfa)[i], "= "))
+        cfai <- cfa[[i]]
+        if(is.numeric(cfai) && length(cfai) == 1) {
+          cat(paste(cfai, "\n"))
+        } else print(cfa[[i]])
+      }
+    }
+  }
+  
+  # ----- parameter estimates with SE and 95% CI --------------------
+  if("se" %in% what) {
+    if(!is.null(cose <- s$coefs.SE.CI))
+      print(cose)
+  }
+  
+  # ---- Interaction ----------------------------
+
+  if("interaction" %in% what) {
+    if(!poisson) 
+      print(s$interaction, family=FALSE)
+  }
+  
+  # ---- Warnings issued in mpl.prepare  ---------------------
+
+  if("errors" %in% what) {
+    probs <- s$problems
+    if(!is.null(probs) && is.list(probs) && (length(probs) > 0)) 
+      lapply(probs,
+             function(x) {
+               if(is.list(x) && !is.null(p <- x$print))
+                 cat(paste("Problem:\n", p, "\n\n"))
+             })
+    
+    if(s$old)
+      warning(paste("Model fitted by old spatstat version", s$version))
         
-        # ----- parameter estimates with SE and 95% CI --------------------
-        if(!is.null(cose <- s$coefs.SE.CI))
-          print(cose)
-        
-        # ---- Interaction ----------------------------
+  # ---- Algorithm status ----------------------------
 
-	if(!poisson) 
-          print(s$interaction, family=FALSE)
+    fitter <- s$fitter
+    converged <- s$converged
+    if(!is.null(fitter) && fitter %in% c("glm", "gam") && !converged)
+      cat(paste("*** Fitting algorithm for", sQuote(fitter),
+                "did not converge ***\n"))
+  }
 
-        # ---- Warnings issued in mpl.prepare  ---------------------
-        
-        probs <- s$problems
-        if(!is.null(probs) && is.list(probs) && (length(probs) > 0)) 
-          lapply(probs,
-                 function(x) {
-                   if(is.list(x) && !is.null(p <- x$print))
-                     cat(paste("Problem:\n", p, "\n\n"))
-                 })
-
-        if(s$old)
-          warning(paste("Model fitted by old spatstat version", s$version))
-        
-        # ---- Algorithm status ----------------------------
-
-        fitter <- s$fitter
-        converged <- s$converged
-        if(!is.null(fitter) && fitter %in% c("glm", "gam") && !converged)
-          cat(paste("*** Fitting algorithm for", sQuote(fitter),
-                    "did not converge ***\n"))
-
-	return(invisible(NULL))
+  return(invisible(NULL))
 }
 
 quad.ppm <- function(object, drop=FALSE) {
@@ -331,3 +349,15 @@ model.images <- function(object, W=as.owin(object), ...) {
   names(result) <- imagenames
   return(result)
 }
+
+unitname.ppm <- function(x) {
+  return(unitname(x$Q))
+}
+
+"unitname<-.ppm" <- function(x, value) {
+  unitname(x$Q) <- value
+  return(x)
+}
+
+nobs.ppm <- function(object, ...) { npoints(data.ppm(object)) }
+

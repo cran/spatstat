@@ -1,14 +1,24 @@
 \name{unitname}
 \alias{unitname}
-\alias{unitname.owin}
-\alias{unitname.psp}
-\alias{unitname.ppp}
 \alias{unitname.im}
+\alias{unitname.kppm}
+\alias{unitname.minconfit}
+\alias{unitname.owin}
+\alias{unitname.ppp}
+\alias{unitname.ppm}
+\alias{unitname.psp}
+\alias{unitname.quad}
+\alias{unitname.slrm}
 \alias{unitname<-}
-\alias{unitname<-.ppp}
-\alias{unitname<-.psp}
-\alias{unitname<-.owin}
 \alias{unitname<-.im}
+\alias{unitname<-.kppm}
+\alias{unitname<-.minconfit}
+\alias{unitname<-.owin}
+\alias{unitname<-.ppp}
+\alias{unitname<-.ppm}
+\alias{unitname<-.psp}
+\alias{unitname<-.quad}
+\alias{unitname<-.slrm}
 \title{Name for Unit of Length}
 \description{
   Inspect or change the name of the unit of length
@@ -16,22 +26,36 @@
 }
 \usage{
 unitname(x)
+\method{unitname}{im}(x)
+\method{unitname}{kppm}(x)
+\method{unitname}{minconfit}(x)
+\method{unitname}{owin}(x)
+\method{unitname}{ppm}(x)
 \method{unitname}{ppp}(x)
 \method{unitname}{psp}(x)
-\method{unitname}{owin}(x)
-\method{unitname}{im}(x)
+\method{unitname}{quad}(x)
+\method{unitname}{slrm}(x)
 unitname(x) <- value
+\method{unitname}{im}(x) <- value
+\method{unitname}{kppm}(x) <- value
+\method{unitname}{minconfit}(x) <- value
+\method{unitname}{owin}(x) <- value
+\method{unitname}{ppm}(x) <- value
 \method{unitname}{ppp}(x) <- value
 \method{unitname}{psp}(x) <- value
-\method{unitname}{owin}(x) <- value
-\method{unitname}{im}(x) <- value
+\method{unitname}{quad}(x) <- value
+\method{unitname}{slrm}(x) <- value
 }
 \arguments{
   \item{x}{A spatial dataset.
     Either a point pattern (object of class \code{"ppp"}),
     a line segment pattern (object of class \code{"psp"}),
-    a window (object of class \code{"owin"}) or
-    a pixel image (object of class \code{"im"}).
+    a window (object of class \code{"owin"}),
+    a pixel image (object of class \code{"im"}),
+    a quadrature scheme (object of class \code{"quad"}),
+    or a fitted point process model
+    (object of class \code{"ppm"} or \code{"kppm"} or \code{"slrm"}
+    or \code{"minconfit"}). 
   }
   \item{value}{
     Name of the unit of length. See Details.
@@ -55,6 +79,11 @@ unitname(x) <- value
     giving the singular and plural forms of the basic unit,
     and a number specifying the multiple of this unit.
   }
+  
+ Note that re-setting the name of the unit of length \emph{does not}
+ affect the numerical values in \code{x}. It changes only the string
+ containing the name of the unit of length. To rescale the numerical
+ values, use \code{\link{rescale}}.
 }
 \value{
   The return value of \code{unitname} is an object of class \code{"units"}
@@ -68,6 +97,7 @@ unitname(x) <- value
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
+  \code{\link{rescale}},
   \code{\link{owin}},
   \code{\link{ppp}}
 }

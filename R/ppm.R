@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.22 $	$Date: 2011/01/17 02:46:06 $
+#	$Revision: 1.23 $	$Date: 2011/05/26 15:48:37 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -18,6 +18,7 @@ function(Q,
          use.gam=FALSE,
          method = "mpl",
          forcefit=FALSE,
+         nd = NULL,
          gcontrol=list(),
          nsim=100,
          nrmh=1e5,
@@ -75,6 +76,7 @@ function(Q,
                        rbord=rbord,
                        use.gam=use.gam,
                        forcefit=forcefit,
+                       nd = nd,
                        gcontrol=gcontrol,
                        callstring=callstring,
                        preponly=FALSE,

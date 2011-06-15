@@ -16,7 +16,9 @@
    MH_SINGLE    whether there is a single interaction 
               (as opposed to a hybrid of several interactions)
 
-   $Revision: 1.4 $  $Date: 2010/08/10 04:54:14 $ 
+   MH_TRACKING  whether to save transition history
+
+   $Revision: 1.7 $  $Date: 2011/05/24 14:43:46 $ 
 
 */
 
@@ -78,6 +80,14 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #endif
 	itype = BIRTH;  /* Birth proposal accepted. */
       }
+#if MH_TRACKING
+      /* save transition history */
+      if(irep < history.nmax) {
+	history.n++;
+	history.proptype[irep] = BIRTH;
+	history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+      }
+#endif
     } else if(nfree > 0) {
       /* Propose death: */
       ix = floor(nfree * unif_rand());
@@ -118,6 +128,14 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #endif
 	itype = DEATH; /* Death proposal accepted. */
       }
+#if MH_TRACKING
+      /* save transition history */
+      if(irep < history.nmax) {
+	history.n++;
+	history.proptype[irep] = DEATH;
+	history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+      }
+#endif
     }
   } else if(nfree > 0) {
     /* Propose shift: */
@@ -171,6 +189,14 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #endif
       itype = SHIFT;          /* Shift proposal accepted . */
     }
+#if MH_TRACKING
+      /* save transition history */
+      if(irep < history.nmax) {
+	history.n++;
+	history.proptype[irep] = SHIFT;
+	history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+      }
+#endif
   }
 
   if(itype != REJECT) {

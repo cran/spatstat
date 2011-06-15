@@ -62,7 +62,10 @@ quadratresample(X, nx, ny=nx, ...,
 }
 \seealso{
   \code{\link{quadrats}},
-  \code{\link{quadratcount}}
+  \code{\link{quadratcount}}.
+
+  See \code{\link{varblock}} to estimate the variance of
+  a summary statistic by block resampling.
 }
 \examples{
   data(bei)

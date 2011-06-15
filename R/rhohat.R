@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.26 $  $Date: 2011/05/18 09:09:41 $
+#  $Revision: 1.29 $  $Date: 2011/06/13 09:23:02 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -9,7 +9,7 @@
 #  More generally allows offsets etc.
 
 rhohat <- function(object, covariate, ...,
-                   transform=FALSE,
+                   transform=FALSE, dimyx=NULL, eps=NULL,
                    n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
                    bwref=bw, covname) {
   if(missing(covname)) 
@@ -41,14 +41,17 @@ rhohat <- function(object, covariate, ...,
            },
            stop("Unrecognised covariate name")
          )
-  }
-  stuff <- evalCovar(model, covariate)
+    cartesian <- TRUE
+  } else cartesian <- FALSE
+  # evaluate covariate
+  stuff <- evalCovar(model, covariate, dimyx=dimyx, eps=eps)
   # unpack
   info   <- stuff$info
   values <- stuff$values
   # values at each data point
   ZX      <- values$ZX
   # values at each pixel
+  Zimage  <- values$Zimage
   Zvalues <- values$Zvalues
   lambda  <- values$lambda
   # normalising constants
@@ -126,7 +129,7 @@ rhohat <- function(object, covariate, ...,
                paste("%s[hi]", paren(covname), sep=""),
                paste("%s[lo]", paren(covname), sep="")),
              desc=desc,
-#             unitname=unitname(data.ppm(model)),
+             unitname=if(cartesian) unitname(data.ppm(model)) else NULL,
              fname="rho",
              yexp=substitute(rho(X), list(X=as.name(covname))))
   attr(rslt, "dotnames") <- c("rho", "hi", "lo")
@@ -139,6 +142,8 @@ rhohat <- function(object, covariate, ...,
          sigma      = sigma,
          covname    = paste(covname, collapse=""),
          ZX         = ZX,
+         Zimage     = Zimage,
+         lambda     = lambda,
          transform  = transform)
   return(rslt)
 }
@@ -205,3 +210,24 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
   invisible(NULL)
 }
 
+predict.rhohat <- function(object, ..., relative=FALSE) {
+  if(length(list(...)) > 0)
+    warning("Additional arguments ignored in predict.rhohat")
+  # extract info
+  s <- attr(object, "stuff")
+  reference <- s$reference
+  # convert to (linearly interpolated) function 
+  x <- with(object, .x)
+  y <- with(object, .y)
+  rho <- approxfun(x, y, rule=2)
+  # extract image of covariate
+  Z <- s$Zimage
+  # apply rho to Z
+  Y <- eval.im(rho(Z))
+  # adjust to reference baseline
+  if(reference == "model" && !relative) {
+    lambda <- s$lambda
+    Y <- eval.im(Y * lambda)
+  }
+  return(Y)
+}

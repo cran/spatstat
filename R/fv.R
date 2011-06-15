@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.67 $   $Date: 2011/05/18 02:06:11 $
+#    $Revision: 1.69 $   $Date: 2011/05/24 07:43:26 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -128,6 +128,10 @@ as.fv <- function(x) {
     return(fv(x, names(x)[1], , names(x)[2]))
   else if(inherits(x, "fasp") && length(x$which) == 1)
     return(x$fns[[1]])
+  else if(inherits(x, "minconfit"))
+    return(x$fit)
+  else if(inherits(x, "kppm"))
+    return(x$mcfit)
   else
     stop(paste("Don't know how to convert this to an object of class",
                sQuote("fv")))
@@ -789,4 +793,11 @@ reconcile.fv <- function(...) {
   rmax <- min(unlist(lapply(z, function(x) { max(with(x, .x)) })))
   z <- lapply(z, function(x, rmax) { x[ with(x, .x) <= rmax, ] }, rmax=rmax)
   return(z)
+}
+
+as.function.fv <- function(x, ..., value) {
+  xx <- with(x, .x)
+  yy <- if(!missing(value) && value %in% names(x)) x[[value]] else with(x, .y)
+  f <- approxfun(xx, yy, rule=1)
+  return(f)
 }

@@ -97,7 +97,8 @@
     \code{\link{psp}} \tab line segment pattern \cr
     \code{\link{tess}} \tab tessellation \cr
     \code{\link{pp3}} \tab three-dimensional point pattern \cr
-    \code{\link{ppx}} \tab point pattern in any number of dimensions
+    \code{\link{ppx}} \tab point pattern in any number of dimensions \cr
+    \code{\link{lpp}} \tab point pattern on a linear network
   }
 
   \bold{To create a point pattern:}
@@ -385,6 +386,8 @@
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr
 	\code{\link{persp.im}}	\tab draw perspective plot of a pixel image \cr
+	\code{\link{rgbim}}	\tab create colour-valued pixel image \cr
+	\code{\link{hsvim}}	\tab create colour-valued pixel image \cr
 	\code{\link{[.im}} 	\tab extract a subset of a pixel image\cr
 	\code{\link{[<-.im}} 	\tab replace a subset of a pixel image\cr
 	\code{\link{shift.im}} \tab apply vector shift to pixel image \cr
@@ -402,9 +405,10 @@
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
-	\code{\link{levelset}} \tab level set of an image\cr
+	\code{\link{scaletointerval}} \tab rescale pixel values \cr
+	\code{\link{levelset}} \tab level set of an image\cr 
 	\code{\link{solutionset}} \tab region where an expression is true
-      }
+     }
 
     \bold{Line segment patterns}
 
@@ -428,6 +432,7 @@
       \code{\link{endpoints.psp}} \tab extract the endpoints of line segments \cr
       \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
+      \code{\link{superimpose}} \tab combine several line segment patterns  \cr
       \code{\link{rotate.psp}} \tab rotate a line segment pattern \cr      
       \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
       \code{\link{periodify}} \tab make several shifted copies \cr      
@@ -531,6 +536,30 @@
       \code{\link{eroded.volumes.boxx}} \tab volumes of erosions of box 
     }
 
+    \bold{Point patterns on a linear network}
+
+    An object of class \code{"lpp"} represents a 
+    point pattern on a linear network (for example,
+    road accidents on a road network).
+
+    An object of class \code{"linnet"} represents a linear network.
+
+    \tabular{ll}{
+      \code{\link{lpp}} \tab create a point pattern on a linear network \cr
+      \code{\link{linnet}} \tab create a linear network \cr
+      \code{\link{clickjoin}} \tab interactively join vertices in network \cr
+      \code{\link{simplenet}} \tab simple example of network \cr
+      \code{\link{rpoislpp}} \tab simulate Poisson points on linear network \cr
+      \code{\link{runiflpp}} \tab simulate random points on a linear network \cr
+      \code{\link{linearK}} \tab Okabe-Yamada network \eqn{K} function \cr
+      \code{\link{pairdist.lpp}} \tab shortest path distances between
+      points  \cr
+      \code{\link[spatstat:methods.lpp]{methods.lpp}}
+      \tab methods for \code{lpp} objects \cr
+      \code{\link[spatstat:methods.linnet]{methods.linnet}}
+      \tab methods for \code{linnet} objects 
+    }
+    
     \bold{Hyperframes}
 
     A hyperframe is like a data frame, except that the entries
@@ -571,7 +600,9 @@
 
   \bold{Modern exploratory tools:}
   \tabular{ll}{
-    \code{\link{nnclean}} \tab Byers-Raftery feature detection 
+    \code{\link{nnclean}} \tab Byers-Raftery feature detection  \cr
+    \code{\link{sharpen.ppp}} \tab Choi-Hall data sharpening \cr
+    \code{\link{rhohat}} \tab Smoothing estimate of covariate effect
   }
 
   \bold{Summary statistics for a point pattern:}
@@ -745,8 +776,8 @@
 
 \section{III. MODEL FITTING (CLUSTER MODELS)}{
   
-  Cluster process models (with homogeneous or inhomogeneous intensity) 
-  can be fitted by the function \code{\link{kppm}}.
+  Cluster process models (with homogeneous or inhomogeneous intensity)
+  and Cox processes can be fitted by the function \code{\link{kppm}}.
   Its result is an object of class \code{"kppm"}.
   The fitted model can be printed, plotted, predicted, simulated
   and updated.
@@ -755,10 +786,18 @@
     \code{\link{plot.kppm}} \tab  Plot the fitted model\cr
     \code{\link{predict.kppm}} \tab Compute fitted intensity \cr
     \code{\link{update.kppm}} \tab Update the model \cr
-    \code{\link{simulate.kppm}} \tab Generate simulated realisations
+    \code{\link{simulate.kppm}} \tab Generate simulated realisations \cr
+    \code{\link{vcov.kppm}} \tab Variance-covariance matrix of coefficients \cr
+    \code{\link{Kmodel.kppm}} \tab \eqn{K} function of fitted model \cr
+    \code{\link{pcfmodel.kppm}} \tab Pair correlation of fitted model 
   }
   
- Lower-level fitting functions include:
+  The theoretical models can also be simulated,
+  for any choice of parameter values,
+  using \code{\link{rThomas}}, \code{\link{rMatClust}}
+  and \code{\link{rLGCP}} respectively.
+  
+  Lower-level fitting functions include:
 
   \tabular{ll}{
     \code{\link{thomas.estK}} \tab fit the Thomas process model \cr
@@ -770,9 +809,6 @@
     \code{\link{mincontrast}} \tab low-level algorithm for fitting models
     \cr \tab by the method of minimum contrast 
   }
-
-  The Thomas and Matern models can also be simulated,
-  using \code{\link{rThomas}} and \code{\link{rMatClust}} respectively.
 }
 
 \section{IV. MODEL FITTING (POISSON AND GIBBS MODELS)}{
@@ -1032,6 +1068,8 @@
     simulate the Mat\'ern Cluster process\cr
     \code{\link{rThomas}} \tab
     simulate the Thomas process  \cr
+    \code{\link{rLGCP}} \tab
+    simulate the log-Gaussian Cox process  \cr
     \code{\link{rGaussPoisson}}  \tab
     simulate the Gauss-Poisson cluster process\cr
     \code{\link{rcell}} \tab
@@ -1041,7 +1079,6 @@
     \code{\link{rpoisppOnLines}} \tab
     generate Poisson random points along specified line segments 
   }
-
       
   \bold{Resampling a point pattern:}
 
@@ -1052,6 +1089,9 @@
     \code{\link{rshift}} \tab random shifting of (subsets of) points\cr
     \code{\link{rthin}} \tab  random thinning 
   }
+  
+  See also \code{\link{varblock}} for estimating the variance
+  of a summary statistic by block resampling.
   
   \bold{Fitted point process models:}
 
@@ -1125,7 +1165,7 @@
   \tabular{ll}{
     \code{\link{diagnose.ppm}} \tab diagnostic plots for spatial trend\cr
     \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint interaction\cr
-    \code{\link{residualspaper}} \tab examples from Baddeley et al (2005)
+    \code{\link{residualspaper}} \tab examples from Baddeley et al (2005) 
   }
 
 
@@ -1228,6 +1268,7 @@
   Juha Heikkinen,
   Kurt Hornik,
   Ross Ihaka,
+  Abdollah Jalilian,
   Robert John-Chandran,
   Devin Johnson,
   Jeff Laake,
@@ -1250,6 +1291,7 @@
   Aila Sarkka,
   Katja Schladitz,
   Bryan Scott,
+  Shen Guochun,
   Ida-Maria Sintorn,
   Yong Song, 
   Malte Spiess,

@@ -152,6 +152,11 @@ fv(x, argu = "r", ylab = NULL, valu, fmla = NULL, alim = NULL, labl = names(x), 
   An object of class \code{"fv"}, see \code{\link{fv.object}}.
 }
 \seealso{
+  See \code{\link{plot.fv}} for plotting an \code{"fv"} object.
+
+  See \code{\link{as.function.fv}} to convert an \code{"fv"} object
+  to an \R function.
+  
   Use \code{\link{cbind.fv}} to combine several \code{"fv"} objects.
   Use \code{\link{bind.fv}} to glue additional columns onto an existing
   \code{"fv"} object.

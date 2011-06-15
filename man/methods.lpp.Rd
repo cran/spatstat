@@ -1,4 +1,6 @@
 \name{methods.lpp}
+\alias{methods.lpp}
+\Rdversion{1.1}
 \alias{as.ppp.lpp}
 \alias{as.psp.lpp}
 \alias{marks<-.lpp}

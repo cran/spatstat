@@ -55,14 +55,21 @@
       demarcated in Figure 1 of Harkness \& Isham (1983).
       These are multitype point pattern objects.
     }
-    \item{\code{ants.trackNE} and \code{ants.trackSW}}{
+    \item{\code{trackNE} and \code{trackSW}}{
       coordinates of two straight lines bounding the foot track.
     }
-    \item{\code{ants.fieldscrub}}{The endpoints of a straight line
+    \item{\code{fieldscrub}}{The endpoints of a straight line
       separating the regions of `field' and `scrub': 
       scrub to the North and field to the South.
     }
-    \item{\code{plot}}{A function, with no arguments, which
+    \item{\code{side}}{
+      A \code{function(x,y)} that determines whether the location
+      \code{(x,y)} is in the scrub or the field. The function can be applied
+      to numeric vectors \code{x} and \code{y}, and returns a factor
+      with levels \code{"scrub"} and \code{"field"}.
+      This function is useful as a spatial covariate.
+    }
+    \item{\code{plot}}{A function which
       produces a plot of the full dataset.
     }
   }
@@ -85,7 +92,8 @@
       giving the two endpoints of line markings}
     \item{fieldscrub}{data in format \code{list(x=numeric(2),y=numeric(2))}
       giving the two endpoints of line markings}
-    \item{plot}{Function with no arguments}
+    \item{side}{Function with arguments \code{x,y}}
+    \item{plot}{Function}
   }
 }
 \usage{data(ants)}

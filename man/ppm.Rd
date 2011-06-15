@@ -16,6 +16,7 @@
        use.gam=FALSE,
        method="mpl",
        forcefit=FALSE,
+       nd = NULL,
        gcontrol=list(),
        nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
        verb=TRUE)
@@ -76,6 +77,12 @@
     If \code{forcefit=FALSE}, some trivial models will be
     fitted by a shortcut. If \code{forcefit=TRUE},
     the generic fitting method will always be used. 
+  }
+  \item{nd}{
+    Optional. Integer or pair of integers.
+    The dimension of the grid of points (\code{nd * nd}
+    or \code{nd[1] * nd[2]})
+    used to evaluate the integral in the pseudolikelihood.
   }
   \item{gcontrol}{
     Optional. List of parameters passed to \code{\link{glm.control}}
@@ -546,6 +553,8 @@
  ppm(Q) 
  # equivalent.
  }
+
+ppm(nztrees, nd=128)
 
  ppm(nztrees, ~ x)
  # fit the nonstationary Poisson process 

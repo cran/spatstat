@@ -50,10 +50,17 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
 
   # decide whether to plot a main header
   main <- if(!missing(main)) main else xname
-  banner <- (sum(nchar(as.character(main))) > 0)
-  if(length(main) > 1)
-    main <- paste(main, collapse="\n")
-  nlines <- if(!is.character(main)) 1 else length(unlist(strsplit(main, "\n")))
+  if(!is.character(main)) {
+    # main title could be an expression
+    nlines <- 1
+    banner <- TRUE
+  } else {
+    # main title is character string/vector, possibly ""
+    banner <- any(nzchar(main))
+    if(length(main) > 1)
+      main <- paste(main, collapse="\n")
+    nlines <- length(unlist(strsplit(main, "\n")))
+  }
   # determine arrangement of plots
   # arrange like mfrow(nrows, ncols) plus a banner at the top
   if(is.null(nrows) && is.null(ncols)) {

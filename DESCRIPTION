@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.22-1
-Date: 2011-05-19
+Version: 1.22-2
+Date: 2011-06-13
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -12,18 +12,19 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         Y.C. Chin; B. Christensen; M. de la Cruz; P. Dalgaard; P.J.
         Diggle; I. Dryden; S. Eglen; A. Gault; M. Genton; P. Grabarnik;
         C. Graf; J. Franklin; U. Hahn; A. Hardegen; M. Hering; M.B.
-        Hansen; M. Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; R.
-        John-Chandran; D. Johnson; J. Laake; R. Mark; J. Mateu; P.
-        McCullagh; S. Meyer; X.C. Mi; J. Moller; L.S. Nielsen; F.
-        Nunes; E. Parilov; J. Picka; A. Raftery; M. Reiter; T.O.
-        Richardson; B.D. Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K.
-        Schladitz; B.T. Scott; I.-M. Sintorn; Y. Song; M. Spiess; M.
-        Stevenson; M. Sumner; P. Surovy; B. Turlach; A. van Burgel; T.
-        Verbeke; A. Villers; H. Wang; H. Wendrock; J. Wild and S. Wong.
+        Hansen; M. Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; A.
+        Jalilian; R. John-Chandran; D. Johnson; J. Laake; R. Mark; J.
+        Mateu; P. McCullagh; S. Meyer; X.C. Mi; J. Moller; L.S.
+        Nielsen; F. Nunes; E. Parilov; J. Picka; A. Raftery; M. Reiter;
+        T.O. Richardson; B.D. Ripley; B. Rowlingson; J. Rudge; A.
+        Sarkka; K. Schladitz; B.T. Scott; G.C. Shen; I.-M. Sintorn; Y.
+        Song; M. Spiess; M. Stevenson; M. Sumner; P. Surovy; B.
+        Turlach; A. van Burgel; T. Verbeke; A. Villers; H. Wang; H.
+        Wendrock; J. Wild and S. Wong.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 Depends: R (>= 2.10.0), stats, graphics, utils, mgcv, deldir (>=
-        0.0-10)
-Suggests: gpclib, sm, maptools, rpanel, tkrplot, scatterplot3d
+        0.0-10), RandomFields (>= 2.0)
+Suggests: gpclib, sm, maptools, spatial, rpanel, tkrplot, scatterplot3d
 Description: A package for analysing spatial data, mainly Spatial Point
         Patterns, including multitype/marked points and spatial
         covariates, in any two-dimensional spatial region. Also
@@ -48,6 +49,6 @@ Description: A package for analysing spatial data, mainly Spatial Point
         residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: 2011-05-19 07:03:53 UTC; adrian
+Packaged: 2011-06-13 09:45:14 UTC; adrian
 Repository: CRAN
-Date/Publication: 2011-05-19 10:05:10
+Date/Publication: 2011-06-15 18:11:32

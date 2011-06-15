@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.1 $   $Date: 2011/05/18 09:12:18 $
+#  $Revision: 1.2 $   $Date: 2011/05/24 15:07:18 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -471,5 +471,14 @@ anova.slrm <- function(object, ..., test=NULL) {
 
 vcov.slrm <- function(object, ...) {
   vcov(object$Fit$FIT)
+}
+
+unitname.slrm <- function(x) {
+  return(unitname(x$Data$response))
+}
+
+"unitname<-.slrm" <- function(x, value) {
+  unitname(x$Data$response) <- value
+  return(x)
 }
 

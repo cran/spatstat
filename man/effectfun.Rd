@@ -66,8 +66,10 @@
   D <- distmap(copper$SouthLines)
   fit <- ppm(X, ~polynom(Z, 7), covariates=list(Z=D))
   plot(effectfun(fit, "Z"))
-  fit <- ppm(X, ~x + polynom(Z, 7), covariates=list(Z=D))
+  fit <- ppm(X, ~x + polynom(Z, 5), covariates=list(Z=D))
   plot(effectfun(fit, "Z", x=20))
+  fit <- ppm(X, ~x)
+  plot(effectfun(fit, "x"))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
