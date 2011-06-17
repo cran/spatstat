@@ -12,7 +12,9 @@
 }
 \arguments{
   \item{model}{A list of parameters. See Details.}
-  \item{\dots}{There should be no other arguments.}
+  \item{\dots}{
+    Optional list of additional named parameters.
+  }
 }
 \value{
   An object of class \code{"rmhmodel"}, which is essentially
@@ -37,6 +39,10 @@
   where \code{cif} and \code{par} are required and the others are
   optional. For details about these components,
   see \code{\link{rmhmodel.default}}.
+
+  The subsequent arguments \code{\dots} (if any) may also
+  have these names, and they will take precedence over
+  elements of the list \code{model}. 
 }  
 \references{
    Diggle, P. J. (2003) \emph{Statistical Analysis of Spatial Point

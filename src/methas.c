@@ -23,8 +23,9 @@ extern Cifns getcif(char *);
 SEXP xmethas(
 	     SEXP ncif,
 	     SEXP cifname,
-	     SEXP par,
-	     SEXP parlen,
+	     SEXP beta,
+	     SEXP ipar,
+	     SEXP iparlen,
 	     SEXP period,
 	     SEXP xprop,
 	     SEXP yprop,
@@ -42,8 +43,8 @@ SEXP xmethas(
              SEXP track)
 {
   char *cifstring;
-  double cvd, cvn, qnodds, anumer, adenom;
-  double *parvector;
+  double cvd, cvn, qnodds, anumer, adenom, betavalue;
+  double *iparvector;
   int verb, marked, mustupdate, itype;
   int nfree;
   int irep, ix, j;
@@ -75,8 +76,9 @@ SEXP xmethas(
 
   PROTECT(ncif      = AS_INTEGER(ncif)); 
   PROTECT(cifname   = AS_CHARACTER(cifname)); 
-  PROTECT(par       = AS_NUMERIC(par)); 
-  PROTECT(parlen    = AS_INTEGER(parlen)); 
+  PROTECT(beta      = AS_NUMERIC(beta)); 
+  PROTECT(ipar      = AS_NUMERIC(ipar)); 
+  PROTECT(iparlen   = AS_INTEGER(iparlen)); 
   PROTECT(period    = AS_NUMERIC(period)); 
   PROTECT(xprop     = AS_NUMERIC(xprop)); 
   PROTECT(yprop     = AS_NUMERIC(yprop)); 
@@ -93,16 +95,16 @@ SEXP xmethas(
   PROTECT(ncond     = AS_INTEGER(ncond)); 
   PROTECT(track     = AS_INTEGER(track)); 
 
-                    /* that's 19 protected objects */
+                    /* that's 20 protected objects */
 
   /* =================== Translate arguments from R to C ================ */
 
   /* 
      Ncif is the number of cif's
-     plength[i] is the number of parameters in the i-th cif
+     plength[i] is the number of interaction parameters in the i-th cif
   */
   Ncif = *(INTEGER_POINTER(ncif));
-  plength = INTEGER_POINTER(parlen);
+  plength = INTEGER_POINTER(iparlen);
 
   /* copy RMH algorithm parameters */
   algo.nrep   = *(INTEGER_POINTER(nrep));
@@ -113,7 +115,8 @@ SEXP xmethas(
   algo.ncond =  *(INTEGER_POINTER(ncond));
 
   /* copy model parameters without interpreting them */
-  model.par = parvector = NUMERIC_POINTER(par);
+  model.beta = NUMERIC_POINTER(beta);
+  model.ipar = iparvector = NUMERIC_POINTER(ipar);
   model.period = NUMERIC_POINTER(period);
   model.ntypes = *(INTEGER_POINTER(ntypes));
   marked = (model.ntypes > 1);
@@ -201,7 +204,7 @@ SEXP xmethas(
   } else {
     for(k = 0; k < Ncif; k++) {
       if(k > 0)
-	model.par += plength[k-1];
+	model.ipar += plength[k-1];
       cdata[k] = (*(cif[k].init))(state, model, algo);
     }
   }
@@ -217,6 +220,10 @@ SEXP xmethas(
   /* Set up some constants */
   verb   = (algo.nverb !=0);
   qnodds = (1.0 - algo.q)/algo.q;
+
+  if(!marked) 
+    betavalue = model.beta[0];
+
 
   /* ============= Run Metropolis-Hastings  ================== */
 
@@ -352,13 +359,13 @@ SEXP xmethas(
       PROTECT(out = NEW_LIST(2));
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout);
-      UNPROTECT(22);  /* 19 arguments plus xout, yout, out */
+      UNPROTECT(23);  /* 20 arguments plus xout, yout, out */
     } else {
       PROTECT(out = NEW_LIST(3)); 
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout); 
       SET_VECTOR_ELT(out, 2, mout);
-      UNPROTECT(23);  /* 19 arguments plus xout, yout, mout, out */
+      UNPROTECT(24);  /* 20 arguments plus xout, yout, mout, out */
     }
   } else {
     /* transition history */
@@ -368,7 +375,7 @@ SEXP xmethas(
       SET_VECTOR_ELT(out, 1, yout);
       SET_VECTOR_ELT(out, 2, pout);
       SET_VECTOR_ELT(out, 3, aout);
-      UNPROTECT(24);  /* 19 arguments plus xout, yout, out, pout, aout */
+      UNPROTECT(25);  /* 20 arguments plus xout, yout, out, pout, aout */
     } else {
       PROTECT(out = NEW_LIST(5)); 
       SET_VECTOR_ELT(out, 0, xout);
@@ -376,7 +383,7 @@ SEXP xmethas(
       SET_VECTOR_ELT(out, 2, mout);
       SET_VECTOR_ELT(out, 3, pout);
       SET_VECTOR_ELT(out, 4, aout);
-      UNPROTECT(25);  /* 19 arguments plus xout, yout, mout, out, pout, aout */
+      UNPROTECT(26);  /* 20 arguments plus xout, yout, mout, out, pout, aout */
     }
   }
   return(out);

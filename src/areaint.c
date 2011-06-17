@@ -9,7 +9,7 @@
 /*
   Conditional intensity function for an area-interaction process:
 
-  cif = beta * eta^(1-B) where B = (uncovered area)/(pi r^2)
+  cif = eta^(1-B) where B = (uncovered area)/(pi r^2)
 
 */
 
@@ -17,7 +17,6 @@
 
 typedef struct AreaInt {
   /* model parameters */
-  double beta;
   double eta;
   double r;
   /* transformations of the parameters */
@@ -51,9 +50,8 @@ Cdata *areaintInit(state, model, algo)
   /* create storage */
   areaint = (AreaInt *) R_alloc(1, sizeof(AreaInt));
   /* Interpret model parameters*/
-  areaint->beta   = model.par[0];
-  areaint->eta    = model.par[1];
-  areaint->r      = r = model.par[2]; 
+  areaint->eta    = model.ipar[0];
+  areaint->r      = r = model.ipar[1]; 
   areaint->r2     = r * r;
   areaint->range2 = 4 * r * r;    /* square of interaction distance */
   /* is the model numerically equivalent to hard core ? */
@@ -107,7 +105,7 @@ double areaintCif(prop, state, cdata)
   y  = state.y;
 
   npts = state.npts;
-  if(npts == 0) return areaint->beta;
+  if(npts == 0) return ((double) 1.0);
 
   r2 = areaint->r2;
   dy = dx = areaint->dx;
@@ -266,13 +264,13 @@ double areaintCif(prop, state, cdata)
   */
 
   if(areaint->hard) {
-    if(kount == kdisc) cifval = areaint->beta;
+    if(kount == kdisc) cifval = 1.0;
     else cifval = 0.0;
   } else {
     /* usual calculation
        COVERED area fraction */
     covfrac = ((double) kdisc - (double) kount)/((double) kdisc);
-    cifval = areaint->beta * exp(areaint->logeta * covfrac);
+    cifval = exp(areaint->logeta * covfrac);
   }
 
   return cifval;

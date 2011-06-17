@@ -1,7 +1,7 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.32 $ $Date: 2011/05/18 08:04:29 $
+# $Revision: 1.33 $ $Date: 2011/06/16 12:32:48 $
 #
 
 lurking <- function(object, covariate, type="eem",
@@ -14,9 +14,10 @@ lurking <- function(object, covariate, type="eem",
                     check=TRUE, ..., splineargs=list(spar=0.5)) {
   
   # validate object
-  if(is.ppp(object))
-    object <- ppm(object, ~1, forcefit=TRUE)
-  verifyclass(object, "ppm")
+  if(is.ppp(object)) {
+    X <- object
+    object <- ppm(X, ~1, forcefit=TRUE)
+  } else verifyclass(object, "ppm")
 
   # match type argument
   type <- pickoption("type", type,
@@ -34,7 +35,7 @@ lurking <- function(object, covariate, type="eem",
 
   # may need to refit the model
   if(plot.sd && is.null(getglmfit(object)))
-    object <- update(object, forcefit=TRUE)
+    object <- update(object, forcefit=TRUE, use.internal=TRUE)
   
   # extract spatial locations
   Q <- quad.ppm(object)

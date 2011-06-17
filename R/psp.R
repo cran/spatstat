@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.61 $ $Date: 2011/05/19 06:14:18 $
+#  $Revision: 1.63 $ $Date: 2011/06/16 04:49:18 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -601,7 +601,7 @@ print.summary.psp <- function(x, ...) {
 
 affine.psp <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "psp")
-  W <- affine.owin(X$window, mat=mat, vec=vec)
+  W <- affine.owin(X$window, mat=mat, vec=vec, ...)
   E <- X$ends
   ends0 <- affinexy(list(x=E$x0,y=E$y0), mat=mat, vec=vec)
   ends1 <- affinexy(list(x=E$x1,y=E$y1), mat=mat, vec=vec)
@@ -637,8 +637,8 @@ rotate.psp <- function(X, angle=pi/2, ...) {
   verifyclass(X, "psp")
   W <- rotate.owin(X$window, angle=angle, ...)
   E <- X$ends
-  ends0 <- rotxy(list(x=E$x0,y=E$y0), angle=angle, ...)
-  ends1 <- rotxy(list(x=E$x1,y=E$y1), angle=angle, ...)
+  ends0 <- rotxy(list(x=E$x0,y=E$y0), angle=angle)
+  ends1 <- rotxy(list(x=E$x1,y=E$y1), angle=angle)
   psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE),
       check=FALSE)
 }

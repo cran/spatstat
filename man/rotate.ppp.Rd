@@ -10,7 +10,8 @@
 \arguments{
   \item{X}{A point pattern (object of class \code{"ppp"}).}
   \item{angle}{Angle of rotation.}
-  \item{\dots}{Ignored.}
+  \item{\dots}{Arguments passed to \code{\link{rotate.owin}} affecting
+    the handling of the observation window, if it is a binary pixel mask.}
 }
 \value{
   Another object of class \code{"ppp"} representing the
@@ -22,8 +23,6 @@
   Angles are measured in
   radians, anticlockwise. The default is to rotate the pattern 90 degrees
   anticlockwise. If the points carry marks, these are preserved.
-
-  Rotation of binary image masks is not yet implemented.
 }
 \seealso{
   \code{\link{ppp.object}},

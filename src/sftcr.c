@@ -10,7 +10,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Softcore {
-  double beta;
   double sigma;
   double kappa;
   double nook;  /*   -1/kappa     */
@@ -31,9 +30,8 @@ Cdata *sftcrinit(state, model, algo)
   softcore = (Softcore *) R_alloc(1, sizeof(Softcore));
 
   /* Interpret model parameters*/
-  softcore->beta   = model.par[0];
-  softcore->sigma  = model.par[1];
-  softcore->kappa  = model.par[2];
+  softcore->sigma  = model.ipar[0];
+  softcore->kappa  = model.ipar[1];
   softcore->period = model.period;
   /* constants */
   softcore->nook = -1/softcore->kappa;
@@ -68,7 +66,7 @@ double sftcrcif(prop, state, cdata)
   y  = state.y;
   npts = state.npts;
 
-  cifval = softcore->beta;
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);

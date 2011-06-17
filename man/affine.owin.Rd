@@ -6,13 +6,21 @@
   plus vector shift) to a window. 
 }
 \usage{
-  \method{affine}{owin}(X, mat=diag(c(1,1)), vec=c(0,0), \dots)
+  \method{affine}{owin}(X, mat=diag(c(1,1)), vec=c(0,0), \dots, rescue=TRUE)
 }
 \arguments{
   \item{X}{Window (object of class \code{"owin"}).}
   \item{mat}{Matrix representing a linear transformation.}
   \item{vec}{Vector of length 2 representing a translation.}
-  \item{\dots}{Ignored}
+  \item{rescue}{
+    Logical. If \code{TRUE}, the transformed window
+    will be processed by \code{\link{rescue.rectangle}}.
+  }
+  \item{\dots}{
+    Optional arguments passed to \code{\link{as.mask}}
+    controlling the pixel resolution of the transformed window,
+    if \code{X} is a binary pixel mask.
+  }
 }
 \value{
   Another window (of class \code{"owin"}) representing the
@@ -36,10 +44,14 @@
 }
 \examples{
   # shear transformation
-  X <- affine(owin(), matrix(c(1,0,0.6,1),ncol=2))
+  shear <- matrix(c(1,0,0.6,1),ncol=2)
+  X <- affine(owin(), shear)
   \dontrun{
   plot(X)
   }
+  data(letterR)
+  affine(letterR, shear, c(0, 0.5))
+  affine(as.mask(letterR), shear, c(0, 0.5))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

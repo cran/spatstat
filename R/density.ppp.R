@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.34 $    $Date: 2011/03/02 03:51:37 $
+#  $Revision: 1.35 $    $Date: 2011/06/17 01:43:21 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -14,7 +14,7 @@ ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
 density.ppp <- function(x, sigma=NULL, ...,
                         weights=NULL, edge=TRUE, varcov=NULL,
                         at="pixels", leaveoneout=TRUE,
-                        adjust=1) {
+                        adjust=1, diggle=FALSE) {
   verifyclass(x, "ppp")
 
   output <- pickoption("output location type", at,
@@ -29,7 +29,8 @@ density.ppp <- function(x, sigma=NULL, ...,
     # VALUES AT DATA POINTS ONLY
     result <- densitypointsEngine(x, sigma, varcov=varcov,
                                   weights=weights, edge=edge,
-                                  leaveoneout=leaveoneout)
+                                  leaveoneout=leaveoneout,
+                                  diggle=diggle)
     if(!is.null(uhoh <- attr(result, "warnings"))) {
       switch(uhoh,
              underflow=warning("underflow due to very small bandwidth"),
@@ -40,18 +41,38 @@ density.ppp <- function(x, sigma=NULL, ...,
   
   # VALUES AT PIXELS
   if(!edge) {
+    # no edge correction
+    edg <- NULL
     raw <- second.moment.calc(x, sigma, what="smooth", ...,
                               weights=weights, varcov=varcov)
     raw$v <- raw$v/(raw$xstep * raw$ystep)
     smo <- raw
-  } else {
+  } else if(!diggle) {
+    # edge correction e(u)
     both <- second.moment.calc(x, sigma, what="smoothedge", ...,
                               weights=weights, varcov=varcov)
     raw <- both$smooth
     edg <- both$edge
     raw$v <- raw$v/(raw$xstep * raw$ystep)
     smo <- eval.im(raw/edg)
+  } else {
+    # edge correction e(x_i)
+    edg <- second.moment.calc(x, sigma, what="edge", ..., varcov=varcov)
+    wi <- 1/safelookup(edg, x, warn=FALSE)
+    wi[!is.finite(wi)] <- 0
+    # edge correction becomes weight attached to points
+    if(is.null(weights)) {
+      newweights <- wi
+    } else {
+      stopifnot(length(weights) == npoints(x))
+      newweights <- weights * wi
+    }
+    raw <- second.moment.calc(x, sigma, what="smooth", ...,
+                              weights=newweights, varcov=varcov)
+    raw$v <- raw$v/(raw$xstep * raw$ystep)
+    smo <- raw
   }
+  
   result <- smo[x$window, drop=FALSE]
 
   # internal use only
@@ -67,7 +88,7 @@ density.ppp <- function(x, sigma=NULL, ...,
 
 densitypointsEngine <- function(x, sigma, ...,
                                 weights=NULL, edge=TRUE, varcov=NULL,
-                                leaveoneout=TRUE) {
+                                leaveoneout=TRUE, diggle=FALSE) {
   if(is.null(varcov)) {
     const <- 1/(2 * pi * sigma^2)
   } else {
@@ -89,6 +110,36 @@ densitypointsEngine <- function(x, sigma, ...,
     attr(result, "warnings") <- "underflow"
     return(result)
   }
+  # evaluate edge correction weights at points 
+  if(edge) {
+    win <- x$window
+    if(is.null(varcov) && win$type == "rectangle") {
+      # evaluate Gaussian probabilities directly
+      xr <- win$xrange
+      yr <- win$yrange
+      xx <- x$x
+      yy <- x$y
+      xprob <-
+        pnorm(xr[2], mean=xx, sd=sigma) - pnorm(xr[1], mean=xx, sd=sigma)
+      yprob <-
+        pnorm(yr[2], mean=yy, sd=sigma) - pnorm(yr[1], mean=yy, sd=sigma)
+      edgeweight <- xprob * yprob
+    } else {
+      edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
+      edgeweight <- safelookup(edg, x, warn=FALSE)
+    }
+    if(diggle) {
+      # Diggle edge correction
+      # edgeweight is attached to each point
+      if(is.null(weights)) {
+        weights <- 1/edgeweight
+      } else {
+        stopifnot(length(weights) == npoints(x) || length(weights) == 1)
+        weights <- weights/edgeweight
+      }
+    }
+  }
+  
   if(spatstat.options("densityC")) {
     # .................. new C code ...........................
     npts <- npoints(x)
@@ -184,27 +235,11 @@ densitypointsEngine <- function(x, sigma, ...,
     result <- result + self
   }
   # ........  Edge correction ........................................
-  if(edge) {
-    win <- x$window
-    if(is.null(varcov) && win$type == "rectangle") {
-      # evaluate Gaussian probabilities directly
-      xr <- win$xrange
-      yr <- win$yrange
-      xx <- x$x
-      yy <- x$y
-      xprob <-
-        pnorm(xr[2], mean=xx, sd=sigma) - pnorm(xr[1], mean=xx, sd=sigma)
-      yprob <-
-        pnorm(yr[2], mean=yy, sd=sigma) - pnorm(yr[1], mean=yy, sd=sigma)
-      edgeweight <- xprob * yprob
-    } else {
-      edg <- second.moment.calc(x, sigma=sigma, what="edge", varcov=varcov)
-      edgeweight <- safelookup(edg, x, warn=FALSE)
-    }
+  if(edge && !diggle) 
     result <- result/edgeweight
-  }
-  result <- as.numeric(result)
+
   # ............. validate .................................
+  result <- as.numeric(result)
   npts <- npoints(x)
   if(length(result) != npts) 
     stop(paste("Internal error: incorrect number of lambda values",

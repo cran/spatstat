@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.45 $   $Date: 2011/05/18 09:18:09 $
+#    $Revision: 1.47 $   $Date: 2011/06/14 07:02:51 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -411,8 +411,21 @@ no.trend.ppm <- function(x) {
   summary.ppm(x, quick=TRUE)$no.trend
 }
 
+is.stationary <- function(x) {
+  UseMethod("is.stationary")
+}
+
+is.poisson <- function(x) {
+  UseMethod("is.poisson")
+}
+
 is.stationary.ppm <- function(x) {
-  summary.ppm(x, quick=TRUE)$stationary
+  TREND <- x$trend
+  if(is.null(TREND) || identical.formulae(TREND, ~1))
+    return(TRUE)
+  if(all(variablesinformula(TREND) == "marks"))
+    return(TRUE)
+  return(FALSE)
 }
 
 is.poisson.ppm <- function(x) {

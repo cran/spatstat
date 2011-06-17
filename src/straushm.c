@@ -13,7 +13,6 @@
 
 typedef struct MultiStraussHard {
   int ntypes;
-  double *beta;    /* beta[i]  for i = 0 ... ntypes-1 */
   double *gamma;   /* gamma[i,j] = gamma[i+ntypes*j] for i,j = 0... ntypes-1 */
   double *rad;     /* rad[i,j] = rad[j+ntypes*i] for i,j = 0... ntypes-1 */
   double *hc;      /* hc[i,j] = hc[j+ntypes*i] for i,j = 0... ntypes-1 */
@@ -35,7 +34,7 @@ Cdata *straushminit(state, model, algo)
      Model model;
      Algor algo;
 {
-  int i, j, ntypes, n2, m, mm, hard;
+  int i, j, ntypes, n2, hard;
   double g, r, h, r2, h2, logg;
   MultiStraussHard *multistrausshard;
 
@@ -50,7 +49,6 @@ Cdata *straushminit(state, model, algo)
 #endif
 
   /* Allocate space for parameters */
-  multistrausshard->beta     = (double *) R_alloc((size_t) ntypes, sizeof(double));
   multistrausshard->gamma    = (double *) R_alloc((size_t) n2, sizeof(double));
   multistrausshard->rad      = (double *) R_alloc((size_t) n2, sizeof(double));
   multistrausshard->hc       = (double *) R_alloc((size_t) n2, sizeof(double));
@@ -66,28 +64,26 @@ Cdata *straushminit(state, model, algo)
   multistrausshard->kount    = (int *) R_alloc((size_t) n2, sizeof(int));
 
   /* Copy and process model parameters*/
-  for(i = 0; i < ntypes; i++)
-    multistrausshard->beta[i]   = model.par[i];
 
-  m = ntypes * (ntypes + 1);
-  mm = m + ntypes * ntypes;
+  /* ipar will contain n^2 values of gamma, then n^2 values of r, 
+     then n^2 values of h */
 
   for(i = 0; i < ntypes; i++) {
     for(j = 0; j < ntypes; j++) {
-      g = model.par[ntypes + i + j*ntypes];
-      r = model.par[m + i + j*ntypes];
-      h = model.par[mm + i + j*ntypes];
+      g = model.ipar[       i + j*ntypes];
+      r = model.ipar[ n2  + i + j*ntypes];
+      h = model.ipar[2*n2 + i + j*ntypes];
       r2 = r * r;
       h2 = h * h;
       hard = (g < DOUBLE_EPS);
       logg = (hard) ? 0 : log(g);
-      MAT(multistrausshard->gamma, i, j, ntypes) = g;
-      MAT(multistrausshard->rad, i, j, ntypes) = r;
-      MAT(multistrausshard->hc, i, j, ntypes) = h; 
-      MAT(multistrausshard->rad2, i, j, ntypes) = r2;
-      MAT(multistrausshard->hc2, i, j, ntypes) = h2;
-      MAT(multistrausshard->rad2hc2, i, j, ntypes) = r2-h2;
-      MAT(multistrausshard->hard, i, j, ntypes) = hard; 
+      MAT(multistrausshard->gamma,    i, j, ntypes) = g;
+      MAT(multistrausshard->rad,      i, j, ntypes) = r;
+      MAT(multistrausshard->hc,       i, j, ntypes) = h; 
+      MAT(multistrausshard->rad2,     i, j, ntypes) = r2;
+      MAT(multistrausshard->hc2,      i, j, ntypes) = h2;
+      MAT(multistrausshard->rad2hc2,  i, j, ntypes) = r2-h2;
+      MAT(multistrausshard->hard,     i, j, ntypes) = hard; 
       MAT(multistrausshard->loggamma, i, j, ntypes) = logg;
     }
   }
@@ -131,7 +127,7 @@ double straushmcif(prop, state, cdata)
   Rprintf("computing cif: u=%lf, v=%lf, mrk=%d\n", u, v, mrk);
 #endif
 
-  cifval = multistrausshard->beta[mrk];
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);

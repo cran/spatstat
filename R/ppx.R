@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.25 $  $Date: 2011/04/17 03:23:48 $
+#  $Revision: 1.26 $  $Date: 2011/06/14 02:16:06 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -78,9 +78,7 @@ summary.ppx <- function(object, ...) { print(object, ...) }
 
 plot.ppx <- function(x, ...) {
   xname <- deparse(substitute(x))
-  coo <- coords(x, temporal=FALSE)
-  if(any(istime <- (x$ctype == "temporal")))
-    warning(paste(sum(istime), "time coordinate(s) ignored"))
+  coo <- coords(x)
   dom <- x$domain
   m <- ncol(coo)
   if(m == 1) {
@@ -96,10 +94,12 @@ plot.ppx <- function(x, ...) {
   } else if(m == 2) {
     if(is.null(dom)) {
       # plot x, y coordinates only
+      nama <- names(coo)
       do.call.matched("plot.default",
-                      resolve.defaults(list(coo[,1], coo[,2], asp=1),
+                      resolve.defaults(list(x=coo[,1], y=coo[,2], asp=1),
                                        list(...),
-                                       list(main=xname)))
+                                       list(main=xname),
+                                       list(xlab=nama[1], ylab=nama[2])))
     } else {
       # plot domain, whatever it is
       do.call("plot", resolve.defaults(list(dom),
@@ -115,11 +115,16 @@ plot.ppx <- function(x, ...) {
     }
   } else if(m == 3) {
     # convert to pp3
-    x3 <- pp3(coo[,1], coo[,2], coo[,3], domain=dom, check=FALSE)
+    if(is.null(dom))
+      dom <- box3(range(coo[,1]), range(coo[,2]), range(coo[,3]))
+    x3 <- pp3(coo[,1], coo[,2], coo[,3], dom)
     # invoke plot.pp3
-    do.call("plot", resolve.defaults(list(x3),
-                                     list(...),
-                                     list(main=xname)))
+    nama <- names(coo)
+    do.call("plot",
+            resolve.defaults(list(x3),
+                             list(...),
+                             list(main=xname),
+                             list(xlab=nama[1], ylab=nama[2], zlab=nama[3])))
   } else stop(paste("Don't know how to plot a general point pattern in",
                ncol(coo), "dimensions"))
   return(invisible(NULL))

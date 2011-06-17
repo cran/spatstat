@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.15 $  $Date: 2011/04/27 06:09:16 $
+#   $Revision: 2.17 $  $Date: 2011/06/14 08:06:39 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -113,7 +113,9 @@ envelope.ppm <-
   if(is.null(simulate)) {
     # ...................................................
     # Simulated realisations of the fitted model Y
-    # will be generated using rmh
+    # will be generated 
+    csr <- is.stationary(Y) && is.poisson(Y)
+    type <- if(csr) "csr" else "rmh"
     # Set up parameters for rmh
     rmodel <- rmhmodel(Y, verbose=FALSE)
     if(is.null(start))
@@ -126,10 +128,10 @@ envelope.ppm <-
     simexpr <- expression(rmhEngine(rmhinfolist, verbose=FALSE))
     envir <- envir.here
     # evaluate in THIS environment
-    simrecipe <- simulrecipe(type = "rmh",
-                             expr = simexpr,
+    simrecipe <- simulrecipe(type  = type,
+                             expr  = simexpr,
                              envir = envir.here,
-                             csr   = FALSE)
+                             csr   = csr)
   } else {
     # ...................................................
     # Simulations are determined by 'simulate' argument
@@ -419,7 +421,9 @@ envelopeEngine <-
                         expr = "simulations by evaluating expression",
                         list = "point patterns from list",
                         "simulated realisations")
-      cat(paste(action, Nsim, descrip, "...\n"))
+      explan <- if(dual) paren(paste(nsim2, "to estimate the mean and",
+                                     nsim, "to calculate envelopes")) else ""
+      cat(paste(action, Nsim, descrip, explan, "...\n"))
     }
     XsimList <- list()
   # start simulation loop 
@@ -488,7 +492,9 @@ envelopeEngine <-
                       expr = "simulations by evaluating expression",
                       list = "point patterns from list",
                       "simulated patterns")
-    cat(paste(action, Nsim, descrip, "...\n"))
+    explan <- if(dual) paren(paste(nsim2, "to estimate the mean and",
+                                   nsim, "to calculate envelopes")) else ""
+    cat(paste(action, Nsim, descrip, explan, "...\n"))
   }
   # determine whether simulated point patterns should be saved
   catchpatterns <- savepatterns && simtype != "list"

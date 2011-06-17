@@ -2,7 +2,8 @@
 \alias{Lest}
 \title{L-function}
 \description{
-  Calculates an estimate of Ripley's L-function
+  Calculates an estimate of the \eqn{L}-function (Besag's
+  transformation of Ripley's \eqn{K}-function)
   for a spatial point pattern.
 }
 \usage{
@@ -11,27 +12,28 @@
 \arguments{
   \item{\dots}{
     Arguments passed to \code{\link{Kest}}
-    to estimate the K-function.
+    to estimate the \eqn{K}-function.
   }
 }
 \details{
-  This command computes an estimate of the L-function
+  This command computes an estimate of the \eqn{L}-function
   for a spatial point pattern.
-  The L-function is a transformation of Ripley's K-function,
+  The \eqn{L}-function is a transformation of Ripley's \eqn{K}-function,
   \deqn{L(r) = \sqrt{\frac{K(r)}{\pi}}}{L(r) = sqrt(K(r)/pi)}
-  where \eqn{K(r)} is the K-function.
+  where \eqn{K(r)} is the \eqn{K}-function.
 
   See \code{\link{Kest}} for information
-  about Ripley's K-function.
+  about Ripley's \eqn{K}-function. The transformation to \eqn{L} was
+  proposed by Besag (1977).
 
   The command \code{Lest} first calls
-  \code{\link{Kest}} to compute the estimate of the K-function,
+  \code{\link{Kest}} to compute the estimate of the \eqn{K}-function,
   and then applies the square root transformation.
 
   For a completely random (uniform Poisson) point pattern,
-  the theoretical value of the L-function is \eqn{L(r) = r}.
+  the theoretical value of the \eqn{L}-function is \eqn{L(r) = r}.
   The square root also has the effect of stabilising
-  the variance of the estimator, so that L is more appropriate
+  the variance of the estimator, so that \eqn{K} is more appropriate
   for use in simulation envelopes and hypothesis tests.
 }
 
@@ -52,6 +54,12 @@
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{L(r)} obtained by the edge corrections
   named.
+}
+\references{
+  Besag, J. (1977) 
+  Discussion of Dr Ripley's paper.
+  \emph{Journal of the Royal Statistical Society, Series B},
+  \bold{39}, 193--195.
 }
 \seealso{
   \code{\link{Kest}},

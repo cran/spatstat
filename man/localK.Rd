@@ -4,7 +4,8 @@
 \title{Neighbourhood density function}
 \description{
   Computes the neighbourhood density function, a local version of
-  the K-function defined by Getis and Franklin (1987).
+  the \eqn{K}-function or \eqn{L}-function,
+  defined by Getis and Franklin (1987).
 }
 \usage{
   localK(X, ..., correction = "Ripley", verbose = TRUE, rvalue=NULL)
@@ -26,10 +27,11 @@
   }
 }
 \details{
-  The command \code{localL} computes the neighbourhood density function,
-  a local version of Ripley's L-function,
-  proposed by Getis and Franklin (1987).
-  The command \code{localK} computes the local analogue of the K-function.
+  The command \code{localL} computes the \emph{neighbourhood density function},
+  a local version of the \eqn{L}-function (Besag's transformation of Ripley's
+  \eqn{K}-function) that was proposed by Getis and Franklin (1987).
+  The command \code{localK} computes the corresponding
+  local analogue of the K-function.
 
   Given a spatial point pattern \code{X}, the neighbourhood density function
   \eqn{L_i(r)}{L[i](r)} associated with the \eqn{i}th point

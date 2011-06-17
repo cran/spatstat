@@ -21,7 +21,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Diggra {
-  double beta;
   double kappa;
   double delta;
   double rho;
@@ -44,10 +43,9 @@ Cdata *diggrainit(state, model, algo)
   diggra = (Diggra *) R_alloc(1, sizeof(Diggra));
 
   /* Interpret model parameters*/
-  diggra->beta   = model.par[0];
-  diggra->kappa  = model.par[1];
-  diggra->delta  = model.par[2];
-  diggra->rho    = model.par[3];
+  diggra->kappa  = model.ipar[0];
+  diggra->delta  = model.ipar[1];
+  diggra->rho    = model.ipar[2];
   diggra->period = model.period;
   /* constants */
   diggra->delta2 = pow(diggra->delta, 2);
@@ -80,12 +78,10 @@ double diggracif(prop, state, cdata)
   y  = state.y;
   npts = state.npts;
 
-  cifval = diggra->beta;
+  cifval = pairprod = 1.0;
 
   if(npts == 0) 
     return(cifval);
-
-  pairprod = 1;
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
@@ -138,7 +134,7 @@ double diggracif(prop, state, cdata)
     }
   }
 
-  cifval *= pow(pairprod, diggra->kappa);
+  cifval = pow(pairprod, diggra->kappa);
   return cifval;
 }
 

@@ -2,7 +2,8 @@
 \alias{Linhom}
 \title{L-function}
 \description{
-  Calculates an estimate of the inhomogeneous version of Ripley's L-function
+  Calculates an estimate of the inhomogeneous version of
+  the \eqn{L}-function (Besag's transformation of Ripley's \eqn{K}-function)
   for a spatial point pattern.
 }
 \usage{
@@ -16,26 +17,28 @@
 }
 \details{
   This command computes an estimate of the inhomogeneous version of
-  the L-function for a spatial point pattern
+  the \eqn{L}-function for a spatial point pattern
 
-  The original L-function is a transformation of Ripley's K-function,
+  The original \eqn{L}-function is a transformation
+  (proposed by Besag) of Ripley's \eqn{K}-function,
   \deqn{L(r) = \sqrt{\frac{K(r)}{\pi}}}{L(r) = sqrt(K(r)/pi)}
-  where \eqn{K(r)} is the Ripley K-function of a spatially homogeneous
+  where \eqn{K(r)} is the Ripley \eqn{K}-function of a spatially homogeneous
   point pattern, estimated by \code{\link{Kest}}.
 
-  The inhomogeneous L-function is the corresponding transformation
-  of the inhomogeneous K-function, estimated by \code{\link{Kinhom}}.
+  The inhomogeneous \eqn{L}-function is the corresponding transformation
+  of the inhomogeneous \eqn{K}-function, estimated by \code{\link{Kinhom}}.
   It is appropriate when the point pattern clearly does not have a
-  homogeneous intensity of points.
+  homogeneous intensity of points. It was proposed by
+  Baddeley, Moller and Waagepetersen (2000).
 
   The command \code{Linhom} first calls
   \code{\link{Kinhom}} to compute the estimate of the inhomogeneous K-function,
   and then applies the square root transformation.
 
   For a Poisson point pattern (homogeneous or inhomogeneous),
-  the theoretical value of the inhomogeneous L-function is \eqn{L(r) = r}.
+  the theoretical value of the inhomogeneous \eqn{L}-function is \eqn{L(r) = r}.
   The square root also has the effect of stabilising
-  the variance of the estimator, so that L is more appropriate
+  the variance of the estimator, so that \eqn{L} is more appropriate
   for use in simulation envelopes and hypothesis tests.
 }
 
@@ -56,6 +59,12 @@
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{L(r)} obtained by the edge corrections
   named.
+}
+\references{
+  Baddeley, A., Moller, J. and Waagepetersen, R. (2000)
+  Non- and semiparametric estimation of interaction in
+  inhomogeneous point patterns.
+  \emph{Statistica Neerlandica} \bold{54}, 329--350.
 }
 \seealso{
   \code{\link{Kest}},

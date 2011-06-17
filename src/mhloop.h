@@ -18,7 +18,7 @@
 
    MH_TRACKING  whether to save transition history
 
-   $Revision: 1.7 $  $Date: 2011/05/24 14:43:46 $ 
+   $Revision: 1.9 $  $Date: 2011/06/16 09:58:38 $ 
 
 */
 
@@ -62,17 +62,25 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #endif
 #endif
       /* evaluate conditional intensity */
+
+#if MH_MARKED
+      betavalue = model.beta[birthprop.mrk];
+#endif
+
 #if MH_SINGLE
-      anumer = (*(thecif.eval))(birthprop, state, thecdata);
+      anumer = betavalue * (*(thecif.eval))(birthprop, state, thecdata);
 #else
-      anumer = 1.0;
+      anumer = betavalue;
       for(k = 0; k < Ncif; k++)
 	anumer *= (*(cif[k].eval))(birthprop, state, cdata[k]);
 #endif
+
       adenom = qnodds*(nfree+1);
+
 #if MH_DEBUG
       Rprintf("cif = %lf, Hastings ratio = %lf\n", anumer, anumer/adenom);
 #endif
+
       /* accept/reject */
       if(unif_rand() * adenom < anumer) {
 #if MH_DEBUG
@@ -110,10 +118,15 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #endif
 #endif
       /* evaluate conditional intensity */
+
+#if MH_MARKED
+      betavalue = model.beta[deathprop.mrk];
+#endif
+
 #if MH_SINGLE
-      adenom = (*(thecif.eval))(deathprop, state, thecdata);
+      adenom = betavalue * (*(thecif.eval))(deathprop, state, thecdata);
 #else
-      adenom = 1.0;
+      adenom = betavalue;
       for(k = 0; k < Ncif; k++)
 	adenom *= (*(cif[k].eval))(deathprop, state, cdata[k]);
 #endif
@@ -178,6 +191,14 @@ for(irep = 0; irep < algo.nrep; irep++) {
       cvn *= (*(cif[k].eval))(shiftprop, state, cdata[k]);
     }
 #endif
+
+#if MH_MARKED
+    if(!algo.fixall) {
+      cvn *= model.beta[shiftprop.mrk];
+      cvd *= model.beta[deathprop.mrk];
+    }
+#endif
+
 #if MH_DEBUG
     Rprintf("cif[old] = %lf, cif[new] = %lf, Hastings ratio = %lf\n", 
 	    cvd, cvn, cvn/cvd);
@@ -236,10 +257,10 @@ for(irep = 0; irep < algo.nrep; irep++) {
 #if MH_SINGLE
 	thecdata = (*(thecif.init))(state, model, algo);
 #else
-	model.par = parvector;
+	model.ipar = iparvector;
 	for(k = 0; k < Ncif; k++) {
 	  if(k > 0)
-	    model.par += plength[k-1];
+	    model.ipar += plength[k-1];
 	  cdata[k] = (*(cif[k].init))(state, model, algo);
 	}	
 #endif
