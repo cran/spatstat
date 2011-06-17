@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.2 $   $Date: 2011/05/24 15:07:18 $
+#  $Revision: 1.3 $   $Date: 2011/06/14 07:28:31 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -482,3 +482,10 @@ unitname.slrm <- function(x) {
   return(x)
 }
 
+is.stationary.slrm <- function(x) {
+  fo <- formula(x)
+  trend <- fo[c(1,3)]
+  return(identical.formulae(trend, ~1))
+}
+
+is.poisson.slrm <- function(x) { TRUE }

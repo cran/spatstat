@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.48 $  $Date: 2010/11/21 03:30:43 $
+#   $Revision: 1.50 $  $Date: 2011/06/16 07:35:25 $
 #
 #
 
@@ -11,13 +11,18 @@ rmhmodel <- function(...) {
 }
 
 rmhmodel.rmhmodel <- function(model, ...) {
+  if(outdated <- is.null(model$C.ipar))
+    warning("Outdated internal format of rmhmodel object; rebuilding it")
+  if(outdated || (length(list(...)) > 0))
+    model <- rmhmodel.list(unclass(model), ...)
   return(model)
 }
 
 rmhmodel.list <- function(model, ...) {
   argnames <- c("cif","par","w","trend","types")
   ok <- argnames %in% names(model)
-  do.call("rmhmodel.default", append(model[argnames[ok]], list(...)))
+  do.call("rmhmodel.default",
+          resolve.defaults(list(...), model[argnames[ok]]))
 }
 
 rmhmodel.default <- function(...,
@@ -55,15 +60,14 @@ rmhmodel.default <- function(...,
                               stopinvalid=FALSE)
     }
     C.id  <- unlist(lapply(models, function(x){x$C.id}))
-    C.parlist <- lapply(models, function(x){x$C.par})
-    C.par     <- unlist(C.parlist)
-    C.parlen  <- unlist(lapply(C.parlist, length))
+    C.betalist <- lapply(models, function(x){x$C.beta})
+    C.iparlist <- lapply(models, function(x){x$C.ipar})
+    C.beta     <- unlist(C.betalist)
+    C.ipar     <- unlist(C.iparlist)
     check <- lapply(models, function(x){x$check})
     maxr <- max(unlist(lapply(models, function(x){x$reach})))
     ismulti <- unlist(lapply(models, function(x){x$multitype.interact}))
     multi <- any(ismulti)
-    # which model will absorb the adjustments to intensity
-    absorb <- if(multi) min(which(ismulti)) else 1
     # determine whether model exists
     integ <- unlist(lapply(models, function(x) { x$integrable }))
     stabi <- unlist(lapply(models, function(x) { x$stabilising }))
@@ -122,9 +126,10 @@ rmhmodel.default <- function(...,
                 trend=trend,
                 types=types,
                 C.id=C.id,
-                C.par=C.par,
-                C.parlen=C.parlen,
-                absorb=absorb,
+                C.beta=C.beta,
+                C.ipar=C.ipar,
+                C.betalist=C.betalist,
+                C.iparlist=C.iparlist,
                 check=check,
                 multitype.interact=multi,
                 integrable=integrable,
@@ -135,6 +140,8 @@ rmhmodel.default <- function(...,
     return(out)
   }
 
+  # non-hybrid
+  
   # Check that this is a recognised model
   # and look up the rules for this model
   rules <- .Spatstat.RmhTable[[cif]]
@@ -160,7 +167,7 @@ rmhmodel.default <- function(...,
 
   # Validate the model parameters and reformat them 
   check <- rules$parhandler
-  C.par <-
+  checkedpar <-
     if(!rules$multitype)
       check(par)
     else if(!is.null(types))
@@ -169,9 +176,16 @@ rmhmodel.default <- function(...,
       # types vector not given - defer checking
       NULL
 
-  # ensure it's a numeric vector
-  C.par <- unlist(C.par)
-
+  if(!is.null(checkedpar)) {
+    stopifnot(is.list(checkedpar))
+    stopifnot(!is.null(names(checkedpar)) && all(nzchar(names(checkedpar))))
+    stopifnot(names(checkedpar)[[1]] == "beta")
+    C.beta  <- unlist(checkedpar[[1]])
+    C.ipar <- as.numeric(unlist(checkedpar[-1]))
+  } else {
+    C.beta <- C.ipar <- NULL
+  }
+  
   # Determine whether model is integrable
   integrable <- rules$validity(par, "integrable")
   explainvalid  <- rules$explainvalid
@@ -197,10 +211,9 @@ rmhmodel.default <- function(...,
               trend=trend,
               types=types,
               C.id=C.id,
-              C.par=C.par,
-              C.parlen=length(C.par),
-              absorb=1,
-              check= if(is.null(C.par)) check else NULL,
+              C.beta=C.beta,
+              C.ipar=C.ipar,
+              check= if(is.null(C.ipar)) check else NULL,
               multitype.interact=rules$multitype,
               integrable=integrable,
               stabilising=stabilising,
@@ -235,7 +248,7 @@ print.rmhmodel <- function(x, ...) {
   
   cat("Numerical parameters: par =\n")
   print(x$par)
-  if(is.null(x$C.par))
+  if(is.null(x$C.ipar))
     cat("Parameters have not yet been checked for compatibility with types.\n")
   if(is.owin(x$w)) print(x$w) else cat("Window: not specified.\n")
   cat("Trend: ")
@@ -258,6 +271,12 @@ is.poisson.rmhmodel <- function(x) {
   identical(x$cif, 'poisson')
 }
 
+is.stationary.rmhmodel <- function(x) {
+  verifyclass(x, "rmhmodel")
+  tren <- x$trend
+  return(is.null(tren) || is.numeric(tren))
+}
+
 #####  Table of rules for handling rmh models ##################
 
 .Spatstat.RmhTable <-
@@ -274,7 +293,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, forbidNA(beta, ctxt))
               par <- check.named.list(par, "beta", ctxt)
               with(par, explain.ifnot(all(beta >= 0), ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -304,7 +323,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, explain.ifnot(gamma >= 0, ctxt))
               with(par, explain.ifnot(r >= 0, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               gamma <- par$gamma
@@ -348,7 +367,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(r >= 0, ctxt))
               with(par, explain.ifnot(hc >= 0, ctxt))
               with(par, explain.ifnot(hc <= r, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               hc <- par$hc
@@ -386,7 +405,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, explain.ifnot(sigma >= 0, ctxt))
               with(par, explain.ifnot(kappa >= 0 && kappa <= 1, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -436,8 +455,7 @@ is.poisson.rmhmodel <- function(x) {
               explain.ifnot(all(gamma >= 0), ctxt)
               explain.ifnot(all(r >= 0), ctxt)
 
-              # Repack as flat vector
-	      par <- c(beta,gamma,r)
+              par <- list(beta=beta, gamma=gamma, r=r)
               return(par)
             }, 
             validity=function(par, kind) {
@@ -506,8 +524,7 @@ is.poisson.rmhmodel <- function(x) {
               explain.ifnot(all(hradii >= 0), ctxt)
               explain.ifnot(all(iradii >= hradii), ctxt)
 
-# Repack as flat vector
-              par <- c(beta,gamma,iradii,hradii)
+              par <- list(beta=beta,gamma=gamma,iradii=iradii,hradii=hradii)
               return(par)
             },
             validity=function(par, kind) {
@@ -557,7 +574,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(rho, ctxt))
               with(par, explain.ifnot(rho >= 0, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -593,7 +610,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(delta >= 0, ctxt))              
               with(par, explain.ifnot(rho >= 0, ctxt))              
               with(par, explain.ifnot(delta < rho, ctxt))              
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -625,7 +642,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, check.finite(r, ctxt))
               with(par, check.finite(sat, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -708,12 +725,14 @@ is.poisson.rmhmodel <- function(x) {
               nlook <- nlook+1
               deltar <- mean(diff(r))
               if(identical(all.equal(diff(r),rep(deltar,nlook-1)),TRUE)) {
-		equisp <- 1
-		par <- c(beta,nlook,equisp,deltar,rmax,h)
+		par <- list(beta=beta,nlook=nlook,
+                            equisp=1,
+                            deltar=deltar,rmax=rmax, h=h)
               } else {
-		equisp <- 0
-		par <- c(beta,nlook,equisp,deltar,rmax,h,r)
-               
+		par <- list(beta=beta,nlook=nlook,
+                            equisp=0,
+                            deltar=deltar,rmax=rmax, h=h,
+                            r=r)
               }
               return(par) 
             },
@@ -757,7 +776,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, check.finite(r,   ctxt))
               with(par, explain.ifnot(eta >= 0, ctxt))
               with(par, explain.ifnot(r >= 0,   ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -801,7 +820,7 @@ is.poisson.rmhmodel <- function(x) {
               mmm <- cbind(gamma,r,sat)
               mmm <- mmm[order(r),]
               ndisc <- length(r)
-              par <- c(par$beta,ndisc,as.vector(t(mmm)))
+              par <- list(beta=par$beta,ndisc=ndisc,parms=as.vector(t(mmm)))
               return(par)
             },
             validity=function(par, kind) {
@@ -830,7 +849,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, check.finite(hc, ctxt))
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, check.1.real(hc, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               hc <- par$hc
@@ -867,7 +886,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, explain.ifnot(all(beta >= 0), ctxt))
               with(par, explain.ifnot(hc >= 0, ctxt))
               with(par, explain.ifnot(r > hc, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               hc <- par$hc
@@ -905,7 +924,7 @@ is.poisson.rmhmodel <- function(x) {
               with(par, check.1.real(epsilon, ctxt))
               with(par, explain.ifnot(sigma > 0, ctxt))
               with(par, explain.ifnot(epsilon > 0, ctxt))
-              return(unlist(par))
+              return(par)
             },
             validity=function(par, kind) {
               switch(kind,
@@ -947,8 +966,7 @@ is.poisson.rmhmodel <- function(x) {
               explain.ifnot(all(beta >= 0), ctxt)
               explain.ifnot(all(hradii >= 0), ctxt)
 
-# Repack as flat vector
-              par <- c(beta,hradii)
+              par <- list(beta=beta,hradii=hradii)
               return(par)
             },
             validity=function(par, kind) {
@@ -969,4 +987,5 @@ is.poisson.rmhmodel <- function(x) {
             )
        # end of list '.Spatstat.RmhTable'
        )
+
 

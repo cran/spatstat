@@ -10,7 +10,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Lennard {
-  double beta;
   double sigma;
   double epsilon;
   double sigma2;  /*   sigma^2     */
@@ -41,9 +40,8 @@ Cdata *lennardinit(state, model, algo)
   lennard = (Lennard *) R_alloc(1, sizeof(Lennard));
 
   /* Interpret model parameters*/
-  lennard->beta    = model.par[0];
-  lennard->sigma   = model.par[1];
-  lennard->epsilon = model.par[2];
+  lennard->sigma   = model.ipar[0];
+  lennard->epsilon = model.ipar[1];
   lennard->period  = model.period;
   /* constants */
   lennard->sigma2  = sigma2 = pow(lennard->sigma, 2);
@@ -85,7 +83,7 @@ double lennardcif(prop, state, cdata)
   y  = state.y;
   npts = state.npts;
 
-  cifval = lennard->beta;
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);

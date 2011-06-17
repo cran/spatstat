@@ -1,12 +1,16 @@
 #
-#	affine.S
+#	affine.R
 #
-#	$Revision: 1.30 $	$Date: 2009/03/02 18:02:30 $
+#	$Revision: 1.33 $	$Date: 2011/06/16 05:04:42 $
 #
 
-affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0)) {
+affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
   if(length(X$x) == 0 && length(X$y) == 0)
     return(list(x=c(),y=c()))
+  if(invert) {
+    mat <- invmat <- solve(mat)
+    vec <- - as.numeric(invmat %*% vec)
+  }
   # Y = M X + V
   ans <- mat %*% rbind(X$x, X$y) + matrix(vec, nrow=2, ncol=length(X$x))
   return(list(x = ans[1,],
@@ -26,7 +30,8 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
   return(p)
 }
        
-"affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
+"affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...,
+                          rescue=TRUE) {
   verifyclass(X, "owin")
   if(!is.vector(vec) || length(vec) != 2)
     stop(paste(sQuote("vec"), "should be a vector of length 2"))
@@ -53,22 +58,32 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
              # convert rectangle to polygon
              P <- as.polygonal(X)
              # call polygonal case
-             return(affine.owin(P, mat, vec))
+             return(affine.owin(P, mat, vec, rescue=rescue))
            }
          },
          polygonal={
            # Transform the polygonal boundaries
-           bdry <- lapply(X$bdry, affinexypolygon, mat=mat, vec=vec)
+           bdry <- lapply(X$bdry, affinexypolygon, mat=mat, vec=vec,
+                          detmat=detmat)
            # Compile result
-           W <- owin(poly=bdry, check=FALSE)
+           W <- owin(poly=bdry, check=FALSE, unitname=newunits)
            # Result might be a rectangle: if so, convert to rectangle type
-           W <- rescue.rectangle(W)
-           unitname(W) <- newunits
+           if(rescue)
+             W <- rescue.rectangle(W)
            return(W)
          },
          mask={
-           stop(paste("Sorry,", sQuote("affine.owin"),
-                      "is not yet implemented for masks"))
+           # binary mask
+           newframe <- bounding.box.xy(affinexy(corners(X), mat, vec))
+           W <- if(length(list(...)) > 0) as.mask(newframe, ...) else 
+                   as.mask(newframe, eps=with(X, min(xstep, ystep)))
+           pixelxy <- raster.xy(W)
+           xybefore <- affinexy(pixelxy, mat, vec, invert=TRUE)
+           W$m[] <- with(xybefore, inside.owin(x, y, X))
+           W <- intersect.owin(W, bounding.box(W))
+           if(rescue)
+             W <- rescue.rectangle(W)
+           return(W)
          },
          stop("Unrecognised window type")
          )
@@ -77,7 +92,7 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
 "affine.ppp" <- function(X, mat=diag(c(1,1)), vec=c(0,0), ...) {
   verifyclass(X, "ppp")
   r <- affinexy(X, mat, vec)
-  w <- affine.owin(X$window, mat, vec)
+  w <- affine.owin(X$window, mat, vec, ...)
   return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 

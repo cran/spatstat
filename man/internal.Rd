@@ -166,15 +166,11 @@
 \alias{is.marked.quad}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
-\alias{is.poisson.interact}
-\alias{is.poisson.ppm}
-\alias{is.poisson.rmhmodel}
 \alias{is.pp3}
 \alias{is.ppx}
 \alias{is.prime}
 \alias{is.psp}
 \alias{is.slrm}
-\alias{is.stationary.ppm}
 \alias{is.tess}
 \alias{k3engine}
 \alias{Kborder.engine}
@@ -448,7 +444,7 @@
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 adjustthinrange(ur,vstep,vr)
-affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0))
+affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0), invert=FALSE)
 affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
@@ -507,7 +503,7 @@ damaged.ppm(object)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
-densitypointsEngine(x, sigma, \dots, weights, edge, varcov, leaveoneout)
+densitypointsEngine(x, sigma, \dots, weights, edge, varcov,leaveoneout,diggle)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
@@ -618,15 +614,11 @@ is.interact(x)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 \method{is.multitype}{default}(\dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
-is.poisson.interact(x)
-is.poisson.ppm(x)
-is.poisson.rmhmodel(x)
 is.pp3(x)
 is.ppx(x)
 is.prime(n)
 is.psp(x)
 is.slrm(x)
-is.stationary.ppm(x)    
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
 Kborder.engine(X, rmax, nr, correction, weights)

@@ -16,7 +16,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Lookup {
-  double beta;
   int nlook;
   int equisp;   
   double delta;
@@ -44,11 +43,10 @@ Cdata *lookupinit(state, model, algo)
   lookup = (Lookup *) R_alloc(1, sizeof(Lookup));
 
   /* Interpret model parameters*/
-  lookup->beta   = model.par[0];
-  lookup->nlook  = nlook = model.par[1];
-  lookup->equisp = (model.par[2] > 0); 
-  lookup->delta  = model.par[3];
-  lookup->rmax   = model.par[4];
+  lookup->nlook  = nlook = model.ipar[0];
+  lookup->equisp = (model.ipar[1] > 0); 
+  lookup->delta  = model.ipar[2];
+  lookup->rmax   = model.ipar[3];
   lookup->r2max  = pow(lookup->rmax, 2);
   /* periodic boundary conditions? */
   lookup->period = model.period;
@@ -64,12 +62,12 @@ Cdata *lookupinit(state, model, algo)
 */
   lookup->h = (double *) R_alloc((size_t) nlook, sizeof(double));
   for(i = 0; i < nlook; i++)
-    lookup->h[i] = model.par[5+i];
+    lookup->h[i] = model.ipar[4+i];
   if(!(lookup->equisp)) {
     lookup->r = (double *) R_alloc((size_t) nlook, sizeof(double));
     lookup->r2 = (double *) R_alloc((size_t) nlook, sizeof(double));
     for(i = 0; i < nlook; i++) {
-      ri = lookup->r[i] = model.par[5+nlook+i];
+      ri = lookup->r[i] = model.ipar[4+nlook+i];
       lookup->r2[i] = ri * ri;
     }
   }
@@ -107,7 +105,7 @@ double lookupcif(prop, state, cdata)
 
   npts = state.npts;
 
-  cifval = lookup->beta;
+  cifval = 1.0;
   if(npts == 0) 
     return(cifval);
 

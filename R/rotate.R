@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.12 $	$Date: 2009/02/27 18:47:37 $
+#	$Revision: 1.16 $	$Date: 2011/06/16 05:04:21 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -17,7 +17,7 @@ rotxypolygon <- function(p, angle=pi/2) {
   return(p)
 }
 
-"rotate.owin" <- function(X, angle=pi/2, ...) {
+"rotate.owin" <- function(X, angle=pi/2, ..., rescue=TRUE) {
   verifyclass(X, "owin")
   switch(X$type,
          rectangle={
@@ -27,19 +27,29 @@ rotxypolygon <- function(p, angle=pi/2) {
                           y=X$yrange[c(1,1,2,2)]),
                      unitname=unitname(X))
            # call polygonal case
-           return(rotate.owin(P, angle))
+           return(rotate.owin(P, angle, rescue=rescue))
          },
          polygonal={
            # First rotate the polygonal boundaries
            bdry <- lapply(X$bdry, rotxypolygon, angle=angle)
            # wrap up
-           W <- owin(poly=bdry, unitname=unitname(X))
-           W <- rescue.rectangle(W)
+           W <- owin(poly=bdry, check=FALSE, unitname=unitname(X))
+           if(rescue)
+             W <- rescue.rectangle(W)
            return(W)
          },
          mask={
-           stop(paste("Sorry,", sQuote("rotate.owin"),
-                      "is not yet implemented for masks"))
+           newframe <- bounding.box.xy(rotxy(corners(X), angle))
+           W <- if(length(list(...)) > 0) as.mask(newframe, ...) else 
+                   as.mask(newframe, eps=with(X, min(xstep, ystep)))
+           pixelxy <- raster.xy(W)
+           xybefore <- rotxy(pixelxy, -angle)
+           W$m[] <- with(xybefore, inside.owin(x, y, X))
+           W <- intersect.owin(W, bounding.box(W))
+           if(rescue)
+             W <- rescue.rectangle(W)
+           unitname(W) <- unitname(X)
+           return(W)
          },
          stop("Unrecognised window type")
          )
@@ -48,7 +58,7 @@ rotxypolygon <- function(p, angle=pi/2) {
 "rotate.ppp" <- function(X, angle=pi/2, ...) {
   verifyclass(X, "ppp")
   r <- rotxy(X, angle)
-  w <- rotate.owin(X$window, angle)
+  w <- rotate.owin(X$window, angle, ...)
   return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 

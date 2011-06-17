@@ -13,7 +13,6 @@
 
 typedef struct MultiStrauss {
   int ntypes;
-  double *beta;    /* beta[i]  for i = 0 ... ntypes-1 */
   double *gamma;   /* gamma[i,j] = gamma[i+ntypes*j] for i,j = 0... ntypes-1 */
   double *rad;     /* rad[i,j] = rad[j+ntypes*i] for i,j = 0... ntypes-1 */
   double *rad2;    /* squared radii */
@@ -32,7 +31,7 @@ Cdata *straussminit(state, model, algo)
      Model model;
      Algor algo;
 {
-  int i, j, ntypes, n2, m, hard;
+  int i, j, ntypes, n2, hard;
   double g, r, r2, logg;
   MultiStrauss *multistrauss;
 
@@ -46,7 +45,6 @@ Cdata *straussminit(state, model, algo)
 #endif
 
   /* Allocate space for parameters */
-  multistrauss->beta     = (double *) R_alloc((size_t) ntypes, sizeof(double));
   multistrauss->gamma    = (double *) R_alloc((size_t) n2, sizeof(double));
   multistrauss->rad      = (double *) R_alloc((size_t) n2, sizeof(double));
 
@@ -59,15 +57,13 @@ Cdata *straussminit(state, model, algo)
   multistrauss->kount     = (int *) R_alloc((size_t) n2, sizeof(int));
 
   /* Copy and process model parameters*/
-  for(i = 0; i < ntypes; i++)
-    multistrauss->beta[i]   = model.par[i];
 
-  m = ntypes * (ntypes + 1);
+  /* ipar will contain n^2 gamma values followed by n^2 values of r */
 
   for(i = 0; i < ntypes; i++) {
     for(j = 0; j < ntypes; j++) {
-      g = model.par[ntypes + i + j*ntypes];
-      r = model.par[m + i + j*ntypes];
+      g = model.ipar[i + j*ntypes];
+      r = model.ipar[n2 + i + j*ntypes];
       r2 = r * r;
       hard = (g < DOUBLE_EPS);
       logg = (hard) ? 0 : log(g);
@@ -118,7 +114,7 @@ double straussmcif(prop, state, cdata)
   Rprintf("computing cif: u=%lf, v=%lf, mrk=%d\n", u, v, mrk);
 #endif
 
-  cifval = multistrauss->beta[mrk];
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);

@@ -12,17 +12,15 @@ void fexitc(const char *msg);
   Conditional intensity function for a multiscale saturation process. 
 
   parameter vector: 
-      par[0] = beta
-      par[1] = ndisc
-      par[2] = gamma[0]
-      par[3] = r[0]
-      par[4] = s[0]
+      ipar[0] = ndisc
+      ipar[1] = gamma[0]
+      ipar[2] = r[0]
+      ipar[3] = s[0]
       ...
 */
 
 typedef struct BadGey {
   /* model parameters */
-  double beta;
   int ndisc;
   double *gamma;
   double *r;
@@ -52,8 +50,7 @@ Cdata *badgeyinit(state, model, algo)
   /* create storage */
   badgey = (BadGey *) R_alloc(1, sizeof(BadGey));
 
-  badgey->beta   = model.par[0];
-  badgey->ndisc  = ndisc = model.par[1];
+  badgey->ndisc  = ndisc = model.ipar[0];
   /* Allocate space for parameter vectors */
   badgey->gamma    = (double *) R_alloc((size_t) ndisc, sizeof(double));
   badgey->r        = (double *) R_alloc((size_t) ndisc, sizeof(double));
@@ -64,10 +61,10 @@ Cdata *badgeyinit(state, model, algo)
   badgey->hard     = (int *) R_alloc((size_t) ndisc, sizeof(int));
   /* copy and transform parameters */
   for(i=0; i < ndisc; i++) {
-    i0 = 3*i + 2;
-    g = badgey->gamma[i] = model.par[i0];
-    r = badgey->r[i] =     model.par[i0 + 1];
-        badgey->s[i] =     model.par[i0 + 2];
+    i0 = 3*i + 1;
+    g = badgey->gamma[i] = model.ipar[i0];
+    r = badgey->r[i] =     model.ipar[i0 + 1];
+        badgey->s[i] =     model.ipar[i0 + 2];
     badgey->r2[i] = r * r;
     badgey->hard[i] = (g < DOUBLE_EPS);
     badgey->loggamma[i] = (g < DOUBLE_EPS) ? 0 : log(g);
@@ -123,7 +120,7 @@ double badgeycif(prop, state, cdata)
 #endif
 
   npts = state.npts;
-  cifval = badgey->beta;
+  cifval = 1.0;
   if(npts==0) return cifval;
 
   x = state.x;

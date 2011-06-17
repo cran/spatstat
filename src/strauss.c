@@ -8,7 +8,6 @@
 /* Format for storage of parameters and precomputed/auxiliary data */
 
 typedef struct Strauss {
-  double beta;
   double gamma;
   double r;
   double loggamma;
@@ -30,14 +29,13 @@ Cdata *straussinit(state, model, algo)
   Strauss *strauss;
   strauss = (Strauss *) R_alloc(1, sizeof(Strauss)); 
   /* Interpret model parameters*/
-  strauss->beta   = model.par[0];
-  strauss->gamma  = model.par[1];
-  strauss->r      = model.par[2]; /* No longer passed as r^2 */
+  strauss->gamma  = model.ipar[0];
+  strauss->r      = model.ipar[1]; /* No longer passed as r^2 */
   strauss->r2     = strauss->r * strauss->r; 
   strauss->period = model.period;
 #ifdef MHDEBUG
-  Rprintf("Initialising Strauss beta=%lf, gamma=%lf, r=%lf\n", 
-	  strauss->beta, strauss->gamma, strauss->r);
+  Rprintf("Initialising Strauss gamma=%lf, r=%lf\n", 
+	  strauss->gamma, strauss->r);
 #endif
   /* is the model numerically equivalent to hard core ? */
   strauss->hard   = (strauss->gamma < DOUBLE_EPS);
@@ -73,7 +71,7 @@ double strausscif(prop, state, cdata)
   npts = state.npts;
 
   if(npts == 0) 
-    return(strauss->beta);
+    return((double) 1.0);
 
   kount = 0;
   ixp1 = ix+1;
@@ -115,9 +113,9 @@ double strausscif(prop, state, cdata)
 
   if(strauss->hard) {
     if(kount > 0) cifval = 0.0;
-    else cifval = strauss->beta;
+    else cifval = 1.0;
   }
-  else cifval = (strauss->beta) * exp((strauss->loggamma) * kount);
+  else cifval = exp((strauss->loggamma) * kount);
   
   return cifval;
 }

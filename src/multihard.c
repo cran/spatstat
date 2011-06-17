@@ -13,7 +13,6 @@
 
 typedef struct MultiHard {
   int ntypes;
-  double *beta;    /* beta[i]  for i = 0 ... ntypes-1 */
   double *hc;      /* hc[i,j] = hc[j+ntypes*i] for i,j = 0... ntypes-1 */
   double *hc2;    /* squared radii */
   double *period;
@@ -42,20 +41,16 @@ Cdata *multihardinit(state, model, algo)
 #endif
 
   /* Allocate space for parameters */
-  multihard->beta     = (double *) R_alloc((size_t) ntypes, sizeof(double));
   multihard->hc       = (double *) R_alloc((size_t) n2, sizeof(double));
 
   /* Allocate space for transformed parameters */
   multihard->hc2      = (double *) R_alloc((size_t) n2, sizeof(double));
 
   /* Copy and process model parameters*/
-  for(i = 0; i < ntypes; i++)
-    multihard->beta[i]   = model.par[i];
-
   for(i = 0; i < ntypes; i++) {
     for(j = 0; j < ntypes; j++) {
-      h = model.par[ntypes + i + j*ntypes];
-      MAT(multihard->hc, i, j, ntypes) = h; 
+      h = model.ipar[i + j*ntypes];
+      MAT(multihard->hc,  i, j, ntypes) = h; 
       MAT(multihard->hc2, i, j, ntypes) = h * h;
     }
   }
@@ -99,7 +94,7 @@ double multihardcif(prop, state, cdata)
   Rprintf("computing cif: u=%lf, v=%lf, mrk=%d\n", u, v, mrk);
 #endif
 
-  cifval = multihard->beta[mrk];
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);

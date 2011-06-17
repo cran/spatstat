@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.122 $	$Date: 2011/05/18 09:25:12 $
+#	$Revision: 4.123 $	$Date: 2011/06/16 05:03:56 $
 #
 #
 #	A window may be either
@@ -664,6 +664,11 @@ raster.y <- function(w) {
 	matrix(w$yrow[row(m)], nrow=nr, ncol=nc)
 }
 
+raster.xy <- function(w) {
+  list(x=as.numeric(raster.x(w)),
+       y=as.numeric(raster.y(w)))
+}
+  
 nearest.raster.point <- function(x,y,w, indices=TRUE) {
 	validate.mask(w)
 	nr <- w$dim[1]

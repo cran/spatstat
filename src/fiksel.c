@@ -19,7 +19,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Fiksel {
-  double beta;
   double r;
   double h;
   double kappa;
@@ -42,11 +41,10 @@ Cdata *fikselinit(state, model, algo)
   fiksel = (Fiksel *) R_alloc(1, sizeof(Fiksel));
 
   /* Interpret model parameters*/
-  fiksel->beta   = model.par[0];
-  fiksel->r      = model.par[1];
-  fiksel->h      = model.par[2];
-  fiksel->kappa  = model.par[3];
-  fiksel->a      = model.par[4];
+  fiksel->r      = model.ipar[0];
+  fiksel->h      = model.ipar[1];
+  fiksel->kappa  = model.ipar[2];
+  fiksel->a      = model.ipar[3];
   fiksel->period = model.period;
   /* constants */
   fiksel->h2 = pow(fiksel->h, 2);
@@ -79,7 +77,7 @@ double fikselcif(prop, state, cdata)
   y  = state.y;
   npts = state.npts;
 
-  cifval = 0;
+  cifval = 1.0;
 
   if(npts == 0) 
     return(cifval);
@@ -137,7 +135,7 @@ double fikselcif(prop, state, cdata)
     }
   }
 
-  cifval = fiksel->beta * exp(fiksel->a * pairpotsum);
+  cifval = exp(fiksel->a * pairpotsum);
   return cifval;
 }
 

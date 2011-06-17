@@ -8,7 +8,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct StraussHard {
-  double beta;
   double gamma;
   double r;   /* interaction distance */
   double h;   /* hard core distance */
@@ -33,10 +32,9 @@ Cdata *straushinit(state, model, algo)
   strausshard = (StraussHard *) R_alloc(1, sizeof(StraussHard));
 
   /* Interpret model parameters*/
-  strausshard->beta   = model.par[0];
-  strausshard->gamma  = model.par[1];
-  strausshard->r      = model.par[2]; /* No longer passed as r^2 */
-  strausshard->h      = model.par[3]; /* No longer passed as h^2 */
+  strausshard->gamma  = model.ipar[0];
+  strausshard->r      = model.ipar[1]; /* No longer passed as r^2 */
+  strausshard->h      = model.ipar[2]; /* No longer passed as h^2 */
   strausshard->r2     = pow(strausshard->r, 2);
   strausshard->h2     = pow(strausshard->h, 2); 
   strausshard->r2h2   = strausshard->r2 - strausshard->h2;
@@ -77,7 +75,7 @@ double straushcif(prop, state, cdata)
   npts = state.npts;
 
   if(npts == 0) 
-    return(strausshard->beta);
+    return((double) 1.0);
 
   kount = 0;
   ixp1 = ix+1;
@@ -133,9 +131,9 @@ double straushcif(prop, state, cdata)
 
   if(strausshard->hard) {
     if(kount > 0) cifval = 0.0;
-    else cifval = strausshard->beta;
+    else cifval = 1.0;
   }
-  else cifval = strausshard->beta*exp(strausshard->loggamma*kount);
+  else cifval = exp(strausshard->loggamma*kount);
   
   return cifval;
 }

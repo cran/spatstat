@@ -406,6 +406,7 @@
 	compatible dimensions \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
 	\code{\link{scaletointerval}} \tab rescale pixel values \cr
+	\code{\link{zapsmall.im}} \tab set very small pixel values to zero \cr
 	\code{\link{levelset}} \tab level set of an image\cr 
 	\code{\link{solutionset}} \tab region where an expression is true
      }
@@ -611,7 +612,7 @@
     \code{\link{Fest}} \tab empty space function \eqn{F} \cr
     \code{\link{Gest}} \tab nearest neighbour distribution function \eqn{G} \cr
     \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
-    \code{\link{Lest}} \tab Ripley's \eqn{L}-function\cr
+    \code{\link{Lest}} \tab Besag-Ripley \eqn{L}-function\cr
     \code{\link{Jest}} \tab \eqn{J}-function \eqn{J = (1-G)/(1-F)} \cr
     \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
     \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr

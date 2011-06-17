@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.74 2011/05/24 15:16:32 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.75 2011/06/14 08:55:20 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL,
                         verbose=TRUE, track=FALSE, ...) {
@@ -32,14 +32,15 @@ rmh.default <- function(model,start=NULL,control=NULL,
   types <- rmhResolveTypes(model, start, control)
   ntypes <- length(types)
   mtype <- (ntypes > 1)
-  model$types <- types
 
 # If the model is multitype, check that the model parameters agree with types
 # and digest them
   
-  if(mtype && !is.null(model$check)) 
-    model$C.par <- model$check(model$par, types)
-
+  if(mtype && !is.null(model$check)) {
+    model <- rmhmodel(model, types=types)
+  } else {
+    model$types <- types
+  }
   
 ######## Check for illegal combinations of model, start and control  ########
 
@@ -315,24 +316,33 @@ rmh.default <- function(model,start=NULL,control=NULL,
 # 
 # Integral of trend over the expanded window (or area of window):
 # Iota == Integral Of Trend (or) Area.
-  
+
+  area.w.sim <- area.owin(w.sim)
   if(trendy) {
     if(verbose)
       cat("Evaluating trend integral...")
     tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
-    tsummaries <- lapply(tlist,
-                         function(x, w) {
-                           tmp  <- as.im(x, w)[w, drop=FALSE]
-                           return(summary(tmp))
-                         },
-                         w=w.sim)
+    summarise <- function(x, w, a) {
+      if(is.numeric(x)) {
+        mini <- maxi <- x
+        integ <- a*x
+      } else {
+        Z  <- as.im(x, w)[w, drop=FALSE]
+        ran <- range(Z)
+        mini <- ran[1]
+        maxi <- ran[2]
+        integ <- integral.im(Z)
+      }
+      return(list(min=mini, max=maxi, integral=integ))
+    }
+    tsummaries <- lapply(tlist, summarise, w=w.sim, a=area.w.sim)
     nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
     if(any(nbg))
       stop("Trend has negative values")
     iota <- unlist(lapply(tsummaries, function(x) { x$integral }))
     tmax <- unlist(lapply(tsummaries, function(x) { x$max }))
   } else {
-    iota <- area.owin(w.sim)
+    iota <- area.w.sim
     tmax <- NULL
   }
 
@@ -366,11 +376,12 @@ rmh.default <- function(model,start=NULL,control=NULL,
 
   ncif <- length(model$cif)
   if(ncif == 1) {
-    beta <- model$par[["beta"]]
+    # single interaction
+    beta <- model$C.beta
     betalist <- list(beta)
   } else {
     # hybrid
-    betalist <- lapply(model$par, function(z) { z[["beta"]] })
+    betalist <- model$C.betalist
     # multiply betas for each component
     beta <- betalist[[1]]
     for(k in 2:ncif)
@@ -689,23 +700,14 @@ rmhEngine <- function(InfoList, ...,
   
 # Get the parameters in C-ese
     
-  par <- model$C.par
-  parlen <- model$C.parlen
-  if(is.null(parlen)) {
-    # old style rmhmodel (version 1.20-1 or earlier)
-    parlen <- length(par)
-  }
+  ipar <- model$C.ipar
+  iparlist <- if(ncif == 1) list(ipar) else model$C.iparlist
+  iparlen <- unlist(lapply(iparlist, length))
+
+  beta <- model$internal$beta
   
 # Absorb the constants or vectors `iota' and 'ptypes' into the beta parameters
   beta <- (iota/ptypes) * beta
-  
-# Insert back into C parameters  
-# This assumes that the beta parameters are the first 'ntypes' entries
-# of the parameter vector passed to C
-# (in a hybrid model the component numbered i=absorb is used)
-  absorb <- model$absorb
-  startpos <- cumsum(c(0,parlen))[absorb]
-  par[startpos + (1:ntypes)] <- beta
   
 # Algorithm control parameters
 
@@ -738,8 +740,9 @@ rmhEngine <- function(InfoList, ...,
 # Call the Metropolis-Hastings simulator:
   storage.mode(ncif)   <- "integer"
   storage.mode(C.id)   <- "character"
-  storage.mode(par)    <- "double"
-  storage.mode(parlen) <- "integer"
+  storage.mode(beta)    <- "double"
+  storage.mode(ipar)    <- "double"
+  storage.mode(iparlen) <- "integer"
   storage.mode(period) <- "double"
   storage.mode(xprop)  <- storage.mode(yprop) <- "double"
   storage.mode(Cmprop) <- "integer"
@@ -756,8 +759,9 @@ rmhEngine <- function(InfoList, ...,
   out <- .Call("xmethas",
                ncif,
                C.id,
-               par,
-               parlen,
+               beta,
+               ipar,
+               iparlen,
                period,
                xprop, yprop, Cmprop,
                ntypes, nrep,

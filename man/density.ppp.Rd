@@ -8,7 +8,7 @@
   \method{density}{ppp}(x, sigma, \dots,
         weights, edge=TRUE, varcov=NULL,
         at="pixels", leaveoneout=TRUE,
-        adjust=1)
+        adjust=1, diggle=FALSE)
 }
 \arguments{
   \item{x}{
@@ -44,6 +44,11 @@
   \item{adjust}{
     Optional. Adjustment factor for the smoothing parameter.
   }
+  \item{diggle}{
+    Logical. If \code{TRUE}, use Diggle's edge correction,
+    which is more accurate but slower to compute than the
+    correction described under Details.
+  }
 }
 \value{
   By default, the result is
@@ -73,18 +78,42 @@
   given (it should be a numeric vector; weights can be negative or zero).
 
   If \code{edge=TRUE}, the intensity estimate is corrected for
-  edge effect bias by dividing it by the convolution of the
-  Gaussian kernel with the window of observation.
-  
-  Thus the intensity value at a point \eqn{u} is
-  \deqn{
-    \hat\lambda(u) = e(u) \sum_i k(x_i - u) w_i
-  }{
-    lambda(u) = e(u) sum[i] k(x[i] - u) w[i]
+  edge effect bias in one of two ways:
+  \itemize{
+    \item If \code{diggle=FALSE} (the default) the intensity estimate is
+    correted by dividing it by the convolution of the
+    Gaussian kernel with the window of observation.
+    Thus the intensity value at a point \eqn{u} is
+    \deqn{
+      \hat\lambda(u) = e(u) \sum_i k(x_i - u) w_i
+    }{
+      lambda(u) = e(u) sum[i] k(x[i] - u) w[i]
+    }
+    where \eqn{k} is the Gaussian smoothing kernel,
+    \eqn{e(u)} is an edge correction factor, 
+    and \eqn{w_i}{w[i]} are the weights.
+    \item
+    If \code{diggle=TRUE} then the method of Diggle (1985)
+    is followed exactly.
+    The intensity value at a point \eqn{u} is 
+    \deqn{
+      \hat\lambda(u) = \sum_i k(x_i - u) w_i e(x_i)
+    }{
+      lambda(u) = sum[i] k(x[i] - u) w[i] e(x[i])
+    }
+    where again \eqn{k} is the Gaussian smoothing kernel,
+    \eqn{e(x_i)}{e(x[i])} is an edge correction factor, 
+    and \eqn{w_i}{w[i]} are the weights.
+    This computation is slightly slower but more accurate.
   }
-  where \eqn{k} is the Gaussian smoothing kernel,
-  \eqn{e(u)} is an edge correction factor, 
-  and \eqn{x_i}{w[i]} are the weights.
+  In both cases, the edge correction term \eqn{e(u)} is the reciprocal of the
+  kernel mass inside the window:
+  \deqn{
+    \frac{1}{e(u)} = \int_W k(v-u) \, {\rm d}v
+  }{
+    1/e(u) = integral[v in W] k(v-u) dv
+  }
+  where \eqn{W} is the observation window. 
 
   Instead of the isotropic Gaussian kernel with standard deviation
   \code{sigma}, the smoothing kernel may be chosen to be any Gaussian
@@ -114,11 +143,17 @@
   performed by directly evaluating and summing the Gaussian kernel
   contributions without discretising the data. The result is a numeric
   vector giving the density values.
-  The intensity value at a point \eqn{x_i}{x[i]} is
+  The intensity value at a point \eqn{x_i}{x[i]} is (if \code{diggle=FALSE})
   \deqn{
-    \hat\lambda(x_i) = e(x_i) \sum_j k(x_j - x_i) w_i
+    \hat\lambda(x_i) = e(x_i) \sum_j k(x_j - x_i) w_j
   }{
-    lambda(x[i]) = e(x[i]) sum[j] k(x[j] - x[i]) w[i]
+    lambda(x[i]) = e(x[i]) sum[j] k(x[j] - x[i]) w[j]
+  }
+  or (if \code{diggle=TRUE})
+  \deqn{
+    \hat\lambda(x_i) = \sum_j k(x_j - x_i) w_j e(x_j)
+  }{
+    lambda(x[i]) = sum[j] k(x[j] - x[i]) w[j] e(x[j])
   }
   If \code{leaveoneout=TRUE} (the default), then the sum in the equation
   is taken over all \eqn{j} not equal to \eqn{i},
@@ -177,8 +212,16 @@
 }
 \examples{
   data(cells)
-  Z <- density(cells, 0.05)
-  plot(Z)
+  if(interactive()) {
+    opa <- par(mfrow=c(1,2))
+    plot(density(cells, 0.05))
+    plot(density(cells, 0.05, diggle=TRUE))
+    par(opa)
+  }
+  \testonly{
+     Z <- density(cells, 0.05)
+     Z <- density(cells, 0.05, diggle=TRUE)
+  }
   density(cells, 0.05, at="points")
 }
 \references{

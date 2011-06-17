@@ -1,7 +1,7 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.7 $ $Date: 2011/05/27 21:35:28 $
+#   $Revision: 1.8 $ $Date: 2011/06/17 02:44:23 $
 #
 
 effectfun <- function(model, covname, ...) {
@@ -68,8 +68,11 @@ effectfun <- function(model, covname, ...) {
              },
              stop(paste("Cannot handle covariate of type", dQuote(covtype)))
              )
-    } else if(is.list(co) && all(unlist(lapply(co, is.im)))) {
+    } else if(is.list(co)) {
       Z <- co[[covname]]
+      # convert to image
+      if(!is.im(Z))
+        Z <- as.im(Z, W=as.owin(model))
       covtype <- Z$type
       switch(covtype,
              real={

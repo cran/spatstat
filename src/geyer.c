@@ -12,7 +12,6 @@ void fexitc(const char *msg);
 
 typedef struct Geyer {
   /* model parameters */
-  double beta;
   double gamma;
   double r;
   double s;
@@ -39,14 +38,13 @@ Cdata *geyerinit(state, model, algo)
   geyer = (Geyer *) R_alloc(1, sizeof(Geyer));
 
   /* Interpret model parameters*/
-  geyer->beta   = model.par[0];
-  geyer->gamma  = model.par[1];
-  geyer->r      = model.par[2]; /* not squared any more */
-  geyer->s      = model.par[3]; 
+  geyer->gamma  = model.ipar[0];
+  geyer->r      = model.ipar[1]; /* not squared any more */
+  geyer->s      = model.ipar[2]; 
   geyer->r2     = geyer->r * geyer->r;
 #ifdef MHDEBUG
-  Rprintf("Initialising Geyer beta=%lf, gamma=%lf, r=%lf, sat=%lf\n",
-	  geyer->beta, geyer->gamma, geyer->r, geyer->s);
+  Rprintf("Initialising Geyer gamma=%lf, r=%lf, sat=%lf\n",
+	  geyer->gamma, geyer->r, geyer->s);
 #endif
   /* is the model numerically equivalent to hard core ? */
   geyer->hard   = (geyer->gamma < DOUBLE_EPS);
@@ -87,7 +85,7 @@ double geyercif(prop, state, cdata)
   geyer = (Geyer *) cdata;
 
   npts = state.npts;
-  if(npts==0) return geyer->beta;
+  if(npts==0) return ((double) 1.0);
 
   x = state.x;
   y = state.y;
@@ -199,9 +197,9 @@ double geyercif(prop, state, cdata)
 
  if(geyer->hard) {
     if(tee > 0) cifval = 0.0;
-    else cifval = geyer->beta;
+    else cifval = 1.0;
   }
-  else cifval = geyer->beta*exp(geyer->loggamma*w);
+  else cifval = exp(geyer->loggamma*w);
   
   return cifval;
 }

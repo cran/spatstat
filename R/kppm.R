@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.36 $ $Date: 2011/06/08 11:53:35 $
+# $Revision: 1.38 $ $Date: 2011/06/14 07:39:50 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -18,7 +18,7 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
   if(is.marked(X))
     stop("Sorry, cannot handle marked point patterns")
   po <- ppm(X, trend=trend, covariates=covariates)
-  stationary <- is.null(trend) || identical.formulae(trend, ~1)
+  stationary <- is.stationary(po)
   if(stationary) {
     lambda <- summary(po)$trend$value
     StatFun <- if(statistic == "K") "Kest" else "pcf"
@@ -331,3 +331,22 @@ Kpcf.kppm <- function(model, what=c("K", "pcf")) {
   return(f)
 }
 
+is.stationary.kppm <- function(x) {
+  return(x$stationary)
+}
+
+is.poisson.kppm <- function(x) {
+  switch(x$clusters,
+         Thomas=,
+         MatClust={
+           # Poisson cluster process
+           mu <- x$mu
+           return(!is.null(mu) && (max(mu) == 0))
+         },
+         LGCP = {
+           # log-Gaussian Cox process
+           sigma2 <- x$mcfit$par[["sigma2"]]
+           return(sigma2 == 0)
+         },
+         return(FALSE))
+}

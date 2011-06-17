@@ -12,7 +12,10 @@
   \item{X}{Point pattern (object of class \code{"ppp"}).}
   \item{mat}{Matrix representing a linear transformation.}
   \item{vec}{Vector of length 2 representing a translation.}
-  \item{\dots}{Ignored}
+  \item{\dots}{Arguments passed to \code{\link{affine.owin}} affecting
+    the handling of the observation window, if it is a binary pixel
+    mask.
+  }
 }
 \value{
   Another point pattern (of class \code{"ppp"}) representing the

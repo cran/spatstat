@@ -1,3 +1,62 @@
+	CHANGES IN spatstat VERSION 1.22-3
+
+OVERVIEW 
+
+    o  Important bug fix to simulation code
+
+    o  Miscellaneous improvements
+
+    o  spatstat now depends on R 2.13.0 or later
+
+    o  We thank Ege Rubak, Kaspar Stucki, Vadim Shcherbakov,
+       Jesper Moller and Ben Taylor for contributions.
+
+NEW FUNCTIONS
+
+    o  is.stationary, is.poisson
+       New generic functions for testing whether a point process model 
+       is stationary and/or Poisson.
+       Methods for ppm, kppm, slrm etc
+
+    o  raster.xy
+       raster coordinates of a pixel mask
+
+    o  zapsmall.im
+       'zapsmall' for pixel images
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o  density.ppp
+       New argument 'diggle' allows choice of edge correction
+
+    o  rotate.owin, affine.owin
+       These functions now handle binary pixel masks.
+       New argument 'rescue' determines whether rectangles will be preserved
+
+BUG FIXES
+
+    o  rmh, simulate.ppm
+       Serious bug - simulation was completely incorrect in the case of 
+       a multitype point process with an interaction that does not depend
+       on the marks, such as ppm(betacells, ~marks, Strauss(60))
+       The calling parameters were garbled.
+       Fixed.
+
+    o  effectfun
+       Crashed if the covariate was a function(x,y).
+       Fixed.
+
+    o  lurking
+       Gave erroneous error messages about 'damaged' models.
+       Fixed.
+
+    o  envelope.ppm
+       Did not recognise when the fitted model was equivalent to CSR.
+       Fixed.
+
+    o  plot.ppx
+       Crashed in some cases. Fixed.
+
 	CHANGES IN spatstat VERSION 1.22-2
 
 OVERVIEW 

@@ -33,7 +33,8 @@ typedef struct State {
 
 /* Parameters of model passed from R */
 typedef struct Model {
-  double *par;     /* vector of model parameters */
+  double *beta;     /* vector of activity parameters */
+  double *ipar;     /* vector of interaction parameters */
   double *period;  /* width & height of rectangle, if torus */
   int ntypes;      /* number of possible marks */
 } Model;

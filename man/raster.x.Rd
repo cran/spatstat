@@ -1,14 +1,16 @@
 \name{raster.x}
 \alias{raster.x}
 \alias{raster.y}
+\alias{raster.xy}
 \title{Cartesian Coordinates for a Pixel Raster}
 \description{
-  Returns a matrix giving the \eqn{x} (or \eqn{y}) coordinates
+  Return the \eqn{x} and \eqn{y} coordinates
   of each pixel in a binary pixel image.
 }
 \usage{
  raster.x(w)
  raster.y(w)
+ raster.xy(w)
 }
 \arguments{
   \item{w}{A window (an object of class \code{"owin"})
@@ -16,18 +18,29 @@
   }
 }
 \value{
-  A matrix of the same dimensions as the pixel grid in \code{w},
+  \code{raster.x} and \code{raster.y} return 
+  a matrix of the same dimensions as the pixel grid in \code{w},
   and giving the value of the \eqn{x} (or \eqn{y}) coordinate
   of each pixel in the raster.
+
+  \code{raster.xy} returns a list with components \code{x} and \code{y}
+  which are numeric vectors of equal length containing the pixel coordinates.
 }
 \details{
   The argument \code{w} should be a window (an object of class
   \code{"owin"}, see \code{\link{owin.object}} for details).
   A window of type \code{"mask"} represents a binary pixel image.
-  This function returns a matrix of the same dimensions as the
+  
+  The functions   \code{raster.x} and \code{raster.y} return
+  a matrix of the same dimensions as the
   binary pixel image itself, with entries giving the \eqn{x} coordinate
   (for \code{raster.x}) or \eqn{y} coordinate (for \code{raster.y})
   of each pixel in the image.
+
+  The function \code{raster.xy} returns a list
+  with components \code{x} and \code{y}
+  which are numeric vectors of equal length containing the pixel coordinates.
+
 }
 \seealso{
   \code{\link{owin}},

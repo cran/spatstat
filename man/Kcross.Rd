@@ -157,12 +157,7 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
   The arguments \code{i} and \code{j} are interpreted as
   levels of the factor \code{X$marks}. Beware of the usual
   trap with factors: numerical values are not
-  interpreted in the same way as character values. See the first example.
-
-  The reduced sample estimator of \eqn{K_{ij}}{Kij} is pointwise approximately 
-  unbiased, but need not be a valid distribution function; it may 
-  not be a nondecreasing function of \eqn{r}. Its range is always 
-  within \eqn{[0,1]}.
+  interpreted in the same way as character values. See the last example.
 }
 \seealso{
  \code{\link{Kdot}},

@@ -24,7 +24,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Dgs {
-  double beta;
   double rho;
   double rho2;
   double pion2rho;
@@ -45,8 +44,7 @@ Cdata *dgsinit(state, model, algo)
   dgs = (Dgs *) R_alloc(1, sizeof(Dgs));
 
   /* Interpret model parameters*/
-  dgs->beta   = model.par[0];
-  dgs->rho    = model.par[1];
+  dgs->rho    = model.ipar[0];
   dgs->period = model.period;
   /* constants */
   dgs->rho2       = pow(dgs->rho, 2);
@@ -80,12 +78,10 @@ double dgscif(prop, state, cdata)
   y  = state.y;
   npts = state.npts;
 
-  cifval = dgs->beta;
+  cifval = pairprod = 1.0;
 
   if(npts == 0) 
     return(cifval);
-
-  pairprod = 1;
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
@@ -118,7 +114,9 @@ double dgscif(prop, state, cdata)
     }
   }
 
-  cifval *= pairprod * pairprod;
+  /* sin to sin^2 */
+  cifval = pairprod * pairprod;
+
   return cifval;
 }
 

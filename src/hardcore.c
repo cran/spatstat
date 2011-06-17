@@ -8,7 +8,6 @@
 /* Storage of parameters and precomputed/auxiliary data */
 
 typedef struct Hardcore {
-  double beta;
   double h;   /* hard core distance */
   double h2;
   double *period;
@@ -27,8 +26,7 @@ Cdata *hardcoreinit(state, model, algo)
   hardcore = (Hardcore *) R_alloc(1, sizeof(Hardcore));
 
   /* Interpret model parameters*/
-  hardcore->beta   = model.par[0];
-  hardcore->h      = model.par[1];
+  hardcore->h      = model.ipar[0];
   hardcore->h2     = pow(hardcore->h, 2); 
   hardcore->period = model.period;
   /* periodic boundary conditions? */
@@ -63,7 +61,7 @@ double hardcorecif(prop, state, cdata)
   npts = state.npts;
 
   if(npts == 0) 
-    return(hardcore->beta);
+    return((double) 1.0);
 
   ixp1 = ix+1;
   /* If ix = NONE = -1, then ixp1 = 0 is correct */
@@ -71,13 +69,13 @@ double hardcorecif(prop, state, cdata)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = dist2(u,v,x[j],y[j],hardcore->period);
-	if(d2 < h2) return(0.0);
+	if(d2 < h2) return((double) 0.0);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = dist2(u,v,x[j],y[j],hardcore->period);
-	if(d2 < h2) return(0.0);
+	if(d2 < h2) return((double) 0.0);
       }
     }
   }
@@ -88,7 +86,7 @@ double hardcorecif(prop, state, cdata)
 	if(a > 0) {
 	  a -= pow(v - y[j], 2);
 	  if(a > 0) 
-	    return(0.0);
+	    return((double) 0.0);
 	}
       }
     }
@@ -98,15 +96,13 @@ double hardcorecif(prop, state, cdata)
 	if(a > 0) {
 	  a -= pow(v - y[j], 2);
 	  if(a > 0)
-	    return(0.0);
+	    return((double) 0.0);
 	}
       }
     }
   }
 
-  cifval = hardcore->beta;
-  
-  return cifval;
+  return ((double) 1.0);
 }
 
 Cifns HardcoreCifns = { &hardcoreinit, &hardcorecif, (updafunptr) NULL, FALSE};

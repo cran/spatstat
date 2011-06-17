@@ -237,6 +237,7 @@ lurking(object, covariate, type="eem",
 }
 \examples{
   data(nztrees)
+  lurking(nztrees, expression(x))
   fit <- ppm(nztrees, ~x, Poisson())
   lurking(fit, expression(x))
   lurking(fit, expression(x), cumulative=FALSE)

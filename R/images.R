@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.81 $     $Date: 2011/05/19 04:21:39 $
+#         $Revision: 1.82 $     $Date: 2011/06/16 12:55:50 $
 #
 #      The class "im" of raster images
 #
@@ -716,3 +716,8 @@ scaletointerval.im <- function(x, from=0, to=1) {
   return(y)
 }
 
+zapsmall.im <- function(x, digits) {
+  if(missing(digits))
+    return(eval.im(zapsmall(x)))
+  return(eval.im(zapsmall(x, digits=digits)))
+}
