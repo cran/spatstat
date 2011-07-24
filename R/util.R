@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.71 $    $Date: 2011/06/10 03:08:12 $
+#    $Revision: 1.75 $    $Date: 2011/07/19 12:33:35 $
 #
 #  (a) for matrices only:
 #
@@ -237,7 +237,7 @@ intersect.ranges <- function(a, b, fatal=TRUE) {
   return(c(lo, hi))
 }
 
-.Spatstat.ProgressBar <- NULL
+assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
 
 progressreport <- function(i, n, every=max(1, ceiling(n/100)),
                            nperline=min(charsperline,
@@ -246,11 +246,15 @@ progressreport <- function(i, n, every=max(1, ceiling(n/100)),
                            style=spatstat.options("progress")) {
   switch(style,
          txtbar={
+           .Spatstat.ProgressBar <- get(".Spatstat.ProgressBar", envir = .spEnv)
            if(i == 1)
-             .Spatstat.ProgressBar <<- txtProgressBar(1, n, 1, style=3)
+             assign(".Spatstat.ProgressBar", txtProgressBar(1, n, 1, style=3),
+                    envir = .spEnv)
            setTxtProgressBar(.Spatstat.ProgressBar, i)
-           if(i == n)
+           if(i == n) {
              close(.Spatstat.ProgressBar)
+             assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
+           }
          },
          tty={
            if(i == n) 
@@ -547,3 +551,25 @@ cat.factor <- function (..., recursive=FALSE) {
   return(do.call(rbind,lll)[,1])
 }
 
+nzpaste <- function(..., sep=" ", collapse=NULL) {
+  # Paste only the non-empty strings
+  v <- list(...)
+  ok <- unlist(lapply(v, function(z) {any(nzchar(z))}))
+  do.call("paste", append(v[ok], list(sep=sep, collapse=collapse)))
+}
+
+is.parseable <- function(x) {
+  unlist(lapply(x, function(z) {
+    !inherits(try(parse(text=z), silent=TRUE), "try-error")
+  }))
+}
+
+make.parseable <- function(x) {
+  if(all(is.parseable(x))) x else make.names(x)
+}
+
+# paste(expression(..)) seems to be broken
+
+paste.expr <- function(x) {
+  unlist(lapply(x, function(z) { paste(deparse(z), collapse="") }))
+}

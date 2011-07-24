@@ -3,7 +3,7 @@
 #	Usual invocations to compute multitype J function(s)
 #	if F and G are not required 
 #
-#	$Revision: 4.32 $	$Date: 2011/04/19 02:31:45 $
+#	$Revision: 4.33 $	$Date: 2011/07/04 06:55:31 $
 #
 #
 #
@@ -40,13 +40,15 @@ function(X, i, j, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
                      eps=eps, r=r, breaks=breaks, disjoint=TRUE,
                      correction=correction)
   }
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   result <-
     rebadge.fv(result,
                substitute(J[i,j](r),
-                          list(i=paste(i),j=paste(j))),
-               sprintf("J[list(%s,%s)]", i, j),
+                          list(i=iname,j=jname)),
+               sprintf("J[list(%s,%s)]", iname, jname),
                new.yexp=substitute(J[list(i,j)](r),
-                                      list(i=paste(i),j=paste(j))))
+                                      list(i=iname,j=jname)))
   return(result)
 }
 
@@ -78,11 +80,12 @@ function(X, i, eps=NULL, r=NULL, breaks=NULL, ..., correction=NULL) {
   result <- Jmulti(X, I, J,
                    eps=eps, r=r, breaks=breaks, disjoint=FALSE,
                    correction=correction)
+  iname <- make.parseable(paste(i))
   result <-
     rebadge.fv(result,
-               substitute(J[i ~ dot](r), list(i=paste(i))),
-               paste("J[", i, "~ symbol(\"\\267\")]"),
-               new.yexp=substitute(J[i ~ symbol("\267")](r), list(i=paste(i))))
+               substitute(J[i ~ dot](r), list(i=iname)),
+               paste("J[", iname, "~ symbol(\"\\267\")]"),
+               new.yexp=substitute(J[i ~ symbol("\267")](r), list(i=iname)))
   return(result)
 }
 

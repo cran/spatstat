@@ -3,17 +3,12 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.35 $   $Date: 2011/06/10 08:44:11 $
+#    $Revision: 1.38 $   $Date: 2011/07/19 12:26:16 $
 #
 #
 
-".Spatstat.Options" <- list()
-
-reset.spatstat.options <- function() {
-  .Spatstat.Options <<- lapply(.Spat.Stat.Opt.Table,
-                               function(z) { z$default })
-  invisible(.Spatstat.Options)  
-}
+.spEnv <- new.env()
+assign(".Spatstat.Options", list(), envir = .spEnv)
 
 ".Spat.Stat.Opt.Table" <-
   list(
@@ -23,7 +18,7 @@ reset.spatstat.options <- function() {
          valid="a single logical value"
          ),
        npixel=list(
-         default=100,
+         default=128,
          check=function(x){
            is.numeric(x) && (length(x) %in% c(1,2)) && is.finite(x) &&
            all(x == ceiling(x)) && all(x > 1) 
@@ -70,7 +65,7 @@ reset.spatstat.options <- function() {
          valid="a function that returns character values"
          ),
        ndummy.min=list(
-         default=25,
+         default=32,
          check=function(x) {
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1
          },
@@ -157,12 +152,46 @@ reset.spatstat.options <- function() {
          default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
+       ),
+       psstG.remove.zeroes=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       Kcom.remove.zeroes=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       psstA.ngrid=list(
+         default=32,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x >= 8
+         },
+         valid="a single integer, greater than or equal to 8"
+       ),
+       psstA.nr=list(
+         default=30,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x >= 4
+         },
+         valid="a single integer, greater than or equal to 4"
        )
        )
+
+reset.spatstat.options <- function() {
+  .Spatstat.Options <- lapply(.Spat.Stat.Opt.Table,
+                               function(z) { z$default })
+  assign(".Spatstat.Options", .Spatstat.Options, envir = .spEnv)
+  invisible(.Spatstat.Options)  
+}
+
+reset.spatstat.options()
 
 "spatstat.options" <-
 function (...) 
 {
+    .Spatstat.Options <- get(".Spatstat.Options", envir = .spEnv)
     called <- list(...)    
 
     if(length(called) == 0)
@@ -181,14 +210,14 @@ function (...)
         # spatstat.options("par1", "par2", ...)
 	ischar <- unlist(lapply(called, is.character))
 	if(all(ischar)) {
-		choices <- unlist(called)
-		ok <- choices %in% names(.Spatstat.Options)
-		if(!all(ok))
-                  stop(paste("Unrecognised option(s):", called[!ok]))
-                if(length(called) == 1)
-                  return(.Spatstat.Options[[choices]])
-                else
-                  return(.Spatstat.Options[choices])
+          choices <- unlist(called)
+          ok <- choices %in% names(.Spatstat.Options)
+          if(!all(ok))
+            stop(paste("Unrecognised option(s):", called[!ok]))
+          if(length(called) == 1)
+            return(.Spatstat.Options[[choices]])
+          else
+            return(.Spatstat.Options[choices])
 	} else {
 	   wrong <- called[!ischar]
 	   offending <- unlist(lapply(wrong,
@@ -202,11 +231,11 @@ function (...)
     }
 # spatstat.options(name=value, name2=value2,...)
     assignto <- names(called)
-    if (is.null(assignto) || any(assignto == "")) 
+    if (is.null(assignto) || !all(nzchar(assignto)))
         stop("options must all be identified by name=value")
-    ok <- assignto %in% names(.Spatstat.Options)
-    if(!all(ok))
-	stop(paste("Unrecognised option(s):", assignto[!ok]))
+    recog <- assignto %in% names(.Spat.Stat.Opt.Table)
+    if(!all(recog))
+	stop(paste("Unrecognised option(s):", assignto[!recog]))
 # validate new values
     for(i in seq_along(assignto)) {
       nama <- assignto[i]
@@ -218,8 +247,10 @@ function (...)
                    entry$valid))
     }
 # reassign
-    changed <- .Spatstat.Options[assignto]
-    .Spatstat.Options[assignto] <<- called
+  changed <- .Spatstat.Options[assignto]
+  .Spatstat.Options[assignto] <- called
+  assign(".Spatstat.Options", .Spatstat.Options, envir = .spEnv)
+  
 # return 
     invisible(changed)
 }

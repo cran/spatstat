@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.56 $	$Date: 2011/06/01 17:24:56 $
+#	$Revision: 1.59 $	$Date: 2011/07/23 02:36:53 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -56,6 +56,7 @@
   function (X, lambda=NULL, ..., r = NULL, breaks = NULL, 
          correction=c("border", "bord.modif", "isotropic", "translate"),
             renormalise=TRUE,
+            normpower=1,
             nlarge = 1000, 
             lambda2=NULL,
             reciplambda=NULL, reciplambda2=NULL,
@@ -106,6 +107,12 @@
         check.nmatrix(lambda2, npts)
         reciplambda2 <- 1/lambda2
       }
+      # renormalise
+      if(renormalise) {
+        check.1.real(normpower)
+        stopifnot(normpower %in% 1:2)
+        renorm.factor <- (area^2/sum(reciplambda2))^(normpower/2)
+      } 
     } else {
       # Vector lambda or reciplambda is required
       if(missing(lambda) && is.null(reciplambda)) {
@@ -129,6 +136,8 @@
         # lambda values provided
         if(is.im(lambda)) 
           lambda <- safelookup(lambda, X)
+        else if(is.ppm(lambda))
+          lambda <- predict(lambda, locations=X, type="trend")
         else if(is.function(lambda)) 
           lambda <- lambda(X$x, X$y)
         else if(is.numeric(lambda) && is.vector(as.numeric(lambda)))
@@ -138,10 +147,14 @@
         # evaluate reciprocal
         reciplambda <- 1/lambda
       }
+      # renormalise
+      if(renormalise) {
+        check.1.real(normpower)
+        stopifnot(normpower %in% 1:2)
+        renorm.factor <- (area/sum(reciplambda))^normpower
+      } 
     }
 
-    if(renormalise)
-      pseudoarea <- sum(reciplambda)
     
     # recommended range of r values
     alim <- c(0, min(rmax, rmaxdefault))
@@ -221,12 +234,14 @@
       RS <- Kwtsum(dIJ, bI, wIJ, b, w=reciplambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
+        if(renormalise) Kb <- Kb * renorm.factor
         K <- bind.fv(K, data.frame(border=Kb), "hat(%s^{bord})(r)",
                      "border-corrected estimate of %s",
                      "border")
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
+        if(renormalise) Kbm <- Kbm * renorm.factor
         K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s^{bordm})(r)",
                      "modified border-corrected estimate of %s",
                      "bord.modif")
@@ -238,7 +253,8 @@
       edgewt <- edge.Trans(XI, XJ, paired=TRUE)
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Ktrans <- cumsum(wh)/(if(renormalise) pseudoarea else area)
+      Ktrans <- cumsum(wh)/area
+      if(renormalise) Ktrans <- Ktrans * renorm.factor
       rmax <- diameter(W)/2
       Ktrans[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s^{trans})(r)",
@@ -250,7 +266,8 @@
       edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Kiso <- cumsum(wh)/(if(renormalise) pseudoarea else area)
+      Kiso <- cumsum(wh)/area
+      if(renormalise) Kiso <- Kiso * renorm.factor
       rmax <- diameter(W)/2
       Kiso[r >= rmax] <- NA
       K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s^{iso})(r)",

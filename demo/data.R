@@ -33,6 +33,10 @@ plot(bronzefilter,markscale=1)
 data(cells)
 plot(cells)
 
+data(chicago)
+plot(as.linnet(chicago), main="Chicago Street Crimes",col="green")
+plot(as.ppp(chicago), add=TRUE, col="red", chars=c(16,2,22,17,24,15,6))
+
 data(chorley)
 chorley.extra$plotit()
 
@@ -47,8 +51,14 @@ data(finpines)
 plot(finpines, which.marks="diameter", main="Finnish pines (diameter)")
 plot(finpines, which.marks="height", main="Finnish pines (height)")
 
+data(flu)
+wildM1 <- with(flu, virustype == "wt" & stain == "M2-M1")
+plot(flu[wildM1, 1, drop=TRUE],
+     main=c("flu data", "wild type virus, M2-M1 stain"),
+     chars=c(16,3), cex=0.4, cols=2:3)
+
 data(hamster)
-plot(hamster)
+plot(hamster, cols=c(2,4))
 
 data(heather)
 plot(heather)

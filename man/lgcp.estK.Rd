@@ -213,7 +213,9 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
     u <- lgcp.estK(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
-    lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3))
+    if(require(RandomFields)) {
+      lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3))
+    }
 }
 \keyword{spatial}
 \keyword{models}

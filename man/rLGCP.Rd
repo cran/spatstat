@@ -87,20 +87,22 @@
   \emph{Scandinavian Journal of Statistics} \bold{25}, 451--482.
 }
 \examples{
-  # homogeneous LGCP with exponential covariance function
-  X <- rLGCP("exp", 3, c(0, variance=0.2, nugget=0, scale=.1 ))
+  if(require(RandomFields)) {
+    # homogeneous LGCP with exponential covariance function
+    X <- rLGCP("exp", 3, c(0, variance=0.2, nugget=0, scale=.1 ))
 
-  # inhomogeneous LGCP with Gaussian covariance function
-  m <- as.im(function(x, y){5 - 1.5 * (x - 0.5)^2 + 2 * (y - 0.5)^2}, W=owin())
-  X <- rLGCP("gauss", m, c(0, variance=0.15, nugget = 0, scale =0.5))
-  plot(attr(X, "Lambda"))
-  points(X)
+    # inhomogeneous LGCP with Gaussian covariance function
+    m <- as.im(function(x, y){5 - 1.5 * (x - 0.5)^2 + 2 * (y - 0.5)^2}, W=owin())
+    X <- rLGCP("gauss", m, c(0, variance=0.15, nugget = 0, scale =0.5))
+    plot(attr(X, "Lambda"))
+    points(X)
 
-  # inhomogeneous LGCP with Matern covariance function
-  X <- rLGCP("matern", function(x, y){ 1 - 0.4 * x},
+    # inhomogeneous LGCP with Matern covariance function
+    X <- rLGCP("matern", function(x, y){ 1 - 0.4 * x},
              c(0, variance=2, nugget=0, scale=0.7, a = 0.5),
              win = owin(c(0, 10), c(0, 10)))
-  plot(X)
+    plot(X)
+  } else message("Simulation requires the RandomFields package")
 }
 \author{Abdollah Jalilian and Rasmus Waagepetersen.
   Modified by Adrian Baddeley

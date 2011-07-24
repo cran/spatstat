@@ -180,4 +180,7 @@ fitin.ppm <- function(object) {
   return(f)
 }
 
-
+as.interact.fii <- function(object) {
+  verifyclass(object, "fii")
+  return(object$interaction)
+}

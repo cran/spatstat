@@ -344,10 +344,13 @@ if(enable3d) {
   par(par3)
 }
 
-par2 <- par(mfrow=c(1,2))
-X <- rpoislpp(20, simplenet)
-plot(X, main="Points on a network")
-plot(linearK(X), main="Network K-function")
+par2 <- par(mfrow=c(1,3))
+data(chicago)
+X <- unmark(chicago)
+plot(as.linnet(X), main="Chicago Street Crimes",col="green")
+plot(as.ppp(X), add=TRUE, col="red")
+plot(linearK(X, correction="none"), main="Network K-function")
+plot(linearK(X, correction="Ang"), main="Corrected K-function")
 par(par2)
 
 fanfare("VI. Model-fitting")
@@ -380,6 +383,11 @@ print(fit)
 plot(fit, how="image", main=c("Strauss model",
                                "fit by maximum pseudolikelihood",
                                "Conditional intensity plot"))
+plot(Kcom(fit), cbind(iso, icom, pois) ~ r,
+     legend=FALSE, main="model compensators")
+legend("topleft", legend=c("empirical K function",
+                    "Strauss model compensator of K",
+                    "Poisson theoretical K"), lty=1:3, col=1:3, inset=0.05)
 
 plot(swedishpines)
 fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
@@ -448,16 +456,20 @@ Xg <- rmh(list(cif="geyer", par=list(beta=1.25, gamma=1.6, r=0.2, sat=4.5),
 plot(Xg, main=paste("Geyer saturation process\n",
                     "rmh() with cif=\"geyer\""))
 
-plot(rpoisline(10))
-
-plot(rlinegrid(30, 0.1))
-
 L <- as.psp(matrix(runif(20), 5, 4), window=square(1))
 plot(L, main="runifpointOnLines(30, L)")
 plot(runifpointOnLines(30, L), add=TRUE, pch="+")
 
 plot(L, main="rpoisppOnLines(3, L)")
 plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
+
+data(simplenet)
+plot(runiflpp(20, simplenet))
+plot(rpoislpp(5, simplenet))
+
+plot(rpoisline(10))
+
+plot(rlinegrid(30, 0.1))
 
 spatstat.options(npixel=256)
 X <- dirichlet(runifpoint(30))

@@ -1,14 +1,22 @@
-.First.lib <- function(lib, pkg) {
-  library.dynam("spatstat", pkg, lib)
-  v <- read.dcf(file=system.file("DESCRIPTION", package=pkg),
+#  First.R
+#
+#  $Revision: 1.31 $ $Date: 2011/07/21 06:14:59 $
+#
+
+.onLoad <- function(...) reset.spatstat.options()
+
+.onAttach <- function(libname, pkgname) {
+  v <- read.dcf(file=system.file("DESCRIPTION", package=pkgname),
                 fields="Version")
-  cat("spatstat", v, "\n")
-  cat("Type", sQuote("help(spatstat)"), "for an overview of spatstat\n")
-  cat("    ", sQuote("latest.news()"), "for news on latest version\n")
-  cat("    ", sQuote("licence.polygons()"),
-      "for licence information on polygon calculations\n")
-  reset.spatstat.options()
+  msg <- paste("spatstat", v,
+               "\nType", sQuote("help(spatstat)"),
+               "for an overview of spatstat",
+               "\n    ", sQuote("latest.news()"),
+               "for news on latest version",
+               "\n    ", sQuote("licence.polygons()"),
+               "for licence information on polygon calculations")
+  packageStartupMessage(msg)
   invisible(NULL)
 }
 
-
+  

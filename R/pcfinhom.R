@@ -1,7 +1,7 @@
 #
 #   pcfinhom.R
 #
-#   $Revision: 1.2 $   $Date: 2010/11/21 04:22:52 $
+#   $Revision: 1.6 $   $Date: 2011/07/23 02:37:00 $
 #
 #   inhomogeneous pair correlation function of point pattern 
 #
@@ -10,6 +10,9 @@
 pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
                      kernel="epanechnikov", bw=NULL, stoyan=0.15,
                      correction=c("translate", "Ripley"),
+                     renormalise=TRUE,
+                     normpower=1,
+                     reciplambda=NULL, 
                      sigma=NULL, varcov=NULL)
 {
   verifyclass(X, "ppp")
@@ -38,24 +41,45 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
 
   ########## intensity values #########################
 
-  if(is.null(lambda)) {
+  if(missing(lambda) && is.null(reciplambda)) {
     # No intensity data provided
     # Estimate density by leave-one-out kernel smoothing
     lambda <- density(X, ..., sigma=sigma, varcov=varcov,
                       at="points", leaveoneout=TRUE)
+    lambda <- as.numeric(lambda)
+    reciplambda <- 1/lambda
+  } else if(!is.null(reciplambda)) {
+    # 1/lambda values provided
+    if(is.im(reciplambda)) 
+      reciplambda <- safelookup(reciplambda, X)
+    else if(is.function(reciplambda))
+      reciplambda <- reciplambda(X$x, X$y)
+    else if(is.numeric(reciplambda) && is.vector(as.numeric(reciplambda)))
+      check.nvector(reciplambda, npts)
+    else stop(paste(sQuote("reciplambda"),
+                    "should be a vector, a pixel image, or a function"))
   } else {
     # lambda values provided
-    if(is.vector(lambda)) 
-      check.nvector(lambda, npts)
-    else if(is.im(lambda)) 
+    if(is.im(lambda)) 
       lambda <- safelookup(lambda, X)
+    else if(is.ppm(lambda))
+      lambda <- predict(lambda, locations=X, type="trend")
     else if(is.function(lambda)) 
       lambda <- lambda(X$x, X$y)
+    else if(is.numeric(lambda) && is.vector(as.numeric(lambda)))
+      check.nvector(lambda, npts)
     else stop(paste(sQuote("lambda"),
                     "should be a vector, a pixel image, or a function"))
+    # evaluate reciprocal
+    reciplambda <- 1/lambda
   }
-  # compute reciprocal
-  reciplambda <- 1/lambda
+  
+  # renormalise
+  if(renormalise) {
+    check.1.real(normpower)
+    stopifnot(normpower %in% 1:2)
+    renorm.factor <- (area/sum(reciplambda))^normpower
+  } 
   
   ########## r values ############################
   # handle arguments r and breaks 
@@ -109,6 +133,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
     XJ <- ppp(close$xj, close$yj, window=win, check=FALSE)
     edgewt <- edge.Trans(XI, XJ, paired=TRUE)
     gT <- sewpcf(dIJ, edgewt * wIJ, denargs, area)$g
+    if(renormalise) gT <- gT * renorm.factor
     out <- bind.fv(out,
                    data.frame(trans=gT),
                    "hat(%s^{Trans})(r)",
@@ -119,6 +144,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
     # Ripley isotropic correction
     edgewt <- edge.Ripley(XI, matrix(dIJ, ncol=1))
     gR <- sewpcf(dIJ, edgewt * wIJ, denargs, area)$g
+    if(renormalise) gR <- gR * renorm.factor
     out <- bind.fv(out,
                    data.frame(iso=gR),
                    "hat(%s^{Ripley})(r)",

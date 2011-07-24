@@ -7,8 +7,8 @@
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
-           legend=TRUE, legendpos="topleft", legendmath=TRUE, legendargs=list(),
-           shade=NULL, shadecol="grey")
+           legend=!add, legendpos="topleft", legendmath=TRUE, legendargs=list(),
+           shade=NULL, shadecol="grey", add=FALSE)
 }
 \arguments{
   \item{x}{
@@ -18,7 +18,9 @@
   \item{fmla}{
     an R language formula 
     determining which variables or expressions are plotted.
-    Either a formula object, or a string that can be parsed as a formula.
+    Either a formula object, or a string that can be parsed as a
+    formula.
+    See Details.
   }
   \item{subset}{
     (optional) subset of rows of the data frame that will be plotted.
@@ -85,6 +87,9 @@
     The colour to be used in the \code{shade} plot.
     A character string or an integer specifying a colour.
   }
+  \item{add}{
+    Logical. Whether the plot should be added to an existing plot
+  }
 }
 \value{
   Either \code{NULL}, or a data frame giving the meaning of the
@@ -112,10 +117,16 @@
   against \code{x}. 
   See the examples.
 
-  A convenient abbreviation is the symbol \code{.} which
-  can be used in the formula to represent all
-  the variables in the data frame (other than the function argument
-  itself). See the examples.
+  Convenient abbreviations which can be used in the formula
+  are 
+  \itemize{
+    \item the symbol \code{.} which represents all
+    the variables in the data frame (other than the function argument
+    itself);
+    \item the symbol \code{.x} which represents the function argument;
+    \item the symbol \code{.y} which represents the recommended value
+    of the function.
+  }
 
   The value returned by this plot function indicates the
   meaning of the line types and colours in the plot. It can be used
@@ -154,9 +165,12 @@
    plot(K, iso ~ r, subset=quote(r < 0.2))
                                    # plots iso against r for r < 10
 
+   # Can't remember the names of the columns? No problem..
+   plot(K, sqrt(./pi) ~ .x)
+
    # making a legend by hand
-   v <- plot(K, . ~ r, ylab="K(r)", legend=FALSE)
-   legend(0.05, 0.15, legend=v$meaning, lty=v$lty, col=v$col)
+   v <- plot(K, . ~ r, legend=FALSE)
+   legend("topleft", legend=v$meaning, lty=v$lty, col=v$col)
 
    # significance bands
    KE <- envelope(cells, Kest, nsim=19)

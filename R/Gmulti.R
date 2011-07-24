@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.35 $	$Date: 2011/05/18 07:53:01 $
+#	$Revision: 4.36 $	$Date: 2011/07/04 06:34:51 $
 #
 ################################################################################
 
@@ -43,12 +43,14 @@ function(X, i, j, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han"))
     result <- Gmulti(X, I, J, r=r, breaks=breaks, disjoint=FALSE, ...,
                      correction=correction)
   }
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   result <-
     rebadge.fv(result,
-               substitute(G[i,j](r), list(i=paste(i),j=paste(j))),
-               sprintf("G[list(%s,%s)]", i, j),
+               substitute(G[i,j](r), list(i=iname, j=jname)),
+               sprintf("G[list(%s,%s)]", iname, jname),
                new.yexp=substitute(G[list(i,j)](r),
-                                   list(i=paste(i),j=paste(j))))
+                                   list(i=iname,j=jname)))
   return(result)
 }	
 
@@ -76,10 +78,11 @@ function(X, i, r=NULL, breaks=NULL, ..., correction=c("km","rs","han")) {
 # 
   result <- Gmulti(X, I, J, r, breaks, disjoint=FALSE, ...,
                    correction=correction)
+  iname <- make.parseable(paste(i))
   result <- rebadge.fv(result,
-                  substitute(G[i ~ dot](r), list(i=paste(i))),
-                  paste("G[", i, "~ symbol(\"\\267\")]"),
-                  new.yexp=substitute(G[i ~ symbol("\267")](r), list(i=paste(i))))
+                  substitute(G[i ~ dot](r), list(i=iname)),
+                  paste("G[", iname, "~ symbol(\"\\267\")]"),
+                  new.yexp=substitute(G[i ~ symbol("\267")](r), list(i=iname)))
   return(result)
 }	
 

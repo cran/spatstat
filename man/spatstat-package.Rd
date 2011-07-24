@@ -194,10 +194,12 @@
 	\code{\link{bramblecanes}} \tab Bramble Canes data \cr
 	\code{\link{bronzefilter}} \tab Bronze Filter Section data \cr
 	\code{\link{cells}} \tab Crick-Ripley biological cells data \cr
+	\code{\link{chicago}} \tab Chicago street crimes \cr
 	\code{\link{chorley}} \tab Chorley-Ribble cancer data \cr
 	\code{\link{copper}} \tab Berman-Huntington copper deposits data \cr
 	\code{\link{demopat}} \tab Synthetic point pattern \cr
 	\code{\link{finpines}} \tab Finnish Pines data \cr
+	\code{\link{flu}} \tab Influenza virus proteins \cr
 	\code{\link{hamster}} \tab Aherne's hamster tumour data \cr
 	\code{\link{humberside}} \tab North Humberside childhood leukaemia data \cr
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
@@ -539,26 +541,27 @@
 
     \bold{Point patterns on a linear network}
 
-    An object of class \code{"lpp"} represents a 
-    point pattern on a linear network (for example,
-    road accidents on a road network).
-
-    An object of class \code{"linnet"} represents a linear network.
+    An object of class \code{"linnet"} represents a linear network
+    (for example, a road network).
 
     \tabular{ll}{
-      \code{\link{lpp}} \tab create a point pattern on a linear network \cr
       \code{\link{linnet}} \tab create a linear network \cr
       \code{\link{clickjoin}} \tab interactively join vertices in network \cr
       \code{\link{simplenet}} \tab simple example of network \cr
+      \code{\link{lineardisc}} \tab disc in a linear network \cr
+      \code{\link{methods.linnet}} \tab methods for \code{linnet} objects
+    }
+    
+    An object of class \code{"lpp"} represents a 
+    point pattern on a linear network (for example,
+    road accidents on a road network).
+    
+    \tabular{ll}{
+      \code{\link{lpp}} \tab create a point pattern on a linear network \cr
+      \code{\link{methods.lpp}} \tab methods for \code{lpp} objects \cr
       \code{\link{rpoislpp}} \tab simulate Poisson points on linear network \cr
       \code{\link{runiflpp}} \tab simulate random points on a linear network \cr
-      \code{\link{linearK}} \tab Okabe-Yamada network \eqn{K} function \cr
-      \code{\link{pairdist.lpp}} \tab shortest path distances between
-      points  \cr
-      \code{\link[spatstat:methods.lpp]{methods.lpp}}
-      \tab methods for \code{lpp} objects \cr
-      \code{\link[spatstat:methods.linnet]{methods.linnet}}
-      \tab methods for \code{linnet} objects 
+      \code{\link{chicago}} \tab Chicago street crime data \cr
     }
     
     \bold{Hyperframes}
@@ -725,6 +728,33 @@
     patterns
   }
 
+  \bold{Summary statistics for a point pattern on a linear network:}
+
+  These are for point patterns on a linear network (class \code{lpp}).
+  
+  \tabular{ll}{
+    \code{\link{linearK}} \tab
+    \eqn{K} function on linear network \cr
+    \code{\link{linearKinhom}} \tab
+    inhomogeneous \eqn{K} function on linear network \cr
+    \code{\link{linearpcf}} \tab
+    pair correlation function on linear network \cr
+    \code{\link{linearpcfinhom}} \tab
+    inhomogeneous pair correlation on linear network 
+  }
+
+  Related facilities:
+  
+  \tabular{ll}{
+    \code{\link{pairdist.lpp}} \tab shortest path distances  \cr
+    \code{\link{envelope.lpp}} \tab simulation envelopes  \cr
+    \code{\link{rpoislpp}} \tab simulate Poisson points on linear network \cr
+    \code{\link{runiflpp}} \tab simulate random points on a linear network 
+  }
+  
+  It is also possible to fit point process models to \code{lpp} objects.
+  See Section IV.
+  
   \bold{Summary statistics for a three-dimensional point pattern:}
 
   These are for 3-dimensional point pattern objects (class \code{pp3}).
@@ -965,7 +995,25 @@
     \code{\link{envelope}} \tab compute simulation envelopes for a
     fitted model 
   }
+
+  \bold{Point process models on a linear network:}
+
+  An object of class \code{"lpp"} represents a pattern of points on
+  a linear network. Point process models can also be fitted to these
+  objects. Currently only Poisson models can be fitted.
+
+  \tabular{ll}{
+    \code{\link{lppm}} \tab point process model on linear network \cr
+    \code{\link{anova.lppm}} \tab analysis of deviance for \cr
+    \tab point process model on linear network \cr
+    \code{\link{envelope.lppm}} \tab simulation envelopes for \cr
+    \tab point process model on linear network \cr
+    \code{\link{predict.lppm}} \tab model prediction on linear network \cr
+    \code{\link{linim}} \tab pixel image on linear network \cr
+    \code{\link{plot.linim}} \tab plot a pixel image on linear network
+  }
 }
+
 
 \section{V. MODEL FITTING (SPATIAL LOGISTIC REGRESSION)}{
   
@@ -1155,18 +1203,27 @@
     point process models 
   }
 
-  \bold{Diagnostic plots:}
+  \bold{Residual diagnostics:}
   
   Residuals for a fitted point process model, and diagnostic plots
-  based on the residuals, were introduced in Baddeley et al (2005).
+  based on the residuals, were introduced in Baddeley et al (2005)
+  and Baddeley, Rubak and Moller (2011).  
   
   Type \code{demo(diagnose)}
   for a demonstration of the diagnostics features.
 
   \tabular{ll}{
     \code{\link{diagnose.ppm}} \tab diagnostic plots for spatial trend\cr
-    \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint interaction\cr
-    \code{\link{residualspaper}} \tab examples from Baddeley et al (2005) 
+    \code{\link{qqplot.ppm}} \tab diagnostic Q-Q plot for interpoint interaction\cr
+    \code{\link{residualspaper}} \tab examples from Baddeley et al (2005) \cr
+    \code{\link{Kcom}} \tab model compensator of \eqn{K} function \cr
+    \code{\link{Gcom}} \tab model compensator of \eqn{G} function \cr
+    \code{\link{Kres}} \tab score residual of \eqn{K} function \cr
+    \code{\link{Gres}} \tab score residual of \eqn{G} function \cr
+    \code{\link{psst}} \tab pseudoscore residual of summary function \cr
+    \code{\link{psstA}} \tab pseudoscore residual of empty space function \cr
+    \code{\link{psstG}} \tab pseudoscore residual of \eqn{G} function \cr
+    \code{\link{compareFit}} \tab compare compensators of several fitted models
   }
 
 
@@ -1220,6 +1277,12 @@
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
+
+  Baddeley, A., Rubak, E. and Moller, J. (2011)
+  Score, pseudo-score and residual
+  diagnostics for spatial point process models.
+  To appear in \emph{Statistical Science}.
+
 }
 \section{Licence}{
   This library and its documentation are usable under the terms of the "GNU 
@@ -1272,10 +1335,15 @@
   Abdollah Jalilian,
   Robert John-Chandran,
   Devin Johnson,
+  Mike Kuhn,
   Jeff Laake,
+  Robert Lamb,
+  George Leser,
   Robert Mark,
   Jorge Mateu Mahiques,
+  Monia Mahling,
   Peter McCullagh,
+  Ulf Mehlig,
   Sebastian Wastl Meyer,
   Mi Xiangcheng,
   Jesper Moller,
@@ -1292,13 +1360,16 @@
   Aila Sarkka,
   Katja Schladitz,
   Bryan Scott,
+  Vadim Shcherbakov,
   Shen Guochun,
   Ida-Maria Sintorn,
   Yong Song, 
   Malte Spiess,
   Mark Stevenson,
+  Kaspar Stucki,
   Michael Sumner,
   P. Surovy,
+  Ben Taylor,
   Berwin Turlach,
   Andrew van Burgel,
   Tobias Verbeke,

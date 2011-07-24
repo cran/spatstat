@@ -1,4 +1,5 @@
 \name{spatstat-internal}
+\title{Internal spatstat functions}
 \alias{[.hyperframe}
 \alias{[<-.hyperframe}
 \alias{$.hyperframe}
@@ -20,6 +21,7 @@
 \alias{as.breakpts}
 \alias{as.data.frame.fv}
 \alias{as.fv}
+\alias{as.im.linim}
 \alias{as.list.hyperframe}
 \alias{as.listof}
 \alias{as.units}
@@ -82,6 +84,7 @@
 \alias{distppl}
 \alias{distppll}
 \alias{distppllmin}
+\alias{distributecbind}
 \alias{dist2dpath}
 \alias{divisors}
 \alias{do.as.im}
@@ -90,6 +93,7 @@
 \alias{do.istat}
 \alias{edge.Ripley}
 \alias{edge.Trans}
+\alias{edge.Trans.modif}
 \alias{emptywindow}
 \alias{ensure2vector}
 \alias{envelopeEngine}
@@ -114,6 +118,7 @@
 \alias{f3Cengine}
 \alias{fasp}
 \alias{findCovariate}
+\alias{findcbind}
 \alias{findmarktype}
 \alias{firstfactor}
 \alias{fii}
@@ -166,6 +171,7 @@
 \alias{is.marked.quad}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
+\alias{is.parseable}
 \alias{is.pp3}
 \alias{is.ppx}
 \alias{is.prime}
@@ -185,13 +191,18 @@
 \alias{levels<-.im}
 \alias{licence.polygons}
 \alias{license.polygons}
+\alias{linequad}
+\alias{linearKengine}
+\alias{linearpcfengine}
 \alias{listof}
 \alias{localpcfmatrix}
+\alias{paste.expr}
 \alias{print.localpcfmatrix}
 \alias{plot.localpcfmatrix}
 \alias{lookup.im}
 \alias{majorminorversion}
 \alias{make.even.breaks}
+\alias{make.parseable}
 \alias{makeunits}
 \alias{markappend}
 \alias{markcbind}
@@ -241,6 +252,7 @@
 \alias{nearest.valid.pixel}
 \alias{newstyle.coeff.handling}
 \alias{nncleanEngine}
+\alias{nndcumfun}
 \alias{no.trend.ppm}
 \alias{nobjects}
 \alias{nobjects.ppp}
@@ -248,6 +260,7 @@
 \alias{nobjects.psp}
 \alias{n.quad}
 \alias{numalign}
+\alias{nzpaste}
 \alias{onecolumn}
 \alias{ordinal}
 \alias{outdated.interact}
@@ -295,6 +308,7 @@
 \alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.linim}
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
@@ -432,7 +446,6 @@
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
-\title{Internal spatstat functions}
 \description{
   Internal spatstat functions.
 }
@@ -458,6 +471,7 @@ as.breakpts(\dots)
 \method{as.data.frame}{fv}(x, ...)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
+\method{as.im}{linim}(X, \dots)
 as.listof(x)
 as.units(s)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
@@ -522,6 +536,7 @@ distpl(p, l)
 distppl(p, l)
 distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
 distppllmin(p, l)
+distributecbind(x)
 dist2dpath(dist, method="C")
 divisors(n)
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
@@ -530,6 +545,7 @@ do.iplot(panel)
 do.istat(panel)
 edge.Ripley(X, r, W, method)
 edge.Trans(X, Y, W, exact, paired, trim)
+edge.Trans.modif(X, Y, WX, WY, exact, paired, trim)
 emptywindow(w)
 ensure2vector(x)
 envelopeEngine(X, fun, simul,
@@ -562,6 +578,7 @@ f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findCovariate(covname, scope, scopename=NULL)
+findcbind(root, depth, maxdepth)
 findmarktype(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
@@ -614,6 +631,7 @@ is.interact(x)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 \method{is.multitype}{default}(\dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
+is.parseable(x)
 is.pp3(x)
 is.ppx(x)
 is.prime(n)
@@ -638,14 +656,19 @@ least.common.multiple(n,m)
 \method{levels}{im}(x) <- value
 licence.polygons()
 license.polygons()
+linequad(X, Y, ..., eps, nd)
+linearKengine(X, \dots, r, reweight, denom, correction, showworking)
+linearpcfengine(X, \dots, r, reweight, denom, correction)
 listof(\dots)
 localpcfmatrix(X, i, \dots, delta, rmax, nr, stoyan)
+paste.expr(x)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 \method{[}{localpcfmatrix}(x, i, ...)
 lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
+make.parseable(x)
 makeunits(sing, plur, mul)
 markappend(\dots)
 markcbind(\dots)
@@ -697,6 +720,7 @@ nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
 nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
+nndcumfun(X, \dots, r)
 no.trend.ppm(x)
 nobjects(x)
 \method{nobjects}{ppp}(x)
@@ -704,6 +728,7 @@ nobjects(x)
 \method{nobjects}{psp}(x)
 n.quad(Q)
 numalign(i, nmax, zero)
+nzpaste(\dots, sep, collapse)
 onecolumn(m)
 ordinal(k)
 outdated.interact(object)
@@ -759,6 +784,7 @@ primefactors(n, prmax)
 \method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
+\method{print}{linim}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{msr}(x, \dots)

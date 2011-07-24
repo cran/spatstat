@@ -10,7 +10,7 @@
   cross-validation.
 }
 \usage{
-relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
+relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels", casecontrol=TRUE)
 }
 \arguments{
   \item{X}{
@@ -34,11 +34,16 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
     at a grid of pixel locations (\code{at="pixels"}) or
     only at the points of \code{X} (\code{at="points"}).
   }
+  \item{casecontrol}{
+    Logical. Whether to treat a bivariate point pattern
+    as consisting of cases and controls. See Details.
+  }
 }
 \details{
   If \code{X}  is a bivariate point pattern
-  (a multitype point pattern consisting of two types of points),
-  then points of the first type (the first level of \code{marks(X)})
+  (a multitype point pattern consisting of two types of points)
+  then by default,
+  the points of the first type (the first level of \code{marks(X)})
   are treated as controls or non-events, and points of the second type
   are treated as cases or events. Then this command computes
   the spatially-varying risk of an event,
@@ -47,13 +52,15 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels")
   will be a case.
 
   If \code{X} is a multitype point pattern with \eqn{m > 2} types,
+  or if \code{X} is a bivariate point pattern
+  and \code{casecontrol=FALSE},
   then this command computes, for each type \eqn{j},
   a nonparametric estimate of
   the spatially-varying risk of an event of type \eqn{j}.
   This is the probability \eqn{p_j(u)}{p[j](u)}
   that a point at spatial location \eqn{u}
-  will belong to type \eqn{j}. 
-  
+  will belong to type \eqn{j}.
+
   If \code{at = "pixels"} the calculation is performed for
   every spatial location \eqn{u} on a fine pixel grid, and the result
   is a pixel image representing the function \eqn{p(u)}

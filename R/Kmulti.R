@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.34 $	$Date: 2011/05/18 07:59:30 $
+#	$Revision: 5.35 $	$Date: 2011/07/04 06:01:00 $
 #
 #
 # -------- functions ----------------------------------------
@@ -50,12 +50,14 @@
   K <- Kcross(X, i, j, ...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   L <- rebadge.fv(L,
                   substitute(L[i,j](r),
-                             list(i=paste(i),j=paste(j))),
-                  sprintf("L[list(%s,%s)]", i, j),
+                             list(i=iname,j=jname)),
+                  sprintf("L[list(%s,%s)]", iname, jname),
                   new.yexp=substitute(L[list(i,j)](r),
-                                      list(i=paste(i),j=paste(j))))
+                                      list(i=iname,j=jname)))
   attr(L, "labl") <- attr(K, "labl")
   return(L)  
 }
@@ -67,10 +69,11 @@
   K <- Kdot(X, i, ...)
   L <- eval.fv(sqrt(K/pi))
   # relabel the fv object
+  iname <- make.parseable(paste(i))
   L <- rebadge.fv(L,
-                  substitute(L[i ~ dot](r), list(i=paste(i))),
-                  paste("L[", i, "~ symbol(\"\\267\")]"),
-                  new.yexp=substitute(L[i ~ symbol("\267")](r), list(i=paste(i))))
+                  substitute(L[i ~ dot](r), list(i=iname)),
+                  paste("L[", iname, "~ symbol(\"\\267\")]"),
+                  new.yexp=substitute(L[i ~ symbol("\267")](r), list(i=iname)))
   attr(L, "labl") <- attr(K, "labl")
   return(L)  
 }
@@ -103,12 +106,14 @@ function(X, i, j, r=NULL, breaks=NULL,
     result <- Kmulti(X, I, J,
                      r=r, breaks=breaks, correction=correction, ...)
   }
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   result <-
     rebadge.fv(result, 
-               substitute(Kcross[i,j](r), list(i=paste(i),j=paste(j))),
-               sprintf("K[list(%s,%s)]", i, j),
+               substitute(Kcross[i,j](r), list(i=iname,j=jname)),
+               sprintf("K[list(%s,%s)]", iname, jname),
                new.yexp=substitute(K[list(i,j)](r),
-                                   list(i=paste(i),j=paste(j))))
+                                   list(i=iname,j=jname)))
   return(result)
 }
 
@@ -133,11 +138,12 @@ function(X, i, r=NULL, breaks=NULL,
 	
   result <- Kmulti(X, I, J,
                    r=r, breaks=breaks, correction=correction, ...)
+  iname <- make.parseable(paste(i))
   result <-
     rebadge.fv(result,
-               substitute(K[i ~ dot](r), list(i=paste(i))),
-               paste("K[", i, "~ symbol(\"\\267\")]"),
-               new.yexp=substitute(K[i ~ symbol("\267")](r), list(i=paste(i))))
+               substitute(K[i ~ dot](r), list(i=iname)),
+               paste("K[", iname, "~ symbol(\"\\267\")]"),
+               new.yexp=substitute(K[i ~ symbol("\267")](r), list(i=iname)))
   return(result)
 }
 

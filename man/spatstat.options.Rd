@@ -154,6 +154,53 @@
       \code{\link{rmh}} (see \code{\link{rmhcontrol}}).
       Initialised to \code{2}.
     }
+    \item{fasteval}{
+      One of the strings \code{'off'}, \code{'on'} or
+      \code{'test'} determining whether to use accelerated C code
+      to evaluate the conditional intensity of a Gibbs model.
+      Initialised to \code{'on'}.
+    }
+    \item{density}{
+      Logical. Indicates whether to use accelerated C code
+      to evaluate \code{density.ppp(X, at="points")}
+      Initialised to \code{TRUE}.
+    }
+    \item{psstG.remove.zeroes}{
+      Logical value, determining whether the algorithm in
+      \code{\link{psstG}} 
+      removes or retains the contributions to the function
+      from pairs of points that are identical. If these are
+      retained then the function has a jump at \eqn{r=0}.
+      Initialised to \code{TRUE}.
+    }
+    \item{Kcom.remove.zeroes}{
+      Logical value, determining whether the algorithm in
+      \code{\link{Kcom}} and \code{\link{Kres}}
+      removes or retains the contributions to the function
+      from pairs of points that are identical. If these are
+      retained then the function has a jump at \eqn{r=0}.
+      Initialised to \code{TRUE}.
+    }
+    \item{psstA.ngrid}{
+      Single integer, 
+      controlling the accuracy of the discrete approximation
+      of areas computed in the function \code{\link{psstA}}.
+      The area of a disc is approximated by counting points on
+      an \eqn{n \times n}{n * n} grid.
+      Initialised to 32.
+    }
+    \item{psstA.nr}{
+      Single integer,
+      determining the number of distances \eqn{r}
+      at which the function \code{\link{psstA}} will be evaluated
+      (in the default case where argument \code{r} is absent).
+      Initialised to 30.
+    }
+    \item{exactdt.checks.data,closepairs.newcode}{
+      Logical. For software development purposes only.
+      Do not change these values unless you are
+      Adrian Baddeley. 
+    }    
   }
   If no arguments are given, 
   the current values of all parameters are returned,
@@ -173,7 +220,8 @@
   \code{\link{options}}
 }
 \examples{
-  spatstat.options()
+  # save current values
+  oldopt <- spatstat.options()
 
   spatstat.options("npixel")
   spatstat.options(npixel=150)
@@ -183,6 +231,9 @@
 
   spatstat.options(par.persp=list(theta=-30,phi=40,d=4))
   # see help(persp.default) for other options
+
+  # revert
+  spatstat.options(oldopt)
 
 }
 \author{Adrian Baddeley

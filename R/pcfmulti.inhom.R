@@ -33,13 +33,15 @@ pcfcross.inhom <-
                            correction=correction,
                            sigma=sigma, varcov=varcov,
                            Iname=Iname, Jname=Jname)
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   result <-
     rebadge.fv(result,
                substitute(g[inhom,i,j](r),
-                          list(i=paste(i),j=paste(j))),
-               sprintf("g[list(inhom,%s,%s)]", i, j),
+                          list(i=iname,j=jname)),
+               sprintf("g[list(inhom,%s,%s)]", iname, jname),
                new.yexp=substitute(g[list(inhom,i,j)](r),
-                                   list(i=paste(i),j=paste(j))))
+                                   list(i=iname,j=jname)))
   return(result)
 }
 
@@ -70,12 +72,13 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
                            correction=correction,
                            sigma=sigma, varcov=varcov,
                            Iname=Iname, Jname=Jname)
+  iname <- make.parseable(paste(i))
   result <-
     rebadge.fv(result,
-               substitute(g[inhom, i ~ dot](r), list(i=paste(i))),
-               paste("g[list(inhom,", i, "~symbol(\"\\267\"))]"),
+               substitute(g[inhom, i ~ dot](r), list(i=iname)),
+               paste("g[list(inhom,", iname, "~symbol(\"\\267\"))]"),
                new.yexp=substitute(g[list(inhom, i ~ symbol("\267"))](r),
-                 list(i=paste(i))))
+                 list(i=iname)))
   return(result)
 }
 
