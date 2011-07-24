@@ -9,7 +9,8 @@
 }
 \usage{
   \method{residuals}{ppm}(object, type="raw", \dots, check=TRUE, drop=FALSE,
-                fittedvalues=fitted.ppm(object, check=check, drop=drop))
+                fittedvalues=fitted.ppm(object, check=check, drop=drop),
+                coefs=NULL, quad=NULL)
 }
 \arguments{
   \item{object}{
@@ -42,7 +43,18 @@
     the quadrature points,
     from which the residuals will be computed. 
     For expert use only.
-   }
+  }
+  \item{coefs}{
+    Optional. Numeric vector of coefficients for the model,
+    replacing \code{coef(object)}.
+    See the section on Modified Residuals below.
+  }
+  \item{quad}{
+    Optional. Data specifying how to re-fit the model.
+    A list of arguments passed to \code{\link{quadscheme}}.
+    See the section on Modified Residuals below.
+  }
+  
 }
 \value{
   An object of class \code{"msr"} 
@@ -132,10 +144,37 @@
     The score residuals always sum to zero.
   }
   }
-
   Use \code{\link{plot.msr}} to plot the residuals directly,
   or \code{\link{diagnose.ppm}} to produce diagnostic plots
   based on these residuals.
+}
+\section{Modified Residuals}{
+  Sometimes we want to modify the calculation of residuals by using
+  different values for the model parameters. This capability is
+  provided by the arguments \code{coefs} and \code{quad}.
+
+  If \code{coefs} is given, then the residuals will be computed
+  by taking the model parameters to be \code{coefs}.
+  This should be a numeric vector
+  of the same length as the vector of fitted model parameters
+  \code{coef(object)}. 
+
+  If \code{coefs} is missing and \code{quad} is given,
+  then the model parameters will
+  be determined by re-fitting the model using a new
+  quadrature scheme specified by \code{quad}. 
+  Residuals will be computed for the
+  original model \code{object} using these new parameter values.
+
+  The argument \code{quad} should normally be
+  a list of arguments in \code{name=value} format that will be
+  passed to \code{\link{quadscheme}} (together with
+  the original data points) to determine the new quadrature scheme.
+  It may also be a quadrature scheme (object of class
+  \code{"quad"} to which the model should be fitted, or a
+  point pattern (object of class \code{"ppp"} specifying the
+  \emph{dummy points} in a new quadrature scheme.
+
 }
 \references{
   Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
@@ -159,8 +198,17 @@
     fit <- ppm(cells, ~x, Strauss(r=0.15))
 
     # Pearson residuals
-    rp <- residuals.ppm(fit, type="pe")
+    rp <- residuals(fit, type="pe")
     rp
+
+     # simulated data
+   X <- rStrauss(100,0.7,0.05)
+   # fit Strauss model 
+   fit <- ppm(X, ~1, Strauss(0.05))
+   res.fit <- residuals(fit)
+   # true model parameters
+   truecoef <- c(log(100), log(0.7))
+   res.true <- residuals(fit, coefs=truecoef)  
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

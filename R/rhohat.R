@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.29 $  $Date: 2011/06/13 09:23:02 $
+#  $Revision: 1.30 $  $Date: 2011/06/22 06:52:54 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -17,14 +17,12 @@ rhohat <- function(object, covariate, ...,
   callstring <- paste(deparse(sys.call()), collapse = "")  
   # validate model
   if(is.ppp(object) || inherits(object, "quad")) {
-    model <- ppm(object, ~1, forcefit=TRUE)
+    model <- ppm(object, ~1)
     reference <- "area"
   } else if(is.ppm(object)) {
     model <- object
     reference <- "model"
     modelcall <- model$call
-    if(is.null(getglmfit(model)))
-      model <- update(model, forcefit=TRUE)
   } else stop("object should be a point pattern or a point process model")
 
   if(is.null(adjust)) adjust <- 1
@@ -174,7 +172,7 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
   s <- attr(x, "stuff")
   covname <- s$covname
   asked.rug <- !missing(do.rug) && identical(rug, TRUE)
-  do.call("plot.fv", resolve.defaults(list(x), list(...),
+  do.call("plot.fv", resolve.defaults(list(x=x), list(...),
                                       list(main=xname, shade=c("hi", "lo"))))
   if(do.rug) {
     rugx <- ZX <- s$ZX
@@ -186,12 +184,12 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
       fmla <- argh[[min(which(isfo))]]
       rhs <- rhs.of.formula(fmla)
       vars <- variablesinformula(rhs)
-      vars <- vars[vars %in% names(x)]
-      if(length(vars) == 1 && vars == covname) {
+      vars <- vars[vars %in% c(colnames(x), ".x", ".y")]
+      if(length(vars) == 1 && vars %in% c(covname, ".x")) {
         # expression in terms of covariate
         rhstr <- as.character(rhs)[2]
         dat <- list(ZX)
-        names(dat) <- covname
+        names(dat) <- vars[1]
         rugx <- as.numeric(eval(parse(text=rhstr), dat))
       } else {
         warning("Unable to add rug plot")

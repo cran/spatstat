@@ -1,7 +1,7 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.25 $   $Date: 2010/09/10 10:05:03 $
+#   $Revision: 1.27 $   $Date: 2011/07/04 05:54:40 $
 #
 #
 alltypes <- function(X, fun="K", ...,
@@ -17,13 +17,15 @@ alltypes <- function(X, fun="K", ...,
 # --------------------------------------------------------------------  
 # First inspect marks
 
-  if(!is.marked(X, dfok=FALSE)) {
+  if(!is.marked(X)) {
     nmarks <- 0
     marklabels <- ""
   } else {
-    mks <- marks(X)
-    if(!is.factor(mks))
+    if(!is.multitype(X))
       stop("the marks must be a factor")
+    # ensure type names are parseable (for mathematical labels)
+    levels(marks(X)) <- make.parseable(levels(marks(X)))
+    mks <- marks(X)
     ma <- levels(mks)
     nmarks <- length(ma)
     marklabels <- paste(ma)

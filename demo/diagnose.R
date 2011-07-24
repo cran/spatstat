@@ -58,6 +58,18 @@ diagnose.ppm(fit.hom, main="Wrong model (homogeneous Poisson)")
 diagnose.ppm(fit.inhom,  main="Right model (inhomogeneous Poisson)")
 par(mfrow=c(1,1))
 
+
+# 
+#######################################################
+#  COMPENSATORS
+
+CF <- compareFit(listof(hom=fit.hom, inhom=fit.inhom),
+                 Kcom, same="iso", different="icom")
+plot(CF, main="model compensators", legend=FALSE)
+legend("topleft",
+       legend=c("empirical K function", "compensator of CSR",
+         "compensator of inhomogeneous Poisson"), lty=1:3, col=1:3)
+
 # 
 #######################################################
 #  Q - Q  PLOTS
@@ -86,6 +98,11 @@ diagnose.ppm(fitPoisson, type="pearson",
                     "No suggestion of departure from CSR"))
 # These diagnostic plots do NOT show evidence of departure from uniform Poisson
 
+plot(Kcom(fitPoisson), cbind(iso, icom) ~ r)
+plot(Gcom(fitPoisson), cbind(han, hcom) ~ r)
+
+# K compensator DOES show strong evidence of departure from uniform Poisson
+
 qqplot.ppm(fitPoisson, 40)
 title(main=c("CSR fitted to cells data",
         "Q-Q plot of smoothed raw residuals",
@@ -93,13 +110,17 @@ title(main=c("CSR fitted to cells data",
            
 # Q-Q plot DOES show strong evidence of departure from uniform Poisson.
 #
-fitStrauss <- ppm(cells, ~1, Strauss(r=0.15))
+fitStrauss <- ppm(cells, ~1, Strauss(r=0.1))
 diagnose.ppm(fitStrauss,
              main=c("Strauss model fitted to cells data",
                     "Raw residuals"))
 diagnose.ppm(fitStrauss, type="pearson",
              main=c("Strauss model fitted to cells data",
                     "Pearson residuals"))
+
+plot(Kcom(fitStrauss), cbind(iso, icom) ~ r)
+plot(Gcom(fitStrauss), cbind(han, hcom) ~ r)
+
 # next line takes a LOOONG time ...
 qqplot.ppm(fitStrauss, 40, type="pearson")
 title(main=c("Strauss model fitted to cells data",

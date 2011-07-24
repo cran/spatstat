@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.69 $   $Date: 2011/05/24 07:43:26 $
+#    $Revision: 1.72 $   $Date: 2011/07/04 05:23:54 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -298,7 +298,10 @@ fvlabelmap <- function(x, dot=TRUE) {
   map <- as.list(labl)
   magic <- function(x) {
     subx <- paste("substitute(", x, ", NULL)")
-    eval(parse(text=subx))
+    out <- try(eval(parse(text=subx)), silent=TRUE)
+    if(inherits(out, "try-error"))
+      out <- as.name(make.names(subx))
+    out
   }
   map <- lapply(map, magic)
   names(map) <- colnames(x)
@@ -322,39 +325,15 @@ fvlegend <- function(object, elang) {
   # The result is an expression vector.
   # The j-th entry of the vector is an expression for the
   # j-th column of function values.
-  # It is formed from the LHS of the plot formula,
-  # by replacing "." by labl[j] and replacing any column names
-  # by their corresponding expressions labl[k].
-  map <-  fvlabelmap(object, dot=TRUE)
-  map0 <- fvlabelmap(object, dot=FALSE)
-  replacedot <- function(x, LHS, fullmap) {
-    # modify map so that "." is mapped to x
-    fullmap[["."]] <- x
-    z <- try(eval(substitute(substitute(yy, mp),
-                              list(yy=LHS, mp=fullmap))))
-    if(!inherits(z, "try-error") &&
-       is.language(z) && !is.expression(z))
-      z <- as.expression(z)
-    z
-  }
-  # transform each column label 
-  fancy <- lapply(map0, replacedot, LHS=elang, fullmap=map)
-  # (except the function argument)
-  xname <- fvnames(object, ".x")
-  hit <- names(map0) %in% c(xname, ".x")
-  fancy[hit] <- as.expression(substitute(expression(r),
-                                         list(r=as.name(xname))))
-  # check replacement worked
-  if(!any(unlist(lapply(fancy, inherits, what="try-error")))) {
-    # OK
-    # convert list to expression vector
-    fancy <- do.call("c", unname(fancy))
-    if(is.expression(fancy))
-      return(fancy)
-  }
-  # didn't work
-  fallback <- fvlabels(object, expand=TRUE)
-  return(fallback)
+  map <- fvlabelmap(object, dot=TRUE)
+  ee <- eval(substitute(substitute(e, mp), list(e=elang, mp=map["."])))
+  ee <- distributecbind(as.expression(ee))
+  eout <- as.expression(
+      lapply(ee, function(ei, map) {
+        eval(substitute(substitute(e, mp), list(e=ei, mp=map)))
+      },
+             map=map))
+  return(eout)
 }
 
 
@@ -471,6 +450,14 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
     stop(paste("The arguments", sQuote("same"), "and", sQuote("different"),
                "should not have entries in common"))
   either <- c(same, different)
+  # validate
+  nbg <- unlist(lapply(x, function(z, e) { e[!(e %in% names(z))] }, e=either))
+  nbg <- unique(nbg)
+  if((nbad <- length(nbg)) > 0)
+    stop(paste(ngettext(nbad, "The name", "The names"),
+               commasep(sQuote(nbg)),
+               ngettext(nbad, "is", "are"),
+               "not present in the function objects"))
   # names for different versions
   versionnames <- names(x)
   if(is.null(versionnames))
@@ -478,7 +465,7 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
   shortnames <- abbreviate(versionnames)
   # extract the common values
   y <- x[[1]]
-  if(!(fvnames(y, ".y") %in% same))
+  if(length(same) > 0 && !(fvnames(y, ".y") %in% same))
     fvnames(y, ".y") <- same[1]
   z <- y[, c(fvnames(y, ".x"), same)]
   dotnames <- same
@@ -497,7 +484,7 @@ collapse.fv <- function(..., same=NULL, different=NULL) {
     dotnames <- c(dotnames, names(y))
     # glue onto fv object
     z <- bind.fv(z, y,
-                 labl=paste(prefix, labl, sep=""),
+                 labl=paste(prefix, labl, sep="~"),
                  desc=paste(preamble, desc))
   }
   fvnames(z, ".") <- dotnames
@@ -801,3 +788,75 @@ as.function.fv <- function(x, ..., value) {
   f <- approxfun(xx, yy, rule=1)
   return(f)
 }
+
+findcbind <- function(root, depth=0, maxdepth=1000) {
+  # recursive search through a parse tree to find calls to 'cbind'
+  if(depth > maxdepth) stop("Reached maximum depth")
+  if(length(root) == 1) return(NULL)
+  if(identical(as.name(root[[1]]), as.name("cbind"))) return(list(numeric(0)))
+  out <- NULL
+  for(i in 2:length(root)) {
+    di <- findcbind(root[[i]], depth+1, maxdepth)
+    if(!is.null(di))
+      out <- append(out, lapply(di, function(z,i){ c(i,z)}, i=i))
+  }
+  return(out)
+}
+
+.MathOpNames <- c("+", "-", "*", "/",
+                  "^", "%%", "%/%",
+                  "&", "|", "!",
+                  "==", "!=", "<", "<=", ">=", ">")
+
+distributecbind <- function(x) {
+  # x is an expression involving a call to 'cbind'
+  # return a vector of expressions, each obtained by replacing 'cbind(...)'
+  # by one of its arguments in turn.
+  stopifnot(typeof(x) == "expression")
+  xlang <- x[[1]]
+  locations <- findcbind(xlang)
+  if(length(locations) == 0)
+    return(x)
+  # cbind might occur more than once
+  # check that the number of arguments is the same each time
+  narg <-
+    unique(unlist(lapply(locations,
+                         function(loc, y) {
+                           if(length(loc) > 0) length(y[[loc]]) else length(y)
+                         },
+                         y=xlang))) - 1
+  if(length(narg) > 1) 
+    return(NULL)
+  out <- NULL
+  if(narg > 0) {
+    for(i in 1:narg) {
+      # make a version of the expression
+      # in which cbind() is replaced by its i'th argument
+      fakexlang <- xlang
+      for(loc in locations) {
+        if(length(loc) > 0) {
+          # usual case: 'loc' is integer vector representing nested index
+          cbindcall <- xlang[[loc]]
+          # extract i-th argument
+          argi <- cbindcall[[i+1]]
+          # if argument is an expression, enclose it in parentheses
+          if(length(argi) > 1 && paste(argi[[1]]) %in% .MathOpNames)
+            argi <- substitute((x), list(x=argi))
+          # replace cbind call by its i-th argument
+          fakexlang[[loc]] <- argi
+        } else {
+          # special case: 'loc' = integer(0) representing xlang itself
+          cbindcall <- xlang
+          # extract i-th argument
+          argi <- cbindcall[[i+1]]
+          # replace cbind call by its i-th argument
+          fakexlang <- cbindcall[[i+1]]
+        }
+      }
+      # add to final expression
+      out <- c(out, as.expression(fakexlang))
+    }
+  }
+  return(out)
+}
+

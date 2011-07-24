@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.66 $    $Date: 2011/05/18 08:20:18 $
+#  $Revision: 1.74 $    $Date: 2011/07/06 03:38:36 $
 #
 #
 
@@ -12,13 +12,15 @@ conspire <- function(...) {
 
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
-                    ylim.covers=NULL, legend=TRUE, legendpos="topleft",
+                    ylim.covers=NULL, legend=!add, legendpos="topleft",
                     legendmath=TRUE, legendargs=list(),
-                    shade=NULL, shadecol="grey") {
+                    shade=NULL, shadecol="grey", add=FALSE) {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
+
   verifyclass(x, "fv")
+  env.user <- parent.frame()
 
   indata <- as.data.frame(x)
 
@@ -29,23 +31,49 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     fmla <- attr(x, "fmla")
 
   # This *is* the last possible moment, so...
-  fmla <- as.formula(fmla)
+  fmla <- as.formula(fmla, env=env.user)
 
+  # validate the variable names
+  vars <- variablesinformula(fmla)
+  reserved <- c(".", ".x", ".y")
+  external <- !(vars %in% c(colnames(x), reserved))
+  if(any(external)) {
+    sought <- vars[external]
+    found <- unlist(lapply(sought, exists, envir=env.user))
+    if(any(!found)) {
+      nnot <- sum(!found)
+      stop(paste(ngettext(nnot, "Variable", "Variables"),
+                 commasep(sQuote(sought[!found])),
+                 ngettext(nnot, "was", "were"),
+                 "not found"))
+    } else {
+      # validate the found variables
+      externvars <- lapply(sought, get, envir=env.user)
+      ok <- unlist(lapply(externvars,
+                          function(z, n) { is.numeric(z) &&
+                                           length(z) %in% c(1,n) },
+                          n=nrow(x)))
+      if(!all(ok)) {
+        nnot <- sum(!ok)
+        stop(paste(ngettext(nnot, "Variable", "Variables"),
+                   commasep(sQuote(sought[!ok])),
+                   ngettext(nnot, "is", "are"),
+                   "not of the right format"))
+      }
+    }
+  }
+  
   # Extract left hand side as given
   lhs.original <- fmla[[2]]
   
   # expand "."
   dotnames <- fvnames(x, ".")
-  if(is.null(dotnames)) {
-    argu <- fvnames(x, ".x")
-    allvars <- names(x)
-    dotnames <- allvars[allvars != argu]
-    dotnames <- rev(dotnames) # convention
-  }
   u <- as.call(lapply(c("cbind", dotnames), as.name))
-  fmla <- eval(substitute(substitute(fom, list(.=u)), list(fom=fmla)))
+  ux <- as.name(fvnames(x, ".x"))
+  uy <- as.name(fvnames(x, ".y"))
+  fmla <- eval(substitute(substitute(fom, list(.=u, .x=ux, .y=uy)),
+                          list(fom=fmla)))
 
-  
   # ------------------- extract data for plot ---------------------
   
   # extract LHS and RHS of formula
@@ -79,10 +107,11 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   allind <- 1:nplots
 
   # extra plots may be implied by 'shade'
+  explicit.lhs.names <- colnames(lhsdata)
   
   if(!is.null(shade)) {
     # select columns by name or number
-    names(allind) <- colnames(lhsdata)
+    names(allind) <- explicit.lhs.names
     shind <- try(allind[shade])
     if(inherits(shind, "try-error")) 
       stop("The argument shade should be a valid subset index for columns of x")
@@ -178,11 +207,21 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # even if not all columns are included.
     leftside <- paste(as.expression(leftside))
     cb <- paste("cbind(",
-                paste(colnames(lhsdata), collapse=", "),
+                paste(explicit.lhs.names, collapse=", "),
                 ")", sep="")
-    leftside <- gsub(cb, ".", leftside, fixed=TRUE)
+    compactleftside <- gsub(cb, ".", leftside, fixed=TRUE)
+    # Separately expand "." to cbind(.....) and ".x", ".y" to their real names
+    cball <- paste("cbind(",
+                paste(fvnames(x, "."), collapse=", "),
+                ")", sep="")
+    expandleftside <- gsub(".x", fvnames(x, ".x"), leftside, fixed=TRUE)
+    expandleftside <- gsub(".y", fvnames(x, ".y"), expandleftside, fixed=TRUE)
+    expandleftside <- gsub(".", cball, expandleftside, fixed=TRUE)
     # convert back to language
-    leftside <- as.formula(paste(leftside, "~1"))[[2]]
+    compactleftside <- as.formula(paste(compactleftside, "~1"))[[2]]
+    expandleftside <- as.formula(paste(expandleftside, "~1"))[[2]]
+  } else {
+    compactleftside <- expandleftside <- leftside
   }
 
   # construct label for y axis
@@ -193,7 +232,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     } else {
       # replace "." and short identifiers by plot labels
       ylab <- eval(substitute(substitute(le, mp),
-                                list(le=leftside, mp=map)))
+                                list(le=compactleftside, mp=map)))
     }
   }
   if(is.language(ylab) && !is.expression(ylab))
@@ -201,13 +240,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 
   # ------------------ start plotting ---------------------------
 
-  # check for argument "add" (defaults to FALSE)
-  dotargs <- list(...)
-  v <- match("add", names(dotargs))
-  addit <- if(is.na(v)) FALSE else as.logical(dotargs[[v]])
-  
-  # if add=FALSE, create new plot
-  if(!addit)
+  # create new plot
+  if(!add)
     do.call("plot.default",
             resolve.defaults(list(xlim, ylim, type="n"),
                              list(xlab=xlab, ylab=ylab),
@@ -302,27 +336,29 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         ylab <- deparse(ylab)
       legdesc <- sprintf(legdesc, ylab)
     }
-    if(!is.null(legend) && legend) {
-      # do legend
-      legtxt <- key
-      if(legendmath) {
-        legtxt <- leglabl
-        if(defaultplot) {
-          # try to convert individual labels to expressions
-          fancy <- try(parse(text=leglabl))
-          if(!inherits(fancy, "try-error"))
-            legtxt <- fancy
-        } else {
-          legtxt[keyok] <- fvlegend(x, leftside)[matok]
-        }
+    # compute legend info
+    legtxt <- key
+    if(legendmath) {
+      legtxt <- leglabl
+      if(defaultplot) {
+        # try to convert individual labels to expressions
+        fancy <- try(parse(text=leglabl), silent=TRUE)
+      } else {
+        # try to navigate the parse tree
+        fancy <- try(fvlegend(x, expandleftside), silent=TRUE)
       }
+      if(!inherits(fancy, "try-error"))
+        legtxt <- fancy
+    }
+    # plot legend
+    if(!is.null(legend) && legend) 
       do.call("legend",
               resolve.defaults(legendargs,
                                list(x=legendpos, legend=legtxt, lty=lty, col=col),
                                list(inset=0.05, y.intersp=if(legendmath) 1.3 else 1),
                                .StripNull=TRUE))
-    }
-    df <- data.frame(lty=lty, col=col, key=key, label=leglabl,
+
+    df <- data.frame(lty=lty, col=col, key=key, label=paste.expr(legtxt),
                       meaning=legdesc, row.names=key)
     return(df)
   }

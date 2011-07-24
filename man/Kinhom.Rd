@@ -8,7 +8,8 @@
 \usage{
   Kinhom(X, lambda=NULL, \dots, r = NULL, breaks = NULL,
     correction=c("border", "bord.modif", "isotropic", "translate"),
-    renormalise=TRUE, 
+    renormalise=TRUE,
+    normpower=1,
     nlarge = 1000,
     lambda2=NULL, reciplambda=NULL, reciplambda2=NULL,
     sigma=NULL, varcov=NULL)
@@ -27,7 +28,8 @@
     Either a vector giving the intensity values
     at the points of the pattern \code{X},
     a pixel image (object of class \code{"im"}) giving the
-    intensity values at all locations, or a \code{function(x,y)} which
+    intensity values at all locations, a fitted point process model
+    (object of class \code{"ppm"}) or a \code{function(x,y)} which
     can be evaluated to give the intensity value at any location.
   }
   \item{\dots}{
@@ -54,6 +56,10 @@
   }
   \item{renormalise}{
     Logical. Whether to renormalise the estimate. See Details.
+  }
+  \item{normpower}{
+    Integer (usually either 1 or 2).
+    Normalisation power. See Details.
   }
   \item{nlarge}{
     Optional. Efficiency threshold.
@@ -165,6 +171,10 @@
       assumed to contain the values of the intensity function
       at all locations in the window. 
     }
+    \item{a fitted point process model}{
+      (object of class \code{"ppm"})
+      whose fitted \emph{trend} can be used as the fitted intensity.
+    }
     \item{a function}{
       which can be evaluated to give values of the intensity at
       any locations.
@@ -255,12 +265,24 @@
   circumference of the circle with centre \eqn{x_i}{x[i]} and radius
   \eqn{||x_i - x_j||}{||x[i]-x[j]||} which lies inside the window.
   
-  If \code{renormalise=TRUE} (the default), then the
-  translation-correction and isotropic-correction estimates given above
-  are multiplied by 
-  \eqn{\mbox{area}(W)/\sum (1/\lambda(x_i))}{area(W)/sum[i] (1/lambda(x[i]))}.
+  If \code{renormalise=TRUE} (the default), then the estimates 
+  are multiplied by \eqn{c^{\mbox{normpower}}}{c^normpower} where 
+  \eqn{
+    c = \mbox{area}(W)/\sum (1/\lambda(x_i)).
+  }{
+    c = area(W)/sum[i] (1/lambda(x[i])).
+  }
   This rescaling reduces the variability and bias of the estimate
-  in small samples.
+  in small samples and in cases of very strong inhomogeneity.
+  The default value of \code{normpower} is 1 (for consistency with
+  previous versions of \pkg{spatstat})
+  but the most sensible value is 2, which would correspond to rescaling
+  the \code{lambda} values so that
+  \eqn{
+    \sum (1/\lambda(x_i)) = \mbox{area}(W).
+  }{
+    sum[i] (1/lambda(x[i])) = area(W).
+  }
   
   If the point pattern \code{X} contains more than about 1000 points,
   the isotropic and translation edge corrections can be computationally

@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.17 $	$Date: 2007/10/23 09:14:45 $
+#	$Revision: 1.18 $	$Date: 2011/06/25 10:49:05 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -287,4 +287,11 @@ reincarnate.interact <- function(object) {
            
      )
        
-                                  
+as.interact <- function(object) {
+  UseMethod("as.interact")
+}
+
+as.interact.interact <- function(object) {
+  verifyclass(object, "interact")
+  return(object)
+}

@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.33 $	$Date: 2011/05/18 07:59:12 $
+#	$Revision: 1.34 $	$Date: 2011/07/04 06:37:34 $
 #
 #
 # ------------------------------------------------------------------------
@@ -13,13 +13,15 @@ Lcross.inhom <- function(X, i, j, ...) {
   if(missing(j)) j <- levels(marks(X))[2]
   K <- Kcross.inhom(X, i, j, ...)
   L <- eval.fv(sqrt(pmax(K,0)/pi))
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   # relabel the fv object
   L <- rebadge.fv(L,
                   substitute(L[inhom,i,j](r),
-                             list(i=paste(i),j=paste(j))),
+                             list(i=iname,j=jname)),
                   sprintf("L[list(inhom,%s,%s)]", i, j),
                   new.yexp=substitute(L[list(inhom,i,j)](r),
-                                      list(i=paste(i),j=paste(j))))
+                                      list(i=iname,j=jname)))
   return(L)  
 }
 
@@ -30,11 +32,12 @@ Ldot.inhom <- function(X, i, ...) {
   K <- Kdot.inhom(X, i, ...)
   L <- eval.fv(sqrt(pmax(K,0)/pi))
   # relabel the fv object
+  iname <- make.parseable(paste(i))
   L <- rebadge.fv(L,
-                  substitute(L[inhom, i ~ dot](r), list(i=paste(i))),
-                  paste("L[list(inhom,", i, "~symbol(\"\\267\"))]"),
+                  substitute(L[inhom, i ~ dot](r), list(i=iname)),
+                  paste("L[list(inhom,", iname, "~symbol(\"\\267\"))]"),
                   new.yexp=substitute(L[list(inhom, i ~ symbol("\267"))](r),
-                    list(i=paste(i))))
+                    list(i=iname)))
   return(L)  
 }
 
@@ -63,13 +66,15 @@ function(X, i, j, lambdaI=NULL, lambdaJ=NULL, ...,
                          r=r,breaks=breaks,correction=correction,
                          sigma=sigma, varcov=varcov,
                          lambdaIJ=lambdaIJ, Iname=Iname, Jname=Jname)
+  iname <- make.parseable(paste(i))
+  jname <- make.parseable(paste(j))
   result <-
     rebadge.fv(result,
                substitute(K[inhom,i,j](r),
-                          list(i=paste(i),j=paste(j))),
+                          list(i=iname,j=jname)),
                sprintf("K[list(inhom,%s,%s)]", i, j),
                new.yexp=substitute(K[list(inhom,i,j)](r),
-                                   list(i=paste(i),j=paste(j))))
+                                   list(i=iname,j=jname)))
   return(result)
 }
 
@@ -100,12 +105,13 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
                          sigma=sigma, varcov=varcov,
                          lambdaIJ=lambdaIdot,
                          Iname=Iname, Jname=Jname)
+  iname <- make.parseable(paste(i))
   result <-
     rebadge.fv(result,
-               substitute(K[inhom, i ~ dot](r), list(i=paste(i))),
-               paste("K[list(inhom,", i, "~symbol(\"\\267\"))]"),
+               substitute(K[inhom, i ~ dot](r), list(i=iname)),
+               paste("K[list(inhom,", iname, "~symbol(\"\\267\"))]"),
                new.yexp=substitute(K[list(inhom, i ~ symbol("\267"))](r),
-                                   list(i=paste(i))))
+                                   list(i=iname)))
   return(result)
 }
 

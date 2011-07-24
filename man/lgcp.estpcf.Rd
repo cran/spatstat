@@ -215,7 +215,9 @@ lgcp.estpcf(X,
     u <- lgcp.estpcf(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
-    lgcp.estpcf(redwood, covmodel=list(model="matern", nu=0.3))
+    if(require(RandomFields)) {
+      lgcp.estpcf(redwood, covmodel=list(model="matern", nu=0.3))
+    }
 }
 \keyword{spatial}
 \keyword{models}

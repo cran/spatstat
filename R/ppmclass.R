@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.51 $	$Date: 2011/06/09 07:37:45 $
+#	$Revision: 2.53 $	$Date: 2011/06/25 10:49:18 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -361,3 +361,10 @@ unitname.ppm <- function(x) {
 
 nobs.ppm <- function(object, ...) { npoints(data.ppm(object)) }
 
+as.interact.ppm <- function(object) {
+ verifyclass(object, "ppm")
+ inte <- object$interaction
+ if(is.null(inte))
+   inte <- Poisson()
+ return(inte)
+}

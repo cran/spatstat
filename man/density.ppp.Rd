@@ -121,7 +121,7 @@
   The arguments \code{sigma} and \code{varcov} are incompatible.
   Also \code{sigma} may be a vector of length 2 giving the
   standard deviations of two independent Gaussian coordinates,
-  thus equivalent to \code{varcov = diag(sigma^2)}.
+  thus equivalent to \code{varcov = diag(rep(sigma^2, 2))}.
   
   The smoothing parameter \code{sigma} has a default value
   calculated by a simple rule of thumb
@@ -217,10 +217,13 @@
     plot(density(cells, 0.05))
     plot(density(cells, 0.05, diggle=TRUE))
     par(opa)
+    v <- diag(c(0.05, 0.07)^2)
+    plot(density(cells, varcov=v))
   }
   \testonly{
      Z <- density(cells, 0.05)
      Z <- density(cells, 0.05, diggle=TRUE)
+     Z <- density(cells, varcov=diag(c(0.05^2, 0.07^2)))
   }
   density(cells, 0.05, at="points")
 }

@@ -45,6 +45,7 @@ fitin(object)
 \seealso{
   \code{\link{ppm}},
   \code{\link{ppm.object}},
+  \code{\link{as.interact}}.
 }
 \examples{
    data(betacells)

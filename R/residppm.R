@@ -4,16 +4,14 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.14 $ $Date: 2011/02/15 07:24:08 $
+# $Revision: 1.16 $ $Date: 2011/06/19 06:45:18 $
 #
 
 residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
-                 fittedvalues = fitted.ppm(object, check=check, drop=drop)) {
+                 fittedvalues = fitted.ppm(object, check=check, drop=drop),
+                          coefs=NULL, quad=NULL) {
   
   verifyclass(object, "ppm")
-
-  if(check && missing(fittedvalues) && damaged.ppm(object)) 
-    stop("object format corrupted; try update(object, use.internal=TRUE)")
 
   type <- pickoption("type", type,
                      c(inverse="inverse",
@@ -26,6 +24,46 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
                  pearson="Pearson residuals",
                  score="score residuals")
   typename <- typenames[[type]]
+
+  given.fitted <- !missing(fittedvalues)
+
+  # ................. determine fitted values .................
+  
+  if(is.null(coefs) && is.null(quad)) {
+    # use 'object' without modification
+    # validate 'object'
+    if(check && missing(fittedvalues) && damaged.ppm(object)) 
+      stop("object format corrupted; try update(object, use.internal=TRUE)")
+  } else {
+    # determine a new set of model coefficients
+    if(!is.null(coefs)) {
+      # use specified model parameters
+      modelcoef <- coefs
+    } else {
+      # estimate model parameters using a (presumably) denser set of dummy pts
+      # Determine new quadrature scheme
+      if(inherits(quad, "quad")) 
+        hi.res.quad <- quad
+      else if(is.ppp(quad))
+        hi.res.quad <- quadscheme(data=data.ppm(object), dummy=quad)
+      else {
+        # assume 'quad' is a list of arguments to 'quadscheme'
+        hi.res.quad <- do.call("quadscheme",
+                               append(list(data.ppm(object)),
+                                      quad))
+      }
+      # refit the model with new quadscheme
+      hi.res.fit <- update(object, hi.res.quad)
+      modelcoef <- coef(hi.res.fit)
+    }
+    # now compute fitted values using new coefficients
+    if(!given.fitted) {
+      mom <- model.matrix(object, keepNA=!drop)
+      fittedvalues <- exp(mom %*% modelcoef)
+    }
+  }
+
+  # ..................... compute residuals .....................
 
   # Extract quadrature points and weights
   Q <- quad.ppm(object, drop=drop)

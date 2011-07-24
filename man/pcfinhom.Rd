@@ -8,7 +8,12 @@
   a point pattern using kernel methods.
 }
 \usage{
-pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, stoyan = 0.15, correction = c("translate", "Ripley"), sigma = NULL, varcov = NULL)
+pcfinhom(X, lambda = NULL, ..., r = NULL,
+         kernel = "epanechnikov", bw = NULL, stoyan = 0.15,
+         correction = c("translate", "Ripley"),
+         renormalise = TRUE, normpower=1,
+         reciplambda = NULL,
+         sigma = NULL, varcov = NULL)
 }
 \arguments{
   \item{X}{
@@ -20,7 +25,8 @@ pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, st
     Either a vector giving the intensity values
     at the points of the pattern \code{X},
     a pixel image (object of class \code{"im"}) giving the
-    intensity values at all locations, or a \code{function(x,y)} which
+    intensity values at all locations, a fitted point process model
+    (object of class \code{"ppm"}) or a \code{function(x,y)} which
     can be evaluated to give the intensity value at any location.
   }
   \item{r}{
@@ -42,6 +48,24 @@ pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, st
   }
   \item{correction}{
     Choice of edge correction.
+  }
+  \item{renormalise}{
+    Logical. Whether to renormalise the estimate. See Details.
+  }
+  \item{normpower}{
+    Integer (usually either 1 or 2).
+    Normalisation power. See Details.
+  }
+  \item{reciplambda}{
+    Alternative to \code{lambda}.
+    Values of the estimated \emph{reciprocal} \eqn{1/\lambda}{1/lambda}
+    of the intensity function.
+    Either a vector giving the reciprocal intensity values
+    at the points of the pattern \code{X},
+    a pixel image (object of class \code{"im"}) giving the
+    reciprocal intensity values at all locations,
+    or a \code{function(x,y)} which can be evaluated to give the
+    reciprocal intensity value at any location.
   }
   \item{sigma,varcov}{
     Optional arguments passed to  \code{\link{density.ppp}}
@@ -84,6 +108,24 @@ pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, st
   The command \code{pcfinhom} estimates the inhomogeneous
   pair correlation using a modified version of
   the algorithm in \code{\link{pcf.ppp}}.   
+  
+  If \code{renormalise=TRUE} (the default), then the estimates 
+  are multiplied by \eqn{c^{\mbox{normpower}}}{c^normpower} where 
+  \eqn{
+    c = \mbox{area}(W)/\sum (1/\lambda(x_i)).
+  }{
+    c = area(W)/sum[i] (1/lambda(x[i])).
+  }
+  This rescaling reduces the variability and bias of the estimate
+  in small samples and in cases of very strong inhomogeneity.
+  The default value of \code{normpower} is 1
+  but the most sensible value is 2, which would correspond to rescaling
+  the \code{lambda} values so that
+  \eqn{
+    \sum (1/\lambda(x_i)) = \mbox{area}(W).
+  }{
+    sum[i] (1/lambda(x[i])) = area(W).
+  }
 }
 \value{
   A function value table (object of class \code{"fv"}).
@@ -114,6 +156,8 @@ pcfinhom(X, lambda = NULL, ..., r = NULL, kernel = "epanechnikov", bw = NULL, st
   data(residualspaper)
   X <- residualspaper$Fig4b
   plot(pcfinhom(X, stoyan=0.2, sigma=0.1))
+  fit <- ppm(X, ~polynom(x,y,2))
+  plot(pcfinhom(X, lambda=fit, normpower=2))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

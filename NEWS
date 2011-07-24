@@ -1,3 +1,161 @@
+	CHANGES IN spatstat VERSION 1.23-0
+
+OVERVIEW 
+
+    o  point patterns on a linear network:
+       new tools including geometrically-corrected linear K function, 
+       pair correlation function, point process models, envelopes
+
+    o  changes to renormalisation of estimates in Kinhom and pcfinhom
+
+    o  new dataset: Chicago street crime
+
+    o  spatstat now 'Suggests:' the package RandomFields
+
+    o  spatstat now has a Namespace
+
+    o  we thank Mike Kuhn, Monia Mahling, Brian Ripley for contributions.
+
+NEW DATASET
+
+    o  chicago
+    Street crimes in the University district of Chicago.
+    A point pattern on a linear network.
+
+NEW FUNCTIONS
+
+    o envelope.lpp
+      Simulation envelopes for point patterns on a linear network
+
+    o lineardisc
+      Compute the 'disc' of radius r in a linear network 
+
+    o linearpcf 
+      Pair correlation for point pattern on a linear network
+
+    o linearKinhom, linearpcfinhom
+      Inhomogeneous versions of the K function and pair correlation function
+      for point patterns on a linear network
+
+    o lppm 
+      Fit point process models on a linear network.
+
+    o anova.lppm
+      Analysis of deviance for point process models on a linear network.
+
+    o predict.lppm
+      Prediction for point process models on a linear network.
+
+    o envelope.lppm
+      Simulation envelopes for point process models on a linear network.
+
+    o linim
+      Pixel image on a linear network
+
+    o plot.linim
+      Plot a pixel image on a linear network
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o linearK
+     New argument 'correction'.
+     Geometrically-corrected estimation is performed by default
+     (based on forthcoming paper by Ang, Baddeley and Nair)
+
+   o Kinhom
+     New argument 'normpower' allows different types of renormalisation.
+
+   o pcfinhom
+     Now performs renormalisation of estimate. 
+     Default behaviour changed - estimates are now renormalised by default.
+
+BUG FIXES
+
+    o  density.ppp
+       Crashed if argument 'varcov' was given.
+       Fixed.
+    
+	CHANGES IN spatstat VERSION 1.22-4
+
+OVERVIEW 
+
+    o  new diagnostics based on score residuals
+
+    o  new dataset
+
+    o  improvements to plotting summary functions 
+
+    o  We thank Ege Rubak, Jesper Moller, George Leser, Robert Lamb
+       and Ulf Mehlig for contributions.
+
+NEW FUNCTIONS
+
+    o  Gcom, Gres, Kcom, Kres
+       New diagnostics for fitted Gibbs or Poisson point process models
+       based on score residuals.
+       Gcom is the compensator of the G function
+       Gres is the residual of the G function
+       Kcom is the compensator of the K function
+       Kres is the residual of the K function
+
+    o  psst, psstA, psstG
+       New diagnostics for fitted Gibbs or Poisson point process models
+       based on pseudoscore residuals.
+       psst is the pseudoscore diagnostic for a general alternative
+       psstA is the pseudoscore diagnostic for an Area-interaction alternative
+       psstG is the pseudoscore diagnostic for a Geyer saturation alternative
+
+    o  compareFit
+       Computes and compares several point process models
+       fitted to the same dataset, using a chosen diagnostic.
+
+    o  as.interact
+       Extracts the interpoint interaction structure (without parameters)
+       from a fitted point process model or similar object.
+
+NEW DATASET
+
+    o  flu
+       Spatial point patterns giving the locations of 
+       influenza virus proteins on cell membranes.
+       Kindly released by Dr George Leser and Dr Robert Lamb.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o  pixel images and grids
+      The default size of a pixel grid, given by spatstat.options("npixel"),
+      has been changed from 100 to 128. A power of 2 gives faster
+      and more accurate results in many cases.
+
+   o  residuals.ppm
+       New arguments 'coefs' and 'quad' for advanced use
+       (make it possible to compute residuals from a
+        modified version of the fitted model.)
+
+   o   relrisk 	
+       New argument 'casecontrol' determines whether a bivariate
+       point pattern should be treated as case-control data.
+
+   o   plot.fv
+       Further improvements in mathematical labels.
+
+   o   plot.fv
+       The formula can now include the symbols .x and .y
+       as abbreviation for the function argument and the 
+       recommended function value, respectively.
+
+   o   plot.fv
+       New argument 'add'
+
+BUG FIXES
+
+   o   multitype summary functions
+       (Kcross, Kdot, Gcross, Gdot, .....)
+       Plotting these functions generated an error if the 
+       name of one of the types of points contained spaces,
+       e.g. "Escherichia coli". 
+       Fixed.
+
 	CHANGES IN spatstat VERSION 1.22-3
 
 OVERVIEW 

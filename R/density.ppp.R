@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.35 $    $Date: 2011/06/17 01:43:21 $
+#  $Revision: 1.36 $    $Date: 2011/07/15 13:51:30 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -563,9 +563,9 @@ resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL,
            stop(paste("Give only one of the arguments",
                       sQuote("sigma"), "and", sQuote("varcov")))
          })
-  # apply adjustments 
+  # apply adjustments
   if(!is.null(sigma))  sigma <- adjust * sigma
-  if(!is.null(varcov)) varcov <- sqrt(adjust) * sigma
+  if(!is.null(varcov)) varcov <- (adjust^2) * varcov
   #
   sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
   cutoff <- 8 * sd

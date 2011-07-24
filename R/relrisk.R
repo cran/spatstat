@@ -3,10 +3,11 @@
 #
 #   Estimation of relative risk
 #
-#  $Revision: 1.5 $  $Date: 2011/05/18 09:02:00 $
+#  $Revision: 1.6 $  $Date: 2011/07/07 09:01:04 $
 #
 
-relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels") {
+relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels",
+                    casecontrol=TRUE) {
   stopifnot(is.ppp(X))
   stopifnot(is.multitype(X))
   Y <- split(X)
@@ -26,7 +27,7 @@ relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels") {
     sigma <- do.call(bw.relrisk, append(list(X), bwargs))
   }
   # compute probabilities
-  if(ntypes == 2) {
+  if(ntypes == 2 && casecontrol) {
     # 1 = control, 2 = case
     # compute densities
     Deach <- do.call(density.splitppp,

@@ -5,7 +5,7 @@
 #
 #   original code by Abdollah Jalilian
 #
-#  $Revision: 1.1 $    $Date: 2011/06/08 10:11:39 $
+#  $Revision: 1.2 $    $Date: 2011/07/12 02:52:16 $
 #
 
 rLGCP <-
@@ -17,7 +17,8 @@ rLGCP <-
     if (is.numeric(mu) && !(length(mu) == 1)) 
       stop(paste(sQuote("mu"), "must be a single number"))
   }
-
+  if(!require(RandomFields))
+    stop("Simulation of log-Gaussian Cox process requires the package RandomFields")
   win.given <- !missing(win)
   mu.image <- is.im(mu)
   win <- if(win.given) as.owin(win) else if(mu.image) as.owin(mu) else owin()
