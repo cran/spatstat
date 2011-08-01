@@ -4,7 +4,7 @@
 
   denspt.c
 
-  $Revision: 1.7 $     $Date: 2011/05/17 12:18:53 $
+  $Revision: 1.8 $     $Date: 2011/07/26 08:05:19 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -549,26 +549,24 @@ void wtsmoopt(nxy, x, y, v, self, rmaxi, sig, weight, result)
 
 /* ------------- anisotropic versions -------------------- */
 
-void asmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, result) 
+void asmoopt(nxy, x, y, v, self, rmaxi, sinv, result) 
      /* inputs */
      int *nxy;         /* number of (x,y) points */
      double *x, *y;    /* (x,y) coordinates */
      double *v;        /* vector of mark values to be smoothed */
      int *self;       /* 0 if leave-one-out */
      double *rmaxi;    /* maximum distance at which points contribute */
-     double *detsigma;  /* determinant of variance matrix */
      double *sinv;      /* inverse variance matrix (2x2, flattened) */
      /* output */
      double *result;   /* vector of smoothed values */
 {
   int n, i, j, jleft, jright, countself;
   double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
-  double detsig, s11, s12, s21, s22;
+  double s11, s12, s21, s22;
   double numer, denom, wij; 
 
   n = *nxy;
   rmax = *rmaxi;
-  detsig = *detsigma;
   countself = *self;
 
   s11 = sinv[0];
@@ -648,14 +646,13 @@ void asmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, result)
 }
 
 
-void awtsmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, weight, result) 
+void awtsmoopt(nxy, x, y, v, self, rmaxi, sinv, weight, result) 
      /* inputs */
      int *nxy;         /* number of (x,y) points */
      double *x, *y;    /* (x,y) coordinates */
      double *v;        /* vector of mark values to be smoothed */
      int *self;       /* 0 if leave-one-out */
      double *rmaxi;    /* maximum distance at which points contribute */
-     double *detsigma;  /* determinant of variance matrix */
      double *sinv;      /* inverse variance matrix (2x2, flattened) */
      double *weight;      /* vector of weights */
      /* output */
@@ -663,12 +660,11 @@ void awtsmoopt(nxy, x, y, v, self, rmaxi, detsigma, sinv, weight, result)
 {
   int n, i, j, jleft, jright, countself;
   double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
-  double detsig, s11, s12, s21, s22;
+  double s11, s12, s21, s22;
   double numer, denom, wij; 
 
   n = *nxy;
   rmax = *rmaxi;
-  detsig = *detsigma;
   countself = *self;
 
   s11 = sinv[0];

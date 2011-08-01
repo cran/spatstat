@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.3 $   $Date: 2011/06/14 07:28:31 $
+#  $Revision: 1.4 $   $Date: 2011/07/26 08:24:32 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -457,7 +457,7 @@ model.matrix.slrm <- function(object,..., keepNA=TRUE) {
 update.slrm <- function(object, ..., evaluate=TRUE, env=parent.frame()) {
   e <- update.default(object, ..., evaluate=FALSE)
   if(evaluate)
-    e <- eval(e, env=env)
+    e <- eval(e, envir=env)
   return(e)
 }
 

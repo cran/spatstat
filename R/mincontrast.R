@@ -334,7 +334,8 @@ getdataname <- function(defaultvalue, ..., dataname=NULL) {
 thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -377,7 +378,8 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
                       covmodel=list(model="exponential"), 
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
   
   if(inherits(X, "fv")) {
     K <- X
@@ -429,7 +431,8 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
 matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -478,7 +481,8 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                           pcfargs=list()){
 
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     g <- X
@@ -529,7 +533,8 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
                             lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                             pcfargs=list()){
 
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
 
   if(inherits(X, "fv")) {
     g <- X
@@ -582,7 +587,8 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                         pcfargs=list()) {
   
-  dataname <- getdataname(deparse(substitute(X), width=20, nlines=1), ...)
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
   
   if(inherits(X, "fv")) {
     g <- X

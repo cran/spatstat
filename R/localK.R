@@ -12,22 +12,65 @@
          correction=correction, verbose=verbose, rvalue=rvalue)
 }
 
+"localLinhom" <-
+  function(X, lambda=NULL, ..., correction="Ripley", verbose=TRUE, rvalue=NULL,
+           sigma=NULL, varcov=NULL)
+{
+  localKinhom(X, lambda=lambda, wantL=TRUE, ..., 
+              correction=correction, verbose=verbose, rvalue=rvalue,
+              sigma=sigma, varcov=varcov)
+}
+
 "localK" <-
   function(X, ..., correction="Ripley", verbose=TRUE, rvalue=NULL)
 {
   verifyclass(X, "ppp")
-  
-  wantL <- resolve.defaults(list(...), list(wantL = FALSE))$wantL
+  localKengine(X, ..., correction=correction, verbose=verbose, rvalue=rvalue)
+}
 
+"localKinhom" <-
+  function(X, lambda=NULL, ..., correction="Ripley", verbose=TRUE, rvalue=NULL,
+           sigma=NULL, varcov=NULL)
+{
+  verifyclass(X, "ppp")
+
+  if(is.null(lambda)) {
+    # No intensity data provided
+    # Estimate density by leave-one-out kernel smoothing
+    lambda <- density(X, ..., sigma=sigma, varcov=varcov,
+                            at="points", leaveoneout=TRUE)
+    lambda <- as.numeric(lambda)
+  } else {
+    # validate
+    if(is.im(lambda)) 
+      lambda <- safelookup(lambda, X)
+    else if(is.ppm(lambda))
+      lambda <- predict(lambda, locations=X, type="trend")
+    else if(is.function(lambda)) 
+      lambda <- lambda(X$x, X$y)
+    else if(is.numeric(lambda) && is.vector(as.numeric(lambda)))
+      check.nvector(lambda, npoints(X))
+    else stop(paste(sQuote("lambda"),
+                    "should be a vector, a pixel image, or a function"))
+  }  
+  localKengine(X, lambda=lambda, ...,
+               correction=correction, verbose=verbose, rvalue=rvalue)
+}
+
+"localKengine" <-
+  function(X, ..., wantL=FALSE, lambda=NULL,
+           correction="Ripley", verbose=TRUE, rvalue=NULL)
+{
   npts <- npoints(X)
   W <- X$window
   area <- area.owin(W)
-  lambda <- npts/area
-  lambda1 <- (npts - 1)/area
-  lambda2 <- (npts * (npts - 1))/(area^2)
+  lambda.ave <- npts/area
+  lambda1.ave <- (npts - 1)/area
+
+  weighted <- !is.null(lambda)
 
   if(is.null(rvalue)) 
-    rmaxdefault <- rmax.rule("K", W, lambda)
+    rmaxdefault <- rmax.rule("K", W, lambda.ave)
   else {
     stopifnot(is.numeric(rvalue))
     stopifnot(length(rvalue) == 1)
@@ -58,7 +101,12 @@
   DIJ <- close$d
   XI <- ppp(close$xi, close$yi, window=W, check=FALSE)
   I <- close$i
-
+  if(weighted) {
+    J <- close$j
+    lambdaJ <- lambda[J]
+    weightJ <- 1/lambdaJ
+  } 
+  
   # initialise
   df <- as.data.frame(matrix(NA, length(r), npts))
   labl <- desc <- character(npts)
@@ -70,8 +118,9 @@
            # uncorrected! For demonstration purposes only!
            for(i in 1:npts) {
              ii <- (I == i)
-             wh <- whist(DIJ[ii], breaks$val)  # no weights
-             df[,i] <- cumsum(wh)/lambda1
+             wh <- whist(DIJ[ii], breaks$val,
+                         if(weighted) weightJ[ii] else NULL)  # no edge weights
+             df[,i] <- cumsum(wh)
              icode <- numalign(i, npts)
              names(df)[i] <- paste("un", icode, sep="")
              labl[i] <- paste("%s", bkt(icode), "(r)", sep="")
@@ -79,15 +128,18 @@
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
+           if(!weighted) df <- df/lambda1.ave
          },
          translate={
            # Translation correction
            XJ <- ppp(close$xj, close$yj, window=W, check=FALSE)
            edgewt <- edge.Trans(XI, XJ, paired=TRUE)
+           if(weighted)
+             edgewt <- edgewt * weightJ
            for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val, edgewt[ii])
-             Ktrans <- cumsum(wh)/lambda1
+             Ktrans <- cumsum(wh)
              df[,i] <- Ktrans
              icode <- numalign(i, npts)
              names(df)[i] <- paste("trans", icode, sep="")
@@ -96,16 +148,19 @@
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
+           if(!weighted) df <- df/lambda1.ave
            h <- diameter(W)/2
            df[r >= h, ] <- NA
          },
          isotropic={
            # Ripley isotropic correction
            edgewt <- edge.Ripley(XI, matrix(DIJ, ncol=1))
+           if(weighted)
+             edgewt <- edgewt * weightJ
            for(i in 1:npts) {
              ii <- (I == i)
              wh <- whist(DIJ[ii], breaks$val, edgewt[ii])
-             Kiso <- cumsum(wh)/lambda1
+             Kiso <- cumsum(wh)
              df[,i] <- Kiso
              icode <- numalign(i, npts)
              names(df)[i] <- paste("iso", icode, sep="")
@@ -114,6 +169,7 @@
                               "for point", icode)
              if(verbose) progressreport(i, npts)
            }
+           if(!weighted) df <- df/lambda1.ave
            h <- diameter(W)/2
            df[r >= h, ] <- NA
          })
@@ -131,13 +187,23 @@
   # function value table required
   # add r and theo
   if(!wantL) {
-    ylab <- substitute(K[loc](r), NULL)
     df <- cbind(df, data.frame(r=r, theo=pi * r^2))
-    fnam <- "K[loc][',']"
+    if(!weighted) {
+      ylab <- quote(K[loc](r))
+      fnam <- "K[loc][',']"
+    } else {
+      ylab <- quote(Kinhom[loc](r))
+      fnam <- "Kinhom[loc][',']"
+    }
   } else {
-    ylab <- substitute(L[loc](r), NULL)
     df <- cbind(df, data.frame(r=r, theo=r))
-    fnam <- "L[loc][',']"
+    if(!weighted) {
+      ylab <- quote(L[loc](r))
+      fnam <- "L[loc][',']"
+    } else {
+      ylab <- quote(Linhom[loc](r))
+      fnam <- "Linhom[loc][',']"
+    }
   }
   desc <- c(desc, c("distance argument r", "theoretical Poisson %s"))
   labl <- c(labl, c("r", "%s[pois](r)"))

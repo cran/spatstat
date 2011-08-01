@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.62 $	$Date: 2011/06/08 04:47:30 $
+#	$Revision: 1.63 $	$Date: 2011/08/01 08:30:51 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -297,7 +297,7 @@ function(object, window, ngrid=NULL, locations=NULL,
              mf <- model.frame(formula(model), newdata, ...)
              mm <- model.matrix(formula(model), mf, ...)
              # compute relative variance = diagonal of quadratic form
-             nr <- nrow(newdata)
+             nr <- nrow(mm)
              vv <- numeric(nr)
              for(i in 1:nr) {
                mmi <- mm[i, ]

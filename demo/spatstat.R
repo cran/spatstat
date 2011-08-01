@@ -214,9 +214,10 @@ plot(delaunay(X))
 plot(X, add=TRUE)
 
 data(longleaf)
-parsave <- par(mfrow=c(1,2))
+parsave <- par(mfrow=c(1,3))
 plot(longleaf, main="Longleaf Pines data")
-plot(smooth.ppp(longleaf, 10), main="Spatial smoothing of marks")
+plot(smooth.ppp(longleaf, 10), main="Kernel smoothing")
+plot(idw(longleaf), main="Inverse distance weighted smoothing")
 par(parsave)
 
 data(cells)

@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.34 $	$Date: 2011/05/18 08:38:52 $
+#	$Revision: 1.35 $	$Date: 2011/07/28 05:13:19 $
 #
 #
 #
@@ -139,7 +139,8 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
              else {
                # First fill the polygon's interior with colour
                # Use gpclib to triangulate
-               txy <- triangulate(owin2gpc(W))
+               Triangulate <- gpcmethod("triangulate", list(x="gpc.poly"))
+               txy <- Triangulate(owin2gpc(W))
                ntri <- floor(nrow(txy)/3)
                # Fill triangles with colour
                for(i in seq_len(ntri)) {

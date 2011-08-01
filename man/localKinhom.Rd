@@ -1,20 +1,37 @@
-\name{localK}
-\alias{localK}
-\alias{localL}
-\title{Neighbourhood density function}
+\name{localKinhom}
+\alias{localKinhom}
+\alias{localLinhom}
+\title{Inhomogeneous Neighbourhood Density Function}
 \description{
-  Computes the neighbourhood density function, a local version of
-  the \eqn{K}-function or \eqn{L}-function,
-  defined by Getis and Franklin (1987).
+  Computes spatially-weighted versions of the
+  the local \eqn{K}-function or \eqn{L}-function.
 }
 \usage{
-  localK(X, ..., correction = "Ripley", verbose = TRUE, rvalue=NULL)
-  localL(X, ..., correction = "Ripley", verbose = TRUE, rvalue=NULL)
+  localKinhom(X, lambda, ...,
+              correction = "Ripley", verbose = TRUE, rvalue=NULL,
+              sigma = NULL, varcov = NULL)
+  localLinhom(X, lambda, ..., 
+              correction = "Ripley", verbose = TRUE, rvalue=NULL,
+              sigma = NULL, varcov = NULL)
 }
 \arguments{
   \item{X}{A point pattern (object of class \code{"ppp"}).}
-  \item{\dots}{Ignored.}
-  \item{correction}{String specifying the edge correction to be applied.
+  \item{lambda}{
+    Optional.
+    Values of the estimated intensity function.
+    Either a vector giving the intensity values
+    at the points of the pattern \code{X},
+    a pixel image (object of class \code{"im"}) giving the
+    intensity values at all locations, a fitted point process model
+    (object of class \code{"ppm"}) or a \code{function(x,y)} which
+    can be evaluated to give the intensity value at any location.
+  }
+  \item{\dots}{
+    Extra arguments. Ignored if \code{lambda} is present.
+    Passed to \code{\link{density.ppp}} if \code{lambda} is omitted.
+  }
+  \item{correction}{
+    String specifying the edge correction to be applied.
     Options are \code{"none"}, \code{"translate"}, \code{"Ripley"},
     \code{"isotropic"} or \code{"best"}.
     Only one correction may be specified.
@@ -25,30 +42,36 @@
   \item{rvalue}{Optional. A \emph{single} value of the distance argument
     \eqn{r} at which the function L or K should be computed.
   }
+  \item{sigma, varcov}{
+    Optional arguments passed to \code{\link{density.ppp}} to control
+    the kernel smoothing procedure for estimating \code{lambda},
+    if \code{lambda} is missing.
+  }
 }
 \details{
-  The command \code{localL} computes the \emph{neighbourhood density function},
-  a local version of the \eqn{L}-function (Besag's transformation of Ripley's
-  \eqn{K}-function) that was proposed by Getis and Franklin (1987).
-  The command \code{localK} computes the corresponding
-  local analogue of the K-function.
+  The functions \code{localKinhom} and \code{localLinhom}
+  are inhomogeneous or weighted versions of the
+  neighbourhood density function implemented in
+  \code{\link{localK}} and \code{\link{localL}}.
 
-  Given a spatial point pattern \code{X}, the neighbourhood density function
+  Given a spatial point pattern \code{X}, the
+  inhomogeneous neighbourhood density function
   \eqn{L_i(r)}{L[i](r)} associated with the \eqn{i}th point
   in \code{X} is computed by
   \deqn{
-    L_i(r) = \sqrt{\frac a {(n-1) \pi} \sum_j e_{ij}}
+    L_i(r) = \sqrt{\frac 1 \pi \sum_j \frac{e_{ij}}{\lambda_j}}
   }{
-    L[i](r) = sqrt( (a/((n-1)* pi)) * sum[j] e[i,j])
+    L[i](r) = sqrt( (1/pi) * sum[j] e[i,j]/lambda[j])
   }
   where the sum is over all points \eqn{j \neq i}{j != i} that lie
   within a distance \eqn{r} of the \eqn{i}th point, 
-  \eqn{a} is the area of the observation window, \eqn{n} is the number
-  of points in \code{X}, and \eqn{e_{ij}}{e[i,j]} is an edge correction
+  \eqn{\lambda_j}{\lambda[j]} is the estimated intensity of the
+  point pattern at the point \eqn{j},
+  and \eqn{e_{ij}}{e[i,j]} is an edge correction
   term (as described in \code{\link{Kest}}).
   The value of \eqn{L_i(r)}{L[i](r)} can also be interpreted as one
-  of the summands that contributes to the global estimate of the L
-  function.
+  of the summands that contributes to the global estimate of the
+  inhomogeneous L function (see \code{\link{Linhom}}).
 
   By default, the function \eqn{L_i(r)}{L[i](r)} or
   \eqn{K_i(r)}{K[i](r)} is computed for a range of \eqn{r} values
@@ -61,9 +84,6 @@
   single number, then the function will only be computed for this value
   of \eqn{r}, and the results will be returned as a numeric vector,
   with one entry of the vector for each point of the pattern \code{X}.
-
-  Inhomogeneous counterparts of \code{localK} and \code{localL}
-  are computed by \code{localKinhom} and \code{localLinhom}.
 }
 \value{
   If \code{rvalue} is given, the result is a numeric vector
@@ -84,23 +104,18 @@
   Column \code{i} corresponds to the \code{i}th point.
   The last two columns contain the \code{r} and \code{theo} values.
 }
-\references{
-  Getis, A. and Franklin, J. (1987)
-  Second-order neighbourhood analysis of mapped point patterns.
-  \emph{Ecology} \bold{68}, 473--477.
-}
 \seealso{
-  \code{\link{Kest}},
-  \code{\link{Lest}},
-  \code{\link{localKinhom}},
-  \code{\link{localLinhom}}.
+  \code{\link{Kinhom}},
+  \code{\link{Linhom}},
+  \code{\link{localK}},
+  \code{\link{localL}}.
 }
 \examples{
   data(ponderosa)
   X <- ponderosa
 
   # compute all the local L functions
-  L <- localL(X)
+  L <- localLinhom(X)
 
   # plot all the local L functions against r
   plot(L, main="local L functions for ponderosa", legend=FALSE)
@@ -110,17 +125,10 @@
   
   # compute the values of L(r) for r = 12 metres
   L12 <- localL(X, rvalue=12)
-
-  # Spatially interpolate the values of L12
-  # Compare Figure 5(b) of Getis and Franklin (1987)
-  X12 <- X \%mark\% L12
-  Z <- smooth.ppp(X12, sigma=5, dimyx=128)
-
-  plot(Z, col=topo.colors(128), main="smoothed neighbourhood density")
-  contour(Z, add=TRUE)
-  points(X, pch=16, cex=0.5)
 }
-\author{Adrian Baddeley
+\author{
+  Mike Kuhn,
+  Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner

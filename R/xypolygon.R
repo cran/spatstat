@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.51 $    $Date: 2011/05/18 09:27:37 $
+#    $Revision: 1.53 $    $Date: 2011/08/01 03:37:50 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -31,7 +31,7 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   xp <- polly$x
   yp <- polly$y
 
-  npts <- length(x)
+  full.npts <- npts <- length(x)
   nedges <- length(xp)   # sic
 
   # Check for points (x,y) that coincide with vertices (xp, yp)
@@ -60,92 +60,95 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
   score <- rep(0, npts)
   on.boundary <- rep(FALSE, npts)
 
-  switch(method,
-         Fortran={
-           #------------------ call Fortran routine ------------------
-           temp <- .Fortran(
-                            "inxyp",
-                            x=as.double(x),
-                            y=as.double(y),
-                            xp=as.double(xp),
-                            yp=as.double(yp),
-                            npts=as.integer(npts),
-                            nedges=as.integer(nedges),
-                            score=as.double(score),
-                            onbndry=as.logical(on.boundary),
-                            PACKAGE="spatstat"
-                            )
-           score <- temp$score
-           on.boundary <- temp$onbndry
-         },
-         interpreted={
-           #----------------- original interpreted code --------------
-           for(i in 1:nedges) {
-             x0 <- xp[i]
-             y0 <- yp[i]
-             x1 <- if(i == nedges) xp[1] else xp[i+1]
-             y1 <- if(i == nedges) yp[1] else yp[i+1]
-             dx <- x1 - x0
-             dy <- y1 - y0
-             if(dx < 0) {
-               # upper edge
-               xcriterion <- (x - x0) * (x - x1)
-               consider <- (xcriterion <= 0)
-               if(any(consider)) {
-                 ycriterion <-
-                   y[consider] * dx - x[consider] * dy +  x0 * dy - y0 * dx
-                 # closed inequality
-                 contrib <- (ycriterion >= 0) *
-                             ifelse(xcriterion[consider] == 0, 1/2, 1)
-                 # positive edge sign
-                 score[consider] <- score[consider] + contrib
-                 # detect whether any point lies on this segment
-                 on.boundary[consider] <-
-                   on.boundary[consider] | (ycriterion == 0)
-               }
-             } else if(dx > 0) {
-               # lower edge
-               xcriterion <- (x - x0) * (x - x1)
-               consider <- (xcriterion <= 0)
-               if(any(consider)) {
-                 ycriterion <-
-                   y[consider] * dx - x[consider] * dy + x0 * dy - y0 * dx
-                 # open inequality
-                 contrib <- (ycriterion < 0) *
-                   ifelse(xcriterion[consider] == 0, 1/2, 1)
-                 # negative edge sign
-                 score[consider] <- score[consider] - contrib
-                 # detect whether any point lies on this segment
-                 on.boundary[consider] <-
-                   on.boundary[consider] | (ycriterion == 0)
-               }
-             } else {
-               # vertical edge
-               consider <- (x == x0)
-               if(any(consider)) {
-                 # zero score
-                 # detect whether any point lies on this segment
-                 yconsider <- y[consider]
-                 ycriterion <- (yconsider - y0) * (yconsider - y1)
-                 on.boundary[consider] <-
-                   on.boundary[consider] | (ycriterion <= 0)
+  if(anyretain<- any(retain)) {
+    switch(method,
+           Fortran={
+             #------------------ call Fortran routine ------------------
+             temp <- .Fortran(
+                              "inxyp",
+                              x=as.double(x),
+                              y=as.double(y),
+                              xp=as.double(xp),
+                              yp=as.double(yp),
+                              npts=as.integer(npts),
+                              nedges=as.integer(nedges),
+                              score=as.double(score),
+                              onbndry=as.logical(on.boundary),
+                              PACKAGE="spatstat"
+                              )
+             score <- temp$score
+             on.boundary <- temp$onbndry
+           },
+           interpreted={
+             #----------------- original interpreted code --------------
+             for(i in 1:nedges) {
+               x0 <- xp[i]
+               y0 <- yp[i]
+               x1 <- if(i == nedges) xp[1] else xp[i+1]
+               y1 <- if(i == nedges) yp[1] else yp[i+1]
+               dx <- x1 - x0
+               dy <- y1 - y0
+               if(dx < 0) {
+                 # upper edge
+                 xcriterion <- (x - x0) * (x - x1)
+                 consider <- (xcriterion <= 0)
+                 if(any(consider)) {
+                   ycriterion <-
+                     y[consider] * dx - x[consider] * dy +  x0 * dy - y0 * dx
+                   # closed inequality
+                   contrib <- (ycriterion >= 0) *
+                     ifelse(xcriterion[consider] == 0, 1/2, 1)
+                   # positive edge sign
+                   score[consider] <- score[consider] + contrib
+                   # detect whether any point lies on this segment
+                   on.boundary[consider] <-
+                     on.boundary[consider] | (ycriterion == 0)
+                 }
+               } else if(dx > 0) {
+                 # lower edge
+                 xcriterion <- (x - x0) * (x - x1)
+                 consider <- (xcriterion <= 0)
+                 if(any(consider)) {
+                   ycriterion <-
+                     y[consider] * dx - x[consider] * dy + x0 * dy - y0 * dx
+                   # open inequality
+                   contrib <- (ycriterion < 0) *
+                     ifelse(xcriterion[consider] == 0, 1/2, 1)
+                   # negative edge sign
+                   score[consider] <- score[consider] - contrib
+                   # detect whether any point lies on this segment
+                   on.boundary[consider] <-
+                     on.boundary[consider] | (ycriterion == 0)
+                 }
+               } else {
+                 # vertical edge
+                 consider <- (x == x0)
+                 if(any(consider)) {
+                   # zero score
+                   # detect whether any point lies on this segment
+                   yconsider <- y[consider]
+                   ycriterion <- (yconsider - y0) * (yconsider - y1)
+                   on.boundary[consider] <-
+                     on.boundary[consider] | (ycriterion <= 0)
+                 }
                }
              }
-           }
-         },
-         stop(paste("Unrecognised choice for", sQuote("method")))
-         )
-
+           },
+           stop(paste("Unrecognised choice for", sQuote("method")))
+           )
+  }
+  
   #------------------- END SWITCH ------------------------------
 
   # replace any polygon vertices that were temporarily removed
   if(vertices.present) {
-    full.npts <- length(retain)
     full.score <- rep(0, full.npts)
     full.on.boundary <- rep(FALSE, full.npts)
-    full.score[retain] <- score
+    if(anyretain) {
+      full.score[retain] <- score
+      full.on.boundary[retain] <- on.boundary
+    }
     full.score[is.vertex] <- 1
-    full.on.boundary[retain] <- on.boundary
     full.on.boundary[is.vertex] <- TRUE
     score       <- full.score
     on.boundary <- full.on.boundary
@@ -652,3 +655,30 @@ simplify.xypolygon <- function(p, dmin) {
   return(p)
 }
 
+inside.triangle <- function(x, y, xx, yy) {
+  # test whether points x[i], y[i] lie in triangle xx[1:3], yy[1:3]
+  # using barycentric coordinates
+  # vector 0 is edge from A to C
+  v0x <- xx[3] - xx[1]
+  v0y <- yy[3] - yy[1]
+  # vector 1 is edge from A to B
+  v1x <- xx[2] - xx[1]
+  v1y <- yy[2] - yy[1]
+  # vector 2 is from vertex A to point P
+  v2x <- x - xx[1]
+  v2y <- y - yy[1]
+  # inner products
+  dot00 <- v0x^2 + v0y^2
+  dot01 <- v0x * v1x + v0y * v1y
+  dot02 <- v0x * v2x + v0y * v2y
+  dot11 <- v1x^2 + v1y^2
+  dot12 <- v1x * v2x + v1y * v2y
+  # unnormalised barycentric coordinates
+  Denom <- dot00 * dot11 - dot01 * dot01
+  u <- dot11 * dot02 - dot01 * dot12
+  v <- dot00 * dot12 - dot01 * dot02
+  # test
+  return((u > 0) & (v > 0) & (u + v < Denom))
+  
+  
+}

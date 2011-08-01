@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.31 $   $Date: 2010/12/13 10:04:19 $
+#    $Revision: 1.32 $   $Date: 2011/07/26 08:18:23 $
 #
 #    as.im()
 #
@@ -36,7 +36,7 @@ as.im.im <- function(X, W=NULL, ...,
   # inherit pixel data type from X
   Y$type <- X$type
   if(Y$type == "factor") {
-    Y$v <- factor(Y$v, lev=levels(X))
+    Y$v <- factor(Y$v, levels=levels(X))
     dim(Y$v) <- Y$dim
   }
 

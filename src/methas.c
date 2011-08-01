@@ -163,7 +163,13 @@ SEXP xmethas(
     cif = (Cifns *) R_alloc(Ncif, sizeof(Cifns));
     cdata = (Cdata **) R_alloc(Ncif, sizeof(Cdata *));
     needupd = (int *) R_alloc(Ncif, sizeof(int));
+  } else {
+    /* Keep the compiler happy */
+    cif = (Cifns *) R_alloc(1, sizeof(Cifns));
+    cdata = (Cdata **) R_alloc(1, sizeof(Cdata *));
+    needupd = (int *) R_alloc(1, sizeof(int));
   }
+
 
   /* ================= Determine process to be simulated  ========== */
   
@@ -174,6 +180,9 @@ SEXP xmethas(
     mustupdate = NEED_UPDATE(thecif);
     if(thecif.marked && !marked)
       fexitc("cif is for a marked point process, but proposal data are not marked points; bailing out.");
+    /* Keep compiler happy*/
+    cif[0] = thecif;
+    needupd[0] = mustupdate;
   } else {
     mustupdate = FALSE;
     for(k = 0; k < Ncif; k++) {
@@ -201,6 +210,8 @@ SEXP xmethas(
   /* Interpret the model parameters and initialise auxiliary data */
   if(Ncif == 1) {
     thecdata = (*(thecif.init))(state, model, algo);
+    /* keep compiler happy */
+    cdata[0] = thecdata;
   } else {
     for(k = 0; k < Ncif; k++) {
       if(k > 0)
@@ -221,9 +232,10 @@ SEXP xmethas(
   verb   = (algo.nverb !=0);
   qnodds = (1.0 - algo.q)/algo.q;
 
-  if(!marked) 
-    betavalue = model.beta[0];
 
+  /* Set value of beta for unmarked process */
+  /* (Overwritten for marked process, but keeps compiler happy) */
+  betavalue = model.beta[0];
 
   /* ============= Run Metropolis-Hastings  ================== */
 
@@ -327,8 +339,9 @@ SEXP xmethas(
   PutRNGstate();
 
   /* ============= Done  ================== */
-  
-  /* return list(x,y) or list(x,y,marks) */
+
+  /* Create space for output, and copy final state */
+  /* Point coordinates */
   PROTECT(xout = NEW_NUMERIC(state.npts));
   PROTECT(yout = NEW_NUMERIC(state.npts));
   xx = NUMERIC_POINTER(xout);
@@ -337,12 +350,19 @@ SEXP xmethas(
     xx[j] = state.x[j];
     yy[j] = state.y[j];
   }
+  /* Marks */
   if(marked) {
     PROTECT(mout = NEW_INTEGER(state.npts));
     mm = INTEGER_POINTER(mout);
     for(j = 0; j < state.npts; j++) 
       mm[j] = state.marks[j];
+  } else {
+    /* Keep the compiler happy */
+    PROTECT(mout = NEW_INTEGER(1));
+    mm = INTEGER_POINTER(mout);
+    mm[0] = 0;
   }
+  /* Transition history */
   if(tracking) {
     PROTECT(pout = NEW_INTEGER(algo.nrep));
     PROTECT(aout = NEW_INTEGER(algo.nrep));
@@ -352,20 +372,27 @@ SEXP xmethas(
       pp[j] = history.proptype[j];
       aa[j] = history.accepted[j];
     }
+  } else {
+    /* Keep the compiler happy */
+    PROTECT(pout = NEW_INTEGER(1));
+    PROTECT(aout = NEW_INTEGER(1));
+    pp = INTEGER_POINTER(pout);
+    aa = INTEGER_POINTER(aout);
+    pp[0] = aa[0] = 0;
   }
+
+  /* Pack up into list object for return */
   if(!tracking) {
     /* no transition history */
     if(!marked) {
       PROTECT(out = NEW_LIST(2));
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout);
-      UNPROTECT(23);  /* 20 arguments plus xout, yout, out */
     } else {
       PROTECT(out = NEW_LIST(3)); 
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout); 
       SET_VECTOR_ELT(out, 2, mout);
-      UNPROTECT(24);  /* 20 arguments plus xout, yout, mout, out */
     }
   } else {
     /* transition history */
@@ -375,16 +402,15 @@ SEXP xmethas(
       SET_VECTOR_ELT(out, 1, yout);
       SET_VECTOR_ELT(out, 2, pout);
       SET_VECTOR_ELT(out, 3, aout);
-      UNPROTECT(25);  /* 20 arguments plus xout, yout, out, pout, aout */
-    } else {
+      } else {
       PROTECT(out = NEW_LIST(5)); 
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout); 
       SET_VECTOR_ELT(out, 2, mout);
       SET_VECTOR_ELT(out, 3, pout);
       SET_VECTOR_ELT(out, 4, aout);
-      UNPROTECT(26);  /* 20 arguments plus xout, yout, mout, out, pout, aout */
     }
   }
+  UNPROTECT(26);  /* 20 arguments plus xout, yout, mout, pout, aout, out */
   return(out);
 }
