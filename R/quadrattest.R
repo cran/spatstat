@@ -1,7 +1,7 @@
 #
 #  quadrattest.R
 #
-#  $Revision: 1.26 $  $Date: 2010/12/13 07:44:31 $
+#  $Revision: 1.27 $  $Date: 2011/07/26 09:05:42 $
 #
 
 
@@ -115,7 +115,7 @@ quadrat.testEngine <- function(X, nx, ny, ..., Xcount=NULL,
                   "chi^2 approximation may be inaccurate"),
             call.=FALSE)
   X2 <- sum((OBS - EXP)^2/EXP)
-  PVAL <- pchisq(X2, df, lower=FALSE)
+  PVAL <- pchisq(X2, df, lower.tail=FALSE)
   names(X2) <- "X-squared"
   names(df) <- "df"
   result <- structure(list(statistic = X2,

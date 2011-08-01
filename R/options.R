@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.38 $   $Date: 2011/07/19 12:26:16 $
+#    $Revision: 1.39 $   $Date: 2011/07/31 12:11:06 $
 #
 #
 

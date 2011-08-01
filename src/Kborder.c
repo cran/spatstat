@@ -1,7 +1,7 @@
 #include <math.h>
 # 1 "Kborder.cpp"
 # 1 "<built-in>"
-# 1 "<command line>"
+# 1 "<command-line>"
 # 1 "Kborder.cpp"
 # 18 "Kborder.cpp"
 /*

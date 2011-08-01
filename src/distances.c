@@ -4,7 +4,7 @@
 
   Distances between pairs of points
 
-  $Revision: 1.24 $     $Date: 2010/01/05 03:30:26 $
+  $Revision: 1.25 $     $Date: 2011/08/01 03:02:29 $
 
   pairdist      Pairwise distances
   pair2dist     Pairwise distances squared
@@ -317,6 +317,8 @@ void matchxy(na, xa, ya, nb, xb, yb, match)
      double *xa, *ya, *xb, *yb;
      /* output */
      int *match; 
+     /* match[i] = j+1 if xb[j], yb[j] matches xa[i], ya[i] */
+     /* match[i] = 0   if no such point matches xa[i], ya[i] */
 { 
   int i, j, Na, Nb; 
   double xai, yai;
@@ -324,14 +326,14 @@ void matchxy(na, xa, ya, nb, xb, yb, match)
   Na = *na;
   Nb = *nb;
 
-  for (i=1; i < Na; i++) 
+  for (i=0; i < Na; i++) 
     {
       xai = xa[i];
       yai = ya[i];
       match[i] = 0;
       for (j=0; j < Nb; j++) 
 	if(xai == xb[j] && yai == yb[j]) {
-	  match[i] = j;
+	  match[i] = j+1;
 	  break;
 	}
     }

@@ -1,47 +1,45 @@
-\name{smooth.ppp}
-\alias{smooth.ppp}
-\alias{markmean}
-\alias{markvar}
-\title{Spatial smoothing of observations at irregular points}
+\name{idw}
+\alias{idw}
+\title{Inverse-distance weighted smoothing of observations at irregular points}
 \description{
   Performs spatial smoothing of numeric values observed
-  at a set of irregular locations. Uses Gaussian kernel smoothing.
+  at a set of irregular locations using inverse-distance weighting.
 }
 \usage{
-smooth.ppp(X, ..., weights = rep(1, npoints(X)), at="pixels")
-markmean(X, ...)
-markvar(X, ...)
+idw(X, power=2, at="pixels", ...)
 }
 \arguments{
   \item{X}{A marked point pattern (object of class \code{"ppp"}).}
-  \item{\dots}{Arguments passed to \code{\link{density.ppp}}
-    to control the kernel smoothing and
-    the pixel resolution of the result.}
-  \item{weights}{Optional weights attached to the observations.}
+  \item{power}{Numeric. Power of distance used in the weighting.}
   \item{at}{
     String specifying whether to compute the intensity values
     at a grid of pixel locations (\code{at="pixels"}) or
     only at the points of \code{X} (\code{at="points"}).
   }
+  \item{\dots}{Arguments passed to \code{\link{as.mask}}
+    to control the pixel resolution of the result.}
 }
 \details{
-  The function \code{smooth.ppp} performs spatial smoothing of numeric values
-  observed at a set of irregular locations. The functions
-  \code{markmean} and \code{markvar} are wrappers for \code{smooth.ppp}
-  which compute the spatially-varying mean and variance of the marks of
-  a point pattern.
-
-  Smoothing is performed by Gaussian kernel weighting. If the
+  This function performs spatial smoothing of numeric values
+  observed at a set of irregular locations.
+  
+  Smoothing is performed by inverse distance weighting. If the
   observed values are \eqn{v_1,\ldots,v_n}{v[1],...,v[n]}
   at locations \eqn{x_1,\ldots,x_n}{x[1],...,x[n]} respectively,
   then the smoothed value at a location \eqn{u} is
-  (ignoring edge corrections)
   \deqn{
-    g(u) = \frac{\sum_i k(u-x_i) v_i}{\sum_i k(u-x_i)}
+    g(u) = \frac{\sum_i w_i v_i}{\sum_i w_i}
   }{
-    g(u) = (sum of k(u-x[i]) v[i])/(sum of k(u-x[i]))
+    g(u) = (sum of w[i] * v[i])/(sum of w[i])
   }
-  where \eqn{k} is a Gaussian kernel.
+  where the weights are the inverse \eqn{p}-th powers of distance,
+  \deqn{
+    w_i = \frac 1 {d(u,x_i)^p}
+  }{
+    w[i] = 1/d(u,x[i])^p
+  }
+  where \eqn{d(u,x_i) = ||u - x_i||}{d(u,x[i])}
+  is the Euclidean distance from \eqn{u} to \eqn{x_i}{x[i]}.
   
   The argument \code{X} must be a marked point pattern (object
   of class \code{"ppp"}, see \code{\link{ppp.object}}).
@@ -50,28 +48,22 @@ markvar(X, ...)
   are taken to be the numeric values \eqn{v_i}{v[i]} observed at these
   locations.
 
-  The marks are allowed to be a data frame (in \code{smooth.ppp}
-  and \code{markmean}). Then the smoothing procedure is applied to each
+  The marks are allowed to be a data frame.
+  Then the smoothing procedure is applied to each
   column of marks. 
   
-  The numerator and denominator are computed by \code{\link{density.ppp}}.
-  The arguments \code{...} control the smoothing kernel parameters
-  and determine whether edge correction is applied.
-  See \code{\link{density.ppp}}.
+  If \code{at="pixels"} (the default), the smoothed mark value
+  is calculated at a grid of pixels, and the result is a pixel image.
+  The arguments \code{\dots} control the pixel resolution.
+  See \code{\link{as.mask}}.
 
-  The optional argument \code{weights} allows numerical weights to
-  be applied to the data. If a weight \eqn{w_i}{w[i]}
-  is associated with location \eqn{x_i}{x[i]}, then the smoothed
-  function is 
-  (ignoring edge corrections)
-  \deqn{
-    g(u) = \frac{\sum_i k(u-x_i) v_i w_i}{\sum_i k(u-x_i) w_i}
-  }{
-    g(u) = (sum of k(u-x[i]) v[i] w[i])/(sum of k(u-x[i]) w[i])
-  }
+  If \code{at="points"}, the smoothed mark values are calculated
+  at the data points only, using a leave-one-out rule (the mark value
+  at a data point is excluded when calculating the smoothed value
+  for that point). 
 
-  An alternative to kernel smoothing is inverse-distance weighting,
-  which is performed by \code{\link{idw}}.
+  An alternative to  inverse-distance weighting is kernel smoothing,
+  which is performed by \code{\link{smooth.ppp}}.
 }
 \value{
   \emph{If \code{X} has a single column of marks:}
@@ -98,31 +90,21 @@ markvar(X, ...)
     and one column for each column of marks. 
     Entries are values of the interpolated function at the points of \code{X}.
   }
-  The return value has attributes
-  \code{"sigma"} and \code{"varcov"} which report the smoothing
-  bandwidth that was used.
 }
 \seealso{
   \code{\link{density.ppp}},
   \code{\link{ppp.object}},
   \code{\link{im.object}}.
 
-  See \code{\link{idw}} for inverse-distance weighted smoothing.
+  See \code{\link{smooth.ppp}} for kernel smoothing.
   
   To perform interpolation, see also the \code{akima} package.
 }
 \examples{
-   # Longleaf data - tree locations, marked by tree diameter
-   data(longleaf)
-   # Local smoothing of tree diameter
-   Z <- smooth.ppp(longleaf)
-   # Kernel bandwidth sigma=5
-   plot(smooth.ppp(longleaf, 5))
-   # mark variance
-   plot(markvar(longleaf))
    # data frame of marks: trees marked by diameter and height
    data(finpines)
-   plot(smooth.ppp(finpines))
+   plot(idw(finpines))
+   idw(finpines, at="points")[1:5,]
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

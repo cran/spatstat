@@ -2,7 +2,7 @@
 #
 #   disc.R
 #
-#   $Revision: 1.11 $ $Date: 2011/07/21 07:05:05 $
+#   $Revision: 1.12 $ $Date: 2011/07/26 08:14:35 $
 #
 #   Compute the disc of radius r in a linear network
 #
@@ -169,8 +169,6 @@ countends <- function(L, x=locator(1), r) {
   to0   <- L$to - 1
   zz <- .C("countends",
            np = as.integer(np),
-           x = as.double(x$x),
-           y = as.double(x$y),
            f = as.double(startfraction),
            seg = as.integer(seg0),
            r = as.double(r), 

@@ -135,6 +135,7 @@
 \alias{fvnames<-}
 \alias{g3engine}
 \alias{g3Cengine}
+\alias{gpcmethod}
 \alias{greatest.common.divisor}
 \alias{getdataname}
 \alias{getfields}
@@ -153,6 +154,7 @@
 \alias{idorempty}
 \alias{implemented.for.K}
 \alias{inpoint}
+\alias{inside.triangle}     
 \alias{inside.xypolygon}     
 \alias{intersect.ranges}     
 \alias{intX.owin}     
@@ -195,6 +197,8 @@
 \alias{linearKengine}
 \alias{linearpcfengine}
 \alias{listof}
+\alias{localKengine}
+\alias{localpcfengine}
 \alias{localpcfmatrix}
 \alias{paste.expr}
 \alias{print.localpcfmatrix}
@@ -595,6 +599,7 @@ fvnames(X, a)
 fvnames(X, a) <- value
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
+gpcmethod(fname, signature)
 greatest.common.divisor(n,m)
 getdataname(defaultvalue, \dots, dataname)
 getfields(X, L, fatal = TRUE)
@@ -613,6 +618,7 @@ identical.formulae(x,y)
 idorempty(w, r, caller)
 implemented.for.K(correction, windowtype, explicit)
 inpoint(W)
+inside.triangle(x, y, xx, yy)
 inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
 intersect.ranges(a,b,fatal)
 intX.owin(w)
@@ -660,7 +666,9 @@ linequad(X, Y, ..., eps, nd)
 linearKengine(X, \dots, r, reweight, denom, correction, showworking)
 linearpcfengine(X, \dots, r, reweight, denom, correction)
 listof(\dots)
-localpcfmatrix(X, i, \dots, delta, rmax, nr, stoyan)
+localKengine(X, \dots, wantL, lambda, correction, verbose, rvalue)
+localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
+localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
 paste.expr(x)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)

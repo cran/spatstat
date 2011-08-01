@@ -1,3 +1,50 @@
+	CHANGES IN spatstat VERSION 1.23-1
+
+OVERVIEW 
+
+    o Important bug fix to 'localpcf'.
+
+    o Inverse-distance weighted smoothing.
+
+    o Inhomogeneous versions of neighbourhood density functions.
+
+    o Internal repairs and bug fixes.
+
+    o We thank Mike Kuhn and Ben Madin for contributions.
+
+NEW FUNCTIONS
+
+    o idw
+      Inverse-distance weighted smoothing.
+
+    o localKinhom, localLinhom, localpcfinhom
+      Inhomogeneous versions of localK, localL, localpcf
+
+BUG FIXES
+
+    o localpcf
+      The columns of the result were in the wrong order.
+      [i.e. pair correlation functions were associated with the wrong points.]
+      Fixed.
+
+    o delaunay
+      If the union of several Delaunay triangles formed a triangle,
+      this was erroneously included in the result of delaunay().
+      Fixed.
+
+    o predict.ppm, plot.ppm
+      Sometimes crashed with a warning about 'subscript out of bounds'.
+      Fixed.      
+      
+    o point-in-polygon test
+      Vertices of a polygon were sometimes incorrectly classified
+      as lying outside the polygon. 
+      Fixed.
+
+    o Internal code
+      Numerous tweaks and repairs to satisfy the package checker
+      for the future R version 2.14.
+    
 	CHANGES IN spatstat VERSION 1.23-0
 
 OVERVIEW 

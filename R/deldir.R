@@ -3,11 +3,14 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.8 $ $Date: 2011/05/18 01:39:11 $
+#  $Revision: 1.10 $ $Date: 2011/07/31 10:08:13 $
 #
 
-.Spatstat.use.trigraf <- TRUE
-.Spatstat.use.trigrafS <- TRUE
+.spst.triEnv <- new.env()
+
+assign("use.trigraf",  TRUE, envir=.spst.triEnv)
+assign("use.trigrafS", TRUE, envir=.spst.triEnv)
+assign("debug.delaunay", FALSE, envir=.spst.triEnv)
 
 dirichlet <- function(X) {
   w <- X$window
@@ -28,7 +31,10 @@ delaunay <- function(X) {
   dd <- deldir(X$x, X$y, rw=c(w$xrange, w$yrange))
   a <- dd$delsgs[,5]
   b <- dd$delsgs[,6]
-  if(.Spatstat.use.trigrafS) {
+  use.trigraf  <- get("use.trigraf", envir=.spst.triEnv)
+  use.trigrafS <- get("use.trigrafS", envir=.spst.triEnv)
+  debug.delaunay <- get("debug.delaunay", envir=.spst.triEnv)
+  if(use.trigrafS) {
     # first ensure a[] < b[]
     swap <- (a > b)
     if(any(swap)) {
@@ -43,31 +49,40 @@ delaunay <- function(X) {
     # 
     nv <- nX
     ne <- length(a)
+    ntmax <- ne
     z <- .C("trigrafS",
             nv = as.integer(nv),
             ne = as.integer(ne),
             ie = as.integer(a - 1),
             je = as.integer(b - 1),
+            ntmax = as.integer(ntmax),
             nt = as.integer(integer(1)),
             it = as.integer(integer(ne)),
             jt = as.integer(integer(ne)),
             kt = as.integer(integer(ne)),
+            status = as.integer(integer(1)),
             PACKAGE="spatstat")
+    if(z$status != 0)
+      stop("Internal error: overflow in trigrafS")
     tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
-  } else if(.Spatstat.use.trigraf) {
+  } else if(use.trigraf) {
     nv <- nX
     ne <- length(a)
+    ntmax <- ne
     z <- .C("trigraf",
             nv = as.integer(nv),
             ne = as.integer(ne),
             ie = as.integer(a - 1),
             je = as.integer(b - 1),
+            ntmax = as.integer(ntmax),
             nt = as.integer(integer(1)),
-            it = as.integer(integer(ne)),
-            jt = as.integer(integer(ne)),
-            kt = as.integer(integer(ne)),
-            scratch = as.integer(integer(ne)),
+            it = as.integer(integer(ntmax)),
+            jt = as.integer(integer(ntmax)),
+            kt = as.integer(integer(ntmax)),
+            status = as.integer(integer(1)),
             PACKAGE="spatstat")
+    if(z$status != 0)
+      stop("Internal error: overflow in trigraf")
     tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
   } else {
     tlist <- matrix(integer(0), 0, 3)
@@ -90,7 +105,12 @@ delaunay <- function(X) {
         }
     }
   }
-  # assemble coordinates of triangles
+  # At this point, `tlist' contains all triangles formed by the Delaunay edges,
+  # with vertices given in ascending order i < j < k in the 3 columns of tlist.
+  # Some of these triangles may not belong to the Delaunay triangulation.
+  # They will be weeded out later.
+  
+  # Assemble coordinates of triangles
   x <- X$x
   y <- X$y
   xtri <- matrix(x[tlist], nrow(tlist), 3)
@@ -103,10 +123,59 @@ delaunay <- function(X) {
   clockwise <- (negareas > 0)
   #
   if(any(clockwise)) {
-    xc <- xtri[clockwise,]
-    yc <- ytri[clockwise,]
-    xtri[clockwise,] <- xc[,c(1,3,2)]
-    ytri[clockwise,] <- yc[,c(1,3,2)]
+    xc <- xtri[clockwise, , drop=FALSE]
+    yc <- ytri[clockwise, , drop=FALSE]
+    tc <- tlist[clockwise, , drop=FALSE]
+    xtri[clockwise,]  <- xc[,c(1,3,2)]
+    ytri[clockwise,]  <- yc[,c(1,3,2)]
+    tlist[clockwise,] <- tc[, c(1,3,2)]
+  }
+  # At this point, triangle vertices are listed in anticlockwise order.
+  # The same directed edge (i, j) cannot appear twice.
+  # To weed out invalid triangles, check for such duplication
+  triedges <- rbind(tlist[, c(1,2)],
+                    tlist[, c(2,3)],
+                    tlist[, c(3,1)])
+  if(any(bad <- duplicated(triedges))) {
+    badedges <- unique(triedges[bad, , drop=FALSE])
+    ntri <- nrow(tlist)
+    triid <- rep(seq_len(ntri), 3)
+    illegal <- rep(FALSE, ntri)
+    for(j in seq_len(nrow(badedges))) {
+      from <- badedges[j, 1]
+      to   <- badedges[j, 2]
+      if(debug.delaunay)
+        cat(paste("Suspect edge from vertex", from, "to vertex", to, "\n"))
+      # find all triangles sharing this edge in this orientation
+      sustri <- triid[(triedges[,1] == from) & (triedges[,2] == to)]
+      if(debug.delaunay)
+        cat(paste("\tInvestigating triangles", commasep(sustri), "\n"))
+      # list all vertices associated with the suspect triangles
+      susvert <- sort(unique(as.vector(tlist[sustri, ])))
+      if(debug.delaunay)
+        cat(paste("\tInvestigating vertices", commasep(susvert), "\n"))
+      xsusvert <- x[susvert]
+      ysusvert <- y[susvert]
+      # take each triangle in turn and check whether it contains a data point
+      for(k in sustri) {
+        if(!illegal[k] &&
+           any(inside.triangle(xsusvert, ysusvert, xtri[k,], ytri[k,]))) {
+          if(debug.delaunay)
+            cat(paste("Triangle", k, "is illegal\n"))
+          illegal[k] <- TRUE
+        }
+      }
+    }
+    if(!any(illegal)) {
+      if(debug.delaunay)
+        cat("No illegal triangles found\n")
+    } else {
+      if(debug.delaunay)
+        cat(paste("Removing", sum(illegal), "triangles\n"))
+      tlist <- tlist[!illegal, , drop=FALSE]
+      xtri  <- xtri[!illegal, , drop=FALSE]
+      ytri  <- ytri[!illegal, , drop=FALSE]
+    }
   }
   # make tile list
   tiles <- list()

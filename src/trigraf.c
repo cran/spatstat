@@ -2,7 +2,7 @@
 
   trigraf.c
 
-  $Revision: 1.3 $     $Date: 2011/05/17 13:01:42 $
+  $Revision: 1.5 $     $Date: 2011/08/01 07:59:49 $
 
   trigraf()  Form list of all triangles in a planar graph, given list of edges
 
@@ -10,26 +10,29 @@
 
 */
 
-void trigraf(nv, ne, ie, je, nt, it, jt, kt, scratch)
+#include <R.h>
+
+void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
      /* inputs */
      int *nv;         /* number of graph vertices */
      int *ne;         /* number of edges */
      int *ie, *je;    /* vectors of indices of ends of each edge */ 
-     /* scratch area */
-     int *scratch;    /* integer vector, at least 'ne' in length */
+     int *ntmax;      /* length of storage space for triangles */
      /* output */
-     int *nt;              /* number of triangles (assumed <= ne) */
+     int *nt;              /* number of triangles (<= *ntmax) */
      int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
+     int *status;          /* 0 if OK, 1 if overflow */
 {
-  int Nv, Ne, Nt;
-  int Nj, m, i, j, k, mj, mk;
+  int Nv, Ne, Ntmax;
+  int Nt, Nj, m, i, j, k, mj, mk;
   int *jj;
   
   Nv = *nv;
   Ne = *ne;
+  Ntmax = *ntmax;
 
-  /* initialise storage */
-  jj = scratch;
+  /* initialise scratch storage */
+  jj = (int *) R_alloc(Ne, sizeof(int));
   Nt = 0;
 
   for(i=0; i < Nv; i++) {
@@ -83,6 +86,11 @@ void trigraf(nv, ne, ie, je, nt, it, jt, kt, scratch)
 	      if((ie[m] == j && je[m] == k)
 		 || (ie[m] == k && je[m] == j)) {
   	        /* add (i, j, k) to list of triangles */
+		if(Nt >= Ntmax) {
+		  /* overflow - exit */
+		  *status = 1;
+		  return;
+		}
 		it[Nt] = i;
 		jt[Nt] = j;
 		kt[Nt] = k;
@@ -96,7 +104,7 @@ void trigraf(nv, ne, ie, je, nt, it, jt, kt, scratch)
   }
 
   *nt = Nt;
-
+  *status = 0;
 }
 
 
@@ -108,20 +116,23 @@ void trigraf(nv, ne, ie, je, nt, it, jt, kt, scratch)
 	          that is, je[ie[]=i] is in ascending order for each fixed i
 */
 
-void trigrafS(nv, ne, ie, je, nt, it, jt, kt)
+void trigrafS(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
      /* inputs */
      int *nv;         /* number of graph vertices */
      int *ne;         /* number of edges */
      int *ie, *je;    /* vectors of indices of ends of each edge */ 
+     int *ntmax;      /* length of storage space for triangles */
      /* output */
-     int *nt;              /* number of triangles (assumed <= ne) */
+     int *nt;              /* number of triangles */
      int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
+     int *status;          /* 0 if OK, 1 if overflow */
 {
-  int Ne, Nt;
+  int Ne, Nt, Ntmax;
   int m, i, j, k, mj, mk;
   int firstedge, lastedge;
   
   Ne = *ne;
+  Ntmax = *ntmax;
 
   /* nv is not used, but retained for harmony with trigraf */
   /* Avoid compiler warnings */
@@ -157,6 +168,11 @@ void trigrafS(nv, ne, ie, je, nt, it, jt, kt)
 	  while(m < Ne && ie[m] == j) {
 	    if(je[m] == k) {
 	      /* add (i, j, k) to list of triangles */
+	      if(Nt >= Ntmax) {
+		/* overflow - exit */
+		*status = 1;
+		return;
+	      }
 	      it[Nt] = i;
 	      jt[Nt] = j;
 	      kt[Nt] = k;
@@ -170,7 +186,7 @@ void trigrafS(nv, ne, ie, je, nt, it, jt, kt)
   }
 
   *nt = Nt;
-
+  *status = 0;
 }
 
 

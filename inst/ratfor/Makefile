@@ -60,12 +60,12 @@ clean:
 
 
 Kborder.c:	Kborder.cpp
-	$(CPP) -C -o $@ Kborder.cpp
+	$(CPP) -C -ansi -o $@ Kborder.cpp
 	cat Kborder.h $@ > tmp
 	mv tmp $@
 
 Kwborder.c:	Kborder.cpp
-	$(CPP) -C -DWEIGHTED -o $@ Kborder.cpp
+	$(CPP) -C -ansi -DWEIGHTED -o $@ Kborder.cpp
 	cat Kborder.h $@ > tmpw
 	mv tmpw $@
 

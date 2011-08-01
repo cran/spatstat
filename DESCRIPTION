@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.23-0
-Date: 2011-07-24
+Version: 1.23-1
+Date: 2011-08-01
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -14,12 +14,12 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         C. Graf; J. Franklin; U. Hahn; A. Hardegen; M. Hering; M.B.
         Hansen; M. Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; A.
         Jalilian; R. John-Chandran; D. Johnson; M. Kuhn; J. Laake; R.A.
-        Lamb; G.P. Leser; R. Mark; J. Mateu; P. McCullagh; U. Mehlig;
-        S. Meyer; X.C. Mi; J. Moller; L.S. Nielsen; F. Nunes; E.
-        Parilov; J. Picka; A. Raftery; M. Reiter; T.O. Richardson; B.D.
-        Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K. Schladitz; B.T.
-        Scott; G.C. Shen; V. Shcherbakov; I.-M. Sintorn; Y. Song; M.
-        Spiess; M. Stevenson; K. Stucki; M. Sumner; P. Surovy; B.
+        Lamb; G.P. Leser; B. Madin; R. Mark; J. Mateu; P. McCullagh; U.
+        Mehlig; S. Meyer; X.C. Mi; J. Moller; L.S. Nielsen; F. Nunes;
+        E. Parilov; J. Picka; A. Raftery; M. Reiter; T.O. Richardson;
+        B.D. Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K. Schladitz;
+        B.T. Scott; G.C. Shen; V. Shcherbakov; I.-M. Sintorn; Y. Song;
+        M. Spiess; M. Stevenson; K. Stucki; M. Sumner; P. Surovy; B.
         Taylor; B. Turlach; A. van Burgel; T. Verbeke; A. Villers; H.
         Wang; H. Wendrock; J. Wild and S. Wong.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
@@ -51,6 +51,6 @@ Description: A package for analysing spatial data, mainly Spatial Point
         residual plots and Q-Q plots).
 License: GPL (>= 2)
 URL: http://www.spatstat.org
-Packaged: 2011-07-24 10:25:07 UTC; adrian
+Packaged: 2011-08-01 08:59:59 UTC; adrian
 Repository: CRAN
-Date/Publication: 2011-07-24 14:28:01
+Date/Publication: 2011-08-01 10:36:01

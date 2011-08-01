@@ -45,7 +45,7 @@ double hardcorecif(prop, state, cdata)
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double d2, h2, a, cifval;
+  double d2, h2, a;
   Hardcore *hardcore;
 
   hardcore = (Hardcore *) cdata;

@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.36 $    $Date: 2011/07/15 13:51:30 $
+#  $Revision: 1.37 $    $Date: 2011/07/26 08:06:06 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -450,7 +450,6 @@ smoothpointsEngine <- function(x, values, sigma, ...,
                  v       = as.double(vv),
                  self    = as.integer(!leaveoneout),
                  rmaxi   = as.double(cutoff),
-                 detsigma = as.double(detSigma),
                  sinv    = as.double(flatSinv),
                  result   = as.double(double(npts)),
                  PACKAGE = "spatstat")
@@ -464,7 +463,6 @@ smoothpointsEngine <- function(x, values, sigma, ...,
                  v       = as.double(vv),
                  self    = as.integer(!leaveoneout),
                  rmaxi   = as.double(cutoff),
-                 detsigma = as.double(detSigma),
                  sinv    = as.double(flatSinv),
                  weight  = as.double(wtsort),
                  result   = as.double(double(npts)),

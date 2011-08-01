@@ -452,7 +452,7 @@ void StraussProcess::GeneratePoisson(Point *headPoint,
     headPoint->next = TempPoint;
     *NoP = *NoP + 1;
   }
-};
+}
 
 void StraussProcess::CalcBeta(long int xsidepomm, long int ysidepomm, 
 		   double *betapomm){ 
@@ -972,7 +972,7 @@ void Sampler::Sim(Point2Pattern *p2p) {
   //printf("%d ST: %d ET: %d\n",i,StartTime,EndTime);
   //scanf("%f",&f1);
 
-};
+}
 
 extern "C" {
   void PerfectStrauss(double *beta,

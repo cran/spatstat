@@ -5,7 +5,7 @@
 
    Disc of radius r in linear network
 
-   $Revision: 1.2 $  $Date: 2011/06/20 09:25:36 $
+   $Revision: 1.5 $  $Date: 2011/07/26 09:21:18 $
 
 */
 
@@ -15,8 +15,8 @@
 #define FALSE (!TRUE)
 
 void 
-lineardisc(x, y, f, seg, /* centre of disc */
-	   r,                /* radius of disc */
+lineardisc(f, seg, /* centre of disc (local coords) */
+	   r,      /* radius of disc */
 	   nv, xv, yv,   /* network vertices */
 	   ns, from, to,  /* segments */
 	   dpath,  /* shortest path distances between vertices */
@@ -24,7 +24,7 @@ lineardisc(x, y, f, seg, /* centre of disc */
 	   allinside, boundary, dxv, nendpoints)
      int *nv, *ns;
      int *from, *to; /* integer vectors (mappings) */
-     double *x, *y, *f, *r; 
+     double *f, *r; 
      int *seg;
      double *xv, *yv; /* vectors of coordinates of vertices */
      double *dpath; /* matrix of shortest path distances between vertices */
@@ -35,7 +35,7 @@ lineardisc(x, y, f, seg, /* centre of disc */
      int *nendpoints;
 {
   int Nv, Ns;
-  double x0, y0, f0, rad;
+  double f0, rad;
   int seg0;
 
   int i, A, B, fromi, toi, allin, bdry, reachable, nends;
@@ -46,8 +46,6 @@ lineardisc(x, y, f, seg, /* centre of disc */
   Nv = *nv;
   Ns = *ns;
 
-  x0 = *x;
-  y0 = *y;
   f0 = *f;
   seg0 = *seg;
   rad = *r;
@@ -89,7 +87,7 @@ lineardisc(x, y, f, seg, /* centre of disc */
      and which cross the boundary.
     */
     if(i == seg0) {
-      /* initial segment: disc starts from (x0, y0) */
+      /* initial segment: disc starts from centre (x, y) */
       allin = covered[A] && covered[B];
       bdry  = !allin;
       if(bdry) {
@@ -122,8 +120,7 @@ lineardisc(x, y, f, seg, /* centre of disc */
 /* ------------------------------------------------- */
 
 void 
-countends(np, x, y, /* centres of discs */
-	  f, seg,   /* positions of centres on network */
+countends(np, f, seg, /* centres of discs (local coords) */
 	  r,                /* radii of discs */
 	  nv, xv, yv,   /* network vertices */
 	  ns, from, to,  /* network segments */
@@ -133,7 +130,7 @@ countends(np, x, y, /* centres of discs */
 	  )
      int *np, *nv, *ns;
      int *from, *to; /* integer vectors (mappings) */
-     double *x, *y, *f, *r; 
+     double *f, *r; 
      int *seg;
      double *xv, *yv; /* vectors of coordinates of vertices */
      double *dpath; /* matrix of shortest path distances between vertices */
@@ -141,8 +138,8 @@ countends(np, x, y, /* centres of discs */
      /* OUTPUT */
      int *nendpoints;
 {
-  int Nv, Ns, Np;
-  double x0, y0, f0, rad;
+  int Np, Nv, Ns;
+  double f0, rad;
   int seg0;
 
   int i, m, A, B, fromi, toi, allin, bdry, reachable, nends;
@@ -159,8 +156,6 @@ countends(np, x, y, /* centres of discs */
 
   /* loop over centre points */
   for(m = 0; m < Np; m++) {
-    x0 = x[m];
-    y0 = y[m];
     f0 = f[m];
     seg0 = seg[m];
     rad = r[m];

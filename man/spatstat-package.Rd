@@ -11,7 +11,8 @@
 \details{
   \pkg{spatstat} is a package for the statistical analysis
   of spatial data. Currently, it deals mainly with the analysis of
-  patterns of points in the plane.  The points may carry `marks',
+  patterns of points in the plane.  The points may carry auxiliary
+  data (`marks'),
   and the spatial region in which the points were recorded 
   may have arbitrary shape. 
 
@@ -21,35 +22,49 @@
     \item exploratory data analysis 
     \item simulation of point process models
     \item parametric model-fitting
-    \item hypothesis tests and diagnostics
+    \item hypothesis tests and model diagnostics
   }
-  The point process models to be fitted
-  may be quite general Gibbs/Markov models; they may include spatial trend,
-  dependence on covariates, and interpoint interactions of any order (i.e.
-  not restricted to pairwise interactions). Models are specified by 
-  a \code{formula} in the \code{R} language, and are fitted using
-  a single function \code{\link{ppm}} analogous to
-  \code{\link{lm}} and \code{\link{glm}}.
-  It is also possible to fit cluster process models by the method of
-  minimum contrast.
-
   Apart from two-dimensional point patterns and point processes,
   \pkg{spatstat} also supports patterns of line segments in two
   dimensions, point patterns in three dimensions, and 
   multidimensional space-time point patterns. It also supports
   spatial tessellations and random sets.
+
+  The package can fit several types of point process models
+  to a point pattern dataset:
+  \itemize{
+    \item Poisson point process models
+    (by Berman-Turner approximate maximum likelihood
+    or by spatial logistic regression)
+    \item Gibbs/Markov point process models
+    (by Baddeley-Turner approximate maximum pseudolikelihood
+    or Huang-Ogata approximate maximum likelihood)
+    \item Cox/cluster process models
+    (by Waagepetersen's two-step fitting procedure
+    and minimum contrast)
+  }
+  The models may include spatial trend,
+  dependence on covariates, and complicated interpoint interactions.
+  Models are specified by 
+  a \code{formula} in the \code{R} language, and are fitted using
+  a function analogous to \code{\link{lm}} and \code{\link{glm}}.
+  Fitted models can be printed, plotted, predicted, simulated and so on.
 }
 \section{Getting Started}{
   For a quick introduction to \pkg{spatstat}, see 
-  the paper by Baddeley and Turner (2005a).
+  the paper by Baddeley and Turner (2005a). 
   For a complete 2-day course on using \code{spatstat}, see the workshop notes
-  by Baddeley (2008).
+  by Baddeley (2010).
   Both of these documents are available on the internet.
 
   Type \code{demo(spatstat)} for a demonstration 
   of the package's capabilities.
   Type \code{demo(data)} to see all the datasets
   available in the package.
+  
+  For information about handling data in \bold{shapefiles},
+  see the Vignette \emph{Handling shapefiles in the spatstat package}
+  installed with \pkg{spatstat}.
 }
 \section{Updates}{
   New versions of \pkg{spatstat} are produced about once a month.
@@ -174,9 +189,13 @@
       \bold{To randomly change an existing point pattern:}
       
       \tabular{ll}{
+	\code{\link{rshift}} \tab random shifting of points \cr
+        \code{\link{rjitter}} \tab
+	apply random displacements to points in a pattern\cr
+	\code{\link{rthin}} \tab  random thinning \cr
 	\code{\link{rlabel}} \tab random (re)labelling of a multitype
 	point pattern \cr
-	\code{\link{rshift}} \tab random shift (including toroidal shifts)
+        \code{\link{quadratresample}} \tab block resampling 
       }
 
       \bold{Standard point pattern datasets:}
@@ -618,12 +637,16 @@
     \code{\link{Lest}} \tab Besag-Ripley \eqn{L}-function\cr
     \code{\link{Jest}} \tab \eqn{J}-function \eqn{J = (1-G)/(1-F)} \cr
     \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
-    \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr
-    \code{\link{localK}} \tab neighbourhood K-function\cr
     \code{\link{pcf}} \tab 	pair correlation function \cr
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
     \code{\link{Linhom}} \tab \eqn{L} for inhomogeneous point patterns \cr
     \code{\link{pcfinhom}} \tab pair correlation for inhomogeneous patterns\cr
+    \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr
+    \code{\link{localK}} \tab neighbourhood K-function\cr
+    \code{\link{localpcf}} \tab local pair correlation function\cr
+    \code{\link{localKinhom}} \tab local \eqn{K} for inhomogeneous point patterns \cr
+    \code{\link{localLinhom}} \tab local \eqn{L} for inhomogeneous point patterns \cr
+    \code{\link{localpcfinhom}} \tab local pair correlation for inhomogeneous patterns\cr
     \code{\link{Kest.fft}} \tab fast \eqn{K}-function using FFT for large datasets \cr
     \code{\link{Kmeasure}} \tab reduced second moment measure \cr
     \code{\link{envelope}} \tab simulation envelopes for a summary
@@ -1250,14 +1273,15 @@
   the package. 
   Baddeley and Turner (2005b) is a more detailed explanation of
   how to fit point process models to data.
-  Baddeley (2008) is a complete set of notes from a 2-day workshop
+  Baddeley (2010) is a complete set of notes from a 2-day workshop
   on the use of \code{spatstat}.
 
   Type \code{citation("spatstat")} to get these references.
 }
 \references{
-  Baddeley, A. (2008) Analysing spatial point patterns in R.
-  Workshop notes. CSIRO online technical publication.
+  Baddeley, A. (2010)
+  \emph{Analysing spatial point patterns in R}.
+  Workshop notes. Version 4.1. CSIRO online technical publication.
   URL: \code{www.csiro.au/resources/pf16h.html}
   
   Baddeley, A. and Turner, R. (2005a)
@@ -1296,8 +1320,11 @@
   \email{r.turner@auckland.ac.nz}
 }
 \section{Acknowledgements}{
-  Marie-Colette van Lieshout, Rasmus Waagepetersen, 
-  Dominic Schuhmacher, Ege Rubak and Kasper Klitgaard Berthelsen
+  Kasper Klitgaard Berthelsen,
+  Marie-Colette van Lieshout,
+  Ege Rubak, 
+  Dominic Schuhmacher and
+  Rasmus Waagepetersen
   made substantial contributions of code.
   Additional contributions by
   Ang Qi Wei,
@@ -1339,6 +1366,7 @@
   Jeff Laake,
   Robert Lamb,
   George Leser,
+  Ben Madin,
   Robert Mark,
   Jorge Mateu Mahiques,
   Monia Mahling,

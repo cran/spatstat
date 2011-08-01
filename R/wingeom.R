@@ -213,7 +213,7 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
       ####### Result is polygonal ############
       Ag <- owin2gpc(A)
       Bg <- owin2gpc(B)
-      ABg <- intersect(Ag, Bg)
+      ABg <- (gpcmethod("intersect"))(Ag, Bg)
       AB <- gpc2owin(ABg)
       if(is.null(AB))
         return(emptywindow(C))
@@ -337,7 +337,7 @@ union.owin <- function(A, B, ...) {
       ####### Result is polygonal ############
       Ag <- owin2gpc(A)
       Bg <- owin2gpc(B)
-      ABg <- union(Ag, Bg)
+      ABg <- (gpcmethod("union"))(Ag, Bg)
       AB <- gpc2owin(ABg)
       return(AB)
     }
@@ -401,7 +401,7 @@ setminus.owin <- function(A, B, ...) {
       Bp <- as.polygonal(B)
       Ag <- owin2gpc(Ap)
       Bg <- owin2gpc(Bp)
-      ABg <- setdiff(Ag, Bg)
+      ABg <- (gpcmethod("setdiff"))(Ag, Bg)
       AB <- gpc2owin(ABg)
       AB <- rescue.rectangle(AB)
       return(AB)
@@ -697,6 +697,12 @@ owin2gpc <- function(x) {
     return(p)
   })
   new("gpc.poly", pts=g)
+}
+
+# hack required since gpclib namespace is not automatically imported
+gpcmethod <- function(fname,
+                      signature = list(x="gpc.poly", y="gpc.poly")) {
+  getMethod(fname, signature=signature)
 }
 
 is.convex <- function(x) {

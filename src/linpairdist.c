@@ -5,7 +5,7 @@
 
    Shortest-path distances between each pair of points in linear network
 
-   $Revision: 1.1 $  $Date: 2011/06/11 01:10:12 $
+   $Revision: 1.2 $  $Date: 2011/07/26 08:16:55 $
 
    linpairdist
 
@@ -29,13 +29,12 @@ linpairdist(np, xp, yp,   /* data points */
   double *xp, *yp, *xv, *yv; /* vectors of coordinates */
   double *dpath, *answer; /* matrices */
 {
-  int Np, Nv, Ns, i, j, Np1;
+  int Np, Nv, i, j, Np1;
   int segi, segj, nbi1, nbi2, nbj1, nbj2; 
   double d, xpi, ypi, xpj, ypj, dXi1, dXi2, d1Xj, d2Xj, d11, d12, d21, d22; 
 
   Np = *np;
   Nv = *nv;
-  Ns = *ns;
   Np1 = Np - 1;
 
   for(i = 0; i < Np1; i++) {
