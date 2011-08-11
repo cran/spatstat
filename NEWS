@@ -1,3 +1,57 @@
+	CHANGES IN spatstat VERSION 1.23-2
+
+OVERVIEW 
+
+    o Bug fixes.
+
+    o Several functions have been accelerated.
+
+    o We thank Marcelino de la Cruz and Ben Madin for contributions.
+
+NEW FUNCTIONS
+
+    o sumouter, quadform
+    Evaluate certain quadratic forms.
+
+    o flipxy
+    Exchange x and y coordinates.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o vcov.ppm
+   Accelerated.
+
+   o owin, as.owin
+   Checking the validity of polygons has been accelerated.
+
+   o crossing.psp, selfcrossing.psp
+   Accelerated.
+
+BUG FIXES
+
+    o split.ppp
+    If drop=TRUE then some of the point patterns had the wrong windows.
+    Spotted by Marcelino de la Cruz.
+    Fixed.
+
+    o split.ppp
+    Crashed if the tessellation did not cover the point pattern.
+    Fixed.
+
+    o predict.ppm
+    Crashed when type="se" if NA's were present.
+    Spotted by Ben Madin.
+    Fixed.
+
+    o plot.ppp
+    Incorrectly handled the case where both 'col' and 'cols' were present.
+    Fixed.
+
+    o polygon geometry
+    The point-in-polygon test gave the wrong answer in some boundary cases.
+    Fixed.
+    
+
 	CHANGES IN spatstat VERSION 1.23-1
 
 OVERVIEW 

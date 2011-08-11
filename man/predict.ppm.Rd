@@ -268,10 +268,9 @@ at new locations.
   data(amacrine)
   ma <- ppm(amacrine, ~marks,
      MultiStrauss(c("off","on"),matrix(0.06, 2, 2)))
-  predict(ma)
-  predict(ma, type="cif")
+  Z <- predict(ma)
+  Z <- predict(ma, type="cif")
   predict(ma, locations=data.frame(x=0.8, y=0.5,marks="on"), type="cif")
-
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

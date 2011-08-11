@@ -176,6 +176,16 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x >= 4
          },
          valid="a single integer, greater than or equal to 4"
+       ),
+       crossing.psp.useCall=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       selfcrossing.psp.useCall=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
        )
        )
 

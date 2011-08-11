@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.53 $    $Date: 2011/08/01 03:37:50 $
+#    $Revision: 1.54 $    $Date: 2011/08/07 01:26:49 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -418,11 +418,11 @@ overlap.trapezium <- function(xa, ya, xb, yb, verb=FALSE) {
 }
 
 
-xypolygon2psp <- function(p, w) {
+xypolygon2psp <- function(p, w, check=spatstat.options("checksegments")) {
   verify.xypolygon(p)
   n <- length(p$x)
   nxt <- c(2:n, 1)
-  return(psp(p$x, p$y, p$x[nxt], p$y[nxt], window=w))
+  return(psp(p$x, p$y, p$x[nxt], p$y[nxt], window=w, check=check))
 }
          
     
@@ -518,12 +518,12 @@ owinpolycheck <- function(W, verbose=TRUE) {
   
   # check for duplicated points, self-intersection, outer frame
   if(blowbyblow)
-    cat(paste("Checking", npoly, "polygons..."))
+    cat(paste("Checking", npoly, ngettext(npoly, "polygon...", "polygons...")))
 
   dup <- self <- is.box <- logical(npoly)
 
   for(i in 1:npoly) {
-    if(blowbyblow)
+    if(blowbyblow && npoly > 1)
       progressreport(i, npoly)
     Bi <- B[[i]]
     # check for duplicated vertices
@@ -582,7 +582,7 @@ owinpolycheck <- function(W, verbose=TRUE) {
     if(blowbyblow)
       cat(paste("Checking for cross-intersection between",
                 npoly, "polygons..."))
-    P <- lapply(B, xypolygon2psp, w=outerframe)
+    P <- lapply(B, xypolygon2psp, w=outerframe, check=FALSE)
     for(i in seq_len(npoly-1)) {
       if(blowbyblow)
         progressreport(i, npoly-1)

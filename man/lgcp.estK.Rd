@@ -213,8 +213,16 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
     u <- lgcp.estK(redwood, c(sigma2=0.1, alpha=1))
     u
     plot(u)
-    if(require(RandomFields)) {
+    \testonly{
+      if(require(RandomFields)) {
+      lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3),
+                control=list(maxit=5))
+      }
+    }
+    \donttest{
+      if(require(RandomFields)) {
       lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3))
+      }
     }
 }
 \keyword{spatial}

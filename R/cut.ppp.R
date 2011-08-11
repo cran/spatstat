@@ -3,7 +3,7 @@
 #
 #  cut method for ppp objects
 #
-#  $Revision: 1.9 $   $Date: 2011/05/18 01:36:08 $
+#  $Revision: 1.11 $   $Date: 2011/08/08 06:21:55 $
 #
 
 cut.ppp <- function(x, z=marks(x), ...) {
@@ -14,16 +14,19 @@ cut.ppp <- function(x, z=marks(x), ...) {
       stop("x has no marks to cut")
   }
   if(is.character(z)) {
-    # interpret as the name of a column of marks
-    zname <- z
-    m <- marks(x, dfok=TRUE)
-    if(!(zname %in% colnames(m)))
-      stop(paste("Unrecognised mark variable", sQuote(zname)))
-    z <- m[, zname]
+    if(length(z) == npoints(x)) {
+      # interpret as a factor
+      z <- factor(z)
+    } else if((length(z) == 1) && (z %in% colnames(marks(x)))) {
+      # interpret as the name of a column of marks
+      zname <- z
+      m <- marks(x)
+      z <- m[, zname]
+    } else stop("format of argument z not understood") 
   }
-  if(is.vector(z)) {
+  if(is.factor(z) || is.vector(z)) {
     stopifnot(length(z) == npoints(x))
-    g <- if(is.numeric(z)) cut(z, ...) else factor(z)
+    g <- if(is.factor(z)) z else if(is.numeric(z)) cut(z, ...) else factor(z)
     marks(x) <- g
     return(x)
   }
@@ -53,7 +56,7 @@ cut.ppp <- function(x, z=marks(x), ...) {
              levels(m) <- paste("Tile row ", ij$i, ", col ", ij$j, sep="")
            },
            tiled={
-             todo <- seq_len(x$n)
+             todo <- seq_len(npoints(x))
              nt <- length(z$tiles)
              m <- integer(x$n)
              for(i in 1:nt) {
@@ -67,7 +70,10 @@ cut.ppp <- function(x, z=marks(x), ...) {
                  break
              }
              m[m == 0] <- NA
-             m <- factor(m, levels=seq_len(nt))
+             nama <- names(z$tiles)
+             lev <- seq_len(nt)
+             lab <- if(!is.null(nama) && all(nzchar(nama))) nama else paste("Tile", lev)
+             m <- factor(m, levels=lev, labels=lab)
            },
            image={
              zim <- z$image

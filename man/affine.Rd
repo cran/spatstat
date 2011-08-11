@@ -27,6 +27,7 @@
 \seealso{
   \code{\link{affine.ppp}},
   \code{\link{affine.owin}},
+  \code{\link{flipxy}},
   \code{\link{rotate}},
   \code{\link{shift}}
 }

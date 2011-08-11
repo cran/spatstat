@@ -36,6 +36,7 @@
   \code{\link{affine}},
   \code{\link{affine.owin}},
   \code{\link{affine.ppp}},
+  \code{\link{flipxy}},
   \code{\link{rotate}},
   \code{\link{shift}}
 }

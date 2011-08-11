@@ -124,6 +124,7 @@
 \alias{fii}
 \alias{fikselterms}
 \alias{fillNA}
+\alias{flipxypolygon}
 \alias{forbidNA}
 \alias{FormatFaspFormulae}
 \alias{formula.slrm}
@@ -588,6 +589,7 @@ firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
 fikselterms(U,X,r,kappa,EqualPairs)
 fillNA(x, value)
+flipxypolygon(p)
 forbidNA(x, context, xname)
 FormatFaspFormulae(f, argname)
 \method{formula}{slrm}(x, ...)
@@ -933,7 +935,7 @@ x.quad(Q)
 y.quad(Q)
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
-xypolygon2psp(p, w)
+xypolygon2psp(p, w, check)
 }
 
 \details{

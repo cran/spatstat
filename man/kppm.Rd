@@ -123,9 +123,10 @@
   kppm(redwood, ~1, "Thomas")
   kppm(redwood, ~x, "MatClust") 
   kppm(redwood, ~x, "MatClust", statistic="pcf", statargs=list(stoyan=0.2)) 
-  kppm(redwood, ~1, "LGCP")
-  \donttest{
-  kppm(redwood, ~x, "LGCP", covmodel=list(model="matern", nu=0.3))
+  kppm(redwood, ~1, "LGCP", statistic="pcf")
+  if(require(RandomFields)) {
+     kppm(redwood, ~x, "LGCP", statistic="pcf",
+           covmodel=list(model="matern", nu=0.3))
   }
 }
 \author{Adrian Baddeley

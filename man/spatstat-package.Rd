@@ -269,6 +269,8 @@
 	rotate pattern  \cr
 	\code{\link{shift} } \tab
 	translate pattern  \cr
+	\code{\link{flipxy} } \tab
+	swap \eqn{x} and \eqn{y} coordinates  \cr
 	\code{\link{periodify} } \tab
 	make several translated copies  \cr
 	\code{\link{affine}} \tab
@@ -341,6 +343,7 @@
 	\code{\link{simplify.owin}}	\tab
 	approximate a window by a simple polygon  \cr
 	\code{\link{rotate}} \tab rotate window  \cr
+	\code{\link{flipxy}} \tab swap \eqn{x} and \eqn{y} coordinates  \cr
 	\code{\link{shift} } \tab translate window  \cr
 	\code{\link{periodify} } \tab make several translated copies  \cr
 	\code{\link{affine}} \tab apply affine transformation 
@@ -455,6 +458,7 @@
       \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
       \code{\link{superimpose}} \tab combine several line segment patterns  \cr
+      \code{\link{flipxy}} \tab swap \eqn{x} and \eqn{y} coordinates \cr      
       \code{\link{rotate.psp}} \tab rotate a line segment pattern \cr      
       \code{\link{shift.psp}} \tab shift a line segment pattern \cr      
       \code{\link{periodify}} \tab make several shifted copies \cr      
