@@ -6,10 +6,13 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.10 $     $Date: 2009/01/27 19:03:02 $
+  $Revision: 1.11 $     $Date: 2011/08/09 10:40:16 $
 
  */
 
+#include <R.h>
+#include <Rdefines.h>
+#include <Rmath.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -492,3 +495,273 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
 }
 
 	 
+/*
+        ---------------- .Call INTERFACE  ---------------------------
+
+	Analogues of functions above, but using the .Call interface
+	and dynamic storage allocation, to save space.
+
+ */
+
+SEXP Cxysegint(SEXP x0a, 
+               SEXP y0a, 
+               SEXP dxa, 
+               SEXP dya, 
+               SEXP x0b, 
+               SEXP y0b, 
+               SEXP dxb, 
+               SEXP dyb, 
+	       SEXP eps) 
+{
+  int i, j, k, na, nb;
+  double determinant, absdet, diffx, diffy, tta, ttb, xx, yy;
+
+  int nout, noutmax, newmax;
+  double epsilon;
+  double *x0A, *y0A, *dxA, *dyA, *x0B, *y0B, *dxB, *dyB;
+  double *ta, *tb, *x, *y;
+  int *ia, *jb;
+  SEXP out, iAout, jBout, tAout, tBout, xout, yout;
+  double *tAoutP, *tBoutP, *xoutP, *youtP;
+  int *iAoutP, *jBoutP;
+
+  PROTECT(x0a = AS_NUMERIC(x0a));
+  PROTECT(y0a = AS_NUMERIC(y0a));
+  PROTECT(dxa = AS_NUMERIC(dxa));
+  PROTECT(dya = AS_NUMERIC(dya));
+  PROTECT(x0b = AS_NUMERIC(x0b));
+  PROTECT(y0b = AS_NUMERIC(y0b));
+  PROTECT(dxb = AS_NUMERIC(dxb));
+  PROTECT(dyb = AS_NUMERIC(dyb));
+  PROTECT(eps = AS_NUMERIC(eps));
+  /* that's 9 protected */
+
+
+  /* get pointers */
+  x0A = NUMERIC_POINTER(x0a);
+  y0A = NUMERIC_POINTER(y0a);
+  dxA = NUMERIC_POINTER(dxa);
+  dyA = NUMERIC_POINTER(dya);
+  x0B = NUMERIC_POINTER(x0b);
+  y0B = NUMERIC_POINTER(y0b);
+  dxB = NUMERIC_POINTER(dxb);
+  dyB = NUMERIC_POINTER(dyb);
+
+  /* determine length of vectors */
+  na = LENGTH(x0a);
+  nb = LENGTH(x0b);
+  epsilon = *(NUMERIC_POINTER(eps));
+  
+  /* guess amount of storage required for output */
+  noutmax = (na > nb) ? na : nb;
+  nout = 0;
+  ia = (int *) R_alloc(noutmax, sizeof(int));
+  jb = (int *) R_alloc(noutmax, sizeof(int));
+  ta = (double *) R_alloc(noutmax, sizeof(double));
+  tb = (double *) R_alloc(noutmax, sizeof(double));
+  x = (double *) R_alloc(noutmax, sizeof(double));
+  y = (double *) R_alloc(noutmax, sizeof(double));
+
+  /* scan data and collect intersections */
+  for (j=0; j < nb; j++) {
+    for(i = 0; i < na; i++) {
+      determinant = dxB[j] * dyA[i] - dyB[j] * dxA[i];
+      absdet = (determinant > 0) ? determinant : -determinant;
+      if(absdet > epsilon) {
+	diffx = (x0B[j] - x0A[i])/determinant;
+	diffy = (y0B[j] - y0A[i])/determinant;
+	tta = - dyB[j] * diffx + dxB[j] * diffy;
+	ttb = - dyA[i] * diffx + dxA[i] * diffy;
+	if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+	  /* intersection */
+	  ++nout;
+	  if(nout >= noutmax) {
+	    /* storage overflow - increase space */
+	    newmax = 4 * noutmax;
+	    ia = (int *) S_realloc((char *) ia, 
+				   newmax, noutmax, sizeof(int));
+	    jb = (int *) S_realloc((char *) jb, 
+				   newmax, noutmax, sizeof(int));
+	    ta = (double *) S_realloc((char *) ta, 
+				      newmax, noutmax, sizeof(double));
+	    tb = (double *) S_realloc((char *) tb, 
+				      newmax, noutmax, sizeof(double));
+	    x = (double *) S_realloc((char *) x, 
+				      newmax, noutmax, sizeof(double));
+	    y = (double *) S_realloc((char *) y, 
+				      newmax, noutmax, sizeof(double));
+	    noutmax = newmax;
+	  }
+	  ta[nout] = tta;
+	  tb[nout] = ttb;
+	  ia[nout] = i;
+	  jb[nout] = j;
+	  x[nout]  = x0A[i] + tta * dxA[i];
+	  y[nout]  = y0A[i] + tta * dyA[i];
+	}
+      }
+    }
+  }
+  /* pack up */
+  PROTECT(iAout = NEW_INTEGER(nout));
+  PROTECT(jBout = NEW_INTEGER(nout));
+  PROTECT(tAout = NEW_NUMERIC(nout));
+  PROTECT(tBout = NEW_NUMERIC(nout));
+  PROTECT(xout = NEW_NUMERIC(nout));
+  PROTECT(yout = NEW_NUMERIC(nout));
+  /* 9 + 6 = 15 protected */
+  iAoutP = INTEGER_POINTER(iAout);
+  jBoutP = INTEGER_POINTER(jBout);
+  tAoutP = NUMERIC_POINTER(tAout);
+  tBoutP = NUMERIC_POINTER(tBout);
+  xoutP = NUMERIC_POINTER(xout);
+  youtP = NUMERIC_POINTER(yout);
+  for(k = 0; k < nout; k++) {
+    iAoutP[k] = ia[k];
+    jBoutP[k] = jb[k];
+    tAoutP[k] = ta[k];
+    tBoutP[k] = tb[k];
+    xoutP[k]  = x[k];
+    youtP[k]  = y[k];
+  }
+  PROTECT(out = NEW_LIST(6));
+  /* 15 + 1 = 16 protected */
+  SET_VECTOR_ELT(out, 0, iAout);
+  SET_VECTOR_ELT(out, 1, jBout);
+  SET_VECTOR_ELT(out, 2, tAout);
+  SET_VECTOR_ELT(out, 3, tBout);
+  SET_VECTOR_ELT(out, 4, xout);
+  SET_VECTOR_ELT(out, 5, yout);
+  UNPROTECT(16);
+  return(out);
+}
+
+
+/*
+
+    Similar to Cxysegint,
+    but computes intersections between all pairs of segments
+    in a single list, excluding the diagonal comparisons of course
+
+*/
+
+SEXP CxysegXint(SEXP x0, 
+		SEXP y0, 
+		SEXP dx, 
+		SEXP dy,
+		SEXP eps)
+{ 
+  int i, j, k, n, n1, ijpos, jipos, iipos;
+  double determinant, absdet, diffx, diffy, tti, ttj;
+
+  int nout, noutmax, newmax;
+  double epsilon;
+  double *X0, *Y0, *Dx, *Dy;
+  double *ti, *tj, *x, *y;
+  int *ii, *jj;
+  SEXP out, iout, jout, tiout, tjout, xout, yout;
+  double *tioutP, *tjoutP, *xoutP, *youtP;
+  int *ioutP, *joutP;
+
+  PROTECT(x0 = AS_NUMERIC(x0));
+  PROTECT(y0 = AS_NUMERIC(y0));
+  PROTECT(dx = AS_NUMERIC(dx));
+  PROTECT(dy = AS_NUMERIC(dy));
+  PROTECT(eps = AS_NUMERIC(eps));
+  /* that's 5 protected */
+
+  /* get pointers */
+  X0 = NUMERIC_POINTER(x0);
+  Y0 = NUMERIC_POINTER(y0);
+  Dx = NUMERIC_POINTER(dx);
+  Dy = NUMERIC_POINTER(dy);
+  
+  /* determine length of vectors */
+  n = LENGTH(x0);
+  epsilon = *(NUMERIC_POINTER(eps));
+
+  /* guess amount of storage required for output */
+  noutmax = n;
+  nout = 0;
+  ii = (int *) R_alloc(noutmax, sizeof(int));
+  jj = (int *) R_alloc(noutmax, sizeof(int));
+  ti = (double *) R_alloc(noutmax, sizeof(double));
+  tj = (double *) R_alloc(noutmax, sizeof(double));
+  x = (double *) R_alloc(noutmax, sizeof(double));
+  y = (double *) R_alloc(noutmax, sizeof(double));
+
+  /* scan data */
+  n1 = n - 1;
+  for (j=0; j < n1; j++) {
+    for(i = j+1; i < n; i++) {
+      determinant = Dx[j] * Dy[i] - Dy[j] * Dx[i];
+      absdet = (determinant > 0) ? determinant : -determinant;
+      if(absdet > epsilon) {
+	diffx = (X0[j] - X0[i])/determinant;
+	diffy = (Y0[j] - Y0[i])/determinant;
+	tti = - Dy[j] * diffx + Dx[j] * diffy;
+	ttj = - Dy[i] * diffx + Dx[i] * diffy;
+	if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	  /* intersection */
+	  ++nout;
+	  if(nout >= noutmax) {
+	    /* storage overflow - increase space */
+	    newmax = 4 * noutmax;
+	    ii = (int *) S_realloc((char *) ii, 
+				   newmax, noutmax, sizeof(int));
+	    jj = (int *) S_realloc((char *) jj, 
+				   newmax, noutmax, sizeof(int));
+	    ti = (double *) S_realloc((char *) ti, 
+				      newmax, noutmax, sizeof(double));
+	    tj = (double *) S_realloc((char *) tj, 
+				      newmax, noutmax, sizeof(double));
+	    x = (double *) S_realloc((char *) x, 
+				     newmax, noutmax, sizeof(double));
+	    y = (double *) S_realloc((char *) y, 
+				     newmax, noutmax, sizeof(double));
+	    noutmax = newmax;
+	  }
+	  ti[nout] = tti;
+	  tj[nout] = ttj;
+	  ii[nout] = i;
+	  jj[nout] = j;
+	  x[nout]  = X0[i] + tti * Dx[i];
+	  y[nout]  = Y0[i] + ttj * Dy[i];
+	}
+      }
+    }
+  }
+  
+  /* pack up */
+  PROTECT(iout = NEW_INTEGER(nout));
+  PROTECT(jout = NEW_INTEGER(nout));
+  PROTECT(tiout = NEW_NUMERIC(nout));
+  PROTECT(tjout = NEW_NUMERIC(nout));
+  PROTECT(xout = NEW_NUMERIC(nout));
+  PROTECT(yout = NEW_NUMERIC(nout));
+  /* 5 + 6 = 11 protected */
+  ioutP = INTEGER_POINTER(iout);
+  joutP = INTEGER_POINTER(jout);
+  tioutP = NUMERIC_POINTER(tiout);
+  tjoutP = NUMERIC_POINTER(tjout);
+  xoutP = NUMERIC_POINTER(xout);
+  youtP = NUMERIC_POINTER(yout);
+  for(k = 0; k < nout; k++) {
+    ioutP[k] = ii[k];
+    joutP[k] = jj[k];
+    tioutP[k] = ti[k];
+    tjoutP[k] = tj[k];
+    xoutP[k]  = x[k];
+    youtP[k]  = y[k];
+  }
+  PROTECT(out = NEW_LIST(6));
+  /* 11 + 1 = 12 protected */
+  SET_VECTOR_ELT(out, 0, iout);
+  SET_VECTOR_ELT(out, 1, jout);
+  SET_VECTOR_ELT(out, 2, tiout);
+  SET_VECTOR_ELT(out, 3, tjout);
+  SET_VECTOR_ELT(out, 4, xout);
+  SET_VECTOR_ELT(out, 5, yout);
+  UNPROTECT(12);
+  return(out);
+}

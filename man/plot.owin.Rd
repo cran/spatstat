@@ -71,15 +71,14 @@
   or indirectly reset using 
   \code{\link{spatstat.options}}.
 
-  When \code{x} is of type \code{"rectangle"} or \code{"polygonal"},
-  it is plotted by the \R function \code{\link{polygon}}. To control the
+  When \code{x} is of type \code{"rectangle"} or \code{"polygonal"}, it
+  is plotted by the \R function \code{\link{polygon}}. To control the
   appearance (colour, fill density, line density etc) of the polygon
-  plot, determine the required argument of \code{\link{polygon}}
-  and pass it through \code{...} For example, to paint the
-  interior of the polygon in red, use the argument
-  \code{col="red"}. To draw the polygon edges in green,
-  use \code{border="green"}. To suppress the drawing of polygon edges,
-  use \code{border=NA}.
+  plot, determine the required argument of \code{\link{polygon}} and
+  pass it through \code{...} For example, to paint the interior of the
+  polygon in red, use the argument \code{col="red"}. To draw the polygon
+  edges in green, use \code{border="green"}. To suppress the drawing of
+  polygon edges, use \code{border=NA}.
 
   When \code{x} is of type \code{"mask"}, it is plotted by
   \code{\link{image.default}}. The appearance of the image plot
@@ -93,6 +92,50 @@
   \code{xlim} and \code{ylim} to specify the desired rectangular field of
   view. (The actual field of view may be larger, depending on the
   graphics device).
+}
+\section{Notes on Filled Polygons}{
+  The function \code{\link{polygon}()} can only handle
+  polygons without holes. To plot polygons with holes in a solid colour,
+  we have implemented two workarounds.
+  
+  \describe{
+    \item{polypath function:}{The first workaround uses
+    the relatively new function \code{\link{polypath}()} which
+    \emph{does} have the capability to handle polygons with holes.
+    However \code{polypath()} does not work with devices \code{xfig},
+    \code{pictex}, and \code{X11(type="Xlib")}.
+    It does work with
+    \code{X11(type="cairo")} (see \code{\link{X11}()}).  To make use
+    of this latter facility one needs to have \code{cairo} installed
+    on one's machine.  See \url{http://www.cairographics.org/download}
+    for instructions as to how to obtain \code{cairo}.  After having
+    installed \code{cairo} one needs to re-install \R from source so
+    that it has \code{cairo} capabilites.  To check whether your
+    current installation of R has \code{cairo} capabilities, type
+    (in \R) \code{capabilities()["cairo"]}.
+    The default type for \code{X11()} is controlled by
+    \code{\link{X11.options}()}.  The default for this option appears to
+    remain \code{Xlib} even though the help for \code{X11.options()} says
+    (in respect of \code{type}):  \dQuote{Default "cairo" where available
+      and reliable, otherwise "Xlib".}  You may find it convenient to
+    make \code{cairo} the default, e.g. via your \code{.Rprofile}.
+    The magic incantation to put into \code{.Rprofile} is
+    \preformatted{
+      setHook(packageEvent("graphics", "onLoad"),
+                   function(...) grDevices::X11.options(type="cairo"))
+		 }
+    }	 
+    \item{gpclib package:}{
+      The other workaround requires use of the \code{gpclib} package which
+      effects a triangulation of the polygonal window in question which
+      in turn permits the plotting of the window, filled with a solid
+      colour, without filling the holes.  Type \code{licence.polygons()}
+      for information about the licence under which \code{gpclib} operates.
+      To make use of this workaround you need to have the package{gpclib}
+      installed and to set \code{spatstat.options(gpclib=TRUE)} (and to be
+      working under circumstances permitted by the \code{gpclib} licence).
+    }
+  }
 }
 \seealso{
   \code{\link{owin.object}},
@@ -115,7 +158,7 @@
   plot(w, hatch=TRUE, lwd=2)
 
   # binary mask
-  we <- erosion(w, 100, FALSE)
+  we <- as.mask(erosion(w, 400, FALSE))
   plot(we)
   spatstat.options(par.binary=list(col=grey(c(0.5,1))))
   plot(we)

@@ -3,7 +3,7 @@
 # and asymptotic covariance & correlation matrices
 # for (inhom) Poisson models
 #
-#  $Revision: 1.27 $  $Date: 2011/01/24 05:58:45 $
+#  $Revision: 1.29 $  $Date: 2011/08/05 01:53:48 $
 #
 
 vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
@@ -18,6 +18,8 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
     stop(paste("Unrecognised option: what=", sQuote(what)))
   what <- what.map[m]
 
+  method <- resolve.defaults(list(...), list(method="C"))$method
+  
   # Fisher information *may* be contained in object
   fisher <- object$fisher
   varcov <- object$varcov
@@ -72,15 +74,20 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
     mom <- model.matrix(object, keepNA=FALSE) 
     # compute Fisher information if not known
     if(is.null(fisher)) {
-      fisher <- 0
-      for(i in 1:nrow(mom)) {
-        ro <- mom[i, ]
-        v <- outer(ro, ro, "*") * fi[i] * wt[i]
-        if(!any(is.na(v)))
-          fisher <- fisher + v
-      }
-      momnames <- dimnames(mom)[[2]]
-      dimnames(fisher) <- list(momnames, momnames)
+      switch(method,
+             C = {
+               fisher <- sumouter(mom, fi * wt)
+             },
+             interpreted = {
+               for(i in 1:nrow(mom)) {
+                 ro <- mom[i, ]
+                 v <- outer(ro, ro, "*") * fi[i] * wt[i]
+                 if(!any(is.na(v)))
+                   fisher <- fisher + v
+               }
+               momnames <- dimnames(mom)[[2]]
+               dimnames(fisher) <- list(momnames, momnames)
+             })
     }
   }
 

@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.63 $	$Date: 2011/08/01 08:30:51 $
+#	$Revision: 1.64 $	$Date: 2011/08/02 04:28:12 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -294,10 +294,12 @@ function(object, window, ngrid=NULL, locations=NULL,
              # extract variance-covariance matrix of parameters
              vc <- vcov(model)
              # compute model matrix
-             mf <- model.frame(formula(model), newdata, ...)
-             mm <- model.matrix(formula(model), mf, ...)
+             fmla <- formula(model)
+             mf <- model.frame(fmla, newdata, ..., na.action=na.pass)
+             mm <- model.matrix(fmla, mf, ..., na.action=na.pass)
+             if((nr <- nrow(mm)) != nrow(newdata))
+               stop("Internal error: row mismatch in SE calculation")
              # compute relative variance = diagonal of quadratic form
-             nr <- nrow(mm)
              vv <- numeric(nr)
              for(i in 1:nr) {
                mmi <- mm[i, ]

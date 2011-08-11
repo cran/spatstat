@@ -3,7 +3,7 @@
 #
 #   random shift with optional toroidal boundary
 #
-#   $Revision: 1.14 $   $Date: 2011/05/18 09:10:50 $
+#   $Revision: 1.15 $   $Date: 2011/08/06 11:40:01 $
 #
 #
 rshift <- function(X, ...) {
@@ -17,29 +17,30 @@ rshift.splitppp <- function(X, ..., which=seq_along(X))
     stop(paste("argument", sQuote("group"),
                "not implemented for splitppp objects"))
 
-  if(is.null(which))
-    which <- seq_along(X)
-  Xsub <- X[which]
-  if(length(Xsub) == 0)
-    stop(paste("Argument", sQuote("which"), "did not match any marks"))
-
+  if(is.null(which)) {
+    iwhich <- which <- seq_along(X)
+  } else {
+    id <- seq_along(X)
+    names(id) <- names(X)
+    iwhich <- id[which]
+    if(length(iwhich) == 0)
+      stop(paste("Argument", sQuote("which"), "did not match any marks"))
+  }
+  
   # validate arguments and determine common clipping window
   arglist <- handle.rshift.args(X[[1]]$window, ..., edgedefault="torus")
 
   if(!is.null(clip <- arglist$clip)) {
     # clip the patterns that are not to be shifted
-    X[which] <- "nyet" 
-    X <- lapply(X,
-                function(z, clip) { if(identical(z, "nyet")) "nyet"
-                              else z[clip] },
-                clip=clip)
+    if(length(iwhich) < length(X)) 
+      X[-iwhich] <- lapply(X[-iwhich], "[.ppp", i=clip)
   }
   # perform shift on selected patterns
   # (setting group = NULL ensures each pattern is not split further)
-  shiftXsub <- do.call("lapply", append(list(Xsub, rshift.ppp, group=NULL),
+  shiftXsub <- do.call("lapply", append(list(X[iwhich], rshift.ppp, group=NULL),
                                         arglist))
   # put back
-  X[which] <- shiftXsub
+  X[iwhich] <- shiftXsub
 
   return(X)
 }

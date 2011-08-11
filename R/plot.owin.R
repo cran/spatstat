@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.35 $	$Date: 2011/07/28 05:13:19 $
+#	$Revision: 1.37 $	$Date: 2011/08/08 11:35:02 $
 #
 #
 #
@@ -134,32 +134,48 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
                                                 list(...)),
                                extrargs="lwd")
            } else {
-             if(!(spatstat.options("gpclib") && require(gpclib)))
-               warning("Can't plot filled polygons: gpclib unavailable")
-             else {
-               # First fill the polygon's interior with colour
-               # Use gpclib to triangulate
-               Triangulate <- gpcmethod("triangulate", list(x="gpc.poly"))
-               txy <- Triangulate(owin2gpc(W))
-               ntri <- floor(nrow(txy)/3)
-               # Fill triangles with colour
-               for(i in seq_len(ntri)) {
-                 ri <- 3 * (i - 1) + 1:3
+              # Try using polypath():
+             lucy <- names(dev.cur())
+             if(!(lucy %in% c("xfig","pictex","X11"))) {
+               xx <- do.call(c, lapply(p, function(a) {c(NA, a$x)}))[-1]
+               yy <- do.call(c, lapply(p, function(a) {c(NA, a$y)}))[-1]
+               do.call.matched("polypath",
+                               resolve.defaults(list(x=xx,y=yy),
+                                                list(border=col.poly),
+                                                list(...)))
+             } else {
+	      # Try using gpclib:
+               if(!(spatstat.options("gpclib") && require(gpclib)))
+                 warning(paste("Can't plot filled polygons. ",
+                               "Cannot use polypath() with device ",
+                               paste(dQuote(lucy), collapse=" : "), 
+                               ", and gpclib is unavailable.\n",
+                               sep=""))
+               else {
+                 # First fill the polygon's interior with colour
+                 # Use gpclib to triangulate
+                 Triangulate <- gpcmethod("triangulate", list(x="gpc.poly"))
+                 txy <- Triangulate(owin2gpc(W))
+                 ntri <- floor(nrow(txy)/3)
+                 # Fill triangles with colour
+                 for(i in seq_len(ntri)) {
+                   ri <- 3 * (i - 1) + 1:3
+                   do.call.matched("polygon",
+                                   resolve.defaults(
+                                                    list(x=txy[ri,]),
+                                                    list(border=col.poly),
+                                                    list(...)))
+                 }
+               }
+               # Now draw polygon boundaries
+               for(i in seq_along(p))
                  do.call.matched("polygon",
                                  resolve.defaults(
-                                                  list(x=txy[ri,]),
-                                                  list(border=col.poly),
-                                                  list(...)))
-               }
+                                                  list(x=p[[i]]),
+                                                  list(density=0, col=NA),
+                                                  list(...)),
+                                 extrargs="lwd")
              }
-             # Now draw polygon boundaries
-             for(i in seq_along(p))
-               do.call.matched("polygon",
-                               resolve.defaults(
-                                                list(x=p[[i]]),
-                                                list(density=0, col=NA),
-                                                list(...)),
-                               extrargs="lwd")
            }
            if(hatch) {
              L <- rlinegrid(angle, spacing, W)

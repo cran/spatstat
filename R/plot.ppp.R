@@ -1,7 +1,7 @@
 #
 #	plot.ppp.S
 #
-#	$Revision: 1.48 $	$Date: 2011/05/18 08:40:06 $
+#	$Revision: 1.49 $	$Date: 2011/08/07 01:17:06 $
 #
 #
 #--------------------------------------------------------------------------
@@ -97,7 +97,7 @@ plot.ppp <-
   
   smartpoints <- function(xx, yy, ...,
                           index=1, col=NULL, pch=NULL, cols=NULL, chars=NULL) {
-    if(is.null(col) && !is.null(cols))
+    if(!is.null(cols))
       col <- cols[index]
     if(is.null(pch) && !is.null(chars))
       pch <- chars[index]
@@ -250,7 +250,7 @@ plot.ppp <-
                  sQuote("chars"),
                  "is not equal to the number of types"))
     else
-      chars <- rep(chars, ntypes)
+      explicit$chars <- chars <- rep(chars, ntypes)
   }
 
   if(!is.null(cols) && ((ncols <- length(cols)) != ntypes)) {
@@ -259,7 +259,7 @@ plot.ppp <-
                  sQuote("cols"),
                  "is not equal to the number of types"))
     else
-      cols <- rep(cols, ntypes)
+      explicit$cols <- cols <- rep(cols, ntypes)
   }
     
   for(i in seq_along(um)) {
