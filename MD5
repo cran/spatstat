@@ -1,6 +1,6 @@
-9a494880163d18168409990faa02c016 *DESCRIPTION
+271583332b9bf43024cb878fe58b10e9 *DESCRIPTION
 e04d6ccc28ffb8d71772de4e86d2dc2a *NAMESPACE
-ee8a6dfb986828c89ab4e0206b4b5ebf *NEWS
+b36186aeb7a1f63ff39055c92edd62da *NEWS
 7f2a557c297e6e44c20bfe070c47e4aa *R/Fest.R
 1e5f92f673d1abde541a5d17c572dc4e *R/First.R
 23b1ddd530d8aae53c21f9ab364787e3 *R/GJfox.R
@@ -22,7 +22,7 @@ a8742620874e75312563d5844b76ac3d *R/Kmodel.R
 12a7971efd81d975316ebba8379797d8 *R/Kres.R
 aa74a804e0af38db029d83cbf23307d2 *R/Kscaled.R
 eb6302b9796cfc1d9c930c871f305f2d *R/adaptive.density.R
-cb42d91ea9906e886034cd448f86f4f2 *R/affine.R
+e581986398a5aed136055abdfeb4570e *R/affine.R
 4dfe755e3c155d4e62e2df468bd67a8e *R/allstats.R
 6920955652671da805bf6095a756184f *R/alltypes.R
 6b675cb909546d875fe72f9a8b5dc2f6 *R/anova.ppm.R
@@ -54,7 +54,7 @@ f955b7d8038fa1585e10430b6bf9fc01 *R/datasetup.R
 670e28483954ac04406a1338384406dd *R/defaultwin.R
 2f3810aa06a1cf048dbc1f7baf2f956c *R/deldir.R
 c11e4120b99729e9dcb6a4bb13d71359 *R/deltametric.R
-c5631612c15b0080436f4d8ab4f6db78 *R/density.ppp.R
+d66ffb98751eeab153114d903cb75bf8 *R/density.ppp.R
 cde6f963290610ef388d3dcb1296cfbd *R/density.psp.R
 01d92875d91b6a72d0cf7cd774f24448 *R/dg.R
 0dfc47f9a5d3ed7f430bbdbd61b9b782 *R/dgs.R
@@ -166,14 +166,14 @@ f0029a86004159bccf34e815b4bbf7c4 *R/plot.fv.R
 22368f6d9659ccde08ce9273600e0717 *R/plot.owin.R
 07ca8db4c4df142cdf47da4818c5eb0b *R/plot.plotppm.R
 df0dbd056b370db13b5532ac3b26ed85 *R/plot.ppm.R
-1ff3549dac16fcf8002b7aecdaa3a158 *R/plot.ppp.R
+5b0c9b17222c209ea89d5f93389f9bd1 *R/plot.ppp.R
 7545b2d1ba5f9f44108ae8807155d8a9 *R/plot.splitppp.R
 aa2fb350d8ea21553ec6846ea3c00999 *R/pointsonlines.R
 36b01bc3bf47b7d7e2def13f554ee2f9 *R/poisson.R
 6da226f433aed199b18b157d0877992f *R/pp3.R
 ca51cb1b9da79d419ea8f6e0c73d5593 *R/ppm.R
 8e3043b8097e6eca99756bf671525c35 *R/ppmclass.R
-9eeb25b1a3a4d82dafe9440fcec7060e *R/ppp.R
+55040b907fa528ac7f2018c52529c4a5 *R/ppp.R
 89e7f140c5699f2388b60f67af7ada32 *R/pppmatch.R
 e96ade0f12a2ba132c3d7772b310f2a6 *R/ppx.R
 6bd8c4a55b905afd0ae262eb011e6ab4 *R/predict.ppm.R
@@ -295,7 +295,7 @@ bcbc584cd0e3b64cf9a24b64a20694ad *demo/spatstat.R
 03bba73b3c3de03436db621a37f69e6a *inst/CITATION
 fe0d3fe4554f4dbf851ceb60162850e0 *inst/doc/POLYGONS.txt
 af4749e48f953fd050e2639b57c05e81 *inst/doc/shapefiles.Rnw
-0a04fa75601f4621f2c20d65b2c529d6 *inst/doc/shapefiles.pdf
+293b7a21817b91481417f5b123b6d56d *inst/doc/shapefiles.pdf
 20daf2a56ef1dc143d90e7f2eeafe46b *inst/ratfor/Makefile
 fb0f64349dc429fa2585e57e335283f0 *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxyp.r
@@ -473,7 +473,7 @@ f8c61eec4db767adc5ac78fc14f14d02 *man/default.dummy.Rd
 619990b8c3f877888ef0565a47412999 *man/delaunay.Rd
 c9692ec9deca1da339997981123e8ed6 *man/deltametric.Rd
 3292b98a0ccd3ecc4e161ff952bdae9d *man/demopat.Rd
-30b9e755da418f2eba594174095ac4ae *man/density.ppp.Rd
+837b3e500a7373efa8a8ffcd15028b3a *man/density.ppp.Rd
 a345b9b8d838c677fbde319617b48472 *man/density.psp.Rd
 8f8dbb6cbd23c939254e0cec2232b34e *man/density.splitppp.Rd
 64c3096b783b922f4b1fe6a4d440fe11 *man/deprecated.Rd
@@ -682,7 +682,7 @@ b1f910a479efe48658cf193e5d5dab5d *man/plot.kstest.Rd
 7023d86274db56e26efbfc58df5969ad *man/plot.linnet.Rd
 e5e202b1ccecc7296bc34bf05e9f7f73 *man/plot.listof.Rd
 d9b8c9da0b8a147cca506a27699746f2 *man/plot.msr.Rd
-d21e5033cf5229ef8c8fffccd93d8739 *man/plot.owin.Rd
+1dce17e56f8ac15a397d91909501cb3d *man/plot.owin.Rd
 9412b4f3b5874b4759d065de4b8980bf *man/plot.plotppm.Rd
 131fcbb2fe217f61d2eca582e03ee211 *man/plot.pp3.Rd
 2f135ec02d78c29766f18f7c3fd730ce *man/plot.ppm.Rd
@@ -821,7 +821,7 @@ fd4ab2652f4b7e62bd3ea43a32b0b560 *man/slrm.Rd
 ce33ca08f652b41295c8b93981f80277 *man/smooth.msr.Rd
 0d4bff2c859c73e96519e44d373ca2b2 *man/smooth.ppp.Rd
 00d583a33875b7379524bd7368b980c0 *man/solutionset.Rd
-7a075d1dce91938c38f16a7d6377ed54 *man/spatstat-internal.Rd
+7a6a32542f4dd196e062530d39798f85 *man/spatstat-internal.Rd
 35c3608ef003039c521f2d83876e640a *man/spatstat-package.Rd
 08eae37779cc7fcb7e15311639cba288 *man/spatstat.options.Rd
 259300ed014062d27737ef7e017d4e86 *man/split.im.Rd
@@ -936,7 +936,7 @@ fe828d8643241c167078fcac1f05b8f3 *src/strauss.c
 b87d4694a1955415079550c82955ac38 *src/straussm.c
 5605830f31270b23b68edaae0a741137 *src/trigraf.c
 90a762be786789184a74cd66501b8023 *src/utils.c
-2c6b2ddfbcc68eab56a8c39bc24ea5a1 *src/xyseg.c
+cc76aec095255a4292d7afe6b7635602 *src/xyseg.c
 07af498af7da90496ea389181abd8c9a *tests/NAinCov.R
 8f8fb2368ba7089f44c0fe6a22d1e356 *tests/badwindow.R
 307060e2b3dbbc6398ecd8b081e74e3e *tests/badwindowcheck.R

@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.37 $    $Date: 2011/07/26 08:06:06 $
+#  $Revision: 1.39 $    $Date: 2011/08/11 04:40:03 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -21,7 +21,7 @@ density.ppp <- function(x, sigma=NULL, ...,
                        c(pixels="pixels",
                          points="points"))
   
-  ker <- resolve.2D.kernel(sigma, ..., varcov=varcov, x=x, adjust=adjust)
+  ker <- resolve.2D.kernel(..., sigma=sigma, varcov=varcov, x=x, adjust=adjust)
   sigma <- ker$sigma
   varcov <- ker$varcov
 
@@ -532,8 +532,8 @@ markvar  <- function(X, ...) {
   return(V)
 }
 
-resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL,
-                              adjust=1) {
+resolve.2D.kernel <- function(..., sigma=NULL, varcov=NULL, x, mindist=NULL,
+                              adjust=1, useN=FALSE) {
   sigma.given <- !is.null(sigma)
   varcov.given <- !is.null(varcov)
   if(sigma.given) {
@@ -550,6 +550,12 @@ resolve.2D.kernel <- function(sigma=NULL, ..., varcov=NULL, x, mindist=NULL,
            # default
            w <- x$window
            sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
+           if(useN) {
+             n <- npoints(x)
+             a <- area.owin(as.rectangle(w))
+             sigmaN <- sqrt(10 * a/(pi * n))
+             sigma <- min(sigma, sigmaN)
+           } 
          },
          {
            if(sigma.given && length(sigma) == 2) 

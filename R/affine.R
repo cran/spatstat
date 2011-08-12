@@ -1,12 +1,12 @@
 #
 #	affine.R
 #
-#	$Revision: 1.33 $	$Date: 2011/06/16 05:04:42 $
+#	$Revision: 1.34 $	$Date: 2011/08/12 09:31:48 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
   if(length(X$x) == 0 && length(X$y) == 0)
-    return(list(x=c(),y=c()))
+    return(list(x=numeric(0),y=numeric(0)))
   if(invert) {
     mat <- invmat <- solve(mat)
     vec <- - as.numeric(invmat %*% vec)

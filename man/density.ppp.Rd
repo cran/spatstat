@@ -125,7 +125,8 @@
   
   The smoothing parameter \code{sigma} has a default value
   calculated by a simple rule of thumb
-  that depends only on the size of the window. 
+  that depends only on the size of the window
+  and the number of points.
   The argument \code{adjust} makes it easy for the user to change this
   default. The value of \code{sigma} will be multiplied by
   the factor \code{adjust}. To double the smoothing parameter, set

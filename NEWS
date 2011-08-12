@@ -1,3 +1,19 @@
+	CHANGES IN spatstat VERSION 1.23-3
+
+OVERVIEW 
+
+    o Urgent bug fix.
+
+BUG FIXES
+
+    o crossing.psp
+    Crashed occasionally with a message about NA or NaN values.
+    Fixed.
+
+    o affine.ppp
+    Crashed if the point pattern was empty.
+    Fixed.
+
 	CHANGES IN spatstat VERSION 1.23-2
 
 OVERVIEW 
