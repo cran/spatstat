@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.79 $	$Date: 2011/04/17 05:50:13 $
+#	$Revision: 4.80 $	$Date: 2011/08/12 09:31:11 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -32,9 +32,9 @@ ppp <- function(x, y, ..., window, marks, check=TRUE ) {
   else
     window <- owin(...)
 
-  if(missing(x) && missing(y)) 
+  if((missing(x) && missing(y)) || (length(x) == 0 && length(y) == 0))
     x <- y <- numeric(0)
-  
+
   n <- length(x)
   if(length(y) != n)
     stop("coordinate vectors x and y are not of equal length")

@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.11 $     $Date: 2011/08/09 10:40:16 $
+  $Revision: 1.12 $     $Date: 2011/08/12 10:29:05 $
 
  */
 
@@ -574,7 +574,6 @@ SEXP Cxysegint(SEXP x0a,
 	ttb = - dyA[i] * diffx + dxA[i] * diffy;
 	if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
 	  /* intersection */
-	  ++nout;
 	  if(nout >= noutmax) {
 	    /* storage overflow - increase space */
 	    newmax = 4 * noutmax;
@@ -598,6 +597,7 @@ SEXP Cxysegint(SEXP x0a,
 	  jb[nout] = j;
 	  x[nout]  = x0A[i] + tta * dxA[i];
 	  y[nout]  = y0A[i] + tta * dyA[i];
+	  ++nout;
 	}
       }
     }
@@ -703,7 +703,6 @@ SEXP CxysegXint(SEXP x0,
 	ttj = - Dy[i] * diffx + Dx[i] * diffy;
 	if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
 	  /* intersection */
-	  ++nout;
 	  if(nout >= noutmax) {
 	    /* storage overflow - increase space */
 	    newmax = 4 * noutmax;
@@ -727,6 +726,7 @@ SEXP CxysegXint(SEXP x0,
 	  jj[nout] = j;
 	  x[nout]  = X0[i] + tti * Dx[i];
 	  y[nout]  = Y0[i] + ttj * Dy[i];
+	  ++nout;
 	}
       }
     }

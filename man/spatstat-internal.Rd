@@ -849,7 +849,7 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots, .StripNull=FALSE)
-resolve.2D.kernel(sigma, \dots, varcov, x, mindist, adjust)
+resolve.2D.kernel(\dots, sigma, varcov, x, mindist, adjust, useN)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
 revcumsum(x)

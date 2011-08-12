@@ -114,7 +114,8 @@
     current installation of R has \code{cairo} capabilities, type
     (in \R) \code{capabilities()["cairo"]}.
     The default type for \code{X11()} is controlled by
-    \code{\link{X11.options}()}.  The default for this option appears to
+    \code{\link[grDevices]{X11.options}()}.
+    The default for this option appears to
     remain \code{Xlib} even though the help for \code{X11.options()} says
     (in respect of \code{type}):  \dQuote{Default "cairo" where available
       and reliable, otherwise "Xlib".}  You may find it convenient to

@@ -105,7 +105,7 @@ plot.ppp <-
             resolve.defaults(list(x=list(x=xx, y=yy), ...),
                              if(!is.null(col)) list(col=col) else NULL,
                              if(!is.null(pch)) list(pch=pch) else NULL),
-                    extrargs=c("col", "pch", "type", "bg", "cex", "lwd"))
+                    extrargs=c("col", "pch", "type", "bg", "cex", "lwd", "lty"))
   }
 
   if(!marked || !use.marks) {
