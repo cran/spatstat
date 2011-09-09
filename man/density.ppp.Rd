@@ -132,6 +132,9 @@
   the factor \code{adjust}. To double the smoothing parameter, set
   \code{adjust=2}.
 
+  To perform automatic bandwidth selection using cross-validation,
+  use \code{\link{bw.diggle}}.
+
   By default the intensity values are
   computed at every location \eqn{u} in a fine grid,
   and are returned as a pixel image.
@@ -164,7 +167,10 @@
   If \code{leaveoneout=FALSE} then the sum is taken over all \eqn{j},
   so that the intensity value at a data point includes a contribution
   from the same point.
-
+  
+  To select the bandwidth \code{sigma} automatically by
+  cross-validation, use \code{\link{bw.diggle}}.
+  
   To perform spatial interpolation of values that were observed
   at the points of a point pattern, use \code{\link{smooth.ppp}}.
 
@@ -176,6 +182,7 @@
   two (or more) types of points, use \code{\link{relrisk}}.
 }
 \seealso{
+  \code{\link{bw.diggle}},
   \code{\link{smooth.ppp}},
   \code{\link{sharpen.ppp}},
   \code{\link{adaptive.density}},
@@ -226,6 +233,9 @@
      Z <- density(cells, 0.05, diggle=TRUE)
      Z <- density(cells, varcov=diag(c(0.05^2, 0.07^2)))
   }
+  # automatic bandwidth selection
+  plot(density(cells, sigma=bw.diggle(cells)))
+  # evaluate intensity at points
   density(cells, 0.05, at="points")
 }
 \references{

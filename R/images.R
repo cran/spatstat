@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.82 $     $Date: 2011/06/16 12:55:50 $
+#         $Revision: 1.84 $     $Date: 2011/09/07 04:42:30 $
 #
 #      The class "im" of raster images
 #
@@ -224,6 +224,7 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
     rseq <- sort(unique(rr))
     cseq <- sort(unique(cc))
     if(all(diff(rseq) == 1) && all(diff(cseq) == 1) &&
+       (length(rr) == length(rseq) * length(cseq)) &&
        all(rr == RR[rseq, cseq]) && all(cc == CC[rseq,cseq])) {
       # yes - make image
       dim(y) <- c(length(rseq), length(cseq))
@@ -267,6 +268,10 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
 "[<-.im" <- function(x, i, value) {
   X <- x
   W <- as.owin(X)
+  if(is.im(value)) {
+    value <- value$v
+  }
+  stopifnot(is.vector(value) || is.matrix(value) || is.factor(value))
   if(missing(i)) {
     # set all pixels to 'value'
     v <- X$v

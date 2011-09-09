@@ -276,9 +276,9 @@
 	\code{\link{affine}} \tab
 	apply affine transformation\cr
 	\code{\link{density.ppp}} \tab
-	kernel smoothing\cr
+	kernel smoothing of point pattern\cr
 	\code{\link{smooth.ppp}} \tab
-	interpolate pixel values\cr
+	smooth the marks attached to points\cr
 	\code{\link{sharpen.ppp}} \tab
 	data sharpening\cr
 	\code{\link{identify.ppp}} \tab
@@ -515,7 +515,6 @@
       boundary distance for each tile in tessellation 
     }
 
-
     \bold{Three-dimensional point patterns}
 
     An object of class \code{"pp3"} represents a three-dimensional
@@ -561,7 +560,7 @@
       \code{\link{shortside.boxx}} \tab shortest side of box \cr
       \code{\link{eroded.volumes.boxx}} \tab volumes of erosions of box 
     }
-
+    
     \bold{Point patterns on a linear network}
 
     An object of class \code{"linnet"} represents a linear network
@@ -603,6 +602,17 @@
       \code{\link{as.data.frame.hyperframe}} \tab convert hyperframe to
       data frame 
     }
+    
+    \bold{Layered objects}
+
+    A layered object represents data that should be plotted in
+    successive layers, for example, a background and a foreground.
+
+     \tabular{ll}{
+      \code{\link{layered}} \tab create layered object \cr
+      \code{\link{plot.layered}} \tab plot layered object
+    }
+    
 }
   
 \section{II. EXPLORATORY DATA ANALYSIS}{

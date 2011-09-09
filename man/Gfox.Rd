@@ -71,6 +71,13 @@ Jfox(X, Y, r = NULL, breaks = NULL, correction = c("km", "rs", "han"), ...)
     J(r) = (1-G(r))/(1-H(r))
   }
   For further interpretation, see Foxall and Baddeley (2002).
+  
+  Accuracy of \code{Jfox} depends on the pixel resolution,
+  which is controlled by the
+  arguments \code{eps}, \code{dimyx} and \code{xy} passed to
+  \code{\link{as.mask}}. For example, use \code{eps=0.1} to specify
+  square pixels of side 0.1 units, and \code{dimyx=256} to specify a
+  256 by 256 grid of pixels.
 }
 \value{
   A function value table (object of class \code{"fv"})
@@ -94,6 +101,12 @@ Jfox(X, Y, r = NULL, breaks = NULL, correction = c("km", "rs", "han"), ...)
   Y <- copper$SouthLines
   G <- Gfox(X,Y)
   J <- Jfox(X,Y, correction="km")
+  \testonly{
+  J <- Jfox(X,Y, correction="km", eps=1)
+  }
+  \dontrun{
+  J <- Jfox(X,Y, correction="km", eps=0.25)
+  }
 }
 \author{Rob Foxall and
   Adrian Baddeley

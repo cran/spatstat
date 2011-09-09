@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.7 $ $Date: 2011/05/18 09:08:44 $
+#  $Revision: 1.9 $ $Date: 2011/09/06 03:04:34 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -26,17 +26,22 @@ resolve.defaults <- function(..., .StripNull=FALSE) {
   return(argue)
 }
 
-do.call.matched <- function(fname, arglist, funargs, extrargs=NULL) {
-  fun <- get(fname, mode="function")
-  if(!is.function(fun))
-    stop(paste("internal error: function", sQuote(fname), "not found",
-               sep=""))
+do.call.matched <- function(fun, arglist, funargs, extrargs=NULL) {
+  if(!is.function(fun) && !is.character(fun))
+    stop("Internal error: wrong argument type in do.call.matched")
+  if(is.character(fun)) {
+    fname <- fun
+    fun <- get(fname, mode="function")
+    if(!is.function(fun))
+      stop(paste("internal error: function", sQuote(fname), "not found",
+                 sep=""))
+  } 
   if(missing(funargs))
     funargs <- names(formals(fun))
   funargs <- c(funargs, extrargs)
   givenargs <- names(arglist)
   matched <- givenargs %in% funargs
-  do.call(fname, arglist[matched])
+  do.call(fun, arglist[matched])
 }
 
 

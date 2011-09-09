@@ -2,7 +2,7 @@
 #
 #      distmap.R
 #
-#      $Revision: 1.16 $     $Date: 2009/10/31 22:32:56 $
+#      $Revision: 1.17 $     $Date: 2011/08/14 04:54:28 $
 #
 #
 #     Distance transforms
@@ -110,8 +110,10 @@ distmap.psp <- function(X, ...) {
   yp <- as.vector(raster.y(W))
   np <- length(xp)
   E <- X$ends
+  big <- 2 * diameter(as.rectangle(W))^2
+  dist2 <- rep(big, np)
   DUP <- spatstat.options("dupC")
-  z <- .C("distmap2segs",
+  z <- .C("nndist2segs",
           xp=as.double(xp),
           yp=as.double(yp),
           npoints=as.integer(np),
@@ -121,7 +123,7 @@ distmap.psp <- function(X, ...) {
           y1=as.double(E$y1),
           nsegments=as.integer(nrow(E)),
           epsilon=as.double(.Machine$double.eps),
-          dist2=as.double(numeric(np)),
+          dist2=as.double(dist2),
           index=as.integer(integer(np)),
           DUP=DUP,
           PACKAGE="spatstat")

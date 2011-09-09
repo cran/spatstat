@@ -3,7 +3,7 @@
 #
 #  Foxall G-function and J-function
 #
-#  $Revision: 1.1 $   $Date: 2010/04/09 13:18:54 $
+#  $Revision: 1.2 $   $Date: 2011/08/24 09:28:27 $
 #
 Gfox <- function(X, Y, r=NULL, breaks=NULL,
                  correction=c("km", "rs", "han"), ...) {
@@ -69,8 +69,11 @@ Jfox <- function(X, Y, r=NULL, breaks=NULL,
   G <- Gfox(X, Y, r=H$r, correction=correction, ...)
   # derive J-function
   J <- eval.fv((1-G)/(1-H))
+  # correct calculation of hazard is different
   if("hazard" %in% names(J))
     J$hazard <- G$hazard - H$hazard
+  # base labels on 'J' rather than full expression
+  attr(J, "labl") <- attr(H, "labl")
   # add column of 1's
   J <- bind.fv(J, data.frame(theo=rep(1, nrow(J))), "%s[theo](r)",
                "theoretical value of %s for independence")

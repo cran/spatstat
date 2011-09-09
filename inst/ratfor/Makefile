@@ -6,7 +6,7 @@ CPP = /usr/bin/cpp
 ##########################################################
 # Sources actually written by humans:
 
-RAT_SRC = dppll.r inxyp.r 
+RAT_SRC = dppll.r inxypOld.r 
 
 C_DOMINIC = dinfty.c dwpure.c 
 
@@ -31,7 +31,7 @@ HUMAN = $(C_TEMPLATES) $(RAT_SRC) $(C_SRC) $(CC_SRC)  Makefile
 ##########################################################
 # Source to be generated automatically:
 
-RAT_FOR = dppll.f inxyp.f 
+RAT_FOR = dppll.f inxypOld.f 
 
 K_C = Kborder.c Kwborder.c
 

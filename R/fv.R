@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.72 $   $Date: 2011/07/04 05:23:54 $
+#    $Revision: 1.75 $   $Date: 2011/08/30 03:31:32 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -320,22 +320,19 @@ fvlabelmap <- function(x, dot=TRUE) {
 }
 
 fvlegend <- function(object, elang) {
-  # Compute mathematical legend for each column in fv object 
-  # transformed by language expression 'elang'
-  # The result is an expression vector.
+  # Compute mathematical legend(s) for column(s) in fv object 
+  # transformed by language expression 'elang'.
+  # The expression must already be in 'expanded' form.
+  # The result is an expression, or expression vector.
   # The j-th entry of the vector is an expression for the
   # j-th column of function values.
-  map <- fvlabelmap(object, dot=TRUE)
-  ee <- eval(substitute(substitute(e, mp), list(e=elang, mp=map["."])))
-  ee <- distributecbind(as.expression(ee))
-  eout <- as.expression(
-      lapply(ee, function(ei, map) {
-        eval(substitute(substitute(e, mp), list(e=ei, mp=map)))
-      },
-             map=map))
+  ee <- distributecbind(as.expression(elang))
+  map <- fvlabelmap(object, dot = TRUE)
+  eout <- as.expression(lapply(ee, function(ei, map) {
+    eval(substitute(substitute(e, mp), list(e = ei, mp = map)))
+  }, map = map))
   return(eout)
-}
-
+}  
 
 bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
   verifyclass(x, "fv")
@@ -623,6 +620,8 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   expandelang <- eval(substitute(substitute(ee,
                                       list(.=ud, .x=ux, .y=uy)),
                            list(ee=elang)))
+  evars <- all.vars(expandelang)
+  used.dotnames <- evars[evars %in% dnames]
   # evaluate expression
   datadf <- as.data.frame(data)
   results <- eval(expandelang, as.list(datadf))
@@ -687,15 +686,24 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   if(is.null(oldyexp))
     yexp <- substitute(f(xname), list(f=as.name(fname), xname=as.name(xname)))
   else {
+    # map 'cbind(....)' to "." for name of function only
+    cb <- paste("cbind(",
+                paste(used.dotnames, collapse=", "),
+                ")", sep="")
+    compresselang <- gsub(cb, ".", deparse(expandelang), fixed=TRUE)
+    compresselang <- as.formula(paste(compresselang, "~1"))[[2]]
+    # construct mapping using original function name
     labmap <- fvlabelmap(data, dot=TRUE)
     labmap[["."]] <- oldyexp
     yexp <- eval(substitute(substitute(ee, ff), 
-                            list(ee=elang, ff=labmap)))
+                            list(ee=compresselang, ff=labmap)))
   }
   # construct mathematical labels
-  mathsmap <- as.character(fvlegend(data, elang))
+  mathlabl <- as.character(fvlegend(data, expandelang))
   labl <- colnames(results)
-  labl[okmap] <- mathsmap[namemap[okmap]]
+  mathmap <- match(labl, used.dotnames)
+  okmath <- !is.na(mathmap)
+  labl[okmath] <- mathlabl[mathmap[okmath]]
   # form fv object and return
   out <- fv(results, argu=xname, valu=newyname, labl=labl,
             desc=desc, alim=attr(data, "alim"), fmla=fmla,

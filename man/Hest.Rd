@@ -73,6 +73,12 @@ Hest(X, r=NULL, breaks=NULL, ...,
   cumulative distribution function
   \eqn{H^\ast(r) = P(D \le r)}{H*(r) = P(D <= r)}
   which includes a jump at \eqn{r=0} if \code{X} has nonzero area.
+
+  Accuracy depends on the pixel resolution, which is controlled by the
+  arguments \code{eps}, \code{dimyx} and \code{xy} passed to
+  \code{\link{as.mask}}. For example, use \code{eps=0.1} to specify
+  square pixels of side 0.1 units, and \code{dimyx=256} to specify a
+  256 by 256 grid of pixels.
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -128,6 +134,7 @@ Hest(X, r=NULL, breaks=NULL, ...,
    H <- Hest(X)
    Y <- rpoisline(10)
    H <- Hest(Y)
+   H <- Hest(Y, dimyx=256)
    data(heather)
    H <- Hest(heather$coarse)
    H <- Hest(heather$coarse, conditional=FALSE)

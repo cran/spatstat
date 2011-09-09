@@ -1,27 +1,20 @@
-\name{bw.relrisk}
-\alias{bw.relrisk}
+\name{bw.smoothppp}
+\alias{bw.smoothppp}
 \title{
-  Cross Validated Bandwidth Selection for Relative Risk Estimation
+  Cross Validated Bandwidth Selection for Spatial Smoothing
 }
 \description{
-  Uses cross-validation to select a smoothing bandwidth
-  for the estimation of relative risk.
+  Uses least-squares cross-validation to select a smoothing bandwidth
+  for spatial smoothing of marks.
 }
 \usage{
-   bw.relrisk(X, method = "likelihood", nh = spatstat.options("n.bandwidth"),
+   bw.smoothppp(X, nh = spatstat.options("n.bandwidth"),
    hmin=NULL, hmax=NULL, warn=TRUE)
 }
 
 \arguments{
   \item{X}{
-    A multitype point pattern (object of class \code{"ppp"}
-    which has factor valued marks).
-  }
-  \item{method}{
-    Character string determining the cross-validation method.
-    Current options are \code{"likelihood"},
-    \code{"leastsquares"} or
-    \code{"weightedleastsquares"}.
+    A marked point pattern with numeric marks.
   }
   \item{nh}{
     Number of trial values of smoothing bandwith \code{sigma}
@@ -40,28 +33,28 @@
 }
 \details{
   This function selects an appropriate bandwidth for the nonparametric
-  estimation of relative risk using \code{\link{relrisk}}.
+  smoothing of mark values using \code{\link{smooth.ppp}}.
   
-  Consider the indicators \eqn{y_{ij}}{y[i,j]} which equal \eqn{1} when
-  data point \eqn{x_i}{x[i]} belongs to type \eqn{j}, and equal \eqn{0}
-  otherwise.
-  For a particular value of smoothing bandwidth,
-  let \eqn{\hat p_j(u)}{p*[j](u)} be the estimated
-  probabilities that a point at location \eqn{u} will belong to
-  type \eqn{j}. 
-  Then the bandwidth is chosen to minimise either the likelihood,
-  the squared error, or the approximately standardised squared error, of the
-  indicators \eqn{y_{ij}}{y[i,j]} relative to the fitted
-  values  \eqn{\hat p_j(x_i)}{p*[j](x[i])}. See Diggle (2003).
+  The argument \code{X} must be a marked point pattern
+  with a vector or data frame of marks. All mark values must be numeric.
+  
+  The bandwidth is selected by least-squares cross-validation.
+  Let \eqn{y_i}{y[i]} be the mark value at the \eqn{i}th data point.
+  For a particular choice of smoothing bandwidth,
+  let \eqn{\hat y_i}{y*[i]} be the smoothed value at the \eqn{i}th data point.
+  Then the bandwidth is chosen to minimise 
+  the squared error of the smoothed values
+  \eqn{\sum_i (y_i - \hat y_i)^2}{sum (y[i] - y*[i])^2}.
 
-  The result is a numerical value giving the selected bandwidth \code{sigma}.
+  The result of \code{bw.smoothppp}
+  is a numerical value giving the selected bandwidth \code{sigma}.
   The result also belongs to the class \code{"bw.optim"}
   allowing it to be printed and plotted. The plot shows the cross-validation
   criterion as a function of bandwidth.  
   
   The range of values for the smoothing bandwidth \code{sigma}
   is set by the arguments \code{hmin, hmax}. There is a sensible default,
-  based on multiples of Stoyan's rule of thumb \code{\link{bw.stoyan}}.
+  based on the nearest neighbour distances.
   
   If the optimal bandwidth is achieved at an endpoint of the
   interval \code{[hmin, hmax]}, the algorithm will issue a warning
@@ -79,26 +72,14 @@
   which can be plotted.
 }
 \seealso{
-  \code{\link{relrisk}},
-  \code{\link{bw.stoyan}}
+  \code{\link{smooth.ppp}}
 }
 \examples{
-  data(urkiola)
+  data(longleaf)
   \testonly{spatstat.options(n.bandwidth=8)}
-  b <- bw.relrisk(urkiola)
+  b <- bw.smoothppp(longleaf)
   b
   plot(b)
-  b <- bw.relrisk(urkiola, hmax=20)
-  plot(b)
-}
-\references{
-  Diggle, P.J. (2003)
-  \emph{Statistical analysis of spatial point patterns},
-  Second edition. Arnold.
-  
-  Kelsall, J.E. and Diggle, P.J. (1995)
-  Kernel estimation of relative risk.
-  \emph{Bernoulli} \bold{1}, 3--16.
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

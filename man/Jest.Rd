@@ -219,12 +219,12 @@
    data(cells)
    J <- Jest(cells, 0.01)
    plot(J, main="cells data")
-   # values are far above J= 1, indicating regular pattern
+   # values are far above J = 1, indicating regular pattern
 
    data(redwood)
-   J <- Jest(redwood, 0.01)
+   J <- Jest(redwood, 0.01, legendpos="center")
    plot(J, main="redwood data")
-   # values are below J= 1, indicating clustered pattern
+   # values are below J = 1, indicating clustered pattern
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

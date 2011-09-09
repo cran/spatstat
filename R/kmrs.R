@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.20 $	$Date: 2010/04/09 10:23:49 $
+#	$Revision: 3.21 $	$Date: 2011/08/24 09:11:51 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -199,8 +199,8 @@ censtimeCDFest <- function(o, cc, d, breaks, ...,
   nama <-  c("r",  "km", "hazard", "han", "rs", "raw")
   avail <- c(TRUE,  KM,  KM,       HAN,   RS,   RAW)
   iscdf <- c(FALSE, TRUE, FALSE,   TRUE,  TRUE, TRUE)
-  labl <- c("r", "%s[km](r)", "lambda(r)", "%s[han](r)", "%s[bord](r)", 
-            "%s[raw](r)")[avail]
+  labl <- c("r", "hat(%s)[km](r)", "lambda(r)", "hat(%s)[han](r)",
+            "hat(%s)[bord](r)", "hat(%s)[raw](r)")[avail]
   desc <- c("distance argument r",
             "Kaplan-Meier estimate of %s",
             "Kaplan-Meier estimate of hazard function lambda(r)",
