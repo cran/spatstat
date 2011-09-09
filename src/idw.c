@@ -3,7 +3,7 @@
 
   Inverse-distance weighted smoothing
 
-  $Revision: 1.4 $ $Date: 2011/07/25 06:24:41 $
+  $Revision: 1.5 $ $Date: 2011/09/07 02:10:24 $
 
 */
 
@@ -34,17 +34,35 @@ void idw(x, y, v, n, xstart, xstep, nx, ystart, ystep, ny, power, num, den, rat)
 
   pon2 = (*power)/2.0;
 
-  for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
-    for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
-      /* loop over data points, accumulating numerator and denominator */
-      for(i = 0; i < N; i++) {
-	d2 = (xg - x[i]) * (xg - x[i]) + (yg - y[i]) * (yg - y[i]);
-	w = 1.0/pow(d2, pon2);
-	MAT(num, ix, iy, Ny) += w * v[i];
-	MAT(den, ix, iy, Ny) += w;
+  if(pon2 == 1.0) {
+    /* slightly faster code when power=2 */
+    for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
+      for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
+	/* loop over data points, accumulating numerator and denominator */
+	for(i = 0; i < N; i++) {
+	  d2 = (xg - x[i]) * (xg - x[i]) + (yg - y[i]) * (yg - y[i]);
+	  w = 1.0/d2;
+	  MAT(num, ix, iy, Ny) += w * v[i];
+	  MAT(den, ix, iy, Ny) += w;
+	}
+	/* compute ratio */
+	MAT(rat, ix, iy, Ny) = MAT(num, ix, iy, Ny)/MAT(den, ix, iy, Ny);
       }
-      /* compute ratio */
-      MAT(rat, ix, iy, Ny) = MAT(num, ix, iy, Ny)/MAT(den, ix, iy, Ny);
+    }
+  } else {
+    /* general case */
+    for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
+      for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
+	/* loop over data points, accumulating numerator and denominator */
+	for(i = 0; i < N; i++) {
+	  d2 = (xg - x[i]) * (xg - x[i]) + (yg - y[i]) * (yg - y[i]);
+	  w = 1.0/pow(d2, pon2);
+	  MAT(num, ix, iy, Ny) += w * v[i];
+	  MAT(den, ix, iy, Ny) += w;
+	}
+	/* compute ratio */
+	MAT(rat, ix, iy, Ny) = MAT(num, ix, iy, Ny)/MAT(den, ix, iy, Ny);
+      }
     }
   }
 }
@@ -63,27 +81,54 @@ void idwloo(x, y, v, n, power, num, den, rat)
   N  = *n;
   pon2 = (*power)/2.0;
 
-  for(i = 0; i < N; i++) {
-    xi = x[i];
-    yi = y[i];
-    if(i > 0) {
-      for(j = 0; j < i; j++) {
-	d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	w = 1.0/pow(d2, pon2);
-	num[i] += w * v[j];
-	den[i] += w;
+  if(pon2 == 1.0) {
+    /* slightly faster code when power=2 */
+    for(i = 0; i < N; i++) {
+      xi = x[i];
+      yi = y[i];
+      if(i > 0) {
+	for(j = 0; j < i; j++) {
+	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	  w = 1.0/d2;
+	  num[i] += w * v[j];
+	  den[i] += w;
+	}
       }
-    }
-    if(i < N-1) {
-      for(j = i+1; j < N; j++) {
-	d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	w = 1.0/pow(d2, pon2);
-	num[i] += w * v[j];
-	den[i] += w;
+      if(i < N-1) {
+	for(j = i+1; j < N; j++) {
+	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	  w = 1.0/d2;
+	  num[i] += w * v[j];
+	  den[i] += w;
+	}
       }
+      /* compute ratio */
+      rat[i] = num[i]/den[i];
     }
-    /* compute ratio */
-    rat[i] = num[i]/den[i];
+  } else {
+    /* general case */
+    for(i = 0; i < N; i++) {
+      xi = x[i];
+      yi = y[i];
+      if(i > 0) {
+	for(j = 0; j < i; j++) {
+	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	  w = 1.0/pow(d2, pon2);
+	  num[i] += w * v[j];
+	  den[i] += w;
+	}
+      }
+      if(i < N-1) {
+	for(j = i+1; j < N; j++) {
+	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	  w = 1.0/pow(d2, pon2);
+	  num[i] += w * v[j];
+	  den[i] += w;
+	}
+      }
+      /* compute ratio */
+      rat[i] = num[i]/den[i];
+    }
   }
 }
 

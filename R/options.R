@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.39 $   $Date: 2011/07/31 12:11:06 $
+#    $Revision: 1.40 $   $Date: 2011/09/03 03:09:20 $
 #
 #
 
@@ -186,6 +186,13 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
          default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
+       ),
+       n.bandwidth=list(
+         default=32,
+         check=function(x) {
+           is.numeric(x) && (length(x) == 1) && (x == ceiling(x)) && (x > 2)
+         },
+         valid="a single integer, greater than 2"
        )
        )
 

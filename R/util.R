@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.75 $    $Date: 2011/07/19 12:33:35 $
+#    $Revision: 1.76 $    $Date: 2011/09/07 04:49:45 $
 #
 #  (a) for matrices only:
 #
@@ -572,4 +572,8 @@ make.parseable <- function(x) {
 
 paste.expr <- function(x) {
   unlist(lapply(x, function(z) { paste(deparse(z), collapse="") }))
+}
+
+badprobability <- function(x, NAvalue=NA) {
+  ifelse(is.na(x), NAvalue, !is.finite(x) | x < 0 | x > 1)
 }

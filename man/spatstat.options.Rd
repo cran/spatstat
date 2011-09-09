@@ -165,6 +165,11 @@
       to evaluate \code{density.ppp(X, at="points")}
       Initialised to \code{TRUE}.
     }
+    \item{n.bandwidth}{
+      Integer. Number of trial values of smoothing bandwidth to use for
+      cross-validation in \code{\link{bw.relrisk}} and similar
+      functions.
+    }
     \item{psstG.remove.zeroes}{
       Logical value, determining whether the algorithm in
       \code{\link{psstG}} 

@@ -77,7 +77,7 @@ relrisk(X, sigma = NULL, ..., varcov = NULL, at = "pixels", casecontrol=TRUE)
   Estimation is performed by a simple Nadaraja-Watson type kernel
   smoother (Diggle, 2003). If \code{sigma} and \code{varcov}
   are both missing or null, then the smoothing bandwidth \code{sigma}
-  is selected by cross-validation using \code{\link{bw.relrisk}}. 
+  is selected by cross-validation using \code{\link{bw.relrisk}}.
 }
 \value{
   If \code{X} consists of only two types of points,

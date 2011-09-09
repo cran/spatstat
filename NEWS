@@ -1,3 +1,73 @@
+	CHANGES IN spatstat VERSION 1.23-4
+
+OVERVIEW 
+
+    o Bandwidth selection for density.ppp and smooth.ppp
+
+    o Layered plots. 
+
+    o Model-handling facilities.
+
+    o Improvements and bug fixes.
+
+
+NEW FUNCTIONS
+
+   o bw.diggle
+   Bandwidth selection for density.ppp by mean square error cross-validation.
+
+   o bw.smoothppp
+   Bandwidth selection for smooth.ppp by least-squares cross-validation.
+
+   o layered, plot.layered
+   A simple mechanism for controlling plots that consist of
+   several successive layers of data.
+
+   o model.depends
+   Given a fitted model (of any kind), identify which of the covariates
+   is involved in each term of the model.
+
+   o model.is.additive
+   Determine whether a fitted model  (of any kind) is additive, 
+   in the sense that each term in the model involves at most one covariate.
+
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o smooth.ppp
+   Bandwidth 'sigma' is now selected by least-squares cross-validation
+
+   o bw.relrisk
+   Computation in large datasets accelerated.
+   New arguments 'hmin', 'hmax' control the range of trial values of bandwidth.
+
+   o Hest, Gfox, Jfox
+   Improved algebraic labels for plot
+
+   o spatstat.options
+   New parameter 'n.bandwidth'
+
+   o density.ppp, smooth.ppp
+   Slightly accelerated.
+
+   o point-in-polygon test
+   Accelerated.
+
+BUG FIXES
+
+    o with.fv
+    Mathematical labels were incorrect in some cases.
+    Fixed.
+
+    o bw.relrisk
+    Implementation of method="weightedleastsquares" was incorrect
+    and was equivalent to method="leastsquares".
+    Fixed.
+
+    o smooth.ppp
+    NaN values occurred if the bandwidth was very small.
+    Fixed.
+
 	CHANGES IN spatstat VERSION 1.23-3
 
 OVERVIEW 

@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.8 $    $Date: 2009/04/03 20:06:04 $
+#     $Revision: 1.12 $    $Date: 2011/08/14 05:28:14 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -82,17 +82,15 @@ distppl <- function(p, l) {
   return(dmin)
 }
 
-distppll <- function(p, l, mintype=0, method="Fortran", listit=FALSE) {
+distppll <- function(p, l, mintype=0,
+                     method=c("Fortran", "C", "interpreted"), listit=FALSE) {
   np <- nrow(p)
   nl <- nrow(l)
   xp <- p[,1]
   yp <- p[,2]
   if(is.na(match(mintype,0:2)))
     stop(paste("Argument", sQuote("mintype"), "must be 0, 1 or 2.\n"))
-  if(is.na(match(method, c("Fortran", "interpreted"))))
-    stop(paste("permitted options are", sQuote("Fortran"),
-               "and", sQuote("interpreted")))
-
+  method <- match.arg(method)
   switch(method,
          interpreted={
            dx <- l[,3]-l[,1]
@@ -162,6 +160,31 @@ distppll <- function(p, l, mintype=0, method="Fortran", listit=FALSE) {
              min.d <- temp$xmin
            if(mintype == 2)
              min.which <- temp$jmin
+         },
+         C = {
+           eps <- .Machine$double.eps
+           DUP <- spatstat.options("dupC")
+           temp <- .C(
+                      "prdist2segs",
+                      x=as.double(xp),
+                      y=as.double(yp),
+                      npoints =as.integer(np),
+                      x0=as.double(l[,1]),
+                      y0=as.double(l[,2]),
+                      x1=as.double(l[,3]),
+                      y1=as.double(l[,4]),
+                      nsegments=as.integer(nl),
+                      epsilon=as.double(eps),
+                      dist2=as.double(numeric(np * nl)),
+                      DUP=DUP,
+                      PACKAGE="spatstat")
+           d <- sqrt(matrix(temp$dist2, nrow=np, ncol=nl))
+           if(mintype == 2) {
+             min.which <- apply(d, 1, which.min)
+             min.d <- d[cbind(1:np, min.which)]
+           } else if (mintype == 1) {
+             min.d <- apply(d, 1, min)
+           }
          })
   ###### end switch #####
   if(mintype==0)
@@ -174,11 +197,19 @@ distppll <- function(p, l, mintype=0, method="Fortran", listit=FALSE) {
 
 # faster code if you don't want the n*m matrix 'd'
 
-distppllmin <- function(p, l) {
+distppllmin <- function(p, l, big=NULL) {
   np <- nrow(p)
   nl <- nrow(l)
+  # initialise squared distances to large value
+  if(is.null(big)) {
+    xdif <- diff(range(c(p[,1],l[, c(1,3)])))
+    ydif <- diff(range(c(p[,2],l[, c(2,4)])))
+    big <- 2 * (xdif^2 + ydif^2)
+  }
+  dist2 <- rep(big, np)
+  #
   DUP <- spatstat.options("dupC")
-  z <- .C("distmap2segs",
+  z <- .C("nndist2segs",
           xp=as.double(p[,1]),
           yp=as.double(p[,2]),
           npoints=as.integer(np),
@@ -188,7 +219,7 @@ distppllmin <- function(p, l) {
           y1=as.double(l[,4]),
           nsegments=as.integer(nl),
           epsilon=as.double(.Machine$double.eps),
-          dist2=as.double(numeric(np)),
+          dist2=as.double(dist2),
           index=as.integer(integer(np)),
           DUP=DUP,
           PACKAGE="spatstat")

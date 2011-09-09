@@ -1,7 +1,7 @@
 #
 #    xypolygon.S
 #
-#    $Revision: 1.54 $    $Date: 2011/08/07 01:26:49 $
+#    $Revision: 1.56 $    $Date: 2011/08/13 03:09:12 $
 #
 #    low-level functions defined for polygons in list(x,y) format
 #
@@ -19,7 +19,7 @@ verify.xypolygon <- function(p, fatal=TRUE) {
   return(ok)
 }
 
-inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
+inside.xypolygon <- function(pts, polly, test01=TRUE, method="C") {
   # pts:  list(x,y) points to be tested
   # polly: list(x,y) vertices of a single polygon (n joins to 1)
   # test01: logical - if TRUE, test whether all values in output are 0 or 1
@@ -62,6 +62,22 @@ inside.xypolygon <- function(pts, polly, test01=TRUE, method="Fortran") {
 
   if(anyretain<- any(retain)) {
     switch(method,
+           C={
+             #------------------ call C routine ------------------
+             temp <- .C("inxyp",
+                        x=as.double(x),
+                        y=as.double(y),
+                        xp=as.double(xp),
+                        yp=as.double(yp),
+                        npts=as.integer(npts),
+                        nedges=as.integer(nedges),
+                        score=as.integer(score),
+                        onbndry=as.integer(on.boundary),
+                        PACKAGE="spatstat"
+                        )
+             score <- temp$score/2
+             on.boundary <- as.logical(temp$onbndry)
+           },
            Fortran={
              #------------------ call Fortran routine ------------------
              temp <- .Fortran(

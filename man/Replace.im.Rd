@@ -20,8 +20,9 @@
     by \code{\link{as.ppp}}, or any type of index that applies to a matrix.
   }
   \item{value}{
-     Vector of replacement values (short vectors will be
-     recycled).
+     Vector, matrix, factor or pixel image
+     containing the replacement values.
+     Short vectors will be recycled.
   }
 } 
 \value{

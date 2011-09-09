@@ -5,7 +5,8 @@
 \title{Spatial smoothing of observations at irregular points}
 \description{
   Performs spatial smoothing of numeric values observed
-  at a set of irregular locations. Uses Gaussian kernel smoothing.
+  at a set of irregular locations. Uses Gaussian kernel smoothing
+  and least-squares cross-validated bandwidth selection.
 }
 \usage{
 smooth.ppp(X, ..., weights = rep(1, npoints(X)), at="pixels")
@@ -14,12 +15,13 @@ markvar(X, ...)
 }
 \arguments{
   \item{X}{A marked point pattern (object of class \code{"ppp"}).}
-  \item{\dots}{Arguments passed to \code{\link{density.ppp}}
+  \item{\dots}{Arguments passed to
+    \code{\link{bw.smoothppp}} and \code{\link{density.ppp}}
     to control the kernel smoothing and
     the pixel resolution of the result.}
   \item{weights}{Optional weights attached to the observations.}
   \item{at}{
-    String specifying whether to compute the intensity values
+    String specifying whether to compute the smoothed values
     at a grid of pixel locations (\code{at="pixels"}) or
     only at the points of \code{X} (\code{at="points"}).
   }
@@ -41,7 +43,10 @@ markvar(X, ...)
   }{
     g(u) = (sum of k(u-x[i]) v[i])/(sum of k(u-x[i]))
   }
-  where \eqn{k} is a Gaussian kernel.
+  where \eqn{k} is a Gaussian kernel. This is known as the 
+  Nadaraya-Watson smoother (Nadaraya, 1964, 1989; Watson, 1964).
+  By default, the smoothing kernel bandwidth is chosen by
+  least squares cross-validation (see below).
   
   The argument \code{X} must be a marked point pattern (object
   of class \code{"ppp"}, see \code{\link{ppp.object}}).
@@ -57,7 +62,11 @@ markvar(X, ...)
   The numerator and denominator are computed by \code{\link{density.ppp}}.
   The arguments \code{...} control the smoothing kernel parameters
   and determine whether edge correction is applied.
-  See \code{\link{density.ppp}}.
+  The smoothing kernel bandwidth can be specified by either of the arguments
+  \code{sigma} or \code{varcov} which are passed to \code{\link{density.ppp}}.
+  If neither of these arguments is present, then by default the
+  bandwidth is selected by least squares cross-validation,
+  using \code{\link{bw.smoothppp}}. 
 
   The optional argument \code{weights} allows numerical weights to
   be applied to the data. If a weight \eqn{w_i}{w[i]}
@@ -104,6 +113,7 @@ markvar(X, ...)
 }
 \seealso{
   \code{\link{density.ppp}},
+  \code{\link{bw.smoothppp}},
   \code{\link{ppp.object}},
   \code{\link{im.object}}.
 
@@ -114,21 +124,35 @@ markvar(X, ...)
 \examples{
    # Longleaf data - tree locations, marked by tree diameter
    data(longleaf)
-   # Local smoothing of tree diameter
+   # Local smoothing of tree diameter (automatic bandwidth selection)
    Z <- smooth.ppp(longleaf)
    # Kernel bandwidth sigma=5
    plot(smooth.ppp(longleaf, 5))
    # mark variance
-   plot(markvar(longleaf))
+   plot(markvar(longleaf, sigma=5))
    # data frame of marks: trees marked by diameter and height
    data(finpines)
-   plot(smooth.ppp(finpines))
+   plot(smooth.ppp(finpines, sigma=2))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner
   \email{r.turner@auckland.ac.nz}
+}
+\references{
+  Nadaraya, E.A. (1964) On estimating regression.
+  \emph{Theory of Probability and its Applications}
+  \bold{9}, 141--142.
+
+  Nadaraya, E.A. (1989) 
+  \emph{Nonparametric estimation of probability densities
+  and regression curves}.
+  Kluwer, Dordrecht.
+
+  Watson, G.S. (1964)
+  Smooth regression analysis.
+  \emph{Sankhya A} \bold{26}, 359--372.
 }
 \keyword{spatial}
 \keyword{methods}

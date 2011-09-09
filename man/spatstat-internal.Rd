@@ -25,6 +25,7 @@
 \alias{as.list.hyperframe}
 \alias{as.listof}
 \alias{as.units}
+\alias{badprobability}
 \alias{beachcolours}
 \alias{bermantestEngine}
 \alias{bdrylength.xypolygon} 
@@ -33,6 +34,7 @@
 \alias{breakpts}
 \alias{breakpts.from.r}
 \alias{bt.frame}
+\alias{bw.optim}
 \alias{cartesian}
 \alias{cat.factor}
 \alias{cellmiddles}
@@ -285,7 +287,7 @@
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot.barplotdata}
-\alias{plot.bw.relrisk}
+\alias{plot.bw.optim}
 \alias{plot.fii}
 \alias{plot.minconfit}
 \alias{plot.plotpairsim}
@@ -303,7 +305,7 @@
 \alias{prefixfv}
 \alias{primefactors}       
 \alias{print.bt.frame}
-\alias{print.bw.relrisk}
+\alias{print.bw.optim}
 \alias{print.colourmap}
 \alias{print.diagppm}
 \alias{print.envelope}
@@ -313,6 +315,7 @@
 \alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
+\alias{print.layered}
 \alias{print.linim}
 \alias{print.lut}
 \alias{print.minconfit}
@@ -479,6 +482,7 @@ as.fv(x)
 \method{as.im}{linim}(X, \dots)
 as.listof(x)
 as.units(s)
+badprobability(x, NAvalue)
 beachcolours(heightrange, sealevel, monochrome, ncolours)
 bermantestEngine(model, covariate, which, alternative, ..., modelname, covname, dataname)
 bdrylength.xypolygon(polly)
@@ -488,6 +492,7 @@ breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 bt.frame(Q, trend=~1, interaction=NULL, ..., covariates=NULL,
          correction="border", rbord=0, use.gam=FALSE, allcovar=FALSE)
+bw.optim(cv, h, iopt, \dots, xlab, ylab)
 cartesian(pp, markset, fac = TRUE)
 cat.factor(\dots, recursive=FALSE)
 cellmiddles(W, nx, ny, npix, gi)
@@ -522,7 +527,9 @@ damaged.ppm(object)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
-densitypointsEngine(x, sigma, \dots, weights, edge, varcov,leaveoneout,diggle)
+densitypointsEngine(x, sigma, \dots,
+                    weights, edge, varcov,
+                    leaveoneout, diggle, sorted)
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
@@ -539,13 +546,13 @@ dilate.owin(\dots)
 \method{dimnames}{msr}(x)
 distpl(p, l)               
 distppl(p, l)
-distppll(p, l, mintype=0, method="Fortran", listit=FALSE)
-distppllmin(p, l)
+distppll(p, l, mintype, method, listit)
+distppllmin(p, l, big)
 distributecbind(x)
 dist2dpath(dist, method="C")
 divisors(n)
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
-do.call.matched(fname, arglist, funargs, extrargs)
+do.call.matched(fun, arglist, funargs, extrargs)
 do.iplot(panel)
 do.istat(panel)
 edge.Ripley(X, r, W, method)
@@ -621,7 +628,7 @@ idorempty(w, r, caller)
 implemented.for.K(correction, windowtype, explicit)
 inpoint(W)
 inside.triangle(x, y, xx, yy)
-inside.xypolygon(pts, polly, test01 = TRUE, method="Fortran")
+inside.xypolygon(pts, polly, test01, method)
 intersect.ranges(a,b,fatal)
 intX.owin(w)
 intX.xypolygon(polly)
@@ -765,7 +772,7 @@ pickoption(what="option", key, keymap, \dots,
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{barplotdata}(x, \dots)
-\method{plot}{bw.relrisk}(x, \dots)
+\method{plot}{bw.optim}(x, \dots, add)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
@@ -784,7 +791,7 @@ prange(x)
 prefixfv(x, prefix, prephrase)
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
-\method{print}{bw.relrisk}(x, \dots)
+\method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{envelope}(x, \dots)
@@ -794,6 +801,7 @@ primefactors(n, prmax)
 \method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
 \method{print}{isf}(x, \dots)
+\method{print}{layered}(x, \dots)
 \method{print}{linim}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
@@ -849,7 +857,7 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
 resolve.defaults(\dots, .StripNull=FALSE)
-resolve.2D.kernel(\dots, sigma, varcov, x, mindist, adjust, useN)
+resolve.2D.kernel(\dots, sigma, varcov, x, mindist, adjust, bwfun)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
 revcumsum(x)
@@ -881,7 +889,8 @@ shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr)
 singlestring(s, coll)
-smoothpointsEngine(x, values, sigma, \dots, weights, varcov, leaveoneout)
+smoothpointsEngine(x, values, sigma, \dots,
+                    weights, varcov, leaveoneout, sorted)
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatialCDFframe(model, covariate, \dots)
