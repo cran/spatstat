@@ -93,51 +93,68 @@
   view. (The actual field of view may be larger, depending on the
   graphics device).
 }
-\section{Notes on Filled Polygons}{
-  The function \code{\link{polygon}()} can only handle
+\section{Notes on Filled Polygons with Holes}{
+  The function \code{\link{polygon}} can only handle
   polygons without holes. To plot polygons with holes in a solid colour,
   we have implemented two workarounds.
   
   \describe{
-    \item{polypath function:}{The first workaround uses
-    the relatively new function \code{\link{polypath}()} which
-    \emph{does} have the capability to handle polygons with holes.
-    However \code{polypath()} does not work with devices \code{xfig},
-    \code{pictex}, and \code{X11(type="Xlib")}.
-    It does work with
-    \code{X11(type="cairo")} (see \code{\link{X11}()}).  To make use
-    of this latter facility one needs to have \code{cairo} installed
-    on one's machine.  See \url{http://www.cairographics.org/download}
-    for instructions as to how to obtain \code{cairo}.  After having
-    installed \code{cairo} one needs to re-install \R from source so
-    that it has \code{cairo} capabilites.  To check whether your
-    current installation of R has \code{cairo} capabilities, type
-    (in \R) \code{capabilities()["cairo"]}.
-    The default type for \code{X11()} is controlled by
-    \code{\link[grDevices]{X11.options}()}.
-    The default for this option appears to
-    remain \code{Xlib} even though the help for \code{X11.options()} says
-    (in respect of \code{type}):  \dQuote{Default "cairo" where available
-      and reliable, otherwise "Xlib".}  You may find it convenient to
-    make \code{cairo} the default, e.g. via your \code{.Rprofile}.
-    The magic incantation to put into \code{.Rprofile} is
-    \preformatted{
-      setHook(packageEvent("graphics", "onLoad"),
-                   function(...) grDevices::X11.options(type="cairo"))
-		 }
-    }	 
+    \item{polypath function:}{
+      The first workaround uses
+      the relatively new function \code{\link{polypath}} which
+      \emph{does} have the capability to handle polygons with holes.
+      However, not all graphics devices support \code{\link{polypath}}.
+      The older devices \code{\link{xfig}} and \code{\link{pictex}}
+      do not support \code{\link{polypath}}.
+      On a Windows system, the default graphics device
+#ifdef windows      
+      \code{\link{windows}} 
+#endif
+#ifndef windows      
+      \code{windows}
+#endif
+      supports \code{\link{polypath}}.
+#ifdef unix
+      On a Linux system, the default graphics device
+      \code{X11(type="Xlib")} does \emph{not} support \code{\link{polypath}}
+      but \code{X11(type="cairo")} does support it.
+      See \code{\link{X11}} and the section on Cairo below.
+#endif
+    }
     \item{gpclib package:}{
-      The other workaround requires use of the \code{gpclib} package which
+      The other workaround requires use of the \pkg{gpclib} package which
       effects a triangulation of the polygonal window in question which
       in turn permits the plotting of the window, filled with a solid
       colour, without filling the holes.  Type \code{licence.polygons()}
-      for information about the licence under which \code{gpclib} operates.
+      for information about the licence under which \pkg{gpclib} operates.
       To make use of this workaround you need to have the package{gpclib}
       installed and to set \code{spatstat.options(gpclib=TRUE)} (and to be
-      working under circumstances permitted by the \code{gpclib} licence).
+      working under circumstances permitted by the \pkg{gpclib} licence).
     }
   }
 }
+#ifdef unix
+\section{Cairo graphics on a Linux system}{
+  Linux systems support
+  the graphics device \code{X11(type="cairo")} (see \code{\link{X11}})
+  provided the external library \pkg{cairo} is installed
+  on the computer. See \url{http://www.cairographics.org/download}
+  for instructions on obtaining and installing \pkg{cairo}.  After having
+  installed \pkg{cairo} one needs to re-install \R from source so
+  that it has \pkg{cairo} capabilites.  To check whether your
+  current installation of R has \pkg{cairo} capabilities, type
+  (in \R) \code{capabilities()["cairo"]}.
+  The default type for \code{\link{X11}} is controlled by
+  \code{\link[grDevices]{X11.options}}.
+  You may find it convenient to
+  make \pkg{cairo} the default, e.g. via your \code{.Rprofile}.
+  The magic incantation to put into \code{.Rprofile} is
+  \preformatted{
+    setHook(packageEvent("graphics", "onLoad"),
+    function(...) grDevices::X11.options(type="cairo"))
+  }
+}
+#endif
 \seealso{
   \code{\link{owin.object}},
   \code{\link{plot.ppp}},

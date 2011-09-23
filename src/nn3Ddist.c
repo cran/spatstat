@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances in 3D 
 
-  $Revision: 1.1 $     $Date: 2010/01/05 05:03:31 $
+  $Revision: 1.2 $     $Date: 2011/09/20 07:39:11 $
 
   THE FOLLOWING FUNCTIONS ASSUME THAT z IS SORTED IN ASCENDING ORDER 
 
@@ -16,6 +16,8 @@
   knnd3D    k-th nearest neighbour distances
   knnw3D    k-th nearest neighbours and their distances
 */
+
+#undef SPATSTAT_DEBUG
 
 #include <R.h>
 #include <math.h>
@@ -40,23 +42,15 @@ void nnd3D(n, x, y, z, nnd, huge)
   int npoints, i, left, right;
   double dmin, d2, d2min, xi, yi, zi, dx, dy, dz, hu, hu2;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("out", "w");
-#endif
 
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     dmin = hu;
@@ -72,7 +66,7 @@ void nnd3D(n, x, y, z, nnd, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "L");
+	  Rprintf("L");
 #endif
 
 	  dx = x[left] - xi;
@@ -93,7 +87,7 @@ void nnd3D(n, x, y, z, nnd, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "R");
+	  Rprintf("R");
 #endif
 	  dx = x[right] - xi;
 	  dy = y[right] - yi;
@@ -105,7 +99,7 @@ void nnd3D(n, x, y, z, nnd, huge)
 	}
     }
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     nnd[i] = dmin;
@@ -394,7 +388,7 @@ void knnd3D(n, kmax, x, y, z, nnd, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances */
@@ -417,7 +411,7 @@ void knnd3D(n, kmax, x, y, z, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L");
+	Rprintf("L");
 #endif
 
 	dx = x[left] - xi;
@@ -456,7 +450,7 @@ void knnd3D(n, kmax, x, y, z, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R");
+	Rprintf("R");
 #endif
 	dx = x[right] - xi;
 	dy = y[right] - yi;
@@ -488,7 +482,7 @@ void knnd3D(n, kmax, x, y, z, nnd, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -556,7 +550,7 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances and indices */
@@ -580,7 +574,7 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L");
+	Rprintf("L");
 #endif
 
 	dx = x[left] - xi;
@@ -623,7 +617,7 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R");
+	Rprintf("R");
 #endif
 	dx = x[right] - xi;
 	dy = y[right] - yi;
@@ -659,7 +653,7 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -670,10 +664,6 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
       nnwhich[nk * i + k] = which[k];
     }
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
 
 }
 

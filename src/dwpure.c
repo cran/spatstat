@@ -2,7 +2,7 @@
 
    dwpure.c
 
-   $Revision: 1.3 $   $Date: 2009/01/27 19:00:58 $
+   $Revision: 1.5 $   $Date: 2011/09/20 07:54:53 $
 
    Code by Dominic Schuhmacher
    
@@ -105,9 +105,9 @@ void dwpure(int *d, int *rmass, int *cmass, int *numr, int *numc, int *flowmatri
 /* For testing: print out cost matrix 
    for (i = 0; i < n1; ++i) {
    for (j = 0; j < n2; ++j) {
-      printf("%d ", COST(i, j, &state, n1));
+      Rprintf("%d ", COST(i, j, &state, n1));
    }
-   printf("\n");
+   Rprintf("\n");
    }   */
 
 /* The main loop */

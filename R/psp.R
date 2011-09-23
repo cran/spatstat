@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.63 $ $Date: 2011/06/16 04:49:18 $
+#  $Revision: 1.64 $ $Date: 2011/09/23 01:24:11 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -388,7 +388,9 @@ plot.psp <- function(x, ..., add=FALSE, which.marks=1,
       lev <- levels(marx)
       colmap <- colourmap(col=rainbow(length(lev)), inputs=factor(lev))
     } else {
-      colmap <- colourmap(col=rainbow(ribn), range=range(marx))
+      if(!all(is.finite(marx)))
+        warning("Some mark values are infinite or NaN or NA")
+      colmap <- colourmap(col=rainbow(ribn), range=range(marx, finite=TRUE))
     }
     col <- colmap(marx)
   }

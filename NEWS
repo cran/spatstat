@@ -1,3 +1,56 @@
+	CHANGES IN spatstat VERSION 1.23-5
+
+OVERVIEW 
+
+   o Bug fix to bandwidth selection.
+
+   o Functions to pool data from several objects of the same class.
+
+   o Improvements and bug fixes.
+
+   o We thank Michael Sumner for contributions.
+
+NEW FUNCTIONS
+
+   o pool
+   Pool data from several objects of the same class
+
+   o pool.envelope
+   Pool simulated data from several envelope objects and create a new envelope
+
+   o pool.fasp
+   Pool simulated data from several function arrays and create a new array
+
+   o envelope.envelope
+   Recalculate an envelope from simulated data using different parameters
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o bw.diggle, bw.relrisk, bw.smoothppp, bw.optim
+   Plot method modified.
+
+   o model.depends
+   Now also recognises 'offset' terms.
+
+BUG FIXES
+
+   o bw.diggle
+   Bandwidth was too large by a factor of 2.
+   Fixed.
+
+   o plot.psp
+   Crashed if any marks were NA.
+   Fixed.
+
+   o pointsOnLines
+   Crashed if any segments had zero length.
+   Ignored argument 'np' in some cases.
+   Fixed.
+
+   o stieltjes
+   Crashed if M had only a single column of function values.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.23-4
 
 OVERVIEW 

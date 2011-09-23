@@ -4,7 +4,7 @@
 
   Edge corrections
 
-  $Revision: 1.8 $     $Date: 2009/08/26 05:18:18 $
+  $Revision: 1.9 $     $Date: 2011/09/20 07:33:37 $
 
  */
 
@@ -14,9 +14,7 @@
 
 #include <math.h>
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
+#include <R.h>
 
 /* This constant is defined in Rmath.h */
 #define TWOPI M_2PI
@@ -101,7 +99,7 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
        ijpos = j * n + i;
        rij = rmat[ijpos];
 #ifdef DEBUG
-       fprintf(stderr, "rij = %lf\n", rij);
+       Rprintf("rij = %lf\n", rij);
 #endif
        /*
 	 half the angle subtended by the intersection between
@@ -113,10 +111,10 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
        aD = (dD < rij) ? acos(dD/rij) : 0.0;
        aU = (dU < rij) ? acos(dU/rij) : 0.0;
 #ifdef DEBUG
-       fprintf(stderr, "aL = %lf\n", aL);
-       fprintf(stderr, "aR = %lf\n", aR);
-       fprintf(stderr, "aD = %lf\n", aD);
-       fprintf(stderr, "aU = %lf\n", aU);
+       Rprintf("aL = %lf\n", aL);
+       Rprintf("aR = %lf\n", aR);
+       Rprintf("aD = %lf\n", aD);
+       Rprintf("aU = %lf\n", aU);
 #endif
        /* apply maxima */
 
@@ -125,10 +123,10 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
        cU = MIN(aU, bUL) + MIN(aU, bUR);
        cD = MIN(aD, bDL) + MIN(aD, bDR);
 #ifdef DEBUG
-       fprintf(stderr, "cL = %lf\n", cL);
-       fprintf(stderr, "cR = %lf\n", cR);
-       fprintf(stderr, "cD = %lf\n", cD);
-       fprintf(stderr, "cU = %lf\n", cU);
+       Rprintf("cL = %lf\n", cL);
+       Rprintf("cR = %lf\n", cR);
+       Rprintf("cD = %lf\n", cD);
+       Rprintf("cU = %lf\n", cU);
 #endif
 
        /* total exterior angle over 2 pi */
@@ -139,7 +137,7 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
 	 extang += 1/4;
 
 #ifdef DEBUG
-       fprintf(stderr, "extang = %lf\n", extang);
+       Rprintf("extang = %lf\n", extang);
 #endif
        /* OK, now compute weight */
        out[ijpos] = 1 / (1 - extang);
@@ -171,20 +169,20 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
     xcentre = xc[i];
     ycentre = yc[i];
 #ifdef DEBUG
-    fprintf(stderr, "centre = (%lf, %lf)\n", xcentre, ycentre);
+    Rprintf("centre = (%lf, %lf)\n", xcentre, ycentre);
 #endif
 
     for(j = 0; j < nradperpt; j++) {
       radius = rmat[ j * n + i];
       radius2 = radius * radius;
 #ifdef DEBUG
-       fprintf(stderr, "radius = %lf\n", radius);
+       Rprintf("radius = %lf\n", radius);
 #endif
 
       total = 0.0;
       for(k=0; k < m; k++) {
 #ifdef DEBUG
-       fprintf(stderr, "k = %d\n", k);
+       Rprintf("k = %d\n", k);
 #endif
 	ncut = 0;
 	xx0 = x0[k];
@@ -192,7 +190,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	xx1 = x1[k];
 	yy1 = y1[k];
 #ifdef DEBUG
-       fprintf(stderr, "(%lf,%lf) to (%lf,%lf)\n", xx0, yy0, xx1, yy1);
+       Rprintf("(%lf,%lf) to (%lf,%lf)\n", xx0, yy0, xx1, yy1);
 #endif
 	/* intersection with left edge */
 	dx0 = xx0 - xcentre;
@@ -203,7 +201,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(y < yy0) {
 	    theta[ncut] = atan2(y - ycentre, dx0);
 #ifdef DEBUG
-	    fprintf(stderr, "cut left at theta= %lf\n", theta[ncut]);
+	    Rprintf("cut left at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -211,7 +209,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(y < yy0) {
 	    theta[ncut] = atan2(y-ycentre, dx0);
 #ifdef DEBUG
-	    fprintf(stderr, "cut left at theta= %lf\n", theta[ncut]);
+	    Rprintf("cut left at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -219,7 +217,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(ycentre < yy0) {
 	    theta[ncut] = atan2(0.0, dx0);
 #ifdef DEBUG
-	    fprintf(stderr, "tangent left at theta= %lf\n", theta[ncut]);
+	    Rprintf("tangent left at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -233,7 +231,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(y < yy1) {
 	    theta[ncut] = atan2(y - ycentre, dx1);
 #ifdef DEBUG
-	    fprintf(stderr, "cut right at theta= %lf\n", theta[ncut]);
+	    Rprintf("cut right at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -241,7 +239,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(y < yy1) {
 	    theta[ncut] = atan2(y - ycentre, dx1);
 #ifdef DEBUG
-	    fprintf(stderr, "cut right at theta= %lf\n", theta[ncut]);
+	    Rprintf("cut right at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -249,7 +247,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  if(ycentre < yy1) {
 	    theta[ncut] = atan2(0.0, dx1);
 #ifdef DEBUG
-	    fprintf(stderr, "tangent right at theta= %lf\n", theta[ncut]);
+	    Rprintf("tangent right at theta= %lf\n", theta[ncut]);
 #endif
 	    ncut++;
 	  }
@@ -270,7 +268,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	    y = yy0 + t * yy01;
 	    theta[ncut] = atan2(y - ycentre, x - xcentre);
 #ifdef DEBUG
-	    fprintf(stderr, "hits segment: t = %lf, theta = %lf\n", 
+	    Rprintf("hits segment: t = %lf, theta = %lf\n", 
 		    t, theta[ncut]);
 #endif
 	    ++ncut;
@@ -281,7 +279,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	    y = yy0 + t * yy01;
 	    theta[ncut] = atan2(y - ycentre, x - xcentre);
 #ifdef DEBUG
-	    fprintf(stderr, "hits segment: t = %lf, theta = %lf\n", 
+	    Rprintf("hits segment: t = %lf, theta = %lf\n", 
 		    t, theta[ncut]);
 #endif
 	    ++ncut;
@@ -293,7 +291,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	    y = yy0 + t * yy01;
 	    theta[ncut] = atan2(y - ycentre, x - xcentre);
 #ifdef DEBUG
-	    fprintf(stderr, "tangent to segment: t = %lf, theta = %lf\n", 
+	    Rprintf("tangent to segment: t = %lf, theta = %lf\n", 
 		    t, theta[ncut]);
 #endif
 	    ++ncut;
@@ -323,7 +321,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 #ifdef DEBUG
 	if(ncut > 0) {
 	  for(l = 0; l < ncut; l++)
-	    fprintf(stderr, "theta[%d] = %lf\n", l, theta[l]);
+	    Rprintf("theta[%d] = %lf\n", l, theta[l]);
 	}
 #endif
 	/* compute length of circumference inside polygon */
@@ -350,16 +348,16 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  contrib = 0.0;
 	  for(l = 0; l <= ncut; l++) {
 #ifdef DEBUG
-	    fprintf(stderr, "delta[%d] = %lf\n", l, delta[l]);
+	    Rprintf("delta[%d] = %lf\n", l, delta[l]);
 #endif
 	    xtest = xcentre + radius * cos(tmid[l]);
 	    ytest = ycentre + radius * sin(tmid[l]);
 	    if(TESTINSIDE(xtest, ytest, xx0, yy0, xx1, yy1)) {
 	      contrib += delta[l];
 #ifdef DEBUG 
-	      fprintf(stderr, "... inside\n");
+	      Rprintf("... inside\n");
 	    } else {
-	      fprintf(stderr, "... outside\n");
+	      Rprintf("... outside\n");
 #endif
 	    }
 
@@ -370,13 +368,13 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
 	  contrib *= -1;
 
 #ifdef DEBUG
-	fprintf(stderr, "contrib = %lf\n", contrib);
+	Rprintf("contrib = %lf\n", contrib);
 #endif
 	total += contrib;
       }
       out[ j * n + i] = total;
 #ifdef DEBUG
-	fprintf(stderr, "total = %lf\n", total);
+	Rprintf("total = %lf\n", total);
 #endif
     }
   }

@@ -22,14 +22,28 @@
 
   The bandwidth \eqn{\sigma}{sigma} is chosen to 
   minimise the mean-square error criterion defined by Diggle (1985).
-  The algorithm computes the mean-square error by the method
-  of Berman and Diggle (1989). See Diggle (2003, page 117) for a
-  summary.
+  The algorithm computes the mean-square error by 
+  the method of Berman and Diggle (1989).
+  See Diggle (2003, pages 115-118) for a summary of this method.
 
   The result is a numerical value giving the selected bandwidth.
   The result also belongs to the class \code{"bw.optim"}
   which can be plotted to show the (rescaled) mean-square error
   as a function of \code{sigma}.
+}
+\section{Definition of bandwidth}{
+  The smoothing parameter \code{sigma} returned by \code{bw.diggle}
+  (and displayed on the horizontal axis of the plot)
+  corresponds to \code{h/2}, where \code{h} is the smoothing
+  parameter described in Diggle (2003, pages 116-118) and
+  Berman and Diggle (1989).
+  In those references, the smoothing kernel 
+  is the uniform density on the disc of radius \code{h}. In
+  \code{\link{density.ppp}}, the smoothing kernel is the
+  isotropic Gaussian density with standard deviation \code{sigma}.
+  When replacing one kernel by another, the usual
+  practice is to adjust the bandwidths so that the kernels have equal
+  variance (cf. Diggle 2003, page 118). This implies that \code{sigma = h/2}.
 }
 \value{
   A numerical value giving the selected bandwidth.
@@ -43,8 +57,10 @@
   data(lansing)
   attach(split(lansing))
   b <- bw.diggle(hickory)
-  plot(b, ylim=c(-2.5, 0), main="Cross validation for hickories")
-  plot(density(hickory, b))
+  plot(b, ylim=c(-2, 0), main="Cross validation for hickories")
+  \donttest{
+   plot(density(hickory, b))
+  }
 }
 \references{
   Berman, M. and Diggle, P. (1989)

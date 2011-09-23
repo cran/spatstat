@@ -1,7 +1,7 @@
 #
 # Determine which 'canonical variables' depend on a supplied covariate
 #
-#   $Revision: 1.2 $  $Date: 2010/05/25 11:04:45 $
+#   $Revision: 1.3 $  $Date: 2011/09/22 10:40:55 $
 #
 
 model.depends <- function(object) {
@@ -31,6 +31,21 @@ model.depends <- function(object) {
   }
   rownames(depends) <- colnames(mm)
   colnames(depends) <- covars
+  # detect offsets
+  if(!is.null(oo <- attr(tt, "offset")) && ((noo <- length(oo)) > 0)) {
+    # entries of 'oo' index the list of variables in terms object
+    vv <- attr(tt, "variables")
+    offdep <- matrix(FALSE, noo, length(covars))
+    offnms <- character(noo)
+    for(i in seq_len(noo)) {
+      offseti <- languageEl(vv, oo[i] + 1)
+      offdep[i, ] <- covars %in% all.vars(offseti)
+      offnms[i] <- deparse(offseti)
+    }
+    rownames(offdep) <- offnms
+    colnames(offdep) <- covars
+    attr(depends, "offset") <- offdep
+  }
   return(depends)
 }
 

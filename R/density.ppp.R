@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.49 $    $Date: 2011/09/09 02:53:31 $
+#  $Revision: 1.50 $    $Date: 2011/09/12 09:00:16 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -324,28 +324,34 @@ bw.diggle <- function(X) {
   stopifnot(is.ppp(X))
   lambda <- npoints(X)/area.owin(as.owin(X))
   K <- Kest(X, correction="best")
-  rvals <- K$r
-  if(!is.null(alim <- attr(K, "alim")))
-    rvals <- rvals[rvals <= alim[2]]
   yname <- fvnames(K, ".y")
+  K <- K[, c("r", yname)]
+  rvals <- K$r
+  # evaluation of M(r) requires K(2r)
+  rmax2 <- max(rvals)/2
+  if(!is.null(alim <- attr(K, "alim"))) rmax2 <- min(alim[2], rmax2)
+  ok <- (rvals <= rmax2)
+  rvals <- rvals[ok]
+  #
   nr <- length(rvals)
-  M0 <- (1/lambda - 2 * K[[yname]])/(pi * rvals^2)
-  M1 <- numeric(nr)
+  J <- numeric(nr)
   phi <- function(x,h) { 
     if(h <= 0) return(rep(0, length(x)))
-    y <- pmin(1, x/(2 * h))
-    2 * h^2 * (acos(y) - y * sqrt(1 - y^2))
+    y <- pmax(0, pmin(1, x/(2 * h)))
+    4 * pi * h^2 * (acos(y) - y * sqrt(1 - y^2))
   }
-  for(i in 1:nr) {
-    ri <- rvals[i]
-    Ji <- stieltjes(phi, K, h=ri)[[yname]]/(2 * pi)
-    M1[i] <- 1 + Ji/(pi * ri^2)^2
-  }
-  M <- M0 + M1
-  result <- bw.optim(M, rvals,
+  for(i in 1:nr) 
+    J[i] <- stieltjes(phi, K, h=rvals[i])[[yname]]/(2 * pi)
+  pir2 <- pi * rvals^2
+  M <- (1/lambda - 2 * K[[yname]][ok])/pir2 + J/pir2^2
+  # This calculation was for the uniform kernel on B(0,h)
+  # Convert to standard deviation of (one-dimensional marginal) kernel
+  sigma <- rvals/2
+  result <- bw.optim(M, sigma,
                      xlab=expression(sigma),
                      ylab=expression(M(sigma)),
                      creator="bw.diggle",
+                     J=J,
                      lambda=lambda)
   return(result)
 }

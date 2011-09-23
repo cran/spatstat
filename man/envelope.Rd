@@ -372,7 +372,11 @@
   \code{nsim} containing all the simulated point patterns.
 
   See \code{\link{plot.envelope}} and \code{\link{plot.fv}}
-  for information about how to plot the envelopes. 
+  for information about how to plot the envelopes.
+
+  Different envelopes can be recomputed from the same data
+  using \code{\link{envelope.envelope}}.
+  Envelopes can be combined using \code{\link{pool.envelope}}.
 }
 \section{Errors and warnings}{
   An error may be generated if one of the simulations produces a
@@ -415,6 +419,8 @@
   \code{\link{fv.object}},
   \code{\link{plot.envelope}},
   \code{\link{plot.fv}},
+  \code{\link{envelope.envelope}},
+  \code{\link{pool.envelope}},
   \code{\link{Kest}},
   \code{\link{Gest}},
   \code{\link{Fest}},

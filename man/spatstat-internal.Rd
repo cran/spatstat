@@ -99,6 +99,7 @@
 \alias{emptywindow}
 \alias{ensure2vector}
 \alias{envelopeEngine}
+\alias{envelope.matrix}
 \alias{equalpairs}          
 \alias{equalpairs.quad}          
 \alias{equals.quad}          
@@ -568,6 +569,10 @@ envelopeEngine(X, fun, simul,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user)
+\method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
+      nsim, nsim2, jsim, jsim.mean,
+      type, use.theory, csr, nrank, ginterval, nSD,
+      check, Yname)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
