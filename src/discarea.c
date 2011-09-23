@@ -4,7 +4,7 @@
 
   Area of intersection between disc and polygonal window
 
-  $Revision: 1.4 $     $Date: 2009/08/02 03:59:56 $
+  $Revision: 1.5 $     $Date: 2011/09/20 07:34:33 $
 
  */
 
@@ -12,9 +12,7 @@
 
 #include <math.h>
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
+#include <R.h>
 
 #define MIN(A,B) (((A) < (B)) ? (A) : (B))
 #define MAX(A,B) (((A) > (B)) ? (A) : (B))
@@ -46,27 +44,27 @@ discareapoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, eps, out)
     xcentre = xc[i];
     ycentre = yc[i];
 #ifdef DEBUG
-    fprintf(stderr, "\ni = %d:\n centre = (%lf, %lf)\n", i, xcentre, ycentre);
+    Rprintf("\ni = %d:\n centre = (%lf, %lf)\n", i, xcentre, ycentre);
 #endif
 
     for(j = 0; j < nradperpt; j++) {
       radius = rmat[ j * n + i];
       radius2 = radius * radius;
 #ifdef DEBUG
-       fprintf(stderr, "radius = %lf\n", radius);
+       Rprintf("radius = %lf\n", radius);
 #endif
 
       total = 0.0;
       for(k=0; k < m; k++) {
 #ifdef DEBUG
-       fprintf(stderr, "k = %d\n", k);
+       Rprintf("k = %d\n", k);
 #endif
 	xx0 = x0[k];
 	yy0 = y0[k];
 	xx1 = x1[k];
 	yy1 = y1[k];
 #ifdef DEBUG
-       fprintf(stderr, "(%lf,%lf) to (%lf,%lf)\n", xx0, yy0, xx1, yy1);
+       Rprintf("(%lf,%lf) to (%lf,%lf)\n", xx0, yy0, xx1, yy1);
 #endif
        /* refer to unit disc at origin */
        /* arrange so that xleft < xright */
@@ -86,14 +84,14 @@ discareapoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, eps, out)
 	 contrib =  radius2 * DiscContrib(xleft,yleft,xright,yright,epsilon);
        }
 #ifdef DEBUG
-	fprintf(stderr, "contrib = %lf\n contrib/(pi * r^2)=%lf\n", 
+	Rprintf("contrib = %lf\n contrib/(pi * r^2)=%lf\n", 
 		contrib, contrib/(PI * radius2));
 #endif
 	total += contrib;
       }
       out[ j * n + i] = total;
 #ifdef DEBUG
-	fprintf(stderr, "total = %lf\ntotal/(pi * r^2) = %lf\n", 
+	Rprintf("total = %lf\ntotal/(pi * r^2) = %lf\n", 
 		total, total/(PI * radius2));
 #endif
     }
@@ -114,7 +112,7 @@ double trigbit(v)
   if(v > 1.0)
     return(PI);
   result = PI/2 + asin(v) + v * sqrt(1 - v * v);
-  fprintf(stderr, "trigbit: v = %lf, asin(v)=%lf, result=%lf\n",
+  Rprintf("trigbit: v = %lf, asin(v)=%lf, result=%lf\n",
 	  v, asin(v), result);
   return(result);
 }
@@ -142,7 +140,7 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
 
 #ifdef DEBUG
   double increm;
-  fprintf(stderr, 
+  Rprintf(
 	  "DiscContrib: xleft=%lf, yleft=%lf, xright=%lf, yright=%lf\n",
 	  xleft, yleft, xright, yright);
 #endif
@@ -154,7 +152,7 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   if(xlo >= xhi - eps) {
     /* intersection is empty or negligible */
 #ifdef DEBUG
-    fprintf(stderr, "intersection is empty or negligible\n");
+    Rprintf("intersection is empty or negligible\n");
 #endif
     return(zero);
   }
@@ -170,7 +168,7 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   det = B * B - 4 * A * C;
 
 #ifdef DEBUG
-    fprintf(stderr, "slope=%lf, intercept=%lf\nA = %lf, B=%lf, C=%lf, det=%lf\n",
+    Rprintf("slope=%lf, intercept=%lf\nA = %lf, B=%lf, C=%lf, det=%lf\n",
 	    slope, intercept, A, B, C, det);
 #endif
 
@@ -190,12 +188,12 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
     /* segment is outside disc */
     if(yleft < 0.0) {
 #ifdef DEBUG
-    fprintf(stderr, "segment is beneath disc\n");
+    Rprintf("segment is beneath disc\n");
 #endif
       result = zero;
     } else {
 #ifdef DEBUG
-    fprintf(stderr, "segment is above disc\n");
+    Rprintf("segment is above disc\n");
 #endif
       result = TRIGBIT(xhi) - TRIGBIT(xlo);
     }
@@ -203,7 +201,7 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   } 
   /* possibly three parts */
 #ifdef DEBUG
-  fprintf(stderr, "up to three pieces\n");
+  Rprintf("up to three pieces\n");
 #endif
   result = zero;
   ycut1 = intercept + slope * xcut1;
@@ -211,12 +209,12 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   if(xcut1 > xlo) {
     /* part to left of cut */
 #ifdef DEBUG 
-    fprintf(stderr, "left of cut: [%lf, %lf]\n", xlo, xcut1);
+    Rprintf("left of cut: [%lf, %lf]\n", xlo, xcut1);
     if(ycut1 < 0.0)
-      fprintf(stderr, "below disc - no intersection\n");
+      Rprintf("below disc - no intersection\n");
     else {
       increm = TRIGBIT(xcut1) - TRIGBIT(xlo);
-      fprintf(stderr, "increment = %lf\n", increm);
+      Rprintf("increment = %lf\n", increm);
       result += increm;
     }
 #else
@@ -227,12 +225,12 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   if(xcut2 < xhi) {
     /* part to right of cut */
 #ifdef DEBUG 
-    fprintf(stderr, "right of cut: [%lf, %lf]\n", xcut2, xhi);
+    Rprintf("right of cut: [%lf, %lf]\n", xcut2, xhi);
     if(ycut2 < 0.0)
-      fprintf(stderr, "below disc - no intersection\n");
+      Rprintf("below disc - no intersection\n");
     else {
       increm = TRIGBIT(xhi) - TRIGBIT(xcut2);
-      fprintf(stderr, "increment = %lf\n", increm);
+      Rprintf("increment = %lf\n", increm);
       result += increm;
     }
 #else
@@ -246,11 +244,11 @@ double DiscContrib(xleft, yleft, xright, yright, eps)
   dx = xunder2 - xunder1;
   dx2 = xunder2 * xunder2 - xunder1 * xunder1;
 #ifdef DEBUG 
-    fprintf(stderr, "underneath cut: [%lf, %lf]\n",
+    Rprintf("underneath cut: [%lf, %lf]\n",
 	    xunder1, xunder2);
     increm = intercept * dx + slope * dx2/2 + 
       (TRIGBIT(xunder2) - TRIGBIT(xunder1))/2;
-    fprintf(stderr, "increment = %lf\n", increm);
+    Rprintf("increment = %lf\n", increm);
     result += increm;
 #else
   result += intercept * dx + slope * dx2/2 + 

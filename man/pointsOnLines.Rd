@@ -6,12 +6,19 @@
   at equal distances along each line segment.
 }
 \usage{
-pointsOnLines(X, eps = NULL, np = 1000)
+pointsOnLines(X, eps = NULL, np = 1000, shortok=TRUE)
 }
 \arguments{
   \item{X}{A line segment pattern (object of class \code{"psp"}).}
   \item{eps}{Spacing between successive points.}
-  \item{np}{Approximate total number of points (incompatible with \code{eps}).}
+  \item{np}{Approximate total number of points (incompatible with
+    \code{eps}).}
+  \item{shortok}{
+    Logical. If \code{FALSE}, very short segments
+    (of length shorter than \code{eps}) will not generate any points.
+    If \code{TRUE}, a very short segment will be represented by its
+    midpoint.
+  }
 }
 \details{
   For each line segment in the pattern \code{X}, a succession of points

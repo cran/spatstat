@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.23 $	$Date: 2009/12/22 01:58:22 $
+#	$Revision: 1.28 $	$Date: 2011/09/20 07:07:53 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -53,6 +53,8 @@ fasp <- function(fns, which, formulae=NULL,
         
         if(missing(I)) I <- 1:m
         if(missing(J)) J <- 1:n
+        if(!is.vector(I) || !is.vector(J))
+          stop("Subset operator is only implemented for vector indices")
 
         # determine index subset for lists 'fns', 'titles' etc
         included <- rep(FALSE, length(x$fns))
@@ -109,6 +111,62 @@ dimnames.fasp <- function(x) {
   dimnames(w) <- value
   x$which <- w
   return(x)
+}
+
+pool.fasp <- function(...) {
+  Alist <- list(...)
+  Yname <- paste(deparse(sys.call()), collapse="")
+  if(nchar(Yname) > 60) Yname <- paste(substr(Yname, 1, 40), "[..]")
+  nA <-  length(Alist)
+  if(nA == 0) return(NULL)
+  # validate....
+  # All arguments must be fasp objects
+  notfasp <- !unlist(lapply(Alist, inherits, what="fasp"))
+  if(any(notfasp)) {
+    n <- sum(notfasp)
+    why <- paste(ngettext(n, "Argument", "Arguments"),
+                 commasep(which(notfasp)),
+                 ngettext(n, "does not", "do not"),
+                 "belong to the class",
+                 dQuote("fasp"))
+    stop(why)
+  }
+  # All arguments must have envelopes
+  has.env <- function(z) {
+    all(unlist(lapply(z$funs, inherits, what="envelope")))
+  }
+  notenv <- !unlist(lapply(Alist, has.env))
+  if(any(notenv)) {
+    n <- sum(notenv)
+    why <- paste(ngettext(n, "Argument", "Arguments"),
+                 commasep(which(notenv)),
+                 ngettext(n, "does not", "do not"),
+                 "contain envelope data")
+    stop(why)
+  }
+  
+  if(nA == 1) return(Alist[[1]])
+  
+  # All arguments must have the same dimensions
+  witches <- lapply(Alist, function(z) { z$which })
+  witch1 <- witches[[1]]
+  same <- unlist(lapply(witches, identical, y=witch1))
+  if(!all(same))
+    stop("Function arrays do not have the same array dimensions")
+  
+  # OK.
+  # Pool envelopes at each position
+  result <- Alist[[1]]
+  fns <- result$fns
+  for(k in seq_along(fns)) {
+    funks <- lapply(Alist, function(z, k) { z$fns[[k]] }, k=k)
+    fnk <- do.call("pool.envelope", funks)
+    attr(fnk, "einfo")$Yname <- Yname
+    fns[[k]] <- fnk
+  }
+  result$fns <- fns
+
+  return(result)
 }
 
 # other functions

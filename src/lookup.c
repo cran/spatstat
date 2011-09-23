@@ -72,7 +72,7 @@ Cdata *lookupinit(state, model, algo)
     }
   }
 #ifdef DEBUG
-  printf("Exiting lookupinit: nlook=%d, equisp=%d\n", nlook, lookup->equisp);
+  Rprintf("Exiting lookupinit: nlook=%d, equisp=%d\n", nlook, lookup->equisp);
 #endif
   
   return((Cdata *) lookup);

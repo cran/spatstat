@@ -7,16 +7,13 @@
 
   poly2imA     pixel value = area of intersection between pixel and polygon
 
-  $Revision: 1.2 $ $Date: 2011/05/17 12:41:47 $
+  $Revision: 1.3 $ $Date: 2011/09/20 07:30:41 $
 
 */
 #undef DEBUG
 
+#include <R.h>
 #include <math.h>
-
-#ifdef DEBUG
-#include <stdio.h>
-#endif
 
 #define OUT(I,J) out[I + (J) * Ny]
 
@@ -126,15 +123,14 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
     xnext = xp[k+1];
     ynext = yp[k+1];
 #ifdef DEBUG
-    fprintf(stderr, 
-	    "\nEdge %d from (%lf, %lf) to (%lf, %lf) .........\n",
+    Rprintf("\nEdge %d from (%lf, %lf) to (%lf, %lf) .........\n",
 	    k, xcur, ycur, xnext, ynext);
 #endif
     if(xcur != xnext) {
       /* vertical edges are ignored */
       if(xcur < xnext) {
 #ifdef DEBUG
-	fprintf(stderr, "negative sign\n");
+	Rprintf("negative sign\n");
 #endif
 	sgn = -1;
 	xleft = xcur;
@@ -143,7 +139,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	yright = ynext;
       } else {
 #ifdef DEBUG
-	fprintf(stderr, "positive sign\n");
+	Rprintf("positive sign\n");
 #endif
 	sgn = 1;
 	xleft = xnext;
@@ -164,13 +160,13 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
       imax = ceil((yleft < yright) ? yright : yleft);
       imax = (imax > ny - 1) ? ny - 1 : imax;
 #ifdef DEBUG
-      fprintf(stderr, "imin=%d, imax=%d, jmin=%d, jmax=%d\n", 
+      Rprintf( "imin=%d, imax=%d, jmin=%d, jmax=%d\n", 
 	      imin, imax, jmin, jmax);
 #endif
       /* ........... loop over columns of pixels ..............*/
       for(j = jmin; j <= jmax; j++) {
 #ifdef DEBUG
-      fprintf(stderr, "\t j=%d:\n", j);
+      Rprintf( "\t j=%d:\n", j);
 #endif
 	/* 
 	   Intersect trapezium with column of pixels
@@ -179,14 +175,14 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	  if(xleft >= j) {
 	    /* retain left corner */
 #ifdef DEBUG
-	    fprintf(stderr, "\tretain left corner\n");
+	    Rprintf( "\tretain left corner\n");
 #endif
 	    x0 = xleft;
 	    y0 = yleft;
 	  } else {
 	    /* trim left corner */
 #ifdef DEBUG
-	    fprintf(stderr, "\ttrim left corner\n");
+	    Rprintf( "\ttrim left corner\n");
 #endif
 	    x0 = (double) j;
 	    y0 = yleft + slope * (x0 - xleft);
@@ -194,14 +190,14 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	  if(xright <= j+1) {
 	    /* retain right corner */
 #ifdef DEBUG
-	    fprintf(stderr, "\tretain right corner\n");
+	    Rprintf( "\tretain right corner\n");
 #endif
 	    x1 = xright;
 	    y1 = yright;
 	  } else {
 	    /* trim right corner */
 #ifdef DEBUG
-	    fprintf(stderr, "\ttrim right corner\n");
+	    Rprintf( "\ttrim right corner\n");
 #endif
 	    x1 = (double) (j+1);
 	    y1 = yright + slope * (x1 - xright);
@@ -209,13 +205,13 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	  /* save min and max y */
 	  if(y0 < y1) {
 #ifdef DEBUG
-	    fprintf(stderr, "slope %lf > 0\n", slope);
+	    Rprintf( "slope %lf > 0\n", slope);
 #endif
 	    ylo = y0;
 	    yhi = y1;
 	  } else {
 #ifdef DEBUG
-	    fprintf(stderr, "slope %lf <= 0\n", slope);
+	    Rprintf( "slope %lf <= 0\n", slope);
 #endif
 	    ylo = y1;
 	    yhi = y0;
@@ -225,7 +221,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	  if(imin > 0) {
 	    for(i = 0; i < imin; i++) {
 #ifdef DEBUG
-	      fprintf(stderr, "\ti=%d:\n", i);
+	      Rprintf( "\ti=%d:\n", i);
 #endif
 	      /*
 		The trimmed pixel [x0, x1] * [i, i+1] 
@@ -233,7 +229,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	      */
 	      area = (x1 - x0);
 #ifdef DEBUG
-	      fprintf(stderr, "\tIncrementing area by %lf\n", sgn * area);
+	      Rprintf( "\tIncrementing area by %lf\n", sgn * area);
 #endif
 	      out[j + ny * i] += sgn * area;
 	    }
@@ -241,7 +237,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	  /* second part */
 	  for(i = imin; i <= imax; i++) {
 #ifdef DEBUG
-	    fprintf(stderr, "\ti=%d:\n", i);
+	    Rprintf( "\ti=%d:\n", i);
 #endif
 	    /* 
 	       Compute area of intersection between trapezium
@@ -252,25 +248,25 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	    if(klo == ABOVE) {
 	      /* trapezium covers pixel */
 #ifdef DEBUG
-	      fprintf(stderr, "\t\ttrapezium covers pixel\n");
+	      Rprintf( "\t\ttrapezium covers pixel\n");
 #endif
 	      area = (x1-x0);
 	    } else if(khi == BELOW) {
 #ifdef DEBUG
-	      fprintf(stderr, "\t\tpixel avoids trapezium\n");
+	      Rprintf( "\t\tpixel avoids trapezium\n");
 #endif
 	      /* pixel avoids trapezium */
 	      area = 0.0;
 	    } else if(klo == INSIDE && khi == INSIDE) {
 	      /* polygon edge is inside pixel */
 #ifdef DEBUG
-	      fprintf(stderr, "\t\t polygon edge is inside pixel\n");
+	      Rprintf( "\t\t polygon edge is inside pixel\n");
 #endif
 	      area = (x1-x0) * ((ylo + yhi)/2.0 - i);
 	    } else if(klo == INSIDE && khi == ABOVE) {
 	      /* polygon edge crosses upper edge of pixel */
 #ifdef DEBUG
-	      fprintf(stderr, 
+	      Rprintf( 
 		      "\t\t polygon edge crosses upper edge of pixel\n");
 #endif
 	      xcut = x0 + ((i+1) - y0)/slope;
@@ -281,7 +277,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	    } else if(klo == BELOW && khi == INSIDE) {
 	      /* polygon edge crosses lower edge of pixel */
 #ifdef DEBUG
-	    fprintf(stderr, "\t\t polygon edge crosses lower edge of pixel\n");
+	    Rprintf( "\t\t polygon edge crosses lower edge of pixel\n");
 #endif
 	      xcut = x0 + (i - y0)/slope;
 	      if(slope > 0) 
@@ -291,7 +287,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	    } else if(klo == BELOW && khi == ABOVE) {
 	      /* polygon edge crosses upper and lower edges of pixel */
 #ifdef DEBUG
-	    fprintf(stderr, 
+	    Rprintf( 
 	     "\t\t polygon edge crosses upper and lower edges of pixel\n");
 #endif
 	      xcutA = x0 + (i - y0)/slope;
@@ -307,7 +303,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 	    }
 	    /* add contribution to area of pixel */
 #ifdef DEBUG
-	    fprintf(stderr, "\tIncrementing area by %lf\n", sgn * area);
+	    Rprintf( "\tIncrementing area by %lf\n", sgn * area);
 #endif
 	    out[j + ny * i] += sgn * area;
 	  }

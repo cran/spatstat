@@ -4,7 +4,7 @@
 
   Area difference function
 
-  $Revision: 1.7 $ $Date: 2009/08/12 00:20:28 $
+  $Revision: 1.8 $ $Date: 2011/09/20 07:32:39 $
 
   A(x,r) = area of disc b(0,r) not covered by discs b(x_i,r) for x_i in x
   
@@ -16,9 +16,7 @@
 
 #undef DEBUG
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
+#include <R.h>
 
 /* 
    Original version areadiff()
@@ -55,21 +53,21 @@ areadiff(rad,x,y,nn,ngrid,answer)
       /* test for inside disc */
       if(xg * xg + yg * yg < r2) {
 #ifdef DEBUG
-	fprintf(stderr, "\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
+	Rprintf("\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
 #endif
 	/* run through data points seeking one close to (xy, yg) */
 	found = 0;
 	if(n > 0) 
 	  for(k = 0; k < n && found == 0; k++) {
 #ifdef DEBUG
-	    fprintf(stderr, "(x[%d],y[%d]) = (%lf,%lf)\n", k, k, x[k], y[k]);
+	    Rprintf("(x[%d],y[%d]) = (%lf,%lf)\n", k, k, x[k], y[k]);
 #endif
 	    xdif = x[k] - xg;
 	    ydif = y[k] - yg;
 	    if(xdif * xdif + ydif * ydif < r2) {
 	      found = 1;
 #ifdef DEBUG
-	      fprintf(stderr, "(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
+	      Rprintf("(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
 		      k, k, x[k], y[k]);
 #endif
 	    }
@@ -77,13 +75,13 @@ areadiff(rad,x,y,nn,ngrid,answer)
 	if(found == 0) {
 	  ++count;
 #ifdef DEBUG
-	  fprintf(stderr, "---------------Incrementing count\n");
+	  Rprintf("---------------Incrementing count\n");
 #endif
 	    }
       }
 
 #ifdef DEBUG
-  fprintf(stderr, "Count = %d\n", count);
+  Rprintf("Count = %d\n", count);
 #endif
   
   /* calculate area */
@@ -127,21 +125,21 @@ areadifs(rad,nrads,x,y,nxy,ngrid,answer)
 	  /* test for inside disc */
 	  if(xg * xg + yg * yg < r2) {
 #ifdef DEBUG
-	    fprintf(stderr, "\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
+	    Rprintf("\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
 #endif
 	    /* run through data points seeking one close to (xy, yg) */
 	    found = 0;
 	    if(n > 0)
 	      for(k = 0; k < n && found == 0; k++) {
 #ifdef DEBUG
-		fprintf(stderr, "(x[%d],y[%d]) = (%lf,%lf)\n", k, k, x[k], y[k]);
+		Rprintf("(x[%d],y[%d]) = (%lf,%lf)\n", k, k, x[k], y[k]);
 #endif
 		xdif = x[k] - xg;
 		ydif = y[k] - yg;
 		if(xdif * xdif + ydif * ydif < r2) {
 		  found = 1;
 #ifdef DEBUG
-		  fprintf(stderr, "(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
+		  Rprintf("(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
 			  k, k, x[k], y[k]);
 #endif
 		}
@@ -149,14 +147,14 @@ areadifs(rad,nrads,x,y,nxy,ngrid,answer)
 	    if(found == 0) {
 	      ++count;
 #ifdef DEBUG
-	      fprintf(stderr, "---------------Incrementing count\n");
+	      Rprintf("---------------Incrementing count\n");
 #endif
 	    }
 	  }
       /* end of loop through data points */
 
 #ifdef DEBUG
-      fprintf(stderr, "Count = %d\n", count);
+      Rprintf("Count = %d\n", count);
 #endif
   
       /* calculate area for this value of r*/
@@ -219,14 +217,14 @@ areaBdif(rad,nrads,x,y,nxy,ngrid,x0,y0,x1,y1,answer)
 	      /* test for inside disc */
 	      if(xg * xg + yg * yg < r2) {
 #ifdef DEBUG
-		fprintf(stderr, "\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
+		Rprintf("\n\n (xg,yg) = (%lf, %lf)\n", xg, yg);
 #endif
 	    /* run through data points seeking one close to (xy, yg) */
 		found = 0;
 		if(n > 0)
 		  for(k = 0; k < n && found == 0; k++) {
 #ifdef DEBUG
-		    fprintf(stderr, "(x[%d],y[%d]) = (%lf,%lf)\n", 
+		    Rprintf("(x[%d],y[%d]) = (%lf,%lf)\n", 
 			    k, k, x[k], y[k]);
 #endif
 		    xdif = x[k] - xg;
@@ -234,7 +232,7 @@ areaBdif(rad,nrads,x,y,nxy,ngrid,x0,y0,x1,y1,answer)
 		    if(xdif * xdif + ydif * ydif < r2) {
 		      found = 1;
 #ifdef DEBUG
-		      fprintf(stderr, "(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
+		      Rprintf("(x[%d], y[%d]) = (%lf, %lf) covers!\n", 
 			      k, k, x[k], y[k]);
 #endif
 		    }
@@ -242,7 +240,7 @@ areaBdif(rad,nrads,x,y,nxy,ngrid,x0,y0,x1,y1,answer)
 		if(found == 0) {
 		  ++count;
 #ifdef DEBUG
-		  fprintf(stderr, "---------------Incrementing count\n");
+		  Rprintf("---------------Incrementing count\n");
 #endif
 		}
 	      }
@@ -253,7 +251,7 @@ areaBdif(rad,nrads,x,y,nxy,ngrid,x0,y0,x1,y1,answer)
       /* end of loop through data points */
 
 #ifdef DEBUG
-      fprintf(stderr, "Count = %d\n", count);
+      Rprintf("Count = %d\n", count);
 #endif
   
       /* calculate area for this value of r*/

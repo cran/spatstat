@@ -16,6 +16,8 @@
   }
   \item{sigma}{
     Standard deviation of isotropic Gaussian smoothing kernel.
+    Either a numerical value, or a function that computes an
+    appropriate value of \code{sigma}.
   }
   \item{weights}{
     Optional vector of weights to be attached to the points.
@@ -74,6 +76,7 @@
   By default it computes the convolution of the
   isotropic Gaussian kernel of standard deviation \code{sigma}
   with point masses at each of the data points in \code{x}.
+  Anisotropic Gaussian kernels are also supported.
   Each point has unit weight, unless the argument \code{weights} is
   given (it should be a numeric vector; weights can be negative or zero).
 
@@ -113,28 +116,41 @@
   }{
     1/e(u) = integral[v in W] k(v-u) dv
   }
-  where \eqn{W} is the observation window. 
+  where \eqn{W} is the observation window.
 
-  Instead of the isotropic Gaussian kernel with standard deviation
-  \code{sigma}, the smoothing kernel may be chosen to be any Gaussian
-  kernel, by giving the variance-covariance matrix \code{varcov}.
-  The arguments \code{sigma} and \code{varcov} are incompatible.
-  Also \code{sigma} may be a vector of length 2 giving the
-  standard deviations of two independent Gaussian coordinates,
-  thus equivalent to \code{varcov = diag(rep(sigma^2, 2))}.
+  The smoothing kernel is determined by the arguments
+  \code{sigma}, \code{varcov} and \code{adjust}.
+  \itemize{
+    \item if \code{sigma} is a single numerical value,
+    this is taken as the standard deviation of the isotropic Gaussian
+    kernel.
+    \item alternatively \code{sigma} may be a function that computes
+    an appropriate bandwidth for the isotropic Gaussian kernel
+    from the data point pattern by calling \code{sigma(x)}.
+    To perform automatic bandwidth selection using cross-validation,
+    it is recommended to use the function \code{\link{bw.diggle}}.
+    \item
+    The smoothing kernel may be chosen to be any Gaussian
+    kernel, by giving the variance-covariance matrix \code{varcov}.
+    The arguments \code{sigma} and \code{varcov} are incompatible.
+    \item
+    Alternatively \code{sigma} may be a vector of length 2 giving the
+    standard deviations of two independent Gaussian coordinates,
+    thus equivalent to \code{varcov = diag(rep(sigma^2, 2))}.
+    \item if neither \code{sigma} nor \code{varcov} is specified,
+    an isotropic Gaussian kernel will be used, 
+    with a default value of \code{sigma}
+    calculated by a simple rule of thumb
+    that depends only on the size of the window.
+    \item
+    The argument \code{adjust} makes it easy for the user to change the
+    bandwidth specified by any of the rules above.
+    The value of \code{sigma} will be multiplied by
+    the factor \code{adjust}. The matrix \code{varcov} will be
+    multiplied by \code{adjust^2}. To double the smoothing bandwidth, set
+    \code{adjust=2}.
+  }
   
-  The smoothing parameter \code{sigma} has a default value
-  calculated by a simple rule of thumb
-  that depends only on the size of the window
-  and the number of points.
-  The argument \code{adjust} makes it easy for the user to change this
-  default. The value of \code{sigma} will be multiplied by
-  the factor \code{adjust}. To double the smoothing parameter, set
-  \code{adjust=2}.
-
-  To perform automatic bandwidth selection using cross-validation,
-  use \code{\link{bw.diggle}}.
-
   By default the intensity values are
   computed at every location \eqn{u} in a fine grid,
   and are returned as a pixel image.
@@ -235,11 +251,13 @@
   }
   # automatic bandwidth selection
   plot(density(cells, sigma=bw.diggle(cells)))
+  # equivalent:
+  plot(density(cells, bw.diggle))
   # evaluate intensity at points
   density(cells, 0.05, at="points")
 }
 \references{
-  Baddeley, A. (2008) Analysing spatial point patterns in R.
+  Baddeley, A. (2010) Analysing spatial point patterns in R.
   Workshop notes. CSIRO online technical publication.
   URL: \code{www.csiro.au/resources/pf16h.html}
 

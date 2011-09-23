@@ -36,12 +36,20 @@ model.is.additive(object)
   \code{i}th canonical covariate depends on the \code{j}th
   original covariate.
 
+  If the model formula of \code{object} includes offset terms
+  (see \code{\link{offset}}), then the return value of \code{model.depends}
+  also has an attribute \code{"offset"}. This is a logical value or
+  matrix with one row for each offset term and one column for each of
+  the original covariates, with the \code{i,j} entry equal to \code{TRUE} if the
+  \code{i}th offset term depends on the \code{j}th
+  original covariate.
+
   The command \code{model.is.additive} determines whether the model
   is additive, in the sense that there is no canonical covariate that
   depends on two or more original covariates. It returns a logical value.
 }
 \value{
-  Logical value or matrix.
+  A logical value or matrix.
 }
 \seealso{
   \code{\link{ppm}},

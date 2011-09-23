@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.17 $  $Date: 2011/06/14 08:06:39 $
+#   $Revision: 2.21 $  $Date: 2011/09/20 07:07:19 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -619,170 +619,20 @@ envelopeEngine <-
   
 
   ######### COMPUTE ENVELOPES #######################
-  
-  orderstat <- function(x, n) { sort(x)[n] }
 
-  if(VARIANCE) {
-    # pointwise mean, variance etc
-    simvals[is.infinite(simvals)] <- NA
-    Ef   <- apply(simvals, 1, mean, na.rm=TRUE)
-    varf <- apply(simvals, 1, var, na.rm=TRUE)
-    # derived quantities
-    sd <- sqrt(varf)
-    stdres <- (fX-Ef)/sd
-    stdres[!is.finite(stdres)] <- NA
-    # critical limits
-    lo <- Ef - nSD * sd
-    hi <- Ef + nSD * sd
-    lo.name <- paste("lower", nSD, "sigma critical limit for %s")
-    hi.name <- paste("upper", nSD, "sigma critical limit for %s")
-    # confidence interval 
-    loCI <- Ef - nSD * sd/sqrt(nsim)
-    hiCI <- Ef + nSD * sd/sqrt(nsim)
-    loCI.name <- paste("lower", nSD, "sigma confidence bound",
-                       "for mean of simulated %s")
-    hiCI.name <- paste("upper", nSD, "sigma confidence bound",
-                       "for mean of simulated %s")
-
-    # put together
-    if(csr.theo) {
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            theo=funX[["theo"]],
-                            lo=lo,
-                            hi=hi)
-      morestuff <- data.frame(mmean=Ef,
-                              var=varf,
-                              res=fX-Ef,
-                              stdres=stdres,
-                              loCI=loCI,
-                              hiCI=hiCI)
-      mslabl <- c("bar(%s)(r)",
-                  "paste(var,%s)(r)",
-                  "paste(res,%s)(r)",
-                  "paste(stdres,%s)(r)",
-                  "%s[loCI](r)", "%s[hiCI](r)")
-      msdesc <- c("sample mean of %s from simulations",
-                  "sample variance of %s from simulations",
-                  "raw residual",
-                  "standardised residual",
-                  loCI.name, hiCI.name)
-    } else {
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            mmean=Ef,
-                            lo=lo,
-                            hi=hi)
-      morestuff <- data.frame(var=varf,
-                              res=fX-Ef,
-                              stdres=stdres,
-                              loCI=loCI,
-                              hiCI=hiCI)
-      mslabl <- c("paste(var,%s)(r)",
-                  "paste(res,%s)(r)",
-                  "paste(stdres,%s)(r)",
-                  "%s[loCI](r)", "%s[hiCI](r)")
-      msdesc <- c("sample variance of %s from simulations",
-                  "raw residual",
-                  "standardised residual",
-                  loCI.name, hiCI.name)
-    }
-  } else if(!global) {
-    # POINTWISE ENVELOPES
-    simvals[is.infinite(simvals)] <- NA
-    lo <- apply(simvals, 1, orderstat, n=nrank)
-    hi <- apply(simvals, 1, orderstat, n=nsim-nrank+1)
-    lo.name <- paste("lower pointwise envelope of %s from simulations")
-    hi.name <- paste("upper pointwise envelope of %s from simulations")
-    #
-    if(csr.theo) {
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            theo=funX[["theo"]],
-                            lo=lo,
-                            hi=hi)
-    } else {
-      m <- apply(simvals, 1, mean, na.rm=TRUE)
-      results <- data.frame(r=rvals,
-                            obs=fX,
-                            mmean=m,
-                            lo=lo,
-                            hi=hi)
-    }
+  etype <- if(global) "global" else if(VARIANCE) "variance" else "pointwise"
+  if(dual) {
+    jsim <- 1:nsim
+    jsim.mean <- nsim + 1:nsim2
   } else {
-    # SIMULTANEOUS ENVELOPES
-    domain <- (rvals >= ginterval[1]) & (rvals <= ginterval[2])
-    funX <- funX[domain, ]
-    simvals <- simvals[domain, ]
-    simvals[is.infinite(simvals)] <- NA
-    if(csr.theo)
-      theory <- funX[["theo"]]
-    else {
-      # use the first 'nsim' results to estimate the mean under H0 ...
-      theory <- m <- apply(simvals[, 1:nsim], 1, mean, na.rm=TRUE)
-      if(dual) {
-        # ... then discard them and use the remaining 'nsim2' simulations
-        # to construct the envelopes.
-        simvals <- simvals[, -(1:nsim)]
-      }
-    }
-    # compute max absolute deviations
-    deviations <- sweep(simvals, 1, theory)
-    suprema <- apply(abs(deviations), 2, max, na.rm=TRUE)
-    # ranked deviations
-    dmax <- orderstat(suprema, n=nsim-nrank+1)
-    # simultaneous bands
-    lo <- theory - dmax
-    hi <- theory + dmax
-    lo.name <- "lower critical boundary for %s"
-    hi.name <- "upper critical boundary for %s"
-
-    if(csr.theo)
-      results <- data.frame(r=rvals[domain],
-                            obs=fX[domain],
-                            theo=theory,
-                            lo=lo,
-                            hi=hi)
-    else
-      results <- data.frame(r=rvals[domain],
-                            obs=fX[domain],
-                            mmean=m,
-                            lo=lo,
-                            hi=hi)
+    jsim <- jsim.mean <- NULL
   }
 
-  ############  WRAP UP #########################
-  
-  result <- fv(results,
-               argu="r",
-               ylab=attr(funX, "ylab"),
-               valu="obs",
-               fmla= deparse(. ~ r),
-               alim=attr(funX, "alim"),
-               labl=c("r", "%s[obs](r)",
-                 if(csr.theo) "%s[theo](r)" else "bar(%s)(r)",
-                 "%s[lo](r)", "%s[hi](r)"),
-               desc=c("distance argument r",
-                 "observed value of %s for data pattern",
-                 if(csr.theo) "theoretical value of %s for CSR"
-                 else "sample mean of %s from simulations",
-                 lo.name, hi.name),
-               fname=attr(funX, "fname"),
-               yexp =attr(funX, "yexp"))
-
-  # columns to be plotted by default
-  dotty <- c("obs", if(csr.theo) "theo" else "mmean", "hi", "lo")
-
-  if(VARIANCE) {
-    # add more stuff
-    result <- bind.fv(result, morestuff, mslabl, msdesc)
-    if(csr.theo) dotty <- c(dotty, "mmean")
-  }
-
-  fvnames(result, ".") <- dotty
-
-  unitname(result) <- unitname(funX)
-  class(result) <- c("envelope", class(result))
+  result <- envelope.matrix(simvals, funX=funX,
+                            jsim=jsim, jsim.mean=jsim.mean,
+                            type=etype, csr=csr,
+                            nrank=nrank, ginterval=ginterval, nSD=nSD,
+                            Yname=Yname)
 
   # tack on envelope information
   attr(result, "einfo") <- EnvelopeInfo
@@ -790,8 +640,10 @@ envelopeEngine <-
   # tack on functions and/or patterns if so commanded   
   if(savefuns)
     attr(result, "simfuns") <- SimFuns
-  if(savepatterns)
+  if(savepatterns) {
     attr(result, "simpatterns") <- SimPats
+    attr(result, "datapattern") <- X
+  }
   
   return(result)
 }
@@ -842,7 +694,8 @@ print.envelope <- function(x, ...) {
              rmh="simulations of fitted Gibbs model",
              kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
-             list="point pattern datasets in user-supplied list")
+             list="point pattern datasets in user-supplied list",
+             funs="columns of user-supplied data")
     } else "simulations of fitted model"
   #  
   cat(paste("Obtained from", nsim, descrip, "\n"))
@@ -893,6 +746,7 @@ summary.envelope <- function(object, ...) {
              kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list",
+             funs="columns of user-supplied data",
              "simulated point patterns")
     } else "simulations of fitted model"
   #  
@@ -932,6 +786,434 @@ summary.envelope <- function(object, ...) {
   return(invisible(NULL))
 }
   
+
+# envelope.matrix
+# core functionality to compute envelope values
+
+# theory = funX[["theo"]]
+# observed = fX
+
+
+envelope.matrix <- function(Y, ...,
+                            rvals=NULL, observed=NULL, theory=NULL, 
+                            funX=NULL,
+                            nsim=NULL, nsim2=NULL,
+                            jsim=NULL, jsim.mean=NULL,
+                            type=c("pointwise", "global", "variance"),
+                            use.theory = TRUE, csr = FALSE, 
+                            nrank=1, ginterval=NULL, nSD=2,
+                            check=TRUE,
+                            Yname=NULL) {
+
+  if(is.null(Yname))
+    Yname <- deparse(substitute(Y), 60, nlines=1)
+  type <- match.arg(type)
+
+  if(!is.null(funX)) stopifnot(is.fv(funX))
   
+  if(is.null(rvals) && is.null(observed) && !is.null(funX)) {
+    # assume funX is summary function for observed data
+    rvals <- with(funX, .x)
+    observed <- with(funX, .y)
+    theory <- if(use.theory && "theo" %in% names(funX)) with(funX, theo) else NULL
+  } else if(check) {
+    # validate vectors of data
+    if(is.null(rvals)) stop("rvals must be supplied")
+    if(is.null(observed)) stop("observed must be supplied")
+    stopifnot(length(rvals) == nrow(Y))
+    stopifnot(length(observed) == length(rvals))
+  }
+
+  if(use.theory) {
+    use.theory <- !is.null(theory)
+    if(use.theory && check) stopifnot(length(theory) == length(rvals))
+  }
+
+  atr <- if(!is.null(funX)) attributes(funX) else
+         list(alim=range(rvals),
+              ylab=quote(f(r)),
+              yexp=quote(f(r)),
+              fname="f")
   
+  simvals <- Y
+  fX <- observed
+
+  # determine numbers of columns used
+  Ncol <- ncol(simvals)
+  if(Ncol < 2)
+    stop("Need at least 2 columns of function values")
+
+  if(is.null(jsim) && !is.null(nsim)) {
+    # usual case - 'nsim' determines 'jsim'
+    if(nsim > Ncol)
+      stop(paste(nsim, "simulations are not available; only",
+                 Ncol, "columns provided"))
+    jsim <- 1:nsim
+    if(!is.null(nsim2)) {
+      # 'nsim2' determines 'jsim.mean'
+      if(nsim + nsim2 > Ncol)
+        stop(paste(nsim, "+", nsim2, "=", nsim+nsim2, 
+                   "simulations are not available; only",
+                   Ncol, "columns provided"))
+      jsim.mean <- nsim + 1:nsim2
+    }
+  } 
+    
+  restrict.columns <- !is.null(jsim)
+  dual <- !is.null(jsim.mean)
+
+  switch(type,
+         pointwise = {
+           # ....... POINTWISE ENVELOPES ...............................
+           simvals[is.infinite(simvals)] <- NA
+           if(restrict.columns)
+             simvals <- simvals[,jsim]
+           nsim <- ncol(simvals)
+           nsim.mean <- NULL
+           if(nrank == 1) {
+             lohi <- apply(simvals, 1, range)
+           } else {
+             lohi <- apply(simvals, 1,
+                           function(x, n) { sort(x)[n] },
+                           n=c(nrank, nsim-nrank+1))
+           }
+           lo <- lohi[1,]
+           hi <- lohi[2,]
+           lo.name <- paste("lower pointwise envelope of %s from simulations")
+           hi.name <- paste("upper pointwise envelope of %s from simulations")
+           #
+           if(use.theory) {
+             results <- data.frame(r=rvals,
+                                   obs=fX,
+                                   theo=theory,
+                                   lo=lo,
+                                   hi=hi)
+           } else {
+             m <- apply(simvals, 1, mean, na.rm=TRUE)
+             results <- data.frame(r=rvals,
+                                   obs=fX,
+                                   mmean=m,
+                                   lo=lo,
+                                   hi=hi)
+           }
+         },
+         global = {
+           # ..... SIMULTANEOUS ENVELOPES ..........................
+           if(!is.null(ginterval)) {
+             domain <- (rvals >= ginterval[1]) & (rvals <= ginterval[2])
+             funX <- funX[domain, ]
+             simvals <- simvals[domain, ]
+           } else domain <- rep(TRUE, length(rvals))
+           simvals[is.infinite(simvals)] <- NA
+           if(use.theory) {
+             reference <- theory[domain]
+             if(restrict.columns)
+               simvals <- simvals[, jsim]
+             nsim.mean <- NULL
+           } else if(dual) {
+             # Estimate the mean from one set of columns
+             # Form envelopes from another set of columns
+             simvals.mean <- simvals[, jsim.mean]
+             reference <- mmean <- apply(simvals.mean, 1, mean, na.rm=TRUE)
+             nsim.mean <- ncol(simvals.mean)
+             simvals <- simvals[, jsim]
+           } else {
+             # Estimate the mean and form the envelopes using the same data
+             if(restrict.columns)
+               simvals <- simvals[, jsim]
+             reference <- mmean <- apply(simvals, 1, mean, na.rm=TRUE)
+             nsim.mean <- NULL
+           }
+           nsim <- ncol(simvals)
+           # compute max absolute deviations
+           deviations <- sweep(simvals, 1, reference)
+           suprema <- apply(abs(deviations), 2, max, na.rm=TRUE)
+           # ranked deviations
+           dmax <- sort(suprema)[nsim-nrank+1]
+           # simultaneous bands
+           lo <- reference - dmax
+           hi <- reference + dmax
+           lo.name <- "lower critical boundary for %s"
+           hi.name <- "upper critical boundary for %s"
+
+           if(use.theory)
+             results <- data.frame(r=rvals[domain],
+                                   obs=fX[domain],
+                                   theo=reference,
+                                   lo=lo,
+                                   hi=hi)
+           else
+             results <- data.frame(r=rvals[domain],
+                                   obs=fX[domain],
+                                   mmean=reference,
+                                   lo=lo,
+                                   hi=hi)
+         },
+         variance={
+           # ....... POINTWISE MEAN, VARIANCE etc ......................
+           simvals[is.infinite(simvals)] <- NA
+           if(restrict.columns) 
+             simvals <- simvals[, jsim]
+           nsim <- ncol(simvals)
+           nsim.mean <- NULL
+           Ef   <- apply(simvals, 1, mean, na.rm=TRUE)
+           varf <- apply(simvals, 1, var, na.rm=TRUE)
+           # derived quantities
+           sd <- sqrt(varf)
+           stdres <- (fX-Ef)/sd
+           stdres[!is.finite(stdres)] <- NA
+           # critical limits
+           lo <- Ef - nSD * sd
+           hi <- Ef + nSD * sd
+           lo.name <- paste("lower", nSD, "sigma critical limit for %s")
+           hi.name <- paste("upper", nSD, "sigma critical limit for %s")
+           # confidence interval 
+           loCI <- Ef - nSD * sd/sqrt(nsim)
+           hiCI <- Ef + nSD * sd/sqrt(nsim)
+           loCI.name <- paste("lower", nSD, "sigma confidence bound",
+                              "for mean of simulated %s")
+           hiCI.name <- paste("upper", nSD, "sigma confidence bound",
+                              "for mean of simulated %s")
+
+           # put together
+           if(use.theory) {
+             results <- data.frame(r=rvals,
+                                   obs=fX,
+                                   theo=theory,
+                                   lo=lo,
+                                   hi=hi)
+             morestuff <- data.frame(mmean=Ef,
+                                     var=varf,
+                                     res=fX-Ef,
+                                     stdres=stdres,
+                                     loCI=loCI,
+                                     hiCI=hiCI)
+             mslabl <- c("bar(%s)(r)",
+                         "paste(var,%s)(r)",
+                         "paste(res,%s)(r)",
+                         "paste(stdres,%s)(r)",
+                         "%s[loCI](r)", "%s[hiCI](r)")
+             msdesc <- c("sample mean of %s from simulations",
+                         "sample variance of %s from simulations",
+                         "raw residual",
+                         "standardised residual",
+                         loCI.name, hiCI.name)
+           } else {
+             results <- data.frame(r=rvals,
+                                   obs=fX,
+                                   mmean=Ef,
+                                   lo=lo,
+                                   hi=hi)
+             morestuff <- data.frame(var=varf,
+                                     res=fX-Ef,
+                                     stdres=stdres,
+                                     loCI=loCI,
+                                     hiCI=hiCI)
+             mslabl <- c("paste(var,%s)(r)",
+                         "paste(res,%s)(r)",
+                         "paste(stdres,%s)(r)",
+                         "%s[loCI](r)", "%s[hiCI](r)")
+             msdesc <- c("sample variance of %s from simulations",
+                         "raw residual",
+                         "standardised residual",
+                         loCI.name, hiCI.name)
+           }
+         }
+         )
+
+  ############  WRAP UP #########################
+
+  if(use.theory) {
+    # reference is computed curve `theo'
+    reflabl <- "%s[theo](r)"
+    refdesc <- "theoretical value of %s"
+    if(csr) refdesc <- paste(refdesc, "for CSR")
+  } else {
+    # reference is sample mean of simulations
+    reflabl <- "bar(%s)(r)"
+    refdesc <- "sample mean of %s from simulations"
+  }
   
+  result <- fv(results,
+               argu="r",
+               ylab=atr$ylab,
+               valu="obs",
+               fmla= deparse(. ~ r),
+               alim=atr$alim,
+               labl=c("r", "%s[obs](r)",
+                 reflabl,
+                 "%s[lo](r)", "%s[hi](r)"),
+               desc=c("distance argument r",
+                 "observed value of %s for data pattern",
+                 refdesc, lo.name, hi.name),
+               fname=atr$fname,
+               yexp =atr$yexp)
+
+  # columns to be plotted by default
+  dotty <- c("obs", if(use.theory) "theo" else "mmean", "hi", "lo")
+
+  if(type == "variance") {
+    # add more stuff
+    result <- bind.fv(result, morestuff, mslabl, msdesc)
+    if(use.theory) dotty <- c(dotty, "mmean")
+  }
+
+  fvnames(result, ".") <- dotty
+
+  unitname(result) <- unitname(funX)
+  class(result) <- c("envelope", class(result))
+
+  # tack on envelope information
+  attr(result, "einfo") <- list(global = (type =="global"),
+                                csr = csr,
+                                simtype = "funs",
+                                nrank = nrank,
+                                nsim = nsim,
+                                VARIANCE = (type == "variance"),
+                                nSD = nSD,
+                                valname = NULL,
+                                dual = dual,
+                                nsim = nsim,
+                                nsim2 = nsim.mean,
+                                Yname = Yname)
+  return(result)
+}
+
+
+envelope.envelope <- function(Y, fun=NULL, ...) {
+
+  Yname <- deparse(substitute(Y), 60, nlines=1)
+
+  stopifnot(inherits(Y, "envelope"))
+  csr <- attr(Y, "einfo")$csr
+  
+  if(!is.null(fun)) {
+    # apply new function 
+    # point patterns are required
+    sp <- attr(Y, "simpatterns")
+    X  <- attr(Y, "datapattern")
+    if(is.null(sp))
+      stop(paste("Object Y does not contain simulated point patterns",
+                 "(attribute", dQuote("simpatterns"), ");",
+                 "cannot apply a new", sQuote("fun")))
+    if(is.null(X))
+      stop(paste("Cannot apply a new", sQuote("fun"),
+                 "; object Y generated by an older version of spatstat"))
+    result <- do.call(envelope,
+                      resolve.defaults(list(Y=X, fun=fun, simulate=sp),
+                                       list(...),
+                                       list(Yname=Yname,
+                                            nsim=length(sp)),
+                                       .StripNull=TRUE))
+    copyacross <- c("Yname", "csr", "csr.theo", "simtype")
+    attr(result, "einfo")[copyacross] <- attr(Y, "einfo")[copyacross]
+    return(result)
+  }
+
+  # compute new envelope with existing simulated functions
+  sf <- attr(Y, "simfuns")
+  if(is.null(sf))
+    stop(paste("Y does not contain a", dQuote("simfuns"), "attribute",
+               "(it was not generated with savefuns=TRUE)"))
+
+  # extract simulated function values
+  df <- as.data.frame(sf)
+  rname <- fvnames(sf, ".x")
+  df <- df[, (names(df) != rname)]
+
+
+  result <- do.call(envelope.matrix,
+                    resolve.defaults(list(Y=as.matrix(df)),
+                                     list(...),
+                                     list(funX=Y, 
+                                          Yname=Yname),
+                                     .StripNull=TRUE))
+  
+  copyacross <- c("Yname", "csr", "csr.theo", "simtype")
+  attr(result, "einfo")[copyacross] <- attr(Y, "einfo")[copyacross]
+  return(result)
+}
+
+pool <- function(...) {
+  UseMethod("pool")
+}
+
+pool.envelope <- function(...) {
+  Yname <- paste(deparse(sys.call()), collapse="")
+  if(nchar(Yname) > 60) Yname <- paste(substr(Yname, 1, 40), "[..]")
+  Elist <- list(...)
+  nE <-  length(Elist)
+  if(nE == 0) return(NULL)
+  # validate....
+  # All arguments must be envelopes
+  notenv <- !unlist(lapply(Elist, inherits, what="envelope"))
+  if(any(notenv)) {
+    n <- sum(notenv)
+    why <- paste(ngettext(n, "Argument", "Arguments"),
+                 commasep(which(notenv)),
+                 ngettext(n, "does not", "do not"),
+                 "belong to the class",
+                 dQuote("envelope"))
+    stop(why)
+  }
+  if(nE == 1) return(Elist[[1]])
+  # All arguments must have 'simfuns'
+  SFlist <- lapply(Elist, attr, which="simfuns")
+  isnul <- unlist(lapply(SFlist, is.null))
+  if(any(isnul)) {
+    n <- sum(isnul)
+    why <- paste(ngettext(n, "Argument", "Arguments"),
+                 commasep(which(isnul)),
+                 ngettext(n, "does not", "do not"),
+                 "contain a", dQuote("simfuns"), "attribute",
+                 "(not generated with savefuns=TRUE)")
+    stop(why)
+  }
+  # vectors of r values must be identical
+  rlist <- lapply(SFlist, function(z) { with(z, .x) })
+  rvals <- rlist[[1]]
+  samer <- unlist(lapply(rlist, identical, y=rvals))
+  if(!all(samer))
+    stop(paste("Simulated function values are not compatible",
+               "(different values of function argument)"))
+  # functions must be the same
+  fnames <- unique(unlist(lapply(SFlist, attr, which="fname")))
+  if(length(fnames) > 1)
+    stop(paste("Envelopes were computed for different functions:",
+               commasep(sQuote(fnames))))
+  # ... reconcile parameters .......
+  einfolist <- lapply(Elist, attr, which="einfo")
+  global   <- unique(unlist(lapply(einfolist, function(z) { z$global   } )))
+  VARIANCE <- unique(unlist(lapply(einfolist, function(z) { z$VARIANCE } )))
+  simtype  <- unique(unlist(lapply(einfolist, function(z) { z$simtype  } )))
+  csr      <- unique(unlist(lapply(einfolist, function(z) { z$csr      } )))
+  csr.theo <- unique(unlist(lapply(einfolist, function(z) { z$csr.theo } )))
+  resolve <- function(x, x0, warn) {
+    xname <- deparse(substitute(x))
+    if(length(x) == 1)
+      return(x)
+    if(missing(warn))
+      warn <- paste("Envelopes were generated using different values",
+                    "of argument", paste(sQuote(xname), ";", sep=""),
+                    "reverting to default value")
+    if(!is.null(warn))
+      warning(warn, call.=FALSE)
+    return(x0)
+  }
+  global <- resolve(global, FALSE)
+  VARIANCE <- resolve(VARIANCE, FALSE)
+  simtype <- resolve(simtype, "funs",
+                "Envelopes were generated using different types of simulation")
+  csr     <- resolve(csr, FALSE, NULL)
+  csr.theo  <- resolve(csr.theo, FALSE, NULL)
+  type <- if(global) "global" else if(VARIANCE) "variance" else "pointwise"
+  # ..... ready to compute
+  getsimvals <- function(z) {
+    rname <- fvnames(z, ".x")
+    as.matrix(as.data.frame(z)[, names(z) != rname])
+  }
+  matlist <- lapply(SFlist, getsimvals)
+  bigmat <- do.call(cbind, matlist)
+  result <- envelope(bigmat, funX=Elist[[1]], type=type, csr=csr, Yname=Yname)
+  return(result)
+}

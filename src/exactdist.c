@@ -4,7 +4,7 @@
        Exact distance transform of a point pattern
        (used to estimate the empty space function F)
        
-       $Revision: 1.11 $ $Date: 2011/05/17 12:30:02 $
+       $Revision: 1.12 $ $Date: 2011/09/20 07:36:17 $
 
        Author: Adrian Baddeley
 
@@ -26,9 +26,14 @@
        is exemplified in 'exactdt.R'
      
 */
+#undef DEBUG
 
 #include <math.h>
 #include "raster.h"
+
+#ifdef DEBUG
+#include <R.h>
+#endif
 
 void 
 shape_raster(ras,data,xmin,ymin,xmax,ymax,nrow,ncol,mrow,mcol)
@@ -58,7 +63,7 @@ shape_raster(ras,data,xmin,ymin,xmax,ymax,nrow,ncol,mrow,mcol)
 	ras->ymax	= ymax;
 	ras->xstep	= (xmax-xmin)/(ncol - 2 * mcol - 1);
 	ras->ystep	= (ymax-ymin)/(nrow - 2 * mrow - 1);
-	/* printf("xstep,ystep = %lf,%lf\n", ras->xstep,ras->ystep);  */
+	/* Rprintf("xstep,ystep = %lf,%lf\n", ras->xstep,ras->ystep);  */
 }
 
 void
@@ -89,13 +94,13 @@ exact_dt(x, y, npt, dist, index)
 	  return;
 
 	for(i = 0; i < npt; i++) {
-		/* printf("%ld -> (%lf,%lf)\n", i, x[i], y[i]); */
+		/* Rprintf("%ld -> (%lf,%lf)\n", i, x[i], y[i]); */
 		j = RowIndex(*dist,y[i]);
 		k = ColIndex(*dist,x[i]);
 		/* if(!Inside(*dist,j,k))
-			printf("(%ld,%ld) out of bounds\n",j,k);
+			Rprintf("(%ld,%ld) out of bounds\n",j,k);
 		else if (!Inside(*dist,j+1,k+1))
-			printf("(%ld+1,%ld+1) out of bounds\n",j,k);
+			Rprintf("(%ld+1,%ld+1) out of bounds\n",j,k);
 		*/
 		for(l = j; l <= j+1; l++) 
 		for(m = k; m <= k+1; m++) {
@@ -103,10 +108,10 @@ exact_dt(x, y, npt, dist, index)
 			if(   Is_Undefined(Entry(*index,l,m,int))
 			   || Entry(*dist,l,m,double) > d)
 			{
-				/* printf("writing (%ld,%ld) -> %ld\t%lf\n", l,m,i,d); */
+				/* Rprintf("writing (%ld,%ld) -> %ld\t%lf\n", l,m,i,d); */
 				Entry(*index,l,m,int) = i;
 				Entry(*dist,l,m,double) = d;
-				/* printf("checking: %ld, %lf\n",
+				/* Rprintf("checking: %ld, %lf\n",
 				       Entry(*index,l,m,int),
 				       Entry(*dist,l,m,double));
 				 */
@@ -116,7 +121,7 @@ exact_dt(x, y, npt, dist, index)
 /*
 	for(j = 0; j <= index->nrow; j++)
 		for(k = 0; k <= index->ncol; k++)
-			printf("[%ld,%ld] %ld\t%lf\n",
+			Rprintf("[%ld,%ld] %ld\t%lf\n",
 			       j,k,Entry(*index,j,k,int),Entry(*dist,j,k,double));
 */			
 	/* how to update the distance values */
@@ -124,15 +129,15 @@ exact_dt(x, y, npt, dist, index)
 #define COMPARE(ROW,COL,RR,CC) \
 	d = Entry(*dist,ROW,COL,double); \
 	ii = Entry(*index,RR,CC,int); \
-	/* printf(" %lf\t (%ld,%ld) |-> %ld\n", d, RR, CC, ii); */ \
+	/* Rprintf(" %lf\t (%ld,%ld) |-> %ld\n", d, RR, CC, ii); */ \
 	if(Is_Defined(ii) /* && ii < npt */ \
 	   && Entry(*dist,RR,CC,double) < d) { \
 	     dd = DistanceSquared(x[ii],y[ii],Xpos(*index,COL),Ypos(*index,ROW)); \
 	     if(dd < d) { \
-		/* printf("(%ld,%ld) <- %ld\n", ROW, COL, ii); */ \
+		/* Rprintf("(%ld,%ld) <- %ld\n", ROW, COL, ii); */ \
 		Entry(*index,ROW,COL,int) = ii; \
 		Entry(*dist,ROW,COL,double) = dd; \
-		/* printf("checking: %ld, %lf\n", Entry(*index,ROW,COL,int), Entry(*dist,ROW,COL,double)); */\
+		/* Rprintf("checking: %ld, %lf\n", Entry(*index,ROW,COL,int), Entry(*dist,ROW,COL,double)); */\
 	     } \
 	}
 
@@ -144,7 +149,7 @@ exact_dt(x, y, npt, dist, index)
 
 	for(j = index->rmin; j <= index->rmax; j++)
 	for(k = index->cmin; k <= index->cmax; k++) {
-		/* printf("Neighbourhood of (%ld,%ld):\n", j,k); */
+		/* Rprintf("Neighbourhood of (%ld,%ld):\n", j,k); */
 		COMPARE(j,k, j-1,k-1)
 		COMPARE(j,k, j-1,  k)
 		COMPARE(j,k, j-1,k+1)

@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances in m dimensions
 
-  $Revision: 1.3 $     $Date: 2011/05/17 12:40:09 $
+  $Revision: 1.4 $     $Date: 2011/09/20 07:54:01 $
 
   Argument x is an m * n matrix 
   with columns corresponding to points
@@ -22,7 +22,7 @@
   knnwMD    k-th nearest neighbours and their distances
 */
 
-#define SPATSTAT_DEBUG 42
+#undef SPATSTAT_DEBUG
 
 #include <R.h>
 #include <math.h>
@@ -51,21 +51,13 @@ void nndMD(n, m, x, nnd, huge)
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
   /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("outnndMD.txt", "w");
-#endif
 
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     dmin = hu;
@@ -76,10 +68,10 @@ void nndMD(n, m, x, nnd, huge)
     xi0 = xi[0];
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n (");
+    Rprintf("\n (");
     for(j = 0; j < mdimen; j++)
-      fprintf(out, "%lf, ", x[i * mdimen + j]);
-    fprintf(out, ")\n");
+      Rprintf("%lf, ", x[i * mdimen + j]);
+    Rprintf(")\n");
 #endif
 
     
@@ -91,7 +83,7 @@ void nndMD(n, m, x, nnd, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "L=%d, dmin=%lf\n", left, dmin);
+	  Rprintf("L=%d, dmin=%lf\n", left, dmin);
 #endif
 
 	  d2 = dx0 * dx0;
@@ -107,7 +99,7 @@ void nndMD(n, m, x, nnd, huge)
 	    d2min = d2;
 	    dmin = sqrt(d2);
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tupdating dmin=%lf\n", dmin);
+	  Rprintf("\tupdating dmin=%lf\n", dmin);
 #endif
 	  }
 	}
@@ -121,7 +113,7 @@ void nndMD(n, m, x, nnd, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "R=%d, dmin=%lf\n", right, dmin);
+	  Rprintf("R=%d, dmin=%lf\n", right, dmin);
 #endif
 	  d2 = dx0 * dx0;
 	  if(mdimen > 1) {
@@ -136,22 +128,17 @@ void nndMD(n, m, x, nnd, huge)
 	    d2min = d2;
 	    dmin = sqrt(d2);
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tupdating dmin=%lf\n", dmin);
+	  Rprintf("\tupdating dmin=%lf\n", dmin);
 #endif
 	  }
 	}
     }
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     nnd[i] = dmin;
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
-
 }
 
 /* nnwMD: same as nndMD, 
@@ -175,21 +162,13 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
   xi = (double *) R_alloc((size_t) mdimen, sizeof(double));
   /*  dx = (double *) R_alloc((size_t) mdimen, sizeof(double)); */
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("outnnwMD.txt", "w");
-#endif
 
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     dmin = hu;
@@ -208,7 +187,7 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "L");
+	  Rprintf("L");
 #endif
 
 	  d2 = dx0 * dx0;
@@ -236,7 +215,7 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
 	{
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "R");
+	  Rprintf("R");
 #endif
 	  d2 = dx0 * dx0;
 	  if(mdimen > 1) {
@@ -255,17 +234,12 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
 	}
     }
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     nnd[i] = dmin;
     nnwhich[i] = which;
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
-
 }
 
 /* 
@@ -479,16 +453,8 @@ void knndMD(n, m, kmax, x, nnd, huge)
   double d2, dminK, d2minK, xi0, dx0, dxj, hu, hu2, tmp, tmp2;
   double *dmin, *d2min, *xi;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("outknndMD.txt", "w");
-#endif
 
   npoints = *n;
   mdimen  = *m;
@@ -514,7 +480,7 @@ void knndMD(n, m, kmax, x, nnd, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances */
@@ -531,10 +497,10 @@ void knndMD(n, m, kmax, x, nnd, huge)
     xi0 = xi[0];
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n (");
+    Rprintf("\n (");
     for(j = 0; j < mdimen; j++)
-      fprintf(out, "%lf, ", xi[j]);
-    fprintf(out, ")\n");
+      Rprintf("%lf, ", xi[j]);
+    Rprintf(")\n");
 #endif
 
     /* search backward */
@@ -545,35 +511,35 @@ void knndMD(n, m, kmax, x, nnd, huge)
 
 	d2 = dx0 * dx0; 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L=%d\n", left);
-	fprintf(out, "\t 0 ");
+	Rprintf("L=%d\n", left);
+	Rprintf("\t 0 ");
 #endif
 	if(mdimen > 1) {
 	  for(j = 1; j < mdimen && d2 < d2minK; j++) {
 #ifdef SPATSTAT_DEBUG
-	    fprintf(out, "%d ", j);
+	    Rprintf("%d ", j);
 #endif
 	    dxj = xi[j] - x[left * mdimen + j];
 	    d2 += dxj * dxj;
 	  }
 	}
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "\n\t sqrt(d2)=%lf\n", sqrt(d2));
+	Rprintf("\n\t sqrt(d2)=%lf\n", sqrt(d2));
 #endif
 	if (d2 < d2minK) {
 	  /* overwrite last entry */
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
+	  Rprintf("\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
 		  sqrt(d2), nk1, dmin[nk1]);
 #endif
 	  d2min[nk1] = d2;
 	  dmin[nk1] = sqrt(d2);
 	  /* bubble sort */
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] before bubble sort:");
+	  Rprintf("\tdmin[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
 #endif
 	  unsorted = TRUE;
 	  for(k = nk1; unsorted && k > 0; k--) {
@@ -591,10 +557,10 @@ void knndMD(n, m, kmax, x, nnd, huge)
 	    }
 	  }
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] after bubble sort:");
+	  Rprintf("\tdmin[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
 #endif
 	  /* adjust maximum distance */
 	  dminK  = dmin[nk1];
@@ -609,39 +575,39 @@ void knndMD(n, m, kmax, x, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R=%d\n", right);
-	fprintf(out, "\t 0 ");
+	Rprintf("R=%d\n", right);
+	Rprintf("\t 0 ");
 #endif
 	d2 = dx0 * dx0; 
 	if(mdimen > 1) {
 	  for(j = 1; j < mdimen && d2 < d2minK; j++) {
 #ifdef SPATSTAT_DEBUG
-	    fprintf(out, "%d ", j);
+	    Rprintf("%d ", j);
 #endif
 	    dxj = xi[j] - x[right * mdimen + j];
 	    d2 += dxj * dxj;
 	  }
 	}
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "\n\t sqrt(d2)=%lf\n", sqrt(d2));
+	Rprintf("\n\t sqrt(d2)=%lf\n", sqrt(d2));
 #endif
 	if (d2 < d2minK) {
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
+	  Rprintf("\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
 		  sqrt(d2), nk1, dmin[nk1]);
 #endif
 	  /* overwrite last entry */
 	  d2min[nk1] = d2;
 	  dmin[nk1] = sqrt(d2);
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "sqrt(d2)=%lf\n", sqrt(d2));
+	  Rprintf("sqrt(d2)=%lf\n", sqrt(d2));
 #endif
 	  /* bubble sort */
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] before bubble sort:");
+	  Rprintf("\tdmin[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
 #endif
 	  unsorted = TRUE;
 	  for(k = nk1; unsorted && k > 0; k--) {
@@ -659,10 +625,10 @@ void knndMD(n, m, kmax, x, nnd, huge)
 	    }
 	  }
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] after bubble sort:");
+	  Rprintf("\tdmin[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
 #endif
 	  /* adjust maximum distance */
 	  dminK  = dmin[nk1];
@@ -671,7 +637,7 @@ void knndMD(n, m, kmax, x, nnd, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -681,11 +647,6 @@ void knndMD(n, m, kmax, x, nnd, huge)
       nnd[nk * i + k] = dmin[k];
     }
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
-
 }
 
 /* 
@@ -711,16 +672,8 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
   double *dmin, *d2min, *xi;
   int *which;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("outknnwMD.txt", "w");
-#endif
 
   npoints = *n;
   mdimen  = *m;
@@ -747,7 +700,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances */
@@ -765,10 +718,10 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
     xi0 = xi[0];
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n (");
+    Rprintf("\n (");
     for(j = 0; j < mdimen; j++)
-      fprintf(out, "%lf, ", x[i * mdimen + j]);
-    fprintf(out, ")\n");
+      Rprintf("%lf, ", x[i * mdimen + j]);
+    Rprintf(")\n");
 #endif
 
     /* search backward */
@@ -778,15 +731,15 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "L=%d, dminK=%lf\n", left, dminK);
-	  fprintf(out, "\t 0 ");
+	  Rprintf("L=%d, dminK=%lf\n", left, dminK);
+	  Rprintf("\t 0 ");
 #endif
 
 	d2 = dx0 * dx0; 
 	if(mdimen > 1) {
 	  for(j = 1; j < mdimen && d2 < d2minK; j++) {
 #ifdef SPATSTAT_DEBUG
-	    fprintf(out, "%d ", j);
+	    Rprintf("%d ", j);
 #endif
 	    dxj = xi[j] - x[left * mdimen + j];
 	    d2 += dxj * dxj;
@@ -794,7 +747,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	}
 	if (d2 < d2minK) {
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
+	  Rprintf("\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
 		  sqrt(d2), nk1, dmin[nk1]);
 #endif
 	  /* overwrite last entry */
@@ -803,14 +756,14 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	  which[nk1] = left;
 	  /* bubble sort */
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] before bubble sort:");
+	  Rprintf("\tdmin[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
-	  fprintf(out, "\twhich[] before bubble sort:");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
+	  Rprintf("\twhich[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%d, ", which[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%d, ", which[k]);
+	  Rprintf("\n");
 #endif
 	  unsorted = TRUE;
 	  for(k = nk1; unsorted && k > 0; k--) {
@@ -831,14 +784,14 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	    }
 	  }
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] after bubble sort:");
+	  Rprintf("\tdmin[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
-	  fprintf(out, "\twhich[] after bubble sort:");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
+	  Rprintf("\twhich[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%d, ", which[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%d, ", which[k]);
+	  Rprintf("\n");
 #endif
 	  /* adjust maximum distance */
 	  dminK  = dmin[nk1];
@@ -853,14 +806,14 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "R=%d, dminK=%lf\n", right, dminK);
-	  fprintf(out, "\t 0 ");
+	  Rprintf("R=%d, dminK=%lf\n", right, dminK);
+	  Rprintf("\t 0 ");
 #endif
 	d2 = dx0 * dx0; 
 	if(mdimen > 1) {
 	  for(j = 1; j < mdimen && d2 < d2minK; j++) {
 #ifdef SPATSTAT_DEBUG
-	    fprintf(out, "%d ", j);
+	    Rprintf("%d ", j);
 #endif
 	    dxj = xi[j] - x[right * mdimen + j];
 	    d2 += dxj * dxj;
@@ -868,7 +821,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	}
 	if (d2 < d2minK) {
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
+	  Rprintf("\tsqrt(d2)=%lf overwrites dmin[%d] = %lf\n", 
 		  sqrt(d2), nk1, dmin[nk1]);
 #endif
 	  /* overwrite last entry */
@@ -877,14 +830,14 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	  which[nk1] = right;
 	  /* bubble sort */
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] before bubble sort:");
+	  Rprintf("\tdmin[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
-	  fprintf(out, "\twhich[] before bubble sort:");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
+	  Rprintf("\twhich[] before bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%d, ", which[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%d, ", which[k]);
+	  Rprintf("\n");
 #endif
 	  unsorted = TRUE;
 	  for(k = nk1; unsorted && k > 0; k--) {
@@ -905,14 +858,14 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
 	    }
 	  }
 #ifdef SPATSTAT_DEBUG
-	  fprintf(out, "\tdmin[] after bubble sort:");
+	  Rprintf("\tdmin[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%lf, ", dmin[k]);
-	  fprintf(out, "\n");
-	  fprintf(out, "\twhich[] after bubble sort:");
+	    Rprintf("%lf, ", dmin[k]);
+	  Rprintf("\n");
+	  Rprintf("\twhich[] after bubble sort:");
 	  for(k = 0; k < nk; k++)
-	    fprintf(out, "%d, ", which[k]);
-	  fprintf(out, "\n");
+	    Rprintf("%d, ", which[k]);
+	  Rprintf("\n");
 #endif
 	  /* adjust maximum distance */
 	  dminK  = dmin[nk1];
@@ -921,7 +874,7 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -932,11 +885,6 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
       nnwhich[nk * i + k] = which[k];
     }
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
-
 }
 
 

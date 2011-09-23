@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances between points
 
-  $Revision: 1.1 $     $Date: 2009/12/30 02:44:14 $
+  $Revision: 1.2 $     $Date: 2011/09/20 07:40:54 $
 
   THE FOLLOWING FUNCTIONS ASSUME THAT y IS SORTED IN ASCENDING ORDER 
 
@@ -16,6 +16,8 @@
   knndsort      k-th nearest neighbour distances
   knnwhichsort  k-th nearest neighbours and their distances
 */
+
+#undef SPATSTAT_DEBUG
 
 #include <R.h>
 #include <math.h>
@@ -40,23 +42,15 @@ void nndistsort(n, x, y, nnd, huge)
   int npoints, i, left, right;
   double dmin, d2, d2min, xi, yi, dx, dy, hu, hu2;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("out", "w");
-#endif
 
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     dmin = hu;
@@ -70,7 +64,7 @@ void nndistsort(n, x, y, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L");
+	Rprintf("L");
 #endif
 
 	dx = x[left] - xi;
@@ -88,7 +82,7 @@ void nndistsort(n, x, y, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R");
+	Rprintf("R");
 #endif
 	dx = x[right] - xi;
 	d2 =  dx * dx + dy * dy;
@@ -98,15 +92,11 @@ void nndistsort(n, x, y, nnd, huge)
 	}
       }
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     nnd[i] = dmin;
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
 
 }
 
@@ -350,16 +340,8 @@ void knndsort(n, kmax, x, y, nnd, huge)
   double d2, dminK, d2minK, xi, yi, dx, dy, hu, hu2, tmp, tmp2;
   double *dmin, *d2min;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("out", "w");
-#endif
 
   npoints = *n;
   nk      = *kmax;
@@ -378,7 +360,7 @@ void knndsort(n, kmax, x, y, nnd, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances */
@@ -400,7 +382,7 @@ void knndsort(n, kmax, x, y, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L");
+	Rprintf("L");
 #endif
 
 	dx = x[left] - xi;
@@ -438,7 +420,7 @@ void knndsort(n, kmax, x, y, nnd, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R");
+	Rprintf("R");
 #endif
 	dx = x[right] - xi;
 	d2 =  dx * dx + dy * dy;
@@ -469,7 +451,7 @@ void knndsort(n, kmax, x, y, nnd, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -479,10 +461,6 @@ void knndsort(n, kmax, x, y, nnd, huge)
       nnd[nk * i + k] = dmin[k];
     }
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
 
 }
 
@@ -508,16 +486,8 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
   double *dmin, *d2min; 
   int *which;
 
-#ifdef SPATSTAT_DEBUG
-  FILE *out; 
-#endif
-
   hu = *huge;
   hu2 = hu * hu;
-
-#ifdef SPATSTAT_DEBUG
-  out = fopen("out", "w");
-#endif
 
   npoints = *n;
   nk      = *kmax;
@@ -537,7 +507,7 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
   for(i = 0; i < npoints; i++) {
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\ni=%d\n", i); 
+    Rprintf("\ni=%d\n", i); 
 #endif
 
     /* initialise nn distances and indices */
@@ -560,7 +530,7 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "L");
+	Rprintf("L");
 #endif
 
 	dx = x[left] - xi;
@@ -602,7 +572,7 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
       {
 
 #ifdef SPATSTAT_DEBUG
-	fprintf(out, "R");
+	Rprintf("R");
 #endif
 	dx = x[right] - xi;
 	d2 =  dx * dx + dy * dy;
@@ -637,7 +607,7 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
       }
 
 #ifdef SPATSTAT_DEBUG
-    fprintf(out, "\n");
+    Rprintf("\n");
 #endif
 
     /* copy nn distances for point i 
@@ -648,10 +618,5 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
       nnwhich[nk * i + k] = which[k];
     }
   }
-
-#ifdef SPATSTAT_DEBUG
-  fclose(out);
-#endif
-
 }
 
