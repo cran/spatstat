@@ -148,6 +148,7 @@
 \alias{getglmsubset}
 \alias{geyercounts}
 \alias{GLMpredict}
+\alias{good.names}
 \alias{gridindex}            
 \alias{grid1index}
 \alias{grow.rectangle}
@@ -175,6 +176,7 @@
 \alias{is.marked.default}    
 \alias{is.marked.psp}    
 \alias{is.marked.quad}    
+\alias{is.mask}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
 \alias{is.parseable}
@@ -268,6 +270,7 @@
 \alias{nobjects.psp}
 \alias{n.quad}
 \alias{numalign}
+\alias{numeric.columns}
 \alias{nzpaste}
 \alias{onecolumn}
 \alias{ordinal}
@@ -352,6 +355,7 @@
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
 \alias{pointgrid}
+\alias{rastersample}
 \alias{rasterx.im}
 \alias{rastery.im}
 \alias{reach.fii}
@@ -381,6 +385,7 @@
 \alias{runifpoispp}          
 \alias{runifpoisppOnLines}          
 \alias{runifrect}
+\alias{rmhResolveControl}
 \alias{rmhResolveExpansion}
 \alias{rmhResolveTypes}
 \alias{rmhcontrol.rmhcontrol}
@@ -392,6 +397,7 @@
 \alias{rmpoint.I.allim}
 \alias{rpoint.multi}
 \alias{safelookup}
+\alias{samefunction}
 \alias{second.moment.calc}
 \alias{second.moment.engine}
 \alias{shiftxy}              
@@ -571,7 +577,7 @@ envelopeEngine(X, fun, simul,
            envir.user=envir.user)
 \method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
       nsim, nsim2, jsim, jsim.mean,
-      type, use.theory, csr, nrank, ginterval, nSD,
+      type, csr, use.theory, nrank, ginterval, nSD,
       check, Yname)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
@@ -622,6 +628,7 @@ getglmfit(object)
 getglmsubset(object)
 geyercounts(U,X,r,sat,Xcounts,EqualPairs)
 GLMpredict(fit, data, coefs, changecoef)
+good.names(nama, defaults, suffices)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
 grow.rectangle(W, xmargin=0, ymargin=xmargin)
@@ -649,6 +656,7 @@ is.interact(x)
 \method{is.marked}{default}(\dots)  
 \method{is.marked}{psp}(X, \dots)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
+is.mask(w)
 \method{is.multitype}{default}(\dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.parseable(x)
@@ -710,7 +718,7 @@ mask2df(w)
 matcolall(x)
 matcolany(x)
 matcolsum(x)            
-matrixsample(mat, newdim, phase)
+matrixsample(mat, newdim, phase, scale, na.value)
 matrowall(x)
 matrowany(x)
 matrowsum(x)
@@ -750,6 +758,7 @@ nobjects(x)
 \method{nobjects}{psp}(x)
 n.quad(Q)
 numalign(i, nmax, zero)
+numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
 onecolumn(m)
 ordinal(k)
@@ -841,6 +850,7 @@ quadrat.testEngine(X, nx, ny, \dots, Xcount, xbreaks, ybreaks, tess=NULL, fit=NU
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 pointgrid(W, ngrid)
+rastersample(X, Y)
 rasterx.im(x)
 rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
@@ -869,6 +879,7 @@ revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
+rmhResolveControl(control, model)
 rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(\dots)
@@ -885,6 +896,7 @@ runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifpoisppOnLines(lambda, L)
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safelookup(Z, X, factor, warn)
+samefunction(f, g)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL, expand=FALSE)
 second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
@@ -892,7 +904,7 @@ second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
-simulrecipe(type, expr, envir, csr)
+simulrecipe(type, expr, envir, csr, pois)
 singlestring(s, coll)
 smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)

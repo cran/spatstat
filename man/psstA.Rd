@@ -78,8 +78,7 @@ psstA(object, r = NULL, breaks = NULL, ...,
   }
 }
 \details{
-  This function (\emph{previously called} \code{Fpseudo})
-  computes the pseudoscore test statistic
+  This function computes the pseudoscore test statistic
   which can be used as a diagnostic for goodness-of-fit of a fitted
   point process model.
   
@@ -165,9 +164,15 @@ psstA(object, r = NULL, breaks = NULL, ...,
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Alternative functions:
   \code{\link{psstG}},
   \code{\link{psst}},
-  \code{\link{spatstat.options}}
+  \code{\link{Gres}},
+  \code{\link{Kres}}.
+
+  Point process models: \code{\link{ppm}}.
+  
+  Options: \code{\link{spatstat.options}}
 }
 \examples{
    pso <- spatstat.options(psstA.ngrid=16,psstA.nr=10)

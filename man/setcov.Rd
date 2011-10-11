@@ -5,11 +5,14 @@
   Computes the set covariance function of a window.
 }
 \usage{
- setcov(W, \dots)
+ setcov(W, V=W, \dots)
 }
 \arguments{
   \item{W}{
     A window (object of class \code{"owin"}.
+  }
+  \item{V}{
+    Optional. Another window.
   }
   \item{\dots}{
     Optional arguments passed to \code{\link{as.mask}}
@@ -18,7 +21,8 @@
 }
 \value{
   A pixel image (an object of class \code{"im"}) representing the
-  set covariance function of \code{W}.
+  set covariance function of \code{W},
+  or the cross-covariance of \code{W} and \code{V}.
 }
 \details{
   The set covariance function of a region \eqn{W} in the plane
@@ -40,8 +44,14 @@
 
   The set covariance is computed using the Fast Fourier Transform,
   unless \code{W} is a rectangle, when an exact formula is used.
+
+  If the argument \code{V} is present, then \code{setcov(W,V)}
+  computes the set \emph{cross-covariance} function \eqn{C(x)}
+  defined for each vector \eqn{x}
+  as the area of the intersection between \eqn{W} and \eqn{V+x}.
 }
 \seealso{
+  \code{\link{imcov}},
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{erosion}}

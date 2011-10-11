@@ -1,7 +1,7 @@
 #
 # marks.R
 #
-#   $Revision: 1.28 $   $Date: 2011/04/17 04:38:44 $
+#   $Revision: 1.29 $   $Date: 2011/10/11 10:05:36 $
 #
 # stuff for handling marks
 #
@@ -292,4 +292,29 @@ markcbind <- function(...) {
   return(marx)
 }
 
-  
+# extract only the columns of (passably) numeric data from a data frame
+numeric.columns <- function(M, logical=TRUE, others=c("discard", "na")) {
+  others <- match.arg(others)
+  M <- as.data.frame(M)
+  if(ncol(M) == 1)
+    colnames(M) <- NULL
+  process <- function(z, logi, other) {
+    if(is.numeric(z)) return(z)
+    if(logi && is.logical(z)) return(as.integer(z))
+    switch(other,
+           na=rep(NA, length(z)),
+           discard=NULL,
+           NULL)
+  }
+  Mprocessed <- lapply(M, process, logi=logical, other=others)
+  isnul <- unlist(lapply(Mprocessed, is.null))
+  if(all(isnul)) {
+    # all columns have been removed
+    # return a data frame with no columns
+    return(as.data.frame(matrix(, nrow=nrow(M), ncol=0)))
+  }
+  Mout <- do.call("data.frame", Mprocessed[!isnul])
+  if(ncol(M) == 1 && ncol(Mout) == 1)
+    colnames(Mout) <- NULL
+  return(Mout)
+}

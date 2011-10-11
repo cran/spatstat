@@ -60,9 +60,15 @@
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Related functions:
   \code{\link{Kcom}}, 
-  \code{\link{Kest}}, 
-  \code{\link{ppm}}
+  \code{\link{Kest}}.
+  
+  Alternative functions:
+  \code{\link{Gres}},
+  \code{\link{psstG}}, \code{\link{psstA}},  \code{\link{psst}}.
+
+  Point process models: \code{\link{ppm}}.
 }
 \examples{
     data(cells)

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.45 $   $Date: 2011/05/27 22:00:25 $
+#  $Revision: 2.48 $   $Date: 2011/10/06 10:01:04 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -147,7 +147,7 @@ list(
        ntyp <- integer(N)
        for(i in 1:N) {
          interI <- interlist[[i]]
-         # forbid hybrids-of-hybrids
+         # forbid hybrids-of-hybrids - these should not occur anyway
          if(interI$name == "Hybrid interaction")
            stop("Simulation of a hybrid-of-hybrid interaction is not implemented")
          # get RMH mapping for I-th component
@@ -163,17 +163,18 @@ list(
          prefixlength <- nchar(nameI.)
          Cprefix <- substr(Cname, 1, prefixlength)
          relevant <- (Cprefix == nameI.)
-         if(any(relevant)) {
-           # extract coefficients
-           coeffsI <- coeffs[relevant]
+         # extract coefficients
+         #   (there may be none, if this interaction is an 'offset')
+         coeffsI <- coeffs[relevant]
+         # remove the prefix so the coefficients are recognisable to 'siminfoI'
+         if(any(relevant)) 
            names(coeffsI) <-
              substr(Cname[relevant], prefixlength+1, max(nchar(Cname)))
-           # compute RMH info
-           ZI <- siminfoI(coeffsI, interI)
-           cifs[i] <- ZI$cif
-           pars[[i]] <- ZI$par
-           ntyp[i] <- ZI$ntypes
-         }
+         # compute RMH info
+         ZI <- siminfoI(coeffsI, interI)
+         cifs[i] <- ZI$cif
+         pars[[i]] <- ZI$par
+         ntyp[i] <- ZI$ntypes
        }
        nt <- unique(ntyp[ntyp != 1])
        if(length(nt) > 1)
@@ -218,6 +219,10 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
     # enforce defaults for `control'
 
     control <- rmhcontrol(control)
+
+    # adjust to peculiarities of model
+    
+    control <- rmhResolveControl(control, X)
     
     ########  Interpoint interaction
     if(Y$poisson) {
@@ -248,7 +253,8 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       if(newstyle.coeff.handling(inte)) {
         # extract only the interaction coefficients
         Vnames <- Y$entries$Vnames
-        coeffs <- coeffs[Vnames]
+        IsOffset <- Y$entries$IsOffset
+        coeffs <- coeffs[Vnames[!IsOffset]]
       }
       # Ensure the fitted model is valid
       # (i.e. exists mathematically as a point process)

@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.74 $    $Date: 2011/07/06 03:38:36 $
+#  $Revision: 1.75 $    $Date: 2011/09/23 11:29:37 $
 #
 #
 
@@ -106,7 +106,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   nplots <- ncol(lhsdata)
   allind <- 1:nplots
 
+  
   # extra plots may be implied by 'shade'
+  extrashadevars <- NULL
   explicit.lhs.names <- colnames(lhsdata)
   
   if(!is.null(shade)) {
@@ -127,7 +129,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       lty <- c(lty, rep(lty[1], nmore))
       col <- c(col, rep(col[1], nmore))
       lwd <- c(lwd, rep(lwd[1], nmore))
-    }
+      extrashadevars <- colnames(morelhs)
+    } 
   }
   
   # restrict data to subset if desired
@@ -343,12 +346,24 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       if(defaultplot) {
         # try to convert individual labels to expressions
         fancy <- try(parse(text=leglabl), silent=TRUE)
+        if(!inherits(fancy, "try-error"))
+          legtxt <- fancy
       } else {
         # try to navigate the parse tree
         fancy <- try(fvlegend(x, expandleftside), silent=TRUE)
+        if(!inherits(fancy, "try-error")) {
+          if(is.null(extrashadevars)) {
+            legtxt <- fancy
+          } else {
+            # some shade variables were not included in left side of formula
+            mat <- match(extrashadevars, colnames(x))
+            extrashadelabl <- labl[mat]
+            fancy2 <- try(parse(text=extrashadelabl), silent=TRUE)
+            if(!inherits(fancy2, "try-error"))
+              legtxt <- c(fancy, fancy2)
+          }
+        }
       }
-      if(!inherits(fancy, "try-error"))
-        legtxt <- fancy
     }
     # plot legend
     if(!is.null(legend) && legend) 

@@ -125,8 +125,13 @@ psst(object, fun, r = NULL, breaks = NULL, ...,
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Special cases:
   \code{\link{psstA}},
-  \code{\link{psstG}}
+  \code{\link{psstG}}.
+
+  Alternative functions:
+  \code{\link{Kres}},
+  \code{\link{Gres}}.
 }
 \examples{
     data(cells)

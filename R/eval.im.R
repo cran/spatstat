@@ -5,7 +5,9 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#     $Revision: 1.16 $     $Date: 2010/07/16 04:18:05 $
+#        haronise.im()       Harmonise images
+#
+#     $Revision: 1.19 $     $Date: 2011/10/04 02:58:31 $
 #
 
 eval.im <- function(expr, envir) {
@@ -66,7 +68,53 @@ compatible.im <- function(A, B, tol=1e-6) {
                  abs(A$yrow - B$yrow))
   xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
   yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
-  uok <- identical(all.equal(unitname(A), unitname(B)), TRUE)
+  uok <- compatible.units(unitname(A), unitname(B))
   return(xok && yok && uok)
 }
 
+# force a list of images to be compatible
+
+harmonize.im <- harmonise.im <- function(...) {
+  argz <- list(...)
+  n <- length(argz)
+  if(n < 2) return(argz)
+  result <- vector(mode="list", length=n)
+  isim <- unlist(lapply(argz, is.im))
+  if(!any(isim))
+    stop("No images supplied")
+  imgs <- argz[isim]
+  # if any windows are present, extract bounding box
+  iswin <- unlist(lapply(argz, is.owin))
+  bb0 <- if(!any(iswin)) NULL else do.call("bounding.box", unname(argz[iswin]))
+  if(length(imgs) == 1 && is.null(bb0)) {
+    # only one 'true' image: use it as template.
+    result[isim] <- imgs
+    Wtemplate <- imgs[[1]]
+  } else {
+    # test for compatible units
+    un <- lapply(imgs, unitname)
+    uok <- unlist(lapply(un, compatible.units, y=un[[1]]))
+    if(!all(uok))
+      stop("Images have incompatible units of length")
+    # find the image with the highest resolution
+    xsteps <- unlist(lapply(imgs, function(a) { a$xstep }))
+    which.finest <- which.min(xsteps)
+    finest <- imgs[[which.finest]]
+    # get the bounding box
+    bb <- do.call("bounding.box", lapply(unname(imgs), as.rectangle))
+    if(!is.null(bb0)) bb <- bounding.box(bb, bb0)
+    # determine new raster coordinates
+    xcol <- prolongseq(finest$xcol, bb$xrange)
+    yrow <- prolongseq(finest$yrow, bb$yrange)
+    xy <- list(x=xcol, y=yrow)
+    # resample all images on new raster
+    newimgs <- lapply(imgs, as.im, xy=xy)
+    result[isim] <- newimgs
+    Wtemplate <- newimgs[[which.finest]]
+  }
+  # convert other data to images
+  if(any(notim <- !isim)) 
+    result[notim] <- lapply(argz[notim], as.im, W=as.mask(Wtemplate))
+  names(result) <- names(argz)
+  return(result)
+}

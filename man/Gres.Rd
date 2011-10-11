@@ -60,9 +60,18 @@
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Related functions:
   \code{\link{Gcom}}, 
-  \code{\link{Gest}}, 
-  \code{\link{ppm}}
+  \code{\link{Gest}}.
+
+  Alternative functions:
+  \code{\link{Kres}}, 
+  \code{\link{psstA}}, 
+  \code{\link{psstG}}, 
+  \code{\link{psst}}.
+
+  Model-fitting:
+  \code{\link{ppm}}.
 }
 \examples{
     data(cells)

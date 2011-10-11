@@ -7,7 +7,7 @@
 \usage{
   \method{plot}{listof}(x, \dots, main, arrange=TRUE,
    nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel=c(2,1,1,2),
-   panel.begin=NULL, panel.end=NULL, panel.args=NULL)
+   panel.begin=NULL, panel.end=NULL, panel.args=NULL, plotcommand="plot")
 }
 \arguments{
   \item{x}{
@@ -48,6 +48,11 @@
   \item{panel.args}{
     Internal use only.
   }
+  \item{plotcommand}{
+    Optional.
+    Character string containing the name of the command that should be
+    executed to plot each panel. 
+  }
 }
 \value{
   Null.
@@ -69,6 +74,8 @@
 }
 \seealso{
   \code{\link{print.listof}},
+  \code{\link{contour.listof}},
+  \code{\link{image.listof}},
   \code{\link{density.splitppp}}
 }
 \examples{

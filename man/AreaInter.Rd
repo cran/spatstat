@@ -42,7 +42,7 @@
     f(x[1],\ldots,x[n]) =
     alpha . kappa^n(x) . gamma^(-A(x))
   }
-  where 
+  for a point pattern \eqn{x}, where 
   \eqn{x_1,\ldots,x_n}{x[1],\ldots,x[n]} represent the 
   points of the pattern, \eqn{n(x)} is the number of points in the
   pattern, and \eqn{A(x)} is the area of the region formed by
@@ -90,7 +90,20 @@
   \eqn{C(x)} is a true interaction potential, in the sense that
   \eqn{C(x) = 0} if the point pattern \eqn{x} does not contain any
   points that lie close together (closer than \eqn{2r}{2*r} units
-  apart). 
+  apart).
+
+  When a new point \eqn{u} is added to an existing point pattern
+  \eqn{x}, the rescaled potential \eqn{-C(x)} increases by
+  a value between 0 and 1. 
+  The increase is zero if \eqn{u} is not close to any point of \eqn{x}.
+  The increase is 1 if the disc of radius \eqn{r} centred at \eqn{u}
+  is completely contained in the union of discs of radius \eqn{r}
+  centred at the data points \eqn{x_i}{x[i]}. Thus, the increase in
+  potential is a measure of how close the new point \eqn{u} is to the
+  existing pattern \eqn{x}. Addition of the point
+  \eqn{u} contributes a factor \eqn{\beta \eta^\delta}{beta * eta^delta}
+  to the probability density, where \eqn{\delta}{delta} is the
+  increase in potential. 
 
   The old parameters \eqn{\kappa,\gamma}{kappa,gamma} of the
   standard form are related to
@@ -99,13 +112,13 @@
   \deqn{
     \beta = \kappa \gamma^{-\pi r^2} = \kappa /\eta
   }{
-    beta = kappa * gamma^(-pi r^2)= kappa / eta
+    beta = kappa * gamma^(-pi * r^2)= kappa / eta
   }
   and
   \deqn{
     \eta = \gamma^{\pi r^2}
   }{
-    eta = gamma^(pi r^2)
+    eta = gamma^(pi * r^2)
   }
   provided \eqn{\gamma}{gamma} and \eqn{\kappa}{kappa} are positive and finite.
 
@@ -138,6 +151,15 @@
   The interaction distance of this process is equal to
   \code{2 * r}. Two discs of radius \code{r} overlap if their centres
   are closer than \code{2 * r} units apart.
+
+  The estimate of the interaction parameter \eqn{\eta}{eta}
+  is unreliable if the interaction radius \code{r} is too small
+  or too large. In these situations the model is approximately Poisson
+  so that \eqn{\eta}{eta} is unidentifiable.
+  As a rule of thumb, one can inspect the empty space function
+  of the data, computed by \code{\link{Fest}}. The value \eqn{F(r)}
+  of the empty space function at the interaction radius \code{r} should
+  be between 0.2 and 0.8. 
 }
 \examples{
    # prints a sensible description of itself

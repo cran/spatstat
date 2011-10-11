@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.76 $    $Date: 2011/09/07 04:49:45 $
+#    $Revision: 1.82 $    $Date: 2011/10/11 02:36:27 $
 #
 #  (a) for matrices only:
 #
@@ -92,40 +92,45 @@ whist <- function(x, breaks, weights=NULL) {
 #   matrixsample         subsample or supersample a matrix
 #
 
-matrixsample <- function(mat, newdim, phase=c(0,0)) {
+matrixsample <- function(mat, newdim, phase=c(0,0), scale, na.value=NA) {
+  # 'phase+1' is the position of the [1,1] corner of the new matrix
+  #  expressed in the coordinates of the old matrix.
+  # 'scale' is the size of one step in the new matrix,
+  #  expressed in the coordinates of the old matrix.
+  # Both 'phase' and 'scale' can take any real value.
   olddim <- dim(mat)
-  oldlength <- prod(olddim)
-  if(all(olddim >= newdim) && all(olddim %% newdim == 0)) {
-    # new matrix is periodic subsample of old matrix
-    ratio <- olddim/newdim
-    phase <- pmin(pmax(phase, 0), ratio-1)
-    ii <- seq(from=1+phase[1], to=olddim[1], by=ratio[1])
-    jj <- seq(from=1+phase[2], to=olddim[2], by=ratio[2])
-    return(mat[ii,jj])
-  } else if(all(olddim <= newdim) && all(newdim %% olddim == 0)) {
-    # new matrix is repetition of old matrix
-    ratio <- newdim/olddim
-    replicate.rows <- function(m, nrep, l=length(m)) {
-      matrix(rep(m, rep(nrep, l)), nrow(m) * nrep, ncol(m))
-    }
-    mrow <- replicate.rows(mat, ratio[1], oldlength)
-    mfinal <- t(replicate.rows(t(mrow), ratio[2], oldlength * ratio[1]))
-    return(mfinal)
+  if(missing(scale)) scale <- (olddim - 1)/(newdim - 1)
+  scale <- ensure2vector(scale)
+  newdim  <- ensure2vector(newdim)
+  newmat <- matrix(na.value, newdim[1], newdim[2])
+  newrow <- 1:newdim[1]
+  newcol <- 1:newdim[2]
+  oldrow <- round(1 + phase[1] + (newrow-1) * scale[1])
+  oldcol <- round(1 + phase[2] + (newcol-1) * scale[2])
+  oldrow.ok <- (oldrow >= 1) & (oldrow <= olddim[1])
+  oldcol.ok <- (oldcol >= 1) & (oldcol <= olddim[2])
+  newmat[oldrow.ok, oldcol.ok] <- mat[oldrow[oldrow.ok],
+                                      oldcol[oldcol.ok]]
+  return(newmat)
+}
+
+# common invocation of matrixsample
+
+rastersample <- function(X, Y) {
+  stopifnot(is.im(X) || is.mask(X))
+  stopifnot(is.im(Y) || is.mask(Y))
+  phase <- c((Y$yrow[1] - X$yrow[1])/X$ystep,
+             (Y$xcol[1] - X$xcol[1])/X$xstep)
+  scale <- c(Y$ystep/X$ystep,
+             Y$xstep/X$xstep)
+  if(is.im(X)) {
+    if(!is.im(Y)) Y <- as.im(Y)
+    Y$v <- matrixsample(X$v, Y$dim, phase=phase, scale=scale, na.value=NA)
   } else {
-    # general case
-    newmat <- matrix(, newdim[1], newdim[2])
-    newrow <- row(newmat)
-    newcol <- col(newmat)
-    oldrow <- phase[1] + ceiling((newrow * olddim[1])/newdim[1])
-    oldcol <- phase[2] + ceiling((newcol * olddim[2])/newdim[2])
-    oldrow[oldrow < 1] <- 1
-    oldrow[oldrow > olddim[1]] <- olddim[1]
-    oldcol[oldcol < 1] <- 1
-    oldcol[oldcol > olddim[2]] <- olddim[2]
-    newmat <- matrix(mat[cbind(as.vector(oldrow), as.vector(oldcol))],
-                     newdim[1], newdim[2])
-    return(newmat)
+    if(!is.mask(Y)) Y <- as.mask(Y)
+    Y$m <- matrixsample(X$m, Y$dim, phase=phase, scale=scale, na.value=FALSE)
   }
+  return(Y)
 }
 
 pointgrid <- function(W, ngrid) {
@@ -138,7 +143,8 @@ pointgrid <- function(W, ngrid) {
   return(ppp(xx, yy, W))
 }
 
-   
+# text magic
+
 commasep <- function(x) {
   px <- paste(x)
   nx <- length(px)
@@ -443,6 +449,8 @@ validposint <- function(n, caller, fatal=TRUE) {
   return(TRUE)
 }
 
+# wrangle data.frames
+
 firstfactor <- function(x) {
   stopifnot(is.data.frame(x))
   isfac <- unlist(lapply(as.list(x), is.factor))
@@ -455,9 +463,11 @@ onecolumn <- function(m) {
   switch(markformat(m),
          none=stop("No marks provided"),
          vector=m,
-         dataframe=m[,1],
+         dataframe=m[,1, drop=TRUE],
          NA)
 }
+
+# errors and checks
 
 complaining <- function(whinge, fatal=FALSE, value=NULL) {
   if(fatal) stop(whinge, call.=FALSE)
@@ -542,6 +552,21 @@ sensiblevarname <- function(guess, fallback, maxlen=12) {
   return(out)
 }
 
+good.names <- function(nama, defaults, suffices) {
+  # ensure sensible, unique names 
+  stopifnot(is.character(defaults))
+  if(!missing(suffices))
+    defaults <- paste(defaults, suffices, sep="")
+  result <- nama
+  if(is.null(result))
+    result <- defaults
+  else if(any(blank <- !nzchar(result)))
+    result[blank] <- defaults[blank]
+  result <- make.names(result, unique=TRUE)
+  return(result)
+}
+
+    
 cat.factor <- function (..., recursive=FALSE) {
   lll <- list(...)
   chk <- sapply(lll,is.factor)
@@ -576,4 +601,9 @@ paste.expr <- function(x) {
 
 badprobability <- function(x, NAvalue=NA) {
   ifelse(is.na(x), NAvalue, !is.finite(x) | x < 0 | x > 1)
+}
+
+# test for equivalence of two functions 
+samefunction <- function(f, g) {
+  identical(deparse(f), deparse(g))
 }

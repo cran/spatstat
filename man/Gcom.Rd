@@ -213,9 +213,17 @@ Gcom(object, r = NULL, breaks = NULL, ...,
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Related functions:
   \code{\link{Gest}},
-  \code{\link{Gres}},
-  \code{\link{ppm}}
+  \code{\link{Gres}}.
+
+  Alternative functions:
+  \code{\link{Kcom}}, 
+  \code{\link{psstA}}, 
+  \code{\link{psstG}}, 
+  \code{\link{psst}}.
+  
+  Model fitting: \code{\link{ppm}}.
 }
 \examples{
     data(cells)

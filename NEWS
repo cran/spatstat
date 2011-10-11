@@ -1,3 +1,91 @@
+
+	CHANGES IN spatstat VERSION 1.23-6
+
+OVERVIEW 
+
+   o Spatial covariance functions of windows and pixel images.
+
+   o Area-interaction models can now be fitted in non-rectangular windows
+
+   o Bug fix for envelope of inhomogeneous Poisson process
+
+   o Bug fix for raster conversion
+
+   o New vignette on 'Getting Started with Spatstat'
+
+   o Code accelerated.
+
+NEW FUNCTIONS
+
+   o imcov
+   Spatial covariance function of pixel image
+   or spatial cross-covariance function of two pixel images
+
+   o harmonise.im
+   Make several pixel images compatible 
+   by converting them to the same pixel grid
+
+   o contour.listof, image.listof
+   Methods for contour() and image() for lists of objects
+
+   o dummify
+   Convert data to numeric values by constructing dummy variables.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o setcov
+   Can now compute the `cross-covariance' between two regions
+
+   o AreaInter
+   Point process models with the AreaInter() interaction
+   can now be fitted to point pattern data X in any window.
+
+   o areaGain, areaLoss
+   These now handle arbitrary windows W.
+   They are now more accurate when r is very small.
+
+   o Kcom
+   Computation vastly accelerated, for non-rectangular windows.
+
+   o vignettes
+   New vignette 'Getting Started with the Spatstat Package'
+
+   o nncorr, nnmean, nnvario
+   These functions now handle data frames of marks.
+
+BUG FIXES
+
+   o envelope.ppm
+   If the model was an inhomogeneous Poisson process, 
+   the resulting envelope object was incorrect
+   (the simulations were correct, but the envelopes were calculated
+   assuming the model was CSR). Bug was introduced in spatstat 1.23-5.
+   Fixed.
+
+   o envelope.ppm
+   If the model was an inhomogeneous Poisson process 
+   with intensity a function of x and y only,
+   overflow errors sometimes occurred ('insufficient storage' 
+   or 'attempting to generate a large number of random points').
+   Fixed.
+
+   o as.im.im
+   The result of as.im(X, W) was incorrect if 'W' did not cover 'X'.
+   Fixed.
+
+   o as.mask
+   The result of as.mask(w, xy) was incorrect if 'xy' did not cover 'w'.
+   Fixed.
+
+   o plot.fv
+   Legend was incorrectly labelled if 'shade' variables were not included
+   in the plot formula.
+   Fixed.
+
+   o areaGain, areaLoss
+   Crashed if the radius r was close to zero.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.23-5
 
 OVERVIEW 

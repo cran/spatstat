@@ -14,7 +14,8 @@
      nncorr(X,
             f = function(m1, m2) { m1 * m2 },
             \dots,
-            use = "all.obs", method = c("pearson", "kendall", "spearman"))
+            use = "all.obs", method = c("pearson", "kendall", "spearman"),
+            denominator=NULL)
      nnmean(X)
      nnvario(X)
 }
@@ -25,11 +26,17 @@
   }
   \item{f}{
     Function \eqn{f} used in the definition of the
-    nearest neighbour correlation.
+    nearest neighbour correlation. There is a sensible default
+    that depends on the type of marks of \code{X}.
   }
-  \item{\dots}{Extra arguments passed to \code{f}.}
+  \item{\dots}{
+    Extra arguments passed to \code{f}.
+  }
   \item{use,method}{
     Arguments passed to the standard correlation function \code{\link{cor}}.
+  }
+  \item{denominator}{
+    Internal use only.
   }
 }
 \details{
@@ -107,14 +114,24 @@
   }
 
   In the default case where \code{f} is not given,
-  \code{nncorr(X)} computes the unnormalised and normalised
-  versions of the nearest-neighbour product index
-  \eqn{E[M \, M^\ast]}{E[M * M*]},
-  and (if the marks are real numbers) the classical correlation
-  between \eqn{M} and \eqn{M^\ast}{M*}.
+  \code{nncorr(X)} computes
+  \itemize{
+    \item
+    If the marks of \code{X} are real numbers, 
+    the unnormalised and normalised
+    versions of the nearest-neighbour product index
+    \eqn{E[M \, M^\ast]}{E[M * M*]},
+    and the classical correlation
+    between \eqn{M} and \eqn{M^\ast}{M*}.
+    \item
+    If the marks of \code{X} are factor valued,
+    the unnormalised and normalised
+    versions of the nearest-neighbour equality index
+    \eqn{P[M = M^\ast]}{P[M = M*]}.
+  }
 
   The wrapper functions \code{nnmean} and \code{nnvario}
-  computes the correlation indices for two special choices of the
+  compute the correlation indices for two special choices of the
   function \eqn{f(m_1,m_2)}{f(m1,m2)}.
   \itemize{
     \item
@@ -131,8 +148,10 @@
 
   The argument \code{X} must be a point pattern (object of class
   \code{"ppp"}) and must be a marked point pattern.
+  (The marks may be a data frame, containing several columns of mark variables;
+  each column is treated separately.)
 
-  The argument \code{f}
+  If the argument \code{f} is given, it
   must be a function, accepting two arguments \code{m1}
   and \code{m2} which are vectors of equal length containing mark
   values (of the same type as the marks of \code{X}).
@@ -157,9 +176,12 @@
   treated using the \sQuote{border method} edge correction.
 }
 \value{
-  Labelled vector of length 2 or 3 containing the unnormalised and normalised
+  Labelled vector of length 2 or 3
+  containing the unnormalised and normalised
   nearest neighbour correlations, and the classical correlation
   if appropriate.
+  Alternatively a matrix with 2 or 3 rows, containing this information
+  for each mark variable.
 }
 \examples{
   data(finpines)
@@ -167,7 +189,7 @@
   # heights of neighbouring trees are slightly negatively correlated
 
   data(amacrine)
-  nncorr(amacrine, function(m1, m2) { m1 == m2})
+  nncorr(amacrine)
   # neighbouring cells are usually of different type
 }
 \references{

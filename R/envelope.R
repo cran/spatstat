@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.21 $  $Date: 2011/09/20 07:07:19 $
+#   $Revision: 2.22 $  $Date: 2011/10/07 08:52:09 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -15,7 +15,7 @@ envelope <- function(Y, fun, ...) {
   #
   #  type = Type of simulation
   #           "csr": uniform Poisson process
-  #           "rmh": simulated realisation of fitted Gibbs model 
+  #           "rmh": simulated realisation of fitted Gibbs or Poisson model 
   #          "kppm": simulated realisation of fitted cluster model 
   #          "expr": result of evaluating a user-supplied expression
   #          "list": user-supplied list of point patterns
@@ -25,14 +25,18 @@ envelope <- function(Y, fun, ...) {
   #    envir = environment in which to evaluate the expression `expr'
   #
   #    'csr' = TRUE iff the model is (known to be) uniform Poisson
+  #
+  #    pois  = TRUE if model is known to be Poisson
   #  
   # ...................................................................
 
-simulrecipe <- function(type, expr, envir, csr) {
+simulrecipe <- function(type, expr, envir, csr, pois=csr) {
+  if(csr && !pois) warning("Internal error: csr=TRUE but pois=FALSE")
   out <- list(type=type,
               expr=expr,
               envir=envir,
-              csr=csr)
+              csr=csr,
+              pois=pois)
   class(out) <- "simulrecipe"
   out
 }
@@ -75,7 +79,8 @@ envelope.ppp <-
     simrecipe <- simulrecipe(type = "csr",
                              expr = simexpr,
                              envir = envir.here,
-                             csr   = TRUE)
+                             csr   = TRUE,
+                             pois  = TRUE)
   } else {
     # ...................................................
     # Simulations are determined by 'simulate' argument
@@ -113,8 +118,9 @@ envelope.ppm <-
   if(is.null(simulate)) {
     # ...................................................
     # Simulated realisations of the fitted model Y
-    # will be generated 
-    csr <- is.stationary(Y) && is.poisson(Y)
+    # will be generated
+    pois <- is.poisson(Y)
+    csr <- is.stationary(Y) && pois
     type <- if(csr) "csr" else "rmh"
     # Set up parameters for rmh
     rmodel <- rmhmodel(Y, verbose=FALSE)
@@ -131,7 +137,8 @@ envelope.ppm <-
     simrecipe <- simulrecipe(type  = type,
                              expr  = simexpr,
                              envir = envir.here,
-                             csr   = csr)
+                             csr   = csr,
+                             pois  = pois)
   } else {
     # ...................................................
     # Simulations are determined by 'simulate' argument
@@ -173,7 +180,8 @@ envelope.kppm <-
     simrecipe <- simulrecipe(type = "kppm",
                              expr = simexpr,
                              envir = envir.here,
-                             csr   = FALSE)
+                             csr   = FALSE,
+                             pois  = FALSE)
   } else {
     # ...................................................
     # Simulations are determined by 'simulate' argument
@@ -230,6 +238,7 @@ envelopeEngine <-
     simexpr <- simul$expr
     envir   <- simul$envir
     csr     <- simul$csr
+    pois    <- simul$pois
   } else {
     # ...................................................
     # simulation is specified by argument `simulate' to envelope()
@@ -239,6 +248,7 @@ envelopeEngine <-
     csr <- FALSE
     # override
     if(!is.null(icsr <- internal$csr)) csr <- icsr
+    pois <- csr
     model <- NULL
     if(inherits(simulate, "envelope")) {
       # envelope object: see if it contains stored point patterns
@@ -416,7 +426,9 @@ envelopeEngine <-
       action <- if(simtype == "list") "Extracting" else "Generating"
       descrip <- switch(simtype,
                         csr = "simulations of CSR",
-                        rmh = "simulated realisations of fitted Gibbs model",
+                        rmh = paste("simulated realisations of fitted",
+                          if(pois) "Poisson" else "Gibbs",
+                          "model"),
                         kppm = "simulated realisations of fitted cluster model",
                         expr = "simulations by evaluating expression",
                         list = "point patterns from list",
@@ -469,6 +481,7 @@ envelopeEngine <-
                         valname=valname,
                         csr=csr,
                         csr.theo=csr.theo,
+                        pois=pois,
                         simtype=simtype,
                         nrank=nrank,
                         nsim=nsim,
@@ -487,7 +500,9 @@ envelopeEngine <-
     action <- if(simtype == "list") "Extracting" else "Generating"
     descrip <- switch(simtype,
                       csr = "simulations of CSR",
-                      rmh = "simulated realisations of fitted Gibbs model",
+                      rmh = paste("simulated realisations of fitted",
+                        if(pois) "Poisson" else "Gibbs",
+                        "model"),
                       kppm = "simulated realisations of fitted cluster model",
                       expr = "simulations by evaluating expression",
                       list = "point patterns from list",
@@ -630,7 +645,7 @@ envelopeEngine <-
 
   result <- envelope.matrix(simvals, funX=funX,
                             jsim=jsim, jsim.mean=jsim.mean,
-                            type=etype, csr=csr,
+                            type=etype, csr=csr, use.theory=csr.theo,
                             nrank=nrank, ginterval=ginterval, nSD=nSD,
                             Yname=Yname)
 
@@ -674,6 +689,8 @@ print.envelope <- function(x, ...) {
   e <- attr(x, "einfo")
   g <- e$global
   csr <- e$csr
+  pois <- e$pois
+  if(is.null(pois)) pois <- csr
   simtype <- e$simtype
   nr <- e$nrank
   nsim <- e$nsim
@@ -691,7 +708,9 @@ print.envelope <- function(x, ...) {
     else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
-             rmh="simulations of fitted Gibbs model",
+             rmh=paste("simulations of fitted",
+               if(pois) "Poisson" else "Gibbs",
+               "model"),
              kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list",
@@ -728,6 +747,8 @@ summary.envelope <- function(object, ...) {
   nr <- e$nrank
   nsim <- e$nsim
   csr <- e$csr
+  pois <- e$pois
+  if(is.null(pois)) pois <- csr
   has.theo <- "theo" %in% fvnames(object, "*")
   csr.theo <- csr && has.theo
   simtype <- e$simtype
@@ -742,7 +763,9 @@ summary.envelope <- function(object, ...) {
     else if(!is.null(simtype)) {
       switch(simtype,
              csr="simulations of CSR",
-             rmh="simulations of fitted Gibbs model",
+             rmh=paste("simulations of fitted",
+               if(pois) "Poisson" else "Gibbs",
+               "model"),
              kppm="simulations of fitted cluster model",
              expr="evaluations of user-supplied expression",
              list="point pattern datasets in user-supplied list",
@@ -800,7 +823,7 @@ envelope.matrix <- function(Y, ...,
                             nsim=NULL, nsim2=NULL,
                             jsim=NULL, jsim.mean=NULL,
                             type=c("pointwise", "global", "variance"),
-                            use.theory = TRUE, csr = FALSE, 
+                            csr=FALSE, use.theory = csr, 
                             nrank=1, ginterval=NULL, nSD=2,
                             check=TRUE,
                             Yname=NULL) {

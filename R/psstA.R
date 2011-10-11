@@ -3,7 +3,7 @@
 #
 #	Pseudoscore residual for unnormalised F (area-interaction)
 #
-#	$Revision: 1.1 $	$Date: 2011/06/19 06:04:03 $
+#	$Revision: 1.2 $	$Date: 2011/10/05 05:38:38 $
 #
 ################################################################################
 #
@@ -145,9 +145,9 @@ psstA <- function(object, r=NULL, breaks=NULL, ...,
                    "upper 2sigma critical limit for %s",
                    "lower 2sigma critical limit for %s"),
                "res")
+    fvnames(ans, ".") <- c("res", "up", "lo")
   }
   
-  fvnames(ans, ".") <- c("res", "up", "lo")
   # 
   return(ans)
 }
