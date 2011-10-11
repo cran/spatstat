@@ -25,7 +25,9 @@ compatible.im(A, B, tol=1e-6)
   Logical value: \code{TRUE} if the images are compatible, and \code{FALSE}
   if they are not.
 }
-
+\seealso{
+  \code{\link{harmonise.im}}
+}
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}

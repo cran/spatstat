@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.75 2011/06/14 08:55:20 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.76 2011/10/07 04:02:33 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL,
                         verbose=TRUE, track=FALSE, ...) {
@@ -22,7 +22,8 @@ rmh.default <- function(model,start=NULL,control=NULL,
   model <- rmhmodel(model)
   start <- rmhstart(start)
   control <- rmhcontrol(control)
-
+  control <- rmhResolveControl(control, model)
+  
   stopifnot(is.logical(track))
   
 #### Multitype models

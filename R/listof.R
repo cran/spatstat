@@ -40,5 +40,10 @@ as.listof <- function(x) {
   return(x)
 }
 
-  
-  
+contour.listof <- function(x, ...) {
+  plot(x, ..., plotcommand="contour")
+}
+
+image.listof <- function(x, ...) {
+  plot(x, ..., plotcommand="image")
+}

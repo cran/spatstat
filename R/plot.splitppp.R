@@ -5,13 +5,11 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
                                          mar.panel=c(2,1,1,2),
                                          panel.begin=NULL,
                                          panel.end=NULL,
-                                         panel.args=NULL) {
+                                         panel.args=NULL,
+                                         plotcommand="plot") {
   xname <- deparse(substitute(x))
   n <- length(x)
-
-  if(is.null(names(x)))
-    names(x) <- paste("Component_", 1:n, sep="")
-
+  names(x) <- good.names(names(x), "Component_", 1:n)
   if(is.null(main.panel))
     main.panel <- names(x)
   else {
@@ -23,13 +21,13 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
       stop("Incorrect length for main.panel")
   }
 
-  extraplot <- function(nnn, ..., panel.args=NULL) {
+  extraplot <- function(nnn, ..., panel.args=NULL, plotcommand="plot") {
     if(is.null(panel.args)) {
-      plot(...)
+      do.call(plotcommand, list(...))
     } else {
       xtra <- if(is.function(panel.args)) panel.args(nnn) else panel.args
       if(!is.list(xtra)) stop("panel.args should be a list")
-      do.call("plot", append(list(...), xtra))
+      do.call(plotcommand, append(list(...), xtra))
     }
   }
   
@@ -37,11 +35,11 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
     for(i in 1:n) {
       if(is.null(panel.begin)) {
         extraplot(i, x[[i]], main=main.panel[i], ...,
-                  panel.args=panel.args)
+                  panel.args=panel.args, plotcommand=plotcommand)
       } else {
         panel.begin(i)
         extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
-                  panel.args=panel.args)
+                  panel.args=panel.args, plotcommand=plotcommand)
       }
       if(!is.null(panel.end)) panel.end(i)
     }
@@ -99,11 +97,11 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   for(i in 1:n) {
     if(is.null(panel.begin)) {
       extraplot(i, x[[i]], main=main.panel[i], ...,
-                panel.args=panel.args)
+                panel.args=panel.args, plotcommand=plotcommand)
     } else {
       panel.begin(i)
       extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
-                panel.args=panel.args)
+                panel.args=panel.args, plotcommand=plotcommand)
     }
     if(!is.null(panel.end)) panel.end(i)
   }

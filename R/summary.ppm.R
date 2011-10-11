@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.47 $   $Date: 2011/06/14 07:02:51 $
+#    $Revision: 1.48 $   $Date: 2011/10/06 09:23:53 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -76,16 +76,17 @@ summary.ppm <- function(object, ..., quick=FALSE) {
 
   y$entries$coef <- COEFS <- x$coef
 
+  y$entries$Vnames <- Vnames <- x$internal$Vnames
+  y$entries$IsOffset <- x$internal$IsOffset
+
   ###### Extract fitted interaction and summarise  #################
   
   FITIN <- fitin(x)
   y$interaction <- summary(FITIN)
 
-  y$entries$Vnames <- Vnames <- x$internal$Vnames
-
   # Exit here if quick=TRUE
     
-  if(is.logical(quick) && quick) {
+  if(identical(quick, TRUE)) {
     class(y) <- "summary.ppm"
     return(y)
   }

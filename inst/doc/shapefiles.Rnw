@@ -2,6 +2,8 @@
 
 % \VignetteIndexEntry{Handling shapefiles in the spatstat package}
 
+\SweaveOpts{eps=TRUE}
+
 <<echo=FALSE,results=hide,fig=FALSE>>=
 options(SweaveHooks=list(fig=function() par(mar=c(1,1,1,1))))
 @ 

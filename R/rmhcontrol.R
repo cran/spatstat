@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.11 $  $Date: 2010/11/04 04:18:52 $
+#   $Revision: 1.13 $  $Date: 2011/10/07 04:41:56 $
 #
 #
 
@@ -217,4 +217,20 @@ default.rmhcontrol <- function(model, ...) {
                periodic=(as.owin(model)$type=="rectangle"))
   ctrl <- resolve.defaults(list(...), dflt)
   return(rmhcontrol(ctrl))
+}
+
+
+rmhResolveControl <- function(control, model) {
+  # adjust control information once the model is known
+  stopifnot(inherits(control, "rmhcontrol"))
+  ispois <- try(is.poisson(model))
+  if(inherits(try, "try-error"))
+    stop("Cannot determine whether the model is Poisson")
+  undecided <- with(control, !(force.exp || force.noexp))
+  if(undecided && ispois) {
+    control$force.exp <- FALSE
+    control$force.noexp <- TRUE
+    control$expand <- 1
+  }
+  return(control)
 }

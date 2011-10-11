@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.32 $   $Date: 2011/07/26 08:18:23 $
+#    $Revision: 1.35 $   $Date: 2011/10/04 04:53:41 $
 #
 #    as.im()
 #
@@ -29,9 +29,7 @@ as.im.im <- function(X, W=NULL, ...,
     Y <- as.im(W, eps=eps, dimyx=dimyx, xy=xy)
   }
   # resample X onto raster of Y
-  phase <- c((Y$xcol[1] - X$xcol[1])/X$xstep,
-             (Y$yrow[1] - X$yrow[1])/X$ystep)
-  Y$v <- matrixsample(X$v, Y$dim, phase=round(phase))
+  Y <- rastersample(X, Y)
 
   # inherit pixel data type from X
   Y$type <- X$type

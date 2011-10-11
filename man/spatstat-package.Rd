@@ -393,7 +393,8 @@
 	\code{\link{is.convex}} \tab determine whether a window is convex \cr 
 	\code{\link{convexhull}} \tab compute convex hull \cr
 	\code{\link{as.mask}} \tab pixel approximation of window \cr
-	\code{\link{as.polygonal}} \tab polygonal approximation of window 
+	\code{\link{as.polygonal}} \tab polygonal approximation of window \cr
+	\code{\link{setcov}} \tab spatial covariance function of window
       }
 
     \bold{Pixel images:}
@@ -428,11 +429,13 @@
 	\code{\link{connected}} \tab find connected components \cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
+	\code{\link{harmonise.im}} \tab make images compatible \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
 	\code{\link{scaletointerval}} \tab rescale pixel values \cr
 	\code{\link{zapsmall.im}} \tab set very small pixel values to zero \cr
 	\code{\link{levelset}} \tab level set of an image\cr 
-	\code{\link{solutionset}} \tab region where an expression is true
+	\code{\link{solutionset}} \tab region where an expression is true \cr
+	\code{\link{imcov}} \tab spatial covariance function of image
      }
 
     \bold{Line segment patterns}

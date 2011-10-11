@@ -57,7 +57,6 @@ psstG(object, r = NULL, breaks = NULL, ...,
 }
 \details{
   This function
-  (\emph{previously called} \code{Gpseudo})
   computes the pseudoscore test statistic
   which can be used as a diagnostic for goodness-of-fit of a fitted
   point process model.
@@ -129,7 +128,11 @@ psstG(object, r = NULL, breaks = NULL, ...,
   Ege Rubak and Jesper Moller.
 }
 \seealso{
-  \code{\link{psstA}}
+  Alternative functions:
+  \code{\link{psstA}},
+  \code{\link{psst}},
+  \code{\link{Kres}},
+  \code{\link{Gres}}.
 }
 \examples{
    X <- rStrauss(200,0.1,0.05)

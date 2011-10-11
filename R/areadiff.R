@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.16 $  $Date: 2011/05/18 01:21:06 $
+#  $Revision: 1.23 $  $Date: 2011/10/05 05:14:09 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -150,15 +150,41 @@ areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.di
   u <- as.ppp(u, W=as.owin(X))
   stopifnot(is.numeric(r) && all(is.finite(r)) && all(r >= 0))
   #
-  constrain <- !is.null(W)
-  if(constrain && (W$type != "rectangle"))
-    stop("only implemented for W=rectangle or W=NULL")
-  #
   nu <- u$n
   nr <- length(r)
   if(nr == 0)
     return(numeric(0))
   rmax <- max(r)
+  #
+  constrain <- !is.null(W)
+  if(constrain && (W$type != "rectangle")) {
+    # Constrained to an irregular window
+    # initialise to value for small-r
+    result <- matrix(pi * r^2, nrow=nu, ncol=nr, byrow=TRUE)    
+    # vector of radii below which b(u,r) is disjoint from U(X,r)
+    rcrit.u <- nncross(u, X)$dist/2
+    rcrit.min <- min(rcrit.u)
+    # Use distance transform and set covariance
+    D <- distmap(X, ...)
+    DW <- D[W, drop=FALSE]
+    # distance from (0,0) - thresholded to make digital discs
+    discWin <- owin(c(-rmax,rmax),c(-rmax,rmax))
+    discWin <- as.mask(discWin, eps=min(D$xstep, rmax/4))
+    rad <- as.im(function(x,y){sqrt(x^2+y^2)}, W=discWin)
+    # 
+    for(j in which(r > rcrit.min)) {
+      # rj is above the critical radius rcrit.u[i] for at least one point u[i]
+      rj <- r[j]
+      if(any(above <- (rj > rcrit.u))) {
+        Uncovered  <- levelset(DW, rj, ">")
+        DiscRj     <- levelset(rad, rj, "<=")
+        AreaGainIm <- setcov(Uncovered, DiscRj)
+        result[above, j] <- safelookup(AreaGainIm, u[above])
+      }
+    }
+    return(result)
+  }
+  #
   #
   xx <- X$x
   yy <- X$y
@@ -210,12 +236,28 @@ areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.di
 
 areaLoss.grid <- function(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc")) {
   verifyclass(X, "ppp")
-  n <- X$n
+  n <- npoints(X)
+  nr <- length(r)
   indices <- if(is.null(subset)) 1:n else (1:n)[subset]
-  answer <- matrix(, nrow=length(indices), ncol=length(r))
+  answer <- matrix(, nrow=length(indices), ncol=nr)
+#  for(k in seq_along(indices)) {
+#    i <- indices[k]
+#    answer[k,] <- areaGain(X[i], X[-i], r, W=W, ngrid=ngrid)
+#  }
+  # radii below which there are no overlaps
+  rcrit <- nndist(X)/2
+  #
+  D <- distmap(X, ...)
+  DW <- D[W, drop=FALSE]
+  a <- area.owin(as.owin(DW))
+  # empirical cdf of distance values
+  FW <- ecdf(DW[drop=TRUE])
+  # 
   for(k in seq_along(indices)) {
     i <- indices[k]
-    answer[k,] <- areaGain(X[i], X[-i], r, W=W, ngrid=ngrid)
+    Di <- distmap(X[-i], ...)
+    FiW <- ecdf(Di[W, drop=TRUE])
+    answer[k, ] <- ifelse(r > rcrit[i], a * (FW(r) - FiW(r)), pi * r^2)
   }
   return(answer)
 }

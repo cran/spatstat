@@ -1,7 +1,7 @@
 #
 #	affine.R
 #
-#	$Revision: 1.34 $	$Date: 2011/08/12 09:31:48 $
+#	$Revision: 1.35 $	$Date: 2011/10/04 10:00:44 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
@@ -151,6 +151,8 @@ shiftxypolygon <- function(p, vec=c(0,0)) {
          },
          stop("Unrecognised window type")
          )
+  # tack on shift vector
+  attr(X, "lastshift") <- vec
   # units are unchanged
   return(X)
 }
@@ -171,10 +173,15 @@ shiftxypolygon <- function(p, vec=c(0,0)) {
                    bottomleft={ c(W$xrange[1], W$yrange[1]) })
     vec <- -locn
   }
+  # perform shift
   r <- shiftxy(X, vec)
   w <- shift.owin(X$window, vec)
-  return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
+  Y <- ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE)
+  # tack on shift vector
+  attr(Y, "lastshift") <- vec
+  return(Y)
 }
+
 
 
 

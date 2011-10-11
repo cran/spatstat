@@ -179,9 +179,15 @@ Kcom(object, r = NULL, breaks = NULL, ...,
   Ege Rubak and Jesper Moller.
 }
 \seealso{
+  Related functions: 
   \code{\link{Kres}},
-  \code{\link{Kest}},
-  \code{\link{ppm}}
+  \code{\link{Kest}}.
+
+  Alternative functions:
+  \code{\link{Gcom}},
+  \code{\link{psstG}}, \code{\link{psstA}},  \code{\link{psst}}.
+
+  Point process models: \code{\link{ppm}}.
 }
 \examples{
     data(cells)

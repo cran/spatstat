@@ -3,7 +3,7 @@
 #
 #   model compensated K-function
 #
-# $Revision: 1.2 $ $Date: 2011/06/19 06:07:05 $
+# $Revision: 1.4 $ $Date: 2011/10/04 06:24:24 $
 #
 
 Kcom <- function(object, r=NULL, breaks=NULL, ..., 
@@ -26,8 +26,28 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
   X <- data.ppm(fit)
   Win <- X$window
 
+  # selection of edge corrections
+  correction.given <- !missing(correction) && !is.null(correction)
+  correction <- pickoption("correction", correction,
+                           c(none="none",
+                             border="border",
+                             isotropic="isotropic",
+                             Ripley="isotropic",
+                             ripley="isotropic",
+                             translate="translation",
+                             translation="translation",
+                             best="best"),
+                           multi=TRUE)
+  correction <- implemented.for.K(correction, Win$type, correction.given)
+
+  opt <- list(bord = any(correction == "border"),
+              tran = any(correction == "translation"),
+              ripl = any(correction == "isotropic"))
+  if(sum(unlist(opt)) == 0)
+    stop("No corrections selected")
+  
   # edge correction algorithm 
-  conditional.case <- (fit$correction == "border" && fit$rbord > 0)
+  conditional.case <- (opt$bord && fit$rbord > 0)
   algo <- if(!conditional.case) "classical" else
           if(restrict) "restricted" else "reweighted"
 
@@ -81,25 +101,6 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
   nr <- length(r)
   rmax <- breaks$max
 
-  # selection of edge corrections
-  correction.given <- !missing(correction) && !is.null(correction)
-  correction <- pickoption("correction", correction,
-                           c(none="none",
-                             border="border",
-                             isotropic="isotropic",
-                             Ripley="isotropic",
-                             ripley="isotropic",
-                             translate="translation",
-                             best="best"),
-                           multi=TRUE)
-
-  correction <- implemented.for.K(correction, Win$type, correction.given)
-
-  opt <- list(bord = any(correction == "border"),
-              tran = any(correction == "translation"),
-              ripl = any(correction == "isotropic"))
-  if(sum(unlist(opt)) == 0)
-    stop("No corrections selected")
   
   # recommended range of r values
   alim <- c(0, min(rmax, rmaxdefault))
@@ -273,6 +274,9 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
                              exact=FALSE, paired=FALSE,
                              trim=spatstat.options("maxedgewt")) {
 
+  # computes edge correction factor
+  #  f = area(WY)/area(intersect.owin(WY, shift(WX, X[i] - Y[j])))
+  
   X <- as.ppp(X, WX)
 
   W <- X$window
@@ -283,17 +287,19 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
   xx <- Y$x
   yy <- Y$y
 
-  if(paired && (X$n != Y$n))
+  nX <- npoints(X)
+  nY <- npoints(Y)
+  if(paired && (nX != nY))
     stop("X and Y should have equal length when paired=TRUE")
   
   # For irregular polygons, exact evaluation is very slow;
   # so use pixel approximation, unless exact=TRUE
-#  if(!exact) {
-#    if(WX$type == "polygonal")
-#      WX <- as.mask(WX)
-#    if(WY$type == "polygonal")
-#      WY <- as.mask(WX)
-#  }
+  if(!exact) {
+    if(WX$type == "polygonal")
+      WX <- as.mask(WX)
+    if(WY$type == "polygonal")
+      WY <- as.mask(WX)
+  }
 
   typeX <- WX$type
   typeY <- WY$type
@@ -325,11 +331,11 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
     WY <- as.polygonal(WY)
     a <- area.owin(W)
     if(!paired) {
-      weight <- matrix(, nrow=X$n, ncol=Y$n)
-      if(X$n > 0 && Y$n > 0) {
-        for(i in seq(X$n)) {
+      weight <- matrix(, nrow=nX, ncol=nY)
+      if(nX > 0 && nY > 0) {
+        for(i in seq_len(nX)) {
           X.i <- c(x[i], y[i])
-          for(j in seq(Y$n)) {
+          for(j in seq_len(nY)) {
             shiftvector <- X.i - c(xx[j],yy[j])
             WXshift <- shift(WX, shiftvector)
             b <- overlap.owin(WY, WXshift)
@@ -338,9 +344,10 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
         }
       }
     } else {
-      weight <- numeric(X$n)
-      if(X$n > 0) {
-        for(i in seq(X$n)) {
+      nX <- npoints(X)
+      weight <- numeric(nX)
+      if(nX > 0) {
+        for(i in seq_len(nX)) {
           shiftvector <- c(x[i],y[i]) - c(xx[i],yy[i])
           WXshift <- shift(WX, shiftvector)
           b <- overlap.owin(WY, WXshift)
@@ -349,7 +356,6 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
       }
     }
   } else {
-    stop("Newfangled translation correction is not yet implemented for masks")
     WX <- as.mask(WX)
     WY <- as.mask(WY)
     # make difference vectors
@@ -360,10 +366,9 @@ edge.Trans.modif <- function(X, Y=X, WX=X$window, WY=Y$window,
       DX <- x - xx
       DY <- y - yy
     }
-    # compute set covariance of window
-    # THIS LINE NEEDS TO BE ALTERED
-    g <- setcov(WX)
-    # evaluate set covariance at these vectors
+    # compute set cross-covariance
+    g <- setcov(WY,WX)
+    # evaluate set cross-covariance at these vectors
     gvalues <- lookup.im(g, as.vector(DX), as.vector(DY),
                          naok=TRUE, strict=FALSE)
     weight <- area.owin(WY)/gvalues

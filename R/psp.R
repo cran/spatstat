@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.64 $ $Date: 2011/09/23 01:24:11 $
+#  $Revision: 1.65 $ $Date: 2011/10/04 10:00:29 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -627,12 +627,17 @@ shift.psp <- function(X, vec=c(0,0), ..., origin=NULL) {
                    bottomleft={ c(W$xrange[1], W$yrange[1]) })
     return(shift(X, -locn))
   }
+  # perform shift
   W <- shift.owin(X$window, vec=vec, ...)
   E <- X$ends
   ends0 <- shiftxy(list(x=E$x0,y=E$y0), vec=vec, ...)
   ends1 <- shiftxy(list(x=E$x1,y=E$y1), vec=vec, ...)
-  psp(ends0$x, ends0$y, ends1$x, ends1$y, window=W, marks=marks(X, dfok=TRUE),
-      check=FALSE)
+  Y <- psp(ends0$x, ends0$y, ends1$x, ends1$y,
+           window=W, marks=marks(X, dfok=TRUE),
+           check=FALSE)
+  # tack on shift vector
+  attr(Y, "lastshift") <- vec
+  return(Y)
 }
 
 rotate.psp <- function(X, angle=pi/2, ...) {

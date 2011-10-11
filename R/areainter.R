@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.11 $	$Date: 2011/05/30 09:00:28 $
+#    $Revision: 1.13 $	$Date: 2011/10/04 11:27:53 $
 #
 #    The area interaction
 #
@@ -25,11 +25,14 @@ AreaInter <- function(r) {
     dummies <- !(seq_len(n) %in% EqualPairs[,2])
     if(sum(dummies) > 0)
       answer[dummies] <- -areaGain(U[dummies], X, r)
-    for(k in seq_len(nrow(EqualPairs))) {
-      i <- EqualPairs[k,1]
-      j <- EqualPairs[k,2]
-      answer[j] <- -areaGain(U[j], X[-i], r)
-    }
+    ii <- EqualPairs[,1]
+    jj <- EqualPairs[,2]
+    answer[jj] <- -areaLoss(X, r, subset=ii)
+#    for(k in seq_len(nrow(EqualPairs))) {
+#      i <- EqualPairs[k,1]
+#      j <- EqualPairs[k,2]
+#      answer[j] <- -areaGain(U[j], X[-i], r)
+#    }
     return(1 + answer/(pi * r^2))
   }
              

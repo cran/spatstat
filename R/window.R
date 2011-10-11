@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.123 $	$Date: 2011/06/16 05:03:56 $
+#	$Revision: 4.125 $	$Date: 2011/10/04 04:53:32 $
 #
 #
 #	A window may be either
@@ -556,11 +556,8 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
            }
          },
          mask = {
-           out <- rasta
            # resample existing mask on new raster
-           phase <- c((rasta$xcol[1] - w$xcol[1])/w$xstep,
-                      (rasta$yrow[1] - w$yrow[1])/w$ystep)
-           out$m <- matrixsample(w$m, c(nr, nc), phase=round(phase))
+           out <- rastersample(w, rasta)
          },
          polygonal = {
            # use C code
@@ -633,6 +630,10 @@ as.polygonal <- function(W) {
 
 #
 # ----------------------------------------------------------------------
+
+is.mask <- function(w) {
+  return(inherits(w, "owin") && (w$type == "mask"))
+}
 
 validate.mask <- function(w, fatal=TRUE) {
   verifyclass(w, "owin", fatal=fatal)
