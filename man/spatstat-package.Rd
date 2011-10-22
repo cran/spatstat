@@ -51,11 +51,14 @@
   Fitted models can be printed, plotted, predicted, simulated and so on.
 }
 \section{Getting Started}{
-  For a quick introduction to \pkg{spatstat}, see 
-  the paper by Baddeley and Turner (2005a). 
+  For a quick introduction to \pkg{spatstat}, see
+  the package vignette \emph{Getting started with spatstat}
+  installed with \pkg{spatstat}. (To see this document online,
+  start \R, type \code{help.start()} to open the help browser, and
+  navigate to \code{Packages > spatstat > Vignettes}).
+
   For a complete 2-day course on using \code{spatstat}, see the workshop notes
-  by Baddeley (2010).
-  Both of these documents are available on the internet.
+  by Baddeley (2010), available on the internet.
 
   Type \code{demo(spatstat)} for a demonstration 
   of the package's capabilities.
@@ -692,6 +695,7 @@
     \code{\link{distfun}} \tab distance map function\cr
     \code{\link{density.ppp}} \tab kernel smoothed density\cr
     \code{\link{smooth.ppp}} \tab spatial interpolation of marks  \cr
+    \code{\link{relrisk}} \tab kernel estimate of relative risk\cr
     \code{\link{sharpen.ppp}} \tab data sharpening  \cr
     \code{\link{rknn}} \tab theoretical distribution of nearest
     neighbour distance
@@ -699,8 +703,10 @@
 
   \bold{Summary statistics for a multitype point pattern:}
   A multitype point pattern is represented by an object \code{X}
-  of class \code{"ppp"} with a component \code{X$marks} which is a factor. 
+  of class \code{"ppp"} such that \code{marks(X)} is a factor. 
   \tabular{ll}{
+    \code{\link{relrisk}} \tab kernel estimation of relative risk  \cr
+    \code{\link{scan.test}} \tab spatial scan test of elevated risk  \cr
     \code{\link{Gcross},\link{Gdot},\link{Gmulti}} \tab
     multitype nearest neighbour distributions 
     \eqn{G_{ij}, G_{i\bullet}}{G[i,j], G[i.]} \cr
@@ -1222,7 +1228,8 @@
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
     \code{\link{qqplot.ppm}} \tab diagnostic plot for interpoint
-    interaction
+    interaction \cr
+    \code{\link{scan.test}} \tab spatial scan statistic/test
   }
 }
 
@@ -1239,6 +1246,7 @@
     \code{\link{bermantest}} \tab Berman's goodness-of-fit tests\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
+    \code{\link{scan.test}} \tab spatial scan statistic/test \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for
     point process models 
   }

@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.84 $     $Date: 2011/09/07 04:42:30 $
+#         $Revision: 1.86 $     $Date: 2011/10/12 11:17:10 $
 #
 #      The class "im" of raster images
 #
@@ -696,12 +696,12 @@ dim.im <- function(x) { x$dim }
 
 # colour images
 rgbim <- function(R, G, B, maxColorValue=255) {
-  eval.im(factor(rgb(as.vector(R), as.vector(G), as.vector(B),
+  eval.im(factor(rgbNA(as.vector(R), as.vector(G), as.vector(B),
                      maxColorValue=maxColorValue)))
 }
 
 hsvim <- function(H, S, V) {
-  eval.im(factor(hsv(as.vector(H), as.vector(S), as.vector(V))))
+  eval.im(factor(hsvNA(as.vector(H), as.vector(S), as.vector(V))))
 }
 
 scaletointerval <- function(x, from=0, to=1) {
@@ -709,7 +709,7 @@ scaletointerval <- function(x, from=0, to=1) {
 }
 
 scaletointerval.default <- function(x, from=0, to=1) {
-  rr <- range(x)
+  rr <- range(x, na.rm=TRUE)
   b <- (to - from)/diff(rr)
   y <- from + b * (x - rr[1])
   return(y)

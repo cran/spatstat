@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.125 $	$Date: 2011/10/04 04:53:32 $
+#	$Revision: 4.126 $	$Date: 2011/10/13 02:12:33 $
 #
 #
 #	A window may be either
@@ -464,8 +464,9 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
     } else {
     # use pixel size 'eps'
       if(!is.null(eps)) {
-        nr <- diff(w$yrange)/eps
-        nc <- diff(w$xrange)/eps
+        eps <- ensure2vector(eps)
+        nc <- diff(w$xrange)/eps[1]
+        nr <- diff(w$yrange)/eps[2]
         if(nr < 1 || nc < 1)
           warning("pixel size parameter eps > size of window")
         nr <- ceiling(nr)

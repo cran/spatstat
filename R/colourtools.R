@@ -1,7 +1,7 @@
 #
 #  colourtools.R
 #
-#   $Revision: 1.1 $   $Date: 2010/06/14 12:19:15 $
+#   $Revision: 1.3 $   $Date: 2011/10/13 10:40:48 $
 #
 
 
@@ -28,4 +28,24 @@ paletteindex <- function(x) {
 }
 
 samecolour <- function(x, y) { col2hex(x) == col2hex(y) }
+
+# versions of rgb() and hsv() that work with NA values
+
+rgbNA <- function(red, green, blue, ...) {
+  ok <- !(is.na(red) | is.na(green) | is.na(blue))
+  values <- rgb(red[ok], green[ok], blue[ok], ...)
+  result <- character(length(red))
+  result[ok] <- values
+  result[!ok] <- NA
+  return(result)
+}
+
+hsvNA <- function(h, s, v, ...) {
+  ok <- !(is.na(h) | is.na(s) | is.na(v))
+  values <- hsv(h[ok], s[ok], v[ok], ...)
+  result <- character(length(h))
+  result[ok] <- values
+  result[!ok] <- NA
+  return(result)
+}
 

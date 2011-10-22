@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.28 $	$Date: 2011/09/20 07:07:53 $
+#	$Revision: 1.29 $	$Date: 2011/10/18 04:21:44 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -133,7 +133,7 @@ pool.fasp <- function(...) {
   }
   # All arguments must have envelopes
   has.env <- function(z) {
-    all(unlist(lapply(z$funs, inherits, what="envelope")))
+    all(unlist(lapply(z$fns, inherits, what="envelope")))
   }
   notenv <- !unlist(lapply(Alist, has.env))
   if(any(notenv)) {

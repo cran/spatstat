@@ -1,33 +1,36 @@
 \name{compatible.fasp}
 \alias{compatible.fasp}
-\title{Test Whether Two Function Arrays Are Compatible}
+\title{Test Whether Function Arrays Are Compatible}
 \description{
-  Tests whether two function arrays (class \code{"fasp"})
+  Tests whether two or more function arrays (class \code{"fasp"})
   are compatible.
 }
 \usage{
-  compatible.fasp(A, B)
+  \method{compatible}{fasp}(A, B, \dots)
 }
 \arguments{
-  \item{A,B}{Function arrays (object of class \code{"fasp"}).}
+  \item{A,B,\dots}{Two or more function arrays (object of class \code{"fasp"}).}
 }
 \details{
   An object of class \code{"fasp"} can be regarded as an array
   of functions. Such objects are returned by the
   command \code{\link{alltypes}}.
 
-  This function tests whether two such objects are compatible
+  This command tests whether such objects are compatible
   (so that, for example, they could be added or subtracted).
+  It is a method for the generic command \code{\link{compatible}}.
   
-  The functions are compatible if the arrays have the same dimensions,
-  and the corresponding functions in each cell of the array
+  The function arrays are compatible if the arrays have the same dimensions,
+  and the corresponding elements in each cell of the array
   are compatible as defined by \code{\link{compatible.fv}}.
 }
 \value{
   Logical value: \code{TRUE} if the objects are compatible, and \code{FALSE}
   if they are not.
 }
-
+\seealso{
+  \code{\link{eval.fasp}}
+}
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}

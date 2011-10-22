@@ -1,4 +1,74 @@
 
+	CHANGES IN spatstat VERSION 1.24-1
+
+OVERVIEW 
+
+   o Spatial Scan Test
+
+   o Functionality for replicated point patterns
+
+   o Bug fixes
+
+NEW FUNCTIONS
+
+   o scan.test
+     Spatial scan test of clustering
+
+   o rat
+   New class of 'ratio objects'
+
+   o pool.rat
+   New method for 'pool'.
+   Combines K function estimates for replicated point patterns (etc) 
+   by computing ratio-of-sums 
+
+   o unnormdensity
+   Weighted kernel density with weights that do not sum to 1
+   and may be negative.
+
+   o compatible
+   New generic function with methods for 'fv', 'im', 'fasp' and 'units'
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o Kest
+   New argument 'ratio' determines whether the numerator and denominator
+   of the estimate of the K-function will be stored. 
+   This enables analysis of replicated point patterns, 
+   using 'pool.rat()' to pool the K function estimates.
+
+   o Lest
+   Now handles theoretical variance estimates (using delta method)
+   if var.approx=TRUE
+
+   o as.mask
+   Argument 'eps' can now be a 2-vector, specifying x and y resolutions.
+
+   o default.expand
+   Behaviour changed slightly.
+
+   o plot.listof, plot.splitppp, contour.listof, image.listof
+   The arguments 'panel.begin' and 'panel.end' can now be objects
+   such as windows. 
+
+BUG FIXES
+
+   o rgbim, hsvim
+   Did not work on images with non-rectangular domains.
+   Fixed.
+
+   o scaletointerval
+   Did not handle NA's.
+   Fixed.
+
+
+	CHANGES IN spatstat VERSION 1.24-0
+
+OVERVIEW 
+
+   o This version was not released publicly.
+
+
 	CHANGES IN spatstat VERSION 1.23-6
 
 OVERVIEW 

@@ -1,7 +1,7 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.14 $   $Date: 2008/01/04 17:09:20 $
+#   $Revision: 1.16 $   $Date: 2011/10/16 07:41:36 $
 #
 #
 
@@ -138,16 +138,22 @@ print.summary.units <- function(x, ...) {
   invisible(NULL)
 }
 
-compatible.units <- function(x,y,coerce=TRUE) {
+compatible.units <- function(A, B, ..., coerce=TRUE) {
+  stopifnot(inherits(A, "units"))
+  if(missing(B)) return(TRUE)
+  stopifnot(inherits(B, "units"))
+  # check for null units
+  Anull <- summary(A)$vanilla
+  Bnull <- summary(B)$vanilla
   # `coerce' determines whether `vanilla' units are compatible with other units
-  stopifnot(inherits(x, "units"))
-  stopifnot(inherits(y, "units"))
-  xnull <- summary(x)$vanilla
-  ynull <- summary(y)$vanilla
-  if(xnull && ynull)
-    return(TRUE)
-  else if(!xnull && !ynull)
-    return(identical(all.equal(x,y), TRUE))
-  else
-    return(as.logical(coerce))
+  coerce <- as.logical(coerce)
+  # 
+  agree <- if(!Anull && !Bnull) identical(all.equal(A,B), TRUE) else
+           if(Anull && Bnull) TRUE else coerce 
+  #
+  if(!agree) return(FALSE)
+  # A and B agree
+  if(length(list(...)) == 0) return(TRUE)
+  # recursion
+  return(compatible.units(B, ...))
 }

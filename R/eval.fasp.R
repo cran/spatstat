@@ -6,7 +6,7 @@
 #
 #        compatible.fasp()       Check whether two fasp objects are compatible
 #
-#     $Revision: 1.2 $     $Date: 2011/05/18 01:59:25 $
+#     $Revision: 1.5 $     $Date: 2011/10/16 07:41:02 $
 #
 
 eval.fasp <- function(expr, envir) {
@@ -30,13 +30,11 @@ eval.fasp <- function(expr, envir) {
   fasps <- vars[isfasp]
   nfasps <- length(fasps)
   # test whether the fasp objects are compatible
-  if(nfasps > 1) {
-    # test compatibility
-    for(i in 2:nfasps)
-      if(!compatible.fasp(fasps[[1]], fasps[[i]]))
-        stop(paste("Objects", names(fasps)[1], "and", names(fasps)[i],
-                   "are incompatible"))
-  }
+  if(nfasps > 1 && !(ok <- do.call("compatible", unname(fasps))))
+    stop(paste(if(nfasps > 2) "some of" else NULL,
+               "the objects",
+               commasep(sQuote(names(fasps))),
+               "are not compatible"))
   # copy first object as template
   result <- fasps[[1]]
   which <- result$which
@@ -63,8 +61,9 @@ eval.fasp <- function(expr, envir) {
   return(result)
 }
 
-compatible.fasp <- function(A, B) {
+compatible.fasp <- function(A, B, ...) {
   verifyclass(A, "fasp")
+  if(missing(B)) return(TRUE)
   verifyclass(B, "fasp")
   dimA <- dim(A$which)
   dimB <- dim(B$which)
@@ -77,6 +76,9 @@ compatible.fasp <- function(A, B) {
       if(!compatible.fv(Aij, Bij))
         return(FALSE)
     }
-  return(TRUE)
+  # A and B agree
+  if(length(list(...)) == 0) return(TRUE)
+  # recursion
+  return(compatible.fasp(B, ...))
 }
 

@@ -36,8 +36,13 @@
   arguments \code{eps}, \code{dimyx} and \code{xy},
   which are mutually incompatible.
 
-  If \code{eps} is given, then the grid spacing will be 
-  approximately \code{eps} in both the \eqn{x} and \eqn{y} directions.
+  If \code{eps} is given, then it determines the grid spacing.
+  If \code{eps} is a single number,
+  then the grid spacing will be approximately \code{eps}
+  in both the \eqn{x} and \eqn{y} directions. If \code{eps} is a
+  vector of length 2, then the grid spacing will be approximately
+  \code{eps[1]} in the \eqn{x} direction and 
+  \code{eps[2]} in the \eqn{y} direction.
 
   If \code{dimyx} is given, then the pixel grid will be an
   \eqn{m \times n}{m x n} rectangular grid

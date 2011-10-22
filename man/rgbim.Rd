@@ -45,7 +45,7 @@
   \code{\link{rgb}},
   \code{\link{hsv}}.
 
-  See \code{\link[spatstat:colourtools]{rgb2hex}}
+  See \code{\link[spatstat:colourtools]{colourtools}}
   for additional colour tools.
 }
 \examples{

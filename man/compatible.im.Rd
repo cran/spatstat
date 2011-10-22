@@ -1,18 +1,19 @@
 \name{compatible.im}
 \alias{compatible.im}
-\title{Test Whether Two Pixel Images Are Compatible}
+\title{Test Whether Pixel Images Are Compatible}
 \description{
-  Tests whether two pixel image objects have compatible dimensions.
+  Tests whether two or more pixel image objects have compatible dimensions.
 }
 \usage{
-compatible.im(A, B, tol=1e-6)
+ \method{compatible}{im}(A, B, \dots, tol=1e-6)
 }
 \arguments{
-  \item{A,B}{Pixel images (objects of class \code{"im"}).}
+  \item{A,B,\dots}{Two or more pixel images (objects of class \code{"im"}).}
   \item{tol}{Tolerance factor}
 }
 \details{
   This function tests whether the pixel images \code{A} and \code{B}
+  (and any additional images \code{\dots})
   have compatible pixel dimensions. They are compatible if they have
   the same number of rows and columns, the same physical pixel
   dimensions, and occupy the same rectangle in the plane.
@@ -26,6 +27,7 @@ compatible.im(A, B, tol=1e-6)
   if they are not.
 }
 \seealso{
+  \code{\link{eval.im}},
   \code{\link{harmonise.im}}
 }
 \author{Adrian Baddeley
