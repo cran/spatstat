@@ -42,8 +42,10 @@
     See the help file for \code{\link{par}}.
   }
   \item{panel.begin,panel.end}{
-    Optional. Functions that will be executed before and after each panel is
+    Optional. Functions
+    that will be executed before and after each panel is
     plotted.
+    See Details.
   }
   \item{panel.args}{
     Internal use only.
@@ -67,6 +69,13 @@
   (objects of class \code{"ppp"}, see \code{\link{ppp.object}}).
   Each of these point patterns will be plotted in turn
   using \code{\link{plot.ppp}}. 
+
+  The arguments \code{panel.begin} and \code{panel.end}
+  may be functions (taking the argument \code{i} for the panel
+  number) that will be executed before and after each panel is plotted.
+  Alternatively, they may be objects of some class that can be plotted
+  with the generic \code{plot} command. They will be plotted before and
+  after each panel is plotted.
 }
 \seealso{
   \code{\link{split.ppp}},

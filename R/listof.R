@@ -41,9 +41,17 @@ as.listof <- function(x) {
 }
 
 contour.listof <- function(x, ...) {
-  plot(x, ..., plotcommand="contour")
+  xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  do.call("plot.listof",
+          resolve.defaults(list(x=x, plotcommand="contour"),
+                           list(...),
+                           list(main=xname)))
 }
 
 image.listof <- function(x, ...) {
-  plot(x, ..., plotcommand="image")
+  xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  do.call("plot.listof",
+          resolve.defaults(list(x=x, plotcommand="image"),
+                           list(...),
+                           list(main=xname)))
 }

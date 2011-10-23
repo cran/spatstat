@@ -20,7 +20,8 @@ pool(...)
   
   \code{pool} is used to combine the data from several objects of the same type,
   and to compute statistics based on the combined dataset.
-  It is typically used in high-performance computing applications,
+  It may be used to pool the estimates obtained from replicated datasets.
+  It may also be used in high-performance computing applications,
   when the objects \code{\dots} have been computed on different processors
   or in different batch runs, and we wish to combine them.
 }
@@ -29,7 +30,8 @@ pool(...)
 }
 \seealso{
   \code{\link{pool.envelope}},
-  \code{\link{pool.fasp}}
+  \code{\link{pool.fasp}},
+  \code{\link{pool.rat}}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

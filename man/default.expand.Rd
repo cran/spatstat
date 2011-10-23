@@ -23,7 +23,8 @@
   }
 } 
 \value{
-  A window (object of class \code{"owin"}).
+  A window (object of class \code{"owin"})
+  or the numeric value 1, representing no expansion.
 }
 \details{
   This function computes a default value for the
@@ -47,10 +48,17 @@
   The function \code{default.expand} determines the default expansion
   window for a fitted point process model \code{object}.
   
+  If the model is Poisson, then no expansion is necessary.
+  No expansion is performed by default,
+  and \code{default.expand} returns the value 1, representing no expansion.
+  The simulation window is the original window \code{w = as.owin(object)}.
+  
   If the model depends on external covariates (i.e.\ covariates other than
   the Cartesian covariates \code{x} and \code{y} and the \code{marks})
-  then no expansion is performed, and \code{default.expand} returns the
-  original window \code{w = as.owin(object)}.
+  then no expansion is feasible, in general, because the spatial domain
+  of the covariates is not guaranteed to be large enough.
+  \code{default.expand} returns the value 1, representing no expansion.
+  The simulation window is the original window \code{w = as.owin(object)}.
 
   Otherwise, the original window \code{w = as.owin(object)} is expanded by
   a distance \code{m * rr}, where

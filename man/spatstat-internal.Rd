@@ -21,6 +21,7 @@
 \alias{as.breakpts}
 \alias{as.data.frame.fv}
 \alias{as.fv}
+\alias{as.im.scan.test}
 \alias{as.im.linim}
 \alias{as.list.hyperframe}
 \alias{as.listof}
@@ -54,6 +55,7 @@
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closepairs}
+\alias{compatible.rat}
 \alias{complaining}
 \alias{compileK}
 \alias{compilepcf}
@@ -62,7 +64,6 @@
 \alias{crossfikselterms}
 \alias{cobble.xy}
 \alias{commasep}
-\alias{compatible.units}
 \alias{conform.imagelist}
 \alias{countingweights}
 \alias{damaged.ppm}
@@ -155,6 +156,7 @@
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
 \alias{ho.engine}
+\alias{hsvNA}
 \alias{identical.formulae}
 \alias{idorempty}
 \alias{implemented.for.K}
@@ -243,11 +245,6 @@
 \alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
-\alias{sensiblevarname}
-\alias{sewpcf}
-\alias{sewsmod}
-\alias{slr.prepare}
-\alias{slrAssemblePixelData}
 \alias{model.matrix.slrm}
 \alias{model.se.image}
 \alias{mpl.engine}
@@ -272,6 +269,7 @@
 \alias{numalign}
 \alias{numeric.columns}
 \alias{nzpaste}
+\alias{offsetsinformula}
 \alias{onecolumn}
 \alias{ordinal}
 \alias{outdated.interact}
@@ -300,6 +298,7 @@
 \alias{plot.qqppm}
 \alias{plot.quadratcount}
 \alias{plot.quadrattest}
+\alias{plot.scan.test}
 \alias{polynom}
 \alias{ppllengine}
 \alias{ppmCovariates}
@@ -330,9 +329,11 @@
 \alias{print.profilepl}
 \alias{print.quadrattest}
 \alias{print.qqppm}
+\alias{print.rat}
 \alias{print.rmhcontrol}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
+\alias{print.rmhInfoList}
 \alias{print.slrm}
 \alias{print.splitppp}
 \alias{print.summary.fii}
@@ -345,11 +346,11 @@
 \alias{print.summary.splitppp}
 \alias{print.summary.units}
 \alias{print.tess}
-\alias{print.units}
 \alias{prolongseq}
 \alias{quad}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
+\alias{rgbNA}
 \alias{rhs.of.formula}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
@@ -368,7 +369,6 @@
 \alias{reconcile.fv}
 \alias{repair.old.factor.image}
 \alias{reincarnate.interact}
-\alias{rescale.units}
 \alias{resid4plot}
 \alias{resid1plot}
 \alias{resid1panel}
@@ -398,13 +398,24 @@
 \alias{rpoint.multi}
 \alias{safelookup}
 \alias{samefunction}
+\alias{scanmeasure}
+\alias{scanmeasure.ppp}
+\alias{scanmeasure.im}
+\alias{scanBinomLRTS}
+\alias{scanPoisLRTS}
+\alias{scanLRTS}
 \alias{second.moment.calc}
 \alias{second.moment.engine}
+\alias{sensiblevarname}
+\alias{sewpcf}
+\alias{sewsmod}
 \alias{shiftxy}              
 \alias{shiftxypolygon}              
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
 \alias{singlestring}              
+\alias{slr.prepare}
+\alias{slrAssemblePixelData}
 \alias{smoothpointsEngine}              
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
@@ -425,7 +436,6 @@
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
-\alias{summary.units}
 \alias{superimposeMarks}
 \alias{sympoly}
 \alias{terms.slrm}
@@ -445,6 +455,7 @@
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
+\alias{vanilla.fv}        
 \alias{variablesinformula}
 \alias{vcov.slrm}
 \alias{verbalogic}
@@ -486,6 +497,7 @@ as.breakpts(\dots)
 \method{as.data.frame}{fv}(x, ...)
 as.fv(x)
 \method{as.list}{hyperframe}(x, ...)
+\method{as.im}{scan.test}(X, \dots)
 \method{as.im}{linim}(X, \dots)
 as.listof(x)
 as.units(s)
@@ -519,6 +531,7 @@ clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
 closepairs(X,rmax)
+\method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
 compileK(D, r, weights, denom, check)
 compilepcf(D, r, weights, denom, check, endcorrect, \dots)
@@ -527,7 +540,6 @@ crosspaircounts(X,Y,r)
 crossfikselterms(X,Y,r,kappa)
 cobble.xy(x, y, f, fatal)
 commasep(x)
-compatible.units(x, y, coerce=TRUE)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
@@ -635,6 +647,7 @@ grow.rectangle(W, xmargin=0, ymargin=xmargin)
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
+hsvNA(h, s, v, \dots)
 identical.formulae(x,y)
 idorempty(w, r, caller)
 implemented.for.K(correction, windowtype, explicit)
@@ -667,7 +680,7 @@ is.psp(x)
 is.slrm(x)
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
-Kborder.engine(X, rmax, nr, correction, weights)
+Kborder.engine(X, rmax, nr, correction, weights, ratio)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)
 Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
@@ -726,11 +739,6 @@ maxflow(costm)
 meanlistfv(z)
 meanX.owin(w)            
 meanY.owin(w)
-sensiblevarname(guess, fallback, maxlen)
-sewpcf(d, w, denargs, lambda2area)
-sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
-slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
-slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 \method{model.matrix}{slrm}(object, ..., keepNA = TRUE)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
@@ -760,6 +768,7 @@ n.quad(Q)
 numalign(i, nmax, zero)
 numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
+offsetsinformula(x)
 onecolumn(m)
 ordinal(k)
 outdated.interact(object)
@@ -796,13 +805,14 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
            limcol=if(monochrome) "black" else "red")
 \method{plot}{quadratcount}(x, \dots, add, entries, dx, dy, show.tiles)
 \method{plot}{quadrattest}(x, \dots)
+\method{plot}{scan.test}(x, \dots, do.window)
 polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 prange(x)
-prefixfv(x, prefix, prephrase)
+prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 primefactors(n, prmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
@@ -826,9 +836,11 @@ primefactors(n, prmax)
 \method{print}{profilepl}(x, \dots)
 \method{print}{quadrattest}(x, \dots)
 \method{print}{qqppm}(x, \dots)
+\method{print}{rat}(x, \dots)
 \method{print}{rmhcontrol}(x, \dots)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
+\method{print}{rmhInfoList}(x, \dots)
 \method{print}{slrm}(x, ...)
 \method{print}{splitppp}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
@@ -840,11 +852,11 @@ primefactors(n, prmax)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.units}(x, \dots)
 \method{print}{tess}(x, \dots, brief=FALSE)
-\method{print}{units}(x, \dots)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
 quadrat.testEngine(X, nx, ny, \dots, Xcount, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
@@ -855,7 +867,7 @@ rasterx.im(x)
 rastery.im(x)
 \method{reach}{fii}(x, \dots, epsilon)
 rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl, new.yexp,
-new.dotnames, new.preferred, new.formula)
+new.dotnames, new.preferred, new.formula, new.tags)
 rebound(x, rect)
 \method{rebound}{im}(x, rect)
 \method{rebound}{ppp}(x, rect)
@@ -864,7 +876,6 @@ rebound(x, rect)
 reconcile.fv(\dots)
 repair.old.factor.image(x)
 reincarnate.interact(object)
-\method{rescale}{units}(X,s)
 resid4plot(RES, plot.neg="image", plot.smooth="imagecontour",
            spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)
 resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
@@ -897,15 +908,26 @@ runifpoisppOnLines(lambda, L)
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safelookup(Z, X, factor, warn)
 samefunction(f, g)
+scanmeasure(X, \dots)
+\method{scanmeasure}{ppp}(X, r, \dots)
+\method{scanmeasure}{im}(X, r, \dots)
+scanPoisLRTS(nZ, nG, muZ, muG, alternative)
+scanBinomLRTS(nZ, nG, muZ, muG, alternative)
+scanLRTS(X, r, \dots, method, baseline, case, alternative)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL, expand=FALSE)
 second.moment.engine(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, obswin=as.owin(x), varcov=NULL, npts=NULL)
+sensiblevarname(guess, fallback, maxlen)
+sewpcf(d, w, denargs, lambda2area)
+sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr, pois)
 singlestring(s, coll)
+slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
+slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)
 \method{sort}{im}(x, \dots)
@@ -926,7 +948,6 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
-\method{summary}{units}(object, \dots)
 superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
 \method{terms}{slrm}(x, ...)
@@ -946,6 +967,7 @@ valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
+vanilla.fv(x)
 variablesinformula(x)
 \method{vcov}{slrm}(object, ...)
 verbalogic(x, op)

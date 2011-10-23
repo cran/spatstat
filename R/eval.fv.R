@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.13 $     $Date: 2011/04/12 12:17:17 $
+#     $Revision: 1.16 $     $Date: 2011/10/16 07:40:43 $
 #
 
 eval.fv <- function(expr, envir) {
@@ -30,13 +30,11 @@ eval.fv <- function(expr, envir) {
     stop("No fv objects in this expression")
   funs <- vars[fvs]
   # test whether the fv objects are compatible
-  if(nfuns > 1) {
-    # test compatibility
-    for(i in 2:nfuns)
-      if(!compatible.fv(funs[[1]], funs[[i]]))
-        stop(paste("Objects", names(funs)[1], "and", names(funs)[i],
-                   "are incompatible"))
-  }
+  if(nfuns > 1 && !(ok <- do.call("compatible", unname(funs))))
+    stop(paste(if(nfuns > 2) "some of" else NULL,
+               "the functions",
+               commasep(sQuote(names(funs))),
+               "are not compatible"))
   # copy first object as template
   result <- funs[[1]]
   labl <- attr(result, "labl")
@@ -78,6 +76,7 @@ eval.fv <- function(expr, envir) {
     ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
   }
   if(any(duplicated(yexps))) {
+    newfnames <- names(funs)
     for(i in 1:nfuns)
       funs[[i]] <- rebadge.fv(funs[[i]], 
                               new.yexp=substitute(f(r), list(f=as.name(newfnames[i]))))
@@ -103,17 +102,32 @@ eval.fv <- function(expr, envir) {
   return(result)
 }
 
-compatible.fv <- function(A, B) {
+compatible <- function(A, B, ...) {
+  UseMethod("compatible")
+}
+
+compatible.fv <- function(A, B, ...) {
   verifyclass(A, "fv")
+  if(missing(B)) return(TRUE)
   verifyclass(B, "fv")
+  # are columns the same?
   namesmatch <-
     identical(all.equal(names(A),names(B)), TRUE) &&
     (fvnames(A, ".x") == fvnames(B, ".x")) &&
     (fvnames(A, ".y") == fvnames(B, ".y"))
+  if(!namesmatch)
+    return(FALSE)
+  # are 'r' values the same ?
   rA <- with(A, .x)
   rB <- with(B, .x)
   approx.equal <- function(x, y) { max(abs(x-y)) <= .Machine$double.eps }
   rmatch <- (length(rA) == length(rB)) && approx.equal(rA, rB)
-  return(namesmatch && rmatch)
+  if(!rmatch)
+    return(FALSE)
+  # A and B are compatible
+  if(length(list(...)) == 0)
+    return(TRUE)
+  # recursion
+  return(compatible.fv(B, ...))
 }
 

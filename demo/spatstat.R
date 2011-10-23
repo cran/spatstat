@@ -190,9 +190,17 @@ plot(rh,
 plot(predict(rh), main="predict(rhohat(X,D))")
 
 data(cells)
-Z <- density.ppp(cells, 0.07)
+Z <- density(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
+
+data(redwood)
+plot(redwood, main="Redwood data")
+te <- scan.test(redwood, 0.1, method="poisson")
+plot(te, main=c("Scan Statistic for redwood data",
+              paste("p-value =", signif(te$p.value,3))))
+plot(redwood, add=TRUE)
+te
 
 data(shapley)
 X <- unique(unmark(shapley))
@@ -280,6 +288,13 @@ X <- unmark(bronzefilter)
 plot(X, "Bronze filter data")
 lam <- predict(ppm(X, ~x))
 plot(Kscaled(X, lam), xlim=c(0, 1.5), main="Locally-scaled K function")
+
+data(urkiola)
+plot(urkiola)
+plot(split(urkiola))
+plot(density(split(urkiola)))
+contour(density(split(urkiola)), panel.begin=as.owin(urkiola))
+plot(relrisk(urkiola), main="Relative risk (cross-validated)")
 
 data(bramblecanes)
 plot(bramblecanes)
@@ -384,17 +399,19 @@ print(fit)
 plot(fit, how="image", main=c("Strauss model",
                                "fit by maximum pseudolikelihood",
                                "Conditional intensity plot"))
+# fitted interaction
+fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
+plot(fitin(fit), legend=FALSE,
+     main=c("Pairwise interaction model",
+            "fit by maximum pseudolikelihood"))
+
+# model compensator
 plot(Kcom(fit), cbind(iso, icom, pois) ~ r,
      legend=FALSE, main="model compensators")
 legend("topleft", legend=c("empirical K function",
                     "Strauss model compensator of K",
                     "Poisson theoretical K"), lty=1:3, col=1:3, inset=0.05)
 
-plot(swedishpines)
-fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
-plot(fitin(fit), legend=FALSE,
-     main=c("Pairwise interaction model",
-            "fit by maximum pseudolikelihood"))
 par(parsave)
 
 Xsim <- rmh(model=fit,

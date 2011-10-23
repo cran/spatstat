@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.76 2011/10/07 04:02:33 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.78 2011/10/13 10:21:49 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,control=NULL,
                         verbose=TRUE, track=FALSE, ...) {
@@ -472,6 +472,10 @@ rmh.default <- function(model,start=NULL,control=NULL,
   rmhEngine(InfoList, verbose=verbose, track=track, kitchensink=TRUE, ...)
 }
 
+print.rmhInfoList <- function(x, ...) {
+  cat("\nPre-digested Metropolis-Hastings algorithm parameters (rmhInfoList)\n")
+  print(as.listof(x))
+}
 
 
 #---------------  rmhEngine -------------------------------------------

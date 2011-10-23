@@ -1,4 +1,5 @@
 \name{colourtools}
+\alias{colourtools}
 \alias{paletteindex}
 \alias{rgb2hex}
 \alias{col2hex}

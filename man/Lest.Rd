@@ -35,6 +35,15 @@
   The square root also has the effect of stabilising
   the variance of the estimator, so that \eqn{K} is more appropriate
   for use in simulation envelopes and hypothesis tests.
+
+  See \code{\link{Kest}} for the list of arguments.
+}
+\section{Variance approximations}{
+  If the argument \code{var.approx=TRUE} is given, the return value
+  includes columns \code{rip} and \code{ls} containing approximations
+  to the variance of \eqn{\hat L(r)}{Lest(r)} under CSR.
+  These are obtained by the delta method from the variance
+  approximations described in \code{\link{Kest}}.
 }
 
 \value{

@@ -7,7 +7,7 @@
 #
 #        haronise.im()       Harmonise images
 #
-#     $Revision: 1.19 $     $Date: 2011/10/04 02:58:31 $
+#     $Revision: 1.23 $     $Date: 2011/10/16 07:41:20 $
 #
 
 eval.im <- function(expr, envir) {
@@ -31,14 +31,12 @@ eval.im <- function(expr, envir) {
     stop("No images in this expression")
   images <- vars[ims]
   nimages <- length(images)
-  # test the images are compatible
-  if(nimages > 1) {
-    # test compatibility
-    for(i in 2:nimages)
-      if(!compatible.im(images[[1]], images[[i]]))
-        stop(paste("Images", names(images)[1], "and", names(images)[i],
-                   "are incompatible"))
-  }
+  # test that the images are compatible
+  if(!(ok <- do.call("compatible", unname(images))))
+    stop(paste(if(nimages > 2) "some of" else NULL,
+               "the images",
+               commasep(sQuote(names(images))),
+               "are not compatible"))
   # replace each image by its matrix of pixel values, and evaluate
   getvalues <- function(x) {
     v <- as.matrix(x)
@@ -57,8 +55,9 @@ eval.im <- function(expr, envir) {
   return(result)
 }
   
-compatible.im <- function(A, B, tol=1e-6) {
+compatible.im <- function(A, B, ..., tol=1e-6) {
   verifyclass(A, "im")
+  if(missing(B)) return(TRUE)
   verifyclass(B, "im")
   xdiscrep <- max(abs(A$xrange - B$xrange),
                  abs(A$xstep - B$xstep),
@@ -69,7 +68,13 @@ compatible.im <- function(A, B, tol=1e-6) {
   xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
   yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
   uok <- compatible.units(unitname(A), unitname(B))
-  return(xok && yok && uok)
+  if(!(xok && yok && uok))
+    return(FALSE)
+  # A and B are compatible
+  if(length(list(...)) == 0)
+    return(TRUE)
+  # recursion
+  return(compatible.im(B, ..., tol=tol))
 }
 
 # force a list of images to be compatible

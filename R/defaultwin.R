@@ -2,17 +2,19 @@
 #
 #  defaultwin.R
 #
-#   $Revision: 1.6 $   $Date: 2010/08/08 02:08:43 $
+#   $Revision: 1.7 $   $Date: 2011/10/13 01:51:36 $
 #
 
 default.expand <- function(object, m=2, epsilon=1e-6) {
   verifyclass(object, "ppm")
-  # data window
-  w <- as.owin(data.ppm(object))
+  # no expansion necessary if model is Poisson
+  if(is.poisson(object))
+    return(1)
   # no expansion if model depends on covariate data
   if(summary(object)$uses.covars)
-    return(w)
-  # expand w by distance m * reach
+    return(1)
+  # expand data window by distance d = m * reach
+  w <- as.owin(data.ppm(object))
   rr <- reach(object, epsilon=epsilon)
   if(!is.finite(rr))
     return(NULL)

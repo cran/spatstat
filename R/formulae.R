@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.13 $	$Date: 2010/05/26 08:22:24 $
+#	$Revision: 1.14 $	$Date: 2011/10/20 10:24:56 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical
@@ -42,6 +42,18 @@ variablesinformula <- function(x) {
   all.vars(as.expression(x))
 }
 
+offsetsinformula <- function(x) {
+  if(is.null(x)) return(character(0))
+  if(class(x) != "formula")
+    stop("argument is not a formula")
+  tums <- terms(x)
+  offs <- attr(tums, "offset")
+  if(length(offs) == 0) return(character(0))
+  vars <- attr(tums, "variables")
+  termnames <- unlist(lapply(vars, deparse))[-1]
+  termnames[offs]
+}
+  
 rhs.of.formula <- function(x) {
   if(!inherits(x, "formula"))
     stop("x must be a formula")

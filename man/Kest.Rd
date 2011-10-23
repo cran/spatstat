@@ -8,7 +8,7 @@ from a point pattern in a window of arbitrary shape.
 \usage{
   Kest(X, \dots, r=NULL, breaks=NULL, 
      correction=c("border", "isotropic", "Ripley", "translate"),
-    nlarge=3000, domain=NULL, var.approx=FALSE)
+    nlarge=3000, domain=NULL, var.approx=FALSE, ratio=FALSE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -46,6 +46,11 @@ from a point pattern in a window of arbitrary shape.
     variance of \eqn{\hat K(r)}{Kest(r)} under CSR
     will also be computed.
   }
+  \item{ratio}{
+    Logical. Advanced use only.
+    If \code{TRUE}, the numerator and denominator of
+    each edge-corrected estimate will also be saved.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
@@ -68,6 +73,12 @@ from a point pattern in a window of arbitrary shape.
   If \code{var.approx=TRUE} then the return value
   also has columns \code{rip} and \code{ls} containing approximations
   to the variance of \eqn{\hat K(r)}{Kest(r)} under CSR.
+
+  If \code{ratio=TRUE} then the return value also has two
+  attributes called \code{"numerator"} and \code{"denominator"}
+  which are \code{"fv"} objects
+  containing the numerators and denominators of each
+  estimate of \eqn{K(r)}. 
 }
 \details{
   The \eqn{K} function (variously called ``Ripley's K-function''

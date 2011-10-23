@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.76 $   $Date: 2011/09/12 08:13:07 $
+#    $Revision: 1.79 $   $Date: 2011/10/18 06:08:22 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -124,17 +124,24 @@ is.fv <- function(x) {
 as.fv <- function(x) {
   if(is.fv(x))
     return(x)
-  else if(inherits(x, "data.frame"))
+  if(inherits(x, "data.frame"))
     return(fv(x, names(x)[1], , names(x)[2]))
-  else if(inherits(x, "fasp") && length(x$which) == 1)
+  if(inherits(x, "fasp") && length(x$which) == 1)
     return(x$fns[[1]])
-  else if(inherits(x, "minconfit"))
+  if(inherits(x, "minconfit"))
     return(x$fit)
-  else if(inherits(x, "kppm"))
+  if(inherits(x, "kppm"))
     return(x$mcfit)
-  else
-    stop(paste("Don't know how to convert this to an object of class",
-               sQuote("fv")))
+  stop(paste("Don't know how to convert this to an object of class",
+             sQuote("fv")))
+}
+
+vanilla.fv <- function(x) {
+  # remove everything except basic fv characteristics
+  retain <- c("names", "row.names", .Spatstat.FvAttrib)
+  attributes(x) <- attributes(x)[retain]
+  class(x) <- c("fv", "data.frame")
+  return(x)
 }
 
 print.fv <- function(x, ...) {
@@ -144,7 +151,7 @@ print.fv <- function(x, ...) {
   cat(paste("Function value object (class ", sQuote("fv"), ")\n", sep=""))
   if(!is.null(ylab <- a$ylab)) {
     if(is.language(ylab))
-      ylab <- deparse(ylab)
+      ylab <- paste(deparse(ylab), collapse=" ")
     xlab <- fvlabels(x)[[a$argu]]
     cat(paste("for the function", xlab, "->", ylab, "\n"))
   }
@@ -521,21 +528,27 @@ tweak.fv.entry <- function(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag
 rebadge.fv <- function(x, new.ylab, new.fname,
                        tags, new.desc, new.labl,
                        new.yexp=new.ylab, new.dotnames,
-                       new.preferred, new.formula) {
+                       new.preferred, new.formula, new.tags) {
   if(!missing(new.ylab)) 
     attr(x, "ylab") <- new.ylab
   if(!missing(new.yexp) || !missing(new.ylab))
     attr(x, "yexp") <- new.yexp
   if(!missing(new.fname))
     attr(x, "fname") <- new.fname
-  if(!missing(tags) && !(missing(new.desc) && missing(new.labl))) {
+  if(!missing(tags) && !(missing(new.desc) && missing(new.labl) && missing(new.tags))) {
     nama <- names(x)
     desc <- attr(x, "desc")
     labl <- attr(x, "labl")
+    valu <- attr(x, "valu")
     for(i in seq_along(tags))
     if(!is.na(m <- match(tags[i], nama))) {
       if(!missing(new.desc)) desc[m] <- new.desc[i]
       if(!missing(new.labl)) labl[m] <- new.labl[i]
+      if(!missing(new.tags)) {
+        names(x)[m] <- new.tags[i]
+        if(tags[i] == valu)
+          attr(x, "valu") <- new.tags[i]
+      }
     }
     attr(x, "desc") <- desc
     attr(x, "labl") <- labl
@@ -550,6 +563,7 @@ rebadge.fv <- function(x, new.ylab, new.fname,
     attr(x, "fmla") <- new.formula
   return(x)
 }
+
 
 # subset extraction operator
 "[.fv" <-
@@ -742,17 +756,21 @@ stieltjes <- function(f, M, ...) {
   return(results)
 }
 
-prefixfv <- function(x, prefix, prephrase) {
+prefixfv <- function(x, tagprefix="", descprefix="", lablprefix=tagprefix,
+                     whichtags=fvnames(x, "*")) {
   # attach a prefix to fv information 
-  relevant <- names(x) %in% fvnames(x, "*")
-  names(x)[relevant] <- paste(prefix, names(x)[relevant], sep="")
-  fvnames(x, ".y")   <- paste(prefix, fvnames(x, ".y"), sep="")
+  stopifnot(is.fv(x))
   att <- attributes(x)
-  x <- rebadge.fv(x,
-                  tags=names(x)[relevant],
-                  new.desc=paste(prephrase, att$desc[relevant]),
-                  new.labl=paste(prefix, att$labl[relevant], sep=""))
-  return(x)
+  relevant <- names(x) %in% whichtags
+  oldtags <- names(x)[relevant]
+  newtags <- paste(tagprefix, oldtags, sep="")
+  newlabl <- paste(lablprefix, att$labl[relevant], sep="")
+  newdesc <- paste(descprefix, att$desc[relevant], sep="")
+  y <- rebadge.fv(x, tags=oldtags,
+                  new.desc=newdesc,
+                  new.labl=newlabl,
+                  new.tags=newtags)
+  return(y)
 }
 
 reconcile.fv <- function(...) {

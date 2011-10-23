@@ -30,18 +30,20 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
       do.call(plotcommand, append(list(...), xtra))
     }
   }
+
+  exec.or.plot <- function(x, i, ...) {
+    if(is.null(x)) return(NULL)
+    if(is.function(x)) x(i) else plot(x, ...)
+  }
   
   if(!arrange) {
     for(i in 1:n) {
-      if(is.null(panel.begin)) {
-        extraplot(i, x[[i]], main=main.panel[i], ...,
-                  panel.args=panel.args, plotcommand=plotcommand)
-      } else {
-        panel.begin(i)
-        extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
-                  panel.args=panel.args, plotcommand=plotcommand)
-      }
-      if(!is.null(panel.end)) panel.end(i)
+      exec.or.plot(panel.begin, i, main=main.panel[i])
+      extraplot(i, x[[i]], ...,
+                add=!is.null(panel.begin),
+                main=main.panel[i],
+                panel.args=panel.args, plotcommand=plotcommand)
+      exec.or.plot(panel.end, i, add=TRUE)
     }
     return(invisible(NULL))
   }
@@ -95,15 +97,12 @@ plot.listof <- plot.splitppp <- function(x, ..., main, arrange=TRUE,
   npa <- par(mar=mar.panel)
   if(!banner) opa <- npa
   for(i in 1:n) {
-    if(is.null(panel.begin)) {
-      extraplot(i, x[[i]], main=main.panel[i], ...,
-                panel.args=panel.args, plotcommand=plotcommand)
-    } else {
-      panel.begin(i)
-      extraplot(i, x[[i]], main=main.panel[i], ..., add=TRUE,
-                panel.args=panel.args, plotcommand=plotcommand)
-    }
-    if(!is.null(panel.end)) panel.end(i)
+    exec.or.plot(panel.begin, i, main=main.panel[i])
+    extraplot(i, x[[i]], ...,
+              add = !is.null(panel.begin), 
+              main = main.panel[i],
+              panel.args=panel.args, plotcommand=plotcommand)
+    exec.or.plot(panel.end, i, add=TRUE)
   }
   # revert
   layout(1)
