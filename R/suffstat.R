@@ -3,7 +3,7 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.13 $  $Date: 2011/05/18 09:15:04 $
+#  $Revision: 1.15 $  $Date: 2011/11/07 06:08:49 $
 #
 #
 
@@ -17,14 +17,12 @@ suffstat <- function(model, X=data.ppm(model)) {
   else
     X <- NULL
 
-  ss <- model$interaction$family$suffstat
+  inter    <- model$interaction
 
-  func <- if(!is.null(ss))
-            ss
-          else if(summary(model, quick=TRUE)$poisson)
-            suffstat.poisson
-          else
-            suffstat.generic
+  func <- if(is.null(inter) || is.poisson(inter)) suffstat.poisson else 
+          if(!is.null(ssinter  <- inter$suffstat)) ssinter else
+          if(!is.null(ssfamily <- inter$family$suffstat)) ssfamily else
+          suffstat.generic
 
   return(func(model, X, callstring))
 }
@@ -102,8 +100,7 @@ suffstat.poisson <- function(model, X, callstring="suffstat.poisson") {
   else 
     verifyclass(X, "ppp")
   
-  su <- summary(model, quick=TRUE)
-  if(!(su$poisson))
+  if(!is.poisson(model))
     stop("Model is not a Poisson process")
 
   Empty <- X[numeric(0)]

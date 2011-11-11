@@ -31,7 +31,7 @@
   expansion window (the argument \code{expand} in \code{\link{rmhcontrol}})
   given a fitted point process model \code{object}.
   This default is used by \code{\link{envelope}}, 
-  \code{\link{qqplot.ppm}} and other functions.
+  \code{\link{qqplot.ppm}}, \code{\link{simulate.ppm}} and other functions.
 
   Suppose we wish to generate simulated realisations
   of a fitted point process model inside a window \code{w}.
@@ -60,7 +60,19 @@
   \code{default.expand} returns the value 1, representing no expansion.
   The simulation window is the original window \code{w = as.owin(object)}.
 
-  Otherwise, the original window \code{w = as.owin(object)} is expanded by
+  If the model depends on the Cartesian covariates \code{x} and \code{y},
+  it would be feasible to expand the simulation window, and this was the
+  default for \pkg{spatstat} version 1.24-1 and earlier.
+  However this sometimes produces artefacts (such as an empty point pattern)
+  or memory overflow, because the fitted trend, extrapolated outside the
+  original window of the data, may become very large.
+  In \pkg{spatstat} version 1.24-2 and later, the
+  default rule is \emph{not} to expand if the model depends
+  on \code{x} or \code{y}.
+  Again \code{default.expand} returns the value 1, representing no expansion.
+  
+  Otherwise, expansion will occur.
+  The original window \code{w = as.owin(object)} is expanded by
   a distance \code{m * rr}, where
   \code{rr} is the interaction range of the model, computed by
   \code{\link{reach}}. If \code{w} is a rectangle then

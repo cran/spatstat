@@ -1,18 +1,18 @@
 #
 # simulation of FITTED model
 #
-#  $Revision: 1.20 $ $Date: 2010/11/04 04:37:02 $
+#  $Revision: 1.22 $ $Date: 2011/11/02 07:33:15 $
 #
 #
 rmh.ppm <- function(model, start = NULL,
-                    control = default.rmhcontrol(model),
-                    ..., verbose=TRUE, project=TRUE) {
+                    control = default.rmhcontrol(model, expand=expand),
+                    ..., project=TRUE, expand=NULL, verbose=TRUE) {
   verifyclass(model, "ppm")
 
   control <- rmhcontrol(control)
   
   # convert fitted model object to list of parameters for rmh.default
-  X <- rmhmodel.ppm(model, verbose=verbose, project=project, control=control)
+  X <- rmhmodel(model, verbose=verbose, project=project, control=control)
 
   # set initial state
 
@@ -26,19 +26,21 @@ rmh.ppm <- function(model, start = NULL,
 
 simulate.ppm <- function(object, nsim=1, ...,
                          start = NULL,
-                         control = default.rmhcontrol(object),
+                         control = default.rmhcontrol(object, expand=expand),
                          project=TRUE,
-                         verbose=FALSE, progress=(nsim > 1)) {
+                         expand=NULL,
+                         verbose=FALSE,
+                         progress=(nsim > 1)) {
   verifyclass(object, "ppm")
 
   # Set up parameters for rmh
-  rmodel <- rmhmodel(object, verbose=FALSE)
+  rcontr <- rmhcontrol(control)
+  rmodel <- rmhmodel(object, verbose=FALSE, project=TRUE, control=rcontr)
   if(is.null(start)) {
     datapattern <- data.ppm(object)
     start <- rmhstart(n.start=datapattern$n)
   }
   rstart <- rmhstart(start)
-  rcontr <- rmhcontrol(control)
   # pre-digest arguments
   rmhinfolist <- rmh(rmodel, rstart, rcontr, preponly=TRUE, verbose=verbose)
   # go

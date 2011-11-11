@@ -49,15 +49,16 @@
     \item{\code{'geyer'}}{Saturation process (Geyer, 1999).}
     \item{\code{'hardcore'}}{Hard core process}
     \item{\code{'lennard'}}{Lennard-Jones process}
+    \item{\code{'lookup'}}{General isotropic pairwise interaction process,
+      with the interaction function specified via a ``lookup table''.}
     \item{\code{'multihard'}}{Multitype hardcore process}
     \item{\code{'strauss'}}{The Strauss process}
     \item{\code{'straush'}}{The Strauss process with hard core}
     \item{\code{'sftcr'}}{The Softcore process}
     \item{\code{'straussm'}}{ The multitype Strauss process}
     \item{\code{'straushm'}}{Multitype Strauss process with hard core}
-    \item{\code{'lookup'}}{General isotropic pairwise interaction process,
-      with the interaction function specified via a ``lookup table''.}
-  }
+    \item{\code{'triplets'}}{Triplets process (Geyer, 1999).}
+ }
 
   The argument \code{par} supplies parameter values appropriate to
   the conditional intensity function being invoked. These are:
@@ -236,6 +237,13 @@
       corresponding entries
       of \code{iradii}.
     }
+    \item{triplets:}{
+      (Triplets process.) A \bold{named} list with components
+      \code{beta,gamma,r} which are respectively the ``base''
+      intensity, the triplet interaction parameter and the
+      interaction radius.  Note that \code{gamma} must be less than
+      or equal to 1.
+    }
     \item{lookup:}{
       (Arbitrary pairwise interaction process with isotropic interaction.)
       A \bold{named} list with components
@@ -368,11 +376,11 @@
    Biometrika \bold{74}, 763 -- 770.
    \emph{Scandinavian Journal of Statistics} \bold{21}, 359--373.
 
-Fiksel, T. (1984)
-Estimation of parameterized pair potentials
-of marked and non-marked Gibbsian point processes.
-\emph{Electronische Informationsverabeitung und Kybernetika}
-\bold{20}, 270--278.
+   Fiksel, T. (1984)
+   Estimation of parameterized pair potentials
+   of marked and non-marked Gibbsian point processes.
+   \emph{Electronische Informationsverabeitung und Kybernetika}
+   \bold{20}, 270--278.
 
    Geyer, C.J. (1999)
    Likelihood Inference for Spatial Point
@@ -421,7 +429,8 @@ otherwise an error is given.
   \code{\link{Poisson}},
   \code{\link{Softcore}},
   \code{\link{Strauss}},
-  \code{\link{StraussHard}}
+  \code{\link{StraussHard}},
+  \code{\link{Triplets}}
 }
 \examples{
    # Strauss process:
@@ -487,6 +496,10 @@ otherwise an error is given.
    mod10 <- rmhmodel(cif="straushm",par=list(beta=beta,gamma=gmma,
                  iradii=ri,hradii=rhc),w=c(0,250,0,250),
                  trend=list(tr3,tr4))
+
+   # Triplets process:
+   mod11 <- rmhmodel(cif="triplets",par=list(beta=2,gamma=0.2,r=0.7),
+                 w=c(0,10,0,10))
 
    # Lookup (interaction function h_2 from page 76, Diggle (2003)):
       r <- seq(from=0,to=0.2,length=101)[-1] # Drop 0.

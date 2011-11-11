@@ -55,6 +55,7 @@
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closepairs}
+\alias{coef.summary.ppm}
 \alias{compatible.rat}
 \alias{complaining}
 \alias{compileK}
@@ -531,6 +532,7 @@ clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
 closepairs(X,rmax)
+\method{coef}{summary.ppm}(object, \dots)
 \method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
 compileK(D, r, weights, denom, check)

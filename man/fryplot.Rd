@@ -6,7 +6,7 @@
   Displays the Fry plot (Patterson plot) of a spatial point pattern. 
 }
 \usage{
-fryplot(X, ..., width=NULL)
+fryplot(X, ..., width=NULL, from=NULL, to=NULL)
 frypoints(X)
 }
 \arguments{
@@ -17,6 +17,11 @@ frypoints(X)
   \item{\dots}{Optional arguments to control the appearance of the plot.}
   \item{width}{Optional parameter indicating the width of a box
     for a zoomed-in view of the Fry plot near the origin.}
+  \item{from,to}{
+    Optional. Subset indices specifying which points of \code{X}
+    will be considered when forming the vectors (drawn from each point of
+    \code{from}, to each point of \code{to}.)
+  }
 }
 \details{
   The function \code{fryplot} generates a Fry plot (or Patterson plot);
@@ -114,8 +119,11 @@ data(cells)
 fryplot(cells)
 Y <- frypoints(cells)
 data(amacrine)
-X <- split(amacrine)$off
-fryplot(X, width=0.25)
+fryplot(amacrine, width=0.2,
+                  from=(marks(amacrine) == "on"),
+                  chars=c(3,16), cols=2:3,
+                  main="Fry plot centred at an On-cell")
+points(0,0)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

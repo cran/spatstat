@@ -11,6 +11,7 @@
 
 Gcom <- function(object, r=NULL, breaks=NULL, ...,
                  correction=c("border", "Hanisch"),
+                 conditional=!is.poisson(object),
                  restrict=FALSE,
                  trend=~1, interaction=Poisson(),
                  rbord=reach(interaction),
@@ -24,6 +25,9 @@ Gcom <- function(object, r=NULL, breaks=NULL, ...,
   else 
     stop("object should be a fitted point process model or a point pattern")
 
+  if(missing(conditional) || is.null(conditional))
+    conditional <- !is.poisson(fit)
+  
   rfixed <- !is.null(r) || !is.null(breaks)
   
   # selection of edge corrections
@@ -42,12 +46,11 @@ Gcom <- function(object, r=NULL, breaks=NULL, ...,
   Win <- X$window
 
   # edge correction algorithm 
-  conditional.case <- (fit$correction == "border" && fit$rbord > 0)
-  algo <- if(!conditional.case) "classical" else
+  algo <- if(!conditional) "classical" else
           if(restrict) "restricted" else "reweighted"
 
   # conditioning on border region?
-  if(!conditional.case) {
+  if(!conditional) {
     Wfree <- Win
   } else {
     rbord <- fit$rbord
@@ -75,7 +78,7 @@ Gcom <- function(object, r=NULL, breaks=NULL, ...,
   USED <- if(algo == "reweighted") (bdist.points(U) > rbord) else rep(TRUE, U$n)
   
   # adjustments to account for restricted domain 
-  if(conditional.case) {
+  if(conditional) {
     npoints.used <- sum(Z & USED)
     area.used <- sum(WQ[USED])
     lambda.used <- npoints.used/area.used

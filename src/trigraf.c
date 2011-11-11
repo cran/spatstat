@@ -2,15 +2,34 @@
 
   trigraf.c
 
-  $Revision: 1.5 $     $Date: 2011/08/01 07:59:49 $
+  Form list of all triangles in a planar graph, given list of edges
+  
+  $Revision: 1.6 $     $Date: 2011/11/07 07:38:16 $
 
-  trigraf()  Form list of all triangles in a planar graph, given list of edges
+  Form list of all triangles in a planar graph, given list of edges
+  
+  Called by .C:
+  -------------
+  trigraf()  Generic C implementation with fixed storage limit
+             usable with Delaunay triangulation
 
-  trigrafS() Faster version when input data are sorted.
+  trigrafS() Faster version when input data are sorted
+	     (again with predetermined storage limit)
+	     suited for handling Delaunay triangulation
+
+  Called by .Call:
+  ---------------
+  trigraph()   Version with dynamic storage allocation
+
+  triograph()  Faster version assuming 'iedge' is sorted in increasing order
+
+  trioxgraph()  Even faster version for use with quadrature schemes
 
 */
 
 #include <R.h>
+#include <Rdefines.h>
+#undef DEBUGTRI
 
 void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
      /* inputs */
@@ -190,6 +209,548 @@ void trigrafS(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
 }
 
 
+/* ------------------- callable by .Call ------------------------- */
+
+
+SEXP trigraph(SEXP nv,  /* number of vertices */
+	      SEXP iedge,  /* vectors of indices of ends of each edge */   
+	      SEXP jedge)  /* all arguments are integer */
+{
+  int Nv, Ne;
+  int *ie, *je;         /* edges */
+  int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
+  int Nt, Ntmax;        /* number of triangles */
+
+  int Nj;
+  int *jj; /* scratch storage */
+
+  int i, j, k, m, mj, mk, Nmore;
   
+  /* output */
+  SEXP iTout, jTout, kTout, out;
+  int *ito, *jto, *kto;
   
+  /* =================== Protect R objects from garbage collector ======= */
+  PROTECT(nv = AS_INTEGER(nv));
+  PROTECT(iedge = AS_INTEGER(iedge));
+  PROTECT(jedge = AS_INTEGER(jedge));
+  /* That's 3 protected objects */
+
+  /* numbers of vertices and edges */
+  Nv = *(INTEGER_POINTER(nv)); 
+  Ne = LENGTH(iedge);
+
+  /* input arrays */
+  ie = INTEGER_POINTER(iedge);
+  je = INTEGER_POINTER(jedge);
+
+  /* initialise storage (with a guess at max size) */
+  Ntmax = 3 * Ne;
+  it = (int *) R_alloc(Ntmax, sizeof(int));
+  jt = (int *) R_alloc(Ntmax, sizeof(int));
+  kt = (int *) R_alloc(Ntmax, sizeof(int));
+  Nt = 0;
+
+  /* initialise scratch storage */
+  jj = (int *) R_alloc(Ne, sizeof(int));
+
   
+  for(i=0; i < Nv; i++) { 
+
+#ifdef DEBUGTRI
+    Rprintf("i=%d ---------- \n", i);
+#endif
+
+    /* Find triangles involving vertex 'i'
+       in which 'i' is the lowest-numbered vertex */
+
+    /* First, find vertices j > i connected to i */
+    Nj = 0;
+    for(m = 0; m < Ne; m++) {
+      if(ie[m] == i) {
+	j = je[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      } else if(je[m] == i) {
+	j = ie[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      }
+    }
+
+    /* 
+       Determine which pairs of vertices j, k are joined by an edge;
+       save triangles (i,j,k) 
+    */
+
+#ifdef DEBUGTRI
+    Rprintf("Nj = %d\n", Nj);
+#endif
+
+    if(Nj > 1) {
+#ifdef DEBUGTRI
+      Rprintf("i=%d\njj=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+      /* Sort jj in ascending order */
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(k < j) {
+	    /* swap */
+	    jj[mk] = j;
+	    jj[mj] = k;
+	    j = k;
+	  }
+	}
+      }
+#ifdef DEBUGTRI
+      Rprintf("sorted=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(j != k) {
+	    /* Run through edges to determine whether j, k are neighbours */
+	    for(m = 0; m < Ne; m++) {
+	      if((ie[m] == j && je[m] == k)
+		 || (ie[m] == k && je[m] == j)) {
+  	        /* add (i, j, k) to list of triangles */
+		if(Nt >= Ntmax) {
+		  /* overflow - allocate more space */
+		  Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		  it = (int *) S_realloc((char *) it,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  jt = (int *) S_realloc((char *) jt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  kt = (int *) S_realloc((char *) kt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  Ntmax = Nmore;
+		}
+		it[Nt] = i;
+		jt[Nt] = j;
+		kt[Nt] = k;
+		Nt++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  /* allocate space for output */
+  PROTECT(iTout = NEW_INTEGER(Nt));
+  PROTECT(jTout = NEW_INTEGER(Nt));
+  PROTECT(kTout = NEW_INTEGER(Nt));
+  PROTECT(out   = NEW_LIST(3));
+  /* that's 3+4=7 protected objects */
+  
+  ito = INTEGER_POINTER(iTout);
+  jto = INTEGER_POINTER(jTout);
+  kto = INTEGER_POINTER(kTout);
+  
+  /* copy triangle indices to output vectors */
+  for(m = 0; m < Nt; m++) {
+    ito[m] = it[m];
+    jto[m] = jt[m];
+    kto[m] = kt[m];
+  }
+  
+  /* insert output vectors in output list */
+  SET_VECTOR_ELT(out, 0, iTout);
+  SET_VECTOR_ELT(out, 1, jTout);
+  SET_VECTOR_ELT(out, 2, kTout);
+
+  UNPROTECT(7);
+  return(out);
+}
+
+
+/* faster version assuming iedge is in increasing order */
+
+SEXP triograph(SEXP nv,  /* number of vertices */
+	       SEXP iedge,  /* vectors of indices of ends of each edge */   
+	       SEXP jedge)  /* all arguments are integer */
+{
+  int Nv, Ne;
+  int *ie, *je;         /* edges */
+  int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
+  int Nt, Ntmax;        /* number of triangles */
+
+  int Nj;
+  int *jj; /* scratch storage */
+
+  int i, j, k, m, mj, mk, maxjk, Nmore;
+  
+  /* output */
+  SEXP iTout, jTout, kTout, out;
+  int *ito, *jto, *kto;
+  
+  /* =================== Protect R objects from garbage collector ======= */
+  PROTECT(nv = AS_INTEGER(nv));
+  PROTECT(iedge = AS_INTEGER(iedge));
+  PROTECT(jedge = AS_INTEGER(jedge));
+  /* That's 3 protected objects */
+
+  /* numbers of vertices and edges */
+  Nv = *(INTEGER_POINTER(nv)); 
+  Ne = LENGTH(iedge);
+
+  /* input arrays */
+  ie = INTEGER_POINTER(iedge);
+  je = INTEGER_POINTER(jedge);
+
+  /* initialise storage (with a guess at max size) */
+  Ntmax = 3 * Ne;
+  it = (int *) R_alloc(Ntmax, sizeof(int));
+  jt = (int *) R_alloc(Ntmax, sizeof(int));
+  kt = (int *) R_alloc(Ntmax, sizeof(int));
+  Nt = 0;
+
+  /* initialise scratch storage */
+  jj = (int *) R_alloc(Ne, sizeof(int));
+
+  
+  for(i=0; i < Nv; i++) { 
+
+#ifdef DEBUGTRI
+    Rprintf("i=%d ---------- \n", i);
+#endif
+
+    /* Find triangles involving vertex 'i'
+       in which 'i' is the lowest-numbered vertex */
+
+    /* First, find vertices j > i connected to i */
+    Nj = 0;
+    for(m = 0; m < Ne; m++) {
+      if(ie[m] == i) {
+	j = je[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      } else if(je[m] == i) {
+	j = ie[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      }
+    }
+
+    /* 
+       Determine which pairs of vertices j, k are joined by an edge;
+       save triangles (i,j,k) 
+    */
+
+#ifdef DEBUGTRI
+    Rprintf("Nj = %d\n", Nj);
+#endif
+
+    if(Nj > 1) {
+#ifdef DEBUGTRI
+      Rprintf("i=%d\njj=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+      /* Sort jj in ascending order */
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(k < j) {
+	    /* swap */
+	    jj[mk] = j;
+	    jj[mj] = k;
+	    j = k;
+	  }
+	}
+      }
+#ifdef DEBUGTRI
+      Rprintf("sorted=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(j != k) {
+	    /* Run through edges to determine whether j, k are neighbours */
+	    maxjk = (j > k) ? j : k;
+	    for(m = 0; m < Ne; m++) {
+              if(ie[m] > maxjk) break;
+	      /* 
+		 since iedge is in increasing order, the test below
+		 will always be FALSE when ie[m] > max(j,k)
+	      */
+	      if((ie[m] == j && je[m] == k)
+		 || (ie[m] == k && je[m] == j)) {
+  	        /* add (i, j, k) to list of triangles */
+		if(Nt >= Ntmax) {
+		  /* overflow - allocate more space */
+		  Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		  it = (int *) S_realloc((char *) it,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  jt = (int *) S_realloc((char *) jt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  kt = (int *) S_realloc((char *) kt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  Ntmax = Nmore;
+		}
+		it[Nt] = i;
+		jt[Nt] = j;
+		kt[Nt] = k;
+		Nt++;
+	      } 
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  /* allocate space for output */
+  PROTECT(iTout = NEW_INTEGER(Nt));
+  PROTECT(jTout = NEW_INTEGER(Nt));
+  PROTECT(kTout = NEW_INTEGER(Nt));
+  PROTECT(out   = NEW_LIST(3));
+  /* that's 3+4=7 protected objects */
+  
+  ito = INTEGER_POINTER(iTout);
+  jto = INTEGER_POINTER(jTout);
+  kto = INTEGER_POINTER(kTout);
+  
+  /* copy triangle indices to output vectors */
+  for(m = 0; m < Nt; m++) {
+    ito[m] = it[m];
+    jto[m] = jt[m];
+    kto[m] = kt[m];
+  }
+  
+  /* insert output vectors in output list */
+  SET_VECTOR_ELT(out, 0, iTout);
+  SET_VECTOR_ELT(out, 1, jTout);
+  SET_VECTOR_ELT(out, 2, kTout);
+
+  UNPROTECT(7);
+  return(out);
+}
+
+/* 
+   Even faster version using information about dummy vertices.
+   Dummy-to-dummy edges are forbidden.
+
+   For generic purposes use 'friendly' for 'isdata'
+   Edge between j and k is possible iff friendly[j] || friendly[k].
+   Edges with friendly = FALSE cannot be connected to one another.
+
+ */
+
+
+SEXP trioxgraph(SEXP nv,  /* number of vertices */
+		SEXP iedge,  /* vectors of indices of ends of each edge */   
+		SEXP jedge,
+		SEXP friendly)  /* indicator vector, length nv */
+{
+  /* input */
+  int Nv, Ne;
+  int *ie, *je;         /* edges */
+  int *friend;         /* indicator */
+
+  /* output */
+  int *it, *jt, *kt;    /* vectors of indices of vertices of triangles */ 
+  int Nt, Ntmax;        /* number of triangles */
+
+  /* scratch storage */
+  int Nj;
+  int *jj; 
+  int i, j, k, m, mj, mk, maxjk, Nmore;
+  
+  /* output to R */
+  SEXP iTout, jTout, kTout, out;
+  int *ito, *jto, *kto;
+  
+  /* =================== Protect R objects from garbage collector ======= */
+  PROTECT(nv = AS_INTEGER(nv));
+  PROTECT(iedge = AS_INTEGER(iedge));
+  PROTECT(jedge = AS_INTEGER(jedge));
+  PROTECT(friendly = AS_INTEGER(friendly));
+  /* That's 4 protected objects */
+
+  /* numbers of vertices and edges */
+  Nv = *(INTEGER_POINTER(nv)); 
+  Ne = LENGTH(iedge);
+
+  /* input arrays */
+  ie = INTEGER_POINTER(iedge);
+  je = INTEGER_POINTER(jedge);
+  friend = INTEGER_POINTER(friendly);
+
+  /* initialise storage (with a guess at max size) */
+  Ntmax = 3 * Ne;
+  it = (int *) R_alloc(Ntmax, sizeof(int));
+  jt = (int *) R_alloc(Ntmax, sizeof(int));
+  kt = (int *) R_alloc(Ntmax, sizeof(int));
+  Nt = 0;
+
+  /* initialise scratch storage */
+  jj = (int *) R_alloc(Ne, sizeof(int));
+
+  
+  for(i=0; i < Nv; i++) { 
+
+#ifdef DEBUGTRI
+    Rprintf("i=%d ---------- \n", i);
+#endif
+
+    /* Find triangles involving vertex 'i'
+       in which 'i' is the lowest-numbered vertex */
+
+    /* First, find vertices j > i connected to i */
+    Nj = 0;
+    for(m = 0; m < Ne; m++) {
+      if(ie[m] == i) {
+	j = je[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      } else if(je[m] == i) {
+	j = ie[m];
+	if(j > i) {
+	  jj[Nj] = j;
+	  Nj++;
+	}
+      }
+    }
+
+    /* 
+       Determine which pairs of vertices j, k are joined by an edge;
+       save triangles (i,j,k) 
+    */
+
+#ifdef DEBUGTRI
+    Rprintf("Nj = %d\n", Nj);
+#endif
+
+    if(Nj > 1) {
+#ifdef DEBUGTRI
+      Rprintf("i=%d\njj=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+      /* Sort jj in ascending order */
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(k < j) {
+	    /* swap */
+	    jj[mk] = j;
+	    jj[mj] = k;
+	    j = k;
+	  }
+	}
+      }
+#ifdef DEBUGTRI
+      Rprintf("sorted=\n", i);
+      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+      Rprintf("\n\n");
+#endif
+
+      for(mj = 0; mj < Nj-1; mj++) {
+	j = jj[mj];
+	for(mk = mj+1; mk < Nj; mk++) {
+	  k = jj[mk];
+	  if(j != k && (friend[j] || friend[k])) {
+	    /* Run through edges to determine whether j, k are neighbours */
+	    maxjk = (j > k) ? j : k;
+	    for(m = 0; m < Ne; m++) {
+              if(ie[m] > maxjk) break;
+	      /* 
+		 since iedge is in increasing order, the test below
+		 will always be FALSE when ie[m] > max(j,k)
+	      */
+	      if((ie[m] == j && je[m] == k)
+		 || (ie[m] == k && je[m] == j)) {
+  	        /* add (i, j, k) to list of triangles */
+		if(Nt >= Ntmax) {
+		  /* overflow - allocate more space */
+		  Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		  it = (int *) S_realloc((char *) it,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  jt = (int *) S_realloc((char *) jt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  kt = (int *) S_realloc((char *) kt,
+					 Nmore,  Ntmax,
+					 sizeof(int));
+		  Ntmax = Nmore;
+		}
+		it[Nt] = i;
+		jt[Nt] = j;
+		kt[Nt] = k;
+		Nt++;
+	      } 
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  /* allocate space for output */
+  PROTECT(iTout = NEW_INTEGER(Nt));
+  PROTECT(jTout = NEW_INTEGER(Nt));
+  PROTECT(kTout = NEW_INTEGER(Nt));
+  PROTECT(out   = NEW_LIST(3));
+  /* that's 4+4=8 protected objects */
+  
+  ito = INTEGER_POINTER(iTout);
+  jto = INTEGER_POINTER(jTout);
+  kto = INTEGER_POINTER(kTout);
+  
+  /* copy triangle indices to output vectors */
+  for(m = 0; m < Nt; m++) {
+    ito[m] = it[m];
+    jto[m] = jt[m];
+    kto[m] = kt[m];
+  }
+  
+  /* insert output vectors in output list */
+  SET_VECTOR_ELT(out, 0, iTout);
+  SET_VECTOR_ELT(out, 1, jTout);
+  SET_VECTOR_ELT(out, 2, kTout);
+
+  UNPROTECT(8);
+  return(out);
+}

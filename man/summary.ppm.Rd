@@ -7,7 +7,7 @@
 }
 \usage{
   \method{summary}{ppm}(object, \dots, quick=FALSE)
-  \method{print.summary}{ppm}(x, \dots)
+  \method{print}{summary.ppm}(x, \dots)
 }
 \arguments{
   \item{object}{A fitted point process model.}
@@ -35,6 +35,10 @@
   In normal usage, \code{print.summary.ppm} is invoked implicitly
   when the user calls \code{summary.ppm} without assigning its value
   to anything. See the examples.
+
+  You can also type \code{coef(summary(object))} to extract a table
+  of the fitted coefficients of the point process model \code{object}
+  together with standard errors and confidence limits. 
 }
 \value{
   \code{summary.ppm} returns an object of class \code{"summary.ppm"},
@@ -57,6 +61,7 @@
   s
   # extract stuff
   names(s)
+  coef(s)
   s$args$correction
   s$name
   s$trend$value

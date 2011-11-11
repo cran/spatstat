@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.37 $   $Date: 2011/05/18 08:18:43 $
+#   $Revision: 1.38 $   $Date: 2011/11/01 11:31:29 $
 #
 #
 #   calculate pair correlation function
@@ -128,7 +128,7 @@ pcf.ppp <- function(X, ..., r=NULL,
 
 sewpcf <- function(d, w, denargs, lambda2area) {
   wtot <- sum(w)
-  kden <- do.call("density.default",
+  kden <- do.call.matched("density.default",
                   append(list(x=d, weights=w/wtot), denargs))
   r <- kden$x
   y <- kden$y * wtot

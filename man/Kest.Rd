@@ -47,9 +47,10 @@ from a point pattern in a window of arbitrary shape.
     will also be computed.
   }
   \item{ratio}{
-    Logical. Advanced use only.
+    Logical. 
     If \code{TRUE}, the numerator and denominator of
-    each edge-corrected estimate will also be saved.
+    each edge-corrected estimate will also be saved,
+    for use in analysing replicated point patterns.
   }
 }
 \value{

@@ -10,7 +10,7 @@
   within a given distance of a point of type \eqn{i}.
 }
 \usage{
-Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
+Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -45,6 +45,12 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
     It specifies the edge correction(s) to be applied.
   }
   \item{\dots}{Ignored.}
+  \item{ratio}{
+    Logical. 
+    If \code{TRUE}, the numerator and denominator of
+    each edge-corrected estimate will also be saved,
+    for use in analysing replicated point patterns.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -62,6 +68,12 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{K_{ij}(r)}{Kij(r)}
   obtained by the edge corrections named.
+
+  If \code{ratio=TRUE} then the return value also has two
+  attributes called \code{"numerator"} and \code{"denominator"}
+  which are \code{"fv"} objects
+  containing the numerators and denominators of each
+  estimate of \eqn{K(r)}. 
 }
 \details{
   This function \code{Kcross} and its companions
@@ -171,6 +183,9 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots)
     K01 <- Kcross(betacells, "off", "on") 
     plot(K01)
 
+    \testonly{
+    K01 <- Kcross(betacells, "off", "on", ratio=TRUE) 
+    }
     \dontrun{
     K10 <- Kcross(betacells, "on", "off")
 

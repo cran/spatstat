@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.13 $  $Date: 2011/10/07 04:41:56 $
+#   $Revision: 1.14 $  $Date: 2011/11/02 05:43:18 $
 #
 #
 
@@ -215,7 +215,7 @@ default.rmhcontrol <- function(model, ...) {
   stopifnot(is.ppm(model))
   dflt <- list(expand=default.expand(model),
                periodic=(as.owin(model)$type=="rectangle"))
-  ctrl <- resolve.defaults(list(...), dflt)
+  ctrl <- resolve.defaults(list(...), dflt, .StripNull=TRUE)
   return(rmhcontrol(ctrl))
 }
 
@@ -223,11 +223,10 @@ default.rmhcontrol <- function(model, ...) {
 rmhResolveControl <- function(control, model) {
   # adjust control information once the model is known
   stopifnot(inherits(control, "rmhcontrol"))
-  ispois <- try(is.poisson(model))
-  if(inherits(try, "try-error"))
-    stop("Cannot determine whether the model is Poisson")
   undecided <- with(control, !(force.exp || force.noexp))
-  if(undecided && ispois) {
+  if(undecided && (is.poisson(model) || !is.stationary(model))) {
+    # Expansion is unnecessary for Poisson processes
+    # Default is not to expand if model is non-stationary 
     control$force.exp <- FALSE
     control$force.noexp <- TRUE
     control$expand <- 1

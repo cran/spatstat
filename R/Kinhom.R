@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.59 $	$Date: 2011/07/23 02:36:53 $
+#	$Revision: 1.60 $	$Date: 2011/11/01 11:21:45 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -48,7 +48,9 @@
   K <- Kinhom(...)
   L <- eval.fv(sqrt(pmax(K,0)/pi))
   # relabel the fv object
-  L <- rebadge.fv(L, substitute(Linhom(r), NULL), "Linhom")
+  L <- rebadge.fv(L, quote(Linhom(r)), "Linhom",
+                  names(K), new.labl=attr(K, "labl"))
+  #
   return(L)  
 }
 

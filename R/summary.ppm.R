@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.48 $   $Date: 2011/10/06 09:23:53 $
+#    $Revision: 1.49 $   $Date: 2011/10/31 09:15:13 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -251,6 +251,10 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   
   class(y) <- "summary.ppm"
   return(y)
+}
+
+coef.summary.ppm <- function(object, ...) {
+  object$coefs.SE.CI
 }
 
 print.summary.ppm <- function(x, ...) {

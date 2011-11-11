@@ -8,8 +8,9 @@
 \usage{
   \method{simulate}{ppm}(object, nsim=1, ...,
                          start = NULL,
-                         control = default.rmhcontrol(object),
+                         control = default.rmhcontrol(object, expand=expand),
                          project=TRUE,
+                         expand=NULL,
                          verbose=FALSE, progress=(nsim > 1))
 }
 \arguments{
@@ -32,6 +33,17 @@
   \item{\dots}{
     Ignored.
   }
+  \item{project}{
+    Logical flag indicating what to do if the fitted model is
+    invalid (in the sense that the values of the fitted coefficients do not
+    specify a valid point process).
+    If \code{project=TRUE} the closest valid model will be simulated;
+    if \code{project=FALSE} an error will occur.
+  }
+  \item{expand}{
+    Optional expansion factor for simulation window.
+    Defaults to 2.
+  }
   \item{verbose}{
     Logical flag indicating whether to print progress reports
     from \code{\link{rmh.ppm}}
@@ -40,13 +52,6 @@
   \item{progress}{
     Logical flag indicating whether to print progress reports
     for the sequence of simulations.
-  }
-  \item{project}{
-    Logical flag indicating what to do if the fitted model is
-    invalid (in the sense that the values of the fitted coefficients do not
-    specify a valid point process).
-    If \code{project=TRUE} the closest valid model will be simulated;
-    if \code{project=FALSE} an error will occur.
   }
 }
 \details{

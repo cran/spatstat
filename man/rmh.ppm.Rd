@@ -7,9 +7,13 @@
   using the Metropolis-Hastings algorithm.
 }
 
-\usage{\method{rmh}{ppm}(model,start=NULL,
-               control=default.rmhcontrol(model),
-               \dots, verbose=TRUE, project=TRUE) }
+\usage{
+  \method{rmh}{ppm}(model, start=NULL,
+                    control=default.rmhcontrol(model, expand=expand),
+                    \dots,
+                    project=TRUE, expand=NULL, 
+                    verbose=TRUE)
+}
 
 \arguments{
   \item{model}{A fitted point process model (object of class
@@ -29,15 +33,19 @@
   \item{\dots}{
     Further arguments passed to \code{\link{rmh.default}}.
   }
-  \item{verbose}{
-    Logical flag indicating whether to print progress reports.
-  }
   \item{project}{
     Logical flag indicating what to do if the fitted model is
     invalid (in the sense that the values of the fitted coefficients do not
     specify a valid point process).
     If \code{project=TRUE} the closest valid model will be simulated;
     if \code{project=FALSE} an error will occur.
+  }
+  \item{expand}{
+    Optional expansion factor for simulation window.
+    Defaults to 2.
+  }
+  \item{verbose}{
+    Logical flag indicating whether to print progress reports.
   }
 }
 

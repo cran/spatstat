@@ -147,7 +147,9 @@ at new locations.
     or a pixel image or images.
     \item 
     If neither \code{ngrid} nor \code{locations} is given, then
-    \code{ngrid} is assumed. It defaults to 50.
+    \code{ngrid} is assumed. The value of \code{ngrid} defaults to
+    \code{\link{spatstat.options}("npixel")}, which is initialised to 128
+    when \pkg{spatstat} is loaded.
   }
   The argument \code{locations} may be a data frame or list
   specifying arbitrary locations,
@@ -224,7 +226,8 @@ at new locations.
   \code{\link{ppm.object}},
   \code{\link{plot.ppm}},
   \code{\link{print.ppm}},
-  \code{\link{fitted.ppm}}
+  \code{\link{fitted.ppm}},
+  \code{\link{spatstat.options}}
 }
 \section{Warnings}{
   The current implementation invokes \code{\link{predict.glm}}

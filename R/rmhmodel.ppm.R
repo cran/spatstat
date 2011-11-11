@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.48 $   $Date: 2011/10/06 10:01:04 $
+#  $Revision: 2.50 $   $Date: 2011/11/07 05:47:56 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -92,6 +92,14 @@ list(
        hc <- inte$par$hc
        return(list(cif='straush',
                    par=list(gamma=gamma,r=r,hc=hc),
+                   ntypes=1))
+     },
+     "Triplets process" =
+     function(coeffs, inte) {
+       gamma <- inte$interpret(coeffs,inte)$param$gamma
+       r <- inte$par$r
+       return(list(cif = "triplets",
+                   par = list(gamma = gamma, r = r),
                    ntypes=1))
      },
      "Multitype Strauss process" =
@@ -265,9 +273,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
           if(is.null(inte$project))
             stop("Internal error: interaction has no projection operator")
           coeffs <- inte$project(coeffs, inte)
-        }
-        else
-          stop("The fitted model is not a valid point process")
+        } else stop("The fitted model is not a valid point process")
       }
       # Translate the model to the format required by rmh.default
       Z <- siminfo(coeffs, inte)

@@ -99,7 +99,7 @@ function(X, r=NULL, breaks=NULL, ..., correction=c("rs", "km", "han")) {
     }
     # add to fv object
     Z <- bind.fv(Z, result,
-                 c("hat(%s)[bord](r)", "hat(%s)[km](r)", "hazard(r)"),
+                 c("hat(%s)[bord](r)", "hat(%s)[km](r)", "hat(lambda)[km](r)"),
                  c("border corrected estimate of %s",
                    "Kaplan-Meier estimate of %s",
                    "Kaplan-Meier estimate of hazard function lambda(r)"),

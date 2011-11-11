@@ -10,7 +10,7 @@ which counts the expected number of points of subset \eqn{J}
 within a given distance from a typical point in subset \code{I}.
 }
 \usage{
-Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots)
+Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -43,6 +43,12 @@ Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots)
     It specifies the edge correction(s) to be applied.
   }
   \item{\dots}{Ignored.}
+  \item{ratio}{
+    Logical. 
+    If \code{TRUE}, the numerator and denominator of
+    each edge-corrected estimate will also be saved,
+    for use in analysing replicated point patterns.
+  }
 }
 \value{
 An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -60,6 +66,12 @@ together with a column or columns named
 according to the selected edge corrections. These columns contain
 estimates of the function \eqn{K_{IJ}(r)}{KIJ(r)}
 obtained by the edge corrections named.
+
+  If \code{ratio=TRUE} then the return value also has two
+  attributes called \code{"numerator"} and \code{"denominator"}
+  which are \code{"fv"} objects
+  containing the numerators and denominators of each
+  estimate of \eqn{K(r)}. 
 }
 \details{
 The function \code{Kmulti}

@@ -83,6 +83,7 @@
   \code{\link{Strauss}},
   \code{\link{Softcore}},
   \code{\link{StraussHard}},
+  \code{\link{Triplets}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},
   \code{\link{DiggleGratton}},
