@@ -556,11 +556,15 @@
 
 ppm(nztrees, nd=128)
 
- ppm(nztrees, ~ x)
+fit1 <- ppm(nztrees, ~ x)
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx)
  # where x,y are the Cartesian coordinates
  # and a,b are parameters to be estimated
+
+fit1
+coef(fit1)
+coef(summary(fit1))
 
  ppm(nztrees, ~ polynom(x,2))
  # fit the nonstationary Poisson process 

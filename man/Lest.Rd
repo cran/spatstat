@@ -7,17 +7,23 @@
   for a spatial point pattern.
 }
 \usage{
-  Lest(...)
+  Lest(X, ...)
 }
 \arguments{
+  \item{X}{
+    The observed point pattern, 
+    from which an estimate of \eqn{L(r)} will be computed.
+    An object of class \code{"ppp"}, or data
+    in any format acceptable to \code{\link{as.ppp}()}.
+  }
   \item{\dots}{
-    Arguments passed to \code{\link{Kest}}
-    to estimate the \eqn{K}-function.
+    Other arguments passed to \code{\link{Kest}}
+    to control the estimation procedure.
   }
 }
 \details{
   This command computes an estimate of the \eqn{L}-function
-  for a spatial point pattern.
+  for the spatial point pattern \code{X}.
   The \eqn{L}-function is a transformation of Ripley's \eqn{K}-function,
   \deqn{L(r) = \sqrt{\frac{K(r)}{\pi}}}{L(r) = sqrt(K(r)/pi)}
   where \eqn{K(r)} is the \eqn{K}-function.

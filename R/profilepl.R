@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.10 $  $Date: 2010/06/28 04:32:41 $
+#  $Revision: 1.11 $  $Date: 2011/11/02 01:46:55 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -9,7 +9,7 @@
 profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   s <- as.data.frame(s)
   n <- nrow(s)
-  fname <- deparse(substitute(f))
+  fname <- paste(deparse(substitute(f)), collapse="")
   stopifnot(is.function(f))
   # validate 's'
   parms <- names(s)

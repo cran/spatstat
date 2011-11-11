@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.82 $    $Date: 2011/10/11 02:36:27 $
+#    $Revision: 1.83 $    $Date: 2011/11/06 06:25:12 $
 #
 #  (a) for matrices only:
 #
@@ -562,7 +562,8 @@ good.names <- function(nama, defaults, suffices) {
     result <- defaults
   else if(any(blank <- !nzchar(result)))
     result[blank] <- defaults[blank]
-  result <- make.names(result, unique=TRUE)
+  if(any(duplicated(result)))
+    result <- make.names(result, unique=TRUE)
   return(result)
 }
 

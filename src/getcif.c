@@ -7,7 +7,7 @@ extern Cifns AreaIntCifns, BadGeyCifns, DgsCifns, DiggraCifns,
   FikselCifns, GeyerCifns, HardcoreCifns, 
   LennardCifns, LookupCifns, 
   SoftcoreCifns, StraussCifns, StraussHardCifns, 
-  MultiStraussCifns, MultiStraussHardCifns, MultiHardCifns;
+  MultiStraussCifns, MultiStraussHardCifns, MultiHardCifns, TripletsCifns;
 
 Cifns NullCifns = NULL_CIFNS;
 
@@ -32,6 +32,7 @@ CifPair CifTable[] = {
   {"straush",   &StraussHardCifns},
   {"straussm",  &MultiStraussCifns},
   {"straushm",  &MultiStraussHardCifns},
+  {"triplets",  &TripletsCifns},
   {(char *) NULL, (Cifns *) NULL}
 };
 

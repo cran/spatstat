@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.35 $	$Date: 2011/07/04 06:01:00 $
+#	$Revision: 5.37 $	$Date: 2011/11/10 09:44:45 $
 #
 #
 # -------- functions ----------------------------------------
@@ -80,7 +80,8 @@
 
 "Kcross" <- 
 function(X, i, j, r=NULL, breaks=NULL,
-         correction =c("border", "isotropic", "Ripley", "translate") , ...)
+         correction =c("border", "isotropic", "Ripley", "translate") , ...,
+         ratio=FALSE)
 {
   verifyclass(X, "ppp")
   if(!is.multitype(X, dfok=FALSE)) 
@@ -98,13 +99,15 @@ function(X, i, j, r=NULL, breaks=NULL,
 
   if(i == j) {
     result <- Kest(X[I],
-                   r=r, breaks=breaks, correction=correction, ...)
+                   r=r, breaks=breaks, correction=correction, ...,
+                   ratio=ratio)
   } else {
     J <- (marx == j)
     if(!any(J))
       stop(paste("No points have mark j =", j))
     result <- Kmulti(X, I, J,
-                     r=r, breaks=breaks, correction=correction, ...)
+                     r=r, breaks=breaks, correction=correction, ...,
+                     ratio=ratio)
   }
   iname <- make.parseable(paste(i))
   jname <- make.parseable(paste(j))
@@ -119,7 +122,8 @@ function(X, i, j, r=NULL, breaks=NULL,
 
 "Kdot" <- 
 function(X, i, r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") , ...)
+         correction = c("border", "isotropic", "Ripley", "translate") , ...,
+         ratio=FALSE)
 {
   verifyclass(X, "ppp")
   if(!is.multitype(X, dfok=FALSE)) 
@@ -137,7 +141,7 @@ function(X, i, r=NULL, breaks=NULL,
   if(!any(I)) stop(paste("No points have mark i =", i))
 	
   result <- Kmulti(X, I, J,
-                   r=r, breaks=breaks, correction=correction, ...)
+                   r=r, breaks=breaks, correction=correction, ..., ratio=ratio)
   iname <- make.parseable(paste(i))
   result <-
     rebadge.fv(result,
@@ -150,7 +154,8 @@ function(X, i, r=NULL, breaks=NULL,
 
 "Kmulti"<-
 function(X, I, J, r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") , ...)
+         correction = c("border", "isotropic", "Ripley", "translate") , ...,
+         ratio=FALSE)
 {
   verifyclass(X, "ppp")
 
@@ -205,6 +210,16 @@ function(X, I, J, r=NULL, breaks=NULL,
   desc <- c("distance argument r", "theoretical Poisson %s")
   K <- fv(K, "r", substitute(Kmulti(r), NULL),
           "theo", , alim, c("r","{%s^{pois}}(r)"), desc, fname="K[multi]")
+  
+  # save numerator and denominator?
+  if(ratio) {
+    denom <- lambdaI * lambdaJ * area
+    numK <- eval.fv(denom * K)
+    denK <- eval.fv(denom + K * 0)
+    attributes(numK) <- attributes(denK) <- attributes(K)
+    attr(numK, "desc")[2] <- "numerator for theoretical Poisson %s"
+    attr(denK, "desc")[2] <- "denominator for theoretical Poisson %s"
+  }
 
   # find close pairs of points
   XI <- X[I]
@@ -242,10 +257,22 @@ function(X, I, J, r=NULL, breaks=NULL,
   if(any(correction == "none")) {
     # uncorrected! 
     wh <- whist(dcloseIJ, breaks$val)  # no weights
-    Kun <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    numKun <- cumsum(wh)
+    denKun <- lambdaI * lambdaJ * area
+    Kun <- numKun/denKun
     K <- bind.fv(K, data.frame(un=Kun), "hat(%s^{un})(r)",
                  "uncorrected estimate of %s",
                  "un")
+    if(ratio) {
+      # save numerator and denominator
+      numK <- bind.fv(numK, data.frame(un=numKun), "hat(%s)[un](r)",
+                 "numerator of uncorrected estimate of %s",
+                 "un")
+      denK <- bind.fv(denK, data.frame(un=denKun), "hat(%s)[un](r)",
+                 "denominator of uncorrected estimate of %s",
+                 "un")
+    }
+
   }
   if(any(correction == "border" | correction == "bord.modif")) {
     # border method
@@ -257,42 +284,93 @@ function(X, I, J, r=NULL, breaks=NULL,
     RS <- Kount(dcloseIJ, bcloseI, bI, breaks)
     if(any(correction == "bord.modif")) {
       denom.area <- eroded.areas(W, r)
-      Kbm <- RS$numerator/(denom.area * nI * nJ)
+      numKbm <- RS$numerator
+      denKbm <- denom.area * nI * nJ
+      Kbm <- numKbm/denKbm
       K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s^{bordm})(r)",
                    "modified border-corrected estimate of %s",
                    "bord.modif")
+      if(ratio) {
+        # save numerator and denominator
+        numK <- bind.fv(numK, data.frame(bord.modif=numKbm),
+                        "hat(%s)[bordm](r)",
+                        "numerator of modified border-corrected estimate of %s",
+                        "bord.modif")
+        denK <- bind.fv(denK, data.frame(bord.modif=denKbm),
+                        "hat(%s)[bordm](r)",
+                        "denominator of modified border-corrected estimate of %s",
+                        "bord.modif")
+      }
     }
     if(any(correction == "border")) {
-      Kb <- RS$numerator/(lambdaJ * RS$denom.count)
+      numKb <- RS$numerator
+      denKb <- lambdaJ * RS$denom.count
+      Kb <- numKb/denKb
       K <- bind.fv(K, data.frame(border=Kb), "hat(%s^{bord})(r)",
                    "border-corrected estimate of %s",
                    "border")
+      if(ratio) {
+        numK <- bind.fv(numK, data.frame(border=numKb), "hat(%s)[bord](r)",
+                        "numerator of border-corrected estimate of %s",
+                        "border")
+        denK <- bind.fv(denK, data.frame(border=denKb), "hat(%s)[bord](r)",
+                        "denominator of border-corrected estimate of %s",
+                        "border")
+      }
     }
   }
   if(any(correction == "translate")) {
     # translation correction
     edgewt <- edge.Trans(XI[icloseI], XJ[jcloseJ], paired=TRUE)
     wh <- whist(dcloseIJ, breaks$val, edgewt)
-    Ktrans <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    numKtrans <- cumsum(wh)
+    denKtrans <- lambdaI * lambdaJ * area
+    Ktrans <- numKtrans/denKtrans
     rmax <- diameter(W)/2
     Ktrans[r >= rmax] <- NA
     K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s^{trans})(r)",
                  "translation-corrected estimate of %s",
                  "trans")
+    if(ratio) {
+      numK <- bind.fv(numK, data.frame(trans=numKtrans), "hat(%s)[trans](r)",
+                      "numerator of translation-corrected estimate of %s",
+                      "trans")
+      denK <- bind.fv(denK, data.frame(trans=denKtrans), "hat(%s)[trans](r)",
+                      "denominator of translation-corrected estimate of %s",
+                      "trans")
+    }
   }
   if(any(correction == "isotropic")) {
     # Ripley isotropic correction
     edgewt <- edge.Ripley(XI[icloseI], matrix(dcloseIJ, ncol=1))
     wh <- whist(dcloseIJ, breaks$val, edgewt)
-    Kiso <- cumsum(wh)/(lambdaI * lambdaJ * area)
+    numKiso <- cumsum(wh)
+    denKiso <- lambdaI * lambdaJ * area
+    Kiso <- numKiso/denKiso
     rmax <- diameter(W)/2
     Kiso[r >= rmax] <- NA
     K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s^{iso})(r)",
                  "Ripley isotropic correction estimate of %s",
                  "iso")
+   if(ratio) {
+      numK <- bind.fv(numK, data.frame(iso=numKiso), "hat(%s)[iso](r)",
+                      "numerator of Ripley isotropic correction estimate of %s",
+                      "iso")
+      denK <- bind.fv(denK, data.frame(iso=denKiso), "hat(%s)[iso](r)",
+                      "denominator of Ripley isotropic correction estimate of %s",
+                      "iso")
+    }
   }
   # default is to display them all
   attr(K, "fmla") <- . ~ r
   unitname(K) <- unitname(X)
+  
+  if(ratio) {
+    # finish up numerator & denominator
+    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
+    unitname(numK) <- unitname(denK) <- unitname(K)
+    # tack on to result
+    K <- rat(K, numK, denK, check=FALSE)
+  }
   return(K)
 }

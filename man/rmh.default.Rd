@@ -148,6 +148,11 @@ track=FALSE, \dots) }
       original data window \code{w}, then clipped to \code{w}
       when the algorithm has finished.
 
+      The default is to expand the simulation window
+      if the model is stationary and non-Poisson
+      (i.e. it has no trend and the interaction is not Poisson)
+      and not to expand in all other cases. 
+      
       If the model has a trend, then in order for expansion to
       be feasible, the trend must be given either as a function,
       or an image whose bounding box is large enough to contain
@@ -289,7 +294,8 @@ trend corresponding to a particular type, there is still a component
   \code{\link{Poisson}},
   \code{\link{Softcore}},
   \code{\link{Strauss}},
-  \code{\link{StraussHard}}
+  \code{\link{StraussHard}},
+  \code{\link{Triplets}}
 }
 \section{Other models}{
   In theory, any finite point process model can be simulated using
@@ -415,6 +421,12 @@ trend corresponding to a particular type, there is still a component
    X.area <- rmh(model=mod42,start=list(n.start=ns),
                   control=list(nrep=nr,nverb=nv))
 
+   # Triplets process
+   modtrip <- list(cif="triplets",par=list(beta=2,gamma=0.2,r=0.7),
+                   w=c(0,10,0,10))
+   X.triplets <- rmh(model=modtrip,
+                     start=list(n.start=ns),
+                     control=list(nrep=nr,nverb=nv))
    
    # Multitype Strauss:
    beta <- c(0.027,0.008)

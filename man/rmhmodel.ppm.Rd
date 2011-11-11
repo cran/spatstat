@@ -120,7 +120,8 @@
   \code{\link{Poisson}},
   \code{\link{Softcore}},
   \code{\link{Strauss}},
-  \code{\link{StraussHard}}
+  \code{\link{StraussHard}},
+  \code{\link{Triplets}}
 }
 \examples{
   data(cells)

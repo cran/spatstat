@@ -2,7 +2,7 @@
 #
 #  defaultwin.R
 #
-#   $Revision: 1.7 $   $Date: 2011/10/13 01:51:36 $
+#   $Revision: 1.8 $   $Date: 2011/11/02 07:54:11 $
 #
 
 default.expand <- function(object, m=2, epsilon=1e-6) {
@@ -12,6 +12,9 @@ default.expand <- function(object, m=2, epsilon=1e-6) {
     return(1)
   # no expansion if model depends on covariate data
   if(summary(object)$uses.covars)
+    return(1)
+  # no expansion if model is nonstationary
+  if(!is.stationary(object))
     return(1)
   # expand data window by distance d = m * reach
   w <- as.owin(data.ppm(object))

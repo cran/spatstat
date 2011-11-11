@@ -202,9 +202,12 @@
       }
 
       \bold{Standard point pattern datasets:}
-      
-      Remember to say \code{\link{data}(amacrine)} etc.
-      Type \code{demo(data)} to see all the datasets
+
+      Datasets in \pkg{spatstat} are lazy-loaded, so you can simply
+      type the name of the dataset to use it; there is no need
+      to type \code{\link{data}(amacrine)} etc.
+
+      Type \code{demo(data)} to see a display of all the datasets
       installed with the package.
       
       \tabular{ll}{
@@ -993,7 +996,8 @@
     \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
     \code{\link{Softcore}()} \tab pairwise interaction, soft core potential\cr
     \code{\link{Strauss}()} \tab  Strauss process \cr
-    \code{\link{StraussHard}()} \tab Strauss/hard core point process
+    \code{\link{StraussHard}()} \tab Strauss/hard core point process \cr
+    \code{\link{Triplets}()} \tab Geyer triplets process
   }
   
   \bold{Finer control over model fitting:}

@@ -23,11 +23,12 @@ Cdata *hardcoreinit(state, model, algo)
      Algor algo;
 {
   Hardcore *hardcore;
+  double h;
   hardcore = (Hardcore *) R_alloc(1, sizeof(Hardcore));
 
   /* Interpret model parameters*/
-  hardcore->h      = model.ipar[0];
-  hardcore->h2     = pow(hardcore->h, 2); 
+  hardcore->h      = h = model.ipar[0];
+  hardcore->h2     = h * h;
   hardcore->period = model.period;
   /* periodic boundary conditions? */
   hardcore->per    = (model.period[0] > 0.0);

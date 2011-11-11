@@ -1,12 +1,17 @@
 #
 #  fryplot.R
 #
-#  $Revision: 1.4 $ $Date: 2010/11/26 09:07:11 $
+#  $Revision: 1.5 $ $Date: 2011/10/30 12:19:28 $
 #
 
-fryplot <- function(X, ..., width=NULL) {
+fryplot <- function(X, ..., width=NULL, from=NULL, to=NULL) {
   Xname <- deparse(substitute(X))
   X <- as.ppp(X)
+  n <- npoints(X)
+  ismarked <- is.marked(X)
+  seqn <- seq_len(n)
+  from <- if(is.null(from)) seqn else seqn[from]
+  to   <- if(is.null(to))   seqn else seqn[to]
   b <- as.rectangle(X)
   halfspan <- with(b, c(diff(xrange), diff(yrange)))/2
   if(!is.null(width)) {
@@ -19,18 +24,24 @@ fryplot <- function(X, ..., width=NULL) {
                            list(...),
                            list(invert=TRUE),
                            list(main=paste("Fry plot of", Xname))))
-  n <- X$n
-  xx <- X$x
-  yy <- X$y
-  for(i in 1:n) {
-    dxi <- xx[-i] - xx[i]
-    dyi <- yy[-i] - yy[i]
+  xx <- X$x[to]
+  yy <- X$y[to]
+  if(ismarked) {
+    marx <- as.data.frame(marks(X))
+    marx <- marx[to, ,drop=FALSE]
+  }
+  for(i in from) {
+    noti <- (to != i)
+    dxi <- xx[noti] - xx[i]
+    dyi <- yy[noti] - yy[i]
     oki <- (abs(dxi) < halfspan[1]) & (abs(dyi) < halfspan[2])
-    if(any(oki)) 
-      do.call.matched("points.default",
-                      append(list(x=dxi[oki], y=dyi[oki]),
-                             list(...)),
-                      extrargs=c("pch", "col", "bg", "cex", "lwd"))
+    if(any(oki)) {
+      mki <- if(ismarked) marx[noti, , drop=FALSE] else NULL
+      dXi <- ppp(x=dxi[oki], y=dyi[oki], window=bb,
+                 marks=mki[oki,],
+                 check=FALSE)
+      plot(dXi, add=TRUE, ...)
+    }
   }
   return(invisible(NULL))
 }
@@ -49,5 +60,10 @@ frypoints <- function(X) {
   DX <- as.vector(dx[nondiag])
   DY <- as.vector(dy[nondiag])
   Fry <- ppp(DX, DY, window=bb, check=FALSE)
+  if(is.marked(X)) {
+    marx <- as.data.frame(marks(X))
+    rowind <- row(nondiag)[nondiag]
+    marks(Fry) <- marx[rowind, ]
+  }
   return(Fry)
 }

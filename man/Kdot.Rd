@@ -10,7 +10,7 @@
   within a given distance of a point of type \eqn{i}.
 }
 \usage{
-Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
+Kdot(X, i, r=NULL, breaks=NULL, correction, ..., ratio=FALSE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -41,6 +41,12 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
     It specifies the edge correction(s) to be applied.
   }
   \item{\dots}{Ignored.}
+  \item{ratio}{
+    Logical. 
+    If \code{TRUE}, the numerator and denominator of
+    each edge-corrected estimate will also be saved,
+    for use in analysing replicated point patterns.
+  }
 }
 \value{
   An object of class \code{"fv"} (see \code{\link{fv.object}}).
@@ -58,6 +64,12 @@ Kdot(X, i, r=NULL, breaks=NULL, correction, ...)
   according to the selected edge corrections. These columns contain
   estimates of the function \eqn{K_{i\bullet}(r)}{Ki.(r)}
   obtained by the edge corrections named.
+
+  If \code{ratio=TRUE} then the return value also has two
+  attributes called \code{"numerator"} and \code{"denominator"}
+  which are \code{"fv"} objects
+  containing the numerators and denominators of each
+  estimate of \eqn{K(r)}. 
 }
 \details{
   This function \code{Kdot} and its companions

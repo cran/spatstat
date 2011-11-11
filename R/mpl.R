@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.132 $	$Date: 2011/07/26 08:22:37 $
+#	$Revision: 5.133 $	$Date: 2011/11/03 09:54:27 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -101,7 +101,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/07/26 08:22:37 $")
+                    date="$Date: 2011/11/03 09:54:27 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -133,7 +133,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
                covariates  = covariates,  # covariates are still retained!
                covfunargs  = covfunargs,
 	       correction  = correction,
-               rbord       = rbord,
+               rbord       = 0,
                terms       = terms(trend.formula),
                version     = the.version,
                problems    = list())
@@ -248,7 +248,7 @@ rslt <- list(
              covariates   = covariates,
              covfunargs   = covfunargs,
              correction   = correction,
-             rbord        = rbord,
+             rbord        = if(correction == "border") rbord else 0,
              terms        = terms(trend.formula),
              version      = the.version,
              problems     = problems)

@@ -77,7 +77,6 @@
   Cochran, W.G. (1977) 
   \emph{Sampling techniques}, 3rd edition.
   New York: John Wiley and Sons.
-  
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

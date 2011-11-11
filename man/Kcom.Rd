@@ -16,6 +16,7 @@
 \usage{
 Kcom(object, r = NULL, breaks = NULL, ...,
      correction = c("border", "isotropic", "translate"),
+     conditional = !is.poisson(object),
      restrict = FALSE,
      trend = ~1, interaction = Poisson(), rbord = reach(interaction),
      compute.var = TRUE,
@@ -44,10 +45,15 @@ Kcom(object, r = NULL, breaks = NULL, ...,
     Optional vector of character strings specifying the edge
     correction(s) to be used. See \code{\link{Kest}} for options.
   }
+  \item{conditional}{
+    Optional. Logical value indicating whether to 
+    compute the estimates for the conditional case. See Details.
+  }
   \item{restrict}{
-    Logical value indicating whether to compute
-    the restriction estimator (\code{restrict=TRUE}) or
+    Logical value indicating
+    whether to compute the restriction estimator (\code{restrict=TRUE}) or
     the reweighting estimator (\code{restrict=FALSE}, the default).
+    Applies only if \code{conditional=TRUE}.
     See Details.
   }
   \item{trend,interaction,rbord}{
@@ -147,11 +153,18 @@ Kcom(object, r = NULL, breaks = NULL, ...,
   If the fitted model is a Poisson point process, then the formulae above
   are exactly what is computed. If the fitted model is not Poisson, the 
   formulae above are modified slightly to handle edge effects.
-  The modification is determined by the argument
-  \code{restrict}. If \code{restrict=TRUE} the algorithm calculates
-  the \emph{restriction estimator}; if \code{restrict=FALSE} it
-  calculates the \emph{reweighting estimator}.
+
+  The modification is determined by the arguments
+  \code{conditional} and \code{restrict}.
+  The value of \code{conditional} defaults to \code{FALSE} for Poisson models
+  and \code{TRUE} for non-Poisson models.
+  If \code{conditional=FALSE} then the formulae above are not modified.
+  If \code{conditional=TRUE}, then the algorithm calculates
+  the \emph{restriction estimator} if \code{restrict=TRUE},
+  and calculates the \emph{reweighting estimator} if \code{restrict=FALSE}.
   See Appendix D of Baddeley, Rubak and Moller (2011).
+  Thus, by default, the reweighting estimator is computed
+  for non-Poisson models.
   
   The nonparametric estimates of \eqn{K(r)} are approximately unbiased
   estimates of the \eqn{K}-function, assuming the point process is

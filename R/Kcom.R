@@ -3,11 +3,12 @@
 #
 #   model compensated K-function
 #
-# $Revision: 1.4 $ $Date: 2011/10/04 06:24:24 $
+# $Revision: 1.5 $ $Date: 2011/11/03 10:15:40 $
 #
 
 Kcom <- function(object, r=NULL, breaks=NULL, ..., 
                  correction=c("border", "isotropic", "translate"),
+                 conditional=!is.poisson(object),
                  restrict=FALSE,
                  trend=~1, interaction=Poisson(), rbord=reach(interaction),
                  compute.var=TRUE,
@@ -19,6 +20,9 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
   else 
     stop("object should be a fitted point process model or a point pattern")
   
+  if(missing(conditional) || is.null(conditional))
+    conditional <- !is.poisson(fit)
+
   rfixed <- !is.null(r) || !is.null(breaks)
   
   # Extract data and window
@@ -46,13 +50,12 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
   if(sum(unlist(opt)) == 0)
     stop("No corrections selected")
   
-  # edge correction algorithm 
-  conditional.case <- (opt$bord && fit$rbord > 0)
-  algo <- if(!conditional.case) "classical" else
+  # edge correction algorithm
+  algo <- if(!conditional) "classical" else
           if(restrict) "restricted" else "reweighted"
 
   # conditioning on border region?
-  if(!conditional.case) {
+  if(!conditional) {
     Wfree <- Win
   } else {
     rbord <- fit$rbord

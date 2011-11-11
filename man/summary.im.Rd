@@ -7,7 +7,7 @@
 }
 \usage{
   \method{summary}{im}(object, \dots)
-  \method{print.summary}{im}(x, \dots)
+  \method{print}{summary.im}(x, \dots)
 }
 \arguments{
   \item{object}{A pixel image.}

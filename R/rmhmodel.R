@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.50 $  $Date: 2011/06/16 07:35:25 $
+#   $Revision: 1.51 $  $Date: 2011/11/06 10:08:13 $
 #
 #
 
@@ -983,6 +983,44 @@ is.stationary.rmhmodel <- function(x) {
               stabilising="hradii[i,i] > 0 for all i"),
             reach=function(par, ...) {
               return(max(0, par$hradii, na.rm=TRUE))
+            }
+            ),
+#       
+# 16. Triplets.
+#       
+       'triplets'=
+       list(
+            C.id="triplets",
+            multitype=FALSE,
+            parhandler=function(par, ...) {
+              ctxt <- "For the triplets cif"
+              par <- check.named.list(par, c("beta","gamma","r"), ctxt)
+              # treat r=NA as absence of interaction
+              par <- within(par, if(is.na(r)) { r <- 0; gamma <- 1 })
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.1.real(gamma, ctxt))
+              with(par, check.1.real(r,     ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(gamma >= 0, ctxt))
+              with(par, explain.ifnot(r >= 0, ctxt))
+              return(par)
+            },
+            validity=function(par, kind) {
+              gamma <- par$gamma
+              switch(kind,
+                     integrable=(gamma <= 1),
+                     stabilising=(gamma == 0)
+                     )
+            },
+            explainvalid=list(
+              integrable="gamma <= 1",
+              stabilising="gamma == 0"),
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g == 1) 0 else r)
             }
             )
        # end of list '.Spatstat.RmhTable'

@@ -7,7 +7,7 @@
 }
 \usage{
   \method{summary}{quad}(object, \dots, checkdup=FALSE)
-  \method{print.summary}{quad}(x, \dots, dp=3)
+  \method{print}{summary.quad}(x, \dots, dp=3)
 }
 \arguments{
   \item{object}{A quadrature scheme.}

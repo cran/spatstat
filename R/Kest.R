@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.73 $	$Date: 2011/10/18 05:41:01 $
+#	$Revision: 5.75 $	$Date: 2011/10/30 11:17:11 $
 #
 #
 # -------- functions ----------------------------------------
@@ -34,16 +34,23 @@
 #
 # ------------------------------------------------------------------------
 
-"Lest" <- function(...) {
-  K <- Kest(...)
+"Lest" <- function(X, ...) {
+  K <- Kest(X, ...)
   L <- eval.fv(sqrt(K/pi))
-  # relabel the fv object
-  L <- rebadge.fv(L, quote(L(r)), "L", names(K), new.labl=attr(K, "labl"))
   # handle variance estimates
   if(any(varcols <- colnames(K) %in% c("rip", "ls"))) {
-    varL <- with(K, ifelse(r == 0, 0, ./(2 * pi * r)))
-    L[,varcols] <- as.data.frame(L)[,varcols]
+    r <- with(L, .x)
+    L[,varcols] <- as.data.frame(K)[,varcols]/(2 * pi * r)^2
+    # fix 0/0
+    n <- npoints(X)
+    A <- area.owin(as.owin(X))
+    if(any(colnames(K) == "rip"))
+      L[r == 0, "rip"] <- (2 * A/(n-1)^2)/(4 * pi)
+    if(any(colnames(K) == "ls"))
+      L[r == 0, "ls"]  <- (2 * A/(n * (n-1)))/(4 * pi)
   }
+  # relabel the fv object
+  L <- rebadge.fv(L, quote(L(r)), "L", names(K), new.labl=attr(K, "labl"))
   #
   return(L)  
 }

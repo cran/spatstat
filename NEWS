@@ -1,4 +1,90 @@
 
+	CHANGES IN spatstat VERSION 1.24-2
+
+OVERVIEW 
+
+   o Geyer's triplet interaction
+
+   o more functionality for replicated point patterns
+
+   o changed default for simulation window in point process simulation
+
+   o changed default for edge correction in Kcom, Gcom
+ 
+   o data in spatstat is now lazy-loaded
+
+   o bug fixes 
+
+NEW FUNCTIONS
+
+   o Triplets
+   Geyer's triplet interaction, for point process models
+
+   o coef.summary.ppm
+   New method coef.summary.ppm
+   You can now type 'coef(summary(fit))' to extract a table
+   of the fitted coefficients of the point process model 'fit'
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o data in spatstat are now lazy-loaded
+   so you don't have to type data(amacrine), etc.
+
+   o rmh.default, rmh.ppm, simulate.ppm
+   These now handle the 'triplets' interaction
+   
+   o fryplot
+   Now has arguments 'to' and 'from', allowing 
+   selection of a subset of points.
+
+   o fryplot, frypoints
+   These functions now handle marked point patterns properly.
+
+   o Kcross, Kdot, Kmulti
+   New argument 'ratio' determines whether the numerator and denominator
+   of the estimate of the multitype K-function will be stored. 
+   This enables analysis of replicated point patterns, 
+   using 'pool.rat()' to pool the K function estimates.
+
+   o rmh.ppm, simulate.ppm, default.expand
+   For point process models which have a trend depending only on x and y,
+   the simulation window is now taken to be the same as the original 
+   window containing the data (by default). 
+   That is, `expansion' does not take place, by default.
+   (In previous versions of spatstat the simulation window was larger
+   than the original data window.)
+   
+   o rmh.ppm, simulate.ppm
+   The argument sequence for these functions has changed.
+   New argument 'expand' allows more explicit control over simulation domain.
+
+   o Kcom, Gcom
+   New argument 'conditional' gives more explicit control
+   over choice of edge correction in compensator.
+   Simplified defaults for edge correction.  
+
+   o Kinhom
+   Improved plot labels.
+
+   o profilepl
+   Printed output improved.
+
+BUG FIXES
+
+   o Lest
+   The variance approximations (Lotwick-Silverman and Ripley)
+   obtained with var.approx=TRUE, were incorrect for Lest 
+   (although they were correct for Kest) due to a coding error.
+   Fixed.
+   
+   o simulate.ppm
+   Ignored the argument 'control' in some cases. 
+   Fixed.
+
+   o pcf and its relatives (pcfinhom, pcfcross.inhom, pcfdot.inhom)
+   Sometimes gave a warning about 'extra arguments ignored'.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.24-1
 
 OVERVIEW 
