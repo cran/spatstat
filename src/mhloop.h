@@ -18,7 +18,7 @@
 
    MH_TRACKING  whether to save transition history
 
-   $Revision: 1.9 $  $Date: 2011/06/16 09:58:38 $ 
+   $Revision: 1.10 $  $Date: 2011/11/20 04:00:17 $ 
 
 */
 
@@ -27,6 +27,8 @@
 #endif
 
 for(irep = 0; irep < algo.nrep; irep++) {
+
+  R_CheckUserInterrupt();
 
 #if MH_DEBUG
   Rprintf("iteration %d\n", irep);

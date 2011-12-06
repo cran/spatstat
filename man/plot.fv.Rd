@@ -8,7 +8,7 @@
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
            legend=!add, legendpos="topleft", legendmath=TRUE, legendargs=list(),
-           shade=NULL, shadecol="grey", add=FALSE)
+           shade=NULL, shadecol="grey", add=FALSE, limitsonly=FALSE)
 }
 \arguments{
   \item{x}{
@@ -90,6 +90,12 @@
   \item{add}{
     Logical. Whether the plot should be added to an existing plot
   }
+  \item{limitsonly}{
+    Logical. If \code{FALSE}, plotting is performed normally.
+    If \code{TRUE}, no plotting is performed at all; 
+    just the \eqn{x} and \eqn{y} limits of the plot are computed
+    and returned. 
+  }
 }
 \value{
   Either \code{NULL}, or a data frame giving the meaning of the
@@ -141,9 +147,15 @@
 
   The default values of \code{lty}, \code{col} and \code{lwd} can
   be changed using \code{\link{spatstat.options}("plot.fv")}.
+
+  Use \code{type = "n"} to create the plot region and draw the axes
+  without plotting any data.
+
+  Use \code{limitsonly=TRUE} to suppress all plotting
+  and just compute the \eqn{x} and \eqn{y} limits. This can be used
+  to calculate common \eqn{x} and \eqn{y} scales for several plots.
 }
 \examples{
-   data(cells)
    K <- Kest(cells)
    # K is an object of class "fv"
 
@@ -175,6 +187,17 @@
    # significance bands
    KE <- envelope(cells, Kest, nsim=19)
    plot(KE, shade=c("hi", "lo"))
+
+   # how to display two functions on a common scale
+   Kr <- Kest(redwood)
+   a <- plot(K, limitsonly=TRUE)
+   b <- plot(Kr, limitsonly=TRUE)
+   xlim <- range(a$xlim, b$xlim)
+   ylim <- range(a$ylim, b$ylim)
+   opa <- par(mfrow=c(1,2))
+   plot(K, xlim=xlim, ylim=ylim)
+   plot(Kr, xlim=xlim, ylim=ylim)
+   par(opa)
 }
 \seealso{
   \code{\link{fv.object}},

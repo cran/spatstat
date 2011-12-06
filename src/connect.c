@@ -4,12 +4,15 @@
        Connected component transform of a discrete binary image
        (8-connected topology)
        
-       $Revision: 1.2 $ $Date: 2010/12/22 08:57:40 $
+       $Revision: 1.4 $ $Date: 2011/11/20 04:41:56 $
 
        
 */
 
 #include <math.h>
+#include <R.h>
+#include <R_ext/Utils.h>
+
 #include "raster.h"
 
 void   shape_raster();
@@ -43,7 +46,8 @@ comcommer(im)
 
   while(nchanged >0) {
     nchanged = 0;
-    for(j = rmin; j <= rmax; j++)
+    for(j = rmin; j <= rmax; j++) {
+      R_CheckUserInterrupt();
       for(k = cmin; k <= cmax; k++) {
 	curlabel = ENTRY(j, k);
 	if(curlabel != 0) {
@@ -63,6 +67,7 @@ comcommer(im)
 	  }
 	}
       }
+    }
   }
 }
 

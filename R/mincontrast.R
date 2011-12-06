@@ -121,14 +121,14 @@ print.minconfit <- function(x, ...) {
   if(!is.null(mo))
     cat(paste("Model:", mo, "\n"))
   if(!is.null(cm)) {
-    # Covariance model - LGCP only
-    cat(paste("\tCovariance model:", cm$model, "\n"))
+    # Covariance/kernel model and nuisance parameters 
+    cat(paste("\t", cm$type, "model:", cm$model, "\n"))
     margs <- cm$margs
     if(!is.null(margs)) {
       nama <- names(margs)
       tags <- ifelse(nzchar(nama), paste(nama, "="), "")
       tagvalue <- paste(tags, margs)
-      cat(paste("\tCovariance parameters:",
+      cat(paste("\t", cm$type, "parameters:",
                 paste(tagvalue, collapse=", "),
                 "\n"))
     }
@@ -229,6 +229,7 @@ unitname.minconfit <- function(x) {
            1 + exp(-rvals^2/(4 * par[2]))/(4 * pi * par[1] * par[2])
          }
          ),
+       # ...............................................
        MatClust=list(
          # Matern Cluster process: par = (kappa, R)
          K = function(par,rvals, ..., funaux){
@@ -268,6 +269,67 @@ unitname.minconfit <- function(x) {
            })
 
          ),
+       # ...............................................
+       Cauchy=list(
+         # Neyman-Scott with Cauchy clusters: par = (kappa, eta2)
+         K = function(par,rvals, ...){
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           pi*rvals^2 + (1 - 1/sqrt(1 + rvals^2/par[2]))/par[1]
+         },
+         pcf= function(par,rvals, ...){
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           1 + ((1 + rvals^2/par[2])^(-1.5))/(2 * pi * par[2] * par[1])
+         }
+         ),
+       # ...............................................
+       VarGamma=list(
+         # Neyman-Scott with VarianceGamma/Bessel clusters: par = (kappa, eta)
+         K = local({
+           # K function requires integration of pair correlation
+           xgx <- function(x, par, nu.pcf) {
+             # x * pcf(x) without check on par values
+             numer <- (x/par[2])^nu.pcf * besselK(x/par[2], nu.pcf)
+             denom <- 2^(nu.pcf+1) * pi * par[2]^2 * par[1] * gamma(nu.pcf + 1)
+             return(x * (1 + numer/denom))
+           }
+           vargammaK <- function(par,rvals, ..., margs){
+             # margs = list(.. nu.pcf.. ) 
+             if(any(par <= 0))
+               return(rep(Inf, length(rvals)))
+             nu.pcf <- margs$nu.pcf
+             out <- numeric(length(rvals))
+             ok <- (rvals > 0)
+             rvalsok <- rvals[ok]
+             outok <- numeric(sum(ok))
+             for (i in 1:length(rvalsok))
+               outok[i] <- 2 * pi * integrate(xgx,
+                                              lower=0, upper=rvalsok[i],
+                                              par=par, nu.pcf=nu.pcf)$value
+             out[ok] <- outok
+             return(out)
+           }
+           vargammaK
+           }), # end of 'local'
+         pcf= function(par,rvals, ..., margs){
+           # margs = list(..nu.pcf..)
+           if(any(par <= 0))
+             return(rep(Inf, length(rvals)))
+           nu.pcf <- margs$nu.pcf
+           numer <- (rvals/par[2])^nu.pcf * besselK(rvals/par[2], nu.pcf)
+           denom <- 2^(nu.pcf+1) * pi * par[2]^2 * par[1]  * gamma(nu.pcf+1)
+           return(1 + numer/denom)
+         },
+         parhandler = function(..., nu.ker) {
+           stopifnot(nu.ker > -1/2)
+           return(list(type="Kernel",
+                       model="VarGamma",
+                       margs=list(nu.ker=nu.ker,
+                                  nu.pcf=2*nu.ker+1)))
+         }
+         ),
+       # ...............................................
        LGCP=list(
          # Log Gaussian Cox process: par = (sigma2, alpha)
          # calls Covariance() from RandomFields package
@@ -322,7 +384,7 @@ unitname.minconfit <- function(x) {
              if(inherits(ok, "try-error"))
                stop("Error in evaluating Covariance")
            }
-           return(list(model=model, margs=margs))
+           return(list(type="Covariance",model=model, margs=margs))
          }
          )
   )
@@ -635,4 +697,230 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
   return(result)
 }
 
+
+cauchy.estK <- function(X, startpar=c(kappa=1,eta2=1),
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
+
+# omega: scale parameter of Cauchy kernel function
+# eta: scale parameter of Cauchy pair correlation function
+# eta = 2 * omega
+
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+
+  if(inherits(X, "fv")) {
+    K <- X
+    if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
+      warning("Argument X does not appear to be a K-function")
+  } else if(inherits(X, "ppp")) {
+    K <- Kest(X)
+    dataname <- paste("Kest(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","eta2"))
+
+  theoret <- .Spatstat.ClusterModelInfo$Cauchy$K
+
+  desc <- "minimum contrast fit of Neyman-Scott process with Cauchy kernel"
+  result <- mincontrast(K, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)", desc=desc),
+                        explain=list(dataname=dataname,
+                          fname=attr(K, "fname"),
+                          modelname="Cauchy process"), ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "eta2")
+  result$par <- par
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       omega=sqrt(par[["eta2"]])/2,
+                       mu=mu)
+  result$internal <- list(model="Cauchy")
+  return(result)
+}
+
+
+cauchy.estpcf <- function(X, startpar=c(kappa=1,eta2=1),
+                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
+                          pcfargs=list()) {
+
+# omega: scale parameter of Cauchy kernel function
+# eta: scale parameter of Cauchy pair correlation function
+# eta = 2 * omega
+
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+
+  if(inherits(X, "fv")) {
+    g <- X
+    if(!(attr(g, "fname") %in% c("g", "g[inhom]")))
+      warning("Argument X does not appear to be a pair correlation function")
+  } else if(inherits(X, "ppp")) {
+    g <- do.call("pcf.ppp", append(list(X), pcfargs))
+    dataname <- paste("pcf(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","eta2"))
+
+  theoret <- .Spatstat.ClusterModelInfo$Cauchy$pcf
+
+  # avoid using g(0) as it may be infinite
+  argu <- fvnames(g, ".x")
+  rvals <- g[[argu]]
+  if(rvals[1] == 0 && (is.null(rmin) || rmin == 0)) {
+    rmin <- rvals[2]
+  }
+  
+  desc <- "minimum contrast fit of Neyman-Scott process with Cauchy kernel"
+  result <- mincontrast(g, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)", desc=desc),
+                        explain=list(dataname=dataname,
+                          fname=attr(g, "fname"),
+                          modelname="Cauchy process"), ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "eta2")
+  result$par <- par
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       omega=sqrt(par[["eta2"]])/2,
+                       mu=mu)
+  result$internal <- list(model="Cauchy")
+  return(result)
+}
+
+
+vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
+                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
+
+# nu.ker: smoothness parameter of Variance Gamma kernel function
+# omega: scale parameter of kernel function
+# nu.pcf: smoothness parameter of Variance Gamma pair correlation function
+# eta: scale parameter of Variance Gamma pair correlation function
+# nu.pcf = 2 * nu.ker + 1    and    eta = omega
+
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+
+  if(inherits(X, "fv")) {
+    K <- X
+    if(!(attr(K, "fname") %in% c("K", "K[inhom]")))
+      warning("Argument X does not appear to be a K-function")
+  } else if(inherits(X, "ppp")) {
+    K <- Kest(X)
+    dataname <- paste("Kest(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","eta"))
+
+  theoret <- .Spatstat.ClusterModelInfo$VarGamma$K
+  
+  # test validity of parameter nu and digest
+  ph <- .Spatstat.ClusterModelInfo$VarGamma$parhandler
+  cmodel <- ph(nu.ker=nu.ker)
+  margs <- cmodel$margs
+
+  desc <- "minimum contrast fit of Neyman-Scott process with Variance Gamma kernel"
+  result <- mincontrast(K, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)", desc=desc),
+                        explain=list(dataname=dataname,
+                          fname=attr(K, "fname"),
+                          modelname="Variance Gamma process"),
+                        margs=margs, ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "eta")
+  result$par <- par
+  result$covmodel <- cmodel
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       omega=par[["eta"]],
+                       mu=mu)
+  result$internal <- list(model="VarGamma")
+  return(result)
+}
+
+
+vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4, 
+                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
+                          pcfargs=list()) {
+
+# nu.ker: smoothness parameter of Variance Gamma kernel function
+# omega: scale parameter of kernel function
+# nu.pcf: smoothness parameter of Variance Gamma pair correlation function
+# eta: scale parameter of Variance Gamma pair correlation function
+# nu.pcf = 2 * nu.ker + 1    and    eta = omega
+
+  dataname <-
+    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+
+  if(inherits(X, "fv")) {
+    g <- X
+    if(!(attr(g, "fname") %in% c("g", "g[inhom]")))
+      warning("Argument X does not appear to be a pair correlation function")
+  } else if(inherits(X, "ppp")) {
+    g <- do.call("pcf.ppp", append(list(X), pcfargs))
+    dataname <- paste("pcf(", dataname, ")", sep="")
+    if(is.null(lambda))
+      lambda <- summary(X)$intensity
+  } else 
+    stop("Unrecognised format for argument X")
+
+  startpar <- check.named.vector(startpar, c("kappa","eta"))
+
+  theoret <- .Spatstat.ClusterModelInfo$VarGamma$pcf
+
+  # test validity of parameter nu and digest 
+  ph <- .Spatstat.ClusterModelInfo$VarGamma$parhandler
+  cmodel <- ph(nu.ker=nu.ker)
+  margs <- cmodel$margs
+  
+  # avoid using g(0) as it may be infinite
+  argu <- fvnames(g, ".x")
+  rvals <- g[[argu]]
+  if(rvals[1] == 0 && (is.null(rmin) || rmin == 0)) {
+    rmin <- rvals[2]
+  }
+  
+  desc <- "minimum contrast fit of Neyman-Scott process with Variance Gamma kernel"
+  result <- mincontrast(g, theoret, startpar,
+                        ctrl=list(q=q, p=p,rmin=rmin, rmax=rmax),
+                        fvlab=list(label="%s[fit](r)", desc=desc),
+                        explain=list(dataname=dataname,
+                          fname=attr(g, "fname"),
+                          modelname="Variance Gamma process"),
+                        margs=margs,
+                        ...)
+  # imbue with meaning
+  par <- result$par
+  names(par) <- c("kappa", "eta")
+  result$par <- par
+  result$covmodel <- cmodel
+  # infer model parameters
+  mu <- if(is.numeric(lambda) && length(lambda) == 1)
+           lambda/result$par[["kappa"]] else NA
+  result$modelpar <- c(kappa=par[["kappa"]],
+                       omega=par[["eta"]],
+                       mu=mu)
+  result$internal <- list(model="VarGamma")
+  return(result)
+}
 

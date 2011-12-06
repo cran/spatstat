@@ -1,6 +1,7 @@
 \name{model.depends}
 \alias{model.depends}
 \alias{model.is.additive}
+\alias{model.covariates}
 \title{
   Identify Covariates Involved in each Model Term
 }
@@ -11,10 +12,14 @@
 \usage{
 model.depends(object)
 model.is.additive(object)
+model.covariates(object, fitted=TRUE, offset=TRUE)
 }
 \arguments{
   \item{object}{
     A fitted model of any kind.
+  }
+  \item{fitted,offset}{
+    Logical values determining which type of covariates to include.
   }
 }
 \details{
@@ -44,6 +49,14 @@ model.is.additive(object)
   \code{i}th offset term depends on the \code{j}th
   original covariate.
 
+  The command \code{model.covariates} returns a character vector
+  containing the names of all (original) covariates that were actually
+  used to fit the model. By default, this includes all covariates that
+  appear in the model formula, including offset terms as well as 
+  canonical covariate terms. To omit the offset terms, set
+  \code{offset=FALSE}. To omit the canonical covariate terms,
+  set \code{fitted=FALSE}.
+
   The command \code{model.is.additive} determines whether the model
   is additive, in the sense that there is no canonical covariate that
   depends on two or more original covariates. It returns a logical value.
@@ -61,6 +74,7 @@ model.is.additive(object)
    z <- rep(c(-1,1), 5)
    fit <- lm(y ~ poly(x,2) + sin(z))
    model.depends(fit)
+   model.covariates(fit)
    model.is.additive(fit)
 }
 \author{Adrian Baddeley

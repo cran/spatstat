@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.53 $	$Date: 2011/06/25 10:49:18 $
+#	$Revision: 2.54 $	$Date: 2011/11/28 06:53:11 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -79,7 +79,7 @@ function(x, ...,
 
     if(!notrend) {
       cat("\nTrend formula: ")
-      print(s$trend$formula)
+      print(s$trend$formula, showEnv=FALSE)
     }
 
     tv <- s$trend$value
@@ -266,7 +266,6 @@ extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
     c(edf, aic + (k - 2) * edf)
 }
 
-
 #
 # method for model.frame
 
@@ -368,3 +367,4 @@ as.interact.ppm <- function(object) {
    inte <- Poisson()
  return(inte)
 }
+

@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.30 $    $Date: 2011/05/18 09:22:02 $
+#  $Revision: 1.35 $    $Date: 2011/11/28 07:20:18 $
 #
 #
 #
@@ -10,7 +10,14 @@
 update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
                                     envir=parent.frame()) {
   verifyclass(object, "ppm")
+  aargh <- list(...)
 
+  call <- getCall(object)
+  if(!is.call(call))
+    stop(paste("Internal error - getCall(object) is not of class",
+               sQuote("call")))
+  callstring <- paste(deparse(sys.call()), collapse="")
+  
   newformula <- function(old, change, eold=object$callframe, enew=envir) {
     old <- if(is.null(old)) ~1 else eval(old, eold)
     change <- if(is.null(change)) ~1 else eval(change, enew)
@@ -19,15 +26,61 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
     update.formula(old, change)
   }
   
-  # inspect model
-  antique <- summary(object, quick="no prediction")$antiquated
-  if(antique)
-    stop("Model was fitted by a very old version of spatstat; cannot be updated")
-  call <- object$call
-  if(!is.call(call))
-    stop(paste("Internal error - object$call is not of class",
-               sQuote("call")))
+  # Special cases 
+  # (1) no new information
+  if(length(aargh) == 0) 
+    return(eval(call, as.list(envir), enclos=object$callframe))
 
+  # (2) model can be updated using existing covariate data frame
+  ismpl <- with(object, method == "mpl" && fitter %in% c("gam", "glm"))
+  only.fmla <- length(aargh) == 1 && inherits(fmla <- aargh[[1]], "formula")
+  if(ismpl && only.fmla) {
+    # This is a dangerous hack! 
+    glmdata <- object$internal$glmdata
+    # check whether data for new variables are available
+    # (this doesn't work with things like 'pi')
+    vars.available <- c(colnames(glmdata), names(object$covfunargs))
+    if(all(variablesinformula(fmla) %in% c(".", vars.available))) {
+      # we can update using internal data
+      FIT <- object$internal$glmfit
+      orig.env <- environment(FIT$terms)
+      # update formula using "." rules
+      fmla <- newformula(formula(FIT), fmla)
+      trend <- rhs.of.formula(fmla)
+      # update GLM/GAM fit 
+      upd.glm.call <- update(FIT, fmla, evaluate=FALSE)
+      FIT <- eval(upd.glm.call, envir=orig.env)
+      environment(FIT$terms) <- orig.env
+      object$internal$glmfit <- FIT
+      # update entries of object
+      object$trend <- trend
+      object$terms <- terms(fmla)
+      object$coef <- co <- FIT$coef
+      object$callstring <- callstring
+      object$callframe <- parent.frame()
+      if(is.finite(object$maxlogpl)) {
+        # Update maxlogpl provided it is finite
+        # (If the likelihood is infinite, this is due to the interaction;
+        # if we update the trend, the likelihood will remain infinite.)
+        W <- glmdata$.mpl.W
+        SUBSET <- glmdata$.mpl.SUBSET        
+        Z <- is.data(object$Q)
+        object$maxlogpl <- -(deviance(FIT)/2 +
+                             sum(log(W[Z & SUBSET])) + sum(Z & SUBSET))
+      }
+      # update the model call
+      upd.call <- call
+      upd.call$trend <- trend
+      object$call <- upd.call
+      # update fitted interaction (depends on coefficients, if not Poisson)
+      if(!is.null(inter <- object$interaction) && !is.poisson(inter)) 
+        object$fitin <-
+          fii(inter, co, object$internal$Vnames, object$internal$IsOffset)
+      return(object)
+    }
+  }
+  
+  # general case.
   undecided <- is.null(use.internal) || !is.logical(use.internal)
   force.int   <- !undecided && use.internal
   force.ext   <- !undecided && !use.internal
@@ -51,11 +104,6 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
     if("covariates" %in% namobj) call$covariates <- object$covariates
   }
   
-  # handle arguments
-  aargh <- list(...)
-
-  if(length(aargh) == 0) 
-    return(eval(call, as.list(envir), enclos=object$callframe))
 
   Q.is.new <- FALSE
   

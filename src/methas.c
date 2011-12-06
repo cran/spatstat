@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rdefines.h>
+#include <R_ext/Utils.h>
 #include "methas.h"
 
 void fexitc(const char *msg);

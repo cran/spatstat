@@ -7,7 +7,7 @@
        nndist2segs: minimum distance from point to any line segment
        prdist2segs: pairwise distances from each point to each line segment
 
-       $Revision: 1.6 $ $Date: 2011/08/24 09:30:47 $
+       $Revision: 1.7 $ $Date: 2011/11/20 03:39:10 $
 
        Author: Adrian Baddeley
 
@@ -15,6 +15,7 @@
 
 #include <R.h>
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 #include <math.h>
 
 void
@@ -43,6 +44,7 @@ nndist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2, index)
   eps  = *epsilon;
 
   for(j = 0; j < nseg; j++) {
+    R_CheckUserInterrupt();
     dx = x1[j] - x0[j];
     dy = y1[j] - y0[j];
     leng = hypot(dx, dy);
@@ -118,6 +120,7 @@ prdist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2)
   eps  = *epsilon;
 
   for(j = 0; j < nseg; j++) {
+    R_CheckUserInterrupt();
     dx = x1[j] - x0[j];
     dy = y1[j] - y0[j];
     leng = hypot(dx, dy);

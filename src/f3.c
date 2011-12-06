@@ -1,5 +1,6 @@
 #include <math.h>
 #include <R.h>
+#include <R_ext/Utils.h>
 #include "geom3.h"
 #include "functable.h"
 
@@ -10,7 +11,7 @@
 #endif
 
 /*
-	$Revision: 1.2 $	$Date: 2009/11/10 17:53:59 $
+	$Revision: 1.3 $	$Date: 2011/11/20 04:19:10 $
 
 	3D distance transform
 
@@ -158,9 +159,10 @@ distrans3(b, v, ok)
 
   /* Forward pass: Top to Bottom; Back to Front; Left to Right. */
 
-  for(z=0;z<b->Mz;z++)
-    for(y=0;y<b->My;y++)
-      for(x=0;x<b->Mx;x++)
+  for(z=0;z<b->Mz;z++) {
+    R_CheckUserInterrupt();
+    for(y=0;y<b->My;y++) {
+      for(x=0;x<b->Mx;x++) {
 	if(VALUE((*b),x,y,z) == 0)
 	  VALUE((*v),x,y,z) = 0;
 	else {
@@ -197,13 +199,17 @@ distrans3(b, v, ok)
 
 	  VALUE((*v),x,y,z) = q;
 	}
+      }
+    }
+  }
 
 
 	/* Backward pass: Bottom to Top; Front to Back; Right to Left. */
 
-	for(z = b->Mz - 1; z >= 0; z--)
-	for(y = b->My - 1; y >= 0; y--)
-	for(x = b->Mx - 1; x >= 0; x--)
+  for(z = b->Mz - 1; z >= 0; z--) {
+    R_CheckUserInterrupt();
+    for(y = b->My - 1; y >= 0; y--) {
+      for(x = b->Mx - 1; x >= 0; x--) {
 	if((q = VALUE((*v),x,y,z)) != 0)
 	{
 	  /* same row */
@@ -229,6 +235,9 @@ distrans3(b, v, ok)
 
 	  VALUE((*v),x,y,z) = q;
 	}
+      }
+    }
+  }
 }
 
 void

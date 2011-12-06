@@ -105,17 +105,13 @@
     Logical flag indicating whether to print progress reports
     (for \code{method="ho"})
   }
-  
 }
 \value{
   An object of class \code{"ppm"} describing a fitted point process
   model.
  
-  The fitted parameters can be obtained just by printing this object.
-  Fitted spatial trends can be extracted using the \code{predict} method
-  for this object (see \code{\link{predict.ppm}}).
-
-  See \code{\link{ppm.object}} for details of the format of this object.
+  See \code{\link{ppm.object}} for details of the format of this object
+  and methods available for manipulating it.
 }
 \details{
   This function fits a point process model
@@ -219,10 +215,16 @@
       see \code{\link{im.object}}), or a \code{function(x, y, ...)}, or
       a single number.   The software will look up
       the pixel values of each image at the required locations
-      (quadrature points). In the case of a \code{function(x, y, ...)},
+      (quadrature points).
+      In the case of a \code{function(x, y, ...)}, the arguments
+      \code{x} and \code{y} are implicit, and 
       any additional arguments \code{\dots} should be given in
-      \code{covfunargs}. The argument \code{Q} may be either a quadrature
-      scheme or a point pattern.
+      \code{covfunargs}.
+
+      Note that, for covariate functions, only the \emph{name} of the
+      function appears in the trend formula. A covariate function is
+      treated as if it were a single variable. The function arguments do not
+      appear in the trend formula. See the Examples.
 
       If \code{covariates} is a list,
       the list entries should have names corresponding to
@@ -273,6 +275,11 @@
       points) generally yield a better approximation, at the
       expense of higher computational load. 
 
+      An easy way to fit models using a finer quadrature scheme
+      is to let \code{Q} be the original point pattern data,
+      and use the argument \code{nd}
+      to determine the number of dummy points in the quadrature scheme.
+      
       Complete control over the quadrature scheme is possible.
       See \code{\link{quadscheme}} for an overview.
       Use \code{quadscheme(X, D, method="dirichlet")} to compute
@@ -377,9 +384,11 @@
   These parameters are of two types:
   \describe{
     \item{regular parameters:}{
-      A parameter \eqn{\theta}{theta} is called \emph{regular}
-      if the likelihood, when considered as a function of
-      \eqn{\theta}{theta}, is an exponential family.
+      A parameter \eqn{\phi}{phi} is called \emph{regular}
+      if the log likelihood is a linear function of \eqn{\theta}{theta} where 
+      \eqn{\theta = \theta(\psi)}{theta = theta(psi)} is some transformation of 
+      \eqn{\psi}{psi}. [Then \eqn{\theta}{theta} is called the canonical
+      parameter.]
     }
     \item{irregular parameters}{
       Other parameters are called \emph{irregular}. 
@@ -393,7 +402,8 @@
   determining the range of interaction.
 
   The \code{ppm} command is only designed to estimate regular
-  parameters. It requires the values of any irregular parameters
+  parameters of the interaction.
+  It requires the values of any irregular parameters of the interaction
   to be fixed. For example, to fit a Strauss process model to the \code{cells}
   dataset, you could type \code{ppm(cells, ~1, Strauss(r=0.07))}.
   Note that the value of the irregular parameter \code{r} must be given.
@@ -442,11 +452,12 @@
 }
 
 \seealso{
-  \code{\link{ppp}}, 
-  \code{\link{quadscheme}}, 
-  \code{\link{ppm.object}},
-  \code{\link{profilepl}}.
+  \code{\link{ppm.object}} for details of how to
+  print, plot and manipulate a fitted model.
 
+  \code{\link{ppp}} and \code{\link{quadscheme}}
+  for constructing data.
+  
   Interactions: 
       \code{\link{Poisson}},
       \code{\link{AreaInter}},
@@ -468,6 +479,9 @@
       \code{\link{Softcore}},
       \code{\link{Strauss}} and 
       \code{\link{StraussHard}}.
+
+      See \code{\link{profilepl}} for advice on
+      fitting nuisance parameters in the interaction.
 }
 \section{Warnings}{
   The implementation of the Huang-Ogata method is experimental;
@@ -613,6 +627,10 @@ coef(summary(fit1))
  ppm(Q, ~ y + Z, covariates=data.frame(Z=Zvalues))
  # Note Q not X
 
+ # COVARIATE FUNCTION WITH EXTRA ARGUMENTS
+ #
+f <- function(x,y,a){ y - a }
+ppm(X, ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
 
  ## MULTITYPE POINT PROCESSES ### 
  data(lansing)

@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances in m dimensions
 
-  $Revision: 1.4 $     $Date: 2011/09/20 07:54:01 $
+  $Revision: 1.5 $     $Date: 2011/11/20 04:09:19 $
 
   Argument x is an m * n matrix 
   with columns corresponding to points
@@ -25,8 +25,8 @@
 #undef SPATSTAT_DEBUG
 
 #include <R.h>
+#include <R_ext/Utils.h>
 #include <math.h>
-/* #include <stdio.h> */
 
 #ifndef FALSE
 #define TRUE 1
@@ -55,6 +55,8 @@ void nndMD(n, m, x, nnd, huge)
   hu2 = hu * hu;
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -166,6 +168,8 @@ void nnwMD(n, m, x, nnd, nnwhich, huge)
   hu2 = hu * hu;
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -279,6 +283,7 @@ void nnXwMD(m, n1, x1, n2, x2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+    R_CheckUserInterrupt();
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -374,6 +379,9 @@ void nnXxMD(m, n1, x1, id1, n2, x2, id2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+
+    R_CheckUserInterrupt();
+
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -478,6 +486,8 @@ void knndMD(n, m, kmax, x, nnd, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -698,6 +708,8 @@ void knnwMD(n, m, kmax, x, nnd, nnwhich, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 

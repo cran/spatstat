@@ -17,13 +17,10 @@ par(mar=c(1,1,2,1)+0.1)
 fanfare("Spatstat demonstration")
 
 fanfare("I. Types of data")
-data(swedishpines)
 plot(swedishpines, main="Point pattern")
 
-data(demopat)
 plot(demopat, cols=c("green", "blue"), main="Multitype point pattern")
 
-data(longleaf)
 plot(longleaf, fg="blue", main="Marked point pattern")
 
 a <- psp(runif(20),runif(20),runif(20),runif(20), window=owin())
@@ -34,7 +31,6 @@ marks(a) <- runif(20)
 plot(a, main="Marked line segment pattern")
 
 plot(owin(), main="Rectangular window")
-data(letterR)
 plot(letterR, main="Polygonal window")
 plot(as.mask(letterR), main="Binary mask window")
 
@@ -48,7 +44,6 @@ enable3d <- ("scatterplot3d" %in% row.names(installed.packages()))
 if(enable3d)
   plot(rpoispp3(100), main="Three-dimensional point pattern")
 
-data(simplenet)
 plot(simplenet, main="Linear network (linnet)")
 
 X <- rpoislpp(20, simplenet)
@@ -59,7 +54,6 @@ fanfare("II. Graphics")
 plot(letterR, col="green", border="red", lwd=2, main="Polygonal window with colour fill")
 plot(letterR, hatch=TRUE, spacing=0.15, angle=30, main="Polygonal window with line shading")
 
-data(amacrine)
 plot(amacrine, chars=c(1,16),
      main="plot(X, chars = c(1,16))")
 plot(amacrine, cols=c("red","blue"), chars=16,
@@ -86,7 +80,6 @@ plot(ct, main="Colour map for real numbers")
 ca <- colourmap(rainbow(8), inputs=letters[1:8])
 plot(ca, main="Colour map for discrete values")
 
-data(letterR)
 W <- owin(c(1,5),c(0,4.5))
 Lout <- scaletointerval(distmap(rebound.owin(letterR, W)))
 Lin <- scaletointerval(distmap(complement.owin(letterR, W)))
@@ -100,7 +93,6 @@ plot(hsvim(D,L,X), valuesAreColours=TRUE, main="Three images: HSV display")
 
 fanfare("III. Conversion between types")
 
-data(chorley)
 W <- as.owin(chorley)
 plot(W, "window W")
 
@@ -132,11 +124,9 @@ plot(X[subset], main="subset operation: X[subset]")
 subwindow <- owin(poly=list(x=c(0,96,96,40,40),y=c(0,0,100,100,50)))
 plot(X[subwindow], main="subset operation: X[subwindow]")
 
-data(lansing)
 plot(lansing, "Lansing Woods data")
 plot(split(lansing), main="split operation: split(X)")
 
-data(longleaf)
 plot(longleaf, main="Longleaf Pines data")
 plot(cut(longleaf, breaks=3),
      main=c("cut operation", "cut(longleaf, breaks=3)"))
@@ -173,12 +163,11 @@ title(sub=paste("p-value =", signif(tes$p.value,3)), cex.sub=1.4)
 
 par(mar=c(4,4,3,2)+0.1)
 
-data(nztrees)
 tesk <- kstest(nztrees, "x")
 tesk
 plot(tesk)
 
-data(murchison)
+
 mur <- lapply(murchison, rescale, s=1000)
 X <- mur$gold
 D <- distfun(mur$faults)
@@ -189,12 +178,12 @@ plot(rh,
      legend=FALSE)
 plot(predict(rh), main="predict(rhohat(X,D))")
 
-data(cells)
+
 Z <- density(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
 plot(cells, add=TRUE)
 
-data(redwood)
+
 plot(redwood, main="Redwood data")
 te <- scan.test(redwood, 0.1, method="poisson")
 plot(te, main=c("Scan Statistic for redwood data",
@@ -202,7 +191,6 @@ plot(te, main=c("Scan Statistic for redwood data",
 plot(redwood, add=TRUE)
 te
 
-data(shapley)
 X <- unique(unmark(shapley))
 plot(X, "Shapley galaxy concentration", pch=".")
 plot(nnclean(X, k=17), main="Byers-Raftery nearest neighbour cleaning",
@@ -221,16 +209,13 @@ plot(X, add=TRUE)
 plot(delaunay(X))
 plot(X, add=TRUE)
 
-data(longleaf)
 parsave <- par(mfrow=c(1,3))
 plot(longleaf, main="Longleaf Pines data")
 plot(smooth.ppp(longleaf, 10), main="Kernel smoothing")
 plot(idw(longleaf), main="Inverse distance weighted smoothing")
 par(parsave)
 
-data(cells)
 fryplot(cells, main=c("Fry plot","cells data"), pch="+")
-data(longleaf)
 miplot(longleaf, main="Morishita Index plot", pch=16, col="blue")
 
 plot(swedishpines, main="Swedish Pines data")
@@ -276,36 +261,30 @@ plot(Jest(swedishpines), main=c("J-function", "J(r)=(1-G(r))/(1-F(r))"))
      
 plot(allstats(swedishpines))
 
-data(residualspaper)
 Fig4b <- residualspaper$Fig4b
 
 plot(Fig4b, main="Inhomogeneous point pattern")
 plot(Kinhom(Fig4b), main="Inhomogeneous K-function")
 plot(pcfinhom(Fig4b, stoyan=0.1), main="Inhomogeneous pair correlation")
 
-data(bronzefilter)
 X <- unmark(bronzefilter)
 plot(X, "Bronze filter data")
 lam <- predict(ppm(X, ~x))
 plot(Kscaled(X, lam), xlim=c(0, 1.5), main="Locally-scaled K function")
 
-data(urkiola)
 plot(urkiola)
 plot(split(urkiola))
 plot(density(split(urkiola)))
 contour(density(split(urkiola)), panel.begin=as.owin(urkiola))
 plot(relrisk(urkiola), main="Relative risk (cross-validated)")
 
-data(bramblecanes)
 plot(bramblecanes)
 bramblecanes <- rescale(bramblecanes, 1/9)
 plot(alltypes(bramblecanes, "K"), mar.panel=c(4,5,2,2)+0.1)
 
-data(amacrine)
 amacrine <- rescale(amacrine, 1/662)
 plot(alltypes(amacrine, Lcross, envelope=TRUE, nsim=9), . - r ~ r, ylim=c(-25, 5))
 
-data(ponderosa)
 ponderosa.extra$plotit(main="Ponderosa Pines")
 
 L <- localL(ponderosa)
@@ -337,7 +316,6 @@ plot(alltypes(amacrine, markconnect),
      title="Mark connection functions for amacrine cells")
 
 parsave <- par(mfrow=c(1,2))
-data(spruces)
 plot(spruces, cex.main=0.75)
 par(pty="s")
 plot(markcorr(spruces), main="Mark correlation", legendpos="bottomright")
@@ -361,7 +339,6 @@ if(enable3d) {
 }
 
 par2 <- par(mfrow=c(1,3))
-data(chicago)
 X <- unmark(chicago)
 plot(as.linnet(X), main="Chicago Street Crimes",col="green")
 plot(as.ppp(X), add=TRUE, col="red")
@@ -371,7 +348,6 @@ par(par2)
 
 fanfare("VI. Model-fitting")
 
-data(japanesepines)
 plot(japanesepines)
 fit <- ppm(japanesepines, ~1)
 print(fit)
@@ -383,7 +359,9 @@ plot(fit, how="image", se=FALSE, main=c("Inhomogeneous Poisson model",
 plot(fit, how="image", trend=FALSE,
      main="Standard error of fitted intensity")
 
-data(redwood)
+plot(leverage(fit))
+plot(influence(fit))
+
 parsave <- par(mfrow=c(1,2))
 plot(redwood)
 fitT <- kppm(redwood, ~1, clusters="Thomas")
@@ -420,7 +398,6 @@ Xsim <- rmh(model=fit,
 plot(Xsim, main="Simulation from fitted Strauss model")
 
 
-data(demopat)
 demopat <- rescale(demopat, 8)
 unitname(demopat) <- c("mile", "miles")
 demopat
@@ -431,7 +408,6 @@ plot(fit, trend=TRUE, se=TRUE)
 
 fanfare("VII. Simulation")
 
-data(letterR)
 plot(letterR, main="Poisson random points")
 lambda <- 10/area.owin(letterR)
 points(rpoispp(lambda, win=letterR))
@@ -444,6 +420,8 @@ plot(rMaternII(200, 0.05))
 plot(rSSI(0.05, 200))
 plot(rThomas(10, 0.2, 5))
 plot(rMatClust(10, 0.05, 4))
+plot(rCauchy(30, 0.01, 5))
+plot(rVarGamma(30, 2, 0.02, 5))
 plot(rGaussPoisson(30, 0.05, 0.5))
 param <- c(0, variance=0.2, nugget=0, scale=.1)
 mu <- 4
@@ -481,7 +459,6 @@ plot(runifpointOnLines(30, L), add=TRUE, pch="+")
 plot(L, main="rpoisppOnLines(3, L)")
 plot(rpoisppOnLines(3, L), add=TRUE, pch="+")
 
-data(simplenet)
 plot(runiflpp(20, simplenet))
 plot(rpoislpp(5, simplenet))
 
@@ -499,7 +476,6 @@ spatstat.options(npixel=100)
 
 fanfare("VIII. Geometry")
 
-data(letterR)
 A <- letterR
 
 B <- shift(letterR, c(0.2,0.1))
@@ -545,7 +521,6 @@ plot(pointsOnLines(a, np=100), add=TRUE, pch="+")
 parry <- par(mfrow=c(1,3))
 X <- tess(xgrid=seq(2, 4, length=10), ygrid=seq(0, 3.5, length=8))
 plot(X)
-data(letterR)
 plot(letterR)
 plot(intersect.tess(X, letterR))
 
@@ -557,14 +532,12 @@ plot(L, col="red", lwd=2)
 plot(chop.tess(X,L))
 par(parry)
 
-data(chorley)
 W <- chorley$window
 plot(W, main="simplify.owin")
 WS <- simplify.owin(W, 2)
 plot(WS, add=TRUE, border="green")
 
 nopa <- par(mfrow=c(2,2))
-data(letterR)
 Rbox <- grow.rectangle(as.rectangle(letterR), 0.3)
 
 v <- erode.owin(letterR, 0.25)
@@ -596,7 +569,6 @@ plot(cut(Z, 5))
 plot(eval.im(sqrt(Z) - 3))
 plot(solutionset(abs(Z - 6) <= 1))
 
-data(cells)
 d <- distmap(cells, dimyx=256)
 W <- levelset(d, 0.06)
 nopa <- par(mfrow=c(1,2))

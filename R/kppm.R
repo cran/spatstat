@@ -3,16 +3,18 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.38 $ $Date: 2011/06/14 07:39:50 $
+# $Revision: 1.43 $ $Date: 2011/12/02 10:22:48 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
                  statistic="K", statargs=list()) {
   Xname <- deparse(substitute(X))
   clusters <- pickoption("cluster type", clusters,
-                         c(Thomas="Thomas",
-                           MatClust="MatClust",
-                           LGCP="LGCP"))
+                         c(Thomas   = "Thomas",
+                           MatClust = "MatClust",
+                           Cauchy   = "Cauchy",
+                           VarGamma = "VarGamma",
+                           LGCP     = "LGCP"))
   statistic <- pickoption("summary statistic", statistic,
                           c(K="K", g="pcf", pcf="pcf"))
   if(is.marked(X))
@@ -59,6 +61,32 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
            kappa <- mcfit$par[["kappa"]]
            # mu = intensity of parents
            mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
+           isPCP <- TRUE
+         },
+         Cauchy = {
+           startpar0 <- c(kappa = 1, eta2 = 4 * mean(nndist(X))^2)
+           FitFun <- if (statistic == "K") "cauchy.estK" else "cauchy.estpcf"
+           mcfit <- do.call(FitFun,
+                            resolve.defaults(list(X = Stat, 
+                                                  lambda = lambda),
+                                             list(...),
+                                             list(startpar = startpar0,
+                                                  dataname = Xname)))
+           # kappa = mean number of points per cluster
+           kappa <- mcfit$par[["kappa"]]
+           mu <- if (stationary) lambda/kappa else eval.im(lambda/kappa)
+           isPCP <- TRUE
+         }, VarGamma = {
+           startpar0 <- c(kappa = 1, eta = 2 * mean(nndist(X)))
+           FitFun <- if (statistic == "K") "vargamma.estK" else "vargamma.estpcf"
+           mcfit <- do.call(FitFun,
+                            resolve.defaults(list(X = Stat, 
+                                                  lambda = lambda),
+                                             list(...),
+                                             list(startpar = startpar0, 
+                                                  dataname = Xname, nu = 0.5)))
+           kappa <- mcfit$par[["kappa"]]
+           mu <- if (stationary) lambda/kappa else eval.im(lambda/kappa)
            isPCP <- TRUE
          },
          LGCP={
@@ -184,7 +212,8 @@ predict.kppm <- function(object, ...) {
 }
 
 simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
-                          window=NULL, covariates=NULL) {
+                          window=NULL, covariates=NULL,
+                          verbose=TRUE) {
   # .... copied from simulate.lm ....
   if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
     runif(1)
@@ -196,6 +225,7 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
     RNGstate <- structure(seed, kind = as.list(RNGkind()))
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
   }
+  
   # ..................................
   # determine parameters
   if(is.null(window)) {
@@ -216,6 +246,8 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
   } else {
     # recompute 'mu' using new data
     switch(object$clusters,
+           Cauchy=,
+           VarGamma=,
            Thomas=,
            MatClust={
              # Poisson cluster process
@@ -228,23 +260,35 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
              sigma2 <- mp$sigma2
              lambda <- predict(object, window=win, covariates=covariates)
              mu <- eval.im(log(lambda) - sigma2/2)
-           }
+           },
+           stop(paste("Simulation of", sQuote(object$clusters),
+                      "processes is not yet implemented"))
            )
   }
-  
+
+  # prepare data for execution
   out <- list()
   switch(object$clusters,
          Thomas={
            kappa <- mp$kappa
            sigma <- mp$sigma
-           for(i in 1:nsim)
-             out[[i]] <- rThomas(kappa,sigma,mu,win)
+           cmd <- expression(rThomas(kappa,sigma,mu,win))
          },
          MatClust={
            kappa <- mp$kappa
-           r <-     mp$R
-           for(i in 1:nsim)
-             out[[i]] <- rMatClust(kappa,r,mu,win)
+           r     <- mp$R
+           cmd   <- expression(rMatClust(kappa,r,mu,win))
+         },
+         Cauchy = {
+           kappa <- mp$kappa
+           omega <- mp$omega
+           cmd   <- expression(rCauchy(kappa, omega, mu, win))
+         },
+         VarGamma = {
+           kappa  <- mp$kappa
+           omega  <- mp$omega
+           nu.ker <- object$mcfit$covmodel$margs$nu.ker
+           cmd    <- expression(rVarGamma(kappa, nu.ker, omega, mu, win))
          },
          LGCP={
            sigma2 <- mp$sigma2
@@ -253,9 +297,18 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
            model <- cm$model
            margs <- cm$margs
            param <- c(0, sigma2, 0, alpha, unlist(margs))
-           for(i in 1:nsim)
-             out[[i]] <- rLGCP(model=model, mu=mu, param=param, ..., win=win)
+           cmd   <- expression(rLGCP(model=model, mu=mu, param=param,
+                                     ..., win=win))
          })
+
+  # run
+  if(verbose && (nsim > 1))
+    cat(paste("Generating", nsim, "simulations... "))
+  for(i in 1:nsim) {
+    out[[i]] <- eval(cmd)
+    if(verbose) progressreport(i, nsim)
+  }
+  # pack up
   out <- as.listof(out)
   names(out) <- paste("Simulation", 1:nsim)
   attr(out, "seed") <- RNGstate
@@ -337,6 +390,8 @@ is.stationary.kppm <- function(x) {
 
 is.poisson.kppm <- function(x) {
   switch(x$clusters,
+         Cauchy=,
+         VarGamma=,
          Thomas=,
          MatClust={
            # Poisson cluster process

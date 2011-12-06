@@ -11,20 +11,89 @@
   Typically it is the output of the model fitter,
   \code{\link{ppm}}.
 
-  There are methods \code{\link{print.ppm}},
-  \code{\link{plot.ppm}}, \code{\link{predict.ppm}}, \code{\link{fitted.ppm}}
-  and \code{\link{coef.ppm}} for the generic functions
-  \code{\link{print}}, \code{\link{plot}}, \code{\link{predict}},
-  \code{\link{fitted}} and \code{\link{coef}} respectively.
+  The class \code{ppm} has methods for the following
+  standard generic functions:
 
-  See also (for example) \code{\link{Strauss}}
-  to understand how to specify 
-  a point process model with unknown parameters.
+  \tabular{lll}{
+    generic \tab method \tab description \cr
+    \code{print} \tab \code{\link{print.ppm}}
+    \tab print details \cr
+    \code{plot} \tab \code{\link{plot.ppm}}
+    \tab plot fitted model \cr
+    \code{predict} \tab \code{\link{predict.ppm}}
+    \tab fitted intensity and conditional intensity \cr 
+    \code{fitted} \tab \code{\link{fitted.ppm}}
+    \tab fitted intensity \cr
+    \code{coef} \tab \code{\link{coef.ppm}}
+    \tab fitted coefficients of model \cr
+    \code{anova} \tab \code{\link{anova.ppm}}
+    \tab Analysis of Deviance \cr
+    \code{formula} \tab \code{\link{formula.ppm}}
+    \tab Extract model formula \cr
+    \code{terms} \tab \code{\link{terms.ppm}}
+    \tab Terms in the model formula \cr
+    \code{residuals} \tab \code{\link{residuals.ppm}}
+    \tab Point process residuals \cr
+    \code{simulate} \tab \code{\link{simulate.ppm}}
+    \tab Simulate the fitted model \cr
+    \code{update} \tab \code{\link{update.ppm}}
+    \tab Change or refit the model \cr
+    \code{vcov} \tab \code{\link{vcov.ppm}}
+    \tab Variance/covariance matrix of parameter estimates \cr
+    \code{model.frame} \tab \code{\link{model.frame.ppm}}
+    \tab Model frame \cr
+    \code{model.matrix} \tab \code{\link{model.matrix.ppm}}
+    \tab Design matrix \cr
+    \code{logLik} \tab \code{\link{logLik.ppm}}
+    \tab log \emph{pseudo} likelihood \cr
+    \code{extractAIC} \tab \code{\link{extractAIC.ppm}}
+    \tab pseudolikelihood counterpart of AIC \cr
+    \code{nobs} \tab \code{\link{nobs.ppm}}
+    \tab number of observations
+    }
 
+  The class \code{ppm} also has methods for the following
+  generic functions defined in the \pkg{spatstat} package:
+
+  \tabular{lll}{
+    generic \tab method \tab description \cr
+    \code{\link{as.interact}} \tab \code{\link{as.interact.ppm}}
+    \tab Interpoint interaction structure \cr
+    \code{\link{as.owin}} \tab \code{\link{as.owin.ppm}}
+    \tab Observation window of data \cr
+    \code{\link{bermantest}} \tab \code{\link{bermantest.ppm}}
+    \tab Berman's test \cr
+    \code{\link{envelope}} \tab \code{\link{envelope.ppm}}
+    \tab Simulation envelopes \cr
+    \code{\link{fitin}} \tab \code{\link{fitin.ppm}}
+    \tab Fitted interaction \cr
+    \code{\link{is.marked}} \tab \code{\link{is.marked.ppm}}
+    \tab Determine whether the model is marked \cr
+    \code{\link{is.multitype}} \tab \code{\link{is.multitype.ppm}}
+    \tab Determine whether the model is multitype \cr
+    \code{\link{is.poisson}} \tab \code{\link{is.poisson.ppm}}
+    \tab Determine whether the model is Poisson \cr
+    \code{\link{is.stationary}} \tab \code{\link{is.stationary.ppm}}
+    \tab Determine whether the model is stationary \cr
+    \code{\link{kstest}} \tab \code{\link{kstest.ppm}}
+    \tab Kolmogorov-Smirnov test \cr
+    \code{\link{quadrat.test}} \tab \code{\link{quadrat.test.ppm}}
+    \tab Quadrat counting test \cr
+    \code{\link{reach}} \tab \code{\link{reach.ppm}}
+    \tab Interaction range of model \cr
+    \code{\link{rmhmodel}} \tab \code{\link{rmhmodel.ppm}}
+    \tab Model in a form that can be simulated \cr
+    \code{\link{rmh}} \tab \code{\link{rmh.ppm}}
+    \tab Perform simulation \cr
+    \code{\link{unitname}} \tab \code{\link{unitname.ppm}}
+    \tab Name of unit of length
+    }
+    
   Information about the data (to which the model was fitted)
   can be extracted using \code{\link{data.ppm}}, \code{\link{dummy.ppm}}
   and \code{\link{quad.ppm}}.
-
+}
+\section{Internal format}{
   If you really need to get at the internals,
   a \code{ppm} object contains at least the following entries:
   \tabular{ll}{
@@ -43,6 +112,7 @@
   Strauss process) are encoded in the \code{interaction} entry.
   However see the Warnings.
 }
+
 \seealso{
   \code{\link{ppm}},
   \code{\link{coef.ppm}},

@@ -1,10 +1,11 @@
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 
 /*
 
   denspt.c
 
-  $Revision: 1.8 $     $Date: 2011/07/26 08:05:19 $
+  $Revision: 1.9 $     $Date: 2011/11/20 03:23:50 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -48,6 +49,7 @@ void denspt(nxy, x, y, rmaxi, sig, result)
 
   for(i = 0; i < n; i++) {
 
+    R_CheckUserInterrupt();
     resulti = 0.0;
 
     xi = x[i];
@@ -132,6 +134,8 @@ void wtdenspt(nxy, x, y, rmaxi, sig, weight, result)
 
   for(i = 0; i < n; i++) {
 
+    R_CheckUserInterrupt();
+    
     resulti = 0.0;
 
     xi = x[i];
@@ -218,6 +222,8 @@ void adenspt(nxy, x, y, rmaxi, detsigma, sinv, result)
 
   for(i = 0; i < n; i++) {
 
+    R_CheckUserInterrupt();
+    
     resulti = 0.0;
 
     xi = x[i];
@@ -305,6 +311,9 @@ void awtdenspt(nxy, x, y, rmaxi, detsigma, sinv, weight, result)
   jleft = jright = 0;
 
   for(i = 0; i < n; i++) {
+
+    R_CheckUserInterrupt();
+    
     resulti = 0.0;
     xi = x[i];
     yi = y[i];
@@ -392,6 +401,8 @@ void smoopt(nxy, x, y, v, self, rmaxi, sig, result)
 
   for(i = 0; i < n; i++) {
 
+    R_CheckUserInterrupt();
+    
     numer = denom = 0.0;
 
     xi = x[i];
@@ -486,6 +497,8 @@ void wtsmoopt(nxy, x, y, v, self, rmaxi, sig, weight, result)
   jleft = jright = 0;
 
   for(i = 0; i < n; i++) {
+
+    R_CheckUserInterrupt();
 
     numer = denom = 0.0;
 
@@ -582,6 +595,8 @@ void asmoopt(nxy, x, y, v, self, rmaxi, sinv, result)
   jleft = jright = 0;
 
   for(i = 0; i < n; i++) {
+
+    R_CheckUserInterrupt();
 
     numer = denom = 0.0;
 
@@ -680,6 +695,9 @@ void awtsmoopt(nxy, x, y, v, self, rmaxi, sinv, weight, result)
   jleft = jright = 0;
 
   for(i = 0; i < n; i++) {
+    
+    R_CheckUserInterrupt();
+
     numer = denom = 0.0;
     xi = x[i];
     yi = y[i];

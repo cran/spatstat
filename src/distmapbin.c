@@ -4,13 +4,14 @@
        Distance transform of a discrete binary image
        (8-connected path metric)
        
-       $Revision: 1.5 $ $Date: 2010/12/22 08:58:10 $
+       $Revision: 1.6 $ $Date: 2011/11/20 03:34:16 $
 
        
 */
 
 #include <math.h>
 #include "raster.h"
+#include <R_ext/Utils.h>
 
 void   dist_to_bdry();
 void   shape_raster();
@@ -63,32 +64,36 @@ distmap_bin(in, dist)
 	  
 	/* forward pass */
 
-	for(j = rmin; j <= rmax; j++)
-	for(k = cmin; k <= cmax; k++) {
-	  if(MASKTRUE(j, k))
-	    d = DISTANCE(j, k) = 0.0;
-	  else {
-	    d = huge;
-	    UPDATE(d, j-1, k-1, diagstep);
-	    UPDATE(d, j-1,   k, ystep);
-	    UPDATE(d, j-1, k+1, diagstep);
-	    UPDATE(d,   j, k-1, xstep);
-	    DISTANCE(j,k) = d;
+	for(j = rmin; j <= rmax; j++) {
+	  R_CheckUserInterrupt();
+	  for(k = cmin; k <= cmax; k++) {
+	    if(MASKTRUE(j, k))
+	      d = DISTANCE(j, k) = 0.0;
+	    else {
+	      d = huge;
+	      UPDATE(d, j-1, k-1, diagstep);
+	      UPDATE(d, j-1,   k, ystep);
+	      UPDATE(d, j-1, k+1, diagstep);
+	      UPDATE(d,   j, k-1, xstep);
+	      DISTANCE(j,k) = d;
+	    }
 	  }
 	}
 
 	/* backward pass */
 
-	for(j = rmax; j >= rmin; j--) 
-	for(k = cmax; k >= cmin; k--) {
-	  if(MASKFALSE(j,k)) {
-	    d = DISTANCE(j,k);
-	    UPDATE(d, j+1, k+1, diagstep);
-	    UPDATE(d, j+1,   k, ystep);
-	    UPDATE(d, j+1, k-1, diagstep);
-	    UPDATE(d,   j, k+1, xstep);
-	    DISTANCE(j,k) = d;
-	  } 
+	for(j = rmax; j >= rmin; j--) {
+	  R_CheckUserInterrupt();
+	  for(k = cmax; k >= cmin; k--) {
+	    if(MASKFALSE(j,k)) {
+	      d = DISTANCE(j,k);
+	      UPDATE(d, j+1, k+1, diagstep);
+	      UPDATE(d, j+1,   k, ystep);
+	      UPDATE(d, j+1, k-1, diagstep);
+	      UPDATE(d,   j, k+1, xstep);
+	      DISTANCE(j,k) = d;
+	    } 
+	  }
 	}
 }
 

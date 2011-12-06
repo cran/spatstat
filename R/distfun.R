@@ -3,7 +3,7 @@
 #
 #   distance function (returns a function of x,y)
 #
-#   $Revision: 1.4 $   $Date: 2010/08/06 05:45:09 $
+#   $Revision: 1.12 $   $Date: 2011/11/29 10:09:40 $
 #
 
 distfun <- function(X, ...) {
@@ -13,8 +13,8 @@ distfun <- function(X, ...) {
 distfun.ppp <- function(X, ...) {
   # this line forces X to be bound
   stopifnot(is.ppp(X))
-  g <- function(x,y) {
-    Y <- if(!missing(y)) ppp(x, y, window=X$window) else as.ppp(x)
+  g <- function(x,y=NULL) {
+    Y <- xy.coords(x, y)[c("x", "y")]
     nncross(Y, X)$dist
   }
   attr(g, "Xclass") <- "ppp"
@@ -25,8 +25,8 @@ distfun.ppp <- function(X, ...) {
 distfun.psp <- function(X, ...) {
   # this line forces X to be bound
   stopifnot(is.psp(X))
-  g <- function(x,y) {
-    Y <- if(!missing(y)) ppp(x, y, window=X$window) else as.ppp(x)
+  g <- function(x,y=NULL) {
+    Y <-  xy.coords(x, y)[c("x", "y")]
     nncross(Y, X)$dist
   }
   attr(g, "Xclass") <- "psp"
@@ -37,18 +37,22 @@ distfun.psp <- function(X, ...) {
 distfun.owin <- function(X, ..., invert=FALSE) {
   # this line forces X to be bound
   stopifnot(is.owin(X))
-  P <- as.psp(as.polygonal(X))
-  R <- as.rectangle(X)
-  g <- function(x,y) {
-    if(missing(y)) {
-      Y <- as.ppp(x)
-      x <- Y$x
-      y <- Y$y
-    }
-    inside <- inside.owin(x, y, X)
-    D <- nncross(list(x=x,y=y), P)$dist
-    zero <- if(!invert) inside else !inside
-    out <- ifelse(zero, 0, D)
+  #
+  if(X$type == "mask" && (!(spatstat.options("gpclib") && require(gpclib)))) {
+    warning("Polygon calculations unavailable; using distmap")
+    discrete <- TRUE
+    D <- if(!invert) distmap(X) else distmap(complement.owin(X))
+  } else {
+    discrete <- FALSE
+    P <- as.psp(as.polygonal(X))
+  }
+  g <- function(x,y=NULL) {
+    Y <-  xy.coords(x, y)
+    if(discrete)
+      return(D[Y])
+    inside <- inside.owin(Y$x, Y$y, X)
+    D <- nncross(Y, P)$dist
+    out <- if(!invert) ifelse(inside, 0, D) else ifelse(inside, D, 0)
     return(out)
   }
   attr(g, "Xclass") <- "owin"
@@ -59,6 +63,27 @@ distfun.owin <- function(X, ..., invert=FALSE) {
 as.owin.distfun <- function(W, ..., fatal=TRUE) {
   X <- get("X", envir=environment(W))
   as.owin(X, ..., fatal=fatal)
+}
+
+as.im.distfun <- function(X, W=NULL, ...,
+                           eps=NULL, dimyx=NULL, xy=NULL,
+                           na.replace=NULL) {
+  if(is.null(W)) {
+    # use 'distmap' for speed
+    env <- environment(X)
+    Xdata  <- get("X",      envir=env)
+    if(is.owin(Xdata)) {
+      invert <- get("invert", envir=env)
+      if(invert)
+        Xdata <- complement.owin(Xdata)
+    }
+    D <- distmap(Xdata, eps=eps, dimyx=dimyx, xy=xy)
+    if(!is.null(na.replace))
+      D$v[is.null(D$v)] <- na.replace
+    return(D)
+  }
+  # use as.im.function
+  NextMethod("as.im")
 }
 
 print.distfun <- function(x, ...) {
@@ -77,7 +102,7 @@ print.distfun <- function(x, ...) {
 plot.distfun <- function(x, ...) {
   xname <- deparse(substitute(x))
   X <- get("X", envir=environment(x))
-  W <- as.rectangle(X)
+  W <- as.owin(X)
   do.call("do.as.im",
           resolve.defaults(list(x, action="plot"),
                            list(...),
@@ -88,7 +113,7 @@ plot.distfun <- function(x, ...) {
 contour.distfun <- function(x, ...) {
   xname <- deparse(substitute(x))
   X <- get("X", envir=environment(x))
-  W <- as.rectangle(X)
+  W <- as.owin(X)
   do.call("do.as.im",
           resolve.defaults(list(x, action="contour"),
                            list(...),

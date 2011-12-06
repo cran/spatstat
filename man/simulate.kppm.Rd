@@ -6,7 +6,7 @@
 }
 \usage{
   \method{simulate}{kppm}(object, nsim = 1, seed=NULL, ...,
-         window=NULL, covariates=NULL)
+         window=NULL, covariates=NULL, verbose=TRUE)
 }
 \arguments{
   \item{object}{
@@ -29,6 +29,9 @@
   \item{covariates}{
     Optional. A named list containing new values for the covariates in the
     model. 
+  }
+  \item{verbose}{
+    Logical. Whether to print progress reports (when \code{nsim > 1}).
   }
 }
 \details{

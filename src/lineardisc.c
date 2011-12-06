@@ -1,11 +1,12 @@
 #include <R.h>
+#include <R_ext/Utils.h>
 
 /* 
    lineardisc.c
 
    Disc of radius r in linear network
 
-   $Revision: 1.5 $  $Date: 2011/07/26 09:21:18 $
+   $Revision: 1.6 $  $Date: 2011/11/20 03:56:06 $
 
 */
 
@@ -82,6 +83,7 @@ lineardisc(f, seg, /* centre of disc (local coords) */
   nends = 0;
 
   for(i = 0; i < Ns; i++) {
+    R_CheckUserInterrupt();
     /* 
      Determine which line segments are completely inside the disc,
      and which cross the boundary.
@@ -190,6 +192,7 @@ countends(np, f, seg, /* centres of discs (local coords) */
     nends = 0;
 
     for(i = 0; i < Ns; i++) {
+      R_CheckUserInterrupt();
       /* 
 	 Determine which line segments are completely inside the disc,
 	 and which cross the boundary.

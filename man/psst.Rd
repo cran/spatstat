@@ -12,7 +12,7 @@
 \usage{
 psst(object, fun, r = NULL, breaks = NULL, ...,
      trend = ~1, interaction = Poisson(), rbord = reach(interaction),
-     truecoef=NULL, hi.res=NULL, funcorrection = "best")
+     truecoef=NULL, hi.res=NULL, funargs = list(correction="best"))
 }
 \arguments{
   \item{object}{
@@ -56,9 +56,9 @@ psst(object, fun, r = NULL, breaks = NULL, ...,
     Then the diagnostic will be computed for the default
     quadrature scheme, but using the high resolution coefficients.
   }
-  \item{funcorrection}{
-    Optional. The value of the \code{correction} argument
-    to be passed to \code{fun}.
+  \item{funargs}{
+    Optional.
+    List of additional arguments to be passed to \code{fun}.
   }
 }
 \details{

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.50 $   $Date: 2011/11/07 05:47:56 $
+#  $Revision: 2.52 $   $Date: 2011/11/18 08:39:44 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -149,6 +149,17 @@ list(
      function(coeffs, inte){
        # for hybrids, $par is a list of the component interactions
        interlist <- inte$par
+       # check for Poisson components
+       ispois <- unlist(lapply(interlist, is.poisson))
+       if(all(ispois)) {
+         # reduces to Poisson
+         Z <- list(cif='poisson', par=list())
+         return(Z)
+       } else if(any(ispois)) {
+         # remove Poisson components
+         interlist <- interlist[!ispois]
+       }
+       # 
        N <- length(interlist)
        cifs <- character(N)
        pars <- vector(mode="list", length=N)
@@ -188,7 +199,13 @@ list(
        if(length(nt) > 1)
          stop(paste("Hybrid components have different numbers of types:",
                     commasep(nt)))
-       Z <- list(cif=cifs, par=pars, ntypes=ntyp)
+       if(N == 1) {
+         # single cif: revert to original format: par is a list of parameters
+         Z <- list(cif=cifs[1], par=pars[[1]], ntypes=ntyp)
+       } else {
+         # hybrid cif: par is a list of lists of parameters
+         Z <- list(cif=cifs,    par=pars,      ntypes=ntyp)
+       }
        return(Z)
      }
 )

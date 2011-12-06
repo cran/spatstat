@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.83 $    $Date: 2011/11/06 06:25:12 $
+#    $Revision: 1.84 $    $Date: 2011/11/16 11:06:01 $
 #
 #  (a) for matrices only:
 #
@@ -608,3 +608,19 @@ badprobability <- function(x, NAvalue=NA) {
 samefunction <- function(f, g) {
   identical(deparse(f), deparse(g))
 }
+
+codetime <- local({
+  uname <- c("min", "hours", "days", "weeks", "years",
+             "thousand years", "million years", "billion years")
+  multiple <- c(60, 60, 24, 7, 365/7, 1e3, 1e3, 1e3)
+  function(x) {
+    u <- "sec"
+    for(k in seq_along(multiple)) {
+      if(x > multiple[k]) {
+        x <- x/multiple[k]
+        u <- uname[k]
+      } else break
+    }
+    paste(round(x, 1), u)
+  }
+})

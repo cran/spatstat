@@ -4,17 +4,17 @@
 
   Edge corrections
 
-  $Revision: 1.9 $     $Date: 2011/09/20 07:33:37 $
+  $Revision: 1.10 $     $Date: 2011/11/20 03:21:54 $
 
  */
 
+#include <math.h>
+#include <R.h>
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 
 #undef DEBUG
 
-#include <math.h>
-
-#include <R.h>
 
 /* This constant is defined in Rmath.h */
 #define TWOPI M_2PI
@@ -59,6 +59,9 @@ void ripleybox(nx, x, y, rmat, nr, xmin, ymin, xmax, ymax,  epsilon, out)
   y1 = *ymax;
   eps = *epsilon;
   for(i = 0; i < n; i++) {
+
+    R_CheckUserInterrupt();
+
      xx = x[i];
      yy = y[i];
   /* 
@@ -166,6 +169,7 @@ void ripleypoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, out)
   m = *nseg;
 
   for(i = 0; i < n; i++) {
+    R_CheckUserInterrupt();
     xcentre = xc[i];
     ycentre = yc[i];
 #ifdef DEBUG

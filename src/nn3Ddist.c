@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances in 3D 
 
-  $Revision: 1.2 $     $Date: 2011/09/20 07:39:11 $
+  $Revision: 1.3 $     $Date: 2011/11/20 04:06:30 $
 
   THE FOLLOWING FUNCTIONS ASSUME THAT z IS SORTED IN ASCENDING ORDER 
 
@@ -20,8 +20,8 @@
 #undef SPATSTAT_DEBUG
 
 #include <R.h>
+#include <R_ext/Utils.h>
 #include <math.h>
-/* #include <stdio.h> */
 
 #ifndef FALSE
 #define TRUE 1
@@ -48,6 +48,8 @@ void nnd3D(n, x, y, z, nnd, huge)
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -132,6 +134,7 @@ void nnw3D(n, x, y, z, nnd, nnwhich, huge)
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
+    R_CheckUserInterrupt();
     dmin = hu;
     d2min = hu2;
     which = -1;
@@ -209,6 +212,9 @@ void nnXw3D(n1, x1, y1, z1, n2, x2, y2, z2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+
+    R_CheckUserInterrupt();
+    
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -290,6 +296,9 @@ void nnXx3D(n1, x1, y1, z1, id1, n2, x2, y2, z2, id2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+    
+    R_CheckUserInterrupt();
+    
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -386,6 +395,8 @@ void knnd3D(n, kmax, x, y, z, nnd, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -548,6 +559,8 @@ void knnw3D(n, kmax, x, y, z, nnd, nnwhich, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 

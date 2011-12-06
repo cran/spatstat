@@ -1,13 +1,13 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.15 $   $Date: 2011/06/10 09:05:54 $
+#   $Revision: 1.17 $   $Date: 2011/11/23 06:09:58 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
 #  Less memory-hungry for large patterns
 #
-closepairs <- function(X, rmax) {
+closepairs <- function(X, rmax, ordered=TRUE) {
   verifyclass(X, "ppp")
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   npts <- npoints(X)
@@ -153,6 +153,19 @@ closepairs <- function(X, rmax) {
   # convert i,j indices to original sequence
   i <- oo[i]
   j <- oo[j]
+  # are (i, j) and (j, i) equivalent?
+  if(!ordered) {
+    ok <- (i < j)
+    i  <-  i[ok]
+    j  <-  j[ok]
+    xi <- xi[ok]
+    yi <- yi[ok]
+    xj <- xj[ok]
+    yj <- yj[ok]
+    dx <- dx[ok]
+    dy <- dy[ok]
+    d  <-  d[ok]
+  }
   # done
   return(list(i=i,
               j=j,
@@ -177,83 +190,120 @@ crosspairs <- function(X, Y, rmax) {
   Xsort <- X[ooX]
   ooY <- order(Y$x)
   Ysort <- Y[ooY]
-  # obtain upper estimate of number of pairs
-  # (to work around gcc bug 323)
-  DUP <- spatstat.options("dupC")
-  rmaxplus <- 1.25 * rmax
-  nsize <- .C("crosscount",
-               nn1=as.integer(X$n),
-               x1=as.double(Xsort$x),
-               y1=as.double(Xsort$y),
-               nn2=as.integer(Ysort$n),
-               x2=as.double(Ysort$x),
-               y2=as.double(Ysort$y),
-               rmaxi=as.double(rmaxplus),
-               count=as.integer(integer(1)),
-               DUP=DUP,
-               PACKAGE="spatstat")$count
-  if(nsize <= 0)
-    return(list(i=integer(0),
-                j=integer(0),
-                xi=numeric(0),
-                yi=numeric(0),
-                xj=numeric(0),
-                yj=numeric(0),
-                dx=numeric(0),
-                dy=numeric(0),
-                d=numeric(0)))
+  if(spatstat.options("crosspairs.newcode")) {
+    # ------------------- use new faster code ---------------------
+    # First (over)estimate the number of pairs
+    nX <- npoints(X)
+    nY <- npoints(Y)
+    nsize <- ceiling(2 * pi * (rmax^2) * nX * nY/area.owin(Y$window))
+    nsize <- max(1024, nsize)
+    # .Call
+    Xx <- Xsort$x
+    Xy <- Xsort$y
+    Yx <- Ysort$x
+    Yy <- Ysort$y
+    r <- rmax
+    ng <- nsize
+    storage.mode(Xx) <- storage.mode(Xy) <- "double"
+    storage.mode(Yx) <- storage.mode(Yy) <- "double"
+    storage.mode(r) <- "double"
+    storage.mode(ng) <- "integer"
+    z <- .Call("Vcrosspairs",
+               xx1=Xx, yy1=Xy,
+               xx2=Yx, yy2=Yy,
+               rr=r, nguess=ng,
+               PACKAGE="spatstat")
+    if(length(z) != 9)
+      stop("Internal error: incorrect format returned from Vclosepairs")
+    i  <- z[[1]]  # NB no increment required
+    j  <- z[[2]]
+    xi <- z[[3]]
+    yi <- z[[4]]
+    xj <- z[[5]]
+    yj <- z[[6]]
+    dx <- z[[7]]
+    dy <- z[[8]]
+    d  <- z[[9]]
+  } else {
+    # Older code 
+    # obtain upper estimate of number of pairs
+    # (to work around gcc bug 323)
+    DUP <- spatstat.options("dupC")
+    rmaxplus <- 1.25 * rmax
+    nsize <- .C("crosscount",
+                nn1=as.integer(X$n),
+                x1=as.double(Xsort$x),
+                y1=as.double(Xsort$y),
+                nn2=as.integer(Ysort$n),
+                x2=as.double(Ysort$x),
+                y2=as.double(Ysort$y),
+                rmaxi=as.double(rmaxplus),
+                count=as.integer(integer(1)),
+                DUP=DUP,
+                PACKAGE="spatstat")$count
+    if(nsize <= 0)
+      return(list(i=integer(0),
+                  j=integer(0),
+                  xi=numeric(0),
+                  yi=numeric(0),
+                  xj=numeric(0),
+                  yj=numeric(0),
+                  dx=numeric(0),
+                  dy=numeric(0),
+                  d=numeric(0)))
 
-  # allow slightly more space to work around gcc bug #323
-  nsize <- ceiling(1.1 * nsize) + X$n + Y$n
-
-  # now extract pairs
-  z <-
-    .C("crosspairs",
-       nn1=as.integer(X$n),
-       x1=as.double(Xsort$x),
-       y1=as.double(Xsort$y),
-       nn2=as.integer(Y$n),
-       x2=as.double(Ysort$x),
-       y2=as.double(Ysort$y),
-       r=as.double(rmax),
-       noutmax=as.integer(nsize), 
-       nout=as.integer(integer(1)),
-       iout=as.integer(integer(nsize)),
-       jout=as.integer(integer(nsize)), 
-       xiout=as.double(numeric(nsize)),
-       yiout=as.double(numeric(nsize)),
-       xjout=as.double(numeric(nsize)),
-       yjout=as.double(numeric(nsize)),
-       dxout=as.double(numeric(nsize)),
-       dyout=as.double(numeric(nsize)),
-       dout=as.double(numeric(nsize)),
-       status=as.integer(integer(1)),
-       DUP=DUP,
-       PACKAGE="spatstat")
-  if(z$status != 0)
-    stop(paste("Internal error: C routine complains that insufficient space was allocated:", nsize))
-  # trim vectors to the length indicated
-  npairs <- z$nout
-  if(npairs <= 0)
-    return(list(i=integer(0),
-                j=integer(0),
-                xi=numeric(0),
-                yi=numeric(0),
-                xj=numeric(0),
-                yj=numeric(0),
-                dx=numeric(0),
-                dy=numeric(0),
-                d=numeric(0)))
-  actual <- seq_len(npairs)
-  i  <- z$iout[actual] + 1
-  j  <- z$jout[actual] + 1
-  xi <- z$xiout[actual]
-  yi <- z$yiout[actual]
-  xj <- z$xjout[actual]
-  yj <- z$yjout[actual]
-  dx <- z$dxout[actual]
-  dy <- z$dyout[actual]
-  d <-  z$dout[actual]
+    # allow slightly more space to work around gcc bug #323
+    nsize <- ceiling(1.1 * nsize) + X$n + Y$n
+    
+    # now extract pairs
+    z <-
+      .C("crosspairs",
+         nn1=as.integer(X$n),
+         x1=as.double(Xsort$x),
+         y1=as.double(Xsort$y),
+         nn2=as.integer(Y$n),
+         x2=as.double(Ysort$x),
+         y2=as.double(Ysort$y),
+         r=as.double(rmax),
+         noutmax=as.integer(nsize), 
+         nout=as.integer(integer(1)),
+         iout=as.integer(integer(nsize)),
+         jout=as.integer(integer(nsize)), 
+         xiout=as.double(numeric(nsize)),
+         yiout=as.double(numeric(nsize)),
+         xjout=as.double(numeric(nsize)),
+         yjout=as.double(numeric(nsize)),
+         dxout=as.double(numeric(nsize)),
+         dyout=as.double(numeric(nsize)),
+         dout=as.double(numeric(nsize)),
+         status=as.integer(integer(1)),
+         DUP=DUP,
+         PACKAGE="spatstat")
+    if(z$status != 0)
+      stop(paste("Internal error: C routine complains that insufficient space was allocated:", nsize))
+    # trim vectors to the length indicated
+    npairs <- z$nout
+    if(npairs <= 0)
+      return(list(i=integer(0),
+                  j=integer(0),
+                  xi=numeric(0),
+                  yi=numeric(0),
+                  xj=numeric(0),
+                  yj=numeric(0),
+                  dx=numeric(0),
+                  dy=numeric(0),
+                  d=numeric(0)))
+    actual <- seq_len(npairs)
+    i  <- z$iout[actual] + 1
+    j  <- z$jout[actual] + 1
+    xi <- z$xiout[actual]
+    yi <- z$yiout[actual]
+    xj <- z$xjout[actual]
+    yj <- z$yjout[actual]
+    dx <- z$dxout[actual]
+    dy <- z$dyout[actual]
+    d <-  z$dout[actual]
+  }
   # convert i,j indices to original sequences
   i <- ooX[i]
   j <- ooY[j]

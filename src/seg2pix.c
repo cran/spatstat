@@ -1,4 +1,5 @@
 #include <R.h>
+#include <R_ext/Utils.h>
 
 #undef DEBUG
 
@@ -52,6 +53,8 @@ void seg2pixI(ns,x0,y0,x1,y1,nx,ny,out)
       V(k, j) = 0;
 
   for(i = 0; i < Ns; i++) {
+    R_CheckUserInterrupt();
+
     x0i = x0[i];
     y0i = y0[i];
     x1i = x1[i];
@@ -199,6 +202,7 @@ void seg2pixL(ns,x0,y0,x1,y1,weights,pixwidth,pixheight,nx,ny,out)
       V(k, j) = 0;
 
   for(i = 0; i < Ns; i++) {
+    R_CheckUserInterrupt();
     x0i = x0[i];
     y0i = y0[i];
     x1i = x1[i];

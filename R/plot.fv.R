@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.75 $    $Date: 2011/09/23 11:29:37 $
+#  $Revision: 1.76 $    $Date: 2011/11/23 03:44:09 $
 #
 #
 
@@ -14,7 +14,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
                     ylim.covers=NULL, legend=!add, legendpos="topleft",
                     legendmath=TRUE, legendargs=list(),
-                    shade=NULL, shadecol="grey", add=FALSE) {
+                    shade=NULL, shadecol="grey", add=FALSE,
+                    limitsonly=FALSE) {
 
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
@@ -174,6 +175,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   if(!is.null(ylim.covers))
     ylim <- range(ylim, ylim.covers)
 
+  # return x, y limits only?
+  if(limitsonly)
+    return(list(xlim=xlim, ylim=ylim))
+  
   # -------------  work out how to label the plot --------------------
 
   # extract plot labels 
@@ -251,6 +256,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                              list(...),
                              list(main=xname)))
 
+  # handle 'type' = "n" 
+  giventype <- resolve.defaults(list(...), list(type=NA))$type
+  if(identical(giventype, "n"))
+    return(invisible(NULL))
 
   # process lty, col, lwd arguments
 

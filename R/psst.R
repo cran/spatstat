@@ -3,7 +3,7 @@
 #
 #	Computes the GNZ contrast of delta-f for any function f
 #
-#	$Revision: 1.1 $	$Date: 2011/06/19 06:05:38 $
+#	$Revision: 1.2 $	$Date: 2011/11/20 02:12:36 $
 #
 ################################################################################
 #
@@ -12,7 +12,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
                  trend=~1, interaction=Poisson(),
                  rbord=reach(interaction),
                  truecoef=NULL, hi.res=NULL,
-                 funcorrection="best") {
+                 funargs=list(correction="best")) {
   if(inherits(object, "ppm")) 
     fit <- object
   else if(inherits(object, "ppp"))
@@ -84,7 +84,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
             fname="bold(R)~Delta~S")
 
   # evaluate fun(X) for data
-  fX <- fun(X, r=rvals, correction=funcorrection)
+  fX <- do.call(fun, append(list(X, r=rvals), funargs))
   fX <- with(fX, .y)
   zero <- rep(0, length(fX))
   # sum over all quadrature points
@@ -104,7 +104,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
     wi <- wc[i]
     if(Z[i]) {
       # data point
-      fXi <- fun(X[-i], r=rvals, correction=funcorrection)
+      fXi <- do.call(fun, append(list(X[-i], r=rvals), funargs))
       fXi <- with(fXi, .y)
       deltaf <- fX - fXi
       sumX <- sumX + deltaf
@@ -112,7 +112,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
       # dummy point
       uX$x[1] <- Ux[i]
       uX$y[1] <- Uy[i]
-      fuX <- fun(uX, r=rvals, correction=funcorrection)
+      fuX <- do.call(fun, append(list(uX, r=rvals), funargs))
       fuX <- with(fuX, .y)
       deltaf <- fuX - fX
     }

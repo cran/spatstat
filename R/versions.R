@@ -3,7 +3,7 @@
 #
 # version numbers
 #
-# $Revision: 1.4 $  $Date: 2007/09/05 16:32:26 $
+# $Revision: 1.5 $  $Date: 2011/11/21 08:53:49 $
 #
 #####################
 
@@ -41,3 +41,4 @@ majorminorversion <- function(v) {
   vp <- package_version(v)
   return(package_version(paste(vp$major, vp$minor, sep=".")))
 }
+
