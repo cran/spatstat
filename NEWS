@@ -1,4 +1,96 @@
 
+	CHANGES IN spatstat VERSION 1.25-0
+
+OVERVIEW 
+
+   o Leverage and influence for point process models
+
+   o New cluster models (support for model-fitting and simulation).
+
+   o Fit irregular parameters in trend of point process model
+
+   o Third order summary statistic.
+
+   o Improvements to speed and robustness of code.
+
+   o spatstat now depends on R 2.14
+
+   o We thank Abdollah Jalilian and Rasmus Waagepetersen for contributions.
+
+NEW FUNCTIONS
+
+   o leverage.ppm, influence.ppm, dfbetas.ppm
+   Leverage and influence for point process models
+
+   o ippm
+   Experimental extension to 'ppm' which fits irregular parameters in trend
+   by Fisher scoring algorithm.
+
+   o Tstat
+   Third order summary statistic for point patterns
+   based on counting triangles.
+
+   o rCauchy, rVarGamma
+   simulation of a Neyman-Scott process with Cauchy clusters
+   or Variance Gamma (Bessel) clusters.
+   Contributed by Abdollah Jalilian.
+
+   o rPoissonCluster
+   simulation of a general Poisson cluster process
+
+   o model.covariates
+   Identify the covariates involved in a model (lm, glm, ppm etc)
+
+   o as.im.distfun
+   Converts a 'distfun' to a pixel image.
+
+   o cauchy.estK, cauchy.estpcf, vargamma.estK, vargamma.estpcf
+   Low-level model-fitting functions for the Neyman-Scott process 
+   with Cauchy or Variance-Gamma cluster kernel.
+   Contributed by Abdollah Jalilian.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o kppm
+   Now accepts clusters="Cauchy" or clusters="VarGamma"
+   for the Neyman-Scott process with Cauchy or Variance-Gamma cluster kernel.
+   Code contributed by Abdollah Jalilian.
+
+   o rNeymanScott
+   Argument 'rcluster' may now take a different format.
+
+   o psst
+   Argument 'funcorrection' changed to 'funargs' allowing greater flexibility.
+
+   o plot.fv, plot.envelope
+   New argument 'limitsonly' allows calculation of 
+   a common x,y scale for several plots.
+
+   o overall speed 
+   spatstat is now byte-compiled and runs slightly faster.
+
+   o user interrupt
+   Long calculations in spatstat now respond to the Interrupt/Stop signal.
+
+   o update.ppm
+   Now runs faster and uses much less memory,
+   when the update only affects the model formula (trend formula).
+   
+   o rNeymanScott, rThomas, rMatClust
+   Accelerated thanks to Rasmus Waagepetersen.
+
+   o multitype data and models
+   Second order multitype statistics (such as Kcross, pcfcross)
+   and multitype interaction models (such as MultiStrauss)
+   now run faster, by a further 5%.
+
+BUG FIXES
+
+   o distfun
+   Some manipulations involving 'distfun' objects failed if the
+   original data X in distfun(X) did not have a rectangular window.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.24-2
 
 OVERVIEW 

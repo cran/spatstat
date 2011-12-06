@@ -61,6 +61,16 @@ par(mfrow=c(1,1))
 
 # 
 #######################################################
+#  LEVERAGE/INFLUENCE
+
+plot(leverage(fit.inhom))
+
+plot(influence(fit.inhom))
+
+plot(dfbetas(fit.inhom))
+
+# 
+#######################################################
 #  COMPENSATORS
 
 CF <- compareFit(listof(hom=fit.hom, inhom=fit.inhom),
@@ -85,7 +95,6 @@ title(main=c("Right model (inhomogeneous Poisson)",
 # 
 #######################################################
 #
-data(cells)
 plot(cells)
 fitPoisson <- ppm(cells, ~1, Poisson())
 diagnose.ppm(fitPoisson,
@@ -130,7 +139,6 @@ title(main=c("Strauss model fitted to cells data",
 # 
 #######################################################
 #
-data(nztrees)
 plot(nztrees)
 fit <- ppm(nztrees, ~1, Poisson())
 diagnose.ppm(fit, type="pearson")

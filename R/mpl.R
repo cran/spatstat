@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.133 $	$Date: 2011/11/03 09:54:27 $
+#	$Revision: 5.134 $	$Date: 2011/11/18 02:38:03 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -101,7 +101,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/11/03 09:54:27 $")
+                    date="$Date: 2011/11/18 02:38:03 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -744,6 +744,13 @@ evalInteraction <- function(X, P, E,
   # (does not assign/touch the variable names)
 
   verifyclass(interaction, "interact")
+
+  # handle Poisson case
+  if(is.poisson(interaction)) {
+    out <- matrix(, nrow=npoints(P), ncol=0)
+    attr(out, "IsOffset") <- logical(0)
+    return(out)
+  }
   
   # determine whether to use fast evaluation in C
   fastok    <- (spatstat.options("fasteval") %in% c("on", "test"))

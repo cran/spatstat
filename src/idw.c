@@ -3,11 +3,12 @@
 
   Inverse-distance weighted smoothing
 
-  $Revision: 1.5 $ $Date: 2011/09/07 02:10:24 $
+  $Revision: 1.6 $ $Date: 2011/11/20 03:48:27 $
 
 */
 
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 
 #define MAT(X,I,J,NROW) (X)[(J) + (NROW) * (I)]
 
@@ -37,6 +38,7 @@ void idw(x, y, v, n, xstart, xstep, nx, ystart, ystep, ny, power, num, den, rat)
   if(pon2 == 1.0) {
     /* slightly faster code when power=2 */
     for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
+      R_CheckUserInterrupt();
       for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
 	/* loop over data points, accumulating numerator and denominator */
 	for(i = 0; i < N; i++) {
@@ -52,6 +54,7 @@ void idw(x, y, v, n, xstart, xstep, nx, ystart, ystep, ny, power, num, den, rat)
   } else {
     /* general case */
     for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
+      R_CheckUserInterrupt();
       for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
 	/* loop over data points, accumulating numerator and denominator */
 	for(i = 0; i < N; i++) {
@@ -84,6 +87,7 @@ void idwloo(x, y, v, n, power, num, den, rat)
   if(pon2 == 1.0) {
     /* slightly faster code when power=2 */
     for(i = 0; i < N; i++) {
+      R_CheckUserInterrupt();
       xi = x[i];
       yi = y[i];
       if(i > 0) {
@@ -108,6 +112,7 @@ void idwloo(x, y, v, n, power, num, den, rat)
   } else {
     /* general case */
     for(i = 0; i < N; i++) {
+      R_CheckUserInterrupt();
       xi = x[i];
       yi = y[i];
       if(i > 0) {

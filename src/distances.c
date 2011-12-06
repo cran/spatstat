@@ -4,7 +4,7 @@
 
   Distances between pairs of points
 
-  $Revision: 1.25 $     $Date: 2011/08/01 03:02:29 $
+  $Revision: 1.26 $     $Date: 2011/11/20 03:25:47 $
 
   pairdist      Pairwise distances
   pair2dist     Pairwise distances squared
@@ -20,7 +20,7 @@
  */
 
 #include <math.h>
-/* #include <stdio.h> */
+#include <R_ext/Utils.h>
 
 double sqrt();
 
@@ -42,6 +42,8 @@ void pairdist(n, x, y, d)
 
   for (i=1; i < npoints; i++) 
     {
+      R_CheckUserInterrupt();
+
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -82,6 +84,7 @@ void pair2dist(n, x, y, d)
 
   for (i=1; i < npoints; i++) 
     {
+      R_CheckUserInterrupt();
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -119,6 +122,8 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
   dptr = d;
 
   for (j=0; j < nt; j++) {
+
+    R_CheckUserInterrupt();
     xj = xto[j];
     yj = yto[j];
     for(i = 0; i < nf; i++, dptr++) {
@@ -148,6 +153,7 @@ void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
   dptr = d;
 
   for (j=0; j < nt; j++) {
+    R_CheckUserInterrupt();
     xj = xto[j];
     yj = yto[j];
     for(i = 0; i < nf; i++, dptr++) {
@@ -182,6 +188,8 @@ void pairPdist(n, x, y, xwidth, yheight, d)
 
   for (i=1; i < npoints; i++) 
     {
+      R_CheckUserInterrupt();
+
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -234,6 +242,7 @@ void pairP2dist(n, x, y, xwidth, yheight, d)
 
   for (i=1; i < npoints; i++) 
     {
+      R_CheckUserInterrupt();
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -283,6 +292,7 @@ void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
   dptr = d;
 
   for (j=0; j < nt; j++) {
+    R_CheckUserInterrupt();
     xj = xto[j];
     yj = yto[j];
     for(i = 0; i < nf; i++, dptr++) {
@@ -328,6 +338,7 @@ void matchxy(na, xa, ya, nb, xb, yb, match)
 
   for (i=0; i < Na; i++) 
     {
+      R_CheckUserInterrupt();
       xai = xa[i];
       yai = ya[i];
       match[i] = 0;

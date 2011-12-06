@@ -1,11 +1,12 @@
 Package: spatstat
-Version: 1.24-2
-Date: 2011-11-11
+Version: 1.25-0
+Date: 2011-12-06
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> 
 	and Rolf Turner <r.turner@auckland.ac.nz> 
 	with substantial contributions of code by 
 	Kasper Klitgaard Berthelsen;
+	Abdollah Jalilian;
 	Marie-Colette van Lieshout;
 	Ege Rubak; 
 	Dominic Schuhmacher;
@@ -44,7 +45,6 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 	J. Heikkinen; 
 	K. Hornik; 
 	R. Ihaka; 
-	A. Jalilian;
 	R. John-Chandran; 
 	D. Johnson; 
 	M. Kuhn; 
@@ -92,7 +92,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 	and
 	S. Wong. 
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
-Depends: R (>= 2.13.0), stats, graphics, utils, mgcv, deldir (>=
+Depends: R (>= 2.14.0), stats, graphics, utils, mgcv, deldir (>=
         0.0-10)
 Suggests: gpclib, sm, maptools, spatial, rpanel, tkrplot,
         scatterplot3d, RandomFields (>= 2.0)
@@ -106,6 +106,7 @@ License: GPL (>= 2)
 URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
-Packaged: 2011-11-11 04:41:38 UTC; adrian
+ByteCompile: true
+Packaged: 2011-12-06 02:58:25 UTC; adrian
 Repository: CRAN
-Date/Publication: 2011-11-11 11:19:29
+Date/Publication: 2011-12-06 07:00:35

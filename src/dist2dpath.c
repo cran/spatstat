@@ -1,4 +1,5 @@
 #include <R.h>
+#include <R_ext/Utils.h>
 
 /*
   given matrix of edge lengths
@@ -41,6 +42,7 @@ void dist2dpath(nv, d, adj, dpath, niter)
     Rprintf("--------- iteration %d ---------------\n", iter);
 #endif
     for(i = 1; i < n; i++) {
+      R_CheckUserInterrupt();
       for(j = 0; j < i; j++) {
 	dij = DPATH(i,j);
 #ifdef DEBUG

@@ -49,6 +49,9 @@
   which computes the distance function of \code{X}
   on a grid of locations, and returns the distance
   values in the form of a pixel image.
+
+  A \code{distfun} object can be converted to a pixel image
+  using \code{\link{as.im}}.
 }
 \value{
   A \code{function} with arguments \code{x,y}.

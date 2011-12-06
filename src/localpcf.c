@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 
 /*
 

@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.40 $   $Date: 2011/09/03 03:09:20 $
+#    $Revision: 1.41 $   $Date: 2011/11/23 06:08:39 $
 #
 #
 
@@ -149,6 +149,11 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
          valid="a single logical value"
        ),
        closepairs.newcode=list(
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       crosspairs.newcode=list(
          default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"

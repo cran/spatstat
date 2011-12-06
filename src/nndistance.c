@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances between points
 
-  $Revision: 1.2 $     $Date: 2011/09/20 07:40:54 $
+  $Revision: 1.3 $     $Date: 2011/11/20 04:04:42 $
 
   THE FOLLOWING FUNCTIONS ASSUME THAT y IS SORTED IN ASCENDING ORDER 
 
@@ -20,8 +20,8 @@
 #undef SPATSTAT_DEBUG
 
 #include <R.h>
+#include <R_ext/Utils.h>
 #include <math.h>
-/* #include <stdio.h> */
 
 #ifndef FALSE
 #define TRUE 1
@@ -48,6 +48,8 @@ void nndistsort(n, x, y, nnd, huge)
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
+    
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -121,6 +123,9 @@ void nnwhichsort(n, x, y, nnd, nnwhich, huge)
   npoints = *n;
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
+
     dmin = hu;
     d2min = hu2;
     which = -1;
@@ -195,6 +200,9 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+
+    R_CheckUserInterrupt();
+
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -273,6 +281,9 @@ void nnXexclude(n1, x1, y1, id1, n2, x2, y2, id2, nnd, nnwhich, huge)
   lastjwhich = 0;
 
   for(i = 0; i < npoints1; i++) {
+
+    R_CheckUserInterrupt();
+
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -358,6 +369,8 @@ void knndsort(n, kmax, x, y, nnd, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 
@@ -505,6 +518,8 @@ void knnwhichsort(n, kmax, x, y, nnd, nnwhich, huge)
   /* loop over points */
 
   for(i = 0; i < npoints; i++) {
+
+    R_CheckUserInterrupt();
 
 #ifdef SPATSTAT_DEBUG
     Rprintf("\ni=%d\n", i); 

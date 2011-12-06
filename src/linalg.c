@@ -5,11 +5,12 @@
 
    Yes, really
 
-   $Revision: 1.2 $ $Date: 2011/08/04 08:53:40 $ 
+   $Revision: 1.3 $ $Date: 2011/11/20 03:50:17 $ 
 
 */
 
 #include <R.h>
+#include <R_ext/Utils.h>
 
 /*
     computes the weighted sum of outer products 
@@ -29,6 +30,7 @@ void wsumouter(x, n, p, w, y)
   N = *n; 
   P = *p;
   for(j = 0; j < N; j++) {
+    R_CheckUserInterrupt();
     wj = w[j];
     xcolj = x + j * P;
     for(i = 0; i < P; i++) {
@@ -60,6 +62,7 @@ void quadform(x, n, p, v, y)
   N = *n; 
   P = *p;
   for(j = 0; j < N; j++) {
+    R_CheckUserInterrupt();
     xcolj = x + j * P;
     yj = 0;
     for(i = 0; i < P; i++) {

@@ -7,12 +7,13 @@
 
   poly2imA     pixel value = area of intersection between pixel and polygon
 
-  $Revision: 1.3 $ $Date: 2011/09/20 07:30:41 $
+  $Revision: 1.4 $ $Date: 2011/11/20 04:15:39 $
 
 */
 #undef DEBUG
 
 #include <R.h>
+#include <R_ext/Utils.h>
 #include <math.h>
 
 #define OUT(I,J) out[I + (J) * Ny]
@@ -38,6 +39,7 @@ poly2imI(xp, yp, np, nx, ny, out)
 
   /* run through polygon edges */
   for(k = 0; k < Np-1; k++) {
+    R_CheckUserInterrupt();
     x0 = xp[k];
     y0 = yp[k];
     x1 = xp[k+1];
@@ -118,6 +120,7 @@ poly2imA(ncol, nrow, xpoly, ypoly, npoly, out, status)
 
   /* ............ loop over polygon edges ...................*/
   for(k = 0; k < np - 1; k++) {
+    R_CheckUserInterrupt();
     xcur = xp[k];
     ycur = yp[k];
     xnext = xp[k+1];

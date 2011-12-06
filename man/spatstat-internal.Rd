@@ -64,6 +64,7 @@
 \alias{crosspaircounts}
 \alias{crossfikselterms}
 \alias{cobble.xy}
+\alias{codetime}
 \alias{commasep}
 \alias{conform.imagelist}
 \alias{countingweights}
@@ -210,8 +211,6 @@
 \alias{localpcfengine}
 \alias{localpcfmatrix}
 \alias{paste.expr}
-\alias{print.localpcfmatrix}
-\alias{plot.localpcfmatrix}
 \alias{lookup.im}
 \alias{majorminorversion}
 \alias{make.even.breaks}
@@ -292,6 +291,7 @@
 \alias{plot.barplotdata}
 \alias{plot.bw.optim}
 \alias{plot.fii}
+\alias{plot.localpcfmatrix}
 \alias{plot.minconfit}
 \alias{plot.plotpairsim}
 \alias{plot.pppmatching}
@@ -303,6 +303,7 @@
 \alias{polynom}
 \alias{ppllengine}
 \alias{ppmCovariates}
+\alias{ppm.influence}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
 \alias{prange}
@@ -321,6 +322,7 @@
 \alias{print.isf}
 \alias{print.layered}
 \alias{print.linim}
+\alias{print.localpcfmatrix}
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
@@ -445,6 +447,7 @@
 \alias{test.selfcrossing.psp}
 \alias{tilecentroids}        
 \alias{tilenames}        
+\alias{trianglediameters}
 \alias{trim.mask}        
 \alias{tweak.fv.entry}        
 \alias{unitname.default}
@@ -531,7 +534,7 @@ clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
-closepairs(X,rmax)
+closepairs(X,rmax,ordered)
 \method{coef}{summary.ppm}(object, \dots)
 \method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
@@ -541,6 +544,7 @@ crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 crossfikselterms(X,Y,r,kappa)
 cobble.xy(x, y, f, fatal)
+codetime(x)
 commasep(x)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
@@ -811,6 +815,10 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
+ppm.influence(fit,
+   what = c("leverage","influence","dfbetas","derivatives"),
+   ..., iScore = NULL, iHessian = NULL, iArgs=list(), drop = FALSE,
+   method=c("C", "interpreted"))
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
 prange(x)
@@ -958,6 +966,7 @@ test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
 tilenames(x)
+trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)

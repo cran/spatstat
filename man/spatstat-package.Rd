@@ -68,6 +68,9 @@
   For information about handling data in \bold{shapefiles},
   see the Vignette \emph{Handling shapefiles in the spatstat package}
   installed with \pkg{spatstat}.
+
+  To learn about spatial point process methods, see the short book
+  by Diggle (2003) and the handbook Gelfand et al (2010).
 }
 \section{Updates}{
   New versions of \pkg{spatstat} are produced about once a month.
@@ -176,6 +179,10 @@
 	simulate the Thomas process  \cr
 	\code{\link{rGaussPoisson}}  \tab
 	simulate the Gauss-Poisson cluster process\cr
+	\code{\link{rCauchy}} \tab
+	simulate Neyman-Scott Cauchy cluster process \cr
+	\code{\link{rVarGamma}} \tab
+	simulate Neyman-Scott Variance Gamma cluster process \cr
 	\code{\link{rthin}} \tab  random thinning  \cr
 	\code{\link{rcell}} \tab
 	simulate the Baddeley-Silverman cell process  \cr
@@ -656,9 +663,10 @@
     \code{\link{quadratcount}} \tab Quadrat counts \cr
     \code{\link{Fest}} \tab empty space function \eqn{F} \cr
     \code{\link{Gest}} \tab nearest neighbour distribution function \eqn{G} \cr
-    \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
-    \code{\link{Lest}} \tab Besag-Ripley \eqn{L}-function\cr
     \code{\link{Jest}} \tab \eqn{J}-function \eqn{J = (1-G)/(1-F)} \cr
+    \code{\link{Kest}} \tab Ripley's \eqn{K}-function\cr
+    \code{\link{Lest}} \tab Besag \eqn{L}-function\cr
+    \code{\link{Tstat}} \tab Third order \eqn{T}-function \cr
     \code{\link{allstats}} \tab all four functions \eqn{F}, \eqn{G}, \eqn{J}, \eqn{K} \cr
     \code{\link{pcf}} \tab 	pair correlation function \cr
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
@@ -863,6 +871,7 @@
   and updated.
 
   \tabular{ll}{
+    \code{\link{kppm}} \tab  Fit model\cr
     \code{\link{plot.kppm}} \tab  Plot the fitted model\cr
     \code{\link{predict.kppm}} \tab Compute fitted intensity \cr
     \code{\link{update.kppm}} \tab Update the model \cr
@@ -874,18 +883,23 @@
   
   The theoretical models can also be simulated,
   for any choice of parameter values,
-  using \code{\link{rThomas}}, \code{\link{rMatClust}}
-  and \code{\link{rLGCP}} respectively.
+  using \code{\link{rThomas}}, \code{\link{rMatClust}},
+  \code{\link{rCauchy}}, \code{\link{rVarGamma}},
+  and \code{\link{rLGCP}}.
   
   Lower-level fitting functions include:
 
   \tabular{ll}{
+    \code{\link{lgcp.estK}} \tab fit a log-Gaussian Cox process model\cr
+    \code{\link{lgcp.estpcf}} \tab fit a log-Gaussian Cox process model\cr
     \code{\link{thomas.estK}} \tab fit the Thomas process model \cr
     \code{\link{thomas.estpcf}} \tab fit the Thomas process model \cr
     \code{\link{matclust.estK}} \tab fit the Matern Cluster process model \cr
     \code{\link{matclust.estpcf}} \tab fit the Matern Cluster process model \cr
-    \code{\link{lgcp.estK}} \tab fit a log-Gaussian Cox process model\cr
-    \code{\link{lgcp.estpcf}} \tab fit a log-Gaussian Cox process model\cr
+    \code{\link{cauchy.estK}} \tab fit a Neyman-Scott Cauchy cluster process \cr
+   \code{\link{cauchy.estpcf}} \tab fit a Neyman-Scott Cauchy cluster process\cr
+   \code{\link{vargamma.estK}} \tab fit a Neyman-Scott Variance Gamma process\cr
+   \code{\link{vargamma.estpcf}} \tab fit a Neyman-Scott Variance Gamma process\cr
     \code{\link{mincontrast}} \tab low-level algorithm for fitting models
     \cr \tab by the method of minimum contrast 
   }
@@ -950,7 +964,12 @@
     \code{\link{summary.ppm}} \tab Summarise a fitted model\cr
     \code{\link{effectfun}} \tab Compute the fitted effect of one covariate\cr
     \code{\link{logLik.ppm}} \tab log-likelihood or log-pseudolikelihood\cr
-    \code{\link{anova.ppm}} \tab Analysis of deviance
+    \code{\link{anova.ppm}} \tab Analysis of deviance \cr
+    \code{\link{model.frame.ppm}} \tab Extract data frame used to fit model  \cr
+    \code{\link{model.images}} \tab Extract spatial data used to fit model  \cr
+    \code{\link{model.depends}} \tab Identify variables in the model \cr
+    \code{\link{as.interact}} \tab Interpoint interaction component of model \cr
+    \code{\link{fitin}} \tab Extract fitted interpoint interaction 
   }
   For model selection, you can also use 
   the generic functions \code{\link{step}}, \code{\link{drop1}} 
@@ -1113,7 +1132,7 @@
     \code{vcov.slrm}  \tab Variance-covariance matrix of fitted coefficients \cr
     \code{\link{fitted.slrm}} \tab Compute fitted probabilities or
     intensity \cr
-    \code{\link{logLik.slrm}}   \tab Evalate loglikelihood of fitted
+    \code{\link{logLik.slrm}}   \tab Evaluate loglikelihood of fitted
     model \cr
     \code{\link{plot.slrm}}    \tab Plot fitted probabilities or
     intensity \cr
@@ -1171,6 +1190,10 @@
     simulate the log-Gaussian Cox process  \cr
     \code{\link{rGaussPoisson}}  \tab
     simulate the Gauss-Poisson cluster process\cr
+    \code{\link{rCauchy}} \tab
+    simulate Neyman-Scott process with Cauchy clusters \cr
+    \code{\link{rVarGamma}} \tab
+    simulate Neyman-Scott process with Variance Gamma clusters \cr
     \code{\link{rcell}} \tab
     simulate the Baddeley-Silverman cell process  \cr
     \code{\link{runifpointOnLines}} \tab
@@ -1255,6 +1278,17 @@
     point process models 
   }
 
+  \bold{Sensitivity diagnostics:}
+
+  Classical measures of model sensitivity such as leverage and influence
+  have been adapted to point process models.
+  
+    \tabular{ll}{
+      \code{\link{leverage.ppm}} \tab Leverage for point process model\cr
+      \code{\link{influence.ppm}} \tab Influence for point process model\cr
+      \code{\link{dfbetas.ppm}} \tab Parameter influence\cr
+    }
+  
   \bold{Residual diagnostics:}
   
   Residuals for a fitted point process model, and diagnostic plots
@@ -1336,6 +1370,24 @@
   diagnostics for spatial point process models.
   To appear in \emph{Statistical Science}.
 
+  Diggle, P.J. (2003)
+  \emph{Statistical analysis of spatial point patterns},
+  Second edition. Arnold.
+
+  Gelfand, A.E., Diggle, P.J., Fuentes, M. and Guttorp, P., editors (2010)
+  \emph{Handbook of Spatial Statistics}.
+  CRC Press.
+
+  Huang, F. and Ogata, Y. (1999)
+  Improvements of the maximum pseudo-likelihood
+  estimators in various spatial statistical models.
+  \emph{Journal of Computational and Graphical Statistics}
+  \bold{8}, 510--530.
+
+  Waagepetersen, R.
+  An estimating function approach to inference for
+  inhomogeneous Neyman-Scott processes.
+  \emph{Biometrics} \bold{63} (2007) 252--258.
 }
 \section{Licence}{
   This library and its documentation are usable under the terms of the "GNU 
@@ -1350,6 +1402,7 @@
 }
 \section{Acknowledgements}{
   Kasper Klitgaard Berthelsen,
+  Abdollah Jalilian,
   Marie-Colette van Lieshout,
   Ege Rubak, 
   Dominic Schuhmacher and

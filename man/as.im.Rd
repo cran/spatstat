@@ -1,10 +1,12 @@
 \name{as.im}
 \alias{as.im}
 \alias{as.im.im}
+\alias{as.im.leverage.ppm}
 \alias{as.im.owin}
 \alias{as.im.matrix}
 \alias{as.im.tess}
 \alias{as.im.function}
+\alias{as.im.distfun}
 \alias{as.im.default}
 \title{Convert to Pixel Image}
 \description{
@@ -25,6 +27,10 @@
   \method{as.im}{function}(X, W=NULL, \dots,
         eps=NULL, dimyx=NULL, xy=NULL,
         na.replace=NULL)
+  \method{as.im}{distfun}(X, W=NULL, \dots,
+        eps=NULL, dimyx=NULL, xy=NULL,
+        na.replace=NULL)
+  \method{as.im}{leverage.ppm}(X, \dots)
   \method{as.im}{default}(X, W=NULL, \dots,
         eps=NULL, dimyx=NULL, xy=NULL,
         na.replace=NULL)
@@ -89,7 +95,10 @@
     of all the pixels in the image mask, and \code{...} are any extra
     arguments given. This function must return a
     vector or factor of the same length as the input vectors,
-    giving the pixel values. 
+    giving the pixel values.
+    \item
+    an object of class \code{"distfun"} representing a distance function
+    (created by the command \code{\link{distfun}}).
     \item
     a list with entries \code{x, y, z} in the format expected by
     the standard \code{R} functions

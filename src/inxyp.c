@@ -6,9 +6,11 @@
   NB: relative to other versions, 'score' is multiplied by 2
   (and is an integer)
 
-  $Revision: 1.3 $   $Date: 2011/08/13 03:33:04 $
+  $Revision: 1.4 $   $Date: 2011/11/20 03:47:11 $
 
  */
+
+#include <R_ext/Utils.h>
 
 void inxyp(x,y,xp,yp,npts,nedges,score,onbndry) 
   /* inputs */
@@ -31,6 +33,7 @@ void inxyp(x,y,xp,yp,npts,nedges,score,onbndry)
   y0 = yp[Ne1];
 
   for(i = 0; i < Nedges; i++) {
+    R_CheckUserInterrupt();
   /* visit edge (x0,y0) -> (x1,y1) */
     x1 = xp[i];
     y1 = yp[i];

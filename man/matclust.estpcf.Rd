@@ -166,7 +166,7 @@ matclust.estpcf(X, startpar=c(kappa=1,R=1), lambda=NULL,
     data(redwood)
     u <- matclust.estpcf(redwood, c(kappa=10, R=0.1))
     u
-    plot(u)
+    plot(u, legendpos="topright")
 }
 \keyword{spatial}
 \keyword{models}

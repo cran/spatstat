@@ -17,7 +17,9 @@
     Maximum radius of a random cluster.
   }
   \item{rcluster}{
-    A function which generates random clusters.
+    A function which generates random clusters,
+    or other data specifying the random cluster mechanism.
+    See Details.
   }
   \item{win}{
     Window in which to simulate the pattern.
@@ -52,21 +54,47 @@
   See \code{\link{rpoispp}} for details.
   
   Second, each parent point is
-  replaced by a random cluster of points, created by calling the
-  function \code{rcluster}.
+  replaced by a random cluster of points.
   These clusters are combined together to yield a single point pattern
   which is then returned as the result of \code{rNeymanScott}.
 
-  The function \code{rcluster} should expect to be called as
-  \code{rcluster(xp[i],yp[i],\dots)} for each parent point at a location
-  \code{(xp[i],yp[i])}. The return value of \code{rcluster}
-  should be a list with elements
-  \code{x,y} which are vectors of equal length giving the absolute
-  \eqn{x} and \code{y} coordinates of the points in the cluster.
-
-  If the return value of \code{rcluster} is a point pattern (object of
-  class \code{"ppp"}) then it may have marks. The result of
-  \code{rNeymanScott} will then be a marked point pattern.
+  The argument \code{rcluster} specifies the cluster mechanism.
+  It may be either:
+  \itemize{
+    \item
+    A \code{function} which will be called to generate each random
+    cluster (the offspring points of each parent point).
+    The function should expect to be called
+    in the form \code{rcluster(x0,y0,\dots)} for a parent point at a location
+    \code{(x0,y0)}. The return value of \code{rcluster}
+    should specify the coordinates of the points in the cluster;
+    it may be a list containing elements
+    \code{x,y}, or a point pattern (object of
+    class \code{"ppp"}). If it is a marked point pattern then the result of
+    \code{rNeymanScott} will be a marked point pattern.
+    \item
+    A \code{list(mu, f)} where \code{mu} specifies the mean
+    number of offspring points in each cluster, and \code{f}
+    generates the random displacements (vectors pointing from the parent
+    to the offspring). In this case, the number of offspring
+    in a cluster is assumed to have a Poisson distribution, implying
+    that the Neyman-Scott process is also a Cox process.
+    The first element \code{mu} should be either a single nonnegative
+    number (interpreted as the mean of the Poisson distribution of
+    cluster size)
+    or a pixel image or a \code{function(x,y)} giving a spatially
+    varying mean cluster size (interpreted in the sense of
+    Waagepetersen, 2007).
+    The second element \code{f} should be a function that will be
+    called once in the form \code{f(n)} to generate \code{n} independent
+    and identically distributed displacement vectors (i.e. as if there
+    were a cluster of size \code{n} with a parent at the origin
+    \code{(0,0)}). 
+    The function should return
+    a point pattern (object of class \code{"ppp"})
+    or something acceptable to \code{\link[grDevices]{xy.coords}}
+    that specifies the coordinates of \code{n} points. 
+  }
 
   If required, the intermediate stages of the simulation (the parents
   and the individual clusters) can also be extracted from
@@ -80,7 +108,9 @@
   \code{\link{rpoispp}},
   \code{\link{rThomas}},
   \code{\link{rGaussPoisson}},
-  \code{\link{rMatClust}}
+  \code{\link{rMatClust}},
+  \code{\link{rCauchy}},
+  \code{\link{rVarGamma}}
 }
 \examples{
   # each cluster consist of 10 points in a disc of radius 0.2
@@ -97,6 +127,17 @@
      return(X)
   }
   plot(rNeymanScott(15,0.1,nclust2, radius=0.1, n=5))
+}
+\references{
+  Neyman, J. and Scott, E.L. (1958)
+  A statistical approach to problems of cosmology.
+  \emph{Journal of the Royal Statistical Society, Series B}
+  \bold{20}, 1--43.
+
+  Waagepetersen, R. (2007)
+  An estimating function approach to inference for
+  inhomogeneous Neyman-Scott processes.
+  \emph{Biometrics} \bold{63}, 252--258.
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

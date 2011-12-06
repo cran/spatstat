@@ -1,11 +1,12 @@
 #include <R.h>
+#include <R_ext/Utils.h>
 
 /* 
    linpairdist.c
 
    Shortest-path distances between each pair of points in linear network
 
-   $Revision: 1.2 $  $Date: 2011/07/26 08:16:55 $
+   $Revision: 1.3 $  $Date: 2011/11/20 03:56:57 $
 
    linpairdist
 
@@ -38,6 +39,7 @@ linpairdist(np, xp, yp,   /* data points */
   Np1 = Np - 1;
 
   for(i = 0; i < Np1; i++) {
+    R_CheckUserInterrupt();
     xpi = xp[i];
     ypi = yp[i];
     segi = segmap[i];

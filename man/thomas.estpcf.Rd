@@ -152,7 +152,7 @@ thomas.estpcf(X, startpar=c(kappa=1,sigma2=1), lambda=NULL,
     data(redwood)
     u <- thomas.estpcf(redwood, c(kappa=10, sigma2=0.1))
     u
-    plot(u)
+    plot(u, legendpos="topright")
     u2 <- thomas.estpcf(redwood, c(kappa=10, sigma2=0.1),
           pcfargs=list(stoyan=0.12))
 }

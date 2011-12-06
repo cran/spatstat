@@ -6,15 +6,15 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.12 $     $Date: 2011/08/12 10:29:05 $
+  $Revision: 1.13 $     $Date: 2011/11/20 04:24:42 $
 
  */
 
 #include <R.h>
 #include <Rdefines.h>
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 #include <math.h>
-#include <stdio.h>
 
 #define NIETS -1.0
 
@@ -77,6 +77,7 @@ void xysegint(na, x0a, y0a, dxa, dya,
   mb = *nb;
   for (j=0; j < mb; j++) 
     {
+      R_CheckUserInterrupt();
       for(i = 0; i < ma; i++) {
 	ijpos = j * ma + i;
 	ok[ijpos] = 0;
@@ -122,6 +123,7 @@ void xysi(na, x0a, y0a, dxa, dya,
   mb = *nb;
   for (j=0; j < mb; j++) 
     {
+      R_CheckUserInterrupt();
       for(i = 0; i < ma; i++) {
 	ijpos = j * ma + i;
 	ok[ijpos] = 0;
@@ -165,6 +167,7 @@ void xysiANY(na, x0a, y0a, dxa, dya,
   mb = *nb;
   for (j=0; j < mb; j++) 
     {
+      R_CheckUserInterrupt();
       for(i = 0; i < ma; i++) {
 	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
@@ -211,6 +214,7 @@ void xysegVslice(na, xa,
   epsilon = *eps;
 
   for (j=0; j < mb; j++) {
+    R_CheckUserInterrupt();
     /* determine whether segment j is nearly vertical */
     width = dxb[j];
     abswidth = (width > 0) ? width : -width;
@@ -272,6 +276,7 @@ void xysegXint(n, x0, y0, dx, dy,
   mm1 = m - 1;
   for (j=0; j < mm1; j++) 
     {
+      R_CheckUserInterrupt();
       for(i = j+1; i < m; i++) {
 	ijpos = j * m + i;
 	jipos = i * m + j;
@@ -330,6 +335,7 @@ void xysxi(n, x0, y0, dx, dy,
   mm1 = m - 1;
   for (j=0; j < mm1; j++) 
     {
+      R_CheckUserInterrupt();
       for(i = j+1; i < m; i++) {
 	ijpos = j * m + i;
 	jipos = i * m + j;
@@ -403,6 +409,7 @@ void xypolyselfint(n, x0, y0, dx, dy,
   mm2 = m - 2;
   for (j=0; j < mm2; j++) 
     {
+      R_CheckUserInterrupt();
       mstop = (j > 0) ? m : mm1;
       for(i = j+2; i < mstop; i++) {
 	ijpos = j * m + i;
@@ -466,6 +473,7 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
   mm2 = m - 2;
   for (j=0; j < mm2; j++) 
     {
+      R_CheckUserInterrupt();
       mstop = (j > 0) ? m : mm1;
       for(i = j+2; i < mstop; i++) {
 	diffx = x0[j] - x0[i];
@@ -564,6 +572,7 @@ SEXP Cxysegint(SEXP x0a,
 
   /* scan data and collect intersections */
   for (j=0; j < nb; j++) {
+    R_CheckUserInterrupt();
     for(i = 0; i < na; i++) {
       determinant = dxB[j] * dyA[i] - dyB[j] * dxA[i];
       absdet = (determinant > 0) ? determinant : -determinant;
@@ -693,6 +702,7 @@ SEXP CxysegXint(SEXP x0,
   /* scan data */
   n1 = n - 1;
   for (j=0; j < n1; j++) {
+    R_CheckUserInterrupt();
     for(i = j+1; i < n; i++) {
       determinant = Dx[j] * Dy[i] - Dy[j] * Dx[i];
       absdet = (determinant > 0) ? determinant : -determinant;

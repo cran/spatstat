@@ -4,7 +4,7 @@
 
   Area difference function
 
-  $Revision: 1.8 $ $Date: 2011/09/20 07:32:39 $
+  $Revision: 1.9 $ $Date: 2011/11/20 03:11:29 $
 
   A(x,r) = area of disc b(0,r) not covered by discs b(x_i,r) for x_i in x
   
@@ -17,6 +17,7 @@
 #undef DEBUG
 
 #include <R.h>
+#include <R_ext/Utils.h>
 
 /* 
    Original version areadiff()
@@ -131,6 +132,7 @@ areadifs(rad,nrads,x,y,nxy,ngrid,answer)
 	    found = 0;
 	    if(n > 0)
 	      for(k = 0; k < n && found == 0; k++) {
+		R_CheckUserInterrupt();
 #ifdef DEBUG
 		Rprintf("(x[%d],y[%d]) = (%lf,%lf)\n", k, k, x[k], y[k]);
 #endif

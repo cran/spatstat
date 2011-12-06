@@ -8,7 +8,7 @@
 
   Assumes point patterns are sorted in increasing order of x coordinate
 
-  $Revision: 1.3 $  $Date: 2011/07/25 09:14:06 $
+  $Revision: 1.4 $  $Date: 2011/11/20 03:57:54 $
 
 */
 
@@ -59,6 +59,7 @@ void FNAME(nn1, x1, y1, id1,
   jleft = jright = 0;
 
   for(i = 0; i < n1; i++) {
+    R_CheckUserInterrupt();
     x1i = x1[i];
     y1i = y1[i];
     id1i = id1[i];

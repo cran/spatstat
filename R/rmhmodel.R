@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.51 $  $Date: 2011/11/06 10:08:13 $
+#   $Revision: 1.53 $  $Date: 2011/11/18 15:01:14 $
 #
 #
 
@@ -48,20 +48,58 @@ rmhmodel.default <- function(...,
   if(!is.character(cif))
     stop("cif should be a character string")
 
+  betamultiplier <- 1
+
   Ncif <- length(cif)
   if(Ncif > 1) {
-    # hybrid 
+    # hybrid
+    # check for Poisson components
+    ispois <- (cif == 'poisson')
+    if(any(ispois)) {
+      # validate Poisson components
+      Npois <- sum(ispois)
+      poismodels <- vector(mode="list", length=Npois)
+      parpois <- par[ispois]
+      for(i in 1:Npois)
+        poismodels[[i]] <- rmhmodel(cif='poisson', par=parpois[[i]],
+                                    w=w, trend=NULL, types=types,
+                                    stopinvalid=FALSE)
+      # consolidate Poisson intensity parameters
+      poisbetalist <- lapply(poismodels, function(x){x$C.beta})
+      poisbeta <- Reduce("*", poisbetalist)
+      if(all(ispois)) {
+        # model collapses to a Poisson process
+        cif <- 'poisson'
+        Ncif <- 1
+        par <- list(beta=poisbeta)
+        betamultiplier <- 1
+      } else {
+        # remove Poisson components
+        cif <- cif[!ispois]
+        Ncif <- sum(!ispois)
+        par <- par[!ispois]
+        if(Ncif == 1) # revert to single-cif format
+          par <- par[[1]]
+        # absorb beta parameters 
+        betamultiplier <- poisbeta
+      }
+    }
+  }
+  
+  if(Ncif > 1) {
+    # genuine hybrid 
     models <- vector(mode="list", length=Ncif)
     check <- vector(mode="list", length=Ncif)
-    for(i in 1:Ncif) {
-      cifi <- cif[i]
-      pari <- par[[i]]
-      models[[i]] <- rmhmodel(cif=cifi, par=pari, w=w, trend=NULL, types=types,
+    for(i in 1:Ncif) 
+      models[[i]] <- rmhmodel(cif=cif[i], par=par[[i]],
+                              w=w, trend=NULL, types=types,
                               stopinvalid=FALSE)
-    }
     C.id  <- unlist(lapply(models, function(x){x$C.id}))
     C.betalist <- lapply(models, function(x){x$C.beta})
     C.iparlist <- lapply(models, function(x){x$C.ipar})
+    # absorb beta multiplier into beta parameter of first component
+    C.betalist[[1]] <- C.betalist[[1]] * betamultiplier
+    # concatenate for use in C
     C.beta     <- unlist(C.betalist)
     C.ipar     <- unlist(C.iparlist)
     check <- lapply(models, function(x){x$check})
@@ -119,7 +157,6 @@ rmhmodel.default <- function(...,
                            stabilising=sreason)
     }
 
-    ##
     out <- list(cif=cif,
                 par=par,
                 w=w,
@@ -181,6 +218,7 @@ rmhmodel.default <- function(...,
     stopifnot(!is.null(names(checkedpar)) && all(nzchar(names(checkedpar))))
     stopifnot(names(checkedpar)[[1]] == "beta")
     C.beta  <- unlist(checkedpar[[1]])
+    C.beta <- C.beta * betamultiplier
     C.ipar <- as.numeric(unlist(checkedpar[-1]))
   } else {
     C.beta <- C.ipar <- NULL

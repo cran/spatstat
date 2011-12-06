@@ -1,11 +1,12 @@
 #include <math.h>
 #include <R.h>
 #include <Rmath.h>
+#include <R_ext/Utils.h>
 #include "geom3.h"
 #include "functable.h"
 
 /*
-	$Revision: 1.5 $	$Date: 2010/10/24 10:54:43 $
+	$Revision: 1.6 $	$Date: 2011/11/20 04:16:58 $
 
 	pair correlation function of 3D point pattern
 	(Epanechnikov kernel) 
@@ -51,6 +52,7 @@ pcf3trans(p, n, b, pcf, delta)
 
   /* compute numerator */
   for( i = 0; i < n; i++) {
+    R_CheckUserInterrupt();
     ip = p + i;
     for(j = i + 1; j < n; j++) {
       /* compute pairwise distance */
@@ -147,6 +149,7 @@ pcf3isot(p, n, b, pcf, delta)
 
 	/* compute numerator */
   for( i = 0; i < n; i++) {
+    R_CheckUserInterrupt();
     ip = p + i;
     for(j = i + 1; j < n; j++) {
       jp = p + j;

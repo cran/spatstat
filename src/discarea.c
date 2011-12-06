@@ -4,7 +4,7 @@
 
   Area of intersection between disc and polygonal window
 
-  $Revision: 1.5 $     $Date: 2011/09/20 07:34:33 $
+  $Revision: 1.6 $     $Date: 2011/12/03 00:15:52 $
 
  */
 
@@ -16,8 +16,10 @@
 
 #define MIN(A,B) (((A) < (B)) ? (A) : (B))
 #define MAX(A,B) (((A) > (B)) ? (A) : (B))
-#define PI 3.1415926535898
 
+#ifndef PI
+#define PI 3.1415926535898
+#endif
 
 void 
 discareapoly(nc, xc, yc, nr, rmat, nseg, x0, y0, x1, y1, eps, out) 
