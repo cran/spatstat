@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.54 $	$Date: 2011/11/28 06:53:11 $
+#	$Revision: 2.56 $	$Date: 2011/12/13 11:00:59 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -152,6 +152,9 @@ function(x, ...,
                 "did not converge ***\n"))
   }
 
+  if(s$projected)
+    cat("Fit was projected to obtain a valid point process model\n")
+  
   return(invisible(NULL))
 }
 
@@ -218,6 +221,31 @@ valid.ppm <- function(object, na.value=TRUE) {
   coeffs <- coef(object)
   Icoeffs <- coeffs[Vnames]
   return(checker(Icoeffs, inte))
+}
+
+project.ppm <- function(object, fatal=FALSE) {
+  verifyclass(object, "ppm")
+  inte <- object$interaction
+  if(is.null(inte)) 
+    return(object)
+  proj <- inte$project
+  if(is.null(proj)) {
+    whinge <- "Internal error: interaction has no projection operator"
+    if(fatal) stop(whinge) 
+    warning(whinge)
+    return(object)
+  }
+  # tweak interaction coefficients
+  object$coef.mpl <- coeffs <- coef(object)
+  Vnames   <- object$internal$Vnames
+  Icoeffs  <- coeffs[Vnames]
+  Icoeffs <- proj(Icoeffs, inte)
+  object$coef[Vnames] <- Icoeffs
+  object$projected <- TRUE
+  # recompute fitted interaction
+  object$fitin <- NULL
+  object$fitin <- fitin(object)
+  return(object)
 }
 
 

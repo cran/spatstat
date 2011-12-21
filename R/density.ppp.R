@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.50 $    $Date: 2011/09/12 09:00:16 $
+#  $Revision: 1.51 $    $Date: 2011/12/09 10:21:18 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -354,6 +354,14 @@ bw.diggle <- function(X) {
                      J=J,
                      lambda=lambda)
   return(result)
+}
+
+bw.scott <- function(X) {
+  stopifnot(is.ppp(X))
+  n <- npoints(X)
+  sdx <- sqrt(var(X$x))
+  sdy <- sqrt(var(X$y))
+  return(c(sdx, sdy) * n^(-1/6))
 }
 
 

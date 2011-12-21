@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.84 $    $Date: 2011/11/16 11:06:01 $
+#    $Revision: 1.85 $    $Date: 2011/12/16 09:49:06 $
 #
 #  (a) for matrices only:
 #
@@ -397,7 +397,7 @@ check.named.thing <- function(x, nam, namopt=character(0), xtitle=NULL,
   return(whinge)
 }
 
-forbidNA <- function(x, context, xname) {
+forbidNA <- function(x, context="", xname) {
   if(missing(xname)) xname <- deparse(substitute(x))
   if(any(is.na(x))) {
     offence <- ngettext(length(x), "be NA", "contain NA values")
@@ -407,7 +407,7 @@ forbidNA <- function(x, context, xname) {
   return(TRUE)
 }
 
-check.finite <- function(x, context, xname) {
+check.finite <- function(x, context="", xname) {
   if(missing(xname)) xname <- deparse(substitute(x))
   forbidNA(x, context, xname)
   if(any(!is.finite(x))) {
@@ -485,7 +485,7 @@ check.1.real <- function(x, context="", fatal=TRUE) {
   return(TRUE)
 }
    
-explain.ifnot <- function(expr, context) {
+explain.ifnot <- function(expr, context="") {
   ex <- deparse(substitute(expr))
   ans <- expr
   if(!identical(ans, TRUE))

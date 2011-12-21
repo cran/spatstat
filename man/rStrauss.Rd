@@ -75,8 +75,6 @@
   Metropolis-Hastings algorithm used in \code{\link{rmh}}, whose output
   is only approximately correct).
 
-  The implementation is currently \bold{experimental}.
-  
   There is a tiny chance that the algorithm will 
   run out of space before it has terminated. If this occurs, an error
   message will be generated.
@@ -106,11 +104,9 @@
   Strauss, D.J. (1975)
   A model for clustering.
   \emph{Biometrika} \bold{63}, 467--475.
-
 }
 \author{
-  Kasper Klitgaard Berthelsen
-  \email{k.berthelsen@lancaster.ac.uk},
+  Kasper Klitgaard Berthelsen,
   adapted for \pkg{spatstat} by Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
@@ -120,7 +116,10 @@
    Z <- rStrauss(100,0.7,0.05)
 }
 \seealso{
-  \code{\link{rmh}}
+  \code{\link{rmh}},
+  \code{\link{Strauss}},
+  \code{\link{rHardcore}},
+  \code{\link{rDiggleGratton}}.
 }
 
 \keyword{spatial}

@@ -16,6 +16,7 @@
        use.gam=FALSE,
        method="mpl",
        forcefit=FALSE,
+       project=FALSE,
        nd = NULL,
        gcontrol=list(),
        nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
@@ -77,6 +78,11 @@
     If \code{forcefit=FALSE}, some trivial models will be
     fitted by a shortcut. If \code{forcefit=TRUE},
     the generic fitting method will always be used. 
+  }
+  \item{project}{
+    Logical. Setting \code{project=TRUE} will ensure that the
+    fitted model is always a valid point process by
+    applying \code{\link{project.ppm}}.
   }
   \item{nd}{
     Optional. Integer or pair of integers.
@@ -481,7 +487,11 @@
       \code{\link{StraussHard}}.
 
       See \code{\link{profilepl}} for advice on
-      fitting nuisance parameters in the interaction.
+      fitting nuisance parameters in the interaction,
+      and \code{\link{ippm}} for irregular parameters in the trend.
+
+      See \code{\link{valid.ppm}} and \code{\link{project.ppm}} for
+      ensuring the fitted model is a valid point process.
 }
 \section{Warnings}{
   The implementation of the Huang-Ogata method is experimental;
@@ -503,10 +513,17 @@
   is less than or equal to \eqn{1},
   corresponding to a value of \code{ppm()$theta[2]}
   less than or equal to \code{0}.
-  The current version of \code{ppm} maximises the pseudolikelihood
+
+  By default (if \code{project=FALSE}) the algorithm
+  maximises the pseudolikelihood
   without constraining the parameters, and does not apply any checks for
-  sanity after fitting the model. 
- 
+  sanity after fitting the model.
+  This is because the fitted parameter value
+  could be useful information for data analysis.
+  To constrain the parameters to ensure that the model is a valid
+  point process, set \code{project=TRUE}. See also the functions
+  \code{\link{valid.ppm}} and \code{\link{project.ppm}}.
+  
   The \code{trend} formula should not use any variable names
   beginning with the prefixes \code{.mpl} or \code{Interaction}
   as these names are reserved

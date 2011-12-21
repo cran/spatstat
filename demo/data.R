@@ -43,6 +43,8 @@ plot(flu[wildM1, 1, drop=TRUE],
      main=c("flu data", "wild type virus, M2-M1 stain"),
      chars=c(16,3), cex=0.4, cols=2:3)
 
+plot(gorillas, chars=c(1,3), cols=2:3, main="Gorilla nest sites")
+
 plot(hamster, cols=c(2,4))
 
 plot(heather)

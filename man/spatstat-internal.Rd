@@ -455,7 +455,6 @@
 \alias{update.interact}
 \alias{update.slrm}
 \alias{validradius}        
-\alias{valid.ppm}        
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
@@ -974,7 +973,6 @@ tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{update}{interact}(object, \dots)
 \method{update}{slrm}(object, ..., evaluate = TRUE, env = parent.frame())
 validradius(r, caller)
-valid.ppm(object, na.value)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)

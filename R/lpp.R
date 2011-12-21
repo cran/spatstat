@@ -49,7 +49,8 @@ summary.lpp <- function(object, ...) {
               totlength=totlen,
               intensity=npoints/totlen,
               nvert=L$vertices$n,
-              nedge=L$lines$n)
+              nedge=L$lines$n,
+              unitinfo=summary(unitname(L)))
   class(out) <- "summary.lpp"
   return(out)
 }
@@ -60,8 +61,10 @@ print.summary.lpp <- function(x, ...) {
   cat(paste("Linear network with",
             x$nvert, "vertices and",
             x$nedge, "edges\n"))
-  cat(paste("Total edge length", x$totlength, "\n"))
-  cat(paste("Average intensity", x$intensity, "points per unit length\n"))
+  u <- x$unitinfo
+  cat(paste("Total edge length", x$totlength, u$plural, u$explain, "\n"))
+  cat(paste("Average intensity", x$intensity,
+            "points per", if(u$vanilla) "unit length" else u$singular, "\n"))
   invisible(NULL)
 }
 

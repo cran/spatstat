@@ -1,4 +1,62 @@
 
+	CHANGES IN spatstat VERSION 1.25-1
+
+OVERVIEW 
+
+   o We thank Neba Funwi-Gabga and Jorge Mateu for contributions.
+
+   o New dataset of gorilla nest sites
+
+   o New functions for perfect simulation 
+
+   o Bug fix for rare crashes in rStrauss
+
+   o Code for ensuring a fitted point process model is a valid point process
+
+NEW DATASET
+
+   o gorillas
+   Gorilla nest sites in a National Park in Cameroon.
+   Generously contributed by Neba Funwi-Gabga
+
+NEW FUNCTIONS
+
+   o rDiggleGratton, rDGS, rHardcore
+   Perfect simulation for the Diggle-Gratton process,
+   Diggle-Gates-Stibbard process, and Hardcore process.
+
+   o bw.scott
+   Scott's rule of thumb for bandwidth selection in
+   multidimensional smoothing
+
+   o valid.ppm
+   Checks whether a fitted point process model is a valid point process
+
+   o project.ppm
+   Forces a fitted point process model to be a valid point process
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o ppm
+   New argument 'project' determines whether the fitted model
+   is forced to be a valid point process
+
+   o linnet
+   Substantially accelerated.
+
+   o rStrauss
+   Slightly accelerated.
+
+   o summary.lpp
+   Now prints the units of length.
+
+BUG FIXES
+
+   o rStrauss
+   Crashed rarely (once every 10 000 realisations)
+   with a memory segmentation fault.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.25-0
 
 OVERVIEW 
