@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.64 $	$Date: 2011/08/02 04:28:12 $
+#	$Revision: 1.65 $	$Date: 2011/12/13 07:16:13 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -46,13 +46,14 @@ function(object, window, ngrid=NULL, locations=NULL,
 #       find out what kind of model it is
 #
   mod <- summary(model, quick="no prediction")  # undocumented hack!
-  stationary <- mod$stationary
-  poisson    <- mod$poisson
-  marked     <- mod$marked
-  multitype  <- mod$multitype
-  notrend    <- mod$no.trend
-  trivial    <- poisson && notrend
-
+  stationary  <- mod$stationary
+  poisson     <- mod$poisson
+  marked      <- mod$marked
+  multitype   <- mod$multitype
+  notrend     <- mod$no.trend
+  changedcoef <- mod$changedcoef
+  trivial     <- poisson && notrend
+  
   need.covariates <- mod$has.covars
 
   if(mod$antiquated)
@@ -283,7 +284,7 @@ function(object, window, ngrid=NULL, locations=NULL,
 #   predict
 #
     lambda <- GLMpredict(glmfit, newdata, coef(object),
-                         changecoef=(object$method!="mpl"))
+                         changecoef=changedcoef)
 #
     switch(type,
            cif=,
@@ -353,7 +354,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     }
   # invoke predict.glm or compute prediction
     z <- GLMpredict(glmfit, newdata, coef(object),
-                    changecoef=(object$method != "mpl"))
+                    changecoef=changedcoef)
     
   # reset to zero if potential was zero
   if(any(cif.equals.zero))

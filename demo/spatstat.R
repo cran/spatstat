@@ -430,6 +430,10 @@ X <- rLGCP("exp", mu, param)
 plot(attr(X, "Lambda"), main="log-Gaussian Cox process")
 plot(X, add=TRUE, pch=16)
 
+plot(rStrauss(200, 0.3, 0.07))
+plot(rDiggleGratton(200,0.03,0.08))
+plot(rDGS(300, 0.05))
+
 plot(redwood, main="random thinning - rthin()")
 points(rthin(redwood, 0.5), col="green", cex=1.4)
 

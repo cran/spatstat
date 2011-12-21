@@ -171,6 +171,16 @@
 	simulate Simple Sequential Inhibition process\cr
 	\code{\link{rStrauss}} \tab
 	simulate Strauss process (perfect simulation)\cr
+	\code{\link{rHardcore}} \tab
+	simulate Hard Core process (perfect simulation)\cr
+	\code{\link{rDiggleGratton}} \tab
+	simulate Diggle-Gratton process (perfect simulation)\cr
+	\code{\link{rDGS}} \tab
+	simulate Diggle-Gates-Stibbard process (perfect simulation)\cr
+	\code{\link{rNeymanScott}} \tab
+	simulate a general Neyman-Scott process\cr
+	\code{\link{rPoissonCluster}} \tab
+	simulate a general Neyman-Scott process\cr
 	\code{\link{rNeymanScott}} \tab
 	simulate a general Neyman-Scott process\cr
 	\code{\link{rMatClust}} \tab
@@ -232,6 +242,7 @@
 	\code{\link{demopat}} \tab Synthetic point pattern \cr
 	\code{\link{finpines}} \tab Finnish Pines data \cr
 	\code{\link{flu}} \tab Influenza virus proteins \cr
+	\code{\link{gorillas}} \tab Gorilla nest sites \cr
 	\code{\link{hamster}} \tab Aherne's hamster tumour data \cr
 	\code{\link{humberside}} \tab North Humberside childhood leukaemia data \cr
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
@@ -969,7 +980,9 @@
     \code{\link{model.images}} \tab Extract spatial data used to fit model  \cr
     \code{\link{model.depends}} \tab Identify variables in the model \cr
     \code{\link{as.interact}} \tab Interpoint interaction component of model \cr
-    \code{\link{fitin}} \tab Extract fitted interpoint interaction 
+    \code{\link{fitin}} \tab Extract fitted interpoint interaction \cr
+    \code{\link{valid.ppm}} \tab Check the model is a valid point process \cr
+    \code{\link{project.ppm}} \tab Ensure the model is a valid point process 
   }
   For model selection, you can also use 
   the generic functions \code{\link{step}}, \code{\link{drop1}} 
@@ -1428,6 +1441,7 @@
   Peter Diggle,
   Ian Dryden,
   Stephen Eglen,
+  Neba Funwi-Gabga,
   Agnes Gault,
   Marc Genton,
   Pavel Grabarnik,

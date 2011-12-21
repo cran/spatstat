@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.49 $   $Date: 2011/10/31 09:15:13 $
+#    $Revision: 1.50 $   $Date: 2011/12/13 07:15:50 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -62,16 +62,21 @@ summary.ppm <- function(object, ..., quick=FALSE) {
           INTERACT$name,
           sep="")
 
-  y$method <- x$method
-
-  y$problems <- x$problems
-
   ######  Fitting algorithm ########################################
+
+  y$method <- x$method
+  
+  y$problems <- x$problems
 
   y$fitter <- x$fitter
   if(y$fitter %in% c("glm", "gam"))
     y$converged <- x$internal$glmfit$converged
-        
+
+  ######  Coefficients were changed after fit? #####################
+  
+  y$projected <- identical(x$projected, TRUE)
+  y$changedcoef <- y$projected || (y$method != "mpl")
+
   ######  Extract fitted model coefficients #########################
 
   y$entries$coef <- COEFS <- x$coef
@@ -290,6 +295,8 @@ print.summary.ppm <- function(x, ...) {
     if(x$converged) cat("Algorithm converged\n")
     else cat("*** Algorithm did not converge ***\n")
   }
+  if(x$projected)
+    cat("Fit was projected to obtain a valid point process model\n")
 
   cat("Call:\n")
   print(x$args$call)

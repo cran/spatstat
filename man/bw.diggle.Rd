@@ -51,7 +51,8 @@
   which can be plotted.
 }
 \seealso{
-  \code{\link{density.ppp}}
+  \code{\link{density.ppp}},
+  \code{\link{bw.scott}}
 }
 \examples{
   data(lansing)

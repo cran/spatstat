@@ -18,6 +18,7 @@ function(Q,
          use.gam=FALSE,
          method = "mpl",
          forcefit=FALSE,
+         project=FALSE,
          nd = NULL,
          gcontrol=list(),
          nsim=100,
@@ -86,16 +87,21 @@ function(Q,
   fitMPL$callstring <- callstring
   fitMPL$callframe <- parent.frame()
 
+  if(project && !valid.ppm(fitMPL))
+    fitMPL <- project.ppm(fitMPL)
+  
   if(method == "mpl" || is.poisson.ppm(fitMPL))
     return(fitMPL)
 
   fitHO <- ho.engine(fitMPL, nsim=nsim, nrmh=nrmh, start=start,
                      control=control, verb=verb)
 
-  if(!is.null(fitHO))
-    return(fitHO)
-  else
+  if(is.null(fitHO))
     return(fitMPL)
-
+  
+  if(project && !valid.ppm(fitHO))
+    fitHO <- project.ppm(fitHO)
+  
+  return(fitHO)
 }
 
