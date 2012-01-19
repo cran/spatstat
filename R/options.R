@@ -3,7 +3,7 @@
 #
 #     Spatstat Options
 #
-#    $Revision: 1.41 $   $Date: 2011/11/23 06:08:39 $
+#    $Revision: 1.45 $   $Date: 2012/01/19 13:04:58 $
 #
 #
 
@@ -67,9 +67,9 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
        ndummy.min=list(
          default=32,
          check=function(x) {
-           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1
+           is.numeric(x) && length(x) <= 2 && all(x == ceiling(x)) && all(x > 1)
          },
-         valid="a single integer, greater than 1"
+         valid="a single integer or a pair of integers, greater than 1"
        ),
        dupC = list(
          default=FALSE,
@@ -198,6 +198,30 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
            is.numeric(x) && (length(x) == 1) && (x == ceiling(x)) && (x > 2)
          },
          valid="a single integer, greater than 2"
+       ),
+       project.fast=list(
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       rmh.p=list(
+         default=0.9,
+         check=function(x) { is.numeric(x) && length(x) == 1 &&
+                             x >= 0 && x <= 1 },
+         valid="a single numerical value, between 0 and 1"
+       ),
+       rmh.q=list(
+         default=0.9,
+         check=function(x) { is.numeric(x) && length(x) == 1 &&
+                             x > 0 && x < 1 },
+         valid="a single numerical value, strictly between 0 and 1"
+       ),
+       rmh.nrep=list(
+         default=5e5, 
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 0
+         },
+         valid="a single integer, greater than 0"
        )
        )
 

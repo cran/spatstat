@@ -2,7 +2,7 @@
 #
 #    triplets.R
 #
-#    $Revision: 1.5 $	$Date: 2011/11/07 08:05:52 $
+#    $Revision: 1.7 $	$Date: 2012/01/18 10:50:14 $
 #
 #    The triplets interaction
 #
@@ -13,7 +13,9 @@
 #
 
 Triplets <- local({
+
   DebugTriplets <- FALSE
+  
   # define triplet potential
   TripletPotential <- function(X,U,EqualPairs,pars,correction, ...) {
     if(!all(ok <- correction %in% c("border", "none"))) {
@@ -98,9 +100,9 @@ Triplets <- local({
     list(
          name     = "Triplets process",
          creator  = "Triplets",
-         family   = NULL, # to be added
+         family   = "triplet.family", # evaluated later
          pot      = TripletPotential,
-         par      = NULL, # to be added
+         par      = list(r=NULL), # filled in later
          parnames = "interaction distance",
          init     = function(self) {
                       r <- self$par$r
@@ -118,12 +120,10 @@ Triplets <- local({
          },
          valid = function(coeffs, self) {
            gamma <- ((self$interpret)(coeffs, self))$param$gamma
-           return(is.finite(gamma))
+           return(is.finite(gamma) && (gamma <= 1))
          },
          project = function(coeffs, self) {
-           loggamma <- as.numeric(coeffs[1])
-           coeffs[1] <- if(is.na(loggamma)) -Inf else min(0, loggamma)
-           return(coeffs)
+           if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
@@ -140,12 +140,7 @@ Triplets <- local({
   class(BlankTripletsObject) <- "interact"
   # define Triplets function
   Triplets <- function(r) {
-    out <- BlankTripletsObject
-    out$family  <- triplet.family
-    out$par     <- list(r=r)
-    out$version <- versionstring.spatstat()
-    out$init(out)
-    return(out)
+    instantiate.interact(BlankTripletsObject, list(r=r))
   }
   Triplets
 })

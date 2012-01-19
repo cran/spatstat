@@ -8,15 +8,11 @@
   satisfies the integrability conditions for existence of the point process.
 }
 \usage{
-valid.ppm(object, na.value = TRUE)
+valid.ppm(object)
 }
 \arguments{
   \item{object}{
     Fitted point process model (object of class \code{"ppm"}).
-  }
-  \item{na.value}{
-    Result that should be returned if the fitted model coefficients
-    contain \code{NA}'s.
   }
 }
 \details{
@@ -50,8 +46,9 @@ valid.ppm(object, na.value = TRUE)
 
   Another possible reason for invalid models is that the data may not
   be adequate for estimation of the model parameters. In this case,
-  some of the fitted coefficients could be \code{NA}. If this happens
-  then \code{valid.ppm} returns the value specified by \code{na.value}.
+  some of the fitted coefficients could be \code{NA} or infinite
+  values. If this happens
+  then \code{valid.ppm} returns \code{FALSE}.
 
   Use the function \code{\link{project.ppm}} to force the fitted model
   to be valid.

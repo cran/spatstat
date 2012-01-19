@@ -1,17 +1,54 @@
 #
 #     dg.S
 #
-#    $Revision: 1.12 $	$Date: 2011/05/18 01:42:53 $
+#    $Revision: 1.15 $	$Date: 2012/01/18 11:32:24 $
 #
 #     Diggle-Gratton pair potential
 #
 #
-DiggleGratton <- function(delta, rho) {
-  out <- 
+DiggleGratton <- local({
+
+  # .... auxiliary functions ......
+
+  diggraterms <- function(X, Y, idX, idY, delta, rho) {
+    stopifnot(is.numeric(delta))
+    stopifnot(is.numeric(rho))
+    stopifnot(delta < rho)
+    # sort in increasing order of x coordinate
+    oX <- order(X$x)
+    oY <- order(Y$x)
+    Xsort <- X[oX]
+    Ysort <- Y[oY]
+    idXsort <- idX[oX]
+    idYsort <- idY[oY]
+    nX <- npoints(X)
+    nY <- npoints(Y)
+    # call C routine
+    out <- .C("Ediggra",
+              nnsource = as.integer(nX),
+              xsource  = as.double(Xsort$x),
+              ysource  = as.double(Xsort$y),
+              idsource = as.integer(idXsort),
+              nntarget = as.integer(nY),
+              xtarget  = as.double(Ysort$x),
+              ytarget  = as.double(Ysort$y),
+              idtarget = as.integer(idYsort),
+              ddelta   = as.double(delta),
+              rrho     = as.double(rho),
+              values   = as.double(double(nX)),
+              PACKAGE  = "spatstat")
+    answer <- integer(nX)
+    answer[oX] <- out$values
+    return(answer)
+  }
+
+  # .......... template object ..........
+  
+  BlankDG <- 
   list(
          name     = "Diggle-Gratton process",
          creator  = "DiggleGratton",
-         family    = pairwise.family,
+         family    = "pairwise.family",  #evaluated later
          pot      = function(d, par) {
                        delta <- par$delta
                        rho <- par$rho
@@ -20,11 +57,11 @@ DiggleGratton <- function(delta, rho) {
                        h <- above + inrange * (d - delta)/(rho - delta)
                        return(log(h))
                     },
-         par      = list(delta=delta, rho=rho),
+         par      = list(delta=NULL, rho=NULL),  # to be filled in later
          parnames = list("lower limit delta", "upper limit rho"),
          init     = function(self) {
-                      r <- self$par$delta
-                      r <- self$par$rho
+                      delta <- self$par$delta
+                      rho   <- self$par$rho
                       if(!is.numeric(delta) || length(delta) != 1)
                        stop("lower limit delta must be a single number")
                       if(!is.numeric(rho) || length(rho) != 1)
@@ -42,13 +79,14 @@ DiggleGratton <- function(delta, rho) {
                        printable=round(kappa,4)))
          },
          valid = function(coeffs, self) {
-           kappa <- ((self$interpret)(coeffs, self))$param$kappa
+           kappa <- as.numeric(coeffs[1])
            return(is.finite(kappa) && (kappa >= 0))
          },
          project = function(coeffs, self) {
            kappa <- as.numeric(coeffs[1])
-           coeffs[1] <- if(is.na(kappa)) 0 else max(0, kappa)
-           return(coeffs)
+           if(is.finite(kappa) && (kappa >= 0))
+             return(NULL)
+           return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            rho <- self$par$rho
@@ -60,7 +98,7 @@ DiggleGratton <- function(delta, rho) {
              return(delta)
            else return(rho)
          },
-       version=versionstring.spatstat(),
+       version=NULL, # evaluated later
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -81,40 +119,11 @@ DiggleGratton <- function(delta, rho) {
          return(matrix(answer, ncol=1))
        }
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankDG) <- "interact"
 
+  DiggleGratton <- function(delta, rho) {
+    instantiate.interact(BlankDG, list(delta=delta, rho=rho))
+  }
 
-diggraterms <- function(X, Y, idX, idY, delta, rho) {
-  stopifnot(is.numeric(delta))
-  stopifnot(is.numeric(rho))
-  stopifnot(delta < rho)
-  # sort in increasing order of x coordinate
-  oX <- order(X$x)
-  oY <- order(Y$x)
-  Xsort <- X[oX]
-  Ysort <- Y[oY]
-  idXsort <- idX[oX]
-  idYsort <- idY[oY]
-  nX <- npoints(X)
-  nY <- npoints(Y)
-  # call C routine
-  out <- .C("Ediggra",
-            nnsource = as.integer(nX),
-            xsource  = as.double(Xsort$x),
-            ysource  = as.double(Xsort$y),
-            idsource = as.integer(idXsort),
-            nntarget = as.integer(nY),
-            xtarget  = as.double(Ysort$x),
-            ytarget  = as.double(Ysort$y),
-            idtarget = as.integer(idYsort),
-            ddelta   = as.double(delta),
-            rrho     = as.double(rho),
-            values   = as.double(double(nX)),
-            PACKAGE  = "spatstat")
-  answer <- integer(nX)
-  answer[oX] <- out$values
-  return(answer)
-}
+  DiggleGratton
+})

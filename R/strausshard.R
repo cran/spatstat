@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.13 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 2.15 $	$Date: 2012/01/18 10:48:42 $
 #
 #    The Strauss/hard core process
 #
@@ -13,18 +13,19 @@
 # -------------------------------------------------------------------
 #	
 
-StraussHard <- function(r, hc) {
-  out <- 
-  list(
+StraussHard <- local({
+
+  BlankStraussHard <- 
+    list(
          name   = "Strauss - hard core process",
          creator = "StraussHard",
-         family  = pairwise.family,
+         family  = "pairwise.family",  # evaluated later
          pot    = function(d, par) {
            v <- 1 * (d <= par$r)
            v[ d <= par$hc ] <-  (-Inf)
            v
          },
-         par    = list(r = r, hc = hc),
+         par    = list(r = NULL, hc = NULL), # filled in later
          parnames = c("interaction distance",
                       "hard core distance"), 
          init   = function(self) {
@@ -45,16 +46,15 @@ StraussHard <- function(r, hc) {
                        printable=round(gamma,4)))
          },
          valid = function(coeffs, self) {
-           gamma <- (self$interpret)(coeffs, self)$param$gamma
-           return(is.finite(gamma))
+           loggamma <- as.numeric(coeffs[1])
+           return(is.finite(loggamma))
          },
          project = function(coeffs, self) {
-           gamma <- (self$interpret)(coeffs, self)$param$gamma
-           if(is.na(gamma)) 
-             coeffs[1] <- 0
-           else if(!is.finite(gamma)) 
-             coeffs[1] <- log(.Machine$double.xmax)
-           return(coeffs)
+           loggamma <- as.numeric(coeffs[1])
+           if(is.finite(loggamma))
+             return(NULL)
+           hc <- self$par$hc
+           if(hc > 0) return(Hardcore(hc)) else return(Poisson()) 
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
@@ -67,7 +67,7 @@ StraussHard <- function(r, hc) {
            else
              return(r)
          },
-       version=versionstring.spatstat(),
+       version=NULL, # evaluated later
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -85,9 +85,12 @@ StraussHard <- function(r, hc) {
          answer <- ifelse(hclose == 0, rclose, -Inf)
          return(matrix(answer, ncol=1))
        }
-       
-  )
-  class(out) <- "interact"
-  (out$init)(out)
-  return(out)
-}
+         )
+  class(BlankStraussHard) <- "interact"
+  
+  StraussHard <- function(r, hc) {
+    instantiate.interact(BlankStraussHard, list(r=r, hc=hc))
+  }
+
+  StraussHard
+})

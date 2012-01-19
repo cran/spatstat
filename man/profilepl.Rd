@@ -128,7 +128,7 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
     }
     ps <- profilepl(s, Strauss, cells)
     ps
-    plot(ps)
+    if(interactive()) plot(ps)
 
     # two irregular parameters
     s <- expand.grid(r=seq(0.05,0.15, by=0.01),sat=1:3)
@@ -137,7 +137,7 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
     }
     pg <- profilepl(s, Geyer, cells)
     pg
-    plot(pg)
+    if(interactive()) plot(pg)
     \dontrun{
     pg$fit
     }
@@ -145,6 +145,7 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
     # multitype pattern with a common interaction radius
     data(betacells)
     s <- data.frame(R=seq(65,85,by=5))
+    \testonly{ s <- data.frame(R=seq(65,85,by=10)) }
     MS <- function(R) { MultiStrauss(radii=diag(c(R,R))) }
     pm <- profilepl(s, MS, betacells, ~marks)
 }

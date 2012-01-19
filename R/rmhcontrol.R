@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.14 $  $Date: 2011/11/02 05:43:18 $
+#   $Revision: 1.16 $  $Date: 2012/01/19 12:19:16 $
 #
 #
 
@@ -39,6 +39,10 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
                  "p, q, nrep, expand, periodic, ptypes, x.cond, fixall, nverb",
                  ") with arguments given explicitly by name"))
   }
+  # impose default values
+  if(missing(p)) p <- spatstat.options("rmh.p")
+  if(missing(q)) q <- spatstat.options("rmh.q")
+  if(missing(nrep)) nrep <- spatstat.options("rmh.nrep")
   # validate arguments
   if(!is.numeric(p) || length(p) != 1
      || p < 0 || p > 1)

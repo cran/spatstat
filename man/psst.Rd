@@ -136,9 +136,10 @@ psst(object, fun, r = NULL, breaks = NULL, ...,
 \examples{
     data(cells)
     fit0 <- ppm(cells, ~1) # uniform Poisson
+    \testonly{fit0 <- ppm(cells, ~1, nd=8)}
     G0 <- psst(fit0, Gest)
     G0
-    plot(G0)
+    if(interactive()) plot(G0)
 }
 \keyword{spatial}
 \keyword{models}

@@ -51,6 +51,7 @@
 \examples{
   # create three images with values in [0,1]
   X <- setcov(owin())
+  X <- eval.im(pmin(1,X))
   Y <- as.im(function(x,y){(x+1)/2}, W=as.owin(X))
   Z <- as.im(function(x,y){(y+1)/2}, W=as.owin(X))
   RGB <- rgbim(X, Y, Z, 1)

@@ -3,10 +3,11 @@
 #
 #   simulating from Neyman-Scott processes
 #
-#   $Revision: 1.6 $  $Date: 2011/12/06 00:35:52 $
+#   $Revision: 1.7 $  $Date: 2012/01/16 02:59:10 $
 #
 #    Original code for rCauchy and rVarGamma by Abdollah Jalilian
 #    Other code and modifications by Adrian Baddeley
+#    Bug fixes by Abdollah, Adrian, and Rolf Turner
 
 "rNeymanScott" <-
   function(kappa, rmax, rcluster, win = owin(c(0,1),c(0,1)), ..., lmax=NULL)
@@ -182,7 +183,8 @@ rCauchy <- local({
     # simulate
     result <- rNeymanScott(kappa, rmax,
                            list(mu, rnmix.invgam),
-                           win, rate = 2 * eta^2)
+                           win, rate = eta^2/8)
+    # correction from Abdollah: the rate is beta = omega^2 / 2 = eta^2 / 8.
     return(result)
   }
 

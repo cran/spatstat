@@ -2,7 +2,7 @@
 #
 #    satpiece.S
 #
-#    $Revision: 1.9 $	$Date: 2008/04/11 15:17:30 $
+#    $Revision: 1.14 $	$Date: 2012/01/18 11:04:54 $
 #
 #    Saturated pairwise interaction process with piecewise constant potential
 #
@@ -13,12 +13,26 @@
 # -------------------------------------------------------------------
 #	
 
-SatPiece <- function(r, sat) {
-  out <- 
-  list(
+SatPiece <- local({
+
+  # ..... auxiliary functions ......
+
+  delSP <- function(i, r, sat) {
+    r   <- r[-i]
+    sat <- sat[-i]
+    nr <- length(r)
+    if(nr == 0) return(Poisson())
+    if(nr == 1) return(Geyer(r, sat))
+    return(SatPiece(r, sat))
+  }
+
+  # ....... template object ..........
+  
+  BlankSatPiece <- 
+    list(
          name     = "piecewise constant Saturated pairwise interaction process",
          creator  = "SatPiece",
-         family    = pairsat.family,
+         family   = "pairsat.family", # evaluated later
          pot      = function(d, par) {
                        r <- par$r
                        nr <- length(r)
@@ -30,7 +44,7 @@ SatPiece <- function(r, sat) {
                        }
                        out
                     },
-         par      = list(r = r, sat=sat),
+         par      = list(r = NULL, sat=NULL), # filled in later
          parnames = c("interaction thresholds", "saturation parameters"),
          init     = function(self) {
                       r <- self$par$r
@@ -74,18 +88,24 @@ SatPiece <- function(r, sat) {
                       & (gamma <= 1 | sat != Inf)))
         },
         project = function(coeffs, self){
-          gamma <- (self$interpret)(coeffs, self)$param$gammas
+          loggammas <- as.numeric(coeffs)
           sat <- self$par$sat
-          # convert gamma=NA to gamma = 1
-          if(any(na <- is.na(gamma))) 
-            coeffs[na] <- 0
-          # convert gamma=Inf (where sat > 0) to a large finite value
-          if(any(inf <- !na & (gamma == Inf) & (sat != 0)))
-            coeffs[inf] <- log(.Machine$double.xmax)/self$par$sat
-          # clip gamma to [0,1] where sat = Inf
-          if(any(unsat <- (sat == Inf)))
-            coeffs[unsat] <- pmin(0, coeffs[unsat])
-          return(coeffs)
+          r   <- self$par$r
+          ok <- is.finite(loggammas) & (is.finite(sat) | loggammas <= 0)
+          if(all(ok))
+            return(NULL)
+          if(!any(ok))
+            return(Poisson())
+          bad <- !ok
+          if(spatstat.options("project.fast") || sum(bad) == 1) {
+            # remove smallest threshold with an unidentifiable parameter
+            firstbad <- min(which(bad))
+            return(delSP(firstbad, r, sat))
+          } else {
+            # consider all candidate submodels
+            subs <- lapply(which(bad), delSP, r=r, sat=sat)
+            return(subs)
+          }
         },
         irange = function(self, coeffs=NA, epsilon=0, ...) {
           r <- self$par$r
@@ -99,9 +119,16 @@ SatPiece <- function(r, sat) {
             return(0)
           else return(2 * max(r[active]))
         },
-       version=versionstring.spatstat()
+       version=NULL # added later
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankSatPiece) <- "interact"
+
+  SatPiece <- function(r, sat) {
+    instantiate.interact(BlankSatPiece, list(r=r, sat=sat))
+  }
+
+  SatPiece
+})
+
+
+                  

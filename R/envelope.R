@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.22 $  $Date: 2011/10/07 08:52:09 $
+#   $Revision: 2.23 $  $Date: 2012/01/09 02:42:11 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -324,9 +324,12 @@ envelopeEngine <-
   fname <- sQuote(fname)
 
   # R function to apply
-  if(is.character(fun))
-    fun <- get(fun)
-  if(!is.function(fun)) 
+  if(is.character(fun)) {
+    gotfun <- try(get(fun, mode="function"))
+    if(inherits(gotfun, "try-error"))
+      stop(paste("Could not find a function named", sQuote(fun)))
+    fun <- gotfun
+  } else if(!is.function(fun)) 
     stop(paste("unrecognised format for function", fname))
   fargs <- names(formals(fun))
   if(!any(c("r", "...") %in% fargs))

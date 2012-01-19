@@ -162,13 +162,15 @@
   be between 0.2 and 0.8. 
 }
 \examples{
+   \testonly{op <- spatstat.options(ngrid.disc=8)}
+
    # prints a sensible description of itself
    AreaInter(r=0.1)
 
    # Note the reach is twice the radius
    reach(AreaInter(r=1))
 
-   # Fit the stationary area interaction process to Swedish Pines data   
+   # Fit the stationary area interaction process to Swedish Pines data
    data(swedishpines)
    ppm(swedishpines, ~1, AreaInter(r=7))
 
@@ -181,6 +183,7 @@
    \dontrun{
    ppm(swedishpines, ~polynom(x/10,y/10,3), AreaInter(r=7))
    }
+   \testonly{spatstat.options(op)}
 }
 \references{
   Baddeley, A.J. and Van Lieshout, M.N.M. (1995).

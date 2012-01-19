@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.56 $	$Date: 2011/12/13 11:00:59 $
+#	$Revision: 2.63 $	$Date: 2012/01/18 04:07:52 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -209,44 +209,215 @@ getglmsubset <- function(object) {
 
 # ??? method for 'effects' ???
 
-valid.ppm <- function(object, na.value=TRUE) {
+valid.ppm <- function(object) {
   verifyclass(object, "ppm")
+  if(!all(is.finite(coef(object))))
+    return(FALSE)
   inte <- object$interaction
   if(is.null(inte))
     return(TRUE)
   checker <- inte$valid
-  if(is.null(checker))
-    return(na.value)
+  if(is.null(checker)) {
+    warning("Internal error: unable to check validity of model")
+    return(NA)
+  }
   Vnames <- object$internal$Vnames
   coeffs <- coef(object)
   Icoeffs <- coeffs[Vnames]
   return(checker(Icoeffs, inte))
 }
 
-project.ppm <- function(object, fatal=FALSE) {
-  verifyclass(object, "ppm")
-  inte <- object$interaction
-  if(is.null(inte)) 
-    return(object)
-  proj <- inte$project
-  if(is.null(proj)) {
-    whinge <- "Internal error: interaction has no projection operator"
-    if(fatal) stop(whinge) 
-    warning(whinge)
+project.ppm <- local({
+  tracemessage <- function(depth, ...) {
+    if(depth == 0) return(NULL)
+    spacer <- paste(rep("  ", depth), collapse="")
+    marker <- ngettext(depth, "trace", paste("trace", depth))
+    marker <- paren(marker, "[")
+    cat(paste(spacer, marker, " ", paste(...), "\n", sep=""))
+  }
+  leaving <- function(depth) {
+    tracemessage(depth, ngettext(depth, "Returning.", "Exiting level."))
+  }
+  project.ppm <- function(object, ..., fatal=FALSE, trace=FALSE) {
+    verifyclass(object, "ppm")
+    fast <- spatstat.options("project.fast")
+    # user specifies 'trace' as logical
+    # but 'trace' can also be integer representing trace depth
+    td <- as.integer(trace)
+    trace <- (td > 0)
+    tdnext <- if(trace) td+1 else 0
+    if(valid.ppm(object)) {
+      tracemessage(td, "Model is valid.")
+      leaving(td)
+      return(object)
+    }
+    # First ensure trend coefficients are all finite
+    coeffs <- coef(object)
+    # Which coefficients are trend coefficients
+    coefnames  <- names(coeffs)
+    internames <- object$internal$Vnames
+    trendnames <- coefnames[!(coefnames %in% internames)]
+    # Trend terms in trend formula
+    trendterms <- attr(terms(object), "term.labels")
+    # Mapping from coefficients to terms of GLM
+    coef2term  <- attr(model.matrix(object), "assign")
+    istrend <- (coef2term > 0) & (coefnames %in% trendnames)
+    # Identify non-finite trend coefficients
+    bad <- istrend & !is.finite(coeffs)
+    if(!any(bad)) {
+      tracemessage(td, "Trend terms are valid.")
+    } else {
+      nbad <- sum(bad)
+      tracemessage(td,
+                   "Non-finite ",
+                   ngettext(nbad,
+                            "coefficient for term ",
+                            "coefficients for terms "),
+                   commasep(sQuote(trendterms[coef2term[bad]])))
+      if(fast) {
+        # remove first illegal term
+        firstbad <- min(which(bad))
+        badterm <- trendterms[coef2term[firstbad]]
+        # remove this term from model
+        tracemessage(td, "Removing term ", sQuote(badterm))
+        removebad <- as.formula(paste("~ . - ", badterm), env=object$callframe)
+        newobject <- update(object, removebad)
+        if(trace) {
+          tracemessage(td, "Updated model:")
+          print(newobject)
+        }
+        # recurse
+        newobject <- project.ppm(newobject, fatal=fatal, trace=tdnext)
+        # return
+        leaving(td)
+        return(newobject)
+      } else {
+        # consider all illegal terms
+        bestobject <- NULL
+        for(i in which(bad)) {
+          badterm <- trendterms[coef2term[i]]
+          # remove this term from model
+          tracemessage(td, "Considering removing term ", sQuote(badterm))
+          removebad <- as.formula(paste("~ . - ", badterm),
+                                  env=object$callframe)
+          object.i <- update(object, removebad)
+          if(trace) {
+            tracemessage(td, "Considering updated model:")
+            print(object.i)
+          }
+          # recurse
+          object.i <- project.ppm(object.i, fatal=fatal, trace=tdnext)
+          # evaluate logPL
+          logPL.i   <- logLik(object.i, warn=FALSE)
+          tracemessage(td, "max log pseudolikelihood = ", logPL.i)
+          # optimise
+          if(is.null(bestobject) || (logLik(bestobject, warn=FALSE) < logPL.i))
+            bestobject <- object.i
+        }
+        if(trace) {
+          tracemessage(td, "Best submodel:")
+          print(bestobject)
+        }
+        # return
+        leaving(td)
+        return(bestobject)
+      }
+    } 
+    # Now handle interaction
+    inte <- object$interaction
+    if(is.null(inte)) {
+      tracemessage(td, "No interaction to check.")
+      leaving(td)
+      return(object)
+    }
+    tracemessage(td, "Inspecting interaction terms.")
+    proj <- inte$project
+    if(is.null(proj)) {
+      whinge <- "Internal error: interaction has no projection operator"
+      if(fatal) stop(whinge) 
+      warning(whinge)
+      leaving(td)
+      return(object)
+    }
+    # apply projection 
+    coef.mpl <- coeffs <- coef(object)
+    Vnames   <- object$internal$Vnames
+    Icoeffs  <- coeffs[Vnames]
+    change <- proj(Icoeffs, inte)
+    if(is.null(change)) {
+      tracemessage(td, "Interaction does not need updating.")
+      leaving(td)
+      return(object)
+    }
+    tracemessage(td, "Interaction is not valid.")
+    if(is.numeric(change)) {
+      tracemessage(td, "Interaction coefficients updated without re-fitting.")
+      # old style: 'project' returned a vector of updated coefficients
+      Icoeffs <- change
+      # tweak interaction coefficients
+      object$coef[Vnames] <- Icoeffs
+      # recompute fitted interaction
+      object$fitin <- NULL
+      object$fitin <- fitin(object)
+    } else if(is.interact(change)) {
+      # new style: 'project' returns an interaction
+      if(trace) {
+        tracemessage(td, "Interaction changed to:")
+        print(change)
+      }
+      # refit the whole model
+      newobject <- update(object, interaction=change, envir=object$callframe)
+      if(trace) {
+        tracemessage(td, "Updated model:")
+        print(newobject)
+      }
+      # recurse
+      newobject <- project.ppm(newobject, fatal=fatal, trace=tdnext)
+      object <- newobject
+    } else if(is.list(change) && all(unlist(lapply(change, is.interact)))) {
+      # new style: 'project' returns a list of candidate interactions
+      nchange <- length(change)
+      tracemessage(td, "Considering", nchange,
+                   ngettext(nchange, "submodel", "submodels"))
+      bestobject <- NULL
+      for(i in seq_len(nchange)) {
+        change.i <- change[[i]]
+        if(trace) {
+          tracemessage(td,
+                       "Considering", ordinal(i), 
+                       "candidate submodel, with interaction:")
+          print(change.i)
+        }
+        # refit the whole model
+        object.i <- update(object, interaction=change.i, envir=object$callframe)
+        if(trace) {
+          tracemessage(td, "Considering", ordinal(i),
+                       "candidate updated model:")
+          print(object.i)
+        }
+        # recurse
+        object.i <- project.ppm(object.i, fatal=fatal, trace=tdnext)
+        # evaluate logPL
+        logPL.i   <- logLik(object.i, warn=FALSE)
+        tracemessage(td, "max log pseudolikelihood = ", logPL.i)
+        # optimise
+        if(is.null(bestobject) || (logLik(bestobject, warn=FALSE) < logPL.i))
+          bestobject <- object.i
+      }
+      # end loop through submodels
+      if(trace) {
+        tracemessage(td, "Best submodel:")
+        print(bestobject)
+      }
+      object <- bestobject
+    } else stop("Internal error: unrecognised format of update")
+    object$projected <- TRUE
+    object$coef.mpl  <- coef.mpl
+    leaving(td)
     return(object)
   }
-  # tweak interaction coefficients
-  object$coef.mpl <- coeffs <- coef(object)
-  Vnames   <- object$internal$Vnames
-  Icoeffs  <- coeffs[Vnames]
-  Icoeffs <- proj(Icoeffs, inte)
-  object$coef[Vnames] <- Icoeffs
-  object$projected <- TRUE
-  # recompute fitted interaction
-  object$fitin <- NULL
-  object$fitin <- fitin(object)
-  return(object)
-}
+  project.ppm
+})
 
 
 logLik.ppm <- function(object, ..., warn=TRUE) {

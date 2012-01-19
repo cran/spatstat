@@ -2,6 +2,8 @@
 # Check that nndist and nnwhich give
 # results consistent with direct calculation from pairdist
 
+# Similarly for nncross and distfun
+
 require(spatstat)
 local({
   eps <- sqrt(.Machine$double.eps)
@@ -77,6 +79,20 @@ local({
   nw5P <- g(pairdist(X), 5)
   if(any(nw5 != nw5P))
     stop("nnwhich.ppx(k=5) does not agree with pairdist")
+
+  #### nncross in two dimensions
+  X <- runifpoint(42)
+  Y <- runifpoint(42, win=owin(c(1,2),c(1,2)))
+  nc <- nncross(X,Y)
+  ncd <- nc$dist
+  ncw <- nc$which
+  cd <- crossdist(X,Y)
+  cdd <- apply(cd, 1, min)
+  cdw <- apply(cd, 1, which.min)
+  if(any(abs(ncd - cdd) > eps))
+    stop("nncross()$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("nncross()$which does not agree with apply(crossdist(), 1, which.min)")
 })
 require(spatstat)
 
@@ -1241,4 +1257,22 @@ local({
   fithard <- ppm(cells, ~1, Triplets(0.05))
   fithard
   suffstat(fithard)
+})
+#
+#     tests/project.ppm.R
+#
+#      $Revision: 1.2 $  $Date: 2012/01/16 13:47:31 $
+#
+#     Tests of projection mechanism
+#
+
+require(spatstat)
+local({
+  # a very unidentifiable model
+  fit <- ppm(cells, ~Z, Strauss(1e-06), covariates=list(Z=0))
+  project.ppm(fit)
+  # multitype
+  fit2 <- ppm(amacrine, ~1, MultiStrauss(types=c("off", "on"),
+                                         radii=matrix(1e-06, 2, 2)))
+  project.ppm(fit2)
 })

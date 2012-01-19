@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.49 $   $Date: 2011/05/19 01:49:22 $
+#  $Revision: 1.54 $   $Date: 2011/12/31 03:29:22 $
 #
 #  Plotting code for pixel images
 #
@@ -12,287 +12,344 @@
 #
 ###########################################################################
 
-plot.im <- function(x, ...,
-                    col=NULL, valuesAreColours=NULL,
-                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
-                    ribscale=1) {
-  main <- deparse(substitute(x))
-  verifyclass(x, "im")
-  zlim <- list(...)$zlim
+plot.im <- local({
 
-  xtype <- x$type
+  # recognised plot parameters
+  
+  plotparams <- imageparams <- c("main", "asp", "sub", "axes", "ann",
+                   "cex", "font", 
+                   "cex.axis", "cex.lab", "cex.main", "cex.sub",
+                   "col.axis", "col.lab", "col.main", "col.sub",
+                   "font.axis", "font.lab", "font.main", "font.sub")
+  axisparams <- c("pos",
+                  "cex", "font", "col", 
+                  "cex.axis", "cex.lab",
+                  "col.axis", "col.lab",
+                  "font.axis", "font.lab")
 
-  # determine whether pixel values are to be treated as colours
-  if(!is.null(valuesAreColours)) {
-    # argument given - validate
-    stopifnot(is.logical(valuesAreColours))
-    if(valuesAreColours) {
-      # pixel values must be factor or character
-      if(!xtype %in% c("factor", "character")) {
-        warning(paste("Pixel values of type", sQuote(xtype),
-                      "are not interpretable as colours"))
-        valuesAreColours <- FALSE
-      } else {
-        # colour values do not need a colour map
-        if(!is.null(col))
-          warning(paste("Pixel values are taken to be colour values,",
-                        "because valuesAreColours=TRUE;", 
-                        "the colour map (argument col) is ignored"),
-                  call.=FALSE)
-      }
-    }
-  } else if(!is.null(col)) {
-    # argument 'col' controls colours
-    valuesAreColours <- FALSE
-  } else {
-    # default : determine whether pixel values are colours
-    strings <- switch(xtype,
-                      character = { as.vector(x$v) },
-                      factor    = { levels(x) },
-                      { NULL })
-    valuesAreColours <- is.character(strings) && 
-      !inherits(try(col2rgb(strings), silent=TRUE), "try-error")
-    if(valuesAreColours)
-      cat("Interpreting pixel values as colours\n")
+  # auxiliary functions
+
+  image.doit <- function(..., extrargs=imageparams) {
+    do.call.matched("image.default",
+                    resolve.defaults(...),
+                    extrargs=extrargs)
   }
-  # 
-  if(valuesAreColours) {
-    # colour-valued images are plotted using the code for factor images
-    # with the colour map equal to the levels of the factor
-    switch(xtype,
-           factor = {
-             col <- levels(x)
-           },
-           character = {
-             x <- eval.im(factor(x))
-             xtype <- "factor"
-             col <- levels(x)
-           },
-           {
-             warning(paste("Pixel values of type", sQuote(xtype),
-                           "are not interpretable as colours"))
-           })
-    # colours not suitable for ribbon
-    ribbon <- FALSE
-  } 
-    
-  imagebreaks <- NULL
-  ribbonvalues <- ribbonbreaks <- NULL
 
   clamp <- function(x, v, tol=0.02 * diff(v)) {
     ok <- (x >= v[1] - tol) & (x <= v[2] + tol)
     x[ok]
   }
 
-  colmap <- if(inherits(col, "colourmap")) col else NULL
+  # main function
+  PlotIm <- function(x, ...,
+                     col=NULL, valuesAreColours=NULL,
+                     ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
+                     ribscale=1, ribargs=list()) {
+    main <- deparse(substitute(x))
+    verifyclass(x, "im")
+    dotargs <- list(...)
+    stopifnot(is.list(ribargs))
+  
+    zlim <- dotargs$zlim
 
-  switch(xtype,
-         real    = {
-           vrange <- range(x)
-           vrange <- range(zlim, vrange)
-           if(!is.null(colmap)) {
-             # explicit colour map
-             s <- summary(colmap)
-             if(s$discrete)
-               stop("Discrete colour map is not applicable to real values")
-             imagebreaks <- s$breaks
-             vrange <- range(imagebreaks)
-             col <- s$outputs
-           }
-           trivial <- (diff(vrange) <= .Machine$double.eps)
-           if(!trivial) {
-             ribbonvalues <- seq(from=vrange[1], to=vrange[2], length.out=ribn)
-             ribbonrange <- vrange
-             ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
-                                  vrange)
-             ribbonlabels <- paste(ribbonticks * ribscale)
-           }
-         },
-         integer = {
-           values <- as.vector(x$v)
-           values <- values[!is.na(values)]
-           uv <- unique(values)
-           vrange <- range(uv)
-           vrange <- range(zlim, vrange)
-           nvalues <- length(uv)
-           trivial <- (nvalues < 2)
-           if(!trivial){
-             ribbonticks <- clamp(pretty(vrange * ribscale)/ribscale, vrange)
-             ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
-             if(identical(all.equal(ribbonticks,
-                                    vrange[1]:vrange[2]), TRUE)) {
-               # each possible value will be printed on ribbon label
-               ribbonvalues <- vrange[1]:vrange[2]
-               imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
-               ribbonrange <- range(imagebreaks)
-               ribbonticks <- ribbonvalues
-               ribbonlabels <- paste(ribbonticks * ribscale)
-             } else {
-               # not all values will be printed on ribbon label
-               ribn <- min(ribn, diff(vrange)+1)
-               ribbonvalues <- seq(from=vrange[1], to=vrange[2], length.out=ribn)
+    xtype <- x$type
+
+    # determine whether pixel values are to be treated as colours
+    if(!is.null(valuesAreColours)) {
+      # argument given - validate
+      stopifnot(is.logical(valuesAreColours))
+      if(valuesAreColours) {
+        # pixel values must be factor or character
+        if(!xtype %in% c("factor", "character")) {
+          warning(paste("Pixel values of type", sQuote(xtype),
+                        "are not interpretable as colours"))
+          valuesAreColours <- FALSE
+        } else {
+          # colour values do not need a colour map
+          if(!is.null(col))
+            warning(paste("Pixel values are taken to be colour values,",
+                          "because valuesAreColours=TRUE;", 
+                          "the colour map (argument col) is ignored"),
+                    call.=FALSE)
+        }
+      }
+    } else if(!is.null(col)) {
+      # argument 'col' controls colours
+      valuesAreColours <- FALSE
+    } else {
+      # default : determine whether pixel values are colours
+      strings <- switch(xtype,
+                        character = { as.vector(x$v) },
+                        factor    = { levels(x) },
+                        { NULL })
+      valuesAreColours <- is.character(strings) && 
+      !inherits(try(col2rgb(strings), silent=TRUE), "try-error")
+      if(valuesAreColours)
+        cat("Interpreting pixel values as colours\n")
+    }
+    # 
+    if(valuesAreColours) {
+      # colour-valued images are plotted using the code for factor images
+      # with the colour map equal to the levels of the factor
+      switch(xtype,
+             factor = {
+               col <- levels(x)
+             },
+             character = {
+               x <- eval.im(factor(x))
+               xtype <- "factor"
+               col <- levels(x)
+             },
+             {
+               warning(paste("Pixel values of type", sQuote(xtype),
+                             "are not interpretable as colours"))
+             })
+      # colours not suitable for ribbon
+      ribbon <- FALSE
+    } 
+    
+    imagebreaks <- NULL
+    ribbonvalues <- ribbonbreaks <- NULL
+    
+    colmap <- if(inherits(col, "colourmap")) col else NULL
+
+    switch(xtype,
+           real    = {
+             vrange <- range(x)
+             vrange <- range(zlim, vrange)
+             if(!is.null(colmap)) {
+               # explicit colour map
+               s <- summary(colmap)
+               if(s$discrete)
+                 stop("Discrete colour map is not applicable to real values")
+               imagebreaks <- s$breaks
+               vrange <- range(imagebreaks)
+               col <- s$outputs
+             }
+             trivial <- (diff(vrange) <= .Machine$double.eps)
+             if(!trivial) {
+               ribbonvalues <- seq(from=vrange[1], to=vrange[2],
+                                   length.out=ribn)
                ribbonrange <- vrange
+               ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
+                                    vrange)
                ribbonlabels <- paste(ribbonticks * ribscale)
              }
-           }
-           if(!is.null(colmap)) {
-             # explicit colour map
-             s <- summary(colmap)
-             if(!s$discrete)
-               imagebreaks <- s$breaks
-             else
-               imagebreaks <- c(s$inputs[1] - 0.5, s$inputs + 0.5)
-             col <- s$outputs
-           }
-         },
-         logical = {
-           values <- as.integer(as.vector(x$v))
-           values <- values[!is.na(values)]
-           uv <- unique(values)
-           trivial <- (length(uv) < 2)
-           vrange <- c(0,1)
-           imagebreaks <- c(-0.5, 0.5, 1.5)
-           ribbonvalues <- c(0,1)
-           ribbonrange <- range(imagebreaks)
-           ribbonbreaks <- imagebreaks
-           ribbonticks <- ribbonvalues
-           ribbonlabels <- c("FALSE", "TRUE")
-           if(!is.null(colmap)) 
-             col <- colmap(c(FALSE,TRUE))
-         },
-         factor  = {
-           lev <- levels(x)
-           nvalues <- length(lev)
-           trivial <- (nvalues < 2)
-           # ensure all factor levels plotted separately
-           fac <- factor(lev, levels=lev)
-           intlev <- as.integer(fac)
-           imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
-           ribbonvalues <- intlev
-           ribbonrange <- range(imagebreaks)
-           ribbonbreaks <- imagebreaks
-           ribbonticks <- ribbonvalues
-           ribbonlabels <- paste(lev)
-           vrange <- range(intlev)
-           if(!is.null(colmap)) 
-             col <- colmap(fac)
-         },
-         character  = {
-           x <- eval.im(factor(x))
-           lev <- levels(x)
-           nvalues <- length(lev)
-           trivial <- (nvalues < 2)
-           # ensure all factor levels plotted separately
-           fac <- factor(lev, levels=lev)
-           intlev <- as.integer(fac)
-           imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
-           ribbonvalues <- intlev
-           ribbonrange <- range(imagebreaks)
-           ribbonbreaks <- imagebreaks
-           ribbonticks <- ribbonvalues
-           ribbonlabels <- paste(lev)
-           vrange <- range(intlev)
-           if(!is.null(colmap)) 
-             col <- colmap(fac)
-         },
-         stop(paste("Do not know how to plot image of type", sQuote(xtype)))
-         )
-
+           },
+           integer = {
+             values <- as.vector(x$v)
+             values <- values[!is.na(values)]
+             uv <- unique(values)
+             vrange <- range(uv)
+             vrange <- range(zlim, vrange)
+             nvalues <- length(uv)
+             trivial <- (nvalues < 2)
+             if(!trivial){
+               ribbonticks <- clamp(pretty(vrange * ribscale)/ribscale, vrange)
+               ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
+               if(identical(all.equal(ribbonticks,
+                                      vrange[1]:vrange[2]), TRUE)) {
+                 # each possible value will be printed on ribbon label
+                 ribbonvalues <- vrange[1]:vrange[2]
+                 imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
+                 ribbonrange <- range(imagebreaks)
+                 ribbonticks <- ribbonvalues
+                 ribbonlabels <- paste(ribbonticks * ribscale)
+               } else {
+                 # not all values will be printed on ribbon label
+                 ribn <- min(ribn, diff(vrange)+1)
+                 ribbonvalues <- seq(from=vrange[1], to=vrange[2],
+                                     length.out=ribn)
+                 ribbonrange <- vrange
+                 ribbonlabels <- paste(ribbonticks * ribscale)
+               }
+             }
+             if(!is.null(colmap)) {
+               # explicit colour map
+               s <- summary(colmap)
+               imagebreaks <-
+                 if(!s$discrete) s$breaks else
+                 c(s$inputs[1] - 0.5, s$inputs + 0.5)
+               col <- s$outputs
+             }
+           },
+           logical = {
+             values <- as.integer(as.vector(x$v))
+             values <- values[!is.na(values)]
+             uv <- unique(values)
+             trivial <- (length(uv) < 2)
+             vrange <- c(0,1)
+             imagebreaks <- c(-0.5, 0.5, 1.5)
+             ribbonvalues <- c(0,1)
+             ribbonrange <- range(imagebreaks)
+             ribbonbreaks <- imagebreaks
+             ribbonticks <- ribbonvalues
+             ribbonlabels <- c("FALSE", "TRUE")
+             if(!is.null(colmap)) 
+               col <- colmap(c(FALSE,TRUE))
+           },
+           factor  = {
+             lev <- levels(x)
+             nvalues <- length(lev)
+             trivial <- (nvalues < 2)
+             # ensure all factor levels plotted separately
+             fac <- factor(lev, levels=lev)
+             intlev <- as.integer(fac)
+             imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
+             ribbonvalues <- intlev
+             ribbonrange <- range(imagebreaks)
+             ribbonbreaks <- imagebreaks
+             ribbonticks <- ribbonvalues
+             ribbonlabels <- paste(lev)
+             vrange <- range(intlev)
+             if(!is.null(colmap)) 
+               col <- colmap(fac)
+           },
+           character  = {
+             x <- eval.im(factor(x))
+             lev <- levels(x)
+             nvalues <- length(lev)
+             trivial <- (nvalues < 2)
+             # ensure all factor levels plotted separately
+             fac <- factor(lev, levels=lev)
+             intlev <- as.integer(fac)
+             imagebreaks <- c(intlev - 0.5, max(intlev) + 0.5)
+             ribbonvalues <- intlev
+             ribbonrange <- range(imagebreaks)
+             ribbonbreaks <- imagebreaks
+             ribbonticks <- ribbonvalues
+             ribbonlabels <- paste(lev)
+             vrange <- range(intlev)
+             if(!is.null(colmap)) 
+               col <- colmap(fac)
+           },
+           stop(paste("Do not know how to plot image of type", sQuote(xtype)))
+           )
   
-  # determine colour map
-  if(!is.null(colmap)) {
-    # explicit colour map object
-    colourinfo <- list(breaks=imagebreaks, col=col)
-  } else {
-    # compile colour information using default colour values
-    colfun <- spatstat.options("image.colfun")
-    if(!is.null(imagebreaks)) 
-      colourinfo <- list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
-    else 
-      colourinfo <- list(col=colfun(255))
-    # user-specified colour values
-    if(!is.null(col)) {
-      colourinfo$col <- col
-      if(!is.null(colourinfo$breaks)) {
-      # check consistency
-        nvalues <- length(colourinfo$breaks) - 1
-        if(length(col) != nvalues)
-          stop(paste("Length of argument", dQuote("col"),
-                     paren(paste(length(col))),
-                     "does not match the number of distinct values",
-                     paren(paste(nvalues))))
+    # determine colour map
+    if(!is.null(colmap)) {
+      # explicit colour map object
+      colourinfo <- list(breaks=imagebreaks, col=col)
+    } else {
+      # compile colour information using default colour values
+      colfun <- spatstat.options("image.colfun")
+      colourinfo <- if(!is.null(imagebreaks)) {
+        list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
+      } else list(col=colfun(255))
+      # user-specified colour values
+      if(!is.null(col)) {
+        colourinfo$col <- col
+        if(!is.null(colourinfo$breaks)) {
+        # check consistency
+          nvalues <- length(colourinfo$breaks) - 1
+          if(length(col) != nvalues)
+            stop(paste("Length of argument", dQuote("col"),
+                       paren(paste(length(col))),
+                       "does not match the number of distinct values",
+                       paren(paste(nvalues))))
+        }
       }
     }
-  }
   
-  add <- resolve.defaults(list(...), list(add=FALSE))$add
+    add <- resolve.defaults(dotargs, list(add=FALSE))$add
 
-  image.doit <- function(...) {
-    do.call.matched("image.default",
-                    resolve.defaults(...),
-                    extrargs=c("main", "asp", "sub", "axes", "ann"))
-  }
-  
-  if(!identical(ribbon, TRUE)
-     || identical(add, TRUE)
-     || trivial)
-    {
-      # plot image without ribbon
-      image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
-                 list(...),
-                 colourinfo,
-                 list(xlab = "", ylab = ""),
-                 list(asp = 1, main = main, axes=FALSE)
-                 )
-      return(invisible(NULL))
-    }
-  # determine plot region
-  # image at left, ribbon at right
-  bb <- owin(x$xrange, x$yrange)
-  xwidth <- diff(bb$xrange)
-  xheight <- diff(bb$yrange)
-  xsize <- max(xwidth, xheight)
-  bb.rib <- owin(bb$xrange[2] + c(ribsep, ribsep+ribwid) * xsize,
-                 bb$yrange)
-  bb.all <- bounding.box(bb.rib, bb)
-  # establish coordinate system
-  do.call.matched("plot.default",
-          resolve.defaults(list(x=0, y=0,  type="n", axes=FALSE, asp=1,
-                            xlim=bb.all$xrange, ylim=bb.all$yrange),
-                           list(...), list(main=main, xlab="", ylab="")))
-  # plot image
+    if(!identical(ribbon, TRUE)
+       || identical(add, TRUE)
+       || trivial)
+      {
+        # plot image without ribbon
+        image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+                   dotargs,
+                   list(useRaster=TRUE),
+                   colourinfo,
+                   list(xlab = "", ylab = ""),
+                   list(asp = 1, main = main, axes=FALSE)
+                   )
+        return(invisible(NULL))
+      }
+    # determine plot region
+    # image at left, ribbon at right
+    bb <- owin(x$xrange, x$yrange)
+    xwidth <- diff(bb$xrange)
+    xheight <- diff(bb$yrange)
+    xsize <- max(xwidth, xheight)
+    bb.rib <- owin(bb$xrange[2] + c(ribsep, ribsep+ribwid) * xsize,
+                   bb$yrange)
+    bb.all <- bounding.box(bb.rib, bb)
+    # establish coordinate system
+    do.call.matched("plot.default",
+                    resolve.defaults(list(x=0, y=0,  type="n",
+                                          axes=FALSE, asp=1,
+                                          xlim=bb.all$xrange,
+                                          ylim=bb.all$yrange),
+                                     dotargs,
+                                     list(main=main, xlab="", ylab="")),
+                    extrargs=plotparams)
+    # plot image
     image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
                list(add=TRUE),
-               list(...),
+               dotargs,
+               list(useRaster=TRUE),
                colourinfo,
                list(xlab = "", ylab = ""),
                list(asp = 1, main = main))
-  # axes for image
-  imax <- resolve.defaults(list(...), list(axes=FALSE))$axes
-  if(imax) {
-    px <- pretty(bb$xrange)
-    py <- pretty(bb$yrange)
-    axis(1, at=px, pos=bb$yrange[1])
-    axis(2, at=py, pos=bb$xrange[1])
-    rect(x$xrange[1], x$yrange[1], x$xrange[2], x$yrange[2])
+    # axes for image
+    imax <- identical(dotargs$axes, TRUE)
+    imbox <- !identical(dotargs$box, FALSE)
+    if(imbox)
+      rect(x$xrange[1], x$yrange[1], x$xrange[2], x$yrange[2])
+    if(imax) {
+      px <- pretty(bb$xrange)
+      py <- pretty(bb$yrange)
+      do.call.matched("axis",
+                      resolve.defaults(
+                                       list(side=1, at=px), 
+                                       dotargs,
+                                       list(pos=bb$yrange[1])),
+                      extrargs=axisparams)
+      do.call.matched("axis",
+                      resolve.defaults(
+                                       list(side=2, at=py), 
+                                       dotargs,
+                                       list(pos=bb$xrange[1])),
+                      extrargs=axisparams)
+    }
+    # plot ribbon image containing the range of image values
+    ycoords <- seq(from=bb.rib$yrange[1], to=bb.rib$yrange[2],
+                   length.out=length(ribbonvalues)+1)
+    image.doit(list(x=bb.rib$xrange, y=ycoords,
+                    z=matrix(ribbonvalues, nrow=1),
+                    add=TRUE),
+               ribargs,
+               list(useRaster=TRUE),
+               list(main="", sub=""),
+               dotargs,
+               colourinfo)
+    # box around ribbon?
+    resol <- resolve.defaults(ribargs, dotargs)
+    if(!identical(resol$box, FALSE))
+      plot(as.owin(bb.rib), add=TRUE)
+    # scale axis for ribbon image
+    ribaxis <- !(identical(resol$axes, FALSE) || identical(resol$ann, FALSE))
+    if(ribaxis) {
+      scal <- diff(bb.rib$yrange)/diff(ribbonrange)
+      at.y <- bb.rib$yrange[1] + scal * (ribbonticks - ribbonrange[1])
+      yaxp <- c(bb.rib$yrange, length(ribbonticks))
+      do.call.matched("axis",
+                      resolve.defaults(
+                                       list(side=4,
+                                            at=at.y, labels=ribbonlabels),
+                                       ribargs, dotargs,
+                                       list(pos=bb.rib$xrange[2], yaxp=yaxp)),
+                      extrargs=axisparams)
+    }
+    #
+    return(invisible(NULL))
   }
-  # plot ribbon image containing the range of image values
-  ycoords <- seq(from=bb.rib$yrange[1], to=bb.rib$yrange[2],
-                 length.out=length(ribbonvalues)+1)
-  image.doit(list(x=bb.rib$xrange, y=ycoords,
-                  z=matrix(ribbonvalues, nrow=1),
-                  add=TRUE, main="", sub=""),
-             list(...),
-             colourinfo)
-  plot(as.owin(bb.rib), add=TRUE)
-  # ticks for ribbon image
-  scal <- diff(bb.rib$yrange)/diff(ribbonrange)
-  at.y <- bb.rib$yrange[1] + scal * (ribbonticks - ribbonrange[1])
-  par(yaxp=c(bb.rib$yrange, length(ribbonticks)))
-  axis(4, at=at.y, labels=ribbonlabels, pos=bb.rib$xrange[2])
-  #
-  return(invisible(NULL))
-} 
+
+  PlotIm
+})
+
 
 
 ########################################################################

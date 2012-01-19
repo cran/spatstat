@@ -1,5 +1,5 @@
 #
-#    random.S
+#    random.R
 #
 #    Functions for generating random point patterns
 #

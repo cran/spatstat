@@ -2,7 +2,7 @@
 #
 #    lennard.R
 #
-#    $Revision: 1.14 $	$Date: 2011/02/08 09:10:37 $
+#    $Revision: 1.17 $	$Date: 2012/01/18 10:56:30 $
 #
 #    Lennard-Jones potential
 #
@@ -10,14 +10,13 @@
 # -------------------------------------------------------------------
 #	
 
-LennardJones <- function(sigma0=NA) {
-  if(is.null(sigma0) || !is.finite(sigma0))
-    sigma0 <- NA
-  out <- 
+LennardJones <- local({
+
+  BlankLJ <- 
     list(
          name     = "Lennard-Jones process",
          creator  = "LennardJones",
-         family    = pairwise.family,
+         family   = "pairwise.family",  # evaluated later
          pot      = function(d, par) {
            sig0 <- par$sigma0
            if(is.na(sig0)) {
@@ -37,7 +36,7 @@ LennardJones <- function(sigma0=NA) {
            }
            return(p)
          },
-         par      = list(sigma0=sigma0),
+         par      = list(sigma0=NULL),  # filled in later
          parnames = "Initial approximation to sigma",
          selfstart = function(X, self) {
            # self starter for Lennard Jones
@@ -82,12 +81,10 @@ LennardJones <- function(sigma0=NA) {
          },
          valid = function(coeffs, self) {
            p <- self$interpret(coeffs, self)$param
-           return(all(!is.na(p) & (p > 0)))
+           return(all(is.finite(p) & (p > 0)))
          },
          project = function(coeffs, self) {
-           if(!self$valid(coeffs, self))
-             coeffs[] <- 0
-           return(coeffs)
+           if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            if(any(is.na(coeffs)) || epsilon == 0)
@@ -98,9 +95,16 @@ LennardJones <- function(sigma0=NA) {
            theta2 <- abs(coeffs[2])
            return(sig0 * max((theta1/epsilon)^(1/12), (theta2/epsilon)^(1/6)))
          },
-       version=versionstring.spatstat()
+       version=NULL # filled in later
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankLJ) <- "interact"
+
+  LennardJones <- function(sigma0=NA) {
+    if(is.null(sigma0) || !is.finite(sigma0))
+      sigma0 <- NA
+    instantiate.interact(BlankLJ, list(sigma0=sigma0))
+  }
+
+  LennardJones
+})
+

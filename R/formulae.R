@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.14 $	$Date: 2011/10/20 10:24:56 $
+#	$Revision: 1.15 $	$Date: 2012/01/16 08:06:41 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical
@@ -62,6 +62,16 @@ rhs.of.formula <- function(x) {
     x <- x[-2]
   }
   return(x)
+}
+
+lhs.of.formula <- function(x) {
+  if(!inherits(x, "formula"))
+    stop("x must be a formula")
+  if(length(as.list(x)) == 3) {
+    # formula has a response: return it
+    return(x[2])
+  }
+  return(NULL)
 }
 
 sympoly <- function(x,y,n) {

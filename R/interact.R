@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.18 $	$Date: 2011/06/25 10:49:05 $
+#	$Revision: 1.20 $	$Date: 2012/01/18 09:31:39 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -294,4 +294,20 @@ as.interact <- function(object) {
 as.interact.interact <- function(object) {
   verifyclass(object, "interact")
   return(object)
+}
+
+
+#### internal code for streamlining initialisation of interactions
+#
+#    x should be a partially-completed 'interact' object
+#
+
+instantiate.interact <- function(x, par) {
+  if(is.character(x$family)) x$family <- get(x$family)
+  # set parameter values
+  x$par    <- par
+  # validate parameters
+  x$init(x)
+  x$version <- versionstring.spatstat()
+  return(x)
 }

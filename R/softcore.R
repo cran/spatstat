@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 2.7 $   $Date: 2007/01/11 03:34:51 $
+#    $Revision: 2.9 $   $Date: 2012/01/18 10:44:55 $
 #
 #    Soft core processes.
 #
@@ -13,16 +13,17 @@
 # -------------------------------------------------------------------
 #
 
-Softcore <- function(kappa) {
-  out <- 
+Softcore <- local({
+
+  BlankSoftcore <- 
   list(
          name     = "Soft core process",
          creator  = "Softcore",
-         family   = pairwise.family,
+         family   = "pairwise.family",  # evaluated later
          pot      = function(d, par) {
                         -d^(-2/par$kappa)
                     },
-         par      = list(kappa = kappa),
+         par      = list(kappa = NULL),  # filled in later
          parnames = "Exponent kappa",
          init     = function(self) {
                       kappa <- self$par$kappa
@@ -45,11 +46,7 @@ number less than 1")
            return(is.finite(theta) && (theta >= 0))
          },
          project = function(coeffs, self) {
-           theta <- coeffs[1]
-           if(is.na(theta))
-             theta <- 0
-           coeffs[] <- max(0, theta)
-           return(coeffs)
+           if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            # distance d beyond which log(interaction factor) <= epsilon
@@ -59,10 +56,15 @@ number less than 1")
            kappa <- self$par$kappa
            return((theta/epsilon)^(kappa/2))
          },
-       version=versionstring.spatstat()
+       version=NULL # filled in later
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankSoftcore) <- "interact"
 
+  Softcore <- function(kappa) {
+    instantiate.interact(BlankSoftcore, list(kappa=kappa))
+  }
+
+  Softcore
+})
+
+                  

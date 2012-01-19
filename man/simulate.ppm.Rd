@@ -66,9 +66,10 @@
   (objects of class \code{"ppp"}).
 }
 \examples{
-  data(japanesepines)
+  \testonly{op <- spatstat.options(rmh.nrep=10)}
   fit <- ppm(japanesepines, ~1, Strauss(0.1))
   simulate(fit, 2)
+  \testonly{spatstat.options(op)}
 }
 \seealso{
   \code{\link{ppm}},

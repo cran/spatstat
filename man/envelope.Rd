@@ -549,10 +549,11 @@ nsim=4, global=TRUE))
  }
 
  # Precomputed list of point patterns
- X <- rpoispp(50)
+ X <- rpoispp(30)
  PatList <- list()
- for(i in 1:20) PatList[[i]] <- runifpoint(X$n)
- plot(envelope(X, Kest, nsim=20, simulate=PatList))
+ for(i in 1:19) PatList[[i]] <- runifpoint(npoints(X))
+ E <- envelope(X, Kest, nsim=19, simulate=PatList)
+ if(interactive()) plot(E)
 
 # re-using the same point patterns
  EK <- envelope(X, Kest, nsim=10, savepatterns=TRUE)

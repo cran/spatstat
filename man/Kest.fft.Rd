@@ -93,10 +93,11 @@ using the Fast Fourier Transform.
  spatstat.options(npixel=512)
  }
  \testonly{
-  spatstat.options(npixel=125)
+  op <- spatstat.options(npixel=125)
  }
  Kpp <- Kest.fft(pp, 0.01)
  plot(Kpp)
+ \testonly{spatstat.options(op)}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

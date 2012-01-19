@@ -4,7 +4,7 @@
 
   Nearest Neighbour Distances between points
 
-  $Revision: 1.3 $     $Date: 2011/11/20 04:04:42 $
+  $Revision: 1.4 $     $Date: 2012/01/16 05:03:56 $
 
   THE FOLLOWING FUNCTIONS ASSUME THAT y IS SORTED IN ASCENDING ORDER 
 
@@ -203,6 +203,10 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
 
     R_CheckUserInterrupt();
 
+#ifdef SPATSTAT_DEBUG
+    Rprintf("\ni=%d\n", i); 
+#endif
+
     dmin = hu;
     d2min = hu2;
     jwhich = -1;
@@ -211,38 +215,66 @@ void nnXwhich(n1, x1, y1, n2, x2, y2, nnd, nnwhich, huge)
 
     /* search backward from previous nearest neighbour */
     if(lastjwhich > 0) {
+#ifdef SPATSTAT_DEBUG
+      Rprintf("start backward search\n");
+#endif
       for(jleft = lastjwhich - 1;
 	  jleft >= 0 && (dy = (y1i - y2[jleft])) < dmin ;
 	  --jleft)
 	{
+#ifdef SPATSTAT_DEBUG
+	  Rprintf("\tjleft=%d, dmin=%lf\n", jleft, dmin);
+#endif
 	  dx = x2[jleft] - x1i;
 	  d2 =  dx * dx + dy * dy;
 	  if (d2 < d2min) {
 	    d2min = d2;
 	    dmin = sqrt(d2);
 	    jwhich = jleft;
+#ifdef SPATSTAT_DEBUG
+	  Rprintf("\tUpdating jwhich=%d, dmin=%lf\n", jwhich, dmin);
+#endif
 	  }
 	}
+#ifdef SPATSTAT_DEBUG
+      Rprintf("end backward search\n");
+#endif
     }
 
     /* search forward from previous nearest neighbour  */
     if(lastjwhich < npoints2) {
+#ifdef SPATSTAT_DEBUG
+      Rprintf("start forward search\n");
+#endif
       for(jright = lastjwhich;
 	  jright < npoints2 && (dy = (y2[jright] - y1i)) < dmin ;
 	  ++jright)
 	{
+#ifdef SPATSTAT_DEBUG
+	  Rprintf("\tjright=%d, dmin=%lf\n", jright, dmin);
+#endif
 	  dx = x2[jright] - x1i;
 	  d2 =  dx * dx + dy * dy;
 	  if (d2 < d2min) {
 	    d2min = d2;
 	    dmin = sqrt(d2);
 	    jwhich = jright;
+#ifdef SPATSTAT_DEBUG
+	  Rprintf("\tUpdating jwhich=%d, dmin=%lf\n", jwhich, dmin);
+#endif
 	  }
 	}
+#ifdef SPATSTAT_DEBUG
+      Rprintf("end forward search\n");
+#endif
     }
     nnd[i] = dmin;
     nnwhich[i] = jwhich;
     lastjwhich = jwhich;
+#ifdef SPATSTAT_DEBUG
+	  Rprintf("Committing nnd[%d] = %lf, nnwhich[%d] = %d\n", 
+		  i, nnd[i], i, nnwhich[i]);
+#endif
   }
 }
 

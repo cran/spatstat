@@ -2,7 +2,7 @@
 #
 #    multihard.R
 #
-#    $Revision: 1.2 $	$Date: 2011/05/17 13:21:11 $
+#    $Revision: 1.5 $	$Date: 2012/01/18 10:54:43 $
 #
 #    The Hard core process
 #
@@ -13,26 +13,11 @@
 # -------------------------------------------------------------------
 #	
 
-MultiHard <- function(types=NULL, hradii) {
-  if(!is.null(types)) {
-    if(length(types) == 0)
-      stop(paste("The", sQuote("types"),"argument should be",
-                 "either NULL or a vector of all possible types"))
-    if(any(is.na(types)))
-      stop("NA's not allowed in types")
-    if(is.factor(types)) {
-      types <- levels(types)
-    } else {
-      types <- levels(factor(types, levels=types))
-    }
-    dimnames(hradii) <- list(types, types)
-  } 
-  out <- 
-  list(
-         name     = "Multitype Hardcore process",
-         creator  = "MultiHard",
-         family    = pairwise.family,
-         pot      = function(d, tx, tu, par) {
+MultiHard <- local({
+
+  # .... multitype hard core potential
+  
+  MHpotential <- function(d, tx, tu, par) {
      # arguments:
      # d[i,j] distance between points X[i] and U[j]
      # tx[i]  type (mark) of point X[i]
@@ -93,56 +78,82 @@ MultiHard <- function(types=NULL, hradii) {
      }
      attr(z, "IsOffset") <- TRUE
      return(z)
-     },
-     #### end of 'pot' function ####
-     #       
-         par      = list(types=types, hradii = hradii),
-         parnames = c("possible types", "hardcore distances"),
-         selfstart = function(X, self) {
-		if(!is.null(self$par$types)) return(self)
-                types <- levels(marks(X))
-                MultiHard(types=types,hradii=self$par$hradii)
-	 },
-         init     = function(self) {
-                      types <- self$par$types
-                      if(!is.null(types)) {
-                        h <- self$par$hradii
-                        nt <- length(types)
-                        MultiPair.checkmatrix(h, nt, sQuote("hradii"))
-                      }
-                    },
-         update = NULL,  # default OK
-         print = function(self) {
-           print.isf(self$family)
-           cat(paste("Interaction:\t", self$name, "\n"))
+   }
+   #### end of 'pot' function ####
+
+  # ............ template object ...................
+  
+  BlankMH <- 
+  list(
+       name     = "Multitype Hardcore process",
+       creator  = "MultiHard",
+       family   = "pairwise.family",  # evaluated later
+       pot      = MHpotential,
+       par      = list(types=NULL, hradii = NULL), # filled in later
+       parnames = c("possible types", "hardcore distances"),
+       selfstart = function(X, self) {
+         if(!is.null(self$par$types)) return(self)
+         types <- levels(marks(X))
+         MultiHard(types=types,hradii=self$par$hradii)
+       },
+       init     = function(self) {
+         types <- self$par$types
+         if(!is.null(types)) {
            h <- self$par$hradii
-           cat(paste(nrow(h), "types of points\n"))
-           types <- self$par$types
-           if(!is.null(types)) {
-             cat("Possible types: \n")
-             print(types)
-           } else cat("Possible types: \t not yet determined\n")
-           cat("Hardcore radii:\n")
-           print(h)
-           invisible()
-         },
-        interpret = function(coeffs, self) {
-          # there are no regular parameters (woo-hoo!)
-          return(NULL)
-        },
-        valid = function(coeffs, self) {
-          return(TRUE)
-        },
-        project = function(coeffs, self) {
-          return(coeffs)
-        },
-         irange = function(self, coeffs=NA, epsilon=0, ...) {
-           h <- self$par$hradii
-           return(max(0, h, na.rm=TRUE))
-         },
-       version=versionstring.spatstat()
+           nt <- length(types)
+           MultiPair.checkmatrix(h, nt, sQuote("hradii"))
+           if(length(types) == 0)
+             stop(paste("The", sQuote("types"),
+                        "argument should be",
+                        "either NULL or a vector of all possible types"))
+           if(any(is.na(types)))
+             stop("NA's not allowed in types")
+           if(is.factor(types)) {
+             types <- levels(types)
+           } else {
+             types <- levels(factor(types, levels=types))
+           }
+         }
+       },
+       update = NULL,  # default OK
+       print = function(self) {
+         print.isf(self$family)
+         cat(paste("Interaction:\t", self$name, "\n"))
+         h <- self$par$hradii
+         cat(paste(nrow(h), "types of points\n"))
+         types <- self$par$types
+         if(!is.null(types)) {
+           cat("Possible types: \n")
+           print(types)
+         } else cat("Possible types: \t not yet determined\n")
+         cat("Hardcore radii:\n")
+         print(h)
+         invisible()
+       },
+       interpret = function(coeffs, self) {
+        # there are no regular parameters (woo-hoo!)
+         return(NULL)
+       },
+       valid = function(coeffs, self) {
+         return(TRUE)
+       },
+       project = function(coeffs, self) {
+         return(NULL)
+       },
+       irange = function(self, coeffs=NA, epsilon=0, ...) {
+         h <- self$par$hradii
+         return(max(0, h, na.rm=TRUE))
+       },
+       version=NULL # fix later
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankMH) <- "interact"
+
+  MultiHard <- function(types=NULL, hradii) {
+    out <- instantiate.interact(BlankMH, list(types=types, hradii = hradii))
+    if(!is.null(types))
+      dimnames(out$par$hradii) <- list(types, types)
+    return(out)
+  }
+
+  MultiHard
+})

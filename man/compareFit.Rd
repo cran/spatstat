@@ -111,12 +111,19 @@ compareFit(object, Fun, r = NULL, breaks = NULL, ...,
   \code{\link{collapse.fv}}
 }
 \examples{
-   data(swedishpines)
+   nd <- 25
+   \testonly{
+        op <- spatstat.options(ngrid.disc=8)
+        nd <- 10
+   }
    ilist <- list(Poisson(), AreaInter(7), Strauss(7))
    iname <- c("Poisson", "AreaInter", "Strauss")
    K <- compareFit(swedishpines, Kcom, interaction=ilist, rbord=9, 
-            same="iso", different="icom", modelnames=iname)
+            same="iso", different="icom", modelnames=iname, nd=nd)
    K
+   \testonly{
+        spatstat.options(op)
+   }
 }
 \keyword{spatial}
 \keyword{models}
