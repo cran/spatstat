@@ -246,6 +246,7 @@ at new locations.
 }
 \examples{
   data(cells)
+  \testonly{op <- spatstat.options(npixel=32)}
   m <- ppm(cells, ~ polynom(x,y,2), Strauss(0.05))
   trend <- predict(m, type="trend")
   \dontrun{
@@ -274,6 +275,8 @@ at new locations.
   Z <- predict(ma)
   Z <- predict(ma, type="cif")
   predict(ma, locations=data.frame(x=0.8, y=0.5,marks="on"), type="cif")
+
+  \testonly{spatstat.options(op)}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

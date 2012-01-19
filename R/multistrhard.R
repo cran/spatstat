@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.19 $	$Date: 2011/05/22 12:52:46 $
+#    $Revision: 2.24 $	$Date: 2012/01/18 09:57:24 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -14,27 +14,11 @@
 # -------------------------------------------------------------------
 #	
 
-MultiStraussHard <- function(types=NULL, iradii, hradii) {
-  if(!is.null(types)) {
-    if(length(types) == 0)
-      stop(paste("The", sQuote("types"),"argument should be",
-                 "either NULL or a vector of all possible types"))
-    if(any(is.na(types)))
-      stop("NA's not allowed in types")
-    if(is.factor(types)) {
-      types <- levels(types)
-    } else {
-      types <- levels(factor(types, levels=types))
-    }
-    dimnames(iradii) <- list(types, types)
-    dimnames(hradii) <- list(types, types)
-  } 
-  out <- 
-  list(
-         name     = "Multitype Strauss Hardcore process",
-         creator  = "MultiStraussHard",
-         family    = pairwise.family,
-         pot      = function(d, tx, tu, par) {
+MultiStraussHard <- local({
+  
+  # ........  define potential ......................
+
+  MSHpotential <- function(d, tx, tu, par) {
      # arguments:
      # d[i,j] distance between points X[i] and U[j]
      # tx[i]  type (mark) of point X[i]
@@ -99,35 +83,69 @@ MultiStraussHard <- function(types=NULL, iradii, hradii) {
        z[Xsub, Qsub, ucode[i]] <- value[Xsub, Qsub]
      }     
      return(z)
-     },
-     #### end of 'pot' function ####
-     #       
-         par      = list(types=types, iradii = iradii, hradii = hradii),
+   }
+  # ............... end of potential function ...................
+
+  # .......... auxiliary functions .................
+  
+  delMSH <- function(which, types, iradii, hradii, ihc) {
+    iradii[which] <- NA
+    if(any(!is.na(iradii))) {
+      # some gamma interactions left
+      # return modified MultiStraussHard with fewer gamma parameters
+      return(MultiStraussHard(types, iradii, hradii))
+    } else if(any(!ihc)) {
+      # no gamma interactions left, but some active hard cores
+      return(MultiHard(types, hradii))
+    } else return(Poisson())
+  }
+
+  # ...........................................................
+  
+  # Set up basic object except for family and parameters
+
+  BlankMSHobject <- 
+    list(
+         name     = "Multitype Strauss Hardcore process",
+         creator  = "MultiStraussHard",
+         family   = "pairwise.family", # evaluated later
+         pot      = MSHpotential,
+         par      = list(types=NULL, iradii=NULL, hradii=NULL),  # to be added
          parnames = c("possible types", "interaction distances", "hardcore distances"),
          selfstart = function(X, self) {
-		if(!is.null(self$par$types)) return(self)
-                types <- levels(marks(X))
-                MultiStraussHard(types=types,iradii=self$par$iradii,
-                                 hradii=self$par$hradii)
+           if(!is.null(self$par$types)) return(self)
+           types <- levels(marks(X))
+           MultiStraussHard(types=types,iradii=self$par$iradii,
+                            hradii=self$par$hradii)
 	 },
          init     = function(self) {
-                      types <- self$par$types
-                      if(!is.null(types)) {
-                        r <- self$par$iradii
-                        h <- self$par$hradii
-                        nt <- length(types)
-                        MultiPair.checkmatrix(r, nt, sQuote("iradii"))
-                        MultiPair.checkmatrix(h, nt, sQuote("hradii"))
-                        ina <- is.na(iradii)
-                        hna <- is.na(hradii)
-                        if(all(ina))
-                          stop(paste("All entries of", sQuote("iradii"),
-                                     "are NA"))
-                        both <- !ina & !hna
-                        if(any(iradii[both] <= hradii[both]))
-                          stop("iradii must be larger than hradii")
-                      }
-                    },
+           types <- self$par$types
+           iradii <- self$par$iradii
+           hradii <- self$par$hradii
+           if(!is.null(types)) {
+             if(length(types) == 0)
+               stop(paste("The", sQuote("types"),"argument should be",
+                          "either NULL or a vector of all possible types"))
+             if(any(is.na(types)))
+               stop("NA's not allowed in types")
+             if(is.factor(types)) {
+               types <- levels(types)
+             } else {
+               types <- levels(factor(types, levels=types))
+             }
+             nt <- length(types)
+             MultiPair.checkmatrix(iradii, nt, sQuote("iradii"))
+             MultiPair.checkmatrix(hradii, nt, sQuote("hradii"))
+           }
+           ina <- is.na(iradii)
+           hna <- is.na(hradii)
+           if(all(ina))
+             stop(paste("All entries of", sQuote("iradii"),
+                        "are NA"))
+           both <- !ina & !hna
+           if(any(iradii[both] <= hradii[both]))
+             stop("iradii must be larger than hradii")
+         },
          update = NULL,  # default OK
          print = function(self) {
            print.isf(self$family)
@@ -188,28 +206,43 @@ MultiStraussHard <- function(types=NULL, iradii, hradii) {
            return(all(gamma[required & ihc] <= 1))
          },
          project = function(coeffs, self) {
+           # types
+           types <- self$par$types
            # interaction radii r[i,j]
            iradii <- self$par$iradii
            # hard core radii r[i,j]
            hradii <- self$par$hradii
            # interaction parameters gamma[i,j]
            gamma <- (self$interpret)(coeffs, self)$param$gammas
-           # remove NA's
-           gamma[is.na(gamma)] <- 1
-           # inactive hard cores?
-           ihc <- (is.na(hradii) | hradii == 0)
-           if(any(ihc & (gamma > 1))) 
-               gamma[ihc] <- pmin(gamma[ihc], 1)
-           # now put them back..
-           # get matrices of interaction radii
-           r <- self$par$iradii
-           h <- self$par$hradii
-           # list all unordered pairs of types
-           uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
-           # reassign 
-           coeffs[] <- log(gamma[uptri])
-           return(coeffs)
-        },
+           # required gamma parameters
+           required <- !is.na(iradii)
+           # inactive hard cores
+           ihc <- is.na(hradii) | (hradii == 0)
+           # problems
+           okgamma <- is.finite(gamma) & (gamma <= 1)
+           naughty <- ihc & required & !okgamma
+           if(!any(naughty))
+             return(NULL)
+           #
+           if(spatstat.options("project.fast")) {
+             # remove ALL naughty terms simultaneously
+             return(delMSH(naughty, types, iradii, hradii, ihc))
+           } else {
+             # present a list of candidates
+             rn <- row(naughty)
+             cn <- col(naughty)
+             uptri <- (rn <= cn) 
+             upn <- uptri & naughty
+             rowidx <- as.vector(rn[upn])
+             colidx <- as.vector(cn[upn])
+             matindex <- function(v) { matrix(c(v, rev(v)),
+                                              ncol=2, byrow=TRUE) }
+             mats <- lapply(as.data.frame(rbind(rowidx, colidx)), matindex)
+             inters <- lapply(mats, delMSH,
+                              types=types, iradii=iradii,
+                              hradii=hradii, ihc=ihc)
+             return(inters)           }
+         },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$iradii
            h <- self$par$hradii
@@ -225,9 +258,23 @@ MultiStraussHard <- function(types=NULL, iradii, hradii) {
            else
              return(max(c(r[ractive],h[hactive])))
          },
-       version=versionstring.spatstat()
-  )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+         version=NULL # to be added
+         )
+  class(BlankMSHobject) <- "interact"
+
+  # Finally define MultiStraussHard function
+
+  MultiStraussHard <- function(types=NULL, iradii, hradii) {
+    out <- instantiate.interact(BlankMSHobject,
+                                list(types=types,
+                                     iradii = iradii, hradii = hradii))
+    if(!is.null(types)) 
+      dimnames(out$par$iradii) <- 
+        dimnames(out$par$hradii) <- list(types, types)
+    return(out)
+  }
+
+  MultiStraussHard
+})
+
+

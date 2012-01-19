@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.15 $	$Date: 2009/10/22 20:41:37 $
+#    $Revision: 2.18 $	$Date: 2012/01/18 09:56:35 $
 #
 #    The multitype Strauss process
 #
@@ -12,26 +12,11 @@
 # -------------------------------------------------------------------
 #	
 
-MultiStrauss <- function(types=NULL, radii) {
-  if(!is.null(types)) {
-    if(length(types) == 0)
-      stop(paste("The", sQuote("types"),"argument should be",
-                 "either NULL or a vector of all possible types"))
-    if(any(is.na(types)))
-      stop("NA's not allowed in types")
-    if(is.factor(types)) {
-      types <- levels(types)
-    } else {
-      types <- levels(factor(types, levels=types))
-    }
-    dimnames(radii) <- list(types, types)
-  } 
-  out <- 
-  list(
-         name     = "Multitype Strauss process",
-         creator  = "MultiStrauss",
-         family    = pairwise.family,
-         pot      = function(d, tx, tu, par) {
+MultiStrauss <- local({
+
+  # ......... define interaction potential
+
+  MSpotential <- function(d, tx, tu, par) {
      # arguments:
      # d[i,j] distance between points X[i] and U[j]
      # tx[i]  type (mark) of point X[i]
@@ -89,101 +74,147 @@ MultiStrauss <- function(types=NULL, radii) {
        z[Xsub, Qsub, ucode[i]] <- str[Xsub, Qsub]
      }
      return(z)
-   },
-     #### end of 'pot' function ####
-     #       
-         par      = list(types=types, radii = radii),
-         parnames = c("possible types", "interaction distances"),
-         selfstart = function(X, self) {
-		if(!is.null(self$par$types)) return(self)
-                types <- levels(marks(X))
-                MultiStrauss(types=types,radii=self$par$radii)
-	 },
-         init     = function(self) {
-                      types <- self$par$types
-                      if(!is.null(types)) {
-                        h <- self$par$radii
-                        nt <- length(types)
-                        MultiPair.checkmatrix(h, nt, sQuote("radii"))
-                      }
-                    },
-         update = NULL, # default OK
-         print = function(self) {
-           print.isf(self$family)
-           cat(paste("Interaction:\t", self$name, "\n"))
+   }
+   #### end of 'pot' function ####
+
+  # ........ auxiliary functions ..............
+  delMS <- function(which, types, radii) {
+    radii[which] <- NA
+    if(all(is.na(radii))) return(Poisson())
+    return(MultiStrauss(types, radii))
+  }
+  
+  # Set up basic object except for family and parameters
+  BlankMSobject <- 
+  list(
+       name     = "Multitype Strauss process",
+       creator  = "MultiStrauss",
+       family   = "pairwise.family", # evaluated later
+       pot      = MSpotential,
+       par      = list(types=NULL, radii = NULL), # to be filled in later
+       parnames = c("possible types", "interaction distances"),
+       selfstart = function(X, self) {
+         if(!is.null(self$par$types)) return(self)
+         types <- levels(marks(X))
+         MultiStrauss(types=types,radii=self$par$radii)
+       },
+       init = function(self) {
+         types <- self$par$types
+         if(!is.null(types)) {
            radii <- self$par$radii
-           cat(paste(nrow(radii), "types of points\n"))
-           types <- self$par$types
-           if(!is.null(types)) {
-             cat("Possible types: \n")
-             print(types)
-           } else cat("Possible types:\t not yet determined\n")
-           cat("Interaction radii:\n")
-           print(self$par$radii)
-           invisible()
-         },
-        interpret = function(coeffs, self) {
-          # get possible types
-          typ <- self$par$types
-          ntypes <- length(typ)
-          # get matrix of Strauss interaction radii
-          r <- self$par$radii
-          # list all unordered pairs of types
-          uptri <- (row(r) <= col(r)) & (!is.na(r))
-          index1 <- (row(r))[uptri]
-          index2 <- (col(r))[uptri]
-          npairs <- length(index1)
-          # extract canonical parameters; shape them into a matrix
-          gammas <- matrix(, ntypes, ntypes)
-          dimnames(gammas) <- list(typ, typ)
-          expcoef <- exp(coeffs)
-          gammas[ cbind(index1, index2) ] <- expcoef
-          gammas[ cbind(index2, index1) ] <- expcoef
-          #
-          return(list(param=list(gammas=gammas),
-                      inames="interaction parameters gamma_ij",
-                      printable=round(gammas,4)))
-        },
-         valid = function(coeffs, self) {
-           # interaction parameters gamma[i,j]
-           gamma <- (self$interpret)(coeffs, self)$param$gammas
-           # interaction radii
-           radii <- self$par$radii
-           # parameters to estimate
-           required <- !is.na(radii)
-           gr <- gamma[required]
-           return(all(is.finite(gr) & gr <= 1))
-         },
-         project  = function(coeffs, self) {
-           # interaction parameters gamma[i,j]
-           gamma <- (self$interpret)(coeffs, self)$param$gammas
-           # remove NA's
-           gamma[is.na(gamma)] <- 1
-           # constrain them
-           gamma <- matrix(pmin(gamma, 1),
-                           nrow=nrow(gamma), ncol=ncol(gamma))
-           # now put them back 
-           # get matrix of Strauss interaction radii
-           r <- self$par$radii
-           # list all unordered pairs of types
-           uptri <- (row(r) <= col(r)) & (!is.na(r))
-           # reassign 
-           coeffs[] <- log(gamma[uptri])
-           return(coeffs)
-         },
-         irange = function(self, coeffs=NA, epsilon=0, ...) {
-           r <- self$par$radii
-           active <- !is.na(r)
-           if(any(!is.na(coeffs))) {
-             gamma <- (self$interpret)(coeffs, self)$param$gammas
-             gamma[is.na(gamma)] <- 1
-             active <- active & (abs(log(gamma)) > epsilon)
+           nt <- length(types)
+           MultiPair.checkmatrix(radii, nt, sQuote("radii"))
+           if(length(types) == 0)
+             stop(paste("The", sQuote("types"),"argument should be",
+                        "either NULL or a vector of all possible types"))
+           if(any(is.na(types)))
+             stop("NA's not allowed in types")
+           if(is.factor(types)) {
+             types <- levels(types)
+           } else {
+             types <- levels(factor(types, levels=types))
            }
-           if(any(active)) return(max(r[active])) else return(0)
-         },
-       version=versionstring.spatstat()
-  )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+         }
+       },
+       update = NULL, # default OK
+       print = function(self) {
+         print.isf(self$family)
+         cat(paste("Interaction:\t", self$name, "\n"))
+         radii <- self$par$radii
+         cat(paste(nrow(radii), "types of points\n"))
+         types <- self$par$types
+         if(!is.null(types)) {
+           cat("Possible types: \n")
+           print(types)
+         } else cat("Possible types:\t not yet determined\n")
+         cat("Interaction radii:\n")
+         print(self$par$radii)
+         invisible()
+       },
+       interpret = function(coeffs, self) {
+         # get possible types
+         typ <- self$par$types
+         ntypes <- length(typ)
+         # get matrix of Strauss interaction radii
+         r <- self$par$radii
+         # list all unordered pairs of types
+         uptri <- (row(r) <= col(r)) & (!is.na(r))
+         index1 <- (row(r))[uptri]
+         index2 <- (col(r))[uptri]
+         npairs <- length(index1)
+         # extract canonical parameters; shape them into a matrix
+         gammas <- matrix(, ntypes, ntypes)
+         dimnames(gammas) <- list(typ, typ)
+         expcoef <- exp(coeffs)
+         gammas[ cbind(index1, index2) ] <- expcoef
+         gammas[ cbind(index2, index1) ] <- expcoef
+         #
+         return(list(param=list(gammas=gammas),
+                     inames="interaction parameters gamma_ij",
+                     printable=round(gammas,4)))
+       },
+       valid = function(coeffs, self) {
+         # interaction parameters gamma[i,j]
+         gamma <- (self$interpret)(coeffs, self)$param$gammas
+         # interaction radii
+         radii <- self$par$radii
+         # parameters to estimate
+         required <- !is.na(radii)
+         gr <- gamma[required]
+         return(all(is.finite(gr) & gr <= 1))
+       },
+       project  = function(coeffs, self) {
+         # interaction parameters gamma[i,j]
+         gamma <- (self$interpret)(coeffs, self)$param$gammas
+         # interaction radii and types
+         radii <- self$par$radii
+         types <- self$par$types
+         # problems?
+         required <- !is.na(radii)
+         okgamma  <- is.finite(gamma) & (gamma <= 1)
+         naughty  <- required & !okgamma
+         # 
+         if(!any(naughty))  
+           return(NULL)
+         if(spatstat.options("project.fast")) {
+           # remove ALL naughty terms simultaneously
+           return(delMS(naughty, types, radii))
+         } else {
+           # present a list of candidates
+           rn <- row(naughty)
+           cn <- col(naughty)
+           uptri <- (rn <= cn) 
+           upn <- uptri & naughty
+           rowidx <- as.vector(rn[upn])
+           colidx <- as.vector(cn[upn])
+           matindex <- function(v) { matrix(c(v, rev(v)),
+                                            ncol=2, byrow=TRUE) }
+           mats <- lapply(as.data.frame(rbind(rowidx, colidx)), matindex)
+           inters <- lapply(mats, delMS, types=types, radii=radii)
+           return(inters)
+         }
+       },
+       irange = function(self, coeffs=NA, epsilon=0, ...) {
+         r <- self$par$radii
+         active <- !is.na(r)
+         if(any(!is.na(coeffs))) {
+           gamma <- (self$interpret)(coeffs, self)$param$gammas
+           gamma[is.na(gamma)] <- 1
+           active <- active & (abs(log(gamma)) > epsilon)
+         }
+         if(any(active)) return(max(r[active])) else return(0)
+       },
+       version=NULL # to be added
+       )
+  class(BlankMSobject) <- "interact"
+
+  # finally create main function
+  MultiStrauss <- function(types=NULL, radii) {
+    out <- instantiate.interact(BlankMSobject, list(types=types, radii = radii))
+    if(!is.null(types))
+      dimnames(out$par$radii) <- list(types, types)
+    return(out)
+  }
+
+  MultiStrauss
+})

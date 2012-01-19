@@ -140,6 +140,9 @@ ippm(..., iScore=NULL,
   \code{\link[spatstat]{ppm}}
 }
 \examples{
+  nd <- 32
+  \testonly{nd <- 10}
+  
   gamma0 <- 3
   delta0 <- 5
   POW <- 3
@@ -168,7 +171,7 @@ ippm(..., iScore=NULL,
        covariates=list(Z=Z, f=f),
        iScore=Dlogf,
        start=list(gamma=1, delta=1),
-       tol=0.01)
+       tol=0.01, nd=nd)
 }
 \keyword{spatial}
 \keyword{models}

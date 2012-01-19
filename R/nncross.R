@@ -2,7 +2,7 @@
 #   nncross.R
 #
 #
-#    $Revision: 1.6 $  $Date: 2009/08/29 01:43:09 $
+#    $Revision: 1.11 $  $Date: 2012/01/17 09:18:32 $
 #
 
 
@@ -22,6 +22,7 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
   if(is.psp(Y))
     return(ppllengine(X,Y,"distance"))
 
+  # Y is a point pattern
   if(is.null(iX) != is.null(iY))
     stop("If one of iX, iY is given, then both must be given")
   exclude <- (!is.null(iX) || !is.null(iY))
@@ -44,22 +45,23 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
   }
 
   # call C code
-  nndv <- numeric(X$n)
-  nnwh <- integer(X$n)
+  nndv <- numeric(nX)
+  nnwh <- integer(nX)
 
   DUP <- spatstat.options("dupC")
+  huge <- 1.1 * diameter(bounding.box(as.rectangle(X), as.rectangle(Y)))
   
   if(!exclude) 
     z <- .C("nnXwhich",
-            n1=as.integer(X$n),
+            n1=as.integer(nX),
             x1=as.double(X$x),
             y1=as.double(X$y),
-            n2=as.integer(Y$n),
+            n2=as.integer(nY),
             x2=as.double(Y$x),
             y2=as.double(Y$y),
             nnd=as.double(nndv),
             nnwhich=as.integer(nnwh),
-            huge=as.double(diameter(X$window)),
+            huge=as.double(huge),
             DUP=DUP,
             PACKAGE="spatstat")
   else
@@ -74,14 +76,17 @@ nncross <- function(X, Y, iX=NULL, iY=NULL) {
             id2=as.integer(iY),
             nnd=as.double(nndv),
             nnwhich=as.integer(nnwh),
-            huge=as.double(diameter(X$window)),
+            huge=as.double(huge),
             DUP=DUP,
             PACKAGE="spatstat")
     
   # reinterpret in original ordering
   nndv[oX] <- z$nnd
   nnwcode <- z$nnwhich + 1
-  nnwcode[nnwcode < 1] <- NA
+  if(any(uhoh <- (nnwcode < 1))) {
+    warning("NA's produced in nncross()$which")
+    nnwcode[uhoh] <- NA
+  }
   nnwh[oX] <- oY[nnwcode]
   return(data.frame(dist=nndv, which=nnwh))
 }

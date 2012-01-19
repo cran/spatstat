@@ -2,7 +2,7 @@
 #
 #    badgey.S
 #
-#    $Revision: 1.5 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 1.9 $	$Date: 2012/01/18 11:15:29 $
 #
 #    Hybrid Geyer process
 #
@@ -13,12 +13,25 @@
 # -------------------------------------------------------------------
 #	
 
-BadGey <- function(r, sat) {
-  out <- 
+BadGey <- local({
+
+  # ........... auxiliary functions ..............
+  delBG <- function(i, r, sat) {
+    r   <- r[-i]
+    sat <- sat[-i]
+    nr <- length(r)
+    if(nr == 0) return(Poisson())
+    if(nr == 1) return(Geyer(r, sat))
+    return(BadGey(r, sat))
+  }
+
+  # .............. template ....................
+  
+  BlankBG <- 
   list(
          name     = "hybrid Geyer process",
          creator  = "BadGey",
-         family    = pairsat.family,
+         family   = "pairsat.family",  # will be evaluated later
          pot      = function(d, par) {
                        r <- par$r
                        nr <- length(r)
@@ -27,7 +40,7 @@ BadGey <- function(r, sat) {
                          out[,,i] <- (d <= r[i])
                        out
                     },
-         par      = list(r = r, sat=sat),
+         par      = list(r = NULL, sat=NULL), # to fill in later
          parnames = c("interaction radii", "saturation parameters"),
          init     = function(self) {
                       r <- self$par$r
@@ -71,18 +84,24 @@ BadGey <- function(r, sat) {
                       & (gamma <= 1 | sat != Inf)))
         },
         project = function(coeffs, self){
-          gamma <- (self$interpret)(coeffs, self)$param$gammas
+          loggammas <- as.numeric(coeffs)
           sat <- self$par$sat
-          # convert gamma=NA to gamma = 1
-          if(any(na <- is.na(gamma))) 
-            coeffs[na] <- 0
-          # convert gamma=Inf (where sat > 0) to a large finite value
-          if(any(inf <- !na & (gamma == Inf) & (sat != 0)))
-            coeffs[inf] <- log(.Machine$double.xmax)/self$par$sat
-          # clip gamma to [0,1] where sat = Inf
-          if(any(unsat <- (sat == Inf)))
-            coeffs[unsat] <- pmin(0, coeffs[unsat])
-          return(coeffs)
+          r   <- self$par$r
+          good <- is.finite(loggammas) & (is.finite(sat) | loggammas <= 0)
+          if(all(good))
+            return(NULL)
+          if(!any(good))
+            return(Poisson())
+          bad <- !good
+          if(spatstat.options("project.fast") || sum(bad) == 1) {
+            # remove smallest threshold with an unidentifiable parameter
+            firstbad <- min(which(bad))
+            return(delBG(firstbad, r, sat))
+          } else {
+            # consider all candidate submodels
+            subs <- lapply(which(bad), delBG, r=r, sat=sat)
+            return(subs)
+          }
         },
         irange = function(self, coeffs=NA, epsilon=0, ...) {
           r <- self$par$r
@@ -96,7 +115,7 @@ BadGey <- function(r, sat) {
             return(0)
           else return(2 * max(r[active]))
         },
-       version=versionstring.spatstat(),
+       version=NULL, # to be added later
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -108,8 +127,8 @@ BadGey <- function(r, sat) {
            return(NULL)
          if(spatstat.options("fasteval") == "test")
            message("Using fast eval for BadGey")
-         r  <- potpars$r
-         hc <- potpars$sat
+         r   <- potpars$r
+         sat <- potpars$sat
          # ensure r and sat have equal length
          if(length(r) != length(sat)) {
            if(length(r) == 1)
@@ -143,7 +162,14 @@ BadGey <- function(r, sat) {
          return(answer)
        }
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankBG) <- "interact"
+
+  BadGey <- function(r, sat) {
+    instantiate.interact(BlankBG, list(r=r, sat=sat))
+  }
+
+  BadGey
+
+})
+
+

@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.17 $	$Date: 2011/05/18 02:06:52 $
+#    $Revision: 2.20 $	$Date: 2012/01/18 11:44:35 $
 #
 #    Geyer's saturation process
 #
@@ -11,16 +11,19 @@
 #
 #	
 
-Geyer <- function(r, sat) {
-  out <- 
+Geyer <- local({
+
+  # .......... template ..........
+
+  BlankGeyer <- 
   list(
          name     = "Geyer saturation process",
          creator  = "Geyer",
-         family    = pairsat.family,
+         family   = "pairsat.family",  # evaluated later
          pot      = function(d, par) {
                          (d <= par$r)  # same as for Strauss
                     },
-         par      = list(r = r, sat=sat),
+         par      = list(r = NULL, sat=NULL),  # filled in later
          parnames = c("interaction distance","saturation parameter"),
          init     = function(self) {
                       r <- self$par$r
@@ -43,16 +46,12 @@ Geyer <- function(r, sat) {
                        printable=round(gamma,4)))
          },
          valid = function(coeffs, self) {
-           gamma <- (self$interpret)(coeffs, self)$param$gamma
-           return(is.finite(gamma))
+           loggamma <- as.numeric(coeffs[1])
+           sat <- self$par$sat
+           return(is.finite(loggamma) && (is.finite(sat) || loggamma <= 0))
          },
          project = function(coeffs, self) {
-           gamma <- (self$interpret)(coeffs, self)$param$gamma
-           if(is.na(gamma)) 
-             coeffs[1] <- 0
-           else if(!is.finite(gamma)) 
-             coeffs[1] <- log(.Machine$double.xmax)/self$par$sat
-           return(coeffs)
+           if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
@@ -63,7 +62,7 @@ Geyer <- function(r, sat) {
            }
            return(2 * r)
          },
-       version=versionstring.spatstat(),
+       version=NULL, # evaluated later
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -75,8 +74,8 @@ Geyer <- function(r, sat) {
            return(NULL)
          if(spatstat.options("fasteval") == "test")
            message("Using fast eval for Geyer")
-         r  <- potpars$r
-         hc <- potpars$sat
+         r   <- potpars$r
+         sat <- potpars$sat
          # first determine saturated pair counts
          counts <- strausscounts(U, X, r, EqualPairs) 
          satcounts <- pmin(sat, counts)
@@ -99,54 +98,60 @@ Geyer <- function(r, sat) {
          return(matrix(answer, ncol=1))
        }
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankGeyer) <- "interact"
+  
+  Geyer <- function(r, sat) {
+    instantiate.interact(BlankGeyer, list(r = r, sat=sat))
+  }
 
-geyercounts <- function(U, X, r, sat, Xcounts, EqualPairs) {
-  # evaluate effect of adding dummy point or deleting data point
-  # on saturated counts of other data points
-  stopifnot(is.numeric(r))
-  stopifnot(is.numeric(sat))
-  # for C calls we need finite numbers
-  stopifnot(is.finite(r))
-  stopifnot(is.finite(sat))
-  # sort in increasing order of x coordinate
-  oX <- order(X$x)
-  oU <- order(U$x)
-  Xsort <- X[oX]
-  Usort <- U[oU]
-  nX <- npoints(X)
-  nU <- npoints(U)
-  Xcountsort <- Xcounts[oX]
-  # inverse: data point i has sorted position i' = rankX[i]
-  rankX <- integer(nX)
-  rankX[oX] <- seq_len(nX)
-  rankU <- integer(nU)
-  rankU[oU] <- seq_len(nU)
-  # map from quadrature points to data points
-  Uindex <- EqualPairs[,2]
-  Xindex <- EqualPairs[,1]
-  Xsortindex <- rankX[Xindex]
-  Usortindex <- rankU[Uindex]
-  Cmap <- rep(-1, nU)
-  Cmap[Usortindex] <- Xsortindex - 1
-  # call C routine
-  zz <- .C("Egeyer",
-           nnquad = as.integer(nU),
-           xquad  = as.double(Usort$x),
-           yquad  = as.double(Usort$y),
-           quadtodata = as.integer(Cmap),
-           nndata = as.integer(nX),
-           xdata  = as.double(Xsort$x),
-           ydata  = as.double(Xsort$y),
-           tdata  = as.integer(Xcountsort),
-           rrmax  = as.double(r),
-           ssat   = as.double(sat),
-           result = as.double(numeric(nU)),
-           PACKAGE="spatstat")
-  result <- zz$result[rankU]
-  return(result)
-}
+  Geyer
+})
+
+  # ........... externally visible auxiliary functions .........
+  
+  geyercounts <- function(U, X, r, sat, Xcounts, EqualPairs) {
+    # evaluate effect of adding dummy point or deleting data point
+    # on saturated counts of other data points
+    stopifnot(is.numeric(r))
+    stopifnot(is.numeric(sat))
+    # for C calls we need finite numbers
+    stopifnot(is.finite(r))
+    stopifnot(is.finite(sat))
+    # sort in increasing order of x coordinate
+    oX <- order(X$x)
+    oU <- order(U$x)
+    Xsort <- X[oX]
+    Usort <- U[oU]
+    nX <- npoints(X)
+    nU <- npoints(U)
+    Xcountsort <- Xcounts[oX]
+    # inverse: data point i has sorted position i' = rankX[i]
+    rankX <- integer(nX)
+    rankX[oX] <- seq_len(nX)
+    rankU <- integer(nU)
+    rankU[oU] <- seq_len(nU)
+    # map from quadrature points to data points
+    Uindex <- EqualPairs[,2]
+    Xindex <- EqualPairs[,1]
+    Xsortindex <- rankX[Xindex]
+    Usortindex <- rankU[Uindex]
+    Cmap <- rep(-1, nU)
+    Cmap[Usortindex] <- Xsortindex - 1
+    # call C routine
+    zz <- .C("Egeyer",
+             nnquad = as.integer(nU),
+             xquad  = as.double(Usort$x),
+             yquad  = as.double(Usort$y),
+             quadtodata = as.integer(Cmap),
+             nndata = as.integer(nX),
+             xdata  = as.double(Xsort$x),
+             ydata  = as.double(Xsort$y),
+             tdata  = as.integer(Xcountsort),
+             rrmax  = as.double(r),
+             ssat   = as.double(sat),
+             result = as.double(numeric(nU)),
+             PACKAGE="spatstat")
+    result <- zz$result[rankU]
+    return(result)
+  }
 

@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.126 $	$Date: 2011/10/13 02:12:33 $
+#	$Revision: 4.128 $	$Date: 2012/01/19 04:42:02 $
 #
 #
 #	A window may be either
@@ -567,6 +567,11 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 
   unitname(out) <- uname
   return(out)
+}
+
+as.matrix.owin <- function(x, ...) {
+  m <- as.mask(x, ...)
+  return(m$m)
 }
 
 #

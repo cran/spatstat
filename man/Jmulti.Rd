@@ -7,7 +7,7 @@
   For a marked point pattern, 
   estimate the multitype \eqn{J} function
   summarising dependence between the
-  points in subset \code{I}
+  points in subset \eqn{I}
   and those in subset \eqn{J}.
 }
 \usage{
@@ -17,14 +17,15 @@
 \arguments{
   \item{X}{The observed point pattern, 
     from which an estimate of the multitype distance distribution function
-    \eqn{J_{IJ}(r)}{JIJ(r)} will be computed.
+    \eqn{J_{IJ}(r)}{J[IJ](r)} will be computed.
     It must be a marked point pattern.
     See under Details.
   }
   \item{I}{Subset of points of \code{X} from which distances are
-    measured. 
+    measured. See Details.
   }
   \item{J}{Subset of points in \code{X} to which distances are measured.
+    See Details.
   }
   \item{eps}{A positive number.
     The pixel resolution of the discrete approximation to Euclidean
@@ -32,7 +33,7 @@
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the distribution function
-    \eqn{J_{IJ}(r)}{JIJ(r)} should be evaluated.
+    \eqn{J_{IJ}(r)}{J[IJ](r)} should be evaluated.
     There is a sensible default.
     First-time users are strongly advised not to specify this argument.
     See below for important conditions on \eqn{r}.
@@ -57,22 +58,22 @@
 
   Essentially a data frame containing six numeric columns 
   \item{r}{the values of the argument \eqn{r} 
-    at which the function \eqn{J_{IJ}(r)}{JIJ(r)} has been  estimated
+    at which the function \eqn{J_{IJ}(r)}{J[IJ](r)} has been  estimated
   }
   \item{rs}{the ``reduced sample'' or ``border correction''
-    estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
+    estimator of \eqn{J_{IJ}(r)}{J[IJ](r)}
   }
-  \item{km}{the spatial Kaplan-Meier estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
+  \item{km}{the spatial Kaplan-Meier estimator of \eqn{J_{IJ}(r)}{J[IJ](r)}
   }
-  \item{han}{the Hanisch-style estimator of \eqn{J_{IJ}(r)}{JIJ(r)}
+  \item{han}{the Hanisch-style estimator of \eqn{J_{IJ}(r)}{J[IJ](r)}
   }
-  \item{un}{the uncorrected estimate of \eqn{J_{IJ}(r)}{JIJ(r)},
+  \item{un}{the uncorrected estimate of \eqn{J_{IJ}(r)}{J[IJ](r)},
     formed by taking the ratio of uncorrected empirical estimators
-    of \eqn{1 - G_{IJ}(r)}{1 - GIJ(r)}
-    and \eqn{1 - F_{J}(r)}{1 - FJ(r)}, see
+    of \eqn{1 - G_{IJ}(r)}{1 - G[IJ](r)}
+    and \eqn{1 - F_{J}(r)}{1 - F[J](r)}, see
     \code{\link{Gdot}} and \code{\link{Fest}}.
   }
-  \item{theo}{the theoretical value of \eqn{J_{IJ}(r)}{JIJ(r)}
+  \item{theo}{the theoretical value of \eqn{J_{IJ}(r)}{J[IJ](r)}
     for a marked Poisson process with the same estimated intensity,
     namely 1.
   }
@@ -86,8 +87,8 @@
   Suppose \eqn{X_I}{X[I]}, \eqn{X_J}{X[J]} are subsets, possibly
   overlapping, of a marked point process. Define
   \deqn{J_{IJ}(r) = \frac{1 - G_{IJ}(r)}{1 - F_J(r)}}{
-    JIJ(r) = (1 - GIJ(r))/(1 - FJ(r))}
-  where \eqn{F_J(r)}{FJ(r)} is the cumulative distribution function of
+    J[IJ](r) = (1 - G[IJ](r))/(1 - F[J](r))}
+  where \eqn{F_J(r)}{F[J](r)} is the cumulative distribution function of
   the distance from a fixed location to the nearest point
   of \eqn{X_J}{X[J]}, and \eqn{G_{IJ}(r)}{GJ(r)}
   is the distribution function of the distance
@@ -98,9 +99,9 @@
   \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
 
   The arguments \code{I} and \code{J} specify two subsets of the
-  point pattern. They may be logical vectors of length equal to
-  \code{X$n}, or integer vectors with entries in the range 1 to
-  \code{X$n}, etc.
+  point pattern \code{X}. They may be logical vectors of length equal to
+  \code{npoints(X)}, or integer vectors with entries in the range 1 to
+  \code{npoints(X)}, etc.
 
   It is assumed that \code{X} can be treated
   as a realisation of a stationary (spatially homogeneous) 
@@ -112,7 +113,7 @@
   treated in the same manner as in \code{\link{Jest}}.
 
   The argument \code{r} is the vector of values for the
-  distance \eqn{r} at which \eqn{J_{IJ}(r)}{JIJ(r)} should be evaluated. 
+  distance \eqn{r} at which \eqn{J_{IJ}(r)}{J[IJ](r)} should be evaluated. 
   It is also used to determine the breakpoints
   (in the sense of \code{\link{hist}})
   for the computation of histograms of distances. The reduced-sample and
@@ -143,7 +144,7 @@
     \testonly{
         longleaf <- longleaf[seq(1,longleaf$n, by=50), ]
     }
-    Jm <- Jmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
+    Jm <- Jmulti(longleaf, marks(longleaf) <= 15, marks(longleaf) >= 25)
     plot(Jm)
 }
 \author{Adrian Baddeley

@@ -2,7 +2,7 @@
 #
 #    poisson.S
 #
-#    $Revision: 1.6 $	$Date: 2007/01/11 03:36:02 $
+#    $Revision: 1.7 $	$Date: 2012/01/16 08:26:08 $
 #
 #    The Poisson process
 #
@@ -30,7 +30,7 @@ Poisson <- function() {
            invisible()
          },
          valid = function(...) { TRUE },
-         project = function(coeffs, ...) { coeffs },
+         project = function(...) NULL, 
          irange = function(...) { 0 },
          version=versionstring.spatstat()
   )

@@ -1,8 +1,8 @@
 #
 #
-#    strauss.S
+#    strauss.R
 #
-#    $Revision: 2.18 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 2.22 $	$Date: 2012/01/18 09:39:59 $
 #
 #    The Strauss process
 #
@@ -13,16 +13,19 @@
 # -------------------------------------------------------------------
 #	
 
-Strauss <- function(r) {
-  out <- 
+Strauss <- local({
+
+  # create blank template object without family and pars
+
+  BlankStrauss <-
   list(
        name     = "Strauss process",
        creator  = "Strauss",
-       family    = pairwise.family,
+       family    = "pairwise.family", # evaluated later
        pot      = function(d, par) {
          d <= par$r
        },
-       par      = list(r = r),
+       par      = list(r = NULL), # to be filled in
        parnames = "interaction distance",
        init     = function(self) {
          r <- self$par$r
@@ -39,13 +42,11 @@ Strauss <- function(r) {
                      printable=round(gamma,4)))
        },
        valid = function(coeffs, self) {
-         gamma <- ((self$interpret)(coeffs, self))$param$gamma
-         return(is.finite(gamma) && (gamma <= 1))
+         loggamma <- as.numeric(coeffs[1])
+         return(is.finite(loggamma) && (loggamma <= 0))
        },
        project = function(coeffs, self) {
-         loggamma <- as.numeric(coeffs[1])
-         coeffs[1] <- if(is.na(loggamma)) 0 else min(0, loggamma)
-         return(coeffs)
+         if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
        },
        irange = function(self, coeffs=NA, epsilon=0, ...) {
          r <- self$par$r
@@ -57,7 +58,7 @@ Strauss <- function(r) {
          else
            return(r)
        },
-       version=versionstring.spatstat(),
+       version=NULL, # to be filled in 
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -72,13 +73,21 @@ Strauss <- function(r) {
          answer <- strausscounts(U, X, r, EqualPairs)
          return(matrix(answer, ncol=1))
        }
-  )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+       )
+  class(BlankStrauss) <- "interact"
 
 
+  # Finally define main function
+  
+  Strauss <- function(r) {
+    instantiate.interact(BlankStrauss, list(r=r))
+  }
+
+  Strauss
+})
+
+# generally accessible functions
+      
 strausscounts <- function(U, X, r, EqualPairs=NULL) {
   answer <- crosspaircounts(U,X,r)
   nU <- npoints(U)

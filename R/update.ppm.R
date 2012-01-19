@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.35 $    $Date: 2011/11/28 07:20:18 $
+#  $Revision: 1.36 $    $Date: 2012/01/16 08:09:42 $
 #
 #
 #
@@ -44,9 +44,13 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
       # we can update using internal data
       FIT <- object$internal$glmfit
       orig.env <- environment(FIT$terms)
-      # update formula using "." rules
-      fmla <- newformula(formula(FIT), fmla)
-      trend <- rhs.of.formula(fmla)
+      # ensure fmla has only a right hand side
+      if(!is.null(lh <- lhs.of.formula(fmla)))
+        warning("Ignored left side of formula")
+      fmla <- rhs.of.formula(fmla)
+      # update formulae using "." rules
+      trend <- newformula(object$trend, fmla)
+      fmla  <- newformula(formula(FIT), fmla)
       # update GLM/GAM fit 
       upd.glm.call <- update(FIT, fmla, evaluate=FALSE)
       FIT <- eval(upd.glm.call, envir=orig.env)
@@ -58,6 +62,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
       object$coef <- co <- FIT$coef
       object$callstring <- callstring
       object$callframe <- parent.frame()
+      object$internal$fmla <- fmla
       if(is.finite(object$maxlogpl)) {
         # Update maxlogpl provided it is finite
         # (If the likelihood is infinite, this is due to the interaction;

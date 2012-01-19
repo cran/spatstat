@@ -2,7 +2,7 @@
 #
 #    dgs.R
 #
-#    $Revision: 1.2 $	$Date: 2011/05/18 01:43:21 $
+#    $Revision: 1.5 $	$Date: 2012/01/18 10:06:43 $
 #
 #    Diggle-Gates-Stibbard process
 #
@@ -10,12 +10,44 @@
 # -------------------------------------------------------------------
 #	
 
-DiggleGatesStibbard <- function(rho) {
-  out <- 
-  list(
+DiggleGatesStibbard <- local({
+
+  # .......... auxiliary functions ................
+  dgsTerms <- function(X, Y, idX, idY, rho) {
+    stopifnot(is.numeric(rho))
+    # sort in increasing order of x coordinate
+    oX <- order(X$x)
+    oY <- order(Y$x)
+    Xsort <- X[oX]
+    Ysort <- Y[oY]
+    idXsort <- idX[oX]
+    idYsort <- idY[oY]
+    nX <- npoints(X)
+    nY <- npoints(Y)
+    # call C routine
+    out <- .C("Ediggatsti",
+            nnsource = as.integer(nX),
+            xsource  = as.double(Xsort$x),
+            ysource  = as.double(Xsort$y),
+            idsource = as.integer(idXsort),
+            nntarget = as.integer(nY),
+            xtarget  = as.double(Ysort$x),
+            ytarget  = as.double(Ysort$y),
+            idtarget = as.integer(idYsort),
+            rrho     = as.double(rho),
+            values   = as.double(double(nX)),
+            PACKAGE  = "spatstat")
+    answer <- integer(nX)
+    answer[oX] <- out$values
+    return(answer)
+  }
+
+  # ...... template object ......................
+  BlankDGS <- 
+    list(
          name   = "Diggle-Gates-Stibbard process",
          creator = "DiggleGatesStibbard",
-         family  = pairwise.family,
+         family  = "pairwise.family",  # evaluated later
          pot    = function(d, par) {
            rho <- par$rho
            v <- log(sin((pi/2) * d/rho)^2)
@@ -23,7 +55,7 @@ DiggleGatesStibbard <- function(rho) {
            attr(v, "IsOffset") <- TRUE
            v
          },
-         par    = list(rho = rho),
+         par    = list(rho = NULL),  # to be filled in later
          parnames = "interaction range", 
          init   = function(self) {
            rho <- self$par$rho
@@ -39,63 +71,38 @@ DiggleGatesStibbard <- function(rho) {
            return(TRUE)
          },
          project = function(coeffs, self) {
-           return(coeffs)
+           return(NULL)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            rho <- self$par$rho
            return(rho)
          },
-       version=versionstring.spatstat(),
-       # fast evaluation is available for the border correction only
-       can.do.fast=function(X,correction,par) {
-         return(all(correction %in% c("border", "none")))
-       },
-       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
-         # fast evaluator for DiggleGatesStibbard interaction
-         if(!all(correction %in% c("border", "none")))
-           return(NULL)
-         if(spatstat.options("fasteval") == "test")
-           message("Using fast eval for DiggleGatesStibbard")
-         rho <- potpars$rho
-         idX <- seq_len(npoints(X))
-         idU <- rep(-1, npoints(U))
-         idU[EqualPairs[,2]] <- EqualPairs[,1]
-         v <- dgsTerms(U, X, idU, idX, rho)
-         v <- matrix(v, ncol=1)
-         attr(v, "IsOffset") <- TRUE
-         return(v)
-       }
-  )
-  class(out) <- "interact"
-  (out$init)(out)
-  return(out)
-}
+         version=NULL, # evaluated later
+         # fast evaluation is available for the border correction only
+         can.do.fast=function(X,correction,par) {
+           return(all(correction %in% c("border", "none")))
+         },
+         fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
+           # fast evaluator for DiggleGatesStibbard interaction
+           if(!all(correction %in% c("border", "none")))
+             return(NULL)
+           if(spatstat.options("fasteval") == "test")
+             message("Using fast eval for DiggleGatesStibbard")
+           rho <- potpars$rho
+           idX <- seq_len(npoints(X))
+           idU <- rep(-1, npoints(U))
+           idU[EqualPairs[,2]] <- EqualPairs[,1]
+           v <- dgsTerms(U, X, idU, idX, rho)
+           v <- matrix(v, ncol=1)
+           attr(v, "IsOffset") <- TRUE
+           return(v)
+         }
+         )
+  class(BlankDGS) <- "interact"
 
-dgsTerms <- function(X, Y, idX, idY, rho) {
-  stopifnot(is.numeric(rho))
-  # sort in increasing order of x coordinate
-  oX <- order(X$x)
-  oY <- order(Y$x)
-  Xsort <- X[oX]
-  Ysort <- Y[oY]
-  idXsort <- idX[oX]
-  idYsort <- idY[oY]
-  nX <- npoints(X)
-  nY <- npoints(Y)
-  # call C routine
-  out <- .C("Ediggatsti",
-            nnsource = as.integer(nX),
-            xsource  = as.double(Xsort$x),
-            ysource  = as.double(Xsort$y),
-            idsource = as.integer(idXsort),
-            nntarget = as.integer(nY),
-            xtarget  = as.double(Ysort$x),
-            ytarget  = as.double(Ysort$y),
-            idtarget = as.integer(idYsort),
-            rrho     = as.double(rho),
-            values   = as.double(double(nX)),
-            PACKAGE  = "spatstat")
-  answer <- integer(nX)
-  answer[oX] <- out$values
-  return(answer)
-}
+  DiggleGatesStibbard <- function(rho) {
+    instantiate.interact(BlankDGS, list(rho = rho))
+  }
+
+  DiggleGatesStibbard
+})

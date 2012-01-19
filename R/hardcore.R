@@ -2,7 +2,7 @@
 #
 #    hardcore.S
 #
-#    $Revision: 1.4 $	$Date: 2010/07/18 08:46:28 $
+#    $Revision: 1.6 $	$Date: 2012/01/18 10:23:02 $
 #
 #    The Hard core process
 #
@@ -13,19 +13,20 @@
 # -------------------------------------------------------------------
 #	
 
-Hardcore <- function(hc) {
-  out <- 
+Hardcore <- local({
+
+  BlankHardcore <- 
   list(
          name   = "Hard core process",
          creator = "Hardcore",
-         family  = pairwise.family,
+         family  = "pairwise.family",  # evaluated later
          pot    = function(d, par) {
            v <- 0 * d
            v[ d <= par$hc ] <-  (-Inf)
            attr(v, "IsOffset") <- TRUE
            v
          },
-         par    = list(hc = hc),
+         par    = list(hc = NULL),  # filled in later
          parnames = "hard core distance", 
          init   = function(self) {
            hc <- self$par$hc
@@ -41,13 +42,13 @@ Hardcore <- function(hc) {
            return(TRUE)
          },
          project = function(coeffs, self) {
-           return(coeffs)
+           return(NULL)
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            hc <- self$par$hc
            return(hc)
          },
-       version=versionstring.spatstat(),
+       version=NULL, # evaluated later
        # fast evaluation is available for the border correction only
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
@@ -67,7 +68,11 @@ Hardcore <- function(hc) {
          return(v)
        }
   )
-  class(out) <- "interact"
-  (out$init)(out)
-  return(out)
-}
+  class(BlankHardcore) <- "interact"
+  
+  Hardcore <- function(hc) {
+    instantiate.interact(BlankHardcore, list(hc=hc))
+  }
+
+  Hardcore
+})

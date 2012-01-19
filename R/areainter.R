@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.13 $	$Date: 2011/10/04 11:27:53 $
+#    $Revision: 1.17 $	$Date: 2012/01/18 09:37:46 $
 #
 #    The area interaction
 #
@@ -13,36 +13,40 @@
 # -------------------------------------------------------------------
 #
 
-AreaInter <- function(r) {
- areapot <- 
-  function(X,U,EqualPairs,pars,correction, ...) {
-    if(any(correction != "border"))
-      warning("Only the border correction is available - other options were ignored")
-    n <- U$n
-    answer <- numeric(n)
-    r <- pars$r
-    if(is.null(r)) stop("internal error: r parameter not found")
-    dummies <- !(seq_len(n) %in% EqualPairs[,2])
-    if(sum(dummies) > 0)
-      answer[dummies] <- -areaGain(U[dummies], X, r)
-    ii <- EqualPairs[,1]
-    jj <- EqualPairs[,2]
-    answer[jj] <- -areaLoss(X, r, subset=ii)
+AreaInter <- local({
+
+  # area-interaction potential function
+  areapot <- 
+    function(X,U,EqualPairs,pars,correction, ...) {
+      if(any(correction != "border"))
+        warning(paste("Only the border correction is available;",
+                      "other options were ignored"))
+      n <- U$n
+      answer <- numeric(n)
+      r <- pars$r
+      if(is.null(r)) stop("internal error: r parameter not found")
+      dummies <- !(seq_len(n) %in% EqualPairs[,2])
+      if(sum(dummies) > 0)
+        answer[dummies] <- -areaGain(U[dummies], X, r)
+      ii <- EqualPairs[,1]
+      jj <- EqualPairs[,2]
+      answer[jj] <- -areaLoss(X, r, subset=ii)
 #    for(k in seq_len(nrow(EqualPairs))) {
 #      i <- EqualPairs[k,1]
 #      j <- EqualPairs[k,2]
 #      answer[j] <- -areaGain(U[j], X[-i], r)
 #    }
-    return(1 + answer/(pi * r^2))
-  }
-             
-  out <- 
+      return(1 + answer/(pi * r^2))
+    }
+
+  # template object without family, par, version
+  BlankAI <- 
   list(
          name     = "Area-interaction process",
          creator  = "AreaInter",
-         family   = inforder.family,
+         family   = "inforder.family", # evaluated later
          pot      = areapot,
-         par      = list(r = r),
+         par      = list(r = NULL), # to be filled in
          parnames = "disc radius",
          init     = function(self) {
                       r <- self$par$r
@@ -63,9 +67,9 @@ AreaInter <- function(r) {
            return(is.finite(eta))
          },
          project = function(coeffs, self) {
-           if(!(self$valid)(coeffs, self))
-             stop("Can't project to a valid model")
-           return(coeffs)
+           if((self$valid)(coeffs, self))
+             return(NULL)
+           return(Poisson())
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
@@ -77,10 +81,16 @@ AreaInter <- function(r) {
            else
              return(2 * r)
          },
-       version=versionstring.spatstat()
+       version=NULL # to be added
   )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+  class(BlankAI) <- "interact"
 
+  AreaInter <- function(r) {
+    instantiate.interact(BlankAI, list(r=r))
+  }
+
+  AreaInter
+})
+
+
+             

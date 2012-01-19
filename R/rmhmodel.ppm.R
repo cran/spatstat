@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.52 $   $Date: 2011/11/18 08:39:44 $
+#  $Revision: 2.53 $   $Date: 2011/12/28 06:02:43 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -226,6 +226,17 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
   # converts ppm object `model' into format palatable to rmh.default
   
     verifyclass(model, "ppm")
+
+    # Ensure the fitted model is valid
+    # (i.e. exists mathematically as a point process)
+    if(!valid.ppm(model)) {
+      if(project) {
+        if(verbose)
+          cat("Model is invalid - projecting it\n")
+        model <- project.ppm(model, fatal=TRUE)
+      } else stop("The fitted model is not a valid point process")
+    }
+    
     X <- model
 
     if(verbose)
@@ -280,17 +291,6 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
         Vnames <- Y$entries$Vnames
         IsOffset <- Y$entries$IsOffset
         coeffs <- coeffs[Vnames[!IsOffset]]
-      }
-      # Ensure the fitted model is valid
-      # (i.e. exists mathematically as a point process)
-      if(!valid.ppm(model)) {
-        if(project) {
-          if(verbose)
-            cat("Model is invalid - projecting it\n")
-          if(is.null(inte$project))
-            stop("Internal error: interaction has no projection operator")
-          coeffs <- inte$project(coeffs, inte)
-        } else stop("The fitted model is not a valid point process")
       }
       # Translate the model to the format required by rmh.default
       Z <- siminfo(coeffs, inte)

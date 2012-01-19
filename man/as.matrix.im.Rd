@@ -29,6 +29,9 @@
 \value{
   A matrix or array.
 }
+\seealso{
+  \code{\link{as.matrix.owin}}
+}
 \examples{
    # artificial image
    Z <- setcov(square(1))

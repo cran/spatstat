@@ -178,8 +178,9 @@
   # binary mask
   we <- as.mask(erosion(w, 400, FALSE))
   plot(we)
-  spatstat.options(par.binary=list(col=grey(c(0.5,1))))
+  op <- spatstat.options(par.binary=list(col=grey(c(0.5,1))))
   plot(we)
+  spatstat.options(op)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

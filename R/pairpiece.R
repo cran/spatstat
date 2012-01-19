@@ -2,7 +2,7 @@
 #
 #    pairpiece.S
 #
-#    $Revision: 1.16 $	$Date: 2008/04/08 10:10:34 $
+#    $Revision: 1.20 $	$Date: 2012/01/18 10:40:05 $
 #
 #    A pairwise interaction process with piecewise constant potential
 #
@@ -13,12 +13,24 @@
 # -------------------------------------------------------------------
 #	
 
-PairPiece <- function(r) {
-  out <- 
+PairPiece <- local({
+
+  # .... auxiliary functions ........
+  delP <- function(i, r) {
+    r <- r[-i]
+    nr <- length(r)
+    if(nr == 0) return(Poisson())
+    if(nr == 1) return(Strauss(r))
+    return(PairPiece(r))
+  }
+
+  # ..... template ..........
+
+  BlankPairPiece <- 
   list(
          name     = "Piecewise constant pairwise interaction process",
          creator  = "PairPiece",
-         family    = pairwise.family,
+         family   = "pairwise.family", # evaluated later
          pot      = function(d, par) {
                        r <- par$r
                        nr <- length(r)
@@ -30,7 +42,7 @@ PairPiece <- function(r) {
                        }
                        out
                      },
-         par      = list(r = r),
+         par      = list(r = NULL), # filled in later
          parnames = "interaction thresholds",
          init     = function(self) {
                       r <- self$par$r
@@ -57,18 +69,31 @@ PairPiece <- function(r) {
         valid = function(coeffs, self) {
            # interaction parameters gamma
            gamma <- (self$interpret)(coeffs, self)$param$gammas
+           if(!all(is.finite(gamma))) return(FALSE)
            return(all(gamma <= 1) || gamma[1] == 0)
         },
         project = function(coeffs, self){
            # interaction parameters gamma
            gamma <- (self$interpret)(coeffs, self)$param$gammas
-           if(all(gamma <= 1))
-             return(coeffs)
-           # clip to 1
+           # interaction thresholds r[i]
            r <- self$par$r
-           npiece <- length(r)
-           coeffs[] <- pmin(0, coeffs)
-           return(coeffs)
+           # check for NA or Inf
+           bad <- !is.finite(gamma)
+           # gamma > 1 forbidden unless hard core
+           ishard <- is.finite(gamma[1]) && (gamma[1] == 0)
+           if(!ishard)
+             bad <- bad | (gamma > 1)
+           if(!any(bad))
+             return(NULL)
+           if(spatstat.options("project.fast") || sum(bad) == 1) {
+             # remove smallest threshold with an unidentifiable parameter
+             firstbad <- min(which(bad))
+             return(delP(firstbad, r))
+           } else {
+             # consider all candidate submodels
+             subs <- lapply(which(bad), delP, r=r)
+             return(subs)
+           }
         },
         irange = function(self, coeffs=NA, epsilon=0, ...) {
           r <- self$par$r
@@ -81,9 +106,15 @@ PairPiece <- function(r) {
             return(0)
           else return(max(r[active]))
         },
-       version=versionstring.spatstat()
-  )
-  class(out) <- "interact"
-  out$init(out)
-  return(out)
-}
+       version=NULL # filled in later
+       )
+  class(BlankPairPiece) <- "interact"
+
+  PairPiece <- function(r) {
+    instantiate.interact(BlankPairPiece, list(r=r))
+  }
+
+  PairPiece
+})
+
+                   

@@ -2,7 +2,7 @@
 #
 #    ordthresh.S
 #
-#    $Revision: 1.8 $	$Date: 2008/04/08 10:06:23 $
+#    $Revision: 1.10 $	$Date: 2012/01/17 01:19:48 $
 #
 #    Ord process with threshold potential
 #
@@ -38,6 +38,13 @@ OrdThresh <- function(r) {
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
                        printable=round(gamma,4)))
+         },
+         valid = function(coeffs, self) {
+           loggamma <- as.numeric(coeffs[1])
+           is.finite(loggamma)
+         },
+         project = function(coeffs, self) {
+           if((self$valid)(coeffs, self)) return(NULL) else return(Poisson())
          },
          irange = function(...) {
            return(Inf)

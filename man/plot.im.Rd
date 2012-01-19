@@ -8,7 +8,7 @@
 \usage{
   \method{plot}{im}(x, \dots, col=NULL, valuesAreColours=NULL,
                    ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
-                   ribscale=1) 
+                   ribscale=1, ribargs=list()) 
 }
 \arguments{
   \item{x}{
@@ -16,7 +16,8 @@
     An object of class \code{"im"} (see \code{\link{im.object}}).
   }
   \item{\dots}{
-    Extra arguments passed to \code{\link{image}} to control the plot.
+    Extra arguments passed to \code{\link[graphics]{image.default}}
+    to control the plot. See Details.
   }
   \item{col}{
     Colours for displaying the pixel values.
@@ -44,6 +45,13 @@
     Rescaling factor for tick marks. The values on the numerical scale
     printed beside the ribbon will be multiplied by this rescaling factor.
   }
+  \item{ribargs}{
+    List of additional arguments passed to
+    \code{\link[graphics]{image.default}} and
+    \code{\link[graphics]{axis}} 
+    to control the display of the ribbon and its scale axis. These may override
+    the \code{\dots} arguments. 
+  }
 }
 \value{
   none.
@@ -68,6 +76,10 @@
   different numerical values, evenly spaced between the minimum and
   maximum pixel values in the image \code{x}, rendered according to
   the chosen colour map.
+
+  Arguments \code{ribscale, ribargs} control the annotation of the
+  colour ribbon. To plot the colour ribbon without the axis and
+  tick-marks, use \code{ribargs=list(axes=FALSE)}.
 
   Normally the pixel values are displayed using the colours given in the
   argument \code{col}. This may be either an explicit colour map
@@ -121,8 +133,23 @@
   }
   
   Other graphical parameters controlling the display of both the pixel image
-  and the ribbon are passed through the \code{...} arguments
-  directly to the function \code{\link{image.default}}.
+  and the ribbon can be passed through the \code{...} arguments
+  to the function \code{\link[graphics]{image.default}}.
+  A parameter is handled only if it is one of the following:
+  \itemize{
+    \item a formal argument of \code{\link[graphics]{image.default}}
+    that is operative when \code{add=TRUE}.
+    \item one of the
+    parameters \code{"main", "asp", "sub", "axes", "ann",
+      "cex", "font", "cex.axis", "cex.lab", "cex.main", "cex.sub",
+      "col.axis", "col.lab", "col.main", "col.sub",
+      "font.axis", "font.lab", "font.main", "font.sub"}
+    described in \code{\link[graphics]{par}}.
+    \item the argument \code{box}, a logical value specifying whether
+    a box should be drawn.
+  }
+  By default, images are plotted using image rasters rather than
+  polygons, by setting \code{useRaster=TRUE} in \code{image.default}.
 
   Alternatively, the pixel values could be directly 
   interpretable as colour values in \R. That is, the pixel values
@@ -143,15 +170,23 @@
   If pixel values are interpreted as colours, 
   the arguments \code{col} and \code{ribbon} will be ignored,
   and a ribbon will not be plotted.
+}
+\section{Image Rendering Errors and Problems}{
+  The help for \code{\link[graphics]{image.default}} explains that
+  errors may occur, or images may be rendered incorrectly, on some
+  devices, depending on the availability of colours and other
+  device-specific constraints.
   
-  To suppress the axis tick marks and labels, set \code{axes=FALSE}.
+  An error may occur on some graphics devices if the image is very
+  large. If this happens, try setting \code{useRaster=FALSE} in the
+  call to \code{plot.im}.
 }
 \seealso{
   \code{\link{im.object}},
   \code{\link{colourmap}},
   \code{\link{contour.im}},
   \code{\link{persp.im}},
-  \code{\link{image.default}},
+  \code{\link[graphics]{image.default}},
   \code{\link{spatstat.options}}
 }
 \examples{
@@ -163,6 +198,10 @@
    # fixed colour map
    tc <- colourmap(rainbow(128), breaks=seq(-1,2,length=129))
    plot(Z, col=tc)
+   # tweaking the plot
+   plot(Z, main="La vie en bleu", col.main="blue", cex.main=1.5,
+        box=FALSE,
+        ribargs=list(col.axis="blue", col.ticks="blue", cex.axis=0.75))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

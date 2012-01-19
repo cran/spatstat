@@ -81,11 +81,18 @@
       by \code{\link{plot.fv}} and its relatives.
     }
     \item{ndummy.min}{
-      Controls the number of dummy points in a quadrature scheme
+      The minimum number of dummy points in a quadrature scheme
       created by \code{\link{default.dummy}}.
       Either an integer or a pair of integers
-      giving the number of dummy points in the \code{x} and \code{y}
-      directions. 
+      giving the minimum number of dummy points in the \code{x} and \code{y}
+      directions respectively. 
+    }
+    \item{ngrid.disc}{
+      Number of points in the square grid used to compute
+      a discrete approximation to the areas of discs
+      in \code{\link{areaLoss}} and \code{\link{areaGain}}
+      when exact calculation is not available.
+      A single integer.
     }
     \item{image.colfun}{
       Function determining the default colour map for
@@ -201,11 +208,23 @@
       (in the default case where argument \code{r} is absent).
       Initialised to 30.
     }
+    \item{project.fast}{
+      Logical. If \code{TRUE}, the algorithm of
+      \code{\link{project.ppm}}
+      will be accelerated using a shorcut.
+      Initialised to \code{FALSE}.
+    }
     \item{exactdt.checks.data,closepairs.newcode}{
       Logical. For software development purposes only.
-      Do not change these values unless you are
+      Do not change these values, unless you are
       Adrian Baddeley. 
-    }    
+    }
+    \item{rmh.p, rmh.q, rmh.nrep}{
+      New default values for the parameters \code{p}, \code{q}
+      and \code{nrep} in the Metropolis-Hastings simulation
+      algorithm. These override the defaults
+      in \code{\link{rmhcontrol.default}}.
+    }
   }
   If no arguments are given, 
   the current values of all parameters are returned,

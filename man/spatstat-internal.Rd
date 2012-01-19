@@ -62,7 +62,6 @@
 \alias{compilepcf}
 \alias{crosspairs}
 \alias{crosspaircounts}
-\alias{crossfikselterms}
 \alias{cobble.xy}
 \alias{codetime}
 \alias{commasep}
@@ -73,9 +72,7 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{densitypointsEngine}
-\alias{dgsTerms}
 \alias{diagnose.ppm.engine}
-\alias{diggraterms}
 \alias{digital.volume}
 \alias{dilate.owin}
 \alias{dim.fasp}               
@@ -128,7 +125,6 @@
 \alias{findmarktype}
 \alias{firstfactor}
 \alias{fii}
-\alias{fikselterms}
 \alias{fillNA}
 \alias{flipxypolygon}
 \alias{forbidNA}
@@ -165,6 +161,7 @@
 \alias{inpoint}
 \alias{inside.triangle}     
 \alias{inside.xypolygon}     
+\alias{instantiate.interact}
 \alias{intersect.ranges}     
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
@@ -201,6 +198,7 @@
 \alias{least.common.multiple}
 \alias{levels.im}
 \alias{levels<-.im}
+\alias{lhs.of.formula}
 \alias{licence.polygons}
 \alias{license.polygons}
 \alias{linequad}
@@ -541,7 +539,6 @@ compileK(D, r, weights, denom, check)
 compilepcf(D, r, weights, denom, check, endcorrect, \dots)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
-crossfikselterms(X,Y,r,kappa)
 cobble.xy(x, y, f, fatal)
 codetime(x)
 commasep(x)
@@ -557,8 +554,6 @@ densitypointsEngine(x, sigma, \dots,
 diagnose.ppm.engine(object, \dots, type="eem", typename, opt,
                          sigma=NULL, rbord = reach(object), compute.sd=TRUE,
                          compute.cts=TRUE, rv=NULL, oldstyle=FALSE)
-dgsTerms(X, Y, idX, idY, rho)
-diggraterms(X, Y, idX, idY, delta, rho)
 digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dim}{fasp}(x)
@@ -622,7 +617,6 @@ findcbind(root, depth, maxdepth)
 findmarktype(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
-fikselterms(U,X,r,kappa,EqualPairs)
 fillNA(x, value)
 flipxypolygon(p)
 forbidNA(x, context, xname)
@@ -659,6 +653,7 @@ implemented.for.K(correction, windowtype, explicit)
 inpoint(W)
 inside.triangle(x, y, xx, yy)
 inside.xypolygon(pts, polly, test01, method)
+instantiate.interact(x, par)
 intersect.ranges(a,b,fatal)
 intX.owin(w)
 intX.xypolygon(polly)
@@ -700,6 +695,7 @@ km.rs.opt(o, cc, d, breaks, KM, RS)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
+lhs.of.formula(x)
 licence.polygons()
 license.polygons()
 linequad(X, Y, ..., eps, nd)

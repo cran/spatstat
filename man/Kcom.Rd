@@ -203,28 +203,36 @@ Kcom(object, r = NULL, breaks = NULL, ...,
   Point process models: \code{\link{ppm}}.
 }
 \examples{
-    data(cells)
     fit0 <- ppm(cells, ~1) # uniform Poisson
-    plot(Kcom(fit0))
+    \testonly{fit0 <- ppm(cells, ~1, nd=16)}
+
+    if(interactive()) {
+      plot(Kcom(fit0))
 # compare the isotropic-correction estimates
-    plot(Kcom(fit0), cbind(iso, icom) ~ r)
+      plot(Kcom(fit0), cbind(iso, icom) ~ r)
 # uniform Poisson is clearly not correct
+    }
 
     fit1 <- ppm(cells, ~1, Strauss(0.08))
+    \testonly{fit1 <- ppm(cells, ~1, Strauss(0.08), nd=16)}
     K1 <- Kcom(fit1)
     K1
-    plot(K1)
-    plot(K1, cbind(iso, icom) ~ r)
-    plot(K1, cbind(trans, tcom) ~ r)
+    if(interactive()) {
+      plot(K1)
+      plot(K1, cbind(iso, icom) ~ r)
+      plot(K1, cbind(trans, tcom) ~ r)
 # how to plot the difference between nonparametric estimates and compensators
-    plot(K1, iso - icom ~ r)
+      plot(K1, iso - icom ~ r)
 # fit looks approximately OK; try adjusting interaction distance
-
+    }
     fit2 <- ppm(cells, ~1, Strauss(0.12))
+    \testonly{fit2 <- ppm(cells, ~1, Strauss(0.12), nd=16)}
     K2 <- Kcom(fit2)
-    plot(K2)
-    plot(K2, cbind(iso, icom) ~ r)
-    plot(K2, iso - icom ~ r)
+    if(interactive()) {
+      plot(K2)
+      plot(K2, cbind(iso, icom) ~ r)
+      plot(K2, iso - icom ~ r)
+    }
 }
 \keyword{spatial}
 \keyword{models}

@@ -1,4 +1,80 @@
 
+	CHANGES IN spatstat VERSION 1.25-2
+
+OVERVIEW 
+
+   o We thank Abdollah Jalilian and Thierry Onkelinx for contributions.
+
+   o Very Important bug fixes.
+
+   o Improved mechanism for handling 'invalid' point processes
+
+NEW FUNCTIONS
+
+   o as.matrix.owin
+   Converts a window to a logical matrix.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o project.ppm
+     Improved algorithm.
+     Now handles terms in the trend formula as well as the interaction.
+     The projected point process is now obtained by re-fitting the model,
+     and is guaranteed to be the maximum pseudolikelihood fit.
+
+   o plot.im
+     Now handles many arguments recognised by plot.default
+     such as 'cex.main'. Also handles argument 'box'.
+     New argument 'ribargs' contains parameters controlling the
+     ribbon plot only.      
+
+   o spatstat.options
+     New option 'project.fast' allows a faster shortcut for project.ppm
+
+   o spatstat.options
+     New options 'rmh.p', 'rmh.q', 'rmh.nrep' determine the default values
+     of the parameters p, q and nrep of the Metropolis-Hastings algorithm.
+     See rmhcontrol
+
+   o ppm
+     Slightly accelerated.
+
+BUG FIXES
+
+   o nncross, distfun, AreaInter
+     Results of nncross were possibly incorrect 
+     when X and Y did not have the same window. 
+     This bug affected values of 'distfun' and may also 
+     have affected ppm objects with interaction 'AreaInter'.
+     [Spotted by Thierry Onkelinx]
+     Bug introduced in spatstat 1.9-4 (June 2006).
+     Fixed.
+
+   o rCauchy
+     Simulations were incorrect in the sense that 
+     the value of 'omega' was inadvertently doubled 
+     (i.e. omega was incorrectly replaced by 2 * omega).
+     Bug introduced in spatstat 1.25-0.
+     Fixed.
+
+   o plot.im
+     White lines were present in the image display, on some graphics devices,
+     due to changes in R 2.14.
+     Fixed.
+
+   o update.ppm
+     The result of 'update(object, formula)' sometimes contained errors
+     in the internal format.
+     Bug introduced in spatstat 1.25-0.
+     Fixed.
+
+   o example(AreaInter), example(bw.smoothppp),
+   example(Kest.fft), example(plot.owin), example(predict.ppm),
+   example(simulate.ppm)
+	Executing these examples had the side-effect of
+	changing some of the parameters in spatstat.options.
+	Fixed.
+
 	CHANGES IN spatstat VERSION 1.25-1
 
 OVERVIEW 

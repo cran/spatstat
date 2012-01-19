@@ -76,10 +76,11 @@
 }
 \examples{
   data(longleaf)
-  \testonly{spatstat.options(n.bandwidth=8)}
+  \testonly{op <- spatstat.options(n.bandwidth=8)}
   b <- bw.smoothppp(longleaf)
   b
   plot(b)
+  \testonly{spatstat.options(op)}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

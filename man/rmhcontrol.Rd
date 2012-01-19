@@ -14,11 +14,11 @@
 }
 \arguments{
   \item{\dots}{Arguments passed to methods.}
-  \item{p}{Probability of proposing a shift (as against a birth/death)}
+  \item{p}{Probability of proposing a shift (as against a birth/death).}
   \item{q}{Conditional probability of proposing a death given that a
-    birth or death will be proposed}
+    birth or death will be proposed.}
   \item{nrep}{Total number of steps (proposals) of Metropolis-Hastings
-    algorithm that should be run}
+    algorithm that should be run.}
   \item{expand}{Either a numerical expansion factor,
     or a window (object of class \code{"owin"}), specifying that
     simulations are to be performed in a domain larger than the
@@ -80,14 +80,23 @@
 
       If \eqn{p = 1} then no expansion of the simulation window
       is allowed (see \code{expand} below).
+
+      The default value of \code{p} can be changed by setting
+      the parameter \code{rmh.p} in \code{\link{spatstat.options}}.
     }
     \item{q}{The conditional probability of proposing a death
       (rather than a birth) given that a shift is not proposed.
       This is of course ignored if \code{p} is equal to 1.
+
+      The default value of \code{q} can be changed by setting
+      the parameter \code{rmh.q} in \code{\link{spatstat.options}}.
     }
     \item{nrep}{The number of repetitions or iterations 
       to be made by the Metropolis-Hastings algorithm.  It should
       be large.
+
+      The default value of \code{nrep} can be changed by setting
+      the parameter \code{rmh.nrep} in \code{\link{spatstat.options}}.
     }
     \item{expand}{
       Either a numerical expansion factor, or
