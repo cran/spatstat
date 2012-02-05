@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.63 $	$Date: 2012/01/18 04:07:52 $
+#	$Revision: 2.65 $	$Date: 2012/02/03 11:41:54 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -419,6 +419,7 @@ project.ppm <- local({
   project.ppm
 })
 
+# more methods
 
 logLik.ppm <- function(object, ..., warn=TRUE) {
   if(!is.poisson.ppm(object) && warn) 
@@ -446,8 +447,6 @@ logLik.ppm <- function(object, ..., warn=TRUE) {
   return(ll)
 }
 
-# more methods
-
 formula.ppm <- function(x, ...) {
   f <- x$trend
   if(is.null(f)) f <- ~1
@@ -456,6 +455,27 @@ formula.ppm <- function(x, ...) {
 
 terms.ppm <- function(x, ...) {
   terms(formula(x), ...)
+}
+
+labels.ppm <- function(object, ...) {
+  # extract fitted trend coefficients
+  co <- coef(object)
+  Vnames <- object$internal$Vnames
+  is.trend <- !(names(co) %in% Vnames)
+  # model terms
+  tt <- terms(object)
+  lab <- attr(tt, "term.labels")
+  if(length(lab) == 0)
+    return(character(0))
+  # model matrix
+  mm <- model.matrix(object)
+  ass <- attr(mm, "assign")
+  # 'ass' associates coefficients with model terms
+  # except ass == 0 for the Intercept
+  coef.ok <- is.finite(co)
+  relevant <- (ass > 0) & is.trend
+  okterms <- unique(ass[coef.ok & relevant])
+  return(lab[okterms])
 }
 
 extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)

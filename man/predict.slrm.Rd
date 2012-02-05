@@ -11,7 +11,8 @@
   linear predictor in each pixel.
 }
 \usage{
- \method{predict}{slrm}(object, ..., type = "intensity", newdata=NULL)
+ \method{predict}{slrm}(object, ..., type = "intensity",
+                        newdata=NULL, window=NULL)
 }
 \arguments{
   \item{object}{
@@ -31,6 +32,10 @@
     Optional.  List containing new covariate values for the prediction.
     See Details.
   }
+  \item{window}{
+    Optional.  New window in which to predict.
+    An object of class \code{"owin"}.
+  }
 }
 \details{
   This is a method for \code{\link[stats]{predict}} for spatial logistic
@@ -42,7 +47,7 @@
   is computed at each pixel. If \code{type="probabilities"}) the 
   probability of the presence of a random point in each pixel is
   computed. If \code{type="link"}, the value of the linear predictor is
-  computed at each pixel.
+  computed at each pixel. 
 
   If \code{newdata = NULL} (the default), the algorithm computes
   fitted values of the model (based on the data that was originally used

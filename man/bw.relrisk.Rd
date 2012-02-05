@@ -84,12 +84,13 @@
 }
 \examples{
   data(urkiola)
-  \testonly{spatstat.options(n.bandwidth=8)}
+  \testonly{op <- spatstat.options(n.bandwidth=8)}
   b <- bw.relrisk(urkiola)
   b
   plot(b)
   b <- bw.relrisk(urkiola, hmax=20)
   plot(b)
+  \testonly{spatstat.options(op)}
 }
 \references{
   Diggle, P.J. (2003)

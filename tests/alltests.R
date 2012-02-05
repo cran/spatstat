@@ -1276,3 +1276,20 @@ local({
                                          radii=matrix(1e-06, 2, 2)))
   project.ppm(fit2)
 })
+#
+# tests/hyperframe.R
+#
+# test "[.hyperframe" etc
+#
+#  $Revision: 1.2 $  $Date: 2012/01/31 11:04:44 $
+#
+
+  lambda <- runif(4, min=50, max=100)
+  X <- lapply(as.list(lambda), function(x) { rpoispp(x) })
+  h <- hyperframe(lambda=lambda, X=X)
+  h$lambda2 <- lambda^2
+  h[, "lambda3"] <- lambda^3
+  h[, "Y"] <- X
+  h[, "X"] <- lapply(X, flipxy)
+  h[, c("X", "Y")] <- hyperframe(X=X, Y=X)
+

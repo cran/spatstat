@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.135 $	$Date: 2011/12/13 06:56:26 $
+#	$Revision: 5.138 $	$Date: 2012/02/04 01:34:50 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -43,7 +43,8 @@ function(Q,
          callstring="",
          precomputed=NULL,
          savecomputed=FALSE,
-         preponly=FALSE
+         preponly=FALSE,
+         rename.intercept=TRUE
 ) {
 #
 # Extract precomputed data if available
@@ -101,7 +102,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2011/12/13 06:56:26 $")
+                    date="$Date: 2012/02/04 01:34:50 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -115,11 +116,23 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   # the model is the uniform Poisson process
   # The MPLE (= MLE) can be evaluated directly
   npts <- X$n
-  volume <- area.owin(X$window) * markspace.integral(X)
+  W    <- X$window
+  if(rbord > 0) W <- erosion(W, rbord)
+  volume <- area.owin(W) * markspace.integral(X)
   lambda <- npts/volume
-  co <- c("log(lambda)"=log(lambda))
-  se <- 1/sqrt(npts)
+  # fitted canonical coefficient
+  co <- log(lambda)
+  # asymptotic variance of canonical coefficient
+  varcov <- matrix(1/npts, 1, 1)
+  fisher <- matrix(npts,   1, 1)
+  se <- sqrt(1/npts)
+  # give names
+  tag <- if(rename.intercept) "log(lambda)" else "(Intercept)"
+  names(co) <- tag
+  dimnames(varcov) <- dimnames(fisher) <- list(tag, tag)
+  # maximised log likelihood
   maxlogpl <- if(npts == 0) 0 else npts * (log(lambda) - 1)
+  #
   rslt <- list(
                method      = "mpl",
                fitter      = "exact",
@@ -134,8 +147,10 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
                covariates  = covariates,  # covariates are still retained!
                covfunargs  = covfunargs,
 	       correction  = correction,
-               rbord       = 0,
+               rbord       = rbord,
                terms       = terms(trend.formula),
+               fisher      = fisher,
+               varcov      = varcov,
                version     = the.version,
                problems    = list())
   class(rslt) <- "ppm"

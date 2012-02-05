@@ -1,5 +1,6 @@
 \name{ppm.object}
 \alias{ppm.object}
+\alias{methods.ppm}
 \title{Class of Fitted Point Process Models}
 \description{
   A class \code{ppm} to represent a fitted stochastic model
@@ -32,6 +33,8 @@
     \tab Extract model formula \cr
     \code{terms} \tab \code{\link{terms.ppm}}
     \tab Terms in the model formula \cr
+    \code{labels} \tab \code{labels.ppm}
+    \tab Names of estimable terms in the model formula \cr
     \code{residuals} \tab \code{\link{residuals.ppm}}
     \tab Point process residuals \cr
     \code{simulate} \tab \code{\link{simulate.ppm}}
@@ -49,8 +52,19 @@
     \code{extractAIC} \tab \code{\link{extractAIC.ppm}}
     \tab pseudolikelihood counterpart of AIC \cr
     \code{nobs} \tab \code{\link{nobs.ppm}}
-    \tab number of observations
-    }
+    \tab number of observations 
+  }
+
+  Objects of class \code{ppm} can also be handled by the
+  following standard functions, without requiring a special method:
+
+  \tabular{ll}{
+    name \tab description \cr
+    \code{\link{confint}} \tab Confidence intervals for parameters \cr
+    \code{\link{step}} \tab Stepwise model selection \cr
+    \code{\link{drop1}} \tab One-step model improvement \cr
+    \code{\link{add1}} \tab  One-step model improvement
+  }
 
   The class \code{ppm} also has methods for the following
   generic functions defined in the \pkg{spatstat} package:
@@ -122,8 +136,8 @@
   \code{\link{plot.ppm}}.
 }
 \section{Warnings}{
-  The internal representation may change in the next few releases
-  of the \pkg{spatstat} package.
+  The internal representation of \code{ppm} objects
+  may change slightly between releases of the \pkg{spatstat} package.
 }
 \examples{
   data(cells)

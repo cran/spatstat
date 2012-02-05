@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.50 $   $Date: 2011/12/13 07:15:50 $
+#    $Revision: 1.51 $   $Date: 2012/01/31 07:52:12 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -280,7 +280,15 @@ print.summary.ppm <- function(x, ...) {
       "unspecified method"
     else 
       switch(x$method,
-             mpl="maximum pseudolikelihood (Berman-Turner approximation)",
+             mpl={
+               if(!x$poisson) {
+                 "maximum pseudolikelihood (Berman-Turner approximation)"
+               } else {
+                 # Poisson process
+                 if(x$fitter == "exact") "maximum likelihood" else
+                 "maximum likelihood (Berman-Turner approximation)"
+               } 
+             },
              ho="Huang-Ogata method (approximate maximum likelihood)",
              paste("unrecognised method", sQuote(x$method)))
   cat(paste("Fitting method:", methodchosen, "\n"))

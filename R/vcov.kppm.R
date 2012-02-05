@@ -5,7 +5,7 @@
 #
 #   Original code: Abdollah Jalilian
 #
-#   $Revision: 1.4 $  $Date: 2011/05/30 14:53:44 $
+#   $Revision: 1.1 $  $Date: 2012/02/04 01:42:35 $
 #
 
 vcov.kppm <- function(object, ...,
@@ -14,7 +14,12 @@ vcov.kppm <- function(object, ...,
   what <- match.arg(what)
   verifyclass(object, "kppm")
   # extract composite likelihood results
-  po <- object$po  
+  po <- object$po
+  # ensure it was fitted with quadscheme
+  if(is.null(getglmfit(po))) {
+    warning("Re-fitting model with forcefit=TRUE")
+    po <- update(po, forcefit=TRUE)
+  }
   # extract quadrature scheme information
   Q <- quad.ppm(po)
   U <- union.quad(Q)

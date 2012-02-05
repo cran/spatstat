@@ -1,11 +1,91 @@
 
+	CHANGES IN spatstat VERSION 1.25-3
+
+OVERVIEW 
+
+   o We thank Daniel Esser for contributions.
+
+   o Improved support for fitted point process models.
+
+   o Bug fixes.
+
+NEW FUNCTIONS
+
+   o simulate.slrm
+   Method for 'simulate' for spatial logistic regression models.
+
+   o labels.ppm, labels.kppm, labels.slrm
+   Methods for 'labels' for fitted point process models.
+
+   o commonGrid
+   Determine a common spatial domain and pixel resolution
+   for several pixel images and/or binary masks
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o effectfun
+   Now has argument 'se.fit' allowing calculation of standard errors
+   and confidence intervals.
+
+   o [.msr
+   Now handles character-valued indices. 
+
+   o print.summary.ppm
+   Output gives a more precise description of the fitting method.
+
+   o ppm, kppm, slrm
+   Confidence intervals for the fitted trend parameters
+   can now be obtained using 'confint' 
+
+   o predict.slrm
+   New argument 'window' 
+
+   o union.owin
+   Now handles a single argument: union.owin(A) returns A.
+
+BUG FIXES
+
+   o selfcrossing.psp
+   y coordinate values were incorrect.
+   [Spotted by Daniel Esser.]
+   Fixed.
+
+   o as.im.owin
+   Did not handle a binary mask with a 1 x 1 pixel array.
+   Fixed.
+
+   o predict.slrm
+   Results of predict(object, newdata) were incorrect 
+   if the spatial domain of 'newdata' was larger than the original domain.
+   Fixed.
+
+   o ppm
+   If the model was the uniform Poisson process,
+   the argument 'rbord' was ignored.
+   Fixed.
+
+   o image subset assignment "[<-.im"
+   Generated an error if the indexing argument 'i' 
+   was a point pattern containing zero points.
+   Fixed.
+
+   o hyperframe subset assignment "[<-.hyperframe"
+   Did not correctly handle the case where a single column 
+   of the hyperframe was to be changed.
+   Fixed.
+   
+   o help(bw.relrisk), help(rmh.ppm), help(plot.plotppm)
+   These help files had the side-effect of changing some options
+   in spatstat.options.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.25-2
 
 OVERVIEW 
 
    o We thank Abdollah Jalilian and Thierry Onkelinx for contributions.
 
-   o Very Important bug fixes.
+   o Very Important Bug fixes.
 
    o Improved mechanism for handling 'invalid' point processes
 

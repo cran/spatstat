@@ -5,9 +5,10 @@
 #
 #        compatible.im()       Check whether two images are compatible
 #
-#        haronise.im()       Harmonise images
+#        harmonise.im()       Harmonise images
+#        commonGrid()
 #
-#     $Revision: 1.23 $     $Date: 2011/10/16 07:41:20 $
+#     $Revision: 1.27 $     $Date: 2012/02/04 07:43:19 $
 #
 
 eval.im <- function(expr, envir) {
@@ -123,3 +124,60 @@ harmonize.im <- harmonise.im <- function(...) {
   names(result) <- names(argz)
   return(result)
 }
+
+# Return just the corresponding template window
+
+commonGrid <- local({
+  # auxiliary function
+  gettype <- function(x) {
+    if(is.im(x) || is.mask(x)) "raster" else
+    if(is.owin(x) || is.ppp(x) || is.psp(x)) "spatial" else
+    "none"
+  }
+
+  commonGrid <- function(...) {
+    argz <- list(...)
+    type <- unlist(lapply(argz, gettype))
+    israster <- (type == "raster")
+    haswin   <- (type != "none")
+
+    if(any(israster)) {
+      # Get raster data
+      rasterlist <- argz[israster]
+    } else {
+      # No existing raster data - apply default resolution
+      if(!any(haswin))
+        stop("No spatial data supplied")
+      wins <- lapply(argz[haswin], as.owin)
+      rasterlist <- lapply(wins, as.mask)
+    }
+
+    # Find raster object with finest resolution
+    if(length(rasterlist) == 1) {
+      # only one raster object
+      finest <- rasterlist[[1]]
+    } else {
+      # test for compatible units
+      un <- lapply(rasterlist, unitname)
+      uok <- unlist(lapply(un, compatible.units, y=un[[1]]))
+      if(!all(uok))
+        stop("Objects have incompatible units of length")
+      # find the image/mask with the highest resolution
+      xsteps <- unlist(lapply(rasterlist, function(a) { a$xstep }))
+      which.finest <- which.min(xsteps)
+      finest <- rasterlist[[which.finest]]
+    }
+    # determine the bounding box
+    bb <- do.call("bounding.box", lapply(unname(argz[haswin]), as.rectangle))
+    # determine new raster coordinates
+    xcol <- prolongseq(finest$xcol, bb$xrange)
+    yrow <- prolongseq(finest$yrow, bb$yrange)
+    xy <- list(x=xcol, y=yrow)
+    # generate template
+    Wtemplate <- as.mask(bb, xy=xy)
+    return(Wtemplate)
+  }
+
+  commonGrid
+})
+

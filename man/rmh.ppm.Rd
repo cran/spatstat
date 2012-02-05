@@ -147,11 +147,14 @@
 
 \examples{
 
-   op <- spatstat.options(rmh.nrep=1e5)
    live <- interactive()
+   op <- spatstat.options()
+   spatstat.options(rmh.nrep=1e5)
+   Nrep <- 1e5
 
    \testonly{
-     spatstat.options(rmh.nrep=10)
+     spatstat.options(rmh.nrep=10, npixel=10)
+     Nrep <- 10
    }
 
    data(swedishpines)
@@ -170,7 +173,7 @@
 
    # Strauss process simulated on a larger window
    # then clipped to original window
-   Xsim <- rmh(fit, control=list(nrep=1e3, expand=2, periodic=TRUE))
+   Xsim <- rmh(fit, control=list(nrep=Nrep, expand=2, periodic=TRUE))
    
    # Strauss - hard core process
    fit <- ppm(X, ~1, StraussHard(r=7,hc=2))

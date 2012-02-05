@@ -90,8 +90,10 @@
  # Perspective plot only, with altered parameters:
   plot(mpic,how="persp", theta=-30,phi=40,d=4)
  # All plots, with altered parameters for perspective plot:
- spatstat.options(par.persp=list(theta=-30,phi=40,d=4))
+ op <- spatstat.options(par.persp=list(theta=-30,phi=40,d=4))
  plot(mpic)
+ # Revert
+ spatstat.options(op)
  }
 }
 \keyword{spatial}
