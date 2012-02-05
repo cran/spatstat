@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.43 $ $Date: 2011/12/02 10:22:48 $
+# $Revision: 1.45 $ $Date: 2012/02/04 01:48:16 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -19,7 +19,7 @@ kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
                           c(K="K", g="pcf", pcf="pcf"))
   if(is.marked(X))
     stop("Sorry, cannot handle marked point patterns")
-  po <- ppm(X, trend=trend, covariates=covariates)
+  po <- ppm(X, trend=trend, covariates=covariates, rename.intercept=FALSE)
   stationary <- is.stationary(po)
   if(stationary) {
     lambda <- summary(po)$trend$value
@@ -321,6 +321,10 @@ formula.kppm <- function(x, ...) {
 
 terms.kppm <- function(x, ...) {
   terms(x$po, ...)
+}
+
+labels.kppm <- function(object, ...) {
+  labels(object$po, ...)
 }
 
 update.kppm <- function(object, trend=~1, ..., clusters=NULL) {

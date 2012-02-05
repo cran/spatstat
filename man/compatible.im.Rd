@@ -28,7 +28,8 @@
 }
 \seealso{
   \code{\link{eval.im}},
-  \code{\link{harmonise.im}}
+  \code{\link{harmonise.im}},
+  \code{\link{commonGrid}}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

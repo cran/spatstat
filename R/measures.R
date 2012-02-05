@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.19 $  $Date: 2011/05/18 08:05:47 $
+#  $Revision: 1.21 $  $Date: 2012/01/21 08:37:48 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
@@ -34,21 +34,27 @@ msr <- function(qscheme, discrete, density, check=TRUE) {
     nc <- ncol(density)
     if(nd != nc) {
       if(nd == 1) {
+        # replicate columns of discrete component
         discrete <- matrix(rep(discrete, nc), ndata, nc)
+        colnames(discrete) <- colnames(density)
       } else if(nc == 1) {
+        # replicate columns of density component
         density <- matrix(rep(density, nd), nquad, nd)
+        colnames(density) <- colnames(discrete)
       } else stop(paste("Incompatible numbers of columns in",
                         sQuote("discrete"), paren(nd), "and",
                         sQuote("density"), paren(nc)))
     }
     discretepad <- matrix(0, nquad, max(nd, nc))
     discretepad[Z, ] <- discrete
+    colnames(discretepad) <- colnames(density)
   }
 
   #
   #
   # Discretised measure (value of measure for each quadrature tile)
   val <- discretepad + W * density
+  if(is.matrix(density)) colnames(val) <- colnames(density)
   #
   out <- list(loc = U,
               val = val,

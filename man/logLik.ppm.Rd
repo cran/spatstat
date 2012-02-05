@@ -4,7 +4,8 @@
 \alias{nobs.ppm}
 \title{Log Likelihood and AIC for Point Process Model}
 \description{
-  Extracts the log likelihood and AIC of a fitted Poisson point process
+  Extracts the log likelihood, deviance, and AIC
+  of a fitted Poisson point process
   model, or analogous quantities based on the pseudolikelihood for
   a fitted Gibbs point process model.
 }
@@ -42,7 +43,7 @@
   (as approximated by quadrature using the Berman-Turner approximation)
   is extracted. If \code{object} is not a Poisson process, the maximised log
   \emph{pseudolikelihood} is returned, with a warning (if \code{warn=TRUE}).
-  
+
   The Akaike Information Criterion AIC for a fitted model is defined as
   \deqn{
     AIC = -2 \log(L) + k \times \mbox{edf}

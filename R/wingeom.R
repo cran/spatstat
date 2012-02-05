@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.68 $	$Date: 2011/05/18 09:25:48 $
+#	$Revision: 4.69 $	$Date: 2012/02/04 08:12:45 $
 #
 #
 #
@@ -296,8 +296,8 @@ union.owin <- function(A, B, ...) {
     }
   }
   #
-  if(is.null(A) || is.empty(A)) return(B)
-  if(is.null(B) || is.empty(B)) return(A)
+  if(missing(A) || is.null(A) || is.empty(A)) return(B)
+  if(missing(B) || is.null(B) || is.empty(B)) return(A)
   verifyclass(A, "owin")
   verifyclass(B, "owin")
 

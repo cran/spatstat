@@ -47,10 +47,12 @@
   \code{\link{tess}},
 }
 \examples{
+   \testonly{op <- spatstat.options(npixel=10)}
    A <- tess(xgrid=0:4, ygrid=0:3)
-   B <- A[c(1, 3, 4, 7, 12)]
+   B <- A[c(1, 3, 7)]
    E <- A[-1]
    A[c(2, 5, 11)] <- NULL
+   \testonly{spatstat.options(op)}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

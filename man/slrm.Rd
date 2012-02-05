@@ -116,10 +116,11 @@ slrm(formula, ..., data = NULL, offset = TRUE, link = "logit",
   If \code{link="cloglog"} then the algorithm fits a model stating that
   \deqn{\log(-\log(1-p)) = \eta}{log(-log(1-p)) = eta}.
 
-  If \code{offset=TRUE} (the default), the linear predictor includes
-  an offset term equal to the logarithm of the pixel area. This ensures
-  that the fitted parameters are approximately independent of pixel
-  size. If \code{offset=FALSE}, the offset is not included, and the
+  If \code{offset=TRUE} (the default), the model formula will be
+  augmented by adding an offset term equal to the logarithm of the pixel
+  area. This ensures that the fitted parameters are
+  approximately independent of pixel size.
+  If \code{offset=FALSE}, the offset is not included, and the
   traditional form of Spatial Logistic Regression is fitted.
 }
 \value{
@@ -162,7 +163,6 @@ slrm(formula, ..., data = NULL, offset = TRUE, link = "logit",
   Proceedings, 38th Congress, International Statistical Institute.
 }
 \examples{
-     data(copper)
      X <- copper$SouthPoints
      slrm(X ~ 1)
      slrm(X ~ x+y)

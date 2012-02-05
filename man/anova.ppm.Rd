@@ -72,16 +72,33 @@ Performs analysis of deviance for two or more fitted point process models.
     \item{different sizes of dataset:}{
       There may be an error message from \code{anova.glmlist} that
       \dQuote{models were not all fitted to the same size of dataset}.
-      This generally occurs when some of the point process models depend on
-      covariates, which were supplied as pixel images. The error arises
-      when one of the models does not depend on the covariates, or
-      when the pixel images do not have exactly the same domains.
+      This implies that the models were fitted using different
+      quadrature schemes (see \code{\link{quadscheme}}) and/or
+      with different edge corrections or different values of the
+      border edge correction distance \code{rbord}.
 
-      To avoid this problem, the point process models should all be fitted
-      by calling \code{\link{ppm}}
+      To ensure that models are comparable, check the following:
       \itemize{
-	\item with the argument \code{allcovar=TRUE}, and 
-	\item using exactly the same list of covariates in each case.
+	\item the models must all have been fitted to the same
+	point pattern dataset, in the same window.
+	\item all models must have been fitted by the same
+	fitting method as specified by the argument \code{method} in
+	\code{\link{ppm}}. 
+	\item If some of the models depend on covariates, then
+	they should all have been fitted using the same list of
+	covariates, and using \code{allcovar=TRUE} to ensure that the
+	same quadrature scheme is used.
+	\item all models must have been fitted using the same edge
+	correction as specified by the arguments \code{correction}
+	and \code{rbord}. If you did not specify the value of
+	\code{rbord}, then it may have
+	taken a different value for different models. The default value of
+	\code{rbord} is equal to zero for a Poisson model,
+	and otherwise equals the reach (interaction distance) of the
+	interaction term (see \code{\link{reach}}).
+	To ensure that the models are comparable, set \code{rbord} to
+	equal the maximum reach of the interactions that you
+	are fitting.
       }
     }
   }

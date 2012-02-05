@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.13 $     $Date: 2011/11/20 04:24:42 $
+  $Revision: 1.14 $     $Date: 2012/01/21 02:16:09 $
 
  */
 
@@ -735,7 +735,7 @@ SEXP CxysegXint(SEXP x0,
 	  ii[nout] = i;
 	  jj[nout] = j;
 	  x[nout]  = X0[i] + tti * Dx[i];
-	  y[nout]  = Y0[i] + ttj * Dy[i];
+	  y[nout]  = Y0[i] + tti * Dy[i];
 	  ++nout;
 	}
       }

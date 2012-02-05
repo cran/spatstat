@@ -380,6 +380,7 @@
 	Make a discrete pixel approximation of a given window \cr
 	\code{\link{as.im.owin}} \tab convert window to pixel image \cr
 	\code{\link{pixellate.owin}} \tab convert window to pixel image \cr
+	\code{\link{commonGrid}} \tab find common pixel grid for windows \cr
 	\code{\link{nearest.raster.point}} \tab
 	map continuous coordinates to raster locations\cr
 	\code{\link{raster.x}} \tab
@@ -454,6 +455,7 @@
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{harmonise.im}} \tab make images compatible \cr
+	\code{\link{commonGrid}} \tab find a common pixel grid for images \cr
 	\code{\link{eval.im}} \tab evaluate any expression involving images\cr
 	\code{\link{scaletointerval}} \tab rescale pixel values \cr
 	\code{\link{zapsmall.im}} \tab set very small pixel values to zero \cr
@@ -1121,7 +1123,7 @@
   Spatial logistic regression is performed by the function
   \code{\link{slrm}}. Its result is an object of class \code{"slrm"}.
   There are many methods for this class, including methods for
-  \code{print}, \code{fitted}, \code{predict},
+  \code{print}, \code{fitted}, \code{predict}, \code{simulate},
   \code{anova}, \code{coef}, \code{logLik}, \code{terms},
   \code{update}, \code{formula} and \code{vcov}. 
   
@@ -1150,7 +1152,8 @@
     \code{\link{plot.slrm}}    \tab Plot fitted probabilities or
     intensity \cr
     \code{\link{predict.slrm}} \tab Compute predicted probabilities or
-    intensity with new data 
+    intensity with new data \cr
+    \code{\link{simulate.slrm}} \tab Simulate model
   }
   
   There are many other undocumented methods for this class,

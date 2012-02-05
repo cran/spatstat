@@ -4,6 +4,7 @@
 \alias{formula.kppm}
 \alias{print.kppm}
 \alias{terms.kppm}
+\alias{labels.kppm}
 \title{
   Methods for Cluster Point Process Models
 }
@@ -15,6 +16,7 @@
 \method{formula}{kppm}(x, \dots)
 \method{print}{kppm}(x, ...)
 \method{terms}{kppm}(x, \dots)
+\method{labels}{kppm}(object, \dots)
 }
 \arguments{
   \item{x,object}{
@@ -29,8 +31,9 @@
   These functions are methods for the generic commands
   \code{\link{coef}},
   \code{\link{formula}},
-  \code{\link{print}} and
-  \code{\link{terms}}
+  \code{\link{print}},
+  \code{\link{terms}} and
+  \code{\link{labels}}
   for the class \code{"kppm"}.
 
   An object of class \code{"kppm"} represents a fitted
@@ -58,7 +61,8 @@
   fit <- kppm(redwood, ~x, "MatClust")
   coef(fit)
   formula(fit)
-  terms(fit)  
+  tf <- terms(fit)
+  labels(fit)
 }
 \keyword{spatial}
 \keyword{methods}

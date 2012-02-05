@@ -33,6 +33,9 @@ harmonize.im(\dots)
   arguments.
   If the arguments were named (\code{name=value}) then the return value
   also carries these names.
+
+  If you just want to determine the appropriate pixel resolution,
+  without converting the images, use \code{\link{commonGrid}}.
 }
 \value{
   A list,
@@ -52,6 +55,7 @@ harmonize.im(\dots)
    harmonise.im(X=A, Y=B, Z=G)
 }
 \seealso{
+  \code{\link{commonGrid}},
   \code{\link{compatible.im}},
   \code{\link{as.im}}
 }

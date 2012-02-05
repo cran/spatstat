@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.4 $   $Date: 2011/07/26 08:24:32 $
+#  $Revision: 1.12 $   $Date: 2012/02/04 11:46:38 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -89,10 +89,12 @@ slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
 ################ UTILITY TO FIND AND RESHAPE DATA #################
 
 slr.prepare <- function(CallInfo, envir, data,
-                        dataAtPoints=NULL, splitby=NULL) {
+                        dataAtPoints=NULL, splitby=NULL,
+                        clip=TRUE) {
   # CallInfo is produced by slrm()
   # envir is parent environment of model formula
   # data  is 'data' argument that takes precedence over 'envir'
+  # 'clip' is TRUE if the data should be clipped to the domain of Y
   Yname    <- CallInfo$responsename
   varnames <- CallInfo$varnames
   covnames <- CallInfo$covnames
@@ -110,7 +112,7 @@ slr.prepare <- function(CallInfo, envir, data,
   #
   if(!is.null(dataAtPoints)) {
     dataAtPoints <- as.data.frame(dataAtPoints)
-    if(nrow(dataAtPoints) != Y$n)
+    if(nrow(dataAtPoints) != npoints(Y))
       stop(paste("dataAtPoints should have one row for each point in",
                  dQuote(Yname)))
   }
@@ -120,16 +122,14 @@ slr.prepare <- function(CallInfo, envir, data,
   names(covlist) <- covnames
   # Each covariate should be an image, a window, a function, or a single number
   if(ncov == 0) {
-    isim <- isowin <- isfun <- isnum <- isspatial <- israster <- logical(0)
+    isim <- isowin <- ismask <- isfun <- isnum <- isspatial <- israster <- logical(0)
   } else {
     isim  <- unlist(lapply(covlist, is.im))
     isowin  <- unlist(lapply(covlist, is.owin))
+    ismask  <- unlist(lapply(covlist, is.mask))
     isfun  <- unlist(lapply(covlist, is.function))
     isspatial <- isim | isowin | isfun
-    israster <- unlist(lapply(covlist,
-                              function(x) {
-                                is.im(x) | (is.owin(x) && x$type == "mask")
-                              }))
+    israster <- isim | ismask
     isnum <- unlist(lapply(covlist,
                            function(x) { is.numeric(x) && length(x) == 1} ))
   }
@@ -146,7 +146,7 @@ slr.prepare <- function(CallInfo, envir, data,
       stop("The splitting covariate must be a window")
     # ensure it is a polygonal window
     covlist[[splitby]] <- splitwin <- as.polygonal(splitwin)
-    # delete splitting covariate from lists to be processes
+    # delete splitting covariate from lists to be processed
     issplit <- (covnames == splitby)
     isspatial[issplit] <- FALSE
     israster[issplit] <- FALSE
@@ -173,27 +173,30 @@ slr.prepare <- function(CallInfo, envir, data,
     return(NULL)
   }
 
-  # determine common resolution and convert all data to it
+  # determine spatial domain & common resolution: convert all data to it
   if(length(dotargs) > 0 || nraster == 0) {
-    # Use dot arguments to determine pixel resolution
-    W <- do.call("as.mask", append(list(as.owin(Y)), dotargs))
+    # Pixel resolution is determined by explicit arguments
+    if(clip) {
+      # Window extent is determined by response point pattern
+      D <- as.owin(Y)
+    } else {
+      # Window extent is union of domains of data
+      domains <- lapply(append(spatiallist, list(Y)), as.owin)
+      D <- do.call("union.owin", domains)
+    }
+    # Create template mask
+    W <- do.call("as.mask", append(list(D), dotargs))
     # Convert all spatial objects to this resolution
     spatiallist <- lapply(spatiallist, convert, W=W)
   } else {
-    # Use image arguments to determine pixel resolution
-    # Find object with highest pixel resolution    
-    if(nraster == 1) {
-      biggest <- 1
-    } else {
-      pixcounts <- unlist(lapply(rasterlist, function(x) { prod(x$dim) }))
-      biggest <- which.max(pixcounts)
+    # Pixel resolution is determined implicitly by covariate data
+    W <- do.call("commonGrid", rasterlist)
+    if(clip) {
+      # Restrict data to spatial extent of response point pattern
+      W <- intersect.owin(W, as.owin(Y))
     }
-    # Create template mask
-    W <- as.mask(as.owin(rasterlist[[biggest]]))
-    # Adjust all other images to this resolution
-    bigname <- rasternames[biggest]
-    notbig <- (spatialnames != bigname)
-    spatiallist[notbig] <- lapply(spatiallist[notbig], convert, W=W)
+    # Adjust spatial objects to this resolution
+    spatiallist <- lapply(spatiallist, convert, W=W)
   }
   # images containing coordinate values
   xcoordim <- as.im(function(x,y){x}, W=W)
@@ -339,7 +342,8 @@ fitted.slrm <- function(object, ...) {
   predict(object, type="probabilities")
 }
 
-predict.slrm <- function(object, ..., type="intensity", newdata=NULL) {
+predict.slrm <- function(object, ..., type="intensity",
+                         newdata=NULL, window=NULL) {
   type <- pickoption("type", type,
                      c(probabilities="probabilities",
                        link="link",
@@ -352,7 +356,7 @@ predict.slrm <- function(object, ..., type="intensity", newdata=NULL) {
   df   <- object$Data$df
   loga <- df$logpixelarea
 
-  if(is.null(newdata)) {
+  if(is.null(newdata) && is.null(window)) {
     # fitted values from existing fit
     switch(type,
            probabilities={
@@ -382,15 +386,22 @@ predict.slrm <- function(object, ..., type="intensity", newdata=NULL) {
     # update arguments that may affect pixel resolution
     CallInfo <- object$CallInfo
     CallInfo$dotargs <- resolve.defaults(list(...), CallInfo$dotargs)
+    #
+    if(!is.null(window)) {
+      # insert fake response in new window
+      if(is.null(newdata)) newdata <- list()
+      window <- as.owin(window)
+      newdata[[CallInfo$responsename]] <- ppp(numeric(0), numeric(0),
+                                            window=window)
+    }
     # process new data
-    newData <- slr.prepare(CallInfo, environment(CallInfo$formula), newdata)
+    newData <- slr.prepare(CallInfo, environment(CallInfo$formula), newdata,
+                           clip=is.null(window))
     newdf   <- newData$df
     newW    <- newData$W
     newloga <- newdf$logpixelarea
     # compute link values
     linkvalues <- predict(FIT, newdata=newdf, type="link")
-    # adjust for difference in log pixel area
-    linkvalues <- linkvalues - loga + newloga
     #
     linkinv <- family(FIT)$linkinv
     switch(type,
@@ -431,6 +442,25 @@ formula.slrm <- function(x, ...) {
 
 terms.slrm <- function(x, ...) {
   terms(formula(x), ...)
+}
+
+labels.slrm <- function(object, ...) {
+  # extract fitted trend coefficients
+  co <- coef(object)
+  # model terms
+  tt <- terms(object)
+  lab <- attr(tt, "term.labels")
+  if(length(lab) == 0)
+    return(character(0))
+  # model matrix
+  mm <- model.matrix(object)
+  ass <- attr(mm, "assign")
+  # 'ass' associates coefficients with model terms
+  # except ass == 0 for the Intercept
+  coef.ok <- is.finite(co)
+  relevant <- (ass > 0) 
+  okterms <- unique(ass[coef.ok & relevant])
+  return(lab[okterms])
 }
 
 extractAIC.slrm <- function (fit, scale = 0, k = 2, ...)
@@ -489,3 +519,43 @@ is.stationary.slrm <- function(x) {
 }
 
 is.poisson.slrm <- function(x) { TRUE }
+
+
+simulate.slrm <- function(object, nsim=1, seed=NULL, ...,
+                          window=NULL, covariates=NULL, 
+                          verbose=TRUE) {
+  # .... copied from simulate.lm ....
+  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+    runif(1)
+  if (is.null(seed))
+    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+  else {
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)
+    set.seed(seed)
+    RNGstate <- structure(seed, kind = as.list(RNGkind()))
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+  }
+  
+  # determine simulation window and compute intensity
+  if(!is.null(window))
+    stopifnot(is.owin(window))
+  lambda <- predict(object, type="intensity", newdata=covariates, window=window)
+
+  # max lambda (for efficiency)
+  summ <- summary(lambda)
+  lmax <- summ$max + 0.05 * diff(summ$range)
+
+  # run
+  out <- list()
+  if(verbose && (nsim > 1))
+    cat(paste("Generating", nsim, "simulations... "))
+  for(i in 1:nsim) {
+    out[[i]] <- rpoispp(lambda, lmax=lmax)
+    if(verbose) progressreport(i, nsim)
+  }
+  # pack up
+  out <- as.listof(out)
+  names(out) <- paste("Simulation", 1:nsim)
+  attr(out, "seed") <- RNGstate
+  return(out)
+}

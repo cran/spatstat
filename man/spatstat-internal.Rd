@@ -129,7 +129,6 @@
 \alias{flipxypolygon}
 \alias{forbidNA}
 \alias{FormatFaspFormulae}
-\alias{formula.slrm}
 \alias{fvlabels}
 \alias{fvlabels<-}
 \alias{fvlabelmap}
@@ -195,6 +194,7 @@
 \alias{Kpcf.kppm}               
 \alias{killinteraction}
 \alias{km.rs.opt}
+\alias{labels.ppm}
 \alias{least.common.multiple}
 \alias{levels.im}
 \alias{levels<-.im}
@@ -335,7 +335,6 @@
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhInfoList}
-\alias{print.slrm}
 \alias{print.splitppp}
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
@@ -439,7 +438,6 @@
 \alias{summary.ppx}
 \alias{superimposeMarks}
 \alias{sympoly}
-\alias{terms.slrm}
 \alias{termsinformula}
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
@@ -621,7 +619,6 @@ fillNA(x, value)
 flipxypolygon(p)
 forbidNA(x, context, xname)
 FormatFaspFormulae(f, argname)
-\method{formula}{slrm}(x, ...)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
 fvlabelmap(x, dot=TRUE)
@@ -692,6 +689,7 @@ Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
 Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
+\method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
@@ -744,7 +742,9 @@ meanY.owin(w)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
 	 rbord, use.gam, gcontrol, famille,
-         forcefit, nd, allcovar, callstring, precomputed, savecomputed, preponly)
+         forcefit, nd, allcovar, callstring,
+         precomputed, savecomputed, preponly,
+         rename.intercept)
 mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
@@ -846,7 +846,6 @@ primefactors(n, prmax)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
-\method{print}{slrm}(x, ...)
 \method{print}{splitppp}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
@@ -931,7 +930,7 @@ shiftxypolygon(p, vec = c(0, 0))
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr, pois)
 singlestring(s, coll)
-slr.prepare(CallInfo, envir, data, dataAtPoints, splitby)
+slr.prepare(CallInfo, envir, data, dataAtPoints, splitby, clip)
 slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)
@@ -955,7 +954,6 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{ppx}(object, \dots)
 superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
-\method{terms}{slrm}(x, ...)
 termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)

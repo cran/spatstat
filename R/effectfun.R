@@ -1,10 +1,10 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.8 $ $Date: 2011/06/17 02:44:23 $
+#   $Revision: 1.9 $ $Date: 2012/01/24 10:29:03 $
 #
 
-effectfun <- function(model, covname, ...) {
+effectfun <- function(model, covname, ..., se.fit=FALSE) {
   stopifnot(is.ppm(model))
   dotargs <- list(...)
   # determine names of covariates involved
@@ -110,16 +110,41 @@ effectfun <- function(model, covname, ...) {
   #
   # Now predict
   lambda <- predict(model, locations=fakeloc, covariates=fakecov)
+  if(se.fit) {
+    se <- predict(model, locations=fakeloc, covariates=fakecov, type="se")
+    sedf <- data.frame(se =se,
+                       hi = lambda + 2 * se,
+                       lo = lambda - 2 * se)
+  }
   #
   dfin <- if(!is.null(fakecov)) cbind(fakeloc, fakecov) else fakeloc 
   dfin <- dfin[covname]
   df <- cbind(dfin, data.frame(lambda=lambda))
-  if(covtype == "real") {
-    f <- fv(df, argu=covname, ylab=substitute(lambda, NULL),
-            labl=c(covname,"lambda"),
-            valu="lambda", alim=Zr,
-            desc=c(paste("value of covariate", covname),
-              "fitted intensity"))
-    return(f)
-  } else return(df)
+  #
+  if(covtype != "real") {
+    result <- df
+    if(se.fit) result <- cbind(result, sedf)
+  } else {
+    bc <- paren(covname)
+    result <- fv(df, argu=covname, 
+                 ylab=substitute(lambda(X), list(X=as.name(covname))),
+                 labl=c(covname,
+                   paste("hat(%s)", bc)),
+                 valu="lambda", alim=Zr,
+                 desc=c(paste("value of covariate", covname),
+                   "fitted intensity"),
+                 fname="lambda")
+    if(se.fit) {
+      result <- bind.fv(result, sedf,
+                        labl=c(paste("se[%s]", bc),
+                          paste("%s[hi]", bc),
+                          paste("%s[lo]", bc)),
+                        desc=c("standard error of fitted trend",
+                          "upper limit of pointwise 95%% CI for trend",
+                          "lower limit of pointwise 95%% CI for trend"))
+      fvnames(result, ".") <- c("lambda", "hi", "lo")
+      attr(result, "fmla") <- as.formula(paste(". ~ ", covname))
+    }
+  }
+  return(result)
 }

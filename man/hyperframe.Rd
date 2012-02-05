@@ -55,8 +55,9 @@
 }
 \section{Methods for Hyperframes}{
   There are methods for
-  \code{print}, \code{plot}, \code{summary}, \code{with}, \code{[}, \code{$},
-  \code{$<-}, \code{names}, \code{as.data.frame} \code{as.list},
+  \code{print}, \code{plot}, \code{summary}, \code{with},
+  \code{[}, \code{[<},\code{$}, \code{$<-},
+  \code{names}, \code{as.data.frame} \code{as.list},
   \code{cbind} and \code{rbind} for the class of hyperframes. There is also
   \code{is.hyperframe} and \code{\link{as.hyperframe}}.
 }
@@ -92,9 +93,14 @@
   hyperframe(X=1:10, Y=letters[1:10], Z=factor(letters[1:10]),
     stringsAsFactors=FALSE)
 
-  lambda <- runif(10, min=50, max=100)
+  lambda <- runif(4, min=50, max=100)
   X <- lapply(as.list(lambda), function(x) { rpoispp(x) })
-  hyperframe(lambda=lambda, X=X)
+  h <- hyperframe(lambda=lambda, X=X)
+  h
+
+  h$lambda2 <- lambda^2
+  h[, "lambda3"] <- lambda^3
+  h[, "Y"] <- X
 }
 \keyword{spatial}
 \keyword{manip}

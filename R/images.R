@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.86 $     $Date: 2011/10/12 11:17:10 $
+#         $Revision: 1.88 $     $Date: 2012/02/04 08:58:59 $
 #
 #      The class "im" of raster images
 #
@@ -306,18 +306,24 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
 
   if(!is.null(ip <- as.ppp(i, W=W, fatal=FALSE, check=TRUE))) {
     # 'i' is a point pattern
+    nv <- length(value)
+    np <- npoints(ip)
+    if(nv != np && nv != 1)
+      stop("Length of replacement value != number of point locations")
     # test whether all points are inside window FRAME
     ok <- inside.owin(ip$x, ip$y, as.rectangle(W))
     if(any(!ok)) {
       warning("Some points are outside the outer frame of the image")
-      if(length(value) == ip$n)
+      if(nv == np)
         value <- value[ok]
       ip <- ip[ok]
     }
-    # determine row & column positions for each point 
-    loc <- nearest.pixel(ip$x, ip$y, X)
-    # set values
-    X$v[cbind(loc$row, loc$col)] <- value
+    if(npoints(ip) > 0) {
+      # determine row & column positions for each point 
+      loc <- nearest.pixel(ip$x, ip$y, X)
+      # set values
+      X$v[cbind(loc$row, loc$col)] <- value
+    }
     return(X)
   }
   stop("The subset operation is undefined for this type of index")
@@ -334,12 +340,14 @@ function(x, i, drop=TRUE, ..., raster=NULL) {
 
 nearest.pixel <- function(x,y,im) {
   verifyclass(im, "im")
-  nr <- im$dim[1]
-  nc <- im$dim[2]
-  cc <- round(1 + (x - im$xcol[1])/im$xstep)
-  rr <- round(1 + (y - im$yrow[1])/im$ystep)
-  cc <- pmax(1,pmin(cc, nc))
-  rr <- pmax(1,pmin(rr, nr))
+  if(length(x) > 0) {
+    nr <- im$dim[1]
+    nc <- im$dim[2]
+    cc <- round(1 + (x - im$xcol[1])/im$xstep)
+    rr <- round(1 + (y - im$yrow[1])/im$ystep)
+    cc <- pmax(1,pmin(cc, nc))
+    rr <- pmax(1,pmin(rr, nr))
+  } else cc <- rr <- integer(0)
   return(list(row=rr, col=cc))
 }
 

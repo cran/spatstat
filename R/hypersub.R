@@ -4,7 +4,7 @@
 #
 #  subset operations for hyperframes
 #
-#  $Revision: 1.6 $    $Date: 2011/05/18 07:54:41 $
+#  $Revision: 1.7 $    $Date: 2012/01/31 11:00:04 $
 #
 #
 
@@ -108,10 +108,19 @@ function (x, i, j, value)
     # x[, j] <- value
     rown <- row.names(x)
     xlist <- as.list(x)
-    vlist <- as.list(as.hyperframe(value))
-    # this construction accepts all indices including extra entries
-    xlist[j] <- vlist
-    y <- do.call("hyperframe", append(xlist, list(row.names=rown)))
+    singlecolumn <- ( (is.integer(j) && length(j) == 1 && j > 0)
+                     || (is.character(j) && length(j) == 1)
+                     || (is.logical(j) && sum(j) == 1))
+    if(singlecolumn) {
+      # expecting single hypercolumn
+      if(is.logical(j)) j <- names(x)[j]
+      y <- get("$<-.hyperframe")(x, j, value)
+    } else {
+      # expecting hyperframe 
+      xlist[j] <- as.list(as.hyperframe(value))
+      # the above construction accepts all indices including extra entries
+      y <- do.call("hyperframe", append(xlist, list(row.names=rown)))
+    }
     return(y)
   } 
   return(NULL)
