@@ -188,6 +188,7 @@
 \alias{is.tess}
 \alias{k3engine}
 \alias{Kborder.engine}
+\alias{Knone.engine}
 \alias{Kount}
 \alias{Kwtsum}               
 \alias{Kmulti.inhom}               
@@ -678,6 +679,7 @@ is.slrm(x)
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
 Kborder.engine(X, rmax, nr, correction, weights, ratio)
+Knone.engine(X, rmax, nr, weights, ratio)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)
 Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
@@ -749,7 +751,7 @@ mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
             callstring, \dots, covfunargs, allcovar, precomputed, savecomputed,
-            vnamebase, vnameprefix)
+            vnamebase, vnameprefix, warn.illegal)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook)
 multiply.only.finite.entries(x, a)
 na.handle.im(X, na.replace)

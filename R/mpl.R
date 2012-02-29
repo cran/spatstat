@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.138 $	$Date: 2012/02/04 01:34:50 $
+#	$Revision: 5.139 $	$Date: 2012/02/07 08:18:20 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -102,7 +102,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/02/04 01:34:50 $")
+                    date="$Date: 2012/02/07 08:18:20 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -286,7 +286,8 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
                         allcovar=FALSE,
                         precomputed=NULL, savecomputed=FALSE,
                         vnamebase=c("Interaction", "Interact."),
-                        vnameprefix=NULL) {
+                        vnameprefix=NULL,
+                        warn.illegal=TRUE) {
 # Q: quadrature scheme
 # X = data.quad(Q)
 # P = union.quad(Q)
@@ -532,10 +533,11 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
       details <- list(illegal=howmany,
                       print=complaint)
       problems <- append(problems, list(zerolikelihood=details))
-      warning(paste(complaint,
-                    ". Occurred while executing: ",
-                    callstring, sep=""),
-              call. = FALSE)
+      if(warn.illegal)
+        warning(paste(complaint,
+                      ". Occurred while executing: ",
+                      callstring, sep=""),
+                call. = FALSE)
       likelihood.is.zero <- TRUE
     }
   }

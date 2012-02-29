@@ -36,7 +36,7 @@ from a point pattern in a window of arbitrary shape.
   \item{nlarge}{
     Optional. Efficiency threshold.
     If the number of points exceeds \code{nlarge}, then only the
-    border correction will be computed, using a fast algorithm.
+    border correction will be computed (by default), using a fast algorithm.
   }
   \item{domain}{
     Optional. Calculations will be restricted to this subset
@@ -131,16 +131,21 @@ from a point pattern in a window of arbitrary shape.
       Implemented for all window geometries, but slow for
       complex windows. 
     }
+    \item{best}{
+      Selects the best edge correction
+      that is available for the geometry of the window. Currently
+      this is Ripley's isotropic correction for a rectangular
+      or polygonal window, and the translation correction for masks.
+    }
+    \item{none}{
+      Uncorrected estimate.
+      An estimate of the K function \emph{without} edge correction.
+      (i.e. setting \eqn{e_{ij} = 1}{e[i,j] = 1} in the equation below.
+      This estimate is \bold{biased} and should
+      not be used for data analysis, \emph{unless} you have
+      an extremely large point pattern (more than 100,000 points).
+    }
   }
-  For instructional purposes, you can set
-  \code{correction="none"} to compute an estimate of the \eqn{K}
-  function without edge correction. This estimate is biased and should
-  not be used for data analysis.
-
-  You can also set \code{correction="best"} to select the best 
-  correction that is available for the geometry of the window. Currently
-  this is Ripley's isotropic correction for a rectangular
-  or polygonal windows, and the translation correction for masks.
   
   The estimates of \eqn{K(r)} are of the form
   \deqn{
@@ -171,6 +176,11 @@ from a point pattern in a window of arbitrary shape.
   will prevent this from happening.
   Setting \code{nlarge=0} is equivalent to selecting only the border
   correction with \code{correction="border"}.
+
+  If \code{X} contains more than about 100,000 points,
+  even the border correction is time-consuming. You may want to consider
+  setting \code{correction="none"} in this case.
+  There is an even faster algorithm for the uncorrected estimate.
 
   Approximations to the variance of \eqn{\hat K(r)}{Kest(r)}
   are available, for the case of the isotropic edge correction estimator,

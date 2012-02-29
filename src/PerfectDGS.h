@@ -1,5 +1,6 @@
 
 // ........................... Diggle-Gates-Stibbard process ................
+// $Revision: 1.2 $  $Date: 2012/02/05 07:13:57 $
 
 #ifndef PI
 #define PI 3.14159265358979

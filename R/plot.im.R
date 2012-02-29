@@ -43,13 +43,14 @@ plot.im <- local({
   # main function
   PlotIm <- function(x, ...,
                      col=NULL, valuesAreColours=NULL,
-                     ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
+                     ribbon=TRUE, ribside=c("right", "left", "bottom", "top"),
+                     ribsep=0.15, ribwid=0.05, ribn=1024,
                      ribscale=1, ribargs=list()) {
     main <- deparse(substitute(x))
     verifyclass(x, "im")
     dotargs <- list(...)
     stopifnot(is.list(ribargs))
-  
+    ribside <- match.arg(ribside)
     zlim <- dotargs$zlim
 
     xtype <- x$type
@@ -268,13 +269,35 @@ plot.im <- local({
         return(invisible(NULL))
       }
     # determine plot region
-    # image at left, ribbon at right
     bb <- owin(x$xrange, x$yrange)
-    xwidth <- diff(bb$xrange)
-    xheight <- diff(bb$yrange)
-    xsize <- max(xwidth, xheight)
-    bb.rib <- owin(bb$xrange[2] + c(ribsep, ribsep+ribwid) * xsize,
-                   bb$yrange)
+    Width <- diff(bb$xrange)
+    Height <- diff(bb$yrange)
+    Size <- max(Width, Height)
+    switch(ribside,
+           right={
+             # ribbon to right of image
+             bb.rib <- owin(bb$xrange[2] + c(ribsep, ribsep+ribwid) * Size,
+                            bb$yrange)
+             rib.iside <- 4
+           },
+           left={
+             # ribbon to left of image
+             bb.rib <- owin(bb$xrange[1] - c(ribsep+ribwid, ribsep) * Size,
+                            bb$yrange)
+             rib.iside <- 2
+           },
+           top={
+             # ribbon above image
+             bb.rib <- owin(bb$xrange,
+                            bb$yrange[2] + c(ribsep, ribsep+ribwid) * Size)
+             rib.iside <- 3
+           },
+           bottom={
+             # ribbon below image
+             bb.rib <- owin(bb$xrange,
+                            bb$yrange[1] - c(ribsep+ribwid, ribsep) * Size)
+             rib.iside <- 1
+           })
     bb.all <- bounding.box(bb.rib, bb)
     # establish coordinate system
     do.call.matched("plot.default",
@@ -315,13 +338,34 @@ plot.im <- local({
                       extrargs=axisparams)
     }
     # plot ribbon image containing the range of image values
-    ycoords <- seq(from=bb.rib$yrange[1], to=bb.rib$yrange[2],
-                   length.out=length(ribbonvalues)+1)
-    image.doit(list(x=bb.rib$xrange, y=ycoords,
-                    z=matrix(ribbonvalues, nrow=1),
+    rib.npixel <- length(ribbonvalues) + 1
+    switch(ribside,
+           left=,
+           right={
+             # vertical ribbon
+             rib.xcoords <- bb.rib$xrange
+             rib.ycoords <- seq(from=bb.rib$yrange[1],
+                                to=bb.rib$yrange[2],
+                                length.out=rib.npixel)
+             rib.z <- matrix(ribbonvalues, ncol=1)
+             rib.useRaster <- TRUE
+           },
+           top=,
+           bottom={
+             # horizontal ribbon
+             rib.ycoords <- bb.rib$yrange
+             rib.xcoords <- seq(from=bb.rib$xrange[1],
+                                to=bb.rib$xrange[2],
+                                length.out=rib.npixel)
+             rib.z <- matrix(ribbonvalues, nrow=1)
+             # bug workaround
+             rib.useRaster <- FALSE 
+           })
+    image.doit(list(x=rib.xcoords, y=rib.ycoords,
+                    z=t(rib.z),
                     add=TRUE),
                ribargs,
-               list(useRaster=TRUE),
+               list(useRaster=rib.useRaster),
                list(main="", sub=""),
                dotargs,
                colourinfo)
@@ -332,15 +376,40 @@ plot.im <- local({
     # scale axis for ribbon image
     ribaxis <- !(identical(resol$axes, FALSE) || identical(resol$ann, FALSE))
     if(ribaxis) {
-      scal <- diff(bb.rib$yrange)/diff(ribbonrange)
-      at.y <- bb.rib$yrange[1] + scal * (ribbonticks - ribbonrange[1])
-      yaxp <- c(bb.rib$yrange, length(ribbonticks))
+      axisargs <- list(side=rib.iside, labels=ribbonlabels)
+      switch(ribside,
+             right={
+               scal <- diff(bb.rib$yrange)/diff(ribbonrange)
+               at <- bb.rib$yrange[1] + scal * (ribbonticks - ribbonrange[1])
+               axisargs <- append(axisargs, list(at=at))
+               posargs <- list(pos=bb.rib$xrange[2],
+                               yaxp=c(bb.rib$yrange, length(ribbonticks)))
+             },
+             left={
+               scal <- diff(bb.rib$yrange)/diff(ribbonrange)
+               at <- bb.rib$yrange[1] + scal * (ribbonticks - ribbonrange[1])
+               axisargs <- append(axisargs, list(at=at))
+               posargs <- list(pos=bb.rib$xrange[1],
+                               yaxp=c(bb.rib$yrange, length(ribbonticks)))
+             },
+             top={
+               scal <- diff(bb.rib$xrange)/diff(ribbonrange)
+               at <- bb.rib$xrange[1] + scal * (ribbonticks - ribbonrange[1])
+               axisargs <- append(axisargs, list(at=at))
+               posargs <- list(pos=bb.rib$yrange[2],
+                               xaxp=c(bb.rib$xrange, length(ribbonticks)))
+             },
+             bottom={
+               scal <- diff(bb.rib$xrange)/diff(ribbonrange)
+               at <- bb.rib$xrange[1] + scal * (ribbonticks - ribbonrange[1])
+               axisargs <- append(axisargs, list(at=at))
+               posargs <- list(pos=bb.rib$yrange[1],
+                               xaxp=c(bb.rib$xrange, length(ribbonticks)))
+             })
       do.call.matched("axis",
-                      resolve.defaults(
-                                       list(side=4,
-                                            at=at.y, labels=ribbonlabels),
+                      resolve.defaults(axisargs,
                                        ribargs, dotargs,
-                                       list(pos=bb.rib$xrange[2], yaxp=yaxp)),
+                                       posargs),
                       extrargs=axisparams)
     }
     #

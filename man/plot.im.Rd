@@ -7,7 +7,9 @@
 }
 \usage{
   \method{plot}{im}(x, \dots, col=NULL, valuesAreColours=NULL,
-                   ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024,
+                   ribbon=TRUE,
+                   ribside=c("right", "left", "bottom", "top"),
+                   ribsep=0.15, ribwid=0.05, ribn=1024,
                    ribscale=1, ribargs=list()) 
 }
 \arguments{
@@ -31,6 +33,10 @@
   \item{ribbon}{
     Logical flag indicating whether to display a ribbon
     showing the colour map.
+  }
+  \item{ribside}{
+    Character string indicating where to display the ribbon
+    relative to the main image.
   }
   \item{ribsep}{
     Factor controlling the space between the ribbon and the image.
@@ -63,10 +69,13 @@
   The pixel image \code{x} is displayed on the current plot device,
   using equal scales on the \code{x} and \code{y} axes.
 
-  If \code{ribbon=TRUE}, a legend will be plotted at the right of the
-  image. The legend consists of a colour ribbon and an axis with tick-marks,
+  If \code{ribbon=TRUE}, a legend will be plotted.
+  The legend consists of a colour ribbon and an axis with tick-marks,
   showing the correspondence between the pixel values and the colour map.
 
+  By default, the ribbon is placed at the right of the main image.
+  This can be changed using the argument \code{ribside}.
+  
   Arguments \code{ribsep, ribwid, ribn} control the appearance of the
   ribbon.
   The width of the ribbon is \code{ribwid} times the size of the pixel
@@ -193,6 +202,7 @@
    # an image
    Z <- setcov(owin())
    plot(Z)
+   plot(Z, ribside="bottom")
    # stretchable colour map
    plot(Z, col=terrain.colors(128), axes=FALSE)
    # fixed colour map

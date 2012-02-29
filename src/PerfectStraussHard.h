@@ -1,40 +1,47 @@
 
-// ........................... Hardcore process ..........................
-// $Revision: 1.3 $  $Date: 2012/02/05 07:13:25 $
+// ..................... Strauss-Hardcore process ..........................
+//  $Revision: 1.1 $ $Date: 2012/02/05 07:23:54 $
 
-class HardcoreProcess : public PointProcess {
+class StraussHardProcess : public PointProcess {
  public:
-  double beta, R, Rsquared;
-  HardcoreProcess(double xmin, double xmax, double ymin, double ymax, 
-		double b, double Ri);
-  ~HardcoreProcess(){}
+  double beta, gamma, H, R, Hsquared, Rsquared;
+  StraussHardProcess(double xmin, double xmax, double ymin, double ymax, 
+		     double b, double g, double Ri, double Hc);
+  ~StraussHardProcess(){}
   void NewEvent(double *x, double *y, char *InWindow);
   void GeneratePoisson(Point *headPoint, 
 			       long int *GeneratedPoints,
 			       long int *LivingPoints,
 			       long int *NoP);
   double Interaction(double dsquared);
+  //  void CalcBeta(long int xsidepomm, long int ysidepomm, 
+  //	   double *betapomm);
+  //  void CheckBeta(long int xsidepomm, long int ysidepomm, 
+  //		 double *betapomm);
+  //  double lnCondInt(struct Point2 *TempCell, Point2Pattern *p2p);
+  //  void Beta(struct Point2 *TempCell);
+  //  void CalcBeta(Point2Pattern *p2p);
 };
 
-HardcoreProcess::HardcoreProcess(double xmin, double xmax, 
+StraussHardProcess::StraussHardProcess(double xmin, double xmax, 
 			      double ymin, double ymax, 
-			      double b, double Ri) :
+			      double b, double g, double Ri, double Hc) :
   PointProcess(xmin, xmax, ymin, ymax){
-  beta = b; R = Ri; 
-  Rsquared = R * R; 
-  InteractionRange = R;
-  TotalBirthRate = beta*(xmax-xmin)*(ymax-ymin);
+    beta = b; gamma = g; R = Ri;  H = Hc; 
+    Rsquared = R * R; 
+    Hsquared = H * H; 
+    InteractionRange = R;
+    TotalBirthRate = beta*(xmax-xmin)*(ymax-ymin);
   }  
 
-double HardcoreProcess::Interaction(double dsquared)
+double StraussHardProcess::Interaction(double dsquared)
 {
-  double rtn;
-  rtn = 1;
-  if(dsquared < Rsquared) rtn = 0;
-  return(rtn);
+  if(dsquared >= Rsquared) return(1.0);
+  if(dsquared >= Hsquared) return(gamma);
+  return(0.0);
 }
 
-void HardcoreProcess::NewEvent(double *x, double *y, char *InWindow)
+void StraussHardProcess::NewEvent(double *x, double *y, char *InWindow)
 {
   double Xdim, Ydim;
   Xdim = Xmax-Xmin;
@@ -44,7 +51,7 @@ void HardcoreProcess::NewEvent(double *x, double *y, char *InWindow)
   *InWindow = 1;
 }
 
-void HardcoreProcess::GeneratePoisson(Point *headPoint, 
+void StraussHardProcess::GeneratePoisson(Point *headPoint, 
 			      long int *GeneratedPoints,
 			      long int *LivingPoints,
 			      long int *NoP)
@@ -58,19 +65,19 @@ void HardcoreProcess::GeneratePoisson(Point *headPoint,
   *GeneratedPoints = poisson(L);
   *LivingPoints = *GeneratedPoints;
   for (i=1; i<=*GeneratedPoints ; i++){
-    //Rprintf("Generating HardcoreProcess Poisson 3\n");
+    //Rprintf("Generating StraussHardProcess Poisson 3\n");
     //scanf("%f",&f1);
     xtemp = slumptal()*Xdim+Xmin;
     ytemp = slumptal()*Ydim+Ymin;
     //
-    //Rprintf("Generating HardcoreProcess Poisson 3.2\n");
+    //Rprintf("Generating StraussHardProcess Poisson 3.2\n");
     TempPoint = ALLOCATE(struct Point);
     //
     TempPoint->X = xtemp;
     TempPoint->Y = ytemp;
     TempPoint->No = i;
     TempPoint->R = slumptal();
-    //Rprintf("Generating HardcoreProcess Poisson 3.6\n");
+    //Rprintf("Generating StraussHardProcess Poisson 3.6\n");
     TempPoint->next = headPoint->next;
     headPoint->next = TempPoint;
     *NoP = *NoP + 1;
@@ -80,16 +87,19 @@ void HardcoreProcess::GeneratePoisson(Point *headPoint,
 // ........................... Interface to R ..........................
 
 extern "C" {
-  SEXP PerfectHardcore(SEXP beta,
+  SEXP PerfectStraussHard(SEXP beta,
+		      SEXP gamma,
 		      SEXP r,
+		      SEXP hc,
 		      SEXP xrange,
 		      SEXP yrange) {
 
     // input parameters
-    double Beta, R, Xmin, Xmax, Ymin, Ymax;
+    double Beta, Gamma, R, H, Xmin, Xmax, Ymin, Ymax;
     double *Xrange, *Yrange;
     // internal
     int xcells, ycells;
+    PointProcess *TheProcess;
     // output 
     int noutmax;
     SEXP xout, yout, nout, out;
@@ -98,14 +108,18 @@ extern "C" {
 
     // protect arguments from garbage collector    
     PROTECT(beta   = AS_NUMERIC(beta));
+    PROTECT(gamma  = AS_NUMERIC(gamma));
     PROTECT(r      = AS_NUMERIC(r));
+    PROTECT(hc     = AS_NUMERIC(hc));
     PROTECT(xrange = AS_NUMERIC(xrange));
     PROTECT(yrange = AS_NUMERIC(yrange));
-    // that's 4 protected objects
+    // that's 6 protected objects
 
     // extract arguments
     Beta   = *(NUMERIC_POINTER(beta));
+    Gamma  = *(NUMERIC_POINTER(gamma));
     R      = *(NUMERIC_POINTER(r));
+    H      = *(NUMERIC_POINTER(hc));
     Xrange = NUMERIC_POINTER(xrange);
     Xmin   = Xrange[0];
     Xmax   = Xrange[1];
@@ -123,8 +137,9 @@ extern "C" {
     Rprintf("Initialising\n");
 #endif
 
-    // Initialise Hardcore point process
-    HardcoreProcess ExampleProcess(Xmin,Xmax,Ymin,Ymax, Beta, R);  
+    // Initialise StraussHard point process
+    StraussHardProcess ExampleProcess(Xmin,Xmax,Ymin,Ymax, Beta, Gamma, R, H);  
+
     // Initialise point pattern
     Point2Pattern ExamplePattern(Xmin,Xmax,Ymin,Ymax, xcells, ycells);
     // parameters: min x, max x, min y, max y, "cells" in x and y direction
@@ -167,7 +182,7 @@ extern "C" {
     SET_VECTOR_ELT(out, 2, nout);
     
     // return 
-    UNPROTECT(8);  // 4 arguments plus xout, yout, nout, out
+    UNPROTECT(10);  // 6 arguments plus xout, yout, nout, out
     return(out);
   }
 }

@@ -119,7 +119,9 @@
   \code{\link{rmh}},
   \code{\link{Strauss}},
   \code{\link{rHardcore}},
-  \code{\link{rDiggleGratton}}.
+  \code{\link{rStraussHard}},
+  \code{\link{rDiggleGratton}},
+  \code{\link{rDGS}}.
 }
 
 \keyword{spatial}

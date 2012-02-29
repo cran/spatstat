@@ -1,4 +1,51 @@
 
+	CHANGES IN spatstat VERSION 1.25-4
+
+OVERVIEW 
+
+   o We thank Jonathan Lee and Sergiy Protsiv for contributions.
+
+   o Improvements and bug fixes to K function for very large datasets
+
+NEW FUNCTIONS
+
+   o rStraussHard
+   Perfect simulation for Strauss-hardcore process (with gamma <= 1)
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o plot.im
+   The colour ribbon can now be placed left, right, top or bottom 
+   using new argument 'ribside'
+
+   o profilepl
+   Does not generate warnings when some of the candidate models
+   have zero likelihood - for example when fitting model with a hard core.
+
+   o Kest
+   Now includes fast algorithm for 'correction="none"'
+   which will handle patterns containing millions of points.
+
+BUG FIXES
+
+   o Kest, Lest
+   Gave incorrect values in very large datasets, due to numerical overflow.
+   `Very large' typically means about 1 million points in a random pattern, 
+   or 100,000 points in a tightly clustered pattern.
+   [Overflow cannot occur unless there are at least 46,341 points.]
+   [Spotted by Sergiy Protsiv.]
+   Fixed.
+
+   o Kest, Lest
+   Ignored 'ratio=TRUE' if the argument 'domain' was given.
+   [Spotted by Jonathan Lee.]
+   Fixed.
+
+   o rjitter
+   Output was sometimes incorrect. 
+   [Spotted by Sergiy Protsiv.]
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.25-3
 
 OVERVIEW 
