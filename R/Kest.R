@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.75 $	$Date: 2011/10/30 11:17:11 $
+#	$Revision: 5.82 $	$Date: 2012/02/29 05:06:36 $
 #
 #
 # -------- functions ----------------------------------------
@@ -79,7 +79,8 @@ function(X, ..., r=NULL, breaks=NULL,
     # trick Kdot() into doing it
     indom <- factor(inside.owin(X$x, X$y, domain), levels=c(FALSE,TRUE))
     Kd <- Kdot(X %mark% indom, i="TRUE",
-               r=r, breaks=breaks, correction=correction)
+               r=r, breaks=breaks, correction=correction,
+               ratio=ratio)
     # relabel and exit
     Kd <- rebadge.fv(Kd, quote(K(r)), "K")
     return(Kd)
@@ -118,20 +119,38 @@ function(X, ..., r=NULL, breaks=NULL,
   large.n    <- (npts >= nlarge)
   demand.best <- correction.given && best.wanted
   large.n.trigger <- large.n && !correction.given
-  borderonly <- all(correction == "border" | correction == "bord.modif")
-  will.do.fast <- can.do.fast && (borderonly || large.n.trigger)
-  asked      <- borderonly || (nlarge.given && large.n.trigger)
-  if(will.do.fast && !asked)
-        message(paste("number of data points exceeds",
-                      nlarge, "- computing border estimate only"))
+  fastcorrections <- c("border", "bord.modif", "none")
+  fastdefault     <- "border"
+  correction.fast   <- all(correction %in% fastcorrections)
+  will.do.fast <- can.do.fast && (correction.fast || large.n.trigger)
+  asked <- correction.fast || (nlarge.given && large.n.trigger)
   if(asked && !can.do.fast)
     warning("r values not evenly spaced - cannot use efficient code")
-
   if(will.do.fast) {
+    # determine correction(s)
+    ok <- correction %in% fastcorrections
+    correction <- if(any(ok)) correction[ok] else fastdefault
+    bord <- any(correction %in% c("border", "bord.modif"))
+    none <- any(correction =="none")
+    if(!all(ok)) {
+      # some corrections were overridden; notify user
+      corx <- c(if(bord) "border correction estimate" else NULL,
+                if(none) "uncorrected estimate" else NULL)
+      corx <- paste(corx, collapse=" and ")
+      message(paste("number of data points exceeds",
+                    nlarge, "- computing", corx , "only"))
+    }
     # restrict r values to recommended range, unless specifically requested
     if(!rfixed) 
       r <- seq(from=0, to=alim[2], length.out=length(r))
-    return(Kborder.engine(X, max(r), length(r), correction, ratio=ratio))
+    if(bord)
+      Kb <- Kborder.engine(X, max(r), length(r), correction, ratio=ratio)
+    if(none)
+      Kn <- Knone.engine(X, max(r), length(r), ratio=ratio)
+    if(bord && none) 
+      return(cbind.fv(Kb, Kn[, names(Kn) != "theo"]))
+    if(bord) return(Kb)
+    if(none) return(Kn) 
   }
 
   ###########################################
@@ -410,17 +429,35 @@ Kborder.engine <- function(X, rmax, nr=100,
   DUP <- spatstat.options("dupC")
   
   if(is.null(weights)) {
-    res <- .C("Kborder",
-              nxy=as.integer(npts),
-              x=as.double(x),
-              y=as.double(y),
-              b=as.double(b),
-              nr=as.integer(nr),
-              rmax=as.double(rmax),
-              numer=as.integer(integer(nr)),
-              denom=as.integer(integer(nr)),
-              DUP=DUP,
-              PACKAGE="spatstat")
+    # determine whether the numerator can be stored as an integer
+    bigint <- .Machine$integer.max
+    if(npts < sqrt(bigint)) {
+      # yes - use faster integer arithmetic
+      res <- .C("KborderI",
+                nxy=as.integer(npts),
+                x=as.double(x),
+                y=as.double(y),
+                b=as.double(b),
+                nr=as.integer(nr),
+                rmax=as.double(rmax),
+                numer=as.integer(integer(nr)),
+                denom=as.integer(integer(nr)),
+                DUP=DUP,
+                PACKAGE="spatstat")
+    } else {
+      # no - need double precision storage
+      res <- .C("KborderD",
+                nxy=as.integer(npts),
+                x=as.double(x),
+                y=as.double(y),
+                b=as.double(b),
+                nr=as.integer(nr),
+                rmax=as.double(rmax),
+                numer=as.double(numeric(nr)),
+                denom=as.double(numeric(nr)),
+                DUP=DUP,
+                PACKAGE="spatstat")
+    }
     if("bord.modif" %in% correction) {
       denom.area <- eroded.areas(W, r)
       numKbm <- res$numer
@@ -518,6 +555,134 @@ Kborder.engine <- function(X, rmax, nr=100,
                         "bord.modif")
       }
     }
+  }
+  ##
+  # default is to display them all
+  attr(Kfv, "fmla") <- . ~ r
+  unitname(Kfv) <- unitname(X)
+  if(ratio) {
+    # finish off numerator and denominator
+    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
+    unitname(denK) <- unitname(numK) <- unitname(X)
+    # tack on to result
+    Kfv <- rat(Kfv, numK, denK, check=FALSE)
+  }
+  return(Kfv)
+}
+
+Knone.engine <- function(X, rmax, nr=100,
+                         weights=NULL, ratio=FALSE) 
+{
+  verifyclass(X, "ppp")
+  npts <- npoints(X)
+  W <- as.owin(X)
+
+  area <- area.owin(W)
+  lambda <- npts/area
+  lambda2 <- (npts * (npts - 1))/(area^2)
+  denom <- lambda2 * area
+
+  if(missing(rmax))
+    rmax <- diameter(W)/4
+  r <- seq(from=0, to=rmax, length.out=nr)
+
+  # this will be the output data frame
+  Kdf <- data.frame(r=r, theo= pi * r^2)
+  desc <- c("distance argument r", "theoretical Poisson %s")
+  Kfv <- fv(Kdf, "r", quote(K(r)),
+          "theo", , c(0,rmax), c("r","%s[pois](r)"), desc, fname="K")
+
+  if(ratio) {
+    # save numerator and denominator
+    numK <- eval.fv(denom * Kfv)
+    denK <- eval.fv(denom + Kfv * 0)
+    attributes(numK) <- attributes(denK) <- attributes(Kfv)
+    numK <- rebadge.fv(numK, tags="theo",
+                       new.desc="numerator for theoretical Poisson %s")
+    denK <- rebadge.fv(denK, tags="theo",
+                       new.desc="denominator for theoretical Poisson %s")
+  }
+  
+  ####### start computing ############
+  # sort in ascending order of x coordinate
+  orderX <- order(X$x)
+  Xsort <- X[orderX]
+  x <- Xsort$x
+  y <- Xsort$y
+  
+  # call the C code
+  DUP <- spatstat.options("dupC")
+  
+  if(is.null(weights)) {
+    # determine whether the numerator can be stored as an integer
+    bigint <- .Machine$integer.max
+    if(npts < sqrt(bigint)) {
+      # yes - use faster integer arithmetic
+      res <- .C("KnoneI",
+                nxy=as.integer(npts),
+                x=as.double(x),
+                y=as.double(y),
+                nr=as.integer(nr),
+                rmax=as.double(rmax),
+                numer=as.integer(integer(nr)),
+                DUP=DUP,
+                PACKAGE="spatstat")
+    } else {
+      # no - need double precision storage
+      res <- .C("KnoneD",
+                nxy=as.integer(npts),
+                x=as.double(x),
+                y=as.double(y),
+                nr=as.integer(nr),
+                rmax=as.double(rmax),
+                numer=as.double(numeric(nr)),
+                DUP=DUP,
+                PACKAGE="spatstat")
+    }
+
+    numKun <- res$numer
+    denKun <- denom # = lambda2 * area
+    Kun <- numKun/denKun
+  } else {
+    # weighted version
+    if(is.numeric(weights)) {
+      if(length(weights) != X$n)
+        stop("length of weights argument does not match number of points in X")
+    } else {
+      wim <- as.im(weights, W)
+      weights <- wim[X, drop=FALSE]
+      if(any(is.na(weights)))
+        stop("domain of weights image does not contain all points of X")
+    }
+    weights.Xsort <- weights[orderX]
+    res <- .C("Kwnone",
+              nxy=as.integer(npts),
+              x=as.double(x),
+              y=as.double(y),
+              w=as.double(weights.Xsort),
+              nr=as.integer(nr),
+              rmax=as.double(rmax),
+              numer=as.double(numeric(nr)),
+              DUP=DUP,
+              PACKAGE="spatstat")
+    numKun <- res$numer
+    denKun <- sum(weights)
+    Kun <- numKun/denKun
+  }
+
+  # tack on to fv object
+  Kfv <- bind.fv(Kfv, data.frame(un=Kun), "hat(%s)[un](r)",
+                 "uncorrected estimate of %s",
+                 "un")
+  if(ratio) {
+    numK <- bind.fv(numK, data.frame(un=numKun),
+                    "hat(%s)[un](r)",
+                    "numerator of uncorrected estimate of %s",
+                    "un")
+    denK <- bind.fv(denK, data.frame(un=denKun),
+                    "hat(%s)[un](r)",
+                    "denominator of uncorrected estimate of %s",
+                    "un")
   }
   ##
   # default is to display them all

@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.11 $  $Date: 2011/11/02 01:46:55 $
+#  $Revision: 1.12 $  $Date: 2012/02/07 08:23:32 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -81,14 +81,16 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
     # fit model
     if(i == 1) {
       # fit from scratch
-      arg1 <- list(interaction=fi, ..., rbord=rbord, savecomputed=savecomp)
+      arg1 <- list(interaction=fi, ...,
+                   rbord=rbord, savecomputed=savecomp, warn.illegal=FALSE)
       if(pass.cfa) arg1 <- append(arg1, cfai)
       fiti <- do.call(ppm, arg1)
       # save intermediate computations (pairwise distances, etc)
       precomp <- fiti$internal$computed
     } else {
       # use precomputed data
-      argi <- list(interaction=fi, ..., rbord=rbord, precomputed=precomp)
+      argi <- list(interaction=fi, ...,
+                   rbord=rbord, precomputed=precomp, warn.illegal=FALSE)
       if(pass.cfa) argi <- append(argi, cfai)
       fiti <- do.call(ppm, argi)
     }

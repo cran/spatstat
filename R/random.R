@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.44 $   $Date: 2011/12/05 10:25:56 $
+#    $Revision: 4.45 $   $Date: 2012/02/14 07:47:03 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -616,7 +616,7 @@ rjitter <- function(X, radius, retry=TRUE, giveup=10000) {
       changed <- seq_len(nX)[undone][ok]
       X$x[changed] <- xnew[ok]
       X$y[changed] <- ynew[ok]
-      undone[ok] <- FALSE
+      undone[changed] <- FALSE
     }
   }
   return(X)

@@ -1,5 +1,6 @@
 
 // ........................... Diggle-Gratton process ..........................
+//  $Revision: 1.4 $   $Date: 2012/02/05 07:14:16 $
 
 class DiggleGrattonProcess : public PointProcess {
  public:

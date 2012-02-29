@@ -1293,3 +1293,12 @@ local({
   h[, "X"] <- lapply(X, flipxy)
   h[, c("X", "Y")] <- hyperframe(X=X, Y=X)
 
+# check fast code for Kest
+require(spatstat)
+local({
+  Kb <- Kest(cells, nlarge=0)
+  Ku <- Kest(cells, correction="none")
+  Kbu <- Kest(cells, correction=c("none", "border"))
+})
+
+

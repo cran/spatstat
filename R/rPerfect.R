@@ -1,11 +1,13 @@
 #
 #  Perfect Simulation 
 #
-#  $Revision: 1.10 $ $Date: 2011/12/17 09:29:25 $
+#  $Revision: 1.12 $ $Date: 2012/02/05 08:17:29 $
 #
 #  rStrauss
 #  rHardcore
+#  rStraussHard
 #  rDiggleGratton
+#  rDGS
 
 rStrauss <- function(beta, gamma=1, R=0, W=owin()) {
   if(!missing(W)) {
@@ -93,6 +95,64 @@ rHardcore <- function(beta, R=0, W=owin()) {
 
   return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
 }
+
+#
+#  Perfect simulation of hybrid Strauss-Hardcore
+#        provided gamma <= 1
+#
+
+rStraussHard <- function(beta, gamma=1, R=0, H=0, W=owin()) {
+  if(!missing(W)) {
+    verifyclass(W, "owin")
+    if(W$type != "rectangle")
+      stop("W must be a rectangle")
+  }
+
+  check.1.real(beta)
+  check.1.real(gamma)
+  check.1.real(R)
+  check.1.real(H)
+
+  check.finite(beta)
+  check.finite(gamma)
+  check.finite(R)
+  check.finite(H)
+  
+  stopifnot(beta > 0)
+  stopifnot(gamma >= 0)
+  if(gamma > 1)
+    stop("Sorry, perfect simulation is only implemented for gamma <= 1")
+  stopifnot(R >= 0)
+  stopifnot(H >= 0)
+  stopifnot(H <= R)
+
+  nothing <- runif(1)
+
+  xrange <- W$xrange
+  yrange <- W$yrange
+  storage.mode(beta) <- storage.mode(gamma) <-
+    storage.mode(R) <- storage.mode(H) <- "double"
+  storage.mode(xrange) <- storage.mode(yrange) <- "double"
+  
+  z <- .Call("PerfectStraussHard",
+             beta,
+             gamma,
+             R,
+             H,
+             xrange,
+             yrange,
+             PACKAGE="spatstat")
+
+  X <- z[[1]]
+  Y <- z[[2]]
+  nout <- z[[3]]
+
+  if(nout<0)
+    stop("internal error: copying failed in PerfectStraussHard")
+
+  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+}
+
 
 #
 #  Perfect Simulation of Diggle-Gratton process
