@@ -136,7 +136,7 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
   The argument \code{r} is the vector of values for the
   distance \eqn{r} at which \eqn{K_{ij}(r)}{Kij(r)} should be evaluated. 
   The values of \eqn{r} must be increasing nonnegative numbers
-  and the maximum \eqn{r} value must exceed the radius of the
+  and the maximum \eqn{r} value must not exceed the radius of the
   largest disc contained in the window.
 
   The pair correlation function can also be applied to the

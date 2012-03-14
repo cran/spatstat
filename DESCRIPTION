@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.25-4
-Date: 2012-02-29
+Version: 1.25-5
+Date: 2012-03-14
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -16,17 +16,17 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         K. Hornik; R. Ihaka; R. John-Chandran; D. Johnson; M. Kuhn; J.
         Laake; R.A. Lamb; J. Lee; G.P. Leser; B. Madin; R. Mark; J.
         Mateu; P. McCullagh; U. Mehlig; S. Meyer; X.C. Mi; J. Moller;
-        L.S. Nielsen; F. Nunes; T. Onkelinx; E. Parilov; J. Picka; S.
-        Protsiv; A. Raftery; M. Reiter; T.O. Richardson; B.D. Ripley;
-        B. Rowlingson; J. Rudge; A. Sarkka; K. Schladitz; B.T. Scott;
-        G.C. Shen; V. Shcherbakov; I.-M. Sintorn; Y. Song; M. Spiess;
-        M. Stevenson; K. Stucki; M. Sumner; P. Surovy; B. Taylor; B.
-        Turlach; A. van Burgel; T. Verbeke; A. Villers; H. Wang; H.
-        Wendrock; J. Wild and S. Wong.
+        L.S. Nielsen; F. Nunes; J. Oehlschlaegel; T. Onkelinx; E.
+        Parilov; J. Picka; S. Protsiv; A. Raftery; M. Reiter; T.O.
+        Richardson; B.D. Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K.
+        Schladitz; B.T. Scott; G.C. Shen; V. Shcherbakov; I.-M.
+        Sintorn; Y. Song; M. Spiess; M. Stevenson; K. Stucki; M.
+        Sumner; P. Surovy; B. Taylor; B. Turlach; A. van Burgel; T.
+        Verbeke; A. Villers; H. Wang; H. Wendrock; J. Wild and S. Wong.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 Depends: R (>= 2.14.0), stats, graphics, utils, mgcv, deldir (>=
         0.0-10)
-Suggests: gpclib, sm, maptools, spatial, rpanel, tkrplot,
+Suggests: gpclib, sm, maptools, locfit, spatial, rpanel, tkrplot,
         scatterplot3d, RandomFields (>= 2.0)
 Description: A package for analysing spatial data, mainly Spatial Point
         Patterns, including multitype/marked points and spatial
@@ -55,6 +55,6 @@ URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
 ByteCompile: true
-Packaged: 2012-02-29 10:38:58 UTC; adrian
+Packaged: 2012-03-14 05:31:42 UTC; adrian
 Repository: CRAN
-Date/Publication: 2012-02-29 13:06:31
+Date/Publication: 2012-03-14 07:09:51

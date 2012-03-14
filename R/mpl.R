@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.139 $	$Date: 2012/02/07 08:18:20 $
+#	$Revision: 5.140 $	$Date: 2012/03/10 10:49:25 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -102,7 +102,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/02/07 08:18:20 $")
+                    date="$Date: 2012/03/10 10:49:25 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -753,7 +753,7 @@ oversize.quad <- function(Q, ..., nU, nX) {
 # function that should be called to evaluate interaction terms
 # between quadrature points and data points
 
-evalInteraction <- function(X, P, E, 
+evalInteraction <- function(X, P, E = equalpairs(P, X), 
                             interaction, correction,
                             ...,
                             precomputed=NULL,

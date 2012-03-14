@@ -1,6 +1,6 @@
 
 // ........................... Diggle-Gratton process ..........................
-//  $Revision: 1.4 $   $Date: 2012/02/05 07:14:16 $
+//  $Revision: 1.5 $   $Date: 2012/03/10 11:22:56 $
 
 class DiggleGrattonProcess : public PointProcess {
  public:
@@ -102,6 +102,7 @@ extern "C" {
     double *Xrange, *Yrange;
     // internal
     int xcells, ycells;
+    long int StartTime, EndTime;
     // output 
     int noutmax;
     SEXP xout, yout, nout, out;
@@ -170,7 +171,7 @@ extern "C" {
     Sampler PerfectSampler(&ExampleProcess);
     
     // Perform perfect sampling
-    PerfectSampler.Sim(&ExamplePattern);
+    PerfectSampler.Sim(&ExamplePattern, &StartTime, &EndTime);
     
     // Synchronise random number generator 
     PutRNGstate();

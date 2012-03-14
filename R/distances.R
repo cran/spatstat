@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.33 $     $Date: 2011/05/18 01:44:34 $
+#      $Revision: 1.37 $     $Date: 2012/03/14 02:53:30 $
 #
 #
 #      Interpoint distances
@@ -174,7 +174,7 @@ nndist.default <-
          },
          C={
            nnd<-numeric(n)
-           o <- order(y)
+           o <- sort.list(y, method="quick", na.last=NA)
            big <- sqrt(.Machine$double.xmax)
            DUP <- spatstat.options("dupC")
            z<- .C("nndistsort",
@@ -212,7 +212,7 @@ nndist.default <-
            },
            C={
              nnd<-numeric(n * kmaxcalc)
-             o <- order(y)
+             o <- sort.list(y, method="quick", na.last=NA)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
              z<- .C("knndsort",
@@ -298,9 +298,9 @@ nnwhich.default <-
   if(n <= 1) {
     # empty pattern => return integer(0)
     # or pattern with only 1 point => return NA
-    nnd <- matrix(as.integer(NA), nrow=n, ncol=kmax)
-    nnd <- nnd[,k, drop=TRUE]
-    return(nnd)
+    nnw <- matrix(as.integer(NA), nrow=n, ncol=kmax)
+    nnw <- nnw[,k, drop=TRUE]
+    return(nnw)
   }
 
   # number of neighbours that are well-defined
@@ -322,20 +322,18 @@ nnwhich.default <-
            },
            C={
              nnw <- integer(n)
-             o <- order(y)
+             o <- sort.list(y, method="quick", na.last=NA)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
              z<- .C("nnwhichsort",
                     n = as.integer(n),
                     x = as.double(x[o]),
                     y = as.double(y[o]),
-                    nnd = as.double(numeric(n)),
                     nnwhich = as.integer(nnw),
                     huge = as.double(big),
                     DUP=DUP,
                     PACKAGE="spatstat")
-             # convert from C to R indexing
-             witch <- z$nnwhich + 1
+             witch <- z$nnwhich # sic 
              if(any(witch <= 0))
                stop("Internal error: non-positive index returned from C code")
              if(any(witch > n))
@@ -353,7 +351,7 @@ nnwhich.default <-
                D2 <- pairdist.default(x, y, method=method, squared=TRUE)
                # find k'th smallest squared distance
                diag(D2) <- Inf
-               nnw <- t(apply(D2, 1, order))[, 1:kmaxcalc]
+               nnw <- t(apply(D2, 1, sort.list, method="quick", na.last=NA))[, 1:kmaxcalc]
              } else {
                # avoid creating huge matrix
                # handle one row of D at a time
@@ -361,13 +359,13 @@ nnwhich.default <-
                for(i in seq_len(n)) {
                  D2i <- (x - x[i])^2 + (y - y[i])^2
                  D2i[i] <- Inf
-                 nnw[i,] <- order(D2i)[1:kmaxcalc]
+                 nnw[i,] <- sort.list(D2i, method="quick", na.last=NA)[1:kmaxcalc]
                }      
              }
            },
            C={
              nnw <- matrix(integer(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
-             o <- order(y)
+             o <- sort.list(y, method="quick", na.last=NA)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
              z<- .C("knnwhichsort",
@@ -380,8 +378,7 @@ nnwhich.default <-
                     huge = as.double(big),
                     DUP=DUP,
                     PACKAGE="spatstat")
-             # convert from C to R indexing
-             witch <- z$nnwhich + 1
+             witch <- z$nnwhich # sic
              witch <- matrix(witch, nrow=n, ncol=kmaxcalc, byrow=TRUE)
              if(any(witch <= 0))
                stop("Internal error: non-positive index returned from C code")

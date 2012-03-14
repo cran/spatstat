@@ -149,9 +149,9 @@ from a point pattern in a window of arbitrary shape.
   
   The estimates of \eqn{K(r)} are of the form
   \deqn{
-    \hat K(r) = \frac a {(n-1) \pi} \sum_i \sum_j I(d_{ij}\le r) e_{ij}
+    \hat K(r) = \frac a {n (n-1) } \sum_i \sum_j I(d_{ij}\le r) e_{ij}
   }{
-    Kest(r) = (a/((n-1)* pi)) * sum[i,j] I(d[i,j] <= r) e[i,j])
+    Kest(r) = (a/(n * (n-1))) * sum[i,j] I(d[i,j] <= r) e[i,j])
   }
   where \eqn{a} is the area of the window, \eqn{n} is the number of
   data points, and the sum is taken over all ordered pairs of points

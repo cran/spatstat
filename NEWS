@@ -1,4 +1,39 @@
 
+	CHANGES IN spatstat VERSION 1.25-5
+
+OVERVIEW 
+
+   o We thank Ya-Mei Chang, Jens Oehlschlaegel and Yong Song for contributions.
+
+   o Extended functionality of 'rhohat' to local likelihood smoothing
+   and bivariate smoothing.
+
+   o Nearest neighbour distance computations accelerated.
+
+   o spatstat now 'Suggests:' the package 'locfit'
+
+NEW FUNCTIONS
+
+   o rho2hat
+   Bivariate extension of 'rhohat' for estimating spatial residual risk, 
+   or intensity as a function of two covariates.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o rhohat
+   Estimation can now be performed using local likelihood fitting
+   with the 'locfit' package, or using kernel smoothing.
+
+   o nncross
+   Substantially accelerated.
+   New arguments added to control the return value and the sorting of data.
+
+BUG FIXES
+
+   o plot.msr
+   Crashed if the argument 'box' was given.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.25-4
 
 OVERVIEW 

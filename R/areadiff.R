@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.23 $  $Date: 2011/10/05 05:14:09 $
+#  $Revision: 1.24 $  $Date: 2012/03/14 04:13:15 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -162,7 +162,7 @@ areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.di
     # initialise to value for small-r
     result <- matrix(pi * r^2, nrow=nu, ncol=nr, byrow=TRUE)    
     # vector of radii below which b(u,r) is disjoint from U(X,r)
-    rcrit.u <- nncross(u, X)$dist/2
+    rcrit.u <- nncross(u, X, what="dist")/2
     rcrit.min <- min(rcrit.u)
     # Use distance transform and set covariance
     D <- distmap(X, ...)

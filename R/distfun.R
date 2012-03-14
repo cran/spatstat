@@ -3,7 +3,7 @@
 #
 #   distance function (returns a function of x,y)
 #
-#   $Revision: 1.12 $   $Date: 2011/11/29 10:09:40 $
+#   $Revision: 1.13 $   $Date: 2012/03/14 04:14:26 $
 #
 
 distfun <- function(X, ...) {
@@ -15,7 +15,7 @@ distfun.ppp <- function(X, ...) {
   stopifnot(is.ppp(X))
   g <- function(x,y=NULL) {
     Y <- xy.coords(x, y)[c("x", "y")]
-    nncross(Y, X)$dist
+    nncross(Y, X, what="dist")
   }
   attr(g, "Xclass") <- "ppp"
   class(g) <- c("distfun", class(g))
@@ -27,7 +27,7 @@ distfun.psp <- function(X, ...) {
   stopifnot(is.psp(X))
   g <- function(x,y=NULL) {
     Y <-  xy.coords(x, y)[c("x", "y")]
-    nncross(Y, X)$dist
+    nncross(Y, X, what="dist")
   }
   attr(g, "Xclass") <- "psp"
   class(g) <- c("distfun", class(g))
@@ -51,7 +51,7 @@ distfun.owin <- function(X, ..., invert=FALSE) {
     if(discrete)
       return(D[Y])
     inside <- inside.owin(Y$x, Y$y, X)
-    D <- nncross(Y, P)$dist
+    D <- nncross(Y, P, what="dist")
     out <- if(!invert) ifelse(inside, 0, D) else ifelse(inside, D, 0)
     return(out)
   }

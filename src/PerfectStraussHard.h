@@ -1,6 +1,6 @@
 
 // ..................... Strauss-Hardcore process ..........................
-//  $Revision: 1.1 $ $Date: 2012/02/05 07:23:54 $
+//  $Revision: 1.2 $ $Date: 2012/03/10 11:23:17 $
 
 class StraussHardProcess : public PointProcess {
  public:
@@ -100,6 +100,7 @@ extern "C" {
     // internal
     int xcells, ycells;
     PointProcess *TheProcess;
+    long int StartTime, EndTime;
     // output 
     int noutmax;
     SEXP xout, yout, nout, out;
@@ -156,7 +157,7 @@ extern "C" {
     Sampler PerfectSampler(&ExampleProcess);
     
     // Perform perfect sampling
-    PerfectSampler.Sim(&ExamplePattern);
+    PerfectSampler.Sim(&ExamplePattern, &StartTime, &EndTime);
     
     // Synchronise random number generator 
     PutRNGstate();

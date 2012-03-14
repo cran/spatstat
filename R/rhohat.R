@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.30 $  $Date: 2011/06/22 06:52:54 $
+#  $Revision: 1.43 $  $Date: 2012/01/22 10:15:34 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -9,12 +9,33 @@
 #  More generally allows offsets etc.
 
 rhohat <- function(object, covariate, ...,
-                   transform=FALSE, dimyx=NULL, eps=NULL,
+                   method=c("ratio", "reweight", "transform"),
+                   smoother=c("kernel", "local"),
+                   dimyx=NULL, eps=NULL,
                    n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-                   bwref=bw, covname) {
+                   bwref=bw, covname, confidence=0.95) {
+  callstring <- paste(deparse(sys.call()), collapse = "")
+  smoother <- match.arg(smoother)
+  if(smoother == "local" && !require(locfit, quietly=TRUE)) {
+    warning(paste("in", dQuote(callstring), ":",
+                  "package", sQuote("locfit"), "is not available;",
+                  "unable to perform local likelihood smoothing;",
+                  "using kernel smoothing instead"),
+            call.=FALSE)
+    smoother <- "kernel"
+  }
   if(missing(covname)) 
     covname <- sensiblevarname(deparse(substitute(covariate)), "X")
-  callstring <- paste(deparse(sys.call()), collapse = "")  
+  # trap superseded usage
+  argh <- list(...)
+  if(missing(method) && ("transform" %in% names(argh))) {
+    warning(paste("Argument ", sQuote("transform"),
+                  " has been superseded by ", sQuote("method"),
+                  "; see help(rhohat)"))
+    transform <- argh$transform
+    method <- if(transform) "transform" else "ratio"
+  } else method <- match.arg(method)
+
   # validate model
   if(is.ppp(object) || inherits(object, "quad")) {
     model <- ppm(object, ~1)
@@ -57,73 +78,174 @@ rhohat <- function(object, covariate, ...,
   area <- area.owin(as.owin(model))
   baseline <- if(reference == "area") area else (mean(lambda) * area)
   kappahat <- nX/baseline
-  # estimate densities
-  if(is.null(from))
-    from <- min(ZX)
-  if(is.null(to))
-    to   <- max(ZX)
-  interpolate <- function(x,y) {
-    if(inherits(x, "density") && missing(y))
-      approxfun(x$x, x$y, rule=2)
-    else 
-      approxfun(x, y, rule=2)
-  }
-  # reference density
-  ghat <- density(Zvalues,weights=lambda/sum(lambda),
-                  bw=bwref,adjust=adjust,n=n,from=from,to=to, ...)
-  xxx <- ghat$x
-  ghatfun <- interpolate(ghat)
-  # relative density
-  if(!transform) {
-    # compute ratio of smoothed densities
-    fhat <- density(ZX,bw=bw,adjust=adjust,n=n,from=from, to=to, ...)
-    fhatfun <- interpolate(fhat)
-    yyy <- kappahat * fhatfun(xxx)/ghatfun(xxx)
-    # compute variance approximation
-    sigma <- fhat$bw
-    fstar <- density(ZX,bw=bw,adjust=adjust/sqrt(2),n=n,from=from, to=to, ...)
-    fstarfun <- interpolate(fstar)
-    const <- 1/(2 * sigma * sqrt(pi))
-    vvv  <- const * nX * fstarfun(xxx)/(baseline * ghatfun(xxx))^2
+  # limits
+  Zrange <- range(ZX, Zvalues)
+  if(is.null(from)) from <- Zrange[1] 
+  if(is.null(to))   to   <- Zrange[2]
+  if(from > Zrange[1] || to < Zrange[2])
+    stop("Interval [from, to] = ", prange(c(from,to)), 
+         "does not contain the range of data values =", prange(Zrange))
+  # critical constant for CI's
+  crit <- qnorm((1+confidence)/2)
+  percentage <- paste(round(100 * confidence), "%%", sep="")
+  CIblurb <- paste("pointwise", percentage, "confidence interval")
+  # estimate densities   
+  if(smoother == "kernel") {
+    # ............... kernel smoothing ......................
+    interpolate <- function(x,y) {
+      if(inherits(x, "density") && missing(y))
+        approxfun(x$x, x$y, rule=2)
+      else 
+        approxfun(x, y, rule=2)
+    }
+    # reference density
+    ghat <- unnormdensity(Zvalues,weights=lambda/sum(lambda),
+                          bw=bwref,adjust=adjust,n=n,from=from,to=to, ...)
+    xxx <- ghat$x
+    ghatfun <- interpolate(ghat)
+    # relative density
+    switch(method,
+           ratio={
+             # compute ratio of smoothed densities
+             fhat <- unnormdensity(ZX,bw=bw,adjust=adjust,
+                                   n=n,from=from, to=to, ...)
+             fhatfun <- interpolate(fhat)
+             yyy <- kappahat * fhatfun(xxx)/ghatfun(xxx)
+             # compute variance approximation
+             sigma <- fhat$bw
+             fstar <- unnormdensity(ZX,bw=bw,adjust=adjust/sqrt(2),
+                                    n=n,from=from, to=to, ...)
+             fstarfun <- interpolate(fstar)
+             const <- 1/(2 * sigma * sqrt(pi))
+             vvv  <- const * nX * fstarfun(xxx)/(baseline * ghatfun(xxx))^2
+           },
+           reweight={
+             # weight Z values by reciprocal of reference
+             wt <- 1/(baseline * ghatfun(ZX))
+             rhat <- unnormdensity(ZX, weights=wt, bw=bw,adjust=adjust,
+                                   n=n,from=from, to=to, ...)
+             rhatfun <- interpolate(rhat)
+             yyy <- rhatfun(xxx)
+             # compute variance approximation
+             sigma <- rhat$bw
+             rongstar <- unnormdensity(ZX, weights=wt^2,
+                                       bw=bw,adjust=adjust/sqrt(2),
+                                       n=n,from=from, to=to, ...)
+             rongstarfun <- interpolate(rongstar)
+             const <- 1/(2 * sigma * sqrt(pi))
+             vvv  <- const * rongstarfun(xxx)
+           },
+           transform={
+             # probability integral transform
+             Gfun <- interpolate(ghat$x, cumsum(ghat$y)/sum(ghat$y))
+             GZX <- Gfun(ZX)
+             # smooth density on [0,1]
+             qhat <- unnormdensity(GZX,bw=bw,adjust=adjust,
+                                   n=n, from=0, to=1, ...)
+             qhatfun <- interpolate(qhat)
+             # edge effect correction
+             one <- unnormdensity(seq(from=0,to=1,length.out=512),
+                                  bw=qhat$bw, adjust=1,
+                                  n=n,from=0, to=1, ...)
+             onefun <- interpolate(one)
+             # apply to transformed values
+             Gxxx <- Gfun(xxx)
+             yyy <- kappahat * qhatfun(Gxxx)/onefun(Gxxx)
+             # compute variance approximation
+             sigma <- qhat$bw
+             qstar <- unnormdensity(GZX,bw=bw,adjust=adjust/sqrt(2),
+                                    n=n,from=0, to=1, ...)
+             qstarfun <- interpolate(qstar)
+             const <- 1/(2 * sigma * sqrt(pi))
+             vvv  <- const * nX * qstarfun(Gxxx)/(baseline * onefun(Gxxx))^2
+           })
+    vvvname <- "Variance of estimator"
+    vvvlabel <- paste("bold(Var)~hat(%s)", paren(covname), sep="")
+    sd <- sqrt(vvv)
+    hi <- yyy + crit * sd
+    lo <- yyy - crit * sd
   } else {
-    # probability integral transform
-    Gfun <- interpolate(ghat$x, cumsum(ghat$y)/sum(ghat$y))
-    GZX <- Gfun(ZX)
-    # smooth density on [0,1]
-    qhat <- density(GZX,bw=bw,adjust=adjust,n=n,from=0, to=1, ...)
-    qhatfun <- interpolate(qhat)
-    # edge effect correction
-    one <- density(seq(from=0,to=1,length.out=512),
-                    bw=qhat$bw, adjust=1, n=n,from=0, to=1, ...)
-    onefun <- interpolate(one)
-    # apply to transformed values
-    Gxxx <- Gfun(xxx)
-    yyy <- kappahat * qhatfun(Gxxx)/onefun(Gxxx)
-    # compute variance approximation
-    sigma <- qhat$bw
-    qstar <- density(GZX,bw=bw,adjust=adjust/sqrt(2),n=n,from=0, to=1, ...)
-    qstarfun <- interpolate(qstar)
-    const <- 1/(2 * sigma * sqrt(pi))
-    vvv  <- const * nX * qstarfun(Gxxx)/(baseline * onefun(Gxxx))^2
+    # .................. local likelihood smoothing .......................
+    LocfitRaw <- function(x, ...) {
+      do.call.matched("locfit.raw", append(list(x=x), list(...)))
+    }
+    varlog <- function(obj,xx) {
+      # variance of log f-hat
+      stopifnot(inherits(obj, "locfit"))
+      if(!identical(obj$trans, exp))
+        stop("internal error: locfit object does not have log link")
+      # the following call should have band="local" but that produces NaN's
+      pred <- predict(obj, newdata=xx,
+                      se.fit=TRUE, what="coef")
+      se <- pred$se.fit
+      return(se^2)
+    }      
+    xlim <- c(from, to)
+    xxx <- seq(from, to, length=n)
+    # reference density
+    ghat <- LocfitRaw(Zvalues, weights=lambda/sum(lambda), xlim=xlim, ...)
+    ggg <- predict(ghat, xxx)
+    # relative density
+    switch(method,
+           ratio={
+             # compute ratio of smoothed densities
+             fhat <- LocfitRaw(ZX, xlim=xlim, ...)
+             fff <- predict(fhat, xxx)
+             yyy <- kappahat * fff/ggg
+             # compute approximation to variance of log rho-hat
+             varlogN <- 1/nX
+             vvv <- varlog(fhat, xxx) + varlogN
+           },
+           reweight={
+             # weight Z values by reciprocal of reference
+             wt <- 1/(baseline * predict(ghat,ZX))
+             sumwt <- sum(wt)
+             rhat <- LocfitRaw(ZX, weights=(wt/sumwt) * nX,
+                                xlim=xlim, ...)
+             rrr <- predict(rhat, xxx)
+             yyy <- sumwt * rrr
+             # compute approximation to variance of log rho-hat
+             varsumwt <- mean(yyy /(baseline * ggg)) * diff(xlim)
+             varlogsumwt <- varsumwt/sumwt^2
+             vvv <- varlog(rhat, xxx) + varlogsumwt
+           },
+           transform={
+             # probability integral transform
+             Gfun <- approxfun(xxx, cumsum(ggg)/sum(ggg), rule=2)
+             GZX <- Gfun(ZX)
+             # smooth density on [0,1], end effect corrected
+             qhat <- LocfitRaw(GZX, xlim=c(0,1), ...)
+             # apply to transformed values
+             Gxxx <- Gfun(xxx)
+             qqq <- predict(qhat, Gxxx)
+             yyy <- kappahat * qqq
+             # compute approximation to variance of log rho-hat
+             varlogN <- 1/nX
+             vvv <- varlog(qhat, Gxxx) + varlogN
+           })
+    vvvname <- "Variance of log of estimator"
+    vvvlabel <- paste("bold(Var)~log(hat(%s)", paren(covname), ")", sep="")
+    sss <- exp(crit * sqrt(vvv))
+    hi <- yyy * sss
+    lo <- yyy / sss
   }
-  sd <- sqrt(vvv)
   # pack into fv object
-  df <- data.frame(xxx=xxx, rho=yyy, var=vvv, hi=yyy+2*sd, lo=yyy-2*sd)
+  df <- data.frame(xxx=xxx, rho=yyy, var=vvv, hi=hi, lo=lo)
   names(df)[1] <- covname
   desc <- c(paste("covariate", covname),
-            "Estimated covariate effect",
-            "Variance of estimator",
-            "Upper limit of pointwise 95%% confidence interval",
-            "Lower limit of pointwise 95%% confidence interval")
+            "Estimated intensity",
+            vvvname,
+            paste("Upper limit of", CIblurb),
+            paste("Lower limit of", CIblurb))
   rslt <- fv(df,
              argu=covname,
              ylab=substitute(rho(X), list(X=as.name(covname))),
              valu="rho",
              fmla= as.formula(paste(". ~ ", covname)),
-             alim=c(from,to),
+             alim=range(ZX),
              labl=c(covname,
-               paste("%s", paren(covname), sep=""),
-               paste("bold(Var)~%s", paren(covname), sep=""),
+               paste("hat(%s)", paren(covname), sep=""),
+               vvvlabel,
                paste("%s[hi]", paren(covname), sep=""),
                paste("%s[lo]", paren(covname), sep="")),
              desc=desc,
@@ -137,12 +259,13 @@ rhohat <- function(object, covariate, ...,
     list(reference  = reference,
          modelcall  = if(reference == "model") modelcall else NULL,
          callstring = callstring,
-         sigma      = sigma,
+         sigma      = switch(smoother, kernel=sigma, local=NULL),
          covname    = paste(covname, collapse=""),
          ZX         = ZX,
          Zimage     = Zimage,
          lambda     = lambda,
-         transform  = transform)
+         method     = method,
+         smoother   = smoother)
   return(rslt)
 }
 
@@ -157,13 +280,30 @@ print.rhohat <- function(x, ...) {
            print(s$modelcall)
          })
   cat("Estimation method: ")
-  if(s$transform)
-    cat(paste("probability integral transform,",
-              "edge-corrected fixed bandwidth kernel smoothing on [0,1]\n"))
-  else 
-    cat("fixed-bandwidth kernel smoothing\n")
+  switch(s$method,
+         ratio={
+           cat("ratio of fixed-bandwidth kernel smoothers\n")
+         },
+         reweight={
+           cat("fixed-bandwidth kernel smoother of weighted data")
+         },
+         transform={
+           cat(paste("probability integral transform,",
+                     "edge-corrected fixed bandwidth kernel smoothing",
+                     "on [0,1]\n"))
+         },
+         cat("UNKNOWN\n"))
+  cat("Smoother: ")
+  switch(s$smoother,
+         kernel={
+           cat("Kernel density estimator\n")
+           cat(paste("Actual smoothing bandwidth sigma = ",
+                     signif(s$sigma,5), "\n"))
+         },
+         local ={ cat("Local likelihood density estimator\n") }
+         )
   cat(paste("Call:", s$callstring, "\n"))
-  cat(paste("Actual smoothing bandwidth sigma = ", signif(s$sigma,5), "\n"))
+
   NextMethod("print")
 }
 
@@ -229,3 +369,4 @@ predict.rhohat <- function(object, ..., relative=FALSE) {
   }
   return(Y)
 }
+
