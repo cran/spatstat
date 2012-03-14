@@ -1,6 +1,6 @@
 
 // ........................... Diggle-Gates-Stibbard process ................
-// $Revision: 1.2 $  $Date: 2012/02/05 07:13:57 $
+// $Revision: 1.3 $  $Date: 2012/03/10 11:22:50 $
 
 #ifndef PI
 #define PI 3.14159265358979
@@ -98,6 +98,7 @@ extern "C" {
     double *Xrange, *Yrange;
     // internal
     int xcells, ycells;
+    long int StartTime, EndTime;
     // output 
     int noutmax;
     SEXP xout, yout, nout, out;
@@ -162,7 +163,7 @@ extern "C" {
     Sampler PerfectSampler(&ExampleProcess);
     
     // Perform perfect sampling
-    PerfectSampler.Sim(&ExamplePattern);
+    PerfectSampler.Sim(&ExamplePattern, &StartTime, &EndTime);
     
     // Synchronise random number generator 
     PutRNGstate();

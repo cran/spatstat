@@ -1,6 +1,6 @@
 
 // ........................... Strauss process ..........................
-//  $Revision: 1.1 $ $Date: 2012/02/05 07:12:59 $
+//  $Revision: 1.3 $ $Date: 2012/03/10 11:52:48 $
 
 class StraussProcess : public PointProcess {
  public:
@@ -205,11 +205,15 @@ extern "C" {
     // internal
     int xcells, ycells;
     PointProcess *TheProcess;
+    long int EndTime, StartTime;
     // output 
     int noutmax;
     SEXP xout, yout, nout, out;
     double *xx, *yy;
     int *nn;
+
+    SEXP stout, etout;
+    int *ss, *ee;
 
     // protect arguments from garbage collector    
     PROTECT(beta   = AS_NUMERIC(beta));
@@ -259,7 +263,7 @@ extern "C" {
     Sampler PerfectSampler(&ExampleProcess);
     
     // Perform perfect sampling
-    PerfectSampler.Sim(&ExamplePattern);
+    PerfectSampler.Sim(&ExamplePattern, &StartTime, &EndTime);
     
     // Synchronise random number generator 
     PutRNGstate();
@@ -271,21 +275,29 @@ extern "C" {
     PROTECT(xout = NEW_NUMERIC(noutmax));
     PROTECT(yout = NEW_NUMERIC(noutmax));
     PROTECT(nout = NEW_INTEGER(1));
+    PROTECT(stout = NEW_INTEGER(1));
+    PROTECT(etout = NEW_INTEGER(1));
     xx = NUMERIC_POINTER(xout);
     yy = NUMERIC_POINTER(yout);
     nn = INTEGER_POINTER(nout);
+    ss = INTEGER_POINTER(stout);
+    ee = INTEGER_POINTER(etout);
 
     // copy data into output storage
     ExamplePattern.Return(xx, yy, nn, noutmax);
+    *ss = StartTime;
+    *ee = EndTime;
 
     // pack up into output list
-    PROTECT(out  = NEW_LIST(3));
+    PROTECT(out  = NEW_LIST(5));
     SET_VECTOR_ELT(out, 0, xout);
     SET_VECTOR_ELT(out, 1, yout);
     SET_VECTOR_ELT(out, 2, nout);
+    SET_VECTOR_ELT(out, 3, stout);
+    SET_VECTOR_ELT(out, 4, etout);
     
     // return 
-    UNPROTECT(9);  // 5 arguments plus xout, yout, nout, out
+    UNPROTECT(11);  // 5 arguments plus xout, yout, nout, stout, etout, out
     return(out);
   }
 }

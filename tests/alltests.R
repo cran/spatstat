@@ -83,6 +83,8 @@ local({
   #### nncross in two dimensions
   X <- runifpoint(42)
   Y <- runifpoint(42, win=owin(c(1,2),c(1,2)))
+
+  # default nncross
   nc <- nncross(X,Y)
   ncd <- nc$dist
   ncw <- nc$which
@@ -93,7 +95,32 @@ local({
     stop("nncross()$dist does not agree with apply(crossdist(), 1, min)")
   if(any(ncw != cdw))
     stop("nncross()$which does not agree with apply(crossdist(), 1, which.min)")
+
+  # sort on x
+  nc <- nncross(X,Y, sortby="x")
+  ncd <- nc$dist
+  ncw <- nc$which
+  if(any(abs(ncd - cdd) > eps))
+    stop("nncross(sortby=x)$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("nncross(sortby=x)$which does not agree with apply(crossdist(), 1, which.min)")
+
+  # pre-sorted on x
+  Y <- Y[order(Y$x)]
+  nc <- nncross(X,Y, is.sorted.Y=TRUE, sortby="x")
+  ncd <- nc$dist
+  ncw <- nc$which
+  cd <- crossdist(X,Y)
+  cdd <- apply(cd, 1, min)
+  cdw <- apply(cd, 1, which.min)
+  if(any(abs(ncd - cdd) > eps))
+    stop("For sorted data, nncross()$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("For sorted data, nncross()$which does not agree with apply(crossdist(), 1, which.min)")
+
 })
+
+
 require(spatstat)
 
 local({

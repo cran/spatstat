@@ -1476,6 +1476,7 @@
   Jesper Moller,
   Linda Stougaard Nielsen,
   Felipe Nunes,
+  Jens Oehlschlaegel,
   Thierry Onkelinx,
   Evgeni Parilov,
   Jeff Picka,

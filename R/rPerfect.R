@@ -1,7 +1,7 @@
 #
 #  Perfect Simulation 
 #
-#  $Revision: 1.12 $ $Date: 2012/02/05 08:17:29 $
+#  $Revision: 1.13 $ $Date: 2012/03/10 11:52:26 $
 #
 #  rStrauss
 #  rHardcore
@@ -47,11 +47,14 @@ rStrauss <- function(beta, gamma=1, R=0, W=owin()) {
   X <- z[[1]]
   Y <- z[[2]]
   nout <- z[[3]]
+  times <- c(start=z[[4]], end=z[[5]])
 
   if(nout<0)
     stop("internal error: copying failed in PerfectStrauss")
 
-  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+  P <- ppp(X[1:nout], Y[1:nout], window=W, check=FALSE)
+  attr(P, "times") <- times
+  return(P)
 }
 
 #  Perfect Simulation of Hardcore process

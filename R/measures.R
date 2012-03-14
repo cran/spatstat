@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.21 $  $Date: 2012/01/21 08:37:48 $
+#  $Revision: 1.22 $  $Date: 2012/03/07 04:07:10 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
@@ -127,7 +127,8 @@ plot.msr <- function(x, ...) {
   if(d == 1) {
     smo <- smooth.ppp(x$loc %mark% x$density, sigma=max(nndist(x$loc)), ...)
     xtra <- unique(c(names(formals(plot.default)),
-                     names(formals(image.default))))
+                     names(formals(image.default)),
+                     "box"))
     do.call.matched("plot.im",
                     resolve.defaults(list(x=smo),
                                      list(...),
@@ -136,6 +137,7 @@ plot.msr <- function(x, ...) {
     xtra <- unique(c(names(formals(plot.owin)),
                      names(formals(points)),
                      names(formals(symbols))))
+    xtra <- setdiff(xtra, "box")
     do.call.matched("plot.ppp",
                     resolve.defaults(list(x=x$loc %mark% x$discrete),
                                      list(add=TRUE),

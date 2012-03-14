@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.69 $	$Date: 2012/02/04 08:12:45 $
+#	$Revision: 4.70 $	$Date: 2012/03/14 04:17:34 $
 #
 #
 #
@@ -726,7 +726,7 @@ is.convex <- function(x) {
            v <- as.ppp(v, W=as.rectangle(x))
            ch <- convexhull.xy(v)
            edg <- as.psp(ch)
-           edgedist <- nncross(v, edg)$dist
+           edgedist <- nncross(v, edg, what="dist")
            pixdiam <- sqrt(x$xstep^2 + x$ystep^2)
            return(all(edgedist <= pixdiam))
          })

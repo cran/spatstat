@@ -430,7 +430,7 @@ class Sampler{
   //long int UpperLiving[2];
   Sampler(PointProcess *p){ PP = p;}
   ~Sampler(){}
-  void Sim(Point2Pattern *p2p);
+  void Sim(Point2Pattern *p2p, long int *ST, long int *ET);
   long int BirthDeath(long int TimeStep,
 		      struct Point *headLiving,
 		      struct Point *headDeleted,
@@ -650,7 +650,7 @@ long int Sampler::BirthDeath(long int TimeStep,
   return(n);
 }
 
-void Sampler::Sim(Point2Pattern *p2p) {
+void Sampler::Sim(Point2Pattern *p2p, long int *ST, long int *ET) {
 
   P2P = p2p;
   long int StartTime, EndTime, TimeStep, D0Time, D0Living;
@@ -836,7 +836,8 @@ void Sampler::Sim(Point2Pattern *p2p) {
   FREE(TempTransition);
   //Rprintf("%d ST: %d ET: %d\n",i,StartTime,EndTime);
   //scanf("%f",&f1);
-
+  *ST = StartTime;
+  *ET = EndTime;
 }
 
 #include "PerfectStrauss.h"

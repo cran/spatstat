@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.36 $	$Date: 2011/07/04 06:34:51 $
+#	$Revision: 4.38 $	$Date: 2012/03/14 04:39:20 $
 #
 ################################################################################
 
@@ -154,12 +154,12 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   XI <- X[I]
   XJ <- X[J]
   if(disjoint) 
-    nnd <- nncross(XI, XJ)$dist
+    nnd <- nncross(XI, XJ, what="dist")
   else {
     seqnp <- seq_len(npts)
     iX <- seqnp[I]
     iY <- seqnp[J]
-    nnd <- nncross(XI, XJ, iX, iY)$dist
+    nnd <- nncross(XI, XJ, iX, iY, what="dist")
   }
 #  distance to boundary from each type i point
   bdry <- bdist.points(XI)

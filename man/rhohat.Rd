@@ -9,11 +9,12 @@
 }
 \usage{
 rhohat(object, covariate, ...,
-       transform=FALSE,
+       method=c("ratio", "reweight", "transform"),
+       smoother=c("kernel", "local"),
        dimyx=NULL, eps=NULL,
        n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
        bwref=bw,
-       covname)
+       covname, confidence=0.95)
 }
 \arguments{
   \item{object}{
@@ -28,8 +29,11 @@ rhohat(object, covariate, ...,
     Alternatively one of the strings \code{"x"} or \code{"y"}
     signifying the Cartesian coordinates.
   }
-  \item{transform}{
-    Logical value determining the smoothing method. See Details.
+  \item{method}{
+    Character string determining the smoothing method. See Details.
+  }
+  \item{smoother}{
+    Character string determining the smoothing algorithm. See Details.
   }
   \item{dimyx,eps}{
     Arguments passed to \code{\link{as.mask}} to control the pixel
@@ -54,10 +58,15 @@ rhohat(object, covariate, ...,
     observed at all locations in the window).
   }
   \item{\dots}{
-    Additional arguments passed to \code{\link{density.default}}.
+    Additional arguments passed to \code{\link{density.default}}
+    or \code{\link[locfit]{locfit}}.
   }
   \item{covname}{
     Optional. Character string to use as the name of the covariate.
+  }
+  \item{confidence}{
+    Confidence level for confidence intervals.
+    A number between 0 and 1.
   }
 }
 \details{
@@ -67,8 +76,9 @@ rhohat(object, covariate, ...,
   \deqn{\lambda(u) = \rho(Z(u))}{lambda(u) = rho(Z(u))} where
   \eqn{Z} is the spatial covariate function given by \code{covariate},
   and \eqn{\rho(z)}{rho(z)} is a function to be estimated. 
-  This command computes an estimator of \eqn{\rho(z)}{rho(z)}
-  proposed by Baddeley and Turner (2005).
+  This command computes estimators of \eqn{\rho(z)}{rho(z)}
+  proposed by Baddeley and Turner (2005)
+  and Baddeley et al (2012).
 
   If \code{object} is a fitted point process model, suppose \code{X} is
   the original data point pattern to which the model was fitted. Then
@@ -80,16 +90,48 @@ rhohat(object, covariate, ...,
     lambda(u) = rho(Z(u)) * kappa(u)
   }
   where \eqn{\kappa(u)}{kappa(u)} is the intensity of the fitted model
-  \code{object}. A modified version of the Baddeley-Turner (2005)
-  smoothing estimator is computed.
+  \code{object}. A smoothing estimator of \eqn{\rho(z)}{rho(z)} is computed.
 
-  If \code{transform=FALSE}, the smoothing method is
-  fixed bandwidth kernel smoothing, using \code{\link{density.default}}.
-  If \code{transform=TRUE}, the smoothing method is variable-bandwidth kernel
-  smoothing, implemented by applying the Probability Integral Transform
-  to the covariate values, yielding values in the range 0 to 1,
-  then applying edge-corrected fixed-bandwidth smoothing on the interval
-  \eqn{[0,1]}, and back-transforming.
+  The estimation procedure is determined by the character strings
+  \code{method} and \code{smoother}.
+  The estimation procedure involves computing several density estimates
+  and combining them. 
+  The algorithm used to compute density estimates is 
+  determined by \code{smoother}:
+  \itemize{
+    \item If \code{smoother="kernel"},
+    each the smoothing procedure is based on
+    fixed-bandwidth kernel density estimation,
+    performed by \code{\link{density.default}}.
+    \item If \code{smoother="local"}, the smoothing procedure
+    is based on local likelihood density estimation, performed by
+    \code{\link[locfit]{locfit}}.
+  }
+  The \code{method} determines how the density estimates will be
+  combined to obtain an estimate of \eqn{\rho(z)}{rho(z)}:
+  \itemize{
+    \item
+    If \code{method="ratio"}, then \eqn{\rho(z)}{rho(z)} is
+    estimated by the ratio of two density estimates.
+    The numerator is a (rescaled) density estimate obtained by
+    smoothing the values \eqn{Z(y_i)}{Z(y[i])} of the covariate
+    \eqn{Z} observed at the data points \eqn{y_i}{y[i]}. The denominator
+    is a density estimate of the reference distribution of \eqn{Z}.
+    \item
+    If \code{method="reweight"}, then \eqn{\rho(z)}{rho(z)} is
+    estimated by applying density estimation to the 
+    values \eqn{Z(y_i)}{Z(y[i])} of the covariate
+    \eqn{Z} observed at the data points \eqn{y_i}{y[i]},
+    with weights inversely proportional to the reference density of
+    \eqn{Z}.
+    \item 
+    If \code{method="transform"},
+    the smoothing method is variable-bandwidth kernel
+    smoothing, implemented by applying the Probability Integral Transform
+    to the covariate values, yielding values in the range 0 to 1,
+    then applying edge-corrected density estimation on the interval
+    \eqn{[0,1]}, and back-transforming.
+  }
 }
 \value{
   A function value table (object of class \code{"fv"})
@@ -100,10 +142,10 @@ rhohat(object, covariate, ...,
   and \code{predict}.
 }
 \references{
-  Baddeley, A. and Chang, Y.-M. and Song, Y. and Turner, R. 
-  \emph{Diagnostics for transformation of covariates
-    in spatial Poisson point process models}.
-  Submitted for publication.
+  Baddeley, A., Chang, Y.-M., Song, Y. and Turner, R. (2012)
+  Nonparametric estimation of the dependence of a point
+  process on spatial covariates.
+  \emph{Statistics and Its Interface}, in press.
   
   Baddeley, A. and Turner, R. (2005)
   Modelling spatial point patterns in R.
@@ -121,7 +163,8 @@ rhohat(object, covariate, ...,
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link[spatstat:methods.rhohat]{methods.rhohat}}
+  \code{\link{rho2hat}},
+  \code{\link{methods.rhohat}}
 }
 \examples{
   X <-  rpoispp(function(x,y){exp(3+3*x)})
@@ -129,6 +172,10 @@ rhohat(object, covariate, ...,
   rho <- rhohat(X, function(x,y){x})
   plot(rho)
   curve(exp(3+3*x), lty=3, col=2, add=TRUE)
+
+  rhoB <- rhohat(X, "x", method="reweight")
+  rhoC <- rhohat(X, "x", method="transform")
+
   fit <- ppm(X, ~x)
   rr <- rhohat(fit, "y")
 }
