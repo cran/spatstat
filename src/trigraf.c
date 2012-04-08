@@ -4,10 +4,15 @@
 
   Form list of all triangles in a planar graph, given list of edges
   
-  $Revision: 1.10 $     $Date: 2011/11/13 01:57:34 $
+  $Revision: 1.13 $     $Date: 2012/04/06 09:26:50 $
 
   Form list of all triangles in a planar graph, given list of edges
-  
+
+  Note: vertex indices ie, je are indices in R.
+        They are handled without converting to C convention,
+        because we only need to test equality and ordering.
+	(*except in 'trioxgraph'*)
+
   Called by .C:
   -------------
   trigraf()  Generic C implementation with fixed storage limit
@@ -35,6 +40,8 @@
 #include <Rdefines.h>
 #include <R_ext/Utils.h>
 
+#include "chunkloop.h"
+
 #undef DEBUGTRI
 
 void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
@@ -49,7 +56,7 @@ void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
      int *status;          /* 0 if OK, 1 if overflow */
 {
   int Nv, Ne, Ntmax;
-  int Nt, Nj, m, i, j, k, mj, mk;
+  int Nt, Nj, m, i, j, k, mj, mk, maxchunk;
   int *jj;
   
   Nv = *nv;
@@ -60,67 +67,70 @@ void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
   jj = (int *) R_alloc(Ne, sizeof(int));
   Nt = 0;
 
-  for(i=0; i < Nv; i++) {
+  /* vertex index i ranges from 1 to Nv */
+  XOUTERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    /* Find triangles involving vertex 'i'
-       in which 'i' is the lowest-numbered vertex */
+    XINNERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
+      /* Find triangles involving vertex 'i'
+	 in which 'i' is the lowest-numbered vertex */
 
-    /* First, find vertices j > i connected to i */
-    Nj = 0;
-    for(m = 0; m < Ne; m++) {
-      if(ie[m] == i) {
-	j = je[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      } else if(je[m] == i) {
-	j = ie[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      }
-    }
-
-    /* 
-       Determine which pairs of vertices j, k are joined by an edge;
-       save triangles (i,j,k) 
-    */
-
-    if(Nj > 1) {
-      /* Sort jj in ascending order */
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(k < j) {
-	    /* swap */
-	    jj[mk] = j;
-	    jj[mj] = k;
-	    j = k;
+      /* First, find vertices j > i connected to i */
+      Nj = 0;
+      for(m = 0; m < Ne; m++) {
+	if(ie[m] == i) {
+	  j = je[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
+	  }
+	} else if(je[m] == i) {
+	  j = ie[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
 	  }
 	}
       }
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(j != k) {
-	    /* Run through edges to determine whether j, k are neighbours */
-	    for(m = 0; m < Ne; m++) {
-	      if((ie[m] == j && je[m] == k)
-		 || (ie[m] == k && je[m] == j)) {
-  	        /* add (i, j, k) to list of triangles */
-		if(Nt >= Ntmax) {
-		  /* overflow - exit */
-		  *status = 1;
-		  return;
+
+      /* 
+	 Determine which pairs of vertices j, k are joined by an edge;
+	 save triangles (i,j,k) 
+      */
+
+      if(Nj > 1) {
+	/* Sort jj in ascending order */
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(k < j) {
+	      /* swap */
+	      jj[mk] = j;
+	      jj[mj] = k;
+	      j = k;
+	    }
+	  }
+	}
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(j != k) {
+	      /* Run through edges to determine whether j, k are neighbours */
+	      for(m = 0; m < Ne; m++) {
+		if((ie[m] == j && je[m] == k)
+		   || (ie[m] == k && je[m] == j)) {
+		  /* add (i, j, k) to list of triangles */
+		  if(Nt >= Ntmax) {
+		    /* overflow - exit */
+		    *status = 1;
+		    return;
+		  }
+		  it[Nt] = i;
+		  jt[Nt] = j;
+		  kt[Nt] = k;
+		  Nt++;
 		}
-		it[Nt] = i;
-		jt[Nt] = j;
-		kt[Nt] = k;
-		Nt++;
 	      }
 	    }
 	  }
@@ -128,7 +138,6 @@ void trigraf(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
       }
     }
   }
-
   *nt = Nt;
   *status = 0;
 }
@@ -169,7 +178,7 @@ void trigrafS(nv, ne, ie, je, ntmax, nt, it, jt, kt, status)
 
   lastedge = -1;
   while(lastedge + 1 < Ne) {
-    R_CheckUserInterrupt();
+    if(lastedge % 256 == 0) R_CheckUserInterrupt();
     /* 
        Consider next vertex i.
        The edges (i,j) with i < j appear contiguously in the edge list.
@@ -232,7 +241,7 @@ SEXP trigraph(SEXP nv,  /* number of vertices */
   int Nj;
   int *jj; /* scratch storage */
 
-  int i, j, k, m, mj, mk, Nmore;
+  int i, j, k, m, mj, mk, Nmore, maxchunk;
   
   /* output */
   SEXP iTout, jTout, kTout, out;
@@ -262,101 +271,102 @@ SEXP trigraph(SEXP nv,  /* number of vertices */
   /* initialise scratch storage */
   jj = (int *) R_alloc(Ne, sizeof(int));
 
-  
-  for(i=0; i < Nv; i++) { 
-
+  XOUTERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
     R_CheckUserInterrupt();
+    XINNERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
 
 #ifdef DEBUGTRI
-    Rprintf("i=%d ---------- \n", i);
+      Rprintf("i=%d ---------- \n", i);
 #endif
 
-    /* Find triangles involving vertex 'i'
-       in which 'i' is the lowest-numbered vertex */
+      /* Find triangles involving vertex 'i'
+	 in which 'i' is the lowest-numbered vertex */
 
-    /* First, find vertices j > i connected to i */
-    Nj = 0;
-    for(m = 0; m < Ne; m++) {
-      if(ie[m] == i) {
-	j = je[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      } else if(je[m] == i) {
-	j = ie[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      }
-    }
-
-    /* 
-       Determine which pairs of vertices j, k are joined by an edge;
-       save triangles (i,j,k) 
-    */
-
-#ifdef DEBUGTRI
-    Rprintf("Nj = %d\n", Nj);
-#endif
-
-    if(Nj > 1) {
-#ifdef DEBUGTRI
-      Rprintf("i=%d\njj=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
-#endif
-      /* Sort jj in ascending order */
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(k < j) {
-	    /* swap */
-	    jj[mk] = j;
-	    jj[mj] = k;
-	    j = k;
+      /* First, find vertices j > i connected to i */
+      Nj = 0;
+      for(m = 0; m < Ne; m++) {
+	if(ie[m] == i) {
+	  j = je[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
+	  }
+	} else if(je[m] == i) {
+	  j = ie[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
 	  }
 	}
       }
+
+      /* 
+	 Determine which pairs of vertices j, k are joined by an edge;
+	 save triangles (i,j,k) 
+      */
+
 #ifdef DEBUGTRI
-      Rprintf("sorted=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
+      Rprintf("Nj = %d\n", Nj);
 #endif
 
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(j != k) {
-	    /* Run through edges to determine whether j, k are neighbours */
-	    for(m = 0; m < Ne; m++) {
-	      if((ie[m] == j && je[m] == k)
-		 || (ie[m] == k && je[m] == j)) {
-  	        /* add (i, j, k) to list of triangles */
-		if(Nt >= Ntmax) {
-		  /* overflow - allocate more space */
-		  Nmore = 2 * Ntmax;
+      if(Nj > 1) {
 #ifdef DEBUGTRI
-		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+	Rprintf("i=%d\njj=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
 #endif
-		  it = (int *) S_realloc((char *) it,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  jt = (int *) S_realloc((char *) jt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  kt = (int *) S_realloc((char *) kt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  Ntmax = Nmore;
+	/* Sort jj in ascending order */
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(k < j) {
+	      /* swap */
+	      jj[mk] = j;
+	      jj[mj] = k;
+	      j = k;
+	    }
+	  }
+	}
+#ifdef DEBUGTRI
+	Rprintf("sorted=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
+#endif
+
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(j != k) {
+	      /* Run through edges to determine whether j, k are neighbours */
+	      for(m = 0; m < Ne; m++) {
+		if((ie[m] == j && je[m] == k)
+		   || (ie[m] == k && je[m] == j)) {
+		  /* add (i, j, k) to list of triangles */
+		  if(Nt >= Ntmax) {
+		    /* overflow - allocate more space */
+		    Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		    Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		    it = (int *) S_realloc((char *) it,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    jt = (int *) S_realloc((char *) jt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    kt = (int *) S_realloc((char *) kt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    Ntmax = Nmore;
+		  }
+		  /* output indices in R convention */
+		  it[Nt] = i;
+		  jt[Nt] = j;
+		  kt[Nt] = k;
+		  Nt++;
 		}
-		it[Nt] = i;
-		jt[Nt] = j;
-		kt[Nt] = k;
-		Nt++;
 	      }
 	    }
 	  }
@@ -407,7 +417,7 @@ SEXP triograph(SEXP nv,  /* number of vertices */
   int Nj;
   int *jj; /* scratch storage */
 
-  int i, j, k, m, mj, mk, maxjk, Nmore;
+  int i, j, k, m, mj, mk, maxjk, Nmore, maxchunk;
   
   /* output */
   SEXP iTout, jTout, kTout, out;
@@ -437,107 +447,108 @@ SEXP triograph(SEXP nv,  /* number of vertices */
   /* initialise scratch storage */
   jj = (int *) R_alloc(Ne, sizeof(int));
 
-  
-  for(i=0; i < Nv; i++) { 
+  XOUTERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
     R_CheckUserInterrupt();
+    XINNERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
 
 #ifdef DEBUGTRI
-    Rprintf("i=%d ---------- \n", i);
+      Rprintf("i=%d ---------- \n", i);
 #endif
 
-    /* Find triangles involving vertex 'i'
-       in which 'i' is the lowest-numbered vertex */
+      /* Find triangles involving vertex 'i'
+	 in which 'i' is the lowest-numbered vertex */
 
-    /* First, find vertices j > i connected to i */
-    Nj = 0;
-    for(m = 0; m < Ne; m++) {
-      if(ie[m] == i) {
-	j = je[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      } else if(je[m] == i) {
-	j = ie[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      }
-    }
-
-    /* 
-       Determine which pairs of vertices j, k are joined by an edge;
-       save triangles (i,j,k) 
-    */
-
-#ifdef DEBUGTRI
-    Rprintf("Nj = %d\n", Nj);
-#endif
-
-    if(Nj > 1) {
-#ifdef DEBUGTRI
-      Rprintf("i=%d\njj=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
-#endif
-      /* Sort jj in ascending order */
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(k < j) {
-	    /* swap */
-	    jj[mk] = j;
-	    jj[mj] = k;
-	    j = k;
+      /* First, find vertices j > i connected to i */
+      Nj = 0;
+      for(m = 0; m < Ne; m++) {
+	if(ie[m] == i) {
+	  j = je[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
+	  }
+	} else if(je[m] == i) {
+	  j = ie[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
 	  }
 	}
       }
+
+      /* 
+	 Determine which pairs of vertices j, k are joined by an edge;
+	 save triangles (i,j,k) 
+      */
+
 #ifdef DEBUGTRI
-      Rprintf("sorted=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
+      Rprintf("Nj = %d\n", Nj);
 #endif
 
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(j != k) {
-	    /* Run through edges to determine whether j, k are neighbours */
-	    maxjk = (j > k) ? j : k;
-	    for(m = 0; m < Ne; m++) {
-              if(ie[m] > maxjk) break;
-	      /* 
-		 since iedge is in increasing order, the test below
-		 will always be FALSE when ie[m] > max(j,k)
-	      */
-	      if((ie[m] == j && je[m] == k)
-		 || (ie[m] == k && je[m] == j)) {
-  	        /* add (i, j, k) to list of triangles */
-		if(Nt >= Ntmax) {
-		  /* overflow - allocate more space */
-		  Nmore = 2 * Ntmax;
+      if(Nj > 1) {
 #ifdef DEBUGTRI
-		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+	Rprintf("i=%d\njj=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
 #endif
-		  it = (int *) S_realloc((char *) it,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  jt = (int *) S_realloc((char *) jt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  kt = (int *) S_realloc((char *) kt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  Ntmax = Nmore;
-		}
-		it[Nt] = i;
-		jt[Nt] = j;
-		kt[Nt] = k;
-		Nt++;
-	      } 
+	/* Sort jj in ascending order */
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(k < j) {
+	      /* swap */
+	      jj[mk] = j;
+	      jj[mj] = k;
+	      j = k;
+	    }
+	  }
+	}
+#ifdef DEBUGTRI
+	Rprintf("sorted=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
+#endif
+
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(j != k) {
+	      /* Run through edges to determine whether j, k are neighbours */
+	      maxjk = (j > k) ? j : k;
+	      for(m = 0; m < Ne; m++) {
+		if(ie[m] > maxjk) break;
+		/* 
+		   since iedge is in increasing order, the test below
+		   will always be FALSE when ie[m] > max(j,k)
+		*/
+		if((ie[m] == j && je[m] == k)
+		   || (ie[m] == k && je[m] == j)) {
+		  /* add (i, j, k) to list of triangles */
+		  if(Nt >= Ntmax) {
+		    /* overflow - allocate more space */
+		    Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		    Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		    it = (int *) S_realloc((char *) it,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    jt = (int *) S_realloc((char *) jt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    kt = (int *) S_realloc((char *) kt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    Ntmax = Nmore;
+		  }
+		  it[Nt] = i;
+		  jt[Nt] = j;
+		  kt[Nt] = k;
+		  Nt++;
+		} 
+	      }
 	    }
 	  }
 	}
@@ -600,7 +611,7 @@ SEXP trioxgraph(SEXP nv,  /* number of vertices */
   /* scratch storage */
   int Nj;
   int *jj; 
-  int i, j, k, m, mj, mk, maxjk, Nmore;
+  int i, j, k, m, mj, mk, maxjk, Nmore, maxchunk;
   
   /* output to R */
   SEXP iTout, jTout, kTout, out;
@@ -632,107 +643,115 @@ SEXP trioxgraph(SEXP nv,  /* number of vertices */
   /* initialise scratch storage */
   jj = (int *) R_alloc(Ne, sizeof(int));
 
-  
-  for(i=0; i < Nv; i++) { 
+  /* convert to C indexing convention */
+  for(m = 0; m < Ne; m++) {
+    ie[m] -= 1;
+    je[m] -= 1;
+  }
+
+  OUTERCHUNKLOOP(i, Nv, maxchunk, 8196) {
     R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, Nv, maxchunk, 8196) {
 
 #ifdef DEBUGTRI
-    Rprintf("i=%d ---------- \n", i);
+      Rprintf("i=%d ---------- \n", i);
 #endif
 
-    /* Find triangles involving vertex 'i'
-       in which 'i' is the lowest-numbered vertex */
+      /* Find triangles involving vertex 'i'
+	 in which 'i' is the lowest-numbered vertex */
 
-    /* First, find vertices j > i connected to i */
-    Nj = 0;
-    for(m = 0; m < Ne; m++) {
-      if(ie[m] == i) {
-	j = je[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      } else if(je[m] == i) {
-	j = ie[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  Nj++;
-	}
-      }
-    }
-
-    /* 
-       Determine which pairs of vertices j, k are joined by an edge;
-       save triangles (i,j,k) 
-    */
-
-#ifdef DEBUGTRI
-    Rprintf("Nj = %d\n", Nj);
-#endif
-
-    if(Nj > 1) {
-#ifdef DEBUGTRI
-      Rprintf("i=%d\njj=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
-#endif
-      /* Sort jj in ascending order */
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(k < j) {
-	    /* swap */
-	    jj[mk] = j;
-	    jj[mj] = k;
-	    j = k;
+      /* First, find vertices j > i connected to i */
+      Nj = 0;
+      for(m = 0; m < Ne; m++) {
+	if(ie[m] == i) {
+	  j = je[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
+	  }
+	} else if(je[m] == i) {
+	  j = ie[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    Nj++;
 	  }
 	}
       }
+
+      /* 
+	 Determine which pairs of vertices j, k are joined by an edge;
+	 save triangles (i,j,k) 
+      */
+
 #ifdef DEBUGTRI
-      Rprintf("sorted=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
+      Rprintf("Nj = %d\n", Nj);
 #endif
 
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(j != k && (friend[j] || friend[k])) {
-	    /* Run through edges to determine whether j, k are neighbours */
-	    maxjk = (j > k) ? j : k;
-	    for(m = 0; m < Ne; m++) {
-              if(ie[m] > maxjk) break;
-	      /* 
-		 since iedge is in increasing order, the test below
-		 will always be FALSE when ie[m] > max(j,k)
-	      */
-	      if((ie[m] == j && je[m] == k)
-		 || (ie[m] == k && je[m] == j)) {
-  	        /* add (i, j, k) to list of triangles */
-		if(Nt >= Ntmax) {
-		  /* overflow - allocate more space */
-		  Nmore = 2 * Ntmax;
+      if(Nj > 1) {
 #ifdef DEBUGTRI
-		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+	Rprintf("i=%d\njj=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
 #endif
-		  it = (int *) S_realloc((char *) it,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  jt = (int *) S_realloc((char *) jt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  kt = (int *) S_realloc((char *) kt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  Ntmax = Nmore;
-		}
-		it[Nt] = i;
-		jt[Nt] = j;
-		kt[Nt] = k;
-		Nt++;
-	      } 
+	/* Sort jj in ascending order */
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(k < j) {
+	      /* swap */
+	      jj[mk] = j;
+	      jj[mj] = k;
+	      j = k;
+	    }
+	  }
+	}
+#ifdef DEBUGTRI
+	Rprintf("sorted=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
+#endif
+
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(j != k && (friend[j] || friend[k])) {
+	      /* Run through edges to determine whether j, k are neighbours */
+	      maxjk = (j > k) ? j : k;
+	      for(m = 0; m < Ne; m++) {
+		if(ie[m] > maxjk) break;
+		/* 
+		   since iedge is in increasing order, the test below
+		   will always be FALSE when ie[m] > max(j,k)
+		*/
+		if((ie[m] == j && je[m] == k)
+		   || (ie[m] == k && je[m] == j)) {
+		  /* add (i, j, k) to list of triangles */
+		  if(Nt >= Ntmax) {
+		    /* overflow - allocate more space */
+		    Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		    Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		    it = (int *) S_realloc((char *) it,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    jt = (int *) S_realloc((char *) jt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    kt = (int *) S_realloc((char *) kt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    Ntmax = Nmore;
+		  }
+		  /* convert back to R indexing */
+		  it[Nt] = i + 1;
+		  jt[Nt] = j + 1;
+		  kt[Nt] = k + 1;
+		  Nt++;
+		} 
+	      }
 	    }
 	  }
 	}
@@ -789,7 +808,7 @@ SEXP triDgraph(SEXP nv,  /* number of vertices */
   int *jj; 
   double *dd;
 
-  int i, j, k, m, mj, mk, Nmore;
+  int i, j, k, m, mj, mk, Nmore, maxchunk;
   double dij, dik, djk, diam;
   
   /* output */
@@ -824,116 +843,118 @@ SEXP triDgraph(SEXP nv,  /* number of vertices */
   /* initialise scratch storage */
   jj = (int *) R_alloc(Ne, sizeof(int));
   dd = (double *) R_alloc(Ne, sizeof(double));
-  
-  for(i=0; i < Nv; i++) { 
+
+  XOUTERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
     R_CheckUserInterrupt();
+    XINNERCHUNKLOOP(i, 1, Nv, maxchunk, 8196) {
 
 #ifdef DEBUGTRI
-    Rprintf("i=%d ---------- \n", i);
+      Rprintf("i=%d ---------- \n", i);
 #endif
 
-    /* Find triangles involving vertex 'i'
-       in which 'i' is the lowest-numbered vertex */
+      /* Find triangles involving vertex 'i'
+	 in which 'i' is the lowest-numbered vertex */
 
-    /* First, find vertices j > i connected to i */
-    Nj = 0;
-    for(m = 0; m < Ne; m++) {
-      if(ie[m] == i) {
-	j = je[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  dd[Nj] = edgelen[m];
-	  Nj++;
-	}
-      } else if(je[m] == i) {
-	j = ie[m];
-	if(j > i) {
-	  jj[Nj] = j;
-	  dd[Nj] = edgelen[m];
-	  Nj++;
-	}
-      }
-    }
-
-    /* 
-       Determine which pairs of vertices j, k are joined by an edge;
-       save triangles (i,j,k) 
-    */
-
-#ifdef DEBUGTRI
-    Rprintf("Nj = %d\n", Nj);
-#endif
-
-    if(Nj > 1) {
-#ifdef DEBUGTRI
-      Rprintf("i=%d\njj=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
-#endif
-      /* Sort jj in ascending order */
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  if(k < j) {
-	    /* swap */
-	    jj[mk] = j;
-	    jj[mj] = k;
-	    dik = dd[mj];
-	    dd[mj] = dd[mk];
-	    dd[mk] = dik;
-	    j = k;
+      /* First, find vertices j > i connected to i */
+      Nj = 0;
+      for(m = 0; m < Ne; m++) {
+	if(ie[m] == i) {
+	  j = je[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    dd[Nj] = edgelen[m];
+	    Nj++;
+	  }
+	} else if(je[m] == i) {
+	  j = ie[m];
+	  if(j > i) {
+	    jj[Nj] = j;
+	    dd[Nj] = edgelen[m];
+	    Nj++;
 	  }
 	}
       }
+
+      /* 
+	 Determine which pairs of vertices j, k are joined by an edge;
+	 save triangles (i,j,k) 
+      */
+
 #ifdef DEBUGTRI
-      Rprintf("sorted=\n", i);
-      for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
-      Rprintf("\n\n");
+      Rprintf("Nj = %d\n", Nj);
 #endif
 
-      for(mj = 0; mj < Nj-1; mj++) {
-	j = jj[mj];
-	dij = dd[mj];
-	for(mk = mj+1; mk < Nj; mk++) {
-	  k = jj[mk];
-	  dik = dd[mk];
-	  if(j != k) {
-	    /* Run through edges to determine whether j, k are neighbours */
-	    for(m = 0; m < Ne; m++) {
-	      if((ie[m] == j && je[m] == k)
-		 || (ie[m] == k && je[m] == j)) {
-		/* triangle (i, j, k) */
-		/* determine triangle diameter */
-		diam = (dij > dik) ? dij : dik;
-		djk = edgelen[m];
-		if(djk > diam) diam = djk; 
-  	        /* add (i, j, k) to list of triangles */
-		if(Nt >= Ntmax) {
-		  /* overflow - allocate more space */
-		  Nmore = 2 * Ntmax;
+      if(Nj > 1) {
 #ifdef DEBUGTRI
-		  Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+	Rprintf("i=%d\njj=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
 #endif
-		  it = (int *) S_realloc((char *) it,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  jt = (int *) S_realloc((char *) jt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  kt = (int *) S_realloc((char *) kt,
-					 Nmore,  Ntmax,
-					 sizeof(int));
-		  dt = (double *) S_realloc((char *) dt,
-					 Nmore,  Ntmax,
-					 sizeof(double));
-		  Ntmax = Nmore;
+	/* Sort jj in ascending order */
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    if(k < j) {
+	      /* swap */
+	      jj[mk] = j;
+	      jj[mj] = k;
+	      dik = dd[mj];
+	      dd[mj] = dd[mk];
+	      dd[mk] = dik;
+	      j = k;
+	    }
+	  }
+	}
+#ifdef DEBUGTRI
+	Rprintf("sorted=\n", i);
+	for(mj = 0; mj < Nj; mj++) Rprintf("%d ", jj[mj]);
+	Rprintf("\n\n");
+#endif
+
+	for(mj = 0; mj < Nj-1; mj++) {
+	  j = jj[mj];
+	  dij = dd[mj];
+	  for(mk = mj+1; mk < Nj; mk++) {
+	    k = jj[mk];
+	    dik = dd[mk];
+	    if(j != k) {
+	      /* Run through edges to determine whether j, k are neighbours */
+	      for(m = 0; m < Ne; m++) {
+		if((ie[m] == j && je[m] == k)
+		   || (ie[m] == k && je[m] == j)) {
+		  /* triangle (i, j, k) */
+		  /* determine triangle diameter */
+		  diam = (dij > dik) ? dij : dik;
+		  djk = edgelen[m];
+		  if(djk > diam) diam = djk; 
+		  /* add (i, j, k) to list of triangles */
+		  if(Nt >= Ntmax) {
+		    /* overflow - allocate more space */
+		    Nmore = 2 * Ntmax;
+#ifdef DEBUGTRI
+		    Rprintf("Doubling space from %d to %d\n", Ntmax, Nmore);
+#endif
+		    it = (int *) S_realloc((char *) it,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    jt = (int *) S_realloc((char *) jt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    kt = (int *) S_realloc((char *) kt,
+					   Nmore,  Ntmax,
+					   sizeof(int));
+		    dt = (double *) S_realloc((char *) dt,
+					      Nmore,  Ntmax,
+					      sizeof(double));
+		    Ntmax = Nmore;
+		  }
+		  it[Nt] = i;
+		  jt[Nt] = j;
+		  kt[Nt] = k;
+		  dt[Nt] = diam; 
+		  Nt++;
 		}
-		it[Nt] = i;
-		jt[Nt] = j;
-		kt[Nt] = k;
-		dt[Nt] = diam; 
-		Nt++;
 	      }
 	    }
 	  }

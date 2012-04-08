@@ -1,7 +1,7 @@
 #
 #      distanxD.R
 #
-#      $Revision: 1.3 $     $Date: 2010/05/01 01:33:49 $
+#      $Revision: 1.4 $     $Date: 2012/04/06 09:44:54 $
 #
 #      Interpoint distances for multidimensional points
 #
@@ -83,7 +83,7 @@ nndist.ppx <- function(X, ..., k=1) {
   if(kmaxcalc == 1) {
     # calculate nearest neighbour distance only
     nnd<-numeric(n)
-    o <- order(coo[,1])
+    o <- fave.order(coo[,1])
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("nndMD",
@@ -98,7 +98,7 @@ nndist.ppx <- function(X, ..., k=1) {
   } else {
     # case kmaxcalc > 1
     nnd<-numeric(n * kmaxcalc)
-    o <- order(coo[,1])
+    o <- fave.order(coo[,1])
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("knndMD",
@@ -175,7 +175,7 @@ nnwhich.ppx <- function(X, ..., k=1) {
   if(kmaxcalc == 1) {
     # identify nearest neighbour only
     nnw <- integer(n)
-    o <- order(coo[,1])
+    o <- fave.order(coo[,1])
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("nnwMD",
@@ -187,8 +187,7 @@ nnwhich.ppx <- function(X, ..., k=1) {
                huge = as.double(big),
                DUP=DUP,
                PACKAGE="spatstat")
-    # convert from C to R indexing
-    witch <- Cout$nnwhich + 1
+    witch <- Cout$nnwhich
     if(any(witch <= 0))
       stop("Internal error: non-positive index returned from C code")
     if(any(witch > n))
@@ -197,7 +196,7 @@ nnwhich.ppx <- function(X, ..., k=1) {
   } else {
     # case kmaxcalc > 1
     nnw <- matrix(integer(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
-    o <- order(coo[,1])
+    o <- fave.order(coo[,1])
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("knnwMD",
@@ -210,8 +209,7 @@ nnwhich.ppx <- function(X, ..., k=1) {
                huge = as.double(big),
                DUP=DUP,
                PACKAGE="spatstat")
-    # convert from C to R indexing
-    witch <- Cout$nnwhich + 1
+    witch <- Cout$nnwhich
     witch <- matrix(witch, nrow=n, ncol=kmaxcalc, byrow=TRUE)
     if(any(witch <= 0))
       stop("Internal error: non-positive index returned from C code")

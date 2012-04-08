@@ -1,8 +1,12 @@
+#include <R.h>
+#include <R_ext/Utils.h>
+#include "chunkloop.h"
+
 /*
 
   Egeyer.c
 
-  $Revision: 1.2 $     $Date: 2010/07/13 05:45:46 $
+  $Revision: 1.4 $     $Date: 2012/03/28 05:56:05 $
 
   Part of C implementation of 'eval' for Geyer interaction
 
@@ -17,22 +21,19 @@
 
 */
 
-#define OK 0
-#define OVERFLOW 1
-
 double sqrt();
 
 void Egeyer(nnquad, xquad, yquad, quadtodata,
-		 nndata, xdata, ydata, tdata,
-		 rrmax, ssat, result) 
-     /* inputs */
+	    nndata, xdata, ydata, tdata,
+	    rrmax, ssat, result) 
+/* inputs */
      int *nnquad, *nndata, *quadtodata, *tdata;
      double *xquad, *yquad, *xdata, *ydata, *rrmax, *ssat;
      /* output */
      double *result;
 {
-  int nquad, ndata, j, i, ileft, iright, total, dataindex, isdata;
-  double xquadj, yquadj, rmax, sat, r2max, xleft, xright, dx, dy, d2;
+  int nquad, ndata, maxchunk, j, i, ileft, total, dataindex, isdata;
+  double xquadj, yquadj, rmax, sat, r2max, xleft, dx, dy, dx2, d2;
   double tbefore, tafter, satbefore, satafter, delta;
 
   nquad = *nnquad;
@@ -45,52 +46,51 @@ void Egeyer(nnquad, xquad, yquad, quadtodata,
   if(nquad == 0 || ndata == 0) 
     return;
 
-  ileft = iright = 0;
+  ileft = 0;
 
-  for(j = 0; j < nquad; j++) {
-    total = 0;
-    xquadj = xquad[j];
-    yquadj = yquad[j];
-    dataindex = quadtodata[j];
-    isdata = (dataindex >= 0);
-    /* search all points with x in [xleft, xright] */
-    xleft  = xquadj - rmax;
-    xright = xquadj + rmax;
+  OUTERCHUNKLOOP(j, nquad, maxchunk, 65536) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, nquad, maxchunk, 65536) {
+      total = 0;
+      xquadj = xquad[j];
+      yquadj = yquad[j];
+      dataindex = quadtodata[j];
+      isdata = (dataindex >= 0);
 
-    /* 
-       adjust scope of search [ileft, iright]
+      /* 
+	 adjust starting point
+      */
+      xleft  = xquadj - rmax;
+      while((xdata[ileft] < xleft) && (ileft+1 < ndata))
+	++ileft;
 
-    */
-    while((ileft+1 < ndata) && xdata[ileft] < xleft)
-      ++ileft;
-
-    while((iright+1 < ndata) && xdata[iright+1] <= xright)
-      ++iright;
-
-    /* 
-       process from ileft to iright
-    */
-    for(i=ileft; i <= iright; i++) {
-      if(i != dataindex) {
-	/* squared interpoint distance */
+      /* 
+	 process until dx > rmax
+      */
+      for(i=ileft; i < ndata; i++) {
 	dx = xdata[i] - xquadj;
-	dy = ydata[i] - yquadj;
-	d2= dx * dx + dy * dy;
-	if(d2 <= r2max) {
-	  /* effect of adding dummy point j or 
-	     negative effect of removing data point */
-	  tbefore = tdata[i];
-	  tafter  = tbefore + ((isdata) ? -1 : 1);
-	  /* effect on saturated values */
-	  satbefore = (double) ((tbefore < sat)? tbefore : sat);
-	  satafter  = (double) ((tafter  < sat)? tafter  : sat);
-	  /* sum changes over all i */
-	  delta = satafter - satbefore; 
-	  total += ((isdata) ? -delta : delta);
+	dx2 = dx * dx;
+	if(dx2 > r2max)
+	  break;
+	if(i != dataindex) {
+	  dy = ydata[i] - yquadj;
+	  d2 = dx2 + dy * dy;
+	  if(d2 <= r2max) {
+	    /* effect of adding dummy point j or 
+	       negative effect of removing data point */
+	    tbefore = tdata[i];
+	    tafter  = tbefore + ((isdata) ? -1 : 1);
+	    /* effect on saturated values */
+	    satbefore = (double) ((tbefore < sat)? tbefore : sat);
+	    satafter  = (double) ((tafter  < sat)? tafter  : sat);
+	    /* sum changes over all i */
+	    delta = satafter - satbefore; 
+	    total += ((isdata) ? -delta : delta);
+	  }
 	}
       }
+      result[j] = total;
     }
-    result[j] = total;
   }
 }
 

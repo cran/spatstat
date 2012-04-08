@@ -188,7 +188,7 @@ smoothpointsEngine <- function(x, values, sigma, ...,
       yy <- x$y
       vv <- values
     } else {
-      oo <- order(x$x)
+      oo <- fave.order(x$x)
       xx <- x$x[oo]
       yy <- x$y[oo]
       vv <- values[oo]
@@ -329,7 +329,7 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
   stopifnot(is.ppp(X))
   stopifnot(is.marked(X))
   # rearrange in ascending order of x-coordinate (for C code)
-  X <- X[order(X$x)]
+  X <- X[fave.order(X$x)]
   #
   marx <- marks(X)
   # determine a range of bandwidth values

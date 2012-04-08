@@ -30,7 +30,8 @@
 \alias{beachcolours}
 \alias{bermantestEngine}
 \alias{bdrylength.xypolygon} 
-\alias{bdry.mask} 
+\alias{bdry.mask}
+\alias{bind.ratfv}
 \alias{blankcoefnames}
 \alias{breakpts}
 \alias{breakpts.from.r}
@@ -60,6 +61,7 @@
 \alias{complaining}
 \alias{compileK}
 \alias{compilepcf}
+\alias{conform.ratfv}
 \alias{crosspairs}
 \alias{crosspaircounts}
 \alias{cobble.xy}
@@ -117,6 +119,7 @@
 \alias{exactPdt}
 \alias{explain.ifnot}
 \alias{extractAIC.slrm}
+\alias{fave.order}
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
@@ -349,6 +352,8 @@
 \alias{print.tess}
 \alias{prolongseq}
 \alias{quad}
+\alias{RandomFieldsSafe}
+\alias{ratfv}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
 \alias{rgbNA}
@@ -506,6 +511,7 @@ beachcolours(heightrange, sealevel, monochrome, ncolours)
 bermantestEngine(model, covariate, which, alternative, ..., modelname, covname, dataname)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
+bind.ratfv(x, numerator, denominator, labl, desc, preferred, ratio)
 blankcoefnames(x)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
@@ -534,8 +540,9 @@ closepairs(X,rmax,ordered)
 \method{coef}{summary.ppm}(object, \dots)
 \method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
-compileK(D, r, weights, denom, check)
+compileK(D, r, weights, denom, check, ratio)
 compilepcf(D, r, weights, denom, check, endcorrect, \dots)
+conform.ratfv(x)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 cobble.xy(x, y, f, fatal)
@@ -608,6 +615,7 @@ exactdt(X, \dots)
 exactPdt(w)
 explain.ifnot(expr, context)
 \method{extractAIC}{slrm}(fit, scale = 0, k = 2, ...)
+fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
@@ -860,6 +868,8 @@ primefactors(n, prmax)
 \method{print}{tess}(x, \dots, brief=FALSE)
 prolongseq(x, newrange)
 quad(data, dummy, w, param)
+RandomFieldsSafe()
+ratfv(df, numer, denom, \dots, ratio)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 rgbNA(red, green, blue, \dots)

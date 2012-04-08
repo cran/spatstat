@@ -1,4 +1,37 @@
 
+	CHANGES IN spatstat VERSION 1.26-0
+
+OVERVIEW 
+
+   o We thank Jens Oehlschlaegel for contributions.
+
+   o Further substantial acceleration of spatstat functions.
+
+   o Workaround for bug in RandomFields package.
+
+   o Numerous modifications to internal code.
+
+NEW FUNCTIONS
+
+   o RandomFieldsSafe
+   There is a bug in the package 'RandomFields' (version <= 2.0.54)
+   which causes a crash to occur, in the development version of R
+   but not in R 2.15.0. To avoid crashing spatstat, we have written
+   the temporary, undocumented function RandomFieldsSafe() 
+   which returns TRUE if it is safe to use the RandomFields package.
+   Examples in the spatstat help files for kppm, lgcp.estK, lgcp.estpcf
+   and rLGCP are only executed if RandomFieldsSafe() returns TRUE.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o Many functions
+   Many spatstat functions now run faster, and will handle larger datasets,
+   thanks to improvements in the internal code, 
+   following suggestions from Jens Oehlschlaegel.
+
+   o Many functions
+   The response to an 'Interrupt' signal is slightly slower.
+
 	CHANGES IN spatstat VERSION 1.25-5
 
 OVERVIEW 

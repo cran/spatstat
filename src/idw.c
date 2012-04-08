@@ -3,12 +3,13 @@
 
   Inverse-distance weighted smoothing
 
-  $Revision: 1.6 $ $Date: 2011/11/20 03:48:27 $
+  $Revision: 1.7 $ $Date: 2012/03/27 04:30:54 $
 
 */
 
 #include <Rmath.h>
 #include <R_ext/Utils.h>
+#include "chunkloop.h"
 
 #define MAT(X,I,J,NROW) (X)[(J) + (NROW) * (I)]
 
@@ -38,7 +39,7 @@ void idw(x, y, v, n, xstart, xstep, nx, ystart, ystep, ny, power, num, den, rat)
   if(pon2 == 1.0) {
     /* slightly faster code when power=2 */
     for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
-      R_CheckUserInterrupt();
+      if(ix % 256 == 0) R_CheckUserInterrupt();
       for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
 	/* loop over data points, accumulating numerator and denominator */
 	for(i = 0; i < N; i++) {
@@ -54,7 +55,7 @@ void idw(x, y, v, n, xstart, xstep, nx, ystart, ystep, ny, power, num, den, rat)
   } else {
     /* general case */
     for(ix = 0, xg=x0; ix < Nx; ix++, xg+=dx) {
-      R_CheckUserInterrupt();
+      if(ix % 256 == 0) R_CheckUserInterrupt();
       for(iy = 0, yg=y0; iy < Ny; iy++, yg+=dy) {
 	/* loop over data points, accumulating numerator and denominator */
 	for(i = 0; i < N; i++) {
@@ -78,7 +79,7 @@ void idwloo(x, y, v, n, power, num, den, rat)
      double *power;                   /* exponent for IDW */
      double *num, *den, *rat;     /* output vectors - assumed initialised 0 */
 {
-  int N, i, j;
+  int N, i, j, maxchunk;
   double xi, yi, d2, w, pon2;
   
   N  = *n;
@@ -86,55 +87,60 @@ void idwloo(x, y, v, n, power, num, den, rat)
 
   if(pon2 == 1.0) {
     /* slightly faster code when power=2 */
-    for(i = 0; i < N; i++) {
+    OUTERCHUNKLOOP(i, N, maxchunk, 16384) {
       R_CheckUserInterrupt();
-      xi = x[i];
-      yi = y[i];
-      if(i > 0) {
-	for(j = 0; j < i; j++) {
-	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	  w = 1.0/d2;
-	  num[i] += w * v[j];
-	  den[i] += w;
+      INNERCHUNKLOOP(i, N, maxchunk, 16384) {
+	xi = x[i];
+	yi = y[i];
+	if(i > 0) {
+	  for(j = 0; j < i; j++) {
+	    d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	    w = 1.0/d2;
+	    num[i] += w * v[j];
+	    den[i] += w;
+	  }
 	}
-      }
-      if(i < N-1) {
-	for(j = i+1; j < N; j++) {
-	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	  w = 1.0/d2;
-	  num[i] += w * v[j];
-	  den[i] += w;
+	if(i < N-1) {
+	  for(j = i+1; j < N; j++) {
+	    d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	    w = 1.0/d2;
+	    num[i] += w * v[j];
+	    den[i] += w;
+	  }
 	}
+	/* compute ratio */
+	rat[i] = num[i]/den[i];
       }
-      /* compute ratio */
-      rat[i] = num[i]/den[i];
     }
   } else {
     /* general case */
-    for(i = 0; i < N; i++) {
+    OUTERCHUNKLOOP(i, N, maxchunk, 16384) {
       R_CheckUserInterrupt();
-      xi = x[i];
-      yi = y[i];
-      if(i > 0) {
-	for(j = 0; j < i; j++) {
-	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	  w = 1.0/pow(d2, pon2);
-	  num[i] += w * v[j];
-	  den[i] += w;
+      INNERCHUNKLOOP(i, N, maxchunk, 16384) {
+	xi = x[i];
+	yi = y[i];
+	if(i > 0) {
+	  for(j = 0; j < i; j++) {
+	    d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	    w = 1.0/pow(d2, pon2);
+	    num[i] += w * v[j];
+	    den[i] += w;
+	  }
 	}
-      }
-      if(i < N-1) {
-	for(j = i+1; j < N; j++) {
-	  d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
-	  w = 1.0/pow(d2, pon2);
-	  num[i] += w * v[j];
-	  den[i] += w;
+	if(i < N-1) {
+	  for(j = i+1; j < N; j++) {
+	    d2 = (xi - x[j]) * (xi - x[j]) + (yi - y[j]) * (yi - y[j]);
+	    w = 1.0/pow(d2, pon2);
+	    num[i] += w * v[j];
+	    den[i] += w;
+	  }
 	}
+	/* compute ratio */
+	rat[i] = num[i]/den[i];
       }
-      /* compute ratio */
-      rat[i] = num[i]/den[i];
     }
   }
 }
+
 
 

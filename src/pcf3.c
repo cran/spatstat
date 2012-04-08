@@ -4,9 +4,10 @@
 #include <R_ext/Utils.h>
 #include "geom3.h"
 #include "functable.h"
+#include "chunkloop.h"
 
 /*
-	$Revision: 1.6 $	$Date: 2011/11/20 04:16:58 $
+	$Revision: 1.7 $	$Date: 2012/03/27 05:01:41 $
 
 	pair correlation function of 3D point pattern
 	(Epanechnikov kernel) 
@@ -28,7 +29,7 @@ pcf3trans(p, n, b, pcf, delta)
      Ftable *pcf;
      double delta;
 {
-  register int i, j, l, lmin, lmax;
+  register int i, j, l, lmin, lmax, maxchunk;
   register double dx, dy, dz, dist;
   register double  vx, vy, vz, tval;
   Point *ip, *jp;
@@ -51,45 +52,47 @@ pcf3trans(p, n, b, pcf, delta)
   dt = (pcf->t1 - pcf->t0)/(pcf->n - 1);
 
   /* compute numerator */
-  for( i = 0; i < n; i++) {
+  OUTERCHUNKLOOP(i, n, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    ip = p + i;
-    for(j = i + 1; j < n; j++) {
-      /* compute pairwise distance */
-      jp = p + j;
-      dx = jp->x - ip->x;
-      dy = jp->y - ip->y;
-      dz = jp->z - ip->z;
-      dist = sqrt(dx * dx + dy * dy + dz * dz);
-      lmin = ceil( ((dist - delta) - pcf->t0) / dt );
-      lmax = floor( ((dist + delta) - pcf->t0) / dt );
-      if(lmax >= 0 && lmin < pcf->n) {
-	/* kernel centred at 'dist' has nonempty intersection 
-	   with specified range of t values */
-	/* compute intersection */
-	if(lmin < 0)
-	  lmin = 0;
-	if(lmax >= pcf->n)
-	  lmax = pcf->n - 1;
-	/* compute (inverse) edge correction weight */
-	vx = b->x1 - b->x0 - (dx > 0 ? dx : -dx);
-	vy = b->y1 - b->y0 - (dy > 0 ? dy : -dy);
-	vz = b->z1 - b->z0 - (dz > 0 ? dz : -dz);
-	invweight = vx * vy * vz * FOURPI * dist * dist;
-	if(invweight > 0.0) {
-	  for(l = lmin; l < pcf->n; l++) {
-	    tval = pcf->t0 + l * dt;
-	    /* unnormalised Epanechnikov kernel with halfwidth delta */
-	    frac = (dist - tval)/delta;
-	    kernel = (1 - frac * frac);
-	    if(kernel > 0) 	    
-	      (pcf->num)[l] += kernel / invweight;
+    INNERCHUNKLOOP(i, n, maxchunk, 8196) {
+      ip = p + i;
+      for(j = i + 1; j < n; j++) {
+	/* compute pairwise distance */
+	jp = p + j;
+	dx = jp->x - ip->x;
+	dy = jp->y - ip->y;
+	dz = jp->z - ip->z;
+	dist = sqrt(dx * dx + dy * dy + dz * dz);
+	lmin = ceil( ((dist - delta) - pcf->t0) / dt );
+	lmax = floor( ((dist + delta) - pcf->t0) / dt );
+	if(lmax >= 0 && lmin < pcf->n) {
+	  /* kernel centred at 'dist' has nonempty intersection 
+	     with specified range of t values */
+	  /* compute intersection */
+	  if(lmin < 0)
+	    lmin = 0;
+	  if(lmax >= pcf->n)
+	    lmax = pcf->n - 1;
+	  /* compute (inverse) edge correction weight */
+	  vx = b->x1 - b->x0 - (dx > 0 ? dx : -dx);
+	  vy = b->y1 - b->y0 - (dy > 0 ? dy : -dy);
+	  vz = b->z1 - b->z0 - (dz > 0 ? dz : -dz);
+	  invweight = vx * vy * vz * FOURPI * dist * dist;
+	  if(invweight > 0.0) {
+	    for(l = lmin; l < pcf->n; l++) {
+	      tval = pcf->t0 + l * dt;
+	      /* unnormalised Epanechnikov kernel with halfwidth delta */
+	      frac = (dist - tval)/delta;
+	      kernel = (1 - frac * frac);
+	      if(kernel > 0) 	    
+		(pcf->num)[l] += kernel / invweight;
+	    }
 	  }
 	}
       }
     }
   }
-
+  
   /* constant factor in kernel */
   coef = 3.0/(4.0 * delta);
   /* multiplied by 2 because we only visited i < j pairs */
@@ -98,12 +101,11 @@ pcf3trans(p, n, b, pcf, delta)
   /* normalise kernel and compute ratio estimate */
   for(l = 0; l < pcf->n; l++) {
     (pcf->num)[l] *= twocoef;
-    (pcf->f)[l] = ((pcf->denom)[l] > 0.0)?
-      (pcf->num)[l] / (pcf->denom)[l]
-      : 0.0;
+    (pcf->f)[l] = ((pcf->denom)[l] > 0.0) ?
+      (pcf->num)[l] / (pcf->denom)[l] : 0.0;
   }
-
 }
+
 
 void
 pcf3isot(p, n, b, pcf, delta)
@@ -113,7 +115,7 @@ pcf3isot(p, n, b, pcf, delta)
      Ftable *pcf;
      double delta;
 {
-  register int i, j, l, lmin, lmax;
+  register int i, j, l, lmin, lmax, maxchunk;
   register double dx, dy, dz, dist;
   Point *ip, *jp;
   double dt, vol, denom, mass, tval;
@@ -148,39 +150,41 @@ pcf3isot(p, n, b, pcf, delta)
   half.z0  = (b->z0 + b->z1)/2.0;
 
 	/* compute numerator */
-  for( i = 0; i < n; i++) {
+  OUTERCHUNKLOOP(i, n, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    ip = p + i;
-    for(j = i + 1; j < n; j++) {
-      jp = p + j;
-      dx = jp->x - ip->x;
-      dy = jp->y - ip->y;
-      dz = jp->z - ip->z;
-      dist = sqrt(dx * dx + dy * dy + dz * dz);
-      lmin = ceil( ((dist - delta) - pcf->t0) / dt );
-      lmax = floor( ((dist + delta) - pcf->t0) / dt );
-      if(lmax >= 0 && lmin < pcf->n) {
-	/* kernel centred at 'dist' has nonempty intersection 
-	   with specified range of t values */
-	/* compute intersection */
-	if(lmin < 0)
-	  lmin = 0;
-	if(lmax >= pcf->n)
-	  lmax = pcf->n - 1;
-	/* compute edge correction weight */
-	mass = (1.0 / sphesfrac(ip, b, dist)) 
-	  + (1.0 / sphesfrac(jp, b, dist)); 
-	mass *= 
-	  1.0 - 8.0 * sphevol(&vertex, &half, dist) / vol;
-	if(mass > 0.0) {
-	  mass /= FOURPI * dist * dist;
-	  for(l = lmin; l < pcf->n; l++) {
-	    tval = pcf->t0 + l * dt;
-	    /* unnormalised Epanechnikov kernel with halfwidth delta */
-	    frac = (dist - tval)/delta;
-	    kernel = (1 - frac * frac);
-	    if(kernel > 0) 	    
-	      (pcf->num)[l] += kernel * mass;
+    INNERCHUNKLOOP(i, n, maxchunk, 8196) {
+      ip = p + i;
+      for(j = i + 1; j < n; j++) {
+	jp = p + j;
+	dx = jp->x - ip->x;
+	dy = jp->y - ip->y;
+	dz = jp->z - ip->z;
+	dist = sqrt(dx * dx + dy * dy + dz * dz);
+	lmin = ceil( ((dist - delta) - pcf->t0) / dt );
+	lmax = floor( ((dist + delta) - pcf->t0) / dt );
+	if(lmax >= 0 && lmin < pcf->n) {
+	  /* kernel centred at 'dist' has nonempty intersection 
+	     with specified range of t values */
+	  /* compute intersection */
+	  if(lmin < 0)
+	    lmin = 0;
+	  if(lmax >= pcf->n)
+	    lmax = pcf->n - 1;
+	  /* compute edge correction weight */
+	  mass = (1.0 / sphesfrac(ip, b, dist)) 
+	    + (1.0 / sphesfrac(jp, b, dist)); 
+	  mass *= 
+	    1.0 - 8.0 * sphevol(&vertex, &half, dist) / vol;
+	  if(mass > 0.0) {
+	    mass /= FOURPI * dist * dist;
+	    for(l = lmin; l < pcf->n; l++) {
+	      tval = pcf->t0 + l * dt;
+	      /* unnormalised Epanechnikov kernel with halfwidth delta */
+	      frac = (dist - tval)/delta;
+	      kernel = (1 - frac * frac);
+	      if(kernel > 0) 	    
+		(pcf->num)[l] += kernel * mass;
+	    }
 	  }
 	}
       }

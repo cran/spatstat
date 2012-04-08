@@ -79,7 +79,7 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
   mapXY <- factor(df$mapXY, levels=seq(Llines$n))
   dfmap <- split(df, mapXY, drop=TRUE)
   # sort each segment's data by position along segment
-  dfmap <- lapply(dfmap, function(z) { z[order(z$tp), ] })
+  dfmap <- lapply(dfmap, function(z) { z[fave.order(z$tp), ] })
   # plot each segment's data
   Lends <- Llines$ends
   Lperp <- angles.psp(Llines) + pi/2

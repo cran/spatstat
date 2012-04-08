@@ -136,7 +136,7 @@ bw.relrisk <- function(X, method="likelihood",
   stopifnot(is.ppp(X))
   stopifnot(is.multitype(X))
   # rearrange in ascending order of x-coordinate (for C code)
-  X <- X[order(X$x)]
+  X <- X[fave.order(X$x)]
   #
   Y <- split(X)
   ntypes <- length(Y)

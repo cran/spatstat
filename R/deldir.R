@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.10 $ $Date: 2011/07/31 10:08:13 $
+#  $Revision: 1.11 $ $Date: 2012/04/06 09:09:39 $
 #
 
 .spst.triEnv <- new.env()
@@ -53,8 +53,8 @@ delaunay <- function(X) {
     z <- .C("trigrafS",
             nv = as.integer(nv),
             ne = as.integer(ne),
-            ie = as.integer(a - 1),
-            je = as.integer(b - 1),
+            ie = as.integer(a),
+            je = as.integer(b),
             ntmax = as.integer(ntmax),
             nt = as.integer(integer(1)),
             it = as.integer(integer(ne)),
@@ -64,7 +64,7 @@ delaunay <- function(X) {
             PACKAGE="spatstat")
     if(z$status != 0)
       stop("Internal error: overflow in trigrafS")
-    tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
+    tlist <- with(z, cbind(it, jt, kt)[1:nt, ])
   } else if(use.trigraf) {
     nv <- nX
     ne <- length(a)
@@ -72,8 +72,8 @@ delaunay <- function(X) {
     z <- .C("trigraf",
             nv = as.integer(nv),
             ne = as.integer(ne),
-            ie = as.integer(a - 1),
-            je = as.integer(b - 1),
+            ie = as.integer(a),
+            je = as.integer(b),
             ntmax = as.integer(ntmax),
             nt = as.integer(integer(1)),
             it = as.integer(integer(ntmax)),
@@ -83,7 +83,7 @@ delaunay <- function(X) {
             PACKAGE="spatstat")
     if(z$status != 0)
       stop("Internal error: overflow in trigraf")
-    tlist <- with(z, cbind(it, jt, kt)[1:nt, ]) + 1
+    tlist <- with(z, cbind(it, jt, kt)[1:nt, ])
   } else {
     tlist <- matrix(integer(0), 0, 3)
     for(i in seq_len(nX)) {

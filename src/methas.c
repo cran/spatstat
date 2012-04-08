@@ -2,6 +2,7 @@
 #include <Rdefines.h>
 #include <R_ext/Utils.h>
 #include "methas.h"
+#include "chunkloop.h"
 
 void fexitc(const char *msg);
 
@@ -48,7 +49,7 @@ SEXP xmethas(
   double *iparvector;
   int verb, marked, mustupdate, itype;
   int nfree;
-  int irep, ix, j;
+  int irep, ix, j, maxchunk;
   int Ncif; 
   int *plength;
   long Nmore;

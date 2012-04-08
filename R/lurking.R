@@ -184,7 +184,7 @@ lurking <- function(object, covariate, type="eem",
       # Reorder the data/quad points in order of increasing covariate value
       # and then compute the cumulative sum of their residuals/marks
     markscovres <- marks(covres)
-    o <- order(markscovres)
+    o <- fave.order(markscovres)
     covsort <- markscovres[o]
     cummark <- cumsumna(marks(res)[o])
       # we'll plot(covsort, cummark) in the cumulative case

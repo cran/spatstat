@@ -4,7 +4,7 @@
 
   Distances between pairs of points
 
-  $Revision: 1.26 $     $Date: 2011/11/20 03:25:47 $
+  $Revision: 1.27 $     $Date: 2012/03/27 04:22:13 $
 
   pairdist      Pairwise distances
   pair2dist     Pairwise distances squared
@@ -21,6 +21,7 @@
 
 #include <math.h>
 #include <R_ext/Utils.h>
+#include "chunkloop.h"
 
 double sqrt();
 
@@ -31,7 +32,7 @@ void pairdist(n, x, y, d)
      /* output */
      double *d;
 { 
-  int i, j, npoints; 
+  int i, j, npoints, maxchunk; 
   double *dp;
   double xi, yi, dx, dy, dist;
 
@@ -40,10 +41,9 @@ void pairdist(n, x, y, d)
   /* set d[0,0] = 0 */
   *d = 0.0;
 
-  for (i=1; i < npoints; i++) 
-    {
-      R_CheckUserInterrupt();
-
+  OUTERCHUNKLOOP(i, npoints, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, npoints, maxchunk, 16384) {
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -62,6 +62,7 @@ void pairdist(n, x, y, d)
 	  d[ j * npoints + i] = dist;
 	}
     }
+  }
 }
 
 /* squared distances */
@@ -73,7 +74,7 @@ void pair2dist(n, x, y, d)
      /* output */
      double *d;
 { 
-  int i, j, npoints; 
+  int i, j, npoints, maxchunk; 
   double *dp;
   double xi, yi, dx, dy, dist;
 
@@ -82,9 +83,9 @@ void pair2dist(n, x, y, d)
   /* set d[0,0] = 0 */
   *d = 0.0;
 
-  for (i=1; i < npoints; i++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(i, npoints, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, npoints, maxchunk, 16384) {
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -103,6 +104,7 @@ void pair2dist(n, x, y, d)
 	  d[ j * npoints + i] = dist;
 	}
     }
+  }
 }
 
 void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
@@ -112,7 +114,7 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
      /* output */
      double *d;
 { 
-  int i, j, nf, nt; 
+  int i, j, nf, nt, maxchunk; 
   double *dptr;
   double xj, yj, dx, dy;
 
@@ -121,18 +123,20 @@ void crossdist(nfrom, xfrom, yfrom, nto, xto, yto, d)
 
   dptr = d;
 
-  for (j=0; j < nt; j++) {
-
+  OUTERCHUNKLOOP(j, nt, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    xj = xto[j];
-    yj = yto[j];
-    for(i = 0; i < nf; i++, dptr++) {
+    INNERCHUNKLOOP(j, nt, maxchunk, 16384) {
+      xj = xto[j];
+      yj = yto[j];
+      for(i = 0; i < nf; i++, dptr++) {
 	dx = xj - xfrom[i];
 	dy = yj - yfrom[i];
 	*dptr = sqrt( dx * dx + dy * dy ); 
+      }
     }
   }
 }
+
 
 /* squared distances */
 
@@ -143,7 +147,7 @@ void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
      /* output */
      double *d;
 { 
-  int i, j, nf, nt; 
+  int i, j, nf, nt, maxchunk; 
   double *dptr;
   double xj, yj, dx, dy;
 
@@ -152,18 +156,19 @@ void cross2dist(nfrom, xfrom, yfrom, nto, xto, yto, d)
 
   dptr = d;
 
-  for (j=0; j < nt; j++) {
+  OUTERCHUNKLOOP(j, nt, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    xj = xto[j];
-    yj = yto[j];
-    for(i = 0; i < nf; i++, dptr++) {
+    INNERCHUNKLOOP(j, nt, maxchunk, 16384) {
+      xj = xto[j];
+      yj = yto[j];
+      for(i = 0; i < nf; i++, dptr++) {
 	dx = xj - xfrom[i];
 	dy = yj - yfrom[i];
 	*dptr = dx * dx + dy * dy; 
+      }
     }
   }
 }
-
 
 
 /* distances with periodic correction */
@@ -175,7 +180,7 @@ void pairPdist(n, x, y, xwidth, yheight, d)
      /* output */
      double *d;
 { 
-  int i, j, npoints; 
+  int i, j, npoints, maxchunk; 
   double *dp;
   double xi, yi, dx, dy, dx2, dy2, dx2p, dy2p, dist, wide, high;
 
@@ -186,10 +191,9 @@ void pairPdist(n, x, y, xwidth, yheight, d)
   /* set d[0,0] = 0 */
   *d = 0.0;
 
-  for (i=1; i < npoints; i++) 
-    {
-      R_CheckUserInterrupt();
-
+  OUTERCHUNKLOOP(i, npoints, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, npoints, maxchunk, 16384) {
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -218,6 +222,7 @@ void pairPdist(n, x, y, xwidth, yheight, d)
 	  d[ j * npoints + i] = dist;
 	}
     }
+  }
 }
 
 /* same function without the sqrt */
@@ -229,7 +234,7 @@ void pairP2dist(n, x, y, xwidth, yheight, d)
      /* output */
      double *d;
 { 
-  int i, j, npoints; 
+  int i, j, npoints, maxchunk; 
   double *dp;
   double xi, yi, dx, dy, dx2, dy2, dx2p, dy2p, dist, wide, high;
 
@@ -240,9 +245,9 @@ void pairP2dist(n, x, y, xwidth, yheight, d)
   /* set d[0,0] = 0 */
   *d = 0.0;
 
-  for (i=1; i < npoints; i++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(i, npoints, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, npoints, maxchunk, 16384) {
       xi = x[i];
       yi = y[i];
       /* point at the start of column i */
@@ -271,6 +276,7 @@ void pairP2dist(n, x, y, xwidth, yheight, d)
 	  d[ j * npoints + i] = dist;
 	}
     }
+  }
 }
 
 void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
@@ -280,7 +286,7 @@ void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
      /* output */
      double *d;
 { 
-  int i, j, nf, nt; 
+  int i, j, nf, nt, maxchunk; 
   double *dptr;
   double xj, yj, dx, dy, dx2, dy2, dx2p, dy2p, wide, high;
 
@@ -291,24 +297,26 @@ void crossPdist(nfrom, xfrom, yfrom, nto, xto, yto, xwidth, yheight, d)
 
   dptr = d;
 
-  for (j=0; j < nt; j++) {
+  OUTERCHUNKLOOP(j, nt, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    xj = xto[j];
-    yj = yto[j];
-    for(i = 0; i < nf; i++, dptr++) {
+    INNERCHUNKLOOP(j, nt, maxchunk, 16384) {
+      xj = xto[j];
+      yj = yto[j];
+      for(i = 0; i < nf; i++, dptr++) {
 	dx = xj - xfrom[i];
 	dy = yj - yfrom[i];
-	  dx2p = dx * dx;
-	  dy2p = dy * dy;
-	  dx2 = (dx - wide) * (dx - wide);
-	  dy2 = (dy - high) * (dy - high);
-	  if(dx2 < dx2p) dx2p = dx2;
-	  if(dy2 < dy2p) dy2p = dy2;
-	  dx2 = (dx + wide) * (dx + wide);
-	  dy2 = (dy + high) * (dy + high);
-	  if(dx2 < dx2p) dx2p = dx2;
-	  if(dy2 < dy2p) dy2p = dy2;
-	  *dptr = sqrt( dx2p + dy2p ); 
+	dx2p = dx * dx;
+	dy2p = dy * dy;
+	dx2 = (dx - wide) * (dx - wide);
+	dy2 = (dy - high) * (dy - high);
+	if(dx2 < dx2p) dx2p = dx2;
+	if(dy2 < dy2p) dy2p = dy2;
+	dx2 = (dx + wide) * (dx + wide);
+	dy2 = (dy + high) * (dy + high);
+	if(dx2 < dx2p) dx2p = dx2;
+	if(dy2 < dy2p) dy2p = dy2;
+	*dptr = sqrt( dx2p + dy2p ); 
+      }
     }
   }
 }
@@ -330,23 +338,24 @@ void matchxy(na, xa, ya, nb, xb, yb, match)
      /* match[i] = j+1 if xb[j], yb[j] matches xa[i], ya[i] */
      /* match[i] = 0   if no such point matches xa[i], ya[i] */
 { 
-  int i, j, Na, Nb; 
+  int i, j, Na, Nb, maxchunk; 
   double xai, yai;
 
   Na = *na;
   Nb = *nb;
 
-  for (i=0; i < Na; i++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(i, Na, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, Na, maxchunk, 16384) {
       xai = xa[i];
       yai = ya[i];
       match[i] = 0;
-      for (j=0; j < Nb; j++) 
+      for (j=0; j < Nb; j++) {
 	if(xai == xb[j] && yai == yb[j]) {
 	  match[i] = j+1;
 	  break;
 	}
+      }
     }
+  }
 }
-

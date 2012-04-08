@@ -101,7 +101,7 @@ connected <- function(X, background=NA, method="C") {
       else if(nmerge > 1) {
         relevant <- (equiv[,2] > 0)
         equiv <- equiv[relevant, , drop=FALSE]
-        equiv <- equiv[order(equiv[,1]),]
+        equiv <- equiv[fave.order(equiv[,1]),]
       }
       for (i in 1:nrow(equiv)){
         current <- equiv[i, 1]

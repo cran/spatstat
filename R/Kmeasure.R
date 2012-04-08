@@ -156,7 +156,7 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
     rtwist <- ((-nr):(nr-1)) %% (2 * nr) + 1
     ctwist <- (-nc):(nc-1) %% (2*nc) + 1
     if(debug) {
-      if(any(order(xcol.G) != rtwist))
+      if(any(fave.order(xcol.G) != rtwist))
         cat("something round the twist\n")
     }
     Kermit <- Kern[ rtwist, ctwist]
@@ -252,7 +252,7 @@ second.moment.engine <- function(x, sigma=NULL, edge=TRUE,
     ctwist <- (-nc):(nc-1) %% (2*nc) + 1
     mom <- mom[ rtwist, ctwist]
     if(debug) {
-      if(any(order(xcol.G) != rtwist))
+      if(any(fave.order(xcol.G) != rtwist))
         cat("something round the twist\n")
     }
   }

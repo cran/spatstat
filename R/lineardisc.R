@@ -2,7 +2,7 @@
 #
 #   disc.R
 #
-#   $Revision: 1.12 $ $Date: 2011/07/26 08:14:35 $
+#   $Revision: 1.13 $ $Date: 2012/04/06 09:51:58 $
 #
 #   Compute the disc of radius r in a linear network
 #
@@ -164,9 +164,9 @@ countends <- function(L, x=locator(1), r) {
   startfraction <- pro$tp
 
   # convert indices to C 
-  seg0 <- startsegment - 1
-  from0 <- L$from - 1
-  to0   <- L$to - 1
+  seg0 <- startsegment - 1L
+  from0 <- L$from - 1L
+  to0   <- L$to - 1L
   zz <- .C("countends",
            np = as.integer(np),
            f = as.double(startfraction),

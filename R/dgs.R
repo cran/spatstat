@@ -16,8 +16,8 @@ DiggleGatesStibbard <- local({
   dgsTerms <- function(X, Y, idX, idY, rho) {
     stopifnot(is.numeric(rho))
     # sort in increasing order of x coordinate
-    oX <- order(X$x)
-    oY <- order(Y$x)
+    oX <- fave.order(X$x)
+    oY <- fave.order(Y$x)
     Xsort <- X[oX]
     Ysort <- Y[oY]
     idXsort <- idX[oX]

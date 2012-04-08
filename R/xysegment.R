@@ -1,7 +1,7 @@
 #
 #      xysegment.S
 #
-#     $Revision: 1.12 $    $Date: 2011/08/14 05:28:14 $
+#     $Revision: 1.13 $    $Date: 2012/04/06 09:56:24 $
 #
 # Low level utilities for analytic geometry for line segments
 #
@@ -224,6 +224,6 @@ distppllmin <- function(p, l, big=NULL) {
           DUP=DUP,
           PACKAGE="spatstat")
   min.d <- sqrt(z$dist2)
-  min.which <- z$index+1
+  min.which <- z$index+1L
   return(list(min.d=min.d, min.which=min.which))
 }

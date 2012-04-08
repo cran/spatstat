@@ -1,7 +1,7 @@
 #
 #      distan3D.R
 #
-#      $Revision: 1.3 $     $Date: 2010/03/08 08:23:04 $
+#      $Revision: 1.4 $     $Date: 2012/04/06 09:37:15 $
 #
 #      Interpoint distances for 3D points
 #
@@ -99,7 +99,7 @@ nndist.pp3 <- function(X, ..., k=1) {
   if(kmaxcalc == 1) {
     # calculate nearest neighbour distance only
     nnd<-numeric(n)
-    o <- order(z)
+    o <- fave.order(z)
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("nnd3D",
@@ -115,7 +115,7 @@ nndist.pp3 <- function(X, ..., k=1) {
   } else {
     # case kmaxcalc > 1
     nnd<-numeric(n * kmaxcalc)
-    o <- order(z)
+    o <- fave.order(z)
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("knnd3D",
@@ -192,7 +192,7 @@ nnwhich.pp3 <- function(X, ..., k=1) {
   if(kmaxcalc == 1) {
     # identify nearest neighbour only
     nnw <- integer(n)
-    o <- order(z)
+    o <- fave.order(z)
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("nnw3D",
@@ -206,7 +206,7 @@ nnwhich.pp3 <- function(X, ..., k=1) {
                DUP=DUP,
                PACKAGE="spatstat")
     # convert from C to R indexing
-    witch <- Cout$nnwhich + 1
+    witch <- Cout$nnwhich + 1L
     if(any(witch <= 0))
       stop("Internal error: non-positive index returned from C code")
     if(any(witch > n))
@@ -215,7 +215,7 @@ nnwhich.pp3 <- function(X, ..., k=1) {
   } else {
     # case kmaxcalc > 1
     nnw <- matrix(integer(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
-    o <- order(z)
+    o <- fave.order(z)
     big <- sqrt(.Machine$double.xmax)
     DUP <- spatstat.options("dupC")
     Cout <- .C("knnw3D",
@@ -230,7 +230,7 @@ nnwhich.pp3 <- function(X, ..., k=1) {
                DUP=DUP,
                PACKAGE="spatstat")
     # convert from C to R indexing
-    witch <- Cout$nnwhich + 1
+    witch <- Cout$nnwhich + 1L
     witch <- matrix(witch, nrow=n, ncol=kmaxcalc, byrow=TRUE)
     if(any(witch <= 0))
       stop("Internal error: non-positive index returned from C code")

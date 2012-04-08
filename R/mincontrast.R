@@ -340,7 +340,7 @@ unitname.minconfit <- function(x) {
              # For efficiency
              integrand <- function(r,par,...) 2*pi*r*exp(par[1]*exp(-r/par[2]))
            } else {
-             if(!require(RandomFields))
+             if(!(require(RandomFields) && RandomFieldsSafe()))
                stop("The package RandomFields is required")
              integrand <- function(r,par,model,margs)
                2*pi *r *exp(Covariance(r,model=model,
@@ -365,7 +365,7 @@ unitname.minconfit <- function(x) {
              # For efficiency and to avoid need for RandomFields package
              gtheo <- exp(par[1]*exp(-rvals/par[2]))
            } else {
-             if(!require(RandomFields))
+             if(!(require(RandomFields) && RandomFieldsSafe()))
                stop("The package RandomFields is required")
              gtheo <- exp(Covariance(rvals,model=model,
                                      param=c(0.0,par[1],0.0,par[2],margs)))
@@ -377,7 +377,7 @@ unitname.minconfit <- function(x) {
              stop("Covariance function model should be specified by name")
            margs <- c(...)
            if(model != "exponential") {
-             if(!require(RandomFields))
+             if(!(require(RandomFields) && RandomFieldsSafe()))
                stop("The package RandomFields is required")
              # check validity
              ok <- try(Covariance(0, model=model,param=c(0,1,0,1,margs)))

@@ -2,7 +2,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.37 $     $Date: 2012/03/14 02:53:30 $
+#      $Revision: 1.38 $     $Date: 2012/03/18 09:47:52 $
 #
 #
 #      Interpoint distances
@@ -174,7 +174,7 @@ nndist.default <-
          },
          C={
            nnd<-numeric(n)
-           o <- sort.list(y, method="quick", na.last=NA)
+           o <- fave.order(y)
            big <- sqrt(.Machine$double.xmax)
            DUP <- spatstat.options("dupC")
            z<- .C("nndistsort",
@@ -212,7 +212,7 @@ nndist.default <-
            },
            C={
              nnd<-numeric(n * kmaxcalc)
-             o <- sort.list(y, method="quick", na.last=NA)
+             o <- fave.order(y)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
              z<- .C("knndsort",
@@ -322,7 +322,7 @@ nnwhich.default <-
            },
            C={
              nnw <- integer(n)
-             o <- sort.list(y, method="quick", na.last=NA)
+             o <- fave.order(y)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
              z<- .C("nnwhichsort",
@@ -351,7 +351,7 @@ nnwhich.default <-
                D2 <- pairdist.default(x, y, method=method, squared=TRUE)
                # find k'th smallest squared distance
                diag(D2) <- Inf
-               nnw <- t(apply(D2, 1, sort.list, method="quick", na.last=NA))[, 1:kmaxcalc]
+               nnw <- t(apply(D2, 1, fave.order))[, 1:kmaxcalc]
              } else {
                # avoid creating huge matrix
                # handle one row of D at a time
@@ -359,16 +359,16 @@ nnwhich.default <-
                for(i in seq_len(n)) {
                  D2i <- (x - x[i])^2 + (y - y[i])^2
                  D2i[i] <- Inf
-                 nnw[i,] <- sort.list(D2i, method="quick", na.last=NA)[1:kmaxcalc]
+                 nnw[i,] <- fave.order(D2i)[1:kmaxcalc]
                }      
              }
            },
            C={
              nnw <- matrix(integer(n * kmaxcalc), nrow=n, ncol=kmaxcalc)
-             o <- sort.list(y, method="quick", na.last=NA)
+             o <- fave.order(y)
              big <- sqrt(.Machine$double.xmax)
              DUP <- spatstat.options("dupC")
-             z<- .C("knnwhichsort",
+             z<- .C("knnsort",
                     n = as.integer(n),
                     kmax = as.integer(kmaxcalc),
                     x = as.double(x[o]),

@@ -213,13 +213,13 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
     u
     if(interactive()) plot(u)
     \testonly{
-      if(require(RandomFields)) {
+      if(require(RandomFields) && RandomFieldsSafe()) {
       lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3),
                 control=list(maxit=3))
       }
     }
     \donttest{
-      if(require(RandomFields)) {
+      if(require(RandomFields) && RandomFieldsSafe()) {
       lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3))
       }
     }

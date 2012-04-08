@@ -29,8 +29,8 @@ Fiksel <- local({
   crossfikselterms <- function(X, Y, r, kappa) {
     stopifnot(is.numeric(r))
     # sort in increasing order of x coordinate
-    oX <- order(X$x)
-    oY <- order(Y$x)
+    oX <- fave.order(X$x)
+    oY <- fave.order(Y$x)
     Xsort <- X[oX]
     Ysort <- Y[oY]
     nX <- npoints(X)

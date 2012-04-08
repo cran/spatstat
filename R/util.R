@@ -478,7 +478,7 @@ complaining <- function(whinge, fatal=FALSE, value=NULL) {
 check.1.real <- function(x, context="", fatal=TRUE) {
   xname <- deparse(substitute(x))
   if(!is.numeric(x) || length(x) != 1) {
-    whinge <-  paste(xname, "should be a single number")
+    whinge <-  paste(sQuote(xname), "should be a single number")
     if(nzchar(context)) whinge <- paste(context, whinge)
     return(complaining(whinge, fatal=fatal, value=FALSE))
   }
@@ -624,3 +624,9 @@ codetime <- local({
     paste(round(x, 1), u)
   }
 })
+
+# defines the current favorite algorithm for 'order' 
+fave.order <- function(x) { sort.list(x, method="quick", na.last=NA) }
+
+
+  

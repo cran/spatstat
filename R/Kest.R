@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.82 $	$Date: 2012/02/29 05:06:36 $
+#	$Revision: 5.90 $	$Date: 2012/04/07 02:02:33 $
 #
 #
 # -------- functions ----------------------------------------
@@ -159,20 +159,13 @@ function(X, ..., r=NULL, breaks=NULL,
         
         
   # this will be the output data frame
-  K <- data.frame(r=r, theo= pi * r^2)
+  Kdf <- data.frame(r=r, theo = pi * r^2)
   desc <- c("distance argument r", "theoretical Poisson %s")
-  K <- fv(K, "r", quote(K(r)),
-          "theo", , alim, c("r","%s[pois](r)"), desc, fname="K")
-
-  # save numerator and denominator?
-  if(ratio) {
-    denom <- lambda2 * area
-    numK <- eval.fv(denom * K)
-    denK <- eval.fv(denom + K * 0)
-    attributes(numK) <- attributes(denK) <- attributes(K)
-    attr(numK, "desc")[2] <- "numerator for theoretical Poisson %s"
-    attr(denK, "desc")[2] <- "denominator for theoretical Poisson %s"
-  }
+  denom <- lambda2 * area
+  K <- ratfv(Kdf, NULL, denom,
+             "r", quote(K(r)),
+             "theo", NULL, alim, c("r","%s[pois](r)"), desc, fname="K",
+             ratio=ratio)
   
   # identify all close pairs
   rmax <- max(r)
@@ -186,19 +179,12 @@ function(X, ..., r=NULL, breaks=NULL,
     numKun <- cumsum(wh)
     denKun <- lambda2 * area
     # uncorrected estimate of K
-    Kun <- numKun/denKun
-    K <- bind.fv(K, data.frame(un=Kun), "hat(%s)[un](r)",
-                 "uncorrected estimate of %s",
-                 "un")
-    if(ratio) {
-      # save numerator and denominator
-      numK <- bind.fv(numK, data.frame(un=numKun), "hat(%s)[un](r)",
-                 "numerator of uncorrected estimate of %s",
-                 "un")
-      denK <- bind.fv(denK, data.frame(un=denKun), "hat(%s)[un](r)",
-                 "denominator of uncorrected estimate of %s",
-                 "un")
-    }
+    K <- bind.ratfv(K,
+                    data.frame(un=numKun), denKun,
+                    "hat(%s)[un](r)",
+                    "uncorrected estimate of %s",
+                    "un",
+                    ratio=ratio)
   }
   
   if(any(correction == "border" | correction == "bord.modif")) {
@@ -214,37 +200,24 @@ function(X, ..., r=NULL, breaks=NULL,
       denom.area <- eroded.areas(W, r)
       numKbm <- RS$numerator
       denKbm <- lambda2 * denom.area
-      Kbm <- numKbm/denKbm
-      K <- bind.fv(K, data.frame(bord.modif=Kbm), "hat(%s)[bordm](r)",
-                   "modified border-corrected estimate of %s",
-                   "bord.modif")
-      if(ratio) {
-        # save numerator and denominator
-        numK <- bind.fv(numK, data.frame(bord.modif=numKbm),
-                        "hat(%s)[bordm](r)",
-                        "numerator of modified border-corrected estimate of %s",
-                        "bord.modif")
-        denK <- bind.fv(denK, data.frame(bord.modif=denKbm),
-                        "hat(%s)[bordm](r)",
-                        "denominator of modified border-corrected estimate of %s",
-                        "bord.modif")
-      }
+      K <- bind.ratfv(K,
+                      data.frame(bord.modif=numKbm),
+                      data.frame(bord.modif=denKbm),
+                      "hat(%s)[bordm](r)",
+                      "modified border-corrected estimate of %s",
+                      "bord.modif",
+                      ratio=ratio)
     }
     if(any(correction == "border")) {
       numKb <- RS$numerator
       denKb <- lambda * RS$denom.count
-      Kb <- numKb/denKb
-      K <- bind.fv(K, data.frame(border=Kb), "hat(%s)[bord](r)",
-                   "border-corrected estimate of %s",
-                   "border")
-      if(ratio) {
-        numK <- bind.fv(numK, data.frame(border=numKb), "hat(%s)[bord](r)",
-                        "numerator of border-corrected estimate of %s",
-                        "border")
-        denK <- bind.fv(denK, data.frame(border=denKb), "hat(%s)[bord](r)",
-                        "denominator of border-corrected estimate of %s",
-                        "border")
-      }
+      K <- bind.ratfv(K,
+                      data.frame(border=numKb), 
+                      data.frame(border=denKb), 
+                      "hat(%s)[bord](r)",
+                      "border-corrected estimate of %s",
+                      "border",
+                      ratio=ratio)
     }
   }
 
@@ -255,20 +228,15 @@ function(X, ..., r=NULL, breaks=NULL,
     wh <- whist(DIJ, breaks$val, edgewt)
     numKtrans <- cumsum(wh)
     denKtrans <- lambda2 * area
-    Ktrans <- numKtrans/denKtrans
-    h <- diameter(W)/2
-    Ktrans[r >= h] <- NA
-    K <- bind.fv(K, data.frame(trans=Ktrans), "hat(%s)[trans](r)",
-                 "translation-corrected estimate of %s",
-                 "trans")
-    if(ratio) {
-      numK <- bind.fv(numK, data.frame(trans=numKtrans), "hat(%s)[trans](r)",
-                      "numerator of translation-corrected estimate of %s",
-                      "trans")
-      denK <- bind.fv(denK, data.frame(trans=denKtrans), "hat(%s)[trans](r)",
-                      "denominator of translation-corrected estimate of %s",
-                      "trans")
-    }
+    h <- diameter(as.rectangle(W))/2
+    numKtrans[r >= h] <- NA
+    K <- bind.ratfv(K,
+                    data.frame(trans=numKtrans),
+                    denKtrans,
+                    "hat(%s)[trans](r)",
+                    "translation-corrected estimate of %s",
+                    "trans",
+                    ratio=ratio)
   }
   if(any(correction == "isotropic")) {
     # Ripley isotropic correction
@@ -276,34 +244,41 @@ function(X, ..., r=NULL, breaks=NULL,
     wh <- whist(DIJ, breaks$val, edgewt)
     numKiso <- cumsum(wh)
     denKiso <- lambda2 * area
-    Kiso <- numKiso/denKiso
     h <- diameter(W)/2
-    Kiso[r >= h] <- NA
-    K <- bind.fv(K, data.frame(iso=Kiso), "hat(%s)[iso](r)",
+    numKiso[r >= h] <- NA
+    K <- bind.ratfv(K,
+                 data.frame(iso=numKiso),
+                 denKiso,
+                 "hat(%s)[iso](r)",
                  "Ripley isotropic correction estimate of %s",
-                 "iso")
-    if(ratio) {
-      numK <- bind.fv(numK, data.frame(iso=numKiso), "hat(%s)[iso](r)",
-                      "numerator of Ripley isotropic correction estimate of %s",
-                      "iso")
-      denK <- bind.fv(denK, data.frame(iso=denKiso), "hat(%s)[iso](r)",
-                      "denominator of Ripley isotropic correction estimate of %s",
-                      "iso")
-    }
+                 "iso",
+                 ratio=ratio)
   }
   #
   if(var.approx) {
-    # Compute variance approximations 
+    # Compute variance approximations
     A <- area
     P <- perimeter(W)
     n <- npts
     # Ripley asymptotic approximation
     rip <- 2 * ((A/(n-1))^2) * (pi * r^2/A + 0.96 * P * r^3/A^2
                                 + 0.13 * (n/A) * P * r^5/A^2)
-    K <- bind.fv(K, data.frame(rip=rip),
+    if(!ratio) {
+      K <- bind.fv(K, data.frame(rip=rip),
                  "vR(r)", 
                  "Ripley approximation to var(%s) under CSR",
                  "iso")
+    } else {
+      den <- (n-1)^2
+      ripnum <- den * rip
+      ripden <- rep(den, length(rip))
+      K <- bind.ratfv(K,
+                      data.frame(rip=ripnum),
+                      data.frame(rip=ripden),
+                      "vR(r)", 
+                      "Ripley approximation to var(%s) under CSR",
+                      "iso")
+    }
     if(W$type == "rectangle") {
       # Lotwick-Silverman
       a1r <- (0.21 * P * r^3 + 1.3 * r^4)/A^2
@@ -314,9 +289,21 @@ function(X, ..., r=NULL, breaks=NULL,
         (1.0716 * P * r^3 + 2.2375 * r^4)/A^2
       ls <- (A^2) * (2 * br - a1r + (n-2) * a2r)/(n*(n-1))
       # add column 
-      K <- bind.fv(K, data.frame(ls=ls), "vLS(r)",
-                 "Lotwick-Silverman approx to var(%s) under CSR",
-                 "iso")
+      if(!ratio) {
+        K <- bind.fv(K, data.frame(ls=ls), "vLS(r)",
+                     "Lotwick-Silverman approx to var(%s) under CSR",
+                     "iso")
+      } else {
+        den <- n*(n-1)
+        lsnum <- ls * den
+        lsden <- rep(den, length(ls))
+        K <- bind.ratfv(K,
+                        data.frame(ls=lsnum),
+                        data.frame(ls=lsden),
+                        "vLS(r)",
+                        "Lotwick-Silverman approx to var(%s) under CSR",
+                        "iso")
+      }
     }
   }
   # default plot will display all edge corrections
@@ -324,17 +311,11 @@ function(X, ..., r=NULL, breaks=NULL,
   nama <- rev(colnames(K))
   nama <- nama[!(nama %in% c("r", "rip", "ls"))]
   fvnames(K, ".") <- nama
-  #
   unitname(K) <- unitname(X)
-  #
-  if(ratio) {
-    # finish up numerator & denominator
-    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
-    fvnames(numK, ".") <-  fvnames(denK, ".") <- nama
-    unitname(numK) <- unitname(denK) <- unitname(K)
-    # tack on to result
-    K <- rat(K, numK, denK, check=FALSE)
-  }
+  # copy to other components
+  if(ratio)
+    K <- conform.ratfv(K)
+
   return(K)
 }
 
@@ -417,7 +398,7 @@ Kborder.engine <- function(X, rmax, nr=100,
   
   ####### start computing ############
   # sort in ascending order of x coordinate
-  orderX <- order(X$x)
+  orderX <- fave.order(X$x)
   Xsort <- X[orderX]
   x <- Xsort$x
   y <- Xsort$y
@@ -605,7 +586,7 @@ Knone.engine <- function(X, rmax, nr=100,
   
   ####### start computing ############
   # sort in ascending order of x coordinate
-  orderX <- order(X$x)
+  orderX <- fave.order(X$x)
   Xsort <- X[orderX]
   x <- Xsort$x
   y <- Xsort$y
@@ -714,7 +695,7 @@ rmax.rule <- function(fun="K", W, lambda) {
          G = ,
          J = {
            # rule of thumb
-           rdiam  <- diameter(W)/2
+           rdiam  <- diameter(as.rectangle(W))/2
            # Poisson process has F(rlarge) = 1 - 10^(-5)
            rlarge <-
              if(!missing(lambda)) sqrt(log(1e5)/(pi * lambda)) else Inf
