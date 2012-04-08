@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.25-5
-Date: 2012-03-14
+Version: 1.26-0
+Date: 2012-04-08
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -55,6 +55,6 @@ URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
 ByteCompile: true
-Packaged: 2012-03-14 05:31:42 UTC; adrian
+Packaged: 2012-04-08 03:39:10 UTC; adrian
 Repository: CRAN
-Date/Publication: 2012-03-14 07:09:51
+Date/Publication: 2012-04-08 05:33:48

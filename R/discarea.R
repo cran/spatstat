@@ -1,7 +1,7 @@
 #
 #    discarea.R
 #
-#  $Revision: 1.13 $  $Date: 2010/01/16 03:00:00 $
+#  $Revision: 1.14 $  $Date: 2012/04/06 09:36:09 $
 #
 #
 #  Compute area of intersection between a disc and a window,
@@ -17,9 +17,13 @@ discpartarea <- function(X, r, W=as.owin(X)) {
   n <- X$n
   if(is.matrix(r) && nrow(r) != n)
     stop("the number of rows of r should match the number of points in X")
-  if(!is.matrix(r)) 
-    r <- matrix(r, nrow=n, ncol=length(r), byrow=TRUE)
-
+  if(!is.matrix(r)) {
+    nr <- length(r)
+    r <- matrix(r, nrow=n, ncol=nr, byrow=TRUE)
+  } else {
+    nr <- ncol(r)
+  }
+  
   W <- as.polygonal(W)
   
   # convert polygon to line segments
@@ -32,7 +36,7 @@ discpartarea <- function(X, r, W=as.owin(X)) {
           nc=as.integer(n),
           xc=as.double(X$x),
           yc=as.double(X$y),
-          nr=as.integer(ncol(r)),
+          nr=as.integer(nr),
           rmat=as.double(r),
           nseg=as.integer(Y$n),
           x0=as.double(Y$ends$x0),
@@ -43,7 +47,7 @@ discpartarea <- function(X, r, W=as.owin(X)) {
           out=as.double(numeric(length(r))),
           PACKAGE="spatstat"
           )
-  areas <- matrix(z$out, nrow(r), ncol(r))
+  areas <- matrix(z$out, n, nr)
   return(areas)
 }
 

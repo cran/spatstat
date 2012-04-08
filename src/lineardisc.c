@@ -1,12 +1,13 @@
 #include <R.h>
 #include <R_ext/Utils.h>
+#include "chunkloop.h"
 
 /* 
    lineardisc.c
 
    Disc of radius r in linear network
 
-   $Revision: 1.6 $  $Date: 2011/11/20 03:56:06 $
+   $Revision: 1.7 $  $Date: 2012/03/27 04:39:46 $
 
 */
 
@@ -39,7 +40,7 @@ lineardisc(f, seg, /* centre of disc (local coords) */
   double f0, rad;
   int seg0;
 
-  int i, A, B, fromi, toi, allin, bdry, reachable, nends;
+  int i, A, B, fromi, toi, allin, bdry, reachable, nends, maxchunk;
   double length0, dxA, dxB, dxAvi, dxBvi, residue;
   double *resid; 
   int *covered;
@@ -63,57 +64,61 @@ lineardisc(f, seg, /* centre of disc (local coords) */
   /* visit vertices */
   covered = (int *) R_alloc((size_t) Nv, sizeof(int));
   resid = (double *) R_alloc((size_t) Nv, sizeof(double));
-  for(i = 0; i < Nv; i++) {
-    /* distance going through A */
-    dxAvi = dxA + DPATH(A,i);
-    /* distance going through B */
-    dxBvi = dxB + DPATH(B,i);
-    /* shortest path distance to this vertex */
-    dxv[i] = (dxAvi < dxBvi) ? dxAvi : dxBvi;
-    /* distance left to 'spend' from this vertex */
-    residue = rad - dxv[i];
-    resid[i] = (residue > 0)? residue : 0;
-    /* determine whether vertex i is inside the disc of radius r */
-    covered[i] = (residue >= 0);
-  }
 
+  OUTERCHUNKLOOP(i, Nv, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(i, Nv, maxchunk, 16384) {
+      /* distance going through A */
+      dxAvi = dxA + DPATH(A,i);
+      /* distance going through B */
+      dxBvi = dxB + DPATH(B,i);
+      /* shortest path distance to this vertex */
+      dxv[i] = (dxAvi < dxBvi) ? dxAvi : dxBvi;
+      /* distance left to 'spend' from this vertex */
+      residue = rad - dxv[i];
+      resid[i] = (residue > 0)? residue : 0;
+      /* determine whether vertex i is inside the disc of radius r */
+      covered[i] = (residue >= 0);
+    }
+  }
   /* 
      Now visit line segments. 
   */
   nends = 0;
 
-  for(i = 0; i < Ns; i++) {
+  OUTERCHUNKLOOP(i, Ns, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    /* 
-     Determine which line segments are completely inside the disc,
-     and which cross the boundary.
-    */
-    if(i == seg0) {
-      /* initial segment: disc starts from centre (x, y) */
-      allin = covered[A] && covered[B];
-      bdry  = !allin;
-      if(bdry) {
-	if(!covered[A]) nends++;
-	if(!covered[B]) nends++;
+    INNERCHUNKLOOP(i, Ns, maxchunk, 16384) {
+      /* 
+	 Determine which line segments are completely inside the disc,
+	 and which cross the boundary.
+      */
+      if(i == seg0) {
+	/* initial segment: disc starts from centre (x, y) */
+	allin = covered[A] && covered[B];
+	bdry  = !allin;
+	if(bdry) {
+	  if(!covered[A]) nends++;
+	  if(!covered[B]) nends++;
+	}
+      } else {
+	/* another segment: disc extends in from either endpoint */
+	fromi = from[i];
+	toi   = to[i];
+	reachable = (covered[fromi] || covered[toi]);
+	if(reachable) {
+	  allin = (resid[fromi] + resid[toi] >= lengths[i]);
+	  bdry = !allin;
+	} else allin = bdry = FALSE;
+	if(bdry) {
+	  if(covered[fromi]) nends++;
+	  if(covered[toi]) nends++;
+	}
       }
-    } else {
-      /* another segment: disc extends in from either endpoint */
-      fromi = from[i];
-      toi   = to[i];
-      reachable = (covered[fromi] || covered[toi]);
-      if(reachable) {
-	allin = (resid[fromi] + resid[toi] >= lengths[i]);
-	bdry = !allin;
-      } else allin = bdry = FALSE;
-      if(bdry) {
-	if(covered[fromi]) nends++;
-	if(covered[toi]) nends++;
-      }
+      allinside[i] = allin;
+      boundary[i] = bdry;
     }
-    allinside[i] = allin;
-    boundary[i] = bdry;
   }
-
   *nendpoints = nends;
 }
 
@@ -144,7 +149,7 @@ countends(np, f, seg, /* centres of discs (local coords) */
   double f0, rad;
   int seg0;
 
-  int i, m, A, B, fromi, toi, allin, bdry, reachable, nends;
+  int i, m, A, B, fromi, toi, allin, bdry, reachable, nends, maxchunk;
   double length0, dxA, dxB, dxAvi, dxBvi, dxvi, residue;
   double *resid; 
   int *covered;
@@ -157,69 +162,71 @@ countends(np, f, seg, /* centres of discs (local coords) */
   resid = (double *) R_alloc((size_t) Nv, sizeof(double));
 
   /* loop over centre points */
-  for(m = 0; m < Np; m++) {
-    f0 = f[m];
-    seg0 = seg[m];
-    rad = r[m];
+  OUTERCHUNKLOOP(m, Np, maxchunk, 256) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(m, Np, maxchunk, 256) {
+      f0 = f[m];
+      seg0 = seg[m];
+      rad = r[m];
 
-    /* endpoints of segment containing centre */
-    A = from[seg0];
-    B = to[seg0];
+      /* endpoints of segment containing centre */
+      A = from[seg0];
+      B = to[seg0];
 
-    /* distances from centre to A and B */
-    length0 = lengths[seg0];
-    dxA = f0 * length0;
-    dxB = (1-f0) * length0;
+      /* distances from centre to A and B */
+      length0 = lengths[seg0];
+      dxA = f0 * length0;
+      dxB = (1-f0) * length0;
 
-    /* visit vertices */
-    for(i = 0; i < Nv; i++) {
-      /* distance going through A */
-      dxAvi = dxA + DPATH(A,i);
-      /* distance going through B */
-      dxBvi = dxB + DPATH(B,i);
-      /* shortest path distance to this vertex */
-      dxvi = (dxAvi < dxBvi) ? dxAvi : dxBvi;
-      /* distance left to 'spend' from this vertex */
-      residue = rad - dxvi;
-      resid[i] = (residue > 0)? residue : 0;
-      /* determine whether vertex i is inside the disc of radius r */
-      covered[i] = (residue >= 0);
-    }
+      /* visit vertices */
+      for(i = 0; i < Nv; i++) {
+	/* distance going through A */
+	dxAvi = dxA + DPATH(A,i);
+	/* distance going through B */
+	dxBvi = dxB + DPATH(B,i);
+	/* shortest path distance to this vertex */
+	dxvi = (dxAvi < dxBvi) ? dxAvi : dxBvi;
+	/* distance left to 'spend' from this vertex */
+	residue = rad - dxvi;
+	resid[i] = (residue > 0)? residue : 0;
+	/* determine whether vertex i is inside the disc of radius r */
+	covered[i] = (residue >= 0);
+      }
 
-    /* 
-       Now visit line segments. 
-    */
-    nends = 0;
-
-    for(i = 0; i < Ns; i++) {
-      R_CheckUserInterrupt();
       /* 
-	 Determine which line segments are completely inside the disc,
-	 and which cross the boundary.
+	 Now visit line segments. 
       */
-      if(i == seg0) {
-	/* initial segment: disc starts from (x0, y0) */
-	allin = covered[A] && covered[B];
-	bdry  = !allin;
-	if(bdry) {
-	  if(!covered[A]) nends++;
-	  if(!covered[B]) nends++;
-	}
-      } else {
-	/* another segment: disc extends in from either endpoint */
-	fromi = from[i];
-	toi   = to[i];
-	reachable = (covered[fromi] || covered[toi]);
-	if(reachable) {
-	  allin = (resid[fromi] + resid[toi] >= lengths[i]);
-	  bdry = !allin;
-	} else allin = bdry = FALSE;
-	if(bdry) {
-	  if(covered[fromi]) nends++;
-	  if(covered[toi]) nends++;
+      nends = 0;
+
+      for(i = 0; i < Ns; i++) {
+	/* 
+	   Determine which line segments are completely inside the disc,
+	   and which cross the boundary.
+	*/
+	if(i == seg0) {
+	  /* initial segment: disc starts from (x0, y0) */
+	  allin = covered[A] && covered[B];
+	  bdry  = !allin;
+	  if(bdry) {
+	    if(!covered[A]) nends++;
+	    if(!covered[B]) nends++;
+	  }
+	} else {
+	  /* another segment: disc extends in from either endpoint */
+	  fromi = from[i];
+	  toi   = to[i];
+	  reachable = (covered[fromi] || covered[toi]);
+	  if(reachable) {
+	    allin = (resid[fromi] + resid[toi] >= lengths[i]);
+	    bdry = !allin;
+	  } else allin = bdry = FALSE;
+	  if(bdry) {
+	    if(covered[fromi]) nends++;
+	    if(covered[toi]) nends++;
+	  }
 	}
       }
+      nendpoints[m] = nends;
     }
-  nendpoints[m] = nends;
   }
 }

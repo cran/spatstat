@@ -32,7 +32,7 @@ applynbd <- function(X, FUN, N, R, criterion, exclude=FALSE, ...) {
      dist <- pairdist(X$x,X$y)	
 
      # compute row ranks (avoid ties)
-     rankit <- function(x) {  u <- numeric(length(x)); u[order(x)] <- seq_along(x); return(u) }
+     rankit <- function(x) {  u <- numeric(length(x)); u[fave.order(x)] <- seq_along(x); return(u) }
      drank <- t(apply(dist, 1, rankit)) - 1
 
      if(!missing(R)) {

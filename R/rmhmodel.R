@@ -856,7 +856,7 @@ is.stationary.rmhmodel <- function(x) {
               if(length(sat)==1) sat <- rep(sat,length(gamma))
               else explain.ifnot(length(sat) == length(gamma), ctxt)
               mmm <- cbind(gamma,r,sat)
-              mmm <- mmm[order(r),]
+              mmm <- mmm[fave.order(r),]
               ndisc <- length(r)
               par <- list(beta=par$beta,ndisc=ndisc,parms=as.vector(t(mmm)))
               return(par)

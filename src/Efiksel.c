@@ -1,8 +1,12 @@
+#include <R.h>
+#include <R_ext/Utils.h>
+#include "chunkloop.h"
+
 /*
 
   Efiksel.c
 
-  $Revision: 1.1 $     $Date: 2010/07/15 04:30:39 $
+  $Revision: 1.3 $     $Date: 2012/03/28 05:55:29 $
 
   C implementation of 'eval' for Fiksel interaction (non-hardcore part)
 
@@ -10,22 +14,19 @@
 
 */
 
-#define OK 0
-#define OVERFLOW 1
-
 double sqrt(), exp();
 
 void Efiksel(nnsource, xsource, ysource, 
 	     nntarget, xtarget, ytarget, 
 	     rrmax, kkappa, values) 
-     /* inputs */
+/* inputs */
      int *nnsource, *nntarget;
      double *xsource, *ysource, *xtarget, *ytarget, *rrmax, *kkappa;
      /* output */
      double *values;
 {
-  int nsource, ntarget, j, i, ileft, iright;
-  double xsourcej, ysourcej, xleft, xright, dx, dy, d2;
+  int nsource, ntarget, maxchunk, j, i, ileft;
+  double xsourcej, ysourcej, xleft, dx, dy, dx2, d2;
   double rmax, r2max, kappa, total;
 
   nsource = *nnsource;
@@ -38,38 +39,37 @@ void Efiksel(nnsource, xsource, ysource,
   if(nsource == 0 || ntarget == 0) 
     return;
 
-  ileft = iright = 0;
+  ileft = 0;
 
-  for(j = 0; j < nsource; j++) {
-    total = 0;
-    xsourcej = xsource[j];
-    ysourcej = ysource[j];
-    /* search all points with x in [xleft, xright] */
-    xleft  = xsourcej - rmax;
-    xright = xsourcej + rmax;
+  OUTERCHUNKLOOP(j, nsource, maxchunk, 16384) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, nsource, maxchunk, 16384) {
+      total = 0;
+      xsourcej = xsource[j];
+      ysourcej = ysource[j];
+      /* 
+	 adjust starting point
+      */
+      xleft  = xsourcej - rmax;
+      while((xtarget[ileft] < xleft) && (ileft+1 < ntarget))
+	++ileft;
 
-    /* 
-       adjust scope of search [ileft, iright]
-
-    */
-    while((ileft+1 < ntarget) && xtarget[ileft] < xleft)
-      ++ileft;
-
-    while((iright+1 < ntarget) && xtarget[iright+1] <= xright)
-      ++iright;
-
-    /* 
-       process from ileft to iright
-    */
-    for(i=ileft; i <= iright; i++) {
-      /* squared interpoint distance */
-      dx = xtarget[i] - xsourcej;
-      dy = ytarget[i] - ysourcej;
-      d2= dx * dx + dy * dy;
-      if(d2 <= r2max)
-	total += exp(- kappa * sqrt(d2));
+      /* 
+	 process from ileft until dx > rmax
+      */
+      for(i=ileft; i < ntarget; i++) {
+	/* squared interpoint distance */
+	dx = xtarget[i] - xsourcej;
+	dx2 = dx * dx;
+	if(dx2 > r2max)
+	  break;
+	dy = ytarget[i] - ysourcej;
+	d2 = dx2 + dy * dy;
+	if(d2 <= r2max)
+	  total += exp(- kappa * sqrt(d2));
+      }
+      values[j] = total;
     }
-    values[j] = total;
   }
 }
 

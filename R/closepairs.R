@@ -1,7 +1,7 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.17 $   $Date: 2011/11/23 06:09:58 $
+#   $Revision: 1.19 $   $Date: 2012/03/18 08:53:45 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
@@ -22,7 +22,7 @@ closepairs <- function(X, rmax, ordered=TRUE) {
                 dy=numeric(0),
                 d=numeric(0)))
   # sort points by increasing x coordinate
-  oo <- order(X$x)
+  oo <- fave.order(X$x)
   Xsort <- X[oo]
   # First make an OVERESTIMATE of the number of pairs
   nsize <- ceiling(4 * pi * (npts^2) * (rmax^2)/area.owin(X$window))
@@ -138,8 +138,8 @@ closepairs <- function(X, rmax, ordered=TRUE) {
                   dy=numeric(0),
                   d=numeric(0)))
     actual <- seq_len(npairs)
-    i  <- z$iout[actual] + 1
-    j  <- z$jout[actual] + 1
+    i  <- z$iout[actual]  # sic
+    j  <- z$jout[actual]
     xi <- z$xiout[actual]
     yi <- z$yiout[actual]
     xj <- z$xjout[actual]
@@ -186,9 +186,9 @@ crosspairs <- function(X, Y, rmax) {
   verifyclass(Y, "ppp")
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   # order patterns by increasing x coordinate
-  ooX <- order(X$x)
+  ooX <- fave.order(X$x)
   Xsort <- X[ooX]
-  ooY <- order(Y$x)
+  ooY <- fave.order(Y$x)
   Ysort <- Y[ooY]
   if(spatstat.options("crosspairs.newcode")) {
     # ------------------- use new faster code ---------------------
@@ -294,8 +294,8 @@ crosspairs <- function(X, Y, rmax) {
                   dy=numeric(0),
                   d=numeric(0)))
     actual <- seq_len(npairs)
-    i  <- z$iout[actual] + 1
-    j  <- z$jout[actual] + 1
+    i  <- z$iout[actual] # sic
+    j  <- z$jout[actual] 
     xi <- z$xiout[actual]
     yi <- z$yiout[actual]
     xj <- z$xjout[actual]

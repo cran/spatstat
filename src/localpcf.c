@@ -2,6 +2,8 @@
 #include <Rmath.h>
 #include <R_ext/Utils.h>
 
+#include "chunkloop.h"
+
 /*
 
   localpcf.c

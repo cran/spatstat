@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.14 $     $Date: 2012/01/21 02:16:09 $
+  $Revision: 1.15 $     $Date: 2012/03/27 05:37:26 $
 
  */
 
@@ -15,6 +15,8 @@
 #include <Rmath.h>
 #include <R_ext/Utils.h>
 #include <math.h>
+
+#include "chunkloop.h"
 
 #define NIETS -1.0
 
@@ -70,14 +72,14 @@ void xysegint(na, x0a, y0a, dxa, dya,
      double *xx, *yy, *ta, *tb;
      int *ok;
 { 
-  int i, j, ma, mb, ijpos;
+  int i, j, ma, mb, ijpos, maxchunk;
   double determinant, absdet, diffx, diffy, tta, ttb;
 
   ma = *na;
   mb = *nb;
-  for (j=0; j < mb; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
       for(i = 0; i < ma; i++) {
 	ijpos = j * ma + i;
 	ok[ijpos] = 0;
@@ -98,6 +100,7 @@ void xysegint(na, x0a, y0a, dxa, dya,
 	}
       }
     }
+  }
 }
 
 /* 
@@ -116,14 +119,14 @@ void xysi(na, x0a, y0a, dxa, dya,
      /* outputs (matrices) */
      int *ok;
 { 
-  int i, j, ma, mb, ijpos;
+  int i, j, ma, mb, ijpos, maxchunk;
   double determinant, absdet, diffx, diffy, tta, ttb;
 
   ma = *na;
   mb = *nb;
-  for (j=0; j < mb; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
       for(i = 0; i < ma; i++) {
 	ijpos = j * ma + i;
 	ok[ijpos] = 0;
@@ -141,6 +144,7 @@ void xysi(na, x0a, y0a, dxa, dya,
 	}
       }
     }
+  }
 }
 
 /* 
@@ -159,15 +163,15 @@ void xysiANY(na, x0a, y0a, dxa, dya,
      /* output (single logical value) */
      int *ok;
 { 
-  int i, j, ma, mb;
+  int i, j, ma, mb, maxchunk;
   double determinant, absdet, diffx, diffy, tta, ttb;
 
   *ok = 0;
   ma = *na;
   mb = *nb;
-  for (j=0; j < mb; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
       for(i = 0; i < ma; i++) {
 	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
@@ -184,8 +188,8 @@ void xysiANY(na, x0a, y0a, dxa, dya,
 	}
       }
     }
+  }
 }
-
 
 /* 
     Analogue of xysegint
@@ -205,7 +209,7 @@ void xysegVslice(na, xa,
      double *yy;
      int *ok;
 { 
-  int i, j, ma, mb, ijpos;
+  int i, j, ma, mb, ijpos, maxchunk;
   double diffx0, diffx1, width, abswidth, epsilon;
   int notvertical;
 
@@ -213,35 +217,36 @@ void xysegVslice(na, xa,
   mb = *nb;
   epsilon = *eps;
 
-  for (j=0; j < mb; j++) {
+  OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    /* determine whether segment j is nearly vertical */
-    width = dxb[j];
-    abswidth = (width > 0) ? width : -width;
-    notvertical = (abswidth <= epsilon);
+    INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
+      /* determine whether segment j is nearly vertical */
+      width = dxb[j];
+      abswidth = (width > 0) ? width : -width;
+      notvertical = (abswidth <= epsilon);
     
-    for(i = 0; i < ma; i++) {
-      ijpos = j * ma + i;
-      ok[ijpos] = 0;
-      yy[ijpos] = NIETS;
-      /* test whether vertical line i separates endpoints of segment j */
-      diffx0 = xa[i] - x0b[j];
-      diffx1 = diffx0 - width;
-      if(diffx0 * diffx1 <= 0) {
-	/* intersection */
-	ok[ijpos] = 1;
-	/* compute y-coordinate of intersection point */
-	if(notvertical) {
-	  yy[ijpos] = y0b[j] + diffx0 * dyb[j]/width;
-	} else {
-	  /* vertical or nearly-vertical segment: pick midpoint */	  
-	  yy[ijpos] = y0b[j] + dyb[j]/2.0;
+      for(i = 0; i < ma; i++) {
+	ijpos = j * ma + i;
+	ok[ijpos] = 0;
+	yy[ijpos] = NIETS;
+	/* test whether vertical line i separates endpoints of segment j */
+	diffx0 = xa[i] - x0b[j];
+	diffx1 = diffx0 - width;
+	if(diffx0 * diffx1 <= 0) {
+	  /* intersection */
+	  ok[ijpos] = 1;
+	  /* compute y-coordinate of intersection point */
+	  if(notvertical) {
+	    yy[ijpos] = y0b[j] + diffx0 * dyb[j]/width;
+	  } else {
+	    /* vertical or nearly-vertical segment: pick midpoint */	  
+	    yy[ijpos] = y0b[j] + dyb[j]/2.0;
+	  }
 	}
       }
     }
   }
 }
-
 
 /* 
     -------------- ONE PSP OBJECT ----------------------------
@@ -268,15 +273,15 @@ void xysegXint(n, x0, y0, dx, dy,
      double *xx, *yy, *ti, *tj;
      int *ok;
 { 
-  int i, j, m, mm1, ijpos, jipos, iipos;
+  int i, j, m, mm1, ijpos, jipos, iipos, maxchunk;
   double determinant, absdet, diffx, diffy, tti, ttj;
 
   m = *n;
  
   mm1 = m - 1;
-  for (j=0; j < mm1; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mm1, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mm1, maxchunk, 8196) {
       for(i = j+1; i < m; i++) {
 	ijpos = j * m + i;
 	jipos = i * m + j;
@@ -300,6 +305,7 @@ void xysegXint(n, x0, y0, dx, dy,
 	}
       }
     }
+  }
 
   /* assign diagonal */
   for(i = 0; i < m; i++) {
@@ -327,15 +333,15 @@ void xysxi(n, x0, y0, dx, dy,
      /* outputs (matrices) */
      int *ok;
 { 
-  int i, j, m, mm1, ijpos, jipos, iipos;
+  int i, j, m, mm1, ijpos, jipos, iipos, maxchunk;
   double determinant, absdet, diffx, diffy, tti, ttj;
 
   m = *n;
  
   mm1 = m - 1;
-  for (j=0; j < mm1; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mm1, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mm1, maxchunk, 8196) {
       for(i = j+1; i < m; i++) {
 	ijpos = j * m + i;
 	jipos = i * m + j;
@@ -353,6 +359,7 @@ void xysxi(n, x0, y0, dx, dy,
 	}
       }
     }
+  }
 
   /* assign diagonal */
   for(i = 0; i < m; i++) {
@@ -387,18 +394,17 @@ void xypolyselfint(n, x0, y0, dx, dy,
      double *xx, *yy, *ti, *tj;
      int *ok;
 { 
-  int i, j, m, mm1, mm2, mstop, ijpos, jipos;
+  int i, j, k, m, m2, mm1, mm2, mstop, ijpos, jipos, maxchunk;
   double determinant, absdet, diffx, diffy, tti, ttj;
 
   m = *n;
-
-  /* initialise */
-  for(i = 0; i < m; i++) 
-    for(j = 0; j < m; j++) {
-	ijpos = j * m + i;
-	ok[ijpos] = 0;
-	xx[ijpos] = yy[ijpos] = ti[ijpos] = tj[ijpos] = NIETS;
-    }
+  m2 = m * m;
+  /* initialise matrices */
+  
+  for(k = 0; k < m2; k++) {
+    ok[k] = 0;
+    xx[k] = yy[k] = ti[k] = tj[k] = NIETS;
+  }
 
   if(m <= 2) 
     return;
@@ -407,9 +413,9 @@ void xypolyselfint(n, x0, y0, dx, dy,
      Don't compare 0 with m-1  */
   mm1 = m - 1;
   mm2 = m - 2;
-  for (j=0; j < mm2; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mm2, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mm2, maxchunk, 8196) {
       mstop = (j > 0) ? m : mm1;
       for(i = j+2; i < mstop; i++) {
 	ijpos = j * m + i;
@@ -431,6 +437,7 @@ void xypolyselfint(n, x0, y0, dx, dy,
 	}
       }
     }
+  }
 }
 	 
 
@@ -453,7 +460,7 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
      /* output */
      int *answer;
 { 
-  int i, j, m, mm1, mm2, mstop, prop;
+  int i, j, m, mm1, mm2, mstop, prop, maxchunk;
   double determinant, absdet, diffx, diffy, tti, ttj;
   double Xsep, Ysep;
 
@@ -471,9 +478,9 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
      Don't compare 0 with m-1  */
   mm1 = m - 1;
   mm2 = m - 2;
-  for (j=0; j < mm2; j++) 
-    {
-      R_CheckUserInterrupt();
+  OUTERCHUNKLOOP(j, mm2, maxchunk, 8196) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, mm2, maxchunk, 8196) {
       mstop = (j > 0) ? m : mm1;
       for(i = j+2; i < mstop; i++) {
 	diffx = x0[j] - x0[i];
@@ -500,6 +507,7 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
 	}
       }
     }
+  }
 }
 
 	 
@@ -524,7 +532,7 @@ SEXP Cxysegint(SEXP x0a,
   int i, j, k, na, nb;
   double determinant, absdet, diffx, diffy, tta, ttb, xx, yy;
 
-  int nout, noutmax, newmax;
+  int nout, noutmax, newmax, maxchunk;
   double epsilon;
   double *x0A, *y0A, *dxA, *dyA, *x0B, *y0B, *dxB, *dyB;
   double *ta, *tb, *x, *y;
@@ -571,42 +579,44 @@ SEXP Cxysegint(SEXP x0a,
   y = (double *) R_alloc(noutmax, sizeof(double));
 
   /* scan data and collect intersections */
-  for (j=0; j < nb; j++) {
+  OUTERCHUNKLOOP(j, nb, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    for(i = 0; i < na; i++) {
-      determinant = dxB[j] * dyA[i] - dyB[j] * dxA[i];
-      absdet = (determinant > 0) ? determinant : -determinant;
-      if(absdet > epsilon) {
-	diffx = (x0B[j] - x0A[i])/determinant;
-	diffy = (y0B[j] - y0A[i])/determinant;
-	tta = - dyB[j] * diffx + dxB[j] * diffy;
-	ttb = - dyA[i] * diffx + dxA[i] * diffy;
-	if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
-	  /* intersection */
-	  if(nout >= noutmax) {
-	    /* storage overflow - increase space */
-	    newmax = 4 * noutmax;
-	    ia = (int *) S_realloc((char *) ia, 
-				   newmax, noutmax, sizeof(int));
-	    jb = (int *) S_realloc((char *) jb, 
-				   newmax, noutmax, sizeof(int));
-	    ta = (double *) S_realloc((char *) ta, 
-				      newmax, noutmax, sizeof(double));
-	    tb = (double *) S_realloc((char *) tb, 
-				      newmax, noutmax, sizeof(double));
-	    x = (double *) S_realloc((char *) x, 
-				      newmax, noutmax, sizeof(double));
-	    y = (double *) S_realloc((char *) y, 
-				      newmax, noutmax, sizeof(double));
-	    noutmax = newmax;
+    INNERCHUNKLOOP(j, nb, maxchunk, 8196) {
+      for(i = 0; i < na; i++) {
+	determinant = dxB[j] * dyA[i] - dyB[j] * dxA[i];
+	absdet = (determinant > 0) ? determinant : -determinant;
+	if(absdet > epsilon) {
+	  diffx = (x0B[j] - x0A[i])/determinant;
+	  diffy = (y0B[j] - y0A[i])/determinant;
+	  tta = - dyB[j] * diffx + dxB[j] * diffy;
+	  ttb = - dyA[i] * diffx + dxA[i] * diffy;
+	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+	    /* intersection */
+	    if(nout >= noutmax) {
+	      /* storage overflow - increase space */
+	      newmax = 4 * noutmax;
+	      ia = (int *) S_realloc((char *) ia, 
+				     newmax, noutmax, sizeof(int));
+	      jb = (int *) S_realloc((char *) jb, 
+				     newmax, noutmax, sizeof(int));
+	      ta = (double *) S_realloc((char *) ta, 
+					newmax, noutmax, sizeof(double));
+	      tb = (double *) S_realloc((char *) tb, 
+					newmax, noutmax, sizeof(double));
+	      x = (double *) S_realloc((char *) x, 
+				       newmax, noutmax, sizeof(double));
+	      y = (double *) S_realloc((char *) y, 
+				       newmax, noutmax, sizeof(double));
+	      noutmax = newmax;
+	    }
+	    ta[nout] = tta;
+	    tb[nout] = ttb;
+	    ia[nout] = i;
+	    jb[nout] = j;
+	    x[nout]  = x0A[i] + tta * dxA[i];
+	    y[nout]  = y0A[i] + tta * dyA[i];
+	    ++nout;
 	  }
-	  ta[nout] = tta;
-	  tb[nout] = ttb;
-	  ia[nout] = i;
-	  jb[nout] = j;
-	  x[nout]  = x0A[i] + tta * dxA[i];
-	  y[nout]  = y0A[i] + tta * dyA[i];
-	  ++nout;
 	}
       }
     }
@@ -663,7 +673,7 @@ SEXP CxysegXint(SEXP x0,
   int i, j, k, n, n1, ijpos, jipos, iipos;
   double determinant, absdet, diffx, diffy, tti, ttj;
 
-  int nout, noutmax, newmax;
+  int nout, noutmax, newmax, maxchunk;
   double epsilon;
   double *X0, *Y0, *Dx, *Dy;
   double *ti, *tj, *x, *y;
@@ -701,47 +711,49 @@ SEXP CxysegXint(SEXP x0,
 
   /* scan data */
   n1 = n - 1;
-  for (j=0; j < n1; j++) {
+  OUTERCHUNKLOOP(j, n1, maxchunk, 8196) {
     R_CheckUserInterrupt();
-    for(i = j+1; i < n; i++) {
-      determinant = Dx[j] * Dy[i] - Dy[j] * Dx[i];
-      absdet = (determinant > 0) ? determinant : -determinant;
-      if(absdet > epsilon) {
-	diffx = (X0[j] - X0[i])/determinant;
-	diffy = (Y0[j] - Y0[i])/determinant;
-	tti = - Dy[j] * diffx + Dx[j] * diffy;
-	ttj = - Dy[i] * diffx + Dx[i] * diffy;
-	if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
-	  /* intersection */
-	  if(nout >= noutmax) {
-	    /* storage overflow - increase space */
-	    newmax = 4 * noutmax;
-	    ii = (int *) S_realloc((char *) ii, 
-				   newmax, noutmax, sizeof(int));
-	    jj = (int *) S_realloc((char *) jj, 
-				   newmax, noutmax, sizeof(int));
-	    ti = (double *) S_realloc((char *) ti, 
-				      newmax, noutmax, sizeof(double));
-	    tj = (double *) S_realloc((char *) tj, 
-				      newmax, noutmax, sizeof(double));
-	    x = (double *) S_realloc((char *) x, 
-				     newmax, noutmax, sizeof(double));
-	    y = (double *) S_realloc((char *) y, 
-				     newmax, noutmax, sizeof(double));
-	    noutmax = newmax;
+    INNERCHUNKLOOP(j, n1, maxchunk, 8196) {
+      for(i = j+1; i < n; i++) {
+	determinant = Dx[j] * Dy[i] - Dy[j] * Dx[i];
+	absdet = (determinant > 0) ? determinant : -determinant;
+	if(absdet > epsilon) {
+	  diffx = (X0[j] - X0[i])/determinant;
+	  diffy = (Y0[j] - Y0[i])/determinant;
+	  tti = - Dy[j] * diffx + Dx[j] * diffy;
+	  ttj = - Dy[i] * diffx + Dx[i] * diffy;
+	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	    /* intersection */
+	    if(nout >= noutmax) {
+	      /* storage overflow - increase space */
+	      newmax = 4 * noutmax;
+	      ii = (int *) S_realloc((char *) ii, 
+				     newmax, noutmax, sizeof(int));
+	      jj = (int *) S_realloc((char *) jj, 
+				     newmax, noutmax, sizeof(int));
+	      ti = (double *) S_realloc((char *) ti, 
+					newmax, noutmax, sizeof(double));
+	      tj = (double *) S_realloc((char *) tj, 
+					newmax, noutmax, sizeof(double));
+	      x = (double *) S_realloc((char *) x, 
+				       newmax, noutmax, sizeof(double));
+	      y = (double *) S_realloc((char *) y, 
+				       newmax, noutmax, sizeof(double));
+	      noutmax = newmax;
+	    }
+	    ti[nout] = tti;
+	    tj[nout] = ttj;
+	    ii[nout] = i;
+	    jj[nout] = j;
+	    x[nout]  = X0[i] + tti * Dx[i];
+	    y[nout]  = Y0[i] + tti * Dy[i];
+	    ++nout;
 	  }
-	  ti[nout] = tti;
-	  tj[nout] = ttj;
-	  ii[nout] = i;
-	  jj[nout] = j;
-	  x[nout]  = X0[i] + tti * Dx[i];
-	  y[nout]  = Y0[i] + tti * Dy[i];
-	  ++nout;
 	}
       }
     }
   }
-  
+
   /* pack up */
   PROTECT(iout = NEW_INTEGER(nout));
   PROTECT(jout = NEW_INTEGER(nout));

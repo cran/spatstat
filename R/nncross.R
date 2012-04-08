@@ -74,13 +74,13 @@ nncross <- function(X, Y, iX=NULL, iY=NULL,
   }
   # sort only if needed
   if(!is.sorted.X){
-    oX <- sort.list(Xy, method="quick", na.last=NA)
+    oX <- fave.order(Xy)
     Xx <- Xx[oX]
     Xy <- Xy[oX]
     if(exclude) iX <- iX[oX]
   }
   if (!is.sorted.Y){
-    oY <- sort.list(Yy, method="quick", na.last=NA)
+    oY <- fave.order(Yy)
     Yx <- Yx[oY]
     Yy <- Yy[oY]
     if(exclude) iY <- iY[oY]

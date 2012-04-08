@@ -1133,23 +1133,28 @@ local({
 #
 # tests/kppm.R
 #
-# $Revision: 1.5 $ $Date: 2011/12/05 07:29:16 $
+# $Revision: 1.6 $ $Date: 2012/04/08 03:22:20 $
 #
 # Test functionality of kppm that depends on RandomFields
 #
 
 require(spatstat)
 local({
-  fit0 <- kppm(redwood, ~1, "LGCP")
-  simulate(fit0)
 
-  fit <- kppm(redwood, ~x, "LGCP", covmodel=list(model="matern", nu=0.3))
-  simulate(fit)
+  if(require(RandomFields) && RandomFieldsSafe()) {
+
+    fit0 <- kppm(redwood, ~1, "LGCP")
+    simulate(fit0)
+
+    fit <- kppm(redwood, ~x, "LGCP", covmodel=list(model="matern", nu=0.3))
+    simulate(fit)
 
 # ... and Abdollah's code
 
-  fit <- kppm(redwood, ~x, cluster="Cauchy", statistic="K")
-  simulate(fit)
+    fit <- kppm(redwood, ~x, cluster="Cauchy", statistic="K")
+    simulate(fit)
+  }
+  
 })
 
 

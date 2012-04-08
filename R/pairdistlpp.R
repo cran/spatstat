@@ -68,9 +68,9 @@ pairdist.lpp <- function(X, ..., method="C") {
   } else {
     # C code
     # convert indices to start at 0
-    from0 <- from - 1
-    to0   <- to - 1
-    segmap <- pro - 1
+    from0 <- from - 1L
+    to0   <- to - 1L
+    segmap <- pro - 1L
     zz <- .C("linpairdist",
              np = as.integer(n),
              xp = as.double(X$x),

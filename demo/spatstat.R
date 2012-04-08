@@ -423,12 +423,15 @@ plot(rMatClust(10, 0.05, 4))
 plot(rCauchy(30, 0.01, 5))
 plot(rVarGamma(30, 2, 0.02, 5))
 plot(rGaussPoisson(30, 0.05, 0.5))
-param <- c(0, variance=0.2, nugget=0, scale=.1)
-mu <- 4
-plot(rLGCP("exp", mu, param))
-X <- rLGCP("exp", mu, param)
-plot(attr(X, "Lambda"), main="log-Gaussian Cox process")
-plot(X, add=TRUE, pch=16)
+
+if(require(RandomFields) && RandomFieldsSafe()) {
+  param <- c(0, variance=0.2, nugget=0, scale=.1)
+  mu <- 4
+  plot(rLGCP("exp", mu, param))
+  X <- rLGCP("exp", mu, param)
+  plot(attr(X, "Lambda"), main="log-Gaussian Cox process")
+  plot(X, add=TRUE, pch=16)
+}
 
 plot(rStrauss(200, 0.3, 0.07))
 plot(rDiggleGratton(200,0.03,0.08))

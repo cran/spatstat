@@ -1,3 +1,5 @@
+#include <R.h>
+#include <R_ext/Utils.h>
 #include <math.h>
 
 /* 

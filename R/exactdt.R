@@ -2,7 +2,7 @@
 #	exactdt.S
 #	S function exactdt() for exact distance transform
 #
-#	$Revision: 4.13 $	$Date: 2010/12/23 09:27:04 $
+#	$Revision: 4.14 $	$Date: 2012/04/06 09:47:31 $
 #
 
 "exactdt"<-
@@ -66,6 +66,6 @@ function(X, ...)
   bdry <- matrix(res$boundary,
                  ncol=Nnc, nrow=Nnr, byrow = TRUE)[rmin:rmax, cmin:cmax]
   # convert index from C to R indexing
-  inde <- inde + 1
+  inde <- inde + 1L
   return(list(d = dist, i = inde, b = bdry, w=w))
 }

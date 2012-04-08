@@ -156,7 +156,7 @@ densitypointsEngine <- function(x, sigma, ...,
       xx <- x$x
       yy <- x$y
     } else {
-      oo <- order(x$x)
+      oo <- fave.order(x$x)
       xx <- x$x[oo]
       yy <- x$y[oo]
     } 

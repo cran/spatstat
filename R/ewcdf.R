@@ -10,7 +10,7 @@ ewcdf <- function(x, weights=rep(1/length(x), length(x)))
     stop("'x' must have 1 or more non-missing values")
   stopifnot(all(weights >= 0))
   # sort in increasing order of x value
-  ox <- order(x)
+  ox <- fave.order(x)
   x <- x[ox]
   w <- weights[ox]
   # find jump locations and match

@@ -1,8 +1,12 @@
+#include <R.h>
+#include <R_ext/Utils.h>
+#include "chunkloop.h"
+
 /*
 
   Estrauss.c
 
-  $Revision: 1.2 $     $Date: 2010/07/12 13:25:02 $
+  $Revision: 1.3 $     $Date: 2012/03/28 05:56:24 $
 
   C implementation of 'eval' for Strauss interaction
 
@@ -13,22 +17,19 @@
 
 */
 
-#define OK 0
-#define OVERFLOW 1
-
 double sqrt();
 
 void closepaircounts(nnsource, xsource, ysource, 
 		     nntarget, xtarget, ytarget, 
 		     rrmax, counts) 
-     /* inputs */
+/* inputs */
      int *nnsource, *nntarget;
      double *xsource, *ysource, *xtarget, *ytarget, *rrmax;
      /* output */
      int *counts;
 {
-  int nsource, ntarget, j, i, ileft, iright, counted;
-  double xsourcej, ysourcej, rmax, r2max, xleft, xright, dx, dy, d2;
+  int nsource, ntarget, maxchunk, j, i, ileft, counted;
+  double xsourcej, ysourcej, rmax, r2max, xleft, dx, dy, dx2, d2;
 
   nsource = *nnsource;
   ntarget = *nntarget;
@@ -38,40 +39,35 @@ void closepaircounts(nnsource, xsource, ysource,
   if(nsource == 0 || ntarget == 0) 
     return;
 
-  ileft = iright = 0;
+  ileft = 0;
 
-  for(j = 0; j < nsource; j++) {
-    counted = 0;
-    xsourcej = xsource[j];
-    ysourcej = ysource[j];
-    /* search all points with x in [xleft, xright] */
-    xleft  = xsourcej - rmax;
-    xright = xsourcej + rmax;
+  OUTERCHUNKLOOP(j, nsource, maxchunk, 65536) {
+    R_CheckUserInterrupt();
+    INNERCHUNKLOOP(j, nsource, maxchunk, 65536) {
+      counted = 0;
+      xsourcej = xsource[j];
+      ysourcej = ysource[j];
+      /* 
+	 adjust starting point
+      */
+      xleft  = xsourcej - rmax;
+      while((xtarget[ileft] < xleft) && (ileft+1 < ntarget))
+	++ileft;
 
-    /* 
-       adjust scope of search [ileft, iright]
-
-    */
-    while((ileft+1 < ntarget) && xtarget[ileft] < xleft)
-      ++ileft;
-
-    while((iright+1 < ntarget) && xtarget[iright+1] <= xright)
-      ++iright;
-
-    /* 
-       process from ileft to iright
-    */
-    for(i=ileft; i <= iright; i++) {
-      /* squared interpoint distance */
-      dx = xtarget[i] - xsourcej;
-      dy = ytarget[i] - ysourcej;
-      d2= dx * dx + dy * dy;
-      if(d2 <= r2max)
-	++counted;
+      /* 
+	 process from ileft to iright
+      */
+      for(i=ileft; i < ntarget; i++) {
+	dx = xtarget[i] - xsourcej;
+	dx2 = dx * dx;
+	if(dx2 > r2max)
+	  break;
+	dy = ytarget[i] - ysourcej;
+	d2 = dx2 + dy * dy;
+	if(d2 <= r2max)
+	  ++counted;
+      }
+      counts[j] = counted;
     }
-    counts[j] = counted;
   }
 }
-
-
-

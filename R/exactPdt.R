@@ -2,7 +2,7 @@
 #	exactPdt.R
 #	R function exactPdt() for exact distance transform of pixel image
 #
-#	$Revision: 4.12 $	$Date: 2010/12/22 12:07:01 $
+#	$Revision: 4.13 $	$Date: 2012/04/06 09:49:56 $
 #
 
 "exactPdt"<-
@@ -56,7 +56,7 @@
   bdist<- matrix(res$boundary,
                  ncol=Nnc, nrow=Nnr, byrow = TRUE)[rmin:rmax, cmin:cmax]
   # convert from C to R indexing
-  rows <- rows + 1
-  cols <- cols + 1
+  rows <- rows + 1L
+  cols <- cols + 1L
   return(list(d=dist,row=rows,col=cols,b=bdist, w=w))
 }

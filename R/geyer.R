@@ -118,8 +118,8 @@ Geyer <- local({
     stopifnot(is.finite(r))
     stopifnot(is.finite(sat))
     # sort in increasing order of x coordinate
-    oX <- order(X$x)
-    oU <- order(U$x)
+    oX <- fave.order(X$x)
+    oU <- fave.order(U$x)
     Xsort <- X[oX]
     Usort <- U[oU]
     nX <- npoints(X)

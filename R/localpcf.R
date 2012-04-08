@@ -94,7 +94,7 @@ localpcfmatrix <- function(X, i=seq_len(npoints(X)), ...,
     out <- matrix(0, nr, 0)
   } else {
     # sort points in increasing order of x coordinate
-    oX <- order(X$x)
+    oX <- fave.order(X$x)
     Xsort <- X[oX]
     idXsort <- (1:nX)[oX]
     if(weighted) {
@@ -110,7 +110,7 @@ localpcfmatrix <- function(X, i=seq_len(npoints(X)), ...,
       # i is some kind of index
       Y <- X[i]
       idY <- (1:nX)[i]
-      oY <- order(Y$x)
+      oY <- fave.order(Y$x)
       Ysort <- Y[oY]
       idYsort <- idY[oY]
     }

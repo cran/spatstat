@@ -2,7 +2,7 @@
 
   closepair.c
 
-  $Revision: 1.20 $     $Date: 2011/11/23 06:13:53 $
+  $Revision: 1.27 $     $Date: 2012/03/26 07:41:50 $
 
   Assumes point pattern is sorted in increasing order of x coordinate
 
@@ -52,8 +52,8 @@ void paircount(nxy, x, y, rmaxi, count)
      /* output */
      int *count;
 {
-  int n, i, j, jleft, jright, counted;
-  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
+  int n, maxchunk, i, j, counted;
+  double xi, yi, rmax, r2max, dx, dy, a;
 
   n = *nxy;
   rmax = *rmaxi;
@@ -63,54 +63,52 @@ void paircount(nxy, x, y, rmaxi, count)
   if(n == 0) 
     return;
 
-  jleft = jright = 0;
+  /* loop in chunks of 2^16 */
 
-  for(i = 0; i < n; i++) {
+  i = 0; maxchunk = 0; 
+
+  while(i < n) {
+
     R_CheckUserInterrupt();
-    xi = x[i];
-    yi = y[i];
-    /* search all points with x in [xleft, xright] */
-    xleft = xi - rmax;
-    xright = xi + rmax;
 
-    /* 
-       adjust moving boundary - scope of search [jleft, jright]
+    maxchunk += 65536; 
+    if(maxchunk > n) maxchunk = n;
 
-    */
-    while(x[jleft] < xleft && jleft < i)
-      ++jleft;
+    for(; i < maxchunk; i++) {
 
-    while(jright+1 < n && x[jright+1] <= xright)
-      ++jright;
+      xi = x[i];
+      yi = y[i];
 
-    /* 
-       process from jleft to i-1 
-    */
-    if(jleft < i) {
-      for(j=jleft; j < i; j++) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	d2= dx * dx + dy * dy;
-	if(d2 <= r2max)
-	  ++counted;
+      if(i > 0) { 
+	/* scan backwards from i */
+	for(j = i - 1; j >= 0; j--) {
+	  dx = x[j] - xi;
+	  a = r2max - dx * dx;
+	  if(a < 0) 
+	    break;
+	  dy = y[j] - yi;
+	  a -= dy * dy;
+	  if(a >= 0)
+	    ++counted;
+	}
       }
+      if(i + 1 < n) {
+	/* scan forwards from i */
+	for(j = i + 1; j < n; j++) {
+	  dx = x[j] - xi;
+	  a = r2max - dx * dx;
+	  if(a < 0) 
+	    break;
+	  dy = y[j] - yi;
+	  a -= dy * dy;
+	  if(a >= 0)
+	    ++counted;
+	}
+      } 
+      /* end loop over i */
     }
+  } 
 
-    /* 
-       process from i+1 to jright
-    */
-    if(jright > i) {
-      for(j=i+1; j <= jright; j++) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	d2= dx * dx + dy * dy;
-	if(d2<= r2max)
-	  ++counted;
-      }
-    }
-  }
   *count = counted;
 }
 
@@ -119,6 +117,7 @@ void paircount(nxy, x, y, rmaxi, count)
   analogue for two different point patterns
 */
 
+
 void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count) 
      /* inputs */
      int *nn1, *nn2;
@@ -126,8 +125,8 @@ void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count)
      /* output */
      int *count;
 {
-  int n1, n2, i, j, jleft, jright, counted;
-  double x1i, y1i, rmax, r2max, xleft, xright, dx, dy, d2;
+  int n1, n2, maxchunk, i, j, jleft, counted;
+  double x1i, y1i, rmax, r2max, xleft, dx, dy, a;
 
   n1 = *nn1;
   n2 = *nn2;
@@ -139,40 +138,47 @@ void crosscount(nn1, x1, y1, nn2, x2, y2, rmaxi, count)
   if(n1 == 0 || n2 == 0) 
     return;
 
-  jleft = jright = 0;
+  jleft = 0;
 
-  for(i = 0; i < n1; i++) {
+  i = 0; maxchunk = 0; 
+
+  while(i < n1) {
+
     R_CheckUserInterrupt();
-    x1i = x1[i];
-    y1i = y1[i];
-    /* search all points with x in [xleft, xright] */
-    xleft = x1i - rmax;
-    xright = x1i + rmax;
 
-    /* 
-       adjust scope of search [jleft, jright]
+    maxchunk += 65536; 
+    if(maxchunk > n1) maxchunk = n1;
 
-    */
-    while((jleft+1 < n2) && x2[jleft] < xleft)
-      ++jleft;
+    for(; i < maxchunk; i++) {
+  
+      x1i = x1[i];
+      y1i = y1[i];
 
-    while((jright+1 < n2) && x2[jright+1] <= xright)
-      ++jright;
+      /* 
+	 adjust starting index
+      */
+      xleft = x1i - rmax;
+      while((x2[jleft] < xleft) && (jleft+1 < n2))
+	++jleft;
 
-    /* 
-       process from jleft to jright
-    */
-    for(j=jleft; j <= jright; j++) {
-      /* squared interpoint distance */
-      dx = x2[j] - x1i;
-      dy = y2[j] - y1i;
-      d2= dx * dx + dy * dy;
-      if(d2 <= r2max)
-	++counted;
+      /* 
+	 process from j=jleft until dx > rmax
+      */
+      for(j=jleft; j < n2; j++) {
+	dx = x2[j] - x1i;
+	a  = r2max - dx * dx;
+	if(a < 0)
+	  break;
+	dy = y2[j] - y1i;
+	a -= dy * dy;
+	if(a > 0) 
+	  ++counted;
+      }
     }
   }
   *count = counted;
 }
+
 
 
 /*
@@ -217,8 +223,8 @@ void closepairs(nxy, x, y, r, noutmax,
      double *xiout, *yiout, *xjout, *yjout, *dxout, *dyout, *dout;
      int *status;
 {
-  int n, k, kmax, i, j, jleft, jright;
-  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
+  int n, k, kmax, maxchunk, i, j;
+  double xi, yi, rmax, r2max, dx, dy, dx2, d2;
 
   n = *nxy;
   rmax = *r;
@@ -233,82 +239,78 @@ void closepairs(nxy, x, y, r, noutmax,
   if(n == 0) 
     return;
 
-  jleft = jright = 0;
+  /* loop in chunks of 2^16 */
 
-  for(i = 0; i < n; i++) {
+  i = 0; maxchunk = 0; 
+  while(i < n) {
+
     R_CheckUserInterrupt();
-    xi = x[i];
-    yi = y[i];
-    /* search all points with x in [xleft, xright] */
-    xleft = xi - rmax;
-    xright = xi + rmax;
 
-    /* 
-       adjust scope of search [jleft, jright]
+    maxchunk += 65536; 
+    if(maxchunk > n) maxchunk = n;
 
-    */
-    while(x[jleft] < xleft && jleft < i)
-      ++jleft;
+    for(; i < maxchunk; i++) {
 
-    while(jright+1 < n && x[jright+1] <= xright)
-      ++jright;
+      xi = x[i];
+      yi = y[i];
 
-    /* 
-       process from jleft to i-1 
-    */
-    if(jleft < i) {
-      for(j=jleft; j < i; j++) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	d2= dx * dx + dy * dy;
-	if(d2 <= r2max) {
-	  /* add this (i, j) pair to output */
-	  if(k >= kmax) {
-	    *nout = k;
-	    *status = ERR_OVERFLOW;
-	    return;
+      if(i > 0) {
+	/* scan backwards */
+	for(j = i - 1; j >= 0; j++) {
+	  dx = x[j] - xi;
+	  dx2 = dx * dx;
+	  if(dx2 > r2max)
+	    break;
+	  dy = y[j] - yi;
+	  d2 = dx2 + dy * dy;
+	  if(d2 <= r2max) {
+	    /* add this (i, j) pair to output */
+	    if(k >= kmax) {
+	      *nout = k;
+	      *status = ERR_OVERFLOW;
+	      return;
+	    }
+	    jout[k] = j + 1;  /* R indexing */
+	    iout[k] = i + 1;
+	    xiout[k] = xi;
+	    yiout[k] = yi;
+	    xjout[k] = x[j];
+	    yjout[k] = y[j];
+	    dxout[k] = dx;
+	    dyout[k] = dy;
+	    dout[k] = sqrt(d2);
+	    ++k;
 	  }
-	  jout[k] = j;
-	  iout[k] = i;
-	  xiout[k] = xi;
-	  yiout[k] = yi;
-	  xjout[k] = x[j];
-	  yjout[k] = y[j];
-	  dxout[k] = dx;
-	  dyout[k] = dy;
-	  dout[k] = sqrt(d2);
-	  ++k;
 	}
       }
-    }
-
-    /* 
-       process from i+1 to jright
-    */
-    if(jright > i) {
-      for(j=i+1; j <= jright; j++) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	d2= dx * dx + dy * dy;
-	if(d2 <= r2max) {
-	  /* add this (i, j) pair to output */
-	  if(k >= kmax) {
-	    *nout = k;
-	    *status = ERR_OVERFLOW;
-	    return;
+    
+      if(i + 1 < n) {
+	/* scan forwards */
+	for(j = i + 1; j < n; j++) {
+	  dx = x[j] - xi;
+	  dx2 = dx * dx;
+	  if(dx2 > r2max)
+	    break;
+	  dy = y[j] - yi;
+	  d2 = dx2 + dy * dy;
+	  if(d2 <= r2max) {
+	    /* add this (i, j) pair to output */
+	    if(k >= kmax) {
+	      *nout = k;
+	      *status = ERR_OVERFLOW;
+	      return;
+	    }
+	    jout[k] = j + 1;  /* R indexing */
+	    iout[k] = i + 1; 
+	    xiout[k] = xi;
+	    yiout[k] = yi;
+	    xjout[k] = x[j];
+	    yjout[k] = y[j];
+	    dxout[k] = dx;
+	    dyout[k] = dy;
+	    dout[k] = sqrt(d2);
+	    ++k;
 	  }
-	  jout[k] = j;
-	  iout[k] = i;
-	  xiout[k] = xi;
-	  yiout[k] = yi;
-	  xjout[k] = x[j];
-	  yjout[k] = y[j];
-	  dxout[k] = dx;
-	  dyout[k] = dy;
-	  dout[k] = sqrt(d2);
-	  ++k;
 	}
       }
     }
@@ -328,8 +330,8 @@ void crosspairs(nn1, x1, y1, nn2, x2, y2, rmaxi, noutmax,
      double *xiout, *yiout, *xjout, *yjout, *dxout, *dyout, *dout;
      int *status;
 {
-  int n1, n2, k, kmax, i, j, jleft, jright;
-  double x1i, y1i, rmax, r2max, xleft, xright, dx, dy, d2;
+  int n1, n2, maxchunk, k, kmax, i, j, jleft;
+  double x1i, y1i, rmax, r2max, xleft, dx, dy, dx2, d2;
 
   n1 = *nn1;
   n2 = *nn2;
@@ -345,51 +347,59 @@ void crosspairs(nn1, x1, y1, nn2, x2, y2, rmaxi, noutmax,
   if(n1 == 0 || n2 == 0) 
     return;
 
-  jleft = jright = 0;
+  jleft = 0;
 
-  for(i = 0; i < n1; i++) {
+  i = 0; maxchunk = 0; 
+
+  while(i < n1) {
+
     R_CheckUserInterrupt();
-    x1i = x1[i];
-    y1i = y1[i];
-    /* search all points with x in [xleft, xright] */
-    xleft = x1i - rmax;
-    xright = x1i + rmax;
 
-    /* 
-       adjust scope of search [jleft, jright]
+    maxchunk += 65536; 
+    if(maxchunk > n1) maxchunk = n1;
 
-    */
-    while((jleft+1 < n2) && x2[jleft] < xleft)
-      ++jleft;
+    for(; i < maxchunk; i++) {
 
-    while((jright+1 < n2) && x2[jright+1] <= xright)
-      ++jright;
+      x1i = x1[i];
+      y1i = y1[i];
 
-    /* 
-       process from jleft to jright
-    */
-    for(j=jleft; j <= jright; j++) {
-      /* squared interpoint distance */
-      dx = x2[j] - x1i;
-      dy = y2[j] - y1i;
-      d2= dx * dx + dy * dy;
-      if(d2 <= r2max) {
-	/* add this (i, j) pair to output */
-	if(k >= kmax) {
-	  *nout = k;
-	  *status = ERR_OVERFLOW;
-	  return;
+      /* 
+	 adjust starting position jleft
+
+      */
+      xleft = x1i - rmax;
+      while((x2[jleft] < xleft) && (jleft+1 < n2))
+	++jleft;
+
+
+      /* 
+	 process from j=jleft until dx > rmax
+      */
+      for(j=jleft; j < n2; j++) {
+	dx = x2[j] - x1i;
+	dx2 = dx * dx;
+	if(dx2 > r2max)
+	  break;
+	dy = y2[j] - y1i;
+	d2 = dx2 + dy * dy;
+	if(d2 <= r2max) {
+	  /* add this (i, j) pair to output */
+	  if(k >= kmax) {
+	    *nout = k;
+	    *status = ERR_OVERFLOW;
+	    return;
+	  }
+	  jout[k] = j + 1;  /* R indexing */
+	  iout[k] = i + 1;
+	  xiout[k] = x1i;
+	  yiout[k] = y1i;
+	  xjout[k] = x2[j];
+	  yjout[k] = y2[j];
+	  dxout[k] = dx;
+	  dyout[k] = dy;
+	  dout[k] = sqrt(d2);
+	  ++k;
 	}
-	jout[k] = j;
-	iout[k] = i;
-	xiout[k] = x1i;
-	yiout[k] = y1i;
-	xjout[k] = x2[j];
-	yjout[k] = y2[j];
-	dxout[k] = dx;
-	dyout[k] = dy;
-	dout[k] = sqrt(d2);
-	++k;
       }
     }
   }
@@ -402,8 +412,8 @@ SEXP Vclosepairs(SEXP xx,
 		 SEXP nguess) 
 {
   double *x, *y;
-  double xi, yi, rmax, r2max, xleft, xright, dx, dy, d2;
-  int n, k, kmax, kmaxold, i, j, jleft, jright, m;
+  double xi, yi, rmax, r2max, dx, dy, dx2, d2;
+  int n, k, kmax, kmaxold, maxchunk, i, j, m;
   /* local storage */
   int *iout, *jout;
   double *xiout, *yiout, *xjout, *yjout, *dxout, *dyout, *dout;
@@ -445,106 +455,99 @@ SEXP Vclosepairs(SEXP xx,
     dyout =  (double *) R_alloc(kmax, sizeof(double));
     dout  =  (double *) R_alloc(kmax, sizeof(double));
     
-    jleft = jright = 0;
+    /* loop in chunks of 2^16 */
 
-    for(i = 0; i < n; i++) {
+    i = 0; maxchunk = 0; 
+    while(i < n) {
 
       R_CheckUserInterrupt();
+
+      maxchunk += 65536; 
+      if(maxchunk > n) maxchunk = n;
+
+      for(; i < maxchunk; i++) {
+
+	xi = x[i];
+	yi = y[i];
+
+	if(i > 0) {
+	  /* scan backward */
+	  for(j = i - 1; j >= 0; j--) {
+	    dx = x[j] - xi;
+	    dx2 = dx * dx;
+	    if(dx2 > r2max)
+	      break;
+	    dy = y[j] - yi;
+	    d2 = dx2 + dy * dy;
+	    if(d2 <= r2max) {
+	      /* add this (i, j) pair to output */
+	      if(k >= kmax) {
+		/* overflow; allocate more space */
+		kmaxold = kmax;
+		kmax    = 2 * kmax;
+		iout  = intRealloc(iout,  kmaxold, kmax);
+		jout  = intRealloc(jout,  kmaxold, kmax);
+		xiout = dblRealloc(xiout, kmaxold, kmax); 
+		yiout = dblRealloc(yiout, kmaxold, kmax); 
+		xjout = dblRealloc(xjout, kmaxold, kmax); 
+		yjout = dblRealloc(yjout, kmaxold, kmax); 
+		dxout = dblRealloc(dxout, kmaxold, kmax); 
+		dyout = dblRealloc(dyout, kmaxold, kmax); 
+		dout  = dblRealloc(dout,  kmaxold, kmax); 
+	      }
+	      jout[k] = j + 1; /* R indexing */
+	      iout[k] = i + 1;
+	      xiout[k] = xi;
+	      yiout[k] = yi;
+	      xjout[k] = x[j];
+	      yjout[k] = y[j];
+	      dxout[k] = dx;
+	      dyout[k] = dy;
+	      dout[k] = sqrt(d2);
+	      ++k;
+	    }
+	  }
+	}
       
-      xi = x[i];
-      yi = y[i];
-      /* search all points with x in [xleft, xright] */
-      xleft = xi - rmax;
-      xright = xi + rmax;
-
-      /* 
-	 adjust scope of search [jleft, jright]
-
-      */
-      while(x[jleft] < xleft && jleft < i)
-	++jleft;
-
-      while(jright+1 < n && x[jright+1] <= xright)
-	++jright;
-
-      /* 
-	 process from jleft to i-1 
-      */
-      if(jleft < i) {
-
-	for(j=jleft; j < i; j++) {
-	  /* squared interpoint distance */
-	  dx = x[j] - xi;
-	  dy = y[j] - yi;
-	  d2= dx * dx + dy * dy;
-	  if(d2 <= r2max) {
-	    /* add this (i, j) pair to output */
-	    if(k >= kmax) {
-	      /* overflow; allocate more space */
-	      kmaxold = kmax;
-	      kmax    = 2 * kmax;
-	      iout  = intRealloc(iout,  kmaxold, kmax);
-	      jout  = intRealloc(jout,  kmaxold, kmax);
-	      xiout = dblRealloc(xiout, kmaxold, kmax); 
-	      yiout = dblRealloc(yiout, kmaxold, kmax); 
-	      xjout = dblRealloc(xjout, kmaxold, kmax); 
-	      yjout = dblRealloc(yjout, kmaxold, kmax); 
-	      dxout = dblRealloc(dxout, kmaxold, kmax); 
-	      dyout = dblRealloc(dyout, kmaxold, kmax); 
-	      dout  = dblRealloc(dout,  kmaxold, kmax); 
+	if(i + 1 < n) {
+	  /* scan forward */
+	  for(j = i + 1; j < n; j++) {
+	    dx = x[j] - xi;
+	    dx2 = dx * dx;
+	    if(dx2 > r2max)
+	      break;
+	    dy = y[j] - yi;
+	    d2 = dx2 + dy * dy;
+	    if(d2 <= r2max) {
+	      /* add this (i, j) pair to output */
+	      if(k >= kmax) {
+		/* overflow; allocate more space */
+		kmaxold = kmax;
+		kmax    = 2 * kmax;
+		iout  = intRealloc(iout,  kmaxold, kmax);
+		jout  = intRealloc(jout,  kmaxold, kmax);
+		xiout = dblRealloc(xiout, kmaxold, kmax); 
+		yiout = dblRealloc(yiout, kmaxold, kmax); 
+		xjout = dblRealloc(xjout, kmaxold, kmax); 
+		yjout = dblRealloc(yjout, kmaxold, kmax); 
+		dxout = dblRealloc(dxout, kmaxold, kmax); 
+		dyout = dblRealloc(dyout, kmaxold, kmax); 
+		dout  = dblRealloc(dout,  kmaxold, kmax); 
+	      }
+	      jout[k] = j + 1; /* R indexing */
+	      iout[k] = i + 1;
+	      xiout[k] = xi;
+	      yiout[k] = yi;
+	      xjout[k] = x[j];
+	      yjout[k] = y[j];
+	      dxout[k] = dx;
+	      dyout[k] = dy;
+	      dout[k] = sqrt(d2);
+	      ++k;
 	    }
-	    jout[k] = j + 1;
-	    iout[k] = i + 1;
-	    xiout[k] = xi;
-	    yiout[k] = yi;
-	    xjout[k] = x[j];
-	    yjout[k] = y[j];
-	    dxout[k] = dx;
-	    dyout[k] = dy;
-	    dout[k] = sqrt(d2);
-	    ++k;
 	  }
 	}
-      }
-
-      /* 
-	 process from i+1 to jright
-      */
-      if(jright > i) {
-
-	for(j=i+1; j <= jright; j++) {
-	  /* squared interpoint distance */
-	  dx = x[j] - xi;
-	  dy = y[j] - yi;
-	  d2= dx * dx + dy * dy;
-	  if(d2 <= r2max) {
-	    /* add this (i, j) pair to output */
-	    if(k >= kmax) {
-	      /* overflow; allocate more space */
-	      kmaxold = kmax;
-	      kmax    = 2 * kmax;
-	      iout  = intRealloc(iout,  kmaxold, kmax);
-	      jout  = intRealloc(jout,  kmaxold, kmax);
-	      xiout = dblRealloc(xiout, kmaxold, kmax); 
-	      yiout = dblRealloc(yiout, kmaxold, kmax); 
-	      xjout = dblRealloc(xjout, kmaxold, kmax); 
-	      yjout = dblRealloc(yjout, kmaxold, kmax); 
-	      dxout = dblRealloc(dxout, kmaxold, kmax); 
-	      dyout = dblRealloc(dyout, kmaxold, kmax); 
-	      dout  = dblRealloc(dout,  kmaxold, kmax); 
-	    }
-	    jout[k] = j + 1;
-	    iout[k] = i + 1;
-	    xiout[k] = xi;
-	    yiout[k] = yi;
-	    xjout[k] = x[j];
-	    yjout[k] = y[j];
-	    dxout[k] = dx;
-	    dyout[k] = dy;
-	    dout[k] = sqrt(d2);
-	    ++k;
-	  }
-	}
+	/* end of i loop */
       }
     }
   }
@@ -596,6 +599,7 @@ SEXP Vclosepairs(SEXP xx,
 }
 
 
+
 SEXP Vcrosspairs(SEXP xx1,
 		 SEXP yy1,
 		 SEXP xx2,
@@ -606,13 +610,13 @@ SEXP Vcrosspairs(SEXP xx1,
   /* input vectors */
   double *x1, *y1, *x2, *y2;
   /* lengths */
-  int n1, n2, nout, noutmax, noutmaxold;
+  int n1, n2, nout, noutmax, noutmaxold, maxchunk;
   /* distance parameter */
   double rmax, r2max;
   /* indices */
-  int i, j, jleft, jright, m;
+  int i, j, jleft, m;
   /* temporary values */
-  double x1i, y1i, xleft, xright, dx, dy, d2;
+  double x1i, y1i, xleft, dx, dy, dx2, d2;
   /* local storage */
   int *iout, *jout;
   double *xiout, *yiout, *xjout, *yjout, *dxout, *dyout, *dout;
@@ -659,64 +663,68 @@ SEXP Vcrosspairs(SEXP xx1,
     dyout =  (double *) R_alloc(noutmax, sizeof(double));
     dout  =  (double *) R_alloc(noutmax, sizeof(double));
     
-    jleft = jright = 0;
+    jleft = 0;
 
-    for(i = 0; i < n1; i++) {
+    i = 0; maxchunk = 0;
+
+    while(i < n1) {
 
       R_CheckUserInterrupt();
-      
-      x1i = x1[i];
-      y1i = y1[i];
-      /* search all points with x in [xleft, xright] */
-      xleft = x1i - rmax;
-      xright = x1i + rmax;
 
-      /* 
-	 adjust scope of search [jleft, jright]
+      maxchunk += 65536;
+      if(maxchunk > n1) maxchunk = n1;
 
-      */
-      while((jleft+1 < n2) && x2[jleft] < xleft)
-	++jleft;
+      for( ; i < maxchunk; i++) {
+	x1i = x1[i];
+	y1i = y1[i];
 
-      while((jright+1 < n2) && x2[jright+1] <= xright)
-	++jright;
+	/* 
+	   adjust starting point jleft
+	*/
+	xleft = x1i - rmax;
+	while((x2[jleft] < xleft) && (jleft+1 < n2))
+	  ++jleft;
 
-      /* 
-	 process 
-      */
-     for(j=jleft; j <= jright; j++) {
-      /* squared interpoint distance */
-      dx = x2[j] - x1i;
-      dy = y2[j] - y1i;
-      d2= dx * dx + dy * dy;
-      if(d2 <= r2max) {
-	/* add this (i, j) pair to output */
-	if(nout >= noutmax) {
-	  /* overflow; allocate more space */
-	  noutmaxold = noutmax;
-	  noutmax    = 2 * noutmax;
-	  iout  = intRealloc(iout,  noutmaxold, noutmax);
-	  jout  = intRealloc(jout,  noutmaxold, noutmax);
-	  xiout = dblRealloc(xiout, noutmaxold, noutmax); 
-	  yiout = dblRealloc(yiout, noutmaxold, noutmax); 
-	  xjout = dblRealloc(xjout, noutmaxold, noutmax); 
-	  yjout = dblRealloc(yjout, noutmaxold, noutmax); 
-	  dxout = dblRealloc(dxout, noutmaxold, noutmax); 
-	  dyout = dblRealloc(dyout, noutmaxold, noutmax); 
-	  dout  = dblRealloc(dout,  noutmaxold, noutmax); 
+	/* 
+	   process from j = jleft until dx > rmax
+	*/
+	for(j=jleft; j < n2; j++) {
+	  /* squared interpoint distance */
+	  dx = x2[j] - x1i;
+	  dx2 = dx * dx;
+	  if(dx2 > r2max)
+	    break;
+	  dy = y2[j] - y1i;
+	  d2 = dx2 + dy * dy;
+	  if(d2 <= r2max) {
+	    /* add this (i, j) pair to output */
+	    if(nout >= noutmax) {
+	      /* overflow; allocate more space */
+	      noutmaxold = noutmax;
+	      noutmax    = 2 * noutmax;
+	      iout  = intRealloc(iout,  noutmaxold, noutmax);
+	      jout  = intRealloc(jout,  noutmaxold, noutmax);
+	      xiout = dblRealloc(xiout, noutmaxold, noutmax); 
+	      yiout = dblRealloc(yiout, noutmaxold, noutmax); 
+	      xjout = dblRealloc(xjout, noutmaxold, noutmax); 
+	      yjout = dblRealloc(yjout, noutmaxold, noutmax); 
+	      dxout = dblRealloc(dxout, noutmaxold, noutmax); 
+	      dyout = dblRealloc(dyout, noutmaxold, noutmax); 
+	      dout  = dblRealloc(dout,  noutmaxold, noutmax); 
+	    }
+	    iout[nout] = i + 1; /* R indexing */
+	    jout[nout] = j + 1;
+	    xiout[nout] = x1i;
+	    yiout[nout] = y1i;
+	    xjout[nout] = x2[j];
+	    yjout[nout] = y2[j];
+	    dxout[nout] = dx;
+	    dyout[nout] = dy;
+	    dout[nout] = sqrt(d2);
+	    ++nout;
+	  }
 	}
-	iout[nout] = i + 1;
-	jout[nout] = j + 1;
-	xiout[nout] = x1i;
-	yiout[nout] = y1i;
-	xjout[nout] = x2[j];
-	yjout[nout] = y2[j];
-	dxout[nout] = dx;
-	dyout[nout] = dy;
-	dout[nout] = sqrt(d2);
-	++nout;
       }
-     }
     }
   }
 
@@ -765,4 +773,3 @@ SEXP Vcrosspairs(SEXP xx1,
   UNPROTECT(16); /* 6 inputs and 10 outputs (Out and its 9 components) */
   return(Out);
 }
-

@@ -7,7 +7,7 @@
        nndist2segs: minimum distance from point to any line segment
        prdist2segs: pairwise distances from each point to each line segment
 
-       $Revision: 1.7 $ $Date: 2011/11/20 03:39:10 $
+       $Revision: 1.9 $ $Date: 2012/03/27 05:38:51 $
 
        Author: Adrian Baddeley
 
@@ -17,6 +17,8 @@
 #include <Rmath.h>
 #include <R_ext/Utils.h>
 #include <math.h>
+
+#include "chunkloop.h"
 
 void
 nndist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2, index)
@@ -33,7 +35,7 @@ nndist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2, index)
 					*/
      int	*index;		        /* which line segment is closest */
 {
-  int	i,j, np, nseg;
+  int	i,j, np, nseg, maxchunk;
   double dx,dy,leng,co,si;  /* parameters of segment */
   double xdif0,ydif0,xdif1,ydif1,xpr,ypr; /* vectors */
   double dsq0,dsq1,dsq,dsqperp; /* squared distances */
@@ -43,54 +45,56 @@ nndist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2, index)
   nseg = *nsegments;
   eps  = *epsilon;
 
-  for(j = 0; j < nseg; j++) {
+  OUTERCHUNKLOOP(j, nseg, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    dx = x1[j] - x0[j];
-    dy = y1[j] - y0[j];
-    leng = hypot(dx, dy);
-    if(leng > eps) {
-      /* normal case */
-      co = dx/leng;
-      si = dy/leng;
-      for(i = 0; i < np; i++) {
-	/* vectors from pixel to segment endpoints */
-	xdif0 =  xp[i] - x0[j];
-	ydif0 =  yp[i] - y0[j];
-	xdif1 =  xp[i] - x1[j];
-	ydif1 =  yp[i] - y1[j];
-	/* squared distances to segment endpoints */
-	dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
-	dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
-	dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
-	/* rotate pixel around 1st endpoint of segment
-	   so that line segment lies in x axis */
-	xpr = xdif0 * co + ydif0 * si;
-	ypr = -xdif0 * si + ydif0 * co;
-	/* perpendicular distance applies only in perpendicular region */
-	if(xpr >= 0.0 && xpr <= leng) {
-	  dsqperp = ypr * ypr;
-	  if(dsqperp < dsq) dsq = dsqperp;
+    INNERCHUNKLOOP(j, nseg, maxchunk, 16384) {
+      dx = x1[j] - x0[j];
+      dy = y1[j] - y0[j];
+      leng = hypot(dx, dy);
+      if(leng > eps) {
+	/* normal case */
+	co = dx/leng;
+	si = dy/leng;
+	for(i = 0; i < np; i++) {
+	  /* vectors from pixel to segment endpoints */
+	  xdif0 =  xp[i] - x0[j];
+	  ydif0 =  yp[i] - y0[j];
+	  xdif1 =  xp[i] - x1[j];
+	  ydif1 =  yp[i] - y1[j];
+	  /* squared distances to segment endpoints */
+	  dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
+	  dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
+	  dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
+	  /* rotate pixel around 1st endpoint of segment
+	     so that line segment lies in x axis */
+	  xpr = xdif0 * co + ydif0 * si;
+	  ypr = -xdif0 * si + ydif0 * co;
+	  /* perpendicular distance applies only in perpendicular region */
+	  if(xpr >= 0.0 && xpr <= leng) {
+	    dsqperp = ypr * ypr;
+	    if(dsqperp < dsq) dsq = dsqperp;
+	  }
+	  if(dist2[i] > dsq) {
+	    dist2[i] = dsq;
+	    index[i] = j;
+	  }
 	}
-	if(dist2[i] > dsq) {
-	  dist2[i] = dsq;
-	  index[i] = j;
-	}
-      }
-    } else {
-      /* short segment - use endpoints only */
-      for(i = 0; i < np; i++) {
-	/* vectors from pixel to segment endpoints */
-	xdif0 =  xp[i] - x0[j];
-	ydif0 =  yp[i] - y0[j];
-	xdif1 =  xp[i] - x1[j];
-	ydif1 =  yp[i] - y1[j];
-	/* squared distances to segment endpoints */
-	dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
-	dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
-	dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
-	if(dist2[i] > dsq) {
-	  dist2[i] = dsq;
-	  index[i] = j;
+      } else {
+	/* short segment - use endpoints only */
+	for(i = 0; i < np; i++) {
+	  /* vectors from pixel to segment endpoints */
+	  xdif0 =  xp[i] - x0[j];
+	  ydif0 =  yp[i] - y0[j];
+	  xdif1 =  xp[i] - x1[j];
+	  ydif1 =  yp[i] - y1[j];
+	  /* squared distances to segment endpoints */
+	  dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
+	  dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
+	  dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
+	  if(dist2[i] > dsq) {
+	    dist2[i] = dsq;
+	    index[i] = j;
+	  }
 	}
       }
     }
@@ -109,7 +113,7 @@ prdist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2)
      double	*dist2;		        /* squared distances from each pixel 
                                         to each line segment */
 {
-  int	i,j, np, nseg;
+  int	i,j, np, nseg, maxchunk;
   double dx,dy,leng,co,si;  /* parameters of segment */
   double xdif0,ydif0,xdif1,ydif1,xpr,ypr; /* vectors */
   double dsq0,dsq1,dsq,dsqperp; /* squared distances */
@@ -119,51 +123,53 @@ prdist2segs(xp, yp, npoints, x0, y0, x1, y1, nsegments, epsilon, dist2)
   nseg = *nsegments;
   eps  = *epsilon;
 
-  for(j = 0; j < nseg; j++) {
+  OUTERCHUNKLOOP(j, nseg, maxchunk, 16384) {
     R_CheckUserInterrupt();
-    dx = x1[j] - x0[j];
-    dy = y1[j] - y0[j];
-    leng = hypot(dx, dy);
-    if(leng > eps) {
-      /* normal case */
-      co = dx/leng;
-      si = dy/leng;
-      for(i = 0; i < np; i++) {
-	/* vectors from pixel to segment endpoints */
-	xdif0 =  xp[i] - x0[j];
-	ydif0 =  yp[i] - y0[j];
-	xdif1 =  xp[i] - x1[j];
-	ydif1 =  yp[i] - y1[j];
-	/* squared distances to segment endpoints */
-	dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
-	dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
-	dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
-	/* rotate pixel around 1st endpoint of segment
-	   so that line segment lies in x axis */
-	xpr = xdif0 * co + ydif0 * si;
-	ypr = -xdif0 * si + ydif0 * co;
-	/* perpendicular distance applies only in perpendicular region */
-	if(xpr >= 0.0 && xpr <= leng) {
-	  dsqperp = ypr * ypr;
-	  if(dsqperp < dsq) dsq = dsqperp;
+    INNERCHUNKLOOP(j, nseg, maxchunk, 16384) {
+      dx = x1[j] - x0[j];
+      dy = y1[j] - y0[j];
+      leng = hypot(dx, dy);
+      if(leng > eps) {
+	/* normal case */
+	co = dx/leng;
+	si = dy/leng;
+	for(i = 0; i < np; i++) {
+	  /* vectors from pixel to segment endpoints */
+	  xdif0 =  xp[i] - x0[j];
+	  ydif0 =  yp[i] - y0[j];
+	  xdif1 =  xp[i] - x1[j];
+	  ydif1 =  yp[i] - y1[j];
+	  /* squared distances to segment endpoints */
+	  dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
+	  dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
+	  dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
+	  /* rotate pixel around 1st endpoint of segment
+	     so that line segment lies in x axis */
+	  xpr = xdif0 * co + ydif0 * si;
+	  ypr = -xdif0 * si + ydif0 * co;
+	  /* perpendicular distance applies only in perpendicular region */
+	  if(xpr >= 0.0 && xpr <= leng) {
+	    dsqperp = ypr * ypr;
+	    if(dsqperp < dsq) dsq = dsqperp;
+	  }
+	  dist2[i + j * np] = dsq;
 	}
-	dist2[i + j * np] = dsq;
-      }
-    } else {
-      /* short segment */
-      for(i = 0; i < np; i++) {
-	/* vectors from pixel to segment endpoints */
-	xdif0 =  xp[i] - x0[j];
-	ydif0 =  yp[i] - y0[j];
-	xdif1 =  xp[i] - x1[j];
-	ydif1 =  yp[i] - y1[j];
-	/* squared distances to segment endpoints */
-	dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
-	dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
-	dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
-	dist2[i + j * np] = dsq;
+      } else {
+	/* short segment */
+	for(i = 0; i < np; i++) {
+	  /* vectors from pixel to segment endpoints */
+	  xdif0 =  xp[i] - x0[j];
+	  ydif0 =  yp[i] - y0[j];
+	  xdif1 =  xp[i] - x1[j];
+	  ydif1 =  yp[i] - y1[j];
+	  /* squared distances to segment endpoints */
+	  dsq0 = xdif0 * xdif0 + ydif0 * ydif0;
+	  dsq1 = xdif1 * xdif1 + ydif1 * ydif1;
+	  dsq = (dsq0 < dsq1) ? dsq0 : dsq1;
+	  dist2[i + j * np] = dsq;
+	}
       }
     }
-  }
-}	
+  }	
+}
 

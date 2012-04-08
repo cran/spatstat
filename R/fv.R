@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.79 $   $Date: 2011/10/18 06:08:22 $
+#    $Revision: 1.87 $   $Date: 2012/04/07 04:11:40 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -889,3 +889,92 @@ distributecbind <- function(x) {
   return(out)
 }
 
+# Form a new 'fv' object as a ratio
+
+ratfv <- function(df, numer, denom, ..., ratio=TRUE) {
+  # Determine y
+  if(!missing(df)) {
+    y <- fv(df, ...)
+    num <- NULL
+  } else {
+    # Compute numer/denom
+    # Numerator must be a data frame
+    num <- fv(numer, ...)    
+    # Denominator may be a data frame or a constant
+    force(denom)
+    y <- eval.fv(num/denom)
+    # relabel
+    y <- fv(as.data.frame(y), ...)
+  }
+  if(!ratio)
+    return(y)
+  if(is.null(num)) {
+    # Compute num = y * denom
+    # Denominator may be a data frame or a constant
+    force(denom)
+    num <- eval.fv(y * denom)
+    # ditch labels
+    num <- fv(as.data.frame(num), ...)
+  }
+  # make denominator an fv object
+  if(is.data.frame(denom)) {
+    den <- fv(denom, ...)
+  } else {
+    # scalar
+    check.1.real(denom, "Unless it is a data frame,")
+    # replicate it in all the data columns
+    dendf <- as.data.frame(num)
+    valuecols <- (names(num) != fvnames(num, ".x"))
+    dendf[, valuecols] <- denom
+    den <- fv(dendf, ...)
+  } 
+  # tweak the descriptions
+  ok <- (names(y) != fvnames(y, ".x"))
+  attr(num, "desc")[ok] <- paste("numerator of",   attr(num, "desc")[ok])
+  attr(den, "desc")[ok] <- paste("denominator of", attr(den, "desc")[ok])
+  # form ratio object
+  y <- rat(y, num, den, check=FALSE)
+  return(y)
+}
+
+# Tack new column(s) onto a ratio fv object
+
+bind.ratfv <- function(x, numerator, denominator, 
+                       labl = NULL, desc = NULL, preferred = NULL,
+                       ratio=TRUE) {
+  y <- bind.fv(x, numerator/denominator,
+               labl=labl, desc=desc, preferred=preferred)
+  if(!ratio)
+    return(y)
+  stopifnot(inherits(x, "rat"))
+  num <- attr(x, "numerator")
+  den <- attr(x, "denominator")
+  # convert scalar denominator to data frame
+  if(!is.data.frame(denominator)) {
+    check.1.real(denominator, "Unless it is a data frame,")
+    dvalue <- denominator
+    denominator <- numerator
+    denominator[] <- dvalue
+  }
+  num <- bind.fv(num, numerator,
+                 labl=labl, desc=paste("numerator of", desc),
+                 preferred=preferred)
+  den <- bind.fv(den, denominator,
+                 labl=labl, desc=paste("denominator of", desc),
+                 preferred=preferred)
+  y <- rat(y, num, den, check=FALSE)
+  return(y)
+}
+
+conform.ratfv <- function(x) {
+  # harmonise display properties in components of a ratio
+  stopifnot(inherits(x, "rat"), is.fv(x))
+  num <- attr(x, "numerator")
+  den <- attr(x, "denominator")
+  attr(num, "fmla") <- attr(den, "fmla") <- attr(x, "fmla")
+  fvnames(num, ".") <- fvnames(den, ".") <- fvnames(x, ".")
+  unitname(num)     <- unitname(den)     <- unitname(x)
+  attr(x, "numerator") <- num
+  attr(x, "denominator") <- den
+  return(x)
+}

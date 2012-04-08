@@ -4,7 +4,7 @@
        Connected component transform of a discrete binary image
        (8-connected topology)
        
-       $Revision: 1.4 $ $Date: 2011/11/20 04:41:56 $
+       $Revision: 1.5 $ $Date: 2012/03/27 01:42:56 $
 
        
 */
@@ -46,8 +46,8 @@ comcommer(im)
 
   while(nchanged >0) {
     nchanged = 0;
+    R_CheckUserInterrupt();
     for(j = rmin; j <= rmax; j++) {
-      R_CheckUserInterrupt();
       for(k = cmin; k <= cmax; k++) {
 	curlabel = ENTRY(j, k);
 	if(curlabel != 0) {

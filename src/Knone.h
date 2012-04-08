@@ -6,15 +6,15 @@
 
   Variables:
 
-     FNAME        function name
+  FNAME        function name
 
-     OUTTYPE      storage type of the output 'numer' 
-                  ('int' or 'double')
+  OUTTYPE      storage type of the output 'numer' 
+  ('int' or 'double')
 
-     WEIGHTED     #defined for weighted (inhom) K function
+  WEIGHTED     #defined for weighted (inhom) K function
 
 
-  $Revision: 1.2 $     $Date: 2012/02/29 04:57:21 $
+  $Revision: 1.3 $     $Date: 2012/03/18 11:33:27 $
 
 */
 
@@ -24,7 +24,7 @@ void FNAME(
 	   w,
 #endif
 	   nr, rmax, numer) 
-     /* inputs */
+/* inputs */
      int *nxy, *nr;
      double *x, *y, *rmax;
 #ifdef WEIGHTED
@@ -33,9 +33,9 @@ void FNAME(
      /* output */
      OUTTYPE *numer;
 {
-  int i, j, l, n, nt, n1, lmin, lmax;
+  int i, j, l, n, nt, n1, lmin, lmax, maxchunk;
   double dt, tmax, tmax2, xi, yi;
-  double xleft, xright, dratio, dij, dij2, dx, dy;
+  double xleft, xright, dratio, dij, dij2, dx, dy, dx2;
 #ifdef WEIGHTED
   double wi, wj, wij;
 #endif
@@ -73,74 +73,87 @@ void FNAME(
   if(n == 0) 
     return;
 
-  for(i = 0; i < n; i++) {
+  /* loop in chunks of 2^16 */
+
+  i = 0; maxchunk = 0; 
+  while(i < n) {
+
+    R_CheckUserInterrupt();
+
+    maxchunk += 65536; 
+    if(maxchunk > n) maxchunk = n;
+
+    for(; i < maxchunk; i++) {
+
 #ifdef WEIGHTED
-    wi = w[i];
+      wi = w[i];
 #endif
-    xi = x[i];
-    yi = y[i];
+      xi = x[i];
+      yi = y[i];
 
-    /* scan through points (x[j],y[j]) */
-    xleft = xi - tmax;
-    xright = xi + tmax;
-
-    /* 
-       scan backward from i-1 
-       until x < xleft or until we run out 
-    */
-    if(i > 0) {
-      for(j=i-1; x[j] >= xleft && j >= 0; j--) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	dij2= dx * dx + dy * dy;
-	if(dij2 < tmax2) {
+      /* 
+	 scan backward from i-1 
+	 until x[j] < x[i] -tmax or until we run out 
+      */
+      if(i > 0) {
+	for(j=i-1; j >= 0; j--) {
+	  dx = x[j] - xi;
+	  dx2 = dx * dx;
+	  if(dx2 > tmax2)
+	    break;
+	  dy = y[j] - yi;
+	  dij2 = dx2 + dy * dy;
+	  if(dij2 < tmax2) {
 #ifdef WEIGHTED 
-	  wj = w[j];
+	    wj = w[j];
 #endif
-	  /* increment numerator for all r >= dij */
-	  dij = (double) sqrt(dij2);
-	  dratio = dij/dt;
-	  /* smallest integer greater than or equal to dratio */
-	  lmin = (int) ceil(dratio);
-	  /* increment entries lmin to lmax inclusive */
-	  if(lmin <= lmax) {
+	    /* increment numerator for all r >= dij */
+	    dij = (double) sqrt(dij2);
+	    dratio = dij/dt;
+	    /* smallest integer greater than or equal to dratio */
+	    lmin = (int) ceil(dratio);
+	    /* increment entries lmin to lmax inclusive */
+	    if(lmin <= lmax) {
 #ifdef WEIGHTED
-	    wij = wi * wj;
+	      wij = wi * wj;
 #endif
-	    for(l = lmin; l <= lmax; l++) 
-	      numer[l] += WIJ;
+	      for(l = lmin; l <= lmax; l++) 
+		numer[l] += WIJ;
+	    }
 	  }
 	}
       }
-    }
 
-    /* 
-       scan forward from i+1 
-       until x > xright or until we run out 
-    */
-    if(i < n1) {
-      for(j=i+1; x[j] <= xright && j < n; j++) {
-	/* squared interpoint distance */
-	dx = x[j] - xi;
-	dy = y[j] - yi;
-	dij2= dx * dx + dy * dy;
-	if(dij2 < tmax2) {
+      /* 
+	 scan forward from i+1 
+	 until x[j] > x[i] + tmax or until we run out 
+      */
+      if(i < n1) {
+	for(j=i+1; j < n; j++) {
+	  /* squared interpoint distance */
+	  dx = x[j] - xi;
+	  dx2 = dx * dx;
+	  if(dx2 > tmax2)
+	    break;
+	  dy = y[j] - yi;
+	  dij2 = dx2 + dy * dy;
+	  if(dij2 < tmax2) {
 #ifdef WEIGHTED 
-	  wj = w[j];
+	    wj = w[j];
 #endif
-	  /* increment numerator for all r >= dij */
-	  dij = (double) sqrt(dij2);
-	  dratio = dij/dt;
-	  /* smallest integer greater than or equal to dratio */
-	  lmin = (int) ceil(dratio);
-	  /* increment entries lmin to lmax inclusive */
-	  if(lmin <= lmax) {
+	    /* increment numerator for all r >= dij */
+	    dij = (double) sqrt(dij2);
+	    dratio = dij/dt;
+	    /* smallest integer greater than or equal to dratio */
+	    lmin = (int) ceil(dratio);
+	    /* increment entries lmin to lmax inclusive */
+	    if(lmin <= lmax) {
 #ifdef WEIGHTED
-	    wij = wi * wj;
+	      wij = wi * wj;
 #endif
-	    for(l = lmin; l <= lmax; l++) 
-	      numer[l] += WIJ;
+	      for(l = lmin; l <= lmax; l++) 
+		numer[l] += WIJ;
+	    }
 	  }
 	}
       }

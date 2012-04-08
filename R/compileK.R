@@ -3,10 +3,10 @@
 # Function to take a matrix of pairwise distances
 # and compile a 'K' function in the format required by spatstat.
 #
-#   $Revision: 1.3 $  $Date: 2011/06/11 02:06:06 $
+#   $Revision: 1.4 $  $Date: 2012/03/29 02:55:57 $
 # -------------------------------------------------------------------
 
-compileK <- function(D, r, weights=NULL, denom=1, check=TRUE) {
+compileK <- function(D, r, weights=NULL, denom=1, check=TRUE, ratio=FALSE) {
   # process r values
   breaks <- breakpts.from.r(r)
   rmax <- breaks$max
@@ -30,12 +30,21 @@ compileK <- function(D, r, weights=NULL, denom=1, check=TRUE) {
   # divide by appropriate denominator
   Kratio <- Kcount/denom
   # wrap it up as an 'fv' object for use in spatstat
-  df <- data.frame(r=r,
-                   est=Kratio)
-  K <- fv(df, "r", substitute(compileK(r), NULL), "est", . ~ r , c(0,rmax),
-          c("r", "%s(r)"),
-          c("distance argument r", "estimated %s"),
-          fname="compileK")
+  df <- data.frame(r=r, est=Kratio)
+  if(!ratio) {
+    K <- fv(df, "r", substitute(compileK(r), NULL), "est", . ~ r , c(0,rmax),
+            c("r", "%s(r)"),
+            c("distance argument r", "estimated %s"),
+            fname="compileK")
+  } else {
+    num <- data.frame(r=r, est=Kcount)
+    den <- data.frame(r=r, est=denom)
+    K <- ratfv(num, den,
+               "r", substitute(compileK(r), NULL), "est", . ~ r , c(0,rmax),
+               c("r", "%s(r)"),
+               c("distance argument r", "estimated %s"),
+               fname="compileK")
+  }
   return(K)
 }
 
