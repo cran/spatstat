@@ -3,18 +3,61 @@
 #
 #  Spatial scan statistics
 #
-#  $Revision: 1.5 $  $Date: 2011/10/14 03:54:09 $
+#  $Revision: 1.7 $  $Date: 2012/04/16 11:59:52 $
 #
 
 scanmeasure <- function(X, ...){
   UseMethod("scanmeasure")
 }
 
-scanmeasure.ppp <- function(X, r, ...) {
-  Y <- pixellate(X, ..., padzero=TRUE)
-  Z <- scanmeasure(Y, r)
-  pixarea <- with(Y, xstep * ystep)
-  Z <- eval.im(as.integer(round(Z/pixarea)))
+
+scanmeasure.ppp <- function(X, r, ..., method=c("counts", "fft")) {
+  method <- match.arg(method)
+  # enclosing window
+  W <- as.rectangle(as.owin(X))
+  # expand domain to include all circles
+  W <- grow.rectangle(W, r)
+  # determine pixel resolution  
+  W <- as.mask(W, ...)
+  # 
+  switch(method,
+         counts = {
+           # direct calculation using C code
+           # get new dimensions
+           dimyx <- W$dim
+           xr <- W$xrange
+           yr <- W$yrange
+           nr <- dimyx[1]
+           nc <- dimyx[2]
+           #
+           n <- npoints(X)
+           zz <- .C("scantrans",
+                    x=as.double(X$x),
+                    y=as.double(X$y),
+                    n=as.integer(n),
+                    xmin=as.double(xr[1]),
+                    ymin=as.double(yr[1]),
+                    xmax=as.double(xr[2]),
+                    ymax=as.double(yr[2]),
+                    nr=as.integer(nr),
+                    nc=as.integer(nc),
+                    R=as.double(r),
+                    counts=as.integer(numeric(prod(dimyx))),
+                    PACKAGE="spatstat")
+           zzz <- matrix(zz$counts, nrow=dimyx[1], ncol=dimyx[2], byrow=TRUE)
+           Z <- im(zzz, xrange=xr, yrange=yr, unitname=unitname(X))
+         },
+         fft = {
+           # Previous version of scanmeasure.ppp had
+           #    Y <- pixellate(X, ..., padzero=TRUE)
+           # but this is liable to Gibbs phenomena.
+           # Instead, convolve with small Gaussian (sd = 1 pixel width)
+           sigma <- with(W, unique(c(xstep, ystep)))
+           Y <- density(X, ..., sigma=sigma)
+           # invoke scanmeasure.im
+           Z <- scanmeasure(Y, r)
+           Z <- eval.im(as.integer(round(Z)))
+         })
   return(Z)
 }
 

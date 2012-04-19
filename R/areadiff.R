@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.24 $  $Date: 2012/03/14 04:13:15 $
+#  $Revision: 1.25 $  $Date: 2012/04/14 06:02:39 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -234,31 +234,44 @@ areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.di
   return(result)
 }
 
-areaLoss.grid <- function(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc")) {
+areaLoss.grid <- function(X, r, ...,
+                          W=as.owin(X), subset=NULL,
+                          method = c("count", "distmap"),
+                          ngrid = spatstat.options("ngrid.disc"),
+                          exact = FALSE) {
   verifyclass(X, "ppp")
   n <- npoints(X)
   nr <- length(r)
   indices <- if(is.null(subset)) 1:n else (1:n)[subset]
   answer <- matrix(, nrow=length(indices), ncol=nr)
-#  for(k in seq_along(indices)) {
-#    i <- indices[k]
-#    answer[k,] <- areaGain(X[i], X[-i], r, W=W, ngrid=ngrid)
-#  }
-  # radii below which there are no overlaps
-  rcrit <- nndist(X)/2
-  #
-  D <- distmap(X, ...)
-  DW <- D[W, drop=FALSE]
-  a <- area.owin(as.owin(DW))
-  # empirical cdf of distance values
-  FW <- ecdf(DW[drop=TRUE])
-  # 
-  for(k in seq_along(indices)) {
-    i <- indices[k]
-    Di <- distmap(X[-i], ...)
-    FiW <- ecdf(Di[W, drop=TRUE])
-    answer[k, ] <- ifelse(r > rcrit[i], a * (FW(r) - FiW(r)), pi * r^2)
-  }
+  if(missing(method)) {
+    method <- if(nr <= 20 || exact) "count" else "distmap"
+  } else method <- match.arg(method)
+  switch(method,
+         count = {
+           # one value of r: use grid-counting
+           for(k in seq_along(indices)) {
+             i <- indices[k]
+             answer[k,] <- areaGain(X[i], X[-i], r, W=W,
+                                    ngrid=ngrid, exact=exact)
+           }
+         },
+         distmap = {
+           # Many values of r: use distance transform
+           D <- distmap(X, ...)
+           DW <- D[W, drop=FALSE]
+           a <- area.owin(as.owin(DW))
+           # empirical cdf of distance values
+           FW <- ecdf(DW[drop=TRUE])
+           # radii below which there are no overlaps
+           rcrit <- nndist(X)/2
+           for(k in seq_along(indices)) {
+             i <- indices[k]
+             Di <- distmap(X[-i], ...)
+             FiW <- ecdf(Di[W, drop=TRUE])
+             answer[k, ] <- ifelse(r > rcrit[i], a * (FW(r) - FiW(r)), pi * r^2)
+           }
+         })
   return(answer)
 }
 

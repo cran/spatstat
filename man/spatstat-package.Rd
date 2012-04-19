@@ -696,7 +696,8 @@
     \code{\link{envelope}} \tab simulation envelopes for a summary
     function \cr
     \code{\link{varblock}} \tab variances and confidence intervals\cr
-                   \tab for a summary function 
+                   \tab for a summary function \cr
+    \code{\link{lohboot}} \tab bootstrap for a summary function 
   }
 
   Related facilities:
@@ -1229,7 +1230,8 @@
   }
   
   See also \code{\link{varblock}} for estimating the variance
-  of a summary statistic by block resampling.
+  of a summary statistic by block resampling, and
+  \code{\link{lohboot}} for another bootstrap technique.
   
   \bold{Fitted point process models:}
 
@@ -1439,6 +1441,7 @@
   Igor Chernayavsky,
   Y.C. Chin,
   Bjarke Christensen,
+  Jean-Francois Coeurjolly,
   Marcelino de la Cruz,
   Peter Dalgaard,
   Peter Diggle,

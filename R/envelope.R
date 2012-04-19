@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.23 $  $Date: 2012/01/09 02:42:11 $
+#   $Revision: 2.24 $  $Date: 2012/04/10 10:01:29 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -341,6 +341,8 @@ envelopeEngine <-
   # validate other arguments
   if((nrank %% 1) != 0)
     stop("nrank must be an integer")
+  if((nsim %% 1) != 0)
+    stop("nsim must be an integer")
   stopifnot(nrank > 0 && nrank < nsim/2)
 
   rgiven <- "r" %in% names(list(...))

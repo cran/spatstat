@@ -1,7 +1,7 @@
 #
 #   localpcf.R
 #
-#  $Revision: 1.14 $  $Date: 2011/07/25 10:51:43 $
+#  $Revision: 1.16 $  $Date: 2012/04/18 11:28:48 $
 #
 #
 
@@ -71,7 +71,15 @@ localpcfengine <- function(X, ...,
   attr(g, "fmla") <- . ~ r
   fvnames(g, ".") <- names(df)[names(df) != "r"]
   unitname(g) <- unitname(X)
+  attr(g, "delta") <- delta  # create fv object
+  g <- fv(df, "r", quote(localg(r)),
+          "theo", , c(0, max(r)), labl, desc, fname="localg")
+  # default is to display them all
+  attr(g, "fmla") <- . ~ r
+  fvnames(g, ".") <- names(df)[names(df) != "r"]
+  unitname(g) <- unitname(X)
   attr(g, "delta") <- delta
+  attr(g, "correction") <- "border"
   return(g)
 }
 

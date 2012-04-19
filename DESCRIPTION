@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.26-0
-Date: 2012-04-08
+Version: 1.26-1
+Date: 2012-04-19
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -9,18 +9,18 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         Rasmus Waagepetersen.  Additional contributions by Q.W. Ang; S.
         Azaele; C. Beale; R. Bernhardt; B. Biggerstaff; R. Bivand; F.
         Bonneu; J. Burgos; S. Byers; Y.M. Chang; J.B. Chen; I.
-        Chernayavsky; Y.C. Chin; B. Christensen; M. de la Cruz; P.
-        Dalgaard; P.J. Diggle; I. Dryden; S. Eglen; N. Funwi-Gabga; A.
-        Gault; M. Genton; P. Grabarnik; C. Graf; J. Franklin; U. Hahn;
-        A. Hardegen; M. Hering; M.B. Hansen; M. Hazelton; J. Heikkinen;
-        K. Hornik; R. Ihaka; R. John-Chandran; D. Johnson; M. Kuhn; J.
-        Laake; R.A. Lamb; J. Lee; G.P. Leser; B. Madin; R. Mark; J.
-        Mateu; P. McCullagh; U. Mehlig; S. Meyer; X.C. Mi; J. Moller;
-        L.S. Nielsen; F. Nunes; J. Oehlschlaegel; T. Onkelinx; E.
-        Parilov; J. Picka; S. Protsiv; A. Raftery; M. Reiter; T.O.
-        Richardson; B.D. Ripley; B. Rowlingson; J. Rudge; A. Sarkka; K.
-        Schladitz; B.T. Scott; G.C. Shen; V. Shcherbakov; I.-M.
-        Sintorn; Y. Song; M. Spiess; M. Stevenson; K. Stucki; M.
+        Chernayavsky; Y.C. Chin; B. Christensen; J.-F. Coeurjolly; M.
+        de la Cruz; P. Dalgaard; P.J. Diggle; I. Dryden; S. Eglen; N.
+        Funwi-Gabga; A. Gault; M. Genton; P. Grabarnik; C. Graf; J.
+        Franklin; U. Hahn; A. Hardegen; M. Hering; M.B. Hansen; M.
+        Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; R. John-Chandran;
+        D. Johnson; M. Kuhn; J. Laake; R.A. Lamb; J. Lee; G.P. Leser;
+        B. Madin; R. Mark; J. Mateu; P. McCullagh; U. Mehlig; S. Meyer;
+        X.C. Mi; J. Moller; L.S. Nielsen; F. Nunes; J. Oehlschlaegel;
+        T. Onkelinx; E. Parilov; J. Picka; S. Protsiv; A. Raftery; M.
+        Reiter; T.O. Richardson; B.D. Ripley; B. Rowlingson; J. Rudge;
+        A. Sarkka; K. Schladitz; B.T. Scott; G.C. Shen; V. Shcherbakov;
+        I.-M. Sintorn; Y. Song; M. Spiess; M. Stevenson; K. Stucki; M.
         Sumner; P. Surovy; B. Taylor; B. Turlach; A. van Burgel; T.
         Verbeke; A. Villers; H. Wang; H. Wendrock; J. Wild and S. Wong.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
@@ -55,6 +55,6 @@ URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
 ByteCompile: true
-Packaged: 2012-04-08 03:39:10 UTC; adrian
+Packaged: 2012-04-19 02:59:30 UTC; adrian
 Repository: CRAN
-Date/Publication: 2012-04-08 05:33:48
+Date/Publication: 2012-04-19 08:14:28

@@ -7,7 +7,9 @@
 }
 \usage{
   \method{vcov}{ppm}(object, \dots, what = "vcov", verbose = TRUE,
-gam.action="warn", matrix.action="warn", hessian=FALSE)
+                    gam.action=c("warn", "fatal", "silent"),
+                    matrix.action=c("warn", "fatal", "silent"),
+                    hessian=FALSE)
 }
 \arguments{
   \item{object}{A fitted point process model (an object of class \code{"ppm"}.)}
@@ -23,13 +25,10 @@ gam.action="warn", matrix.action="warn", hessian=FALSE)
     if various minor problems are encountered.
   }
   \item{gam.action}{String indicating what to do if \code{object} was
-    fitted by \code{gam}. Options are \code{"fatal"}, \code{"warn"} and
-    \code{"silent"}.
+    fitted by \code{gam}. 
   }
   \item{matrix.action}{String indicating what to do if the matrix
     is ill-conditioned (so that its inverse cannot be calculated).
-    Options are \code{"fatal"}, \code{"warn"} and
-    \code{"silent"}.
   }
   \item{hessian}{
     Logical. Use the negative Hessian matrix
@@ -69,24 +68,38 @@ gam.action="warn", matrix.action="warn", hessian=FALSE)
   \code{\link{coef.ppm}(object)}.
 
   For models fitted by maximum pseudolikelihood (which is the
-  default in \code{\link{ppm}}), the current implementation only works
-  for Poisson point processes. 
-  The calculations are based on standard asymptotic theory for the maximum
-  likelihood estimator.
-  The observed Fisher information matrix of the fitted model
-  \code{object} is first computed, by
-  summing over the Berman-Turner quadrature points in the fitted model.
-  The asymptotic variance-covariance matrix is calculated as the inverse of the
-  observed Fisher information. The correlation matrix is then obtained
-  by normalising.
+  default in \code{\link{ppm}}), the implementation works
+  as follows.
+  \itemize{
+    \item
+    If the fitted model \code{object} is a Poisson process,
+    the calculations are based on standard asymptotic theory for the maximum
+    likelihood estimator (Kutoyants, 1998).
+    The observed Fisher information matrix of the fitted model
+    \code{object} is first computed, by
+    summing over the Berman-Turner quadrature points in the fitted model.
+    The asymptotic variance-covariance matrix is calculated as the
+    inverse of the
+    observed Fisher information. The correlation matrix is then obtained
+    by normalising.
+    \item
+    If the fitted model is not a Poisson process (i.e. it is some other
+    Gibbs point process) then the calculations are based on
+    Coeurjolly and Rubak (2012). The model must be a stationary point
+    process. A consistent estimator of the
+    variance-covariance matrix is computed by summing terms over all
+    pairs of data points. If required, the Fisher information is
+    calculated as the inverse of the variance-covariance matrix.
+  }
 
   For models fitted by the Huang-Ogata method (\code{method="ho"} in
-  the call to \code{\link{ppm}}), the implementation works for all
-  models. A Monte Carlo estimate of the Fisher information matrix is
-  calculated using the results of the original fit. 
+  the call to \code{\link{ppm}}), the implementation uses the 
+  Monte Carlo estimate of the Fisher information matrix that was
+  computed when the original model was fitted. 
   
   The argument \code{verbose} makes it possible to suppress some
   diagnostic messages.
+
 
   The asymptotic theory is not correct if the model was fitted using
   \code{gam} (by calling \code{\link{ppm}} with \code{use.gam=TRUE}).
@@ -99,8 +112,7 @@ gam.action="warn", matrix.action="warn", hessian=FALSE)
   warning.
   
   If \code{hessian=TRUE} then the negative Hessian (second derivative)
-  matrix of the log pseudolikelihood, and its inverse,
-  will be computed.
+  matrix of the log pseudolikelihood, and its inverse, will be computed.
   For non-Poisson models, this is not a valid estimate of variance,
   but is useful for other calculations.
 }
@@ -109,10 +121,13 @@ gam.action="warn", matrix.action="warn", hessian=FALSE)
   \emph{system is computationally singular} indicates that the
   determinant of the Fisher information matrix was either too large 
   or too small for reliable numerical calculation.
-  This can occur either because of numerical overflow or
-  because of collinearity in the covariates. Most commonly it occurs
-  because of numerical overflow: to check this, rescale the 
+  This can occur because of numerical overflow or
+  collinearity in the covariates. To check this, rescale the 
   coordinates of the data points and refit the model. See the Examples.
+
+  In a Gibbs model, a singular matrix may also occur if the
+  fitted model is a hard core process: this is a feature of the
+  variance estimator.
 }
 \value{
   A square matrix.
@@ -132,13 +147,32 @@ gam.action="warn", matrix.action="warn", hessian=FALSE)
   # rescale x, y coordinates to range [0,1] x [0,1] approximately
   demopat <- rescale(demopat, 10000)
   m <- ppm(demopat, ~polynom(x,y,2))
-  v <- vcov(m)  
+  v <- vcov(m)
+
+  # Gibbs example
+  fitS <- ppm(swedishpines, ~1, Strauss(9))
+  coef(fitS)
+  sqrt(diag(vcov(fitS)))
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@csiro.au}
+\author{
+  Original code for Poisson point process was written by
+  Adrian Baddeley \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+  and Rolf Turner \email{r.turner@auckland.ac.nz}.
+  New code for Gibbs point processes was generously contributed by
+  Ege Rubak and Jean-Francois Coeurjolly.
+}
+\references{
+  Coeurjolly, J.-F. and Rubak, E. (2012)
+  \emph{Fast covariance estimation for innovations
+    computed from a spatial Gibbs point process}.
+  Research Report, Centre for Stochastic Geometry and Bioimaging,
+  Denmark, 2012. \url{www.csgb.dk}
+
+  Kutoyants, Y.A. (1998) 
+  \bold{Statistical Inference for Spatial Poisson Processes},
+  Lecture Notes in Statistics 134. 
+  New York: Springer 1998. 
 }
 \keyword{spatial}
 \keyword{methods}

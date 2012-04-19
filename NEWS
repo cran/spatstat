@@ -1,4 +1,42 @@
 
+	CHANGES IN spatstat VERSION 1.26-1
+
+OVERVIEW 
+
+   o Variance-covariance matrix for Gibbs point process models.
+
+   o Bootstrap confidence bands for pair correlation function and K function.
+
+   o Bug fix in scan test.
+
+   o Area-interaction model accelerated.
+
+   o we thank Jean-Francois Coeurjolly and Ege Rubak for contributions.
+
+NEW FUNCTIONS
+
+  o lohboot
+  Computes bootstrap confidence bands for pair correlation function
+  and K function using Loh's (2008) mark bootstrap.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+  o vcov.ppm
+  Now works for all Gibbs point process models, thanks to new code (and theory)
+  from Jean-Francois Coeurjolly and Ege Rubak
+
+  o AreaInter
+  Computations related to the area-interaction point process 
+  (ppm, predict.ppm, residuals.ppm, diagnose.ppm, qqplot.ppm)
+  have been accelerated.
+
+BUG FIXES
+
+  o scan.test
+  Results were sometimes incorrect due to numerical instability
+  (a 'Gibbs phenomenon'). 
+  Fixed.
+  
 	CHANGES IN spatstat VERSION 1.26-0
 
 OVERVIEW 

@@ -127,7 +127,10 @@
   If it is specified, \code{r} must be a vector of increasing numbers
   starting from \code{r[1] = 0}, 
   and \code{max(r)} must not exceed half the diameter of 
-  the window. 
+  the window.
+
+  To compute a confidence band for the true value of the
+  pair correlation function, use \code{\link{lohboot}}.
 }
 \references{
   Stoyan, D. and Stoyan, H. (1994)
@@ -138,7 +141,8 @@
 \seealso{
   \code{\link{Kest}},
   \code{\link{pcf}},
-  \code{\link{density}}
+  \code{\link{density}},
+  \code{\link{lohboot}}.
 }
 \examples{
   data(simdat)

@@ -3,7 +3,7 @@
 #
 # calculate sufficient statistic
 #
-#  $Revision: 1.15 $  $Date: 2011/11/07 06:08:49 $
+#  $Revision: 1.16 $  $Date: 2012/04/14 07:51:58 $
 #
 #
 
@@ -66,12 +66,12 @@ suffstat.generic <- function(model, X=NULL, callstring="suffstat.generic") {
     mom <- partialModelMatrix(Xprior, Xcurrent, model, "suffstat")
     lastrow <- length(prior) + 1
     momrow <- mom[lastrow, ]
-    names(momrow) <- coefnames
     if(i == 1)
       result <- momrow
     else
       result <- momrow + result
   }
+  names(result) <- coefnames
   attr(result, "mplsubset") <- NULL
   return(result)
 }
