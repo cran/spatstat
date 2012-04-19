@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.19 $     $Date: 2011/05/18 01:49:35 $
+#       $Revision: 5.20 $     $Date: 2012/04/18 08:25:01 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -69,8 +69,13 @@ tilecentroids <- function (W, nx, ny)
   }
 }
 
-cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
-{
+cellmiddles <- local({
+  # auxiliary 
+  middle <- function(v) { n <- length(v);
+                          mid <- ceiling(n/2);
+                          v[mid]}
+  # main
+  cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE) {
     if(W$type == "rectangle")
       return(gridcentres(W, nx, ny))
 
@@ -101,9 +106,6 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
     
     ## For each tile, find middle point in list of pixels in each tile
     # (always inside tile, by construction)
-    middle <- function(v) { n <- length(v);
-                            mid <- ceiling(n/2);
-                            v[mid]}
     midpix <- tapply(seq_along(pid), pid, middle)
     if(gi) {
       x <- xx[midpix]
@@ -116,7 +118,9 @@ cellmiddles <- function (W, nx, ny, npix=NULL, gi=FALSE)
       y <- M$yrow[midrow]
     }
     return(list(x=x,y=y))
-}
+  }
+  cellmiddles
+})
 
 spokes <- function(x, y, nrad = 3, nper = 3, fctr = 1.5, Mdefault=1) {
 	#
@@ -216,17 +220,8 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
 #           a multiple of the mask array dimensions, for speed.
 #
 
-default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
-  # computes dimensions of rectangular grids of 
-  #     - dummy points  (nd)
-  #     - tiles for grid weights (ntile)
-  #     - pixels for approximating area (npix)
-  # for data pattern X.
-  #
-  verifyclass(X, "ppp")
-  win <- X$window
-  pixels <- (win$type != "rectangle")
-  
+default.n.tiling <- local({
+  # auxiliary
   ensure2print <- function(x, verbose=TRUE, blah="user specified") {
     xname <- deparse(substitute(x))
     x <- ensure2vector(x)
@@ -234,21 +229,6 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
       cat(paste(blah, xname, "=", x[1], "*", x[2], "\n"))
     x
   }
-  
-  if(nd.given <- !is.null(nd)) 
-    nd <- ensure2print(nd, verbose)
-  if(ntile.given <- !is.null(ntile)) 
-    ntile <- ensure2print(ntile, verbose)
-  if(npix.given <- !is.null(npix)) 
-    npix <- ensure2print(npix, verbose)
-
-  if(pixels) 
-    sonpixel <- rev(ensure2print(spatstat.options("npixel"), verbose, ""))
-
-  ndummy.min <- ensure2print(spatstat.options("ndummy.min"), verbose, "")
-  ndminX <- pmax(ndummy.min, 10 * ceiling(2 * sqrt(X$n)/10))
-  ndminX <- ensure2vector(ndminX)
-
   minmultiple <- function(n, lo, hi) {
     if(lo > hi) {
       temp <- hi
@@ -280,6 +260,33 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
   min2div <- function(N, lo, Nbig) 
     c(mindivisor(N[1], lo[1], Nbig[1]),
       mindivisor(N[2], lo[2], Nbig[2]))
+  
+  # main
+  default.n.tiling <- 
+    function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
+  # computes dimensions of rectangular grids of 
+  #     - dummy points  (nd)
+  #     - tiles for grid weights (ntile)
+  #     - pixels for approximating area (npix)
+  # for data pattern X.
+  #
+  verifyclass(X, "ppp")
+  win <- X$window
+  pixels <- (win$type != "rectangle")
+  
+  if(nd.given <- !is.null(nd)) 
+    nd <- ensure2print(nd, verbose)
+  if(ntile.given <- !is.null(ntile)) 
+    ntile <- ensure2print(ntile, verbose)
+  if(npix.given <- !is.null(npix)) 
+    npix <- ensure2print(npix, verbose)
+
+  if(pixels) 
+    sonpixel <- rev(ensure2print(spatstat.options("npixel"), verbose, ""))
+
+  ndummy.min <- ensure2print(spatstat.options("ndummy.min"), verbose, "")
+  ndminX <- pmax(ndummy.min, 10 * ceiling(2 * sqrt(X$n)/10))
+  ndminX <- ensure2vector(ndminX)
 
   # range of acceptable values for npix
   if(npix.given)
@@ -345,7 +352,9 @@ default.n.tiling <- function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
     return(list(nd=nd, ntile=ntile, npix=npix))
   else
     return(list(nd=nd, ntile=ntile, npix=npix))
-  
 }
+
+  default.n.tiling
+})
 
 

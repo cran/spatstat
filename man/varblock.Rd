@@ -86,6 +86,9 @@ varblock(X, fun = Kest, blocks = quadrats(X, nx = nx, ny = ny), ...,
   in the \code{correction} argument to \code{fun}, if it has one.
   Some edge corrections are only available if you have set
   \code{spatstat.options(gpclib=TRUE)}.
+
+  An alternative to \code{varblock} is Loh's mark bootstrap
+  \code{\link{lohboot}}.
 }
 \value{
   A function value table (object of class \code{"fv"})
@@ -108,10 +111,11 @@ varblock(X, fun = Kest, blocks = quadrats(X, nx = nx, ny = ny), ...,
 }
 \seealso{
  \code{\link{tess}},
- \code{\link{quadrats}},
+ \code{\link{quadrats}} for basic manipulation.
+ 
+ \code{\link{lohboot}} for an alternative bootstrap technique.
 }
 \examples{
-   data(amacrine)
    v <- varblock(amacrine, Kest, nx=4, ny=2)
    v <- varblock(amacrine, Kcross, nx=4, ny=2)
    if(interactive()) plot(v, iso ~ r, shade=c("hiiso", "loiso"))

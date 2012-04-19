@@ -311,6 +311,7 @@
 \alias{prange}
 \alias{prefixfv}
 \alias{primefactors}       
+\alias{primesbelow}       
 \alias{print.bt.frame}
 \alias{print.bw.optim}
 \alias{print.colourmap}
@@ -496,7 +497,10 @@ area.xypolygon(polly)
 areaGain.diri(u, X, r, ..., W=as.owin(X))
 areaGain.grid(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.disc"))
 areaLoss.diri(X, r, ..., W=as.owin(X), subset=NULL)
-areaLoss.grid(X, r, ..., W=as.owin(X), subset=NULL, ngrid=spatstat.options("ngrid.disc"))
+areaLoss.grid(X, r, ..., W=as.owin(X), subset=NULL,
+                         method = c("count", "distmap"),
+                         ngrid = spatstat.options("ngrid.disc"),
+                         exact = FALSE) 
 AsymmDistance.psp(X, Y, metric="Hausdorff", method="Fortran")
 as.breakpts(\dots)
 \method{as.data.frame}{fv}(x, ...)
@@ -601,7 +605,7 @@ equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
 equalsfun.quad(Q)          
-eratosthenes(nmax)
+eratosthenes(nmax, startset)
 erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, \dots,
@@ -829,6 +833,7 @@ pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE,
 prange(x)
 prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 primefactors(n, prmax)
+primesbelow(nmax)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
@@ -925,7 +930,7 @@ runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safelookup(Z, X, factor, warn)
 samefunction(f, g)
 scanmeasure(X, \dots)
-\method{scanmeasure}{ppp}(X, r, \dots)
+\method{scanmeasure}{ppp}(X, r, \dots, method)
 \method{scanmeasure}{im}(X, r, \dots)
 scanPoisLRTS(nZ, nG, muZ, muG, alternative)
 scanBinomLRTS(nZ, nG, muZ, muG, alternative)

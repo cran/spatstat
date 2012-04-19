@@ -225,7 +225,7 @@ from a point pattern in a window of arbitrary shape.
   under CSR, use \code{\link{envelope}}. 
   
   To compute a confidence interval for the true \eqn{K}-function,
-  use \code{\link{varblock}}.
+  use \code{\link{varblock}} or \code{\link{lohboot}}.
 }
 \references{
 Baddeley, A.J. Spatial sampling and censoring.

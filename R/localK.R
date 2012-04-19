@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.15 $	$Date: 2011/04/18 00:42:20 $
+#	$Revision: 1.16 $	$Date: 2012/04/18 11:28:39 $
 #
 #
 
@@ -212,6 +212,7 @@
   # default is to display them all
   attr(K, "fmla") <- . ~ r
   unitname(K) <- unitname(X)
+  attr(K, "correction") <- correction
   return(K)
 }
 
