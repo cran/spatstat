@@ -1,7 +1,7 @@
 #
 # marks.R
 #
-#   $Revision: 1.29 $   $Date: 2011/10/11 10:05:36 $
+#   $Revision: 1.30 $   $Date: 2012/05/12 10:24:22 $
 #
 # stuff for handling marks
 #
@@ -121,7 +121,7 @@ function(X, na.action="warn", ...) {
 }
 
 "is.marked.default" <-
-  function(...) { return(FALSE) }
+  function(...) { return(!is.null(marks(...))) }
 
 
 # ------------------------------------------------------------------
@@ -130,13 +130,24 @@ is.multitype <- function(X, ...) {
   UseMethod("is.multitype")
 }
 
-is.multitype.default <- function(...) { return(FALSE) }
+is.multitype.default <- function(X, ...) {
+  m <- marks(X)
+  if(is.null(m))
+    return(FALSE)
+  if(!is.null(dim(m))) {
+    # should have a single column
+    if(dim(m)[2] != 1)
+      return(FALSE)
+    m <- m[,1,drop=TRUE]
+  }
+  return(is.factor(m))
+}
 
 is.multitype.ppp <- function(X, na.action="warn", ...) {
   marx <- marks(X, dfok=TRUE)
   if(is.null(marx))
     return(FALSE)
-  if(is.data.frame(marx) && ncol(marx) > 1)
+  if((is.data.frame(marx) || is.hyperframe(marx)) && ncol(marx) > 1)
     return(FALSE)
   if(!is.factor(marx))
     return(FALSE)

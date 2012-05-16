@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.76 $    $Date: 2011/11/23 03:44:09 $
+#  $Revision: 1.80 $    $Date: 2012/05/14 07:49:47 $
 #
 #
 
@@ -13,6 +13,7 @@ conspire <- function(...) {
 plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL,
                     ylim.covers=NULL, legend=!add, legendpos="topleft",
+                    legendavoid=missing(legendpos),
                     legendmath=TRUE, legendargs=list(),
                     shade=NULL, shadecol="grey", add=FALSE,
                     limitsonly=FALSE) {
@@ -20,6 +21,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   xname <-
     if(is.language(substitute(x))) deparse(substitute(x)) else ""
 
+  force(legendavoid)
+  
   verifyclass(x, "fv")
   env.user <- parent.frame()
 
@@ -302,10 +305,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       shdata2[shade1OK & !shade2OK] <- if(up1) ylim[1] else ylim[2]
       shadeOK <- shade1OK | shade2OK
     } 
-    # plot grey polygon 
-    polygon(c(rhsdata[shadeOK], rev(rhsdata[shadeOK])),
-            c(shdata1[shadeOK],  rev(shdata2[shadeOK])),
-            border=shadecol, col=shadecol)
+    # plot grey polygon
+    xpoly <- c(rhsdata[shadeOK], rev(rhsdata[shadeOK]))
+    ypoly <- c(shdata1[shadeOK], rev(shdata2[shadeOK])) 
+    polygon(xpoly, ypoly, border=shadecol, col=shadecol)
     # overwrite graphical parameters
     lty[shind] <- 1
     # try to preserve the same type of colour specification
@@ -323,7 +326,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # remove these columns from further plotting
     allind <- allind[-shind]
     # 
-  }
+  } else xpoly <- ypoly <- numeric(0)
   
   # ----------------- plot lines ------------------------------
 
@@ -374,10 +377,24 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
         }
       }
     }
+
+    if(legendavoid || identical(legendpos, "float")) {
+      # Automatic determination of legend position
+      # Assemble data for all plot objects
+      linedata <- list(x=rep(rhsdata, length(allind)),
+                       y=as.vector(lhsdata[,allind]))
+      polydata <- if(length(xpoly) > 0) list(x=xpoly, y=ypoly) else NULL
+      objects <- assemble.plot.objects(xlim, ylim,
+                                       lines=linedata, polygon=polydata)
+      # find best position to avoid them
+      legendbest <- findbestlegendpos(objects, preference=legendpos)
+    } else legendbest <- list()
+    
     # plot legend
     if(!is.null(legend) && legend) 
       do.call("legend",
               resolve.defaults(legendargs,
+                               legendbest,
                                list(x=legendpos, legend=legtxt, lty=lty, col=col),
                                list(inset=0.05, y.intersp=if(legendmath) 1.3 else 1),
                                .StripNull=TRUE))
@@ -389,3 +406,115 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
 }
 
 
+assemble.plot.objects <- function(xlim, ylim, ..., lines=NULL, polygon=NULL) {
+  # Take data that would have been passed to the commands 'lines' and 'polygon'
+  # and form corresponding geometrical objects.
+  objects <- list()
+  if(!is.null(lines)) {
+    # Collect vertices of line plots as a point pattern
+    x <- lines$x
+    y <- lines$y
+    ok <- is.finite(x) & is.finite(y)
+    V <- ppp(x[ok], y[ok], xlim, ylim, check=FALSE)
+    objects <- append(objects, list(V))
+  }
+  if(!is.null(polygon)) {
+    # Add filled polygon
+    pol <- polygon[c("x", "y")]
+    if(area.xypolygon(pol) < 0) pol <- lapply(pol, rev)
+    P <- try(owin(poly=pol, xrange=xlim, yrange=ylim, check=FALSE))
+    if(!inherits(P, "try-error"))
+      objects <- append(objects, list(P))
+  }
+  return(objects)
+}
+
+findbestlegendpos <- local({
+  # Given a list of geometrical objects, find the best position
+  # to avoid them.
+  thefunction <- function(objects, show=FALSE, aspect=1, bdryok=TRUE,
+                          preference="float", verbose=FALSE) {
+    # find bounding box
+    W <- do.call("bounding.box", lapply(objects, as.rectangle))
+    # convert to common box
+    objects <- lapply(objects, rebound, rect=W)
+    # comp
+    # rescale x and y axes so that bounding box has aspect ratio 'aspect'
+    aspectW <- with(W, diff(yrange)/diff(xrange))
+    s <- aspect/aspectW
+    mat <- diag(c(1, s))
+    invmat <- diag(c(1, 1/s))
+    scaled.objects <- lapply(objects, affine, mat=mat)
+    scaledW <- affine(W, mat=mat)
+    if(verbose) {
+      cat("Scaled space:\n")
+      print(scaledW)
+    }
+    # apply distance transforms in scaled space
+    D1 <- distmap(scaled.objects[[1]])
+    Dlist <- lapply(scaled.objects, distmap, xy=list(x=D1$xcol, y=D1$yrow))
+    # distance transform of superposition
+    D <- Reduce(function(A,B){ eval.im(pmin(A,B)) }, Dlist)
+    if(!bdryok) {
+      # include distance to boundary
+      B <- attr(D1, "bdry")
+      D <- eval.im(pmin(D, B))
+    }
+    if(show) 
+      plot(affine(D, mat=invmat), add=TRUE)
+    # examine distance map
+    if(preference != "float") {
+      # check for collision at preferred location
+      xr <- W$xrange
+      yr <- W$yrange
+      testloc <- switch(preference,
+                        topleft     = c(xr[1],yr[2]),
+                        top         = c(mean(xr), yr[2]),
+                        topright    = c(xr[2], yr[2]),
+                        right       = c(xr[2], mean(yr)),
+                        bottomright = c(xr[2], yr[1]),
+                        bottom      = c(mean(xr), yr[1]),
+                        bottomleft  = c(xr[1], yr[1]),
+                        left        = c(xr[1], mean(yr)),
+                        center      = c(mean(xr), mean(yr)),
+                        NULL)
+      if(!is.null(testloc)) {
+        # look up distance value at preferred location
+        val <- safelookup(D, list(x=testloc[1], y=testloc[2]))
+        crit <- 0.15 * min(diff(xr), diff(yr))
+        if(verbose)
+          cat(paste("val=",val, ", crit=", crit, "\n"))
+        if(val > crit) {
+          # no collision: stay at preferred location.
+          return(list(x=preference))
+        }
+      }
+      # collision occurred!
+    }
+    # find location of max
+    locmax <- which(D$v == max(D), arr.ind=TRUE)
+    locmax <- unname(locmax[1,])
+    pos <- list(x=D$xcol[locmax[2]], y=D$yrow[locmax[1]])
+    pos <- affinexy(pos, mat=invmat)
+    if(show) 
+      points(pos)
+    # determine justification of legend relative to this point
+    # to avoid crossing edges of plot
+    xrel <- (pos$x - W$xrange[1])/diff(W$xrange)
+    yrel <- (pos$y - W$yrange[1])/diff(W$yrange)
+    xjust <- if(xrel < 0.1) 0 else if(xrel > 0.9) 1 else 0.5 
+    yjust <- if(yrel < 0.1) 0 else if(yrel > 0.9) 1 else 0.5
+    #
+    out <- list(x=pos, xjust=xjust, yjust=yjust)
+    return(out)
+  }
+
+  callit <- function(...) {
+    rslt <- try(thefunction(...))
+    if(!inherits(rslt, "try-error"))
+      return(rslt)
+    return(list())
+  }
+  callit
+})
+  

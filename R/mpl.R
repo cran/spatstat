@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.140 $	$Date: 2012/03/10 10:49:25 $
+#	$Revision: 5.142 $	$Date: 2012/05/09 10:45:54 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -85,6 +85,11 @@ function(Q,
   if(!is.null(interaction) && !inherits(interaction, "interact"))
     stop(paste("Argument", sQuote("interaction"), "has incorrect format"))
 #
+  check.1.real(rbord, "In ppm")
+  explain.ifnot(rbord >= 0, "In ppm")
+# rbord applies only to border correction
+  if(correction != "border") rbord <- 0 
+#
 # Self-starting interaction?
 #
   if(!is.null(ss <- interaction$selfstart)) 
@@ -95,6 +100,7 @@ function(Q,
 want.trend <- !is.null(trend) && !identical.formulae(trend, ~1)
 want.inter <- !is.null(interaction) && !is.null(interaction$family)
 trend.formula <- if(want.trend) trend else (~1)
+
   
 # Stamp with spatstat version number
   
@@ -102,7 +108,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/03/10 10:49:25 $")
+                    date="$Date: 2012/05/09 10:45:54 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -117,7 +123,7 @@ if(!want.trend && !want.inter && !forcefit && !allcovar) {
   # The MPLE (= MLE) can be evaluated directly
   npts <- X$n
   W    <- X$window
-  if(rbord > 0) W <- erosion(W, rbord)
+  if(correction == "border" && rbord > 0) W <- erosion(W, rbord)
   volume <- area.owin(W) * markspace.integral(X)
   lambda <- npts/volume
   # fitted canonical coefficient
@@ -265,7 +271,7 @@ rslt <- list(
              covariates   = covariates,
              covfunargs   = covfunargs,
              correction   = correction,
-             rbord        = if(correction == "border") rbord else 0,
+             rbord        = rbord,
              terms        = terms(trend.formula),
              version      = the.version,
              problems     = problems)
@@ -490,9 +496,9 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     }
 
     # Check the names are valid as column names in a dataframe
-    okVnames <- make.names(Vnames)
+    okVnames <- make.names(Vnames, unique=TRUE)
     if(any(Vnames != okVnames)) {
-      warning("internal error: names of interaction terms contained illegal characters; names have been repaired.")
+      warning("Names of interaction terms contained illegal characters; names have been repaired.")
       Vnames <- okVnames
     }
     

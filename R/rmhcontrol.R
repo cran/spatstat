@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.16 $  $Date: 2012/01/19 12:19:16 $
+#   $Revision: 1.22 $  $Date: 2012/05/11 11:19:58 $
 #
 #
 
@@ -27,7 +27,7 @@ rmhcontrol.list <- function(...) {
 }
 
 rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
-                        expand=NULL, periodic=FALSE, ptypes=NULL,
+                        expand=NULL, periodic=NULL, ptypes=NULL,
                         x.cond=NULL, fixall=FALSE, nverb=0)
 {
   argh <- list(...)
@@ -53,16 +53,15 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
   if(!is.numeric(nrep) || length(nrep) != 1
      || nrep < 1)
     stop("nrep should be an integer >= 1")
+  nrep <- as.integer(nrep)
   if(!is.numeric(nverb) || length(nverb) != 1
      || nverb < 0 || nverb > nrep)
     stop("nverb should be an integer <= nrep")
+  nverb <- as.integer(nverb)
   if(!is.logical(fixall) || length(fixall) != 1)
     stop("fixall should be a logical value")
-  if(!is.logical(periodic) || length(periodic) != 1)
-    stop(paste(sQuote("periodic"), "should be a logical value"))
-  if(!is.null(expand) && !(is.numeric(expand) || is.owin(expand)))
-    stop(paste(sQuote("expand"),
-               "should be either a number, a window, or NULL"))
+  if(!is.null(periodic) && (!is.logical(periodic) || length(periodic) != 1))
+    stop(paste(sQuote("periodic"), "should be a logical value or NULL"))
 
 #################################################################
 # Conditioning on point configuration
@@ -116,38 +115,18 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
 ###############################################################  
 # `expand' determines expansion of the simulation window
 
-  if(is.null(expand)) 
-    force.exp <- force.noexp <- FALSE
-  else if(is.owin(expand)) {
-    force.exp <- TRUE
-    force.noexp <- FALSE
-  } else if(is.numeric(expand)) {
-    if(expand < 1) {
-      warning(paste("parameter", sQuote("expand"), " < 1; reset to 1"))
-      expand <- 1
-    }
-    force.exp <- (expand > 1)
-    force.noexp <- !force.exp
-  } else stop(paste("Component expand of argument control must",
-                    "be either a number, a window, or NULL.\n"))
+  expand <- rmhexpand(expand)
 
 # No expansion is permitted if we are conditioning on the
 # number of points
   
   if(fixing != "none") {
-    if(force.exp)
+    if(expand$force.exp)
       stop(paste("When conditioning on the number of points,",
-                 "no expansion may be done.\n"))
-    else if(is.null(expand)) expand <- 1
+                 "no expansion may be done.\n"), call.=FALSE)
+    # no expansion
+    expand <- .no.expansion
   }
-
-# At this stage if there was a reason not to expand the window,
-# then expand has been specified (and set to 1).  So if expand has
-# not been specified we let it default to the numeric value 2.
-# However force.exp = force.noexp = FALSE
-# indicating that this was not the user's idea  
-  if(is.null(expand))
-    expand <- spatstat.options("expand")
 
 ###################################################################
 # return augmented list  
@@ -157,8 +136,6 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
               periodic=periodic, 
               ptypes=ptypes,
               fixall=fixall,
-              force.exp=force.exp,
-              force.noexp=force.noexp,
               fixcode=fixcode,
               fixing=fixing,
               condtype=condtype,
@@ -199,41 +176,32 @@ print.rmhcontrol <- function(x, ...) {
   else
     cat("No progress reports (nverb = 0).\n")
 
-  cat("Expand the simulation window? ")
-  if(x$force.noexp)
-    cat("No.\n")
-  else {
-    if(x$force.exp)
-      cat("Yes:\n")
-    else
-      cat("Not determined. Default is:\n")
-    
-    if(is.numeric(x$expand))
-      cat(paste("\tarea expansion factor", x$expand, "\n"))
-    else 
-      print(x$expand)
-  }
+  # invoke print.rmhexpand
+  print(x$expand)
+
+  cat("Periodic edge correction? ")
+  if(is.null(x$periodic)) cat("Not yet determined.\n") else 
+  if(x$periodic) cat("Yes.\n") else cat("No.\n")
+  #
+  return(invisible(NULL))
 }
 
-default.rmhcontrol <- function(model, ...) {
-  stopifnot(is.ppm(model))
-  dflt <- list(expand=default.expand(model),
-               periodic=(as.owin(model)$type=="rectangle"))
-  ctrl <- resolve.defaults(list(...), dflt, .StripNull=TRUE)
-  return(rmhcontrol(ctrl))
+default.rmhcontrol <- function(model) {
+  # set default for 'expand'
+  return(rmhcontrol(expand=default.expand(model)))
 }
 
+update.rmhcontrol <- function(object, ...) {
+  do.call.matched("rmhcontrol.default",
+                  resolve.defaults(list(...), as.list(object)))
+}
 
 rmhResolveControl <- function(control, model) {
   # adjust control information once the model is known
   stopifnot(inherits(control, "rmhcontrol"))
-  undecided <- with(control, !(force.exp || force.noexp))
-  if(undecided && (is.poisson(model) || !is.stationary(model))) {
-    # Expansion is unnecessary for Poisson processes
-    # Default is not to expand if model is non-stationary 
-    control$force.exp <- FALSE
-    control$force.noexp <- TRUE
-    control$expand <- 1
-  }
+  # change *default* expansion rule to something appropriate for model
+  # (applies only if expansion rule is undecided)
+  control$expand <- change.default.expand(control$expand, default.expand(model))
   return(control)
 }
+

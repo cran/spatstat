@@ -6,11 +6,16 @@
   and returns a pixel image.
 }
 \usage{
-  eval.im(expr, envir)
+  eval.im(expr, envir, harmonize=TRUE)
 }
 \arguments{
   \item{expr}{An expression.}
-  \item{envir}{Optional. The environment in which to evaluate the expression.}
+  \item{envir}{Optional. The environment in which to evaluate the
+    expression.}
+  \item{harmonize}{
+    Logical. Whether to resolve inconsistencies between
+    the pixel grids.
+  }
 }
 \details{
   This function is a wrapper to make it easier to perform
@@ -45,7 +50,11 @@
   
   The expression \code{expr} must be vectorised.
   There must be at least one pixel image in the expression.
+
   All images must have compatible dimensions.
+  If \code{harmonize=TRUE}, images that have incompatible dimensions
+  will be resampled so that they are compatible.
+  If \code{harmonize=FALSE}, images that are incompatible will cause an error.
 }
 \value{
   An image object of class \code{"im"}.
@@ -53,6 +62,7 @@
 \seealso{
   \code{\link{as.im}},
   \code{\link{compatible.im}},
+  \code{\link{harmonise.im}},
   \code{\link{im.object}}
 }
 \examples{

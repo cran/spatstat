@@ -8,7 +8,7 @@
 #		Gdot		      G_{i\bullet}
 #		Gmulti	              (generic)
 #
-#	$Revision: 4.38 $	$Date: 2012/03/14 04:39:20 $
+#	$Revision: 4.39 $	$Date: 2012/04/25 02:14:18 $
 #
 ################################################################################
 
@@ -110,14 +110,15 @@ function(X, I, J, r=NULL, breaks=NULL, ..., disjoint=NULL,
   npts <- npoints(X)
   area <- area.owin(W)
 # check I and J
-  if(!is.logical(I) || !is.logical(J))
-    stop("I and J must be logical vectors")
-  if(length(I) != X$n || length(J) != X$n)
-    stop("length of I or J does not equal the number of points")
+  I <- ppsubset(X, I)
+  J <- ppsubset(X, J)
+  if(is.null(I) || is.null(J))
+    stop("I and J must be valid subset indices")
   nI <- sum(I)
   nJ <- sum(J)
   if(nI == 0) stop("No points satisfy condition I")
   if(nJ == 0) stop("No points satisfy condition J")
+
   if(is.null(disjoint))
     disjoint <- !any(I & J)
 # choose correction(s)

@@ -35,6 +35,8 @@
 \seealso{
   \code{\link{affine}},
   \code{\link{affine.owin}},
+  \code{\link{affine.psp}},
+  \code{\link{affine.im}},
   \code{\link{flipxy}},
   \code{\link{rotate}},
   \code{\link{shift}}

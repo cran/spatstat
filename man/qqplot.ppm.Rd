@@ -11,7 +11,7 @@
   qqplot.ppm(fit, nsim=100, expr=NULL, \dots, type="raw",
              style="mean", fast=TRUE, verbose=TRUE, plot.it=TRUE,
              dimyx=NULL, nrep=if(fast) 5e4 else 1e5,
-             control=default.rmhcontrol(fit, nrep=nrep),
+             control=update(default.rmhcontrol(fit), nrep=nrep),
              saveall=FALSE,
              monochrome=FALSE,
              limcol=if(monochrome) "black" else "red",

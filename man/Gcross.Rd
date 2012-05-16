@@ -19,12 +19,16 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
-  \item{j}{Number or character string identifying the type (mark value)
+  \item{j}{The type (mark value)
     of the points in \code{X} to which distances are measured.
+    A character string (or something that will be
+    converted to a character string).
     Defaults to the second level of \code{marks(X)}.
   }
   \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
@@ -92,8 +96,8 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
   \code{X$marks} must be a factor.
   The arguments \code{i} and \code{j} will be interpreted as
   levels of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
+  an integer value \code{i=3} will be interpreted as
+  the number 3, \bold{not} the 3rd smallest level). 
   
   The ``cross-type'' (type \eqn{i} to type \eqn{j})
   nearest neighbour distance distribution function 
@@ -187,10 +191,11 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
 
 }
 \section{Warnings}{
-  The arguments \code{i} and \code{j} are interpreted as
-  levels of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. See the first example.
+  The arguments \code{i} and \code{j} are always interpreted as
+  levels of the factor \code{X$marks}. They are converted to character
+  strings if they are not already character strings.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 
   The function \eqn{G_{ij}}{Gij} does not necessarily have a density. 
 

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.65 $	$Date: 2012/02/03 11:41:54 $
+#	$Revision: 2.69 $	$Date: 2012/05/14 02:35:54 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -42,12 +42,21 @@ function(x, ...,
          what=c("all", "model", "trend", "interaction", "se", "errors")) {
 
   verifyclass(x, "ppm")
+  misswhat <- missing(what) 
 
   opts <- c("model", "trend", "interaction", "se", "errors")
   what <- match.arg(what, c("all", opts), several.ok=TRUE)
   if("all" %in% what) what <- opts
+
+  # If SE was explicitly requested, calculate it.
+  # Otherwise, do it only if the model is Poisson (by default)
+  do.SE <- if(!misswhat) ("se" %in% what) else
+           switch(spatstat.options("print.ppm.SE"),
+                  always = TRUE,
+                  poisson = is.poisson(x),
+                  never = FALSE)
   
-  s <- summary.ppm(x)
+  s <- summary.ppm(x, quick=if(do.SE) FALSE else "no variances")
         
   notrend <-    s$no.trend
   stationary <- s$stationary
@@ -116,17 +125,26 @@ function(x, ...,
     }
   }
   
-  # ----- parameter estimates with SE and 95% CI --------------------
-  if("se" %in% what) {
-    if(!is.null(cose <- s$coefs.SE.CI))
-      print(cose)
-  }
-  
   # ---- Interaction ----------------------------
 
   if("interaction" %in% what) {
-    if(!poisson) 
+    if(!poisson) {
       print(s$interaction, family=FALSE)
+      cat("\n")
+    }
+  }
+  
+  # ----- parameter estimates with SE and 95% CI --------------------
+  if("se" %in% what) {
+    if(!is.null(cose <- s$coefs.SE.CI)) {
+      print(cose)
+    } else if(do.SE) {
+      # standard error calculation failed
+      cat("Standard errors unavailable; variance-covariance matrix is singular")
+    } else {
+      # standard error was voluntarily omitted
+      cat("For standard errors, type coef(summary(x))\n")
+    }
   }
   
   # ---- Warnings issued in mpl.prepare  ---------------------

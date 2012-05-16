@@ -7,7 +7,8 @@
 \usage{
  \method{plot}{fv}(x, fmla, \dots, subset=NULL, lty=NULL, col=NULL, lwd=NULL,
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
-           legend=!add, legendpos="topleft", legendmath=TRUE, legendargs=list(),
+           legend=!add, legendpos="topleft", legendavoid=missing(legendpos),
+           legendmath=TRUE, legendargs=list(),
            shade=NULL, shadecol="grey", add=FALSE, limitsonly=FALSE)
 }
 \arguments{
@@ -66,6 +67,16 @@
     The position of the legend. Either a character string keyword
     (see \code{\link[graphics]{legend}} for keyword options)
     or a pair of coordinates in the format \code{list(x,y)}.
+    Alternatively if \code{legendpos="float"}, a location will be
+    selected inside the plot region, avoiding the graphics.
+  }
+  \item{legendavoid}{
+    Whether to avoid collisions between the legend and the graphics.
+    Logical value.
+    If \code{TRUE}, the code will check for collisions between the
+    legend box and the graphics, and will override \code{legendpos}
+    if a collision occurs.
+    If \code{FALSE}, the value of \code{legendpos} is always respected.
   }
   \item{legendmath}{
     Logical. If \code{TRUE}, the legend will display the

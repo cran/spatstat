@@ -8,7 +8,8 @@ at new locations.
 }
 \usage{
    \method{predict}{ppm}(object, window, ngrid=NULL, locations=NULL,
-   covariates=NULL, type="trend", \dots, check=TRUE, repair=TRUE)
+   covariates=NULL, type="trend", X=data.ppm(object),
+   \dots, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -17,22 +18,23 @@ at new locations.
     class \code{"ppm"} (see \code{\link{ppm.object}}).
   }
   \item{window}{
-    A window (object of class \code{"owin"})
+    Optional. A window (object of class \code{"owin"})
     delimiting the locations where predictions
     should be computed. Defaults to the window of the
     original data used to fit the model \code{object}.
   }
-  \item{ngrid}{Dimensions of a rectangular grid of locations
+  \item{ngrid}{
+    Optional. Dimensions of a rectangular grid of locations
     inside \code{window} where the predictions should be computed.
     An integer, or an integer vector of length 2,
     specifying the number of grid points in the \eqn{y} and \eqn{x}
     directions. (Incompatible with \code{locations})
   }
   \item{locations}{
-    Data giving the \eqn{x,y} coordinates (and marks, if required)
-    at which predictions should be computed. Either a data frame
-    or a binary image mask.
-    (Incompatible with \code{ngrid})
+    Optional. Data giving the \eqn{x,y} coordinates (and marks, if required)
+    of locations at which predictions should be computed.
+    Either a point pattern, or a data frame with columns named \code{x} and
+    \code{y}, or a binary image mask. (Incompatible with \code{ngrid})
   }
   \item{covariates}{
     Values of external covariates required by the model.
@@ -45,6 +47,12 @@ at new locations.
     Options are \code{"trend"} for the spatial trend, 
     \code{"cif"} or \code{"lambda"} for the conditional intensity,
     and \code{"se"} for the standard error of the fitted spatial trend.
+  }
+  \item{X}{
+    Optional. A point pattern (object of class \code{"ppp"})
+    to be taken as the data point pattern when calculating the
+    conditional intensity. The default is to use the original data
+    to which the model was fitted.
   }
   \item{\dots}{
     Ignored.
@@ -151,11 +159,22 @@ at new locations.
     \code{\link{spatstat.options}("npixel")}, which is initialised to 128
     when \pkg{spatstat} is loaded.
   }
-  The argument \code{locations} may be a data frame or list
-  specifying arbitrary locations,
-  or a binary image mask (an object of class \code{"owin"}
+  The argument \code{locations} may be a point pattern,
+  a data frame or a list specifying arbitrary locations;
+  or it may be a binary image mask (an object of class \code{"owin"}
   with type \code{"mask"}) specifying (a subset of) a rectangular
   grid of locations. 
+
+  If \code{locations} is a point pattern (object of class \code{"ppp"}),
+  then prediction will be performed at the points of the point pattern.
+  The result of prediction will be a vector of predicted values,
+  one value for each point.
+  If the model is a marked point process, then
+  \code{locations} should be a marked point pattern, with marks of the
+  same kind as the model; prediction will be performed at these
+  marked points.
+  The result of prediction will be a vector of predicted values,
+  one value for each (marked) point.
 
   If \code{locations} is a data frame or list, then it must contain
   vectors \code{locations$x} and \code{locations$y} specifying the
@@ -264,7 +283,7 @@ at new locations.
   # prediction at arbitrary locations
   predict(mj, locations=data.frame(x=0.3, y=0.4))
 
-  X <- runifpoint(5, japanesepines$window)
+  X <- runifpoint(5, as.owin(japanesepines))
   predict(mj, locations=X)
   predict(mj, locations=X, type="se")
 

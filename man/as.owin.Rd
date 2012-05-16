@@ -10,6 +10,7 @@
 \alias{as.owin.gpc.poly}
 \alias{as.owin.data.frame}
 \alias{as.owin.distfun}
+\alias{as.owin.rmhmodel}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
 \description{
@@ -28,6 +29,7 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
  \method{as.owin}{data.frame}(W, \dots, fatal=TRUE)
  \method{as.owin}{distfun}(W, \dots, fatal=TRUE)
+ \method{as.owin}{rmhmodel}(W, \dots, fatal=FALSE)
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
 \arguments{
@@ -107,6 +109,14 @@ in any of several formats, into an object of class \code{"owin"}.
     an object of class \code{"distfun"} representing a
     distance function. The spatial domain of the function will be
     extracted.
+    \item
+    an object of class \code{"rmhmodel"} representing a
+    point process model that can be simulated using \code{\link{rmh}}.
+    The window (spatial domain) of the model will be extracted.
+    The window may be \code{NULL} in some circumstances (indicating that the
+    simulation window has not yet been determined). This is not treated
+    as an error, because the argument \code{fatal} defaults to
+    \code{FALSE} for this method.
   }
   If the argument \code{W} is not in one of these formats
   and cannot be converted to a window, then an error will

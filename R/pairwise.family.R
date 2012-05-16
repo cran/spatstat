@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.32 $	$Date: 2011/05/18 08:17:10 $
+#    $Revision: 1.33 $	$Date: 2012/04/26 00:56:55 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -268,7 +268,7 @@ if(correction == "translate") {
 }
 
 # No pair potential term between a point and itself
-if(!is.null(EqualPairs)) {
+if(length(EqualPairs) > 0) {
   nplanes <- dim(POT)[3]
   for(k in 1:nplanes)
     POT[cbind(EqualPairs, k)] <- 0

@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.53 $  $Date: 2011/11/18 15:01:14 $
+#   $Revision: 1.56 $  $Date: 2012/05/14 04:28:39 $
 #
 #
 
@@ -315,6 +315,21 @@ is.stationary.rmhmodel <- function(x) {
   return(is.null(tren) || is.numeric(tren))
 }
 
+as.owin.rmhmodel <- function(W, ..., fatal=FALSE) {
+  # W is the rmhmodel object. It contains a window w
+  ans <- W$w
+  if(is.owin(ans)) return(ans)
+  if(fatal) stop("rmhmodel object does not contain a window")
+  return(NULL)
+}
+
+is.expandable.rmhmodel <- function(x) {
+  tren <- x$tren
+  ok <- function(z) { is.null(z) || is.numeric(z) || is.function(z) }
+  return(if(!is.list(tren)) ok(tren) else all(unlist(lapply(tren, ok))))
+}
+
+  
 #####  Table of rules for handling rmh models ##################
 
 .Spatstat.RmhTable <-
@@ -691,7 +706,7 @@ is.stationary.rmhmodel <- function(x) {
             reach = function(par, ...) {
               r <- par[["r"]]
               g <- par[["gamma"]]
-              return(if(g == 1) 0 else r)
+              return(if(g == 1) 0 else 2 * r)
             }
             ),
 #       
@@ -870,7 +885,8 @@ is.stationary.rmhmodel <- function(x) {
             reach = function(par, ...) {
               r <- par[["r"]]
               gamma <- par[["gamma"]]
-              return(max(r[gamma != 1]))
+              operative <- (gamma != 1)
+              return(if(!any(operative)) 0 else (2 * max(r[operative])))
             }
             ),
 #

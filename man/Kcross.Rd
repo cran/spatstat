@@ -19,12 +19,16 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
-  \item{j}{Number or character string identifying the type (mark value)
+  \item{j}{The type (mark value)
     of the points in \code{X} to which distances are measured.
+    A character string (or something that will be
+    converted to a character string).
     Defaults to the second level of \code{marks(X)}.
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
@@ -166,10 +170,11 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
 
 }
 \section{Warnings}{
-  The arguments \code{i} and \code{j} are interpreted as
-  levels of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. See the last example.
+  The arguments \code{i} and \code{j} are always interpreted as
+  levels of the factor \code{X$marks}. They are converted to character
+  strings if they are not already character strings.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 }
 \seealso{
  \code{\link{Kdot}},
@@ -189,10 +194,11 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
     \dontrun{
     K10 <- Kcross(betacells, "on", "off")
 
-    # synthetic example    
+    # synthetic example: point pattern with marks 0 and 1
     pp <- runifpoispp(50)
-    pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
-    K <- Kcross(pp, "0", "1") # note: "0" not 0
+    pp <- pp \%mark\% factor(sample(0:1, npoints(pp), replace=TRUE))
+    K <- Kcross(pp, "0", "1")
+    K <- Kcross(pp, 0, 1) # equivalent
     }
 }
 \author{Adrian Baddeley

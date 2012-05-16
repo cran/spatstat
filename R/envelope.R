@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.24 $  $Date: 2012/04/10 10:01:29 $
+#   $Revision: 2.28 $  $Date: 2012/05/15 09:22:30 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -102,7 +102,8 @@ envelope.ppp <-
 envelope.ppm <- 
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
-           start=NULL, control=default.rmhcontrol(Y, nrep=nrep), nrep=1e5, 
+           start=NULL,
+           control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5, 
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
@@ -830,6 +831,7 @@ envelope.matrix <- function(Y, ...,
                             type=c("pointwise", "global", "variance"),
                             csr=FALSE, use.theory = csr, 
                             nrank=1, ginterval=NULL, nSD=2,
+                            savefuns=FALSE,
                             check=TRUE,
                             Yname=NULL) {
 
@@ -1104,6 +1106,25 @@ envelope.matrix <- function(Y, ...,
                                 nsim = nsim,
                                 nsim2 = nsim.mean,
                                 Yname = Yname)
+
+  # tack on saved functions
+  if(savefuns) {
+    alldata <- cbind(rvals, simvals)
+    simnames <- paste("sim", 1:nsim, sep="")
+    colnames(alldata) <- c("r", simnames)
+    alldata <- as.data.frame(alldata)
+    SimFuns <- fv(alldata,
+                   argu="r",
+                   ylab=atr$ylab,
+                   valu="sim1",
+                   fmla= deparse(. ~ r),
+                   alim=atr$alim,
+                   labl=names(alldata),
+                   desc=c("distance argument r",
+                     paste("Simulation ", 1:nsim, sep="")))
+    fvnames(SimFuns, ".") <- simnames
+    attr(result, "simfuns") <- SimFuns
+  } 
   return(result)
 }
 
@@ -1113,13 +1134,30 @@ envelope.envelope <- function(Y, fun=NULL, ...) {
   Yname <- deparse(substitute(Y), 60, nlines=1)
 
   stopifnot(inherits(Y, "envelope"))
-  csr <- attr(Y, "einfo")$csr
+
+  csr <- list(...)$internal$csr
+  if(is.null(csr))
+    csr <- attr(Y, "einfo")$csr
+  
+  X  <- attr(Y, "datapattern")
+  sf <- attr(Y, "simfuns")
+  sp <- attr(Y, "simpatterns")
+  
+  if(is.null(fun) && is.null(sf)) {
+    # No simulated functions - must compute them from simulated patterns
+    if(is.null(sp))
+      stop(paste("Cannot compute envelope:",
+                 "Y does not contain simulated functions",
+                 "(was not generated with savefuns=TRUE)",
+                 "and does not contain simulated patterns",
+                 "(was not generated with savepatterns=TRUE)"))
+    # set default fun=Kest
+    fun <- Kest
+  }
   
   if(!is.null(fun)) {
     # apply new function 
     # point patterns are required
-    sp <- attr(Y, "simpatterns")
-    X  <- attr(Y, "datapattern")
     if(is.null(sp))
       stop(paste("Object Y does not contain simulated point patterns",
                  "(attribute", dQuote("simpatterns"), ");",
@@ -1133,32 +1171,31 @@ envelope.envelope <- function(Y, fun=NULL, ...) {
                                        list(Yname=Yname,
                                             nsim=length(sp)),
                                        .StripNull=TRUE))
-    copyacross <- c("Yname", "csr", "csr.theo", "simtype")
-    attr(result, "einfo")[copyacross] <- attr(Y, "einfo")[copyacross]
-    return(result)
+  } else {
+    # compute new envelope with existing simulated functions
+    if(is.null(sf)) 
+      stop(paste("Y does not contain a", dQuote("simfuns"), "attribute",
+                 "(it was not generated with savefuns=TRUE)"))
+
+    # extract simulated function values
+    df <- as.data.frame(sf)
+    rname <- fvnames(sf, ".x")
+    df <- df[, (names(df) != rname)]
+
+    result <- do.call(envelope.matrix,
+                      resolve.defaults(list(Y=as.matrix(df)),
+                                       list(...),
+                                       list(csr=csr),
+                                       list(funX=Y, 
+                                            Yname=Yname),
+                                       .StripNull=TRUE))
   }
 
-  # compute new envelope with existing simulated functions
-  sf <- attr(Y, "simfuns")
-  if(is.null(sf))
-    stop(paste("Y does not contain a", dQuote("simfuns"), "attribute",
-               "(it was not generated with savefuns=TRUE)"))
-
-  # extract simulated function values
-  df <- as.data.frame(sf)
-  rname <- fvnames(sf, ".x")
-  df <- df[, (names(df) != rname)]
-
-
-  result <- do.call(envelope.matrix,
-                    resolve.defaults(list(Y=as.matrix(df)),
-                                     list(...),
-                                     list(funX=Y, 
-                                          Yname=Yname),
-                                     .StripNull=TRUE))
-  
+  # Tack on envelope info
   copyacross <- c("Yname", "csr", "csr.theo", "simtype")
   attr(result, "einfo")[copyacross] <- attr(Y, "einfo")[copyacross]
+  # Save data
+  
   return(result)
 }
 

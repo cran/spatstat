@@ -19,12 +19,16 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
-    of the points in \code{X} \bold{from} which distances are measured.
+  \item{i}{The type (mark value)
+    of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
-  \item{j}{Number or character string identifying the type (mark value)
-    of the points in \code{X} \bold{to} which distances are measured.
+  \item{j}{The type (mark value)
+    of the points in \code{X} to which distances are measured.
+    A character string (or something that will be
+    converted to a character string).
     Defaults to the second level of \code{marks(X)}.
   }
   \item{eps}{A positive number.
@@ -102,8 +106,8 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
   \code{X$marks} must be a factor.
   The argument \code{i} will be interpreted as a
   level of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
+  an integer value \code{i=3} will be interpreted as the number 3,
+  \bold{not} the 3rd smallest level).
   
   The ``type \eqn{i} to type \eqn{j}'' multitype \eqn{J} function 
   of a stationary multitype point process \eqn{X}
@@ -155,10 +159,11 @@ Jcross(X, i, j, eps=NULL, r=NULL, breaks=NULL, \dots, correction=NULL)
 
 }
 \section{Warnings}{
-  The argument \code{i} is interpreted as
-  a level of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. See the first example.
+  The arguments \code{i} and \code{j} are always interpreted as
+  levels of the factor \code{X$marks}. They are converted to character
+  strings if they are not already character strings.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 }
 \seealso{
  \code{\link{Jdot}},

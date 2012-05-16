@@ -7,7 +7,7 @@
 
    Disc of radius r in linear network
 
-   $Revision: 1.7 $  $Date: 2012/03/27 04:39:46 $
+   $Revision: 1.9 $  $Date: 2012/04/20 04:46:17 $
 
 */
 
@@ -15,6 +15,8 @@
 
 #define TRUE (0 == 0)
 #define FALSE (!TRUE)
+
+#undef DEBUG
 
 void 
 lineardisc(f, seg, /* centre of disc (local coords) */
@@ -107,7 +109,8 @@ lineardisc(f, seg, /* centre of disc (local coords) */
 	toi   = to[i];
 	reachable = (covered[fromi] || covered[toi]);
 	if(reachable) {
-	  allin = (resid[fromi] + resid[toi] >= lengths[i]);
+	  allin = covered[fromi] && covered[toi] && 
+                     (resid[fromi] + resid[toi] >= lengths[i]);
 	  bdry = !allin;
 	} else allin = bdry = FALSE;
 	if(bdry) {
@@ -133,6 +136,7 @@ countends(np, f, seg, /* centres of discs (local coords) */
 	  ns, from, to,  /* network segments */
 	  dpath,  /* shortest path distances between vertices */
 	  lengths, /* segment lengths */
+	  toler, /* tolerance */
 	  nendpoints /* output counts of endpoints */
 	  )
      int *np, *nv, *ns;
@@ -142,6 +146,7 @@ countends(np, f, seg, /* centres of discs (local coords) */
      double *xv, *yv; /* vectors of coordinates of vertices */
      double *dpath; /* matrix of shortest path distances between vertices */
      double *lengths; /* vector of segment lengths */
+     double *toler; /* tolerance for merging endpoints and vertices */
      /* OUTPUT */
      int *nendpoints;
 {
@@ -149,25 +154,32 @@ countends(np, f, seg, /* centres of discs (local coords) */
   double f0, rad;
   int seg0;
 
-  int i, m, A, B, fromi, toi, allin, bdry, reachable, nends, maxchunk;
-  double length0, dxA, dxB, dxAvi, dxBvi, dxvi, residue;
+  int i, m, A, B, fromi, toi, reachable, nends, maxchunk, covfrom, covto, allin;
+  double length0, dxA, dxB, dxAvi, dxBvi, dxvi, residue, resfrom, resto, tol;
   double *resid; 
-  int *covered;
+  int *covered, *terminal;
 
   Np = *np;
   Nv = *nv;
   Ns = *ns;
+  tol = *toler;
 
   covered = (int *) R_alloc((size_t) Nv, sizeof(int));
+  terminal = (int *) R_alloc((size_t) Nv, sizeof(int));
   resid = (double *) R_alloc((size_t) Nv, sizeof(double));
 
   /* loop over centre points */
   OUTERCHUNKLOOP(m, Np, maxchunk, 256) {
     R_CheckUserInterrupt();
     INNERCHUNKLOOP(m, Np, maxchunk, 256) {
+
       f0 = f[m];
       seg0 = seg[m];
       rad = r[m];
+
+#ifdef DEBUG
+      Rprintf("\nCentre point %d lies in segment %d\n", m, seg0);
+#endif
 
       /* endpoints of segment containing centre */
       A = from[seg0];
@@ -177,6 +189,8 @@ countends(np, f, seg, /* centres of discs (local coords) */
       length0 = lengths[seg0];
       dxA = f0 * length0;
       dxB = (1-f0) * length0;
+
+      nends = 0;
 
       /* visit vertices */
       for(i = 0; i < Nv; i++) {
@@ -188,15 +202,32 @@ countends(np, f, seg, /* centres of discs (local coords) */
 	dxvi = (dxAvi < dxBvi) ? dxAvi : dxBvi;
 	/* distance left to 'spend' from this vertex */
 	residue = rad - dxvi;
-	resid[i] = (residue > 0)? residue : 0;
-	/* determine whether vertex i is inside the disc of radius r */
-	covered[i] = (residue >= 0);
+	if(residue > tol) {
+	  resid[i] = residue;
+	  covered[i] = TRUE;
+	  terminal[i] = FALSE;
+	} else if(residue < -tol) {
+	  resid[i] = 0;
+	  covered[i] = terminal[i] = FALSE;
+	} else {
+	  /* vertex is within 'tol' of an endpoint 
+	   - deem it to be one 
+	  */
+	  resid[i] = 0;
+	  covered[i] = terminal[i] = TRUE;
+	  /* vertex is an endpoint of disc */
+	  ++nends;  
+	}
       }
 
+#ifdef DEBUG
+      Rprintf("%d terminal endpoints\n", nends);
+#endif
+
       /* 
-	 Now visit line segments. 
+	 Now visit line segments 
+	 to count any endpoints that are interior to the segments.
       */
-      nends = 0;
 
       for(i = 0; i < Ns; i++) {
 	/* 
@@ -205,24 +236,54 @@ countends(np, f, seg, /* centres of discs (local coords) */
 	*/
 	if(i == seg0) {
 	  /* initial segment: disc starts from (x0, y0) */
-	  allin = covered[A] && covered[B];
-	  bdry  = !allin;
-	  if(bdry) {
-	    if(!covered[A]) nends++;
-	    if(!covered[B]) nends++;
-	  }
+	  if(!covered[A]) nends++;
+	  if(!covered[B]) nends++;
+#ifdef DEBUG
+	  if(!covered[A]) Rprintf("A not covered\n");
+	  if(!covered[B]) Rprintf("B not covered\n");
+#endif
 	} else {
 	  /* another segment: disc extends in from either endpoint */
 	  fromi = from[i];
 	  toi   = to[i];
-	  reachable = (covered[fromi] || covered[toi]);
+	  covfrom = covered[fromi];
+	  covto   = covered[toi];
+	  resfrom = resid[fromi];
+	  resto   = resid[toi];
+	  reachable = covfrom || covto;
+#ifdef DEBUG
+	  residue = resfrom + resto - lengths[i];
+	  Rprintf("%d: %s %s: %lf + %lf - %lf = %lf sign %s\n", 
+		  i,
+		  (terminal[fromi]) ? "T" : ((covfrom) ? "Y" : "N"),
+		  (terminal[toi]) ? "T" : ((covto) ? "Y" : "N"),
+		  resfrom, resto, lengths[i], residue,
+		  (residue < 0) ? "-" : ((residue > 0) ? "+" : "0"));
+#endif
 	  if(reachable) {
-	    allin = (resid[fromi] + resid[toi] >= lengths[i]);
-	    bdry = !allin;
-	  } else allin = bdry = FALSE;
-	  if(bdry) {
-	    if(covered[fromi]) nends++;
-	    if(covered[toi]) nends++;
+	    residue = resfrom + resto - lengths[i];
+	    allin = covfrom && covto && (residue >= 0);
+#ifdef DEBUG
+	    if(allin) {
+	      Rprintf("Covered\n"); 
+	    } else if((terminal[fromi] || terminal[toi]) &&
+		      (residue >= - tol * lengths[i])) {
+		Rprintf("Deemed to be covered\n"); 
+	    } else Rprintf("Reachable\n");
+#endif
+	    allin = allin || 
+	      ((terminal[fromi] || terminal[toi]) &&
+	       (residue >= - tol));
+	    if(!allin) {
+	      /* segment is not entirely covered by disc
+		 - infer endpoint(s) in interior of segment */
+	      if(covfrom && !terminal[fromi]) nends++;
+	      if(covto && !terminal[toi]) nends++;
+#ifdef DEBUG
+	      if(covfrom && !terminal[fromi]) Rprintf("fromi => end\n");
+	      if(covto && !terminal[toi]) Rprintf("toi => end\n");
+#endif
+	    }
 	  }
 	}
       }

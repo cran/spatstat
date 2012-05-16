@@ -8,10 +8,10 @@
 #        harmonise.im()       Harmonise images
 #        commonGrid()
 #
-#     $Revision: 1.27 $     $Date: 2012/02/04 07:43:19 $
+#     $Revision: 1.29 $     $Date: 2012/05/15 07:09:34 $
 #
 
-eval.im <- function(expr, envir) {
+eval.im <- function(expr, envir, harmonize=TRUE) {
   e <- as.expression(substitute(expr))
   # get names of all variables in the expression
   varnames <- all.vars(e)
@@ -33,11 +33,19 @@ eval.im <- function(expr, envir) {
   images <- vars[ims]
   nimages <- length(images)
   # test that the images are compatible
-  if(!(ok <- do.call("compatible", unname(images))))
-    stop(paste(if(nimages > 2) "some of" else NULL,
-               "the images",
-               commasep(sQuote(names(images))),
-               "are not compatible"))
+  if(!(ok <- do.call("compatible", unname(images)))) {
+    whinge <- paste(if(nimages > 2) "some of" else NULL,
+                    "the images",
+                    commasep(sQuote(names(images))),
+                    if(!harmonize) "are" else "were",
+                    "not compatible")
+    if(!harmonize) {
+      stop(whinge, call.=FALSE)
+    } else {
+      warning(whinge, call.=FALSE)
+      images <- do.call("harmonise.im", images)
+    }
+  }
   # replace each image by its matrix of pixel values, and evaluate
   getvalues <- function(x) {
     v <- as.matrix(x)
@@ -60,6 +68,8 @@ compatible.im <- function(A, B, ..., tol=1e-6) {
   verifyclass(A, "im")
   if(missing(B)) return(TRUE)
   verifyclass(B, "im")
+  if(!all(A$dim == B$dim))
+    return(FALSE)
   xdiscrep <- max(abs(A$xrange - B$xrange),
                  abs(A$xstep - B$xstep),
                  abs(A$xcol - B$xcol))

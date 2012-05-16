@@ -1,7 +1,7 @@
 #
 # Determine which 'canonical variables' depend on a supplied covariate
 #
-#   $Revision: 1.4 $  $Date: 2011/11/21 06:40:09 $
+#   $Revision: 1.7 $  $Date: 2012/05/08 03:44:21 $
 #
 
 model.depends <- function(object) {
@@ -72,4 +72,15 @@ model.covariates <- function(object, fitted=TRUE, offset=TRUE) {
   return(nm[keep])
 }
 
-  
+has.offset.term <- function(object) {
+  # model terms
+  tt <- terms(object)
+  oo  <- attr(tt, "offset")
+  return(!is.null(oo) && (length(oo) > 0))
+}
+
+has.offset <- function(object) {
+  has.offset.term(object) || !is.null(model.offset(model.frame(object)))
+}
+
+

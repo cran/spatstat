@@ -13,7 +13,7 @@
 
 predict.ppm <-
 function(object, window, ngrid=NULL, locations=NULL,
-         covariates=NULL, type="trend", 
+         covariates=NULL, type="trend", X=data.ppm(object),  
          ..., check=TRUE, repair=TRUE) {
 #
 #  options for `type'
@@ -317,8 +317,9 @@ function(object, window, ngrid=NULL, locations=NULL,
 # 	
   # set up arguments
     inter <- model$interaction
-    X <- model$Q$data
-    U <- ppp(newdata$x, y=newdata$y, window=X$window, check=FALSE)
+    if(!missing(X)) stopifnot(is.ppp(X))
+    W <- as.owin(data.ppm(model))
+    U <- ppp(newdata$x, y=newdata$y, window=W, check=FALSE)
     if(marked) 
       marks(U) <- Umarks <- newdata$marks
     # determine which prediction points are data points

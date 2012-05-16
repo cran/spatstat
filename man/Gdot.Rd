@@ -20,8 +20,10 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
   \item{r}{Optional. Numeric vector. The values of the argument \eqn{r}
@@ -87,8 +89,8 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
   \code{X$marks} must be a factor.
   The argument will be interpreted as a
   level of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3). 
+  an integer value \code{i=3} will be interpreted as the number 3,
+  \bold{not} the 3rd smallest level.)
   
   The ``dot-type'' (type \eqn{i} to any type)
   nearest neighbour distance distribution function 
@@ -186,10 +188,11 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
 
 }
 \section{Warnings}{
-  The argument \code{i} is interpreted as a
-  level of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. See the first example.
+  The argument \code{i} is interpreted as
+  a level of the factor \code{X$marks}. It is converted to a character
+  string if it is not already a character string.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 
   The function \eqn{G_{i\bullet}}{Gi.} does not necessarily have a density. 
 
@@ -216,8 +219,9 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
 
     # synthetic example    
     pp <- runifpoispp(30)
-    pp <- pp \%mark\% factor(sample(0:1, pp$n, replace=TRUE))
-    G <- Gdot(pp, "0") # note: "0" not 0
+    pp <- pp \%mark\% factor(sample(0:1, npoints(pp), replace=TRUE))
+    G <- Gdot(pp, "0")
+    G <- Gdot(pp, 0) # equivalent
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

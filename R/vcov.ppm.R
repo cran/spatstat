@@ -3,7 +3,7 @@
 # and Fisher information matrix
 # for ppm objects
 #
-#  $Revision: 1.32 $  $Date: 2012/04/15 01:03:32 $
+#  $Revision: 1.41 $  $Date: 2012/05/13 08:13:07 $
 #
 
 vcov.ppm <- local({
@@ -40,6 +40,8 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
   # because we might use different estimators,
   # or the parameters might be a subset of the canonical parameter
 
+  Alist  <- NULL
+
   ############## guts ##############################
 
   if(needguts) {
@@ -61,16 +63,21 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
     }
 
     if(!is.poisson(object) && !hessian) {
-      # Gibbs model - invoke new code from Ege and J-F
+      # Gibbs model - separate code
       varcov <- vcovGibbs(object, ..., matrix.action=matrix.action)
       if(is.null(varcov))
         return(NULL)
+      # varcov is the variance-covariance matrix, with attributes
+      Alist <- attr(varcov, "A")
+      attr(varcov, "A") <- NULL
+      # 
+      if(what == "internals") 
+        mom <- model.matrix(object)
       if(what %in% c("fisher", "internals")) {
         # compute fisher information 
         fisher <- checksolve(varcov, matrix.action,
                              "variance-covariance matrix",
                              "Fisher information" )
-        if(is.null(fisher)) return(NULL)
       }
     } else {
       # Poisson model, or Hessian of Gibbs model
@@ -132,28 +139,266 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
            return(varcov / outer(sd, sd, "*"))
          },
          internals = {
-           return(list(fisher=fisher, suff=mom))
+           return(append(list(fisher=fisher, suff=mom), Alist))
          })
 }
 
-  # vcovGibbs from Ege Rubak and J-F Coeurjolly
 
-vcovGibbs <- function(fit, ..., special.alg = TRUE,
-                      matrix.action=c("warn", "fatal", "silent")){
+vcovGibbs <- function(fit, ..., generic=FALSE) {
   verifyclass(fit, "ppm")
-  if(!is.stationary(fit))
-    stop("Sorry, vcov is only implemented for stationary processes")
-  if(fit$correction!="border")
-    stop("Sorry, vcov is only implemented for the border correction")
+  # decide whether to use the generic, slower algorithm
+  use.generic <- generic ||
+                 !is.stationary(fit) ||
+                 has.offset(fit) ||
+                 !(fit$correction == "border" && fit$rbord == reach(fit)) ||
+                 !identical(options("contrasts")[[1]],
+                            c(unordered="contr.treatment",
+                              ordered="contr.poly"))
+  #
+  vc <- if(use.generic) vcovGibbsAJB(fit, ...) else vcovGibbsEgeJF(fit, ...)
+  return(vc)
+}
 
+vcovGibbsAJB <- function(model,
+                         ...,
+                         matrix.action=c("warn", "fatal", "silent"),
+                         algorithm=c("vectorclip", "vector", "basic")) {
+  stopifnot(is.ppm(model))
+  matrix.action <- match.arg(matrix.action)
+  algorithm <- match.arg(algorithm)
+
+  p <- length(coef(model))
+  if(length(p) == 0) return(matrix(, 0, 0))
+  pnames <- names(coef(model))
+  dnames <- list(pnames, pnames)
+  #
+  correction <- model$correction
+  Q <- quad.ppm(model)
+  X <- data.ppm(model)
+  Z <- is.data(Q)
+  W <- as.owin(model)
+  #
+  # determine which data points entered into the sum in the pseudolikelihood
+  # (border correction, nonzero cif)
+  ok <- getglmsubset(model)
+  ok <- ok[Z]
+  #
+  #
+  nX <- npoints(X)
+  if(nX == 0)
+    return(matrix(NA, p, p, dimnames=dnames))
+  # conditional intensity lambda(X[i] | X) = lambda(X[i] | X[-i])
+  lam <- fitted(model, dataonly=TRUE)
+  # sufficient statistic h(X[i] | X) = h(X[i] | X[-i])
+  m <- model.matrix(model)[Z, , drop=FALSE]
+  mok <- m[ok, , drop=FALSE]
+  #
+  A1 <- sumouter(mok)
+  dimnames(A1) <- dnames
+  #
+  A2 <- A3 <- matrix(0, p, p, dimnames=dnames)
+  # identify close pairs
+  R <- reach(model, epsilon=1e-2)
+  if(is.finite(R)) {
+    areaW <- area.owin(if(correction == "border") erosion(W, R) else W)
+    A1 <- A1/areaW
+    if(R == 0) return(A1)
+    cl <- closepairs(X, R)
+    I <- cl$i
+    J <- cl$j
+    if(algorithm == "vectorclip") {
+      cl2 <- closepairs(X, 2*R)
+      I2 <- cl2$i
+      J2 <- cl2$j
+    }
+  } else {
+    # either infinite reach, or something wrong
+    areaW <- area.owin(W)
+    A1 <- A1/areaW
+    IJ <- expand.grid(I=1:nX, J=1:nX)
+    I2 <- I <- IJ$I
+    J2 <- J <- IJ$J
+  }
+  # filter:  I and J must both belong to the nominated subset 
+  okIJ <- ok[I] & ok[J]
+  I <- I[okIJ]
+  J <- J[okIJ]
+  #
+  if(length(I) == 0) return(A1)
+  # The following ensures that 'empty' and 'X' have compatible marks 
+  empty <- X[integer(0)]
+  # Run through pairs
+  switch(algorithm,
+         basic={
+           for(i in unique(I)) {
+             Xi <- X[i]
+             Ji <- unique(J[I==i])
+             if((nJi <- length(Ji)) > 0) {
+               for(k in 1:nJi) {
+                 j <- Ji[k]
+                 X.ij <- X[-c(i,j)]
+                 # compute conditional intensity
+                 #    lambda(X[j] | X[-i]) = lambda(X[j] | X[-c(i,j)]
+                 plamj.i <- predict(model, type="cif", locations=X[j], X=X.ij)
+                 # corresponding values of sufficient statistic 
+                 #    h(X[j] | X[-i]) = h(X[j] | X[-c(i,j)]
+                 pmj.i <- partialModelMatrix(X.ij, X[j], model)[nX-1, ]
+                 # conditional intensity and sufficient statistic
+                 # in reverse order
+                 #    lambda(X[i] | X[-j]) = lambda(X[i] | X[-c(i,j)]
+                 plami.j <- predict(model, type="cif", locations=X[i], X=X.ij)
+                 pmi.j <- partialModelMatrix(X.ij, Xi, model)[nX-1, ]
+                 # increment A2, A3
+                 wt <- plami.j / lam[i] - 1
+                 A2 <- A2 + wt * outer(pmi.j, pmj.i)
+                 # delta sufficient statistic
+                 # delta_i h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X) - h(X[j] | X[-i])
+                 # delta_j h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X[-i]) - h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X) - h(X[i] | X[-j])
+                 deltaiSj <- m[j, ] - pmj.i
+                 deltajSi <- m[i, ] - pmi.j
+                 A3 <- A3 + outer(deltaiSj, deltajSi)
+               }
+             }
+           }
+         },
+         vector={
+           # --------- faster algorithm using vector functions ------------
+           for(i in unique(I)) {
+             Ji <- unique(J[I==i])
+             if((nJi <- length(Ji)) > 0) {
+               X.i <- X[-i]
+               XJi <- X[Ji]
+               # index of XJi in X.i
+               J.i <- Ji - (Ji > i)
+               # compute conditional intensity
+               #   lambda(X[j] | X[-i]) = lambda(X[j] | X[-c(i,j)]
+               # for all j
+               plamj <- predict(model, type="cif", locations=XJi, X=X.i)
+               # corresponding values of sufficient statistic 
+               #    h(X[j] | X[-i]) = h(X[j] | X[-c(i,j)]
+               # for all j
+               pmj <- partialModelMatrix(X.i, empty, model)[J.i, , drop=FALSE]
+               #
+               # conditional intensity and sufficient statistic in reverse order
+               #    lambda(X[i] | X[-j]) = lambda(X[i] | X[-c(i,j)]
+               # for all j
+               plami <- numeric(nJi)
+               pmi <- matrix(, nJi, p)
+               Xi <- X[i]
+               for(k in 1:nJi) {
+                 j <- Ji[k]
+                 X.ij <- X[-c(i,j)]
+                 plami[k] <- predict(model, type="cif", locations=Xi, X=X.ij)
+                 pmi[k, ] <- partialModelMatrix(X.ij, Xi, model)[nX-1, ]
+               }
+               # increment A2, A3
+               wt <- plami / lam[i] - 1
+               for(k in 1:nJi) {
+                 A2 <- A2 + wt[k] * outer(pmi[k,], pmj[k,])
+                 j <- Ji[k]
+                 # delta sufficient statistic
+                 # delta_i h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X) - h(X[j] | X[-i])
+                 # delta_j h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X[-i]) - h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X) - h(X[i] | X[-j])
+                 deltaiSj <- m[j, ] - pmj[k,]
+                 deltajSi <- m[i, ] - pmi[k,]
+                 A3 <- A3 + outer(deltaiSj, deltajSi)
+               }
+             }
+           }
+         },
+         vectorclip={
+           # --------- faster version of 'vector' algorithm
+           # --------  by removing non-interacting points of X
+           for(i in unique(I2)) {
+             # all points within 2R
+             J2i <- unique(J2[I2==i])
+             # all points within R
+             Ji  <- unique(J[I==i])
+             isclose <- J2i %in% Ji
+             if(any(isclose)) {
+               Xi <- X[i]
+               # replace X[-i] by X \cap b(0, 2R)
+               X.i <- X[J2i]
+               nX.i <- length(J2i)
+               # locations to be interrogated
+               XJi <- X[Ji]
+               nJi <- length(Ji)
+               # index of XJi in X.i
+               J.i <- match(Ji, J2i)
+               if(any(is.na(J.i)))
+                 stop("Internal error: Ji not a subset of J2i")
+               # compute conditional intensity
+               #   lambda(X[j] | X[-i]) = lambda(X[j] | X[-c(i,j)]
+               # for all j
+               plamj <- predict(model, type="cif", locations=XJi, X=X.i)
+               # corresponding values of sufficient statistic 
+               #    h(X[j] | X[-i]) = h(X[j] | X[-c(i,j)]
+               # for all j
+               pmj <- partialModelMatrix(X.i, empty, model)[J.i, , drop=FALSE]
+               #
+               # conditional intensity and sufficient statistic in reverse order
+               #    lambda(X[i] | X[-j]) = lambda(X[i] | X[-c(i,j)]
+               # for all j
+               plami <- numeric(nJi)
+               pmi <- matrix(, nJi, p)
+               for(k in 1:nJi) {
+                 j <- Ji[k]
+                 # X.ij <- X[-c(i,j)]
+                 X.ij <- X.i[-J.i[k]]
+                 plami[k] <- predict(model, type="cif", locations=Xi, X=X.ij)
+                 pmi[k, ] <- partialModelMatrix(X.ij, Xi, model)[nX.i, ]
+               }
+               # increment A2, A3
+               wt <- plami / lam[i] - 1
+               for(k in 1:nJi) {
+                 A2 <- A2 + wt[k] * outer(pmi[k,], pmj[k,])
+                 j <- Ji[k]
+                 # delta sufficient statistic
+                 # delta_i h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
+                 # = h(X[j] | X) - h(X[j] | X[-i])
+                 # delta_j h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X[-i]) - h(X[i] | X[-c(i,j)])
+                 # = h(X[i] | X) - h(X[i] | X[-j])
+                 deltaiSj <- m[j, ] - pmj[k,]
+                 deltajSi <- m[i, ] - pmi[k,]
+                 A3 <- A3 + outer(deltaiSj, deltajSi)
+               }
+             }
+           }
+         })
+  A2 <- A2/areaW
+  A3 <- A3/areaW
+  ## Matrix Sigma (A1+A2+A3):
+  Sigma <-A1+A2+A3
+  ## Finally the result is calculated:
+  U <- checksolve(A1, matrix.action, , "variance")
+  if(is.null(U)) return(NULL)
+  mat <- U %*% Sigma %*% U / areaW
+  dimnames(mat) <- dnames
+  #
+  attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
+  return(mat)
+}
+
+# vcovGibbs from Ege Rubak and J-F Coeurjolly
+
+vcovGibbsEgeJF <- function(fit, ...,
+                           special.alg = TRUE,
+                           matrix.action=c("warn", "fatal", "silent")) {
+  verifyclass(fit, "ppm")
   matrix.action <- match.arg(matrix.action)
   
   ## Interaction name:
   iname <- fit$interaction$name
-  
-  ## Handling the Area Interaction Process: no longer needed
-#  if(iname=="Area-interaction process")
-#    fit$interaction$pot <- HackedAreaInterPot
   
   ## Does the model have marks which are in the trend?
   marx <- is.marked(fit) && ("marks" %in% variablesinformula(fit$trend))
@@ -165,7 +410,7 @@ vcovGibbs <- function(fit, ..., special.alg = TRUE,
   ## Fitted parameters and the parameter dimension p (later consiting of p1 trend param. and p2 interaction param.):
   theta <- coef(fit)
   p <- length(theta)
-  
+
   ## Number of points:
   n <- npoints(Xplus)
 
@@ -174,11 +419,17 @@ vcovGibbs <- function(fit, ..., special.alg = TRUE,
     param <- coef(fit)
     switch(iname,
       "Strauss"={
-	  return(vcovPairPiece(Xplus, reach(fit$interaction), exp(coef(fit)[2])))
+	  return(vcovPairPiece(Xplus,
+                               reach(fit$interaction),
+                               exp(coef(fit)[2]),
+                               matrix.action))
       },
            
       "Piecewise constant pairwise interaction process"={
-        return(vcovPairPiece(Xplus, fit$interaction$par$r, exp(coef(fit)[-1])))
+        return(vcovPairPiece(Xplus,
+                             fit$interaction$par$r,
+                             exp(coef(fit)[-1]),
+                             matrix.action))
       },
 
       "Multitype Strauss process"={
@@ -187,7 +438,8 @@ vcovGibbs <- function(fit, ..., special.alg = TRUE,
         ## Only implemented for 2 types with equal interaction range:
         if(ncol(matR)==2 && marx){
           n <- length(theta)
-          res <- vcovMultiStrauss(Xplus, R, exp(theta[c(n-2,n-1,n)]))
+          res <- vcovMultiStrauss(Xplus, R, exp(theta[c(n-2,n-1,n)]),
+                                  matrix.action)
           return(res)
         }
       }
@@ -253,7 +505,7 @@ vcovGibbs <- function(fit, ..., special.alg = TRUE,
   }
   frac <- exp(-frac)-1
 
-  ## In the rest we restric attention to points in the interior:
+  ## In the rest we restrict attention to points in the interior:
   
   ## The interaction range:
   R <- reach(fit$interaction)
@@ -304,7 +556,11 @@ vcovGibbs <- function(fit, ..., special.alg = TRUE,
     mat <- contrastmatrix(mat, p1)
     dimnames(mat) <- list(names(theta), names(theta))
   }
-  
+  # save A1, A2, A3 
+  dimnames(A1) <- dimnames(A2) <-
+    dimnames(A3) <- list(names(theta), names(theta))
+  attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
+  #
   return(mat)
 }
 
@@ -386,6 +642,8 @@ vcovPairPiece <- function(Xplus, R, gam, matrix.action){
   mat <- U%*%Sigma%*%U / areaW
   nam <- c("(intercept)", names(gam))
   dimnames(mat) <- list(nam, nam)
+  dimnames(A1) <- dimnames(A2) <- dimnames(A3) <- list(nam, nam)
+  attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
   return(mat)
 }
 
@@ -505,7 +763,9 @@ vcovMultiStrauss <- function(Xplus, vecR, vecg, matrix.action){
 
   nam <- c(levels(marks(Xplus)), names(vecg))
   dimnames(mat) <- list(nam, nam)
+  dimnames(A1) <- dimnames(A2) <- dimnames(A3) <- list(nam, nam)
   
+  attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
   return(mat)
 }
 
@@ -559,6 +819,10 @@ vcovStrauss <- function(Xplus, R, gam, matrix.action){
   if(is.null(U)) return(U)
 
   mat <- U%*%Sigma%*%U / areaW
+
+  nam <- c("(Intercept)", "Interaction")
+  dimnames(A1) <- dimnames(A2) <- dimnames(A3) <- list(nam, nam)
+  attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
   
   return(mat)
 }

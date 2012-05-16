@@ -35,24 +35,38 @@
   
   The argument \code{Y} should be a simulation envelope (object of
   class \code{"envelope"}) produced by any of the methods for
-  \code{\link{envelope}}.
+  \code{\link{envelope}}. Additionally, \code{Y} must contain either
+  \itemize{
+    \item the simulated point patterns that were used to create
+    the original envelope (so \code{Y} should have been created by calling
+    \code{\link{envelope}} with \code{savepatterns=TRUE});
+    \item the summary functions of the simulated point patterns
+    that were used to create
+    the original envelope (so \code{Y} should have been created by calling
+    \code{\link{envelope}} with \code{savefuns=TRUE}).
+  }
 
   If the argument \code{fun} is given, it should be a summary function
   that can be applied to the simulated point patterns that were
-  used to create \code{Y}. Also, \code{Y} should contain
-  these point patterns, so \code{Y} should have been created by calling
-  \code{\link{envelope}} with \code{savepatterns=TRUE}. The envelope of
+  used to create \code{Y}. The envelope of
   the summary function \code{fun} for these point patterns
   will be computed using the parameters specified in \code{\dots}.
 
-  If \code{fun} is not given, then the new envelope will be computed
-  from the same set of simulated function values
-  that were used to compute \code{Y}.
-  Also, \code{Y} should contain these function values,
-  so \code{Y} should have been created by calling
-  \code{\link{envelope}} with \code{savefuns=TRUE}. The envelope 
+  If \code{fun} is not given, then:
+  \itemize{
+    \item
+    If \code{Y} contains the summary functions that were used to
+    compute the original envelope, then the new envelope will be
+    computed from these original summary functions.
+    \item
+    Otherwise, if \code{Y} contains the simulated point patterns.
+    then the \eqn{K} function \code{\link{Kest}} will be applied to
+    each of these simulated point patterns, and the new envelope will
+    be based on the \eqn{K} functions.
+  }
+  The new envelope 
   will be computed using the parameters specified in \code{\dots}.
-  
+
   See \code{\link{envelope}} for a full list of envelope parameters.
   Frequently-used parameters include \code{nrank} and \code{nsim} (to change the
   number of simulations used and the significance level of the

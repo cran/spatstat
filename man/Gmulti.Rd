@@ -89,9 +89,17 @@ Gmulti(X, I, J, r=NULL, breaks=NULL, \dots,
   \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
 
   The arguments \code{I} and \code{J} specify two subsets of the
-  point pattern. They may be logical vectors of length equal to
-  \code{X$n}, or integer vectors with entries in the range 1 to
-  \code{X$n}, etc.
+  point pattern. They may be any type of subset indices, for example,
+  logical vectors of length equal to \code{npoints(X)},
+  or integer vectors with entries in the range 1 to
+  \code{npoints(X)}, or negative integer vectors.
+
+  Alternatively, \code{I} and \code{J} may be \bold{functions}
+  that will be applied to the point pattern \code{X} to obtain
+  index vectors. If \code{I} is a function, then evaluating
+  \code{I(X)} should yield a valid subset index. This option
+  is useful when generating simulation envelopes using
+  \code{\link{envelope}}.
 
   This algorithm estimates the distribution function \eqn{G_{IJ}(r)}{GIJ(r)} 
   from the point pattern \code{X}. It assumes that \code{X} can be treated

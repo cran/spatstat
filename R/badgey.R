@@ -2,7 +2,7 @@
 #
 #    badgey.S
 #
-#    $Revision: 1.9 $	$Date: 2012/01/18 11:15:29 $
+#    $Revision: 1.10 $	$Date: 2012/05/12 02:33:53 $
 #
 #    Hybrid Geyer process
 #
@@ -18,7 +18,12 @@ BadGey <- local({
   # ........... auxiliary functions ..............
   delBG <- function(i, r, sat) {
     r   <- r[-i]
-    sat <- sat[-i]
+    if(length(r) == length(sat)) {
+      r   <- r[-i]
+      sat <- sat[-i]
+    } else if(length(sat) == 1) {
+      r <- r[-i]
+    } else stop("Mismatch in dimensions of arguments r and sat")
     nr <- length(r)
     if(nr == 0) return(Poisson())
     if(nr == 1) return(Geyer(r, sat))

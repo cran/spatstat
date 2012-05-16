@@ -20,10 +20,10 @@ Kmulti(X, I, J, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
     See under Details.
   }
   \item{I}{Subset index specifying the points of \code{X}
-    from which distances are measured. 
+    from which distances are measured. See Details.
   }
   \item{J}{Subset index specifying the points in \code{X} to which
-    distances are measured. 
+    distances are measured. See Details.
   }
   \item{r}{numeric vector. The values of the argument \eqn{r}
     at which the multitype \eqn{K} function
@@ -97,9 +97,17 @@ The argument \code{X} must be a point pattern (object of class
 \code{"ppp"}) or any data that are acceptable to \code{\link{as.ppp}}.
 
 The arguments \code{I} and \code{J} specify two subsets of the
-point pattern. They may be logical vectors of length equal to
-\code{X$n}, or integer vectors with entries in the range 1 to
-\code{X$n}, etc.
+point pattern. They may be any type of subset indices, for example,
+logical vectors of length equal to \code{npoints(X)},
+or integer vectors with entries in the range 1 to
+\code{npoints(X)}, or negative integer vectors.
+
+Alternatively, \code{I} and \code{J} may be \bold{functions}
+that will be applied to the point pattern \code{X} to obtain
+index vectors. If \code{I} is a function, then evaluating
+\code{I(X)} should yield a valid subset index. This option
+is useful when generating simulation envelopes using
+\code{\link{envelope}}.
 
 The argument \code{r} is the vector of values for the
 distance \eqn{r} at which \eqn{K_{IJ}(r)}{KIJ(r)} should be evaluated. 
@@ -188,13 +196,20 @@ Implemented for all window geometries.
  \code{\link{pcf}}
 }
 \examples{
-    data(longleaf)
      # Longleaf Pine data: marks represent diameter
     \testonly{
-        longleaf <- longleaf[seq(1,longleaf$n, by=50), ]
+        longleaf <- longleaf[seq(1,npoints(longleaf), by=50), ]
     }
     K <- Kmulti(longleaf, longleaf$marks <= 15, longleaf$marks >= 25)
     plot(K)
+    # functions determining subsets
+    f1 <- function(X) { marks(X) <= 15 }
+    f2 <- function(X) { marks(X) >= 15 }
+    K <- Kmulti(longleaf, f1, f2)
+   \testonly{
+        rm(longleaf)
+    }
+ 
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

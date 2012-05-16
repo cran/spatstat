@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.23 $	$Date: 2011/05/26 15:48:37 $
+#	$Revision: 1.24 $	$Date: 2012/05/09 10:45:46 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -49,8 +49,9 @@ function(Q,
                              translation="translate",
                              none="none"))
   
-  # validate rbord for border correction
+  # validate rbord 
   if(correction == "border") {
+    # rbord for border correction
     rbord.given <- !missing(rbord) && !is.null(rbord)
     if(is.null(rbord))
       rbord <- reach(interaction)
@@ -66,6 +67,10 @@ function(Q,
               "rbord, or use a different edge correction")
       stop(whinge)
     }
+  } else {
+    # rbord must be numeric to satisfy mpl.engine
+    if(is.null(rbord))
+      rbord <- 0
   }
   
   # go

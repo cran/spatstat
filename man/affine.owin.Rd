@@ -39,6 +39,8 @@
 \seealso{
   \code{\link{affine}},
   \code{\link{affine.ppp}},
+  \code{\link{affine.psp}},
+  \code{\link{affine.im}},
   \code{\link{rotate}},
   \code{\link{shift}}
 }

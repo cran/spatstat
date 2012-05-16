@@ -2,38 +2,46 @@
 #
 #  defaultwin.R
 #
-#   $Revision: 1.8 $   $Date: 2011/11/02 07:54:11 $
+#   $Revision: 1.9 $   $Date: 2012/05/11 11:20:09 $
 #
 
 default.expand <- function(object, m=2, epsilon=1e-6) {
-  verifyclass(object, "ppm")
+  stopifnot(is.ppm(object) || inherits(object, "rmhmodel"))
   # no expansion necessary if model is Poisson
   if(is.poisson(object))
-    return(1)
-  # no expansion if model depends on covariate data
-  if(summary(object)$uses.covars)
-    return(1)
-  # no expansion if model is nonstationary
+    return(.no.expansion)
+  # default is no expansion if model is nonstationary
   if(!is.stationary(object))
-    return(1)
-  # expand data window by distance d = m * reach
-  w <- as.owin(data.ppm(object))
+    return(.no.expansion)
+  
+# Redundant since a non-expandable model is non-stationary
+#  if(!is.expandable(object))
+#    return(.no.expansion)
+  
+  # rule is to expand data window by distance d = m * reach
   rr <- reach(object, epsilon=epsilon)
   if(!is.finite(rr))
-    return(NULL)
+    return(rmhexpand())
   if(!is.numeric(m) || length(m) != 1 || m < 1)
     stop("m should be a single number >= 1")
   mr <- m * rr
-  if(w$type == "rectangle") 
-    return(owin(w$xrange + c(-1,1) * mr, w$yrange + c(-1,1) * mr))
-  else
-    return(dilation.owin(w, mr))
+  rule <- rmhexpand(distance = mr)
+  # 
+  w <- as.owin(object)
+  if(!is.null(w)) {
+    # apply rule to window
+    wplus <- expand.owin(w, rule)
+    # save as new expansion rule
+    rule <- rmhexpand(wplus)
+  }
+  return(rule)
 }
 
 default.clipwindow <- function(object, epsilon=1e-6) {
-  verifyclass(object, "ppm")
+  stopifnot(is.ppm(object) || inherits(object, "rmhmodel"))
   # data window
-  w <- as.owin(data.ppm(object))
+  w <- as.owin(object)
+  if(is.null(w)) return(NULL)
   # interaction range of model
   rr <- reach(object, epsilon=epsilon)
   if(!is.finite(rr))
@@ -41,7 +49,7 @@ default.clipwindow <- function(object, epsilon=1e-6) {
   if(rr == 0)
     return(w)
   else
-    return(erosion.owin(w, rr))
+    return(erosion(w, rr))
 }
 
   

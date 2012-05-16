@@ -2,7 +2,7 @@
 #
 #    triplets.R
 #
-#    $Revision: 1.7 $	$Date: 2012/01/18 10:50:14 $
+#    $Revision: 1.8 $	$Date: 2012/04/26 00:56:33 $
 #
 #    The triplets interaction
 #
@@ -29,7 +29,7 @@ Triplets <- local({
     # check that all points of X are included in U
     nX <- npoints(X)
     nU <- npoints(U)
-    XinU <- if(is.null(EqualPairs)) integer(0) else EqualPairs[,1]
+    XinU <- if(length(EqualPairs) == 0) integer(0) else EqualPairs[,1]
     missX <- which(table(factor(XinU, levels=1:nX)) == 0)
     if((nmiss <- length(missX)) > 0) {
       # add missing points to (the end of) U

@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.53 $   $Date: 2011/12/28 06:02:43 $
+#  $Revision: 2.55 $   $Date: 2012/05/11 11:19:52 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -243,7 +243,7 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
       cat("Extracting model information...")
     
     # Extract essential information
-    Y <- summary(X)
+    Y <- summary(X, quick="no variances")
 
     if(Y$marked && !Y$multitype)
       stop("Not implemented for marked point processes other than multitype")
@@ -365,32 +365,22 @@ rmhmodel.ppm <- function(model, win, ..., verbose=TRUE, project=TRUE,
 
 rmhResolveExpansion <- function(win, control, imagelist, itype="covariate") {
   # Determine expansion window for simulation
-
-  if(control$force.noexp) {
-    # Expansion prohibited
-    return(list(wsim=win, expanded=FALSE))
-  }
+  ex <- control$expand
   
-  # Determine proposed expansion window
-  expand <- control$expand
-  if(is.null(expand)) {
-    want.expand <- FALSE
-    wexp <- win
-  } else if(is.owin(expand)) {
-    want.expand <- TRUE
-    wexp <- expand
-  } else if(is.numeric(expand) && length(expand) == 1) {
-    if(expand < 1)
-      stop("expand must be >= 1")
-    wexp <- if(expand == 1) win else expand.owin(win, expand)
-    want.expand <- (expand > 1)
-  } else stop(paste("Unrecognised format for", sQuote("expand")))
-    
-  # Decide whether to expand
-
-  if(!want.expand)
+# The following is redundant because it is implied by !will.expand(ex)  
+#  if(ex$force.noexp) {
+#    # Expansion prohibited
+#    return(list(wsim=win, expanded=FALSE))
+#  }
+  
+  # Is expansion contemplated?
+  if(!will.expand(ex))
     return(list(wsim=win, expanded=FALSE))
 
+  # Proposed expansion window
+  wexp <- expand.owin(win, ex)
+
+  # Check feasibility
   isim <- unlist(lapply(imagelist, is.im))
   imagelist <- imagelist[isim]
 
@@ -402,19 +392,14 @@ rmhResolveExpansion <- function(win, control, imagelist, itype="covariate") {
   # Expansion is limited to domain of image data
   # Determine maximum possible expansion window
   wins <- lapply(imagelist, as.owin)
-  if(length(wins) == 1) {
-    cwin <- wins[[1]]
-  } else {
-    names(wins) <- NULL
-    cwin <- do.call("intersect.owin", wins)
-  }
+  cwin <- do.call("intersect.owin", unname(wins))
   
   if(!is.subset.owin(wexp, cwin)) {
     # Cannot expand to proposed window
-    if(control$force.exp)
+    if(ex$force.exp)
       stop(paste("Cannot expand the simulation window,",
                  "because the", itype, "images do not cover",
-                 "the expanded window"))
+                 "the expanded window"), call.=FALSE)
       # Take largest possible window
     wexp <- intersect.owin(wexp, cwin)
   }

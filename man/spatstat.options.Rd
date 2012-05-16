@@ -225,6 +225,16 @@
       algorithm. These override the defaults
       in \code{\link{rmhcontrol.default}}.
     }
+    \item{print.ppm.SE}{
+      Default rule used by \code{\link{print.ppm}}
+      to decide whether to calculate and print standard errors
+      of the estimated coefficients of the model.
+      One of the strings \code{"always"}, \code{"never"} or
+      \code{"poisson"} (the latter indicating that standard errors
+      will be calculated only for Poisson models). The default is
+      \code{"poisson"} because the calculation for non-Poisson models
+      can take a long time.
+      }
   }
   If no arguments are given, 
   the current values of all parameters are returned,
