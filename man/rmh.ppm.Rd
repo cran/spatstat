@@ -9,10 +9,9 @@
 
 \usage{
   \method{rmh}{ppm}(model, start=NULL,
-                    control=default.rmhcontrol(model, expand=expand),
+                    control=default.rmhcontrol(model),
                     \dots,
-                    project=TRUE, expand=NULL, 
-                    verbose=TRUE)
+                    project=TRUE, verbose=TRUE)
 }
 
 \arguments{
@@ -26,12 +25,13 @@
     \code{\link{rmhstart}} for description of these arguments.
     Defaults to \code{list(x.start=data.ppm(model))}
   }
-  \item{control}{Data controlling the running of
+  \item{control}{Data controlling the iterative behaviour of
     the Metropolis-Hastings algorithm.  See \code{\link{rmhcontrol}}
     for description of these arguments.
   }
   \item{\dots}{
-    Further arguments passed to \code{\link{rmh.default}}.
+    Further arguments passed to \code{\link{rmhcontrol}},
+    or to \code{\link{rmh.default}}, or to covariate functions in the model.
   }
   \item{project}{
     Logical flag indicating what to do if the fitted model is
@@ -39,10 +39,6 @@
     specify a valid point process).
     If \code{project=TRUE} the closest valid model will be simulated;
     if \code{project=FALSE} an error will occur.
-  }
-  \item{expand}{
-    Optional expansion factor for simulation window.
-    Defaults to 2.
   }
   \item{verbose}{
     Logical flag indicating whether to print progress reports.
@@ -97,22 +93,30 @@
   The arguments \code{start} and \code{control} are lists of
   parameters determining the initial state and the iterative
   behaviour, respectively, of the Metropolis-Hastings algorithm.
-  They are passed directly to \code{\link{rmhstart}} and
-  \code{\link{rmhcontrol}} respectively.
-  See \code{\link{rmhstart}} and
-  \code{\link{rmhcontrol}} for details of these parameters.
 
-  Note that if you specify \code{control$expand > 1} (so that the
+  The argument \code{start} is passed directly to \code{\link{rmhstart}}.
+  See \code{\link{rmhstart}} for details of the parameters of the
+  initial state, and their default values.
+
+  The argument \code{control} is first passed to
+  \code{\link{rmhcontrol}}. Then if any additional arguments \code{\dots}
+  are given, \code{\link{update.rmhcontrol}} is called to update the
+  parameter values. See \code{\link{rmhcontrol}} for details of
+  the iterative behaviour parameters, and \code{\link{default.rmhcontrol}}
+  for their default values.
+
+  Note that if you specify expansion of the simulation window
+  using the parameter \code{expand} (so that the
   model will be simulated on a window larger than the original data
   window) then the model must be capable of extrapolation to this
-  larger window. This excludes models which depend on external covariates.
+  larger window. This is usually not possible for models which
+  depend on external covariates, because the domain of a covariate image
+  is usually the same as the domain of the fitted model.
   
   After extracting the relevant information from the fitted model
-  object \code{model}, \code{rmh.ppm} simply invokes the default
+  object \code{model}, \code{rmh.ppm} invokes the default
   \code{rmh} algorithm \code{\link{rmh.default}}, unless the model
-  is Poisson.
-
-  If the model is Poisson then the Metropolis-Hastings
+  is Poisson. If the model is Poisson then the Metropolis-Hastings
   algorithm is not needed, and the model is simulated directly, using
   one of \code{\link{rpoispp}}, \code{\link{rmpoispp}},
   \code{\link{rpoint}} or \code{\link{rmpoint}}.
@@ -131,6 +135,7 @@
   \code{\link{rmhmodel}},
   \code{\link{rmhcontrol}},
   \code{\link{default.rmhcontrol}},
+  \code{\link{update.rmhcontrol}},
   \code{\link{rmhstart}},
   \code{\link{rmh.default}},
   \code{\link{ppp.object}},
@@ -174,6 +179,7 @@
    # Strauss process simulated on a larger window
    # then clipped to original window
    Xsim <- rmh(fit, control=list(nrep=Nrep, expand=2, periodic=TRUE))
+   Xsim <- rmh(fit, nrep=Nrep, expand=2, periodic=TRUE)
    
    # Strauss - hard core process
    fit <- ppm(X, ~1, StraussHard(r=7,hc=2))

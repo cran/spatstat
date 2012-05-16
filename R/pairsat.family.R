@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.33 $	$Date: 2011/05/18 08:15:31 $
+#    $Revision: 1.34 $	$Date: 2012/04/26 00:55:22 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -91,7 +91,7 @@ if(is.null(saturate)) {
 
 # first ensure all data points are included in the quadrature points
 Xindex  <- seq_len(npoints(X))
-if(is.null(EqualPairs)) {
+if(length(EqualPairs) == 0) {
   # no data points included 
   missingdata <- Xindex
 } else {

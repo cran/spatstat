@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.10 $   $Date: 2010/08/15 01:57:12 $
+#  $Revision: 1.11 $   $Date: 2012/04/30 08:49:41 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -79,6 +79,13 @@ as.linnet.lpp <- function(X, ..., fatal=TRUE) {
   X$domain
 }
   
+"[.lpp" <- function (x, i, ...) {
+  # invoke [.ppx
+  y <- NextMethod("[")
+  class(y) <- c("lpp", class(y))
+  return(y)
+}
+
 unitname.lpp <- function(x) {
   u <- unitname(x$domain)
   return(u)
@@ -107,3 +114,4 @@ as.psp.lpp <- function(x, ..., fatal=TRUE){
   verifyclass(x, "lpp", fatal=fatal)
   return(x$domain$lines)
 }
+

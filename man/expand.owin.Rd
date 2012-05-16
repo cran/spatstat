@@ -1,50 +1,49 @@
 \name{expand.owin}
 \alias{expand.owin}
-\title{Expand Window By Factor}
+\title{Apply Expansion Rule}
 \description{
-  Expands the bounding box of a window by a given factor.
+  Applies an expansion rule to a window.
 }
 \usage{
- expand.owin(W, f=1)
+ expand.owin(W, \dots)
 }
 \arguments{
   \item{W}{A window.}
-  \item{f}{Scalar factor for expansion of the \emph{area} of the window.}
+  \item{\dots}{
+    Arguments passed to \code{\link{rmhexpand}} to
+    determine an expansion rule.
+  }
 }
 \value{
-  A rectangular window.
+  A window (object of class \code{"owin"}).
 }
 \details{
-  The argument \code{w} should be a window (an object of class
-  \code{"owin"}, see \code{\link{owin.object}} for details)
-  or can be given in any format acceptable to \code{\link{as.owin}()}.
+  The argument \code{W} should be a window (an object of class
+  \code{"owin"}).
 
-  The bounding box of the
-  window \code{W} is expanded by a scale factor equal to the square root
-  of \code{f} in both the \eqn{x} and \eqn{y} directions,
-  so that the area increases by a factor \code{f}. The centre of this
-  expanded rectangle is the same as the centre of the original bounding
-  box. The expanded rectangle is returned.
+  This command applies the expansion rule specified by the
+  arguments \code{\dots} to the window \code{W}, yielding another
+  window.
 
-  This quirky little function exists mainly for reference,
-  as it is the rule for calculating window expansion in our implementation of
-  the Metropolis-Hastings algorithm \code{\link{rmh.default}}.
+  The arguments \code{\dots} are passed to \code{\link{rmhexpand}}
+  to determine the expansion rule.
 
-  For general transformations of the scale, location and orientation
+  For other transformations of the scale, location and orientation
   of a window, see \code{\link{shift}}, \code{\link{affine}}
   and \code{\link{rotate}}.
 }
 \seealso{
-  \code{\link{owin}},
-  \code{\link{as.owin}},
+  \code{\link{rmhexpand}} about expansion rules.
+  
   \code{\link{shift}},
   \code{\link{rotate}},
-  \code{\link{affine}}
+  \code{\link{affine}} for other types of manipulation.
 }
 \examples{
-  w <- square(1)
-  expand.owin(w, 9)
-  # returns the square [-1,2] x [-1,2]
+   expand.owin(square(1), 9)
+   expand.owin(square(1), distance=0.5)
+   expand.owin(letterR, length=2)
+   expand.owin(letterR, distance=0.1)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

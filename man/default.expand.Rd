@@ -1,8 +1,8 @@
 \name{default.expand}
 \alias{default.expand}
-\title{Compute Expansion Window for Simulation}
+\title{Default Expansion Rule for Simulation of Model}
 \description{
-  Defines the default expansion window
+  Defines the default expansion window or expansion rule
   for simulation of a fitted point process model.
 }
 \usage{
@@ -10,7 +10,8 @@
 }
 \arguments{
   \item{object}{
-    A fitted point process model (object of class \code{"ppp"}).
+    A point process model (object of class \code{"ppm"}
+    or \code{"rmhmodel"}).
   }
   \item{m}{
     A single numeric value.
@@ -18,17 +19,16 @@
     \code{m * reach(object)} along each side.
   }
   \item{epsilon}{
-    Threshold argument passed to \code{\link{reach.ppm}} to determine
+    Threshold argument passed to \code{\link{reach}} to determine
     \code{reach(object)}.
   }
 } 
 \value{
-  A window (object of class \code{"owin"})
-  or the numeric value 1, representing no expansion.
+  A window expansion rule (object of class \code{"rmhexpand"}).
 }
 \details{
   This function computes a default value for the
-  expansion window (the argument \code{expand} in \code{\link{rmhcontrol}})
+  expansion rule (the argument \code{expand} in \code{\link{rmhcontrol}})
   given a fitted point process model \code{object}.
   This default is used by \code{\link{envelope}}, 
   \code{\link{qqplot.ppm}}, \code{\link{simulate.ppm}} and other functions.
@@ -46,18 +46,18 @@
   determines the expansion of the simulation window.
 
   The function \code{default.expand} determines the default expansion
-  window for a fitted point process model \code{object}.
+  rule for a fitted point process model \code{object}.
   
   If the model is Poisson, then no expansion is necessary.
   No expansion is performed by default,
-  and \code{default.expand} returns the value 1, representing no expansion.
+  and \code{default.expand} returns a rule representing no expansion.
   The simulation window is the original window \code{w = as.owin(object)}.
   
   If the model depends on external covariates (i.e.\ covariates other than
   the Cartesian covariates \code{x} and \code{y} and the \code{marks})
   then no expansion is feasible, in general, because the spatial domain
   of the covariates is not guaranteed to be large enough.
-  \code{default.expand} returns the value 1, representing no expansion.
+  \code{default.expand} returns a rule representing no expansion.
   The simulation window is the original window \code{w = as.owin(object)}.
 
   If the model depends on the Cartesian covariates \code{x} and \code{y},
@@ -69,7 +69,7 @@
   In \pkg{spatstat} version 1.24-2 and later, the
   default rule is \emph{not} to expand if the model depends
   on \code{x} or \code{y}.
-  Again \code{default.expand} returns the value 1, representing no expansion.
+  Again \code{default.expand} returns a rule representing no expansion.
   
   Otherwise, expansion will occur.
   The original window \code{w = as.owin(object)} is expanded by
@@ -81,6 +81,7 @@
   distance \code{m * rr} using \code{\link{dilation}}.
 }
 \seealso{
+  \code{\link{rmhexpand}},
   \code{\link{rmhcontrol}},
   \code{\link{rmh}},
   \code{\link{envelope}},
@@ -89,6 +90,8 @@
 \examples{
   data(cells)
   fit <- ppm(cells, ~1, Strauss(0.07))
+  default.expand(fit)
+  mod <- rmhmodel(cif="strauss", par=list(beta=100, gamma=0.5, r=0.07))
   default.expand(fit)
 }
 \author{Adrian Baddeley

@@ -17,12 +17,16 @@ Lcross.inhom(X, i, j, \dots)
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
-  \item{j}{Number or character string identifying the type (mark value)
+  \item{j}{The type (mark value)
     of the points in \code{X} to which distances are measured.
+    A character string (or something that will be
+    converted to a character string).
     Defaults to the second level of \code{marks(X)}.
   }
   \item{\dots}{
@@ -64,10 +68,11 @@ Lcross.inhom(X, i, j, \dots)
   Boca Raton, 2003.
 }
 \section{Warnings}{
-  The arguments \code{i} and \code{j} are interpreted as
-  levels of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. 
+  The arguments \code{i} and \code{j} are always interpreted as
+  levels of the factor \code{X$marks}. They are converted to character
+  strings if they are not already character strings.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 }
 \seealso{
  \code{\link{Lcross}},

@@ -2,7 +2,7 @@
 #
 #     setcov.R
 #
-#     $Revision: 1.8 $ $Date: 2011/10/10 08:29:03 $
+#     $Revision: 1.10 $ $Date: 2012/05/16 09:38:02 $
 #
 #    Compute the set covariance function of a window
 #    or the (noncentred) spatial covariance function of an image
@@ -23,9 +23,17 @@ setcov <- function(W, V=W, ...) {
 }
 
 imcov <- function(X, Y=X) {
+  if(missing(Y)) Y <- NULL
+  convolve.im(X, Y, reflectX = FALSE, reflectY=TRUE)
+}
+
+convolve.im <- function(X, Y=X, ..., reflectX=FALSE, reflectY=FALSE) {
   stopifnot(is.im(X))
-  crosscov <- !missing(Y)
-  if(crosscov) {
+  have.Y <- !missing(Y) && !is.null(Y)
+  crosscov <- have.Y || reflectX || reflectY
+  trap.extra.arguments(..., .Context="In convolve.im")
+  #
+  if(have.Y) {
     # cross-covariance 
     stopifnot(is.im(Y))
     Xbox <- as.rectangle(X)
@@ -39,6 +47,10 @@ imcov <- function(X, Y=X) {
     XY <- harmonise.im(X=X, Y=Y)
     X <- XY$X
     Y <- XY$Y
+  } else {
+    # Y is missing or NULL
+    Y <- X
+    Xbox <- Ybox <- as.rectangle(X)
   }
   M <- X$v
   M[is.na(M)] <- 0
@@ -52,34 +64,51 @@ imcov <- function(X, Y=X) {
   lengthMpad <- 4 * nc * nr
   fM <- fft(Mpad)
   if(!crosscov) {
-    # compute set covariance by fft
-    G <- fft(Mod(fM)^2, inverse=TRUE)/lengthMpad
+    # compute convolution square
+    G <- fft(fM^2, inverse=TRUE)/lengthMpad
   } else {
-    # compute set cross-covariance by fft
+    # compute set cross-covariance or convolution by fft
     N <- Y$v
     N[is.na(N)] <- 0
     Npad <- matrix(0, ncol=2*nc, nrow=2*nr)
     Npad[1:nr, 1:nc] <- N
     fN <- fft(Npad)
-    G <- fft(fM * Conj(fN), inverse=TRUE)/lengthMpad
+    if(reflectY) fN <- Conj(fN)
+    if(reflectX) fM <- Conj(fM)
+    G <- fft(fM * fN, inverse=TRUE)/lengthMpad
   }
 #  cat(paste("maximum imaginary part=", max(Im(G)), "\n"))
   G <- Mod(G) * xstep * ystep
-  # Currently G[i,j] corresponds to a vector shift of
-  #     dy = (i-1) mod nr, dx = (j-1) mod nc.
-  # Rearrange this periodic function so that 
-  # the origin of translations (0,0) is at matrix position (nr,nc)
-  G <- G[ ((-nr):nr) %% (2 * nr) + 1, (-nc):nc %% (2*nc) + 1]
-  # Now set up a raster image 
-  out <- im(G, xcol=xstep * ((-nc):nc), yrow=ystep * ((-nr):nr))
+  if(reflectX != reflectY) {
+    # Currently G[i,j] corresponds to a vector shift of
+    #     dy = (i-1) mod nr, dx = (j-1) mod nc.
+    # Rearrange this periodic function so that 
+    # the origin of translations (0,0) is at matrix position (nr,nc)
+    # NB this introduces an extra row and column
+    G <- G[ ((-nr):nr) %% (2 * nr) + 1, (-nc):nc %% (2*nc) + 1]
+  }
+  # Determine spatial domain of full raster image
+  XB <- as.rectangle(X)
+  YB <- as.rectangle(Y)
+  # undo shift
+  if(have.Y) YB <- shift(YB, -svec)
+  # reflect
+  if(reflectX) XB <- reflect(XB)
+  if(reflectY) YB <- reflect(YB)
+  # Minkowski sum of covering boxes
+  xran <- XB$xrange + YB$xrange
+  yran <- XB$yrange + YB$yrange
+  # Declare spatial domain
+  out <- im(G, xrange = xran, yrange=yran)
   if(crosscov) {
-    # restrict domain
-    width <- diff(Xbox$xrange) + diff(Ybox$xrange)
-    height <- diff(Xbox$yrange) + diff(Ybox$yrange)
-    XYbox <- owin(c(-1,1) * width/2, c(-1,1) * height/2)
+    # restrict to actual spatial domain of function
+    if(reflectX) Xbox <- reflect(Xbox)
+    if(reflectY) Ybox <- reflect(Ybox)
+   # Minkowski sum 
+    xran <- Xbox$xrange + Ybox$xrange
+    yran <- Xbox$yrange + Ybox$yrange   
+    XYbox <- owin(xran, yran)
     out <- out[XYbox]
-    # undo shift
-    out <- shift(out, svec)
   }
   return(out)
 }

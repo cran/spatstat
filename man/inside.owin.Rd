@@ -11,6 +11,8 @@
 \arguments{
   \item{x}{
     Vector of \eqn{x} coordinates of points to be tested.
+    (Alternatively, a point pattern object providing both
+    \eqn{x} and \eqn{y} coordinates.)
   }
   \item{y}{
     Vector of \eqn{y} coordinates of points to be tested.

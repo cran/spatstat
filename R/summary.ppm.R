@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.51 $   $Date: 2012/01/31 07:52:12 $
+#    $Revision: 1.55 $   $Date: 2012/05/13 07:49:25 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -114,8 +114,11 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       if(is.owin(x)) "owin" else
       if(is.numeric(x) && length(x) == 1) "number" else "unknown"
     }
-    y$covar.type <- ctype <- unlist(lapply(covars, covtype))
-    y$covar.descrip <- y$covar.type
+    ctype <- unlist(lapply(covars, covtype))
+    y$expandable <- all(ctype[used] %in%c("distfun", "function", "number"))
+    names(ctype) <- names(covars)
+    y$covar.type <- ctype
+    y$covar.descrip <- ctype
     # are there any functions?
     y$has.funcs <- any(isfun <- (ctype == "function"))
     # do covariates depend on additional arguments?
@@ -231,11 +234,15 @@ summary.ppm <- function(object, ..., quick=FALSE) {
   }
   
   # ----- parameters with SE --------------------------
-  if(y$poisson && (length(COEFS) > 0)) {
+
+  if(is.character(quick) && (quick == "no variances"))
+    return(y)
+
+  if(length(COEFS) > 0) {
     # compute standard errors
     se <- x$internal$se
     if(is.null(se)) {
-      vc <- vcov(x, matrix.action="silent")
+      vc <- vcov(x, matrix.action="warn")
       if(!is.null(vc))
         se <- sqrt(diag(vc))
     }
@@ -244,10 +251,10 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       lo <- COEFS - two * se
       hi <- COEFS + two * se
       pval <- 2 * pnorm(abs(COEFS)/se, lower.tail=FALSE)
-      psig <- cut(pval, c(0,0.001, 0.01, 0.05, 1),
-                  labels=c("***", "**", "*", " "))
+      psig <- cut(pval, c(0,0.001, 0.01, 0.05, 1, Inf),
+                  labels=c("***", "**", "*", "  ", "na"))
       notapplic <- names(COEFS) %in% c("(Intercept)", "log(lambda)")
-      psig[notapplic] <- " "
+      psig[notapplic] <- "na"
       # table of coefficient estimates with SE and 95% CI
       y$coefs.SE.CI <- data.frame(Estimate=COEFS, S.E.=se, Ztest=psig,
                                   CI95.lo=lo, CI95.hi=hi)
@@ -461,6 +468,10 @@ is.marked.ppm <- function(X, ...) {
 
 is.multitype.ppm <- function(X, ...) {
   summary.ppm(X, quick=TRUE)$multitype
+}
+
+is.expandable.ppm <- function(x) {
+  return(identical(summary(x)$expandable, TRUE))
 }
 
 blankcoefnames <- function(x) {

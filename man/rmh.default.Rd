@@ -7,8 +7,11 @@
   algorithm. 
 }
 
-\usage{\method{rmh}{default}(model, start, control, verbose=TRUE,
-track=FALSE, \dots) }
+\usage{
+   \method{rmh}{default}(model, start=NULL,
+   control=default.rmhcontrol(model),
+   verbose=TRUE, track=FALSE, \dots)
+}
 
 \arguments{
   \item{model}{Data specifying the point process model
@@ -26,8 +29,9 @@ track=FALSE, \dots) }
   \item{track}{Logical flag indicating whether to save the transition
     history of the simulations.
   }
-  \item{\dots}{Further arguments which will be passed to
-    any trend functions in \code{model}.
+  \item{\dots}{
+    Further arguments passed to \code{\link{rmhcontrol}}
+    or to trend functions in \code{model}.
   }
 }
 
@@ -37,7 +41,8 @@ track=FALSE, \dots) }
   The returned value has an attribute \code{info} containing
   modified versions of the arguments
   \code{model}, \code{start}, and \code{control} which together specify
-  the exact simulation procedure.
+  the exact simulation procedure. The \code{info} attribute can be
+  printed (and is printed automatically by \code{\link{summary.ppp}}).
 
   The value of \code{\link[base:Random]{.Random.seed}} at the start
   of the simulations is also saved and returned as an attribute
@@ -179,6 +184,8 @@ track=FALSE, \dots) }
     }
   }
   For full details of these parameters, see \code{\link{rmhcontrol}}.
+  The control parameters can also be given in the \code{\dots} arguments.
+
 }
 \section{Conditional Simulation}{
   There are several kinds of conditional simulation.

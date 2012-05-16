@@ -2,7 +2,7 @@
 #
 #   disc.R
 #
-#   $Revision: 1.13 $ $Date: 2012/04/06 09:51:58 $
+#   $Revision: 1.16 $ $Date: 2012/04/20 04:45:17 $
 #
 #   Compute the disc of radius r in a linear network
 #
@@ -14,6 +14,7 @@ lineardisc <- function(L, x=locator(1), r, plotit=TRUE,
   # r is the radius of the disc
   #
   stopifnot(inherits(L, "linnet"))
+  check.1.real(r)
   lines <- L$lines
   vertices <- L$vertices
   lengths <- lengths.psp(lines)
@@ -127,6 +128,10 @@ lineardisc <- function(L, x=locator(1), r, plotit=TRUE,
                           W=win, check=FALSE)
   #
   if(plotit) {
+    if(dev.cur() == 1) {
+      # null device - initialise a plot
+      plot(L, main="")
+    }
     points(x, col=cols[1], pch=16)
     plot(disclines, add=TRUE, col=cols[2], lwd=2)
     plot(discends, add=TRUE, col=cols[3], pch=16)
@@ -167,6 +172,7 @@ countends <- function(L, x=locator(1), r) {
   seg0 <- startsegment - 1L
   from0 <- L$from - 1L
   to0   <- L$to - 1L
+  toler <- 0.001 * min(lengths)
   zz <- .C("countends",
            np = as.integer(np),
            f = as.double(startfraction),
@@ -179,7 +185,8 @@ countends <- function(L, x=locator(1), r) {
            from = as.integer(from0),
            to = as.integer(to0), 
            dpath = as.double(dpath),
-           lengths = as.double(lengths), 
+           lengths = as.double(lengths),
+           toler=as.double(toler),
            nendpoints = as.integer(integer(np)),
            PACKAGE="spatstat")
   zz$nendpoints

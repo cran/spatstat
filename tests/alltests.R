@@ -698,7 +698,7 @@ local({
   Int  <- density(X,dimyx=200)
   Lint <- eval.im(log(npoints(X1)*Int/npoints(X)))
   M    <- as.owin(Int)
-  MR   <- intersect.owin(M,expand.owin(M,0.5))
+  MR   <- intersect.owin(M,scalardilate(M,0.5,origin="midpoint"))
   X1 <- X1[MR]
   Fut  <- ppm(X1,~offset(Lint),covariates=list(Lint=Lint),
               inter=BadGey(r=c(0.03,0.05),sat=3))
@@ -924,17 +924,14 @@ local({
   hrad <- matrix(0.005, 2, 2)
 
   tryit <- function(types, X, irad, hrad) { 
-    m <- X$marks
-    levels(m) <- types
-    X$marks <- m
-    ppm(X, ~marks + polynom(x,y,2), MultiStrauss(types=types,radii=irad))
+    levels(marks(X)) <- types
     fit <- ppm(X, ~marks + polynom(x,y,2),
                MultiStraussHard(types=types,iradii=irad,hradii=hrad))
     print(fit)
     print(coef(fit))
     val <- fitted(fit)
     pred <- predict(fit)
-    return(NULL)
+    return(invisible(NULL))
   }
 
   tryit(hyphenated, amacrine, irad, hrad)

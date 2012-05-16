@@ -1,7 +1,7 @@
 #
 #	affine.R
 #
-#	$Revision: 1.35 $	$Date: 2011/10/04 10:00:44 $
+#	$Revision: 1.41 $	$Date: 2012/05/14 06:00:15 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
@@ -30,6 +30,10 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
   return(p)
 }
        
+"affine" <- function(X, ...) {
+  UseMethod("affine")
+}
+
 "affine.owin" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...,
                           rescue=TRUE) {
   verifyclass(X, "owin")
@@ -96,9 +100,94 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
   return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 
+"affine.im" <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
+  verifyclass(X, "im")
+  if(!is.vector(vec) || length(vec) != 2)
+    stop(paste(sQuote("vec"), "should be a vector of length 2"))
+  if(!is.matrix(mat) || any(dim(mat) != c(2,2)))
+    stop(paste(sQuote("mat"), "should be a 2 x 2 matrix"))
+  # Inspect the determinant
+  detmat <- det(mat)
+  if(abs(detmat) < .Machine$double.eps)
+    stop("Matrix of linear transformation is singular")
+  #
+  diagonalmatrix <- all(mat == diag(diag(mat)))
+  scaletransform <- diagonalmatrix && (length(unique(diag(mat))) == 1)
+  newunits <- if(scaletransform) unitname(X) else as.units(NULL)
+  newpixels <- (length(list(...)) > 0)
+  #
+  if(diagonalmatrix && !newpixels) {
+    # diagonal matrix: apply map to row and column locations
+    v      <- X$v
+    d      <- X$dim
+    newbox <- affine(as.rectangle(X), mat=mat, vec=vec)
+    newxy  <- affinexy(list(x=X$xcol, y=X$yrow), mat=mat, vec=vec)
+    xcol <- newxy$x
+    yrow <- newxy$y
+    if(diag(mat)[1] < 0) {
+      # x scale is negative
+      xcol <- rev(xcol)
+      v <- v[, (d[2]:1)]
+    }
+    if(diag(mat)[2] < 0) {
+      # y scale is negative
+      yrow <- rev(yrow)
+      v <- v[(d[1]:1), ]
+    }
+    Y <- im(v, xcol=xcol, yrow=yrow,
+            xrange=newbox$xrange, yrange=newbox$yrange,
+            unitname=newunits)
+  } else {
+    # general case
+    # create box containing transformed image
+    newframe <- bounding.box.xy(affinexy(corners(X), mat, vec))
+    W <- if(length(list(...)) > 0) as.mask(newframe, ...) else 
+    as.mask(newframe, eps=with(X, min(xstep, ystep)))
+    unitname(W) <- newunits
+    # raster for transformed image
+    naval <- switch(X$type,
+                    factor={ factor(NA, levels=levels(X)) },
+                    integer = NA_integer_,
+                    logical = as.logical(NA_integer_),
+                    real = NA_real_,
+                    complex = NA_complex_, 
+                    character = NA_character_,
+                    NA)
+    Y <- as.im(W, value=naval)
+    # preimages of pixels of transformed image
+    xx <- as.vector(rasterx.im(Y))
+    yy <- as.vector(rastery.im(Y))
+    pre <- affinexy(list(x=xx, y=yy), mat, vec, invert=TRUE)
+    # sample original image
+    Y$v[] <- lookup.im(X, pre$x, pre$y, naok=TRUE)
+  }
+  return(Y)
+}
 
-"affine" <- function(X, ...) {
-  UseMethod("affine")
+
+### ---------------------- reflect ----------------------------------
+
+reflect <- function(X) {
+  UseMethod("reflect")
+}
+
+reflect.default <- function(X) { affine(X, mat=diag(c(-1,-1))) }
+
+reflect.im <- function(X) {
+  stopifnot(is.im(X))
+  out <- with(X,
+              list(v      = v[dim[1]:1, dim[2]:1],
+                   dim    = dim,
+                   xrange = rev(-xrange),
+                   yrange = rev(-yrange),
+                   xstep  = xstep,
+                   ystep  = ystep,
+                   xcol   = rev(-xcol),
+                   yrow   = rev(-yrow),
+                   type   = type,
+                   units  = units))
+  class(out) <- "im"
+  return(out)
 }
 
 ### ---------------------- shift ----------------------------------
@@ -121,16 +210,19 @@ shiftxypolygon <- function(p, vec=c(0,0)) {
 "shift.owin" <- function(X,  vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "owin")
   if(!is.null(origin)) {
-    stopifnot(is.character(origin))
     if(!missing(vec))
       warning("argument vec ignored; overruled by argument origin")
-    origin <- pickoption("origin", origin, c(centroid="centroid",
-                                             midpoint="midpoint",
-                                             bottomleft="bottomleft"))
-    locn <- switch(origin,
-                   centroid={ unlist(centroid.owin(X)) },
-                   midpoint={ c(mean(X$xrange), mean(X$yrange)) },
-                   bottomleft={ c(X$xrange[1], X$yrange[1]) })
+    if(is.numeric(origin)) {
+      locn <- origin
+    } else if(is.character(origin)) {
+      origin <- pickoption("origin", origin, c(centroid="centroid",
+                                               midpoint="midpoint",
+                                               bottomleft="bottomleft"))
+      locn <- switch(origin,
+                     centroid={ unlist(centroid.owin(X)) },
+                     midpoint={ c(mean(X$xrange), mean(X$yrange)) },
+                     bottomleft={ c(X$xrange[1], X$yrange[1]) })
+    } else stop("origin must be a character string or a numeric vector")
     return(shift(X, -locn))
   }
   # Shift the bounding box
@@ -160,17 +252,20 @@ shiftxypolygon <- function(p, vec=c(0,0)) {
 "shift.ppp" <- function(X, vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "ppp")
   if(!is.null(origin)) {
-    stopifnot(is.character(origin))
     if(!missing(vec))
       warning("argument vec ignored; overruled by argument origin")
-    origin <- pickoption("origin", origin, c(centroid="centroid",
-                                             midpoint="midpoint",
-                                             bottomleft="bottomleft"))
-    W <- X$window
-    locn <- switch(origin,
-                   centroid={ unlist(centroid.owin(W)) },
-                   midpoint={ c(mean(W$xrange), mean(W$yrange)) },
-                   bottomleft={ c(W$xrange[1], W$yrange[1]) })
+    if(is.numeric(origin)) {
+      locn <- origin
+    } else if(is.character(origin)) {
+      origin <- pickoption("origin", origin, c(centroid="centroid",
+                                               midpoint="midpoint",
+                                               bottomleft="bottomleft"))
+      W <- X$window
+      locn <- switch(origin,
+                     centroid={ unlist(centroid.owin(W)) },
+                     midpoint={ c(mean(W$xrange), mean(W$yrange)) },
+                     bottomleft={ c(W$xrange[1], W$yrange[1]) })
+    } else stop("origin must be a character string or a numeric vector")
     vec <- -locn
   }
   # perform shift
@@ -182,6 +277,31 @@ shiftxypolygon <- function(p, vec=c(0,0)) {
   return(Y)
 }
 
+### ---------------------- scalar dilation ---------------------------------
 
+scalardilate <- function(X, f, ...) {
+  UseMethod("scalardilate")
+}
+
+scalardilate.default <- function(X, f, ...) {
+  trap.extra.arguments(..., .Context="In scalardilate(X,f)")
+  check.1.real(f, "In scalardilate(X,f)")
+  stopifnot(is.finite(f) && f > 0)
+  Y <- affine(X, mat=diag(c(f,f)))
+  return(Y)
+}
+
+scalardilate.owin <- scalardilate.ppp <- function(X, f, ..., origin=NULL) {
+  trap.extra.arguments(..., .Context="In scalardilate(X,f)")
+  check.1.real(f, "In scalardilate(X,f)")
+  stopifnot(is.finite(f) && f > 0)
+  if(!is.null(origin)) {
+    X <- shift(X, origin=origin)
+    negorig <- attr(X, "lastshift")
+  } else negorig <- c(0,0)
+  Y <- affine(X, mat=diag(c(f, f)), vec = -negorig)
+  return(Y)
+}
+  
 
 

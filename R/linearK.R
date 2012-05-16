@@ -1,7 +1,7 @@
 #
 # linearK
 #
-# $Revision: 1.25 $ $Date: 2011/07/21 09:16:28 $
+# $Revision: 1.26 $ $Date: 2012/04/19 13:33:06 $
 #
 # K function for point pattern on linear network
 #
@@ -134,6 +134,10 @@ linearKengine <- function(X, ..., r=NULL, reweight=NULL, denom=1,
      m <- matrix(1, np, np)
      for(j in 1:np) 
        m[ -j, j] <- countends(L, Y[-j], D[-j,j])
+     if(any(uhoh <- (m == 0))) {
+       warning("Internal error: disc boundary count equal to zero")
+       m[uhoh] <- 1
+     }
      edgewt <- 1/m
   }
   # compute K

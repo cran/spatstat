@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.85 $    $Date: 2011/12/16 09:49:06 $
+#    $Revision: 1.89 $    $Date: 2012/05/10 09:46:11 $
 #
 #  (a) for matrices only:
 #
@@ -488,7 +488,7 @@ check.1.real <- function(x, context="", fatal=TRUE) {
 explain.ifnot <- function(expr, context="") {
   ex <- deparse(substitute(expr))
   ans <- expr
-  if(!identical(ans, TRUE))
+  if(!(is.logical(ans) && length(ans) == 1 && ans))
     stop(paste(context, "it must be TRUE that", sQuote(ex)), call.=FALSE)
 }
 
@@ -628,5 +628,60 @@ codetime <- local({
 # defines the current favorite algorithm for 'order' 
 fave.order <- function(x) { sort.list(x, method="quick", na.last=NA) }
 
+# convert any appropriate subset index for a point pattern
+# to a logical vector
 
-  
+ppsubset <- function(X, I) {
+  Iname <- deparse(substitute(I))
+  # I could be a function to be applied to X
+  if(is.function(I)) {
+    I <- I(X)
+    if(!is.vector(I)) {
+      warning(paste("Function", sQuote(Iname), "did not return a vector"),
+              call.=FALSE)
+      return(NULL)
+    }
+  }      
+  # I is now an index vector
+  n <- npoints(X)
+  i <- try(seq_len(n)[I])
+  if(inherits(i, "try-error") || any(is.na(i))) {
+    warning(paste("Invalid subset index", sQuote(Iname)),
+            call.=FALSE)
+    return(NULL)
+  }
+  if(is.logical(I))
+    return(I)
+  # convert to logical
+  Z <- rep(FALSE, n)
+  Z[I] <- TRUE
+  return(Z)
+}
+
+
+trap.extra.arguments <- function(..., .Context="", .Fatal=FALSE) {
+  z <- list(...)
+  if((narg <- length(z)) == 0) return(FALSE)
+  nama <- names(z)
+  named <- nzchar(nama)
+  whinge <- paste(.Context, ":", sep="")
+  if(any(named)) {
+    # some arguments are named: ensure all are named
+    nama <- sQuote(nama)
+    if(!all(named)) 
+      nama[!named] <- paste("[Arg", 1:length(nama), ,"]", sep="")[!named]
+    whinge <- paste(whinge,
+                    "unrecognised",
+                    ngettext(narg, "argument", "arguments"),
+                    commasep(nama),
+                    ngettext(narg, "was", "were"), "ignored")
+  } else {
+    # all arguments unnamed
+    whinge <- paste(whinge, 
+                    narg, "unrecognised",
+                    ngettext(narg, "argument was", "arguments were"),
+                    "ignored")   
+  }
+  if(.Fatal) stop(whinge, call.=FALSE) else warning(whinge, call.=FALSE)
+  return(TRUE)
+}

@@ -6,7 +6,7 @@
 
   xysegint     compute intersections between line segments
 
-  $Revision: 1.15 $     $Date: 2012/03/27 05:37:26 $
+  $Revision: 1.17 $     $Date: 2012/05/07 06:15:11 $
 
  */
 
@@ -20,6 +20,8 @@
 
 #define NIETS -1.0
 
+#undef DEBUG 
+#define INSIDE01(X,E) (X * (1.0 - X) >= -E)
 
 /* 
          --------------- PAIRS OF PSP OBJECTS ----------------------
@@ -73,10 +75,12 @@ void xysegint(na, x0a, y0a, dxa, dya,
      int *ok;
 { 
   int i, j, ma, mb, ijpos, maxchunk;
-  double determinant, absdet, diffx, diffy, tta, ttb;
+  double determinant, absdet, diffx, diffy, tta, ttb, epsilon;
 
   ma = *na;
   mb = *nb;
+  epsilon = *eps;
+
   OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
     R_CheckUserInterrupt();
     INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
@@ -86,16 +90,30 @@ void xysegint(na, x0a, y0a, dxa, dya,
 	xx[ijpos] = yy[ijpos] = ta[ijpos] = tb[ijpos] = NIETS;
 	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+#ifdef DEBUG
+	Rprintf("i = %d, j = %d\n", i, j);
+	Rprintf("segment A[i]: (%lf, %lf) to (%lf, %lf)\n",
+		x0a[i], y0a[i], x0a[i] + dxa[i], y0a[i] + dya[i]);
+	Rprintf("segment B[j]: (%lf, %lf) to (%lf, %lf)\n",
+		x0b[j], y0b[j], x0b[j] + dxb[j], y0b[j] + dyb[j]);
+	Rprintf("determinant=%lf\n", determinant);
+#endif	
+	if(absdet > epsilon) {
 	  diffx = (x0b[j] - x0a[i])/determinant;
 	  diffy = (y0b[j] - y0a[i])/determinant;
 	  ta[ijpos] = tta = - dyb[j] * diffx + dxb[j] * diffy;
 	  tb[ijpos] = ttb = - dya[i] * diffx + dxa[i] * diffy;
-	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+#ifdef DEBUG
+	  Rprintf("ta = %lf, tb = %lf\n", tta, ttb);
+#endif	
+	  if(INSIDE01(tta, epsilon) && INSIDE01(ttb, epsilon)) {
 	    /* intersection */
 	    ok[ijpos] = 1;
 	    xx[ijpos] = x0a[i] + tta * dxa[i];
 	    yy[ijpos] = y0a[i] + tta * dya[i];
+#ifdef DEBUG
+	    Rprintf("segments intersect at (%lf, %lf)\n", xx[ijpos], yy[ijpos]);
+#endif	
 	  }
 	}
       }
@@ -120,10 +138,12 @@ void xysi(na, x0a, y0a, dxa, dya,
      int *ok;
 { 
   int i, j, ma, mb, ijpos, maxchunk;
-  double determinant, absdet, diffx, diffy, tta, ttb;
+  double determinant, absdet, diffx, diffy, tta, ttb, epsilon;
 
   ma = *na;
   mb = *nb;
+  epsilon = *eps;
+
   OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
     R_CheckUserInterrupt();
     INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
@@ -132,12 +152,12 @@ void xysi(na, x0a, y0a, dxa, dya,
 	ok[ijpos] = 0;
 	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+	if(absdet > epsilon) {
 	  diffx = (x0b[j] - x0a[i])/determinant;
 	  diffy = (y0b[j] - y0a[i])/determinant;
 	  tta = - dyb[j] * diffx + dxb[j] * diffy;
 	  ttb = - dya[i] * diffx + dxa[i] * diffy;
-	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+	  if(INSIDE01(tta, epsilon) && INSIDE01(ttb, epsilon)) {
 	    /* intersection */
 	    ok[ijpos] = 1;
 	  }
@@ -164,23 +184,25 @@ void xysiANY(na, x0a, y0a, dxa, dya,
      int *ok;
 { 
   int i, j, ma, mb, maxchunk;
-  double determinant, absdet, diffx, diffy, tta, ttb;
+  double determinant, absdet, diffx, diffy, tta, ttb, epsilon;
 
   *ok = 0;
   ma = *na;
   mb = *nb;
+  epsilon = *eps;
+
   OUTERCHUNKLOOP(j, mb, maxchunk, 8196) {
     R_CheckUserInterrupt();
     INNERCHUNKLOOP(j, mb, maxchunk, 8196) {
       for(i = 0; i < ma; i++) {
 	determinant = dxb[j] * dya[i] - dyb[j] * dxa[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+	if(absdet > epsilon) {
 	  diffx = (x0b[j] - x0a[i])/determinant;
 	  diffy = (y0b[j] - y0a[i])/determinant;
 	  tta = - dyb[j] * diffx + dxb[j] * diffy;
 	  ttb = - dya[i] * diffx + dxa[i] * diffy;
-	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+	  if(INSIDE01(tta, epsilon) && INSIDE01(ttb, epsilon)) {
 	    /* intersection */
 	    *ok = 1;
 	    return;
@@ -274,9 +296,10 @@ void xysegXint(n, x0, y0, dx, dy,
      int *ok;
 { 
   int i, j, m, mm1, ijpos, jipos, iipos, maxchunk;
-  double determinant, absdet, diffx, diffy, tti, ttj;
+  double determinant, absdet, diffx, diffy, tti, ttj, epsilon;
 
   m = *n;
+  epsilon = *eps;
  
   mm1 = m - 1;
   OUTERCHUNKLOOP(j, mm1, maxchunk, 8196) {
@@ -290,14 +313,14 @@ void xysegXint(n, x0, y0, dx, dy,
 	xx[jipos] = yy[jipos] = tj[ijpos] = tj[jipos] = NIETS;
 	determinant = dx[j] * dy[i] - dy[j] * dx[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+	if(absdet > epsilon) {
 	  diffx = (x0[j] - x0[i])/determinant;
 	  diffy = (y0[j] - y0[i])/determinant;
 	  ti[ijpos] = tti = - dy[j] * diffx + dx[j] * diffy;
 	  tj[ijpos] = ttj = - dy[i] * diffx + dx[i] * diffy;
 	  tj[jipos] = ti[ijpos];
 	  ti[jipos] = tj[ijpos];
-	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	  if(INSIDE01(tti, epsilon) && INSIDE01(ttj, epsilon)) {
 	    ok[ijpos] = ok[jipos] = 1;
 	    xx[ijpos] = xx[jipos] = x0[i] + tti * dx[i];
 	    yy[ijpos] = yy[jipos] = y0[i] + tti * dy[i];
@@ -334,9 +357,10 @@ void xysxi(n, x0, y0, dx, dy,
      int *ok;
 { 
   int i, j, m, mm1, ijpos, jipos, iipos, maxchunk;
-  double determinant, absdet, diffx, diffy, tti, ttj;
+  double determinant, absdet, diffx, diffy, tti, ttj, epsilon;
 
   m = *n;
+  epsilon = *eps;
  
   mm1 = m - 1;
   OUTERCHUNKLOOP(j, mm1, maxchunk, 8196) {
@@ -348,12 +372,12 @@ void xysxi(n, x0, y0, dx, dy,
 	ok[ijpos] = ok[jipos] = 0;
 	determinant = dx[j] * dy[i] - dy[j] * dx[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+	if(absdet > epsilon) {
 	  diffx = (x0[j] - x0[i])/determinant;
 	  diffy = (y0[j] - y0[i])/determinant;
 	  tti = - dy[j] * diffx + dx[j] * diffy;
 	  ttj = - dy[i] * diffx + dx[i] * diffy;
-	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	  if(INSIDE01(tti, epsilon) && INSIDE01(ttj, epsilon)) {
 	    ok[ijpos] = ok[jipos] = 1;
 	  }
 	}
@@ -395,10 +419,12 @@ void xypolyselfint(n, x0, y0, dx, dy,
      int *ok;
 { 
   int i, j, k, m, m2, mm1, mm2, mstop, ijpos, jipos, maxchunk;
-  double determinant, absdet, diffx, diffy, tti, ttj;
+  double determinant, absdet, diffx, diffy, tti, ttj, epsilon;
 
   m = *n;
+  epsilon = *eps;
   m2 = m * m;
+
   /* initialise matrices */
   
   for(k = 0; k < m2; k++) {
@@ -422,14 +448,14 @@ void xypolyselfint(n, x0, y0, dx, dy,
 	jipos = i * m + j;
 	determinant = dx[j] * dy[i] - dy[j] * dx[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
-	if(absdet > *eps) {
+	if(absdet > epsilon) {
 	  diffx = (x0[j] - x0[i])/determinant;
 	  diffy = (y0[j] - y0[i])/determinant;
 	  ti[ijpos] = tti = - dy[j] * diffx + dx[j] * diffy;
 	  tj[ijpos] = ttj = - dy[i] * diffx + dx[i] * diffy;
 	  tj[jipos] = ti[ijpos];
 	  ti[jipos] = tj[ijpos];
-	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	  if(INSIDE01(tti, epsilon) && INSIDE01(ttj, epsilon)) {
 	    ok[ijpos] = ok[jipos] = 1;
 	    xx[ijpos] = xx[jipos] = x0[i] + tti * dx[i];
 	    yy[ijpos] = yy[jipos] = y0[i] + tti * dy[i];
@@ -461,13 +487,14 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
      int *answer;
 { 
   int i, j, m, mm1, mm2, mstop, prop, maxchunk;
-  double determinant, absdet, diffx, diffy, tti, ttj;
+  double determinant, absdet, diffx, diffy, tti, ttj, epsilon;
   double Xsep, Ysep;
 
   m = *n;
   prop = *proper;
   Xsep = *xsep;
   Ysep = *ysep;
+  epsilon = *eps;
 
   *answer = 0;
 
@@ -488,12 +515,12 @@ void xypsi(n, x0, y0, dx, dy, xsep, ysep, eps, proper, answer)
 	if(diffx < Xsep && diffx > -Xsep && diffy < Ysep && diffy > -Ysep) {
 	  determinant = dx[j] * dy[i] - dy[j] * dx[i];
 	  absdet = (determinant > 0) ? determinant : -determinant;
-	  if(absdet > *eps) {
+	  if(absdet > epsilon) {
 	    diffx = diffx/determinant;
 	    diffy = diffy/determinant;
 	    tti = - dy[j] * diffx + dx[j] * diffy;
 	    ttj = - dy[i] * diffx + dx[i] * diffy;
-	    if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	    if(INSIDE01(tti, epsilon) && INSIDE01(ttj, epsilon)) {
               /* intersection occurs */
 	      if(prop == 0 ||
 		 (tti != 0.0 && tti != 1.0) || 
@@ -585,12 +612,23 @@ SEXP Cxysegint(SEXP x0a,
       for(i = 0; i < na; i++) {
 	determinant = dxB[j] * dyA[i] - dyB[j] * dxA[i];
 	absdet = (determinant > 0) ? determinant : -determinant;
+#ifdef DEBUG
+	Rprintf("i = %d, j = %d\n", i, j);
+	Rprintf("segment A[i]: (%lf, %lf) to (%lf, %lf)\n",
+		x0A[i], y0A[i], x0A[i] + dxA[i], y0A[i] + dyA[i]);
+	Rprintf("segment B[j]: (%lf, %lf) to (%lf, %lf)\n",
+		x0B[j], y0B[j], x0B[j] + dxB[j], y0B[j] + dyB[j]);
+	Rprintf("determinant=%lf\n", determinant);
+#endif	
 	if(absdet > epsilon) {
 	  diffx = (x0B[j] - x0A[i])/determinant;
 	  diffy = (y0B[j] - y0A[i])/determinant;
 	  tta = - dyB[j] * diffx + dxB[j] * diffy;
 	  ttb = - dyA[i] * diffx + dxA[i] * diffy;
-	  if(tta >= 0.0 && tta <= 1.0 && ttb >= 0.0 && ttb <= 1.0) {
+#ifdef DEBUG
+	  Rprintf("ta = %lf, tb = %lf\n", tta, ttb);
+#endif	
+	  if(INSIDE01(tta, epsilon) && INSIDE01(ttb, epsilon)) {
 	    /* intersection */
 	    if(nout >= noutmax) {
 	      /* storage overflow - increase space */
@@ -615,6 +653,9 @@ SEXP Cxysegint(SEXP x0a,
 	    jb[nout] = j;
 	    x[nout]  = x0A[i] + tta * dxA[i];
 	    y[nout]  = y0A[i] + tta * dyA[i];
+#ifdef DEBUG
+	    Rprintf("segments intersect at (%lf, %lf)\n", x[nout], y[nout]);
+#endif	
 	    ++nout;
 	  }
 	}
@@ -722,7 +763,7 @@ SEXP CxysegXint(SEXP x0,
 	  diffy = (Y0[j] - Y0[i])/determinant;
 	  tti = - Dy[j] * diffx + Dx[j] * diffy;
 	  ttj = - Dy[i] * diffx + Dx[i] * diffy;
-	  if(tti >= 0.0 && tti <= 1.0 && ttj >= 0.0 && ttj <= 1.0) {
+	  if(INSIDE01(tti,epsilon) && INSIDE01(ttj,epsilon)) {
 	    /* intersection */
 	    if(nout >= noutmax) {
 	      /* storage overflow - increase space */

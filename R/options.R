@@ -222,7 +222,13 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
            is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 0
          },
          valid="a single integer, greater than 0"
-       )
+       ),
+       print.ppm.SE=list(
+         default="poisson",
+         check=function(x) { is.character(x) && length(x) == 1 &&
+                             x %in% c("always", "poisson", "never") },
+         valid="one of the strings \'always\', \'poisson\' or \'never\'"
+       )         
        )
 
 reset.spatstat.options <- function() {

@@ -27,19 +27,28 @@
   This is the \code{print} method for the class \code{"ppm"}.
   It prints information about the fitted model in a sensible format.
 
-  See \code{\link{ppm.object}} for details of the class \code{"ppm"}.
+  The argument \code{what} makes it possible to print only some
+  of the information.
+
+  If \code{what} is missing, then by default,
+  standard errors for the estimated coefficients of the model
+  will be printed only if the model is a Poisson point process.
+  To print the standard errors for a non-Poisson model,
+  call \code{print.ppm} with the argument \code{what} given explicitly,
+  or reset the default rule by typing
+  \code{spatstat.options(print.ppm.SE="always")}.
 }
 \seealso{
-  \code{\link{ppm}},
-  \code{\link{ppm.object}},
+  \code{\link{ppm.object}} for details of the class \code{"ppm"}.
+
+  \code{\link{ppm}} for generating these objects.
+  
   \code{\link{plot.ppm}},
   \code{\link{predict.ppm}}
 }
 \examples{
  \dontrun{
- data(cells)
- Q <- quadscheme(cells)
- m <- ppm(Q, ~1, Strauss(0.05))
+ m <- ppm(cells, ~1, Strauss(0.05))
  m
  }
 }

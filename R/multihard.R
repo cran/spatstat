@@ -2,7 +2,7 @@
 #
 #    multihard.R
 #
-#    $Revision: 1.5 $	$Date: 2012/01/18 10:54:43 $
+#    $Revision: 1.6 $	$Date: 2012/05/08 08:27:22 $
 #
 #    The Hard core process
 #
@@ -38,15 +38,20 @@ MultiHard <- local({
         stop("data and model do not have the same possible levels of marks")
      if(!identical(lu, par$types))
         stop("dummy points and model do not have the same possible levels of marks")
-                   
+
+     # ensure factor levels are acceptable for column names (etc)
+     lxname <- make.names(lx, unique=TRUE)
+     
      # list all UNORDERED pairs of types to be checked
      # (the interaction must be symmetric in type, and scored as such)
      uptri <- (row(h) <= col(h)) & (!is.na(h))
      mark1 <- (lx[row(h)])[uptri]
      mark2 <- (lx[col(h)])[uptri]
-     vname <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
+     # corresponding names
+     mark1name <- (lxname[row(h)])[uptri]
+     mark2name <- (lxname[col(h)])[uptri]
+     vname <- apply(cbind(mark1name,mark2name), 1, paste, collapse="x")
      vname <- paste("mark", vname, sep="")
-     vname <- make.names(vname)  # converts illegal characters
      npairs <- length(vname)
      # list all ORDERED pairs of types to be checked
      # (to save writing the same code twice)

@@ -22,8 +22,10 @@ Kdot.inhom(X, i, lambdaI=NULL, lambdadot=NULL, \dots, r=NULL, breaks=NULL,
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). See under Details.
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
     Defaults to the first level of \code{marks(X)}.
   }
   \item{lambdaI}{
@@ -134,8 +136,8 @@ Kdot.inhom(X, i, lambdaI=NULL, lambdadot=NULL, \dots, r=NULL, breaks=NULL,
 
   The argument \code{i} will be interpreted as a
   level of the factor \code{X$marks}. (Warning: this means that
-  an integer value \code{i=3} will be interpreted as the 3rd smallest level,
-  not the number 3).
+  an integer value \code{i=3} will be interpreted as the number 3,
+  \bold{not} the 3rd smallest level).
   If \code{i} is missing, it defaults to the first
   level of the marks factor, \code{i = levels(X$marks)[1]}.
   
@@ -201,15 +203,17 @@ Kdot.inhom(X, i, lambdaI=NULL, lambdadot=NULL, \dots, r=NULL, breaks=NULL,
   Boca Raton, 2003.
 }
 \section{Warnings}{
-  The argument \code{i} is interpreted as a
-  level of the factor \code{X$marks}. Beware of the usual
-  trap with factors: numerical values are not
-  interpreted in the same way as character values. 
+  The argument \code{i} is interpreted as
+  a level of the factor \code{X$marks}. It is converted to a character
+  string if it is not already a character string.
+  The value \code{i=1} does \bold{not}
+  refer to the first level of the factor.
 }
 \seealso{
  \code{\link{Kdot}},
  \code{\link{Kinhom}},
  \code{\link{Kcross.inhom}},
+ \code{\link{Kmulti.inhom}},
  \code{\link{pcf}}
 }
 \examples{

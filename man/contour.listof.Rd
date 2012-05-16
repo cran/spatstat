@@ -8,7 +8,7 @@
 }
 \usage{
   \method{contour}{listof}(x, \dots)
-  \method{image}{listof}(x, \dots)
+  \method{image}{listof}(x, \dots, equal.ribbon=FALSE)
 }
 \arguments{
   \item{x}{
@@ -17,6 +17,11 @@
   }
   \item{\dots}{
     Arguments passed to \code{\link{plot.listof}} to control the plot.
+  }
+  \item{equal.ribbon}{
+    Logical. If \code{TRUE}, the colour maps of all the images are
+    the same. If \code{FALSE}, the colour map of each
+    image is adjusted to the range of values of that image.
   }
 }
 \value{
@@ -37,7 +42,6 @@
 }
 \examples{
 # Multitype point pattern
- data(amacrine)
  contour(density(split(amacrine)))
 }
 \author{Adrian Baddeley

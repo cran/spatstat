@@ -34,6 +34,7 @@
 }
 \seealso{
   \code{\link{affine}},
+  \code{\link{reflect}},
   \code{\link{rotate}},
   \code{\link{shift}}
 }

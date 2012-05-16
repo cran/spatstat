@@ -169,6 +169,7 @@ plot(tesk)
 
 
 mur <- lapply(murchison, rescale, s=1000)
+mur <- lapply(mur, "unitname<-", value="km")
 X <- mur$gold
 D <- distfun(mur$faults)
 rh <- rhohat(X,D, dimyx=256)
@@ -378,12 +379,22 @@ plot(fit, how="image", main=c("Strauss model",
                                "fit by maximum pseudolikelihood",
                                "Conditional intensity plot"))
 # fitted interaction
+plot(swedishpines)
 fit <- ppm(swedishpines, ~1, PairPiece(c(3,5,7,9,11,13)))
 plot(fitin(fit), legend=FALSE,
      main=c("Pairwise interaction model",
             "fit by maximum pseudolikelihood"))
 
+# simulation
+plot(swedishpines)
+Xsim <- rmh(model=fit,
+            start=list(n.start=80),
+            control=list(nrep=100))
+plot(Xsim, main="Simulation from fitted Strauss model")
+
 # model compensator
+plot(swedishpines)
+fit <- ppm(swedishpines, ~1, Strauss(r=7))
 plot(Kcom(fit), cbind(iso, icom, pois) ~ r,
      legend=FALSE, main="model compensators")
 legend("topleft", legend=c("empirical K function",
@@ -392,12 +403,7 @@ legend("topleft", legend=c("empirical K function",
 
 par(parsave)
 
-Xsim <- rmh(model=fit,
-            start=list(n.start=80),
-            control=list(nrep=100))
-plot(Xsim, main="Simulation from fitted Strauss model")
-
-
+# Multitype data
 demopat <- rescale(demopat, 8)
 unitname(demopat) <- c("mile", "miles")
 demopat
@@ -571,10 +577,16 @@ par(nopa)
 fanfare("IX. Operations on pixel images")
 
 plot(Z, main="An image Z")
+# Z is distance map of Swedish Pines
 plot(levelset(Z, 4))
 plot(cut(Z, 5))
 plot(eval.im(sqrt(Z) - 3))
 plot(solutionset(abs(Z - 6) <= 1))
+nopa <- par(mfrow=c(1,2))
+plot(Z)
+segments(0,0,96,100,lwd=2)
+plot(transect.im(Z))
+par(nopa)
 
 d <- distmap(cells, dimyx=256)
 W <- levelset(d, 0.06)

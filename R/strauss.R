@@ -2,7 +2,7 @@
 #
 #    strauss.R
 #
-#    $Revision: 2.22 $	$Date: 2012/01/18 09:39:59 $
+#    $Revision: 2.23 $	$Date: 2012/04/26 00:55:53 $
 #
 #    The Strauss process
 #
@@ -92,7 +92,7 @@ strausscounts <- function(U, X, r, EqualPairs=NULL) {
   answer <- crosspaircounts(U,X,r)
   nU <- npoints(U)
   # subtract counts of identical pairs
-  if(!is.null(EqualPairs)) {
+  if(length(EqualPairs) > 0) {
     idcount <- as.integer(table(factor(EqualPairs[,2], levels=1:nU)))
     answer <- answer - idcount
   }

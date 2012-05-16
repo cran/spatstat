@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.128 $	$Date: 2012/01/19 04:42:02 $
+#	$Revision: 4.130 $	$Date: 2012/05/07 06:22:06 $
 #
 #
 #	A window may be either
@@ -637,6 +637,14 @@ as.polygonal <- function(W) {
 #
 # ----------------------------------------------------------------------
 
+is.polygonal <- function(w) {
+  return(inherits(w, "owin") && (w$type == "polygonal"))
+}
+
+is.rectangle <- function(w) {
+  return(inherits(w, "owin") && (w$type == "rectangle"))
+}
+
 is.mask <- function(w) {
   return(inherits(w, "owin") && (w$type == "mask"))
 }
@@ -846,8 +854,8 @@ complement.owin <- function(w, frame=as.rectangle(w)) {
 inside.owin <- function(x, y, w) {
   # test whether (x,y) is inside window w
   # x, y may be vectors 
-  
-  if(inherits(x, "ppp") && missing(y))
+
+  if(missing(y) && all(c("x", "y") %in% names(x)))
     return(inside.owin(x$x, x$y, w))
 
   w <- as.owin(w)

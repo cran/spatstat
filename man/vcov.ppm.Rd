@@ -85,8 +85,7 @@
     \item
     If the fitted model is not a Poisson process (i.e. it is some other
     Gibbs point process) then the calculations are based on
-    Coeurjolly and Rubak (2012). The model must be a stationary point
-    process. A consistent estimator of the
+    Coeurjolly and Rubak (2012). A consistent estimator of the
     variance-covariance matrix is computed by summing terms over all
     pairs of data points. If required, the Fisher information is
     calculated as the inverse of the variance-covariance matrix.
@@ -99,7 +98,6 @@
   
   The argument \code{verbose} makes it possible to suppress some
   diagnostic messages.
-
 
   The asymptotic theory is not correct if the model was fitted using
   \code{gam} (by calling \code{\link{ppm}} with \code{use.gam=TRUE}).
@@ -115,6 +113,9 @@
   matrix of the log pseudolikelihood, and its inverse, will be computed.
   For non-Poisson models, this is not a valid estimate of variance,
   but is useful for other calculations.
+
+  Note that standard errors and 95 percent confidence intervals for
+  the coefficients can also be obtained using \code{coef(summary(object))}.
 }
 \section{Error messages}{
   An error message that reports
@@ -159,8 +160,9 @@
   Adrian Baddeley \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
   and Rolf Turner \email{r.turner@auckland.ac.nz}.
-  New code for Gibbs point processes was generously contributed by
+  New code for stationary Gibbs point processes was generously contributed by
   Ege Rubak and Jean-Francois Coeurjolly.
+  New code for generic Gibbs process written by Adrian Baddeley.
 }
 \references{
   Coeurjolly, J.-F. and Rubak, E. (2012)

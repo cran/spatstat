@@ -23,14 +23,14 @@
 \details{
   The (uncentred, unnormalised)
   \emph{spatial covariance function} of a pixel image \eqn{X} in the plane
-  is the function \eqn{C(v)} defined for each vector \eqn{v}
-  as the integral 
+  is the function \eqn{C(v)} defined for each vector \eqn{v} as
   \deqn{
-    C(u) = \int X(u)X(u+v)\, {\rm d}u
+    C(v) = \int X(u)X(u-v)\, {\rm d}u
   }{
-    C(u) = integral of X(u) * X(u+v) du
+    C(v) = integral of X(u) * X(u-v) du
   }
-  over all spatial locations \eqn{u}, where \eqn{X(u)} denotes the
+  where the integral is
+  over all spatial locations \eqn{u}, and where \eqn{X(u)} denotes the
   pixel value at location \eqn{u}.
   
   This command computes a discretised approximation to
@@ -43,20 +43,23 @@
   computes the set \emph{cross-covariance} function \eqn{C(u)}
   defined as 
   \deqn{
-    C(u) = \int X(u)Y(u+v)\, {\rm d}u.
+    C(v) = \int X(u)Y(u-v)\, {\rm d}u.
   }{
-    C(u) = integral of X(u) * Y(u+v) du.
+    C(v) = integral of X(u) * Y(u-v) du.
   }
+
+  Note that \code{imcov(X,Y)} is equivalent to
+  \code{convolve.im(X,Y,reflectY=TRUE)}.
 }
 \seealso{
   \code{\link{setcov}},
+  \code{\link{convolve.im}},
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{erosion}}
 }
 \examples{
-  w <- owin(c(0,1),c(0,1))
-  X <- as.im(w)
+  X <- as.im(square(1))
   v <- imcov(X)
   plot(v)
 }

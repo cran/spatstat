@@ -1,7 +1,8 @@
 #
-# $Id: rmh.default.R,v 1.78 2011/10/13 10:21:49 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.80 2012/05/13 07:38:18 adrian Exp adrian $
 #
-rmh.default <- function(model,start=NULL,control=NULL,
+rmh.default <- function(model,start=NULL,
+                        control=default.rmhcontrol(model),
                         verbose=TRUE, track=FALSE, ...) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
@@ -18,14 +19,28 @@ rmh.default <- function(model,start=NULL,control=NULL,
     cat("Checking arguments..")
 
 # validate arguments and fill in the defaults
-  
+
   model <- rmhmodel(model)
   start <- rmhstart(start)
-  control <- rmhcontrol(control)
+  if(is.null(control)) {
+    control <- default.rmhcontrol(model)
+  } else {
+    control <- rmhcontrol(control)
+  }
+  # override 
+  if(length(list(...)) > 0)
+    control <- update(control, ...)
+
   control <- rmhResolveControl(control, model)
   
   stopifnot(is.logical(track))
-  
+
+  # retain "..." arguments unrecognised by rmhcontrol
+  # These are assumed to be arguments of functions defining the trend
+  argh <- list(...)
+  known <- names(argh) %in% names(formals(rmhcontrol.default))
+  f.args <- argh[!known]
+
 #### Multitype models
   
 # Decide whether the model is multitype; if so, find the types.
@@ -48,10 +63,9 @@ rmh.default <- function(model,start=NULL,control=NULL,
   # No expansion can be done if we are using x.start
 
   if(start$given == "x") {
-    if(control$force.exp)
-      stop("Cannot expand window when using x.start.\n")
-    else 
-      control$expand <- 1
+    if(control$expand$force.exp)
+      stop("Cannot expand window when using x.start.\n", call.=FALSE)
+    control$expand <- .no.expansion
   }
 
 # Warn about a silly value of fixall:
@@ -99,7 +113,7 @@ rmh.default <- function(model,start=NULL,control=NULL,
   w.clip <-
     if(!is.null(model$w))
       model$w
-    else if(control$expand == 1) {
+    else if(!will.expand(control$expand)) {
       if(start$given == "x" && is.ppp(x.start))
         x.start$window
       else if(is.owin(w.trend))
@@ -273,13 +287,16 @@ rmh.default <- function(model,start=NULL,control=NULL,
 #==+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===+===
 
 ###################  Periodic boundary conditions #########################
-  
-# If periodic is TRUE we have to be simulating in a rectangular window.
 
   periodic <- control$periodic
   
-  if(periodic && w.state$type != "rectangle")
-      stop("Need rectangular window for periodic simulation.\n")
+  if(is.null(periodic)) {
+    # undecided. Use default rule
+    control$periodic <- periodic <- expanded && is.rectangle(w.state)
+  } else if(periodic && !is.rectangle(w.state)) {
+    # if periodic is TRUE we have to be simulating in a rectangular window.
+    stop("Need rectangular window for periodic simulation.\n")
+  }
 
 # parameter passed to C:  
   period <-
@@ -444,9 +461,7 @@ rmh.default <- function(model,start=NULL,control=NULL,
   Model$w <- w.clip
   Model$types <- types
   
-  Control$expand <- if(expanded) w.state else 1
-  Control$force.exp <- expanded
-  Control$force.noexp <- !expanded
+  Control$expand <- if(expanded) rmhexpand(w.state) else .no.expansion
 
   Control$internal <- list(w.sim=w.sim,
                            w.state=w.state,
@@ -469,7 +484,9 @@ rmh.default <- function(model,start=NULL,control=NULL,
   class(InfoList) <- c("rmhInfoList", class(InfoList))
 
   # go
-  rmhEngine(InfoList, verbose=verbose, track=track, kitchensink=TRUE, ...)
+  do.call("rmhEngine",
+          append(list(InfoList, verbose=verbose, track=track, kitchensink=TRUE),
+                 f.args))
 }
 
 print.rmhInfoList <- function(x, ...) {
@@ -792,7 +809,7 @@ rmhEngine <- function(InfoList, ...,
   }
 
 # Now clip the pattern to the ``clipping'' window:
-  if(!control$force.noexp)
+  if(!control$expand$force.noexp)
     X <- X[w.clip]
 
 # Append to the result information about how it was generated.

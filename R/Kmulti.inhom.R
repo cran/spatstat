@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.34 $	$Date: 2011/07/04 06:37:34 $
+#	$Revision: 1.35 $	$Date: 2012/04/25 01:00:08 $
 #
 #
 # ------------------------------------------------------------------------
@@ -120,22 +120,25 @@ function(X, i, lambdaI=NULL, lambdadot=NULL, ...,
 function(X, I, J, lambdaI=NULL, lambdaJ=NULL, 
          ...,
          r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
+         correction = c("border", "isotropic", "Ripley", "translate"),
          lambdaIJ=NULL,
-         sigma=NULL, varcov=NULL,
-         Iname = "points satisfying condition I",
-         Jname = "points satisfying condition J")
+         sigma=NULL, varcov=NULL)
 {
   verifyclass(X, "ppp")
 
-  extras <- list(...)
-  if(length(extras) > 0)
-    warning(paste("Unrecognised arguments", names(extras)))
+  extrargs <- resolve.defaults(list(...),
+                               list(Iname="points satisfying condition I",
+                                    Jname="points satisfying condition J"))
+  if(length(extrargs) > 2)
+    warning("Additional arguments unrecognised")
+  Iname <- extrargs$Iname
+  Jname <- extrargs$Jname
+  
         
   npts <- npoints(X)
   x <- X$x
   y <- X$y
-  W <- X$window
+  W <- as.owin(X)
   area <- area.owin(W)
 
   # validate edge correction
@@ -155,12 +158,11 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
 
   correction <- implemented.for.K(correction, W$type, correction.given)
 
-  # validate I, J 
-  if(!is.logical(I) || !is.logical(J))
-    stop("I and J must be logical vectors")
-  if(length(I) != npts || length(J) != npts)
-    stop(paste("The length of I and J must equal",
-               "the number of points in the pattern"))
+  # validate I, J
+  I <- ppsubset(X, I)
+  J <- ppsubset(X, J)
+  if(is.null(I) || is.null(J))
+    stop("I and J must be valid subset indices")
 	
   nI <- sum(I)
   nJ <- sum(J)

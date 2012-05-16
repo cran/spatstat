@@ -295,10 +295,14 @@
 	translate pattern  \cr
 	\code{\link{flipxy} } \tab
 	swap \eqn{x} and \eqn{y} coordinates  \cr
+	\code{\link{reflect} } \tab
+	reflect in the origin  \cr
 	\code{\link{periodify} } \tab
 	make several translated copies  \cr
 	\code{\link{affine}} \tab
 	apply affine transformation\cr
+	\code{\link{scalardilate}} \tab
+	apply scalar dilation\cr
 	\code{\link{density.ppp}} \tab
 	kernel smoothing of point pattern\cr
 	\code{\link{smooth.ppp}} \tab
@@ -419,6 +423,9 @@
 	\code{\link{convexhull}} \tab compute convex hull \cr
 	\code{\link{as.mask}} \tab pixel approximation of window \cr
 	\code{\link{as.polygonal}} \tab polygonal approximation of window \cr
+	\code{\link{is.rectangle}} \tab test whether window is a rectangle \cr 
+	\code{\link{is.polygonal}} \tab test whether window is polygonal \cr 
+	\code{\link{is.mask}} \tab test whether window is a mask \cr 
 	\code{\link{setcov}} \tab spatial covariance function of window
       }
 
@@ -461,7 +468,9 @@
 	\code{\link{zapsmall.im}} \tab set very small pixel values to zero \cr
 	\code{\link{levelset}} \tab level set of an image\cr 
 	\code{\link{solutionset}} \tab region where an expression is true \cr
-	\code{\link{imcov}} \tab spatial covariance function of image
+	\code{\link{imcov}} \tab spatial covariance function of image \cr
+	\code{\link{convolve.im}} \tab spatial convolution of images \cr
+	\code{\link{transect.im}} \tab line transect of image
      }
 
     \bold{Line segment patterns}
@@ -1291,6 +1300,8 @@
     \code{\link{bermantest}} \tab Berman's goodness-of-fit tests\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
+    \code{\link{clf.test}} \tab Cressie (1991)/Loosmore and Ford (2006) test \cr
+    \code{\link{mad.test}} \tab Mean Absolute Deviation test \cr
     \code{\link{scan.test}} \tab spatial scan statistic/test \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for
     point process models 
@@ -1461,6 +1472,7 @@
   Juha Heikkinen,
   Kurt Hornik,
   Ross Ihaka,
+  Aruna Jammalamadaka,
   Robert John-Chandran,
   Devin Johnson,
   Mike Kuhn,

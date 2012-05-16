@@ -17,6 +17,7 @@
 \alias{areaGain.grid}       
 \alias{areaLoss.diri}       
 \alias{areaLoss.grid}       
+\alias{assemble.plot.objects}       
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
 \alias{as.data.frame.fv}
@@ -41,6 +42,7 @@
 \alias{cat.factor}
 \alias{cellmiddles}
 \alias{censtimeCDFest}
+\alias{change.default.expand}          
 \alias{checkfields}          
 \alias{check.finite}
 \alias{check.hist.lengths}
@@ -101,6 +103,7 @@
 \alias{emptywindow}
 \alias{ensure2vector}
 \alias{envelopeEngine}
+\alias{envelopeTest}
 \alias{envelope.matrix}
 \alias{equalpairs}          
 \alias{equalpairs.quad}          
@@ -123,6 +126,7 @@
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
+\alias{findbestlegendpos}
 \alias{findCovariate}
 \alias{findcbind}
 \alias{findmarktype}
@@ -171,6 +175,9 @@
 \alias{intY.xypolygon}     
 \alias{is.cadlag}
 \alias{is.data}
+\alias{is.expandable}
+\alias{is.expandable.ppm}
+\alias{is.expandable.rmhmodel}
 \alias{is.fv}
 \alias{is.hole.xypolygon}
 \alias{is.hyperframe}
@@ -179,7 +186,6 @@
 \alias{is.marked.default}    
 \alias{is.marked.psp}    
 \alias{is.marked.quad}    
-\alias{is.mask}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
 \alias{is.parseable}
@@ -194,7 +200,6 @@
 \alias{Knone.engine}
 \alias{Kount}
 \alias{Kwtsum}               
-\alias{Kmulti.inhom}               
 \alias{Kpcf.kppm}               
 \alias{killinteraction}
 \alias{km.rs.opt}
@@ -308,6 +313,7 @@
 \alias{ppm.influence}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
+\alias{ppsubset}
 \alias{prange}
 \alias{prefixfv}
 \alias{primefactors}       
@@ -337,6 +343,7 @@
 \alias{print.qqppm}
 \alias{print.rat}
 \alias{print.rmhcontrol}
+\alias{print.rmhexpand}
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhInfoList}
@@ -348,6 +355,7 @@
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
+\alias{print.summary.rmhexpand}
 \alias{print.summary.splitppp}
 \alias{print.summary.units}
 \alias{print.tess}
@@ -359,6 +367,7 @@
 \alias{rectquadrat.countEngine}
 \alias{rgbNA}
 \alias{rhs.of.formula}
+\alias{RmhExpandRule}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -443,6 +452,7 @@
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
+\alias{summary.rmhexpand}
 \alias{superimposeMarks}
 \alias{sympoly}
 \alias{termsinformula}
@@ -450,6 +460,7 @@
 \alias{test.selfcrossing.psp}
 \alias{tilecentroids}        
 \alias{tilenames}        
+\alias{trap.extra.arguments}
 \alias{trianglediameters}
 \alias{trim.mask}        
 \alias{tweak.fv.entry}        
@@ -500,7 +511,8 @@ areaLoss.diri(X, r, ..., W=as.owin(X), subset=NULL)
 areaLoss.grid(X, r, ..., W=as.owin(X), subset=NULL,
                          method = c("count", "distmap"),
                          ngrid = spatstat.options("ngrid.disc"),
-                         exact = FALSE) 
+                         exact = FALSE)
+assemble.plot.objects(xlim, ylim, ..., lines, polygon)
 AsymmDistance.psp(X, Y, metric="Hausdorff", method="Fortran")
 as.breakpts(\dots)
 \method{as.data.frame}{fv}(x, ...)
@@ -525,7 +537,9 @@ bw.optim(cv, h, iopt, \dots, xlab, ylab)
 cartesian(pp, markset, fac = TRUE)
 cat.factor(\dots, recursive=FALSE)
 cellmiddles(W, nx, ny, npix, gi)
-censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom, pmax)
+censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom,
+pmax)
+change.default.expand(x, newdefault)
 checkfields(X,L)          
 check.finite(x, context, xname)
 check.hist.lengths(hist,breaks)
@@ -597,10 +611,11 @@ envelopeEngine(X, fun, simul,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user)
+envelopeTest(X, \dots, power, rinterval, use.theo, Xname, verbose, internal)
 \method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
       nsim, nsim2, jsim, jsim.mean,
       type, csr, use.theory, nrank, ginterval, nSD,
-      check, Yname)
+      savefuns, check, Yname)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
@@ -623,6 +638,7 @@ fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames)
+findbestlegendpos(...)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
 findmarktype(x)
@@ -671,6 +687,9 @@ intY.owin(w)
 intY.xypolygon(polly)
 is.cadlag(s)
 is.data(Q)
+is.expandable(x)
+\method{is.expandable}{ppm}(x)
+\method{is.expandable}{rmhmodel}(x)
 is.fv(x)
 is.hole.xypolygon(polly)
 is.hyperframe(x)
@@ -679,8 +698,7 @@ is.interact(x)
 \method{is.marked}{default}(\dots)  
 \method{is.marked}{psp}(X, \dots)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
-is.mask(w)
-\method{is.multitype}{default}(\dots)  
+\method{is.multitype}{default}(X, \dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.parseable(x)
 is.pp3(x)
@@ -694,12 +712,6 @@ Kborder.engine(X, rmax, nr, correction, weights, ratio)
 Knone.engine(X, rmax, nr, weights, ratio)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks)
-Kmulti.inhom(X, I, J, lambdaI=NULL, lambdaJ=NULL, \dots,
-         r=NULL, breaks=NULL,
-         correction = c("border", "isotropic", "Ripley", "translate") ,
-         lambdaIJ=NULL, sigma=NULL, varcov=NULL, 
-         Iname = "points satisfying condition I",
-         Jname = "points satisfying condition J")
 Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
@@ -830,6 +842,7 @@ ppm.influence(fit,
    method=c("C", "interpreted"))
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE, precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff = 1, matching = TRUE, ccode = TRUE, precision = 9, approximation = 10) 
+ppsubset(X, I)
 prange(x)
 prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 primefactors(n, prmax)
@@ -858,6 +871,7 @@ primesbelow(nmax)
 \method{print}{qqppm}(x, \dots)
 \method{print}{rat}(x, \dots)
 \method{print}{rmhcontrol}(x, \dots)
+\method{print}{rmhexpand}(x, \dots, prefix=TRUE)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
@@ -868,6 +882,7 @@ primesbelow(nmax)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp=3)
 \method{print}{summary.psp}(x, \dots)
+\method{print}{summary.rmhexpand}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.units}(x, \dots)
 \method{print}{tess}(x, \dots, brief=FALSE)
@@ -879,6 +894,7 @@ rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
+RmhExpandRule(nama)
 quadrat.testEngine(X, nx, ny, \dots, Xcount, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
@@ -969,6 +985,7 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
+\method{summary}{rmhexpand}(object, \dots)
 superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
 termsinformula(x)
@@ -976,6 +993,7 @@ test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 tilecentroids(W, nx, ny)
 tilenames(x)
+trap.extra.arguments(\dots, .Context, .Fatal)
 trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)

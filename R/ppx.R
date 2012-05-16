@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.26 $  $Date: 2011/06/14 02:16:06 $
+#  $Revision: 1.29 $  $Date: 2012/05/12 11:12:19 $
 #
 
 ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
@@ -130,6 +130,14 @@ plot.ppx <- function(x, ...) {
   return(invisible(NULL))
 }
 
+"[.ppx" <- function (x, i, ...) {
+  da <- x$data
+  daij <- da[i, , drop=FALSE]
+  out <- list(data=daij, ctype=x$ctype, domain=x$domain)
+  class(out) <- "ppx"
+  return(out)
+}
+
 coords <- function(x, ...) {
   UseMethod("coords")
 }
@@ -176,6 +184,7 @@ as.matrix.ppx <- function(x, ...) { as.matrix(as.data.frame(x, ...)) }
 marks.ppx <- function(x, ..., drop=TRUE) {
   ctype <- x$ctype
   chosen <- (ctype == "mark")
+  if(!any(chosen)) return(NULL)
   x$data[, chosen, drop=drop]
 }
 
@@ -198,7 +207,8 @@ marks.ppx <- function(x, ..., drop=TRUE) {
       newctype <- ctype[retain]
     } else {
       newdata <- cbind(coorddata, value)
-      newctype <- c(ctype, rep("mark", ncol(value)))
+      newctype <- factor(c(as.character(ctype), rep("mark", ncol(value))),
+                         levels=levels(ctype))
     }
   }
   out <- list(data=newdata, ctype=newctype, domain=x$domain)

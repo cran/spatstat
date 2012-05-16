@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.70 $	$Date: 2012/03/14 04:17:34 $
+#	$Revision: 4.73 $	$Date: 2012/05/12 01:04:17 $
 #
 #
 #
@@ -159,8 +159,6 @@ overlap.owin <- function(A, B) {
 #
 
 intersect.owin <- function(A, B, ..., fatal=TRUE) {
-  verifyclass(A, "owin")
-  verifyclass(B, "owin")
   liszt <- list(...)
   rasterinfo <- list()
   if(length(liszt) > 0) {
@@ -177,6 +175,10 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
                      append(list(B, windows[[i]]), rasterinfo))
     }
   }
+  if(missing(A) || is.null(A)) return(B)
+  if(missing(B) || is.null(B)) return(A)
+  verifyclass(A, "owin")
+  verifyclass(B, "owin")
   #
   if(identical(A, B))
     return(A)
@@ -197,12 +199,12 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
            
   # Determine type of intersection
   
-  Arect <- (A$type == "rectangle")
-  Brect <- (B$type == "rectangle")
-  Apoly <- (A$type == "polygonal")
-  Bpoly <- (B$type == "polygonal")
-  Amask <- (A$type == "mask")
-  Bmask <- (B$type == "mask")
+  Arect <- is.rectangle(A)
+  Brect <- is.rectangle(B)
+  Apoly <- is.polygonal(A)
+  Bpoly <- is.polygonal(B)
+  Amask <- is.mask(A)
+  Bmask <- is.mask(B)
   
   # Rectangular case
   if(Arect && Brect)
@@ -310,16 +312,16 @@ union.owin <- function(A, B, ...) {
   
   # Determine type of intersection
   
-  Arect <- (A$type == "rectangle")
-  Brect <- (B$type == "rectangle")
-  Apoly <- (A$type == "polygonal")
-  Bpoly <- (B$type == "polygonal")
-  Amask <- (A$type == "mask")
-  Bmask <- (B$type == "mask")
+  Arect <- is.rectangle(A)
+  Brect <- is.rectangle(B)
+  Apoly <- is.polygonal(A)
+  Bpoly <- is.polygonal(B)
+  Amask <- is.mask(A)
+  Bmask <- is.mask(B)
 
   # Rectangular cases
   
-  if(A$type == "rectangle" && B$type == "rectangle") {
+  if(Arect && Brect) {
     if(is.subset.owin(A, B))
       return(B)
     else if (is.subset.owin(B,A))
@@ -386,12 +388,12 @@ setminus.owin <- function(A, B, ...) {
   
   # Determine type of arguments
   
-  Arect <- (A$type == "rectangle")
-  Brect <- (B$type == "rectangle")
-  Apoly <- (A$type == "polygonal")
-  Bpoly <- (B$type == "polygonal")
-  Amask <- (A$type == "mask")
-  Bmask <- (B$type == "mask")
+  Arect <- is.rectangle(A)
+  Brect <- is.rectangle(B)
+  Apoly <- is.polygonal(A)
+  Bpoly <- is.polygonal(B)
+  Amask <- is.mask(A)
+  Bmask <- is.mask(B)
 
   # Polygonal case
 
@@ -474,9 +476,9 @@ trim.mask <- function(M, R, tolerant=TRUE) {
 
 restrict.mask <- function(M, W) {
   # M is a mask, W is any window
-  stopifnot(inherits(M, "owin") && M$type == "mask")
+  stopifnot(is.mask(M))
   stopifnot(inherits(W, "owin"))
-  if(W$type == "rectangle")
+  if(is.rectangle(W) == "rectangle")
     return(trim.mask(M, W))
   M <- trim.mask(M, as.rectangle(W))
   # Determine which pixels of M are inside W
@@ -488,26 +490,28 @@ restrict.mask <- function(M, W) {
   M$m <- Mm
   return(M)
 }
-  
-expand.owin <- function(W, f=1) {
-  # expand bounding box of 'win'
-  # by factor 'f' in **area**
-  if(f <= 0)
-    stop("f must be > 0")
-  if(f == 1)
-    return(W)
-  bb <- bounding.box(W)
-  xr <- bb$xrange
-  yr <- bb$yrange
-  fff <- (sqrt(f) - 1)/2
-  Wexp <- owin(xr + fff * c(-1,1) * diff(xr),
-               yr + fff * c(-1,1) * diff(yr),
-               unitname=unitname(W))
-  return(Wexp)
-}
+
+# SUBSUMED IN rmhexpand.R
+# expand.owin <- function(W, f=1) {
+#
+#  # expand bounding box of 'win'
+#  # by factor 'f' in **area**
+#  if(f <= 0)
+#    stop("f must be > 0")
+#  if(f == 1)
+#    return(W)
+#  bb <- bounding.box(W)
+#  xr <- bb$xrange
+#  yr <- bb$yrange
+#  fff <- (sqrt(f) - 1)/2
+#  Wexp <- owin(xr + fff * c(-1,1) * diff(xr),
+#               yr + fff * c(-1,1) * diff(yr),
+#               unitname=unitname(W))
+#  return(Wexp)
+#}
 
 trim.rectangle <- function(W, xmargin=0, ymargin=xmargin) {
-  if(W$type != "rectangle")
+  if(!is.rectangle(W))
     stop("Internal error: tried to trim margin off non-rectangular window")
   xmargin <- ensure2vector(xmargin)
   ymargin <- ensure2vector(ymargin)
@@ -591,7 +595,7 @@ incircle <- function(W) {
   verifyclass(W, "owin")
   if(is.empty(W))
     return(NULL)
-  if(W$type == "rectangle") {
+  if(is.rectangle(W)) {
     xr <- W$xrange
     yr <- W$yrange
     x0 <- mean(xr)
@@ -613,7 +617,7 @@ incircle <- function(W) {
   loccol <- as.vector(col(v)[ok])[locn]
   x0 <- D$xcol[loccol]
   y0 <- D$yrow[locrow]
-  if(W$type == "mask") {
+  if(is.mask(W)) {
     # radius could be one pixel diameter shorter than Dmax
     Dpixel <- sqrt(D$xstep^2 + D$ystep^2)
     radius <- max(0, Dmax - Dpixel)
@@ -626,9 +630,9 @@ inpoint <- function(W) {
   verifyclass(W, "owin")
   if(is.empty(W))
     return(NULL)
-  if(W$type == "rectangle")
+  if(is.rectangle(W))
     return(c(mean(W$xrange), mean(W$yrange)))
-  if(W$type == "polygonal") {
+  if(is.polygonal(W)) {
     xy <- centroid.owin(W)
     if(inside.owin(xy$x, xy$y, W))
       return(xy)

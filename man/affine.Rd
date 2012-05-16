@@ -12,7 +12,10 @@
 \arguments{
   \item{X}{Any suitable dataset representing a two-dimensional
     object, such as a point pattern (object of class \code{"ppp"}),
-    or a window (object of class \code{"owin"}).}
+    a line segment pattern (object of class \code{"psp"}),
+    a window (object of class \code{"owin"}) or a pixel image
+    (object of class \code{"im"}).
+  }
   \item{\dots}{Arguments determining the affine transformation.}
 }
 \value{
@@ -26,8 +29,11 @@
 }
 \seealso{
   \code{\link{affine.ppp}},
+  \code{\link{affine.psp}},
   \code{\link{affine.owin}},
+  \code{\link{affine.im}},
   \code{\link{flipxy}},
+  \code{\link{reflect}},
   \code{\link{rotate}},
   \code{\link{shift}}
 }

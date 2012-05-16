@@ -23,11 +23,17 @@ pcfcross.inhom(X, i, j, lambdaI = NULL, lambdaJ = NULL, ...,
     It must be a multitype point pattern (a marked point pattern
     whose marks are a factor). 
   }
-  \item{i}{Number or character string identifying the type (mark value)
+  \item{i}{The type (mark value)
     of the points in \code{X} from which distances are measured.
+    A character string (or something that will be converted to a
+    character string).
+    Defaults to the first level of \code{marks(X)}.
   }
-  \item{j}{Number or character string identifying the type (mark value)
+  \item{j}{The type (mark value)
     of the points in \code{X} to which distances are measured.
+    A character string (or something that will be
+    converted to a character string).
+    Defaults to the second level of \code{marks(X)}.
   }
   \item{lambdaI}{
     Optional.

@@ -9,17 +9,20 @@
 }
 \usage{
   envelope(Y, fun, ...)
+
   \method{envelope}{ppp}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
-  start=NULL, control=default.rmhcontrol(Y, nrep=nrep), nrep=1e5,
+  start=NULL, control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5,
   transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+
   \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL,
@@ -290,6 +293,8 @@
       lies outside the envelope \bold{at any value of} \eqn{r}.
       This test has exact significance level
       \code{alpha = nrank/(1 + nsim)}.
+
+      This test can also be performed using \code{\link{mad.test}}.
     }
     \item{based on sample moments:}{if \code{VARIANCE=TRUE},
       the algorithm calculates the
@@ -416,11 +421,17 @@
   John Wiley and Sons.
 } 
 \seealso{
+  \code{\link{clf.test}},
+  \code{\link{mad.test}}
+  for envelope-based tests.
+  
   \code{\link{fv.object}},
   \code{\link{plot.envelope}},
   \code{\link{plot.fv}},
   \code{\link{envelope.envelope}},
-  \code{\link{pool.envelope}},
+  \code{\link{pool.envelope}}
+  for handling envelopes.
+  
   \code{\link{Kest}},
   \code{\link{Gest}},
   \code{\link{Fest}},

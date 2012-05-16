@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.18 $	$Date: 2012/01/18 09:56:35 $
+#    $Revision: 2.19 $	$Date: 2012/05/08 08:27:08 $
 #
 #    The multitype Strauss process
 #
@@ -37,15 +37,20 @@ MultiStrauss <- local({
         stop("data and model do not have the same possible levels of marks")
      if(!identical(lu, par$types))
         stop("dummy points and model do not have the same possible levels of marks")
+     
+     # ensure factor levels are acceptable for column names (etc)
+     lxname <- make.names(lx, unique=TRUE)
 
      # list all UNORDERED pairs of types to be checked
      # (the interaction must be symmetric in type, and scored as such)
      uptri <- (row(r) <= col(r)) & !is.na(r)
      mark1 <- (lx[row(r)])[uptri]
      mark2 <- (lx[col(r)])[uptri]
-     vname <- apply(cbind(mark1,mark2), 1, paste, collapse="x")
+     # corresponding names
+     mark1name <- (lxname[row(r)])[uptri]
+     mark2name <- (lxname[col(r)])[uptri]
+     vname <- apply(cbind(mark1name,mark2name), 1, paste, collapse="x")
      vname <- paste("mark", vname, sep="")
-     vname <- make.names(vname)  # converts illegal characters
      npairs <- length(vname)
      # list all ORDERED pairs of types to be checked
      # (to save writing the same code twice)

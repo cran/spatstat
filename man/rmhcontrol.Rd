@@ -8,8 +8,9 @@
 }
 \usage{
    rmhcontrol(\dots)
+
    \method{rmhcontrol}{default}(\dots, p=0.9, q=0.5, nrep=5e5,
-                      expand=NULL, periodic=FALSE, ptypes=NULL,
+                      expand=NULL, periodic=NULL, ptypes=NULL,
                       x.cond=NULL, fixall=FALSE, nverb=0)
 }
 \arguments{
@@ -19,13 +20,21 @@
     birth or death will be proposed.}
   \item{nrep}{Total number of steps (proposals) of Metropolis-Hastings
     algorithm that should be run.}
-  \item{expand}{Either a numerical expansion factor,
-    or a window (object of class \code{"owin"}), specifying that
-    simulations are to be performed in a domain larger than the
+  \item{expand}{
+    Simulation window or expansion rule.
+    Either a window (object of class \code{"owin"})
+    or a numerical expansion factor, specifying that
+    simulations are to be performed in a domain other than the
     original data window, then clipped to the original data window.
+    This argument is passed to \code{\link{rmhexpand}}.
+    A numerical expansion factor can be in several formats:
+    see \code{\link{rmhexpand}}.
   }
-  \item{periodic}{(Logical) whether to simulate ``periodically'', i.e.
-    on a torus formed by identifying opposite edges of a rectangle.}
+  \item{periodic}{
+    Logical value (or \code{NULL}) indicating whether to simulate
+    ``periodically'', i.e. identifying opposite edges of the rectangular
+    simulation window. A \code{NULL} value means ``undecided.''
+  }
   \item{ptypes}{For multitype point processes, the distribution of
     the mark attached to a new random point (when a birth is
     proposed)}
@@ -99,45 +108,57 @@
       the parameter \code{rmh.nrep} in \code{\link{spatstat.options}}.
     }
     \item{expand}{
-      Either a numerical expansion factor, or
-      a window (object of class \code{"owin"}). Indicates that
-      the process is to be simulated on a larger domain than the
-      original data window \code{w}, then clipped to \code{w}
-      when the algorithm has finished.
+      Either a number or a window (object of class \code{"owin"}).
+      Indicates that the process is to be simulated on a 
+      domain other than the original data window \code{w},
+      then clipped to \code{w} when the algorithm has finished.
       This would often be done in order to approximate the
       simulation of a stationary process (Geyer, 1999)
       or more generally a process existing in the
       whole plane, rather than just in the window \code{w}.
-	 
+
       If \code{expand} is a window object, it is taken as the
       larger domain in which simulation is performed.
-      If \code{expand} is numeric, it is interpreted
-      as the factor by which the \emph{area} of the enclosing box of the
-      window \code{w} is to be expanded (i.e. width and height are
-      stretched by the same factor \code{sqrt(area)}).
-      The expansion is computed by the function \code{\link{expand.owin}}.
-	 
-      If \code{expand} equals 1 then no expansion is performed.
-      Any value of \code{expand} smaller than 1 is ignored and
-      treated as 1.
 
+      If \code{expand} is numeric, it is interpreted
+      as an expansion factor or expansion distance
+      for determining the simulation domain from the data window.
+      It should be a \emph{named} scalar, such as
+      \code{expand=c(area=2)}, \code{expand=c(distance=0.1)},
+      \code{expand=c(length=1.2)}.  See \code{\link{rmhexpand}()} for
+      more details. If the name is omitted, it defaults to \code{area}.
+     
       Expansion is not permitted if the number of points has been
       fixed by setting \code{p = 1} or if the
       starting configuration has been specified via the
       argument \code{x.start} in \code{\link{rmhstart}}.
-      In these cases \code{expand} defaults to 1.
 
-      Otherwise, \code{expand} defaults to
-      \code{\link{spatstat.options}("expand")} which defaults to 2.
+      If \code{expand} is \code{NULL}, this is interpreted to mean
+      \dQuote{not yet decided}. An expansion rule will be determined
+      at a later stage, using appropriate defaults.
+      See \code{\link{rmhexpand}}.
     }
-    \item{periodic}{A logical scalar; if \code{periodic} is \code{TRUE}
-      we simulate a process on the torus formed by identifying
-      opposite edges of a rectangular window.  This window could
-      be the ``original'' window if that window is rectangular, or
-      the bounding box of that window, or an expansion of the
-      bounding box (when \code{expand} is greater than 1).  In the
-      latter two cases the simulated pattern is clipped to the
-      original window.
+    \item{periodic}{A logical value (or \code{NULL})
+      determining whether to simulate \dQuote{periodically}.
+      If \code{periodic} is \code{TRUE}, and if the simulation window
+      is a rectangle, then the simulation algorithm effectively
+      identifies opposite edges of the rectangle. Points
+      near the right-hand edge of the rectangle are deemed to be close
+      to points near the left-hand edge. Periodic simulation usually
+      gives a better approximation to a stationary point process.
+      For periodic simulation, the simulation window must be a rectangle.
+      (The simulation window is determined by \code{expand} as described
+      above.)
+
+      The value \code{NULL} means \sQuote{undecided}.
+      The decision is postponed until \code{\link{rmh}} is called.
+      Depending on the point process model to be simulated,
+      \code{rmh} will then set \code{periodic=TRUE} if the simulation window
+      is expanded \emph{and} the expanded simulation window is rectangular;
+      otherwise \code{periodic=FALSE}.
+
+      Note that \code{periodic=TRUE} is only permitted when the
+      simulation window (i.e. the expanded window) is rectangular.       
     }
     \item{ptypes}{A vector of probabilities (summing to 1) to be used
       in assigning a random type to a new point.  Defaults to a vector
@@ -246,7 +267,7 @@
   \code{\link{rmh}},
   \code{\link{rmhmodel}},
   \code{\link{rmhstart}},
-  \code{\link{expand.owin}},
+  \code{\link{rmhexpand}},
   \code{\link{spatstat.options}}
 }
 \examples{

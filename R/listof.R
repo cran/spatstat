@@ -48,10 +48,15 @@ contour.listof <- function(x, ...) {
                            list(main=xname)))
 }
 
-image.listof <- function(x, ...) {
+image.listof <- function(x, ..., equal.ribbon = FALSE) {
   xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  if(equal.ribbon) {
+    zlim <- range(unlist(lapply(x, range)))
+    zz <- list(zlim=zlim)
+  } else zz <- list()
   do.call("plot.listof",
           resolve.defaults(list(x=x, plotcommand="image"),
+                           zz,
                            list(...),
                            list(main=xname)))
 }

@@ -2,7 +2,7 @@
 #
 #    ord.family.S
 #
-#    $Revision: 1.14 $	$Date: 2011/05/18 08:14:44 $
+#    $Revision: 1.15 $	$Date: 2012/04/26 00:54:59 $
 #
 #    The Ord model (family of point process models)
 #
@@ -53,7 +53,7 @@ seqX <- seq_len(nX)
 seqU <- seq_len(nU)
 
 # determine which points in the combined list are data points
-if(!is.null(EqualPairs))           
+if(length(EqualPairs) > 0)           
   is.data <- seqU %in% EqualPairs[,2] 
 else
   is.data <- rep(FALSE, nU)

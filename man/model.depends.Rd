@@ -2,6 +2,8 @@
 \alias{model.depends}
 \alias{model.is.additive}
 \alias{model.covariates}
+\alias{has.offset.term}
+\alias{has.offset}
 \title{
   Identify Covariates Involved in each Model Term
 }
@@ -13,6 +15,8 @@
 model.depends(object)
 model.is.additive(object)
 model.covariates(object, fitted=TRUE, offset=TRUE)
+has.offset.term(object)
+has.offset(object)
 }
 \arguments{
   \item{object}{
@@ -60,6 +64,16 @@ model.covariates(object, fitted=TRUE, offset=TRUE)
   The command \code{model.is.additive} determines whether the model
   is additive, in the sense that there is no canonical covariate that
   depends on two or more original covariates. It returns a logical value.
+
+  The command \code{has.offset.term} is a faster way to determine whether the
+  model \emph{formula} includes an \code{offset} term.
+
+  The functions \code{model.depends} and \code{has.offset.term}
+  only detect \code{offset} terms which are present
+  in the model formula. They do not detect numerical offsets in the
+  model object, that were inserted using the \code{offset} argument
+  in \code{lm}, \code{glm} etc. To detect the presence of offsets
+  of both kinds, use \code{has.offset}.
 }
 \value{
   A logical value or matrix.
@@ -76,6 +90,13 @@ model.covariates(object, fitted=TRUE, offset=TRUE)
    model.depends(fit)
    model.covariates(fit)
    model.is.additive(fit)
+
+   fitoff1 <- lm(y ~ x + offset(z))
+   fitoff2 <- lm(y ~ x, offset=z)
+   has.offset.term(fitoff1)
+   has.offset(fitoff1)
+   has.offset.term(fitoff2)
+   has.offset(fitoff2)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

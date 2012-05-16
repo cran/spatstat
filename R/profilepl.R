@@ -45,21 +45,32 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   namcal <- names(pseudocall)
   namcal[namcal=="f"] <- "interaction"
   names(pseudocall) <- namcal
-  # determine border correction distance
-  if(is.null(rbord)) {
-    # compute rbord = max reach of interactions
-    if(verbose) message("(computing rbord)")
-    for(i in 1:n) {
-      fi <- do.call("f", as.list(s[i, is.farg, drop=FALSE]))
-      if(!inherits(fi, "interact"))
-        stop(paste("f did not yield an object of class", sQuote("interact")))
-      re <- reach(fi)
-      if(is.null(rbord))
-        rbord <- re
-      else if(rbord < re)
-        rbord <- re
-    }
+  # Determine edge correction
+  # with partial matching, avoiding collisions with
+  # other arguments to ppm that have similar names.
+  getppmcorrection <- function(..., correction = "border",
+           covariates = NULL, covfunargs = NULL, control = NULL) {
+    return(correction)
   }
+  correction <- getppmcorrection(...)
+  if(correction == "border") {
+    # determine border correction distance
+    if(is.null(rbord)) {
+      # compute rbord = max reach of interactions
+      if(verbose) message("(computing rbord)")
+      for(i in 1:n) {
+        fi <- do.call("f", as.list(s[i, is.farg, drop=FALSE]))
+        if(!inherits(fi, "interact"))
+          stop(paste("f did not yield an object of class",
+                     sQuote("interact")))
+        re <- reach(fi)
+        if(is.null(rbord))
+          rbord <- re
+        else if(rbord < re)
+          rbord <- re
+      }
+    }
+  } 
   # determine whether computations can be saved
   if(pass.cfa || got.cfa) {
     savecomp <- FALSE
@@ -102,7 +113,7 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
       allcoef <- data.frame(matrix(co, nrow=1))
       names(allcoef) <- names(co)
     } else
-      allcoef <- rbind(allcoef, co)
+    allcoef <- rbind(allcoef, co)
   }
   if(verbose) message("done.")
   opti <- which.max(logmpl)
