@@ -117,14 +117,18 @@
 
   The use of the argument \code{fmla} is like \code{plot.formula}, but offers
   some extra functionality.
-  
-  The left and right hand sides of \code{fmla}
-  are evaluated in the data frame \code{x},
+
+  The left and right hand sides of \code{fmla} are evaluated,
   and the results are plotted against each other
   (the left side on the \eqn{y} axis 
-  against the right side on the \eqn{x} axis). 
-  Both left and right sides may be variables in the data frame
-  or expressions in these variables.
+  against the right side on the \eqn{x} axis).
+
+  The left and right hand sides of \code{fmla} may be
+  the names of columns of the data frame \code{x},
+  or expressions involving these names. If a variable in \code{fmla}
+  is not the name of a column of \code{x}, the algorithm will search for
+  an object of this name in the environment where \code{plot.fv} was
+  called, and then in the enclosing environment, and so on. 
 
   Multiple curves may be specified by a single formula
   of the form 

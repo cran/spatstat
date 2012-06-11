@@ -105,7 +105,8 @@ G3est(X, ..., rmax = NULL, nrval = 128, correction = c("rs", "km", "Hanisch"))
 }
 \seealso{
   \code{\link{F3est}},
-  \code{\link{K3est}}
+  \code{\link{K3est}},
+  \code{\link{pcf3est}}
 }
 \examples{
   X <- rpoispp3(42)

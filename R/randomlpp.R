@@ -3,21 +3,21 @@
 #
 #  Random point pattern generators for a linear network
 #
-#  $Revision: 1.1 $   $Date: 2010/06/09 05:11:52 $
+#  $Revision: 1.2 $   $Date: 2012/06/06 09:55:15 $
 #
 
 rpoislpp <- function(lambda, L, ...) {
   verifyclass(L, "linnet")
-  LL <- L$lines
-  X <- rpoisppOnLines(lambda, LL, ...)
+  X <- datagen.rpoisppOnLines(lambda, as.psp(L), ...)
   Y <- lpp(X, L)
   return(Y)
 }
 
 runiflpp <- function(n, L) {
+  if(!is.numeric(n) || (length(n) != 1) || (n < 0) || (n %% 1 != 0))
+    stop("n should be a single nonnegative integer")
   verifyclass(L, "linnet")
-  LL <- L$lines
-  X <- runifpointOnLines(n, LL)
+  X <- datagen.runifpointOnLines(n, as.psp(L))
   Y <- lpp(X, L)
   return(Y)
 }

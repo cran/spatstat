@@ -2,7 +2,7 @@
 #
 #   rmhstart.R
 #
-#   $Revision: 1.8 $  $Date: 2009/10/22 18:37:26 $
+#   $Revision: 1.9 $  $Date: 2012/05/30 11:38:18 $
 #
 #
 
@@ -30,8 +30,6 @@ rmhstart.default <- function(start=NULL, ..., n.start=NULL, x.start=NULL)
   # n.start and x.start are incompatible
   if(ngiven && xgiven)
     stop("Give only one of the arguments n.start and x.start")
-  if(!ngiven && !xgiven)
-    stop("No starting state specified.")
 
   given <- if(ngiven) "n" else if(xgiven) "x" else "none"
 

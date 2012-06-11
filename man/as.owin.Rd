@@ -3,6 +3,8 @@
 \alias{as.owin.owin}
 \alias{as.owin.ppp}
 \alias{as.owin.ppm}
+\alias{as.owin.kppm}
+\alias{as.owin.lppm}
 \alias{as.owin.psp}
 \alias{as.owin.quad}
 \alias{as.owin.tess}
@@ -19,17 +21,33 @@ in any of several formats, into an object of class \code{"owin"}.
 }
 \usage{
  as.owin(W, \dots, fatal=TRUE)
+
  \method{as.owin}{owin}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
+
+ \method{as.owin}{kppm}(W, \dots, fatal=TRUE)
+
+ \method{as.owin}{lppm}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{psp}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{quad}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{tess}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{data.frame}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{distfun}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{rmhmodel}(W, \dots, fatal=FALSE)
+
  \method{as.owin}{default}(W, \dots, fatal=TRUE)
 }
 \arguments{
@@ -96,10 +114,16 @@ in any of several formats, into an object of class \code{"owin"}.
     lies outside the window, is transformed into the logical value
     \code{FALSE}, which is the corresponding convention for window masks.
     \item
-    an object of class \code{"ppm"} representing a fitted point process
+    an object of class \code{"ppm"} or \code{"kppm"}  
+    representing a fitted point process
     model. In this case, \code{as.owin} extracts the  original point
     pattern data to which the model was fitted, and returns the
     observation window of this point pattern.
+    \item
+    an object of class \code{"lppm"}
+    representing a fitted point process model on a linear network.
+    In this case, \code{as.owin} extracts the linear network
+    and returns a window containing this network. 
     \item
     A \code{data.frame} with exactly three columns. Each row of the
     data frame corresponds to one pixel. Each row contains the

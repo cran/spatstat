@@ -6,102 +6,123 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.16 $     $Date: 2011/10/16 07:40:43 $
+#     $Revision: 1.18 $     $Date: 2012/06/11 05:22:24 $
 #
 
-eval.fv <- function(expr, envir) {
-  # convert syntactic expression to 'expression' object
-  e <- as.expression(substitute(expr))
-  # convert syntactic expression to call
-  elang <- substitute(expr)
-  # find names of all variables in the expression
-  varnames <- all.vars(e)
-  if(length(varnames) == 0)
-    stop("No variables in this expression")
-  # get the actual variables
-  if(missing(envir))
-    envir <- sys.parent()
-  vars <- lapply(as.list(varnames), function(x, ee) get(x, envir=ee), ee=envir)
-  names(vars) <- varnames
-  # find out which ones are fv objects
-  fvs <- unlist(lapply(vars, is.fv))
-  nfuns <- sum(fvs)
-  if(nfuns == 0)
-    stop("No fv objects in this expression")
-  funs <- vars[fvs]
-  # test whether the fv objects are compatible
-  if(nfuns > 1 && !(ok <- do.call("compatible", unname(funs))))
-    stop(paste(if(nfuns > 2) "some of" else NULL,
-               "the functions",
-               commasep(sQuote(names(funs))),
-               "are not compatible"))
-  # copy first object as template
-  result <- funs[[1]]
-  labl <- attr(result, "labl")
-  # determine which function estimates are supplied
-  argname <- fvnames(result, ".x")
-  nam <- names(result)
-  ynames <- nam[nam != argname]
-  # for each function estimate, evaluate expression
-  for(yn in ynames) {
-    # extract corresponding estimates from each fv object
-    funvalues <- lapply(funs, function(x, n) { x[[n]] }, n=yn)
-    # insert into list of argument values
-    vars[fvs] <- funvalues
-    # evaluate
-    result[[yn]] <- eval(e, vars)
-  }
-  # determine mathematical labels.
-  # 'yexp' determines y axis label
-  # 'ylab' determines y label in printing and description
-  # 'fname' is sprintf-ed into 'labl' for legend
-  getfname <- function(x) { if(!is.null(y <- attr(x, "fname"))) y else "" }
-  yexps <- lapply(funs, function(x) { attr(x, "yexp") })
-  ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
-  fnames <- unlist(lapply(funs, getfname))
-  # Remove duplication
-  # Typically occurs when combining several K functions, etc.
-  # Tweak fv objects so their function names are their object names
-  # as used in the expression
-  if(any(duplicated(fnames))) {
-    newfnames <- names(funs)
-    for(i in 1:nfuns)
-      funs[[i]] <- rebadge.fv(funs[[i]], new.fname=newfnames[i])
-    fnames <- newfnames
-  }
-  if(any(duplicated(ylabs))) {
-    for(i in 1:nfuns)
-      funs[[i]] <- rebadge.fv(funs[[i]], 
-                              new.ylab=substitute(f(r), list(f=as.name(fnames[i]))))
-    ylabs <- lapply(funs, function(x) { attr(x, "ylab") })
-  }
-  if(any(duplicated(yexps))) {
-    newfnames <- names(funs)
-    for(i in 1:nfuns)
-      funs[[i]] <- rebadge.fv(funs[[i]], 
-                              new.yexp=substitute(f(r), list(f=as.name(newfnames[i]))))
-    yexps <- lapply(funs, function(x) { attr(x, "yexp") })
-  }
-  # now compute y axis labels for the result
-  attr(result, "yexp") <- eval(substitute(substitute(e, yexps), list(e=elang)))
-  attr(result, "ylab") <- eval(substitute(substitute(e, ylabs), list(e=elang)))
-  # compute fname equivalent to expression
-  flatten <- function(x) { paste(x, collapse=" ") }
-  attr(result, "fname") <- paren(flatten(deparse(elang)))
-  # now compute the [modified] y labels
-  labelmaps <- lapply(funs, fvlabelmap, dot=FALSE)
-  for(yn in ynames) {
-    # labels for corresponding columns of each argument
-    funlabels <- lapply(labelmaps, function(x, n) { x[[n]] }, n=yn)
-    # form expression involving these columns
-    labl[match(yn, names(result))] <-
-      flatten(deparse(eval(substitute(substitute(e, f),
-                                      list(e=elang, f=funlabels)))))
-  }
-  attr(result, "labl") <- labl
-  return(result)
-}
+eval.fv <- local({
 
+  # main function
+  eval.fv <- function(expr, envir, dotonly=TRUE) {
+    # convert syntactic expression to 'expression' object
+    e <- as.expression(substitute(expr))
+    # convert syntactic expression to call
+    elang <- substitute(expr)
+    # find names of all variables in the expression
+    varnames <- all.vars(e)
+    if(length(varnames) == 0)
+      stop("No variables in this expression")
+    # get the actual variables
+    if(missing(envir))
+      envir <- sys.parent()
+    vars <- lapply(as.list(varnames), get, envir=envir)
+    names(vars) <- varnames
+    # find out which ones are fv objects
+    fvs <- unlist(lapply(vars, is.fv))
+    nfuns <- sum(fvs)
+    if(nfuns == 0)
+      stop("No fv objects in this expression")
+    funs <- vars[fvs]
+    # restrict to columns identified by 'dotnames'
+    if(dotonly) 
+      funs <- lapply(funs, restrict.to.dot)
+    # test whether the fv objects are compatible
+    if(nfuns > 1 && !(ok <- do.call("compatible", unname(funs))))
+      stop(paste(if(nfuns > 2) "some of" else NULL,
+                 "the functions",
+                 commasep(sQuote(names(funs))),
+                 "are not compatible"))
+    # copy first object as template
+    result <- funs[[1]]
+    labl <- attr(result, "labl")
+    # determine which function estimates are supplied
+    argname <- fvnames(result, ".x")
+    nam <- names(result)
+    ynames <- nam[nam != argname]
+    # for each function estimate, evaluate expression
+    for(yn in ynames) {
+      # extract corresponding estimates from each fv object
+      funvalues <- lapply(funs, "[[", i=yn)
+      # insert into list of argument values
+      vars[fvs] <- funvalues
+      # evaluate
+      result[[yn]] <- eval(e, vars)
+    }
+    # determine mathematical labels.
+    # 'yexp' determines y axis label
+    # 'ylab' determines y label in printing and description
+    # 'fname' is sprintf-ed into 'labl' for legend
+    yexps <- lapply(funs, attr, which="yexp")
+    ylabs <- lapply(funs, attr, which="ylab")
+    fnames <- unlist(lapply(funs, getfname))
+    # Remove duplication
+    # Typically occurs when combining several K functions, etc.
+    # Tweak fv objects so their function names are their object names
+    # as used in the expression
+    if(any(duplicated(fnames))) {
+      newfnames <- names(funs)
+      for(i in 1:nfuns)
+        funs[[i]] <- rebadge.fv(funs[[i]], new.fname=newfnames[i])
+      fnames <- newfnames
+    }
+    if(any(duplicated(ylabs))) {
+      for(i in 1:nfuns) {
+        new.ylab <- substitute(f(r), list(f=as.name(fnames[i])))
+        funs[[i]] <- rebadge.fv(funs[[i]], new.ylab=new.ylab)
+      }
+      ylabs <- lapply(funs, attr, which="ylab")
+    }
+    if(any(duplicated(yexps))) {
+      newfnames <- names(funs)
+      for(i in 1:nfuns) {
+        new.yexp <- substitute(f(r), list(f=as.name(newfnames[i])))
+        funs[[i]] <- rebadge.fv(funs[[i]], new.yexp=new.yexp)
+      }
+      yexps <- lapply(funs, attr, which="yexp")
+    }
+    # now compute y axis labels for the result
+    attr(result, "yexp") <- eval(substitute(substitute(e, yexps),
+                                            list(e=elang)))
+    attr(result, "ylab") <- eval(substitute(substitute(e, ylabs),
+                                            list(e=elang)))
+    # compute fname equivalent to expression
+    attr(result, "fname") <- paren(flatten(deparse(elang)))
+    # now compute the [modified] y labels
+    labelmaps <- lapply(funs, fvlabelmap, dot=FALSE)
+    for(yn in ynames) {
+      # labels for corresponding columns of each argument
+      funlabels <- lapply(labelmaps, "[[", i=yn)
+      # form expression involving these columns
+      labl[match(yn, names(result))] <-
+        flatten(deparse(eval(substitute(substitute(e, f),
+                                        list(e=elang, f=funlabels)))))
+    }
+    attr(result, "labl") <- labl
+    return(result)
+  }
+
+  # helper functions
+  restrict.to.dot <- function(z) {
+    argu <- fvnames(z, ".x")
+    dotn <- fvnames(z, ".")
+    ok <- colnames(z) %in% c(argu, dotn)
+    return(z[, ok])
+  }
+  getfname <- function(x) { if(!is.null(y <- attr(x, "fname"))) y else "" }
+  flatten <- function(x) { paste(x, collapse=" ") }
+  
+  eval.fv
+})
+    
 compatible <- function(A, B, ...) {
   UseMethod("compatible")
 }

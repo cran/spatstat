@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.88 $     $Date: 2012/02/04 08:58:59 $
+#         $Revision: 1.89 $     $Date: 2012/06/08 09:46:19 $
 #
 #      The class "im" of raster images
 #
@@ -66,22 +66,26 @@ im <- function(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)),
   if(miss.xcol && !is.null(xrange)) {
     # use 'xrange' 
     xstep <- diff(xrange)/nc
-    xcol <- xrange[1] - xstep/2 + xstep * seq_len(nc)
+    xcol <- seq(from=xrange[1] + xstep/2, to=xrange[2] - xstep/2, length.out=nc)
   } else {
     # use 'xcol'
     if(length(xcol) <= 1)
       stop("Only 1 column of pixels - cannot determine pixel width")
+    # ensure spacing is constant
+    xcol <- seq(from=min(xcol), to=max(xcol), length.out=length(xcol))
     xstep <- diff(xcol)[1]
     xrange <- range(xcol) + c(-1,1) * xstep/2
   }
   if(miss.yrow && !is.null(yrange)) {
     # use 'yrange'
     ystep <- diff(yrange)/nr
-    yrow <- yrange[1] - ystep/2 + ystep * seq_len(nr)
+    yrow <- seq(from=yrange[1] + ystep/2, to=yrange[2] - ystep/2, length.out=nr)
   } else {
     # use 'yrow'
     if(length(yrow) <= 1)
       stop("Only 1 row of pixels - cannot determine pixel height")
+    # ensure spacing is constant
+    yrow <- seq(from=min(yrow), to=max(yrow), length.out=length(yrow))
     ystep <- diff(yrow)[1]
     yrange <- range(yrow) + c(-1,1) * ystep/2
   }  
@@ -666,32 +670,34 @@ rebound.im <- function(x, rect) {
   dy <- x$ystep
   nbot <- max(0, floor((x$yrange[1]-rect$yrange[1])/dy))
   ntop <- max(0, floor((rect$yrange[2]-x$yrange[2])/dy))
+  # determine exact x and y ranges (to preserve original pixel locations)
+  xrange.new <- x$xrange + c(-nleft, nright) * dx
+  yrange.new <- x$yrange + c(-nbot,  ntop) * dy
   # expand pixel data matrix
   nr <- x$dim[1]
   nc <- x$dim[2]
-  nrnew <- nr + ntop + nbot
-  ncnew <- nc + nleft + nright
-  vnew <- cbind(matrix(NA, nr, nleft), x$v, matrix(NA, nr, nright))
-  vnew <- rbind(matrix(NA, nbot, ncnew), vnew, matrix(NA, ntop, ncnew))
-  # extend x, y coordinate vectors
-  xcolnew <- c(if(nleft > 0) x$xcol[1] - (nleft:1) * dx else NULL,
-               x$xcol,
-               if(nright > 0) x$xcol[nc] + (1:nright) * dx else NULL)
-  yrownew <- c(if(nbot > 0) x$yrow[1] - (nbot:1) * dy else NULL,
-               x$yrow,
-               if(ntop > 0) x$yrow[nr] + (1:ntop) * dy else NULL)
-  # rebuild image object
-  xnew <- list(v      = vnew,
-               dim    = c(nrnew, ncnew),
-               xrange = rect$xrange,
-               yrange = rect$yrange,
-               xstep  = dx,
-               ystep  = dy,
-               xcol   = xcolnew,
-               yrow   = yrownew,
-               type   = x$type,
-               units   = unitname(x))
-  class(xnew) <- "im"
+  nrnew <- nbot  + nr + ntop
+  ncnew <- nleft + nc + nright
+  naval <- switch(x$type,
+                  factor=,
+                  integer=NA_integer_,
+                  real=NA_real_,
+                  character=NA_character_,
+                  complex=NA_complex_,
+                  NA)
+  vnew <- matrix(naval, nrnew, ncnew)
+  if(x$type != "factor") {
+    vnew[nbot + (1:nr), nleft + (1:nc)] <- x$v
+  } else {
+    vnew[nbot + (1:nr), nleft + (1:nc)] <- as.integer(x$v)
+    vnew <- factor(vnew, labels=levels(x))
+    dim(vnew) <- c(nrnew, ncnew)
+  }
+  # build new image object
+  xnew <- im(vnew,
+             xrange = xrange.new,
+             yrange = yrange.new,
+             unitname = unitname(x))
   return(xnew)
 }
 

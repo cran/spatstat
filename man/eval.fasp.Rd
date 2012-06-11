@@ -7,11 +7,13 @@
   and returns another function array.
 }
 \usage{
-  eval.fasp(expr, envir)
+  eval.fasp(expr, envir, dotonly=TRUE)
 }
 \arguments{
   \item{expr}{An expression.}
-  \item{envir}{Optional. The environment in which to evaluate the expression.}
+  \item{envir}{Optional. The environment in which to evaluate the
+    expression.}
+  \item{dotonly}{Logical. Passed to \code{\link{eval.fv}}.}
 }
 \details{
   This is a wrapper to make it easier to perform

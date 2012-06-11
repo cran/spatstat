@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.69 $	$Date: 2012/05/14 02:35:54 $
+#	$Revision: 2.74 $	$Date: 2012/06/09 04:24:58 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -177,7 +177,10 @@ function(x, ...,
 }
 
 quad.ppm <- function(object, drop=FALSE) {
-  verifyclass(object, "ppm")
+  if(!is.ppm(object)) {
+    if(inherits(object, "kppm")) object <- object$po else
+    stop("object is not of class ppm")
+  }
   Q <- object$Q
   if(!drop || is.null(Q))
     return(Q)
@@ -229,20 +232,26 @@ getglmsubset <- function(object) {
 
 valid.ppm <- function(object) {
   verifyclass(object, "ppm")
-  if(!all(is.finite(coef(object))))
+  coeffs <- coef(object)
+  # ensure all coefficients are fitted, and finite
+  if(!all(is.finite(coeffs)))
     return(FALSE)
+  # inspect interaction
   inte <- object$interaction
   if(is.null(inte))
-    return(TRUE)
+    return(TRUE) # Poisson process
+  # extract fitted interaction coefficients
+  Vnames <- object$internal$Vnames
+  IsOffset <- object$internal$IsOffset  
+  Icoeffs <- coeffs[Vnames[!IsOffset]]
+  # check interaction
   checker <- inte$valid
-  if(is.null(checker)) {
+  if(is.null(checker) || !newstyle.coeff.handling(inte)) {
     warning("Internal error: unable to check validity of model")
     return(NA)
   }
-  Vnames <- object$internal$Vnames
-  coeffs <- coef(object)
-  Icoeffs <- coeffs[Vnames]
-  return(checker(Icoeffs, inte))
+  answer <- checker(Icoeffs, inte)
+  return(answer)
 }
 
 project.ppm <- local({
@@ -558,7 +567,11 @@ model.matrix.ppm <- function(object, data=model.frame(object),
   return(mm)
 }
 
-model.images <- function(object, W=as.owin(object), ...) {
+model.images <- function(object, ...) {
+  UseMethod("model.images")
+}
+
+model.images.ppm <- function(object, W=as.owin(object), ...) {
   X <- data.ppm(object)
   # make a quadscheme with a dummy point at every pixel
   Q <- pixelquad(X, W)

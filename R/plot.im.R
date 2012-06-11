@@ -53,6 +53,8 @@ plot.im <- local({
     ribside <- match.arg(ribside)
     zlim <- dotargs$zlim
 
+    x <- repair.image.xycoords(x)
+
     xtype <- x$type
 
     # determine whether pixel values are to be treated as colours

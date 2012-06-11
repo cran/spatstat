@@ -14,7 +14,7 @@
 \usage{
 as.hyperframe(x, \dots)
 \method{as.hyperframe}{default}(x, \dots)
-\method{as.hyperframe}{data.frame}(x, \dots)
+\method{as.hyperframe}{data.frame}(x, \dots, stringsAsFactors=FALSE)
 \method{as.hyperframe}{hyperframe}(x, \dots)
 \method{as.hyperframe}{listof}(x, \dots)
 }
@@ -23,7 +23,12 @@ as.hyperframe(x, \dots)
     Data in some other format.
   }
   \item{\dots}{
-    Ignored.
+    Optional arguments passed to \code{\link{hyperframe}}.
+  }
+  \item{stringsAsFactors}{
+    Logical. If \code{TRUE}, any column of the data frame \code{x} that
+    contains character strings will be converted to a \code{factor}.
+    If \code{FALSE}, no such conversion will occur.
   }
 }
 \details{
@@ -45,6 +50,16 @@ as.hyperframe(x, \dots)
   (see \code{\link{as.hyperframe.ppx}}) which extract
   the coordinates from a spatial dataset. These methods
   do discard some information.
+}
+\section{Conversion of Strings to Factors}{
+  Note that \code{as.hyperframe.default}
+  will convert a character vector to a factor.
+  It behaves like \code{\link{as.data.frame}}.
+
+  However \code{as.hyperframe.data.frame} does not convert strings to
+  factors; it respects the structure of the data frame \code{x}.
+
+  The behaviour can be changed using the argument \code{stringsAsFactors}.
 }
 \value{
   An object of class \code{"hyperframe"} created by

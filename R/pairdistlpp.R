@@ -1,21 +1,20 @@
 #
-# pairdist.R
+# pairdistlpp.R
 #
-#  $Revision: 1.2 $ $Date: 2011/06/11 01:54:15 $
+#  $Revision: 1.4 $ $Date: 2012/06/06 11:13:02 $
 #
 # Calculates the shortest-path distance between each pair of points
 # in a point pattern on a linear network.
 #
-# R will treat this function as a 'method' for pairdist()
 #
 
 pairdist.lpp <- function(X, ..., method="C") {
   stopifnot(inherits(X, "lpp"))
   stopifnot(method %in% c("C", "interpreted"))
   #
-  L <- X$domain
-  X <- as.ppp(X)
-  n <- X$n
+  L <- as.linnet(X)
+  Y <- as.ppp(X)
+  n <- npoints(Y)
   #
   Lseg  <- L$lines
   Lvert <- L$vertices
@@ -24,7 +23,9 @@ pairdist.lpp <- function(X, ..., method="C") {
   dpath <- L$dpath
   
   # find nearest segment for each point
-  pro <- nearestsegment(X, Lseg)
+  # This is given by local coordinates, if available (spatstat >= 1.27-1)
+  loco <- coords(X, local=TRUE, spatial=FALSE, temporal=FALSE)
+  pro <- if(ncol(loco) > 0) loco$seg else nearestsegment(X, Lseg)
 
   pairdistmat <- matrix(0,n,n)
 
@@ -32,7 +33,7 @@ pairdist.lpp <- function(X, ..., method="C") {
     # loop through all pairs of data points
     for (i in 1:(n-1)) {
       proi <- pro[i]
-      Xi <- X[i]
+      Xi <- Y[i]
       nbi1 <- from[proi]
       nbi2 <- to[proi]
       vi1 <- Lvert[nbi1]
@@ -40,7 +41,7 @@ pairdist.lpp <- function(X, ..., method="C") {
       dXi1 <- crossdist(Xi, vi1)
       dXi2 <- crossdist(Xi, vi2)
       for (j in (i+1):n) {
-        Xj <- X[j]
+        Xj <- Y[j]
         proj <- pro[j]
         if(proi == proj) {
           # points i and j lie on the same segment
@@ -73,8 +74,8 @@ pairdist.lpp <- function(X, ..., method="C") {
     segmap <- pro - 1L
     zz <- .C("linpairdist",
              np = as.integer(n),
-             xp = as.double(X$x),
-             yp = as.double(X$y),
+             xp = as.double(Y$x),
+             yp = as.double(Y$y),
              nv = as.integer(Lvert$n),
              xv = as.double(Lvert$x),
              yv = as.double(Lvert$y),

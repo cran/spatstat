@@ -346,15 +346,27 @@ unitname.minconfit <- function(x) {
                2*pi *r *exp(Covariance(r,model=model,
                                        param=c(0.0,par[1],0.0,par[2],margs)))
            }
-           th <- numeric(length(rvals))
-           th[1] <- if(rvals[1] == 0) 0 else 
-                    integrate(integrand,lower=0,upper=rvals[1],
-                              par=par,model=model,margs=margs)$value
-           for (i in 2:length(rvals)) {
-             delta <- integrate(integrand,
-                                lower=rvals[i-1],upper=rvals[i],
-                                par=par,model=model,margs=margs)
-             th[i]=th[i-1]+delta$value
+           nr <- length(rvals)
+           th <- numeric(nr)
+           if(spatstat.options("fastK.lgcp")) {
+             # integrate using Simpson's rule
+             fvals <- integrand(r=rvals, par=par, model=model, margs=margs)
+             th[1] <- rvals[1] * fvals[1]/2
+             if(nr > 1)
+               for(i in 2:nr)
+                 th[i] <- th[i-1] +
+                   (rvals[i] - rvals[i-1]) * (fvals[i] + fvals[i-1])/2
+           } else {
+             # integrate using Simpson's rule
+             th[1] <- if(rvals[1] == 0) 0 else 
+             integrate(integrand,lower=0,upper=rvals[1],
+                       par=par,model=model,margs=margs)$value
+             for (i in 2:length(rvals)) {
+               delta <- integrate(integrand,
+                                  lower=rvals[i-1],upper=rvals[i],
+                                  par=par,model=model,margs=margs)
+               th[i]=th[i-1]+delta$value
+             }
            }
            return(th)
          },

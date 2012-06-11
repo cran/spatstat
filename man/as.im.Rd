@@ -139,7 +139,12 @@
   in the image will be replaced by this value.  The resulting image is
   then defined everwhere on the full rectangular domain, instead of a
   smaller window. Here \code{na.replace} should be a single value,
-  of the same type as the other entries in the image. 
+  of the same type as the other entries in the image.
+
+  If \code{X} is a pixel image that was created by an older version
+  of \pkg{spatstat}, the command \code{X <- as.im(X)} will
+  repair the internal format of \code{X} so that it conforms to the
+  current version of \pkg{spatstat}.
 }
 \value{
   An image object of class \code{"im"}.

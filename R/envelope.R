@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.28 $  $Date: 2012/05/15 09:22:30 $
+#   $Revision: 2.29 $  $Date: 2012/05/30 10:01:38 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -216,7 +216,8 @@ envelopeEngine <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
-           envir.user=envir.user) {
+           envir.user=envir.user,
+           expected.arg="r") {
   #
   envir.here <- sys.frame(sys.nframe())
 
@@ -333,9 +334,11 @@ envelopeEngine <-
   } else if(!is.function(fun)) 
     stop(paste("unrecognised format for function", fname))
   fargs <- names(formals(fun))
-  if(!any(c("r", "...") %in% fargs))
-    stop(paste(fname, "should have an argument",
-               sQuote("r"), "or", sQuote("...")))
+  if(!any(c(expected.arg, "...") %in% fargs))
+    stop(paste(fname, "should have",
+               ngettext(length(expected.arg), "an argument", "arguments"),
+               "named", commasep(sQuote(expected.arg)),
+               "or a", sQuote("..."), "argument"))
   usecorrection <- any(c("correction", "...") %in% fargs)
 
   # ---------------------------------------------------------------------
@@ -346,7 +349,7 @@ envelopeEngine <-
     stop("nsim must be an integer")
   stopifnot(nrank > 0 && nrank < nsim/2)
 
-  rgiven <- "r" %in% names(list(...))
+  rgiven <- any(expected.arg %in% names(list(...)))
 
   if(tran <- !is.null(transform)) {
     stopifnot(is.expression(transform))
@@ -524,9 +527,19 @@ envelopeEngine <-
   nrvals <- length(rvals)
   simvals <- matrix(, nrow=nrvals, ncol=Nsim)
 
+  # inferred values of function argument 'r' or equivalent parameters
+  if(identical(expected.arg, "r")) {
+    # Kest, etc
+    inferred.r.args <- list(r=rvals)
+  } else if(identical(expected.arg, c("rmax", "nrval"))) {
+    # K3est, etc
+    inferred.r.args <- list(rmax=max(rvals), nrval=length(rvals))
+  } else
+  stop(paste("Don't know how to infer values of", commasep(expected.arg)))
+    
   # arguments for function
   funargs <-
-    resolve.defaults(if(rgiven) NULL else list(r=rvals),
+    resolve.defaults(inferred.r.args,
                      list(...),
                      if(usecorrection) list(correction="best") else NULL)
   
@@ -569,26 +582,34 @@ envelopeEngine <-
     }
 
     # sanity checks
-    if(!inherits(funXsim, "fv"))
-      stop(paste("When applied to a simulated pattern, the function",
-                 fname, "did not return an object of class",
-                 sQuote("fv")))
-    argname.sim <- fvnames(funXsim, ".x")
-    valname.sim <- fvnames(funXsim, ".y")
-    if(argname.sim != argname)
-      stop(paste("The objects returned by", fname,
-                 "when applied to a simulated pattern",
-                 "and to the data pattern",
-                 "are incompatible. They have different argument names",
-                 sQuote(argname.sim), "and", sQuote(argname), 
-                 "respectively"))
-    if(valname.sim != valname)
-      stop(paste("When", fname, "is applied to a simulated pattern",
-                 "it provides an estimate named", sQuote(valname.sim), 
-                 "whereas the estimate for the data pattern is named",
-                 sQuote(valname),
-                 ". Try using the argument", sQuote("correction"),
-                 "to make them compatible"))
+    if(i == 1) {
+      if(!inherits(funXsim, "fv"))
+        stop(paste("When applied to a simulated pattern, the function",
+                   fname, "did not return an object of class",
+                   sQuote("fv")))
+      argname.sim <- fvnames(funXsim, ".x")
+      valname.sim <- fvnames(funXsim, ".y")
+      if(argname.sim != argname)
+        stop(paste("The objects returned by", fname,
+                   "when applied to a simulated pattern",
+                   "and to the data pattern",
+                   "are incompatible. They have different argument names",
+                   sQuote(argname.sim), "and", sQuote(argname), 
+                   "respectively"))
+      if(valname.sim != valname)
+        stop(paste("When", fname, "is applied to a simulated pattern",
+                   "it provides an estimate named", sQuote(valname.sim), 
+                   "whereas the estimate for the data pattern is named",
+                   sQuote(valname),
+                   ". Try using the argument", sQuote("correction"),
+                   "to make them compatible"))
+      rfunX    <- with(funX,    ".x")
+      rfunXsim <- with(funXsim, ".x")
+      if(!identical(rfunX, rfunXsim))
+        stop(paste("When", fname, "is applied to a simulated pattern,",
+                   "the values of the argument", sQuote(argname.sim),
+                   "are different from those used for the data."))
+    }
 
     if(tran) {
       # extract only the recommended value
@@ -599,7 +620,7 @@ envelopeEngine <-
       # apply the transformation to it
       funXsim <- eval(transform.funXsim)
     }
-      
+
     # extract the values for simulation i
     simvals.i <- funXsim[[valname]]
     if(length(simvals.i) != nrvals)

@@ -101,8 +101,9 @@
 
   
   The argument \code{start} determines the initial state of the
-  Metropolis-Hastings algorithm. It is either a list, or an object
-  of class \code{"rmhstart"}, with the following components:
+  Metropolis-Hastings algorithm. It is either \code{NULL},
+  or an object of class \code{"rmhstart"},
+  or a list with the following components:
 
   \describe{
     \item{n.start}{
@@ -131,8 +132,8 @@
   The third argument \code{control} controls the simulation
   procedure (including \emph{conditional simulation}),
   iterative behaviour, and termination of the
-  Metropolis-Hastings algorithm. It is either a list, or an
-  object of class \code{"rmhcontrol"}, with components:
+  Metropolis-Hastings algorithm. It is either \code{NULL}, or
+  a list, or an object of class \code{"rmhcontrol"}, with components:
   \describe{
     \item{p}{The probability of proposing a ``shift''
       (as opposed to a birth or death) in the Metropolis-Hastings
@@ -356,14 +357,18 @@ trend corresponding to a particular type, there is still a component
    X1.strauss <- rmh(model=mod01,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
-   # Strauss process, conditioning on n = 80:
-   X2.strauss <- rmh(model=mod01,start=list(n.start=ns),
+   # Strauss process, conditioning on n = 42:
+   X2.strauss <- rmh(model=mod01,start=list(n.start=42),
                      control=list(p=1,nrep=nr,nverb=nv))
 
    \testonly{
-     X1.strauss <- rmh(model=mod01,start=list(n.start=ns),
+     X1.strauss <- rmh(model=mod01,start=list(n.start=42),
                      control=list(nrep=nr,nverb=nv), track=TRUE)
-     X2.strauss <- rmh(model=mod01,start=list(n.start=ns),
+     X2.strauss <- rmh(model=mod01,start=list(n.start=42),
+                     control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
+     X1.strauss <- rmh(model=mod01,
+                     control=list(nrep=nr,nverb=nv), track=TRUE)
+     X2.strauss <- rmh(model=mod01,
                      control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
    }
    

@@ -169,6 +169,9 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
   This function is considerably slower than \code{\link{lgcp.estpcf}}
   because of the computation time required for the integral
   in the \eqn{K}-function.
+
+  Computation can be accelerated, at the cost of less accurate results,
+  by setting \code{spatstat.options(fastK.lgcp=TRUE)}. 
 }
 \references{
   Moller, J, Syversveen, A. and Waagepetersen, R. (1998)
@@ -214,8 +217,11 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
     if(interactive()) plot(u)
     \testonly{
       if(require(RandomFields) && RandomFieldsSafe()) {
-      lgcp.estK(redwood, covmodel=list(model="matern", nu=0.3),
+      K <- Kest(redwood, r=seq(0, 0.1, length=9))
+      op <- spatstat.options(fastK.lgcp=TRUE)
+      lgcp.estK(K, covmodel=list(model="matern", nu=0.3),
                 control=list(maxit=3))
+      spatstat.options(op)
       }
     }
     \donttest{

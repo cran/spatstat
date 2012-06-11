@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.80 $    $Date: 2012/05/14 07:49:47 $
+#  $Revision: 1.81 $    $Date: 2012/05/18 03:42:19 $
 #
 #
 
@@ -43,7 +43,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   external <- !(vars %in% c(colnames(x), reserved))
   if(any(external)) {
     sought <- vars[external]
-    found <- unlist(lapply(sought, exists, envir=env.user))
+    found <- unlist(lapply(sought, exists, envir=env.user, mode="numeric"))
     if(any(!found)) {
       nnot <- sum(!found)
       stop(paste(ngettext(nnot, "Variable", "Variables"),

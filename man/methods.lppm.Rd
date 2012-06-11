@@ -8,6 +8,7 @@
 \alias{plot.lppm}
 \alias{terms.lppm}
 \alias{update.lppm}
+\alias{as.linnet.lppm}
 \title{
   Methods for Fitted Point Process Models on a Linear Network
 }
@@ -24,9 +25,10 @@
   \method{print}{lppm}(x, ...)
   \method{terms}{lppm}(x, ...)
   \method{update}{lppm}(object, ...)
+  \method{as.linnet}{lppm}(X, ...)
 }
 \arguments{
-  \item{object,fit,x}{
+  \item{object,fit,x,X}{
     An object of class \code{"lppm"} representing a fitted point process
     model on a linear network.
   }
