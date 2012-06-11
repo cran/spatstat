@@ -22,8 +22,35 @@ lpp(X, L)
 }
 \details{
   This command creates an object of class \code{"lpp"} that represents
-  a point pattern on a linear network. The points of \code{X} should lie
-  on the lines of \code{L}. 
+  a point pattern on a linear network.
+
+  Normally \code{X} is a point pattern. The points of \code{X} should lie
+  on the lines of \code{L}.
+
+  Alternatively \code{X} may be a matrix or data frame containing at
+  least two columns.
+  \itemize{
+    \item Usually
+    the first two columns of \code{X} will be interpreted
+    as spatial coordinates, and any remaining columns as marks.
+    \item 
+    The exception occurs if \code{X} is a data frame with columns named
+    \code{x}, \code{y}, \code{seg} and \code{tp}. Then
+    \code{x} and \code{y} will be interpreted as spatial
+    coordinates, and \code{seg} and \code{tp} as local
+    coordinates, with \code{seg} indicating which line segment of
+    \code{L} the point lies on, and \code{tp} indicating how far along
+    the segment the point lies (normalised to 1). Any remaining columns
+    will be interpreted as marks.
+  }
+}
+\section{Note on changed format}{
+  The internal format of \code{"lpp"} objects was changed in
+  \pkg{spatstat} version \code{1.28-0}.
+  Objects in the old format are still handled correctly,
+  but computations are faster in the new format.
+  To convert an object \code{X} from the old format to the new format,
+  use \code{X <- lpp(as.ppp(X), as.linnet(X))}.
 }
 \value{
   An object of class \code{"lpp"}. 

@@ -1,7 +1,7 @@
 #
 # marks.R
 #
-#   $Revision: 1.30 $   $Date: 2012/05/12 10:24:22 $
+#   $Revision: 1.31 $   $Date: 2012/06/05 01:26:23 $
 #
 # stuff for handling marks
 #
@@ -93,6 +93,8 @@ markformat.default <- function(x) {
   if(is.null(x)) return("none")
   if(is.vector(x) || is.factor(x)) return("vector")
   if(is.data.frame(x)) return("dataframe")
+  if(is.hyperframe(x)) return("hyperframe")
+  if(inherits(x, "listof")) return("listof")
   stop("Mark format not understood")
 }
 
@@ -185,43 +187,42 @@ unmark.splitppp <- function(X) {
 
 ##### utility functions for subsetting & combining marks #########
 
-findmarktype <- function(x) {
-  if(is.null(x)) return("none")
-  if(is.vector(x) || is.factor(x)) return("vector")
-  if(is.data.frame(x)) return("dataframe")
-  if(inherits(x, "listof")) return("listof")
-  stop("Unrecognised mark format")
-}
 
 marksubset <- function(x, index, format=NULL) {
-  if(is.null(format)) format <- findmarktype(x)
+  if(is.null(format)) format <- markformat(x)
   switch(format,
          none={return(NULL)},
+         listof=,
          vector={return(x[index])},
+         hyperframe=,
          dataframe={return(x[index,,drop=FALSE])},
-         listof={return(x[index])},
          stop("Internal error: unrecognised format of marks"))
 }
 
 "%msub%" <- marksubsetop <- function(x,i) { marksubset(x, i) }
 
 "%mrep%" <- markreplicateop <- function(x,n) { 
-  format <- findmarktype(x)
+  format <- markformat(x)
   switch(format,
          none={return(NULL)},
          listof=,
          vector={ return(rep(x,n))},
          dataframe={
-           return(as.data.frame(lapply(x, function(z, k) rep(z, k), k=n)))
+           return(as.data.frame(lapply(x, rep, times=n)))
+         },
+         hyperframe={
+           xcols <- as.list(x)
+           repxcols <- lapply(xcols, rep, times=n)
+           return(do.call("hyperframe", repxcols))
          },
          stop("Internal error: unrecognised format of marks"))
 }
 
 "%mapp%" <- markappendop <- function(x,y) { 
-  fx <- findmarktype(x)
-  fy <- findmarktype(y)
+  fx <- markformat(x)
+  fy <- markformat(y)
   agree <- (fx == fy)
-  if(fx == "data.frame")
+  if(all(c(fx,fy) %in% c("dataframe", "hyperframe")))
     agree <- agree && identical(names(x),names(y)) 
   if(!agree)
     stop("Attempted to concatenate marks that are not compatible")
@@ -232,6 +233,7 @@ marksubset <- function(x, index, format=NULL) {
              return(cat.factor(x,y))
            else return(c(x,y))
          },
+         hypeframe=,
          dataframe = { return(rbind(x,y)) },
          listof = {
            z <- append(x,y)
@@ -246,7 +248,7 @@ markappend <- function(...) {
   # combine marks from any number of patterns
   marxlist <- list(...)
   # check on compatibility of marks
-  mkfmt <- sapply(marxlist,findmarktype)
+  mkfmt <- sapply(marxlist,markformat)
   if(length(unique(mkfmt))>1)
     stop(paste("Marks of some patterns are of different format",
                "from those of other patterns."))
@@ -262,6 +264,7 @@ markappend <- function(...) {
            marx <- do.call("rbind", marxlist)[,1]
            return(marx)
          },
+         hyperframe =,
          dataframe = {
            # check compatibility of data frames
            # (this is redundant but gives more helpful message)
@@ -289,17 +292,22 @@ markappend <- function(...) {
 markcbind <- function(...) {
   # cbind several columns of marks
   marxlist <- list(...)
-  # convert each to data frame
-  to.df <- function(z) {
-    switch(findmarktype(z),
-           listof = ,
-           none = NULL,
-           vector = as.data.frame.vector(z),
-           dataframe = z)
+  mkfmt <- unlist(lapply(marxlist, markformat))
+  if(any(vacuous <- (mkfmt == "none"))) {
+    marxlist <- marxlist[!vacuous]
+    mkfmt    <- mkfmt[!vacuous]
   }
-  dflist <- unname(lapply(marxlist, to.df))
-  ok <- !sapply(dflist, is.null)
-  marx <- do.call(data.frame, dflist[ok])
+  if(all(mkfmt %in% c("vector", "dataframe"))) {
+    # result is a data frame
+    if(any(isvec <- (mkfmt == "vector")))
+      marxlist[isvec] <- lapply(marxlist[isvec], as.data.frame.vector)
+    marx <- do.call(data.frame, marxlist)
+  } else {
+    # result is a hyperframe
+    if(!all(ishyp <- (mkfmt == "hyperframe"))) 
+      marxlist[!ishyp] <- lapply(marxlist[!ishyp], as.hyperframe)
+    marx <- do.call(hyperframe, marxlist)
+  }
   return(marx)
 }
 

@@ -5,6 +5,8 @@
 \alias{$.hyperframe}
 \alias{$<-.hyperframe}
 \alias{[.localpcfmatrix}
+\alias{[.splitppx}
+\alias{[<-.splitppx}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{adjustthinrange}
@@ -72,6 +74,9 @@
 \alias{conform.imagelist}
 \alias{countingweights}
 \alias{damaged.ppm}
+\alias{datagen.runifpointOnLines}
+\alias{datagen.runifpoisppOnLines}
+\alias{datagen.rpoisppOnLines}
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
@@ -129,7 +134,6 @@
 \alias{findbestlegendpos}
 \alias{findCovariate}
 \alias{findcbind}
-\alias{findmarktype}
 \alias{firstfactor}
 \alias{fii}
 \alias{fillNA}
@@ -217,6 +221,7 @@
 \alias{localKengine}
 \alias{localpcfengine}
 \alias{localpcfmatrix}
+\alias{local2lpp}
 \alias{paste.expr}
 \alias{lookup.im}
 \alias{majorminorversion}
@@ -227,6 +232,7 @@
 \alias{markcbind}
 \alias{markformat}
 \alias{markformat.ppp}
+\alias{markformat.ppx}
 \alias{markformat.psp}
 \alias{markformat.default}
 \alias{mark.scale.default}
@@ -348,6 +354,7 @@
 \alias{print.rmhstart}
 \alias{print.rmhInfoList}
 \alias{print.splitppp}
+\alias{print.splitppx}
 \alias{print.summary.fii}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
@@ -357,6 +364,7 @@
 \alias{print.summary.psp}
 \alias{print.summary.rmhexpand}
 \alias{print.summary.splitppp}
+\alias{print.summary.splitppx}
 \alias{print.summary.units}
 \alias{print.tess}
 \alias{prolongseq}
@@ -365,6 +373,7 @@
 \alias{ratfv}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
+\alias{repair.image.xycoords}
 \alias{rgbNA}
 \alias{rhs.of.formula}
 \alias{RmhExpandRule}
@@ -440,11 +449,13 @@
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
 \alias{sphere.volume}
+\alias{str.hyperframe}
 \alias{stratrand}
 \alias{strausscounts}
 \alias{suffloc}
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
+\alias{summarise.trend}
 \alias{summary.envelope}
 \alias{summary.fii}
 \alias{summary.hyperframe}
@@ -452,6 +463,7 @@
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
+\alias{summary.splitppx}
 \alias{summary.rmhexpand}
 \alias{superimposeMarks}
 \alias{sympoly}
@@ -497,6 +509,8 @@
 \method{[}{hyperframe}(x, i, j) <- value
 \method{$}{hyperframe}(x, name)
 \method{$}{hyperframe}(x, i) <- value
+\method{[}{splitppx}(x, ...)
+\method{[}{splitppx}(x, ...) <- value
 acedist.show(X, Y, n, d, timelag = 0)
 acedist.noshow(X, Y, n, d)
 adjustthinrange(ur,vstep,vr)
@@ -569,6 +583,9 @@ commasep(x)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
+datagen.runifpointOnLines(n, L)
+datagen.runifpoisppOnLines(lambda, L)
+datagen.rpoisppOnLines(lambda, L, lmax, \dots)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, verbose)
 default.ntile(X)
@@ -610,7 +627,7 @@ envelopeEngine(X, fun, simul,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
-           envir.user=envir.user)
+           envir.user=envir.user, expected.arg="r")
 envelopeTest(X, \dots, power, rinterval, use.theo, Xname, verbose, internal)
 \method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
       nsim, nsim2, jsim, jsim.mean,
@@ -641,7 +658,6 @@ fasp(fns, which, formulae, dataname, title, rowNames, colNames)
 findbestlegendpos(...)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
-findmarktype(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
@@ -729,6 +745,7 @@ listof(\dots)
 localKengine(X, \dots, wantL, lambda, correction, verbose, rvalue)
 localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
 localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
+local2lpp(L, seg, tp, X)
 paste.expr(x)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
@@ -742,6 +759,7 @@ markappend(\dots)
 markcbind(\dots)
 markformat(x)
 \method{markformat}{ppp}(x)
+\method{markformat}{ppx}(x)
 \method{markformat}{psp}(x)
 \method{markformat}{default}(x)
 mark.scale.default(marx, w, markscale=NULL, maxsize=NULL)
@@ -876,6 +894,7 @@ primesbelow(nmax)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
 \method{print}{splitppp}(x, \dots)
+\method{print}{splitppx}(x, \dots)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
 \method{print}{summary.listof}(x, \dots)
@@ -884,6 +903,7 @@ primesbelow(nmax)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.rmhexpand}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
+\method{print}{summary.splitppx}(x, \dots)
 \method{print}{summary.units}(x, \dots)
 \method{print}{tess}(x, \dots, brief=FALSE)
 prolongseq(x, newrange)
@@ -892,6 +912,7 @@ RandomFieldsSafe()
 ratfv(df, numer, denom, \dots, ratio)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+repair.image.xycoords(x)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
 RmhExpandRule(nama)
@@ -974,11 +995,13 @@ spatialCDFtest(model, covariate, test, \dots, dimyx, eps, jitter, modelname, cov
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
+\method{str}{hyperframe}(object, \dots)
 stratrand(window, nx, ny, k = 1)
 strausscounts(U,X,r,EqualPairs)
 suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
+summarise.trend(trend, w, a)
 \method{summary}{envelope}(object,\dots)
 \method{summary}{fii}(object,\dots)
 \method{summary}{hyperframe}(object, ..., brief=FALSE)
@@ -986,6 +1009,7 @@ suffstat.poisson(model, X, callstring)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{rmhexpand}(object, \dots)
+\method{summary}{splitppx}(object, \dots)
 superimposeMarks(arglist, nobj)
 sympoly(x, y, n)
 termsinformula(x)

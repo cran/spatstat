@@ -3,7 +3,7 @@
 #
 #   simulation envelopes for pp3 
 #
-#   $Revision: 1.2 $  $Date: 2010/06/06 04:47:35 $
+#   $Revision: 1.3 $  $Date: 2012/05/30 10:02:07 $
 #
 
 envelope.pp3 <-
@@ -54,13 +54,15 @@ envelope.pp3 <-
     # Data pattern is argument Y
     X <- Y
   }
-  envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
-                 verbose=verbose, clipdata=FALSE,
-                 transform=transform, global=global, ginterval=ginterval,
-                 savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
-                 VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user)
+  en <-
+    envelopeEngine(X=X, fun=fun, simul=simrecipe,
+                   nsim=nsim, nrank=nrank, ..., 
+                   verbose=verbose, clipdata=FALSE,
+                   transform=transform, global=global, ginterval=ginterval,
+                   savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
+                   VARIANCE=VARIANCE, nSD=nSD,
+                   Yname=Yname, maxnerr=maxnerr, cl=cl,
+                   envir.user=envir.user,
+                   expected.arg=c("rmax", "nrval"))
 }
 

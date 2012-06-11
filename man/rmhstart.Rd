@@ -56,7 +56,7 @@
   The arguments are:
     \describe{
       \item{n.start}{
-	The number of ``initial'' points to be randomly
+	The number of \dQuote{initial} points to be randomly
 	(uniformly) generated in the simulation window \code{w}.
 	Incompatible with \code{x.start}.
 
@@ -66,13 +66,14 @@
 
 	If expansion of the simulation window is selected (see the argument
 	\code{expand} to \code{\link{rmhcontrol}}),
-	then \code{n.start} will be multiplied by the expansion factor
+	then the actual number of starting points in the simulation
+	will be \code{n.start} multiplied by the expansion factor
 	(ratio of the areas of the expanded window and original window).
 
 	For faster convergence of the Metropolis-Hastings algorithm,
 	the value of \code{n.start} should be roughly equal to
-	(an educated guess at) the expected number of points which
-	will be generated inside the window.
+	(an educated guess at) the expected number of points
+	for the point process inside the window.
       }
       \item{x.start}{
 	Initial point pattern configuration. Incompatible with

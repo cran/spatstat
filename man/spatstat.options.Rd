@@ -234,7 +234,21 @@
       will be calculated only for Poisson models). The default is
       \code{"poisson"} because the calculation for non-Poisson models
       can take a long time.
-      }
+    }
+    \item{nvoxel}{
+      Default number of voxels in a 3D image,
+      typically for calculating the distance transform in \code{\link{F3est}}.
+      Initialised to 4 megavoxels: \code{nvoxel = 2^22 = 4194304}.
+    }
+    \item{fastK.lgcp}{
+      Logical. Whether to use fast or slow algorithm to compute the
+      (theoretical) \eqn{K}-function of a log-Gaussian Cox process
+      for use in \code{\link{lgcp.estK}} or \code{\link{Kmodel}}.
+      The slow algorithm uses accurate numerical integration; the
+      fast algorithm uses Simpson's Rule for numerical integration,
+      and is about two orders of magnitude faster.
+      Initialised to \code{FALSE}. 
+    }
   }
   If no arguments are given, 
   the current values of all parameters are returned,

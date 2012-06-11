@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.45 $ $Date: 2012/02/04 01:48:16 $
+# $Revision: 1.47 $ $Date: 2012/06/02 02:45:24 $
 #
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
@@ -409,3 +409,23 @@ is.poisson.kppm <- function(x) {
          },
          return(FALSE))
 }
+
+# other methods that pass through to 'ppm'
+
+as.owin.kppm <- function(W, ..., fatal=TRUE) {
+  as.owin(W$po, ..., fatal=fatal)
+}
+
+model.images.kppm <- function(object, W=as.owin(object), ...) {
+  model.images(object$po, W=W, ...)
+}
+
+model.matrix.kppm <- function(object, data=model.frame(object), ...,
+                              keepNA=TRUE) {
+  model.matrix(object$po, data=data, ..., keepNA=keepNA)
+}
+
+model.frame.kppm <- function(formula, ...) {
+  model.frame(formula$po, ...)
+}
+

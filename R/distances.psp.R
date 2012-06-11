@@ -3,7 +3,7 @@
 #
 #  Hausdorff distance and Euclidean separation for psp objects
 #
-#  $Revision: 1.7 $ $Date: 2009/10/22 00:25:00 $
+#  $Revision: 1.8 $ $Date: 2012/06/11 06:06:11 $
 #
 #
 
@@ -66,17 +66,31 @@ crossdist.psp <- function(X, Y, ..., method="Fortran", type="Hausdorff") {
 
 nndist.psp <- function(X, ..., k=1, method="Fortran") {
   verifyclass(X, "psp")
-  n <- X$n
+  if(!(is.vector(k) && all(k %% 1 == 0) && all(k >= 1)))
+    stop("k should be a positive integer or integers")
+  n <- nobjects(X)
+  kmax <- max(k)
+  lenk <- length(k)
+  result <- if(lenk == 1) numeric(n) else matrix(, nrow=n, ncol=lenk)
   if(n == 0)
-    return(numeric(0))
-  else if(n <= k)
-    return(rep(Inf, n))
+    return(result)
+  if(kmax >= n) {
+    # not enough objects 
+    # fill with Infinite values
+    result[] <- Inf
+    if(any(ok <- (kmax < n))) {
+      # compute the lower-order nnd's
+      result[, ok] <- nndist.psp(X, ..., k=k[ok], method=method)
+    }
+    return(result)
+  }
+  # normal case:
   D <- pairdist.psp(X, ..., method=method)
   diag(D) <- Inf
-  if(k == 1) 
+  if(kmax == 1) 
     NND <- apply(D, 1, min)
-  else
-    NND <- apply(D, 1, function(z,k) { sort(z)[k] }, k=k)
+  else 
+    NND <- t(apply(D, 1, function(z,k) { sort(z)[k] }, k=k))[, , drop=TRUE]
   return(NND)
 }
 

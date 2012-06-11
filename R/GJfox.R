@@ -3,7 +3,7 @@
 #
 #  Foxall G-function and J-function
 #
-#  $Revision: 1.2 $   $Date: 2011/08/24 09:28:27 $
+#  $Revision: 1.3 $   $Date: 2012/06/11 05:07:18 $
 #
 Gfox <- function(X, Y, r=NULL, breaks=NULL,
                  correction=c("km", "rs", "han"), ...) {
@@ -68,7 +68,7 @@ Jfox <- function(X, Y, r=NULL, breaks=NULL,
   H <- Hest(Y, r=r, breaks=breaks, correction=correction, ...)
   G <- Gfox(X, Y, r=H$r, correction=correction, ...)
   # derive J-function
-  J <- eval.fv((1-G)/(1-H))
+  J <- eval.fv((1-G)/(1-H), dotonly=FALSE)
   # correct calculation of hazard is different
   if("hazard" %in% names(J))
     J$hazard <- G$hazard - H$hazard

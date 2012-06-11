@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.56 $  $Date: 2012/05/14 04:28:39 $
+#   $Revision: 1.57 $  $Date: 2012/05/24 03:44:14 $
 #
 #
 
@@ -10,8 +10,11 @@ rmhmodel <- function(...) {
   UseMethod("rmhmodel")
 }
 
+
 rmhmodel.rmhmodel <- function(model, ...) {
-  if(outdated <- is.null(model$C.ipar))
+  # Check for outdated internal format
+  # C.par was replaced by C.beta and C.ipar in spatstat 1.22-3 
+  if(outdated <- !is.null(model$C.par))
     warning("Outdated internal format of rmhmodel object; rebuilding it")
   if(outdated || (length(list(...)) > 0))
     model <- rmhmodel.list(unclass(model), ...)

@@ -1,5 +1,7 @@
 \name{model.matrix.ppm}
 \alias{model.matrix.ppm}
+\alias{model.matrix.kppm}
+\alias{model.matrix.lppm}
 \title{Extract Design Matrix from Point Process Model}
 \description{
   Given a point process model that has been
@@ -8,10 +10,16 @@
 }
 \usage{
    \method{model.matrix}{ppm}(object, data=model.frame(object), ..., keepNA=TRUE)
+
+   \method{model.matrix}{kppm}(object, data=model.frame(object), ...,
+   keepNA=TRUE)
+
+   \method{model.matrix}{lppm}(object, data=model.frame(object), ..., keepNA=TRUE)
 }
 \arguments{
   \item{object}{
-    The fitted point process model (an object of class \code{"ppm"}.)
+    The fitted point process model. An object of class \code{"ppm"}
+    or \code{"kppm"} or \code{"lppm"}.
   }
   \item{data}{
     A model frame, containing the data required for the Berman-Turner device.
@@ -26,21 +34,24 @@
   }
 }
 \details{
-  This command is a method for the generic function
-  \code{\link{model.matrix}}. It extracts the design matrix of a
-  spatial point process model (class \code{"ppm"}).
+  These commands are methods for the generic function
+  \code{\link{model.matrix}}. They extracts the design matrix of a
+  spatial point process model (class \code{"ppm"} or \code{"kppm"}
+  or \code{"lppm"}).
 
   More precisely, this command extracts
   the design matrix of the generalised linear model associated with
-  a spatial point process model.
+  a spatial point process model. 
   
   The \code{object} must be a fitted point process model
-  (object of class \code{"ppm"}) fitted to spatial point pattern data.
+  (object of class \code{"ppm"} or \code{"kppm"} or \code{"lppm"})
+  fitted to spatial point pattern data.
   Such objects are produced by the model-fitting
-  function \code{\link{ppm}}.
+  functions \code{\link{ppm}}, \code{\link{kppm}} and \code{\link{lppm}}.
 
-  This function \code{model.matrix.ppm}
-  extracts the model matrix for the GLM.
+  The methods \code{model.matrix.ppm}, \code{model.matrix.kppm}
+  and \code{model.matrix.lppm}
+  extract the model matrix for the GLM.
 
   The result is a matrix, with one row for every quadrature point
   in the fitting procedure, and one column for every constructed
@@ -70,6 +81,7 @@
 \seealso{
   \code{\link{model.images}},
   \code{\link{ppm}},
+  \code{\link{kppm}},
   \code{\link{ppm.object}},
   \code{\link{quad.ppm}},
   \code{\link{residuals.ppm}},
@@ -77,10 +89,11 @@
 }
 
 \examples{
-   data(cells)
    fit <- ppm(cells, ~x)
    model.matrix(fit)
    # matrix with two columns: '(Intercept)' and 'x'
+   kfit <- kppm(redwood, ~x, "Thomas")
+   m <- model.matrix(kfit)
 }
 \keyword{spatial}
 \keyword{models}

@@ -67,7 +67,7 @@
 }
 \examples{
    df <- data.frame(x=runif(4),y=runif(4),t=runif(4))
-   X <- ppx(data=df, temporal="t")
+   X <- ppx(data=df, coord.type=c("s","s","t"))
    as.data.frame(X)
    val <- runif(4)
    E <- lapply(val, function(s) { rpoispp(s) })

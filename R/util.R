@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.89 $    $Date: 2012/05/10 09:46:11 $
+#    $Revision: 1.90 $    $Date: 2012/06/05 09:06:45 $
 #
 #  (a) for matrices only:
 #
@@ -452,11 +452,11 @@ validposint <- function(n, caller, fatal=TRUE) {
 # wrangle data.frames
 
 firstfactor <- function(x) {
-  stopifnot(is.data.frame(x))
+  stopifnot(is.data.frame(x) || is.hyperframe(x))
   isfac <- unlist(lapply(as.list(x), is.factor))
   if(!any(isfac)) 
     return(NULL)
-  return(x[, min(which(isfac))])
+  return(x[, min(which(isfac)), drop=TRUE])
 }
 
 onecolumn <- function(m) {

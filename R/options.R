@@ -228,8 +228,21 @@ assign(".Spatstat.Options", list(), envir = .spEnv)
          check=function(x) { is.character(x) && length(x) == 1 &&
                              x %in% c("always", "poisson", "never") },
          valid="one of the strings \'always\', \'poisson\' or \'never\'"
-       )         
+       ),
+       nvoxel=list(
+         default=2^22,
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 2^12
+         },
+         valid="a single integer, greater than 2^12"
+       ),
+       fastK.lgcp=list(
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
        )
+       )
+# end of options list
 
 reset.spatstat.options <- function() {
   .Spatstat.Options <- lapply(.Spat.Stat.Opt.Table,

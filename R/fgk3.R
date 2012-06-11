@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.8 $	$Date: 2011/05/18 02:04:06 $
+#	$Revision: 1.14 $	$Date: 2012/05/30 13:07:26 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -17,8 +17,10 @@ K3est <- function(X, ...,
                              isotropic="isotropic",
                              best="isotropic"),
                            multi=TRUE)
+  trap.extra.arguments(..., .Context="In K3est")
+  B <- X$domain
   if(is.null(rmax))
-    rmax <- diameter.box3(X$domain)/2
+    rmax <- diameter(B)/2
   r <- seq(from=0, to=rmax, length.out=nrval)
 
   # this will be the output data frame
@@ -28,7 +30,7 @@ K3est <- function(X, ...,
           "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="K3")
 
   # extract the x,y,z ranges as a vector of length 6
-  flatbox <- unlist(X$domain[1:3])
+  flatbox <- unlist(B[1:3])
 
   # extract coordinates
   coo <- coords(X)
@@ -69,12 +71,14 @@ G3est <- function(X, ...,
                              hanisch="han",
                              best="km"),
                            multi=TRUE)
+  trap.extra.arguments(..., .Context="In G3est")
+  B <- X$domain
   if(is.null(rmax))
-    rmax <- diameter.box3(X$domain)/2
+    rmax <- diameter(B)/2
   r <- seq(from=0, to=rmax, length.out=nrval)
 
   coo <- coords(X)
-  lambda <- nrow(coo)/volume.box3(X$domain)
+  lambda <- nrow(coo)/volume(B)
   
   # this will be the output data frame
   G <- data.frame(r=r, theo= 1 - exp( - lambda * (4/3) * pi * r^3))
@@ -83,7 +87,7 @@ G3est <- function(X, ...,
           "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="G3")
 
   # extract the x,y,z ranges as a vector of length 6
-  flatbox <- unlist(X$domain[1:3])
+  flatbox <- unlist(B[1:3])
 
   # collect four histograms for censored data
   u <- g3Cengine(coo$x, coo$y, coo$z, flatbox,
@@ -109,9 +113,11 @@ G3est <- function(X, ...,
 
 F3est <- function(X, ...,
                   rmax=NULL, nrval=128, vside=NULL,
-                  correction=c("rs", "km", "cs"))
+                  correction=c("rs", "km", "cs"),
+                  sphere=c("fudge", "ideal", "digital"))
 {
   stopifnot(inherits(X, "pp3"))
+  sphere <- match.arg(sphere)
   correction <- pickoption("correction", correction,
                            c(rs="rs",
                              border="rs",
@@ -122,27 +128,52 @@ F3est <- function(X, ...,
                              CS="cs",
                              best="km"),
                            multi=TRUE)
+  trap.extra.arguments(..., .Context="In F3est")
+  B <- X$domain
   if(is.null(rmax))
-    rmax <- diameter.box3(X$domain)/2
+    rmax <- diameter(B)/2
   r <- seq(from=0, to=rmax, length.out=nrval)
 
   coo <- coords(X)
-  lambda <- nrow(coo)/volume.box3(X$domain)
+  vol <- volume(B)
+  lambda <- nrow(coo)/vol
 
   # determine voxel size
   if(missing(vside)) {
-    shortside <- with(X$domain, min(diff(xrange),diff(yrange),diff(zrange)))
-    vside <- shortside/128
+    voxvol <- vol/spatstat.options("nvoxel")
+    vside <- voxvol^(1/3)
+    # ensure the shortest side is a whole number of voxels
+    s <- shortside(B)
+    m <- ceiling(s/vside)
+    vside <- s/m
   }
-  
+
+  # compute theoretical value
+  switch(sphere,
+         ideal = {
+           volsph <- (4/3) * pi * r^3
+           spherename <- "ideal sphere"
+         },
+         fudge = {
+           volsph <- 0.78 * (4/3) * pi * r^3
+           spherename <- "approximate sphere"
+         },
+         digital = {
+           volsph <- digital.volume(c(0, rmax), nrval, vside)
+           spherename <- "digital sphere"
+         })
+  theo.desc <- paste("theoretical Poisson %s using", spherename)
+           
   # this will be the output data frame
-  FF <- data.frame(r=r, theo= 1 - exp( - lambda * (4/3) * pi * r^3))
-  desc <- c("distance argument r", "theoretical Poisson %s")
+  FF <- data.frame(r     = r,
+                   theo  = 1 - exp( - lambda * volsph))
+  desc <- c("distance argument r", theo.desc)
+  labl <- c("r","%s[pois](r)")
   FF <- fv(FF, "r", substitute(F3(r), NULL),
-          "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="F3")
+          "theo", , c(0,rmax/2), labl, desc, fname="F3")
 
   # extract the x,y,z ranges as a vector of length 6
-  flatbox <- unlist(X$domain[1:3])
+  flatbox <- unlist(B[1:3])
 
   # go
   u <- f3Cengine(coo$x, coo$y, coo$z, flatbox,
@@ -177,12 +208,14 @@ pcf3est <- function(X, ...,
                              isotropic="isotropic",
                              best="isotropic"),
                            multi=TRUE)
+  trap.extra.arguments(..., .Context="In pcf3est")
+  B <- X$domain
   if(is.null(rmax))
-    rmax <- diameter.box3(X$domain)/2
+    rmax <- diameter(B)/2
   r <- seq(from=0, to=rmax, length.out=nrval)
 
   if(is.null(delta)) {
-    lambda <- npoints(X)/volume(X$domain)
+    lambda <- npoints(X)/volume(B)
     delta <- adjust * 0.26/lambda^(1/3)
   }
   if(biascorrect) {
@@ -198,7 +231,7 @@ pcf3est <- function(X, ...,
           "theo", , c(0,rmax/2), c("r","%s[pois](r)"), desc, fname="pcf3")
 
   # extract the x,y,z ranges as a vector of length 6
-  flatbox <- unlist(X$domain[1:3])
+  flatbox <- unlist(B[1:3])
 
   # extract coordinates
   coo <- coords(X)

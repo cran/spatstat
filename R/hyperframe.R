@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.41 $  $Date: 2011/05/18 07:54:11 $
+# $Revision: 1.45 $  $Date: 2012/06/06 02:08:03 $
 #
 
 hyperframe <- function(...,
@@ -223,24 +223,29 @@ as.hyperframe.hyperframe <- function(x, ...) {
   return(x)
 }
 
-as.hyperframe.data.frame <- function(x, ...) {
-  if(missing(x)) 
-    return(do.call("hyperframe", list(...)))
+as.hyperframe.data.frame <- function(x, ..., stringsAsFactors=FALSE) {
+  xlist <- if(missing(x)) NULL else as.list(x)
   do.call("hyperframe",
           resolve.defaults(
-                           as.list(x),
+                           xlist,
                            list(...),
-                           list(row.names=rownames(x))))
+                           list(row.names=rownames(x),
+                                stringsAsFactors=stringsAsFactors),
+                           .StripNull=TRUE))
 }
 
 as.hyperframe.listof <- function(x, ...) {
-  if(missing(x)) 
-    return(do.call("hyperframe", list(...)))
+  if(!missing(x)) {
+    xname <- sensiblevarname(deparse(substitute(x)), "x")
+    xlist <- list(x)
+    names(xlist) <- xname
+  } else xlist <- NULL
   do.call("hyperframe",
           resolve.defaults(
-                           list(x),
+                           xlist,
                            list(...),
-                           list(row.names=names(x))))
+                           list(row.names=rownames(x)),
+                           .StripNull=TRUE))
 }
 
 as.hyperframe.default <- function(x, ...) {
@@ -482,3 +487,40 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
   return(invisible(NULL))
 }
   
+str.hyperframe <- function(object, ...) {
+  d <- dim(object)
+  x <- unclass(object)
+  argh <- resolve.defaults(list(...), list(nest.lev=0, indent.str="  .."))
+  cat(paste("'hyperframe':\t",
+            d[1], ngettext(d[1], "row", "rows"),
+            "and",
+            d[2], ngettext(d[2], "column", "columns"),
+            "\n"))
+  nr <- d[1]
+  nc <- d[2]
+  if(nc > 0) {
+    vname <- x$vname
+    vclass <- x$vclass
+    vtype  <- as.character(x$vtype)
+    indentstring <- with(argh, paste(rep(indent.str, nest.lev), collapse=""))
+    for(j in 1:nc) {
+      tag <- paste("$", vname[j])
+      switch(vtype[j],
+             dfcolumn={
+               desc <- vclass[j]
+               if(nr > 0) {
+                 vals <- object[1:min(nr,3),j,drop=TRUE]
+                 vals <- paste(paste(format(vals), collapse=" "), "...")
+               } else vals <- ""
+             },
+             hypercolumn=,
+             hyperatom={
+               desc <- "objects of class"
+               vals <- vclass[j]
+             })
+      cat(paste(paste(indentstring, tag, sep=""),
+                ":", desc, vals, "\n"))
+    }
+  }
+  return(invisible(NULL))
+}

@@ -1,4 +1,145 @@
 
+	CHANGES IN spatstat VERSION 1.28-0
+
+OVERVIEW 
+
+   o We thank Farzaneh Safavimanesh, Andrew Hardegen and Tom Lawrence 
+     for contributions.
+
+   o Improvements to 3D summary functions.
+
+   o A multidimensional point pattern (ppx) can now have 'local' coordinates
+   as well as spatial and temporal coordinates and marks.
+
+   o Changed format for point patterns on a linear network (lpp).
+   Changes are backward compatible. Many computations run faster.
+
+   o More support for fitted cluster models (kppm).
+
+   o split method for multidimensional point patterns (ppx)
+   and point patterns on a linear network (lpp).
+
+   o Fixed bug causing errors in plot.im
+
+   o Miscellaneous improvements and bug fixes
+
+NEW FUNCTIONS
+
+   o exactMPLEstrauss
+   Fits the stationary Strauss point process model
+   using an exact maximum pseudolikelihood technique.
+   This is mainly intended for technical investigation of algorithms.
+
+   o split.ppx
+   Method for 'split' for multidimensional point patterns (class 'ppx').
+   This also works for point patterns on a linear network (class 'lpp').
+
+   o model.images
+   This function is now generic, with methods for classes ppm, kppm, lppm
+
+   o model.frame, model.matrix
+   These generic functions now have methods for classes kppm, lppm
+
+   o as.owin.kppm, as.owin.lppm
+   New methods for 'as.owin' for objects of class kppm, lppm
+
+   o as.linnet.lppm
+   Extracts the linear network in which a point process model was fitted.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o class 'ppx'
+   An object of class 'ppx' may now include 'local' coordinates 
+   as well as 'spatial' and 'temporal' coordinates, and marks.
+
+   o ppx
+   Arguments have changed.
+   
+   o class 'lpp'
+   The internal format of lpp objects has been extended
+   (but is backward-compatible). Many computations run faster.
+   To convert an object to the new format: X <- lpp(as.ppp(X), as.linnet(X)).
+
+   o F3est
+   Calculation of theoretical Poisson curve ('theo') has changed,
+   and is now controlled by the argument 'sphere'.
+
+   o rmh, rmhstart
+   The initial state ('start') can now be missing or null.
+
+   o im, as.im
+   The pixel coordinates in an image object are now generated
+   more accurately. This avoids a numerical error in plot.im.
+
+   o eval.fv, eval.fasp
+   Evaluation is now applied only to columns that contain
+   values of the function itself (rather than values of the
+   derivative, hazard rate, etc). This is controlled by the
+   new argument 'dotonly'.
+
+   o spatstat.options
+   New option 'nvoxel'
+
+   o quad.ppm
+   Now accepts kppm objects.
+
+   o str
+   This generic function (for inspecting the internal structure of an object)
+   now produces sensible output for objects of class 'hyperframe', 'ppx', 'lpp'
+
+   o ppx, coords.ppx, coords<-.ppx
+   The arguments to these functions have changed.
+
+   o lgcp.estK, Kmodel
+   Computation can be greatly accelerated 
+   by setting spatstat.options(fastK.lgcp=TRUE).
+
+   o G3est
+   Computation accelerated.
+
+   o envelope
+   Computation slightly accelerated.
+
+   o spatstat.options
+   New option 'fastK.lgcp' 
+
+BUG FIXES
+
+   o nndist.psp
+   Caused an error if length(k) > 1.
+   Fixed.
+
+   o plot.im
+   Sometimes reported an error 
+   "useRaster=TRUE can only be used with a regular grid."
+   This was due to numerical rounding effects on the coordinates
+   of a pixel image. 
+   Fixed.
+   
+   o plot.fv
+   If a formula was used to specify the plot,
+   the names of variables in the formula were sometimes
+   incorrectly matched to *functions*.
+   Spotted by Farzaneh Safavimanesh.
+   Fixed.
+
+   o F3est
+   Took a very long time if the containing box was very flat,
+   due to the default value of 'vside'.
+   Fixed.
+
+   o rmh, rmhmodel
+   An erroneous warning about 'outdated format of rmhmodel object' 
+   sometimes occurred.
+   Fixed.
+
+   o marks<-.ppx
+   Names of result were incorrect. Fixed.
+
+   o hyperframe class
+   Various minor bug fixes.
+
+
 	CHANGES IN spatstat VERSION 1.27-0
 
 OVERVIEW 

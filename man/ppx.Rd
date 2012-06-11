@@ -9,7 +9,7 @@
   with any kind of coordinates and marks.
 }
 \usage{
-ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
+ppx(data, domain=NULL, coord.type=NULL)
 }
 \arguments{
   \item{data}{
@@ -20,13 +20,15 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
     Optional. The space-time domain containing the points.
     An object in some appropriate format, or \code{NULL}.
   }
-  \item{spatial}{
-    Character vector giving the names of the columns of
-    \code{data} that should be interpreted as spatial coordinates.
-  }
-  \item{temporal}{
-    Character vector giving the names of the columns of
-    \code{data} that should be interpreted as temporal coordinates.
+  \item{coord.type}{
+    Character vector specifying how each column of
+    \code{data} should be interpreted: as a spatial coordinate,
+    a temporal coordinate, a local coordinate or a mark.
+    Entries are partially matched to the values
+    \code{"spatial"},
+    \code{"temporal"},
+    \code{"local"} and
+    \code{"mark"}.
   }
 }
 \details{
@@ -34,6 +36,7 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
   represents a marked point pattern
   in multidimensional space and/or time. There may be any
   number of spatial coordinates, any number of temporal coordinates,
+  any number of local coordinates,
   and any number of mark variables. The individual marks may be
   atomic (numeric values, factor values, etc) or objects of any kind.
 
@@ -43,15 +46,17 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
   one row of data for each point.
 
   Each column of \code{data} is either
-  a spatial coordinate, a temporal coordinate, or a mark variable.
-  The argument \code{spatial} determines which columns are interpreted
-  as spatial coordinates: if it is present, \code{spatial} should be a
-  character vector matching the names of columns of \code{data}. 
-  Similarly the argument \code{temporal} determines which columns
-  are interpreted as temporal coordinates.
+  a spatial coordinate, a temporal coordinate,
+  a local coordinate, or a mark variable.
+  The argument \code{coord.type} determines how each column is interpreted.
+  It should be a character vector, of length equal to the number of
+  columns of \code{data}. It should contain strings that partially match
+  the values \code{"spatial"}, \code{"temporal"}, \code{"local"} and
+  \code{"mark"}. (The first letters will be sufficient.)
   
-  By default,  columns of numerical data are assumed to represent
-  spatial coordinates.
+  By default (if \code{coord.type} is missing or \code{NULL}),
+  columns of numerical data are assumed to represent
+  spatial coordinates, while other columns are assumed to be marks.
 }
 \value{
   An object of class \code{"ppx"}.
@@ -67,11 +72,13 @@ ppx(data, domain=NULL, spatial = NULL, temporal = NULL)
   \code{\link{print.ppx}} 
 }
 \examples{
-   df <- data.frame(x=runif(4),y=runif(4),z=runif(4))
-   X <- ppx(data=df, t="z")
+   df <- data.frame(x=runif(4),y=runif(4),t=runif(4),
+                    age=rep(c("old", "new"), 2),
+                    size=runif(4))
+   X <- ppx(data=df, coord.type=c("s","s","t","m","m"))
    X
 
-   val <- runif(4)
+   val <- 20 * runif(4)
    E <- lapply(val, function(s) { rpoispp(s) })
    hf <- hyperframe(t=val, e=as.listof(E))
    Z <- ppx(data=hf, domain=c(0,1))

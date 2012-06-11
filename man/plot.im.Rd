@@ -189,6 +189,14 @@
   An error may occur on some graphics devices if the image is very
   large. If this happens, try setting \code{useRaster=FALSE} in the
   call to \code{plot.im}.
+
+  The error message
+  \code{useRaster=TRUE can only be used with a regular grid}
+  means that the \eqn{x} and \eqn{y} coordinates of the pixels in the
+  image are not perfectly equally spaced, due to numerical rounding.
+  This occurs with some images created by earlier versions of \pkg{spatstat}.
+  To repair the coordinates in an image \code{X}, type
+  \code{X <- as.im(X)}.
 }
 \seealso{
   \code{\link{im.object}},

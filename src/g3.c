@@ -4,7 +4,7 @@
 #include "functable.h"
 
 /*
-	$Revision: 1.2 $	$Date: 2009/11/10 17:55:03 $
+	$Revision: 1.3 $	$Date: 2012/05/22 07:17:31 $
 
 	G function (nearest neighbour distribution) of 3D point pattern
 
@@ -42,7 +42,7 @@
 # /////////////////////////////////////////////
 # AUTHOR: Adrian Baddeley, CWI, Amsterdam, 1991.
 #
-# MODIFIED BY: Adrian Baddeley, Perth 2009.
+# MODIFIED BY: Adrian Baddeley, Perth 2009, 2012.
 #
 # This software is distributed free
 # under the conditions that
@@ -68,7 +68,7 @@ nndist3(p, n, b)
      Box *b;
 {
   register int i, j;
-  register double dx, dy, dz, dist, nearest, huge;
+  register double dx, dy, dz, dist2, nearest2, huge2;
   Point *ip, *jp;
   double *nnd;
 
@@ -77,23 +77,23 @@ nndist3(p, n, b)
   dx = b->x1 - b->x0;
   dy = b->y1 - b->y0;
   dz = b->z1 - b->z0;
-  huge = 2.0 * sqrt(dx * dx + dy * dy + dz * dz);
+  huge2 = 2.0 * (dx * dx + dy * dy + dz * dz);
 	
   /* scan each point and find closest */
   for( i = 0; i < n; i++) {
     ip = p + i;
-    nearest = huge;
+    nearest2 = huge2;
     for(j = 0; j < n; j++)
       if(j != i) {
 	jp = p + j;
 	dx = jp->x - ip->x;
 	dy = jp->y - ip->y;
 	dz = jp->z - ip->z;
-	dist = sqrt(dx * dx + dy * dy + dz * dz);
-	if(j == 0 || (i == 0 && j == 1) || dist < nearest)
-	  nearest = dist;
+	dist2 = dx * dx + dy * dy + dz * dz;
+	if(dist2 < nearest2)
+	  nearest2 = dist2;
       }
-    nnd[i] = nearest;
+    nnd[i] = sqrt(nearest2);
   }
   return(nnd);
 }

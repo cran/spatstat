@@ -91,7 +91,7 @@ print.lppm <- function(x, ...) {
   cat("Point process model on linear network\n")
   print(x$fit)
   cat("Linear network:\n")
-  print(as.linnet(x$X))
+  print(as.linnet(x))
   return(invisible(NULL))
 }
 
@@ -153,4 +153,39 @@ extractAIC.lppm <- function(fit, ...) {
   extractAIC(fit$fit, ...)
 }
 
+as.owin.lppm <- function(W, ..., fatal=TRUE) {
+  stopifnot(inherits(W, "lppm"))
+  as.owin(as.linnet(W), ..., fatal=fatal)
+}
+
+model.images.lppm <- function(object, L=as.linnet(object), ...) {
+  stopifnot(inherits(object, "lppm"))
+  stopifnot(inherits(L, "linnet"))
+  m <- model.images(object$fit, W=as.rectangle(L), ...)
+  if(length(m) > 0) {
+    # restrict images to L
+    rasta <- as.mask(m[[1]])
+    DL <- as.mask.psp(as.psp(L), xy=rasta)
+    ZL <- as.im(DL)
+    m <- lapply(m, function(x, Z) eval.im(x * Z), Z=ZL)
+    # convert to linim
+    m <- lapply(m, function(x, L) linim(L,x), L=L)
+  }
+  return(as.listof(m))
+}
+  
+model.matrix.lppm <- function(object, data=model.frame(object),
+                             ..., keepNA=TRUE) {
+  stopifnot(inherits(object, "lppm"))
+  model.matrix(object$fit, data=data, ..., keepNA=keepNA)
+}
+
+model.frame.lppm <- function(formula, ...) {
+  stopifnot(inherits(formula, "lppm"))
+  model.frame(formula$fit, ...)
+}
+
+as.linnet.lppm <- function(X, ...) {
+  as.linnet(X$X, ...)
+}
 

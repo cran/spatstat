@@ -47,7 +47,7 @@
 }
 \examples{
    df <- data.frame(x=runif(4),y=runif(4),z=runif(4))
-   X <- ppx(data=df, t="z")
+   X <- ppx(data=df, coord.type=c("s","s","t"))
    X[-2]
 }
 \author{Adrian Baddeley

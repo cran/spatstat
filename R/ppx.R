@@ -3,49 +3,49 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.29 $  $Date: 2012/05/12 11:12:19 $
+#  $Revision: 1.35 $  $Date: 2012/06/06 10:39:05 $
 #
 
-ppx <- function(data, domain=NULL, spatial=NULL, temporal=NULL) {
-  data <- as.hyperframe(data)
-  suitable <- (summary(data)$storage == "dfcolumn")
-  if(is.null(spatial) && is.null(temporal)) {
-    # assume all suitable columns of data are spatial coordinates
-    isspatial <- suitable
-    istemporal <- FALSE & suitable
-  } else {
-    # 'spatial' determines which columns contain spatial coordinates
-    # 'temporal' determines which columns contain temporal coordinates
-    # convert them to logical vectors
-    vnames <- names(data)
-    names(vnames) <- vnames
-    isspatial <- vnames %in% vnames[spatial]
-    istemporal <- vnames %in% vnames[temporal]
-    if(is.null(spatial))
-      isspatial <- suitable & !istemporal
-    # check for conflicts
-    if(any(nbg <- isspatial & istemporal)) 
-      stop(paste(ngettext(sum(nbg), "coordinate", "coordinates"),
-                 commasep(sQuote(vnames[isspatial & istemporal])),
-                 "selected as both spatial and temporal"))
-    # check that the coordinate columns contain ordinary data
-    if(any(nbg <- (isspatial & !suitable)))
-      stop(paste(ngettext(sum(nbg), "column", "columns"),
-                 commasep(dQuote(vnames[nbg])),
-                 ngettext(sum(nbg), "contain", "contains"),
-                 "data that are not suitable as spatial coordinates"))
-    if(any(nbg <- (istemporal & !suitable)))
-      stop(paste(ngettext(sum(nbg), "column", "columns"),
-                 commasep(dQuote(vnames[nbg])),
-                 ngettext(sum(nbg), "contain", "contains"),
-                 "data that are not suitable as time coordinates"))
+ppx <- local({
+  
+  ctype.table <- c("spatial", "temporal", "local", "mark")
+  ctype.real  <- c(TRUE,      TRUE,       FALSE,   FALSE)
+
+  ppx <- function(data, domain=NULL, coord.type=NULL) {
+    data <- as.hyperframe(data)
+    # columns suitable for spatial coordinates
+    suitable <- with(unclass(data), vtype == "dfcolumn" && vclass == "numeric")
+    if(is.null(coord.type)) {
+      # assume all suitable columns of data are spatial coordinates
+      # and all other columns are marks.
+      ctype <- ifelse(suitable, "spatial", "mark")
+    } else {
+      stopifnot(is.character(coord.type))
+      stopifnot(length(coord.type) == ncol(data))
+      ctypeid <- pmatch(coord.type, ctype.table, duplicates.ok=TRUE)
+      # validate
+      if(any(uhoh <- is.na(ctypeid)))
+        stop(paste("Unrecognised coordinate",
+                   ngettext(sum(uhoh), "type", "types"),
+                   commasep(sQuote(coord.type[uhoh]))))
+      if(any(uhoh <- (!suitable & ctype.real[ctypeid]))) {
+        nuh <- sum(uhoh)
+        stop(paste(ngettext(nuh, "Coordinate", "Coordinates"),
+                   commasep(sQuote(names(data)[uhoh])),
+                   ngettext(nuh, "does not", "do not"),
+                   "contain real numbers"))
+      }
+      ctype <- ctype.table[ctypeid]
+    }
+    ctype <- factor(ctype, levels=ctype.table)
+    out <- list(data=data, ctype=ctype, domain=domain)
+    class(out) <- "ppx"
+    return(out)
   }
-  ctype <- ifelse(isspatial, "spatial", ifelse(istemporal, "temporal", "mark"))
-  ctype <- factor(ctype, levels=c("spatial", "temporal", "mark"))
-  out <- list(data=data, ctype=ctype, domain=domain)
-  class(out) <- "ppx"
-  return(out)
-}
+
+  ppx
+})
+
 
 is.ppx <- function(x) { inherits(x, "ppx") }
 
@@ -63,6 +63,10 @@ print.ppx <- function(x, ...) {
   if(any(istime <- (x$ctype == "temporal")))
     cat(paste(sum(istime), "-dimensional time coordinates ",
               paren(paste(nama[istime], collapse=",")), "\n", sep=""))
+  if(any(islocal <- (x$ctype == "local"))) 
+    cat(paste(sum(ismark), ngettext(sum(ismark), "column", "columns"),
+              "of local coordinates:",
+              commasep(sQuote(nama[ismark])), "\n"))
   if(any(ismark <- (x$ctype == "mark"))) 
     cat(paste(sum(ismark), ngettext(sum(ismark), "column", "columns"),
               "of marks:",
@@ -78,7 +82,7 @@ summary.ppx <- function(object, ...) { print(object, ...) }
 
 plot.ppx <- function(x, ...) {
   xname <- deparse(substitute(x))
-  coo <- coords(x)
+  coo <- coords(x, local=FALSE)
   dom <- x$domain
   m <- ncol(coo)
   if(m == 1) {
@@ -142,9 +146,11 @@ coords <- function(x, ...) {
   UseMethod("coords")
 }
 
-coords.ppx <- function(x, ..., spatial=TRUE, temporal=TRUE) {
+coords.ppx <- function(x, ..., spatial=TRUE, temporal=TRUE, local=TRUE) {
   ctype <- x$ctype
-  chosen <- (ctype == "spatial" & spatial) | (ctype == "temporal" & temporal)
+  chosen <- (ctype == "spatial" & spatial) |
+            (ctype == "temporal" & temporal) | 
+            (ctype == "local" & local) 
   as.data.frame(x$data[, chosen])
 }
 
@@ -168,9 +174,11 @@ coords.ppp <- function(x, ...) { data.frame(x=x$x,y=x$y) }
   return(result)
 }
 
-"coords<-.ppx" <- function(x, ..., spatial=TRUE, temporal=TRUE, value) {
+"coords<-.ppx" <- function(x, ..., spatial=TRUE, temporal=TRUE, local=TRUE, value) {
   ctype <- x$ctype
-  chosen <- (ctype == "spatial" & spatial) | (ctype == "temporal" & temporal)
+  chosen <- (ctype == "spatial" & spatial) |
+            (ctype == "temporal" & temporal) | 
+            (ctype == "local" & local) 
   x$data[, chosen] <- value
   return(x)
 }
@@ -196,6 +204,10 @@ marks.ppx <- function(x, ..., drop=TRUE) {
     newdata <- coorddata
     newctype <- ctype[retain]
   } else {
+    if(is.matrix(value) && nrow(value) == nrow(x$data)) {
+      # assume matrix is to be treated as data frame
+      value <- as.data.frame(value)
+    }
     if(!is.data.frame(value) && !is.hyperframe(value)) 
       value <- hyperframe(marks=value)
     if(is.hyperframe(value) || is.hyperframe(coorddata)) {
@@ -207,7 +219,8 @@ marks.ppx <- function(x, ..., drop=TRUE) {
       newctype <- ctype[retain]
     } else {
       newdata <- cbind(coorddata, value)
-      newctype <- factor(c(as.character(ctype), rep("mark", ncol(value))),
+      newctype <- factor(c(as.character(ctype[retain]),
+                           rep("mark", ncol(value))),
                          levels=levels(ctype))
     }
   }
@@ -219,6 +232,13 @@ marks.ppx <- function(x, ..., drop=TRUE) {
 unmark.ppx <- function(X) {
   marks(X) <- NULL
   return(X)
+}
+
+markformat.ppx <- function(x) {
+  mf <- x$markformat
+  if(is.null(mf)) 
+    mf <- markformat(marks(x))
+  return(mf)
 }
 
 boxx <- function(..., unitname=NULL) {

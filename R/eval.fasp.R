@@ -6,10 +6,10 @@
 #
 #        compatible.fasp()       Check whether two fasp objects are compatible
 #
-#     $Revision: 1.5 $     $Date: 2011/10/16 07:41:02 $
+#     $Revision: 1.6 $     $Date: 2012/06/11 05:22:53 $
 #
 
-eval.fasp <- function(expr, envir) {
+eval.fasp <- function(expr, envir, dotonly=TRUE) {
   # convert syntactic expression to 'expression' object
   e <- as.expression(substitute(expr))
   # convert syntactic expression to call
@@ -21,7 +21,7 @@ eval.fasp <- function(expr, envir) {
   # get the actual variables
   if(missing(envir))
     envir <- sys.parent()
-  vars <- lapply(as.list(varnames), function(x, ee) get(x, envir=ee), ee=envir)
+  vars <- lapply(as.list(varnames), get, envir=envir)
   names(vars) <- varnames
   # find out which ones are fasp objects
   isfasp <- unlist(lapply(vars, inherits, what="fasp"))
@@ -53,7 +53,8 @@ eval.fasp <- function(expr, envir) {
       for(k in seq_along(vars)) 
         assign(varnames[k], vars[[k]], envir=fenv)
       # evaluate
-      resultij <- eval(substitute(eval.fv(ee,ff), list(ee=e, ff=fenv)))
+      resultij <- eval(substitute(eval.fv(ee,ff,dd),
+                                  list(ee=e, ff=fenv, dd=dotonly)))
       # insert back into fasp
       result$fns[[which[i,j] ]] <- resultij
   }

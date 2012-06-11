@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.80 2012/05/13 07:38:18 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.81 2012/05/30 08:52:43 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
@@ -173,6 +173,19 @@ rmh.default <- function(model,start=NULL,
     }
   }
 
+# Extract the 'beta' parameters
+
+  if(length(model$cif) == 1) {
+    # single interaction
+    beta <- model$C.beta
+    betalist <- list(beta)
+  } else {
+    # hybrid
+    betalist <- model$C.betalist
+    # multiply beta vectors for each component
+    beta <- Reduce("*", betalist)
+  }
+  
 ##### .................. CONDITIONAL SIMULATION ...................
 
 #####  
@@ -237,6 +250,26 @@ rmh.default <- function(model,start=NULL,
 
 ###################### Starting state data ############################
 
+# There must now be a starting state.
+  
+  if(start$given == "none") {
+    # For conditional simulation, the starting state must be given
+    if(condtype != "none")
+      stop("No starting state given")
+    # Determine integral of beta * trend over data window.
+    # This is the expected number of points in the reference Poisson process.
+    area.w.clip <- area.owin(w.clip)
+    if(trendy) {
+      tsummaries <- summarise.trend(trend, w=w.clip, a=area.w.clip)
+      En <- beta * unlist(lapply(tsummaries, function(x) { x$integral }))
+    } else {
+      En <- beta * area.w.clip
+    }
+    # Fix n.start equal to this integral
+    n.start <- if(spatstat.options("scalable")) round(En) else ceiling(En)
+    start <- rmhstart(n.start=n.start)
+  }
+  
 # In the case of conditional simulation, the start data determine
 # the 'free' points (i.e. excluding x.cond) in the initial state.
 
@@ -271,7 +304,7 @@ rmh.default <- function(model,start=NULL,
            # Adjust the number of points in the starting state in accordance
            # with the expansion that has occurred.  
            if(expanded) {
-	     holnum <- if(spatstat.options()$scalable) round else ceiling
+	     holnum <- if(spatstat.options("scalable")) round else ceiling
              n.start <- holnum(n.start * area.owin(w.sim)/area.owin(w.clip))
            }
            #
@@ -339,21 +372,7 @@ rmh.default <- function(model,start=NULL,
   if(trendy) {
     if(verbose)
       cat("Evaluating trend integral...")
-    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
-    summarise <- function(x, w, a) {
-      if(is.numeric(x)) {
-        mini <- maxi <- x
-        integ <- a*x
-      } else {
-        Z  <- as.im(x, w)[w, drop=FALSE]
-        ran <- range(Z)
-        mini <- ran[1]
-        maxi <- ran[2]
-        integ <- integral.im(Z)
-      }
-      return(list(min=mini, max=maxi, integral=integ))
-    }
-    tsummaries <- lapply(tlist, summarise, w=w.sim, a=area.w.sim)
+    tsummaries <- summarise.trend(trend, w=w.sim, a=area.w.sim)
     nbg  <- unlist(lapply(tsummaries, function(x) { x$min < 0 }))
     if(any(nbg))
       stop("Trend has negative values")
@@ -390,22 +409,6 @@ rmh.default <- function(model,start=NULL,
     }
   }
 
-# Extract the 'beta' parameters
-
-  ncif <- length(model$cif)
-  if(ncif == 1) {
-    # single interaction
-    beta <- model$C.beta
-    betalist <- list(beta)
-  } else {
-    # hybrid
-    betalist <- model$C.betalist
-    # multiply betas for each component
-    beta <- betalist[[1]]
-    for(k in 2:ncif)
-      beta <- beta * betalist[[k]]
-  }
-  
 #
 #  If beta = 0, the process is almost surely empty
 #
@@ -493,7 +496,6 @@ print.rmhInfoList <- function(x, ...) {
   cat("\nPre-digested Metropolis-Hastings algorithm parameters (rmhInfoList)\n")
   print(as.listof(x))
 }
-
 
 #---------------  rmhEngine -------------------------------------------
 #
@@ -828,3 +830,29 @@ rmhEngine <- function(InfoList, ...,
   return(X)
 }
 
+
+# helper function
+
+summarise.trend <- local({
+  # main function
+  summarise.trend <- function(trend, w, a=area.owin(w)) {
+    tlist <- if(is.function(trend) || is.im(trend)) list(trend) else trend
+    return(lapply(tlist, summarise1, w=w, a=a))
+  }
+  # 
+  summarise1 <-  function(x, w, a) {
+    if(is.numeric(x)) {
+      mini <- maxi <- x
+      integ <- a*x
+    } else {
+      Z  <- as.im(x, w)[w, drop=FALSE]
+      ran <- range(Z)
+      mini <- ran[1]
+      maxi <- ran[2]
+      integ <- integral.im(Z)
+    }
+    return(list(min=mini, max=maxi, integral=integ))
+  }
+  summarise.trend
+})
+  

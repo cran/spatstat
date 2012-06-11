@@ -6,11 +6,13 @@
   and returns another object of the same kind.
 }
 \usage{
-  eval.fv(expr, envir)
+  eval.fv(expr, envir, dotonly=TRUE)
 }
 \arguments{
   \item{expr}{An expression.}
-  \item{envir}{Optional. The environment in which to evaluate the expression.}
+  \item{envir}{Optional. The environment in which to evaluate the
+    expression.}
+  \item{dotonly}{Logical. See Details.}
 }
 \details{
   This is a wrapper to make it easier to perform
@@ -49,6 +51,25 @@
   The expression \code{expr} must be vectorised.
   There must be at least one object of class \code{"fv"} in the expression.
   All such objects must be compatible.
+
+  If \code{dotonly=TRUE} (the default), the expression will be
+  evaluated only for those columns of an \code{"fv"} object
+  that contain values of the function itself (rather than
+  values of the derivative of the function, the hazard rate, etc).
+  If \code{dotonly=FALSE}, the expression will be evaluated for all columns.
+
+  For example the result of \code{\link{Fest}} includes several columns
+  containing estimates of the empty space function \eqn{F(r)},
+  but also includes an estimate of the
+  \emph{hazard} \eqn{h(r)} of \eqn{F(r)}. Transformations that are valid
+  for \eqn{F} may not be valid for \eqn{h}. Accordingly, \eqn{h} would
+  normally be omitted from the calculation.
+  
+  The columns of an object \code{x} that represent the function itself
+  are identified by its \dQuote{dot} names, \code{fvnames(x, ".")}.
+  They are the columns normally plotted by \code{\link{plot.fv}}
+  and identified by the symbol \code{"."} in plot formulas
+  in \code{\link{plot.fv}}.
 }
 \value{
   Another object of class \code{"fv"}.

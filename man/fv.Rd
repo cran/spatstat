@@ -9,7 +9,8 @@
   from raw numerical data. 
 }
 \usage{
-fv(x, argu = "r", ylab = NULL, valu, fmla = NULL, alim = NULL, labl = names(x), desc = NULL, unitname = NULL, fname = NULL, yexp = ylab)
+fv(x, argu = "r", ylab = NULL, valu, fmla = NULL, alim = NULL, labl =
+names(x), desc = NULL, unitname = NULL, fname = NULL, yexp = ylab)
 }
 \arguments{
   \item{x}{

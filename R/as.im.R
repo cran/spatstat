@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.36 $   $Date: 2012/01/21 12:24:56 $
+#    $Revision: 1.37 $   $Date: 2012/06/08 09:44:56 $
 #
 #    as.im()
 #
@@ -17,8 +17,11 @@ as.im.im <- function(X, W=NULL, ...,
                      na.replace=NULL) {
   X <- repair.old.factor.image(X)
   if(is.null(W)) {
-    if(is.null(eps) && is.null(dimyx) && is.null(xy))
-      return(na.handle.im(X, na.replace))
+    if(is.null(eps) && is.null(dimyx) && is.null(xy)) {
+      X <- repair.image.xycoords(X)
+      X <- na.handle.im(X, na.replace)
+      return(X)
+    }
     # pixel raster determined by dimyx etc
     W <- as.mask(as.rectangle(X), eps=eps, dimyx=dimyx, xy=xy)
     # invoke as.im.owin
@@ -247,3 +250,6 @@ repair.old.factor.image <- function(x) {
   return(x)
 }
 
+repair.image.xycoords <- function(x) {
+  im(x$v, xrange=x$xrange, yrange=x$yrange, unitname=unitname(x))
+}

@@ -12,16 +12,16 @@
 \description{
   Given any kind of spatial or space-time point pattern,
   this function extracts the
-  (space and/or time) coordinates of the points
+  (space and/or time and/or local) coordinates of the points
   and returns them as a data frame.
 }
 \usage{
   coords(x, ...)
   \method{coords}{ppp}(x, ...)
-  \method{coords}{ppx}(x, ..., spatial = TRUE, temporal = TRUE)
+  \method{coords}{ppx}(x, ..., spatial = TRUE, temporal = TRUE, local=TRUE)
   coords(x, ...) <- value
   \method{coords}{ppp}(x, ...) <- value
-  \method{coords}{ppx}(x, ..., spatial = TRUE, temporal = TRUE) <- value
+  \method{coords}{ppx}(x, ..., spatial = TRUE, temporal = TRUE, local=TRUE) <- value
 }
 \arguments{
   \item{x}{
@@ -34,10 +34,10 @@
   \item{\dots}{
     Further arguments passed to methods.
   }
-  \item{spatial,temporal}{
-    Logical values indicating whether to extract spatial and temporal
-    coordinates, respectively. The default is to return both
-    spatial and temporal coordinates. (Only relevant to \code{ppx} objects).
+  \item{spatial,temporal,local}{
+    Logical values indicating whether to extract spatial, temporal
+    and local coordinates, respectively. The default is to return all
+    such coordinates. (Only relevant to \code{ppx} objects).
   }
   \item{value}{
     New values of the coordinates. A numeric vector with one entry for each
@@ -75,7 +75,7 @@
 }
 \examples{
    df <- data.frame(x=runif(4),y=runif(4),t=runif(4))
-   X <- ppx(data=df, temporal="t")
+   X <- ppx(data=df, coord.type=c("s","s","t"))
    coords(X)
    coords(X, temporal=FALSE)
    coords(X) <- matrix(runif(12), ncol=3)
