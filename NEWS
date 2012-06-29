@@ -1,4 +1,74 @@
 
+	CHANGES IN spatstat VERSION 1.28-1
+
+OVERVIEW 
+
+   o We thank Ege Rubak, Gopal Nair, Jens Oehlschlaegel and Mike Zamboni
+     for contributions.
+
+   o New approximation to the intensity of a fitted Gibbs model.
+
+   o Minor improvements and bug fixes
+
+   o spatstat now 'Suggests' the package 'gsl'
+
+NEW FUNCTIONS
+
+   o intensity, intensity.ppp, intensity.ppm
+   Calculate the intensity of a dataset or fitted model.
+   Includes new approximation to the intensity of a fitted Gibbs model
+
+   o LambertW
+   Lambert's W-function
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+  o envelope
+  Improved plot labels for envelopes that were generated using
+  the 'transform' argument.
+
+  o plot.fv
+  Improved algorithm for collision detection.
+
+  o plot.im
+  Now returns the colour map used.
+
+  o plot.listof, plot.splitppp
+  Slight change to handling of plot.begin and plot.end
+
+  o square
+  Now accepts vectors of length 2
+
+  o plot.fii
+  Increased resolution of the plot obtained from plot(fitin(ppm(...))) 
+
+  o image.listof
+  If equal.ribbon=TRUE, the colour ribbon will no longer be 
+  displayed repeatedly for each panel, 
+  but will now be plotted only once, at the right hand side of the plot array.
+
+BUG FIXES
+
+  o vcov.ppm
+  Results were sometimes incorrect for a Gibbs model with non-trivial trend.
+  Spotted by Ege Rubak.
+  Fixed.
+
+  o nncross
+  In rare cases the results could be slightly incorrect.
+  Spotted by Jens Oehlschlaegel.
+  Fixed.
+
+  o plot.fv
+  When add=TRUE, the x limits were sometimes truncated.
+  Spotted by Mike Zamboni.
+  Fixed.
+
+  o plot.im
+  Labels for the tick marks on the colour ribbon
+  were sometimes ridiculous, e.g. "2.00000001".
+  Fixed.
+
 	CHANGES IN spatstat VERSION 1.28-0
 
 OVERVIEW 

@@ -1331,3 +1331,31 @@ local({
 })
 
 
+#
+#  tests/vcovppm.R
+#
+#  Check validity of vcov.ppm algorithms
+#
+#  Thanks to Ege Rubak
+#
+#  $Revision: 1.1 $  $Date: 2012/06/19 07:33:49 $
+#
+
+require(spatstat)
+
+local({
+
+  set.seed(42)
+  X <- rStrauss(200, .5, .05)
+  model <- ppm(X, inter = Strauss(.05))
+
+  vc <- vcov(model, generic = TRUE, algorithm = "vectorclip")
+  v  <- vcov(model, generic = TRUE, algorithm = "vector")
+  b  <- vcov(model, generic = TRUE, algorithm = "basic")
+
+  if(max(abs(v-b)) > 1e-7)
+    stop("Disagreement between vcov.ppm algorithms 'vector' and 'basic' ")
+  if(max(abs(v-vc)) > 1e-7)
+    stop("Disagreement between vcov.ppm algorithms 'vector' and 'vectorclip' ")
+
+})

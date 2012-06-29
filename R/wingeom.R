@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.73 $	$Date: 2012/05/12 01:04:17 $
+#	$Revision: 4.74 $	$Date: 2012/06/22 08:02:17 $
 #
 #
 #
@@ -94,13 +94,16 @@ even.breaks.owin <- function(w) {
 unit.square <- function() { owin(c(0,1),c(0,1)) }
 
 square <- function(r=1) {
-  if(length(r) != 1 || !is.numeric(r))
-    stop("argument r must be a single number")
-  if(is.na(r) || !is.finite(r))
+  stopifnot(is.numeric(r))
+  if(any(is.na(r) | !is.finite(r)))
     stop("argument r is NA or infinite")
-  if(r <= 0)
-    stop("side of square must be positive")
-  owin(c(0,r),c(0,r))
+  if(length(r) == 1) {
+    stopifnot(r > 0)
+    r <- c(0,r)
+  } else if(length(r) == 2) {
+    stopifnot(r[1] < r[2])
+  } else stop("argument r must be a single number, or a vector of length 2")
+  owin(r,r)
 }
 
 overlap.owin <- function(A, B) {

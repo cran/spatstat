@@ -42,7 +42,8 @@
 }
 \examples{
 # Multitype point pattern
- contour(density(split(amacrine)))
+ contour(D <- density(split(amacrine)))
+ image(D, equal.ribbon=TRUE, main="")
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.74 $	$Date: 2012/06/09 04:24:58 $
+#	$Revision: 2.75 $	$Date: 2012/06/13 14:35:52 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -42,6 +42,7 @@ function(x, ...,
          what=c("all", "model", "trend", "interaction", "se", "errors")) {
 
   verifyclass(x, "ppm")
+
   misswhat <- missing(what) 
 
   opts <- c("model", "trend", "interaction", "se", "errors")
@@ -181,6 +182,7 @@ quad.ppm <- function(object, drop=FALSE) {
     if(inherits(object, "kppm")) object <- object$po else
     stop("object is not of class ppm")
   }
+  forbid.logi(object)
   Q <- object$Q
   if(!drop || is.null(Q))
     return(Q)
@@ -208,6 +210,7 @@ coef.ppm <- function(object, ...) {
 
 getglmfit <- function(object) {
   verifyclass(object, "ppm")
+  forbid.logi(object)
   glmfit <- object$internal$glmfit
   if(is.null(glmfit))
       return(NULL)
@@ -218,12 +221,14 @@ getglmfit <- function(object) {
 
 getglmdata <- function(object, drop=FALSE) {
   verifyclass(object, "ppm")
+  forbid.logi(object)
   gd <- object$internal$glmdata
   if(!drop) return(gd)
   return(gd[gd$.mpl.SUBSET,])
 }
 
 getglmsubset <- function(object) {
+  forbid.logi(object)
   gd <- object$internal$glmdata
   return(gd$.mpl.SUBSET)
 }
@@ -466,6 +471,9 @@ logLik.ppm <- function(object, ..., warn=TRUE) {
            cifdata <- cif[Z]
            ll <- sum(log(cifdata[cifdata > 0])) - sum(w * cif)
          },
+         logi={
+           forbid.logi(object)
+         },
          stop(paste("Internal error: unrecognised ppm method:",
                     dQuote(method)))
          )
@@ -517,6 +525,7 @@ extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
 
 model.frame.ppm <- function(formula, ...) {
   object <- formula
+  forbid.logi(object)
   gf <- getglmfit(object)
   if(is.null(gf)) {
     warning("Model re-fitted with forcefit=TRUE")
@@ -532,6 +541,7 @@ model.frame.ppm <- function(formula, ...) {
 
 model.matrix.ppm <- function(object, data=model.frame(object),
                              ..., keepNA=TRUE) {
+  forbid.logi(object)
   gf <- getglmfit(object)
   if(is.null(gf)) {
     warning("Model re-fitted with forcefit=TRUE")

@@ -2,7 +2,7 @@
 #
 #    strauss.R
 #
-#    $Revision: 2.23 $	$Date: 2012/04/26 00:55:53 $
+#    $Revision: 2.24 $	$Date: 2012/06/28 04:20:49 $
 #
 #    The Strauss process
 #
@@ -72,6 +72,12 @@ Strauss <- local({
          r <- potpars$r
          answer <- strausscounts(U, X, r, EqualPairs)
          return(matrix(answer, ncol=1))
+       },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         gamma <- exp(as.numeric(coeffs[1]))
+         r <- self$par$r
+         return((1-gamma) * pi * r^2)
        }
        )
   class(BlankStrauss) <- "interact"

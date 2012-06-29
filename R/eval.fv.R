@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.18 $     $Date: 2012/06/11 05:22:24 $
+#     $Revision: 1.19 $     $Date: 2012/06/19 11:05:08 $
 #
 
 eval.fv <- local({
@@ -66,6 +66,7 @@ eval.fv <- local({
     fnames <- unlist(lapply(funs, getfname))
     # Remove duplication
     # Typically occurs when combining several K functions, etc.
+    oldfnames <- fnames
     # Tweak fv objects so their function names are their object names
     # as used in the expression
     if(any(duplicated(fnames))) {
@@ -95,7 +96,17 @@ eval.fv <- local({
     attr(result, "ylab") <- eval(substitute(substitute(e, ylabs),
                                             list(e=elang)))
     # compute fname equivalent to expression
-    attr(result, "fname") <- paren(flatten(deparse(elang)))
+    if(nfuns > 1) {
+      # take original expression
+      the.fname <- paren(flatten(deparse(elang)))
+    } else {
+      # replace object name in expression by its function name
+      namemap <- list(as.name(oldfnames[1]))
+      names(namemap) <- names(funs)[1]
+      the.fname <- deparse(eval(substitute(substitute(e, namemap),
+                                         list(e=elang))))
+    } 
+    attr(result, "fname") <- the.fname
     # now compute the [modified] y labels
     labelmaps <- lapply(funs, fvlabelmap, dot=FALSE)
     for(yn in ynames) {

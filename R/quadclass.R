@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.17 $	$Date: 2011/05/24 07:30:48 $
+#	$Revision: 4.18 $	$Date: 2012/06/19 06:03:01 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -186,7 +186,7 @@ equalpairs.quad <- function(Q) {
   #     X[E[i,1]] == U[E[i,2]] for all i
   # where X = Q$data and U = union.quad(Q)
   n <- Q$data$n
-  return(matrix(rep(1:n,2), ncol=2))
+  return(matrix(rep(seq_len(n),2), ncol=2))
 }
       
 union.quad <- function(Q) {

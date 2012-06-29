@@ -5,7 +5,7 @@
 }
 \description{
   Computes a smoothing estimate of the intensity of a point process,
-  as a function of a spatial covariate.
+  as a function of a (continuous) spatial covariate.
 }
 \usage{
 rhohat(object, covariate, ...,
@@ -80,6 +80,8 @@ rhohat(object, covariate, ...,
   proposed by Baddeley and Turner (2005)
   and Baddeley et al (2012).
 
+  The covariate \eqn{Z} must have continuous values.
+
   If \code{object} is a fitted point process model, suppose \code{X} is
   the original data point pattern to which the model was fitted. Then
   this command assumes \code{X} is a realisation of a Poisson point
@@ -141,11 +143,18 @@ rhohat(object, covariate, ...,
   which has special methods for \code{print}, \code{plot}
   and \code{predict}.
 }
+\section{Categorical and discrete covariates}{
+  This technique assumes that the covariate has continuous values.
+  It is not applicable to covariates with categorical (factor) values
+  or discrete values such as small integers.
+  For a categorical covariate, use
+  \code{\link{quadratcount}(X, tess=covariate)}
+}
 \references{
   Baddeley, A., Chang, Y.-M., Song, Y. and Turner, R. (2012)
   Nonparametric estimation of the dependence of a point
   process on spatial covariates.
-  \emph{Statistics and Its Interface}, in press.
+  \emph{Statistics and Its Interface} \bold{5} (2), 221--236.
   
   Baddeley, A. and Turner, R. (2005)
   Modelling spatial point patterns in R.

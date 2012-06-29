@@ -7,7 +7,8 @@
 \usage{
   \method{plot}{listof}(x, \dots, main, arrange=TRUE,
    nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel=c(2,1,1,2),
-   panel.begin=NULL, panel.end=NULL, panel.args=NULL, plotcommand="plot")
+   panel.begin=NULL, panel.end=NULL, panel.args=NULL, plotcommand="plot",
+   adorn.left=NULL, adorn.right=NULL, adorn.bottom=NULL, adorn.size=0.2)
 }
 \arguments{
   \item{x}{
@@ -43,7 +44,7 @@
   }
   \item{panel.begin,panel.end}{
     Optional. Functions that will be executed before and after each panel is
-    plotted.
+    plotted. See Details.
   }
   \item{panel.args}{
     Internal use only.
@@ -52,6 +53,15 @@
     Optional.
     Character string containing the name of the command that should be
     executed to plot each panel. 
+  }
+  \item{adorn.left,adorn.right,adorn.bottom}{
+    Optional. Functions (with no arguments) that will be executed to
+    generate additional plots at the margins (left, right, and/or
+    bottom, respectively) of the array of plots.
+  }
+  \item{adorn.size}{
+    Relative width (as a fraction of the other panels' widths)
+    of the margin plots.
   }
 }
 \value{
@@ -71,6 +81,21 @@
   class \code{"listof"}, essentially a list of pixel images.
   These images can be plotted in a nice arrangement
   using \code{plot.listof}. See the Example.
+
+  The arguments \code{panel.begin} and \code{panel.end}
+  may be functions that will be executed before and after each panel is plotted.
+  They will be called as \code{panel.begin(i, y, main=main.panel[i])}
+  and \code{panel.end(i, y, add=TRUE)}.
+
+  Alternatively, \code{panel.begin} and \code{panel.end} may be objects
+  of some class that can be plotted
+  with the generic \code{plot} command. They will be plotted before and
+  after each panel is plotted.
+
+  If all entries of \code{x} are pixel images,
+  the function \code{\link{image.listof}} is called to control
+  the plotting. The arguments \code{equal.ribbon} and \code{col}
+  can be used to determine the colour map or maps applied.
 }
 \seealso{
   \code{\link{print.listof}},
@@ -81,7 +106,9 @@
 \examples{
 # Multitype point pattern
  data(amacrine)
- plot(density(split(amacrine)))
+ plot(D <- density(split(amacrine)))
+ plot(D, main="", equal.ribbon=TRUE,
+      panel.end=function(i,y,...){contour(y, ...)})
 }
 
 \author{Adrian Baddeley

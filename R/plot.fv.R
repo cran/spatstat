@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.81 $    $Date: 2012/05/18 03:42:19 $
+#  $Revision: 1.83 $    $Date: 2012/06/19 08:21:44 $
 #
 #
 
@@ -150,6 +150,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # -------------------- determine plotting limits ----------------------
   
   # determine x and y limits and clip data to these limits
+  if(is.null(xlim) && add) {
+    # x limits are determined by existing plot
+    xlim <- par("usr")[1:2]
+  }
   if(!is.null(xlim)) {
     ok <- (xlim[1] <= rhsdata & rhsdata <= xlim[2])
     rhsdata <- rhsdata[ok]
@@ -381,8 +385,9 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     if(legendavoid || identical(legendpos, "float")) {
       # Automatic determination of legend position
       # Assemble data for all plot objects
-      linedata <- list(x=rep(rhsdata, length(allind)),
-                       y=as.vector(lhsdata[,allind]))
+      linedata <- list()
+      for(i in seq_along(allind)) 
+        linedata[[i]] <- list(x=rhsdata, y=lhsdata[,i])
       polydata <- if(length(xpoly) > 0) list(x=xpoly, y=ypoly) else NULL
       objects <- assemble.plot.objects(xlim, ylim,
                                        lines=linedata, polygon=polydata)
@@ -411,16 +416,38 @@ assemble.plot.objects <- function(xlim, ylim, ..., lines=NULL, polygon=NULL) {
   # and form corresponding geometrical objects.
   objects <- list()
   if(!is.null(lines)) {
-    # Collect vertices of line plots as a point pattern
-    x <- lines$x
-    y <- lines$y
-    ok <- is.finite(x) & is.finite(y)
-    V <- ppp(x[ok], y[ok], xlim, ylim, check=FALSE)
-    objects <- append(objects, list(V))
+    if(is.psp(lines)) {
+      objects <- list(lines)
+    } else {
+      if(checkfields(lines, c("x", "y"))) {
+        lines <- list(lines)
+      } else if(!all(unlist(lapply(lines, checkfields, L=c("x", "y")))))
+        stop("lines should be a psp object, a list(x,y) or a list of list(x,y)")
+      W <- owin(xlim, ylim)
+      for(i in seq_along(lines)) {
+        lines.i <- lines[[i]]
+        x.i <- lines.i$x
+        y.i <- lines.i$y
+        n <- length(x.i)
+        if(length(y.i) != n)
+          stop(paste(paste("In lines[[", i, "]]", sep=""),
+                     "the vectors x and y have unequal length"))
+        if(!all(ok <- (is.finite(x.i) & is.finite(y.i)))) {
+          x.i <- x.i[ok]
+          y.i <- y.i[ok]
+          n <- sum(ok)
+        }
+        segs.i <- psp(x.i[-n], y.i[-n], x.i[-1], y.i[-1], W, check=FALSE)
+        objects <- append(objects, list(segs.i))        
+      }
+    }
   }
   if(!is.null(polygon)) {
     # Add filled polygon
     pol <- polygon[c("x", "y")]
+    ok <- with(pol, is.finite(x) & is.finite(y))
+    if(!all(ok))
+      pol <- with(pol, list(x=x[ok], y=y[ok]))
     if(area.xypolygon(pol) < 0) pol <- lapply(pol, rev)
     P <- try(owin(poly=pol, xrange=xlim, yrange=ylim, check=FALSE))
     if(!inherits(P, "try-error"))
@@ -450,9 +477,11 @@ findbestlegendpos <- local({
       cat("Scaled space:\n")
       print(scaledW)
     }
+    # pixellate the scaled objects
+    pix.scal.objects <- lapply(scaled.objects, as.mask.psp)
     # apply distance transforms in scaled space
-    D1 <- distmap(scaled.objects[[1]])
-    Dlist <- lapply(scaled.objects, distmap, xy=list(x=D1$xcol, y=D1$yrow))
+    D1 <- distmap(pix.scal.objects[[1]])
+    Dlist <- lapply(pix.scal.objects, distmap, xy=list(x=D1$xcol, y=D1$yrow))
     # distance transform of superposition
     D <- Reduce(function(A,B){ eval.im(pmin(A,B)) }, Dlist)
     if(!bdryok) {
@@ -460,13 +489,15 @@ findbestlegendpos <- local({
       B <- attr(D1, "bdry")
       D <- eval.im(pmin(D, B))
     }
-    if(show) 
+    if(show) {
       plot(affine(D, mat=invmat), add=TRUE)
+      lapply(lapply(scaled.objects, affine, mat=invmat), plot, add=TRUE)
+    }
     # examine distance map
     if(preference != "float") {
       # check for collision at preferred location
-      xr <- W$xrange
-      yr <- W$yrange
+      xr <- scaledW$xrange
+      yr <- scaledW$yrange
       testloc <- switch(preference,
                         topleft     = c(xr[1],yr[2]),
                         top         = c(mean(xr), yr[2]),

@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.33 $	$Date: 2012/04/26 00:56:55 $
+#    $Revision: 1.35 $	$Date: 2012/06/24 08:01:36 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -34,7 +34,7 @@ pairwise.family <-
          # 
          pairpot <- inter$pot
          potpars <- inter$par
-         rmax <- reach(fint, epsilon=1e-6)
+         rmax <- reach(fint, epsilon=1e-3)
          xlim <- list(...)$xlim
          if(is.infinite(rmax)) {
            if(!is.null(xlim))
@@ -46,7 +46,7 @@ pairwise.family <-
          }
          if(is.null(d)) {
            dmax <- 1.25 * rmax
-           d <- seq(from=0, to=dmax, length.out=256)
+           d <- seq(from=0, to=dmax, length.out=1024)
          } else {
            stopifnot(is.numeric(d) &&
                      all(is.finite(d)) &&
@@ -58,7 +58,7 @@ pairwise.family <-
          types <- potpars$types
          if(is.null(types)) {
            # compute potential function as `fv' object
-           dd <- matrix(d, nrow=256, ncol=1)
+           dd <- matrix(d, ncol=1)
            p <- pairpot(dd, potpars)
            if(length(dim(p))==2)
              p <- array(p, dim=c(dim(p),1), dimnames=NULL)
@@ -87,8 +87,9 @@ pairwise.family <-
            if(!is.factor(types))
              types <- factor(types, levels=types)
            m <- length(types)
-           dd <- matrix(rep(d, m), nrow=256 * m, ncol=m)
-           tx <- rep(types, rep(256, m))
+           nd <- length(d)
+           dd <- matrix(rep(d, m), nrow=nd * m, ncol=m)
+           tx <- rep(types, rep(nd, m))
            ty <- types
            p <- pairpot(dd, tx, ty, potpars)
            if(length(dim(p))==2)

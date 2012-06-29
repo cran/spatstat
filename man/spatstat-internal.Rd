@@ -139,6 +139,7 @@
 \alias{fillNA}
 \alias{flipxypolygon}
 \alias{forbidNA}
+\alias{forbid.logi}
 \alias{FormatFaspFormulae}
 \alias{fvlabels}
 \alias{fvlabels<-}
@@ -222,6 +223,7 @@
 \alias{localpcfengine}
 \alias{localpcfmatrix}
 \alias{local2lpp}
+\alias{logi.engine}
 \alias{paste.expr}
 \alias{lookup.im}
 \alias{majorminorversion}
@@ -338,6 +340,7 @@
 \alias{print.layered}
 \alias{print.linim}
 \alias{print.localpcfmatrix}
+\alias{print.logippm}
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
@@ -459,6 +462,7 @@
 \alias{summary.envelope}
 \alias{summary.fii}
 \alias{summary.hyperframe}
+\alias{summary.logippm}
 \alias{summary.lut}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
@@ -663,6 +667,7 @@ fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
 flipxypolygon(p)
 forbidNA(x, context, xname)
+forbid.logi(object)
 FormatFaspFormulae(f, argname)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
@@ -746,8 +751,10 @@ localKengine(X, \dots, wantL, lambda, correction, verbose, rvalue)
 localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
 localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
 local2lpp(L, seg, tp, X)
+logi.engine(\dots)
 paste.expr(x)
 \method{print}{localpcfmatrix}(x, \dots)
+\method{print}{logippm}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 \method{[}{localpcfmatrix}(x, i, ...)
 lookup.im(Z, x, y, naok, strict)
@@ -898,6 +905,7 @@ primesbelow(nmax)
 \method{print}{summary.fii}(x, \dots)
 \method{print}{summary.hyperframe}(x, ...)
 \method{print}{summary.listof}(x, \dots)
+\method{print}{summary.lut}(x, \dots)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp=3)
 \method{print}{summary.psp}(x, \dots)
@@ -1005,6 +1013,8 @@ summarise.trend(trend, w, a)
 \method{summary}{envelope}(object,\dots)
 \method{summary}{fii}(object,\dots)
 \method{summary}{hyperframe}(object, ..., brief=FALSE)
+\method{summary}{logippm}(object, \dots)
+\method{summary}{lut}(object, \dots)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
