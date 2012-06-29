@@ -2,7 +2,7 @@
 #
 #    hardcore.S
 #
-#    $Revision: 1.6 $	$Date: 2012/01/18 10:23:02 $
+#    $Revision: 1.7 $	$Date: 2012/06/28 04:20:25 $
 #
 #    The Hard core process
 #
@@ -66,6 +66,11 @@ Hardcore <- local({
          v <- matrix(ifelse(counts > 0, -Inf, 0), ncol=1)
          attr(v, "IsOffset") <- TRUE
          return(v)
+       },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         hc <- self$par$hc
+         return(pi * hc^2)
        }
   )
   class(BlankHardcore) <- "interact"

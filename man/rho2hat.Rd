@@ -40,6 +40,8 @@ rho2hat(object, cov1, cov2, ..., method=c("ratio", "reweight"))
   the values of the covariates \code{cov1} and \code{cov2}
   observed at the points of the point pattern. 
 
+  The covariates \code{cov1,cov2} must have continuous values.
+  
   If \code{object} is a fitted point process model, suppose \code{X} is
   the original data point pattern to which the model was fitted. Then
   this command assumes \code{X} is a realisation of a Poisson point
@@ -84,7 +86,7 @@ rho2hat(object, cov1, cov2, ..., method=c("ratio", "reweight"))
   Baddeley, A., Chang, Y.-M., Song, Y. and Turner, R. (2012)
   Nonparametric estimation of the dependence of a point
   process on spatial covariates.
-  \emph{Statistics and Its Interface}, in press.
+  \emph{Statistics and Its Interface} \bold{5} (2), 221--236.
 }
 \author{
   Adrian Baddeley

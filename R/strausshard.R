@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.15 $	$Date: 2012/01/18 10:48:42 $
+#    $Revision: 2.16 $	$Date: 2012/06/28 04:20:40 $
 #
 #    The Strauss/hard core process
 #
@@ -84,6 +84,13 @@ StraussHard <- local({
          rclose <- strausscounts(U, X, r,  EqualPairs)
          answer <- ifelse(hclose == 0, rclose, -Inf)
          return(matrix(answer, ncol=1))
+       },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         gamma <- exp(as.numeric(coeffs[1]))
+         r <- self$par$r
+         hc <- self$par$hc
+         return(pi * (hc^2 + (1-gamma) * (r^2 - hc^2)))
        }
          )
   class(BlankStraussHard) <- "interact"

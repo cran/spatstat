@@ -223,8 +223,8 @@ vcovGibbsAJB <- function(model,
   okIJ <- ok[I] & ok[J]
   I <- I[okIJ]
   J <- J[okIJ]
-  #
   if(length(I) == 0) return(A1)
+  #
   # The following ensures that 'empty' and 'X' have compatible marks 
   empty <- X[integer(0)]
   # Run through pairs
@@ -269,9 +269,13 @@ vcovGibbsAJB <- function(model,
            # --------- faster algorithm using vector functions ------------
            for(i in unique(I)) {
              Ji <- unique(J[I==i])
-             if((nJi <- length(Ji)) > 0) {
-               X.i <- X[-i]
+             nJi <- length(Ji)
+             if(nJi > 0) {
+               Xi <- X[i]
+               # neighbours of X[i]
                XJi <- X[Ji]
+               # all points other than X[i]
+               X.i <- X[-i]
                # index of XJi in X.i
                J.i <- Ji - (Ji > i)
                # compute conditional intensity
@@ -288,7 +292,6 @@ vcovGibbsAJB <- function(model,
                # for all j
                plami <- numeric(nJi)
                pmi <- matrix(, nJi, p)
-               Xi <- X[i]
                for(k in 1:nJi) {
                  j <- Ji[k]
                  X.ij <- X[-c(i,j)]
@@ -317,20 +320,19 @@ vcovGibbsAJB <- function(model,
          vectorclip={
            # --------- faster version of 'vector' algorithm
            # --------  by removing non-interacting points of X
-           for(i in unique(I2)) {
+           for(i in unique(I)) {
              # all points within 2R
              J2i <- unique(J2[I2==i])
              # all points within R
              Ji  <- unique(J[I==i])
-             isclose <- J2i %in% Ji
-             if(any(isclose)) {
+             nJi <- length(Ji)
+             if(nJi > 0) {
                Xi <- X[i]
-               # replace X[-i] by X \cap b(0, 2R)
+               # neighbours of X[i]
+               XJi <- X[Ji]
+               # replace X[-i] by X[-i] \cap b(0, 2R)
                X.i <- X[J2i]
                nX.i <- length(J2i)
-               # locations to be interrogated
-               XJi <- X[Ji]
-               nJi <- length(Ji)
                # index of XJi in X.i
                J.i <- match(Ji, J2i)
                if(any(is.na(J.i)))

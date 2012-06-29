@@ -7,7 +7,8 @@
 \usage{
   \method{plot}{splitppp}(x, \dots, main, arrange=TRUE,
    nrows=NULL, ncols=NULL, main.panel=NULL, mar.panel=c(2,1,1,2),
-   panel.begin=NULL, panel.end=NULL, panel.args=NULL, plotcommand="plot")
+   panel.begin=NULL, panel.end=NULL, panel.args=NULL, plotcommand="plot",
+   adorn.left=NULL, adorn.right=NULL, adorn.bottom=NULL, adorn.size=0.2)
 }
 \arguments{
   \item{x}{
@@ -55,6 +56,15 @@
     Character string containing the name of the command that should be
     executed to plot each panel. 
   }
+  \item{adorn.left,adorn.right,adorn.bottom}{
+    Optional. Functions (with no arguments) that will be executed to
+    generate additional plots at the margins (left, right, and/or
+    bottom, respectively) of the array of plots.
+  }
+  \item{adorn.size}{
+    Relative width (as a fraction of the other panels' widths)
+    of the margin plots.
+  }
 }
 \value{
   Null.
@@ -71,9 +81,12 @@
   using \code{\link{plot.ppp}}. 
 
   The arguments \code{panel.begin} and \code{panel.end}
-  may be functions (taking the argument \code{i} for the panel
-  number) that will be executed before and after each panel is plotted.
-  Alternatively, they may be objects of some class that can be plotted
+  may be functions that will be executed before and after each panel is plotted.
+  They will be called as \code{panel.begin(i, y, main=main.panel[i])}
+  and \code{panel.end(i, y, add=TRUE)}.
+
+  Alternatively, \code{panel.begin} and \code{panel.end} may be objects
+  of some class that can be plotted
   with the generic \code{plot} command. They will be plotted before and
   after each panel is plotted.
 }
@@ -86,8 +99,9 @@
 # Multitype point pattern
  data(amacrine)
  plot(split(amacrine))
+ plot(split(amacrine), main="", 
+     panel.begin=function(i, y, ...) { plot(density(y), ribbon=FALSE, ...) })
 }
-
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}

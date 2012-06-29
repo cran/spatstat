@@ -216,7 +216,7 @@ Gcom(object, r = NULL, breaks = NULL, ...,
   Baddeley, A., Rubak, E. and Moller, J. (2011)
   Score, pseudo-score and residual
   diagnostics for spatial point process models.
-  To appear in \emph{Statistical Science}.
+  \emph{Statistical Science} \bold{26}, 613--646.
 }
 \author{
   Adrian Baddeley

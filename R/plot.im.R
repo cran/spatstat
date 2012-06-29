@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.54 $   $Date: 2011/12/31 03:29:22 $
+#  $Revision: 1.56 $   $Date: 2012/06/25 04:42:06 $
 #
 #  Plotting code for pixel images
 #
@@ -67,13 +67,13 @@ plot.im <- local({
           warning(paste("Pixel values of type", sQuote(xtype),
                         "are not interpretable as colours"))
           valuesAreColours <- FALSE
-        } else {
-          # colour values do not need a colour map
-          if(!is.null(col))
-            warning(paste("Pixel values are taken to be colour values,",
-                          "because valuesAreColours=TRUE;", 
-                          "the colour map (argument col) is ignored"),
-                    call.=FALSE)
+        } else if(!is.null(col)) {
+          # colour info provided: contradictory
+          warning(paste("Pixel values are taken to be colour values,",
+                        "because valuesAreColours=TRUE;", 
+                        "the colour map (argument col) is ignored"),
+                  call.=FALSE)
+          col <- NULL
         }
       }
     } else if(!is.null(col)) {
@@ -136,7 +136,7 @@ plot.im <- local({
                ribbonrange <- vrange
                ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
                                     vrange)
-               ribbonlabels <- paste(ribbonticks * ribscale)
+               ribbonlabels <- paste(zapsmall(ribbonticks * ribscale))
              }
            },
            integer = {
@@ -234,13 +234,14 @@ plot.im <- local({
       # explicit colour map object
       colourinfo <- list(breaks=imagebreaks, col=col)
     } else {
-      # compile colour information using default colour values
+      # compile colour information
+      # start with default colour values
       colfun <- spatstat.options("image.colfun")
       colourinfo <- if(!is.null(imagebreaks)) {
         list(breaks=imagebreaks, col=colfun(length(imagebreaks)-1))
       } else list(col=colfun(255))
-      # user-specified colour values
       if(!is.null(col)) {
+        # overwrite colour info with user-specified colour values
         colourinfo$col <- col
         if(!is.null(colourinfo$breaks)) {
         # check consistency
@@ -253,7 +254,37 @@ plot.im <- local({
         }
       }
     }
-  
+
+    # colour map to be returned (invisibly)
+    i.col <- colourinfo$col
+    i.bks <- colourinfo$breaks
+    output.colmap <-
+      if(is.null(i.col)) NULL else
+      if(inherits(i.col, "colourmap")) i.col else
+      if(valuesAreColours) colourmap(col=i.col, inputs=i.col) else
+      switch(xtype,
+             integer=,
+             real= {
+               if(!is.null(i.bks)) {
+                 colourmap(col=i.col, breaks=i.bks)
+               } else colourmap(col=i.col, range=vrange)
+             },
+             logical={
+               colourmap(col=i.col, inputs=c(FALSE,TRUE))
+             },
+             character=,
+             factor={
+               colourmap(col=i.col, inputs=lev)
+             },
+             NULL)
+    
+    # ........ secret exit used by plot.listof
+    
+    preponly <- resolve.defaults(dotargs, list(preponly=FALSE))$preponly
+    if(preponly) return(output.colmap)
+
+    # ........ start plotting .................
+
     add <- resolve.defaults(dotargs, list(add=FALSE))$add
 
     if(!identical(ribbon, TRUE)
@@ -268,7 +299,7 @@ plot.im <- local({
                    list(xlab = "", ylab = ""),
                    list(asp = 1, main = main, axes=FALSE)
                    )
-        return(invisible(NULL))
+        return(invisible(output.colmap))
       }
     # determine plot region
     bb <- owin(x$xrange, x$yrange)
@@ -415,7 +446,7 @@ plot.im <- local({
                       extrargs=axisparams)
     }
     #
-    return(invisible(NULL))
+    return(invisible(output.colmap))
   }
 
   PlotIm

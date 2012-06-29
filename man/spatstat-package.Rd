@@ -1397,7 +1397,7 @@
   Baddeley, A., Rubak, E. and Moller, J. (2011)
   Score, pseudo-score and residual
   diagnostics for spatial point process models.
-  To appear in \emph{Statistical Science}.
+  \emph{Statistical Science} \bold{26}, 613--646.
 
   Diggle, P.J. (2003)
   \emph{Statistical analysis of spatial point patterns},
@@ -1523,9 +1523,10 @@
   Alexendre Villers,
   Hao Wang,
   H. Wendrock,
-  Jan Wild
+  Jan Wild,
+  Selene Wong
   and
-  Selene Wong.
+  Mike Zamboni.
 }
 \keyword{spatial}
 \keyword{package}

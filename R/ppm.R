@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.24 $	$Date: 2012/05/09 10:45:46 $
+#	$Revision: 1.25 $	$Date: 2012/06/13 14:25:43 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -27,7 +27,7 @@ function(Q,
          control=list(nrep=nrmh),
          verb=TRUE
 ) {
-  if(!(method %in% c("mpl", "ho")))
+  if(!(method %in% c("mpl", "ho", "logi")))
     stop(paste("Unrecognised fitting method", sQuote(method)))
   cl <- match.call()
   callstring <- paste(deparse(sys.call()), collapse="")
@@ -72,8 +72,25 @@ function(Q,
     if(is.null(rbord))
       rbord <- 0
   }
+
+  if(method == "logi") {
+    fitLOGI <- logi.engine(Q=Q, trend=trend,
+                           interaction=interaction,
+                           covariates=covariates,
+                           covfunargs=covfunargs,
+                           correction=correction,
+                           rbord=rbord,
+                           use.gam=use.gam,
+                           forcefit=forcefit,
+                           nd = nd,
+                           gcontrol=gcontrol,
+                           callstring=callstring,
+                           preponly=FALSE,
+                           ...)
+    return(fitLOGI)
+  }
   
-  # go
+  # fit by maximum pseudolikelihood
   fitMPL <- mpl.engine(Q=Q, trend=trend,
                        interaction=interaction,
                        covariates=covariates,

@@ -60,7 +60,7 @@
   }
 }
 \value{
-  none.
+  The colour map used. An object of class \code{"colourmap"}.
 }
 \details{
   This is the \code{plot} method for the class \code{"im"}.

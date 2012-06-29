@@ -23,7 +23,7 @@
   Copyright (C) Adrian Baddeley, Jens Oehlschlagel and Rolf Turner 2000-2012
   Licence: GPL >= 2
 
-  $Revision: 1.2 $  $Date: 2012/03/14 03:35:24 $
+  $Revision: 1.3 $  $Date: 2012/06/15 01:53:28 $
 
 
 */
@@ -85,7 +85,7 @@ void FNAME(n1, x1, y1, id1,
 	  {
 	    dy = y2[jright] - y1i;
 	    dy2 = dy * dy; 
-	    if(dy2 >= d2min)
+	    if(dy2 > d2min) /* note that dy2 >= d2min could break too early */
 	      break;
 #ifdef EXCLUDE
 	    /* do not compare identical points */
@@ -109,7 +109,7 @@ void FNAME(n1, x1, y1, id1,
 	  {
 	    dy = y1i - y2[jleft];
 	    dy2 = dy * dy;
-	    if(dy2 >= d2min)
+	    if(dy2 > d2min) /* note that dy2 >= d2min could break too early */
 	      break;
 #ifdef EXCLUDE
 	    /* do not compare identical points */
