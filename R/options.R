@@ -287,7 +287,7 @@ function (...)
 	   wrong <- called[!ischar]
 	   offending <- unlist(lapply(wrong,
 	   		function(x) { y <- x;
-	     		deparse(substitute(y)) }))
+	     		short.deparse(substitute(y)) }))
 	   offending <- paste(offending, collapse=",")
            stop(paste("Unrecognised mode of argument(s) [",
 		offending,

@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.90 $	$Date: 2012/04/07 02:02:33 $
+#	$Revision: 5.91 $	$Date: 2012/08/22 01:38:59 $
 #
 #
 # -------- functions ----------------------------------------
@@ -307,7 +307,7 @@ function(X, ..., r=NULL, breaks=NULL,
     }
   }
   # default plot will display all edge corrections
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   nama <- rev(colnames(K))
   nama <- nama[!(nama %in% c("r", "rip", "ls"))]
   fvnames(K, ".") <- nama
@@ -539,11 +539,11 @@ Kborder.engine <- function(X, rmax, nr=100,
   }
   ##
   # default is to display them all
-  attr(Kfv, "fmla") <- . ~ r
+  formula(Kfv) <- . ~ r
   unitname(Kfv) <- unitname(X)
   if(ratio) {
     # finish off numerator and denominator
-    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
+    formula(numK) <- formula(denK) <- . ~ r
     unitname(denK) <- unitname(numK) <- unitname(X)
     # tack on to result
     Kfv <- rat(Kfv, numK, denK, check=FALSE)
@@ -667,11 +667,11 @@ Knone.engine <- function(X, rmax, nr=100,
   }
   ##
   # default is to display them all
-  attr(Kfv, "fmla") <- . ~ r
+  formula(Kfv) <- . ~ r
   unitname(Kfv) <- unitname(X)
   if(ratio) {
     # finish off numerator and denominator
-    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
+    formula(numK) <- formula(denK) <- . ~ r
     unitname(denK) <- unitname(numK) <- unitname(X)
     # tack on to result
     Kfv <- rat(Kfv, numK, denK, check=FALSE)

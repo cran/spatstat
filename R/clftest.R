@@ -7,13 +7,13 @@
 #
 
 clf.test <- function(X, ..., rinterval=NULL, use.theo=FALSE) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   envelopeTest(X, ..., power=2,
                use.theo=use.theo, rinterval=rinterval, Xname=Xname)
 }
 
 mad.test <- function(X, ..., rinterval=NULL, use.theo=FALSE) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   envelopeTest(X, ..., power=Inf,
                use.theo=use.theo, rinterval=rinterval, Xname=Xname)
 }
@@ -22,7 +22,7 @@ envelopeTest <- function(X, ...,
                          power=1, rinterval=NULL,
                          use.theo=FALSE, Xname=NULL, verbose=TRUE,
                          internal=NULL) {
-  if(is.null(Xname)) Xname <- deparse(substitute(X))
+  if(is.null(Xname)) Xname <- short.deparse(substitute(X))
   check.1.real(power)
   explain.ifnot(power >= 0)
   # compute or extract simulated functions
@@ -99,7 +99,7 @@ envelopeTest <- function(X, ...,
       testname <- paste("Integrated", ordinal(power), "Power Deviation test")
     }
   }
-  # compute rank
+  # compute rank and p-value
   datarank <- sum(devdata < devsim) + sum(devdata == devsim)/2 + 1
   pvalue <- datarank/(nsim+1)
   # bookkeeping
@@ -129,7 +129,7 @@ envelopeTest <- function(X, ...,
                            p.value = pvalue,
                            method = testname,
                            data.name = e$Yname),
-                      class = "htest")
+                      class="htest")
   return(result)
 }
 

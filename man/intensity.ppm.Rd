@@ -35,7 +35,8 @@
 
   If \code{X} is another Gibbs point process model, the intensity is
   computed approximately using the Poisson-saddlepoint approximation
-  (Baddeley and Nair, 2012). 
+  (Baddeley and Nair, 2012). Currently this is implemented only for
+  pairwise interactions.
 }
 \value{
   A numeric value (if the model is stationary)
@@ -58,10 +59,8 @@
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/},
-  Gopal Nair, 
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+  \url{http://www.maths.uwa.edu.au/~adrian/}
+  and Gopal Nair.
 }
 \keyword{spatial}
 \keyword{models}

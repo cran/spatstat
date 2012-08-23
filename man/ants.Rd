@@ -8,7 +8,7 @@
 \description{
   These data give the spatial locations of nests of two species of
   ants, \emph{Messor wasmanni} and \emph{Cataglyphis bicolor},
-  recorded by Professor R.D.\ Harkness at a site in northern Greece,
+  recorded by Professor R.D. Harkness at a site in northern Greece,
   and described in Harkness \& Isham (1983). 
   The full dataset (supplied here) has an irregular polygonal boundary,
   while most analyses have been confined to two rectangular
@@ -69,7 +69,7 @@
       with levels \code{"scrub"} and \code{"field"}.
       This function is useful as a spatial covariate.
     }
-    \item{\code{plot}}{A function which
+    \item{\code{plotit}}{A function which
       produces a plot of the full dataset.
     }
   }
@@ -93,7 +93,7 @@
     \item{fieldscrub}{data in format \code{list(x=numeric(2),y=numeric(2))}
       giving the two endpoints of line markings}
     \item{side}{Function with arguments \code{x,y}}
-    \item{plot}{Function}
+    \item{plotit}{Function}
   }
 }
 \usage{data(ants)}
@@ -102,7 +102,7 @@
   # Equivalent to Figure 1 of Harkness and Isham (1983)
 
   data(ants)
-  ants.extra$plot()
+  ants.extra$plotit()
 
   # Data in subrectangle A, rotated 
   # Approximate data used by Sarkka (1993)

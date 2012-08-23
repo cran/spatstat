@@ -36,7 +36,7 @@ allstats <- function(pp, ..., dataname=NULL,verb=FALSE) {
 
 # add title
   if(is.null(dataname))
-    dataname <- deparse(substitute(pp))
+    dataname <- short.deparse(substitute(pp))
   title <- paste("Four summary functions for ",
               	dataname,".",sep="")
   attr(fns, "title") <- title

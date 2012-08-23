@@ -31,7 +31,7 @@ print.bw.optim <- function(x, ...) {
 }
 
 plot.bw.optim <- function(x, ..., add=FALSE) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   h <- attr(x, "h")
   cv <- attr(x, "cv")
   iopt <- attr(x, "iopt")

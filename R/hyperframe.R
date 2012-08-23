@@ -236,7 +236,7 @@ as.hyperframe.data.frame <- function(x, ..., stringsAsFactors=FALSE) {
 
 as.hyperframe.listof <- function(x, ...) {
   if(!missing(x)) {
-    xname <- sensiblevarname(deparse(substitute(x)), "x")
+    xname <- sensiblevarname(short.deparse(substitute(x)), "x")
     xlist <- list(x)
     names(xlist) <- xname
   } else xlist <- NULL
@@ -409,7 +409,7 @@ plot.hyperframe <- function(x, e, ..., main, arrange=TRUE,
                             nrows=NULL, ncols=NULL,
                             parargs=list(mar=c(1,1,3,1) * marsize),
                             marsize=0.1) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   main <- if(!missing(main)) main else xname
   ee <- as.expression(substitute(e))
   

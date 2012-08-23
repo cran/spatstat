@@ -20,7 +20,8 @@
        nd = NULL,
        gcontrol=list(),
        nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
-       verb=TRUE)
+       verb=TRUE,
+       callstring=NULL)
 }
 \arguments{
   \item{Q}{
@@ -110,6 +111,9 @@
   \item{verb}{
     Logical flag indicating whether to print progress reports
     (for \code{method="ho"})
+  }
+  \item{callstring}{
+    Internal use only.
   }
 }
 \value{
@@ -650,22 +654,15 @@ f <- function(x,y,a){ y - a }
 ppm(X, ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
 
  ## MULTITYPE POINT PROCESSES ### 
- data(lansing)
- # Multitype point pattern --- trees marked by species
-\testonly{
- # equivalent functionality - smaller dataset
- data(betacells)
- }
-
  # fit stationary marked Poisson process
  # with different intensity for each species
 \dontrun{ppm(lansing, ~ marks, Poisson())}
-\testonly{ppm(betacells, ~ marks, Poisson())}
+\testonly{ppm(amacrine, ~ marks, Poisson())}
 
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
 \dontrun{ppm(lansing, ~ marks * polynom(x,y,3), Poisson())}
-\testonly{ppm(betacells, ~ marks * polynom(x,y,2), Poisson())}
+\testonly{ppm(amacrine, ~ marks * polynom(x,y,2), Poisson())}
 
 }
 \author{Adrian Baddeley

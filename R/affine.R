@@ -1,7 +1,7 @@
 #
 #	affine.R
 #
-#	$Revision: 1.41 $	$Date: 2012/05/14 06:00:15 $
+#	$Revision: 1.42 $	$Date: 2012/07/13 08:46:10 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
@@ -121,15 +121,16 @@ affinexypolygon <- function(p, mat=diag(c(1,1)), vec=c(0,0),
     v      <- X$v
     d      <- X$dim
     newbox <- affine(as.rectangle(X), mat=mat, vec=vec)
-    newxy  <- affinexy(list(x=X$xcol, y=X$yrow), mat=mat, vec=vec)
-    xcol <- newxy$x
-    yrow <- newxy$y
-    if(diag(mat)[1] < 0) {
+    xscale <- diag(mat)[1]
+    yscale <- diag(mat)[2]
+    xcol <- xscale * X$xcol + vec[1]
+    yrow <- yscale * X$yrow + vec[2]
+    if(xscale < 0) {
       # x scale is negative
       xcol <- rev(xcol)
       v <- v[, (d[2]:1)]
     }
-    if(diag(mat)[2] < 0) {
+    if(yscale < 0) {
       # y scale is negative
       yrow <- rev(yrow)
       v <- v[(d[1]:1), ]

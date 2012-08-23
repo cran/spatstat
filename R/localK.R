@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.16 $	$Date: 2012/04/18 11:28:39 $
+#	$Revision: 1.17 $	$Date: 2012/08/22 01:41:46 $
 #
 #
 
@@ -210,7 +210,7 @@
   # create fv object
   K <- fv(df, "r", ylab, "theo", , alim, labl, desc, fname=fnam)
   # default is to display them all
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   unitname(K) <- unitname(X)
   attr(K, "correction") <- correction
   return(K)

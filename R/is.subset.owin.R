@@ -1,7 +1,7 @@
 #
 #  is.subset.owin.R
 #
-#  $Revision: 1.8 $   $Date: 2012/05/09 00:32:56 $
+#  $Revision: 1.9 $   $Date: 2012/08/13 06:36:08 $
 #
 #  Determine whether a window is a subset of another window
 #
@@ -53,8 +53,11 @@ is.subset.owin <- local({
       # all vertices of A are inside B.
       if(is.convex(B))
         return(TRUE)
-      # compare area of intersection with area of A
-      return(overlap.owin(A,B) >= area.owin(A))
+      # check for boundary crossings
+      bx <- crossing.psp(as.psp(A), as.psp(B))
+      return(npoints(bx) == 0)
+      # OLD METHOD: compare area of intersection with area of A
+      # return(overlap.owin(A,B) >= area.owin(A))
     }
   
    # Discretise

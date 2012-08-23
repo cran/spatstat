@@ -1,15 +1,15 @@
-\name{clf.test}
-\alias{clf.test}
+\name{dclf.test}
+\alias{dclf.test}
 \alias{mad.test}
 \title{
-  Cressie-Loosmore-Ford and Maximum Absolute Deviation Tests
+  Diggle-Cressie-Loosmore-Ford and Maximum Absolute Deviation Tests
 }
 \description{
-  Perform the Cressie (1991)/Loosmore and Ford (2006) test or the
-  Maximum Absolute Deviation test for a spatial point pattern.
+  Perform the Diggle (1986) / Cressie (1991) / Loosmore and Ford (2006)
+  test or the Maximum Absolute Deviation test for a spatial point pattern.
 }
 \usage{
-clf.test(X, ..., rinterval = NULL, use.theo=FALSE)
+dclf.test(X, ..., rinterval = NULL, use.theo=FALSE)
 mad.test(X, ..., rinterval = NULL, use.theo=FALSE)
 }
 \arguments{
@@ -41,8 +41,9 @@ mad.test(X, ..., rinterval = NULL, use.theo=FALSE)
   of a point pattern dataset to a point process model, based on
   Monte Carlo simulation from the model.
 
-  \code{clf.test} performs the test advocated by Loosmore and Ford (2006)
-  which is also described in Cressie (1991, page 667, equation (8.5.42)).
+  \code{dclf.test} performs the test advocated by Loosmore and Ford (2006)
+  which is also described in Diggle (1986), Cressie (1991, page 667, equation
+  (8.5.42)) and Diggle (2003, page 14).
 
   \code{mad.test} performs the \sQuote{global} or
   \sQuote{Maximum Absolute Deviation} test described by Ripley (1977, 1981).
@@ -101,6 +102,15 @@ mad.test(X, ..., rinterval = NULL, use.theo=FALSE)
   \emph{Statistics for spatial data}.
   John Wiley and Sons, 1991.
 
+  Diggle, P. J. (1986).
+  Displaced amacrine cells in the retina of a
+  rabbit : analysis of a bivariate spatial point pattern. 
+  \emph{J. Neuroscience Methods} \bold{18}, 115--125.
+ 
+  Diggle, P.J. (2003)
+  \emph{Statistical analysis of spatial point patterns},
+  Second edition. Arnold.
+
   Loosmore, N.B. and Ford, E.D. (2006)
   Statistical inference using the \emph{G} or \emph{K} point
   pattern spatial statistics. \emph{Ecology} \bold{87}, 1925--1931.
@@ -124,13 +134,14 @@ mad.test(X, ..., rinterval = NULL, use.theo=FALSE)
   \code{\link{envelope}}
 }
 \examples{
-  clf.test(cells, Lest)
-  m <- mad.test(cells, Lest, verbose=FALSE, rinterval=c(0, 0.1))
+  dclf.test(cells, Lest, nsim=39)
+  m <- mad.test(cells, Lest, verbose=FALSE, rinterval=c(0, 0.1), nsim=19)
   m
   # extract the p-value
   m$p.value
   # variance stabilised G function
-  clf.test(cells, Gest, transform=expression(asin(sqrt(.))), verbose=FALSE)
+  dclf.test(cells, Gest, transform=expression(asin(sqrt(.))),
+                   verbose=FALSE, nsim=19)
 }
 \keyword{spatial}
 \keyword{htest}

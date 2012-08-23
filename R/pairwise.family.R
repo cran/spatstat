@@ -240,7 +240,7 @@ if(!is.matrix(POT) && !is.array(POT)) {
 
 if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dim(M))) {
         whinge <- paste(
-           "The pair potential function ",deparse(substitute(pairpot)),
+           "The pair potential function ",short.deparse(substitute(pairpot)),
            "must produce a matrix or array with its first two dimensions\n",
            "the same as the dimensions of its input.\n", sep="")
 	stop(whinge)

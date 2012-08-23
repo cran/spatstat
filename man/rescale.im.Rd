@@ -27,10 +27,14 @@
   (Thus, the coordinate values are \emph{divided} by \code{s},
   while the unit value is multiplied by \code{s}).
 
+  If \code{s} is missing, then the coordinates will be re-expressed
+  in \sQuote{native} units; for example if the current unit is
+  equal to 0.1 metres, then the coordinates will be re-expressed in metres.
+
   The result is a pixel image representing the \emph{same} data
   but re-expressed in a different unit.
 
-  Pixel values are unchanged. 
+  Pixel values are unchanged. This may not be what you intended!
 }
 \seealso{
   \code{\link{im}},
@@ -47,7 +51,9 @@
 # first alter the pixel values
   Zm <- eval.im(9 * Z)
 # now rescale the pixel coordinates
-  Zm <- rescale(Zm, 1/9)
+  Z <- rescale(Zm, 1/9)
+# or equivalently
+  Z <- rescale(Zm)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

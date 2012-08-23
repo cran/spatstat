@@ -114,7 +114,7 @@
   For non-Poisson models, this is not a valid estimate of variance,
   but is useful for other calculations.
 
-  Note that standard errors and 95 percent confidence intervals for
+  Note that standard errors and 95\% confidence intervals for
   the coefficients can also be obtained using \code{coef(summary(object))}.
 }
 \section{Error messages}{

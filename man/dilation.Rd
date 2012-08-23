@@ -27,7 +27,7 @@
   }
   \item{polygonal}{
     Logical flag indicating whether to compute a polygonal
-    approximation to the erosion (\code{polygonal=TRUE}) or
+    approximation to the dilation (\code{polygonal=TRUE}) or
     a pixel grid approximation (\code{polygonal=FALSE}).
   }
   \item{tight}{

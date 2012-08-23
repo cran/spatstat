@@ -130,7 +130,7 @@ print.summary.lut <- function(x, ...) {
 plot.colourmap <- function(x, ..., main,
                            xlim=NULL, ylim=NULL, vertical=FALSE, axis=TRUE) {
   if(missing(main))
-    main <- deparse(substitute(x))
+    main <- short.deparse(substitute(x))
   stuff <- attr(x, "stuff")
   col <- stuff$outputs
   n   <- stuff$n

@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.35 $	$Date: 2012/04/25 01:00:08 $
+#	$Revision: 1.36 $	$Date: 2012/08/22 01:39:58 $
 #
 #
 # ------------------------------------------------------------------------
@@ -318,7 +318,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
                          "iso")
         }
         # default is to display them all
-        attr(K, "fmla") <- . ~ r
+        formula(K) <- . ~ r
         unitname(K) <- unitname(X)
         return(K)
           

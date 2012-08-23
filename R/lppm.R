@@ -96,7 +96,7 @@ print.lppm <- function(x, ...) {
 }
 
 plot.lppm <- function(x, ..., type="trend") {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   y <- predict(x, type=type)
   do.call("plot", resolve.defaults(list(y),
                                    list(...),

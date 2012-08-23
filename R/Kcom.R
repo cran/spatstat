@@ -265,7 +265,7 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
   }
 
   # default is to display all corrections
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   unitname(K) <- unitname(X)
   # secret tag used by 'Kres'
   attr(K, "maker") <- "Kcom"

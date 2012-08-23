@@ -2,7 +2,7 @@
 #
 #    fiksel.R
 #
-#    $Revision: 1.7 $	$Date: 2012/04/26 00:52:51 $
+#    $Revision: 1.8 $	$Date: 2012/07/14 06:36:26 $
 #
 #    Fiksel interaction 
 #    
@@ -127,6 +127,23 @@ Fiksel <- local({
          fikselbit <- fikselterms(U, X, r, kappa, EqualPairs)
          answer <- ifelse(hclose == 0, fikselbit, -Inf)
          return(matrix(answer, ncol=1))
+       },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         a <- as.numeric(coeffs[1])
+         r     <- self$par$r
+         hc    <- self$par$hc
+         kappa <- self$par$kappa
+         f <- function(x, kappa, a){ 2 * pi * x *
+                                       (1 - exp(a * exp(-x * kappa))) }
+         hardbit <- integrate(f=f, lower=hc, upper=r,
+                              a=a, kappa=kappa)
+         mess <- hardbit[["message"]]
+         if(!identical(mess, "OK")) {
+           warning(mess)
+           return(NA)
+         }
+         return(pi * hc^2 + hardbit$value)
        }
   )
   class(BlankFiksel) <- "interact"

@@ -122,7 +122,7 @@ print.summary.pp3 <- function(x, ...) {
 }
 
 plot.pp3 <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   if(!require("scatterplot3d"))
     stop("Package scatterplot3d is needed to plot 3D point patterns\n")
   coo <- coords(x)

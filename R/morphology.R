@@ -340,7 +340,7 @@ opening.ppp <- function(w, r, ...) {
 # ............ utilities ............................
 
 validradius <- function(r, caller="morphological operator") {
-  rname <- deparse(substitute(r))
+  rname <- short.deparse(substitute(r))
   groan <- function(whinge, caller) {
     stop(paste("for", paste(caller, ",", sep=""), whinge), call.=FALSE)
   }

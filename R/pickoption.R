@@ -7,7 +7,7 @@
 pickoption <- function(what="option", key, keymap, ...,
                        exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 {
-  keyname <- deparse(substitute(key))
+  keyname <- short.deparse(substitute(key))
 
   if(!is.character(key))
     stop(paste(keyname, "must be a character string",

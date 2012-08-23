@@ -4,7 +4,7 @@
 #
 #   Random generators for MULTITYPE point processes
 #
-#   $Revision: 1.29 $   $Date: 2011/05/18 08:51:51 $
+#   $Revision: 1.30 $   $Date: 2012/08/20 03:48:56 $
 #
 #   rmpoispp()   random marked Poisson pp
 #   rmpoint()    n independent random marked points
@@ -359,9 +359,15 @@ rmpoint.I.allim <- function(n, f, types) {
 #
 rpoint.multi <- function (n, f, fmax=NULL, marks = NULL,
                           win = unit.square(),
-                          giveup = 1000, verbose = FALSE) {
+                          giveup = 1000, verbose = FALSE,
+                          warn=TRUE) {
   no.marks <- is.null(marks) ||
                (is.factor(marks) && length(levels(marks)) == 1)
+  if(warn) {
+    nhuge <- spatstat.options("huge.npoints")
+    if(n > nhuge)
+      warning(paste("Attempting to generate", n, "random points"))
+  }
   # unmarked case
   if (no.marks) {
     if(is.function(f))

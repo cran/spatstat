@@ -303,11 +303,13 @@
 \alias{pickoption}
 \alias{ploterodewin}
 \alias{ploterodeimage}
+\alias{plot.addvar}
 \alias{plot.barplotdata}
 \alias{plot.bw.optim}
 \alias{plot.fii}
 \alias{plot.localpcfmatrix}
 \alias{plot.minconfit}
+\alias{plot.parres}
 \alias{plot.plotpairsim}
 \alias{plot.pppmatching}
 \alias{plot.profilepl}
@@ -325,7 +327,8 @@
 \alias{prange}
 \alias{prefixfv}
 \alias{primefactors}       
-\alias{primesbelow}       
+\alias{primesbelow}
+\alias{print.addvar}    
 \alias{print.bt.frame}
 \alias{print.bw.optim}
 \alias{print.colourmap}
@@ -344,6 +347,7 @@
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
+\alias{print.parres}
 \alias{print.plotpairsim}
 \alias{print.plotppm}
 \alias{print.pppmatching}
@@ -401,6 +405,7 @@
 \alias{resid1plot}
 \alias{resid1panel}
 \alias{resolve.defaults}
+\alias{resolve.1.default}
 \alias{resolve.2D.kernel}
 \alias{restrict.mask}
 \alias{reverse.xypolygon}    
@@ -439,6 +444,7 @@
 \alias{sewsmod}
 \alias{shiftxy}              
 \alias{shiftxypolygon}              
+\alias{short.deparse}
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
 \alias{singlestring}              
@@ -483,6 +489,7 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{update.interact}
+\alias{update.rmhstart}
 \alias{update.slrm}
 \alias{validradius}        
 \alias{validate.mask}        
@@ -581,7 +588,7 @@ compilepcf(D, r, weights, denom, check, endcorrect, \dots)
 conform.ratfv(x)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
-cobble.xy(x, y, f, fatal)
+cobble.xy(x, y, f, fatal, \dots)
 codetime(x)
 commasep(x)
 conform.imagelist(X, Zlist)
@@ -619,7 +626,7 @@ do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
 do.call.matched(fun, arglist, funargs, extrargs)
 do.iplot(panel)
 do.istat(panel)
-edge.Ripley(X, r, W, method)
+edge.Ripley(X, r, W, method, maxweight)
 edge.Trans(X, Y, W, exact, paired, trim)
 edge.Trans.modif(X, Y, WX, WY, exact, paired, trim)
 emptywindow(w)
@@ -631,12 +638,12 @@ envelopeEngine(X, fun, simul,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
-           envir.user=envir.user, expected.arg="r")
+           envir.user=envir.user, expected.arg="r", do.pwrong=FALSE)
 envelopeTest(X, \dots, power, rinterval, use.theo, Xname, verbose, internal)
 \method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
       nsim, nsim2, jsim, jsim.mean,
       type, csr, use.theory, nrank, ginterval, nSD,
-      savefuns, check, Yname)
+      savefuns, check, Yname, do.pwrong)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
@@ -795,7 +802,7 @@ mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
 	 rbord, use.gam, gcontrol, famille,
          forcefit, nd, allcovar, callstring,
          precomputed, savecomputed, preponly,
-         rename.intercept)
+         rename.intercept, justQ)
 mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
@@ -846,10 +853,12 @@ pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
 ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
+\method{plot}{addvar}(x, \dots, do.points=FALSE)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, add)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
+\method{plot}{parres}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{plotpairsim}(x, \dots)
 \method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
@@ -872,6 +881,7 @@ prange(x)
 prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 primefactors(n, prmax)
 primesbelow(nmax)
+\method{print}{addvar}(x, \dots)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
@@ -888,6 +898,7 @@ primesbelow(nmax)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{msr}(x, \dots)
+\method{print}{parres}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{plotpairsim}(x, \dots)
 \method{print}{pppmatching}(x, \dots)
@@ -924,7 +935,7 @@ repair.image.xycoords(x)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
 RmhExpandRule(nama)
-quadrat.testEngine(X, nx, ny, \dots, Xcount, xbreaks, ybreaks, tess=NULL, fit=NULL, Xname=NULL, fitname=NULL)
+quadrat.testEngine(X, nx, ny, alternative, method, conditional, \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
 pointgrid(W, ngrid)
@@ -948,7 +959,8 @@ resid1plot(RES, opt, plot.neg="image", plot.smooth="imagecontour",
               srange=NULL, monochrome=FALSE, main=NULL, \dots)
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD, xlab,ylab, \dots)
-resolve.defaults(\dots, .StripNull=FALSE)
+resolve.defaults(\dots, .MatchNull=TRUE, .StripNull=FALSE)
+resolve.1.default(.A, \dots)
 resolve.2D.kernel(\dots, sigma, varcov, x, mindist, adjust, bwfun)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
@@ -961,14 +973,14 @@ rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
 \method{rmhcontrol}{rmhcontrol}(\dots)
 \method{rmhcontrol}{list}(\dots)
-rmhEngine(InfoList, \dots, verbose, track, kitchensink, preponly) 
+rmhEngine(InfoList, \dots, verbose, kitchensink, preponly) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
 rmpoint.I.allim(n, f, types)
 \method{row.names}{hyperframe}(x)
 \method{row.names}{hyperframe}(x) <- value
-rpoint.multi(n, f, fmax=NULL, marks = NULL, win = unit.square(), giveup = 1000, verbose = FALSE)
+rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn)
 runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
 runifpoisppOnLines(lambda, L)
 runifrect(n, win = owin(c(0, 1), c(0, 1)))
@@ -989,6 +1001,7 @@ sewpcf(d, w, denargs, lambda2area)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
+short.deparse(x, maxlen)
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr, pois)
 singlestring(s, coll)
@@ -1034,6 +1047,7 @@ tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x)
 \method{unitname}{default}(x) <- value
 \method{update}{interact}(object, \dots)
+\method{update}{rmhstart}(object, \dots)
 \method{update}{slrm}(object, ..., evaluate = TRUE, env = parent.frame())
 validradius(r, caller)
 validate.mask(w, fatal=TRUE)        

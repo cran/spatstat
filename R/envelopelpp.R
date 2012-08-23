@@ -1,7 +1,7 @@
 #
 #  envelopelpp.R
 #
-#  $Revision: 1.10 $   $Date: 2011/07/21 08:50:17 $
+#  $Revision: 1.11 $   $Date: 2012/07/23 07:06:59 $
 #
 #  Envelopes for 'lpp' objects
 #
@@ -13,9 +13,9 @@ envelope.lpp <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL) {
+           Yname=NULL, do.pwrong=FALSE) {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),
@@ -63,7 +63,7 @@ envelope.lpp <-
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, cl=cl,
-                 envir.user=envir.user)
+                 envir.user=envir.user, do.pwrong=do.pwrong)
 }
 
 envelope.lppm <-
@@ -72,9 +72,9 @@ envelope.lppm <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL) {
+           Yname=NULL, do.pwrong=FALSE) {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),
@@ -116,5 +116,5 @@ envelope.lppm <-
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, cl=cl,
-                 envir.user=envir.user)
+                 envir.user=envir.user, do.pwrong=do.pwrong)
 }

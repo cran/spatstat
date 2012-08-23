@@ -100,7 +100,7 @@ print.distfun <- function(x, ...) {
 }
 
 plot.distfun <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   X <- get("X", envir=environment(x))
   W <- as.owin(X)
   do.call("do.as.im",

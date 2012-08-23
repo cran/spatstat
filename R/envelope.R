@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.29 $  $Date: 2012/05/30 10:01:38 $
+#   $Revision: 2.32 $  $Date: 2012/08/20 10:26:56 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -48,9 +48,9 @@ envelope.ppp <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, maxnerr=nsim) {
+           Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
   
@@ -96,7 +96,7 @@ envelope.ppp <-
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user)
+                 envir.user=envir.user, do.pwrong=do.pwrong)
 }
 
 envelope.ppm <- 
@@ -107,9 +107,9 @@ envelope.ppm <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, maxnerr=nsim) {
+           Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
 
@@ -153,7 +153,7 @@ envelope.ppm <-
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user)
+                 envir.user=envir.user, do.pwrong=do.pwrong)
 }
 
 envelope.kppm <-
@@ -161,10 +161,11 @@ envelope.kppm <-
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
-           VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+           VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
+           do.pwrong=FALSE)
 {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
   
@@ -196,7 +197,7 @@ envelope.kppm <-
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user)
+                 envir.user=envir.user, do.pwrong=do.pwrong)
 
 }
 
@@ -217,7 +218,8 @@ envelopeEngine <-
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user,
-           expected.arg="r") {
+           expected.arg="r",
+           do.pwrong=FALSE) {
   #
   envir.here <- sys.frame(sys.nframe())
 
@@ -321,7 +323,7 @@ envelopeEngine <-
     stop("Internal error: fun is NULL")
 
   # Name of function, for error messages
-  fname <- if(is.name(substitute(fun))) deparse(substitute(fun))
+  fname <- if(is.name(substitute(fun))) short.deparse(substitute(fun))
            else if(is.character(fun)) fun else "fun"
   fname <- sQuote(fname)
 
@@ -499,7 +501,8 @@ envelopeEngine <-
                         dual=dual,
                         nsim2=nsim2,
                         VARIANCE=VARIANCE,
-                        nSD=nSD)
+                        nSD=nSD,
+                        do.pwrong=do.pwrong)
 
   # ----------------------------------------
   ######### SIMULATE #######################
@@ -674,7 +677,7 @@ envelopeEngine <-
                             jsim=jsim, jsim.mean=jsim.mean,
                             type=etype, csr=csr, use.theory=csr.theo,
                             nrank=nrank, ginterval=ginterval, nSD=nSD,
-                            Yname=Yname)
+                            Yname=Yname, do.pwrong=do.pwrong)
 
   # tack on envelope information
   attr(result, "einfo") <- EnvelopeInfo
@@ -692,7 +695,7 @@ envelopeEngine <-
 
 
 plot.envelope <- function(x, ..., shade=c("hi", "lo")) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   argh <- list(...)
   if(missing(shade) &&
      length(argh) > 0 &&
@@ -726,6 +729,7 @@ print.envelope <- function(x, ...) {
   type <- if(V) paste("Pointwise", e$nSD, "sigma") else
           if(g) "Simultaneous" else "Pointwise" 
   cat(paste(type, "critical envelopes for", fname, "\n"))
+  cat(paste("and observed value for", sQuote(e$Yname), "\n"))
   if(!is.null(valname <- e$valname))
     cat(paste("Edge correction:",
               dQuote(valname), "\n"))
@@ -764,7 +768,11 @@ print.envelope <- function(x, ...) {
                     "/", nsim+1, sep=""),
               "=", alpha, "\n"))
   }
-  cat(paste("Data:", e$Yname, "\n"))
+  if(!is.null(pwrong <- attr(x, "pwrong"))) {
+    cat(paste("\t[Estimated significance level of pointwise excursions:",
+              paste("pwrong=", signif(pwrong, 3), "]\n", sep="")))
+  }
+  cat("\n")
   NextMethod("print")
 }
                   
@@ -838,11 +846,11 @@ summary.envelope <- function(object, ...) {
   
 
 # envelope.matrix
+
 # core functionality to compute envelope values
 
 # theory = funX[["theo"]]
 # observed = fX
-
 
 envelope.matrix <- function(Y, ...,
                             rvals=NULL, observed=NULL, theory=NULL, 
@@ -854,14 +862,18 @@ envelope.matrix <- function(Y, ...,
                             nrank=1, ginterval=NULL, nSD=2,
                             savefuns=FALSE,
                             check=TRUE,
-                            Yname=NULL) {
-
+                            Yname=NULL,
+                            do.pwrong=FALSE) {
   if(is.null(Yname))
-    Yname <- deparse(substitute(Y), 60, nlines=1)
+    Yname <- short.deparse(substitute(Y))
+
   type <- match.arg(type)
 
-  if(!is.null(funX)) stopifnot(is.fv(funX))
-  
+  if(!is.null(funX))
+    stopifnot(is.fv(funX))
+
+  pwrong <- NULL
+    
   if(is.null(rvals) && is.null(observed) && !is.null(funX)) {
     # assume funX is summary function for observed data
     rvals <- with(funX, .x)
@@ -947,6 +959,13 @@ envelope.matrix <- function(Y, ...,
                                    lo=lo,
                                    hi=hi)
            }
+           if(do.pwrong) {
+             # estimate the p-value for the 'wrong test'
+             dataranks <- t(apply(simvals, 1, rank, ties.method="random"))
+             is.signif <- (dataranks <= nrank) | (dataranks >= nsim-nrank+1)
+             is.signif.somewhere <- apply(is.signif, 2, any)
+             pwrong <- sum(is.signif.somewhere)/nsim
+           }
          },
          global = {
            # ..... SIMULTANEOUS ENVELOPES ..........................
@@ -999,6 +1018,9 @@ envelope.matrix <- function(Y, ...,
                                    mmean=reference,
                                    lo=lo,
                                    hi=hi)
+           if(do.pwrong)
+             warning(paste("Argument", sQuote("do.pwrong=TRUE"), "ignored;",
+                           "it is not relevant to global envelopes"))
          },
          variance={
            # ....... POINTWISE MEAN, VARIANCE etc ......................
@@ -1069,6 +1091,12 @@ envelope.matrix <- function(Y, ...,
                          "standardised residual",
                          loCI.name, hiCI.name)
            }
+           if(do.pwrong) {
+             # estimate the p-value for the 'wrong test'
+             is.signif <- (fX <= lo) | (fX >= hi)
+             is.signif.somewhere <- apply(is.signif, 2, any)
+             pwrong <- sum(is.signif.somewhere)/nsim
+           }
          }
          )
 
@@ -1117,6 +1145,8 @@ envelope.matrix <- function(Y, ...,
   # tack on envelope information
   attr(result, "einfo") <- list(global = (type =="global"),
                                 csr = csr,
+                                use.theory = use.theory,
+                                csr.theo = csr && use.theory,
                                 simtype = "funs",
                                 nrank = nrank,
                                 nsim = nsim,
@@ -1126,7 +1156,8 @@ envelope.matrix <- function(Y, ...,
                                 dual = dual,
                                 nsim = nsim,
                                 nsim2 = nsim.mean,
-                                Yname = Yname)
+                                Yname = Yname,
+                                do.pwrong=do.pwrong)
 
   # tack on saved functions
   if(savefuns) {
@@ -1145,14 +1176,16 @@ envelope.matrix <- function(Y, ...,
                      paste("Simulation ", 1:nsim, sep="")))
     fvnames(SimFuns, ".") <- simnames
     attr(result, "simfuns") <- SimFuns
-  } 
+  }
+  if(do.pwrong)
+    attr(result, "pwrong") <- pwrong
   return(result)
 }
 
 
-envelope.envelope <- function(Y, fun=NULL, ...) {
+envelope.envelope <- function(Y, fun=NULL, ..., global=FALSE, VARIANCE=FALSE) {
 
-  Yname <- deparse(substitute(Y), 60, nlines=1)
+  Yname <- short.deparse(substitute(Y))
 
   stopifnot(inherits(Y, "envelope"))
 
@@ -1203,11 +1236,14 @@ envelope.envelope <- function(Y, fun=NULL, ...) {
     rname <- fvnames(sf, ".x")
     df <- df[, (names(df) != rname)]
 
+    # interface with 'envelope.matrix'
+    etype <- if(global) "global" else if(VARIANCE) "variance" else "pointwise"
     result <- do.call(envelope.matrix,
                       resolve.defaults(list(Y=as.matrix(df)),
                                        list(...),
-                                       list(csr=csr),
-                                       list(funX=Y, 
+                                       list(type=etype,
+                                            csr=csr,
+                                            funX=Y, 
                                             Yname=Yname),
                                        .StripNull=TRUE))
   }
@@ -1225,7 +1261,7 @@ pool <- function(...) {
 }
 
 pool.envelope <- function(...) {
-  Yname <- paste(deparse(sys.call()), collapse="")
+  Yname <- short.deparse(sys.call())
   if(nchar(Yname) > 60) Yname <- paste(substr(Yname, 1, 40), "[..]")
   Elist <- list(...)
   nE <-  length(Elist)
@@ -1275,7 +1311,7 @@ pool.envelope <- function(...) {
   csr      <- unique(unlist(lapply(einfolist, function(z) { z$csr      } )))
   csr.theo <- unique(unlist(lapply(einfolist, function(z) { z$csr.theo } )))
   resolve <- function(x, x0, warn) {
-    xname <- deparse(substitute(x))
+    xname <- short.deparse(substitute(x))
     if(length(x) == 1)
       return(x)
     if(missing(warn))

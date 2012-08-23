@@ -192,7 +192,7 @@ print.minconfit <- function(x, ...) {
               
 
 plot.minconfit <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   do.call("plot.fv",
           resolve.defaults(list(x$fit),
                            list(...),
@@ -409,7 +409,7 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -453,7 +453,7 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
   
   if(inherits(X, "fv")) {
     K <- X
@@ -506,7 +506,7 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -556,7 +556,7 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
                           pcfargs=list()){
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     g <- X
@@ -608,7 +608,7 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
                             pcfargs=list()){
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     g <- X
@@ -662,7 +662,7 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
                         pcfargs=list()) {
   
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
   
   if(inherits(X, "fv")) {
     g <- X
@@ -718,7 +718,7 @@ cauchy.estK <- function(X, startpar=c(kappa=1,eta2=1),
 # eta = 2 * omega
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -767,7 +767,7 @@ cauchy.estpcf <- function(X, startpar=c(kappa=1,eta2=1),
 # eta = 2 * omega
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     g <- X
@@ -824,7 +824,7 @@ vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
 # nu.pcf = 2 * nu.ker + 1    and    eta = omega
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     K <- X
@@ -882,7 +882,7 @@ vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4,
 # nu.pcf = 2 * nu.ker + 1    and    eta = omega
 
   dataname <-
-    getdataname(deparse(substitute(X), width.cutoff=20, nlines=1), ...)
+    getdataname(short.deparse(substitute(X), 20), ...)
 
   if(inherits(X, "fv")) {
     g <- X

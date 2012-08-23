@@ -11,7 +11,7 @@ plot(amacrine)
 
 plot(anemones, markscale=0.5)
 
-ants.extra$plot()
+ants.extra$plotit()
 
 plot(bei.extra$elev, main="Beilschmiedia")
 plot(bei, add=TRUE, pch=16, cex=0.3)
@@ -58,6 +58,9 @@ plot(split(lansing))
 
 plot(longleaf)
 
+plot(mucosa, chars=c(1,3), cols=c("red", "green"))
+plot(mucosa.subwin, add=TRUE, lty=3)
+
 plot(murchison$greenstone, main="Murchison data", col="lightgreen")
 plot(murchison$gold, add=TRUE, pch="+",col="blue")
 plot(murchison$faults, add=TRUE, col="red")
@@ -81,7 +84,7 @@ ponderosa.extra$plotit()
 
 plot(redwood)
 
-redwoodfull.extra$plot()
+redwoodfull.extra$plotit()
 
 plot(residualspaper$Fig1)
 plot(residualspaper$Fig4a)

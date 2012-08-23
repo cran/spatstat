@@ -106,6 +106,14 @@ PairPiece <- local({
             return(0)
           else return(max(r[active]))
         },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         r     <- self$par$r
+         gamma <- (self$interpret)(coeffs, self)$param$gammas
+         # areas of annuli between r[i-1], r[i]
+         areas <- pi * diff(c(0,r)^2)
+         return(sum(areas * (1-gamma)))
+       },
        version=NULL # filled in later
        )
   class(BlankPairPiece) <- "interact"

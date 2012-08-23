@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.38 $	$Date: 2012/04/24 09:02:25 $
+#	$Revision: 5.39 $	$Date: 2012/08/22 01:40:38 $
 #
 #
 # -------- functions ----------------------------------------
@@ -361,12 +361,12 @@ function(X, I, J, r=NULL, breaks=NULL,
     }
   }
   # default is to display them all
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   unitname(K) <- unitname(X)
   
   if(ratio) {
     # finish up numerator & denominator
-    attr(numK, "fmla") <- attr(denK, "fmla") <- . ~ r
+    formula(numK) <- formula(denK) <- . ~ r
     unitname(numK) <- unitname(denK) <- unitname(K)
     # tack on to result
     K <- rat(K, numK, denK, check=FALSE)

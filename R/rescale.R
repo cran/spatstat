@@ -11,18 +11,21 @@ rescale <- function(X, s) {
 }
 
 rescale.ppp <- function(X, s) {
+  if(missing(s)) s <- 1/unitname(X)$multiplier
   Y <- affine.ppp(X, mat=diag(c(1/s,1/s)))
   unitname(Y) <- rescale(unitname(X), s)
   return(Y)
 }
 
 rescale.owin <- function(X, s) {
+  if(missing(s)) s <- 1/unitname(X)$multiplier
   Y <- affine.owin(X, mat=diag(c(1/s,1/s)))
   unitname(Y) <- rescale(unitname(X), s)
   return(Y)
 }
 
 rescale.im <- function(X, s) {
+  if(missing(s)) s <- 1/unitname(X)$multiplier
   Y <- X
   Y$xrange <- X$xrange/s
   Y$yrange <- X$yrange/s
@@ -35,6 +38,7 @@ rescale.im <- function(X, s) {
 }
 
 rescale.psp <- function(X, s) {
+  if(missing(s)) s <- 1/unitname(X)$multiplier
   Y <- affine.psp(X, mat=diag(c(1/s,1/s)))
   unitname(Y) <- rescale(unitname(X), s)
   return(Y)
@@ -43,9 +47,13 @@ rescale.psp <- function(X, s) {
 rescale.units <- function(X, s) {
   if(summary(X)$vanilla)
     return(X)
-  if(!is.numeric(s) || length(s) != 1 || s <= 0)
-    stop("s should be a positive number")
-  X$multiplier <- s * X$multiplier
+  if(missing(s)) {
+    X$multiplier <- 1
+  } else {
+    if(!is.numeric(s) || length(s) != 1 || s <= 0)
+      stop("s should be a positive number")
+    X$multiplier <- s * X$multiplier
+  }
   return(X)
 }
 

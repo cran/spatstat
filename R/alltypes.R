@@ -12,7 +12,7 @@ alltypes <- function(X, fun="K", ...,
 #
   verifyclass(X,"ppp")
   if(is.null(dataname))
-    dataname <- deparse(substitute(X))
+    dataname <- short.deparse(substitute(X))
 
 # --------------------------------------------------------------------  
 # First inspect marks

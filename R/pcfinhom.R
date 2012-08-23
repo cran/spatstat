@@ -1,7 +1,7 @@
 #
 #   pcfinhom.R
 #
-#   $Revision: 1.6 $   $Date: 2011/07/23 02:37:00 $
+#   $Revision: 1.7 $   $Date: 2012/08/22 01:43:24 $
 #
 #   inhomogeneous pair correlation function of point pattern 
 #
@@ -163,7 +163,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
   corrxns <- rev(nama2[nama2 != "r"])
 
   # default is to display them all
-  attr(out, "fmla") <- deparse(as.formula(paste(
+  formula(out) <- deparse(as.formula(paste(
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))

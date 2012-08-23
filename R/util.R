@@ -552,6 +552,13 @@ sensiblevarname <- function(guess, fallback, maxlen=12) {
   return(out)
 }
 
+short.deparse <- function(x, maxlen=60) {
+  deparse(x,
+          nlines=1,
+          width.cutoff=maxlen,
+          control="delayPromises")
+}
+
 good.names <- function(nama, defaults, suffices) {
   # ensure sensible, unique names 
   stopifnot(is.character(defaults))
@@ -567,7 +574,6 @@ good.names <- function(nama, defaults, suffices) {
   return(result)
 }
 
-    
 cat.factor <- function (..., recursive=FALSE) {
   lll <- list(...)
   chk <- sapply(lll,is.factor)

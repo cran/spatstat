@@ -27,6 +27,10 @@
 
   The result is a window representing the \emph{same} region of space,
   but re-expressed in a different unit.
+
+  If \code{s} is missing, then the coordinates will be re-expressed
+  in \sQuote{native} units; for example if the current unit is
+  equal to 0.1 metres, then the coordinates will be re-expressed in metres.
 }
 \section{Note}{
   The result of this operation is equivalent to the original window.
@@ -47,8 +51,10 @@
   W <- swedishpines$window
   W
 # coordinates are in decimetres (0.1 metre)
-# convert to metres
+# convert to metres:
   rescale(W, 10)
+# or equivalently
+  rescale(W)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

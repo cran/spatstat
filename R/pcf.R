@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.38 $   $Date: 2011/11/01 11:31:29 $
+#   $Revision: 1.41 $   $Date: 2012/08/22 04:02:14 $
 #
 #
 #   calculate pair correlation function
@@ -114,7 +114,7 @@ pcf.ppp <- function(X, ..., r=NULL,
   }
   
   # default is to display all corrections
-  attr(out, "fmla") <- . ~ r
+  formula(out) <- . ~ r
   #
   unitname(out) <- unitname(X)
   return(out)
@@ -150,75 +150,82 @@ sewpcf <- function(d, w, denargs, lambda2area) {
   for(i in seq_along(X$fns)) {
     Xi <- X$fns[[i]]
     PCFi <- pcf.fv(Xi, ..., method=method)
-    Y$fns[[i]] <- as.fv(PCFi)
+    Y$fns[[i]] <- PCFi
     if(is.fv(PCFi))
-      Y$default.formula[[i]] <- attr(PCFi, "fmla")
+      Y$default.formula[[i]] <- formula(PCFi)
   }
   return(Y)
 }
 
 
-"pcf.fv" <-
-function(X, ..., method="c") {
-  verifyclass(X, "fv")
-  
+pcf.fv <- local({
+
   callmatched <- function(fun, argue) {
     formalnames <- names(formals(fun))
     formalnames <- formalnames[formalnames != "..."]
     do.call("fun", argue[names(argue) %in% formalnames])
   }
 
-  # extract r and the recommended estimate of K
-  r <- with(X, .x)
-  K <- with(X, .y)
-  alim <- attr(X, "alim")
+  pcf.fv <- function(X, ..., method="c") {
+    verifyclass(X, "fv")
+  
+    # extract r and the recommended estimate of K
+    r <- with(X, .x)
+    K <- with(X, .y)
+    alim <- attr(X, "alim")
 
-  # remove NA's
-  ok <- !is.na(K)
-  K <- K[ok]
-  r <- r[ok]
-  switch(method,
-         a = {
-           ss <- callmatched(smooth.spline,
-                             list(x=r, y=K, ...))
-           dK <- predict(ss, r, deriv=1)$y
-           g <- dK/(2 * pi * r)
-         },
-         b = {
-           y <- K/(2 * pi * r)
-           y[!is.finite(y)] <- 0
-           ss <- callmatched(smooth.spline,
-                             list(x=r, y=y, ...))
-           dy <- predict(ss, r, deriv=1)$y
-           g <- dy + y/r
-         },
-         c = {
-           z <- K/(pi * r^2)
-           z[!is.finite(z)] <- 1
-           ss <- callmatched(smooth.spline,
-                             list(x=r, y=z, ...))
-           dz <- predict(ss, r, deriv=1)$y
-           g <- (r/2) * dz + z
-         },
-         d = {
-           z <- sqrt(K)
-           z[!is.finite(z)] <- 0
-           ss <- callmatched(smooth.spline,
-                             list(x=r, y=z, ...))
-           dz <- predict(ss, r, deriv=1)$y
-           g <- z * dz/(pi * r)
-         },
-         stop(paste("unrecognised method", sQuote(method)))
-         )
+    # remove NA's
+    ok <- !is.na(K)
+    K <- K[ok]
+    r <- r[ok]
+    switch(method,
+           a = {
+             ss <- callmatched(smooth.spline,
+                               list(x=r, y=K, ...))
+             dK <- predict(ss, r, deriv=1)$y
+             g <- dK/(2 * pi * r)
+           },
+           b = {
+             y <- K/(2 * pi * r)
+             y[!is.finite(y)] <- 0
+             ss <- callmatched(smooth.spline,
+                               list(x=r, y=y, ...))
+             dy <- predict(ss, r, deriv=1)$y
+             g <- dy + y/r
+           },
+           c = {
+             z <- K/(pi * r^2)
+             z[!is.finite(z)] <- 1
+             ss <- callmatched(smooth.spline,
+                               list(x=r, y=z, ...))
+             dz <- predict(ss, r, deriv=1)$y
+             g <- (r/2) * dz + z
+           },
+           d = {
+             z <- sqrt(K)
+             z[!is.finite(z)] <- 0
+             ss <- callmatched(smooth.spline,
+                               list(x=r, y=z, ...))
+             dz <- predict(ss, r, deriv=1)$y
+             g <- z * dz/(pi * r)
+           },
+           stop(paste("unrecognised method", sQuote(method)))
+           )
 
-  # pack result into "fv" data frame
-  Z <- fv(data.frame(r=r, pcf=g, theo=rep(1, length(r))),
-          "r", substitute(g(r), NULL), "pcf", . ~ r, alim,
-          c("r", "%s(r)", "%s[pois](r)"),
-          c("distance argument r",
-            "estimate of %s by numerical differentiation",
-            "theoretical Poisson value of %s"),
-          fname="g")
-  unitname(Z) <- unitname(X)
-  return(Z)
-}
+    # pack result into "fv" data frame
+    Z <- fv(data.frame(r=r,
+                       theo=rep(1, length(r)),
+                       pcf=g),
+            "r", substitute(g(r), NULL), "pcf", . ~ r, alim,
+            c("r", "%s[pois](r)", "%s(r)"),
+            c("distance argument r",
+              "theoretical Poisson value of %s",
+              "estimate of %s by numerical differentiation"),
+            fname="g")
+    unitname(Z) <- unitname(X)
+    return(Z)
+  }
+
+  pcf.fv
+})
+

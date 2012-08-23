@@ -132,7 +132,7 @@ is.marked.quad <- function(X, na.action="warn", ...) {
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
-                           deparse(substitute(X))))
+                           short.deparse(substitute(X))))
            },
            fatal = {
              return(FALSE)
@@ -150,7 +150,7 @@ is.multitype.quad <- function(X, na.action="warn", ...) {
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
-                           deparse(substitute(X))))
+                           short.deparse(substitute(X))))
            },
            fatal = {
              return(FALSE)
@@ -202,7 +202,9 @@ union.quad <- function(Q) {
 #   Plot a quadrature scheme
 #
 #
-plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
+plot.quad <- function(x, ..., main, dum=list()) {
+  if(missing(main) || is.null(main)) 
+	main <- short.deparse(substitute(x))
   verifyclass(x, "quad")
   data <- x$data
   dummy <- x$dummy
@@ -230,7 +232,7 @@ plot.quad <- function(x, ..., main=deparse(substitute(x)), dum=list()) {
     }
   } else {
     plot(data, ..., main=main)
-    addplot <- function(x, ..., add=TRUE, main=deparse(substitute(x))) {
+    addplot <- function(x, ..., add=TRUE, main=short.deparse(substitute(x))) {
       plot(x, ..., main=main, add=add)
     }
     do.call("addplot", append(list(dummy), dum))

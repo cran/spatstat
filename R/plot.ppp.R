@@ -16,7 +16,7 @@ plot.ppp <-
 # A plot() method for the class 'ppp'
 #
   if(missing(main))
-    main <- deparse(substitute(x))
+    main <- short.deparse(substitute(x))
 
 # First handle `rejected' points
   sick <- inherits(x, "ppp") && !is.null(rejects <- attr(x, "rejects"))

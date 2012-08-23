@@ -8,7 +8,7 @@
 
 kppm <- function(X, trend = ~1, clusters="Thomas", covariates=NULL, ...,
                  statistic="K", statargs=list()) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   clusters <- pickoption("cluster type", clusters,
                          c(Thomas   = "Thomas",
                            MatClust = "MatClust",
@@ -180,7 +180,7 @@ print.kppm <- function(x, ...) {
 }
 
 plot.kppm <- function(x, ..., what=c("intensity", "statistic")) {
-  modelname <- deparse(substitute(x))
+  modelname <- short.deparse(substitute(x))
   plotem <- function(x, ..., main=dmain, dmain) { plot(x, ..., main=main) }
   what <- pickoption("plot type", what,
                     c(statistic="statistic",

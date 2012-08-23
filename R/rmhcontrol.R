@@ -2,7 +2,7 @@
 #
 #   rmhcontrol.R
 #
-#   $Revision: 1.22 $  $Date: 2012/05/11 11:19:58 $
+#   $Revision: 1.24 $  $Date: 2012/08/14 10:23:55 $
 #
 #
 
@@ -28,16 +28,16 @@ rmhcontrol.list <- function(...) {
 
 rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
                         expand=NULL, periodic=NULL, ptypes=NULL,
-                        x.cond=NULL, fixall=FALSE, nverb=0)
+                        x.cond=NULL, fixall=FALSE, nverb=0,
+                        nsave=NULL, nburn=nsave, track=FALSE)
 {
   argh <- list(...)
   nargh <- length(argh)
   if(nargh > 0) {
     # allow rmhcontrol(NULL), otherwise flag an error
     if(!(nargh == 1 && is.null(argh[[1]])))
-      stop(paste("Unrecognised arguments; syntax should be rmhcontrol(",
-                 "p, q, nrep, expand, periodic, ptypes, x.cond, fixall, nverb",
-                 ") with arguments given explicitly by name"))
+      stop(paste("Unrecognised arguments to rmhcontrol;",
+                 "valid arguments are listed in help(rmhcontrol.default)"))
   }
   # impose default values
   if(missing(p)) p <- spatstat.options("rmh.p")
@@ -62,6 +62,14 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
     stop("fixall should be a logical value")
   if(!is.null(periodic) && (!is.logical(periodic) || length(periodic) != 1))
     stop(paste(sQuote("periodic"), "should be a logical value or NULL"))
+  if(saving <- !is.null(nsave)) {
+    if(!is.numeric(nsave) || length(nsave) != 1
+       || nsave < 0 || nsave >= nrep)
+      stop("nsave should be an integer < nrep")
+    if(is.null(nburn)) nburn <- min(nsave, nrep-nsave)
+    if(!is.null(nburn)) stopifnot(nburn + nsave <= nrep)
+  }
+  stopifnot(is.logical(track))
 
 #################################################################
 # Conditioning on point configuration
@@ -139,7 +147,9 @@ rmhcontrol.default <- function(..., p=0.9, q=0.5, nrep=5e5,
               fixcode=fixcode,
               fixing=fixing,
               condtype=condtype,
-              x.cond=x.cond)
+              x.cond=x.cond,
+              saving=saving, nsave=nsave, nburn=nburn,
+              track=track)
   class(out) <- c("rmhcontrol", class(out))
   return(out)
 }
@@ -171,6 +181,11 @@ print.rmhcontrol <- function(x, ...) {
            cat("Conditional simulation of Palm type\n")
          })
   cat(paste("Number of M-H iterations: nrep =", x$nrep, "\n"))
+  if(x$saving) 
+    cat(paste("Save point pattern every", x$nsave, "iterations",
+              "after a burn-in of", x$nburn, "iterations\n"))
+  cat(paste("Track proposal type and acceptance/rejection?",
+            if(x$track) "yes" else "no", "\n"))
   if(x$nverb > 0)
     cat(paste("Progress report every nverb=", x$nverb, "iterations\n"))
   else

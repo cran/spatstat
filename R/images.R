@@ -533,7 +533,7 @@ min.im <- function(x, ...) {
 }
 
 hist.im <- function(x, ..., probability=FALSE) {
-  xname <- paste(deparse(substitute(x), 500), collapse="\n")
+  xname <- short.deparse(substitute(x))
   verifyclass(x, "im")
   main <- paste("Histogram of", xname)
   # default plot arguments

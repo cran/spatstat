@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.83 $    $Date: 2012/06/19 08:21:44 $
+#  $Revision: 1.86 $    $Date: 2012/07/21 10:46:26 $
 #
 #
 
@@ -16,23 +16,32 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
                     legendavoid=missing(legendpos),
                     legendmath=TRUE, legendargs=list(),
                     shade=NULL, shadecol="grey", add=FALSE,
+                    log="",
                     limitsonly=FALSE) {
 
   xname <-
-    if(is.language(substitute(x))) deparse(substitute(x)) else ""
+    if(is.language(substitute(x))) short.deparse(substitute(x)) else ""
 
   force(legendavoid)
-  
+  if(is.null(legend))
+    legend <- !add
+
   verifyclass(x, "fv")
   env.user <- parent.frame()
 
   indata <- as.data.frame(x)
 
+  xlogscale <- (log %in% c("x", "xy", "yx"))
+  ylogscale <- (log %in% c("y", "xy", "yx"))
+
+  if(missing(shade) && !is.null(defaultshade <- attr(x, "shade")))
+    shade <- defaultshade
+    
   # ---------------- determine plot formula ----------------
   
   defaultplot <- missing(fmla) || is.null(fmla)
   if(defaultplot) 
-    fmla <- attr(x, "fmla")
+    fmla <- formula(x)
 
   # This *is* the last possible moment, so...
   fmla <- as.formula(fmla, env=env.user)
@@ -91,7 +100,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # reformat
   if(is.vector(lhsdata)) {
     lhsdata <- matrix(lhsdata, ncol=1)
-    colnames(lhsdata) <- paste(deparse(lhs), collapse="")
+    colnames(lhsdata) <- paste(short.deparse(lhs), collapse="")
   }
   # check lhs names exist
   lnames <- colnames(lhsdata)
@@ -162,6 +171,8 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     # if we're using the default argument, use its recommended range
     if(rhs == fvnames(x, ".x")) {
       xlim <- attr(x, "alim")
+      if(xlogscale && xlim[1] <= 0) 
+        xlim[1] <- min(rhsdata[is.finite(rhsdata) & rhsdata > 0], na.rm=TRUE)
       rok <- is.finite(rhsdata) & rhsdata >= xlim[1] & rhsdata <= xlim[2]
       lok <- apply(is.finite(lhsdata), 1, any)
       ok <- lok & rok
@@ -171,14 +182,20 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
       rok <- is.finite(rhsdata) 
       lok <- apply(is.finite(lhsdata), 1, any)
       ok <- lok & rok
+      if(xlogscale) 
+        ok <- ok & (rhsdata > 0) & apply(lhsdata > 0, 1, any)
       rhsdata <- rhsdata[ok]
       lhsdata <- lhsdata[ok, , drop=FALSE]
-      xlim <- range(rhsdata)
+      xlim <- range(rhsdata) 
     }
   }
 
-  if(is.null(ylim))
-    ylim <- range(lhsdata[is.finite(lhsdata)],na.rm=TRUE)
+  if(is.null(ylim)) {
+    yok <- is.finite(lhsdata)
+    if(ylogscale)
+      yok <- yok & (lhsdata > 0)
+    ylim <- range(lhsdata[yok],na.rm=TRUE)
+  }
   if(!is.null(ylim.covers))
     ylim <- range(ylim, ylim.covers)
 
@@ -258,7 +275,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   # create new plot
   if(!add)
     do.call("plot.default",
-            resolve.defaults(list(xlim, ylim, type="n"),
+            resolve.defaults(list(xlim, ylim, type="n", log=log),
                              list(xlab=xlab, ylab=ylab),
                              list(...),
                              list(main=xname)))
@@ -276,7 +293,7 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     if(length(a) == 1)
       return(rep(a, n))
     else if(length(a) != n)
-      stop(paste("Length of", deparse(substitute(a)),
+      stop(paste("Length of", short.deparse(substitute(a)),
                  "does not match number of curves to be plotted"))
     else 
       return(a)
@@ -337,78 +354,109 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
   for(i in allind)
     lines(rhsdata, lhsdata[,i], lty=lty[i], col=col[i], lwd=lwd[i])
 
-  # determine legend 
   if(nplots == 1)
     return(invisible(NULL))
-  else {
-    key <- colnames(lhsdata)
-    mat <- match(key, names(x))
-    keyok <- !is.na(mat)
-    matok <- mat[keyok]
-    legdesc <- rep("constructed variable", length(key))
-    legdesc[keyok] <- attr(x, "desc")[matok]
-    leglabl <- lnames0
-    leglabl[keyok] <- labl[matok]
-    ylab <- attr(x, "ylab")
-    if(!is.null(ylab)) {
-      if(is.language(ylab))
-        ylab <- deparse(ylab)
-      legdesc <- sprintf(legdesc, ylab)
-    }
-    # compute legend info
-    legtxt <- key
-    if(legendmath) {
-      legtxt <- leglabl
-      if(defaultplot) {
-        # try to convert individual labels to expressions
-        fancy <- try(parse(text=leglabl), silent=TRUE)
-        if(!inherits(fancy, "try-error"))
+
+  # ---------------- determine legend -------------------------
+  
+  key <- colnames(lhsdata)
+  mat <- match(key, names(x))
+  keyok <- !is.na(mat)
+  matok <- mat[keyok]
+  legdesc <- rep("constructed variable", length(key))
+  legdesc[keyok] <- attr(x, "desc")[matok]
+  leglabl <- lnames0
+  leglabl[keyok] <- labl[matok]
+  ylab <- attr(x, "ylab")
+  if(!is.null(ylab)) {
+    if(is.language(ylab))
+      ylab <- deparse(ylab)
+    legdesc <- sprintf(legdesc, ylab)
+  }
+  # compute legend info
+  legtxt <- key
+  if(legendmath) {
+    legtxt <- leglabl
+    if(defaultplot) {
+      # try to convert individual labels to expressions
+      fancy <- try(parse(text=leglabl), silent=TRUE)
+      if(!inherits(fancy, "try-error"))
+        legtxt <- fancy
+    } else {
+      # try to navigate the parse tree
+      fancy <- try(fvlegend(x, expandleftside), silent=TRUE)
+      if(!inherits(fancy, "try-error")) {
+        if(is.null(extrashadevars)) {
           legtxt <- fancy
-      } else {
-        # try to navigate the parse tree
-        fancy <- try(fvlegend(x, expandleftside), silent=TRUE)
-        if(!inherits(fancy, "try-error")) {
-          if(is.null(extrashadevars)) {
-            legtxt <- fancy
-          } else {
-            # some shade variables were not included in left side of formula
-            mat <- match(extrashadevars, colnames(x))
-            extrashadelabl <- labl[mat]
-            fancy2 <- try(parse(text=extrashadelabl), silent=TRUE)
-            if(!inherits(fancy2, "try-error"))
-              legtxt <- c(fancy, fancy2)
-          }
+        } else {
+          # some shade variables were not included in left side of formula
+          mat <- match(extrashadevars, colnames(x))
+          extrashadelabl <- labl[mat]
+          fancy2 <- try(parse(text=extrashadelabl), silent=TRUE)
+          if(!inherits(fancy2, "try-error"))
+            legtxt <- c(fancy, fancy2)
         }
       }
     }
+  }
 
+  # --------------- handle legend plotting  -----------------------------
+    
+  if(identical(legend, TRUE)) {
+    # legend will be plotted
+    # Basic parameters of legend
+    legendxpref <- if(identical(legendpos, "float")) NULL else legendpos
+    legendspec <- resolve.defaults(legendargs,
+                                   list(x=legendxpref,
+                                        legend=legtxt,
+                                        lty=lty,
+                                        col=col,
+                                        inset=0.05,
+                                        y.intersp=if(legendmath) 1.3 else 1),
+                                   .StripNull=TRUE)
+      
     if(legendavoid || identical(legendpos, "float")) {
       # Automatic determination of legend position
       # Assemble data for all plot objects
       linedata <- list()
+      xmap <- if(xlogscale) log10 else identity
+      ymap <- if(ylogscale) log10 else identity
+      inv.xmap <- if(xlogscale) function(x) { 10^x } else identity
+      inv.ymap <- if(ylogscale) function(x) { 10^x } else identity
       for(i in seq_along(allind)) 
-        linedata[[i]] <- list(x=rhsdata, y=lhsdata[,i])
-      polydata <- if(length(xpoly) > 0) list(x=xpoly, y=ypoly) else NULL
-      objects <- assemble.plot.objects(xlim, ylim,
+        linedata[[i]] <- list(x=xmap(rhsdata), y=ymap(lhsdata[,i]))
+      polydata <-
+        if(length(xpoly) > 0) list(x=xmap(xpoly), y=ymap(ypoly)) else NULL
+      objects <- assemble.plot.objects(xmap(xlim), ymap(ylim),
                                        lines=linedata, polygon=polydata)
       # find best position to avoid them
-      legendbest <- findbestlegendpos(objects, preference=legendpos)
+      legendbest <- findbestlegendpos(objects, preference=legendpos,
+                                      legendspec=legendspec)
+      # handle log scale
+      if((xlogscale || ylogscale) &&
+         checkfields(legendbest, c("x", "xjust", "yjust"))) {
+        # back-transform x, y coordinates
+        legendbest$x$x <- inv.xmap(legendbest$x$x)
+        legendbest$x$y <- inv.ymap(legendbest$x$y)
+      }
     } else legendbest <- list()
     
-    # plot legend
+    #  ********** plot legend *************************
     if(!is.null(legend) && legend) 
       do.call("legend",
               resolve.defaults(legendargs,
                                legendbest,
-                               list(x=legendpos, legend=legtxt, lty=lty, col=col),
-                               list(inset=0.05, y.intersp=if(legendmath) 1.3 else 1),
+                               legendspec,
                                .StripNull=TRUE))
-
-    df <- data.frame(lty=lty, col=col, key=key, label=paste.expr(legtxt),
-                      meaning=legdesc, row.names=key)
-    return(df)
+    
   }
+
+  # return legend info
+  df <- data.frame(lty=lty, col=col, key=key, label=paste.expr(legtxt),
+                   meaning=legdesc, row.names=key)
+  return(df)
 }
+
 
 
 assemble.plot.objects <- function(xlim, ylim, ..., lines=NULL, polygon=NULL) {
@@ -460,7 +508,8 @@ findbestlegendpos <- local({
   # Given a list of geometrical objects, find the best position
   # to avoid them.
   thefunction <- function(objects, show=FALSE, aspect=1, bdryok=TRUE,
-                          preference="float", verbose=FALSE) {
+                          preference="float", verbose=FALSE,
+                          legendspec=NULL) {
     # find bounding box
     W <- do.call("bounding.box", lapply(objects, as.rectangle))
     # convert to common box
@@ -493,34 +542,51 @@ findbestlegendpos <- local({
       plot(affine(D, mat=invmat), add=TRUE)
       lapply(lapply(scaled.objects, affine, mat=invmat), plot, add=TRUE)
     }
-    # examine distance map
     if(preference != "float") {
-      # check for collision at preferred location
-      xr <- scaledW$xrange
-      yr <- scaledW$yrange
-      testloc <- switch(preference,
-                        topleft     = c(xr[1],yr[2]),
-                        top         = c(mean(xr), yr[2]),
-                        topright    = c(xr[2], yr[2]),
-                        right       = c(xr[2], mean(yr)),
-                        bottomright = c(xr[2], yr[1]),
-                        bottom      = c(mean(xr), yr[1]),
-                        bottomleft  = c(xr[1], yr[1]),
-                        left        = c(xr[1], mean(yr)),
-                        center      = c(mean(xr), mean(yr)),
-                        NULL)
-      if(!is.null(testloc)) {
-        # look up distance value at preferred location
-        val <- safelookup(D, list(x=testloc[1], y=testloc[2]))
-        crit <- 0.15 * min(diff(xr), diff(yr))
-        if(verbose)
-          cat(paste("val=",val, ", crit=", crit, "\n"))
-        if(val > crit) {
-          # no collision: stay at preferred location.
+      # evaluate preferred location (check for collision)
+      if(!is.null(legendspec)) {
+        # pretend to plot the legend as specified
+        legout <- do.call("legend", append(legendspec, list(plot=FALSE)))
+        # determine bounding box
+        legbox <- with(legout$rect, owin(c(left, left+w), c(top-h, top)))
+        scaledlegbox <- affine(legbox, mat=mat)
+        # check for collision 
+        Dmin <- min(D[scaledlegbox])
+        if(Dmin >= 0.02) {
+          # no collision: stay at preferred location. Exit.
           return(list(x=preference))
         }
+        # collision occurred! 
+      } else {
+        # no legend information.
+        # Pretend legend is 15% of plot width and height
+        xr <- scaledW$xrange
+        yr <- scaledW$yrange
+        testloc <- switch(preference,
+                          topleft     = c(xr[1],yr[2]),
+                          top         = c(mean(xr), yr[2]),
+                          topright    = c(xr[2], yr[2]),
+                          right       = c(xr[2], mean(yr)),
+                          bottomright = c(xr[2], yr[1]),
+                          bottom      = c(mean(xr), yr[1]),
+                          bottomleft  = c(xr[1], yr[1]),
+                          left        = c(xr[1], mean(yr)),
+                          center      = c(mean(xr), mean(yr)),
+                          NULL)
+        if(!is.null(testloc)) {
+          # look up distance value at preferred location
+          val <- safelookup(D, list(x=testloc[1], y=testloc[2]))
+          crit <- 0.15 * min(diff(xr), diff(yr))
+          if(verbose)
+            cat(paste("val=",val, ", crit=", crit, "\n"))
+          if(val > crit) {
+            # no collision: stay at preferred location. Exit.
+            return(list(x=preference))
+          }
+        # collision occurred! 
+        }
       }
-      # collision occurred!
+      # collision occurred! 
     }
     # find location of max
     locmax <- which(D$v == max(D), arr.ind=TRUE)

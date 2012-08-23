@@ -6,10 +6,15 @@ Creates an instance of the Soft Core point process model
 which can then be fitted to point pattern data.
 }
 \usage{
-  Softcore(kappa)
+  Softcore(kappa, sigma0=NA)
 }
 \arguments{
-  \item{kappa}{The exponent \eqn{\kappa}{kappa} of the Soft Core interaction}
+  \item{kappa}{The exponent \eqn{\kappa}{kappa} of the Soft Core
+    interaction}
+  \item{sigma0}{
+    Optional. Initial estimate of the parameter \eqn{\sigma}{sigma}.
+    A positive number.
+  }
 }
 \value{
   An object of class \code{"interact"}
@@ -75,7 +80,7 @@ which can then be fitted to point pattern data.
   The appropriate description of the Soft Core process pairwise interaction is
   yielded by the function \code{Softcore()}. See the examples below.
  
-  Note the only argument is the exponent  \code{kappa}.
+  The main argument is the exponent  \code{kappa}.
   When \code{kappa} is fixed, the model becomes an exponential family
   with canonical parameters \eqn{\log \beta}{log(beta)}
   and \deqn{
@@ -85,6 +90,11 @@ which can then be fitted to point pattern data.
   }
   The canonical parameters are estimated by \code{\link{ppm}()}, not fixed in
   \code{Softcore()}. 
+
+  The optional argument \code{sigma0} can be used to improve
+  numerical stability. If \code{sigma0} is given, it should be a positive
+  number, and it should be a rough estimate of the
+  parameter \eqn{\sigma}{sigma}. 
 }
 \seealso{
   \code{\link{ppm}},

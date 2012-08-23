@@ -1276,16 +1276,20 @@ local({
 
 # tests/triplets.R
 # test code for triplet interaction
-# $Revision: 1.3 $ $Date: 2011/12/05 07:29:16 $
+# $Revision: 1.4 $ $Date: 2012/07/12 02:43:32 $
 require(spatstat)
 local({
   fit <- ppm(redwood, ~1, Triplets(0.1))
   fit
   suffstat(fit)
-  # hard core
-  fithard <- ppm(cells, ~1, Triplets(0.05))
-  fithard
-  suffstat(fithard)
+  # hard core (zero triangles, coefficient is NA)
+  fit0 <- ppm(cells, ~1, Triplets(0.05))
+  fit0
+  suffstat(fit0)
+  # bug case (1 triangle in data)
+  fit1 <- ppm(cells, ~1, Triplets(0.15))
+  fit1
+  suffstat(fit1)
 })
 #
 #     tests/project.ppm.R
@@ -1359,3 +1363,42 @@ local({
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'vectorclip' ")
 
 })
+# tests/windows.R
+# Tests of owin geometry code
+
+require(spatstat)
+local({
+  spatstat.options(gpclib=TRUE)
+  # Ege Rubak spotted this problem in 1.28-1
+  A <- as.owin(ants)
+  B <- dilation(A, 140)
+  if(!is.subset.owin(A, B))
+    stop("is.subset.owin fails in polygonal case")
+  spatstat.options(gpclib=FALSE)
+})
+
+#
+# test addvar options
+#
+
+X <-  rpoispp(function(x,y){exp(3+3*x)})
+model <- ppm(X, ~y)
+addvar(model, "x", crosscheck=TRUE)
+addvar(model, "x", bw.input="quad")
+w <- square(0.5)
+addvar(model, "x", subregion=w)
+addvar(model, "x", subregion=w, bw.input="points")
+# additional test of parres
+X <-  rpoispp(function(x,y){exp(3+x+2*x^2)})
+model <- ppm(X, ~x+y)
+
+# options in parres
+parres(model, "x")
+parres(model, "x", bw.input="quad")
+w <- square(0.5)
+parres(model, "x", subregion=w)
+parres(model, "x", subregion=w, bw.input="quad")
+
+# check whether 'update.ppm' has messed up internals
+mod2 <- update(model, ~x)
+parres(mod2, "x")

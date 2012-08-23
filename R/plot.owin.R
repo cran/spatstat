@@ -16,7 +16,7 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
 # Function plot.owin.  A method for plot.
 #
   if(missing(main))
-    main <- deparse(substitute(x))
+    main <- short.deparse(substitute(x))
   W <- x
   verifyclass(W, "owin")
   if(missing(box))

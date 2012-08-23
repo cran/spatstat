@@ -9,7 +9,7 @@
   using different parameters.
 }
 \usage{
-\method{envelope}{envelope}(Y, fun = NULL, ...)
+\method{envelope}{envelope}(Y, fun = NULL, ..., global=FALSE, VARIANCE=FALSE)
 }
 \arguments{
   \item{Y}{
@@ -18,7 +18,7 @@
   \item{fun}{
     Optional. Summary function to be applied to the simulated point patterns.
   }
-  \item{\dots}{
+  \item{\dots,global,VARIANCE}{
     Parameters controlling the type of envelope that is re-computed. 
     See \code{\link{envelope}}.
   }

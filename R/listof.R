@@ -41,7 +41,7 @@ as.listof <- function(x) {
 }
 
 contour.listof <- function(x, ...) {
-  xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  xname <- short.deparse(substitute(x))
   do.call("plot.listof",
           resolve.defaults(list(x=x, plotcommand="contour"),
                            list(...),
@@ -49,7 +49,7 @@ contour.listof <- function(x, ...) {
 }
 
 image.listof <- function(x, ..., equal.ribbon = FALSE) {
-  xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  xname <- short.deparse(substitute(x))
   if(equal.ribbon) {
     dotargs <- list(...)
     # all panels will be coded using the same colour map

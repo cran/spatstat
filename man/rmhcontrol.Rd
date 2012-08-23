@@ -11,7 +11,8 @@
 
    \method{rmhcontrol}{default}(\dots, p=0.9, q=0.5, nrep=5e5,
                       expand=NULL, periodic=NULL, ptypes=NULL,
-                      x.cond=NULL, fixall=FALSE, nverb=0)
+                      x.cond=NULL, fixall=FALSE, nverb=0,
+                      nsave=NULL, nburn=nsave, track=FALSE)
 }
 \arguments{
   \item{\dots}{Arguments passed to methods.}
@@ -43,6 +44,16 @@
     whether to fix the number of points of each type.}
   \item{nverb}{Progress reports will be printed every \code{nverb}
     iterations}
+  \item{nsave,nburn}{
+    If these values are specified, then
+    intermediate states of the simulation algorithm will be saved
+    every \code{nsave} iterations, after an initial burn-in period of
+    \code{nburn} iterations.
+  }
+  \item{track}{
+    Logical flag indicating whether to save the transition
+    history of the simulations.
+  }
 }
 
 \value{
@@ -188,6 +199,17 @@
       (which consist simply of the number of repetitions completed)
       should be printed out.  If nverb is left at 0, the default,
       the simulation proceeds silently.
+    }
+    \item{nsave,nburn}{If these integers are given, then the
+      current state of the simulation algorithm (i.e. the current
+      random point pattern) will be saved every \code{nsave} iterations,
+      starting from iteration \code{nburn}. 
+    }
+    \item{track}{
+      Logical flag indicating whether to save the transition
+      history of the simulations (i.e. information specifying
+      what type of proposal was made, and whether it was accepted
+      or rejected, for each iteration).
     }
   }
 }

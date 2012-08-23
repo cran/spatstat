@@ -30,6 +30,10 @@
   but re-expressed in a different unit.
 
   Mark values are unchanged.
+
+  If \code{s} is missing, then the coordinates will be re-expressed
+  in \sQuote{native} units; for example if the current unit is
+  equal to 0.1 metres, then the coordinates will be re-expressed in metres.
 }
 \section{Note}{
   The result of this operation is equivalent to the original segment pattern.
@@ -50,6 +54,10 @@
    # data are in km
    # convert to metres
    rescale(X, 1/1000)
+   X
+   # rename unit
+   unitname(X) <- c("metre", "metres")
+   X
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

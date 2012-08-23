@@ -5,7 +5,7 @@
 #
 
 fryplot <- function(X, ..., width=NULL, from=NULL, to=NULL) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   X <- as.ppp(X)
   n <- npoints(X)
   ismarked <- is.marked(X)

@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.45 $   $Date: 2012/02/14 07:47:03 $
+#    $Revision: 4.46 $   $Date: 2012/08/20 03:46:16 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -58,15 +58,17 @@
 
 
 "runifpoint" <-
-  function(n, win=owin(c(0,1),c(0,1)), giveup=1000)
+  function(n, win=owin(c(0,1),c(0,1)), giveup=1000, warn=TRUE)
 {
     win <- as.owin(win)
     if(n == 0)
       return(ppp(numeric(0), numeric(0), window=win))
-    
-    nhuge <- spatstat.options("huge.npoints")
-    if(n > nhuge)
-      warning(paste("Attempting to generate", n, "random points"))
+
+    if(warn) {
+      nhuge <- spatstat.options("huge.npoints")
+      if(n > nhuge)
+        warning(paste("Attempting to generate", n, "random points"))
+    }
 
     switch(win$type,
            rectangle = {

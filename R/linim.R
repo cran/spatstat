@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.4 $   $Date: 2011/07/21 09:19:09 $
+#  $Revision: 1.5 $   $Date: 2012/07/17 06:36:34 $
 #
 #  Image/function on a linear network
 #
@@ -52,11 +52,14 @@ print.linim <- function(x, ...) {
 }
 
 plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   style <- match.arg(style)
   # colour style: plot as pixel image
   if(style == "colour")
-    return(plot.im(x, ...))
+    return(do.call("plot.im",
+                   resolve.defaults(list(x),
+                                    list(...),
+                                    list(main=xname))))
   # width style
   L <- attr(x, "L")
   df <- attr(x, "df")

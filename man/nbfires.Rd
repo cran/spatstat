@@ -1,6 +1,6 @@
 \name{nbfires}
 \alias{nbfires}
-\alias{nbextras}
+\alias{nbfires.extra}
 \alias{nbw.rect}
 \docType{data}
 \title{Point Patterns of New Brunswick Forest Fires}
@@ -12,8 +12,8 @@ under their jurisdiction for the years 1987 to 2003 inclusive
 }
 \usage{data(nbfires)}
 \format{
-Executing \code{data(nbfires)} creates two objects: \code{nbfires}
-and \code{nbw.rect}.
+Executing \code{data(nbfires)} gives access to three objects: \code{nbfires},
+\code{nbfires.extra} and \code{nbw.rect}.
 
 The object \code{nbfires} is a marked point pattern (an object of
 class \code{"ppp"}) consisting of all of the fires in the years
@@ -26,6 +26,9 @@ The object \code{nbw.rect} is a rectangular window which covers
 central New Brunswick.  It is provided for use in illustrative and
 \sQuote{practice} calculations inasmuch as the use of a rectangular
 window simplifies some computations considerably.
+
+For conformity with other datasets, \code{nbfires.extra} is also
+provided. It is a list containing just the window \code{nbw.rect}.
 }
 \details{
 The coordinates of the fire locations were provided in terms of

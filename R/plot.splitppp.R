@@ -34,7 +34,7 @@ plot.listof <- plot.splitppp <-
                             adorn.right=NULL,
                             adorn.bottom=NULL,
                             adorn.size=0.2) {
-    xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+    xname <- short.deparse(substitute(x))
 
     # `boomerang despatch'
     cl <- match.call()
@@ -102,7 +102,7 @@ plot.listof <- plot.splitppp <-
     else stopifnot(nrows * ncols >= length(x))
     nblank <- ncols * nrows - n
     # determine approximate relative dimensions for equal scale plots
-    boxes <- try(lapply(x, as.rectangle))
+    boxes <- try(lapply(x, as.rectangle), silent=TRUE)
     sizes.known <- !inherits(boxes, "try-error")
     # set up layout
     mat <- matrix(c(seq_len(n), rep(0, nblank)),

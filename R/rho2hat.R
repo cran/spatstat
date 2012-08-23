@@ -7,9 +7,9 @@
 #
 
 rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
-  cov1name <- deparse(substitute(cov1))
-  cov2name <- deparse(substitute(cov2))
-  callstring <- paste(deparse(sys.call()), collapse = "")
+  cov1name <- short.deparse(substitute(cov1))
+  cov2name <- short.deparse(substitute(cov2))
+  callstring <- short.deparse(sys.call())
   method <- match.arg(method)
   # validate model
   if(is.ppp(object) || inherits(object, "quad")) {
@@ -159,7 +159,7 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
 }
 
 plot.rho2hat <- function(x, ..., do.points=FALSE) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   s <- attr(x, "stuff")
   # resolve "..." arguments
   rd <- resolve.defaults(list(...),

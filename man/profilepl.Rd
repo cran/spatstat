@@ -143,11 +143,9 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
     }
 
     # multitype pattern with a common interaction radius
-    data(betacells)
-    s <- data.frame(R=seq(65,85,by=5))
-    \testonly{ s <- data.frame(R=seq(65,85,by=10)) }
+    s <- data.frame(R=seq(0.03,0.05,by=0.01))
     MS <- function(R) { MultiStrauss(radii=diag(c(R,R))) }
-    pm <- profilepl(s, MS, betacells, ~marks)
+    pm <- profilepl(s, MS, amacrine, ~marks)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

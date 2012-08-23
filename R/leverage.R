@@ -13,7 +13,7 @@ leverage <- function(model, ...) {
 leverage.ppm <- function(model, ...,
                          drop=FALSE, iScore=NULL, iHessian=NULL, iArgs=list())
 {
-  fitname <- deparse(substitute(model))
+  fitname <- short.deparse(substitute(model))
   u <- list(fit=model, fitname=fitname)
   s <- ppm.influence(model, what="leverage", drop=drop,
                          iScore=iScore, iHessian=iHessian, iArgs=iArgs,
@@ -26,7 +26,7 @@ leverage.ppm <- function(model, ...,
 influence.ppm <- function(model, ...,
                           drop=FALSE, iScore=NULL, iHessian=NULL, iArgs=list())
 {
-  fitname <- deparse(substitute(model))
+  fitname <- short.deparse(substitute(model))
   u <- list(fit=model,fitname=fitname)
   s <- ppm.influence(model, what="influence", drop=drop,
                          iScore=iScore, iHessian=iHessian, iArgs=iArgs,
@@ -37,7 +37,7 @@ influence.ppm <- function(model, ...,
 }
 
 dfbetas.ppm <- function(model, ..., drop=FALSE, iScore=NULL, iHessian=NULL, iArgs=list()) {
-  fitname <- deparse(substitute(model))
+  fitname <- short.deparse(substitute(model))
   u <- list(fit=model,fitname=fitname)
   s <- ppm.influence(model, what="dfbetas", drop=drop,
                          iScore=iScore, iHessian=iHessian, iArgs=iArgs,

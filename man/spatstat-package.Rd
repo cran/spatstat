@@ -248,6 +248,7 @@
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
 	\code{\link{lansing}} \tab Lansing Woods data \cr
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
+	\code{\link{mucosa}} \tab Cells in gastric mucosa \cr
 	\code{\link{murchison}} \tab Murchison gold deposits \cr
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
@@ -259,7 +260,7 @@
 	\code{\link{shapley}} \tab Galaxies in an astronomical survey \cr
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
-	\code{\link{swedishpines}} \tab Strand-Ripley swedish pines data \cr
+	\code{\link{swedishpines}} \tab Strand-Ripley Swedish pines data \cr
 	\code{\link{urkiola}} \tab Urkiola Woods data
       }
 
@@ -677,7 +678,8 @@
   \tabular{ll}{
     \code{\link{nnclean}} \tab Byers-Raftery feature detection  \cr
     \code{\link{sharpen.ppp}} \tab Choi-Hall data sharpening \cr
-    \code{\link{rhohat}} \tab Smoothing estimate of covariate effect
+    \code{\link{rhohat}} \tab Kernel estimate of covariate effect\cr
+    \code{\link{rho2hat}} \tab Kernel estimate of covariate effect
   }
 
   \bold{Summary statistics for a point pattern:}
@@ -1318,11 +1320,24 @@
       \code{\link{dfbetas.ppm}} \tab Parameter influence\cr
     }
   
+  \bold{Diagnostics for covariate effect:}
+
+  Classical diagnostics for covariate effects have been adapted to
+  point process models.
+
+  \tabular{ll}{
+    \code{\link{parres}} \tab Partial residual plot\cr
+    \code{\link{addvar}} \tab Added variable plot \cr
+    \code{\link{rhohat}} \tab Kernel estimate of covariate effect\cr
+    \code{\link{rho2hat}} \tab Kernel estimate of covariate effect
+    (bivariate) 
+  }
+  
   \bold{Residual diagnostics:}
   
   Residuals for a fitted point process model, and diagnostic plots
-  based on the residuals, were introduced in Baddeley et al (2005)
-  and Baddeley, Rubak and Moller (2011).  
+  based on the residuals, were introduced in Baddeley et al (2005) and
+  Baddeley, Rubak and Moller (2011).
   
   Type \code{demo(diagnose)}
   for a demonstration of the diagnostics features.
@@ -1338,7 +1353,8 @@
     \code{\link{psst}} \tab pseudoscore residual of summary function \cr
     \code{\link{psstA}} \tab pseudoscore residual of empty space function \cr
     \code{\link{psstG}} \tab pseudoscore residual of \eqn{G} function \cr
-    \code{\link{compareFit}} \tab compare compensators of several fitted models
+    \code{\link{compareFit}} \tab compare compensators of several fitted
+    models
   }
 
 
@@ -1441,6 +1457,7 @@
   Ang Qi Wei,
   Sandro Azaele,
   Colin Beale,
+  Thomas Bendtsen,
   Ricardo Bernhardt,
   Brad Biggerstaff,
   Roger Bivand,

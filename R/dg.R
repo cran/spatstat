@@ -117,6 +117,17 @@ DiggleGratton <- local({
          answer <- diggraterms(U, X, idU, idX, delta, rho)
          answer <- log(pmax(0, answer))
          return(matrix(answer, ncol=1))
+       },
+       Mayer=function(coeffs, self) {
+         # second Mayer cluster integral
+         rho   <- self$par$rho
+         delta <- self$par$delta
+         width <- rho - delta
+         kappa <- coeffs[1]
+         ans <- pi * (rho^2
+                      - 2 * rho* width/(kappa + 1)
+                      + 2 * width^2/((kappa + 1) * (kappa + 2)))
+         return(ans)
        }
   )
   class(BlankDG) <- "interact"

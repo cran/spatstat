@@ -3,13 +3,13 @@
 #
 # 'exact' MPLE for stationary Strauss process
 #
-#  $Revision: 1.3 $  $Date: 2012/05/31 05:57:50 $
+#  $Revision: 1.5 $  $Date: 2012/07/13 09:12:41 $
 #
 
 exactMPLEstrauss <- local({
 
   # main function
-  exactMPLEstrauss <- function(X, R, ngrid=2048, plotit=FALSE) {
+  exactMPLEstrauss <- function(X, R, ngrid=2048, plotit=FALSE, project=TRUE) {
     n <- npoints(X)
     W <- as.owin(X)
     # border correction
@@ -28,11 +28,12 @@ exactMPLEstrauss <- local({
     # find optimal log(gamma)
     op <- optim(log(0.5), lpl, sco, method="L-BFGS-B",
                 control=list(fnscale=-1),
-                lower=-Inf, upper=0, A=A, sumT=sumT, nR=nR)
+                lower=-Inf, upper=if(project) 0 else Inf,
+                A=A, sumT=sumT, nR=nR)
     loggamma <- op$par
     # plot?
     if(plotit) {
-      x <- seq(log(1e-4), 0, length=512)
+      x <- seq(log(1e-4), if(project) 0 else log(1e4), length=512)
       plot(x, lpl(x, A, sumT, nR),
            type="l",
            xlab=expression(log(gamma)),

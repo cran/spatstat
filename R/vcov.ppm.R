@@ -851,7 +851,7 @@ contrastmatrix <- function(x,p){
 
 
 checksolve <- function(M, action, descrip, target="") {
-  Mname <- deparse(substitute(M))
+  Mname <- short.deparse(substitute(M))
   Minv <- try(solve(M), silent=(action=="silent"))
   if(!inherits(Minv, "try-error"))
     return(Minv)

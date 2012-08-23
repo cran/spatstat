@@ -1,7 +1,7 @@
 #
 #   pcfmulti.inhom.R
 #
-#   $Revision: 1.4 $   $Date: 2011/05/18 08:17:52 $
+#   $Revision: 1.5 $   $Date: 2012/08/22 01:43:47 $
 #
 #   inhomogeneous multitype pair correlation functions
 #
@@ -270,7 +270,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
   corrxns <- rev(nama2[nama2 != "r"])
 
   # default is to display them all
-  attr(out, "fmla") <- deparse(as.formula(paste(
+  formula(out) <- deparse(as.formula(paste(
                        "cbind(",
                         paste(corrxns, collapse=","),
                         ") ~ r")))

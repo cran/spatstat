@@ -1,7 +1,7 @@
 #
 #	Kscaled.R	Estimation of K function for locally-scaled process
 #
-#	$Revision: 1.4 $	$Date: 2010/11/25 04:34:38 $
+#	$Revision: 1.5 $	$Date: 2012/08/22 01:41:16 $
 #
 
 "Lscaled" <- function(...) {
@@ -136,7 +136,7 @@
                  "iso")
   }
   # default plot will display all edge corrections
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   nama <- rev(colnames(K))
   fvnames(K, ".") <- nama[!(nama %in% c("r", "rip", "ls"))]
   #

@@ -18,8 +18,8 @@ bermantest.ppp <-
            which=c("Z1", "Z2"),
            alternative=c("two.sided", "less", "greater"),
            ...) {
-    Xname <- deparse(substitute(X))
-    covname <- deparse(substitute(covariate))
+    Xname <- short.deparse(substitute(X))
+    covname <- short.deparse(substitute(covariate))
     which <- match.arg(which)
     alternative <- match.arg(alternative)
 
@@ -34,8 +34,8 @@ bermantest.ppm <- function(model, covariate,
                            which=c("Z1", "Z2"),
                            alternative=c("two.sided", "less", "greater"),
                            ...) {
-  modelname <- deparse(substitute(model))
-  covname <- deparse(substitute(covariate))
+  modelname <- short.deparse(substitute(model))
+  covname <- short.deparse(substitute(covariate))
   verifyclass(model, "ppm")
   which <- match.arg(which)
   alternative <- match.arg(alternative)
@@ -56,9 +56,9 @@ bermantestEngine <- function(model, covariate,
 
   
   if(missing(modelname))
-    modelname <- if(csr) "CSR" else deparse(substitute(model))
+    modelname <- if(csr) "CSR" else short.deparse(substitute(model))
   if(missing(covname))
-    covname <- deparse(substitute(covariate))
+    covname <- short.deparse(substitute(covariate))
   if(missing(dataname))
     dataname <- paste(model$call[[2]])
 

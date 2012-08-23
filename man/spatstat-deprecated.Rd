@@ -1,4 +1,5 @@
 \name{spatstat-deprecated}
+\alias{clf.test}
 \alias{conspire}
 \alias{eval.hyper}
 \alias{ksmooth.ppp}
@@ -11,6 +12,7 @@
   Deprecated spatstat functions.
 }
 \usage{
+clf.test(\dots)
 conspire(\dots)
 ksmooth.ppp(x, sigma, \dots, edge=TRUE)
 ks.test.ppm(\dots)
@@ -21,6 +23,8 @@ superimposePSP(\dots, W=NULL, check=TRUE)
 }
 
 \details{
+  \code{clf.test} has been renamed \code{\link{dclf.test}}.
+
   \code{conspire} has been replaced by \code{\link{plot.fv}}.
 
   \code{ksmooth.ppp} has been replaced by \code{\link{density.ppp}}.

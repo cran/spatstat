@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.65 $ $Date: 2011/10/04 10:00:29 $
+#  $Revision: 1.66 $ $Date: 2012/07/31 07:36:18 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -329,7 +329,7 @@ unmark.psp <- function(X) {
 
 plot.psp <- function(x, ..., add=FALSE, which.marks=1,
                      ribbon=TRUE, ribsep=0.15, ribwid=0.05, ribn=1024) {
-  main <- deparse(substitute(x))
+  main <- short.deparse(substitute(x))
   verifyclass(x, "psp")
   #
   n <- nsegments(x)
@@ -345,7 +345,7 @@ plot.psp <- function(x, ..., add=FALSE, which.marks=1,
       do.call.matched("plot.owin", 
                       resolve.defaults(list(x=x$window),
                                        list(...),
-                                       list(main=deparse(substitute(x)))))
+                                       list(main=main)))
     } else {
       # enlarged window with room for colour ribbon
       # x at left, ribbon at right
@@ -578,14 +578,11 @@ print.summary.psp <- function(x, ...) {
                x <- clip.psp(x, window=i)
              },
              index={
-               subset <- i
-               markformat <- markformat(x)
-               x <- as.psp(x$ends[subset, ],
-                           window=x$window,
-                           marks=switch(markformat,
-                             none=NULL,
-                             vector=x$marks[subset],
-                             dataframe=x$marks[subset,]))
+               enz <- x$ends[i, ]
+               win <- x$window
+               marx <- marksubset(x$marks, i, markformat(x))
+               x <- with(enz, psp(x0, y0, x1, y1, window=win, marks=marx,
+                                  check=FALSE))
              })
     }
 

@@ -99,7 +99,7 @@
   # ppp object
   data(simdat)
   \testonly{
-    simdat <- simdat[seq(1,simdat$n, by=4)]
+    simdat <- simdat[seq(1,npoints(simdat), by=4)]
   }
   p <- pcf(simdat)
   plot(p)
@@ -110,13 +110,9 @@
   plot(p2)
 
   # multitype pattern; fasp object
-  data(betacells)
-  \testonly{
-     betacells <- betacells[seq(1,betacells$n, by=10)]
-  }
-  betaK <- alltypes(betacells, "K")
-  betap <- pcf(betaK, spar=1, method="b")
-  plot(betap)
+  amaK <- alltypes(amacrine, "K")
+  amap <- pcf(amaK, spar=1, method="b")
+  plot(amap)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
