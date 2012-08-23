@@ -18,7 +18,7 @@
 
    MH_TRACKING  whether to save transition history
 
-   $Revision: 1.11 $  $Date: 2012/03/27 04:53:58 $ 
+   $Revision: 1.14 $  $Date: 2012/08/20 07:15:08 $ 
 
 */
 
@@ -34,8 +34,12 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
     Rprintf("iteration %d\n", irep);
 #endif
 
-    if(verb && ((irep+1)%algo.nverb == 0))
-      Rprintf("iteration %d\n", irep+1);
+    if(verb) {
+      /* print progress message every nverb iterations */
+      iverb = irep + 1 + algo.nrep0;
+      if((iverb % algo.nverb) == 0)
+	Rprintf("iteration %d\n", iverb);
+    }
 
     itype = REJECT;
 

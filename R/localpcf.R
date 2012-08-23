@@ -1,7 +1,7 @@
 #
 #   localpcf.R
 #
-#  $Revision: 1.16 $  $Date: 2012/04/18 11:28:48 $
+#  $Revision: 1.17 $  $Date: 2012/08/20 02:25:20 $
 #
 #
 
@@ -68,17 +68,10 @@ localpcfengine <- function(X, ...,
   g <- fv(df, "r", quote(localg(r)),
           "theo", , c(0, max(r)), labl, desc, fname="localg")
   # default is to display them all
-  attr(g, "fmla") <- . ~ r
+  formula(g) <- . ~ r
   fvnames(g, ".") <- names(df)[names(df) != "r"]
   unitname(g) <- unitname(X)
-  attr(g, "delta") <- delta  # create fv object
-  g <- fv(df, "r", quote(localg(r)),
-          "theo", , c(0, max(r)), labl, desc, fname="localg")
-  # default is to display them all
-  attr(g, "fmla") <- . ~ r
-  fvnames(g, ".") <- names(df)[names(df) != "r"]
-  unitname(g) <- unitname(X)
-  attr(g, "delta") <- delta
+  attr(g, "delta") <- delta  
   attr(g, "correction") <- "border"
   return(g)
 }
@@ -184,7 +177,7 @@ print.localpcfmatrix <- function(x, ...) {
 }
 
 plot.localpcfmatrix <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   rval <- attr(x, "r")
   do.call("matplot",
           resolve.defaults(list(rval, x),

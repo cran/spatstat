@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.60 $	$Date: 2011/11/01 11:21:45 $
+#	$Revision: 1.61 $	$Date: 2012/08/22 01:39:25 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -278,7 +278,7 @@
     }
 
     # default is to display them all
-    attr(K, "fmla") <- . ~ r
+    formula(K) <- . ~ r
     unitname(K) <- unitname(X)
     return(K)
 }

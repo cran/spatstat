@@ -25,7 +25,7 @@
 
 iplot <- function(x, xname) {
   if(missing(xname))
-    xname <- deparse(substitute(x))
+    xname <- short.deparse(substitute(x))
   verifyclass(x, "ppp")
   if(markformat(x) == "dataframe")
 	marks(x) <- marks(x)[,1]

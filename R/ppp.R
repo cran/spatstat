@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.82 $	$Date: 2012/04/29 07:44:57 $
+#	$Revision: 4.83 $	$Date: 2012/08/13 07:33:21 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -164,17 +164,17 @@ as.ppp.data.frame <- function(X, W = NULL, ..., fatal=TRUE) {
   if(is.null(W))
     return(complaining("x,y coords given but no window specified",
                        fatal, value=NULL))
-    
+
+  # columns 1 and 2 are assumed to be coordinates
+  # marks from other columns
+  marx <- if(ncol(X) > 2) X[, -(1:2)] else NULL
+
   if(is.function(W))
-    Z <- cobble.xy(X[,1], X[,2], W, fatal)
+    Z <- cobble.xy(X[,1], X[,2], W, fatal, marks=marx, check=check)
   else {
     win <- as.owin(W)
-    Z <- ppp(X[,1], X[,2], window = win, check=check)
+    Z <- ppp(X[,1], X[,2], window = win, marks=marx, check=check)
   }
-
-  # add marks from other columns
-  if(ncol(X) > 2)
-    marks(Z) <- X[, -(1:2)]
 
   return(Z)
 }
@@ -266,7 +266,7 @@ as.ppp.default <- function(X, W=NULL, ..., fatal=TRUE) {
         }
 }
 
-cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
+cobble.xy <- function(x, y, f=ripras, fatal=TRUE, ...) {
   if(!is.function(f))
     stop("f is not a function")
   w <- f(x,y)
@@ -279,7 +279,7 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE) {
       return(NULL)
     }
   }
-  return(ppp(x, y, window=w))
+  return(ppp(x, y, window=w, ...))
 }
   
 

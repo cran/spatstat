@@ -2,7 +2,7 @@ amacrine
 anemones
 ants: ants ants.extra
 bei: bei bei.extra
-betacells: betacells betacells.extra
+betacells
 bramblecanes
 bronzefilter
 cells
@@ -21,8 +21,9 @@ japanesepines
 lansing
 letterR
 longleaf
+mucosa: mucosa mucosa.subwin
 murchison
-nbfires: nbfires nbw.rect
+nbfires: nbfires nbfires.extra nbw.rect
 nztrees
 osteo
 ponderosa: ponderosa ponderosa.extra

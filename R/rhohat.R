@@ -14,7 +14,7 @@ rhohat <- function(object, covariate, ...,
                    dimyx=NULL, eps=NULL,
                    n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
                    bwref=bw, covname, confidence=0.95) {
-  callstring <- paste(deparse(sys.call()), collapse = "")
+  callstring <- short.deparse(sys.call())
   smoother <- match.arg(smoother)
   if(smoother == "local" && !require(locfit, quietly=TRUE)) {
     warning(paste("in", dQuote(callstring), ":",
@@ -25,7 +25,7 @@ rhohat <- function(object, covariate, ...,
     smoother <- "kernel"
   }
   if(missing(covname)) 
-    covname <- sensiblevarname(deparse(substitute(covariate)), "X")
+    covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
   # trap superseded usage
   argh <- list(...)
   if(missing(method) && ("transform" %in% names(argh))) {
@@ -308,7 +308,7 @@ print.rhohat <- function(x, ...) {
 }
 
 plot.rhohat <- function(x, ..., do.rug=TRUE) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   s <- attr(x, "stuff")
   covname <- s$covname
   asked.rug <- !missing(do.rug) && identical(rug, TRUE)

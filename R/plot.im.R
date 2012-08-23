@@ -46,7 +46,7 @@ plot.im <- local({
                      ribbon=TRUE, ribside=c("right", "left", "bottom", "top"),
                      ribsep=0.15, ribwid=0.05, ribn=1024,
                      ribscale=1, ribargs=list()) {
-    main <- deparse(substitute(x))
+    main <- short.deparse(substitute(x))
     verifyclass(x, "im")
     dotargs <- list(...)
     stopifnot(is.list(ribargs))

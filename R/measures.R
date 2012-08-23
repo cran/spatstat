@@ -122,7 +122,7 @@ print.msr <- function(x, ...) {
 }
 
 plot.msr <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   d <- ncol(as.matrix(x$val))  
   if(d == 1) {
     smo <- smooth.ppp(x$loc %mark% x$density, sigma=max(nndist(x$loc)), ...)

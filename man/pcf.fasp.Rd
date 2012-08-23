@@ -126,15 +126,10 @@
 }
 \examples{
   # multitype point pattern
-  data(betacells)
-  \testonly{
-     betacells <- betacells[seq(1,betacells$n, by=10)]
-  }
-  KK <- alltypes(betacells, "K")
+  KK <- alltypes(amacrine, "K")
   p <- pcf.fasp(KK, spar=0.5, method="b")
   plot(p)
-  # short range inhibition between all types
-  # strong inhibition between "on" and "off"
+  # strong inhibition between points of the same type
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

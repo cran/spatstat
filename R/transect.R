@@ -9,7 +9,7 @@
 transect.im <- local({
 
   specify.location <- function(loc, rect) {
-    lname <- deparse(substitute(loc))
+    lname <- short.deparse(substitute(loc))
     if(is.numeric(loc) || is.list(loc))
       return(xy.coords(loc))
     if(!(is.character(loc) && length(loc) == 1))
@@ -36,7 +36,7 @@ transect.im <- local({
   transect.im <- 
     function(X, ..., from="bottomleft", to="topright",
              click=FALSE, add=FALSE) {
-      Xname <- deparse(substitute(X), width.cutoff=20, nlines=1)
+      Xname <- short.deparse(substitute(X))
       Xname <- sensiblevarname(Xname, "X")
       stopifnot(is.im(X))
       # determine transect position

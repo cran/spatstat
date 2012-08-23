@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.142 $	$Date: 2012/05/09 10:45:54 $
+#	$Revision: 5.143 $	$Date: 2012/07/09 04:52:12 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -44,7 +44,8 @@ function(Q,
          precomputed=NULL,
          savecomputed=FALSE,
          preponly=FALSE,
-         rename.intercept=TRUE
+         rename.intercept=TRUE,
+         justQ = FALSE
 ) {
 #
 # Extract precomputed data if available
@@ -75,6 +76,9 @@ function(Q,
     P <- union.quad(Q)
 
   }
+#
+# secret exit  
+  if(justQ) return(Q)
 #
 #  
   computed <- if(savecomputed) list(X=X, Q=Q, U=P) else NULL
@@ -108,7 +112,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/05/09 10:45:54 $")
+                    date="$Date: 2012/07/09 04:52:12 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -604,8 +608,8 @@ return(list(fmla=fmla, trendfmla=trendfmla,
 
 mpl.get.covariates <- function(covariates, locations, type="locations",
                                covfunargs=list()) {
-  covargname <- sQuote(deparse(substitute(covariates)))
-  locargname <- sQuote(deparse(substitute(locations)))
+  covargname <- sQuote(short.deparse(substitute(covariates)))
+  locargname <- sQuote(short.deparse(substitute(locations)))
   if(is.null(covfunargs)) covfunargs <- list()
   #
   x <- locations$x

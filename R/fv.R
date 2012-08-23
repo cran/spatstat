@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.87 $   $Date: 2012/04/07 04:11:40 $
+#    $Revision: 1.90 $   $Date: 2012/08/22 01:37:14 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -27,6 +27,9 @@
 #         desc       longer description for each column 
 #
 #         unitname   name of unit of length for 'r'
+#
+#         shade      (optional) column names of upper & lower limits
+#                    of shading - typically a confidence interval
 #
 #    Objects of this class are returned by Kest(), etc
 #
@@ -54,11 +57,12 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
     stop(paste(sQuote("valu"), "must be the name of a column of x"))
 
   if(is.null(fmla))
-    fmla <- as.formula(paste(valu, "~", argu))
-  else if(!inherits(fmla, "formula") && !is.character(fmla))
+    fmla <- paste(valu, "~", argu)
+  else if(inherits(fmla, "formula")) {
+    # convert formula to string
+    fmla <- deparse(fmla)
+  } else if(!is.character(fmla))
     stop(paste(sQuote("fmla"), "should be a formula or a string"))
-  # convert to string
-  fmla <- deparse(fmla)
 
   if(is.null(alim)) {
     argue <- x[[argu]]
@@ -91,6 +95,7 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   attr(x, "units") <- as.units(unitname)
   attr(x, "fname") <- fname
   attr(x, "dotnames") <- NULL
+  attr(x, "shade") <- NULL
   # 
   class(x) <- c("fv", class(x))
   return(x)
@@ -107,7 +112,8 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
                         "desc",
                         "units",
                         "fname",
-                        "dotnames")
+                        "dotnames",
+                        "shade")
 
 as.data.frame.fv <- function(x, ...) {
   stopifnot(is.fv(x))
@@ -179,8 +185,12 @@ print.fv <- function(x, ...) {
               labl[j],pad(labjump - lablen[j]),
               desc[j],"\n", sep=""))
   cat("--------------------------------------\n\n")
-  cat("Default plot formula:\n\t")
-  print.formula(as.formula(a$fmla))
+  cat(paste("Default plot formula:\t",
+            deparse(as.formula(a$fmla)),
+            "\n"))
+  if(!is.null(a$shade)) 
+    cat(paste("\nColumns", commasep(sQuote(a$shade)),
+              "will be plotted as shading (by default)\n"))
   alim <- signif(a$alim, 5)
   rang <- signif(range(with(x, .x)), 5)
   cat(paste("\nRecommended range of argument ", a$argu,
@@ -198,6 +208,7 @@ print.fv <- function(x, ...) {
 .Spatstat.FvAbbrev <- c(
                         ".x",
                         ".y",
+                        ".s",
                         ".",
                         "*")
 
@@ -211,6 +222,9 @@ fvnames <- function(X, a=".") {
          },
          ".x"={
            return(attr(X, "argu"))
+         },
+         ".s"={
+           return(attr(X, "shade"))
          },
          "." = {
            # The specified 'dotnames'
@@ -251,6 +265,10 @@ fvnames <- function(X, a=".") {
            if(!is.character(value) || length(value) != 1)
              stop("value should be a single string")
          },
+         ".s"={
+           if(!is.character(value) || length(value) != 2)
+             stop("value should be a vector of 2 character strings")
+         },
          "."={
            if(!is.character(value))
              stop("value should be a character vector")
@@ -272,6 +290,9 @@ fvnames <- function(X, a=".") {
          },
          ".y"={
            attr(X, "valu") <- value
+         },
+         ".s"={
+           attr(X, "shade") <- value
          },
          "."={
            attr(X, "dotnames") <- value
@@ -299,10 +320,7 @@ fvlabels <- function(x, expand=FALSE) {
 }
 
 
-fvlabelmap <- function(x, dot=TRUE) {
-  labl <- fvlabels(x, expand=TRUE)
-  # construct mapping from identifiers to labels
-  map <- as.list(labl)
+fvlabelmap <- local({
   magic <- function(x) {
     subx <- paste("substitute(", x, ", NULL)")
     out <- try(eval(parse(text=subx)), silent=TRUE)
@@ -310,21 +328,32 @@ fvlabelmap <- function(x, dot=TRUE) {
       out <- as.name(make.names(subx))
     out
   }
-  map <- lapply(map, magic)
-  names(map) <- colnames(x)
-  if(dot) {
-    # also map "." to name of target function
-    if(!is.null(ye <- attr(x, "yexp")))
-      map <- append(map, list("."=ye))
-    # map other fvnames to their corresponding labels
-    map <- append(map, list(".x"=map[[fvnames(x, ".x")]],
-                            ".y"=map[[fvnames(x, ".y")]]))
+
+  fvlabelmap <- function(x, dot=TRUE) {
+    labl <- fvlabels(x, expand=TRUE)
+    # construct mapping from identifiers to labels
+    map <- as.list(labl)
+    map <- lapply(map, magic)
+    names(map) <- colnames(x)
+    if(dot) {
+      # also map "." to name of target function
+      if(!is.null(ye <- attr(x, "yexp")))
+        map <- append(map, list("."=ye))
+      # map other fvnames to their corresponding labels
+      map <- append(map, list(".x"=map[[fvnames(x, ".x")]],
+                              ".y"=map[[fvnames(x, ".y")]]))
+      if(!is.null(fvnames(x, ".s"))) {
+        shex <- unname(map[fvnames(x, ".s")])
+        shadexpr <- substitute(c(A,B), list(A=shex[[1]], B=shex[[2]]))
+        map <- append(map, list(".s" = shadexpr))
+      }
+    }
+    return(map)
   }
-#    # alternative version of map (vector of expressions)
-#  mapvec <- sapply(as.list(labl), function(x) { parse(text=x) })
-#  names(mapvec) <- colnames(x)
-  return(map)
-}
+
+  fvlabelmap
+})
+
 
 fvlegend <- function(object, elang) {
   # Compute mathematical legend(s) for column(s) in fv object 
@@ -560,7 +589,7 @@ rebadge.fv <- function(x, new.ylab, new.fname,
     attr(x, "valu") <- new.preferred
   }
   if(!missing(new.formula))
-    attr(x, "fmla") <- new.formula
+    formula(x) <- new.formula
   return(x)
 }
 
@@ -614,6 +643,27 @@ rebadge.fv <- function(x, new.ylab, new.fname,
                fname=attr(x,"fname")))
 }  
 
+# method for 'formula'
+
+formula.fv <- function(x, ...) {
+  attr(x, "fmla")
+}
+
+# method for 'formula<-'
+# (generic is defined in formulae.R)
+
+"formula<-.fv" <- function(x, ..., value) {
+  if(is.null(value))
+    value <- paste(fvnames(x, ".y"), "~", fvnames(x, ".x"))
+  else if(inherits(value, "formula")) {
+    # convert formula to string
+    value <- deparse(value)
+  } else if(!is.character(value))
+    stop("Assignment value should be a formula or a string")
+  attr(x, "fmla") <- value
+  return(x)
+}
+
 #   method for with()
 
 with.fv <- function(data, expr, ..., drop=TRUE) {
@@ -627,12 +677,16 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   datanames <- names(data)
   xname <- fvnames(data, ".x")
   yname <- fvnames(data, ".y")
-  dnames <- datanames[datanames %in% fvnames(data, ".")]
-  ud <- as.call(lapply(c("cbind", dnames), as.name))
   ux <- as.name(xname)
   uy <- as.name(yname)
+  dnames <- datanames[datanames %in% fvnames(data, ".")]
+  ud <- as.call(lapply(c("cbind", dnames), as.name))
+  if(!is.null(fvnames(data, ".s"))) {
+    snames <- datanames[datanames %in% fvnames(data, ".s")]
+    us <- as.call(lapply(c("cbind", snames), as.name))
+  } else us <- NULL
   expandelang <- eval(substitute(substitute(ee,
-                                      list(.=ud, .x=ux, .y=uy)),
+                                      list(.=ud, .x=ux, .y=uy, .s=us)),
                            list(ee=elang)))
   evars <- all.vars(expandelang)
   used.dotnames <- evars[evars %in% dnames]
@@ -687,7 +741,7 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   # decide which of the columns should be the preferred value
   newyname <- if(yname %in% resultnames) yname else resultnames[1]
   # construct default plot formula
-  fmla <- as.formula(paste(". ~", xname))
+  fmla <- deparse(as.formula(paste(". ~", xname)))
   dotnames <- resultnames
   # construct description strings
   desc <- character(ncol(results))
@@ -971,7 +1025,7 @@ conform.ratfv <- function(x) {
   stopifnot(inherits(x, "rat"), is.fv(x))
   num <- attr(x, "numerator")
   den <- attr(x, "denominator")
-  attr(num, "fmla") <- attr(den, "fmla") <- attr(x, "fmla")
+  formula(num) <- formula(den) <- formula(x)
   fvnames(num, ".") <- fvnames(den, ".") <- fvnames(x, ".")
   unitname(num)     <- unitname(den)     <- unitname(x)
   attr(x, "numerator") <- num

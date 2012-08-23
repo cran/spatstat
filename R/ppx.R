@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.35 $  $Date: 2012/06/06 10:39:05 $
+#  $Revision: 1.36 $  $Date: 2012/07/17 06:39:34 $
 #
 
 ppx <- local({
@@ -81,7 +81,7 @@ print.ppx <- function(x, ...) {
 summary.ppx <- function(object, ...) { print(object, ...) }
 
 plot.ppx <- function(x, ...) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   coo <- coords(x, local=FALSE)
   dom <- x$domain
   m <- ncol(coo)
@@ -105,10 +105,13 @@ plot.ppx <- function(x, ...) {
                                        list(main=xname),
                                        list(xlab=nama[1], ylab=nama[2])))
     } else {
-      # plot domain, whatever it is
-      do.call("plot", resolve.defaults(list(dom),
+      add <- resolve.defaults(list(...), list(add=FALSE))$add
+      if(!add) {
+        # plot domain, whatever it is
+        do.call("plot", resolve.defaults(list(dom),
                                        list(...),
                                        list(main=xname)))
+      }
       # convert to ppp
       x2 <- ppp(coo[,1], coo[,2], window=as.owin(dom),
                 marks=as.data.frame(marks(x)), check=FALSE)

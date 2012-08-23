@@ -75,15 +75,14 @@ which can then be fitted to point pattern data.
    r <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStrauss(radii=r)
    # prints a sensible description of itself
-   data(betacells)
-   r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiStrauss(, r))
-   # fit the stationary multitype Strauss process to `betacells'
+   r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
+   ppm(amacrine, ~1, MultiStrauss(, r))
+   # fit the stationary multitype Strauss process to `amacrine'
    # Note the comma; needed since "types" is not specified.
 
    \dontrun{
-   ppm(betacells, ~polynom(x,y,3), MultiStrauss(c("off","on"), r))
-   # fit a nonstationary Strauss process with log-cubic polynomial trend
+   ppm(X, ~polynom(x,y,3), MultiStrauss(c("off","on"), r))
+   # fit a nonstationary multitype Strauss process with log-cubic trend
    }
 }
 \section{Warnings}{

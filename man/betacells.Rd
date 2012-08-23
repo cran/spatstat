@@ -1,11 +1,10 @@
 \name{betacells}
 \alias{betacells}
-\alias{betacells.extra}
 \docType{data}
 \title{Beta Ganglion Cells in Cat Retina} 
 \description{
-  Point pattern of cells in the retina, each cell classified as `on' or `off'.
-  A bivariate point pattern.
+  Point pattern of cells in the retina, each cell classified as `on' or
+  `off' and labelled with the cell profile area.
 } 
 \format{
   \code{betacells} is an object of class \code{"ppp"}
@@ -14,15 +13,18 @@
   \tabular{ll}{
     \code{x} \tab Cartesian \eqn{x}-coordinate of cell \cr
     \code{y} \tab Cartesian \eqn{y}-coordinate of cell \cr
-    \code{marks} \tab factor with levels \code{off} and \code{on} \cr
-                 \tab indicating ``off'' and ``on'' cells
+    \code{marks} \tab data frame of marks
   }
-  See \code{\link{ppp.object}} for details of the format.
   Cartesian coordinates are given in microns.
 
-  \code{betacells.extra} is a list with one component \code{area}
-  which is the vector of areas (in square microns) of the cells
-  in the pattern.
+  The data frame of marks has two columns:
+  \tabular{ll}{
+    \code{type} \tab factor with levels \code{off} and \code{on} \cr
+                \tab indicating ``off'' and ``on'' cells\cr
+    \code{area} \tab numeric vector giving the \cr
+		\tab areas of cell profiles (in square microns)
+  }
+  See \code{\link{ppp.object}} for details of the format.
 }
 \usage{data(betacells)}
 \source{
@@ -49,10 +51,11 @@
   in the arrangement of cell mosaics in the retina, see
   Rockhill et al (2000).
 
-  The dataset is a multitype point pattern giving the locations
-  and types (``on'' or ``off'') of beta cells observed
+  The dataset is a marked point pattern giving the locations,
+  types (``on'' or ``off''), and profile areas of beta cells observed
   in a rectangle of dimensions \eqn{750 \times 990}{750 x 990} microns.
-  Coordinates are given in microns (thousandths of a millimetre).
+  Coordinates are given in microns (thousandths of a millimetre)
+  and areas are given in square microns.
   
   The original source is Figure 6 of W\"assle et al (1981),
   which is a manual drawing of the beta mosaic observed
@@ -66,9 +69,7 @@
   body). The \eqn{x,y} location of each cell was taken to be the
   centroid of the soma. The type of each cell (``on'' or `off'')
   was identified by referring to Figures 6(b) and 6(d).
-
-  The area of each soma (in square microns) was also computed,
-  and is provided in the dataset \code{betacells.extra}.
+  The area of each soma (in square microns) was also computed.
 
   Note that this is a corrected version of the \code{\link{ganglia}}  
   dataset provided in earlier versions of \pkg{spatstat}.
@@ -76,12 +77,9 @@
   in the original paper and contain some scanning errors.
 }
 \examples{
-   data(betacells)
    plot(betacells)
-   plot(betacells$window, main="beta cells")
-   symbols(betacells$x, betacells$y,
-       circles=sqrt(betacells.extra$area/pi),
-       inches=FALSE, add=TRUE)
+   area <- marks(betacells)$area
+   plot(betacells \%mark\% sqrt(area/pi), markscale=1)
 }
 \references{
 Hering, E. (1878) Zur Lehre von Lichtsinn. Vienna.

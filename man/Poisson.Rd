@@ -61,9 +61,8 @@ which can then be fitted to point pattern data.
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
 \testonly{
- # equivalent functionality - smaller dataset
- data(betacells)
- ppm(betacells, ~ marks * polynom(x,y,2), Poisson())
+   # equivalent functionality - smaller dataset
+   ppm(amacrine, ~ marks * polynom(x,y,2), Poisson())
 }
 }
 \author{Adrian Baddeley

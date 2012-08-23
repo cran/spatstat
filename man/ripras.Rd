@@ -57,7 +57,7 @@
   likelihood estimate of \eqn{D} is the bounding box of the points
   (computed by \code{\link{bounding.box.xy}}). The Ripley-Rasson
   estimator is a rescaled copy of the bounding box,
-  with scaling factor \eqn{1/sqrt(1 - 4/n)}{1/\sqrt{1 - \frac 4 n}}
+  with scaling factor \eqn{(n+1)/(n-1)}
   where \eqn{n} is the number of data points,
   centred at the centroid of the bounding box.
   The scaling factor may be overridden using the argument \code{f}.

@@ -1,9 +1,9 @@
 #
-# $Id: rmh.default.R,v 1.81 2012/05/30 08:52:43 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.91 2012/08/20 03:49:45 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
-                        verbose=TRUE, track=FALSE, ...) {
+                        verbose=TRUE, ...) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
 # patterns, given the conditional intensity function of the 
@@ -33,8 +33,6 @@ rmh.default <- function(model,start=NULL,
 
   control <- rmhResolveControl(control, model)
   
-  stopifnot(is.logical(track))
-
   # retain "..." arguments unrecognised by rmhcontrol
   # These are assumed to be arguments of functions defining the trend
   argh <- list(...)
@@ -347,12 +345,10 @@ rmh.default <- function(model,start=NULL,
   else {
     ptypes <- control$ptypes
     if(is.null(ptypes)) {
-      # default values
-      ptypes <- switch(start$given,
-                       none = ,
-                       n = rep(1/ntypes,ntypes),
-                       x = table(marks(x.start, dfok=FALSE))/x.start$n
-                       )
+      # default proposal probabilities
+      ptypes <- if(start$given == "x" && (nx <- npoints(x.start)) > 0) {
+        table(marks(x.start, dfok=FALSE))/nx
+      } else rep(1/ntypes, ntypes)
     } else {
       # Validate ptypes
       if(length(ptypes) != ntypes | sum(ptypes) != 1)
@@ -488,7 +484,7 @@ rmh.default <- function(model,start=NULL,
 
   # go
   do.call("rmhEngine",
-          append(list(InfoList, verbose=verbose, track=track, kitchensink=TRUE),
+          append(list(InfoList, verbose=verbose, kitchensink=TRUE),
                  f.args))
 }
 
@@ -524,7 +520,7 @@ print.rmhInfoList <- function(x, ...) {
 # -------------------------------------------------------
 
 rmhEngine <- function(InfoList, ...,
-                       verbose=FALSE, track=FALSE, kitchensink=FALSE,
+                       verbose=FALSE, kitchensink=FALSE,
                        preponly=FALSE) {
 # Internal Use Only!
 # This is the interface to the C code.
@@ -742,6 +738,10 @@ rmhEngine <- function(InfoList, ...,
   fixing  <- control$fixing
   fixall  <- control$fixall
   nverb   <- control$nverb
+  saving  <- control$saving
+  nsave   <- control$nsave
+  nburn   <- control$nburn
+  track   <- control$track
   
   if(verbose)
     cat("Proposal points...")
@@ -752,16 +752,17 @@ rmhEngine <- function(InfoList, ...,
 # Generate the ``proposal points'' in the expanded window.
   xy <-
     if(trendy)
-      rpoint.multi(nrep,trend,tmax,factor(Cmprop, levels=Ctypes),w.sim,...)
+      rpoint.multi(nrep,trend,tmax,
+                   factor(Cmprop, levels=Ctypes),
+                   w.sim, ..., warn=FALSE)
     else
-      runifpoint(nrep,w.sim)
+      runifpoint(nrep, w.sim, warn=FALSE)
   xprop <- xy$x
   yprop <- xy$y
 
   if(verbose)
     cat("Start simulation.\n")
 
-# Call the Metropolis-Hastings simulator:
   storage.mode(ncif)   <- "integer"
   storage.mode(C.id)   <- "character"
   storage.mode(beta)    <- "double"
@@ -780,53 +781,160 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(npts.cond) <- "integer"
   storage.mode(track) <- "integer"
 
-  out <- .Call("xmethas",
-               ncif,
-               C.id,
-               beta,
-               ipar,
-               iparlen,
-               period,
-               xprop, yprop, Cmprop,
-               ntypes, nrep,
-               p, q,
-               nverb,
-               x, y,
-               Cmarks,
-               npts.cond,
-               fixall,
-               track,
-               PACKAGE="spatstat")
+  if(!saving) {
+    # ////////// Single block /////////////////////////////////
+    nrep0 <- 0
+    storage.mode(nrep0)  <- "integer"
+    # Call the Metropolis-Hastings C code:
+    out <- .Call("xmethas",
+                 ncif,
+                 C.id,
+                 beta,
+                 ipar,
+                 iparlen,
+                 period,
+                 xprop, yprop, Cmprop,
+                 ntypes,
+                 nrep,
+                 p, q,
+                 nverb,
+                 nrep0,
+                 x, y, Cmarks,
+                 npts.cond,
+                 fixall,
+                 track,
+                 PACKAGE="spatstat")
   
-  # Extract the point pattern returned from C
+    # Extract the point pattern returned from C
+    X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
+    if(mtype) {
+      # convert integer marks from C to R
+      marx <- factor(out[[3]], levels=0:(ntypes-1))
+      # then restore original type levels
+      levels(marx) <- types
+      # glue to points
+      marks(X) <- marx
+    }
 
-  X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
-  if(mtype) {
-    # convert integer marks from C to R
-    marx <- factor(out[[3]], levels=0:(ntypes-1))
-    # then restore original type levels
-    levels(marx) <- types
-    # glue to points
-    marks(X) <- marx
+    # Now clip the pattern to the ``clipping'' window:
+    if(!control$expand$force.noexp)
+      X <- X[w.clip]
+
+    # Extract transition history:
+    if(track) {
+      usedout <- if(mtype) 3 else 2
+      proptype <- factor(out[[usedout+1]], levels=1:3,
+                         labels=c("Birth", "Death", "Shift"))
+      accepted <- as.logical(out[[usedout+2]])
+      History <- data.frame(proposaltype=proptype, accepted=accepted)
+    }
+  } else {
+    # ////////// Multiple blocks /////////////////////////////////
+    # determine length of each block of simulations
+    nblocks <- as.integer(1 + ceiling((nrep - nburn)/nsave))
+    block <- c(nburn, rep(nsave, nblocks-1))
+    block[nblocks] <- block[nblocks] - (sum(block)-nrep)
+    block <- block[block >= 1]
+    nblocks <- length(block)
+    blockend <- cumsum(block)
+    # set up list to contain the saved point patterns
+    Xlist <- vector(mode="list", length=nblocks)
+    # Call the Metropolis-Hastings C code repeatedly:
+    xprev <- x
+    yprev <- y
+    Cmarksprev <- Cmarks
+    #
+    # ................ loop .........................
+    for(I in 1:nblocks) {
+      # number of iterations for this block
+      nrepI <- block[I]
+      storage.mode(nrepI) <- "integer"
+      # number of previous iterations
+      nrep0 <- if(I == 1) 0 else blockend[I-1]
+      storage.mode(nrep0)  <- "integer"
+      # proposals
+      seqI <- 1:nrepI
+      xpropI <- xprop[seqI]
+      ypropI <- yprop[seqI]
+      CmpropI <- Cmprop[seqI]
+      storage.mode(xpropI) <- storage.mode(ypropI) <- "double"
+      storage.mode(CmpropI) <- "integer"
+      # call
+      out <- .Call("xmethas",
+                   ncif,
+                   C.id,
+                   beta,
+                   ipar,
+                   iparlen,
+                   period,
+                   xpropI, ypropI, CmpropI,
+                   ntypes,
+                   nrepI,
+                   p, q,
+                   nverb,
+                   nrep0,
+                   xprev, yprev, Cmarksprev,
+                   npts.cond,
+                   fixall,
+                   track,
+                   PACKAGE="spatstat")
+      # Extract the point pattern returned from C
+      X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
+      if(mtype) {
+        # convert integer marks from C to R
+        marx <- factor(out[[3]], levels=0:(ntypes-1))
+        # then restore original type levels
+        levels(marx) <- types
+        # glue to points
+        marks(X) <- marx
+      }
+      
+      # Now clip the pattern to the ``clipping'' window:
+      if(!control$expand$force.noexp)
+        X <- X[w.clip]
+
+      # commit to list
+      Xlist[[I]] <- X
+      
+      # Extract transition history:
+      if(track) {
+        usedout <- if(mtype) 3 else 2
+        proptype <- factor(out[[usedout+1]], levels=1:3,
+                           labels=c("Birth", "Death", "Shift"))
+        accepted <- as.logical(out[[usedout+2]])
+        HistoryI <- data.frame(proposaltype=proptype, accepted=accepted)
+        # concatenate with histories of previous blocks
+        History <- if(I == 1) HistoryI else rbind(History, HistoryI)
+      }
+
+      # update 'previous state'
+      xprev <- out[[1]]
+      yprev <- out[[2]]
+      Cmarksprev <- if(!mtype) 0 else out[[3]]
+      storage.mode(xprev) <- storage.mode(yprev) <- "double"
+      storage.mode(Cmarksprev) <- "integer"
+
+      # discard used proposals
+      xprop <- xprop[-seqI]
+      yprop <- yprop[-seqI]
+      Cmprop <- Cmprop[-seqI]
+    }
+    # .............. end loop ...............................
+    
+    # Result of simulation is final state 'X'
+    # Tack on the list of intermediate states
+    names(Xlist) <- paste("Iteration", as.integer(blockend), sep="_")
+    attr(X, "saved") <- as.listof(Xlist)
   }
-
-# Now clip the pattern to the ``clipping'' window:
-  if(!control$expand$force.noexp)
-    X <- X[w.clip]
 
 # Append to the result information about how it was generated.
   if(kitchensink) {
     attr(X, "info") <- InfoList
     attr(X, "seed") <- saved.seed
   }
-  if(track) {
-    # append transition history
-    usedout <- if(mtype) 3 else 2
-    proptype <- factor(out[[usedout+1]], levels=1:3,
-                       labels=c("Birth", "Death", "Shift"))
-    accepted <- as.logical(out[[usedout+2]])
-    attr(X, "history") <- data.frame(proposaltype=proptype, accepted=accepted)
-  }
+  if(track)
+    attr(X, "history") <- History
+  
   return(X)
 }
 

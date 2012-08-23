@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.25 $	$Date: 2012/05/08 08:26:52 $
+#    $Revision: 2.26 $	$Date: 2012/07/13 08:48:43 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -157,7 +157,7 @@ MultiStraussHard <- local({
            cat(paste("Interaction:\t", self$name, "\n"))
            types <- self$par$types
            iradii <- self$par$iradii
-           hradii <- self$pa$hradii
+           hradii <- self$par$hradii
            nt <- nrow(iradii)
            cat(paste(nt, "types of points\n"))
            if(!is.null(types)) {

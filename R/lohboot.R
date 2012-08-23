@@ -1,7 +1,7 @@
 #
 #  lohboot.R
 #
-#  $Revision: 1.3 $   $Date: 2012/04/19 02:47:55 $
+#  $Revision: 1.4 $   $Date: 2012/08/22 01:42:47 $
 #
 #  Loh's bootstrap CI's for local pcf, local K etc
 #
@@ -73,7 +73,7 @@ lohboot <-
          Kinhom={ fname <- "K[inhom]" ; ylab <- quote(K[inhom](r)) })
   g <- fv(df, "r", ylab, ctag, , c(0, max(f$r)), labl, desc, fname=fname)
   # default is to display them all
-  attr(g, "fmla") <- . ~ r
+  formula(g) <- . ~ r
   fvnames(g, ".") <- c(ctag, "hi", "lo", "theo")
   unitname(g) <- unitname(X)
   g

@@ -12,7 +12,8 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
                  trend=~1, interaction=Poisson(),
                  rbord=reach(interaction),
                  truecoef=NULL, hi.res=NULL,
-                 funargs=list(correction="best")) {
+                 funargs=list(correction="best"),
+                 verbose=TRUE) {
   if(inherits(object, "ppm")) 
     fit <- object
   else if(inherits(object, "ppp"))
@@ -90,7 +91,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
   # sum over all quadrature points
   iused <- seq(U$n)[USED]
   nused <- length(iused)
-  cat(paste("\nProcessing", nused, "quadrature points..."))
+  if(verbose) cat(paste("\nProcessing", nused, "quadrature points..."))
   # running sums & integrals
   sumX <- zero
   integ <- integ2 <- zero
@@ -124,7 +125,7 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
       gc()
       cat("collected]")
     }
-    progressreport(j, nused)
+    if(verbose) progressreport(j, nused)
   }
 
   sdv <- sqrt(integ2)

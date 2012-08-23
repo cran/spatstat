@@ -5,7 +5,7 @@
 #
 
 miplot <- function(X, ...) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   X <- as.ppp(X)
   W <- X$window
   N <- X$n

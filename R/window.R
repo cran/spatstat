@@ -654,9 +654,9 @@ validate.mask <- function(w, fatal=TRUE) {
   if(w$type == "mask")
     return(TRUE)
   if(fatal)
-      stop(paste(deparse(substitute(w)), "is not a binary mask"))
+      stop(paste(short.deparse(substitute(w)), "is not a binary mask"))
   else {
-      warning(paste(deparse(substitute(w)), "is not a binary mask"))
+      warning(paste(short.deparse(substitute(w)), "is not a binary mask"))
       return(FALSE)
   }
 }
@@ -786,7 +786,7 @@ bounding.box <- function(...) {
 }
   
 complement.owin <- function(w, frame=as.rectangle(w)) {
-  wname <- deparse(substitute(w))
+  wname <- short.deparse(substitute(w))
   w <- as.owin(w)
 
   if(reframe <- !missing(frame)) {

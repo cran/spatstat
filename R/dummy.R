@@ -223,7 +223,7 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
 default.n.tiling <- local({
   # auxiliary
   ensure2print <- function(x, verbose=TRUE, blah="user specified") {
-    xname <- deparse(substitute(x))
+    xname <- short.deparse(substitute(x))
     x <- ensure2vector(x)
     if(verbose)
       cat(paste(blah, xname, "=", x[1], "*", x[2], "\n"))

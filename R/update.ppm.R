@@ -16,7 +16,7 @@ update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
   if(!is.call(call))
     stop(paste("Internal error - getCall(object) is not of class",
                sQuote("call")))
-  callstring <- paste(deparse(sys.call()), collapse="")
+  callstring <- short.deparse(sys.call())
   
   newformula <- function(old, change, eold=object$callframe, enew=envir) {
     old <- if(is.null(old)) ~1 else eval(old, eold)

@@ -1,17 +1,17 @@
 Package: spatstat
-Version: 1.28-1
-Date: 2012-06-29
+Version: 1.28-2
+Date: 2012-08-23
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
         code by Kasper Klitgaard Berthelsen; Abdollah Jalilian;
         Marie-Colette van Lieshout; Ege Rubak; Dominic Schuhmacher; and
         Rasmus Waagepetersen.  Additional contributions by Q.W. Ang; S.
-        Azaele; C. Beale; R. Bernhardt; B. Biggerstaff; R. Bivand; F.
-        Bonneu; J. Burgos; S. Byers; Y.M. Chang; J.B. Chen; I.
-        Chernayavsky; Y.C. Chin; B. Christensen; J.-F. Coeurjolly; M.
-        de la Cruz; P. Dalgaard; P.J. Diggle; I. Dryden; S. Eglen; N.
-        Funwi-Gabga; A. Gault; M. Genton; P. Grabarnik; C. Graf; J.
+        Azaele; C. Beale; R. Bernhardt; T. Bendtsen; B. Biggerstaff; R.
+        Bivand; F. Bonneu; J. Burgos; S. Byers; Y.M. Chang; J.B. Chen;
+        I. Chernayavsky; Y.C. Chin; B. Christensen; J.-F. Coeurjolly;
+        M. de la Cruz; P. Dalgaard; P.J. Diggle; I. Dryden; S. Eglen;
+        N. Funwi-Gabga; A. Gault; M. Genton; P. Grabarnik; C. Graf; J.
         Franklin; U. Hahn; A. Hardegen; M. Hering; M.B. Hansen; M.
         Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; A. Jammalamadaka;
         R. John-Chandran; D. Johnson; M. Kuhn; J. Laake; T. Lawrence;
@@ -57,6 +57,6 @@ URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
 ByteCompile: true
-Packaged: 2012-06-29 08:01:51 UTC; adrian
+Packaged: 2012-08-23 09:52:09 UTC; adrian
 Repository: CRAN
-Date/Publication: 2012-06-29 10:23:53
+Date/Publication: 2012-08-23 12:07:28

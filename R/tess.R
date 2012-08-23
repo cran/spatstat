@@ -139,7 +139,7 @@ print.tess <- function(x, ..., brief=FALSE) {
 }
 
 plot.tess <- function(x, ..., main, add=FALSE, col=NULL) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   if(missing(main))
     main <- xname
   switch(x$type,

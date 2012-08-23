@@ -4,7 +4,7 @@
 #
 #   Functions for manipulating model formulae
 #
-#	$Revision: 1.15 $	$Date: 2012/01/16 08:06:41 $
+#	$Revision: 1.16 $	$Date: 2012/08/22 01:28:24 $
 #
 #   identical.formulae()
 #          Test whether two formulae are identical
@@ -20,6 +20,13 @@
 #
 # -------------------------------------------------------------------
 #	
+
+# new generic
+
+"formula<-" <- function(x, ..., value) {
+  UseMethod("formula<-")
+}
+
 
 identical.formulae <- function(x, y) {
   # workaround for bug in all.equal.formula in R 2.5.0

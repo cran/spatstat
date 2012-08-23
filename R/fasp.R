@@ -115,7 +115,7 @@ dimnames.fasp <- function(x) {
 
 pool.fasp <- function(...) {
   Alist <- list(...)
-  Yname <- paste(deparse(sys.call()), collapse="")
+  Yname <- short.deparse(sys.call())
   if(nchar(Yname) > 60) Yname <- paste(substr(Yname, 1, 40), "[..]")
   nA <-  length(Alist)
   if(nA == 0) return(NULL)

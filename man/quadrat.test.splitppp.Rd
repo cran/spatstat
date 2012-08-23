@@ -1,9 +1,13 @@
 \name{quadrat.test.splitppp}
 \alias{quadrat.test.splitppp}
-\title{Chi-Squared Test of CSR for Split Point Pattern}
+\title{Dispersion Test of CSR for Split Point Pattern Based on
+       Quadrat Counts}
 \description{
-  Performs a chi-squared test of Complete Spatial Randomness
-  for each of the component patterns in a split point pattern.
+  Performs a test of Complete Spatial Randomness
+  for each of the component patterns in a split point pattern,
+  based on quadrat counts.
+  By default performs chi-squared tests; can also perform
+  Monte Carlo based tests.
 }
 \usage{
 \method{quadrat.test}{splitppp}(X, ...)

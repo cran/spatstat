@@ -7,6 +7,7 @@
 }
 \usage{
   \method{simulate}{ppm}(object, nsim=1, ...,
+                         singlerun = FALSE,
                          start = NULL,
                          control = default.rmhcontrol(object),
                          project=TRUE,
@@ -20,10 +21,18 @@
   \item{nsim}{
     Number of simulated realisations.
   }
+  \item{singlerun}{
+    Logical. Whether to generate the simulated realisations
+    from a single long run of the Metropolis-Hastings algorithm
+    (\code{singlerun=TRUE}) or from separate, independent runs of the
+    algorithm (\code{singlerun=FALSE}, the default).
+  }
   \item{start}{Data determining the initial state
     of the Metropolis-Hastings algorithm.  See
     \code{\link{rmhstart}} for description of these arguments.
-    Defaults to \code{list(x.start=data.ppm(model))}
+    Defaults to \code{list(n.start=npoints(data.ppm(model)))}
+    meaning that the initial state of the algorithm
+    has the same number of points as the original dataset.
   }
   \item{control}{Data controlling the running of
     the Metropolis-Hastings algorithm.  See \code{\link{rmhcontrol}}
@@ -56,6 +65,19 @@
   point process models.
   
   Simulations are performed by \code{\link{rmh.ppm}}.
+
+  If \code{singlerun=FALSE} (the default), the simulated patterns are
+  the results of independent runs of the Metropolis-Hastings
+  algorithm. If \code{singlerun=TRUE}, a single long run of the
+  algorithm is performed, and the state of the simulation is saved
+  every \code{nsave} iterations to yield the simulated patterns.
+
+  In the case of a single run, the behaviour is controlled
+  by the parameters \code{nsave,nburn,nrep}. These 
+  are described in \code{\link{rmhcontrol}}. They may be passed
+  in the \code{\dots} arguments or included in \code{control}.
+  It is sufficient to specify two
+  of the three parameters \code{nsave,nburn,nrep}.
 }
 \value{
   A list of length \code{nsim} containing simulated point patterns
@@ -65,6 +87,7 @@
   \testonly{op <- spatstat.options(rmh.nrep=10)}
   fit <- ppm(japanesepines, ~1, Strauss(0.1))
   simulate(fit, 2)
+  simulate(fit, 2, singlerun=TRUE, nsave=1e4, nburn=1e4)
   \testonly{spatstat.options(op)}
 }
 \seealso{

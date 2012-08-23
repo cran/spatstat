@@ -3,14 +3,14 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.12 $   $Date: 2012/02/04 11:46:38 $
+#  $Revision: 1.13 $   $Date: 2012/07/09 03:54:30 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
                  dataAtPoints=NULL, splitby=NULL) {
   
   # remember call
-  CallInfo <- list(callstring = paste(deparse(sys.call()), collapse=""),
+  CallInfo <- list(callstring = short.deparse(sys.call()),
                    cl = match.call(),
                    formula = formula,
                    offset=offset,
@@ -430,7 +430,7 @@ predict.slrm <- function(object, ..., type="intensity",
 }
 
 plot.slrm <- function(x, ..., type="intensity") {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   y <- predict(x, type=type)
   do.call("plot.im", resolve.defaults(list(x=y), list(...), list(main=xname)))
 }

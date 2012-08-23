@@ -51,7 +51,7 @@ pppmatching <- function(X, Y, am, type = NULL, cutoff = NULL,
 # irrespective of their weights
 plot.pppmatching <- function(x, addmatch = NULL, main = NULL, ...) {
    if (is.null(main))
-      main <- deparse(substitute(x))
+      main <- short.deparse(substitute(x))
    pp1 <- x$pp1
    pp2 <- x$pp2
    plot.owin(pp1$window, main = main, ...)

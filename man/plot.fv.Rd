@@ -9,7 +9,7 @@
            xlim=NULL, ylim=NULL, xlab=NULL, ylab=NULL, ylim.covers=NULL,
            legend=!add, legendpos="topleft", legendavoid=missing(legendpos),
            legendmath=TRUE, legendargs=list(),
-           shade=NULL, shadecol="grey", add=FALSE, limitsonly=FALSE)
+           shade=NULL, shadecol="grey", add=FALSE, log="", limitsonly=FALSE)
 }
 \arguments{
   \item{x}{
@@ -100,6 +100,11 @@
   }
   \item{add}{
     Logical. Whether the plot should be added to an existing plot
+  }
+  \item{log}{
+    A character string which contains \code{"x"} if the x axis is to
+    be logarithmic, \code{"y"} if the y axis is to be logarithmic and
+    \code{"xy"} or \code{"yx"} if both axes are to be logarithmic.
   }
   \item{limitsonly}{
     Logical. If \code{FALSE}, plotting is performed normally.

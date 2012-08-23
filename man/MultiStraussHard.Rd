@@ -67,11 +67,10 @@ which can then be fitted to point pattern data.
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
    MultiStraussHard(iradii=r,hradii=h)
    # prints a sensible description of itself
-   data(betacells)
-   r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiStraussHard(,r,h))
-   # fit the stationary multitype hardcore Strauss process to `betacells'
+   r <- 0.04 * matrix(c(1,2,2,1), nrow=2,ncol=2)
+   h <- 0.02 * matrix(c(1,NA,NA,1), nrow=2,ncol=2)
+   ppm(amacrine, ~1, MultiStraussHard(,r,h))
+   # fit stationary multitype hardcore Strauss process to `amacrine'
    # Note the comma; needed since "types" is not specified.
 }
 \section{Warnings}{

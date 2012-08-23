@@ -12,7 +12,8 @@
 \usage{
 psst(object, fun, r = NULL, breaks = NULL, ...,
      trend = ~1, interaction = Poisson(), rbord = reach(interaction),
-     truecoef=NULL, hi.res=NULL, funargs = list(correction="best"))
+     truecoef=NULL, hi.res=NULL, funargs = list(correction="best"),
+     verbose=TRUE)
 }
 \arguments{
   \item{object}{
@@ -57,8 +58,11 @@ psst(object, fun, r = NULL, breaks = NULL, ...,
     quadrature scheme, but using the high resolution coefficients.
   }
   \item{funargs}{
-    Optional.
     List of additional arguments to be passed to \code{fun}.
+  }
+  \item{verbose}{
+    Logical value determining whether to print progress reports
+    during the computation.
   }
 }
 \details{

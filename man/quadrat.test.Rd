@@ -3,19 +3,41 @@
 \alias{quadrat.test.ppp}
 \alias{quadrat.test.ppm}
 \alias{quadrat.test.quadratcount}
-\title{Chi-Squared Dispersion Test for Spatial Point Pattern Based on
-  Quadrat Counts}
+\title{Dispersion Test for Spatial Point Pattern Based on
+       Quadrat Counts}
 \description{
-  Performs a chi-squared test of Complete Spatial Randomness
+  Performs a test of Complete Spatial Randomness
   for a given point pattern, based on quadrat counts.
-  Alternatively performs a chi-squared goodness-of-fit test of a fitted
+  Alternatively performs a goodness-of-fit test of a fitted
   inhomogeneous Poisson model.
+  By default performs chi-squared tests; can also perform
+  Monte Carlo based tests.
 }
 \usage{
 quadrat.test(X, ...)
-\method{quadrat.test}{ppp}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
-\method{quadrat.test}{ppm}(X, nx=5, ny=nx, ..., xbreaks=NULL, ybreaks=NULL, tess=NULL)
-\method{quadrat.test}{quadratcount}(X, ...)
+
+\method{quadrat.test}{ppp}(X, nx=5, ny=nx,
+                          alternative=c("two.sided", "regular", "clustered"),
+                           method=c("Chisq", "MonteCarlo"),
+                           conditional=TRUE,
+                           ..., 
+                           xbreaks=NULL, ybreaks=NULL, tess=NULL,
+                           nsim=1999)
+
+\method{quadrat.test}{ppm}(X, nx=5, ny=nx, 
+                          alternative=c("two.sided", "regular", "clustered"),
+                           method=c("Chisq", "MonteCarlo"),
+                           conditional=TRUE,
+                           ..., 
+                           xbreaks=NULL, ybreaks=NULL, tess=NULL,
+                           nsim=1999)
+
+\method{quadrat.test}{quadratcount}(X,
+                          alternative=c("two.sided", "regular", "clustered"),
+                          method=c("Chisq", "MonteCarlo"),
+                          conditional=TRUE,
+                          ...,
+                          nsim=1999)
 }
 \arguments{
   \item{X}{
@@ -30,6 +52,20 @@ quadrat.test(X, ...)
     Numbers of quadrats in the \eqn{x} and \eqn{y} directions.
     Incompatible with \code{xbreaks} and \code{ybreaks}.
   }
+  \item{alternative}{
+    Character string (partially matched) specifying the alternative
+    hypothesis.
+  }
+  \item{method}{
+    Character string (partially matched) specifying the test to use:
+    either \code{method="Chisq"} for the chi-squared test (the default),
+    or \code{method="MonteCarlo"} for a Monte Carlo test.
+  }
+  \item{conditional}{
+   Logical.  Should the Monte Carlo test be conducted
+   conditionally upon the observed number of points of the pattern?
+   Ignored if \code{method="Chisq"}.
+  }
   \item{\dots}{Ignored.}
   \item{xbreaks}{
     Optional. Numeric vector giving the \eqn{x} coordinates of the
@@ -43,10 +79,14 @@ quadrat.test(X, ...)
     Tessellation (object of class \code{"tess"}) determining the
     quadrats. Incompatible with \code{nx, ny, xbreaks, ybreaks}.
   }
+  \item{nsim}{
+    The number of simulated samples to generate when
+    \code{method="MonteCarlo"}. 
+  }
 }
 \details{
-  These functions perform \eqn{\chi^2}{chi^2} tests of goodness-of-fit
-  for a point process model, based on quadrat counts.
+  These functions perform \eqn{\chi^2}{chi^2} tests or Monte Carlo tests
+  of goodness-of-fit for a point process model, based on quadrat counts.
 
   The function \code{quadrat.test} is generic, with methods for
   point patterns (class \code{"ppp"}), split point patterns
@@ -81,8 +121,43 @@ quadrat.test(X, ...)
   specified by the argument \code{tess}.
   The expected number of points in each quadrat is also calculated,
   as determined by CSR (in the first case) or by the fitted model
-  (in the second case). Then we perform the
-  \eqn{\chi^2}{chi^2} test of goodness-of-fit to the quadrat counts.
+  (in the second case). Then we perform either the 
+  \eqn{\chi^2}{chi^2} test of goodness-of-fit to the quadrat counts
+  (if \code{method="Chisq"})
+  or a Monte Carlo test (if \code{method="MonteCarlo"}).
+
+  If \code{method="Chisq"} then the \eqn{\chi^2}{chi^2} test of
+  goodness-of-fit is performed. The Pearson \eqn{X^2} statistic
+  \deqn{
+    X^2 = sum((observed - expected)^2/expected)
+  }
+  is computed, and compared to the \eqn{\chi^2}{chi^2} distribution
+  with \eqn{m-k} degrees of freedom, where \code{m} is the number of
+  quadrats and \eqn{k} is the number of fitted parameters
+  (equal to 1 for \code{quadrat.test.ppp}). The default is to
+  compute the \emph{two-sided} \eqn{p}-value, so that the test will
+  be declared significant if \eqn{X^2} is either very large or very
+  small. One-sided \eqn{p}-values can be obtained by specifying the
+  \code{alternative}. An important requirement of the
+  \eqn{\chi^2}{chi^2} test is that the expected counts in each quadrat
+  be greater than 5.
+
+  If \code{method="MonteCarlo"} then a Monte Carlo test is performed,
+  obviating the need for all expected counts to be at least 5.  In the
+  Monte Carlo test, \code{nsim} random point patterns are generated
+  from the null hypothesis (either CSR or the fitted point process
+  model). The Pearson \eqn{X^2} statistic is computed as above.
+  The \eqn{p}-value is determined by comparing the \eqn{X^2}
+  statistic for the observed point pattern, with the values obtained
+  from the simulations. Again the default is to
+  compute the \emph{two-sided} \eqn{p}-value.
+
+  If \code{conditional} is \code{TRUE} then the simulated samples are
+  generated from the multinomial distribution with the number of \dQuote{trials}
+  equal to the number of observed points and the vector of probabilities
+  equal to the expected counts divided by the sum of the expected counts.
+  Otherwise the simulated samples are independent Poisson counts, with
+  means equal to the expected counts.
 
   The return value is an object of class \code{"htest"}.
   Printing the object gives comprehensible output
@@ -116,6 +191,20 @@ quadrat.test(X, ...)
   data(simdat)
   quadrat.test(simdat)
   quadrat.test(simdat, 4, 3)
+
+  quadrat.test(simdat, alternative="regular")
+  quadrat.test(simdat, alternative="clustered")
+
+  # Using Monte Carlo p-values
+  quadrat.test(swedishpines) # Get warning, small expected values.
+  \dontrun{
+    quadrat.test(swedishpines, method="M", nsim=4999)
+    quadrat.test(swedishpines, method="M", nsim=4999, conditional=FALSE)
+  }
+  \testonly{
+    quadrat.test(swedishpines, method="M", nsim=19)
+    quadrat.test(swedishpines, method="M", nsim=19, conditional=FALSE)
+  }
 
   # quadrat counts
   qS <- quadratcount(simdat, 4, 3)

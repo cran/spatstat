@@ -6,7 +6,7 @@
   containing \eqn{n} independent uniform random points.
 }
 \usage{
- runifpoint(n, win=owin(c(0,1),c(0,1)), giveup=1000)
+ runifpoint(n, win=owin(c(0,1),c(0,1)), giveup=1000, warn=TRUE)
 }
 \arguments{
   \item{n}{
@@ -20,6 +20,10 @@
   \item{giveup}{
     Number of attempts in the rejection method after which
     the algorithm should stop trying to generate new points.
+  }
+  \item{warn}{
+    Logical. Whether to issue a warning if \code{n} is very large.
+    See Details.
   }
 }
 \value{
@@ -51,6 +55,11 @@
   }
   The algorithm for binary image masks is faster than the rejection
   method but involves discretisation.
+
+  If \code{warn=TRUE}, then a warning will be issued if \code{n} is very large.
+  The threshold is \code{\link{spatstat.options}("huge.npoints")}.
+  This warning has no consequences,
+  but it helps to trap a number of common errors.
 }
 \seealso{
 \code{\link{ppp.object}},

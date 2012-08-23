@@ -2,7 +2,7 @@
 #
 #   rmhstart.R
 #
-#   $Revision: 1.9 $  $Date: 2012/05/30 11:38:18 $
+#   $Revision: 1.10 $  $Date: 2012/08/14 06:39:11 $
 #
 #
 
@@ -81,5 +81,10 @@ print.rmhstart <- function(x, ...) {
                paste("(", paste(n.start, collapse=","), ")", sep="")
            cat(paste("number fixed at n.start =", nstring, "\n")) }
          )
+}
+
+update.rmhstart <- function(object, ...) {
+  do.call.matched("rmhstart.default",
+                  resolve.defaults(list(...), as.list(object)))
 }
 

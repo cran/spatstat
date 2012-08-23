@@ -46,7 +46,7 @@
   \code{fun} using the bootstrap method of Loh (2008).
 
   If \code{fun="pcf"}, for example, the algorithm computes a pointwise
-  \code{100 * alpha} percent confidence interval for the true value of
+  \code{(100 * confidence)}\% confidence interval for the true value of
   the pair correlation function \code{\link{pcf}} for the point
   process. It starts by computing the array of
   \emph{local} pair correlation functions,
@@ -56,7 +56,7 @@
   with replacement; from each resampled dataset the total contribution
   is computed, yielding \code{nsim} random pair correlation functions.
   The pointwise \code{alpha/2} and \code{1 - alpha/2} quantiles of
-  these functions are computed. 
+  these functions are computed, where \code{alpha = 1 - confidence}.
 
   To control the smoothing and estimation algorithm, use the 
   arguments \code{\dots}, which are passed to the local version

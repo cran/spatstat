@@ -213,12 +213,12 @@ Tstat <- local({
         }
       }
       # default plot will display all edge corrections
-      attr(TT, "fmla") <- . ~ r
+      formula(TT) <- . ~ r
       unitname(TT) <- unitname(X)
       #
       if(ratio) {
         # finish up numerator & denominator
-        attr(numT, "fmla") <- attr(denT, "fmla") <- . ~ r
+        formula(numT) <- formula(denT) <- . ~ r
         unitname(numT) <- unitname(denT) <- unitname(TT)
         # tack on to result
         TT <- rat(TT, numT, denT, check=FALSE)

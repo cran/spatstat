@@ -23,12 +23,12 @@
   The auxiliary information about the subregions is contained in 
   \code{redwoodfull.extra}, which is a list with entries
   \tabular{ll}{
-    \code{diag}\tab The coordinates of the diagonal boundary\cr
+    \code{rdiag}\tab The coordinates of the diagonal boundary\cr
                \tab between regions I and II \cr
     \code{regionI} \tab Region I as a window object \cr
     \code{regionII} \tab Region II as a window object \cr
     \code{regionR} \tab Ripley's subrectangle (approximate) \cr
-    \code{plot}    \tab Function to plot the full data and auxiliary markings
+    \code{plotit}    \tab Function to plot the full data and auxiliary markings
   }
 
   Ripley (1977) extracted a subset of these data, containing 62 points,
@@ -38,12 +38,12 @@
   ``the redwood data'' in the spatial statistics literature.
   The exact dataset used by Ripley is supplied in the \pkg{spatstat}
   library as \code{\link{redwood}}.
-  There are some minor inconsistencies with
-  \code{redwood} since it originates from a different digitisation.
 
   The approximate position of the square chosen by Ripley
   within the \code{redwoodfull} pattern
   is indicated by the window \code{redwoodfull.extra$regionR}.
+  There are some minor inconsistencies with
+  \code{redwood} since it originates from a different digitisation.
 } 
 \format{
   The dataset \code{redwoodfull} is an object of class \code{"ppp"}
@@ -54,19 +54,19 @@
 
   The dataset \code{redwoodfull.extra} is a list with entries
   \tabular{ll}{
-    \code{diag}\tab coordinates of endpoints of a line,\cr
+    \code{rdiag}\tab coordinates of endpoints of a line,\cr
                \tab in format \code{list(x=numeric(2),y=numeric(2))} \cr
     \code{regionI} \tab a window object \cr
     \code{regionII} \tab a window object \cr
     \code{regionR} \tab a window object \cr
-    \code{plot}    \tab Function with no arguments
+    \code{plotit}    \tab Function with no arguments
   }
 }
 \usage{data(redwoodfull)}
 \examples{
        data(redwoodfull)
        plot(redwoodfull)
-       redwoodfull.extra$plot()
+       redwoodfull.extra$plotit()
        # extract the pattern in region II 
        redwoodII <- redwoodfull[, redwoodfull.extra$regionII]
 }

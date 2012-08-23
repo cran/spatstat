@@ -51,7 +51,6 @@
   \code{\link{redwood}},
   \code{\link{simdat}} and
   \code{\link{swedishpines}}.
-  Use \code{\link{data}(xxx)} to access the dataset \code{xxx}.
   
   Point patterns may be scanned from your own data files by
   \code{\link{scanpp}} or by using \code{\link{read.table}} and

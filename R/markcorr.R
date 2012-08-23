@@ -2,7 +2,7 @@
 #
 #     markcorr.R
 #
-#     $Revision: 1.58 $ $Date: 2011/04/19 02:40:31 $
+#     $Revision: 1.62 $ $Date: 2012/08/22 01:43:05 $
 #
 #    Estimate the mark correlation function
 #    and related functions 
@@ -407,7 +407,7 @@ markcorr <-
   corrxns <- rev(nama2[nama2 != "r"])
 
   # default is to display them all
-  attr(result, "fmla") <- (. ~ r)
+  formula(result) <- (. ~ r)
   fvnames(result, ".") <- corrxns
   #
   unitname(result) <- unitname(X)

@@ -90,7 +90,7 @@
     (\code{monochrome=FALSE}).
   }
   \item{limcol}{
-    String. The colour to be used when plotting the 95-percent limit
+    String. The colour to be used when plotting the 95\% limit
     curves.
   }
   \item{maxerr}{

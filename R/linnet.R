@@ -104,7 +104,7 @@ summary.linnet <- function(object, ...) {
 plot.linnet <- function(x, ..., main=NULL, add=FALSE,
                         vertices=FALSE, window=FALSE) {
   if(is.null(main))
-    main <- deparse(substitute(x))
+    main <- short.deparse(substitute(x))
   stopifnot(inherits(x, "linnet"))
   lines <- as.psp(x)
   if(!add) {

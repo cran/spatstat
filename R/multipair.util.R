@@ -13,7 +13,7 @@
 MultiPair.checkmatrix <-
   function(mat, n, matname, naok=TRUE, zerook=TRUE) {
     if(missing(matname))
-      matname <- deparse(substitute(mat))
+      matname <- short.deparse(substitute(mat))
     if(!is.matrix(mat))
       stop(paste(matname, "must be a matrix"))
     if(any(dim(mat) != rep(n,2)))

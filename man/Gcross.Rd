@@ -214,20 +214,19 @@ Gcross(X, i, j, r=NULL, breaks=NULL, \dots, correction=c("rs", "km", "han"))
  \code{\link{Gmulti}}
 }
 \examples{
-    data(betacells)
-     # cat retina data
-    G01 <- Gcross(betacells)
+    # amacrine cells data
+    G01 <- Gcross(amacrine)
 
     # equivalent to:
     \dontrun{
-    G01 <- Gcross(betacells, "off", "on")
+    G01 <- Gcross(amacrine, "off", "on")
     }
 
     plot(G01)
 
     # empty space function of `on' points
     \dontrun{
-       F1 <- Fest(split(betacells)$on, r = G01$r, eps=10.0)
+       F1 <- Fest(split(amacrine)$on, r = G01$r)
        lines(F1$r, F1$km, lty=3)
     }
 

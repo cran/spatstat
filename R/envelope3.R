@@ -3,7 +3,7 @@
 #
 #   simulation envelopes for pp3 
 #
-#   $Revision: 1.3 $  $Date: 2012/05/30 10:02:07 $
+#   $Revision: 1.4 $  $Date: 2012/07/23 07:06:49 $
 #
 
 envelope.pp3 <-
@@ -12,9 +12,9 @@ envelope.pp3 <-
            transform=NULL, global=FALSE, ginterval=NULL,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, maxnerr=nsim) {
+           Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
   cl <- match.call()
-  if(is.null(Yname)) Yname <- deparse(substitute(Y))
+  if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),
@@ -63,6 +63,7 @@ envelope.pp3 <-
                    VARIANCE=VARIANCE, nSD=nSD,
                    Yname=Yname, maxnerr=maxnerr, cl=cl,
                    envir.user=envir.user,
-                   expected.arg=c("rmax", "nrval"))
+                   expected.arg=c("rmax", "nrval"),
+                   do.pwrong=do.pwrong)
 }
 

@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.14 $	$Date: 2012/05/30 13:07:26 $
+#	$Revision: 1.15 $	$Date: 2012/08/22 01:34:03 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -52,7 +52,7 @@ K3est <- function(X, ...,
                  "iso")
   }
   # default is to display them all
-  attr(K, "fmla") <- . ~ r
+  formula(K) <- . ~ r
   unitname(K) <- unitname(X)
   return(K)
 }
@@ -106,7 +106,7 @@ G3est <- function(X, ...,
                   "Normalised Hanisch estimate of %s",
                   "han")
   # default is to display them all
-  attr(G, "fmla") <- . ~ r
+  formula(G) <- . ~ r
   unitname(G) <- unitname(X)
   return(G)
 }
@@ -192,7 +192,7 @@ F3est <- function(X, ...,
                   "Chiu-Stoyan estimate of %s",
                   "cs")
   # default is to display them all
-  attr(FF, "fmla") <- . ~ r
+  formula(FF) <- . ~ r
   unitname(FF) <- unitname(X)
   return(FF)
 }
@@ -257,7 +257,7 @@ pcf3est <- function(X, ...,
                  "iso")
   }
   # default is to display them all
-  attr(g, "fmla") <- . ~ r
+  formula(g) <- . ~ r
   unitname(g) <- unitname(X)
   attr(g, "delta") <- delta
   return(g)

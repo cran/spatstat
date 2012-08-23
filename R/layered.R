@@ -30,7 +30,7 @@ print.layered <- function(x, ...) {
 }
 
 plot.layered <- function(x, ..., which=NULL, plotargs=NULL) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   xp <- if(is.null(which)) x else x[which]
   if(length(xp) == 0)
     return(invisible(NULL))

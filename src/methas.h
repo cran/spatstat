@@ -54,7 +54,9 @@ typedef struct Algor {
   int ncond;        /* For conditional simulation, 
 		       the first 'ncond' points are fixed */
   int nrep;        /* number of iterations */
-  int nverb;        /* print report every 'nverb' iterations */
+  int nverb;       /* print report every 'nverb' iterations */
+  int nrep0;       /* number of iterations already performed 
+		      in previous blocks - for reporting purposes */
 } Algor;
 
 /* Metropolis-Hastings proposal */

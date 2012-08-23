@@ -112,7 +112,7 @@ function(X, na.action="warn", ...) {
     return(FALSE)
   if((length(marx) > 0) && any(is.na(marx))) {
     gripe <- paste("some mark values are NA in the point pattern",
-                   deparse(substitute(X)))
+                   short.deparse(substitute(X)))
     switch(na.action,
            warn = warning(gripe, call.=FALSE),
            fatal = stop(gripe, call.=FALSE),
@@ -157,7 +157,7 @@ is.multitype.ppp <- function(X, na.action="warn", ...) {
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
-                           deparse(substitute(X))))
+                           short.deparse(substitute(X))))
            },
            fatal = {
              return(FALSE)

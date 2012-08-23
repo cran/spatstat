@@ -41,7 +41,7 @@ clarkevans.test <- function(X, ...,
                             alternative=c("two.sided", "less", "greater"),
                             nsim=1000
                             ) {
-  Xname <- deparse(substitute(X))
+  Xname <- short.deparse(substitute(X))
   verifyclass(X, "ppp")
   W <- X$window
 

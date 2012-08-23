@@ -1,7 +1,7 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.9 $ $Date: 2012/01/24 10:29:03 $
+#   $Revision: 1.10 $ $Date: 2012/08/22 01:33:12 $
 #
 
 effectfun <- function(model, covname, ..., se.fit=FALSE) {
@@ -143,7 +143,7 @@ effectfun <- function(model, covname, ..., se.fit=FALSE) {
                           "upper limit of pointwise 95%% CI for trend",
                           "lower limit of pointwise 95%% CI for trend"))
       fvnames(result, ".") <- c("lambda", "hi", "lo")
-      attr(result, "fmla") <- as.formula(paste(". ~ ", covname))
+      formula(result) <- paste(". ~ ", covname)
     }
   }
   return(result)

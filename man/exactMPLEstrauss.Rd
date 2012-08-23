@@ -8,7 +8,7 @@
   of the parameters of a stationary Strauss point process.
 }
 \usage{
-  exactMPLEstrauss(X, R, ngrid = 2048, plotit = FALSE)
+  exactMPLEstrauss(X, R, ngrid = 2048, plotit = FALSE, project=TRUE)
 }
 \arguments{
   \item{X}{
@@ -26,6 +26,11 @@
   \item{plotit}{
     Logical. If \code{TRUE}, the log pseudolikelihood is plotted
     on the current device. 
+  }
+  \item{project}{
+    Logical. If \code{TRUE} (the default), the parameter
+    \eqn{\gamma}{gamma} is constrained to lie in the interval
+    \eqn{[0,1]}. If \code{FALSE}, this constraint is not applied.
   }
 }
 \details{
@@ -54,9 +59,19 @@
   \eqn{\log\beta}{log(beta)} and \eqn{\log\gamma}{log(gamma)}.
   These values correspond to the entries that would be obtained with
   \code{coef(ppm(X, ~1, Strauss(R)))}.
-
   The fitted coefficients are typically accurate to
   within \eqn{10^{-6}}{10^(-6)} as shown in Baddeley and Turner (2013).
+  
+  Note however that (by default) \code{exactMPLEstrauss} 
+  constrains the parameter \eqn{\gamma}{gamma} to lie in the
+  interval \eqn{[0,1]} in which the point process is well defined
+  (Kelly and Ripley, 1976)
+  whereas \code{\link{ppm}} does not constrain
+  the value of \eqn{\gamma}{gamma} (by default). This behaviour is controlled by
+  the argument \code{project} to \code{\link{ppm}} and
+  \code{exactMPLEstrauss}. The default for \code{\link{ppm}}
+  is \code{project=FALSE}, while the default for \code{exactMPLEstrauss}
+  is \code{project=TRUE}.
 }
 \value{
   Vector of length 2.
@@ -69,6 +84,10 @@
 
   Baddeley, A. and Turner, R. (2013)
   Manuscript in preparation.  
+
+  Kelly, F.P. and Ripley, B.D. (1976)
+  On Strauss's model for clustering.
+  \emph{Biometrika} \bold{63}, 357--360.
 
   Ripley, B.D. (1988)
   \emph{Statistical inference for spatial processes}.
@@ -88,6 +107,9 @@
    exactMPLEstrauss(cells, 0.1)
    coef(ppm(cells, ~1, Strauss(0.1)))
    coef(ppm(cells, ~1, Strauss(0.1), nd=128))
+   exactMPLEstrauss(redwood, 0.04)
+   exactMPLEstrauss(redwood, 0.04, project=FALSE)
+   coef(ppm(redwood, ~1, Strauss(0.04)))
 }
 \keyword{spatial}
 \keyword{models}

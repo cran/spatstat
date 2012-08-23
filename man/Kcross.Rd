@@ -183,16 +183,15 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
  \code{\link{pcf}}
 }
 \examples{
-    data(betacells)
-     # cat retina data
-    K01 <- Kcross(betacells, "off", "on") 
+    # amacrine cells data
+    K01 <- Kcross(amacrine, "off", "on") 
     plot(K01)
 
     \testonly{
-    K01 <- Kcross(betacells, "off", "on", ratio=TRUE) 
+    K01 <- Kcross(amacrine, "off", "on", ratio=TRUE) 
     }
     \dontrun{
-    K10 <- Kcross(betacells, "on", "off")
+    K10 <- Kcross(amacrine, "on", "off")
 
     # synthetic example: point pattern with marks 0 and 1
     pp <- runifpoispp(50)

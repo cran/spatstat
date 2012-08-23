@@ -95,7 +95,7 @@
   and it is possible then that the matching obtained is not optimal and the associated
   distance is only a strict upper bound of the true distance.
   As a general guideline (which can be very wrong in special situations) a small
-  number of zeroes (up to about 50 percent of the smaller point pattern
+  number of zeroes (up to about 50\% of the smaller point pattern
   cardinality \eqn{m})
   usually still results in the right matching, and the number can even be quite a bit
   higher and usually still provides a highly accurate upper bound for the distance.

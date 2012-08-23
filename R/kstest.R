@@ -20,8 +20,8 @@ kstest <- function(...) {
 
 kstest.ppp <-
   function(X, covariate, ..., jitter=TRUE) {
-    Xname <- deparse(substitute(X))
-    covname <- singlestring(deparse(substitute(covariate)))
+    Xname <- short.deparse(substitute(X))
+    covname <- singlestring(short.deparse(substitute(covariate)))
     if(is.character(covariate)) covname <- covariate
     if(!is.marked(X, dfok=TRUE)) {
       # unmarked
@@ -55,8 +55,8 @@ kstest.ppp <-
 }
 
 kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
-  modelname <- deparse(substitute(model))
-  covname <- singlestring(deparse(substitute(covariate)))
+  modelname <- short.deparse(substitute(model))
+  covname <- singlestring(short.deparse(substitute(covariate)))
   if(is.character(covariate)) covname <- covariate
   verifyclass(model, "ppm")
   if(is.poisson.ppm(model) && is.stationary.ppm(model))
@@ -73,9 +73,9 @@ kstest.ppm <- function(model, covariate, ..., jitter=TRUE) {
 kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
   # get names
   if(is.null(modelname))
-    modelname <- deparse(substitute(model))
+    modelname <- short.deparse(substitute(model))
   if(is.null(covname))
-    covname <- deparse(substitute(covariate))
+    covname <- short.deparse(substitute(covariate))
   dataname <- model$CallInfo$responsename
   #
   stopifnot(is.slrm(model))
@@ -221,9 +221,9 @@ evalCovar <- function(model, covariate, ...,
 
   # determine names
   if(is.null(modelname))
-    modelname <- if(csr) "CSR" else deparse(substitute(model))
+    modelname <- if(csr) "CSR" else short.deparse(substitute(model))
   if(is.null(covname)) {
-    covname <- singlestring(deparse(substitute(covariate)))
+    covname <- singlestring(short.deparse(substitute(covariate)))
     if(is.character(covariate)) covname <- covariate
   }
   if(is.null(dataname))

@@ -51,26 +51,23 @@
   \code{\link{is.multitype.ppp}}
 }
 \examples{
-   data(lansing)
+   X <- lansing
    # Multitype point pattern --- trees marked by species
 
    \testonly{
       # Smaller dataset
-      data(betacells)
-      lansing <- betacells[seq(2, 135, by=3), ]
+      X <- amacrine
    }
 
-  fit1 <- ppm(lansing, ~ marks, Poisson())
+  fit1 <- ppm(X, ~ marks, Poisson())
   is.multitype(fit1)
   # TRUE
 
-  fit2 <- ppm(lansing, ~ 1, Poisson())
+  fit2 <- ppm(X, ~ 1, Poisson())
   is.multitype(fit2)
   # TRUE
 
-  data(cells)
   # Unmarked point pattern
-
   fit3 <- ppm(cells, ~ 1, Poisson())
   is.multitype(fit3)
   # FALSE

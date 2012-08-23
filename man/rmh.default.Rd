@@ -10,7 +10,7 @@
 \usage{
    \method{rmh}{default}(model, start=NULL,
    control=default.rmhcontrol(model),
-   verbose=TRUE, track=FALSE, \dots)
+   verbose=TRUE, \dots)
 }
 
 \arguments{
@@ -25,9 +25,6 @@
   }
   \item{verbose}{Logical flag indicating whether to print progress
     reports.
-  }
-  \item{track}{Logical flag indicating whether to save the transition
-    history of the simulations.
   }
   \item{\dots}{
     Further arguments passed to \code{\link{rmhcontrol}}
@@ -48,12 +45,17 @@
   of the simulations is also saved and returned as an attribute
   \code{seed}.
 
-  If \code{track=TRUE}, the transition history of the algorithm
+  If the argument \code{track=TRUE} was given (see \code{\link{rmhcontrol}}),
+  the transition history of the algorithm
   is saved, and returned as an attribute \code{history}. The transition
   history is a data frame containing a factor \code{proposaltype}
   identifying the proposal type (Birth, Death or Shift) and
   a logical vector \code{accepted} indicating whether the proposal was
   accepted.
+
+  If the argument \code{nsave} was given (see \code{\link{rmhcontrol}}),
+  the return value has an attribute \code{saved} which is a list of
+  point patterns, containing the intermediate states of the algorithm.
 }
 
 \details{
@@ -183,10 +185,19 @@
       \emph{conditional simulation} will be performed, and \code{x.cond}
       specifies the conditioning points and the type of conditioning.
     }
+    \item{nsave,nburn}{
+      If these values are specified, then
+      intermediate states of the simulation algorithm will be saved
+      every \code{nsave} iterations, after an initial burn-in period of
+      \code{nburn} iterations.
+    }
+    \item{track}{
+      Logical flag indicating whether to save the transition
+      history of the simulations.
+    }
   }
   For full details of these parameters, see \code{\link{rmhcontrol}}.
   The control parameters can also be given in the \code{\dots} arguments.
-
 }
 \section{Conditional Simulation}{
   There are several kinds of conditional simulation.
@@ -372,6 +383,14 @@ trend corresponding to a particular type, there is still a component
                      control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
    }
    
+   # Tracking algorithm progress:
+   X <- rmh(model=mod01,start=list(n.start=ns),
+            control=list(nrep=nr, nsave=nr/5, nburn=nr/2, track=TRUE))
+   History <- attr(X, "history")
+   Saved <- attr(X, "saved")
+   head(history)
+   plot(Saved)
+
    # Hard core process:
    mod02 <- list(cif="hardcore",par=list(beta=2,hc=0.7),w=c(0,10,0,10))
    X3.hardcore <- rmh(model=mod02,start=list(n.start=ns),
@@ -595,6 +614,7 @@ trend corresponding to a particular type, there is still a component
    X4.badgey <- rmh(model=mod22,start=list(n.start=ns),
                     control=list(nrep=nr,nverb=nv))
    # Same again --- i.e. the BadGey model includes the Geyer model.
+
 
    # Illustrating scalability.
    \dontrun{

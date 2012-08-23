@@ -37,6 +37,7 @@ SEXP xmethas(
 	     SEXP p,
 	     SEXP q,
 	     SEXP nverb,
+	     SEXP nrep0,
 	     SEXP x,
 	     SEXP y,
 	     SEXP marks,
@@ -49,7 +50,7 @@ SEXP xmethas(
   double *iparvector;
   int verb, marked, mustupdate, itype;
   int nfree;
-  int irep, ix, j, maxchunk;
+  int irep, ix, j, maxchunk, iverb;
   int Ncif; 
   int *plength;
   long Nmore;
@@ -90,6 +91,7 @@ SEXP xmethas(
   PROTECT(   p      = AS_NUMERIC(p)); 
   PROTECT(   q      = AS_NUMERIC(q)); 
   PROTECT(nverb     = AS_INTEGER(nverb)); 
+  PROTECT(nrep0     = AS_INTEGER(nrep0)); 
   PROTECT(   x      = AS_NUMERIC(x)); 
   PROTECT(   y      = AS_NUMERIC(y)); 
   PROTECT( marks    = AS_INTEGER(marks)); 
@@ -97,7 +99,7 @@ SEXP xmethas(
   PROTECT(ncond     = AS_INTEGER(ncond)); 
   PROTECT(track     = AS_INTEGER(track)); 
 
-                    /* that's 20 protected objects */
+                    /* that's 21 protected objects */
 
   /* =================== Translate arguments from R to C ================ */
 
@@ -111,6 +113,7 @@ SEXP xmethas(
   /* copy RMH algorithm parameters */
   algo.nrep   = *(INTEGER_POINTER(nrep));
   algo.nverb  = *(INTEGER_POINTER(nverb));
+  algo.nrep0  = *(INTEGER_POINTER(nrep0));
   algo.p = *(NUMERIC_POINTER(p));
   algo.q = *(NUMERIC_POINTER(q));
   algo.fixall = ((*(INTEGER_POINTER(fixall))) == 1);
@@ -413,6 +416,6 @@ SEXP xmethas(
       SET_VECTOR_ELT(out, 4, aout);
     }
   }
-  UNPROTECT(26);  /* 20 arguments plus xout, yout, mout, pout, aout, out */
+  UNPROTECT(27);  /* 21 arguments plus xout, yout, mout, pout, aout, out */
   return(out);
 }

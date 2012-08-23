@@ -9,7 +9,7 @@
 
 suffstat <- function(model, X=data.ppm(model)) {
   cl <- sys.call()
-  callstring <- paste(deparse(cl), collapse=" ")
+  callstring <- short.deparse(cl)
 
   verifyclass(model, "ppm")
   if(!missing(X))

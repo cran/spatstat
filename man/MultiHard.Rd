@@ -55,12 +55,14 @@ which can then be fitted to point pattern data.
 }
 \examples{
    h <- matrix(c(1,2,2,1), nrow=2,ncol=2)
-   MultiHard(hradii=h)
+
    # prints a sensible description of itself
-   data(betacells)
-   h <- 15.0 * matrix(c(NA,1,1,NA), nrow=2,ncol=2)
-   ppm(betacells, ~1, MultiHard(,h))
-   # fit the stationary multitype hardcore process to `betacells'
+   MultiHard(hradii=h)
+
+   # Fit the stationary multitype hardcore process to `amacrine'
+   # with hard core operating only between cells of the same type.
+   h <- 0.02 * matrix(c(1, NA, NA, 1), nrow=2,ncol=2)
+   ppm(amacrine, ~1, MultiHard(,h))
    # Note the comma; needed since "types" is not specified.
 }
 \section{Warnings}{

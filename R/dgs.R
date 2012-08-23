@@ -96,6 +96,11 @@ DiggleGatesStibbard <- local({
            v <- matrix(v, ncol=1)
            attr(v, "IsOffset") <- TRUE
            return(v)
+         },
+         Mayer=function(coeffs, self) {
+           # second Mayer cluster integral
+           rho   <- self$par$rho
+           return((pi/2 - 2/pi) * rho^2)
          }
          )
   class(BlankDGS) <- "interact"

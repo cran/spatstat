@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.25 $	$Date: 2012/06/13 14:25:43 $
+#	$Revision: 1.26 $	$Date: 2012/07/09 04:50:30 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -25,12 +25,14 @@ function(Q,
          nrmh=1e5,
          start=NULL,
          control=list(nrep=nrmh),
-         verb=TRUE
+         verb=TRUE,
+         callstring=NULL
 ) {
   if(!(method %in% c("mpl", "ho", "logi")))
     stop(paste("Unrecognised fitting method", sQuote(method)))
   cl <- match.call()
-  callstring <- paste(deparse(sys.call()), collapse="")
+  if(is.null(callstring)) 
+    callstring <- paste(short.deparse(sys.call()), collapse="")
 
   if(is.null(interaction))
     interaction <- Poisson()
@@ -85,7 +87,6 @@ function(Q,
                            nd = nd,
                            gcontrol=gcontrol,
                            callstring=callstring,
-                           preponly=FALSE,
                            ...)
     return(fitLOGI)
   }
@@ -102,8 +103,12 @@ function(Q,
                        nd = nd,
                        gcontrol=gcontrol,
                        callstring=callstring,
-                       preponly=FALSE,
                        ...)
+
+  if(!is.ppm(fitMPL)) {
+    # internal use only - returns some other data
+    return(fitMPL)
+  }
   
   fitMPL$call <- cl
   fitMPL$callstring <- callstring

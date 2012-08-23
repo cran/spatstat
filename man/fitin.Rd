@@ -48,19 +48,16 @@ fitin(object)
   \code{\link{as.interact}}.
 }
 \examples{
-   data(betacells)
-
    # unmarked 
-   X <- unmark(betacells)
-   model <- ppm(X, ~1, PairPiece(seq(10,100,by=10)))
+   model <- ppm(swedishpines, ~1, PairPiece(seq(3,19,by=4)))
    f <- fitin(model)
    f
    plot(f)
 
-   # marked
-   # fit the stationary multitype Strauss process to `betacells'
-   r <- 30.0 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   model <- ppm(betacells, ~1, MultiStrauss(c("off","on"), r))
+   # multitype
+   # fit the stationary multitype Strauss process to `amacrine'
+   r <- 0.02 * matrix(c(1,2,2,1), nrow=2,ncol=2)
+   model <- ppm(amacrine, ~1, MultiStrauss(c("off","on"), r))
    f <- fitin(model)
    f
    plot(f)

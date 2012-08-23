@@ -12,12 +12,12 @@
   simulate=NULL, verbose=TRUE, 
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, do.pwrong=FALSE)
   \method{envelope}{lppm}(Y, fun=linearK, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, 
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, do.pwrong=FALSE)
 }
 \arguments{
   \item{Y}{
@@ -97,6 +97,13 @@
   \item{Yname}{
     Character string that should be used as the name of the 
     data point pattern \code{Y} when printing or plotting the results.
+  }
+  \item{do.pwrong}{
+    Logical. If \code{TRUE}, the algorithm will also estimate
+    the true significance level of the \dQuote{wrong} test (the test that
+    declares the summary function for the data to be significant
+    if it lies outside the \emph{pointwise} critical boundary at any
+    point). This estimate is printed when the result is printed.
   }
 }
 \details{

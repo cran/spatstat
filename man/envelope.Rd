@@ -14,20 +14,21 @@
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
+  do.pwrong=FALSE)
 
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   start=NULL, control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5,
   transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim, do.pwrong=FALSE)
 
   \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
-  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim)
+  nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim, do.pwrong=FALSE)
 }
 \arguments{
   \item{Y}{
@@ -135,6 +136,13 @@
     requires at least one point), the pattern will be rejected
     and a new random point pattern will be generated. If this happens
     more than \code{maxnerr} times, the algorithm will give up.
+  }
+  \item{do.pwrong}{
+    Logical. If \code{TRUE}, the algorithm will also estimate
+    the true significance level of the \dQuote{wrong} test (the test that
+    declares the summary function for the data to be significant
+    if it lies outside the \emph{pointwise} critical boundary at any
+    point). This estimate is printed when the result is printed.
   }
 }
 \value{

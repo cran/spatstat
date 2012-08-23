@@ -169,7 +169,7 @@ scan.test <- function(X, r, ...,
                       case = 2,
                       alternative=c("greater", "less", "two.sided"),
                       verbose=TRUE) {
-  dataname <- deparse(substitute(X), width.cutoff=60, nlines=1)
+  dataname <- short.deparse(substitute(X))
   stopifnot(is.ppp(X))
   method <- match.arg(method)
   alternative <- match.arg(alternative)
@@ -263,7 +263,7 @@ scan.test <- function(X, r, ...,
 }
 
 plot.scan.test <- function(x, ..., do.window=TRUE) {
-  xname <- deparse(substitute(x), width.cutoff=60, nlines=1)
+  xname <- short.deparse(substitute(x))
   Z <- as.im(x)
   do.call("plot",
           resolve.defaults(list(x=Z), list(...), list(main=xname)))

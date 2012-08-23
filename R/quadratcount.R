@@ -71,7 +71,7 @@ quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
 plot.quadratcount <- function(x, ...,
                               add=FALSE, entries=as.vector(t(as.table(x))),
                               dx=0, dy=0, show.tiles=TRUE) {
-  xname <- deparse(substitute(x))
+  xname <- short.deparse(substitute(x))
   tess <- attr(x, "tess")
   # add=FALSE, show.tiles=TRUE  => plot tiles + numbers
   # add=FALSE, show.tiles=FALSE => plot window (add=FALSE) + numbers

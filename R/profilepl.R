@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.12 $  $Date: 2012/02/07 08:23:32 $
+#  $Revision: 1.16 $  $Date: 2012/07/09 04:57:47 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -9,7 +9,7 @@
 profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   s <- as.data.frame(s)
   n <- nrow(s)
-  fname <- paste(deparse(substitute(f)), collapse="")
+  fname <- paste(short.deparse(substitute(f)), collapse="")
   stopifnot(is.function(f))
   # validate 's'
   parms <- names(s)
@@ -75,8 +75,8 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
   if(pass.cfa || got.cfa) {
     savecomp <- FALSE
   } else {
-    fit0 <- ppm(..., rbord=rbord)
-    savecomp <- !oversize.quad(quad.ppm(fit0))
+    Q <- ppm(..., rbord=rbord, justQ=TRUE)
+    savecomp <- !oversize.quad(Q)
   }
   
   # fit one model and extract quadscheme
@@ -93,17 +93,22 @@ profilepl <- function(s, f, ..., rbord=NULL, verbose=TRUE) {
     if(i == 1) {
       # fit from scratch
       arg1 <- list(interaction=fi, ...,
-                   rbord=rbord, savecomputed=savecomp, warn.illegal=FALSE)
+                   rbord=rbord, savecomputed=savecomp,
+                   warn.illegal=FALSE,
+                   callstring="")
       if(pass.cfa) arg1 <- append(arg1, cfai)
-      fiti <- do.call(ppm, arg1)
+      fiti <- do.call("ppm", arg1)
       # save intermediate computations (pairwise distances, etc)
       precomp <- fiti$internal$computed
+      savedargs <- list(...,
+                        rbord=rbord, precomputed=precomp,
+                        warn.illegal=FALSE,
+                        callstring="")
     } else {
       # use precomputed data
-      argi <- list(interaction=fi, ...,
-                   rbord=rbord, precomputed=precomp, warn.illegal=FALSE)
+      argi <- append(savedargs, list(interaction=fi))
       if(pass.cfa) argi <- append(argi, cfai)
-      fiti <- do.call(ppm, argi)
+      fiti <- do.call("ppm", argi)
     }
     # save log PL for each fit
     logmpl[i] <- as.numeric(logLik(fiti, warn=FALSE))
@@ -186,7 +191,7 @@ plot.profilepl <- function(x, ..., add=FALSE, main=NULL,
   npara <- ncol(para)
   # main header
   if(is.null(main))
-    main <- deparse(x$pseudocall)
+    main <- short.deparse(x$pseudocall)
   # x variable for plot
   if(is.null(xvariable)) {
     xvalues <- para[,1]

@@ -3,7 +3,7 @@
 #
 # Code related to intensity and intensity approximations
 #
-#  $Revision: 1.2 $ $Date: 2012/06/28 04:43:49 $
+#  $Revision: 1.3 $ $Date: 2012/07/14 06:46:58 $
 #
 
 intensity <- function(X, ...) {
@@ -22,6 +22,10 @@ intensity.ppp <- function(X, ...) {
 }
 
 intensity.ppm <- function(X, ...) {
+  if(!identical(valid.ppm(X), TRUE)) {
+    warning("Model is invalid - projecting it")
+    X <- project.ppm(X)
+  }
   if(is.poisson(X)) {
     if(is.stationary(X)) {
       # stationary univariate/multivariate Poisson
@@ -47,6 +51,11 @@ intensity.ppm <- function(X, ...) {
   co <- with(fitin(X), coefs[Vnames[!IsOffset]])
   # compute second Mayer cluster integral
   G <- Mayer(co, inte)
+  if(is.null(G) || !is.finite(G)) 
+    stop("Internal error in computing Mayer cluster integral")
+  if(G < 0)
+    stop(paste("Unable to apply Poisson-saddlepoint approximation:",
+               "Mayer cluster integral is negative"))
   # activity parameter
   sX <- summary(X, quick="no variances")
   beta <- sX$trend$value

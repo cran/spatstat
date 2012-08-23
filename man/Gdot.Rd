@@ -212,9 +212,8 @@ Gdot(X, i, r=NULL, breaks=NULL, \dots, correction=c("km", "rs", "han"))
  \code{\link{Gmulti}}
 }
 \examples{
-    data(betacells)
-     # cat retina data
-    G0. <- Gdot(betacells, "off") 
+    # amacrine cells data
+    G0. <- Gdot(amacrine, "off") 
     plot(G0.)
 
     # synthetic example    
