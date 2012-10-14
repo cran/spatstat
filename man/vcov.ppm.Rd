@@ -115,7 +115,8 @@
   but is useful for other calculations.
 
   Note that standard errors and 95\% confidence intervals for
-  the coefficients can also be obtained using \code{coef(summary(object))}.
+  the coefficients can also be obtained using
+  \code{confint(object)} or \code{coef(summary(object))}.
 }
 \section{Error messages}{
   An error message that reports
@@ -163,6 +164,13 @@
   New code for stationary Gibbs point processes was generously contributed by
   Ege Rubak and Jean-Francois Coeurjolly.
   New code for generic Gibbs process written by Adrian Baddeley.
+}
+\seealso{
+  \code{\link{vcov}} for the generic,
+
+  \code{\link{ppm}} for information about fitted models,
+  
+  \code{\link[stats]{confint}} for confidence intervals.
 }
 \references{
   Coeurjolly, J.-F. and Rubak, E. (2012)

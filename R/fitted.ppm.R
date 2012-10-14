@@ -3,19 +3,32 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.8 $   $Date: 2010/05/07 12:17:57 $
+#   $Revision: 1.9 $   $Date: 2012/09/11 13:26:54 $
 # 
 
-fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, check=TRUE, repair=TRUE) {
+fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE,
+                       new.coef=NULL,
+                       drop=FALSE, check=TRUE, repair=TRUE) {
   verifyclass(object, "ppm")
-
+  
   if(check && damaged.ppm(object)) {
     if(!repair)
       stop("object format corrupted; try update(object, use.internal=TRUE)")
     message("object format corrupted; repairing it.")
     object <- update(object, use.internal=TRUE)
   }
-    
+  
+  fitcoef <- coef(object)
+  if(!is.null(new.coef)) {
+    # validate
+    if(length(new.coef) != length(fitcoef))
+      stop(paste("Argument new.coef has wrong length",
+                 length(new.coef), ": should be", length(fitcoef)))
+    coeffs <- new.coef
+  } else {
+    coeffs <- fitcoef
+  }
+  
   uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
 
   typelist <- c("lambda", "cif",    "trend")
@@ -24,10 +37,9 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, c
     stop(paste("Unrecognised choice of ", sQuote("type"),
                ": ", sQuote(type), sep=""))
   type <- typevalu[m]
-
+  
   if(uniform) {
-    fitcoef <- coef.ppm(object)
-    lambda <- exp(fitcoef[[1]])
+    lambda <- exp(coeffs[[1]])
     Q <- quad.ppm(object, drop=drop)
     lambda <- rep(lambda, n.quad(Q))
   } else {
@@ -51,8 +63,8 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE, drop=FALSE, c
            })
 
     # Compute predicted [conditional] intensity values
-    lambda <- GLMpredict(glmfit, glmdata, coef(object),
-                         changecoef=(object$method != "mpl"))
+    changecoef <- !is.null(new.coef) || (object$method != "mpl")
+    lambda <- GLMpredict(glmfit, glmdata, coeffs, changecoef=changecoef)
     
     # Note: the `newdata' argument is necessary in order to obtain
     # predictions at all quadrature points. If it is omitted then

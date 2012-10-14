@@ -36,7 +36,8 @@ listof <- function(...) {
 as.listof <- function(x) {
   if(!is.list(x))
     x <- list(x)
-  class(x) <- c("listof", class(x))
+  if(!inherits(x, "listof"))
+    class(x) <- c("listof", class(x))
   return(x)
 }
 

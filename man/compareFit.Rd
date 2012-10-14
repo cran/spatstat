@@ -117,6 +117,10 @@ compareFit(object, Fun, r = NULL, breaks = NULL, ...,
    }
    ilist <- list(Poisson(), Geyer(7, 2), Strauss(7))
    iname <- c("Poisson", "Geyer", "Strauss")
+   \testonly{
+      ilist <- ilist[c(1,3)]
+      iname <- iname[c(1,3)]
+   }
    K <- compareFit(swedishpines, Kcom, interaction=ilist, rbord=9, 
             same="iso", different="icom", modelnames=iname, nd=nd)
    K

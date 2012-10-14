@@ -1,26 +1,24 @@
-\name{methods.distfun}
-\alias{methods.distfun}
-\alias{contour.distfun}
-\alias{persp.distfun}
-\alias{plot.distfun}
-\alias{print.distfun}
+\name{methods.funxy}
+\alias{methods.funxy}
+\alias{contour.funxy}
+\alias{persp.funxy}
+\alias{plot.funxy}
 \Rdversion{1.1}
 \title{
-  Methods for Distance Functions
+  Methods for Spatial Functions
 }
 \description{
-  Methods for objects of the class \code{"distfun"}.
+  Methods for objects of the class \code{"funxy"}.
 }
 \usage{
-\method{contour}{distfun}(x, \dots)
-\method{persp}{distfun}(x, \dots)
-\method{plot}{distfun}(x, \dots)
-\method{print}{distfun}(x, \dots)
+\method{contour}{funxy}(x, \dots)
+\method{persp}{funxy}(x, \dots)
+\method{plot}{funxy}(x, \dots)
 }
 \arguments{
   \item{x}{
-    Object of class \code{"distfun"} representing a
-    distance function.
+    Object of class \code{"funxy"} representing a
+    function of \eqn{x,y} coordinates.
   }
   \item{\dots}{
     Named arguments controlling the plot. See Details.
@@ -28,21 +26,19 @@
 }
 \details{
   These are methods for the generic functions
-  \code{\link{print}},
   \code{\link{plot}},
   \code{\link{contour}}
   and \code{\link{persp}}
-  for the class \code{"distfun"} of distance functions.
-  See \code{\link{distfun}} for explanation about this class.
-  
-  The \code{print} method prints a description of the domain of the
-  distance function and the spatial object of which it is the distance
-  function. Any additional arguments \code{\dots} are ignored.
+  for the class \code{"funxy"} of spatial functions.
+
+  Objects of class \code{"funxy"} are created, for example,
+  by the commands \code{\link{distfun}} and \code{\link{funxy}}.
   
   The \code{plot}, \code{contour} and \code{persp} methods first convert
   \code{x} to a pixel image object using \code{\link{as.im}},
   then display it using \code{\link{plot.im}}, \code{\link{contour.im}} or
   \code{\link{persp.im}}.
+
   Additional arguments \code{\dots} are either
   passed to \code{\link{as.im.function}} to
   control the spatial resolution of the pixel image, or passed to 
@@ -60,6 +56,7 @@
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
+  \code{\link{funxy}},
   \code{\link{distfun}},
   \code{\link{as.im}},
   \code{\link{plot.im}},

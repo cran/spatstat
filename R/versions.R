@@ -28,12 +28,19 @@ versionstring.interact <- function(object) {
 }
 
 # Get version number of current spatstat installation
+# This is now saved in the spatstat cache environment rather than read from file every time
 
 versionstring.spatstat <- function() {
+  get("SpatstatVersion", envir = .spEnv)
+}
+
+store.versionstring.spatstat <- function() {
   vs <- read.dcf(file=system.file("DESCRIPTION", package="spatstat"),
                  fields="Version")
-  return(as.character(vs))
+  vs <- as.character(vs)
+  assign("SpatstatVersion", vs, envir=.spEnv)
 }
+
 
 # Extract major and minor versions only.
 
@@ -55,4 +62,3 @@ RandomFieldsSafe <- function() {
   message("RandomFields is disabled due to a bug")
   return(FALSE)
 }
-

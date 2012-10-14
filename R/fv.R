@@ -4,7 +4,7 @@
 #
 #    class "fv" of function value objects
 #
-#    $Revision: 1.90 $   $Date: 2012/08/22 01:37:14 $
+#    $Revision: 1.91 $   $Date: 2012/08/31 02:16:31 $
 #
 #
 #    An "fv" object represents one or more related functions
@@ -632,7 +632,7 @@ rebadge.fv <- function(x, new.ylab, new.fname,
   alim <- c(max(alim[1], rang[1]),
             min(alim[2], rang[2]))
 
-  return(fv(z, argu=attr(x, "argu"),
+  result <- fv(z, argu=attr(x, "argu"),
                ylab=attr(x, "ylab"),
                valu=attr(x, "valu"),
                fmla=attr(x, "fmla"),
@@ -640,7 +640,14 @@ rebadge.fv <- function(x, new.ylab, new.fname,
                labl=attr(x, "labl")[selected],
                desc=attr(x, "desc")[selected],
                unitname=attr(x, "units"),
-               fname=attr(x,"fname")))
+               fname=attr(x,"fname"))
+  # carry over preferred names, if possible
+  dotn <- fvnames(x, ".")
+  fvnames(result, ".") <- dotn[dotn %in% colnames(result)]
+  shad <- fvnames(x, ".s")
+  if(!is.null(shad) && all(shad %in% colnames(result)))
+    fvnames(result, ".s") <- shad
+  return(result)
 }  
 
 # method for 'formula'

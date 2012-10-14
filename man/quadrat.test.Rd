@@ -184,7 +184,7 @@ quadrat.test(X, ...)
   for explanation. 
 
   The return value is also an object of the special class
-  \code{"quadrat.test"}, and there is a plot method for this class.
+  \code{"quadrattest"}, and there is a plot method for this class.
   See the examples.
 }
 \examples{

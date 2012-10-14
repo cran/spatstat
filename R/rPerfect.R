@@ -1,7 +1,7 @@
 #
 #  Perfect Simulation 
 #
-#  $Revision: 1.13 $ $Date: 2012/03/10 11:52:26 $
+#  $Revision: 1.14 $ $Date: 2012/10/13 05:49:28 $
 #
 #  rStrauss
 #  rHardcore
@@ -52,7 +52,8 @@ rStrauss <- function(beta, gamma=1, R=0, W=owin()) {
   if(nout<0)
     stop("internal error: copying failed in PerfectStrauss")
 
-  P <- ppp(X[1:nout], Y[1:nout], window=W, check=FALSE)
+  seqn <- seq_len(nout)
+  P <- ppp(X[seqn], Y[seqn], window=W, check=FALSE)
   attr(P, "times") <- times
   return(P)
 }
@@ -96,7 +97,8 @@ rHardcore <- function(beta, R=0, W=owin()) {
   if(nout<0)
     stop("internal error: copying failed in PerfectHardcore")
 
-  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+  seqn <- seq_len(nout)
+  P <- ppp(X[seqn], Y[seqn], window=W, check=FALSE)
 }
 
 #
@@ -153,7 +155,8 @@ rStraussHard <- function(beta, gamma=1, R=0, H=0, W=owin()) {
   if(nout<0)
     stop("internal error: copying failed in PerfectStraussHard")
 
-  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+  seqn <- seq_len(nout)
+  P <- ppp(X[seqn], Y[seqn], window=W, check=FALSE)
 }
 
 
@@ -208,7 +211,8 @@ rDiggleGratton <- function(beta, delta, rho, kappa=1, W=owin()) {
   if(nout<0)
     stop("internal error: copying failed in PerfectDiggleGratton")
 
-  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+  seqn <- seq_len(nout)
+  P <- ppp(X[seqn], Y[seqn], window=W, check=FALSE)
 }
 
 
@@ -254,7 +258,8 @@ rDGS <- function(beta, rho, W=owin()) {
   if(nout<0)
     stop("internal error: copying failed in PerfectDGS")
 
-  return(ppp(X[1:nout], Y[1:nout], window=W, check=FALSE))
+  seqn <- seq_len(nout)
+  P <- ppp(X[seqn], Y[seqn], window=W, check=FALSE)
 }
 
 

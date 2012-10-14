@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.10 $ $Date: 2012/08/21 05:21:09 $
+#  $Revision: 1.11 $ $Date: 2012/09/04 01:57:38 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -55,4 +55,23 @@ resolve.1.default <- function(.A, ...) {
   hit <- (names(res) == .A)
   if(!any(hit)) return(NULL)
   return(res[[min(which(hit))]])
+}
+
+# extract all the arguments that are not trapped by a function
+
+passthrough <- function(.Fun, ..., .Fname=NULL) {
+  if(is.null(.Fname))
+    .Fname <- deparse(substitute(.Fun))
+  # make a fake call to the named function using the arguments "..."
+  cl <- eval(substitute(call(.Fname, ...)))
+  # match the call to the function 
+  mc <- match.call(.Fun, cl)
+  # extract the arguments
+  mcargs <- as.list(mc)[-1]
+  # figure out which ones are actually formal arguments of the function
+  nam <- names(formals(.Fun))
+  nam <- setdiff(nam, "...")
+  known <- names(mcargs) %in% nam
+  # return the *other* arguments
+  return(mcargs[!known])
 }

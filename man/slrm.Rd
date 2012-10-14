@@ -131,7 +131,8 @@ slrm(formula, ..., data = NULL, offset = TRUE, link = "logit",
   \code{anova}, \code{coef}, \code{logLik}, \code{terms},
   \code{update}, \code{formula} and \code{vcov}.
   Automated stepwise model selection is possible using
-  \code{\link{step}}.
+  \code{\link{step}}. Confidence intervals for the parameters can be
+  computed using \code{\link[stats]{confint}}. 
 }
 \seealso{
   \code{\link{anova.slrm}},
@@ -139,7 +140,8 @@ slrm(formula, ..., data = NULL, offset = TRUE, link = "logit",
   \code{\link{fitted.slrm}},
   \code{\link{logLik.slrm}},
   \code{\link{plot.slrm}},
-  \code{\link{predict.slrm}}
+  \code{\link{predict.slrm}},
+  \code{\link{vcov.slrm}}
 }
 \references{
   Agterberg, F.P. (1974)

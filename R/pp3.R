@@ -68,7 +68,13 @@ eroded.volumes.box3 <- function(x, r) {
 shortside <- function(x) { UseMethod("shortside") }
 
 shortside.box3 <- function(x) {
-  min(diff(x$xrange), diff(x$yrange), diff(x$zrange))
+  min(sidelengths(x))
+}
+
+sidelengths <- function(x) { UseMethod("sidelengths") }
+
+sidelengths.box3 <- function(x) {
+  with(x, c(diff(xrange), diff(yrange), diff(zrange)))
 }
 
 pp3 <- function(x, y, z, ...) {

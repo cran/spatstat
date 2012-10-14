@@ -40,7 +40,8 @@ plot.listof <- plot.splitppp <-
     cl <- match.call()
     if(missing(plotcommand) && all(unlist(lapply(x, is.im)))) {
       cl[[1]] <- as.name("image.listof")
-      return(eval(cl))
+      parenv <- sys.parent()
+      return(eval(cl, envir=parenv))
     }
             
     n <- length(x)

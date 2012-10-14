@@ -117,10 +117,10 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
   \item{fit}{Best-fitting model}
   \item{param}{The data frame \code{s}}
   \item{iopt}{Row index of the best-fitting parameters in \code{s}}
+
+  To extract the best fitting model you can also use \code{\link{as.ppm}}.
 }
 \examples{
-    data(cells)
-
     # one irregular parameter
     s <- data.frame(r=seq(0.05,0.15, by=0.01))
     \testonly{
@@ -133,19 +133,21 @@ profilepl(s, f, \dots, rbord = NULL, verbose = TRUE)
     # two irregular parameters
     s <- expand.grid(r=seq(0.05,0.15, by=0.01),sat=1:3)
     \testonly{
-      s <- expand.grid(r=c(0.05,0.1,0.15),sat=1:2)
+      s <- expand.grid(r=c(0.07,0.12),sat=1:2)
     }
     pg <- profilepl(s, Geyer, cells)
     pg
-    if(interactive()) plot(pg)
-    \dontrun{
-    pg$fit
+    if(interactive()) {
+      plot(pg)
+      as.ppm(fit)
     }
 
     # multitype pattern with a common interaction radius
-    s <- data.frame(R=seq(0.03,0.05,by=0.01))
-    MS <- function(R) { MultiStrauss(radii=diag(c(R,R))) }
-    pm <- profilepl(s, MS, amacrine, ~marks)
+    \dontrun{
+     s <- data.frame(R=seq(0.03,0.05,by=0.01))
+     MS <- function(R) { MultiStrauss(radii=diag(c(R,R))) }
+     pm <- profilepl(s, MS, amacrine, ~marks)
+    }
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

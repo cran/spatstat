@@ -2,7 +2,7 @@
 #
 #     setcov.R
 #
-#     $Revision: 1.10 $ $Date: 2012/05/16 09:38:02 $
+#     $Revision: 1.11 $ $Date: 2012/10/10 06:48:16 $
 #
 #    Compute the set covariance function of a window
 #    or the (noncentred) spatial covariance function of an image
@@ -108,7 +108,7 @@ convolve.im <- function(X, Y=X, ..., reflectX=FALSE, reflectY=FALSE) {
     xran <- Xbox$xrange + Ybox$xrange
     yran <- Xbox$yrange + Ybox$yrange   
     XYbox <- owin(xran, yran)
-    out <- out[XYbox]
+    out <- out[XYbox, rescue=TRUE]
   }
   return(out)
 }

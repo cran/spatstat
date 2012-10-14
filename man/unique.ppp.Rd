@@ -6,7 +6,7 @@
   in a spatial point pattern.
 }
 \usage{
- \method{unique}{ppp}(x, \dots)
+ \method{unique}{ppp}(x, \dots, warn=FALSE)
 }
 \arguments{
   \item{x}{
@@ -14,7 +14,11 @@
     (object of class \code{"ppp"}).
   }
   \item{\dots}{
-    Ignored.
+    Arguments passed to \code{\link{duplicated.ppp}}.
+  }
+  \item{warn}{
+    Logical. If \code{TRUE}, issue a warning message if any
+    duplicated points were found.
   }
 }
 \value{
@@ -41,6 +45,7 @@
 \examples{
    X <- ppp(c(1,1,0.5), c(2,2,1), window=square(3))
    unique(X)
+   unique(X, rule="deldir")
 }
 
 \author{Adrian Baddeley

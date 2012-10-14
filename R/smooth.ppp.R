@@ -3,7 +3,7 @@
 #
 #  Smooth the marks of a point pattern
 # 
-#  $Revision: 1.1 $  $Date: 2011/09/09 02:05:12 $
+#  $Revision: 1.2 $  $Date: 2012/08/26 09:01:56 $
 #
 
 smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
@@ -60,9 +60,14 @@ smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
                                         list(...),
                                         list(edge=FALSE)))
              result <- eval.im(numerator/denominator)
-             # trap NaN and +/- Inf but not NA
-             nbg <- as.matrix(eval.im(is.infinite(result) | is.nan(result)))
-             if(any(nbg)) {
+             # trap small values of denominator
+             # trap NaN and +/- Inf values of result, but not NA
+             eps <- .Machine$double.eps
+             nbg <- eval.im(is.infinite(result)
+                            | is.nan(result)
+                            | (denominator < eps))
+             if(any(as.matrix(nbg), na.rm=TRUE)) {
+               warning("Numerical underflow detected: sigma is probably too small")
                # l'Hopital's rule
                distX <- distmap(X, xy=numerator)
                whichnn <- attr(distX, "index")

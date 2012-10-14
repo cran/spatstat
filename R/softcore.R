@@ -2,7 +2,7 @@
 #
 #    softcore.S
 #
-#    $Revision: 2.11 $   $Date: 2012/08/22 11:53:54 $
+#    $Revision: 2.12 $   $Date: 2012/08/27 02:09:49 $
 #
 #    Soft core processes.
 #
@@ -25,7 +25,7 @@ Softcore <- local({
          if(is.na(sig0)) {
            p <- -d^(-2/par$kappa)
          } else {
-           # expand around sigma0 and set large numbers to Inf
+           # expand around sigma0 and set large negative numbers to -Inf
            drat <- d/sig0
            p <- -drat^(-2/par$kappa)
            p[p < -25] <- -Inf
@@ -36,25 +36,27 @@ Softcore <- local({
        parnames = c("Exponent kappa", "Initial approximation to sigma"),
        selfstart = function(X, self) {
          # self starter for Softcore
-         kappa <- self$par$kappa
-         # attempt to set value of 'sigma0'
-         if(!is.na(self$par$sigma0)) {
-           # value fixed by user or previous invocation
-           return(self)
-         }
          if(npoints(X) < 2) {
-           # not enough points
+           # not enough points to make any decisions
            return(self)
          }
-         s0 <- min(nndist(X))
-         if(s0 == 0) {
+         md <- min(nndist(X))
+         if(md == 0) {
            warning(paste("Pattern contains duplicated points:",
                          "impossible under Softcore model"))
-           s0 <- mean(nndist(X))
-           if(s0 == 0)
-             return(self)
+           return(self)
          }
-         Softcore(kappa=kappa, sigma0=s0)           
+         kappa <- self$par$kappa
+         if(!is.na(sigma0 <- self$par$sigma0)) {
+           # value fixed by user or previous invocation
+           # check it
+           if((md/sigma0)^(-2/kappa) > 25)
+             warning(paste("Initial approximation sigma0 is too large;",
+                           "some data points will have zero probability"))
+           return(self)
+         }
+         # take sigma0 = minimum interpoint distance
+         Softcore(kappa=kappa, sigma0=md)
        },
        init     = function(self) {
          kappa <- self$par$kappa

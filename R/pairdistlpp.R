@@ -1,11 +1,12 @@
 #
 # pairdistlpp.R
 #
-#  $Revision: 1.4 $ $Date: 2012/06/06 11:13:02 $
+#  $Revision: 1.9 $ $Date: 2012/10/13 02:25:43 $
 #
-# Calculates the shortest-path distance between each pair of points
-# in a point pattern on a linear network.
 #
+#  pairdist.lpp
+#        Calculates the shortest-path distance between each pair of points
+#        in a point pattern on a linear network.
 #
 
 pairdist.lpp <- function(X, ..., method="C") {
@@ -22,10 +23,8 @@ pairdist.lpp <- function(X, ..., method="C") {
   to    <- L$to
   dpath <- L$dpath
   
-  # find nearest segment for each point
-  # This is given by local coordinates, if available (spatstat >= 1.27-1)
-  loco <- coords(X, local=TRUE, spatial=FALSE, temporal=FALSE)
-  pro <- if(ncol(loco) > 0) loco$seg else nearestsegment(X, Lseg)
+  # nearest segment for each point
+  pro <- coords(X, local=TRUE, spatial=FALSE, temporal=FALSE)$seg
 
   pairdistmat <- matrix(0,n,n)
 
@@ -90,3 +89,4 @@ pairdist.lpp <- function(X, ..., method="C") {
   }
   return(pairdistmat)
 }
+

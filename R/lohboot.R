@@ -1,7 +1,7 @@
 #
 #  lohboot.R
 #
-#  $Revision: 1.4 $   $Date: 2012/08/22 01:42:47 $
+#  $Revision: 1.6 $   $Date: 2012/08/31 07:14:04 $
 #
 #  Loh's bootstrap CI's for local pcf, local K etc
 #
@@ -9,14 +9,19 @@
 lohboot <-
   function(X,
            fun=c("pcf", "Kest", "pcfinhom", "Kinhom"),
-           ..., nsim=200, confidence=0.95, type=7) {
+           ..., nsim=200, confidence=0.95, global=FALSE, type=7) {
   stopifnot(is.ppp(X))
   fun <- match.arg(fun)
   # validate confidence level
   stopifnot(confidence > 0.5 && confidence < 1)
   alpha <- 1 - confidence
-  probs <- c(alpha/2, 1-alpha/2)
-  rank <- nsim * probs[2]
+  if(!global) {
+    probs <- c(alpha/2, 1-alpha/2)
+    rank <- nsim * probs[2]
+  } else {
+    probs <- 1-alpha
+    rank <- nsim * probs
+  }
   if(abs(rank - round(rank)) > 0.001)
     warning(paste("confidence level", confidence,
                   "corresponds to a non-integer rank", paren(rank),
@@ -49,8 +54,17 @@ lohboot <-
     ystar[,i] <- rowMeans(y[,ind], na.rm=TRUE)
   }
   # compute quantiles
-  hilo <- apply(ystar, 1, quantile,
-                probs=probs, na.rm=TRUE, type=type)
+  if(!global) {
+    # pointwise quantiles
+    hilo <- apply(ystar, 1, quantile,
+                  probs=probs, na.rm=TRUE, type=type)
+  } else {
+    # quantiles of deviation
+    ydif <- sweep(ystar, 1, ymean)
+    ydev <- apply(abs(ydif), 2, max, na.rm=TRUE)
+    crit <- quantile(ydev, probs=probs, na.rm=TRUE, type=type)
+    hilo <- rbind(ymean - crit, ymean + crit)
+  }
   # create fv object
   df <- data.frame(r=f$r,
                    theo=f$theo,
@@ -72,9 +86,9 @@ lohboot <-
          pcfinhom={ fname <- "g[inhom]" ; ylab <- quote(g[inhom](r)) },
          Kinhom={ fname <- "K[inhom]" ; ylab <- quote(K[inhom](r)) })
   g <- fv(df, "r", ylab, ctag, , c(0, max(f$r)), labl, desc, fname=fname)
-  # default is to display them all
   formula(g) <- . ~ r
   fvnames(g, ".") <- c(ctag, "hi", "lo", "theo")
+  fvnames(g, ".s") <- c("hi", "lo")
   unitname(g) <- unitname(X)
   g
 }

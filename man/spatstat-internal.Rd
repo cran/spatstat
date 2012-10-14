@@ -127,6 +127,7 @@
 \alias{exactPdt}
 \alias{explain.ifnot}
 \alias{extractAIC.slrm}
+\alias{extractAtomicQtests}
 \alias{fave.order}
 \alias{f3engine}
 \alias{f3Cengine}
@@ -177,7 +178,8 @@
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
 \alias{intY.owin}     
-\alias{intY.xypolygon}     
+\alias{intY.xypolygon}
+\alias{is.atomicQtest}
 \alias{is.cadlag}
 \alias{is.data}
 \alias{is.expandable}
@@ -213,8 +215,6 @@
 \alias{levels.im}
 \alias{levels<-.im}
 \alias{lhs.of.formula}
-\alias{licence.polygons}
-\alias{license.polygons}
 \alias{linequad}
 \alias{linearKengine}
 \alias{linearpcfengine}
@@ -224,6 +224,7 @@
 \alias{localpcfmatrix}
 \alias{local2lpp}
 \alias{logi.engine}
+\alias{passthrough}
 \alias{paste.expr}
 \alias{lookup.im}
 \alias{majorminorversion}
@@ -260,7 +261,6 @@
 \alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
-\alias{model.matrix.slrm}
 \alias{model.se.image}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
@@ -333,10 +333,12 @@
 \alias{print.bw.optim}
 \alias{print.colourmap}
 \alias{print.diagppm}
+\alias{print.distfun}
 \alias{print.envelope}
 \alias{print.fasp}       
 \alias{print.fii}       
 \alias{print.fv}       
+\alias{print.funxy}       
 \alias{print.hyperframe}
 \alias{print.interact}       
 \alias{print.isf}
@@ -347,6 +349,7 @@
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.msr}
+\alias{print.nnfun}
 \alias{print.parres}
 \alias{print.plotpairsim}
 \alias{print.plotppm}
@@ -458,6 +461,7 @@
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
 \alias{sphere.volume}
+\alias{store.versionstring.spatstat}
 \alias{str.hyperframe}
 \alias{stratrand}
 \alias{strausscounts}
@@ -485,7 +489,7 @@
 \alias{trap.extra.arguments}
 \alias{trianglediameters}
 \alias{trim.mask}        
-\alias{tweak.fv.entry}        
+\alias{tweak.fv.entry}
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{update.interact}
@@ -497,7 +501,6 @@
 \alias{validposint}        
 \alias{vanilla.fv}        
 \alias{variablesinformula}
-\alias{vcov.slrm}
 \alias{verbalogic}
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
@@ -509,6 +512,7 @@
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
+\alias{X2testEngine}
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
@@ -589,7 +593,7 @@ conform.ratfv(x)
 crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 cobble.xy(x, y, f, fatal, \dots)
-codetime(x)
+codetime(x, hms)
 commasep(x)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
@@ -598,7 +602,7 @@ datagen.runifpointOnLines(n, L)
 datagen.runifpoisppOnLines(lambda, L)
 datagen.rpoisppOnLines(lambda, L, lmax, \dots)
 default.clipwindow(object, epsilon)
-default.n.tiling(X, nd, ntile, npix, verbose)
+default.n.tiling(X, nd, ntile, npix, eps, verbose)
 default.ntile(X)
 densitypointsEngine(x, sigma, \dots,
                     weights, edge, varcov,
@@ -662,6 +666,7 @@ exactdt(X, \dots)
 exactPdt(w)
 explain.ifnot(expr, context)
 \method{extractAIC}{slrm}(fit, scale = 0, k = 2, ...)
+extractAtomicQtests(x)
 fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
@@ -713,6 +718,7 @@ intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
 intY.xypolygon(polly)
+is.atomicQtest(x)
 is.cadlag(s)
 is.data(Q)
 is.expandable(x)
@@ -748,8 +754,6 @@ least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 lhs.of.formula(x)
-licence.polygons()
-license.polygons()
 linequad(X, Y, ..., eps, nd)
 linearKengine(X, \dots, r, reweight, denom, correction, showworking)
 linearpcfengine(X, \dots, r, reweight, denom, correction)
@@ -759,6 +763,7 @@ localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
 localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
 local2lpp(L, seg, tp, X)
 logi.engine(\dots)
+passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{print}{logippm}(x, \dots)
@@ -796,17 +801,17 @@ maxflow(costm)
 meanlistfv(z)
 meanX.owin(w)            
 meanY.owin(w)
-\method{model.matrix}{slrm}(object, ..., keepNA = TRUE)
 model.se.image(fit, W, \dots, what)
 mpl.engine(Q, trend, interaction, \dots, covariates, covfunargs, correction,
 	 rbord, use.gam, gcontrol, famille,
-         forcefit, nd, allcovar, callstring,
+         forcefit, nd, eps, allcovar, callstring,
          precomputed, savecomputed, preponly,
          rename.intercept, justQ)
 mpl.get.covariates(covariates, locations, type, covfunargs)
 mpl.prepare(Q, X, P, trend, interaction, covariates, 
             want.trend, want.inter, correction, rbord, Pname,
-            callstring, \dots, covfunargs, allcovar, precomputed, savecomputed,
+            callstring, \dots,
+            covfunargs, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix, warn.illegal)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook)
 multiply.only.finite.entries(x, a)
@@ -886,9 +891,11 @@ primesbelow(nmax)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
+\method{print}{distfun}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{fii}(x, \dots)
+\method{print}{funxy}(x, \dots)
 \method{print}{fv}(x, \dots)
 \method{print}{hyperframe}(x, ...)
 \method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
@@ -898,6 +905,7 @@ primesbelow(nmax)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{msr}(x, \dots)
+\method{print}{nnfun}(x, \dots)
 \method{print}{parres}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{plotpairsim}(x, \dots)
@@ -1016,6 +1024,7 @@ spatialCDFtest(model, covariate, test, \dots, dimyx, eps, jitter, modelname, cov
 sphere.volume(range, nval = 10)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
+store.versionstring.spatstat()
 \method{str}{hyperframe}(object, \dots)
 stratrand(window, nx, ny, k = 1)
 strausscounts(U,X,r,EqualPairs)
@@ -1055,7 +1064,6 @@ validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
 vanilla.fv(x)
 variablesinformula(x)
-\method{vcov}{slrm}(object, ...)
 verbalogic(x, op)
 versionstring.interact(object)
 versionstring.ppm(object)
@@ -1067,6 +1075,7 @@ warn.ignored.args(\dots, context)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)
+X2testEngine(OBS, EXP, \dots, method, df, nsim, conditional, alternative, testname, dataname)
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w, check)

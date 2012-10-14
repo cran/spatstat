@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.18 $	$Date: 2012/06/19 06:03:01 $
+#	$Revision: 4.21 $	$Date: 2012/09/03 05:32:36 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -116,11 +116,9 @@ marks.quad <- function(x, dfok=FALSE, ...) {
     mdat <- rep(NA, dat$n)
   if(is.null(mdum))
     mdum <- rep(NA, dum$n)
-  mall <- c(mdat, mdum)
-  if(is.factor(mdat) && is.factor(mdum) && all(levels(mdat) == levels(mdum))) {
-    mall <- factor(mall)
-    levels(mall) <- levels(mdat)
-  }
+  if(is.factor(mdat) && is.factor(mdum)) {
+    mall <- cat.factor(mdat, mdum)
+  } else mall <- c(mdat, mdum)
   return(mall)
 }
 

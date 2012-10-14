@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.42 $ $Date: 2011/05/18 09:20:08 $
+#   $Revision: 1.43 $ $Date: 2012/09/05 08:17:17 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, keepempty=FALSE) {
@@ -385,16 +385,6 @@ as.tess.im <- function(X) {
   return(tess(image = X))
 }
 
-as.tess.quadratcount <- function(X) {
-  return(attr(X, "tess"))
-}
-
-as.tess.quadrattest <- function(X) {
-  Y <- attr(X, "quadratcount")
-  Z <- attr(Y, "tess")
-  return(Z)
-}
-
 as.tess.list <- function(X) {
   W <- lapply(X, as.owin)
   return(tess(tiles=W))
@@ -418,61 +408,79 @@ intersect.tess <- function(X, Y, ...) {
     result <- result[Y, drop=FALSE]
     return(tess(image=result, window=Y))
   }
-  Y <- as.tess(Y)
-  Xtiles <- tiles(X)
-  Ytiles <- tiles(Y)
-  Ztiles <- list()
-  for(i in seq_along(Xtiles))
-    for(j in seq_along(Ytiles)) {
-      Tij <- intersect.owin(Xtiles[[i]], Ytiles[[j]], ..., fatal=FALSE)
-      if(!is.null(Tij) && !is.empty(Tij))
-        Ztiles <- append(Ztiles, list(Tij))
+  if(is.owin(Y)) {
+    # efficient code when Y is a window, retaining names of tiles of X
+    Ztiles <- lapply(tiles(X), intersect.owin, B=Y, ..., fatal=FALSE)
+    isempty <- unlist(lapply(Ztiles, function(x) { is.null(x) || is.empty(x)}))
+    Ztiles <- Ztiles[!isempty]
+    Xwin <- as.owin(X)
+    Ywin <- Y
+  } else {
+    # general case
+    Y <- as.tess(Y)
+    Xtiles <- tiles(X)
+    Ytiles <- tiles(Y)
+    Ztiles <- list()
+    namesX <- names(Xtiles)
+    for(i in seq_along(Xtiles)) {
+      Xi <- Xtiles[[i]]
+      Ti <- lapply(Ytiles, intersect.owin, B=Xi, ..., fatal=FALSE)
+      isempty <- unlist(lapply(Ti, function(x) { is.null(x) || is.empty(x)}))
+      Ti <- Ti[!isempty]
+      names(Ti) <- paste(namesX[i], names(Ti), sep="x")
+      Ztiles <- append(Ztiles, Ti)
     }
-  Xwin <- as.owin(X)
-  Ywin <- as.owin(Y)
+    Xwin <- as.owin(X)
+    Ywin <- as.owin(Y)
+  }
   Zwin <- intersect.owin(Xwin, Ywin)
   return(tess(tiles=Ztiles, window=Zwin))
 }
 
 
-bdist.tiles <- function(X) {
-  if(!is.tess(X))
-    stop("X must be a tessellation")
-  W <- as.owin(X)
-  switch(X$type,
-         rect=,
-         tiled={
-           tt <- tiles(X)
-           if(is.convex(W)) {
-             # distance is minimised at a tile vertex
-             vdist <- function(x,w) {
-               z <- as.ppp(vertices(x), W=w)
-               min(bdist.points(z))
+bdist.tiles <- local({
+
+  vdist <- function(x,w) {
+    z <- as.ppp(vertices(x), W=w, check=FALSE)
+    min(bdist.points(z))
+  }
+  edist <- function(x,b) {
+    xd <- crossdist(as.psp(x, check=FALSE), b, type="separation")
+    min(xd)
+  }
+
+  bdist.tiles <-  function(X) {
+    if(!is.tess(X))
+      stop("X must be a tessellation")
+    W <- as.owin(X)
+    switch(X$type,
+           rect=,
+           tiled={
+             tt <- tiles(X)
+             if(is.convex(W)) {
+               # distance is minimised at a tile vertex
+               d <- sapply(tt, vdist, w=W)
+             } else {
+               # coerce everything to polygons
+               W  <- as.polygonal(W)
+               tt <- lapply(tt, as.polygonal)
+               # compute min dist from tile edges to window edges
+               d <- sapply(tt, edist, b=as.psp(W))
              }
-             d <- sapply(tt, vdist, w=W)
-           } else {
-             # coerce everything to polygons
-             W  <- as.polygonal(W)
-             tt <- lapply(tt, as.polygonal)
-             # compute min dist from tile edges to window edges
-             edist <- function(x,b) {
-               xd <- crossdist(as.psp(x), b, type="separation")
-               min(xd)
-             }
-             d <- sapply(tt, edist, b=as.psp(W))
+           },
+           image={
+             Xim <- X$image
+             # compute boundary distance for each pixel
+             bd <- bdist.pixels(as.owin(Xim), style="image")
+             bd <- bd[W, drop=FALSE]
+             # split over tiles
+             bX <- split(bd, X)
+             # compute minimum distance over each level of factor
+             d <- sapply(bX, function(z) { summary(z)$min })
            }
-         },
-         image={
-           Xim <- X$image
-           # compute boundary distance for each pixel
-           bd <- bdist.pixels(as.owin(Xim), style="image")
-           bd <- bd[W, drop=FALSE]
-           # split over tiles
-           bX <- split(bd, X)
-           # compute minimum distance over each level of factor
-           d <- sapply(bX, function(z) { summary(z)$min })
-         }
-         )
-    
-  return(d)
-}
+           )
+    return(d)
+  }
+  bdist.tiles
+})
+

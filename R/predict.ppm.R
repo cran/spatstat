@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.65 $	$Date: 2011/12/13 07:16:13 $
+#	$Revision: 1.67 $	$Date: 2012/10/09 08:33:45 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -11,25 +11,30 @@
 #
 # -------------------------------------------------------------------
 
-predict.ppm <-
-function(object, window, ngrid=NULL, locations=NULL,
-         covariates=NULL, type="trend", X=data.ppm(object),  
-         ..., check=TRUE, repair=TRUE) {
+predict.ppm <- local({
+#
+#  extract undocumented arguments and trap others
+#
+  xtract <- function(..., newdata=NULL, sumobj=NULL, E=NULL) {
+    if(!is.null(newdata))
+      warning(paste("The use of the argument", sQuote("newdata"),
+                    "is out-of-date. See help(predict.ppm)"))
+    trap.extra.arguments(..., .Context="In predict.ppm")
+    return(list(sumobj=sumobj, E=E))
+  }
+
+  predict.ppm <- function(object, window, ngrid=NULL, locations=NULL,
+                          covariates=NULL, type="trend", X=data.ppm(object),  
+                          ..., new.coef=NULL, check=TRUE, repair=TRUE) {
 #
 #  options for `type'
   type <- pickoption("type", type,
                      c(trend="trend", cif="cif", lambda="cif",
                        se="se", SE="se"))
-#
-#  guard against mistakes
-#  
-  dotargs <- list(...)
-  nama <- names(dotargs)
-  if(!is.null(nama) && any(nama == "newdata"))
-    warning(paste("The use of the argument", sQuote("newdata"),
-                  "is out-of-date. See help(predict.ppm)"))
-  else if(length(dotargs) > 0)
-    warning("Some arguments were ignored by predict.ppm")
+# extract undocumented arguments 
+  xarg <- xtract(...)
+  sumobj <- xarg$sumobj
+  E      <- xarg$E
 #
 #	'object' is the output of ppm()
 #
@@ -42,21 +47,34 @@ function(object, window, ngrid=NULL, locations=NULL,
     message("object format corrupted; repairing it.")
     object <- update(object, use.internal=TRUE)
   }
+
+  fitcoef <- coef(object)
+  if(!is.null(new.coef)) {
+    # validate coefs
+    if(length(new.coef) != length(fitcoef))
+      stop(paste("Argument new.coef has wrong length",
+                 length(new.coef), ": should be", length(fitcoef)))
+    coeffs <- new.coef
+  } else {
+    coeffs <- fitcoef
+  }
+
 #
 #       find out what kind of model it is
 #
-  mod <- summary(model, quick="no prediction")  # undocumented hack!
-  stationary  <- mod$stationary
-  poisson     <- mod$poisson
-  marked      <- mod$marked
-  multitype   <- mod$multitype
-  notrend     <- mod$no.trend
-  changedcoef <- mod$changedcoef
+  if(is.null(sumobj))
+    sumobj <- summary(model, quick="entries")  # undocumented hack!
+  stationary  <- sumobj$stationary
+  poisson     <- sumobj$poisson
+  marked      <- sumobj$marked
+  multitype   <- sumobj$multitype
+  notrend     <- sumobj$no.trend
+  changedcoef <- sumobj$changedcoef || !is.null(new.coef)
   trivial     <- poisson && notrend
   
-  need.covariates <- mod$has.covars
+  need.covariates <- sumobj$has.covars
 
-  if(mod$antiquated)
+  if(sumobj$antiquated)
     warning("The model was fitted by an out-of-date version of spatstat")
 #
 #       determine mark space
@@ -65,7 +83,7 @@ function(object, window, ngrid=NULL, locations=NULL,
     if(!multitype)
       stop("Prediction not yet implemented for general marked point processes")
     else 
-      types <- levels(marks(mod$entries$data))
+      types <- levels(marks(sumobj$entries$data))
   }
 #
 #
@@ -157,7 +175,7 @@ function(object, window, ngrid=NULL, locations=NULL,
           ngrid <- rep(ngrid,2)
       }
       if(missing(window))
-        window <- mod$entries$data$window
+        window <- sumobj$entries$data$window
       masque <- as.mask(window, dimyx=ngrid)
     }
     # Hack -----------------------------------------------
@@ -257,7 +275,7 @@ function(object, window, ngrid=NULL, locations=NULL,
   if(trivial) {
 #############  UNIFORM POISSON PROCESS #####################
 
-    lambda <- exp(model$coef[[1]])
+    lambda <- exp(coeffs[[1]])
     switch(type,
            cif=,
            trend={
@@ -283,7 +301,7 @@ function(object, window, ngrid=NULL, locations=NULL,
 #
 #   predict
 #
-    lambda <- GLMpredict(glmfit, newdata, coef(object),
+    lambda <- GLMpredict(glmfit, newdata, coeffs, 
                          changecoef=changedcoef)
 #
     switch(type,
@@ -323,7 +341,8 @@ function(object, window, ngrid=NULL, locations=NULL,
     if(marked) 
       marks(U) <- Umarks <- newdata$marks
     # determine which prediction points are data points
-    E <- equalpairs(U, X, marked)
+    if(is.null(E))
+      E <- equalpairs(U, X, marked)
     
     # evaluate interaction
     Vnew <- evalInteraction(X, U, E, inter, correction="none")
@@ -354,7 +373,7 @@ function(object, window, ngrid=NULL, locations=NULL,
       #
     }
   # invoke predict.glm or compute prediction
-    z <- GLMpredict(glmfit, newdata, coef(object),
+    z <- GLMpredict(glmfit, newdata, coeffs, 
                     changecoef=changedcoef)
     
   # reset to zero if potential was zero
@@ -398,6 +417,9 @@ function(object, window, ngrid=NULL, locations=NULL,
 #  
   return(out)
 }
+
+  predict.ppm
+})
 
 
 ####################################################################

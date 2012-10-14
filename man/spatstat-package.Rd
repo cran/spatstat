@@ -448,7 +448,9 @@
 	\code{\link{hsvim}}	\tab create colour-valued pixel image \cr
 	\code{\link{[.im}} 	\tab extract a subset of a pixel image\cr
 	\code{\link{[<-.im}} 	\tab replace a subset of a pixel image\cr
+	\code{\link{rotate.im}} \tab rotate pixel image \cr
 	\code{\link{shift.im}} \tab apply vector shift to pixel image \cr
+	\code{\link{affine.im}} \tab apply affine transformation to image \cr
 	\code{X}	\tab	print very basic information about image \code{X}\cr
 	\code{\link{summary}(X)} \tab	summary of image \code{X} \cr
 	\code{\link{hist.im}} \tab	histogram of image \cr
@@ -676,6 +678,7 @@
 
   \bold{Modern exploratory tools:}
   \tabular{ll}{
+    \code{\link{clusterset}} \tab Allard-Fraley feature detection  \cr
     \code{\link{nnclean}} \tab Byers-Raftery feature detection  \cr
     \code{\link{sharpen.ppp}} \tab Choi-Hall data sharpening \cr
     \code{\link{rhohat}} \tab Kernel estimate of covariate effect\cr
@@ -829,6 +832,7 @@
   
   \tabular{ll}{
     \code{\link{pairdist.lpp}} \tab shortest path distances  \cr
+    \code{\link{crossdist.lpp}} \tab shortest path distances  \cr
     \code{\link{envelope.lpp}} \tab simulation envelopes  \cr
     \code{\link{rpoislpp}} \tab simulate Poisson points on linear network \cr
     \code{\link{runiflpp}} \tab simulate random points on a linear network 
@@ -1156,7 +1160,7 @@
   \tabular{ll}{
     \code{\link{anova.slrm}} \tab Analysis of deviance \cr
     \code{\link{coef.slrm}}  \tab Extract fitted coefficients \cr
-    \code{vcov.slrm}  \tab Variance-covariance matrix of fitted coefficients \cr
+    \code{\link{vcov.slrm}}  \tab Variance-covariance matrix of fitted coefficients \cr
     \code{\link{fitted.slrm}} \tab Compute fitted probabilities or
     intensity \cr
     \code{\link{logLik.slrm}}   \tab Evaluate loglikelihood of fitted
@@ -1494,10 +1498,12 @@
   Devin Johnson,
   Mike Kuhn,
   Jeff Laake,
+  Frederic Lavancier,
   Tom Lawrence,
   Robert Lamb,
   Jonathan Lee,
   George Leser,
+  Li Haitao,
   Ben Madin,
   Robert Mark,
   Jorge Mateu Mahiques,
@@ -1507,6 +1513,7 @@
   Sebastian Wastl Meyer,
   Mi Xiangcheng,
   Jesper Moller,
+  Erika Mudrak,
   Linda Stougaard Nielsen,
   Felipe Nunes,
   Jens Oehlschlaegel,

@@ -2,7 +2,7 @@
 #
 #    multistrauss.S
 #
-#    $Revision: 2.19 $	$Date: 2012/05/08 08:27:08 $
+#    $Revision: 2.20 $	$Date: 2012/08/30 02:09:41 $
 #
 #    The multitype Strauss process
 #
@@ -61,22 +61,24 @@ MultiStrauss <- local({
      # unordered pair corresponding to each ordered pair
      ucode <- c(1:npairs, (1:npairs)[different])
      #
-     # go....
-     # assemble the relevant interaction distance for each pair of points
-     rxu <- r[ tx, tu ]
-     # apply relevant threshold to each pair of points
-     str <- (d <= rxu)
      # create logical array for result
      z <- array(FALSE, dim=c(dim(d), npairs),
                 dimnames=list(character(0), character(0), vname))
-     # assign str[i,j] -> z[i,j,k] where k is relevant interaction code
-     for(i in 1:nordpairs) {
-       # data points with mark m1
-       Xsub <- (tx == mark1o[i])
-       # quadrature points with mark m2
-       Qsub <- (tu == mark2o[i])
-       # assign
-       z[Xsub, Qsub, ucode[i]] <- str[Xsub, Qsub]
+     # go....
+     if(length(z) > 0) {
+       # assemble the relevant interaction distance for each pair of points
+       rxu <- r[ tx, tu ]
+       # apply relevant threshold to each pair of points
+       str <- (d <= rxu)
+       # assign str[i,j] -> z[i,j,k] where k is relevant interaction code
+       for(i in 1:nordpairs) {
+         # data points with mark m1
+         Xsub <- (tx == mark1o[i])
+         # quadrature points with mark m2
+         Qsub <- (tu == mark2o[i])
+         # assign
+         z[Xsub, Qsub, ucode[i]] <- str[Xsub, Qsub]
+       }
      }
      return(z)
    }

@@ -49,15 +49,22 @@
   for additional colour tools.
 }
 \examples{
+  \testonly{
+    op <- spatstat.options(npixel=32)
+  }
   # create three images with values in [0,1]
   X <- setcov(owin())
   X <- eval.im(pmin(1,X))
-  Y <- as.im(function(x,y){(x+1)/2}, W=as.owin(X))
-  Z <- as.im(function(x,y){(y+1)/2}, W=as.owin(X))
+  M <- as.owin(X)
+  Y <- as.im(function(x,y){(x+1)/2}, W=M)
+  Z <- as.im(function(x,y){(y+1)/2}, W=M)
   RGB <- rgbim(X, Y, Z, 1)
   HSV <- hsvim(X, Y, Z)
   plot(RGB, valuesAreColours=TRUE)
   plot(HSV, valuesAreColours=TRUE)
+  \testonly{
+    spatstat.options(op)
+  }
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

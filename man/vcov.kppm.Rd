@@ -31,7 +31,11 @@
   cluster point process model \code{object}. It is a method for the 
   generic function \code{\link{vcov}}.
   
-  The result is an \code{n * n} matrix where \code{n = length(coef(model))}.
+  The result is an \code{n * n} matrix where \code{n =
+    length(coef(model))}.
+
+  To calculate a confidence interval for a regression parameter,
+  use \code{\link[stats]{confint}} as shown in the examples.
 }
 \value{
   A square matrix. 
@@ -55,10 +59,14 @@
 \examples{
    data(redwood)
    fit <- kppm(redwood, ~ x + y)
-   vc <- vcov(fit)
-   sd <- sqrt(diag(vc))
-   t(coef(fit) + 1.96 * outer(sd, c(lower=-1, upper=1)))
+   vcov(fit)
    vcov(fit, what="corr")
+
+   # confidence interval
+   confint(fit)
+   # cross-check the confidence interval by hand:
+   sd <- sqrt(diag(vcov(fit)))
+   t(coef(fit) + 1.96 * outer(sd, c(lower=-1, upper=1)))
 }
 \keyword{spatial}
 \keyword{methods}

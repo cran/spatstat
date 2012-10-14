@@ -180,6 +180,10 @@ summary.profilepl <- function(object, ...) {
   print(object$fit)
 }
 
+as.ppm.profilepl <- function(object) {
+  object$fit
+}
+
 
 #
 #  plot method 
@@ -251,3 +255,4 @@ plot.profilepl <- function(x, ..., add=FALSE, main=NULL,
   abline(v = xvalues[x$iopt], lty=2, col="green")
   return(invisible(NULL))
 }
+

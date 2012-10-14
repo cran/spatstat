@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.26 $	$Date: 2012/07/13 08:48:43 $
+#    $Revision: 2.27 $	$Date: 2012/08/30 02:10:53 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -64,29 +64,31 @@ MultiStraussHard <- local({
      # unordered pair corresponding to each ordered pair
      ucode <- c(1:npairs, (1:npairs)[different])
      #
-     # go....
-     # apply the relevant interaction distance to each pair of points
-     rxu <- r[ tx, tu ]
-     str <- (d < rxu)
-     str[is.na(str)] <- FALSE
-     # and the relevant hard core distance
-     hxu <- h[ tx, tu ]
-     forbid <- (d < hxu)
-     forbid[is.na(forbid)] <- FALSE
-     # form the potential 
-     value <- ifelse(forbid, -Inf, str)
      # create numeric array for result
      z <- array(0, dim=c(dim(d), npairs),
                 dimnames=list(character(0), character(0), vname))
-     # assign value[i,j] -> z[i,j,k] where k is relevant interaction code
-     for(i in 1:nordpairs) {
-       # data points with mark m1
-       Xsub <- (tx == mark1o[i])
-       # quadrature points with mark m2
-       Qsub <- (tu == mark2o[i])
-       # assign
-       z[Xsub, Qsub, ucode[i]] <- value[Xsub, Qsub]
-     }     
+     # go....
+     if(length(z) > 0) {
+       # apply the relevant interaction distance to each pair of points
+       rxu <- r[ tx, tu ]
+       str <- (d < rxu)
+       str[is.na(str)] <- FALSE
+       # and the relevant hard core distance
+       hxu <- h[ tx, tu ]
+       forbid <- (d < hxu)
+       forbid[is.na(forbid)] <- FALSE
+       # form the potential 
+       value <- ifelse(forbid, -Inf, str)
+       # assign value[i,j] -> z[i,j,k] where k is relevant interaction code
+       for(i in 1:nordpairs) {
+         # data points with mark m1
+         Xsub <- (tx == mark1o[i])
+         # quadrature points with mark m2
+         Qsub <- (tu == mark2o[i])
+         # assign
+         z[Xsub, Qsub, ucode[i]] <- value[Xsub, Qsub]
+       }
+     }
      return(z)
    }
   # ............... end of potential function ...................

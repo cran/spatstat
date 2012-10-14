@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.28-2
-Date: 2012-08-23
+Version: 1.29-0
+Date: 2012-10-14
 Title: Spatial Point Pattern analysis, model-fitting, simulation, tests
 Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         <r.turner@auckland.ac.nz> with substantial contributions of
@@ -14,20 +14,20 @@ Author: Adrian Baddeley <Adrian.Baddeley@csiro.au> and Rolf Turner
         N. Funwi-Gabga; A. Gault; M. Genton; P. Grabarnik; C. Graf; J.
         Franklin; U. Hahn; A. Hardegen; M. Hering; M.B. Hansen; M.
         Hazelton; J. Heikkinen; K. Hornik; R. Ihaka; A. Jammalamadaka;
-        R. John-Chandran; D. Johnson; M. Kuhn; J. Laake; T. Lawrence;
-        R.A. Lamb; J. Lee; G.P. Leser; B. Madin; R. Mark; J. Mateu; P.
-        McCullagh; U. Mehlig; S. Meyer; X.C. Mi; J. Moller; L.S.
-        Nielsen; F. Nunes; J. Oehlschlaegel; T. Onkelinx; E. Parilov;
-        J. Picka; S. Protsiv; A. Raftery; M. Reiter; T.O. Richardson;
-        B.D. Ripley; B. Rowlingson; J. Rudge; F. Safavimanesh; A.
-        Sarkka; K. Schladitz; B.T. Scott; G.C. Shen; V. Shcherbakov;
-        I.-M. Sintorn; Y. Song; M. Spiess; M. Stevenson; K. Stucki; M.
-        Sumner; P. Surovy; B. Taylor; B. Turlach; A. van Burgel; T.
-        Verbeke; A. Villers; H. Wang; H. Wendrock; J. Wild; S. Wong and
-        M.E. Zamboni.
+        R. John-Chandran; D. Johnson; M. Kuhn; J. Laake; F. Lavancier;
+        T. Lawrence; R.A. Lamb; J. Lee; G.P. Leser; H.T. Li; B. Madin;
+        R. Mark; J. Mateu; P. McCullagh; U. Mehlig; S. Meyer; X.C. Mi;
+        J. Moller; E. Mudrak; L.S. Nielsen; F. Nunes; J. Oehlschlaegel;
+        T. Onkelinx; E. Parilov; J. Picka; S. Protsiv; A. Raftery; M.
+        Reiter; T.O. Richardson; B.D. Ripley; B. Rowlingson; J. Rudge;
+        F. Safavimanesh; A. Sarkka; K. Schladitz; B.T. Scott; G.C.
+        Shen; V. Shcherbakov; I.-M. Sintorn; Y. Song; M. Spiess; M.
+        Stevenson; K. Stucki; M. Sumner; P. Surovy; B. Taylor; B.
+        Turlach; A. van Burgel; T. Verbeke; A. Villers; H. Wang; H.
+        Wendrock; J. Wild; S. Wong and M.E. Zamboni.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@csiro.au>
 Depends: R (>= 2.14.0), stats, graphics, utils, mgcv, deldir (>=
-        0.0-10)
+        0.0-21)
 Suggests: gpclib, sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
         scatterplot3d, RandomFields (>= 2.0)
 Description: A package for analysing spatial data, mainly Spatial Point
@@ -57,6 +57,6 @@ URL: http://www.spatstat.org
 LazyData: true
 LazyLoad: true
 ByteCompile: true
-Packaged: 2012-08-23 09:52:09 UTC; adrian
+Packaged: 2012-10-14 08:48:50 UTC; adrian
 Repository: CRAN
-Date/Publication: 2012-08-23 12:07:28
+Date/Publication: 2012-10-14 10:47:47

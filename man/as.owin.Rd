@@ -12,6 +12,8 @@
 \alias{as.owin.gpc.poly}
 \alias{as.owin.data.frame}
 \alias{as.owin.distfun}
+\alias{as.owin.nnfun}
+\alias{as.owin.funxy}
 \alias{as.owin.rmhmodel}
 \alias{as.owin.default}
 \title{Convert Data To Class owin}
@@ -45,6 +47,10 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{data.frame}(W, \dots, fatal=TRUE)
 
  \method{as.owin}{distfun}(W, \dots, fatal=TRUE)
+
+ \method{as.owin}{nnfun}(W, \dots, fatal=TRUE)
+
+ \method{as.owin}{funxy}(W, \dots, fatal=TRUE)
 
  \method{as.owin}{rmhmodel}(W, \dots, fatal=FALSE)
 
@@ -130,8 +136,9 @@ in any of several formats, into an object of class \code{"owin"}.
     \eqn{x} and \eqn{y} coordinates of a pixel, and a logical value
     indicating whether the pixel lies inside the window.   
     \item
-    an object of class \code{"distfun"} representing a
-    distance function. The spatial domain of the function will be
+    an object of class \code{"distfun"}, \code{"nnfun"}
+    or \code{"funxy"} representing a function of spatial location,
+    defined on a spatial domain. The spatial domain of the function will be
     extracted.
     \item
     an object of class \code{"rmhmodel"} representing a
