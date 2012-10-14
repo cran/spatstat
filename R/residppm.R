@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.16 $ $Date: 2011/06/19 06:45:18 $
+# $Revision: 1.17 $ $Date: 2012/09/11 12:44:10 $
 #
 
 residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
@@ -25,7 +25,7 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
                  score="score residuals")
   typename <- typenames[[type]]
 
-  given.fitted <- !missing(fittedvalues)
+  given.fitted <- !missing(fittedvalues) && !is.null(fittedvalues)
 
   # ................. determine fitted values .................
   
@@ -57,10 +57,8 @@ residuals.ppm <- function(object, type="raw", ..., check=TRUE, drop=FALSE,
       modelcoef <- coef(hi.res.fit)
     }
     # now compute fitted values using new coefficients
-    if(!given.fitted) {
-      mom <- model.matrix(object, keepNA=!drop)
-      fittedvalues <- exp(mom %*% modelcoef)
-    }
+    if(!given.fitted) 
+      fittedvalues <- fitted(object, drop=drop, new.coef=modelcoef)
   }
 
   # ..................... compute residuals .....................

@@ -1,17 +1,23 @@
 #
 #   unique.ppp.R
 #
-# $Revision: 1.14 $  $Date: 2011/05/18 09:20:41 $
+# $Revision: 1.17 $  $Date: 2012/10/13 23:31:44 $
 #
 
-unique.ppp <- function(x, ...) {
+unique.ppp <- function(x, ..., warn=FALSE) {
   verifyclass(x, "ppp")
-  dupe <- duplicated.ppp(x)
+  dupe <- duplicated.ppp(x, ...)
+  if(!any(dupe)) return(x)
+  if(warn) warning(paste(sum(dupe), "duplicated points were removed"),
+                   call.=FALSE)
   return(x[!dupe])
 }
 
-duplicated.ppp <- function(x, ...) {
+duplicated.ppp <- function(x, ..., rule=c("spatstat", "deldir")) {
   verifyclass(x, "ppp")
+  rule <- match.arg(rule)
+  if(rule == "deldir")
+    return(duplicatedxy(x))
   n <- x$n
   if(markformat(x) == "dataframe")
      return(duplicated(as.data.frame(x)))

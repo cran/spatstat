@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.19 $     $Date: 2012/06/19 11:05:08 $
+#     $Revision: 1.20 $     $Date: 2012/08/31 01:58:30 $
 #
 
 eval.fv <- local({
@@ -31,6 +31,7 @@ eval.fv <- local({
     nfuns <- sum(fvs)
     if(nfuns == 0)
       stop("No fv objects in this expression")
+    # extract them
     funs <- vars[fvs]
     # restrict to columns identified by 'dotnames'
     if(dotonly) 
@@ -44,6 +45,8 @@ eval.fv <- local({
     # copy first object as template
     result <- funs[[1]]
     labl <- attr(result, "labl")
+    origdotnames   <- fvnames(result, ".")
+    origshadenames <- fvnames(result, ".s")
     # determine which function estimates are supplied
     argname <- fvnames(result, ".x")
     nam <- names(result)
@@ -118,6 +121,10 @@ eval.fv <- local({
                                         list(e=elang, f=funlabels)))))
     }
     attr(result, "labl") <- labl
+    # copy dotnames and shade names from template
+    fvnames(result, ".") <- origdotnames[origdotnames %in% names(result)]
+    if(!is.null(origshadenames) && all(origshadenames %in% names(result)))
+      fvnames(result, ".s") <- origshadenames
     return(result)
   }
 
@@ -125,7 +132,8 @@ eval.fv <- local({
   restrict.to.dot <- function(z) {
     argu <- fvnames(z, ".x")
     dotn <- fvnames(z, ".")
-    ok <- colnames(z) %in% c(argu, dotn)
+    shadn <- fvnames(z, ".s")
+    ok <- colnames(z) %in% unique(c(argu, dotn, shadn))
     return(z[, ok])
   }
   getfname <- function(x) { if(!is.null(y <- attr(x, "fname"))) y else "" }

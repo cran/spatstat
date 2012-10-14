@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.46 $   $Date: 2012/08/20 03:46:16 $
+#    $Revision: 4.51 $   $Date: 2012/09/05 04:10:58 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -343,23 +343,55 @@ rpoint <- function(n, f, fmax=NULL,
 }
   
 "rSSI" <-
-  function(r, n, win = owin(c(0,1),c(0,1)), 
+  function(r, n=Inf, win = square(1), 
            giveup = 1000, x.init=NULL)
 {
+  win.given <- !missing(win) && !is.null(win)
   stopifnot(is.numeric(r) && length(r) == 1 && r >= 0)
   stopifnot(is.numeric(n) && length(n) == 1 && n >= 0)
      # Simple Sequential Inhibition process
      # fixed number of points
      # Naive implementation, proposals are uniform
-  win <- as.owin(win)
-  if(is.null(x.init))
+  if(is.null(x.init)) {
+    # start with empty pattern in specified window
+    win <- as.owin(win)
     x.init <- ppp(numeric(0),numeric(0), window=win)
-  else
+  } else {
+    # start with specified pattern
     stopifnot(is.ppp(x.init))
+    if(!win.given) {
+      win <- as.owin(x.init)
+    } else {
+      # check compatibility of windows
+      if(!identical(win, as.owin(x.init)))
+        warning(paste("Argument", sQuote("win"),
+                      "is not the same as the window of", sQuote("x.init")))
+      x.init.new <- x.init[win]
+      if(npoints(x.init.new) == 0)
+        stop(paste("No points of x.init lie inside the specified window",
+                   sQuote("win")))
+      nlost <- npoints(x.init) - npoints(x.init.new)
+      if(nlost > 0) 
+        warning(paste(nlost, "out of",
+                      npoints(x.init), "points of the pattern x.init",
+                      "lay outside the specified window",
+                      sQuote("win")))
+      x.init <- x.init.new
+    }
+    if(n < npoints(x.init))
+      stop(paste("x.init contains", npoints(x.init), "points",
+                 "but a pattern containing only n =", n, "points", 
+                 "is required"))
+    if(n == npoints(x.init)) {
+      warning(paste("Initial state x.init already contains", n, "points;",
+                    "no further points were added"))
+      return(x.init)
+    }
+  }
   X <- x.init
   r2 <- r^2
-  if(n * pi * r2/4  > area.owin(win))
-    stop(paste("Window is too small to fit", n, "points",
+  if(!is.infinite(n) && (n * pi * r2/4  > area.owin(win)))
+    warning(paste("Window is too small to fit", n, "points",
                "at minimum separation", r))
   ntries <- 0
   while(ntries < giveup) {
@@ -369,11 +401,12 @@ rpoint <- function(n, f, fmax=NULL,
     y <- qq$y[1]
     if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
       X <- superimpose(X, qq, W=win)
-    if(X$n == n)
+    if(X$n >= n)
       return(X)
   }
-  warning(paste("Gave up after", giveup,
-                "attempts with only", X$n, "points placed out of", n))
+  if(!is.infinite(n))
+    warning(paste("Gave up after", giveup,
+                  "attempts with only", X$n, "points placed out of", n))
   return(X)
 }
 

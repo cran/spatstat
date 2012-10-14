@@ -50,22 +50,29 @@
   on a grid of locations, and returns the distance
   values in the form of a pixel image.
 
+  The result of \code{f <- distfun(X)} also belongs to the class
+  \code{"funxy"} and to the special class \code{"distfun"}.
+  It can be printed and plotted immediately as shown in the Examples.
+  
   A \code{distfun} object can be converted to a pixel image
   using \code{\link{as.im}}.
 }
 \value{
   A \code{function} with arguments \code{x,y}.
-  The function also belongs to the class \code{"distfun"} for which
-  there are methods for \code{print}, \code{plot},
-  \code{contour} and \code{persp}.
+  The function also belongs to the class \code{"distfun"} which has
+  a method for \code{print}.
+  It also belongs to the class \code{"funxy"} which has methods
+  for \code{plot}, \code{contour} and \code{persp}.
 }
 \seealso{
   \code{\link{distmap}},
-  \code{\link{plot.distfun}}
+  \code{\link{plot.funxy}}
 }
 \examples{
    data(letterR)
    f <- distfun(letterR)
+   f
+   plot(f)
    f(0.2, 0.3)
 }
 \author{Adrian Baddeley

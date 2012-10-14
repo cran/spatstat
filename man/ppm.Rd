@@ -18,6 +18,7 @@
        forcefit=FALSE,
        project=FALSE,
        nd = NULL,
+       eps = NULL,
        gcontrol=list(),
        nsim=100, nrmh=1e5, start=NULL, control=list(nrep=nrmh),
        verb=TRUE,
@@ -87,9 +88,16 @@
   }
   \item{nd}{
     Optional. Integer or pair of integers.
-    The dimension of the grid of points (\code{nd * nd}
+    The dimension of the grid of dummy points (\code{nd * nd}
     or \code{nd[1] * nd[2]})
     used to evaluate the integral in the pseudolikelihood.
+    Incompatible with \code{eps}.
+  }
+  \item{eps}{
+    Optional. 
+    A positive number, or a vector of two positive numbers, giving the
+    horizontal and vertical spacing, respectively, of the grid of
+    dummy points. Incompatible with \code{nd}.
   }
   \item{gcontrol}{
     Optional. List of parameters passed to \code{\link{glm.control}}

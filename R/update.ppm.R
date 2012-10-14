@@ -7,8 +7,9 @@
 #
 #
 
-update.ppm <- function(object, ..., fixdummy=TRUE, use.internal=NULL,
-                                    envir=parent.frame()) {
+update.ppm <- function(object, ...,
+                       fixdummy=TRUE, use.internal=NULL,
+                       envir=parent.frame()) {
   verifyclass(object, "ppm")
   aargh <- list(...)
 

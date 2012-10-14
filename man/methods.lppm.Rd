@@ -4,6 +4,7 @@
 \alias{extractAIC.lppm}
 \alias{formula.lppm}
 \alias{logLik.lppm}
+\alias{nobs.lppm}
 \alias{print.lppm}
 \alias{plot.lppm}
 \alias{terms.lppm}
@@ -18,13 +19,23 @@
 }
 \usage{
   \method{coef}{lppm}(object, ...)
+
   \method{extractAIC}{lppm}(fit, ...)
+
   \method{formula}{lppm}(x, ...)
+
   \method{logLik}{lppm}(object, ...)
+
+  \method{nobs}{lppm}(object, ...)
+
   \method{plot}{lppm}(x, ..., type="trend")
+
   \method{print}{lppm}(x, ...)
+
   \method{terms}{lppm}(x, ...)
+
   \method{update}{lppm}(object, ...)
+
   \method{as.linnet}{lppm}(X, ...)
 }
 \arguments{
@@ -48,6 +59,7 @@
   \code{\link{extractAIC}},
   \code{\link{formula}},
   \code{\link{logLik}},
+  \code{\link{nobs}},
   \code{\link{plot}},
   \code{\link{print}}, 
   \code{\link{terms}} and
@@ -74,6 +86,7 @@
   formula(fit)
   terms(fit)
   logLik(fit)
+  nobs(fit)
   extractAIC(fit)
   update(fit, ~1)
 }

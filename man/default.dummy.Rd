@@ -6,7 +6,8 @@
   for use in a quadrature scheme.
 }
 \usage{
- default.dummy(X, nd, random=FALSE, ntile=NULL, npix=NULL, \dots, verbose=FALSE)
+ default.dummy(X, nd, random=FALSE, ntile=NULL, npix=NULL, \dots,
+              eps=NULL, verbose=FALSE)
 }
 \arguments{
   \item{X}{
@@ -34,6 +35,12 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{eps}{
+    Optional. Grid spacing.
+    A positive number, or a vector of two positive numbers, giving the
+    horizontal and vertical spacing, respectively, of the grid of
+    dummy points. Incompatible with \code{nd}.
   }
   \item{verbose}{
     If \code{TRUE}, information about the construction of the

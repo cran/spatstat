@@ -3,7 +3,7 @@
 #
 #	Utilities for computing quadrature weights
 #
-#	$Revision: 4.27 $	$Date: 2011/05/18 09:24:01 $
+#	$Revision: 4.28 $	$Date: 2012/10/09 04:18:51 $
 #
 #
 # Main functions:
@@ -54,8 +54,11 @@ countingweights <- function(id, areas, check=TRUE) {
 #
     zerocount <- (counts == 0)
     zeroarea <- (areas == 0)
-    if(any(!zeroarea & zerocount))
-	warning("some tiles with positive area do not contain any points")
+    if(any(uhoh <- !zeroarea & zerocount)) {
+      lostfrac <- sum(areas[uhoh])/sum(areas)
+      warning(paste("some tiles with positive area do not contain any points:",
+                    "relative error =", signif(lostfrac, 4)))
+    }
     if(any(!zerocount & zeroarea)) {
 	warning("Some tiles with zero area contain points")
 	warning("Some weights are zero")

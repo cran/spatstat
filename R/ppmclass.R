@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.75 $	$Date: 2012/06/13 14:35:52 $
+#	$Revision: 2.76 $	$Date: 2012/10/09 02:43:03 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -371,6 +371,9 @@ project.ppm <- local({
       leaving(td)
       return(object)
     }
+    # ensure the same edge correction is used!
+    correction <- object$correction
+    rbord      <- object$rbord
     # apply projection 
     coef.mpl <- coeffs <- coef(object)
     Vnames   <- object$internal$Vnames
@@ -397,8 +400,10 @@ project.ppm <- local({
         tracemessage(td, "Interaction changed to:")
         print(change)
       }
-      # refit the whole model
-      newobject <- update(object, interaction=change, envir=object$callframe)
+      # refit the whole model (using the same edge correction)
+      newobject <- update(object, interaction=change,
+                          correction=correction, rbord=rbord,
+                          envir=object$callframe)
       if(trace) {
         tracemessage(td, "Updated model:")
         print(newobject)
@@ -421,7 +426,9 @@ project.ppm <- local({
           print(change.i)
         }
         # refit the whole model
-        object.i <- update(object, interaction=change.i, envir=object$callframe)
+        object.i <- update(object, interaction=change.i,
+                           correction=correction, rbord=rbord,
+                           envir=object$callframe)
         if(trace) {
           tracemessage(td, "Considering", ordinal(i),
                        "candidate updated model:")
@@ -628,3 +635,10 @@ as.interact.ppm <- function(object) {
  return(inte)
 }
 
+as.ppm <- function(object) {
+  UseMethod("as.ppm")
+}
+
+as.ppm.ppm <- function(object) {
+  object
+}

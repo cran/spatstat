@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.143 $	$Date: 2012/07/09 04:52:12 $
+#	$Revision: 5.144 $	$Date: 2012/10/09 08:31:13 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -39,6 +39,7 @@ function(Q,
          famille=NULL,
          forcefit=FALSE,
          nd = NULL,
+         eps = eps,
          allcovar=FALSE,
          callstring="",
          precomputed=NULL,
@@ -66,7 +67,7 @@ function(Q,
     } else if(verifyclass(Q, "ppp", fatal = FALSE)) {
       # point pattern - create default quadrature scheme
       X <- Q
-      Q <- quadscheme(X, nd=nd)
+      Q <- quadscheme(X, nd=nd, eps=eps)
     } else 
       stop("First argument Q should be a point pattern or a quadrature scheme")
     
@@ -112,7 +113,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/07/09 04:52:12 $")
+                    date="$Date: 2012/10/09 08:31:13 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -464,6 +465,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
     # while the column(s) of V are the regression variables (log-potentials)
 
     E <- equalpairs.quad(Q)
+
     V <- evalInteraction(X, P, E, interaction, correction,
                          ...,
                          precomputed=precomputed,
@@ -731,7 +733,8 @@ partialModelMatrix <- function(X, D, model, callstring="", ...) {
   prep  <- mpl.prepare(Q, X, P, trend, inter, covar,
                        correction=model$correction,
                        rbord=model$rbord,
-                       Pname="data points", callstring=callstring, ...)
+                       Pname="data points", callstring=callstring,
+                       ...)
   fmla    <- prep$fmla
   glmdata <- prep$glmdata
   mof <- model.frame(fmla, glmdata)

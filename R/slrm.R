@@ -3,7 +3,7 @@
 #
 #  Spatial Logistic Regression
 #
-#  $Revision: 1.13 $   $Date: 2012/07/09 03:54:30 $
+#  $Revision: 1.20 $   $Date: 2012/10/14 04:10:53 $
 #
 
 slrm <- function(formula, ..., data=NULL, offset=TRUE, link="logit",
@@ -213,6 +213,7 @@ slr.prepare <- function(CallInfo, envir, data,
     df <- slrAssemblePixelData(Y, Yname, W,
                                covimages, dataAtPoints, basepixelarea)
     sumYloga <- Y$n * log(basepixelarea)
+    serial <- attr(df, "serial")
   } else {
     # fractional pixel areas
     pixsplit <- pixellate(splitwin, W)
@@ -222,12 +223,15 @@ slr.prepare <- function(CallInfo, envir, data,
     # split processing
     dfIN <- slrAssemblePixelData(Y[ins], Yname, W, covimages,
                                  dataAtPoints[ins, ], splitpixelarea)
+    serialIN <- attr(dfIN, "serial")
     dfIN[[splitby]] <- TRUE
     dfOUT <- slrAssemblePixelData(Y[!ins], Yname, W, covimages,
                                   dataAtPoints[!ins, ],
                                   basepixelarea - splitpixelarea)
+    serialOUT <- attr(dfOUT, "serial")
     dfOUT[[splitby]] <- FALSE
     df <- rbind(dfIN, dfOUT)
+    serial <- c(serialIN, serialOUT)
     # sum of log pixel areas associated with points
     Ysplit <- pixsplit[Y]
     sumYloga <- sum(log(ifelse(ins, Ysplit, basepixelarea - Ysplit)))
@@ -243,6 +247,7 @@ slr.prepare <- function(CallInfo, envir, data,
                numnames=numnames,
                W=W,
                df=df,
+               serial=serial,
                sumYloga=sumYloga,
                dataAtPoints=dataAtPoints)
   return(Data)
@@ -286,13 +291,16 @@ slrAssemblePixelData <- function(Y, Yname, W,
     }
   pixdata <- lapply(allimages, pixelvalues)
   df <- as.data.frame(pixdata)
+  serial <- seq_len(nrow(df))
   # add log(pixel area) column
   if(length(pixelarea) == 1) {
     df <- cbind(df, logpixelarea=log(pixelarea))
   } else {
     ok <- (pixelarea > 0)
     df <- cbind(df[ok, ], logpixelarea=log(pixelarea[ok]))
+    serial <- serial[ok]
   }
+  attr(df, "serial") <- serial
   return(df)
 }
 
@@ -377,8 +385,8 @@ predict.slrm <- function(object, ..., type="intensity",
            }
            )
     v <- rep(NA, nrow(df))
-    which <- complete.cases(df)
-    v[which] <- values
+    ok <- complete.cases(df)
+    v[ok] <- values[ok]
     out <- im(v, xcol=W$xcol, yrow=W$yrow, unitname=unitname(W))
     return(out)
   } else {
@@ -396,13 +404,20 @@ predict.slrm <- function(object, ..., type="intensity",
     }
     # process new data
     newData <- slr.prepare(CallInfo, environment(CallInfo$formula), newdata,
-                           clip=is.null(window))
+                           clip=!is.null(window))
     newdf   <- newData$df
     newW    <- newData$W
     newloga <- newdf$logpixelarea
+    # avoid NA etc
+    npixel <- nrow(newdf)
+    ok <- complete.cases(newdf)
+    if(!all(ok)) {
+      newdf   <- newdf[ok, , drop=FALSE]
+      newloga <- newloga[ok]
+    }
     # compute link values
     linkvalues <- predict(FIT, newdata=newdf, type="link")
-    #
+    # transform to desired scale
     linkinv <- family(FIT)$linkinv
     switch(type,
            probabilities={
@@ -421,9 +436,9 @@ predict.slrm <- function(object, ..., type="intensity",
              }
            }
            )
-    v <- rep(NA, nrow(newdf))
-    which <- complete.cases(newdf)
-    v[which] <- values
+    # form image
+    v <- rep(NA_real_, npixel)
+    v[ok] <- values
     out <- im(v, xcol=newW$xcol, yrow=newW$yrow, unitname=unitname(W))
     return(out)
   }
@@ -476,12 +491,46 @@ model.matrix.slrm <- function(object,..., keepNA=TRUE) {
   if(!keepNA)
     return(mm)
   df <- object$Data$df
-  if(nrow(mm) == nrow(df))
+  comp <- complete.cases(df)
+  if(all(comp))
     return(mm)
-  which <- complete.cases(df)
+  if(sum(comp) != nrow(mm))
+      stop("Internal error in patching NA's")
   mmplus <- matrix(NA, nrow(df), ncol(mm))
-  mmplus[which, ] <- mm
+  mmplus[comp, ] <- mm
   return(mmplus)
+}
+
+model.images.slrm <- function(object, ...) {
+  mm <- model.matrix(object, ...)
+  mm <- as.data.frame(mm)
+  Data <- object$Data
+  W      <- Data$W
+  serial <- Data$serial
+  splitby <- object$CallInfo$splitby
+  blank   <- as.im(NA_real_, W)
+  assignbyserial <- function(values, serial, template) {
+    Z <- template
+    Z$v[serial] <- values
+    return(Z)
+  }
+  if(is.null(splitby)) {
+    result <- lapply(as.list(mm), assignbyserial, serial=serial, template=blank)
+  } else {
+    df <- Data$df
+    IN <- as.logical(df[[splitby]])
+    OUT <- !IN
+    mmIN <- mm[IN, , drop=FALSE]
+    mmOUT <- mm[OUT, , drop=FALSE]
+    resultIN <- lapply(as.list(mmIN), assignbyserial,
+                       serial=serial[IN], template=blank)
+    resultOUT <- lapply(as.list(mmOUT), assignbyserial,
+                       serial=serial[OUT], template=blank)
+    names(resultIN) <- paste(names(resultIN), splitby, "TRUE", sep="")
+    names(resultOUT) <- paste(names(resultOUT), splitby, "FALSE", sep="")
+    result <- c(resultIN, resultOUT)
+  }
+  return(as.listof(result))
 }
 
 update.slrm <- function(object, ..., evaluate=TRUE, env=parent.frame()) {
@@ -499,8 +548,21 @@ anova.slrm <- function(object, ..., test=NULL) {
   do.call("anova.glm", append(fitz, list(test=test)))
 }
 
-vcov.slrm <- function(object, ...) {
-  vcov(object$Fit$FIT)
+vcov.slrm <- function(object, ..., what=c("vcov", "corr", "fisher", "Fisher")) {
+  stopifnot(is.slrm(object))
+  what <- match.arg(what)
+  vc <- vcov(object$Fit$FIT)
+  result <- switch(what,
+                   vcov = vc,
+                   corr = {
+                     sd <- sqrt(diag(vc))
+                     vc / outer(sd, sd, "*")
+                   },
+                   fisher=,
+                   Fisher={
+                     solve(vc)
+                   })
+  return(result)
 }
 
 unitname.slrm <- function(x) {

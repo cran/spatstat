@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.5 $   $Date: 2012/07/17 06:36:34 $
+#  $Revision: 1.6 $   $Date: 2012/10/05 09:41:18 $
 #
 #  Image/function on a linear network
 #
@@ -103,3 +103,25 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
 }
 
 as.im.linim <- function(X, ...) { as.im(X$Z, ...) }
+
+as.linim <- function(X, ...) {
+  UseMethod("as.linim")
+}
+
+as.linim.default <- function(X, L, ...) {
+  stopifnot(inherits(L, "linnet"))
+  Y <- as.im(X, W=as.rectangle(as.owin(L)), ...)
+  Z <- as.im(as.mask.psp(as.psp(L), as.owin(Y)))
+  Y <- eval.im(Z * Y)
+  out <- linim(L, Y)
+  return(out)
+}
+
+as.linim.linim <- function(X, ...) {
+  if(length(list(...)) == 0)
+    return(X)
+  Y <- as.linim.default(X, as.linnet(X), ...)
+  return(Y)
+}
+
+    

@@ -865,6 +865,92 @@ f <- ppm(amacrine, ~z + marks, covariates=list(z=Zim))
 m <- rmhmodel(f)
 
 })
+#
+#  tests/rmh.ppm.R
+#
+#  $Revision: 1.1 $ $Date: 2012/10/14 07:24:21 $
+#
+#  Examples removed from rmh.ppm.Rd
+#  stripped down to minimal tests of validity
+#
+
+require(spatstat)
+local({
+   op <- spatstat.options()
+   spatstat.options(rmh.nrep=10, npixel=10, ndummy.min=10)
+   spatstat.options(project.fast=TRUE)
+   Nrep <- 10
+
+   X <- swedishpines
+   # Poisson process
+   fit <- ppm(X, ~1, Poisson())
+   Xsim <- rmh(fit)
+   # Strauss process   
+   fit <- ppm(X, ~1, Strauss(r=7))
+   Xsim <- rmh(fit)
+
+   # Strauss process simulated on a larger window
+   # then clipped to original window
+   Xsim <- rmh(fit, control=list(nrep=Nrep, expand=1.1, periodic=TRUE))
+
+   # Strauss - hard core process
+#   fit <- ppm(X, ~1, StraussHard(r=7,hc=2))
+#   Xsim <- rmh(fit, start=list(n.start=X$n))
+
+   # Geyer saturation process
+#   fit <- ppm(X, ~1, Geyer(r=7,sat=2))
+#   Xsim <- rmh(fit, start=list(n.start=X$n))
+
+   # Area-interaction process
+     fit <- ppm(X, ~1, AreaInter(r=7))
+     Xsim <- rmh(fit, start=list(n.start=X$n))
+  
+     # soft core interaction process
+#     X <- quadscheme(X, nd=50)
+#     fit <- ppm(X, ~1, Softcore(kappa=0.1), correction="isotropic")
+#     Xsim <- rmh(fit, start=list(n.start=X$n))
+
+     # Diggle-Gratton pairwise interaction model
+#     fit <- ppm(cells, ~1, DiggleGratton(0.05, 0.1))
+#     Xsim <- rmh(fit, start=list(n.start=cells$n))
+#     plot(Xsim, main="simulation from fitted Diggle-Gratton model")
+   
+   X <- rSSI(0.05, 100)
+
+   # piecewise-constant pairwise interaction function
+   fit <- ppm(X, ~1, PairPiece(seq(0.02, 0.1, by=0.01)))
+   Xsim <- rmh(fit)
+
+   # marked point pattern
+   Y <- amacrine
+
+   # marked Poisson models
+   fit <- ppm(Y)
+   Ysim <- rmh(fit)
+
+   fit <- ppm(Y,~marks)
+   Ysim <- rmh(fit)
+
+   fit <- ppm(Y,~x)
+   Ysim <- rmh(fit)
+#   fit <- ppm(Y,~polynom(x,2))
+#   Ysim <- rmh(fit)
+
+   fit <- ppm(Y,~marks+x)
+   Ysim <- rmh(fit)
+#   fit <- ppm(Y,~marks+polynom(x,2))
+#   Ysim <- rmh(fit)
+
+   # multitype Strauss models
+   MS <- MultiStrauss(types = levels(Y$marks),
+                      radii=matrix(0.07, ncol=2, nrow=2))
+
+#   fit <- ppm(Y,~marks*polynom(x,2), MS)
+    fit <- ppm(Y,~marks*x, MS)
+   Ysim <- rmh(fit)
+
+   spatstat.options(op)
+ })
 # fvproblems.R
 
 require(spatstat)
@@ -1342,7 +1428,7 @@ local({
 #
 #  Thanks to Ege Rubak
 #
-#  $Revision: 1.1 $  $Date: 2012/06/19 07:33:49 $
+#  $Revision: 1.2 $  $Date: 2012/10/09 09:57:00 $
 #
 
 require(spatstat)
@@ -1353,13 +1439,23 @@ local({
   X <- rStrauss(200, .5, .05)
   model <- ppm(X, inter = Strauss(.05))
 
-  vc <- vcov(model, generic = TRUE, algorithm = "vectorclip")
-  v  <- vcov(model, generic = TRUE, algorithm = "vector")
   b  <- vcov(model, generic = TRUE, algorithm = "basic")
+  v  <- vcov(model, generic = TRUE, algorithm = "vector")
+  vc <- vcov(model, generic = TRUE, algorithm = "vectorclip")
 
-  if(max(abs(v-b)) > 1e-7)
+  disagree <- function(x, y, tol=1e-7) { max(abs(x-y)) > tol }
+  asymmetric <- function(x) { disagree(x, t(x)) }
+
+  if(asymmetric(b))
+    stop("Non-symmetric matrix produced by vcov.ppm 'basic' algorithm")
+  if(asymmetric(v))
+    stop("Non-symmetric matrix produced by vcov.ppm 'vector' algorithm")
+  if(asymmetric(vc))
+    stop("Non-symmetric matrix produced by vcov.ppm 'vectorclip' algorithm")
+  
+  if(disagree(v, b))
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'basic' ")
-  if(max(abs(v-vc)) > 1e-7)
+  if(disagree(v, vc))
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'vectorclip' ")
 
 })
@@ -1402,3 +1498,27 @@ parres(model, "x", subregion=w, bw.input="quad")
 # check whether 'update.ppm' has messed up internals
 mod2 <- update(model, ~x)
 parres(mod2, "x")
+#
+# tests/lppstuff.R
+#
+# Tests for lpp code
+#
+#  $Revision: 1.1 $  $Date: 2012/10/13 01:30:10 $
+
+
+require(spatstat)
+
+local({
+  # check 'normalise' option in linearKinhom
+  X <- rpoislpp(5, simplenet)
+  fit <- lppm(X, ~x)
+  K <- linearKinhom(X, lambda=fit, normalise=FALSE)
+  plot(K)
+  g <- linearpcfinhom(X, lambda=fit, normalise=FALSE)
+  plot(g)
+  K <- linearKinhom(X, lambda=fit, normalise=TRUE)
+  plot(K)
+  g <- linearpcfinhom(X, lambda=fit, normalise=TRUE)
+  plot(g)
+})
+

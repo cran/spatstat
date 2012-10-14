@@ -2,18 +2,26 @@
 #   nncross.R
 #
 #
-#    $Revision: 1.17 $  $Date: 2012/03/14 04:18:21 $
+#    $Revision: 1.18 $  $Date: 2012/10/13 02:02:00 $
 #
 #  Copyright (C) Adrian Baddeley, Jens Oehlschlaegel and Rolf Turner 2000-2012
 #  Licence: GNU Public Licence >= 2
 
-nncross <- function(X, Y, iX=NULL, iY=NULL,
+nncross <- function(X, Y, ...) {
+  UseMethod("nncross")
+}
+
+nncross.default <- function(X, Y, ...) {
+  X <- as.ppp(X, W=bounding.box.xy)
+  nncross(X, Y, ...)
+}
+
+nncross.ppp <- function(X, Y, iX=NULL, iY=NULL,
                     what = c("dist", "which"),
                     ...,
                     sortby=c("range", "var", "x", "y"),
                     is.sorted.X = FALSE,
                     is.sorted.Y = FALSE) {
-  X <- as.ppp(X, W=bounding.box.xy)
   stopifnot(is.ppp(Y) || is.psp(Y))
   sortby <- match.arg(sortby)
   what   <- match.arg(what, choices=c("dist", "which"), several.ok=TRUE)

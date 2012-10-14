@@ -104,12 +104,18 @@
   \code{\link{ppm}}
 }
 \examples{
+\testonly{
+   exactMPLEstrauss(cells, 0.1, ngrid=128)
+   exactMPLEstrauss(cells, 0.1, ngrid=128, project=FALSE)
+}
+if(interactive()) {
    exactMPLEstrauss(cells, 0.1)
    coef(ppm(cells, ~1, Strauss(0.1)))
    coef(ppm(cells, ~1, Strauss(0.1), nd=128))
    exactMPLEstrauss(redwood, 0.04)
    exactMPLEstrauss(redwood, 0.04, project=FALSE)
    coef(ppm(redwood, ~1, Strauss(0.04)))
+}
 }
 \keyword{spatial}
 \keyword{models}

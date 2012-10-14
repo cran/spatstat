@@ -10,7 +10,7 @@
   Monte Carlo based tests.
 }
 \usage{
-\method{quadrat.test}{splitppp}(X, ...)
+\method{quadrat.test}{splitppp}(X, ..., df=NULL, df.est=NULL, Xname=NULL)
 }
 \arguments{
   \item{X}{
@@ -18,6 +18,7 @@
     each component of which will be subjected to the goodness-of-fit test.
   }
   \item{\dots}{Arguments passed to \code{\link{quadrat.test.ppp}}.}
+  \item{df,df.est,Xname}{Arguments passed to \code{\link{pool.quadrattest}}.}
 }
 \details{
   The function \code{quadrat.test} is generic, with methods for
@@ -27,12 +28,12 @@
 
   If \code{X} is a split point pattern, then for each of the
   component point patterns (taken separately) we test 
-  the null hypotheses of Complete Spatial Randomness.
-  The method \code{quadrat.test.ppp} is applied to each
-  component point pattern.
+  the null hypotheses of Complete Spatial Randomness,
+  then combine the result into a single test.
 
-  The return value is a list of objects, each giving the result of
-  one of the tests.
+  The method \code{quadrat.test.ppp} is applied to each
+  component point pattern. Then the results are pooled using
+  \code{\link{pool.quadrattest}} to obtain a single test.
 }
 \seealso{
   \code{\link{quadrat.test}},
@@ -42,14 +43,12 @@
   \code{\link{chisq.test}},
   \code{\link{kstest}}.
 
-  To test a Poisson point process model against a specific alternative,
+  To test a Poisson point process model against a specific Poisson alternative,
   use \code{\link{anova.ppm}}.
 }
 \value{
-  A list of objects, each giving the result of one of the
-  hypothesis tests. Each component object is of class \code{"htest"}
-  and \code{"quadrat.test"}. The list itself is of class \code{"listof"}
-  so that it can be printed and plotted.
+  An object of class \code{"quadrattest"} which can be printed and
+  plotted.
 }
 \examples{
  data(humberside)

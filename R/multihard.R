@@ -2,7 +2,7 @@
 #
 #    multihard.R
 #
-#    $Revision: 1.6 $	$Date: 2012/05/08 08:27:22 $
+#    $Revision: 1.7 $	$Date: 2012/08/30 02:13:06 $
 #
 #    The Hard core process
 #
@@ -62,24 +62,26 @@ MultiHard <- local({
      # unordered pair corresponding to each ordered pair
      ucode <- c(1:npairs, (1:npairs)[different])
      #
-     # go....
-     # apply the relevant hard core distance to each pair of points
-     hxu <- h[ tx, tu ]
-     forbid <- (d < hxu)
-     forbid[is.na(forbid)] <- FALSE
-     # form the potential 
-     value <- ifelse(forbid, -Inf, 0)
      # create numeric array for result
      z <- array(0, dim=c(dim(d), npairs),
                 dimnames=list(character(0), character(0), vname))
-     # assign value[i,j] -> z[i,j,k] where k is relevant interaction code
-     for(i in 1:nordpairs) {
-       # data points with mark m1
-       Xsub <- (tx == mark1o[i])
-       # quadrature points with mark m2
-       Qsub <- (tu == mark2o[i])
-       # assign
-       z[Xsub, Qsub, ucode[i]] <- value[Xsub, Qsub]
+     # go....
+     if(length(z) > 0) {
+       # apply the relevant hard core distance to each pair of points
+       hxu <- h[ tx, tu ]
+       forbid <- (d < hxu)
+       forbid[is.na(forbid)] <- FALSE
+       # form the potential 
+       value <- ifelse(forbid, -Inf, 0)
+       # assign value[i,j] -> z[i,j,k] where k is relevant interaction code
+       for(i in 1:nordpairs) {
+         # data points with mark m1
+         Xsub <- (tx == mark1o[i])
+         # quadrature points with mark m2
+         Qsub <- (tu == mark2o[i])
+         # assign
+         z[Xsub, Qsub, ucode[i]] <- value[Xsub, Qsub]
+       }
      }
      attr(z, "IsOffset") <- TRUE
      return(z)

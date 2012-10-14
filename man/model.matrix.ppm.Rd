@@ -50,7 +50,7 @@
   functions \code{\link{ppm}}, \code{\link{kppm}} and \code{\link{lppm}}.
 
   The methods \code{model.matrix.ppm}, \code{model.matrix.kppm}
-  and \code{model.matrix.lppm}
+  and \code{model.matrix.lppm} 
   extract the model matrix for the GLM.
 
   The result is a matrix, with one row for every quadrature point
@@ -68,9 +68,9 @@
   \code{\link{quad.ppm}}.
 }
 \value{
-  A matrix. Rows of the matrix correspond to quadrature points
+  A matrix. Columns of the matrix are covariates in the model.
+  Rows of the matrix correspond to quadrature points
   in the fitting procedure (provided \code{keepNA=TRUE}).
-  Columns are covariates in the model.
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
@@ -79,18 +79,19 @@
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
+  \code{\link{model.matrix}},
   \code{\link{model.images}},
   \code{\link{ppm}},
   \code{\link{kppm}},
+  \code{\link{lppm}},
   \code{\link{ppm.object}},
   \code{\link{quad.ppm}},
-  \code{\link{residuals.ppm}},
-  \code{\link{model.matrix}}
+  \code{\link{residuals.ppm}}
 }
 
 \examples{
    fit <- ppm(cells, ~x)
-   model.matrix(fit)
+   head(model.matrix(fit))
    # matrix with two columns: '(Intercept)' and 'x'
    kfit <- kppm(redwood, ~x, "Thomas")
    m <- model.matrix(kfit)

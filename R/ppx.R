@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.36 $  $Date: 2012/07/17 06:39:34 $
+#  $Revision: 1.37 $  $Date: 2012/09/06 07:42:21 $
 #
 
 ppx <- local({
@@ -288,24 +288,28 @@ unitname.ppx <- function(x) { unitname(x$domain) }
   return(x)
 }
 
-volume.boxx <- function(x) {
+sidelengths.boxx <- function(x) {
   stopifnot(inherits(x, "boxx"))
-  prod(unlist(lapply(x$ranges, diff)))
+  y <- unlist(lapply(x$ranges, diff))
+  return(y)
+}
+  
+volume.boxx <- function(x) {
+  prod(sidelengths(x))
 }
 
 diameter.boxx <- function(x) {
-  stopifnot(inherits(x, "boxx"))
-  sqrt(sum(unlist(lapply(x$ranges, diff))^2))
+  d <- sqrt(sum(sidelengths(x)^2))
+  return(d)
 }
 
 shortside.boxx <- function(x) {
-  stopifnot(inherits(x, "boxx"))
-  min(unlist(lapply(x$ranges, diff)))
+  return(min(sidelengths(x)))
 }
 
 eroded.volumes.boxx <- function(x, r) {
-  stopifnot(inherits(x, "boxx"))
-  ero <- sapply(x$ranges, function(z, r) { pmax(0, diff(z) - 2 * r)}, r=r)
+  len <- sidelengths(x)
+  ero <- sapply(as.list(len), function(z, r) { pmax(0, z - 2 * r)}, r=r)
   apply(ero, 1, prod)
 }
 

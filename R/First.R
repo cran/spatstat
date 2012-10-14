@@ -6,8 +6,8 @@
 .onLoad <- function(...) reset.spatstat.options()
 
 .onAttach <- function(libname, pkgname) {
-  v <- read.dcf(file=system.file("DESCRIPTION", package=pkgname),
-                fields="Version")
+  store.versionstring.spatstat()
+  v <- versionstring.spatstat()
   msg <- paste("spatstat", v,
                "\nType", sQuote("help(spatstat)"),
                "for an overview of spatstat",

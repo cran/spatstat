@@ -3,18 +3,24 @@
 \alias{diameter.boxx}
 \alias{volume.boxx}
 \alias{shortside.boxx}
+\alias{sidelengths.boxx}
 \alias{eroded.volumes.boxx}
 \title{
   Geometrical Calculations for Multi-Dimensional Box
 }
 \description{
   Calculates the volume, diameter, shortest side,
-  or eroded volume of a multi-dimensional box.
+  side lengths, or eroded volume of a multi-dimensional box.
 }
 \usage{
 \method{diameter}{boxx}(x)
+
 \method{volume}{boxx}(x)
+
 \method{shortside}{boxx}(x)
+
+\method{sidelengths}{boxx}(x)
+
 \method{eroded.volumes}{boxx}(x, r)
 }
 \arguments{
@@ -30,7 +36,8 @@
   \code{diameter.boxx}, 
   \code{volume.boxx} and \code{shortside.boxx}
   compute the diameter, volume and shortest side length of the box.
-
+  \code{sidelengths.boxx} returns the lengths of each side of the box.
+  
   \code{eroded.volumes.boxx} computes, for each entry \code{r[i]},
   the volume of the smaller box obtained by removing a slab of
   thickness \code{r[i]} from each face of the box. This smaller box is
@@ -39,8 +46,10 @@
 }
 \value{
   For \code{diameter.boxx}, \code{shortside.boxx} and
-  \code{volume.boxx}, a single numeric
-  value. For \code{eroded.volumes.boxx}, a numeric vector of the same length
+  \code{volume.boxx}, a single numeric value.
+  For \code{sidelengths.boxx}, a numeric vector of length equal to
+  the number of spatial dimensions.
+  For \code{eroded.volumes.boxx}, a numeric vector of the same length
   as \code{r}.  
 }
 \author{Adrian Baddeley
@@ -53,10 +62,11 @@
   \code{\link{boxx}}
 }
 \examples{
-    X <- boxx(c(0,10),c(0,10),c(0,5))
+    X <- boxx(c(0,10),c(0,10),c(0,5),c(0,2))
     diameter(X) 
     volume(X)
     shortside(X)
+    sidelengths(X)
     hd <- shortside(X)/2
     eroded.volumes(X, seq(0,hd, length=10))
 }

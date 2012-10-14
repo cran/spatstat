@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.55 $   $Date: 2012/05/13 07:49:25 $
+#    $Revision: 1.57 $   $Date: 2012/10/13 09:32:07 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -109,13 +109,12 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     # describe covariates
     covtype <- function(x) {
       if(is.im(x)) "im" else
-      if(inherits(x, "distfun")) "distfun" else
       if(is.function(x)) "function" else
       if(is.owin(x)) "owin" else
       if(is.numeric(x) && length(x) == 1) "number" else "unknown"
     }
     ctype <- unlist(lapply(covars, covtype))
-    y$expandable <- all(ctype[used] %in%c("distfun", "function", "number"))
+    y$expandable <- all(ctype[used] %in%c("function", "number"))
     names(ctype) <- names(covars)
     y$covar.type <- ctype
     y$covar.descrip <- ctype
@@ -126,6 +125,7 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       y$covfunargs <- x$covfunargs
       funs <- covars[isfun]
       fdescrip <- function(f) {
+        if(inherits(f, "distfun")) return("distfun")
         alist <- paste(names(formals(f)), collapse=", ")
         paste("function(", alist, ")", sep="")
       }
@@ -169,6 +169,9 @@ summary.ppm <- function(object, ..., quick=FALSE) {
                            interaction=INTERACT),
                       y$entries)
 
+  if(is.character(quick) && (quick == "entries"))
+    return(y)
+  
   ####### Summarise data ############################
 
   y$data <- summary.ppp(DATA, checkdup=FALSE)

@@ -3,7 +3,7 @@
 #
 #  Point process models on a linear network
 #
-#  $Revision: 1.13 $   $Date: 2011/03/21 09:18:21 $
+#  $Revision: 1.15 $   $Date: 2012/10/02 06:41:55 $
 #
 
 lppm <- function(X, ...) {
@@ -189,3 +189,6 @@ as.linnet.lppm <- function(X, ...) {
   as.linnet(X$X, ...)
 }
 
+nobs.lppm <- function(object, ...) {
+  npoints(object$X)
+}

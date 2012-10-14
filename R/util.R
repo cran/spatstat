@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.90 $    $Date: 2012/06/05 09:06:45 $
+#    $Revision: 1.97 $    $Date: 2012/10/11 03:56:04 $
 #
 #  (a) for matrices only:
 #
@@ -244,12 +244,14 @@ intersect.ranges <- function(a, b, fatal=TRUE) {
 }
 
 assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
+assign(".Spatstat.ProgressStartTime", 0, envir = .spEnv)
 
 progressreport <- function(i, n, every=max(1, ceiling(n/100)),
                            nperline=min(charsperline,
                              every * ceiling(charsperline /(every+3))),
                            charsperline=60,
                            style=spatstat.options("progress")) {
+  missevery <- missing(every)
   switch(style,
          txtbar={
            .Spatstat.ProgressBar <- get(".Spatstat.ProgressBar", envir = .spEnv)
@@ -263,8 +265,41 @@ progressreport <- function(i, n, every=max(1, ceiling(n/100)),
            }
          },
          tty={
+           now <- proc.time()
+           if(i == 1) {
+             # Initialise stuff
+             assign(".Spatstat.ProgressStartTime", now, envir = .spEnv)
+             if(missevery && every > 1 && n > 10) {
+               expo <- 10^as.integer(floor(log10(every)))
+               leading <- every/expo
+               vals <- c(1, 2, 5, 10)
+               roundlead <- vals[which.min(abs(leading - vals))]
+               every <- roundlead * expo
+               nperline <- min(charsperline,
+                               every * ceiling(charsperline /(every+3)))
+             }
+             assign(".Spatstat.ProgressData",
+                    list(every=every, nperline=nperline), envir=.spEnv)
+           } else {
+             pd <- get(".Spatstat.ProgressData", envir=.spEnv)
+             every <- pd$every
+             nperline <- pd$nperline
+             if(i < n) {
+               # estimate time remaining
+               t0 <- get(".Spatstat.ProgressStartTime", envir=.spEnv)
+               elapsed <- now - t0
+               elapsed <- unname(elapsed[3])
+               rate <- elapsed/(i-1)
+               remaining <- rate * (n-i)
+               if(rate > 20 || (remaining > 180 &&  (i %% every == 0))) {
+                 st <- paste("etd", codetime(round(remaining)))
+                 st <- paren(st, "[")
+                 cat(paste(st, "\n"))
+               }
+             }
+           }
            if(i == n) 
-             cat(paste(n, ".\n", sep=""))
+             cat(paste(" ", n, ".\n", sep=""))
            else if(every == 1 || i <= 3)
              cat(paste(i, ",", if(i %% nperline == 0) "\n" else " ", sep=""))
            else {
@@ -311,6 +346,8 @@ check.nvector <- function(v, npoints, fatal=TRUE, things="data points",
   whinge <- NULL
   if(!is.numeric(v))
     whinge <- paste(vname, "is not numeric")
+  else if(!is.vector(v))
+    whinge <- paste(vname, "is not a vector")
   else if(length(v) != npoints)
     whinge <- paste("The length of", vname,
                     "should equal the number of", things)
@@ -616,19 +653,43 @@ samefunction <- function(f, g) {
 }
 
 codetime <- local({
-  uname <- c("min", "hours", "days", "weeks", "years",
+  uname <- c("min", "hours", "days", "years",
              "thousand years", "million years", "billion years")
-  multiple <- c(60, 60, 24, 7, 365/7, 1e3, 1e3, 1e3)
-  function(x) {
-    u <- "sec"
+  u1name <- c("min", "hour", "day", "year",
+             "thousand years", "million years", "billion years")
+  multiple <- c(60, 60, 24, 365, 1e3, 1e3, 1e3)
+  codehms <- function(x) {
+    x <- round(x)
+    hours <- x %/% 3600
+    mins  <- (x %/% 60) %% 60
+    secs  <- x %% 60
+    h <- if(hours > 0) paste(hours, ":", sep="") else ""
+    started <- (hours > 0)
+    m <- if(mins > 0) {
+      paste(if(mins < 10 && started) "0" else "", mins, ":", sep="")
+    } else if(started) "00:" else ""
+    started <- started | (mins > 0)
+    s <- if(secs > 0) {
+      paste(if(secs < 10 && started) "0" else "", secs, sep="")
+    } else if(started) "00" else "0 sec"
+    paste(h, m, s, sep="")
+  }
+  codetime <- function(x, hms=TRUE) {
+    if(hms && (x < 60 * 60 * 24))
+      return(codehms(x))
+    u <- u1 <- "sec"
     for(k in seq_along(multiple)) {
-      if(x > multiple[k]) {
+      if(x >= multiple[k]) {
         x <- x/multiple[k]
         u <- uname[k]
+        u1 <- u1name[k]
       } else break
     }
-    paste(round(x, 1), u)
+    xx <- round(x, 1)
+    ux <- if(xx == 1) u1 else u
+    paste(xx, ux)
   }
+  codetime
 })
 
 # defines the current favorite algorithm for 'order' 

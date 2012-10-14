@@ -9,7 +9,7 @@ at new locations.
 \usage{
    \method{predict}{ppm}(object, window, ngrid=NULL, locations=NULL,
    covariates=NULL, type="trend", X=data.ppm(object),
-   \dots, check=TRUE, repair=TRUE)
+   \dots, new.coef=NULL, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -56,6 +56,10 @@ at new locations.
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{new.coef}{
+    Numeric vector of parameter values to replace the 
+    fitted model parameters \code{coef(object)}.
   }
   \item{check}{
     Logical value indicating whether to check the internal format

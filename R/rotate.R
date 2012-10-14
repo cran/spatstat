@@ -1,7 +1,7 @@
 #
 #	rotate.S
 #
-#	$Revision: 1.16 $	$Date: 2011/06/16 05:04:21 $
+#	$Revision: 1.18 $	$Date: 2012/10/10 01:20:23 $
 #
 
 rotxy <- function(X, angle=pi/2) {
@@ -17,7 +17,11 @@ rotxypolygon <- function(p, angle=pi/2) {
   return(p)
 }
 
-"rotate.owin" <- function(X, angle=pi/2, ..., rescue=TRUE) {
+rotate <- function(X, ...) {
+  UseMethod("rotate")
+}
+
+rotate.owin <- function(X, angle=pi/2, ..., rescue=TRUE) {
   verifyclass(X, "owin")
   switch(X$type,
          rectangle={
@@ -55,16 +59,17 @@ rotxypolygon <- function(p, angle=pi/2) {
          )
 }
 
-"rotate.ppp" <- function(X, angle=pi/2, ...) {
+rotate.ppp <- function(X, angle=pi/2, ...) {
   verifyclass(X, "ppp")
   r <- rotxy(X, angle)
   w <- rotate.owin(X$window, angle, ...)
   return(ppp(r$x, r$y, window=w, marks=marks(X, dfok=TRUE), check=FALSE))
 }
 
-
-"rotate" <- function(X, ...) {
-  UseMethod("rotate")
+rotate.im <- function(X, angle=pi/2, ...) {
+  co <- cos(angle)
+  si <- sin(angle)
+  m <- matrix(c(co,si,-si,co), nrow=2, ncol=2)
+  affine(X, mat=m)
 }
 
-  

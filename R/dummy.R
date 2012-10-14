@@ -3,7 +3,7 @@
 #
 #	Utilities for generating patterns of dummy points
 #
-#       $Revision: 5.20 $     $Date: 2012/04/18 08:25:01 $
+#       $Revision: 5.22 $     $Date: 2012/09/06 07:42:33 $
 #
 #	corners()	corners of window
 #	gridcenters()	points of a rectangular grid
@@ -166,7 +166,8 @@ concatxy <- function(...) {
 
 #------------------------------------------------------------
 
-default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ..., verbose=FALSE) {
+default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL,
+                          ..., eps=NULL, verbose=FALSE) {
 	# default action to create dummy points.
 	# regular grid of nd[1] * nd[2] points
 	# plus corner points of window frame,
@@ -174,9 +175,10 @@ default.dummy <- function(X, nd=NULL, random=FALSE, ntile=NULL, npix = NULL, ...
 	# 
 	X <- as.ppp(X)
 	win <- X$window
+        #
         # default dimensions
         a <- default.n.tiling(X, nd=nd, ntile=ntile, npix=npix,
-                              verbose=verbose)
+                              eps=eps, verbose=verbose)
         nd    <- a$nd
         ntile <- a$ntile
         npix  <- a$npix
@@ -262,10 +264,11 @@ default.n.tiling <- local({
       mindivisor(N[2], lo[2], Nbig[2]))
   
   # main
-  default.n.tiling <- 
-    function(X, nd=NULL, ntile=NULL, npix=NULL, verbose=TRUE) {
+  default.n.tiling <- function(X,
+                               nd=NULL, ntile=NULL, npix=NULL,
+                               eps=NULL, verbose=TRUE) {
   # computes dimensions of rectangular grids of 
-  #     - dummy points  (nd)
+  #     - dummy points  (nd) (eps)
   #     - tiles for grid weights (ntile)
   #     - pixels for approximating area (npix)
   # for data pattern X.
@@ -287,6 +290,13 @@ default.n.tiling <- local({
   ndummy.min <- ensure2print(spatstat.options("ndummy.min"), verbose, "")
   ndminX <- pmax(ndummy.min, 10 * ceiling(2 * sqrt(X$n)/10))
   ndminX <- ensure2vector(ndminX)
+
+  if(eps.given <- !is.null(eps)) {
+    eps <- ensure2print(eps, verbose)
+    Xbox <- as.rectangle(as.owin(X))
+    sides <- with(Xbox, c(diff(xrange), diff(yrange)))
+    ndminX <- pmax(ndminX, sides/eps)
+  }
 
   # range of acceptable values for npix
   if(npix.given)

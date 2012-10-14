@@ -3,6 +3,7 @@
 \alias{model.images.ppm}
 \alias{model.images.kppm}
 \alias{model.images.lppm}
+\alias{model.images.slrm}
 \title{Compute Images of Constructed Covariates}
 \description{
   For a point process model fitted to spatial point pattern data,
@@ -17,11 +18,13 @@
   \method{model.images}{kppm}(object, W = as.owin(object), ...)
 
   \method{model.images}{lppm}(object, L = as.linnet(object), ...)
+
+  \method{model.images}{slrm}(object, ...)
 }
 \arguments{
   \item{object}{
     The fitted point process model. An object of class \code{"ppm"}
-    or \code{"kppm"} or \code{"lppm"}.
+    or \code{"kppm"} or \code{"lppm"} or \code{"slrm"}.
   }
   \item{W}{
     A window (object of class \code{"owin"}) in which the
@@ -47,12 +50,15 @@
   object of class \code{"ppm"} (produced by the model-fitting
   function \code{\link{ppm}}) or class \code{"kppm"} (produced by the
   fitting function \code{\link{kppm}}) or class \code{"lppm"} (produced
-  by \code{\link{lppm}}).
+  by \code{\link{lppm}}) or class \code{"slrm"} (produced by
+  \code{\link{slrm}}). 
 
   The spatial covariates required by the model-fitting procedure
   are computed at every pixel location in the window \code{W}.
   For \code{lppm} objects, the covariates are computed at every
-  location on the network \code{L}.
+  location on the network \code{L}. For \code{slrm} objects, the
+  covariates are computed on the pixels that were used to fit the
+  model.
 
   Note that the spatial covariates computed here
   are not the original covariates that were supplied when fitting the
@@ -93,6 +99,9 @@
   \code{\link[stats]{model.matrix}},
   \code{\link{ppm}},
   \code{\link{ppm.object}},
+  \code{\link{lppm}},
+  \code{\link{kppm}},
+  \code{\link{slrm}},
   \code{\link{im}},
   \code{\link{im.object}},
   \code{\link{plot.listof}},
@@ -104,6 +113,8 @@
    model.images(fit)
    fit2 <- ppm(cells, ~cut(x,3))
    model.images(fit2)
+   fit3 <- slrm(japanesepines ~ x)
+   model.images(fit3)
 }
 \keyword{spatial}
 \keyword{models}

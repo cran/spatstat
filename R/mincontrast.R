@@ -99,7 +99,8 @@ mincontrast <- function(observed, theoretical, startpar,
                  fit=fitfv,
                  opt=minimum,
                  ctrl=list(p=ctrl$p,q=ctrl$q,rmin=rmin,rmax=rmax),
-                 info=explain
+                 info=explain,
+                 startpar=startpar
                  )
   
   class(result) <- c("minconfit", class(result))
@@ -176,6 +177,9 @@ print.minconfit <- function(x, ...) {
          },
          cat(paste("Unrecognised error code", cgce, "\n"))
          )
+  # Starting values
+  cat("Starting values of parameters:\n")
+  print(x$startpar)
   # Algorithm parameters
   ct <- x$ctrl
   cat(paste("Domain of integration:",

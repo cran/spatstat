@@ -6,7 +6,7 @@
   are duplicates of previous points, and returns a logical vector.
 }
 \usage{
- \method{duplicated}{ppp}(x, \dots)
+ \method{duplicated}{ppp}(x, \dots, rule=c("spatstat", "deldir"))
 }
 \arguments{
   \item{x}{
@@ -15,6 +15,10 @@
   }
   \item{\dots}{
     Ignored.
+  }
+  \item{rule}{
+    Character string.
+    The rule for determining duplicated points.
   }
 }
 \value{
@@ -35,6 +39,15 @@
   returns a logical vector with entries that are \code{TRUE}
   for duplicated points and \code{FALSE} for unique (non-duplicated)
   points.
+
+  If \code{rule="spatstat"} (the default), duplicated points are
+  determined by testing equality of their coordinates and marks
+  using \code{==}. This is the most stringent possible test.
+  If \code{rule="deldir"}, duplicated points are
+  determined using the function \code{\link[deldir]{duplicatedxy}}
+  in the package \pkg{deldir}, which currently uses
+  \code{\link{duplicated.data.frame}}. Setting \code{rule="deldir"}
+  will ensure consistency with functions in the \pkg{deldir} package.
 }
 \seealso{
   \code{\link{ppp.object}},
@@ -44,6 +57,7 @@
 \examples{
    X <- ppp(c(1,1,0.5), c(2,2,1), window=square(3))
    duplicated(X)
+   duplicated(X, rule="deldir")
 }
 
 \author{Adrian Baddeley

@@ -777,3 +777,4 @@ emptywindow <- function(w) {
   out <- owin(w$xrange, w$yrange, poly=list(), unitname=unitname(w))
   return(out)
 }
+

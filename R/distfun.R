@@ -3,7 +3,7 @@
 #
 #   distance function (returns a function of x,y)
 #
-#   $Revision: 1.13 $   $Date: 2012/03/14 04:14:26 $
+#   $Revision: 1.14 $   $Date: 2012/10/13 08:28:16 $
 #
 
 distfun <- function(X, ...) {
@@ -18,6 +18,7 @@ distfun.ppp <- function(X, ...) {
     nncross(Y, X, what="dist")
   }
   attr(g, "Xclass") <- "ppp"
+  g <- funxy(g, as.rectangle(as.owin(X)))
   class(g) <- c("distfun", class(g))
   return(g)
 }
@@ -30,6 +31,7 @@ distfun.psp <- function(X, ...) {
     nncross(Y, X, what="dist")
   }
   attr(g, "Xclass") <- "psp"
+  g <- funxy(g, as.rectangle(as.owin(X)))
   class(g) <- c("distfun", class(g))
   return(g)
 }
@@ -56,6 +58,7 @@ distfun.owin <- function(X, ..., invert=FALSE) {
     return(out)
   }
   attr(g, "Xclass") <- "owin"
+  g <- funxy(g, as.rectangle(as.owin(X)))
   class(g) <- c("distfun", class(g))
   return(g)
 }
@@ -97,38 +100,5 @@ print.distfun <- function(x, ...) {
   X <- get("X", envir=environment(x))
   print(X)
   return(invisible(NULL))
-}
-
-plot.distfun <- function(x, ...) {
-  xname <- short.deparse(substitute(x))
-  X <- get("X", envir=environment(x))
-  W <- as.owin(X)
-  do.call("do.as.im",
-          resolve.defaults(list(x, action="plot"),
-                           list(...),
-                           list(main=xname, W=W)))
-  invisible(NULL)
-}
-
-contour.distfun <- function(x, ...) {
-  xname <- deparse(substitute(x))
-  X <- get("X", envir=environment(x))
-  W <- as.owin(X)
-  do.call("do.as.im",
-          resolve.defaults(list(x, action="contour"),
-                           list(...),
-                           list(main=xname, W=W)))
-  invisible(NULL)
-}
-
-persp.distfun <- function(x, ...) {
-  xname <- deparse(substitute(x))
-  X <- get("X", envir=environment(x))
-  W <- as.rectangle(X)
-  do.call("do.as.im",
-          resolve.defaults(list(x, action="persp"),
-                           list(...),
-                           list(main=xname, W=W)))
-  invisible(NULL)
 }
 

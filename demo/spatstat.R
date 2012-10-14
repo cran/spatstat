@@ -199,6 +199,18 @@ plot(nnclean(X, k=17), main="Byers-Raftery nearest neighbour cleaning",
 Y <- sharpen(X, sigma=0.5, edgecorrect=TRUE)
 plot(Y, main="Choi-Hall data sharpening", pch=".")
 
+  owpa <- par(mfrow=c(1,2))
+  W <- grow.rectangle(as.rectangle(letterR), 1)
+  X <- superimpose(runifpoint(300, letterR),
+                   runifpoint(50, W), W=W)
+  plot(W, main="clusterset(X)")
+  plot(clusterset(X, fast=TRUE), add=TRUE, chars=c("o", "+"), cols=1:2)
+  plot(letterR, add=TRUE)
+  plot(W, main="clusterset(X, 'd')")
+  plot(clusterset(X, "d", exact=FALSE), add=TRUE)
+  plot(letterR, add=TRUE)
+  par(owpa)
+
 D <- density(a, sigma=0.05)
 plot(D, main="Kernel smoothed intensity of line segment pattern")
 plot(a, add=TRUE)
@@ -260,6 +272,11 @@ plot(a, add=TRUE,col="red")
 
 plot(Jest(swedishpines), main=c("J-function", "J(r)=(1-G(r))/(1-F(r))"))
      
+Z <- nnfun(swedishpines)
+plot(swedishpines$window, main="Nearest neighbour map")
+plot(Z, add=TRUE)
+points(swedishpines)
+
 plot(allstats(swedishpines))
 
 Fig4b <- residualspaper$Fig4b
@@ -576,8 +593,8 @@ par(nopa)
 
 fanfare("IX. Operations on pixel images")
 
+Z <- distmap(swedishpines, dimyx=512)
 plot(Z, main="An image Z")
-# Z is distance map of Swedish Pines
 plot(levelset(Z, 4))
 plot(cut(Z, 5))
 plot(eval.im(sqrt(Z) - 3))

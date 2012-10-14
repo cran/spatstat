@@ -121,6 +121,9 @@ cauchy.estpcf(X, startpar=c(kappa=1,eta2=1), lambda=NULL,
   }
 }
 \references{
+Ghorbani, M. (2012) Cauchy cluster process.
+\emph{Metrika}, to appear.
+
   Waagepetersen, R. (2007)
   An estimating function approach to inference for
   inhomogeneous Neyman-Scott processes.

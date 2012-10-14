@@ -7,14 +7,14 @@
 
    Shortest-path distances between each pair of points in linear network
 
-   $Revision: 1.4 $  $Date: 2012/03/27 04:41:49 $
+   $Revision: 1.5 $  $Date: 2012/10/12 10:21:46 $
 
    linpairdist
 
 */
 
-#define DPATH(I,J) dpath[(J) + Nv * (I)]
-#define ANSWER(I,J) answer[(J) + Np * (I)]
+#define DPATH(I,J) dpath[(I) + Nv * (J)]
+#define ANSWER(I,J) answer[(I) + Np * (J)]
 #define EUCLID(X,Y,U,V) sqrt(pow((X)-(U),2)+pow((Y)-(V),2))
 
 void 

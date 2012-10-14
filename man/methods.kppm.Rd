@@ -54,7 +54,8 @@
 \seealso{
   \code{\link{kppm}},  \code{\link{plot.kppm}},
   \code{\link{predict.kppm}}, \code{\link{simulate.kppm}},
-  \code{\link{update.kppm}}, \code{\link{vcov.kppm}}.
+  \code{\link{update.kppm}}, \code{\link{vcov.kppm}},
+  \code{\link{as.ppm.kppm}}.
 }
 \examples{
   data(redwood)

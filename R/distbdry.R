@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.34 $	$Date: 2011/05/18 01:45:44 $
+#	$Revision: 4.35 $	$Date: 2012/09/27 07:53:34 $
 #
 # -------- functions ----------------------------------------
 #
@@ -42,11 +42,13 @@ function(X)
                  bdry <- window$bdry
                  for(i in seq_along(bdry)) {
                    polly <- bdry[[i]]
-                   nsegs <- length(polly$x)
-                   for(j in 1:nsegs) {
+                   px <- polly$x
+                   py <- polly$y
+                   nsegs <- length(px)
+                   for(j in seq_len(nsegs)) {
                      j1 <- if(j < nsegs) j + 1 else 1
-                     seg <- c(polly$x[j],  polly$y[j],
-                              polly$x[j1], polly$y[j1])
+                     seg <- c(px[j],  py[j],
+                              px[j1], py[j1])
                      result <- pmin(result, distppl(xy, seg))
                    }
                  }

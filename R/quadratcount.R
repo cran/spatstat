@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.32 $  $Date: 2011/05/18 08:47:19 $
+#  $Revision: 1.33 $  $Date: 2012/09/05 08:17:55 $
 #
 
 quadratcount <- function(X, ...) {
@@ -159,3 +159,8 @@ quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL,
   }
   return(Z)
 }
+
+as.tess.quadratcount <- function(X) {
+  return(attr(X, "tess"))
+}
+

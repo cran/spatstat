@@ -1,5 +1,7 @@
 \name{nncross}
 \alias{nncross}
+\alias{nncross.ppp}
+\alias{nncross.default}
 \title{Nearest Neighbours Between Two Patterns}
 \description{
   Given two point patterns \code{X} and \code{Y},
@@ -7,12 +9,17 @@
   Alternatively \code{Y} may be a line segment pattern.
 }
 \usage{
-  nncross(X, Y, iX=NULL, iY=NULL,
+  nncross(X, Y, \dots)
+
+  \method{nncross}{ppp}(X, Y,
+          iX=NULL, iY=NULL,
           what = c("dist", "which"),
           \dots,
           sortby=c("range", "var", "x", "y"),
           is.sorted.X = FALSE,
           is.sorted.Y = FALSE)
+
+  \method{nncross}{default}(X, Y, \dots)
 }
 \arguments{
   \item{X}{Point pattern (object of class \code{"ppp"}).}

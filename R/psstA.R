@@ -3,7 +3,7 @@
 #
 #	Pseudoscore residual for unnormalised F (area-interaction)
 #
-#	$Revision: 1.2 $	$Date: 2011/10/05 05:38:38 $
+#	$Revision: 1.3 $	$Date: 2012/09/09 02:50:20 $
 #
 ################################################################################
 #
@@ -88,7 +88,8 @@ psstA <- function(object, r=NULL, breaks=NULL, ...,
   desc <- c("distance argument r", "value 0 corresponding to perfect fit")
   ans <- fv(df, "r", substitute(bold(R)~Delta~V[A](r), NULL),
             "theo", . ~ r,
-            alim=c(0, rmax), c("r","%s[theo](r)"), desc, fname="bold(R)~Delta~V[A]")
+            alim=c(0, rmax), c("r","%s[theo](r)"), desc,
+            fname="bold(R)~Delta~V[A]")
 
   #
   # for efficiency, compute the largest value of distance transform
@@ -145,7 +146,7 @@ psstA <- function(object, r=NULL, breaks=NULL, ...,
                    "upper 2sigma critical limit for %s",
                    "lower 2sigma critical limit for %s"),
                "res")
-    fvnames(ans, ".") <- c("res", "up", "lo")
+    fvnames(ans, ".") <- c("res", "up", "lo", "theo")
   }
   
   # 

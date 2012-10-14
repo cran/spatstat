@@ -8,7 +8,7 @@
 \usage{
   lohboot(X,
           fun=c("pcf", "Kest", "pcfinhom", "Kinhom"),
-          \dots, nsim=200, confidence=0.95, type=7)
+          \dots, nsim=200, confidence=0.95, global=FALSE, type=7)
 }
 \arguments{
   \item{X}{
@@ -27,6 +27,11 @@
   }
   \item{confidence}{
     Confidence level, as a fraction between 0 and 1.
+  }
+  \item{global}{
+    Logical. If \code{FALSE} (the default), pointwise confidence intervals
+    are constructed. If \code{TRUE}, a global (simultaneous) confidence band is
+    constructed.
   }
   \item{type}{
     Integer. Argument passed to \code{\link[stats]{quantile}}
@@ -92,7 +97,7 @@
 }
 \examples{
   p <- lohboot(simdat, stoyan=0.5)
-  plot(p, shade=c("lo", "hi"))
+  plot(p)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

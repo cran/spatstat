@@ -11,7 +11,7 @@
 }
 \usage{
   \method{fitted}{ppm}(object, \dots, type="lambda", dataonly=FALSE,
-  drop=FALSE, check=TRUE, repair=TRUE)
+  new.coef=NULL, drop=FALSE, check=TRUE, repair=TRUE)
 }
 \arguments{
   \item{object}{
@@ -30,6 +30,10 @@
     at the points of the data point pattern. If \code{FALSE}, then
     values will be computed at all the points of the quadrature scheme
     used to fit the model, including the points of the data point pattern.
+  }
+  \item{new.coef}{
+    Numeric vector of parameter values to replace the 
+    fitted model parameters \code{coef(object)}.
   }
   \item{drop}{
     Logical value determining whether to delete quadrature points

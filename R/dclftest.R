@@ -1,7 +1,7 @@
 #
 #  dclftest.R
 #
-#  $Revision: 1.10 $  $Date: 2012/08/20 08:22:57 $
+#  $Revision: 1.11 $  $Date: 2012/10/11 03:49:28 $
 #
 #  Monte Carlo tests for CSR (etc)
 #
@@ -73,7 +73,32 @@ envelopeTest <- function(X, ...,
     obs <- obs[ok]
     sim <- sim[ok, ]
     reference <- reference[ok]
-  } else rinterval <- range(r)
+  } else {
+    rinterval <- range(r)
+    bad <- !apply(is.finite(as.matrix(X)), 1, all)
+    if(any(bad)) {
+      if(bad[1] && !any(bad[-1])) {
+        # ditch r = 0
+        rinterval <- c(r[2], max(r))
+        if(verbose)
+          warning(paste("Some function values were infinite or NaN",
+                        "at distance r = 0; interval of r values was reset to",
+                        prange(rinterval)))
+        ok <- (rinterval[1] <= r & r <= rinterval[2])
+        obs <- obs[ok]
+        sim <- sim[ok, ]
+        reference <- reference[ok]
+      } else {
+        # problem
+        rbadmax <- max(r[bad])
+        unitinfo <- summary(unitname(X))
+        stop(paste("Some function values were infinite or NaN",
+                   "at distances r up to",
+                   paste(rbadmax, ".", sep=""),
+                   "Please specify a shorter", sQuote("rinterval")))
+      }
+    } 
+  }
 
   # compute test statistic
   if(is.infinite(power)) {

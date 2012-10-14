@@ -13,7 +13,7 @@
   }
 }
 \value{
-  The numerical value of the diameter of the . 
+  The numerical value of the diameter of the window. 
 }
 \details{
   This function computes the 

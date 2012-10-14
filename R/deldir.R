@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.11 $ $Date: 2012/04/06 09:09:39 $
+#  $Revision: 1.14 $ $Date: 2012/10/13 23:38:08 $
 #
 
 .spst.triEnv <- new.env()
@@ -13,9 +13,13 @@ assign("use.trigrafS", TRUE, envir=.spst.triEnv)
 assign("debug.delaunay", FALSE, envir=.spst.triEnv)
 
 dirichlet <- function(X) {
+  stopifnot(is.ppp(X))
+  X <- unique(X, rule="deldir", warn=TRUE)
   w <- X$window
   dd <- deldir(X$x, X$y, rw=c(w$xrange,w$yrange))
   pp <- lapply(tile.list(dd), function(z) { owin(poly=z[c("x","y")]) })
+  if(length(pp) == npoints(X))
+    names(pp) <- seq_len(npoints(X))
   dir <- tess(tiles=pp, window=as.rectangle(w))
   if(w$type != "rectangle")
     dir <- intersect.tess(dir, w)
@@ -24,7 +28,7 @@ dirichlet <- function(X) {
 
 delaunay <- function(X) {
   stopifnot(is.ppp(X))
-  X <- unique(X)
+  X <- unique(X, rule="deldir", warn=TRUE)
   nX <- npoints(X)
   if(nX < 3) return(NULL)
   w <- X$window

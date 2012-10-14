@@ -1,4 +1,186 @@
 
+	CHANGES IN spatstat VERSION 1.29-0
+
+OVERVIEW 
+
+   o We thank Colin Beale, Li Haitao, Frederic Lavancier, Erika Mudrak and Ege Rubak for contributions.
+
+   o random sequential packing
+ 
+   o Allard-Fraley estimator
+
+   o method for pooling several quadrat tests
+
+   o better control over dummy points in ppm
+
+   o more support for data on a linear network
+
+   o nearest neighbour map 
+
+   o changes to subsetting of images
+
+   o improvements and bug fixes 
+
+NEW FUNCTIONS
+
+   o clusterset
+   Allard-Fraley estimator of high-density features in a point pattern
+
+   o pool.quadrattest
+   Pool several quadrat tests
+
+   o nnfun
+   Nearest-neighbour map of a point pattern or a line segment pattern
+
+   o as.ppm
+   Converts various kinds of objects to ppm
+
+   o crossdist.lpp
+   Shortest-path distances between pairs of points in a linear network
+
+   o nobs.lppm
+   Method for 'nobs' for lppm objects.
+
+   o as.linim
+   Converts various kinds of objects to 'linim'
+
+   o model.images.slrm
+   Method for model.images for slrm objects
+
+   o rotate.im
+   Rotate a pixel image
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o "[.im" and "[<-.im"
+   New argument 'j' allows any type of matrix indexing to be used.
+
+   o "[.im"
+   Default behaviour changed in the case of a rectangular subset.
+   New argument 'rescue' can be set to TRUE to reinstate previous behaviour.
+
+   o rSSI
+   Performs 'Random Sequential Packing' if n=Inf.
+
+   o ppm
+   New argument 'eps' determines the spacing between dummy points.
+   (also works for related functions quadscheme, default.dummy, ...)
+
+   o fitted.ppm, predict.ppm
+   Argument 'new.coef' specifies a vector of parameter values
+   to replace the fitted coefficients of the model.
+
+   o lppm
+   Stepwise model selection using step() now works for lppm objects.
+
+   o vcov.slrm
+   Can now calculate correlation matrix or Fisher information matrix
+   as well as variance-covariance matrix.
+
+   o eval.fv
+   Improved behaviour when plotted.
+
+   o "[.fv"
+   Improved behaviour when plotted.
+
+   o lohboot
+   When the result is plotted, the confidence limits are now shaded.
+
+   o lohboot
+   New argument 'global' allows global (simultaneous) confidence bands
+   instead of pointwise confidence intervals.
+
+   o vcov.ppm
+   Accelerated by 30% in some cases.
+
+   o quadrat.test.splitppp
+   The result is now a single object of class 'quadrattest'
+
+   o progressreport
+   Improved output (also affects many functions which print progress reports)
+
+   o Full redwood data (redwoodfull)
+   Plot function redwoodfull.extra$plotit has been slightly improved.
+
+   o nncross
+   This function is now generic, with methods for 'ppp' and 'default'.
+
+   o distfun
+   The internal format of objects of class 'distfun' has been changed.
+
+   o duplicated.ppp, unique.ppp   
+   New argument 'rule' allows behaviour to be consistent with package 'deldir'
+
+BUG FIXES
+
+   o bdist.tiles
+   Values were incorrect in some cases due to numerical error.
+   (Spotted by Erika Mudrak.)
+   Fixed.
+
+   o vcov.ppm, suffstat
+   These functions sometimes gave incorrect values 
+   for marked point process models.
+   Fixed.
+
+   o simulate.ppm, predict.ppm
+   Did not correctly handle the 'window' argument. (Spotted by Li Haitao).
+   Fixed.
+
+   o smooth.ppp, markmean
+   If sigma was very small, strange values were produced, due to
+   numerical underflow. (Spotted by Colin Beale).
+   Fixed.
+
+   o MultiHard, MultiStrauss, MultiStraussHard
+   Crashed if the data point pattern was empty.
+   (Spotted by Ege Rubak).
+   Fixed.
+
+   o vcov.ppm
+   Crashed sporadically, with multitype interactions.
+   (Spotted by Ege Rubak).
+   Fixed.
+
+   o rStrauss, rHardcore, rStraussHard, rDiggleGratton, rDGS
+   If the simulated pattern was empty, these functions would either
+   crash, or return a pattern containing 1 point.
+   (Spotted by Frederic Lavancier).
+   Fixed.
+
+   o model.matrix.slrm
+   Crashed if the model was fitted using split pixels.
+   Fixed.
+
+   o residuals.ppm, diagnose.ppm
+   Did not always correctly handle models that included offset terms.
+   Fixed.
+
+   o project.ppm
+   When a model was projected by project.ppm or by ppm(project=TRUE),
+   the edge corrections used the projected models were sometimes different
+   from the edge corrections in the original model, so that the 
+   projected and unprojected models were not comparable.
+   Fixed.
+
+   o plot.listof, plot.splitppp
+   Crashed sometimes due to a scoping problem.
+   Fixed.
+
+   o dclf.test, mad.test
+   Crashed if any of the function values were infinite or NaN.
+   Fixed.
+
+   o psstA
+   Default plot did not show the horizontal line at y=0
+   corresponding to a perfect fit.
+   Fixed.
+
+   o vcov.ppm
+   names attribute was spelt incorrectly in some cases.
+   Fixed.
+
+
 	CHANGES IN spatstat VERSION 1.28-2
 
 OVERVIEW 
@@ -115,7 +297,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
 
   o betacells
   This dataset has been restructured. The vector of cell profile areas,
-  that was formerly given by betacells.extra$area, has now been included
+  formerly given by betacells.extra$area, has now been included
   as a column of marks in the point pattern 'betacells'.
 
   o ants
