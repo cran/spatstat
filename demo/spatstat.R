@@ -68,6 +68,8 @@ Z <- as.im(function(x,y) { r <- sqrt(x^2+y^2); r * exp(-r) },
            owin(c(-5,5),c(-5,5)))
 plot(Z, main="pixel image: image plot")
 plot(Z, main="pixel image: image plot (heat colours)", col=heat.colors(256))
+plot(Z, main="pixel image: logarithmic colour map", 
+     log=TRUE, col=rainbow(128, end=5/6))
 contour(Z, main="pixel image: contour plot", axes=FALSE)
 plot(Z, main="pixel image: image + contour plot")
 contour(Z, add=TRUE)
@@ -172,13 +174,14 @@ mur <- lapply(murchison, rescale, s=1000)
 mur <- lapply(mur, "unitname<-", value="km")
 X <- mur$gold
 D <- distfun(mur$faults)
+plot(X, main="Murchison gold deposits", cols="blue")
+plot(mur$faults, add=TRUE, col="red")
 rh <- rhohat(X,D, dimyx=256)
 plot(rh,
      main="Smoothed rate estimate",
      xlab="Distance to nearest fault (km)",
      legend=FALSE)
 plot(predict(rh), main="predict(rhohat(X,D))")
-
 
 Z <- density(cells, 0.07)
 plot(Z, main="Kernel smoothed intensity of point pattern")
@@ -271,11 +274,13 @@ contour(distmap(a), main="Distance map")
 plot(a, add=TRUE,col="red")
 
 plot(Jest(swedishpines), main=c("J-function", "J(r)=(1-G(r))/(1-F(r))"))
-     
-Z <- nnfun(swedishpines)
-plot(swedishpines$window, main="Nearest neighbour map")
+
+X <- swedishpines
+X <- X[sample(1:npoints(X))]
+Z <- nnfun(X)
+plot(as.owin(X), main="Nearest neighbour map")
 plot(Z, add=TRUE)
-points(swedishpines)
+points(X)
 
 plot(allstats(swedishpines))
 
@@ -284,6 +289,8 @@ Fig4b <- residualspaper$Fig4b
 plot(Fig4b, main="Inhomogeneous point pattern")
 plot(Kinhom(Fig4b), main="Inhomogeneous K-function")
 plot(pcfinhom(Fig4b, stoyan=0.1), main="Inhomogeneous pair correlation")
+plot(Ginhom(Fig4b, sigma=0.06), main="Inhomogeneous G-function")
+plot(Jinhom(Fig4b, sigma=0.06), main="Inhomogeneous J-function")
 
 X <- unmark(bronzefilter)
 plot(X, "Bronze filter data")
@@ -379,6 +386,15 @@ plot(fit, how="image", trend=FALSE,
 
 plot(leverage(fit))
 plot(influence(fit))
+
+plot(mur$gold, main="Murchison gold deposits", cols="blue")
+plot(mur$faults, add=TRUE, col="red")
+fit <- ppm(mur$gold, ~D, covariates=list(D=distfun(mur$faults)))
+plot(parres(fit, "D"),
+     main="Partial residuals from loglinear Poisson model",
+     xlab="Distance to nearest fault (km)",
+     ylab="log intensity of gold", legend=FALSE)
+legend("bottomleft", legend=c("partial residual", "loglinear fit"), col=c(1,4), lty=c(1,4))
 
 parsave <- par(mfrow=c(1,2))
 plot(redwood)

@@ -3,7 +3,7 @@
 # and Fisher information matrix
 # for ppm objects
 #
-#  $Revision: 1.54 $  $Date: 2012/10/09 10:40:41 $
+#  $Revision: 1.63 $  $Date: 2012/11/23 01:25:54 $
 #
 
 vcov.ppm <- local({
@@ -13,7 +13,8 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
                      matrix.action=c("warn", "fatal", "silent"),
                      hessian=FALSE) {
   verifyclass(object, "ppm")
-
+  argh <- list(...)
+  
   gam.action <- match.arg(gam.action)
   matrix.action <- match.arg(matrix.action)
 
@@ -24,7 +25,12 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
     stop(paste("Unrecognised option: what=", sQuote(what)))
   what <- what.map[m]
 
-  method <- resolve.defaults(list(...), list(method="C"))$method
+  # computation method
+  method <- resolve.1.default("method", argh, list(method="C"))
+
+  # nonstandard calculations (hack) 
+  generic.triggers <- c("A1", "A1dummy", "new.coef", "matwt")
+  nonstandard <- any(generic.triggers %in% names(argh))
   
   # Fisher information *may* be contained in object
   fisher <- object$fisher
@@ -34,7 +40,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
   needguts <-
     (is.null(fisher) && what=="fisher") ||
     (is.null(varcov) && what %in% c("vcov", "corr")) ||
-    (what == "internals")
+    (what == "internals") || nonstandard
 
   # In general it is not true that varcov = solve(fisher)
   # because we might use different estimators,
@@ -91,13 +97,29 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
         if(is.null(gf))
           stop("Internal error - refitting did not yield a glm object")
       }
+      # nonstandard calculations?
+      matwt <- resolve.1.default("matwt", argh)
+      new.coef <- resolve.1.default("new.coef", argh)
       # compute related stuff
-      fi <- fitted(object, type="trend", check=FALSE, drop=TRUE)
+      fi <- fitted(object, type="trend", new.coef=new.coef,
+                   check=FALSE, drop=TRUE)
       wt <- quad.ppm(object, drop=TRUE)$w
       # extract model matrix
-      mom <- model.matrix(object, keepNA=FALSE) 
+      mom <- model.matrix(object, keepNA=FALSE)
+      # apply weights to rows - temporary hack
+      if(!is.null(matwt)) {
+        nwt <- length(matwt)
+        nmom <- nrow(mom)
+        if(nwt != nmom) {
+          ss <- getglmsubset(object)
+          if(length(ss) == nmom && sum(ss) == nwt) {
+            matwt <- matwt[ss]
+          } else stop("Hack argument matwt has incompatible length")
+        }
+        mom <- matwt * mom
+      }
       # compute Fisher information if not known
-      if(is.null(fisher)) {
+      if(is.null(fisher) || nonstandard) {
         switch(method,
                C = {
                  fisher <- sumouter(mom, fi * wt)
@@ -147,15 +169,18 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
 vcovGibbs <- function(fit, ..., generic=FALSE) {
   verifyclass(fit, "ppm")
   # decide whether to use the generic, slower algorithm
-  generic.triggers <- c("A1dummy", "new.coef", "matwt")
-  use.generic <- generic ||
-                 !is.stationary(fit) ||
-                 has.offset(fit) ||
-                 !(fit$correction == "border" && fit$rbord == reach(fit)) ||
-                 any(generic.triggers %in% names(list(...)))
-                 !identical(options("contrasts")[[1]],
-                            c(unordered="contr.treatment",
-                              ordered="contr.poly"))
+  generic.triggers <- c("A1", "A1dummy", "new.coef", "matwt")
+  use.generic <-
+    generic ||
+  !is.stationary(fit) ||
+  (fit$method == "logi" && ("marks" %in% variablesinformula(fit$trend))) ||
+  (fit$method != "logi" && has.offset(fit)) ||
+  (fit$method == "logi" && has.offset.term(fit)) ||
+  !(fit$correction == "border" && fit$rbord == reach(fit)) ||
+  any(generic.triggers %in% names(list(...)))
+  !identical(options("contrasts")[[1]],
+             c(unordered="contr.treatment",
+               ordered="contr.poly"))
   #
   vc <- if(use.generic) vcovGibbsAJB(fit, ...) else vcovGibbsEgeJF(fit, ...)
   return(vc)
@@ -164,11 +189,13 @@ vcovGibbs <- function(fit, ..., generic=FALSE) {
 ## vcovGibbsAJB
 ## Adrian's code, modified by Ege to handle logistic case as well
 ##                modified by Adrian to handle 'new.coef'
+## 2012/10/26, bugfixes by Ege for the logistic case
 
 vcovGibbsAJB <- function(model,
                          ...,
                          matrix.action=c("warn", "fatal", "silent"),
                          algorithm=c("vectorclip", "vector", "basic"),
+                         A1 = NULL,
                          A1dummy = FALSE,
                          matwt = NULL, new.coef = NULL
                          ) {
@@ -233,10 +260,18 @@ vcovGibbsAJB <- function(model,
     #
   }
   # Sensitivity matrix for MPLE case (= A1)
-  if(A1dummy){
-    A1 <- sumouter(mokall, w = lamall[okall]/(lamall[okall]+rho))
-  } else{
-    A1 <- sumouter(mok)
+  if(is.null(A1)) {
+    if(A1dummy){
+#    A1 <- sumouter(mokall, w = lamall[okall]/(lamall[okall]+rho))
+      A1 <- sumouter(mokall, w = (lamall * w.quad(Q))[okall])
+    } else{
+      A1 <- sumouter(mok)
+    }
+  } else {
+    stopifnot(is.matrix(A1))
+    if(!all(dim(A1) == p))
+      stop(paste("Matrix A1 has wrong dimensions:",
+                 prange(dim(A1)), "!=", prange(c(p, p))))
   }
   dimnames(A1) <- dnames
   #
@@ -246,7 +281,9 @@ vcovGibbsAJB <- function(model,
   # identify close pairs
   R <- reach(model, epsilon=1e-2)
   if(is.finite(R)) {
-    areaW <- area.owin(if(correction == "border") Wminus <- erosion(W, R) else W)
+    areaW <- if(correction == "border") eroded.areas(W, R) else area.owin(W)
+    
+#    areaW <- area.owin(if(correction == "border") Wminus <- erosion(W, R) else W)
     if(R == 0 && !logi) return(A1)
     if(R == 0 && logi) return(A1log)
     cl <- closepairs(X, R)
@@ -318,7 +355,7 @@ vcovGibbsAJB <- function(model,
                  wt <- plami.j / lam[i] - 1
                  A2 <- A2 + wt * outer(pmi.j, pmj.i)
                  if(logi)
-                   A2log <- A2log + wt * rho/(lam[i]+rho) * rho/(lam[j]+rho) * outer(pmi.j, pmj.i)
+                   A2log <- A2log + wt * rho/(plami.j+rho) * rho/(plamj.i+rho) * outer(pmi.j, pmj.i)
                  # delta sufficient statistic
                  # delta_i h(X[j] | X[-c(i,j)])
                  # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
@@ -392,7 +429,7 @@ vcovGibbsAJB <- function(model,
                  j <- Ji[k]
                  A2 <- A2 + wt[k] * outer(pmi[k,], pmj[k,])
                  if(logi)
-                   A2log <- A2log + wt[k] * rho/(lam[i]+rho) * rho/(lam[j]+rho) * outer(pmi[k,], pmj[k,])
+                   A2log <- A2log + wt[k] * rho/(plami[k]+rho) * rho/(plamj[k]+rho) * outer(pmi[k,], pmj[k,])
                  # delta sufficient statistic
                  # delta_i h(X[j] | X[-c(i,j)])
                  # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
@@ -474,7 +511,7 @@ vcovGibbsAJB <- function(model,
                  j <- Ji[k]
                  A2 <- A2 + wt[k] * outer(pmi[k,], pmj[k,])
                  if(logi)
-                   A2log <- A2log + wt[k] * rho/(lam[i]+rho) * rho/(lam[j]+rho) * outer(pmi[k,], pmj[k,])
+                   A2log <- A2log + wt[k] * rho/(plami[k]+rho) * rho/(plamj[k]+rho) * outer(pmi[k,], pmj[k,])
                  # delta sufficient statistic
                  # delta_i h(X[j] | X[-c(i,j)])
                  # = h(X[j] | X[-j]) - h(X[j] | X[-c(i,j)])
@@ -535,15 +572,19 @@ vcovGibbsAJB <- function(model,
            Q2 <- quad(data=X, dummy=D2)
            Q2$dummy$Dinfo <- D2$Dinfo
            Z2 <- is.data(Q2)
-           arglist <- list(Q=Q2, trend=model$trend, interaction = model$interaction,
+           arglist <- list(Q=Q2, trend=model$trend, interaction = model$interaction, method = model$method,
                            correction = model$correction, rbord = model$rbord, covariates = model$covariates)
            arglist <- append(arglist, model$internal$logistic$extraargs)
            model2 <- do.call(ppm, args = arglist)
 
            ## New cif
-           lamall2 <- fitted(model2, check=FALSE)
+           lamall2 <- fitted(model2, check = FALSE, new.coef = new.coef)
            ## New model matrix
            mall2 <- model.matrix(model2)
+# Excised by AJB           
+#           if(reweighting) {
+#             mall2 <- mall2 * matwt
+#           }
            okall2 <- getglmsubset(model2)
 
            # index vectors of stratrand cell indices of dummy points 
@@ -552,8 +593,11 @@ vcovGibbsAJB <- function(model,
 
            # Dummy points inside eroded window (for border correction)
            if(is.finite(R) && (correction == "border")){
-             ii <- inside.owin(D, w = Wminus)
-             ii2 <- inside.owin(D2, w = Wminus)
+             ii <- (bdist.points(D) >= R)
+             ii2 <- (bdist.points(D2) >= R)
+#  AJB:  faster and more consistent than:             
+#             ii <- inside.owin(D, w = Wminus)
+#             ii2 <- inside.owin(D2, w = Wminus)
            } else{
              ii <- rep(TRUE, npoints(D))
              ii2 <- rep(TRUE, npoints(D2))
@@ -596,6 +640,7 @@ vcovGibbsAJB <- function(model,
 }
 
 # vcovGibbs from Ege Rubak and J-F Coeurjolly
+## 2012/10/26, modified by Ege to handle logistic case as well
 
 vcovGibbsEgeJF <- function(fit, ...,
                            special.alg = TRUE,
@@ -621,7 +666,7 @@ vcovGibbsEgeJF <- function(fit, ...,
   n <- npoints(Xplus)
 
   ## Using the faster algorithms for special cases
-  if(special.alg){
+  if(special.alg && fit$method != "logi"){
     param <- coef(fit)
     switch(iname,
       "Strauss process"={
@@ -687,8 +732,7 @@ vcovGibbsEgeJF <- function(fit, ...,
 
   ## Matrices for differences of potentials:
   E <- matrix(rep(1:(n-1), 2), ncol = 2)
-  V2 <- array(0,dim=c(n,n,p))
-  dV <- array(0,dim=c(n,n,p))
+  dV <- V2 <- array(0,dim=c(n,n,p))
 
   for(k in 1:p1){
     V2[,,k] <- matrix(V1[,k], n, n, byrow = FALSE)
@@ -725,16 +769,19 @@ vcovGibbsEgeJF <- function(fit, ...,
   ## The reduced window, area and point pattern:
   W<-erosion.owin(Wplus,R)
   areaW <- area.owin(W)
-  X <- Xplus[W]
+
+  ## Interior points determined by bdist.points:
+  IntPoints <- bdist.points(Xplus)>=R  
+  X <- Xplus[IntPoints]
   
   ## Making a logical matrix, I, indicating R-close pairs which are in the interior:
-  IntPoints <- nncross(Xplus,X)$dist==0
   D <- pairdist(Xplus)
   diag(D) <- Inf
   I <- D<=R * outer(IntPoints,IntPoints)
   
   ## Matrix A1:
   A1 <- t(V1[IntPoints,])%*%V1[IntPoints,]/areaW
+
   ## Matrix A2:
   A2 <- matrix(0,p,p)
   for(k in 1:p){
@@ -772,22 +819,167 @@ vcovGibbsEgeJF <- function(fit, ...,
     dimnames(A3) <- list(names(theta), names(theta))
   attr(mat, "A") <- list(A1=A1, A2=A2, A3=A3)
   #
-  return(mat)
+  ## Return result for standard ppm method:
+  if(fit$method!="logi")
+    return(mat)
+
+  ########################################################################
+  ###### The remainder is only executed when the method is logistic ######
+  ########################################################################
+
+  ### Most of this is copy/pasted from vcovGibbsAJB
+  correction <- fit$correction
+  Q <- quad.ppm(fit)
+  D <- dummy.ppm(fit)
+  rho <- fit$internal$logistic$rho
+  ## If dummy intensity rho is unknown we estimate it
+  if(is.null(rho))
+     rho <- npoints(D)/(area.owin(D)*markspace.integral(D))
+  X <- data.ppm(fit)
+  Z <- is.data(Q)
+
+  # determine which data points entered into the sum in the pseudolikelihood
+  # (border correction, nonzero cif)
+  # data and dummy:
+  okall <- getglmsubset(fit)
+  ## # data only:
+  ## ok <- okall[Z]
+
+  # conditional intensity lambda(X[i] | X) = lambda(X[i] | X[-i])
+  # data and dummy:
+  lamall <- fitted(fit, check = FALSE)
+  ## # data only:
+  ## lam <- lamall[Z]
+
+  # sufficient statistic h(X[i] | X) = h(X[i] | X[-i])
+  # data and dummy:
+  mall <- model.matrix(fit)
+  mokall <- mall[okall, , drop=FALSE]
+  ## # data only:
+  ## m <- mall[Z, , drop=FALSE]
+  ## mok <- m[ok, , drop=FALSE]
+
+  # Sensitivity matrix S and A1 matrix for logistic case
+  Slog <- sumouter(mokall, w = lamall[okall]*rho/(lamall[okall]+rho)^2)/areaW
+  A1log <- sumouter(mokall, w = lamall[okall]*rho*rho/(lamall[okall]+rho)^3)/areaW
+
+  ## Define W1, W2 and dW for the logistic method based on V1, V2 and dV (frac is unchanged)
+  lambda1 <- exp(rowSums(matrix(theta,n,p,byrow=TRUE)*V1))
+  W1 <- V1*rho/(lambda1+rho)
+  lambda2 <- exp(apply(array(rep(theta,each=n*n),dim=c(n,n,p))*V2, c(1,2), sum))
+  W2 <- V2
+  dW <- dV
+  for(k in 1:p){
+    W2[,,k] <- V2[,,k] * rho/(lambda2+rho)
+    for(j in 1:n){
+      dW[,j,k] <- W1[,k] - W2[,j,k]
+    }
+  }
+  ## Matrices A2log and A3log for the first component Sigma1log of the variance:
+  A2log <- A3log <- matrix(0,p,p)
+  for(k in 1:p){
+    for(l in k:p){
+      A2log[k,l] <- A2log[l,k] <- sum(I*W2[,,k]*frac*t(W2[,,l]))
+      A3log[k,l] <- A3log[l,k] <- sum(I*dW[,,k]*t(dW[,,l]))
+    }
+  }
+  A2log <- A2log/areaW
+  A3log <- A3log/areaW
+  
+  ## First variance component Sigma1log (A1log+A2log+A3log):
+  Sigma1log <- A1log+A2log+A3log
+
+  ## Matrix Sigma2log (depends on dummy process type)
+  switch(fit$internal$logistic$how,
+         poisson={
+           Sigma2log <- sumouter(mokall, w = lamall[okall]*lamall[okall]*rho/(lamall[okall]+rho)^3)/areaW
+         },
+         binomial={
+           Sigma2log <- sumouter(mokall, w = lamall[okall]*lamall[okall]*rho/(lamall[okall]+rho)^3)/areaW
+           A1vec <- t(mokall) %*% (rho*lamall[okall]/(lamall[okall]+rho)^2/areaW)
+           Sigma2log <- Sigma2log - A1vec%*%t(A1vec)/rho*areaW/sum(1/(lamall[okall]+rho))
+         },
+         stratrand={
+           ### Dirty way of refitting model with new dummy pattern (should probably be done using call, eval, envir, etc.):
+           D2 <- logi.dummy(X = X, type = "stratrand", nd = fit$internal$logistic$args)
+           Q2 <- quad(data=X, dummy=D2)
+           Q2$dummy$Dinfo <- D2$Dinfo
+           Z2 <- is.data(Q2)
+           arglist <- list(Q=Q2, trend=fit$trend, interaction = fit$interaction, method = fit$method,
+                           correction = fit$correction, rbord = fit$rbord, covariates = fit$covariates)
+           arglist <- append(arglist, fit$internal$logistic$extraargs)
+           fit2 <- do.call(ppm, args = arglist)
+
+           ## New cif
+           lamall2 <- fitted(fit2, check=FALSE)
+           ## New model matrix
+           mall2 <- model.matrix(fit2)
+           okall2 <- getglmsubset(fit2)
+
+           # index vectors of stratrand cell indices of dummy points 
+           inD <- fit$internal$logistic$inD
+           inD2 <- fit2$internal$logistic$inD
+
+           # Dummy points inside eroded window (for border correction)
+           if(is.finite(R) && (correction == "border")){
+             ii <- inside.owin(D, w = W)
+             ii2 <- inside.owin(D2, w = W)
+           } else{
+             ii <- rep(TRUE, npoints(D))
+             ii2 <- rep(TRUE, npoints(D2))
+           }
+           # OK points of dummy pattern 1 with a valid point of dummy pattern 2 in same stratrand cell (and vice versa)
+           okdum <- okall[!Z]
+           okdum2 <- okall2[!Z2]
+           ok1 <- okdum & ii & is.element(inD, inD2[okdum2 & ii2])
+           ok2 <- okdum2 & ii2 & is.element(inD2, inD[okdum & ii])
+           ## ok1 <- okdum & okdum2 & ii & is.element(inD, inD2[ii2])
+           ## ok2 <- okdum2 & okdum1 & ii2 & is.element(inD2, inD[ii])
+           ## ok1 <- ii & is.element(inD, inD2[ii2])
+           ## ok2 <- ii2 & is.element(inD2, inD[ii])
+
+           # cif and suff. stat. for valid points in dummy patterns 1 and 2
+           lamdum <- lamall[!Z][ok1]
+           lamdum2 <- lamall2[!Z2][ok2]
+           mdum <- mall[!Z,][ok1,]
+           mdum2 <- mall2[!Z2,][ok2,]
+
+           # finally calculation of Sigma2
+           wlam <- mdum * rho*lamdum/(lamdum+rho)
+           wlam2 <- mdum2 * rho*lamdum2/(lamdum2+rho)
+           Sigma2log <- t(wlam-wlam2)%*%(wlam-wlam2)/(2*rho*rho*areaW)
+         },
+         stop("sorry - unrecognized dummy process in logistic fit")
+         )
+
+  ## Finally the result is calculated:
+  Ulog <- checksolve(Slog, matrix.action, , "variance")
+  if(is.null(Ulog)) return(NULL)
+  matlog <- Ulog %*% (Sigma1log+Sigma2log) %*% Ulog / areaW
+  
+  ## Attaching dimnames to all matrices
+  dimnames(Sigma2log) <- dimnames(matlog) <- dimnames(Slog) <- dimnames(Sigma1log) <- dimnames(A1log) <- dimnames(A2log) <- dimnames(A3log) <- list(names(theta),names(theta))
+
+  #
+  attr(matlog, "A") <- list(A1log=A1log, A2log=A2log, A3log=A3log, Slog=Slog, Sigma1log=Sigma1log, Sigma2log=Sigma2log, mple=mat)
+
+  return(matlog)
 }
 
 vcovPairPiece <- function(Xplus, R, gam, matrix.action){
   ## R is  the  vector of breaks (R[length(R)]= range of the pp.
   ## gam is the vector of weights
+  Rmax <- R[length(R)]
   
   ## Xplus : point process observed in W+R
   ## Extracting the window and calculating area:
   Wplus<-as.owin(Xplus)
-  W<-erosion.owin(Wplus,R[length(R)])
+  W<-erosion.owin(Wplus,Rmax)
   areaW <- area.owin(W)
-  X<-Xplus[W]
-  # Identify points inside W
-  IntPoints<- inside.owin(Xplus, , W)
-  # IntPoints <- (Xplus$x >= W$xrange[1]) &  (Xplus$x <= W$xrange[2])&(Xplus$y >= W$yrange[1]) &  (Xplus$y <= W$yrange[2])
+
+  ## Interior points determined by bdist.points:
+  IntPoints <- bdist.points(Xplus)>=Rmax
+  X <- Xplus[IntPoints]
   
   ## Matrix D with pairwise distances between points and infinite distance
   ## between a point and itself:
@@ -873,16 +1065,14 @@ vcovMultiStrauss <- function(Xplus, vecR, vecg, matrix.action){
   Wplus<-as.owin(Xplus)
   W<-erosion.owin(Wplus,R)
   areaW <- area.owin(W)
-  X<-Xplus[W]
   X1plus<-Xplus[Xplus$marks==levels(Xplus$marks)[1]]
   X2plus<-Xplus[Xplus$marks==levels(Xplus$marks)[2]]
-  X1<-X1plus[W]
-  X2<-X2plus[W]
-  # Identify points inside W
-  IntPoints1 <- inside.owin(X1plus, , W)
-  IntPoints2 <- inside.owin(X2plus, , W)
-  # IntPoints1<- (X1plus$x >= W$xrange[1]) &  (X1plus$x <= W$xrange[2])&(X1plus$y >= W$yrange[1]) &  (X1plus$y <= W$yrange[2]) 
-  # IntPoints2<- (X2plus$x >= W$xrange[1]) &  (X2plus$x <= W$xrange[2])&(X2plus$y >= W$yrange[1]) &  (X2plus$y <= W$yrange[2]) 
+
+  ## Interior points determined by bdist.points:
+  IntPoints1 <- bdist.points(X1plus)>=R
+  IntPoints2 <- bdist.points(X2plus)>=R
+  X1 <- X1plus[IntPoints1]
+  X2 <- X2plus[IntPoints2]
 
   ## Matrix D with pairwise distances between points and infinite distance
   ## between a point and itself:

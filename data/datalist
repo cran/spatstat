@@ -8,15 +8,18 @@ bronzefilter
 cells
 chicago
 chorley: chorley chorley.extra
+clmfires: clmcov100 clmcov200 clmfires
 copper
 demopat
 finpines
 flu
 ganglia
+gordon
 gorillas: gorillas gorillas.extra
 hamster
 heather
 humberside: humberside humberside.convex
+hyytiala
 japanesepines
 lansing
 letterR
@@ -26,6 +29,7 @@ murchison
 nbfires: nbfires nbfires.extra nbw.rect
 nztrees
 osteo
+paracou
 ponderosa: ponderosa ponderosa.extra
 redwood
 redwoodfull: redwoodfull redwoodfull.extra
@@ -36,3 +40,4 @@ simplenet
 spruces
 swedishpines
 urkiola
+waka

@@ -1,7 +1,7 @@
 #
 #   pcfmulti.inhom.R
 #
-#   $Revision: 1.5 $   $Date: 2012/08/22 01:43:47 $
+#   $Revision: 1.6 $   $Date: 2012/11/21 06:08:54 $
 #
 #   inhomogeneous multitype pair correlation functions
 #
@@ -105,6 +105,7 @@ pcfmulti.inhom <- function(X, I, J, lambdaI=NULL, lambdaJ=NULL, ...,
                            c(isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
 

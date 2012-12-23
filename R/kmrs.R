@@ -9,7 +9,7 @@
 #	reduced.sample()
 #       km.rs()
 #
-#	$Revision: 3.21 $	$Date: 2011/08/24 09:11:51 $
+#	$Revision: 3.23 $	$Date: 2012/12/22 11:07:05 $
 #
 #	The functions in this file produce vectors `km' and `rs'
 #	where km[k] and rs[k] are estimates of F(breaks[k+1]),
@@ -214,3 +214,23 @@ censtimeCDFest <- function(o, cc, d, breaks, ...,
   return(Z)
 }
 
+# simple interface for students and code development
+
+compileCDF <- function(D, B, r, ..., han.denom=NULL, check=TRUE) {
+  han <- !is.null(han.denom)
+  breaks <- breakpts.from.r(r)
+  if(check) {
+    stopifnot(length(D) == length(B) && all(D >= 0) && all(B >= 0))
+    if(han)
+      stopifnot(length(han.denom) == length(D))
+  }
+  D <- as.vector(D)
+  B <- as.vector(B)
+  # observed (censored) lifetimes
+  o <- pmin(D, B)
+  # censoring indicators
+  d <- (D <= B)
+  # go
+  result <- censtimeCDFest(o, B, d, breaks, HAN=han, han.denom=han.denom)
+  result <- rebadge.fv(result, new.fname="compileCDF")
+}

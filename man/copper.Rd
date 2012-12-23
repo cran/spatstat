@@ -70,9 +70,10 @@
   }
 }
 \source{
-  Dr J. Huntington.
+  Dr Jonathan Huntington, CSIRO Earth Science and Resource Engineering,
+  Sydney, Australia.
   Coordinates kindly provided by Dr. Mark Berman
-  and Dr. A. Green, CSIRO, Sydney, Australia.
+  and Dr. Andy Green, CSIRO, Sydney, Australia.
 }
 \references{
 Baddeley, A. and Turner, R. (2000)

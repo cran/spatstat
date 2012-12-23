@@ -87,6 +87,11 @@ mad.test(X, ..., rinterval = NULL, use.theo=FALSE)
   \eqn{\sin^{-1}\sqrt x}{asin(sqrt(x))} using the argument
   \code{transform}. See the Examples.
 }
+\section{Handling Ties}{
+  If the observed value of the test statistic is equal to one or more of the
+  simulated values (called a \emph{tied value}), then the tied values
+  will be assigned a random ordering, and a message will be printed.
+}
 \value{
   An object of class \code{"htest"}.
   Printing this object gives a report on the result of the test.

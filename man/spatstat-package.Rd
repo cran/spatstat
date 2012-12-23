@@ -11,8 +11,8 @@
 \details{
   \pkg{spatstat} is a package for the statistical analysis
   of spatial data. Currently, it deals mainly with the analysis of
-  patterns of points in the plane.  The points may carry auxiliary
-  data (`marks'),
+  spatial patterns of points in two-dimensional space.
+  The points may carry auxiliary data (`marks'),
   and the spatial region in which the points were recorded 
   may have arbitrary shape. 
 
@@ -25,10 +25,11 @@
     \item hypothesis tests and model diagnostics
   }
   Apart from two-dimensional point patterns and point processes,
-  \pkg{spatstat} also supports patterns of line segments in two
-  dimensions, point patterns in three dimensions, and 
-  multidimensional space-time point patterns. It also supports
-  spatial tessellations and random sets.
+  \pkg{spatstat} also supports point patterns in three dimensions, 
+  point patterns in multidimensional space-time,
+  point patterns on a linear network,
+  patterns of line segments in two dimensions, 
+  and spatial tessellations and random sets in two dimensions.
 
   The package can fit several types of point process models
   to a point pattern dataset:
@@ -238,13 +239,16 @@
 	\code{\link{cells}} \tab Crick-Ripley biological cells data \cr
 	\code{\link{chicago}} \tab Chicago street crimes \cr
 	\code{\link{chorley}} \tab Chorley-Ribble cancer data \cr
+	\code{\link{clmfires}} \tab Castilla-La Mancha forest fires \cr
 	\code{\link{copper}} \tab Berman-Huntington copper deposits data \cr
 	\code{\link{demopat}} \tab Synthetic point pattern \cr
 	\code{\link{finpines}} \tab Finnish Pines data \cr
 	\code{\link{flu}} \tab Influenza virus proteins \cr
+	\code{\link{gordon}} \tab People in Gordon Square, London \cr
 	\code{\link{gorillas}} \tab Gorilla nest sites \cr
 	\code{\link{hamster}} \tab Aherne's hamster tumour data \cr
 	\code{\link{humberside}} \tab North Humberside childhood leukaemia data \cr
+	\code{\link{hyytiala}} \tab Mixed forest in Hyyti{\"a}l{\"a}, Finland\cr
 	\code{\link{japanesepines}} \tab Japanese Pines data \cr
 	\code{\link{lansing}} \tab Lansing Woods data \cr
 	\code{\link{longleaf}} \tab Longleaf Pines data \cr
@@ -253,6 +257,7 @@
 	\code{\link{nbfires}} \tab New Brunswick fires data \cr
 	\code{\link{nztrees}} \tab Mark-Esler-Ripley trees data \cr
 	\code{\link{osteo}} \tab Osteocyte lacunae (3D, replicated) \cr
+	\code{\link{paracou}} \tab Kimboto trees in Paracou, French Guiana \cr
 	\code{\link{ponderosa}} \tab Getis-Franklin ponderosa pine trees data \cr
 	\code{\link{redwood}} \tab Strauss-Ripley redwood saplings data \cr
 	\code{\link{redwoodfull}} \tab Strauss redwood saplings data (full set) \cr
@@ -261,7 +266,8 @@
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
 	\code{\link{swedishpines}} \tab Strand-Ripley Swedish pines data \cr
-	\code{\link{urkiola}} \tab Urkiola Woods data
+	\code{\link{urkiola}} \tab Urkiola Woods data \cr
+	\code{\link{waka}} \tab Trees in Waka national park
       }
 
       \bold{To manipulate a point pattern:}
@@ -320,6 +326,8 @@
 	compute Dirichlet-Voronoi tessellation \cr
 	\code{\link{delaunay}} \tab
 	compute Delaunay triangulation \cr 
+	\code{\link{delaunay.distance}} \tab
+	graph distance in Delaunay triangulation \cr 
 	\code{\link{convexhull}} \tab compute convex hull \cr
 	\code{\link{discretise}} \tab discretise coordinates \cr
 	\code{\link{pixellate.ppp}} \tab approximate point pattern by 
@@ -676,6 +684,24 @@
     \code{\link{miplot}} \tab Morishita Index plot
   }
 
+  \bold{Smoothing:}
+  \tabular{ll}{
+    \code{\link{density.ppp}} \tab kernel smoothed density\cr
+    \code{\link{relrisk}} \tab kernel estimate of relative risk\cr
+    \code{\link{smooth.ppp}} \tab spatial interpolation of marks  \cr
+    \code{\link{bw.diggle}} \tab cross-validated bandwidth selection
+                               for \code{\link{density.ppp}}\cr
+    \code{\link{bw.scott}} \tab Scott's rule of thumb 
+                                for density estimation\cr
+    \code{\link{bw.relrisk}} \tab cross-validated bandwidth selection
+                               for \code{\link{relrisk}} \cr
+    \code{\link{bw.smoothppp}} \tab cross-validated bandwidth selection
+                               for \code{\link{smooth.ppp}} \cr
+    \code{\link{bw.frac}} \tab bandwidth selection using window geometry\cr
+    \code{\link{bw.stoyan}} \tab Stoyan's rule of thumb for bandwidth
+                               for \code{\link{pcf}}
+  }
+
   \bold{Modern exploratory tools:}
   \tabular{ll}{
     \code{\link{clusterset}} \tab Allard-Fraley feature detection  \cr
@@ -699,6 +725,9 @@
     \code{\link{Kinhom}} \tab \eqn{K} for inhomogeneous point patterns \cr
     \code{\link{Linhom}} \tab \eqn{L} for inhomogeneous point patterns \cr
     \code{\link{pcfinhom}} \tab pair correlation for inhomogeneous patterns\cr
+    \code{\link{Finhom}} \tab \eqn{F} for inhomogeneous point patterns \cr
+    \code{\link{Ginhom}} \tab \eqn{G} for inhomogeneous point patterns \cr
+    \code{\link{Jinhom}} \tab \eqn{J} for inhomogeneous point patterns \cr
     \code{\link{localL}} \tab Getis-Franklin neighbourhood density function\cr
     \code{\link{localK}} \tab neighbourhood K-function\cr
     \code{\link{localpcf}} \tab local pair correlation function\cr
@@ -999,6 +1028,7 @@
     \code{\link{model.depends}} \tab Identify variables in the model \cr
     \code{\link{as.interact}} \tab Interpoint interaction component of model \cr
     \code{\link{fitin}} \tab Extract fitted interpoint interaction \cr
+    \code{\link{is.hybrid}} \tab Determine whether the model is a hybrid \cr
     \code{\link{valid.ppm}} \tab Check the model is a valid point process \cr
     \code{\link{project.ppm}} \tab Ensure the model is a valid point process 
   }
@@ -1034,6 +1064,7 @@
     \code{\link{Fiksel}()}	 \tab Fiksel pairwise interaction process\cr
     \code{\link{Geyer}()}	 \tab Geyer's saturation process\cr
     \code{\link{Hardcore}()}	 \tab Hard core process\cr
+    \code{\link{Hybrid}()}	 \tab Hybrid of several interactions\cr
     \code{\link{LennardJones}() } \tab Lennard-Jones potential \cr
     \code{\link{MultiHard}()} \tab 		multitype hard core process \cr
     \code{\link{MultiStrauss}()} \tab 		multitype Strauss process \cr
@@ -1049,6 +1080,8 @@
     \code{\link{StraussHard}()} \tab Strauss/hard core point process \cr
     \code{\link{Triplets}()} \tab Geyer triplets process
   }
+  Note that it is also possible to combine several such interactions
+  using \code{\link{Hybrid}}.
   
   \bold{Finer control over model fitting:}
   
@@ -1306,7 +1339,7 @@
     \code{\link{bermantest}} \tab Berman's goodness-of-fit tests\cr
     \code{\link{envelope}} \tab critical envelope for Monte Carlo
     test of goodness-of-fit \cr
-    \code{\link{clf.test}} \tab Cressie (1991)/Loosmore and Ford (2006) test \cr
+    \code{\link{dclf.test}} \tab Diggle(1986)/ Cressie(1991)/ Loosmore and Ford (2006) test \cr
     \code{\link{mad.test}} \tab Mean Absolute Deviation test \cr
     \code{\link{scan.test}} \tab spatial scan statistic/test \cr
     \code{\link{anova.ppm}} \tab Analysis of Deviance for
@@ -1457,12 +1490,14 @@
   Dominic Schuhmacher and
   Rasmus Waagepetersen
   made substantial contributions of code.
+
   Additional contributions by
   Ang Qi Wei,
   Sandro Azaele,
   Colin Beale,
   Thomas Bendtsen,
   Ricardo Bernhardt,
+  Andrew Bevan,
   Brad Biggerstaff,
   Roger Bivand,
   Florent Bonneu,
@@ -1479,6 +1514,7 @@
   Peter Diggle,
   Ian Dryden,
   Stephen Eglen,
+  Olivier Flores,
   Neba Funwi-Gabga,
   Agnes Gault,
   Marc Genton,
@@ -1504,6 +1540,7 @@
   Jonathan Lee,
   George Leser,
   Li Haitao,
+  George Limitsios,
   Ben Madin,
   Robert Mark,
   Jorge Mateu Mahiques,
@@ -1520,6 +1557,7 @@
   Thierry Onkelinx,
   Evgeni Parilov,
   Jeff Picka,
+  Nicolas Picard,
   Sergiy Protsiv,
   Adrian Raftery,
   Matt Reiter,

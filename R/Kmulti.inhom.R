@@ -1,7 +1,7 @@
 #
 #	Kmulti.inhom.S		
 #
-#	$Revision: 1.36 $	$Date: 2012/08/22 01:39:58 $
+#	$Revision: 1.37 $	$Date: 2012/11/21 06:01:48 $
 #
 #
 # ------------------------------------------------------------------------
@@ -153,6 +153,7 @@ function(X, I, J, lambdaI=NULL, lambdaJ=NULL,
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
 

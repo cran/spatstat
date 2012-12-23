@@ -2,7 +2,7 @@
 #
 #    geyer.S
 #
-#    $Revision: 2.20 $	$Date: 2012/01/18 11:44:35 $
+#    $Revision: 2.22 $	$Date: 2012/11/06 08:15:58 $
 #
 #    Geyer's saturation process
 #
@@ -76,26 +76,53 @@ Geyer <- local({
            message("Using fast eval for Geyer")
          r   <- potpars$r
          sat <- potpars$sat
-         # first determine saturated pair counts
+         # first ensure all data points are in U
+         nX <- npoints(X)
+         nU <- npoints(U)
+         Xseq  <- seq_len(nX)
+         if(length(EqualPairs) == 0) {
+           # no data points currently included 
+           missingdata <- rep(TRUE, nX)
+         } else {
+           Xused <- EqualPairs[,1]
+           missingdata <- !(Xseq %in% Xused)
+         }
+         somemissing <- any(missingdata)
+         if(somemissing) {
+           # add the missing data points
+           nmiss <- sum(missingdata)
+           U <- superimpose(U, X[missingdata], W=X$window)
+           # correspondingly augment the list of equal pairs
+           originalrows <- seq_len(nU)
+           newXindex <- Xseq[missingdata]
+           newUindex <- nU + seq_len(nmiss)
+           EqualPairs <- rbind(EqualPairs, cbind(newXindex, newUindex))
+           nU <- nU + nmiss
+         }
+         # determine saturated pair counts
          counts <- strausscounts(U, X, r, EqualPairs) 
          satcounts <- pmin(sat, counts)
          satcounts <- matrix(satcounts, ncol=1)
          if(halfway) {
-           # trapdoor used by suffstat() 
-           return(satcounts)
+           # trapdoor used by suffstat()
+           answer <- satcounts
          } else if(sat == Inf) {
            # no saturation: fast code
-           return(2 * satcounts)
+           answer <- 2 * satcounts
+         } else {
+           # extract counts for data points
+           Uindex <- EqualPairs[,2]
+           Xindex <- EqualPairs[,1]
+           Xcounts <- integer(npoints(X))
+           Xcounts[Xindex] <- counts[Uindex]
+           # evaluate change in saturated counts of other data points
+           change <- geyercounts(U, X, r, sat, Xcounts, EqualPairs)
+           answer <- satcounts + change
+           answer <- matrix(answer, ncol=1)
          }
-         # extract counts for data points
-         Uindex <- EqualPairs[,2]
-         Xindex <- EqualPairs[,1]
-         Xcounts <- integer(npoints(X))
-         Xcounts[Xindex] <- counts[Uindex]
-         # evaluate change in saturated counts of other data points
-         change <- geyercounts(U, X, r, sat, Xcounts, EqualPairs)
-         answer <- satcounts + change
-         return(matrix(answer, ncol=1))
+         if(somemissing)
+           answer <- answer[originalrows, , drop=FALSE]
+         return(answer)
        }
   )
   class(BlankGeyer) <- "interact"

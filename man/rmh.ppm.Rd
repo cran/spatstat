@@ -77,7 +77,10 @@
   \code{\link{StraussHard}}
   and \code{\link{Softcore}},
   including nonstationary models. See the examples.
-
+  
+  It is also possible to simulate \emph{hybrids} of several such models.
+  See \code{\link{Hybrid}} and the examples.
+  
   It is possible that the fitted coefficients of a point process model
   may be ``illegal'', i.e. that there may not exist a
   mathematically well-defined point process with the given parameter
@@ -150,6 +153,7 @@
   \code{\link{DiggleGatesStibbard}},
   \code{\link{Geyer}},
   \code{\link{Hardcore}},
+  \code{\link{Hybrid}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},
   \code{\link{PairPiece}},
@@ -218,6 +222,12 @@
    if(live) plot(Ysim, main="simulation from fitted inhomogeneous Multitype Strauss")
 
    spatstat.options(op)
+
+  \dontrun{
+    # Hybrid model
+    fit <- ppm(redwood, ~1, Hybrid(A=Strauss(0.02), B=Geyer(0.1, 2)))
+    Y <- rmh(fit)
+  }
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

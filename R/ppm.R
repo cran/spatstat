@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.26 $	$Date: 2012/07/09 04:50:30 $
+#	$Revision: 1.27 $	$Date: 2012/11/06 09:17:09 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -41,6 +41,8 @@ function(Q,
   if(is.ppp(Q) && is.marked(Q) && !is.multitype(Q)) 
     stop(paste("ppm is not yet implemented for marked point patterns,",
                "other than multitype patterns."))
+  if(!(is.ppp(Q) || inherits(Q, "quad")))
+    stop("Argument Q must be a point pattern or a quadrature scheme")
   
   # validate choice of edge correction
   correction <- pickoption("correction", correction,

@@ -45,6 +45,7 @@ Kcross(X, i, j, r=NULL, breaks=NULL, correction, \dots, ratio=FALSE)
     A character vector containing any selection of the
     options \code{"border"}, \code{"bord.modif"},
     \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+    \code{"translation"},
     \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }

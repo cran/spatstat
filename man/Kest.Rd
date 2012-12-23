@@ -30,7 +30,7 @@ from a point pattern in a window of arbitrary shape.
     Optional. A character vector containing any selection of the
     options \code{"none"}, \code{"border"}, \code{"bord.modif"},
     \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
-    \code{"none"} or \code{"best"}.
+    \code{"translation"}, \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }
   \item{nlarge}{
@@ -127,7 +127,7 @@ from a point pattern in a window of arbitrary shape.
       This is implemented for rectangular and polygonal windows
       (not for binary masks).
     }
-    \item{translate}{Translation correction (Ohser, 1983).
+    \item{translate/translation}{Translation correction (Ohser, 1983).
       Implemented for all window geometries, but slow for
       complex windows. 
     }

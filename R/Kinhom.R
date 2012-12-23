@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.61 $	$Date: 2012/08/22 01:39:25 $
+#	$Revision: 1.62 $	$Date: 2012/11/21 06:00:14 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -87,6 +87,7 @@
                                isotropic="isotropic",
                                Ripley="isotropic",
                                translate="translate",
+                               translation="translate",
                                best="best"),
                              multi=TRUE)
 

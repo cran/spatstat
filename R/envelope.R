@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.32 $  $Date: 2012/08/20 10:26:56 $
+#   $Revision: 2.35 $  $Date: 2012/12/18 09:33:57 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -355,20 +355,26 @@ envelopeEngine <-
 
   if(tran <- !is.null(transform)) {
     stopifnot(is.expression(transform))
+    transform.funX <- dotexpr.to.call(transform, "funX", "eval.fv")
+    transform.funXsim <- dotexpr.to.call(transform, "funXsim", "eval.fv")
+    # 'transform.funX' and 'transform.funXsim' are unevaluated calls to eval.fv
+    
+    # .... old code ....
+    
     # 'transform' is an expression 
-    aa <- substitute(substitute(tt, list(.=as.name("funX"))),
-                     list(tt=transform))
+#    aa <- substitute(substitute(tt, list(.=as.name("funX"))),
+#                     list(tt=transform))
     # 'aa' is a language expression invoking 'substitute'
-    bb <- eval(parse(text=deparse(aa)))
+#    bb <- eval(parse(text=deparse(aa)))
     # 'bb' is an expression obtained by replacing "." by "funX" 
-    transform.funX <- as.call(bb)
-    transform.funX[[1]] <- as.name("eval.fv")
+#    transform.funX <- as.call(bb)
+#    transform.funX[[1]] <- as.name("eval.fv")
     # 'transform.funX' is an unevaluated call to eval.fv
-    aa <- substitute(substitute(tt, list(.=as.name("funXsim"))),
-                     list(tt=transform))
-    bb <- eval(parse(text=deparse(aa)))
-    transform.funXsim <- as.call(bb)
-    transform.funXsim[[1]] <- as.name("eval.fv")
+#    aa <- substitute(substitute(tt, list(.=as.name("funXsim"))),
+#                     list(tt=transform))
+#    bb <- eval(parse(text=deparse(aa)))
+#    transform.funXsim <- as.call(bb)
+#    transform.funXsim[[1]] <- as.name("eval.fv")
   }
   if(!is.null(ginterval)) 
     stopifnot(is.numeric(ginterval) && length(ginterval) == 2)
@@ -649,14 +655,15 @@ envelopeEngine <-
     colnames(alldata) <- c("r", simnames)
     alldata <- as.data.frame(alldata)
     SimFuns <- fv(alldata,
-                   argu="r",
-                   ylab=attr(funX, "ylab"),
-                   valu="sim1",
-                   fmla= deparse(. ~ r),
-                   alim=attr(funX, "alim"),
-                   labl=names(alldata),
-                   desc=c("distance argument r",
-                     paste("Simulation ", 1:nsim, sep="")))
+                  argu="r",
+                  ylab=attr(funX, "ylab"),
+                  valu="sim1",
+                  fmla= deparse(. ~ r),
+                  alim=attr(funX, "alim"),
+                  labl=names(alldata),
+                  desc=c("distance argument r",
+                    paste("Simulation ", 1:nsim, sep="")),
+                  fname=attr(funX, "fname"))
     fvnames(SimFuns, ".") <- simnames
   } 
   if(savepatterns)
@@ -1183,11 +1190,13 @@ envelope.matrix <- function(Y, ...,
 }
 
 
-envelope.envelope <- function(Y, fun=NULL, ..., global=FALSE, VARIANCE=FALSE) {
+envelope.envelope <- function(Y, fun=NULL, ...,
+                              transform=NULL, global=FALSE, VARIANCE=FALSE) {
 
   Yname <- short.deparse(substitute(Y))
 
   stopifnot(inherits(Y, "envelope"))
+  Yorig <- Y
 
   csr <- list(...)$internal$csr
   if(is.null(csr))
@@ -1222,7 +1231,8 @@ envelope.envelope <- function(Y, fun=NULL, ..., global=FALSE, VARIANCE=FALSE) {
     result <- do.call(envelope,
                       resolve.defaults(list(Y=X, fun=fun, simulate=sp),
                                        list(...),
-                                       list(Yname=Yname,
+                                       list(transform=transform,
+                                            Yname=Yname,
                                             nsim=length(sp)),
                                        .StripNull=TRUE))
   } else {
@@ -1230,6 +1240,15 @@ envelope.envelope <- function(Y, fun=NULL, ..., global=FALSE, VARIANCE=FALSE) {
     if(is.null(sf)) 
       stop(paste("Y does not contain a", dQuote("simfuns"), "attribute",
                  "(it was not generated with savefuns=TRUE)"))
+
+    if(!is.null(transform)) {
+      # Apply transformation to Y and sf
+      stopifnot(is.expression(transform))
+      cc <- dotexpr.to.call(transform, "Y", "eval.fv")
+      Y <- eval(cc)
+      cc <- dotexpr.to.call(transform, "sf", "eval.fv")
+      sf <- eval(cc)
+    }
 
     # extract simulated function values
     df <- as.data.frame(sf)
@@ -1248,9 +1267,32 @@ envelope.envelope <- function(Y, fun=NULL, ..., global=FALSE, VARIANCE=FALSE) {
                                        .StripNull=TRUE))
   }
 
+  if(!is.null(transform)) {
+    # post-process labels
+    labl <- attr(result, "labl")
+    dnames <- colnames(result)
+    dnames <- dnames[dnames %in% fvnames(result, ".")]
+    # expand "."
+    ud <- as.call(lapply(c("cbind", dnames), as.name))
+    expandtransform <- eval(substitute(substitute(tr, list(.=ud)),
+                                       list(tr=transform[[1]])))
+    # compute new labels 
+    attr(result, "fname") <- attr(Yorig, "fname")
+    mathlabl <- as.character(fvlegend(result, expandtransform))
+    # match labels to columns
+    evars <- all.vars(expandtransform)
+    used.dotnames <- evars[evars %in% dnames]
+    mathmap <- match(colnames(result), used.dotnames)
+    okmath <- !is.na(mathmap)
+    # update appropriate labels
+    labl[okmath] <- mathlabl[mathmap[okmath]]
+    attr(result, "labl") <- labl
+  }
+  
   # Tack on envelope info
-  copyacross <- c("Yname", "csr", "csr.theo", "simtype")
-  attr(result, "einfo")[copyacross] <- attr(Y, "einfo")[copyacross]
+  copyacross <- c("Yname", "csr.theo", "simtype")
+  attr(result, "einfo")[copyacross] <- attr(Yorig, "einfo")[copyacross]
+  attr(result, "einfo")$csr <- csr
   # Save data
   
   return(result)

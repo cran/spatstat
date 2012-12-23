@@ -1,4 +1,203 @@
 
+	CHANGES IN spatstat VERSION 1.30-0
+
+
+OVERVIEW 
+
+   o We thank Jorge Mateu, Andrew Bevan, Olivier Flores, Marie-Colette van Lieshout, Nicolas Picard and Ege Rubak for contributions.
+
+   o The spatstat manual now exceeds 1000 pages.
+
+   o Hybrids of point process models.
+
+   o Five new datasets
+
+   o Second order composite likelihood method for kppm.
+
+   o Inhomogeneous F, G and J functions.
+
+   o Delaunay graph distance
+
+   o Fixed serious bug in 'lppm' for marked patterns.
+
+   o bug fix in some calculations for Geyer model
+
+   o Improvements to linear networks code
+
+   o Pixel images can now be displayed with a logarithmic colour map.
+
+   o spatstat now formally 'Depends' on the R core package 'grDevices'
+
+   o miscellaneous improvements and bug fixes
+
+NEW DATASETS
+
+   o clmfires
+   Forest fires in Castilla-La Mancha
+
+   o gordon
+   People sitting on the grass in Gordon Square, London
+
+   o hyytiala 
+   Mixed forest in Hyytiala, Finland (marked by species)
+
+   o paracou
+   Kimboto trees in Paracou, French Guiana (marked as adult/juvenile)
+
+   o waka
+   Trees in Waka national park (marked with diameters)
+
+NEW FUNCTIONS
+
+   o Hybrid
+   The hybrid of several point process interactions
+   [Joint research with Jorge Mateu and Andrew Bevan]
+
+   o is.hybrid
+   Recognise a hybrid interaction or hybrid point process model.
+
+   o Finhom, Ginhom, Jinhom
+   Inhomogeneous versions of the F, G and J functions
+   [Thanks to Marie-Colette van Lieshout]
+
+   o delaunay.distance
+   Graph distance in the Delaunay triangulation.
+
+   o distcdf
+   Cumulative distribution function of the distance between
+   two independent random points in a given window.
+
+   o bw.frac
+   Bandwidth selection based on window geometry
+
+   o shortside.owin, sidelengths.owin
+   Side lengths of (enclosing rectangle of) a window
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o ppm
+   Can now fit models with 'hybrid' interactions
+   [Joint research with Jorge Mateu and Andrew Bevan]
+
+   o kppm
+   Now has the option of fitting models using Guan's (2006)
+   second order composite likelihood.
+
+   o envelope.lpp
+   Now handles multitype point patterns.
+
+   o envelope.envelope
+   New argument 'transform' allows the user to apply a transformation
+   to previously-computed summary functions.
+
+   o runifpointOnLines, rpoisppOnLines, runiflpp, rpoislpp
+   Can now generate multitype point patterns.
+
+   o rmhmodel, rmh, simulate.ppm
+   Now handle point process models with 'hybrid' interactions.
+
+   o kppm
+   Accelerated, and more reliable, due to better choice of starting values 
+   in the optimisation procedure.
+
+   o kppm
+   The internal format of kppm objects has changed.
+
+   o minimum contrast estimation
+   Error messages from the optimising function 'optim' are now trapped
+   and handled.
+
+   o rhohat
+   This command is now generic, with methods for ppp, quad, and ppm.
+
+   o raster.x, raster.y, raster.xy
+   These functions have a new argument 'drop'
+
+   o summary.ppm
+   Improved behaviour when the model covariates are a data frame.
+
+   o progressreport
+   Output improved.
+
+   o second order summary functions
+   (Kest, Lest, Kinhom, pcf.ppp, Kdot, Kcross, Ldot etc etc)
+   These functions now accept correction="translation" as an 
+   alternative to correction = "translate", for consistency.
+
+   o plot.im
+   New argument 'log' allows colour map to be equally spaced on a log scale.
+
+   o as.owin.ppm, as.owin.kppm
+   New argument 'from' allows the user to extract the spatial window
+   of the point data (from="points") or the covariate images (from="covariates")
+
+   o dclf.test, mad.test
+   The rule for handling tied values of the test statistic has been changed.
+   The tied values are now randomly ordered to obtain a randomised integer rank.
+
+   o with.fv
+   New argument 'enclos' allows evaluation in other environments
+
+BUG FIXES
+
+   o lppm
+   For multitype patterns, the fitted model was completely incorrect
+   due to an error in constructing the quadrature scheme.
+   Fixed.
+
+   o Geyer
+   For point process models with the 'Geyer' interaction, 
+   vcov.ppm() and suffstat() sometimes gave incorrect answers.
+   [Spotted by Ege Rubak.]
+   Fixed.
+
+   o as.im.im
+   Did not correctly handle factor-valued images
+   if one of the arguments 'dimyx', 'eps', 'xy' was given.
+   Fixed.
+
+   o envelope.lppm
+   Crashed if the model was multitype.
+   Fixed.
+
+   o lpp
+   Did not handle empty patterns.
+   Fixed.
+
+   o density.ppp
+   If 'sigma' was a bandwidth selection function such as bw.scott()
+   which returned a numeric vector of length 2, a warning message was issued, 
+   and the smoothing bandwidth was erroneously taken to be
+   the first element of the vector.
+   Fixed.
+
+   o Fest, Jcross, Jdot, Jmulti
+   If these functions were computed using correction = 'rs', 
+   plotting them would sometimes give an error,      
+   with the message "no finite x/y limits".
+   Fixed.
+
+   o pcfmodel.kppm
+   For models with clusters="VarGamma"
+   the value of the pcf at distance r=0 was given as NaN. 
+   Fixed.
+
+   o vcov.ppm
+   Result was incorrect in rare cases, due to numerical rounding effects.
+   Fixed.
+
+   o rLGCP, simulate.kppm
+   For models fitted to point patterns in an irregular window, 
+   simulation sometimes failed, with a message that the image 'mu' 
+   did not cover the simulation window.
+   (Spotted by George Limitsios.)
+   Fixed.
+
+   o rLGCP, simulate.kppm
+   Crashed sometimes with an error about unequal x and y steps
+   (from 'GaussRF').
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.29-0
 
 OVERVIEW 

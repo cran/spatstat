@@ -26,6 +26,12 @@ runifpointOnLines(n, L)
     \item given that the point falls on a particular segment,
     it has uniform probability density along that segment.
   }
+  If \code{n} is a single integer, the result is an unmarked point
+  pattern containing \code{n} points.
+  If \code{n} is a vector of integers, the result is a marked point
+  pattern, with \code{m} different types of points, where
+  \code{m = length(n)},
+  in which there are \code{n[j]} points of type \code{j}.
 }
 \value{
   A point pattern (object of class \code{"ppp"}) with the same
@@ -42,6 +48,7 @@ runifpointOnLines(n, L)
   Y <- runifpointOnLines(20, X)
   plot(X, main="")
   plot(Y, add=TRUE)
+  Z <- runifpointOnLines(c(5,5), X)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

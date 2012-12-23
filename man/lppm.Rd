@@ -50,6 +50,7 @@ lppm(X, ...)
 \examples{
   example(lpp)
   lppm(X, ~1)
+  lppm(X, ~x)
 }
 \references{
   Ang, Q.W. (2010)

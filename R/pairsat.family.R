@@ -2,7 +2,7 @@
 #
 #    pairsat.family.S
 #
-#    $Revision: 1.34 $	$Date: 2012/04/26 00:55:22 $
+#    $Revision: 1.37 $	$Date: 2012/11/06 07:50:46 $
 #
 #    The saturated pairwise interaction family of point process models
 #
@@ -90,23 +90,27 @@ if(is.null(saturate)) {
 }
 
 # first ensure all data points are included in the quadrature points
-Xindex  <- seq_len(npoints(X))
+nX <- npoints(X)
+nU <- npoints(U)
+Xseq  <- seq_len(nX)
 if(length(EqualPairs) == 0) {
-  # no data points included 
-  missingdata <- Xindex
+  # no data points currently included 
+  missingdata <- rep(TRUE, nX)
 } else {
   Xused <- EqualPairs[,1]
-  missingdata <- !(Xindex %in% Xused)
+  missingdata <- !(Xseq %in% Xused)
 }
 somemissing <- any(missingdata)
 if(somemissing) {
   # add the missing data points
+  originalrows <- seq_len(nU)
+  nmiss <- sum(missingdata)
   U <- superimpose(U, X[missingdata], W=X$window)
-  # augment the list of equal pairs
-  n <- ncol(EqualPairs)
-  originalcolumns <- 1:n
-  Xneeded <- Xindex[missingdata]
-  EqualPairs <- rbind(EqualPairs, cbind(Xneeded, n + 1:length(Xneeded)))
+  # correspondingly augment the list of equal pairs
+  newXindex <- Xseq[missingdata]
+  newUindex <- nU + seq_len(nmiss)
+  EqualPairs <- rbind(EqualPairs, cbind(newXindex, newUindex))
+  nU <- nU + nmiss
 }
 
 # compute the pair potentials POT and the unsaturated potential sums V
@@ -184,9 +188,9 @@ V.delta.sum <- apply(V.delta, c(2,3), sum)
 V <- V.sat + V.delta.sum
 
 ##########################################
-# remove any columns that were added
+# remove rows corresponding to supplementary points
 if(somemissing)
-      V <- V[originalcolumns, , drop=FALSE]
+      V <- V[originalrows, , drop=FALSE]
 
 ### tack on the saved computations from pairwise.family$eval
 if(savecomputed)
@@ -215,7 +219,7 @@ suffstat = function(model, X=NULL, callstring="pairsat.family$suffstat") {
   mpldata   <- is.data(quad.ppm(modelX))
   contribute <- mplsubset[mpldata]
   
-  Empty <- X[rep(FALSE, X$n)]
+  Empty <- X[integer(0)]
   mom <- partialModelMatrix(X, Empty, model, "suffstat", halfway=TRUE)
   # halfway=TRUE is passed to pairsat.family$eval
   # and yields matrix of saturated potential sums 

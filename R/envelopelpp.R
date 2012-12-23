@@ -1,7 +1,7 @@
 #
 #  envelopelpp.R
 #
-#  $Revision: 1.11 $   $Date: 2012/07/23 07:06:59 $
+#  $Revision: 1.13 $   $Date: 2012/10/20 07:58:22 $
 #
 #  Envelopes for 'lpp' objects
 #
@@ -31,18 +31,12 @@ envelope.lpp <-
     # Data pattern X is argument Y
     # Data pattern determines intensity of Poisson process
     X <- Y
-    sY <- summary(Y)
-    Yintens <- sY$intensity
+    nY <- if(!is.marked(Y)) npoints(Y) else table(marks(Y))
     NETWORK <- Y$domain
-    NETLINES <- NETWORK$lines
+    totlen <- sum(lengths.psp(NETWORK$lines))
+    Yintens <- nY/totlen
     # expression that will be evaluated
-    simexpr <- 
-      if(!is.marked(Y)) {
-        # unmarked point pattern
-        expression(lpp(rpoisppOnLines(Yintens, NETLINES), NETWORK))
-      } else {
-        stop("Sorry, simulation of marked point patterns on a linear network is not yet implemented")
-      }
+    simexpr <- expression(rpoislpp(Yintens, NETWORK))
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "csr",
                              expr = simexpr,
@@ -92,10 +86,11 @@ envelope.lppm <-
     X <- Y$X
     MODEL <- Y
     NETWORK <- X$domain
-    NETLINES <- NETWORK$lines
     type <- "lppm"
     lambdaFit <- predict(MODEL)
-    simexpr <- expression(lpp(rpoisppOnLines(lambdaFit, NETLINES), NETWORK))
+    LMAX <-
+      if(is.im(lambdaFit)) max(lambdaFit) else unlist(lapply(lambdaFit, max))
+    simexpr <- expression(rpoislpp(lambdaFit, NETWORK, lmax=LMAX))
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "lppm",
                              expr = simexpr,

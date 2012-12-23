@@ -30,7 +30,7 @@ Tstat(X, ..., r = NULL, rmax = NULL,
   \item{correction}{
     Optional. A character vector containing any selection of the
     options \code{"none"}, \code{"border"}, \code{"bord.modif"},
-    \code{"translate"}, or \code{"best"}.
+    \code{"translate"}, \code{"translation"}, or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }
   \item{ratio}{

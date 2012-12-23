@@ -9,7 +9,8 @@
   using different parameters.
 }
 \usage{
-\method{envelope}{envelope}(Y, fun = NULL, ..., global=FALSE, VARIANCE=FALSE)
+\method{envelope}{envelope}(Y, fun = NULL, ...,
+                            transform=NULL, global=FALSE, VARIANCE=FALSE)
 }
 \arguments{
   \item{Y}{
@@ -18,7 +19,7 @@
   \item{fun}{
     Optional. Summary function to be applied to the simulated point patterns.
   }
-  \item{\dots,global,VARIANCE}{
+  \item{\dots,transform,global,VARIANCE}{
     Parameters controlling the type of envelope that is re-computed. 
     See \code{\link{envelope}}.
   }
@@ -86,6 +87,7 @@
   E2 <- envelope(E, nrank=2)
   Eg <- envelope(E, global=TRUE)
   EG <- envelope(E, Gest)
+  EL <- envelope(E, transform=expression(sqrt(./pi)))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

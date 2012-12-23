@@ -1,5 +1,8 @@
 \name{rhohat}
 \alias{rhohat}
+\alias{rhohat.ppp}
+\alias{rhohat.quad}
+\alias{rhohat.ppm}
 \title{
   Smoothing Estimate of Covariate Transformation
 }
@@ -8,7 +11,25 @@
   as a function of a (continuous) spatial covariate.
 }
 \usage{
-rhohat(object, covariate, ...,
+rhohat(object, covariate, ...)
+
+\method{rhohat}{ppp}(object, covariate, ...,
+       method=c("ratio", "reweight", "transform"),
+       smoother=c("kernel", "local"),
+       dimyx=NULL, eps=NULL,
+       n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
+       bwref=bw,
+       covname, confidence=0.95)
+
+\method{rhohat}{quad}(object, covariate, ...,
+       method=c("ratio", "reweight", "transform"),
+       smoother=c("kernel", "local"),
+       dimyx=NULL, eps=NULL,
+       n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
+       bwref=bw,
+       covname, confidence=0.95)
+
+\method{rhohat}{ppm}(object, covariate, ...,
        method=c("ratio", "reweight", "transform"),
        smoother=c("kernel", "local"),
        dimyx=NULL, eps=NULL,

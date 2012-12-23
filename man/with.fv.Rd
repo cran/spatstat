@@ -6,7 +6,7 @@
   function value table (object of class \code{"fv"}).
 }
 \usage{
-\method{with}{fv}(data, expr, ..., drop = TRUE)
+\method{with}{fv}(data, expr, ..., drop = TRUE, enclos=NULL)
 }
 \arguments{
   \item{data}{A function value table (object of class \code{"fv"})
@@ -23,6 +23,10 @@
     then the result will be returned as a vector if \code{drop=TRUE}.
     Otherwise it will be returned as another function value table
     (object of class \code{"fv"}).
+  }
+  \item{enclos}{
+    An environment in which to search for variables that are
+    not found in \code{data}. Defaults to \code{\link{parent.frame}()}.
   }
 }
 \details{

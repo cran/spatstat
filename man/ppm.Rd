@@ -586,7 +586,6 @@
   if they have been obtained with different values of \code{rbord}.
 }
 \examples{
- data(nztrees)
  ppm(nztrees)
  # fit the stationary Poisson process
  # to point pattern 'nztrees'
@@ -597,7 +596,12 @@
  # equivalent.
  }
 
-ppm(nztrees, nd=128)
+ \dontrun{
+  ppm(nztrees, nd=128)
+ }
+ \testonly{
+   ppm(nztrees, nd=16)
+ }
 
 fit1 <- ppm(nztrees, ~ x)
  # fit the nonstationary Poisson process 
@@ -609,7 +613,13 @@ fit1
 coef(fit1)
 coef(summary(fit1))
 
+\dontrun{
  ppm(nztrees, ~ polynom(x,2))
+}
+\testonly{
+ ppm(nztrees, ~ polynom(x,2), nd=16)
+}
+
  # fit the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(a + bx + cx^2)
 
@@ -621,19 +631,29 @@ coef(summary(fit1))
  # Fits the nonstationary Poisson process 
  # with intensity function lambda(x,y) = exp(B(x))
  # where B is a B-spline with df = 3
- 
+
+\dontrun{
  ppm(nztrees, ~1, Strauss(r=10), rbord=10)
+}
+\testonly{
+ ppm(nztrees, ~1, Strauss(r=10), rbord=10, nd=16)
+}
  # Fit the stationary Strauss process with interaction range r=10
  # using the border method with margin rbord=10
 
+\dontrun{
  ppm(nztrees, ~ x, Strauss(13), correction="periodic")
+}
+\testonly{
+ ppm(nztrees, ~ x, Strauss(13), correction="periodic", nd=16)
+}
  # Fit the nonstationary Strauss process with interaction range r=13
  # and exp(first order potential) =  activity = beta(x,y) = exp(a+bx)
  # using the periodic correction.
 
 # Huang-Ogata fit:
 \dontrun{ppm(nztrees, ~1, Strauss(r=10), method="ho")}
-\testonly{ppm(nztrees, ~1, Strauss(r=10), method="ho", nsim=10)}
+\testonly{ppm(nztrees, ~1, Strauss(r=10), method="ho", nd=16, nsim=10)}
 
 
  # COVARIATES
@@ -665,12 +685,12 @@ ppm(X, ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
  # fit stationary marked Poisson process
  # with different intensity for each species
 \dontrun{ppm(lansing, ~ marks, Poisson())}
-\testonly{ppm(amacrine, ~ marks, Poisson())}
+\testonly{a <- ppm(amacrine, ~ marks, Poisson(), nd=16)}
 
  # fit nonstationary marked Poisson process
  # with different log-cubic trend for each species
 \dontrun{ppm(lansing, ~ marks * polynom(x,y,3), Poisson())}
-\testonly{ppm(amacrine, ~ marks * polynom(x,y,2), Poisson())}
+\testonly{ppm(amacrine, ~ marks * polynom(x,y,2), Poisson(), nd=16)}
 
 }
 \author{Adrian Baddeley

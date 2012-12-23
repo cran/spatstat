@@ -13,8 +13,9 @@ rpoislpp(lambda, L, ...)
 \arguments{
   \item{lambda}{
     Intensity of the Poisson process. 
-    A single number, a \code{function(x,y)}, or a pixel image
-    (object of class \code{"im"}).
+    A single number, a \code{function(x,y)}, a pixel image
+    (object of class \code{"im"}), or a vector of numbers,
+    a list of functions, or a list of images.
   }
   \item{L}{
     A linear network (object of class \code{"linnet"},
@@ -46,6 +47,8 @@ rpoislpp(lambda, L, ...)
    data(simplenet)
    X <- rpoislpp(5, simplenet)
    plot(X)
+   # multitype
+   X <- rpoislpp(c(a=5, b=5), simplenet)
 }
 \keyword{spatial}
 \keyword{datagen}

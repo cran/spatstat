@@ -2,7 +2,7 @@
 #
 #    badgey.S
 #
-#    $Revision: 1.10 $	$Date: 2012/05/12 02:33:53 $
+#    $Revision: 1.11 $	$Date: 2012/11/06 08:48:17 $
 #
 #    Hybrid Geyer process
 #
@@ -142,8 +142,31 @@ BadGey <- local({
              sat <- rep(sat, length(r))
            else stop("lengths or r and sat do not match")
          }
+         # first ensure all data points are in U
+         nX <- npoints(X)
+         nU <- npoints(U)
+         Xseq  <- seq_len(nX)
+         if(length(EqualPairs) == 0) {
+           # no data points currently included 
+           missingdata <- rep(TRUE, nX)
+         } else {
+           Xused <- EqualPairs[,1]
+           missingdata <- !(Xseq %in% Xused)
+         }
+         somemissing <- any(missingdata)
+         if(somemissing) {
+           # add the missing data points
+           nmiss <- sum(missingdata)
+           U <- superimpose(U, X[missingdata], W=X$window)
+           # correspondingly augment the list of equal pairs
+           originalrows <- seq_len(nU)
+           newXindex <- Xseq[missingdata]
+           newUindex <- nU + seq_len(nmiss)
+           EqualPairs <- rbind(EqualPairs, cbind(newXindex, newUindex))
+           nU <- nU + nmiss
+         }
          nterms <- length(r)
-         answer <- matrix(, nrow=npoints(U), ncol=nterms)
+         answer <- matrix(, nrow=nU, ncol=nterms)
          for(k in 1:nterms) {
            # first determine saturated pair counts
            counts <- strausscounts(U, X, r[k], EqualPairs) 
@@ -164,6 +187,8 @@ BadGey <- local({
              answer[,k] <- satcounts + change
            }
          }
+         if(somemissing)
+           answer <- answer[originalrows, , drop=FALSE]
          return(answer)
        }
   )

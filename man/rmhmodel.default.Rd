@@ -58,10 +58,15 @@
     \item{\code{'straussm'}}{ The multitype Strauss process}
     \item{\code{'straushm'}}{Multitype Strauss process with hard core}
     \item{\code{'triplets'}}{Triplets process (Geyer, 1999).}
- }
-
+  }
+  It is also possible to specify a \emph{hybrid} of these interactions.
+  In this case, \code{cif} is a character vector containing names from
+  the list above. For example, \code{cif=c('strauss', 'geyer')} would
+  specify a hybrid of the Strauss and Geyer models.
+  
   The argument \code{par} supplies parameter values appropriate to
-  the conditional intensity function being invoked. These are:
+  the conditional intensity function being invoked.
+  For the interactions listed above, these parameters are:
   \describe{
     \item{areaint:}{
       (Area-interaction process.) A \bold{named} list with components
@@ -321,7 +326,11 @@
       }
     }
   }
-
+  For a hybrid model, the argument \code{par} should be a list,
+  of the same length as \code{cif}, such that \code{par[[i]]}
+  is a list of the parameters required for the interaction
+  \code{cif[i]}. See the Examples.
+  
   The optional argument \code{trend} determines the spatial trend in the model,
   if it has one. It should be a function or image
   (or a list of such, if the model is multitype)
@@ -361,7 +370,7 @@
   is multitype, and \code{types} is not specified, then this vector
   defaults to \code{1:ntypes} where \code{ntypes} is the number of
   types.
-}  
+}
 \references{
    Diggle, P. J. (2003) \emph{Statistical Analysis of Spatial Point
    Patterns} (2nd ed.) Arnold, London.
@@ -507,6 +516,12 @@ otherwise an error is given.
       h[r<0.05] <- 0
       h[r>0.10] <- 1
       mod17 <- rmhmodel(cif="lookup",par=list(beta=4000,h=h,r=r),w=c(0,1,0,1))
+
+  # hybrid model
+  modhy <- rmhmodel(cif=c('strauss', 'geyer'),
+                    par=list(list(beta=100,gamma=0.5,r=0.05),
+                             list(beta=1, gamma=0.7,r=0.1, sat=2)),
+                    w=square(1))
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

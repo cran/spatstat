@@ -1,7 +1,7 @@
 #
 #   pcfinhom.R
 #
-#   $Revision: 1.7 $   $Date: 2012/08/22 01:43:24 $
+#   $Revision: 1.8 $   $Date: 2012/11/21 06:08:54 $
 #
 #   inhomogeneous pair correlation function of point pattern 
 #
@@ -27,6 +27,7 @@ pcfinhom <- function(X, lambda=NULL, ..., r=NULL,
                            c(isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
 

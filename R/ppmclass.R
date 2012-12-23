@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.76 $	$Date: 2012/10/09 02:43:03 $
+#	$Revision: 2.79 $	$Date: 2012/12/10 06:20:36 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -642,3 +642,23 @@ as.ppm <- function(object) {
 as.ppm.ppm <- function(object) {
   object
 }
+
+# method for as.owin
+
+as.owin.ppm <- function(W, ..., from=c("points", "covariates"), fatal=TRUE) {
+  if(!verifyclass(W, "ppm", fatal=fatal))
+    return(NULL)
+  from <- match.arg(from)
+  datawin <- as.owin(data.ppm(W))
+  if(from == "points")
+    return(datawin)
+  covs <- W$covariates
+  isim <- unlist(lapply(covs, is.im))
+  if(!any(isim))
+    return(datawin)
+  cwins <- lapply(covs[isim], as.owin)
+  covwin <- do.call("intersect.owin", unname(cwins))
+  result <- intersect.owin(covwin, datawin)
+  return(result)
+}
+

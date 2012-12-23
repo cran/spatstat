@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.56 $   $Date: 2012/06/25 04:42:06 $
+#  $Revision: 1.60 $   $Date: 2012/12/14 00:48:48 $
 #
 #  Plotting code for pixel images
 #
@@ -26,7 +26,7 @@ plot.im <- local({
                   "cex.axis", "cex.lab",
                   "col.axis", "col.lab",
                   "font.axis", "font.lab")
-
+  
   # auxiliary functions
 
   image.doit <- function(..., extrargs=imageparams) {
@@ -39,10 +39,11 @@ plot.im <- local({
     ok <- (x >= v[1] - tol) & (x <= v[2] + tol)
     x[ok]
   }
-
+  
+  
   # main function
   PlotIm <- function(x, ...,
-                     col=NULL, valuesAreColours=NULL,
+                     col=NULL, valuesAreColours=NULL, log=FALSE,
                      ribbon=TRUE, ribside=c("right", "left", "bottom", "top"),
                      ribsep=0.15, ribwid=0.05, ribn=1024,
                      ribscale=1, ribargs=list()) {
@@ -56,6 +57,11 @@ plot.im <- local({
     x <- repair.image.xycoords(x)
 
     xtype <- x$type
+
+    do.log <- identical(log, TRUE)
+    if(do.log && !(x$type %in% c("real", "integer")))
+      stop(paste("Log transform is undefined for an image of type",
+                 sQuote(xtype)))
 
     # determine whether pixel values are to be treated as colours
     if(!is.null(valuesAreColours)) {
@@ -75,6 +81,11 @@ plot.im <- local({
                   call.=FALSE)
           col <- NULL
         }
+        if(do.log) 
+          warning(paste("Pixel values are taken to be colour values,",
+                        "because valuesAreColours=TRUE;", 
+                        "the argument log=TRUE is ignored"),
+                  call.=FALSE)
       }
     } else if(!is.null(col)) {
       # argument 'col' controls colours
@@ -111,6 +122,29 @@ plot.im <- local({
       ribbon <- FALSE
     } 
     
+    # transform pixel values to log scale?
+    if(do.log) {
+      rx <- range(x)
+      if(all(rx > 0)) {
+        x <- eval.im(log10(x))
+      } else {
+        if(any(rx < 0)) 
+          warning(paste("Negative pixel values",
+                        "omitted from logarithmic colour map;",
+                        "range of values =", prange(rx)),
+                  call.=FALSE)
+        if(!all(rx < 0))
+          warning("Zero pixel values omitted from logarithmic colour map",
+                  call.=FALSE)
+        x <- eval.im(log10(ifelse(x > 0, x, NA)))
+      } 
+      xtype <- x$type
+      Log <- log10
+      Exp <- function(x) { 10^x }
+    } else {
+      Log <- Exp <- function(x) { x }
+    }
+    
     imagebreaks <- NULL
     ribbonvalues <- ribbonbreaks <- NULL
     
@@ -131,12 +165,19 @@ plot.im <- local({
              }
              trivial <- (diff(vrange) <= .Machine$double.eps)
              if(!trivial) {
+               # ribbonvalues: domain of colour map (pixel values)
+               # ribbonrange: (min, max) of pixel values in image
+               # nominalrange: range of values shown on ribbon 
+               # nominalmarks: values shown on ribbon at tick marks
+               # ribbonticks: pixel values of tick marks 
+               # ribbonlabels: text displayed at tick marks
                ribbonvalues <- seq(from=vrange[1], to=vrange[2],
                                    length.out=ribn)
                ribbonrange <- vrange
-               ribbonticks <- clamp(pretty(ribscale * ribbonvalues)/ribscale,
-                                    vrange)
-               ribbonlabels <- paste(zapsmall(ribbonticks * ribscale))
+               nominalrange <- Log(ribscale * Exp(ribbonrange))
+               nominalmarks <- axisTicks(nominalrange, log=do.log)
+               ribbonticks <- Log(nominalmarks/ribscale)
+               ribbonlabels <- paste(nominalmarks)
              }
            },
            integer = {
@@ -148,23 +189,25 @@ plot.im <- local({
              nvalues <- length(uv)
              trivial <- (nvalues < 2)
              if(!trivial){
-               ribbonticks <- clamp(pretty(vrange * ribscale)/ribscale, vrange)
-               ribbonticks <- ribbonticks[ribbonticks %% 1 == 0]
-               if(identical(all.equal(ribbonticks,
-                                      vrange[1]:vrange[2]), TRUE)) {
-                 # each possible value will be printed on ribbon label
+               nominalrange <- Log(ribscale * Exp(vrange))
+               nominalmarks <- axisTicks(nominalrange, log=do.log)
+               nominalmarks <- nominalmarks[nominalmarks %% 1 == 0]
+               ribbonticks <- Log(nominalmarks/ribscale)
+               ribbonlabels <- paste(nominalmarks)
+               if(!do.log && identical(all.equal(ribbonticks,
+                                                 vrange[1]:vrange[2]), TRUE)) {
+                 # each possible pixel value will appear in ribbon
                  ribbonvalues <- vrange[1]:vrange[2]
                  imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
                  ribbonrange <- range(imagebreaks)
                  ribbonticks <- ribbonvalues
                  ribbonlabels <- paste(ribbonticks * ribscale)
                } else {
-                 # not all values will be printed on ribbon label
+                 # not all possible values will appear in ribbon
                  ribn <- min(ribn, diff(vrange)+1)
                  ribbonvalues <- seq(from=vrange[1], to=vrange[2],
                                      length.out=ribn)
                  ribbonrange <- vrange
-                 ribbonlabels <- paste(ribbonticks * ribscale)
                }
              }
              if(!is.null(colmap)) {

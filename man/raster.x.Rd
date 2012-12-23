@@ -8,39 +8,56 @@
   of each pixel in a binary pixel image.
 }
 \usage{
- raster.x(w)
- raster.y(w)
- raster.xy(w)
+ raster.x(w, drop=FALSE)
+ raster.y(w, drop=FALSE)
+ raster.xy(w, drop=FALSE)
 }
 \arguments{
-  \item{w}{A window (an object of class \code{"owin"})
+  \item{w}{
+    A window (object of class \code{"owin"})
     of type \code{"mask"} representing a binary pixel image.
+  }
+  \item{drop}{
+    Logical.
+    If \code{TRUE}, then coordinates of pixels that lie outside the
+    window are removed.
+    If \code{FALSE} (the default) then the coordinates of every
+    pixel in the containing rectangle are retained.
   }
 }
 \value{
+  \code{raster.xy} returns a list with components \code{x} and \code{y}
+  which are numeric vectors of equal length containing the pixel coordinates.
+
+  If \code{drop=FALSE}, 
   \code{raster.x} and \code{raster.y} return 
   a matrix of the same dimensions as the pixel grid in \code{w},
   and giving the value of the \eqn{x} (or \eqn{y}) coordinate
   of each pixel in the raster.
 
-  \code{raster.xy} returns a list with components \code{x} and \code{y}
-  which are numeric vectors of equal length containing the pixel coordinates.
+  If \code{drop=TRUE}, 
+  \code{raster.x} and \code{raster.y} return numeric vectors.
 }
 \details{
   The argument \code{w} should be a window (an object of class
   \code{"owin"}, see \code{\link{owin.object}} for details).
   A window of type \code{"mask"} represents a binary pixel image.
-  
-  The functions   \code{raster.x} and \code{raster.y} return
+
+  If \code{drop=FALSE} (the default), the 
+  functions   \code{raster.x} and \code{raster.y} return
   a matrix of the same dimensions as the
   binary pixel image itself, with entries giving the \eqn{x} coordinate
   (for \code{raster.x}) or \eqn{y} coordinate (for \code{raster.y})
-  of each pixel in the image.
+  of each pixel in the binary image.
+
+  If \code{drop=TRUE}, pixels that lie outside the
+  window \code{w} are removed, and \code{raster.x} and \code{raster.y} 
+  return numeric vectors containing the coordinates of the
+  pixels that are inside the window \code{w}.
 
   The function \code{raster.xy} returns a list
   with components \code{x} and \code{y}
   which are numeric vectors of equal length containing the pixel coordinates.
-
 }
 \seealso{
   \code{\link{owin}},

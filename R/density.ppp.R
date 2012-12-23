@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.51 $    $Date: 2011/12/09 10:21:18 $
+#  $Revision: 1.53 $    $Date: 2012/10/29 09:30:12 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -273,9 +273,25 @@ densitypointsEngine <- function(x, sigma, ...,
 
 resolve.2D.kernel <- function(..., sigma=NULL, varcov=NULL, x, mindist=NULL,
                               adjust=1, bwfun=NULL) {
-  if(!is.null(sigma) && is.function(sigma)) {
+  if(is.function(sigma)) {
     bwfun <- sigma
     sigma <- NULL
+  }
+  if(is.null(sigma) && is.null(varcov) && !is.null(bwfun)) {
+    # call bandwidth selection function
+    bw <- do.call.matched(bwfun, resolve.defaults(list(X=x), list(...)))
+    # interpret the result as either sigma or varcov
+    if(!is.numeric(bw))
+      stop("bandwidth selector returned a non-numeric result")
+    if(length(bw) %in% c(1,2)) {
+      sigma <- as.numeric(bw)
+      if(!all(sigma > 0))
+        stop("bandwidth selector returned negative value(s)")
+    } else if(is.matrix(bw) && nrow(bw) == 2 && ncol(bw) == 2) {
+      varcov <- bw
+      if(!all(eigen(varcov)$values > 0))
+        stop("bandwidth selector returned matrix with negative eigenvalues")
+    } else stop("bandwidth selector did not return a matrix or numeric value")
   }
   sigma.given <- !is.null(sigma)
   varcov.given <- !is.null(varcov)
@@ -291,13 +307,8 @@ resolve.2D.kernel <- function(..., sigma=NULL, varcov=NULL, x, mindist=NULL,
   switch(ngiven+1,
          {
            # default
-           if(!is.null(bwfun)) {
-             sigma <- do.call.matched(bwfun,
-                                      resolve.defaults(list(X=x), list(...)))
-           } else {
-             w <- x$window
-             sigma <- (1/8) * min(diff(w$xrange), diff(w$yrange))
-           }
+           w <- x$window
+           sigma <- (1/8) * shortside(as.rectangle(w))
          },
          {
            if(sigma.given && length(sigma) == 2) 

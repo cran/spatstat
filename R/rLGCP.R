@@ -5,11 +5,11 @@
 #
 #   original code by Abdollah Jalilian
 #
-#  $Revision: 1.3 $    $Date: 2012/04/08 03:37:08 $
+#  $Revision: 1.6 $    $Date: 2012/12/10 05:46:08 $
 #
 
 rLGCP <-
-  function(model="exponential", mu = 0, param = NULL, ..., win)
+  function(model="exponential", mu = 0, param = NULL, ..., win=NULL)
 {
   if(!missing(mu)) {
     if (!(is.numeric(mu) || is.function(mu) || is.im(mu))) 
@@ -19,7 +19,7 @@ rLGCP <-
   }
   if(!(require(RandomFields) && RandomFieldsSafe()))
     stop("Simulation of log-Gaussian Cox process requires the package RandomFields")
-  win.given <- !missing(win)
+  win.given <- !is.null(win)
   mu.image <- is.im(mu)
   win <- if(win.given) as.owin(win) else if(mu.image) as.owin(mu) else owin()
   
@@ -41,7 +41,10 @@ rLGCP <-
   muxy[is.na(muxy)] <- -Inf
 
   # generate Gaussian random field
-  z <- GaussRF(x, y, grid = TRUE, model = model, param = param, ...)
+  xgrid <- c(x[1], x[length(x)], w$xstep)
+  ygrid <- c(y[1], y[length(y)], w$ystep)
+  z <- GaussRF(xgrid, ygrid, grid = TRUE, gridtriple=TRUE,
+               model = model, param = param, ...)
   logLambda <- muxy + z
   # convert to log-Gaussian image
   Lambda <- matrix(exp(logLambda), nrow=dim[1], ncol=dim[2], byrow=TRUE)

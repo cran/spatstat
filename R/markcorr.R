@@ -130,6 +130,7 @@ markcorrint <-
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
   isborder  <- correction %in% c("border", "bord.modif")
@@ -256,6 +257,7 @@ markcorr <-
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
   

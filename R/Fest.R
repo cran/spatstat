@@ -4,7 +4,7 @@
 #	S function empty.space()
 #	Computes estimates of the empty space function
 #
-#	$Revision: 4.30 $	$Date: 2011/04/19 02:12:58 $
+#	$Revision: 4.31 $	$Date: 2012/11/13 09:13:34 $
 #
 "Fest" <- 	
 "empty.space" <-
@@ -112,8 +112,6 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
                  "hat(%s)[cs](r)", 
                  "Chiu-Stoyan estimate of %s",
                  "cs")
-    # modify recommended plot range
-    attr(Z, "alim") <- range(rvals[cs <= 0.9])
   }
 
   if(any(correction %in% c("rs", "km"))) {
@@ -136,15 +134,18 @@ function(X, ..., eps = NULL, r=NULL, breaks=NULL,
     # add to fv object
     Z <- bind.fv(Z, result,
                  labels, descr, if(want.km) "km" else "rs")
-    
-    # modify recommended plot range
-    bestF <- if(want.km) result$km else result$rs
-    attr(Z, "alim") <-  range(rvals[bestF <= 0.9]) 
   }
   
+  # wrap up
+  unitname(Z) <- unitname(X)
+  
+  # remove 'hazard' from the dotnames
   nama <- names(Z)
   fvnames(Z, ".") <- rev(nama[!(nama %in% c("r", "hazard"))])
-  unitname(Z) <- unitname(X)
+  
+  # determine recommended plot range
+  attr(Z, "alim") <- with(Z, range(.x[is.finite(.y) & .y <= 0.9]))
+
   return(Z)
 }
 

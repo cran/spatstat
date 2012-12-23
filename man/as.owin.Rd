@@ -28,9 +28,9 @@ in any of several formats, into an object of class \code{"owin"}.
 
  \method{as.owin}{ppp}(W, \dots, fatal=TRUE)
 
- \method{as.owin}{ppm}(W, \dots, fatal=TRUE)
+ \method{as.owin}{ppm}(W, \dots, from=c("points", "covariates"), fatal=TRUE)
 
- \method{as.owin}{kppm}(W, \dots, fatal=TRUE)
+ \method{as.owin}{kppm}(W, \dots, from=c("points", "covariates"), fatal=TRUE)
 
  \method{as.owin}{lppm}(W, \dots, fatal=TRUE)
 
@@ -64,6 +64,7 @@ in any of several formats, into an object of class \code{"owin"}.
     See Details.
   }
   \item{\dots}{Ignored.}
+  \item{from}{Character string. See Details.}
 }
 \value{
   An object of class \code{"owin"} (see \code{\link{owin.object}})
@@ -122,9 +123,13 @@ in any of several formats, into an object of class \code{"owin"}.
     \item
     an object of class \code{"ppm"} or \code{"kppm"}  
     representing a fitted point process
-    model. In this case, \code{as.owin} extracts the  original point
+    model. In this case, if \code{from="data"} (the default),
+    \code{as.owin} extracts the  original point
     pattern data to which the model was fitted, and returns the
-    observation window of this point pattern.
+    observation window of this point pattern. If
+    \code{from="covariates"} then \code{as.owin} extracts the
+    covariate images to which the model was fitted,
+    and returns a binary mask window that specifies the pixel locations.
     \item
     an object of class \code{"lppm"}
     representing a fitted point process model on a linear network.

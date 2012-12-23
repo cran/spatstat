@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.14 $ $Date: 2012/10/13 23:38:08 $
+#  $Revision: 1.15 $ $Date: 2012/10/22 08:06:42 $
 #
 
 .spst.triEnv <- new.env()
@@ -195,5 +195,43 @@ delaunay <- function(X) {
   return(del)
 }
 
-  
-  
+delaunay.distance <- function(X) {
+  stopifnot(is.ppp(X))
+  nX <- npoints(X)
+  w <- as.owin(X)
+  ok <- !duplicated(X, rule="deldir")
+  Y <- X[ok] 
+  nY <- npoints(Y)
+  if(nY < 3) 
+    return(matrix(Inf, nX, nX))
+  dd <- deldir(Y$x, Y$y, rw=c(w$xrange,w$yrange))
+  joins <- as.matrix(dd$delsgs[,5:6])
+  joins <- rbind(joins, joins[,2:1])
+  d <- matrix(-1L, nY, nY)
+  diag(d) <- 0
+  d[joins] <- 1
+  adj <- matrix(FALSE, nY, nY)
+  diag(adj) <- TRUE
+  adj[joins] <- TRUE
+  z <- .C("idist2dpath",
+          nv = as.integer(nY),
+          d = as.integer(d), 
+          adj = as.integer(adj),
+          dpath = as.integer(integer(nY * nY)),
+          tol = as.integer(0),
+          niter = as.integer(integer(1)), 
+          status = as.integer(integer(1)),
+          PACKAGE = "spatstat")
+  if (z$status == -1)
+    warning(paste("graph connectivity algorithm did not converge after", 
+                  z$niter, "iterations", "on", nY, "vertices and", 
+                  sum(adj) - nY, "edges"))
+  dpathY <- matrix(z$dpath, nY, nY)
+  if(all(ok)) {
+    dpathX <- dpathY
+  } else {
+    dpathX <- matrix(NA_integer_, nX, nX)
+    dpathX[ok, ok] <- dpathY
+  }
+  return(dpathX)
+}

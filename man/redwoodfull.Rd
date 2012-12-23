@@ -14,12 +14,23 @@
   which is available as \code{\link{redwood}}.
  
   Strauss (1975) divided the sampling region into two subregions I and II
-  demarcated by a diagonal line across the region. The spatial pattern
+  demarcated by a diagonal line.  The spatial pattern
   appears to be slightly regular in region I and strongly clustered in 
-  region II.
+  region II. 
+
+  Strauss (1975) writes: \dQuote{It was felt that the seedlings
+    would be scattered fairly randomly, except that a number of
+    tight clusters would form around some of the redwood tree stumps
+    present in the plot. A discontinuity in the soil, very roughly
+    demarked by the diagonal line in the figure, was expected to cause
+    a difference in clustering behaviour between regions I and II. Moreover,
+    almost all the redwood stumps were situated in region II.}
 
   The dataset \code{redwoodfull} contains the full point pattern
   of 195 trees. 
+  The window has been rescaled to the unit square.
+  Its physical size is approximately 130 feet across.
+
   The auxiliary information about the subregions is contained in 
   \code{redwoodfull.extra}, which is a list with entries
   \tabular{ll}{
@@ -33,8 +44,9 @@
 
   Ripley (1977) extracted a subset of these data, containing 62 points,
   lying within a square subregion which overlaps regions I and II.
-  He rescaled the data to the unit square. 
-  This has been re-analysed many times, and is the dataset usually known as
+  He rescaled that subset to the unit square. 
+  This subset has been re-analysed many times,
+  and is the dataset usually known as
   ``the redwood data'' in the spatial statistics literature.
   The exact dataset used by Ripley is supplied in the \pkg{spatstat}
   library as \code{\link{redwood}}.
@@ -48,9 +60,10 @@
 \format{
   The dataset \code{redwoodfull} is an object of class \code{"ppp"}
   representing the point pattern of tree locations.
-  The window has been rescaled to the unit square.
   See \code{\link{ppp.object}} for details of the format of a
   point pattern object.
+  The window has been rescaled to the unit square.
+  Its physical size is approximately 128 feet across.
 
   The dataset \code{redwoodfull.extra} is a list with entries
   \tabular{ll}{

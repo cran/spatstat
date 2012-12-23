@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.57 $   $Date: 2012/10/13 09:32:07 $
+#    $Revision: 1.58 $   $Date: 2012/11/14 08:33:46 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -106,12 +106,16 @@ summary.ppm <- function(object, ..., quick=FALSE) {
     used <- (y$trendvar %in% names(covars))
     y$covars.used <- y$trendvar[used]
     y$uses.covars <- any(used)
+    y$covars.are.df <- is.data.frame(covars)
     # describe covariates
     covtype <- function(x) {
       if(is.im(x)) "im" else
       if(is.function(x)) "function" else
       if(is.owin(x)) "owin" else
-      if(is.numeric(x) && length(x) == 1) "number" else "unknown"
+      if(is.numeric(x) && length(x) == 1) "number" else
+      if(is.factor(x)) "factor" else
+      if(is.integer(x)) "integer" else
+      if(is.numeric(x)) "numeric" else storage.mode(x)
     }
     ctype <- unlist(lapply(covars, covtype))
     y$expandable <- all(ctype[used] %in%c("function", "number"))
@@ -372,9 +376,12 @@ print.summary.ppm <- function(x, ...) {
   if(x$has.covars) {
     if(notrend || !x$uses.covars)
       cat("Model object contains external covariates\n")
+    isdf <- identical(x$covars.are.df, TRUE)
     if(!is.null(cd <- x$covar.descrip)) {
       # print description of each covariate
-      cat("\nCovariates provided:\n")
+      cat(paste("\nCovariates provided",
+                if(isdf) " (in data frame)" else NULL,
+                ":\n", sep=""))
       namescd <- names(cd)
       for(i in seq_along(cd))
         cat(paste("\t", namescd[i], ": ", cd[i], "\n", sep=""))
@@ -474,7 +481,7 @@ is.multitype.ppm <- function(X, ...) {
 }
 
 is.expandable.ppm <- function(x) {
-  return(identical(summary(x)$expandable, TRUE))
+  return(identical(summary(x, quick="entries")$expandable, TRUE))
 }
 
 blankcoefnames <- function(x) {
