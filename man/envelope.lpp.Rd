@@ -13,6 +13,8 @@
   transform=NULL,global=FALSE,ginterval=NULL,
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, do.pwrong=FALSE)
+
+
   \method{envelope}{lppm}(Y, fun=linearK, nsim=99, nrank=1, \dots, 
   simulate=NULL, verbose=TRUE, 
   transform=NULL,global=FALSE,ginterval=NULL,
@@ -176,11 +178,19 @@
   \bold{33}, 271-290.
 }
 \examples{
-   example(lpp)
+   if(interactive()) {
+     ns <- 39
+     np <- 40
+   } else { ns <- np <- 3 }
+   X <- runiflpp(np, simplenet)
    # uniform Poisson
-   envelope(X, nsim=4)
+   envelope(X, nsim=ns)
    # nonuniform Poisson
    fit <- lppm(X, ~x)
-   envelope(fit, nsim=4)
+   envelope(fit, nsim=ns)
+
+   #multitype
+   marks(X) <- sample(letters[1:2], np, replace=TRUE)
+   envelope(X, nsim=ns)
 }
 \keyword{spatial}

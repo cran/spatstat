@@ -866,6 +866,57 @@ m <- rmhmodel(f)
 
 })
 #
+#    tests/rmhmodelHybrids.R
+#
+#  Test that rmhmodel.ppm and rmhmodel.default
+#  work on Hybrid interaction models
+#
+#   $Revision: 1.1 $  $Date: 2012/10/22 03:16:48 $
+#
+
+require(spatstat)
+
+local({
+  # ......... rmhmodel.ppm .......................
+
+  fit1 <- ppm(redwood, ~1,
+              Hybrid(A=Strauss(0.02), B=Geyer(0.1, 2), C=Geyer(0.15, 1)))
+  rmhmodel(fit1)
+
+  # Test of handling 'IsOffset' 
+  data(cells)
+  fit2 <- ppm(cells, ~1, Hybrid(H=Hardcore(0.05), G=Geyer(0.15, 2)))
+  rmhmodel(fit2)
+
+  # Test of handling Poisson components
+  fit3 <- ppm(cells, ~1, Hybrid(P=Poisson(), S=Strauss(0.05)))
+  X3 <- rmh(fit3, control=list(nrep=1e3,expand=1), verbose=FALSE)
+
+  # ............ rmhmodel.default ............................
+
+   modH <- list(cif=c("strauss","geyer"),
+                par=list(list(beta=50,gamma=0.5, r=0.1),
+                         list(beta=1, gamma=0.7, r=0.2, sat=2)),
+                w = square(1))
+   rmhmodel(modH)
+
+  # test handling of Poisson components
+
+   modHP <- list(cif=c("poisson","strauss"),
+                 par=list(list(beta=5),
+                          list(beta=10,gamma=0.5, r=0.1)),
+                 w = square(1))
+   rmhmodel(modHP)
+
+   modPP <- list(cif=c("poisson","poisson"),
+                 par=list(list(beta=5),
+                          list(beta=10)),
+                 w = square(1))
+   rmhmodel(modPP)
+})
+
+
+#
 #  tests/rmh.ppm.R
 #
 #  $Revision: 1.1 $ $Date: 2012/10/14 07:24:21 $
@@ -1052,15 +1103,16 @@ local({
   Q <- quadscheme(X)
   U <- union.quad(Q)
   EP <- equalpairs.quad(Q)
-  gg <- Geyer(0.11, 2)
+  G <- Geyer(0.11, 2)
 # The value r=0.11 is chosen to avoid hardware numerical effects (gcc bug 323).
 # It avoids being close any value of pairdist(redwood).
 # The nearest such values are 0.1077.. and 0.1131..
 # By contrast if r = 0.1 there are values differing from 0.1 by 3e-17
-  a <- pairsat.family$eval(X,U,EP,gg$pot,gg$par,"border")
-  b <-         gg$fasteval(X,U,EP,gg$pot,gg$par,"border")
+  a <- pairsat.family$eval(X,U,EP,G$pot,G$par,"border")
+  b <-          G$fasteval(X,U,EP,G$pot,G$par,"border")
   if(!all(a==b))
     stop("Results of Geyer()$fasteval and pairsat.family$eval do not match")
+  
 })
 
 require(spatstat)
@@ -1229,7 +1281,9 @@ local({
     fit0 <- kppm(redwood, ~1, "LGCP")
     simulate(fit0)
 
-    fit <- kppm(redwood, ~x, "LGCP", covmodel=list(model="matern", nu=0.3))
+    fit <- kppm(redwood, ~x, "LGCP",
+                covmodel=list(model="matern", nu=0.3),
+                control=list(maxit=5))
     simulate(fit)
 
 # ... and Abdollah's code
@@ -1380,7 +1434,7 @@ local({
 #
 #     tests/project.ppm.R
 #
-#      $Revision: 1.2 $  $Date: 2012/01/16 13:47:31 $
+#      $Revision: 1.3 $  $Date: 2012/10/22 03:12:08 $
 #
 #     Tests of projection mechanism
 #
@@ -1394,6 +1448,19 @@ local({
   fit2 <- ppm(amacrine, ~1, MultiStrauss(types=c("off", "on"),
                                          radii=matrix(1e-06, 2, 2)))
   project.ppm(fit2)
+  
+  # hybrids
+  r0 <- min(nndist(redwood))
+  ra <- 1.25 * r0
+  rb <- 0.8 * r0
+  f <- ppm(redwood, ~1, Hybrid(A=Strauss(ra), B=Geyer(0.1, 2)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Strauss(rb), B=Geyer(0.1, 2)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Strauss(ra), B=Strauss(0.1)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Strauss(rb), B=Strauss(0.1)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Hardcore(rb), B=Strauss(0.1)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Hardcore(rb), B=Geyer(0.1, 2)), project=TRUE)
+  f <- ppm(redwood, ~1, Hybrid(A=Geyer(rb, 1), B=Strauss(0.1)), project=TRUE)
+
 })
 #
 # tests/hyperframe.R
@@ -1428,7 +1495,7 @@ local({
 #
 #  Thanks to Ege Rubak
 #
-#  $Revision: 1.2 $  $Date: 2012/10/09 09:57:00 $
+#  $Revision: 1.3 $  $Date: 2012/11/06 08:46:01 $
 #
 
 require(spatstat)
@@ -1442,6 +1509,7 @@ local({
   b  <- vcov(model, generic = TRUE, algorithm = "basic")
   v  <- vcov(model, generic = TRUE, algorithm = "vector")
   vc <- vcov(model, generic = TRUE, algorithm = "vectorclip")
+  vn <- vcov(model, generic = FALSE)
 
   disagree <- function(x, y, tol=1e-7) { max(abs(x-y)) > tol }
   asymmetric <- function(x) { disagree(x, t(x)) }
@@ -1452,12 +1520,38 @@ local({
     stop("Non-symmetric matrix produced by vcov.ppm 'vector' algorithm")
   if(asymmetric(vc))
     stop("Non-symmetric matrix produced by vcov.ppm 'vectorclip' algorithm")
+  if(asymmetric(vn))
+    stop("Non-symmetric matrix produced by vcov.ppm Strauss algorithm")
   
   if(disagree(v, b))
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'basic' ")
   if(disagree(v, vc))
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'vectorclip' ")
+  if(disagree(vn, vc))
+    stop("Disagreement between vcov.ppm generic and Strauss algorithms")
 
+  # Geyer code
+  xx <- c(0.7375956, 0.6851697, 0.6399788, 0.6188382)
+  yy <- c(0.5816040, 0.6456319, 0.5150633, 0.6191592)
+  Y <- ppp(xx, yy, window=square(1))
+  modelY <- ppm(Y, ~1, Geyer(0.1, 1))
+
+  b  <- vcov(modelY, generic = TRUE, algorithm = "basic")
+  v  <- vcov(modelY, generic = TRUE, algorithm = "vector")
+  vc <- vcov(modelY, generic = TRUE, algorithm = "vectorclip")
+
+  if(asymmetric(b))
+    stop("Non-symmetric matrix produced by vcov.ppm 'basic' algorithm for Geyer model")
+  if(asymmetric(v))
+    stop("Non-symmetric matrix produced by vcov.ppm 'vector' algorithm for Geyer model")
+  if(asymmetric(vc))
+    stop("Non-symmetric matrix produced by vcov.ppm 'vectorclip' algorithm for Geyer model")
+  
+  if(disagree(v, b))
+    stop("Disagreement between vcov.ppm algorithms 'vector' and 'basic' for Geyer model")
+  if(disagree(v, vc))
+    stop("Disagreement between vcov.ppm algorithms 'vector' and 'vectorclip' for Geyer model")
+  
 })
 # tests/windows.R
 # Tests of owin geometry code

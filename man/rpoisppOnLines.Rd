@@ -10,8 +10,9 @@ rpoisppOnLines(lambda, L, lmax = NULL, ...)
 }
 \arguments{
   \item{lambda}{Intensity of the Poisson process.
-    A single number, a \code{function(x,y)}, or a pixel image
-    (object of class \code{"im"}).
+    A single number, a \code{function(x,y)}, a pixel image
+    (object of class \code{"im"}), or a vector of numbers,
+    a list of functions, or a list of images.
   }
   \item{L}{Line segment pattern (object of class \code{"psp"})
     on which the points should be generated.
@@ -35,12 +36,22 @@ rpoisppOnLines(lambda, L, lmax = NULL, ...)
   per unit \bold{length} of line segment. 
   It may be constant, or it may depend on spatial location.
 
-  The argument \code{lambda} may be a single number,
+  In order to generate an unmarked Poisson process,
+  the argument \code{lambda} may be a single number,
   or a \code{function(x,y)}, or a pixel image (object of class
-  \code{"im"}). In the two latter cases, the rejection method is used.
+  \code{"im"}). 
 
+  In order to generate a \emph{marked} Poisson process,
+  \code{lambda} may be a numeric vector, a list of functions,
+  or a list of images, each entry giving the intensity for
+  a different mark value.
+
+  If \code{lambda} is not numeric, then the (Lewis-Shedler)
+  rejection method is used. 
   The rejection method requires knowledge of \code{lmax},
-  the maximum possible value of \code{lambda}. If \code{lmax} is not
+  the maximum possible value of \code{lambda}. This should be either
+  a single number, or a numeric vector of the same length as
+  \code{lambda}. If \code{lmax} is not
   given, it will be computed approximately, by sampling many values of
   \code{lambda}. 
 }
@@ -55,23 +66,35 @@ rpoisppOnLines(lambda, L, lmax = NULL, ...)
   \code{\link{rpoispp}}
 }
 \examples{
+  live <- interactive()
   L <- psp(runif(10), runif(10), runif(10), runif(10),  window=owin())
-  plot(L, main="")
+  if(live) plot(L, main="")
 
   # uniform intensity
   Y <- rpoisppOnLines(4, L)
-  plot(Y, add=TRUE, pch="+")
+  if(live) plot(Y, add=TRUE, pch="+")
+
+  # uniform MARKED process with types 'a' and 'b'
+  Y <- rpoisppOnLines(c(a=4, b=5), L)
+  if(live) {
+    plot(L, main="")
+    plot(Y, add=TRUE, pch="+")
+  }
 
   # intensity is a function
   Y <- rpoisppOnLines(function(x,y){ 10 * x^2}, L, 10)
-  plot(L, main="")
-  plot(Y, add=TRUE, pch="+")
+  if(live) { 
+    plot(L, main="")
+    plot(Y, add=TRUE, pch="+")
+  }
 
   # intensity is an image
   Z <- as.im(function(x,y){10 * sqrt(x+y)}, unit.square())
   Y <- rpoisppOnLines(Z, L, 10)
-  plot(L, main="")
-  plot(Y, add=TRUE, pch="+")
+  if(live) {
+   plot(L, main="")
+   plot(Y, add=TRUE, pch="+")
+  }
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

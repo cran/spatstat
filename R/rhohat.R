@@ -1,31 +1,30 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.43 $  $Date: 2012/01/22 10:15:34 $
+#  $Revision: 1.44 $  $Date: 2012/10/25 11:59:46 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
 #  spatial covariate Z(u) through lambda(u) = rho(Z(u)).
 #  More generally allows offsets etc.
 
-rhohat <- function(object, covariate, ...,
-                   method=c("ratio", "reweight", "transform"),
-                   smoother=c("kernel", "local"),
-                   dimyx=NULL, eps=NULL,
-                   n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-                   bwref=bw, covname, confidence=0.95) {
+rhohat <- function(object, covariate, ...) {
+  UseMethod("rhohat")
+}
+
+rhohat.ppp <- rhohat.quad <- rhohat.ppm <- 
+  function(object, covariate, ...,
+           method=c("ratio", "reweight", "transform"),
+           smoother=c("kernel", "local"),
+           dimyx=NULL, eps=NULL,
+           n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
+           bwref=bw, covname, confidence=0.95) {
   callstring <- short.deparse(sys.call())
   smoother <- match.arg(smoother)
-  if(smoother == "local" && !require(locfit, quietly=TRUE)) {
-    warning(paste("in", dQuote(callstring), ":",
-                  "package", sQuote("locfit"), "is not available;",
-                  "unable to perform local likelihood smoothing;",
-                  "using kernel smoothing instead"),
-            call.=FALSE)
-    smoother <- "kernel"
-  }
   if(missing(covname)) 
     covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
+  if(is.null(adjust))
+    adjust <- 1
   # trap superseded usage
   argh <- list(...)
   if(missing(method) && ("transform" %in% names(argh))) {
@@ -35,19 +34,44 @@ rhohat <- function(object, covariate, ...,
     transform <- argh$transform
     method <- if(transform) "transform" else "ratio"
   } else method <- match.arg(method)
-
   # validate model
   if(is.ppp(object) || inherits(object, "quad")) {
     model <- ppm(object, ~1)
     reference <- "area"
+    modelcall <- NULL
   } else if(is.ppm(object)) {
     model <- object
     reference <- "model"
     modelcall <- model$call
   } else stop("object should be a point pattern or a point process model")
 
-  if(is.null(adjust)) adjust <- 1
+
+  rhohat2dEngine(model, covariate, reference, ...,
+                 method=method,
+                 smoother=smoother,
+                 dimyx=dimyx, eps=eps,
+                 n=n, bw=bw, adjust=adjust, from=from, to=to,
+                 bwref=bwref, covname=covname, confidence=confidence,
+                 modelcall=modelcall, callstring=callstring)
+}
+
+rhohat2dEngine <- function(model, covariate, reference, ...,
+                   method=c("ratio", "reweight", "transform"),
+                   smoother=c("kernel", "local"),
+                   dimyx=NULL, eps=NULL,
+                   n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
+                   bwref=bw, covname, confidence=0.95,
+                   modelcall=NULL, callstring="rhohat") {
   
+  # check availability of locfit package
+  if(smoother == "local" && !require(locfit, quietly=TRUE)) {
+    warning(paste("in", dQuote(callstring), ":",
+                  "package", sQuote("locfit"), "is not available;",
+                  "unable to perform local likelihood smoothing;",
+                  "using kernel smoothing instead"),
+            call.=FALSE)
+    smoother <- "kernel"
+  }
   # evaluate the covariate at data points and at pixels
   if(is.character(covariate) && length(covariate) == 1) {
     covname <- covariate
@@ -257,7 +281,7 @@ rhohat <- function(object, covariate, ...,
   class(rslt) <- c("rhohat", class(rslt))
   attr(rslt,"stuff") <-
     list(reference  = reference,
-         modelcall  = if(reference == "model") modelcall else NULL,
+         modelcall  = modelcall, 
          callstring = callstring,
          sigma      = switch(smoother, kernel=sigma, local=NULL),
          covname    = paste(covname, collapse=""),

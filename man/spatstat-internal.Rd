@@ -63,6 +63,7 @@
 \alias{coef.summary.ppm}
 \alias{compatible.rat}
 \alias{complaining}
+\alias{compileCDF}
 \alias{compileK}
 \alias{compilepcf}
 \alias{conform.ratfv}
@@ -102,6 +103,7 @@
 \alias{do.call.matched}
 \alias{do.iplot}
 \alias{do.istat}
+\alias{dotexpr.to.call}
 \alias{edge.Ripley}
 \alias{edge.Trans}
 \alias{edge.Trans.modif}
@@ -210,6 +212,8 @@
 \alias{Kpcf.kppm}               
 \alias{killinteraction}
 \alias{km.rs.opt}
+\alias{kppmMinCon}
+\alias{kppmComLik}
 \alias{labels.ppm}
 \alias{least.common.multiple}
 \alias{levels.im}
@@ -273,6 +277,7 @@
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
 \alias{newstyle.coeff.handling}
+\alias{niceround}
 \alias{nncleanEngine}
 \alias{nndcumfun}
 \alias{no.trend.ppm}
@@ -286,6 +291,9 @@
 \alias{nzpaste}
 \alias{offsetsinformula}
 \alias{onecolumn}
+\alias{optimStatus}
+\alias{printStatus}
+\alias{signalStatus}
 \alias{ordinal}
 \alias{outdated.interact}
 \alias{overlap.owin}
@@ -305,6 +313,7 @@
 \alias{ploterodeimage}
 \alias{plot.addvar}
 \alias{plot.barplotdata}
+\alias{plot.bw.frac}
 \alias{plot.bw.optim}
 \alias{plot.fii}
 \alias{plot.localpcfmatrix}
@@ -330,6 +339,7 @@
 \alias{primesbelow}
 \alias{print.addvar}    
 \alias{print.bt.frame}
+\alias{print.bw.frac}
 \alias{print.bw.optim}
 \alias{print.colourmap}
 \alias{print.diagppm}
@@ -386,6 +396,7 @@
 \alias{repair.image.xycoords}
 \alias{rgbNA}
 \alias{rhs.of.formula}
+\alias{rhohat2dEngine}
 \alias{RmhExpandRule}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
@@ -456,8 +467,10 @@
 \alias{smoothpointsEngine}              
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
+\alias{spatstatClusterModelInfo}
 \alias{spatialCDFframe}
 \alias{spatialCDFtest}
+\alias{splitHybridInteraction}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
 \alias{sphere.volume}
@@ -587,6 +600,7 @@ closepairs(X,rmax,ordered)
 \method{coef}{summary.ppm}(object, \dots)
 \method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
+compileCDF(D, B, r, \dots, han.denom, check)
 compileK(D, r, weights, denom, check, ratio)
 compilepcf(D, r, weights, denom, check, endcorrect, \dots)
 conform.ratfv(x)
@@ -594,13 +608,13 @@ crosspairs(X,Y,rmax)
 crosspaircounts(X,Y,r)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms)
-commasep(x)
+commasep(x, join)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 damaged.ppm(object)
 datagen.runifpointOnLines(n, L)
 datagen.runifpoisppOnLines(lambda, L)
-datagen.rpoisppOnLines(lambda, L, lmax, \dots)
+datagen.rpoisppOnLines(lambda, L, lmax, \dots, check=TRUE)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, eps, verbose)
 default.ntile(X)
@@ -627,9 +641,10 @@ distributecbind(x)
 dist2dpath(dist, method="C")
 divisors(n)
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
-do.call.matched(fun, arglist, funargs, extrargs)
+do.call.matched(fun, arglist, funargs, extrargs, sieve)
 do.iplot(panel)
 do.istat(panel)
+dotexpr.to.call(expr, dot, evaluator)
 edge.Ripley(X, r, W, method, maxweight)
 edge.Trans(X, Y, W, exact, paired, trim)
 edge.Trans.modif(X, Y, WX, WY, exact, paired, trim)
@@ -643,7 +658,9 @@ envelopeEngine(X, fun, simul,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user, expected.arg="r", do.pwrong=FALSE)
-envelopeTest(X, \dots, power, rinterval, use.theo, Xname, verbose, internal)
+envelopeTest(X, \dots,
+            power, rinterval, use.theo, tie.rule, save.envelope,
+            Xname, verbose, internal)
 \method{envelope}{matrix}(Y, ..., rvals, observed, theory, funX,
       nsim, nsim2, jsim, jsim.mean,
       type, csr, use.theory, nrank, ginterval, nSD,
@@ -749,6 +766,8 @@ Kwtsum(dIJ, bI, wIJ, b, w, breaks)
 Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
+kppmMinCon(X, Xname, po, clusters, statistic, statargs, \dots)
+kppmComLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
 \method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
@@ -821,6 +840,7 @@ na.handle.im(X, na.replace)
 nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
 newstyle.coeff.handling(object)
+niceround(x, m)
 nncleanEngine(kthNND, k, d, \dots, tol, plothist, verbose, maxit)
 nndcumfun(X, \dots, r)
 no.trend.ppm(x)
@@ -834,6 +854,9 @@ numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
 offsetsinformula(x)
 onecolumn(m)
+optimStatus(x, call)
+printStatus(x, errors.only)
+signalStatus(x, errors.only)
 ordinal(k)
 outdated.interact(object)
 overlap.owin(A,B)
@@ -860,6 +883,7 @@ ploterodewin(W1, W2, col.edge, col.inside, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ)
 \method{plot}{addvar}(x, \dots, do.points=FALSE)
 \method{plot}{barplotdata}(x, \dots)
+\method{plot}{bw.frac}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, add)
 \method{plot}{fii}(x, \dots)
 \method{plot}{minconfit}(x, \dots)
@@ -888,6 +912,7 @@ primefactors(n, prmax)
 primesbelow(nmax)
 \method{print}{addvar}(x, \dots)
 \method{print}{bt.frame}(x, \dots)
+\method{print}{bw.frac}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
@@ -942,6 +967,10 @@ rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 repair.image.xycoords(x)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
+rhohat2dEngine(model, covariate, reference, \dots,
+               method, smoother, dimyx, eps,
+               n, bw, adjust, from, to, 
+               bwref, covname, confidence, modelcall, callstring)
 RmhExpandRule(nama)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
@@ -1019,9 +1048,11 @@ smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
+spatstatClusterModelInfo(name)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots, dimyx, eps, jitter, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
+splitHybridInteraction(coeffs, inte)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
 store.versionstring.spatstat()

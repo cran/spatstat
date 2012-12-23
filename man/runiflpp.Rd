@@ -13,7 +13,8 @@ runiflpp(n, L)
 \arguments{
   \item{n}{
     Number of random points to generate.
-    A nonnegative integer.
+    A nonnegative integer, or a vector of integers
+    specifying the number of points of each type.
   }
   \item{L}{
     A linear network (object of class \code{"linnet"},
@@ -42,6 +43,8 @@ runiflpp(n, L)
    data(simplenet)
    X <- runiflpp(10, simplenet)
    plot(X)
+  # marked
+   Z <- runiflpp(c(a=10, b=3), simplenet)
 }
 \keyword{spatial}
 \keyword{datagen}

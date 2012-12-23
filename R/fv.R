@@ -673,10 +673,12 @@ formula.fv <- function(x, ...) {
 
 #   method for with()
 
-with.fv <- function(data, expr, ..., drop=TRUE) {
+with.fv <- function(data, expr, ..., drop=TRUE, enclos=NULL) {
   cl <- match.call()
   verifyclass(data, "fv")
-  # convert syntactic expression to 'expression' object
+  if(is.null(enclos)) 
+    enclos <- parent.frame()
+   # convert syntactic expression to 'expression' object
   e <- as.expression(substitute(expr))
   # convert syntactic expression to call
   elang <- substitute(expr)
@@ -699,7 +701,7 @@ with.fv <- function(data, expr, ..., drop=TRUE) {
   used.dotnames <- evars[evars %in% dnames]
   # evaluate expression
   datadf <- as.data.frame(data)
-  results <- eval(expandelang, as.list(datadf))
+  results <- eval(expandelang, as.list(datadf), enclos=enclos)
   # --------------------
   # make sense of the results
   #

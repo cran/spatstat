@@ -1,7 +1,7 @@
 #
 #	localK.R		Getis-Franklin neighbourhood density function
 #
-#	$Revision: 1.17 $	$Date: 2012/08/22 01:41:46 $
+#	$Revision: 1.18 $	$Date: 2012/11/21 06:08:54 $
 #
 #
 
@@ -87,6 +87,7 @@
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=FALSE)
 

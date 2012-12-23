@@ -5,9 +5,12 @@
   Prints Progress Reports during a loop or iterative calculation.
 }
 \usage{
-progressreport(i, n, every = max(1, ceiling(n/100)), nperline =
-min(charsperline, every * ceiling(charsperline/(every + 3))),
-charsperline = 60, style=spatstat.options("progress"))
+progressreport(i, n,
+               every = min(100,max(1, ceiling(n/100))),
+               nperline = min(charsperline,
+                              every * ceiling(charsperline/(every + 3))),
+               charsperline = 60,
+               style=spatstat.options("progress"))
 }
 \arguments{
   \item{i}{

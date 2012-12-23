@@ -201,18 +201,20 @@ kstest(...)
    model <- ppm(nztrees, ~x)
    kstest(model, "x")
 
-   # synthetic data: nonuniform Poisson process
-   X <- rpoispp(function(x,y) { 100 * exp(x) }, win=square(1))
+   if(interactive()) {
+     # synthetic data: nonuniform Poisson process
+     X <- rpoispp(function(x,y) { 100 * exp(x) }, win=square(1))
 
-   # fit uniform Poisson process
-   fit0 <- ppm(X, ~1)
-   # fit correct nonuniform Poisson process
-   fit1 <- ppm(X, ~x)
+     # fit uniform Poisson process
+     fit0 <- ppm(X, ~1)
+     # fit correct nonuniform Poisson process
+     fit1 <- ppm(X, ~x)
 
-   # test wrong model
-   kstest(fit0, "x")
-   # test right model
-   kstest(fit1, "x")
+     # test wrong model
+     kstest(fit0, "x")
+     # test right model
+     kstest(fit1, "x")
+   }
 
    # multitype point pattern
    data(amacrine)

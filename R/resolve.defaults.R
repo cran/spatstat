@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.11 $ $Date: 2012/09/04 01:57:38 $
+#  $Revision: 1.13 $ $Date: 2012/12/06 04:34:03 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -32,7 +32,7 @@ resolve.defaults <- function(..., .MatchNull=TRUE, .StripNull=FALSE) {
   return(argue)
 }
 
-do.call.matched <- function(fun, arglist, funargs, extrargs=NULL) {
+do.call.matched <- function(fun, arglist, funargs, extrargs=NULL, sieve=FALSE) {
   if(!is.function(fun) && !is.character(fun))
     stop("Internal error: wrong argument type in do.call.matched")
   if(is.character(fun)) {
@@ -47,7 +47,12 @@ do.call.matched <- function(fun, arglist, funargs, extrargs=NULL) {
   funargs <- c(funargs, extrargs)
   givenargs <- names(arglist)
   matched <- givenargs %in% funargs
-  do.call(fun, arglist[matched])
+  # apply 'fun' to matched arguments
+  out <- do.call(fun, arglist[matched])
+  # retain un-matched arguments?
+  if(sieve)
+    out <- list(result=out, otherargs=arglist[!matched])
+  return(out)
 }
 
 resolve.1.default <- function(.A, ...) {
@@ -57,12 +62,12 @@ resolve.1.default <- function(.A, ...) {
   return(res[[min(which(hit))]])
 }
 
-# extract all the arguments that are not trapped by a function
+# extract all the arguments that match '...' rather than a named argument
 
 passthrough <- function(.Fun, ..., .Fname=NULL) {
   if(is.null(.Fname))
     .Fname <- deparse(substitute(.Fun))
-  # make a fake call to the named function using the arguments "..."
+  # make a fake call to the named function using the arguments provided
   cl <- eval(substitute(call(.Fname, ...)))
   # match the call to the function 
   mc <- match.call(.Fun, cl)

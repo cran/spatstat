@@ -48,7 +48,8 @@
   \item{correction}{
       A character vector containing any selection of the
       options \code{"border"}, 
-      \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+      \code{"isotropic"}, \code{"Ripley"},
+      \code{"translate"}, \code{"translation"},
       \code{"none"} or \code{"best"}.
       It specifies the edge correction(s) to be applied.
   }

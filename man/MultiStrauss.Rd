@@ -76,7 +76,11 @@ which can then be fitted to point pattern data.
    MultiStrauss(radii=r)
    # prints a sensible description of itself
    r <- 0.03 * matrix(c(1,2,2,1), nrow=2,ncol=2)
-   ppm(amacrine, ~1, MultiStrauss(, r))
+   X <- amacrine
+   \testonly{
+      X <- X[ owin(c(0, 0.8), c(0, 1)) ]
+   }
+   ppm(X, ~1, MultiStrauss(, r))
    # fit the stationary multitype Strauss process to `amacrine'
    # Note the comma; needed since "types" is not specified.
 

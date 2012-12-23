@@ -33,7 +33,7 @@
   \item{correction}{
     String specifying the edge correction to be applied.
     Options are \code{"none"}, \code{"translate"}, \code{"Ripley"},
-    \code{"isotropic"} or \code{"best"}.
+    \code{"translation"}, \code{"isotropic"} or \code{"best"}.
     Only one correction may be specified.
   }
   \item{verbose}{Logical flag indicating whether to print progress

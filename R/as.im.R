@@ -3,7 +3,7 @@
 #
 #    conversion to class "im"
 #
-#    $Revision: 1.37 $   $Date: 2012/06/08 09:44:56 $
+#    $Revision: 1.38 $   $Date: 2012/12/03 04:49:34 $
 #
 #    as.im()
 #
@@ -33,13 +33,6 @@ as.im.im <- function(X, W=NULL, ...,
   }
   # resample X onto raster of Y
   Y <- rastersample(X, Y)
-
-  # inherit pixel data type from X
-  Y$type <- X$type
-  if(Y$type == "factor") {
-    Y$v <- factor(Y$v, levels=levels(X))
-    dim(Y$v) <- Y$dim
-  }
 
   return(na.handle.im(Y, na.replace))
 }

@@ -1,7 +1,7 @@
 #
 # linequad.R
 #
-#  $Revision: 1.5 $ $Date: 2011/07/21 08:52:48 $
+#  $Revision: 1.6 $ $Date: 2012/10/20 06:37:06 $
 #
 # create quadscheme for a pattern of points lying *on* line segments
 
@@ -80,18 +80,18 @@ linequad <- function(X, Y, ..., eps=NULL, nd=1000) {
       # attach correct marks to data points
       marks(newdat) <- marx[relevant]
       dat <- superimpose(dat, newdat, W=win, check=FALSE)
-      newdum <- as.ppp(newdum, W=win, check=FALSE)
       wdat <- c(wdat, wnewdat)
+      newdum <- as.ppp(newdum, W=win, check=FALSE)
       # replicate dummy points with each mark
-      for(k in seq(length(flev))) {
+      # also add points at data locations with other marks
+      for(k in seq_len(length(flev))) {
         le <- flev[k]
-        marks(newdum) <- le
-        dum <- superimpose(dum, newdum, W=win, check=FALSE)
-        wdum <- c(wdum, wnewdum)
-        # also add data points with other marks
-        avoid <- (marx[relevant] != le)
-        dat <- superimpose(dat, newdat[avoid] %mark% le, W=win, check=FALSE)
-        wdat <- c(wdat, wnewdat[avoid])
+        avoid <- (marks(newdat) != le)
+        dum <- superimpose(dum,
+                           newdum %mark% le,
+                           newdat[avoid] %mark% le,
+                           W=win, check=FALSE)
+        wdum <- c(wdum, wnewdum, wnewdat[avoid])
       }
     }
   }

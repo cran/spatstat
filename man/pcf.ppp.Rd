@@ -90,7 +90,8 @@
   pages 284--285). By default, their recommendations
   are followed exactly.
 
-  If \code{correction="translate"} then the translation correction
+  If \code{correction="translate"} or \code{correction="translation"}
+  then the translation correction
   is used. The estimate is given in equation (15.15), page 284 of
   Stoyan and Stoyan (1994).
 

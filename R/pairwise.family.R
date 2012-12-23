@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.35 $	$Date: 2012/06/24 08:01:36 $
+#    $Revision: 1.36 $	$Date: 2012/11/21 06:05:29 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -201,7 +201,7 @@ else
 if(length(correction) > 1)
   stop("Only one edge correction allowed at a time!")
 
-if(!any(correction == c("periodic", "border", "translate", "isotropic", "Ripley", "none")))
+if(!any(correction == c("periodic", "border", "translate", "translation", "isotropic", "Ripley", "none")))
   stop(paste("Unrecognised edge correction", sQuote(correction)))
 
 #### Compute basic data
@@ -250,7 +250,7 @@ if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dim(M))) {
 if(length(dim(POT))==2)
         POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
                           
-if(correction == "translate") {
+if(correction == "translate" || correction == "translation") {
         edgewt <- edge.Trans(X, U)
         # sanity check ("everybody knows there ain't no...")
         if(!is.matrix(edgewt))

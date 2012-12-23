@@ -366,7 +366,7 @@
       \eqn{L(r) = \sqrt{K(r)/\pi}}{L(r) = sqrt(K(r)/pi)}
       and this is implemented by setting
       \code{transform=expression(sqrt(./pi))}.
-      Such transforms are only useful if \code{global=TRUE}.
+      Such transforms are useful if \code{global=TRUE}.
     }
   }
 
@@ -406,8 +406,9 @@
 \section{Confidence intervals}{
   Simulation envelopes do \bold{not} compute confidence intervals;
   they generate significance bands. 
-  If you really need a confidence interval for the true mean
-  of the data pattern, use \code{\link{varblock}}.
+  If you really need a confidence interval for the true summary function
+  of the point process, use \code{\link{lohboot}}.
+  See also \code{\link{varblock}}.
 }
 \references{
   Cressie, N.A.C. \emph{Statistics for spatial data}.
@@ -450,7 +451,6 @@
   \code{\link{default.expand}}
 }
 \examples{
- data(simdat)
  X <- simdat
 
  # Envelope of K function under CSR
@@ -458,7 +458,7 @@
  plot(envelope(X))
  }
  \testonly{
-  plot(envelope(X, nsim=4))
+  plot(envelope(X, nsim=3))
  }
 
  # Translation edge correction (this is also FASTER):
@@ -466,31 +466,29 @@
  plot(envelope(X, correction="translate"))
  }
  \testonly{
-  plot(envelope(X, nsim=4, correction="translate"))
+  plot(envelope(X, nsim=3, correction="translate"))
  }
 
  # Envelope of K function for simulations from Gibbs model 
- data(cells)
- fit <- ppm(cells, ~1, Strauss(0.05))
  \dontrun{
+ fit <- ppm(cells, ~1, Strauss(0.05))
  plot(envelope(fit))
  plot(envelope(fit), global=TRUE)
  }
  \testonly{
-  plot(envelope(fit, nsim=4))
-  plot(envelope(fit, nsim=4, global=TRUE))
+  fit <- ppm(cells, ~1, Strauss(0.05), nd=25)
+  plot(envelope(fit, nsim=3, correction="border"))
+  plot(envelope(fit, nsim=3, correction="border", global=TRUE))
  }
 
  # Envelope of K function for simulations from cluster model 
- data(redwood)
  fit <- kppm(redwood, ~1, "Thomas")
  \dontrun{
  plot(envelope(fit, Gest))
  plot(envelope(fit, Gest, global=TRUE))
  }
  \testonly{
-  plot(envelope(fit, Gest, nsim=4))
-  plot(envelope(fit, Gest, nsim=4, global=TRUE))
+  plot(envelope(fit, Gest, correction="rs", nsim=3, global=TRUE))
  }
 
  # Envelope of G function under CSR
@@ -498,7 +496,7 @@
  plot(envelope(X, Gest))
  }
  \testonly{
-  plot(envelope(X, Gest, nsim=4))
+  plot(envelope(X, Gest, correction="rs", nsim=3))
  }
 
  # Envelope of L function under CSR
@@ -508,7 +506,7 @@
   plot(E, sqrt(./pi) ~ r)
  }
  \testonly{
-  E <- envelope(X, Kest, nsim=4)
+  E <- envelope(X, Kest, correction="border", nsim=3)
   plot(E, sqrt(./pi) ~ r)
  }
 
@@ -518,7 +516,8 @@
   plot(envelope(X, Kest, transform=expression(sqrt(./pi)), global=TRUE))
  }
  \testonly{
- plot(envelope(X, Kest, nsim=4,transform=expression(sqrt(./pi)), global=TRUE))
+ plot(envelope(X, Kest, nsim=3, correction="border",
+               transform=expression(sqrt(./pi)), global=TRUE))
  }
 
  # How to pass arguments needed to compute the summary functions:
@@ -530,7 +529,7 @@
  plot(envelope(demopat, Jcross, i="A", j="B"))
  }
  \testonly{
- plot(envelope(demopat, Jcross, i="A", j="B", nsim=4))
+ plot(envelope(demopat, Jcross, correction="rs", i="A", j="B", nsim=3))
  }
  
  # Use of `simulate'
@@ -539,12 +538,9 @@
  plot(envelope(cells, Gest, simulate=expression(rMaternI(100,0.02))))
  }
  \testonly{
-  plot(envelope(cells, Gest, simulate=expression(runifpoint(42)), nsim=4))
-  plot(envelope(cells, Gest, simulate=expression(rMaternI(100, 0.02)), nsim=4))
-  plot(envelope(cells, Gest, simulate=expression(runifpoint(42)),
-nsim=4, global=TRUE))
-  plot(envelope(cells, Gest, simulate=expression(rMaternI(100, 0.02)),
-nsim=4, global=TRUE))
+  plot(envelope(cells, Gest, correction="rs", simulate=expression(runifpoint(42)), nsim=3))
+    plot(envelope(cells, Gest, correction="rs", simulate=expression(rMaternI(100, 0.02)),
+nsim=3, global=TRUE))
  }
 
  # Envelope under random toroidal shifts
@@ -561,22 +557,35 @@ nsim=4, global=TRUE))
  }
   
  # Envelope of INHOMOGENEOUS K-function with fitted trend
+
+ # Note that the principle of symmetry, essential to the validity of
+ # simulation envelopes, requires that both the observed and
+ # simulated patterns be subjected to the same method of intensity
+ # estimation. In the following example it would be incorrect to set the
+ # argument 'lambda=red.dens' in the envelope command, because this
+ # would mean that the inhomogeneous K functions of the simulated
+ # patterns would be computed using the intensity function estimated
+ # from the original redwood data, violating the symmetry.  There is
+ # still a concern about the fact that the simulations are generated
+ # from a model that was fitted to the data; this is only a problem in
+ # small datasets.
+
 \dontrun{
- trend <- density.ppp(X, 1.5)
- plot(envelope(X, Kinhom, lambda=trend,
-         simulate=expression(rpoispp(trend))))
+ red.dens <- density(redwood, sigma=bw.diggle)
+ plot(envelope(redwood, Kinhom, sigma=bw.diggle,
+         simulate=expression(rpoispp(red.dens))))
  }
 
  # Precomputed list of point patterns
- X <- rpoispp(30)
+ X <- rpoispp(20)
+ nX <- npoints(X)
  PatList <- list()
- for(i in 1:19) PatList[[i]] <- runifpoint(npoints(X))
- E <- envelope(X, Kest, nsim=19, simulate=PatList)
- if(interactive()) plot(E)
+ for(i in 1:5) PatList[[i]] <- runifpoint(nX)
+ E <- envelope(X, Kest, nsim=5, simulate=PatList)
 
 # re-using the same point patterns
- EK <- envelope(X, Kest, nsim=10, savepatterns=TRUE)
- EG <- envelope(X, Kest, nsim=10, simulate=EK)
+ EK <- envelope(X, Kest, nsim=3, savepatterns=TRUE)
+ EG <- envelope(X, Gest, nsim=3, simulate=EK)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

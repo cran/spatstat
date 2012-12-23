@@ -6,7 +6,9 @@
   Plot a pixel image.
 }
 \usage{
-  \method{plot}{im}(x, \dots, col=NULL, valuesAreColours=NULL,
+  \method{plot}{im}(x, \dots,
+                   col=NULL, valuesAreColours=NULL,
+                   log=FALSE,
                    ribbon=TRUE,
                    ribside=c("right", "left", "bottom", "top"),
                    ribsep=0.15, ribwid=0.05, ribn=1024,
@@ -29,6 +31,10 @@
   \item{valuesAreColours}{
     Logical value. If \code{TRUE}, the pixel values of \code{x}
     are to be interpreted as colour values.
+  }
+  \item{log}{
+    Logical value. If \code{TRUE}, the colour map will be
+    evenly-spaced on a logarithmic scale.
   }
   \item{ribbon}{
     Logical flag indicating whether to display a ribbon
@@ -220,6 +226,9 @@
    plot(Z, main="La vie en bleu", col.main="blue", cex.main=1.5,
         box=FALSE,
         ribargs=list(col.axis="blue", col.ticks="blue", cex.axis=0.75))
+   # log scale
+   V <- eval.im(exp(exp(Z+2))/1e4)
+   plot(V, log=TRUE, main="Log scale")
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

@@ -4,7 +4,7 @@
 #	Compute estimates of cross-type K functions
 #	for multitype point patterns
 #
-#	$Revision: 5.39 $	$Date: 2012/08/22 01:40:38 $
+#	$Revision: 5.40 $	$Date: 2012/11/21 06:08:54 $
 #
 #
 # -------- functions ----------------------------------------
@@ -176,6 +176,7 @@ function(X, I, J, r=NULL, breaks=NULL,
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
 

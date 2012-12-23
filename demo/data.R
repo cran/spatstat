@@ -30,6 +30,10 @@ plot(as.ppp(chicago), add=TRUE, col="red", chars=c(16,2,22,17,24,15,6))
 
 chorley.extra$plotit()
 
+plot(clmfires, which.marks="cause", cols=2:5, cex=0.25,
+     main="Castilla-La Mancha forest fires")
+plot(clmcov200, main="Covariates for forest fires")
+
 plot(copper$Points, main="Copper")
 plot(copper$Lines, add=TRUE)
 
@@ -43,6 +47,8 @@ plot(flu[wildM1, 1, drop=TRUE],
      main=c("flu data", "wild type virus, M2-M1 stain"),
      chars=c(16,3), cex=0.4, cols=2:3)
 
+plot(gordon, main="People in Gordon Square", pch=16)
+
 plot(gorillas, chars=c(1,3), cols=2:3, main="Gorilla nest sites")
 
 plot(hamster, cols=c(2,4))
@@ -50,6 +56,11 @@ plot(hamster, cols=c(2,4))
 plot(heather)
 
 plot(humberside)
+
+plot(owin(c(0,25),c(0,20)), type="n", main="Hyytiala")
+plot(hyytiala$window, add=TRUE)
+a <- plot(hyytiala, add=TRUE, cols=2:5)
+legend(22, 20, legend=names(a), pch=a, col=2:5)
 
 plot(japanesepines)
 
@@ -82,6 +93,8 @@ if(enable3d) {
 
 ponderosa.extra$plotit()
 
+plot(paracou, cols=2:3, chars=c(16,3))
+
 plot(redwood)
 
 redwoodfull.extra$plotit()
@@ -101,5 +114,8 @@ plot(swedishpines)
 
 a <- plot(urkiola, cex=0.5, cols=2:3)
 legend("bottomleft", legend=names(a), pch=a, col=2:3)
+
+plot(waka, markscale=0.02, main=c("Waka national park", "tree diameters"))
+
 par(oldpar)
 options(oldoptions)

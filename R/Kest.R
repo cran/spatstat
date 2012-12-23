@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.91 $	$Date: 2012/08/22 01:38:59 $
+#	$Revision: 5.92 $	$Date: 2012/11/21 06:08:54 $
 #
 #
 # -------- functions ----------------------------------------
@@ -102,6 +102,7 @@ function(X, ..., r=NULL, breaks=NULL,
                              isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
   best.wanted <- ("best" %in% correction)

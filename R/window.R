@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.130 $	$Date: 2012/05/07 06:22:06 $
+#	$Revision: 4.132 $	$Date: 2012/12/10 03:55:34 $
 #
 #
 #	A window may be either
@@ -332,12 +332,6 @@ as.owin.im <- function(W, ..., fatal=TRUE) {
   return(out)
 }
 
-as.owin.ppm <- function(W, ..., fatal=TRUE) {
-  if(!verifyclass(W, "ppm", fatal=fatal))
-    return(NULL)
-  as.owin(data.ppm(W))
-}
-
 as.owin.psp <- function(W, ..., fatal=TRUE) {
   if(!verifyclass(W, "psp", fatal=fatal))
     return(NULL)
@@ -661,27 +655,25 @@ validate.mask <- function(w, fatal=TRUE) {
   }
 }
              
-raster.x <- function(w) {
-	validate.mask(w)
-        di <- w$dim
-        nr <- di[1]
-        nc <- di[2]
-	m <- matrix(0, nrow=nr, ncol=nc)
-	matrix(w$xcol[col(m)], nrow=nr, ncol=nc)
+raster.x <- function(w, drop=FALSE) {
+  validate.mask(w)
+  m <- w$m
+  x <- w$xcol[col(m)]
+  x <- if(drop) x[m, drop=TRUE] else array(x, dim=w$dim)
+  return(x)
 }
 
-raster.y <- function(w) {
-	validate.mask(w)
-        di <- w$dim
-        nr <- di[1]
-        nc <- di[2]
-	m <- matrix(0, nrow=nr, ncol=nc)
-	matrix(w$yrow[row(m)], nrow=nr, ncol=nc)
+raster.y <- function(w, drop=FALSE) {
+  validate.mask(w)
+  m <- w$m
+  y <- w$yrow[row(m)]
+  y <- if(drop) y[m, drop=TRUE] else array(y, dim=w$dim)
+  return(y)
 }
 
-raster.xy <- function(w) {
-  list(x=as.numeric(raster.x(w)),
-       y=as.numeric(raster.y(w)))
+raster.xy <- function(w, drop=FALSE) {
+  list(x=as.numeric(raster.x(w, drop=drop)),
+       y=as.numeric(raster.y(w, drop=drop)))
 }
   
 nearest.raster.point <- function(x,y,w, indices=TRUE) {

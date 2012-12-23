@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.97 $    $Date: 2012/10/11 03:56:04 $
+#    $Revision: 1.104 $    $Date: 2012/12/18 04:42:33 $
 #
 #  (a) for matrices only:
 #
@@ -124,9 +124,32 @@ rastersample <- function(X, Y) {
   scale <- c(Y$ystep/X$ystep,
              Y$xstep/X$xstep)
   if(is.im(X)) {
-    if(!is.im(Y)) Y <- as.im(Y)
-    Y$v <- matrixsample(X$v, Y$dim, phase=phase, scale=scale, na.value=NA)
+    # resample an image
+    if(!is.im(Y))
+      Y <- as.im(Y)
+    Xtype <- X$type
+    Xv    <- X$v
+    # handle factor-valued image as integer
+    if(Xtype == "factor") 
+      Xv <- array(as.integer(Xv), dim=X$dim)
+    # resample
+    naval <- switch(Xtype,
+                 factor=,
+                 integer= NA_integer_, 
+                 logical = as.logical(NA_integer_), 
+                 real = NA_real_, 
+                 complex = NA_complex_, 
+                 character = NA_character_,
+                 NA)
+    Y$v <- matrixsample(Xv, Y$dim, phase=phase, scale=scale, na.value=naval)
+    # inherit pixel data type from X
+    Y$type <- Xtype
+    if(Xtype == "factor") {
+      Y$v <- factor(Y$v, labels=levels(X))
+      dim(Y$v) <- Y$dim
+    }
   } else {
+    # resample a mask
     if(!is.mask(Y)) Y <- as.mask(Y)
     Y$m <- matrixsample(X$m, Y$dim, phase=phase, scale=scale, na.value=FALSE)
   }
@@ -145,12 +168,13 @@ pointgrid <- function(W, ngrid) {
 
 # text magic
 
-commasep <- function(x) {
+commasep <- function(x, join="and") {
   px <- paste(x)
   nx <- length(px)
   if(nx <= 1) return(px)
   commas <- c(rep(", ", length(px)-2),
-              " and ", "")
+              paste("", join, ""),
+              "")
   return(paste(paste(px, commas, sep=""), collapse=""))
 }
 
@@ -243,59 +267,95 @@ intersect.ranges <- function(a, b, fatal=TRUE) {
   return(c(lo, hi))
 }
 
-assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
-assign(".Spatstat.ProgressStartTime", 0, envir = .spEnv)
+niceround <- function(x, m=c(1,2,5,10)) {
+  expo <- 10^as.integer(floor(log10(x)))
+  y <- m * expo
+  z <- y[which.min(abs(y - x))]
+  return(z)
+}
 
-progressreport <- function(i, n, every=max(1, ceiling(n/100)),
+assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
+assign(".Spatstat.ProgressData", NULL, envir = .spEnv)
+
+progressreport <- function(i, n, every=min(100,max(1, ceiling(n/100))),
                            nperline=min(charsperline,
                              every * ceiling(charsperline /(every+3))),
                            charsperline=60,
                            style=spatstat.options("progress")) {
   missevery <- missing(every)
+  if(i > n) {
+    warning(paste("progressreport called with i =", i, "> n =", n))
+    return(invisible(NULL))
+  }
   switch(style,
          txtbar={
-           .Spatstat.ProgressBar <- get(".Spatstat.ProgressBar", envir = .spEnv)
-           if(i == 1)
-             assign(".Spatstat.ProgressBar", txtProgressBar(1, n, 1, style=3),
+           if(i == 1) {
+             # initialise text bar
+             assign(".Spatstat.ProgressBar",
+                    txtProgressBar(1, n, 1, style=3),
                     envir = .spEnv)
-           setTxtProgressBar(.Spatstat.ProgressBar, i)
-           if(i == n) {
-             close(.Spatstat.ProgressBar)
-             assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
+           } else {
+             # get text bar
+             pbar <- get(".Spatstat.ProgressBar", envir = .spEnv)
+             # update 
+             setTxtProgressBar(pbar, i)
+             if(i == n) {
+               close(pbar)
+               assign(".Spatstat.ProgressBar", NULL, envir = .spEnv)
+             } 
            }
          },
          tty={
            now <- proc.time()
            if(i == 1) {
              # Initialise stuff
-             assign(".Spatstat.ProgressStartTime", now, envir = .spEnv)
              if(missevery && every > 1 && n > 10) {
-               expo <- 10^as.integer(floor(log10(every)))
-               leading <- every/expo
-               vals <- c(1, 2, 5, 10)
-               roundlead <- vals[which.min(abs(leading - vals))]
-               every <- roundlead * expo
+               every <- niceround(every)
                nperline <- min(charsperline,
                                every * ceiling(charsperline /(every+3)))
              }
+             showtime <- FALSE
+             showevery <- n
              assign(".Spatstat.ProgressData",
-                    list(every=every, nperline=nperline), envir=.spEnv)
+                    list(every=every, nperline=nperline,
+                         starttime=now,
+                         showtime=FALSE, showevery=n),
+                    envir=.spEnv)
            } else {
              pd <- get(".Spatstat.ProgressData", envir=.spEnv)
-             every <- pd$every
-             nperline <- pd$nperline
+             if(is.null(pd))
+               stop(paste("progressreport called with i =", i, "before i = 1"))
+             every     <- pd$every
+             nperline  <- pd$nperline
+             showtime  <- pd$showtime
+             showevery <- pd$showevery
              if(i < n) {
                # estimate time remaining
-               t0 <- get(".Spatstat.ProgressStartTime", envir=.spEnv)
-               elapsed <- now - t0
+               starttime <- pd$starttime
+               elapsed <- now - starttime
                elapsed <- unname(elapsed[3])
                rate <- elapsed/(i-1)
                remaining <- rate * (n-i)
-               if(rate > 20 || (remaining > 180 &&  (i %% every == 0))) {
-                 st <- paste("etd", codetime(round(remaining)))
-                 st <- paren(st, "[")
-                 cat(paste(st, "\n"))
+               if(!showtime) {
+                 # show time remaining if..
+                 if(rate > 20) {
+                   # .. rate is very slow
+                   showtime <- TRUE
+                   showevery <- 1
+                 } else if(remaining > 180) {
+                   # ... more than 3 minutes remaining
+                   showtime <- TRUE
+                   showevery <- every
+                   aminute <- ceiling(60/rate)
+                   if(aminute < showevery) 
+                     showevery <- min(niceround(aminute), showevery)
+                 }
                }
+               assign(".Spatstat.ProgressData",
+                    list(every=every, nperline=nperline,
+                         starttime=starttime,
+                         showtime=showtime, showevery=showevery),
+                    envir=.spEnv)
              }
            }
            if(i == n) 
@@ -309,6 +369,11 @@ progressreport <- function(i, n, every=max(1, ceiling(n/100)),
                cat(".")
              if(i %% nperline == 0)
                cat("\n")
+           }
+           if(i < n && showtime && (i %% showevery == 0)) {
+             st <- paste("etd", codetime(round(remaining)))
+             st <- paren(st, "[")
+             cat(paste("", st, ""))
            }
            flush.console()
          },
@@ -659,7 +724,8 @@ codetime <- local({
              "thousand years", "million years", "billion years")
   multiple <- c(60, 60, 24, 365, 1e3, 1e3, 1e3)
   codehms <- function(x) {
-    x <- round(x)
+    sgn <- if(x < 0) "-" else ""
+    x <- round(abs(x))
     hours <- x %/% 3600
     mins  <- (x %/% 60) %% 60
     secs  <- x %% 60
@@ -671,12 +737,15 @@ codetime <- local({
     started <- started | (mins > 0)
     s <- if(secs > 0) {
       paste(if(secs < 10 && started) "0" else "", secs, sep="")
-    } else if(started) "00" else "0 sec"
-    paste(h, m, s, sep="")
+    } else if(started) "00" else "0"
+    if(!started) s <- paste(s, "sec")
+    paste(sgn, h, m, s, sep="")
   }
   codetime <- function(x, hms=TRUE) {
+    sgn <- if(x < 0) "-" else ""
+    x <- abs(x)
     if(hms && (x < 60 * 60 * 24))
-      return(codehms(x))
+      return(paste(sgn, codehms(x), sep=""))
     u <- u1 <- "sec"
     for(k in seq_along(multiple)) {
       if(x >= multiple[k]) {
@@ -687,7 +756,7 @@ codetime <- local({
     }
     xx <- round(x, 1)
     ux <- if(xx == 1) u1 else u
-    paste(xx, ux)
+    paste(sgn, xx, " ", ux, sep="")
   }
   codetime
 })
@@ -751,4 +820,16 @@ trap.extra.arguments <- function(..., .Context="", .Fatal=FALSE) {
   }
   if(.Fatal) stop(whinge, call.=FALSE) else warning(whinge, call.=FALSE)
   return(TRUE)
+}
+
+dotexpr.to.call <- function(expr, dot="funX", evaluator="eval.fv") {
+  # convert an expression into a function call
+  # replacing "." by the specified variable 
+  stopifnot(is.expression(expr))
+  aa <- substitute(substitute(ee, list(.=as.name(d))),
+                   list(ee=expr, d=dot))
+  bb <- eval(parse(text=deparse(aa)))
+  cc <- as.call(bb)
+  cc[[1]] <- as.name("eval.fv")
+  return(cc)
 }

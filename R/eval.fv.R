@@ -67,7 +67,13 @@ eval.fv <- local({
     yexps <- lapply(funs, attr, which="yexp")
     ylabs <- lapply(funs, attr, which="ylab")
     fnames <- unlist(lapply(funs, getfname))
-    # Remove duplication
+    # Repair 'fname' attributes if blank
+    if(any(blank <- !nzchar(fnames))) {
+      # Set function names to be object names as used in the expression
+      for(i in which(blank))
+        attr(funs[[i]], "fname") <- fnames[i] <- names(funs)[i]
+    }
+    # Remove duplicated names
     # Typically occurs when combining several K functions, etc.
     oldfnames <- fnames
     # Tweak fv objects so their function names are their object names
@@ -102,13 +108,13 @@ eval.fv <- local({
     if(nfuns > 1) {
       # take original expression
       the.fname <- paren(flatten(deparse(elang)))
-    } else {
+    } else if(nzchar(oldname <- oldfnames[1])) {
       # replace object name in expression by its function name
-      namemap <- list(as.name(oldfnames[1]))
+      namemap <- list(as.name(oldname)) 
       names(namemap) <- names(funs)[1]
       the.fname <- deparse(eval(substitute(substitute(e, namemap),
-                                         list(e=elang))))
-    } 
+                                           list(e=elang))))
+    } else the.fname <- names(funs)[1]
     attr(result, "fname") <- the.fname
     # now compute the [modified] y labels
     labelmaps <- lapply(funs, fvlabelmap, dot=FALSE)

@@ -1,7 +1,7 @@
 #
 #   pcf.R
 #
-#   $Revision: 1.41 $   $Date: 2012/08/22 04:02:14 $
+#   $Revision: 1.42 $   $Date: 2012/11/21 06:00:26 $
 #
 #
 #   calculate pair correlation function
@@ -31,6 +31,7 @@ pcf.ppp <- function(X, ..., r=NULL,
                            c(isotropic="isotropic",
                              Ripley="isotropic",
                              translate="translate",
+                             translation="translate",
                              best="best"),
                            multi=TRUE)
 

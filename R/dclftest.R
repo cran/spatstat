@@ -1,7 +1,7 @@
 #
 #  dclftest.R
 #
-#  $Revision: 1.11 $  $Date: 2012/10/11 03:49:28 $
+#  $Revision: 1.14 $  $Date: 2012/12/18 10:01:20 $
 #
 #  Monte Carlo tests for CSR (etc)
 #
@@ -25,9 +25,14 @@ mad.test <- function(X, ..., rinterval=NULL, use.theo=FALSE) {
 
 envelopeTest <- function(X, ...,
                          power=1, rinterval=NULL,
-                         use.theo=FALSE, Xname=NULL, verbose=TRUE,
+                         use.theo=FALSE,
+                         tie.rule=c("randomise","mean"),
+                         save.envelope=FALSE,
+                         Xname=NULL,
+                         verbose=TRUE,
                          internal=NULL) {
   if(is.null(Xname)) Xname <- short.deparse(substitute(X))
+  tie.rule <- match.arg(tie.rule)
   check.1.real(power)
   explain.ifnot(power >= 0)
   # compute or extract simulated functions
@@ -130,7 +135,15 @@ envelopeTest <- function(X, ...,
     }
   }
   # compute rank and p-value
-  datarank <- sum(devdata < devsim) + sum(devdata == devsim)/2 + 1
+  datarank <- sum(devdata < devsim) + 1
+  nties <- sum(devdata == devsim)
+  if(nties > 0) {
+    tierank <- switch(tie.rule,
+                      mean = nties/2,
+                      randomise = sample(1:nties, 1))
+    datarank <- datarank + tierank
+    if(verbose) message("Ties were encountered")
+  }
   pvalue <- datarank/(nsim+1)
   # bookkeeping
   statistic <- data.frame(devdata, rank=datarank)
@@ -160,6 +173,8 @@ envelopeTest <- function(X, ...,
                            method = testname,
                            data.name = e$Yname),
                       class="htest")
+  if(save.envelope)
+    attr(result, "envelope") <- X
   return(result)
 }
 

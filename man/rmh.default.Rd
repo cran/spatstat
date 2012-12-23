@@ -99,8 +99,7 @@
       List of possible types, for a multitype point process.
     }
   }
-  For full details of these parameters, see \code{\link{rmhmodel}}.
-
+  For full details of these parameters, see \code{\link{rmhmodel.default}}.
   
   The argument \code{start} determines the initial state of the
   Metropolis-Hastings algorithm. It is either \code{NULL},

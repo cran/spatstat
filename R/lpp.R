@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.16 $   $Date: 2012/06/07 02:01:05 $
+#  $Revision: 1.17 $   $Date: 2012/10/20 07:56:31 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -12,7 +12,7 @@ lpp <- function(X, L) {
     # includes spatial and local coordinates
     X <- as.data.frame(X)
     # local coords
-    lo <- X[ , localnames]
+    lo <- X[ , localnames, drop=FALSE]
     # spatial coords and marks
     df <- X[, !(names(X) %in% localnames), drop=FALSE]
     # validate local coordinates
@@ -111,7 +111,8 @@ print.summary.lpp <- function(x, ...) {
 as.ppp.lpp <- function(X, ..., fatal=TRUE) {
   verifyclass(X, "lpp", fatal=fatal)
   L <- X$domain
-  Y <- as.ppp(coords(X, temporal=FALSE, local=FALSE), W=L$window)
+  Y <- as.ppp(coords(X, temporal=FALSE, local=FALSE),
+              W=L$window, check=FALSE)
   marks(Y) <- marks(X)
   return(Y)
 }

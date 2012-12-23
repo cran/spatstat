@@ -51,6 +51,14 @@ perimeter <- function(w) {
   return(NA)
 }
 
+sidelengths.owin <- function(x) {
+  if(x$type != "rectangle")
+    warning("Computing the side lengths of a non-rectangular window")
+  with(x, c(diff(xrange), diff(yrange)))
+}
+
+shortside.owin <- function(x) { min(sidelengths(x)) }
+
 eroded.areas <- function(w, r) {
   w <- as.owin(w)
   switch(w$type,

@@ -70,7 +70,8 @@ Kcross.inhom(X, i, j, lambdaI=NULL, lambdaJ=NULL, \dots,  r=NULL, breaks=NULL,
   \item{correction}{
     A character vector containing any selection of the
     options \code{"border"}, \code{"bord.modif"},
-    \code{"isotropic"}, \code{"Ripley"}, \code{"translate"},
+    \code{"isotropic"}, \code{"Ripley"} ,\code{"translate"},
+    \code{"translation"},
     \code{"none"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }

@@ -348,11 +348,13 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
     # rule of thumb based on nearest-neighbour distances
     nnd <- nndist(X)
     nnd <- nnd[nnd > 0]
-    if(is.null(hmin)) 
-      hmin <- max(1.5 * min(nnd), stoyan/5)
+    if(is.null(hmin)) {
+      hmin <- max(1.1 * min(nnd), stoyan/5)
+      hmin <- min(d/8, hmin)
+    }
     if(is.null(hmax)) {
       hmax <- max(stoyan * 20, 3 * mean(nnd), hmin * 2)
-      hmax <- min(d/4, hmax)
+      hmax <- min(d/2, hmax)
     }
   } else stopifnot(hmin < hmax)
   #
@@ -374,8 +376,9 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
     warning(paste("Cross-validation criterion was minimised at",
                   if(iopt == 1) "left-hand" else "right-hand",
                   "end of interval",
-                  "[", signif(hmin, 3), ",", signif(hmax, 3), "];",
-                  "use arguments hmin, hmax to specify a wider interval"))
+                  paste(prange(signif(c(hmin, hmax), 3)), ";", sep=""),
+                  "use arguments hmin, hmax to specify a wider interval"),
+            call.=FALSE)
   #
   result <- bw.optim(cv, h, iopt,
                      xlab="sigma", ylab="Least squares CV",

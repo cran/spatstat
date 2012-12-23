@@ -69,7 +69,11 @@ which can then be fitted to point pattern data.
    # prints a sensible description of itself
    r <- 0.04 * matrix(c(1,2,2,1), nrow=2,ncol=2)
    h <- 0.02 * matrix(c(1,NA,NA,1), nrow=2,ncol=2)
-   ppm(amacrine, ~1, MultiStraussHard(,r,h))
+   X <- amacrine
+   \testonly{
+       X <- X[owin(c(0,0.8), c(0,1))]
+   }
+   fit <- ppm(X, ~1, MultiStraussHard(,r,h))
    # fit stationary multitype hardcore Strauss process to `amacrine'
    # Note the comma; needed since "types" is not specified.
 }

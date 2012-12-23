@@ -250,8 +250,10 @@ plot.fv <- function(x, fmla, ..., subset=NULL, lty=NULL, col=NULL, lwd=NULL,
     expandleftside <- gsub(".y", fvnames(x, ".y"), expandleftside, fixed=TRUE)
     expandleftside <- gsub(".", cball, expandleftside, fixed=TRUE)
     # convert back to language
-    compactleftside <- as.formula(paste(compactleftside, "~1"))[[2]]
-    expandleftside <- as.formula(paste(expandleftside, "~1"))[[2]]
+#    compactleftside <- as.formula(paste(compactleftside, "~1"))[[2]]
+#    expandleftside <- as.formula(paste(expandleftside, "~1"))[[2]]
+    compactleftside <- parse(text=compactleftside)[[1]]
+    expandleftside <- parse(text=expandleftside)[[1]]
   } else {
     compactleftside <- expandleftside <- leftside
   }
