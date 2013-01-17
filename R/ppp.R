@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.83 $	$Date: 2012/08/13 07:33:21 $
+#	$Revision: 4.84 $	$Date: 2013/01/08 07:16:16 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -429,8 +429,10 @@ summary.ppp <- function(object, ..., checkdup=TRUE) {
   result$n <- object$n
   result$window <- summary(object$window)
   result$intensity <- result$n/result$window$area
-  if(checkdup)
+  if(checkdup) {
     result$nduplicated <- sum(duplicated(object))
+    result$rounding <- rounding(object)
+  }
   if(result$is.marked) {
     mks <- marks(object, dfok=TRUE)
     if(result$multiple.marks <- is.data.frame(mks)) {
@@ -481,6 +483,24 @@ print.summary.ppp <- function(x, ..., dp=3) {
   ndup <- x$nduplicated
   if((!is.null(ndup)) && (ndup > 0))
     cat("\n*Pattern contains duplicated points*\n")
+  rndg <- x$rounding
+  if(!is.null(rndg)) {
+    if(rndg >= 4) {
+      cat(paste("\nCoordinates are given to", rndg, "decimal places\n"))
+    } else if(rndg > 0) {
+      cat(paste("\nCoordinates are given to", rndg, "decimal places",
+                "\ni.e. rounded to the nearest multiple of",
+                10^(-rndg), unitinfo$plural, unitinfo$explain, "\n"))
+    } else if(rndg == 0) {
+      cat(paste("\nCoordinates are integers",
+                "\ni.e. rounded to the nearest 1", unitinfo$singular,
+                unitinfo$explain, "\n"))
+    } else {
+      cat(paste("\nCoordinates are multiples of", 10^(-rndg), unitinfo$plural,
+                unitinfo$explain, "\n"))
+    }
+    cat("\n")
+  }
   if(x$is.marked) {
     if(x$multiple.marks) {
       cat(paste("Mark variables: ", paste(x$marknames, collapse=", "), "\n"))
@@ -496,8 +516,8 @@ print.summary.ppp <- function(x, ..., dp=3) {
       cat("Summary:\n")
       print(x$marks)
     }
+    cat("\n")
   }
-  cat("\n")
   print(x$window)
   if(!is.null(nrejects <- x$rejects)) 
     cat(paste("\n***",

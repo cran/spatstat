@@ -80,6 +80,7 @@ double geyercif(prop, state, cdata)
   double w, a, dd2, b, f, cifval;
   double *x, *y;
   int *aux;
+  double *period;
   Geyer *geyer;
   
   geyer = (Geyer *) cdata;
@@ -93,10 +94,10 @@ double geyercif(prop, state, cdata)
   v = prop.v;
   ix = prop.ix;
 
-  r2 = geyer->r2;
-  s = geyer->s;
-
-  aux = geyer->aux;
+  r2     = geyer->r2;
+  s      = geyer->s;
+  period = geyer->period;
+  aux    = geyer->aux;
 
   /* 
      tee = neighbour count at the point in question;
@@ -108,8 +109,7 @@ double geyercif(prop, state, cdata)
     if(geyer->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],geyer->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  tee++;
 	  f = s - aux[j];
 	  if(f > 1) /* j is not saturated after addition of (u,v) */
@@ -117,12 +117,12 @@ double geyercif(prop, state, cdata)
 	  else if(f > 0) /* j becomes saturated by addition of (u,v) */
 	    w = w + f;
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
-	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < r2) {
+	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
 	  tee++;
 	  f = s - aux[j];
 	  if(f > 1) /* j is not saturated after addition of (u,v) */
@@ -130,6 +130,7 @@ double geyercif(prop, state, cdata)
 	  else if(f > 0) /* j becomes saturated by addition of (u,v) */
 	    w = w + f;
 	}
+	END_IF_CLOSE_D2
       }
     }
   } else if(prop.itype == DEATH) {
@@ -138,8 +139,7 @@ double geyercif(prop, state, cdata)
       /* Periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2 = dist2(u,v,x[j],y[j],geyer->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  f = s - aux[j];
 	  if(f > 0) /* j is not saturated */
 	    w = w + 1; /* deletion of 'ix' decreases count by 1 */
@@ -152,13 +152,13 @@ double geyercif(prop, state, cdata)
 	    }
 	  }
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < r2) {
+	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
 	  f = s - aux[j];
 	  if(f > 0) /* j was not saturated */
 	    w = w + 1; /* deletion of 'ix' decreases count by 1 */
@@ -171,25 +171,47 @@ double geyercif(prop, state, cdata)
 	    }
 	  }
 	}
+	END_IF_CLOSE_D2
       }
     }
   } else if(prop.itype == SHIFT) { 
     /* Compute the cif at the new point, not the ratio of new/old */
-    for(j=0; j<npts; j++) {
-      if(j == ix) continue;
-      d2 = dist2either(u,v,x[j],y[j],geyer->period);
-      if(d2 < r2) {
-	tee++;
-	a = aux[j];
-	/* Adjust */
-	dd2 = dist2either(x[ix],y[ix], x[j],y[j],geyer->period);
-	if(dd2 < r2) a = a - 1;
-	b = a + 1;
-	if(a < s && s < b) {
-	  w = w + s - a;
+    if(geyer->per) {
+      /* Periodic distance */
+      for(j=0; j<npts; j++) {
+	if(j == ix) continue;
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	  tee++;
+	  a = aux[j];
+	  /* Adjust */
+	  dd2 = dist2(x[ix],y[ix], x[j],y[j],period);
+	  if(dd2 < r2) a = a - 1;
+	  b = a + 1;
+	  if(a < s && s < b) {
+	    w = w + s - a;
+	  }
+	  else if(s >= b) w = w + 1;
 	}
-	else if(s >= b) w = w + 1;
+	END_IF_CLOSE_PERIODIC_D2
       }
+    } else {
+      /* Euclidean distance */
+      for(j=0; j<npts; j++) {
+	if(j == ix) continue;
+	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	  tee++;
+	  a = aux[j];
+	  /* Adjust */
+	  dd2 = hypot(x[ix] - x[j], y[ix] - y[j]);
+	  if(dd2 < r2) a = a - 1;
+	  b = a + 1;
+	  if(a < s && s < b) {
+	    w = w + s - a;
+	  }
+	  else if(s >= b) w = w + 1;
+	}
+	END_IF_CLOSE_PERIODIC_D2
+	  }
     }
   }
 
@@ -214,12 +236,14 @@ void geyerupd(state, prop, cdata)
   double u, v, xix, yix, r2, d2, d2old, d2new;
   double *x, *y;
   int *aux;
+  double *period;
   Geyer *geyer;
 
   geyer = (Geyer *) cdata;
-
+  period = geyer->period;
   aux = geyer->aux;
   r2 = geyer->r2;
+
   x = state.x;
   y = state.y;
   npts = state.npts;
@@ -234,20 +258,20 @@ void geyerupd(state, prop, cdata)
     if(geyer->per) {
       /* periodic distance */
       for(j=0; j < npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],geyer->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  aux[j] += 1;
 	  aux[npts] += 1;
 	} 
+	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j < npts; j++) {
-	d2 = pow(u-x[j], 2) + pow(v-y[j], 2);
-	if(d2 < r2) {
+	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
 	  aux[j] += 1;
 	  aux[npts] += 1;
 	} 
+	END_IF_CLOSE_D2
       }
     }
     return;
@@ -262,21 +286,21 @@ void geyerupd(state, prop, cdata)
       /* periodic distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	d2 = dist2(u,v,x[j],y[j],geyer->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  if(j < ix) aux[j] -= 1;
 	  else aux[j-1] = aux[j] - 1;
 	} else if(j >= ix) aux[j-1] = aux[j];
+	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	d2 = pow(u-x[j], 2) + pow(v-y[j], 2);
-	if(d2 < r2) {
+	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
 	  if(j < ix) aux[j] -= 1;
 	  else aux[j-1] = aux[j] - 1;
 	} else if(j >= ix) aux[j-1] = aux[j];
+	END_IF_CLOSE_D2
       }
     }
     return;
@@ -310,8 +334,8 @@ void geyerupd(state, prop, cdata)
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2new = pow(u-x[j], 2) + pow(v-y[j], 2);
-	d2old = pow(x[ix]-x[j], 2) + pow(y[ix]-y[j],2);
+	d2new = hypot(u-x[j],     v-y[j]);
+	d2old = hypot(x[ix]-x[j], y[ix]-y[j]);
 	if(d2old >= r2 && d2new >= r2) continue;
 	if(d2new < r2) {
 	  /* increment neighbour count for new point */

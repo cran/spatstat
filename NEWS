@@ -1,4 +1,79 @@
 
+	CHANGES IN spatstat VERSION 1.31-0
+
+OVERVIEW
+
+   o We thank Frederic Lavancier and Ege Rubak for contributions.
+
+   o Major bug fix in simulation of area-interaction process.
+
+   o Metropolis-Hastings simulations accelerated.
+
+   o Rounding of spatial coordinates
+
+   o clmfires dataset corrected.
+
+   o Bug fixes and minor improvements.
+
+NEW FUNCTIONS
+
+   o round.ppp
+   Round the spatial coordinates of a point pattern 
+   to a specified number of decimal places.
+
+   o rounding
+   Determine whether a dataset has been rounded.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o rmh
+   Simulation of the following models has been accelerated:
+   areaint, dgs, diggra, fiksel, geyer, hardcore, lennard, multihard,
+   strauss, straush, straussm, strausshm.
+
+   o rmh
+   The transition history of the simulation (which is saved if 'track=TRUE')
+   now also contains the value of the Hastings ratio for each proposal.
+
+   o clmfires
+   The clmfires dataset has been modified to remove errors and inconsistencies.
+
+   o plot.linim
+   Appearance of the plot has been improved, when style='width'.
+
+   o summary.ppm
+   Now reports whether the spatial coordinates have been rounded.
+
+   o dclf.test, mad.test
+   The range of distance values ('rinterval') used in the test
+   is now printed in the test output, and is saved as an attribute.
+
+
+BUGS
+
+   o rmh
+   Simulation of the Area-Interaction model was completely incorrect.
+   Spotted by Frederic Lavancier.
+   The bug was introduced in spatstat version 1.23-6 or later.
+   Fixed.
+
+   o dclf.test
+   The test statistic was incorrectly scaled (by a few percent).
+   This did not affect the p-value of the test.
+   Fixed.
+
+   o ppx
+   If argument 'coord.type' was missing, various errors occurred:
+   a crash may have occurred, or the results may have depended
+   on the storage type of the data. 
+   Spotted by Ege Rubak.
+   Fixed. 
+
+   o plot.ppx
+   Crashed for 1-dimensional point patterns.
+   Spotted by Ege Rubak.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.30-0
 
 

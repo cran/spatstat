@@ -64,7 +64,7 @@ double dgscif(prop, state, cdata)
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double d2, r2, pairprod, cifval;
+  double dx, dy, d2, r2, pairprod, cifval;
   Dgs *dgs;
 
   dgs = (Dgs *) cdata;
@@ -89,27 +89,36 @@ double dgscif(prop, state, cdata)
     if(ix > 0) {
       for(j=0; j < ix; j++) {
 	d2 = dist2(u,v,x[j],y[j],dgs->period);
-	if(d2 < r2) pairprod *= sin(dgs->pion2rho * sqrt(d2));
+	if(d2 <= r2) 
+	  pairprod *= sin(dgs->pion2rho * sqrt(d2));
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
 	d2 = dist2(u,v,x[j],y[j],dgs->period);
-	if(d2 < r2) pairprod *= sin(dgs->pion2rho * sqrt(d2));
+	if(d2 <= r2)
+	  pairprod *= sin(dgs->pion2rho * sqrt(d2));
       }
     }
   }
   else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < r2) pairprod *= sin(dgs->pion2rho * sqrt(d2));
+	dx = u - x[j];
+	d2 = dx * dx;
+	if(d2 <= r2) {
+	  dy = v - y[j];
+	  d2 += dy * dy;
+	  if(d2 <= r2) 
+	    pairprod *= sin(dgs->pion2rho * sqrt(d2));
+	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = pow(u - x[j], 2) + pow(v - y[j], 2);
-	if(d2 < r2) pairprod *= sin(dgs->pion2rho * sqrt(d2));
+	IF_CLOSE_D2(u, v, x[j], y[j], r2, d2)
+	  pairprod *= sin(dgs->pion2rho * sqrt(d2));
+        END_IF_CLOSE
       }
     }
   }

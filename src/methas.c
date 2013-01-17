@@ -58,6 +58,10 @@ SEXP xmethas(
   int    *mm,      *mpropose, *pp, *aa;
   SEXP out, xout, yout, mout, pout, aout;
   int tracking;
+#if HISTORY_INCLUDES_RATIO
+  SEXP numout, denout;
+  double *nn, *dd;
+#endif
 
   State state;
   Model model;
@@ -208,6 +212,10 @@ SEXP xmethas(
     history.n = 0;
     history.proptype = (int *) R_alloc(algo.nrep, sizeof(int));
     history.accepted = (int *) R_alloc(algo.nrep, sizeof(int));
+#if HISTORY_INCLUDES_RATIO
+    history.numerator   = (double *) R_alloc(algo.nrep, sizeof(double));
+    history.denominator = (double *) R_alloc(algo.nrep, sizeof(double));
+#endif
   }
 
   /* ================= Initialise algorithm ==================== */
@@ -377,6 +385,16 @@ SEXP xmethas(
       pp[j] = history.proptype[j];
       aa[j] = history.accepted[j];
     }
+#if HISTORY_INCLUDES_RATIO
+    PROTECT(numout = NEW_NUMERIC(algo.nrep));
+    PROTECT(denout = NEW_NUMERIC(algo.nrep));
+    nn = NUMERIC_POINTER(numout);
+    dd = NUMERIC_POINTER(denout);
+    for(j = 0; j < algo.nrep; j++) {
+      nn[j] = history.numerator[j];
+      dd[j] = history.denominator[j];
+    }
+#endif
   } else {
     /* Keep the compiler happy */
     PROTECT(pout = NEW_INTEGER(1));
@@ -384,6 +402,13 @@ SEXP xmethas(
     pp = INTEGER_POINTER(pout);
     aa = INTEGER_POINTER(aout);
     pp[0] = aa[0] = 0;
+#if HISTORY_INCLUDES_RATIO
+    PROTECT(numout = NEW_NUMERIC(1));
+    PROTECT(denout = NEW_NUMERIC(1));
+    nn = NUMERIC_POINTER(numout);
+    dd = NUMERIC_POINTER(denout);
+    nn[0] = dd[0] = 0;
+#endif
   }
 
   /* Pack up into list object for return */
@@ -402,20 +427,41 @@ SEXP xmethas(
   } else {
     /* transition history */
     if(!marked) {
+#if HISTORY_INCLUDES_RATIO
+      PROTECT(out = NEW_LIST(6));
+#else
       PROTECT(out = NEW_LIST(4));
+#endif
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout);
       SET_VECTOR_ELT(out, 2, pout);
       SET_VECTOR_ELT(out, 3, aout);
+#if HISTORY_INCLUDES_RATIO
+      SET_VECTOR_ELT(out, 4, numout);
+      SET_VECTOR_ELT(out, 5, denout);
+#endif
       } else {
+#if HISTORY_INCLUDES_RATIO
+      PROTECT(out = NEW_LIST(7));
+#else
       PROTECT(out = NEW_LIST(5)); 
+#endif
       SET_VECTOR_ELT(out, 0, xout);
       SET_VECTOR_ELT(out, 1, yout); 
       SET_VECTOR_ELT(out, 2, mout);
       SET_VECTOR_ELT(out, 3, pout);
       SET_VECTOR_ELT(out, 4, aout);
+#if HISTORY_INCLUDES_RATIO
+      SET_VECTOR_ELT(out, 5, numout);
+      SET_VECTOR_ELT(out, 6, denout);
+#endif
     }
   }
+#if HISTORY_INCLUDES_RATIO
+  UNPROTECT(29);  /* 21 arguments plus xout, yout, mout, pout, aout, out,
+                            numout, denout */
+#else
   UNPROTECT(27);  /* 21 arguments plus xout, yout, mout, pout, aout, out */
+#endif
   return(out);
 }

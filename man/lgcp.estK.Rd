@@ -212,7 +212,10 @@ lgcp.estK(X, startpar=c(sigma2=1,alpha=1),
   \code{\link{Kest}} for the \eqn{K} function.
 }
 \examples{
-    u <- lgcp.estK(redwood, c(sigma2=0.1, alpha=1))
+    \donttest{
+      u <- lgcp.estK(redwood)
+    }
+    u <- lgcp.estK(redwood, c(sigma2=1, alpha=0.1))
     u
     if(interactive()) plot(u)
 

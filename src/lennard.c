@@ -69,12 +69,17 @@ double lennardcif(prop, state, cdata)
   int npts, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double d2, sigma2, ratio6, pairsum, cifval;
+  double d2, ratio6, pairsum, cifval;
+  double sigma2, d2max, d2min;
+  double *period;
   Lennard *lennard;
 
   lennard = (Lennard *) cdata;
 
   sigma2 = lennard->sigma2;
+  d2max  = lennard->d2max;
+  d2min  = lennard->d2min;
+  period = lennard->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -95,56 +100,55 @@ double lennardcif(prop, state, cdata)
   if(lennard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],lennard->period);
-	if(d2 < lennard->d2max) {
-	  if(d2 < lennard->d2min) {
-	    cifval = 0;
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2) {
+	  if(d2 < d2min) {
+	    cifval = 0.0;
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],lennard->period);
-	if(d2 < lennard->d2max) {
-	  if(d2 < lennard->d2min) {
-	    cifval = 0;
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2) {
+	  if(d2 < d2min) {
+	    cifval = 0.0;
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
-  }
-  else { /* Euclidean distance */
+  } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = pow(u - x[j],2) + pow(v-y[j],2);
-	if(d2 < lennard->d2max) {
+        IF_CLOSE_D2(u, v, x[j], y[j], d2max, d2) {
 	  if(d2 < lennard->d2min) {
-	    cifval = 0;
+	    cifval = 0.0;
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
+        END_IF_CLOSE_D2
       }
-    }  
+    }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = pow(u - x[j],2) + pow(v-y[j],2);
-	if(d2 < lennard->d2max) {
+        IF_CLOSE_D2(u, v, x[j], y[j], d2max, d2) {
 	  if(d2 < lennard->d2min) {
-	    cifval = 0;
+	    cifval = 0.0;
 	    return cifval;
 	  }
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
+        END_IF_CLOSE_D2
       }
     }
   }

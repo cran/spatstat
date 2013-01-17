@@ -69,14 +69,14 @@ double hardcorecif(prop, state, cdata)
   if(hardcore->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],hardcore->period);
-	if(d2 < h2) return((double) 0.0);
+	if(dist2thresh(u,v,x[j],y[j],hardcore->period, h2))
+	  return((double) 0.0);
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],hardcore->period);
-	if(d2 < h2) return((double) 0.0);
+	if(dist2thresh(u,v,x[j],y[j],hardcore->period, h2))
+	  return((double) 0.0);
       }
     }
   }

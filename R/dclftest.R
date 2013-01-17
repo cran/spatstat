@@ -1,7 +1,7 @@
 #
 #  dclftest.R
 #
-#  $Revision: 1.14 $  $Date: 2012/12/18 10:01:20 $
+#  $Revision: 1.16 $  $Date: 2013/01/09 07:22:18 $
 #
 #  Monte Carlo tests for CSR (etc)
 #
@@ -113,7 +113,7 @@ envelopeTest <- function(X, ...,
     devsim <- apply(abs(sim-reference), 2, max)
     testname <- "Maximum absolute deviation test"
   } else {
-    a <- diff(rinterval) * (if(used.theo) 1 else (nsim/(nsim - 1))^power)
+    a <- diff(rinterval) * (if(used.theo) 1 else ((nsim+1)/nsim)^power)
     if(power == 2) {
       # Cramer-von Mises
       devdata <- a * mean((obs - reference)^2)
@@ -163,16 +163,22 @@ envelopeTest <- function(X, ...,
              "unrecognised model")
     } else "unrecognised model"
   fname <- deparse(attr(X, "ylab"))
+  uname <- with(summary(unitname(X)),
+                if(!vanilla) paste(plural, explain) else NULL)
   testname <- c(paste(testname, "of", nullmodel),
                 paste("Monte Carlo test based on", nsim, "simulations"),
                 paste("Summary function:", fname),
                 paste("Reference function:",
-                      if(used.theo) "theoretical" else "sample mean"))
+                      if(used.theo) "theoretical" else "sample mean"),
+                paste("Interval of distance values:",
+                      prange(rinterval), uname)
+                )
   result <- structure(list(statistic = statistic,
                            p.value = pvalue,
                            method = testname,
                            data.name = e$Yname),
                       class="htest")
+  attr(result, "rinterval") <- rinterval
   if(save.envelope)
     attr(result, "envelope") <- X
   return(result)

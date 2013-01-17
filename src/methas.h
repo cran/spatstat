@@ -74,12 +74,18 @@ typedef struct Propo {
 #define DEATH 2
 #define SHIFT 3
 
+#define HISTORY_INCLUDES_RATIO TRUE
+
 /* Record of transition history */
 typedef struct History {
   int nmax;              /* length of vectors */
   int n;                 /* number of events recorded */
   int *proptype;         /* vector: proposal type */
   int *accepted;         /* vector: 0 for reject, 1 for accept */
+#if HISTORY_INCLUDES_RATIO
+  double *numerator;     /* vectors: Hastings ratio numerator & denominator  */
+  double *denominator;
+#endif
 } History;
 
 /* conditional intensity functions */

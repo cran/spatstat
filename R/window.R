@@ -1024,7 +1024,7 @@ print.summary.owin <- function(x, ...) {
   cat(paste(prange(zapsmall(x$xrange)),
             "x",
             prange(zapsmall(x$yrange)),
-            pluralunits, "\n", sep=""))
+            pluralunits, "\n"))
   Area <- signif(x$area, 6)
   cat(paste("Window area = ", Area, "square",
             if(Area == 1) singularunits else pluralunits, "\n"))
