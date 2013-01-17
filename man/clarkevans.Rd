@@ -95,8 +95,8 @@ clarkevans(X, correction=c("none", "Donnelly", "cdf"),
 
   Donnelly, K. (1978) Simulations to determine the variance
   and edge-effect of total nearest neighbour distance.
-  In \emph{Simulation methods in archaeology},
-  Cambridge University Press, pp 91--95.
+  In I. Hodder (ed.) \emph{Simulation studies in archaeology},
+  Cambridge/New York: Cambridge University Press, pp 91--95.
 }
 \author{
 John Rudge

@@ -79,14 +79,14 @@ double strausscif(prop, state, cdata)
   if(strauss->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],strauss->period);
-	if(d2 < r2) kount = kount+1;
+	if(dist2thresh(u,v,x[j],y[j],strauss->period, r2))
+	  kount = kount+1;
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],strauss->period);
-	if(d2 < r2) kount = kount+1;
+	if(dist2thresh(u,v,x[j],y[j],strauss->period, r2))
+	  kount = kount+1;
       }
     }
   }

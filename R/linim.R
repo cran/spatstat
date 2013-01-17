@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.6 $   $Date: 2012/10/05 09:41:18 $
+#  $Revision: 1.7 $   $Date: 2013/01/15 04:57:55 $
 #
 #  Image/function on a linear network
 #
@@ -79,21 +79,35 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
   } 
   df$values <- adjust * scale * (df$values - vr[1])
   # split data by segment
-  mapXY <- factor(df$mapXY, levels=seq(Llines$n))
+  mapXY <- factor(df$mapXY, levels=seq_len(Llines$n))
   dfmap <- split(df, mapXY, drop=TRUE)
   # sort each segment's data by position along segment
   dfmap <- lapply(dfmap, function(z) { z[fave.order(z$tp), ] })
   # plot each segment's data
   Lends <- Llines$ends
   Lperp <- angles.psp(Llines) + pi/2
+  Lfrom <- L$from
+  Lto   <- L$to
+  Lvert <- L$vertices
   for(i in seq(length(dfmap))) {
     z <- dfmap[[i]]
     segid <- unique(z$mapXY)[1]
-    xx <- c(z$x, rev(z$x))
-    yy <- c(z$y, rev(z$y))
-    vv <- c(z$values, -rev(z$values))/2
-    xx <- xx + cos(Lperp[segid]) * vv
-    yy <- yy + sin(Lperp[segid]) * vv
+    xx <- z$x
+    yy <- z$y
+    vv <- z$values
+    # add endpoints of segment
+    leftend <- Lvert[Lfrom[segid]]
+    rightend <- Lvert[Lto[segid]]
+    xx <- c(leftend$x, xx, rightend$x)
+    yy <- c(leftend$y, yy, rightend$y)
+    vv <- c(vv[1],     vv, vv[length(vv)])
+    # create polygon
+    xx <- c(xx, rev(xx))
+    yy <- c(yy, rev(yy))
+    vv <- c(vv, -rev(vv))/2
+    ang <- Lperp[segid]
+    xx <- xx + cos(ang) * vv
+    yy <- yy + sin(ang) * vv
     do.call.matched("polygon",
                     resolve.defaults(list(x=xx, y=yy),
                                      list(...),

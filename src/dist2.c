@@ -1,7 +1,7 @@
 # include <math.h>
 
-#define YES (0 == 0)
-#define NO (!YES)
+#define YES 1
+#define NO 0
 
 /* 
 
@@ -9,80 +9,92 @@
 
    dist2thresh: faster code for testing whether dist2 < r2
 
+   dist2Mthresh: same as dist2thresh, but does not assume
+                 the points are within one period of each other.
 */
 
 double dist2(u,v,x,y,period)
-     double u, v, x, y, *period;
+     double u, v, x, y;
+     double *period;
 {
-  double wide, high, a1, a2, a3, b1, b2, b3, amin, bmin, d2;
+  double wide, high, dx, dy, dxp, dyp, a, b, d2;
+  /* points are assumed to lie within one period of each other */
 
   wide = period[0];
   high = period[1];
 
-  /*
+  dx = u - x;
+  if(dx < 0.0) dx = -dx;
+  dxp = wide - dx;
+  a = (dx < dxp)? dx : dxp;
 
-  The following line is commented out, 
-  as we now avoid calling 'dist2' in this case:
+  dy = v - y;
+  if(dy < 0.0) dy = -dy;
+  dyp = high - dy;
+  b = (dy < dyp)? dy : dyp;
 
-  if(wide < 0.) return pow(u-x,2) + pow(v-y,2);
-
-  */
-
-  a1 = pow(u-x,2);
-  a2 = pow(u-x+wide,2);
-  a3 = pow(u-x-wide,2);
-
-  b1 = pow(v-y,2);
-  b2 = pow(v-y+high,2);
-  b3 = pow(v-y-high,2);
-
-  amin = a1;
-  if(a2 < amin) amin=a2;
-  if(a3 < amin) amin=a3;
-
-  bmin = b1;
-  if(b2 < bmin) bmin=b2;
-  if(b3 < bmin) bmin=b3;
-
-  d2 = amin + bmin;
-  
+  d2 = a * a + b * b;
   return d2;
 }
 
 double dist2either(u,v,x,y,period)
-     double u, v, x, y, *period;
+     double u, v, x, y;
+     double *period;
 {
-  if(period[0] < 0.) return pow(u-x,2) + pow(v-y,2);
+  if(period[0] < 0.0) return pow(u-x,2) + pow(v-y,2);
   return(dist2(u,v,x,y,period));
 }
 
 int dist2thresh(u,v,x,y,period,r2)
-     double u, v, x, y, *period, r2;
+     double u, v, x, y, r2;
+     double *period;
 {
-  double wide, high, amin, bmin, aa, bb, residue, dx, dy;
+  double wide, high, dx, dy, dxp, dyp, a, b, residue;
+  /* points are assumed to lie within one period of each other */
 
   wide = period[0];
   high = period[1];
-  
+
   dx = u - x;
-  amin = dx * dx;
-  aa = (dx - wide) * (dx - wide);
-  if(aa < amin) amin = aa;
-  aa = (dx + wide) * (dx + wide);
-  if(aa < amin) amin = aa;
-
-  residue = r2 - amin;
-  if(residue < 0)
+  if(dx < 0.0) dx = -dx;
+  dxp = wide - dx;
+  a = (dx < dxp) ? dx : dxp;
+  residue = r2 - a * a;
+  if(residue < 0.0)
     return NO;
-
   dy = v - y;
-  bmin = dy * dy;
-  bb = (dy - high) * (dy - high);
-  if(bb < bmin) bmin= bb;
-  bb = (dy + high) * (dy + high);
-  if(bb < bmin) bmin= bb;
+  if(dy < 0.0) dy = -dy;
+  dyp = high - dy;
+  b = (dy < dyp) ? dy : dyp;
+  if (residue >= b * b) 
+    return YES; 
+  return NO;
+}
 
-  residue = residue - bmin;
+int dist2Mthresh(u,v,x,y,period,r2)
+     double u, v, x, y, r2;
+     double *period;
+{
+  double wide, high, dx, dy, dxp, dyp, a, b, residue;
+  /* points are NOT assumed to lie within one period of each other */
 
-  return (residue >= 0);
+  wide = period[0];
+  high = period[1];
+
+  dx = u - x;
+  if(dx < 0.0) dx = -dx;
+  while(dx > wide) dx -= wide;
+  dxp = wide - dx;
+  a = (dx < dxp) ? dx : dxp;
+  residue = r2 - a * a;
+  if(residue < 0.0)
+    return NO;
+  dy = v - y;
+  if(dy < 0.0) dy = -dy;
+  while(dy > high) dy -= high;
+  dyp = high - dy;
+  b = (dy < dyp) ? dy : dyp;
+  if (residue >= b * b) 
+    return YES; 
+  return NO;
 }

@@ -5,7 +5,7 @@
 #
 #   original code by Abdollah Jalilian
 #
-#  $Revision: 1.6 $    $Date: 2012/12/10 05:46:08 $
+#  $Revision: 1.7 $    $Date: 2013/01/13 04:01:55 $
 #
 
 rLGCP <-
@@ -43,7 +43,7 @@ rLGCP <-
   # generate Gaussian random field
   xgrid <- c(x[1], x[length(x)], w$xstep)
   ygrid <- c(y[1], y[length(y)], w$ystep)
-  z <- GaussRF(xgrid, ygrid, grid = TRUE, gridtriple=TRUE,
+  z <- RandomFields::GaussRF(xgrid, ygrid, grid = TRUE, gridtriple=TRUE,
                model = model, param = param, ...)
   logLambda <- muxy + z
   # convert to log-Gaussian image

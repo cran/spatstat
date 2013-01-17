@@ -15,6 +15,7 @@ typedef struct MultiHard {
   int ntypes;
   double *hc;      /* hc[i,j] = hc[j+ntypes*i] for i,j = 0... ntypes-1 */
   double *hc2;    /* squared radii */
+  double  range2;   /* square of interaction range */
   double *period;
   int per;
 } MultiHard;
@@ -28,7 +29,7 @@ Cdata *multihardinit(state, model, algo)
      Algor algo;
 {
   int i, j, ntypes, n2;
-  double h;
+  double h, h2, range2;
   MultiHard *multihard;
 
   multihard = (MultiHard *) R_alloc(1, sizeof(MultiHard));
@@ -47,13 +48,18 @@ Cdata *multihardinit(state, model, algo)
   multihard->hc2      = (double *) R_alloc((size_t) n2, sizeof(double));
 
   /* Copy and process model parameters*/
+  range2 = 0.0;
   for(i = 0; i < ntypes; i++) {
     for(j = 0; j < ntypes; j++) {
       h = model.ipar[i + j*ntypes];
+      h2 = h * h;
       MAT(multihard->hc,  i, j, ntypes) = h; 
-      MAT(multihard->hc2, i, j, ntypes) = h * h;
+      MAT(multihard->hc2, i, j, ntypes) = h2;
+      if(range2 > h2) range2 = h2;
     }
   }
+  multihard->range2 = range2;
+
   /* periodic boundary conditions? */
   multihard->period = model.period;
   multihard->per    = (model.period[0] > 0.0);
@@ -75,10 +81,13 @@ double multihardcif(prop, state, cdata)
   int *marks;
   double *x, *y;
   double u, v;
-  double d2, a, cifval;
+  double d2, range2, a, cifval;
+  double *period;
   MultiHard *multihard;
 
   multihard = (MultiHard *) cdata;
+  range2 = multihard->range2;
+  period = multihard->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -110,52 +119,52 @@ double multihardcif(prop, state, cdata)
   if(multihard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],multihard->period);
-	if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
-	  cifval = 0;
-	  return(cifval);
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
+	    cifval = 0.0;
+	    return(cifval);
+	  }
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],multihard->period);
-	if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
-	  cifval = 0;
-	  return(cifval);
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
+	    cifval = 0.0;
+	    return(cifval);
+	  }
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
   }
   else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	mrkj = marks[j];
-	a = MAT(multihard->hc2, mrk, mrkj, ntypes); 
-	a -= pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j],2);
-	  if(a > 0) {
-	    cifval = 0;
+        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
+	    cifval = 0.0;
 	    return(cifval);
 	  }
 	}
+	END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	mrkj = marks[j];
-	a = MAT(multihard->hc2, mrk, mrkj, ntypes); 
-	a -= pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j],2);
-	  if(a > 0) {
-	    cifval = 0;
+        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multihard->hc2, mrk, mrkj, ntypes)) {
+	    cifval = 0.0;
 	    return(cifval);
 	  }
 	}
+	END_IF_CLOSE_D2
       }
     }
   }

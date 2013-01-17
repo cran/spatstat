@@ -52,6 +52,9 @@
   identifying the proposal type (Birth, Death or Shift) and
   a logical vector \code{accepted} indicating whether the proposal was
   accepted.
+  The data frame also has columns \code{numerator}, \code{denominator}
+  which give the numerator and denominator of the Hastings ratio for
+  the proposal.
 
   If the argument \code{nsave} was given (see \code{\link{rmhcontrol}}),
   the return value has an attribute \code{saved} which is a list of
@@ -347,17 +350,16 @@ trend corresponding to a particular type, there is still a component
   \code{.Random.seed <- seed} before calling \code{rmh.default}.
 }
 \examples{
-   \dontrun{
-   nr   <- 1e5
-   nv  <- 5000
-   ns <- 200
-   }
-   \testonly{
-   nr  <- 10
-   nv <- 5
-   ns <- 20
-   oldopt <- spatstat.options()
-   spatstat.options(expand=1.1)
+   if(interactive()) {
+     nr   <- 1e5
+     nv  <- 5000
+     ns <- 200
+   } else {
+     nr  <- 10
+     nv <- 5
+     ns <- 20
+     oldopt <- spatstat.options()
+     spatstat.options(expand=1.1)
    }
    set.seed(961018)
    
@@ -366,28 +368,19 @@ trend corresponding to a particular type, there is still a component
                  w=c(0,10,0,10))
    X1.strauss <- rmh(model=mod01,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
+
+   if(interactive()) plot(X1.strauss)
    
    # Strauss process, conditioning on n = 42:
    X2.strauss <- rmh(model=mod01,start=list(n.start=42),
                      control=list(p=1,nrep=nr,nverb=nv))
 
-   \testonly{
-     X1.strauss <- rmh(model=mod01,start=list(n.start=42),
-                     control=list(nrep=nr,nverb=nv), track=TRUE)
-     X2.strauss <- rmh(model=mod01,start=list(n.start=42),
-                     control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
-     X1.strauss <- rmh(model=mod01,
-                     control=list(nrep=nr,nverb=nv), track=TRUE)
-     X2.strauss <- rmh(model=mod01,
-                     control=list(p=1,nrep=nr,nverb=nv), track=TRUE)
-   }
-   
    # Tracking algorithm progress:
    X <- rmh(model=mod01,start=list(n.start=ns),
             control=list(nrep=nr, nsave=nr/5, nburn=nr/2, track=TRUE))
    History <- attr(X, "history")
    Saved <- attr(X, "saved")
-   head(history)
+   head(History)
    plot(Saved)
 
    # Hard core process:
@@ -395,6 +388,8 @@ trend corresponding to a particular type, there is still a component
    X3.hardcore <- rmh(model=mod02,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
    
+   if(interactive()) plot(X3.hardcore)
+
    # Strauss process equal to pure hardcore:
    mod02s <- list(cif="strauss",par=list(beta=2,gamma=0,r=0.7),w=c(0,10,0,10))
    X3.strauss <- rmh(model=mod02s,start=list(n.start=ns),
@@ -407,6 +402,7 @@ trend corresponding to a particular type, there is still a component
                 w=owin(poly=list(x=x,y=y)))
    X4.strauss <- rmh(model=mod03,start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X4.strauss)
    
    # Strauss process in a polygonal window, conditioning on n = 80.
    X5.strauss <- rmh(model=mod03,start=list(n.start=ns),
@@ -444,12 +440,14 @@ trend corresponding to a particular type, there is still a component
                 w=c(0,10,0,10))
    X.sftcr <- rmh(model=mod07,start=list(n.start=ns),
                   control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.sftcr)
 
    # Area-interaction process:
    mod42 <- rmhmodel(cif="areaint",par=list(beta=2,eta=1.6,r=0.7),
                  w=c(0,10,0,10))
    X.area <- rmh(model=mod42,start=list(n.start=ns),
                   control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.area)
 
    # Triplets process
    modtrip <- list(cif="triplets",par=list(beta=2,gamma=0.2,r=0.7),
@@ -457,6 +455,7 @@ trend corresponding to a particular type, there is still a component
    X.triplets <- rmh(model=modtrip,
                      start=list(n.start=ns),
                      control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.triplets)
    
    # Multitype Strauss:
    beta <- c(0.027,0.008)
@@ -466,6 +465,7 @@ trend corresponding to a particular type, there is still a component
                 w=c(0,250,0,250))
    X1.straussm <- rmh(model=mod08,start=list(n.start=ns),
                       control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
+   if(interactive()) plot(X1.straussm)
    
    # Multitype Strauss conditioning upon the total number
    # of points being 80:
@@ -501,6 +501,7 @@ trend corresponding to a particular type, there is still a component
    X1.straushm.trend <- rmh(model=mod10,start=list(n.start=ns),
                             control=list(ptypes=c(0.75,0.25),
                             nrep=nr,nverb=nv))
+   if(interactive()) plot(X1.straushm.trend)
    
    # Multitype Strauss hardcore with trends for each type, given as images:
    bigwin <- square(250)
@@ -517,6 +518,7 @@ trend corresponding to a particular type, there is still a component
    mod12 <- list(cif="dgs",par=list(beta=3600,rho=0.08),w=c(0,1,0,1))
    X.dgs <- rmh(model=mod12,start=list(n.start=ns),
                 control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.dgs)
    
    # Diggle-Gratton:
    mod13 <- list(cif="diggra",
@@ -524,19 +526,22 @@ trend corresponding to a particular type, there is still a component
                  w=square(1))
    X.diggra <- rmh(model=mod13,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.diggra)
    
    # Fiksel:
    modFik <- list(cif="fiksel",
                  par=list(beta=180,r=0.15,hc=0.07,kappa=2,a= -1.0),
                  w=square(1))
-   X.diggra <- rmh(model=modFik,start=list(n.start=ns),
+   X.fiksel <- rmh(model=modFik,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X.fiksel)
    
    # Geyer:
    mod14 <- list(cif="geyer",par=list(beta=1.25,gamma=1.6,r=0.2,sat=4.5),
                  w=c(0,10,0,10))
    X1.geyer <- rmh(model=mod14,start=list(n.start=ns),
                    control=list(nrep=nr,nverb=nv))
+   if(interactive()) plot(X1.geyer)
    
    # Geyer; same as a Strauss process with parameters
    # (beta=2.25,gamma=0.16,r=0.7):
@@ -564,6 +569,7 @@ trend corresponding to a particular type, there is still a component
       mod17 <- list(cif="lookup",par=list(beta=4000,h=h,r=r),w=c(0,1,0,1))
       X.lookup <- rmh(model=mod17,start=list(n.start=ns),
                       control=list(nrep=nr,nverb=nv))
+      if(interactive()) plot(X.lookup)
                    
    # Strauss with trend
    tr <- function(x,y){x <- x/250; y <- y/250;
@@ -629,11 +635,9 @@ trend corresponding to a particular type, there is still a component
     # Under the default spatstat options the foregoing all.equal()
     # will yield TRUE.  Setting spatstat.options(scalable=FALSE) and
     # re-running the code will reveal differences between X1 and X2.
-}
-
-   \testonly{
-   spatstat.options(oldopt)
    }
+
+   if(!interactive()) spatstat.options(oldopt)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

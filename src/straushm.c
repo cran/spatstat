@@ -19,6 +19,7 @@ typedef struct MultiStraussHard {
   double *rad2;    /* squared radii */
   double *hc2;    /* squared radii */
   double *rad2hc2;    /* r^2 - h^2 */
+  double  range2;   /* square of interaction range */
   double *loggamma; /* logs of gamma[i,j] */
   double *period;
   int    *hard;     /* hard[i,j] = 1 if gamma[i,j] ~~ 0 */
@@ -35,7 +36,7 @@ Cdata *straushminit(state, model, algo)
      Algor algo;
 {
   int i, j, ntypes, n2, hard;
-  double g, r, h, r2, h2, logg;
+  double g, r, h, r2, h2, logg, range2;
   MultiStraussHard *multistrausshard;
 
   multistrausshard = (MultiStraussHard *) R_alloc(1, sizeof(MultiStraussHard));
@@ -68,6 +69,8 @@ Cdata *straushminit(state, model, algo)
   /* ipar will contain n^2 values of gamma, then n^2 values of r, 
      then n^2 values of h */
 
+  range2 = 0.0;
+
   for(i = 0; i < ntypes; i++) {
     for(j = 0; j < ntypes; j++) {
       g = model.ipar[       i + j*ntypes];
@@ -85,8 +88,11 @@ Cdata *straushminit(state, model, algo)
       MAT(multistrausshard->rad2hc2,  i, j, ntypes) = r2-h2;
       MAT(multistrausshard->hard,     i, j, ntypes) = hard; 
       MAT(multistrausshard->loggamma, i, j, ntypes) = logg;
+      if(r2 > range2) range2 = r2;
     }
   }
+  multistrausshard->range2 = range2;
+
   /* periodic boundary conditions? */
   multistrausshard->period = model.period;
   multistrausshard->per    = (model.period[0] > 0.0);
@@ -109,9 +115,13 @@ double straushmcif(prop, state, cdata)
   double *x, *y;
   double u, v, lg;
   double d2, a, cifval;
+  double range2;
+  double *period;
   MultiStraussHard *multistrausshard;
 
   multistrausshard = (MultiStraussHard *) cdata;
+  range2 = multistrausshard->range2;
+  period = multistrausshard->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -154,64 +164,63 @@ double straushmcif(prop, state, cdata)
   if(multistrausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],multistrausshard->period);
-	if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
-	  if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
-	    cifval = 0;
-	    return(cifval);
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
+	      cifval = 0.0;
+	      return(cifval);
+	    }
+	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
-	  MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	mrkj = marks[j];
-	d2 = dist2(u,v,x[j],y[j],multistrausshard->period);
-	if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
-	  if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
-	    cifval = 0;
-	    return(cifval);
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
+	      cifval = 0.0;
+	      return(cifval);
+	    }
+	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
-	  MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	}
+	END_IF_CLOSE_PERIODIC_D2
       }
     }
-  }
-  else { /* Euclidean distance */
+  } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	mrkj = marks[j];
-	a = MAT(multistrausshard->rad2, mrk, mrkj, ntypes); 
-	a -= pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j],2);
-	  if(a > 0) {
-	    if(a > MAT(multistrausshard->rad2hc2, mrk, mrkj, ntypes)) {
-	      cifval = 0;
+        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
+	      cifval = 0.0;
 	      return(cifval);
 	    }
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
+	END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	mrkj = marks[j];
-	a = MAT(multistrausshard->rad2, mrk, mrkj, ntypes); 
-	a -= pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j],2);
-	  if(a > 0) {
-	    if(a > MAT(multistrausshard->rad2hc2, mrk, mrkj, ntypes)) {
-	      cifval = 0;
+        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+	  mrkj = marks[j];
+	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
+	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
+	      cifval = 0.0;
 	      return(cifval);
 	    }
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
+	END_IF_CLOSE_D2
       }
     }
   }

@@ -113,6 +113,7 @@
   \code{\link{Fiksel}},
   \code{\link{Geyer}},
   \code{\link{Hardcore}},
+  \code{\link{Hybrid}},
   \code{\link{LennardJones}},
   \code{\link{MultiStrauss}},
   \code{\link{MultiStraussHard}},

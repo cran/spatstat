@@ -3,7 +3,7 @@
 #
 # Code related to intensity and intensity approximations
 #
-#  $Revision: 1.3 $ $Date: 2012/07/14 06:46:58 $
+#  $Revision: 1.4 $ $Date: 2013/01/13 04:01:07 $
 #
 
 intensity <- function(X, ...) {
@@ -73,7 +73,7 @@ LambertW <- local({
 
   W <- function(x) {
     if(require(gsl, quietly=TRUE))
-      return(lambert_W0(x))
+      return(gsl::lambert_W0(x))
     result <- rep(NA_real_, length(x))
     for(i in which(is.finite(x) & (x >= 0)))
       result[i] <- uniroot(yexpyminusx, c(0, x[i]), x=x[i])$root

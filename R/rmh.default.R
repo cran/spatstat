@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.91 2012/08/20 03:49:45 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.93 2013/01/11 01:54:25 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
@@ -827,6 +827,14 @@ rmhEngine <- function(InfoList, ...,
                          labels=c("Birth", "Death", "Shift"))
       accepted <- as.logical(out[[usedout+2]])
       History <- data.frame(proposaltype=proptype, accepted=accepted)
+      if(length(out) >= usedout + 4) {
+        # history includes numerator & denominator of Hastings ratio
+        numerator <- as.double(out[[usedout + 3]])
+        denominator <- as.double(out[[usedout + 4]])
+        History <- cbind(History,
+                         data.frame(numerator=numerator,
+                                    denominator=denominator))
+      }
     }
   } else {
     # ////////// Multiple blocks /////////////////////////////////
@@ -903,6 +911,14 @@ rmhEngine <- function(InfoList, ...,
                            labels=c("Birth", "Death", "Shift"))
         accepted <- as.logical(out[[usedout+2]])
         HistoryI <- data.frame(proposaltype=proptype, accepted=accepted)
+        if(length(out) >= usedout + 4) {
+          # history includes numerator & denominator of Hastings ratio
+          numerator <- as.double(out[[usedout + 3]])
+          denominator <- as.double(out[[usedout + 4]])
+          HistoryI <- cbind(HistoryI,
+                            data.frame(numerator=numerator,
+                                       denominator=denominator))
+        }
         # concatenate with histories of previous blocks
         History <- if(I == 1) HistoryI else rbind(History, HistoryI)
       }

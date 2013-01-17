@@ -466,7 +466,7 @@
  plot(envelope(X, correction="translate"))
  }
  \testonly{
-  plot(envelope(X, nsim=3, correction="translate"))
+  E <- envelope(X, nsim=3, correction="translate")
  }
 
  # Envelope of K function for simulations from Gibbs model 
@@ -476,9 +476,9 @@
  plot(envelope(fit), global=TRUE)
  }
  \testonly{
-  fit <- ppm(cells, ~1, Strauss(0.05), nd=25)
-  plot(envelope(fit, nsim=3, correction="border"))
-  plot(envelope(fit, nsim=3, correction="border", global=TRUE))
+  fit <- ppm(cells, ~1, Strauss(0.05), nd=20)
+  E <- envelope(fit, nsim=3, correction="border", nrep=100)
+  E <- envelope(fit, nsim=3, correction="border", global=TRUE, nrep=100)
  }
 
  # Envelope of K function for simulations from cluster model 
@@ -488,7 +488,7 @@
  plot(envelope(fit, Gest, global=TRUE))
  }
  \testonly{
-  plot(envelope(fit, Gest, correction="rs", nsim=3, global=TRUE))
+  E <- envelope(fit, Gest, correction="rs", nsim=3, global=TRUE, nrep=100)
  }
 
  # Envelope of G function under CSR
@@ -496,7 +496,7 @@
  plot(envelope(X, Gest))
  }
  \testonly{
-  plot(envelope(X, Gest, correction="rs", nsim=3))
+  E <- envelope(X, Gest, correction="rs", nsim=3)
  }
 
  # Envelope of L function under CSR
@@ -516,8 +516,8 @@
   plot(envelope(X, Kest, transform=expression(sqrt(./pi)), global=TRUE))
  }
  \testonly{
- plot(envelope(X, Kest, nsim=3, correction="border",
-               transform=expression(sqrt(./pi)), global=TRUE))
+  E <- envelope(X, Kest, nsim=3, correction="border",
+               transform=expression(sqrt(./pi)), global=TRUE)
  }
 
  # How to pass arguments needed to compute the summary functions:
@@ -577,15 +577,27 @@ nsim=3, global=TRUE))
  }
 
  # Precomputed list of point patterns
- X <- rpoispp(20)
+\dontrun{
  nX <- npoints(X)
  PatList <- list()
- for(i in 1:5) PatList[[i]] <- runifpoint(nX)
- E <- envelope(X, Kest, nsim=5, simulate=PatList)
+ for(i in 1:19) PatList[[i]] <- runifpoint(nX)
+ E <- envelope(X, Kest, nsim=19, simulate=PatList)
+}
+\testonly{
+ PatList <- list()
+ for(i in 1:3) PatList[[i]] <- runifpoint(10)
+ E <- envelope(X, Kest, nsim=3, simulate=PatList)
+}
 
 # re-using the same point patterns
+\dontrun{
+ EK <- envelope(X, Kest, savepatterns=TRUE)
+ EG <- envelope(X, Gest, simulate=EK)
+}
+\testonly{
  EK <- envelope(X, Kest, nsim=3, savepatterns=TRUE)
  EG <- envelope(X, Gest, nsim=3, simulate=EK)
+}
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

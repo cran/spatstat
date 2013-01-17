@@ -18,7 +18,7 @@
 
    MH_TRACKING  whether to save transition history
 
-   $Revision: 1.14 $  $Date: 2012/08/20 07:15:08 $ 
+   $Revision: 1.15 $  $Date: 2013/01/11 01:42:06 $ 
 
 */
 
@@ -100,6 +100,10 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 	  history.n++;
 	  history.proptype[irep] = BIRTH;
 	  history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+#if HISTORY_INCLUDES_RATIO
+	  history.numerator[irep] = anumer;
+	  history.denominator[irep] = adenom;
+#endif
 	}
 #endif
       } else if(nfree > 0) {
@@ -153,6 +157,10 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 	  history.n++;
 	  history.proptype[irep] = DEATH;
 	  history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+#if HISTORY_INCLUDES_RATIO
+	  history.numerator[irep] = anumer;
+	  history.denominator[irep] = adenom;
+#endif
 	}
 #endif
       }
@@ -222,6 +230,10 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 	history.n++;
 	history.proptype[irep] = SHIFT;
 	history.accepted[irep] = (itype == REJECT) ? 0 : 1;
+#if HISTORY_INCLUDES_RATIO
+	  history.numerator[irep] = cvn;
+	  history.denominator[irep] = cvd;
+#endif
       }
 #endif
     }

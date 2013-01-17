@@ -59,12 +59,14 @@ double straushcif(prop, state, cdata)
   double u, v;
   double r2, d2, h2, r2h2, a, cifval;
   StraussHard *strausshard;
+  double *period;
 
   strausshard = (StraussHard *) cdata;
 
   r2     = strausshard->r2;
   h2     = strausshard->h2;
   r2h2   = strausshard->r2h2;
+  period = strausshard->period;
 
   u  = prop.u;
   v  = prop.v;
@@ -83,20 +85,20 @@ double straushcif(prop, state, cdata)
   if(strausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	d2 = dist2(u,v,x[j],y[j],strausshard->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  if(d2 < h2) return(0.0);
-	  kount = kount+1;
+	  ++kount;
 	}
+        END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	d2 = dist2(u,v,x[j],y[j],strausshard->period);
-	if(d2 < r2) {
+	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
 	  if(d2 < h2) return(0.0);
-	  kount = kount+1;
+	  ++kount;
 	}
+        END_IF_CLOSE_PERIODIC_D2
       }
     }
   }
@@ -109,7 +111,7 @@ double straushcif(prop, state, cdata)
 	  if(a > 0) {
 	    if(a > r2h2)
 	      return(0.0);
-	    kount = kount+1;
+	    ++kount;
 	  }
 	}
       }
@@ -122,7 +124,7 @@ double straushcif(prop, state, cdata)
 	  if(a > 0) {
 	    if(a > r2h2)
 	      return(0.0);
-	    kount = kount+1;
+	    ++kount;
 	  }
 	}
       }

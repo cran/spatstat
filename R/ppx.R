@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.37 $  $Date: 2012/09/06 07:42:21 $
+#  $Revision: 1.39 $  $Date: 2013/01/15 09:22:59 $
 #
 
 ppx <- local({
@@ -14,7 +14,9 @@ ppx <- local({
   ppx <- function(data, domain=NULL, coord.type=NULL) {
     data <- as.hyperframe(data)
     # columns suitable for spatial coordinates
-    suitable <- with(unclass(data), vtype == "dfcolumn" && vclass == "numeric")
+    suitable <- with(unclass(data),
+                     vtype == "dfcolumn" &
+                     (vclass == "numeric" | vclass == "integer"))
     if(is.null(coord.type)) {
       # assume all suitable columns of data are spatial coordinates
       # and all other columns are marks.
@@ -86,7 +88,7 @@ plot.ppx <- function(x, ...) {
   dom <- x$domain
   m <- ncol(coo)
   if(m == 1) {
-    coo <- as.vector(coo)
+    coo <- coo[,1]
     ran <- diff(range(coo))
     ylim <- c(-1,1) * ran/20
     do.call("plot.default",

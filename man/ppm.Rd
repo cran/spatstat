@@ -195,6 +195,8 @@
       \code{\link{Strauss}} and 
       \code{\link{StraussHard}}.
       See the examples below.
+      It is also possible to combine several interactions
+      using \code{\link{Hybrid}}.
  
       If \code{interaction} is missing or \code{NULL},
       then the model to be fitted
@@ -485,6 +487,7 @@
       \code{\link{Geyer}},
       \code{\link{Fiksel}},
       \code{\link{Hardcore}},
+      \code{\link{Hybrid}},
       \code{\link{LennardJones}},
       \code{\link{MultiStrauss}},
       \code{\link{MultiStraussHard}},
