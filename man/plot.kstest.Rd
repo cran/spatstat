@@ -6,6 +6,7 @@
 }
 \usage{
 \method{plot}{kstest}(x, ...,
+                   style=c("cdf", "PP", "QQ"),
                    lwd=par("lwd"), col=par("col"), lty=par("lty"),
                    lwd0=lwd, col0=col, lty0=lty)
 }
@@ -18,13 +19,16 @@
     extra arguments that will be passed to the plotting function
     \code{\link{plot.default}}.
   }
+  \item{style}{
+    Style of plot. See Details.
+  }
   \item{col,lwd,lty}{
     The width, colour and type of lines used to plot the
-    empirical distribution.
+    empirical curve (the empirical distribution, or PP plot or QQ plot).
   }
   \item{col0,lwd0,lty0}{
     The width, colour and type of lines used to plot the
-    predicted distribution.
+    reference curve (the predicted distribution, or the diagonal).
   }
 }
 \value{
@@ -35,11 +39,31 @@
   An object of this class represents the outcome of
   a spatial Kolmogorov-Smirnov test, computed by \code{\link{kstest}}.
 
-  The plot displays the two cumulative distribution functions
+  If \code{style="cdf"} (the default), 
+  the plot displays the two cumulative distribution functions
   that are compared by the test: namely the empirical cumulative distribution
   function of the covariate at the data points, and the predicted
   cumulative distribution function of the covariate under the model,
-  both plotted against the value of the covariate.
+  both plotted against the value of the covariate. The
+  Kolmogorov-Smirnov test statistic is the maximum vertical separation
+  between the two curves.
+
+  If \code{style="PP"} then the P-P plot is drawn. The
+  \eqn{x} coordinates of the plot are cumulative
+  probabilities for the covariate under the model.
+  The \eqn{y} coordinates are cumulative probabilities
+  for the covariate at the data points. The diagonal line
+  \eqn{y=x} is also drawn for reference. The Kolmogorov-Smirnov
+  test statistic is the maximum vertical separation
+  between the P-P plot and the diagonal reference line.
+
+  If \code{style="QQ"} then the Q-Q plot is drawn. The
+  \eqn{x} coordinates of the plot are quantiles
+  of the covariate under the model.
+  The \eqn{y} coordinates are quantiles of the 
+  covariate at the data points. The diagonal line
+  \eqn{y=x} is also drawn for reference. The Kolmogorov-Smirnov
+  test statistic cannot be read off the Q-Q plot.
 }
 \seealso{
   \code{\link{kstest}}
@@ -59,6 +83,10 @@
 
    # plot result of test
    plot(k, lwd0=3)
+
+   plot(k, style="PP")
+
+   plot(k, style="QQ")
 }
 
 \author{Adrian Baddeley

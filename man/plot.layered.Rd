@@ -41,6 +41,9 @@ Layered Plot
   into a single object of class \code{"layered"} using the
   function \code{\link{layered}}. Then the layers can be plotted using
   the method \code{plot.layered}.
+
+  The subset operator \code{\link{[.layered}} can be used
+  to zoom in on a subregion.
 }
 \value{
   Null.
@@ -53,6 +56,8 @@ Layered Plot
 }
 \seealso{
   \code{\link{layered}},
+  \code{\link{layerplotargs}},
+  \code{\link{[.layered}},
   \code{\link{plot}}.
 }
 \examples{
@@ -62,6 +67,8 @@ Layered Plot
    plot(L)
    plot(L, which = 2)
    plot(L, plotargs=list(list(ribbon=FALSE), list(pch=3, cols="white")))
+   # plot a subregion
+   plot(L[, square(0.5)])
 }
 \keyword{spatial}
 \keyword{hplot}

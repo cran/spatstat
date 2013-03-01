@@ -6,6 +6,8 @@
 
 void fexitc(const char *msg);
 
+#undef MH_DEBUG 
+
 /*
   Conditional intensity function for a Geyer saturation process.  
 */
@@ -24,6 +26,10 @@ typedef struct Geyer {
   int per;
   /* auxiliary counts */
   int *aux;
+#ifdef MH_DEBUG
+  int *freshaux;
+  int prevtype;
+#endif
 } Geyer;
 
 Cdata *geyerinit(state, model, algo)
@@ -31,9 +37,11 @@ Cdata *geyerinit(state, model, algo)
      Model model;
      Algor algo;
 {
-  int i, j;
-  double d2;
+  int i, j, n1;
   Geyer *geyer;
+  double r2;
+  double *period;
+  DECLARE_CLOSE_VARS;
 
   geyer = (Geyer *) R_alloc(1, sizeof(Geyer));
 
@@ -54,19 +62,49 @@ Cdata *geyerinit(state, model, algo)
   geyer->per    = (model.period[0] > 0.0);
   /* allocate storage for auxiliary counts */
   geyer->aux = (int *) R_alloc((size_t) state.npmax, sizeof(int));
+#ifdef MH_DEBUG
+  geyer->freshaux = (int *) R_alloc((size_t) state.npmax, sizeof(int));
+  geyer->prevtype = -42;
+#endif
+
+  r2 = geyer->r2;
+
   /* Initialise auxiliary counts */
   for(i = 0; i < state.npmax; i++) 
     geyer->aux[i] = 0;
 
-  for(i = 0; i < state.npts; i++) {
-    for(j = 0; j < state.npts; j++) {
-      d2 = dist2either(state.x[i], state.y[i], state.x[j], state.y[j], 
-		       geyer->period);
-      if(d2 < geyer->r2)
-	geyer->aux[i] += 1;
+  if(geyer->per) {
+    /* periodic */
+    period = geyer->period;
+    if(state.npts > 1) {
+      n1 = state.npts - 1;
+      for(i = 0; i < n1; i++) {
+	for(j = i+1; j < state.npts; j++) {
+	  if(CLOSE_PERIODIC(state.x[i], state.y[i], 
+			    state.x[j], state.y[j], 
+			    period, r2)) {
+	    geyer->aux[i] += 1;
+	    geyer->aux[j] += 1;
+	  }
+	}
+      }
+    }
+  } else {
+    /* Euclidean distance */
+    if(state.npts > 1) {
+      n1 = state.npts - 1;
+      for(i = 0; i < n1; i++) {
+	for(j = i+1; j < state.npts; j++) {
+	  if(CLOSE(state.x[i], state.y[i], 
+		 state.x[j], state.y[j], 
+		   r2)) {
+	    geyer->aux[i] += 1;
+	    geyer->aux[j] += 1;
+	  }
+	}
+      }
     }
   }
-
   return((Cdata *) geyer);
 }
 
@@ -76,13 +114,14 @@ double geyercif(prop, state, cdata)
      Cdata *cdata;
 {
   int ix, j, npts, tee;
-  double u, v, d2, r2, s;
-  double w, a, dd2, b, f, cifval;
+  double u, v, r2, s;
+  double w, a, b, f, cifval;
   double *x, *y;
   int *aux;
   double *period;
   Geyer *geyer;
-  
+  DECLARE_CLOSE_VARS;
+
   geyer = (Geyer *) cdata;
 
   npts = state.npts;
@@ -109,7 +148,7 @@ double geyercif(prop, state, cdata)
     if(geyer->per) {
       /* periodic distance */
       for(j=0; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
 	  tee++;
 	  f = s - aux[j];
 	  if(f > 1) /* j is not saturated after addition of (u,v) */
@@ -117,12 +156,11 @@ double geyercif(prop, state, cdata)
 	  else if(f > 0) /* j becomes saturated by addition of (u,v) */
 	    w = w + f;
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	if(CLOSE(u,v,x[j],y[j],r2)) {
 	  tee++;
 	  f = s - aux[j];
 	  if(f > 1) /* j is not saturated after addition of (u,v) */
@@ -130,7 +168,6 @@ double geyercif(prop, state, cdata)
 	  else if(f > 0) /* j becomes saturated by addition of (u,v) */
 	    w = w + f;
 	}
-	END_IF_CLOSE_D2
       }
     }
   } else if(prop.itype == DEATH) {
@@ -139,7 +176,7 @@ double geyercif(prop, state, cdata)
       /* Periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
 	  f = s - aux[j];
 	  if(f > 0) /* j is not saturated */
 	    w = w + 1; /* deletion of 'ix' decreases count by 1 */
@@ -152,13 +189,12 @@ double geyercif(prop, state, cdata)
 	    }
 	  }
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	if(CLOSE(u,v,x[j],y[j],r2)) {
 	  f = s - aux[j];
 	  if(f > 0) /* j was not saturated */
 	    w = w + 1; /* deletion of 'ix' decreases count by 1 */
@@ -171,7 +207,6 @@ double geyercif(prop, state, cdata)
 	    }
 	  }
 	}
-	END_IF_CLOSE_D2
       }
     }
   } else if(prop.itype == SHIFT) { 
@@ -180,38 +215,34 @@ double geyercif(prop, state, cdata)
       /* Periodic distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
 	  tee++;
 	  a = aux[j];
 	  /* Adjust */
-	  dd2 = dist2(x[ix],y[ix], x[j],y[j],period);
-	  if(dd2 < r2) a = a - 1;
+	  if(CLOSE_PERIODIC(x[ix],y[ix],x[j],y[j],period,r2)) a = a - 1;
 	  b = a + 1;
 	  if(a < s && s < b) {
 	    w = w + s - a;
 	  }
 	  else if(s >= b) w = w + 1;
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	if(CLOSE(u,v,x[j],y[j],r2)) {
 	  tee++;
 	  a = aux[j];
 	  /* Adjust */
-	  dd2 = hypot(x[ix] - x[j], y[ix] - y[j]);
-	  if(dd2 < r2) a = a - 1;
+	  if(CLOSE(x[ix], y[ix], x[j], y[j], r2)) a = a - 1;
 	  b = a + 1;
 	  if(a < s && s < b) {
 	    w = w + s - a;
 	  }
 	  else if(s >= b) w = w + 1;
 	}
-	END_IF_CLOSE_PERIODIC_D2
-	  }
+      }
     }
   }
 
@@ -233,11 +264,18 @@ void geyerupd(state, prop, cdata)
 {
 /* Declare other variables */
   int ix, npts, j;
-  double u, v, xix, yix, r2, d2, d2old, d2new;
+  int oldclose, newclose;
+  double u, v, xix, yix, r2;
   double *x, *y;
   int *aux;
   double *period;
   Geyer *geyer;
+#ifdef MH_DEBUG
+  int *freshaux;
+  int i;
+  int oc, nc;
+#endif
+  DECLARE_CLOSE_VARS;
 
   geyer = (Geyer *) cdata;
   period = geyer->period;
@@ -247,6 +285,56 @@ void geyerupd(state, prop, cdata)
   x = state.x;
   y = state.y;
   npts = state.npts;
+
+#ifdef MH_DEBUG  
+  /* ........................ debugging cross-check ................ */
+
+  /* recompute 'aux' values afresh */
+  freshaux = geyer->freshaux;
+  for(i = 0; i < state.npts; i++)
+    freshaux[i] = 0;
+
+  if(geyer->per) {
+    /* periodic */
+    for(i = 0; i < state.npts; i++) {
+      for(j = 0; j < state.npts; j++) {
+	if(i == j) continue;
+	if(CLOSE_PERIODIC(state.x[i], state.y[i],
+			  state.x[j], state.y[j],
+			  period, r2)) 
+	  freshaux[i] += 1;
+      }
+    }
+  } else {
+    /* Euclidean distance */
+    for(i = 0; i < state.npts; i++) {
+      for(j = 0; j < state.npts; j++) {
+	if(i == j) continue;
+	if(CLOSE(state.x[i], state.y[i], 
+		 state.x[j], state.y[j], 
+		 r2))
+	  freshaux[i] += 1;
+      }
+    }
+  }
+  /* Check agreement with 'aux' */
+  for(j = 0; j < state.npts; j++) {
+    if(aux[j] != freshaux[j]) {
+      Rprintf("\n\taux[%d] = %d, freshaux[%d] = %d\n", 
+	      j, aux[j], j, freshaux[j]);
+      Rprintf("\tnpts = %d\n", state.npts);
+      Rprintf("\tperiod = (%lf, %lf)\n", period[0], period[1]);
+      if(geyer->prevtype == BIRTH) error("updaux failed after BIRTH");
+      if(geyer->prevtype == DEATH) error("updaux failed after DEATH");
+      if(geyer->prevtype == SHIFT) error("updaux failed after SHIFT");
+      error("updaux failed at start");
+    }
+  }
+  /* OK. Record type of this transition */ 
+  geyer->prevtype = prop.itype;
+
+  /* ................ end debug cross-check ................ */
+#endif
 
   if(prop.itype == BIRTH) { 
     /* Birth */
@@ -258,25 +346,21 @@ void geyerupd(state, prop, cdata)
     if(geyer->per) {
       /* periodic distance */
       for(j=0; j < npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
 	  aux[j] += 1;
 	  aux[npts] += 1;
 	} 
-	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j < npts; j++) {
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	if(CLOSE(u,v,x[j],y[j],r2)) {
 	  aux[j] += 1;
 	  aux[npts] += 1;
 	} 
-	END_IF_CLOSE_D2
       }
     }
-    return;
-  }
-  if(prop.itype == DEATH) {
+  } else if(prop.itype == DEATH) {
     /* Death */
     ix = prop.ix;
     u = x[ix];
@@ -286,27 +370,22 @@ void geyerupd(state, prop, cdata)
       /* periodic distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
 	  if(j < ix) aux[j] -= 1;
 	  else aux[j-1] = aux[j] - 1;
 	} else if(j >= ix) aux[j-1] = aux[j];
-	END_IF_CLOSE_PERIODIC_D2
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j==ix) continue;
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {
+	if(CLOSE(u,v,x[j],y[j],r2)) {
 	  if(j < ix) aux[j] -= 1;
 	  else aux[j-1] = aux[j] - 1;
 	} else if(j >= ix) aux[j-1] = aux[j];
-	END_IF_CLOSE_D2
       }
     }
-    return;
-  }
-
-  if(prop.itype == SHIFT) { 
+  } else if(prop.itype == SHIFT) { 
     /* Shift */
     u = prop.u;
     v = prop.v;
@@ -319,36 +398,36 @@ void geyerupd(state, prop, cdata)
     if(geyer->per) {
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2new = dist2(u,v,x[j],y[j],geyer->period);
-	d2old = dist2(xix,yix,x[j],y[j],geyer->period);
-	if(d2old >= r2 && d2new >= r2) continue;
-	if(d2new < r2) {
+	newclose = oldclose = FALSE;
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) newclose = TRUE;
+	if(CLOSE_PERIODIC(xix,yix,x[j],y[j],period,r2)) oldclose = TRUE;
+	if(newclose) {
 	  /* increment neighbour count for new point */
 	  aux[ix] += 1;
-	  if(d2old >= r2) 
+	  if(!oldclose) 
 	    aux[j] += 1; /* point j gains a new neighbour */
-	} else if(d2old < r2) 
+	} else if(oldclose)
 	  aux[j] -= 1; /* point j loses a neighbour */
       }
     } else {
       /* Euclidean distance */
       for(j=0; j<npts; j++) {
 	if(j == ix) continue;
-	d2new = hypot(u-x[j],     v-y[j]);
-	d2old = hypot(x[ix]-x[j], y[ix]-y[j]);
-	if(d2old >= r2 && d2new >= r2) continue;
-	if(d2new < r2) {
+	newclose = oldclose = FALSE;
+	if(CLOSE(u,v,x[j],y[j],r2)) newclose = TRUE;
+	if(CLOSE(xix,yix,x[j],y[j],r2)) oldclose = TRUE;
+	if(newclose) {
 	  /* increment neighbour count for new point */
 	  aux[ix] += 1;
-	  if(d2old >= r2) 
+	  if(!oldclose) 
 	    aux[j] += 1; /* point j gains a new neighbour */
-	} else if(d2old < r2) 
+	} else if(oldclose)
 	  aux[j] -= 1; /* point j loses a neighbour */
       }
     }
-    return;
-  }
-  fexitc("Unrecognised transition type; bailing out.\n");
+  } else fexitc("Unrecognised transition type; bailing out.\n");
+
+  return;
 }
 
 Cifns GeyerCifns = { &geyerinit, &geyercif, &geyerupd, FALSE};

@@ -276,6 +276,22 @@ local({
   ss <- summary(ljtrmod)
 })
 
+#
+#   tests/ppmgam.R
+#
+#   Test ppm with use.gam=TRUE
+#
+#   $Revision: 1.2 $  $Date: 2013/03/01 08:46:34 $
+#
+
+require(spatstat)
+local({
+  fit <- ppm(nztrees, ~s(x,y), use.gam=TRUE)
+  mm <- model.matrix(fit)
+  mf <- model.frame(fit)
+  v <- vcov(fit)
+})
+
 # ppmmarkorder.R
 # $Revision: 1.2 $  $Date: 2011/12/05 07:29:16 $
 # Test that predict.ppm, plot.ppm and plot.fitin
@@ -314,6 +330,43 @@ local({
   fit3 <- update(fit2, ~x)
 })
 
+#
+#  tests/rmhAux.R
+#
+#  $Revision: 1.1 $  $Date: 2013/02/18 10:41:27 $
+#
+#  For interactions which maintain 'auxiliary data',
+#  verify that the auxiliary data are correctly updated.
+#
+#  To do this we run rmh with nsave=1 so that the point pattern state
+#  is saved after every iteration, then the algorithm is restarted,
+#  and the auxiliary data are re-initialised. The final state must agree with
+#  the result of simulation without saving.
+# ----------------------------------------------------
+
+require(spatstat)
+
+local({
+
+   # Geyer:
+   mod <- list(cif="geyer",
+               par=list(beta=1.25,gamma=1.6,r=0.2,sat=4.5),
+               w=square(10))
+
+   set.seed(42)
+   X.nosave <- rmh(model=mod,
+                   start=list(n.start=50),
+                   control=list(nrep=1e3, periodic=FALSE, expand=1))
+   set.seed(42)
+   X.save <- rmh(model=mod,
+                 start=list(n.start=50),
+                 control=list(nrep=1e3, periodic=FALSE, expand=1,
+                   nburn=0, nsave=1))
+
+   stopifnot(npoints(X.save) == npoints(X.nosave))
+   stopifnot(max(nncross(X.save, X.nosave)$dist) == 0)
+   stopifnot(max(nncross(X.nosave, X.save)$dist) == 0)
+})
 # Test examples for rmh.default
 # run to reasonable length
 # and with tests for validity added
@@ -892,7 +945,7 @@ m <- rmhmodel(f)
 #  Test that rmhmodel.ppm and rmhmodel.default
 #  work on Hybrid interaction models
 #
-#   $Revision: 1.1 $  $Date: 2012/10/22 03:16:48 $
+#   $Revision: 1.3 $  $Date: 2013/01/29 02:12:13 $
 #
 
 require(spatstat)
@@ -902,7 +955,9 @@ local({
 
   fit1 <- ppm(redwood, ~1,
               Hybrid(A=Strauss(0.02), B=Geyer(0.1, 2), C=Geyer(0.15, 1)))
-  rmhmodel(fit1)
+  m1 <- rmhmodel(fit1)
+  m1
+  reach(m1)
 
   # Test of handling 'IsOffset' 
   data(cells)
@@ -919,7 +974,9 @@ local({
                 par=list(list(beta=50,gamma=0.5, r=0.1),
                          list(beta=1, gamma=0.7, r=0.2, sat=2)),
                 w = square(1))
-   rmhmodel(modH)
+   rmodH <- rmhmodel(modH)
+   rmodH
+   reach(rmodH)
 
   # test handling of Poisson components
 
@@ -927,13 +984,18 @@ local({
                  par=list(list(beta=5),
                           list(beta=10,gamma=0.5, r=0.1)),
                  w = square(1))
-   rmhmodel(modHP)
+   rmodHP <- rmhmodel(modHP)
+   rmodHP
+   reach(rmodHP)
 
    modPP <- list(cif=c("poisson","poisson"),
                  par=list(list(beta=5),
                           list(beta=10)),
                  w = square(1))
-   rmhmodel(modPP)
+   rmodPP <- rmhmodel(modPP)
+   rmodPP
+   reach(rmodPP)
+  
 })
 
 
@@ -1284,6 +1346,10 @@ local({
   kstest(AC, DM)
   # should be OK:
   kstest(unmark(AC), DM)
+  # linear networks
+  X <- runiflpp(20, simplenet)
+  fit <- lppm(X, ~1)
+  kstest(fit, "y")
 })
 
 #
@@ -1618,7 +1684,7 @@ parres(mod2, "x")
 #
 # Tests for lpp code
 #
-#  $Revision: 1.1 $  $Date: 2012/10/13 01:30:10 $
+#  $Revision: 1.2 $  $Date: 2013/01/23 08:20:41 $
 
 
 require(spatstat)
@@ -1635,5 +1701,27 @@ local({
   plot(K)
   g <- linearpcfinhom(X, lambda=fit, normalise=TRUE)
   plot(g)
+  # check empty patterns OK
+  X <- runiflpp(0, simplenet)
+  print(X)
 })
 
+#
+#  tests/density.R
+#
+#  Test behaviour of density methods and inhomogeneous summary functions
+#
+#  $Revision: 1.1 $  $Date: 2013/02/26 09:13:52 $
+#
+
+require(spatstat)
+
+local({
+
+  lam <- density(redwood)
+  K <- Kinhom(redwood, lam)
+  
+  lamX <- density(redwood, at="points")
+  KX <- Kinhom(redwood, lamX)
+  
+})

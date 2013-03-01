@@ -8,8 +8,6 @@
    It is #included several times in methas.c
    with different #defines for the following variables
 
-   MH_DEBUG     whether to print debug information
-   
    MH_MARKED    whether the simulation is marked
                (= the variable 'marked' is TRUE)
 
@@ -18,7 +16,11 @@
 
    MH_TRACKING  whether to save transition history
 
-   $Revision: 1.15 $  $Date: 2013/01/11 01:42:06 $ 
+   MH_DEBUG     whether to print debug information
+   
+   MH_SNOOP     whether to run visual debugger
+
+   $Revision: 1.17 $  $Date: 2013/02/13 09:35:40 $ 
 
 */
 
@@ -94,6 +96,11 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 #endif
 	  itype = BIRTH;  /* Birth proposal accepted. */
 	}
+#if MH_SNOOP
+	/* visual debug */
+	mhsnoop(&snooper, irep, &algo, &state, &birthprop, 
+		anumer, adenom, &itype);
+#endif
 #if MH_TRACKING
 	/* save transition history */
 	if(irep < history.nmax) {
@@ -151,6 +158,11 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 #endif
 	  itype = DEATH; /* Death proposal accepted. */
 	}
+#if MH_SNOOP
+	/* visual debug */
+	mhsnoop(&snooper, irep, &algo, &state, &deathprop, 
+		anumer, adenom, &itype);
+#endif
 #if MH_TRACKING
 	/* save transition history */
 	if(irep < history.nmax) {
@@ -224,6 +236,11 @@ OUTERCHUNKLOOP(irep, algo.nrep, maxchunk, 1024) {
 #endif
 	itype = SHIFT;          /* Shift proposal accepted . */
       }
+#if MH_SNOOP
+	/* visual debug */
+	mhsnoop(&snooper, irep, &algo, &state, &shiftprop, 
+		cvn, cvd, &itype);
+#endif
 #if MH_TRACKING
       /* save transition history */
       if(irep < history.nmax) {

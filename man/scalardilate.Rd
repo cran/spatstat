@@ -1,7 +1,9 @@
 \name{scalardilate}
 \alias{scalardilate}
-\alias{scalardilate.ppp}
+\alias{scalardilate.im}
 \alias{scalardilate.owin}
+\alias{scalardilate.ppp}
+\alias{scalardilate.psp}
 \alias{scalardilate.default}
 \title{Apply Scalar Dilation}
 \description{
@@ -12,16 +14,21 @@
 \usage{
   scalardilate(X, f, \dots)
 
+  \method{scalardilate}{im}(X, f, \dots, origin=NULL)
+
   \method{scalardilate}{owin}(X, f, \dots, origin=NULL)
 
   \method{scalardilate}{ppp}(X, f, \dots, origin=NULL)
+
+  \method{scalardilate}{psp}(X, f, \dots, origin=NULL)
 
   \method{scalardilate}{default}(X, f, \dots)
 }
 \arguments{
   \item{X}{Any suitable dataset representing a two-dimensional
     object, such as a point pattern (object of class \code{"ppp"}),
-    or a window (object of class \code{"owin"}).
+    a window (object of class \code{"owin"}), a pixel image
+    (class \code{"im"}) and so on.
   }
   \item{f}{
     Scalar dilation factor. A finite number greater than zero.
@@ -44,7 +51,8 @@
   \code{origin}. 
 
   The function \code{scalardilate} is generic, with methods for
-  windows (class \code{"owin"}) and point patterns (class \code{"ppp"})
+  windows (class \code{"owin"}), point patterns (class \code{"ppp"}),
+  pixel images (class \code{"im"}), line segment patterns (class \code{"psp"})
   and a default method.
 
   If the argument \code{origin} is not given,

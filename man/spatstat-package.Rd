@@ -322,6 +322,7 @@
 	remove duplicate points \cr
 	\code{\link{duplicated.ppp}} \tab
 	determine which points are duplicates \cr
+	\code{\link{connected.ppp}} \tab find clumps of points \cr
 	\code{\link{dirichlet}} \tab
 	compute Dirichlet-Voronoi tessellation \cr
 	\code{\link{delaunay}} \tab
@@ -416,7 +417,7 @@
 	\code{\link{perimeter}}	\tab	compute perimeter length \cr
 	\code{\link{diameter.owin}}	\tab	compute diameter\cr
 	\code{\link{incircle}}	\tab	find largest circle inside a window \cr
-	\code{\link{connected}}    \tab find connected components of window \cr
+	\code{\link{connected.owin}}    \tab find connected components of window \cr
 	\code{\link{eroded.areas}}	\tab	compute areas of eroded windows\cr
 	\code{\link{dilated.areas}}	\tab	compute areas of dilated windows\cr
 	\code{\link{bdist.points}}	\tab	compute distances from data points to window boundary \cr
@@ -469,7 +470,7 @@
 	\code{\link{is.im}} \tab test whether an object is a pixel image\cr
 	\code{\link{interp.im}} \tab interpolate a pixel image\cr
 	\code{\link{blur}} \tab apply Gaussian blur to image\cr
-	\code{\link{connected}} \tab find connected components \cr
+	\code{\link{connected.im}} \tab find connected components \cr
 	\code{\link{compatible.im}} \tab test whether two images have
 	compatible dimensions \cr
 	\code{\link{harmonise.im}} \tab make images compatible \cr
@@ -659,7 +660,8 @@
 
      \tabular{ll}{
       \code{\link{layered}} \tab create layered object \cr
-      \code{\link{plot.layered}} \tab plot layered object
+      \code{\link{plot.layered}} \tab plot layered object\cr
+      \code{\link{[.layered}} \tab extract subset of layered object
     }
     
 }
@@ -1059,6 +1061,7 @@
     \code{\link{Poisson}()} \tab		the Poisson point process\cr
     \code{\link{AreaInter}()}	 \tab Area-interaction process\cr
     \code{\link{BadGey}()} \tab	multiscale Geyer process\cr
+    \code{\link{Concom}()} \tab	connected component interaction\cr
     \code{\link{DiggleGratton}() } \tab Diggle-Gratton potential \cr
     \code{\link{DiggleGatesStibbard}() } \tab Diggle-Gates-Stibbard potential \cr
     \code{\link{Fiksel}()}	 \tab Fiksel pairwise interaction process\cr
@@ -1518,6 +1521,7 @@
   Neba Funwi-Gabga,
   Agnes Gault,
   Marc Genton,
+  Jason Goldstick,
   Pavel Grabarnik,
   C. Graf,
   Janet Franklin,
@@ -1583,6 +1587,7 @@
   Andrew van Burgel,
   Tobias Verbeke,
   Alexendre Villers,
+  Fabrice Vinatier,
   Hao Wang,
   H. Wendrock,
   Jan Wild,

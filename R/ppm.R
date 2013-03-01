@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.27 $	$Date: 2012/11/06 09:17:09 $
+#	$Revision: 1.29 $	$Date: 2013/02/07 09:58:14 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -29,6 +29,8 @@ function(Q,
          verb=TRUE,
          callstring=NULL
 ) {
+  Qname <- short.deparse(substitute(Q))
+  
   if(!(method %in% c("mpl", "ho", "logi")))
     stop(paste("Unrecognised fitting method", sQuote(method)))
   cl <- match.call()
@@ -50,6 +52,7 @@ function(Q,
                              periodic="periodic",
                              isotropic="isotropic",
                              Ripley="isotropic",
+                             trans="translate",
                              translate="translate",
                              translation="translate",
                              none="none"))
@@ -91,6 +94,7 @@ function(Q,
                            gcontrol=gcontrol,
                            callstring=callstring,
                            ...)
+    fitLOGI$Qname <- Qname
     return(fitLOGI)
   }
   
@@ -108,6 +112,7 @@ function(Q,
                        gcontrol=gcontrol,
                        callstring=callstring,
                        ...)
+  fitMPL$Qname <- Qname
 
   if(!is.ppm(fitMPL)) {
     # internal use only - returns some other data

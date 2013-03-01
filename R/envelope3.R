@@ -3,7 +3,7 @@
 #
 #   simulation envelopes for pp3 
 #
-#   $Revision: 1.4 $  $Date: 2012/07/23 07:06:49 $
+#   $Revision: 1.5 $  $Date: 2013/01/24 10:30:36 $
 #
 
 envelope.pp3 <-
@@ -13,8 +13,9 @@ envelope.pp3 <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- K3est
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),

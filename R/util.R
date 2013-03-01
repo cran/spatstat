@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.104 $    $Date: 2012/12/18 04:42:33 $
+#    $Revision: 1.108 $    $Date: 2013/02/28 05:49:57 $
 #
 #  (a) for matrices only:
 #
@@ -411,7 +411,7 @@ check.nvector <- function(v, npoints, fatal=TRUE, things="data points",
   whinge <- NULL
   if(!is.numeric(v))
     whinge <- paste(vname, "is not numeric")
-  else if(!is.vector(v))
+  else if(!is.atomic(v) || !is.null(dim(v)))  # vector with attributes
     whinge <- paste(vname, "is not a vector")
   else if(length(v) != npoints)
     whinge <- paste("The length of", vname,
@@ -499,23 +499,43 @@ check.named.thing <- function(x, nam, namopt=character(0), xtitle=NULL,
   return(whinge)
 }
 
-forbidNA <- function(x, context="", xname) {
-  if(missing(xname)) xname <- deparse(substitute(x))
+forbidNA <- function(x, context="", xname, fatal=TRUE, usergiven=TRUE) {
+  if(missing(xname)) xname <- sQuote(deparse(substitute(x)))
   if(any(is.na(x))) {
-    offence <- ngettext(length(x), "be NA", "contain NA values")
-    whinge <- paste(context, sQuote(xname), "must not", offence)
-    stop(whinge, call.=FALSE)
+    if(usergiven) {
+      # argument came from user
+      offence <- ngettext(length(x), "be NA", "contain NA values")
+      whinge <- paste(context, xname, "must not", offence)
+    } else {
+      # argument was computed internally
+      violates <- ngettext(length(x), "is NA", "contains NA values")
+      whinge <- paste(context, xname, violates)
+    }
+    if(fatal) stop(whinge, call.=FALSE)
+    warning(whinge, call.=FALSE)
+    return(FALSE)
   }
   return(TRUE)
 }
 
-check.finite <- function(x, context="", xname) {
-  if(missing(xname)) xname <- deparse(substitute(x))
-  forbidNA(x, context, xname)
+check.finite <- function(x, context="", xname, fatal=TRUE, usergiven=TRUE) {
+  if(missing(xname)) xname <- sQuote(deparse(substitute(x)))
+  forbidNA(x, context, xname, fatal=fatal, usergiven=usergiven)
   if(any(!is.finite(x))) {
-    oblige <- ngettext(length(x), "be a finite value", "contain finite values")
-    whinge <- paste(context, sQuote(xname), "must", oblige)
-    stop(whinge, call.=FALSE)
+    if(usergiven) {
+      # argument came from user
+      oblige <- ngettext(length(x),
+                         "be a finite value", "contain finite values")
+      whinge <- paste(context, xname, "must", oblige)
+    } else {
+      # argument was computed internally
+      violates <- ngettext(length(x),
+                           "is not finite", "contains non-finite values")
+      whinge <- paste(context, xname, violates)
+    }
+    if(fatal) stop(whinge, call.=FALSE)
+    warning(whinge, call.=FALSE)
+    return(FALSE)
   }
   return(TRUE)
 }
@@ -833,3 +853,18 @@ dotexpr.to.call <- function(expr, dot="funX", evaluator="eval.fv") {
   cc[[1]] <- as.name("eval.fv")
   return(cc)
 }
+
+# print names and version numbers of libraries loaded
+
+sessionLibs <- function() {
+  a <- sessionInfo()
+  b <- unlist(lapply(a$otherPkgs, getElement, name="Version"))
+  g <- rbind(names(b), unname(b))
+  d <- apply(g, 2, paste, collapse=" ")
+  if(length(d) > 0) {
+    cat("Libraries loaded:\n")
+    for(di in d) cat(paste("\t", di, "\n"))
+  } else cat("Libraries loaded: None\n")
+  return(invisible(d))
+}
+

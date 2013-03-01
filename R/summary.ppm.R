@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.58 $   $Date: 2012/11/14 08:33:46 $
+#    $Revision: 1.59 $   $Date: 2013/01/31 07:12:56 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -259,7 +259,8 @@ summary.ppm <- function(object, ..., quick=FALSE) {
       hi <- COEFS + two * se
       pval <- 2 * pnorm(abs(COEFS)/se, lower.tail=FALSE)
       psig <- cut(pval, c(0,0.001, 0.01, 0.05, 1, Inf),
-                  labels=c("***", "**", "*", "  ", "na"))
+                  labels=c("***", "**", "*", "  ", "na"),
+                  include.lowest=TRUE)
       notapplic <- names(COEFS) %in% c("(Intercept)", "log(lambda)")
       psig[notapplic] <- "na"
       # table of coefficient estimates with SE and 95% CI

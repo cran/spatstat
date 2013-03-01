@@ -14,7 +14,8 @@
     A single positive number.
   }
   \item{sigma}{
-    Standard deviation of displacement of a point from its cluster centre.
+    Standard deviation of random displacement (along each coordinate axis)
+    of a point from its cluster centre.
   }
   \item{mu}{
     Expected number of points per cluster.

@@ -68,7 +68,7 @@ Geyer <- local({
          return(all(correction %in% c("border", "none")))
        },
        fasteval=function(X,U,EqualPairs,pairpot,potpars,correction,
-                         ..., halfway=FALSE) {
+                         ..., halfway=FALSE, check=TRUE) {
          # fast evaluator for Geyer interaction
          if(!all(correction %in% c("border", "none")))
            return(NULL)
@@ -91,7 +91,7 @@ Geyer <- local({
          if(somemissing) {
            # add the missing data points
            nmiss <- sum(missingdata)
-           U <- superimpose(U, X[missingdata], W=X$window)
+           U <- superimpose(U, X[missingdata], W=X$window, check=check)
            # correspondingly augment the list of equal pairs
            originalrows <- seq_len(nU)
            newXindex <- Xseq[missingdata]

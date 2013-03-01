@@ -69,6 +69,7 @@ double diggracif(prop, state, cdata)
   double d2, pairprod, cifval;
   double rho, rho2, delta, delta2, fac;
   double *period;
+  DECLARE_CLOSE_D2_VARS;
 
   Diggra *diggra;
 
@@ -97,7 +98,7 @@ double diggracif(prop, state, cdata)
   if(diggra->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,rho2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,rho2,d2)) {
 	  if(d2 < delta2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -105,12 +106,11 @@ double diggracif(prop, state, cdata)
 	    pairprod *= fac * (sqrt(d2)-delta);
 	  }
 	}
-        END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,rho2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,rho2,d2)) {
 	  if(d2 < delta2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -118,13 +118,12 @@ double diggracif(prop, state, cdata)
 	    pairprod *= fac * (sqrt(d2)-delta);
 	  }
 	}
-        END_IF_CLOSE_PERIODIC_D2
       }
     }
   } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], rho2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], rho2, d2)) {
 	  if(d2 <= delta2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -132,12 +131,11 @@ double diggracif(prop, state, cdata)
 	    pairprod *= fac * (sqrt(d2)-delta);
 	  }
 	}
-        END_IF_CLOSE_D2
       }  
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], rho2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], rho2, d2)) {
 	  if(d2 <= delta2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -145,7 +143,6 @@ double diggracif(prop, state, cdata)
 	    pairprod *= fac * (sqrt(d2)-delta);
 	  }
 	}
-        END_IF_CLOSE_D2
       }  
     }
   }

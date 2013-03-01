@@ -4,7 +4,7 @@
 #	Tabulate mark frequencies in r-neighbourhood of each point 
 #	for multitype point patterns
 #
-#	$Revision: 1.5 $	$Date: 2011/05/18 08:05:13 $
+#	$Revision: 1.6 $	$Date: 2013/02/22 05:34:02 $
 #
 #       Requested by Ian Robertson <igr@stanford.edu>
 
@@ -23,7 +23,7 @@ function(X, R, exclude=TRUE)
           stop("marks must be a factor")
         
         # identify close pairs
-        p <- closepairs(X,R)
+        p <- closepairs(X,R,what="indices")
         pi <- p$i
         pj <- p$j
         if(!exclude) {

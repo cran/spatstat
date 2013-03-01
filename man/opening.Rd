@@ -10,8 +10,11 @@
 }
 \usage{
  opening(w, r, \dots)
+
  \method{opening}{owin}(w, r, \dots, polygonal=NULL)
+
  \method{opening}{ppp}(w, r, \dots)
+
  \method{opening}{psp}(w, r, \dots)
 }
 \arguments{
@@ -21,12 +24,15 @@
     or a point pattern (object of class \code{"ppp"}).
   }
   \item{r}{positive number: the radius of the opening.}
-  \item{\dots}{extra arguments passed to \code{\link{as.mask}}
-    controlling the pixel resolution, if a pixel approximation is used}
+  \item{\dots}{
+    extra arguments passed to \code{\link{as.mask}}
+    controlling the pixel resolution, if a pixel approximation is used
+  }
   \item{polygonal}{
     Logical flag indicating whether to compute a polygonal
     approximation to the erosion (\code{polygonal=TRUE}) or
     a pixel grid approximation (\code{polygonal=FALSE}).
+    Ignored if \code{gpclib} is disabled.
   }
 }
 \value{
@@ -50,7 +56,12 @@
   in the boundary. For very large radii, the opened set is empty.
 
   The algorithm applies \code{\link{erosion}} followed by
-  \code{\link{dilation}}. 
+  \code{\link{dilation}}.
+
+  Polygonal calculations require the \code{gpclib}
+  package which is subject to licence restrictions.
+  It is enabled by \code{spatstat.options(gpclib=TRUE)}.
+  See \code{\link{licence.polygons}}.
 }
 \seealso{
   \code{\link{closing}} for the opposite operation.
@@ -62,9 +73,13 @@
   \code{\link{as.owin}} for information about windows.
 }
 \examples{
-  data(letterR)
-  v <- opening(letterR, 0.3, dimyx=256)
-  plot(v, main="opening")
+  if(spatstat.options("gpclib")) {
+    v <- opening(letterR, 0.3)
+  } else {
+    v <- opening(letterR, 0.3, dimyx=256, polygonal=FALSE)
+  }
+  plot(letterR, type="n", main="opening")
+  plot(v, add=TRUE, col="grey")
   plot(letterR, add=TRUE)
 }
 \references{

@@ -3,7 +3,7 @@
 #
 # Test statistics from Berman (1986)
 #
-#  $Revision: 1.9 $  $Date: 2010/11/28 02:43:49 $
+#  $Revision: 1.12 $  $Date: 2013/02/15 11:20:20 $
 #
 #
 
@@ -39,69 +39,102 @@ bermantest.ppm <- function(model, covariate,
   verifyclass(model, "ppm")
   which <- match.arg(which)
   alternative <- match.arg(alternative)
-  if(is.poisson.ppm(model) && is.stationary.ppm(model))
+  if(is.poisson(model) && is.stationary(model))
     modelname <- "CSR"
   do.call("bermantestEngine",
           resolve.defaults(list(model, covariate, which, alternative),
                            list(...),
                            list(modelname=modelname,
-                                covname=covname)))
+                                covname=covname,
+                                dataname=model$Qname)))
+}
+
+bermantest.lpp <-
+  function(X, covariate,
+           which=c("Z1", "Z2"),
+           alternative=c("two.sided", "less", "greater"),
+           ...) {
+    Xname <- short.deparse(substitute(X))
+    covname <- short.deparse(substitute(covariate))
+    which <- match.arg(which)
+    alternative <- match.arg(alternative)
+
+    do.call("bermantestEngine",
+            resolve.defaults(list(lppm(X), covariate, which, alternative),
+                             list(...),
+                             list(modelname="CSR",
+                                  covname=covname, dataname=Xname)))
+}
+
+bermantest.lppm <- function(model, covariate,
+                           which=c("Z1", "Z2"),
+                           alternative=c("two.sided", "less", "greater"),
+                           ...) {
+  modelname <- short.deparse(substitute(model))
+  covname <- short.deparse(substitute(covariate))
+  verifyclass(model, "lppm")
+  which <- match.arg(which)
+  alternative <- match.arg(alternative)
+  if(is.poisson(model) && is.stationary(model))
+    modelname <- "CSR"
+  do.call("bermantestEngine",
+          resolve.defaults(list(model, covariate, which, alternative),
+                           list(...),
+                           list(modelname=modelname,
+                                covname=covname,
+                                dataname=model$Xname)))
 }
 
 bermantestEngine <- function(model, covariate,
                              which=c("Z1", "Z2"),
                              alternative=c("two.sided", "less", "greater"),
                              ...,
-                             modelname, covname, dataname) {
+                             modelname, covname, dataname="") {
 
-  
+  csr <- is.poisson(model) && is.stationary(model)
   if(missing(modelname))
     modelname <- if(csr) "CSR" else short.deparse(substitute(model))
   if(missing(covname))
     covname <- short.deparse(substitute(covariate))
-  if(missing(dataname))
-    dataname <- paste(model$call[[2]])
 
   which <- match.arg(which)
   alternative <- match.arg(alternative)
 
-  verifyclass(model, "ppm")
-  if(!is.poisson.ppm(model))
+  if(!is.poisson(model))
     stop("Only implemented for Poisson point process models")
-  csr <- is.stationary.ppm(model)
 
-  # data point pattern
-  X <- data.ppm(model)
-  npts <- npoints(X)
-  
   # ........... first assemble data ...............
   fram <- spatialCDFframe(model, covariate, ...,
                         modelname=modelname,
                         covname=covname,
                         dataname=dataname)
   fvalues <- fram$values
-  # covariate image
-  Z <- fvalues$Zimage
+  info    <- fram$info
   # values of covariate at data points
   ZX <- fvalues$ZX
   # transformed to Unif[0,1] under H0
   U  <- fvalues$U
-  # domain
-  W <- as.owin(Z)
+  # values of covariate at pixels
+  Zvalues <- fvalues$Zvalues
+  # corresponding pixel areas/weights
+  weights <- fvalues$weights
   # intensity of model
-  lambda <- predict(model, locations=W)
+  lambda  <- fvalues$lambda
 
   switch(which,
          Z1={
            #......... Berman Z1 statistic .....................
-           method <- paste("Berman Z1 test of",
-                           if(csr) "CSR" else "inhomogeneous Poisson process")
+           method <-
+             paste("Berman Z1 test of",
+                   if(info$csr) "CSR" else "inhomogeneous Poisson process",
+                   "in", info$spacename)
            # sum of covariate values at data points
            Sn <- sum(ZX)
            # predicted mean and variance
-           En    <- integral.im(lambda)
-           ESn   <- integral.im(eval.im(lambda * Z))
-           varSn <- integral.im(eval.im(lambda * Z^2))
+           lamwt <- lambda * weights
+           En    <- sum(lamwt)
+           ESn   <- sum(lamwt * Zvalues)
+           varSn <- sum(lamwt * Zvalues^2)
            # working, for plot method
            working <- list(meanZX=mean(ZX),
                            meanZ=ESn/En)
@@ -123,8 +156,11 @@ bermantestEngine <- function(model, covariate,
          },
          Z2={
            #......... Berman Z2 statistic .....................
-           method <- paste("Berman Z2 test of",
-                           if(csr) "CSR" else "inhomogeneous Poisson process")
+           method <-
+             paste("Berman Z2 test of",
+                   if(info$csr) "CSR" else "inhomogeneous Poisson process",
+                   "in", info$spacename)
+           npts <- length(ZX)
            statistic <- sqrt(12/npts) * (sum(U) - npts/2)
            working <- list(meanU=mean(U))
            names(statistic) <- "Z2"
@@ -141,7 +177,7 @@ bermantestEngine <- function(model, covariate,
                               "evaluated at points of",
                               sQuote(dataname), "\n\t",
                               "and transformed to uniform distribution under",
-                              if(csr) modelname else sQuote(modelname))
+                              if(info$csr) modelname else sQuote(modelname))
          })
            
   out <- list(statistic=statistic,
@@ -171,6 +207,7 @@ plot.bermantest <-
     info <- attr(ks, "info")
   }
   work <- x$working
+  op <- options(useFancyQuotes=FALSE)
   switch(x$which,
          Z1={
            # plot cdf's of Z
@@ -218,6 +255,7 @@ plot.bermantest <-
            abline(v=0.5, lwd=lwd0,col=col0,lty=lty0)
            abline(v=work$meanU, lwd=lwd,col=col,lty=lty)
          })
+  options(op)
   return(invisible(NULL))
 }
 

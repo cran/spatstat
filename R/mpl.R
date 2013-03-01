@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.144 $	$Date: 2012/10/09 08:31:13 $
+#	$Revision: 5.150 $	$Date: 2013/02/25 06:32:31 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -113,7 +113,7 @@ spv <- package_version(versionstring.spatstat())
 the.version <- list(major=spv$major,
                     minor=spv$minor,
                     release=spv$patchlevel,
-                    date="$Date: 2012/10/09 08:31:13 $")
+                    date="$Date: 2013/02/25 06:32:31 $")
 
 if(want.inter) {
   # ensure we're using the latest version of the interaction object
@@ -196,11 +196,17 @@ fmla <- prep$fmla
 glmdata <- prep$glmdata
 problems <- prep$problems
 likelihood.is.zero <- prep$likelihood.is.zero
+is.identifiable <- prep$is.identifiable
 computed <- append(computed, prep$computed)
 IsOffset <- prep$IsOffset
+
   
 ################# F i t    i t   ####################################
 
+if(!is.identifiable) 
+  stop(paste("in", callstring, ":", problems$unidentifiable$print),
+       call.=FALSE)
+  
 # to avoid problem with package checker  
 .mpl.W <- glmdata$.mpl.W
 .mpl.SUBSET <- glmdata$.mpl.SUBSET
@@ -314,6 +320,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
   names.precomputed <- names(precomputed)
 
   likelihood.is.zero <- FALSE
+  is.identifiable <- TRUE
   
   if(!missing(vnamebase)) {
     if(length(vnamebase) == 1)
@@ -361,7 +368,11 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
   
   glmdata <- data.frame(.mpl.W = .mpl$W,
                         .mpl.Y = .mpl$Y)
-        
+
+  # count data and dummy points in specified subset
+  izdat <- .mpl$Z[.mpl$SUBSET]
+  ndata <- sum(izdat)
+  ndummy <- sum(!izdat)
     
 ####################### T r e n d ##############################
 
@@ -397,8 +408,12 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
       glmdata <- data.frame(glmdata, x=P$x)
     if(allcovar || "y" %in% trendvariables)
       glmdata <- data.frame(glmdata, y=P$y)
-    if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS))
+    if(("marks" %in% trendvariables) || !is.null(.mpl$MARKS)) {
+      if(is.null(.mpl$MARKS))
+        stop("Model formula depends on marks, but data do not have marks",
+             call.=FALSE)
       glmdata <- data.frame(glmdata, marks=.mpl$MARKS)
+    }
     #
     # Check covariates
     if(!is.null(covariates)) {
@@ -457,7 +472,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
 
   Vnames <- NULL
   IsOffset <- NULL
-  
+
   if(want.inter) {
 
     # Form the matrix of "regression variables" V.
@@ -537,6 +552,31 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
 
     .mpl$SUBSET <- .mpl$SUBSET & .mpl$KEEP
 
+    # Check that there are at least some data and dummy points remaining
+    datremain <- .mpl$Z[.mpl$SUBSET]
+    somedat <- any(datremain)
+    somedum <- !all(datremain)
+    if(!(is.identifiable <- somedat && somedum)) {
+      # Model would be unidentifiable if it were fitted.
+      # Exclude cases where mpl.prepare is used without intending to fit.
+      somedat <- somedat || (ndata == 0)
+      somedum <- somedum || (ndummy == 0)
+      if(!(somedat && somedum)) {
+        # register problem
+        offending <- !c(somedat, somedum)
+        offending <- c("all data points", "all dummy points")[offending]
+        offending <- paste(offending, collapse=" and ")
+        complaint <- paste("model is unidentifiable:",
+                           offending, "have zero conditional intensity")
+        details <- list(data=!somedat,
+                        dummy=!somedum,
+                        print=complaint)
+        problems <- append(problems, list(unidentifiable=details))
+      }
+    }
+
+    # check whether the model has zero likelihood:
+    # check whether ANY data points have zero conditional intensity
     if(any(.mpl$Z & !.mpl$KEEP)) {
       howmany <- sum(.mpl$Z & !.mpl$KEEP)
       complaint <- paste(howmany,
@@ -545,7 +585,7 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
       details <- list(illegal=howmany,
                       print=complaint)
       problems <- append(problems, list(zerolikelihood=details))
-      if(warn.illegal)
+      if(warn.illegal && is.identifiable)
         warning(paste(complaint,
                       ". Occurred while executing: ",
                       callstring, sep=""),
@@ -598,7 +638,9 @@ mpl.prepare <- function(Q, X, P, trend, interaction, covariates,
 
 return(list(fmla=fmla, trendfmla=trendfmla,
             glmdata=glmdata, Vnames=Vnames, IsOffset=IsOffset,
-            problems=problems, likelihood.is.zero=likelihood.is.zero,
+            problems=problems,
+            likelihood.is.zero=likelihood.is.zero,
+            is.identifiable=is.identifiable,
             computed=computed))
 
 }
@@ -915,7 +957,7 @@ evalInterEngine <- function(X, P, E,
       V <- evaluate(X, P, E,
                     interaction$pot,
                     interaction$par,
-                    correction)
+                    correction, ...)
     }
   }
 

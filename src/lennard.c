@@ -73,6 +73,7 @@ double lennardcif(prop, state, cdata)
   double sigma2, d2max, d2min;
   double *period;
   Lennard *lennard;
+  DECLARE_CLOSE_D2_VARS;
 
   lennard = (Lennard *) cdata;
 
@@ -100,7 +101,7 @@ double lennardcif(prop, state, cdata)
   if(lennard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2)) {
 	  if(d2 < d2min) {
 	    cifval = 0.0;
 	    return cifval;
@@ -108,12 +109,11 @@ double lennardcif(prop, state, cdata)
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,d2max,d2)) {
 	  if(d2 < d2min) {
 	    cifval = 0.0;
 	    return cifval;
@@ -121,13 +121,12 @@ double lennardcif(prop, state, cdata)
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
   } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], d2max, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], d2max, d2)) {
 	  if(d2 < lennard->d2min) {
 	    cifval = 0.0;
 	    return cifval;
@@ -135,12 +134,11 @@ double lennardcif(prop, state, cdata)
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
-        END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], d2max, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], d2max, d2)) {
 	  if(d2 < lennard->d2min) {
 	    cifval = 0.0;
 	    return cifval;
@@ -148,7 +146,6 @@ double lennardcif(prop, state, cdata)
 	  ratio6 = pow(sigma2/d2, 3);
 	  pairsum += ratio6 * (1.0 - ratio6);
 	}
-        END_IF_CLOSE_D2
       }
     }
   }

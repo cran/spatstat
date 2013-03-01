@@ -1,9 +1,9 @@
 #
-# $Id: rmh.default.R,v 1.93 2013/01/11 01:54:25 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.96 2013/02/24 10:35:18 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
-                        verbose=TRUE, ...) {
+                        ..., verbose=TRUE, snoop=FALSE) {
 #
 # Function rmh.  To simulate realizations of 2-dimensional point
 # patterns, given the conditional intensity function of the 
@@ -484,7 +484,8 @@ rmh.default <- function(model,start=NULL,
 
   # go
   do.call("rmhEngine",
-          append(list(InfoList, verbose=verbose, kitchensink=TRUE),
+          append(list(InfoList,
+                      verbose=verbose, snoop=snoop, kitchensink=TRUE),
                  f.args))
 }
 
@@ -521,7 +522,7 @@ print.rmhInfoList <- function(x, ...) {
 
 rmhEngine <- function(InfoList, ...,
                        verbose=FALSE, kitchensink=FALSE,
-                       preponly=FALSE) {
+                       preponly=FALSE, snoop=FALSE) {
 # Internal Use Only!
 # This is the interface to the C code.
 
@@ -708,6 +709,17 @@ rmhEngine <- function(InfoList, ...,
     if(mtype)
       Cmarks <- c(as.integer(marks(x.condpp))-1, Cmarks)
   }
+
+# decide whether to activate visual debugger
+  if(snoop) {
+    Xinit <- ppp(x, y, window=w.sim)
+    if(mtype)
+      marks(Xinit) <- Cmarks + 1
+    if(verbose) cat("\nCreating debugger environment..")
+    snoopenv <- rmhSnoopEnv(Xinit=Xinit, Wclip=w.clip, R=reach(model))
+    if(verbose) cat("Done.\n")
+  } else snoopenv <- "none"
+
   
 #######################################################################
 #  Set up C call
@@ -803,6 +815,7 @@ rmhEngine <- function(InfoList, ...,
                  npts.cond,
                  fixall,
                  track,
+                 snoopenv,
                  PACKAGE="spatstat")
   
     # Extract the point pattern returned from C
@@ -885,6 +898,7 @@ rmhEngine <- function(InfoList, ...,
                    npts.cond,
                    fixall,
                    track,
+                   snoopenv,
                    PACKAGE="spatstat")
       # Extract the point pattern returned from C
       X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)

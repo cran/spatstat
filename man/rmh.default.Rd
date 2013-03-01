@@ -10,7 +10,8 @@
 \usage{
    \method{rmh}{default}(model, start=NULL,
    control=default.rmhcontrol(model),
-   verbose=TRUE, \dots)
+   \dots, 
+   verbose=TRUE, snoop=FALSE)
 }
 
 \arguments{
@@ -23,12 +24,15 @@
   \item{control}{Data controlling the iterative behaviour
     and termination of the algorithm.
   }
-  \item{verbose}{Logical flag indicating whether to print progress
-    reports.
-  }
   \item{\dots}{
     Further arguments passed to \code{\link{rmhcontrol}}
     or to trend functions in \code{model}.
+  }
+  \item{verbose}{Logical flag indicating whether to print progress
+    reports.
+  }
+  \item{snoop}{
+    Logical. If \code{TRUE}, activate the visual debugger. 
   }
 }
 
@@ -244,7 +248,34 @@
   conditionally on the number of points of each type,
   no expansion of the window is possible.
 }
-     
+\section{Visual Debugger}{
+  If \code{snoop = TRUE}, an interactive debugger is activated.
+  On the current plot device, the debugger displays the current
+  state of the Metropolis-Hastings algorithm together with
+  the proposed transition to the next state.
+  Clicking on this graphical display (using the left mouse button)
+  will re-centre the display at the clicked location.
+  Surrounding this graphical display is an array of boxes representing
+  different actions.
+  Clicking on one of the action boxes (using the left mouse button)
+  will cause the action to be performed.
+  Debugger actions include:
+  \itemize{
+    \item Zooming in or out
+    \item Panning (shifting the field of view) left, right, up or down
+    \item Jumping to the next iteration
+    \item Skipping 10, 100, 1000, 10000 or 100000 iterations
+    \item Jumping to the next Birth proposal (etc)
+    \item Changing the fate of the proposal (i.e. changing whether
+    the proposal is accepted or rejected)
+    \item Dumping the current state and proposal to a file
+    \item Printing detailed information at the terminal
+    \item Exiting the debugger (so that the simulation
+    algorithm continues without further interruption).
+  }
+  Right-clicking the mouse will also cause the debugger to exit.
+}
+
 \references{
    Baddeley, A. and Turner, R. (2000) Practical maximum
    pseudolikelihood for spatial point patterns.

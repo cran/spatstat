@@ -1,4 +1,252 @@
 
+	CHANGES IN spatstat VERSION 1.31-1
+
+OVERVIEW
+
+   o We thank Marcelino de la Cruz, Daniel Esser, Jason Goldstick,
+     Abdollah Jalilian, Ege Rubak and Fabrice Vinatier for contributions.
+
+   o Nonparametric estimation and tests for 
+     point patterns in a linear network.
+
+   o More support for 'layered' objects.
+
+   o Find clumps in a point pattern.
+
+   o Connected component interaction model.
+
+   o Improvements to interactive plots.
+
+   o Visual debugger for Metropolis-Hastings algorithm.
+
+   o Bug fix in Metropolis-Hastings simulation of Geyer process.
+
+   o Faster Metropolis-Hastings simulation.
+
+   o Faster computation of 'envelope', 'fv' and 'fasp' objects.
+
+   o Improvements and bug fixes.
+
+NEW FUNCTIONS
+
+   o connected.ppp
+   Find clumps in a point pattern.
+
+   o kstest.lpp, kstest.lppm
+   The spatial Kolmogorov-Smirnov test can now be applied 
+   to point patterns on a linear network (class 'lpp') and 
+   point processes on a linear network (class 'lppm').
+
+   o bermantest.lpp, bermantest.lppm
+   Berman's Z1 and Z2 tests can now be applied to point patterns
+   on a linear network (class 'lpp') and point processes on a linear
+   network (class 'lppm').
+
+   o rhohat.lpp, rhohat.lppm
+   Nonparametric estimation of the dependence of a point pattern
+   on a spatial covariate: 'rhohat' now applies to 
+   objects of class 'lpp' and 'lppm'.
+
+   o intensity.lpp
+   Empirical intensity of a point pattern on a linear network.
+
+   o as.function.rhohat
+   Converts a 'rhohat' object to a function,
+   with extrapolation beyond the endpoints.
+
+   o [.layered
+   Subset operator for layered objects.
+
+   o shift, rotate, affine, rescale, reflect, flipxy, scalardilate
+   These geometrical transformations now work for 'layered' objects.
+
+   o iplot.layered
+   Interactive plotting for 'layered' objects.
+
+   o as.owin.layered
+   Method for as.owin for layered objects.
+
+   o [.owin
+   Subset operator for windows, equivalent to intersect.owin.
+
+   o rcellnumber
+   Generates random integers for the Baddeley-Silverman counterexample.
+
+   o is.lpp
+   Tests whether an object is a point pattern on a linear network.
+
+   o is.stationary.lppm, is.poisson.lppm
+   New methods for is.stationary and is.poisson for class 'lppm'
+
+   o sessionLibs
+   Print library names and version numbers (for use in Sweave scripts)
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o iplot
+   iplot is now generic, with methods for 'ppp', 'layered' and 'default'.
+   iplot methods now support zoom and pan navigation.
+
+   o rmh.default
+   New argument 'snoop' allows the user to activate a visual debugger
+   for the Metropolis-Hastings algorithm.
+
+   o connected
+   connected() is now generic, with methods for 'im', 'owin' and 'ppp'.
+
+   o alltypes
+   Now works for lpp objects 
+
+   o rlabel
+   Now works for lpp, pp3, ppx objects
+
+   o plot.kstest
+   Can now perform P-P and Q-Q plots as well.
+
+   o plot.fasp
+   New argument 'samey' controls whether all panels 
+   have the same y limits.
+
+   o plot.fasp
+   Changed default value of 'samex'.
+
+   o Objects of class 'envelope', 'fv' and 'fasp' 
+   Reduced computation time and storage required for these objects.
+   
+   o pcfmodel.kppm
+   Improved calculation.
+
+   o plot.fv
+   Improved collision-avoidance algorithm
+   (for avoiding overlaps between curves and legend)
+
+   o ppm
+   Improved error handling
+
+   o envelope
+   All methods for 'envelope' now handle fun=NULL   
+
+   o setminus.owin
+   Better handling of the case where both arguments are rectangles.
+
+   o rmh
+   Simulation has been further accelerated.
+
+   o lppm
+   Accelerated.
+
+   o vcov.ppm
+   Accelerated.
+
+   o marktable
+   Accelerated.
+
+   o Triplets() interaction
+   Accelerated.
+
+   o alltypes
+   Accelerated when envelope=TRUE.
+
+BUG FIXES
+
+   o rmh
+   Simulation of the Geyer saturation process was incorrect.
+   [Bug introduced in previous version, spatstat 1.31-0.]
+   Fixed.
+
+   o rmh
+   Simulation of the Geyer saturation process was 
+   incorrectly initialised, so that the results of a short run 
+   (i.e. small value of 'nrep') were incorrect, 
+   while long runs were correct.
+   [Bug introduced in spatstat 1.17-0, october 2009.]
+   Fixed.
+
+   o ppm 
+   Objects fitted with use.gam=TRUE caused fatal errors in
+   various functions including print, summary, vcov and model.frame.
+   Spotted by Jason Goldstick.
+   Fixed.
+
+   o lpp, runiflpp, rpoislpp
+   Empty point patterns caused an error.
+   Fixed.
+
+   o rmh.default
+   Crashed for hybrid models, with message 
+   'Attempt to apply non-function'.
+   Spotted by Ege Rubak.
+   Fixed.
+
+   o relrisk
+   Crashed when 'at="points"' for a multitype pattern
+   with more than 2 types.
+   Spotted by Marcelino de la Cruz.
+   Fixed.
+
+   o erosion.owin, dilation.psp, border
+   Ignored the arguments "..." in some cases
+   (namely when the window was polygonal and 'gpclib' was disabled).
+   Fixed.
+
+   o rsyst, rcell
+   Did not correctly handle the argument 'dx'.
+   Spotted by Fabrice Vinatier.
+   Fixed.
+
+   o correction="trans"
+   Various functions such as Kest 
+   no longer recognised 'correction = "trans"'.
+   Fixed.
+
+   o istat
+   Crashed with an error message about envelopes. 
+   Fixed.
+
+   o summary.ppm, print.ppm
+   p-values which were exactly equal to zero were reported as NA.
+   Fixed.
+
+   o [.im
+   Crashed if the intersection consisted of
+   a single row or column of pixels.
+   Fixed.
+
+   o plot.im
+   Sometimes incorrectly displayed an image consisting of 
+   a single row or column of pixels.
+   Fixed.
+
+   o plot.layered
+   The plot region was determined by the first layer,
+   so that objects in subsequent layers could sometimes 
+   fall outside the plot region.
+   Fixed.
+
+   o transect.im
+   If the arguments 'from' and 'to' were numeric vectors of length 2,
+   the result was garbled.
+   Fixed.   
+
+   o Inhomogeneous K functions and pair correlation functions
+   [Kinhom, pcfinhom, Kcross.inhom, Kdot.inhom, pcfcross.inhom, etc.]
+   These functions reported an error 'lambda is not a vector'
+   if the intensity argument lambda was computed using density(, at="points").
+   Fixed.
+
+   o rlabel
+   Did not accept a point pattern with a hyperframe of marks.
+   Fixed.
+
+   o alltypes
+   Crashed when envelope=TRUE if the summary function 'fun'
+   did not have default values for the marks i and j.
+   Fixed.
+
+   o Kres, Gres, psst, psstA
+   Ignored the unit of length.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.31-0
 
 OVERVIEW
@@ -49,7 +297,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
    is now printed in the test output, and is saved as an attribute.
 
 
-BUGS
+BUG FIXES
 
    o rmh
    Simulation of the Area-Interaction model was completely incorrect.
@@ -2579,7 +2827,7 @@ OVERVIEW
 
     o	Urgent bug fix
 
-BUGS
+BUG FIXES
  
     o   print.summary.ppm exited with an error message,
     	if the model had external covariates.
@@ -2652,7 +2900,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
 
     o   distmap.ppp
    	Internal code is more robust.
-BUGS
+BUG FIXES
 
     o  im
 	Did not correctly handle 1 x 1 arrays.
@@ -2734,7 +2982,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o   smooth.fv
     	Default value of 'which' has been changed.
 
-BUGS
+BUG FIXES
 
     o   Kest
     	If the argument 'domain' was used, the resulting estimate
@@ -2798,7 +3046,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o   plot.fv
     	More robust handling of 'shade'
 
-BUGS
+BUG FIXES
 
     o   relrisk
     	Format of relrisk(at="points") was incorrect.
@@ -2877,7 +3125,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o   qqplot.ppm
     	Changed default value of 'control' 
 
-BUGS
+BUG FIXES
 
     o   marks<-.ppp, setmarks, %mark%
     	A matrix of marks was accepted by ppp() 
@@ -2956,7 +3204,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o   envelope
 	Improvements to robustness of code.
 
-BUGS
+BUG FIXES
 
    o    quadratcount
    	If V was a tessellation created using a factor-valued image,
@@ -3043,7 +3291,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o   rmh
     	Slightly accelerated.
 
-BUGS
+BUG FIXES
 
     o   rmh
     	Simulation of the Lennard-Jones model (cif = 'lennard') was incorrect
@@ -3192,7 +3440,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
 	Now prints the available range of 'r' values
 	as well as the recommended range of 'r' values.
 
-BUGS
+BUG FIXES
 
     o   rmh
         Simulation of Lennard-Jones model was incorrect;

@@ -3,6 +3,7 @@
 #include <R_ext/Utils.h>
 #include "methas.h"
 #include "chunkloop.h"
+#include "mhsnoop.h"
 
 void fexitc(const char *msg);
 
@@ -43,7 +44,8 @@ SEXP xmethas(
 	     SEXP marks,
 	     SEXP ncond,
 	     SEXP fixall,
-             SEXP track)
+             SEXP track,
+             SEXP snoopenv)
 {
   char *cifstring;
   double cvd, cvn, qnodds, anumer, adenom, betavalue;
@@ -68,6 +70,7 @@ SEXP xmethas(
   Algor algo;
   Propo birthprop, deathprop, shiftprop;
   History history;
+  Snoop snooper;
 
   /* The following variables are used only for a non-hybrid interaction */
   Cifns thecif;     /* cif structure */
@@ -128,7 +131,8 @@ SEXP xmethas(
   model.ipar = iparvector = NUMERIC_POINTER(ipar);
   model.period = NUMERIC_POINTER(period);
   model.ntypes = *(INTEGER_POINTER(ntypes));
-  marked = (model.ntypes > 1);
+
+  state.ismarked = marked = (model.ntypes > 1);
   
   /* copy initial state */
   state.npts   = LENGTH(x);
@@ -218,6 +222,22 @@ SEXP xmethas(
 #endif
   }
 
+  /* ============= Visual debugging ========== */
+
+  /* Active if 'snoopenv' is an environment */
+
+
+#if MH_DEBUG
+  Rprintf("Initialising mhsnoop\n");
+#endif
+
+  initmhsnoop(&snooper, snoopenv);
+
+#if MH_DEBUG
+  Rprintf("Initialised\n");
+  if(snooper.active) Rprintf("Debugger is active.\n");
+#endif
+
   /* ================= Initialise algorithm ==================== */
  
   /* Interpret the model parameters and initialise auxiliary data */
@@ -255,98 +275,19 @@ SEXP xmethas(
   /* Initialise random number generator */
   GetRNGstate();
 
-  if(tracking) {
-    /* saving transition history */
-#define MH_TRACKING TRUE
-    if(Ncif == 1) {
-      /* single interaction */
-#define MH_SINGLE TRUE
-      if(marked) {
-	/* marked process */
-#define MH_MARKED TRUE
+/*
 
-	/* run loop */
-#include "mhloop.h"
+  Here comes the code for the M-H loop.
 
-      } else {
-	/* unmarked process */
-#undef MH_MARKED
-#define MH_MARKED FALSE
+  The basic code (in mhloop.h) is #included many times using different options
 
-	/* run loop */
-#include "mhloop.h"
+  The C preprocessor descends through a chain of files 
+       mhv1.h, mhv2.h, ...
+  to enumerate all possible combinations of flags.
 
-      }
-    } else {
-      /* hybrid interaction */
-#undef MH_SINGLE
-#define MH_SINGLE FALSE
-      if(marked) {
-	/* marked process */
-#undef MH_MARKED
-#define MH_MARKED TRUE
+*/
 
-	/* run loop */
-#include "mhloop.h"
-
-      } else {
-	/* unmarked process */
-#undef MH_MARKED
-#define MH_MARKED FALSE
-
-	/* run loop */
-#include "mhloop.h"
-
-      }
-    }
-  } else {
-    /* not saving transition history */
-#undef MH_TRACKING
-#define MH_TRACKING FALSE
-    if(Ncif == 1) {
-      /* single interaction */
-#undef MH_SINGLE
-#define MH_SINGLE TRUE
-      if(marked) {
-	/* marked process */
-#undef MH_MARKED
-#define MH_MARKED TRUE
-
-	/* run loop */
-#include "mhloop.h"
-
-      } else {
-	/* unmarked process */
-#undef MH_MARKED
-#define MH_MARKED FALSE
-
-	/* run loop */
-#include "mhloop.h"
-
-      }
-    } else {
-      /* hybrid interaction */
-#undef MH_SINGLE
-#define MH_SINGLE FALSE
-      if(marked) {
-	/* marked process */
-#undef MH_MARKED
-#define MH_MARKED TRUE
-
-	/* run loop */
-#include "mhloop.h"
-
-      } else {
-	/* unmarked process */
-#undef MH_MARKED
-#define MH_MARKED FALSE
-
-	/* run loop */
-#include "mhloop.h"
-
-      }
-    }
-  }
+#include "mhv1.h"
 
   /* relinquish random number generator */
   PutRNGstate();

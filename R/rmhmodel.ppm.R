@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.55 $   $Date: 2012/05/11 11:19:52 $
+#  $Revision: 2.56 $   $Date: 2013/02/25 01:02:12 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -173,7 +173,8 @@ list(
          siminfoI <- .Spatstat.Rmhinfo[[interI$name]]
          if(is.null(siminfoI))
            stop(paste("Simulation of a fitted", sQuote(interI$name),
-                      "has not yet been implemented"))
+                      "has not yet been implemented"),
+                call.=FALSE)
          # nameI is the tag that identifies I-th component in hybrid
          nameI  <- names(interlist)[[i]]
          nameI. <- paste(nameI, ".", sep="")

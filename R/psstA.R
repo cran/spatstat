@@ -3,7 +3,7 @@
 #
 #	Pseudoscore residual for unnormalised F (area-interaction)
 #
-#	$Revision: 1.3 $	$Date: 2012/09/09 02:50:20 $
+#	$Revision: 1.4 $	$Date: 2013/02/26 04:32:07 $
 #
 ################################################################################
 #
@@ -148,7 +148,7 @@ psstA <- function(object, r=NULL, breaks=NULL, ...,
                "res")
     fvnames(ans, ".") <- c("res", "up", "lo", "theo")
   }
-  
+  unitname(ans) <- unitname(fit)
   # 
   return(ans)
 }

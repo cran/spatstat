@@ -72,7 +72,8 @@ There is however no actual duplication of points in the 1998 to 2003
 patterns due to \dQuote{jittering} having been applied in order to
 avoid such duplication.  It is not clear just \emph{how} the fire
 locations were jittered.  It seems unlikely that the jittering was
-done using the \code{jitter()} function from \code{R})
+done using the \code{jitter()} function from \code{R} or the
+\pkg{spatstat} function \code{\link{rjitter}}.
 
 Of course there are many sets of points which are \emph{virtually}
 identical, being separated by distances induced by the jittering.

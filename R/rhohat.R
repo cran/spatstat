@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.44 $  $Date: 2012/10/25 11:59:46 $
+#  $Revision: 1.47 $  $Date: 2013/01/30 09:28:14 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -37,7 +37,7 @@ rhohat.ppp <- rhohat.quad <- rhohat.ppm <-
   # validate model
   if(is.ppp(object) || inherits(object, "quad")) {
     model <- ppm(object, ~1)
-    reference <- "area"
+    reference <- "Lebesgue"
     modelcall <- NULL
   } else if(is.ppm(object)) {
     model <- object
@@ -45,34 +45,6 @@ rhohat.ppp <- rhohat.quad <- rhohat.ppm <-
     modelcall <- model$call
   } else stop("object should be a point pattern or a point process model")
 
-
-  rhohat2dEngine(model, covariate, reference, ...,
-                 method=method,
-                 smoother=smoother,
-                 dimyx=dimyx, eps=eps,
-                 n=n, bw=bw, adjust=adjust, from=from, to=to,
-                 bwref=bwref, covname=covname, confidence=confidence,
-                 modelcall=modelcall, callstring=callstring)
-}
-
-rhohat2dEngine <- function(model, covariate, reference, ...,
-                   method=c("ratio", "reweight", "transform"),
-                   smoother=c("kernel", "local"),
-                   dimyx=NULL, eps=NULL,
-                   n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-                   bwref=bw, covname, confidence=0.95,
-                   modelcall=NULL, callstring="rhohat") {
-  
-  # check availability of locfit package
-  if(smoother == "local" && !require(locfit, quietly=TRUE)) {
-    warning(paste("in", dQuote(callstring), ":",
-                  "package", sQuote("locfit"), "is not available;",
-                  "unable to perform local likelihood smoothing;",
-                  "using kernel smoothing instead"),
-            call.=FALSE)
-    smoother <- "kernel"
-  }
-  # evaluate the covariate at data points and at pixels
   if(is.character(covariate) && length(covariate) == 1) {
     covname <- covariate
     switch(covname,
@@ -84,10 +56,91 @@ rhohat2dEngine <- function(model, covariate, reference, ...,
            },
            stop("Unrecognised covariate name")
          )
-    cartesian <- TRUE
-  } else cartesian <- FALSE
-  # evaluate covariate
-  stuff <- evalCovar(model, covariate, dimyx=dimyx, eps=eps)
+    covunits <- unitname(data.ppm(model))
+  } else {
+    covunits <- NULL
+  }
+
+  area <- area.owin(as.owin(data.ppm(model)))
+  
+  rhohatEngine(model, covariate, reference, area, ...,
+               method=method,
+               smoother=smoother,
+               resolution=list(dimyx=dimyx, eps=eps),
+               n=n, bw=bw, adjust=adjust, from=from, to=to,
+               bwref=bwref, covname=covname, covunits=covunits,
+               confidence=confidence,
+               modelcall=modelcall, callstring=callstring)
+}
+
+rhohat.lpp <- rhohat.lppm <- 
+  function(object, covariate, ...,
+           method=c("ratio", "reweight", "transform"),
+           smoother=c("kernel", "local"),
+           nd=1000, eps=NULL,
+           n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
+           bwref=bw, covname, confidence=0.95) {
+  callstring <- short.deparse(sys.call())
+  smoother <- match.arg(smoother)
+  method <- match.arg(method)
+  if(missing(covname)) 
+    covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
+  if(is.null(adjust))
+    adjust <- 1
+  # validate model
+  if(is.lpp(object)) {
+    X <- object
+    model <- lppm(object, ~1)
+    reference <- "Lebesgue"
+    modelcall <- NULL
+  } else if(inherits(object, "lppm")) {
+    model <- object
+    X <- model$X
+    reference <- "model"
+    modelcall <- model$call
+  } else stop("object should be of class lpp or lppm")
+  
+  if(is.character(covariate) && length(covariate) == 1) {
+    covname <- covariate
+    switch(covname,
+           x={
+             covariate <- function(x,y) { x }
+           }, 
+           y={
+             covariate <- function(x,y) { y }
+           },
+           stop("Unrecognised covariate name")
+         )
+    covunits <- unitname(X)
+  } else {
+    covunits <- NULL
+  }
+
+  totlen <- sum(lengths.psp(as.psp(as.linnet(X))))
+  
+  rhohatEngine(model, covariate, reference, totlen, ...,
+               method=method,
+               smoother=smoother,
+               resolution=list(nd=nd, eps=eps),
+               n=n, bw=bw, adjust=adjust, from=from, to=to,
+               bwref=bwref, covname=covname, covunits=covunits,
+               confidence=confidence,
+               modelcall=modelcall, callstring=callstring)
+}
+
+rhohatEngine <- function(model, covariate,
+                         reference=c("Lebesgue", "model"), volume,
+                         ...,
+                         method=c("ratio", "reweight", "transform"),
+                         smoother=c("kernel", "local"),
+                         resolution=list(), 
+                         n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
+                         bwref=bw, covname, covunits=NULL, confidence=0.95,
+                         modelcall=NULL, callstring="rhohat") {
+  reference <- match.arg(reference)
+  # evaluate the covariate at data points and at pixels
+  stuff <- do.call("evalCovar",
+                   append(list(model, covariate), resolution))
   # unpack
   info   <- stuff$info
   values <- stuff$values
@@ -98,9 +151,52 @@ rhohat2dEngine <- function(model, covariate, reference, ...,
   Zvalues <- values$Zvalues
   lambda  <- values$lambda
   # normalising constants
+  baseline <- if(reference == "Lebesgue") volume else (mean(lambda) * volume)
+  # info 
+  savestuff <- list(reference  = reference,
+                    Zimage     = Zimage)
+  # calculate rho-hat
+  result <- rhohatCalc(ZX, Zvalues, lambda, baseline,
+                       ...,
+                       method=method, smoother=smoother,
+                       n=n, bw=bw, adjust=adjust, from=from, to=to,
+                       bwref=bwref, covname=covname, confidence=confidence,
+                       covunits=covunits,
+                       modelcall=modelcall, callstring=callstring,
+                       savestuff=savestuff)
+  return(result)
+}
+
+
+# basic calculation of rhohat from covariate values
+
+rhohatCalc <- function(ZX, Zvalues, lambda, baseline, ...,
+                       method=c("ratio", "reweight", "transform"),
+                       smoother=c("kernel", "local"),
+                       n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
+                       bwref=bw, covname, confidence=0.95,
+                       covunits = NULL, modelcall=NULL, callstring=NULL,
+                       savestuff=list()) {
+  method <- match.arg(method)
+  smoother <- match.arg(smoother)
+  # check availability of locfit package
+  if(smoother == "local" && !require(locfit, quietly=TRUE)) {
+    warning(paste("In", paste(dQuote(callstring), ":", sep=""),
+                  "package", sQuote("locfit"), "is not available;",
+                  "unable to perform local likelihood smoothing;",
+                  "using kernel smoothing instead"),
+            call.=FALSE)
+    smoother <- "kernel"
+  }
+  # validate
+  stopifnot(is.numeric(ZX))
+  stopifnot(is.numeric(Zvalues))
+  stopifnot(is.numeric(lambda))
+  stopifnot(length(lambda) == length(Zvalues))
+  stopifnot(all(is.finite(lambda)))
+  check.1.real(baseline)
+  # normalising constants
   nX   <- length(ZX)
-  area <- area.owin(as.owin(model))
-  baseline <- if(reference == "area") area else (mean(lambda) * area)
   kappahat <- nX/baseline
   # limits
   Zrange <- range(ZX, Zvalues)
@@ -273,23 +369,23 @@ rhohat2dEngine <- function(model, covariate, reference, ...,
                paste("%s[hi]", paren(covname), sep=""),
                paste("%s[lo]", paren(covname), sep="")),
              desc=desc,
-             unitname=if(cartesian) unitname(data.ppm(model)) else NULL,
+             unitname=covunits,
              fname="rho",
              yexp=substitute(rho(X), list(X=as.name(covname))))
   attr(rslt, "dotnames") <- c("rho", "hi", "lo")
   # pack up
   class(rslt) <- c("rhohat", class(rslt))
-  attr(rslt,"stuff") <-
-    list(reference  = reference,
-         modelcall  = modelcall, 
+  # add info
+  stuff <- 
+    list(modelcall  = modelcall, 
          callstring = callstring,
          sigma      = switch(smoother, kernel=sigma, local=NULL),
          covname    = paste(covname, collapse=""),
          ZX         = ZX,
-         Zimage     = Zimage,
          lambda     = lambda,
          method     = method,
          smoother   = smoother)
+  attr(rslt, "stuff") <- append(stuff, savestuff)
   return(rslt)
 }
 
@@ -394,3 +490,10 @@ predict.rhohat <- function(object, ..., relative=FALSE) {
   return(Y)
 }
 
+as.function.rhohat <- function(x, ..., value, extrapolate=TRUE) {
+  xx <- with(x, .x)
+  yy <- if(!missing(value) && value %in% names(x)) x[[value]] else with(x, .y)
+  endrule <- if(!extrapolate) 1 else 2
+  f <- approxfun(xx, yy, rule=endrule)
+  return(f)
+}

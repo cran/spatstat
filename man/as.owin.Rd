@@ -4,11 +4,13 @@
 \alias{as.owin.ppp}
 \alias{as.owin.ppm}
 \alias{as.owin.kppm}
+\alias{as.owin.lpp}
 \alias{as.owin.lppm}
 \alias{as.owin.psp}
 \alias{as.owin.quad}
 \alias{as.owin.tess}
 \alias{as.owin.im}
+\alias{as.owin.layered}
 \alias{as.owin.gpc.poly}
 \alias{as.owin.data.frame}
 \alias{as.owin.distfun}
@@ -32,6 +34,8 @@ in any of several formats, into an object of class \code{"owin"}.
 
  \method{as.owin}{kppm}(W, \dots, from=c("points", "covariates"), fatal=TRUE)
 
+ \method{as.owin}{lpp}(W, \dots, fatal=TRUE)
+
  \method{as.owin}{lppm}(W, \dots, fatal=TRUE)
 
  \method{as.owin}{psp}(W, \dots, fatal=TRUE)
@@ -41,6 +45,8 @@ in any of several formats, into an object of class \code{"owin"}.
  \method{as.owin}{tess}(W, \dots, fatal=TRUE)
 
  \method{as.owin}{im}(W, \dots, fatal=TRUE)
+
+ \method{as.owin}{layered}(W, \dots, fatal=TRUE)
 
  \method{as.owin}{gpc.poly}(W, \dots, fatal=TRUE)
 
@@ -76,7 +82,10 @@ in any of several formats, into an object of class \code{"owin"}.
  
   This function converts data in any of several formats 
   into an object of class \code{"owin"} for use by the \pkg{spatstat}
-  package.  The argument \code{W} may be
+  package. The function \code{as.owin} is generic, with methods
+  for different classes of objects, and a default method.
+
+  The argument \code{W} may be
   \itemize{
     \item
     an object of class \code{"owin"}
@@ -131,6 +140,11 @@ in any of several formats, into an object of class \code{"owin"}.
     covariate images to which the model was fitted,
     and returns a binary mask window that specifies the pixel locations.
     \item
+    an object of class \code{"lpp"}
+    representing a point pattern on a linear network.
+    In this case, \code{as.owin} extracts the linear network
+    and returns a window containing this network. 
+    \item
     an object of class \code{"lppm"}
     representing a fitted point process model on a linear network.
     In this case, \code{as.owin} extracts the linear network
@@ -153,16 +167,18 @@ in any of several formats, into an object of class \code{"owin"}.
     simulation window has not yet been determined). This is not treated
     as an error, because the argument \code{fatal} defaults to
     \code{FALSE} for this method.
+    \item
+    an object of class \code{"layered"} representing a
+    list of spatial objects. See \code{\link{layered}}.
+    In this case, \code{as.owin} will be applied to each
+    of the objects in the list, and the union of these windows
+    will be returned.
   }
   If the argument \code{W} is not in one of these formats
   and cannot be converted to a window, then an error will
   be generated (if \code{fatal=TRUE}) or a value of \code{NULL}
   will be returned (if \code{fatal=FALSE}).
 
-  The function \code{as.owin} is generic, with methods for
-  \code{"owin"},
-  \code{"im"} and
-  \code{"ppp"} as well as the default method.
 }
 \seealso{
   \code{\link{owin.object}},

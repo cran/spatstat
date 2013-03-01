@@ -1,5 +1,6 @@
 \name{is.marked.ppm}
 \alias{is.marked.ppm}
+\alias{is.marked.lppm}
 \title{Test Whether A Point Process Model is Marked}
 \description{
   Tests whether a fitted point process model involves ``marks''
@@ -12,6 +13,7 @@
   \item{X}{
     Fitted point process model (object of class \code{"ppm"})
     usually obtained from \code{\link{ppm}}.
+    Alternatively, a model of class \code{"lppm"}.
   }
   \item{\dots}{
     Ignored.

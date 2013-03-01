@@ -3,7 +3,7 @@
 #
 #	Residual K
 #
-#	$Revision: 1.1 $	$Date: 2011/06/19 05:57:13 $
+#	$Revision: 1.2 $	$Date: 2013/02/26 04:32:27 $
 #
 #############################################################################
 #
@@ -66,6 +66,7 @@ Kres <- function(object, ...) {
                    "standardised isotropic-corrected residual %s",
                    "ires")
     fvnames(ans, ".") <- c(savedotnames, c("ihi", "ilo"))
-  } 
+  }
+  unitname(ans) <- unitname(K)
   return(ans)
 }

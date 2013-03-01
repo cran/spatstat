@@ -57,6 +57,7 @@ double strausscif(prop, state, cdata)
   double u, v;
   double r2, d2, a, cifval;
   Strauss *strauss;
+  DECLARE_CLOSE_VARS;
 
   strauss = (Strauss *) cdata;
 
@@ -79,34 +80,27 @@ double strausscif(prop, state, cdata)
   if(strauss->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	if(dist2thresh(u,v,x[j],y[j],strauss->period, r2))
-	  kount = kount+1;
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],strauss->period, r2))
+	  ++kount;
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	if(dist2thresh(u,v,x[j],y[j],strauss->period, r2))
-	  kount = kount+1;
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],strauss->period, r2))
+	  ++kount;
       }
     }
-  }
-  else { /* Euclidean distance */
+  } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	a = r2 - pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j], 2);
-	  if(a > 0) kount = kount+1;
-	}
+	if(CLOSE(u,v,x[j],y[j], r2))
+	  ++kount;
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	a = r2 - pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j], 2);
-	  if(a > 0) kount = kount+1;
-	}
+	if(CLOSE(u,v,x[j],y[j], r2))
+	  ++kount;
       }
     }
   }

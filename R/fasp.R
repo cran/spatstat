@@ -1,7 +1,7 @@
 #
 #	fasp.R
 #
-#	$Revision: 1.29 $	$Date: 2011/10/18 04:21:44 $
+#	$Revision: 1.30 $	$Date: 2013/01/24 07:47:34 $
 #
 #
 #-----------------------------------------------------------------------------
@@ -9,13 +9,17 @@
 
 # creator
 fasp <- function(fns, which, formulae=NULL,
-                 dataname=NULL, title=NULL, rowNames=NULL, colNames=NULL) {
+                 dataname=NULL, title=NULL, rowNames=NULL, colNames=NULL,
+                 checkfv=TRUE) {
   stopifnot(is.list(fns))
   stopifnot(is.matrix(which))
   stopifnot(length(fns) == length(which))
-
-  fns <- lapply(fns, as.fv)
   n   <- length(which)
+
+  if(checkfv)
+    for(i in seq_len(n))
+      if(!is.fv(fns[[i]]))
+        stop(paste("fns[[", i, "]] is not an fv object", sep=""))
 
   # set row and column labels
   if(!is.null(rowNames))

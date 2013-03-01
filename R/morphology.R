@@ -6,7 +6,7 @@
 #  generic functions
 #  and methods for owin, psp, ppp
 #
-#  $Revision: 1.18 $   $Date: 2011/05/18 08:06:53 $
+#  $Revision: 1.19 $   $Date: 2013/02/14 01:41:13 $
 #
 
 # ............ generic  ............................
@@ -70,7 +70,7 @@ erosion.owin <-
   if(polygonal) {
     # compute polygonal region
     cw <- complement.owin(w)
-    dcw <- dilation.owin(cw, r, polygonal=TRUE)
+    dcw <- dilation.owin(cw, r, polygonal=TRUE, ...)
     cdcw <- complement.owin(dcw)
     wnew <- intersect.owin(cdcw, w)
     return(wnew)
@@ -244,7 +244,7 @@ dilation.psp <- function(w, r, ..., polygonal=TRUE, tight=TRUE) {
       yy <- c(yy, seg$y0 + r * sin(leftcircle))
       sausage <- owin(newbox$xrange, newbox$yrange, poly=list(x=xx, y=yy))
       # add to set
-      out <- union.owin(out, sausage)
+      out <- union.owin(out, sausage, ...)
     }
     return(out)
   }

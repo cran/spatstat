@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.74 $	$Date: 2012/06/22 08:02:17 $
+#	$Revision: 4.76 $	$Date: 2013/02/24 04:12:36 $
 #
 #
 #
@@ -163,6 +163,22 @@ overlap.owin <- function(A, B) {
   stop("Internal error")
 }
 
+#
+#  subset operator for window
+#
+
+"[.owin" <- 
+function(x, i, ...) {
+  if(!missing(i) && !is.null(i)) {
+    if(is.im(i) && i$type == "logical") {
+      # convert to window
+      i <- as.owin(eval.im(ifelse(i, 1, NA)))
+    } else stopifnot(is.owin(i))
+    x <- intersect.owin(x, i, fatal=FALSE)
+  }
+  return(x)
+}
+    
 #
 #
 #  Intersection and union of windows
@@ -406,6 +422,13 @@ setminus.owin <- function(A, B, ...) {
   Amask <- is.mask(A)
   Bmask <- is.mask(B)
 
+  # Case where A and B are both rectangular
+  if(Arect && Brect) {
+    C <- intersect.owin(A, B, fatal=FALSE)
+    if(is.null(C)) return(A)
+    return(complement.owin(C, A))
+  }
+    
   # Polygonal case
 
   if(!Amask && !Bmask) {

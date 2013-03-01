@@ -10,7 +10,9 @@ transect.im <- local({
 
   specify.location <- function(loc, rect) {
     lname <- short.deparse(substitute(loc))
-    if(is.numeric(loc) || is.list(loc))
+    if(is.numeric(loc) && length(loc) == 2)
+      return(list(x=loc[1], y=loc[2]))
+    if(is.list(loc))
       return(xy.coords(loc))
     if(!(is.character(loc) && length(loc) == 1))
       stop(paste("Unrecognised format for", sQuote(lname)), call.=FALSE)

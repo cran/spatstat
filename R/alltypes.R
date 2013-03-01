@@ -1,16 +1,20 @@
 #
 #      alltypes.R
 #
-#   $Revision: 1.27 $   $Date: 2011/07/04 05:54:40 $
+#   $Revision: 1.29 $   $Date: 2013/01/24 07:47:50 $
 #
 #
+                                  
 alltypes <- function(X, fun="K", ...,
                      dataname=NULL,verb=FALSE,envelope=FALSE) {
 #
 # Function 'alltypes' --- calculates a summary function for
 # each type, or each pair of types, in a multitype point pattern
 #
-  verifyclass(X,"ppp")
+  if(is.ppp(X)) classname <- "ppp" else
+  if(is.lpp(X)) classname <- "lpp" else
+  stop("X should be a ppp or lpp object")
+  
   if(is.null(dataname))
     dataname <- short.deparse(substitute(X))
 
@@ -45,30 +49,14 @@ alltypes <- function(X, fun="K", ...,
 # ---------------------------------------------------------------------
 # determine function to be called
   
-  estimator <- 
-    if(is.function(fun))
-      fun
-    else if(is.character(fun) && fun %in% c("F", "G", "J", "K", "L", "pcf")) {
-    # conventional abbreviations
-      if(nmarks > 0) 
-        switch(fun,
-               F=Fest,
-               G=Gcross,
-               J=Jcross,
-               K=Kcross,
-               L=Lcross,
-               pcf=pcfcross)
-      else
-        switch(fun,
-               F=Fest,
-               G=Gest,
-               J=Jest,
-               K=Kest,
-               L=Lest,
-               pcf=pcf)
-    } else if(is.character(fun))
-      get(fun, mode="function")
-    else 
+  if(is.function(fun)) {
+    estimator <- fun
+  } else if(is.character(fun)) {
+    # First try matching one of the standard abbreviations K, G etc
+    estimator <- getSumFun(fun, classname, (nmarks > 0), fatal=FALSE)
+    if(is.null(estimator))
+      estimator <- get(fun, mode="function")
+  } else 
       stop(paste(sQuote("fun"), "should be a function or a character string"))
   
 # ------------------------------------------------------------------  
@@ -135,7 +123,7 @@ alltypes <- function(X, fun="K", ...,
                                           list(i=ma[i], j=ma[j]),
                                           NULL)))
       k <- k+1
-      fns[[k]] <- currentfv 
+      fns[[k]] <- as.fv(currentfv)
     }
   }
 
@@ -149,6 +137,57 @@ alltypes <- function(X, fun="K", ...,
   rslt <- fasp(fns, which=witch,
                formulae=NULL,
                dataname=dataname,
-               title=title)
+               title=title,
+               checkfv=FALSE)
   return(rslt)
 }
+
+# Lookup table for standard abbreviations of functions
+
+getSumFun <- local({
+
+  ftable <-
+  rbind(
+        data.frame(class="ppp", marked=FALSE,
+                   abbrev=c("F", "G", "J", "K", "L", "pcf"),
+                   full=c("Fest", "Gest", "Jest", "Kest", "Lest", "pcf"),
+                   stringsAsFactors=FALSE),
+        data.frame(class="ppp", marked=TRUE,
+                   abbrev=c("F", "G", "J", "K", "L", "pcf"),
+                   full=  c("Fest",
+                     "Gcross", "Jcross", "Kcross", "Lcross",
+                     "pcfcross"),
+                   stringsAsFactors=FALSE),
+        data.frame(class="lpp", marked=FALSE,
+                   abbrev=c("K", "pcf"),
+                   full=c("linearK", "linearpcf"),
+                   stringsAsFactors=FALSE),
+        data.frame(class="lpp", marked=TRUE,
+                   abbrev=c("K", "pcf"),
+                   full=c("linearKcross", "linearpcfcross"),
+                   stringsAsFactors=FALSE)
+        )
+
+  getfun <- function(abbreviation, classname, ismarked, fatal=TRUE) {
+    matches <- with(ftable,
+                    which(abbrev == abbreviation &
+                          class == classname &
+                          marked == ismarked))
+    if(length(matches) == 0) {
+      if(!fatal)
+        return(NULL)
+      stop(paste("No match to function abbreviation",
+                 sQuote(abbreviation),
+                 "for class",
+                 sQuote(classname)))
+    }
+    if(length(matches) > 1)
+      stop("Ambiguous function name")
+    fullname <- ftable$full[matches]
+    get(fullname, mode="function")
+  }
+
+  getfun
+})
+
+

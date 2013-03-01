@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.60 $   $Date: 2012/12/14 00:48:48 $
+#  $Revision: 1.61 $   $Date: 2013/02/11 10:27:16 $
 #
 #  Plotting code for pixel images
 #
@@ -40,6 +40,10 @@ plot.im <- local({
     x[ok]
   }
   
+  cellbreaks <- function(x, dx) {
+    nx <- length(x)
+    seq(x[1] - dx/2, x[nx] + dx/2, length.out=nx+1)
+  }
   
   # main function
   PlotIm <- function(x, ...,
@@ -335,7 +339,9 @@ plot.im <- local({
        || trivial)
       {
         # plot image without ribbon
-        image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+        image.doit(list(x=cellbreaks(x$xcol, x$xstep),
+                        y=cellbreaks(x$yrow, x$ystep),
+                        z=t(x$v)),
                    dotargs,
                    list(useRaster=TRUE),
                    colourinfo,
@@ -385,7 +391,9 @@ plot.im <- local({
                                      list(main=main, xlab="", ylab="")),
                     extrargs=plotparams)
     # plot image
-    image.doit(list(x=x$xcol, y=x$yrow, z=t(x$v)),
+    image.doit(list(x=cellbreaks(x$xcol, x$xstep),
+                    y=cellbreaks(x$yrow, x$ystep),
+                    z=t(x$v)),
                list(add=TRUE),
                dotargs,
                list(useRaster=TRUE),

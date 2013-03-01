@@ -105,6 +105,7 @@ double straussmcif(prop, state, cdata)
   double range2;
   double *period;
   MultiStrauss *multistrauss;
+  DECLARE_CLOSE_D2_VARS;
 
   multistrauss = (MultiStrauss *) cdata;
   range2 = multistrauss->range2;
@@ -151,44 +152,40 @@ double straussmcif(prop, state, cdata)
   if(multistrauss->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrauss->rad2, mrk, mrkj, ntypes)) 
 	    MAT(multistrauss->kount, mrk, mrkj, ntypes)++;
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrauss->rad2, mrk, mrkj, ntypes)) 
 	    MAT(multistrauss->kount, mrk, mrkj, ntypes)++;
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
   }
   else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], range2, d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrauss->rad2, mrk, mrkj, ntypes)) 
 	    MAT(multistrauss->kount, mrk, mrkj, ntypes)++;
 	}
-	END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], range2, d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrauss->rad2, mrk, mrkj, ntypes)) 
 	    MAT(multistrauss->kount, mrk, mrkj, ntypes)++;
 	}
-	END_IF_CLOSE_D2
       }
     }
   }

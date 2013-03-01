@@ -3,7 +3,7 @@
 #
 #	Computes the GNZ contrast of delta-f for any function f
 #
-#	$Revision: 1.2 $	$Date: 2011/11/20 02:12:36 $
+#	$Revision: 1.4 $	$Date: 2013/02/26 07:03:14 $
 #
 ################################################################################
 #
@@ -86,6 +86,8 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
 
   # evaluate fun(X) for data
   fX <- do.call(fun, append(list(X, r=rvals), funargs))
+  fXunits <- unitname(fX)
+  # Extract 'best' estimate only
   fX <- with(fX, .y)
   zero <- rep(0, length(fX))
   # sum over all quadrature points
@@ -158,14 +160,15 @@ psst <- function(object, fun, r=NULL, breaks=NULL, ...,
                "res")
 
   fvnames(ans,".") <- c("res", "hi", "lo", "theo")
+  unitname(ans) <- fXunits
   # 
   return(ans)
 }
 
 npfun <- function(X, ..., r) {
-  npoints <- X$n
+  npts <- npoints(X)
   # initialise fv object
-  df <- data.frame(r=r, theo=0, npoint=npoints)
+  df <- data.frame(r=r, theo=0, npoint=npts)
   desc <- c("distance argument r",
             "value 0",
             "value equal to number of points")
@@ -173,6 +176,7 @@ npfun <- function(X, ..., r) {
             "npoint", . ~ r,
             alim=c(0, max(r)), c("r","%s[theo](r)", "%s[obs](r)"),
             desc, fname="npoints")
+  unitname(ans) <- unitname(X)
   return(ans)
 }
 
@@ -190,6 +194,7 @@ nndcumfun <- function(X, ..., r) {
             "obs", . ~ r,
             alim=c(0, max(r)), c("r","%s[theo](r)", "%s[obs](r)"),
             desc, fname="nndcount")
+  unitname(ans) <- unitname(X)
   return(ans)
 }
 

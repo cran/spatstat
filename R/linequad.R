@@ -1,17 +1,29 @@
 #
 # linequad.R
 #
-#  $Revision: 1.6 $ $Date: 2012/10/20 06:37:06 $
+#  $Revision: 1.7 $ $Date: 2013/01/29 04:01:32 $
 #
 # create quadscheme for a pattern of points lying *on* line segments
 
 linequad <- function(X, Y, ..., eps=NULL, nd=1000) {
-  if(inherits(X, "lpp") && missing(Y)) {
-    # linequad(X) where X is an lpp object
-    return(linequad(as.ppp(X), as.psp(X)))
-  }
-  stopifnot(is.ppp(X))
-  stopifnot(is.psp(Y))
+  if(is.lpp(X)) {
+    # extract local coordinates from lpp object
+    coo <- coords(X)
+    mapXY <- coo$seg
+    tp    <- coo$tp
+    Xproj <- as.ppp(X)
+    if(!missing(Y))
+      warning("Argument Y ignored when X is an lpp object")
+    Y <- as.psp(X)
+  } else if(is.ppp(X)) {
+    # project data points onto segments
+    stopifnot(is.psp(Y))
+    v <- project2segment(X, Y)
+    Xproj <- v$Xproj
+    mapXY <- v$mapXY
+    tp    <- v$tp
+  } else stop("X should be an object of class lpp or ppp")
+  
   # handle multitype
   ismulti <- is.multitype(X)
   if(is.marked(X) && !ismulti)
@@ -21,7 +33,7 @@ linequad <- function(X, Y, ..., eps=NULL, nd=1000) {
     flev <- factor(levels(marx))
   }
   #
-  win <- Y$window
+  win <- as.owin(Y)
   len <- lengths.psp(Y)
   nseg <- length(len)
   if(missing(eps)) {
@@ -29,11 +41,6 @@ linequad <- function(X, Y, ..., eps=NULL, nd=1000) {
     eps <- sum(len)/nd
   } else
   stopifnot(is.numeric(eps) && length(eps) == 1 && is.finite(eps) && eps > 0)
-  # project data points onto segments
-  v <- project2segment(X, Y)
-  Xproj <- v$Xproj
-  mapXY <- v$mapXY
-  tp    <- v$tp
   # initialise quad scheme 
   dat <- dum <- ppp(numeric(0), numeric(0), window=win)
   wdat <- wdum <- numeric(0)

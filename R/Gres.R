@@ -3,7 +3,7 @@
 #
 #	Residual G 
 #
-#	$Revision: 1.1 $	$Date: 2011/06/19 05:57:18 $
+#	$Revision: 1.2 $	$Date: 2013/02/26 04:32:21 $
 #
 #############################################################################
 #
@@ -65,5 +65,6 @@ Gres <- function(object, ...) {
                    "hres")
     fvnames(ans, ".") <- c(savedotnames, c("hi", "lo"))
   }
+  unitname(ans) <- unitname(G)
   return(ans)
 }

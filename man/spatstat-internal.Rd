@@ -14,6 +14,7 @@
 \alias{affinexypolygon}
 \alias{anycrossing.psp}
 \alias{apply23sum}
+\alias{applytolayers}
 \alias{area.xypolygon}       
 \alias{areaGain.diri}       
 \alias{areaGain.grid}       
@@ -56,6 +57,7 @@
 \alias{check.1.real}
 \alias{check.testfun}
 \alias{clarkevansCalc}
+\alias{clear.simplepanel}
 \alias{clip.psp}
 \alias{cliprect.psp}
 \alias{clippoly.psp}
@@ -81,6 +83,7 @@
 \alias{default.clipwindow}
 \alias{default.n.tiling}
 \alias{default.ntile}
+\alias{dflt.redraw}
 \alias{densitypointsEngine}
 \alias{diagnose.ppm.engine}
 \alias{digital.volume}
@@ -101,7 +104,6 @@
 \alias{divisors}
 \alias{do.as.im}
 \alias{do.call.matched}
-\alias{do.iplot}
 \alias{do.istat}
 \alias{dotexpr.to.call}
 \alias{edge.Ripley}
@@ -120,6 +122,8 @@
 \alias{erodemask}
 \alias{erode.owin}
 \alias{evalCovar}
+\alias{evalCovar.ppm}
+\alias{evalCovar.lppm}
 \alias{evalCovariate}
 \alias{evalInteraction}
 \alias{evalInterEngine}
@@ -159,12 +163,15 @@
 \alias{getglmdata}
 \alias{getglmfit}
 \alias{getglmsubset}
+\alias{getlambda.lpp}
+\alias{getSumFun}
 \alias{geyercounts}
 \alias{GLMpredict}
 \alias{good.names}
 \alias{gridindex}            
 \alias{grid1index}
 \alias{grow.rectangle}
+\alias{grow.simplepanel}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
 \alias{ho.engine}
@@ -215,6 +222,7 @@
 \alias{kppmMinCon}
 \alias{kppmComLik}
 \alias{labels.ppm}
+\alias{layout.boxes}
 \alias{least.common.multiple}
 \alias{levels.im}
 \alias{levels<-.im}
@@ -293,7 +301,10 @@
 \alias{onecolumn}
 \alias{optimStatus}
 \alias{printStatus}
+\alias{redraw.simplepanel}
+\alias{run.simplepanel}
 \alias{signalStatus}
+\alias{simplepanel}
 \alias{ordinal}
 \alias{outdated.interact}
 \alias{overlap.owin}
@@ -396,8 +407,10 @@
 \alias{repair.image.xycoords}
 \alias{rgbNA}
 \alias{rhs.of.formula}
-\alias{rhohat2dEngine}
+\alias{rhohatEngine}
+\alias{rhohatCalc}
 \alias{RmhExpandRule}
+\alias{rmhsnoop}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -405,6 +418,7 @@
 \alias{rastersample}
 \alias{rasterx.im}
 \alias{rastery.im}
+\alias{rasterxy.im}
 \alias{reach.fii}
 \alias{rebadge.fv}
 \alias{rebound}
@@ -435,6 +449,7 @@
 \alias{rmhResolveControl}
 \alias{rmhResolveExpansion}
 \alias{rmhResolveTypes}
+\alias{rmhSnoopEnv}
 \alias{rmhcontrol.rmhcontrol}
 \alias{rmhcontrol.list}
 \alias{rmhEngine}
@@ -468,6 +483,7 @@
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
 \alias{spatstatClusterModelInfo}
+\alias{spatstatRmhInfo}
 \alias{spatialCDFframe}
 \alias{spatialCDFtest}
 \alias{splitHybridInteraction}
@@ -525,6 +541,7 @@
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
+\alias{xy.grid}
 \alias{X2testEngine}
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
@@ -546,6 +563,7 @@ affinexy(X, mat = diag(c(1, 1)), vec = c(0, 0), invert=FALSE)
 affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
+applytolayers(L, FUN, ...)
 area.xypolygon(polly)
 areaGain.diri(u, X, r, ..., W=as.owin(X))
 areaGain.grid(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.disc"))
@@ -583,7 +601,7 @@ censtimeCDFest(o, cc, d, breaks, \dots, KM, RS, HAN, RAW, han.denom,
 pmax)
 change.default.expand(x, newdefault)
 checkfields(X,L)          
-check.finite(x, context, xname)
+check.finite(x, context, xname, fatal, usergiven)
 check.hist.lengths(hist,breaks)
 check.named.list(x, nam, context, namopt)
 check.named.vector(x, nam, context, namopt)
@@ -593,10 +611,11 @@ check.nmatrix(m, npoints, fatal=TRUE, things="data points", naok=FALSE, squarema
 check.1.real(x, context, fatal)
 check.testfun(f, f1, X)
 clarkevansCalc(X, correction, clipregion, working)
+clear.simplepanel(P)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
-closepairs(X,rmax,ordered)
+closepairs(X,rmax,ordered,what)
 \method{coef}{summary.ppm}(object, \dots)
 \method{compatible}{rat}(A, B, \dots)
 complaining(whinge, fatal, value)
@@ -604,7 +623,7 @@ compileCDF(D, B, r, \dots, han.denom, check)
 compileK(D, r, weights, denom, check, ratio)
 compilepcf(D, r, weights, denom, check, endcorrect, \dots)
 conform.ratfv(x)
-crosspairs(X,Y,rmax)
+crosspairs(X,Y,rmax,what)
 crosspaircounts(X,Y,r)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms)
@@ -618,6 +637,7 @@ datagen.rpoisppOnLines(lambda, L, lmax, \dots, check=TRUE)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, eps, verbose)
 default.ntile(X)
+dflt.redraw(button, name, env)
 densitypointsEngine(x, sigma, \dots,
                     weights, edge, varcov,
                     leaveoneout, diggle, sorted)
@@ -642,7 +662,6 @@ dist2dpath(dist, method="C")
 divisors(n)
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
 do.call.matched(fun, arglist, funargs, extrargs, sieve)
-do.iplot(panel)
 do.istat(panel)
 dotexpr.to.call(expr, dot, evaluator)
 edge.Ripley(X, r, W, method, maxweight)
@@ -672,8 +691,11 @@ equalsfun.quad(Q)
 eratosthenes(nmax, startset)
 erodemask(w,r,strict)
 erode.owin(\dots)
-evalCovar(model, covariate, \dots,
+evalCovar(model, covariate, \dots)
+\method{evalCovar}{ppm}(model, covariate, \dots,
           dimyx, eps, jitter, modelname, covname, dataname)
+\method{evalCovar}{lppm}(model, covariate, \dots,
+          eps, nd, jitter, modelname, covname, dataname)
 evalCovariate(covariate, locations)
 evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
@@ -687,7 +709,7 @@ extractAtomicQtests(x)
 fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
-fasp(fns, which, formulae, dataname, title, rowNames, colNames)
+fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
 findbestlegendpos(...)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
@@ -695,7 +717,7 @@ firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
 flipxypolygon(p)
-forbidNA(x, context, xname)
+forbidNA(x, context, xname, fatal, usergiven)
 forbid.logi(object)
 FormatFaspFormulae(f, argname)
 fvlabels(x, expand=FALSE)
@@ -713,12 +735,15 @@ getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
 getglmsubset(object)
+getlambda.lpp(lambda, X, \dots)
+getSumFun(abbreviation, classname, ismarked, fatal)
 geyercounts(U,X,r,sat,Xcounts,EqualPairs)
 GLMpredict(fit, data, coefs, changecoef)
 good.names(nama, defaults, suffices)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
 grow.rectangle(W, xmargin=0, ymargin=xmargin)
+grow.simplepanel(P, side, len, new.clicks, new.redraws, \dots, aspect)
 handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
@@ -769,6 +794,7 @@ km.rs.opt(o, cc, d, breaks, KM, RS)
 kppmMinCon(X, Xname, po, clusters, statistic, statargs, \dots)
 kppmComLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
 \method{labels}{ppm}(object, \dots)
+layout.boxes(B, n, horizontal, aspect, usefrac)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
@@ -856,7 +882,10 @@ offsetsinformula(x)
 onecolumn(m)
 optimStatus(x, call)
 printStatus(x, errors.only)
+redraw.simplepanel(P, verbose)
+run.simplepanel(P, verbose)
 signalStatus(x, errors.only)
+simplepanel(title, B, boxes, clicks, redraws, exit, env)
 ordinal(k)
 outdated.interact(object)
 overlap.owin(A,B)
@@ -967,11 +996,18 @@ rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 repair.image.xycoords(x)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x)
-rhohat2dEngine(model, covariate, reference, \dots,
-               method, smoother, dimyx, eps,
+rhohatEngine(model, covariate, reference, volume, \dots,
+               method, smoother, resolution, 
                n, bw, adjust, from, to, 
-               bwref, covname, confidence, modelcall, callstring)
+               bwref, covname, covunits, confidence, modelcall, callstring)
+rhohatCalc(ZX, Zvalues, lambda, baseline, \dots,
+           method, smoother,
+           n, bw, adjust, from, to, 
+           bwref, covname, confidence,
+           covunits, modelcall, callstring, savestuff)
 RmhExpandRule(nama)
+rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
+     proptype, proplocn, propmark, propindx, numerator, denominator)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
 quadscheme.spatial(data, dummy, method = "grid", \dots)
@@ -979,6 +1015,7 @@ pointgrid(W, ngrid)
 rastersample(X, Y)
 rasterx.im(x)
 rastery.im(x)
+rasterxy.im(x, drop)
 \method{reach}{fii}(x, \dots, epsilon)
 rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl, new.yexp,
 new.dotnames, new.preferred, new.formula, new.tags)
@@ -1008,9 +1045,10 @@ rotxypolygon(p, angle = pi/2)
 rmhResolveControl(control, model)
 rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
+rmhSnoopEnv(Xinit, Wclip, R)
 \method{rmhcontrol}{rmhcontrol}(\dots)
 \method{rmhcontrol}{list}(\dots)
-rmhEngine(InfoList, \dots, verbose, kitchensink, preponly) 
+rmhEngine(InfoList, \dots, verbose, kitchensink, preponly, snoop) 
 \method{rmhmodel}{rmhmodel}(model, \dots)
 \method{rmhstart}{rmhstart}(start, \dots)
 \method{rmhstart}{list}(start, \dots)
@@ -1049,6 +1087,7 @@ smoothpointsEngine(x, values, sigma, \dots,
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatstatClusterModelInfo(name)
+spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots, dimyx, eps, jitter, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
@@ -1106,6 +1145,7 @@ warn.ignored.args(\dots, context)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)
+xy.grid(xr, yr, nx, ny, dx, dy)
 X2testEngine(OBS, EXP, \dots, method, df, nsim, conditional, alternative, testname, dataname)
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)

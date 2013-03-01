@@ -9,8 +9,9 @@
 
 \usage{
    \method{plot}{fasp}(x,formule=NULL, \dots,
-                        subset=NULL, title=NULL, samex=TRUE,
-                        banner=TRUE, mar.panel=NULL,
+                        subset=NULL, title=NULL, banner=TRUE,
+                        samex=FALSE, samey=FALSE,
+                        mar.panel=NULL,
                         outerlabels=TRUE, cex.outerlabels=1.25,
                         legend=FALSE)
 }
@@ -19,12 +20,11 @@
   \item{x}{An object of class \code{"fasp"} representing a
     function array.
   }
-
-  \item{formule}{A formula or list of formulae indicating what
+  \item{formule}{
+    A formula or list of formulae indicating what
     variables are to be plotted against what variable. Each formula is
     either an R language formula object, or a string that can be parsed
-    as a formula. If
-    \code{formule} is a list, its \eqn{k^{th}}{k-th} component
+    as a formula. If \code{formule} is a list, its \eqn{k^{th}}{k-th} component
     should be applicable to the \eqn{(i,j)^{th}}{(i,j)-th}
     plot where \code{x$which[i,j]=k}.  If the formula is left
     as \code{NULL}, then \code{plot.fasp} attempts to use the component
@@ -35,25 +35,26 @@
     Arguments passed to \code{\link{plot.fv}} to control 
     the individual plot panels. 
   }
-  \item{subset}{A logical vector, or a vector of indices, or an
-     expression or a character string, or a \bold{list} of such,
-     indicating a subset of the data to be included in each plot.
-     If \code{subset} is a list, its \eqn{k^{th}}{k-th} component
-     should be applicable to the \eqn{(i,j)^{th}}{(i,j)-th} plot
-     where \code{x$which[i,j]=k}.
+  \item{subset}{
+    A logical vector, or a vector of indices, or an
+    expression or a character string, or a \bold{list} of such,
+    indicating a subset of the data to be included in each plot.
+    If \code{subset} is a list, its \eqn{k^{th}}{k-th} component
+    should be applicable to the \eqn{(i,j)^{th}}{(i,j)-th} plot
+    where \code{x$which[i,j]=k}.
   }
-
   \item{title}{
     Overall title for the plot.
   }
-  \item{samex}{
-    Logical flag indicating whether all individual plots should have the
-    same x axis limits. This makes it easier to compare the plots.
-    It can only be set to \code{FALSE} if you are using the default plot style
-    (i.e. only when \code{formule} is missing).
-  }
   \item{banner}{
     Logical. If \code{TRUE}, the overall title is plotted.
+    If \code{FALSE}, the overall title is not plotted
+    and no space is allocated for it.
+  }
+  \item{samex,samey}{
+    Logical values indicating whether all individual plot panels should have the
+    same x axis limits and the same y axis limits, respectively.
+    This makes it easier to compare the plots.
   }
   \item{mar.panel}{
     Vector of length 4 giving the value of the

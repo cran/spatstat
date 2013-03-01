@@ -2,11 +2,13 @@
 \alias{is.stationary}
 \alias{is.stationary.ppm}
 \alias{is.stationary.kppm}
+\alias{is.stationary.lppm}
 \alias{is.stationary.slrm}
 \alias{is.stationary.rmhmodel}
 \alias{is.poisson}
 \alias{is.poisson.ppm}
 \alias{is.poisson.kppm}
+\alias{is.poisson.lppm}
 \alias{is.poisson.slrm}
 \alias{is.poisson.rmhmodel}
 \alias{is.poisson.interact}
@@ -22,11 +24,14 @@
 is.stationary(x)
 \method{is.stationary}{ppm}(x)
 \method{is.stationary}{kppm}(x)
+\method{is.stationary}{lppm}(x)
 \method{is.stationary}{slrm}(x)
 \method{is.stationary}{rmhmodel}(x)
+
 is.poisson(x)
 \method{is.poisson}{ppm}(x)
 \method{is.poisson}{kppm}(x)
+\method{is.poisson}{lppm}(x)
 \method{is.poisson}{slrm}(x)
 \method{is.poisson}{rmhmodel}(x)
 \method{is.poisson}{interact}(x)
@@ -34,7 +39,7 @@ is.poisson(x)
 \arguments{
   \item{x}{
     A fitted spatial point process model
-    (object of class \code{"ppm"}, \code{"kppm"}
+    (object of class \code{"ppm"}, \code{"kppm"}, \code{"lppm"}
     or \code{"slrm"}) or similar object.
   }
 }
@@ -84,6 +89,7 @@ is.poisson(x)
   Model-fitting functions 
   \code{\link{ppm}},
   \code{\link{kppm}},
+  \code{\link{lppm}},
   \code{\link{slrm}}.
 }
 \examples{

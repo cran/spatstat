@@ -118,6 +118,7 @@ double straushmcif(prop, state, cdata)
   double range2;
   double *period;
   MultiStraussHard *multistrausshard;
+  DECLARE_CLOSE_D2_VARS;
 
   multistrausshard = (MultiStraussHard *) cdata;
   range2 = multistrausshard->range2;
@@ -164,7 +165,7 @@ double straushmcif(prop, state, cdata)
   if(multistrausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
 	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
@@ -174,12 +175,11 @@ double straushmcif(prop, state, cdata)
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2) {
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,range2,d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
 	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
@@ -189,13 +189,12 @@ double straushmcif(prop, state, cdata)
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
-	END_IF_CLOSE_PERIODIC_D2
       }
     }
   } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], range2, d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
 	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
@@ -205,12 +204,11 @@ double straushmcif(prop, state, cdata)
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
-	END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-        IF_CLOSE_D2(u, v, x[j], y[j], range2, d2) {
+        if(CLOSE_D2(u, v, x[j], y[j], range2, d2)) {
 	  mrkj = marks[j];
 	  if(d2 < MAT(multistrausshard->rad2, mrk, mrkj, ntypes)) {
 	    if(d2 < MAT(multistrausshard->hc2, mrk, mrkj, ntypes)) {
@@ -220,7 +218,6 @@ double straushmcif(prop, state, cdata)
 	    MAT(multistrausshard->kount, mrk, mrkj, ntypes)++;
 	  }
 	}
-	END_IF_CLOSE_D2
       }
     }
   }

@@ -3,20 +3,32 @@
 #
 # connected component transform
 #
-#    $Revision: 1.6 $  $Date: 2011/05/18 01:35:12 $
+#    $Revision: 1.13 $  $Date: 2013/02/25 04:59:13 $
 #
-# Original code by Julian Burgos <jmburgos@u.washington.edu>
-# Adapted by Adrian Baddeley
+# Interpreted code for pixel images by Julian Burgos <jmburgos@u.washington.edu>
+# Rewritten in C by Adrian Baddeley
 #
+# Code for point patterns by Adrian Baddeley
 
-connected <- function(X, background=NA, method="C") {
+connected <- function(X, ...) {
+  UseMethod("connected")
+}
+
+connected.im <- function(X, ..., background=NA, method="C") {
   method <- pickoption("algorithm choice", method,
                        c(C="C", interpreted="interpreted"))
-  # convert X to binary mask
-  if(is.im(X) && !is.na(background))
+  if(!is.na(background))
     X <- solutionset(X != background)
   else
     X <- as.mask(as.owin(X))
+  connected.owin(X, method=method)
+}
+
+connected.owin <- function(X, ..., method="C") {
+  method <- pickoption("algorithm choice", method,
+                       c(C="C", interpreted="interpreted"))
+  # convert X to binary mask
+  X <- as.mask(X)
   #     
   Y <- X$m
   nr <- X$dim[1]
@@ -32,7 +44,7 @@ connected <- function(X, background=NA, method="C") {
     L[M] <- seq_len(sum(M))
     L[!M] <- 0
     # resolve labels
-    z <- .C("concom",
+    z <- .C("cocoImage",
             mat=as.integer(t(L)),
             nr=as.integer(nr),
             nc=as.integer(nc),
@@ -137,3 +149,36 @@ connected <- function(X, background=NA, method="C") {
           xcol=X$xcol, yrow=X$yrow, unitname=unitname(X))
   return(Z)
 }
+
+connected.ppp <- function(X, R, ...) {
+  stopifnot(is.ppp(X))
+  check.1.real(R, "In connected.ppp")
+  stopifnot(R >= 0)
+  internal <- resolve.1.default("internal", list(...), list(internal=FALSE))
+  nv <- npoints(X)
+  cl <- closepairs(X, R, what="indices")
+  ie <- cl$i - 1L
+  je <- cl$j - 1L
+  ne <- length(ie)
+  zz <- .C("cocoGraph",
+           nv=as.integer(nv),
+           ne=as.integer(ne),
+           ie=as.integer(ie),
+           je=as.integer(je),
+           label=as.integer(integer(nv)),
+           status=as.integer(integer(1)),
+           PACKAGE="spatstat")
+  if(zz$status != 0)
+    stop("Internal error: connected.ppp did not converge")
+  if(internal)
+    return(zz$label)
+  lab <- zz$label + 1L
+  # Renumber labels sequentially 
+  lab <- as.integer(factor(lab))
+  # Convert labels to factor
+  lab <- factor(lab)
+  # Apply to points
+  Y <- X %mark% lab
+  return(Y)
+}
+

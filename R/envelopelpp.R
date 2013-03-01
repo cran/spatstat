@@ -1,7 +1,7 @@
 #
 #  envelopelpp.R
 #
-#  $Revision: 1.13 $   $Date: 2012/10/20 07:58:22 $
+#  $Revision: 1.14 $   $Date: 2013/01/24 10:30:07 $
 #
 #  Envelopes for 'lpp' objects
 #
@@ -14,8 +14,9 @@ envelope.lpp <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, do.pwrong=FALSE) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- linearK
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),
@@ -67,8 +68,9 @@ envelope.lppm <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, do.pwrong=FALSE) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- linearK
 
   if("clipdata" %in% names(list(...)))
     stop(paste("The argument", sQuote("clipdata"),

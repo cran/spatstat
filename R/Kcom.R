@@ -3,7 +3,7 @@
 #
 #   model compensated K-function
 #
-# $Revision: 1.5 $ $Date: 2011/11/03 10:15:40 $
+# $Revision: 1.6 $ $Date: 2013/02/07 09:58:14 $
 #
 
 Kcom <- function(object, r=NULL, breaks=NULL, ..., 
@@ -38,6 +38,7 @@ Kcom <- function(object, r=NULL, breaks=NULL, ...,
                              isotropic="isotropic",
                              Ripley="isotropic",
                              ripley="isotropic",
+                             trans="translation",
                              translate="translation",
                              translation="translation",
                              best="best"),

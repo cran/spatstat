@@ -222,7 +222,7 @@ compileCDF <- function(D, B, r, ..., han.denom=NULL, check=TRUE) {
   if(check) {
     stopifnot(length(D) == length(B) && all(D >= 0) && all(B >= 0))
     if(han)
-      stopifnot(length(han.denom) == length(D))
+      stopifnot(length(han.denom) == length(r))
   }
   D <- as.vector(D)
   B <- as.vector(B)

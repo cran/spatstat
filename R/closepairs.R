@@ -1,26 +1,35 @@
 #
 # closepairs.R
 #
-#   $Revision: 1.19 $   $Date: 2012/03/18 08:53:45 $
+#   $Revision: 1.20 $   $Date: 2013/02/22 05:28:27 $
 #
 #  simply extract the r-close pairs from a dataset
 # 
 #  Less memory-hungry for large patterns
 #
-closepairs <- function(X, rmax, ordered=TRUE) {
+closepairs <- function(X, rmax, ordered=TRUE, what=c("all", "indices")) {
   verifyclass(X, "ppp")
+  what <- match.arg(what)
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
   npts <- npoints(X)
-  if(npts == 0)
-    return(list(i=integer(0),
-                j=integer(0),
-                xi=numeric(0),
-                yi=numeric(0),
-                xj=numeric(0),
-                yj=numeric(0),
-                dx=numeric(0),
-                dy=numeric(0),
-                d=numeric(0)))
+  null.answer <- switch(what,
+                        all = {
+                          list(i=integer(0),
+                               j=integer(0),
+                               xi=numeric(0),
+                               yi=numeric(0),
+                               xj=numeric(0),
+                               yj=numeric(0),
+                               dx=numeric(0),
+                               dy=numeric(0),
+                               d=numeric(0))
+                        },
+                        indices = {
+                          list(i=integer(0),
+                               j=integer(0))
+                        })
+   if(npts == 0)
+     return(null.answer)
   # sort points by increasing x coordinate
   oo <- fave.order(X$x)
   Xsort <- X[oo]
@@ -38,20 +47,33 @@ closepairs <- function(X, rmax, ordered=TRUE) {
     storage.mode(y) <- "double"
     storage.mode(r) <- "double"
     storage.mode(ng) <- "integer"
-    z <- .Call("Vclosepairs",
-               xx=x, yy=y, rr=r, nguess=ng,
-               PACKAGE="spatstat")
-    if(length(z) != 9)
-      stop("Internal error: incorrect format returned from Vclosepairs")
-    i  <- z[[1]]  # NB no increment required
-    j  <- z[[2]]
-    xi <- z[[3]]
-    yi <- z[[4]]
-    xj <- z[[5]]
-    yj <- z[[6]]
-    dx <- z[[7]]
-    dy <- z[[8]]
-    d  <- z[[9]]
+    switch(what,
+           all = {
+             z <- .Call("Vclosepairs",
+                        xx=x, yy=y, rr=r, nguess=ng,
+                        PACKAGE="spatstat")
+             if(length(z) != 9)
+               stop("Internal error: incorrect format returned from Vclosepairs")
+             i  <- z[[1]]  # NB no increment required
+             j  <- z[[2]]
+             xi <- z[[3]]
+             yi <- z[[4]]
+             xj <- z[[5]]
+             yj <- z[[6]]
+             dx <- z[[7]]
+             dy <- z[[8]]
+             d  <- z[[9]]
+           },
+           indices = {
+             z <- .Call("VcloseIJpairs",
+                        xx=x, yy=y, rr=r, nguess=ng,
+                        PACKAGE="spatstat")
+             if(length(z) != 2)
+               stop("Internal error: incorrect format returned from VcloseIJpairs")
+             i  <- z[[1]]  # NB no increment required
+             j  <- z[[2]]
+           })
+
   } else {
     # ------------------- use older code --------------------------
     DUP <- spatstat.options("dupC")
@@ -90,15 +112,7 @@ closepairs <- function(X, rmax, ordered=TRUE) {
                   DUP=DUP,
                   PACKAGE="spatstat")$count
       if(nsize <= 0)
-        return(list(i=integer(0),
-                    j=integer(0),
-                    xi=numeric(0),
-                    yi=numeric(0),
-                    xj=numeric(0),
-                    yj=numeric(0),
-                    dx=numeric(0),
-                    dy=numeric(0),
-                    d=numeric(0)))
+        return(null.answer)
       # add a bit more for safety
       nsize <- ceiling(1.1 * nsize) + 2 * npts
       # now extract points
@@ -128,25 +142,19 @@ closepairs <- function(X, rmax, ordered=TRUE) {
   # trim vectors to the length indicated
     npairs <- z$nout
     if(npairs <= 0)
-      return(list(i=integer(0),
-                  j=integer(0),
-                  xi=numeric(0),
-                  yi=numeric(0),
-                  xj=numeric(0),
-                  yj=numeric(0),
-                  dx=numeric(0),
-                  dy=numeric(0),
-                  d=numeric(0)))
+      return(null.answer)
     actual <- seq_len(npairs)
     i  <- z$iout[actual]  # sic
     j  <- z$jout[actual]
-    xi <- z$xiout[actual]
-    yi <- z$yiout[actual]
-    xj <- z$xjout[actual]
-    yj <- z$yjout[actual]
-    dx <- z$dxout[actual]
-    dy <- z$dyout[actual]
-    d <-  z$dout[actual]
+    if(what == "all") {
+      xi <- z$xiout[actual]
+      yi <- z$yiout[actual]
+      xj <- z$xjout[actual]
+      yj <- z$yjout[actual]
+      dx <- z$dxout[actual]
+      dy <- z$dyout[actual]
+      d <-  z$dout[actual]
+    }
     # ------------------- end code switch ------------------------
   }
   
@@ -158,33 +166,62 @@ closepairs <- function(X, rmax, ordered=TRUE) {
     ok <- (i < j)
     i  <-  i[ok]
     j  <-  j[ok]
-    xi <- xi[ok]
-    yi <- yi[ok]
-    xj <- xj[ok]
-    yj <- yj[ok]
-    dx <- dx[ok]
-    dy <- dy[ok]
-    d  <-  d[ok]
+    if(what == "all") {
+      xi <- xi[ok]
+      yi <- yi[ok]
+      xj <- xj[ok]
+      yj <- yj[ok]
+      dx <- dx[ok]
+      dy <- dy[ok]
+      d  <-  d[ok]
+    }
   }
   # done
-  return(list(i=i,
-              j=j,
-              xi=xi, 
-              yi=yi,
-              xj=xj,
-              yj=yj,
-              dx=dx,
-              dy=dy,
-              d=d))
+  switch(what,
+         all = {
+           answer <- list(i=i,
+                          j=j,
+                          xi=xi, 
+                          yi=yi,
+                          xj=xj,
+                          yj=yj,
+                          dx=dx,
+                          dy=dy,
+                          d=d)
+         },
+         indices = {
+           answer <- list(i = i, j = j)
+         })
+  return(answer)
 }
 
 
 #######################
 
-crosspairs <- function(X, Y, rmax) {
+crosspairs <- function(X, Y, rmax, what=c("all", "indices")) {
   verifyclass(X, "ppp")
   verifyclass(Y, "ppp")
+  what <- match.arg(what)
   stopifnot(is.numeric(rmax) && length(rmax) == 1 && rmax >= 0)
+  null.answer <- switch(what,
+                        all = {
+                          list(i=integer(0),
+                               j=integer(0),
+                               xi=numeric(0),
+                               yi=numeric(0),
+                               xj=numeric(0),
+                               yj=numeric(0),
+                               dx=numeric(0),
+                               dy=numeric(0),
+                               d=numeric(0))
+                        },
+                        indices = {
+                          list(i=integer(0),
+                               j=integer(0))
+                        })
+  nX <- npoints(X)
+  nY <- npoints(Y)
+  if(nX == 0 || nY == 0) return(null.answer)
   # order patterns by increasing x coordinate
   ooX <- fave.order(X$x)
   Xsort <- X[ooX]
@@ -193,8 +230,6 @@ crosspairs <- function(X, Y, rmax) {
   if(spatstat.options("crosspairs.newcode")) {
     # ------------------- use new faster code ---------------------
     # First (over)estimate the number of pairs
-    nX <- npoints(X)
-    nY <- npoints(Y)
     nsize <- ceiling(2 * pi * (rmax^2) * nX * nY/area.owin(Y$window))
     nsize <- max(1024, nsize)
     # .Call
@@ -208,22 +243,37 @@ crosspairs <- function(X, Y, rmax) {
     storage.mode(Yx) <- storage.mode(Yy) <- "double"
     storage.mode(r) <- "double"
     storage.mode(ng) <- "integer"
-    z <- .Call("Vcrosspairs",
-               xx1=Xx, yy1=Xy,
-               xx2=Yx, yy2=Yy,
-               rr=r, nguess=ng,
-               PACKAGE="spatstat")
-    if(length(z) != 9)
-      stop("Internal error: incorrect format returned from Vclosepairs")
-    i  <- z[[1]]  # NB no increment required
-    j  <- z[[2]]
-    xi <- z[[3]]
-    yi <- z[[4]]
-    xj <- z[[5]]
-    yj <- z[[6]]
-    dx <- z[[7]]
-    dy <- z[[8]]
-    d  <- z[[9]]
+    switch(what,
+           all = {
+             z <- .Call("Vcrosspairs",
+                        xx1=Xx, yy1=Xy,
+                        xx2=Yx, yy2=Yy,
+                        rr=r, nguess=ng,
+                        PACKAGE="spatstat")
+             if(length(z) != 9)
+               stop("Internal error: incorrect format returned from Vcrosspairs")
+             i  <- z[[1]]  # NB no increment required
+             j  <- z[[2]]
+             xi <- z[[3]]
+             yi <- z[[4]]
+             xj <- z[[5]]
+             yj <- z[[6]]
+             dx <- z[[7]]
+             dy <- z[[8]]
+             d  <- z[[9]]
+           },
+           indices = {
+             z <- .Call("VcrossIJpairs",
+                        xx1=Xx, yy1=Xy,
+                        xx2=Yx, yy2=Yy,
+                        rr=r, nguess=ng,
+                        PACKAGE="spatstat")
+             if(length(z) != 2)
+               stop("Internal error: incorrect format returned from VcrossIJpairs")
+             i  <- z[[1]]  # NB no increment required
+             j  <- z[[2]]
+           })
+           
   } else {
     # Older code 
     # obtain upper estimate of number of pairs
@@ -242,15 +292,7 @@ crosspairs <- function(X, Y, rmax) {
                 DUP=DUP,
                 PACKAGE="spatstat")$count
     if(nsize <= 0)
-      return(list(i=integer(0),
-                  j=integer(0),
-                  xi=numeric(0),
-                  yi=numeric(0),
-                  xj=numeric(0),
-                  yj=numeric(0),
-                  dx=numeric(0),
-                  dy=numeric(0),
-                  d=numeric(0)))
+      return(null.answer)
 
     # allow slightly more space to work around gcc bug #323
     nsize <- ceiling(1.1 * nsize) + X$n + Y$n
@@ -284,15 +326,7 @@ crosspairs <- function(X, Y, rmax) {
     # trim vectors to the length indicated
     npairs <- z$nout
     if(npairs <= 0)
-      return(list(i=integer(0),
-                  j=integer(0),
-                  xi=numeric(0),
-                  yi=numeric(0),
-                  xj=numeric(0),
-                  yj=numeric(0),
-                  dx=numeric(0),
-                  dy=numeric(0),
-                  d=numeric(0)))
+      return(null.answer)
     actual <- seq_len(npairs)
     i  <- z$iout[actual] # sic
     j  <- z$jout[actual] 
@@ -308,13 +342,20 @@ crosspairs <- function(X, Y, rmax) {
   i <- ooX[i]
   j <- ooY[j]
   # done
-  return(list(i=i,
-              j=j,
-              xi=xi, 
-              yi=yi,
-              xj=xj,
-              yj=yj,
-              dx=dx,
-              dy=dy,
-              d=d))
+  switch(what,
+         all = {
+           answer <- list(i=i,
+                          j=j,
+                          xi=xi, 
+                          yi=yi,
+                          xj=xj,
+                          yj=yj,
+                          dx=dx,
+                          dy=dy,
+                          d=d)
+         },
+         indices = {
+           answer <- list(i=i, j=j)
+         })
+  return(answer)
 }
