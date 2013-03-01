@@ -1,3 +1,11 @@
+        CHANGES IN spatstat VERSION 1.31-1.1
+
+BUG FIXES
+
+   o The examples no longer use the defunct .find.packages.
+
+   o src/dpll.f has incorrect bounds of '1' replaced by '*'
+
 
 	CHANGES IN spatstat VERSION 1.31-1
 

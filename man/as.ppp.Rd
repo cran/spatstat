@@ -126,7 +126,7 @@ for use by the \pkg{spatstat} package).
 
  # Venables-Ripley format
  # check for 'spatial' package
- spatialpath <- .find.package("spatial", quiet=TRUE)
+ spatialpath <- find.package("spatial", quiet=TRUE)
  if(length(spatialpath) != 0) {
    require(spatial)
    towns <- ppinit("towns.dat")
