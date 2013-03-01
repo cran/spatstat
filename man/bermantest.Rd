@@ -2,6 +2,8 @@
 \alias{bermantest}
 \alias{bermantest.ppm}
 \alias{bermantest.ppp}
+\alias{bermantest.lppm}
+\alias{bermantest.lpp}
 \title{Berman's Tests for Point Process Model} 
 \description{
   Tests the goodness-of-fit of a Poisson point process model
@@ -9,19 +11,30 @@
 }
 \usage{
 bermantest(...)
+
 \method{bermantest}{ppp}(X, covariate,
                          which = c("Z1", "Z2"),
         alternative = c("two.sided", "less", "greater"), ...)
+
 \method{bermantest}{ppm}(model, covariate,
+                         which = c("Z1", "Z2"),
+               alternative = c("two.sided", "less", "greater"), ...)
+
+\method{bermantest}{lpp}(X, covariate,
+                         which = c("Z1", "Z2"),
+        alternative = c("two.sided", "less", "greater"), ...)
+
+\method{bermantest}{lppm}(model, covariate,
                          which = c("Z1", "Z2"),
                alternative = c("two.sided", "less", "greater"), ...)
 }
 \arguments{
   \item{X}{
-    A point pattern (object of class \code{"ppp"}).
+    A point pattern (object of class \code{"ppp"} or \code{"lpp"}).
   }
   \item{model}{
-    A fitted point process model (object of class \code{"ppm"}).
+    A fitted point process model (object of class \code{"ppm"} or
+    \code{"lppm"}).
   }
   \item{covariate}{
     The spatial covariate on which the test will be based.
@@ -47,16 +60,19 @@ bermantest(...)
   \eqn{Z_1}{Z[1]} and \eqn{Z_2}{Z[2]} proposed by Berman (1986).
 
   The function \code{bermantest} is generic, with methods for
-  point patterns (\code{"ppp"}) and point process models (\code{"ppm"}).
+  point patterns (\code{"ppp"} or \code{"lpp"})
+  and point process models (\code{"ppm"} or \code{"lppm"}).
   \itemize{
     \item 
-    If \code{X} is a point pattern dataset (object of class \code{"ppp"}), then
+    If \code{X} is a point pattern dataset (object of class
+    \code{"ppp"} or \code{"lpp"}), then
     \code{bermantest(X, ...)} performs a goodness-of-fit test of the
     uniform Poisson point process (Complete Spatial Randomness, CSR)
     for this dataset.
     \item
     If \code{model} is a fitted point process model
-    (object of class \code{"ppm"}) then \code{bermantest(model, ...)} performs
+    (object of class \code{"ppm"} or \code{"lppm"})
+    then \code{bermantest(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
   }

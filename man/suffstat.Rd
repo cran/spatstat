@@ -100,9 +100,8 @@
   \code{\link{ppm}}
 }
 \examples{
-    data(swedishpines)
     fitS <- ppm(swedishpines, ~1, Strauss(7))
-    X <- rpoispp(summary(swedishpines)$intensity, win=swedishpines$window)
+    X <- rpoispp(intensity(swedishpines), win=as.owin(swedishpines))
     suffstat(fitS, X)
 }
 \author{Adrian Baddeley

@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.92 $	$Date: 2012/11/21 06:08:54 $
+#	$Revision: 5.93 $	$Date: 2013/02/07 09:58:14 $
 #
 #
 # -------- functions ----------------------------------------
@@ -101,6 +101,7 @@ function(X, ..., r=NULL, breaks=NULL,
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
+                             trans="translate",
                              translate="translate",
                              translation="translate",
                              best="best"),

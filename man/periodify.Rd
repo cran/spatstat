@@ -34,6 +34,8 @@ periodify(X, ...)
   \item{nx,ny}{
     Integers.
     Numbers of additional copies of \code{X} in each direction.
+    The result will be a grid of \code{2 * nx + 1} by \code{2 * ny + 1}
+    copies of the original object.
     (Overruled by \code{ix, iy, ixy}).
   }
   \item{\dots}{
@@ -70,6 +72,13 @@ periodify(X, ...)
   combine them into a single pattern of the same kind as \code{X}.
   This can be used (for example) to compute toroidal or periodic
   edge corrections for various operations on \code{X}.
+
+  If the arguments \code{nx}, \code{ny} are given
+  and other arguments are missing,
+  the original object will be copied \code{nx} times to the right
+  and \code{nx} times to the left, then \code{ny} times upward and
+  \code{ny} times downward, making \code{(2 * nx + 1) * (2 * ny + 1)} 
+  copies altogether, arranged in a grid, centred on the original object.
   
   If the arguments \code{ix}, \code{iy} or \code{ixy} are specified,
   then these determine the grid positions of the copies of \code{X}

@@ -10,15 +10,19 @@
   in different ways.
 }
 \usage{
-layered(..., plotargs = NULL)
+layered(..., plotargs = NULL, LayerList=NULL)
 }
 \arguments{
   \item{\dots}{
     Objects which can be plotted by \code{plot}.
-}
+  }
   \item{plotargs}{
     Default values of the plotting arguments for each of the objects.
     A list of lists of arguments of the form \code{name=value}.
+  }
+  \item{LayerList}{
+    A list of objects.
+    Incompatible with \code{\dots}.
   }
 }
 \details{
@@ -49,6 +53,8 @@ layered(..., plotargs = NULL)
 }
 \value{
   A list, belonging to the class \code{"layered"}.
+  There are methods for \code{plot}, \code{"["},
+  \code{"shift"}, \code{"affine"}, \code{"rotate"} and \code{"rescale"}.
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}
@@ -57,7 +63,10 @@ layered(..., plotargs = NULL)
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link{plot.layered}}
+  \code{\link{plot.layered}},
+  \code{\link{methods.layered}},
+  \code{\link{[.layered}},
+  \code{\link{layerplotargs}}.
 }
 \examples{
    data(cells)

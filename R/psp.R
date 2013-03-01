@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.66 $ $Date: 2012/07/31 07:36:18 $
+#  $Revision: 1.67 $ $Date: 2013/02/10 03:46:10 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -575,7 +575,7 @@ print.summary.psp <- function(x, ...) {
       style <- if(inherits(i, "owin")) "window" else "index"
       switch(style,
              window={
-               x <- clip.psp(x, window=i)
+               x <- clip.psp(x, window=i, check=FALSE)
              },
              index={
                enz <- x$ends[i, ]

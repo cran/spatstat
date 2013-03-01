@@ -3,7 +3,7 @@
 #
 #   Estimation of relative risk
 #
-#  $Revision: 1.16 $  $Date: 2011/09/09 02:03:22 $
+#  $Revision: 1.17 $  $Date: 2013/02/17 23:48:03 $
 #
 
 relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels",
@@ -106,11 +106,12 @@ relrisk <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels",
                                            at="points"),
                                       dargs))
              # trap NaN values
-             nbg <- apply(badprobability(result, TRUE), 1, any)
-             if(any(nbg)) {
+             bad <- badprobability(as.matrix(result), TRUE)
+             badrow <- apply(bad, 1, any)
+             if(any(badrow)) {
                # apply l'Hopital's rule
                typenn <- imarks[nnwhich(X)]
-               result[nbg, ] <- (typenn == col(result))[nbg, ]
+               result[badrow, ] <- (typenn == col(result))[badrow, ]
              }
            })
   }

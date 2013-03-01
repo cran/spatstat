@@ -1,14 +1,19 @@
 #
 #   plot.fasp.R
 #
-#   $Revision: 1.25 $   $Date: 2011/05/18 08:19:30 $
+#   $Revision: 1.26 $   $Date: 2013/01/24 11:37:39 $
 #
 plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
-                      title=NULL, samex=TRUE, banner=TRUE, 
+                      title=NULL, banner=TRUE,
+                      samex=FALSE, samey=FALSE,
                       mar.panel=NULL,
                       outerlabels=TRUE, cex.outerlabels=1.25,
                       legend=FALSE) {
-
+  # plot dimensions
+  which <- x$which
+  nrows  <- nrow(which)
+  ncols  <- ncol(which)
+  
 # Determine the overall title of the plot
   if(banner) {
     if(!is.null(title)) overall <- title
@@ -52,21 +57,29 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
     msub <- TRUE
   } else msub <- FALSE
 
-# compute common x axis limits for all plots (in default case)
-  if(defaultplot && samex) {
-    ends <- lapply(x$fns, function(z) { attr(z, "alim")})
-    isnul <- unlist(lapply(ends, is.null))
-    ends <- ends[!isnul]
-    lo <- max(unlist(lapply(ends, min)))
-    hi <- min(unlist(lapply(ends, max)))
-    xlim <- c(lo,hi)
-  } else xlim <- NULL
+# compute common x, y axis limits for all plots ?
+  xlim <- ylim <- NULL
+  if(samex || samey) {
+    cat("Computing limits\n")
+    # call plot.fv to determine plot limits of each panel
+    for(i in 1:nrows) {
+      for(j in 1:ncols) {
+        k <- which[i,j]
+        if(!is.na(k)) {
+          fun <- as.fv(x$fns[[k]])
+          fmla <- if(!defaultplot) formule[k] else NULL
+          sub <- if(msub) subset[[k]] else subset
+          lims <- plot(fun, fmla, subset=sub, limitsonly=TRUE)
+          # update the limits
+          if(samex) xlim <- range(xlim, lims$xlim)
+          if(samey) ylim <- range(ylim, lims$ylim)
+        }
+      }
+    }
+  } 
 
 #############################################################  
 # Set up the plot layout
-  which <- x$which
-  nrows  <- nrow(which)
-  ncols  <- ncol(which)
   n <- nrows * ncols
 # panels 1..n = plot panels
   codes <- matrix(seq_len(n), byrow=TRUE, ncol=ncols, nrow=nrows)
@@ -124,7 +137,8 @@ plot.fasp <- function(x, formule=NULL, ..., subset=NULL,
         do.call("plot",
                 resolve.defaults(list(x=fun, fmla=fmla, subset=sub),
                                  list(...),
-                                 list(xlim=xlim, main=main, legend=legend),
+                                 list(xlim=xlim, ylim=ylim,
+                                      main=main, legend=legend),
                                  list(ann=ann.def, axes=ann.def,
                                       frame.plot=TRUE)))
       }

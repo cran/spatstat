@@ -1,4 +1,5 @@
 # include <math.h>
+#include <R.h>
 
 #define YES 1
 #define NO 0
@@ -60,13 +61,13 @@ int dist2thresh(u,v,x,y,period,r2)
   dxp = wide - dx;
   a = (dx < dxp) ? dx : dxp;
   residue = r2 - a * a;
-  if(residue < 0.0)
+  if(residue <= 0.0)
     return NO;
   dy = v - y;
   if(dy < 0.0) dy = -dy;
   dyp = high - dy;
   b = (dy < dyp) ? dy : dyp;
-  if (residue >= b * b) 
+  if (residue > b * b) 
     return YES; 
   return NO;
 }

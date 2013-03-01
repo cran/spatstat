@@ -3,10 +3,11 @@
 #
 #  Point process models on a linear network
 #
-#  $Revision: 1.15 $   $Date: 2012/10/02 06:41:55 $
+#  $Revision: 1.17 $   $Date: 2013/01/29 06:46:49 $
 #
 
 lppm <- function(X, ...) {
+  Xname <- short.deparse(substitute(X))
   nama <- names(list(...))
   resv <- c("method", "forcefit")
   if(any(clash <- resv %in% nama))
@@ -18,7 +19,7 @@ lppm <- function(X, ...) {
   fit <- ppm(Q, ..., method="mpl", forcefit=TRUE)
   if(!is.poisson.ppm(fit))
     warning("Non-Poisson models currently use Euclidean distance")
-  out <- list(X=X, fit=fit)
+  out <- list(X=X, fit=fit, Xname=Xname)
   class(out) <- "lppm"
   return(out)
 }
@@ -92,6 +93,7 @@ print.lppm <- function(x, ...) {
   print(x$fit)
   cat("Linear network:\n")
   print(as.linnet(x))
+  cat(paste("Original data:", x$Xname, "\n"))
   return(invisible(NULL))
 }
 
@@ -192,3 +194,13 @@ as.linnet.lppm <- function(X, ...) {
 nobs.lppm <- function(object, ...) {
   npoints(object$X)
 }
+
+is.poisson.lppm <- function(x) { is.poisson(x$fit) }
+
+is.stationary.lppm <- function(x) { is.stationary(x$fit) }
+
+is.multitype.lppm <- function(X, ...) { is.multitype(X$fit) }
+
+is.marked.lppm <- function(X, ...) { is.marked(X$fit) }
+
+

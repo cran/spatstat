@@ -14,7 +14,7 @@
 
 \arguments{
   \item{X}{The observed point pattern, for which summary function
-    estimates are required.  An object of class \code{"ppp"}.
+    estimates are required.  An object of class \code{"ppp"} or \code{"lpp"}.
   }
 
   \item{fun}{The summary function. Either an \R function,

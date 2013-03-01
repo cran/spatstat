@@ -1,18 +1,29 @@
 \name{iplot}
 \alias{iplot}
-\title{Point and Click Interface for Displaying a Point Pattern}
+\alias{iplot.ppp}
+\alias{iplot.layered}
+\alias{iplot.default}
+\title{Point and Click Interface for Displaying Spatial Data}
 \description{
-  Plot a two-dimensional spatial point pattern
+  Plot spatial data
   with interactive (point-and-click) control over the plot.
 }
 \usage{
- iplot(x, xname)
+ iplot(x, ...)
+
+ \method{iplot}{ppp}(x, ..., xname)
+
+ \method{iplot}{layered}(x, ..., xname)
+
+ \method{iplot}{default}(x, ..., xname)
 }
 \arguments{
   \item{x}{
-    The spatial point pattern to be plotted.
-    An object of class \code{"ppp"}.
+    The spatial object to be plotted.
+    An object of class \code{"ppp"}, \code{"psp"}, \code{"im"},
+    \code{"owin"}, or \code{"layered"}.
   }
+  \item{\dots}{Ignored.}
   \item{xname}{
     Optional. Character string to use as the title of the dataset.
   }
@@ -21,30 +32,42 @@
   \code{NULL}.
 }
 \details{
-  This function generates a plot of a spatial point pattern dataset
-  (object of class \code{"ppp"}) and allows 
-  interactive control over the appearance of the plot
+  The function \code{iplot} generates a plot of the spatial dataset \code{x}
+  and allows interactive control over the appearance of the plot
   using a point-and-click interface.
 
-  A new popup window is launched.
-  The point pattern \code{x} is displayed in the left half of the window
-  using \code{\link{plot.ppp}} with the default values of all
-  the plot parameters. The right side of the window contains
-  buttons and sliders allowing the user to change the header text,
-  the plot symbols, the scale used to represent numeric marks,
-  and so on. For a multitype point pattern, the user
-  can also switch between viewing all points in a single display,
-  and splitting the points into separate patterns according to type.
+  The function \code{iplot} is generic, with methods for
+  for point patterns (\code{\link{iplot.ppp}}),
+  layered objects (\code{\link{iplot.layered}})
+  and a default method. The default method will handle objects of
+  class \code{"psp"}, \code{"im"} and \code{"owin"}
+  at least.
+
+  A new popup window is launched. The spatial dataset
+  \code{x} is displayed in the middle of the window using the
+  appropriate \code{plot} method.
+
+  The left side of the window contains
+  buttons and sliders allowing the user to change the plot parameters.
+
+  The right side of the window contains navigation controls for
+  zooming (changing magnification), panning (shifting the
+  field of view relative to the data), redrawing and exiting.
+
+  If the user clicks in the area where the point pattern is displayed,
+  the field of view will be re-centred at the point that was clicked.
 }
 \seealso{
-  \code{\link{istat}},
-  \code{\link{ppp.object}},
-  \code{\link{plot.ppp}}
+  \code{\link{istat}}
 }
 \examples{
    if(interactive()) {
-      data(cells)
       iplot(cells)
+      iplot(amacrine)
+      iplot(lansing)
+      L <- layered(D=distmap(cells), P=cells,
+            plotargs=list(list(ribbon=FALSE), list(pch=16)))
+      iplot(L)
    }
 }
 \author{Adrian Baddeley

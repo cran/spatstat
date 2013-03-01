@@ -69,6 +69,7 @@ double fikselcif(prop, state, cdata)
   double kappa, r2, h2;
   double *period;
   Fiksel *fiksel;
+  DECLARE_CLOSE_D2_VARS;
 
   fiksel = (Fiksel *) cdata;
   period = fiksel->period;
@@ -95,34 +96,32 @@ double fikselcif(prop, state, cdata)
   if(fiksel->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {	
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2)) {	
 	  if(d2 < h2) {
 	    cifval = 0.0;
 	    return(cifval);
 	  } else {
 	    pairpotsum += exp(-kappa * sqrt(d2));
 	  }
-	  END_IF_CLOSE_PERIODIC_D2
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {	
+	if(CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2)) {	
 	  if(d2 < h2) {
 	    cifval = 0.0;
 	    return(cifval);
 	  } else {
 	    pairpotsum += exp(-kappa * sqrt(d2));
 	  }
-	  END_IF_CLOSE_PERIODIC_D2
 	}
       }
     }
   } else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {	
+	if(CLOSE_D2(u,v,x[j],y[j],r2,d2)) {	
 	  if(d2 < h2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -130,12 +129,11 @@ double fikselcif(prop, state, cdata)
 	    pairpotsum += exp(-kappa * sqrt(d2));
 	  }
 	}
-        END_IF_CLOSE_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_D2(u,v,x[j],y[j],r2,d2) {	
+	if(CLOSE_D2(u,v,x[j],y[j],r2,d2)) {	
 	  if(d2 < h2) {
 	    cifval = 0.0;
 	    return(cifval);
@@ -143,7 +141,6 @@ double fikselcif(prop, state, cdata)
 	    pairpotsum += exp(-kappa * sqrt(d2));
 	  }
 	}
-        END_IF_CLOSE_D2
       }
     }
   }

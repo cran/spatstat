@@ -3,16 +3,18 @@
 \title{Evaluate Expression Involving Function Arrays}
 \description{
   Evaluates any expression involving one or more function arrays
-  (\code{fasp} objects)
-  and returns another function array.
+  (\code{fasp} objects) and returns another function array.
 }
 \usage{
   eval.fasp(expr, envir, dotonly=TRUE)
 }
 \arguments{
-  \item{expr}{An expression.}
-  \item{envir}{Optional. The environment in which to evaluate the
-    expression.}
+  \item{expr}{
+    An expression involving the names of objects of class \code{"fasp"}.
+  }
+  \item{envir}{
+    Optional. The environment in which to evaluate the expression.
+  }
   \item{dotonly}{Logical. Passed to \code{\link{eval.fv}}.}
 }
 \details{
@@ -32,13 +34,19 @@
   Suppose \code{X} and \code{Y} are two objects of class \code{"fasp"}
   which are compatible (for example the arrays
   must have the same dimensions). Then 
-  \code{eval.im(X + Y)} will add the corresponding functions in
+  \code{eval.fasp(X + Y)} will add the corresponding functions in
   each cell of the arrays \code{X} and \code{Y},
   and return the resulting array of functions.
 
+  Suppose \code{X} is an object of class \code{"fasp"}
+  and \code{f} is an object of class \code{"fv"}.
+  Then \code{eval.fasp(X + f)} will add the function \code{f}
+  to the functions in each cell of the array \code{X},
+  and return the resulting array of functions.
+
   In general, \code{expr} can be any expression involving
-  (a) the \emph{names} of objects of class \code{"fasp"}, (b) scalar
-  constants, and (c) functions which are vectorised.
+  (a) the \emph{names} of objects of class \code{"fasp"} or \code{"fv"},
+  (b) scalar constants, and (c) functions which are vectorised.
   See the Examples.
 
   First \code{eval.fasp} determines which of the \emph{variable names}
@@ -59,7 +67,6 @@
 }
 \examples{
   # manipulating the K function
-  data(amacrine)
   K <- alltypes(amacrine, "K")
 
   # expressions involving a fasp object
@@ -67,7 +74,11 @@
   L <- eval.fasp(sqrt(K/pi))
 
   # expression involving two fasp objects
-  eval.fasp(K - L)
+  D <- eval.fasp(K - L)
+
+  # subtracting the unmarked K function from the cross-type K functions
+  K0 <- Kest(unmark(amacrine))
+  DK <- eval.fasp(K - K0)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@csiro.au}

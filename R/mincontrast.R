@@ -397,11 +397,14 @@ printStatus <- function(x, errors.only=FALSE) {
            if(any(par <= 0))
              return(rep(Inf, length(rvals)))
            nu.pcf <- margs$nu.pcf
-           numer <- (rvals/par[2])^nu.pcf * besselK(rvals/par[2], nu.pcf)
-           # r = 0 yields 0 * Inf = NaN
-           numer[!is.finite(numer)] <- 0
-           denom <- 2^(nu.pcf+1) * pi * par[2]^2 * par[1]  * gamma(nu.pcf+1)
-           return(1 + numer/denom)
+           sig2 <- 1 / (4 * pi * (par[2]^2) * nu.pcf * par[1])
+           denom <- 2^(nu.pcf - 1) * gamma(nu.pcf)
+           rr <- rvals / par[2]
+           # Matern correlation function
+           fr <- ifelse(rr > 0,
+                        (rr^nu.pcf) * besselK(rr, nu.pcf) / denom,
+                        1)
+           return(1 + sig2 * fr)
          },
          parhandler = function(..., nu.ker = -1/4) {
            stopifnot(nu.ker > -1/2)

@@ -177,6 +177,7 @@
       \code{\link{Poisson}},
       \code{\link{AreaInter}},
       \code{\link{BadGey}},
+      \code{\link{Concom}},
       \code{\link{DiggleGatesStibbard}},
       \code{\link{DiggleGratton}},
       \code{\link{Fiksel}},

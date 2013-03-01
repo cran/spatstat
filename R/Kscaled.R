@@ -1,7 +1,7 @@
 #
 #	Kscaled.R	Estimation of K function for locally-scaled process
 #
-#	$Revision: 1.6 $	$Date: 2012/11/21 06:08:54 $
+#	$Revision: 1.7 $	$Date: 2013/02/07 09:58:14 $
 #
 
 "Lscaled" <- function(...) {
@@ -37,6 +37,7 @@
                                border="border",
                                isotropic="isotropic",
                                Ripley="isotropic",
+                               trans="translate",
                                translate="translate",
                                translation="translate",
                                best="best"),

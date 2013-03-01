@@ -3,7 +3,7 @@
 # and Fisher information matrix
 # for ppm objects
 #
-#  $Revision: 1.63 $  $Date: 2012/11/23 01:25:54 $
+#  $Revision: 1.64 $  $Date: 2013/02/25 06:53:36 $
 #
 
 vcov.ppm <- local({
@@ -212,6 +212,7 @@ vcovGibbsAJB <- function(model,
   #
   sumobj <- summary(model, quick="entries")
   correction <- model$correction
+  rbord      <- model$rbord
   Q <- quad.ppm(model)
   D <- dummy.ppm(model)
   rho <- model$internal$logistic$rho
@@ -281,26 +282,26 @@ vcovGibbsAJB <- function(model,
   # identify close pairs
   R <- reach(model, epsilon=1e-2)
   if(is.finite(R)) {
-    areaW <- if(correction == "border") eroded.areas(W, R) else area.owin(W)
-    
-#    areaW <- area.owin(if(correction == "border") Wminus <- erosion(W, R) else W)
     if(R == 0 && !logi) return(A1)
     if(R == 0 && logi) return(A1log)
-    cl <- closepairs(X, R)
+    cl <- closepairs(X, R, what="indices")
     I <- cl$i
     J <- cl$j
     if(algorithm == "vectorclip") {
-      cl2 <- closepairs(X, 2*R)
+      cl2 <- closepairs(X, 2*R, what="indices")
       I2 <- cl2$i
       J2 <- cl2$j
     }
   } else {
     # either infinite reach, or something wrong
-    areaW <- area.owin(W)
     IJ <- expand.grid(I=1:nX, J=1:nX)
+    IJ <- subset(IJ, I != J)
     I2 <- I <- IJ$I
     J2 <- J <- IJ$J
   }
+  # Eroded area
+  areaW <- if(correction == "border") eroded.areas(W, rbord) else area.owin(W)
+  #
   A1 <- A1/areaW
   if(logi){
     A1log <- A1log/areaW

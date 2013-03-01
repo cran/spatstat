@@ -82,6 +82,7 @@
 }
 \seealso{
   \code{\link{lpp}},
+  \code{\link{intensity.lpp}},
   \code{\link[spatstat:methods.ppx]{methods.ppx}}
 }
 \examples{

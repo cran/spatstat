@@ -11,7 +11,8 @@
 }
 \arguments{
   \item{X}{
-    Point pattern (object of class \code{"ppp"}).
+    Point pattern (object of class \code{"ppp"},
+    \code{"lpp"}, \code{"pp3"} or \code{"ppx"}).
   }
   \item{labels}{
     Vector of values from which the new marks will be drawn
@@ -24,7 +25,7 @@
   }
 }
 \value{
-  A marked point pattern.
+  A marked point pattern (of the same class as \code{X}).
 }
 \details{
   This very simple function allocates random marks to

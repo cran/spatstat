@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.15 $	$Date: 2012/08/22 01:34:03 $
+#	$Revision: 1.16 $	$Date: 2013/02/07 09:58:14 $
 #
 #	Estimates of F, G and K for three-dimensional point patterns
 #
@@ -14,7 +14,9 @@ K3est <- function(X, ...,
   stopifnot(inherits(X, "pp3"))
   correction <- pickoption("correction", correction,
                            c(translation="translation",
+			     trans="translation",
                              isotropic="isotropic",
+                             iso="isotropic",
                              best="isotropic"),
                            multi=TRUE)
   trap.extra.arguments(..., .Context="In K3est")
@@ -205,7 +207,9 @@ pcf3est <- function(X, ...,
   stopifnot(inherits(X, "pp3"))
   correction <- pickoption("correction", correction,
                            c(translation="translation",
+                             trans="translation",
                              isotropic="isotropic",
+                             iso="isotropic",
                              best="isotropic"),
                            multi=TRUE)
   trap.extra.arguments(..., .Context="In pcf3est")

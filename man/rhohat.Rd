@@ -3,6 +3,8 @@
 \alias{rhohat.ppp}
 \alias{rhohat.quad}
 \alias{rhohat.ppm}
+\alias{rhohat.lpp}
+\alias{rhohat.lppm}
 \title{
   Smoothing Estimate of Covariate Transformation
 }
@@ -36,12 +38,30 @@ rhohat(object, covariate, ...)
        n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
        bwref=bw,
        covname, confidence=0.95)
+
+\method{rhohat}{lpp}(object, covariate, ...,
+       method=c("ratio", "reweight", "transform"),
+       smoother=c("kernel", "local"),
+       nd=1000, eps=NULL,
+       n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
+       bwref=bw,
+       covname, confidence=0.95)
+
+\method{rhohat}{lppm}(object, covariate, ...,
+       method=c("ratio", "reweight", "transform"),
+       smoother=c("kernel", "local"),
+       nd=1000, eps=NULL,
+       n = 512, bw = "nrd0", adjust=1, from = NULL, to = NULL,
+       bwref=bw,
+       covname, confidence=0.95)
+
 }
 \arguments{
   \item{object}{
-    A point pattern (object of class \code{"ppp"}),
+    A point pattern (object of class \code{"ppp"} or \code{"lpp"}),
     a quadrature scheme (object of class \code{"quad"})
-    or a fitted point process model (object of class \code{"ppm"}).
+    or a fitted point process model (object of class \code{"ppm"}
+    or \code{"lppm"}).
   }
   \item{covariate}{
     Either a \code{function(x,y)} or a pixel image (object of
@@ -56,9 +76,10 @@ rhohat(object, covariate, ...)
   \item{smoother}{
     Character string determining the smoothing algorithm. See Details.
   }
-  \item{dimyx,eps}{
-    Arguments passed to \code{\link{as.mask}} to control the pixel
+  \item{dimyx,eps,nd}{
+    Arguments controlling the pixel
     resolution at which the covariate will be evaluated.
+    See Details.
   }
   \item{bw}{
     Smoothing bandwidth or bandwidth rule
@@ -155,6 +176,19 @@ rhohat(object, covariate, ...)
     then applying edge-corrected density estimation on the interval
     \eqn{[0,1]}, and back-transforming.
   }
+
+  The covariate will be evaluated on a fine grid of locations,
+  with spatial resolution controlled by the arguments
+  \code{dimyx,eps,nd}. 
+  In two dimensions (i.e.
+  if \code{object} is of class \code{"ppp"}, \code{"ppm"} or
+  \code{"quad"}) the arguments \code{dimyx, eps} are
+  passed to \code{\link{as.mask}} to control the pixel
+  resolution. On a linear network (i.e. if \code{object} is of class
+  \code{"lpp"} or \code{"lppm"}) the argument \code{nd} specifies the
+  total number of test locations on the linear
+  network, and \code{eps} specifies the linear separation between test
+  locations. 
 }
 \value{
   A function value table (object of class \code{"fv"})
@@ -194,7 +228,8 @@ rhohat(object, covariate, ...)
 }
 \seealso{
   \code{\link{rho2hat}},
-  \code{\link{methods.rhohat}}
+  \code{\link{methods.rhohat}},
+  \code{\link{parres}}
 }
 \examples{
   X <-  rpoispp(function(x,y){exp(3+3*x)})
@@ -208,6 +243,10 @@ rhohat(object, covariate, ...)
 
   fit <- ppm(X, ~x)
   rr <- rhohat(fit, "y")
+
+# linear network
+  Y <- runiflpp(30, simplenet)
+  rhoY <- rhohat(Y, "y")
 }
 \keyword{spatial}
 \keyword{models}

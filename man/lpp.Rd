@@ -62,6 +62,7 @@ lpp(X, L)
   \url{http://www.maths.uwa.edu.au/~adrian/}
 }
 \seealso{
+  \code{\link{intensity.lpp}}, 
   \code{\link[spatstat:methods.lpp]{methods.lpp}} and
   \code{\link[spatstat:methods.ppx]{methods.ppx}} for methods applicable
   to \code{lpp} objects.

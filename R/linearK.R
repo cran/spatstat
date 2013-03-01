@@ -1,7 +1,7 @@
 #
 # linearK
 #
-# $Revision: 1.26 $ $Date: 2012/04/19 13:33:06 $
+# $Revision: 1.29 $ $Date: 2013/01/31 02:49:14 $
 #
 # K function for point pattern on linear network
 #
@@ -49,26 +49,8 @@ linearKinhom <- function(X, lambda=NULL, r=NULL,  ...,
   np <- sX$npoints
   lengthL <- sX$totlength
   #
-  XX <- as.ppp(X)
-  lambdaX <-
-    if(is.vector(lambda)) lambda  else
-    if(is.function(lambda)) lambda(XX$x, XX$y, ...) else
-    if(is.im(lambda)) safelookup(lambda, XX) else 
-    if(inherits(lambda, "linim")) safelookup(as.im(lambda), XX) else 
-    if(is.ppm(lambda) || inherits(lambda, "lppm"))
-      predict(lambda, locations=as.data.frame(XX)) else
-    stop("lambda should be a numeric vector, function, image or ppm object")
-
-  if(!is.numeric(lambdaX))
-    stop("Values of lambda are not numeric")
-  if((nv <- length(lambdaX)) != np)
-     stop(paste("Obtained", nv, "values of lambda",
-	   "but point pattern contains", np, "points"))
-  if(any(lambdaX < 0))
-    stop("Negative values of lambda obtained")
-  if(any(lambdaX == 0))
-    stop("Zero values of lambda obtained")
-
+  lambdaX <- getlambda.lpp(lambda, X, ...)
+  #
   invlam <- 1/lambdaX
   invlam2 <- outer(invlam, invlam, "*")
   denom <- if(!normalise) lengthL else sum(invlam)
@@ -88,6 +70,31 @@ linearKinhom <- function(X, lambda=NULL, r=NULL,  ...,
   return(K)
 }
 
+getlambda.lpp <- function(lambda, X, ...) {
+  lambdaname <- deparse(substitute(lambda))
+  XX <- as.ppp(X)
+  lambdaX <-
+    if(is.vector(lambda)) lambda  else
+    if(is.function(lambda)) lambda(XX$x, XX$y, ...) else
+    if(is.im(lambda)) safelookup(lambda, XX) else 
+    if(inherits(lambda, "linim")) safelookup(as.im(lambda), XX) else 
+    if(is.ppm(lambda) || inherits(lambda, "lppm"))
+      predict(lambda, locations=as.data.frame(XX)) else
+    stop(paste(lambdaname, "should be",
+               "a numeric vector, function, pixel image, or fitted model"))
+
+  if(!is.numeric(lambdaX))
+    stop(paste("Values of", lambdaname, "are not numeric"))
+  if((nv <- length(lambdaX)) != (np <- npoints(X)))
+     stop(paste("Obtained", nv, "values of", lambdaname,
+	   "but point pattern contains", np, "points"))
+  if(any(lambdaX < 0))
+    stop(paste("Negative values of", lambdaname, "obtained"))
+  if(any(lambdaX == 0))
+    stop(paste("Zero values of", lambdaname, "obtained"))
+
+  return(lambdaX)
+}
 
 linearKengine <- function(X, ..., r=NULL, reweight=NULL, denom=1,
                           correction="Ang", showworking=FALSE) {

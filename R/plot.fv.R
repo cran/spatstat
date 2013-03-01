@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.86 $    $Date: 2012/07/21 10:46:26 $
+#  $Revision: 1.87 $    $Date: 2013/02/04 05:04:40 $
 #
 #
 
@@ -529,7 +529,9 @@ findbestlegendpos <- local({
       print(scaledW)
     }
     # pixellate the scaled objects
-    pix.scal.objects <- lapply(scaled.objects, as.mask.psp)
+    asma <- function(z) { if(is.owin(z)) as.mask(z) else
+                          if(is.psp(z)) as.mask.psp(z) else NULL }
+    pix.scal.objects <- lapply(scaled.objects, asma)
     # apply distance transforms in scaled space
     D1 <- distmap(pix.scal.objects[[1]])
     Dlist <- lapply(pix.scal.objects, distmap, xy=list(x=D1$xcol, y=D1$yrow))

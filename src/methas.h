@@ -29,6 +29,7 @@ typedef struct State {
   int *marks;    /* vector of mark values */
   int npts;       /* current number of points */
   int npmax;      /* storage limit */
+  int ismarked;   /* whether the pattern is marked */
 } State;
 
 /* Parameters of model passed from R */

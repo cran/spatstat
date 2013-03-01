@@ -57,9 +57,10 @@ double straushcif(prop, state, cdata)
   int npts, kount, ix, ixp1, j;
   double *x, *y;
   double u, v;
-  double r2, d2, h2, r2h2, a, cifval;
+  double r2, d2, h2, r2h2, cifval;
   StraussHard *strausshard;
   double *period;
+  DECLARE_CLOSE_VARS;
 
   strausshard = (StraussHard *) cdata;
 
@@ -85,47 +86,36 @@ double straushcif(prop, state, cdata)
   if(strausshard->per) { /* periodic distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
-	  if(d2 < h2) return(0.0);
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
+	  /* RESIDUE = r2 - distance^2 */
+	  if(RESIDUE > r2h2) return(0.0);
 	  ++kount;
 	}
-        END_IF_CLOSE_PERIODIC_D2
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	IF_CLOSE_PERIODIC_D2(u,v,x[j],y[j],period,r2,d2) {
-	  if(d2 < h2) return(0.0);
+	if(CLOSE_PERIODIC(u,v,x[j],y[j],period,r2)) {
+	  if(RESIDUE > r2h2) return(0.0);
 	  ++kount;
 	}
-        END_IF_CLOSE_PERIODIC_D2
       }
     }
   }
   else { /* Euclidean distance */
     if(ix > 0) {
       for(j=0; j < ix; j++) {
-	a = r2 - pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j], 2);
-	  if(a > 0) {
-	    if(a > r2h2)
-	      return(0.0);
-	    ++kount;
-	  }
+	if(CLOSE(u,v,x[j],y[j],r2)) {
+	  if(RESIDUE > r2h2) return(0.0);
+	  ++kount;
 	}
       }
     }
     if(ixp1 < npts) {
       for(j=ixp1; j<npts; j++) {
-	a = r2 - pow(u - x[j], 2);
-	if(a > 0) {
-	  a -= pow(v - y[j], 2);
-	  if(a > 0) {
-	    if(a > r2h2)
-	      return(0.0);
-	    ++kount;
-	  }
+	if(CLOSE(u,v,x[j],y[j],r2)) {
+	  if(RESIDUE > r2h2) return(0.0);
+	  ++kount;
 	}
       }
     }

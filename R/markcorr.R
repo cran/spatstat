@@ -129,6 +129,7 @@ markcorrint <-
                              "bord.modif"="bord.modif",
                              isotropic="isotropic",
                              Ripley="isotropic",
+                             trans="translate",
                              translate="translate",
                              translation="translate",
                              best="best"),

@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.17 $   $Date: 2012/10/20 07:56:31 $
+#  $Revision: 1.19 $   $Date: 2013/01/24 04:02:18 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -16,11 +16,13 @@ lpp <- function(X, L) {
     # spatial coords and marks
     df <- X[, !(names(X) %in% localnames), drop=FALSE]
     # validate local coordinates
-    nedge <- nobjects(as.psp(L))
-    if(with(lo, any(seg < 1 || seg > nedge)))
-      stop("Segment index coordinate 'seg' exceeds bounds")
-    if(with(lo, any(tp < 0 || tp > 1)))
-      stop("Local coordinate 'tp' outside [0,1]")
+    if(nrow(X) > 0) {
+      nedge <- nobjects(as.psp(L))
+      if(with(lo, any(seg < 1 || seg > nedge)))
+        stop("Segment index coordinate 'seg' exceeds bounds")
+      if(with(lo, any(tp < 0 || tp > 1)))
+        stop("Local coordinate 'tp' outside [0,1]")
+    }
   } else {
     # local coordinates must be computed
     if(!is.ppp(X))
@@ -108,6 +110,15 @@ print.summary.lpp <- function(x, ...) {
   invisible(NULL)
 }
 
+intensity.lpp <- function(X, ...) {
+  len <- sum(lengths.psp(as.psp(as.linnet(X))))
+  if(is.multitype(X)) table(marks(X))/len else npoints(X)/len
+}
+
+is.lpp <- function(x) {
+  inherits(x, "lpp")
+}
+
 as.ppp.lpp <- function(X, ..., fatal=TRUE) {
   verifyclass(X, "lpp", fatal=fatal)
   L <- X$domain
@@ -115,6 +126,10 @@ as.ppp.lpp <- function(X, ..., fatal=TRUE) {
               W=L$window, check=FALSE)
   marks(Y) <- marks(X)
   return(Y)
+}
+
+as.owin.lpp <- function(W,  ..., fatal=TRUE) {
+  as.owin(as.ppp(W, ..., fatal=fatal))
 }
 
 as.linnet.lpp <- function(X, ..., fatal=TRUE) {

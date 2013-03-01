@@ -1,9 +1,11 @@
 \name{kstest.ppm}
 \alias{kstest}
 \alias{kstest.ppm}
+\alias{kstest.lppm}
+\alias{kstest.lpp}
 \alias{kstest.ppp}
 \alias{kstest.slrm}
-\title{Kolmogorov-Smirnov Test for Point Process Model} 
+\title{Kolmogorov-Smirnov Test for Point Pattern or Point Process Model} 
 \description{
   Performs a Kolmogorov-Smirnov test of goodness-of-fit
   of a Poisson point process model. The test compares the observed
@@ -13,14 +15,16 @@
 kstest(...)
 \method{kstest}{ppp}(X, covariate, ..., jitter=TRUE)
 \method{kstest}{ppm}(model, covariate, ..., jitter=TRUE)
+\method{kstest}{lpp}(X, covariate, ..., jitter=TRUE)
+\method{kstest}{lppm}(model, covariate, ..., jitter=TRUE)
 \method{kstest}{slrm}(model, covariate, ..., modelname=NULL, covname=NULL)
 }
 \arguments{
   \item{X}{
-    A point pattern (object of class \code{"ppp"}).
+    A point pattern (object of class \code{"ppp"} or \code{"lpp"}).
   }
   \item{model}{
-    A fitted point process model (object of class \code{"ppm"})
+    A fitted point process model (object of class \code{"ppm"} or \code{"lppm"})
     or fitted spatial logistic regression (object of class \code{"slrm"}).
   }
   \item{covariate}{
@@ -50,7 +54,8 @@ kstest(...)
   are compared using the Kolmogorov-Smirnov test. 
 
   The function \code{kstest} is generic, with methods for
-  point patterns (\code{"ppp"}), point process models (\code{"ppm"})
+  point patterns (\code{"ppp"} or \code{"lpp"}),
+  point process models (\code{"ppm"} or \code{"lppm"})
   and spatial logistic regression models (\code{"slrm"}).
   \itemize{
     \item 
@@ -64,7 +69,8 @@ kstest(...)
     Complete Spatial Randomness and Independence, CSRI).
     \item
     If \code{model} is a fitted point process model
-    (object of class \code{"ppm"}) then \code{kstest(model, ...)} performs
+    (object of class \code{"ppm"} or \code{"lppm"})
+    then \code{kstest(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
     \item

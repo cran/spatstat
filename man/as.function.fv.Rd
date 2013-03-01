@@ -1,5 +1,6 @@
 \name{as.function.fv}
 \alias{as.function.fv}
+\alias{as.function.rhohat}
 \title{
   Convert Function Value Table to Function
 }
@@ -7,7 +8,9 @@
   Converts an object of class \code{"fv"} to an \R language function.
 }
 \usage{
-  \method{as.function}{fv}(x, ..., value)
+  \method{as.function}{fv}(x, ..., value, extrapolate=FALSE)
+
+  \method{as.function}{rhohat}(x, ..., value, extrapolate=TRUE)
 }
 \arguments{
   \item{x}{
@@ -19,7 +22,11 @@
   \item{value}{
     Optional. String selecting one of the columns of \code{x}
     for use as the function value.
-}
+  }
+  \item{extrapolate}{
+    Logical value indicating whether to extrapolate the function
+    outside the domain of \code{x}. See Details.
+  }
 }
 \details{
   A function value table (object of class \code{"fv"})
@@ -37,8 +44,12 @@
 
   If \code{f <- as.function(x)} then \code{f} is a function with one numeric
   argument, that performs linear interpolation between the values
-  in the table \code{x}. Argument values lying outside the range of the
-  table yield an \code{NA} value.
+  in the table \code{x}.
+
+  Argument values lying outside the range of the table
+  yield an \code{NA} value (if \code{extrapolate=FALSE})
+  or the function value at the nearest endpoint of the range
+  (if \code{extrapolate = TRUE}).
 
   The command \code{as.function.fv} is a method for the generic command
   \code{\link{as.function}}. 

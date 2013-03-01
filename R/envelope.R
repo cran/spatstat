@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.35 $  $Date: 2012/12/18 09:33:57 $
+#   $Revision: 2.38 $  $Date: 2013/02/27 07:46:34 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -49,11 +49,12 @@ envelope.ppp <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- Kest
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
-  
+
   if(is.null(simulate)) {
     # ...................................................
     # Realisations of complete spatial randomness
@@ -108,8 +109,9 @@ envelope.ppm <-
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, do.pwrong=FALSE) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- Kest
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
 
@@ -164,8 +166,9 @@ envelope.kppm <-
            VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
            do.pwrong=FALSE)
 {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
+  if(is.null(fun)) fun <- Kest
   envir.user <- parent.frame()
   envir.here <- sys.frame(sys.nframe())
   
@@ -222,7 +225,7 @@ envelopeEngine <-
            do.pwrong=FALSE) {
   #
   envir.here <- sys.frame(sys.nframe())
-
+  
   # ----------------------------------------------------------
   # Determine Simulation
   # ----------------------------------------------------------
@@ -234,6 +237,10 @@ envelopeEngine <-
             stop("Unrecognised class of point pattern")
   Xobjectname <- paste("point pattern of class", sQuote(Xclass))
 
+  # Undocumented option to generate patterns only.
+  patterns.only <- identical(internal$eject, "patterns")
+  evaluate.fun <- !patterns.only
+  
   # Identify type of simulation from argument 'simul'
   if(inherits(simul, "simulrecipe")) {
     # ..................................................
@@ -319,30 +326,32 @@ envelopeEngine <-
   # Summary function to be applied 
   # ------------------------------------------------------------------
 
-  if(is.null(fun))
-    stop("Internal error: fun is NULL")
+  if(evaluate.fun) {
+    if(is.null(fun))
+      stop("Internal error: fun is NULL")
 
-  # Name of function, for error messages
-  fname <- if(is.name(substitute(fun))) short.deparse(substitute(fun))
-           else if(is.character(fun)) fun else "fun"
-  fname <- sQuote(fname)
+    # Name of function, for error messages
+    fname <- if(is.name(substitute(fun))) short.deparse(substitute(fun)) else
+             if(is.character(fun)) fun else "fun"
+    fname <- sQuote(fname)
 
-  # R function to apply
-  if(is.character(fun)) {
-    gotfun <- try(get(fun, mode="function"))
-    if(inherits(gotfun, "try-error"))
-      stop(paste("Could not find a function named", sQuote(fun)))
-    fun <- gotfun
-  } else if(!is.function(fun)) 
-    stop(paste("unrecognised format for function", fname))
-  fargs <- names(formals(fun))
-  if(!any(c(expected.arg, "...") %in% fargs))
-    stop(paste(fname, "should have",
-               ngettext(length(expected.arg), "an argument", "arguments"),
-               "named", commasep(sQuote(expected.arg)),
-               "or a", sQuote("..."), "argument"))
-  usecorrection <- any(c("correction", "...") %in% fargs)
-
+    # R function to apply
+    if(is.character(fun)) {
+      gotfun <- try(get(fun, mode="function"))
+      if(inherits(gotfun, "try-error"))
+        stop(paste("Could not find a function named", sQuote(fun)))
+      fun <- gotfun
+    } else if(!is.function(fun)) 
+      stop(paste("unrecognised format for function", fname))
+    fargs <- names(formals(fun))
+    if(!any(c(expected.arg, "...") %in% fargs))
+      stop(paste(fname, "should have",
+                 ngettext(length(expected.arg), "an argument", "arguments"),
+                 "named", commasep(sQuote(expected.arg)),
+                 "or a", sQuote("..."), "argument"))
+    usecorrection <- any(c("correction", "...") %in% fargs)
+  }
+  
   # ---------------------------------------------------------------------
   # validate other arguments
   if((nrank %% 1) != 0)
@@ -382,39 +391,42 @@ envelopeEngine <-
   # ---------------------------------------------------------------------
   # Evaluate function for data pattern X
   # ------------------------------------------------------------------
-  Xarg <- if(!clipdata) X else X[clipwin]
-  funX <- do.call(fun,
-                  resolve.defaults(list(Xarg),
-                                   list(...),
-                                   if(usecorrection) list(correction="best") else NULL))
+  if(evaluate.fun) {
+    Xarg <- if(!clipdata) X else X[clipwin]
+    corrx <- if(usecorrection) list(correction="best") else NULL
+    funX <- do.call(fun,
+                    resolve.defaults(list(Xarg),
+                                     list(...),
+                                     corrx))
+                                     
+    if(!inherits(funX, "fv"))
+      stop(paste("The function", fname,
+                 "must return an object of class", sQuote("fv")))
+
+    argname <- fvnames(funX, ".x")
+    valname <- fvnames(funX, ".y")
+    has.theo <- "theo" %in% fvnames(funX, "*")
+    csr.theo <- csr && has.theo
+
+    if(tran) {
+      # extract only the recommended value
+      if(csr.theo) 
+        funX <- funX[, c(argname, valname, "theo")]
+      else
+        funX <- funX[, c(argname, valname)]
+      # apply the transformation to it
+      funX <- eval(transform.funX)
+    }
     
-  if(!inherits(funX, "fv"))
-    stop(paste("The function", fname,
-               "must return an object of class", sQuote("fv")))
+    rvals <- funX[[argname]]
+    fX    <- funX[[valname]]
 
-  argname <- fvnames(funX, ".x")
-  valname <- fvnames(funX, ".y")
-  has.theo <- "theo" %in% fvnames(funX, "*")
-  csr.theo <- csr && has.theo
-
-  if(tran) {
-    # extract only the recommended value
-    if(csr.theo) 
-      funX <- funX[, c(argname, valname, "theo")]
-    else
-      funX <- funX[, c(argname, valname)]
-    # apply the transformation to it
-    funX <- eval(transform.funX)
+    # default domain over which to maximise
+    alim <- attr(funX, "alim")
+    if(global && is.null(ginterval))
+      ginterval <- if(rgiven) range(rvals) else alim
   }
-
-  rvals <- funX[[argname]]
-  fX    <- funX[[valname]]
-
-  # default domain over which to maximise
-  alim <- attr(funX, "alim")
-  if(global && is.null(ginterval))
-    ginterval <- if(rgiven) range(rvals) else alim
-
+  
   #--------------------------------------------------------------------
   # Determine number of simulations
   # ------------------------------------------------------------------
@@ -437,7 +449,7 @@ envelopeEngine <-
 
   # Undocumented secret exit
   # ------------------------------------------------------------------
-  if(!is.null(eject <- internal$eject) && eject == "patterns") {
+  if(patterns.only) {
     # generate simulated realisations and return only these patterns
     if(verbose) {
       action <- if(simtype == "list") "Extracting" else "Generating"

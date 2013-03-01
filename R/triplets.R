@@ -2,7 +2,7 @@
 #
 #    triplets.R
 #
-#    $Revision: 1.10 $	$Date: 2012/07/12 02:08:20 $
+#    $Revision: 1.11 $	$Date: 2013/02/22 05:43:36 $
 #
 #    The triplets interaction
 #
@@ -50,7 +50,7 @@ Triplets <- local({
     isdata[iXU] <- TRUE
     # identify all close pairs u, x
     r <- pars$r
-    cp <- crosspairs(U, X, r)
+    cp <- crosspairs(U, X, r, what="indices")
     if(DebugTriplets)
       cat(paste("crosspairs at distance", r, "yields", length(cp$i), "pairs\n"))
     IU <- cp$i

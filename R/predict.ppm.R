@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.67 $	$Date: 2012/10/09 08:33:45 $
+#	$Revision: 1.68 $	$Date: 2013/02/25 06:31:37 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -345,7 +345,7 @@ predict.ppm <- local({
       E <- equalpairs(U, X, marked)
     
     # evaluate interaction
-    Vnew <- evalInteraction(X, U, E, inter, correction="none")
+    Vnew <- evalInteraction(X, U, E, inter, correction="none", check=check)
 
   # Negative infinite values signify cif = zero
     cif.equals.zero <- matrowany(Vnew == -Inf)

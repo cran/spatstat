@@ -1,7 +1,7 @@
 #
 #	affine.R
 #
-#	$Revision: 1.42 $	$Date: 2012/07/13 08:46:10 $
+#	$Revision: 1.43 $	$Date: 2013/02/25 07:49:05 $
 #
 
 affinexy <- function(X, mat=diag(c(1,1)), vec=c(0,0), invert=FALSE) {
@@ -292,7 +292,8 @@ scalardilate.default <- function(X, f, ...) {
   return(Y)
 }
 
-scalardilate.owin <- scalardilate.ppp <- function(X, f, ..., origin=NULL) {
+scalardilate.im <- scalardilate.owin <- scalardilate.psp <- scalardilate.ppp <-
+  function(X, f, ..., origin=NULL) {
   trap.extra.arguments(..., .Context="In scalardilate(X,f)")
   check.1.real(f, "In scalardilate(X,f)")
   stopifnot(is.finite(f) && f > 0)

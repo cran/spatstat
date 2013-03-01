@@ -1,19 +1,26 @@
 \name{connected}
 \Rdversion{1.1}
 \alias{connected}
+\alias{connected.im}
+\alias{connected.owin}
 \title{
-  Connected components of an image or window
+  Connected components
 }
 \description{
-  Finds the topologically-connected clumps of pixels in an image or window.
+  Finds the topologically-connected components of a spatial object,
+  such as the connected clumps of pixels in a binary image.
 }
 \usage{
-connected(X, background = NA, method="C")
+connected(X, \dots)
+
+\method{connected}{owin}(X, \dots, method="C")
+
+\method{connected}{im}(X, \dots, background = NA, method="C")
 }
 \arguments{
   \item{X}{
-    Image (object of class \code{"im"}) or window (object of class
-    \code{"owin"}).
+    A spatial object such as a pixel image (object of class \code{"im"})
+    or a window (object of class \code{"owin"}).
   }
   \item{background}{
     Optional. Treat pixels with this value 
@@ -23,9 +30,17 @@ connected(X, background = NA, method="C")
     String indicating the algorithm to be used. Either \code{"C"}
     or \code{"interpreted"}. See Details.
   }
+  \item{\dots}{
+    Other arguments, not recognised by these methods.
+  }
 }
 \details{
-  This function computes the connected component transform
+  The function \code{connected} is generic, with methods
+  for pixel images (class \code{"im"}) and windows (class \code{"owin"})
+  described here. There is also a method for point patterns
+  described in \code{\link{connected.ppp}}.
+  
+  The functions described here compute the connected component transform
   (Rosenfeld and Pfalz, 1966)
   of a binary image or binary mask. The argument \code{X} is first
   converted into a pixel image with logical values. Then the algorithm
@@ -67,6 +82,7 @@ connected(X, background = NA, method="C")
   471-494.
 }
 \seealso{
+  \code{\link{connected.ppp}},
   \code{\link{im.object}}, 
   \code{\link{tess}}
 }

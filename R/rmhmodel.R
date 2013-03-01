@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.57 $  $Date: 2012/05/24 03:44:14 $
+#   $Revision: 1.58 $  $Date: 2013/01/29 02:12:26 $
 #
 #
 
@@ -184,9 +184,7 @@ rmhmodel.default <- function(...,
   
   # Check that this is a recognised model
   # and look up the rules for this model
-  rules <- .Spatstat.RmhTable[[cif]]
-  if(is.null(rules))
-    stop(paste("Unrecognised cif:", sQuote(cif)))
+  rules <- spatstatRmhInfo(cif)
   
   # Map the name of the cif from R to C
   #      (the names are normally identical in R and C,
@@ -303,8 +301,23 @@ print.rmhmodel <- function(x, ...) {
 reach.rmhmodel <- function(x, ...) {
   if(length(list(...)) == 0)
     return(x$reach)
-  rules <- .Spatstat.RmhTable[[x$cif]]
-  return(rules$reach(x$par, ...))
+  # reach must be recomputed 
+  cif <- x$cif
+  Ncif <- length(cif)
+  pars <- if(Ncif == 1) list(x$par) else x$par
+  maxr <- 0
+  for(i in seq_len(Ncif)) {
+    cif.i <- cif[i]
+    par.i <- pars[[i]]
+    rules <- spatstatRmhInfo(cif.i)
+    rchfun  <- rules$reach
+    if(!is.function(rchfun))
+      stop(paste("Internal error: reach is unknown for cif=", sQuote(cif.i)),
+           call.=FALSE)
+    r.i <- rchfun(par.i, ...)
+    maxr <- max(maxr, r.i, na.rm=TRUE)
+  }
+  return(maxr)
 }
 
 is.poisson.rmhmodel <- function(x) {
@@ -335,6 +348,13 @@ is.expandable.rmhmodel <- function(x) {
   
 #####  Table of rules for handling rmh models ##################
 
+spatstatRmhInfo <- function(cifname) {
+  rules <- .Spatstat.RmhTable[[cifname]]
+  if(is.null(rules))
+    stop(paste("Unrecognised cif:", sQuote(cifname)), call.=FALSE)
+  return(rules)
+}
+  
 .Spatstat.RmhTable <-
   list(
 #

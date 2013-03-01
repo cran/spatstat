@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.79 $	$Date: 2012/12/10 06:20:36 $
+#	$Revision: 2.81 $	$Date: 2013/03/01 04:02:45 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -54,7 +54,7 @@ function(x, ...,
   do.SE <- if(!misswhat) ("se" %in% what) else
            switch(spatstat.options("print.ppm.SE"),
                   always = TRUE,
-                  poisson = is.poisson(x),
+                  poisson = is.poisson(x) && (x$fitter != "gam"),
                   never = FALSE)
   
   s <- summary.ppm(x, quick=if(do.SE) FALSE else "no variances")
@@ -539,8 +539,9 @@ model.frame.ppm <- function(formula, ...) {
     object <- update(object, forcefit=TRUE)
     gf <- getglmfit(object)
   }
-  gd <- getglmdata(object)
-  model.frame(gf, data=gd, ...)
+#  gd <- getglmdata(object)
+#  model.frame(gf, data=gd, ...)
+  model.frame(gf, ...)
 }
 
 #

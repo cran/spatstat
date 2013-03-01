@@ -1,7 +1,7 @@
 #
 #  logistic.R
 #
-#   $Revision: 1.4 $  $Date: 2012/06/14 07:22:41 $
+#   $Revision: 1.5 $  $Date: 2013/02/07 09:58:14 $
 #
 #  Logistic likelihood method - under development
 #
@@ -29,6 +29,7 @@ logi.engine <- local({
                              periodic="periodic",
                              isotropic="isotropic",
                              Ripley="isotropic",
+                             trans="translate",
                              translate="translate",
                              translation="translate",
                              none="none"))

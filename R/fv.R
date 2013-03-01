@@ -674,7 +674,7 @@ formula.fv <- function(x, ...) {
 #   method for with()
 
 with.fv <- function(data, expr, ..., drop=TRUE, enclos=NULL) {
-  cl <- match.call()
+  cl <- short.deparse(sys.call())
   verifyclass(data, "fv")
   if(is.null(enclos)) 
     enclos <- parent.frame()
@@ -874,10 +874,11 @@ reconcile.fv <- function(...) {
   return(z)
 }
 
-as.function.fv <- function(x, ..., value) {
+as.function.fv <- function(x, ..., value, extrapolate=FALSE) {
   xx <- with(x, .x)
   yy <- if(!missing(value) && value %in% names(x)) x[[value]] else with(x, .y)
-  f <- approxfun(xx, yy, rule=1)
+  endrule <- if(!extrapolate) 1 else 2
+  f <- approxfun(xx, yy, rule=endrule)
   return(f)
 }
 

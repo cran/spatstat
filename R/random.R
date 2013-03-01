@@ -3,7 +3,7 @@
 #
 #    Functions for generating random point patterns
 #
-#    $Revision: 4.51 $   $Date: 2012/09/05 04:10:58 $
+#    $Revision: 4.57 $   $Date: 2013/02/01 10:32:08 $
 #
 #
 #    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -505,65 +505,93 @@ rstrat <- function(win=square(1), nx, ny=nx, k=1) {
   return(X)
 }
 
-rsyst <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
+xy.grid <- function(xr, yr, nx, ny, dx, dy) {
+  nx.given <- !is.null(nx)
+  ny.given <- !is.null(ny)
+  dx.given <- !is.null(dx)
+  dy.given <- !is.null(dy)
+  if(nx.given && dx.given)
+    stop("Do not give both nx and dx")    
+  if(nx.given) {
+    stopifnot(nx >= 1)
+    x0 <- seq(from=xr[1], to=xr[2], length.out=nx+1)
+    dx <- diff(xr)/nx
+  } else if(dx.given) {
+    stopifnot(dx > 0)
+    x0 <- seq(from=xr[1], to=xr[2], by=dx)
+    nx <- length(x0)
+  } else stop("Need either nx or dx")
+  # determine y grid
+  if(ny.given && dy.given)
+    stop("Do not give both ny and dy")    
+  if(ny.given) {
+    stopifnot(ny >= 1)
+    y0 <- seq(from=yr[1], to=yr[2], length.out=ny+1)
+    dy <- diff(yr)/ny
+  } else {
+    if(is.null(dy)) dy <- dx
+    stopifnot(dy > 0)
+    y0 <- seq(from=yr[1], to=yr[2], by=dy)
+    ny <- length(y0)
+  }
+  return(list(x0=x0, y0=y0, nx=nx, ny=ny, dx=dx, dy=dy))
+}
+  
+rsyst <- function(win=square(1), nx=NULL, ny=nx, ..., dx=NULL, dy=dx) {
   win <- as.owin(win)
   xr <- win$xrange
   yr <- win$yrange
-  if(!missing(nx)) {
-    stopifnot(nx >= 1 && ny >= 1)
-    if(!is.null(dx) || !is.null(dy))
-      stop("Do not give both nx and dx")
-    dx <- diff(xr)/nx
-    dy <- diff(yr)/ny
-    x0 <- seq(from=xr[1], to=xr[2], length.out=nx+1)
-    y0 <- seq(from=yr[1], to=yr[2], length.out=ny+1)
-  } else if(!is.null(dx)) {
-    stopifnot(dx > 0 & dy > 0)
-    if(!is.null(nx) || !is.null(ny))
-      stop("Do not give both nx and dx")
-    x0 <- seq(from=xr[1], to=xr[2], by=dx)
-    y0 <- seq(from=yr[1], to=yr[2], by=dy)
-  } else stop("Either (nx, ny) or (dx, dy) should be given")
+  # determine grid coordinates 
+  if(missing(ny)) ny <- NULL
+  if(missing(dy)) dy <- NULL
+  g <- xy.grid(xr, yr, nx, ny, dx, dy)
+  x0 <- g$x0
+  y0 <- g$y0
+  dx <- g$dx
+  dy <- g$dy
+  # assemble grid and randomise location
   xy0 <- expand.grid(x=x0, y=y0)
   x <- xy0$x + runif(1, min = 0, max = dx)
   y <- xy0$y + runif(1, min = 0, max = dy)
   Xbox <- ppp(x, y, xr, yr, check=FALSE)
+  # trim to window
   X <- Xbox[win]
   return(X)
 }
 
+rcellnumber <- function(n, N=10) {
+  if(!missing(N)) {
+    if(round(N) != N) stop("N must be an integer")
+    stopifnot(is.finite(N))
+    stopifnot(N > 1)
+  }
+  u <- runif(n, min=0, max=1)
+  p0 <- 1/N
+  pN <- 1/(N * (N-1))
+  k <- ifelse(u < 1/N, 0, ifelse(u < (1 - pN), 1, N))
+  return(k)
+}
 
-rcell <- function(win=square(1), nx, ny=nx, dx=NULL, dy=NULL) {
+rcell <- function(win=square(1), nx=NULL, ny=nx, ..., dx=NULL, dy=dx, N=10) {
   win <- as.owin(win)
   xr <- win$xrange
   yr <- win$yrange
-  if(!missing(nx)) {
-    stopifnot(nx >= 1 && ny >= 1)
-    if(!is.null(dx) || !is.null(dy))
-      stop("Do not give both nx and dx")
-    dx <- diff(xr)/nx
-    dy <- diff(yr)/ny
-    x0 <- seq(from=xr[1], to=xr[2], length.out=nx+1)
-    y0 <- seq(from=yr[1], to=yr[2], length.out=ny+1)
-  } else if(!is.null(dx)) {
-    stopifnot(dx > 0 & dy > 0)
-    if(!is.null(nx) || !is.null(ny))
-      stop("Do not give both nx and dx")
-    x0 <- seq(from=xr[1], to=xr[2], by=dx)
-    y0 <- seq(from=yr[1], to=yr[2], by=dy)
-  } else stop("Either (nx, ny) or (dx, dy) should be given")
-  mx <- length(x0)
-  my <- length(y0)
+  # determine grid coordinates 
+  if(missing(ny)) ny <- NULL
+  if(missing(dy)) dy <- NULL
+  g <- xy.grid(xr, yr, nx, ny, dx, dy)
+  nx <- g$nx
+  ny <- g$ny
+  x0 <- g$x0
+  y0 <- g$y0
+  dx <- g$dx
+  dy <- g$dy
+  # generate pattern
   x <- numeric(0)
   y <- numeric(0)
-  rcellnumber <- function(n) {
-    u <- runif(n, min=0, max=1)
-    k <- ifelse(u < 1/10, 0, ifelse(u < 89/90, 1, 10))
-    return(k)
-  }
-  for(ix in seq_len(mx))
-    for(iy in seq_len(my)) {
-      nij <- rcellnumber(1)
+  for(ix in seq_len(nx))
+    for(iy in seq_len(ny)) {
+      nij <- rcellnumber(1, N)
       x <- c(x, x0[ix] + runif(nij, min=0, max=dx))
       y <- c(y, y0[iy] + runif(nij, min=0, max=dy))
     }

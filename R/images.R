@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#         $Revision: 1.96 $     $Date: 2012/10/12 10:49:32 $
+#         $Revision: 1.98 $     $Date: 2013/02/11 09:22:14 $
 #
 #      The class "im" of raster images
 #
@@ -228,8 +228,18 @@ function(x, i, j, ..., drop=TRUE, raster=NULL, rescue=is.owin(i)) {
         yr <- clip(i$yrange, x$yrange)
         colsub <- inrange(out$xcol, xr)
         rowsub <- inrange(out$yrow, yr)
-        return(im(out$v[rowsub,colsub], out$xcol[colsub], out$yrow[rowsub],
-                  unitname=unitname(x)))
+        ncolsub <- sum(colsub)
+        nrowsub <- sum(rowsub)
+        if(ncolsub == 0 || nrowsub == 0)
+          return(numeric(0))
+        marg <- list(mat=out$v[rowsub, colsub, drop=FALSE],
+                     unitname=unitname(x))
+        xarg <-
+          if(ncolsub > 1) list(xcol = out$xcol[colsub]) else list(xrange=xr)
+        yarg <-
+          if(nrowsub > 1) list(yrow = out$yrow[rowsub]) else list(yrange=yr)
+        result <- do.call("im", c(marg, xarg, yarg))
+        return(result)
       } 
     }
     if(verifyclass(i, "im", fatal=FALSE)) {
@@ -617,6 +627,21 @@ rastery.im <- function(x) {
   v <- x$v
   yy <- x$yrow
   matrix(yy[row(v)], ncol=ncol(v), nrow=nrow(v))
+}
+
+rasterxy.im <- function(x, drop=FALSE) {
+  verifyclass(x, "im")
+  v <- x$v
+  xx <- x$xcol
+  yy <- x$yrow
+  if(!drop) {
+    ans <- cbind(as.vector(xx[col(v)]), as.vector(yy[row(v)]))
+  } else {
+    ok <- !is.null(x$v)
+    ans <- cbind(as.vector(xx[col(v)[ok]]), as.vector(yy[row(v)[ok]]))
+  }
+  colnames(ans) <- c("x", "y")
+  return(ans)
 }
 
 ##############
