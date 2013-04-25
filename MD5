@@ -1,6 +1,6 @@
-970b6fd9dce9b32c23e235b80be1645a *DESCRIPTION
+e6eea30fa29f4cf06d2cd81bd4f398b3 *DESCRIPTION
 e04d6ccc28ffb8d71772de4e86d2dc2a *NAMESPACE
-848596885eda256725c57104d56d5dd5 *NEWS
+0d24d2fa7be1de5ce5bb2fd06652036b *NEWS
 e2680f1399af8c6a7df92d3903270e12 *R/Fest.R
 23e7ea8e35a7f801f3fc35f14b29387d *R/First.R
 ca1ace64c86b867b579efbef83c7c7e4 *R/GJfox.R
@@ -469,7 +469,7 @@ ed34eeb5b251f92a18d936a3275b2cba *man/as.mask.Rd
 64c20e384fa85038e588fafcf66c321e *man/as.owin.Rd
 67393038ca342b68a6627e75a0c2a594 *man/as.polygonal.Rd
 e21d20b010abaebc51e35421b187fa02 *man/as.ppm.Rd
-873cc277bfe7e33aae182cc00c6e4f6a *man/as.ppp.Rd
+8bbcb22db3156336b04e00f3e9a35730 *man/as.ppp.Rd
 0e22cfca91acc6b0e9b285aa0c41fec6 *man/as.psp.Rd
 14cfdd417f266e99ac8ae69d45b55a75 *man/as.rectangle.Rd
 c6a3aa349aaefa83294cb9f811ae1f7a *man/as.tess.Rd
@@ -1063,7 +1063,7 @@ d57a2dd2a7e40aa4f741c3d4c8193578 *src/dist2dpath.c
 5b20e886a81c932df538e18e9bff6d51 *src/distances.c
 b0e4920146ae880786dc61d4b6e7fcba *src/distmapbin.c
 2214769b031225151f12603e0f37fd0c *src/distseg.c
-089c8c0d4d4c409912c2797faff5f7e2 *src/dppll.f
+5d7b76b156eb885eac657b5aec25e4d8 *src/dppll.f
 7028f09de82307e1e46de69c104b7423 *src/dwpure.c
 e73182d2331b6f41c46a793bf8606e88 *src/exactPdist.c
 60642750dc3fb722bc05b35a2237f5ca *src/exactdist.c
