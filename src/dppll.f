@@ -1,8 +1,8 @@
 C Output from Public domain Ratfor, version 1.0
       subroutine dppll(x,y,l1,l2,l3,l4,np,nl,eps,mint,rslt,xmin,jmin)
       implicit double precision(a-h,o-z)
-      dimension x(*), y(*), rslt(np,*), xmin(*), jmin(*)
-      double precision l1(*), l2(*), l3(*), l4(*)
+      dimension x(np), y(np), rslt(np,nl), xmin(np), jmin(np)
+      double precision l1(nl), l2(nl), l3(nl), l4(nl)
       one = 1.d0
       zero = 0.d0
       do23000 j = 1,nl 
