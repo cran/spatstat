@@ -23,6 +23,7 @@ options(SweaveHooks=list(fig=function() par(mar=c(1,1,1,1))))
 <<echo=FALSE,results=hide>>=
 library(spatstat)
 spatstat.options(gpclib=TRUE)
+options(useFancyQuotes=FALSE)
 sdate <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
          fields = "Date")
 sversion <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
