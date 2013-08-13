@@ -28,6 +28,7 @@ sdate <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
          fields = "Date")
 sversion <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
          fields = "Version")
+options(useFancyQuotes=FALSE)
 @ 
 
 \title{Getting started with \texttt{spatstat}}
