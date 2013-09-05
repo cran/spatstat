@@ -213,7 +213,7 @@ options(SweaveHooks=list(fig=function() par(mar=rep(4,4)+0.1)))
 plot(Kest(mypattern))
 @ 
 
-  For more information, type \texttt{help(Kest)}
+For more information, type \texttt{help(Kest)}
   \item 
   Envelopes of $K$-function:
 <<eval=FALSE>>=
@@ -235,7 +235,8 @@ options(SweaveHooks=list(fig=function() par(mar=c(1,1,1,1))))
 <<fig=TRUE,results=hide>>=
 plot(density(mypattern))
 @ 
-  For more information, type \texttt{help(density.ppp)}
+
+For more information, type \texttt{help(density.ppp)}
 \end{itemize}
 \item 
   Next if you have additional columns of data
@@ -283,7 +284,7 @@ Information sources for \spst\ include:
     type \texttt{help(blah)}.
     There is a graphical help interface, 
     which you can start by typing \texttt{help.start()}.
-    Alternatively you can download a pdf of the entire manual (800 pages!)
+    Alternatively you can download a pdf of the entire manual (1000 pages!)
     from the website \texttt{www.spatstat.org}. 
   \end{quote}
 \item workshop notes:
