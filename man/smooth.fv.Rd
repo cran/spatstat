@@ -1,5 +1,4 @@
-\name{smooth.fv}
-\alias{smooth.fv}
+\name{Smooth.fv}
 \alias{Smooth.fv}
 \title{
   Apply Smoothing to Function Values
@@ -9,16 +8,12 @@
   in selected columns of a function value table.
 }
 \usage{
-smooth.fv(x, which = "*", ...,
-          method=c("smooth.spline", "loess"),
-          xinterval=NULL)
-
 \method{Smooth}{fv}(X, which = "*", ...,
           method=c("smooth.spline", "loess"),
           xinterval=NULL)
 }
 \arguments{
-  \item{x,X}{
+  \item{X}{
     Values to be smoothed.
     A function value table (object of class \code{"fv"},
     see \code{\link{fv.object}}).
@@ -44,7 +39,7 @@ smooth.fv(x, which = "*", ...,
   }
 }
 \details{
-  The command \code{smooth.fv} or \code{Smooth.fv}
+  The command \code{Smooth.fv}
   applies smoothing to the function values in
   a function value table (object of class \code{"fv"}).
 
