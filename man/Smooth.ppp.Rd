@@ -1,5 +1,4 @@
-\name{smooth.ppp}
-\alias{smooth.ppp}
+\name{Smooth.ppp}
 \alias{Smooth.ppp}
 \alias{markmean}
 \alias{markvar}
@@ -10,37 +9,60 @@
   and least-squares cross-validated bandwidth selection.
 }
 \usage{
-smooth.ppp(X, ..., weights = rep(1, npoints(X)), at="pixels")
-
-\method{Smooth}{ppp}(X, ..., weights = rep(1, npoints(X)), at="pixels")
+\method{Smooth}{ppp}(X, sigma=NULL,
+                     ...,
+                     weights = rep(1, npoints(X)),
+                     at="pixels",
+                     edge=TRUE, diggle=FALSE)
 
 markmean(X, ...)
-markvar(X, ...)
+
+markvar(X, sigma=NULL, ..., weights=NULL, varcov=NULL)
 }
 \arguments{
   \item{X}{A marked point pattern (object of class \code{"ppp"}).}
-  \item{\dots}{Arguments passed to
+  \item{sigma}{
+    Smoothing bandwidth.
+    A single positive number, a numeric vector of length 2,
+    or a function that selects the bandwidth automatically.
+    See \code{\link{density.ppp}}.
+  }
+  \item{\dots}{
+    Further arguments passed to
     \code{\link{bw.smoothppp}} and \code{\link{density.ppp}}
     to control the kernel smoothing and
-    the pixel resolution of the result.}
-  \item{weights}{Optional weights attached to the observations.}
+    the pixel resolution of the result.
+  }
+  \item{weights}{
+    Optional weights attached to the observations.
+    A numeric vector, numeric matrix, or an \code{expression}.
+    See \code{\link{density.ppp}}.
+  }
   \item{at}{
     String specifying whether to compute the smoothed values
     at a grid of pixel locations (\code{at="pixels"}) or
     only at the points of \code{X} (\code{at="points"}).
   }
+  \item{edge,diggle}{
+    Arguments passed to \code{\link{density.ppp}} to
+    determine the edge correction.
+  }
+  \item{varcov}{
+    Variance-covariance matrix. An alternative
+    to \code{sigma}. See \code{\link{density.ppp}}.
+  }
 }
 \details{
-  The function \code{smooth.ppp} or \code{Smooth.ppp}
+  The function \code{Smooth.ppp}
   performs spatial smoothing of numeric values
   observed at a set of irregular locations. The functions
-  \code{markmean} and \code{markvar} are wrappers for \code{smooth.ppp}
+  \code{markmean} and \code{markvar} are wrappers for \code{Smooth.ppp}
   which compute the spatially-varying mean and variance of the marks of
   a point pattern.
 
   \code{Smooth.ppp} is a method for the generic function
   \code{\link{Smooth}} for the class \code{"ppp"} of point patterns.
-  Thus you can type simply \code{Smooth(X)}, but not \code{smooth(X)}.
+  Thus you can type simply \code{Smooth(X)}.
   
   Smoothing is performed by Gaussian kernel weighting. If the
   observed values are \eqn{v_1,\ldots,v_n}{v[1],...,v[n]}
@@ -65,7 +87,7 @@ markvar(X, ...)
   locations.
 
   The marks are allowed to be a data frame (in
-  \code{Smooth.ppp}, \code{smooth.ppp}
+  \code{Smooth.ppp}
   and \code{markmean}). Then the smoothing procedure is applied to each
   column of marks. 
   
@@ -144,7 +166,6 @@ markvar(X, ...)
 }
 \examples{
    # Longleaf data - tree locations, marked by tree diameter
-   data(longleaf)
    # Local smoothing of tree diameter (automatic bandwidth selection)
    Z <- Smooth(longleaf)
    # Kernel bandwidth sigma=5
@@ -152,7 +173,6 @@ markvar(X, ...)
    # mark variance
    plot(markvar(longleaf, sigma=5))
    # data frame of marks: trees marked by diameter and height
-   data(finpines)
    plot(Smooth(finpines, sigma=2))
 }
 \author{Adrian Baddeley

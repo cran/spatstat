@@ -1,5 +1,4 @@
-\name{smooth.msr}
-\alias{smooth.msr}
+\name{Smooth.msr}
 \alias{Smooth.msr}
 \title{
   Smooth a Signed or Vector-Valued Measure
@@ -8,8 +7,6 @@
   Apply kernel smoothing to a signed measure or vector-valued measure.
 }
 \usage{
- smooth.msr(X, ...)
-
  \method{Smooth}{msr}(X, ...)
 }
 \arguments{
@@ -35,12 +32,12 @@
   belongs to the class \code{"listof"} so that it can be printed and plotted.
 }
 \references{
-  Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005)
+  Baddeley, A., Turner, R., \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
 
-  Baddeley, A., Moller, J. and Pakes, A.G. (2008) 
+  Baddeley, A., \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Pakes, A.G. (2008) 
   Properties of residuals for spatial point processes.
   \emph{Annals of the Institute of Statistical Mathematics}
   \bold{60}, 627--649.
