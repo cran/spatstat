@@ -1,22 +1,32 @@
-\name{bounding.box}
-\alias{bounding.box}
-\title{Bounding Box of a Window or Point Pattern}
+\name{boundingbox}
+\alias{boundingbox}
+\alias{boundingbox.default}
+\alias{boundingbox.im}
+\alias{boundingbox.owin}
+\alias{boundingbox.ppp}
+\title{
+  Bounding Box of a Window, Image, or Point Pattern
+}
 \description{
-  Find the smallest rectangle containing a given window(s)
-  or point pattern(s).
+  Find the smallest rectangle containing a given window(s),
+  image(s) or point pattern(s).
 }
 \usage{
- bounding.box(\dots)
+boundingbox(\dots)
+
+\method{boundingbox}{default}(\dots)
+
+\method{boundingbox}{im}(\dots)
+
+\method{boundingbox}{owin}(\dots)
+
+\method{boundingbox}{ppp}(\dots)
 }
 \arguments{
   \item{\dots}{One or more windows (objects of class \code{"owin"}),
     pixel images (objects of class \code{"im"}) or
     point patterns (objects of class \code{"ppp"}).
   }
-}
-\value{
-  A window (object of class \code{"owin"})
-  of type \code{"rectangle"} representing a rectangle.
 }
 \details{
   This function finds the smallest rectangle (with sides parallel to
@@ -28,8 +38,7 @@
   which is returned by \code{\link{as.rectangle}}).
 
   For a point pattern (object of class \code{"ppp"}), the bounding box
-  is the smallest rectangle that contains all the points of the pattern,
-  and is computed by \code{\link{bounding.box.xy}}.
+  is the smallest rectangle that contains all the points of the pattern.
 
   For a pixel image (object of class \code{"im"}), the image will
   be converted to a window using \code{\link{as.owin}},
@@ -39,19 +48,18 @@
   this function finds the smallest rectangle that contains
   all the bounding boxes of the objects.
 }
-\seealso{
+\value{
   \code{\link{owin}},
   \code{\link{as.owin}},
   \code{\link{as.rectangle}}
-  \code{\link{bounding.box.xy}}
 }
 \examples{
   w <- owin(c(0,10),c(0,10), poly=list(x=c(1,2,3,2,1), y=c(2,3,4,6,7)))
-  r <- bounding.box(w)
+  r <- boundingbox(w)
   # returns rectangle [1,3] x [2,7]
 
   w2 <- unit.square()
-  r <- bounding.box(w, w2)
+  r <- boundingbox(w, w2)
   # returns rectangle [0,3] x [0,7]
 }
 \author{Adrian Baddeley

@@ -1,31 +1,70 @@
 #
-plot.listof <- plot.splitppp <-
+plot.listof <- 
   local({
 
   # auxiliary functions
-  extraplot <- function(nnn, ..., panel.args=NULL, plotcommand="plot") {
-    if(is.null(panel.args)) {
-      do.call(plotcommand, list(...))
-    } else {
+  extraplot <- function(nnn, x, ..., add=FALSE,
+                        panel.args=NULL, plotcommand="plot") {
+    argh <- list(...)
+    if(is.ppp(x)) argh <- c(argh, list(multiplot=FALSE))
+    if(!is.null(panel.args)) {
       xtra <- if(is.function(panel.args)) panel.args(nnn) else panel.args
-      if(!is.list(xtra)) stop("panel.args should be a list")
-      do.call(plotcommand, append(list(...), xtra))
+      if(!is.list(xtra))
+        stop(paste0("panel.args",
+                    if(is.function(panel.args)) "(i)" else "",
+                    " should be a list"))
+      argh <- resolve.defaults(xtra, argh)
     }
+    # some plot commands don't recognise 'add'
+    if(add)
+      argh <- append(argh, list(add=TRUE))
+    do.call(plotcommand, append(list(x=x), argh))
   }
 
-  exec.or.plot <- function(cmd, i, xi, ...) {
+  exec.or.plot <- function(cmd, i, xi, ..., add=FALSE) {
     if(is.null(cmd)) return(NULL)
-    if(is.function(cmd)) {
-      do.call(cmd, resolve.defaults(list(i, xi, ...)))
+    if(!add) {
+      # some plot commands don't recognise 'add'
+      if(is.function(cmd)) {
+        do.call(cmd, resolve.defaults(list(i, xi, ...)))
+      } else {
+        do.call(plot, resolve.defaults(list(cmd, ...)))
+      }
     } else {
-      do.call(plot, resolve.defaults(list(cmd, ...)))
+      if(is.function(cmd)) {
+        do.call(cmd, resolve.defaults(list(i, xi, ..., add=add)))
+      } else {
+        do.call(plot, resolve.defaults(list(cmd, ..., add=add)))
+      }
+    }
+    
+  }
+
+  exec.or.plotshift <- function(cmd, i, xi, ..., vec=vec, add=FALSE) {
+    if(is.null(cmd)) return(NULL)
+    if(!add) {
+      # some plot commands don't recognise 'add'
+      if(is.function(cmd)) {
+        do.call(cmd, resolve.defaults(list(i, xi, ...)))
+      } else {
+        cmd <- shift(cmd, vec)
+        do.call(plot, resolve.defaults(list(cmd, ...)))
+      }
+    } else {
+      if(is.function(cmd)) {
+        do.call(cmd, resolve.defaults(list(i, xi, ..., add=TRUE)))
+      } else {
+        cmd <- shift(cmd, vec)
+        do.call(plot, resolve.defaults(list(cmd, ..., add=TRUE)))
+      }
     }
   }
 
-  ## bounding box, including ribbon for images
-  getplotbox <- function(x, ...) {
-    if(!is.im(x)) return(as.rectangle(x))
-    y <- plot.im(x, ..., do.plot=FALSE)
+  ## bounding box, including ribbon for images, legend for point patterns
+  getplotbox <- function(x, ..., do.plot) {
+    if(!inherits(x, c("im", "ppp", "psp", "msr", "layered")))
+      return(as.rectangle(x))
+    y <- plot(x, ..., do.plot=FALSE)
     return(attr(y, "bbox"))
   }
 
@@ -36,10 +75,12 @@ plot.listof <- plot.splitppp <-
     return(!inherits(y, "try-error"))
   }
 
-  plot.splitppp <- function(x, ..., main, arrange=TRUE,
+  plot.listof <- function(x, ..., main, arrange=TRUE,
                             nrows=NULL, ncols=NULL,
                             main.panel=NULL,
                             mar.panel=c(2,1,1,2),
+                            hsep = 0,
+                            vsep = 0,
                             panel.begin=NULL,
                             panel.end=NULL,
                             panel.args=NULL,
@@ -52,14 +93,25 @@ plot.listof <- plot.splitppp <-
                             equal.scales=FALSE) {
     xname <- short.deparse(substitute(x))
     
-    # `boomerang despatch'
+    ## `boomerang despatch'
     cl <- match.call()
     if(missing(plotcommand) && all(unlist(lapply(x, is.im)))) {
       cl[[1]] <- as.name("image.listof")
       parenv <- sys.parent()
       return(eval(cl, envir=parenv))
     }
-            
+
+    ## panel margins
+    if(!missing(mar.panel)) {
+      nm <- length(mar.panel)
+      if(nm == 1) mar.panel <- rep(mar.panel, 4) else
+      if(nm == 2) mar.panel <- rep(mar.panel, 2) else
+      if(nm != 4) stop("mar.panel should have length 1, 2 or 4")
+    } else if(any(unlist(lapply(x, is.fv)))) {
+      ## change default
+      mar.panel <- 0.25+c(4,4,2,2)
+    }
+    
     n <- length(x)
     names(x) <- good.names(names(x), "Component_", 1:n)
     if(is.null(main.panel))
@@ -122,7 +174,7 @@ plot.listof <- plot.splitppp <-
     nblank <- ncols * nrows - n
     ## determine dimensions of objects
     ##     (including space for colour ribbons, if they are images)
-    boxes <- try(lapply(x, getplotbox), silent=TRUE)
+    boxes <- try(lapply(x, getplotbox, ...), silent=TRUE)
     sizes.known <- !inherits(boxes, "try-error")
     if(equal.scales && !sizes.known) {
       warning("Ignored equal.scales=TRUE; scales could not be determined")
@@ -143,8 +195,9 @@ plot.listof <- plot.splitppp <-
     mat <- matrix(c(seq_len(n), integer(nblank)),
                   byrow=TRUE, ncol=ncols, nrow=nrows)
     if(sizes.known) {
-      xwidths <- unlist(lapply(scaledboxes, function(z) { diff(z$xrange) }))
-      xheights <- unlist(lapply(scaledboxes, function(z) { diff(z$yrange) }))
+      boxsides <- lapply(scaledboxes, sidelengths)
+      xwidths <- unlist(lapply(boxsides, "[", i=1))
+      xheights <- unlist(lapply(boxsides, "[", i=2))
       heights <- apply(mat, 1, function(j,h) { max(h[j[j>0]]) }, h=xheights)
       widths <- apply(mat, 2, function(i,w) { max(w[i[i>0]]) }, w=xwidths)
     } else {
@@ -156,12 +209,10 @@ plot.listof <- plot.splitppp <-
     nall <- n
     ## determine whether to display all objects in one enormous plot
     ## Precondition is that everything has a spatial bounding box
-    single.plot <-
-      equal.scales && sizes.known &&
-      is.shiftable(panel.end) &&
-      is.shiftable(panel.begin) &&
-      is.null(adorn.left) && is.null(adorn.right) &&
-      is.null(adorn.top) && is.null(adorn.bottom)
+    single.plot <- equal.scales && sizes.known
+    if(equal.scales && !single.plot)
+      warning("equal.scales=TRUE ignored", "because bounding boxes",
+              "could not be determined", call.=FALSE)
     ##
     if(single.plot) {
       ## .........  create a single plot ..................
@@ -169,12 +220,16 @@ plot.listof <- plot.splitppp <-
       ht <- max(heights)
       wd <- max(widths)
       marpar <- mar.panel * c(ht, wd, ht, wd)/6
+      vsep <- vsep * ht/6
+      hsep <- hsep * wd/6
       mainheight <- any(nzchar(main.panel)) * ht/5
       ewidths <- marpar[2] + widths + marpar[4]
       eheights <- marpar[1] + heights + marpar[3] + mainheight
-      bigbox <- owin(c(0, sum(ewidths)), c(0, sum(eheights)))
-      ox <- cumsum(c(0, ewidths))[1:ncols] + marpar[2]
-      oy <- cumsum(c(0, eheights))[1:nrows] + marpar[1]
+      Width <- sum(ewidths) + hsep * (length(ewidths) - 1)
+      Height <- sum(eheights) + vsep * (length(eheights) - 1)
+      bigbox <- owin(c(0, Width), c(0, Height))
+      ox <- marpar[2] + cumsum(c(0, ewidths + hsep))[1:ncols]
+      oy <- marpar[1] + cumsum(c(0, rev(eheights) + vsep))[nrows:1]
       panelorigin <- as.matrix(expand.grid(x=ox, y=oy))
       ## initialise, with banner
       cex <- resolve.1.default(list(cex.title=1.5), list(...))
@@ -184,21 +239,27 @@ plot.listof <- plot.splitppp <-
         ## determine shift vector that moves bottom left corner of spatial box
         ## to bottom left corner of target area on plot device
         vec <- panelorigin[i,] - with(scaledboxes[[i]], c(xrange[1], yrange[1]))
+        ## shift panel contents
+        xi <- x[[i]]
+        xishift <- shift(xi, vec)
         ## let rip
-        if(!is.null(panel.begin)) 
-          plot(shift(panel.begin, vec), add=TRUE,
-               main=main.panel[i], show.all=TRUE)
-        xi <- x[[i]] 
-        extraplot(i, shift(xi, vec), ...,
+        if(!is.null(panel.begin))
+          exec.or.plotshift(panel.begin, i, xishift,
+                            add=TRUE,
+                            main=main.panel[i], show.all=TRUE,
+                            vec=vec)
+        extraplot(i, xishift, ...,
                   add=TRUE, show.all=is.null(panel.begin),
                   main=main.panel[i],
                   panel.args=panel.args, plotcommand=plotcommand)
-        if(!is.null(panel.end))
-          plot(shift(panel.end, vec), add=TRUE)
+        exec.or.plotshift(panel.end, i, xishift, add=TRUE, vec=vec)
       }
       return(invisible(NULL))
     }
     ## ................. multiple logical plots using 'layout' ..............
+    ## adjust panel margins to accommodate desired extra separation
+    mar.panel <- mar.panel + c(vsep, hsep, vsep, hsep)/2
+    ## check for adornment
     if(!is.null(adorn.left)) {
       # add margin at left, of width adorn.size * meanwidth
       nall <- i.left <- n+1
@@ -272,6 +333,6 @@ plot.listof <- plot.splitppp <-
     return(invisible(NULL))
   }
 
-  plot.splitppp
+  plot.listof
 })
 
