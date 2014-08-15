@@ -1,20 +1,21 @@
-\name{plot.kstest}
-\alias{plot.kstest}
-\title{Plot a Spatial Kolmogorov-Smirnov Test}
+\name{plot.cdftest}
+\alias{plot.cdftest}
+\title{Plot a Spatial Distribution Test}
 \description{
-  Plot the result of a spatial Kolmogorov-Smirnov test
+  Plot the result of a spatial distribution test
+  computed by \code{cdf.test}.
 }
 \usage{
-\method{plot}{kstest}(x, ...,
+\method{plot}{cdftest}(x, ...,
                    style=c("cdf", "PP", "QQ"),
-                   lwd=par("lwd"), col=1, lty=1,
+                   lwd=par("lwd"), col=par("col"), lty=par("lty"),
                    lwd0=lwd, col0=2, lty0=2,
                    do.legend)
 }
 \arguments{
   \item{x}{
-    Object to be plotted. An object of class \code{"kstest"}
-    produced by a method for \code{\link{kstest}}.
+    Object to be plotted. An object of class \code{"cdftest"}
+    produced by a method for \code{\link{cdf.test}}.
   }
   \item{\dots}{
     extra arguments that will be passed to the plotting function
@@ -40,9 +41,12 @@
   \code{NULL}.
 }
 \details{
-  This is the \code{plot} method for the class \code{"kstest"}.
+  This is the \code{plot} method for the class \code{"cdftest"}.
   An object of this class represents the outcome of
-  a spatial Kolmogorov-Smirnov test, computed by \code{\link{kstest}}.
+  a spatial distribution test, computed by \code{\link{cdf.test}},
+  and based on either the Kolmogorov-Smirnov,
+  \ifelse{latex}{\out{Cram\'er}}{Cramer}-von Mises
+  or Anderson-Darling test.
 
   If \code{style="cdf"} (the default), 
   the plot displays the two cumulative distribution functions
@@ -50,7 +54,8 @@
   function of the covariate at the data points, and the predicted
   cumulative distribution function of the covariate under the model,
   both plotted against the value of the covariate. The
-  Kolmogorov-Smirnov test statistic is the maximum vertical separation
+  Kolmogorov-Smirnov test statistic (for example)
+  is the maximum vertical separation
   between the two curves.
 
   If \code{style="PP"} then the P-P plot is drawn. The
@@ -71,7 +76,7 @@
   test statistic cannot be read off the Q-Q plot.
 }
 \seealso{
-  \code{\link{kstest}}
+  \code{\link{cdf.test}}
 }
 \examples{
    # synthetic data: nonuniform Poisson process
@@ -84,7 +89,7 @@
    xcoord <- function(x,y) { x }
 
    # test wrong model
-   k <- kstest(fit0, xcoord)
+   k <- cdf.test(fit0, xcoord)
 
    # plot result of test
    plot(k, lwd0=3)

@@ -1,27 +1,36 @@
 #
-#  kstest.R
+#  cdftest.R
 #
-#  $Revision: 1.60 $  $Date: 2014/05/05 09:51:52 $
+#  $Revision: 2.7 $  $Date: 2014/06/25 11:00:10 $
 #
 #
 
 # --------- old -------------
 
 ks.test.ppm <- function(...) {
-  .Deprecated("kstest.ppm", package="spatstat")
-  kstest.ppm(...)
+  .Deprecated("cdf.test.ppm", package="spatstat")
+  cdf.test.ppm(...)
+}
+
+kstest <- kstest.ppp <- kstest.ppm <- kstest.lpp <- kstest.lppm <-
+  kstest.slrm <-
+  function(...) {
+    message("kstest is out of date; use cdf.test")
+#  .Deprecated("cdf.test", package="spatstat")
+  cdf.test(..., test="ks")
 }
 
 # ---------------------------
 
-kstest <- function(...) {
-  UseMethod("kstest")
+cdf.test <- function(...) {
+  UseMethod("cdf.test")
 }
 
-kstest.ppp <-
-  function(X, covariate, ..., jitter=TRUE) {
+cdf.test.ppp <-
+  function(X, covariate, test=c("ks", "cvm", "ad"), ..., jitter=TRUE) {
     Xname <- short.deparse(substitute(X))
     covname <- singlestring(short.deparse(substitute(covariate)))
+    test <- match.arg(test)
     if(is.character(covariate)) covname <- covariate
     if(!is.marked(X, dfok=TRUE)) {
       # unmarked
@@ -47,33 +56,35 @@ kstest.ppp <-
       modelname <- "CSR"
     }
     do.call("spatialCDFtest",
-            resolve.defaults(list(model, covariate, test="ks"),
+            resolve.defaults(list(model, covariate, test=test),
                              list(jitter=jitter),
                              list(...),
                              list(modelname=modelname,
                                   covname=covname, dataname=Xname)))
 }
 
-kstest.ppm <- 
-  function(model, covariate, ..., jitter=TRUE) {
+cdf.test.ppm <- 
+  function(model, covariate, test=c("ks", "cvm", "ad"), ..., jitter=TRUE) {
   modelname <- short.deparse(substitute(model))
   covname <- singlestring(short.deparse(substitute(covariate)))
+  test <- match.arg(test)
   verifyclass(model, "ppm")
   if(is.character(covariate)) covname <- covariate
   if(is.poisson(model) && is.stationary(model))
     modelname <- "CSR"
   do.call("spatialCDFtest",
-          resolve.defaults(list(model, covariate, test="ks"),
+          resolve.defaults(list(model, covariate, test=test),
                            list(jitter=jitter),
                            list(...),
                            list(modelname=modelname,
                                 covname=covname)))
 }
 
-kstest.lpp <-
-  function(X, covariate, ..., jitter=TRUE) {
+cdf.test.lpp <-
+  function(X, covariate, test=c("ks", "cvm", "ad"), ..., jitter=TRUE) {
     Xname <- short.deparse(substitute(X))
     covname <- singlestring(short.deparse(substitute(covariate)))
+    test <- match.arg(test)
     if(is.character(covariate)) covname <- covariate
     if(!is.marked(X, dfok=TRUE)) {
       # unmarked
@@ -99,22 +110,25 @@ kstest.lpp <-
       modelname <- "CSR"
     }
     do.call("spatialCDFtest",
-            resolve.defaults(list(model, covariate, test="ks"),
+            resolve.defaults(list(model, covariate, test=test),
                              list(jitter=jitter),
                              list(...),
                              list(modelname=modelname,
                                   covname=covname, dataname=Xname)))
 }
 
-kstest.lppm <- function(model, covariate, ..., jitter=TRUE) {
+cdf.test.lppm <- function(model, covariate,
+                          test=c("ks", "cvm", "ad"),
+                          ..., jitter=TRUE) {
   modelname <- short.deparse(substitute(model))
   covname <- singlestring(short.deparse(substitute(covariate)))
+  test <- match.arg(test)
   verifyclass(model, "lppm")
   if(is.character(covariate)) covname <- covariate
   if(is.poisson(model) && is.stationary(model))
     modelname <- "CSR"
   do.call("spatialCDFtest",
-          resolve.defaults(list(model, covariate, test="ks"),
+          resolve.defaults(list(model, covariate, test=test),
                            list(jitter=jitter),
                            list(...),
                            list(modelname=modelname,
@@ -122,13 +136,16 @@ kstest.lppm <- function(model, covariate, ..., jitter=TRUE) {
 }
 
 
-kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
+cdf.test.slrm <- function(model, covariate,
+                          test=c("ks", "cvm", "ad"), ...,
+                          modelname=NULL, covname=NULL) {
   # get names
   if(is.null(modelname))
     modelname <- short.deparse(substitute(model))
   if(is.null(covname))
     covname <- short.deparse(substitute(covariate))
   dataname <- model$CallInfo$responsename
+  test <- match.arg(test)
   #
   stopifnot(is.slrm(model))
   stopifnot(is.im(covariate))
@@ -161,10 +178,17 @@ kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
   # now apply cdf
   U <- FZ(ZX)
   # Test uniformity of transformed values
-  result <- ks.test(U, "punif", ...)
+  result <- switch(test,
+                   ks  = ks.test(U, "punif", ...),
+                   cvm = cvm.test(U, "punif", ...),
+                   ad = ad.test(U, "punif", ...))
+  testname <- switch(test,
+                     ks="Kolmogorov-Smirnov",
+                     cvm="Cramer-Von Mises",
+                     ad="Anderson-Darling")
 
   # modify the 'htest' entries
-  result$method <- paste("Spatial Kolmogorov-Smirnov test of",
+  result$method <- paste("Spatial", testname, "test of",
                          "inhomogeneous Poisson process",
                          "in two dimensions")
   result$data.name <-
@@ -172,8 +196,8 @@ kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
           "evaluated at points of", sQuote(dataname), "\n\t",
           "and transformed to uniform distribution under model",
           sQuote(modelname))
-  # additional class 'kstest'
-  class(result) <- c("kstest", class(result))
+  # additional class 'cdftest'
+  class(result) <- c("cdftest", class(result))
   attr(result, "prep") <-
     list(Zvalues=covvalu, ZX=ZX, FZ=FZ, FZX=ecdf(ZX), U=U)
   attr(result, "info") <- list(modelname=modelname, covname=covname,
@@ -183,14 +207,15 @@ kstest.slrm <- function(model, covariate, ..., modelname=NULL, covname=NULL) {
 
 #.............  helper functions ........................#
 
-spatialCDFtest <- function(model, covariate, test, ...,
+spatialCDFtest <- function(model, covariate, test=c("ks", "cvm", "ad"),
+                           ...,
                            dimyx=NULL, eps=NULL,
                            jitter=TRUE, 
                            modelname=NULL, covname=NULL, dataname=NULL) {
   if(!is.poisson(model))
     stop("Only implemented for Poisson point process models")
   # conduct test based on comparison of CDF's of covariate values
-  test <- pickoption("test", test, c(ks="ks"))
+  test <- match.arg(test)
   # compute the essential data
   fra <- spatialCDFframe(model, covariate,
                          dimyx=dimyx, eps=eps,
@@ -200,13 +225,17 @@ spatialCDFtest <- function(model, covariate, test, ...,
   info   <- fra$info
   # Test uniformity of transformed values
   U <- values$U
-  switch(test,
-         ks={ result <- ks.test(U, "punif", ...) },
-         stop("Unrecognised test option"))
-
+  result <- switch(test,
+                   ks  = ks.test(U, "punif", ...),
+                   cvm = cvm.test(U, "punif", ...),
+                   ad = ad.test(U, "punif", ...))
+  testname <- switch(test,
+                     ks="Kolmogorov-Smirnov",
+                     cvm="Cramer-Von Mises",
+                     ad="Anderson-Darling")
   # modify the 'htest' entries
   csr <- info$csr
-  result$method <- paste("Spatial Kolmogorov-Smirnov test of",
+  result$method <- paste("Spatial", testname, "test of",
                          if(csr) "CSR" else "inhomogeneous Poisson process",
                          "in", info$spacename)
   result$data.name <-
@@ -215,8 +244,8 @@ spatialCDFtest <- function(model, covariate, test, ...,
           "and transformed to uniform distribution under",
           if(csr) info$modelname else sQuote(info$modelname))
   
-  # additional class 'kstest'
-  class(result) <- c("kstest", class(result))
+  # additional class 'cdftest'
+  class(result) <- c("cdftest", class(result))
   attr(result, "frame") <- fra
   return(result)        
 }
@@ -235,7 +264,8 @@ spatialCDFframe <- function(model, covariate, ...) {
   FZX <- ecdf(ZX)
   # form weighted cdf of Z values in window
   wts <- lambda * weights
-  FZ <- ewcdf(Zvalues, wts/sum(wts))
+  sumwts <- sum(wts)
+  FZ <- ewcdf(Zvalues, wts/sumwts)
   # Ensure support of cdf includes the range of the data
   xxx <- knots(FZ)
   yyy <- FZ(xxx)
@@ -260,12 +290,19 @@ spatialCDFframe <- function(model, covariate, ...) {
   stuff$values$FZ  <- FZ
   stuff$values$FZX <- FZX
   stuff$values$U   <- U
+  stuff$values$EN <- sumwts  ## integral of intensity = expected number of pts
   class(stuff) <- "spatialCDFframe"
   return(stuff)
 }
 
-plot.kstest <- function(x, ..., style=c("cdf", "PP", "QQ"),
-                        lwd=par("lwd"), col=1, lty=1,
+plot.kstest <- function(x, ...) {
+  message("kstest is out of date; use cdf.test")
+#  .Deprecated("plot.cdftest", package="spatstat")
+  plot.cdftest(x, ...)
+}
+
+plot.cdftest <- function(x, ..., style=c("cdf", "PP", "QQ"),
+                        lwd=par("lwd"), col=par("col"), lty=par("lty"),
                         lwd0=lwd, col0=2, lty0=2,
                         do.legend=TRUE) {
   style <- match.arg(style)
@@ -305,9 +342,10 @@ plot.kstest <- function(x, ..., style=c("cdf", "PP", "QQ"),
                                     list(xlab=info$covname, ylab="probability",
                                          main=main)))
            plot(FZX, add=TRUE, do.points=FALSE, lwd=lwd, col=col, lty=lty)
-           if(do.legend)
+           if(do.legend) 
              legend("topleft", c("observed", "expected"),
-                    lwd=c(lwd,lwd0), col=c(col,col0),
+                    lwd=c(lwd,lwd0),
+                    col=c(col2hex(col), col2hex(col0)),
                     lty=c(lty2char(lty),lty2char(lty0)))
          },
          PP={

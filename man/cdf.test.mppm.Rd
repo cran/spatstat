@@ -1,14 +1,17 @@
-\name{kstest.mppm}
-\alias{kstest.mppm}
-\title{Kolmogorov-Smirnov Test for Multiple Point Process Model} 
+\name{cdf.test.mppm}
+\alias{cdf.test.mppm}
+\title{Spatial Distribution Test for Multiple Point Process Model} 
 \description{
-  Performs a Kolmogorov-Smirnov test of goodness-of-fit
+  Performs a spatial distribution test
   of a Poisson point process model fitted to multiple spatial point
   patterns.  The test compares the observed
-  and predicted distributions of the values of a spatial covariate.
+  and predicted distributions of the values of a spatial covariate,
+  using either the Kolmogorov-Smirnov,
+  \ifelse{latex}{\out{Cram\'er}}{Cramer}-von Mises 
+  or Anderson-Darling test of goodness-of-fit.
 }
 \usage{
-\method{kstest}{mppm}(model, covariate, ...,
+\method{cdf.test}{mppm}(model, covariate, test=c("ks", "cvm", "ad"), ...,
             verbose=TRUE, interpolate=FALSE, fast=TRUE, jitter=TRUE)
 }
 \arguments{
@@ -22,8 +25,14 @@
     images, a hyperframe, or a character string containing the name
     of one of the covariates in \code{model}.
   }
+  \item{test}{
+    Character string identifying the test to be performed:
+    \code{"ks"} for Kolmogorov-Smirnov test,
+    \code{"cvm"} for \ifelse{latex}{\out{Cram\'er}}{Cramer}-von Mises test
+    or \code{"ad"} for Anderson-Darling test.
+  }
   \item{\dots}{
-    Arguments passed to \code{\link{ks.test}}
+    Arguments passed to \code{\link[spatstat]{cdf.test}}
     to control the test.
   }
   \item{verbose}{Logical flag indicating whether to print
@@ -49,7 +58,7 @@
 }
 \details{
   This function is a method for the generic function
-  \code{\link[spatstat]{kstest}} for the class \code{mppm}.
+  \code{\link[spatstat]{cdf.test}} for the class \code{mppm}.
 
   This function performs a goodness-of-fit test of
   a point process model that has been fitted to multiple point patterns.
@@ -98,12 +107,14 @@
   the values of the \code{covariate} at the original data points
   are transformed by the predicted cumulative distribution function
   \eqn{F} into numbers between 0 and 1. If the model is correct,
-  these numbers are i.i.d. uniform random numbers. The
-  Kolmogorov-Smirnov test of uniformity is then applied using
-  the \R core function \code{\link[stats]{ks.test}}.
+  these numbers are i.i.d. uniform random numbers. 
+  A goodness-of-fit test of the uniform distribution is applied
+  to these numbers using \code{\link[stats]{ks.test}},
+  \code{\link[goftest]{cvm.test}} or \code{\link[goftest]{ad.test}}.
 
   This test was apparently first described (in the context of
-  spatial data) by Berman (1986). See also Baddeley et al (2005).
+  spatial data, and for Kolmogorov-Smirnov) by Berman (1986).
+  See also Baddeley et al (2005).
 
   The argument \code{interpolate} determines 
   how pixel values will be handled when code{covariate} is a pixel image.
@@ -116,8 +127,9 @@
   arising when the pixel grid is coarse. 
 }
 \value{
-  An object of class \code{"htest"} containing the results of the
-  test. See \code{\link{ks.test}} for details.
+  An object of class \code{"cdftest"} and \code{"htest"}
+  containing the results of the
+  test. See \code{\link[spatstat]{cdf.test}} for details.
 }
 \author{Adrian Baddeley
   \email{adrian.baddeley@uwa.edu.au}
@@ -127,7 +139,7 @@
   \url{http://www.math.unb.ca/~rolf}
 }
 \seealso{
-  \code{\link{ks.test}},
+  \code{\link[spatstat]{cdf.test}},
   \code{\link[spatstat]{quadrat.test}},
   \code{\link{mppm}}
 }
@@ -156,9 +168,9 @@
    xcoord <- function(x,y) { x }
 
    # test wrong model
-   kstest.mppm(fit0, xcoord)
+   cdf.test(fit0, xcoord)
    # test right model
-   kstest.mppm(fit1, xcoord)
+   cdf.test(fit1, xcoord)
 }
 \keyword{htest}
 \keyword{spatial}

@@ -1,12 +1,14 @@
 #
-# kstest.mppm.R
+# cdf.test.mppm.R
 #
-# $Revision: 1.11 $  $Date: 2007/05/18 17:59:41 $
+# $Revision: 1.12 $  $Date: 2014/06/10 02:47:08 $
 #
-kstest.mppm <- function(model, covariate, ..., verbose=TRUE,
+cdf.test.mppm <- function(model, covariate,
+                          test=c("ks", "cvm", "ad"), ..., verbose=TRUE,
                          interpolate=FALSE, fast=TRUE, jitter=TRUE) {
   modelname <- short.deparse(substitute(model))
   covname <- short.deparse(substitute(covariate))
+  test <- match.arg(test)
   stopifnot(is.mppm(model))
   if(!is.poisson.mppm(model))
     stop("Only implemented for Poisson models")
@@ -51,7 +53,7 @@ kstest.mppm <- function(model, covariate, ..., verbose=TRUE,
   if(verbose)
     cat("done.\nComputing statistics for each pattern...")
 
-  # compile information for KS test from each row
+  # compile information for test from each row
   Zvalues <- ZX <- Win <- list()
   for(i in 1:npat) {
     if(verbose) progressreport(i, npat)
@@ -162,13 +164,21 @@ kstest.mppm <- function(model, covariate, ..., verbose=TRUE,
   }
 
   # Test uniformity
-  result <- ks.test(U, "punif", ...)
+  result <- switch(test,
+                   ks  = ks.test(U, "punif", ...),
+                   cvm = cvm.test(U, "punif", ...),
+                   ad = ad.test(U, "punif", ...))
+  testname <- switch(test,
+                     ks="Kolmogorov-Smirnov",
+                     cvm="Cramer-Von Mises",
+                     ad="Anderson-Darling")
+  result$method <- paste("Spatial", testname, "test")
   result$data.name <-
     paste("predicted cdf of covariate", sQuote(paste(covname, collapse="")),
           "evaluated at data points of", sQuote(modelname))
   if(verbose)
     cat("done.\n")
-  class(result) <- c("kstest", class(result))
+  class(result) <- c("cdftest", class(result))
   attr(result, "prep") <- list(Zvalues = Zvalues, lambda = lambda,
                                ZX = ZX, FZ = FZ, U = U, type = type)
   attr(result, "info") <- list(modelname = modelname, covname = covname)

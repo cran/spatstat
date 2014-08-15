@@ -1,23 +1,31 @@
-\name{kstest.ppm}  %DontDeclareMethods
-\alias{kstest}
-\alias{kstest.ppm}
-\alias{kstest.lppm}
-\alias{kstest.lpp}
-\alias{kstest.ppp}
-\alias{kstest.slrm}
-\title{Kolmogorov-Smirnov Test for Point Pattern or Point Process Model} 
+\name{cdf.test} 
+\alias{cdf.test}
+\alias{cdf.test.ppm}
+\alias{cdf.test.lppm}
+\alias{cdf.test.lpp}
+\alias{cdf.test.ppp}
+\alias{cdf.test.slrm}
+\title{Spatial Distribution Test for Point Pattern or Point Process Model} 
 \description{
-  Performs a Kolmogorov-Smirnov test of goodness-of-fit
-  of a Poisson point process model. The test compares the observed
-  and predicted distributions of the values of a spatial covariate.
+  Performs a test of goodness-of-fit of a Poisson point process model.
+  The observed and predicted distributions
+  of the values of a spatial covariate are compared using either the
+  Kolmogorov-Smirnov test,
+  \ifelse{latex}{\out{Cram\'er}}{Cramer}-von Mises test
+  or Anderson-Darling test.
 }
 \usage{
-kstest(...)
-\method{kstest}{ppp}(X, covariate, ..., jitter=TRUE)
-\method{kstest}{ppm}(model, covariate, ..., jitter=TRUE)
-\method{kstest}{lpp}(X, covariate, ..., jitter=TRUE)
-\method{kstest}{lppm}(model, covariate, ..., jitter=TRUE)
-\method{kstest}{slrm}(model, covariate, ..., modelname=NULL, covname=NULL)
+cdf.test(...)
+
+\method{cdf.test}{ppp}(X, covariate, test=c("ks", "cvm", "ad"), ..., jitter=TRUE)
+
+\method{cdf.test}{ppm}(model, covariate,  test=c("ks", "cvm", "ad"), ..., jitter=TRUE)
+
+\method{cdf.test}{lpp}(X, covariate,  test=c("ks", "cvm", "ad"), ..., jitter=TRUE)
+
+\method{cdf.test}{lppm}(model, covariate,  test=c("ks", "cvm", "ad"), ..., jitter=TRUE)
+
+\method{cdf.test}{slrm}(model, covariate,  test=c("ks", "cvm", "ad"), ..., modelname=NULL, covname=NULL)
 }
 \arguments{
   \item{X}{
@@ -33,8 +41,17 @@ kstest(...)
     a list of pixel images, or one of the characters
     \code{"x"} or \code{"y"} indicating the Cartesian coordinates.
   }
+  \item{test}{
+    Character string identifying the test to be performed:
+    \code{"ks"} for Kolmogorov-Smirnov test,
+    \code{"cvm"} for \ifelse{latex}{\out{Cram\'er}}{Cramer}-von Mises test
+    or \code{"ad"} for Anderson-Darling test.
+  }
   \item{\dots}{
-    Arguments passed to \code{\link{ks.test}}
+    Arguments passed to \code{\link[stats]{ks.test}}
+    (from the \pkg{stats} package) or 
+    \code{\link[goftest]{cvm.test}} or
+    \code{\link[goftest]{ad.test}} (from the \pkg{goftest} package)
     to control the test.
   }
   \item{jitter}{
@@ -53,14 +70,14 @@ kstest(...)
   and the predicted distribution of the same values under the model,
   are compared using the Kolmogorov-Smirnov test. 
 
-  The function \code{kstest} is generic, with methods for
+  The function \code{cdf.test} is generic, with methods for
   point patterns (\code{"ppp"} or \code{"lpp"}),
   point process models (\code{"ppm"} or \code{"lppm"})
   and spatial logistic regression models (\code{"slrm"}).
   \itemize{
     \item 
     If \code{X} is a point pattern dataset (object of class
-    \code{"ppp"}), then \code{kstest(X, ...)}
+    \code{"ppp"}), then \code{cdf.test(X, ...)}
     performs a goodness-of-fit test of the
     uniform Poisson point process (Complete Spatial Randomness, CSR)
     for this dataset.
@@ -70,18 +87,19 @@ kstest(...)
     \item
     If \code{model} is a fitted point process model
     (object of class \code{"ppm"} or \code{"lppm"})
-    then \code{kstest(model, ...)} performs
+    then \code{cdf.test(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
     \item
     If \code{model} is a fitted spatial logistic regression
-    (object of class \code{"slrm"}) then \code{kstest(model, ...)} performs
+    (object of class \code{"slrm"}) then \code{cdf.test(model, ...)} performs
     a test of goodness-of-fit for this fitted model. 
   }
   The test is performed by comparing the observed distribution
   of the values of a spatial covariate at the data points,
   and the predicted distribution of the same covariate under the model,
-  using the classical Kolmogorov-Smirnov test. Thus, you must nominate
+  using a classical goodness-of-fit test.
+  Thus, you must nominate
   a spatial covariate for this test.
   
   If \code{X} is a point pattern that does not have marks,
@@ -119,18 +137,21 @@ kstest(...)
   are transformed by the predicted cumulative distribution function
   \eqn{F} into numbers between 0 and 1. If the model is correct,
   these numbers are i.i.d. uniform random numbers. The
-  Kolmogorov-Smirnov test of uniformity is applied using
-  \code{\link{ks.test}}.
+  A goodness-of-fit test of the uniform distribution is applied
+  to these numbers using \code{stats::\link[stats]{ks.test}},
+  \code{goftest::\link[goftest]{cvm.test}} or
+  \code{goftest::\link[goftest]{ad.test}}.
 
   This test was apparently first described (in the context of
-  spatial data) by Berman (1986). See also Baddeley et al (2005).
+  spatial data, and using Kolmogorov-Smirnov) by Berman (1986).
+  See also Baddeley et al (2005).
 
   The return value is an object of class \code{"htest"} containing the
   results of the hypothesis test. The print method for this class
   gives an informative summary of the test outcome.
 
-  The return value also belongs to the class \code{"kstest"}
-  for which there is a plot method \code{\link{plot.kstest}}.
+  The return value also belongs to the class \code{"cdftest"}
+  for which there is a plot method \code{\link{plot.cdftest}}.
   The plot method displays the empirical cumulative distribution
   function of the covariate at the data points, and the predicted
   cumulative distribution function of the covariate under the model,
@@ -140,7 +161,7 @@ kstest(...)
   randomly perturbed, in order to avoid ties.
   If the original data contains any ties in the covariate (i.e. points
   with equal values of the covariate), and if \code{jitter=FALSE}, then 
-  the Kolmogorov-Smirnov test implemented in \code{\link{ks.test}}
+  the Kolmogorov-Smirnov test implemented in \code{\link[stats]{ks.test}}
   will issue a warning that it cannot calculate the exact \eqn{p}-value.
   To avoid this, if \code{jitter=TRUE} each value of the covariate will
   be perturbed by adding a small random value. The perturbations are
@@ -151,16 +172,16 @@ kstest(...)
 }
 \value{
   An object of class \code{"htest"} containing the results of the
-  test. See \code{\link{ks.test}} for details. The return value can be
+  test. See \code{\link[stats]{ks.test}} for details. The return value can be
   printed to give an informative summary of the test.
 
-  The value also belongs to the class \code{"kstest"} for which there is
+  The value also belongs to the class \code{"cdftest"} for which there is
   a plot method.
 }
 \section{Warning}{
   The outcome of the test involves a small amount of random variability,
   because (by default) the coordinates are randomly perturbed to
-  avoid tied values. Hence, if \code{kstest} is executed twice, the
+  avoid tied values. Hence, if \code{cdf.test} is executed twice, the
   \eqn{p}-values will not be exactly the same. To avoid this behaviour,
   set \code{jitter=FALSE}.
 }
@@ -171,14 +192,17 @@ kstest(...)
   \email{r.turner@auckland.ac.nz}
 }
 \seealso{
-  \code{\link{plot.kstest}},
+  \code{\link{plot.cdftest}},
   \code{\link{quadrat.test}},
-  \code{\link{bermantest}},
-  \code{\link{ks.test}},
+  \code{\link{berman.test}},
+  \code{\link[stats]{ks.test}},
+  \code{\link[goftest]{cvm.test}},
+  \code{\link[goftest]{ad.test}},
   \code{\link{ppm}}
 }
 \references{
-  Baddeley, A., Turner, R., \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Hazelton, M. (2005)
+  Baddeley, A., Turner, R.,
+  \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
@@ -190,19 +214,21 @@ kstest(...)
 }
 \examples{
    # test of CSR using x coordinate
-   kstest(nztrees, "x")
+   cdf.test(nztrees, "x")
+   cdf.test(nztrees, "x", "cvm")
+   cdf.test(nztrees, "x", "ad")
 
    # test of CSR using a function of x and y
    fun <- function(x,y){2* x + y}
-   kstest(nztrees, fun)
+   cdf.test(nztrees, fun)
 
    # test of CSR using an image covariate
    funimage <- as.im(fun, W=as.owin(nztrees))
-   kstest(nztrees, funimage)
+   cdf.test(nztrees, funimage)
 
    # fit inhomogeneous Poisson model and test
    model <- ppm(nztrees, ~x)
-   kstest(model, "x")
+   cdf.test(model, "x")
 
    if(interactive()) {
      # synthetic data: nonuniform Poisson process
@@ -214,15 +240,15 @@ kstest(...)
      fit1 <- ppm(X, ~x)
 
      # test wrong model
-     kstest(fit0, "x")
+     cdf.test(fit0, "x")
      # test right model
-     kstest(fit1, "x")
+     cdf.test(fit1, "x")
    }
 
    # multitype point pattern
-   kstest(amacrine, "x")
+   cdf.test(amacrine, "x")
    yimage <- as.im(function(x,y){y}, W=as.owin(amacrine))
-   kstest(ppm(amacrine, ~marks+y), yimage)
+   cdf.test(ppm(amacrine, ~marks+y), yimage)
 }
 \keyword{htest}
 \keyword{spatial}

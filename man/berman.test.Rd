@@ -1,30 +1,30 @@
-\name{bermantest} %DontDeclareMethods
-\alias{bermantest}
-\alias{bermantest.ppm}
-\alias{bermantest.ppp}
-\alias{bermantest.lppm}
-\alias{bermantest.lpp}
+\name{berman.test} %DontDeclareMethods
+\alias{berman.test}
+\alias{berman.test.ppm}
+\alias{berman.test.ppp}
+\alias{berman.test.lppm}
+\alias{berman.test.lpp}
 \title{Berman's Tests for Point Process Model} 
 \description{
   Tests the goodness-of-fit of a Poisson point process model
   using methods of Berman (1986).
 }
 \usage{
-bermantest(...)
+berman.test(...)
 
-\method{bermantest}{ppp}(X, covariate,
+\method{berman.test}{ppp}(X, covariate,
                          which = c("Z1", "Z2"),
         alternative = c("two.sided", "less", "greater"), ...)
 
-\method{bermantest}{ppm}(model, covariate,
+\method{berman.test}{ppm}(model, covariate,
                          which = c("Z1", "Z2"),
                alternative = c("two.sided", "less", "greater"), ...)
 
-\method{bermantest}{lpp}(X, covariate,
+\method{berman.test}{lpp}(X, covariate,
                          which = c("Z1", "Z2"),
         alternative = c("two.sided", "less", "greater"), ...)
 
-\method{bermantest}{lppm}(model, covariate,
+\method{berman.test}{lppm}(model, covariate,
                          which = c("Z1", "Z2"),
                alternative = c("two.sided", "less", "greater"), ...)
 }
@@ -48,7 +48,10 @@ bermantest(...)
     Character string specifying the alternative hypothesis.
   }
   \item{\dots}{
-    Ignored.
+    Additional arguments controlling the pixel resolution
+    (arguments \code{dimyx} and \code{eps} passed to
+    \code{\link{as.mask}})
+    or other undocumented features.
   }
 }
 \details{
@@ -58,21 +61,23 @@ bermantest(...)
   and the predicted distribution of the same values under the model,
   are compared using either of two test statistics
   \eqn{Z_1}{Z[1]} and \eqn{Z_2}{Z[2]} proposed by Berman (1986).
+  The \eqn{Z_1}{Z[1]} test is also known as the
+  Lawson-Waller test.
 
-  The function \code{bermantest} is generic, with methods for
+  The function \code{berman.test} is generic, with methods for
   point patterns (\code{"ppp"} or \code{"lpp"})
   and point process models (\code{"ppm"} or \code{"lppm"}).
   \itemize{
     \item 
     If \code{X} is a point pattern dataset (object of class
     \code{"ppp"} or \code{"lpp"}), then
-    \code{bermantest(X, ...)} performs a goodness-of-fit test of the
+    \code{berman.test(X, ...)} performs a goodness-of-fit test of the
     uniform Poisson point process (Complete Spatial Randomness, CSR)
     for this dataset.
     \item
     If \code{model} is a fitted point process model
     (object of class \code{"ppm"} or \code{"lppm"})
-    then \code{bermantest(model, ...)} performs
+    then \code{berman.test(model, ...)} performs
     a test of goodness-of-fit for this fitted model. In this case,
     \code{model} should be a Poisson point process.
   }
@@ -108,6 +113,10 @@ bermantest(...)
     \eqn{\sigma^2}{sigma^2} of \eqn{S} are computed
     from the values of the covariate at all locations in the window.
     Then we compute \eqn{Z_1 = (S-\mu)/\sigma}{Z[1]=(S-mu)/sigma}.
+    Closely-related tests were proposed independently 
+    by Waller et al (1993) and Lawson (1993)
+    so this test is often termed the 
+    Lawson-Waller test in epidemiological literature.
     \item If \code{which="Z2"},
     the test statistic \eqn{Z_2}{Z[2]} is computed as follows.
     The values of the \code{covariate} at all locations in the
@@ -141,12 +150,13 @@ bermantest(...)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
+  \url{http://www.maths.uwa.edu.au/~adrian/},
+  Rolf Turner
   \email{r.turner@auckland.ac.nz}
+  and Ege Rubak.
 }
 \seealso{
-  \code{\link{kstest}},
+  \code{\link{cdf.test}},
   \code{\link{quadrat.test}},
   \code{\link{ppm}}
 }
@@ -155,6 +165,19 @@ bermantest(...)
   Testing for spatial association between a point process
   and another stochastic process.
   \emph{Applied Statistics} \bold{35}, 54--62.
+
+  Lawson, A.B. (1993)
+  On the analysis of mortality events around a
+  prespecified fixed point.
+  \emph{Journal of the Royal Statistical Society, Series A}
+  \bold{156} (3) 363--377.
+
+  Waller, L., Turnbull, B., Clark, L.C. and Nasca, P. (1992)
+  Chronic Disease Surveillance and testing of
+  clustering of disease and exposure: Application to
+  leukaemia incidence and TCE-contaminated dumpsites
+  in upstate New York.
+  \emph{Environmetrics} \bold{3}, 281--300.
 }
 \examples{
    # Berman's data
@@ -163,8 +186,8 @@ bermantest(...)
    L <- copper$SouthLines
    D <- distmap(L, eps=1)
    # test of CSR
-   bermantest(X, D)
-   bermantest(X, D, "Z2")
+   berman.test(X, D)
+   berman.test(X, D, "Z2")
 }
 \keyword{htest}
 \keyword{spatial}
