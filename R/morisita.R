@@ -1,5 +1,5 @@
 #
-# morishita.R
+# morisita.R
 #
 #  $Revision: 1.6 $  $Date: 2014/06/03 02:58:09 $
 #
@@ -10,11 +10,11 @@ miplot <- function(X, ...) {
   W <- X$window
   N <- X$n
   if(W$type != "rectangle")
-    stop("Window of X is not a rectangle - Morishita index undefined")
+    stop("Window of X is not a rectangle - Morisita index undefined")
   a <- min(diff(W$xrange), diff(W$yrange))
   maxnquad <- floor(a/mean(nndist(X)))
   if(maxnquad <= 1)
-    stop("Not enough points for a Morishita plot")
+    stop("Not enough points for a Morisita plot")
   mindex <- numeric(maxnquad)
   for(nquad in 1:maxnquad) {
     qq <- quadratcount(X, nquad, nquad)
@@ -34,8 +34,8 @@ miplot <- function(X, ...) {
                            list(xlim=c(0,max(quadsize)),
                                 ylim=c(0,max(1, mindex)),
                                 xlab=paste("Diameter of quadrat", unitinfo),
-                                ylab="Morishita index",
-                                main=paste("Morishita plot for", Xname))))
+                                ylab="Morisita index",
+                                main=paste("Morisita plot for", Xname))))
   abline(h=1, lty=2)
   return(invisible(NULL))
 }

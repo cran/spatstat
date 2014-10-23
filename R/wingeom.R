@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.86 $	$Date: 2014/08/04 10:40:04 $
+#	$Revision: 4.90 $	$Date: 2014/10/04 10:58:47 $
 #
 #
 #
@@ -11,8 +11,12 @@
 
 volume.owin <- function(x) { area.owin(x) }
 
+area <- function(w) UseMethod("area")
+
+area.default <- function(w) area.owin(as.owin(w))
+
 area.owin <- function(w) {
-	w <- as.owin(w)
+    stopifnot(is.owin(w))
         switch(w$type,
                rectangle = {
 		width <- abs(diff(w$xrange))
@@ -20,7 +24,7 @@ area.owin <- function(w) {
 		area <- width * height
                },
                polygonal = {
-                 area <- sum(unlist(lapply(w$bdry, area.xypolygon)))
+                 area <- sum(unlist(lapply(w$bdry, Area.xypolygon)))
                },
                mask = {
                  pixelarea <- abs(w$xstep * w$ystep)
@@ -59,8 +63,10 @@ sidelengths.owin <- function(x) {
 
 shortside.owin <- function(x) { min(sidelengths(x)) }
 
-eroded.areas <- function(w, r) {
+eroded.areas <- function(w, r, subset=NULL) {
   w <- as.owin(w)
+  if(!is.null(subset) && !is.mask(w))
+    w <- as.mask(w)
   switch(w$type,
          rectangle = {
            width <- abs(diff(w$xrange))
@@ -68,23 +74,24 @@ eroded.areas <- function(w, r) {
            areas <- pmax(width - 2 * r, 0) * pmax(height - 2 * r, 0)
          },
          polygonal = {
-           # warning("Approximating polygonal window by digital image")
+           ## warning("Approximating polygonal window by digital image")
            w <- as.mask(w)
            areas <- eroded.areas(w, r)
          },
          mask = {
-           # distances from each pixel to window boundary
-           b <- bdist.pixels(w, style="matrix")
-           # histogram breaks to satisfy hist()
+           ## distances from each pixel to window boundary
+           b <- if(is.null(subset)) bdist.pixels(w, style="matrix") else 
+                bdist.pixels(w)[subset, drop=TRUE, rescue=FALSE]
+           ## histogram breaks to satisfy hist()
            Bmax <- max(b, r)
            breaks <- c(-1,r,Bmax+1)
-           # histogram of boundary distances
+           ## histogram of boundary distances
            h <- hist(b, breaks=breaks, plot=FALSE)$counts
-           # reverse cumulative histogram
+           ## reverse cumulative histogram
            H <- revcumsum(h)
-           # drop first entry corresponding to r=-1
+           ## drop first entry corresponding to r=-1
            H <- H[-1]
-           # convert count to area
+           ## convert count to area
            pixarea <- w$xstep * w$ystep
            areas <- pixarea * H
          },
@@ -248,7 +255,7 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
     if(length(ab)==0)
       return(emptywindow(C))
     # ensure correct polarity
-    totarea <- sum(unlist(lapply(ab, area.xypolygon)))
+    totarea <- sum(unlist(lapply(ab, Area.xypolygon)))
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=unitname(A))
@@ -367,7 +374,7 @@ union.owin <- function(A, B, ...) {
     if(length(ab) == 0)
       return(emptywindow(C))
     # ensure correct polarity
-    totarea <- sum(unlist(lapply(ab, area.xypolygon)))
+    totarea <- sum(unlist(lapply(ab, Area.xypolygon)))
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=unitname(A))
@@ -447,7 +454,7 @@ setminus.owin <- function(A, B, ...) {
     if(length(ab) == 0)
       return(emptywindow(C))
     # ensure correct polarity
-    totarea <- sum(unlist(lapply(ab, area.xypolygon)))
+    totarea <- sum(unlist(lapply(ab, Area.xypolygon)))
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=unitname(A))
@@ -614,10 +621,23 @@ bdry.mask <- function(W) {
   m <- W$m
   nr <- nrow(m)
   nc <- ncol(m)
-  b <-     (m != rbind(FALSE,       m[-nr, ]))
-  b <- b | (m != rbind(m[-1, ], FALSE))
-  b <- b | (m != cbind(FALSE,       m[, -nc]))
-  b <- b | (m != cbind(m[, -1], FALSE))
+  if(!spatstat.options('Cbdrymask')) {
+    ## old interpreted code
+    b <-     (m != rbind(FALSE,       m[-nr, ]))
+    b <- b | (m != rbind(m[-1, ], FALSE))
+    b <- b | (m != cbind(FALSE,       m[, -nc]))
+    b <- b | (m != cbind(m[, -1], FALSE))
+  } else {
+    b <- integer(nr * nc)
+    DUP <- spatstat.options("dupC")
+    z <- .C("bdrymask",
+            nx = as.integer(nc),
+            ny = as.integer(nr),
+            m = as.integer(m),
+            b = as.integer(b),
+            DUP=DUP)
+    b <- matrix(as.logical(b), nr, nc)
+  }
   W$m <- b
   return(W)
 }
@@ -797,3 +817,48 @@ emptywindow <- function(w) {
   return(out)
 }
 
+discs <- function(centres, radii=marks(centres)/2, ..., 
+                  separate=FALSE, mask=FALSE, trim=TRUE, delta=NULL) {
+  stopifnot(is.ppp(centres))
+  n <- npoints(centres)
+  if(n == 0) return(emptywindow(Frame(centres)))
+  check.nvector(radii, npoints(centres))
+  stopifnot(all(radii > 0))
+  if(is.null(delta)) delta <- 2 * pi * min(radii)/16
+  if(separate) {
+    D <- list()
+    W <- disc(centre=centres[1], radius=radii[1], delta=delta)
+    D[[1]] <- W
+    if(n == 1) return(D)
+    for(i in 2:n) 
+      D[[i]] <- disc(centre=centres[i], radius=radii[i], delta=delta)
+    return(D)
+  } else if(mask) {
+    M <- as.mask(Window(centres), ...)
+    DUP <- spatstat.options('dupC')
+    z <- .C("discs2grid",
+            nx    = as.integer(M$dim[2]),
+            x0    = as.double(M$xcol[1]),
+            xstep = as.double(M$xstep),  
+            ny    = as.integer(M$dim[1]),
+            y0    = as.double(M$yrow[1]),
+            ystep = as.double(M$ystep), 
+            nd    = as.integer(n),
+            xd    = as.double(centres$x),
+            yd    = as.double(centres$y),
+            rd    = as.double(radii), 
+            out   = as.integer(integer(prod(M$dim))),
+            DUP   = DUP)
+    M$m[] <- as.logical(z$out)
+    return(M)
+  } else {
+    W <- disc(centre=centres[1], radius=radii[1], delta=delta)
+    if(n == 1) return(W)
+    for(i in 2:n) {
+      Di <- disc(centre=centres[i], radius=radii[i], delta=delta)
+      W <- union.owin(W, Di)
+    }
+    if(trim) W <- intersect.owin(W, Window(centres))
+    return(W)
+  }
+}

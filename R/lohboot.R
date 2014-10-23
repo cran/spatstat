@@ -1,7 +1,7 @@
 #
 #  lohboot.R
 #
-#  $Revision: 1.9 $   $Date: 2013/12/17 10:14:24 $
+#  $Revision: 1.13 $   $Date: 2014/10/08 10:25:26 $
 #
 #  Loh's bootstrap CI's for local pcf, local K etc
 #
@@ -11,7 +11,18 @@ lohboot <-
            fun=c("pcf", "Kest", "Lest", "pcfinhom", "Kinhom", "Linhom"),
            ..., nsim=200, confidence=0.95, global=FALSE, type=7) {
   stopifnot(is.ppp(X))
-  fun <- match.arg(fun)
+  fun.name <- short.deparse(substitute(fun))
+  if(is.character(fun)) {
+    fun <- match.arg(fun)
+  } else if(is.function(fun)) {
+    flist <- list(pcf=pcf, Kest=Kest, Lest=Lest,
+                  pcfinhom=pcfinhom, Kinhom=Kinhom, Linhom=Linhom)
+    id <- match(list(fun), flist)
+    if(is.na(id))
+      stop(paste("Loh's bootstrap is not supported for the function",
+                 sQuote(fun.name)))
+    fun <- names(flist)[id]
+  } else stop("Unrecognised format for argument fun")
   # validate confidence level
   stopifnot(confidence > 0.5 && confidence < 1)
   alpha <- 1 - confidence
@@ -31,10 +42,10 @@ lohboot <-
   localfun <- switch(fun,
                      pcf=localpcf,
                      Kest=localK,
-                     Lest=localK,
+                     Lest=localL,
                      pcfinhom=localpcfinhom,
                      Kinhom=localKinhom,
-                     Linhom=localKinhom)
+                     Linhom=localLinhom)
   f <- localfun(X, ...)
   theo <- f$theo
   # parse edge correction info
@@ -69,12 +80,6 @@ lohboot <-
     crit <- quantile(ydev, probs=probs, na.rm=TRUE, type=type)
     hilo <- rbind(ymean - crit, ymean + crit)
   }
-  # now transform from K to L if required
-  if(fun %in% c("Lest", "Linhom")) {
-    ymean <- sqrt(ymean/pi)
-    theo  <- sqrt(theo/pi)
-    hilo  <- sqrt(hilo/pi)
-  }
   # create fv object
   df <- data.frame(r=f$r,
                    theo=theo,
@@ -99,7 +104,7 @@ lohboot <-
          Linhom={ fname <- "L[inhom]" ; ylab <- quote(L[inhom](r)) })
   g <- fv(df, "r", ylab, ctag, , c(0, max(f$r)), labl, desc, fname=fname)
   formula(g) <- . ~ r
-  fvnames(g, ".") <- c(ctag, "hi", "lo", "theo")
+  fvnames(g, ".") <- c(ctag, "theo", "hi", "lo")
   fvnames(g, ".s") <- c("hi", "lo")
   unitname(g) <- unitname(X)
   g

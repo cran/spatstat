@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.104 $    $Date: 2014/08/27 02:00:06 $
+#  $Revision: 1.116 $    $Date: 2014/10/12 08:17:57 $
 #
 #
 
@@ -46,6 +46,7 @@ plot.fv <- local({
                       legendmath=TRUE, legendargs=list(),
                       shade=fvnames(x, ".s"), shadecol="grey", add=FALSE,
                       log="",
+                      mathfont=c("italic", "plain", "bold", "bolditalic"), 
                       limitsonly=FALSE) {
 
     xname <-
@@ -54,6 +55,8 @@ plot.fv <- local({
     force(legendavoid)
     if(is.null(legend))
       legend <- !add
+
+    mathfont <- match.arg(mathfont)
 
     verifyclass(x, "fv")
     env.user <- parent.frame()
@@ -74,7 +77,7 @@ plot.fv <- local({
 
     ## validate the variable names
     vars <- variablesinformula(fmla)
-    reserved <- c(".", ".x", ".y")
+    reserved <- c(".", ".x", ".y", ".a", ".s")
     external <- !(vars %in% c(colnames(x), reserved))
     if(any(external)) {
       sought <- vars[external]
@@ -108,13 +111,8 @@ plot.fv <- local({
     ## expand "."
     dotnames <- fvnames(x, ".")
     starnames <- fvnames(x, "*")
-    u <- if(length(dotnames) == 1) as.name(dotnames) else {
-      as.call(lapply(c("cbind", dotnames), as.name))
-    }
-    ux <- as.name(fvnames(x, ".x"))
-    uy <- as.name(fvnames(x, ".y"))
-    fmla <- eval(substitute(substitute(fom, list(.=u, .x=ux, .y=uy)),
-                            list(fom=fmla)))
+    umap <- fvexprmap(x)
+    fmla <- eval(substitute(substitute(fom, um), list(fom=fmla, um=umap)))
 
     ## ------------------- extract data for plot ---------------------
   
@@ -204,9 +202,19 @@ plot.fv <- local({
                       "~ 1")
           lhs <- lhs.of.formula(as.formula(ff))
           success <- TRUE
-        } else {
-          success <- FALSE
-        }
+        } else if(length(explicit.lhs.dotnames) > 1) {
+          ## lhs = cbind(...) where ... are dotnames
+          cbound <- paste0("cbind",
+                           paren(paste(explicit.lhs.dotnames, collapse=", ")))
+          if(identical(deparse(lhs), cbound)) {
+            success <- TRUE
+            explicit.lhs.names <- union(explicit.lhs.names, extrashadevars)
+            ff <- paste("cbind",
+                        paren(paste(explicit.lhs.names, collapse=", ")),
+                        "~ 1")
+            lhs <- lhs.of.formula(as.formula(ff))
+          } else success <- FALSE
+        } else success <- FALSE
         if(success) {
           ## add these columns to the plotting data
           lhsdata <- cbind(lhsdata, morelhs)
@@ -258,7 +266,7 @@ plot.fv <- local({
     } else {
       ## if we're using the default argument, use its recommended range
       if(rhs == fvnames(x, ".x")) {
-        xlim <- attr(x, "alim")
+        xlim <- attr(x, "alim") %orifnull% range(rhsdata, finite=TRUE)
         if(xlogscale && xlim[1] <= 0) 
           xlim[1] <- min(rhsdata[is.finite(rhsdata) & rhsdata > 0], na.rm=TRUE)
         ok <- !is.finite(rhsdata) | (rhsdata >= xlim[1] & rhsdata <= xlim[2])
@@ -300,25 +308,29 @@ plot.fv <- local({
       argname <- fvnames(x, ".x")
       if(as.character(fmla)[3] == argname) {
         ## The x axis variable is the default function argument.
-        argName <- as.name(argname)
-        xlab <- as.expression(argName)
+        ArgString <- fvlabels(x, expand=TRUE)[[argname]]
+        xexpr <- parse(text=ArgString)
+        ## use specified font
+        xexpr <- fontify(xexpr, mathfont)
         ## Add name of unit of length?
         ax <- summary(unitname(x))$axis
         if(is.null(ax)) {
-          xlab <- as.expression(argName)
+          xlab <- xexpr
         } else {
           xlab <- expression(VAR ~ COMMENT)
-          xlab[[1]][[2]] <- argName
+          xlab[[1]][[2]] <- xexpr[[1]]
           xlab[[1]][[3]] <- ax
         }
       } else {
         ## map ident to label
         xlab <- eval(substitute(substitute(rh, mp), list(rh=rhs, mp=map)))
+        ## use specified font
+        xlab <- fontify(xlab, mathfont)
       }
     }
     if(is.language(xlab) && !is.expression(xlab))
       xlab <- as.expression(xlab)
-  
+
     ## ......... label for y axis ...................
 
     leftside <- lhs
@@ -364,8 +376,13 @@ plot.fv <- local({
                                 list(le=compactleftside, mp=map)))
       }
     }
-    if(is.language(ylab) && !is.expression(ylab))
-      ylab <- as.expression(ylab)
+    if(is.language(ylab)) {
+      ## use specified font
+      ylab <- fontify(ylab, mathfont)
+      ## ensure it's an expression
+      if(!is.expression(ylab))
+        ylab <- as.expression(ylab)
+    }
 
     ## ------------------ start plotting ---------------------------
 
@@ -475,8 +492,8 @@ plot.fv <- local({
     leglabl[keyok] <- labl[matok]
     ylab <- attr(x, "ylab")
     if(!is.null(ylab)) {
-      if(is.language(ylab))
-        ylab <- deparse(ylab)
+      if(is.language(ylab)) 
+        ylab <- flat.deparse(ylab)
       legdesc <- sprintf(legdesc, ylab)
     }
     ## compute legend info
@@ -496,17 +513,25 @@ plot.fv <- local({
       }
     }
 
+    if(is.expression(legtxt) ||
+       is.language(legtxt) ||
+       all(sapply(legtxt, is.language)))
+      legtxt <- fontify(legtxt, mathfont)
+
     ## --------------- handle legend plotting  -----------------------------
     
     if(identical(legend, TRUE)) {
       ## legend will be plotted
       ## Basic parameters of legend
       legendxpref <- if(identical(legendpos, "float")) NULL else legendpos
+      optparfv <- spatstat.options("par.fv")$legendargs %orifnull% list()
       legendspec <- resolve.defaults(legendargs,
+                                     list(lty=lty,
+                                          col=col,
+                                          lwd=lwd),
+                                     optparfv,
                                      list(x=legendxpref,
                                           legend=legtxt,
-                                          lty=lty,
-                                          col=col,
                                           inset=0.05,
                                           y.intersp=if(legendmath) 1.3 else 1),
                                      .StripNull=TRUE)
@@ -598,7 +623,7 @@ assemble.plot.objects <- function(xlim, ylim, ..., lines=NULL, polygon=NULL) {
     ok <- with(pol, is.finite(x) & is.finite(y))
     if(!all(ok))
       pol <- with(pol, list(x=x[ok], y=y[ok]))
-    if(area.xypolygon(pol) < 0) pol <- lapply(pol, rev)
+    if(Area.xypolygon(pol) < 0) pol <- lapply(pol, rev)
     P <- try(owin(poly=pol, xrange=xlim, yrange=ylim, check=FALSE))
     if(!inherits(P, "try-error"))
       objects <- append(objects, list(P))

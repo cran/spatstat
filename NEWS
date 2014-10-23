@@ -1,4 +1,318 @@
 
+	CHANGES IN spatstat VERSION 1.39-0
+
+OVERVIEW
+
+   o We thank Shane Frank, Shaaban Ghalandarayeshi, Ute Hahn, 
+     Mahdieh Khanmohammadi, Nicoletta Nava, Jens Randel Nyengaard,
+     Sebastian Schutte, Rasmus Waagepetersen and Carl G. Witthoft 
+     for contributions.
+
+   o ANOVA extended to Gibbs models.
+
+   o Improved algorithm for locally-scaled K-function.
+
+   o Leave-one-out calculation of fitted values in ppm objects.
+
+   o New dataset: presynaptic vesicles.
+
+   o Geometrical operations with windows and images.
+
+   o More edge corrections for K-function.
+
+   o Improved handling and plotting of 'fv' objects.
+
+   o Utilities for perspective views of surfaces.
+
+   o New classes 'anylist', 'solist' will ultimately replace 'listof'.
+
+   o Bug fixes.
+
+   o Version nickname: 'Smoke and Mirrors'
+
+NEW DATASETS
+
+   o vesicles
+   Synaptic vesicles 
+   (includes raw data files for training purposes)
+
+NEW CLASSES
+
+   o anylist
+   List of objects. 
+   (A replacement for 'listof')
+
+   o solist
+   List of two-dimensional spatial objects.
+   (A replacement for some uses of 'listof')
+
+NEW FUNCTIONS
+
+   o perspPoints, perspLines, perspSegments, perspContour
+   Draw points and lines on a surface, as seen in perspective view.
+
+   o hopskel.test
+   Hopkins-Skellam test of CSR
+
+   o project2set
+   For each data point in a point pattern X, find the nearest
+   spatial location in a given window W.
+
+   o stienen, stienenset
+   Stienen diagrams
+
+   o dirichlet.vertices
+   Vertices of the Dirichlet tessellation
+
+   o discs 
+   Union of discs.
+   Given a point pattern dataset recording the locations and diameters
+   of objects, find the region covered by the objects.
+
+   o increment.fv
+   Increments of a summary function: g(x) = f(x+h)-f(x-h).
+
+   o rotmean
+   Rotational average of pixel values in an image
+
+   o fardist
+   Distance from each pixel/data point to farthest part of window boundary
+
+   o circumradius.owin
+   Circumradius of a window
+
+   o rmax.Trans, rmax.Ripley
+   Compute the maximum distance 'r' for which the 
+   translation edge correction and isotropic edge correction   
+   are valid.
+
+   o is.grey
+   Determines whether a colour value is a shade of grey.
+
+   o harmonise
+   Convert several objects of the same class to a common format.
+   (New generic function with existing methods harmonise.im and harmonise.fv)
+
+   o area
+   New generic function, with methods for 'owin' and 'default'.
+
+   o Fhazard
+   Hazard rate of empty space function
+
+   o anylist, as.anylist, [.anylist, [<-.anylist, print.anylist, summary.anylist
+   Support for new class 'anylist'
+
+   o solist, as.solist, [.solist, [<-.solist, print.solist, summary.solist
+   Support for new class 'solist'
+
+   o plot.anylist, plot.solist
+   Plot methods for the classes 'anylist' and 'solist'
+   (Currently identical to 'plot.listof')
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o anova.ppm
+   Now applies to Gibbs models as well as Poisson models,
+   using adjusted composite likelihood ratio test statistic.
+
+   o persp.im
+   If visible=TRUE, the algorithm will also calculate which pixels of x
+   are visible in the perspective view. This is useful for drawing
+   points or lines on a perspective surface.
+
+   o Kscaled
+   Improved algorithm [thanks to Ute Hahn.]
+   New arguments 'renormalise' and 'normpower' allow renormalisation
+   of intensity, similar to Kinhom.
+
+   o Kest
+   New option: correction="rigid" computes the rigid motion correction.
+
+   o pairwise interactions 
+   Fitted parameters and other calculations for pairwise interaction models
+   DiggleGatesStibbard, DiggleGratton, Fiksel, Geyer, Strauss 
+   may change slightly due to a change in handling numerical rounding effects.
+
+   o eval.fv
+   Functions no longer need to have exactly the same sequence of 'r' values.
+   They will now be made compatible using 'harmonise.fv'.
+
+   o fitted.ppm
+   New argument 'leaveoneout' allows leave-one-out calculation
+   of fitted intensity at original data points.
+
+   o Kinhom, Linhom
+   New argument 'leaveoneout' specifies whether the leave-one-out rule
+   should be applied when calculating the fitted intensities. 
+   
+   o crosspaircounts
+   Results may change slightly due to a change in handling numerical 
+   rounding effects.
+
+   o Fest, Gest
+   New argument 'domain' supports bootstrap methods.
+ 
+   o plot.fv
+   New argument 'mathfont' determines the font (e.g. plain, italic, bold)
+   for mathematical expressions on the axes and in the legend.
+   Defaults to italic.
+
+   o scanpp 
+   Upgraded to handle multiple columns of mark data.
+
+   o circumradius
+   The function 'circumradius' is now generic, with methods
+   for the classes 'owin' and 'linnet'.
+
+   o edge.Trans
+   New argument 'give.rmax' 
+
+   o fvnames, plot.fv
+   The symbol '.a' is now recognised. It stands for 'all function values'.
+
+   o as.function.fv
+   Argument 'extrapolate' can have length 1 or 2.
+
+   o varblock
+   New argument 'confidence' determines the confidence level.
+
+   o $<-.fv
+   This can now be used to add an extra column to an 'fv' object
+   (previously it refused).
+
+   o minnndist, maxnndist
+   New argument 'positive'. If TRUE, coincident points are ignored:
+   the nearest-neighbour distance of a point is the distance to the
+   nearest point that does not coincide with the current point.
+
+   o plot.fv
+   Improved handling of 'shade' argument.
+
+   o Kmeasure
+   Now passes '...' arguments to as.mask()
+
+   o Ksector
+   Now allows start < 0.  
+   New arguments 'units' and 'domain'.
+
+   o pairorient
+   New arguments 'units' and 'domain'.
+
+   o eroded.areas
+   New argument 'subset'
+
+   o disc
+   New argument 'delta' 
+
+   o plot.plotppm
+   New argument 'pppargs'
+
+   o harmonise.fv, harmonise.im
+   These are now methods for the new generic 'harmonise'
+
+   o Fest, Gest
+   These functions now also compute the theoretical value of hazard
+   for a Poisson process, if correction = "km".
+
+   o with.fv
+   Improved mathematical labels.
+
+   o Gfox, Jfox
+   Improved mathematical labels.
+
+   o area.owin
+   This function is now a method for the new generic 'area'
+
+   o edges
+   Default for argument 'check' changed to FALSE.
+
+BUG FIXES
+
+   o varblock
+   Calculations were incorrect if more than one column of 
+   edge corrections was computed. 
+   [Bug introduced in spatstat 1.21-1, november 2010.]
+   Fixed.
+
+   o varblock
+   Crashed if one of the quadrats contained no data points.
+   Fixed.
+
+   o lohboot
+   Interval was calculated wrongly when global=TRUE and fun="Lest" or "Linhom".
+   Fixed.
+
+   o nnmark
+   Crashed when at="points" if there was only a single column of marks.
+   [Spotted by Shane Frank.]
+   Fixed.
+
+   o plot.msr
+   Some elements of the plot were omitted or cut off.
+   Fixed.
+
+   o plot.msr
+   Did not work with 'equal.scales=TRUE'.
+   Fixed.
+
+   o plot.msr, augment.msr
+   Crashed if every data point was duplicated.
+   Fixed.
+
+   o as.im.owin
+   Crashed if X was a 1 x 1 pixel array.
+   Fixed.
+
+   o owin
+   Coordinates of polygon data were altered slightly when fix=TRUE. 
+   [Spotted by Carl Witthoft.]
+   Fixed.
+   
+   o objects of class 'fv'
+   Assigning a new value to names(x) or colnames(x) or dimnames(x)
+   would cause the internal data format to become corrupted.
+   Fixed.
+
+   o to.grey, complementarycolour
+   Did not work properly on 'colourmap' objects.
+   Fixed.
+
+   o Kest
+   Ignored argument 'var.approx' if the window was a rectangle.
+   Fixed.
+
+   o rmh.ppm, rmhmodel.ppm
+   Ignored the argument 'new.coef'.
+   [Spotted by Sebastian Schutte]
+   Fixed.
+
+   o as.function.fv
+   The meanings of 'extrapolate=TRUE' and 'extrapolate=FALSE' were swapped.
+   Fixed.
+
+   o varblock
+   Handled the case 'fun=Lest' incorrectly.
+   Fixed.
+
+   o [.fv
+   Sometimes garbled the internal data format, causing plot.fv to crash.
+   Fixed.
+
+   o range.fv
+   Sometimes returned NA even when na.rm=TRUE.
+   Fixed.
+
+   o Fest
+   Argument 'eps' was not interpreted correctly.
+   Fixed.
+
+   o plot.fv
+   Argument 'lwd' was not passed to legend()
+
+   o flipxy.owin
+   Sometimes deleted the name of the unit of length.
+   Fixed.
+
 	CHANGES IN spatstat VERSION 1.38-1
 
 OVERVIEW

@@ -5,7 +5,8 @@
   Displays a perspective plot of a pixel image.
 }
 \usage{
-  \method{persp}{im}(x, \dots, colmap=NULL, colin=x, apron=FALSE)
+  \method{persp}{im}(x, \dots,
+                     colmap=NULL, colin=x, apron=FALSE, visible=FALSE)
 }
 \arguments{
   \item{x}{
@@ -27,12 +28,22 @@
     Logical. If \code{TRUE}, a grey apron is placed
     around the sides of the perspective plot.
   }
+  \item{visible}{
+    Logical value indicating whether to compute which pixels of \code{x}
+    are visible in the perspective view. See Details.
+  }
 }
 \value{
   (invisibly) the 3D transformation matrix
   returned by \code{\link{persp.default}},
   together with an attribute \code{"expand"} which gives the
   relative scale of the \eqn{z} coordinate.
+
+  If argument \code{visible=TRUE} was given, the return value
+  also has an attribute \code{"visible"} which is a pixel image,
+  compatible with \code{x}, with logical values which are \emph{TRUE}
+  when the corresponding pixel is visible in the perspective view,
+  and \code{FALSE} when it is obscured.
 }
 \details{
   This is the \code{persp} method for the class \code{"im"}.
@@ -55,6 +66,21 @@
     \code{length(colmap)} intervals, and those parts of the surface
     which lie in a particular altitude range will be assigned
     the corresponding colour from \code{colmap}.
+    \item If \code{colmap} is a function in the \R language
+    of the form \code{function(n, ...)}, this function will be called
+    with an appropriate value of \code{n} to generate a character
+    vector of \code{n} colours. 
+      Examples of such functions are
+      \code{\link[grDevices]{heat.colors}},
+      \code{\link[grDevices]{terrain.colors}},
+      \code{\link[grDevices]{topo.colors}} and
+      \code{\link[grDevices]{cm.colors}}. 
+    \item If \code{colmap} is a function in the \R language of the
+    form \code{function(range, ...)} then it will be called
+    with \code{range} equal to the range of altitudes,
+    to determine the colour values or colour map.
+    Examples of such functions are \code{\link{beachcolours}}
+    and \code{\link{beachcolourmap}}.
     \item If \code{colmap} is a list with entries \code{breaks} and \code{col},
     then \code{colmap$breaks} determines the breakpoints of the altitude
     intervals, and \code{colmap$col} provides the corresponding colours.
@@ -80,9 +106,23 @@
   The vertical scale is controlled by the argument \code{expand}:
   setting \code{expand=1} will interpret the pixel values as being in
   the same units as the spatial coordinates \eqn{x} and \eqn{y} and
-  represent them at the same scale.  
+  represent them at the same scale.
+
+  If \code{visible=TRUE}, the algorithm also computes whether each pixel
+  in \code{x} is visible in the perspective view. In order to be
+  visible, a pixel must not be obscured by another pixel which lies
+  in front of it (as seen from the viewing direction), and the
+  three-dimensional vector normal to the surface must be pointing toward the
+  viewer. The return value of \code{persp.im} then has an attribute
+  \code{"visible"} which is a pixel image, compatible with \code{x},
+  with pixel value equal to \code{TRUE} if the corresponding pixel in
+  \code{x} is visible, and \code{FALSE} if it is not visible.
 }
 \seealso{
+  \code{\link{perspPoints}},
+  \code{\link{perspLines}}
+  for drawing additional points or lines on the surface.
+
   \code{\link{im.object}},
   \code{\link{plot.im}},
   \code{\link{contour.im}}
@@ -96,9 +136,9 @@
 
    ## Terrain elevation
    persp(bei.extra$elev, colmap=terrain.colors(128),
-       apron=TRUE, theta=-30, phi=20,
-       zlab="Elevation", main="", ticktype="detailed",
-       expand=6)
+         apron=TRUE, theta=-30, phi=20,
+         zlab="Elevation", main="", ticktype="detailed",
+         expand=6)
 }
 \author{Adrian Baddeley
   \email{Adrian.Baddeley@uwa.edu.au}

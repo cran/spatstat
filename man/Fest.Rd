@@ -1,13 +1,18 @@
 \name{Fest}
 \alias{Fest}
-\alias{empty.space}
-\title{Estimate the empty space function F}
+\alias{Fhazard}
+\title{Estimate the Empty Space Function or its Hazard Rate}
 \description{
-  Estimates the empty space function \eqn{F(r)} from a point pattern in a 
+  Estimates the empty space function \eqn{F(r)}
+  or its hazard rate \eqn{h(r)} from a point pattern in a 
   window of arbitrary shape.
 }
 \usage{
-Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
+Fest(X, \dots, eps, r=NULL, breaks=NULL,
+     correction=c("rs", "km", "cs"),
+     domain=NULL)
+
+Fhazard(X, \dots) 
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -15,7 +20,10 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
     An object of class \code{ppp}, or data
     in any format acceptable to \code{\link{as.ppp}()}.
   }
-  \item{\dots}{Ignored.}
+  \item{\dots}{
+    Extra arguments, passed from \code{Fhazard} to \code{Fest}.
+    Extra arguments to \code{Fest} are ignored.
+  }
   \item{eps}{Optional. A positive number.
     The resolution of the discrete approximation to Euclidean
     distance (see below). There is a sensible default.
@@ -35,12 +43,17 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
     \code{"none"}, \code{"rs"}, \code{"km"}, \code{"cs"}
     and \code{"best"}.
   }
+  \item{domain}{
+    Optional. Calculations will be restricted to this subset
+    of the window. See Details.
+  }
 }
 \value{
   An object of class \code{"fv"}, see \code{\link{fv.object}},
   which can be plotted directly using \code{\link{plot.fv}}.
 
-  Essentially a data frame containing up to seven columns:
+  The result of \code{Fest} is 
+  essentially a data frame containing up to seven columns:
   \item{r}{the values of the argument \eqn{r} 
     at which the function \eqn{F(r)} has been  estimated
   }
@@ -62,8 +75,22 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
   \item{theo}{the theoretical value of \eqn{F(r)}
   for a stationary Poisson process of the same estimated intensity.
   }
+
+  The result of \code{Fhazard} contains only three columns
+  \item{r}{the values of the argument \eqn{r} 
+    at which the hazard rate \eqn{h(r)} has been  estimated
+  }
+  \item{hazard}{the spatial Kaplan-Meier estimate of the
+    hazard rate \eqn{h(r)}}
+  \item{theo}{
+    the theoretical value of \eqn{h(r)}
+    for a stationary Poisson process of the same estimated intensity.
+  }
 }
 \details{
+  \code{Fest} computes an estimate of the empty space function \eqn{F(r)},
+  and \code{Fhazard} computes an estimate of its hazard rate \eqn{h(r)}.
+  
   The empty space function 
   (also called the ``\emph{spherical contact distribution}''
   or the ``\emph{point-to-nearest-event}'' distribution)
@@ -150,18 +177,27 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
   \code{r} values must be very fine (ideally not greater than \code{eps/4}).
 
   The algorithm also returns an estimate of the hazard rate function, 
-  \eqn{\lambda(r)}{lambda(r)}, of \eqn{F(r)}. The hazard rate is
+  \eqn{h(r)} of \eqn{F(r)}. The hazard rate is
   defined by
-  \deqn{\lambda(r) = - \frac{d}{dr} \log(1 - F(r))}{%
-    lambda(r) = - (d/dr) log(1 - F(r)) %
+  \deqn{h(r) = - \frac{d}{dr} \log(1 - F(r))}{%
+    h(r) = - (d/dr) log(1 - F(r)) %
   }
   The hazard rate of \eqn{F} has been proposed as a useful
   exploratory statistic (Baddeley and Gill, 1994).
-  The estimate of \eqn{\lambda(r)}{lambda(r)} given here
+  The estimate of \eqn{h(r)} given here
   is a discrete approximation to the hazard rate of the 
   Kaplan-Meier estimator of \eqn{F}. Note that \eqn{F} is 
   absolutely continuous (for any stationary point process \eqn{X}), 
   so the hazard function always exists (Baddeley and Gill, 1997). 
+
+  If the argument \code{domain} is given, the estimate of \eqn{F(r)}
+  will be based only on the empty space distances
+  measured from locations inside \code{domain} (although their
+  nearest data points may lie outside \code{domain}).
+  This is useful in bootstrap techniques. The argument \code{domain}
+  should be a window (object of class \code{"owin"}) or something acceptable to
+  \code{\link{as.owin}}. It must be a subset of the
+  window of the point pattern \code{X}.
 
   The naive empirical distribution of distances from each location
   in the window to the nearest point of the data pattern, is a biased
@@ -224,13 +260,14 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
   The spatial Kaplan-Meier estimator of \eqn{F} is always nondecreasing
   but its maximum value may be less than \eqn{1}.
 
-  The estimate of \eqn{\lambda(r)}{lambda(r)}
+  The estimate of hazard rate \eqn{h(r)}
   returned by the algorithm is an approximately
-  unbiased estimate for the integral of \eqn{\lambda()}{lambda()}
+  unbiased estimate for the integral of \eqn{h()}
   over the corresponding histogram cell.
   It may exhibit oscillations due to discretisation effects.
   We recommend modest smoothing, such as kernel smoothing with 
-  kernel width equal to the width of a histogram cell.
+  kernel width equal to the width of a histogram cell,
+  using \code{\link{Smooth.fv}}.
 }
 \seealso{
   \code{\link{Gest}},
@@ -241,7 +278,6 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
   \code{\link{kaplan.meier}}
 }
 \examples{
-   data(cells)
    Fc <- Fest(cells, 0.01)
 
    # Tip: don't use F for the left hand side!
@@ -258,6 +294,9 @@ Fest(X, ..., eps, r=NULL, breaks=NULL, correction=c("rs", "km", "cs"))
    \dontrun{
    plot(Fc, . ~ theo)
    plot(Fc, asin(sqrt(.)) ~ asin(sqrt(theo)))
+   }
+   \testonly{
+   Fh <- Fhazard(cells)
    }
 }
 \author{Adrian Baddeley

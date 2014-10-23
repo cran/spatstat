@@ -188,9 +188,7 @@
 	\code{\link{rNeymanScott}} \tab
 	simulate a general Neyman-Scott process\cr
 	\code{\link{rPoissonCluster}} \tab
-	simulate a general Neyman-Scott process\cr
-	\code{\link{rNeymanScott}} \tab
-	simulate a general Neyman-Scott process\cr
+	simulate a general Poisson cluster process\cr
 	\code{\link{rMatClust}} \tab
 	simulate the \ifelse{latex}{\out{Mat\'ern}}{Matern} Cluster process\cr
 	\code{\link{rThomas}} \tab
@@ -1640,11 +1638,13 @@
   Olivier Flores,
   David Ford,
   Peter Forbes,
+  Shane Frank,
   Janet Franklin,
   Funwi-Gabga Neba,
   Oscar Garcia,
   Agnes Gault,
   Marc Genton,
+  Shaaban Ghalandarayeshi,
   Julian Gilbey,
   Jason Goldstick,
   Pavel Grabarnik,
@@ -1661,6 +1661,7 @@
   Aruna Jammalamadaka,
   Robert John-Chandran,
   Devin Johnson,
+  Mahdieh Khanmohammadi,
   Mike Kuhn,
   Jeff Laake,
   Frederic Lavancier,
@@ -1685,8 +1686,10 @@
   Jesper \ifelse{latex}{\out{M\o ller}}{Moller},
   Erika Mudrak,
   Gopalan Nair,
+  Nicoletta Nava,
   Linda Stougaard Nielsen,
   Felipe Nunes,
+  Jens Randel Nyengaard,
   Jens \ifelse{latex}{\out{Oehlschl\"{a}gel}}{Oehlschlaegel},
   Thierry Onkelinx,
   Sean O'Riordan,
@@ -1710,6 +1713,7 @@
   Farzaneh Safavimanesh,
   Aila \ifelse{latex}{\out{S\"{a}rkk\"{a}}}{Sarkka},
   Katja Schladitz,
+  Sebastian Schutte,
   Bryan Scott,
   Vadim Shcherbakov,
   Shen Guochun,
@@ -1733,6 +1737,7 @@
   Hao Wang,
   H. Wendrock,
   Jan Wild,
+  Carl G. Witthoft,
   Selene Wong,
   Mike Zamboni
   and

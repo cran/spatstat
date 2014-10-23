@@ -62,6 +62,7 @@
             renormalise=TRUE,
             normpower=1,
             update = TRUE,
+            leaveoneout = TRUE,
             nlarge = 1000, 
             lambda2=NULL,
             reciplambda=NULL, reciplambda2=NULL,
@@ -75,10 +76,10 @@
     # determine basic parameters
     W <- X$window
     npts <- npoints(X)
-    area <- area.owin(W)
+    areaW <- area(W)
     diamW <- diameter(W)
     
-    rmaxdefault <- rmax.rule("K", W, npts/area)
+    rmaxdefault <- rmax.rule("K", W, npts/areaW)
     breaks <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
     r <- breaks$r
     rmax <- breaks$max
@@ -129,7 +130,7 @@
       if(renormalise) {
         check.1.real(normpower)
         stopifnot(normpower %in% 1:2)
-        renorm.factor <- (area^2/sum(reciplambda2))^(normpower/2)
+        renorm.factor <- (areaW^2/sum(reciplambda2))^(normpower/2)
       } 
     } else {
       # Vector lambda or reciplambda is required
@@ -138,7 +139,7 @@
         danger <- FALSE
         # Estimate density by leave-one-out kernel smoothing
         lambda <- density(X, ..., sigma=sigma, varcov=varcov,
-                            at="points", leaveoneout=TRUE)
+                            at="points", leaveoneout=leaveoneout)
         lambda <- as.numeric(lambda)
         reciplambda <- 1/lambda
       } else if(!is.null(reciplambda)) {
@@ -162,9 +163,16 @@
             lambda <- predict(lambda, locations=X, type="trend")
           } else {
             ## re-fit model to data X
-            model <-
-              if(is.ppm(model)) update(model, Q=X) else update(model, X=X)
-            lambda <- fitted(model, dataonly=TRUE)
+            if(is.ppm(model)) {
+              model <- update(model, Q=X)
+              lambda <- fitted(model, dataonly=TRUE, leaveoneout=leaveoneout)
+            } else if(is.kppm(model)) {
+              model <- update(model, X=X)
+              lambda <- fitted(model, dataonly=TRUE, leaveoneout=leaveoneout)
+            } else {
+              model <- update(model, X=X)
+              lambda <- fitted(model, dataonly=TRUE)
+            }
             danger <- FALSE
             if(miss.update) 
               warn.once(key="Kinhom.update",
@@ -185,7 +193,7 @@
       if(renormalise) {
         check.1.real(normpower)
         stopifnot(normpower %in% 1:2)
-        renorm.factor <- (area/sum(reciplambda))^normpower
+        renorm.factor <- (areaW/sum(reciplambda))^normpower
       } 
     }
 
@@ -335,7 +343,7 @@
       edgewt <- edge.Trans(dx=close$dx, dy=close$dy, W=W, paired=TRUE)
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Ktrans <- cumsum(wh)/area
+      Ktrans <- cumsum(wh)/areaW
       if(renormalise) Ktrans <- Ktrans * renorm.factor
       rmax <- diamW/2
       Ktrans[r >= rmax] <- NA
@@ -348,7 +356,7 @@
       edgewt <- edge.Ripley(X[I], matrix(dIJ, ncol=1))
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
-      Kiso <- cumsum(wh)/area
+      Kiso <- cumsum(wh)/areaW
       if(renormalise) Kiso <- Kiso * renorm.factor
       rmax <- diamW/2
       Kiso[r >= rmax] <- NA

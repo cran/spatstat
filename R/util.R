@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.159 $    $Date: 2014/08/08 07:10:09 $
+#    $Revision: 1.165 $    $Date: 2014/10/14 05:44:08 $
 #
 #
 matrowsum <- function(x) {
@@ -326,13 +326,14 @@ prolongseq <- function(x, newrange, step=NULL) {
 }
 
 intersect.ranges <- function(a, b, fatal=TRUE) {
-  lo <- max(a[1],b[1])
-  hi <- min(a[2],b[2])
-  if(lo > hi) {
-    if(fatal) stop("Intersection is empty")
-    else return(NULL)
+  if(!is.null(a) && !is.null(b)) {
+    lo <- max(a[1],b[1])
+    hi <- min(a[2],b[2])
+    if(lo <= hi)
+      return(c(lo, hi))
   }
-  return(c(lo, hi))
+  if(fatal) stop("Intersection is empty")
+  return(NULL)
 }
 
 inside.range <- function(x, r) {
@@ -863,7 +864,12 @@ short.deparse <- function(x, maxlen=60) {
 }
 
 ## deparse() can produce multiple lines of text
-flat.deparse <- function(x) { paste(deparse(x), collapse=" ") }
+flat.deparse <- function(x) {
+  y <- paste(deparse(x), collapse=" ")
+  y <- gsub("\n", " ", y)
+  y <- gsub(" ", "", y)
+  return(y)
+}
 
 good.names <- function(nama, defaults, suffices) {
   # ensure sensible, unique names 
@@ -1307,4 +1313,44 @@ prepareTitle <- function(main) {
               nlines=nlines,
               blank=rep('  ', nlines)))
 }
+
+simplenumber <- function(x, unit = "", multiply="*") {
+  ## Try to express x as a simple multiple or fraction
+  stopifnot(length(x) == 1)
+  s <- if(x < 0) "-" else ""
+  x <- abs(x)
+  if(unit == "") {
+    if(x %% 1 == 0) return(paste0(s, round(x)))
+    for(i in 2:12) 
+      if((i/x) %% 1 == 0) return(paste0(s, i, "/", round(i/x)))
+  } else {
+    if(x == 0) return("0")
+    if(x == 1) return(paste0(s,unit))
+    if(x %% 1 == 0) return(paste0(s, round(x), multiply, unit))
+    if((1/x) %% 1 == 0) return(paste0(s, unit, "/", round(i/x)))
+    for(i in 2:12) 
+      if((i/x) %% 1 == 0) return(paste0(s, i, multiply, unit, "/", round(i/x)))
+  }
+  return(NULL)
+}
+
+fontify <- function(x, font="italic") {
+  if(!nzchar(font) || font == "plain")
+    return(x)
+  if(is.character(x))
+    return(paste0(font, "(", x, ")"))
+  if(is.expression(x)) {
+    if((n <- length(x)) > 0) {
+      for(i in 1:n) 
+        x[[i]] <- fontify(x[[i]], font)
+    }
+    return(x)
+  }
+  if(is.language(x) || is.numeric(x)) 
+    return(substitute(f(X), list(f=as.name(font), X=x)))
+  if(all(sapply(x, is.language)))
+    return(lapply(x, fontify))
+  return(NULL)
+}
+
 

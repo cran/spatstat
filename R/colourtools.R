@@ -1,7 +1,7 @@
 #
 #  colourtools.R
 #
-#   $Revision: 1.7 $   $Date: 2014/04/05 08:41:04 $
+#   $Revision: 1.9 $   $Date: 2014/10/14 12:35:54 $
 #
 
 
@@ -32,19 +32,34 @@ samecolour <- function(x, y) { col2hex(x) == col2hex(y) }
 complementarycolour <- function(x) {
   if(is.null(x)) return(NULL)
   if(inherits(x, "colourmap")) {
-    col <- summary(x)[["outputs"]]
-    return(tweak.colourmap(x, complementarycolour(col)))
+    colouroutputs(x) <- complementarycolour(colouroutputs(x))
+    return(x)
   }
   y <- apply(255 - col2rgb(x), 2, rgb2hex)
   return(y)
 }
 
+is.grey <- function(x) {
+  if(inherits(x, "colourmap")) x <- colouroutputs(x)
+  if(is.function(x)) return(NA)
+  sat <- rgb2hsv(col2rgb(x))["s", ]
+  return(sat == 0)
+}
+  
 to.grey <- function(x, weights=c(1,1,1)) {
   if(is.null(x)) return(NULL)
   if(inherits(x, "colourmap")) {
-    col <- summary(x)[["outputs"]]
-    return(tweak.colourmap(x, to.grey(col, weights)))
+    colouroutputs(x) <- to.grey(colouroutputs(x), weights=weights)
+    return(x)
   }
+  if(is.function(x)) {
+    f <- x
+    g <- function(...) to.grey(f(...))
+    return(g)
+  }
+  ## preserve palette indices, if only using black/grey
+  if(all(!is.na(paletteindex(x))) && all(is.grey(x)))
+    return(x)
   y <- col2rgb(x)
   z <- (weights %*% y)/(255 * sum(weights))
   return(grey(z))

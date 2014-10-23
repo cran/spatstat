@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.44 $  $Date: 2014/07/05 02:29:54 $
+#  $Revision: 1.45 $  $Date: 2014/10/07 05:01:05 $
 #
 
 leverage <- function(model, ...) {
@@ -182,7 +182,10 @@ ppmInfluence <- function(fit,
              }
            })
     vc <- solve(fush)
+  } else {
+    REG <- 1:ncol(mom)
   }
+  
   if(!needHess) {
     hess <- fush
     invhess <- vc
@@ -273,7 +276,7 @@ ppmInfluence <- function(fit,
     levval <- loc %mark% h
     levsmo <- Smooth(levval, sigma=maxnndist(loc))
     # nominal mean level
-    a <- area.owin(loc$window)
+    a <- area(loc$window)
     levmean <- p/a
     lev <- list(val=levval, smo=levsmo, ave=levmean)
     result$lev <- lev

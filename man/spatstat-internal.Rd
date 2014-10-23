@@ -13,7 +13,7 @@
 \alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{applytolayers}
-\alias{area.xypolygon}       
+\alias{Area.xypolygon}       
 \alias{areadelta2}       
 \alias{areaGain.diri}       
 \alias{areaGain.grid}       
@@ -83,6 +83,8 @@
 \alias{crosspairquad}
 \alias{cobble.xy}
 \alias{codetime}
+\alias{colouroutputs}
+\alias{colouroutputs<-}
 \alias{commasep}
 \alias{conform.imagelist}
 \alias{countingweights}
@@ -172,9 +174,11 @@
 \alias{flat.deparse}
 \alias{flatfname}
 \alias{flipxypolygon}
+\alias{fontify}
 \alias{forbidNA}
 \alias{forbid.logi}
 \alias{FormatFaspFormulae}
+\alias{fvexprmap}
 \alias{fvlabels}
 \alias{fvlabels<-}
 \alias{fvlabelmap}
@@ -234,6 +238,7 @@
 \alias{intX.xypolygon}     
 \alias{intY.owin}     
 \alias{intY.xypolygon}
+\alias{invokeColourmapRule}
 \alias{is.atomicQtest}
 \alias{is.cadlag}
 \alias{is.data}
@@ -348,6 +353,7 @@
 \alias{multiplicityNumeric}
 \alias{na.handle.im}
 \alias{names.hyperframe}
+\alias{names<-.fv}
 \alias{names<-.hyperframe}
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
@@ -416,6 +422,7 @@
 \alias{primesbelow}
 \alias{printStatus}
 \alias{print.addvar}    
+\alias{print.anylist}    
 \alias{print.autoexec}    
 \alias{print.bt.frame}
 \alias{print.bw.frac}
@@ -459,6 +466,7 @@
 \alias{print.rmhInfoList}
 \alias{print.splitppp}
 \alias{print.simplepanel}
+\alias{print.solist}
 \alias{print.splitppx}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
@@ -469,6 +477,7 @@
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
 \alias{print.summary.rmhexpand}
+\alias{print.summary.solist}
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
 \alias{print.summary.units}
@@ -548,6 +557,7 @@
 \alias{safedeldir}
 \alias{safelookup}
 \alias{samefunction}
+\alias{scalardilate.breakpts}
 \alias{scalardilate.msr}
 \alias{scanmeasure}
 \alias{scanmeasure.ppp}
@@ -568,6 +578,7 @@
 \alias{shiftxypolygon}              
 \alias{short.deparse}
 \alias{signalStatus}
+\alias{simplenumber}              
 \alias{simplify.xypolygon}              
 \alias{simulrecipe}              
 \alias{singlestring}              
@@ -668,7 +679,7 @@ affinexypolygon(p, mat, vec, detmat)
 anycrossing.psp(A,B)
 apply23sum(x)
 applytolayers(L, FUN, \dots)
-area.xypolygon(polly)
+Area.xypolygon(polly)
 areadelta2(X, r, \dots)
 areaGain.diri(u, X, r, \dots, W)
 areaGain.grid(u, X, r, \dots, W, ngrid)
@@ -743,6 +754,8 @@ conform.ratfv(x)
 crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms, what)
+colouroutputs(x)
+colouroutputs(x) <- value
 commasep(x, join, flatten)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
@@ -855,9 +868,11 @@ fillNA(x, value)
 flat.deparse(x)
 flatfname(x)
 flipxypolygon(p)
+fontify(x, font)
 forbidNA(x, context, xname, fatal, usergiven)
 forbid.logi(object)
 FormatFaspFormulae(f, argname)
+fvexprmap(x)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
 fvlabelmap(x, dot=TRUE)
@@ -888,7 +903,7 @@ grid1index(x, xrange, nx)
 grow.mask(M, xmargin=0, ymargin=xmargin)
 gsubdot(replacement, x)
 HermiteCoefs(order)
-handle.r.b.args(r = NULL, breaks = NULL, window, eps = NULL, rmaxdefault)
+handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 hsvNA(h, s, v, \dots)
@@ -917,6 +932,7 @@ intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
 intY.xypolygon(polly)
+invokeColourmapRule(colfun, x, \dots, zlim, colargs)
 is.atomicQtest(x)
 is.cadlag(s)
 is.data(Q)
@@ -1025,7 +1041,7 @@ matrowall(x)
 matrowany(x)
 matrowsum(x)
 maxflow(costm)
-meanlistfv(z)
+meanlistfv(z, \dots)
 meanX.owin(w)            
 meanY.owin(w)
 model.se.image(fit, W, \dots, what)
@@ -1048,6 +1064,7 @@ MultiPair.checkmatrix(mat, n, matname, naok, zerook, asymmok)
 multiplicityNumeric(x)
 multiply.only.finite.entries(x, a)
 na.handle.im(X, na.replace)
+\method{names}{fv}(x) <- value
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, im)
@@ -1134,6 +1151,7 @@ prepareTitle(main)
 primefactors(n, prmax)
 primesbelow(nmax)
 \method{print}{addvar}(x, \dots)
+\method{print}{anylist}(x, \dots)
 \method{print}{autoexec}(x, \dots)
 \method{print}{bt.frame}(x, \dots)
 \method{print}{bw.frac}(x, \dots)
@@ -1175,6 +1193,7 @@ primesbelow(nmax)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
 \method{print}{simplepanel}(x, \dots)
+\method{print}{solist}(x, \dots)
 \method{print}{splitppp}(x, \dots)
 \method{print}{splitppx}(x, \dots)
 \method{print}{summary.hyperframe}(x, \dots)
@@ -1187,6 +1206,7 @@ primesbelow(nmax)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.rmhexpand}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
+\method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
 \method{print}{summary.units}(x, \dots)
 \method{print}{texturemap}(x, \dots)
@@ -1282,6 +1302,7 @@ runifrect(n, win = owin(c(0, 1), c(0, 1)))
 safedeldir(X)
 safelookup(Z, X, factor, warn)
 samefunction(f, g)
+\method{scalardilate}{breakpts}(X, f, \dots)
 \method{scalardilate}{msr}(X, f, \dots)
 scanmeasure(X, \dots)
 \method{scanmeasure}{ppp}(X, r, \dots, method) %DontDeclare
@@ -1303,6 +1324,7 @@ sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 short.deparse(x, maxlen)
+simplenumber(x, unit, multiply)
 simplify.xypolygon(p, dmin)
 simulrecipe(type, expr, envir, csr, pois, constraints)
 singlestring(s, coll)

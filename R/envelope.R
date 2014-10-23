@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.65 $  $Date: 2014/08/26 04:28:00 $
+#   $Revision: 2.67 $  $Date: 2014/10/08 10:07:59 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -544,7 +544,7 @@ envelopeEngine <-
   # default domain over which to maximise
   alim <- attr(funX, "alim")
   if(global && is.null(ginterval))
-    ginterval <- if(rgiven) range(rvals) else alim
+    ginterval <- if(rgiven || is.null(alim)) range(rvals) else alim
   
   #--------------------------------------------------------------------
   # Determine number of simulations
@@ -885,7 +885,7 @@ print.envelope <- function(x, ...) {
   nr <- e$nrank
   nsim <- e$nsim
   V <- e$VARIANCE
-  fname <- deparse(attr(x, "ylab"))
+  fname <- flat.deparse(attr(x, "ylab"))
   type <- if(V) paste("Pointwise", e$nSD, "sigma") else
           if(g) "Simultaneous" else "Pointwise"
   splat(type, "critical envelopes for", fname,
@@ -930,7 +930,7 @@ print.envelope <- function(x, ...) {
           "Monte Carlo test:",
           paste0(if(g) nr else 2 * nr,
                  "/", nsim+1),
-          "=", alpha)
+          "=", signif(alpha, 3))
   }
   if(waxlyrical('gory') && !is.null(pwrong <- attr(x, "pwrong"))) {
     splat("\t[Estimated significance level of pointwise excursions:",

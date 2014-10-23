@@ -373,6 +373,13 @@ Important new classes of objects are listed here.
 \item \texttt{texturemap}:
   An object of class '\texttt{texturemap}' 
   represents a mapping from data values to graphical textures.
+  
+\item \texttt{anylist}, \texttt{solist}:
+  these are replacements for the class '\texttt{listof}'.
+  An object of class '\texttt{anylist}' represents a list of
+  objects, of any kind, that the user intends to treat in the same way.
+  An object of class '\texttt{solist}' (spatial object list)
+  represents a list of two-dimensional spatial objects.
 \end{itemize}
   
 \section{New datasets}  
@@ -380,6 +387,9 @@ Important new classes of objects are listed here.
 The following datasets have been added to the package.
 
 \begin{itemize}
+\item \texttt{vesicles}:
+  Spatial pattern of synaptic vesicles in rat brain tissue.
+   
 \item \texttt{sporophores}:
   Spatial pattern of three species of mycorrhizal fungi around a tree.
   Multitype point pattern in circular window.
@@ -439,6 +449,33 @@ The following datasets have been added to the package.
 Following is a list of all the functions that have been added.
 
 \begin{itemize}
+  \item \texttt{anylist}, \texttt{as.anylist}, \texttt{[.anylist}, \texttt{[<-.anylist}, \texttt{print.anylist}, \texttt{summary.anylist}\\ 
+   Support for new class '\texttt{anylist}'
+ \item \texttt{solist}, \texttt{as.solist}, 
+   \texttt{[.solist}, \texttt{[<-.solist}, \texttt{print.solist}, 
+   \texttt{summary.solist}\\
+   Support for new class '\texttt{solist}'
+ \item \texttt{plot.anylist}, \texttt{plot.solist}: \\
+   Plot methods for the classes '\texttt{anylist}' and '\texttt{solist}'
+   (Currently identical to '\texttt{plot.listof}')
+\item \texttt{perspPoints}, \texttt{perspLines}, \texttt{perspSegments},
+  \texttt{perspContour}: draw points and lines on a surface,
+  as seen in perspective view.
+\item \texttt{project2set}: 
+  For each data point in a point pattern \texttt{X}, find the nearest
+  spatial location in a given window \texttt{W}.
+\item \texttt{discs}: union of discs. 
+  (Given a point pattern dataset recording the locations and diameters
+  of objects, find the region covered by the objects.)
+\item \texttt{Fhazard}: hazard rate of the empty space function.
+\item \texttt{dirichlet.vertices}: Vertices of the Dirichlet tessellation.
+\item \texttt{stienen, stienenSet}: Stienen diagrams.
+\item \texttt{hopskel.test}: Hopkins-Skellam test.
+\item \texttt{is.grey}: determines whether a colour value is a shade of grey.
+\item \texttt{increment.fv}: increments of a summary function:
+  $g(x) = f(x+h)-f(x-h)$.
+\item \texttt{rotmean}: rotational average of pixel values in an image.
+\item \texttt{fardist}: distance to farthest part of window boundary.
 \item \verb![<-.fv!, \verb!$<-.fv!: %$
   subset replacement operators for \texttt{fv} objects.
 \item \texttt{Ksector}: directional version of $K$-function.
@@ -1523,6 +1560,50 @@ the News and Release Notes for each update.
 
    \item One-sided tests and envelopes of summary functions
 
+   \item Palm likelihood method for fitting cluster processes and Cox processes.
+
+   \item Quasi-likelihood and weighted composite likelihood methods
+     for estimating trend in cluster processes and Cox processes.
+
+   \item Further extensions to model formulas in ppm and kppm.
+
+   \item Faster variance calculations for ppm objects.
+
+   \item One-sided tests and one-sided envelopes of summary functions.
+
+   \item Cramer-Von Mises and Anderson-Darling tests of spatial distribution.
+
+   \item Cressie-Read test statistic in quadrat counting tests.
+
+   \item Spatial cumulative distribution functions.
+
+   \item Faster algorithm for point pattern matching.
+
+   \item Increased support for envelopes.
+
+   \item New generic functions \texttt{Window}, 
+     \texttt{Frame} and \texttt{domain}.
+
+   \item Directional $K$-function and directional distribution.
+
+   \item Raster calculations accelerated.
+
+   \item Summary functions accelerated.
+     
+   \item \texttt{anova} extended to Gibbs models.
+
+   \item Improved algorithm for locally-scaled K-function.
+
+   \item Leave-one-out calculation of fitted values in ppm objects
+
+   \item Geometrical operations with windows and images.
+
+   \item More edge corrections for K-function.
+
+   \item Improved handling and plotting of 'fv' objects.
+
+   \item Utilities for perspective views of surfaces.
+
   \end{itemize}
   
 \section{Alphabetical list of changes}
@@ -1994,6 +2075,9 @@ listed alphabetically.
       \item 
         The surface heights and colours can be controlled by
         two different pixel images.
+      \item 
+        Option to compute which pixels are visible in the perspective view
+        and which are obscured.
       \end{itemize}
 
   \item  pixel images and grids:
@@ -2755,10 +2839,15 @@ of potential impact.
    process model.
    \bugger{1.38-0}{august 2014}{1.38-1}{august 2014}
      
- \item \texttt{predict.ppm}
+ \item \texttt{predict.ppm}:
    Calculation of the conditional intensity omitted the edge correction
    if \texttt{correction='translate'} or \texttt{correction='periodic'}. 
    \bugger{1.17-0}{october 2009}{1.31-3}{may 2013}
+
+ \item \texttt{varblock}:
+   Calculations were incorrect if more than one column of 
+   edge corrections was computed. 
+   \bugger{1.21-1}{november 2010}{1.39-0}{october 2014}
    
  \item \texttt{scan.test}
    Results were sometimes incorrect due to numerical instability

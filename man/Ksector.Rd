@@ -8,10 +8,11 @@
   lie in a particular range of angles.
 }
 \usage{
-Ksector(X, begin = 0, end = 2 * pi, \dots,
+Ksector(X, begin = 0, end = 360, \dots,
+        units = c("degrees", "radians"), 
         r = NULL, breaks = NULL,
         correction = c("border", "isotropic", "Ripley", "translate"),
-        ratio = FALSE)
+        domain=NULL, ratio = FALSE, verbose=TRUE)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -21,10 +22,14 @@ Ksector(X, begin = 0, end = 2 * pi, \dots,
   }
   \item{begin,end}{
     Numeric values giving the range of angles inside which
-    points will be counted. Angles are measured in radians
-    anti-clockwise from the positive \eqn{x}-axis.
+    points will be counted. Angles are measured in degrees
+    (if \code{units="degrees"}, the default) or radians
+    (if \code{units="radians"}) anti-clockwise from the positive \eqn{x}-axis.
   }
   \item{\dots}{Ignored.}
+  \item{units}{
+    Units in which the angles \code{begin} and \code{end} are expressed.
+  }
   \item{r}{
     Optional. Vector of values for the argument \eqn{r} at which \eqn{K(r)} 
     should be evaluated. Users are advised \emph{not} to specify this
@@ -40,11 +45,19 @@ Ksector(X, begin = 0, end = 2 * pi, \dots,
     \code{"translation"}, \code{"none"}, \code{"good"} or \code{"best"}.
     It specifies the edge correction(s) to be applied.
   }
+  \item{domain}{
+    Optional window. The first point \eqn{x_i}{x[i]} of each pair of points
+    will be constrained to lie in \code{domain}.
+  }
   \item{ratio}{
     Logical. 
     If \code{TRUE}, the numerator and denominator of
     each edge-corrected estimate will also be saved,
     for use in analysing replicated point patterns.
+  }
+  \item{verbose}{
+    Logical value indicating whether to print progress reports
+    and warnings.
   }
 }
 \details{
@@ -66,7 +79,7 @@ Ksector(X, begin = 0, end = 2 * pi, \dots,
   \code{\link{Kest}}
 }
 \examples{
- K <- Ksector(swedishpines, 0, pi/2)
+ K <- Ksector(swedishpines, 0, 90)
  plot(K)
 }
 \author{Adrian Baddeley

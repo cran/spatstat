@@ -3,7 +3,7 @@
 #
 #	The 'plot' method for observation windows (class "owin")
 #
-#	$Revision: 1.51 $	$Date: 2014/08/18 02:20:17 $
+#	$Revision: 1.52 $	$Date: 2014/09/27 09:45:44 $
 #
 #
 #
@@ -55,8 +55,11 @@ plot.owin <- function(x, main, add=FALSE, ..., box, edge=0.04,
   if(!add) {
     # new plot
     # allow space for main title
-    guesslinespace <- 0.08 * diff(yr) * cex.main.absol
-    ylim[2] <- ylim[2] + nlines * guesslinespace
+    if(nlines > 0) {
+      guesslinespace <- 0.1 * diff(yr) * cex.main.absol
+      added <- (nlines + 1) * guesslinespace
+      ylim[2] <- ylim[2] + added
+    }
     # set up plot with equal scales
     do.call.plotfun("plot.default",
                     resolve.defaults(list(x=numeric(0), y=numeric(0),
@@ -221,7 +224,7 @@ break.holes <- local({
     if(length(ab)==0)
       return(emptywindow(Box))
     # ensure correct polarity
-    totarea <- sum(unlist(lapply(ab, area.xypolygon)))
+    totarea <- sum(unlist(lapply(ab, Area.xypolygon)))
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(Box$xrange, Box$yrange,

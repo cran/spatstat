@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.20 $ $Date: 2014/08/08 10:02:24 $
+#  $Revision: 1.21 $ $Date: 2014/10/14 10:02:44 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -127,15 +127,18 @@ passthrough <- function(.Fun, ..., .Fname=NULL) {
 
 graphicsPars <- local({
   ## recognised additional arguments to image.default(), axis() etc
+    PlotArgs <- c(
+        "main", "asp", "sub", "axes", "ann",
+        "cex", "font", 
+        "cex.axis", "cex.lab", "cex.main", "cex.sub",
+        "col.axis", "col.lab", "col.main", "col.sub",
+        "font.axis", "font.lab", "font.main", "font.sub")
+    
   TheTable <- 
-    list(plot = c(
-           "main", "asp", "sub", "axes", "ann",
-           "cex", "font", 
-           "cex.axis", "cex.lab", "cex.main", "cex.sub",
-           "col.axis", "col.lab", "col.main", "col.sub",
-           "font.axis", "font.lab", "font.main", "font.sub"),
+    list(plot = PlotArgs,
          image = c(
            "main", "asp", "sub", "axes", "ann",
+           "box", 
            "cex", "font", 
            "cex.axis", "cex.lab", "cex.main", "cex.sub",
            "col.axis", "col.lab", "col.main", "col.sub",
@@ -149,11 +152,17 @@ graphicsPars <- local({
          owin = c(
            "sub",
            "cex", "font", "col",
-           "border",
+           "border", "box", 
            "cex.main", "cex.sub",
            "col.main", "col.sub",
            "font.main", "font.sub",
-           "xaxs", "yaxs"))
+           "xaxs", "yaxs"),
+         symbols = c(PlotArgs, "fg", "bg"))
+
+    TheTable$ppp <- unique(c(TheTable$owin,
+                             TheTable$symbols,
+                             "pch", "cex", "lty", "lwd",
+                             "etch"))
 
   graphicsPars <- function(key) {
     n <- pmatch(key, names(TheTable))

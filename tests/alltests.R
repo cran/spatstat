@@ -1260,6 +1260,17 @@ local({
   plot(alltypes(amacrine, "J"))
   plot(alltypes(amacrine, pcfcross))
 })
+
+#
+#  Test quirks related to 'alim' attribute
+
+local({
+  K <- Kest(cells)
+  attr(K, "alim") <- NULL
+  plot(K)
+  attr(K, "alim") <- c(0, 0.1)
+  plot(tail(K))
+})
 ## tests involving strange mark values
 ## $Revision: 1.2 $ $Date: 2014/01/08 11:15:05 $
 
@@ -2258,4 +2269,15 @@ local({
     fut <- ppm(X ~ Z + x + y, nd=8)
     fut0 <- step(fut, trace=0)
     cat("OK\n")
+})
+## tests/colour.R
+##
+## $Revision$ $Date$
+##
+
+require(spatstat)
+
+local({
+   f <- function(n) grey(seq(0,1,length=n))
+   z <- to.grey(f)
 })
