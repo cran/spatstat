@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.77 $	$Date: 2014/10/24 00:22:30 $
+#	$Revision: 1.78 $	$Date: 2014/11/10 11:16:58 $
 #
 #
 #--------------------------------------------------------------------------
@@ -223,7 +223,7 @@ plot.ppp <- local({
 
   ## Determine symbol map and mark values to be used
   y <- x
-  if(!is.marked(x) || !use.marks) {
+  if(!is.marked(x, na.action="ignore") || !use.marks) {
     ## Marks are not mapped.
     marx <- NULL
     if(is.null(symap)) symap <- symbolmap(..., chars=chars, cols=cols)
@@ -236,7 +236,7 @@ plot.ppp <- local({
       y <- setmarks(y, marx)
     }
     if(npoints(y) > 0) {
-      ok <- complete.cases(as.data.frame(x))
+      ok <- complete.cases(as.data.frame(y))
       if(!any(ok)) {
         warning("All mark values are NA; plotting locations only.")
         if(is.null(symap)) symap <- symbolmap()
@@ -255,7 +255,7 @@ plot.ppp <- local({
                                     markscale=markscale,
                                     ...)
   }
-  gtype <- symbolmaptype(symap)
+#  gtype <- symbolmaptype(symap)
 
   ## Determine bounding box for main plot
   BB <- as.rectangle(x)

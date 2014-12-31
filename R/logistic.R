@@ -1,7 +1,7 @@
 #
 #  logistic.R
 #
-#   $Revision: 1.16 $  $Date: 2014/10/24 00:22:30 $
+#   $Revision: 1.18 $  $Date: 2014/12/17 00:52:48 $
 #
 #  Logistic likelihood method - under development
 #
@@ -20,7 +20,8 @@ logi.engine <- function(Q,
                         vnameprefix=NULL,
                         justQ = FALSE,
                         savecomputed = FALSE,
-                        precomputed = NULL
+                        precomputed = NULL,
+                        VB=FALSE
                         ){
   if(is.null(trend)) trend <- ~1 
   if(is.null(interaction)) interaction <- Poisson()
@@ -180,8 +181,14 @@ logi.engine <- function(Q,
   .logi.ok  <- ok
   .logi.Y   <- resp
   # go
-  fit <- glm(fmla, data=glmdata,
-             family=binomial(), subset = .logi.ok, weights = .logi.w)
+  ##fit <- glm(fmla, data=glmdata,
+  ##           family=binomial(), subset = .logi.ok, weights = .logi.w)
+  fit <- if(VB) 
+           vblogit.fmla(fmla, data = glmdata, 
+                        subset = .logi.ok, weights = .logi.w, ...)
+         else 
+           glm(fmla, data = glmdata, 
+               family = binomial(), subset = .logi.ok, weights = .logi.w)
   environment(fit$terms) <- sys.frame(sys.nframe())
   ## Fitted coeffs
   co <- coef(fit)
@@ -195,7 +202,7 @@ logi.engine <- function(Q,
   the.version <- list(major=spv$major,
                       minor=spv$minor,
                       release=spv$patchlevel,
-                      date="$Date: 2014/10/24 00:22:30 $")
+                      date="$Date: 2014/12/17 00:52:48 $")
 
   ## Compile results
   fit <- list(method      = "logi",
@@ -212,6 +219,7 @@ logi.engine <- function(Q,
               fitin       = fitin,
               maxlogpl    = maxlogpl,
               covariates  = mpl.usable(covariates),
+              varcov      = if(VB) fit$S else NULL,
               internal    = list(Vnames  = Vnames,
                                  IsOffset=IsOffset,
                                  glmdata = glmdata,

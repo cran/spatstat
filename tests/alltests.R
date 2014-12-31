@@ -424,22 +424,32 @@ local({
 #
 #   Test backdoor exits and hidden options in ppm
 #
-#   $Revision: 1.1 $  $Date: 2013/06/17 06:54:51 $
+#   $Revision: 1.4 $  $Date: 2014/11/10 03:05:01 $
 #
 require(spatstat)
 local({
 
-  # (1) skip.border
+  ## (1) skip.border
   
   fit <- ppm(cells, ~1, Strauss(0.1), skip.border=TRUE)
 
-  # (2) subset arguments of different kinds
+  ## (2) subset arguments of different kinds
   fut <- ppm(cells ~ x, subset=(x > 0.5))
   fot <- ppm(cells ~ x, subset=(x > 0.5), method="logi")
   W <- owin(c(0.4, 0.8), c(0.2, 0.7))
   fut <- ppm(cells ~ x, subset=W)
   fot <- ppm(cells ~ x, subset=W, method="logi")
-  
+
+  ## (3) profilepl -> ppm
+  ##     uses 'skip.border' and 'precomputed'
+  ##     also tests scoping for covariates
+  splants <- split(ants)
+  mess    <- splants[["Messor"]]
+  cats    <- splants[["Cataglyphis"]]
+  ss      <- data.frame(r=seq(60,120,by=20),hc=29/6)
+  dM      <- distmap(mess,dimyx=256)
+  mungf    <- profilepl(ss, StraussHard, cats ~ dM)
+  mungp   <- profilepl(ss, StraussHard, trend=~dM, Q=cats)
 })
 
 #
@@ -447,7 +457,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.1 $ $Date: 2013/11/12 16:06:11 $
+#  $Revision: 1.2 $ $Date: 2014/12/31 04:24:30 $
 #
 
 require(spatstat)
@@ -455,8 +465,17 @@ require(spatstat)
 local({
   # test of 'covfunargs'
   f <- function(x,y,a){ y - a }
-  fit <- ppm(cells, ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
+  fit <- ppm(cells ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
   p <- predict(fit)
+
+  # prediction involving 0 * NA
+  qc <- quadscheme(cells, nd=10)
+  r <- minnndist(as.ppp(qc))/10
+  fit <- ppm(qc ~ 1, Strauss(r)) # model has NA for interaction coefficient
+  p1 <- predict(fit)
+  p2 <- predict(fit, type="cif", ngrid=10)
+  stopifnot(all(is.finite(as.matrix(p1))))
+  stopifnot(all(is.finite(as.matrix(p2))))
 })
 
 #
@@ -1933,7 +1952,7 @@ local({
 #
 #  Test behaviour of density methods and inhomogeneous summary functions
 #
-#  $Revision: 1.1 $  $Date: 2013/02/26 09:13:52 $
+#  $Revision: 1.2 $  $Date: 2014/11/14 05:58:15 $
 #
 
 require(spatstat)
@@ -1945,7 +1964,20 @@ local({
   
   lamX <- density(redwood, at="points")
   KX <- Kinhom(redwood, lamX)
-  
+
+  ## test all code cases of new 'relrisk' algorithm
+  pants <- function(...) {
+    a <- relrisk(ants, sigma=100, se=TRUE, ...)
+    return(TRUE)
+  }
+  pants()
+  pants(casecontrol=FALSE)
+  pants(relative=TRUE)
+  pants(casecontrol=FALSE, relative=TRUE)
+  pants(at="points")
+  pants(casecontrol=FALSE,at="points")
+  pants(relative=TRUE,at="points")
+  pants(casecontrol=FALSE, relative=TRUE,at="points")
 })
 #
 # tests/slrm.R
@@ -2117,6 +2149,11 @@ b <- alltypes(demopat, Kcross, nsim=4, envelope=TRUE, global=TRUE)
 # check 'transform' idioms
 A <- envelope(cells, Kest, nsim=4, transform=expression(. - .x))
 B <- envelope(cells, Kest, nsim=4, transform=expression(sqrt(./pi) - .x))
+
+#' check savefuns/savepatterns with global 
+fit <- ppm(cells~x)
+Ef <- envelope(fit, Kest, nsim=4, savefuns=TRUE, global=TRUE)
+Ep <- envelope(fit, Kest, nsim=4, savepatterns=TRUE, global=TRUE)
 
 # check conditional simulation
 e1 <- envelope(cells, Kest, nsim=4, fix.n=TRUE)
@@ -2301,3 +2338,71 @@ local({
   A <- runifpoint(3)
   AB <- project2segment(A,B)
 })
+## tests/markcor.R
+##   Tests of mark correlation code (etc)
+## $Revision: 1.3 $ $Date: 2014/11/09 03:59:41 $
+
+require(spatstat)
+
+local({
+  ## check.testfun checks equality of functions
+  ##  and is liable to break if the behaviour of all.equal is changed
+  fe <- function(m1, m2) {m1 == m2}
+  fm <- function(m1, m2) {m1 * m2}
+  fs <- function(m1, m2) {sqrt(m1)}
+  if(check.testfun(fe, X=amacrine)$ftype != "equ")
+    warning("check.testfun fails to recognise mark equality function")
+  if(check.testfun(fm, X=longleaf)$ftype != "mul")
+    warning("check.testfun fails to recognise mark product function")
+  check.testfun(fs, X=longleaf)
+  
+  ## test all is well in markcorrint -> Kinhom 
+  MA <- markcorrint(amacrine,function(m1,m2){m1==m2})
+  set.seed(42)
+  AR <- rlabel(amacrine)
+  MR <- markcorrint(AR,function(m1,m2){m1==m2})
+  if(isTRUE(all.equal(MA,MR)))
+    stop("markcorrint unexpectedly ignores marks")
+})
+# ...............................................................
+#          multippm/tests/tests.R
+#
+#      Tests of 'mppm' and methods
+#
+#  $Revision: 1.4 $ $Date: 2014/12/28 01:32:31 $
+
+require(spatstat)
+
+# test interaction formulae and subfits
+data(simba)
+fit1 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
+            iformula=~ifelse(group=="control", po, str))
+fit2 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
+            iformula=~id * str)
+fit3 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), pie=PairPiece(c(0.05,0.1))), iformula=~I((group=="control") * po) + I((group=="treatment") * pie))
+fit1
+fit2
+fit3
+subfits(fit1)
+subfits(fit2)
+subfits(fit3)
+
+# test handling of offsets and zero cif values in mppm
+
+ data(waterstriders)
+ H <- hyperframe(Y = waterstriders)
+ mppm(Y ~ 1,  data=H, Hardcore(1.5))
+ mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
+
+# prediction, in training/testing context
+#    (example from Markus Herrmann and Ege Rubak)
+
+X <- waterstriders
+dist <- as.listof(lapply(waterstriders,
+                         function(z) distfun(runifpoint(1, Window(z)))))
+i <- 3
+train <- hyperframe(pattern = X[-i], dist = dist[-i])
+test <- hyperframe(pattern = X[i], dist = dist[i])
+fit <- mppm(pattern ~ dist, data = train)
+pred <- predict(fit, type="cif", newdata=test, verbose=TRUE)
+

@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.30 $	$Date: 2014/10/24 00:22:30 $
+#    $Revision: 1.35 $	$Date: 2014/12/22 04:37:56 $
 #
 #    The area interaction
 #
@@ -41,6 +41,12 @@ AreaInter <- local({
       return(1 - areas/(pi * r^2))
     }
 
+  #' fractional area of overlap of two unit discs at distance 2 * z
+  discOverlap <- function(z) {
+    z <- pmax(pmin(z, 1), -1)
+    (2/pi) * (acos(z) - z * sqrt(1 - z^2))
+  }
+  
   # template object without family, par, version
   BlankAI <- 
   list(
@@ -57,12 +63,49 @@ AreaInter <- local({
                     },
          update = NULL,  # default OK
          print = NULL,    # default OK
+         plot = function(fint, ..., d=NULL, plotit=TRUE) {
+           verifyclass(fint, "fii")
+           inter <- fint$interaction
+           unitz <- unitname(fint)
+           if(!identical(inter$name, "Area-interaction process"))
+             stop("Tried to plot the wrong kind of interaction")
+           #' fitted interaction coefficient
+           theta <- fint$coefs[fint$Vnames]
+           #' interaction radius
+           r <- inter$par$r
+           xlim <- resolve.1.default(list(xlim=c(0, 1.25 * 2*r)), list(...)) 
+           rmax <- max(xlim, d)
+           if(is.null(d)) {
+             d <- seq(from=0, to=rmax, length.out=1024)
+           } else {
+             stopifnot(is.numeric(d) &&
+                       all(is.finite(d)) &&
+                       all(diff(d) > 0))
+           }
+           #' compute interaction between two points at distance d
+           y <- exp(theta * discOverlap(d/(2 * r)))
+           #' compute `fv' object
+           fun <- fv(data.frame(r=d, h=y, one=1),
+                     "r", substitute(h(r), NULL), "h", cbind(h,one) ~ r,
+                     xlim, c("r", "h(r)", "1"),
+                     c("distance argument r",
+                       "maximal interaction h(r)",
+                       "reference value 1"),
+                     unitname=unitz)
+           if(plotit)
+             do.call("plot.fv",
+                     resolve.defaults(list(fun),
+                                      list(...),
+                                      list(ylim=range(0,1,y))))
+           return(invisible(fun))
+         },
+         #' end of function 'plot'
          interpret =  function(coeffs, self) {
            logeta <- as.numeric(coeffs[1])
            eta <- exp(logeta)
            return(list(param=list(eta=eta),
                        inames="interaction parameter eta",
-                       printable=round(eta,4)))
+                       printable=signif(eta)))
          },
          valid = function(coeffs, self) {
            eta <- ((self$interpret)(coeffs, self))$param$eta
@@ -99,6 +142,8 @@ AreaInter <- local({
     instantiate.interact(BlankAI, list(r=r))
   }
 
+  AreaInter <- intermaker(AreaInter, BlankAI)
+  
   AreaInter
 })
 

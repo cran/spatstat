@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.105 $	$Date: 2014/08/14 08:28:03 $
+#	$Revision: 2.116 $	$Date: 2014/12/31 01:54:00 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -64,21 +64,23 @@ function(x, ...,
                 always = { force.SE <- TRUE }, 
                 never  = { force.no.SE <- TRUE },
                 poisson = {
-                  do.SE <- is.poisson(x) &&
-                           !is.null(x$fitter) && (x$fitter != "gam") &&
-                           waxlyrical("extras", terselevel)
+                  do.SE <-
+                    is.poisson(x) &&
+                      !identical(x$fitter, "gam") &&
+                        (!is.null(x$varcov) || x$method != "logi") &&
+                          waxlyrical("extras", terselevel)
                 })
   do.SE <- (do.SE || force.SE) && !force.no.SE
 
   s <- summary.ppm(x, quick=if(do.SE) FALSE else "no variances")
         
   notrend <-    s$no.trend
-  stationary <- s$stationary
+#  stationary <- s$stationary
   poisson <-    s$poisson
   markeddata <- s$marked
   multitype  <- s$multitype
         
-  markedpoisson <- poisson && markeddata
+#  markedpoisson <- poisson && markeddata
   csr <- poisson && notrend && !markeddata
 
   special <- csr && all(c("model", "trend") %in% what)
@@ -94,15 +96,16 @@ function(x, ...,
         
       if(markeddata) mrk <- s$entries$marks
       if(multitype) {
-        cat("Possible marks:\n")
-        splat(paste(levels(mrk)))
+        splat(paste("Possible marks:",
+                    commasep(sQuote(levels(mrk)))))
         parbreak(terselevel)
       }
     }
     ## ----- trend --------------------------
     if("trend" %in% what) {
       if(!notrend) {
-        splat("Trend formula: ",
+        splat("Log",
+              if(poisson) "intensity: " else "trend: ",
               pasteFormula(s$trend$formula))
         parbreak(terselevel)
       }
@@ -117,9 +120,11 @@ function(x, ...,
           splat(thead)
           for(i in seq_along(tv))
             print(tv[[i]])
-        } else if(is.numeric(tv) && length(tv) == 1 && is.null(names(tv))) {
+        } else if(is.numeric(tv) && length(tv) == 1) {
           ## single number: append to end of current line
-          splat(paste0(thead, "\t", signif(tv, digits)))
+          tvn <- names(tv)
+          tveq <- if(is.null(tvn)) "\t" else paste(" ", tvn, "= ")
+          splat(paste0(thead, tveq, signif(tv, digits)))
         } else {
           ## some other format 
           splat(thead)
@@ -156,8 +161,8 @@ function(x, ...,
 
   if("interaction" %in% what) {
     if(!poisson) {
-      print(s$interaction, family=FALSE,
-            brief=!waxlyrical("extras", terselevel))
+      print(s$interaction, family=FALSE, banner=FALSE, 
+            brief=!waxlyrical("extras"))
       parbreak(terselevel)
     }
   }
@@ -171,7 +176,8 @@ function(x, ...,
       splat("Standard errors unavailable; variance-covariance matrix is singular")
     } else if(!force.no.SE) {
       # standard error was voluntarily omitted
-      splat("For standard errors, type coef(summary(x))\n")
+      if(waxlyrical('space', terselevel))
+        splat("For standard errors, type coef(summary(x))\n")
     }
   }
   
@@ -194,12 +200,26 @@ function(x, ...,
     fitter <- s$fitter
     converged <- s$converged
     if(!is.null(fitter) && fitter %in% c("glm", "gam") && !converged)
-      splat(paste("*** Fitting algorithm for", sQuote(fitter),
-                "did not converge ***"))
+      splat("*** Fitting algorithm for", sQuote(fitter),
+            "did not converge ***")
   }
 
-  if(waxlyrical("extras", terselevel) && s$projected)
+  if(waxlyrical("extras", terselevel) && s$projected) {
+    parbreak()
     splat("Fit was projected to obtain a valid point process model")
+  }
+
+  if(identical(s$valid, FALSE) && waxlyrical("errors", terselevel)) {
+    parbreak()
+    splat("***",
+          "Model is not valid",
+          "***\n***",
+          "Interaction parameters are outside valid range",
+          "***")
+  } else if(is.na(s$valid) && waxlyrical("extras", terselevel)) {
+    parbreak()
+    splat("[Validity of model could not be checked]")
+  }
   
   return(invisible(NULL))
 }
@@ -282,6 +302,7 @@ getppmdatasubset <- function(object) {
   return(sub)
 }
 
+
 getppmOriginalCovariates <- function(object) {
   df <- as.data.frame(as.ppp(quad.ppm(object)))
   cova <- object$covariates
@@ -297,7 +318,7 @@ getppmOriginalCovariates <- function(object) {
   
 # ??? method for 'effects' ???
 
-valid.ppm <- function(object) {
+valid.ppm <- function(object, warn=TRUE) {
   verifyclass(object, "ppm")
   coeffs <- coef(object)
   # ensure all coefficients are fitted, and finite
@@ -314,7 +335,7 @@ valid.ppm <- function(object) {
   # check interaction
   checker <- inte$valid
   if(is.null(checker) || !newstyle.coeff.handling(inte)) {
-    warning("Internal error: unable to check validity of model")
+    if(warn) warning("Internal error: unable to check validity of model")
     return(NA)
   }
   answer <- checker(Icoeffs, inte)
@@ -599,11 +620,27 @@ labels.ppm <- function(object, ...) {
   return(lab[okterms])
 }
 
-extractAIC.ppm <- function (fit, scale = 0, k = 2, ...)
+AIC.ppm <- function(object, ..., k=2, takeuchi=TRUE) {
+  ll <- logLik(object, warn=FALSE)
+  pen <- attr(ll, "df")
+  if(takeuchi && !is.poisson(object)) {
+    vv <- vcov(object, what="internals")
+    logi <- (object$method == "logi")
+    J  <- with(vv, if(!logi) Sigma else (Sigma1log+Sigma2log))
+    H  <- with(vv, if(!logi) A1 else Slog)
+    ## Takeuchi penalty = trace of J H^{-1} = trace of H^{-1} J
+    JiH <- try(solve(H, J), silent=TRUE)
+    if(!inherits(JiH, "try-error")) 
+      pen <- sum(diag(JiH))
+  } 
+  return(- 2 * as.numeric(ll) + k * pen)
+}
+
+extractAIC.ppm <- function (fit, scale = 0, k = 2, ..., takeuchi=TRUE)
 {
-    edf <- length(coef(fit))
-    aic <- AIC(fit)
-    c(edf, aic + (k - 2) * edf)
+  edf <- length(coef(fit))
+  aic <- AIC(fit, k=k, takeuchi=takeuchi)
+  c(edf, aic)
 }
 
 #
@@ -626,8 +663,24 @@ model.frame.ppm <- function(formula, ...) {
 # method for model.matrix
 
 model.matrix.ppm <- function(object, data=model.frame(object),
-                             ..., keepNA=TRUE) {
-  data.given <- !missing(data)
+                             ..., Q=NULL, keepNA=TRUE) {
+  data.given <- !missing(data) && !is.null(data)
+  if(!is.null(Q)) {
+    if(data.given) stop("Arguments Q and data are incompatible")
+    if(!inherits(Q, c("ppp", "quad")))
+      stop("Q should be a point pattern or quadrature scheme")
+    if(is.ppp(Q)) Q <- quad(Q, Q[FALSE])
+    ## construct Berman-Turner frame
+    needed <- c("trend", "interaction", "covariates", "correction", "rbord")
+    bt <- do.call("bt.frame", append(list(Q), object[needed]))
+    ## compute model matrix
+    mf <- model.frame(bt$fmla, bt$glmdata, ...)
+    mm <- model.matrix(bt$fmla, mf, ...)
+    ## remove NA's ?
+    if(!keepNA)
+      mm <- mm[complete.cases(mm), ..., drop=FALSE]
+    return(mm)
+  }
   gf <- getglmfit(object)
   if(is.null(gf)) {
     warning("Model re-fitted with forcefit=TRUE")
@@ -680,28 +733,33 @@ model.images <- function(object, ...) {
 
 model.images.ppm <- function(object, W=as.owin(object), ...) {
   X <- data.ppm(object)
-  # make a quadscheme with a dummy point at every pixel
+  ## make a quadscheme with a dummy point at every pixel
   Q <- pixelquad(X, W)
-  # construct Berman-Turner frame
-  needed <- c("trend", "interaction", "covariates", "correction", "rbord")
-  bt <- do.call("bt.frame", append(list(Q), object[needed]))
-  # compute model matrix
-  mf <- model.frame(bt$fmla, bt$glmdata, ...)
-  mm <- model.matrix(bt$fmla, mf, ...)
-  # retain only the entries for dummy points (pixels)
+  ## compute model matrix
+  mm <- model.matrix(object, Q=Q)
+  ## retain only the entries for dummy points (pixels)
   mm <- mm[!is.data(Q), , drop=FALSE]
-  # create template image
+  mm <- as.data.frame(mm)
+  ## create template image
   Z <- as.im(attr(Q, "M"))
-  # make images
+  ok <- !is.na(Z$v)
+  ## make images
   imagenames <- colnames(mm)
-  result <- lapply(imagenames,
-                   function(nama, Z, mm) {
-                     Z$v[!is.na(Z$v)] <- mm[, nama]
-                     return(Z)
-                   },
-                   Z=Z, mm=mm)
-  result <- as.listof(result)
-  names(result) <- imagenames
+  if(!is.multitype(object)) {
+    result <- lapply(as.list(mm), replace, list=ok, x=Z)
+    result <- as.listof(result)
+    names(result) <- imagenames
+  } else {
+    marx <- marks(Q$dummy)
+    mmsplit <- split(mm, marx)
+    result <- vector(mode="list", length=length(mmsplit))
+    for(i in seq_along(mmsplit))
+      result[[i]] <- as.listof(lapply(as.list(mmsplit[[i]]),
+                                      replace, list=ok, x=Z))
+    names(result) <- names(mmsplit)
+    result <- do.call(hyperframe, result)
+    row.names(result) <- imagenames
+  }
   return(result)
 }
 
@@ -732,7 +790,7 @@ as.ppm.ppm <- function(object) {
   object
 }
 
-# method for as.owin
+## method for as.owin
 
 as.owin.ppm <- function(W, ..., from=c("points", "covariates"), fatal=TRUE) {
   if(!verifyclass(W, "ppm", fatal=fatal))

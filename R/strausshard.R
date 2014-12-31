@@ -73,7 +73,7 @@ StraussHard <- local({
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
-                       printable=round(gamma,4)))
+                       printable=dround(gamma)))
          },
          valid = function(coeffs, self) {
            loggamma <- as.numeric(coeffs[1])
@@ -129,5 +129,7 @@ StraussHard <- local({
     instantiate.interact(BlankStraussHard, list(r=r, hc=hc))
   }
 
+  StraussHard <- intermaker(StraussHard, BlankStraussHard)
+  
   StraussHard
 })

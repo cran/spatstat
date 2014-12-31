@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.181 $	$Date: 2014/10/24 00:22:30 $
+#	$Revision: 5.187 $	$Date: 2014/12/17 09:28:02 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -65,7 +65,7 @@ mpl.engine <-
       } else if(verifyclass(Q, "ppp", fatal = FALSE)) {
         ## point pattern - create default quadrature scheme
         X <- Q
-        Q <- quadscheme(X, nd=nd, eps=eps)
+        Q <- quadscheme(X, nd=nd, eps=eps, check=FALSE)
       } else 
       stop("First argument Q should be a point pattern or a quadrature scheme")
       ## Data and dummy points together
@@ -101,7 +101,7 @@ mpl.engine <-
     the.version <- list(major=spv$major,
                         minor=spv$minor,
                         release=spv$patchlevel,
-                        date="$Date: 2014/10/24 00:22:30 $")
+                        date="$Date: 2014/12/17 09:28:02 $")
 
     if(want.inter) {
       ## ensure we're using the latest version of the interaction object
@@ -193,7 +193,7 @@ mpl.engine <-
     problems <- prep$problems
     likelihood.is.zero <- prep$likelihood.is.zero
     is.identifiable <- prep$is.identifiable
-    computed <- append(computed, prep$computed)
+    computed <- resolve.defaults(prep$computed, computed)
     IsOffset <- prep$IsOffset
 
     ## update covariates (if they were resolved from the environment)  
@@ -262,6 +262,7 @@ mpl.engine <-
 
     ## fitted interaction object
     fitin <- if(want.inter) fii(interaction, co, Vnames, IsOffset) else fii()
+    unitname(fitin) <- unitname(X)
     ######################################################################
     ## Clean up & return 
 
@@ -346,6 +347,7 @@ mpl.prepare <- local({
 
     ## Extract covariate values
     updatecovariates <- FALSE
+    covariates.df <- NULL
     if(allcovar || want.trend || want.subset) {
       if("covariates.df" %in% names.precomputed) {
         covariates.df <- precomputed$covariates.df
@@ -403,7 +405,7 @@ mpl.prepare <- local({
     ## count data and dummy points in specified subset
     izdat <- .mpl$Z[.mpl$SUBSET]
     ndata <- sum(izdat)
-    ndummy <- sum(!izdat)
+#    ndummy <- sum(!izdat)
     
     ## Determine the domain of integration for the pseudolikelihood.
     if(correction == "border") {
@@ -451,7 +453,7 @@ mpl.prepare <- local({
       }
       ##
       ## Check covariates
-      if(!is.null(covariates)) {
+      if(!is.null(covariates.df)) {
         ## Check for duplication of reserved names
         cc <- check.clashes(reserved.names, names(covariates),
                             sQuote("covariates"))
@@ -512,7 +514,8 @@ mpl.prepare <- local({
       ## Form the matrix of "regression variables" V.
       ## The rows of V correspond to the rows of P (quadrature points)
       ## while the column(s) of V are the regression variables (log-potentials)
-      E <- equalpairs.quad(Q)
+
+      E <- precomputed$E %orifnull% equalpairs.quad(Q)
 
       if(!skip.border) {
         ## usual case
@@ -522,21 +525,37 @@ mpl.prepare <- local({
                              savecomputed=savecomputed)
       } else {
         ## evaluate only in eroded domain
-        Retain <- .mpl$DOMAIN
-        Psub <- P[Retain]
-        ## map serial numbers in 'P[Retain]' to serial numbers in 'Psub'
-        Pmap <- cumsum(Retain)
-        keepE <- Retain[ E[,2] ]
-        ## adjust equal pairs matrix
-        Esub <- E[ keepE, , drop=FALSE]
-        Esub[,2] <- Pmap[Esub[,2]]
+        if(all(c("Esub", "Usub", "Retain") %in% names.precomputed)) {
+          ## use precomputed data
+          Psub <- precomputed$Usub
+          Esub <- precomputed$Esub
+          Retain <- precomputed$Retain
+        } else {
+          Retain <- .mpl$DOMAIN
+          Psub <- P[Retain]
+          ## map serial numbers in 'P[Retain]' to serial numbers in 'Psub'
+          Pmap <- cumsum(Retain)
+          keepE <- Retain[ E[,2] ]
+          ## adjust equal pairs matrix
+          Esub <- E[ keepE, , drop=FALSE]
+          Esub[,2] <- Pmap[Esub[,2]]
+        }
         ## call evaluator on reduced data
         ## with 'W=NULL' (currently detected only by AreaInter)
+        if(all(c("X", "Q", "U") %in% names.precomputed)) {
+          subcomputed <- resolve.defaults(list(E=Esub, U=Psub, Q=Q[Retain]),
+                                          precomputed)
+        } else subcomputed <- NULL
         V <- evalInteraction(X, Psub, Esub, interaction, correction,
                              ...,
                              W=NULL,
-                             precomputed=precomputed,
+                             precomputed=subcomputed,
                              savecomputed=savecomputed)
+        if(savecomputed) {
+          computed$Usub <- Psub
+          computed$Esub <- Esub
+          computed$Retain <- Retain
+        }
       }
       
       if(!is.matrix(V))
@@ -560,8 +579,8 @@ mpl.prepare <- local({
     
       ## extract intermediate computation results 
       if(savecomputed)
-        computed <- append(computed, attr(V, "computed"))
-  
+        computed <- resolve.defaults(attr(V, "computed"), computed)
+
       ## Augment data frame by appending the regression variables
       ## for interactions.
       ##
@@ -990,7 +1009,7 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
     Pdummy <- if(length(Pdata) > 0) Pall[-Pdata] else Pall
     nD <- length(Pdummy)
     ## size of full matrix
-    nmat <- (nD + nX) * nX
+#    nmat <- (nD + nX) * nX
     nMAX <- spatstat.options("maxmatrix")
     ## Calculate number of dummy points in largest permissible X * (X+D) matrix 
     nperblock <- max(1, floor(nMAX/nX - nX))
@@ -1011,7 +1030,8 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
                     nD - nperblock * nfull, "dummy points"))
     ##
     ##
-    Ei <- cbind(1:nX, 1:nX)
+    seqX <- seq_len(nX)
+    EX <- cbind(seqX, seqX)
     ##
     for(iblock in 1:nblocks) {
       first <- min(nD, (iblock - 1) * nperblock + 1)
@@ -1020,7 +1040,7 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
       Di <- P[Pdummy[first:last]]
       Pi <- superimpose(X, Di, check=FALSE, W=X$window)
       ## evaluate potential
-      Vi <- evalInterEngine(X=X, P=Pi, E=Ei, 
+      Vi <- evalInterEngine(X=X, P=Pi, E=EX, 
                             interaction=interaction,
                             correction=correction,
                             ...,
@@ -1029,8 +1049,20 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
         V <- Vi
       } else {
         ## tack on the glm variables for the extra DUMMY points only
-        V <- rbind(V, Vi[-(1:nX), , drop=FALSE])
+        V <- rbind(V, Vi[-seqX, , drop=FALSE])
       }
+    }
+    ## The first 'nX' rows of V contain values for X.
+    ## The remaining rows of V contain values for dummy points.
+    if(length(Pdata) == 0) {
+      ## simply discard rows corresponding to data
+      V <- V[-seqX, , drop=FALSE]
+    } else {
+      ## replace data in correct position
+      ii <- integer(nP)
+      ii[Pdata] <- seqX
+      ii[Pdummy] <- (nX+1):nrow(V)
+      V <- V[ii, ]
     }
   } 
   return(V)
@@ -1041,6 +1073,7 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
 evalInterEngine <- function(X, P, E, 
                             interaction, correction,
                             ...,
+                            Reach = NULL,
                             precomputed=NULL,
                             savecomputed=FALSE) {
 
@@ -1063,7 +1096,7 @@ evalInterEngine <- function(X, P, E,
   if(is.null(V)) {
     ## use generic evaluator for family
     evaluate <- interaction$family$eval
-    Reach <- reach(interaction)
+    if(is.null(Reach)) Reach <- reach(interaction)
     if("precomputed" %in% names(formals(evaluate))) {
       ## Use precomputed data
       ## version 1.9-3 onward (pairwise and pairsat families)

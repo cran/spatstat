@@ -3,6 +3,7 @@
 \alias{[.pp3}
 \alias{[.localpcfmatrix}
 \alias{[.splitppx}
+\alias{[.diagramobj}
 \alias{[<-.splitppx}
 \alias{acedist.show}
 \alias{acedist.noshow}
@@ -67,12 +68,14 @@
 \alias{check.1.real}
 \alias{check.range}
 \alias{check.testfun}
+\alias{circticks}
 \alias{clarkevansCalc}
 \alias{clip.psp}
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closethresh}
 \alias{coef.summary.ppm}
+\alias{coef.vblogit} 
 \alias{coerce.marks.numeric}
 \alias{compatible.rat}
 \alias{complaining}
@@ -104,6 +107,7 @@
 \alias{densitycrossEngine}
 \alias{densitypointsEngine}
 \alias{diagnose.ppm.engine}
+\alias{diagramobj}
 \alias{digital.volume}
 \alias{dilate.owin}
 \alias{dim.fasp}               
@@ -129,6 +133,7 @@
 \alias{doMultiStraussHard}
 \alias{dotexpr.to.call}
 \alias{dropifsingle}
+\alias{dround}
 \alias{emptywindow}
 \alias{ensure2vector}
 \alias{ensure3Darray}
@@ -161,6 +166,7 @@
 \alias{extractAtomicQtests}
 \alias{fakecallstring}
 \alias{fakemaintitle}
+\alias{family.vblogit} 
 \alias{fave.order}
 \alias{f3engine}
 \alias{f3Cengine}
@@ -211,6 +217,8 @@
 \alias{HermiteCoefs}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
+\alias{hierarchicalordering}
+\alias{hiermat}
 \alias{ho.engine}
 \alias{hsvNA}
 \alias{IdenticalRows}
@@ -233,6 +241,7 @@
 \alias{inside.triangle}     
 \alias{inside.xypolygon}     
 \alias{instantiate.interact}
+\alias{intermaker}
 \alias{intersect.ranges}     
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
@@ -296,11 +305,13 @@
 \alias{local2lpp}
 \alias{logi.dummy}
 \alias{logi.engine}
+\alias{logLik.vblogit}
 \alias{lty2char}
 \alias{parbreak}
 \alias{passthrough}
 \alias{paste.expr}
 \alias{plan.legend.layout}
+\alias{PoisSaddleApp}
 \alias{prettyinside}
 \alias{prettydiscrete}
 \alias{putSpatstatVariable}
@@ -416,6 +427,7 @@
 \alias{pppdist.prohorov}
 \alias{ppsubset}
 \alias{prange}
+\alias{predict.vblogit}
 \alias{prefixfv}
 \alias{prepareTitle}
 \alias{primefactors}       
@@ -436,11 +448,11 @@
 \alias{print.fv}       
 \alias{print.fvfun}       
 \alias{print.funxy}       
-\alias{print.symbolmap}       
-\alias{print.Smoothfun}       
+\alias{print.hierarchicalordering}
 \alias{print.hyperframe}
 \alias{print.influence.ppm}       
 \alias{print.interact}       
+\alias{print.intermaker}       
 \alias{print.isf}
 \alias{print.layered}
 \alias{print.leverage.ppm}
@@ -451,6 +463,7 @@
 \alias{print.mppm}
 \alias{print.msr}
 \alias{print.nnfun}
+\alias{print.onearrow}
 \alias{print.parres}
 \alias{print.plotpairsim}
 \alias{print.plotppm}
@@ -466,6 +479,7 @@
 \alias{print.rmhInfoList}
 \alias{print.splitppp}
 \alias{print.simplepanel}
+\alias{print.Smoothfun}       
 \alias{print.solist}
 \alias{print.splitppx}
 \alias{print.summary.hyperframe}
@@ -481,9 +495,13 @@
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
 \alias{print.summary.units}
+\alias{print.symbolmap}       
+\alias{print.textstring}
 \alias{print.texturemap}
 \alias{print.tess}
 \alias{print.timed}
+\alias{print.vblogit}
+\alias{print.yardstick}
 \alias{prolongseq}
 \alias{putlastshift}
 \alias{quad}
@@ -503,6 +521,8 @@
 \alias{rhohatCalc}
 \alias{RmhExpandRule}
 \alias{rmhsnoop}
+\alias{roseContinuous}
+\alias{ruletextline}
 \alias{quadrat.testEngine}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
@@ -569,6 +589,7 @@
 \alias{sensiblevarname}
 \alias{sewpcf}
 \alias{sewsmod}
+\alias{shift.diagramobj}              
 \alias{shift.influence.ppm}              
 \alias{shift.leverage.ppm}              
 \alias{shift.msr}              
@@ -617,6 +638,7 @@
 \alias{summary.ppx}
 \alias{summary.splitppx}
 \alias{summary.rmhexpand}
+\alias{summary.vblogit}
 \alias{sumsymouter}
 \alias{superimposeMarks}
 \alias{symbolmaptype}
@@ -635,15 +657,19 @@
 \alias{unitname<-.default}
 \alias{unparen}
 \alias{update.interact}
+\alias{update.im}
 \alias{update.ippm}
 \alias{update.rmhstart}
 \alias{uptrimat}
 \alias{validradius}        
+\alias{validate.angles}        
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
 \alias{vanilla.fv}        
 \alias{variablesinformula}
+%\alias{vblogit} %DoNotExport
+%\alias{vblogit.fmla} %DoNotExport
 \alias{verbalogic}
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
@@ -670,6 +696,7 @@
 \usage{
 \method{[}{splitppx}(x, \dots)
 \method{[}{splitppx}(x, \dots) <- value
+\method{[}{diagramobj}(x, \dots)
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
 active.interactions(object)
@@ -738,12 +765,14 @@ check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
 check.range(x, fatal)
 check.testfun(f, f1, X)
+circticks(R, at)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
 closethresh(X,R,S,ordered)
 \method{coef}{summary.ppm}(object, \dots)
+\method{coef}{vblogit}(object, \dots) 
 coerce.marks.numeric(X, warn)
 \method{compatible}{rat}(A, B, \dots) %DontDeclare
 complaining(whinge, fatal, value)
@@ -777,10 +806,12 @@ densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     diggle, sorted)
 densitypointsEngine(x, sigma, \dots,
                     weights, edge, varcov,
-                    leaveoneout, diggle, sorted)
+                    leaveoneout, diggle, sorted, spill)
 diagnose.ppm.engine(object, \dots, type, typename, opt,
-                         sigma, rbord, compute.sd,
-                         compute.cts, rv, oldstyle, splineargs)
+                         sigma, rbord, compute.sd, compute.cts,
+                         envelope, nsim, nrank,
+                         rv, oldstyle, splineargs, verbose)
+diagramobj(X, \dots)
 digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dim}{fasp}(x)
@@ -806,6 +837,7 @@ do.istat(panel)
 doMultiStraussHard(iradii, hradii, types)
 dotexpr.to.call(expr, dot, evaluator)
 dropifsingle(x)
+dround(x)
 emptywindow(w)
 ensure2vector(x)
 ensure3Darray(x)
@@ -836,13 +868,14 @@ eratosthenes(nmax, startset)
 erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, \dots)
-\method{evalCovar}{ppm}(model, covariate, \dots,
+\method{evalCovar}{ppm}(model, covariate, \dots, lambdatype,
           dimyx, eps, jitter, modelname, covname, dataname) 
-\method{evalCovar}{lppm}(model, covariate, \dots,
+\method{evalCovar}{lppm}(model, covariate, \dots, lambdatype, 
           eps, nd, jitter, modelname, covname, dataname)
 evalCovariate(covariate, locations)
 evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
-evalInterEngine(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
+evalInterEngine(X,P,E,interaction,correction,\dots,
+                Reach,precomputed,savecomputed)
 evalPairPotential(X,P,E,pairpot,potpars,R)
 even.breaks.owin(w)
 evenly.spaced(x, tol)
@@ -855,6 +888,7 @@ explain.ifnot(expr, context)
 extractAtomicQtests(x)
 fakecallstring(fname, parlist)
 fakemaintitle(bb, main, \dots)
+\method{family}{vblogit}(object, \dots)
 fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
@@ -905,6 +939,8 @@ gsubdot(replacement, x)
 HermiteCoefs(order)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
+hierarchicalordering(i, s)
+hiermat(x, h)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 hsvNA(h, s, v, \dots)
 IdenticalRows(i,j,a,b)
@@ -927,6 +963,7 @@ inside.range(x, r)
 inside.triangle(x, y, xx, yy)
 inside.xypolygon(pts, polly, test01, method)
 instantiate.interact(x, par)
+intermaker(f, blank)
 intersect.ranges(a,b,fatal)
 intX.owin(w)
 intX.xypolygon(polly)
@@ -994,13 +1031,16 @@ local2lpp(L, seg, tp, X)
 logi.dummy(X, dummytype, nd, mark.repeat, \dots)
 logi.engine(Q, trend, interaction, \dots, 
             covariates, subsetexpr, correction, rbord, covfunargs, allcovar, 
-            vnamebase, vnameprefix, justQ, savecomputed, precomputed)
+            vnamebase, vnameprefix, justQ, savecomputed, precomputed,
+            VB)
+\method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
 parbreak(terse)
 passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
+PoisSaddleApp(beta, fi)
 prettyinside(x, \dots)
 prettydiscrete(x, n)
 \method{print}{localpcfmatrix}(x, \dots)
@@ -1125,7 +1165,8 @@ ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ, do.plot)
 \method{plot}{parres}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{plotpairsim}(x, \dots)
-\method{plot}{profilepl}(x, \dots, add=FALSE, main=NULL, tag=TRUE, coeff=NULL, xvariable=NULL)
+\method{plot}{profilepl}(x, \dots, add, main, tag, coeff, xvariable,
+                         col, lty, lwd, col.opt, lty.opt, lwd.opt)
 \method{plot}{qqppm}(x, \dots, limits=TRUE, monochrome=FALSE,
            limcol=if(monochrome) "black" else "red")
 \method{plot}{spatialcdf}(x, \dots, xlab, ylab)
@@ -1146,6 +1187,8 @@ pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
             ccode, auction, precision, approximation) 
 ppsubset(X, I)
 prange(x)
+\method{predict}{vblogit}(object, newdata, type, se.fit, dispersion,
+                          terms, na.action, \dots)
 prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 prepareTitle(main)
 primefactors(n, prmax)
@@ -1165,11 +1208,11 @@ primesbelow(nmax)
 \method{print}{funxy}(x, \dots)
 \method{print}{fv}(x, \dots, tight)
 \method{print}{fvfun}(x, \dots)
-\method{print}{symbolmap}(x, \dots)
-\method{print}{Smoothfun}(x, \dots)
+\method{print}{hierarchicalordering}(x, \dots)
 \method{print}{hyperframe}(x, \dots)
 \method{print}{influence.ppm}(x, \dots)
-\method{print}{interact}(x, \dots, family=TRUE, brief=FALSE)       
+\method{print}{interact}(x, \dots, family, brief, banner)       
+\method{print}{intermaker}(x, \dots)
 \method{print}{isf}(x, \dots)
 \method{print}{layered}(x, \dots)
 \method{print}{leverage.ppm}(x, \dots)
@@ -1179,6 +1222,7 @@ primesbelow(nmax)
 \method{print}{mppm}(x, \dots)
 \method{print}{msr}(x, \dots)
 \method{print}{nnfun}(x, \dots)
+\method{print}{onearrow}(x, \dots)
 \method{print}{parres}(x, \dots)
 \method{print}{plotppm}(x, \dots)
 \method{print}{plotpairsim}(x, \dots)
@@ -1193,6 +1237,7 @@ primesbelow(nmax)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
 \method{print}{simplepanel}(x, \dots)
+\method{print}{Smoothfun}(x, \dots)
 \method{print}{solist}(x, \dots)
 \method{print}{splitppp}(x, \dots)
 \method{print}{splitppx}(x, \dots)
@@ -1209,9 +1254,13 @@ primesbelow(nmax)
 \method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
 \method{print}{summary.units}(x, \dots)
+\method{print}{symbolmap}(x, \dots)
+\method{print}{textstring}(x, \dots)
 \method{print}{texturemap}(x, \dots)
 \method{print}{tess}(x, \dots, brief=FALSE)
 \method{print}{timed}(x, \dots)
+\method{print}{vblogit}(x, \dots)
+\method{print}{yardstick}(x, \dots)
 prolongseq(x, newrange, step)
 putlastshift(X, vec)
 quad(data, dummy, w, param)
@@ -1240,6 +1289,8 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
 RmhExpandRule(nama)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
      proptype, proplocn, propmark, propindx, numerator, denominator)
+roseContinuous(ang, rad, unit, \dots, main, do.plot)
+ruletextline(ch, n, terse)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, CR, 
      \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
 quadscheme.replicated(data, dummy, method = "grid", \dots)
@@ -1295,10 +1346,10 @@ rmhEngine(InfoList, \dots, verbose, kitchensink, preponly, snoop)
 rmpoint.I.allim(n, f, types)
 \method{row.names}{hyperframe}(x)
 \method{row.names}{hyperframe}(x) <- value
-rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn)
-runifpoispp(lambda, win = owin(c(0, 1), c(0, 1)))
-runifpoisppOnLines(lambda, L)
-runifrect(n, win = owin(c(0, 1), c(0, 1)))
+rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn, nsim)
+runifpoispp(lambda, win, \dots, nsim)
+runifpoisppOnLines(lambda, L, nsim)
+runifrect(n, win, nsim)
 safedeldir(X)
 safelookup(Z, X, factor, warn)
 samefunction(f, g)
@@ -1316,6 +1367,7 @@ second.moment.engine(x, sigma, edge, what, \dots,
 sensiblevarname(guess, fallback, maxlen)
 sewpcf(d, w, denargs, lambda2area, divisor)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
+\method{shift}{diagramobj}(X, \dots)
 \method{shift}{influence.ppm}(X, \dots)
 \method{shift}{leverage.ppm}(X, \dots)
 \method{shift}{msr}(X, \dots)
@@ -1340,7 +1392,7 @@ spatstatClusterModelInfo(name)
 spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
-         dimyx, eps, jitter, modelname, covname, dataname)
+         dimyx, eps, jitter, nsim, verbose, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
 %splat(\dots)
 splitHybridInteraction(coeffs, inte)
@@ -1366,6 +1418,7 @@ summarise.trend(trend, w, a)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{rmhexpand}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
+\method{summary}{vblogit}(object, \dots)
 sumsymouter(x, w)
 superimposeMarks(arglist, nobj)
 symbolmaptype(x)
@@ -1384,15 +1437,19 @@ tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
 \method{unitname}{default}(x) <- value  %DontDeclare
 unparen(x)
 \method{update}{interact}(object, \dots) 
+\method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
 \method{update}{rmhstart}(object, \dots)
 uptrimat(x)
 validradius(r, caller)
+validate.angles(angles, unit, guess)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
 vanilla.fv(x)
 variablesinformula(x)
+%vblogit(y, X, offset, eps, m0, S0, S0i, xi0, verb, maxiter, \dots)
+%vblogit.fmla(formula, offset, data, subset, weights, verbose, epsilon, \dots)
 verbalogic(x, op)
 versionstring.interact(object)
 versionstring.ppm(object)

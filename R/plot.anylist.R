@@ -1,9 +1,16 @@
-#
-plot.solist <- plot.anylist <- 
-plot.listof <- 
+##
+##  plot.anylist.R
+##
+##  Plotting functions for 'solist', 'anylist', 'imlist'
+##       and legacy class 'listof'
+##
+##  $Revision: 1.5 $ $Date: 2014/12/01 06:20:21 $
+##
+
+plot.anylist <- plot.solist <- plot.listof <-
   local({
 
-  # auxiliary functions
+  ## auxiliary functions
   extraplot <- function(nnn, x, ..., add=FALSE, extrargs=list(),
                         panel.args=NULL, plotcommand="plot") {
     argh <- list(...)
@@ -19,7 +26,7 @@ plot.listof <-
     }
     if(length(extrargs) > 0)
       argh <- resolve.defaults(argh, extrargs)
-    # some plot commands don't recognise 'add'
+    ## some plot commands don't recognise 'add'
     if(add)
       argh <- append(argh, list(add=TRUE))
     do.call(plotcommand, append(list(x=x), argh))
@@ -68,7 +75,7 @@ plot.listof <-
     return(!inherits(y, "try-error"))
   }
 
-  plot.listof <- function(x, ..., main, arrange=TRUE,
+  plot.anylist <- function(x, ..., main, arrange=TRUE,
                             nrows=NULL, ncols=NULL,
                             main.panel=NULL,
                             mar.panel=c(2,1,1,2),
@@ -86,17 +93,25 @@ plot.listof <-
                             equal.scales=FALSE,
                             halign=FALSE, valign=FALSE) {
     xname <- short.deparse(substitute(x))
+
+    isSo <- inherits(x, "solist")
+    isIm <- inherits(x, "imlist") || (isSo && all(unlist(lapply(x, is.im))))
     
     ## `boomerang despatch'
     cl <- match.call()
-    if(missing(plotcommand) && all(unlist(lapply(x, is.im)))) {
-      cl[[1]] <- as.name("image.listof")
+    if(missing(plotcommand) && isIm) {
+      cl[[1]] <- as.name("image.imlist")
       parenv <- sys.parent()
       return(eval(cl, envir=parenv))
     }
 
-    isfv <- unlist(lapply(x, is.fv))
-    allfv <- all(isfv)
+    if(isSo) {
+      allfv <- somefv <- FALSE
+    } else {
+      isfv <- unlist(lapply(x, is.fv))
+      allfv <- all(isfv)
+      somefv <- any(isfv)
+    }
     
     ## panel margins
     if(!missing(mar.panel)) {
@@ -104,7 +119,7 @@ plot.listof <-
       if(nm == 1) mar.panel <- rep(mar.panel, 4) else
       if(nm == 2) mar.panel <- rep(mar.panel, 2) else
       if(nm != 4) stop("mar.panel should have length 1, 2 or 4")
-    } else if(any(isfv)) {
+    } else if(somefv) {
       ## change default
       mar.panel <- 0.25+c(4,4,2,2)
     }
@@ -132,7 +147,7 @@ plot.listof <-
     } else extrargs <- list()
     
     if(!arrange) {
-      # sequence of plots
+      ## sequence of plots
       for(i in 1:n) {
         xi <- x[[i]]
         exec.or.plot(panel.begin, i, xi, main=main.panel[i],
@@ -155,22 +170,22 @@ plot.listof <-
       return(invisible(NULL))
     }
 
-    # ARRAY of plots
-    # decide whether to plot a main header
+    ## ARRAY of plots
+    ## decide whether to plot a main header
     main <- if(!missing(main) && !is.null(main)) main else xname
     if(!is.character(main)) {
-      # main title could be an expression
+      ## main title could be an expression
       nlines <- 1
       banner <- TRUE
     } else {
-      # main title is character string/vector, possibly ""
+      ## main title is character string/vector, possibly ""
       banner <- any(nzchar(main))
       if(length(main) > 1)
         main <- paste(main, collapse="\n")
       nlines <- length(unlist(strsplit(main, "\n")))
     }
-    # determine arrangement of plots
-    # arrange like mfrow(nrows, ncols) plus a banner at the top
+    ## determine arrangement of plots
+    ## arrange like mfrow(nrows, ncols) plus a banner at the top
     if(is.null(nrows) && is.null(ncols)) {
       nrows <- as.integer(floor(sqrt(n)))
       ncols <- as.integer(ceiling(n/nrows))
@@ -296,44 +311,44 @@ plot.listof <-
     }
     ## ................. multiple logical plots using 'layout' ..............
     ## adjust panel margins to accommodate desired extra separation
-    mar.panel <- mar.panel + c(vsep, hsep, vsep, hsep)/2
+    mar.panel <- pmax(0, mar.panel + c(vsep, hsep, vsep, hsep)/2)
     ## check for adornment
     if(!is.null(adorn.left)) {
-      # add margin at left, of width adorn.size * meanwidth
+      ## add margin at left, of width adorn.size * meanwidth
       nall <- i.left <- n+1
       mat <- cbind(i.left, mat)
       widths <- c(adorn.size * meanwidth, widths)
     } 
     if(!is.null(adorn.right)) {
-      # add margin at right, of width adorn.size * meanwidth
+      ## add margin at right, of width adorn.size * meanwidth
       nall <- i.right <- nall+1
       mat <- cbind(mat, i.right)
       widths <- c(widths, adorn.size * meanwidth)
     } 
     if(!is.null(adorn.bottom)) {
-      # add margin at bottom, of height adorn.size * meanheight
+      ## add margin at bottom, of height adorn.size * meanheight
       nall <- i.bottom <- nall+1
       mat <- rbind(mat, i.bottom)
       heights <- c(heights, adorn.size * meanheight)
     } 
     if(!is.null(adorn.top)) {
-      # add margin at top, of height adorn.size * meanheight
+      ## add margin at top, of height adorn.size * meanheight
       nall <- i.top <- nall + 1
       mat <- rbind(i.top, mat)
       heights <- c(adorn.size * meanheight, heights)
     } 
     if(banner) {
-      # Increment existing panel numbers
-      # New panel 1 is the banner
+      ## Increment existing panel numbers
+      ## New panel 1 is the banner
       panels <- (mat > 0)
       mat[panels] <- mat[panels] + 1
       mat <- rbind(1, mat)
       heights <- c(0.1 * meanheight * (1 + nlines), heights)
     }
-    # declare layout
+    ## declare layout
     layout(mat, heights=heights, widths=widths, respect=sizes.known)
-    # start output .....
-    # .... plot banner
+    ## start output .....
+    ## .... plot banner
     if(banner) {
       opa <- par(mar=rep.int(0,4), xpd=TRUE)
       plot(numeric(0),numeric(0),type="n",ann=FALSE,axes=FALSE,
@@ -341,7 +356,7 @@ plot.listof <-
       cex <- resolve.1.default(list(cex.title=1.5), list(...))/par('cex')
       text(0,0,main, cex=cex)
     }
-    # plot panels
+    ## plot panels
     npa <- par(mar=mar.panel)
     if(!banner) opa <- npa
     for(i in 1:n) {
@@ -354,7 +369,7 @@ plot.listof <-
                 panel.args=panel.args, plotcommand=plotcommand)
       exec.or.plot(panel.end, i, xi, add=TRUE, extrargs=extrargs)
     }
-    # adornments
+    ## adornments
     if(nall > n) {
       par(mar=rep.int(0,4), xpd=TRUE)
       if(!is.null(adorn.left))
@@ -366,12 +381,107 @@ plot.listof <-
       if(!is.null(adorn.top))
         adorn.top()
     }
-    # revert
+    ## revert
     layout(1)
     par(opa)
     return(invisible(NULL))
   }
 
-  plot.listof
+  plot.anylist
+})
+
+
+contour.imlist <- contour.listof <- function(x, ...) {
+  xname <- short.deparse(substitute(x))
+  do.call("plot.solist",
+          resolve.defaults(list(x=x, plotcommand="contour"),
+                           list(...),
+                           list(main=xname)))
+}
+
+image.imlist <- plot.imlist <- image.listof <- local({
+
+  image.imlist <- function(x, ..., equal.ribbon = FALSE, ribmar=NULL) {
+    xname <- short.deparse(substitute(x))
+    if(equal.ribbon &&
+       !inherits(x, "imlist") &&
+       !all(unlist(lapply(x, is.im)))) {
+      warning("equal.ribbon is only implemented for objects of class 'im'")
+      equal.ribbon <- FALSE
+    }
+    if(equal.ribbon) imagecommon(x, ..., xname=xname, ribmar=ribmar) else 
+      do.call("plot.solist",
+              resolve.defaults(list(x=x, plotcommand="image"),
+                               list(...),
+                               list(main=xname)))
+  }
+
+  imagecommon <- function(x, ...,
+                          xname,
+                          zlim=NULL,
+                          ribbon=TRUE,
+                          ribside=c("right", "left", "bottom", "top"),
+                          ribsep=NULL, ribwid=0.5, ribn=1024,
+                          ribscale=NULL, ribargs=list(),
+                          ribmar = NULL, mar.panel = c(2,1,1,2)) {
+    if(missing(xname))
+      xname <- short.deparse(substitute(x))
+    ribside <- match.arg(ribside)
+    stopifnot(is.list(ribargs))
+    if(!is.null(ribsep))
+      warning("Argument ribsep is not yet implemented for image arrays")
+    ## determine range of values
+    if(is.null(zlim))
+      zlim <- range(unlist(lapply(x, range)))
+    ## determine common colour map
+    imcolmap <- plot.im(x[[1]], do.plot=FALSE, zlim=zlim, ..., ribn=ribn)
+    ## plot ribbon?
+    if(!ribbon) {
+      ribadorn <- list()
+    } else {
+      ## determine plot arguments for colour ribbon
+      vertical <- (ribside %in% c("right", "left"))
+      scaleinfo <- if(!is.null(ribscale)) list(labelmap=ribscale) else list()
+      sidecode <- match(ribside, c("bottom", "left", "top", "right"))
+      ribstuff <- c(list(x=imcolmap, main="", vertical=vertical),
+                    ribargs,
+                    scaleinfo,
+                    list(side=sidecode))
+      if (is.null(mar.panel)) 
+        mar.panel <- c(2, 1, 1, 2)
+      if (length(mar.panel) != 4) 
+        mar.panel <- rep(mar.panel, 4)[1:4]
+      if (is.null(ribmar)) {
+        ribmar <- mar.panel/2
+        newmar <- c(2, 0)
+        switch(ribside,
+               left   = { ribmar[c(2, 4)] <- newmar },
+               right  = { ribmar[c(4, 2)] <- newmar },
+               bottom = { ribmar[c(1, 3)] <- newmar },
+               top    = { ribmar[c(3, 1)] <- newmar }
+               )
+      }
+       ## function executed to plot colour ribbon
+      do.ribbon <- function() {
+        opa <- par(mar=ribmar)
+        do.call("plot", ribstuff)
+        par(opa)
+      }
+      ## encoded as 'adorn' argument
+      ribadorn <- list(adorn=do.ribbon, adorn.size=ribwid)
+      names(ribadorn)[1] <- paste("adorn", ribside, sep=".")
+    }
+    ##
+    do.call("plot.solist",
+            resolve.defaults(list(x=x, plotcommand="image"),
+                             list(...),
+                             list(mar.panel=mar.panel,
+                                  main=xname,
+                                  col=imcolmap, zlim=zlim,
+                                  ribbon=FALSE),
+                             ribadorn))
+  }
+
+  image.imlist
 })
 

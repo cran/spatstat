@@ -100,6 +100,8 @@ MultiStrauss <- local({
        pot      = MSpotential,
        par      = list(types=NULL, radii = NULL), # to be filled in later
        parnames = c("possible types", "interaction distances"),
+       pardesc  = c("vector of possible types",
+                    "matrix of hardcore distances"),
        selfstart = function(X, self) {
          if(!is.null(self$par$types)) return(self)
          types <- levels(marks(X))
@@ -156,7 +158,7 @@ MultiStrauss <- local({
          #
          return(list(param=list(gammas=gammas),
                      inames="interaction parameters gamma_ij",
-                     printable=round(gammas,4)))
+                     printable=dround(gammas)))
        },
        valid = function(coeffs, self) {
          # interaction parameters gamma[i,j]
@@ -226,5 +228,7 @@ MultiStrauss <- local({
     return(out)
   }
 
+  MultiStrauss <- intermaker(MultiStrauss, BlankMSobject)
+  
   MultiStrauss
 })

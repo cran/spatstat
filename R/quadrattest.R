@@ -1,7 +1,7 @@
 #
 #   quadrattest.R
 #
-#   $Revision: 1.46 $  $Date: 2014/10/24 00:22:30 $
+#   $Revision: 1.49 $  $Date: 2014/11/11 10:34:41 $
 #
 
 quadrat.test <- function(X, ...) {
@@ -240,7 +240,7 @@ X2testEngine <- function(OBS, EXP, ...,
              SIM  <- matrix(rpois(nsim*ne,EXP),nrow=ne)
            }
            simstats <- apply(SIM, 2, CressieReadStatistic, EXP=EXP)
-           if(any(duplicated(simstats)))
+           if(anyDuplicated(simstats))
              simstats <- jitter(simstats)
            phi <- (1 + sum(simstats >= X2))/(1+nsim)
            plo <- (1 + sum(simstats <= X2))/(1+nsim)
@@ -261,6 +261,7 @@ X2testEngine <- function(OBS, EXP, ...,
                              CR = CR,
                              method.key = method),
                         class = "htest")
+  return(result)
 }
                          
 print.quadrattest <- function(x, ...) {
@@ -359,8 +360,8 @@ pool.quadrattest <- function(...,
   # data from all cells in all tests
   OBS <- unlist(lapply(tests, getElement, name="observed"))
   EXP <- unlist(lapply(tests, getElement, name="expected"))
-  RES <- unlist(lapply(tests, getElement, name="residuals"))
-  STA <- unlist(lapply(tests, getElement, name="statistic"))
+  # RES <- unlist(lapply(tests, getElement, name="residuals"))
+  # STA <- unlist(lapply(tests, getElement, name="statistic"))
 
   # information about each test
   Mkey <- unlist(lapply(tests, getElement, name="method.key"))

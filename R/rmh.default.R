@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.98 2014/10/24 00:22:30 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.99 2014/12/27 15:30:57 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
@@ -109,8 +109,8 @@ rmh.default <- function(model,start=NULL,
 ##  Clipping window (for final result)
   
   w.clip <-
-    if(!is.null(model$w))
-      model$w
+    if(!is.null(w.model))
+      w.model
     else if(!will.expand(control$expand)) {
       if(start$given == "x" && is.ppp(x.start))
         x.start$window
@@ -198,7 +198,7 @@ rmh.default <- function(model,start=NULL,
   
   condtype <- control$condtype
   x.cond   <- control$x.cond
-  n.cond   <- control$n.cond
+#  n.cond   <- control$n.cond
 
   switch(condtype,
          none={
@@ -248,6 +248,10 @@ rmh.default <- function(model,start=NULL,
 
 ###################### Starting state data ############################
 
+# whether the initial state should be thinned
+  
+  thin <- (start$given != "x") && (control$fixing == "none")
+  
 # There must now be a starting state.
   
   if(start$given == "none") {
@@ -466,7 +470,8 @@ rmh.default <- function(model,start=NULL,
                            w.state=w.state,
                            x.condpp=x.condpp,
                            ptypes=ptypes,
-                           period=period)
+                           period=period,
+                           thin=thin)
 
   Model$internal <- list(a.s.empty=a.s.empty,
                          empty=if(a.s.empty) empty else NULL,
@@ -554,7 +559,7 @@ rmhEngine <- function(InfoList, ...,
 
   trend <- model$trend
   trendy <- model$internal$trendy
-  betalist <- model$internal$betalist
+#  betalist <- model$internal$betalist
   beta <- model$internal$beta
   iota <- model$internal$iota
   tmax <- model$internal$tmax
@@ -655,7 +660,7 @@ rmhEngine <- function(InfoList, ...,
 #### Build starting state
 
   npts.cond  <- if(condtype != "none") x.condpp$n else 0
-  npts.total <- npts.free + npts.cond
+#  npts.total <- npts.free + npts.cond
 
 #### FIRST generate the 'free' points
   
@@ -746,14 +751,15 @@ rmhEngine <- function(InfoList, ...,
   p       <- control$p
   q       <- control$q
   nrep    <- control$nrep
-  fixcode <- control$fixcode
-  fixing  <- control$fixing
+#  fixcode <- control$fixcode
+#  fixing  <- control$fixing
   fixall  <- control$fixall
   nverb   <- control$nverb
   saving  <- control$saving
   nsave   <- control$nsave
   nburn   <- control$nburn
   track   <- control$track
+  thin    <- control$internal$thin
   
   if(verbose)
     cat("Proposal points...")
@@ -792,6 +798,7 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(fixall) <- "integer"
   storage.mode(npts.cond) <- "integer"
   storage.mode(track) <- "integer"
+  storage.mode(thin) <- "integer"
 
   if(!saving) {
     # ////////// Single block /////////////////////////////////
@@ -815,6 +822,7 @@ rmhEngine <- function(InfoList, ...,
                  npts.cond,
                  fixall,
                  track,
+                 thin,
                  snoopenv)
 #                 PACKAGE="spatstat")
   
@@ -865,6 +873,8 @@ rmhEngine <- function(InfoList, ...,
     yprev <- y
     Cmarksprev <- Cmarks
     #
+    thinFALSE <- as.integer(FALSE)
+    storage.mode(thinFALSE) <- "integer"
     # ................ loop .........................
     for(I in 1:nblocks) {
       # number of iterations for this block
@@ -880,6 +890,8 @@ rmhEngine <- function(InfoList, ...,
       CmpropI <- Cmprop[seqI]
       storage.mode(xpropI) <- storage.mode(ypropI) <- "double"
       storage.mode(CmpropI) <- "integer"
+      # no thinning in subsequent blocks
+      if(I > 1) thin <- thinFALSE
       # call
       out <- .Call("xmethas",
                    ncif,
@@ -898,6 +910,7 @@ rmhEngine <- function(InfoList, ...,
                    npts.cond,
                    fixall,
                    track,
+                   thin,
                    snoopenv)
 #                   PACKAGE="spatstat")
       # Extract the point pattern returned from C

@@ -3,7 +3,7 @@
 #
 # Code related to intensity and intensity approximations
 #
-#  $Revision: 1.11 $ $Date: 2014/10/24 00:22:30 $
+#  $Revision: 1.13 $ $Date: 2014/12/11 08:25:02 $
 #
 
 intensity <- function(X, ...) {
@@ -73,7 +73,14 @@ intensity.ppm <- function(X, ...) {
     if(is.stationary(X)) {
       # stationary univariate/multivariate Poisson
       sX <- summary(X, quick="no variances")
-      return(sX$trend$value)
+      lam <- sX$trend$value
+      if(sX$multitype && sX$no.trend) {
+        ## trend is ~1; lam should be replicated for each mark
+        lev <- levels(marks(data.ppm(X)))
+        lam <- rep(lam, length(lev))
+        names(lam) <- lev
+      }
+      return(lam)
     }
     # Nonstationary Poisson
     return(predict(X, ...))
@@ -81,23 +88,7 @@ intensity.ppm <- function(X, ...) {
   # Gibbs process
   if(is.multitype(X))
     stop("Not yet implemented for multitype Gibbs processes")
-  inte <- as.interact(X)
-  if(!identical(inte$family$name, "pairwise"))
-    stop("Intensity approximation is only available for pairwise interaction models")
-  # Stationary, pairwise interaction
-  Mayer <- inte$Mayer
-  if(is.null(Mayer))
-    stop(paste("Sorry, not yet implemented for", inte$name))
-  # interaction coefficients
-  co <- with(fitin(X), coefs[Vnames[!IsOffset]])
-  # compute second Mayer cluster integral
-  G <- Mayer(co, inte)
-  if(is.null(G) || !is.finite(G)) 
-    stop("Internal error in computing Mayer cluster integral")
-  if(G < 0)
-    stop(paste("Unable to apply Poisson-saddlepoint approximation:",
-               "Mayer cluster integral is negative"))
-  ##
+  # Compute first order term
   if(is.stationary(X)) {
     ## activity parameter
     sX <- summary(X, quick="no variances")
@@ -106,6 +97,31 @@ intensity.ppm <- function(X, ...) {
     ## activity function (or values of it, depending on '...')
     beta <- predict(X, ...)
   }
+  ## apply approximation
+  lambda <- PoisSaddleApp(beta, fitin(X))
+  return(lambda)
+}
+
+PoisSaddleApp <- function(beta, fi) {
+  ## apply Poisson-Saddlepoint approximation
+  ## given first order term and fitted interaction
+  stopifnot(inherits(fi, "fii"))
+  inte <- as.interact(fi)
+  if(!identical(inte$family$name, "pairwise"))
+    stop("Intensity approximation is only available for pairwise interaction models")
+  # Stationary, pairwise interaction
+  Mayer <- inte$Mayer
+  if(is.null(Mayer))
+    stop(paste("Sorry, not yet implemented for", inte$name))
+  # interaction coefficients
+  co <- with(fi, coefs[Vnames[!IsOffset]])
+  # compute second Mayer cluster integral
+  G <- Mayer(co, inte)
+  if(is.null(G) || !is.finite(G)) 
+    stop("Internal error in computing Mayer cluster integral")
+  if(G < 0)
+    stop(paste("Unable to apply Poisson-saddlepoint approximation:",
+               "Mayer cluster integral is negative"))
   ## solve
   if(is.im(beta)) {
     lambda <- if(G == 0) eval.im(0 * beta) else eval.im(LambertW(G * beta)/G)
@@ -115,6 +131,7 @@ intensity.ppm <- function(X, ...) {
   }
   return(lambda)
 }
+
 
 # Lambert's W-function
 

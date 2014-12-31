@@ -499,7 +499,7 @@ progressreport <- function(i, n, every=min(100,max(1, ceiling(n/100))),
 numalign <- function(i, nmax, zero="0") {
   stopifnot(i <= nmax)
   nplaces <- as.integer(ceiling(log10(nmax+1)))
-  out <- blank <- paste(rep(zero, nplaces), collapse="")
+  out <- paste(rep(zero, nplaces), collapse="")
   istring <- paste(i)
   ilen <- nchar(istring)
   substr(out, nplaces-ilen+1, nplaces) <- istring
@@ -881,7 +881,7 @@ good.names <- function(nama, defaults, suffices) {
     result <- defaults
   else if(any(blank <- !nzchar(result)))
     result[blank] <- defaults[blank]
-  if(any(duplicated(result)))
+  if(anyDuplicated(result))
     result <- make.names(result, unique=TRUE)
   return(result)
 }
@@ -1321,7 +1321,7 @@ simplenumber <- function(x, unit = "", multiply="*") {
   x <- abs(x)
   if(unit == "") {
     if(x %% 1 == 0) return(paste0(s, round(x)))
-    for(i in 2:12) 
+    for(i in 1:12) 
       if((i/x) %% 1 == 0) return(paste0(s, i, "/", round(i/x)))
   } else {
     if(x == 0) return("0")
@@ -1351,6 +1351,10 @@ fontify <- function(x, font="italic") {
   if(all(sapply(x, is.language)))
     return(lapply(x, fontify))
   return(NULL)
+}
+
+dround <- function(x) {
+  round(x, getOption('digits'))
 }
 
 

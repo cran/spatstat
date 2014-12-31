@@ -122,7 +122,7 @@ Triplets <- local({
            gamma <- exp(loggamma)
            return(list(param=list(gamma=gamma),
                        inames="interaction parameter gamma",
-                       printable=round(gamma,4)))
+                       printable=dround(gamma)))
          },
          valid = function(coeffs, self) {
            gamma <- ((self$interpret)(coeffs, self))$param$gamma
@@ -148,6 +148,8 @@ Triplets <- local({
   Triplets <- function(r) {
     instantiate.interact(BlankTripletsObject, list(r=r))
   }
+  Triplets <- intermaker(Triplets, BlankTripletsObject)
+  
   Triplets
 })
 

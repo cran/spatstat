@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.43 $  $Date: 2014/10/24 00:22:30 $
+#  $Revision: 1.44 $  $Date: 2014/11/11 01:25:08 $
 #
 
 ppx <- local({
@@ -348,7 +348,14 @@ eroded.volumes.boxx <- function(x, r) {
   apply(ero, 1, prod)
 }
 
-runifpointx <- function(n, domain) {
+runifpointx <- function(n, domain, nsim=1) {
+  if(nsim > 1) {
+    result <- vector(mode="list", length=nsim)
+    for(i in 1:n) result[[i]] <- runifpointx(n, domain)
+    result <- as.solist(result)
+    names(result) <- paste("Simulation", 1:n)
+    return(result)
+  }
   stopifnot(inherits(domain, "boxx"))
   coo <- lapply(domain$ranges,
                 function(ra, n) { runif(n, min=ra[1], max=ra[2]) },
@@ -357,7 +364,14 @@ runifpointx <- function(n, domain) {
   ppx(df, domain)
 }
 
-rpoisppx <- function(lambda, domain) {
+rpoisppx <- function(lambda, domain, nsim=1) {
+  if(nsim > 1) {
+    result <- vector(mode="list", length=nsim)
+    for(i in 1:n) result[[i]] <- rpoisppx(lambda, domain)
+    result <- as.solist(result)
+    names(result) <- paste("Simulation", 1:n)
+    return(result)
+  }
   stopifnot(inherits(domain, "boxx"))
   vol <- volume.boxx(domain)
   stopifnot(is.numeric(lambda) && length(lambda) == 1 && lambda >= 0)
@@ -378,6 +392,11 @@ duplicated.ppx <- function(x, ...) {
   dup <- duplicated(as.data.frame(x), ...)
   return(dup)
 }
+
+anyDuplicated.ppx <- function(x, ...) {
+  anyDuplicated(as.data.frame(x), ...)
+}
+
 
 multiplicity.ppx <- function(x) {
   mul <- multiplicity(as.data.frame(x))

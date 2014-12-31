@@ -1,7 +1,7 @@
 #
 # ippm.R
 #
-#   $Revision: 2.15 $   $Date: 2014/06/24 02:44:07 $
+#   $Revision: 2.17 $   $Date: 2014/12/22 07:22:51 $
 #
 # Fisher scoring algorithm for irregular parameters in ppm trend
 #
@@ -46,8 +46,8 @@ ippm <- local({
     ## fit the initial model and extract information
     ppmcall$covfunargs <- covfunargs
     fit0 <- eval(ppmcall, callframe)
-    lpl0 <- fit0$maxlogpl
-    p <- length(coef(fit0))
+#    lpl0 <- fit0$maxlogpl
+#    p <- length(coef(fit0))
     ## examine covariates and trend
     covariates <- fit0$covariates
     isfun <- unlist(lapply(covariates, is.function))
@@ -161,7 +161,7 @@ ippm <- local({
                      "lower than current estimate. ",
                      "Either current estimate is an approximate ",
                      "local minimum of the function ",
-                     "or 'steptol' is too small"),
+                     "or 'steptol' is too large"),
                    "Iteration limit exceeded",
                    c("Maximum step size 'stepmax' ",
                      "exceeded five consecutive times. ",
@@ -185,7 +185,7 @@ update.ippm <- local({
   }
 
   update.ippm <- function(object, ..., envir=environment(terms(object))) {
-    call <- match.call()
+#    call <- match.call()
     new.call <- old.call <- object$call
     old.callframe <- object$callframe
     Qold <- eval(old.call$Q, as.list(envir), enclos=old.callframe)

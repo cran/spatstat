@@ -2,7 +2,7 @@
 #
 #    strauss.R
 #
-#    $Revision: 2.31 $	$Date: 2014/10/24 00:22:30 $
+#    $Revision: 2.32 $	$Date: 2014/12/07 09:01:47 $
 #
 #    The Strauss process
 #
@@ -39,7 +39,7 @@ Strauss <- local({
          gamma <- exp(loggamma)
          return(list(param=list(gamma=gamma),
                      inames="interaction parameter gamma",
-                     printable=round(gamma,4)))
+                     printable=dround(gamma)))
        },
        valid = function(coeffs, self) {
          loggamma <- as.numeric(coeffs[1])
@@ -111,6 +111,8 @@ Strauss <- local({
     instantiate.interact(BlankStrauss, list(r=r))
   }
 
+  Strauss <- intermaker(Strauss, BlankStrauss)
+  
   Strauss
 })
 

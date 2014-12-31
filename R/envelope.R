@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.67 $  $Date: 2014/10/08 10:07:59 $
+#   $Revision: 2.69 $  $Date: 2014/12/10 01:18:19 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -384,7 +384,7 @@ envelopeEngine <-
     if(!is.null(icsr <- internal$csr)) csr <- icsr
     pois <- csr
     constraints <- ""
-    model <- NULL
+#    model <- NULL
     if(inherits(simulate, "envelope")) {
       # envelope object: see if it contains stored point patterns
       simpat <- attr(simulate, "simpatterns")
@@ -801,7 +801,7 @@ envelopeEngine <-
 
   if(savefuns) {
     alldata <- cbind(rvals, simvals)
-    simnames <- paste("sim", 1:nsim, sep="")
+    simnames <- paste("sim", 1:Nsim, sep="")
     colnames(alldata) <- c("r", simnames)
     alldata <- as.data.frame(alldata)
     SimFuns <- fv(alldata,
@@ -812,7 +812,7 @@ envelopeEngine <-
                   alim=attr(funX, "alim"),
                   labl=names(alldata),
                   desc=c("distance argument r",
-                    paste("Simulation ", 1:nsim, sep="")),
+                    paste("Simulation ", 1:Nsim, sep="")),
                   fname=attr(funX, "fname"),
                   yexp=attr(funX, "yexp"))
     fvnames(SimFuns, ".") <- simnames
@@ -832,7 +832,8 @@ envelopeEngine <-
 
   result <- envelope.matrix(simvals, funX=funX,
                             jsim=jsim, jsim.mean=jsim.mean,
-                            type=etype, alternative=alternative, csr=csr, use.theory=csr.theo,
+                            type=etype, alternative=alternative,
+                            csr=csr, use.theory=csr.theo,
                             nrank=nrank, ginterval=ginterval, nSD=nSD,
                             Yname=Yname, do.pwrong=do.pwrong,
                             weights=weights)
@@ -1706,12 +1707,12 @@ pool.envelope <- function(..., savefuns=FALSE, savepatterns=FALSE) {
   global    <- resolveEinfo(eilist, "global",   FALSE)
   VARIANCE  <- resolveEinfo(eilist, "VARIANCE", FALSE)
   alternative      <- resolveEinfo(eilist, "alternative", FALSE)
-  simtype   <- resolveEinfo(eilist, "simtype",  "funs",
-          "Envelopes were generated using different types of simulation")
-  constraints   <- resolveEinfo(eilist, "constraints",  "",
-          "Envelopes were generated using different types of conditioning")
+  resolveEinfo(eilist, "simtype",  "funs",
+               "Envelopes were generated using different types of simulation")
+  resolveEinfo(eilist, "constraints",  "",
+               "Envelopes were generated using different types of conditioning")
+  resolveEinfo(eilist, "csr.theo", FALSE, NULL)
   csr         <- resolveEinfo(eilist, "csr", FALSE, NULL)
-  csr.theo    <- resolveEinfo(eilist, "csr.theo", FALSE, NULL)
   use.weights <- resolveEinfo(eilist, "use.weights" , FALSE,
      "Weights were used in some, but not all, envelopes: they will be ignored")
   #

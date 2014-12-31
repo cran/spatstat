@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.93 $	$Date: 2014/10/24 01:58:26 $
+#	$Revision: 4.95 $	$Date: 2014/12/14 08:16:37 $
 #
 #
 #
@@ -237,8 +237,8 @@ intersect.owin <- function(A, B, ..., fatal=TRUE) {
   
   Arect <- is.rectangle(A)
   Brect <- is.rectangle(B)
-  Apoly <- is.polygonal(A)
-  Bpoly <- is.polygonal(B)
+#  Apoly <- is.polygonal(A)
+#  Bpoly <- is.polygonal(B)
   Amask <- is.mask(A)
   Bmask <- is.mask(B)
   
@@ -327,7 +327,7 @@ union.owin <- function(A, B, ...) {
     # explicit arguments controlling raster info
     israster <- names(liszt) %in% names(formals(as.mask))
     rasterinfo <- liszt[israster]
-    # handle intersection of more than two windows
+    # handle union of more than two windows
     isowin <- unlist(lapply(liszt, is.owin))
     nextra <- sum(isowin)
     if(nextra > 0) {
@@ -352,22 +352,21 @@ union.owin <- function(A, B, ...) {
   
   # Determine type of intersection
   
-  Arect <- is.rectangle(A)
-  Brect <- is.rectangle(B)
-  Apoly <- is.polygonal(A)
-  Bpoly <- is.polygonal(B)
+#  Arect <- is.rectangle(A)
+#  Brect <- is.rectangle(B)
+#  Apoly <- is.polygonal(A)
+#  Bpoly <- is.polygonal(B)
   Amask <- is.mask(A)
   Bmask <- is.mask(B)
 
-  # Result is not rectangular.
-  # Create a rectangle to contain it.
+  # Create a rectangle to contain the result
   
   C <- owin(range(A$xrange, B$xrange),
             range(A$yrange, B$yrange),
             unitname=unitname(A))
 
   if(!Amask && !Bmask) {
-    ####### Result is polygonal ############
+    ####### Result is polygonal (or rectangular) ############
     a <- lapply(as.polygonal(A)$bdry, reverse.xypolygon)
     b <- lapply(as.polygonal(B)$bdry, reverse.xypolygon)
     ab <- polyclip::polyclip(a, b, "union", fillA="nonzero", fillB="nonzero")
@@ -432,8 +431,8 @@ setminus.owin <- function(A, B, ...) {
   
   Arect <- is.rectangle(A)
   Brect <- is.rectangle(B)
-  Apoly <- is.polygonal(A)
-  Bpoly <- is.polygonal(B)
+#  Apoly <- is.polygonal(A)
+#  Bpoly <- is.polygonal(B)
   Amask <- is.mask(A)
   Bmask <- is.mask(B)
 
@@ -452,7 +451,7 @@ setminus.owin <- function(A, B, ...) {
     b <- lapply(as.polygonal(B)$bdry, reverse.xypolygon)
     ab <- polyclip::polyclip(a, b, "minus", fillA="nonzero", fillB="nonzero")
     if(length(ab) == 0)
-      return(emptywindow(C))
+      return(emptywindow(A))
     # ensure correct polarity
     totarea <- sum(unlist(lapply(ab, Area.xypolygon)))
     if(totarea < 0)

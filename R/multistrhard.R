@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.30 $	$Date: 2014/04/30 07:57:30 $
+#    $Revision: 2.31 $	$Date: 2014/12/23 05:42:03 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -119,12 +119,28 @@ doMultiStraussHard <- local({
          family   = "pairwise.family", # evaluated later
          pot      = MSHpotential,
          par      = list(types=NULL, iradii=NULL, hradii=NULL),  # to be added
-         parnames = c("possible types", "interaction distances", "hardcore distances"),
+         parnames = c("possible types",
+                      "interaction distances",
+                      "hardcore distances"),
+         pardesc  = c("vector of possible types",
+                      "matrix of interaction distances",
+                      "matrix of hardcore distances"),
          selfstart = function(X, self) {
-           if(!is.null(self$par$types)) return(self)
-           types <- levels(marks(X))
-           MultiStraussHard(types=types,iradii=self$par$iradii,
-                            hradii=self$par$hradii)
+           types <- self$par$types
+           hradii <- self$par$hradii
+           if(!is.null(types) && !is.null(hradii)) return(self)
+           if(is.null(types)) types <- levels(marks(X))
+           if(is.null(hradii)) {
+             marx <- marks(X)
+             d <- nndist(X, by=marx)
+             h <- aggregate(d, by=list(from=marx), min)
+             h <- as.matrix(h[, -1, drop=FALSE])
+             m <- table(marx)
+             mm <- outer(m, m, pmin)
+             hradii <- h * mm/(mm+1)
+             dimnames(hradii) <- list(types, types)
+           }
+           MultiStraussHard(types=types,hradii=hradii,iradii=self$par$iradii)
 	 },
          init     = function(self) {
            types <- self$par$types
@@ -195,7 +211,7 @@ doMultiStraussHard <- local({
           #
           return(list(param=list(gammas=gammas),
                       inames="interaction parameters gamma_ij",
-                      printable=round(gammas,4)))
+                      printable=dround(gammas)))
         },
         valid = function(coeffs, self) {
            # interaction radii r[i,j]
@@ -286,19 +302,33 @@ doMultiStraussHard <- local({
 })
 
 
-MultiStraussHard <- function(iradii, hradii, types=NULL) {
-  ## try new syntax
-  newcall <- match.call()
-  newcall[[1]] <- as.name('doMultiStraussHard')
-  out <- try(eval(newcall, parent.frame()), silent=TRUE)
-  if(is.interact(out))
-    return(out)
-  ## try old syntax
-  oldcall <- match.call(function(types=NULL, iradii, hradii) {})
-  oldcall[[1]] <- as.name('doMultiStraussHard')
-  out <- try(eval(oldcall, parent.frame()), silent=TRUE)
-  if(is.interact(out))
-    return(out)
-  ## Syntax is wrong: generate error using new syntax rules
-  doMultiStraussHard(iradii=iradii, hradii=hradii, types=types)
-}
+MultiStraussHard <- local({
+
+  MultiStraussHard <- function(iradii, hradii, types=NULL) {
+    ## try new syntax
+    newcall <- match.call()
+    newcall[[1]] <- as.name('doMultiStraussHard')
+    out <- try(eval(newcall, parent.frame()), silent=TRUE)
+    if(is.interact(out))
+      return(out)
+    ## try old syntax
+    oldcall <- match.call(function(types=NULL, iradii, hradii) {})
+    oldcall[[1]] <- as.name('doMultiStraussHard')
+    out <- try(eval(oldcall, parent.frame()), silent=TRUE)
+    if(is.interact(out))
+      return(out)
+    ## Syntax is wrong: generate error using new syntax rules
+    doMultiStraussHard(iradii=iradii, hradii=hradii, types=types)
+  }
+
+
+  BlankMSHobject <- get("BlankMSHobject",
+                        envir=environment(doMultiStraussHard))
+  
+  MultiStraussHard <- intermaker(MultiStraussHard, BlankMSHobject)
+
+  MultiStraussHard
+})
+
+
+  

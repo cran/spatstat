@@ -1601,6 +1601,7 @@
   Kasper Klitgaard Berthelsen,
   Abdollah Jalilian,
   Marie-Colette van Lieshout,
+  Tuomas Rajala,
   Dominic Schuhmacher and
   Rasmus Waagepetersen
   made substantial contributions of code.
@@ -1651,10 +1652,11 @@
   C. Graf,
   Ute Hahn,
   Andrew Hardegen,
-  Mandy Hering, 
   Martin \ifelse{latex}{\out{B\o gsted}}{Bogsted} Hansen,
   Martin Hazelton,
   Juha Heikkinen,
+  Mandy Hering,
+  Markus Herrmann,
   Kurt Hornik,
   Philipp Hunziker,
   Ross Ihaka,
@@ -1662,6 +1664,7 @@
   Robert John-Chandran,
   Devin Johnson,
   Mahdieh Khanmohammadi,
+  Peter Kovesi,
   Mike Kuhn,
   Jeff Laake,
   Frederic Lavancier,
@@ -1671,6 +1674,7 @@
   George Leser,
   Li Haitao,
   George Limitsios,
+  Andrew Lister,
   Ben Madin,
   Kiran Marchikanti,
   Jeff Marcus,
@@ -1683,6 +1687,7 @@
   Mi Xiangcheng,
   Lore De Middeleer,
   Robin Milne,
+  Enrique Miranda,
   Jesper \ifelse{latex}{\out{M\o ller}}{Moller},
   Erika Mudrak,
   Gopalan Nair,
@@ -1739,6 +1744,7 @@
   Jan Wild,
   Carl G. Witthoft,
   Selene Wong,
+  Maxime Woringer,
   Mike Zamboni
   and
   Achim Zeileis.

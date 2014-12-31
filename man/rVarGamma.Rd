@@ -7,7 +7,7 @@
 }
 \usage{
  rVarGamma(kappa, nu.ker, omega, mu, win = owin(), 
-           eps = 0.001, nu.pcf=NULL)
+           eps = 0.001, nu.pcf=NULL, nsim=1)
 }
 \arguments{
   \item{kappa}{
@@ -38,9 +38,11 @@
   \item{nu.pcf}{
     Alternative specifier of the shape parameter. See Details.
   }
+  \item{nsim}{Number of simulated realisations to be generated.}
 }
 \value{
-  The simulated point pattern (an object of class \code{"ppp"}).
+  A point pattern (an object of class \code{"ppp"}) if \code{nsim=1},
+  or a list of point patterns if \code{nsim > 1}.
 
   Additionally,  some intermediate results of the simulation are
   returned as attributes of this point pattern.
@@ -81,7 +83,7 @@
   Poisson process on the infinite plane.
 
   This model can be fitted to data by the method of minimum contrast,
-  using \code{\link{cauchy.estK}}, \code{\link{cauchy.estpcf}}
+  using \code{\link{vargamma.estK}}, \code{\link{vargamma.estpcf}}
   or \code{\link{kppm}}. It can also be fitted by maximum composite
   likelihood using \code{\link{kppm}}.
   
@@ -102,15 +104,15 @@
   When the parents are homogeneous (\code{kappa} is a single number)
   and the offspring are inhomogeneous (\code{mu} is a
   function or pixel image), the model can be fitted to data
-  using \code{\link{kppm}}, or using \code{\link{cauchy.estK}}
-  or \code{\link{cauchy.estpcf}}
+  using \code{\link{kppm}}, or using \code{\link{vargamma.estK}}
+  or \code{\link{vargamma.estpcf}}
   applied to the inhomogeneous \eqn{K} function. 
 }
 \seealso{
   \code{\link{rpoispp}},
   \code{\link{rNeymanScott}},
-  \code{\link{cauchy.estK}},
-  \code{\link{cauchy.estpcf}},
+  \code{\link{vargamma.estK}},
+  \code{\link{vargamma.estpcf}},
   \code{\link{kppm}}.
 }
 \examples{

@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.60 $  $Date: 2014/10/24 00:22:30 $
+#  $Revision: 1.61 $  $Date: 2014/11/10 11:18:05 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -65,7 +65,7 @@ rhohat.ppp <- rhohat.quad <-
                n=n, bw=bw, adjust=adjust, from=from, to=to,
                bwref=bwref, covname=covname, covunits=covunits,
                confidence=confidence,
-               modelcall=NULL, callstring=callstring)
+               modelcall=modelcall, callstring=callstring)
 }
 
 rhohat.ppm <- function(object, covariate, ...,
@@ -202,7 +202,7 @@ rhohatEngine <- function(model, covariate,
   stuff <- do.call("evalCovar",
                    append(list(model, covariate), resolution))
   # unpack
-  info   <- stuff$info
+#  info   <- stuff$info
   values <- stuff$values
   # values at each data point
   ZX      <- values$ZX
@@ -565,7 +565,7 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
         names(dat) <- vars[1]
         rugx <- as.numeric(eval(parse(text=rhstr), dat))
       } else {
-        warning("Unable to add rug plot")
+        if(asked.rug) warning("Unable to add rug plot")
         rugx <- NULL
       }
     } 
