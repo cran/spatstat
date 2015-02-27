@@ -4,7 +4,7 @@
 #
 # Works out which interaction is in force for a given point pattern
 #
-#  $Revision: 1.11 $  $Date: 2014/11/10 08:17:39 $
+#  $Revision: 1.13 $  $Date: 2015/02/25 23:48:07 $
 #
 #
 impliedpresence <- function(tags, formula, df, extranames=character(0)) {
@@ -170,7 +170,7 @@ illegal.iformula <- function(ifmla, itags, dfvarnames) {
   v.is.name <- sapply(vars, is.name)
   # a term may be an expression like sin(x), poly(x,y,degree=2)
   v.args <- lapply(vars, function(x) all.vars(as.expression(x)))
-  v.n.args <- sapply(v.args, length)
+#  v.n.args <- sapply(v.args, length)
   v.has.itag <- sapply(v.args,
                       function(x,y) { any(y %in% x) },
                          y=itags)
@@ -198,7 +198,3 @@ illegal.iformula <- function(ifmla, itags, dfvarnames) {
     return("Interaction between itags is not defined")
   return(NULL)
 }
-
-    
-                       
-  

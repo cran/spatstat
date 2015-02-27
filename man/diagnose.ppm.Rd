@@ -12,7 +12,7 @@
   diagnose.ppm(object, \dots, type="raw", which="all", sigma=NULL, 
                rbord=reach(object), cumulative=TRUE,
                plot.it=TRUE, rv = NULL,
-               compute.sd=TRUE, compute.cts=TRUE,
+               compute.sd=is.poisson(object), compute.cts=TRUE,
                envelope=FALSE, nsim=39, nrank=1,
                typename, check=TRUE, repair=TRUE,
                oldstyle=FALSE, splineargs=list(spar=0.5))
@@ -20,7 +20,7 @@
   \method{plot}{diagppm}(x, \dots, which, 
                plot.neg=c("image", "discrete", "contour", "imagecontour"),
                plot.smooth=c("imagecontour", "image", "contour", "persp"),
-               plot.sd=TRUE, spacing=0.1,
+               plot.sd, spacing=0.1, outer=3,
                srange=NULL, monochrome=FALSE, main=NULL)
 }
 \arguments{
@@ -95,6 +95,10 @@
     is generated) expressed as a fraction of the width of the
     window of the point pattern.
   }
+  \item{outer}{
+    The distance from the outermost line of text to the nearest plot
+    panel, expressed as a multiple of the spacing between plot panels.
+  }
   \item{srange}{
     Vector of length 2 that will be taken as giving the range of values
     of the smoothed residual field, when generating an image plot of this
@@ -148,7 +152,7 @@
   and printed using \code{print.diagppm}.
 }
 \details{
-  This function generates several diagnostic plots for a
+  The function \code{diagnose.ppm} generates several diagnostic plots for a
   fitted point process model.
   The plots display the residuals from the fitted model
   (Baddeley et al, 2005)
@@ -332,8 +336,14 @@
 
   The return value of \code{diagnose.ppm}
   is an object of class \code{"diagppm"}.
-  There are methods for \code{plot} and \code{print} for such objects.
-  See the Examples.
+  The \code{plot} method for this class is documented here.
+  There is also a \code{print} method. See the Examples.
+
+  In \code{plot.diagppm},
+  if a four-panel diagnostic plot is produced (the default), then
+  the extra arguments \code{xlab}, \code{ylab}, \code{rlab} determine the
+  text labels for the \eqn{x} and \eqn{y} coordinates
+  and the residuals, respectively.
   
   See also the companion functions \code{\link{qqplot.ppm}}, which produces a
   Q-Q plot of the residuals, and \code{\link{lurking}}, which produces
@@ -364,8 +374,7 @@
  \code{\link{ppm}}
 }
 \examples{
-    data(cells)
-    fit <- ppm(cells, ~x, Strauss(r=0.15))
+    fit <- ppm(cells ~x, Strauss(r=0.15))
     diagnose.ppm(fit)
     \dontrun{
     diagnose.ppm(fit, type="pearson")

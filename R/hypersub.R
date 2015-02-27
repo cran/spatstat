@@ -4,7 +4,7 @@
 ##
 ##  subset operations for hyperframes
 ##
-##  $Revision: 1.17 $    $Date: 2014/11/11 10:21:17 $
+##  $Revision: 1.18 $    $Date: 2015/01/10 11:41:08 $
 ##
 
 "[.hyperframe" <- function(x, i, j, drop=FALSE, strip=drop, ...) {
@@ -57,15 +57,15 @@
                          hypercolumn = (x$hypercolumns[[nami]])[[1]]
                          )
       }
-      return(y)
+      return(as.anylist(y))
     } else if(ncols == 1) {
-      ## return a column as a 'listof' or a vector
+      ## return a column as an 'anylist'/'solist' or a vector
       switch(as.character(x$vtype),
              dfcolumn = {
                return(x$df[, , drop=TRUE])
              },
              hypercolumn = {
-               y <- as.listof(x$hypercolumns[[1]])
+               y <- as.solist(x$hypercolumns[[1]], demote=TRUE)
                names(y) <- row.names(x$df)
                return(y)
              },
@@ -74,7 +74,7 @@
                ha <- x$hyperatoms[1]
                names(ha) <- NULL
                hc <- rep.int(ha, x$ncases)
-               hc <- as.listof(hc)
+               hc <- as.solist(hc, demote=TRUE)
                names(hc) <- row.names(x$df)
                return(hc)
              }
@@ -145,7 +145,8 @@ function (x, i, j, value)
     J <- colseq[j]
     ## convert to lists 
     xlist <- as.list(x)
-    hv <- if(is.hyperframe(value)) value else as.hyperframe(as.listof(value))
+    hv <- if(is.hyperframe(value)) value else
+          as.hyperframe(as.solist(value, demote=TRUE))
     vlist <- as.list(hv)
     nrowV <- dim(hv)[1]
     ncolV <- dim(hv)[2]

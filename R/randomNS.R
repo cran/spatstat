@@ -3,27 +3,33 @@
 ##
 ##   simulating from Neyman-Scott processes
 ##
-##   $Revision: 1.13 $  $Date: 2014/11/17 08:44:46 $
+##   $Revision: 1.18 $  $Date: 2015/02/25 03:42:41 $
 ##
 ##    Original code for rCauchy and rVarGamma by Abdollah Jalilian
 ##    Other code and modifications by Adrian Baddeley
 ##    Bug fixes by Abdollah, Adrian, and Rolf Turner
 
 rNeymanScott <- 
-  function(kappa, rmax, rcluster, win = owin(c(0,1),c(0,1)), ...,
-           lmax=NULL, nsim=1)
+  function(kappa, expand, rcluster, win = owin(c(0,1),c(0,1)), ...,
+           lmax=NULL, nsim=1, drop=TRUE)
 {
   ## Generic Neyman-Scott process
   ## Implementation for bounded cluster radius
   ##
+
+  ## Catch old argument name rmax for expand
+  if(missing(expand) && !is.null(rmax <- list(...)$rmax))
+    expand <- rmax
+    
   ## 'rcluster' may be
   ##
   ##     (1) a function(x,y, ...) that takes the coordinates
   ##         (x,y) of the parent point and generates a list(x,y) of offspring
   ##
+
   if(is.function(rcluster))
-    return(rPoissonCluster(kappa, rmax, rcluster, win, ...,
-                           lmax=lmax, nsim=nsim))
+    return(rPoissonCluster(kappa, expand, rcluster, win, ...,
+                           lmax=lmax, nsim=nsim, drop=drop))
 
   ##     (2) a list(mu, f) where mu is a numeric value, function, or pixel image
   ##         and f is a function(n, ...) generating n i.i.d. offspring at 0,0
@@ -48,15 +54,14 @@ rNeymanScott <-
 
   ## Generate parents in dilated window
   frame <- boundingbox(win)
-  dilated <- grow.rectangle(frame, rmax)
+  dilated <- grow.rectangle(frame, expand)
   if(is.im(kappa) && !is.subset.owin(dilated, as.owin(kappa)))
     stop(paste("The window in which the image",
                sQuote("kappa"),
                "is defined\n",
                "is not large enough to contain the dilation of the window",
                sQuote("win")))
-  parentlist <- rpoispp(kappa, lmax=lmax, win=dilated, nsim=nsim)
-  if(nsim == 1) parentlist <- list(parentlist)
+  parentlist <- rpoispp(kappa, lmax=lmax, win=dilated, nsim=nsim, drop=FALSE)
 
   resultlist <- vector(mode="list", length=nsim)
   for(i in 1:nsim) {
@@ -100,21 +105,21 @@ rNeymanScott <-
       result <- ppp(xoff, yoff, window=win, check=FALSE, marks=mm)
     }
 
-    attr(result, "parents") <- parents
-    attr(result, "parentid") <- parentid
-
     if(is.im(mu)) {
       ## inhomogeneously modulated clusters a la Waagepetersen
       P <- eval.im(mu/mumax)
       result <- rthin(result, P)
     }
 
+    attr(result, "parents") <- parents
+    attr(result, "parentid") <- parentid
+    attr(result, "expand") <- expand
     resultlist[[i]] <- result
   }
 
-  if(nsim == 1) return(resultlist[[1]])
+  if(nsim == 1 && drop) return(resultlist[[1]])
   names(resultlist) <- paste("Simulation", 1:nsim)
-  return(resultlist)
+  return(as.solist(resultlist))
 }  
 
 rMatClust <- local({
@@ -127,12 +132,23 @@ rMatClust <- local({
   }
 
   rMatClust <- 
-  function(kappa, r, mu, win = owin(c(0,1),c(0,1)), nsim=1) {
+  function(kappa, scale, mu, win = owin(c(0,1),c(0,1)),
+           nsim=1, drop=TRUE, saveLambda=FALSE, expand = scale, ...) {
     ## Matern Cluster Process with Poisson (mu) offspring distribution
-    stopifnot(is.numeric(r) && length(r) == 1 && r > 0)
-    result <- rNeymanScott(kappa, r, list(mu, rundisk), win, radius=r,
-                           nsim=nsim)  
-    return(result)
+    ## Catch old scale syntax (r)
+    if(missing(scale)) scale <- list(...)$r
+    check.1.real(scale)
+    stopifnot(scale > 0)
+    result <- rNeymanScott(kappa, scale, list(mu, rundisk), win, radius=scale,
+                           nsim=nsim, drop=FALSE)
+    if(saveLambda){
+      for(i in 1:nsim) {
+        parents <- attr(result[[i]], "parents")
+        Lambda <- clusterfield("MatClust", parents, scale=scale, mu=mu, ...)
+        attr(result[[i]], "Lambda") <- Lambda[win]
+      }
+    }
+    return(if(nsim == 1 && drop) result[[1]] else result)
   }
 
   rMatClust
@@ -148,17 +164,33 @@ rThomas <- local({
 
   ## main function
   rThomas <-
-    function(kappa, sigma, mu, win = owin(c(0,1),c(0,1)), nsim=1) {
+      function(kappa, scale, mu, win = owin(c(0,1),c(0,1)), nsim=1, drop=TRUE, 
+               saveLambda=FALSE, expand = 4*scale, ...) {
       ## Thomas process with Poisson(mu) number of offspring
       ## at isotropic Normal(0,sigma^2) displacements from parent
       ##
-      stopifnot(is.numeric(sigma) && length(sigma) == 1 && sigma > 0)
+      ## Catch old scale syntax (omega)
+      if(missing(scale)) scale <- list(...)$sigma
+      check.1.real(scale)
+      stopifnot(scale > 0)
+      
+      ## determine the maximum radius of clusters
+      if(missing(expand))
+          expand <- clusterradius("Thomas", scale = scale, ...)
 
-      result <- rNeymanScott(kappa, 4 * sigma, list(mu, gaus),
-                             win, sigma=sigma,
-                             nsim=nsim)  
-      return(result)
+      result <- rNeymanScott(kappa, expand, list(mu, gaus),
+                             win, sigma=scale,
+                             nsim=nsim, drop=FALSE)  
+      if(saveLambda){
+        for(i in 1:nsim) {
+          parents <- attr(result[[i]], "parents")
+          Lambda <- clusterfield("Thomas", parents, scale=scale, mu=mu, ...)
+          attr(result[[i]], "Lambda") <- Lambda[win]
+        }
+      }
+      return(if(nsim == 1 && drop) result[[1]] else result)
     }
+
   rThomas
 })
 
@@ -167,7 +199,7 @@ rThomas <- local({
 ## Neyman-Scott process with Cauchy kernel function
 ## ================================================
 
-## omega: scale parameter of Cauchy kernel function
+## scale / omega: scale parameter of Cauchy kernel function
 ## eta: scale parameter of Cauchy pair correlation function
 ## eta = 2 * omega
 
@@ -180,28 +212,41 @@ rCauchy <- local({
     return(sqrt(s) * V)
   }
 
-  ## threshold the kernel function in polar coordinate
-  kernthresh <- function(r, eta, eps) {
-    4 * (r/eta^2)/((1 + (2 * r/eta)^2)^(3/2)) - eps
-  }
-  
   ## main function
-  rCauchy <- function (kappa, omega, mu, win = owin(), eps = 0.001, nsim=1) {
-
-    ## omega: scale parameter of Cauchy kernel function
+  rCauchy <- function (kappa, scale, mu, win = owin(), thresh = 0.001,
+                       nsim=1, drop=TRUE, saveLambda=FALSE, expand = NULL,
+                       ...) {
+    ## scale / omega: scale parameter of Cauchy kernel function
     ## eta: scale parameter of Cauchy pair correlation function
-    eta     <- 2 * omega
+
+    ## Catch old scale syntax (omega)
+    dots <- list(...)
+    if(missing(scale)) scale <- dots$omega
     
+    ## Catch old name 'eps' for 'thresh':
+    if(missing(thresh))
+        thresh <- dots$eps %orifnull% 0.001
+
     ## determine the maximum radius of clusters
-    rmax <- uniroot(kernthresh,
-                    lower = eta/2, upper = 5 * diameter(as.rectangle(win)),
-                    eta = eta, eps = eps)$root
+    if(missing(expand)){
+        expand <- clusterradius("Cauchy", scale = scale, thresh = thresh, ...)
+    } else if(!missing(thresh)){
+        warning("Argument ", sQuote("thresh"), " is ignored when ", sQuote("expand"), " is given")
+    }
+
     ## simulate
-    result <- rNeymanScott(kappa, rmax,
+    result <- rNeymanScott(kappa, expand,
                            list(mu, rnmix.invgam),
-                           win, rate = eta^2/8, nsim=nsim)
+                           win, rate = scale^2/2, nsim=nsim, drop=FALSE)
     ## correction from Abdollah: the rate is beta = omega^2 / 2 = eta^2 / 8.
-    return(result)
+    if(saveLambda){
+      for(i in 1:nsim) {
+        parents <- attr(result[[i]], "parents")
+        Lambda <- clusterfield("Cauchy", parents, scale=scale, mu=mu, ...)
+        attr(result[[i]], "Lambda") <- Lambda[win]
+      }
+    }
+    return(if(nsim == 1 && drop) result[[1]] else result)
   }
 
   rCauchy })
@@ -226,39 +271,52 @@ rVarGamma <- local({
     return(sqrt(s) * V)
   }
 
-  ## kernel function in polar coordinates
-  kernfun.old <- function(r, nu.ker, omega, eps) {
-    numer <- ((r/omega)^(nu.ker+1)) * besselK(r/omega, nu.ker)
-    denom <- (2^nu.ker) * omega * gamma(nu.ker + 1)
-    numer/denom - eps
-  }
-  kernfun <- function(r, nu.ker, omega, eps) {
-    numer <- ((r/omega)^(nu.ker + 1)) * besselK(r/omega, nu.ker)
-    denom <- pi * (2^(nu.ker+1)) * omega^2 * gamma(nu.ker + 1)
-    numer/denom - eps
-  }
-  
   ## main function
-  rVarGamma <- function (kappa, nu.ker=NULL, omega, mu, win = owin(),
-                         eps = 0.001, nu.pcf=NULL, nsim=1) {
-    ## nu.ker: smoothness parameter of Variance Gamma kernel function
-    ## omega: scale parameter of kernel function
-
-    nu.ker <- resolve.vargamma.shape(nu.ker=nu.ker, nu.pcf=nu.pcf)$nu.ker
+  rVarGamma <- function (kappa, nu, scale, mu, win = owin(),
+                         thresh = 0.001, nsim=1, drop=TRUE, saveLambda=FALSE,
+                         expand = NULL, ...) {
+    ## nu / nu.ker: smoothness parameter of Variance Gamma kernel function
+    ## scale / omega: scale parameter of kernel function
+    ## Catch old nu.ker/nu.pcf syntax and resolve nu-value.
+    dots <- list(...)
+    if(missing(nu)){
+        nu <- resolve.vargamma.shape(nu.ker=dots$nu.ker, nu.pcf=dots$nu.pcf)$nu.ker
+    } else{
+        check.1.real(nu)
+        stopifnot(nu > -1/2)
+    }
+    ## Catch old scale syntax (omega)
+    if(missing(scale)) scale <- dots$omega
     
-    ## determine the maximum radius of clusters
-    rmax <- uniroot(kernfun,
-                    lower = omega, upper = 5 * diameter(as.rectangle(win)),
-                    nu.ker = nu.ker, omega=omega, eps=eps)$root
+    ## Catch old name 'eps' for 'thresh':
+    if(missing(thresh))
+        thresh <- dots$eps %orifnull% 0.001
+
+     ## determine the maximum radius of clusters
+    if(missing(expand)){
+        expand <- clusterradius("VarGamma", scale = scale, nu = nu,
+                             thresh = thresh, ...)
+    } else if(!missing(thresh)){
+        warning("Argument ", sQuote("thresh"), " is ignored when ", sQuote("expand"), " is given")
+    }
+
     ## simulate
-    result <- rNeymanScott(kappa, rmax,
+    result <- rNeymanScott(kappa, expand,
                            list(mu, rnmix.gamma), win,
 ##                          WAS:  shape = 2 * (nu.ker + 1)
-                           shape = nu.ker + 1,
-                           rate = 1/(2 * omega^2),
-                           nsim=nsim)
-    return(result)
+                           shape = nu + 1,
+                           rate = 1/(2 * scale^2),
+                           nsim=nsim, drop=FALSE)
+    if(saveLambda){
+      for(i in 1:nsim) {
+        parents <- attr(result[[i]], "parents")
+        Lambda <- clusterfield("VarGamma", parents, scale=scale,
+                               nu=nu, mu=mu, ...)
+        attr(result[[i]], "Lambda") <- Lambda[win]
+      }
+    }
+    return(if(nsim == 1 && drop) result[[1]] else result)
   }
 
-  rVarGamma })
-
+  rVarGamma
+})

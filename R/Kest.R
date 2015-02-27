@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.106 $	$Date: 2014/11/10 10:35:35 $
+#	$Revision: 5.108 $	$Date: 2015/02/22 03:00:48 $
 #
 #
 # -------- functions ----------------------------------------
@@ -108,7 +108,7 @@ function(X, ..., r=NULL, breaks=NULL,
                              good="good",
                              best="best"),
                            multi=TRUE)
-  best.wanted <- ("best" %in% correction)
+#  best.wanted <- ("best" %in% correction)
   # replace 'good' by the optimal choice for this size of dataset
   if("good" %in% correction)
     correction[correction == "good"] <- good.correction.K(X)
@@ -187,7 +187,9 @@ function(X, ..., r=NULL, breaks=NULL,
   
     ## identify all close pairs
     rmax <- max(r)
-    close <- closepairs(X, rmax)
+    what <- 
+	if(any(correction %in% c("translate", "isotropic"))) "all" else "ijd"
+    close <- closepairs(X, rmax, what=what)
     DIJ <- close$d
 
     if(any(correction == "none")) {
@@ -715,6 +717,11 @@ rmax.rule <- function(fun="K", W, lambda) {
            # Count at most 1000 neighbours per point
            rlarge <- if(!missing(lambda)) sqrt(1000 /(pi * lambda)) else Inf
            rmax <- min(rlarge, ripley)
+         },
+         Kscaled = {
+           ## rule of thumb for Kscaled
+           rdiam  <- diameter(as.rectangle(W))/2 * sqrt(lambda)
+           rmax <- min(10, rdiam)
          },
          F = ,
          G = ,

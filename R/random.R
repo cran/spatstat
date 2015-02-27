@@ -3,7 +3,7 @@
 ##
 ##    Functions for generating random point patterns
 ##
-##    $Revision: 4.71 $   $Date: 2014/11/27 03:25:32 $
+##    $Revision: 4.73 $   $Date: 2015/02/23 00:21:39 $
 ##
 ##
 ##    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -31,7 +31,7 @@
 ##          plot(rMaternII(100, 0.05))
 ##
 
-runifrect <- function(n, win=owin(c(0,1),c(0,1)), nsim=1)
+runifrect <- function(n, win=owin(c(0,1),c(0,1)), nsim=1, drop=TRUE)
 {
   ## no checking
   xr <- win$xrange
@@ -39,7 +39,8 @@ runifrect <- function(n, win=owin(c(0,1),c(0,1)), nsim=1)
   if(nsim == 1) {
     x <- runif(n, min=xr[1], max=xr[2])
     y <- runif(n, min=yr[1], max=yr[2])
-    return(ppp(x, y, window=win, check=FALSE))
+    X <- ppp(x, y, window=win, check=FALSE)
+    return(if(drop) X else solist(X))
   } 
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -50,16 +51,17 @@ runifrect <- function(n, win=owin(c(0,1),c(0,1)), nsim=1)
   return(as.solist(result))
 }
 
-runifdisc <- function(n, radius=1, centre=c(0,0), ..., nsim=1)
+runifdisc <- function(n, radius=1, centre=c(0,0), ..., nsim=1, drop=TRUE)
 {
   ## i.i.d. uniform points in the disc of radius r and centre (x,y)
   disque <- disc(centre=centre, radius=radius, ...)
   if(nsim == 1) {
     theta <- runif(n, min=0, max= 2 * pi)
     s <- sqrt(runif(n, min=0, max=radius^2))
-    return(ppp(centre[1] + s * cos(theta),
-               centre[2] + s * sin(theta),
-               window=disque, check=FALSE))
+    X <- ppp(centre[1] + s * cos(theta),
+             centre[2] + s * sin(theta),
+             window=disque, check=FALSE)
+    return(if(drop) X else solist(X))
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -74,7 +76,7 @@ runifdisc <- function(n, radius=1, centre=c(0,0), ..., nsim=1)
 
 
 runifpoint <- function(n, win=owin(c(0,1),c(0,1)),
-                       giveup=1000, warn=TRUE, ..., nsim=1)
+                       giveup=1000, warn=TRUE, ..., nsim=1, drop=TRUE)
 {
   win <- as.owin(win)
     
@@ -91,8 +93,11 @@ runifpoint <- function(n, win=owin(c(0,1),c(0,1)),
 
   if(warn) {
     nhuge <- spatstat.options("huge.npoints")
-    if(n > nhuge)
-      warning(paste("Attempting to generate", n, "random points"))
+    if(n > nhuge) {
+      whinge <- paste("Attempting to generate", n, "random points")
+      message(whinge)
+      warning(whinge, call.=FALSE)
+    }
   }
 
   switch(win$type,
@@ -158,13 +163,14 @@ runifpoint <- function(n, win=owin(c(0,1),c(0,1)),
          )
   
   ## list of point patterns produced.
-  if(nsim == 1)
+  if(nsim == 1 && drop)
     return(result[[1]])
   names(result) <- paste("Simulation", 1:nsim)
   return(as.solist(result))
 }
 
-runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ..., nsim=1) {
+runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ...,
+                        nsim=1, drop=TRUE) {
   win <- as.owin(win)
   if(!is.numeric(lambda) || length(lambda) > 1 ||
      !is.finite(lambda) || lambda < 0)
@@ -173,7 +179,7 @@ runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ..., nsim=1) {
   if(lambda == 0) {
     ## return empty pattern
     emp <- ppp(numeric(0), numeric(0), window=win)
-    if(nsim == 1) return(emp)
+    if(nsim == 1 && drop) return(emp)
     result <- rep(list(emp), nsim)
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
@@ -188,8 +194,8 @@ runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ..., nsim=1) {
     X <- runifpoint(n, box)
     ## trim to window
     if(win$type != "rectangle")
-      X <- X[win]  
-    return(X)
+      X <- X[win]
+    return(if(drop) X else solist(X))
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -206,11 +212,11 @@ runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ..., nsim=1) {
 
 rpoint <- function(n, f, fmax=NULL,
                    win=unit.square(), ..., giveup=1000,verbose=FALSE,
-                   nsim=1) {
+                   nsim=1, drop=TRUE) {
   
   if(missing(f) || (is.numeric(f) && length(f) == 1))
     ## uniform distribution
-    return(runifpoint(n, win, giveup, nsim=nsim))
+    return(runifpoint(n, win, giveup, nsim=nsim, drop=drop))
   
   ## non-uniform distribution....
   if(!is.function(f) && !is.im(f))
@@ -224,7 +230,7 @@ rpoint <- function(n, f, fmax=NULL,
     if(n == 0) {
       ## return empty pattern(s)
       emp <- ppp(numeric(0), numeric(0), window=wf)
-      if(nsim == 1) return(emp)
+      if(nsim == 1 && drop) return(emp)
       result <- rep(list(emp), nsim)
       names(result) <- paste("Simulation", 1:nsim)
       return(as.solist(result))
@@ -245,7 +251,8 @@ rpoint <- function(n, f, fmax=NULL,
       ## extract pixel centres and randomise within pixels
       x <- xpix[id] + runif(n, min= -dx/2, max=dx/2)
       y <- ypix[id] + runif(n, min= -dy/2, max=dy/2)
-      return(ppp(x, y, window=wf, check=FALSE))
+      X <- ppp(x, y, window=wf, check=FALSE)
+      return(if(drop) X else solist(X))
     }
     result <- vector(mode="list", length=nsim)
     for(isim in 1:nsim) {
@@ -268,7 +275,7 @@ rpoint <- function(n, f, fmax=NULL,
   if(n == 0) {
     ## return empty pattern(s)
     emp <- ppp(numeric(0), numeric(0), window=win)
-    if(nsim == 1) return(emp)
+    if(nsim == 1 && drop) return(emp)
     result <- rep(list(emp), nsim)
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
@@ -332,13 +339,13 @@ rpoint <- function(n, f, fmax=NULL,
                    X$n, "points accepted"))
     }
   }
-  if(nsim == 1) return(result[[1]])
+  if(nsim == 1 && drop) return(result[[1]])
   names(result) <- paste("Simulation", 1:nsim)
   return(as.solist(result))
 }
 
 rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
-                    nsim=1) {
+                    nsim=1, drop=TRUE) {
   ## arguments:
   ##     lambda  intensity: constant, function(x,y,...) or image
   ##     lmax     maximum possible value of lambda(x,y,...)
@@ -366,7 +373,7 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
     
   if(is.numeric(lambda)) 
     ## uniform Poisson
-    return(runifpoispp(lambda, win, nsim=nsim))
+    return(runifpoispp(lambda, win, nsim=nsim, drop=drop))
 
   ## inhomogeneous Poisson
   ## perform thinning of uniform Poisson
@@ -386,9 +393,9 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
       u <- runif(X$n)
       retain <- (u <= prob)
       X <- X[retain, ]
-      return(X)
+      return(if(drop) X else solist(X))
     }
-    result <- runifpoispp(lmax, win, nsim=nsim)
+    result <- runifpoispp(lmax, win, nsim=nsim, drop=FALSE)
     for(isim in 1:nsim) {
       X <- result[[isim]]
       if(X$n > 0) {
@@ -410,9 +417,9 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
       u <- runif(X$n)
       retain <- (u <= prob)
       X <- X[retain, ]
-      return(X)
+      return(if(drop) X else solist(X))
     }
-    result <- runifpoispp(lmax, win, nsim=nsim)
+    result <- runifpoispp(lmax, win, nsim=nsim, drop=FALSE)
     for(isim in 1:nsim) {
       X <- result[[isim]]
       if(X$n > 0) {
@@ -428,7 +435,7 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
 }
     
 rMaternI <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
-                     ..., nsim=1)
+                     ..., nsim=1, drop=TRUE)
 {
   win <- as.owin(win)
   stopifnot(is.numeric(r) && length(r) == 1)
@@ -439,7 +446,7 @@ rMaternI <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
   } else {
     X <- rpoispp(kappa, win=win, nsim=nsim)
   }
-  result <- if(nsim == 1) list(X) else X
+  result <- if(nsim == 1) solist(X) else X
   for(isim in 1:nsim) {
     Y <- result[[isim]]
     if(npoints(Y) > 1) {
@@ -450,12 +457,12 @@ rMaternI <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
       Y <- Y[win]
     result[[isim]] <- Y
   }
-  if(nsim == 1) return(result[[1]])
+  if(nsim == 1 && drop) return(result[[1]])
   return(as.solist(result))
 }
     
 rMaternII <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
-                      ..., nsim=1)
+                      ..., nsim=1, drop=TRUE)
 {
   win <- as.owin(win)
   stopifnot(is.numeric(r) && length(r) == 1)
@@ -485,12 +492,12 @@ rMaternII <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
       Y <- Y[win]
     result[[isim]] <- Y
   }
-  if(nsim == 1) return(result[[1]])
+  if(nsim == 1 && drop) return(result[[1]])
   return(as.solist(result))
 }
   
 rSSI <- function(r, n=Inf, win = square(1), 
-                 giveup = 1000, x.init=NULL, ..., nsim=1)
+                 giveup = 1000, x.init=NULL, ..., nsim=1, drop=TRUE)
 {
   win.given <- !missing(win) && !is.null(win)
   stopifnot(is.numeric(r) && length(r) == 1 && r >= 0)
@@ -499,7 +506,7 @@ rSSI <- function(r, n=Inf, win = square(1),
   if(nsim > 1) {
     result <- vector(mode="list", length=nsim)
     for(isim in 1:nsim)
-      result[[isim]] <- rSSI(r=r, n=n, win=if(win.given) win else NULL,
+      result[[isim]] <- rSSI(r=r, n=n, win=if(win.given) win else square(1),
                              giveup=giveup, x.init=x.init)
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
@@ -540,7 +547,7 @@ rSSI <- function(r, n=Inf, win = square(1),
     if(n == npoints(x.init)) {
       warning(paste("Initial state x.init already contains", n, "points;",
                     "no further points were added"))
-      return(x.init)
+      return(if(drop) x.init else solist(x.init))
     }
   }
   X <- x.init
@@ -557,17 +564,17 @@ rSSI <- function(r, n=Inf, win = square(1),
     if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
       X <- superimpose(X, qq, W=win, check=FALSE)
     if(X$n >= n)
-      return(X)
+      return(if(drop) X else solist(X))
   }
   if(!is.infinite(n))
     warning(paste("Gave up after", giveup,
                   "attempts with only", X$n, "points placed out of", n))
-  return(X)
+  return(if(drop) X else solist(X))
 }
 
 rPoissonCluster <-
-  function(kappa, rmax, rcluster, win = owin(c(0,1),c(0,1)), ...,
-           lmax=NULL, nsim=1)
+  function(kappa, expand, rcluster, win = owin(c(0,1),c(0,1)), ...,
+           lmax=NULL, nsim=1, drop=TRUE)
 {
   ## Generic Poisson cluster process
   ## Implementation for bounded cluster radius
@@ -578,12 +585,19 @@ rPoissonCluster <-
   ## "..." are arguments to be passed to 'rcluster()'
   ##
 
+  ## Catch old argument name rmax for expand, and allow rmax to be
+  ## passed to rcluster (and then be ignored)
+  if(missing(expand) && !is.null(rmax <- list(...)$rmax)){
+      expand <- rmax
+      f <- rcluster
+      rcluster <- function(..., rmax) f(...)
+  }
   win <- as.owin(win)
   
   ## Generate parents in dilated window
   frame <- boundingbox(win)
-  dilated <- owin(frame$xrange + c(-rmax, rmax),
-                  frame$yrange + c(-rmax, rmax))
+  dilated <- owin(frame$xrange + c(-expand, expand),
+                  frame$yrange + c(-expand, expand))
   if(is.im(kappa) && !is.subset.owin(dilated, as.owin(kappa)))
     stop(paste("The window in which the image",
                sQuote("kappa"),
@@ -631,11 +645,12 @@ rPoissonCluster <-
 
     attr(result, "parents") <- parents
     attr(result, "parentid") <- parentid
+    attr(result, "expand") <- expand
 
     resultlist[[isim]] <- result
   }
 
-  if(nsim == 1) return(resultlist[[1]])
+  if(nsim == 1 && drop) return(resultlist[[1]])
 
   names(resultlist) <- paste("Simulation", 1:nsim)
   return(as.solist(resultlist))
@@ -644,10 +659,10 @@ rPoissonCluster <-
 rGaussPoisson <- local({
   
   rGaussPoisson <- function(kappa, r, p2, win=owin(c(0,1), c(0,1)),
-                            ..., nsim=1) {
+                            ..., nsim=1, drop=TRUE) {
     ## Gauss-Poisson process
     result <- rPoissonCluster(kappa, 1.05 * r, oneortwo,
-                              win, radius=r/2, p2=p2, nsim=nsim)
+                              win, radius=r/2, p2=p2, nsim=nsim, drop=drop)
     return(result)
   }
 
@@ -665,7 +680,7 @@ rGaussPoisson <- local({
 })
 
   
-rstrat <- function(win=square(1), nx, ny=nx, k=1, nsim=1) {
+rstrat <- function(win=square(1), nx, ny=nx, k=1, nsim=1, drop=TRUE) {
   win <- as.owin(win)
   stopifnot(nx >= 1 && ny >= 1)
   stopifnot(k >= 1)
@@ -673,7 +688,7 @@ rstrat <- function(win=square(1), nx, ny=nx, k=1, nsim=1) {
     xy <- stratrand(win, nx, ny, k)
     Xbox <- ppp(xy$x, xy$y, win$xrange, win$yrange, check=FALSE)
     X <- Xbox[win]
-    return(X)
+    return(if(drop) X else solist(X))
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -699,7 +714,7 @@ xy.grid <- function(xr, yr, nx, ny, dx, dy) {
   } else if(dx.given) {
     stopifnot(dx > 0)
     x0 <- seq(from=xr[1], to=xr[2], by=dx)
-    nx <- length(x0)
+    nx <- length(x0) - 1
   } else stop("Need either nx or dx")
   ## determine y grid
   if(ny.given && dy.given)
@@ -712,12 +727,13 @@ xy.grid <- function(xr, yr, nx, ny, dx, dy) {
     if(is.null(dy)) dy <- dx
     stopifnot(dy > 0)
     y0 <- seq(from=yr[1], to=yr[2], by=dy)
-    ny <- length(y0)
+    ny <- length(y0) - 1
   }
   return(list(x0=x0, y0=y0, nx=nx, ny=ny, dx=dx, dy=dy))
 }
   
-rsyst <- function(win=square(1), nx=NULL, ny=nx, ..., dx=NULL, dy=dx, nsim=1) {
+rsyst <- function(win=square(1), nx=NULL, ny=nx, ..., dx=NULL, dy=dx,
+                  nsim=1, drop=TRUE) {
   win <- as.owin(win)
   xr <- win$xrange
   yr <- win$yrange
@@ -737,7 +753,7 @@ rsyst <- function(win=square(1), nx=NULL, ny=nx, ..., dx=NULL, dy=dx, nsim=1) {
     Xbox <- ppp(x, y, xr, yr, check=FALSE)
     ## trim to window
     X <- Xbox[win]
-    return(X)
+    return(if(drop) X else solist(X))
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -765,7 +781,7 @@ rcellnumber <- function(n, N=10) {
 }
 
 rcell <- function(win=square(1), nx=NULL, ny=nx, ...,
-                  dx=NULL, dy=dx, N=10, nsim=1) {
+                  dx=NULL, dy=dx, N=10, nsim=1, drop=TRUE) {
   win <- as.owin(win)
   xr <- win$xrange
   yr <- win$yrange
@@ -793,18 +809,18 @@ rcell <- function(win=square(1), nx=NULL, ny=nx, ...,
     Xbox <- ppp(x, y, xr, yr, check=FALSE)
     result[[isim]] <- Xbox[win]
   }
-  if(nsim == 1) return(result[[1]])
+  if(nsim == 1 && drop) return(result[[1]])
   names(result) <- paste("Simulation", 1:nsim)
   return(as.solist(result))
 }
 
 
-rthin <- function(X, P, ..., nsim=1) {
+rthin <- function(X, P, ..., nsim=1, drop=TRUE) {
   verifyclass(X, "ppp")
 
   nX <- npoints(X)
   if(nX == 0) {
-    if(nsim == 1) return(X)
+    if(nsim == 1 && drop) return(X)
     result <- rep(list(X), nsim)
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
@@ -849,7 +865,7 @@ rthin <- function(X, P, ..., nsim=1) {
     ## also handle offspring-to-parent map if present
     if(!is.null(parentid <- attr(X, "parentid")))
       attr(Y, "parentid") <- parentid[retain]
-    return(Y)
+    return(if(drop) Y else solist(Y))
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
@@ -867,7 +883,8 @@ rthin <- function(X, P, ..., nsim=1) {
 
 ## rjitter
 
-rjitter <- function(X, radius, retry=TRUE, giveup=10000, ..., nsim=1) {
+rjitter <- function(X, radius, retry=TRUE, giveup=10000, ...,
+                    nsim=1, drop=TRUE) {
   verifyclass(X, "ppp")
   if(missing(radius) || is.null(radius))
     radius <- bw.stoyan(X)
@@ -908,6 +925,6 @@ rjitter <- function(X, radius, retry=TRUE, giveup=10000, ..., nsim=1) {
       undone[changed] <- FALSE
     }
   }
-  return(X)
+  return(if(drop) X else solist(X))
 }
 

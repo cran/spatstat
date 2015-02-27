@@ -14,6 +14,7 @@ clmfires: clmfires clmfires.extra
 copper
 demohyper
 demopat
+dendrite
 finpines
 flu
 ganglia
@@ -42,6 +43,7 @@ shapley: shapley shapley.extra
 simba
 simdat
 simplenet
+spiders
 sporophores
 spruces
 swedishpines

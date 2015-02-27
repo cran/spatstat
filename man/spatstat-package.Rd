@@ -5,7 +5,7 @@
 \title{The Spatstat Package}
 \description{
   This is a summary of the features of 
-  \pkg{spatstat}, a package in \code{R}
+  \pkg{spatstat}, a package in \R 
   for the statistical analysis of spatial point patterns.
 }
 \details{
@@ -48,7 +48,7 @@
   The models may include spatial trend,
   dependence on covariates, and complicated interpoint interactions.
   Models are specified by 
-  a \code{formula} in the \code{R} language, and are fitted using
+  a \code{formula} in the \R  language, and are fitted using
   a function analogous to \code{\link{lm}} and \code{\link{glm}}.
   Fitted models can be printed, plotted, predicted, simulated and so on.
 }
@@ -232,11 +232,15 @@
 
       Type \code{demo(data)} to see a display of all the datasets
       installed with the package.
+
+      Type \code{vignette(datasets)} for a document giving an overview
+      of all datasets, including background information, and plots.
       
       \tabular{ll}{
 	\code{\link{amacrine}} \tab Austin Hughes' rabbit amacrine cells \cr
 	\code{\link{anemones}} \tab Upton-Fingleton sea anemones data\cr
 	\code{\link{ants}} \tab Harkness-Isham ant nests data\cr
+	\code{\link{bdspots}} \tab Breakdown spots in microelectrodes \cr
 	\code{\link{bei}} \tab Tropical rainforest trees \cr
 	\code{\link{betacells}} \tab Waessle et al. cat retinal ganglia data \cr
 	\code{\link{bramblecanes}} \tab Bramble Canes data \cr
@@ -246,6 +250,7 @@
 	\code{\link{chorley}} \tab Chorley-Ribble cancer data \cr
 	\code{\link{clmfires}} \tab Castilla-La Mancha forest fires \cr
 	\code{\link{copper}} \tab Berman-Huntington copper deposits data \cr
+	\code{\link{dendrite}} \tab Dendritic spines \cr
 	\code{\link{demohyper}} \tab Synthetic point patterns\cr
 	\code{\link{demopat}} \tab Synthetic point pattern \cr
 	\code{\link{finpines}} \tab Finnish Pines data \cr
@@ -272,6 +277,7 @@
 	\code{\link{residualspaper}} \tab Data from Baddeley et al (2005) \cr
 	\code{\link{shapley}} \tab Galaxies in an astronomical survey \cr
 	\code{\link{simdat}} \tab Simulated point pattern (inhomogeneous, with interaction) \cr
+	\code{\link{spiders}} \tab Spider webs on mortar lines of brick wall \cr
 	\code{\link{sporophores}} \tab Mycorrhizal fungi around a tree \cr
 	\code{\link{spruces}} \tab Spruce trees in Saxonia \cr
 	\code{\link{swedishpines}} \tab Strand-Ripley Swedish pines data \cr
@@ -474,6 +480,7 @@
 	\code{\link{pixellate}} \tab convert other data to a pixel image\cr
 	\code{\link{as.matrix.im}} \tab convert pixel image to matrix\cr
 	\code{\link{as.data.frame.im}} \tab convert pixel image to data frame\cr
+	\code{\link{as.function.im}} \tab convert pixel image to function\cr
 	\code{\link{plot.im}}	\tab	plot a pixel image on screen as a digital image\cr
 	\code{\link{contour.im}}	\tab draw contours of a pixel image \cr
 	\code{\link{persp.im}}	\tab draw perspective plot of a pixel image \cr
@@ -575,6 +582,7 @@
       \code{\link{tess}} \tab create a tessellation \cr
       \code{\link{quadrats}} \tab create a tessellation of rectangles\cr
       \code{\link{hextess}} \tab create a tessellation of hexagons \cr
+      \code{\link{quantess}} \tab quantile tessellation \cr
       \code{\link{as.tess}} \tab convert other data to a tessellation \cr
       \code{\link{plot.tess}} \tab plot a tessellation \cr
       \code{\link{tiles}} \tab extract all the tiles of a tessellation \cr
@@ -665,6 +673,8 @@
       \code{\link{rpoislpp}} \tab simulate Poisson points on linear network \cr
       \code{\link{runiflpp}} \tab simulate random points on a linear network \cr
       \code{\link{chicago}} \tab Chicago street crime data \cr
+      \code{\link{dendrite}} \tab Dendritic spines data \cr
+      \code{\link{spiders}} \tab Spider webs on mortar lines of brick wall \cr
     }
     
     \bold{Hyperframes}
@@ -879,7 +889,7 @@
     \code{\link{markvar}} \tab smoothed local variance of marks \cr
     \code{\link{markcorr}} \tab mark correlation function \cr
     \code{\link{markvario}} \tab mark variogram \cr
-    \code{\link{markcorrint}} \tab mark correlation integral \cr
+    \code{\link{Kmark}} \tab mark-weighted \eqn{K} function \cr
     \code{\link{Emark}} \tab mark independence diagnostic \eqn{E(r)} \cr
     \code{\link{Vmark}} \tab mark independence diagnostic \eqn{V(r)} \cr
     \code{\link{nnmean}} \tab nearest neighbour mean index \cr
@@ -1140,7 +1150,7 @@
   
   \bold{To specify a point process model:}
   
-  The first order ``trend'' of the model is determined by an \code{R}
+  The first order ``trend'' of the model is determined by an \R 
   language formula. The formula specifies the form of the
   \emph{logarithm} of the trend.
   
@@ -1636,6 +1646,7 @@
   Patrick Donnelly,
   Ian Dryden,
   Stephen Eglen,
+  Ahmed El-Gabbas,
   Olivier Flores,
   David Ford,
   Peter Forbes,
@@ -1708,6 +1719,7 @@
   Pablo Ramon,
   Xavier Raynaud,
   Matt Reiter,
+  Ian Renner,
   Tom Richardson,
   Brian Ripley,
   Ted Rosenbaum,
@@ -1732,6 +1744,7 @@
   Ben Taylor,
   Thordis Linda Thorarinsdottir,
   Berwin Turlach,
+  Torben Tvedebrink,
   Kevin Ummer,
   Medha Uppala,
   Andrew van Burgel,
@@ -1739,6 +1752,7 @@
   Mikko Vihtakari,
   Alexendre Villers,
   Fabrice Vinatier,
+  Sasha Voss,
   Hao Wang,
   H. Wendrock,
   Jan Wild,

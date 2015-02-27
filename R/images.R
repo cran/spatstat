@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.123 $     $Date: 2014/12/04 10:03:57 $
+#      $Revision: 1.124 $     $Date: 2015/02/17 10:46:04 $
 #
 #      The class "im" of raster images
 #
@@ -89,11 +89,6 @@ im <- function(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)),
 
   unitname <- as.units(unitname)
 
-  # get rid of those annoying 8.67e-19 printouts
-  swat <- function(x) {ifelseAX(abs(x) < .Machine$double.eps, 0, x)}
-  xrange <- swat(xrange)
-  yrange <- swat(yrange)
-  
   out <- list(v   = mat,
               dim = c(nr, nc),
               xrange   = xrange,
@@ -890,14 +885,18 @@ quantile.im <- function(x, ...) {
   return(q)
 }
 
-integral.im <- function(x, domain=NULL, ...) {
-  verifyclass(x, "im")
-  typ <- x$type
+integral <- function(f, domain=NULL, ...) {
+  UseMethod("integral")
+}
+
+integral.im <- function(f, domain=NULL, ...) {
+  verifyclass(f, "im")
+  typ <- f$type
   if(!any(typ == c("integer", "real", "complex", "logical")))
     stop(paste("Don't know how to integrate an image of type", sQuote(typ)))
   if(!is.null(domain))
-    x <- x[domain, drop=FALSE, tight=TRUE]
-  a <- with(x, sum(v, na.rm=TRUE) * xstep * ystep)
+    f <- f[domain, drop=FALSE, tight=TRUE]
+  a <- with(f, sum(v, na.rm=TRUE) * xstep * ystep)
   return(a)
 }
 
@@ -1085,3 +1084,9 @@ padimage <- function(X, value, n=1) {
   return(Y)
 }
 
+as.function.im <- function(x, ...) {
+  Z <- x
+  f <- function(x,y) { Z[list(x=x, y=y)] }
+  g <- funxy(f, Window(x))
+  return(g)
+}

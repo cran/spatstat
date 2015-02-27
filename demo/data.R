@@ -41,6 +41,8 @@ plot(copper$Lines, add=TRUE)
 plot(demohyper, quote({ plot(Image, main=""); plot(Points, add=TRUE) }),
       parargs=list(mar=rep(1,4)))
 
+plot(dendrite, leg.side="bottom", main="", cex=0.75, cols=2:4)
+
 plot(demopat)
 
 plot(finpines, main="Finnish pines")
@@ -88,10 +90,7 @@ plot(split(nbfires)$"2000", which.marks="fire.type",
 plot(nztrees)
 plot(trim.rectangle(as.owin(nztrees), c(0,5), 0), add=TRUE, lty=3)
 
-enable3d <- ("scatterplot3d" %in% row.names(installed.packages()))
-if(enable3d) {
-  plot(osteo[1:10,], tick.marks=FALSE, xlab="", ylab="", zlab="")
-}
+plot(osteo[1:10,], tick.marks=FALSE, xlab="", ylab="", zlab="")
 
 plot(paracou, cols=2:3, chars=c(16,3))
 
@@ -114,6 +113,8 @@ plot(residualspaper$Fig4c)
 shapley.extra$plotit(main="Shapley")
 
 plot(simdat)
+
+plot(spiders, pch=16, show.window=FALSE)
 
 plot(sporophores, chars=c(16,1,2), cex=0.6)
 points(0,0,pch=16, cex=2)

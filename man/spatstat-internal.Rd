@@ -19,7 +19,8 @@
 \alias{areaGain.diri}       
 \alias{areaGain.grid}       
 \alias{areaLoss.diri}       
-\alias{areaLoss.grid}       
+\alias{areaLoss.grid}
+\alias{articlebeforenumber}
 \alias{assemble.plot.objects}       
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
@@ -68,6 +69,7 @@
 \alias{check.1.real}
 \alias{check.range}
 \alias{check.testfun}
+\alias{choptext}
 \alias{circticks}
 \alias{clarkevansCalc}
 \alias{clip.psp}
@@ -159,6 +161,7 @@
 \alias{evenly.spaced}
 \alias{exactdt}              
 \alias{exactPdt}
+\alias{exhibitStringList}
 \alias{expand.polynom}
 \alias{expandwinPerfect}
 \alias{explain.ifnot}
@@ -217,6 +220,7 @@
 \alias{HermiteCoefs}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
+\alias{head.hyperframe}
 \alias{hierarchicalordering}
 \alias{hiermat}
 \alias{ho.engine}
@@ -307,11 +311,13 @@
 \alias{logi.engine}
 \alias{logLik.vblogit}
 \alias{lty2char}
+\alias{padtowidth}
 \alias{parbreak}
 \alias{passthrough}
 \alias{paste.expr}
 \alias{plan.legend.layout}
 \alias{PoisSaddleApp}
+\alias{polytileareaEngine}
 \alias{prettyinside}
 \alias{prettydiscrete}
 \alias{putSpatstatVariable}
@@ -405,6 +411,7 @@
 \alias{plotEachLayer}
 \alias{ploterodewin}
 \alias{ploterodeimage}
+\alias{plot3Dpoints}
 \alias{plot.addvar}
 \alias{plot.barplotdata}
 \alias{plot.bw.frac}
@@ -484,6 +491,7 @@
 \alias{print.splitppx}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
+\alias{print.summary.linnet}
 \alias{print.summary.logiquad}
 \alias{print.summary.lut}
 \alias{print.summary.mppm}
@@ -502,6 +510,7 @@
 \alias{print.timed}
 \alias{print.vblogit}
 \alias{print.yardstick}
+\alias{project3Dhom}
 \alias{prolongseq}
 \alias{putlastshift}
 \alias{quad}
@@ -578,6 +587,7 @@
 \alias{safelookup}
 \alias{samefunction}
 \alias{scalardilate.breakpts}
+\alias{scalardilate.diagramobj}
 \alias{scalardilate.msr}
 \alias{scanmeasure}
 \alias{scanmeasure.ppp}
@@ -610,6 +620,7 @@
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
 \alias{spatstatClusterModelInfo}
+\alias{spatstatLocator}
 \alias{spatstatRmhInfo}
 \alias{spatialCDFframe}
 \alias{spatialCDFtest}
@@ -643,9 +654,11 @@
 \alias{superimposeMarks}
 \alias{symbolmaptype}
 \alias{sympoly}
+\alias{tail.hyperframe}
 \alias{termsinformula}
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
+\alias{there.is.no.try}
 \alias{tilecentroids}        
 \alias{tileindex}        
 \alias{trap.extra.arguments}
@@ -715,6 +728,7 @@ areaLoss.grid(X, r, \dots, W, subset,
                          method = c("count", "distmap"),
                          ngrid = spatstat.options("ngrid.disc"),
                          exact = FALSE)
+articlebeforenumber(k)
 assemble.plot.objects(xlim, ylim, \dots, lines, polygon)
 AsymmDistance.psp(X, Y, metric, method)
 as.breakpts(\dots)
@@ -765,6 +779,7 @@ check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
 check.range(x, fatal)
 check.testfun(f, f1, X)
+choptext(\dots, prefix)
 circticks(R, at)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
@@ -774,7 +789,7 @@ closethresh(X,R,S,ordered)
 \method{coef}{summary.ppm}(object, \dots)
 \method{coef}{vblogit}(object, \dots) 
 coerce.marks.numeric(X, warn)
-\method{compatible}{rat}(A, B, \dots) %DontDeclare
+\method{compatible}{rat}(A, B, \dots) 
 complaining(whinge, fatal, value)
 compileCDF(D, B, r, \dots, han.denom, check)
 compileK(D, r, weights, denom, check, ratio, fname)
@@ -881,6 +896,7 @@ even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
+exhibitStringList(prefix, strings)
 expand.polynom(f)
 expandwinPerfect(W, expand, amount)
 explain.ifnot(expr, context)
@@ -920,7 +936,7 @@ getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
 getglmsubset(object)
-getlambda.lpp(lambda, X, \dots)
+getlambda.lpp(lambda, X, \dots, update)
 getlastshift(X)
 getppmdatasubset(object)
 getppmOriginalCovariates(object)
@@ -938,7 +954,9 @@ grow.mask(M, xmargin=0, ymargin=xmargin)
 gsubdot(replacement, x)
 HermiteCoefs(order)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
-handle.rshift.args(W, \dots, radius, width, height, edge, clip, edgedefault)
+handle.rshift.args(W, \dots, radius, width, height, edge, clip,
+edgedefault)
+\method{head}{hyperframe}(x,n,\dots)
 hierarchicalordering(i, s)
 hiermat(x, h)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
@@ -974,8 +992,8 @@ is.atomicQtest(x)
 is.cadlag(s)
 is.data(Q)
 is.expandable(x)
-\method{is.expandable}{ppm}(x)  %DontDeclare
-\method{is.expandable}{rmhmodel}(x) %DontDeclare
+\method{is.expandable}{ppm}(x)  
+\method{is.expandable}{rmhmodel}(x) 
 is.fv(x)
 is.hole.xypolygon(polly)
 is.hyperframe(x)
@@ -1004,7 +1022,7 @@ Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
 kppmComLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
-kppmMinCon(X, Xname, po, clusters, statistic, statargs, \dots)
+kppmMinCon(X, Xname, po, clusters, control, statistic, statargs, \dots)
 kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
 \method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
@@ -1035,12 +1053,14 @@ logi.engine(Q, trend, interaction, \dots,
             VB)
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
+padtowidth(a, b, justify)
 parbreak(terse)
 passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
 PoisSaddleApp(beta, fi)
+polytileareaEngine(P, xrange, yrange, nx, ny)
 prettyinside(x, \dots)
 prettydiscrete(x, n)
 \method{print}{localpcfmatrix}(x, \dots)
@@ -1057,10 +1077,10 @@ makeunits(sing, plur, mul)
 markappend(\dots)
 markcbind(\dots)
 markformat(x)
-\method{markformat}{ppp}(x) %DontDeclare
-\method{markformat}{ppx}(x) %DontDeclare
-\method{markformat}{psp}(x) %DontDeclare
-\method{markformat}{default}(x) %DontDeclare
+\method{markformat}{ppp}(x) 
+\method{markformat}{ppx}(x) 
+\method{markformat}{psp}(x) 
+\method{markformat}{default}(x) 
 mark.scale.default(marx, w, markscale, maxsize, meansize, characters)
 markspace.integral(X)
 \method{marks}{default}(x, \dots)
@@ -1116,9 +1136,9 @@ nncleanEngine(kthNND, k, d, \dots, tol, maxit,
 nndcumfun(X, \dots, r)
 no.trend.ppm(x)
 nobjects(x)
-\method{nobjects}{ppp}(x) %DontDeclare
-\method{nobjects}{ppx}(x) %DontDeclare
-\method{nobjects}{psp}(x) %DontDeclare
+\method{nobjects}{ppp}(x)
+\method{nobjects}{ppx}(x)
+\method{nobjects}{psp}(x)
 n.quad(Q)
 numalign(i, nmax, zero)
 numeric.columns(M, logical, others)
@@ -1157,6 +1177,10 @@ pickoption(what="option", key, keymap, \dots,
 plotEachLayer(x, \dots, main, plotargs, add, show.all, do.plot)
 ploterodewin(W1, W2, col.edge, col.inside, do.plot, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ, do.plot)
+plot3Dpoints(xyz, eye, org,
+             \dots,
+             type, xlim, ylim, zlim,
+             add, box, main, cex, box.back, box.front)
 \method{plot}{addvar}(x, \dots, do.points=FALSE)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.frac}(x, \dots)
@@ -1242,6 +1266,7 @@ primesbelow(nmax)
 \method{print}{splitppp}(x, \dots)
 \method{print}{splitppx}(x, \dots)
 \method{print}{summary.hyperframe}(x, \dots)
+\method{print}{summary.linnet}(x, \dots)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.logiquad}(x, \dots, dp=3)
 \method{print}{summary.lut}(x, \dots)
@@ -1261,6 +1286,7 @@ primesbelow(nmax)
 \method{print}{timed}(x, \dots)
 \method{print}{vblogit}(x, \dots)
 \method{print}{yardstick}(x, \dots)
+project3Dhom(xyz, eye, org, vert)
 prolongseq(x, newrange, step)
 putlastshift(X, vec)
 quad(data, dummy, w, param)
@@ -1273,7 +1299,7 @@ rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 reduceformula(fmla, deletevar, verbose)
 repair.image.xycoords(x)
 resolveEinfo(x, what, fallback, warn)
-resolve.vargamma.shape(\dots, nu.ker, nu.pcf)
+resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
 rgbNA(red, green, blue, \dots)
 rhs.of.formula(x, tilde)
 rhohatEngine(model, covariate, reference, volume, \dots,
@@ -1308,15 +1334,16 @@ rebadge.fv(x, new.ylab, new.fname, tags, new.desc, new.labl, new.yexp,
 rebadge.as.crossfun(x, main, sub, i, j)
 rebadge.as.dotfun(x, main, sub, i)
 rebound(x, rect)
-\method{rebound}{im}(x, rect)  %DontDeclare
-\method{rebound}{ppp}(x, rect) %DontDeclare
-\method{rebound}{psp}(x, rect) %DontDeclare
-\method{rebound}{owin}(x, rect) %DontDeclare
+\method{rebound}{im}(x, rect)  
+\method{rebound}{ppp}(x, rect) 
+\method{rebound}{psp}(x, rect) 
+\method{rebound}{owin}(x, rect)
 reconcile.fv(\dots)
 repair.old.factor.image(x)
 reincarnate.interact(object)
 resid4plot(RES, plot.neg, plot.smooth,
-           spacing=0.1, srange=NULL,monochrome=FALSE, main=NULL, \dots)
+           spacing, outer, srange, monochrome, main,
+           xlab, ylab, rlab, \dots)
 resid1plot(RES, opt, plot.neg, plot.smooth,
               srange, monochrome, main,
               add, show.all, do.plot, \dots)
@@ -1337,33 +1364,34 @@ rmhResolveControl(control, model)
 rmhResolveExpansion(win, control, imagelist, itype)
 rmhResolveTypes(model, start, control)
 rmhSnoopEnv(Xinit, Wclip, R)
-\method{rmhcontrol}{rmhcontrol}(\dots)  %DontDeclare
-\method{rmhcontrol}{list}(\dots) %DontDeclare
+\method{rmhcontrol}{rmhcontrol}(\dots) 
+\method{rmhcontrol}{list}(\dots) 
 rmhEngine(InfoList, \dots, verbose, kitchensink, preponly, snoop) 
-\method{rmhmodel}{rmhmodel}(model, \dots) %DontDeclare
-\method{rmhstart}{rmhstart}(start, \dots) %DontDeclare
-\method{rmhstart}{list}(start, \dots) %DontDeclare
+\method{rmhmodel}{rmhmodel}(model, \dots) 
+\method{rmhstart}{rmhstart}(start, \dots) 
+\method{rmhstart}{list}(start, \dots) 
 rmpoint.I.allim(n, f, types)
 \method{row.names}{hyperframe}(x)
 \method{row.names}{hyperframe}(x) <- value
-rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn, nsim)
-runifpoispp(lambda, win, \dots, nsim)
+rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn, nsim, drop)
+runifpoispp(lambda, win, \dots, nsim, drop)
 runifpoisppOnLines(lambda, L, nsim)
-runifrect(n, win, nsim)
+runifrect(n, win, nsim, drop)
 safedeldir(X)
 safelookup(Z, X, factor, warn)
 samefunction(f, g)
 \method{scalardilate}{breakpts}(X, f, \dots)
+\method{scalardilate}{diagramobj}(X, f, \dots)
 \method{scalardilate}{msr}(X, f, \dots)
 scanmeasure(X, \dots)
-\method{scanmeasure}{ppp}(X, r, \dots, method) %DontDeclare
-\method{scanmeasure}{im}(X, r, \dots) %DontDeclare
+\method{scanmeasure}{ppp}(X, r, \dots, method) 
+\method{scanmeasure}{im}(X, r, \dots)
 scanPoisLRTS(nZ, nG, muZ, muG, alternative)
 scanBinomLRTS(nZ, nG, muZ, muG, alternative)
 second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
 \dots, varcov=NULL, expand=FALSE)
 second.moment.engine(x, sigma, edge, what, \dots,
-      obswin, varcov, npts, debug)
+      kernel, obswin, varcov, npts, debug)
 sensiblevarname(guess, fallback, maxlen)
 sewpcf(d, w, denargs, lambda2area, divisor)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
@@ -1388,7 +1416,8 @@ smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
-spatstatClusterModelInfo(name)
+spatstatClusterModelInfo(name, onlyPCP)
+spatstatLocator(n, ...)
 spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
@@ -1423,9 +1452,11 @@ sumsymouter(x, w)
 superimposeMarks(arglist, nobj)
 symbolmaptype(x)
 sympoly(x, y, n)
+\method{tail}{hyperframe}(x,n,\dots)
 termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
+there.is.no.try(\dots)
 tilecentroids(W, nx, ny)
 tileindex(x, y, Z)
 trap.extra.arguments(\dots, .Context, .Fatal)
@@ -1433,8 +1464,8 @@ trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 truncline(x, nc)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
-\method{unitname}{default}(x)  %DontDeclare
-\method{unitname}{default}(x) <- value  %DontDeclare
+\method{unitname}{default}(x) 
+\method{unitname}{default}(x) <- value 
 unparen(x)
 \method{update}{interact}(object, \dots) 
 \method{update}{im}(object, \dots) 

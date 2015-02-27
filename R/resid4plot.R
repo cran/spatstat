@@ -5,7 +5,7 @@
 #         resid1plot       one or more unrelated individual plots 
 #         resid1panel      one panel of resid1plot
 #
-#   $Revision: 1.27 $    $Date: 2014/10/24 00:22:30 $
+#   $Revision: 1.29 $    $Date: 2015/02/03 05:52:52 $
 #
 #
 
@@ -30,10 +30,13 @@ resid4plot <- local({
     function(RES,
              plot.neg=c("image", "discrete", "contour", "imagecontour"),
              plot.smooth=c("imagecontour", "image", "contour", "persp"),
-             spacing=0.1, srange=NULL, monochrome=FALSE, main=NULL,
+             spacing=0.1, outer=3, srange=NULL, monochrome=FALSE, main=NULL,
+             xlab="x coordinate", ylab="y coordinate", rlab, 
              ...)
 {
   plot.neg <- match.arg(plot.neg)
+  if(missing(rlab)) rlab <- NULL
+  rlablines <- if(is.null(rlab)) 1 else sum(nzchar(rlab))
   clip     <- RES$clip
   Yclip    <- RES$Yclip
   Z        <- RES$smooth$Z
@@ -49,9 +52,10 @@ resid4plot <- local({
   space <- spacing * max(wide,high)
   width <- wide + space + wide
   height <- high + space + high
-  outerspace <- 3 * space
-  plot(c(0, width) + outerspace * c(-1,1),
-       c(0, height) + outerspace * c(-1,1),
+  outerspace <- outer * space
+  outerRspace <- (outer - 1 + rlablines) * space
+  plot(c(0, width) + c(-outerRspace, outerspace),
+       c(0, height) + c(-outerspace, outerRspace),
        type="n", asp=1.0, axes=FALSE, xlab="", ylab="")
   # determine colour map for background
   if(is.null(srange)) {
@@ -174,7 +178,7 @@ resid4plot <- local({
     theoreticalV <- a$ExZ
     theoreticalX <- a$x
     theoreticalSD <- NULL
-    ylabel <- paste("marginal of", typename)
+    if(is.null(rlab)) rlab <- paste("marginal of", typename)
   } else if(!is.null(RES$xcumul)) {
     a <- RES$xcumul
     observedX <- a$empirical$covariate
@@ -184,7 +188,7 @@ resid4plot <- local({
     theoreticalSD <- a$theoretical$sd
     theoreticalHI <- a$theoretical$upper
     theoreticalLO <- a$theoretical$lower
-    ylabel <- paste("cumulative sum of", typename)
+    if(is.null(rlab)) rlab <- paste("cumulative sum of", typename)
   }
   # pretty axis marks
   pX <- pretty(theoreticalX)
@@ -218,9 +222,9 @@ resid4plot <- local({
              3, ...)
   }
   axis(side=1, pos=0, at=xscale(pX), labels=pX)
-  text(xscale(mean(theoreticalX)), - outerspace, "x coordinate")
+  text(xscale(mean(theoreticalX)), - outerspace, xlab)
   axis(side=2, pos=0, at=yscale(pV), labels=pV)
-  text(-outerspace, yscale(mean(pV)), ylabel, srt=90)
+  text(-outerRspace, yscale(mean(pV)), rlab, srt=90)
   
   # --------- lurking variable plot for y coordinate ------------------
   #           (cumulative or marginal)
@@ -232,7 +236,7 @@ resid4plot <- local({
     theoreticalV <- a$EyZ
     theoreticalY <- a$y
     theoreticalSD <- NULL
-    ylabel <- paste("marginal of", typename)
+    if(is.null(rlab)) rlab <- paste("marginal of", typename)
   } else if(!is.null(RES$ycumul)) {
     a <- RES$ycumul
     observedV <- a$empirical$value
@@ -242,7 +246,7 @@ resid4plot <- local({
     theoreticalSD <- a$theoretical$sd
     theoreticalHI <- a$theoretical$upper
     theoreticalLO <- a$theoretical$lower
-    ylabel <- paste("cumulative sum of", typename)
+    if(is.null(rlab)) rlab <- paste("cumulative sum of", typename)
   }
   # pretty axis marks
   pY <- pretty(theoreticalY)
@@ -276,9 +280,9 @@ resid4plot <- local({
              3, ...)
   }
   axis(side=4, pos=width, at=yscale(pY), labels=pY)
-  text(width + outerspace, yscale(mean(theoreticalY)), "y coordinate", srt=90)
+  text(width + outerspace, yscale(mean(theoreticalY)), ylab, srt=90)
   axis(side=3, pos=height, at=xscale(pV), labels=pV)
-  text(xscale(mean(pV)), height + outerspace, ylabel)
+  text(xscale(mean(pV)), height + outerRspace, rlab)
   #
   if(!is.null(main))
     title(main=main)
@@ -449,7 +453,7 @@ resid1plot <-
       switch(plot.smooth,
              image={
                plot(as.rectangle(W), box=FALSE, main=main,
-                    do.plot=do.plot, ...)
+                    do.plot=do.plot, add=add, ...)
                z <- ploterodeimage(W, Z, colsZ=backcols, rangeZ=srange,
                                    do.plot=do.plot, ...)
                bb <- boundingbox(as.rectangle(W), z)
@@ -468,7 +472,7 @@ resid1plot <-
              },
              imagecontour={
                plot(as.rectangle(W), box=FALSE, main=main,
-                    do.plot=do.plot, ...)
+                    do.plot=do.plot, add=add, ...)
                z <- ploterodeimage(W, Z, colsZ=backcols, rangeZ=srange,
                                    do.plot=do.plot, ...)
                contour(Z, add=TRUE, do.plot=do.plot, ...)

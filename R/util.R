@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.165 $    $Date: 2014/10/14 05:44:08 $
+#    $Revision: 1.169 $    $Date: 2015/02/18 00:37:09 $
 #
 #
 matrowsum <- function(x) {
@@ -171,6 +171,8 @@ commasep <- function(x, join=" and ", flatten=TRUE) {
 }
 
 paren <- function(x, type="(") {
+  if(length(x) == 0) return(x)
+  if(identical(type, "")) type <- "blank"
   switch(type,
          "(" = {
            out <- paste("(", x, ")", sep="")
@@ -180,6 +182,9 @@ paren <- function(x, type="(") {
          },
          "{" = {
            out <- paste("{", x, "}", sep="")
+         },
+         blank = {
+           out <- paste(x)
          },
          stop(paste("Unrecognised parenthesis type:", sQuote(type)))
          )
@@ -234,6 +239,33 @@ truncline <- function(x, nc) {
   return(z)
 }
 
+padtowidth <- local({
+
+  blankstring <- function(n) paste(rep(" ", n), collapse="")
+
+  padtowidth <- function(a, b, justify=c("left", "right", "centre")) {
+    justify <- match.arg(justify)
+    if(is.character(b)) b <- nchar(b) else stopifnot(is.numeric(b))
+    extra <- pmax(0, b - nchar(a))
+    rpad <- lpad <- ""
+    switch(justify,
+           left = {
+             rpad <- sapply(extra, blankstring)
+           },
+           right = {
+             lpad <- sapply(extra, blankstring)
+           },
+           centre = {
+             lpad <- sapply(floor(extra/2), blankstring)
+             rpad <- sapply(ceiling(extra/2), blankstring)
+           })
+    result <- paste0(lpad, a, rpad)
+    return(result)
+  }
+
+  padtowidth
+})
+
 fakecallstring <- function(fname, parlist) {
   cl <- do.call("call", append(list(name = fname), parlist))
   return(format(cl))
@@ -255,6 +287,14 @@ ordinal <- function(k) {
                                  ifelse(last == 3, "rd",
                                         "th"))))
   return(paste(k, ending, sep=""))
+}
+
+articlebeforenumber <- function(k) {
+  k <- abs(k)
+  if(k == 11) return("an")
+  leading <- floor(k/10^floor(log10(k)))
+  if(leading == 8) return("an")
+  return("a")
 }
 
 # equivalent to rev(cumsum(rev(x)))
@@ -1321,15 +1361,19 @@ simplenumber <- function(x, unit = "", multiply="*") {
   x <- abs(x)
   if(unit == "") {
     if(x %% 1 == 0) return(paste0(s, round(x)))
-    for(i in 1:12) 
+    for(i in 1:12) {
       if((i/x) %% 1 == 0) return(paste0(s, i, "/", round(i/x)))
+      if((i*x) %% 1 == 0) return(paste0(s, round(i*x), "/", i))
+    }
   } else {
     if(x == 0) return("0")
     if(x == 1) return(paste0(s,unit))
     if(x %% 1 == 0) return(paste0(s, round(x), multiply, unit))
     if((1/x) %% 1 == 0) return(paste0(s, unit, "/", round(i/x)))
-    for(i in 2:12) 
+    for(i in 2:12) {
       if((i/x) %% 1 == 0) return(paste0(s, i, multiply, unit, "/", round(i/x)))
+      if((i*x) %% 1 == 0) return(paste0(s, round(i*x), multiply, unit, "/", i))
+    }
   }
   return(NULL)
 }
@@ -1357,4 +1401,8 @@ dround <- function(x) {
   round(x, getOption('digits'))
 }
 
-
+there.is.no.try <- function(...) {
+  y <- try(..., silent=TRUE)
+  if(inherits(y, "try-error")) return(NULL)
+  return(y)
+}

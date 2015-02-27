@@ -184,6 +184,7 @@ local({
 })
 # tests/NAinCov.R
 # Testing the response to the presence of NA's in covariates
+# $Revision: 1.4 $ $Date: 2015/01/09 04:52:43 $
 
 require(spatstat)
 local({
@@ -193,8 +194,7 @@ local({
   # fit model: should produce a warning but no failure
   misfit <- ppm(X, ~Y, covariates=list(Y=Y))
   # prediction 
-  Z <- predict(misfit, type="trend")
-  Z <- predict(misfit, type="se")
+  Z <- predict(misfit, type="trend", se=TRUE)
   # covariance matrix: all should be silent
   v <- vcov(misfit)
   ss <- vcov(misfit, what="internals")
@@ -450,6 +450,11 @@ local({
   dM      <- distmap(mess,dimyx=256)
   mungf    <- profilepl(ss, StraussHard, cats ~ dM)
   mungp   <- profilepl(ss, StraussHard, trend=~dM, Q=cats)
+
+  ## splitting large quadschemes into blocks
+  op <- spatstat.options(maxmatrix=5000)
+  pr <- predict(ppm(cells ~ x, AreaInter(0.05)))
+  spatstat.options(op)
 })
 
 #
@@ -1406,10 +1411,7 @@ Z <- pixellate(X)
 p <- matrix(c(1.5, 0), 1, 2)
 l <- matrix(c(0,0,1,0,1,0,2,0), 2, 4, byrow=T)
 a <- distppll(p, l, mintype=2, method="interpreted")
-b <- distppll(p, l, mintype=2, method="Fortran")
 d <- distppll(p, l, mintype=2, method="C")
-if(a$min.which != b$min.which)
-  stop("conflict between Fortran and interpreted code in distppll")
 if(a$min.which != d$min.which)
   stop("conflict between C and interpreted code in distppll")
 
@@ -1560,7 +1562,7 @@ local({
 #
 # tests/kppm.R
 #
-# $Revision: 1.6 $ $Date: 2012/04/08 03:22:20 $
+# $Revision: 1.8 $ $Date: 2015/01/11 01:25:25 $
 #
 # Test functionality of kppm that depends on RandomFields
 #
@@ -1570,18 +1572,21 @@ local({
 
   if(require(RandomFields) && RandomFieldsSafe()) {
 
-    fit0 <- kppm(redwood, ~1, "LGCP")
-    simulate(fit0)
-
-    fit <- kppm(redwood, ~x, "LGCP",
+    fit0 <- kppm(redwood ~1, "LGCP")
+    Y0 <- simulate(fit0)[[1]]
+    stopifnot(is.ppp(Y0))
+    
+    fit1 <- kppm(redwood ~x, "LGCP",
                 covmodel=list(model="matern", nu=0.3),
                 control=list(maxit=5))
-    simulate(fit)
+    Y1 <- simulate(fit1)[[1]]
+    stopifnot(is.ppp(Y1))
 
 # ... and Abdollah's code
 
-    fit <- kppm(redwood, ~x, cluster="Cauchy", statistic="K")
-    simulate(fit)
+    fit2 <- kppm(redwood ~x, cluster="Cauchy", statistic="K")
+    Y2 <- simulate(fit2)[[1]]
+    stopifnot(is.ppp(Y2))
   }
   
 })
@@ -1677,6 +1682,12 @@ split(puntos, tessr4, drop=TRUE) <- puntosr4
 A <- runifpoint(10)
 B <- runifpoint(10)
 AB <- split(superimpose(A=A, B=B))
+
+#' check that split<- respects ordering where possible
+X <- amacrine
+Y <- split(X)
+split(X) <- Y
+stopifnot(identical(X, amacrine))
 
 })
 #
@@ -2363,6 +2374,28 @@ local({
   MR <- markcorrint(AR,function(m1,m2){m1==m2})
   if(isTRUE(all.equal(MA,MR)))
     stop("markcorrint unexpectedly ignores marks")
+})
+##  tests/closeshave.R
+## check 'closepairs/crosspairs' code
+## validity and memory allocation
+## $Revision: 1.1 $ $Date: 2015/02/21 02:56:07 $
+
+local({
+  r <- 0.12
+  close.all <- closepairs(redwood, r)
+  close.ij <- closepairs(redwood, r, what="indices")
+  close.ijd <- closepairs(redwood, r, what="ijd")
+  stopifnot(identical(close.ij, close.all[c("i","j")]))
+  stopifnot(identical(close.ijd, close.all[c("i","j","d")]))
+
+  Y <- split(amacrine)
+  on <- Y$on
+  off <- Y$off
+  cross.all <- crosspairs(on, off, r)
+  cross.ij <- crosspairs(on, off, r, what="indices")
+  cross.ijd <- crosspairs(on, off, r, what="ijd")
+  stopifnot(identical(cross.ij, cross.all[c("i","j")]))
+  stopifnot(identical(cross.ijd, cross.all[c("i","j","d")]))
 })
 # ...............................................................
 #          multippm/tests/tests.R

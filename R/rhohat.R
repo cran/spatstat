@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.61 $  $Date: 2014/11/10 11:18:05 $
+#  $Revision: 1.63 $  $Date: 2015/02/24 01:44:41 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -260,7 +260,9 @@ rhohatCalc <- local({
   ## note: this function normalises the weights, like density.default
   LocfitRaw <- function(x, ..., weights=NULL) {
     if(is.null(weights)) weights <- 1
-    do.call.matched("locfit.raw", append(list(x=x, weights=weights), list(...)))
+    requireNamespace("locfit", quietly=TRUE)
+    do.call.matched(locfit::locfit.raw,
+                    append(list(x=x, weights=weights), list(...)))
   }
 
   varlog <- function(obj,xx) {
@@ -287,7 +289,7 @@ rhohatCalc <- local({
     method <- match.arg(method)
     smoother <- match.arg(smoother)
     ## check availability of locfit package
-    if(smoother == "local" && !require(locfit, quietly=TRUE)) {
+    if(smoother == "local" && !requireNamespace("locfit", quietly=TRUE)) {
       warning(paste("In", paste(dQuote(callstring), ":", sep=""),
                     "package", sQuote("locfit"), "is not available;",
                     "unable to perform local likelihood smoothing;",
@@ -598,7 +600,7 @@ predict.rhohat <- function(object, ..., relative=FALSE) {
   # adjust to reference baseline
   if(reference != "Lebesgue" && !relative) {
     lambda <- s$lambda
-    Y <- eval.im(Y * lambda)
+    Y[] <- Y[] * lambda
   }
   return(Y)
 }

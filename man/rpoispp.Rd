@@ -7,7 +7,7 @@
   Includes CSR (complete spatial randomness).
 }
 \usage{
- rpoispp(lambda, lmax=NULL, win=owin(), \dots, nsim=1)
+ rpoispp(lambda, lmax=NULL, win=owin(), \dots, nsim=1, drop=TRUE)
 }
 \arguments{
   \item{lambda}{
@@ -29,6 +29,11 @@
     Arguments passed to \code{lambda} if it is a function.
   }
   \item{nsim}{Number of simulated realisations to be generated.}
+  \item{drop}{
+    Logical. If \code{nsim=1} and \code{drop=TRUE} (the default), the
+    result will be a point pattern, rather than a list 
+    containing a point pattern.
+  }
 }
 \value{
   A point pattern (an object of class \code{"ppp"})
@@ -47,9 +52,19 @@
   inside the window \code{win}.
   The function \code{lambda} must work correctly with vectors \code{x}
   and \code{y}.
-  The value \code{lmax} must be given and must be an upper bound on the 
-  values of \code{lambda(x,y,\dots)} for all locations \code{(x, y)}
-  inside the window \code{win}. 
+  
+  If \code{lmax} is given,
+  it must be an upper bound on the values of \code{lambda(x,y,\dots)}
+  for all locations \code{(x, y)}
+  inside the window \code{win}.
+
+  If \code{lmax} is missing or \code{NULL},
+  an approximate upper bound is computed by finding the maximum value
+  of \code{lambda(x,y,\dots)}
+  on a grid of locations \code{(x,y)} inside the window \code{win},
+  and adding a safety margin equal to 5 percent of the range of
+  \code{lambda} values. This can be computationally intensive,
+  so it is advisable to specify \code{lmax} if possible.
 
   If \code{lambda} is a pixel image object of class \code{"im"}
   (see \code{\link{im.object}}), this algorithm generates a realisation
@@ -117,12 +132,18 @@
  # pixel image
  Z <- as.im(function(x,y){100 * sqrt(x+y)}, unit.square())
  pp <- rpoispp(Z)
+
+ # randomising an existing point pattern
+ rpoispp(intensity(cells), win=Window(cells))
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{
+Adrian Baddeley
+\email{Adrian.Baddeley@uwa.edu.au}
+\url{http://www.maths.uwa.edu.au/~adrian/}
+Rolf Turner
+\email{r.turner@auckland.ac.nz}
+and Ege Rubak
+\email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{datagen}

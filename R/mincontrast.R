@@ -125,6 +125,8 @@ mincontrast <- local({
 })
 
 print.minconfit <- function(x, ...) {
+  terselevel <- spatstat.options('terse')
+  digits <- getOption('digits')
   ## explanatory
   cat(paste("Minimum contrast fit ",
             "(",
@@ -158,32 +160,63 @@ print.minconfit <- function(x, ...) {
     if(!is.null(da))
       splat(" fitted to", da)
   }
+
+  if(waxlyrical('space', terselevel))
+      cat("\n")
   ## Values
-  splat("Parameters fitted by minimum contrast ($par):")
+  splat("Internal parameters fitted by minimum contrast ($par):")
   print(x$par, ...)
-  mp <- x$modelpar
-  if(!is.null(mp)) {
-    splat("Derived parameters of",
-          if(!is.null(mo)) mo else "model",
-          "($modelpar):")
-    print(mp)
+  if(waxlyrical('space', terselevel))
+      cat("\n")
+  
+  ## Handling new parameters
+  isPCP <- x$isPCP %orifnull% x$internal$model!="lgcp"
+  cpar <- x$clustpar
+  if (!is.null(cpar)) {
+    splat("Fitted",
+          if(isPCP) "cluster" else "covariance",
+          "parameters:")
+    print(cpar, digits=digits)
+  } else{
+    ## Old modelpar field if necessary
+    mp <- x$modelpar
+    if(!is.null(mp)) {
+      splat("Derived parameters of",
+            if(!is.null(mo)) mo else "model",
+            "($modelpar):")
+      print(mp)
+    }
   }
+  if(!is.null(mu <- x$mu)) {
+    if(isPCP) {
+      splat("Mean cluster size: ",
+            if(!is.im(mu)) paste(signif(mu, digits), "points") else "[pixel image]")
+    } else {
+      splat("Fitted mean of log of random intensity:",
+            if(!is.im(mu)) signif(mu, digits) else "[pixel image]")
+    }
+  }
+  if(waxlyrical('space', terselevel))
+      cat("\n")
   ## Diagnostics
   printStatus(optimStatus(x$opt))
   ## Starting values
-  splat("Starting values of parameters:")
-  print(x$startpar)
-  ## Algorithm parameters
-  ct <- x$ctrl
-  splat("Domain of integration:",
-        "[",
-        signif(ct$rmin,4),
-        ",",
-        signif(ct$rmax,4),
-        "]")
-  splat("Exponents:",
-        "p=", paste(signif(ct$p, 3), ",",  sep=""),
-        "q=", signif(ct$q,3))
+  if(waxlyrical('gory', terselevel)){
+      cat("\n")
+      splat("Starting values of parameters:")
+      print(x$startpar)
+      ## Algorithm parameters
+      ct <- x$ctrl
+      splat("Domain of integration:",
+            "[",
+            signif(ct$rmin,4),
+            ",",
+            signif(ct$rmax,4),
+            "]")
+      splat("Exponents:",
+            "p=", paste(signif(ct$p, 3), ",",  sep=""),
+            "q=", signif(ct$q,3))
+  }
   invisible(NULL)
 }
               
@@ -211,15 +244,18 @@ as.fv.minconfit <- function(x) x$fit
 
 optimStatus <- function(x, call=NULL) {
   cgce <- x$convergence
+  neval <- x$counts[["function"]]
   switch(paste(cgce),
          "0" = {
            simpleMessage(
-                         paste("Converged successfully after",
-                               x$counts[["function"]],
-                               "iterations"),
+                         paste("Converged successfully after", 
+                               neval, "function evaluations"),
                          call)
          },
-         "1" = simpleWarning("Iteration limit maxit was reached", call),
+         "1" = simpleWarning(
+           paste("Iteration limit maxit was reached after",
+                 neval, "function evaluations"),
+           call),
          "10" = simpleWarning("Nelder-Mead simplex was degenerate", call),
          "51"= {
            simpleWarning(
@@ -290,327 +326,11 @@ printStatusList <- function(stats) {
 ############### applications (specific models) ##################
 
 
-## lookup table of explicitly-known K functions and pcf
-## and algorithms for computing sensible starting parameters
-
-.Spatstat.ClusterModelInfoTable <- 
-  list(
-       Thomas=list(
-         ## Thomas process: par = (kappa, sigma2)
-         modelname = "Thomas process",
-         isPCP=TRUE,
-         ## K-function
-         K = function(par,rvals, ...){
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           pi*rvals^2+(1-exp(-rvals^2/(4*par[2])))/par[1]
-         },
-         ## pair correlation function
-         pcf= function(par,rvals, ...){
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           1 + exp(-rvals^2/(4 * par[2]))/(4 * pi * par[1] * par[2])
-         },
-         ## sensible starting parameters
-         selfstart = function(X) {
-           kappa <- intensity(X)
-           sigma2 <- 4 * mean(nndist(X))^2
-           c(kappa=kappa, sigma2=sigma2)
-         },
-         ## meaningful model parameters
-         interpret = function(par, lambda) {
-           kappa <- par[["kappa"]]
-           sigma <- sqrt(par[["sigma2"]])
-           mu <- if(is.numeric(lambda) && length(lambda) == 1)
-             lambda/kappa else NA
-           c(kappa=kappa, sigma=sigma, mu=mu)
-         }
-         ),
-       ## ...............................................
-       MatClust=list(
-         ## Matern Cluster process: par = (kappa, R)
-         modelname = "Matern cluster process",
-         isPCP=TRUE,
-         K = function(par,rvals, ..., funaux){
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           kappa <- par[1]
-           R <- par[2]
-           Hfun <- funaux$Hfun
-           y <- pi * rvals^2 + (1/kappa) * Hfun(rvals/(2 * R))
-           return(y)
-         },
-         pcf= function(par,rvals, ..., funaux){
-             if(any(par <= 0))
-               return(rep.int(Inf, length(rvals)))
-             kappa <- par[1]
-             R <- par[2]
-             g <- funaux$g
-             y <- 1 + (1/(pi * kappa * R^2)) * g(rvals/(2 * R))
-             return(y)
-           },
-         funaux=list(
-           Hfun=function(zz) {
-             ok <- (zz < 1)
-             h <- numeric(length(zz))
-             h[!ok] <- 1
-             z <- zz[ok]
-             h[ok] <- 2 + (1/pi) * (
-                                    (8 * z^2 - 4) * acos(z)
-                                    - 2 * asin(z)
-                                    + 4 * z * sqrt((1 - z^2)^3)
-                                    - 6 * z * sqrt(1 - z^2)
-                                    )
-             return(h)
-           },
-           DOH=function(zz) {
-             ok <- (zz < 1)
-             h <- numeric(length(zz))
-             h[!ok] <- 0
-             z <- zz[ok]
-             h[ok] <- (16/pi) * (z * acos(z) - (z^2) * sqrt(1 - z^2))
-             return(h)
-           },
-           ## g(z) = DOH(z)/z has a limit at z=0.
-           g=function(zz) {
-             ok <- (zz < 1)
-             h <- numeric(length(zz))
-             h[!ok] <- 0
-             z <- zz[ok]
-             h[ok] <- (2/pi) * (acos(z) - z * sqrt(1 - z^2))
-             return(h)
-           }),
-         ## sensible starting paramters
-         selfstart = function(X) {
-           kappa <- intensity(X)
-           R <- 2 * mean(nndist(X)) 
-           c(kappa=kappa, R=R)
-         },
-         ## meaningful model parameters
-         interpret = function(par, lambda) {
-           kappa <- par[["kappa"]]
-           R     <- par[["R"]]
-           mu    <- if(is.numeric(lambda) && length(lambda) == 1)
-             lambda/kappa else NA           
-           c(kappa=kappa, R=R, mu=mu)
-         }
-         ),
-       ## ...............................................
-       Cauchy=list(
-         ## Neyman-Scott with Cauchy clusters: par = (kappa, eta2)
-         modelname = "Neyman-Scott process with Cauchy kernel",
-         isPCP=TRUE,
-         K = function(par,rvals, ...){
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           pi*rvals^2 + (1 - 1/sqrt(1 + rvals^2/par[2]))/par[1]
-         },
-         pcf= function(par,rvals, ...){
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           1 + ((1 + rvals^2/par[2])^(-1.5))/(2 * pi * par[2] * par[1])
-         },
-         selfstart = function(X) {
-           kappa <- intensity(X)
-           eta2 <- 4 * mean(nndist(X))^2
-           c(kappa = kappa, eta2 = eta2)
-         },
-         ## meaningful model parameters
-         interpret = function(par, lambda) {
-           kappa <- par[["kappa"]]
-           omega <- sqrt(par[["eta2"]])/2
-           mu <- if(is.numeric(lambda) && length(lambda) == 1)
-             lambda/kappa else NA
-           c(kappa=kappa, omega=omega, mu=mu)
-         }
-         ),
-       ## ...............................................
-       VarGamma=list(
-         ## Neyman-Scott with VarianceGamma/Bessel clusters: par = (kappa, eta)
-         modelname = "Neyman-Scott process with Variance Gamma kernel",
-         isPCP=TRUE,
-         K = local({
-           ## K function requires integration of pair correlation
-           xgx <- function(x, par, nu.pcf) {
-             ## x * pcf(x) without check on par values
-             numer <- (x/par[2])^nu.pcf * besselK(x/par[2], nu.pcf)
-             denom <- 2^(nu.pcf+1) * pi * par[2]^2 * par[1] * gamma(nu.pcf + 1)
-             return(x * (1 + numer/denom))
-           }
-           vargammaK <- function(par,rvals, ..., margs){
-             ## margs = list(.. nu.pcf.. ) 
-             if(any(par <= 0))
-               return(rep.int(Inf, length(rvals)))
-             nu.pcf <- margs$nu.pcf
-             out <- numeric(length(rvals))
-             ok <- (rvals > 0)
-             rvalsok <- rvals[ok]
-             outok <- numeric(sum(ok))
-             for (i in 1:length(rvalsok))
-               outok[i] <- 2 * pi * integrate(xgx,
-                                              lower=0, upper=rvalsok[i],
-                                              par=par, nu.pcf=nu.pcf)$value
-             out[ok] <- outok
-             return(out)
-           }
-           vargammaK
-           }), ## end of 'local'
-         pcf= function(par,rvals, ..., margs){
-           ## margs = list(..nu.pcf..)
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           nu.pcf <- margs$nu.pcf
-           sig2 <- 1 / (4 * pi * (par[2]^2) * nu.pcf * par[1])
-           denom <- 2^(nu.pcf - 1) * gamma(nu.pcf)
-           rr <- rvals / par[2]
-           ## Matern correlation function
-           fr <- ifelseXB(rr > 0,
-                        (rr^nu.pcf) * besselK(rr, nu.pcf) / denom,
-                        1)
-           return(1 + sig2 * fr)
-         },
-         parhandler = function(..., nu.ker = -1/4) {
-           check.1.real(nu.ker)
-           stopifnot(nu.ker > -1/2)
-           nu.pcf <- 2 * nu.ker + 1
-           return(list(type="Kernel",
-                       model="VarGamma",
-                       margs=list(nu.ker=nu.ker,
-                                  nu.pcf=nu.pcf)))
-         },
-         ## sensible starting values
-         selfstart = function(X) {
-           kappa <- intensity(X)
-           eta <- 2 * mean(nndist(X))
-           c(kappa=kappa, eta=eta)
-         },
-         ## meaningful model parameters
-         interpret = function(par, lambda) {
-           kappa <- par[["kappa"]]
-           omega <- par[["eta"]]
-           mu <- if(is.numeric(lambda) && length(lambda) == 1)
-             lambda/kappa else NA
-           c(kappa=kappa, omega=omega, mu=mu)
-         }
-         ),
-       ## ...............................................
-       LGCP=list(
-         ## Log Gaussian Cox process: par = (sigma2, alpha)
-         modelname = "Log-Gaussian Cox process",
-         isPCP=FALSE,
-         ## calls relevant covariance function from RandomFields package
-         K = function(par, rvals, ..., model, margs) {
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           if(model == "exponential") {
-             ## For efficiency and to avoid need for RandomFields package
-             integrand <- function(r,par,...) 2*pi*r*exp(par[1]*exp(-r/par[2]))
-           } else {
-             ## use RandomFields 
-             integrand <- function(r,par,model,margs) {
-               modgen <- attr(model, "modgen")
-               if(length(margs) == 0) {
-                 mod <- modgen(var=par[1], scale=par[2])
-               } else {
-                 mod <- do.call(modgen,
-                                append(list(var=par[1], scale=par[2]),
-                                       margs))
-               }
-               2*pi *r *exp(RFcov(model=mod, x=r))
-             }
-           }
-           nr <- length(rvals)
-           th <- numeric(nr)
-           if(spatstat.options("fastK.lgcp")) {
-             ## integrate using Simpson's rule
-             fvals <- integrand(r=rvals, par=par, model=model, margs=margs)
-             th[1] <- rvals[1] * fvals[1]/2
-             if(nr > 1)
-               for(i in 2:nr)
-                 th[i] <- th[i-1] +
-                   (rvals[i] - rvals[i-1]) * (fvals[i] + fvals[i-1])/2
-           } else {
-             ## integrate using 'integrate'
-             th[1] <- if(rvals[1] == 0) 0 else 
-             integrate(integrand,lower=0,upper=rvals[1],
-                       par=par,model=model,margs=margs)$value
-             for (i in 2:length(rvals)) {
-               delta <- integrate(integrand,
-                                  lower=rvals[i-1],upper=rvals[i],
-                                  par=par,model=model,margs=margs)
-               th[i]=th[i-1]+delta$value
-             }
-           }
-           return(th)
-         },
-         pcf= function(par, rvals, ..., model, margs) {
-           if(any(par <= 0))
-             return(rep.int(Inf, length(rvals)))
-           if(model == "exponential") {
-             ## For efficiency and to avoid need for RandomFields package
-             gtheo <- exp(par[1]*exp(-rvals/par[2]))
-           } else {
-             modgen <- attr(model, "modgen")
-             if(length(margs) == 0) {
-               mod <- modgen(var=par[1], scale=par[2])
-             } else {
-               mod <- do.call(modgen,
-                              append(list(var=par[1], scale=par[2]),
-                                     margs))
-             }
-             gtheo <- exp(RFcov(model=mod, x=rvals))
-           }
-           return(gtheo)
-         },
-         parhandler=function(model = "exponential", ...) {
-           if(!is.character(model))
-             stop("Covariance function model should be specified by name")
-           margs <- c(...)
-           if(model != "exponential") {
-             if(!require(RandomFields))
-               stop("The package RandomFields is required")
-             ## get the 'model generator' 
-             modgen <- mget(paste0("RM", model), inherits=TRUE,
-                           ifnotfound=list(NULL))[[1]]
-             if(is.null(modgen) || !inherits(modgen, "RMmodelgenerator"))
-               stop(paste("Model", sQuote(model), "is not recognised"))
-             attr(model, "modgen") <- modgen
-           }
-           return(list(type="Covariance", model=model, margs=margs))
-         },
-         ## sensible starting values
-         selfstart = function(X) {
-           alpha <- 2 * mean(nndist(X))
-           c(sigma2=1, alpha=alpha)
-         },
-         ## meaningful model parameters
-         interpret = function(par, lambda) {
-           sigma2 <- par[["sigma2"]]
-           alpha  <- par[["alpha"]]
-           mu <- if(is.numeric(lambda) && length(lambda) == 1 && lambda > 0)
-             log(lambda) - sigma2/2 else NA
-           c(sigma2=sigma2, alpha=alpha, mu=mu)
-         }
-         )
-  )
-
-spatstatClusterModelInfo <- function(name) {
-  if(!is.character(name) || length(name) != 1)
-    stop("Argument must be a single character string", call.=FALSE)
-  nama2 <- names(.Spatstat.ClusterModelInfoTable)
-  if(!(name %in% nama2))
-    stop(paste(sQuote(name), "is not recognised;",
-               "valid names are", commasep(sQuote(nama2))),
-         call.=FALSE)
-  out <- .Spatstat.ClusterModelInfoTable[[name]]
-  return(out)
-}
-
 getdataname <- function(defaultvalue, ..., dataname=NULL) {
   if(!is.null(dataname)) dataname else defaultvalue
 }
   
-thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
+thomas.estK <- function(X, startpar=c(kappa=1,scale=1),
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
   dataname <-
@@ -628,9 +348,8 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","sigma2"))
-
   info <- spatstatClusterModelInfo("Thomas")
+  startpar <- info$checkpar(startpar)
   theoret <- info$K
   
   result <- mincontrast(K, theoret, startpar,
@@ -647,10 +366,12 @@ thomas.estK <- function(X, startpar=c(kappa=1,sigma2=1),
   ## infer meaningful model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="Thomas")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
-lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
+lgcp.estK <- function(X, startpar=c(var=1,scale=1),
                       covmodel=list(model="exponential"), 
                       lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
@@ -669,10 +390,9 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("sigma2","alpha"))
-
   info <- spatstatClusterModelInfo("LGCP")
-  
+  startpar <- info$checkpar(startpar)
+
   ## digest parameters of Covariance model and test validity
   ph <- info$parhandler
   cmodel <- do.call(ph, covmodel)
@@ -697,12 +417,13 @@ lgcp.estK <- function(X, startpar=c(sigma2=1,alpha=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="lgcp")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
+  result$clustargs <- info$checkclustargs(cmodel$margs, old=FALSE)
   return(result)
 }
 
-
-
-matclust.estK <- function(X, startpar=c(kappa=1,R=1),
+matclust.estK <- function(X, startpar=c(kappa=1,scale=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
   dataname <-
@@ -720,9 +441,8 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","R"))
-
   info <- spatstatClusterModelInfo("MatClust")
+  startpar <- info$checkpar(startpar)
   theoret <- info$K
   funaux <-  info$funaux
   
@@ -742,13 +462,14 @@ matclust.estK <- function(X, startpar=c(kappa=1,R=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="MatClust")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
-
 ## versions using pcf (suggested by Jan Wild)
 
-thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
+thomas.estpcf <- function(X, startpar=c(kappa=1,scale=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                           pcfargs=list()){
 
@@ -767,9 +488,8 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","sigma2"))
-
   info <- spatstatClusterModelInfo("Thomas")
+  startpar <- info$checkpar(startpar)
   theoret <- info$pcf
   
   ## avoid using g(0) as it may be infinite
@@ -794,10 +514,12 @@ thomas.estpcf <- function(X, startpar=c(kappa=1,sigma2=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="Thomas")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
-matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
+matclust.estpcf <- function(X, startpar=c(kappa=1,scale=1),
                             lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                             pcfargs=list()){
 
@@ -816,9 +538,8 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","R"))
-
   info <- spatstatClusterModelInfo("MatClust")
+  startpar <- info$checkpar(startpar)
   theoret <- info$pcf
   funaux <-  info$funaux
   
@@ -844,10 +565,12 @@ matclust.estpcf <- function(X, startpar=c(kappa=1,R=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="MatClust")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
-lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
+lgcp.estpcf <- function(X, startpar=c(var=1,scale=1),
                       covmodel=list(model="exponential"), 
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                         pcfargs=list()) {
@@ -867,10 +590,9 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("sigma2","alpha"))
-
   info <- spatstatClusterModelInfo("LGCP")
-  
+  startpar <- info$checkpar(startpar)
+
   ## digest parameters of Covariance model and test validity
   ph <- info$parhandler
   cmodel <- do.call(ph, covmodel)
@@ -895,11 +617,14 @@ lgcp.estpcf <- function(X, startpar=c(sigma2=1,alpha=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="lgcp")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
+  result$clustargs <- info$checkclustargs(cmodel$margs, old=FALSE)
   return(result)
 }
 
 
-cauchy.estK <- function(X, startpar=c(kappa=1,eta2=1),
+cauchy.estK <- function(X, startpar=c(kappa=1,scale=1),
                         lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...) {
 
 ## omega: scale parameter of Cauchy kernel function
@@ -921,9 +646,8 @@ cauchy.estK <- function(X, startpar=c(kappa=1,eta2=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","eta2"))
-
   info <- spatstatClusterModelInfo("Cauchy")
+  startpar <- info$checkpar(startpar)
   theoret <- info$K
 
   desc <- "minimum contrast fit of Neyman-Scott process with Cauchy kernel"
@@ -940,11 +664,13 @@ cauchy.estK <- function(X, startpar=c(kappa=1,eta2=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="Cauchy")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
 
-cauchy.estpcf <- function(X, startpar=c(kappa=1,eta2=1),
+cauchy.estpcf <- function(X, startpar=c(kappa=1,scale=1),
                           lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, ...,
                           pcfargs=list()) {
 
@@ -967,9 +693,8 @@ cauchy.estpcf <- function(X, startpar=c(kappa=1,eta2=1),
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","eta2"))
-
   info <- spatstatClusterModelInfo("Cauchy")
+  startpar <- info$checkpar(startpar)
   theoret <- info$pcf
 
   ## avoid using g(0) as it may be infinite
@@ -993,13 +718,18 @@ cauchy.estpcf <- function(X, startpar=c(kappa=1,eta2=1),
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="Cauchy")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
   return(result)
 }
 
 ## user-callable
-resolve.vargamma.shape <- function(..., nu.ker=NULL, nu.pcf=NULL) {
-  if(is.null(nu.ker) && is.null(nu.pcf))
-    stop("Must specify either nu.ker or nu.pcf", call.=FALSE)
+resolve.vargamma.shape <- function(..., nu.ker=NULL, nu.pcf=NULL, default = FALSE) {
+  if(is.null(nu.ker) && is.null(nu.pcf)){
+    if(!default)
+        stop("Must specify either nu.ker or nu.pcf", call.=FALSE)
+    nu.ker <- -1/4
+  }
   if(!is.null(nu.ker) && !is.null(nu.pcf))
     stop("Only one of nu.ker and nu.pcf should be specified",
          call.=FALSE)
@@ -1015,9 +745,9 @@ resolve.vargamma.shape <- function(..., nu.ker=NULL, nu.pcf=NULL) {
   return(list(nu.ker=nu.ker, nu.pcf=nu.pcf))
 }
 
-vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
-                        lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL,
-                          nu.pcf=NULL, ...) {
+vargamma.estK <- function(X, startpar=c(kappa=1,scale=1), nu = -1/4,
+                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL,
+                          ...) {
 
 ## nu.ker: smoothness parameter of Variance Gamma kernel function
 ## omega: scale parameter of kernel function
@@ -1027,8 +757,6 @@ vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
 
   dataname <-
     getdataname(short.deparse(substitute(X), 20), ...)
-
-  if(missing(nu.ker) && !is.null(nu.pcf)) nu.ker <- NULL
   
   if(inherits(X, "fv")) {
     K <- X
@@ -1042,14 +770,21 @@ vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
   } else 
     stop("Unrecognised format for argument X")
 
-  startpar <- check.named.vector(startpar, c("kappa","eta"))
+  ## Catch old nu.ker/nu.pcf syntax and resolve nu-value.
+  dots <- list(...)
+  if(missing(nu)){
+      nu <- resolve.vargamma.shape(nu.ker=dots$nu.ker, nu.pcf=dots$nu.pcf, default = TRUE)$nu.ker
+  }
+  check.1.real(nu)
+  stopifnot(nu > -1/2)
 
   info <- spatstatClusterModelInfo("VarGamma")
+  startpar <- info$checkpar(startpar)
   theoret <- info$K
   
   ## test validity of parameter nu and digest
   ph <- info$parhandler
-  cmodel <- ph(nu.ker=nu.ker, nu.pcf=nu.pcf)
+  cmodel <- ph(nu.ker=nu)
   margs <- cmodel$margs
 
   desc <- "minimum contrast fit of Neyman-Scott process with Variance Gamma kernel"
@@ -1068,13 +803,16 @@ vargamma.estK <- function(X, startpar=c(kappa=1,eta=1), nu.ker = -1/4,
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="VarGamma")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
+  result$clustargs <- info$checkclustargs(cmodel$margs, old=FALSE)
   return(result)
 }
 
 
-vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4, 
-                          lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, 
-                          nu.pcf=NULL, ..., pcfargs=list()) {
+vargamma.estpcf <- function(X, startpar=c(kappa=1,scale=1), nu=-1/4, 
+                            lambda=NULL, q=1/4, p=2, rmin=NULL, rmax=NULL, 
+                            ..., pcfargs=list()) {
 
 ## nu.ker: smoothness parameter of Variance Gamma kernel function
 ## omega: scale parameter of kernel function
@@ -1084,8 +822,6 @@ vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4,
 
   dataname <-
     getdataname(short.deparse(substitute(X), 20), ...)
-
-  if(missing(nu.ker) && !is.null(nu.pcf)) nu.ker <- NULL
 
   if(inherits(X, "fv")) {
     g <- X
@@ -1097,16 +833,25 @@ vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4,
     if(is.null(lambda))
       lambda <- summary(X)$intensity
   } else 
-    stop("Unrecognised format for argument X")
-
-  startpar <- check.named.vector(startpar, c("kappa","eta"))
+      stop("Unrecognised format for argument X")
+  
+  ## Catch old nu.ker/nu.pcf syntax and resolve nu-value.
+  dots <- list(...)
+  if(missing(nu)){
+      ## nutmp <- try(resolve.vargamma.shape(nu.ker=dots$nu.ker, nu.pcf=dots$nu.pcf)$nu.ker, silent=TRUE)
+      ## if(!inherits(nutmp, "try-error")) nu <- nutmp
+      nu <- resolve.vargamma.shape(nu.ker=dots$nu.ker, nu.pcf=dots$nu.pcf, default = TRUE)$nu.ker
+  }
+  check.1.real(nu)
+  stopifnot(nu > -1/2)
 
   info <- spatstatClusterModelInfo("VarGamma")
+  startpar <- info$checkpar(startpar)
   theoret <- info$pcf
 
   ## test validity of parameter nu and digest 
   ph <- info$parhandler
-  cmodel <- ph(nu.ker=nu.ker, nu.pcf=nu.pcf)
+  cmodel <- ph(nu.ker=nu)
   margs <- cmodel$margs
   
   ## avoid using g(0) as it may be infinite
@@ -1133,6 +878,9 @@ vargamma.estpcf <- function(X, startpar=c(kappa=1,eta=1), nu.ker=-1/4,
   ## infer model parameters
   result$modelpar <- info$interpret(par, lambda)
   result$internal <- list(model="VarGamma")
+  ## add new parametrisation to object
+  result$clustpar <- info$checkpar(par, old=FALSE)
+  result$clustargs <- info$checkclustargs(cmodel$margs, old=FALSE)
   return(result)
 }
 

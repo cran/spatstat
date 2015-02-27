@@ -3,7 +3,7 @@
 #
 #  Point process models on a linear network
 #
-#  $Revision: 1.23 $   $Date: 2014/11/20 11:04:37 $
+#  $Revision: 1.28 $   $Date: 2015/02/18 02:36:11 $
 #
 
 lppm <- function(X, ...) {
@@ -13,8 +13,8 @@ lppm <- function(X, ...) {
 
 lppm.formula <- function(X, interaction=NULL, ..., data=NULL) {
   ## remember call
-  callstring <- short.deparse(sys.call())
-  ## cl <- match.call()
+  callstring <- paste(short.deparse(sys.call()), collapse = "")
+  cl <- match.call()
 
   ########### INTERPRET FORMULA ##############################
   
@@ -43,14 +43,16 @@ lppm.formula <- function(X, interaction=NULL, ..., data=NULL) {
   }
   result <- eval(thecall, parent.frame())
 
-  if(!("callstring" %in% names(list(...))))
-    result$callstring <- callstring
-  
+  result$call <- cl
+  result$callstring <- callstring
+
   return(result)
 }
 
 lppm.lpp <- function(X, ..., eps=NULL, nd=1000) {
   Xname <- short.deparse(substitute(X))
+  callstring <- paste(short.deparse(sys.call()), collapse = "")
+  cl <- match.call()
   nama <- names(list(...))
   resv <- c("method", "forcefit")
   if(any(clash <- resv %in% nama))
@@ -62,7 +64,7 @@ lppm.lpp <- function(X, ..., eps=NULL, nd=1000) {
   fit <- ppm(Q, ..., method="mpl", forcefit=TRUE)
   if(!is.poisson.ppm(fit))
     warning("Non-Poisson models currently use Euclidean distance")
-  out <- list(X=X, fit=fit, Xname=Xname)
+  out <- list(X=X, fit=fit, Xname=Xname, call=cl, callstring=callstring)
   class(out) <- "lppm"
   return(out)
 }
@@ -135,11 +137,24 @@ coef.lppm <- function(object, ...) {
 }
 
 print.lppm <- function(x, ...) {
-  cat("Point process model on linear network\n")
+  splat("Point process model on linear network")
   print(x$fit)
-  cat("Linear network:\n")
-  print(as.linnet(x))
-  cat(paste("Original data:", x$Xname, "\n"))
+  terselevel <- spatstat.options('terse')
+  if(waxlyrical('extras', terselevel))
+    splat("Original data:", x$Xname)
+  if(waxlyrical('gory', terselevel))
+    print(as.linnet(x))
+  return(invisible(NULL))
+}
+
+summary.lppm <- function(object, ...) {
+  splat("Point process model on linear network")
+  print(summary(object$fit))
+  terselevel <- spatstat.options('terse')
+  if(waxlyrical('extras', terselevel))
+    splat("Original data:", object$Xname)
+  if(waxlyrical('gory', terselevel))
+    print(summary(as.linnet(object)))
   return(invisible(NULL))
 }
 
@@ -151,12 +166,16 @@ plot.lppm <- function(x, ..., type="trend") {
                                    list(main=xname)))
 }
   
-anova.lppm <- function(object, ..., test=NULL, override=FALSE) {
+anova.lppm <- function(object, ..., test=NULL) {
   stuff <- list(object=object, ...)
-  # extract ppm objects where appropriate
+  if(!is.na(hit <- match("override", names(stuff)))) {
+    warning("Argument 'override' is outdated and was ignored")
+    stuff <- stuff[-hit]
+  }
+  #' extract ppm objects where appropriate
   stuff <- lapply(stuff, function(z) { if(inherits(z, "lppm")) z$fit else z })
-  # analysis of deviance for 
-  do.call("anova.ppm", append(stuff, list(test=test, override=override)))
+  #' analysis of deviance or adjusted composite deviance
+  do.call("anova.ppm", append(stuff, list(test=test)))
 }
 
 update.lppm <- function(object, ...) {

@@ -1,8 +1,8 @@
 Package: spatstat
-Version: 1.40-0
-Nickname: Do The Maths
-Date: 2014-12-31
-Title: Spatial Point Pattern Analysis, Model-fitting, Simulation, Tests
+Version: 1.41-1
+Nickname: Ides of March
+Date: 2015-02-27
+Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
         and Ege Rubak <rubak@math.aau.dk>,
@@ -44,6 +44,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	P. Donnelly;
 	I. Dryden; 
 	S. Eglen; 
+	A. El-Gabbas;
         O. Flores;
 	E.D. Ford;
         P. Forbes;
@@ -115,6 +116,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	P. Ramon;
 	X. Raynaud,
 	M. Reiter; 
+        I. Renner;
 	T.O. Richardson;  
 	B.D. Ripley;  
 	E. Rosenbaum; 
@@ -139,6 +141,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	B. Taylor; 
 	T. Thorarinsdottir;
 	B. Turlach; 
+	T. Tvedebrink;
         K. Ummer;
 	M. Uppala;
 	A. van Burgel; 
@@ -146,6 +149,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
         M. Vihtakari;
 	A. Villers; 
         F. Vinatier;
+        S. Voss;
 	H. Wang; 
 	H. Wendrock; 
 	J. Wild;
@@ -157,10 +161,10 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	A. Zeileis.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>
 Depends: R (>= 3.1.1), stats, graphics, grDevices, utils
-Imports: mgcv, deldir (>= 0.0-21), abind, tensor, polyclip (>= 1.3-0),
-        goftest
+Imports: mgcv, Matrix, deldir (>= 0.0-21), abind, tensor, polyclip (>=
+        1.3-0), goftest
 Suggests: sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
-        scatterplot3d, RandomFields (>= 3.0.0), Matrix
+        RandomFields (>= 3.0.0)
 Description: Comprehensive toolbox for analysing spatial data, mainly Spatial Point Patterns, including multitype/marked points and spatial covariates, in any two-dimensional spatial region. Also supports three-dimensional point patterns, space-time point patterns in any number of dimensions, and point patterns on a linear network. 
 	Contains about 2000 functions for plotting spatial data, exploratory data analysis, model-fitting, simulation, spatial sampling, model diagnostics, and formal inference. 
 	Data types include point patterns, line segment patterns, spatial windows, pixel images, tessellations, and linear networks. 
@@ -172,6 +176,6 @@ URL: http://www.spatstat.org
 LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
-Packaged: 2014-12-31 04:28:53 UTC; adrian
+Packaged: 2015-02-27 00:43:10 UTC; adrian
 Repository: CRAN
-Date/Publication: 2014-12-31 10:17:05
+Date/Publication: 2015-02-27 07:32:22

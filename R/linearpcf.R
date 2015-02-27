@@ -1,7 +1,7 @@
 #
 # linearpcf.R
 #
-# $Revision: 1.11 $ $Date: 2014/11/10 10:46:54 $
+# $Revision: 1.13 $ $Date: 2015/02/25 06:22:54 $
 #
 # pair correlation function for point pattern on linear network
 #
@@ -46,28 +46,11 @@ linearpcfinhom <- function(X, lambda=NULL, r=NULL,  ...,
     linearpcf(X, r=r, ..., correction=correction)
   # extract info about pattern
   sX <- summary(X)
-  np <- sX$npoints
+#  np <- sX$npoints
   lengthL <- sX$totlength
   #
-  XX <- as.ppp(X)
-  lambdaX <-
-    if(is.vector(lambda)) lambda  else
-    if(is.function(lambda)) lambda(XX$x, XX$y, ...) else
-    if(is.im(lambda)) safelookup(lambda, XX) else 
-    if(is.ppm(lambda) || inherits(lambda, "lppm"))
-      predict(lambda, locations=as.data.frame(XX)) else
-    stop("lambda should be a numeric vector, function, image or ppm object")
-
-  if(!is.numeric(lambdaX))
-    stop("Values of lambda are not numeric")
-  if((nv <- length(lambdaX)) != np)
-     stop(paste("Obtained", nv, "values of lambda",
-	   "but point pattern contains", np, "points"))
-  if(any(lambdaX < 0))
-    stop("Negative values of lambda obtained")
-  if(any(lambdaX == 0))
-    stop("Zero values of lambda obtained")
-
+  lambdaX <- getlambda.lpp(lambda, X, ...)
+  #
   invlam <- 1/lambdaX
   invlam2 <- outer(invlam, invlam, "*")
   denom <- if(!normalise) lengthL else sum(invlam)
@@ -88,12 +71,15 @@ linearpcfinhom <- function(X, lambda=NULL, r=NULL,  ...,
   g <- rebadge.fv(g, new.fname=fname, new.ylab=ylab)
   # reattach bandwidth
   attr(g, "bw") <- bw
+  attr(g, "dangerous") <- attr(lambdaX, "dangerous")
   return(g)
 }
 
 
 linearpcfengine <- function(X, ..., r=NULL,
                             reweight=NULL, denom=1, correction="Ang") {
+  # ensure distance information is present
+  X <- as.lpp(X, sparse=FALSE)
   # extract info about pattern
 #  sX <- summary(X)
 #  np <- sX$npoints

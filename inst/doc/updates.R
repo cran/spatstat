@@ -38,7 +38,7 @@ text(as.Date("2013-01-01"), 50, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:2713-2717
+### code chunk number 5: updates.Rnw:2918-2922
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -47,7 +47,7 @@ nbugssince <- nrow(news(Version > "1.21-2" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:2724-2725 (eval = FALSE)
+### code chunk number 6: updates.Rnw:2929-2930 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

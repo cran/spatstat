@@ -3,7 +3,7 @@
 #
 #	Pseudoscore residual for unnormalised G (saturation process)
 #
-#	$Revision: 1.7 $	$Date: 2014/11/11 02:33:16 $
+#	$Revision: 1.8 $	$Date: 2015/02/22 03:00:48 $
 #
 ################################################################################
 #
@@ -37,7 +37,7 @@ psstG <- function(object, r=NULL, breaks=NULL, ...,
   U <- union.quad(Q)
   Z <- is.data(Q) # indicator data/dummy
   E <- equalsfun.quad(Q)
-  WQ <- w.quad(Q)  # quadrature weights
+#  WQ <- w.quad(Q)  # quadrature weights
 
   # integrals will be restricted to quadrature points
   # that were actually used in the fit
@@ -74,7 +74,7 @@ psstG <- function(object, r=NULL, breaks=NULL, ...,
   # residuals
   res <- residuals(fit, type="raw",drop=FALSE,
                     new.coef=truecoef, quad=hi.res)
-  resval <- with(res, "increment")
+#  resval <- with(res, "increment")
   rescts <- with(res, "continuous")
   # absolute weight for continuous integrals
   wc   <- -rescts
@@ -118,7 +118,7 @@ psstG <- function(object, r=NULL, breaks=NULL, ...,
   
   # Second phase: ................................................
   # close pairs (quadrature point to data point)
-  close <- crosspairs(U, X, rmax)
+  close <- crosspairs(U, X, rmax, what="ijd")
   dIJ <- close$d
   I   <- close$i
   J   <- close$j

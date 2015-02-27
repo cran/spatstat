@@ -3,7 +3,7 @@
 #
 #  Method for 'density' for point patterns
 #
-#  $Revision: 1.70 $    $Date: 2014/10/24 00:22:30 $
+#  $Revision: 1.76 $    $Date: 2015/01/30 03:47:16 $
 #
 
 ksmooth.ppp <- function(x, sigma, ..., edge=TRUE) {
@@ -16,12 +16,23 @@ density.ppp <- local({
 density.ppp <- function(x, sigma=NULL, ...,
                         weights=NULL, edge=TRUE, varcov=NULL,
                         at="pixels", leaveoneout=TRUE,
-                        adjust=1, diggle=FALSE) {
+                        adjust=1, diggle=FALSE,
+                        se=FALSE) {
   verifyclass(x, "ppp")
 
   output <- pickoption("output location type", at,
                        c(pixels="pixels",
                          points="points"))
+
+  if("kernel" %in% names(list(...))) {
+    ## kernel is only partly implemented!
+    if(output == "points")
+      stop("Non-Gaussian kernel is not implemented for at='points'")
+    if(se)
+      stop("Standard errors are not implemented for non-Gaussian kernel")
+    if(is.function(sigma))
+      warning("Bandwidth selection will be based on Gaussian kernel")
+  }
   
   ker <- resolve.2D.kernel(..., sigma=sigma, varcov=varcov, x=x, adjust=adjust)
   sigma <- ker$sigma
@@ -32,6 +43,15 @@ density.ppp <- function(x, sigma=NULL, ...,
   if(length(weights) == 0 || (!is.null(dim(weights)) && nrow(weights) == 0))
     weights <- NULL 
 
+  if(se) {
+    # compute standard error
+    SE <- denspppSEcalc(x, sigma=sigma, varcov=varcov,
+                        ...,
+                        weights=weights, edge=edge, at=output,
+                        leaveoneout=leaveoneout, adjust=adjust,
+                        diggle=diggle)
+  }
+                         
   if(output == "points") {
     # VALUES AT DATA POINTS ONLY
     result <- densitypointsEngine(x, sigma, varcov=varcov,
@@ -43,6 +63,8 @@ density.ppp <- function(x, sigma=NULL, ...,
              underflow=warning("underflow due to very small bandwidth"),
              warning(uhoh))
     }
+    if(se) 
+      result <- list(estimate=result, SE=SE)
     return(result)
   }
   
@@ -94,6 +116,8 @@ density.ppp <- function(x, sigma=NULL, ...,
   # normal return
   attr(result, "sigma") <- sigma
   attr(result, "varcov") <- varcov
+  if(se)
+    result <- list(estimate=result, SE=SE)
   return(result)
 }
 
@@ -106,6 +130,48 @@ divide.by.pixelarea <- function(x) {
   }
   return(x)
 }
+
+denspppSEcalc <- function(x, sigma, varcov, ...,
+                          weights, edge, diggle, at) {
+  ## Calculate standard error, rather than estimate
+  tau <- taumat <- NULL
+  if(is.null(varcov)) {
+    varconst <- 1/(4 * pi * prod(sigma))
+    tau <- sigma/sqrt(2)
+  } else {
+    varconst <- 1/(4 * pi * sqrt(det(varcov)))
+    taumat <- varcov/2
+  }
+  ## Calculate edge correction weights
+  if(edge) {
+    edgeim <- second.moment.calc(x, sigma, what="edge", ...,
+                                 varcov=varcov)
+    if(diggle || at == "points") {
+      edgeX <- safelookup(edgeim, x, warn=FALSE)
+      diggleX <- 1/edgeX
+      diggleX[!is.finite(diggleX)] <- 0
+    }
+    edgeim <- edgeim[Window(x), drop=FALSE]
+  }
+  ## Perform smoothing
+  if(!edge) {
+    ## no edge correction
+    V <- density(x, sigma=tau, varcov=taumat, ...,
+                 weights=weights, edge=edge, diggle=diggle, at=at)
+  } else if(!diggle) {
+    ## edge correction e(u)
+    V <- density(x, sigma=tau, varcov=taumat, ...,
+                 weights=weights, edge=edge, diggle=diggle, at=at)
+    V <- if(at == "pixels") (V/edgeim) else (V * diggleX)
+  } else {
+    ## Diggle edge correction e(x_i)
+    wts <- diggleX * (weights %orifnull% 1)
+    V <- density(x, sigma=tau, varcov=taumat, ...,
+                 weights=wts, edge=edge, diggle=diggle, at=at)
+  }
+  V <- V * varconst
+  return(sqrt(V))
+}       
 
 density.ppp
 
@@ -139,7 +205,7 @@ densitypointsEngine <- function(x, sigma, ...,
 #    attr(result, "warnings") <- "underflow"
 #    return(result)
 #  }
-  if(leaveoneout) {
+  if(leaveoneout && npoints(x) > 1) {
     # ensure each point has its closest neighbours within the cutoff
     nndmax <- maxnndist(x)
     cutoff <- max(2 * nndmax, cutoff)
@@ -425,12 +491,9 @@ densitycrossEngine <- function(Xdata, Xquery, sigma, ...,
                                weights=NULL, edge=TRUE, varcov=NULL,
                                diggle=FALSE,
                                sorted=FALSE) {
-  if(is.null(varcov)) {
-    const <- 1/(2 * pi * sigma^2)
-  } else {
+  if(!is.null(varcov)) {
     detSigma <- det(varcov)
     Sinv <- solve(varcov)
-    const <- 1/(2 * pi * sqrt(detSigma))
   }
   if(length(weights) == 0 || (!is.null(dim(weights)) && nrow(weights) == 0))
     weights <- NULL
@@ -555,6 +618,7 @@ densitycrossEngine <- function(Xdata, Xquery, sigma, ...,
                  result  = as.double(double(nquery)))
         if(sorted) result[,j] <- zz$result else result[ooq,j] <- zz$result
       }
+      colnames(result) <- weightnames
     }
   } else {
     ## anisotropic kernel
@@ -606,6 +670,7 @@ densitycrossEngine <- function(Xdata, Xquery, sigma, ...,
                  result  = as.double(double(nquery)))
         if(sorted) result[,j] <- zz$result else result[ooq,j] <- zz$result 
       }
+      colnames(result) <- weightnames
     }
   }
   # ........  Edge correction ........................................
@@ -618,3 +683,5 @@ densitycrossEngine <- function(Xdata, Xquery, sigma, ...,
   # 
   return(result)
 }
+
+

@@ -4,7 +4,7 @@
 ##   Simple objects for the elements of a diagram (text, arrows etc)
 ##    that are compatible with plot.layered and plot.listof
 ##
-##   $Revision: 1.8 $ $Date: 2014/12/02 09:31:45 $
+##   $Revision: 1.10 $ $Date: 2015/02/17 03:45:04 $
 
 # ......... internal class 'diagramobj' supports other classes  .........
 
@@ -31,6 +31,12 @@ shift.diagramobj <- function(X, ...) {
   return(y)
 }
 
+scalardilate.diagramobj <- function(X, f, ...) {
+  y <- NextMethod("scalardilate")
+  attributes(y) <- attributes(X)
+  return(y)
+}
+
 # .............. user-accessible classes ................
 # .........  (these only need a creator and a plot method) ......
 
@@ -39,25 +45,24 @@ shift.diagramobj <- function(X, ...) {
 
 textstring <- function(x, y, txt=NULL, ...) {
   if(is.ppp(x) && missing(y)) {
-    stopifnot(npoints(x) == 1)
     X <- x
-    Window(x) <- boundingbox(x)
+    Window(X) <- boundingbox(x)
   } else {
     if(missing(y) && checkfields(x, c("x", "y"))) {
       y <- x$y
       x <- x$x
+      stopifnot(length(x) == length(y))
     }
-    check.1.real(x)
-    check.1.real(y)
-    X <- ppp(x, y, window=owin(c(x,x),c(y,y)))
+    X <- ppp(x, y, window=owin(range(x),range(y)))
   }
-  Y <- diagramobj(X, txt=txt, otherargs=list(...))
+  marks(X) <- txt
+  Y <- diagramobj(X, otherargs=list(...))
   class(Y) <- c("textstring", class(Y))
   return(Y)
 }
 
 plot.textstring <- function(x, ..., do.plot=TRUE) {
-  txt <- attr(x, "txt")
+  txt <- marks(x)
   otha <- attr(x, "otherargs")
   if(do.plot) do.call.matched(text.default,
                               resolve.defaults(list(...),
@@ -69,8 +74,16 @@ plot.textstring <- function(x, ..., do.plot=TRUE) {
 
 print.textstring <- function(x, ...) {
   splat("Text string object")
-  splat("Text:", dQuote(attr(x, "txt")))
-  splat("Coordinates:", paren(paste(x$x, x$y, collapse=", ")))
+  txt <- marks(x)
+  if(npoints(x) == 1) {
+    splat("Text:", dQuote(txt))
+    splat("Coordinates:", paren(paste(as.vector(coords(x)), collapse=", ")))
+  } else {
+    splat("Text:")
+    print(txt)
+    splat("Coordinates:")
+    print(coords(x))
+  }
   return(invisible(NULL))
 }
   
@@ -138,10 +151,11 @@ plot.yardstick <- local({
   plot.yardstick <- function(x, ...,
                              angle=20,
                              frac=1/8,
-                             cex=1,
-                             pos=NULL,
                              split=FALSE,
                              shrink=1/4,
+                             pos=NULL,
+                             txt.args=list(),
+                             txt.shift=c(0,0),
                              do.plot=TRUE) {
     if(do.plot) {
       txt <- attr(x, "txt")
@@ -153,7 +167,7 @@ plot.yardstick <- local({
         ## double-headed arrow
         myarrows(A[1], A[2], B[1], y1=B[2],
                  angle=angle, frac=frac, moreargs=argh)
-        if(missing(pos))
+        if(is.null(pos) && !("adj" %in% names(txt.args)))
           pos <- if(abs(A[1] - B[1]) < abs(A[2] - B[2])) 4 else 3
       } else {
         ## two single-headed arrows with text 
@@ -166,7 +180,16 @@ plot.yardstick <- local({
         myarrows(BM[1], BM[2], B[1], B[2], 
                  angle=angle, frac=newfrac, left=FALSE, moreargs=argh)
       }
-      text(M[1], M[2], txt, cex=cex, pos=pos)
+      if(is.null(txt.shift)) txt.shift <- rep(0, 2) else 
+                             txt.shift <- ensure2vector(unlist(txt.shift))
+      do.call.matched(text.default,
+                      resolve.defaults(list(x=M[1] + txt.shift[1],
+                                            y=M[2] + txt.shift[2]),
+                                       txt.args,
+                                       list(labels=txt, pos=pos),
+                                       argh,
+                                       .MatchNull=FALSE),
+                      extrargs=c("srt", "family", "xpd"))
     }
     return(invisible(Window(x)))
   }

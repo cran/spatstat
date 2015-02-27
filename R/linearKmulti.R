@@ -1,7 +1,7 @@
 #
 # linearKmulti
 #
-# $Revision: 1.5 $ $Date: 2014/11/10 10:45:42 $
+# $Revision: 1.7 $ $Date: 2015/02/25 06:23:05 $
 #
 # K functions for multitype point pattern on linear network
 #
@@ -98,8 +98,6 @@ linearKdot.inhom <- function(X, i, lambdaI, lambdadot,
     if(!(i %in% lev)) stop(paste("i = ", i , "is not a valid mark"))  
   I <- (marx == i)
   J <- rep(TRUE, npoints(X))  # i.e. all points
-  # for better error messages
-  lambdadot <- getlambda.lpp(lambdadot, X, ...)
   # compute
   result <- linearKmulti.inhom(X, I, J, lambdaI, lambdadot, 
                                r=r, correction=correction, normalise=normalise,
@@ -178,6 +176,9 @@ linearKmulti.inhom <- function(X, I, J, lambdaI, lambdaJ,
   correction <- attr(K, "correction")
   type <- if(correction == "Ang") "L, inhom" else "net, inhom"
   K <- rebadge.as.crossfun(K, "K", type, "I", "J")
+  # set markers for 'envelope'
+  attr(K, "dangerous") <- union(attr(lambdaI, "dangerous"),
+                                attr(lambdaJ, "dangerous"))
   return(K)
 }
 
@@ -185,13 +186,15 @@ linearKmulti.inhom <- function(X, I, J, lambdaI, lambdaJ,
 
 linearKmultiEngine <- function(X, I, J, ..., r=NULL, reweight=NULL, denom=1,
                           correction="Ang", showworking=FALSE) {
+  # ensure distance information is present
+  X <- as.lpp(X, sparse=FALSE)
   # extract info about pattern
 #  sX <- summary(X)
 #  np <- sX$npoints
 #  lengthL <- sX$totlength
   np <- npoints(X)
   # extract linear network
-  L <- X$domain
+  L <- domain(X)
   # extract points
   XP <- as.ppp(X)
   W <- as.owin(XP)

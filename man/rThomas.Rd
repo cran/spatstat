@@ -6,14 +6,16 @@
   Thomas cluster process.
 }
 \usage{
- rThomas(kappa, sigma, mu, win = owin(c(0,1),c(0,1)), nsim=1)
+  rThomas(kappa, scale, mu, win = owin(c(0,1),c(0,1)),
+          nsim=1, drop=TRUE, 
+          saveLambda=FALSE, expand = 4*scale, ...)
 }
 \arguments{
   \item{kappa}{
     Intensity of the Poisson process of cluster centres.
     A single positive number, a function, or a pixel image.
   }
-  \item{sigma}{
+  \item{scale}{
     Standard deviation of random displacement (along each coordinate axis)
     of a point from its cluster centre.
   }
@@ -28,14 +30,35 @@
     or something acceptable to \code{\link{as.owin}}.
   }
   \item{nsim}{Number of simulated realisations to be generated.}
+  \item{drop}{
+    Logical. If \code{nsim=1} and \code{drop=TRUE} (the default), the
+    result will be a point pattern, rather than a list 
+    containing a point pattern.
+  }
+  \item{saveLambda}{
+    Logical. If \code{TRUE} then the random intensity corresponding to
+    the simulated parent points will also be calculated and saved,
+    and returns as an attribute of the point pattern.
+  }
+  \item{expand}{
+    Numeric. Size of window expansion for generation of parent
+    points. Has a sensible default.
+  }
+  \item{\dots}{
+    Passed to \code{\link{clusterfield}} to control the image
+    resolution when \code{saveLambda=TRUE} and to
+    \code{\link{clusterradius}} when \code{expand} is missing.
+  }
 }
 \value{
   A point pattern (an object of class \code{"ppp"}) if \code{nsim=1},
   or a list of point patterns if \code{nsim > 1}.
 
-  Additionally,  some intermediate results of the simulation are
-  returned as attributes of this point pattern.
-  See \code{\link{rNeymanScott}}.
+  Additionally, some intermediate results of the simulation are returned
+  as attributes of this point pattern (see
+  \code{\link{rNeymanScott}}). Furthermore, the simulated intensity
+  function is returned as an attribute \code{"Lambda"}, if
+  \code{saveLambda=TRUE}.
 }
 \details{
   This algorithm generates a realisation of the (`modified')
@@ -86,7 +109,7 @@
   \code{win} could have its parent point lying outside \code{win}.
   In order to allow this, the simulation algorithm
   first expands the original window \code{win}
-  by a distance \code{4 * sigma} and generates the Poisson process of
+  by a distance \code{expand} and generates the Poisson process of
   parent points on this larger window. If \code{kappa} is a pixel image,
   its domain must contain this larger window.
 
@@ -97,19 +120,21 @@
 
   The Thomas process with homogeneous parents
   (i.e. where \code{kappa} is a single number)
-  can be fitted to data using \code{\link{kppm}} or related functions.
+  can be fitted to data using \code{\link{kppm}}.
   Currently it is not possible to fit the Thomas model
   with inhomogeneous parents.
 }
 \seealso{
 \code{\link{rpoispp}},
 \code{\link{rMatClust}},
-\code{\link{rGaussPoisson}},
+\code{\link{rCauchy}},
+\code{\link{rVarGamma}},
 \code{\link{rNeymanScott}},
-\code{\link{thomas.estK}},
-\code{\link{thomas.estpcf}},
-\code{\link{kppm}}
+\code{\link{rGaussPoisson}},
+\code{\link{kppm}},
+\code{\link{clusterfit}}.
 }
+
 \references{
   Diggle, P. J., Besag, J. and Gleaves, J. T. (1976)
   Statistical analysis of spatial point patterns by

@@ -6,14 +6,16 @@
   Neyman-Scott process with Cauchy cluster kernel.
 }
 \usage{
- rCauchy(kappa, omega, mu, win = owin(), eps = 0.001, nsim=1)
+ rCauchy(kappa, scale, mu, win = owin(), thresh = 0.001,
+         nsim=1, drop=TRUE, 
+         saveLambda=FALSE, expand = NULL, \dots)
 }
 \arguments{
   \item{kappa}{
     Intensity of the Poisson process of cluster centres.
     A single positive number, a function, or a pixel image.
   }
-  \item{omega}{
+  \item{scale}{
     Scale parameter for cluster kernel. Determines the size of clusters.
     A positive number, in the same units as the spatial coordinates.
   }
@@ -27,19 +29,44 @@
     An object of class \code{"owin"}
     or something acceptable to \code{\link{as.owin}}.
   }
-  \item{eps}{
-    Threshold below which the values of the cluster kernel
-    will be treated as zero for simulation purposes. 
+  \item{thresh}{
+    Threshold relative to the cluster kernel value at the origin (parent
+    location) determining when the cluster kernel will be treated as
+    zero for simulation purposes. Will be overridden by argument
+    \code{expand} if that is given.
   }
   \item{nsim}{Number of simulated realisations to be generated.}
+  \item{drop}{
+    Logical. If \code{nsim=1} and \code{drop=TRUE} (the default), the
+    result will be a point pattern, rather than a list 
+    containing a point pattern.
+  }
+  \item{saveLambda}{
+    Logical. If \code{TRUE} then the random intensity corresponding to
+    the simulated parent points will also be calculated and saved,
+    and returns as an attribute of the point pattern.
+  }
+  \item{expand}{
+    Numeric. Size of window expansion for generation of parent
+    points. By default determined by calling
+    \code{\link{clusterradius}} with the numeric threshold value given
+    in \code{thresh}.
+  }
+  \item{\dots}{
+    Passed to \code{\link{clusterfield}} to control the image resolution
+    when \code{saveLambda=TRUE} and to \code{\link{clusterradius}} when
+    \code{expand} is missing or \code{NULL}.
+  }
 }
 \value{
   A point pattern (an object of class \code{"ppp"}) if \code{nsim=1},
   or a list of point patterns if \code{nsim > 1}.
 
-  Additionally,  some intermediate results of the simulation are
-  returned as attributes of this point pattern.
-  See \code{\link{rNeymanScott}}.
+  Additionally, some intermediate results of the simulation are returned
+  as attributes of this point pattern (see
+  \code{\link{rNeymanScott}}). Furthermore, the simulated intensity
+  function is returned as an attribute \code{"Lambda"}, if
+  \code{saveLambda=TRUE}.
 }
 \details{
   This algorithm generates a realisation of the Neyman-Scott process
@@ -54,12 +81,12 @@
   according to a Cauchy kernel.
 
   In this implementation, parent points are not restricted to lie in the
-  window; the parent process is effectively the uniform
-  Poisson process on the infinite plane.
+  window; the parent process is effectively the uniform Poisson process
+  on the infinite plane.
 
   This model can be fitted to data by the method of minimum contrast,
-  using \code{\link{cauchy.estK}}, \code{\link{cauchy.estpcf}}
-  or \code{\link{kppm}}.
+  maximum composite likelihood or Palm likelihood using
+  \code{\link{kppm}}.
   
   The algorithm can also generate spatially inhomogeneous versions of
   the cluster process:
@@ -78,16 +105,17 @@
   When the parents are homogeneous (\code{kappa} is a single number)
   and the offspring are inhomogeneous (\code{mu} is a
   function or pixel image), the model can be fitted to data
-  using \code{\link{kppm}}, or using \code{\link{cauchy.estK}}
-  or \code{\link{cauchy.estpcf}}
-  applied to the inhomogeneous \eqn{K} function. 
+  using \code{\link{kppm}}. 
 }
 \seealso{
   \code{\link{rpoispp}},
+  \code{\link{rMatClust}},
+  \code{\link{rThomas}},
+  \code{\link{rVarGamma}},
   \code{\link{rNeymanScott}},
-  \code{\link{cauchy.estK}},
-  \code{\link{cauchy.estpcf}},
-  \code{\link{kppm}}.
+  \code{\link{rGaussPoisson}},
+  \code{\link{kppm}},
+  \code{\link{clusterfit}}.
 }
 \examples{
  # homogeneous
@@ -97,8 +125,8 @@
  Y <- rCauchy(50, 0.01, Z)
 }
 \references{
-  Ghorbani, M. (2012) Cauchy cluster process.
-  \emph{Metrika}, to appear.
+  Ghorbani, M. (2013) Cauchy cluster process.
+  \emph{Metrika} \bold{76}, 697-706.
 
   Jalilian, A., Guan, Y. and Waagepetersen, R. (2013)
   Decomposition of variance for spatial Cox processes.

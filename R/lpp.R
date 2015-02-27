@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.25 $   $Date: 2014/08/09 01:56:29 $
+#  $Revision: 1.33 $   $Date: 2015/02/24 01:58:05 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -50,32 +50,41 @@ lpp <- function(X, L) {
 
 print.lpp <- function(x, ...) {
   stopifnot(inherits(x, "lpp"))
-  cat("Point pattern on linear network\n")
+  splat("Point pattern on linear network")
   sd <- summary(x$data)
   np <- sd$ncases
   nama <- sd$col.names
-  cat(paste(np, ngettext(np, "point", "points"), "\n"))
-  if(any(iscoord <- (x$ctype == "spatial")))
-    cat(paste(sum(iscoord), "-dimensional space coordinates ",
-              paren(paste(nama[iscoord], collapse=",")), "\n", sep=""))
-  if(any(istime <- (x$ctype == "temporal")))
-    cat(paste(sum(istime), "-dimensional time coordinates ",
-              paren(paste(nama[istime], collapse=",")), "\n", sep=""))
-  if(any(islocal <- (x$ctype == "local"))) 
-    cat(paste(sum(islocal), ngettext(sum(islocal), "column", "columns"),
-              "of local coordinates:",
-              commasep(sQuote(nama[islocal])), "\n"))
-  if(any(ismark <- (x$ctype == "mark"))) 
-    cat(paste(sum(ismark), ngettext(sum(ismark), "column", "columns"),
-              "of marks:",
-              commasep(sQuote(nama[ismark])), "\n"))
+  splat(np, ngettext(np, "point", "points"))
+  ## check for unusual coordinates
+  ctype <- x$ctype
+  nam.m <- nama[ctype == "mark"]
+  nam.t <- nama[ctype == "temporal"]
+  nam.c <- setdiff(nama[ctype == "spatial"], c("x","y"))
+  nam.l <- setdiff(nama[ctype == "local"], c("seg", "tp"))
+  if(length(nam.c) > 0)
+    splat("Additional spatial coordinates", commasep(sQuote(nam.c)))
+  if(length(nam.l) > 0)
+    splat("Additional local coordinates", commasep(sQuote(nam.l)))
+  if(length(nam.t) > 0)
+    splat("Additional temporal coordinates", commasep(sQuote(nam.t)))
+  if((nmarks <- length(nam.m)) > 0) {
+    if(nmarks > 1) {
+      splat(nmarks, "columns of marks:", commasep(sQuote(nam.m)))
+    } else {
+      marx <- marks(x)
+      if(is.factor(marx)) {
+        exhibitStringList("Multitype, with possible types:", levels(marx))
+      } else splat("Marks of type", sQuote(typeof(marx)))
+    }
+  }
   print(x$domain, ...)
-  invisible(NULL)
+  return(invisible(NULL))
 }
 
 plot.lpp <- function(x, ..., main, add=FALSE,
                      use.marks=TRUE, which.marks=NULL,
-                     show.all=!add, do.plot=TRUE, multiplot=TRUE) {
+                     show.all=!add, show.window=FALSE,
+                     do.plot=TRUE, multiplot=TRUE) {
   if(missing(main))
     main <- short.deparse(substitute(x))
   ## Handle multiple columns of marks as separate plots
@@ -89,7 +98,8 @@ plot.lpp <- function(x, ..., main, add=FALSE,
       ## generate one plot for each column of marks
       y <- as.listof(lapply(mx, function(z, P) setmarks(P,z), P=x))
       out <- do.call("plot",
-                     c(list(x=y, main=main, do.plot=do.plot),
+                     c(list(x=y, main=main, do.plot=do.plot,
+                            show.window=show.window),
                        list(...)))
       return(invisible(out))
     } 
@@ -104,21 +114,26 @@ plot.lpp <- function(x, ..., main, add=FALSE,
   if(!do.plot) return(a)
   ## initialise graphics space
   if(!add) {
-    b <- attr(a, "bbox")
-    plot(b, type="n", main=main, ..., show.all=FALSE)
+    if(show.window) {
+      plot(Window(P), main=main, invert=TRUE, ...)
+    } else {
+      b <- attr(a, "bbox")
+      plot(b, type="n", main=main, ..., show.all=FALSE)
+    }
   }
   ## plot linear network
   L <- as.linnet(x)
   do.call.matched("plot.linnet",
                   resolve.defaults(list(x=L, add=TRUE),
                                    list(...)),
-                  extrargs=c("col", "lty", "lwd"))
+                  extrargs=c("lty", "lwd", "col"))
   ## plot points, legend, title
   ans <- do.call.matched("plot.ppp",
                          c(list(x=P, add=TRUE, main=main,
-                                show.all=show.all),
+                                show.all=show.all, show.window=FALSE),
                            list(...)),
-                         extrargs=c("pch", "fg", "bg", "lty", "lwd",
+                         extrargs=c("shape", "size", "pch", "cex",
+                           "fg", "bg", "cols", "lty", "lwd", "etch",
                            "cex.main", "col.main", "line", "outer", "sub"))
   return(invisible(ans))
 }
@@ -127,35 +142,68 @@ plot.lpp <- function(x, ..., main, add=FALSE,
 summary.lpp <- function(object, ...) {
   stopifnot(inherits(object, "lpp"))
   L <- object$domain
-  npoints <- nrow(object$data)
-  totlen <-  sum(lengths.psp(L$lines))
-  marx <- marks(object)
-  summarx <- if(is.null(marx)) NULL else summary(marx)
-  out <- list(npoints=npoints,
-              totlength=totlen,
-              intensity=npoints/totlen,
-              nvert=L$vertices$n,
-              nedge=L$lines$n,
-              unitinfo=summary(unitname(L)),
-              marks=summarx)
-  class(out) <- "summary.lpp"
-  return(out)
+  result <- summary(L)
+  np <- npoints(object)
+  result$npoints <- np <- npoints(object)
+  result$intensity <- np/result$totlength
+  result$is.marked <- is.marked(object)
+  result$is.multitype <- is.marked(object)
+  if(result$is.marked) {
+    mks <- marks(object)
+    if(result$multiple.marks <- is.data.frame(mks)) {
+      result$marknames <- names(mks)
+      result$is.numeric <- FALSE
+      result$marktype <- "dataframe"
+      result$is.multitype <- FALSE
+    } else {
+      result$is.numeric <- is.numeric(mks)
+      result$marknames <- "marks"
+      result$marktype <- typeof(mks)
+      result$is.multitype <- is.multitype(object)
+    }
+    if(result$is.multitype) {
+      tm <- as.vector(table(mks))
+      tfp <- data.frame(frequency=tm,
+                        proportion=tm/sum(tm),
+                        intensity=tm/result$totlength,
+                        row.names=levels(mks))
+      result$marks <- tfp
+    } else 
+      result$marks <- summary(mks)
+  }
+  class(result) <- "summary.lpp"
+  return(result)
 }
 
 print.summary.lpp <- function(x, ...) {
-  cat("Point pattern on linear network\n")
-  cat(paste(x$npoints, "points\n"))
-  cat(paste("Linear network with",
-            x$nvert, "vertices and",
-            x$nedge, "edges\n"))
+  splat("Point pattern on linear network")
+  splat(x$npoints, "points")
+  splat("Linear network with",
+        x$nvert, "vertices and",
+        x$nline, "lines")
   u <- x$unitinfo
-  cat(paste("Total edge length", x$totlength, u$plural, u$explain, "\n"))
-  cat(paste("Average intensity", x$intensity,
-            "points per", if(u$vanilla) "unit length" else u$singular, "\n"))
-  if(!is.null(x$marks)) {
-    cat("Marks:\n")
-    print(x$marks)
+  dig <- getOption('digits')
+  splat("Total length", signif(x$totlength, dig), u$plural, u$explain)
+  splat("Average intensity", signif(x$intensity, dig),
+        "points per", if(u$vanilla) "unit length" else u$singular)
+  if(x$is.marked) {
+    if(x$multiple.marks) {
+      splat("Mark variables:", commasep(x$marknames, ", "))
+      cat("Summary:\n")
+      print(x$marks)
+    } else if(x$is.multitype) {
+      cat("Multitype:\n")
+      print(signif(x$marks,dig))
+    } else {
+      splat("marks are ",
+            if(x$is.numeric) "numeric, ",
+            "of type ", sQuote(x$marktype),
+            sep="")
+      cat("Summary:\n")
+      print(x$marks)
+    }
   }
+  print(x$win, prefix="Enclosing window: ")
   invisible(NULL)
 }
 
@@ -168,14 +216,40 @@ is.lpp <- function(x) {
   inherits(x, "lpp")
 }
 
+is.multitype.lpp <- function(X, na.action="warn", ...) {
+  marx <- marks(X)
+  if(is.null(marx))
+    return(FALSE)
+  if((is.data.frame(marx) || is.hyperframe(marx)) && ncol(marx) > 1)
+    return(FALSE)
+  if(!is.factor(marx))
+    return(FALSE)
+  if((length(marx) > 0) && any(is.na(marx)))
+    switch(na.action,
+           warn = {
+             warning(paste("some mark values are NA in the point pattern",
+                           short.deparse(substitute(X))))
+           },
+           fatal = {
+             return(FALSE)
+           },
+           ignore = {}
+           )
+  return(TRUE)
+}
+
 as.lpp <- function(x, y=NULL, seg=NULL, tp=NULL, ...,
-                   marks=NULL, L=NULL, check=FALSE) {
-  nomore <- is.null(y) && is.null(seg) && is.null(tp)
+                   marks=NULL, L=NULL, check=FALSE, sparse) {
+  nomore <- is.null(y) && is.null(seg) && is.null(tp) 
   if(inherits(x, "lpp") && nomore) {
     X <- x
+    if(!missing(sparse) && !is.null(sparse))
+      X$domain <- as.linnet(domain(X), sparse=sparse)
   } else {
     if(!inherits(L, "linnet"))
       stop("L should be a linear network")
+    if(!missing(sparse) && !is.null(sparse))
+      L <- as.linnet(L, sparse=sparse)
     if(is.ppp(x) && nomore) {
       X <- lpp(x, L)
     } else {
@@ -212,9 +286,12 @@ as.owin.lpp <- function(W,  ..., fatal=TRUE) {
 
 domain.lpp <- function(X, ...) { as.linnet(X) }
 
-as.linnet.lpp <- function(X, ..., fatal=TRUE) {
+as.linnet.lpp <- function(X, ..., fatal=TRUE, sparse) {
   verifyclass(X, "lpp", fatal=fatal)
-  X$domain
+  L <- X$domain
+  if(!missing(sparse))
+    L <- as.linnet(L, sparse=sparse)
+  return(L)
 }
   
 "[.lpp" <- function (x, i, ...) {
@@ -412,5 +489,25 @@ superimpose.lpp <- function(..., L=NULL) {
   Y <- lpp(locns, L)
   marks(Y) <- marx
   return(Y)
+}
+
+#
+# interactive plot for lpp objects
+#
+
+iplot.lpp <- function(x, ..., xname) {
+  if(missing(xname))
+    xname <- short.deparse(substitute(x))
+  stopifnot(is.lpp(x))
+  ## predigest
+  L <- domain(x)
+  v <- vertices(L)
+  deg <- vertexdegree(L)
+  dv <- textstring(v, txt=paste(deg))
+  y <- layered(lines=as.psp(L),
+               vertices=v,
+               degree=dv,
+               points=as.ppp(x))
+  iplot(y, ..., xname=xname, visible=c(TRUE, FALSE, FALSE, TRUE))
 }
 

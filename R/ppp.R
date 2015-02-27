@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.100 $	$Date: 2014/11/11 01:26:40 $
+#	$Revision: 4.102 $	$Date: 2015/02/13 08:18:19 $
 #
 #	A point pattern contains the following entries:	
 #
@@ -341,10 +341,12 @@ cobble.xy <- function(x, y, f=ripras, fatal=TRUE, ...) {
 # ------------------------------------------------------------------
 #
 #
-scanpp <- function(filename, window, header=TRUE, dir="", factor.marks = NULL, ...) {
+scanpp <- function(filename, window, header=TRUE, dir="",
+                   factor.marks = NULL, ...) {
   filename <- if(dir=="") filename else
               paste(dir, filename, sep=.Platform$file.sep)
-  df <- read.table(filename, header=header, stringsAsFactors = is.null(factor.marks))
+  df <- read.table(filename, header=header,
+                   stringsAsFactors = is.null(factor.marks))
   if(header) {
     # check whether there are columns named 'x' and 'y'
     colnames <- dimnames(df)[[2]]
@@ -376,13 +378,15 @@ scanpp <- function(filename, window, header=TRUE, dir="", factor.marks = NULL, .
           } else{
               ignored <- paste(" and it is ignored since",
                                sQuote("factor.marks"),
-                               "is also supplied.")
+                               "is also supplied")
           }
-          warning("It appears you have called scanpp with (something partially matching)",
-                  " the deprecated argument ", sQuote("multitype"), ignored,
+          warning("It appears you have called scanpp ",
+                  " with (something partially matching) ",
+                  " the deprecated argument ",
+                  paste0(sQuote("multitype"), ignored, "."),
                   " Please change to the new syntax.")
       }
-    marks <- df[ , -xycolumns]
+    marks <- df[ , -xycolumns, drop=FALSE]
     if(any(factor.marks)){
         # Find indices to convert to factors (recycling to obtain correct length)
         factorid <- (1:ncol(marks))[factor.marks]
@@ -409,74 +413,52 @@ scanpp <- function(filename, window, header=TRUE, dir="", factor.marks = NULL, .
 
 #-------------------------------------------------------------------
 
-print.ppp <- local({
-
-  graceful <- function(prefix, strings) {
-    shortblurb <- paste(prefix, paste(strings, collapse=", "), "\n")
-    if(nchar(shortblurb) < options("width")[[1]]) {
-      cat(shortblurb)
-    } else {
-      cat(paste(prefix,"\n"))
-      print(strings, quote=FALSE)
-    }
-    return(invisible(NULL))
-  }
-    
-  print.ppp <- function(x, ...) {
-    verifyclass(x, "ppp")
-    ism <- is.marked(x, dfok=TRUE)
-    cat(paste0(if(ism) "marked " else NULL,
+print.ppp <- function(x, ...) {
+  verifyclass(x, "ppp")
+  ism <- is.marked(x, dfok=TRUE)
+  splat(paste0(if(ism) "marked " else NULL,
                "planar point pattern:"),
         x$n,
-        ngettext(x$n, "point", "points"),
-        fill=TRUE)
-    if(ism) {
-      mks <- marks(x, dfok=TRUE)
-      if(is.data.frame(mks)) {
-        ## data frame of marks
-        graceful("Mark variables:", names(mks))
+        ngettext(x$n, "point", "points"))
+  if(ism) {
+    mks <- marks(x, dfok=TRUE)
+    if(is.data.frame(mks)) {
+      ## data frame of marks
+      exhibitStringList("Mark variables:", names(mks))
+    } else {
+      ## vector of marks
+      if(is.factor(mks)) {
+        exhibitStringList("Multitype, with levels =", levels(mks))
       } else {
-        ## vector of marks
-        if(is.factor(mks)) {
-          graceful("Multitype, with levels =", levels(mks))
+        ## Numeric, or could be dates
+        if(inherits(mks, "Date")) {
+          splat("marks are dates, of class", sQuote("Date"))
+        } else if(inherits(mks, "POSIXt")) {
+          splat("marks are dates, of class", sQuote("POSIXt"))
         } else {
-          ## Numeric, or could be dates
-          if(inherits(mks, "Date")) {
-            cat("marks are dates,",
-                "of class", sQuote("Date"),
-                fill=TRUE)
-          } else if(inherits(mks, "POSIXt")) {
-            cat("marks are dates,",
-                "of class", sQuote("POSIXt"),
-                fill=TRUE)
-          } else {
-            cat(paste0("marks are", if(is.numeric(mks)) " numeric," else NULL),
-                "of storage type ", sQuote(typeof(mks)),
-                fill=TRUE)
-          }
+          splat(paste0("marks are", if(is.numeric(mks)) " numeric," else NULL),
+                "of storage type ", sQuote(typeof(mks)))
         }
       }
     }
-    print(x$window)
-    if(!is.null(rejects <- attr(x, "rejects"))) {
-      nrejects <- rejects$n
-      cat("***",
+  }
+  print(x$window)
+  terselevel <- spatstat.options('terse')
+  if(waxlyrical('errors', terselevel) &&
+     !is.null(rejects <- attr(x, "rejects"))) {
+    nrejects <- rejects$n
+    splat("***",
           nrejects,
           ngettext(nrejects, "illegal point", "illegal points"),
           "stored in",
-          paste("attr(,", dQuote("rejects"), ")", sep=""),
-          "***",
-          fill=TRUE)
-    }
-    if(!is.null(info <- attr(x, "info")) && inherits(info, "rmhInfoList"))
-      cat("\nPattern was generated by",
-          "Metropolis-Hastings simulation.",
-          fill=TRUE)
-    return(invisible(NULL))
+          paste0("attr(,", dQuote("rejects"), ")"),
+          "***")
   }
-
-  print.ppp
-})
+  if(waxlyrical('extras', terselevel) &&
+     !is.null(info <- attr(x, "info")) && inherits(info, "rmhInfoList"))
+    splat("Pattern was generated by Metropolis-Hastings simulation.")
+  return(invisible(NULL))
+}
 
 
 summary.ppp <- function(object, ..., checkdup=TRUE) {

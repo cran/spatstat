@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.11 $   $Date: 2014/11/10 11:14:30 $
+#  $Revision: 1.18 $   $Date: 2015/02/25 07:04:17 $
 #
 #  Image/function on a linear network
 #
@@ -51,25 +51,29 @@ print.linim <- function(x, ...) {
   NextMethod("print")
 }
 
-plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
+plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1,
+                       do.plot=TRUE) {
   xname <- short.deparse(substitute(x))
   style <- match.arg(style)
   # colour style: plot as pixel image
-  if(style == "colour")
+  if(style == "colour" || !do.plot)
     return(do.call("plot.im",
                    resolve.defaults(list(x),
                                     list(...),
-                                    list(main=xname))))
+                                    list(main=xname, do.plot=do.plot))))
   # width style
   L <- attr(x, "L")
   df <- attr(x, "df")
   Llines <- as.psp(L)
   # initialise plot
   W <- as.owin(L)
-  do.call.matched("plot.owin",
-                  resolve.defaults(list(x=W, type="n"),
-                                   list(...), list(main=xname)),
-                  extrargs="type")
+  bb <- do.call.matched("plot.owin",
+                        resolve.defaults(list(x=W, type="n"),
+                                         list(...), list(main=xname)),
+                        extrargs="type")
+  # resolve graphics parameters for polygons
+  grafpar <- resolve.defaults(list(...), list(border=1, col=1))
+  grafpar <- grafpar[names(grafpar) %in% names(formals(polygon))]
   # rescale values to a plottable range
   vr <- range(df$values)
   vr[1] <- min(0, vr[1])
@@ -77,7 +81,7 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
     maxsize <- mean(distmap(Llines))/2
     scale <- maxsize/diff(vr)
   } 
-  df$values <- adjust * scale * (df$values - vr[1])
+  df$values <- adjust * scale * (df$values - vr[1])/2
   # split data by segment
   mapXY <- factor(df$mapXY, levels=seq_len(Llines$n))
   dfmap <- split(df, mapXY, drop=TRUE)
@@ -89,6 +93,10 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
   Lfrom <- L$from
   Lto   <- L$to
   Lvert <- L$vertices
+  Ljoined  <- (vertexdegree(L) > 1)
+  # precompute coordinates of dodecagon
+  dodo <- disc(npoly=12)$bdry[[1]]
+  #
   for(i in seq(length(dfmap))) {
     z <- dfmap[[i]]
     segid <- unique(z$mapXY)[1]
@@ -96,24 +104,37 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1) {
     yy <- z$y
     vv <- z$values
     # add endpoints of segment
-    leftend <- Lvert[Lfrom[segid]]
-    rightend <- Lvert[Lto[segid]]
+    ileft <- Lfrom[segid]
+    iright <- Lto[segid]
+    leftend <- Lvert[ileft]
+    rightend <- Lvert[iright]
     xx <- c(leftend$x, xx, rightend$x)
     yy <- c(leftend$y, yy, rightend$y)
     vv <- c(vv[1],     vv, vv[length(vv)])
-    # create polygon
+    rleft <- vv[1]
+    rright <- vv[length(vv)]
+    # draw polygon around segment
     xx <- c(xx, rev(xx))
     yy <- c(yy, rev(yy))
-    vv <- c(vv, -rev(vv))/2
+    vv <- c(vv, -rev(vv))
     ang <- Lperp[segid]
     xx <- xx + cos(ang) * vv
     yy <- yy + sin(ang) * vv
-    do.call.matched("polygon",
-                    resolve.defaults(list(x=xx, y=yy),
-                                     list(...),
-                                     list(border=NA, col=1)))
+    ## first add dodecagonal 'joints'
+    if(Ljoined[ileft] && rleft > 0) 
+      do.call(polygon,
+              append(list(x=rleft * dodo$x + leftend$x,
+                          y=rleft * dodo$y + leftend$y),
+                     grafpar))
+    if(Ljoined[iright] && rright > 0)
+      do.call(polygon,
+              append(list(x=rright * dodo$x + rightend$x,
+                          y=rright * dodo$y + rightend$y),
+                     grafpar))
+    # now draw main
+    do.call(polygon, append(list(x=xx, y=yy), grafpar))
   }
-  return(invisible(NULL))
+  return(invisible(bb))
 }
 
 as.im.linim <- function(X, ...) { as.im(X$Z, ...) }
@@ -150,8 +171,11 @@ eval.linim <- function(expr, envir, harmonize=TRUE) {
   if(length(varnames) == 0)
     stop("No variables in this expression")
   # get the values of the variables
-  if(missing(envir))
+  if(missing(envir)) {
     envir <- sys.parent()
+  } else if(is.list(envir)) {
+    envir <- list2env(envir, parent=parent.frame())
+  }
   vars <- lapply(as.list(varnames), function(x, e) get(x, envir=e), e=envir)
   names(vars) <- varnames
   funs <- lapply(as.list(funnames), function(x, e) get(x, envir=e), e=envir)
@@ -164,6 +188,7 @@ eval.linim <- function(expr, envir, harmonize=TRUE) {
   # Evaluate the pixel values using eval.im
   # ....................................
   sc[[1]] <- as.name('eval.im')
+  sc$envir <- envir
   Y <- eval(sc)
   # .........................................
   # Then evaluate data frame entries if feasible
@@ -196,4 +221,20 @@ eval.linim <- function(expr, envir, harmonize=TRUE) {
   result <- linim(nets[[1]], Y, df=dfY)
   return(result)
 }
-    
+
+as.linnet.linim <- function(X, ...) {
+  attr(X, "L")
+}
+
+integral.linim <- function(f, domain=NULL, ...){
+  verifyclass(f, "linim")
+  L <- as.linnet(f)
+  if(is.null(domain)) {
+    mu <- mean(f)
+    len <- volume(L)
+  } else {
+    mu <- mean(f[domain])
+    len <- sum(lengths.psp(as.psp(L)[domain]))
+  }
+  return(mu * len)
+}

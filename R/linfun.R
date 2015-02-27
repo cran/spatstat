@@ -3,18 +3,37 @@
 #
 #   Class of functions of location on a linear network
 #
-#   $Revision: 1.1 $   $Date: 2014/10/24 00:22:30 $
+#   $Revision: 1.6 $   $Date: 2015/02/17 11:27:35 $
 #
 
 linfun <- function(f, L) {
   stopifnot(is.function(f))
   stopifnot(inherits(L, "linnet"))
+  fargs <- names(formals(f))
   needargs <- c("x", "y", "seg", "tp")
-  if(!all(needargs %in% names(formals(f))))
-    stop(paste("f must have arguments named", commasep(sQuote(needargs))))
-  class(f) <- c("linfun", class(f))
-  attr(f, "L") <- L
-  return(f)
+  if(!all(needargs %in% fargs))
+    stop(paste("Function must have formal arguments",
+               commasep(sQuote(needargs))),
+         call.=FALSE)
+  otherfargs <- setdiff(fargs, needargs)
+  g <- function(...) {
+    argh <- list(...)
+    extra <- names(argh) %in% otherfargs
+    if(!any(extra)) {
+      X <- as.lpp(..., L=L)
+      value <- do.call(f, as.list(coords(X)))
+    } else {
+      extrargs <- argh[extra]
+      mainargs <- argh[!extra]
+      X <- do.call(as.lpp, mainargs)
+      value <- do.call(f, append(as.list(coords(X)), extrargs))
+    }
+    return(value)
+  }
+  class(g) <- c("linfun", class(g))
+  attr(g, "L") <- L
+  attr(g, "f") <- f
+  return(g)
 }
 
 print.linfun <- function(x, ...) {
@@ -22,9 +41,9 @@ print.linfun <- function(x, ...) {
   if(!is.null(explain <- attr(x, "explain"))) {
     explain(x)
   } else {
-    cat("Function on linear network\n")
-    print(as.function(x), ...)
-    cat("Function domain:\n")
+    splat("Function on linear network:")
+    print(attr(x, "f"), ...)
+    splat("Function domain:")
     print(L)
   }
   invisible(NULL)
@@ -43,8 +62,11 @@ as.linim.linfun <- function(X, L, ..., eps = NULL, dimyx = NULL, xy = NULL) {
   vals <- do.call(X, append(as.list(coo), list(...)))
   # replace values
   df$values <- vals
+  typ <- typeof(vals)
+  storage.mode(Y$v) <- typ
+  Y[] <- vals
+  Y$type <- if(typ == "double") "real" else typ
   attr(Y, "df") <- df
-  Y[!is.na(Y$v)] <- vals
   return(Y)
 }
   
@@ -73,3 +95,6 @@ as.function.linfun <- function(x, ...) {
   return(x)
 }
 
+integral.linfun <- function(f, domain=NULL, ...) {
+  integral(as.linim(f), domain=domain, ...)
+}

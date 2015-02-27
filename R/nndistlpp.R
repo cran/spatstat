@@ -1,7 +1,7 @@
 #
 # nndistlpp.R
 #
-#  $Revision: 1.4 $ $Date: 2014/11/10 12:08:48 $
+#  $Revision: 1.6 $ $Date: 2015/02/22 11:17:25 $
 #
 # Methods for nndist, nnwhich, nncross for linear networks
 #
@@ -13,7 +13,7 @@ nndist.lpp <- function(X, ..., method="C") {
   stopifnot(inherits(X, "lpp"))
   stopifnot(method %in% c("C", "interpreted"))
   #
-  L <- X$domain
+  L <- as.linnet(X$domain, sparse=FALSE)
   Y <- as.ppp(X)
   n <- npoints(Y)
   #
@@ -144,16 +144,21 @@ nncross.lpp <- function(X, Y, iX=NULL, iY=NULL, what = c("dist", "which"), ..., 
   stopifnot(method %in% c("C", "interpreted"))
   check <- resolve.defaults(list(...), list(check=TRUE))$check
   #
-  L <- as.linnet(X)
-  if(check && !identical(L, as.linnet(Y))) 
+  if(check && !identical(as.linnet(X, sparse=TRUE),
+                         as.linnet(Y, sparse=TRUE)))
     stop("X and Y are on different linear networks")
+  Xsparse <- identical(domain(X)$sparse, TRUE)
+  Ysparse <- identical(domain(Y)$sparse, TRUE)
+  L <- if(!Xsparse && Ysparse) as.linnet(X) else
+       if(Xsparse && !Ysparse) as.linnet(Y) else
+       as.linnet(X, sparse=FALSE)
   #
   nX <- npoints(X)
   nY <- npoints(Y)
   P <- as.ppp(X)
   Q <- as.ppp(Y)
   #
-  Lseg  <- L$lines
+#  Lseg  <- L$lines
   Lvert <- L$vertices
   from  <- L$from
   to    <- L$to
