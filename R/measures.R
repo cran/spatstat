@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.52 $  $Date: 2015/02/17 10:47:48 $
+#  $Revision: 1.55 $  $Date: 2015/05/06 07:11:39 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
@@ -96,16 +96,18 @@ msr <- function(qscheme, discrete, density, check=TRUE) {
 
 with.msr <- function(data, expr, ...) {
   stopifnot(inherits(data, "msr"))
-  stopifnot(is.character(expr)) 
-  y <- switch(expr,
-              increment  = { data$val },
-              is.atom    = { data$atoms },
-              discrete   = { data$discrete },
-              density    = { data$density },
-              continuous = { data$density * data$wt },
-              qweights   = { data$wt },
-              qlocations = { data$loc },
-              stop("Unrecognised option in entry.msr", call.=FALSE))
+  stuff <- list(increment  = data$val,
+                is.atom    = data$atoms,
+                discrete   = data$discrete,
+                density    = data$density,
+                continuous = data$density * data$wt,
+                qweights   = data$wt,
+                qlocations = data$loc,
+                atoms      = data$loc[data$atoms],
+                atommass   = data$wt[data$atoms])
+  y <- eval(substitute(expr), envir=stuff, enclos=parent.frame())
+  if(is.character(y) && length(y) == 1 && y %in% names(stuff))
+    y <- stuff[[y]]
   return(y)
 }
 
@@ -114,12 +116,14 @@ print.msr <- function(x, ...) {
   d <- ncol(as.matrix(x$val))
   splat(paste0(if(d == 1) "Scalar" else paste0(d, "-dimensional vector"),
                "-valued measure"))
-  if(d > 1 && !is.null(cn <- colnames(x$val)))
+  if(d > 1 && !is.null(cn <- colnames(x$val)) && waxlyrical("space"))
     splat("vector components:", commasep(sQuote(cn)))
-  if(waxlyrical("extras")) {
+  if(waxlyrical("gory")) {
     splat("Approximated by", n, "quadrature points")
     print(as.owin(x$loc))
     splat(sum(x$atoms), "atoms")
+  }
+  if(waxlyrical("extras")) {
     splat("Total mass:")
     if(d == 1) {
       splat("discrete =", signif(sum(with(x, "discrete")), 5),
@@ -140,8 +144,11 @@ print.msr <- function(x, ...) {
 
 integral.msr <- function(f, domain=NULL, ...) {
   stopifnot(inherits(f, "msr"))
-  if(!is.null(domain))
+  if(!is.null(domain)) {
+    if (is.tess(domain)) 
+      return(sapply(tiles(domain), integral.msr, f = f))
     f <- f[domain]
+  }
   y <- with(f, "increment")
   if(is.matrix(y)) apply(y, 2, sum) else sum(y)
 }
@@ -202,14 +209,14 @@ plot.msr <- function(x, ..., add=FALSE,
       attr(xj, "smoothdensity") <- smo[[j]]
       lis[[j]] <- xj
     }
-    lis <- as.listof(lis)
+    lis <- as.solist(lis)
     if(!is.null(cn <- colnames(x$val)))
       names(lis) <- cn
-    result <- do.call("plot.listof", resolve.defaults(list(lis),
-                                                      list(...),
-                                                      list(how=how,
-                                                           main=main,
-                                                           equal.scales=TRUE)))
+    result <- do.call(plot.solist, resolve.defaults(list(lis),
+                                                    list(...),
+                                                    list(how=how,
+                                                         main=main,
+                                                         equal.scales=TRUE)))
     return(invisible(result))
   }
   ## scalar measure
@@ -330,7 +337,7 @@ Smooth.msr <- function(X, ..., drop=TRUE) {
   val <- X$val
   result <- density(loc, weights=val, ...)
   if(!drop && is.im(result))
-    result <- listof(result)
+    result <- solist(result)
   return(result)
 }
 

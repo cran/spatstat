@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.169 $    $Date: 2015/02/18 00:37:09 $
+#    $Revision: 1.180 $    $Date: 2015/05/20 09:10:09 $
 #
 #
 matrowsum <- function(x) {
@@ -363,6 +363,27 @@ prolongseq <- function(x, newrange, step=NULL) {
   attr(x, "nleft") <- nleft
   attr(x, "nright") <- nright
   return(x)
+}
+
+## fill gaps in a sequence
+fillseq <- function(x) {
+  xname <- short.deparse(substitute(x))
+  n <- length(x)
+  if(n <= 1) return(x)
+  rx <- range(x)
+  dx <- diff(x)
+  if(any(dx < 0)) stop(paste(xname, "should be an increasing sequence"),
+                       call.=FALSE)
+  ## guess step length
+  eps <- diff(rx)/1e7
+  step <- min(dx[dx > eps])
+  ## make new sequence
+  y <- seq(rx[1], rx[2], by=step)
+  ny <- length(y)
+  ## mapping from x to y
+  i <- round((x - rx[1])/step) + 1L
+  i <- pmin(ny, pmax(1, i))
+  return(list(xnew=y, i=i))
 }
 
 intersect.ranges <- function(a, b, fatal=TRUE) {
@@ -781,12 +802,18 @@ validposint <- function(n, caller, fatal=TRUE) {
 
 # wrangle data.frames
 
-firstfactor <- function(x) {
+findfirstfactor <- function(x) {
   stopifnot(is.data.frame(x) || is.hyperframe(x))
   isfac <- unlist(lapply(as.list(x), is.factor))
   if(!any(isfac)) 
     return(NULL)
-  return(x[, min(which(isfac)), drop=TRUE])
+  min(which(isfac))
+}
+
+firstfactor <- function(x) {
+  j <- findfirstfactor(x)
+  if(is.null(j)) return(NULL)
+  return(x[, j, drop=TRUE])
 }
 
 onecolumn <- function(m) {
@@ -1354,29 +1381,44 @@ prepareTitle <- function(main) {
               blank=rep('  ', nlines)))
 }
 
-simplenumber <- function(x, unit = "", multiply="*") {
-  ## Try to express x as a simple multiple or fraction
-  stopifnot(length(x) == 1)
-  s <- if(x < 0) "-" else ""
-  x <- abs(x)
-  if(unit == "") {
-    if(x %% 1 == 0) return(paste0(s, round(x)))
-    for(i in 1:12) {
-      if((i/x) %% 1 == 0) return(paste0(s, i, "/", round(i/x)))
-      if((i*x) %% 1 == 0) return(paste0(s, round(i*x), "/", i))
+simplenumber <- local({
+
+  iswhole <- function(x, tol=0) { abs(x %% 1) <= tol }
+
+  iszero <- function(x, tol=0) { abs(x) <= tol }
+  
+  simplenumber <- function(x, unit = "", multiply="*",
+                           tol=.Machine$double.eps) {
+    ## Try to express x as a simple multiple or fraction
+    if(length(x) > 1)
+      return(sapply(as.list(x), simplenumber,
+                    unit=unit, multiply=multiply, tol=tol))
+    s <- if(x < 0) "-" else ""
+    x <- abs(x)
+    if(unit == "") {
+      if(iswhole(x, tol)) return(paste0(s, round(x)))
+      for(i in 1:12) {
+        if(iswhole(i/x, tol)) return(paste0(s, i, "/", round(i/x)))
+        if(iswhole(i*x, tol)) return(paste0(s, round(i*x), "/", i))
+      }
+    } else {
+      if(iszero(x, tol)) return("0")
+      if(iszero(x-1, tol)) return(paste0(s,unit))
+      if(iswhole(x, tol)) return(paste0(s, round(x), multiply, unit))
+      if(iswhole(1/x, tol)) return(paste0(s, unit, "/", round(1/x)))
+      for(i in 2:12) {
+        if(iswhole(i/x, tol))
+          return(paste0(s, i, multiply, unit, "/", round(i/x)))
+        if(iswhole(i*x, tol))
+          return(paste0(s, round(i*x), multiply, unit, "/", i))
+      }
     }
-  } else {
-    if(x == 0) return("0")
-    if(x == 1) return(paste0(s,unit))
-    if(x %% 1 == 0) return(paste0(s, round(x), multiply, unit))
-    if((1/x) %% 1 == 0) return(paste0(s, unit, "/", round(i/x)))
-    for(i in 2:12) {
-      if((i/x) %% 1 == 0) return(paste0(s, i, multiply, unit, "/", round(i/x)))
-      if((i*x) %% 1 == 0) return(paste0(s, round(i*x), multiply, unit, "/", i))
-    }
+    return(NULL)
   }
-  return(NULL)
-}
+
+  simplenumber
+})
+
 
 fontify <- function(x, font="italic") {
   if(!nzchar(font) || font == "plain")
@@ -1402,7 +1444,59 @@ dround <- function(x) {
 }
 
 there.is.no.try <- function(...) {
+  #' do, or do not
   y <- try(..., silent=TRUE)
   if(inherits(y, "try-error")) return(NULL)
   return(y)
 }
+
+## attach a library's namespace
+bibliotheque <- function(nom, dont) {
+  ok <- requireNamespace(nom)
+  if(!ok) return(FALSE)
+  if(exists(dont)) return(TRUE)
+  if(isNamespaceLoaded(nom)) return(TRUE)
+  cat("Attaching namespace", sQuote(nom), fill=TRUE)
+  attachNamespace(nom)
+  return(exists(dont))
+}
+
+## replace recognise keywords by other keywords
+mapstrings <- function(x, map=NULL) {
+  if(is.null(map)) return(x)
+  x <- as.character(x)
+  from <- names(map)
+  map <- as.character(map)
+  if(sum(nzchar(from)) != length(map))
+    stop("input names are missing in map", call.=FALSE)
+  if(any(duplicated(from)))
+    stop("input names are duplicated in map", call.=FALSE)
+  i <- match(x, from)
+  hit <- !is.na(i)
+  x[hit] <- map[i[hit]]
+  return(x)
+}
+
+romansort <- local({
+
+  # sort character strings in order of Roman alphabet
+  
+  romansort <- function(x) {
+    if(!is.character(x)) return(sort(x))
+    x <- as.vector(x)
+    ## convert each 'word' to a vector of single characters
+    cc <- strsplit(x, "")
+    ## find position of each character in Roman alphabet
+    mm <- lapply(cc, match, table=c(letters, LETTERS))
+    mmax <- max(unlist(mm), na.rm=TRUE)
+    ## encode
+    nn <- sapply(mm, powercode, base=mmax)
+    ## find ordering
+    oo <- order(nn, na.last=TRUE)
+    return(x[oo])
+  }
+
+  powercode <- function(x, base) sum(x * base^rev((seq_len(length(x))-1)))
+
+  romansort
+})

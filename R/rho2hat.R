@@ -3,7 +3,7 @@
 #
 #   Relative risk for pairs of covariate values
 #
-#   $Revision: 1.19 $   $Date: 2014/11/11 02:43:31 $
+#   $Revision: 1.21 $   $Date: 2015/04/28 08:21:12 $
 #
 
 rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
@@ -46,6 +46,7 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
     needflip <- (cov1name == "y" && cov2name == "x")
     X <- data.ppm(model)
     if(needflip) X <- flipxy(X)
+    
     switch(method,
            ratio = {
              # ratio of smoothed intensity estimates
@@ -53,12 +54,15 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
              sigma <- attr(den, "sigma")
              varcov <- attr(den, "varcov")
              W <- as.owin(den)
+             if(!needflip) {
+               lambda <- predict(model, locations=W)
+             } else {
+               lambda <- flipxy(predict(model, locations=flipxy(W)))
+             }
              rslt <- switch(reference,
                             area = { den },
                             model = {
-                              lam <- predict(model, locations=W)
-                              if(needflip) lam <- flipxy(lam)
-                              lam <- blur(lam, sigma=sigma, varcov=varcov,
+                              lam <- blur(lambda, sigma=sigma, varcov=varcov,
                                           normalise=TRUE)
                               eval.im(den/lam)
                             })
@@ -67,14 +71,17 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
              # smoothed point pattern with weights = 1/reference
              W <- do.call.matched("as.mask",
                                   append(list(w=as.owin(X)), list(...)))
+             if(!needflip) {
+               lambda <- predict(model, locations=W)
+             } else {
+               lambda <- flipxy(predict(model, locations=flipxy(W)))
+             }
              gstarX <- switch(reference,
                               area = {
                                 rep.int(area(W), npoints(X))
                               },
                               model = {
-                                lam <- predict(model, locations=W)
-                                if(needflip) lam <- flipxy(lam)
-                                lam[X]
+                                lambda[X]
                               })
              rslt <- density(X, ..., weights=1/gstarX)
              sigma <- attr(rslt, "sigma")
@@ -83,6 +90,7 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
     Z12points <- X
     r1 <- W$xrange
     r2 <- W$yrange
+    lambda <- lambda[]
   } else {
     # general case
     isxy <- FALSE
@@ -144,11 +152,14 @@ rho2hat <- function(object, cov1, cov2, ..., method=c("ratio", "reweight")) {
   }
   # add scale and label info
   attr(rslt, "stuff") <- list(isxy=isxy,
+                              cov1=cov1,
+                              cov2=cov2,
                               cov1name=cov1name,
                               cov2name=cov2name,
                               r1=r1,
                               r2=r2,
                               reference=reference,
+                              lambda=lambda,
                               modelcall=modelcall,
                               callstring=callstring,
                               Z12points=Z12points,
@@ -169,7 +180,8 @@ plot.rho2hat <- function(x, ..., do.points=FALSE) {
   plotparams <- graphicsPars("plot")
   do.call.matched("plot.im",
                   resolve.defaults(list(x=x, axes=FALSE),
-                                   list(...), list(main=xname)),
+                                   list(...),
+                                   list(main=xname, ribargs=list(axes=TRUE))),
                   extrargs=c(plotparams, "add", "zlim", "breaks"))
   # add axes 
   if(rd$axes) {
@@ -227,4 +239,28 @@ print.rho2hat <- function(x, ...) {
   if(!is.null(s$varcov)) { cat("\tvarcov =\n") ; print(s$varcov) }
   cat("Intensity values:\n")
   NextMethod("print")
+}
+
+predict.rho2hat <- function(object, ..., relative=FALSE) {
+  if(length(list(...)) > 0)
+    warning("Additional arguments ignored in predict.rho2hat")
+  # extract info
+  s <- attr(object, "stuff")
+  reference <- s$reference
+  # extract images of covariate, scaled to [0,1]
+  Z1 <- scaletointerval(s$cov1, xrange=s$r1)
+  Z2 <- scaletointerval(s$cov2, xrange=s$r2)
+  # extract pairs of covariate values
+  ZZ <- pairs(Z1, Z2, plot=FALSE)
+  # apply rho to Z
+  YY <- safelookup(object, ppp(ZZ[,1], ZZ[,2], c(0,1), c(0,1)), warn=FALSE)
+  # reform as image
+  Y <- Z1
+  Y[] <- YY
+  # adjust to reference baseline
+  if(reference != "Lebesgue" && !relative) {
+    lambda <- s$lambda
+    Y <- Y * lambda
+  }
+  return(Y)
 }

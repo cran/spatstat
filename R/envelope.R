@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.69 $  $Date: 2014/12/10 01:18:19 $
+#   $Revision: 2.70 $  $Date: 2015/04/14 11:36:21 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -49,7 +49,7 @@ envelope.ppp <-
   function(Y, fun=Kest, nsim=99, nrank=1, ...,
            simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
            verbose=TRUE, clipdata=TRUE, 
-           transform=NULL, global=FALSE, ginterval=NULL,
+           transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
@@ -173,7 +173,8 @@ envelope.ppp <-
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
                  nsim=nsim, nrank=nrank, ..., 
                  verbose=verbose, clipdata=clipdata,
-                 transform=transform, global=global, ginterval=ginterval,
+                 transform=transform,
+                 global=global, ginterval=ginterval, use.theory=use.theory,
                  alternative=alternative,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
@@ -187,7 +188,7 @@ envelope.ppm <-
            verbose=TRUE, clipdata=TRUE, 
            start=NULL,
            control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5, 
-           transform=NULL, global=FALSE, ginterval=NULL,
+           transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL, 
            alternative=c("two.sided", "less", "greater"),
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
@@ -245,7 +246,8 @@ envelope.ppm <-
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
                  nsim=nsim, nrank=nrank, ..., 
                  verbose=verbose, clipdata=clipdata,
-                 transform=transform, global=global, ginterval=ginterval,
+                 transform=transform,
+                 global=global, ginterval=ginterval, use.theory=use.theory,
                  alternative=alternative,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
@@ -256,7 +258,7 @@ envelope.ppm <-
 envelope.kppm <-
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
-           transform=NULL, global=FALSE, ginterval=NULL,
+           transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
@@ -292,7 +294,8 @@ envelope.kppm <-
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
                  nsim=nsim, nrank=nrank, ..., 
                  verbose=verbose, clipdata=clipdata,
-                 transform=transform, global=global, ginterval=ginterval,
+                 transform=transform,
+                 global=global, ginterval=ginterval, use.theory=use.theory,
                  alternative=alternative,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
@@ -313,7 +316,7 @@ envelopeEngine <-
   function(X, fun, simul,
            nsim=99, nrank=1, ..., 
            verbose=TRUE, clipdata=TRUE, 
-           transform=NULL, global=FALSE, ginterval=NULL,
+           transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
            savefuns=FALSE, savepatterns=FALSE,
            saveresultof=NULL,
@@ -526,10 +529,11 @@ envelopeEngine <-
   valname <- fvnames(funX, ".y")
   has.theo <- "theo" %in% fvnames(funX, "*")
   csr.theo <- csr && has.theo
-
+  use.theory <- if(is.null(use.theory)) csr.theo else (use.theory && has.theo)
+  
   if(tran) {
     # extract only the recommended value
-    if(csr.theo) 
+    if(use.theory) 
       funX <- funX[, c(argname, valname, "theo")]
     else
       funX <- funX[, c(argname, valname)]
@@ -552,7 +556,7 @@ envelopeEngine <-
   ## determine whether dual simulations are required
   ## (one set of simulations to calculate the theoretical mean,
   ##  another independent set of simulations to obtain the critical point.)
-  dual <- (global && !csr.theo && !VARIANCE)
+  dual <- (global && !use.theory && !VARIANCE)
   Nsim <- if(!dual) nsim else (nsim + nsim2)
 
   # if taking data from a list of point patterns,
@@ -630,6 +634,7 @@ envelopeEngine <-
                         valname=valname,
                         csr=csr,
                         csr.theo=csr.theo,
+                        use.theory=use.theory,
                         pois=pois,
                         simtype=simtype,
                         constraints=constraints,
@@ -771,7 +776,7 @@ envelopeEngine <-
 
     if(tran) {
       # extract only the recommended value
-      if(csr.theo) 
+      if(use.theory) 
         funXsim <- funXsim[, c(argname, valname, "theo")]
       else
         funXsim <- funXsim[, c(argname, valname)]
@@ -813,7 +818,8 @@ envelopeEngine <-
                   desc=c("distance argument r",
                     paste("Simulation ", 1:Nsim, sep="")),
                   fname=attr(funX, "fname"),
-                  yexp=attr(funX, "yexp"))
+                  yexp=attr(funX, "yexp"),
+                  unitname=unitname(funX))
     fvnames(SimFuns, ".") <- simnames
   } 
   if(savepatterns)
@@ -832,7 +838,7 @@ envelopeEngine <-
   result <- envelope.matrix(simvals, funX=funX,
                             jsim=jsim, jsim.mean=jsim.mean,
                             type=etype, alternative=alternative,
-                            csr=csr, use.theory=csr.theo,
+                            csr=csr, use.theory=use.theory,
                             nrank=nrank, ginterval=ginterval, nSD=nSD,
                             Yname=Yname, do.pwrong=do.pwrong,
                             weights=weights)
@@ -948,11 +954,13 @@ summary.envelope <- function(object, ...) {
   csr <- e$csr
   pois <- e$pois
   if(is.null(pois)) pois <- csr
-  has.theo <- "theo" %in% fvnames(object, "*")
-  csr.theo <- csr && has.theo
   simtype <- e$simtype
   constraints <- e$constraints
   alternative <- e$alternative
+  use.theory <- e$use.theory
+  has.theo <- "theo" %in% fvnames(object, "*")
+  csr.theo <- csr && has.theo
+  use.theory <- if(is.null(use.theory)) csr.theo else (use.theory && has.theo)
   fname <- deparse(attr(object, "ylab"))
   type <- if(V) paste("Pointwise", e$nSD, "sigma") else
           if(g) "Simultaneous" else "Pointwise"
@@ -1012,7 +1020,7 @@ summary.envelope <- function(object, ...) {
                    two.sided = "Envelopes",
                    "Critical boundary"),
             "computed as",
-            if(csr.theo) "theoretical curve" else "mean of simulations",
+            if(use.theory) "theoretical curve" else "mean of simulations",
             switch(alternative,
                    two.sided="plus/minus",
                    less="minus",
@@ -1049,6 +1057,8 @@ summary.envelope <- function(object, ...) {
 # theory = funX[["theo"]]
 # observed = fX
 
+envelope.matrix <- local({
+
 envelope.matrix <- function(Y, ...,
                             rvals=NULL, observed=NULL, theory=NULL, 
                             funX=NULL,
@@ -1081,7 +1091,8 @@ envelope.matrix <- function(Y, ...,
     # assume funX is summary function for observed data
     rvals <- with(funX, .x)
     observed <- with(funX, .y)
-    theory <- if(use.theory && "theo" %in% names(funX)) with(funX, theo) else NULL
+    theory <-
+      if(use.theory && "theo" %in% names(funX)) with(funX, theo) else NULL
   } else if(check) {
     # validate vectors of data
     if(is.null(rvals)) stop("rvals must be supplied")
@@ -1168,7 +1179,8 @@ envelope.matrix <- function(Y, ...,
                lohi <- apply(simvals, 1, range)
              } else {
                lohi <- apply(simvals, 1,
-                             function(x, n) { sort(x)[n] },
+#                             function(x, n) { sort(x)[n] },
+                             orderstats,
                              n=c(nrank, nsim-nrank+1))
              }
              lo <- lohi[1,]
@@ -1528,14 +1540,15 @@ envelope.matrix <- function(Y, ...,
     colnames(alldata) <- c("r", simnames)
     alldata <- as.data.frame(alldata)
     SimFuns <- fv(alldata,
-                   argu="r",
-                   ylab=atr$ylab,
-                   valu="sim1",
-                   fmla= deparse(. ~ r),
-                   alim=atr$alim,
-                   labl=names(alldata),
-                   desc=c("distance argument r",
-                     paste("Simulation ", 1:nsim, sep="")))
+                  argu="r",
+                  ylab=atr$ylab,
+                  valu="sim1",
+                  fmla= deparse(. ~ r),
+                  alim=atr$alim,
+                  labl=names(alldata),
+                  desc=c("distance argument r",
+                          paste("Simulation ", 1:nsim, sep="")),
+                  unitname=unitname(funX))
     fvnames(SimFuns, ".") <- simnames
     attr(result, "simfuns") <- SimFuns
   }
@@ -1546,6 +1559,11 @@ envelope.matrix <- function(Y, ...,
   return(result)
 }
 
+  orderstats <- function(x, n) { sort(x)[n] }
+
+  envelope.matrix
+  
+})
 
 envelope.envelope <- function(Y, fun=NULL, ...,
                               transform=NULL, global=FALSE, VARIANCE=FALSE) {
@@ -1664,7 +1682,7 @@ envelope.envelope <- function(Y, fun=NULL, ...,
   }
   
   # Tack on envelope info
-  copyacross <- c("Yname", "csr.theo", "simtype", "constraints")
+  copyacross <- c("Yname", "csr.theo", "use.theory", "simtype", "constraints")
   attr(result, "einfo")[copyacross] <- attr(Yorig, "einfo")[copyacross]
   attr(result, "einfo")$csr <- csr
   # Save data
@@ -1710,6 +1728,7 @@ pool.envelope <- function(..., savefuns=FALSE, savepatterns=FALSE) {
   csr         <- resolveEinfo(eilist, "csr", FALSE, NULL)
   use.weights <- resolveEinfo(eilist, "use.weights" , FALSE,
      "Weights were used in some, but not all, envelopes: they will be ignored")
+  use.theory <- resolveEinfo(eilist, "use.theory", csr, NULL)
   #
   weights <-
     if(use.weights) unlist(lapply(Elist, attr, which="weights")) else NULL
@@ -1803,7 +1822,7 @@ pool.envelope <- function(..., savefuns=FALSE, savepatterns=FALSE) {
          })
   
   # Copy envelope info that is not handled by envelope.matrix
-  copyacross <- c("Yname", "csr.theo", "simtype", "constraints")
+  copyacross <- c("Yname", "csr.theo", "use.theory", "simtype", "constraints")
   attr(result, "einfo")[copyacross] <- attr(Elist[[1]], "einfo")[copyacross]
   
   # ..............saved patterns .....................

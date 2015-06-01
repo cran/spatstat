@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.72 $   $Date: 2014/11/11 03:09:00 $
+#    $Revision: 1.74 $   $Date: 2015/05/08 04:25:37 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -31,7 +31,8 @@ summary.ppm <- local({
 
     x <- object
     y <- list()
-  
+    class(y) <- "summary.ppm"
+
     #######  Extract main data components #########################
 
     QUAD <- object$Q
@@ -83,7 +84,9 @@ summary.ppm <- local({
     ######  Fitting algorithm ########################################
 
     y$method <- x$method
-  
+
+    y$VB <- x$internal$VB
+    
     y$problems <- x$problems
 
     y$fitter <- if(!is.null(x$fitter)) x$fitter else "unknown"
@@ -112,10 +115,8 @@ summary.ppm <- local({
 
     # Exit here if quick=TRUE
     
-    if(identical(quick, TRUE)) {
-      class(y) <- "summary.ppm"
+    if(identical(quick, TRUE)) 
       return(y)
-    }
 
     ######  Does it have external covariates?  ####################
 
@@ -133,6 +134,7 @@ summary.ppm <- local({
                      covfunargs    = NULL,
                      has.xargs     = FALSE,
                      xargmap       = NULL))
+    class(y) <- "summary.ppm"
 
     if(!antiquated) {
       covars <- x$covariates
@@ -272,6 +274,10 @@ summary.ppm <- local({
     if(is.character(quick) && (quick == "no variances"))
       return(y)
 
+    # Exit before SE for variational Bayes
+    if(!is.null(x$internal$VB))
+      return(y)
+    
     if(length(COEFS) > 0) {
       # compute standard errors
       se <- x$internal$se
@@ -299,7 +305,6 @@ summary.ppm <- local({
       }
     }
   
-    class(y) <- "summary.ppm"
     return(y)
   }
   
@@ -332,19 +337,23 @@ print.summary.ppm <- function(x, ...) {
       switch(x$method,
              mpl={
                if(x$poisson) {
-                 # Poisson process
-                 "maximum likelihood (Berman-Turner approximation)"
+                 # Poisson process 
+                "maximum likelihood (Berman-Turner approximation)"
                } else {
                  "maximum pseudolikelihood (Berman-Turner approximation)"
                } 
              },
              logi={
-               if(!x$poisson) {
-                 "maximum pseudolikelihood (logistic regression approximation)"
+               if(is.null(x$VB)){
+                 if(x$poisson) {
+                   # Poisson process
+                   "maximum likelihood (logistic regression approximation)"
+                 } else {
+                   "maximum pseudolikelihood (logistic regression approximation)"
+                 }
                } else {
-                 # Poisson process
-                 "maximum likelihood (logistic regression approximation)"
-               } 
+                 "maximum posterior density (variational Bayes approximation)"
+               }
              },
              ho="Huang-Ogata method (approximate maximum likelihood)",
              paste("unrecognised method", sQuote(x$method)))
@@ -373,11 +382,17 @@ print.summary.ppm <- function(x, ...) {
   if(x$args$correction == "border")
     splat("\t[border correction distance r =", x$args$rbord,"]")
 
-  ruletextline()
-
   # print summary of quadrature scheme
+  if(is.null(x$quad))
+    return(invisible(NULL))
+  ruletextline()
   print(x$quad)
-  
+
+
+  ## start printing trend information
+  if(is.null(x$no.trend))
+    return(invisible(NULL))
+
   ruletextline()
   splat("FITTED MODEL:")
   parbreak()
@@ -407,6 +422,9 @@ print.summary.ppm <- function(x, ...) {
 
   # ----- trend --------------------------
 
+  if(length(x$trend) == 0)
+    return(invisible(NULL))
+  
   parbreak()
   splat(paste0("---- ", x$trend$name, ": ----"))
   parbreak()
@@ -498,11 +516,12 @@ print.summary.ppm <- function(x, ...) {
   vali <- x$valid
   if(identical(vali, FALSE) && waxlyrical("errors")) {
     parbreak()
-    splat("***",
-          "Model is not valid",
-          "***\n***",
-          "Interaction parameters are outside valid range",
-          "***")
+    splat("*** Model is not valid ***")
+    if(!all(is.finite(x$entries$coef))) {
+      splat("*** Some coefficients are NA or Inf ***")
+    } else {
+      splat("*** Interaction parameters are outside valid range ***")
+    }
   } else if(is.na(vali) && waxlyrical("extras")) {
     parbreak()
     splat("[Validity of model could not be checked]")

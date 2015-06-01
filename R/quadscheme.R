@@ -69,13 +69,13 @@ quadscheme <- function(data, dummy, method="grid", ...) {
 }
 
 quadscheme.spatial <-
-  function(data, dummy, method="grid", ...) {
+  function(data, dummy, method=c("grid", "dirichlet"), ...) {
         #
 	# generate a quadrature scheme from data and dummy patterns.
 	#
 	# The 'method' may be "grid" or "dirichlet"
 	#
-	# '...' are passed to gridweights() or dirichlet.weights()
+	# '...' are passed to gridweights() or dirichletWeights()
         #
         # quadscheme.spatial:
         #       for unmarked point patterns.
@@ -87,6 +87,7 @@ quadscheme.spatial <-
         # 
 
     check <- resolve.defaults(list(...), list(check=TRUE))$check
+    method <- match.arg(method)
     
     data <- as.ppp(data, check=check)
     dummy <- as.ppp(dummy, data$window, check=check)
@@ -104,7 +105,7 @@ quadscheme.spatial <-
              w <- gridweights(both, window= dummy$window, ...)
            },
            dirichlet = {
-             w <- dirichlet.weights(both, window=dummy$window, ...)
+             w <- dirichletWeights(both, window=dummy$window, ...)
            },
            { 
              stop(paste("unrecognised method", sQuote(method)))
@@ -119,13 +120,13 @@ quadscheme.spatial <-
   }
 
 "quadscheme.replicated" <-
-  function(data, dummy, method="grid", ...) {
+  function(data, dummy, method=c("grid", "dirichlet"), ...) {
     ##
     ## generate a quadrature scheme from data and dummy patterns.
     ##
     ## The 'method' may be "grid" or "dirichlet"
     ##
-    ## '...' are passed to gridweights() or dirichlet.weights()
+    ## '...' are passed to gridweights() or dirichletWeights()
     ##
     ## quadscheme.replicated:
     ##       for multitype point patterns.
@@ -133,7 +134,8 @@ quadscheme.spatial <-
     ## No two points in 'data'+'dummy' should have the same spatial location
 
     check <- resolve.defaults(list(...), list(check=TRUE))$check
-
+    method <- match.arg(method)
+    
     data <- as.ppp(data, check=check)
     dummy <- as.ppp(dummy, data$window, check=check)
 		## note data$window is the DEFAULT quadrature window

@@ -1,19 +1,25 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.15 $ $Date: 2014/12/11 07:05:21 $
+#   $Revision: 1.16 $ $Date: 2015/03/28 08:46:27 $
 #
 
 effectfun <- function(model, covname, ..., se.fit=FALSE) {
-  stopifnot(is.ppm(model))
+  if(!is.ppm(model)) {
+    if(is.kppm(model)) model <- as.ppm(model) else
+    if(is.lppm(model)) model <- model$fit else
+    stop("First argument 'model' should be a ppm, kppm or lppm object")
+  }
   dotargs <- list(...)
   # determine names of covariates involved
   intern.names <-
     if(is.marked.ppm(model)) c("x", "y", "marks") else c("x", "y")
   needed.names <- variablesinformula(rhs.of.formula(formula(model)))
   ## validate the relevant covariate 
-  if(missing(covname))
-    stop("covname must be provided")
+  if(missing(covname) | is.null(covname)) {
+    mc <- model.covariates(model)
+    if(length(mc) == 1) covname <- mc else stop("covname must be provided")
+  }
   if(!(covname %in% c(intern.names, needed.names)))
     stop(paste("model does not have a covariate called", sQuote(covname)),
          call.=FALSE)

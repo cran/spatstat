@@ -2,7 +2,7 @@
 #
 #    multistrhard.S
 #
-#    $Revision: 2.33 $	$Date: 2015/01/07 06:24:47 $
+#    $Revision: 2.37 $	$Date: 2015/05/27 06:42:34 $
 #
 #    The multitype Strauss/hardcore process
 #
@@ -44,9 +44,9 @@ doMultiStraussHard <- local({
      # ensure factor levels are acceptable for column names (etc)
      lxname <- make.names(lx, unique=TRUE)
 
-     # list all UNORDERED pairs of types to be checked
+     # list all UNORDERED pairs of types to be counted
      # (the interaction must be symmetric in type, and scored as such)
-     uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
+     uptri <- (row(r) <= col(r)) & !is.na(r)
      mark1 <- (lx[row(r)])[uptri]
      mark2 <- (lx[col(r)])[uptri]
      # corresponding names
@@ -55,7 +55,7 @@ doMultiStraussHard <- local({
      vname <- apply(cbind(mark1name,mark2name), 1, paste, collapse="x")
      vname <- paste("mark", vname, sep="")
      npairs <- length(vname)
-     # list all ORDERED pairs of types to be checked
+     # list all ORDERED pairs of types to be counted
      # (to save writing the same code twice)
      different <- mark1 != mark2
      mark1o <- c(mark1, mark2[different])
@@ -183,16 +183,19 @@ doMultiStraussHard <- local({
            iradii <- self$par$iradii
            hradii <- self$par$hradii
            nt <- nrow(iradii)
-           splat(nt, "types of points")
-           if(!is.null(types)) {
-             splat("Possible types:")
-             print(noquote(types))
-           } else splat("Possible types:\t not yet determined")
+           if(waxlyrical('gory')) {
+             splat(nt, "types of points")
+             if(!is.null(types)) {
+               splat("Possible types:")
+               print(noquote(types))
+             } else splat("Possible types:\t not yet determined")
+           }
            splat("Interaction radii:")
-           print(iradii)
+           dig <- getOption("digits")
+           print(signif(iradii, dig))
            if(!is.null(hradii)) {
              splat("Hardcore radii:")
-             print(hradii)
+             print(signif(hradii, dig))
            } else splat("Hardcore radii: not yet determined")
            invisible()
          },
@@ -204,7 +207,7 @@ doMultiStraussHard <- local({
           r <- self$par$iradii
           h <- self$par$hradii
           # list all relevant unordered pairs of types
-          uptri <- (row(r) <= col(r)) & (!is.na(r) | !is.na(h))
+          uptri <- (row(r) <= col(r)) & !is.na(r)
           index1 <- (row(r))[uptri]
           index2 <- (col(r))[uptri]
           npairs <- length(index1)
@@ -247,11 +250,12 @@ doMultiStraussHard <- local({
            gamma <- (self$interpret)(coeffs, self)$param$gammas
            # required gamma parameters
            required <- !is.na(iradii)
-           # inactive hard cores
-           ihc <- is.na(hradii) | (hradii == 0)
+           # active hard cores
+           activehard <- !is.na(hradii) & (hradii > 0)
+           ihc <- !activehard
            # problems
-           okgamma <- is.finite(gamma) & (gamma <= 1)
-           naughty <- ihc & required & !okgamma
+           gammavalid <- is.finite(gamma) & (activehard | gamma <= 1)
+           naughty    <- required & !gammavalid
            if(!any(naughty))
              return(NULL)
            #
@@ -266,8 +270,8 @@ doMultiStraussHard <- local({
              upn <- uptri & naughty
              rowidx <- as.vector(rn[upn])
              colidx <- as.vector(cn[upn])
-             matindex <- function(v) { matrix(c(v, rev(v)),
-                                              ncol=2, byrow=TRUE) }
+#             matindex <- function(v) { matrix(c(v, rev(v)),
+#                                              ncol=2, byrow=TRUE) }
              mats <- lapply(as.data.frame(rbind(rowidx, colidx)), matindex)
              inters <- lapply(mats, delMSH,
                               types=types, iradii=iradii,
@@ -293,6 +297,8 @@ doMultiStraussHard <- local({
          )
   class(BlankMSHobject) <- "interact"
 
+  matindex <- function(v) { matrix(c(v, rev(v)), ncol=2, byrow=TRUE) }
+  
   # Finally define MultiStraussHard function
   doMultiStraussHard <- function(iradii, hradii=NULL, types=NULL) {
     iradii[iradii == 0] <- NA

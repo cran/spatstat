@@ -1,7 +1,7 @@
 #
 # profilepl.R
 #
-#  $Revision: 1.32 $  $Date: 2015/01/20 13:57:52 $
+#  $Revision: 1.35 $  $Date: 2015/05/10 10:43:49 $
 #
 #  computes profile log pseudolikelihood
 #
@@ -21,7 +21,6 @@ profilepl <- local({
     callenv <- parent.frame()
     s <- as.data.frame(s)
     n <- nrow(s)
-    fname <- paste(short.deparse(substitute(f)), collapse="")
     stopifnot(is.function(f))
     ## validate 's'
     parms <- names(s)
@@ -97,6 +96,7 @@ profilepl <- local({
       savecomp <- !oversize.quad(Q)
     }
     ## go
+    gc()
     if(verbose) message(paste("Comparing", n, "models..."))
     for(i in 1:n) {
       if(verbose)
@@ -143,6 +143,7 @@ profilepl <- local({
     }
     if(verbose) message("Fitting optimal model...")
     opti <- which.max(criterion)
+    gc()
     optint <- do.call(f, as.list(s[opti, is.farg, drop=FALSE]))
     optarg <- list(..., interaction=optint, rbord=rbord)
     if(pass.cfa) {
@@ -161,7 +162,7 @@ profilepl <- local({
                    iopt=opti,
                    fit=optfit,
                    rbord=rbord,
-                   fname=fname,
+                   fname=as.interact(optfit)$name,
                    allcoef=allcoef,
                    otherstuff=list(...),
                    pseudocall=pseudocall)
@@ -190,7 +191,9 @@ print.profilepl <- function(x, ...) {
   }
   nparm <- ncol(x$param)
   if(waxlyrical('extras')) {
-    splat("fitted with rbord =", x$rbord)
+    corx <- x$fit$correction
+    if(identical(corx, "border") && !is.null(x$rbord))
+      splat("fitted with rbord =", x$rbord)
     splat("Interaction:", x$fname)
     splat("Irregular",
           ngettext(nparm, "parameter:", "parameters:\n"),
@@ -346,3 +349,10 @@ plot.profilepl <- local({
 })
 
 
+simulate.profilepl <- function(object, ...) {
+  simulate(as.ppm(object), ...)
+}
+
+parameters.profilepl <- function(model, ...) {
+  parameters(as.ppm(model))
+}

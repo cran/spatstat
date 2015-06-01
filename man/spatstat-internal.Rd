@@ -28,7 +28,6 @@
 \alias{as.data.frame.bw.optim}
 \alias{as.data.frame.fv}
 \alias{as.double.im}
-\alias{as.im.linim}
 \alias{as.list.hyperframe}
 \alias{as.listof}
 \alias{as.units}
@@ -40,6 +39,7 @@
 \alias{bermantestEngine}
 \alias{bdrylength.xypolygon} 
 \alias{bdry.mask}
+\alias{bibliotheque}
 \alias{bind.ratfv}
 \alias{blankcoefnames}
 \alias{blockdiagmatrix}
@@ -68,6 +68,7 @@
 \alias{check.1.integer}
 \alias{check.1.real}
 \alias{check.range}
+\alias{check.rpanel}
 \alias{check.testfun}
 \alias{choptext}
 \alias{circticks}
@@ -76,6 +77,7 @@
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closethresh}
+\alias{coef.summary.kppm}
 \alias{coef.summary.ppm}
 \alias{coef.vblogit} 
 \alias{coerce.marks.numeric}
@@ -88,9 +90,11 @@
 \alias{crosspairquad}
 \alias{cobble.xy}
 \alias{codetime}
+\alias{col.args.to.grey}
 \alias{colouroutputs}
 \alias{colouroutputs<-}
 \alias{commasep}
+\alias{commonPolyclipArgs}
 \alias{conform.imagelist}
 \alias{countingweights}
 \alias{CressieReadStatistic}
@@ -163,6 +167,7 @@
 \alias{exactPdt}
 \alias{exhibitStringList}
 \alias{expand.polynom}
+\alias{expandSpecialLists}
 \alias{expandwinPerfect}
 \alias{explain.ifnot}
 \alias{extractAIC.slrm}
@@ -174,9 +179,11 @@
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
+\alias{fillseq}
 \alias{findbestlegendpos}
 \alias{findCovariate}
 \alias{findcbind}
+\alias{findfirstfactor}
 \alias{firstfactor}
 \alias{fii}
 \alias{fillNA}
@@ -254,6 +261,7 @@
 \alias{invokeColourmapRule}
 \alias{is.atomicQtest}
 \alias{is.cadlag}
+\alias{is.col.argname}
 \alias{is.data}
 \alias{is.expandable}
 \alias{is.expandable.ppm}
@@ -312,6 +320,8 @@
 \alias{logLik.vblogit}
 \alias{lty2char}
 \alias{padtowidth}
+\alias{parameters.interact}
+\alias{parameters.fii}
 \alias{parbreak}
 \alias{passthrough}
 \alias{paste.expr}
@@ -327,6 +337,7 @@
 \alias{makefvlabel}
 \alias{make.parseable}
 \alias{makeunits}
+\alias{mapstrings}
 \alias{markappend}
 \alias{markcbind}
 \alias{markformat}
@@ -401,6 +412,7 @@
 \alias{owinpolycheck}
 \alias{owinpoly2mask}
 \alias{pairs.listof}
+\alias{pairs.solist}
 \alias{param.quad}
 \alias{paren}
 \alias{partialModelMatrix}
@@ -412,11 +424,13 @@
 \alias{ploterodewin}
 \alias{ploterodeimage}
 \alias{plot3Dpoints}
+\alias{plotPolygonBdry}
 \alias{plot.addvar}
 \alias{plot.barplotdata}
 \alias{plot.bw.frac}
 \alias{plot.bw.optim}
 \alias{plot.localpcfmatrix}
+\alias{plot.lurk}
 \alias{plot.minconfit}
 \alias{plot.parres}
 \alias{plot.plotpairsim}
@@ -424,6 +438,7 @@
 \alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{plot.spatialcdf}
+\alias{plot.studpermutest}
 \alias{polynom}
 \alias{ppllengine}
 \alias{ppm.default}
@@ -463,7 +478,6 @@
 \alias{print.isf}
 \alias{print.layered}
 \alias{print.leverage.ppm}
-\alias{print.linim}
 \alias{print.localpcfmatrix}
 \alias{print.lut}
 \alias{print.minconfit}
@@ -528,8 +542,10 @@
 \alias{rhs.of.formula}
 \alias{rhohatEngine}
 \alias{rhohatCalc}
+\alias{rigidradius}
 \alias{RmhExpandRule}
 \alias{rmhsnoop}
+\alias{romansort}
 \alias{roseContinuous}
 \alias{ruletextline}
 \alias{quadrat.testEngine}
@@ -610,11 +626,13 @@
 \alias{short.deparse}
 \alias{signalStatus}
 \alias{simplenumber}              
-\alias{simplify.xypolygon}              
+\alias{simplify.xypolygon}
+\alias{simulate.profilepl}
 \alias{simulrecipe}              
 \alias{singlestring}              
 \alias{slr.prepare}
 \alias{slrAssemblePixelData}
+\alias{Smooth.solist}
 \alias{smoothcrossEngine}              
 \alias{smoothpointsEngine}              
 \alias{sort.im}
@@ -661,6 +679,7 @@
 \alias{there.is.no.try}
 \alias{tilecentroids}        
 \alias{tileindex}        
+\alias{transradius}
 \alias{trap.extra.arguments}
 \alias{trianglediameters}
 \alias{trim.mask}        
@@ -694,7 +713,6 @@
 \alias{waxlyrical}
 \alias{weighted.var}
 \alias{windows.mppm}
-\alias{with.msr}
 \alias{w.quad}               
 \alias{x.quad}
 \alias{y.quad}
@@ -737,7 +755,6 @@ as.breakpts(\dots)
 \method{as.data.frame}{bw.optim}(x, \dots)
 \method{as.double}{im}(x, \dots)
 \method{as.list}{hyperframe}(x, \dots)
-\method{as.im}{linim}(X, \dots)
 as.listof(x)
 as.units(s)
 as2vector(x)
@@ -748,6 +765,7 @@ bbEngine(\dots)
 bermantestEngine(model, covariate, which, alternative, \dots, modelname, covname, dataname)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
+bibliotheque(nom, dont)
 bind.ratfv(x, numerator, denominator, labl, desc, preferred, ratio)
 blankcoefnames(x)
 blockdiagmatrix(\dots)
@@ -778,14 +796,16 @@ check.nmatrix(m, npoints, fatal, things, naok, squarematrix, matchto, warn)
 check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
 check.range(x, fatal)
+check.rpanel()
 check.testfun(f, f1, X)
 choptext(\dots, prefix)
-circticks(R, at)
+circticks(R, at, unit, labels)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
 closethresh(X,R,S,ordered)
+\method{coef}{summary.kppm}(object, \dots)
 \method{coef}{summary.ppm}(object, \dots)
 \method{coef}{vblogit}(object, \dots) 
 coerce.marks.numeric(X, warn)
@@ -798,9 +818,11 @@ conform.ratfv(x)
 crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms, what)
+col.args.to.grey(x)
 colouroutputs(x)
 colouroutputs(x) <- value
 commasep(x, join, flatten)
+commonPolyclipArgs(\dots, p)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
 CressieReadStatistic(OBS,EXP,lambda)
@@ -859,15 +881,15 @@ ensure3Darray(x)
 envelopeEngine(X, fun, simul,
            nsim, nrank, \dots, 
            verbose, clipdata, 
-           transform, global, ginterval,
+           transform, global, ginterval, use.theory,
            alternative,
            savefuns, savepatterns, saveresultof,
            weights,
            nsim2, VARIANCE, nSD,
            Yname, maxnerr, internal, cl,
            envir.user, expected.arg, do.pwrong)
-envelopeProgressData(X, fun, \dots, expo, normalize, deflate)
-envelopeTest(X, \dots, power, alternative,
+envelopeProgressData(X, fun, \dots, exponent, normalize, deflate)
+envelopeTest(X, \dots, exponent, alternative,
             rinterval, use.theo, tie.rule,
             save.envelope, savefuns, savepatterns,
             Xname, verbose, internal)
@@ -898,6 +920,7 @@ exactdt(X, \dots)
 exactPdt(w)
 exhibitStringList(prefix, strings)
 expand.polynom(f)
+expandSpecialLists(x, special)
 expandwinPerfect(W, expand, amount)
 explain.ifnot(expr, context)
 \method{extractAIC}{slrm}(fit, scale = 0, k = 2, \dots)
@@ -909,9 +932,11 @@ fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
+fillseq(x)
 findbestlegendpos(\dots)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
+findfirstfactor(x)
 firstfactor(x)
 fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
@@ -990,6 +1015,7 @@ intY.xypolygon(polly)
 invokeColourmapRule(colfun, x, \dots, zlim, colargs)
 is.atomicQtest(x)
 is.cadlag(s)
+is.col.argname(x)
 is.data(Q)
 is.expandable(x)
 \method{is.expandable}{ppm}(x)  
@@ -1054,6 +1080,8 @@ logi.engine(Q, trend, interaction, \dots,
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
 padtowidth(a, b, justify)
+\method{parameters}{interact}(model, \dots)
+\method{parameters}{fii}(model, \dots)
 parbreak(terse)
 passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
@@ -1074,6 +1102,7 @@ make.even.breaks(bmax, npos, bstep)
 makefvlabel(op, accent, fname, sub, argname)
 make.parseable(x)
 makeunits(sing, plur, mul)
+mapstrings(x, map)
 markappend(\dots)
 markcbind(\dots)
 markformat(x)
@@ -1160,6 +1189,7 @@ oversize.quad(Q, \dots, nU, nX)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 \method{pairs}{listof}(\dots, plot=TRUE)
+\method{pairs}{solist}(\dots, plot=TRUE)
 param.quad(Q)
 paren(x, type)
 partialModelMatrix(X,D,model,callstring,\dots)
@@ -1181,25 +1211,37 @@ plot3Dpoints(xyz, eye, org,
              \dots,
              type, xlim, ylim, zlim,
              add, box, main, cex, box.back, box.front)
+plotPolygonBdry(x, \dots)
 \method{plot}{addvar}(x, \dots, do.points=FALSE)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.frac}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, showopt, optargs)
+\method{plot}{lurk}(x, \dots, shade)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
 \method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{plotpairsim}(x, \dots)
 \method{plot}{profilepl}(x, \dots, add, main, tag, coeff, xvariable,
                          col, lty, lwd, col.opt, lty.opt, lwd.opt)
-\method{plot}{qqppm}(x, \dots, limits=TRUE, monochrome=FALSE,
+\method{plot}{qqppm}(x, \dots, limits=TRUE,
+           monochrome=spatstat.options('monochrome'),
            limcol=if(monochrome) "black" else "red")
 \method{plot}{spatialcdf}(x, \dots, xlab, ylab)
+\method{plot}{studpermutest}(x, fmla, \dots,
+        lty = NULL, col = NULL, lwd = NULL,
+        lty.theo = NULL, col.theo = NULL, lwd.theo = NULL,
+        lwd.mean = if (meanonly) 1 else NULL, lty.mean = lty, col.mean = col, 
+        separately = FALSE, meanonly = FALSE,
+        main = if (meanonly) "group means" else NULL,
+        xlim = NULL, ylim = NULL, ylab = NULL, legend = !add,
+        legendpos = "topleft", lbox = FALSE, add = FALSE)
 polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 \method{ppm}{default}(Q, trend, interaction,
        \dots, covariates, data, covfunargs, subset, 
-       correction, rbord, use.gam, method, forcefit,
-       project, nd, eps, gcontrol, nsim, nrmh, start, control,
+       correction, rbord, use.gam, method, forcefit, project,
+       prior.mean, prior.var,
+       nd, eps, gcontrol, nsim, nrmh, start, control,
        verb, callstring)
 ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
@@ -1240,7 +1282,6 @@ primesbelow(nmax)
 \method{print}{isf}(x, \dots)
 \method{print}{layered}(x, \dots)
 \method{print}{leverage.ppm}(x, \dots)
-\method{print}{linim}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{mppm}(x, \dots)
@@ -1272,7 +1313,7 @@ primesbelow(nmax)
 \method{print}{summary.lut}(x, \dots)
 \method{print}{summary.mppm}(x, \dots, brief)
 \method{print}{summary.owin}(x, \dots)
-\method{print}{summary.ppp}(x, \dots, dp=3)
+\method{print}{summary.ppp}(x, \dots, dp)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.rmhexpand}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
@@ -1312,15 +1353,17 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
            n, bw, adjust, from, to, 
            bwref, covname, confidence,
            covunits, modelcall, callstring, savestuff)
+rigidradius(X)
 RmhExpandRule(nama)
+romansort(x)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
      proptype, proplocn, propmark, propindx, numerator, denominator)
-roseContinuous(ang, rad, unit, \dots, main, do.plot)
+roseContinuous(ang, rad, unit, \dots, main, labels, at, do.plot)
 ruletextline(ch, n, terse)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, CR, 
      \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
-quadscheme.replicated(data, dummy, method = "grid", \dots)
-quadscheme.spatial(data, dummy, method = "grid", \dots)
+quadscheme.replicated(data, dummy, method, \dots)
+quadscheme.spatial(data, dummy, method, \dots)
 pointgrid(W, ngrid)
 rastersample(X, Y)
 rasterx.mask(w, drop)
@@ -1404,12 +1447,14 @@ sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 short.deparse(x, maxlen)
-simplenumber(x, unit, multiply)
+simplenumber(x, unit, multiply, tol)
 simplify.xypolygon(p, dmin)
+\method{simulate}{profilepl}(object, \dots)
 simulrecipe(type, expr, envir, csr, pois, constraints)
 singlestring(s, coll)
 slr.prepare(CallInfo, envir, data, dataAtPoints, splitby, clip)
 slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
+\method{Smooth}{solist}(X, \dots)
 smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
                     weights, varcov, sorted)
 smoothpointsEngine(x, values, sigma, \dots,
@@ -1459,6 +1504,7 @@ test.selfcrossing.psp(A)
 there.is.no.try(\dots)
 tilecentroids(W, nx, ny)
 tileindex(x, y, Z)
+transradius(W)
 trap.extra.arguments(\dots, .Context, .Fatal)
 trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
@@ -1492,7 +1538,6 @@ warn.once(key, \dots)
 waxlyrical(type, terse)
 weighted.var(x, w, na.rm)
 windows.mppm(x)
-\method{with}{msr}(data, expr, \dots)
 w.quad(Q)               
 x.quad(Q)
 y.quad(Q)

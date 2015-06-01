@@ -2,15 +2,16 @@
 #' 
 #'     Quantile Tessellation
 #'
-#'   $Revision: 1.10 $  $Date: 2015/02/01 11:36:57 $
+#'   $Revision: 1.11 $  $Date: 2015/05/17 10:31:04 $
 
 quantess <- function(M, Z, n, ...) {
   UseMethod("quantess")
 }
 
-quantess.owin <- function(M, Z, n, ...) {
+quantess.owin <- function(M, Z, n, ..., type=2) {
   W <- as.owin(M)
   tcross <- MinimalTess(W, ...)
+  force(n)
   if(!is.character(Z)) {
     Zim <- as.im(Z, W)
     Zrange <- range(Zim)
@@ -35,7 +36,7 @@ quantess.owin <- function(M, Z, n, ...) {
            })
     Zim <- as.im(Zfun, W)
   }
-  qZ <- quantile(Zim, probs=(1:(n-1))/n)
+  qZ <- quantile(Zim, probs=(1:(n-1))/n, type=type)
   qZ <- c(Zrange[1], qZ, Zrange[2])
   if(is.polygonal(W) && is.character(Z)) {
     R <- Frame(W)
@@ -43,20 +44,21 @@ quantess.owin <- function(M, Z, n, ...) {
                      x = tess(xgrid=qZ, ygrid=R$yrange),
                      y = tess(xgrid=R$xrange, ygrid=qZ))
     out <- intersect.tess(strips, tess(tiles=list(W)))
+    qzz <- signif(qZ, 3)
+    tilenames(out) <- paste0("[", qzz[1:n], ",",
+                             qzz[-1], c(rep(")", n-1), "]"))
   } else {
-    ZC <- cut(Z, breaks=qZ, include.lowest=TRUE)
+    ZC <- cut(Z, breaks=qZ, include.lowest=TRUE, right=FALSE)
     out <- tess(image=ZC)
   }
-  qzz <- signif(qZ, 3)
-  tilenames(out) <- paste0("[", qzz[1:(n-1)], ",",
-                           qzz[-1], c(rep(")", n-1), "]"))
   if(!is.null(tcross)) out <- intersect.tess(out, tcross)
   return(out)
 }
 
-quantess.ppp <- function(M, Z, n, ...) {
+quantess.ppp <- function(M, Z, n, ..., type=2) {
   W <- as.owin(M)
   tcross <- MinimalTess(W, ...)
+  force(n)
   if(!is.character(Z)) {
     Zim <- as.im(Z, W)
     ZM <- if(is.function(Z)) Z(M$x, M$y) else Zim[M]
@@ -67,12 +69,12 @@ quantess.ppp <- function(M, Z, n, ...) {
     if(is.rectangle(W)) {
       switch(Z,
              x={
-               qx <- quantile(M$x, probs=(1:(n-1))/n)
+               qx <- quantile(M$x, probs=(1:(n-1))/n, type=type)
                qx <- c(W$xrange[1], qx, W$xrange[2])
                out <- tess(xgrid=qx, ygrid=W$yrange)
              },
              y={
-               qy <- quantile(M$y, probs=(1:(n-1))/n)
+               qy <- quantile(M$y, probs=(1:(n-1))/n, type=type)
                qy <- c(W$yrange[1], qy, W$yrange[2])
                out <- tess(xgrid=W$xrange, ygrid=qy)
              })
@@ -92,7 +94,7 @@ quantess.ppp <- function(M, Z, n, ...) {
            })
     Zim <- as.im(Zfun, W)
   } 
-  qZ <- quantile(ZM, probs=(1:(n-1))/n)
+  qZ <- quantile(ZM, probs=(1:(n-1))/n, type=type)
   qZ <- c(Zrange[1], qZ, Zrange[2])
   if(is.polygonal(W) && is.character(Z)) {
     R <- Frame(W)
@@ -100,20 +102,23 @@ quantess.ppp <- function(M, Z, n, ...) {
                      x = tess(xgrid=qZ, ygrid=R$yrange),
                      y = tess(xgrid=R$xrange, ygrid=qZ))
     out <- intersect.tess(strips, tess(tiles=list(W)))
+    qzz <- signif(qZ, 3)
+    tilenames(out) <- paste0("[", qzz[1:n], ",",
+                             qzz[-1], c(rep(")", n-1), "]"))
   } else {
     ZC <- cut(Zim, breaks=qZ, include.lowest=TRUE)
     out <- tess(image=ZC)
   }
-  qzz <- signif(qZ, 3)
-  tilenames(out) <- paste0("[", qzz[1:(n-1)], ",",
-                           qzz[-1], c(rep(")", n-1), "]"))
   if(!is.null(tcross)) out <- intersect.tess(out, tcross)
   return(out)
 }
 
-quantess.im <- function(M, Z, n, ...) {
+quantess.im <- function(M, Z, n, ..., type=2) {
   W <- Window(M)
   tcross <- MinimalTess(W, ...)
+  force(n)
+  if(!(type %in% c(1,2)))
+    stop("Only quantiles of type 1 and 2 are implemented for quantess.im")
   if(is.character(Z)) 
     Z <- switch(Z,
                 x=function(x,y){x},
@@ -124,7 +129,7 @@ quantess.im <- function(M, Z, n, ...) {
   Z <- MZ$Z[W, drop=FALSE]
   Zrange <- range(Z)
   Fun <- ewcdf(Z[], weights=M[]/sum(M[]))
-  qZ <- quantile(Fun, probs=(1:(n-1))/n)
+  qZ <- quantile(Fun, probs=(1:(n-1))/n, type=type)
   qZ <- c(Zrange[1], qZ, Zrange[2])
   ZC <- cut(Z, breaks=qZ, include.lowest=TRUE)
   out <- tess(image=ZC)

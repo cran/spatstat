@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.89 $	$Date: 2014/12/31 04:06:17 $
+#	$Revision: 1.90 $	$Date: 2015/04/21 13:14:28 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -463,8 +463,10 @@ predict.ppm <- local({
         vc <- vcov(model)
         ## compute model matrix
         fmla <- formula(model)
-        mf <- model.frame(fmla, newdata, ..., na.action=na.pass)
-        mm <- model.matrix(fmla, mf, ..., na.action=na.pass)
+#        mf <- model.frame(fmla, newdata, ..., na.action=na.pass)
+#        mm <- model.matrix(fmla, mf, ..., na.action=na.pass)
+        mf <- model.frame(fmla, newdata, na.action=na.pass)
+        mm <- model.matrix(fmla, mf, na.action=na.pass)
         if(nrow(mm) != nrow(newdata))
           stop("Internal error: row mismatch in SE calculation")
         ## compute relative variance = diagonal of quadratic form
@@ -574,7 +576,7 @@ predict.ppm <- local({
           hi <- lo <- imago
           hi[] <- z[,1]
           lo[] <- z[,2]
-          est <- listof(hi, lo)
+          est <- solist(hi, lo)
           names(est) <- ci.names
         }
         if(se) {
@@ -598,7 +600,7 @@ predict.ppm <- local({
           outi[] <- z[newdata$marks == types[i]]
           out[[i]] <- outi
         }
-        out <- as.listof(out)
+        out <- as.solist(out)
         names(out) <- as.character(types)
       }
     }

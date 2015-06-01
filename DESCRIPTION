@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.41-1
-Nickname: Ides of March
-Date: 2015-02-27
+Version: 1.42-0
+Nickname: Life, The Universe and Everything
+Date: 2015-05-27
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -24,6 +24,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	T. Bendtsen;
 	A. Bevan;
 	B. Biggerstaff;
+	A. Bilgrau;
 	L. Bischof;
 	R. Bivand;
 	J.M. Blanco Moreno;
@@ -68,6 +69,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	M. Herrmann; 
 	K. Hornik; 
 	P. Hunziker; 
+	J. Hywood;
 	R. Ihaka; 
 	A. Jammalamadaka;
 	R. John-Chandran; 
@@ -126,9 +128,11 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	C. Ryan; 
 	F. Safavimanesh;
 	A. Sarkka; 
+	C. Schank; 
 	K. Schladitz; 
 	S. Schutte;
 	B.T. Scott; 
+        O. Semboli;
 	G.C. Shen;
 	V. Shcherbakov;
 	I.-M. Sintorn; 
@@ -160,7 +164,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	and
 	A. Zeileis.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>
-Depends: R (>= 3.1.1), stats, graphics, grDevices, utils
+Depends: R (>= 3.2.0), stats, graphics, grDevices, utils
 Imports: mgcv, Matrix, deldir (>= 0.0-21), abind, tensor, polyclip (>=
         1.3-0), goftest
 Suggests: sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
@@ -176,6 +180,6 @@ URL: http://www.spatstat.org
 LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
-Packaged: 2015-02-27 00:43:10 UTC; adrian
+Packaged: 2015-05-27 09:24:09 UTC; adrian
 Repository: CRAN
-Date/Publication: 2015-02-27 07:32:22
+Date/Publication: 2015-06-01 07:46:50

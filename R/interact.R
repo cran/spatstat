@@ -2,7 +2,7 @@
 #	interact.S
 #
 #
-#	$Revision: 1.23 $	$Date: 2014/12/13 05:40:46 $
+#	$Revision: 1.27 $	$Date: 2015/05/08 04:46:04 $
 #
 #	Class 'interact' representing the interpoint interaction
 #               of a point process model
@@ -128,7 +128,7 @@ print.interact <- function(x, ..., family, brief=FALSE, banner=TRUE) {
   if(banner) {
     if(family && !brief && !is.null(xf <- x$family))
       print.isf(xf)
-    splat(if(!brief) "Interaction:" else NULL, x$name)
+    splat(if(!brief) "Interaction:" else NULL, x$name, sep="")
   }
   # Now print the parameters
   if(!is.null(x$print)) {
@@ -136,7 +136,14 @@ print.interact <- function(x, ..., family, brief=FALSE, banner=TRUE) {
   } else {
     # default
     # just print the parameter names and their values
-    cat(paste(x$parnames, ":\t", x$par, "\n", sep=""))
+    pwords <- x$parnames
+    parval <- x$par
+    pwords <- paste(toupper(substring(pwords, 1, 1)),
+                    substring(pwords, 2), sep="")
+    isnum <- sapply(parval, is.numeric)
+    parval[isnum] <- lapply(parval[isnum], signif,
+                            digits=getOption("digits"))
+    splat(paste(paste0(pwords, ":\t", parval), collapse="\n"))
   }
   invisible(NULL)
 }
@@ -178,6 +185,9 @@ is.poisson.interact <- function(x) {
   is.null(x$family)
 }
 
+parameters.interact <- function(model, ...) {
+  model$par
+}
 
 # Test whether interact object was made by an older version of spatstat
 
@@ -299,7 +309,6 @@ as.interact.interact <- function(object) {
   verifyclass(object, "interact")
   return(object)
 }
-
 
 #### internal code for streamlining initialisation of interactions
 #

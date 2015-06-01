@@ -1,20 +1,22 @@
 #
 # split.ppp.R
 #
-# $Revision: 1.25 $ $Date: 2015/02/01 01:24:58 $
+# $Revision: 1.31 $ $Date: 2015/05/09 10:23:48 $
 #
 # split.ppp and "split<-.ppp"
 #
 #########################################
 
-split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
+split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, reduce=FALSE, ...) {
   verifyclass(x, "ppp")
   mf <- markformat(x)
+  fgiven <- !missing(f)
   
-  if(is.null(un))
-    un <- missing(f) && (mf != "dataframe")
+  if(is.null(un)) {
+    un <- !fgiven && (mf != "dataframe")
+  } else un <- as.logical(un)
 
-  if(missing(f)) {
+  if(!fgiven) {
     # f defaults to marks of x
     switch(mf,
            none={
@@ -31,7 +33,7 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
                stop("Data frame of marks contains no factors")
            })
     splittype <- "factor"
-  } else{
+  } else {
     # f was given
     fsplit <- f
     if(is.factor(f)) {
@@ -90,19 +92,31 @@ split.ppp <- function(x, f = marks(x), drop=FALSE, un=NULL, ...) {
            stop("Internal error: wrong format for fsplit"))
   }
 
-  # split the data
-  out <- list()
-  for(l in lev) 
-    out[[paste(l)]] <- x[!is.na(f) & (f == l)]
+  ## remove marks that will not be retained
+  if(un && reduce && mf == "dataframe")
+    warning("Incompatible arguments un=TRUE and reduce=TRUE: assumed un=TRUE")
+  if(un) {
+    x <- unmark(x)
+  } else if(reduce && !fgiven && mf == "dataframe") {
+    # remove the column of marks that determined the split
+    j <- findfirstfactor(marks(x))
+    if(!is.null(j))
+      marks(x) <- marks(x)[, -j]
+  }
   
-  if(un)
-     out <- lapply(out, unmark)
+  ## split the data
+  out <- list()
+  fok <- !is.na(f)
+  for(l in lev) 
+    out[[paste(l)]] <- x[fok & (f == l)]
+
+  ## 
   if(splittype == "tess") {
     til <- tiles(fsplit)
     for(i in seq_along(out))
       out[[i]]$window <- til[[i]]
   }
-  class(out) <- c("splitppp", class(out))
+  class(out) <- c("splitppp", "ppplist", "solist", class(out))
   attr(out, "fsplit") <- fsplit
   attr(out, "fgroup") <- f
   return(out)
@@ -244,7 +258,7 @@ summary.splitppp <- function(object, ...) {
 }
 
 print.summary.splitppp <- function(x, ...) {
-  class(x) <- "listof"
+  class(x) <- "anylist"
   print(x)
   invisible(NULL)
 }
@@ -287,17 +301,17 @@ print.summary.splitppp <- function(x, ...) {
   x
 }
   
-density.splitppp <- function(x, ...) {
-  as.listof(lapply(x, density, ...))
+density.splitppp <- function(x, ..., se=FALSE) {
+  density.ppplist(x, ..., se=se)
 }
 
 plot.splitppp <- function(x, ..., main) {
   if(missing(main)) main <- short.deparse(substitute(x))
-  do.call("plot.listof",
+  do.call(plot.solist,
           resolve.defaults(list(x=x, main=main),
                            list(...),
                            list(equal.scales=TRUE)))
 }
 
-as.layered.splitppp <- function(X) { do.call("layered", X) }
+as.layered.splitppp <- function(X) { do.call(layered, X) }
 

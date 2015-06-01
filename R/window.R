@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.159 $	$Date: 2015/02/25 10:08:05 $
+#	$Revision: 4.166 $	$Date: 2015/03/25 09:56:24 $
 #
 #
 #	A window may be either
@@ -68,7 +68,12 @@
     "Transpose matrices to get the standard presentation in R",
     "Example: image(result$xcol,result$yrow,t(result$d))")
 
-owin <- function(xrange=c(0,1), yrange=c(0,1),
+owin <- local({
+
+  isxy <- function(x) { (is.matrix(x) || is.data.frame(x)) && ncol(x) == 2 }
+  asxy <- function(xy) { list(x=xy[,1], y=xy[,2]) }
+
+  owin <- function(xrange=c(0,1), yrange=c(0,1),
                  ..., poly=NULL, mask=NULL, unitname=NULL, xy=NULL) {
 
   unitname <- as.units(unitname)
@@ -129,8 +134,6 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
       return(w)
     }
     # convert matrix or data frame to list(x,y)
-    isxy <- function(x) { (is.matrix(x) || is.data.frame(x)) && ncol(x) == 2 }
-    asxy <- function(xy) { list(x=xy[,1], y=xy[,2]) }
     if(isxy(poly)) {
       poly <- asxy(poly)
     } else if(is.list(poly) && all(unlist(lapply(poly, isxy)))) {
@@ -237,7 +240,14 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
     return(w)
   } else if(mask.given) {
     ######### digital mask #####################
-    
+
+    if(is.data.frame(mask) &&
+       ncol(mask) %in% c(2,3) &&
+       sum(sapply(mask, is.numeric)) == 2) {
+      # data frame with 2 columns of coordinates
+      return(as.owin(W=mask, xy=xy))
+    }
+      
     if(!is.matrix(mask))
       stop(paste(sQuote("mask"), "must be a matrix"))
     if(!is.logical(mask))
@@ -307,6 +317,9 @@ owin <- function(xrange=c(0,1), yrange=c(0,1),
   NULL
 }
 
+  owin
+})
+
 #
 #-----------------------------------------------------------------------------
 #
@@ -375,11 +388,15 @@ as.owin.tess <- function(W, ..., fatal=TRUE) {
 as.owin.data.frame <- function(W, ..., fatal=TRUE) {
   if(!verifyclass(W, "data.frame", fatal=fatal))
     return(NULL)
-  if(ncol(W) != 3) {
-    whinge <- "need exactly 3 columns of data"
+  if(!(ncol(W) %in% c(2,3))) {
+    whinge <- "need exactly 2 or 3 columns of data"
     if(fatal) stop(whinge)
     warning(whinge)
     return(NULL)
+  }
+  if(ncol(W) == 2) {
+    # assume data is a list of TRUE pixels
+    W <- cbind(W, TRUE)
   }
   mch <- match(c("x", "y"), names(W))
   if(!any(is.na(mch))) {
@@ -392,13 +409,29 @@ as.owin.data.frame <- function(W, ..., fatal=TRUE) {
     iz <- 3
   }
   df <- data.frame(x=W[,ix], y=W[,iy], z=as.logical(W[,iz]))
-  # convert data frame (x,y,z) to logical matrix
-  m <- with(df, tapply(z, list(y, x), any))
-  # extract pixel coordinates
-  xy <- with(df, list(x=sort(unique(x)), y=sort(unique(y))))
-  # make binary mask
-  out <- owin(mask=m, xy=xy)
-  return(out)
+  with(df, {
+    xx <- with(df, sort(unique(x)))
+    yy <- with(df, sort(unique(y)))
+    jj <- with(df, match(x, xx))
+    ii <- with(df, match(y, yy))
+    ## make logical matrix (for incomplete x, y sequence)
+    mm <- matrix(FALSE, length(yy), length(xx))
+    mm[cbind(ii,jj)] <- z
+    ## ensure xx and yy are complete equally-spaced sequences
+    fx <- fillseq(xx)
+    fy <- fillseq(yy)
+    xcol <- fx[[1]]
+    yrow <- fy[[1]]
+    ## mapping from xx to xcol, yy to yrow
+    jjj <- fx[[2]]
+    iii <- fy[[2]]
+    ## make logical matrix for full sequence
+    m <- matrix(FALSE, length(yrow), length(xcol))
+    m[iii,jjj] <- mm
+    ## make binary mask
+    out <- owin(mask=m, xy=list(x=xcol, y=yrow))
+    return(out)
+  })
 }
 
 as.owin.default <- function(W, ..., fatal=TRUE) {
@@ -462,21 +495,25 @@ as.rectangle <- function(w, ...) {
 as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
 #	eps:		   grid mesh (pixel) size
 #	dimyx:		   dimensions of pixel raster
-#       xy:                coordinates of pixel raster  
+#       xy:                coordinates of pixel raster
+  nonamedargs <- is.null(eps) && is.null(dimyx) && is.null(xy)
+  uname <- as.units(NULL)
   if(!missing(w) && !is.null(w)) {
-    if(is.matrix(w))
+    if(is.data.frame(w)) return(owin(mask=w, xy=xy))
+    if(is.matrix(w)) {
+      w <- as.data.frame(w)
+      colnames(w) <- c("x", "y")
       return(owin(mask=w, xy=xy))
+    }
     w <- as.owin(w)
     uname <- unitname(w)
   } else {
-    uname <- as.units(NULL)
     if(is.null(xy)) 
       stop("If w is missing, xy is required")
   }
   # If it's already a mask, and no other arguments specified,
   # just return it.
-  if(!missing(w) && w$type == "mask" &&
-     is.null(eps) && is.null(dimyx) && is.null(xy))
+  if(!missing(w) && w$type == "mask" && nonamedargs)
     return(w)
   
 ##########################
@@ -578,9 +615,17 @@ as.mask <- function(w, eps=NULL, dimyx=NULL, xy=NULL) {
                     units   = uname)
       class(rasta) <- "owin"
     }
-    # window may be implicit in this case.
-    if(missing(w))
-      w <- owin(xrange, yrange)
+    if(missing(w)) {
+      # No more window information
+      out <- rasta
+      if(!(identical(x, xy$x) && identical(y, xy$y))) {
+        ## xy is an enumeration of the TRUE pixels
+        out$m[] <- FALSE
+        ij <- cbind(i=match(xy$y, y), j=match(xy$x, x))
+        out$m[ij] <- TRUE
+      }
+      return(out)
+    }
   }
 
 ################################  
@@ -734,7 +779,8 @@ rasterxy.mask <- function(w, drop=FALSE) {
   return(list(x=as.numeric(x),
               y=as.numeric(y)))
 }
-  
+
+
 nearest.raster.point <- function(x,y,w, indices=TRUE) {
   stopifnot(is.mask(w) || is.im(w))
   nr <- w$dim[1]
@@ -1019,6 +1065,29 @@ print.summary.owin <- function(x, ...) {
   if(!is.null(ledge <- unitinfo$legend))
     splat(ledge)
   return(invisible(x))
+}
+
+as.data.frame.owin <- function(x, ..., drop=TRUE) {
+  stopifnot(is.owin(x))
+  switch(x$type,
+         rectangle = { x <- as.polygonal(x) },
+         polygonal = { },
+         mask = {
+           xy <- rasterxy.mask(x, drop=drop)
+           if(!drop) xy <- append(xy, list(inside=as.vector(x$m)))
+           return(as.data.frame(xy, ...))
+         })
+  b <- x$bdry
+  ishole <- sapply(b, is.hole.xypolygon)
+  sign <- (-1)^ishole
+  b <- lapply(b, as.data.frame, ...)
+  nb <- length(b)
+  if(nb == 1)
+    return(b[[1]])
+  dfs <- mapply(cbind, b, id=as.list(seq_len(nb)), sign=as.list(sign),
+                SIMPLIFY=FALSE)
+  df <- do.call(rbind, dfs)
+  return(df)
 }
 
 discretise <- function(X,eps=NULL,dimyx=NULL,xy=NULL) {

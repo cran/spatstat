@@ -96,7 +96,7 @@ plot.lpp <- function(x, ..., main, add=FALSE,
     do.several <- want.several && !add && multiplot
     if(do.several) {
       ## generate one plot for each column of marks
-      y <- as.listof(lapply(mx, function(z, P) setmarks(P,z), P=x))
+      y <- as.solist(lapply(mx, function(z, P) setmarks(P,z), P=x))
       out <- do.call("plot",
                      c(list(x=y, main=main, do.plot=do.plot,
                             show.window=show.window),
@@ -511,3 +511,13 @@ iplot.lpp <- function(x, ..., xname) {
   iplot(y, ..., xname=xname, visible=c(TRUE, FALSE, FALSE, TRUE))
 }
 
+identify.lpp <- function(x, ...) {
+  verifyclass(x, "lpp")
+  P <- as.ppp(x)
+  id <- identify(P$x, P$y, ...)
+  if(!is.marked(x)) return(id)
+  marks <- as.data.frame(P)[id, -(1:2)]
+  out <- cbind(data.frame(id=id), marks)
+  row.names(out) <- NULL
+  return(out)
+}

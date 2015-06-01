@@ -13,6 +13,7 @@ quadrat.test.ppp <-
            alternative = c("two.sided", "regular", "clustered"),
            method = c("Chisq", "MonteCarlo"),
            conditional=TRUE, CR=1,
+           lambda=NULL, 
            ...,
            xbreaks=NULL, ybreaks=NULL,
            tess=NULL, nsim=1999)
@@ -26,6 +27,7 @@ quadrat.test.ppp <-
                                 method=method,
                                 conditional=conditional,
                                 CR=CR,
+                                fit=lambda,
                                 xbreaks=xbreaks, ybreaks=ybreaks,
                                 tess=tess,
                                 nsim=nsim),
@@ -75,6 +77,7 @@ quadrat.test.quadratcount <-
            alternative = c("two.sided", "regular", "clustered"),
            method=c("Chisq", "MonteCarlo"),
            conditional=TRUE, CR=1,
+           lambda=NULL, 
            ...,
            nsim=1999) {
    trap.extra.arguments(...)
@@ -82,6 +85,7 @@ quadrat.test.quadratcount <-
    alternative <- match.arg(alternative)
    quadrat.testEngine(Xcount=X,
                       alternative=alternative,
+                      fit=lambda,
                       method=method, conditional=conditional, CR=CR, nsim=nsim)
 }
 
@@ -122,6 +126,14 @@ quadrat.testEngine <- function(X, nx, ny,
     df <- switch(method,
                  Chisq      = length(fitmeans) - 1,
                  MonteCarlo = NULL)
+  } else if(is.im(fit) || inherits(fit, "funxy")) {
+    nullname <- "Poisson process with given intensity"
+    fit <- as.im(fit, W=Window(tess))
+    areas <- integral(fit, tess)
+    fitmeans <- sum(Xcount) * areas/sum(areas)
+    df <- switch(method,
+                 Chisq      = length(fitmeans) - 1,
+                 MonteCarlo = NULL)    
   } else {
     if(!is.ppm(fit))
       stop("fit should be a ppm object")
@@ -436,7 +448,7 @@ pool.quadrattest <- function(...,
                          testname=testname, dataname=Xname)
   # add info
   class(result) <- c("quadrattest", class(result))
-  attr(result, "tests") <- as.listof(tests)
+  attr(result, "tests") <- as.solist(tests)
   # there is no quadratcount attribute 
   return(result)
 }
@@ -452,7 +464,7 @@ extractAtomicQtests <- function(x) {
   tests <- attr(x, "tests")
   y <- lapply(tests, extractAtomicQtests)
   z <- do.call("c", y)
-  return(as.listof(z))
+  return(as.solist(z))
 }
 
 as.tess.quadrattest <- function(X) {
@@ -461,7 +473,7 @@ as.tess.quadrattest <- function(X) {
     return(as.tess(Y))
   }
   tests <- extractAtomicQtests(X)
-  return(as.listof(lapply(tests, as.tess.quadrattest)))
+  return(as.solist(lapply(tests, as.tess.quadrattest)))
 }
 
 as.owin.quadrattest <- function(W, ..., fatal=TRUE) {
@@ -476,7 +488,7 @@ as.owin.quadrattest <- function(W, ..., fatal=TRUE) {
 domain.quadrattest <- Window.quadrattest <- function(X, ...) { as.owin(X) }
 
 ## The shift method is undocumented.
-## It is only needed in plot.listof
+## It is only needed in plot.listof etc
 
 shift.quadrattest <- function(X, ...) {
   if(is.atomicQtest(X)) {

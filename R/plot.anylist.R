@@ -4,7 +4,7 @@
 ##  Plotting functions for 'solist', 'anylist', 'imlist'
 ##       and legacy class 'listof'
 ##
-##  $Revision: 1.6 $ $Date: 2015/01/28 07:02:36 $
+##  $Revision: 1.15 $ $Date: 2015/05/20 14:41:37 $
 ##
 
 plot.anylist <- plot.solist <- plot.listof <-
@@ -37,11 +37,13 @@ plot.anylist <- plot.solist <- plot.listof <-
     argh <- resolve.defaults(list(...),
                              extrargs,
                              ## some plot commands don't recognise 'add' 
-                             if(add) list(add=TRUE) else NULL)
-    if(is.function(cmd)) 
+                             if(add) list(add=TRUE) else NULL,
+                             if(is.ppp(cmd)) list(multiplot=FALSE) else NULL)
+    if(is.function(cmd)) {
       do.call(cmd, resolve.defaults(list(i, xi), argh))
-    else
+    } else {
       do.call(plot, resolve.defaults(list(cmd), argh))
+    }
   }
 
   exec.or.plotshift <- function(cmd, i, xi, ..., vec=vec,
@@ -50,7 +52,8 @@ plot.anylist <- plot.solist <- plot.listof <-
     argh <- resolve.defaults(list(...),
                              extrargs,
                              ## some plot commands don't recognise 'add' 
-                             if(add) list(add=TRUE) else NULL)
+                             if(add) list(add=TRUE) else NULL,
+                             if(is.ppp(cmd)) list(multiplot=FALSE) else NULL)
     if(is.function(cmd)) {
       do.call(cmd, resolve.defaults(list(i, xi), argh))
     } else {
@@ -60,14 +63,40 @@ plot.anylist <- plot.solist <- plot.listof <-
   }
 
   ## bounding box, including ribbon for images, legend for point patterns
-  getplotbox <- function(x, ..., do.plot) {
-    if(inherits(x, c("im", "ppp", "psp", "msr", "layered"))) {
-      y <- plot(x, ..., do.plot=FALSE)      
-      return(as.owin(y))
+  getplotbox <- function(x, ..., do.plot, plotcommand="plot") {
+    if(inherits(x, c("im", "ppp", "psp", "msr", "layered", "tess"))) {
+      if(identical(plotcommand, "plot")) {
+        y <- if(is.ppp(x)) plot(x, ..., multiplot=FALSE, do.plot=FALSE) else 
+                           plot(x, ..., do.plot=FALSE)      
+        return(as.owin(y))
+      } else if(identical(plotcommand, "contour")) {
+        y <- contour(x, ..., do.plot=FALSE)      
+        return(as.owin(y))
+      } else {
+        plc <- plotcommand
+        if(is.character(plc)) plc <- get(plc)
+        if(!is.function(plc)) stop("Unrecognised plot function")
+        if("do.plot" %in% names(args(plc)))
+          return(as.owin(do.call(plc, list(x=x, ..., do.plot=FALSE))))
+        return(as.rectangle(x))
+      }
     }
-    return(as.rectangle(x))
+    return(try(as.rectangle(x), silent=TRUE))
   }
 
+  # calculate bounding boxes for each panel using intended arguments!
+  getPlotBoxes <- function(xlist, ..., panel.args=NULL, extrargs=list()) {
+    userargs <- list(...)
+    n <- length(xlist)
+    result <- vector(length=n, mode="list")
+    for(i in seq_len(n)) {
+      pai <- if(is.function(panel.args)) panel.args(i) else list()
+      argh <- resolve.defaults(pai, userargs, extrargs)
+      result[[i]] <- do.call(getplotbox, append(list(x=xlist[[i]]), argh))
+    }
+    return(result)
+  }
+    
   is.shiftable <- function(x) {
     if(is.null(x)) return(TRUE)
     if(is.function(x)) return(FALSE)
@@ -102,7 +131,7 @@ plot.anylist <- plot.solist <- plot.listof <-
     if(missing(plotcommand) && isIm) {
       cl[[1]] <- as.name("image.imlist")
       parenv <- sys.parent()
-      return(eval(cl, envir=parenv))
+      return(invisible(eval(cl, envir=parenv)))
     }
 
     if(isSo) {
@@ -196,14 +225,20 @@ plot.anylist <- plot.solist <- plot.listof <-
       nrows <- as.integer(ceiling(n/ncols))
     else stopifnot(nrows * ncols >= length(x))
     nblank <- ncols * nrows - n
-    if(allfv) {
+    if(allfv || list(plotcommand) %in% list("persp", persp)) {
       ## Function plots do not have physical 'size'
       sizes.known <- FALSE
     } else {
       ## Determine dimensions of objects
       ##     (including space for colour ribbons, if they are images)
-      boxes <- try(lapply(x, getplotbox, ...), silent=TRUE)
-      sizes.known <- !inherits(boxes, "try-error")
+      boxes <- getPlotBoxes(x, ..., plotcommand=plotcommand,
+                            panel.args=panel.args, extrargs=extrargs)
+      sizes.known <- !any(sapply(boxes, inherits, what="try-error"))
+      if(sizes.known) {
+        extrargs <- resolve.defaults(extrargs, list(claim.title.space=TRUE))
+        boxes <- getPlotBoxes(x, ..., plotcommand=plotcommand,
+                              panel.args=panel.args, extrargs=extrargs)
+      }
       if(equal.scales && !sizes.known) {
         warning("Ignored equal.scales=TRUE; scales could not be determined")
         equal.scales <- FALSE
@@ -400,21 +435,21 @@ contour.imlist <- contour.listof <- function(x, ...) {
                            list(main=xname)))
 }
 
-image.imlist <- plot.imlist <- image.listof <- local({
+plot.imlist <- local({
 
-  image.imlist <- function(x, ..., equal.ribbon = FALSE, ribmar=NULL) {
+  plot.imlist <- function(x, ..., plotcommand="image",
+                          equal.ribbon = FALSE, ribmar=NULL) {
     xname <- short.deparse(substitute(x))
     if(equal.ribbon &&
-       !inherits(x, "imlist") &&
-       !all(unlist(lapply(x, is.im)))) {
-      warning("equal.ribbon is only implemented for objects of class 'im'")
-      equal.ribbon <- FALSE
+       (list(plotcommand) %in% list("image", "plot", image, plot))) {
+      out <- imagecommon(x, ..., xname=xname, ribmar=ribmar)
+    } else {
+      out <- do.call("plot.solist",
+                     resolve.defaults(list(x=x, plotcommand=plotcommand), 
+                                      list(...),
+                                      list(main=xname)))
     }
-    if(equal.ribbon) imagecommon(x, ..., xname=xname, ribmar=ribmar) else 
-      do.call("plot.solist",
-              resolve.defaults(list(x=x, plotcommand="image"),
-                               list(...),
-                               list(main=xname)))
+    return(invisible(out))
   }
 
   imagecommon <- function(x, ...,
@@ -483,6 +518,18 @@ image.imlist <- plot.imlist <- image.listof <- local({
                              ribadorn))
   }
 
-  image.imlist
+  plot.imlist
 })
+
+image.imlist <- image.listof <-
+  function(x, ..., equal.ribbon = FALSE, ribmar=NULL) {
+    plc <- resolve.1.default(list(plotcommand="image"), list(...))
+    if(list(plc) %in% list("image", "plot", image, plot)) {
+      out <- plot.imlist(x, ..., plotcommand="image",
+                         equal.ribbon=equal.ribbon, ribmar=ribmar)
+    } else {
+      out <- plot.solist(x, ..., ribmar=ribmar)
+    }
+    return(invisible(out))
+  }
 

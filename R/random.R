@@ -3,7 +3,7 @@
 ##
 ##    Functions for generating random point patterns
 ##
-##    $Revision: 4.73 $   $Date: 2015/02/23 00:21:39 $
+##    $Revision: 4.76 $   $Date: 2015/03/13 11:15:51 $
 ##
 ##
 ##    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -76,12 +76,18 @@ runifdisc <- function(n, radius=1, centre=c(0,0), ..., nsim=1, drop=TRUE)
 
 
 runifpoint <- function(n, win=owin(c(0,1),c(0,1)),
-                       giveup=1000, warn=TRUE, ..., nsim=1, drop=TRUE)
+                       giveup=1000, warn=TRUE, ...,
+                       nsim=1, drop=TRUE, ex=NULL)
 {
-  win <- as.owin(win)
-    
-  check.1.integer(n)
-  stopifnot(n >= 0)
+  if(missing(n) && missing(win) && !is.null(ex)) {
+    stopifnot(is.ppp(ex))
+    n <- npoints(ex)
+    win <- Window(ex)
+  } else {
+    win <- as.owin(win)
+    check.1.integer(n)
+    stopifnot(n >= 0)
+  }
 
   if(n == 0) {
     emp <- ppp(numeric(0), numeric(0), window=win)
@@ -187,10 +193,13 @@ runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ...,
 
   ## will generate Poisson process in enclosing rectangle and trim it
   box <- boundingbox(win)
-  mean <- lambda * area(box)
-
+  meanN <- lambda * area(box)
+  
   if(nsim == 1) {
-    n <- rpois(1, mean)
+    n <- rpois(1, meanN)
+    if(!is.finite(n))
+      stop(paste("Unable to generate Poisson process with a mean of",
+                 meanN, "points"))
     X <- runifpoint(n, box)
     ## trim to window
     if(win$type != "rectangle")
@@ -199,7 +208,10 @@ runifpoispp <- function(lambda, win = owin(c(0,1),c(0,1)), ...,
   }
   result <- vector(mode="list", length=nsim)
   for(isim in 1:nsim) {
-    n <- rpois(1, mean)
+    n <- rpois(1, meanN)
+    if(!is.finite(n))
+      stop(paste("Unable to generate Poisson process with a mean of",
+                 meanN, "points"))
     X <- runifpoint(n, box)
     ## trim to window
     if(win$type != "rectangle")
@@ -345,32 +357,36 @@ rpoint <- function(n, f, fmax=NULL,
 }
 
 rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
-                    nsim=1, drop=TRUE) {
+                    nsim=1, drop=TRUE, ex=NULL) {
   ## arguments:
   ##     lambda  intensity: constant, function(x,y,...) or image
   ##     lmax     maximum possible value of lambda(x,y,...)
   ##     win     default observation window (of class 'owin')
   ##   ...       arguments passed to lambda(x, y, ...)
   ##     nsim    number of replicate simulations
-  
-  if(!(is.numeric(lambda) || is.function(lambda) || is.im(lambda)))
-    stop(paste(sQuote("lambda"),
-               "must be a constant, a function or an image"))
-  if(is.numeric(lambda) && !(length(lambda) == 1 && lambda >= 0))
-    stop(paste(sQuote("lambda"),
-               "must be a single, nonnegative number"))
-  if(!is.null(lmax)) {
-    if(!is.numeric(lmax))
-      stop("lmax should be a number")
-    if(length(lmax) > 1)
-      stop("lmax should be a single number")
+
+  if(missing(lambda) && is.null(lmax) && missing(win) && !is.null(ex)) {
+    lambda <- intensity(unmark(ex))
+    win <- Window(ex)
+  } else {
+    if(!(is.numeric(lambda) || is.function(lambda) || is.im(lambda)))
+      stop(paste(sQuote("lambda"),
+                 "must be a constant, a function or an image"))
+    if(is.numeric(lambda) && !(length(lambda) == 1 && lambda >= 0))
+      stop(paste(sQuote("lambda"),
+                 "must be a single, nonnegative number"))
+    if(!is.null(lmax)) {
+      if(!is.numeric(lmax))
+        stop("lmax should be a number")
+      if(length(lmax) > 1)
+        stop("lmax should be a single number")
+    }
+    win <- if(is.im(lambda))
+      rescue.rectangle(as.owin(lambda))
+    else
+      as.owin(win)
   }
   
-  win <- if(is.im(lambda))
-    rescue.rectangle(as.owin(lambda))
-  else
-    as.owin(win)
-    
   if(is.numeric(lambda)) 
     ## uniform Poisson
     return(runifpoispp(lambda, win, nsim=nsim, drop=drop))
@@ -497,17 +513,28 @@ rMaternII <- function(kappa, r, win = owin(c(0,1),c(0,1)), stationary=TRUE,
 }
   
 rSSI <- function(r, n=Inf, win = square(1), 
-                 giveup = 1000, x.init=NULL, ..., nsim=1, drop=TRUE)
+                 giveup = 1000, x.init=NULL, ...,
+                 f=NULL, fmax=NULL,
+                 nsim=1, drop=TRUE)
 {
   win.given <- !missing(win) && !is.null(win)
   stopifnot(is.numeric(r) && length(r) == 1 && r >= 0)
   stopifnot(is.numeric(n) && length(n) == 1 && n >= 0)
   ##
+  if(!is.null(f)) {
+    stopifnot(is.numeric(f) || is.im(f) || is.function(f))
+    if(is.null(fmax) && !is.numeric(f))
+      fmax <- if(is.im(f)) max(f) else max(as.im(f, win))
+  }
+  ##
   if(nsim > 1) {
     result <- vector(mode="list", length=nsim)
-    for(isim in 1:nsim)
-      result[[isim]] <- rSSI(r=r, n=n, win=if(win.given) win else square(1),
-                             giveup=giveup, x.init=x.init)
+    if(!win.given) win <- square(1)
+    for(isim in 1:nsim) {
+      progressreport(isim, nsim)
+      result[[isim]] <- rSSI(r=r, n=n, win=win, giveup=giveup, x.init=x.init,
+                             f=f, fmax=fmax)
+    }
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
   }
@@ -558,10 +585,10 @@ rSSI <- function(r, n=Inf, win = square(1),
   ntries <- 0
   while(ntries < giveup) {
     ntries <- ntries + 1
-    qq <- runifpoint(1, win)
-    x <- qq$x[1]
-    y <- qq$y[1]
-    if(X$n == 0 || all(((x - X$x)^2 + (y - X$y)^2) > r2))
+    qq <- if(is.null(f)) runifpoint(1, win) else rpoint(1, f, fmax, win)
+    dx <- qq$x[1] - X$x
+    dy <- qq$y[1] - X$y
+    if(all(dx^2 + dy^2 > r2))
       X <- superimpose(X, qq, W=win, check=FALSE)
     if(X$n >= n)
       return(if(drop) X else solist(X))

@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.48 $  $Date: 2014/11/11 02:34:24 $
+#  $Revision: 1.50 $  $Date: 2015/05/10 02:22:36 $
 #
 
 quadratcount <- function(X, ...) {
@@ -9,7 +9,7 @@ quadratcount <- function(X, ...) {
 }
 
 quadratcount.splitppp <- function(X, ...) {
-  as.listof(lapply(X, quadratcount, ...))
+  as.solist(lapply(X, quadratcount, ...))
 }
 
 quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
@@ -50,8 +50,11 @@ quadratcount.ppp <- function(X, nx=5, ny=nx, ...,
     }
   } else {
     # user-supplied tessellation
-    if(!inherits(tess, "tess"))
-      stop("The argument tess should be a tessellation", call.=FALSE)
+    if(!inherits(tess, "tess")) {
+      tess <- try(as.tess(tess), silent=TRUE)
+      if(inherits(tess, "try-error"))
+        stop("The argument tess should be a tessellation", call.=FALSE)
+    }
     if(tess$type == "rect") {
       # fast code for counting points in rectangular grid
       Xcount <- rectquadrat.countEngine(X$x, X$y, tess$xgrid, tess$ygrid)
@@ -147,7 +150,7 @@ quadrats <- function(X, nx=5, ny=nx, xbreaks = NULL, ybreaks = NULL,
   yr <- W$yrange
   b <- rectquadrat.breaks(xr, yr, nx, ny, xbreaks, ybreaks)
   # rectangular tiles
-  Z <- tess(xgrid=b$xbreaks, ygrid=b$ybreaks)
+  Z <- tess(xgrid=b$xbreaks, ygrid=b$ybreaks, unitname=unitname(W))
   if(W$type != "rectangle") {
     # intersect rectangular tiles with window W
     if(!keepempty) {
@@ -193,7 +196,7 @@ intensity.quadratcount <- function(X, ..., image=FALSE) {
 }
 
 ## The shift method is undocumented.
-## It is only needed in plot.listof
+## It is only needed in plot.listof / plot.solist / plot.layered
 
 shift.quadratcount <- function(X, ...) {
   attr(X, "tess") <- te <- shift(attr(X, "tess"), ...)

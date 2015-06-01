@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.116 $	$Date: 2014/12/31 01:54:00 $
+#	$Revision: 2.119 $	$Date: 2015/04/10 04:02:56 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -58,6 +58,8 @@ function(x, ...,
   do.SE <- force.no.SE <- force.SE <- FALSE
   if(np == 0) {
     force.no.SE <- TRUE
+  } else if(!is.null(x$internal$VB)) {
+    force.no.SE <- TRUE
   } else if(!misswhat && ("se" %in% what)) {
     force.SE <- TRUE
   } else switch(spatstat.options("print.ppm.SE"),
@@ -110,32 +112,34 @@ function(x, ...,
         parbreak(terselevel)
       }
 
-      tv <- s$trend$value
+      if(waxlyrical('space', terselevel) || !do.SE) {
+        ## print trend coefficients, unless redundant and space is tight
+        tv <- s$trend$value
       
-      if(length(tv) == 0) 
-        splat("[No trend coefficients]")
-      else {
-        thead <- paste0(s$trend$label, ":")
-        if(is.list(tv)) {
-          splat(thead)
-          for(i in seq_along(tv))
-            print(tv[[i]])
-        } else if(is.numeric(tv) && length(tv) == 1) {
-          ## single number: append to end of current line
-          tvn <- names(tv)
-          tveq <- if(is.null(tvn)) "\t" else paste(" ", tvn, "= ")
-          splat(paste0(thead, tveq, signif(tv, digits)))
-        } else {
-          ## some other format 
-          splat(thead)
-          print(tv)
+        if(length(tv) == 0) 
+          splat("[No trend coefficients]")
+        else {
+          thead <- paste0(s$trend$label, ":")
+          if(is.list(tv)) {
+            splat(thead)
+            for(i in seq_along(tv))
+              print(tv[[i]])
+          } else if(is.numeric(tv) && length(tv) == 1) {
+            ## single number: append to end of current line
+            tvn <- names(tv)
+            tveq <- if(is.null(tvn)) "\t" else paste(" ", tvn, "= ")
+            splat(paste0(thead, tveq, signif(tv, digits)))
+          } else {
+            ## some other format 
+            splat(thead)
+            print(tv)
+          }
         }
+        parbreak(terselevel)
       }
     }
 
-    parbreak(terselevel)
-
-    if(waxlyrical("extras", terselevel) &&
+    if(waxlyrical("space", terselevel) &&
        !is.null(cfa <- s$covfunargs) && length(cfa) > 0) {
       cfafitter <- s$cfafitter
       if(is.null(cfafitter)) {
@@ -211,11 +215,12 @@ function(x, ...,
 
   if(identical(s$valid, FALSE) && waxlyrical("errors", terselevel)) {
     parbreak()
-    splat("***",
-          "Model is not valid",
-          "***\n***",
-          "Interaction parameters are outside valid range",
-          "***")
+    splat("*** Model is not valid ***")
+    if(!all(is.finite(s$entries$coef))) {
+      splat("*** Some coefficients are NA or Inf ***")
+    } else {
+      splat("*** Interaction parameters are outside valid range ***")
+    }
   } else if(is.na(s$valid) && waxlyrical("extras", terselevel)) {
     parbreak()
     splat("[Validity of model could not be checked]")
@@ -326,7 +331,7 @@ valid.ppm <- function(object, warn=TRUE) {
     return(FALSE)
   # inspect interaction
   inte <- object$interaction
-  if(is.null(inte))
+  if(is.poisson(object))
     return(TRUE) # Poisson process
   # extract fitted interaction coefficients
   Vnames <- object$internal$Vnames
@@ -747,14 +752,14 @@ model.images.ppm <- function(object, W=as.owin(object), ...) {
   imagenames <- colnames(mm)
   if(!is.multitype(object)) {
     result <- lapply(as.list(mm), replace, list=ok, x=Z)
-    result <- as.listof(result)
+    result <- as.solist(result)
     names(result) <- imagenames
   } else {
     marx <- marks(Q$dummy)
     mmsplit <- split(mm, marx)
     result <- vector(mode="list", length=length(mmsplit))
     for(i in seq_along(mmsplit))
-      result[[i]] <- as.listof(lapply(as.list(mmsplit[[i]]),
+      result[[i]] <- as.solist(lapply(as.list(mmsplit[[i]]),
                                       replace, list=ok, x=Z))
     names(result) <- names(mmsplit)
     result <- do.call(hyperframe, result)

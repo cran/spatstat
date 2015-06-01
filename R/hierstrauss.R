@@ -1,7 +1,7 @@
 ##
 ##    hierstrauss.R
 ##
-##    $Revision: 1.4 $	$Date: 2015/01/08 07:34:30 $
+##    $Revision: 1.8 $	$Date: 2015/05/27 08:04:38 $
 ##
 ##    The hierarchical Strauss process
 ##
@@ -92,9 +92,11 @@ HierStrauss <- local({
                     "interaction distances",
                     "hierarchical order"),
        selfstart = function(X, self) {
-         if(is.null(self$par$types)) types <- levels(marks(X))
-         if(is.null(self$par$archy)) archy <- types
-         HierStrauss(types=types,radii=self$par$radii,archy=self$par$archy)
+         if(!is.null(self$par$types) && !is.null(self$par$archy))
+           return(self)
+         types <- self$par$types %orifnull% levels(marks(X))
+         archy <- self$par$archy %orifnull% types
+         HierStrauss(types=types,radii=self$par$radii,archy=archy)
        },
        init = function(self) {
          types <- self$par$types
@@ -119,14 +121,18 @@ HierStrauss <- local({
          radii <- self$par$radii
          types <- self$par$types
          archy <- self$par$archy
-         splat(nrow(radii), "types of points")
+         if(waxlyrical('gory'))
+           splat(nrow(radii), "types of points")
          if(!is.null(types) && !is.null(archy)) {
-           splat("Possible types and ordering:")
+           if(waxlyrical('space')) {
+             splat("Possible types and ordering:")
+           } else cat("Hierarchy: ")
            print(archy)
          } else if(!is.null(types)) {
-           splat("Possible types:")
+           (if(waxlyrical('space')) splat else cat)("Possible types: ")
            print(types)
-         } else splat("Possible types:\t not yet determined")
+         } else if(waxlyrical('gory'))
+           splat("Possible types:\t not yet determined")
          splat("Interaction radii:")
          print(hiermat(radii, self$par$archy))
          invisible(NULL)
@@ -170,8 +176,9 @@ HierStrauss <- local({
          # interaction radii and types
          radii <- self$par$radii
          types <- self$par$types
+         archy <- self$par$archy
          # problems?
-         uptri <- self$par$archy$relation
+         uptri <- archy$relation
          required <- !is.na(radii) & uptri
          okgamma  <- !uptri | (is.finite(gamma) & (gamma <= 1))
          naughty  <- required & !okgamma
@@ -230,42 +237,3 @@ HierStrauss <- local({
   
   HierStrauss
 })
-
-
-hierarchicalordering <- function(i, s) {
-  s <- as.character(s)
-  n <- length(s)
-  possible <- if(is.character(i)) s else seq_len(n)
-  j <- match(i, possible)
-  if(any(uhoh <- is.na(j)))
-    stop(paste("Unrecognised",
-               ngettext(sum(uhoh), "level", "levels"),
-               sQuote(i[uhoh]),
-               "amongst possible levels",
-               commasep(sQuote(s))))
-  if(length(j) < n)
-    stop("Ordering is incomplete")
-  ord <- order(j)
-  m <- matrix(, n, n)
-  rel <- matrix(ord[row(m)] <= ord[col(m)], n, n)
-  dimnames(rel) <- list(s, s)
-  x <- list(indices=j, ordering=ord, labels=s, relation=rel)
-  class(x) <- "hierarchicalordering"
-  x
-}
-
-print.hierarchicalordering <- function(x, ...) {
-  splat(x$labels[x$indices], collapse=" ~> ")
-  invisible(NULL)
-}
-                     
-hiermat <- function (x, h) 
-{
-  stopifnot(is.matrix(x))
-  isna <- is.na(x)
-  x[] <- as.character(x)
-  x[isna] <- ""
-  if(inherits(h, "hierarchicalordering")) ## allows h to be NULL, etc
-    x[!(h$relation)] <- ""
-  return(noquote(x))
-}

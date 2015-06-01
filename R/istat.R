@@ -1,7 +1,7 @@
 #
 # interactive analysis of point patterns
 #
-#   $Revision: 1.19 $   $Date: 2015/02/24 01:41:47 $
+#   $Revision: 1.22 $   $Date: 2015/05/07 01:56:31 $
 #
 #
 
@@ -9,21 +9,22 @@ istat <- function(x, xname) {
   if(missing(xname))
     xname <- short.deparse(substitute(x))
   verifyclass(x, "ppp")
+  check.rpanel()
   # generate simulations of CSR for use in envelopes
-  simx <- envelope(x, fun=NULL, nsim=39,
+  simx <- envelope(x, fun=NULL, nsim=39, verbose=FALSE,
                    internal=list(csr=TRUE, eject="patterns"))
   # initial value of smoothing parameter
   sigma0 <- with(x$window, min(diff(xrange),diff(yrange)))/8
   # create panel
-  requireNamespace("rpanel")
-  p <- rpanel::rp.control(paste("istat(", xname, ")", sep=""),
+  p <- rpanel::rp.control(title=paste("istat(", xname, ")", sep=""),
+                          panelname="istat",
+                          size=c(600,400),
                           x=x,           # point pattern
                           xname=xname,   # name of point pattern
                           simx=simx,   # simulated realisations of CSR
                           stat="data",
                           envel="none",
-                          sigma=sigma0,
-                          size=c(600, 400))
+                          sigma=sigma0)
 # Split panel into two halves  
 # Left half of panel: display
 # Right half of panel: controls

@@ -53,14 +53,20 @@
   Fitted models can be printed, plotted, predicted, simulated and so on.
 }
 \section{Getting Started}{
-  For a quick introduction to \pkg{spatstat}, see
+  For a quick introduction to \pkg{spatstat}, read
   the package vignette \emph{Getting started with spatstat}
-  installed with \pkg{spatstat}. (To see this document online,
-  start \R, type \code{help.start()} to open the help browser, and
-  navigate to \code{Packages > spatstat > Vignettes}).
-
+  installed with \pkg{spatstat}. To see this document, you can either
+  \itemize{
+    \item visit \url{cran.r-project.org/web/packages/spatstat}
+    and click on \code{Getting Started with Spatstat}
+    \item
+    start \R, type \code{library(spatstat)} and \code{vignette('getstart')}
+    \item
+    start \R, type \code{help.start()} to open the help
+    browser, and navigate to \code{Packages > spatstat > Vignettes}.
+  }
   For a complete 2-day course on using \pkg{spatstat}, see the workshop notes
-  by Baddeley (2010), available on the internet. (This is now somewhat
+  by Baddeley (2010), available on the internet. (This is now \emph{very}
   out-of-date but it will get you started.)
 
   Type \code{demo(spatstat)} for a demonstration 
@@ -76,7 +82,7 @@
   by Diggle (2003) and the handbook Gelfand et al (2010).
 }
 \section{Updates}{
-  New versions of \pkg{spatstat} are produced about once a month.
+  New versions of \pkg{spatstat} are released every 8 weeks.
   Users are advised to update their installation of \pkg{spatstat}
   regularly.
   
@@ -85,7 +91,8 @@
 
   See the Vignette \emph{Summary of recent updates},
   installed with \pkg{spatstat}, which describes the main changes
-  to \pkg{spatstat} since the workshop notes were published in 2010,
+  to \pkg{spatstat} since the workshop notes (Baddeley, 2010)
+  were published.
   
   Type \code{news(package="spatstat")} to read news documentation about
   all previous versions of the package.
@@ -347,7 +354,7 @@
 	compute Dirichlet-Voronoi tessellation \cr
 	\code{\link{delaunay}} \tab
 	compute Delaunay triangulation \cr 
-	\code{\link{delaunay.distance}} \tab
+	\code{\link{delaunayDistance}} \tab
 	graph distance in Delaunay triangulation \cr 
 	\code{\link{convexhull}} \tab compute convex hull \cr
 	\code{\link{discretise}} \tab discretise coordinates \cr
@@ -659,6 +666,8 @@
       \code{\link{clickjoin}} \tab interactively join vertices in network \cr
       \code{\link{simplenet}} \tab simple example of network \cr
       \code{\link{lineardisc}} \tab disc in a linear network \cr
+      \code{\link{delaunayNetwork}} \tab network of Delaunay triangulation \cr
+      \code{\link{dirichletNetwork}} \tab network of Dirichlet edges \cr
       \code{\link{methods.linnet}} \tab methods for \code{linnet} objects
     }
     
@@ -1229,7 +1238,7 @@
   To compute weights:
   \tabular{ll}{
     \code{\link{gridweights}} \tab quadrature weights by the grid-counting rule  \cr
-    \code{\link{dirichlet.weights}} \tab quadrature weights are
+    \code{\link{dirichletWeights}} \tab quadrature weights are
     Dirichlet tile areas
   }
 
@@ -1626,6 +1635,7 @@
   Ricardo Bernhardt,
   Andrew Bevan,
   Brad Biggerstaff,
+  Anders Bilgrau,
   Leanne Bischof,
   Roger Bivand,
   Jose M. Blanco Moreno,
@@ -1670,6 +1680,7 @@
   Markus Herrmann,
   Kurt Hornik,
   Philipp Hunziker,
+  Jack Hywood,
   Ross Ihaka,
   Aruna Jammalamadaka,
   Robert John-Chandran,
@@ -1729,9 +1740,11 @@
   Christopher Ryan,
   Farzaneh Safavimanesh,
   Aila \ifelse{latex}{\out{S\"{a}rkk\"{a}}}{Sarkka},
+  Cody Schank,
   Katja Schladitz,
   Sebastian Schutte,
   Bryan Scott,
+  Olivia Semboli,
   Vadim Shcherbakov,
   Shen Guochun,
   Ida-Maria Sintorn,

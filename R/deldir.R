@@ -3,7 +3,7 @@
 #
 # Interface to deldir package
 #
-#  $Revision: 1.22 $ $Date: 2015/02/08 10:07:46 $
+#  $Revision: 1.26 $ $Date: 2015/05/16 05:41:57 $
 #
 
 .spst.triEnv <- new.env()
@@ -195,7 +195,7 @@ delaunay <- function(X) {
   return(del)
 }
 
-delaunay.distance <- function(X) {
+delaunayDistance <- function(X) {
   stopifnot(is.ppp(X))
   nX <- npoints(X)
   w <- as.owin(X)
@@ -251,7 +251,7 @@ safedeldir <- function(X) {
   return(NULL)
 }
 
-dirichlet.vertices <- function(X) {
+dirichletVertices <- function(X) {
   DT <- tiles(dirichlet(X))
   xy <- do.call(concatxy, lapply(DT, vertices))
   Y <- unique(ppp(xy$x, xy$y, window=Window(X), check=FALSE))
@@ -260,8 +260,45 @@ dirichlet.vertices <- function(X) {
   Y <- Y[b > thresh]
   return(Y)
 }
-    
-delaunay.network <- function(X) {
+
+dirichletAreas <- function(X) {
+  stopifnot(is.ppp(X))
+  X <- unmark(X)
+  win <- Window(X)
+  dup <- duplicated(X, rule="deldir")
+  if((anydup <- any(dup))) {
+    oldX <- X
+    X <- X[!dup]
+  }
+  switch(win$type,
+         rectangle = {
+           rw <- c(win$xrange, win$yrange)
+           dd <- deldir(X$x, X$y, dpl=NULL, rw=rw)
+           w <- dd$summary[, 'dir.area']
+         },
+         polygonal = {
+           w <- tile.areas(dirichlet(X))
+         },
+         mask = {
+           #' Nearest data point to each pixel:
+           tileid <- exactdt(X)$i
+           #' Restrict to window (result is a vector - OK)
+           tileid <- tileid[win$m]
+           #' Count pixels in each tile
+           id <- factor(tileid, levels=seq_len(X$n))
+           counts <- table(id)
+           #' Convert to digital area
+           pixelarea <- win$xstep * win$ystep
+           w <- pixelarea * as.numeric(counts)
+         })
+  if(!anydup)
+    return(w)
+  oldw <- numeric(npoints(oldX))
+  oldw[!dup] <- w
+  return(oldw)
+}
+
+delaunayNetwork <- function(X) {
   stopifnot(is.ppp(X))
   X <- unique(X, rule="deldir")
   nX <- npoints(X)
@@ -275,7 +312,7 @@ delaunay.network <- function(X) {
   return(linnet(X, edges=joins))
 }
 
-dirichlet.edges <- function(X) {
+dirichletEdges <- function(X) {
   stopifnot(is.ppp(X))
   X <- unique(X, rule="deldir")
   nX <- npoints(X)
@@ -288,4 +325,31 @@ dirichlet.edges <- function(X) {
   return(as.psp(dd$dirsgs[,1:4], window=W))
 }
 
-dirichlet.network <- function(X, ...) as.linnet(dirichlet.edges(X), ...)
+dirichletNetwork <- function(X, ...) as.linnet(dirichletEdges(X), ...)
+
+## deprecated older names
+
+delaunay.distance <- function(...) {
+  .Deprecated("delaunayDistance", package="spatstat")
+  delaunayDistance(...)
+}
+
+delaunay.network <- function(...) {
+  .Deprecated("delaunayNetwork", package="spatstat")
+  delaunayNetwork(...)
+}
+
+dirichlet.edges <- function(...) {
+  .Deprecated("dirichletEdges", package="spatstat")
+  dirichletEdges(...)
+}
+
+dirichlet.network <- function(...) {
+  .Deprecated("dirichletNetwork", package="spatstat")
+  dirichletNetwork(...)
+}
+
+dirichlet.vertices <- function(...) {
+  .Deprecated("dirichletVertices", package="spatstat")
+  dirichletVertices(...)
+}

@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.124 $     $Date: 2015/02/17 10:46:04 $
+#      $Revision: 1.129 $     $Date: 2015/05/16 03:38:48 $
 #
 #      The class "im" of raster images
 #
@@ -435,7 +435,13 @@ update.im <- function(object, ...) {
     # no index provided
     # set all pixels to 'value'
     v <- X$v
-    v[!is.na(v)] <- value
+    if(!is.factor(value)) {
+      v[!is.na(v)] <- value
+    } else {
+      vnew <- matrix(NA_integer_, ncol(v), nrow(v))
+      vnew[!is.na(v)] <- as.integer(value)
+      v <- factor(vnew, labels=levels(value))
+    }
     X$v <- v
     return(update(X))
   }
@@ -837,12 +843,12 @@ hist.im <- function(x, ..., probability=FALSE) {
     if(plotit) {
       ylab <- if(probability) "Probability density" else "Number of pixels"
       out <- do.call("hist.default",
-                   resolve.defaults(list(values),
-                                    list(...),
-                                    list(probability=probability),
-                                    list(xlab=paste("Pixel value"),
-                                         ylab=ylab,
-                                         main=main)))
+                     resolve.defaults(list(values),
+                                      list(...),
+                                      list(freq=!probability,
+                                           xlab="Pixel value",
+                                           ylab=ylab,
+                                           main=main)))
       out$xname <- xname
     } else {
       # plot.default whinges if `probability' given when plot=FALSE
@@ -894,8 +900,10 @@ integral.im <- function(f, domain=NULL, ...) {
   typ <- f$type
   if(!any(typ == c("integer", "real", "complex", "logical")))
     stop(paste("Don't know how to integrate an image of type", sQuote(typ)))
-  if(!is.null(domain))
+  if(!is.null(domain)) {
+    if(is.tess(domain)) return(sapply(tiles(domain), integral.im, f=f))
     f <- f[domain, drop=FALSE, tight=TRUE]
+  }
   a <- with(f, sum(v, na.rm=TRUE) * xstep * ystep)
   return(a)
 }
@@ -930,14 +938,14 @@ split.im <- function(x, f, ..., drop=FALSE) {
   if(drop)
     return(out)
   else 
-    return(as.listof(out))
+    return(as.solist(out))
 }
 
 by.im <- function(data, INDICES, FUN, ...) {
   stopifnot(is.im(data))
   V <- split(data, INDICES)
   U <- lapply(V, FUN, ...)
-  return(as.listof(U))
+  return(as.solist(U, demote=TRUE))
 }
 
 rebound.im <- function(x, rect) {
@@ -1023,6 +1031,7 @@ scaletointerval.default <- function(x, from=0, to=1, xrange=range(x)) {
   } else {
     y <- (from+to)/2 + 0 * x
   }
+  y[] <- pmin(pmax(y[], from), to)
   return(y)
 }
 

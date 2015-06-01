@@ -34,8 +34,8 @@
     boundaries of the rectangular quadrats. Incompatible with \code{ny}.
   }
   \item{tess}{
-    Tessellation (object of class \code{"tess"})
-    determining the quadrats. Incompatible
+    Tessellation (object of class \code{"tess"} or something acceptable
+    to \code{\link{as.tess}}) determining the quadrats. Incompatible
     with \code{nx,ny,xbreaks,ybreaks}.
   }
 }
@@ -49,7 +49,7 @@
   The value of \code{quadratcount.splitppp} is a list of such
   contingency tables, each containing the quadrat counts for one of the
   component point patterns in \code{X}.
-  This list also has the class \code{"listof"} which has
+  This list also has the class \code{"solist"} which has
   print and plot methods.
 }
 \details{

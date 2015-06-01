@@ -5,7 +5,10 @@
   Plots a tessellation.
 }
 \usage{
-  \method{plot}{tess}(x, ..., main, add=FALSE, show.all=!add, col=NULL)
+  \method{plot}{tess}(x, ..., main, add=FALSE,
+                      show.all=!add, col=NULL, do.plot=TRUE,
+                      do.labels=FALSE,
+                      labels=tilenames(x), labelargs=list())
 }
 \arguments{
   \item{x}{Tessellation (object of class \code{"tess"}) to be plotted.}
@@ -22,6 +25,18 @@
     Colour of the tile boundaries. A character string.
     Ignored for pixel tessellations.
   }
+  \item{do.plot}{
+    Logical value indicating whether to actually perform the plot.
+  }
+  \item{do.labels}{
+    Logical value indicating whether to show a text label for each tile
+    of the tessellation.
+  }
+  \item{labels}{Character vector of labels for the tiles.}
+  \item{labelargs}{
+    List of arguments passed to
+    \code{\link{text.default}} to control display of the text labels.
+  }
 }
 \details{
   This is a method for the generic \code{\link{plot}} function
@@ -33,7 +48,8 @@
   type of tessellation. 
 }
 \value{
-  None.
+  (Invisible) window of class \code{"owin"} specifying a bounding box
+  for the plot (including a colour ribbon if plotted).
 }
 \seealso{
   \code{\link{tess}}

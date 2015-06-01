@@ -1,7 +1,7 @@
 #
 # interactive plot for ppp objects using rpanel
 #
-#   $Revision: 1.19 $   $Date: 2015/02/24 01:41:14 $
+#   $Revision: 1.21 $   $Date: 2015/04/15 11:04:49 $
 #
 #
 
@@ -38,9 +38,8 @@ iplot.ppp <- function(x, ..., xname) {
   if(missing(xname))
     xname <- short.deparse(substitute(x))
   verifyclass(x, "ppp")
-  requireNamespace("rpanel")
   
-  if(markformat(x) %in% c("hyperframe", "listof")) 
+  if(markformat(x) %in% c("hyperframe", "list"))
     marks(x) <- as.data.frame(as.hyperframe(marks(x)))
   if(markformat(x) == "dataframe" && ncol(marks(x)) > 1) {
     warning("Using only the first column of marks")
@@ -50,6 +49,8 @@ iplot.ppp <- function(x, ..., xname) {
 
   bb <- as.rectangle(as.owin(x))
   bbmid <- unlist(centroid.owin(bb))
+  ##
+  check.rpanel()
   ##
   p <- rpanel::rp.control(paste("iplot(", xname, ")", sep=""), 
                           x=x,
@@ -334,7 +335,7 @@ do.iplot.ppp <- function(panel) {
 
 CommitAndRedraw <- function(panel) {
   # hack to ensure that panel is immediately updated in rpanel
-  requireNamespace("rpanel", quietly=TRUE)
+  check.rpanel()
   ## This is really a triple-colon!
   rpanel:::rp.control.put(panel$panelname, panel)
   # now redraw it
@@ -343,3 +344,9 @@ CommitAndRedraw <- function(panel) {
 
 iplot.ppp
 })
+
+check.rpanel <- function() {
+  if(!isNamespaceLoaded("rpanel"))
+    stop("The library 'rpanel' is required")
+}
+  

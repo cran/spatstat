@@ -49,7 +49,7 @@ which can then be fitted to point pattern data.
   is a function \eqn{\beta(x_i)}{beta(x[i])}
   of location and type, rather than a constant beta. 
  
-  The function \code{\link[spatstat]{ppm}()},
+  The function \code{\link{ppm}()},
   which fits point process models to 
   point pattern data, requires an argument 
   of class \code{"interact"} describing the interpoint interaction
@@ -61,7 +61,7 @@ which can then be fitted to point pattern data.
   The argument \code{types} need not be specified in normal use.
   It will be determined automatically from the point pattern data set
   to which the HierStrauss interaction is applied,
-  when the user calls \code{\link[spatstat]{ppm}}. 
+  when the user calls \code{\link{ppm}}. 
   However, the user should be confident that
   the ordering of types in the dataset corresponds to the ordering of
   rows and columns in the matrix \code{radii}.
@@ -82,11 +82,14 @@ which can then be fitted to point pattern data.
   specified in \code{HierStrauss}.  The canonical
   parameters \eqn{\log(\beta_j)}{log(beta[j])} and
   \eqn{\log(\gamma_{ij})}{log(gamma[i,j])} are estimated by
-  \code{\link[spatstat]{ppm}()}, not fixed in \code{HierStrauss()}.
+  \code{\link{ppm}()}, not fixed in \code{HierStrauss()}.
 }
 \seealso{
-  \code{\link[spatstat]{MultiStrauss}} for the corresponding
+  \code{\link{MultiStrauss}} for the corresponding
   symmetrical interaction.
+
+  \code{\link{HierHard}},
+  \code{\link{HierStraussHard}}.
 }
 \examples{
    r <- matrix(10 * c(3,4,4,3), nrow=2,ncol=2)
