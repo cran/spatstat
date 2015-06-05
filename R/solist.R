@@ -7,7 +7,7 @@
 ##
 ## plot.solist is defined in plot.solist.R
 ##
-## $Revision: 1.9 $ $Date: 2015/03/12 01:46:17 $
+## $Revision: 1.12 $ $Date: 2015/06/05 08:52:38 $
 
 anylist <- function(...) {
   x <- list(...)
@@ -64,31 +64,36 @@ pool.anylist <- function(x, ...) {
 
 ## .................... solist .............................
 
-solist <- local({
-
-  check2Dspatial <-
-    function(z) !inherits(try(Frame(z), silent=TRUE), "try-error")
-
-  solist <- function(..., check=TRUE, promote=TRUE, demote=FALSE) {
-    stuff <- list(...)
-    if((check || demote) && !all(unlist(lapply(stuff, check2Dspatial)))) {
-      if(demote)
-        return(as.anylist(stuff))
-      stop("Some arguments of solist() are not 2D spatial objects")
-    }
-    class(stuff) <- c("solist", "anylist", "listof", class(stuff))
-    if(promote) {
-      if(all(unlist(lapply(stuff, is.ppp)))) {
-        class(stuff) <- c("ppplist", class(stuff))
-      } else if(all(unlist(lapply(stuff, is.im)))) {
-        class(stuff) <- c("imlist", class(stuff))
-      }
-    }
-    return(stuff)
-  }
-
-  solist
+is.sob <- local({
+  ## test whether x is a spatial object suitable for solist
+  sobjectclasses <- c("ppp", "psp", "im", "owin", 
+                      "quad", "tess", "msr",
+                      "quadratcount", "quadrattest", 
+                      "layered",
+                      "funxy", "distfun", "nnfun", 
+                      "lpp", "linnet", "linfun",
+                      "influence.ppm", "leverage.ppm")
+  is.sob <- function(x) { inherits(x, what=sobjectclasses) }
+  is.sob
 })
+  
+solist <- function(..., check=TRUE, promote=TRUE, demote=FALSE) {
+  stuff <- list(...)
+  if((check || demote) && !all(sapply(stuff, is.sob))) {
+    if(demote)
+      return(as.anylist(stuff))
+    stop("Some arguments of solist() are not 2D spatial objects")
+  }
+  class(stuff) <- c("solist", "anylist", "listof", class(stuff))
+  if(promote) {
+    if(all(unlist(lapply(stuff, is.ppp)))) {
+      class(stuff) <- c("ppplist", class(stuff))
+    } else if(all(unlist(lapply(stuff, is.im)))) {
+      class(stuff) <- c("imlist", class(stuff))
+    }
+  }
+  return(stuff)
+}
 
 as.solist <- function(x, ...) {
   if(inherits(x, "solist") && length(list(...)) == 0)

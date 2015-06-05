@@ -1,4 +1,49 @@
 
+        CHANGES IN spatstat VERSION 1.42-1
+
+OVERVIEW
+
+   o We thank Andrew Hardegen, Tom Lawrence, Robin Milne, Suman Rakshit,
+   and Brian Ripley for contributions.
+
+   o Urgent bug fix.
+
+   o More robust simulation of cluster processes.
+
+   o Slightly accelerated.
+
+   o Version nickname: 'Vogon Poetry'
+
+NEW FUNCTIONS
+
+   o boundingbox.solist
+   Method for boundingbox for lists of spatial objects.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o rThomas, rMatClust, rCauchy, rVarGamma, rNeymanScott
+   New faster algorithm which is more robust against extreme values of
+   the parameters.
+
+   o rNeymanScott
+   New argument 'nonempty' controls choice of algorithm.
+
+   o solist, as.solist
+   Accelerated. 
+
+   o as.list.hyperframe
+   Accelerated. 
+
+BUG FIXES
+
+   o residuals.mppm
+   Brought some computers to a grinding halt, due to the bug in solist().
+   Fixed.
+
+   o solist, as.solist
+   In rare cases, the format was corrupted, or the algorithm never terminated.
+   Fixed.
+
         CHANGES IN spatstat VERSION 1.42-0
 
 OVERVIEW

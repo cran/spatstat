@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.42-0
-Nickname: Life, The Universe and Everything
-Date: 2015-05-27
+Version: 1.42-1
+Nickname: Vogon Poetry
+Date: 2015-06-05
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@uwa.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -180,6 +180,6 @@ URL: http://www.spatstat.org
 LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
-Packaged: 2015-05-27 09:24:09 UTC; adrian
+Packaged: 2015-06-05 16:26:05 UTC; adrian
 Repository: CRAN
-Date/Publication: 2015-06-01 07:46:50
+Date/Publication: 2015-06-05 20:05:20
