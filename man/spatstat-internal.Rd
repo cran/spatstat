@@ -11,9 +11,11 @@
 \alias{adjustthinrange}
 \alias{affinexy}
 \alias{affinexypolygon}
+\alias{ang2rad}
 \alias{anycrossing.psp}
 \alias{apply23sum}
 \alias{applytolayers}
+\alias{applyPolyclipArgs}
 \alias{Area.xypolygon}       
 \alias{areadelta2}       
 \alias{areaGain.diri}       
@@ -50,6 +52,7 @@
 \alias{breakpts.from.r}
 \alias{bt.frame}
 \alias{bw.optim}
+\alias{can.be.formula}
 \alias{cannot.update}
 \alias{cartesian}
 \alias{cat.factor}
@@ -387,6 +390,7 @@
 \alias{names<-.hyperframe}
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
+\alias{newformula}
 \alias{newstyle.coeff.handling}
 \alias{niceround}
 \alias{nncleanEngine}
@@ -580,6 +584,7 @@
 \alias{resolve.2D.kernel}
 \alias{restrict.mask}
 \alias{reverse.xypolygon}    
+\alias{reversePolyclipArgs}
 \alias{revcumsum}
 \alias{rmax.rule}
 \alias{rotxy}
@@ -736,9 +741,11 @@ active.interactions(object)
 adjustthinrange(ur,vstep,vr)
 affinexy(X, mat, vec, invert)
 affinexypolygon(p, mat, vec, detmat)
+ang2rad(ang, unit, start, clockwise)
 anycrossing.psp(A,B)
 apply23sum(x)
 applytolayers(L, FUN, \dots)
+applyPolyclipArgs(x, p)
 Area.xypolygon(polly)
 areadelta2(X, r, \dots)
 areaGain.diri(u, X, r, \dots, W)
@@ -779,6 +786,7 @@ breakpts.from.r(r)
 bt.frame(Q, trend, interaction, \dots, covariates,
          correction, rbord, use.gam, allcovar)
 bw.optim(cv, h, iopt, \dots, cvname, hname, criterion)
+can.be.formula(x)
 cannot.update(\dots)
 cartesian(pp, markset, fac = TRUE)
 cat.factor(\dots, recursive=FALSE)
@@ -802,7 +810,7 @@ check.range(x, fatal)
 check.rpanel()
 check.testfun(f, f1, X)
 choptext(\dots, prefix)
-circticks(R, at, unit, labels)
+circticks(R, at, unit, start, clockwise, labels)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
@@ -1051,9 +1059,12 @@ Kwtsum(dIJ, bI, wIJ, b, w, breaks)
 Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
-kppmComLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
-kppmMinCon(X, Xname, po, clusters, control, statistic, statargs, \dots)
-kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax, \dots)
+kppmComLik(X, Xname, po, clusters, control, weightfun, rmax,
+           algorithm, \dots)
+kppmMinCon(X, Xname, po, clusters, control, statistic, statargs,
+           algorithm, \dots)
+kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax, 
+           algorithm, \dots)
 \method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
@@ -1162,6 +1173,7 @@ na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
+newformula(old, change, eold, enew)
 newstyle.coeff.handling(object)
 niceround(x, m)
 nncleanEngine(kthNND, k, d, \dots, tol, maxit,
@@ -1362,7 +1374,8 @@ RmhExpandRule(nama)
 romansort(x)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
      proptype, proplocn, propmark, propindx, numerator, denominator)
-roseContinuous(ang, rad, unit, \dots, main, labels, at, do.plot)
+roseContinuous(ang, rad, unit, \dots,
+               start, clockwise, main, labels, at, do.plot)
 ruletextline(ch, n, terse)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, CR, 
      \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
@@ -1403,6 +1416,7 @@ resolve.2D.kernel(\dots,
             sigma, varcov, x, mindist, adjust, bwfun, allow.zero)
 restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
+reversePolyclipArgs(x, p)
 revcumsum(x)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
@@ -1513,7 +1527,8 @@ trap.extra.arguments(\dots, .Context, .Fatal)
 trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 truncline(x, nc)
-tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL, new.tag=NULL)
+tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL,
+new.tag=NULL)
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unparen(x)

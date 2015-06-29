@@ -1,4 +1,112 @@
 
+        CHANGES IN spatstat VERSION 1.42-2
+
+OVERVIEW
+
+   o We thank Bob Klaver and Harold-Jeffrey Ship for contributions.
+
+   o Improvements to simulation of Neyman-Scott processes.
+
+   o Improvements to fitting of Neyman-Scott models.
+
+   o Extended functionality for pixel images.
+
+   o Fitted intensity on linear network
+
+   o Triangulation of windows.
+
+   o Corrected an edge correction.
+
+   o Bug fixes and performance improvements.
+
+   o Nickname: 'Barking at Balloons'
+
+NEW FUNCTIONS
+
+   o triangulate.owin
+   Decompose a spatial window into triangles.
+
+   o fitted.lppm
+   Fitted intensity values for a point process on a linear network.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o rThomas, rMatClust, rCauchy, rVarGamma
+   When the model is approximately Poisson, it is simulated using rpoispp. 
+   This avoids computations which would require huge amounts of memory. 
+   New argument 'poisthresh' controls this behaviour.
+
+   o update.kppm
+   Now handles additional arguments in any order, with or without names.
+   Changed arguments. Improved behaviour.
+
+   o kppm, clusterfit
+   New argument 'algorithm' specifies the choice of optimisation algorithm.
+
+   o kppm
+   Left hand side of formula can now involve entries in the list 'data'.
+
+   o rotmean
+   New argument 'padzero'. 
+   Default behaviour has changed.
+
+   o rose.default
+   New argument 'weights'.
+
+   o rose
+   New arguments 'start' and 'clockwise' specify the convention
+   for measuring and plotting angles.
+
+   o padimage 
+   New argument 'W' allows an image to be padded out to fill any window.
+
+   o union.owin
+   Improved behaviour when there are more than 2 windows.
+
+   o clusterset
+   Improved behaviour.
+
+   o affine.owin
+   Allows transformation matrix to be singular, if the window is polygonal.
+
+BUG FIXES
+
+   o spatstat
+   spatstat could not be installed on some 64-bit VM systems
+   because of an apparent bug in R.
+   Fixed.
+
+   o rThomas, rMatClust, rCauchy, rVarGamma
+   Large values of the scale parameter could cause the algorithm to freeze
+   or require huge amounts of memory.
+   Fixed.
+
+   o pcf, pcfinhom
+   Crashed if the point pattern was empty.
+   Fixed.
+
+   o plot.fv
+   Gave an error message if all 'y' values were equal, when legend=TRUE.
+   Fixed.
+
+   o rose.default
+   Display was incorrect when unit="radian".
+   Fixed.
+
+   o Kest
+   Ohser-Stoyan rigid motion correction (correction='rigid')
+   was calculated incorrectly at large distances.
+   Fixed.
+
+   o summary.im
+   Issued a warning about numerical overflow in some cases.
+   [Spotted by Bob Klaver.]
+   Fixed.
+
+   o plot.im
+   Sometimes warned that 'box' is not a graphical parameter.
+   Fixed.
+
         CHANGES IN spatstat VERSION 1.42-1
 
 OVERVIEW

@@ -7,6 +7,8 @@ options(SweaveHooks=list(fig=function() par(mar=c(1,1,1,1))))
 @ 
 
 \usepackage{graphicx}
+\usepackage{anysize}
+\marginsize{2cm}{2cm}{2cm}{2cm}
 
 \newcommand{\pkg}[1]{\texttt{#1}}
 \newcommand{\bold}[1]{{\textbf {#1}}}
@@ -259,7 +261,7 @@ plot(Smooth(mypattern, sigma=1.2), main="Smooth(mypattern)")
 \setkeys{Gin}{width=0.4\textwidth}
 \item
   You are airborne!
-  Now look at the workshop notes \cite{badd10wshop} for more hints.
+  Now look at the book \cite{baddrubaturn15} for more hints.
 \end{enumerate}
 
 \section*{How do I find out which command to use?}
@@ -286,17 +288,22 @@ Information sources for \spst\ include:
     Alternatively you can download a pdf of the entire manual (1000 pages!)
     from the website \texttt{www.spatstat.org}. 
   \end{quote}
-\item workshop notes:
-  \begin{quote}
-    A complete set of notes from an Introductory Workshop is available
-    from \texttt{www.csiro.au/resources/pf16h.html}
-    or by visiting \texttt{www.spatstat.org}
-  \end{quote}
 \item vignettes:
   \begin{quote}
     \Spst\ comes installed with several `vignettes' (introductory documents
     with examples) which can be accessed using the graphical help interface.
     They include a document about \texttt{Handling shapefiles}.
+  \end{quote}
+\item workshop notes:
+  \begin{quote}
+    The notes from a two-day workshop 
+    on \spst\ are available online \cite{badd10wshop}.
+    These are now rather out-of-date, but still useful.
+  \end{quote}
+\item book:
+  \begin{quote}
+    The forthcoming book \cite{baddrubaturn15} 
+    contains a complete course on \texttt{spatstat}.
   \end{quote}
 \item website:
   \begin{quote}
@@ -311,15 +318,18 @@ Information sources for \spst\ include:
   \end{quote}
 \end{itemize}
 
-% The following is inserted from refs.bbl originally generated from refs.tex
-
 \begin{thebibliography}{10}
-
 \bibitem{badd10wshop}
 A. Baddeley.
 \newblock Analysing spatial point patterns in {{R}}.
 \newblock Technical report, CSIRO, 2010.
-\newblock Version 4. Available at {\texttt{www.csiro.au/resources/pf16h.html}}.
+\newblock Version 4.
+\newblock URL \texttt{https://research.csiro.au/software/r-workshop-notes/}
+
+\bibitem{baddrubaturn15}
+A. Baddeley, E. Rubak, and R. Turner.
+\newblock {\em Spatial Point Patterns: Methodology and Applications with {{R}}}.
+\newblock Chapman \& Hall/CRC Press, 2015.
 
 \bibitem{bivapebegome08}
 R. Bivand, E.J. Pebesma, and V. G{\'{o}}mez-Rubio.
