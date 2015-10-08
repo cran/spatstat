@@ -1,13 +1,14 @@
 #
 # lpp.R
 #
-#  $Revision: 1.33 $   $Date: 2015/02/24 01:58:05 $
+#  $Revision: 1.35 $   $Date: 2015/08/06 11:22:01 $
 #
 # Class "lpp" of point patterns on linear networks
 
-lpp <- function(X, L) {
+lpp <- function(X, L, ...) {
   stopifnot(inherits(L, "linnet"))
   localnames <- c("seg", "tp")
+  if(is.matrix(X)) X <- as.data.frame(X)
   if(checkfields(X, c("x", "y", localnames))) {
     # includes spatial and local coordinates
     X <- as.data.frame(X)
@@ -26,7 +27,7 @@ lpp <- function(X, L) {
   } else {
     # local coordinates must be computed
     if(!is.ppp(X))
-      X <- as.ppp(X, W=L$window)
+      X <- as.ppp(X, W=L$window, ...)
     # project to segment
     pro <- project2segment(X, as.psp(L))
     # projected points (spatial coordinates and marks)
@@ -294,13 +295,6 @@ as.linnet.lpp <- function(X, ..., fatal=TRUE, sparse) {
   return(L)
 }
   
-"[.lpp" <- function (x, i, ...) {
-  # invoke [.ppx
-  y <- NextMethod("[")
-  class(y) <- c("lpp", class(y))
-  return(y)
-}
-
 unitname.lpp <- function(x) {
   u <- unitname(x$domain)
   return(u)
@@ -355,7 +349,7 @@ local2lpp <- function(L, seg, tp, X=NULL) {
 # subset extractor
 ####################################################
 
-"[.lpp" <- function (x, i, j, ...) {
+"[.lpp" <- function (x, i, j, drop=FALSE, ...) {
   if(!missing(i) && !is.null(i)) {
     if(is.owin(i)) {
       # spatial domain: call code for 'j'
@@ -365,6 +359,8 @@ local2lpp <- function(L, seg, tp, X=NULL) {
       da <- x$data
       daij <- da[i, , drop=FALSE]
       xi <- ppx(data=daij, domain=x$domain, coord.type=as.character(x$ctype))
+      if(drop)
+        xi <- xi[drop=TRUE] # call [.ppx to remove unused factor levels
       class(xi) <- c("lpp", class(xi))
     }
     x <- xi

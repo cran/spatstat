@@ -36,7 +36,7 @@
  \code{\link{kppm}}
 }
 \examples{
-   fit <- kppm(redwood ~x, "Thomas")
+   fit <- kppm(redwood ~ x, "Thomas")
    rr <- residuals(fit)
 }
 \author{

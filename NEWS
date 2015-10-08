@@ -1,4 +1,407 @@
 
+        CHANGES IN spatstat VERSION 1.43-0
+
+OVERVIEW
+
+   o We thank Leanne Bischof, Christophe Biscio, Belarmain Fandohan,
+   Andrew Hardegen, Frederic Lavancier, Tom Lawrence, Martin Maechler, 
+   Greg McSwiggan, Robin Milne, Gopalan Nair, Tuomas Rajala, 
+   Suman Rakshit, Ben Ramage, Francois Semecurbe and Ida-Maria Sintorn 
+   for contributions.
+
+   o spatstat now depends on the package 'nlme'.
+
+   o spatstat now depends on R 3.2.2 or later.
+
+   o Simulation algorithms have been accelerated; simulation outcomes 
+   are *not* identical to those obtained from previous versions of spatstat. 
+
+   o Determinantal point process models.
+
+   o Random-effects and mixed-effects models for replicated patterns.
+
+   o Dao-Genton test, and corresponding simulation envelopes.
+
+   o Simulated annealing and simulated tempering.
+
+   o spatstat colour tools now handle transparent colours.
+
+   o Improvements to "[" and subset() methods
+
+   o Extensions to kernel smoothing on a linear network.
+
+   o Support for one-dimensional smoothing kernels.
+
+   o Bug fix in Metropolis-Hastings simulation.
+
+   o Mark correlation function may include weights.
+
+   o Cross-correlation version of the mark correlation function.
+
+   o Variance calculations for replicated patterns.
+
+   o Penttinen pairwise interaction model.
+
+   o Contour plots with colours determined by a colour map.
+
+   o New dataset: Australian states and territories.
+
+   o More support for multi-dimensional point patterns.
+
+   o Minor improvements and bug fixes.
+
+   o Version nickname: "Mixed Effects"
+
+NEW DATASET
+
+   o austates
+   The states and large mainland territories of Australia
+   represented as polygonal regions forming a tessellation.
+
+NEW FUNCTIONS
+
+   o dppm
+   Fit a determinantal point process model to point pattern data.
+
+   o fitted.dppm, predict.dppm, intensity.dppm
+   Predict a fitted dppm object.
+
+   o logLik.dppm, AIC.dppm, extractAIC.dppm, nobs.dppm
+   Likelihood and AIC for determinantal point process models
+   (enabling the use of 'step')
+
+   o coef.dppm, formula.dppm, print.dppm, terms.dppm, labels.dppm,
+   model.frame.dppm, model.matrix.dppm, model.images.dppm,
+   is.stationary.dppm, reach.dppm, unitname.dppm, unitname<-.dppm, Window.dppm
+    Various methods for dppm objects.
+
+   o parameters.dppm
+   Extract meaningful list of model parameters
+
+   o objsurf.dppm
+   Objective function surface of a dppm object
+
+   o residuals.dppm
+   Residual measure for a dppm object.
+
+   o dppBessel, dppCauchy, dppGauss, dppMatern,	dppPowerExp
+   Determinantal Point Process models.
+
+   o update.dppmodel            
+   Set parameter values in a dpp model.
+
+   o is.stationary.dppmodel, print.dppmodel, reach.dppmodel, valid.dppmodel    
+   Basic information about a dpp model
+
+   o rdpp, simulate.dppmodel		 
+   Simulation of a dpp model.
+
+   o intensity.dppmodel, Kmodel.dppmodel, pcfmodel.dppmodel
+   Moments of a dpp model
+
+   o dim.dppmodel, dppapproxkernel, dppapproxpcf, dppeigen, dppfamily,
+   dppkernel, dppparbounds, dppspecdenrange, dppspecden
+   Helper functions for dpp models.
+
+   o dclf.sigtrace, mad.sigtrace, mctest.sigtrace
+   Significance trace of Monte Carlo test
+
+   o dg.test
+   Dao-Genton adjusted Monte Carlo goodness-of-fit test.
+
+   o dg.envelope
+   Simulation envelopes corresponding to Dao-Genton test.
+
+   o dg.sigtrace
+   Significance trace for Dao-Genton test
+
+   o dg.progress
+   Progress plot for Dao-Genton test
+
+   o markcrosscorr
+   Mark cross-correlation function for point patterns with
+   several columns of marks
+
+   o fixef.mppm, ranef.mppm
+   Extract fixed effects and random effects from a point process model
+   fitted to replicated point patterns.
+
+   o rtemper
+   Simulated annealing or simulated tempering.
+
+   o to.opaque, to.transparent
+   Change transparency value in colours
+
+   o rgb2hsva
+   Convert RGB to HSV data, like rgb2hsv, but preserving transparency.
+
+   o superimpose.ppplist, superimpose.splitppp
+   New methods for 'superimpose' for lists of point patterns.
+
+   o dkernel, pkernel, qkernel, rkernel
+   Probability density, cumulative probability, quantiles
+   and random generation from distributions used in basic one-dimensional
+   kernel smoothing.
+
+   o kernel.factor
+   Auxiliary calculations for one-dimensional kernel smoothing.
+
+   o PPversion, QQversion
+   Transformation of a summary function to its P-P or Q-Q counterpart.
+
+   o spatdim
+   Spatial dimension of any object in the spatstat package.
+
+   o as.boxx
+   Convert data to a multi-dimensional box.
+
+   o intensity.ppx
+   Method for 'intensity' for multi-dimensional space-time point patterns.
+
+   o fourierbasis
+   Evaluate Fourier basis functions in any number of dimensions.
+
+   o valid
+   New generic function, with methods valid.ppm, valid.lppm, valid.dppmodel
+   
+   o emend, emend.ppm, emend.lppm
+   New generic function with methods for ppm and lppm.
+   emend.ppm is equivalent to project.ppm
+
+   o Penttinen
+   New pairwise interaction model.
+
+   o quantile.density
+   Calculates quantiles from kernel density estimates.
+
+   o CDF.density
+   Calculates cumulative distribution function from kernel density estimates.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o simulation
+   Several basic simulation algorithms have been accelerated.
+   Consequently, simulation outcomes are not identical to 
+   those obtained with previous versions of spatstat, even when the
+   same random seed is used. To ensure compatibility with previous
+   versions of spatstat, revert to the slower code by setting
+   spatstat.options(fastthin=FALSE, fastpois=FALSE).
+
+   o mppm
+   Now handles models with a random effect component.
+   New argument 'random' is a formula specifying the random effect.
+
+   o vcov.mppm
+   Now handles models with Gibbs interactions.
+
+   o [.ppp
+   New argument 'clip' determines whether the window is clipped.
+
+   o [.ppp
+   The previously-unused argument 'drop' now determines whether 
+   to remove unused levels of a factor.
+
+   o [.pp3, [.lpp, [.ppx, subset.ppp, subset.pp3, subset.lpp, subset.ppx
+   These methods now have an argument 'drop' which determines
+   whether to remove unused levels of a factor.
+
+   o density.lpp
+   Now supports both the 'equal-split continuous' and 
+   'equal-split discontinuous' smoothers. New argument 'continuous' 
+   determines the choice of smoother.
+
+   o envelope
+   New argument 'scale' allows global envelopes to have 
+   width proportional to a specified function of r,
+   rather than constant width.
+
+   o dclf.test, mad.test, dclf.progress, mad.progress, mctest.progress
+   New argument 'scale' allows summary function values to be rescaled
+   before the comparison is performed.
+
+   o dclf.test, mad.test
+   New argument 'interpolate' supports interpolation of p-value.
+
+   o dclf.progress, mad.progress, mctest.progress
+   New argument 'interpolate' supports interpolation of critical value of test.
+
+   o simulate.ppm
+   New argument 'w' controls the window of the simulated patterns.
+
+   o default.rmhcontrol, default.rmhexpand
+   New argument 'w'.
+
+   o markcorr
+   New argument 'weights' allows computation of the weighted version
+   of the mark correlation function.
+
+   o density.lpp
+   New argument 'kernel' specifies the smoothing kernel.
+   Any of the standard one-dimensional smoothing kernels can be used.
+
+   o contour.im
+   New argument 'col' specifies the colour of the contour lines.
+   If 'col' is a colour map, then the contours are drawn in different colours.
+
+   o plot.ppp
+   The default colour for the points is now a transparent grey,
+   if this is supported by the plot device.
+
+   o rgbim, hsvim
+   New argument 'A' controls the alpha (transparency) channel.
+
+   o rgb2hex, col2hex, paletteindex, is.colour, samecolour,
+   complementarycolour, is.grey, to.grey
+   These colour tools now handle transparent colours.
+
+   o rgb2hex
+   New argument 'maxColorValue'
+
+   o to.grey
+   New argument 'transparent'.
+
+   o progressreport
+   New argument 'state'
+   New option: style="tk"
+
+   o rLGCP
+   This function no longer requires the package 'RandomFields'
+   to be loaded explicitly. 
+
+   o kppm
+   Fitting a model with clusters="LGCP" no longer requires the
+   package 'RandomFields' to be loaded explicitly.
+
+   o rpoispp
+   Accelerated, when 'lambda' is a pixel image.
+
+   o rthin
+   Accelerated, when 'P' is a single number.
+
+   o spatstat.options
+   New options 'fastthin' and 'fastpois' enable fast simulation algorithms.
+   Set these options to FALSE to reproduce results obtained with
+   previous versions of spatstat.
+
+   o split.ppp
+   The splitting variable 'f' can now be a logical vector.
+
+   o collapse.fv
+   This is now treated as a method for the 'nlme' generic 'collapse'.
+   Its syntax has been adjusted slightly.
+
+   o diagnose.ppm, plot.diagppm
+   New arguments col.neg, col.smooth control the colour maps.
+
+   o valid.ppm
+   This is now a method for the generic function 'valid'.
+
+   o ppm.ppp, ppm.quad
+   New argument 'emend', equivalent to 'project'.
+
+   o "[<-.im"
+   Accepts an array for 'value'.
+
+   o as.im.function
+   New argument 'strict'.
+
+   o bw.ppl
+   New argument 'weights'.
+
+   o plot.mppm
+   New argument 'se'.
+   
+   o dclf.test, mad.test
+   Formal arguments 'use.theo' and 'internal' have been removed.
+
+   o predict.kppm, residuals.kppm
+   Now issues a warning when the calculation ignores the 
+   cluster/Cox component and treats the model as if it were Poisson.
+   (This currently happens in predict.kppm when se=TRUE or interval != "none",
+   and in residuals.kppm when type != "raw").
+
+BUG FIXES
+
+   o lpp
+   Crashed if X was a 4-column matrix.
+   Fixed.
+
+   o plot.fv
+   Crashed with some graphics devices, if legend=TRUE.
+   Fixed.
+
+   o effectfun
+   Crashed if 'covname' was missing.
+   Fixed.
+
+   o rVarGamma, rMatClust, rThomas, rCauchy, rNeymanScott
+   Crashed if 'kappa' was a function or image instead of a single number.
+   [Spotted by Ben Ramage.]
+   Fixed.
+
+   o plot.mppm
+   Crashed with a message about "figure margins too large"
+   unless the argument se=FALSE was given explicitly.
+   Fixed.
+
+   o opening.owin, closing.owin
+   Crashed sometimes, with a message about a rectangle not containing a window.
+   Fixed.
+
+   o persp.im
+   Crashed if all pixel values were equal to zero (unless zlim was given).
+   Fixed.
+
+   o predict.ppm
+   Crashed sometimes if the model was fitted with use.gam=TRUE.
+
+   o as.linim.linfun
+   Generated an error ('L must be a linear network')
+   if extra arguments were given.
+
+   o as.function.fv
+   Generated an error when executed in the 'covr' package.
+   Fixed.
+
+   o rmh, simulate.ppm
+   Results were incorrect for inhomogeneous multitype models
+   simulated with fixall=TRUE (i.e. prescribing a fixed number of
+   points of each type) if the model was segregated 
+   (i.e. if different types of points had different first order trend).
+   Fixed.
+
+   o dclf.progress, mad.progress
+   Ignored the argument 'alternative'. 
+   Fixed.
+   
+   o $<-.hyperframe, [<-.hyperframe
+   Result was garbled if 'value' was a hyperframe with one column.
+
+   o rmh.ppm
+   Argument 'w' was ignored in some cases.
+   Fixed.
+
+   o Hest
+   There was an artefact at r=0 when conditional=TRUE.
+   Fixed.
+
+   o [.msr
+   The result of M[W] where W is a window
+   was a measure with window W, instead of intersect.owin(W, Window(M)).
+   Fixed.
+
+   o pool.envelope
+   Did not always respect the value of 'use.theory'.
+   Fixed.
+
+   o envelope, pool.envelope
+   If 'ginterval' was given, the results were in a slightly incorrect format.
+   Fixed.
+
+   o pool.envelope
+   Did not check for compatible values of 'ginterval'.
+   Fixed.
+
         CHANGES IN spatstat VERSION 1.42-2
 
 OVERVIEW

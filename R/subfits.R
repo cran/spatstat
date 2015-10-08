@@ -1,13 +1,12 @@
 #
 #
-#  $Revision: 1.33 $   $Date: 2015/01/29 06:44:03 $
+#  $Revision: 1.37 $   $Date: 2015/09/30 07:57:58 $
 #
 #
 subfits.new <- function(object, what="models", verbose=FALSE) {
   stopifnot(inherits(object, "mppm"))
 
-  if(!(what %in% c("models","interactions")))
-    stop(paste("Unrecognised option: what=", dQuote(what)))
+  what <- match.arg(what, c("models", "interactions", "basicmodels"))
 
   if(what == "interactions")
     return(subfits.old(object, what, verbose))
@@ -20,6 +19,9 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
   FIT      <- object$Fit$FIT
   coef.FIT <- coef(FIT)
   trend    <- object$trend
+#%^!ifdef RANDOMEFFECTS  
+  random   <- object$random
+#%^!endif  
 #  iformula <- object$iformula
 #  use.gam  <- object$Fit$use.gam
   info     <- object$Info
@@ -40,6 +42,11 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
     stop(paste("subfits() is not implemented for models",
                "in which several interpoint interactions",
                "are active on the same point pattern"))
+#%^!ifdef RANDOMEFFECTS  
+  if(!is.null(random) && any(variablesinformula(random) %in% itags))
+    stop(paste("subfits() is not yet implemented for models",
+               "with random effects that involve the interpoint interactions"))
+#%^!endif
   
   # implied coefficients for each active interaction
   announce("Computing implied coefficients...")
@@ -51,7 +58,8 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
   }
   announce("done.\n")
 
-  # Fisher information, if possible
+  # Fisher information and vcov
+  fisher <- varcov <- NULL
   if(what == "models") {
     announce("Fisher information...")
     fisher   <- vcov(object, what="fisher", err="null")
@@ -59,7 +67,7 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
     if(inherits(varcov, "try-error"))
       varcov <- NULL
     announce("done.\n")
-  }
+  } 
   
   # Extract data frame 
   announce("Extracting data...")
@@ -74,8 +82,9 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
 
   # interactions
   announce("Determining interactions...")
+  pstate <- list()
   for(i in 1:npat) {
-    if(verbose) progressreport(i, npat)
+    if(verbose) pstate <- progressreport(i, npat, state=pstate)
       # Find relevant interaction
     acti <- active[i,]
     nactive <- sum(acti)
@@ -93,7 +102,7 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
     # create fitted interaction with these coefficients
     vni <- if(nactive > 0) Vnamelist[[tagi]] else character(0)
     interactions[[i]] <- fii(interi, coef.avail, vni)
-    }
+  }
   announce("Done!\n")
   names(interactions) <- rownames
 
@@ -125,7 +134,7 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
   fake.version <- list(major=spv$major,
                       minor=spv$minor,
                       release=spv$patchlevel,
-                      date="$Date: 2015/01/29 06:44:03 $")
+                      date="$Date: 2015/09/30 07:57:58 $")
   fake.call <- call("cannot.update", Q=NULL, trend=trend,
                            interaction=NULL, covariates=NULL,
                            correction=object$Info$correction,
@@ -158,8 +167,9 @@ subfits.new <- function(object, what="models", verbose=FALSE) {
 
   ## Loop through point patterns
   announce("Generating models for each row...")
+  pstate <- list()
   for(i in 1:npat) {
-    if(verbose) progressreport(i, npat)
+    if(verbose) pstate <- progressreport(i, npat, state=pstate)
     Yi <- Y[[i]]
     Wi <- if(is.ppp(Yi)) Yi$window else Yi$data$window
     # assemble relevant covariate images
@@ -203,8 +213,7 @@ subfits.old <-
   function(object, what="models", verbose=FALSE) {
   stopifnot(inherits(object, "mppm"))
 
-  if(!(what %in% c("models","interactions")))
-    stop(paste("Unrecognised option: what=", dQuote(what)))
+  what <- match.arg(what, c("models","interactions", "basicmodels"))
   
   # extract stuff
   announce <- if(verbose) function(x) { cat(x) } else function(x) {} 
@@ -213,6 +222,9 @@ subfits.old <-
   FIT      <- object$Fit$FIT
   coef.FIT <- coef(FIT)
   trend    <- object$trend
+#%^!ifdef RANDOMEFFECTS  
+  random   <- object$random
+#%^!endif  
 #  iformula <- object$iformula
   use.gam  <- object$Fit$use.gam
   info     <- object$Info
@@ -233,6 +245,11 @@ subfits.old <-
     stop(paste("subfits() is not implemented for models",
                "in which several interpoint interactions",
                "are active on the same point pattern"))
+#%^!ifdef RANDOMEFFECTS  
+  if(!is.null(random) && any(variablesinformula(random) %in% itags))
+    stop(paste("subfits() is not yet implemented for models",
+               "with random effects that involve the interpoint interactions"))
+#%^!endif
   
   # implied coefficients for each active interaction
   announce("Computing implied coefficients...")
@@ -244,7 +261,8 @@ subfits.old <-
   }
   announce("done.\n")
 
-  # Fisher information, if possible
+  # Fisher information and vcov
+  fisher <- varcov <- NULL
   if(what == "models") {
     announce("Fisher information...")
     fisher   <- vcov(object, what="fisher", err="null")
@@ -266,8 +284,9 @@ subfits.old <-
   
   if(what == "interactions") {
     announce("Determining interactions...")
+    pstate <- list()
     for(i in 1:npat) {
-      if(verbose) progressreport(i, npat)
+      if(verbose) pstate <- progressreport(i, npat, state=pstate)
       # Find relevant interaction
       acti <- active[i,]
       nactive <- sum(acti)
@@ -310,8 +329,9 @@ subfits.old <-
   
   ## Loop through point patterns
   announce("Looping through rows...")
+  pstate <- list()
   for(i in 1:npat) {
-    if(verbose) progressreport(i, npat)
+    if(verbose) pstate <- progressreport(i, npat, state=pstate)
     Yi <- Y[[i]]
     Wi <- if(is.ppp(Yi)) Yi$window else Yi$data$window
     # assemble relevant covariate images
@@ -358,10 +378,16 @@ subfits.old <-
       interi <- interaction[i, acti, drop=TRUE] 
       tagi <- names(interaction)[acti]
       fit <- ppm(Yi, trend, interi, covariates=covariates,
+#%^!ifdef RANDOMEFFECTS                 
+                 allcovar=info$has.random,
+#%^!endif                 
                  use.gam=use.gam,
                  forcefit=TRUE, vnamebase=tagi, vnameprefix=tagi)
     } else {
       fit <- ppm(Yi, trend, Poisson(), covariates=covariates,
+#%^!ifdef RANDOMEFFECTS                 
+                 allcovar=info$has.random,
+#%^!endif                 
                  use.gam=use.gam,
                  forcefit=TRUE)
     }

@@ -3,7 +3,7 @@
 #
 #     Spatstat options and other internal states
 #
-#    $Revision: 1.61 $   $Date: 2015/02/18 00:49:30 $
+#    $Revision: 1.67 $   $Date: 2015/09/06 03:23:27 $
 #
 #
 
@@ -87,6 +87,7 @@ warn.once <- function(key, ...) {
        ),
        checkpolygons = list(
          ## superseded
+         superseded=TRUE,
          default=FALSE,
          check=function(x) {
            warning("spatstat.options('checkpolygons') will be ignored in future versions of spatstat", call.=FALSE)
@@ -124,6 +125,14 @@ warn.once <- function(key, ...) {
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        ),
+       dpp.maxmatrix=list(
+         ## maximum size of matrix in dppeigen
+         default=2^24, # 16,777,216
+         check=function(x) {
+           is.numeric(x) && length(x) == 1 && (x == ceiling(x)) && x > 1024
+         },
+         valid="a single integer, greater than 1024"
+       ),
        exactdt.checks.data=list(
          ## whether 'exactdt' checks validity of return value
          default=FALSE,
@@ -150,6 +159,18 @@ warn.once <- function(key, ...) {
          check=function(x) { x %in% c("off", "on", "test") },
          valid="one of the strings \'off\', \'on\' or \'test\'"
        ),
+       fastpois=list(
+         # whether to use fast algorithm for rpoispp() when lambda is an image
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       fastthin=list(
+         # whether to use fast C algorithm for rthin() when P is constant
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
        fastK.lgcp=list(
          ## whether to cut a few corners in 'lgcp.estK'
          default=FALSE,
@@ -164,6 +185,7 @@ warn.once <- function(key, ...) {
          ),
        gpclib=list(
          ## defunct!
+         superseded=TRUE, 
          default=FALSE,
          check=function(x) {
            message("gpclib is no longer needed")
@@ -316,9 +338,8 @@ warn.once <- function(key, ...) {
        progress = list(
          ## how to display progress reports
          default="tty",
-         check=function(x){ x %in% c("tty", "txtbar") },
-         valid=paste("one of the strings", dQuote("tty"),
-           "or", dQuote("txtbar"))
+         check=function(x){ x %in% c("tty", "tk", "txtbar") },
+         valid="one of the strings 'tty', 'tk' or 'txtbar'"
          ),
        project.fast=list(
          ## whether to cut corners when projecting an invalid ppm object
@@ -395,6 +416,12 @@ warn.once <- function(key, ...) {
          check=function(x) { length(x) == 1 && (x %in% 0:4) },
          valid="an integer between 0 and 4"
        ),
+       transparent=list(
+         ## whether to allow transparent colours in default colour maps
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
        units.paren=list(
          default="(",
          check=function(x) {
@@ -426,13 +453,24 @@ warn.once <- function(key, ...) {
          default=FALSE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
+       ),
+       check.rpanel.loaded=list(
+         # internal debugging
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       check.RandomFields.loaded=list(
+         # this is working OK so no need to check
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
        )
        )
 # end of options list
 
 reset.spatstat.options <- function() {
-  Spatstat.Options <- lapply(.Spat.Stat.Opt.Table,
-                               function(z) { z$default })
+  Spatstat.Options <- lapply(.Spat.Stat.Opt.Table, getElement, name="default")
   putSpatstatVariable("Spatstat.Options", Spatstat.Options)
   invisible(Spatstat.Options)  
 }
@@ -445,9 +483,13 @@ function (...)
     Spatstat.Options <- getSpatstatVariable("Spatstat.Options")
     called <- list(...)    
 
-    if(length(called) == 0)
-    	return(Spatstat.Options)
-
+    if(length(called) == 0) {
+      # return all options, except superseded ones
+      allofem <- .Spat.Stat.Opt.Table[names(Spatstat.Options)]
+      retain <- sapply(lapply(allofem, getElement, name="superseded"), is.null)
+      return(Spatstat.Options[retain])
+    }
+    
     if(is.null(names(called)) && length(called)==1) {
       # spatstat.options(x) 
       x <- called[[1]]

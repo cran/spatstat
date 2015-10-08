@@ -123,12 +123,14 @@ local({
     stop("For sorted data, nncross()$which does not agree with apply(crossdist(), 1, which.min)")
 
   # sanity check for nncross with k > 1
-  ndw <- nncross(X, Y, k=1:4)$which
-  if(any(is.na(ndw)))
-    stop("NA's returned by nncross.ppp(k > 1)$which")
   ndw <- nncross(X, Y, k=1:4, what="which")
   if(any(is.na(ndw)))
     stop("NA's returned by nncross.ppp(k > 1, what='which')")
+  nnc4 <- nncross(X, Y, k=1:4)
+  iswhich <- (substr(colnames(nnc4), 1, nchar("which")) == "which")
+  ndw <- nnc4[,iswhich]
+  if(any(is.na(ndw)))
+    stop("NA's returned by nncross.ppp(k > 1)$which")
   
   # test of correctness for nncross with k > 1
   flipcells <- flipxy(cells)
@@ -337,15 +339,16 @@ local({
 #
 #   Test ppm with use.gam=TRUE
 #
-#   $Revision: 1.2 $  $Date: 2013/03/01 08:46:34 $
+#   $Revision: 1.3 $  $Date: 2015/09/01 02:01:33 $
 #
 
 require(spatstat)
 local({
-  fit <- ppm(nztrees, ~s(x,y), use.gam=TRUE)
+  fit <- ppm(nztrees ~s(x,y), use.gam=TRUE)
   mm <- model.matrix(fit)
   mf <- model.frame(fit)
   v <- vcov(fit)
+  prd <- predict(fit)
 })
 
 #
@@ -733,6 +736,7 @@ if(!identical(wsim, as.owin(cells)))
 })
 
 
+#  tests/rmhMulti.R
 #
 #  tests of rmh, running multitype point processes
 #
@@ -898,8 +902,8 @@ checkp(ks.test(X1$y, "punif")$p.value,
        the.context,
        "Kolmogorov-Smirnov test of uniformity of y coordinates of type 1 points")
 if(any(X1$x < 0.5)) {
-  warning(paste(the.context, ",", 
-                "x-coordinates of type 1 points are IMPOSSIBLE"), call.=FALSE)
+  stop(paste(the.context, ",", 
+             "x-coordinates of type 1 points are IMPOSSIBLE"), call.=FALSE)
 } else {
   checkp(ks.test(Fx1(X1$x), "punif")$p.value,
        the.context,
@@ -1189,6 +1193,10 @@ local({
    # then clipped to original window
    Xsim <- rmh(fit, control=list(nrep=Nrep, expand=1.1, periodic=TRUE))
 
+   # Extension of model to another window (thanks to Tuomas Rajala)
+   Xsim <- rmh(fit, w=square(2))
+   Xsim <- simulate(fit, w=square(2))
+   
    # Strauss - hard core process
 #   fit <- ppm(X, ~1, StraussHard(r=7,hc=2))
 #   Xsim <- rmh(fit, start=list(n.start=X$n))
@@ -1753,7 +1761,7 @@ local({
 #
 #     tests/project.ppm.R
 #
-#      $Revision: 1.5 $  $Date: 2015/05/27 07:33:33 $
+#      $Revision: 1.6 $  $Date: 2015/08/27 08:19:03 $
 #
 #     Tests of projection mechanism
 #
@@ -1766,25 +1774,25 @@ local({
   }
   # a very unidentifiable model
   fit <- ppm(cells ~Z, Strauss(1e-06), covariates=list(Z=0))
-  chk(project.ppm(fit))
+  chk(emend(fit))
   # multitype
   r <- matrix(1e-06, 2, 2)
   fit2 <- ppm(amacrine ~1, MultiStrauss(types=c("off", "on"), radii=r))
-  chk(project.ppm(fit2))
+  chk(emend(fit2))
   # complicated multitype 
   fit3 <- ppm(amacrine ~1, MultiStraussHard(types=c("off", "on"),
                                             iradii=r, hradii=r/5))
-  chk(project.ppm(fit3))
+  chk(emend(fit3))
   
   # hierarchical
   ra <- r
   r[2,1] <- NA
   fit4 <- ppm(amacrine ~1, HierStrauss(types=c("off", "on"), radii=r))
-  chk(project.ppm(fit4))
+  chk(emend(fit4))
   # complicated hierarchical
   fit5 <- ppm(amacrine ~1, HierStraussHard(types=c("off", "on"),
                                             iradii=r, hradii=r/5))
-  chk(project.ppm(fit5))
+  chk(emend(fit5))
   
   # hybrids
   r0 <- min(nndist(redwood))
@@ -2087,7 +2095,7 @@ local({
 #
 # Basic tests of mppm
 #
-# $Revision: 1.1 $ $Date: 2013/11/10 08:59:08 $
+# $Revision: 1.4 $ $Date: 2015/09/30 10:30:01 $
 # 
 
 require(spatstat)
@@ -2102,16 +2110,39 @@ fit3 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), pie=PairPiece(c(0.0
 fit1
 fit2
 fit3
+
 subfits(fit1)
 subfits(fit2)
 subfits(fit3)
 
+# test vcov algorithm
+vcov(fit1)
+vcov(fit2)
+vcov(fit3)
+
+# test summary.mppm which currently sits in spatstat-internal.Rd
+
+summary(fit1)
+summary(fit2)
+summary(fit3)
+
 # test handling of offsets and zero cif values in mppm
 
- data(waterstriders)
- H <- hyperframe(Y = waterstriders)
- mppm(Y ~ 1,  data=H, Hardcore(1.5))
- mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
+H <- hyperframe(Y = waterstriders)
+mppm(Y ~ 1,  data=H, Hardcore(1.5))
+mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
+
+# prediction, in training/testing context
+#    (example from Markus Herrmann and Ege Rubak)
+
+X <- waterstriders
+dist <- as.listof(lapply(waterstriders,
+                         function(z) distfun(runifpoint(1, Window(z)))))
+i <- 3
+train <- hyperframe(pattern = X[-i], dist = dist[-i])
+test <- hyperframe(pattern = X[i], dist = dist[i])
+fit <- mppm(pattern ~ dist, data = train)
+pred <- predict(fit, type="cif", newdata=test, verbose=TRUE)
 })
 # tests/ppx.R
 #
@@ -2164,7 +2195,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.3 $  $Date: 2013/10/21 01:51:07 $
+#  $Revision: 1.4 $  $Date: 2015/09/03 10:44:34 $
 #
 
 require(spatstat)
@@ -2215,6 +2246,16 @@ fit <- ppm(japanesepines ~ 1, Strauss(0.04))
 e4 <- envelope(fit, Kest, nsim=4, fix.n=TRUE)
 fit2 <- ppm(amacrine ~ 1, Strauss(0.03))
 e5 <- envelope(fit2, Gcross, nsim=4, fix.marks=TRUE)
+
+# check pooling of envelopes in global case
+E1 <- envelope(cells, Kest, nsim=5, savefuns=TRUE, global=TRUE)
+E2 <- envelope(cells, Kest, nsim=12, savefuns=TRUE, global=TRUE)
+p12 <- pool(E1, E2)
+E1r <- envelope(cells, Kest, nsim=5, savefuns=TRUE, global=TRUE,
+                ginterval=c(0.05, 0.15))
+E2r <- envelope(cells, Kest, nsim=12, savefuns=TRUE, global=TRUE,
+                ginterval=c(0.05, 0.15))
+p12r <- pool(E1r, E2r)
 })
 ## tests/rhohat.R
 ## Test all combinations of options for rhohatCalc
@@ -2438,45 +2479,3 @@ local({
   stopifnot(identical(cross.ij, cross.all[c("i","j")]))
   stopifnot(identical(cross.ijd, cross.all[c("i","j","d")]))
 })
-# ...............................................................
-#          multippm/tests/tests.R
-#
-#      Tests of 'mppm' and methods
-#
-#  $Revision: 1.4 $ $Date: 2014/12/28 01:32:31 $
-
-require(spatstat)
-
-# test interaction formulae and subfits
-data(simba)
-fit1 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
-            iformula=~ifelse(group=="control", po, str))
-fit2 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
-            iformula=~id * str)
-fit3 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), pie=PairPiece(c(0.05,0.1))), iformula=~I((group=="control") * po) + I((group=="treatment") * pie))
-fit1
-fit2
-fit3
-subfits(fit1)
-subfits(fit2)
-subfits(fit3)
-
-# test handling of offsets and zero cif values in mppm
-
- data(waterstriders)
- H <- hyperframe(Y = waterstriders)
- mppm(Y ~ 1,  data=H, Hardcore(1.5))
- mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
-
-# prediction, in training/testing context
-#    (example from Markus Herrmann and Ege Rubak)
-
-X <- waterstriders
-dist <- as.listof(lapply(waterstriders,
-                         function(z) distfun(runifpoint(1, Window(z)))))
-i <- 3
-train <- hyperframe(pattern = X[-i], dist = dist[-i])
-test <- hyperframe(pattern = X[i], dist = dist[i])
-fit <- mppm(pattern ~ dist, data = train)
-pred <- predict(fit, type="cif", newdata=test, verbose=TRUE)
-

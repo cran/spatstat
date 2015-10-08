@@ -90,7 +90,7 @@
   \email{rubak@math.aau.dk}
 }
 \examples{
-  fit <- kppm(redwood ~x, "Thomas", method="palm")
+  fit <- kppm(redwood ~ x, "Thomas", method="palm")
   nobs(fit)
   logLik(fit)
   extractAIC(fit)

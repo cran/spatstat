@@ -408,7 +408,20 @@ fit2
 
 
 ###################################################
-### code chunk number 60: replicated.Rnw:1085-1088
+### code chunk number 60: replicated.Rnw:1185-1187
+###################################################
+H <- hyperframe(P=waterstriders)
+mppm(P ~ 1, H, random=~1|id)
+
+
+###################################################
+### code chunk number 61: replicated.Rnw:1194-1195 (eval = FALSE)
+###################################################
+## mppm(Neurons ~ AstroIm, random=~AstroIm|WellNumber)
+
+
+###################################################
+### code chunk number 62: replicated.Rnw:1218-1221
 ###################################################
 H <- hyperframe(W=waterstriders)
 fit <- mppm(W ~ 1, H)
@@ -416,34 +429,34 @@ subfits(fit)
 
 
 ###################################################
-### code chunk number 61: replicated.Rnw:1109-1110 (eval = FALSE)
+### code chunk number 63: replicated.Rnw:1242-1243 (eval = FALSE)
 ###################################################
 ## subfits <- subfits.new
 
 
 ###################################################
-### code chunk number 62: replicated.Rnw:1122-1124
+### code chunk number 64: replicated.Rnw:1255-1257
 ###################################################
 H <- hyperframe(W=waterstriders)
 with(H, ppm(W))
 
 
 ###################################################
-### code chunk number 63: replicated.Rnw:1147-1149
+### code chunk number 65: replicated.Rnw:1280-1282
 ###################################################
 fit <- mppm(P ~ x, hyperframe(P=waterstriders))
 res <- residuals(fit)
 
 
 ###################################################
-### code chunk number 64: replicated.Rnw:1159-1160
+### code chunk number 66: replicated.Rnw:1292-1293
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(res)
 
 
 ###################################################
-### code chunk number 65: replicated.Rnw:1165-1167
+### code chunk number 67: replicated.Rnw:1298-1300
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 smor <- with(hyperframe(res=res), Smooth(res, sigma=4))
@@ -451,7 +464,7 @@ plot(smor)
 
 
 ###################################################
-### code chunk number 66: replicated.Rnw:1179-1182
+### code chunk number 68: replicated.Rnw:1312-1315
 ###################################################
 fit <- mppm(P ~ x, hyperframe(P=waterstriders))
 res <- residuals(fit)
@@ -459,7 +472,7 @@ totres <- sapply(res, integral.msr)
 
 
 ###################################################
-### code chunk number 67: replicated.Rnw:1188-1195
+### code chunk number 69: replicated.Rnw:1321-1328
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 fit <- mppm(Points~Image, data=demohyper)
@@ -472,7 +485,7 @@ plot(resids~Group, df)
 
 
 ###################################################
-### code chunk number 68: replicated.Rnw:1216-1219
+### code chunk number 70: replicated.Rnw:1349-1352
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 fit <- mppm(P ~ 1, hyperframe(P=waterstriders))
@@ -481,7 +494,7 @@ plot(sub, quote(diagnose.ppm(Model)))
 
 
 ###################################################
-### code chunk number 69: replicated.Rnw:1232-1240
+### code chunk number 71: replicated.Rnw:1365-1373
 ###################################################
 H <- hyperframe(P = waterstriders)
 fitall <- mppm(P ~ 1, H)
@@ -494,7 +507,7 @@ exp(dr)
 
 
 ###################################################
-### code chunk number 70: replicated.Rnw:1257-1266
+### code chunk number 72: replicated.Rnw:1390-1399
 ###################################################
 H <- hyperframe(X=waterstriders)
 
@@ -508,7 +521,7 @@ quadrat.test(fit2, nx=2)
 
 
 ###################################################
-### code chunk number 71: replicated.Rnw:1295-1296 (eval = FALSE)
+### code chunk number 73: replicated.Rnw:1428-1429 (eval = FALSE)
 ###################################################
 ## kstest.mppm(model, covariate)
 

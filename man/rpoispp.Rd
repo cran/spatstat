@@ -7,7 +7,8 @@
   Includes CSR (complete spatial randomness).
 }
 \usage{
- rpoispp(lambda, lmax=NULL, win=owin(), \dots, nsim=1, drop=TRUE, ex=NULL)
+ rpoispp(lambda, lmax=NULL, win=owin(), \dots,
+         nsim=1, drop=TRUE, ex=NULL, warnwin=TRUE)
 }
 \arguments{
   \item{lambda}{
@@ -39,6 +40,11 @@
     If \code{ex} is given and \code{lambda,lmax,win} are missing,
     then \code{lambda} and \code{win} will be calculated from
     the point pattern \code{ex}.
+  }
+  \item{warnwin}{
+    Logical value specifying whether to issue a warning
+    when \code{win} is ignored (which occurs when \code{lambda}
+    is an image and \code{win} is present).
   }
 }
 \value{
@@ -96,6 +102,13 @@
   The total number of points in the simulated
   pattern will be random with expected value \code{mu = lambda * a}
   where \code{a} is the area of the window \code{win}. 
+}
+\section{Reproducibility}{
+  The simulation algorithm, for the case where
+  \code{lambda} is a pixel image, was changed in \pkg{spatstat}
+  version \code{1.42-3}. Set \code{spatstat.options(fastpois=FALSE)}
+  to use the previous, slower algorithm, if it is desired to reproduce
+  results obtained with earlier versions.
 }
 \seealso{
   \code{\link{rmpoispp}} for Poisson \emph{marked} point patterns,

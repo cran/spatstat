@@ -9,8 +9,9 @@
   surface.
 }
 \usage{
-  \method{plot}{mppm}(x, ..., trend = TRUE, cif = FALSE,
-                  how="image")
+  \method{plot}{mppm}(x, \dots,
+                trend=TRUE, cif=FALSE, se=FALSE,
+                how=c("image", "contour", "persp"))
 }
 \arguments{
   \item{x}{
@@ -20,19 +21,21 @@
     An object of class \code{"mppm"}.
   }
   \item{\dots}{
-    Arguments passed to \code{\link[spatstat]{plot.ppm}} or
-    \code{\link[spatstat]{plot.listof}} controlling the plot.
+    Arguments passed to \code{\link{plot.ppm}} or
+    \code{\link{plot.anylist}} controlling the plot.
   }
   \item{trend}{
-    logical flag; if \code{TRUE}, the spatial trend surface will be produced.
+    Logical value indicating whether to plot the fitted trend.
   }
   \item{cif}{
-    logical flag; if \code{TRUE}, the conditional intensity surface will be
-    produced.
+    Logical value indicating whether to plot the fitted conditional intensity.
+  }
+  \item{se}{
+    Logical value indicating whether to plot the standard error of the
+    fitted trend.
   }
   \item{how}{
-    character string vector indicating the style of
-    plot to be performed. 
+    Single character string indicating the style of plot to be performed. 
   }
 }
 \value{
@@ -45,22 +48,44 @@
 
   It invokes \code{\link{subfits}} to compute the fitted model for
   each individual point pattern dataset, then calls
-  \code{\link[spatstat]{plot.ppm}} to plot these individual models. These
-  individual plots are displayed using \code{\link[spatstat]{plot.listof}},
+  \code{\link{plot.ppm}} to plot these individual models. These
+  individual plots are displayed using \code{\link{plot.anylist}},
   which generates either a series of separate plot frames or an
   array of plot panels on a single page. 
 }
 \seealso{
-  \code{\link[spatstat]{plot.ppm}},
+  \code{\link{plot.ppm}},
   \code{\link{mppm}},
-  \code{\link[spatstat]{plot.listof}}
+  \code{\link{plot.listof}}
 }
-\author{Adrian Baddeley
-  \email{adrian.baddeley@uwa.edu.au}
+\references{
+  Baddeley, A., Rubak, E. and Turner, R. (2015)
+  \emph{Spatial Point Patterns: Methodology and Applications with R}.
+  London: Chapman and Hall/CRC Press. 
+}
+\examples{
+  # Synthetic data from known model
+  n <- 9
+  H <- hyperframe(V=1:n,
+                  U=runif(n, min=-1, max=1))
+  H$Z <- setcov(square(1))
+  H$U <- with(H, as.im(U, as.rectangle(Z)))
+  H$Y <- with(H, rpoispp(eval.im(exp(2+3*Z))))
+
+  fit <- mppm(Y ~Z + U + V, data=H)
+
+  plot(fit)
+}
+\author{
+  Adrian Baddeley, Ida-Maria Sintorn and Leanne Bischoff.
+  Implemented by 
+  Adrian Baddeley
+  \email{Adrian.Baddeley@uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{rolf@math.unb.ca}
-  \url{http://www.math.unb.ca/~rolf}
+  Rolf Turner
+  \email{r.turner@auckland.ac.nz}
+  and Ege Rubak
+  \email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{hplot}

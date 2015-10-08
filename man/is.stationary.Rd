@@ -5,6 +5,8 @@
 \alias{is.stationary.lppm}
 \alias{is.stationary.slrm}
 \alias{is.stationary.rmhmodel}
+\alias{is.stationary.dppm}
+\alias{is.stationary.detpointprocfamily}
 \alias{is.poisson}
 \alias{is.poisson.ppm}
 \alias{is.poisson.kppm}
@@ -27,6 +29,8 @@ is.stationary(x)
 \method{is.stationary}{lppm}(x)
 \method{is.stationary}{slrm}(x)
 \method{is.stationary}{rmhmodel}(x)
+\method{is.stationary}{dppm}(x)
+\method{is.stationary}{detpointprocfamily}(x)
 
 is.poisson(x)
 \method{is.poisson}{ppm}(x)
@@ -39,7 +43,7 @@ is.poisson(x)
 \arguments{
   \item{x}{
     A fitted spatial point process model
-    (object of class \code{"ppm"}, \code{"kppm"}, \code{"lppm"}
+    (object of class \code{"ppm"}, \code{"kppm"}, \code{"lppm"}, \code{"dppm"}
     or \code{"slrm"}) or similar object.
   }
 }
@@ -59,7 +63,10 @@ is.poisson(x)
   \code{"slrm"} (spatial logistic regression models) and
   \code{"rmhmodel"} (model specifications for the
   Metropolis-Hastings algorithm).
-  Additionally \code{is.poisson} has a method for 
+  Additionally \code{is.stationary} has a method for
+  classes \code{"detpointprocfamily"} and \code{"dppm"}
+  (both determinantal point processes) and
+  \code{is.poisson} has a method for 
   class \code{"interact"} (interaction structures for Gibbs models). 
 
   \code{is.poisson.kppm} will return \code{FALSE}, unless
@@ -74,11 +81,14 @@ is.poisson(x)
 \value{
   A logical value.
 }
-\author{Adrian Baddeley
+\author{
+  Adrian Baddeley
   \email{Adrian.Baddeley@uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
+  Rolf Turner
   \email{r.turner@auckland.ac.nz}
+  and Ege Rubak
+  \email{rubak@math.aau.dk}
 }
 \seealso{
   \code{\link{is.marked}} to determine whether a model is a marked
@@ -88,6 +98,7 @@ is.poisson(x)
 
   Model-fitting functions 
   \code{\link{ppm}},
+  \code{\link{dppm}},
   \code{\link{kppm}},
   \code{\link{lppm}},
   \code{\link{slrm}}.
@@ -96,11 +107,11 @@ is.poisson(x)
   data(cells)
   data(redwood)
 
-  fit <- ppm(cells, ~x)
+  fit <- ppm(cells ~ x)
   is.stationary(fit)
   is.poisson(fit)
 
-  fut <- kppm(redwood, ~1, "MatClust")
+  fut <- kppm(redwood ~ 1, "MatClust")
   is.stationary(fut)
   is.poisson(fut)
 

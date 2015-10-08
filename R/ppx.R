@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.44 $  $Date: 2014/11/11 01:25:08 $
+#  $Revision: 1.49 $  $Date: 2015/08/25 08:16:36 $
 #
 
 ppx <- local({
@@ -160,11 +160,35 @@ plot.ppx <- function(x, ...) {
   return(invisible(NULL))
 }
 
-"[.ppx" <- function (x, i, ...) {
+"[.ppx" <- function (x, i, drop=FALSE, ...) {
   da <- x$data
-  daij <- da[i, , drop=FALSE]
-  out <- list(data=daij, ctype=x$ctype, domain=x$domain)
+  if(!missing(i))
+    da <- da[i, , drop=FALSE]
+  out <- list(data=da, ctype=x$ctype, domain=x$domain)
   class(out) <- "ppx"
+  if(drop) {
+    # remove unused factor levels
+    mo <- marks(out)
+    switch(markformat(mo),
+           none = { },
+           vector = {
+             if(is.factor(mo))
+               marks(out) <- factor(mo)
+           },
+           dataframe = {
+             isfac <- sapply(mo, is.factor)
+             if(any(isfac))
+               mo[, isfac] <- lapply(mo[, isfac], factor)
+             marks(out) <- mo
+           },
+           hyperframe = {
+             lmo <- as.list(mo)
+             isfac <- sapply(lmo, is.factor)
+             if(any(isfac))
+               mo[, isfac] <- as.hyperframe(lapply(lmo[isfac], factor))
+             marks(out) <- mo
+           })
+  }
   return(out)
 }
 
@@ -287,6 +311,33 @@ boxx <- function(..., unitname=NULL) {
   return(out)
 }
 
+as.boxx <- function(..., warn.owin = TRUE) {
+  a <- list(...)
+  n <- length(a)
+  if (n == 0) 
+    stop("No arguments given")
+  if (n == 1) {
+    a <- a[[1]]
+    if (inherits(a, "boxx")) 
+      return(a)
+    if (inherits(a, "box3")) 
+      return(boxx(a$xrange, a$yrange, a$zrange, unitname = a$units))
+    if (inherits(a, "owin")) {
+      if (!is.rectangle(a) && warn.owin) 
+        warning("The owin object does not appear to be rectangular - the bounding box is used!")
+      return(boxx(a$xrange, a$yrange, unitname = a$units))
+    }
+    if (is.numeric(a)) {
+      if ((length(a)%%2) == 0) 
+        return(boxx(split(a, rep(1:(length(a)/2), each = 2))))
+      stop(paste("Don't know how to interpret", length(a), "numbers as a box"))
+    }
+    if (!is.list(a)) 
+      stop("Don't know how to interpret data as a box")
+  }
+  return(do.call("boxx", a))
+}
+
 print.boxx <- function(x, ...) {
   m <- ncol(x$ranges)
   cat(paste(m, "-dimensional box:\n", sep=""))
@@ -403,3 +454,19 @@ multiplicity.ppx <- function(x) {
   return(mul)
 }
 
+intensity.ppx <- function(X, ...) {
+  if(!is.multitype(X)) {
+    n <- npoints(X)
+  } else {
+    mks <- marks(X)
+    n <- as.vector(table(mks))
+    names(n) <- levels(mks)
+  }
+  v <- volume(domain(X))
+  return(n/v)
+}
+
+spatdim <- function(X) {
+  if(is.sob(X)) 2L else
+  if(is.ppx(X)) as.integer(sum(X$ctype == "spatial")) else NA_integer_
+}

@@ -1,7 +1,7 @@
 #
 # cdf.test.mppm.R
 #
-# $Revision: 1.13 $  $Date: 2015/01/29 06:46:02 $
+# $Revision: 1.14 $  $Date: 2015/08/12 07:24:31 $
 #
 cdf.test.mppm <- function(model, covariate,
                           test=c("ks", "cvm", "ad"), ..., verbose=TRUE,
@@ -49,13 +49,14 @@ cdf.test.mppm <- function(model, covariate,
     covariate <- as.anylist(rep(list(covariate), npat))
   } else     
   stop(paste("Format of argument", sQuote("covariates"), "not understood"))
-  if(verbose)
+  if(verbose) {
     cat("done.\nComputing statistics for each pattern...")
-
+    pstate <- list()
+  }
   # compile information for test from each row
   Zvalues <- ZX <- Win <- list()
   for(i in 1:npat) {
-    if(verbose) progressreport(i, npat)
+    if(verbose) pstate <- progressreport(i, npat, state=pstate)
     XI <- Y[[i]]
     if(fast)
       PI <- PP[[i]]

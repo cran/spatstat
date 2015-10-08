@@ -1,15 +1,19 @@
 #
 # kernel smoothing on linear network
-# (Okabe algorithm)
+# (Okabe algorithms)
 #  Computationally expensive unless sigma is very small
 #  You Have Been Warned
 #
-#   $Revision: 1.1 $  $Date: 2015/02/26 05:30:39 $
+#   $Revision: 1.5 $  $Date: 2015/08/07 06:59:51 $
 #
 
-density.lpp <- function(x, sigma, ..., epsilon=1e-6,
+density.lpp <- function(x, sigma, ...,
+                        kernel="gaussian",
+                        continuous=TRUE,
+                        epsilon=1e-6,
                         verbose=TRUE, debug=FALSE, savehistory=TRUE) {
   stopifnot(inherits(x, "lpp"))
+  kernel <- match.kernel(kernel)
   L <- as.linnet(x)
   # pixellate linear network
   Llines <- as.psp(L)
@@ -48,7 +52,8 @@ density.lpp <- function(x, sigma, ..., epsilon=1e-6,
     # Gaussian density on segment containing x[i]
     relevant <- (projmap$mapXY == segi)
     values[relevant] <- values[relevant] +
-      dnorm(len * (projmap$tp[relevant] - tpi), sd=sigma)
+      dkernel(len * (projmap$tp[relevant] - tpi),
+              kernel=kernel, sd=sigma)
     # push the two tails onto the stack
     stack <- rbind(data.frame(seg = c(segi, segi),
                               from  = c(TRUE, FALSE), 
@@ -66,8 +71,10 @@ density.lpp <- function(x, sigma, ..., epsilon=1e-6,
   # process the stack
   while(nrow(stack) > 0) {
     if(debug) print(stack)
-    masses <- with(stack, abs(weight) * pnorm(distance, sd=sigma,
-                                           lower.tail=FALSE))
+    masses <- with(stack, abs(weight) * pkernel(distance,
+                                                kernel=kernel,
+                                                sd=sigma,
+                                                lower.tail=FALSE))
     totmass <- sum(masses)
     maxmass <- max(masses)
     if(savehistory)
@@ -101,20 +108,27 @@ density.lpp <- function(x, sigma, ..., epsilon=1e-6,
     Hvert <- if(H$from) Lfrom[Hseg] else Lto[Hseg]
     Hdist <- H$distance
     # find all segments incident to this vertex
-    incident <- (Lfrom == Hvert) | (Lto == Hvert)
-    degree <- sum(incident)
-    for(J in which(incident)) {
+    incident <- which((Lfrom == Hvert) | (Lto == Hvert))
+    degree <- length(incident)
+    # exclude reflecting paths?
+    if(!continuous)
+      incident <- setdiff(incident, Hseg)
+    for(J in incident) {
       lenJ <- Llengths[J]
       # determine whether Hvert is the 'to' or 'from' endpoint of segment J
       H.is.from <- (Lfrom[J] == Hvert)
       # update weight
-      Jweight <- H$weight * (2/degree - (J == Hseg))
+      if(continuous) {
+        Jweight <- H$weight * (2/degree - (J == Hseg))
+      } else {
+        Jweight <- H$weight/(degree-1)
+      }
       # increment density on segment
       relevant <- (projmap$mapXY == J)
       tp.rel <- projmap$tp[relevant]
       d.rel <- lenJ * (if(H.is.from) tp.rel else (1 - tp.rel))
       values[relevant] <- values[relevant] +
-        Jweight * dnorm(d.rel + Hdist, sd=sigma)
+        Jweight * dkernel(d.rel + Hdist, kernel=kernel, sd=sigma)
       # push other end of segment onto stack
       stack <- rbind(data.frame(seg = J,
                                 from  = !(H.is.from),

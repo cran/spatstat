@@ -1,6 +1,7 @@
 \name{methods.lppm}
 \alias{methods.lppm} %DoNotExport
 \alias{coef.lppm}
+\alias{emend.lppm}
 \alias{extractAIC.lppm}
 \alias{formula.lppm}
 \alias{logLik.lppm}
@@ -9,6 +10,7 @@
 \alias{summary.lppm}
 \alias{terms.lppm}
 \alias{update.lppm}
+\alias{valid.lppm}
 \alias{vcov.lppm}
 \alias{as.linnet.lppm}
 \title{
@@ -20,6 +22,8 @@
 }
 \usage{
   \method{coef}{lppm}(object, ...)
+
+  \method{emend}{lppm}(object, \dots)
 
   \method{extractAIC}{lppm}(fit, ...)
 
@@ -36,6 +40,8 @@
   \method{terms}{lppm}(x, ...)
 
   \method{update}{lppm}(object, ...)
+
+  \method{valid}{lppm}(object, ...)
 
   \method{vcov}{lppm}(object, ...)
 
@@ -54,6 +60,7 @@
 \details{
   These are methods for the generic commands
   \code{\link{coef}},
+  \code{\link{emend}}, 
   \code{\link{extractAIC}},
   \code{\link{formula}},
   \code{\link{logLik}},
@@ -61,7 +68,9 @@
   \code{\link{print}}, 
   \code{\link{summary}}, 
   \code{\link{terms}},
-  \code{\link{update}} and
+  \code{\link{update}},
+  \code{\link{valid}}
+  and
   \code{\link{vcov}}
   for the class \code{"lppm"}. 
 }
@@ -72,6 +81,10 @@
   Adrian Baddeley
   \email{Adrian.Baddeley@uwa.edu.au}
   \url{http://www.maths.uwa.edu.au/~adrian/}
+  Rolf Turner
+  \email{r.turner@auckland.ac.nz}
+  and Ege Rubak
+  \email{rubak@math.aau.dk}
 }
 \seealso{
   \code{\link{lppm}},
@@ -79,7 +92,7 @@
 }
 \examples{
   example(lpp)
-  fit <- lppm(X, ~x)
+  fit <- lppm(X ~ x)
   print(fit)
   coef(fit)
   formula(fit)
@@ -88,6 +101,7 @@
   nobs(fit)
   extractAIC(fit)
   update(fit, ~1)
+  valid(fit)
   vcov(fit)
 }
 \keyword{spatial}

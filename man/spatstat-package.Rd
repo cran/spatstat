@@ -43,7 +43,7 @@
     Huang-Ogata approximate maximum likelihood)
     \item Cox/cluster process models
     (by Waagepetersen's two-step fitting procedure
-    and minimum contrast, or by composite likelihood)
+    and minimum contrast, composite likelihood, or Palm likelihood)
   }
   The models may include spatial trend,
   dependence on covariates, and complicated interpoint interactions.
@@ -103,19 +103,21 @@
   datasets is available by typing \code{library(help=spatstat)}.
 
   For further information on any of these,
-  type \code{help(name)} where \code{name} is the name of the function
+  type \code{help(name)} or \code{?name}
+  where \code{name} is the name of the function
   or dataset.
 }
 \section{CONTENTS:}{
   \tabular{ll}{
     I. \tab Creating and manipulating data \cr
     II. \tab Exploratory Data Analysis \cr
-    III. \tab Model fitting (cluster models) \cr
+    III. \tab Model fitting (Cox and cluster models) \cr
     IV. \tab Model fitting (Poisson and Gibbs models) \cr
-    V. \tab Model fitting (spatial logistic regression)\cr
-    VI. \tab Simulation \cr
-    VII. \tab Tests and diagnostics\cr
-    VIII. \tab Documentation
+    V. \tab Model fitting (determinantal point processes)\cr
+    VI. \tab Model fitting (spatial logistic regression)\cr
+    VII. \tab Simulation \cr
+    VIII. \tab Tests and diagnostics\cr
+    IX. \tab Documentation
   }
 }
 
@@ -383,6 +385,7 @@
 	Convert other data to a window object \cr
 	\code{\link{square}}    \tab	make a square window \cr
 	\code{\link{disc}}    \tab	make a circular window \cr
+	\code{\link{ellipse}}    \tab	make an elliptical window \cr
 	\code{\link{ripras}}    \tab
 	Ripley-Rasson estimator of window, given only the points \cr
 	\code{\link{convexhull}} \tab compute convex hull of something \cr 
@@ -438,6 +441,8 @@
 	raster x coordinates \cr
 	\code{\link{raster.y}} \tab
 	raster y coordinates \cr
+	\code{\link{raster.xy}} \tab
+	raster x and y coordinates \cr
 	\code{\link{as.polygonal}} \tab
 	convert pixel mask to polygonal window 
       }
@@ -758,7 +763,8 @@
     print basic description of point pattern \code{X}  \cr
     \code{any(duplicated(X))} \tab
     check for duplicated points in pattern \code{X} \cr
-    \code{\link{istat}(X)} \tab Interactive exploratory analysis 
+    \code{\link{istat}(X)} \tab Interactive exploratory analysis \cr
+    \code{\link{View}(X)} \tab spreadsheet-style viewer
   }
 
   \bold{Classical exploratory tools:}
@@ -794,7 +800,7 @@
     \code{\link{nnclean}} \tab Byers-Raftery feature detection  \cr
     \code{\link{sharpen.ppp}} \tab Choi-Hall data sharpening \cr
     \code{\link{rhohat}} \tab Kernel estimate of covariate effect\cr
-    \code{\link{rho2hat}} \tab Kernel estimate of covariate effect\cr
+    \code{\link{rho2hat}} \tab Kernel estimate of effect of two covariates\cr
     \code{\link{spatialcdf}} \tab Spatial cumulative distribution function\cr
     \code{\link{roc}} \tab Receiver operating characteristic curve
   }
@@ -915,6 +921,7 @@
     \code{\link{markmean}} \tab smoothed local average of marks \cr
     \code{\link{markvar}} \tab smoothed local variance of marks \cr
     \code{\link{markcorr}} \tab mark correlation function \cr
+    \code{\link{markcrosscorr}} \tab mark cross-correlation function \cr
     \code{\link{markvario}} \tab mark variogram \cr
     \code{\link{Kmark}} \tab mark-weighted \eqn{K} function \cr
     \code{\link{Emark}} \tab mark independence diagnostic \eqn{E(r)} \cr
@@ -1053,7 +1060,7 @@
   
 }
 
-\section{III. MODEL FITTING (CLUSTER MODELS)}{
+\section{III. MODEL FITTING (COX AND CLUSTER MODELS)}{
   
   Cluster process models (with homogeneous or inhomogeneous intensity)
   and Cox processes can be fitted by the function \code{\link{kppm}}.
@@ -1129,7 +1136,7 @@
   Gibbs point process models to point pattern data using \pkg{spatstat},
   see Baddeley and Turner (2005b) or Baddeley (2008).
   
-  \bold{To fit a Poison or Gibbs point process model:}
+  \bold{To fit a Poisson or Gibbs point process model:}
 
   Model fitting in \pkg{spatstat} is performed mainly by the function
   \code{\link{ppm}}. Its result is an object of class \code{"ppm"}.
@@ -1231,6 +1238,7 @@
     \code{\link{Ord}()} \tab 		        Ord model, user-supplied potential \cr
     \code{\link{PairPiece}()} \tab		pairwise interaction, piecewise constant \cr
     \code{\link{Pairwise}()} \tab	pairwise interaction, user-supplied potential\cr
+    \code{\link{Penttinen}()} \tab	Penttinen pairwise interaction\cr
     \code{\link{SatPiece}()} \tab	Saturated pair model, piecewise  constant potential\cr
     \code{\link{Saturated}()} \tab	Saturated pair model, user-supplied potential\cr
     \code{\link{Softcore}()} \tab pairwise interaction, soft core potential\cr
@@ -1310,7 +1318,15 @@
 }
 
 
-\section{V. MODEL FITTING (SPATIAL LOGISTIC REGRESSION)}{
+\section{V. MODEL FITTING (DETERMINANTAL POINT PROCESS MODELS)}{
+
+  Code for fitting \emph{determinantal point process models} has 
+  recently been added to \pkg{spatstat}.
+
+  For information, see the help file for \code{\link{dppm}}.
+}
+
+\section{VI. MODEL FITTING (SPATIAL LOGISTIC REGRESSION)}{
   
   \bold{Logistic regression}
   
@@ -1374,7 +1390,7 @@
 }
 
 
-\section{VI. SIMULATION}{
+\section{VII. SIMULATION}{
 
   There are many ways to generate a random point pattern,
   line segment pattern, pixel image or tessellation
@@ -1491,7 +1507,7 @@
 }
 
 
-\section{VII. TESTS AND DIAGNOSTICS}{
+\section{VIII. TESTS AND DIAGNOSTICS}{
 
   \bold{Classical hypothesis tests:}
   
@@ -1576,24 +1592,24 @@
 }
 
 
-\section{VIII. DOCUMENTATION}{
+\section{IX. DOCUMENTATION}{
   The online manual entries are quite detailed and should be consulted
   first for information about a particular function.
   
-  The paper by Baddeley and Turner (2005a) is a brief overview of
-  the package. 
-  Baddeley and Turner (2005b) is a more detailed explanation of
-  how to fit point process models to data.
-  
-  Baddeley (2010) is a complete set of notes from a 2-day workshop
-  on the use of \pkg{spatstat}. It is now very out-of-date.
-
   The forthcoming book
   Baddeley, Rubak and Turner (2015) is a complete course
   on analysing spatial point patterns, with full details about
   \pkg{spatstat}.
 
-  Type \code{citation("spatstat")} to get these references.
+  Older material (which is now out-of-date but is freely available)
+  includes Baddeley and Turner (2005a), a brief overview of
+  the package in its early development;
+  Baddeley and Turner (2005b), a more detailed explanation of
+  how to fit point process models to data; and 
+  Baddeley (2010), a complete set of notes from a 2-day workshop
+  on the use of \pkg{spatstat}. 
+
+  Type \code{citation("spatstat")} to get a list of these references.
 }
 \references{
   Baddeley, A. (2010)
@@ -1667,6 +1683,7 @@
 }
 \section{Acknowledgements}{
   Kasper Klitgaard Berthelsen,
+  Ute Hahn,
   Abdollah Jalilian,
   Marie-Colette van Lieshout,
   Tuomas Rajala,
@@ -1686,6 +1703,7 @@
   Brad Biggerstaff,
   Anders Bilgrau,
   Leanne Bischof,
+  Christophe Biscio,
   Roger Bivand,
   Jose M. Blanco Moreno,
   Florent Bonneu,
@@ -1706,6 +1724,7 @@
   Ian Dryden,
   Stephen Eglen,
   Ahmed El-Gabbas,
+  Belarmain Fandohan,
   Olivier Flores,
   David Ford,
   Peter Forbes,
@@ -1748,6 +1767,7 @@
   George Limitsios,
   Andrew Lister,
   Ben Madin,
+  Martin Maechler,
   Kiran Marchikanti,
   Jeff Marcus,
   Robert Mark,
@@ -1777,6 +1797,7 @@
   Sergiy Protsiv,
   Adrian Raftery,
   Suman Rakshit,
+  Ben Ramage,
   Pablo Ramon,
   Xavier Raynaud,
   Matt Reiter,
@@ -1795,6 +1816,7 @@
   Sebastian Schutte,
   Bryan Scott,
   Olivia Semboli,
+  \ifelse{latex}{\out{Fran\c{c}ois S\'{e}m\'{e}curbe}}{Francois Semecurbe},
   Vadim Shcherbakov,
   Shen Guochun,
   Harold-Jeffrey Ship,

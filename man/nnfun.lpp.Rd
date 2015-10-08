@@ -34,7 +34,7 @@
   is the identifier or serial number of the closest point of \code{X}.
   
   The command \code{nnfun.lpp} is a method for the generic command
-  \code{\link[spatstat]{nnfun}}
+  \code{\link{nnfun}}
   for the class \code{"lpp"} of point patterns on a linear network.
 
   If \code{X} is a point pattern on a linear network,
@@ -43,8 +43,9 @@
   nearest neighbour function of \code{X}. Evaluating the function \code{f}
   in the form \code{v <- f(x,y)}, where \code{x} and \code{y}
   are any numeric vectors of equal length containing coordinates of
-  spatial locations, yields the values of the distance function at these
-  locations. More efficiently \code{f} can take the arguments
+  spatial locations, yields a vector of identifiers or serial numbers of
+  the data points closest to these spatial locations.
+  More efficiently \code{f} can take the arguments
   \code{x, y, seg, tp} where \code{seg} and \code{tp} are the local
   coordinates on the network.
 

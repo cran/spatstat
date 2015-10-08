@@ -18,7 +18,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 3: datasets.Rnw:199-218
+### code chunk number 3: datasets.Rnw:200-219
 ###################################################
 opa <- par()
 ## How to set all margins to zero and eliminate all outer spaces
@@ -42,56 +42,63 @@ setmargins <- function(...) {
 
 
 ###################################################
-### code chunk number 4: datasets.Rnw:227-228 (eval = FALSE)
+### code chunk number 4: datasets.Rnw:228-229 (eval = FALSE)
 ###################################################
 ## plot(amacrine)
 
 
 ###################################################
-### code chunk number 5: datasets.Rnw:230-232
+### code chunk number 5: datasets.Rnw:231-233
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-setmargins(0,1,0,0)
+setmargins(0,1,2,0)
 plot(amacrine)
 
 
 ###################################################
-### code chunk number 6: datasets.Rnw:241-242 (eval = FALSE)
+### code chunk number 6: datasets.Rnw:242-243 (eval = FALSE)
 ###################################################
 ## plot(anemones, markscale=1)
 
 
 ###################################################
-### code chunk number 7: datasets.Rnw:244-246
+### code chunk number 7: datasets.Rnw:245-247
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-setmargins(0)
+setmargins(0,0,2,0)
 plot(anemones, markscale=1)
 
 
 ###################################################
-### code chunk number 8: datasets.Rnw:259-260 (eval = FALSE)
+### code chunk number 8: datasets.Rnw:260-261 (eval = FALSE)
 ###################################################
 ## ants.extra$plotit()
 
 
 ###################################################
-### code chunk number 9: datasets.Rnw:262-264
+### code chunk number 9: datasets.Rnw:263-265
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-zeromargins()
+setmargins(0,0,1,0)
 ants.extra$plotit()
 
 
 ###################################################
-### code chunk number 10: datasets.Rnw:274-276 (eval = FALSE)
+### code chunk number 10: datasets.Rnw:273-274
+###################################################
+getOption("SweaveHooks")[["fig"]]()
+plot(austates)
+
+
+###################################################
+### code chunk number 11: datasets.Rnw:284-286 (eval = FALSE)
 ###################################################
 ## plot(bdspots, equal.scales=TRUE, pch="+", 
 ##      panel.args=function(i)list(cex=c(0.15, 0.2, 0.7)[i]))
 
 
 ###################################################
-### code chunk number 11: datasets.Rnw:278-282
+### code chunk number 12: datasets.Rnw:288-292
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 zeromargins()
@@ -101,23 +108,23 @@ plot(bdspots, equal.scales=TRUE, pch="+", main="",
 
 
 ###################################################
-### code chunk number 12: datasets.Rnw:292-294 (eval = FALSE)
+### code chunk number 13: datasets.Rnw:302-304 (eval = FALSE)
 ###################################################
 ## plot(bei.extra$elev, main="Beilschmiedia")
 ## plot(bei, add=TRUE, pch=16, cex=0.3)
 
 
 ###################################################
-### code chunk number 13: datasets.Rnw:296-299
+### code chunk number 14: datasets.Rnw:306-309
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-setmargins(0)
+setmargins(0,0,2,0)
 plot(bei.extra$elev, main="Beilschmiedia")
 plot(bei, add=TRUE, pch=16, cex=0.3)
 
 
 ###################################################
-### code chunk number 14: datasets.Rnw:302-308
+### code chunk number 15: datasets.Rnw:312-318
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 M <- persp(bei.extra$elev, 
@@ -129,42 +136,42 @@ perspPoints(bei, Z=bei.extra$elev, M=M, pch=16, cex=0.3)
 
 
 ###################################################
-### code chunk number 15: datasets.Rnw:317-318
+### code chunk number 16: datasets.Rnw:327-328
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(betacells)
 
 
 ###################################################
-### code chunk number 16: datasets.Rnw:323-324
+### code chunk number 17: datasets.Rnw:333-334
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(bramblecanes, cols=1:3)
 
 
 ###################################################
-### code chunk number 17: datasets.Rnw:327-328
+### code chunk number 18: datasets.Rnw:337-338
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(split(bramblecanes))
 
 
 ###################################################
-### code chunk number 18: datasets.Rnw:338-339
+### code chunk number 19: datasets.Rnw:348-349
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(bronzefilter,markscale=2)
 
 
 ###################################################
-### code chunk number 19: datasets.Rnw:348-349
+### code chunk number 20: datasets.Rnw:358-359
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(cells)
 
 
 ###################################################
-### code chunk number 20: datasets.Rnw:358-361
+### code chunk number 21: datasets.Rnw:368-371
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(chicago, main="Chicago Street Crimes", col="grey",
@@ -173,14 +180,14 @@ plot(chicago, main="Chicago Street Crimes", col="grey",
 
 
 ###################################################
-### code chunk number 21: datasets.Rnw:371-372
+### code chunk number 22: datasets.Rnw:381-382
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 chorley.extra$plotit()
 
 
 ###################################################
-### code chunk number 22: datasets.Rnw:388-390
+### code chunk number 23: datasets.Rnw:398-400
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(clmfires, which.marks="cause", cols=2:5, cex=0.25,
@@ -188,14 +195,14 @@ plot(clmfires, which.marks="cause", cols=2:5, cex=0.25,
 
 
 ###################################################
-### code chunk number 23: datasets.Rnw:400-401
+### code chunk number 24: datasets.Rnw:410-411
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(clmfires.extra$clmcov200, main="Covariates for forest fires")
 
 
 ###################################################
-### code chunk number 24: datasets.Rnw:412-414
+### code chunk number 25: datasets.Rnw:422-424
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(copper$Points, main="Copper")
@@ -203,7 +210,7 @@ plot(copper$Lines, add=TRUE)
 
 
 ###################################################
-### code chunk number 25: datasets.Rnw:421-423
+### code chunk number 26: datasets.Rnw:431-433
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(demohyper, quote({ plot(Image, main=""); plot(Points, add=TRUE) }),
@@ -211,28 +218,28 @@ plot(demohyper, quote({ plot(Image, main=""); plot(Points, add=TRUE) }),
 
 
 ###################################################
-### code chunk number 26: datasets.Rnw:430-431
+### code chunk number 27: datasets.Rnw:440-441
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(demopat)
 
 
 ###################################################
-### code chunk number 27: datasets.Rnw:445-446
+### code chunk number 28: datasets.Rnw:455-456
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(dendrite, leg.side="bottom", main="", cex=0.75, cols=2:4)
 
 
 ###################################################
-### code chunk number 28: datasets.Rnw:454-455
+### code chunk number 29: datasets.Rnw:464-465
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(finpines, main="Finnish pines")
 
 
 ###################################################
-### code chunk number 29: datasets.Rnw:468-472
+### code chunk number 30: datasets.Rnw:478-482
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 wildM1 <- with(flu, virustype == "wt" & stain == "M2-M1")
@@ -242,83 +249,83 @@ plot(flu[wildM1, 1, drop=TRUE],
 
 
 ###################################################
-### code chunk number 30: datasets.Rnw:480-481
+### code chunk number 31: datasets.Rnw:490-491
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(gordon, main="People in Gordon Square", pch=16)
 
 
 ###################################################
-### code chunk number 31: datasets.Rnw:496-497
+### code chunk number 32: datasets.Rnw:506-507
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(gorillas, which.marks=1, chars=c(1,3), cols=2:3, main="Gorilla nest sites")
 
 
 ###################################################
-### code chunk number 32: datasets.Rnw:501-502 (eval = FALSE)
+### code chunk number 33: datasets.Rnw:511-512 (eval = FALSE)
 ###################################################
 ## system.file("rawdata/gorillas/vegetation.asc", package="spatstat")
 
 
 ###################################################
-### code chunk number 33: datasets.Rnw:511-512
+### code chunk number 34: datasets.Rnw:521-522
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(hamster, cols=c(2,4))
 
 
 ###################################################
-### code chunk number 34: datasets.Rnw:522-523
+### code chunk number 35: datasets.Rnw:532-533
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(heather)
 
 
 ###################################################
-### code chunk number 35: datasets.Rnw:533-534
+### code chunk number 36: datasets.Rnw:543-544
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(humberside)
 
 
 ###################################################
-### code chunk number 36: datasets.Rnw:546-547
+### code chunk number 37: datasets.Rnw:556-557
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(hyytiala, cols=2:5)
 
 
 ###################################################
-### code chunk number 37: datasets.Rnw:556-557
+### code chunk number 38: datasets.Rnw:566-567
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(japanesepines)
 
 
 ###################################################
-### code chunk number 38: datasets.Rnw:566-567
+### code chunk number 39: datasets.Rnw:576-577
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(lansing)
 
 
 ###################################################
-### code chunk number 39: datasets.Rnw:570-571
+### code chunk number 40: datasets.Rnw:580-581
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(split(lansing))
 
 
 ###################################################
-### code chunk number 40: datasets.Rnw:578-579
+### code chunk number 41: datasets.Rnw:588-589
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(longleaf)
 
 
 ###################################################
-### code chunk number 41: datasets.Rnw:588-590
+### code chunk number 42: datasets.Rnw:598-600
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(mucosa, chars=c(1,3), cols=c("red", "green"))
@@ -326,7 +333,7 @@ plot(mucosa.subwin, add=TRUE, lty=3)
 
 
 ###################################################
-### code chunk number 42: datasets.Rnw:604-607
+### code chunk number 43: datasets.Rnw:614-617
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(murchison$greenstone, main="Murchison data", col="lightgreen")
@@ -335,23 +342,24 @@ plot(murchison$faults, add=TRUE, col="red")
 
 
 ###################################################
-### code chunk number 43: datasets.Rnw:615-616
+### code chunk number 44: datasets.Rnw:625-626
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(nbfires, use.marks=FALSE, pch=".")
 
 
 ###################################################
-### code chunk number 44: datasets.Rnw:619-620
+### code chunk number 45: datasets.Rnw:629-630
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(split(nbfires), use.marks=FALSE, chars=".")
 
 
 ###################################################
-### code chunk number 45: datasets.Rnw:623-627
+### code chunk number 46: datasets.Rnw:633-638
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
+par(mar=c(0,0,2,0))
 plot(split(nbfires)$"2000", which.marks="fire.type",
      main=c("New Brunswick fires 2000", "by fire type"),
      cols=c("blue", "green", "red", "cyan"),
@@ -359,7 +367,7 @@ plot(split(nbfires)$"2000", which.marks="fire.type",
 
 
 ###################################################
-### code chunk number 46: datasets.Rnw:635-637
+### code chunk number 47: datasets.Rnw:646-648
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(nztrees)
@@ -367,34 +375,34 @@ plot(trim.rectangle(as.owin(nztrees), c(0,5), 0), add=TRUE, lty=3)
 
 
 ###################################################
-### code chunk number 47: datasets.Rnw:650-651
+### code chunk number 48: datasets.Rnw:661-662
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(osteo[1:10,], main.panel="", pch=21, bg='white')
 
 
 ###################################################
-### code chunk number 48: datasets.Rnw:657-658 (eval = FALSE)
+### code chunk number 49: datasets.Rnw:668-669 (eval = FALSE)
 ###################################################
 ## system.file("rawdata/osteo/osteo36.txt", package="spatstat")
 
 
 ###################################################
-### code chunk number 49: datasets.Rnw:667-668
+### code chunk number 50: datasets.Rnw:678-679
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(paracou, cols=2:3, chars=c(16,3))
 
 
 ###################################################
-### code chunk number 50: datasets.Rnw:676-677
+### code chunk number 51: datasets.Rnw:687-688
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 ponderosa.extra$plotit()
 
 
 ###################################################
-### code chunk number 51: datasets.Rnw:688-691
+### code chunk number 52: datasets.Rnw:699-702
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 pyr <- pyramidal
@@ -403,21 +411,21 @@ plot(pyr, quote(plot(Neurons, pch=16, main=grp)), main="Pyramidal Neurons")
 
 
 ###################################################
-### code chunk number 52: datasets.Rnw:708-709
+### code chunk number 53: datasets.Rnw:719-720
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(redwood)
 
 
 ###################################################
-### code chunk number 53: datasets.Rnw:712-713
+### code chunk number 54: datasets.Rnw:723-724
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 redwoodfull.extra$plotit()
 
 
 ###################################################
-### code chunk number 54: datasets.Rnw:727-729
+### code chunk number 55: datasets.Rnw:738-740
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(as.listof(residualspaper[c("Fig1", "Fig4a", "Fig4b", "Fig4c")]), 
@@ -425,28 +433,28 @@ plot(as.listof(residualspaper[c("Fig1", "Fig4a", "Fig4b", "Fig4c")]),
 
 
 ###################################################
-### code chunk number 55: datasets.Rnw:737-738
+### code chunk number 56: datasets.Rnw:748-749
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 shapley.extra$plotit(main="Shapley")
 
 
 ###################################################
-### code chunk number 56: datasets.Rnw:745-746
+### code chunk number 57: datasets.Rnw:756-757
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(simdat)
 
 
 ###################################################
-### code chunk number 57: datasets.Rnw:754-755
+### code chunk number 58: datasets.Rnw:765-766
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(spiders, pch=16, show.window=FALSE)
 
 
 ###################################################
-### code chunk number 58: datasets.Rnw:762-765
+### code chunk number 59: datasets.Rnw:773-776
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(sporophores, chars=c(16,1,2), cex=0.6)
@@ -455,35 +463,36 @@ text(15,8,"Tree", cex=0.75)
 
 
 ###################################################
-### code chunk number 59: datasets.Rnw:774-775
+### code chunk number 60: datasets.Rnw:785-786
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(spruces, maxsize=min(nndist(spruces)))
 
 
 ###################################################
-### code chunk number 60: datasets.Rnw:784-785
+### code chunk number 61: datasets.Rnw:795-796
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(swedishpines)
 
 
 ###################################################
-### code chunk number 61: datasets.Rnw:794-795
+### code chunk number 62: datasets.Rnw:805-806
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(urkiola, cex=0.5, cols=2:3)
 
 
 ###################################################
-### code chunk number 62: datasets.Rnw:802-803
+### code chunk number 63: datasets.Rnw:813-815
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
+par(mar=c(0,0,2,0))
 plot(waka, markscale=0.04, main=c("Waka national park", "tree diameters"))
 
 
 ###################################################
-### code chunk number 63: datasets.Rnw:810-814
+### code chunk number 64: datasets.Rnw:822-826
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 v <- rotate(vesicles, pi/2)
@@ -493,13 +502,13 @@ plot(ve$activezone, add=TRUE, lwd=3)
 
 
 ###################################################
-### code chunk number 64: datasets.Rnw:839-840 (eval = FALSE)
+### code chunk number 65: datasets.Rnw:851-852 (eval = FALSE)
 ###################################################
 ## system.file("rawdata/vesicles/mitochondria.txt", package="spatstat")
 
 
 ###################################################
-### code chunk number 65: datasets.Rnw:848-849
+### code chunk number 66: datasets.Rnw:860-861
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(waterstriders)

@@ -1,20 +1,31 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.78 $	$Date: 2014/11/10 11:16:58 $
+#	$Revision: 1.81 $	$Date: 2015/10/04 01:28:59 $
 #
 #
 #--------------------------------------------------------------------------
 
 plot.ppp <- local({
 
+  transparencyfun <- function(n) {
+    if(n <= 100) 1 else (0.2 + 0.8 * exp(-(n-100)/1000))
+  }
+  
   ## determine symbol map for marks of points
   default.symap.points <- function(x, ..., 
                                   chars=NULL, cols=NULL, 
                                   maxsize=NULL, meansize=NULL, markscale=NULL) {
     marx <- marks(x)
     if(is.null(marx)) {
-      ## null or constant map
+      ## null or constant symbol map
+      ## consider using transparent colours
+      if(is.null(cols) &&
+         !any(c("col", "fg", "bg") %in% names(list(...))) &&
+         (nx <- npoints(x)) > 100 &&
+         identical(dev.capabilities()$semiTransparency, TRUE) &&
+         spatstat.options("transparent"))
+        cols <- rgb(0,0,0,transparencyfun(nx))
       return(symbolmap(..., chars=chars, cols=cols))
     }
     if(!is.null(dim(marx)))
@@ -226,7 +237,8 @@ plot.ppp <- local({
   if(!is.marked(x, na.action="ignore") || !use.marks) {
     ## Marks are not mapped.
     marx <- NULL
-    if(is.null(symap)) symap <- symbolmap(..., chars=chars, cols=cols)
+    if(is.null(symap))
+      symap <- default.symap.points(unmark(x), ..., chars=chars, cols=cols)
   } else {
     ## Marked point pattern
     marx <- marks(y, dfok=TRUE)
@@ -239,7 +251,8 @@ plot.ppp <- local({
       ok <- complete.cases(as.data.frame(y))
       if(!any(ok)) {
         warning("All mark values are NA; plotting locations only.")
-        if(is.null(symap)) symap <- symbolmap()
+        if(is.null(symap))
+          symap <- default.symap.points(unmark(x), ..., chars=chars, cols=cols)
       } else if(any(!ok)) {
         warning(paste("Some marks are NA;",
                       "corresponding points are omitted."))

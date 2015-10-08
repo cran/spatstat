@@ -3,7 +3,7 @@
 ##
 ##    Functions for generating random point patterns
 ##
-##    $Revision: 4.76 $   $Date: 2015/03/13 11:15:51 $
+##    $Revision: 4.84 $   $Date: 2015/09/06 03:11:34 $
 ##
 ##
 ##    runifpoint()      n i.i.d. uniform random points ("binomial process")
@@ -357,7 +357,7 @@ rpoint <- function(n, f, fmax=NULL,
 }
 
 rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
-                    nsim=1, drop=TRUE, ex=NULL) {
+                    nsim=1, drop=TRUE, ex=NULL, warnwin=TRUE) {
   ## arguments:
   ##     lambda  intensity: constant, function(x,y,...) or image
   ##     lmax     maximum possible value of lambda(x,y,...)
@@ -381,10 +381,13 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
       if(length(lmax) > 1)
         stop("lmax should be a single number")
     }
-    win <- if(is.im(lambda))
-      rescue.rectangle(as.owin(lambda))
-    else
-      as.owin(win)
+    if(is.im(lambda)) {
+      if(warnwin && !missing(win))
+        warning("Argument win ignored", call.=FALSE)
+      win <- rescue.rectangle(as.owin(lambda))
+    } else {
+      win <- as.owin(win)
+    }
   }
   
   if(is.numeric(lambda)) 
@@ -393,7 +396,7 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
 
   ## inhomogeneous Poisson
   ## perform thinning of uniform Poisson
-
+  ## determine upper bound
   if(is.null(lmax)) {
     imag <- as.im(lambda, win, ...)
     summ <- summary(imag)
@@ -410,7 +413,7 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
       retain <- (u <= prob)
       X <- X[retain, ]
       return(if(drop) X else solist(X))
-    }
+    } 
     result <- runifpoispp(lmax, win, nsim=nsim, drop=FALSE)
     for(isim in 1:nsim) {
       X <- result[[isim]]
@@ -426,26 +429,50 @@ rpoispp <- function(lambda, lmax=NULL, win = owin(), ...,
 
   if(is.im(lambda)) {
     ## image lambda
-    if(nsim == 1) {
-      X <- runifpoispp(lmax, win)
-      if(X$n == 0) return(X)
-      prob <- lambda[X]/lmax
-      u <- runif(X$n)
-      retain <- (u <= prob)
-      X <- X[retain, ]
-      return(if(drop) X else solist(X))
-    }
-    result <- runifpoispp(lmax, win, nsim=nsim, drop=FALSE)
-    for(isim in 1:nsim) {
-      X <- result[[isim]]
-      if(X$n > 0) {
+    if(spatstat.options("fastpois")) {
+      ## new code: sample pixels directly
+      mu <- integral(lambda)
+      dx <- lambda$xstep/2
+      dy <- lambda$ystep/2
+      df <- as.data.frame(lambda)
+      npix <- nrow(df)
+      lpix <- df$value
+      result <- vector(mode="list", length=nsim)
+      nn <- rpois(nsim, mu)
+      if(!all(is.finite(nn)))
+        stop(paste("Unable to generate Poisson process with a mean of",
+                   mu, "points"))
+      for(isim in seq_len(nsim)) {
+        ni <- nn[isim]
+        ii <- sample.int(npix, size=ni, replace=TRUE, prob=lpix)
+        xx <- df$x[ii] + runif(ni, -dx, dx)
+        yy <- df$y[ii] + runif(ni, -dy, dy)
+        result[[isim]] <- ppp(xx, yy, window=win, check=FALSE)
+      }
+      if(nsim == 1 && drop) return(result[[1]]) else return(as.solist(result))
+    } else {
+      ## old code: thinning
+      if(nsim == 1) {
+        X <- runifpoispp(lmax, win)
+        if(X$n == 0) return(X)
         prob <- lambda[X]/lmax
         u <- runif(X$n)
         retain <- (u <= prob)
-        result[[isim]] <- X[retain, ]
+        X <- X[retain, ]
+        return(if(drop) X else solist(X))
       }
+      result <- runifpoispp(lmax, win, nsim=nsim, drop=FALSE)
+      for(isim in 1:nsim) {
+        X <- result[[isim]]
+        if(X$n > 0) {
+          prob <- lambda[X]/lmax
+          u <- runif(X$n)
+          retain <- (u <= prob)
+          result[[isim]] <- X[retain, ]
+        }
+      }
+      return(as.solist(result))
     }
-    return(as.solist(result))
   }
   stop(paste(sQuote("lambda"), "must be a constant, a function or an image"))
 }
@@ -530,8 +557,9 @@ rSSI <- function(r, n=Inf, win = square(1),
   if(nsim > 1) {
     result <- vector(mode="list", length=nsim)
     if(!win.given) win <- square(1)
+    pstate <- list()
     for(isim in 1:nsim) {
-      progressreport(isim, nsim)
+      pstate <- progressreport(isim, nsim, state=pstate)
       result[[isim]] <- rSSI(r=r, n=n, win=win, giveup=giveup, x.init=x.init,
                              f=f, fmax=fmax)
     }
@@ -842,6 +870,18 @@ rcell <- function(win=square(1), nx=NULL, ny=nx, ...,
 }
 
 
+thinjump <- function(n, p) {
+  # equivalent to which(runif(n) < p) for constant p
+  stopifnot(length(p) == 1)
+  if(p <= 0) return(integer(0))
+  if(p >= 1) return(seq_len(n))
+  if(p > 0.5) return(-thinjump(n, 1-p))
+  guessmaxlength <- ceiling(n * p + 2 * sqrt(n * p * (1-p)))
+  i <- .Call("thinjumpequal",
+             n, p, guessmaxlength)
+  return(i)
+}
+  
 rthin <- function(X, P, ..., nsim=1, drop=TRUE) {
   verifyclass(X, "ppp")
 
@@ -851,6 +891,22 @@ rthin <- function(X, P, ..., nsim=1, drop=TRUE) {
     result <- rep(list(X), nsim)
     names(result) <- paste("Simulation", 1:nsim)
     return(as.solist(result))
+  }
+
+  if(is.numeric(P) && length(P) == 1 && spatstat.options("fastthin")) {
+    # special algorithm for constant probability
+    result <- vector(mode="list", length=nsim)
+    for(isim in 1:nsim) {
+      retain <- thinjump(nX, P)
+      Y <- X[retain]
+      ## also handle offspring-to-parent map if present
+      if(!is.null(parentid <- attr(X, "parentid")))
+        attr(Y, "parentid") <- parentid[retain]
+      result[[isim]] <- Y
+    }
+    if(nsim == 1 && drop)
+      result <- result[[1]]
+    return(result)
   }
 
   if(is.numeric(P)) {

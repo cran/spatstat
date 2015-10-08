@@ -555,25 +555,22 @@
              model <- cmod$model %orifnull% dots$model %orifnull% "exponential"
              margs <- NULL
              if(model != "exponential") {
-                 if(!isNamespaceLoaded("RandomFields"))
-                     stop(paste("The package RandomFields is required:",
-                                "please type library(RandomFields)"),
-                          call.=FALSE)
-                 ## get the 'model generator' 
-                 modgen <- try(getExportedValue("RandomFields", 
-                                                paste0("RM", model)),
-                               silent=TRUE)
-                 if(inherits(modgen, "try-error") ||
-                    !inherits(modgen, "RMmodelgenerator"))
-                   stop(paste("Model", sQuote(model), "is not recognised"))
-                 attr(model, "modgen") <- modgen
-                 if(is.null(cmod)){
-                     margsnam <- names(formals(modgen))
-                     margsnam <- margsnam[!(margsnam %in% c("var", "scale"))]
-                     margs <- dots[nam %in% margsnam]
-                 } else{
-                     margs <- cmod[names(cmod)!="model"]
-                 }
+               kraever("RandomFields")
+               ## get the 'model generator' 
+               modgen <- try(getExportedValue("RandomFields", 
+                                              paste0("RM", model)),
+                             silent=TRUE)
+               if(inherits(modgen, "try-error") ||
+                  !inherits(modgen, "RMmodelgenerator"))
+                 stop(paste("Model", sQuote(model), "is not recognised"))
+               attr(model, "modgen") <- modgen
+               if(is.null(cmod)){
+                 margsnam <- names(formals(modgen))
+                 margsnam <- margsnam[!(margsnam %in% c("var", "scale"))]
+                 margs <- dots[nam %in% margsnam]
+               } else{
+                 margs <- cmod[names(cmod)!="model"]
+               }
              }
              if(length(margs)==0)
                  margs <- NULL
@@ -591,7 +588,7 @@
              ## For efficiency and to avoid need for RandomFields package
              integrand <- function(r,par,...) 2*pi*r*exp(par[1]*exp(-r/par[2]))
            } else {
-             ## use RandomFields 
+             kraever("RandomFields")
              integrand <- function(r,par,model,margs) {
                modgen <- attr(model, "modgen")
                if(length(margs) == 0) {
@@ -601,7 +598,7 @@
                                 append(list(var=par[1], scale=par[2]),
                                        margs))
                }
-               2*pi *r *exp(RFcov(model=mod, x=r))
+               2*pi *r *exp(RandomFields::RFcov(model=mod, x=r))
              }
            }
            nr <- length(rvals)
@@ -635,6 +632,7 @@
              ## For efficiency and to avoid need for RandomFields package
              gtheo <- exp(par[1]*exp(-rvals/par[2]))
            } else {
+             kraever("RandomFields")
              modgen <- attr(model, "modgen")
              if(length(margs) == 0) {
                mod <- modgen(var=par[1], scale=par[2])
@@ -643,7 +641,7 @@
                               append(list(var=par[1], scale=par[2]),
                                      margs))
              }
-             gtheo <- exp(RFcov(model=mod, x=rvals))
+             gtheo <- exp(RandomFields::RFcov(model=mod, x=rvals))
            }
            return(gtheo)
          },
@@ -652,10 +650,7 @@
              stop("Covariance function model should be specified by name")
            margs <- c(...)
            if(model != "exponential") {
-             if(!isNamespaceLoaded("RandomFields"))
-               stop(paste("The package RandomFields is required:",
-                          "please type library(RandomFields)"),
-                    call.=FALSE)
+             kraever("RandomFields")
              ## get the 'model generator' 
              modgen <- try(getExportedValue("RandomFields", 
                                             paste0("RM", model)),
@@ -684,21 +679,21 @@
   )
 
 spatstatClusterModelInfo <- function(name, onlyPCP = FALSE) {
+  if(inherits(name, "detpointprocfamily"))
+    return(spatstatDPPModelInfo(name))
   if(!is.character(name) || length(name) != 1)
     stop("Argument must be a single character string", call.=FALSE)
-  nama2 <- names(.Spatstat.ClusterModelInfoTable)
+  TheTable <- .Spatstat.ClusterModelInfoTable
+  nama2 <- names(TheTable)
   if(onlyPCP){
-      ok <- sapply(nama2,
-                    function(x) .Spatstat.ClusterModelInfoTable[[x]]$isPCP)
-  } else{
-      ok <- rep(TRUE, length(nama2))
-  }
-  nama2 <- nama2[ok]
+    ok <- sapply(TheTable, getElement, name="isPCP")
+    nama2 <- nama2[ok]
+  } 
   if(!(name %in% nama2))
     stop(paste(sQuote(name), "is not recognised;",
                "valid names are", commasep(sQuote(nama2))),
          call.=FALSE)
-  out <- .Spatstat.ClusterModelInfoTable[[name]]
+  out <- TheTable[[name]]
   return(out)
 }
 

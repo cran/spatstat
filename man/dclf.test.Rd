@@ -9,11 +9,11 @@
   test or the Maximum Absolute Deviation test for a spatial point pattern.
 }
 \usage{
-dclf.test(X, ..., alternative=c("two.sided", "less", "greater"),
-                      rinterval = NULL, use.theo=FALSE)
+dclf.test(X, \dots, alternative=c("two.sided", "less", "greater"),
+                  rinterval = NULL, scale=NULL, interpolate=FALSE)
 
-mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
-                      rinterval = NULL, use.theo=FALSE)
+mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
+                  rinterval = NULL, scale=NULL, interpolate=FALSE)
 }
 \arguments{
   \item{X}{
@@ -29,8 +29,8 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
     Useful arguments include \code{fun} to determine the summary
     function, \code{nsim} to specify the number of Monte Carlo
     simulations, \code{verbose=FALSE} to turn off the messages,
-    and \code{savefuns} or \code{savepatterns} to save the simulation
-    results.
+    \code{savefuns} or \code{savepatterns} to save the simulation
+    results, and \code{use.theory} described under Details. 
   }
   \item{alternative}{
     The alternative hypothesis. A character string.
@@ -41,10 +41,23 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
     over which the maximum absolute deviation, or the integral,
     will be computed for the test. A numeric vector of length 2.
   }
-  \item{use.theo}{
-    Logical value determining whether to compare the summary function
-    for the data to its theoretical value for CSR (\code{use.theo=TRUE})
-    or to the sample mean of simulations from CSR (\code{use.theo=FALSE}).
+  \item{scale}{
+    Optional. A function in the \R language which determines the
+    relative scale of deviations, as a function of
+    distance \eqn{r}. Summary function values for distance \code{r}
+    will be \emph{divided} by \code{scale(r)} before the
+    test statistic is computed.
+  }
+  \item{interpolate}{
+    Logical value specifying whether to calculate the \eqn{p}-value
+    by interpolation.
+    If \code{interpolate=FALSE} (the default), a standard Monte Carlo test
+    is performed, yielding a \eqn{p}-value of the form \eqn{(k+1)/(n+1)}
+    where \eqn{n} is the number of simulations and \eqn{k} is the number
+    of simulated values which are more extreme than the observed value.
+    If \code{interpolate=TRUE}, the \eqn{p}-value is calculated by
+    applying kernel density estimation to the simulated values, and
+    computing the tail probability for this estimated distribution.
   }
 }
 \details{
@@ -54,7 +67,8 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
 
   \code{dclf.test} performs the test advocated by Loosmore and Ford (2006)
   which is also described in Diggle (1986), Cressie (1991, page 667, equation
-  (8.5.42)) and Diggle (2003, page 14). See Baddeley et al (2014).
+  (8.5.42)) and Diggle (2003, page 14). See Baddeley et al (2014) for
+  detailed discussion.
 
   \code{mad.test} performs the \sQuote{global} or
   \sQuote{Maximum Absolute Deviation} test described by Ripley (1977, 1981).
@@ -133,6 +147,11 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
   It is also possible to specify a pointwise test (i.e. taking
   a single, fixed value of distance \eqn{r}) by specifing
   \code{rinterval = c(r,r)}.
+
+  The argument \code{use.theory} passed to \code{\link{envelope}}
+  determines whether to compare the summary function for the data
+  to its theoretical value for CSR (\code{use.theory=TRUE})
+  or to the sample mean of simulations from CSR (\code{use.theory=FALSE}).
 }
 \section{Handling Ties}{
   If the observed value of the test statistic is equal to one or more of the
@@ -147,7 +166,8 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
 \references{
   Baddeley, A., Diggle, P.J., Hardegen, A., Lawrence, T., Milne,
   R.K. and Nair, G. (2014) On tests of spatial pattern based on
-  simulation envelopes. \emph{Ecological Monographs}, to appear.
+  simulation envelopes. 
+  \emph{Ecological Monographs} \bold{84}(3) 477--489.
   
   Baddeley, A., Hardegen, A., Lawrence, T., Milne, R.K. and Nair,
   G. (2015) \emph{Pushing the envelope}. In preparation.
@@ -186,8 +206,8 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
 \author{
   Adrian Baddeley
   \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Andrew Hardegen.
+  \url{http://www.maths.uwa.edu.au/~adrian/},
+  Andrew Hardegen and Suman Rakshit.
 }
 \seealso{
   \code{\link{envelope}},
@@ -205,6 +225,11 @@ mad.test(X, ...,  alternative=c("two.sided", "less", "greater"),
 
   ## one-sided test
   ml <- mad.test(cells, Lest, verbose=FALSE, nsim=19, alternative="less")
+
+  ## scaled
+  mad.test(cells, Kest, verbose=FALSE, nsim=19,
+           rinterval=c(0.05, 0.2),
+           scale=function(r) { r })
 }
 \keyword{spatial}
 \keyword{htest}

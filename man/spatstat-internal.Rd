@@ -41,7 +41,6 @@
 \alias{bermantestEngine}
 \alias{bdrylength.xypolygon} 
 \alias{bdry.mask}
-\alias{bibliotheque}
 \alias{bind.ratfv}
 \alias{blankcoefnames}
 \alias{blockdiagmatrix}
@@ -61,6 +60,7 @@
 \alias{change.default.expand}          
 \alias{checkbigmatrix}          
 \alias{checkfields}          
+\alias{checksolve}          
 \alias{check.finite}
 \alias{check.hist.lengths}
 \alias{check.in.range}
@@ -72,7 +72,6 @@
 \alias{check.1.integer}
 \alias{check.1.real}
 \alias{check.range}
-\alias{check.rpanel}
 \alias{check.testfun}
 \alias{choptext}
 \alias{circticks}
@@ -113,6 +112,7 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{deltasuffstat}
+\alias{Deviant}
 \alias{dflt.redraw}
 \alias{densitycrossEngine}
 \alias{densitypointsEngine}
@@ -142,6 +142,8 @@
 \alias{do.istat}
 \alias{doMultiStraussHard}
 \alias{dotexpr.to.call}
+\alias{dppmFixAlgorithm}
+\alias{dppmFixIntensity}
 \alias{dropifsingle}
 \alias{dround}
 \alias{emptywindow}
@@ -150,6 +152,7 @@
 \alias{envelopeEngine}
 \alias{envelopeProgressData}
 \alias{envelopeTest}
+\alias{envelope.hasenvelope}
 \alias{envelope.matrix}
 \alias{equalpairs}          
 \alias{equalpairs.quad}          
@@ -228,6 +231,8 @@
 \alias{grid1index}
 \alias{grow.mask}
 \alias{gsubdot}
+\alias{hackglmmPQL}
+\alias{hasenvelope}
 \alias{HermiteCoefs}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
@@ -252,6 +257,7 @@
 \alias{impliedcoefficients}
 \alias{inject.expr}
 \alias{inpoint}
+\alias{insertinlist}     
 \alias{inside.range}     
 \alias{inside.triangle}     
 \alias{inside.xypolygon}     
@@ -301,6 +307,7 @@
 \alias{kppmComLik}
 \alias{kppmMinCon}
 \alias{kppmPalmLik}
+\alias{kraever}
 \alias{labels.ppm}
 \alias{least.common.multiple}
 \alias{levels.im}
@@ -365,6 +372,7 @@
 \alias{\%msub\%} %DoNotExport
 %NAMESPACE export("%msub%")
 \alias{mask2df}
+\alias{match.kernel}
 \alias{matcolall}
 \alias{matcolany}
 \alias{matcolsum}
@@ -373,6 +381,7 @@
 \alias{matrowany}
 \alias{matrowsum}
 \alias{maxflow}
+\alias{mctestSigtraceEngine}
 \alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
@@ -401,6 +410,7 @@
 \alias{nobjects.ppx}
 \alias{nobjects.psp}
 \alias{n.quad}
+\alias{nukernel}
 \alias{numalign}
 \alias{numeric.columns}
 \alias{nzpaste}
@@ -470,12 +480,15 @@
 \alias{print.colourmap}
 \alias{print.diagppm}
 \alias{print.distfun}
+\alias{print.detpointprocfamily}
+\alias{print.detpointprocfamilyfun}
 \alias{print.envelope}
 \alias{print.ewcdf}
 \alias{print.fasp}       
 \alias{print.fv}       
 \alias{print.fvfun}       
 \alias{print.funxy}       
+\alias{print.hasenvelope}       
 \alias{print.hierarchicalordering}
 \alias{print.hyperframe}
 \alias{print.influence.ppm}       
@@ -541,6 +554,8 @@
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
 \alias{reduceformula}
+\alias{reheat}
+\alias{relatively.prime}
 \alias{repair.image.xycoords}
 \alias{resolveEinfo}
 \alias{resolve.vargamma.shape}
@@ -645,6 +660,7 @@
 \alias{sort.im}
 \alias{spatstat.rawdata.location}
 \alias{spatstatClusterModelInfo}
+\alias{spatstatDPPModelInfo}
 \alias{spatstatLocator}
 \alias{spatstatRmhInfo}
 \alias{spatialCDFframe}
@@ -684,6 +700,7 @@
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
 \alias{there.is.no.try}
+\alias{thinjump}
 \alias{tilecentroids}        
 \alias{tileindex}        
 \alias{transradius}
@@ -774,7 +791,6 @@ bbEngine(\dots)
 bermantestEngine(model, covariate, which, alternative, \dots, modelname, covname, dataname)
 bdrylength.xypolygon(polly)
 bdry.mask(W)
-bibliotheque(nom, dont)
 bind.ratfv(x, numerator, denominator, labl, desc, preferred, ratio)
 blankcoefnames(x)
 blockdiagmatrix(\dots)
@@ -795,19 +811,19 @@ censtimeCDFest(o, cc, d, breaks, \dots,
      KM, RS, HAN, RAW, han.denom, tt, pmax)
 change.default.expand(x, newdefault)
 checkbigmatrix(n, m, fatal, silent)
-checkfields(X,L)          
+checkfields(X,L)
+checksolve(M, action, descrip, target)
 check.finite(x, context, xname, fatal, usergiven)
 check.hist.lengths(hist,breaks)
 check.in.range(x, r, fatal)
 check.named.list(x, nam, context, namopt)
 check.named.vector(x, nam, context, namopt)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
-check.nvector(v, npoints, fatal, things, naok, warn)
+check.nvector(v, npoints, fatal, things, naok, warn, vname)
 check.nmatrix(m, npoints, fatal, things, naok, squarematrix, matchto, warn)
 check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
 check.range(x, fatal)
-check.rpanel()
 check.testfun(f, f1, X)
 choptext(\dots, prefix)
 circticks(R, at, unit, start, clockwise, labels)
@@ -829,7 +845,7 @@ conform.ratfv(x)
 crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms, what)
-col.args.to.grey(x)
+col.args.to.grey(x, \dots)
 colouroutputs(x)
 colouroutputs(x) <- value
 commasep(x, join, flatten)
@@ -848,6 +864,7 @@ default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
 deltasuffstat(model, \dots, restrict, dataonly, force)
+Deviant(x, alternative, scaling)
 dflt.redraw(button, name, env)
 densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     weights, edge, varcov,
@@ -884,6 +901,8 @@ do.call.without(fun, \dots, avoid)
 do.istat(panel)
 doMultiStraussHard(iradii, hradii, types)
 dotexpr.to.call(expr, dot, evaluator)
+dppmFixIntensity(DPP, lambda, po)
+dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
 dropifsingle(x)
 dround(x)
 emptywindow(w)
@@ -893,21 +912,26 @@ envelopeEngine(X, fun, simul,
            nsim, nrank, \dots, 
            verbose, clipdata, 
            transform, global, ginterval, use.theory,
-           alternative,
+           alternative, scale,
            savefuns, savepatterns, saveresultof,
            weights,
            nsim2, VARIANCE, nSD,
            Yname, maxnerr, internal, cl,
            envir.user, expected.arg, do.pwrong)
-envelopeProgressData(X, fun, \dots, exponent, normalize, deflate)
+envelopeProgressData(X, fun, \dots, exponent,
+                     alternative, scale,
+                     normalize, deflate,
+                     save.envelope, savefuns, savepatterns)
 envelopeTest(X, \dots, exponent, alternative,
-            rinterval, use.theo, tie.rule,
+            rinterval, scale, tie.rule,
+            interpolate, save.interpolant,
             save.envelope, savefuns, savepatterns,
-            Xname, verbose, internal)
+            Xname, verbose)
+\method{envelope}{hasenvelope}(Y, \dots, Yname)
 \method{envelope}{matrix}(Y, \dots, rvals, observed, theory, funX,
-      nsim, nsim2, jsim, jsim.mean,
-      type, alternative, csr, use.theory, nrank, ginterval, nSD,
-      savefuns, check, Yname, do.pwrong, weights, precomputed)
+  nsim, nsim2, jsim, jsim.mean,
+  type, alternative, scale, csr, use.theory, nrank, ginterval, nSD,
+  savefuns, check, Yname, do.pwrong, weights, precomputed)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
@@ -988,6 +1012,9 @@ gridindex(x, y, xrange, yrange, nx, ny)
 grid1index(x, xrange, nx)
 grow.mask(M, xmargin=0, ymargin=xmargin)
 gsubdot(replacement, x)
+hackglmmPQL(fixed, random, family, data, correlation, weights,
+            control, niter, verbose, subset, \dots)
+hasenvelope(X, E)
 HermiteCoefs(order)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip,
@@ -996,7 +1023,7 @@ edgedefault)
 hierarchicalordering(i, s)
 hiermat(x, h)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
-hsvNA(h, s, v, \dots)
+hsvNA(h, s, v, alpha)
 IdenticalRows(i,j,a,b)
 identical.formulae(x,y)
 idorempty(w, r, caller)
@@ -1013,6 +1040,7 @@ impliedpresence(tags, formula, df, extranames=character(0))
 impliedcoefficients(object, tag)
 inject.expr(base, expr)
 inpoint(W)
+insertinlist(x, i, y)
 inside.range(x, r)
 inside.triangle(x, y, xx, yy)
 inside.xypolygon(pts, polly, test01, method)
@@ -1060,11 +1088,12 @@ Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
 kppmComLik(X, Xname, po, clusters, control, weightfun, rmax,
-           algorithm, \dots)
+           algorithm, DPP, \dots)
 kppmMinCon(X, Xname, po, clusters, control, statistic, statargs,
-           algorithm, \dots)
+           algorithm, DPP, \dots)
 kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax, 
-           algorithm, \dots)
+           algorithm, DPP, \dots)
+kraever(package, fatal)
 \method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
@@ -1110,7 +1139,7 @@ prettydiscrete(x, n)
 \method{plot}{localpcfmatrix}(x, \dots)
 putSpatstatVariable(name, value)
 \method{[}{localpcfmatrix}(x, i, \dots)
-\method{[}{pp3}(x, i, \dots)
+\method{[}{pp3}(x, i, drop, \dots)
 lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
@@ -1137,6 +1166,7 @@ x \%msub\% i
 markreplicateop(x, n)
 x \%mrep\% n
 mask2df(w)
+match.kernel(kernel)
 matcolall(x)
 matcolany(x)
 matcolsum(x)            
@@ -1145,6 +1175,8 @@ matrowall(x)
 matrowany(x)
 matrowsum(x)
 maxflow(costm)
+mctestSigtraceEngine(R, devdata, devsim, \dots,
+     interpolate, confint, alpha, exponent, unitname)
 meanlistfv(z, \dots)
 meanX.owin(w)            
 meanY.owin(w)
@@ -1185,6 +1217,7 @@ nobjects(x)
 \method{nobjects}{ppx}(x)
 \method{nobjects}{psp}(x)
 n.quad(Q)
+nukernel(r, m, kernel)
 numalign(i, nmax, zero)
 numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
@@ -1255,7 +1288,7 @@ polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 \method{ppm}{default}(Q, trend, interaction,
        \dots, covariates, data, covfunargs, subset, 
-       correction, rbord, use.gam, method, forcefit, project,
+       correction, rbord, use.gam, method, forcefit, emend, project,
        prior.mean, prior.var,
        nd, eps, gcontrol, nsim, nrmh, start, control,
        verb, callstring)
@@ -1284,12 +1317,15 @@ primesbelow(nmax)
 \method{print}{colourmap}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{distfun}(x, \dots)
+\method{print}{detpointprocfamily}(x, \dots)
+\method{print}{detpointprocfamilyfun}(x, \dots)
 \method{print}{envelope}(x, \dots)
 \method{print}{ewcdf}(x, digits, \dots)
 \method{print}{fasp}(x, \dots)
 \method{print}{funxy}(x, \dots)
 \method{print}{fv}(x, \dots, tight)
 \method{print}{fvfun}(x, \dots)
+\method{print}{hasenvelope}(x, \dots)
 \method{print}{hierarchicalordering}(x, \dots)
 \method{print}{hyperframe}(x, \dots)
 \method{print}{influence.ppm}(x, \dots)
@@ -1354,10 +1390,12 @@ recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 reduceformula(fmla, deletevar, verbose)
+reheat(model, invtemp)
+relatively.prime(n, m)
 repair.image.xycoords(x)
-resolveEinfo(x, what, fallback, warn)
+resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
-rgbNA(red, green, blue, \dots)
+rgbNA(red, green, blue, alpha, maxColorValue)
 rhs.of.formula(x, tilde)
 rhohatEngine(model, covariate, reference, volume, \dots,
                weights, method, horvitz, smoother, resolution, 
@@ -1403,10 +1441,10 @@ repair.old.factor.image(x)
 reincarnate.interact(object)
 resid4plot(RES, plot.neg, plot.smooth,
            spacing, outer, srange, monochrome, main,
-           xlab, ylab, rlab, \dots)
+           xlab, ylab, rlab, col.neg, col.smooth, \dots)
 resid1plot(RES, opt, plot.neg, plot.smooth,
               srange, monochrome, main,
-              add, show.all, do.plot, \dots)
+              add, show.all, do.plot, col.neg, col.smooth, \dots)
 resid1panel(observedX, observedV,
             theoreticalX, theoreticalV, theoreticalSD,
             xlab,ylab, \dots, do.plot)
@@ -1427,7 +1465,8 @@ rmhResolveTypes(model, start, control)
 rmhSnoopEnv(Xinit, Wclip, R)
 \method{rmhcontrol}{rmhcontrol}(\dots) 
 \method{rmhcontrol}{list}(\dots) 
-rmhEngine(InfoList, \dots, verbose, kitchensink, preponly, snoop) 
+rmhEngine(InfoList, \dots, verbose, kitchensink, preponly, snoop,
+                           overrideXstart, overrideclip) 
 \method{rmhmodel}{rmhmodel}(model, \dots) 
 \method{rmhstart}{rmhstart}(start, \dots) 
 \method{rmhstart}{list}(start, \dots) 
@@ -1480,6 +1519,7 @@ smoothpointsEngine(x, values, sigma, \dots,
 \method{sort}{im}(x, \dots)
 spatstat.rawdata.location(\dots)
 spatstatClusterModelInfo(name, onlyPCP)
+spatstatDPPModelInfo(model)
 spatstatLocator(n, ...)
 spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
@@ -1520,6 +1560,7 @@ termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 there.is.no.try(\dots)
+thinjump(n, p)
 tilecentroids(W, nx, ny)
 tileindex(x, y, Z)
 transradius(W)
