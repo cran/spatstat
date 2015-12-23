@@ -1,6 +1,9 @@
 \name{ppm.ppp}
 \alias{ppm.ppp}
 \alias{ppm.quad}
+\concept{point process model}
+\concept{Poisson point process}
+\concept{Gibbs point process}
 \title{
   Fit Point Process Model to Point Pattern Data
 }
@@ -230,27 +233,17 @@
       class \code{"interact"} which is initialised in a very similar way to the
       usage of family objects in \code{\link{glm}} and \code{gam}.
       The models currently available are:
-      \code{\link{Poisson}},
-      \code{\link{AreaInter}},
-      \code{\link{BadGey}},
-      \code{\link{Concom}},
-      \code{\link{DiggleGatesStibbard}},
-      \code{\link{DiggleGratton}},
-      \code{\link{Fiksel}},
-      \code{\link{Geyer}},
-      \code{\link{Hardcore}},
-      \code{\link{LennardJones}},
-      \code{\link{MultiStrauss}},
-      \code{\link{MultiStraussHard}},
-      \code{\link{OrdThresh}}, 
-      \code{\link{Ord}},
-      \code{\link{Pairwise}},
-      \code{\link{PairPiece}},
-      \code{\link{Saturated}},
-      \code{\link{SatPiece}},
-      \code{\link{Softcore}},
-      \code{\link{Strauss}} and 
-      \code{\link{StraussHard}}.
+      \code{\link{AreaInter}}, \code{\link{BadGey}},
+ \code{\link{Concom}}, \code{\link{DiggleGatesStibbard}},
+ \code{\link{DiggleGratton}}, \code{\link{Fiksel}},
+ \code{\link{Geyer}}, \code{\link{Hardcore}}, \code{\link{Hybrid}},
+ \code{\link{LennardJones}}, \code{\link{MultiStrauss}},
+ \code{\link{MultiStraussHard}}, \code{\link{OrdThresh}},
+ \code{\link{Ord}}, \code{\link{Pairwise}}, \code{\link{PairPiece}},
+ \code{\link{Penttinen}}, \code{\link{Poisson}},
+ \code{\link{Saturated}}, \code{\link{SatPiece}},
+ \code{\link{Softcore}}, \code{\link{Strauss}},
+ \code{\link{StraussHard}} and \code{\link{Triplets}}.
       See the examples below.
       It is also possible to combine several interactions
       using \code{\link{Hybrid}}.
@@ -597,35 +590,25 @@
   \code{\link{ppp}} and \code{\link{quadscheme}}
   for constructing data.
   
-  Interactions: 
-      \code{\link{Poisson}},
-      \code{\link{AreaInter}},
-      \code{\link{BadGey}},
-      \code{\link{DiggleGatesStibbard}},
-      \code{\link{DiggleGratton}},
-      \code{\link{Geyer}},
-      \code{\link{Fiksel}},
-      \code{\link{Hardcore}},
-      \code{\link{Hybrid}},
-      \code{\link{LennardJones}},
-      \code{\link{MultiStrauss}},
-      \code{\link{MultiStraussHard}},
-      \code{\link{OrdThresh}}, 
-      \code{\link{Ord}},
-      \code{\link{Pairwise}},
-      \code{\link{PairPiece}},
-      \code{\link{Saturated}},
-      \code{\link{SatPiece}},
-      \code{\link{Softcore}},
-      \code{\link{Strauss}} and 
-      \code{\link{StraussHard}}.
+  Interactions:
+  \code{\link{AreaInter}}, \code{\link{BadGey}},
+ \code{\link{Concom}}, \code{\link{DiggleGatesStibbard}},
+ \code{\link{DiggleGratton}}, \code{\link{Fiksel}},
+ \code{\link{Geyer}}, \code{\link{Hardcore}}, \code{\link{Hybrid}},
+ \code{\link{LennardJones}}, \code{\link{MultiStrauss}},
+ \code{\link{MultiStraussHard}}, \code{\link{OrdThresh}},
+ \code{\link{Ord}}, \code{\link{Pairwise}}, \code{\link{PairPiece}},
+ \code{\link{Penttinen}}, \code{\link{Poisson}},
+ \code{\link{Saturated}}, \code{\link{SatPiece}},
+ \code{\link{Softcore}}, \code{\link{Strauss}},
+ \code{\link{StraussHard}} and \code{\link{Triplets}}.
 
-      See \code{\link{profilepl}} for advice on
-      fitting nuisance parameters in the interaction,
-      and \code{\link{ippm}} for irregular parameters in the trend.
+  See \code{\link{profilepl}} for advice on
+  fitting nuisance parameters in the interaction,
+  and \code{\link{ippm}} for irregular parameters in the trend.
 
-      See \code{\link{valid.ppm}} and \code{\link{emend.ppm}} for
-      ensuring the fitted model is a valid point process.
+  See \code{\link{valid.ppm}} and \code{\link{emend.ppm}} for
+  ensuring the fitted model is a valid point process.
 }
 \section{Warnings}{
   The implementation of the Huang-Ogata method is experimental;
@@ -776,11 +759,13 @@ coef(summary(fit1))
  # using the periodic correction.
 
 
-# Compare Maximum Pseudolikelihood and Huang-Ogata fits:
+# Compare Maximum Pseudolikelihood, Huang-Ogata and VB fits:
 \dontrun{ppm(swedishpines, ~1, Strauss(9))}
 
 \dontrun{ppm(swedishpines, ~1, Strauss(9), method="ho")}
 \testonly{ppm(swedishpines, ~1, Strauss(9), method="ho", nd=16, nsim=8)}
+
+ppm(swedishpines, ~1, Strauss(9), method="VBlogi")
 
  # COVARIATES
  #
@@ -826,11 +811,10 @@ ppm(X, ~x + f, covariates=list(f=f), covfunargs=list(a=1/2))
 \testonly{b <- ppm(ama, ~ marks * polynom(x,y,2), Poisson(), nd=16)}
 
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+ Rolf Turner \email{r.turner@auckland.ac.nz}
+ and Ege Rubak \email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{models}

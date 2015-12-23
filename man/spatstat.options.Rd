@@ -353,7 +353,7 @@
     \item{exactdt.checks.data}{
       Logical.
       Do not change this value, unless you are
-      Adrian Baddeley. 
+      Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}. 
     }
     \item{fasteval}{
       One of the strings \code{'off'}, \code{'on'} or
@@ -398,10 +398,10 @@
   spatstat.options(oldopt)
 
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}

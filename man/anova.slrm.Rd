@@ -50,11 +50,11 @@
   fit1 <- slrm(X ~ x+y)
   anova(fit0, fit1, test="Chi")
 }
-\author{Adrian Baddeley
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
   \email{adrian@maths.uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{models}

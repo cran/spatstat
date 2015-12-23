@@ -53,11 +53,11 @@ rknn(n, k = 1, d = 2, lambda = 1)
   \emph{Statistics for spatial data}.
   John Wiley and Sons, 1991.
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \examples{
   x <- seq(0, 5, length=20)

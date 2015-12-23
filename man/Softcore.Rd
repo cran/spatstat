@@ -118,11 +118,11 @@ which can then be fitted to point pattern data.
    ppm(cells, ~1, Softcore(kappa=0.5), correction="isotropic")
    # fit the stationary Soft Core process to `cells'
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{models}

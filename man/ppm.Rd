@@ -1,6 +1,9 @@
 \name{ppm}
 \alias{ppm}
 \alias{ppm.formula}
+\concept{point process model}
+\concept{Poisson point process}
+\concept{Gibbs point process}
 \title{
   Fit Point Process Model to Data
 }
@@ -53,6 +56,12 @@
   The model may include
   spatial trend, interpoint interaction, and dependence on covariates.
 
+  The model fitted by \code{ppm}
+  is either a Poisson point process (in which different points
+  do not interact with each other) or a Gibbs point process (in which
+  different points typically inhibit each other).
+  For clustered point process models, use \code{\link{kppm}}.
+
   The function \code{ppm} is generic, with methods for
   the classes \code{formula}, \code{ppp} and \code{quad}.
   This page describes the method for a \code{formula}.
@@ -92,31 +101,20 @@
   are defined by the argument \code{interaction}. This is an object of
   class \code{"interact"} which is initialised in a very similar way to the
   usage of family objects in \code{\link{glm}} and \code{gam}.
-  The models currently available are:
-  \code{\link{Poisson}},
-  \code{\link{AreaInter}},
-  \code{\link{BadGey}},
-  \code{\link{Concom}},
-  \code{\link{DiggleGatesStibbard}},
-  \code{\link{DiggleGratton}},
-  \code{\link{Fiksel}},
-  \code{\link{Geyer}},
-  \code{\link{Hardcore}},
-  \code{\link{LennardJones}},
-  \code{\link{MultiStrauss}},
-  \code{\link{MultiStraussHard}},
-  \code{\link{OrdThresh}}, 
-  \code{\link{Ord}},
-  \code{\link{Pairwise}},
-  \code{\link{PairPiece}},
-  \code{\link{Penttinen}},
-  \code{\link{Saturated}},
-  \code{\link{SatPiece}},
-  \code{\link{Softcore}},
-  \code{\link{Strauss}} and 
-  \code{\link{StraussHard}}.
+  The interaction models currently available are:
+  \code{\link{AreaInter}}, \code{\link{BadGey}},
+ \code{\link{Concom}}, \code{\link{DiggleGatesStibbard}},
+ \code{\link{DiggleGratton}}, \code{\link{Fiksel}},
+ \code{\link{Geyer}}, \code{\link{Hardcore}}, \code{\link{Hybrid}},
+ \code{\link{LennardJones}}, \code{\link{MultiStrauss}},
+ \code{\link{MultiStraussHard}}, \code{\link{OrdThresh}},
+ \code{\link{Ord}}, \code{\link{Pairwise}}, \code{\link{PairPiece}},
+ \code{\link{Penttinen}}, \code{\link{Poisson}},
+ \code{\link{Saturated}}, \code{\link{SatPiece}},
+ \code{\link{Softcore}}, \code{\link{Strauss}},
+ \code{\link{StraussHard}} and \code{\link{Triplets}}.
   See the examples below.
-  It is also possible to combine several interactions
+  Note that it is possible to combine several interactions
   using \code{\link{Hybrid}}.
  
   If \code{interaction} is missing or \code{NULL},
@@ -291,36 +289,28 @@
   \code{\link{ppp}} and \code{\link{quadscheme}}
   for constructing data.
   
-  Interactions: 
-      \code{\link{Poisson}},
-      \code{\link{AreaInter}},
-      \code{\link{BadGey}},
-      \code{\link{DiggleGatesStibbard}},
-      \code{\link{DiggleGratton}},
-      \code{\link{Geyer}},
-      \code{\link{Fiksel}},
-      \code{\link{Hardcore}},
-      \code{\link{Hybrid}},
-      \code{\link{LennardJones}},
-      \code{\link{MultiStrauss}},
-      \code{\link{MultiStraussHard}},
-      \code{\link{OrdThresh}}, 
-      \code{\link{Ord}},
-      \code{\link{Pairwise}},
-      \code{\link{PairPiece}},
-      \code{\link{Penttinen}},
-      \code{\link{Saturated}},
-      \code{\link{SatPiece}},
-      \code{\link{Softcore}},
-      \code{\link{Strauss}} and 
-      \code{\link{StraussHard}}.
+  Interactions: \code{\link{AreaInter}}, \code{\link{BadGey}},
+ \code{\link{Concom}}, \code{\link{DiggleGatesStibbard}},
+ \code{\link{DiggleGratton}}, \code{\link{Fiksel}},
+ \code{\link{Geyer}}, \code{\link{Hardcore}}, \code{\link{Hybrid}},
+ \code{\link{LennardJones}}, \code{\link{MultiStrauss}},
+ \code{\link{MultiStraussHard}}, \code{\link{OrdThresh}},
+ \code{\link{Ord}}, \code{\link{Pairwise}}, \code{\link{PairPiece}},
+ \code{\link{Penttinen}}, \code{\link{Poisson}},
+ \code{\link{Saturated}}, \code{\link{SatPiece}},
+ \code{\link{Softcore}}, \code{\link{Strauss}},
+ \code{\link{StraussHard}} and \code{\link{Triplets}}.
 
-      See \code{\link{profilepl}} for advice on
-      fitting nuisance parameters in the interaction,
-      and \code{\link{ippm}} for irregular parameters in the trend.
+  See \code{\link{profilepl}} for advice on
+  fitting nuisance parameters in the interaction,
+  and \code{\link{ippm}} for irregular parameters in the trend.
 
-      See \code{\link{valid.ppm}} and \code{\link{project.ppm}} for
-      ensuring the fitted model is a valid point process.
+  See \code{\link{valid.ppm}} and \code{\link{project.ppm}} for
+  ensuring the fitted model is a valid point process.
+
+  See \code{\link{kppm}} for fitting Cox point process models
+  and cluster point process models, and \code{\link{dppm}} for fitting
+  determinantal point process models.
 }
 \examples{
  # fit the stationary Poisson process
@@ -383,11 +373,13 @@ coef(summary(fit1))
  # using the periodic correction.
 
 
-# Compare Maximum Pseudolikelihood and Huang-Ogata fits:
+# Compare Maximum Pseudolikelihood, Huang-Ogata and Variational Bayes fits:
 \dontrun{ppm(swedishpines ~ 1, Strauss(9))}
 
 \dontrun{ppm(swedishpines ~ 1, Strauss(9), method="ho")}
 \testonly{ppm(swedishpines ~ 1, Strauss(9), method="ho", nd=16, nsim=8)}
+
+ppm(swedishpines ~ 1, Strauss(9), method="VBlogi")
 
  # COVARIATES
  #
@@ -433,13 +425,10 @@ ppm(X ~ x + f, covfunargs=list(a=1/2))
 \testonly{b <- ppm(ama ~  marks * polynom(x,y,2), Poisson(), nd=16)}
 
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak
-  \email{rubak@math.aau.dk}
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+ Rolf Turner \email{r.turner@auckland.ac.nz}
+ and Ege Rubak \email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{models}

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.187 $    $Date: 2015/10/01 10:23:50 $
+#    $Revision: 1.195 $    $Date: 2015/11/21 02:03:24 $
 #
 #
 matrowsum <- function(x) {
@@ -726,18 +726,28 @@ check.nmatrix <- function(m, npoints=NULL, fatal=TRUE, things="data points",
   return(TRUE)
 }
 
-check.named.vector <- function(x, nam, context="", namopt=character(0)) {
+check.named.vector <- function(x, nam, context="", namopt=character(0),
+                               onError=c("fatal", "null")) {
   xtitle <- deparse(substitute(x))
-  check.named.thing(x, nam, namopt, sQuote(xtitle),
-                    is.numeric(x), "vector", context)
+  onError <- match.arg(onError)
+  problem <- check.named.thing(x, nam, namopt, sQuote(xtitle),
+                               is.numeric(x), "vector", context,
+                               fatal=(onError == "fatal"))
+  if(length(problem) > 0 && onError == "null")
+    return(NULL)
   opt <- namopt %in% names(x)
   return(x[c(nam, namopt[opt])])
 }
 
-check.named.list <- function(x, nam, context="", namopt=character(0)) {
+check.named.list <- function(x, nam, context="", namopt=character(0),
+                               onError=c("fatal", "null")) {
   xtitle <- deparse(substitute(x))
-  check.named.thing(x, nam, namopt, sQuote(xtitle),
-                    is.list(x), "list", context)  
+  onError <- match.arg(onError)
+  problem <- check.named.thing(x, nam, namopt, sQuote(xtitle),
+                               is.list(x), "list", context,
+                               fatal=(onError == "fatal"))
+  if(length(problem) > 0 && onError == "null")
+    return(NULL)
   opt <- namopt %in% names(x)
   return(x[c(nam, namopt[opt])])
 }
@@ -1017,7 +1027,7 @@ cat.factor <- function (..., recursive=FALSE) {
 nzpaste <- function(..., sep=" ", collapse=NULL) {
   # Paste only the non-empty strings
   v <- list(...)
-  ok <- unlist(lapply(v, function(z) {any(nzchar(z))}))
+  ok <- sapply(lapply(v, nzchar), any)
   do.call("paste", append(v[ok], list(sep=sep, collapse=collapse)))
 }
 
@@ -1029,11 +1039,15 @@ substringcount <- function(x, y) {
   return(nhits)
 }
 
-is.parseable <- function(x) {
-  unlist(lapply(x, function(z) {
+is.parseable <- local({
+  is.parseable <- function(x) sapply(x, canparse)
+
+  canparse <- function(z) {
     !inherits(try(parse(text=z), silent=TRUE), "try-error")
-  }))
-}
+  }
+
+  is.parseable
+})
 
 make.parseable <- function(x) {
   if(all(is.parseable(x))) x else make.names(x)
@@ -1042,7 +1056,8 @@ make.parseable <- function(x) {
 # paste(expression(..)) seems to be broken
 
 paste.expr <- function(x) {
-  unlist(lapply(x, function(z) { paste(deparse(z), collapse="") }))
+  unlist(lapply(lapply(x, deparse),
+                paste, collapse=""))
 }
 
 #   gsub(".", replacement, x) but only when "." appears as a variable
@@ -1131,6 +1146,16 @@ codetime <- local({
 
 # defines the current favorite algorithm for 'order' 
 fave.order <- function(x) { sort.list(x, method="quick", na.last=NA) }
+
+# order statistic (for use in lapply calls) 
+orderstats <- function(x, k, decreasing=FALSE) {
+  if(decreasing) sort(x, decreasing=TRUE, na.last=TRUE)[k] else sort(x)[k]
+}
+
+# which value is k-th smallest
+orderwhich <- function(x, k, decreasing=FALSE) {
+  if(decreasing) order(x, decreasing=TRUE, na.last=TRUE)[k] else order(x)[k]
+}
 
 # convert any appropriate subset index for a point pattern
 # to a logical vector
@@ -1588,4 +1613,43 @@ insertinlist <- function(x, i, y) {
   return(z)
 }
 
-  
+equispaced <- function(z, reltol=0.001) {
+  dz <- diff(z)
+  return(diff(range(dz)) < reltol * mean(dz))
+}
+
+fastFindInterval <- function(x, b, labels=FALSE, reltol=0.001) {
+  nintervals <- length(b) - 1
+  nx <- length(x)
+  if(nx == 0)
+    return(rep(0, nintervals))
+  ##
+  if(equispaced(b, reltol)) {
+    ## breaks are equally spaced
+    zz <- .C("fastinterv",
+             x          = as.double(x),
+             n          = as.integer(nx),
+             brange     = as.double(range(b)),
+             nintervals = as.integer(nintervals),
+             y          = as.integer(integer(nx))
+             )
+    y <- zz$y
+  } else {
+    ## use R's interval search algorithm
+    y <- findInterval(x, b, rightmost.closed=TRUE)
+  }
+  if(labels) {
+    blab <- paste0("[",
+                   b[1:nintervals],
+                   ",",
+                   b[-1],
+                   c(rep(")", nintervals-1), "]"))
+    y <- as.integer(y)
+    levels(y) <- as.character(blab)
+    class(y) <- "factor"
+  }
+  return(y)
+}
+
+variablesintext <- function(x) all.vars(as.expression(parse(text=x)))
+

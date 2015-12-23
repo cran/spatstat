@@ -37,11 +37,11 @@
   Y <- psp(runif(5), runif(5), runif(5), runif(5),  window=owin())
   append.psp(X,Y)
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{manip}

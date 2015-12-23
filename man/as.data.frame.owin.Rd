@@ -45,13 +45,13 @@
   and possibly other columns.
 }
 \author{
-Adrian Baddeley
-\email{Adrian.Baddeley@uwa.edu.au}
-\url{http://www.maths.uwa.edu.au/~adrian/}
-Rolf Turner
-\email{r.turner@auckland.ac.nz}
-and Ege Rubak
-\email{rubak@math.aau.dk}
+Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+
+
+Rolf Turner \email{r.turner@auckland.ac.nz}
+
+and Ege Rubak \email{rubak@math.aau.dk}
+
 }
 \seealso{
   \code{\link{as.data.frame.im}}

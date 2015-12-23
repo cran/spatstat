@@ -94,11 +94,11 @@ project.ppm(object, \dots, fatal=FALSE, trace=FALSE)
 \value{
   Another point process model (object of class \code{"ppm"}).
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \seealso{
   \code{\link{ppm}},

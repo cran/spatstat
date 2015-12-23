@@ -1,3 +1,26 @@
+## tests/sigtraceprogress.R
+## Tests of *.sigtrace and *.progress
+## $Revision: 1.2 $ $Date: 2015/12/18 08:29:44 $
+
+require(spatstat)
+local({
+  plot(dclf.sigtrace(redwood, nsim=19, alternative="greater", rmin=0.02,
+                     verbose=FALSE))
+  plot(dclf.progress(redwood, nsim=19, alternative="greater", rmin=0.02,
+                     verbose=FALSE))
+  plot(dg.sigtrace(redwood, nsim=5, alternative="greater", rmin=0.02,
+                     verbose=FALSE))
+  plot(dg.progress(redwood, nsim=5, alternative="greater", rmin=0.02,
+                   verbose=FALSE))
+  ## test 'leave-two-out' algorithm
+  a <- dclf.sigtrace(redwood, Lest, nsim=9, use.theory=FALSE, leaveout=2,
+                     verbose=FALSE)
+  aa <- dclf.progress(redwood, Lest, nsim=9, use.theory=FALSE, leaveout=2,
+                      verbose=FALSE)
+  b <- dg.sigtrace(redwood, Lest, nsim=5, use.theory=FALSE, leaveout=2)
+  bb <- dg.progress(redwood, Lest, nsim=5, use.theory=FALSE, leaveout=2,
+                    verbose=FALSE)
+})
 # nndist.R
 # Check that nndist and nnwhich give
 # results consistent with direct calculation from pairdist
@@ -1985,7 +2008,7 @@ parres(mod2, "x")
 #
 # Tests for lpp code
 #
-#  $Revision: 1.2 $  $Date: 2013/01/23 08:20:41 $
+#  $Revision: 1.3 $  $Date: 2015/12/07 10:36:03 $
 
 
 require(spatstat)
@@ -2005,6 +2028,61 @@ local({
   # check empty patterns OK
   X <- runiflpp(0, simplenet)
   print(X)
+  
+  ## nearest neighbour distances
+  eps <- sqrt(.Machine$double.eps)
+  f <- function(mat,k) { apply(mat, 1, function(z,n) { sort(z)[n]  }, n=k+1) }
+  g <- function(mat,k) { apply(mat, 1, function(z,n) { order(z)[n] }, n=k+1) }
+
+  XX <- spiders
+  nn <- nndist(XX)
+  nnP <- f(pairdist(XX), 1)
+  if(any(abs(nn - nnP) > eps))
+    stop("nndist.lpp does not agree with pairdist.lpp")
+
+  nw <- nnwhich(XX)
+  nwP <- g(pairdist(XX), 1)
+  if(any(nw != nwP))
+    stop("nnwhich.lpp does not agree with pairdist")
+
+  ZZ <- split(chicago)
+  XX <- ZZ$damage
+  YY <- ZZ$assault
+  op <- spatstat.options(Cnncrosslpp=FALSE)
+  a <- nncross(XX, YY)
+  spatstat.options(Cnncrosslpp=TRUE)
+  b <- nncross(XX, YY)
+  if(any(a$which != b$which))
+    stop("Inconsistent values of nncross.lpp()$which from different C code")
+  if(max(abs(a$dist - b$dist)) > eps)
+    stop("Inconsistent values of nncross.lpp()$dist from different C code")
+
+  spatstat.options(Cnncrosslpp=TRUE)
+  b2 <- nncross(XX, YY, k=1:2, what="which")
+  if(any(b2$which.1 != b$which))
+    stop("inconsistent values of nncross.lpp()$which from k=1:2 and k=1")
+  a2 <- nncross(XX, YY, k=1:2, what="dist")
+  if(max(abs(a2$dist.1 - a$dist)) > eps)
+    stop("Inconsistent values of nncross.lpp()$dist from k=1:2 and k=1")
+
+  spatstat.options(Cnncrosslpp=TRUE)
+  ii <- seq_len(npoints(XX))
+  w1 <- nnwhich(XX)
+  w2 <- nncross(XX, XX, iX=ii, iY=ii, what="which")
+  w3 <- nncross(XX, XX, iX=ii, iY=ii, what="which", method="interpreted")
+  if(any(w1 != w2))
+    stop("nnwhich.lpp disagrees with nncross.lpp(iX, iY)")
+  if(any(w2 != w3))
+    stop("Different results for nncross.lpp(iX, iY, 'which') using R and C")
+  d1 <- nndist(XX)
+  d2 <- nncross(XX, XX, iX=ii, iY=ii, what="dist")
+  d3 <- nncross(XX, XX, iX=ii, iY=ii, what="dist", method="interpreted")
+  if(max(abs(d1-d2)) > eps)
+    stop("nndist.lpp disagrees with nncross.lpp(iX, iY)")
+  if(max(abs(d2-d3)) > eps)
+    stop("Different results for nncross.lpp(iX, iY, 'dist') using R and C")
+  
+  spatstat.options(op)
 })
 
 #
@@ -2018,6 +2096,21 @@ local({
 require(spatstat)
 
 local({
+
+  # test all cases of density.ppp
+  
+  tryit <- function(...) {
+    Z <- density(cells, ..., at="pixels")
+    Z <- density(cells, ..., at="points")
+    return(invisible(NULL))
+  }
+  
+  tryit(0.05)
+  tryit(0.05, diggle=TRUE)
+  tryit(0.05, se=TRUE)
+  tryit(varcov=diag(c(0.05^2, 0.07^2)))
+  tryit(0.05, weights=data.frame(a=1:42,b=42:1))
+  tryit(0.05, weights=expression(x))
 
   lam <- density(redwood)
   K <- Kinhom(redwood, lam)
@@ -2038,6 +2131,12 @@ local({
   pants(casecontrol=FALSE,at="points")
   pants(relative=TRUE,at="points")
   pants(casecontrol=FALSE, relative=TRUE,at="points")
+
+
+  Z <- Smooth(longleaf, 5, diggle=TRUE)
+  Z <- Smooth(unmark(longleaf) %mark% 1, 5)
+
+  Z <- Smooth(longleaf, 1e-6) # generates warning about small bandwidth
 })
 #
 # tests/slrm.R
@@ -2449,13 +2548,13 @@ local({
     warning("check.testfun fails to recognise mark product function")
   check.testfun(fs, X=longleaf)
   
-  ## test all is well in markcorrint -> Kinhom 
-  MA <- markcorrint(amacrine,function(m1,m2){m1==m2})
+  ## test all is well in Kmark -> Kinhom 
+  MA <- Kmark(amacrine,function(m1,m2){m1==m2})
   set.seed(42)
   AR <- rlabel(amacrine)
-  MR <- markcorrint(AR,function(m1,m2){m1==m2})
+  MR <- Kmark(AR,function(m1,m2){m1==m2})
   if(isTRUE(all.equal(MA,MR)))
-    stop("markcorrint unexpectedly ignores marks")
+    stop("Kmark unexpectedly ignores marks")
 })
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
@@ -2478,4 +2577,13 @@ local({
   cross.ijd <- crosspairs(on, off, r, what="ijd")
   stopifnot(identical(cross.ij, cross.all[c("i","j")]))
   stopifnot(identical(cross.ijd, cross.all[c("i","j","d")]))
+
+  # Rasmus' example
+  R <- 0.04
+  U <- as.ppp(gridcenters(owin(), 50, 50), W=owin())
+  cp <- crosspairs(U, U, R)
+  G <- matrix(0, npoints(U), npoints(U))
+  G[cbind(cp$i, cp$j)] <- 1
+  if(!isSymmetric(G))
+    stop("crosspairs is not symmetric in Rasmus example")
 })

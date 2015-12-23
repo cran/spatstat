@@ -85,11 +85,11 @@ rthin(X, P, \dots, nsim=1, drop=TRUE)
   Z <- as.im(f, redwood$window)
   Y <- rthin(redwood, Z)
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{datagen}

@@ -10,10 +10,18 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:43-49
+### code chunk number 2: updates.Rnw:41-45
 ###################################################
 z <- read.table("packagesizes.txt", header=TRUE)
 z$date <- as.Date(z$date)
+changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
+newdat <- changes[["ndatasets"]]
+
+
+###################################################
+### code chunk number 3: updates.Rnw:54-59
+###################################################
+options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
   yvals <- eval(as.expression(fmla[[2]]), envir=dat)
   plot(fmla, ..., data=dat, type="l", xlab="", lwd=2, ylim=c(0, max(yvals)))
@@ -21,13 +29,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:51-52
-###################################################
-options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
-
-
-###################################################
-### code chunk number 4: updates.Rnw:58-63
+### code chunk number 4: updates.Rnw:65-70
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -38,16 +40,16 @@ text(as.Date("2013-01-01"), 50, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:3530-3534
+### code chunk number 5: updates.Rnw:575-579
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
-nbugssince <- nrow(news(Version > "1.21-2" & grepl("^BUG", Category), 
+nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category), 
                    package="spatstat"))
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:3541-3542 (eval = FALSE)
+### code chunk number 6: updates.Rnw:585-586 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

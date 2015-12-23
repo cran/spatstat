@@ -1,4 +1,201 @@
 
+        CHANGES IN spatstat VERSION 1.44-0
+
+OVERVIEW
+
+   o We thank Jonas Geldmann, Andrew Hardegen, Kassel Hingee,
+     Tom Lawrence, Robin Milne, Gopalan Nair, Suman Rakshit, Peijian Shi
+     and Rasmus Waagepetersen for contributions.
+  
+   o More support for multidimensional point patterns and point processes.
+
+   o More options for envelopes and related Monte Carlo tests.
+
+   o More support for model comparison.
+
+   o k-th nearest neighbours on a linear network.
+
+   o Penttinen process can be simulated (by Metropolis-Hastings or CFTP).
+
+   o Calculate the predicted variance of number of points.
+
+   o Convexifying operation for sets.
+
+   o Subdivide a linear network.
+
+   o Accelerated algorithms for linear networks.
+
+   o Quadrat counting accelerated, in some cases.
+
+   o Version nickname: 'The Sound of One Hand Typing'
+
+NEW FUNCTIONS
+
+   o rPenttinen
+     Simulate the Penttinen process using perfect simulation.
+
+   o varcount
+     Given a point process model, compute the predicted variance
+     of the number of points falling in a window.
+
+   o inside.boxx
+     Test whether multidimensional points lie inside a specified 
+     multidimensional box.
+
+   o lixellate
+     Divide each segment of a linear network into smaller segments.
+
+   o nsegments.linnet, nsegments.lpp
+     Count the number of line segments in a linear network.
+
+   o grow.boxx
+     Expand a multidimensional box.
+
+   o deviance.ppm, deviance.lppm
+     Deviance for a fitted point process model.
+
+   o pseudoR2
+     Pseudo-R-squared for a fitted point process model.
+
+   o tiles.empty
+     Checks whether each tile of a tessellation is empty or nonempty.
+
+   o summary.linim
+     Summary for a pixel image on a linear network.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o rMaternI, rMaternII
+     These functions can now generate random patterns in 
+     three dimensions and higher dimensions, when the argument
+     'win' is of class 'box3' or 'boxx'.
+
+   o "[.ppx"
+     The subset index 'i' may now be a spatial domain
+     of class 'boxx' or 'box3'.
+
+   o rmh.ppm, rmhmodel.ppm, simulate.ppm
+   A model fitted using the 'Penttinen' interaction can now be simulated.
+
+   o rmh.default, rmhmodel.default
+   These functions now recognise cif='penttinen' for the Penttinen interaction.
+
+   o envelope
+   New argument 'clamp' gives greater control over one-sided envelopes.
+
+   o dclf.test, mad.test, dclf.progress, mad.progress, 
+     dclf.sigtrace, mad.sigtrace
+   New argument 'clamp' determines the test statistic for one-sided tests.
+
+   o dclf.progress, mad.progress, dclf.sigtrace, mad.sigtrace,
+    mctest.progress, mctest.sigtrace, dg.progress, dg.sigtrace
+   New argument 'rmin' determines the left endpoint of the test interval.
+
+   o dclf.test, mad.test, dg.test, dg.progress, dg.sigtrace, dg.envelope
+    (also accepted by dclf.progress, mad.progress, dclf.sigtrace, mad.sigtrace)
+   New argument 'leaveout' specifies how to calculate the deviation
+   between the observed summary function and nominal reference value.
+
+   o envelope
+   New argument 'funargs'
+
+   o Hest
+   Argument X can now be a pixel image with logical values.
+   New argument 'W'. [Based on code by Kassel Hingee.]
+
+   o nncross.lpp, distfun.lpp
+   New argument 'k' allows calculation of k-th nearest neighbour.
+   Computation accelerated.
+
+   o logLik.ppm
+   New argument 'absolute'.
+
+   o plot.kppm
+   New arguments 'pause' and 'xname'.
+
+   o tess
+   Argument 'window' is ignored when xgrid, ygrid are given.
+
+   o as.polygonal
+   Can now repair errors in polygon data, if repair=TRUE.
+
+   o rStrauss, rHardcore, rStraussHard, rDiggleGratton, rDGS, rPenttinen
+   New argument 'drop'.
+
+   o Kest.fft
+   Now has '...' arguments allowing control of spatial resolution.
+
+   o lppm
+   Computation accelerated.
+
+   o quadratcount.ppp
+   Computation accelerated in some cases.
+
+   o dg.test
+   Computation accelerated.
+
+BUGS
+
+   o runifpointx, rpoisppx
+   Crashed if nsim > 1.
+   Fixed.
+
+   o triangulate.owin
+   Results were incorrect in some special cases.
+   Fixed.
+
+   o quadrat.test, clarkevans.test
+   In rare cases, the computed Monte Carlo p-value could have been
+   greater than 1. This could have occurred only when nsim was an even number
+   and when the correct p-value was equal to 1.
+   Fixed.
+
+   o linearmarkequal
+   Result was a data frame instead of an 'fv' object.
+   Fixed.
+
+   o point-in-polygon test
+   The function inside.owin could take a very long time to check
+   whether points are inside a polygonal window, if the coordinates
+   were very large numbers. This was due to numerical overflow.
+   (Fixed??)
+
+   o as.fv.kppm	
+   Crashed if the model was not fitted by minimum contrast.
+   Fixed.
+
+   o plot.fv
+   Crashed in some obscure cases.
+   Fixed.
+
+   o collapse.fv
+   Did not allow 'same=NULL'.
+   Fixed.
+
+   o dclf.progress, mad.progress, dg.progress, 
+     dclf.sigtrace, mad.sigtrace, dg.sigtrace
+   The results could not be re-plotted using a plot formula,
+   because the internal data were slightly corrupted.
+   Fixed.
+
+   o Kest.fft
+   Result was incorrectly normalised.
+   Fixed.
+
+   o crosspairs
+   If X and Y were identical point patterns,
+   the result was not necessarily symmetric
+   (on some machines) due to numerical artifacts.
+   Fixed.
+
+   o plot.fv
+   Lines were not correctly clipped to the plot region when 'ylim' was given.
+   Fixed.
+
+   o pool.envelope
+   The 'scale' argument was not handled correctly.
+   Fixed.
+
         CHANGES IN spatstat VERSION 1.43-0
 
 OVERVIEW

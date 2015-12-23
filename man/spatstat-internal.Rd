@@ -36,6 +36,7 @@
 \alias{as2vector}
 \alias{asNumericMatrix}
 \alias{augment.msr}
+\alias{BartCalc}
 \alias{badprobability}
 \alias{bbEngine}
 \alias{bermantestEngine}
@@ -112,7 +113,7 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{deltasuffstat}
-\alias{Deviant}
+\alias{Deviation}
 \alias{dflt.redraw}
 \alias{densitycrossEngine}
 \alias{densitypointsEngine}
@@ -158,6 +159,7 @@
 \alias{equalpairs.quad}          
 \alias{equals.quad}          
 \alias{equalsfun.quad}          
+\alias{equispaced}          
 \alias{eratosthenes}
 \alias{erodemask}
 \alias{erode.owin}
@@ -186,6 +188,7 @@
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
+\alias{fastFindInterval}
 \alias{fillseq}
 \alias{findbestlegendpos}
 \alias{findCovariate}
@@ -201,6 +204,7 @@
 \alias{forbidNA}
 \alias{forbid.logi}
 \alias{FormatFaspFormulae}
+\alias{framebottomleft}
 \alias{fvexprmap}
 \alias{fvlabels}
 \alias{fvlabels<-}
@@ -262,6 +266,7 @@
 \alias{inside.triangle}     
 \alias{inside.xypolygon}     
 \alias{instantiate.interact}
+\alias{interactionfamilyname}
 \alias{intermaker}
 \alias{intersect.ranges}     
 \alias{intX.owin}     
@@ -418,6 +423,8 @@
 \alias{offsetsinformula}
 \alias{onecolumn}
 \alias{optimStatus}
+\alias{orderstats}
+\alias{orderwhich}
 \alias{ordinal}
 \alias{\%orifnull\%}  %DoNotExport
 %NAMESPACE export("%orifnull%")
@@ -427,6 +434,7 @@
 \alias{oversize.quad}    
 \alias{owinpolycheck}
 \alias{owinpoly2mask}
+\alias{owin2polypath}
 \alias{pairs.listof}
 \alias{pairs.solist}
 \alias{param.quad}
@@ -524,6 +532,7 @@
 \alias{print.splitppx}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
+\alias{print.summary.linim}
 \alias{print.summary.linnet}
 \alias{print.summary.logiquad}
 \alias{print.summary.lut}
@@ -556,6 +565,7 @@
 \alias{reduceformula}
 \alias{reheat}
 \alias{relatively.prime}
+\alias{RelevantDeviation}
 \alias{repair.image.xycoords}
 \alias{resolveEinfo}
 \alias{resolve.vargamma.shape}
@@ -564,6 +574,7 @@
 \alias{rhohatEngine}
 \alias{rhohatCalc}
 \alias{rigidradius}
+\alias{rMaternInhibition}
 \alias{RmhExpandRule}
 \alias{rmhsnoop}
 \alias{romansort}
@@ -658,6 +669,7 @@
 \alias{smoothcrossEngine}              
 \alias{smoothpointsEngine}              
 \alias{sort.im}
+\alias{sortalongsegment}
 \alias{spatstat.rawdata.location}
 \alias{spatstatClusterModelInfo}
 \alias{spatstatDPPModelInfo}
@@ -681,6 +693,7 @@
 \alias{suffstat.poisson}
 \alias{summarise.trend}
 \alias{summary.envelope}
+\alias{summary.funxy}
 \alias{summary.hyperframe}
 \alias{summary.logiquad}
 \alias{summary.lut}
@@ -722,8 +735,10 @@
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
-\alias{vanilla.fv}        
+\alias{vanilla.fv}
+\alias{varcountEngine}
 \alias{variablesinformula}
+\alias{variablesintext}
 %\alias{vblogit} %DoNotExport
 %\alias{vblogit.fmla} %DoNotExport
 \alias{verbalogic}
@@ -786,6 +801,7 @@ as.units(s)
 as2vector(x)
 asNumericMatrix(x)
 augment.msr(x, \dots, sigma)
+BartCalc(fY, fK)
 badprobability(x, NAvalue)
 bbEngine(\dots)
 bermantestEngine(model, covariate, which, alternative, \dots, modelname, covname, dataname)
@@ -816,8 +832,8 @@ checksolve(M, action, descrip, target)
 check.finite(x, context, xname, fatal, usergiven)
 check.hist.lengths(hist,breaks)
 check.in.range(x, r, fatal)
-check.named.list(x, nam, context, namopt)
-check.named.vector(x, nam, context, namopt)
+check.named.list(x, nam, context, namopt, onError)
+check.named.vector(x, nam, context, namopt, onError)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
 check.nvector(v, npoints, fatal, things, naok, warn, vname)
 check.nmatrix(m, npoints, fatal, things, naok, squarematrix, matchto, warn)
@@ -864,7 +880,7 @@ default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
 deltasuffstat(model, \dots, restrict, dataonly, force)
-Deviant(x, alternative, scaling)
+Deviation(x, ref, leaveout, n, xi)
 dflt.redraw(button, name, env)
 densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     weights, edge, varcov,
@@ -909,33 +925,35 @@ emptywindow(w)
 ensure2vector(x)
 ensure3Darray(x)
 envelopeEngine(X, fun, simul,
-           nsim, nrank, \dots, 
+           nsim, nrank, \dots, funargs,
            verbose, clipdata, 
            transform, global, ginterval, use.theory,
-           alternative, scale,
+           alternative, scale, clamp,
            savefuns, savepatterns, saveresultof,
            weights,
            nsim2, VARIANCE, nSD,
            Yname, maxnerr, internal, cl,
-           envir.user, expected.arg, do.pwrong)
+           envir.user, expected.arg, do.pwrong,
+           foreignclass, collectrubbish)
 envelopeProgressData(X, fun, \dots, exponent,
-                     alternative, scale,
-                     normalize, deflate,
+                     alternative, leaveout, scale, clamp,
+                     normalize, deflate, rmin, 
                      save.envelope, savefuns, savepatterns)
 envelopeTest(X, \dots, exponent, alternative,
-            rinterval, scale, tie.rule,
+            rinterval, leaveout, scale, clamp, tie.rule,
             interpolate, save.interpolant,
             save.envelope, savefuns, savepatterns,
             Xname, verbose)
 \method{envelope}{hasenvelope}(Y, \dots, Yname)
 \method{envelope}{matrix}(Y, \dots, rvals, observed, theory, funX,
   nsim, nsim2, jsim, jsim.mean,
-  type, alternative, scale, csr, use.theory, nrank, ginterval, nSD,
+  type, alternative, scale, clamp, csr, use.theory, nrank, ginterval, nSD,
   savefuns, check, Yname, do.pwrong, weights, precomputed)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
-equalsfun.quad(Q)          
+equalsfun.quad(Q)
+equispaced(z, reltol)
 eratosthenes(nmax, startset)
 erodemask(w,r,strict)
 erode.owin(\dots)
@@ -967,6 +985,7 @@ fave.order(x)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
+fastFindInterval(x, b, labels, reltol)
 fillseq(x)
 findbestlegendpos(\dots)
 findCovariate(covname, scope, scopename=NULL)
@@ -982,6 +1001,7 @@ fontify(x, font)
 forbidNA(x, context, xname, fatal, usergiven)
 forbid.logi(object)
 FormatFaspFormulae(f, argname)
+framebottomleft(w)
 fvexprmap(x)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
@@ -1045,6 +1065,7 @@ inside.range(x, r)
 inside.triangle(x, y, xx, yy)
 inside.xypolygon(pts, polly, test01, method)
 instantiate.interact(x, par)
+interactionfamilyname(x)
 intermaker(f, blank)
 intersect.ranges(a,b,fatal)
 intX.owin(w)
@@ -1229,6 +1250,8 @@ onecolumn(m)
 optimStatus(x, call)
 printStatus(x, errors.only)
 signalStatus(x, errors.only)
+orderstats(x, k, decreasing)
+orderwhich(x, k, decreasing)
 ordinal(k)
 a \%orifnull\% b
 outdated.interact(object)
@@ -1237,6 +1260,7 @@ overlap.xypolygon(P, Q)
 oversize.quad(Q, \dots, nU, nX)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
+owin2polypath(w)
 \method{pairs}{listof}(\dots, plot=TRUE)
 \method{pairs}{solist}(\dots, plot=TRUE)
 param.quad(Q)
@@ -1359,6 +1383,7 @@ primesbelow(nmax)
 \method{print}{splitppp}(x, \dots)
 \method{print}{splitppx}(x, \dots)
 \method{print}{summary.hyperframe}(x, \dots)
+\method{print}{summary.linim}(x, \dots)
 \method{print}{summary.linnet}(x, \dots)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.logiquad}(x, \dots, dp=3)
@@ -1392,6 +1417,7 @@ rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
 reduceformula(fmla, deletevar, verbose)
 reheat(model, invtemp)
 relatively.prime(n, m)
+RelevantDeviation(x, alternative, clamp, scaling)
 repair.image.xycoords(x)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
@@ -1408,6 +1434,7 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
            bwref, covname, confidence,
            covunits, modelcall, callstring, savestuff)
 rigidradius(X)
+rMaternInhibition(type, kappa, r, win, stationary, \dots, nsim, drop)
 RmhExpandRule(nama)
 romansort(x)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
@@ -1517,6 +1544,7 @@ smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
 smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted)
 \method{sort}{im}(x, \dots)
+sortalongsegment(df)
 spatstat.rawdata.location(\dots)
 spatstatClusterModelInfo(name, onlyPCP)
 spatstatDPPModelInfo(model)
@@ -1526,7 +1554,7 @@ spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
          dimyx, eps, jitter, nsim, verbose, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
-%splat(\dots)
+%splat(\dots, indent)
 splitHybridInteraction(coeffs, inte)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
@@ -1541,6 +1569,7 @@ suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summarise.trend(trend, w, a)
 \method{summary}{envelope}(object,\dots)
+\method{summary}{funxy}(object,\dots)
 \method{summary}{hyperframe}(object, \dots, brief=FALSE)
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
 \method{summary}{lut}(object, \dots)
@@ -1584,7 +1613,9 @@ validate.mask(w, fatal=TRUE)
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
 vanilla.fv(x)
+varcountEngine(g, B, lambdaB, f)
 variablesinformula(x)
+variablesintext(x)
 %vblogit(y, X, offset, eps, m0, S0, S0i, xi0, verb, maxiter, \dots)
 %vblogit.fmla(formula, offset, data, subset, weights, verbose, epsilon, \dots)
 verbalogic(x, op)

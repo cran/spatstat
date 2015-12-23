@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.49 $  $Date: 2015/08/25 08:16:36 $
+#  $Revision: 1.52 $  $Date: 2015/10/21 09:06:57 $
 #
 
 ppx <- local({
@@ -162,9 +162,15 @@ plot.ppx <- function(x, ...) {
 
 "[.ppx" <- function (x, i, drop=FALSE, ...) {
   da <- x$data
-  if(!missing(i))
+  dom <- x$domain
+  if(!missing(i)) {
+    if(inherits(i, c("boxx", "box3"))) {
+      dom <- i
+      i <- inside.boxx(da, w=i)
+    }
     da <- da[i, , drop=FALSE]
-  out <- list(data=da, ctype=x$ctype, domain=x$domain)
+  }
+  out <- list(data=da, ctype=x$ctype, domain=dom)
   class(out) <- "ppx"
   if(drop) {
     # remove unused factor levels
@@ -393,34 +399,50 @@ shortside.boxx <- function(x) {
   return(min(sidelengths(x)))
 }
 
-eroded.volumes.boxx <- function(x, r) {
-  len <- sidelengths(x)
-  ero <- sapply(as.list(len), function(z, r) { pmax.int(0, z - 2 * r)}, r=r)
-  apply(ero, 1, prod)
-}
+eroded.volumes.boxx <- local({
+
+  eroded.volumes.boxx <- function(x, r) {
+    len <- sidelengths(x)
+    ero <- sapply(as.list(len), erode1side, r=r)
+    apply(ero, 1, prod)
+  }
+
+  erode1side <- function(z, r) { pmax.int(0, z - 2 * r)}
+  
+  eroded.volumes.boxx
+})
+
 
 runifpointx <- function(n, domain, nsim=1) {
   if(nsim > 1) {
     result <- vector(mode="list", length=nsim)
-    for(i in 1:n) result[[i]] <- runifpointx(n, domain)
-    result <- as.solist(result)
-    names(result) <- paste("Simulation", 1:n)
+    for(i in 1:nsim) result[[i]] <- runifpointx(n, domain)
+    result <- as.anylist(result)
+    names(result) <- paste("Simulation", 1:nsim)
     return(result)
   }
   stopifnot(inherits(domain, "boxx"))
-  coo <- lapply(domain$ranges,
-                function(ra, n) { runif(n, min=ra[1], max=ra[2]) },
-                n=n)
-  df <- do.call("data.frame", coo)
+  ra <- domain$ranges
+  d <- length(ra)
+  if(n == 0) {
+    coo <- matrix(, nrow=0, ncol=d)
+  } else {
+    coo <- mapply(runif,
+                  n=rep(n, d),
+                  min=ra[1,],
+                  max=ra[2,])
+  }
+  colnames(coo) <- colnames(ra)
+  df <- as.data.frame(coo)
   ppx(df, domain)
 }
 
 rpoisppx <- function(lambda, domain, nsim=1) {
   if(nsim > 1) {
     result <- vector(mode="list", length=nsim)
-    for(i in 1:n) result[[i]] <- rpoisppx(lambda, domain)
-    result <- as.solist(result)
-    names(result) <- paste("Simulation", 1:n)
+    for(i in 1:nsim) result[[i]] <- rpoisppx(lambda, domain)
+    result <- as.anylist(result)
+    names(result) <- paste("Simulation", 1:nsim)
     return(result)
   }
   stopifnot(inherits(domain, "boxx"))
@@ -465,6 +487,49 @@ intensity.ppx <- function(X, ...) {
   v <- volume(domain(X))
   return(n/v)
 }
+
+grow.boxx <- function(W, left, right = left){
+  W <- as.boxx(W)
+  ra <- W$ranges
+  d <- length(ra)
+  if(any(left < 0) || any(right < 0))
+    stop("values of left and right margin must be nonnegative.")
+  if(length(left)==1) left <- rep(left, d)
+  if(length(right)==1) right <- rep(right, d)
+  if(length(left)!=d || length(right)!=d){
+    stop("left and right margin must be either of length 1 or the dimension of the boxx.")
+  }
+  W$ranges[1,] <- ra[1,]-left
+  W$ranges[2,] <- ra[2,]+right
+  return(W)
+}
+
+inside.boxx <- function(..., w = NULL){
+  if(is.null(w))
+    stop("Please provide a boxx using the named argument w.")
+  w <- as.boxx(w)
+  dat <- list(...)
+  if(length(dat)==1){
+    dat1 <- dat[[1]]
+    if(inherits(dat1, "ppx"))
+      dat <- coords(dat1)
+    if(inherits(dat1, "hyperframe"))
+      dat <- as.data.frame(dat1)
+  }
+  ra <- w$ranges
+  if(length(ra)!=length(dat))
+    stop("Mismatch between dimension of boxx and number of coordinate vectors.")
+  ## Check coord. vectors have equal length
+  n <- length(dat[[1]])
+  if(any(sapply(dat, length)!=n))
+    stop("Coordinate vectors have unequal length.")
+  index <- rep(TRUE, n)
+  for(i in seq_along(ra)){
+    index <- index & inside.range(dat[[i]], ra[[i]])
+  }
+  return(index)
+}
+
 
 spatdim <- function(X) {
   if(is.sob(X)) 2L else

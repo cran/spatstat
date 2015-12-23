@@ -77,9 +77,9 @@ linearKdot(X, i, r=NULL, \dots, correction="Ang")
    data(chicago)
    K <- linearKdot(chicago, "assault")
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
 }
 \keyword{spatial}
 \keyword{nonparametric}

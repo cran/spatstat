@@ -6,7 +6,7 @@
   of the Strauss process, using a perfect simulation algorithm.
 }
 \usage{
-  rStrauss(beta, gamma = 1, R = 0, W = owin(), expand=TRUE, nsim=1)
+  rStrauss(beta, gamma = 1, R = 0, W = owin(), expand=TRUE, nsim=1, drop=TRUE)
 }
 \arguments{
   \item{beta}{
@@ -33,6 +33,11 @@
     determining the expansion method.
   }
   \item{nsim}{Number of simulated realisations to be generated.}
+  \item{drop}{
+    Logical. If \code{nsim=1} and \code{drop=TRUE} (the default), the
+    result will be a point pattern, rather than a list 
+    containing a point pattern.
+  }
 }
 \details{
   This function generates a realisation of the 
@@ -114,13 +119,11 @@
 
   Strauss, D.J. (1975)
   A model for clustering.
-  \emph{Biometrika} \bold{63}, 467--475.
+  \emph{Biometrika} \bold{62}, 467--475.
 }
 \author{
   Kasper Klitgaard Berthelsen,
-  adapted for \pkg{spatstat} by Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  adapted for \pkg{spatstat} by Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
 }
 \examples{
    X <- rStrauss(0.05,0.2,1.5,square(141.4))
@@ -132,7 +135,8 @@
   \code{\link{rHardcore}},
   \code{\link{rStraussHard}},
   \code{\link{rDiggleGratton}},
-  \code{\link{rDGS}}.
+  \code{\link{rDGS}},
+  \code{\link{rPenttinen}}.
 }
 
 \keyword{spatial}

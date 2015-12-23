@@ -66,13 +66,13 @@
   superimpose(X,Y) # not marked
   superimpose(A=X, B=Y) # multitype with types A and B
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  Ege Rubak
-  \email{rubak@math.aau.dk}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
+  Ege Rubak \email{rubak@math.aau.dk}
+  
   and Greg McSwiggan.
 }
 \keyword{spatial}

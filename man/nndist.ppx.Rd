@@ -95,9 +95,9 @@
    d1to3 <- nndist(X, k=1:3)
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
 }
 \keyword{spatial}
 \keyword{math}

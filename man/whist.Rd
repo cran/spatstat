@@ -65,11 +65,11 @@ whist(x, breaks, weights = NULL)
   w <- runif(100)
   whist(x,b,w)
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
   with thanks to Peter Dalgaard.
 }
 \keyword{arith}

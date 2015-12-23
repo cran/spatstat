@@ -30,10 +30,10 @@
   D <- density(cells)
   zapsmall.im(D)
 }
-\author{Ege Rubak
-  and Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+\author{Ege Rubak \email{rubak@math.aau.dk}
+  and Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
 }
 \keyword{spatial}
 \keyword{methods}

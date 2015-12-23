@@ -52,6 +52,7 @@
     \item{\code{'lookup'}}{General isotropic pairwise interaction process,
       with the interaction function specified via a ``lookup table''.}
     \item{\code{'multihard'}}{Multitype hardcore process}
+    \item{\code{'penttinen'}}{The Penttinen process}
     \item{\code{'strauss'}}{The Strauss process}
     \item{\code{'straush'}}{The Strauss process with hard core}
     \item{\code{'sftcr'}}{The Softcore process}
@@ -182,6 +183,15 @@
       where \code{beta} is a vector of base intensities for each type
       of point, and \code{hradii} is a matrix of hard core radii
       between each pair of types. 
+    }
+    \item{penttinen:}{
+      (Penttinen process.) A \bold{named} list with components
+      \code{beta,gamma,r} which are respectively the ``base''
+      intensity, the pairwise interaction parameter, and the disc radius.
+      Note that \code{gamma} must be less than or equal to 1.
+      See \code{\link{Penttinen}} for explanation.
+      (Note that there is also an algorithm for perfect simulation
+      of the Penttinen process, \code{\link{rPenttinen}})
     }
     \item{strauss:}{
       (Strauss process.) A \bold{named} list with components
@@ -429,23 +439,15 @@ otherwise an error is given.
   \code{\link{rmhcontrol}},
   \code{\link{rmhstart}},
   \code{\link{ppm}},
-  \code{\link{AreaInter}},
-  \code{\link{BadGey}},
-  \code{\link{DiggleGatesStibbard}},
-  \code{\link{DiggleGratton}},
-  \code{\link{Fiksel}},
-  \code{\link{Geyer}},
-  \code{\link{Hardcore}},
-  \code{\link{LennardJones}},
-  \code{\link{MultiHard}},
-  \code{\link{MultiStrauss}},
-  \code{\link{MultiStraussHard}},
-  \code{\link{PairPiece}},
-  \code{\link{Poisson}},
-  \code{\link{Softcore}},
-  \code{\link{Strauss}},
-  \code{\link{StraussHard}},
-  \code{\link{Triplets}}
+  \code{\link{AreaInter}}, \code{\link{BadGey}},
+ \code{\link{DiggleGatesStibbard}}, \code{\link{DiggleGratton}},
+ \code{\link{Fiksel}}, \code{\link{Geyer}}, \code{\link{Hardcore}},
+ \code{\link{Hybrid}}, \code{\link{LennardJones}},
+ \code{\link{MultiStrauss}}, \code{\link{MultiStraussHard}},
+ \code{\link{PairPiece}}, \code{\link{Penttinen}},
+ \code{\link{Poisson}}, \code{\link{Softcore}},
+ \code{\link{Strauss}}, \code{\link{StraussHard}}
+ and \code{\link{Triplets}}.
 }
 \examples{
    # Strauss process:
@@ -529,11 +531,10 @@ otherwise an error is given.
                              list(beta=1, gamma=0.7,r=0.1, sat=2)),
                     w=square(1))
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  and
+  Rolf Turner \email{r.turner@auckland.ac.nz}
 }
 \keyword{spatial}
 \keyword{datagen}

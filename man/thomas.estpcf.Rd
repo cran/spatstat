@@ -67,8 +67,8 @@ thomas.estpcf(X, startpar=c(kappa=1,scale=1), lambda=NULL,
   For a more detailed explanation of the Method of Minimum Contrast,
   see \code{\link{mincontrast}}.
   
-  The Thomas point process is described in \ifelse{latex}{\out{M\o
-  ller}}{Moller} and Waagepetersen (2003, pp. 61--62). It is a cluster
+  The Thomas point process is described in
+  \ifelse{latex}{\out{M\o ller}}{Moller} and Waagepetersen (2003, pp. 61--62). It is a cluster
   process formed by taking a pattern of parent points, generated
   according to a Poisson process with intensity \eqn{\kappa}{kappa}, and
   around each parent point, generating a random number of offspring
@@ -150,9 +150,7 @@ thomas.estpcf(X, startpar=c(kappa=1,scale=1), lambda=NULL,
   \emph{Biometrics} \bold{63}, 252--258.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
 }
 \seealso{
   \code{\link{thomas.estK}}

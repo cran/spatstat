@@ -228,10 +228,10 @@ Gcom(object, r = NULL, breaks = NULL, ...,
   \emph{Statistical Science} \bold{26}, 613--646.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Ege Rubak and Jesper \ifelse{latex}{\out{M\o ller}}{Moller}.
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  Ege Rubak \email{rubak@math.aau.dk} and Jesper \ifelse{latex}{\out{M\o ller}}{Moller}.
 }
 \seealso{
   Related functions:

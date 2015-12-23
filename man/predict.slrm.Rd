@@ -83,11 +83,11 @@
   Znew <- distmap(copper$Lines)[copper$SouthWindow]
   pcnew <- predict(fitc, newdata=list(Z=Znew))
 }
-\author{Adrian Baddeley
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
   \email{adrian@maths.uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{models}

@@ -41,9 +41,9 @@
   See the help files for the corresponding generic functions.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
 }
 \seealso{
   \code{\link{ppm}},  

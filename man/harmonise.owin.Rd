@@ -47,11 +47,11 @@
   A list of windows, of length equal to the number of arguments
   \code{\dots}. The list belongs to the class \code{"solist"}.
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \examples{
    harmonise(X=letterR,

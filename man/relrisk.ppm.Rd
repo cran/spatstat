@@ -177,13 +177,13 @@
   and 1. If \code{relative=TRUE}, the results are either non-negative
   numbers, or the values \code{Inf} or \code{NA}. 
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak
-  \email{rubak@math.aau.dk}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
+  and Ege Rubak \email{rubak@math.aau.dk}
+  
 }
 \seealso{
   There is another method \code{\link{relrisk.ppp}} for point pattern datasets

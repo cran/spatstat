@@ -23,12 +23,12 @@
 \value{An object of class \code{"detpointprocfamily"}.}
 \author{
   Frederic Lavancier and Christophe Biscio.
-  Modified by Ege Rubak \email{rubak@math.aau.dk},
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
+  Modified by Ege Rubak \email{rubak@math.aau.dk} ,
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
   and 
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \examples{
 m <- dppBessel(lambda=100, alpha=.05, sigma=0, d=2)

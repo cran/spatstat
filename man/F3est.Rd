@@ -131,9 +131,9 @@ F3est(X, ..., rmax = NULL, nrval = 128, vside = NULL,
   \emph{Statistica Neerlandica} \bold{52}, 239--246.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
   and Rana Moyeed.
 }
 \section{Warnings}{

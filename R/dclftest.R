@@ -1,7 +1,7 @@
 #
 #  dclftest.R
 #
-#  $Revision: 1.30 $  $Date: 2015/10/05 06:29:19 $
+#  $Revision: 1.34 $  $Date: 2015/12/16 01:12:17 $
 #
 #  Monte Carlo tests for CSR (etc)
 #
@@ -13,51 +13,68 @@ clf.test <- function(...) {
 
 dclf.test <- function(X, ...,
                       alternative=c("two.sided", "less", "greater"),
-                      rinterval=NULL, scale=NULL,
+                      rinterval=NULL, leaveout=1, scale=NULL, clamp=FALSE, 
                       interpolate=FALSE) {
   Xname <- short.deparse(substitute(X))
   envelopeTest(X, ..., exponent=2, alternative=alternative,
-                       rinterval=rinterval,
-                       scale=scale, interpolate=interpolate,
+                       rinterval=rinterval, leaveout=leaveout,
+                       scale=scale, clamp=clamp, interpolate=interpolate,
                        Xname=Xname)
 }
 
 mad.test <- function(X, ...,
                      alternative=c("two.sided", "less", "greater"),
-                     rinterval=NULL, scale=NULL,
+                     rinterval=NULL, leaveout=1, scale=NULL, clamp=FALSE,
                      interpolate=FALSE) {
   Xname <- short.deparse(substitute(X))
   envelopeTest(X, ..., exponent=Inf, alternative=alternative,
-               rinterval=rinterval,
-               scale=scale, interpolate=interpolate,
+               rinterval=rinterval, leaveout=leaveout, 
+               scale=scale, clamp=clamp, interpolate=interpolate,
                Xname=Xname)
 }
 
 ## measure deviation of summary function
-## taking account of alternative hypothesis and possible scaling
+## leaveout = 0: typically 'ref' is exact theoretical value
+##               Compute raw deviation.
+## leaveout = 1: 'ref' is mean of simulations *and* observed.
+##               Use algebra to compute leave-one-out deviation.
+## leaveout = 2: 'ref' is mean of simulations
+##               Use algebra to compute leave-two-out deviation.
 
-Deviant <- local({
+Deviation <- function(x, ref, leaveout, n, xi=x) {
+  if(leaveout == 0) return(x-ref)
+  if(leaveout == 1) return((x-ref) * (n+1)/n)
+  jackmean <- (n * ref - xi)/(n-1)
+  return(x - jackmean)
+}
+
+## Evaluate signed or absolute deviation,  
+## taking account of alternative hypothesis and possible scaling
+## (Large positive values always favorable to alternative)
+
+RelevantDeviation <- local({
   
-  plusvalue <- function(x) {
+  positivepart <- function(x) {
     d <- dim(x)
     y <- pmax(0, x)
     if(!is.null(d)) y <- matrix(y, d[1], d[2])
     return(y)
   }
 
-  minusvalue <- function(x) plusvalue(-x)
+  negativepart <- function(x) positivepart(-x)
 
-  Deviant <- function(x, alternative, scaling=NULL) {
+  RelevantDeviation <- function(x, alternative, clamp=FALSE, scaling=NULL) {
     if(!is.null(scaling)) x <- x/scaling
     switch(alternative,
            two.sided = abs(x),
-           less = minusvalue(x),
-           greater = plusvalue(x))
+           less = if(clamp) negativepart(x) else -x,
+           greater = if(clamp) positivepart(x) else x)
   }
 
-  Deviant
+  RelevantDeviation
 })
 
+  
 ## workhorse function
 
 envelopeTest <-
@@ -65,7 +82,9 @@ envelopeTest <-
            exponent=1,
            alternative=c("two.sided", "less", "greater"),
            rinterval=NULL,
-           scale=NULL, 
+           leaveout=1,
+           scale=NULL,
+           clamp=FALSE,
            tie.rule=c("randomise","mean"),
            interpolate=FALSE,
            save.interpolant = TRUE,
@@ -76,10 +95,17 @@ envelopeTest <-
            verbose=TRUE) {
     if(is.null(Xname)) Xname <- short.deparse(substitute(X))
     tie.rule <- match.arg(tie.rule)
-    alt <- alternative <- match.arg(alternative)
+    alternative <- match.arg(alternative)
+    if(!(leaveout %in% 0:2))
+      stop("Argument leaveout should equal 0, 1 or 2")
     force(save.envelope)
     check.1.real(exponent)
     explain.ifnot(exponent >= 0)
+    deviationtype <- switch(alternative,
+                            two.sided = "absolute",
+                            greater = if(clamp) "positive" else "signed",
+                            less = if(clamp) "negative" else "signed")
+    deviationblurb <- paste(deviationtype, "deviation")
     ## compute or extract simulated functions
     X <- envelope(X, ...,
                   savefuns=TRUE, savepatterns=savepatterns,
@@ -97,12 +123,18 @@ envelopeTest <-
     if(use.theo && !has.theo)
       warning("No theoretical function available; use.theory ignored")
     if(use.theo && has.theo) {
-      reference <- with(X, theo)
       theo.used <- TRUE
+      reference <- with(X, theo)
+      leaveout <- 0
     } else {
-      ## compute sample mean of simulations *and* observed 
-      reference <- apply(cbind(sim, obs), 1, mean, na.rm=TRUE)
       theo.used <- FALSE
+      if(leaveout == 2) {
+        ## use sample mean of simulations only
+        reference <- apply(sim, 1, mean, na.rm=TRUE)
+      } else {
+        ## use sample mean of simulations *and* observed 
+        reference <- apply(cbind(sim, obs), 1, mean, na.rm=TRUE)
+      }
     }
     ## determine interval of r values for computation
     rok <- r
@@ -166,53 +198,74 @@ envelopeTest <-
 
     ## determine rescaling if any
     if(is.null(scale)) {
-      sc <- NULL
+      scaling <- NULL
     } else if(is.function(scale)) {
-      sc <- scale(rok)
+      scaling <- scale(rok)
       sname <- "scale(r)"
-      ans <- check.nvector(sc, nr, things="values of r",
+      ans <- check.nvector(scaling, nr, things="values of r",
                            fatal=FALSE, vname=sname)
       if(!ans)
         stop(attr(ans, "whinge"), call.=FALSE)
-      if(any(bad <- (sc <= 0))) {
+      if(any(bad <- (scaling <= 0))) {
         ## issue a warning unless this only happens at r=0
         if(any(bad[rok > 0]))
           warning(paste("Some values of", sname, "were negative or zero:",
                         "scale was reset to 1 for these values"),
                   call.=FALSE)
-        sc[bad] <- 1
+        scaling[bad] <- 1
       }
     } else stop("Argument scale should be a function")
+
+    ## compute deviations
+    rawdevDat <- Deviation(obs, reference, leaveout, nsim, sim[,1])
+    rawdevSim <- Deviation(sim, reference, leaveout, nsim)
+    ## evaluate signed/absolute deviation relevant to alternative
+    ddat <- RelevantDeviation(rawdevDat, alternative, clamp, scaling)
+    dsim <- RelevantDeviation(rawdevSim, alternative, clamp, scaling)
 
     ## compute test statistic
     if(is.infinite(exponent)) {
       ## MAD
-      devdata <- max(Deviant(obs-reference, alt, sc))
+      devdata <- max(ddat)
+      devsim <- apply(dsim, 2, max)
       names(devdata) <- "mad"
-      devsim <- apply(Deviant(sim-reference, alt, sc), 2, max)
-      testname <- "Maximum absolute deviation test"
+      testname <- paste("Maximum", deviationblurb, "test")
+      statisticblurb <- paste("Maximum", deviationblurb)
     } else {
       L <- if(nr > 1) diff(rinterval) else 1
-      a <- L * (if(theo.used) 1 else ((nsim+1)/nsim)^exponent)
       if(exponent == 2) {
         ## Cramer-von Mises
-        devdata <- a * mean((Deviant(obs - reference, alt, sc))^2)
+        ddat2 <- if(clamp) ddat^2 else (sign(ddat) * ddat^2)
+        dsim2 <- if(clamp) dsim^2 else (sign(dsim) * dsim^2)
+        devdata <- L * mean(ddat2)
+        devsim  <- L * .colMeans(dsim2, nr, nsim)
         names(devdata) <- "u"
-        devsim <- a * .colMeans((Deviant(sim - reference, alt, sc))^2, nr, nsim)
         testname <- "Diggle-Cressie-Loosmore-Ford test"
+        statisticblurb <- paste("Integral of squared", deviationblurb)
       } else if(exponent == 1) {
         ## integral absolute deviation
-        devdata <- a * mean(Deviant(obs - reference, alt, sc))
+        devdata <- L * mean(ddat)
+        devsim  <- L * .colMeans(dsim, nr, nsim)
         names(devdata) <- "L1"
-        devsim <- a * .colMeans(Deviant(sim - reference, alt, sc), nr, nsim)
-        testname <- "Integral absolute deviation test"
+        testname <- paste("Integral", deviationblurb, "test")
+        statisticblurb <- paste("Integral of", deviationblurb)
       } else {
         ## general p
-        devdata <- a * mean(((Deviant(obs - reference, alt, sc))^exponent))
+        if(clamp) {
+          ddatp <- ddat^exponent
+          dsimp <- dsim^exponent
+        } else {
+          ddatp <- sign(ddat) * (abs(ddat)^exponent)
+          dsimp <- sign(dsim) * (abs(dsim)^exponent)
+        }
+        devdata <- L * mean(ddatp)
+        devsim  <- L * .colMeans(dsimp, nr, nsim)
         names(devdata) <- "Lp"
-        devsim <- a * .colMeans(((Deviant(sim - reference, alt, sc))^exponent), nr, nsim)
         testname <- paste("Integrated",
                           ordinal(exponent), "Power Deviation test")
+        statisticblurb <- paste("Integral of",
+                                ordinal(exponent), "power of",
+                                deviationblurb)
       }
     }
     if(!interpolate) {
@@ -263,16 +316,20 @@ envelopeTest <-
                        "Monte Carlo")
     scaleblurb <- if(is.null(scale)) NULL else
                   paste("Scale function:", paste(deparse(scale), collapse=" "))
+    refblurb <- if(theo.used) "theoretical" else "sample mean"
+    leaveblurb <- if(leaveout == 0) paste("observed minus", refblurb) else
+                  if(leaveout == 1) "leave-one-out" else "leave-two-out"
     testname <- c(paste(testname, "of", nullmodel),
-                  paste(testtype, "based on", nsim,
+                  paste(testtype, "test based on", nsim,
                         "simulations", e$constraints), 
                   paste("Summary function:", fname),
-                  paste("Reference function:",
-                        if(theo.used) "theoretical" else "sample mean"),
+                  paste("Reference function:", refblurb),
                   paste("Alternative:", alternative),
                   paste("Interval of distance values:",
                         prange(rinterval), uname),
-                  scaleblurb
+                  scaleblurb,
+                  paste("Test statistic:", statisticblurb),
+                  paste("Deviation =", leaveblurb)
                   )
     result <- structure(list(statistic = statistic,
                              p.value = pvalue,
@@ -288,8 +345,9 @@ envelopeTest <-
       attr(result, "info") <- list(exponent=exponent,
                                    alternative=alternative,
                                    nties=nties,
+                                   leaveout=leaveout,
                                    interpolate=interpolate,
-                                   scale=scale,
+                                   scale=scale, clamp=clamp,
                                    tie.rule=tie.rule,
                                    use.theo=use.theo)
     }

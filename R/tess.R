@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.69 $ $Date: 2015/06/20 10:56:11 $
+#   $Revision: 1.71 $ $Date: 2015/10/21 09:06:57 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, marks=NULL, keepempty=FALSE,
@@ -21,8 +21,9 @@ tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
   if(isrect) {
     stopifnot(is.numeric(xgrid) && all(diff(xgrid) > 0))
     stopifnot(is.numeric(ygrid) && all(diff(ygrid) > 0))
-    if(is.null(window))
-      window <- owin(range(xgrid), range(ygrid), unitname=uname)
+    if(!is.null(window))
+      warning("Argument 'window' ignored, because xgrid, grid are given")
+    window <- owin(range(xgrid), range(ygrid), unitname=uname)
     ntiles <- (length(xgrid)-1) * (length(ygrid)-1)
     out <- list(type="rect", window=window, xgrid=xgrid, ygrid=ygrid, n=ntiles)
   } else if(istiled) {
@@ -126,10 +127,6 @@ print.tess <- function(x, ..., brief=FALSE) {
          rect={
            if(full) {
              unitinfo <- summary(unitname(win))
-             equispaced <- function(z) {
-               dz <- diff(z)
-               diff(range(dz))/mean(dz) < 0.01
-             }
              if(equispaced(x$xgrid) && equispaced(x$ygrid)) 
                splat("Tiles are equal rectangles, of dimension",
                      signif(mean(diff(x$xgrid)), 5),
@@ -257,8 +254,8 @@ plot.tess <- local({
       labels <- paste(as.vector(labels))
       til <- tiles(x)
       incircles <- lapply(til, incircle)
-      x0 <- unlist(lapply(incircles, function(z) { z$x }))
-      y0 <- unlist(lapply(incircles, function(z) { z$y }))
+      x0 <- sapply(incircles, getElement, name="x")
+      y0 <- sapply(incircles, getElement, name="y")
       do.call.matched("text.default",
                       resolve.defaults(list(x=x0, y = y0),
                                        list(labels=labels),
@@ -340,6 +337,23 @@ tiles <- function(x) {
   return(out)
 }
 
+tiles.empty <- function(x) {
+  stopifnot(is.tess(x))
+  switch(x$type,
+         rect = {
+           nx <- length(x$xgrid) - 1
+           ny <- length(x$ygrid) - 1
+           ans <- rep(FALSE, nx * ny)
+         },
+         tiled = {
+           ans <- sapply(x$tiles, is.empty)
+         },
+         image = {
+           ans <- (table(x$image[]) == 0)
+         })
+  return(ans)
+}
+           
 tilenames <- function(x) {
   stopifnot(is.tess(x))
   switch(x$type,
@@ -640,7 +654,7 @@ intersect.tess <- function(X, Y, ..., keepmarks=FALSE) {
     for(i in seq_along(Xtiles)) {
       Xi <- Xtiles[[i]]
       Ti <- lapply(Ytiles, intersect.owin, B=Xi, ..., fatal=FALSE)
-      isempty <- unlist(lapply(Ti, function(x) { is.null(x) || is.empty(x)}))
+      isempty <- sapply(Ti, is.empty)
       nonempty <- !isempty
       if(any(nonempty)) {
         Ti <- Ti[nonempty]

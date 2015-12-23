@@ -8,12 +8,16 @@
   Compute the distance function of a point pattern on a linear network.
 }
 \usage{
-  \method{distfun}{lpp}(X, ...)
+  \method{distfun}{lpp}(X, ..., k=1)
 }
 \arguments{
   \item{X}{
     A point pattern on a linear network
     (object of class \code{"lpp"}).
+  }
+  \item{k}{
+    An integer. The distance to the \code{k}th nearest point
+    will be computed.
   }
   \item{\dots}{
     Extra arguments are ignored. 
@@ -72,11 +76,11 @@
    Y <- runiflpp(4, simplenet)
    fit <- lppm(Y, ~D, covariates=list(D=f))
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{math}

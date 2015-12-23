@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.68 $  $Date: 2015/08/29 04:36:43 $
+#   $Revision: 1.71 $  $Date: 2015/11/17 07:08:37 $
 #
 #
 
@@ -72,7 +72,7 @@ rmhmodel.default <- local({
                                       w=w, trend=NULL, types=types,
                                       stopinvalid=FALSE)
         ## consolidate Poisson intensity parameters
-        poisbetalist <- lapply(poismodels, function(x){x$C.beta})
+        poisbetalist <- lapply(poismodels, getElement, name="C.beta")
         poisbeta <- Reduce("*", poisbetalist)
         if(all(ispois)) {
           ## model collapses to a Poisson process
@@ -109,7 +109,7 @@ rmhmodel.default <- local({
       ## concatenate for use in C
       C.beta     <- unlist(C.betalist)
       C.ipar     <- unlist(C.iparlist)
-      check <- lapply(models, function(x){x$check})
+      check <- lapply(models, getElement, name="check")
       maxr <- max(unlist(lapply(models, getElement, name="reach")))
       ismulti <- unlist(lapply(models, getElement, name="multitype.interact"))
       multi <- any(ismulti)
@@ -1275,6 +1275,55 @@ spatstatRmhInfo <- function(cifname) {
             temper = function(par, invtemp) {
               within(par, {
                 beta  <- beta^invtemp
+                gamma <- gamma^invtemp
+              })
+            }
+            ),
+#       
+# 17. Penttinen.
+#       
+       'penttinen'=
+       list(
+            C.id="penttinen",
+            multitype=FALSE,
+            parhandler=function(par, ...) {
+              ctxt <- "For the penttinen cif"
+              par <- check.named.list(par, c("beta", "gamma", "r"), ctxt)
+              # treat r=NA as absence of interaction
+              par <- within(par, if(is.na(r)) { r <- 0; gamma <- 1 })
+              with(par, check.finite(beta, ctxt))
+              with(par, check.finite(gamma, ctxt))
+              with(par, check.finite(r, ctxt))
+              with(par, check.1.real(gamma, ctxt))
+              with(par, check.1.real(r, ctxt))
+              with(par, explain.ifnot(all(beta >= 0), ctxt))
+              with(par, explain.ifnot(gamma >= 0, ctxt))
+              with(par, explain.ifnot(r > 0, ctxt))
+              return(par)
+            },
+            validity=function(par, kind) {
+              gamma <- par$gamma
+              switch(kind,
+                     integrable=(gamma <= 1),
+                     stabilising=(gamma == 0)
+                     )
+            },
+            explainvalid=list(
+              integrable="gamma <= 1",
+              stabilising="gamma == 0"),
+            reach = function(par, ...) {
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g == 1) 0 else (2 * r))
+            },
+            hardcore = function(par, ..., epsilon=0) {
+              r <- par[["r"]]
+              g <- par[["gamma"]]
+              return(if(g <= epsilon) (2 * r) else 0)
+            },
+            temper = function(par, invtemp) {
+              within(par, {
+                beta <- beta^invtemp
                 gamma <- gamma^invtemp
               })
             }

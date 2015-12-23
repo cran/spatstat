@@ -38,8 +38,8 @@
   A single numeric value.
 }
 \author{
-  Adrian Baddeley \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au} 
+  
 }
 \seealso{
  \code{\link{circumradius}}, \code{\link{diameter}}, 

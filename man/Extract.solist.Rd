@@ -45,13 +45,10 @@
    x <- solist(japanesepines, cells, redwood)
    x[1] <- list(finpines)
  }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak
-  \email{rubak@math.aau.dk}
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+ Rolf Turner \email{r.turner@auckland.ac.nz}
+ and Ege Rubak \email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{list}

@@ -13,13 +13,13 @@
 }
 \value{Logical}
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak
-  \email{rubak@math.aau.dk}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
+  and Ege Rubak \email{rubak@math.aau.dk}
+  
 }
 \examples{
 model1 <- dppMatern(lambda=100, alpha=.01, nu=1, d=2)

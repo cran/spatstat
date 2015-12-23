@@ -6,7 +6,7 @@
   of the Hardcore process, using a perfect simulation algorithm.
 }
 \usage{
-  rHardcore(beta, R = 0, W = owin(), expand=TRUE, nsim=1)
+  rHardcore(beta, R = 0, W = owin(), expand=TRUE, nsim=1, drop=TRUE)
 }
 \arguments{
   \item{beta}{
@@ -31,6 +31,11 @@
     determining the expansion method.
   }
   \item{nsim}{Number of simulated realisations to be generated.}
+  \item{drop}{
+    Logical. If \code{nsim=1} and \code{drop=TRUE} (the default), the
+    result will be a point pattern, rather than a list 
+    containing a point pattern.
+  }
 }
 \details{
   This function generates a realisation of the 
@@ -77,9 +82,9 @@
   Chapman and Hall/CRC.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
   based on original code for the Strauss process by 
   Kasper Klitgaard Berthelsen.
 }
@@ -91,7 +96,10 @@
   \code{\link{rmh}},
   \code{\link{Hardcore}},
   \code{\link{rStrauss}},
+  \code{\link{rStraussHard}},
   \code{\link{rDiggleGratton}}.
+  \code{\link{rDGS}},
+  \code{\link{rPenttinen}}.
 }
 \keyword{spatial}
 \keyword{datagen}

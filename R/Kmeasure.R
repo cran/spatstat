@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.50 $    $Date: 2015/01/30 05:35:53 $
+#           $Revision: 1.52 $    $Date: 2015/12/04 00:29:38 $
 #
 #     Kmeasure()         compute an estimate of the second order moment measure
 #
@@ -308,9 +308,9 @@ second.moment.engine <-
   if(what != "edge") {
     # compute Bartlett spectrum
     if(nimages == 1) {
-      bart <- Mod(fY)^2 * fK
+      bart <- BartCalc(fY, fK)  ##  bart <- Mod(fY)^2 * fK
     } else {
-      bartlist <- lapply(fYlist, function(z, fK) { Mod(z)^2 * fK}, fK=fK)
+      bartlist <- lapply(fYlist, BartCalc, fK=fK)
     }
   }
   
@@ -469,20 +469,22 @@ second.moment.engine <-
   return(result)
 }
 
-Kest.fft <- function(X, sigma, r=NULL, breaks=NULL) {
+BartCalc <- function(fY, fK) { Mod(fY)^2 * fK }
+  
+Kest.fft <- function(X, sigma, r=NULL, ..., breaks=NULL) {
   verifyclass(X, "ppp")
-  W <- X$window
-  lambda <- X$n/area(W)
+  W <- Window(X)
+  lambda <- npoints(X)/area(W)
   rmaxdefault <- rmax.rule("K", W, lambda)        
   bk <- handle.r.b.args(r, breaks, W, rmaxdefault=rmaxdefault)
   breaks <- bk$val
   rvalues <- bk$r
-  u <- Kmeasure(X, sigma)
+  u <- Kmeasure(X, sigma, ...)
   xx <- rasterx.im(u)
   yy <- rastery.im(u)
   rr <- sqrt(xx^2 + yy^2)
   tr <- whist(rr, breaks, u$v)
-  K  <- cumsum(tr)
+  K  <- cumsum(tr) * with(u, xstep * ystep)
   rmax <- min(rr[is.na(u$v)])
   K[rvalues >= rmax] <- NA
   result <- data.frame(r=rvalues, theo=pi * rvalues^2, border=K)

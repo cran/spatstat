@@ -10,10 +10,12 @@
 }
 \usage{
 dclf.test(X, \dots, alternative=c("two.sided", "less", "greater"),
-                  rinterval = NULL, scale=NULL, interpolate=FALSE)
+                  rinterval = NULL, leaveout=1,
+                  scale=NULL, clamp=FALSE, interpolate=FALSE)
 
 mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
-                  rinterval = NULL, scale=NULL, interpolate=FALSE)
+                  rinterval = NULL, leaveout=1,
+                  scale=NULL, clamp=FALSE, interpolate=FALSE)
 }
 \arguments{
   \item{X}{
@@ -41,12 +43,27 @@ mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
     over which the maximum absolute deviation, or the integral,
     will be computed for the test. A numeric vector of length 2.
   }
+  \item{leaveout}{
+    Optional integer 0, 1 or 2 indicating how to calculate the
+    deviation between the observed summary function and the
+    nominal reference value, when the reference value must be estimated
+    by simulation. See Details.
+  }
   \item{scale}{
     Optional. A function in the \R language which determines the
     relative scale of deviations, as a function of
     distance \eqn{r}. Summary function values for distance \code{r}
     will be \emph{divided} by \code{scale(r)} before the
     test statistic is computed.
+  }
+  \item{clamp}{
+    Logical value indicating how to compute deviations
+    in a one-sided test. Deviations of the observed
+    summary function from the theoretical summary function are initially
+    evaluated as signed real numbers, with large positive values indicating
+    consistency with the alternative hypothesis.
+    If \code{clamp=FALSE} (the default), these values are not changed.
+    If \code{clamp=TRUE}, any negative values are replaced by zero.
   }
   \item{interpolate}{
     Logical value specifying whether to calculate the \eqn{p}-value
@@ -151,7 +168,18 @@ mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
   The argument \code{use.theory} passed to \code{\link{envelope}}
   determines whether to compare the summary function for the data
   to its theoretical value for CSR (\code{use.theory=TRUE})
-  or to the sample mean of simulations from CSR (\code{use.theory=FALSE}).
+  or to the sample mean of simulations from CSR
+  (\code{use.theory=FALSE}).
+
+  The argument \code{leaveout} specifies how to calculate the
+  discrepancy between the summary function for the data and the
+  nominal reference value, when the reference value must be estimated
+  by simulation. The values \code{leaveout=0} and
+  \code{leaveout=1} are both algebraically equivalent (Baddeley et al, 2014,
+  Appendix) to computing the difference \code{observed - reference}
+  where the \code{reference} is the mean of simulated values.
+  The value \code{leaveout=2} gives the leave-two-out discrepancy
+  proposed by Dao and Genton (2014).
 }
 \section{Handling Ties}{
   If the observed value of the test statistic is equal to one or more of the
@@ -181,6 +209,12 @@ mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
   \emph{Statistics for spatial data}.
   John Wiley and Sons, 1991.
 
+  Dao, N.A. and Genton, M. (2014)
+  A Monte Carlo adjusted goodness-of-fit test for
+  parametric models describing spatial point patterns.
+  \emph{Journal of Graphical and Computational Statistics}
+  \bold{23}, 497--517.
+
   Diggle, P. J. (1986).
   Displaced amacrine cells in the retina of a
   rabbit : analysis of a bivariate spatial point pattern. 
@@ -204,9 +238,9 @@ mad.test(X, \dots,  alternative=c("two.sided", "less", "greater"),
   John Wiley and Sons.
  }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/},
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  ,
   Andrew Hardegen and Suman Rakshit.
 }
 \seealso{

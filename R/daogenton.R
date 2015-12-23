@@ -1,14 +1,14 @@
-#
-#  daogenton.R
-#
-#  Dao-Genton adjusted p-values
-#
-#  $Revision: 1.8 $  $Date: 2015/08/30 07:46:14 $
-#
+##
+##  daogenton.R
+##
+##  Dao-Genton adjusted p-values
+##
+##  $Revision: 1.13 $  $Date: 2015/12/20 09:05:27 $
+##
 
 dg.test <- function(X, ..., exponent=2, nsim=19, nsimsub=nsim-1,
                     alternative=c("two.sided", "less", "greater"),
-                    interpolate=FALSE,
+                    reuse=TRUE, leaveout=1, interpolate=FALSE,
                     savefuns=FALSE, savepatterns=FALSE,
                     verbose=TRUE) {
   Xname <- short.deparse(substitute(X))
@@ -18,39 +18,79 @@ dg.test <- function(X, ..., exponent=2, nsim=19, nsimsub=nsim-1,
   if(!missing(nsimsub) && !relatively.prime(nsim, nsimsub))
     stop("nsim and nsimsub must be relatively prime")
   # top-level test
-  if(verbose) cat("Applying test to original data... ")
+  if(verbose) cat("Applying first-stage test to original data... ")
   tX <- envelopeTest(X, ...,
                      nsim=nsim, alternative=alternative,
+                     leaveout=leaveout,
                      interpolate=interpolate,
                      exponent=exponent,
-                     savefuns=savefuns, savepatterns=TRUE, verbose=FALSE,
+                     savefuns=savefuns,
+                     savepatterns=savepatterns || reuse,
+                     verbose=FALSE,
                      envir.simul=env.here)
-  if(verbose) cat("Done.\n")
   pX <- tX$p.value
-  # extract simulated patterns 
-  Ylist <- attr(attr(tX, "envelope"), "simpatterns")
-  # apply same test to each simulated pattern
-  if(verbose) cat(paste("Running tests on", nsim, "simulated patterns... "))
-  pY <- numeric(nsim)
-  for(i in 1:nsim) {
-    if(verbose) progressreport(i, nsim)
-    Yi <- Ylist[[i]]
-    # if X is a model, fit it to Yi. Otherwise the implicit model is CSR.
-    if(Xismodel) Yi <- update(X, Yi)
-    tYi <- envelopeTest(Yi, ...,
-                        nsim=nsimsub, alternative=alternative,
-                        interpolate=interpolate,
-                        exponent=exponent, savepatterns=TRUE, verbose=FALSE,
-                        envir.simul=env.here)
-    pY[i] <- tYi$p.value
+  ## check special case
+  afortiori <- !interpolate && (nsimsub < nsim) &&
+               (pX == (1/(nsim+1)) || pX == 1)
+  if(afortiori) {
+    ## result is determined
+    padj <- pX
+    pY <- NULL
+  } else {
+    ## result is not yet determined
+    if(!reuse) {
+      if(verbose) cat("Repeating first-stage test... ")
+      tXX <- envelopeTest(X, ...,
+                          nsim=nsim, alternative=alternative,
+                          leaveout=leaveout,
+                          interpolate=interpolate,
+                          exponent=exponent,
+                          savefuns=savefuns, savepatterns=TRUE, verbose=FALSE,
+                          envir.simul=env.here)
+      ## extract simulated patterns 
+      Ylist <- attr(attr(tXX, "envelope"), "simpatterns")
+    } else {
+      Ylist <- attr(attr(tX, "envelope"), "simpatterns")
+    }
+    if(verbose) cat("Done.\n")
+    ## apply same test to each simulated pattern
+    if(verbose) cat(paste("Running second-stage tests on",
+                          nsim, "simulated patterns... "))
+    pY <- numeric(nsim)
+    for(i in 1:nsim) {
+      if(verbose) progressreport(i, nsim)
+      Yi <- Ylist[[i]]
+      ## if X is a model, fit it to Yi. Otherwise the implicit model is CSR.
+      if(Xismodel) Yi <- update(X, Yi)
+      tYi <- envelopeTest(Yi, ...,
+                          nsim=nsimsub, alternative=alternative,
+                          leaveout=leaveout,
+                          interpolate=interpolate,
+                          exponent=exponent, savepatterns=TRUE, verbose=FALSE,
+                          envir.simul=env.here)
+      pY[i] <- tYi$p.value
+    }
+    pY <- sort(pY)
+    ## compute adjusted p-value
+    padj <- (1 + sum(pY <= pX))/(1+nsim)
   }
-  # compute adjusted p-value
-  padj <- (1 + sum(pY <= pX))/(1+nsim)
   # pack up
   method <- tX$method
   method <- c("Dao-Genton adjusted goodness-of-fit test",
               paste("based on", method[1]),
-              method[-1])
+              paste("First stage:", method[2]),
+              method[-(1:2)],
+              if(afortiori) {
+                paren(paste("Second stage was omitted: p0 =", pX,
+                            "implies p-value =", padj))
+              } else if(reuse) {
+                paste("Second stage: nested, ", nsimsub,
+                      "simulations for each first-stage simulation")
+              } else {
+                paste("Second stage:", nsim, "*", nsimsub,
+                      "nested simulations independent of first stage")
+              }
+              )
   names(pX) <- "p0"
   result <- structure(list(statistic = pX,
                            p.value = padj,
@@ -59,7 +99,7 @@ dg.test <- function(X, ..., exponent=2, nsim=19, nsimsub=nsim-1,
                       class="htest") 
   attr(result, "rinterval") <- attr(tX, "rinterval")
   attr(result, "pX") <- pX
-  attr(result, "pY") <- sort(pY)
+  attr(result, "pY") <- pY
   if(savefuns || savepatterns)
     result <- hasenvelope(result, attr(tX, "envelope"))
   return(result)
@@ -69,6 +109,7 @@ dg.envelope <- function(X, ..., nsim=19,
                         nsimsub=nsim-1,
                         nrank=1,
                         alternative=c("two.sided", "less", "greater"),
+                        leaveout=1,
                         interpolate = FALSE,
                         savefuns=FALSE, savepatterns=FALSE,
                         verbose=TRUE) {
@@ -80,6 +121,7 @@ dg.envelope <- function(X, ..., nsim=19,
   if(verbose) cat("Applying test to original data... ")
   tX <- envelopeTest(X, ...,
                      alternative=alternative,
+                     leaveout=leaveout,
                      interpolate = interpolate,
                      nsim=nsim, nrank=nrank,
                      exponent=Inf, savepatterns=TRUE, savefuns=TRUE,
@@ -101,6 +143,7 @@ dg.envelope <- function(X, ..., nsim=19,
     if(Xismodel) Yi <- update(X, Yi)
     tYi <- envelopeTest(Yi, ...,
                         alternative=alternative,
+                        leaveout=leaveout,
                         interpolate = interpolate, save.interpolant = FALSE,
                         nsim=nsimsub, nrank=nrank,
                         exponent=Inf, savepatterns=TRUE, verbose=FALSE,

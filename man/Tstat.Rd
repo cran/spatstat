@@ -82,9 +82,9 @@ Tstat(X, ..., r = NULL, rmax = NULL,
 \examples{
   plot(Tstat(redwood))
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
 }
 \keyword{spatial}
 \keyword{nonparametric}

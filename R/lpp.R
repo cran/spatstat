@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.35 $   $Date: 2015/08/06 11:22:01 $
+#  $Revision: 1.39 $   $Date: 2015/11/25 02:56:11 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -18,7 +18,7 @@ lpp <- function(X, L, ...) {
     df <- X[, !(names(X) %in% localnames), drop=FALSE]
     # validate local coordinates
     if(nrow(X) > 0) {
-      nedge <- nobjects(as.psp(L))
+      nedge <- nsegments(L)
       if(with(lo, any(seg < 1 || seg > nedge)))
         stop("Segment index coordinate 'seg' exceeds bounds")
       if(with(lo, any(tp < 0 || tp > 1)))
@@ -97,7 +97,7 @@ plot.lpp <- function(x, ..., main, add=FALSE,
     do.several <- want.several && !add && multiplot
     if(do.several) {
       ## generate one plot for each column of marks
-      y <- as.solist(lapply(mx, function(z, P) setmarks(P,z), P=x))
+      y <- solapply(mx, setmarks, x=x)
       out <- do.call("plot",
                      c(list(x=y, main=main, do.plot=do.plot,
                             show.window=show.window),
@@ -322,6 +322,10 @@ unmark.lpp <- function(X) {
 as.psp.lpp <- function(x, ..., fatal=TRUE){
   verifyclass(x, "lpp", fatal=fatal)
   return(x$domain$lines)
+}
+
+nsegments.lpp <- function(x) {
+  return(x$domain$lines$n)
 }
 
 local2lpp <- function(L, seg, tp, X=NULL) {

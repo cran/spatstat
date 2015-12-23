@@ -8,32 +8,35 @@
   Computes simulation envelopes of a summary function.
 }
 \usage{
-  envelope(Y, fun, ...)
+  envelope(Y, fun, \dots)
 
   \method{envelope}{ppp}(Y, fun=Kest, nsim=99, nrank=1, \dots,
-  simulate=NULL,  fix.n=FALSE, fix.marks=FALSE,
+  funargs=list(), simulate=NULL,  fix.n=FALSE, fix.marks=FALSE,
   verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL, 
-  alternative=c("two.sided", "less", "greater"), scale=NULL, 
+  alternative=c("two.sided", "less", "greater"),
+  scale=NULL, clamp=FALSE, 
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
   do.pwrong=FALSE, envir.simul=NULL)
 
   \method{envelope}{ppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
-  simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
+  funargs=list(), simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
   verbose=TRUE, clipdata=TRUE,
   start=NULL, control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5,
   transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL, 
-  alternative=c("two.sided", "less", "greater"), scale=NULL, 
+  alternative=c("two.sided", "less", "greater"), 
+  scale=NULL, clamp=FALSE, 
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
   do.pwrong=FALSE, envir.simul=NULL)
 
   \method{envelope}{kppm}(Y, fun=Kest, nsim=99, nrank=1, \dots, 
-  simulate=NULL,
+  funargs=list(), simulate=NULL,
   verbose=TRUE, clipdata=TRUE,
   transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL, 
-  alternative=c("two.sided", "less", "greater"), scale=NULL, 
+  alternative=c("two.sided", "less", "greater"), 
+  scale=NULL, clamp=FALSE, 
   savefuns=FALSE, savepatterns=FALSE,
   nsim2=nsim, VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
   do.pwrong=FALSE, envir.simul=NULL)
@@ -60,6 +63,9 @@
   }
   \item{\dots}{
     Extra arguments passed to \code{fun}.
+  }
+  \item{funargs}{
+    A list, containing extra arguments to be passed to \code{fun}.
   }
   \item{simulate}{
     Optional. Specifies how to generate the simulated point patterns.
@@ -127,6 +133,9 @@
     Logical value indicating whether to use the theoretical value,
     computed by \code{fun}, as the reference value for simultaneous
     envelopes. Applicable only when \code{global=TRUE}.
+    Default is \code{use.theory=TRUE} if \code{Y} is a point pattern,
+    or a point process model equivalent to Complete Spatial Randomness,
+    and \code{use.theory=FALSE} otherwise.
   }
   \item{alternative}{
     Character string determining whether the envelope corresponds
@@ -145,6 +154,16 @@
     will be \emph{divided} by \code{scale(r)} before the
     maximum deviation is computed. The resulting global envelopes
     will have width proportional to \code{scale(r)}. 
+  }
+  \item{clamp}{
+    Logical value indicating how to compute envelopes when
+    \code{alternative="less"} or \code{alternative="greater"}.
+    Deviations of the observed
+    summary function from the theoretical summary function are initially
+    evaluated as signed real numbers, with large positive values indicating
+    consistency with the alternative hypothesis.
+    If \code{clamp=FALSE} (the default), these values are not changed.
+    If \code{clamp=TRUE}, any negative values are replaced by zero.
   }
   \item{savefuns}{
     Logical flag indicating whether to save all the simulated
@@ -379,9 +398,18 @@
   sample mean, sample variance and other quantities.
 
   Arguments can be passed to the function \code{fun} through
-  \code{...}. In particular, the argument \code{correction}
-  determines the edge correction to be used to calculate the summary statistic.
-  See the section on Edge Corrections, and the Examples.
+  \code{...}. This means that you simply specify these arguments in the call to
+  \code{envelope}, and they will be passed to \code{fun}.
+  In particular, the argument \code{correction}
+  determines the edge correction to be used to calculate the summary
+  statistic. See the section on Edge Corrections, and the Examples.
+
+  Arguments can also be passed to the function \code{fun}
+  through the list \code{funargs}. This mechanism is typically used if
+  an argument of \code{fun} has the same name as an argument of
+  \code{envelope}. The list \code{funargs} should contain
+  entries of the form \code{name=value}, where each \code{name} is the name
+  of an argument of \code{fun}.
 
   If \code{Y} is a fitted cluster point process model (object of
   class \code{"kppm"}), and \code{simulate=NULL},
@@ -751,11 +779,11 @@ nsim=3, global=TRUE))
  EG <- envelope(X, Gest, nsim=3, simulate=EK)
 }
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
-  and Rolf Turner
-  \email{r.turner@auckland.ac.nz}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
+  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  
 }
 \keyword{spatial}
 \keyword{htest}

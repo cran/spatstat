@@ -32,12 +32,12 @@
 \value{
   Another object of class \code{"symbolmap"}.
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/},
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak.
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  ,
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
+  and Ege Rubak \email{rubak@math.aau.dk}.
 }
 \seealso{
   \code{\link{symbolmap}} to create a graphics symbol map.

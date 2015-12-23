@@ -65,9 +65,9 @@
   fitSx <- ppm(swedishpines ~ x, Strauss(9))
   lamSx <- intensity(fitSx)
 }
-\author{Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  
   and Gopal Nair.
 }
 \keyword{spatial}

@@ -189,10 +189,14 @@
 	simulate Strauss process (perfect simulation)\cr
 	\code{\link{rHardcore}} \tab
 	simulate Hard Core process (perfect simulation)\cr
+	\code{\link{rStraussHard}} \tab
+	simulate Strauss-hard core process (perfect simulation)\cr
 	\code{\link{rDiggleGratton}} \tab
 	simulate Diggle-Gratton process (perfect simulation)\cr
 	\code{\link{rDGS}} \tab
 	simulate Diggle-Gates-Stibbard process (perfect simulation)\cr
+	\code{\link{rPenttinen}} \tab
+	simulate Penttinen process (perfect simulation)\cr
 	\code{\link{rNeymanScott}} \tab
 	simulate a general Neyman-Scott process\cr
 	\code{\link{rPoissonCluster}} \tab
@@ -1421,8 +1425,18 @@
     simulate the \ifelse{latex}{\out{Mat\'ern}}{Matern} Model II inhibition process\cr
     \code{\link{rSSI}} \tab
     simulate Simple Sequential Inhibition process\cr
+    \code{\link{rHardcore}} \tab
+    simulate hard core process (perfect simulation)\cr
     \code{\link{rStrauss}} \tab
     simulate Strauss process (perfect simulation)\cr
+    \code{\link{rStraussHard}} \tab
+    simulate Strauss-hard core process (perfect simulation)\cr
+    \code{\link{rDiggleGratton}} \tab
+    simulate Diggle-Gratton process (perfect simulation)\cr
+    \code{\link{rDGS}} \tab
+    simulate Diggle-Gates-Stibbard process (perfect simulation)\cr
+    \code{\link{rPenttinen}} \tab
+    simulate Penttinen process (perfect simulation)\cr
     \code{\link{rNeymanScott}} \tab
     simulate a general Neyman-Scott process\cr
     \code{\link{rMatClust}} \tab
@@ -1674,12 +1688,12 @@
   General Public License", a copy of which is distributed with the package.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/},
-  Rolf Turner
-  \email{r.turner@auckland.ac.nz}
-  and Ege Rubak \email{rubak@math.aau.dk}.
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+  
+  ,
+  Rolf Turner \email{r.turner@auckland.ac.nz}
+  
+  and Ege Rubak \email{rubak@math.aau.dk} .
 }
 \section{Acknowledgements}{
   Kasper Klitgaard Berthelsen,
@@ -1733,6 +1747,7 @@
   Funwi-Gabga Neba,
   Oscar Garcia,
   Agnes Gault,
+  Jonas Geldmann,
   Marc Genton,
   Shaaban Ghalandarayeshi,
   Julian Gilbey,
@@ -1746,6 +1761,7 @@
   Juha Heikkinen,
   Mandy Hering,
   Markus Herrmann,
+  Kassel Hingee,
   Kurt Hornik,
   Philipp Hunziker,
   Jack Hywood,
@@ -1819,6 +1835,7 @@
   \ifelse{latex}{\out{Fran\c{c}ois S\'{e}m\'{e}curbe}}{Francois Semecurbe},
   Vadim Shcherbakov,
   Shen Guochun,
+  Shi Peijian,
   Harold-Jeffrey Ship,
   Ida-Maria Sintorn,
   Yong Song, 

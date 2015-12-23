@@ -45,8 +45,8 @@
 }
 \author{
   Ang Qi Wei \email{aqw07398@hotmail.com} and
-  Adrian Baddeley \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au} 
+  
 }
 \seealso{
    \code{\link{linnet}}

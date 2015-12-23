@@ -1,17 +1,19 @@
 #
 #  envelopelpp.R
 #
-#  $Revision: 1.18 $   $Date: 2015/10/02 03:43:53 $
+#  $Revision: 1.19 $   $Date: 2015/10/21 09:06:57 $
 #
 #  Envelopes for 'lpp' objects
 #
 #
 
 envelope.lpp <-
-  function(Y, fun=linearK, nsim=99, nrank=1, ..., 
+  function(Y, fun=linearK, nsim=99, nrank=1, ...,
+           funargs=list(),
            simulate=NULL, verbose=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
-           alternative=c("two.sided", "less", "greater"), scale=NULL, 
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, do.pwrong=FALSE, envir.simul=NULL) {
@@ -53,11 +55,11 @@ envelope.lpp <-
     X <- Y
   }
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
+                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
                  verbose=verbose, clipdata=FALSE,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
-                 alternative=alternative, scale=scale, 
+                 alternative=alternative, scale=scale, clamp=clamp, 
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, cl=cl,
@@ -66,9 +68,10 @@ envelope.lpp <-
 
 envelope.lppm <-
   function(Y, fun=linearK, nsim=99, nrank=1, ..., 
-           simulate=NULL, verbose=TRUE, 
+           funargs=list(), simulate=NULL, verbose=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
-           alternative=c("two.sided", "less", "greater"), scale=NULL, 
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE, 
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, do.pwrong=FALSE, envir.simul=NULL) {
@@ -110,11 +113,11 @@ envelope.lppm <-
     X <- Y
   }
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
+                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
                  verbose=verbose, clipdata=FALSE,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
-                 alternative=alternative, scale=scale, 
+                 alternative=alternative, scale=scale, clamp=clamp,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, cl=cl,

@@ -4,6 +4,7 @@
 \alias{as.ppp.lpp}
 \alias{as.psp.lpp}
 \alias{marks<-.lpp}
+\alias{nsegments.lpp}
 \alias{print.lpp}
 \alias{print.summary.lpp}
 \alias{summary.lpp}
@@ -19,13 +20,23 @@
 }
 \usage{
 \method{as.ppp}{lpp}(X, ..., fatal=TRUE)
+
 \method{as.psp}{lpp}(x, ..., fatal=TRUE)
+
 \method{marks}{lpp}(x, ...) <- value
+
+\method{nsegments}{lpp}(x)
+
 \method{print}{lpp}(x, ...)
+
 \method{print}{summary.lpp}(x, ...)
+
 \method{summary}{lpp}(object, ...)
+
 \method{unitname}{lpp}(x)
+
 \method{unitname}{lpp}(x) <- value
+
 \method{unmark}{lpp}(X)
 }
 \arguments{
@@ -51,6 +62,7 @@
   \code{\link{as.ppp}},
   \code{\link{as.psp}},
   \code{\link{marks<-}},
+  \code{\link{nsegments}},
   \code{\link{print}},
   \code{\link{summary}},
   \code{\link{unitname}}, 
@@ -76,9 +88,7 @@
   See the documentation on the corresponding generic function.
 }
 \author{
-  Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}
-  \url{http://www.maths.uwa.edu.au/~adrian/}
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
 }
 \seealso{
   \code{\link{lpp}},

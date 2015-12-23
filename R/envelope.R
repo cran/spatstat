@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.78 $  $Date: 2015/10/05 05:50:48 $
+#   $Revision: 2.82 $  $Date: 2015/11/17 08:53:33 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -47,10 +47,12 @@ simulrecipe <- function(type, expr, envir, csr, pois=csr, constraints="") {
 
 envelope.ppp <-
   function(Y, fun=Kest, nsim=99, nrank=1, ...,
+           funargs=list(),
            simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
            verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
-           alternative=c("two.sided", "less", "greater"), scale=NULL, 
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE, 
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, do.pwrong=FALSE,
@@ -171,11 +173,11 @@ envelope.ppp <-
   }
   
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
+                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
-                 alternative=alternative, scale=scale,
+                 alternative=alternative, scale=scale, clamp=clamp,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
@@ -184,12 +186,14 @@ envelope.ppp <-
 
 envelope.ppm <- 
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
+           funargs=list(),
            simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
            verbose=TRUE, clipdata=TRUE, 
            start=NULL,
            control=update(default.rmhcontrol(Y), nrep=nrep), nrep=1e5, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL, 
-           alternative=c("two.sided", "less", "greater"), scale=NULL,
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE, 
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL, maxnerr=nsim, do.pwrong=FALSE,
@@ -243,12 +247,12 @@ envelope.ppm <-
     # Processing is deferred to envelopeEngine
     simrecipe <- simulate
   }
-  envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
+  envelopeEngine(X=X, fun=fun, simul=simrecipe, 
+                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
-                 alternative=alternative, scale=scale,
+                 alternative=alternative, scale=scale, clamp=clamp, 
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
@@ -257,9 +261,11 @@ envelope.ppm <-
 
 envelope.kppm <-
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
+           funargs=list(),
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
-           alternative=c("two.sided", "less", "greater"), scale=NULL, 
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
            do.pwrong=FALSE, envir.simul=NULL)
@@ -291,12 +297,12 @@ envelope.kppm <-
     # Processing is deferred to envelopeEngine
     simrecipe <- simulate
   }
-  envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., 
+  envelopeEngine(X=X, fun=fun, simul=simrecipe, 
+                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
-                 alternative=alternative, scale=scale,
+                 alternative=alternative, scale=scale, clamp=clamp,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
                  Yname=Yname, maxnerr=maxnerr, cl=cl,
@@ -314,10 +320,11 @@ envelope.kppm <-
 
 envelopeEngine <-
   function(X, fun, simul,
-           nsim=99, nrank=1, ..., 
+           nsim=99, nrank=1, ..., funargs=list(), 
            verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
-           alternative=c("two.sided", "less", "greater"), scale=NULL,
+           alternative=c("two.sided", "less", "greater"),
+           scale=NULL, clamp=FALSE,
            savefuns=FALSE, savepatterns=FALSE,
            saveresultof=NULL,
            weights=NULL,
@@ -326,11 +333,21 @@ envelopeEngine <-
            Yname=NULL, maxnerr=nsim, internal=NULL, cl=NULL,
            envir.user=envir.user,
            expected.arg="r",
-           do.pwrong=FALSE) {
+           do.pwrong=FALSE,
+           foreignclass=NULL,
+           collectrubbish=FALSE) {
   #
   envir.here <- sys.frame(sys.nframe())
 
   alternative <- match.arg(alternative)
+
+  foreignclass <- as.character(foreignclass)
+  if(length(foreignclass) != 0 && clipdata) {
+    warning(paste("Ignoring clipdata=TRUE:",
+                  "I don't know how to clip objects of class",
+                  sQuote(paste(foreignclass, collapse=","))))
+    clipdata <- FALSE
+  }
   
   # ----------------------------------------------------------
   # Determine Simulation
@@ -340,6 +357,7 @@ envelopeEngine <-
   Xclass <- if(is.ppp(X)) "ppp" else
             if(is.pp3(X)) "pp3" else
             if(is.ppx(X)) "ppx" else
+            if(inherits(X, foreignclass)) foreignclass else
             stop("Unrecognised class of point pattern")
   Xobjectname <- paste("point pattern of class", sQuote(Xclass))
 
@@ -403,9 +421,7 @@ envelopeEngine <-
       simexpr <- simulate
       envir <- envir.user
     } else if(is.list(simulate) &&
-              (   (is.ppp(X) && all(unlist(lapply(simulate, is.ppp))))
-               || (is.pp3(X) && all(unlist(lapply(simulate, is.pp3))))
-               || (is.ppx(X) && all(unlist(lapply(simulate, is.ppx)))))) {
+              all(sapply(simulate, inherits, what=Xclass))) {
       # The user-supplied list of point patterns will be used
       simtype <- "list"
       SimDataList <- simulate
@@ -507,6 +523,7 @@ envelopeEngine <-
   funX <- do.call(fun,
                   resolve.defaults(list(Xarg),
                                    list(...),
+                                   funargs,
                                    corrx))
                                      
   if(!inherits(funX, "fv"))
@@ -649,6 +666,8 @@ envelopeEngine <-
                         VARIANCE=VARIANCE,
                         nSD=nSD,
                         alternative=alternative,
+                        scale=scale,
+                        clamp=clamp,
                         use.weights=use.weights,
                         do.pwrong=do.pwrong)
 
@@ -695,7 +714,8 @@ envelopeEngine <-
     
   # arguments for function
   funargs <-
-    resolve.defaults(inferred.r.args,
+    resolve.defaults(funargs,
+                     inferred.r.args,
                      list(...),
                      if(usecorrection) list(correction="best") else NULL)
   
@@ -795,6 +815,12 @@ envelopeEngine <-
     simvals[ , i] <- funXsim[[valname]]
     if(verbose)
       pstate <- progressreport(i, Nsim, state=pstate)
+    
+    if(collectrubbish) {
+      rm(Xsim)
+      rm(funXsim)
+      gc()
+    }
   }
   ##  end simulation loop
   
@@ -841,7 +867,7 @@ envelopeEngine <-
   result <- envelope.matrix(simvals, funX=funX,
                             jsim=jsim, jsim.mean=jsim.mean,
                             type=etype, alternative=alternative,
-                            scale=scale,
+                            scale=scale, clamp=clamp,
                             csr=csr, use.theory=use.theory,
                             nrank=nrank, ginterval=ginterval, nSD=nSD,
                             Yname=Yname, do.pwrong=do.pwrong,
@@ -1061,8 +1087,6 @@ summary.envelope <- function(object, ...) {
 # theory = funX[["theo"]]
 # observed = fX
 
-envelope.matrix <- local({
-
 envelope.matrix <- function(Y, ...,
                             rvals=NULL, observed=NULL, theory=NULL, 
                             funX=NULL,
@@ -1070,7 +1094,7 @@ envelope.matrix <- function(Y, ...,
                             jsim=NULL, jsim.mean=NULL,
                             type=c("pointwise", "global", "variance"),
                             alternative=c("two.sided", "less", "greater"),
-                            scale = NULL,
+                            scale = NULL, clamp=FALSE,
                             csr=FALSE, use.theory = csr, 
                             nrank=1, ginterval=NULL, nSD=2,
                             savefuns=FALSE,
@@ -1186,7 +1210,7 @@ envelope.matrix <- function(Y, ...,
                lohi <- apply(simvals, 1,
 #                             function(x, n) { sort(x)[n] },
                              orderstats,
-                             n=c(nrank, nsim-nrank+1))
+                             k=c(nrank, nsim-nrank+1))
              }
              lo <- lohi[1,]
              hi <- lohi[2,]
@@ -1202,7 +1226,7 @@ envelope.matrix <- function(Y, ...,
                   },
                   greater = {
                     lo <- rep.int(-Inf, length(lo))
-                    lo.name <- "infinite upper limit"
+                    lo.name <- "infinite lower limit"
                   })
            #
            if(use.theory) {
@@ -1297,10 +1321,11 @@ envelope.matrix <- function(Y, ...,
              nsim <- ncol(simvals)
              # compute deviations
              deviations <- sweep(simvals, 1, reference)
-             deviations <- switch(alternative,
-                                  two.sided = abs(deviations),
-                                  less = pmax(0, -deviations),
-                                  greater = pmax(0, deviations))
+             deviations <-
+               switch(alternative,
+                      two.sided = abs(deviations),
+                      greater = if(clamp) pmax(0, deviations) else deviations,
+                      less = if(clamp) pmax(0, -deviations) else (-deviations))
              deviations <- matrix(deviations,
                                   nrow=nrow(simvals), ncol=ncol(simvals))
              ## rescale ?
@@ -1547,7 +1572,8 @@ envelope.matrix <- function(Y, ...,
   attr(result, "einfo") <- list(global = (type =="global"),
                                 ginterval = ginterval,
                                 alternative=alternative,
-                                scale = scale, 
+                                scale = scale,
+                                clamp = clamp,
                                 csr = csr,
                                 use.theory = use.theory,
                                 csr.theo = csr && use.theory,
@@ -1590,12 +1616,6 @@ envelope.matrix <- function(Y, ...,
     attr(result, "weights") <- weights
   return(result)
 }
-
-  orderstats <- function(x, n) { sort(x)[n] }
-
-  envelope.matrix
-  
-})
 
 envelope.envelope <- function(Y, fun=NULL, ...,
                               transform=NULL, global=FALSE, VARIANCE=FALSE) {
@@ -1756,6 +1776,7 @@ pool.envelope <- local({
     VARIANCE  <- resolveEinfo(eilist, "VARIANCE", FALSE)
     alternative      <- resolveEinfo(eilist, "alternative", FALSE)
     scale <- resolveEinfo(eilist, "scale", NULL, atomic=FALSE)
+    clamp <- resolveEinfo(eilist, "clamp", FALSE)
     resolveEinfo(eilist, "simtype",  "funs",
                  "Envelopes were generated using different types of simulation")
     resolveEinfo(eilist, "constraints",  "",
@@ -1811,6 +1832,7 @@ pool.envelope <- local({
            pointwise = {
              result <- envelope(SFmatrix, funX=Elist[[1]],
                                 type=type, alternative=alternative,
+                                clamp=clamp,
                                 csr=csr, use.theory=use.theory,
                                 Yname=Yname, weights=weights,
                                 savefuns=savefuns)
@@ -1824,7 +1846,7 @@ pool.envelope <- local({
              }
              result <- envelope(simfunmatrix, funX=Elist[[1]],
                                 type=type, alternative=alternative,
-                                scale=scale,
+                                scale=scale, clamp=clamp,
                                 csr=csr, use.theory=use.theory,
                                 ginterval=ginterval,
                                 Yname=Yname, weights=weights,
@@ -1846,7 +1868,8 @@ pool.envelope <- local({
                weightlist <- lapply(Elist, attr, which="weights")
                w.mean <- unlist(lapply(weightlist, sum))
                d.mean <- sum(w.mean)
-               ssw <- unlist(lapply(weightlist, function(x) {sum((x/sum(x))^2)}))
+               ssw <- unlist(lapply(weightlist, meansqfrac))
+               ##  meansqfrac :  function(x) {sum((x/sum(x))^2)}))
                w.var  <- w.mean * (1 - ssw)
                d.var <-  d.mean * (1 - sum(ssw))
              }
@@ -1928,7 +1951,9 @@ pool.envelope <- local({
   getrvals <- function(z) { as.matrix(z)[, fvnames(z, ".x")] }
   
   getdotvals <- function(z) { as.matrix(z)[, fvnames(z, "."), drop=FALSE] }
-  
+
+  meansqfrac <- function(x) {sum((x/sum(x))^2)} 
+
   pool.envelope
 })
 
