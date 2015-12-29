@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.44-0
-Nickname: The Sound of One Hand Typing
-Date: 2015-12-22
+Version: 1.44-1
+Nickname: Gift Horse
+Date: 2015-12-29
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -193,6 +193,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2015-12-22 06:17:25 UTC; adrian
+Packaged: 2015-12-29 09:03:39 UTC; adrian
 Repository: CRAN
-Date/Publication: 2015-12-23 06:09:40
+Date/Publication: 2015-12-29 22:08:27
