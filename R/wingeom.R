@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.104 $	$Date: 2015/10/21 09:06:57 $
+#	$Revision: 4.111 $	$Date: 2016/03/03 00:20:56 $
 #
 #
 #
@@ -115,7 +115,7 @@ unit.square <- function() { owin(c(0,1),c(0,1)) }
 
 square <- function(r=1, unitname=NULL) {
   stopifnot(is.numeric(r))
-  if(any(is.na(r) | !is.finite(r)))
+  if(!all(is.finite(r)))
     stop("argument r is NA or infinite")
   if(length(r) == 1) {
     stopifnot(r > 0)
@@ -154,7 +154,8 @@ overlap.owin <- function(A, B) {
     for(i in seq_along(AA))
       for(j in seq_along(BB))
         area <- area + overlap.xypolygon(AA[[i]], BB[[j]])
-    return(area)
+    # small negative numbers can occur due to numerical error
+    return(max(0, area))
   }
   if(At=="mask") {
     # count pixels in A that belong to B
@@ -314,10 +315,10 @@ intersect.owin <- function(..., fatal=TRUE, p) {
   if(length(rasterinfo) > 0) {
     # convert to masks with specified parameters, and intersect
     if(Amask) {
-      A <- do.call("as.mask", append(list(A), rasterinfo))
+      A <- do.call(as.mask, append(list(A), rasterinfo))
       return(restrict.mask(A, B))
     } else {
-      B <- do.call("as.mask", append(list(B), rasterinfo))
+      B <- do.call(as.mask, append(list(B), rasterinfo))
       return(restrict.mask(B, A))
     }
   } 
@@ -479,7 +480,7 @@ union.owin <- function(..., p) {
   }
 
   ## Convert C to mask
-  C <- do.call("as.mask", append(list(w=C), rasterinfo))
+  C <- do.call(as.mask, append(list(w=C), rasterinfo))
 
   rxy <- rasterxy.mask(C)
   x <- rxy$x
@@ -564,7 +565,7 @@ setminus.owin <- function(A, B, ..., p) {
       list()
 
   ## Convert A to mask
-  AB <- do.call("as.mask", append(list(w=A), rasterinfo))
+  AB <- do.call(as.mask, append(list(w=A), rasterinfo))
 
   rxy <- rasterxy.mask(AB)
   x <- rxy$x
@@ -717,8 +718,8 @@ grow.mask <- function(M, xmargin=0, ymargin=xmargin) {
   nright <- attr(xcolplus, "nright")
   nbot <- attr(yrowplus, "nleft")
   ntop <- attr(yrowplus, "nright")
-  mplus[ (nleft+1):(length(yrowplus)-nright),
-         (nbot+1):(length(xcolplus)-ntop) ] <- m
+  mplus[ (nbot+1):(length(yrowplus)-ntop),
+         (nleft+1):(length(xcolplus)-nright) ] <- m
   ## pack up
   result <- owin(xrange=Rplus$xrange,
                  yrange=Rplus$yrange,
@@ -754,6 +755,27 @@ bdry.mask <- function(W) {
   return(W)
 }
 
+nvertices <- function(x, ...) {
+  UseMethod("nvertices")
+}
+
+nvertices.default <- function(x, ...) {
+  v <- vertices(x)
+  vx <- v$x
+  n <- if(is.null(vx)) NA else length(vx)
+  return(n)
+}
+
+nvertices.owin <- function(x, ...) {
+  if(is.empty(x))
+    return(0)
+  n <- switch(x$type,
+              rectangle=4,
+              polygonal=sum(lengths(lapply(x$bdry, getElement, name="x"))),
+              mask=sum(bdry.mask(x)$m))
+  return(n)
+}
+
 vertices <- function(w) {
   UseMethod("vertices")
 }
@@ -769,7 +791,7 @@ vertices.owin <- function(w) {
            vert <- list(x=xr[c(1,2,2,1)], y=yr[c(1,1,2,2)])
          },
          polygonal={
-           vert <- do.call("concatxy",w$bdry)
+           vert <- do.call(concatxy,w$bdry)
          },
          mask={
            bm <- bdry.mask(w)$m

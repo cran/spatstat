@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.52 $  $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.55 $  $Date: 2016/03/05 01:33:03 $
 #
 
 ppx <- local({
@@ -101,7 +101,7 @@ print.ppx <- function(x, ...) {
   invisible(NULL)
 }
 
-summary.ppx <- function(object, ...) { print(object, ...) }
+summary.ppx <- function(object, ...) { object }
 
 plot.ppx <- function(x, ...) {
   xname <- short.deparse(substitute(x))
@@ -112,7 +112,7 @@ plot.ppx <- function(x, ...) {
     coo <- coo[,1]
     ran <- diff(range(coo))
     ylim <- c(-1,1) * ran/20
-    do.call("plot.default",
+    do.call(plot.default,
             resolve.defaults(list(coo, numeric(length(coo))),
                              list(...),
                              list(asp=1, ylim=ylim,
@@ -122,7 +122,7 @@ plot.ppx <- function(x, ...) {
     if(is.null(dom)) {
       # plot x, y coordinates only
       nama <- names(coo)
-      do.call.matched("plot.default",
+      do.call.matched(plot.default,
                       resolve.defaults(list(x=coo[,1], y=coo[,2], asp=1),
                                        list(...),
                                        list(main=xname),
@@ -131,7 +131,7 @@ plot.ppx <- function(x, ...) {
       add <- resolve.defaults(list(...), list(add=FALSE))$add
       if(!add) {
         # plot domain, whatever it is
-        do.call("plot", resolve.defaults(list(dom),
+        do.call(plot, resolve.defaults(list(dom),
                                        list(...),
                                        list(main=xname)))
       }
@@ -139,7 +139,7 @@ plot.ppx <- function(x, ...) {
       x2 <- ppp(coo[,1], coo[,2], window=as.owin(dom),
                 marks=as.data.frame(marks(x)), check=FALSE)
       # invoke plot.ppp
-      return(do.call("plot", resolve.defaults(list(x2),
+      return(do.call(plot, resolve.defaults(list(x2),
                                               list(add=TRUE),
                                               list(...))))
     }
@@ -150,7 +150,7 @@ plot.ppx <- function(x, ...) {
     x3 <- pp3(coo[,1], coo[,2], coo[,3], dom)
     # invoke plot.pp3
     nama <- names(coo)
-    do.call("plot",
+    do.call(plot,
             resolve.defaults(list(x3),
                              list(...),
                              list(main=xname),
@@ -211,7 +211,7 @@ coords.ppx <- function(x, ..., spatial=TRUE, temporal=TRUE, local=TRUE) {
   chosen <- (ctype == "spatial" & spatial) |
             (ctype == "temporal" & temporal) | 
             (ctype == "local" & local) 
-  as.data.frame(x$data[, chosen])
+  as.data.frame(x$data[, chosen, drop=FALSE])
 }
 
 coords.ppp <- function(x, ...) { data.frame(x=x$x,y=x$y) }
@@ -341,7 +341,7 @@ as.boxx <- function(..., warn.owin = TRUE) {
     if (!is.list(a)) 
       stop("Don't know how to interpret data as a box")
   }
-  return(do.call("boxx", a))
+  return(do.call(boxx, a))
 }
 
 print.boxx <- function(x, ...) {
@@ -521,7 +521,7 @@ inside.boxx <- function(..., w = NULL){
     stop("Mismatch between dimension of boxx and number of coordinate vectors.")
   ## Check coord. vectors have equal length
   n <- length(dat[[1]])
-  if(any(sapply(dat, length)!=n))
+  if(any(lengths(dat)!=n))
     stop("Coordinate vectors have unequal length.")
   index <- rep(TRUE, n)
   for(i in seq_along(ra)){

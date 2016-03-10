@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.44-1
-Nickname: Gift Horse
-Date: 2015-12-29
+Version: 1.45-0
+Nickname: One Lakh
+Date: 2016-03-10
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -16,7 +16,8 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	and 
 	Rasmus Waagepetersen.
 	Additional contributions 
-	by Q.W. Ang; 
+	by M. Adepeju;
+        Q.W. Ang; 
 	S. Azaele; 
 	M. Baddeley;
 	C. Beale; 
@@ -42,6 +43,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	R. Corria Ainslie;
 	M. de la Cruz; 
 	P. Dalgaard; 
+	M. D'Antuono;
         S. Das;
 	P.J. Diggle; 
 	P. Donnelly;
@@ -71,6 +73,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	J. Heikkinen; 
 	M. Hering; 
 	M. Herrmann; 
+	P. Hewson;
 	K. Hingee;
 	K. Hornik; 
 	P. Hunziker; 
@@ -165,6 +168,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	A. Villers; 
         F. Vinatier;
         S. Voss;
+	S. Wagner;
 	H. Wang; 
 	H. Wendrock; 
 	J. Wild;
@@ -193,6 +197,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2015-12-29 09:03:39 UTC; adrian
+Packaged: 2016-03-10 08:47:18 UTC; adrian
 Repository: CRAN
-Date/Publication: 2015-12-29 22:08:27
+Date/Publication: 2016-03-10 17:55:24

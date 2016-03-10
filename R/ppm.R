@@ -1,5 +1,5 @@
 #
-#	$Revision: 1.51 $	$Date: 2015/08/27 08:28:22 $
+#	$Revision: 1.53 $	$Date: 2016/03/04 09:34:17 $
 #
 #    ppm()
 #          Fit a point process model to a two-dimensional point pattern
@@ -42,8 +42,7 @@ ppm.formula <- function(Q, interaction=NULL, ..., data=NULL, subset) {
     thecall[ncall + 1:nargh] <- argh
     names(thecall)[ncall + 1:nargh] <- names(argh)
   }
-  callenv <- parent.frame()
-  if(!is.null(data)) callenv <- list2env(data, parent=callenv)
+  callenv <- list2env(as.list(data), parent=parent.frame())
   result <- eval(thecall, envir=callenv)
 
   result$call <- cl
@@ -206,8 +205,8 @@ function(Q,
     fitLOGI$call <- cl
     fitLOGI$callstring <- callstring
     fitLOGI$callframe <- parent.frame()
-    if(project && !valid.ppm(fitLOGI))
-      fitLOGI <- project.ppm(fitLOGI)
+    if(emend && !valid.ppm(fitLOGI))
+      fitLOGI <- emend.ppm(fitLOGI)
     return(fitLOGI)
   }
   
@@ -237,8 +236,8 @@ function(Q,
   fitMPL$callstring <- callstring
   fitMPL$callframe <- parent.frame()
 
-  if(project && !valid.ppm(fitMPL))
-    fitMPL <- project.ppm(fitMPL)
+  if(emend && !valid.ppm(fitMPL))
+    fitMPL <- emend.ppm(fitMPL)
   
   if(method == "mpl" || is.poisson.ppm(fitMPL))
     return(fitMPL)
@@ -249,8 +248,8 @@ function(Q,
   if(is.null(fitHO))
     return(fitMPL)
   
-  if(project && !valid.ppm(fitHO))
-    fitHO <- project.ppm(fitHO)
+  if(emend && !valid.ppm(fitHO))
+    fitHO <- emend.ppm(fitHO)
   
   return(fitHO)
 }

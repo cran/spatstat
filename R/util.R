@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.195 $    $Date: 2015/11/21 02:03:24 $
+#    $Revision: 1.204 $    $Date: 2016/03/04 00:42:30 $
 #
 #
 matrowsum <- function(x) {
@@ -239,6 +239,13 @@ truncline <- function(x, nc) {
   return(z)
 }
 
+is.blank <- function(s) {
+  y <- strsplit(s, "")
+  z <- lapply(y, "==", e2=" ")
+  ans <- sapply(z, all)
+  return(ans)
+}
+
 padtowidth <- local({
 
   blankstring <- function(n) paste(rep(" ", n), collapse="")
@@ -267,7 +274,7 @@ padtowidth <- local({
 })
 
 fakecallstring <- function(fname, parlist) {
-  cl <- do.call("call", append(list(name = fname), parlist))
+  cl <- do.call(call, append(list(name = fname), parlist))
   return(format(cl))
 }
 
@@ -666,21 +673,23 @@ ensure3Darray <- function(x) {
 }
 
 check.nvector <- function(v, npoints=NULL, fatal=TRUE, things="data points",
-                          naok=FALSE, warn=FALSE, vname) {
+                          naok=FALSE, warn=FALSE, vname, oneok=FALSE) {
   # vector of numeric values for each point/thing
   if(missing(vname))
     vname <- sQuote(deparse(substitute(v)))
   whinge <- NULL
+  nv <- length(v)
   if(!is.numeric(v))
     whinge <- paste(vname, "is not numeric")
   else if(!is.atomic(v) || !is.null(dim(v)))  # vector with attributes
     whinge <- paste(vname, "is not a vector")
-  else if(!is.null(npoints) && (length(v) != npoints))
+  else if(!(is.null(npoints) || (nv == npoints)) &&
+          !(oneok && nv == 1)) 
     whinge <- paste("The length of", vname,
-                    paren(paste0("=", length(v))), 
+                    paren(paste0("=", nv)), 
                     "should equal the number of", things,
                     paren(paste0("=", npoints)))
-  else if(!naok && any(is.na(v)))
+  else if(!naok && anyNA(v))
     whinge <- paste("Some values of", vname, "are NA or NaN")
   #
   if(!is.null(whinge)) {
@@ -703,7 +712,7 @@ check.nmatrix <- function(m, npoints=NULL, fatal=TRUE, things="data points",
     whinge <- paste(mname, "should be a matrix")
   else if(squarematrix && (nrow(m) != ncol(m)))
     whinge <- paste(mname, "should be a square matrix")
-  else if(!naok && any(is.na(m)))
+  else if(!naok && anyNA(m))
     whinge <- paste("Some values of", mname, "are NA or NaN")
   else if(!is.null(npoints)) {
     if(matchto=="nrow" && nrow(m) != npoints)
@@ -792,7 +801,7 @@ check.named.thing <- function(x, nam, namopt=character(0), xtitle=NULL,
 
 forbidNA <- function(x, context="", xname, fatal=TRUE, usergiven=TRUE) {
   if(missing(xname)) xname <- sQuote(deparse(substitute(x)))
-  if(any(is.na(x))) {
+  if(anyNA(x)) {
     if(usergiven) {
       # argument came from user
       offence <- ngettext(length(x), "be NA", "contain NA values")
@@ -1028,14 +1037,14 @@ nzpaste <- function(..., sep=" ", collapse=NULL) {
   # Paste only the non-empty strings
   v <- list(...)
   ok <- sapply(lapply(v, nzchar), any)
-  do.call("paste", append(v[ok], list(sep=sep, collapse=collapse)))
+  do.call(paste, append(v[ok], list(sep=sep, collapse=collapse)))
 }
 
 substringcount <- function(x, y) {
   ## count occurrences of 'x' in 'y'
   yy <- paste0("a", y, "a")
   splot <- strsplit(yy, split=x, fixed=TRUE)
-  nhits <- unlist(lapply(splot, length)) - 1
+  nhits <- lengths(splot) - 1
   return(nhits)
 }
 
@@ -1155,36 +1164,6 @@ orderstats <- function(x, k, decreasing=FALSE) {
 # which value is k-th smallest
 orderwhich <- function(x, k, decreasing=FALSE) {
   if(decreasing) order(x, decreasing=TRUE, na.last=TRUE)[k] else order(x)[k]
-}
-
-# convert any appropriate subset index for a point pattern
-# to a logical vector
-
-ppsubset <- function(X, I) {
-  Iname <- deparse(substitute(I))
-  # I could be a function to be applied to X
-  if(is.function(I)) {
-    I <- I(X)
-    if(!is.vector(I)) {
-      warning(paste("Function", sQuote(Iname), "did not return a vector"),
-              call.=FALSE)
-      return(NULL)
-    }
-  }      
-  # I is now an index vector
-  n <- npoints(X)
-  i <- try(seq_len(n)[I])
-  if(inherits(i, "try-error") || any(is.na(i))) {
-    warning(paste("Invalid subset index", sQuote(Iname)),
-            call.=FALSE)
-    return(NULL)
-  }
-  if(is.logical(I))
-    return(I)
-  # convert to logical
-  Z <- rep.int(FALSE, n)
-  Z[I] <- TRUE
-  return(Z)
 }
 
 
@@ -1653,3 +1632,33 @@ fastFindInterval <- function(x, b, labels=FALSE, reltol=0.001) {
 
 variablesintext <- function(x) all.vars(as.expression(parse(text=x)))
 
+requireversion <- function(pkg, ver) {
+  pkgname <- deparse(substitute(pkg))
+  v <- read.dcf(file=system.file("DESCRIPTION", package=pkgname), 
+                fields="Version")
+  if(package_version(v) < ver)
+    stop(paste("Package",
+               sQuote(pkgname),
+               "is out of date: version >=",
+               ver,
+               "is needed"))
+  invisible(NULL)
+}
+
+spatstatDiagnostic <- function(msg) {
+  cat("-----------------------------\n")
+  cat(paste(" >>> Spatstat Diagnostic: ", msg, "<<<\n"))
+  cat("-----------------------------\n")
+  invisible(NULL)
+}
+
+exceedsMaxArraySize <- function(...) {
+  (prod(as.numeric(c(...))) > .Machine$integer.max)
+}
+
+dont.complain.about <- function(...) {
+  #' prevents code checkers complaining about 'unused variables'
+  #' Typically needed where the variables in question
+  #' are referenced in an expression that will be evaluated elsewhere. 
+  return(invisible(NULL))
+}

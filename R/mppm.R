@@ -1,7 +1,7 @@
 #
 # mppm.R
 #
-#  $Revision: 1.69 $   $Date: 2015/12/29 02:40:58 $
+#  $Revision: 1.74 $   $Date: 2016/02/11 05:07:22 $
 #
 
 mppm <- local({
@@ -11,7 +11,12 @@ mppm <- local({
 #%^!ifdef RANDOMEFFECTS                 
                    random=NULL,
 #%^!endif                 
-                   use.gam=FALSE) {
+                   use.gam=FALSE,
+#%^!ifdef RANDOMEFFECTS                                    
+                   reltol.pql=1e-3,
+#%^!endif                 
+                   gcontrol=list()
+                   ) {
     ## remember call
     cl <- match.call()
     callstring <- paste(short.deparse(sys.call()), collapse="")
@@ -291,9 +296,9 @@ mppm <- local({
       }
 
       ## assemble the Mother Of All Data Frames
-      if(i == 1)
+      if(i == 1) {
         moadf <- glmdat
-      else {
+      } else {
         ## There may be new or missing columns
         recognised <- names(glmdat) %in% names(moadf)
         if(any(!recognised)) {
@@ -308,6 +313,20 @@ mppm <- local({
           zeroes <- as.data.frame(matrix(0, nrow(glmdat), length(absentnames)))
           names(zeroes) <- absentnames
           glmdat <- cbind(glmdat, zeroes)
+        }
+        ## Ensure factor columns are consistent
+        m.isfac <- sapply(as.list(glmdat), is.factor)
+        g.isfac <- sapply(as.list(glmdat), is.factor)
+        if(any(uhoh <- (m.isfac != g.isfac)))
+          errorInconsistentRows("values (factor and non-factor)",
+                                colnames(moadf)[uhoh])
+        if(any(m.isfac)) {
+          m.levels <- lapply(as.list(moadf)[m.isfac], levels)
+          g.levels <- lapply(as.list(glmdat)[g.isfac], levels)
+          clash <- !mapply(identical, x=m.levels, y=g.levels)
+          if(any(clash))
+            errorInconsistentRows("factor levels",
+                                  (colnames(moadf)[m.isfac])[clash])
         }
         ## Finally they are compatible
         moadf <- rbind(moadf, glmdat)
@@ -390,24 +409,30 @@ mppm <- local({
     want.trend <- prep0$info$want.trend
     if(want.trend && use.gam) {
       fitter <- "gam"
+      ctrl <- do.call(gam.control, resolve.defaults(gcontrol, list(maxit=50)))
       FIT  <- gam(fmla, family=quasi(link=log, variance=mu), weights=.mpl.W,
                   data=moadf, subset=(.mpl.SUBSET=="TRUE"),
-                  control=gam.control(maxit=50))
+                  control=ctrl)
       deviants <- deviance(FIT)
 #%^!ifdef RANDOMEFFECTS    
     } else if(!is.null(random)) {
       fitter <- "glmmPQL"
+      ctrl <- do.call(lmeControl, resolve.defaults(gcontrol, list(maxIter=50)))
+      attr(fmla, "ctrl") <- ctrl # very strange way to pass argument
+      fixed <- 42 # to satisfy package checker
       FIT  <- hackglmmPQL(fmla, random=random,
                           family=quasi(link=log, variance=mu), weights=.mpl.W,
                           data=moadf, subset=glmmsubset,
-                          control=glm.control(maxit=50))
+                          control=attr(fixed, "ctrl"),
+                          reltol=reltol.pql)
       deviants <-  -2 * logLik(FIT)
 #%^!endif    
     } else {
       fitter <- "glm"
+      ctrl <- do.call(glm.control, resolve.defaults(gcontrol, list(maxit=50)))
       FIT  <- glm(fmla, family=quasi(link="log", variance="mu"), weights=.mpl.W,
                   data=moadf, subset=(.mpl.SUBSET=="TRUE"),
-                  control=glm.control(maxit=50))
+                  control=ctrl)
       deviants <- deviance(FIT)
     }
     ## maximised log-pseudolikelihood
@@ -497,7 +522,17 @@ mppm <- local({
   firstname <- function(z) { z[[1]]$name }
 
   allpoisson <- function(x) all(sapply(x, is.poisson.interact))
-  
+
+  errorInconsistentRows <- function(what, offending) {
+    stop(paste("There are inconsistent",
+               what,
+               "for the",
+               ngettext(length(offending), "variable", "variables"),
+               commasep(sQuote(offending)),
+               "between different rows of the hyperframe 'data'"),
+         call.=FALSE)
+  }
+    
   mppm
 })
 

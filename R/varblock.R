@@ -3,14 +3,14 @@
 #
 #   Variance estimation using block subdivision
 #
-#   $Revision: 1.16 $  $Date: 2015/10/21 09:06:57 $
+#   $Revision: 1.19 $  $Date: 2016/03/08 00:48:06 $
 #
 
 varblock <- local({
 
-  rvalues <- function(z) { with(z, .x) }
+  getrvalues <- function(z) { with(z, .x) }
 
-  maxrvalues <- function(z) { max(rvalues(z)) }
+  stepsize <- function(z) { mean(diff(z)) } 
   
   dofun <- function(domain, fun, Xpp, ...) { fun(Xpp, ..., domain=domain) }
 
@@ -51,9 +51,10 @@ varblock <- local({
       } else {
         ## need to ensure compatible fv objects
         z <- lapply(Y, fun, ...)
-        rmaxes <- sapply(z, maxrvalues)
-        smallest <- which.min(rmaxes)
-        r <- rvalues(z[[smallest]])
+        rlist <- lapply(z, getrvalues)
+        rmax <- min(sapply(rlist, max))
+        rstep <- min(sapply(rlist, stepsize))
+        r <- seq(0, rmax, by=rstep)
         z <- lapply(Y, fun, ..., r=r)
         fX <- fun(X, ..., r=r)
       }
@@ -70,9 +71,10 @@ varblock <- local({
       } else {
         ## need to ensure compatible fv objects
         z <- lapply(B, dofun, ..., fun=fun, Xpp=X)
-        rmaxes <- sapply(z, maxrvalues)
-        smallest <- which.min(rmaxes)
-        r <- rvalues(z[[smallest]])
+        rlist <- lapply(z, getrvalues)
+        rmax <- min(sapply(rlist, max))
+        rstep <- min(sapply(rlist, stepsize))
+        r <- seq(0, rmax, by=rstep)
         z <- lapply(B, dofun, ..., fun=fun, Xpp=X, r=r)
         fX <- fun(X, ..., r=r)
       }
@@ -111,7 +113,7 @@ varblock <- local({
     out <- cbind(fX,m,v,sd,upper,lower)
     ## restrict r domain
     bad <- apply(!is.finite(as.matrix(as.data.frame(out))), 1, all)
-    rmax <- max(rvalues(out)[!bad])
+    rmax <- max(getrvalues(out)[!bad])
     alim <- c(0, rmax)
     if(!canrestrict) alim <- intersect.ranges(attr(out, "alim"), alim)
     attr(out, "alim") <- alim
@@ -140,14 +142,14 @@ meanlistfv <- local({
     ## compute sample mean of a list of fv objects
     if(!is.list(z) || !all(unlist(lapply(z, is.fv))))
       stop("z should be a list of fv objects")
-    if(!do.call("compatible", unname(z)))
+    if(!do.call(compatible, unname(z)))
       stop("Objects are not compatible")
     result <- template <- z[[1]]
     ## extract each object's function values as a matrix
     ynames <- fvnames(template, "*")
     matlist <- unname(lapply(z, getYmatrix, yn=ynames))
     ## stack matrices into an array
-    y <- do.call("abind", append(matlist, list(along=3)))
+    y <- do.call(abind, append(matlist, list(along=3)))
     ## take mean 
     ymean <- apply(y, 1:2, mean, ...)
     result[,ynames] <- ymean

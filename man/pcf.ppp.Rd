@@ -10,7 +10,8 @@
                     stoyan=0.15,
                     correction=c("translate", "Ripley"),
                     divisor = c("r", "d"),
-                    domain=NULL)
+                    domain=NULL,
+                    ratio=FALSE)
 }
 \arguments{
   \item{X}{
@@ -45,6 +46,12 @@
     Optional. Calculations will be restricted to this subset
     of the window. See Details.
   }
+  \item{ratio}{
+    Logical. 
+    If \code{TRUE}, the numerator and denominator of
+    each edge-corrected estimate will also be saved,
+    for use in analysing replicated point patterns.
+  }
 } 
 \value{
   A function value table
@@ -63,6 +70,12 @@
     estimated by Ripley isotropic correction
   }
   as required.
+
+  If \code{ratio=TRUE} then the return value also has two
+  attributes called \code{"numerator"} and \code{"denominator"}
+  which are \code{"fv"} objects
+  containing the numerators and denominators of each
+  estimate of \eqn{g(r)}. 
 }
 \details{
   The pair correlation function \eqn{g(r)} 
@@ -186,15 +199,15 @@
   \code{\link{lohboot}}.
 }
 \examples{
-  data(simdat)
+  X <- simdat
   \testonly{
-    simdat <- simdat[seq(1,simdat$n, by=4)]
+    X <- X[seq(1,npoints(X), by=4)]
   }
-  p <- pcf(simdat)
-  plot(p, main="pair correlation function for simdat")
+  p <- pcf(X)
+  plot(p, main="pair correlation function for X")
   # indicates inhibition at distances r < 0.3
 
-  pd <- pcf(simdat, divisor="d")
+  pd <- pcf(X, divisor="d")
 
   # compare estimates
   plot(p, cbind(iso, theo) ~ r, col=c("blue", "red"),
@@ -203,11 +216,10 @@
   legend("center", col=c("blue", "green"), lty=1, lwd=2,
          legend=c("divisor=r","divisor=d"))
 }
-\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
-  
-  ,
-  Rolf Turner \email{r.turner@auckland.ac.nz}
-  
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+  Rolf Turner \email{r.turner@auckland.ac.nz},
+  Ege Rubak \email{rubak@math.aau.dk}
   and Martin Hazelton.
 }
 \keyword{spatial}

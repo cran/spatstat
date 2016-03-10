@@ -3,7 +3,7 @@
 #
 #   convert ppm object into format palatable to rmh.default
 #
-#  $Revision: 2.61 $   $Date: 2015/11/17 07:10:04 $
+#  $Revision: 2.63 $   $Date: 2016/02/16 01:39:12 $
 #
 #   .Spatstat.rmhinfo
 #   rmhmodel.ppm()
@@ -239,14 +239,9 @@ rmhmodel.ppm <- function(model, w, ...,
   verifyclass(model, "ppm")
   argh <- list(...)
 
-  if(!is.null(new.coef)) {
-    ## hack the coefficients
-    co <- coef(model)
-    check.nvector(new.coef, length(co), things="coefficients")
-    model$coef.orig <- co
-    model$coef <- new.coef
-  }
-
+  if(!is.null(new.coef))
+    model <- tweak.coefs(model, new.coef)
+  
   ## Ensure the fitted model is valid
   ## (i.e. exists mathematically as a point process)
   if(!valid.ppm(model)) {
@@ -415,7 +410,7 @@ rmhResolveExpansion <- function(win, control, imagelist, itype="covariate") {
   # Expansion is limited to domain of image data
   # Determine maximum possible expansion window
   wins <- lapply(imagelist, as.owin)
-  cwin <- do.call("intersect.owin", unname(wins))
+  cwin <- do.call(intersect.owin, unname(wins))
   
   if(!is.subset.owin(wexp, cwin)) {
     # Cannot expand to proposed window

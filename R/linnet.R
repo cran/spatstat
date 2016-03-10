@@ -3,7 +3,7 @@
 #    
 #    Linear networks
 #
-#    $Revision: 1.39 $    $Date: 2015/11/25 02:53:58 $
+#    $Revision: 1.49 $    $Date: 2016/02/03 08:20:36 $
 #
 # An object of class 'linnet' defines a linear network.
 # It includes the following components
@@ -30,7 +30,7 @@
 
 # Make an object of class "linnet" from the minimal data
 
-linnet <- function(vertices, m, edges, sparse=FALSE) {
+linnet <- function(vertices, m, edges, sparse=FALSE, warn=TRUE) {
   if(missing(m) && missing(edges))
     stop("specify either m or edges")
   if(!missing(m) && !missing(edges))
@@ -52,6 +52,11 @@ linnet <- function(vertices, m, edges, sparse=FALSE) {
       diag(m) <- FALSE
     }
     sparse <- !is.matrix(m)
+    ## determine 'from' and 'to' vectors
+    ij <- which(m, arr.ind=TRUE)
+    ij <- ij[ ij[,1] < ij[,2], , drop=FALSE]
+    from <- ij[,1]
+    to   <- ij[,2]
   } else {
     # check (from, to) pairs
     stopifnot(is.matrix(edges) && ncol(edges) == 2)
@@ -64,19 +69,17 @@ linnet <- function(vertices, m, edges, sparse=FALSE) {
     np <- npoints(vertices)
     if(any(edges > np))
       stop("index out-of-bounds in edges list")
+    from <- edges[,1]
+    to   <- edges[,2]
     # convert to adjacency matrix
     if(!sparse) {
       m <- matrix(FALSE, np, np)
       m[edges] <- TRUE
     } else 
-      m <- sparseMatrix(i=edges[,1], j=edges[,2], x=TRUE, dims=c(np, np))
+      m <- sparseMatrix(i=from, j=to, x=TRUE, dims=c(np, np))
     m <- m | t(m)
   }
   # create line segments
-  ij <- which(m, arr.ind=TRUE)
-  ij <- ij[ ij[,1] < ij[,2], , drop=FALSE]
-  from <- ij[,1]
-  to   <- ij[,2]
   xx   <- vertices$x
   yy   <- vertices$y
   lines <- psp(xx[from], yy[from], xx[to], yy[to], window=vertices$window,
@@ -95,8 +98,8 @@ linnet <- function(vertices, m, edges, sparse=FALSE) {
   d[m] <- pairdist(vertices)[m]
   ## now compute shortest-path distances between each pair of vertices
   out$dpath <- dpath <- dist2dpath(d)
-  if(any(is.infinite(dpath)))
-    warning("Network is not connected")
+  if(warn && any(is.infinite(dpath)))
+    warning("Network is not connected", call.=FALSE)
   # pre-compute circumradius
   out$circumradius <- circumradius(out)
   return(out)  
@@ -189,16 +192,32 @@ vertices.linnet <- function(w) {
   return(w$vertices)
 }
 
+nvertices.linnet <- function(x, ...) {
+  verifyclass(x, "linnet")
+  return(x$vertices$n)
+}
+
 nsegments.linnet <- function(x) {
   return(x$lines$n)
 }
 
 Window.linnet <- function(X, ...) {
-  return(as.owin(as.psp(X)))
+  return(X$window)
+}
+
+"Window<-.linnet" <- function(X, ..., check=TRUE, value) {
+  if(check) {
+    X <- X[value]
+  } else {
+    X$window <- value
+    X$lines$window <- value
+    X$vertices$window <- value
+  }
+  return(X)
 }
 
 as.owin.linnet <- function(W, ...) {
-  return(as.owin(as.psp(W)))
+  return(Window(W))
 }
 
 as.linnet <- function(X, ...) {
@@ -304,6 +323,7 @@ circumradius.linnet <- function(x, ...) {
     return(cr)
   dpath <- x$dpath
   if(is.null(dpath)) return(NULL)
+  if(any(is.infinite(dpath))) return(Inf)
   if(nrow(dpath) <= 1)
     return(max(0,dpath))
   from  <- x$from
@@ -422,20 +442,36 @@ rescale.linnet <- function(X, s, unitname) {
   return(Y)
 }
 
-"[.linnet" <- function(x, i, ...) {
+"[.linnet" <- function(x, i, ..., snip=TRUE) {
   if(!is.owin(i))
     stop("In [.linnet: the index i should be a window", call.=FALSE)
-  # Find vertices that lie inside 'i'
-  okvert <- inside.owin(x$vertices, w=i)
-  # find segments whose endpoints both lie in 'i'
-  okedge <- okvert[x$from] & okvert[x$to]
-  # assign new serial numbers to vertices, and recode 
-  newserial <- cumsum(okvert)
-  newfrom <- newserial[x$from[okedge]]
-  newto   <- newserial[x$to[okedge]]
-  # make new linear network
-  xnew <- linnet(x$vertices[i], edges=cbind(newfrom, newto),
-                 sparse=x$sparse %orifnull% is.null(x$dpath))
+  w <- i
+  ## Find vertices that lie inside window
+  vertinside <- inside.owin(x$vertices, w=w)
+  from <- x$from
+  to   <- x$to
+  if(snip) {
+    ## For efficiency, first restrict network to relevant segments.
+    ## Find segments EITHER OF whose endpoints lie in 'w'
+    okedge <- vertinside[from] | vertinside[to]
+    ## extract relevant subset of network graph
+    x <- thinNetwork(x, retainedges=okedge)
+    ## Now add vertices at crossing points with boundary of 'w'
+    b <- crossing.psp(as.psp(x), edges(w))
+    x <- insertVertices(x, unique(b))
+    boundarypoints <- attr(x, "id")
+    ## update data
+    from <- x$from
+    to   <- x$to
+    vertinside <- inside.owin(x$vertices, w=w)
+    vertinside[boundarypoints] <- TRUE
+  }
+  ## find segments whose endpoints BOTH lie in 'w'
+  edgeinside <- vertinside[from] & vertinside[to]
+  ## extract relevant subset of network
+  xnew <- thinNetwork(x, retainedges=edgeinside)
+  ## adjust window efficiently
+  Window(xnew, check=FALSE) <- w
   return(xnew)
 }
 
@@ -461,3 +497,32 @@ iplot.linnet <- function(x, ..., xname) {
 pixellate.linnet <- function(x, ...) {
   pixellate(as.psp(x), ...)
 }
+
+connected.linnet <- function(X, ..., what=c("labels", "components")) {
+  verifyclass(X, "linnet")
+  what <- match.arg(what)
+  nv <- npoints(vertices(X))
+  ie <- X$from - 1L
+  je   <- X$to   - 1L
+  ne <- length(ie)
+  zz <- .C("cocoGraph",
+           nv = as.integer(nv),
+           ne = as.integer(ne), 
+           ie = as.integer(ie),
+           je = as.integer(je),
+           label = as.integer(integer(nv)), 
+           status = as.integer(integer(1)))
+  if (zz$status != 0) 
+    stop("Internal error: connected.linnet did not converge")
+  lab <- zz$label + 1L
+  lab <- as.integer(factor(lab))
+  lab <- factor(lab)
+  if(what == "labels")
+    return(lab)
+  nets <- list()
+  subsets <- split(seq_len(nv), lab)
+  for(i in seq_along(subsets)) 
+    nets[[i]] <- thinNetwork(X, retainvertices=subsets[[i]])
+  return(nets)
+}
+

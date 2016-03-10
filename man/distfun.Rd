@@ -11,13 +11,13 @@
   Compute the distance function of an object, and return it as a function.
 }
 \usage{
-  distfun(X, ...)
+  distfun(X, \dots)
 
-  \method{distfun}{ppp}(X, ..., k=1)
+  \method{distfun}{ppp}(X, \dots, k=1)
 
-  \method{distfun}{psp}(X, ...)
+  \method{distfun}{psp}(X, \dots)
 
-  \method{distfun}{owin}(X, ..., invert=FALSE)
+  \method{distfun}{owin}(X, \dots, invert=FALSE)
 }
 \arguments{
   \item{X}{Any suitable dataset representing a two-dimensional
@@ -50,7 +50,10 @@
   in the form \code{v <- f(x,y)}, where \code{x} and \code{y}
   are any numeric vectors of equal length containing coordinates of
   spatial locations, yields the values of the distance function at these
-  locations.
+  locations. Alternatively \code{x} can be a
+  point pattern (object of class \code{"ppp"} or \code{"lpp"}) of
+  locations at which the distance function should be computed (and then
+  \code{y} should be missing).
 
   This should be contrasted with the related command \code{\link{distmap}}
   which computes the distance function of \code{X}
@@ -88,12 +91,13 @@
    d2 <- distfun(cells, k=2)
    d(0.5, 0.5)
    d2(0.5, 0.5)
+
+   z <- d(japanesepines)
 }
-\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
-  
-  
-  and Rolf Turner \email{r.turner@auckland.ac.nz}
-  
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+ Rolf Turner \email{r.turner@auckland.ac.nz}
+ and Ege Rubak \email{rubak@math.aau.dk}.
 }
 \keyword{spatial}
 \keyword{math}

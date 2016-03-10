@@ -3,14 +3,14 @@
 #
 # method for 'fitted' for ppm objects
 #
-#   $Revision: 1.12 $   $Date: 2014/10/07 05:13:22 $
+#   $Revision: 1.14 $   $Date: 2016/02/22 02:36:43 $
 # 
 
 fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE,
                        new.coef=NULL, leaveoneout=FALSE,
-                       drop=FALSE, check=TRUE, repair=TRUE) {
+                       drop=FALSE, check=TRUE, repair=TRUE, dropcoef=FALSE) {
   verifyclass(object, "ppm")
-  
+
   if(check && damaged.ppm(object)) {
     if(!repair)
       stop("object format corrupted; try update(object, use.internal=TRUE)")
@@ -22,21 +22,12 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE,
     ## Leave-one-out calculation for data points only
     if(missing(dataonly)) dataonly <- TRUE
     if(!dataonly)
-      stop("Leave-one-out calculation requires dataonly=FALSE")
+      stop("Leave-one-out calculation requires dataonly=TRUE")
     if(!is.null(new.coef))
       stop("Leave-one-out calculation requires new.coef=NULL")
   }
   
-  fitcoef <- coef(object)
-  if(!is.null(new.coef)) {
-    # validate
-    if(length(new.coef) != length(fitcoef))
-      stop(paste("Argument new.coef has wrong length",
-                 length(new.coef), ": should be", length(fitcoef)))
-    coeffs <- new.coef
-  } else {
-    coeffs <- fitcoef
-  }
+  coeffs <- adaptcoef(new.coef, coef(object), drop=dropcoef)
   
   uniform <- is.poisson.ppm(object) && no.trend.ppm(object)
 
@@ -105,4 +96,36 @@ fitted.ppm <- function(object, ..., type="lambda", dataonly=FALSE,
   return(lambda)
 }
 
+adaptcoef <- function(new.coef, fitcoef, drop=FALSE) {
+  ## a replacement for 'fitcoef' will be extracted from 'new.coef' 
+  if(is.null(new.coef)) {
+    coeffs <- fitcoef
+  } else if(length(new.coef) == length(fitcoef)) {
+    coeffs <- new.coef
+  } else {
+    fitnames <- names(fitcoef)
+    newnames <- names(new.coef)
+    if(is.null(newnames) || is.null(fitnames))
+      stop(paste("Argument new.coef has wrong length",
+                 length(new.coef), ": should be", length(fitcoef)),
+           call.=FALSE)
+    absentnames <- setdiff(fitnames, newnames)
+    excessnames <- setdiff(newnames, fitnames)
+    if((nab <- length(absentnames)) > 0)
+      stop(paste(ngettext(nab, "Coefficient", "Coefficients"),
+                 commasep(sQuote(absentnames)),
+                 ngettext(nab, "is", "are"),
+                 "missing from new.coef"),
+           call.=FALSE)
+    if(!drop && ((nex <- length(excessnames)) > 0)) 
+      stop(paste(ngettext(nex, "Coefficient", "Coefficients"),
+                 commasep(sQuote(excessnames)),
+                 ngettext(nab, "is", "are"),
+                 "present in new.coef but not in coef(object)"),
+           call.=FALSE)
+    #' extract only the relevant coefficients
+    coeffs <- new.coef[fitnames]
+  }
+  return(coeffs)
+}
 

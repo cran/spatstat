@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.192 $	$Date: 2015/10/16 07:21:42 $
+#	$Revision: 5.202 $	$Date: 2016/03/09 01:59:27 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -101,7 +101,7 @@ mpl.engine <-
     the.version <- list(major=spv$major,
                         minor=spv$minor,
                         release=spv$patchlevel,
-                        date="$Date: 2015/10/16 07:21:42 $")
+                        date="$Date: 2016/03/09 01:59:27 $")
 
     if(want.inter) {
       ## ensure we're using the latest version of the interaction object
@@ -762,11 +762,11 @@ mpl.prepare <- local({
 mpl.usable <- function(x) {
   ## silently remove covariates that don't have recognised format
   if(length(x) == 0 || is.data.frame(x)) return(x)
-  isim   <- unlist(lapply(x, is.im))
-  isfun  <- unlist(lapply(x, is.function))
-  iswin  <- unlist(lapply(x, is.owin))
-  istess <- unlist(lapply(x, is.tess))
-  isnum  <- unlist(lapply(x, is.numeric)) & (unlist(lapply(x, length)) == 1)
+  isim   <- sapply(x, is.im)
+  isfun  <- sapply(x, is.function)
+  iswin  <- sapply(x, is.owin)
+  istess <- sapply(x, is.tess)
+  isnum  <- sapply(x, is.numeric) & (lengths(x) == 1)
   recognised <- isim | isfun | iswin | istess | isnum
   if(!all(recognised)) 
     x <- x[recognised]
@@ -934,22 +934,64 @@ partialModelMatrix <- function(X, D, model, callstring="", ...) {
   return(mom)
 }
   
-oversize.quad <- function(Q, ..., nU, nX) {
+oversize.quad <- function(Q, ..., nU, nX, p=1) {
   ## Determine whether the quadrature scheme is
   ## too large to handle in one piece (in mpl)
   ## for a generic interaction
   ##    nU = number of quadrature points
   ##    nX = number of data points
+  ##    p = dimension of statistic 
   if(missing(nU))
     nU <- n.quad(Q)
   if(missing(nX))
     nX <- npoints(Q$data)
   nmat <- as.double(nU) * nX
-  nMAX <- spatstat.options("maxmatrix")
+  nMAX <- spatstat.options("maxmatrix")/p
   needsplit <- (nmat > nMAX)
   return(needsplit)
 }
 
+quadBlockSizes <- function(nX, nD, p=1,
+                           nMAX=spatstat.options("maxmatrix")/p,
+                           announce=TRUE) {
+  if(inherits(nX, "quad") && missing(nD)) {
+    nD <- npoints(nX$dummy)
+    nX <- npoints(nX$data)
+  }
+  ## Calculate number of dummy points in largest permissible X * (X+D) matrix 
+  nperblock <- max(1, floor(nMAX/nX - nX))
+  ## determine number of such blocks 
+  nblocks <- ceiling(nD/nperblock)
+  ## make blocks roughly equal (except for the last one)
+  nperblock <- min(nperblock, ceiling(nD/nblocks))
+  ## announce
+  if(announce && nblocks > 1) {
+    msg <- paste("Large quadrature scheme",
+                 "split into blocks to avoid memory size limits;",
+                 nD, "dummy points split into",
+                 nblocks, "blocks,")
+    nfull <- nblocks - 1
+    nlastblock <- nD - nperblock * nfull
+    if(nlastblock == nperblock) {
+      msg <- paste(msg,
+                   "each containing",
+                   nperblock, "dummy points")
+    } else {
+      msg <- paste(msg,
+                   "the first",
+                   ngettext(nfull, "block", paste(nfull, "blocks")),
+                   "containing",
+                   nperblock,
+                   ngettext(nperblock, "dummy point", "dummy points"),
+                   "and the last block containing",
+                   nlastblock, 
+                   ngettext(nlastblock, "dummy point", "dummy points"))
+    }
+    message(msg)
+  } else nlastblock <- nperblock
+  return(list(nblocks=nblocks, nperblock=nperblock, nlastblock=nlastblock))
+}
+    
 ## function that should be called to evaluate interaction terms
 ## between quadrature points and data points
 
@@ -1012,41 +1054,10 @@ evalInteraction <- function(X, P, E = equalpairs(P, X),
     Pall <- seq_len(nP)
     Pdummy <- if(length(Pdata) > 0) Pall[-Pdata] else Pall
     nD <- length(Pdummy)
-    ## size of full matrix
-#    nmat <- (nD + nX) * nX
-    nMAX <- spatstat.options("maxmatrix")
-    ## Calculate number of dummy points in largest permissible X * (X+D) matrix 
-    nperblock <- max(1, floor(nMAX/nX - nX))
-    ## determine number of such blocks 
-    nblocks <- ceiling(nD/nperblock)
-    ## make blocks roughly equal (except for the last one)
-    nperblock <- min(nperblock, ceiling(nD/nblocks))
-    ## announce
-    if(nblocks > 1) {
-      msg <- paste("Large quadrature scheme",
-                   "split into blocks to avoid memory size limits;",
-                   nD, "dummy points split into",
-                   nblocks, "blocks,")
-      nfull <- nblocks - 1
-      nlastblock <- nD - nperblock * nfull
-      if(nlastblock == nperblock) {
-        msg <- paste(msg,
-                     "each containing",
-                     nperblock, "dummy points")
-      } else {
-        msg <- paste(msg,
-                     "the first",
-                     ngettext(nfull, "block", paste(nfull, "blocks")),
-                     "containing",
-                     nperblock,
-                     ngettext(nperblock, "dummy point", "dummy points"),
-                     "and the last block containing",
-                     nlastblock, 
-                     ngettext(nlastblock, "dummy point", "dummy points"))
-      }
-      message(msg)
-    }
-    ##
+    ## calculate block sizes
+    bls <- quadBlockSizes(nX, nD, announce=TRUE)
+    nblocks    <- bls$nblocks
+    nperblock  <- bls$nperblock
     ##
     seqX <- seq_len(nX)
     EX <- cbind(seqX, seqX)
@@ -1142,18 +1153,40 @@ evalInterEngine <- function(X, P, E,
 deltasuffstat <- local({
   
   deltasuffstat <- function(model, ...,
-                            restrict=TRUE, dataonly=TRUE, force=FALSE) {
+                            restrict=TRUE, dataonly=TRUE, force=FALSE,
+                            quadsub=NULL,
+                            sparseOK=FALSE) {
     stopifnot(is.ppm(model))
+    sparsegiven <- !missing(sparseOK)
+    
     if(dataonly) {
       X <- data.ppm(model)
       nX <- npoints(X)
     } else {
       X <- quad.ppm(model)
+      if(!is.null(quadsub)) {
+        z <- is.data(X)
+        z[quadsub] <- FALSE
+        if(any(z))
+          stop("subset 'quadsub' must include all data points", call.=FALSE)
+        X <- X[quadsub]
+      }
       nX <- n.quad(X)
     }
     ncoef <- length(coef(model))
     inte <- as.interact(model)
-    zeroes <- array(0, dim=c(nX, nX, ncoef)) 
+
+    sparseOK <- sparseOK && spatstat.options('developer')
+    if(!sparseOK && exceedsMaxArraySize(nX, nX, ncoef)) {
+      if(sparsegiven || !spatstat.options("developer"))
+        stop("Array dimensions too large", call.=FALSE)
+      warning("Switching to sparse array code", call.=FALSE)
+      sparseOK <- TRUE
+    }
+
+    zeroes <- if(!sparseOK) array(0, dim=c(nX, nX, ncoef)) else
+                            sparse3Darray(dims=c(nX, nX, ncoef))
+    
     if(is.poisson(inte))
       return(zeroes)
     
@@ -1169,32 +1202,40 @@ deltasuffstat <- local({
     ## Look for member function $delta2 in the interaction
     v <- NULL
     if(!is.null(delta2 <- inte$delta2) && is.function(delta2)) {
-      v <- delta2(X, inte, model$correction)
+      v <- delta2(X, inte, model$correction, sparseOK=sparseOK)
     }
     ## Look for generic $delta2 function for the family
     if(is.null(v) &&
        !is.null(delta2 <- inte$family$delta2) &&
        is.function(delta2))
-      v <- delta2(X, inte, model$correction)
+      v <- delta2(X, inte, model$correction, sparseOK=sparseOK)
     ## no luck?
     if(is.null(v)) {
       if(!force)
         return(NULL)
       ## use brute force algorithm
-      v <- if(dataonly) deltasufX(model) else deltasufQ(model)
+      v <- if(dataonly) deltasufX(model, sparseOK) else
+           deltasufQ(model, quadsub, sparseOK)
     }
     ## make it a 3D array
-    if(length(dim(v)) == 2)
-      v <- array(v, dim=c(dim(v), 1))
+    if(length(dim(v)) != 3) {
+      if(is.matrix(v)) {
+        v <- array(v, dim=c(dim(v), 1))
+      } else if(inherits(v, "sparseMatrix")) {
+        v <- as.sparse3Darray(v)
+      }
+    }
+    if(!sparseOK && inherits(v, "sparse3Darray"))
+      v <- as.array(v)
   
     if(restrict) {
       ## kill contributions from points outside the domain of pseudolikelihood
       ## (e.g. points in the border region)
-      use <- if(dataonly) getppmdatasubset(model) else getglmsubset(model)
-      if(any(kill <- !use)) {
-        kill <- array(outer(kill, kill, "&"), dim=dim(v))
-        v[kill] <- 0
-      }
+      use <- if(dataonly) getppmdatasubset(model) else
+             if(is.null(quadsub)) getglmsubset(model) else
+             getglmsubset(model)[quadsub]
+      if(any(kill <- !use)) 
+        v[kill,kill,] <- 0
     }
 
     ## Output array: planes must correspond to model coefficients
@@ -1212,7 +1253,7 @@ deltasuffstat <- local({
     }
     ## Map planes of 'v' into coefficients
     Imap <- match(Inames, names(coef(model)))
-    if(any(is.na(Imap)))
+    if(anyNA(Imap))
       stop(paste("Internal error: deltasuffstat:",
                  "cannot match interaction coefficients"))
     if(length(Imap) > 0) {
@@ -1224,7 +1265,7 @@ deltasuffstat <- local({
 
   ## compute deltasuffstat using partialModelMatrix
 
-  deltasufX <- function(model) {
+  deltasufX <- function(model, sparseOK=FALSE) {
     stopifnot(is.ppm(model))
     X <- data.ppm(model)
   
@@ -1281,7 +1322,7 @@ deltasuffstat <- local({
           nX.i <- length(J2i)
           ## index of XJi in X.i
           J.i <- match(Ji, J2i)
-          if(any(is.na(J.i)))
+          if(anyNA(J.i))
             stop("Internal error: Ji not a subset of J2i")
           ## equalpairs matrix
           E.i <- cbind(J.i, seq_len(nJi))
@@ -1313,22 +1354,29 @@ deltasuffstat <- local({
     return(delta)
   }
 
-  deltasufQ <- function(model) {
+  deltasufQ <- function(model, quadsub, sparseOK) {
     stopifnot(is.ppm(model))
 
+    p <- length(coef(model))
+    
     Q <- quad.ppm(model)
-    X <- data.ppm(model)
+    m <- model.matrix(model)
+    ok <- getglmsubset(model)
+
+    if(!is.null(quadsub)) {
+      Q <- Q[quadsub]
+      m <- m[quadsub, , drop=FALSE]
+      ok <- ok[quadsub]
+    }
+    
+    X <- Q$data
     U <- union.quad(Q)
     nU <- npoints(U)
     nX <- npoints(X)
     isdata <- is.data(Q)
     isdummy <- !isdata
-  
-    p <- length(coef(model))
+    m <- m[isdata, ,drop=FALSE]
     
-    m <- model.matrix(model)[isdata, ]
-    ok <- getglmsubset(model)
-
     ## canonical statistic before and after adding/deleting U[j]
     mafter <- mbefore <- array(t(m), dim=c(p, nU, nU))
     delta <- array(0, dim=dim(mafter))
@@ -1391,7 +1439,7 @@ deltasuffstat <- local({
           nX.i <- length(J2i)
           ## index of XJi in X.i 
           J.i <- match(Ji[isd], J2i)
-          if(any(is.na(J.i)))
+          if(anyNA(J.i))
             stop("Internal error: Ji[isd] not a subset of J2i")
           ## index of DJi in superimpose(X.i, DJi)
           JDi <- nX.i + seq_len(sum(!isd))
@@ -1425,7 +1473,7 @@ deltasuffstat <- local({
           nXUi <- length(J2Ui)
           ## index of XJi in X.i 
           J.i <- match(JiData, J2Ui)
-          if(any(is.na(J.i)))
+          if(anyNA(J.i))
             stop("Internal error: Ji[isd] not a subset of J2i")
           ## index of DJi in superimpose(X.i, DJi)
           JDi <- nXUi + seq_len(length(JiDummy))

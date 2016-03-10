@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.113 $	$Date: 2015/03/18 03:16:03 $
+#	$Revision: 5.117 $	$Date: 2016/02/26 02:23:20 $
 #
 #
 # -------- functions ----------------------------------------
@@ -156,8 +156,13 @@ function(X, ..., r=NULL, rmax=NULL, breaks=NULL,
       Kb <- Kborder.engine(X, max(r), length(r), correction, ratio=ratio)
     if(none)
       Kn <- Knone.engine(X, max(r), length(r), ratio=ratio)
-    if(bord && none) 
-      return(cbind.fv(Kb, Kn[, names(Kn) != "theo"]))
+    if(bord && none) {
+      Kn <- Kn[ , names(Kn) != "theo"]
+      yn <- fvnames(Kb, ".y")
+      Kbn <- if(!ratio) bind.fv(Kb, Kn, preferred=yn) else
+             bind.ratfv(Kb, Kn, preferred=yn)
+      return(Kbn)
+    }
     if(bord) return(Kb)
     if(none) return(Kn) 
   }
@@ -193,6 +198,11 @@ function(X, ..., r=NULL, rmax=NULL, breaks=NULL,
     close <- closepairs(X, rmax, what=what)
     DIJ <- close$d
 
+    ## precompute set covariance of window
+    gW <- NULL
+    if(any(correction %in% c("translate", "rigid", "isotropic")))
+      gW <- setcov(W)
+    
     if(any(correction == "none")) {
       ## uncorrected! For demonstration purposes only!
       wh <- whist(DIJ, breaks$val)  # no weights
@@ -243,11 +253,12 @@ function(X, ..., r=NULL, rmax=NULL, breaks=NULL,
 
     if(any(correction == "translate")) {
       ## Ohser-Stoyan translation correction
-      edgewt <- edge.Trans(dx=close$dx, dy=close$dy, W=W, paired=TRUE)
+      edgewt <- edge.Trans(dx=close$dx, dy=close$dy, W=W, paired=TRUE,
+                           gW = gW, give.rmax=TRUE)
       wh <- whist(DIJ, breaks$val, edgewt)
       numKtrans <- cumsum(wh)
       denKtrans <- lambda2 * areaW
-      h <- transradius(W)
+      h <- attr(edgewt, "rmax")
       numKtrans[r >= h] <- NA
       K <- bind.ratfv(K,
                       data.frame(trans=numKtrans),
@@ -259,12 +270,12 @@ function(X, ..., r=NULL, rmax=NULL, breaks=NULL,
     }
     if(any(correction == "rigid")) {
       ## Ohser-Stoyan rigid motion correction
-      CW <- rotmean(setcov(W))
+      CW <- rotmean(gW)
       edgewt <- areaW/as.function(CW)(DIJ)
       wh <- whist(DIJ, breaks$val, edgewt)
       numKrigid <- cumsum(wh)
       denKrigid <- lambda2 * areaW
-      h <- rigidradius(X) #sic
+      h <- rmax.Rigid(X, gW) #sic: X not W
       numKrigid[r >= h] <- NA
       K <- bind.ratfv(K,
                       data.frame(rigid=numKrigid),
@@ -523,7 +534,7 @@ Kborder.engine <- function(X, rmax, nr=100,
     } else {
       wim <- as.im(weights, W)
       weights <- wim[X, drop=FALSE]
-      if(any(is.na(weights)))
+      if(anyNA(weights))
         stop("domain of weights image does not contain all points of X")
     }
     weights.Xsort <- weights[orderX]
@@ -662,7 +673,7 @@ Knone.engine <- function(X, rmax, nr=100,
     } else {
       wim <- as.im(weights, W)
       weights <- wim[X, drop=FALSE]
-      if(any(is.na(weights)))
+      if(anyNA(weights))
         stop("domain of weights image does not contain all points of X")
     }
     weights.Xsort <- weights[orderX]
@@ -796,7 +807,7 @@ Krect.engine <- function(X, rmax, nr=100,
     } else {
       wim <- as.im(weights, W)
       weights <- wim[X, drop=FALSE]
-      if(any(is.na(weights)))
+      if(anyNA(weights))
         stop("domain of weights image does not contain all points of X")
     }
   }
@@ -995,30 +1006,4 @@ Krect.engine <- function(X, rmax, nr=100,
 }
 
 
-## maximum radius for translation correction
-## = inradius of W + ^W
-
-transradius <- function(W) {
-  stopifnot(is.owin(W))
-  if(W$type == "rectangle") return(shortside(W))
-  Z <- setcov(W)
-  a <- with(Z, xstep * ystep)
-  D <- solutionset(Z > a)
-  return(inradius(D))
-}
-
-## maximum radius for rigid motion correction
-## = circumradius of W + ^W
-
-rigidradius <- function(X) {
-  stopifnot(is.ppp(X) || is.owin(X))
-  if(is.ppp(X))
-    return(max(pairdist(X[chull(X)])))
-  W <- X
-  if(W$type == "rectangle") return(diameter(W))
-  Z <- setcov(W)
-  a <- with(Z, xstep * ystep)
-  D <- solutionset(Z > a)
-  return(circumradius(D))
-}
   

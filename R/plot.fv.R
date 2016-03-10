@@ -1,7 +1,7 @@
 #
 #       plot.fv.R   (was: conspire.S)
 #
-#  $Revision: 1.122 $    $Date: 2015/11/17 03:40:21 $
+#  $Revision: 1.124 $    $Date: 2016/02/16 01:39:12 $
 #
 #
 
@@ -96,8 +96,8 @@ plot.fv <- local({
       } else {
         ## validate the found variables
         externvars <- lapply(sought, get, envir=env.user)
-        isnum <- unlist(lapply(externvars, is.numeric))
-        len <- unlist(lapply(externvars, length))
+        isnum <- sapply(externvars, is.numeric)
+        len <- lengths(externvars)
         ok <- isnum & (len == 1 | len == nrow(x))
         if(!all(ok)) {
           nnot <- sum(!ok)
@@ -195,6 +195,7 @@ plot.fv <- local({
           uy <- as.name(fvnames(x, ".y"))
           foo <- eval(substitute(substitute(fom, list(.=u, .x=ux, .y=uy)),
                                  list(fom=fmla.original)))
+          dont.complain.about(u, ux, uy)
           lhsnew <- foo[[2]]
           morelhs <- eval(lhsnew, envir=indata)
           success <- identical(colnames(morelhs), extrashadevars)
@@ -393,7 +394,7 @@ plot.fv <- local({
 
     ## create new plot
     if(!add)
-      do.call("plot.default",
+      do.call(plot.default,
               resolve.defaults(list(xlim, ylim, type="n", log=log),
                                list(xlab=xlab, ylab=ylab),
                                list(...),
@@ -581,7 +582,7 @@ plot.fv <- local({
     
       ##  ********** plot legend *************************
       if(!is.null(legend) && legend) 
-        do.call("legend",
+        do.call(graphics::legend,
                 resolve.defaults(legendargs,
                                  legendbest,
                                  legendspec,
@@ -655,7 +656,7 @@ findbestlegendpos <- local({
                           preference="float", verbose=FALSE,
                           legendspec=NULL) {
     # find bounding box
-    W <- do.call("boundingbox", lapply(objects, as.rectangle))
+    W <- do.call(boundingbox, lapply(objects, as.rectangle))
     # convert to common box
     objects <- lapply(objects, rebound, rect=W)
     # comp
@@ -690,7 +691,8 @@ findbestlegendpos <- local({
       # evaluate preferred location (check for collision)
       if(!is.null(legendspec)) {
         # pretend to plot the legend as specified
-        legout <- do.call("legend", append(legendspec, list(plot=FALSE)))
+        legout <- do.call(graphics::legend,
+                          append(legendspec, list(plot=FALSE)))
         # determine bounding box
         legbox <- with(legout$rect, owin(c(left, left+w), c(top-h, top)))
         scaledlegbox <- affine(legbox, mat=mat)

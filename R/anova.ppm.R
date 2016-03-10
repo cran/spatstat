@@ -1,7 +1,7 @@
 #
 #   anova.ppm.R
 #
-#  $Revision: 1.21 $   $Date: 2015/04/23 14:29:50 $
+#  $Revision: 1.23 $   $Date: 2016/02/11 10:17:12 $
 #
 
 anova.ppm <- local({
@@ -147,7 +147,7 @@ anova.ppm <- local({
     ## If any models were fitted by ippm we need to correct the df
     if(newton) {
       nfree <- sapply(lapply(objex, logLik), attr, which="df")
-      ncanonical <- sapply(lapply(objex, coef), length)
+      ncanonical <- lengths(lapply(objex, coef))
       nextra <- nfree - ncanonical
       if(is.null(fitz))
         fitz <- lapply(objex, getglmfit)
@@ -158,7 +158,7 @@ anova.ppm <- local({
 
     ## Finally do the appropriate ANOVA
     if(is.null(fitz)) fitz <- lapply(objex, getglmfit)
-    result <- do.call("anova", append(fitz, list(test=test, dispersion=1)))
+    result <- do.call(anova, append(fitz, list(test=test, dispersion=1)))
 
     ## Remove approximation-dependent columns if present
     result[, "Resid. Dev"] <- NULL

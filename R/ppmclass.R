@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.127 $	$Date: 2015/10/16 07:47:19 $
+#	$Revision: 2.129 $	$Date: 2016/02/15 04:34:14 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -723,7 +723,7 @@ model.matrix.ppm <- function(object, data=model.frame(object),
     if(is.ppp(Q)) Q <- quad(Q, Q[FALSE])
     ## construct Berman-Turner frame
     needed <- c("trend", "interaction", "covariates", "correction", "rbord")
-    bt <- do.call("bt.frame", append(list(Q), object[needed]))
+    bt <- do.call(bt.frame, append(list(Q), object[needed]))
     ## compute model matrix
     mf <- model.frame(bt$fmla, bt$glmdata, ...)
     mm <- model.matrix(bt$fmla, mf, ...)
@@ -745,7 +745,7 @@ model.matrix.ppm <- function(object, data=model.frame(object),
     # new data. Must contain the Berman-Turner variables as well.
     bt <- list(.mpl.Y=1, .mpl.W=1, .mpl.SUBSET=TRUE)
     if(any(forgot <- !(names(bt) %in% names(data)))) 
-      data <- do.call("cbind", append(list(data), bt[forgot]))
+      data <- do.call(cbind, append(list(data), bt[forgot]))
     mm <- model.matrix(gf, data=data, ...)
     return(mm)
   }
@@ -855,7 +855,7 @@ as.owin.ppm <- function(W, ..., from=c("points", "covariates"), fatal=TRUE) {
   if(!any(isim))
     return(datawin)
   cwins <- lapply(covs[isim], as.owin)
-  covwin <- do.call("intersect.owin", unname(cwins))
+  covwin <- do.call(intersect.owin, unname(cwins))
   result <- intersect.owin(covwin, datawin)
   return(result)
 }
@@ -863,5 +863,16 @@ as.owin.ppm <- function(W, ..., from=c("points", "covariates"), fatal=TRUE) {
 domain.ppm <- Window.ppm <- function(X, ..., from=c("points", "covariates")) {
   from <- match.arg(from)
   as.owin(X, ..., from=from)
+}
+
+## change the coefficients in a ppm or other model
+
+tweak.coefs <- function(model, new.coef) {
+  if(is.null(new.coef)) return(model)
+  co <- coef(model)
+  check.nvector(new.coef, length(co), things="coefficients")
+  model$coef.orig <- co
+  model$coef <- new.coef
+  return(model)
 }
 

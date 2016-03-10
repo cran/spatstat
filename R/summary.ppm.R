@@ -3,7 +3,7 @@
 #
 #    summary() method for class "ppm"
 #
-#    $Revision: 1.74 $   $Date: 2015/05/08 04:25:37 $
+#    $Revision: 1.75 $   $Date: 2016/02/18 00:29:30 $
 #
 #    summary.ppm()
 #    print.summary.ppm()
@@ -26,7 +26,7 @@ summary.ppm <- local({
     return(ar[ar != "..."])
   }
 
-  summary.ppm <- function(object, ..., quick=FALSE) {
+  summary.ppm <- function(object, ..., quick=FALSE, fine=FALSE) {
     verifyclass(object, "ppm")
 
     x <- object
@@ -166,7 +166,7 @@ summary.ppm <- local({
           y$covar.descrip[isfun] <- unlist(lapply(funs, fdescrip))
           # find any extra arguments (after args 1 & 2) explicitly named
           fargs <- lapply(funs, xargs)
-          nxargs <- unlist(lapply(fargs, length))
+          nxargs <- lengths(fargs)
           y$has.xargs <- any(nxargs > 0)
           if(y$has.xargs) {
             # identify which function arguments are fixed in the call
@@ -282,7 +282,7 @@ summary.ppm <- local({
       # compute standard errors
       se <- x$internal$se
       if(is.null(se)) {
-        vc <- vcov(x, matrix.action="warn")
+        vc <- vcov(x, fine=fine, matrix.action="warn")
         if(!is.null(vc)) {
           se <- if(is.matrix(vc)) sqrt(diag(vc)) else
                 if(length(vc) == 1) sqrt(vc) else NULL

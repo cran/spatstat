@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.32 $     $Date: 2015/10/21 09:06:57 $
+#     $Revision: 1.33 $     $Date: 2016/02/11 10:17:12 $
 #
 
 eval.fv <- local({
@@ -43,7 +43,7 @@ eval.fv <- local({
     if(!is.null(equiv))
       funs <- lapply(funs, mapnames, map=equiv)
     # test whether the fv objects are compatible
-    if(nfuns > 1 && !(do.call("compatible", unname(funs)))) {
+    if(nfuns > 1 && !(do.call(compatible, unname(funs)))) {
       warning(paste(if(nfuns > 2) "some of" else NULL,
                     "the functions",
                     commasep(sQuote(names(funs))),
@@ -217,11 +217,15 @@ harmonize.fv <- harmonise.fv <- local({
     if(n == 1) {
       a1 <- argh[[1]]
       if(is.fv(a1)) return(argh)
-      if(is.list(a1) && all(sapply(a1, is.fv))) argh <- a1
+      if(is.list(a1) && all(sapply(a1, is.fv))) {
+        argh <- a1
+        n <- length(argh)
+      }
     }
     isfv <- sapply(argh, is.fv)
     if(!all(isfv))
       stop("All arguments must be fv objects")
+    if(n == 1) return(argh[[1]])
     ## determine range of argument
     ranges <- lapply(argh, argumentrange)
     xrange <- c(max(unlist(lapply(ranges, min))),
@@ -256,7 +260,7 @@ harmonize.fv <- harmonise.fv <- local({
                       function(v,xx,fi) fi(xx, v),
                       xx=xx, fi=fi)
       names(yyval) <- starnames
-      ri <- do.call("data.frame", append(xxval, yyval))
+      ri <- do.call(data.frame, append(xxval, yyval))
       fva <- .Spatstat.FvAttrib
       attributes(ri)[fva] <- attributes(ai)[fva]
       class(ri) <- c("fv", class(ri))

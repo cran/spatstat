@@ -3,7 +3,7 @@
 #
 #  Linear Algebra
 #
-# $Revision: 1.11 $ $Date: 2015/09/30 04:36:17 $
+# $Revision: 1.15 $ $Date: 2016/03/01 09:12:46 $
 #
 
 sumouter <- function(x, w=NULL) {
@@ -124,11 +124,15 @@ bilinearform <- function(x, v, y) {
 
 sumsymouter <- function(x, w=NULL) {
   # computes the sum of outer(x[,i,j], x[,j,i]) * w[i,j] over all pairs i != j
-  stopifnot(is.array(x) && length(dim(x)) == 3)
+  if(inherits(x, c("sparseSlab", "sparse3Darray")) &&
+     (is.null(w) || inherits(w, "sparseMatrix")))
+    return(sumsymouterSparse(x, w))
+  x <- as.array(x)
+  stopifnot(length(dim(x)) == 3)
   if(dim(x)[2] != dim(x)[3])
     stop("The second and third dimensions of x should be equal")
   if(!is.null(w)) {
-    stopifnot(is.matrix(w))
+    w <- as.matrix(w)
     if(!all(dim(w) == dim(x)[-1]))
       stop("Dimensions of w should match the second and third dimensions of x")
   }
@@ -164,4 +168,22 @@ checksolve <- function(M, action, descrip, target="") {
          warn= warning(whinge, call.=FALSE),
          silent={})
   return(NULL)
+}
+
+check.mat.mul <- function(A, B, Acols="columns of A", Brows="rows of B",
+                          fatal=TRUE) {
+  # check whether A %*% B would be valid: if not, print a useful message
+  if(!is.matrix(A)) A <- matrix(A, nrow=1, dimnames=list(NULL, names(A)))
+  if(!is.matrix(B)) B <- matrix(B, ncol=1, dimnames=list(names(B), NULL))
+  nA <- ncol(A)
+  nB <- nrow(B) 
+  if(nA == nB) return(TRUE)
+  if(!fatal) return(FALSE)
+  if(any(nzchar(Anames <- colnames(A))))
+    message(paste0("Names of ", Acols, ": ", commasep(Anames)))
+  if(any(nzchar(Bnames <- rownames(B))))
+    message(paste0("Names of ", Brows, ": ", commasep(Bnames)))
+  stop(paste("Internal error: number of", Acols, paren(nA),
+             "does not match number of", Brows, paren(nB)),
+       call.=FALSE)
 }

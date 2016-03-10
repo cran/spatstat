@@ -19,32 +19,32 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 3: replicated.Rnw:189-190
+### code chunk number 3: replicated.Rnw:180-181
 ###################################################
 waterstriders
 
 
 ###################################################
-### code chunk number 4: replicated.Rnw:208-209
+### code chunk number 4: replicated.Rnw:199-200
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(waterstriders, main="")
 
 
 ###################################################
-### code chunk number 5: replicated.Rnw:216-217
+### code chunk number 5: replicated.Rnw:207-208
 ###################################################
 summary(waterstriders)
 
 
 ###################################################
-### code chunk number 6: replicated.Rnw:225-226
+### code chunk number 6: replicated.Rnw:216-217
 ###################################################
 X <- listof(rpoispp(100), rpoispp(100), rpoispp(100))
 
 
 ###################################################
-### code chunk number 7: replicated.Rnw:231-233
+### code chunk number 7: replicated.Rnw:222-224
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(X)
@@ -52,20 +52,20 @@ X
 
 
 ###################################################
-### code chunk number 8: replicated.Rnw:262-263 (eval = FALSE)
+### code chunk number 8: replicated.Rnw:253-254 (eval = FALSE)
 ###################################################
 ## hyperframe(...)
 
 
 ###################################################
-### code chunk number 9: replicated.Rnw:288-290
+### code chunk number 9: replicated.Rnw:279-281
 ###################################################
 H <- hyperframe(X=1:3, Y=list(sin,cos,tan))
 H
 
 
 ###################################################
-### code chunk number 10: replicated.Rnw:298-303
+### code chunk number 10: replicated.Rnw:289-294
 ###################################################
 G <- hyperframe(X=1:3, Y=letters[1:3], Z=factor(letters[1:3]),
                 W=list(rpoispp(100),rpoispp(100), rpoispp(100)),
@@ -75,39 +75,39 @@ G
 
 
 ###################################################
-### code chunk number 11: replicated.Rnw:332-333
+### code chunk number 11: replicated.Rnw:323-324
 ###################################################
 simba
 
 
 ###################################################
-### code chunk number 12: replicated.Rnw:346-347
+### code chunk number 12: replicated.Rnw:337-338
 ###################################################
 pyramidal
 
 
 ###################################################
-### code chunk number 13: replicated.Rnw:353-354
+### code chunk number 13: replicated.Rnw:344-345
 ###################################################
 ws <- hyperframe(Striders=waterstriders)
 
 
 ###################################################
-### code chunk number 14: replicated.Rnw:361-363
+### code chunk number 14: replicated.Rnw:352-354
 ###################################################
 H$X
 H$Y
 
 
 ###################################################
-### code chunk number 15: replicated.Rnw:373-375
+### code chunk number 15: replicated.Rnw:364-366
 ###################################################
 H$U <- letters[1:3]
 H
 
 
 ###################################################
-### code chunk number 16: replicated.Rnw:380-384
+### code chunk number 16: replicated.Rnw:371-375
 ###################################################
 G <- hyperframe()
 G$X <- waterstriders
@@ -116,7 +116,7 @@ G
 
 
 ###################################################
-### code chunk number 17: replicated.Rnw:392-396
+### code chunk number 17: replicated.Rnw:383-387
 ###################################################
 H[,1]
 H[2,]
@@ -125,7 +125,7 @@ H[1,1]
 
 
 ###################################################
-### code chunk number 18: replicated.Rnw:402-405
+### code chunk number 18: replicated.Rnw:393-396
 ###################################################
 H[,1,drop=TRUE]
 H[1,1,drop=TRUE]
@@ -133,27 +133,27 @@ H[1,2,drop=TRUE]
 
 
 ###################################################
-### code chunk number 19: replicated.Rnw:418-419 (eval = FALSE)
+### code chunk number 19: replicated.Rnw:409-410 (eval = FALSE)
 ###################################################
 ## plot.listof(x, ..., main, arrange = TRUE, nrows = NULL, ncols = NULL)
 
 
 ###################################################
-### code chunk number 20: replicated.Rnw:434-435
+### code chunk number 20: replicated.Rnw:425-426
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(waterstriders, pch=16, nrows=1)
 
 
 ###################################################
-### code chunk number 21: replicated.Rnw:450-451
+### code chunk number 21: replicated.Rnw:441-442
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(simba)
 
 
 ###################################################
-### code chunk number 22: replicated.Rnw:463-465
+### code chunk number 22: replicated.Rnw:454-456
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 H <- hyperframe(X=1:3, Y=list(sin,cos,tan))
@@ -161,20 +161,20 @@ plot(H$Y)
 
 
 ###################################################
-### code chunk number 23: replicated.Rnw:477-478 (eval = FALSE)
+### code chunk number 23: replicated.Rnw:468-469 (eval = FALSE)
 ###################################################
 ## plot(h, e)
 
 
 ###################################################
-### code chunk number 24: replicated.Rnw:487-488
+### code chunk number 24: replicated.Rnw:478-479
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(demohyper, quote({ plot(Image, main=""); plot(Points, add=TRUE) }))
 
 
 ###################################################
-### code chunk number 25: replicated.Rnw:500-502
+### code chunk number 25: replicated.Rnw:491-493
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 H <- hyperframe(Bugs=waterstriders)
@@ -182,20 +182,20 @@ plot(H, quote(plot(Kest(Bugs))), marsize=1)
 
 
 ###################################################
-### code chunk number 26: replicated.Rnw:515-517
+### code chunk number 26: replicated.Rnw:506-508
 ###################################################
 df <- data.frame(A=1:10, B=10:1)
 with(df, A-B)
 
 
 ###################################################
-### code chunk number 27: replicated.Rnw:530-531 (eval = FALSE)
+### code chunk number 27: replicated.Rnw:521-522 (eval = FALSE)
 ###################################################
 ## with(h,e)
 
 
 ###################################################
-### code chunk number 28: replicated.Rnw:541-544
+### code chunk number 28: replicated.Rnw:532-535
 ###################################################
 H <- hyperframe(Bugs=waterstriders)
 with(H, npoints(Bugs))
@@ -203,46 +203,46 @@ with(H, distmap(Bugs))
 
 
 ###################################################
-### code chunk number 29: replicated.Rnw:567-568
+### code chunk number 29: replicated.Rnw:558-559
 ###################################################
 with(simba, npoints(Points))
 
 
 ###################################################
-### code chunk number 30: replicated.Rnw:575-577
+### code chunk number 30: replicated.Rnw:566-568
 ###################################################
 H <- hyperframe(Bugs=waterstriders)
 K <- with(H, Kest(Bugs))
 
 
 ###################################################
-### code chunk number 31: replicated.Rnw:585-586
+### code chunk number 31: replicated.Rnw:576-577
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(K)
 
 
 ###################################################
-### code chunk number 32: replicated.Rnw:591-593
+### code chunk number 32: replicated.Rnw:582-584
 ###################################################
 H <- hyperframe(Bugs=waterstriders)
 with(H, nndist(Bugs))
 
 
 ###################################################
-### code chunk number 33: replicated.Rnw:599-600
+### code chunk number 33: replicated.Rnw:590-591
 ###################################################
 with(H, min(nndist(Bugs)))
 
 
 ###################################################
-### code chunk number 34: replicated.Rnw:612-613
+### code chunk number 34: replicated.Rnw:603-604
 ###################################################
 simba$Dist <- with(simba, distmap(Points))
 
 
 ###################################################
-### code chunk number 35: replicated.Rnw:626-630
+### code chunk number 35: replicated.Rnw:617-621
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 lambda <- rexp(6, rate=1/50)
@@ -252,20 +252,20 @@ plot(H, quote(plot(Points, main=paste("lambda=", signif(lambda, 4)))))
 
 
 ###################################################
-### code chunk number 36: replicated.Rnw:636-637
+### code chunk number 36: replicated.Rnw:627-628
 ###################################################
 H$X <- with(H, rpoispp(50))
 
 
 ###################################################
-### code chunk number 37: replicated.Rnw:666-667
+### code chunk number 37: replicated.Rnw:657-658
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(simba, quote(plot(density(Points), main="")), nrows=2)
 
 
 ###################################################
-### code chunk number 38: replicated.Rnw:686-688
+### code chunk number 38: replicated.Rnw:677-679
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 rhos <- with(demohyper, rhohat(Points, Image))
@@ -273,81 +273,81 @@ plot(rhos)
 
 
 ###################################################
-### code chunk number 39: replicated.Rnw:705-706 (eval = FALSE)
+### code chunk number 39: replicated.Rnw:696-697 (eval = FALSE)
 ###################################################
 ## mppm(formula, data, interaction, ...)
 
 
 ###################################################
-### code chunk number 40: replicated.Rnw:716-717 (eval = FALSE)
+### code chunk number 40: replicated.Rnw:707-708 (eval = FALSE)
 ###################################################
 ## mppm(Points ~ group, simba, Poisson())
 
 
 ###################################################
-### code chunk number 41: replicated.Rnw:750-751
+### code chunk number 41: replicated.Rnw:741-742
 ###################################################
 mppm(Points ~ 1, simba)
 
 
 ###################################################
-### code chunk number 42: replicated.Rnw:758-759
+### code chunk number 42: replicated.Rnw:749-750
 ###################################################
 mppm(Points ~ group, simba)
 
 
 ###################################################
-### code chunk number 43: replicated.Rnw:765-766
+### code chunk number 43: replicated.Rnw:756-757
 ###################################################
 mppm(Points ~ id, simba)
 
 
 ###################################################
-### code chunk number 44: replicated.Rnw:776-777
+### code chunk number 44: replicated.Rnw:767-768
 ###################################################
 mppm(Points ~ Image, data=demohyper)
 
 
 ###################################################
-### code chunk number 45: replicated.Rnw:795-796 (eval = FALSE)
+### code chunk number 45: replicated.Rnw:786-787 (eval = FALSE)
 ###################################################
 ## mppm(Points ~ offset(log(Image)), data=demohyper)
 
 
 ###################################################
-### code chunk number 46: replicated.Rnw:808-809 (eval = FALSE)
+### code chunk number 46: replicated.Rnw:799-800 (eval = FALSE)
 ###################################################
 ## mppm(Points ~ log(Image), data=demop)
 
 
 ###################################################
-### code chunk number 47: replicated.Rnw:826-827 (eval = FALSE)
+### code chunk number 47: replicated.Rnw:817-818 (eval = FALSE)
 ###################################################
 ## mppm(formula, data, interaction, ..., iformula=NULL)
 
 
 ###################################################
-### code chunk number 48: replicated.Rnw:877-878
+### code chunk number 48: replicated.Rnw:868-869
 ###################################################
 radii <- with(simba, mean(nndist(Points)))
 
 
 ###################################################
-### code chunk number 49: replicated.Rnw:885-887
+### code chunk number 49: replicated.Rnw:876-878
 ###################################################
 Rad <- hyperframe(R=radii)
 Str <- with(Rad, Strauss(R))
 
 
 ###################################################
-### code chunk number 50: replicated.Rnw:892-894
+### code chunk number 50: replicated.Rnw:883-885
 ###################################################
 Int <- hyperframe(str=Str)
 mppm(Points ~ 1, simba, interaction=Int)
 
 
 ###################################################
-### code chunk number 51: replicated.Rnw:921-924
+### code chunk number 51: replicated.Rnw:912-915
 ###################################################
 h <- hyperframe(Y=waterstriders)
 g <- hyperframe(po=Poisson(), str4 = Strauss(4), str7= Strauss(7))
@@ -355,50 +355,50 @@ mppm(Y ~ 1, data=h, interaction=g, iformula=~str4)
 
 
 ###################################################
-### code chunk number 52: replicated.Rnw:935-936
+### code chunk number 52: replicated.Rnw:926-927
 ###################################################
 fit <- mppm(Points ~ 1, simba, Strauss(0.07), iformula = ~Interaction*group)
 
 
 ###################################################
-### code chunk number 53: replicated.Rnw:954-955
+### code chunk number 53: replicated.Rnw:945-946
 ###################################################
 fit
 
 
 ###################################################
-### code chunk number 54: replicated.Rnw:958-960
+### code chunk number 54: replicated.Rnw:949-951
 ###################################################
 co <- coef(fit)
 si <- function(x) { signif(x, 4) }
 
 
 ###################################################
-### code chunk number 55: replicated.Rnw:971-972
+### code chunk number 55: replicated.Rnw:962-963
 ###################################################
 coef(fit)
 
 
 ###################################################
-### code chunk number 56: replicated.Rnw:1029-1030 (eval = FALSE)
+### code chunk number 56: replicated.Rnw:1020-1021 (eval = FALSE)
 ###################################################
 ## interaction=hyperframe(po=Poisson(), str=Strauss(0.07))
 
 
 ###################################################
-### code chunk number 57: replicated.Rnw:1035-1036 (eval = FALSE)
+### code chunk number 57: replicated.Rnw:1026-1027 (eval = FALSE)
 ###################################################
 ## iformula=~ifelse(group=="control", po, str)
 
 
 ###################################################
-### code chunk number 58: replicated.Rnw:1046-1047 (eval = FALSE)
+### code chunk number 58: replicated.Rnw:1037-1038 (eval = FALSE)
 ###################################################
 ## iformula=~I((group=="control")*po) + I((group=="treatment") * str)
 
 
 ###################################################
-### code chunk number 59: replicated.Rnw:1057-1062
+### code chunk number 59: replicated.Rnw:1048-1053
 ###################################################
 g <- hyperframe(po=Poisson(), str=Strauss(0.07))
 fit2 <- mppm(Points ~ 1, simba, g, 
@@ -408,20 +408,20 @@ fit2
 
 
 ###################################################
-### code chunk number 60: replicated.Rnw:1185-1187
+### code chunk number 60: replicated.Rnw:1176-1178
 ###################################################
 H <- hyperframe(P=waterstriders)
 mppm(P ~ 1, H, random=~1|id)
 
 
 ###################################################
-### code chunk number 61: replicated.Rnw:1194-1195 (eval = FALSE)
+### code chunk number 61: replicated.Rnw:1185-1186 (eval = FALSE)
 ###################################################
 ## mppm(Neurons ~ AstroIm, random=~AstroIm|WellNumber)
 
 
 ###################################################
-### code chunk number 62: replicated.Rnw:1218-1221
+### code chunk number 62: replicated.Rnw:1209-1212
 ###################################################
 H <- hyperframe(W=waterstriders)
 fit <- mppm(W ~ 1, H)
@@ -429,34 +429,34 @@ subfits(fit)
 
 
 ###################################################
-### code chunk number 63: replicated.Rnw:1242-1243 (eval = FALSE)
+### code chunk number 63: replicated.Rnw:1233-1234 (eval = FALSE)
 ###################################################
 ## subfits <- subfits.new
 
 
 ###################################################
-### code chunk number 64: replicated.Rnw:1255-1257
+### code chunk number 64: replicated.Rnw:1246-1248
 ###################################################
 H <- hyperframe(W=waterstriders)
 with(H, ppm(W))
 
 
 ###################################################
-### code chunk number 65: replicated.Rnw:1280-1282
+### code chunk number 65: replicated.Rnw:1271-1273
 ###################################################
 fit <- mppm(P ~ x, hyperframe(P=waterstriders))
 res <- residuals(fit)
 
 
 ###################################################
-### code chunk number 66: replicated.Rnw:1292-1293
+### code chunk number 66: replicated.Rnw:1283-1284
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(res)
 
 
 ###################################################
-### code chunk number 67: replicated.Rnw:1298-1300
+### code chunk number 67: replicated.Rnw:1289-1291
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 smor <- with(hyperframe(res=res), Smooth(res, sigma=4))
@@ -464,7 +464,7 @@ plot(smor)
 
 
 ###################################################
-### code chunk number 68: replicated.Rnw:1312-1315
+### code chunk number 68: replicated.Rnw:1303-1306
 ###################################################
 fit <- mppm(P ~ x, hyperframe(P=waterstriders))
 res <- residuals(fit)
@@ -472,7 +472,7 @@ totres <- sapply(res, integral.msr)
 
 
 ###################################################
-### code chunk number 69: replicated.Rnw:1321-1328
+### code chunk number 69: replicated.Rnw:1312-1319
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 fit <- mppm(Points~Image, data=demohyper)
@@ -485,7 +485,7 @@ plot(resids~Group, df)
 
 
 ###################################################
-### code chunk number 70: replicated.Rnw:1349-1352
+### code chunk number 70: replicated.Rnw:1340-1343
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 fit <- mppm(P ~ 1, hyperframe(P=waterstriders))
@@ -494,7 +494,7 @@ plot(sub, quote(diagnose.ppm(Model)))
 
 
 ###################################################
-### code chunk number 71: replicated.Rnw:1365-1373
+### code chunk number 71: replicated.Rnw:1356-1364
 ###################################################
 H <- hyperframe(P = waterstriders)
 fitall <- mppm(P ~ 1, H)
@@ -507,7 +507,7 @@ exp(dr)
 
 
 ###################################################
-### code chunk number 72: replicated.Rnw:1390-1399
+### code chunk number 72: replicated.Rnw:1381-1390
 ###################################################
 H <- hyperframe(X=waterstriders)
 
@@ -521,7 +521,7 @@ quadrat.test(fit2, nx=2)
 
 
 ###################################################
-### code chunk number 73: replicated.Rnw:1428-1429 (eval = FALSE)
+### code chunk number 73: replicated.Rnw:1419-1420 (eval = FALSE)
 ###################################################
 ## kstest.mppm(model, covariate)
 

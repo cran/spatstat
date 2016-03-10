@@ -3,7 +3,7 @@
 #
 # Simple mechanism for layered plotting
 #
-#  $Revision: 1.34 $  $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.35 $  $Date: 2016/02/11 10:17:12 $
 #
 
 layered <- function(..., plotargs=NULL, LayerList=NULL) {
@@ -39,7 +39,7 @@ print.layered <- function(x, ...) {
     print(x[[i]])
   }
   pl <- layerplotargs(x)
-  hasplot <- (unlist(lapply(pl, length)) > 0)
+  hasplot <- (lengths(pl) > 0)
   if(any(hasplot)) 
     splat("Includes plot arguments for", commasep(names(pl)[hasplot]))
   invisible(NULL)
@@ -147,7 +147,7 @@ plotEachLayer <- function(x, ..., main,
                         "lpp", "linnet", 
                         "im", "msr", "layered"))) {
         ## plot method for 'xi' has argument 'do.plot'.
-        out[[i]] <- outi <- do.call("plot",
+        out[[i]] <- outi <- do.call(plot,
                                     resolve.defaults(list(x=xi,
                                                           add=add.i,
                                                           do.plot=do.plot),
@@ -196,7 +196,7 @@ plotEachLayer <- function(x, ..., main,
     p <- p[i]
     nx <- length(x)
   }
-  isnul <- (unlist(lapply(x, length)) == 0)
+  isnul <- (lengths(x) == 0)
   if(!missing(j) && !is.null(j))
     x[!isnul] <- lapply(x[!isnul], "[", i=j)
   if(drop && nx == 1)
@@ -335,7 +335,7 @@ as.owin.layered <- local({
     if(length(Wlist) > 1) {
       same <- unlist(lapply(Wlist[-1], identical, y=Z))
       if(!all(same))
-        Z <- do.call("union.owin", Wlist)
+        Z <- do.call(union.owin, Wlist)
     }
     return(Z)
   }

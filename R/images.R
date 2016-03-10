@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.133 $     $Date: 2015/09/01 01:56:46 $
+#      $Revision: 1.135 $     $Date: 2016/02/16 01:39:12 $
 #
 #      The class "im" of raster images
 #
@@ -34,7 +34,7 @@ im <- function(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)),
   miss.yrow <- missing(yrow)
   
   # determine dimensions
-  if(is.matrix(mat)) {
+  if(!is.null(dim(mat))) {
     nr <- nrow(mat)
     nc <- ncol(mat)
     if(length(xcol) != nc)
@@ -265,7 +265,7 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
           if(ncolsub > 1) list(xcol = out$xcol[colsub]) else list(xrange=xr)
         yarg <-
           if(nrowsub > 1) list(yrow = out$yrow[rowsub]) else list(yrange=yr)
-        result <- do.call("im", c(marg, xarg, yarg))
+        result <- do.call(im, c(marg, xarg, yarg))
         return(result)
       }
       if(verifyclass(i, "im", fatal=FALSE)) {
@@ -308,6 +308,9 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
 
     ## Construct a matrix index call for possible re-use
     M <- as.matrix(x)
+    ## suppress warnings from code checkers
+    dont.complain.about(M)
+    ##
     ycall <- switch(itype,
                     given = {
                       switch(jtype,
@@ -667,7 +670,7 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
   # insert into answer
   value[frameok] <- vf
 
-  if(!naok && any(is.na(value)))
+  if(!naok && anyNA(value))
     warning("Internal error: NA's generated")
 
   return(value)
@@ -828,7 +831,7 @@ hist.im <- function(x, ..., probability=FALSE) {
       heights <- tab
       ylab <- "Number of pixels"
     }
-    mids <- do.call("barplot",
+    mids <- do.call(barplot,
                    resolve.defaults(list(heights),
                                     list(...),
                                     list(xlab=paste("Pixel value"),
@@ -843,7 +846,7 @@ hist.im <- function(x, ..., probability=FALSE) {
     plotit <- resolve.defaults(list(...), list(plot=TRUE))$plot
     if(plotit) {
       ylab <- if(probability) "Probability density" else "Number of pixels"
-      out <- do.call("hist.default",
+      out <- do.call(hist.default,
                      resolve.defaults(list(values),
                                       list(...),
                                       list(freq=!probability,
@@ -853,7 +856,7 @@ hist.im <- function(x, ..., probability=FALSE) {
       out$xname <- xname
     } else {
       # plot.default whinges if `probability' given when plot=FALSE
-      out <- do.call("hist.default",
+      out <- do.call(hist.default,
                    resolve.defaults(list(values),
                                     list(...)))
       # hack!
@@ -864,7 +867,7 @@ hist.im <- function(x, ..., probability=FALSE) {
 }
 
 plot.barplotdata <- function(x, ...) {
-  do.call("barplot",
+  do.call(barplot,
           resolve.defaults(list(height=x$heights),
                            list(...),
                            list(main=paste("Histogram of ", x$xname))))
@@ -885,7 +888,7 @@ cut.im <- function(x, ...) {
 
 quantile.im <- function(x, ...) {
   verifyclass(x, "im")
-  q <- do.call("quantile",
+  q <- do.call(quantile,
                resolve.defaults(list(as.numeric(as.matrix(x))),
                                 list(...),
                                 list(na.rm=TRUE)))

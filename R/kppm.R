@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.114 $ $Date: 2015/11/17 03:46:51 $
+# $Revision: 1.122 $ $Date: 2016/03/04 10:47:08 $
 #
 
 kppm <- function(X, ...) {
@@ -43,9 +43,11 @@ kppm.formula <-
     thecall[ncall + 1:nargh] <- argh
     names(thecall)[ncall + 1:nargh] <- names(argh)
   }
-  result <- eval(thecall, 
-                 envir=if(!is.null(data)) data else parent.frame(),
-                 enclos=if(!is.null(data)) parent.frame() else baseenv())
+#  result <- eval(thecall, 
+#                 envir=if(!is.null(data)) data else parent.frame(),
+#                 enclos=if(!is.null(data)) parent.frame() else baseenv())
+  callenv <- list2env(as.list(data), parent=parent.frame())
+  result <- eval(thecall, envir=callenv, enclos=baseenv())
 
   result$call <- cl
   result$callframe <- parent.frame()
@@ -91,9 +93,8 @@ kppm.ppp <- kppm.quad <-
                       statistic=statistic,
                       statargs=statargs,
                       rmax = rmax)
-  X <- eval(substitute(X),
-            envir=if(!is.null(data)) data else parent.frame(),
-            enclos=if(!is.null(data)) parent.frame() else baseenv())
+  Xenv <- list2env(as.list(covariates), parent=parent.frame())
+  X <- eval(substitute(X), envir=Xenv, enclos=baseenv())
   isquad <- inherits(X, "quad")
   if(!is.ppp(X) && !isquad)
     stop("X should be a point pattern (ppp) or quadrature scheme (quad)")
@@ -330,7 +331,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
     mcargs <- resolve.defaults(mcargs, list(lower=alg$lower, upper=alg$upper))
   }
   
-  mcfit <- do.call("mincontrast", mcargs)
+  mcfit <- do.call(mincontrast, mcargs)
   # Return results for DPPs
   if(isDPP){
     names(mcfit$par) <- names(startpar)
@@ -407,7 +408,7 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
     sumweight <- npairs
   }
   # convert window to mask, saving other arguments for later
-  dcm <- do.call.matched("as.mask",
+  dcm <- do.call.matched(as.mask,
                          append(list(w=W), list(...)),
                          sieve=TRUE)
   M         <- dcm$result
@@ -615,7 +616,7 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
 #    sumweight <- npairs
   }
   # convert window to mask, saving other arguments for later
-  dcm <- do.call.matched("as.mask",
+  dcm <- do.call.matched(as.mask,
                          append(list(w=W), list(...)),
                          sieve=TRUE)
   M         <- dcm$result
@@ -850,7 +851,7 @@ improve.kppm <- local({
       Kmax <- 2*pi * integrate(function(r){r * (gfun(r) - 1)},
                                lower=0, upper=rmax)$value * exp(c(Z %*% beta0))
     ## the g()-1 matrix without tapering
-    if (!fast){
+    if (!fast || (vcov && !fast.vcov)){
       if (verbose)
         cat("computing the g(u_i,u_j)-1 matrix ...")
       gminus1 <- matrix(gfun(c(pairdist(U))) - 1, U$n, U$n)
@@ -948,7 +949,8 @@ improve.kppm <- local({
     out <- object
     out$po$coef.orig <- beta0
     out$po$coef <- bt
-    out$lambda <- predict(out$po, locations = as.mask(out$lambda))
+    loc <- if(is.sob(out$lambda)) as.mask(out$lambda) else mask
+    out$lambda <- predict(out$po, locations = loc)
     out$improve <- list(type = type,
                         rmax = rmax,
                         dimyx = dimyx,
@@ -1233,22 +1235,26 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
            kappa <- mp$kappa
            sigma <- mp$sigma
            cmd <- expression(rThomas(kappa,sigma,mu,win))
+           dont.complain.about(kappa, sigma, mu)
          },
          MatClust={
            kappa <- mp$kappa
            r     <- mp$R
            cmd   <- expression(rMatClust(kappa,r,mu,win))
+           dont.complain.about(kappa, r)
          },
          Cauchy = {
            kappa <- mp$kappa
            omega <- mp$omega
            cmd   <- expression(rCauchy(kappa, omega, mu, win))
+           dont.complain.about(kappa, omega, mu)
          },
          VarGamma = {
            kappa  <- mp$kappa
            omega  <- mp$omega
            nu.ker <- object$covmodel$margs$nu.ker
            cmd    <- expression(rVarGamma(kappa, nu.ker, omega, mu, win))
+           dont.complain.about(kappa, nu.ker, omega, mu)
          },
          LGCP={
            sigma2 <- mp$sigma2
@@ -1273,6 +1279,8 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
              rfmod <- try(rLGCP(model, mu=mu, param=param, 
                               ..., modelonly=TRUE))
            }
+           #' suppress warnings from code checker
+           dont.complain.about(model, mu, param)
            #' check that model is recognised
            if(inherits(rfmod, "try-error"))
              stop(paste("Internal error in simulate.kppm:",
@@ -1352,6 +1360,7 @@ update.kppm <- function(object, ...) {
   envir <- environment(terms(object))
   #' look for a formula argument
   fmla <- formula(object)
+  jf <- integer(0)
   if(!is.null(trend <- argh$trend)) {
     if(!can.be.formula(trend))
       stop("Argument \"trend\" should be a formula")
@@ -1368,7 +1377,6 @@ update.kppm <- function(object, ...) {
     fmla <- argh[[jf]]
     fmla <- newformula(formula(object), fmla, callframe, envir)
   }
-  jf <- integer(0)
 
   #' look for a point pattern or quadscheme
   if(!is.null(X <- argh$X)) {
@@ -1389,8 +1397,10 @@ update.kppm <- function(object, ...) {
     X <- object$X
     jX <- integer(0)
   }
-  #' remove used arguments
-  argh <- argh[-c(jf, jX)]
+  #' remove arguments just recognised, if any
+  jused <- c(jf, jX)
+  if(length(jused) > 0)
+    argh <- argh[-jused]
   #' update
   if(is.null(lhs.of.formula(fmla))) {
     #' kppm(X, ~trend, ...) 

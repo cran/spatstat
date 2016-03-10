@@ -1,7 +1,7 @@
 #
 # ippm.R
 #
-#   $Revision: 2.18 $   $Date: 2015/10/21 09:06:57 $
+#   $Revision: 2.20 $   $Date: 2016/02/16 01:39:12 $
 #
 # Fisher scoring algorithm for irregular parameters in ppm trend
 #
@@ -40,7 +40,7 @@ ippm <- local({
     }
     ##
     smap <- match(names(start), names(covfunargs))
-    if(any(is.na(smap)))
+    if(anyNA(smap))
       stop("variables in start should be a subset of variables in covfunargs")
     covfunargs[smap] <- start
     ## fit the initial model and extract information
@@ -101,7 +101,7 @@ ippm <- local({
     startvec <- unlist(start)
     typsize <- abs(startvec)
     typsize <- pmax(typsize, min(typsize[typsize > 0]))
-    g <- do.call("nlm",
+    g <- do.call(nlm,
                  resolve.defaults(list(f=objectivefun,
                                        p=startvec,
                                        thedata=fdata),

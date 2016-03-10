@@ -3,7 +3,7 @@
 #
 #	A class 'owin' to define the "observation window"
 #
-#	$Revision: 4.170 $	$Date: 2015/10/21 09:06:57 $
+#	$Revision: 4.172 $	$Date: 2016/02/16 01:39:12 $
 #
 #
 #	A window may be either
@@ -399,7 +399,7 @@ as.owin.data.frame <- function(W, ..., fatal=TRUE) {
     W <- cbind(W, TRUE)
   } 
   mch <- match(c("x", "y"), names(W))
-  if(!any(is.na(mch))) {
+  if(!anyNA(mch)) {
     ix <- mch[1]
     iy <- mch[2]
     iz <- (1:3)[-mch]
@@ -860,8 +860,8 @@ complement.owin <- function(w, frame=as.rectangle(w)) {
            if(reframe)
              is.box <- rep.int(FALSE, length(bdry))
            else {
-             nvert <- sapply(lapply(bdry, getElement, name="x"), length)
-             areas <- unlist(lapply(bdry, Area.xypolygon))
+             nvert <- lengths(lapply(bdry, getElement, name="x"))
+             areas <- sapply(bdry, Area.xypolygon)
              boxarea.mineps <- boxarea * (0.99999)
              is.box <- (nvert == 4 & areas >= boxarea.mineps)
              if(sum(is.box) > 1)
@@ -1020,8 +1020,7 @@ summary.owin <- function(object, ...) {
              result$nvertices <- length(poly[[1]]$x)
            } else {
              result$areas <- unlist(lapply(poly, Area.xypolygon))
-             result$nvertices <- sapply(lapply(poly, getElement, name="x"),
-                                        length)
+             result$nvertices <- lengths(lapply(poly, getElement, name="x"))
            }
            result$nhole <- sum(result$areas < 0)
          },

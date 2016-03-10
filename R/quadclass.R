@@ -4,7 +4,7 @@
 #	Class 'quad' to define quadrature schemes
 #	in (rectangular) windows in two dimensions.
 #
-#	$Revision: 4.24 $	$Date: 2014/10/24 00:22:30 $
+#	$Revision: 4.26 $	$Date: 2016/02/16 01:39:12 $
 #
 # An object of class 'quad' contains the following entries:
 #
@@ -130,7 +130,7 @@ is.marked.quad <- function(X, na.action="warn", ...) {
   marx <- marks(X, ...)
   if(is.null(marx))
     return(FALSE)
-  if(any(is.na(marx)))
+  if(anyNA(marx))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
@@ -148,7 +148,7 @@ is.multitype.quad <- function(X, na.action="warn", ...) {
   marx <- marks(X, ...)
   if(is.null(marx))
     return(FALSE)
-  if(any(is.na(marx)))
+  if(anyNA(marx))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
@@ -246,11 +246,11 @@ plot.quad <- function(x, ..., main, add=FALSE, dum=list(), tiles=FALSE) {
                                if(!pixeltiles) list(col="grey") else NULL)
   if(!is.marked(data)) {
     if(!is.null(tt)) {
-      do.call("plot", tileargs)
+      do.call(plot, tileargs)
       add <- TRUE
     }
     plot(data, main=main, add=add, ...)
-    do.call("plot", append(list(x=dummy), dum))
+    do.call(plot, append(list(x=dummy), dum))
   } else if(is.multitype(data) && !add) {
     oldpar <- par(ask = interactive() &&
                   (.Device %in% c("X11", "GTK", "windows", "Macintosh")))
@@ -261,21 +261,21 @@ plot.quad <- function(x, ..., main, add=FALSE, dum=list(), tiles=FALSE) {
     for(k in types) {
       add <- FALSE
       if(!is.null(tt)) {
-        do.call("plot", tileargs)
+        do.call(plot, tileargs)
         add <- TRUE
       }
       maink <- paste(main, "\n mark = ", k, sep="")
       plot(unmark(data[data.marks == k]), main=maink, add=add, ...)
-      do.call("plot", append(list(x=unmark(dummy[dummy.marks == k])),
+      do.call(plot, append(list(x=unmark(dummy[dummy.marks == k])),
                              dum))
     }
   } else {
     if(!is.null(tt)) {
-      do.call("plot", tileargs)
+      do.call(plot, tileargs)
       add <- TRUE
     }
     plot(data, ..., main=main, add=add)
-    do.call("plot", append(list(x=dummy), dum))
+    do.call(plot, append(list(x=dummy), dum))
   }
   invisible(NULL)
 }

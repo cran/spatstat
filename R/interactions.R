@@ -3,7 +3,7 @@
 #
 # Works out which interaction is in force for a given point pattern
 #
-#  $Revision: 1.16 $  $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.23 $  $Date: 2016/02/16 01:39:12 $
 #
 #
 impliedpresence <- function(tags, formula, df, extranames=character(0)) {
@@ -83,7 +83,7 @@ active.interactions <- function(object) {
   answer <- impliedpresence(itags, iformula, dfdata, nondfnames)
 #%^!ifdef RANDOMEFFECTS  
   if(!is.null(random)) {
-    if("/" %in% all.names(random)) {
+    if("|" %in% all.names(random)) {
       ## hack since model.matrix doesn't handle "|" as desired
       rnd <- gsub("|", "/", pasteFormula(random), fixed=TRUE)
       random <- as.formula(rnd, env=environment(random))
@@ -101,6 +101,7 @@ impliedcoefficients <- function(object, tag) {
   stopifnot(is.character(tag) && length(tag) == 1)
   fitobj      <- object$Fit$FIT
   Vnamelist   <- object$Fit$Vnamelist
+  has.random  <- object$Info$has.random
 # Not currently used:  
 #  fitter      <- object$Fit$fitter
 #  interaction <- object$Inter$interaction
@@ -117,25 +118,45 @@ impliedcoefficients <- function(object, tag) {
   vnames <- Vnamelist[[tag]]
   if(!is.character(vnames))
     stop("Internal error - wrong format for vnames")
+  # Check atomic type of each covariate
+  Moadf <- as.list(object$Fit$moadf)
+  islog <- sapply(Moadf, is.logical)
+  isnum <- sapply(Moadf, is.numeric)
+  isfac <- sapply(Moadf, is.factor)
+  # Interaction variables must be numeric or logical
+  if(any(bad <- !(isnum | islog)[vnames]))
+    stop(paste("Internal error: the",
+               ngettext(sum(bad), "variable", "variables"),
+               commasep(sQuote(vnames[bad])),
+               "should be numeric or logical"),
+         call.=FALSE)
   # The answer is a matrix of coefficients,
   # with one row for each point pattern,
   # and one column for each vname
   answer <- matrix(, nrow=object$npat, ncol=length(vnames))
   colnames(answer) <- vnames
-
+  
   # (1) make a data frame of covariates
   # Names of all columns in glm data frame
-  allnames <- names(object$Fit$moadf)
+  allnames <- names(Moadf)
   # Extract the design covariates
   df <- as.data.frame(object$data, warn=FALSE)
   # Names of all covariates other than design covariates
   othernames <- allnames[!(allnames %in% names(df))]
-  # Add columns in which all other covariates are set to 0
-  for(v in othernames) df[, v] <- 0
-  
+  # Add columns in which all other covariates are set to 0, FALSE, etc
+  for(v in othernames) {
+    df[, v] <- if(isnum[[v]]) 0 else
+               if(islog[[v]]) FALSE else
+               if(isfac[[v]]) {
+                 lev <- levels(Moadf[[v]])
+                 factor(lev[1], levels=lev)
+               } else sort(unique(Moadf[[v]]))[1]
+  }
   # (2) evaluate linear predictor
+  Coefs <- if(!has.random) coef(fitobj) else fixef(fitobj)
   opt <- options(warn= -1)
-  eta0 <- predict(fitobj, newdata=df, type="link")
+#  eta0 <- predict(fitobj, newdata=df, type="link")
+  eta0 <- GLMpredict(fitobj, data=df, coefs=Coefs, changecoef=TRUE, type="link")
   options(opt)
   
   # (3) for each vname in turn,
@@ -143,7 +164,8 @@ impliedcoefficients <- function(object, tag) {
   for(j in seq(vnames)) {
     df[[vnames[j] ]] <- 1
     opt <- options(warn= -1)
-    etaj <- predict(fitobj, newdata=df, type="link")
+#    etaj <- predict(fitobj, newdata=df, type="link")
+    etaj <- GLMpredict(fitobj, data=df, coefs=Coefs, changecoef=TRUE, type="link")
     options(opt)
     answer[ ,j] <- etaj - eta0
   }
@@ -206,7 +228,7 @@ illegal.iformula <- local({
     ft.args <- lapply(fterms, variables.in.term, 
                       factors=fax, varnamelist=fv.args)
     ft.itags <- lapply(ft.args, intersect, y=itags)
-    if(any(sapply(ft.itags, length) > 1))
+    if(any(lengths(ft.itags) > 1))
       return("Interaction between itags is not defined")
     return(NULL)
   }

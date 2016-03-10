@@ -1,7 +1,7 @@
 #
 #     ewcdf.R
 #
-#     $Revision: 1.8 $  $Date: 2015/05/17 10:30:37 $
+#     $Revision: 1.9 $  $Date: 2016/02/16 01:39:12 $
 #
 #  With contributions from Kevin Ummel
 #
@@ -38,7 +38,7 @@ ewcdf <- function(x, weights=rep(1/length(x), length(x)))
   return(rval)
 }
 
-  # Hacked from stats:::print.ewcdf
+  # Hacked from stats:::print.ecdf
 print.ewcdf <- function (x, digits = getOption("digits") - 2L, ...) {
   cat("Weighted empirical CDF \nCall: ")
   print(attr(x, "call"), ...)

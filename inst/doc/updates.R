@@ -19,7 +19,7 @@ newdat <- changes[["ndatasets"]]
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:54-59
+### code chunk number 3: updates.Rnw:55-60
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -29,7 +29,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:65-70
+### code chunk number 4: updates.Rnw:66-71
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -40,7 +40,7 @@ text(as.Date("2013-01-01"), 50, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:608-612
+### code chunk number 5: updates.Rnw:839-843
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -49,7 +49,7 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:618-619 (eval = FALSE)
+### code chunk number 6: updates.Rnw:849-850 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

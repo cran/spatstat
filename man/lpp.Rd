@@ -37,7 +37,7 @@ lpp(X, L, \dots)
     the first two columns of \code{X} will be interpreted
     as spatial coordinates, and any remaining columns as marks.
     \item 
-    The exception occurs if \code{X} is a data frame with columns named
+    An exception occurs if \code{X} is a data frame with columns named
     \code{x}, \code{y}, \code{seg} and \code{tp}. Then
     \code{x} and \code{y} will be interpreted as spatial
     coordinates, and \code{seg} and \code{tp} as local
@@ -45,6 +45,13 @@ lpp(X, L, \dots)
     \code{L} the point lies on, and \code{tp} indicating how far along
     the segment the point lies (normalised to 1). Any remaining columns
     will be interpreted as marks.
+    \item 
+    Another exception occurs if \code{X} is a data frame with columns named
+    \code{seg} and \code{tp}. Then
+    \code{seg} and \code{tp} will be interpreted as local
+    coordinates, as above, and the spatial coordinates
+    \code{x,y} will be computed from them.
+    Any remaining columns will be interpreted as marks.
   }
 }
 \section{Note on changed format}{
@@ -96,9 +103,16 @@ lpp(X, L, \dots)
   See \code{\link{linnet}} for linear networks.
 }
 \examples{
-  example(linnet)
+  # letter 'A' 
+  v <- ppp(x=(-2):2, y=3*c(0,1,2,1,0), c(-3,3), c(-1,7))
+  edg <- cbind(1:4, 2:5)
+  edg <- rbind(edg, c(2,4))
+  letterA <- linnet(v, edges=edg)
+
+  # points on letter A
   xx <- list(x=c(-1.5,0,0.5,1.5), y=c(1.5,3,4.5,1.5))
   X <- lpp(xx, letterA)
+
   plot(X)
   X
   summary(X)

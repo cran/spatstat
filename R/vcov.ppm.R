@@ -3,7 +3,7 @@
 ## and Fisher information matrix
 ## for ppm objects
 ##
-##  $Revision: 1.114 $  $Date: 2015/09/30 04:36:48 $
+##  $Revision: 1.123 $  $Date: 2016/03/06 05:01:18 $
 ##
 
 vcov.ppm <- local({
@@ -131,7 +131,7 @@ vcalcPois <- function(object, ...,
                       method=c("C", "interpreted"),
                       verbose=TRUE,
                       fisher=NULL, 
-                      matwt=NULL, new.coef=NULL,
+                      matwt=NULL, new.coef=NULL, dropcoef=FALSE, 
                       saveterms=FALSE) {
   ## variance-covariance matrix of Poisson model,
   ## or Hessian of Gibbs model
@@ -156,7 +156,8 @@ vcalcPois <- function(object, ...,
     }
     ## compute fitted intensity and sufficient statistic
     ltype <- if(is.poisson(object)) "trend" else "lambda"
-    lambda <- fitted(object, type=ltype, new.coef=new.coef, check=FALSE)
+    lambda <- fitted(object, type=ltype, new.coef=new.coef,
+                     dropcoef=dropcoef, check=FALSE)
     mom <- model.matrix(object)
     nmom <- nrow(mom)
     Q <- quad.ppm(object)
@@ -199,7 +200,7 @@ vcalcPois <- function(object, ...,
                for(i in 1:nrow(mom)) {
                  ro <- mom[i, ]
                  v <- outer(ro, ro, "*") * lambda[i] * wt[i]
-                 if(!any(is.na(v)))
+                 if(!anyNA(v))
                    fisher <- fisher + v
                }
                momnames <- dimnames(mom)[[2]]
@@ -212,9 +213,9 @@ vcalcPois <- function(object, ...,
                  ldu <- lambda[i] * wt[i]
                  v <- outer(ro, ro, "*") * ldu
                  v0 <- outer(ro0, ro0, "*") * matwt[i] * ldu
-                 if(!any(is.na(v)))
+                 if(!anyNA(v))
                    fisher <- fisher + v
-                 if(!any(is.na(v0)))
+                 if(!anyNA(v0))
                    gradient <- gradient + v0
                }
                momnames <- dimnames(mom)[[2]]
@@ -350,7 +351,7 @@ vcalcGibbsGeneral <- function(model,
                          A1 = NULL,
                          fine = FALSE,
                          hessian = FALSE,
-                         matwt = NULL, new.coef = NULL,
+                         matwt = NULL, new.coef = NULL, dropcoef=FALSE,
                          saveterms = FALSE,
                          parallel = TRUE
                          ) {
@@ -365,7 +366,7 @@ vcalcGibbsGeneral <- function(model,
   asked.parallel <- !missing(parallel)
   
   old.coef <- coef(model)
-  use.coef <- if(!is.null(new.coef)) new.coef else old.coef
+  use.coef <- adaptcoef(new.coef, old.coef, drop=dropcoef)
   p <- length(old.coef)
   if(p == 0) {
     ## this probably can't happen
@@ -400,7 +401,7 @@ vcalcGibbsGeneral <- function(model,
   nX <- npoints(X)
   ## conditional intensity lambda(X[i] | X) = lambda(X[i] | X[-i])
   ## data and dummy:
-  lamall <- fitted(model, check = FALSE, new.coef = new.coef)
+  lamall <- fitted(model, check = FALSE, new.coef = new.coef, dropcoef=dropcoef)
   ## data only:
   lam <- lamall[Z]
   ## sufficient statistic h(X[i] | X) = h(X[i] | X[-i])
@@ -475,7 +476,9 @@ vcalcGibbsGeneral <- function(model,
     if(parallel) {
       ## compute second order difference
       ##  ddS[i,j,] = h(X[i] | X) - h(X[i] | X[-j])
-      ddS <- deltasuffstat(model, restrict=TRUE, force=FALSE)
+      sparse <- spatstat.options('developer')
+      ddS <- deltasuffstat(model, restrict=TRUE, force=FALSE, sparseOK=sparse)
+      sparse <- sparse && inherits(ddS, "sparse3Darray")
       if(is.null(ddS)) {
         if(asked.parallel)
           warning("parallel option not available - reverting to loop")
@@ -488,33 +491,67 @@ vcalcGibbsGeneral <- function(model,
         ## outer(ddS[,i,j], ddS[,j,i])
         ddSok <- ddS[ , ok, ok, drop=FALSE]
         A3 <- sumsymouter(ddSok)
-        ## mom.array[ ,i,j] = h(X[i] | X)
-        mom.array <- array(t(m), dim=c(p, nX, nX))
-        ## momdel[ ,i,j] = h(X[i] | X[-j])
-        momdel <- mom.array - ddS
-        ## lamdel[i,j] = lambda(X[i] | X[-j])
-        lamdel <-
-          matrix(lam, nX, nX) * exp(tensor::tensor(-use.coef, ddS, 1, 1))
-        ##  pairweight[i,j] = lamdel[i,j]/lambda[i] - 1 
-        pairweight <- lamdel / lam - 1
+        ## compute pairweight and other arrays
+        if(sparse) {
+          ## Entries are only required for pairs i,j which interact.
+          ## mom.array[ ,i,j] = h(X[i] | X)
+          mom.array <- mapSparseEntries(ddS, margin=2, values=m,
+                                        conform=TRUE, across=1)
+          ## momdel[ ,i,j] = h(X[i] | X[-j])
+          momdel <- mom.array - ddS
+          ## pairweight[i,j] = lambda(X[i] | X[-j] )/lambda( X[i] | X ) - 1
+          pairweight <- expm1(tensor1x1(-use.coef, ddS))
+        } else {
+          ## mom.array[ ,i,j] = h(X[i] | X)
+          mom.array <- array(t(m), dim=c(p, nX, nX))
+          ## momdel[ ,i,j] = h(X[i] | X[-j])
+          momdel <- mom.array - ddS
+          ## lamdel[i,j] = lambda(X[i] | X[-j])
+          lamdel <-
+            matrix(lam, nX, nX) * exp(tensor::tensor(-use.coef, ddS, 1, 1))
+          ##  pairweight[i,j] = lamdel[i,j]/lambda[i] - 1 
+          pairweight <- lamdel / lam - 1
+        }
         ## now compute sum_{i,j} for i != j
         ## pairweight[i,j] * outer(momdel[,i,j], momdel[,j,i])
         ## for data points that contributed to the pseudolikelihood
         momdelok <- momdel[ , ok, ok, drop=FALSE]
-        A2 <- sumsymouter(momdelok, w=pairweight[ok, ok])
+        pwok <- pairweight[ok, ok]
+        if(anyNA(momdelok) || anyNA(pwok))
+          stop("Unable to compute variance: NA values present", call.=FALSE)
+        A2 <- sumsymouter(momdelok, w=pwok)
+        dimnames(A2) <- dimnames(A3) <- dnames
         if(logi){
-          ## lam.array[ ,i,j] = lambda(X[i] | X)
-          lam.array <- array(lam, c(nX,nX,p))
-          lam.array <- aperm(lam.array, c(3,1,2))
-          ## lamdel.array[,i,j] = lambda(X[i] | X[-j])
-          lamdel.array <- array(lamdel, c(nX,nX,p))
-          lamdel.array <- aperm(lamdel.array, c(3,1,2))
-          momdellogi <- rho/(lamdel.array+rho)*momdel
+          if(!sparse) {
+            ## lam.array[ ,i,j] = lambda(X[i] | X)
+            lam.array <- array(lam, c(nX,nX,p))
+            lam.array <- aperm(lam.array, c(3,1,2))
+            ## lamdel.array[,i,j] = lambda(X[i] | X[-j])
+            lamdel.array <- array(lamdel, c(nX,nX,p))
+            lamdel.array <- aperm(lamdel.array, c(3,1,2))
+            momdellogi <- rho/(lamdel.array+rho)*momdel
+            ddSlogi <- rho/(lam.array+rho)*mom.array - momdellogi
+          } else {
+            ## lam.array[ ,i,j] = lambda(X[i] | X)
+            lam.array <- mapSparseEntries(ddS, margin=2, lam,
+                                          conform=TRUE, across=1)
+            ## lamdel.array[,i,j] = lambda(X[i] | X[-j])
+            pairweight.array <- aperm(as.sparse3Darray(pairweight), c(3,1,2))
+            lamdel.array <- pairweight.array * lam.array + lam.array
+            lamdel.logi <- applySparseEntries(lamdel.array,
+                                              function(y,rho) { rho/(rho+y) },
+                                              rho=rho)
+            lam.logi <- applySparseEntries(lam.array,
+                                          function(y,rho) { rho/(rho+y) },
+                                          rho=rho)
+            momdellogi <- momdel * lamdel.logi
+            ddSlogi <-    mom.array * lam.logi - momdellogi
+          }
           momdellogiok <- momdellogi[ , ok, ok, drop=FALSE]
-          A2log <- sumsymouter(momdellogiok, w=pairweight[ok, ok])
-          ddSlogi <- rho/(lam.array+rho)*mom.array - momdellogi
+          A2log <- sumsymouter(momdellogiok, w=pwok)
           ddSlogiok <- ddSlogi[ , ok, ok, drop=FALSE]
           A3log <- sumsymouter(ddSlogiok)
+          dimnames(A2log) <- dimnames(A3log) <- dnames
         }
       }
     }
@@ -733,7 +770,7 @@ vcalcGibbsGeneral <- function(model,
                      nX.i <- length(J2i)
                      ## index of XJi in X.i
                      J.i <- match(Ji, J2i)
-                     if(any(is.na(J.i)))
+                     if(anyNA(J.i))
                        stop("Internal error: Ji not a subset of J2i")
                      ## equalpairs matrix
                      E.i <- cbind(J.i, seq_len(nJi))
@@ -904,7 +941,8 @@ vcalcGibbsGeneral <- function(model,
            model2 <- do.call(ppm, args = arglist)
 
            ## New cif
-           lamall2 <- fitted(model2, check = FALSE, new.coef = new.coef)
+           lamall2 <- fitted(model2, check = FALSE,
+                             new.coef = new.coef, dropcoef=dropcoef)
            ## New model matrix
            mall2 <- model.matrix(model2)
            okall2 <- getglmsubset(model2)

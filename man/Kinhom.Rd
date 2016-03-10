@@ -65,13 +65,13 @@
   }
   \item{update}{
     Logical. If \code{lambda} is a fitted model
-    (class \code{"ppm"} or \code{"kppm"})
+    (class \code{"ppm"}, \code{"kppm"} or \code{"dppm"})
     and \code{update=TRUE} (the default),
     the model will first be refitted to the data \code{X}
     (using \code{\link{update.ppm}} or \code{\link{update.kppm}})
     before the fitted intensity is computed.
     If \code{update=FALSE}, the fitted intensity of the
-    model will be computed without fitting it to \code{X}.
+    model will be computed without re-fitting it to \code{X}.
   }
   \item{leaveoneout}{
     Logical value (passed to \code{\link{density.ppp}} or
@@ -330,11 +330,10 @@
   \code{\link{pcf}}
 }
 \examples{
-  data(lansing)
   # inhomogeneous pattern of maples
   X <- unmark(split(lansing)$maple)
   \testonly{
-     sub <- sample(c(TRUE,FALSE), X$n, replace=TRUE, prob=c(0.1,0.9))
+     sub <- sample(c(TRUE,FALSE), npoints(X), replace=TRUE, prob=c(0.1,0.9))
      X <- X[sub]
   }
 

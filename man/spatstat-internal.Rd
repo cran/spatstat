@@ -8,6 +8,7 @@
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{active.interactions}
+\alias{adaptcoef}
 \alias{adjustthinrange}
 \alias{affinexy}
 \alias{affinexypolygon}
@@ -62,9 +63,11 @@
 \alias{checkbigmatrix}          
 \alias{checkfields}          
 \alias{checksolve}          
+\alias{check.finespacing}
 \alias{check.finite}
 \alias{check.hist.lengths}
 \alias{check.in.range}
+\alias{check.mat.mul}
 \alias{check.named.list}
 \alias{check.named.thing}
 \alias{check.named.vector}
@@ -142,6 +145,7 @@
 \alias{do.call.without}
 \alias{do.istat}
 \alias{doMultiStraussHard}
+\alias{dont.complain.about}
 \alias{dotexpr.to.call}
 \alias{dppmFixAlgorithm}
 \alias{dppmFixIntensity}
@@ -175,6 +179,7 @@
 \alias{exactdt}              
 \alias{exactPdt}
 \alias{exhibitStringList}
+\alias{existsSpatstatVariable}
 \alias{expand.polynom}
 \alias{expandSpecialLists}
 \alias{expandwinPerfect}
@@ -189,6 +194,7 @@
 \alias{f3Cengine}
 \alias{fasp}
 \alias{fastFindInterval}
+\alias{fill.coefs}
 \alias{fillseq}
 \alias{findbestlegendpos}
 \alias{findCovariate}
@@ -233,6 +239,7 @@
 \alias{graphicsPars}            
 \alias{gridindex}            
 \alias{grid1index}
+\alias{grokIndexVector}
 \alias{grow.mask}
 \alias{gsubdot}
 \alias{hackglmmPQL}
@@ -275,6 +282,7 @@
 \alias{intY.xypolygon}
 \alias{invokeColourmapRule}
 \alias{is.atomicQtest}
+\alias{is.blank}
 \alias{is.cadlag}
 \alias{is.col.argname}
 \alias{is.data}
@@ -332,10 +340,12 @@
 \alias{localpcfengine}
 \alias{localpcfmatrix}
 \alias{local2lpp}
+\alias{logicalIndex}
 \alias{logi.dummy}
 \alias{logi.engine}
 \alias{logLik.vblogit}
 \alias{lty2char}
+\alias{maskLaslett}
 \alias{padtowidth}
 \alias{parameters.interact}
 \alias{parameters.fii}
@@ -344,7 +354,9 @@
 \alias{paste.expr}
 \alias{plan.legend.layout}
 \alias{PoisSaddleApp}
+\alias{polyLaslett}
 \alias{polytileareaEngine}
+\alias{positiveIndex}
 \alias{prettyinside}
 \alias{prettydiscrete}
 \alias{putSpatstatVariable}
@@ -453,6 +465,7 @@
 \alias{plot.barplotdata}
 \alias{plot.bw.frac}
 \alias{plot.bw.optim}
+\alias{plot.lintess}
 \alias{plot.localpcfmatrix}
 \alias{plot.lurk}
 \alias{plot.minconfit}
@@ -469,6 +482,7 @@
 \alias{ppmCovariates}
 \alias{ppmDerivatives}
 \alias{ppmInfluence}
+\alias{ppmInfluenceEngine}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
 \alias{ppsubset}
@@ -503,8 +517,10 @@
 \alias{print.interact}       
 \alias{print.intermaker}       
 \alias{print.isf}
+\alias{print.laslett}
 \alias{print.layered}
 \alias{print.leverage.ppm}
+\alias{print.lintess}
 \alias{print.localpcfmatrix}
 \alias{print.lut}
 \alias{print.minconfit}
@@ -557,6 +573,7 @@
 \alias{putlastshift}
 \alias{quad}
 \alias{quad.mppm}
+\alias{quadBlockSizes}
 \alias{RandomFieldsSafe}
 \alias{ratfv}
 \alias{recognise.spatstat.type}
@@ -567,13 +584,13 @@
 \alias{relatively.prime}
 \alias{RelevantDeviation}
 \alias{repair.image.xycoords}
+\alias{replacementIndex}
 \alias{resolveEinfo}
 \alias{resolve.vargamma.shape}
 \alias{rgbNA}
 \alias{rhs.of.formula}
 \alias{rhohatEngine}
 \alias{rhohatCalc}
-\alias{rigidradius}
 \alias{rMaternInhibition}
 \alias{RmhExpandRule}
 \alias{rmhsnoop}
@@ -612,6 +629,7 @@
 \alias{reverse.xypolygon}    
 \alias{reversePolyclipArgs}
 \alias{revcumsum}
+\alias{rmax.Rigid}
 \alias{rmax.rule}
 \alias{rotxy}
 \alias{rotxypolygon}
@@ -671,6 +689,7 @@
 \alias{sort.im}
 \alias{sortalongsegment}
 \alias{spatstat.rawdata.location}
+\alias{spatstat.xy.coords}
 \alias{spatstatClusterModelInfo}
 \alias{spatstatDPPModelInfo}
 \alias{spatstatLocator}
@@ -709,18 +728,19 @@
 \alias{symbolmaptype}
 \alias{sympoly}
 \alias{tail.hyperframe}
+\alias{tensor1x1}
 \alias{termsinformula}
 \alias{test.crossing.psp}
 \alias{test.selfcrossing.psp}
 \alias{there.is.no.try}
 \alias{thinjump}
 \alias{tilecentroids}        
-\alias{transradius}
 \alias{trap.extra.arguments}
 \alias{trianglediameters}
 \alias{trim.mask}        
 \alias{truncline}        
 \alias{tweak.fv.entry}
+\alias{tweak.coefs}
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unparen}
@@ -731,6 +751,7 @@
 \alias{uptrimat}
 \alias{validradius}        
 \alias{validate.angles}        
+\alias{validate.lpp.coords}
 \alias{validate.mask}        
 \alias{validate.quad}        
 \alias{validposint}        
@@ -746,6 +767,8 @@
 \alias{versionstring.spatstat}
 \alias{verifyclass}
 \alias{verify.xypolygon}
+\alias{Window<-.linnet}
+\alias{Window<-.lpp}
 \alias{warn.ignored.args}
 \alias{warn.once}
 \alias{waxlyrical}
@@ -759,6 +782,39 @@
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
+%%%% sparse 3D arrays
+\alias{sparse3Darray}
+\alias{as.sparse3Darray}
+\alias{dim.sparse3Darray}
+\alias{dim<-.sparse3Darray}
+\alias{dimnames.sparse3Darray}
+\alias{dimnames<-.sparse3Darray}
+\alias{print.sparse3Darray}
+\alias{aperm.sparse3Darray}
+\alias{as.array.sparse3Darray}
+\alias{[.sparse3Darray}
+\alias{[<-.sparse3Darray}
+\alias{anyNA.sparse3Darray}
+\alias{RelevantZero}
+\alias{RelevantEmpty}
+\alias{isRelevantZero}
+\alias{unionOfSparseIndices}
+\alias{Math.sparse3Darray}
+\alias{Ops.sparse3Darray}
+\alias{Summary.sparse3Darray}
+\alias{inside3Darray}
+\alias{SparseEntries}
+\alias{EntriesToSparse}
+\alias{mapSparseEntries}
+\alias{applySparseEntries}
+\alias{sumsymouterSparse}
+\alias{tenseur}
+\alias{marginSums}
+\alias{rbindCompatibleDataFrames}
+\alias{bind.sparse3Darray}
+\alias{exceedsMaxArraySize}
+%%%%
+\alias{spatstatDiagnostic}
 \description{
   Internal spatstat functions.
 }
@@ -769,6 +825,7 @@
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
 active.interactions(object)
+adaptcoef(new.coef, fitcoef, drop)
 adjustthinrange(ur,vstep,vr)
 affinexy(X, mat, vec, invert)
 affinexypolygon(p, mat, vec, detmat)
@@ -828,13 +885,15 @@ change.default.expand(x, newdefault)
 checkbigmatrix(n, m, fatal, silent)
 checkfields(X,L)
 checksolve(M, action, descrip, target)
+check.finespacing(r, eps, win, context, action, rname)
 check.finite(x, context, xname, fatal, usergiven)
 check.hist.lengths(hist,breaks)
 check.in.range(x, r, fatal)
+check.mat.mul(A, B, Acols, Brows, fatal)
 check.named.list(x, nam, context, namopt, onError)
 check.named.vector(x, nam, context, namopt, onError)
 check.named.thing(x, nam, namopt, xtitle, valid, type, context, fatal)
-check.nvector(v, npoints, fatal, things, naok, warn, vname)
+check.nvector(v, npoints, fatal, things, naok, warn, vname, oneok)
 check.nmatrix(m, npoints, fatal, things, naok, squarematrix, matchto, warn)
 check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
@@ -846,7 +905,7 @@ clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
 cliprect.psp(x, window)
 clippoly.psp(s, window)
-closethresh(X,R,S,ordered)
+closethresh(X,R,S,twice,\dots)
 \method{coef}{summary.kppm}(object, \dots)
 \method{coef}{summary.ppm}(object, \dots)
 \method{coef}{vblogit}(object, \dots) 
@@ -878,7 +937,7 @@ datagen.rpoisppOnLines(lambda, L, lmax, \dots, check)
 default.clipwindow(object, epsilon)
 default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
-deltasuffstat(model, \dots, restrict, dataonly, force)
+deltasuffstat(model, \dots, restrict, dataonly, force, quadsub, sparseOK)
 Deviation(x, ref, leaveout, n, xi)
 dflt.redraw(button, name, env)
 densitycrossEngine(Xdata, Xquery, sigma, \dots,
@@ -915,6 +974,7 @@ do.call.plotfun(fun, arglist, \dots)
 do.call.without(fun, \dots, avoid)
 do.istat(panel)
 doMultiStraussHard(iradii, hradii, types)
+dont.complain.about(\dots)
 dotexpr.to.call(expr, dot, evaluator)
 dppmFixIntensity(DPP, lambda, po)
 dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
@@ -924,7 +984,7 @@ emptywindow(w)
 ensure2vector(x)
 ensure3Darray(x)
 envelopeEngine(X, fun, simul,
-           nsim, nrank, \dots, funargs,
+           nsim, nrank, \dots, funargs, funYargs,
            verbose, clipdata, 
            transform, global, ginterval, use.theory,
            alternative, scale, clamp,
@@ -971,6 +1031,7 @@ evenly.spaced(x, tol)
 exactdt(X, \dots)              
 exactPdt(w)
 exhibitStringList(prefix, strings)
+existsSpatstatVariable(name)
 expand.polynom(f)
 expandSpecialLists(x, special)
 expandwinPerfect(W, expand, amount)
@@ -985,6 +1046,7 @@ f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
 fastFindInterval(x, b, labels, reltol)
+fill.coefs(coefs, required)
 fillseq(x)
 findbestlegendpos(\dots)
 findCovariate(covname, scope, scopename=NULL)
@@ -1022,17 +1084,18 @@ getppmOriginalCovariates(object)
 getSpatstatVariable(name)
 getSumFun(abbreviation, classname, ismarked, fatal)
 geyercounts(U,X,r,sat,Xcounts,EqualPairs)
-geyerdelta2(X,r,sat)
-GLMpredict(fit, data, coefs, changecoef)
+geyerdelta2(X,r,sat,\dots,sparseOK)
+GLMpredict(fit, data, coefs, changecoef, type)
 good.names(nama, defaults, suffices)
 good.correction.K(X)
 graphicsPars(key)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
+grokIndexVector(ind, len, nama)
 grow.mask(M, xmargin=0, ymargin=xmargin)
 gsubdot(replacement, x)
 hackglmmPQL(fixed, random, family, data, correlation, weights,
-            control, niter, verbose, subset, \dots)
+            control, niter, verbose, subset, \dots, reltol)
 hasenvelope(X, E)
 HermiteCoefs(order)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
@@ -1073,6 +1136,7 @@ intY.owin(w)
 intY.xypolygon(polly)
 invokeColourmapRule(colfun, x, \dots, zlim, colargs)
 is.atomicQtest(x)
+is.blank(s)
 is.cadlag(s)
 is.col.argname(x)
 is.data(Q)
@@ -1135,7 +1199,8 @@ listof(\dots)
 localKengine(X, \dots, wantL, lambda, correction, verbose, rvalue)
 localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
 localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
-local2lpp(L, seg, tp, X)
+local2lpp(L, seg, tp, X, df.only)
+logicalIndex(i, nama, len)
 logi.dummy(X, dummytype, nd, mark.repeat, \dots)
 logi.engine(Q, trend, interaction, \dots, 
             covariates, subsetexpr, correction, rbord, covfunargs, allcovar, 
@@ -1143,6 +1208,7 @@ logi.engine(Q, trend, interaction, \dots,
             VB)
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
+maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
 padtowidth(a, b, justify)
 \method{parameters}{interact}(model, \dots)
 \method{parameters}{fii}(model, \dots)
@@ -1152,7 +1218,9 @@ paste.expr(x)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
 PoisSaddleApp(beta, fi)
+polyLaslett(X, \dots, oldX, verbose, plotit)
 polytileareaEngine(P, xrange, yrange, nx, ny)
+positiveIndex(i, nama, len)
 prettyinside(x, \dots)
 prettydiscrete(x, n)
 \method{print}{localpcfmatrix}(x, \dots)
@@ -1256,7 +1324,7 @@ a \%orifnull\% b
 outdated.interact(object)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
 overlap.xypolygon(P, Q)
-oversize.quad(Q, \dots, nU, nX)
+oversize.quad(Q, \dots, nU, nX, p)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 owin2polypath(w)
@@ -1288,6 +1356,7 @@ plotPolygonBdry(x, \dots)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.frac}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, showopt, optargs)
+\method{plot}{lintess}(x, \dots, main)
 \method{plot}{lurk}(x, \dots, shade)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
@@ -1318,12 +1387,16 @@ ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluence(fit, what, \dots, iScore, iHessian, iArgs,
-              drop, method, precomputed)
+              drop, method, precomputed, sparseOK)
+ppmInfluenceEngine(fit, what, iScore, iHessian, iArgs,
+           drop, method, sparse,
+           vc, fush, hess,
+           Q, theta, lam, mom) 
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
             ccode, auction, precision, approximation) 
-ppsubset(X, I)
+ppsubset(X, I, Iname, fatal)
 prange(x)
 \method{predict}{vblogit}(object, newdata, type, se.fit, dispersion,
                           terms, na.action, \dots)
@@ -1355,8 +1428,10 @@ primesbelow(nmax)
 \method{print}{interact}(x, \dots, family, brief, banner)       
 \method{print}{intermaker}(x, \dots)
 \method{print}{isf}(x, \dots)
+\method{print}{laslett}(x, \dots)
 \method{print}{layered}(x, \dots)
 \method{print}{leverage.ppm}(x, \dots)
+\method{print}{lintess}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{mppm}(x, \dots)
@@ -1408,6 +1483,7 @@ prolongseq(x, newrange, step)
 putlastshift(X, vec)
 quad(data, dummy, w, param)
 quad.mppm(x)
+quadBlockSizes(nX, nD, p, nMAX, announce)
 RandomFieldsSafe()
 ratfv(df, numer, denom, \dots, ratio)
 recognise.spatstat.type(x)
@@ -1418,6 +1494,7 @@ reheat(model, invtemp)
 relatively.prime(n, m)
 RelevantDeviation(x, alternative, clamp, scaling)
 repair.image.xycoords(x)
+replacementIndex(ii, stuff)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
 rgbNA(red, green, blue, alpha, maxColorValue)
@@ -1432,7 +1509,6 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
            n, bw, adjust, from, to, 
            bwref, covname, confidence,
            covunits, modelcall, callstring, savestuff)
-rigidradius(X)
 rMaternInhibition(type, kappa, r, win, stationary, \dots, nsim, drop)
 RmhExpandRule(nama)
 romansort(x)
@@ -1482,6 +1558,7 @@ restrict.mask(M, W)
 reverse.xypolygon(p, adjust=FALSE)
 reversePolyclipArgs(x, p)
 revcumsum(x)
+rmax.Rigid(X, g)
 rmax.rule(fun, W, lambda)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
@@ -1545,9 +1622,10 @@ smoothpointsEngine(x, values, sigma, \dots,
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
 spatstat.rawdata.location(\dots)
+spatstat.xy.coords(x, y)
 spatstatClusterModelInfo(name, onlyPCP)
 spatstatDPPModelInfo(model)
-spatstatLocator(n, ...)
+spatstatLocator(n, type, \dots)
 spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
@@ -1584,19 +1662,20 @@ superimposeMarks(arglist, nobj)
 symbolmaptype(x)
 sympoly(x, y, n)
 \method{tail}{hyperframe}(x,n,\dots)
+tensor1x1(A,B)
 termsinformula(x)
 test.crossing.psp(A,B)
 test.selfcrossing.psp(A)
 there.is.no.try(\dots)
 thinjump(n, p)
 tilecentroids(W, nx, ny)
-transradius(W)
 trap.extra.arguments(\dots, .Context, .Fatal)
 trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 truncline(x, nc)
 tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL,
 new.tag=NULL)
+tweak.coefs(model, new.coef)
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unparen(x)
@@ -1607,6 +1686,7 @@ unparen(x)
 uptrimat(x)
 validradius(r, caller)
 validate.angles(angles, unit, guess)
+validate.lpp.coords(X, fatal, context)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
 validposint(n, caller, fatal)
@@ -1622,6 +1702,8 @@ versionstring.ppm(object)
 versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
+\method{Window}{linnet}(X, \dots, check=TRUE) <- value
+\method{Window}{lpp}(X, \dots, check=TRUE) <- value
 warn.ignored.args(\dots, context)
 warn.once(key, \dots)
 waxlyrical(type, terse)
@@ -1636,6 +1718,42 @@ X2testEngine(OBS, EXP, \dots, method, CR, df, nsim,
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w, check)
+%%% sparse 3D arrays
+sparse3Darray(i,j,k,x,dims,dimnames,strict,nonzero)
+as.sparse3Darray(x, \dots)
+\method{dim}{sparse3Darray}(x)
+\method{dim}{sparse3Darray}(x) <- value
+\method{dimnames}{sparse3Darray}(x)
+\method{dimnames}{sparse3Darray}(x) <- value
+\method{print}{sparse3Darray}(x, \dots)
+\method{aperm}{sparse3Darray}(a, perm, resize, \dots)
+\method{as.array}{sparse3Darray}(x, \dots)
+\method{[}{sparse3Darray}(x, i, j, k, drop, \dots)
+\method{[}{sparse3Darray}(x, i, j, k, \dots) <- value
+\method{anyNA}{sparse3Darray}(x, recursive)
+RelevantZero(x)
+RelevantEmpty(x)
+isRelevantZero(x)
+unionOfSparseIndices(A,B)
+\special{Math(x, \dots)}
+\special{Ops(e1, e2)}
+\special{Summary(\dots, na.rm = FALSE)}
+%NAMESPACE S3method("Math", "sparse3Darray")
+%NAMESPACE S3method("Ops", "sparse3Darray")
+%NAMESPACE S3method("Summary", "sparse3Darray")
+inside3Darray(d, i, j, k)
+SparseEntries(x)
+EntriesToSparse(df, dims)
+mapSparseEntries(x, margin, values, conform, across)
+applySparseEntries(x, f, \dots)
+sumsymouterSparse(x, w, dbg)
+tenseur(A, B, alongA, alongB)
+marginSums(X, MARGIN)
+rbindCompatibleDataFrames(x)
+bind.sparse3Darray(A, B, along)
+exceedsMaxArraySize(\dots)
+%%
+spatstatDiagnostic(msg)
 }
 \details{
   These internal \pkg{spatstat} functions are not usually called

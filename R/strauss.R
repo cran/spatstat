@@ -2,7 +2,7 @@
 #
 #    strauss.R
 #
-#    $Revision: 2.33 $	$Date: 2015/10/21 09:06:57 $
+#    $Revision: 2.35 $	$Date: 2016/02/22 09:40:11 $
 #
 #    The Strauss process
 #
@@ -50,7 +50,7 @@ Strauss <- local({
        },
        irange = function(self, coeffs=NA, epsilon=0, ...) {
          r <- self$par$r
-         if(any(is.na(coeffs)))
+         if(anyNA(coeffs))
            return(r)
          loggamma <- coeffs[1]
          if(abs(loggamma) <= epsilon)
@@ -89,16 +89,17 @@ Strauss <- local({
                          - (1-gamma)^2 * (acos(t) - t * sqrt(1 - t^2)))
          return(y)
        },
-       delta2 = function(X, inte, correction, ...) {
+       delta2 = function(X, inte, correction, ..., sparseOK=FALSE) {
          if(!(correction %in% c("border", "none")))
            return(NULL)
          r <- inte$par$r
          X <- as.ppp(X) # algorithm is the same for data and dummy points
          nX <- npoints(X)
          cl <- closepairs(X, r, what="indices")
-         I <- factor(cl$i, levels=1:nX)
-         J <- factor(cl$j, levels=1:nX)
-         v <- table(I, J)
+         v <- sparseMatrix(i=cl$i, j=cl$j, x=1,
+                           dims=c(nX, nX))
+         if(!sparseOK || !spatstat.options('developer'))
+           v <- as.matrix(v)
          return(v)
        }
        )

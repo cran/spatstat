@@ -2,7 +2,7 @@
 #
 #   rmhmodel.R
 #
-#   $Revision: 1.71 $  $Date: 2015/11/17 07:08:37 $
+#   $Revision: 1.73 $  $Date: 2016/02/16 01:39:12 $
 #
 #
 
@@ -24,7 +24,7 @@ rmhmodel.rmhmodel <- function(model, ...) {
 rmhmodel.list <- function(model, ...) {
   argnames <- c("cif","par","w","trend","types")
   ok <- argnames %in% names(model)
-  do.call("rmhmodel.default",
+  do.call(rmhmodel.default,
           resolve.defaults(list(...), model[argnames[ok]]))
 }
 
@@ -877,7 +877,7 @@ spatstatRmhInfo <- function(cifname) {
 		nlook <- length(r)
 		if(length(h) != nlook)
                   stop("Mismatch of lengths of h and r lookup vectors.")
-		if(any(is.na(r)))
+		if(anyNA(r))
                   stop("Missing values not allowed in r lookup vector.")
 		if(is.unsorted(r))
                   stop("The r lookup vector must be in increasing order.")

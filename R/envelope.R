@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.82 $  $Date: 2015/11/17 08:53:33 $
+#   $Revision: 2.83 $  $Date: 2016/02/11 09:36:11 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -47,7 +47,7 @@ simulrecipe <- function(type, expr, envir, csr, pois=csr, constraints="") {
 
 envelope.ppp <-
   function(Y, fun=Kest, nsim=99, nrank=1, ...,
-           funargs=list(),
+           funargs=list(), funYargs=funargs,
            simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
            verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
@@ -107,6 +107,7 @@ envelope.ppp <-
           A %mark% Ymarx[j, , drop=FALSE]
         })
       }
+    dont.complain.about(Yintens, Ywin)
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "csr",
                              expr = simexpr,
@@ -125,6 +126,8 @@ envelope.ppp <-
     Ymarx <- marks(Y)
     # expression that will be evaluated
     simexpr <- expression(runifpoint(nY, Ywin) %mark% Ymarx)
+    # suppress warnings from code checkers
+    dont.complain.about(nY, Ywin, Ymarx)
     # simulation constraints (explanatory string)
     constraints <- if(ismulti) "with fixed number of points of each type" else
                    "with fixed number of points and fixed marks"
@@ -163,6 +166,7 @@ envelope.ppp <-
         A %mark% Ymarx[j, ,drop=FALSE]
       })
     }
+    dont.complain.about(nY, Ywin)
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "csr",
                              expr = simexpr,
@@ -173,7 +177,8 @@ envelope.ppp <-
   }
   
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
+                 nsim=nsim, nrank=nrank, ...,
+                 funargs=funargs, funYargs=funYargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
@@ -186,7 +191,7 @@ envelope.ppp <-
 
 envelope.ppm <- 
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
-           funargs=list(),
+           funargs=list(), funYargs=funargs,
            simulate=NULL, fix.n=FALSE, fix.marks=FALSE,
            verbose=TRUE, clipdata=TRUE, 
            start=NULL,
@@ -234,6 +239,7 @@ envelope.ppm <-
     rmhinfolist <- rmh(rmodel, rstart, rcontr, preponly=TRUE, verbose=FALSE)
     # expression that will be evaluated
     simexpr <- expression(rmhEngine(rmhinfolist, verbose=FALSE))
+    dont.complain.about(rmhinfolist)
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type  = type,
                              expr  = simexpr,
@@ -248,7 +254,8 @@ envelope.ppm <-
     simrecipe <- simulate
   }
   envelopeEngine(X=X, fun=fun, simul=simrecipe, 
-                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
+                 nsim=nsim, nrank=nrank, ...,
+                 funargs=funargs, funYargs=funYargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
@@ -261,7 +268,7 @@ envelope.ppm <-
 
 envelope.kppm <-
   function(Y, fun=Kest, nsim=99, nrank=1, ..., 
-           funargs=list(),
+           funargs=list(), funYargs=funargs,
            simulate=NULL, verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
@@ -285,6 +292,7 @@ envelope.kppm <-
     kmodel <- Y
     # expression that will be evaluated
     simexpr <- expression(simulate(kmodel)[[1]])
+    dont.complain.about(kmodel)
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "kppm",
                              expr = simexpr,
@@ -298,7 +306,8 @@ envelope.kppm <-
     simrecipe <- simulate
   }
   envelopeEngine(X=X, fun=fun, simul=simrecipe, 
-                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
+                 nsim=nsim, nrank=nrank, ...,
+                 funargs=funargs, funYargs=funYargs,
                  verbose=verbose, clipdata=clipdata,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,
@@ -320,7 +329,7 @@ envelope.kppm <-
 
 envelopeEngine <-
   function(X, fun, simul,
-           nsim=99, nrank=1, ..., funargs=list(), 
+           nsim=99, nrank=1, ..., funargs=list(), funYargs=funargs,
            verbose=TRUE, clipdata=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
@@ -427,6 +436,7 @@ envelopeEngine <-
       SimDataList <- simulate
       # expression that will be evaluated
       simexpr <- expression(SimDataList[[i]])
+      dont.complain.about(SimDataList)
       envir <- envir.here
       # ensure that `i' is defined
       i <- 1
@@ -523,7 +533,7 @@ envelopeEngine <-
   funX <- do.call(fun,
                   resolve.defaults(list(Xarg),
                                    list(...),
-                                   funargs,
+                                   funYargs,
                                    corrx))
                                      
   if(!inherits(funX, "fv"))
@@ -712,7 +722,7 @@ envelopeEngine <-
   } else
   stop(paste("Don't know how to infer values of", commasep(expected.arg)))
     
-  # arguments for function
+  # arguments for function when applied to simulated patterns
   funargs <-
     resolve.defaults(funargs,
                      inferred.r.args,
@@ -1718,6 +1728,7 @@ envelope.envelope <- function(Y, fun=NULL, ...,
     dnames <- dnames[dnames %in% fvnames(result, ".")]
     # expand "."
     ud <- as.call(lapply(c("cbind", dnames), as.name))
+    dont.complain.about(ud)
     expandtransform <- eval(substitute(substitute(tr, list(.=ud)),
                                        list(tr=transform[[1]])))
     # compute new labels 

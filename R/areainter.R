@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.35 $	$Date: 2014/12/22 04:37:56 $
+#    $Revision: 1.40 $	$Date: 2016/02/24 10:45:53 $
 #
 #    The area interaction
 #
@@ -93,7 +93,7 @@ AreaInter <- local({
                        "reference value 1"),
                      unitname=unitz)
            if(plotit)
-             do.call("plot.fv",
+             do.call(plot.fv,
                      resolve.defaults(list(fun),
                                       list(...),
                                       list(ylim=range(0,1,y))))
@@ -118,7 +118,7 @@ AreaInter <- local({
          },
          irange = function(self, coeffs=NA, epsilon=0, ...) {
            r <- self$par$r
-           if(any(is.na(coeffs)))
+           if(anyNA(coeffs))
              return(2 * r)
            logeta <- coeffs[1]
            if(abs(logeta) <= epsilon)
@@ -126,7 +126,7 @@ AreaInter <- local({
            else
              return(2 * r)
          },
-         delta2 = function(X, inte, correction) {
+         delta2 = function(X, inte, correction, ...) {
            # Sufficient statistic for second order conditional intensity
            # Area-interaction model 
            if(!(correction %in% c("border", "none")))
@@ -172,7 +172,7 @@ areadelta2 <- local({
       # called once for each interacting pair of points
       xx <- X$x
       yy <- X$y
-      cl <- closepairs(X, 2 * r, what="indices", ordered=FALSE)
+      cl <- closepairs(X, 2 * r, what="indices", twice=FALSE, neat=FALSE)
       I <- cl$i
       J <- cl$j
       eps <- r/spatstat.options("ngrid.disc")
@@ -296,7 +296,7 @@ areadelta2 <- local({
     return(result)
   }
 
-  areadelquad <- function(Q, D, r) {
+  areadelquad <- function(Q, r) {
     # Sufficient statistic for second order conditional intensity
     # Area-interaction model 
     # Evaluate \Delta_{u_j} \Delta_{u_i} S(x) for quadrature points 
@@ -309,8 +309,8 @@ areadelta2 <- local({
     yy <- U$y
     # identify all close pairs of quadrature points
     cl <- closepairs(U, 2 * r, what="indices")
-    I <- b$i
-    J <- b$j
+    I <- cl$i
+    J <- cl$j
     # find neighbours in X of each quadrature point
     zJ <- Z[J]
     neigh <- split(J[zJ], factor(I[zJ], levels=1:nU))

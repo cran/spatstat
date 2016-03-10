@@ -1,31 +1,40 @@
 #
 # lpp.R
 #
-#  $Revision: 1.39 $   $Date: 2015/11/25 02:56:11 $
+#  $Revision: 1.45 $   $Date: 2016/02/16 01:39:12 $
 #
 # Class "lpp" of point patterns on linear networks
 
 lpp <- function(X, L, ...) {
   stopifnot(inherits(L, "linnet"))
   localnames <- c("seg", "tp")
+  spatialnames <- c("x", "y")
+  allcoordnames <- c(spatialnames, localnames)
   if(is.matrix(X)) X <- as.data.frame(X)
-  if(checkfields(X, c("x", "y", localnames))) {
-    # includes spatial and local coordinates
+  if(checkfields(X, localnames)) {
+    # X includes at least local coordinates
     X <- as.data.frame(X)
-    # local coords
-    lo <- X[ , localnames, drop=FALSE]
-    # spatial coords and marks
-    df <- X[, !(names(X) %in% localnames), drop=FALSE]
-    # validate local coordinates
+    #' validate local coordinates
     if(nrow(X) > 0) {
       nedge <- nsegments(L)
-      if(with(lo, any(seg < 1 || seg > nedge)))
+      if(with(X, any(seg < 1 || seg > nedge)))
         stop("Segment index coordinate 'seg' exceeds bounds")
-      if(with(lo, any(tp < 0 || tp > 1)))
+      if(with(X, any(tp < 0 || tp > 1)))
         stop("Local coordinate 'tp' outside [0,1]")
     }
+    if(!checkfields(X, spatialnames)) {
+      #' data give local coordinates only
+      #' reconstruct x,y coordinates from local coordinates
+      Y <- local2lpp(L, X$seg, X$tp, df.only=TRUE)
+      X[,spatialnames] <- Y[,spatialnames,drop=FALSE]
+    }
+    #' local coordinates
+    lo <- X[ , localnames, drop=FALSE]
+    #' spatial coords and marks
+    marknames <- setdiff(names(X), allcoordnames)
+    df <- X[, c(spatialnames, marknames), drop=FALSE]
   } else {
-    # local coordinates must be computed
+    # local coordinates must be computed from spatial coordinates
     if(!is.ppp(X))
       X <- as.ppp(X, W=L$window, ...)
     # project to segment
@@ -85,6 +94,7 @@ print.lpp <- function(x, ...) {
 plot.lpp <- function(x, ..., main, add=FALSE,
                      use.marks=TRUE, which.marks=NULL,
                      show.all=!add, show.window=FALSE,
+                     show.network=TRUE,
                      do.plot=TRUE, multiplot=TRUE) {
   if(missing(main))
     main <- short.deparse(substitute(x))
@@ -98,7 +108,7 @@ plot.lpp <- function(x, ..., main, add=FALSE,
     if(do.several) {
       ## generate one plot for each column of marks
       y <- solapply(mx, setmarks, x=x)
-      out <- do.call("plot",
+      out <- do.call(plot,
                      c(list(x=y, main=main, do.plot=do.plot,
                             show.window=show.window),
                        list(...)))
@@ -123,13 +133,15 @@ plot.lpp <- function(x, ..., main, add=FALSE,
     }
   }
   ## plot linear network
-  L <- as.linnet(x)
-  do.call.matched("plot.linnet",
-                  resolve.defaults(list(x=L, add=TRUE),
-                                   list(...)),
-                  extrargs=c("lty", "lwd", "col"))
+  if(show.network) {
+    L <- as.linnet(x)
+    do.call.matched(plot.linnet,
+                    resolve.defaults(list(x=L, add=TRUE),
+                                     list(...)),
+                    extrargs=c("lty", "lwd", "col"))
+  }
   ## plot points, legend, title
-  ans <- do.call.matched("plot.ppp",
+  ans <- do.call.matched(plot.ppp,
                          c(list(x=P, add=TRUE, main=main,
                                 show.all=show.all, show.window=FALSE),
                            list(...)),
@@ -225,7 +237,7 @@ is.multitype.lpp <- function(X, na.action="warn", ...) {
     return(FALSE)
   if(!is.factor(marx))
     return(FALSE)
-  if((length(marx) > 0) && any(is.na(marx)))
+  if((length(marx) > 0) && anyNA(marx))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
@@ -239,9 +251,9 @@ is.multitype.lpp <- function(X, na.action="warn", ...) {
   return(TRUE)
 }
 
-as.lpp <- function(x, y=NULL, seg=NULL, tp=NULL, ...,
+as.lpp <- function(x=NULL, y=NULL, seg=NULL, tp=NULL, ...,
                    marks=NULL, L=NULL, check=FALSE, sparse) {
-  nomore <- is.null(y) && is.null(seg) && is.null(tp) 
+  nomore <- is.null(y) && is.null(seg) && is.null(tp)
   if(inherits(x, "lpp") && nomore) {
     X <- x
     if(!missing(sparse) && !is.null(sparse))
@@ -253,6 +265,8 @@ as.lpp <- function(x, y=NULL, seg=NULL, tp=NULL, ...,
       L <- as.linnet(L, sparse=sparse)
     if(is.ppp(x) && nomore) {
       X <- lpp(x, L)
+    } else if(is.null(x) && is.null(y) && !is.null(seg) && !is.null(tp)){
+      X <- lpp(data.frame(seg=seg, tp=tp), L=L)
     } else {
       xy <- xy.coords(x,y)[c("x", "y")]
       if(!is.null(seg) && !is.null(tp)) {
@@ -280,6 +294,15 @@ as.ppp.lpp <- function(X, ..., fatal=TRUE) {
 }
 
 Window.lpp <- function(X, ...) { as.owin(X) }
+
+"Window<-.lpp" <- function(X, ..., check=TRUE, value) {
+  if(check) {
+    X <- X[value]
+  } else {
+    Window(X$domain, check=FALSE) <- value
+  }
+  return(X)
+}
 
 as.owin.lpp <- function(W,  ..., fatal=TRUE) {
   as.owin(as.ppp(W, ..., fatal=fatal))
@@ -328,7 +351,7 @@ nsegments.lpp <- function(x) {
   return(x$domain$lines$n)
 }
 
-local2lpp <- function(L, seg, tp, X=NULL) {
+local2lpp <- function(L, seg, tp, X=NULL, df.only=FALSE) {
   stopifnot(inherits(L, "linnet"))
   if(is.null(X)) {
     # map to (x,y)
@@ -343,6 +366,7 @@ local2lpp <- function(L, seg, tp, X=NULL) {
   }
   # compile into data frame
   data <- data.frame(x=x, y=y, seg=seg, tp=tp)
+  if(df.only) return(data)
   ctype <- c("s", "s", "l", "l")
   out <- ppx(data=data, domain=L, coord.type=ctype)
   class(out) <- c("lpp", class(out))
@@ -353,11 +377,11 @@ local2lpp <- function(L, seg, tp, X=NULL) {
 # subset extractor
 ####################################################
 
-"[.lpp" <- function (x, i, j, drop=FALSE, ...) {
+"[.lpp" <- function (x, i, j, drop=FALSE, ..., snip=TRUE) {
   if(!missing(i) && !is.null(i)) {
     if(is.owin(i)) {
       # spatial domain: call code for 'j'
-      xi <- x[,i]
+      xi <- x[,i,snip=snip]
     } else {
       # usual row-type index
       da <- x$data
@@ -372,33 +396,36 @@ local2lpp <- function(L, seg, tp, X=NULL) {
   if(missing(j) || is.null(j))
     return(x)
   stopifnot(is.owin(j))
-  W <- j
+  w <- j
   L <- x$domain
-  da <- x$data
-  # Find vertices that lie inside 'j'
-  okvert <- inside.owin(L$vertices, w=W)
-  # find segments whose endpoints both lie in 'upper'
-  okedge <- okvert[L$from] & okvert[L$to]
-  # assign new serial numbers to vertices, and recode 
-  newserial <- cumsum(okvert)
-  newfrom <- newserial[L$from[okedge]]
-  newto   <- newserial[L$to[okedge]]
-  # make new linear network
-  Lnew <- linnet(L$vertices[W], edges=cbind(newfrom, newto))
-  # find data points that lie on accepted segments
-  coo <- coords(x)
-  okxy <- okedge[coo$seg]
-  cook <- coo[okxy,]
-  # make new lpp object
-  dfnew <- data.frame(x=cook$x,
-                      y=cook$y,
-                      seg=cook$seg,
-                      tp=cook$tp)
-  ctype <- c(rep("spatial", 2), rep("local", 2))
-  xj <- ppx(data=dfnew, domain=Lnew, coord.type=ctype)
-  class(xj) <- c("lpp", class(xj))
-  marks(xj) <- marks(x[okxy])
-  return(xj)
+  # Find vertices that lie inside 'w'
+  vertinside <- inside.owin(L$vertices, w=w)
+  from <- L$from
+  to   <- L$to
+  if(snip) {
+    ## For efficiency, first restrict network to relevant segments.
+    ## Find segments EITHER OF whose endpoints lie in 'w'
+    okedge <- vertinside[from] | vertinside[to]
+    ## extract relevant subset of network graph
+    x <- thinNetwork(x, retainedges=okedge)
+    ## Now add vertices at crossing points with boundary of 'w'
+    b <- crossing.psp(as.psp(L), edges(w))
+    x <- insertVertices(x, unique(b))
+    boundarypoints <- attr(x, "id")
+    ## update data
+    L <- x$domain
+    from <- L$from
+    to   <- L$to
+    vertinside <- inside.owin(L$vertices, w=w)
+    vertinside[boundarypoints] <- TRUE
+  }
+  ## find segments whose endpoints BOTH lie in 'w'
+  edgeinside <- vertinside[from] & vertinside[to]
+  ## extract relevant subset of network
+  xnew <- thinNetwork(x, retainedges=edgeinside)
+  ## adjust window without checking
+  Window(xnew, check=FALSE) <- w
+  return(xnew)
 }
 
 ####################################################
@@ -482,7 +509,7 @@ superimpose.lpp <- function(..., L=NULL) {
   if(any(!islpp))
     objects[!islpp] <- lapply(objects[!islpp], lpp, L=L)
   ## concatenate coordinates 
-  locns <- do.call("rbind", lapply(objects, coords))
+  locns <- do.call(rbind, lapply(objects, coords))
   ## concatenate marks (or use names of arguments)
   marx <- superimposeMarks(objects, sapply(objects, npoints))
   ## make combined pattern

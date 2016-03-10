@@ -50,7 +50,7 @@ local({
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.2 $ $Date: 2015/12/29 08:54:49 $
+## $Revision: 1.3 $ $Date: 2016/03/04 10:10:18 $
 
 local({
   r <- 0.12
@@ -69,6 +69,14 @@ local({
   stopifnot(identical(cross.ij, cross.all[c("i","j")]))
   stopifnot(identical(cross.ijd, cross.all[c("i","j","d")]))
 
+  # closethresh vs closepairs: EXACT agreement
+  thresh <- 0.08
+  clt <- closethresh(redwood, r, thresh)
+  cl <- with(closepairs(redwood, r),
+             list(i=i, j=j, th = (d <= thresh)))
+  if(!identical(cl, clt))
+    stop("closepairs and closethresh disagree")
+  
   # Rasmus' example
   R <- 0.04
   U <- as.ppp(gridcenters(owin(), 50, 50), W=owin())
@@ -77,6 +85,7 @@ local({
   G[cbind(cp$i, cp$j)] <- 1
   if(!isSymmetric(G))
     stop("crosspairs is not symmetric in Rasmus example")
+
 })
 ## tests/colour.R
 ##
@@ -163,7 +172,7 @@ local({
 #
 #  Test behaviour of density methods and inhomogeneous summary functions
 #
-#  $Revision: 1.3 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.5 $  $Date: 2016/03/04 03:09:00 $
 #
 
 require(spatstat)
@@ -191,9 +200,9 @@ local({
   lamX <- density(redwood, at="points")
   KX <- Kinhom(redwood, lamX)
 
-  ## test all code cases of new 'relrisk' algorithm
-  pants <- function(...) {
-    a <- relrisk(ants, sigma=100, se=TRUE, ...)
+  ## test all code cases of new 'relrisk.ppp' algorithm
+  pants <- function(..., X=ants) {
+    a <- relrisk(X, sigma=100, se=TRUE, ...)
     return(TRUE)
   }
   pants()
@@ -205,7 +214,12 @@ local({
   pants(relative=TRUE,at="points")
   pants(casecontrol=FALSE, relative=TRUE,at="points")
 
+  ## more than 2 types
+  pants(X=sporophores)
+  pants(X=sporophores, at="points")
+  pants(X=sporophores, relative=TRUE, at="points")
 
+  ## Smooth.ppp
   Z <- Smooth(longleaf, 5, diggle=TRUE)
   Z <- Smooth(unmark(longleaf) %mark% 1, 5)
 
@@ -364,6 +378,13 @@ local({
   b <-          G$fasteval(X,U,EP,G$pot,G$par,"border")
   if(!all(a==b))
     stop("Results of Geyer()$fasteval and pairsat.family$eval do not match when sat is not an integer")
+# and again for sat < 1
+# (spotted by Rolf)  
+  G <- Geyer(0.11, 0.5)
+  a <- pairsat.family$eval(X,U,EP,G$pot,G$par,"border")
+  b <-          G$fasteval(X,U,EP,G$pot,G$par,"border")
+  if(!all(a==b))
+    stop("Results of Geyer()$fasteval and pairsat.family$eval do not match when sat < 1")
 })
 
 #
@@ -379,6 +400,39 @@ local({
   Ku <- Kest(cells, correction="none")
   Kbu <- Kest(cells, correction=c("none", "border"))
 })
+
+
+#' tests/formuli.R
+#'
+#'  Test machinery for manipulating formulae
+#' 
+#' $Revision: 1.2 $  $Date: 2016/03/05 02:24:32 $
+
+require(spatstat)
+local({
+
+  ff <- function(A, deletevar, B) {
+    D <- reduceformula(A, deletevar)
+    if(!identical.formulae(D, B)) {
+      AD <- as.expression(substitute(reduceformula(A,d),
+                                     list(A=A, d=deletevar)))
+      stop(paste(AD, "\n\tyields ", pasteFormula(D),
+                 " instead of ", pasteFormula(B)),
+           call.=FALSE)
+    }
+    invisible(NULL)
+  }
+
+  ff(~ x + z, "x", ~z)
+
+  ff(y ~ x + z, "x", y~z)
+
+  ff(~ I(x^2) + z, "x",  ~z)
+
+  ff(y ~ poly(x,2) + poly(z,3), "x", y ~poly(z,3))
+
+})
+
 
 
 ##  
@@ -429,7 +483,7 @@ local({
 # 
 #    tests/fvproblems.R
 #
-#    $Revision: 1.6 $  $Date: 2015/12/29 08:57:16 $
+#    $Revision: 1.7 $  $Date: 2016/03/08 00:26:23 $
 #
 
 require(spatstat)
@@ -487,6 +541,18 @@ local({
   attr(K, "alim") <- c(0, 0.1)
   plot(tail(K))
 })
+
+#
+# Check that default 'r' vector passes the test for fine spacing
+
+local({
+  a <- Fest(cells)
+  A <- Fest(cells, r=a$r)
+  b <- Hest(heather$coarse)
+  B <- Hest(heather$coarse, r=b$r)
+})
+
+  
 ##
 ##    tests/gcc323.R
 ##
@@ -575,7 +641,7 @@ local({
 #
 # tests/kppm.R
 #
-# $Revision: 1.9 $ $Date: 2015/12/29 08:54:49 $
+# $Revision: 1.11 $ $Date: 2016/03/04 10:48:03 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -607,7 +673,13 @@ local({
     Y2 <- simulate(fit2)[[1]]
     stopifnot(is.ppp(Y2))
   }
-  
+
+ # improve.kppm
+ fitI <- update(fit, improve.type="quasi")
+ fitxI <- update(fitx, improve.type="quasi")
+ # vcov.kppm
+ vc <- vcov(fitxI)
+ 
 })
 
 
@@ -633,6 +705,34 @@ local({
 
   NULL
 })
+#'
+#'    tests/leverinf.R
+#'
+#'   leverage and influence for Gibbs models
+#' 
+#'   $Revision: 1.2 $ $Date: 2016/02/24 06:40:35 $
+#' 
+
+require(spatstat)
+local({
+  # Strauss()$delta2
+  fitS <- ppm(cells ~ x, Strauss(0.12), rbord=0)
+  leverage(fitS)
+  influence(fitS)
+  # Geyer()$delta2
+  fitG <- ppm(redwood ~ 1, Geyer(0.1, 2), rbord=0)
+  leverage(fitG)
+  influence(fitG)
+  # pairwise.family$delta2
+  fitD <- ppm(cells ~ 1, DiggleGatesStibbard(0.12), rbord=0)
+  leverage(fitD)
+  influence(fitD)
+  # ppmInfluence; offset is present; coefficient vector has length 1
+  fitH <- ppm(cells ~ x, Hardcore(0.07), rbord=0)
+  leverage(fitH)
+  influence(fitH)
+})
+
 ##
 ##    tests/linalgeb.R
 ##
@@ -672,7 +772,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.4 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.6 $  $Date: 2016/02/01 09:44:54 $
 
 
 require(spatstat)
@@ -745,8 +845,23 @@ local({
     stop("nndist.lpp disagrees with nncross.lpp(iX, iY)")
   if(max(abs(d2-d3)) > eps)
     stop("Different results for nncross.lpp(iX, iY, 'dist') using R and C")
-  
+
   spatstat.options(op)
+
+  # test handling marginal cases
+  xyd <- nncross(XX, YY[1])
+
+  ## Test linnet surgery code
+  set.seed(42)
+  X <- runiflpp(30, simplenet)
+  V <- runiflpp(30, simplenet)
+  XV <- insertVertices(X, V)
+  validate.lpp.coords(XV, context="calculated by insertVertices")
+
+  ## Test [.lpp internal data
+  B <- owin(c(0.1,0.7),c(0.19,0.6))
+  XB <- X[B]
+  validate.lpp.coords(XB, context="returned by [.lpp")
 })
 
 ##
@@ -806,54 +921,85 @@ local({
 #
 # Basic tests of mppm
 #
-# $Revision: 1.4 $ $Date: 2015/09/30 10:30:01 $
+# $Revision: 1.7 $ $Date: 2016/02/15 14:30:18 $
 # 
 
 require(spatstat)
 
 local({
-# test interaction formulae and subfits
-fit1 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
-            iformula=~ifelse(group=="control", po, str))
-fit2 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), str=Strauss(0.1)),
-            iformula=~id * str)
-fit3 <- mppm(Points ~ group, simba, hyperframe(po=Poisson(), pie=PairPiece(c(0.05,0.1))), iformula=~I((group=="control") * po) + I((group=="treatment") * pie))
-fit1
-fit2
-fit3
+  ## test interaction formulae and subfits
+  fit1 <- mppm(Points ~ group, simba,
+               hyperframe(po=Poisson(), str=Strauss(0.1)),
+               iformula=~ifelse(group=="control", po, str))
+  fit2 <- mppm(Points ~ group, simba,
+               hyperframe(po=Poisson(), str=Strauss(0.1)),
+               iformula=~str/id)
+  fit3 <- mppm(Points ~ group, simba,
+               hyperframe(po=Poisson(), pie=PairPiece(c(0.05,0.1))),
+        iformula=~I((group=="control") * po) + I((group=="treatment") * pie))
+  fit1
+  fit2
+  fit3
 
-subfits(fit1)
-subfits(fit2)
-subfits(fit3)
+  ## run summary.mppm which currently sits in spatstat-internal.Rd
+  summary(fit1)
+  summary(fit2)
+  summary(fit3)
 
-# test vcov algorithm
-vcov(fit1)
-vcov(fit2)
-vcov(fit3)
+  ## test vcov algorithm
+  vcov(fit1)
+  vcov(fit2)
+  vcov(fit3)
 
-# test summary.mppm which currently sits in spatstat-internal.Rd
+  ## test subfits algorithm
+  s1 <- subfits(fit1)
+  s2 <- subfits(fit2)
+  s3 <- subfits(fit3)
 
-summary(fit1)
-summary(fit2)
-summary(fit3)
+  ## validity of results of subfits()
+  p1 <- solapply(s1, predict)
+  p2 <- solapply(s2, predict)
+  p3 <- solapply(s3, predict)
 
-# test handling of offsets and zero cif values in mppm
+})
 
-H <- hyperframe(Y = waterstriders)
-mppm(Y ~ 1,  data=H, Hardcore(1.5))
-mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
+local({
+  ##  [thanks to Sven Wagner]
+  ## factor covariate, with some levels unused in some rows
+  H <- hyperframe(X=replicate(3, runifpoint(20), simplify=FALSE),
+                  Z=solist(as.im(function(x,y){x}, owin()),
+                    as.im(function(x,y){y}, owin()),
+                    as.im(function(x,y){x+y}, owin())))
+  H$Z <- solapply(H$Z, cut, breaks=(0:4)/2)
 
-# prediction, in training/testing context
-#    (example from Markus Herrmann and Ege Rubak)
+  fit6 <- mppm(X ~ Z, H)
+  v6 <- vcov(fit6)
+  s6 <- subfits(fit6)
+  p6 <- solapply(s6, predict)
 
-X <- waterstriders
-dist <- as.listof(lapply(waterstriders,
-                         function(z) distfun(runifpoint(1, Window(z)))))
-i <- 3
-train <- hyperframe(pattern = X[-i], dist = dist[-i])
-test <- hyperframe(pattern = X[i], dist = dist[i])
-fit <- mppm(pattern ~ dist, data = train)
-pred <- predict(fit, type="cif", newdata=test, verbose=TRUE)
+  # random effects
+  fit7 <- mppm(X ~ Z, H, random=~1|id)
+  v7 <- vcov(fit7)
+  s7 <- subfits(fit7)
+  p7 <- solapply(s7, predict)
+})
+
+local({
+  ## test handling of offsets and zero cif values in mppm
+  H <- hyperframe(Y = waterstriders)
+  mppm(Y ~ 1,  data=H, Hardcore(1.5))
+  mppm(Y ~ 1,  data=H, StraussHard(7, 1.5))
+
+  ## prediction, in training/testing context
+  ##    (example from Markus Herrmann and Ege Rubak)
+  X <- waterstriders
+  dist <- solapply(waterstriders,
+                   function(z) distfun(runifpoint(1, Window(z))))
+  i <- 3
+  train <- hyperframe(pattern = X[-i], dist = dist[-i])
+  test <- hyperframe(pattern = X[i], dist = dist[i])
+  fit <- mppm(pattern ~ dist, data = train)
+  pred <- predict(fit, type="cif", newdata=test, verbose=TRUE)
 })
 #
 # tests/NAinCov.R
@@ -1315,7 +1461,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.2 $ $Date: 2014/12/31 04:24:30 $
+#  $Revision: 1.4 $ $Date: 2016/03/04 03:14:40 $
 #
 
 require(spatstat)
@@ -1334,6 +1480,27 @@ local({
   p2 <- predict(fit, type="cif", ngrid=10)
   stopifnot(all(is.finite(as.matrix(p1))))
   stopifnot(all(is.finite(as.matrix(p2))))
+
+  # test of 'new.coef' mechanism
+  fut <- ppm(cells ~ x, Strauss(0.15), rbord=0)
+  p0 <- predict(fut, type="cif")
+  pe <- predict(fut, type="cif", new.coef=coef(fut))
+  pn <- predict(fut, type="cif", new.coef=unname(coef(fut)))
+  if(max(abs(pe-p0)) > 0.01)
+    stop("new.coef mechanism is broken!")
+  if(max(abs(pn-p0)) > 0.01)
+    stop("new.coef mechanism gives wrong answer, for unnamed vectors")
+
+  # tests of relrisk.ppm
+  fut <- ppm(amacrine ~ x * marks)
+  a <- relrisk(fut, control=2, relative=TRUE)
+  a <- relrisk(fut, se=TRUE)
+  a <- relrisk(fut, relative=TRUE, se=TRUE)
+  fut <- ppm(sporophores ~ marks + x)
+  a <- relrisk(fut, control=2, relative=TRUE)
+  a <- relrisk(fut, se=TRUE)
+  a <- relrisk(fut, relative=TRUE, se=TRUE)
+  
 })
 
 #
@@ -2335,6 +2502,85 @@ local({
 })
 
 
+#'    tests/sparse3Darrays.R
+#'  Basic tests of sparse3array.R code
+#'  $Revision: 1.5 $ $Date: 2016/03/06 02:24:57 $
+
+require(spatstat)
+local({
+
+  if(require(Matrix)) {
+    M <- sparse3Darray(i=1:4, j=sample(1:4, replace=TRUE),
+                       k=c(1,2,1,2), x=1:4, dims=c(5,5,2))
+
+    M
+
+    dimnames(M) <- list(letters[1:5], LETTERS[1:5], c("yes", "no"))
+    M
+    
+    U <- aperm(M, c(1,3,2))
+    U
+    
+    M[ 3:4, , ]
+    
+    M[ 3:4, 2:4, ]
+    
+    M[, 3, ]
+
+    M[, 3, , drop=FALSE]
+    
+    MA <- as.array(M)
+    UA <- as.array(U)
+
+    ## tests of "[<-.sparse3Darray"
+    Mflip <- Mzero <- MandM <- M
+    Mflip[ , , 2:1] <- M
+    stopifnot(Mflip[3,1,1] == M[3,1,2])
+    Mzero[1:3,1:3,] <- 0
+    stopifnot(all(Mzero[1,1,] == 0))
+    M2a <- M[,,2,drop=FALSE]
+    M2d <- M[,,2,drop=TRUE]
+    MandM[,,1] <- M2a
+    MandM[,,1] <- M2d
+
+    ## tests of arithmetic (Math, Ops, Summary)
+    negM <- -M
+    oneM <- 1 * M
+    twoM <- M + M
+    range(M)
+
+    stopifnot(all((M+M) == 2*M))     # non-sparse
+    stopifnot(!any((M+M) != 2*M))    # sparse
+
+    ## tensor operator
+
+    tenseur(c(1,-1), M, 1, 3)
+    tenseur(M, M, 1:2, 1:2)
+    tenseur(M, M, 1:2, 2:1)
+    V <- sparseVector(i=c(1,3,6),x=1:3, length=7)
+    tenseur(V,V)
+    tenseur(V,V,1,1)
+
+    ## test of anyNA method
+    anyNA(M)
+    
+    ## a possible application in spatstat
+    cl10 <- as.data.frame(closepairs(cells, 0.1))
+    cl12 <- as.data.frame(closepairs(cells, 0.12))
+    cl10$k <- 1
+    cl12$k <- 2
+    cl <- rbind(cl10, cl12)
+    n <- npoints(cells)
+    Z <- with(cl,
+              sparse3Darray(i=i, j=j, k=k, x=1, dims=c(n,n,2)))
+    dimnames(Z) <- list(NULL, NULL, c("r=0.1", "r=0.12"))
+
+    Z <- aperm(Z, c(3,1,2))
+    stopifnot(all(sumsymouterSparse(Z) == sumsymouter(as.array(Z))))
+  }
+})
+
+
 #
 #  tests/splitpea.R
 #
@@ -2342,7 +2588,7 @@ local({
 #
 #  Thanks to Marcelino de la Cruz
 #
-#  $Revision: 1.10 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.11 $  $Date: 2016/03/05 01:33:47 $
 #
 
 require(spatstat)
@@ -2394,6 +2640,16 @@ X <- amacrine
 Y <- split(X)
 split(X) <- Y
 stopifnot(identical(X, amacrine))
+
+#' split.ppx
+df <- data.frame(x=runif(4),y=runif(4),t=runif(4),
+                 age=rep(c("old", "new"), 2),
+                 mineral=factor(rep(c("Au","Cu"), each=2),
+                                levels=c("Au", "Cu", "Pb")),
+                 size=runif(4))
+X <- ppx(data=df, coord.type=c("s","s","t","m", "m","m"))
+Y <- split(X, "age")
+Y <- split(X, "mineral", drop=TRUE)
 
 })
 #
@@ -2514,7 +2770,7 @@ local({
 ##
 ##  Check validity of update.ppm
 ##
-##  $Revision: 1.3 $ $Date: 2015/12/29 08:54:49 $
+##  $Revision: 1.4 $ $Date: 2016/03/08 06:30:46 $
 
 local({
     require(spatstat)
@@ -2591,6 +2847,19 @@ local({
     fut <- ppm(X ~ Z + x + y, nd=8)
     fut0 <- step(fut, trace=0)
     cat("OK\n")
+})
+
+# test update.lppm
+
+local({
+  X <- runiflpp(20, simplenet)
+  fit0 <- lppm(X ~ 1)
+  fit1 <- update(fit0, ~ x)
+  anova(fit0, fit1, test="LR")
+  cat("update.lppm(fit, ~trend) is OK\n")
+  fit2 <- update(fit0, . ~ x)
+  anova(fit0, fit2, test="LR")
+  cat("update.lppm(fit, . ~ trend) is OK\n")
 })
 #
 #  tests/vcovppm.R
@@ -2712,7 +2981,7 @@ local({
 ##
 ##    Test weird problems and boundary cases for line segment code
 ##
-##    $Version$ $Date: 2015/12/29 08:54:49 $ 
+##    $Version$ $Date: 2016/02/12 08:18:08 $ 
 ##
 require(spatstat)
 local({
@@ -2721,4 +2990,11 @@ local({
   BB <- angles.psp(B)
   A <- runifpoint(3)
   AB <- project2segment(A,B)
+
+  # mark inheritance
+  X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin())
+  marks(X) <- 1:10
+  Y <- selfcut.psp(X)
+  marks(X) <- data.frame(A=1:10, B=factor(letters[1:10]))
+  Z <- selfcut.psp(X)
 })

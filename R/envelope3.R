@@ -3,12 +3,12 @@
 #
 #   simulation envelopes for pp3 
 #
-#   $Revision: 1.11 $  $Date: 2015/10/21 09:06:57 $
+#   $Revision: 1.12 $  $Date: 2016/02/11 09:36:11 $
 #
 
 envelope.pp3 <-
   function(Y, fun=K3est, nsim=99, nrank=1, ...,
-           funargs=list(),
+           funargs=list(), funYargs=funargs,
            simulate=NULL, verbose=TRUE, 
            transform=NULL, global=FALSE, ginterval=NULL, use.theory=NULL,
            alternative=c("two.sided", "less", "greater"),
@@ -46,6 +46,8 @@ envelope.pp3 <-
       } else {
         stop("Sorry, simulation of marked 3D point patterns is not yet implemented")
       }
+    # suppress warnings from code checkers
+    dont.complain.about(Yintens, Ydomain)
     # evaluate in THIS environment
     simrecipe <- simulrecipe(type = "csr",
                              expr = simexpr,
@@ -60,7 +62,8 @@ envelope.pp3 <-
     X <- Y
   }
   envelopeEngine(X=X, fun=fun, simul=simrecipe,
-                 nsim=nsim, nrank=nrank, ..., funargs=funargs,
+                 nsim=nsim, nrank=nrank, ...,
+                 funargs=funargs, funYargs=funYargs,
                  verbose=verbose, clipdata=FALSE,
                  transform=transform,
                  global=global, ginterval=ginterval, use.theory=use.theory,

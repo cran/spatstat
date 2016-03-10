@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.90 $	$Date: 2015/04/21 13:14:28 $
+#	$Revision: 1.95 $	$Date: 2016/02/23 02:27:03 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -667,10 +667,12 @@ model.se.image <- function(fit, W=as.owin(fit), ..., what="sd") {
   return(U)
 }
 
-GLMpredict <- function(fit, data, coefs, changecoef=TRUE) {
+GLMpredict <- function(fit, data, coefs, changecoef=TRUE,
+                       type=c("response", "link")) {
   ok <- is.finite(coefs)
+  type <- match.arg(type)
   if(!changecoef && all(ok)) {
-    answer <- predict(fit, newdata=data, type="response")
+    answer <- predict(fit, newdata=data, type=type)
   } else {
     # do it by hand
     fmla <- formula(fit)
@@ -678,6 +680,10 @@ GLMpredict <- function(fit, data, coefs, changecoef=TRUE) {
     fram <- model.frame(fmla, data=data)
     # linear predictor
     mm <- model.matrix(fmla, data=fram)
+    # ensure all required coefficients are present
+    coefs <- fill.coefs(coefs, colnames(mm))
+    ok <- is.finite(coefs)
+    #
     if(all(ok)) {
       eta <- as.vector(mm %*% coefs)
     } else {
@@ -697,12 +703,17 @@ GLMpredict <- function(fit, data, coefs, changecoef=TRUE) {
         mo <- apply(mo, 1, sum)
       eta <- mo + eta
     }
-    # response
-    linkinv <- family(fit)$linkinv
-    answer <- linkinv(eta)
+    switch(type,
+           link = {
+             answer <- eta
+           },
+           response = {
+             linkinv <- family(fit)$linkinv
+             answer <- linkinv(eta)
+           })
   }
   # Convert from fitted logistic prob. to lambda for logistic fit
-  if(family(fit)$family=="binomial")
+  if(type == "response" && family(fit)$family=="binomial")
     answer <- fit$data$.logi.B[1] * answer/(1-answer)
   return(answer)
 }
@@ -732,3 +743,35 @@ equalpairs <- function(U, X, marked=FALSE) {
 }
 
   
+fill.coefs <- function(coefs, required) {
+  # 'coefs' should contain all the 'required' values
+  coefsname <- deparse(substitute(coefs))
+  nama <- names(coefs)
+  if(is.null(nama)) {
+    #' names cannot be matched
+    if(length(coefs) != length(required))
+      stop(paste("The unnamed argument", sQuote(coefsname),
+                 "has", length(coefs), "entries, but",
+                 length(required), "are required"),
+           call.=FALSE)
+    # blithely assume they match 1-1
+    names(coefs) <- required
+    return(coefs)
+  }
+  stopifnot(is.character(required))
+  if(identical(nama, required)) return(coefs)
+  inject <- match(nama, required)
+  if(any(notneeded <- is.na(inject))) {
+    warning(paste("Internal glitch: some coefficients were not required:",
+                  commasep(sQuote(nama[notneeded]))),
+            call.=FALSE)
+    coefs <- coefs[!notneeded]
+    nama <- names(coefs)
+    inject <- match(nama, required)
+  }
+  y <- numeric(length(required))
+  names(y) <- required
+  y[inject] <- coefs
+  return(y)
+}
+ 

@@ -4,7 +4,7 @@
 ##
 ##    class "fv" of function value objects
 ##
-##    $Revision: 1.134 $   $Date: 2015/11/14 03:51:20 $
+##    $Revision: 1.138 $   $Date: 2016/02/17 06:48:34 $
 ##
 ##
 ##    An "fv" object represents one or more related functions
@@ -939,6 +939,7 @@ with.fv <- function(data, expr, ..., fun=NULL, enclos=NULL) {
   expandelang <- eval(substitute(substitute(ee,
                                       list(.=ud, .x=ux, .y=uy, .s=us, .a=ua)),
                            list(ee=elang)))
+  dont.complain.about(ua, ud, us, ux, uy)
   evars <- all.vars(expandelang)
   used.dotnames <- evars[evars %in% dnames]
   ## evaluate expression
@@ -1047,7 +1048,7 @@ range.fv <- local({
     isfun <- sapply(aarg, is.fv)
     if(any(isfun)) 
       aarg[isfun] <- lapply(aarg[isfun], range1fv, na.rm=na.rm, finite=finite)
-    do.call("range", append(aarg, list(na.rm=na.rm, finite=finite)))
+    do.call(range, append(aarg, list(na.rm=na.rm, finite=finite)))
   }
 
   range.fv
@@ -1344,13 +1345,25 @@ ratfv <- function(df, numer, denom, ..., ratio=TRUE) {
 bind.ratfv <- function(x, numerator, denominator, 
                        labl = NULL, desc = NULL, preferred = NULL,
                        ratio=TRUE) {
+  if(ratio && !inherits(x, "rat"))
+    stop("ratio=TRUE is set, but x has no ratio information", call.=FALSE)
+  if(missing(denominator) && inherits(numerator, "rat")) {
+    ## extract numerator & denominator from ratio object
+    both <- numerator
+    denominator <- attr(both, "denominator")
+    usenames <- fvnames(both, ".a")
+    numerator   <- as.data.frame(both)[,usenames]
+    denominator <- as.data.frame(denominator)[,usenames]
+    ##  labels default to those of ratio object
+    if(is.null(labl)) labl <- attr(both, "labl")
+    if(is.null(desc)) desc <- attr(both, "desc")
+    if(is.null(labl)) labl <- attr(both, "labl")
+  }
+  # calculate ratio
   y <- bind.fv(x, numerator/denominator,
                labl=labl, desc=desc, preferred=preferred)
   if(!ratio)
     return(y)
-  stopifnot(inherits(x, "rat"))
-  num <- attr(x, "numerator")
-  den <- attr(x, "denominator")
   ## convert scalar denominator to data frame
   if(!is.data.frame(denominator)) {
     if(!is.numeric(denominator) || !is.vector(denominator))
@@ -1362,6 +1375,9 @@ bind.ratfv <- function(x, numerator, denominator,
     denominator <- numerator
     denominator[] <- dvalue
   }
+  ## Now fuse with x
+  num <- attr(x, "numerator")
+  den <- attr(x, "denominator")
   num <- bind.fv(num, numerator,
                  labl=labl, desc=paste("numerator of", desc),
                  preferred=preferred)

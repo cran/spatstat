@@ -1,6 +1,6 @@
 #  Variance-covariance matrix for mppm objects
 #
-# $Revision: 1.11 $ $Date: 2015/09/30 06:38:33 $
+# $Revision: 1.15 $ $Date: 2016/02/16 10:08:00 $
 #
 #
 
@@ -66,12 +66,30 @@ vcov.mppm <- local({
   }
 
   vcmGibbs <- function(object, ..., what, err,
-                       matrix.action=c("warn", "fatal", "silent")) {
-    matrix.action <- match.arg(matrix.action)
+                       matrix.action=c("warn", "fatal", "silent"),
+                       gam.action=c("warn", "fatal", "silent"),
+                       logi.action=c("warn", "fatal", "silent")
+                       ) {
+    if(!missing(err)) {
+      if(err == "null") err <- "silent" 
+      matrix.action <-
+        if(missing(matrix.action)) err else match.arg(matrix.action)
+      gam.action <- if(missing(gam.action)) err else match.arg(gam.action)
+      logi.action <- if(missing(logi.action)) err else match.arg(logi.action)
+    } else {
+      matrix.action <- match.arg(matrix.action)
+      gam.action <- match.arg(gam.action)
+      logi.action <- match.arg(logi.action)
+    }
     collectmom <- (what %in% c("internals", "all"))
     subs <- subfits(object, what="basicmodels")
     n <- length(subs)
-    guts <- lapply(subs, vcov, what="internals")
+    guts <- lapply(subs, vcov, what="internals",
+                   matrix.action=matrix.action,
+                   gam.action=gam.action,
+                   logi.action=logi.action,
+                   dropcoef=TRUE,
+                   ...)
     fish <- lapply(guts, getElement, name="fisher")
     a1   <- lapply(guts, getElement, name="A1")
     a2   <- lapply(guts, getElement, name="A2")
@@ -89,9 +107,10 @@ vcov.mppm <- local({
     if(collectmom)
       Mom <- matrix(, 0, nc, dimnames=list(character(0), cnames))
     for(i in seq_len(n)) {
-      A1 <- addsubmatrix(A1, a1[[i]])
-      A2 <- addsubmatrix(A2, a2[[i]])
-      A3 <- addsubmatrix(A3, a3[[i]])
+      coefnames.i <- names(coef(subs[[i]]))
+      A1 <- addsubmatrix(A1, a1[[i]], coefnames.i)
+      A2 <- addsubmatrix(A2, a2[[i]], coefnames.i)
+      A3 <- addsubmatrix(A3, a3[[i]], coefnames.i)
       if(collectmom) Mom <- bindsubmatrix(Mom, sufs[[i]])
     }
     internals <- list(A1=A1, A2=A2, A3=A3)
@@ -100,7 +119,7 @@ vcov.mppm <- local({
     if(what %in% c("vcov", "corr", "all")) {
       #' variance-covariance matrix required
       U <- checksolve(A1, matrix.action, , "variance")
-      vc <- U %*% (A1 + A2 + A3) %*% U
+      vc <- if(is.null(U)) NULL else (U %*% (A1 + A2 + A3) %*% U)
     }
     out <- switch(what,
                   fisher = A1 + A2 + A3,
@@ -119,16 +138,22 @@ vcov.mppm <- local({
     return(out)
   }
 
-  addsubmatrix <- function(A, B) {
+  addsubmatrix <- function(A, B, guessnames) {
     if(is.null(B)) return(A)
+    if(is.null(colnames(B)) && !missing(guessnames)) {
+      if(is.character(guessnames))
+        guessnames <- list(guessnames, guessnames)
+      if(all(lengths(guessnames) == dim(B)))
+        colnames(B) <- guessnames
+    }
     if(is.null(colnames(B))) {
-      if(!all(dim(A) == dim(B)))
+      if(!all(dim(A) == dim(B))) 
         stop("Internal error: no column names, and matrices non-conformable")
       A <- A + B
       return(A)
     }
     j <- match(colnames(B), colnames(A))
-    if(any(is.na(j)))
+    if(anyNA(j))
       stop("Internal error: unmatched column name(s)")
     A[j,j] <- A[j,j] + B
     return(A)
@@ -143,7 +168,7 @@ vcov.mppm <- local({
       return(A)
     }
     j <- match(colnames(B), colnames(A))
-    if(any(is.na(j)))
+    if(anyNA(j))
       stop("Internal error: unmatched column name(s)")
     BB <- matrix(0, nrow(B), ncol(A))
     BB[,j] <- B

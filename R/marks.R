@@ -1,7 +1,7 @@
 #
 # marks.R
 #
-#   $Revision: 1.41 $   $Date: 2015/10/21 09:06:57 $
+#   $Revision: 1.43 $   $Date: 2016/02/16 01:39:12 $
 #
 # stuff for handling marks
 #
@@ -125,7 +125,7 @@ function(X, na.action="warn", ...) {
   marx <- marks(X, ...)
   if(is.null(marx))
     return(FALSE)
-  if((length(marx) > 0) && any(is.na(marx))) {
+  if((length(marx) > 0) && anyNA(marx)) {
     gripe <- paste("some mark values are NA in the point pattern",
                    short.deparse(substitute(X)))
     switch(na.action,
@@ -168,7 +168,7 @@ is.multitype.ppp <- function(X, na.action="warn", ...) {
     return(FALSE)
   if(!is.factor(marx))
     return(FALSE)
-  if((length(marx) > 0) && any(is.na(marx)))
+  if((length(marx) > 0) && anyNA(marx))
     switch(na.action,
            warn = {
              warning(paste("some mark values are NA in the point pattern",
@@ -228,7 +228,7 @@ marksubset <- function(x, index, format=NULL) {
          hyperframe={
            xcols <- as.list(x)
            repxcols <- lapply(xcols, rep, times=n)
-           return(do.call("hyperframe", repxcols))
+           return(do.call(hyperframe, repxcols))
          },
          stop("Internal error: unrecognised format of marks"))
 }
@@ -263,9 +263,10 @@ markappend <- function(...) {
   marxlist <- list(...)
   # check on compatibility of marks
   mkfmt <- sapply(marxlist,markformat)
-  if(length(unique(mkfmt))>1)
-    stop(paste("Marks of some patterns are of different format",
-               "from those of other patterns."))
+  if(length(ufm <- unique(mkfmt))>1)
+    stop(paste("Cannot append marks of different formats:",
+               commasep(sQuote(ufm))),
+         call.=FALSE)
   mkfmt <- mkfmt[1]
   # combine the marks
   switch(mkfmt,
@@ -275,7 +276,7 @@ markappend <- function(...) {
          vector = {
            marxlist <- lapply(marxlist,
                               function(x){as.data.frame.vector(x,nm="v1")})
-           marx <- do.call("rbind", marxlist)[,1]
+           marx <- do.call(rbind, marxlist)[,1]
            return(marx)
          },
          hyperframe =,
@@ -283,7 +284,7 @@ markappend <- function(...) {
            # check compatibility of data frames
            # (this is redundant but gives more helpful message)
            nama <- lapply(marxlist, names)
-           dims <- unlist(lapply(nama, length))
+           dims <- lengths(nama)
            if(length(unique(dims)) != 1)
              stop("Data frames of marks have different column dimensions.")
            samenames <- unlist(lapply(nama,
@@ -291,7 +292,7 @@ markappend <- function(...) {
                                       y=nama[[1]]))
            if(!all(samenames))
              stop("Data frames of marks have different names.\n")
-           marx <- do.call("rbind", marxlist)
+           marx <- do.call(rbind, marxlist)
            return(marx)
          },
          list = {
@@ -352,7 +353,7 @@ numeric.columns <- function(M, logical=TRUE, others=c("discard", "na")) {
     # return a data frame with no columns
     return(as.data.frame(matrix(, nrow=nrow(M), ncol=0)))
   }
-  Mout <- do.call("data.frame", Mprocessed[!isnul])
+  Mout <- do.call(data.frame, Mprocessed[!isnul])
   if(ncol(M) == 1 && ncol(Mout) == 1)
     colnames(Mout) <- NULL
   return(Mout)

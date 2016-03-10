@@ -2,7 +2,7 @@
 #  update.ppm.R
 #
 #
-#  $Revision: 1.58 $    $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.60 $    $Date: 2016/03/08 05:43:46 $
 #
 #
 #
@@ -24,7 +24,7 @@ update.ppm <- local({
     verifyclass(object, "ppm")
     new.callstring <- short.deparse(sys.call())
     aargh <- list(...)
-    
+
     if(inherits(object, "ippm")) {
       call <- object$dispatched$call
       callframe <- object$dispatched$callframe
@@ -39,7 +39,8 @@ update.ppm <- local({
     callfun <- as.character(call[[1]])
     newstyle <- (callfun == "ppm.formula")
     oldstyle <- !newstyle
-    
+
+
     ## Special cases 
     ## (1) no new information given
     if(length(aargh) == 0 && !identical(use.internal, TRUE)) {
@@ -291,11 +292,11 @@ update.ppm <- local({
       if(is.marked(Qold)) {
         dpar <- Qold$param$dummy
         wpar <- Qold$param$weight
-        Qnew <- do.call("quadscheme", append(list(X), append(dpar, wpar)))
+        Qnew <- do.call(quadscheme, append(list(X), append(dpar, wpar)))
       } else {
         Dum <- Qold$dummy
         wpar <- Qold$param$weight
-        Qnew <- do.call("quadscheme", append(list(X, Dum), wpar))
+        Qnew <- do.call(quadscheme, append(list(X, Dum), wpar))
       }
       ## replace X by new Q
       call$Q <- Qnew

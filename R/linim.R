@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.19 $   $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.22 $   $Date: 2016/02/17 08:35:41 $
 #
 #  Image/function on a linear network
 #
@@ -69,9 +69,9 @@ print.summary.linim <- function(x, ...) {
   win <- x$window
   splat(di[1], "x", di[2], "pixel array (ny, nx)")
   splat("enclosing rectangle:",
-        prange(signif(x$window$xrange, sigdig)),
+        prange(signif(win$xrange, sigdig)),
         "x",
-        prange(signif(x$window$yrange, sigdig)),
+        prange(signif(win$yrange, sigdig)),
         unitinfo$plural,
         unitinfo$explain)
   splat("dimensions of each pixel:",
@@ -113,7 +113,7 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1,
   style <- match.arg(style)
   # colour style: plot as pixel image
   if(style == "colour" || !do.plot)
-    return(do.call("plot.im",
+    return(do.call(plot.im,
                    resolve.defaults(list(x),
                                     list(...),
                                     list(main=xname, do.plot=do.plot))))
@@ -123,7 +123,7 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1,
   Llines <- as.psp(L)
   # initialise plot
   W <- as.owin(L)
-  bb <- do.call.matched("plot.owin",
+  bb <- do.call.matched(plot.owin,
                         resolve.defaults(list(x=W, type="n"),
                                          list(...), list(main=xname)),
                         extrargs="type")
@@ -210,8 +210,8 @@ as.linim <- function(X, ...) {
 as.linim.default <- function(X, L, ...) {
   stopifnot(inherits(L, "linnet"))
   Y <- as.im(X, W=as.rectangle(as.owin(L)), ...)
-  Z <- as.im(as.mask.psp(as.psp(L), as.owin(Y)))
-  Y <- eval.im(Z * Y)
+  M <- as.mask.psp(as.psp(L), as.owin(Y))
+  Y[complement.owin(M)] <- NA
   out <- linim(L, Y)
   return(out)
 }
@@ -334,5 +334,12 @@ scalardilate.linim <- function(X, f, ..., origin=NULL) {
   else negorig <- c(0, 0)
   Y <- affine(X, mat = diag(c(f, f)), vec = -negorig)
   return(Y)
+}
+
+as.data.frame.linim <- function(x, ...) {
+  df <- attr(x, "df")
+  if(!is.na(m <- match("mapXY", colnames(df))))
+    colnames(df)[m] <- "seg"
+  return(df)
 }
 
