@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.202 $	$Date: 2016/03/09 01:59:27 $
+#	$Revision: 5.203 $	$Date: 2016/04/25 02:34:40 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -101,7 +101,7 @@ mpl.engine <-
     the.version <- list(major=spv$major,
                         minor=spv$minor,
                         release=spv$patchlevel,
-                        date="$Date: 2016/03/09 01:59:27 $")
+                        date="$Date: 2016/04/25 02:34:40 $")
 
     if(want.inter) {
       ## ensure we're using the latest version of the interaction object
@@ -282,7 +282,9 @@ mpl.engine <-
            maxlogpl     = maxlogpl,
            satlogpl     = satlogpl,
            internal     = list(glmfit=FIT, glmdata=glmdata, Vnames=Vnames,
-                               IsOffset=IsOffset, fmla=fmla, computed=computed),
+                               IsOffset=IsOffset, fmla=fmla, computed=computed,
+                               vnamebase=prep$vnamebase,
+                               vnameprefix=prep$vnameprefix),
            covariates   = mpl.usable(covariates),
            covfunargs   = covfunargs,
            subsetexpr   = subsetexpr,
@@ -730,7 +732,8 @@ mpl.prepare <- local({
                    problems=problems,
                    likelihood.is.zero=likelihood.is.zero,
                    is.identifiable=is.identifiable,
-                   computed=computed)
+                   computed=computed,
+                   vnamebase=vnamebase, vnameprefix=vnameprefix)
     return(result)
   }
 
@@ -1176,9 +1179,8 @@ deltasuffstat <- local({
     ncoef <- length(coef(model))
     inte <- as.interact(model)
 
-    sparseOK <- sparseOK && spatstat.options('developer')
     if(!sparseOK && exceedsMaxArraySize(nX, nX, ncoef)) {
-      if(sparsegiven || !spatstat.options("developer"))
+      if(sparsegiven)
         stop("Array dimensions too large", call.=FALSE)
       warning("Switching to sparse array code", call.=FALSE)
       sparseOK <- TRUE

@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.73 $ $Date: 2016/02/11 10:17:12 $
+#   $Revision: 1.74 $ $Date: 2016/04/25 02:34:40 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, marks=NULL, keepempty=FALSE,
@@ -259,7 +259,8 @@ plot.tess <- local({
       do.call.matched(text.default,
                       resolve.defaults(list(x=x0, y = y0),
                                        list(labels=labels),
-                                       labelargs))
+                                       labelargs),
+                      funargs=graphicsPars("text"))
     }
     return(invisible(result))
   }
@@ -516,9 +517,22 @@ as.im.tess <- function(X, W=NULL, ...,
   return(out)
 }
 
-as.function.tess <- function(x, ...) {
+nobjects.tess <- function(x) {
+  switch(x$type,
+         image = length(levels(x$image)),
+         rect = (length(x$xgrid)-1) * (length(x$ygrid)-1),
+         tiled = length(x$tiles))
+}
+  
+as.function.tess <- function(x, ..., values=NULL) {
   V <- x
-  f <- function(x,y) { tileindex(x,y,V) }
+  if(is.null(values)) {
+    f <- function(x,y) { tileindex(x,y,V) }
+  } else {
+    if(length(values) != nobjects(x))
+      stop("Length of 'values' should equal the number of tiles", call.=FALSE)
+    f <- function(x,y) { values[as.integer(tileindex(x,y,V))] }
+  }
   g <- funxy(f, Window(V))
   return(g)
 }

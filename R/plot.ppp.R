@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.84 $	$Date: 2016/02/11 10:17:12 $
+#	$Revision: 1.85 $	$Date: 2016/04/25 02:34:40 $
 #
 #
 #--------------------------------------------------------------------------
@@ -466,6 +466,7 @@ fakemaintitle <- function(bb, main, ...) {
   names(parlist) <- c('cex', 'col', 'font')
   do.call.matched(text.default,
                   resolve.defaults(list(x=x0, y=y0, labels=main),
-                                   parlist,    list(...)))
+                                   parlist,    list(...)),
+                  funargs=graphicsPars("text"))
   return(invisible(NULL))
 }

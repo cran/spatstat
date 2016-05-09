@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.26 $ $Date: 2015/10/21 09:06:57 $
+#  $Revision: 1.27 $ $Date: 2016/04/25 02:34:40 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -133,7 +133,10 @@ graphicsPars <- local({
         "cex.axis", "cex.lab", "cex.main", "cex.sub",
         "col.axis", "col.lab", "col.main", "col.sub",
         "font.axis", "font.lab", "font.main", "font.sub")
-    
+
+    TextDefArgs <- setdiff(names(formals(text.default)), "...")
+    TextArgs <- c(TextDefArgs, "srt", "family", "xpd")
+                        
   TheTable <- 
     list(plot = PlotArgs,
          image = c(
@@ -160,7 +163,8 @@ graphicsPars <- local({
            "xaxs", "yaxs",
            "claim.title.space"),
          lines = c("lwd", "lty", "col", "lend", "ljoin", "lmitre"),
-         symbols = c(PlotArgs, "fg", "bg")
+         symbols = c(PlotArgs, "fg", "bg"),
+         text = TextArgs
          )
 
     TheTable$ppp <- unique(c(TheTable$owin,

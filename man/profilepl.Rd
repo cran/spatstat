@@ -1,6 +1,6 @@
 \name{profilepl}
 \alias{profilepl}
-\title{Profile Maximum Pseudolikelihood or AIC}
+\title{Fit Models by Profile Maximum Pseudolikelihood or AIC}
 \description{
   Fits point process models by maximising the profile likelihood,
   profile pseudolikelihood, profile composite likelihood or AIC.
@@ -127,7 +127,13 @@ profilepl(s, f, \dots, aic=FALSE, rbord=NULL, verbose = TRUE)
 }
 \value{
   An object of class \code{"profilepl"}. There are methods
-  for \code{\link{plot}} and \code{\link{print}} for this class.
+  for \code{\link[graphics]{plot}},
+  \code{\link[base]{print}},
+  \code{\link[base]{summary}},
+  \code{\link[stats]{simulate}},
+  \code{\link{as.ppm}}
+  and 
+  \code{\link{parameters}} for objects of this class.
 
   The components of the object include
   \item{fit}{Best-fitting model}
@@ -138,20 +144,20 @@ profilepl(s, f, \dots, aic=FALSE, rbord=NULL, verbose = TRUE)
 }
 \examples{
     # one irregular parameter
-    s <- data.frame(r=seq(0.05,0.15, by=0.01))
+    rr <- data.frame(r=seq(0.05,0.15, by=0.01))
     \testonly{
-      s <- data.frame(r=c(0.05,0.1,0.15))
+      rr <- data.frame(r=c(0.05,0.1,0.15))
     }
-    ps <- profilepl(s, Strauss, cells)
+    ps <- profilepl(rr, Strauss, cells)
     ps
     if(interactive()) plot(ps)
 
     # two irregular parameters
-    s <- expand.grid(r=seq(0.05,0.15, by=0.01),sat=1:3)
+    rs <- expand.grid(r=seq(0.05,0.15, by=0.01),sat=1:3)
     \testonly{
-      s <- expand.grid(r=c(0.07,0.12),sat=1:2)
+      rs <- expand.grid(r=c(0.07,0.12),sat=1:2)
     }
-    pg <- profilepl(s, Geyer, cells)
+    pg <- profilepl(rs, Geyer, cells)
     pg
     if(interactive()) {
       plot(pg)
@@ -160,16 +166,17 @@ profilepl(s, f, \dots, aic=FALSE, rbord=NULL, verbose = TRUE)
 
     # multitype pattern with a common interaction radius
     \dontrun{
-     s <- data.frame(R=seq(0.03,0.05,by=0.01))
+     RR <- data.frame(R=seq(0.03,0.05,by=0.01))
      MS <- function(R) { MultiStrauss(radii=diag(c(R,R))) }
-     pm <- profilepl(s, MS, amacrine, ~marks)
+     pm <- profilepl(RR, MS, amacrine ~marks)
     }
+    ## more information 
+    summary(pg)
 }
-\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
-  
-  
-  and Rolf Turner \email{r.turner@auckland.ac.nz}
-  
+\author{
+  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
+ Rolf Turner \email{r.turner@auckland.ac.nz}
+ and Ege Rubak \email{rubak@math.aau.dk}
 }
 \keyword{spatial}
 \keyword{models}

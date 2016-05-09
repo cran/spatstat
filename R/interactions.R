@@ -3,7 +3,7 @@
 #
 # Works out which interaction is in force for a given point pattern
 #
-#  $Revision: 1.23 $  $Date: 2016/02/16 01:39:12 $
+#  $Revision: 1.25 $  $Date: 2016/04/25 02:34:40 $
 #
 #
 impliedpresence <- function(tags, formula, df, extranames=character(0)) {
@@ -75,6 +75,7 @@ active.interactions <- function(object) {
   datanames <- names(dat)
   dfnames <- summary(dat)$dfnames
   nondfnames <- datanames[!(datanames %in% dfnames)]
+  nondfnames <- union(nondfnames, c("x", "y"))
   
   # extract data-frame values
   dfdata <- as.data.frame(dat[, dfnames, drop=FALSE], warn=FALSE)
@@ -161,13 +162,16 @@ impliedcoefficients <- function(object, tag) {
   
   # (3) for each vname in turn,
   # set the value of the vname to 1 and predict again
-  for(j in seq(vnames)) {
-    df[[vnames[j] ]] <- 1
+  for(j in seq_along(vnames)) {
+    vnj <- vnames[j]
+    df[[vnj]] <- 1
     opt <- options(warn= -1)
 #    etaj <- predict(fitobj, newdata=df, type="link")
     etaj <- GLMpredict(fitobj, data=df, coefs=Coefs, changecoef=TRUE, type="link")
     options(opt)
     answer[ ,j] <- etaj - eta0
+    # set the value of this vname back to 0
+    df[[vnj]] <- 0
   }
   return(answer)
 }

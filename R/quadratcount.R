@@ -1,7 +1,7 @@
 #
 #  quadratcount.R
 #
-#  $Revision: 1.54 $  $Date: 2016/02/16 01:39:12 $
+#  $Revision: 1.55 $  $Date: 2016/04/25 02:34:40 $
 #
 
 quadratcount <- function(X, ...) {
@@ -101,7 +101,8 @@ plot.quadratcount <- function(x, ...,
                     resolve.defaults(list(x=x0 + dx * ra, y = y0 + dy * ra),
                                      list(labels=labels),
                                      textargs, 
-                                     list(...)))
+                                     list(...)),
+                    funargs=graphicsPars("text"))
   }
   return(invisible(NULL))
 }

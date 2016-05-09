@@ -220,7 +220,8 @@
   }
 }
 \value{
-  An object of class \code{"fv"}, see \code{\link{fv.object}},
+  An object of class \code{"envelope"}
+  and \code{"fv"}, see \code{\link{fv.object}},
   which can be printed and plotted directly.
 
   Essentially a data frame containing columns
@@ -427,7 +428,7 @@
   for the simulated patterns.
   This option is only needed in rare cases: usually the basic principle
   requires that the data and simulated patterns must be treated
-  equally, so that \code{funargs} and \code{funYargs} be identical.
+  equally, so that \code{funargs} and \code{funYargs} should be identical.
 
   If \code{Y} is a fitted cluster point process model (object of
   class \code{"kppm"}), and \code{simulate=NULL},
@@ -607,6 +608,7 @@
   \code{\link{envelope.envelope}},
   \code{\link{pool.envelope}}
   for handling envelopes.
+  There are also methods for \code{print} and \code{summary}.
   
   \code{\link{Kest}},
   \code{\link{Gest}},
@@ -644,6 +646,8 @@
  \testonly{
   E <- envelope(X, Lest, nsim=3, global=TRUE)
   E <- envelope(X, Kest, nsim=3, global=TRUE, scale=function(r) { r })
+  E
+  summary(E)
  }
 
  # Envelope of K function for simulations from Gibbs model 

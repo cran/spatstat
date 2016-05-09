@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.95 $	$Date: 2016/02/23 02:27:03 $
+#	$Revision: 1.98 $	$Date: 2016/03/27 07:17:21 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -53,9 +53,9 @@ predict.ppm <- local({
     out
   }
 
-  typeaccept <- c("trend", "cif", "lambda", "intensity", "count", "se", "SE")
-  typeuse    <- c("trend", "cif", "cif",    "intensity", "count", "se", "se")
   typepublic <- c("trend", "cif", "intensity", "count")
+  typeaccept <- c(typepublic, "lambda", "se", "SE", "covariates")
+  typeuse    <- c(typepublic, "cif",    "se", "se", "covariates")
   
   predict.ppm <- function(object, window=NULL, ngrid=NULL, locations=NULL,
                           covariates=NULL,
@@ -399,12 +399,17 @@ predict.ppm <- local({
 
     if(!trivial) {
       Vnames <- model$internal$Vnames
+      vnameprefix <- model$internal$vnameprefix
       glmdata <- getglmdata(model)
       glmfit <- getglmfit(model)
       if(object$method=="logi")
         newdata$.logi.B <- rep(glmdata$.logi.B[1], nrow(newdata))
     }
-  
+
+    ## Undocumented secret exit
+    if(type == "covariates")
+      return(list(newdata=newdata, mask=if(want.image) masque else NULL))
+             
     ## ##########  COMPUTE PREDICTION ##############################
     ##
     ##   Compute the predicted value z[i] for each row of 'newdata'
@@ -509,7 +514,7 @@ predict.ppm <- local({
         ## Assign values to a column of the same name in newdata
         newdata[[Vnames]] <- as.vector(Vnew)
       ##
-      } else if(is.null(dimnames(Vnew)[[2]])) {
+      } else if(is.null(avail <- colnames(Vnew))) {
         ## Potential is vector-valued (Vnew is a matrix)
         ## with unnamed components.
         ## Assign the components, in order of their appearance,
@@ -521,9 +526,20 @@ predict.ppm <- local({
         ## Potential is vector-valued (Vnew is a matrix)
         ## with named components.
         ## Match variables by name
-        for(vn in Vnames)    
-          newdata[[vn]] <- Vnew[,vn]
-        ##
+        if(all(Vnames %in% avail)) {
+          for(vn in Vnames)
+            newdata[[ vn ]] <- Vnew[ , vn]
+        } else if(all(Vnames %in% (Pavail <- paste0(vnameprefix, avail)))) {
+          for(vn in Vnames)
+            newdata[[ vn ]] <- Vnew[ , match(vn, Pavail)]
+        } else
+          stop(paste(
+            "Internal error: unable to match names",
+            "of available interaction terms",
+            commasep(sQuote(avail)),
+            "to required interaction terms",
+            commasep(sQuote(Vnames))
+            ), call.=FALSE)
       }
       ## invoke predict.glm or compute prediction
       z <- GLMpredict(glmfit, newdata, coeffs, 

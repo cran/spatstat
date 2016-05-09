@@ -3,7 +3,7 @@
 ## and Fisher information matrix
 ## for ppm objects
 ##
-##  $Revision: 1.123 $  $Date: 2016/03/06 05:01:18 $
+##  $Revision: 1.126 $  $Date: 2016/03/28 02:56:20 $
 ##
 
 vcov.ppm <- local({
@@ -49,7 +49,7 @@ vcov.ppm <- function(object, ..., what="vcov", verbose=TRUE,
   }
   
   ## nonstandard calculations (hack) 
-  generic.triggers <- c("A1", "new.coef", "matwt", "saveterms")
+  generic.triggers <- c("A1", "new.coef", "matwt", "saveterms", "sparseOK")
   nonstandard <- any(generic.triggers %in% names(argh)) || fine
 #  saveterms <- identical(resolve.1.default("saveterms", argh), TRUE)
   
@@ -282,7 +282,7 @@ vcalcGibbs <- function(fit, ...,
   
   ## decide whether to use the generic algorithm
   generic.triggers <- c("A1", "hessian",
-                        "new.coef", "matwt", "saveterms")
+                        "new.coef", "matwt", "saveterms", "sparseOK")
   
   use.generic <-
     generic || fine ||
@@ -353,7 +353,8 @@ vcalcGibbsGeneral <- function(model,
                          hessian = FALSE,
                          matwt = NULL, new.coef = NULL, dropcoef=FALSE,
                          saveterms = FALSE,
-                         parallel = TRUE
+                         parallel = TRUE,
+                         sparseOK = FALSE
                          ) {
   matrix.action <- match.arg(matrix.action)
   logi.action <- match.arg(logi.action)
@@ -374,6 +375,7 @@ vcalcGibbsGeneral <- function(model,
   }
   pnames <- names(old.coef)
   dnames <- list(pnames, pnames)
+  # (may be revised later)
   
   internals <- list()
   ##
@@ -407,6 +409,17 @@ vcalcGibbsGeneral <- function(model,
   ## sufficient statistic h(X[i] | X) = h(X[i] | X[-i])
   ## data and dummy:
   mall <- model.matrix(model)
+  ## check dimension of canonical statistic 
+  if(ncol(mall) != length(pnames)) {
+    if(!dropcoef)
+      stop(paste("Internal error: dimension of sufficient statistic = ",
+                 ncol(mall), "does not match length of coefficient vector =",
+                 length(pnames)),
+           call.=FALSE)
+    p <- length(pnames)
+    pnames <- colnames(mall)
+    dnames <- list(pnames, pnames)
+  }
   ## save
   if(saveterms) 
     internals <- append(internals,
@@ -476,9 +489,8 @@ vcalcGibbsGeneral <- function(model,
     if(parallel) {
       ## compute second order difference
       ##  ddS[i,j,] = h(X[i] | X) - h(X[i] | X[-j])
-      sparse <- spatstat.options('developer')
-      ddS <- deltasuffstat(model, restrict=TRUE, force=FALSE, sparseOK=sparse)
-      sparse <- sparse && inherits(ddS, "sparse3Darray")
+      ddS <- deltasuffstat(model, restrict=TRUE, force=FALSE, sparseOK=sparseOK)
+      sparse <- inherits(ddS, "sparse3Darray")
       if(is.null(ddS)) {
         if(asked.parallel)
           warning("parallel option not available - reverting to loop")

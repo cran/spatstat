@@ -2,7 +2,7 @@
 #	wingeom.S	Various geometrical computations in windows
 #
 #
-#	$Revision: 4.111 $	$Date: 2016/03/03 00:20:56 $
+#	$Revision: 4.113 $	$Date: 2016/04/25 02:34:40 $
 #
 #
 #
@@ -625,9 +625,8 @@ trim.mask <- function(M, R, tolerant=TRUE) {
     }
 
     ## Extract subset of image grid
-    within.range <- function(u, v) { (u >= v[1]) & (u <= v[2]) }
-    yrowok <- within.range(M$yrow, R$yrange)
-    xcolok <- within.range(M$xcol, R$xrange)
+    yrowok <- inside.range(M$yrow, R$yrange)
+    xcolok <- inside.range(M$xcol, R$xrange)
     if((ny <- sum(yrowok)) == 0 || (nx <- sum(xcolok)) == 0) 
       return(emptywindow(R))
     Z <- M
@@ -968,9 +967,11 @@ discs <- function(centres, radii=marks(centres)/2, ...,
   stopifnot(is.ppp(centres))
   n <- npoints(centres)
   if(n == 0) return(emptywindow(Frame(centres)))
-  check.nvector(radii, npoints(centres))
+  check.nvector(radii, npoints(centres), oneok=TRUE)
   stopifnot(all(radii > 0))
   if(is.null(delta)) delta <- 2 * pi * min(radii)/16
+  if(length(radii) == 1)
+    radii <- rep(radii, npoints(centres))
   if(separate) {
     D <- list()
     W <- disc(centre=centres[1], radius=radii[1], delta=delta)

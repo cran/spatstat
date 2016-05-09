@@ -1,7 +1,7 @@
 #
 # anova.mppm.R
 #
-# $Revision: 1.8 $ $Date: 2016/02/22 04:20:20 $
+# $Revision: 1.9 $ $Date: 2016/04/25 02:34:40 $
 #
 
 anova.mppm <- local({
@@ -17,7 +17,8 @@ anova.mppm <- local({
   fmlaString <- function(z) { paste(as.expression(formula(z))) }
 ##  interString <- function(z) { as.interact(z)$creator }
   
-  anova.mppm <- function(object, ..., test=NULL, adjust=TRUE, warn=TRUE) {
+  anova.mppm <- function(object, ..., test=NULL, adjust=TRUE,
+                         fine=FALSE, warn=TRUE) {
     gripe <- if(warn) do.gripe else dont.gripe
     argh <- list(...)
 
@@ -192,7 +193,7 @@ anova.mppm <- local({
             } else {
               thetaDot <- 0 * coef(bigger)
               thetaDot[injection] <- coef(smaller)
-              JH <- vcov(bigger, what="all", new.coef=thetaDot)
+              JH <- vcov(bigger, what="all", new.coef=thetaDot, fine=fine)
 #              J   <- if(!logi) JH$Sigma else (JH$Sigma1log+JH$Sigma2log)
 #              H   <- if(!logi) JH$A1 else JH$Slog
               J <- JH$fisher

@@ -1,4 +1,203 @@
 
+        CHANGES IN spatstat VERSION 1.45-2
+
+OVERVIEW
+
+    o We thank Ottmar Cronie, Virginia Morera Pujol,
+    Sven Wagner and Marie-Colette van Lieshout for contributions.
+
+    o Recursive-partition point process models.
+
+    o Minkowski sum, morphological dilation and erosion with any shape.
+
+    o Important bug fix in spatial CDF tests.
+
+    o More bug fixes for replicated patterns.
+
+    o Simulate a model fitted to replicated point patterns.
+
+    o Inhomogeneous multitype F and G functions.
+
+    o Summary functions recognise correction="all"
+
+    o Leverage and influence code handles bigger datasets.
+
+    o More support for pixel images.
+
+    o Improved progress reports.
+
+    o New dataset 'redwood3'
+
+    o spatstat now Depends on the package 'rpart'
+
+    o Version nickname: 'Caretaker Mode'
+
+NEW DATASETS
+
+    o redwood3
+    A more accurate version of the 'redwood' data.
+
+NEW FUNCTIONS
+
+    o as.im.data.frame
+    Build a pixel image from a data frame of coordinates and pixel values.
+
+    o covering
+    Cover a window using discs of a given radius.
+
+    o dilationAny, erosionAny, %(-)%
+    Morphological dilation and erosion by any shape.
+
+    o FmultiInhom, GmultiInhom
+    Inhomogeneous multitype/marked versions of the summary functions Fest, Gest.
+
+    o kernel.moment
+    Moment or incomplete moment of smoothing kernel.
+
+    o MinkowskiSum, %(+)%
+    Minkowski sum of two windows: A %(+)% B, or MinkowskiSum(A,B)
+
+    o nobjects
+    New generic function for counting the number of 'things' in a dataset.
+    There are methods for ppp, ppx, psp, tess.
+
+    o parameters.interact, parameters.fii
+    Extract parameters from interpoint interactions.
+    [These existing functions are now documented.]
+
+    o ppmInfluence
+    Calculate leverage.ppm, influence.ppm and dfbetas.ppm efficiently.
+
+    o rppm, plot.rppm, predict.rppm, prune.rppm
+    Recursive-partition point process models
+
+    o simulate.mppm
+    Simulate a point process model fitted to replicated point patterns.
+
+    o update.interact
+    Update the parameters of an interpoint interaction.
+    [This existing function is now documented.]
+
+    o where.max, where.min
+    Find the spatial location(s) where a pixel image achieves its
+    maximum or minimum value.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o cdf.test.mppm
+    Now handles Gibbs models.
+    Now recognises covariate="x" or "y".
+
+    o leverage.ppm, influence.ppm, dfbetas.ppm
+    For Gibbs models, memory usage has been dramatically reduced, 
+    so the code can handle larger datasets and finer quadrature schemes.
+
+    o plot.im
+    Now handles complex-valued images.
+
+    o connected.im
+    Now handles a logical-valued image properly.
+
+    o qqplot.ppm
+    Argument 'expr' can now be a list of point patterns,
+    or an envelope object containing a list of point patterns.
+
+    o as.layered
+    Default method now handles a (vanilla) list of spatial objects.
+
+    o summary functions
+    The argument 'correction="all"' is now recognised: it selects
+    all the available options. 
+        This applies to Fest, F3est, Gest, Gcross, Gdot, Gmulti, G3est, Gfox,
+    	Gcom, Gres, Hest, Jest, Jmulti, Jcross, Jdot, Jfox,
+	Kest, Kinhom, Kmulti, Kcross, Kdot, Kcom, Kres, 
+	Kmulti.inhom, Kcross.inhom, Kdot.inhom, Kscaled, Ksector, Kmark, 
+	K3est, Lscaled, markcorr, markcrosscorr,
+	nnorient, pairorient, pcfinhom, pcfcross.inhom, pcfcross, pcf, Tstat.
+
+    o clarkevans
+    The argument 'correction="all"' is now recognised: it selects
+    all the available options. [This is also the default.]
+
+    o predict.mppm
+    The argument 'type="all"' is now recognised: it selects
+    all the available options. [This is also the default.]
+
+    o plot.kppm
+    The argument 'what="all"' is now recognised: it selects
+    all the available options. [This is also the default.]
+
+    o connected.im, connected.owin
+    Arguments '...' now determine pixel resolution.
+
+    o anova.mppm
+    New argument 'fine'
+
+    o as.owin.data.frame
+    New argument 'step'
+
+    o discs
+    Now accepts a single numeric value for 'radii'.
+
+    o plot.ppp, plot.profilepl, plot.quadratcount, plot.quadrattest, plot.tess
+    Now recognise graphics parameters for text, such as 'family' and 'srt'
+
+    o as.function.tess
+    New argument 'values' specifies the function values.
+
+    o cdf.test
+    Calculations are more robust against numerical rounding effects.
+
+    o progressreport
+    Behaviour improved. New arguments 'tick', 'showtime'.
+
+    o simulate.ppm
+    New argument 'verbose'
+
+    o compileK, compilepcf
+    These internal functions are now documented.
+
+BUG FIXES
+
+    o cdf.test.ppm
+    Calculation of p-values was incorrect for Gibbs models: 
+    1-p was computed instead of p.
+    [Spotted by Sven Wagner.]
+    Fixed.
+
+    o subfits
+    The interaction coefficients of the submodels were incorrect
+    for Gibbs models with a multitype interaction (MultiStrauss, etc).
+    [Spotted by Sven Wagner.]
+    Fixed.
+
+    o subfits
+    Crashed when a Gibbs model included factor-valued spatial covariates
+    and not all levels of the factor were present in each row of the data.
+    [Spotted by Sven Wagner.]
+    Fixed.
+
+    o subfits
+    For Gibbs models with a multitype interaction (MultiStrauss, etc),
+    computation of the conditional intensity caused an error.
+    [Spotted by Sven Wagner.]
+    Fixed.
+
+    o diagnose.ppm
+    Crashed if what="smooth", when the original window was a rectangle.
+    [Spotted by Virginia Morera Pujol.]
+    Fixed.
+
+    o mppm
+    The x and y coordinates were not permitted in the 
+    random-effects formula 'random'.
+    [Spotted by Sven Wagner.]
+    Fixed.
+
+    o vcov.ppm
+    The result had no 'dimnames', if the model was fitted using method="ho".
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.45-0
 
 OVERVIEW

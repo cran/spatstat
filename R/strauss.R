@@ -2,7 +2,7 @@
 #
 #    strauss.R
 #
-#    $Revision: 2.35 $	$Date: 2016/02/22 09:40:11 $
+#    $Revision: 2.36 $	$Date: 2016/04/25 02:34:40 $
 #
 #    The Strauss process
 #
@@ -98,7 +98,7 @@ Strauss <- local({
          cl <- closepairs(X, r, what="indices")
          v <- sparseMatrix(i=cl$i, j=cl$j, x=1,
                            dims=c(nX, nX))
-         if(!sparseOK || !spatstat.options('developer'))
+         if(!sparseOK)
            v <- as.matrix(v)
          return(v)
        }

@@ -4,7 +4,7 @@
 ##   Simple objects for the elements of a diagram (text, arrows etc)
 ##    that are compatible with plot.layered and plot.solist
 ##
-##   $Revision: 1.11 $ $Date: 2015/10/21 09:06:57 $
+##   $Revision: 1.12 $ $Date: 2016/04/25 02:34:40 $
 
 # ......... internal class 'diagramobj' supports other classes  .........
 
@@ -68,7 +68,7 @@ plot.textstring <- function(x, ..., do.plot=TRUE) {
                               resolve.defaults(list(...),
                                                list(x=x$x, y=x$y, labels=txt),
                                                otha),
-                              extrargs=c("srt", "family", "xpd"))
+                              funargs=graphicsPars("text"))
   return(invisible(Frame(x)))
 }
 
@@ -189,7 +189,7 @@ plot.yardstick <- local({
                                        list(labels=txt, pos=pos),
                                        argh,
                                        .MatchNull=FALSE),
-                      extrargs=c("srt", "family", "xpd"))
+                      funargs=graphicsPars("text"))
     }
     return(invisible(Window(x)))
   }
@@ -315,7 +315,7 @@ plot.onearrow <- function(x, ...,
                         list(x=H[1], y=H[2]),
                         argh,
                         list(labels=txt, pos=3 + (V[2] != 0))),
-                      extrargs=c("srt", "family", "xpd"))
+                      funargs=graphicsPars("text"))
     }
   }
   return(invisible(result))

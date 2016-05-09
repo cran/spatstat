@@ -1,7 +1,7 @@
 #
 # mppm.R
 #
-#  $Revision: 1.74 $   $Date: 2016/02/11 05:07:22 $
+#  $Revision: 1.78 $   $Date: 2016/04/24 07:16:59 $
 #
 
 mppm <- local({
@@ -110,7 +110,7 @@ mppm <- local({
         stop(paste("The random effects formula",
                    sQuote("random"),
                    "should not have a left hand side"))
-      checkvars(random, itags, extra=c(data.sumry$col.names, "id"),
+      checkvars(random, itags, extra=c(data.sumry$col.names, "x", "y", "id"),
                 bname="either data or interaction")
       allvars <- c(allvars, variablesinformula(random))
     }
@@ -627,3 +627,31 @@ terms.mppm <- function(x, ...) { terms(formula(x)) }
 
 nobs.mppm <- function(object, ...) { sum(sapply(data.mppm(object), npoints)) }
 
+simulate.mppm <- function(object, nsim=1, ..., verbose=TRUE) {
+  subs <- subfits(object)
+  nr <- length(subs)
+  sims <- list()
+  if(verbose) {
+    splat("Generating simulated realisations of", nr, "models..")
+    state <- list()
+  }
+  for(irow in seq_len(nr)) {
+    sims[[irow]] <- do.call(simulate,
+                            resolve.defaults(list(object=subs[[irow]],
+                                                  nsim=nsim, drop=FALSE),
+                                             list(...),
+                                             list(progress=FALSE)))
+    if(verbose) progressreport(irow, nr)
+  }
+  sim1list <- lapply(sims, "[[", i=1)
+  h <- hyperframe("Sim1"=sim1list)
+  if(nsim > 1) {
+    for(j in 2:nsim) {
+      simjlist <- lapply(sims, "[[", i=j)
+      hj <- hyperframe(Sim=simjlist)
+      names(hj) <- paste0("Sim", j)
+      h <- cbind(h, hj)
+    }
+  }
+  return(h)
+}

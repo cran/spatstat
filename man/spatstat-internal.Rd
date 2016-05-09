@@ -91,8 +91,6 @@
 \alias{compatible.rat}
 \alias{complaining}
 \alias{compileCDF}
-\alias{compileK}
-\alias{compilepcf}
 \alias{conform.ratfv}
 \alias{crosspairquad}
 \alias{cobble.xy}
@@ -325,6 +323,7 @@
 \alias{least.common.multiple}
 \alias{levels.im}
 \alias{levels<-.im}
+\alias{levelsAsFactor}
 \alias{lhs.of.formula}
 \alias{linequad}
 \alias{linearKengine}
@@ -346,9 +345,8 @@
 \alias{logLik.vblogit}
 \alias{lty2char}
 \alias{maskLaslett}
+\alias{matchNameOrPosition}
 \alias{padtowidth}
-\alias{parameters.interact}
-\alias{parameters.fii}
 \alias{parbreak}
 \alias{passthrough}
 \alias{paste.expr}
@@ -414,6 +412,7 @@
 \alias{names.hyperframe}
 \alias{names<-.fv}
 \alias{names<-.hyperframe}
+\alias{natozero}
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
 \alias{newformula}
@@ -422,12 +421,7 @@
 \alias{nncleanEngine}
 \alias{nndcumfun}
 \alias{no.trend.ppm}
-\alias{nobjects}
-\alias{nobjects.ppp}
-\alias{nobjects.ppx}
-\alias{nobjects.psp}
 \alias{n.quad}
-\alias{nukernel}
 \alias{numalign}
 \alias{numeric.columns}
 \alias{nzpaste}
@@ -481,7 +475,6 @@
 \alias{ppm.default}
 \alias{ppmCovariates}
 \alias{ppmDerivatives}
-\alias{ppmInfluence}
 \alias{ppmInfluenceEngine}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
@@ -541,6 +534,7 @@
 \alias{print.rmhmodel}
 \alias{print.rmhstart}
 \alias{print.rmhInfoList}
+\alias{print.rppm}
 \alias{print.splitppp}
 \alias{print.simplepanel}
 \alias{print.Smoothfun}       
@@ -744,7 +738,6 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unparen}
-\alias{update.interact}
 \alias{update.im}
 \alias{update.ippm}
 \alias{update.rmhstart}
@@ -835,8 +828,8 @@ apply23sum(x)
 applytolayers(L, FUN, \dots)
 applyPolyclipArgs(x, p)
 Area.xypolygon(polly)
-areadelta2(X, r, \dots)
-areaGain.diri(u, X, r, \dots, W)
+areadelta2(X, r, \dots, sparseOK)
+areaGain.diri(u, X, r, \dots, W, verbose)
 areaGain.grid(u, X, r, \dots, W, ngrid)
 areaLoss.diri(X, r, \dots, W, subset)
 areaLoss.grid(X, r, \dots, W, subset,
@@ -913,8 +906,6 @@ coerce.marks.numeric(X, warn)
 \method{compatible}{rat}(A, B, \dots) 
 complaining(whinge, fatal, value)
 compileCDF(D, B, r, \dots, han.denom, check)
-compileK(D, r, weights, denom, check, ratio, fname)
-compilepcf(D, r, weights, denom, check, endcorrect, \dots, fname)
 conform.ratfv(x)
 crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
@@ -1047,7 +1038,7 @@ f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
 fastFindInterval(x, b, labels, reltol)
 fill.coefs(coefs, required)
-fillseq(x)
+fillseq(x, step)
 findbestlegendpos(\dots)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
@@ -1182,6 +1173,7 @@ kraever(package, fatal)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
+levelsAsFactor(x)
 lhs.of.formula(x)
 linequad(X, Y, \dots, eps, nd)
 linearKengine(X, \dots, r, reweight, denom, correction, showworking)
@@ -1209,9 +1201,8 @@ logi.engine(Q, trend, interaction, \dots,
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
+matchNameOrPosition(expected, avail)
 padtowidth(a, b, justify)
-\method{parameters}{interact}(model, \dots)
-\method{parameters}{fii}(model, \dots)
 parbreak(terse)
 passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
@@ -1291,6 +1282,7 @@ na.handle.im(X, na.replace)
 \method{names}{fv}(x) <- value
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
+natozero(x)
 nearest.pixel(x, y, im)
 nearest.valid.pixel(x, y, im)
 newformula(old, change, eold, enew)
@@ -1300,12 +1292,7 @@ nncleanEngine(kthNND, k, d, \dots, tol, maxit,
               plothist, lineargs, verbose, Xname)
 nndcumfun(X, \dots, r)
 no.trend.ppm(x)
-nobjects(x)
-\method{nobjects}{ppp}(x)
-\method{nobjects}{ppx}(x)
-\method{nobjects}{psp}(x)
 n.quad(Q)
-nukernel(r, m, kernel)
 numalign(i, nmax, zero)
 numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
@@ -1343,7 +1330,8 @@ pcfmulti.inhom(X, I, J, lambdaI = NULL, lambdaJ = NULL, \dots,
                Iname = "points satisfying condition I",
                Jname = "points satisfying condition J")
 pickoption(what="option", key, keymap, \dots,
-           exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE)
+           exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE,
+           allow.all=TRUE)
 plotEachLayer(x, \dots, main, plotargs, add, show.all, do.plot)
 ploterodewin(W1, W2, col.edge, col.inside, do.plot, \dots)
 ploterodeimage(W, Z, \dots, Wcol, rangeZ, colsZ, do.plot)
@@ -1386,12 +1374,8 @@ ppllengine(X, Y, action="project", check=FALSE)
        verb, callstring)
 ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
-ppmInfluence(fit, what, \dots, iScore, iHessian, iArgs,
-              drop, method, precomputed, sparseOK)
-ppmInfluenceEngine(fit, what, iScore, iHessian, iArgs,
-           drop, method, sparse,
-           vc, fush, hess,
-           Q, theta, lam, mom) 
+ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
+              drop, method, precomputed, sparseOK, fitname)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
@@ -1451,6 +1435,7 @@ primesbelow(nmax)
 \method{print}{rmhmodel}(x, \dots)
 \method{print}{rmhstart}(x, \dots)
 \method{print}{rmhInfoList}(x, \dots)
+\method{print}{rppm}(x, \dots)
 \method{print}{simplepanel}(x, \dots)
 \method{print}{Smoothfun}(x, \dots)
 \method{print}{solist}(x, \dots)
@@ -1581,7 +1566,7 @@ runifpoispp(lambda, win, \dots, nsim, drop)
 runifpoisppOnLines(lambda, L, nsim)
 runifrect(n, win, nsim, drop)
 safedeldir(X)
-safelookup(Z, X, factor, warn)
+safelookup(Z, x, factor, warn)
 samefunction(f, g)
 \method{scalardilate}{breakpts}(X, f, \dots)
 \method{scalardilate}{diagramobj}(X, f, \dots)
@@ -1679,7 +1664,6 @@ tweak.coefs(model, new.coef)
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unparen(x)
-\method{update}{interact}(object, \dots) 
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
 \method{update}{rmhstart}(object, \dots)

@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.30 $  $Date: 2015/07/11 08:19:26 $
+#  $Revision: 1.31 $  $Date: 2016/04/25 02:34:40 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -82,7 +82,7 @@ areaLoss.diri <- function(X, r, ..., W=as.owin(X), subset=NULL) {
   return(out)
 }
 
-areaGain.diri <- function(u, X, r, ..., W=as.owin(X)) {
+areaGain.diri <- function(u, X, r, ..., W=as.owin(X), verbose=FALSE) {
   stopifnot(is.ppp(X))
   Y <- as.ppp(u, W=W)
   nX <- X$n
@@ -97,14 +97,17 @@ areaGain.diri <- function(u, X, r, ..., W=as.owin(X)) {
     return(matrix(, nrow=0, ncol=nr))
   if(nX == 0)
     return(matrix(pi * r^2, nrow=nY, ncol=nr, byrow=TRUE))
-  cat(paste("areaGain,", nY, "points,", nr, "r values\n"))
+  if(verbose)
+    splat("areaGain,",
+          nY, ngettext(nY, "point,", "points,"),
+          nr, ngettext(nr, "rvalue", "r values"))
   out <- matrix(0, nrow=nY, ncol=nr)
   pir2 <- pi * r^2
   wbox <- as.rectangle(as.owin(X))
   #
   state <- list()
   for(i in 1:nY) {
-    state <- progressreport(i, nY, state=state)
+    if(verbose) state <- progressreport(i, nY, state=state)
     V <- superimpose(Y[i], X, W=wbox, check=FALSE)
     # Dirichlet neighbour relation for V
     dd <- deldir(V$x, V$y, rw=c(wbox$xrange, wbox$yrange))

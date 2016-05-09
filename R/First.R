@@ -1,6 +1,6 @@
 #  First.R
 #
-#  $Revision: 1.44 $ $Date: 2015/08/25 08:14:27 $
+#  $Revision: 1.45 $ $Date: 2016/04/25 02:34:40 $
 #
 
 .onLoad <- function(...) reset.spatstat.options()
@@ -14,7 +14,7 @@
                "     ",
                paren(paste("nickname:", sQuote(ni))),
                "\nFor an introduction to spatstat, type",
-               sQuote("beginner"))
+               sQuote("beginner"), "\n")
   packageStartupMessage(msg)
   if(exists("getRversion") && getRversion() >= "3.2.2") {
     ## check versions
