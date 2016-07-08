@@ -187,7 +187,7 @@ local({
 #
 #  Test behaviour of density methods and inhomogeneous summary functions
 #
-#  $Revision: 1.5 $  $Date: 2016/03/04 03:09:00 $
+#  $Revision: 1.6 $  $Date: 2016/07/06 03:42:14 $
 #
 
 require(spatstat)
@@ -209,6 +209,23 @@ local({
   tryit(0.05, weights=data.frame(a=1:42,b=42:1))
   tryit(0.05, weights=expression(x))
 
+  ## compare results with different algorithms
+  opa <- spatstat.options(densityC=FALSE, densityTransform=FALSE)
+  val.interpreted <- density(redwood, at="points", sigma=0.13, edge=FALSE)
+  spatstat.options(densityC=TRUE, densityTransform=FALSE)
+  val.C <- density(redwood, at="points", sigma=0.13, edge=FALSE)
+  spatstat.options(densityC=TRUE, densityTransform=TRUE)
+  val.Transform <- density(redwood, at="points", sigma=0.13, edge=FALSE)
+  spatstat.options(opa)
+
+  if(max(abs(val.interpreted - val.C)) > 0.001)
+    stop(paste("Numerical discrepancy between R and C algorithms",
+               "in density.ppp(at=points)"))
+  if(max(abs(val.C - val.Transform)) > 0.001)
+    stop(paste("Numerical discrepancy between C algorithms",
+               "using transformed and untransformed coordinates",
+               "in density.ppp(at=points)"))
+  
   lam <- density(redwood)
   K <- Kinhom(redwood, lam)
   
@@ -236,9 +253,30 @@ local({
 
   ## Smooth.ppp
   Z <- Smooth(longleaf, 5, diggle=TRUE)
-  Z <- Smooth(unmark(longleaf) %mark% 1, 5)
-
   Z <- Smooth(longleaf, 1e-6) # generates warning about small bandwidth
+
+  ## Smooth.ppp(at='points')
+  X <- longleaf %mark% 42
+  Y <- longleaf %mark% runif(npoints(longleaf), min=41, max=43)
+
+  ZX <- Smooth(X, 5, at="points", leaveoneout=TRUE)
+  ZY <- Smooth(Y, 5, at="points", leaveoneout=TRUE)
+  rZY <- range(ZY)
+  if(rZY[1] < 40 || rZY[2] > 44)
+    stop("Implausible results from Smooth.ppp(at=points, leaveoneout=TRUE)")
+
+  ZX <- Smooth(X, 5, at="points", leaveoneout=FALSE)
+  ZY <- Smooth(Y, 5, at="points", leaveoneout=FALSE)
+  rZY <- range(ZY)
+  if(rZY[1] < 40 || rZY[2] > 44)
+    stop("Implausible results from Smooth.ppp(at=points, leaveoneout=FALSE)")
+  
+  ## drop-dimension coding errors
+  X <- longleaf
+  marks(X) <- cbind(marks(X), 1)
+  Z <- Smooth(X, 5)
+
+  ZZ <- bw.smoothppp(finpines, hmin=0.01, hmax=0.012, nh=2) # reshaping problem
 })
 #'
 #'  tests/discarea.R
@@ -466,6 +504,41 @@ local({
   ff(y ~ poly(x,2) + poly(z,3), "x", y ~poly(z,3))
 
 })
+
+
+
+#
+#  tests/func.R
+#
+#   $Revision: 1.3 $   $Date: 2016/06/10 15:04:08 $
+#
+#  Tests of 'funxy' infrastructure etc
+
+require(spatstat)
+local({
+  W <- square(1)
+  f1a <- function(x, y) sqrt(x^2 + y^2)
+  f1b <- function(x, y) { sqrt(x^2 + y^2) }
+  f2a <- function(x, y) sin(x)
+  f2b <- function(x, y) { sin(x) } 
+  f3a <- function(x, y) sin(x) + cos(x) 
+  f3b <- function(x, y) { sin(x) + cos(x) } 
+  f4a <- function(x, y) { z <- x + y ; z }
+  f4b <- function(x, y) { x + y } 
+  F1a <- funxy(f1a, W)
+  F1b <- funxy(f1b, W)
+  F2a <- funxy(f2a, W)
+  F2b <- funxy(f2b, W)
+  F3a <- funxy(f3a, W)
+  F3b <- funxy(f3b, W)
+  F4a <- funxy(f4a, W)
+  F4b <- funxy(f4b, W)
+  stopifnot(identical(F1a(cells), F1b(cells)))
+  stopifnot(identical(F2a(cells), F2b(cells)))
+  stopifnot(identical(F3a(cells), F3b(cells)))
+  stopifnot(identical(F4a(cells), F4b(cells)))
+})
+
 
 
 
@@ -748,34 +821,38 @@ local({
 #'
 #'   leverage and influence for Gibbs models
 #' 
-#'   $Revision: 1.4 $ $Date: 2016/03/14 07:15:33 $
+#'   $Revision: 1.5 $ $Date: 2016/07/06 08:29:49 $
 #' 
 
 require(spatstat)
 local({
+  # original non-sparse algorithm
+  Leverage <- function(...) leverage(..., sparseOK=FALSE)
+  Influence <- function(...) influence(..., sparseOK=FALSE)
+  Dfbetas <- function(...) dfbetas(..., sparseOK=FALSE)
   # Strauss()$delta2
   fitS <- ppm(cells ~ x, Strauss(0.12), rbord=0)
-  levS <- leverage(fitS)
-  infS <- influence(fitS)
-  dfbS <- dfbetas(fitS)
+  levS <- Leverage(fitS)
+  infS <- Influence(fitS)
+  dfbS <- Dfbetas(fitS)
   # Geyer()$delta2
   fitG <- ppm(redwood ~ 1, Geyer(0.1, 2), rbord=0)
-  levG <- leverage(fitG)
-  infG <- influence(fitG)
+  levG <- Leverage(fitG)
+  infG <- Influence(fitG)
   # pairwise.family$delta2
   fitD <- ppm(cells ~ 1, DiggleGatesStibbard(0.12), rbord=0)
-  levD <- leverage(fitD)
-  infD <- influence(fitD)
+  levD <- Leverage(fitD)
+  infD <- Influence(fitD)
   # ppmInfluence; offset is present; coefficient vector has length 1
   fitH <- ppm(cells ~ x, Hardcore(0.07), rbord=0)
-  levH <- leverage(fitH)
-  infH <- influence(fitH)
+  levH <- Leverage(fitH)
+  infH <- Influence(fitH)
 
   ## divide and recombine algorithm
   op <- spatstat.options(maxmatrix=50000)
-  levSB <- leverage(fitS)
-  infSB <- influence(fitS)
-  dfbSB <- dfbetas(fitS)
+  levSB <- Leverage(fitS)
+  infSB <- Influence(fitS)
+  dfbSB <- Dfbetas(fitS)
 
   chk <- function(x, y, what,
                   from="single-block and multi-block",
@@ -996,7 +1073,7 @@ local({
 #
 # Basic tests of mppm
 #
-# $Revision: 1.7 $ $Date: 2016/02/15 14:30:18 $
+# $Revision: 1.8 $ $Date: 2016/06/28 04:19:08 $
 # 
 
 require(spatstat)
@@ -1078,6 +1155,9 @@ local({
   s9 <- subfits(fit9)
   p9 <- lapply(s9, predict)
   c9 <- lapply(s9, predict, type="cif")
+
+  # and a simple error in recognising 'marks'
+  fit10 <- mppm(X ~ marks, H)
 })
 
 local({

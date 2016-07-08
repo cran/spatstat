@@ -3,7 +3,7 @@
 #
 #  Smooth the marks of a point pattern
 # 
-#  $Revision: 1.26 $  $Date: 2016/02/11 10:17:12 $
+#  $Revision: 1.29 $  $Date: 2016/06/27 09:21:45 $
 #
 
 smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
@@ -176,11 +176,14 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
       switch(at,
              points={
                if(is.null(uhoh)) {
-                 ## numerators is a matrix
+                 ## numerators is a matrix (or may have dropped to vector)
+                 if(!is.matrix(numerators))
+                   numerators <- matrix(numerators, ncol=1)
                  ratio <- numerators/denominator
                  if(any(badpoints <- apply(!is.finite(ratio), 1, any))) {
                    whichnnX <- nnwhich(X)
-                   ratio[badpoints,] <- marx[whichnnX[badpoints], ]
+                   ratio[badpoints,] <-
+                     as.matrix(marx[whichnnX[badpoints], , drop=FALSE])
                  }
                } else {
                  warning("returning original values")
@@ -190,6 +193,9 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                colnames(result) <- colnames(marx)
              },
              pixels={
+               ## numerators is a list of images (or may have dropped to 'im')
+               if(is.im(numerators))
+                 numerators <- list(numerators)
                ratio <- lapply(numerators, "/", e2=denominator)
                if(!is.null(uhoh)) {
                  ## compute nearest neighbour map on same raster
@@ -215,7 +221,7 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                nX <- npoints(X)
                result <- matrix(, nX, ncol(oldmarx))
                if(length(partresult) > 0)
-                 result[,!isconst] <- partresult
+                 result[,!isconst] <- as.matrix(partresult)
                result[,isconst] <- rep(ra[1,isconst], each=nX)
                colnames(result) <- colnames(oldmarx)
              },

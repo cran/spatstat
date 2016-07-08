@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.58 $  $Date: 2016/02/11 10:17:12 $
+#  $Revision: 1.60 $  $Date: 2016/06/30 03:57:09 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!inherits(qscheme, "quad"))
@@ -114,15 +114,21 @@ with.msr <- function(data, expr, ...) {
 }
 
 print.msr <- function(x, ...) {
-  n <- npoints(x$loc)
+  xloc <- x$loc
+  n <- npoints(xloc)
   d <- ncol(as.matrix(x$val))
   splat(paste0(if(d == 1) "Scalar" else paste0(d, "-dimensional vector"),
                "-valued measure"))
   if(d > 1 && !is.null(cn <- colnames(x$val)) && waxlyrical("space"))
     splat("vector components:", commasep(sQuote(cn)))
+  if(is.marked(xloc)) {
+    splat("\tDefined on 2-dimensional space x marks")
+    if(is.multitype(xloc))
+      exhibitStringList("\tPossible marks: ", levels(marks(xloc)))
+  } 
   if(waxlyrical("gory")) {
     splat("Approximated by", n, "quadrature points")
-    print(as.owin(x$loc))
+    print(as.owin(xloc))
     splat(sum(x$atoms), "atoms")
   }
   if(waxlyrical("extras")) {
@@ -144,6 +150,54 @@ print.msr <- function(x, ...) {
   return(invisible(NULL))
 }
 
+is.multitype.msr <- function(X, ...) {
+  is.multitype(X$loc, ...)
+}
+is.marked.msr <- function(X, ...) {
+  is.marked(X$loc, ...)
+}
+
+split.msr <- function(x, f, drop=FALSE, ...) {
+  xloc <- x$loc
+  ## determine split using rules for split.ppp
+  locsplit <- if(missing(f))
+    split(xloc, drop=drop) else split(xloc, f, drop=drop)
+  ## extract grouping factor 
+  g <- attr(locsplit, "fgroup")
+  ## split contributions to measure
+  atomsplit <- split(x$atoms, g, drop=drop) # hyuk
+  wtsplit <- split(x$wt, g, drop=drop)
+  if(ncol(x) == 1) {
+    ## scalar measure
+    valsplit  <- split(x$val, g, drop=drop)
+    discsplit <- split(x$discrete, g, drop=drop)
+    denssplit <- split(x$density, g, drop=drop)
+  } else {
+    ## vector measure
+    valsplit  <- lapply(split(as.data.frame(x$val), g, drop=drop),
+                        as.matrix)
+    discsplit <- lapply(split(as.data.frame(x$discrete), g, drop=drop),
+                        as.matrix)
+    denssplit <- lapply(split(as.data.frame(x$density), g, drop=drop),
+                        as.matrix)
+  }
+  ## form the component measures
+  result <- mapply(list,
+                   loc=locsplit,
+                   val=valsplit,
+                   atoms=atomsplit,
+                   discrete=discsplit,
+                   density=denssplit,
+                   wt=wtsplit,
+                   SIMPLIFY=FALSE)
+  names(result) <- names(locsplit)
+  result <- lapply(result, "class<-", value="msr")
+  if(drop && any(isnul <- (sapply(locsplit, npoints) == 0)))
+    result[isnul] <- NULL
+  result <- as.solist(result)
+  return(result)
+}
+
 integral.msr <- function(f, domain=NULL, ...) {
   stopifnot(inherits(f, "msr"))
   if(!is.null(domain)) {
@@ -158,10 +212,28 @@ integral.msr <- function(f, domain=NULL, ...) {
 augment.msr <- function(x, ..., sigma) {
   ## add a pixel image of the smoothed density component
   stopifnot(inherits(x, "msr"))
+  if(!is.null(attr(x, "smoothdensity"))) return(x)
   d <- ncol(as.matrix(x$val))
   xloc <- x$loc
   W <- as.owin(xloc)
   if(missing(sigma)) sigma <- maxnndist(xloc, positive=TRUE)
+  if(is.multitype(xloc)) {
+    ## multitype case - split by type, smooth, sum
+    y <- lapply(split(x), augment.msr, sigma=sigma, ...)
+    z <- lapply(y, attr, which="smoothdensity")
+    if((nc <- ncol(x)) == 1) {
+      ## scalar valued
+      smo <- Reduce("+", z)
+    } else {
+      ## vector valued
+      smo <- vector(mode="list", length=nc)
+      for(j in 1:nc) 
+        smo[[j]] <- Reduce("+", lapply(z, "[[", i=j))
+      smo <- as.solist(smo)
+    }
+    attr(x, "smoothdensity") <- smo
+    return(x)
+  }   
   ## smooth density unless constant
   xdensity <- as.matrix(x$density)
   ra <- apply(xdensity, 2, range)
@@ -179,12 +251,13 @@ augment.msr <- function(x, ..., sigma) {
     if(any(varble)) 
       smo[varble] <-
         do.call(Smooth,
-                resolve.defaults(list(X=xloc %mark% xdensity[,varble]),
+                resolve.defaults(list(X=xloc %mark% xdensity[,varble, drop=FALSE]),
                                  list(...),
                                  list(sigma=sigma)))
     if(any(!varble)) 
-      smo[!varble] <- lapply(apply(xdensity[, !varble], 2, mean),
+      smo[!varble] <- lapply(apply(xdensity[, !varble, drop=FALSE], 2, mean),
                              as.im, W=W)
+    smo <- as.solist(smo)
   }
   attr(x, "smoothdensity") <- smo
   return(x)
@@ -193,38 +266,63 @@ augment.msr <- function(x, ..., sigma) {
 plot.msr <- function(x, ..., add=FALSE,
                      how=c("image", "contour", "imagecontour"),
                      main=NULL, 
-                     do.plot=TRUE) {
+                     do.plot=TRUE,
+                     multiplot=TRUE) {
   if(is.null(main)) 
     main <- short.deparse(substitute(x))
   how <- match.arg(how)
-  d <- ncol(as.matrix(x$val))
-  if(is.null(smo <- attr(x, "smoothdensity"))) {
-    x <- augment.msr(x, ...)
-    smo <- attr(x, "smoothdensity")
+  
+  if(!multiplot) {
+    ## compress everything to a single panel
+    x$loc <- unmark(x$loc)
+    if(is.matrix(x$val))      x$val <- rowSums(x$val)
+    if(is.matrix(x$discrete)) x$discrete <- rowSums(x$discrete)
+    if(is.matrix(x$density))  x$density <- rowSums(x$density)
+    if(!is.null(smo <- attr(x, "smoothdensity")) && inherits(smo, "solist"))
+      attr(x, "smoothdensity") <- Reduce("+", smo)
   }
-  if(d > 1) {
-    ## split into a list of real-valued measures
-    lis <- list()
-    for(j in 1:d) {
-      xj <- x[,j]
-      attr(xj, "smoothdensity") <- smo[[j]]
-      lis[[j]] <- xj
-    }
-    lis <- as.solist(lis)
-    if(!is.null(cn <- colnames(x$val)))
-      names(lis) <- cn
-    result <- do.call(plot.solist, resolve.defaults(list(lis),
+
+  d <- dim(x)[2]
+  k <- if(is.multitype(x)) length(levels(marks(x$loc))) else 1
+
+  ## multiple plot panels may be generated
+  if(k == 1 && d == 1) {
+    ## single plot
+    y <- solist(x)
+  } else if(k > 1 && d == 1) {
+    ## multitype
+    y <- split(x)
+  } else if(k == 1 && d > 1) {
+    ## vector-valued
+    y <- unstack(x)
+  } else if(k > 1 && d > 1) {
+    ## both multitype and vector-valued
+    y <- split(x)
+    typenames <- names(y)
+    vecnames <- colnames(x$val)
+    y <- as.solist(Reduce(append, lapply(y, unstack)))
+    names(y) <- as.vector(t(outer(typenames, vecnames, paste, sep=".")))
+  } 
+  # ensure image of density is present
+  y <- lapply(y, augment.msr)
+
+  if(length(y) > 1) {
+    ## plot as an array of panels
+    result <- do.call(plot.solist, resolve.defaults(list(y),
                                                     list(...),
+                                                    list(nrows=k, ncols=d),
                                                     list(how=how,
                                                          main=main,
                                                          equal.scales=TRUE)))
     return(invisible(result))
   }
   ## scalar measure
+  x <- y[[1]]
   xatomic <- (x$loc %mark% x$discrete)[x$atoms]
   xtra.im <- graphicsPars("image")
   xtra.pp <- setdiff(graphicsPars("ppp"), c("box", "col"))
   xtra.ow <- graphicsPars("owin")
+  smo <- attr(x, "smoothdensity")
   ##
   do.image <-  how %in% c("image", "imagecontour")
   do.contour <-  how %in% c("contour", "imagecontour")

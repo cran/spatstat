@@ -4,7 +4,7 @@
 # computes residuals for fitted point process model
 #
 #
-# $Revision: 1.23 $ $Date: 2016/02/22 04:03:50 $
+# $Revision: 1.24 $ $Date: 2016/06/30 03:29:54 $
 #
 
 residuals.ppm <-
@@ -16,7 +16,7 @@ residuals.ppm <-
   
   verifyclass(object, "ppm")
   trap.extra.arguments(..., .Context="In residuals.ppm")
-  
+
   type <- pickoption("type", type,
                      c(inverse="inverse",
                        raw="raw",

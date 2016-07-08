@@ -54,6 +54,7 @@
     The diagnostic calculations
     will be confined to those points of the data pattern which are
     at least \code{rbord} units away from the edge of the window.
+    (An infinite value of \code{rbord} will be ignored.)
   }
   \item{cumulative}{
     Logical flag indicating whether the lurking variable plots
@@ -363,12 +364,12 @@
   in such cases.
 }
 \references{
-  Baddeley, A., Turner, R., \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Hazelton, M. (2005)
+  Baddeley, A., Turner, R., \Moller, J. and Hazelton, M. (2005)
   Residual analysis for spatial point processes.
   \emph{Journal of the Royal Statistical Society, Series B}
   \bold{67}, 617--666.
 
-  Baddeley, A., \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Pakes, A.G. (2008) 
+  Baddeley, A., \Moller, J. and Pakes, A.G. (2008) 
   Properties of residuals for spatial point processes.
   \emph{Annals of the Institute of Statistical Mathematics}
   \bold{60}, 627--649.
@@ -407,8 +408,8 @@
     }
 }
 \author{
-  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
-  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  \adrian
+  and \rolf
 }
 \keyword{spatial}
 \keyword{models}

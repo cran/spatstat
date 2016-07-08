@@ -4,10 +4,11 @@
   Plot Influence Measure
 }
 \description{
-  Plots an influence measure that has been computed by \code{\link{influence.ppm}}.
+  Plots an influence measure that has been
+  computed by \code{\link{influence.ppm}}.
 }
 \usage{
- \method{plot}{influence.ppm}(x, ...)
+ \method{plot}{influence.ppm}(x, ..., multiplot=TRUE)
 }
 \arguments{
   \item{x}{
@@ -17,6 +18,11 @@
   \item{\dots}{
     Arguments passed to \code{\link{plot.ppp}}
     to control the plotting.
+  }
+  \item{multiplot}{
+    Logical value indicating whether it is permissible to
+    plot more than one panel. This happens if the original point process
+    model is multitype.
   }
 }
 \details{
@@ -38,9 +44,7 @@
   \emph{Scandinavian Journal of Statistics} \bold{40}, 86--104.
 }
 \author{
-  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
-  
-  
+  \adrian
 }
 \seealso{
   \code{\link{influence.ppm}}

@@ -264,6 +264,7 @@
 \alias{implemented.for.K}
 \alias{impliedpresence}
 \alias{impliedcoefficients}
+\alias{indexCartesian}
 \alias{inject.expr}
 \alias{inpoint}
 \alias{insertinlist}     
@@ -293,9 +294,11 @@
 \alias{is.infline}
 \alias{is.interact}
 \alias{is.marked.default}    
+\alias{is.marked.msr}    
 \alias{is.marked.psp}    
 \alias{is.marked.quad}
 \alias{is.mppm}
+\alias{is.multitype.msr}    
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
 \alias{is.parseable}
@@ -345,6 +348,7 @@
 \alias{logLik.vblogit}
 \alias{lty2char}
 \alias{maskLaslett}
+\alias{matsqrt}
 \alias{matchNameOrPosition}
 \alias{padtowidth}
 \alias{parbreak}
@@ -738,6 +742,9 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unparen}
+\alias{unstack.solist}
+\alias{unstack.layered}
+\alias{unstackFilter}
 \alias{update.im}
 \alias{update.ippm}
 \alias{update.rmhstart}
@@ -936,7 +943,7 @@ densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     diggle, sorted)
 densitypointsEngine(x, sigma, \dots,
                     weights, edge, varcov,
-                    leaveoneout, diggle, sorted, spill)
+                    leaveoneout, diggle, sorted, spill, cutoff)
 diagnose.ppm.engine(object, \dots, type, typename, opt,
                          sigma, rbord, compute.sd, compute.cts,
                          envelope, nsim, nrank,
@@ -1111,6 +1118,7 @@ illegal.iformula(ifmla, itags, dfvarnames)
 implemented.for.K(correction, windowtype, explicit)
 impliedpresence(tags, formula, df, extranames=character(0))
 impliedcoefficients(object, tag)
+indexCartesian(nn)
 inject.expr(base, expr)
 inpoint(W)
 insertinlist(x, i, y)
@@ -1140,10 +1148,12 @@ is.hyperframe(x)
 is.infline(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
+\method{is.marked}{msr}(X, \dots)
 \method{is.marked}{psp}(X, \dots)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 is.mppm(x)
 \method{is.multitype}{default}(X, \dots)  
+\method{is.multitype}{msr}(X, \dots)
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.parseable(x)
 \method{is.poisson}{mppm}(x)
@@ -1201,6 +1211,7 @@ logi.engine(Q, trend, interaction, \dots,
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
+matsqrt(x)
 matchNameOrPosition(expected, avail)
 padtowidth(a, b, justify)
 parbreak(terse)
@@ -1375,7 +1386,8 @@ ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
-              drop, method, precomputed, sparseOK, fitname)
+              drop, method, precomputed, sparseOK,
+              fitname, multitypeOK)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
@@ -1664,6 +1676,9 @@ tweak.coefs(model, new.coef)
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unparen(x)
+\method{unstack}{solist}(x, \dots)
+\method{unstack}{layered}(x, \dots)
+unstackFilter(x)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
 \method{update}{rmhstart}(object, \dots)

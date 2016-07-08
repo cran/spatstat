@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.45-2
-Nickname: Caretaker Mode
-Date: 2016-05-09
+Version: 1.46-1
+Nickname: Spoiler Alert
+Date: 2016-07-08
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -18,6 +18,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rasmus Waagepetersen.
 	Additional contributions 
 	by M. Adepeju;
+        C. Anderson; 
         Q.W. Ang; 
 	S. Azaele; 
 	M. Baddeley;
@@ -181,7 +182,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	and
 	A. Zeileis.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>
-Depends: R (>= 3.2.2), stats, graphics, grDevices, utils, methods,
+Depends: R (>= 3.3.0), stats, graphics, grDevices, utils, methods,
         nlme, rpart
 Imports: mgcv, Matrix, deldir (>= 0.0-21), abind, tensor, polyclip (>=
         1.5-0), goftest
@@ -200,6 +201,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2016-05-09 04:35:04 UTC; adrian
+Packaged: 2016-07-08 09:01:51 UTC; adrian
 Repository: CRAN
-Date/Publication: 2016-05-09 10:08:26
+Date/Publication: 2016-07-08 17:23:44

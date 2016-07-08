@@ -8,7 +8,8 @@
   \method{plot}{msr}(x, \dots, add=FALSE,
                      how=c("image", "contour", "imagecontour"),
                      main=NULL,
-                     do.plot=TRUE)
+                     do.plot=TRUE,
+                     multiplot=TRUE)
 }
 \arguments{
   \item{x}{
@@ -34,6 +35,12 @@
   }
   \item{do.plot}{
     Logical value determining whether to actually perform the plotting.
+  }
+  \item{multiplot}{
+    Logical value indicating whether it is permissible to display
+    a plot with multiple panels (representing different components of
+    a vector-valued measure, or different types of points in a multitype
+    measure.) 
   }
 }
 \value{
@@ -74,10 +81,10 @@
    plot(rs)
    plot(rs, how="contour")
 }
-\author{Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au}
+\author{\adrian
   
   
-  and Rolf Turner \email{r.turner@auckland.ac.nz}
+  and \rolf
   
 }
 \keyword{spatial}

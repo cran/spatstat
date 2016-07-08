@@ -364,12 +364,16 @@
 
    ## or more compactly..
    plot(longleaf, bg=terrain.colors(20), pch=21, cex=1)
+
+   ## clipping
+   plot(humberside)
+   B <- owin(c(4810, 5190), c(4180, 4430))
+   plot(B, add=TRUE, border="red")
+   plot(humberside, clipwin=B, main="Humberside (clipped)")
 }
 
 \author{
-  Adrian Baddeley \email{Adrian.Baddeley@curtin.edu.au},
- Rolf Turner \email{r.turner@auckland.ac.nz}
- and Ege Rubak \email{rubak@math.aau.dk}.
+  \spatstatAuthors.
 }
 \keyword{spatial}
 \keyword{hplot}

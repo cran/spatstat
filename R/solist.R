@@ -7,7 +7,7 @@
 ##
 ## plot.solist is defined in plot.solist.R
 ##
-## $Revision: 1.12 $ $Date: 2015/06/05 08:52:38 $
+## $Revision: 1.13 $ $Date: 2016/06/27 06:59:28 $
 
 anylist <- function(...) {
   x <- list(...)
@@ -71,8 +71,11 @@ is.sob <- local({
                       "quadratcount", "quadrattest", 
                       "layered",
                       "funxy", "distfun", "nnfun", 
-                      "lpp", "linnet", "linfun",
+                      "lpp", "linnet", "linfun",      
                       "influence.ppm", "leverage.ppm")
+  # Note 'linim' inherits 'im'
+  #      'dfbetas.ppm' inherits 'msr'
+
   is.sob <- function(x) { inherits(x, what=sobjectclasses) }
   is.sob
 })
@@ -175,7 +178,7 @@ density.ppplist <- function(x, ..., se=FALSE) {
 }
 
 expandSpecialLists <- function(x, special="solist") {
-  ## x is a list which may include entries which are lists, of class 'lclass'
+  ## x is a list which may include entries which are lists, of class 'special'
   ## unlist these entries only
   hit <- sapply(x, inherits, what=special) 
   if(!any(hit)) return(x)
