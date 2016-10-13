@@ -1,7 +1,7 @@
 #
 # linearpcfmulti.R
 #
-# $Revision: 1.6 $ $Date: 2015/02/25 06:22:40 $
+# $Revision: 1.11 $ $Date: 2016/07/28 08:13:26 $
 #
 # pair correlation functions for multitype point pattern on linear network
 #
@@ -57,9 +57,8 @@ linearpcfmulti <- function(X, I, J, r=NULL, ..., correction="Ang") {
                            multi=FALSE)
   
   # extract info about pattern
-  sX <- summary(X)
-  np <- sX$npoints
-  lengthL <- sX$totlength
+  np <- npoints(X)
+  lengthL <- volume(domain(X))
   # validate I, J
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
@@ -140,7 +139,8 @@ linearpcfcross.inhom <- function(X, i, j, lambdaI, lambdaJ,
 
 linearpcfmulti.inhom <- function(X, I, J, lambdaI, lambdaJ,
                                r=NULL, ...,
-                               correction="Ang", normalise=TRUE) {
+                               correction="Ang",
+                               normalise=TRUE) {
   stopifnot(inherits(X, "lpp"))
   correction <- pickoption("correction", correction,
                            c(none="none",
@@ -149,9 +149,8 @@ linearpcfmulti.inhom <- function(X, I, J, lambdaI, lambdaJ,
                            multi=FALSE)
   
   # extract info about pattern
-  sX <- summary(X)
-  np <- sX$npoints
-  lengthL <- sX$totlength
+  np <- npoints(X)
+  lengthL <- volume(domain(X))
   # validate I, J
   if(!is.logical(I) || !is.logical(J))
     stop("I and J must be logical vectors")
@@ -167,7 +166,7 @@ linearpcfmulti.inhom <- function(X, I, J, lambdaI, lambdaJ,
 
   # compute pcf
   weightsIJ <- outer(1/lambdaI, 1/lambdaJ, "*")
-  denom <- if(!normalise) lengthL else sum(1/lambdaI)
+  denom <- if(!normalise) lengthL else sum(1/lambdaI) 
   g <- linearPCFmultiEngine(X, I, J, r=r,
                             reweight=weightsIJ, denom=denom,
                             correction=correction, ...)
@@ -188,17 +187,12 @@ linearPCFmultiEngine <- function(X, I, J, ..., r=NULL, reweight=NULL, denom=1,
   # ensure distance information is present
   X <- as.lpp(X, sparse=FALSE)
   # extract info about pattern
-#  sX <- summary(X)
-#  np <- sX$npoints
-#  lengthL <- sX$totlength
   np <- npoints(X)
   # extract linear network
-  L <- X$domain
-  # extract points
-  XP <- as.ppp(X)
-  W <- as.owin(XP)
+  L <- domain(X)
+  W <- Window(L)
   # determine r values
-  rmaxdefault <- 0.98 * circumradius(L)
+  rmaxdefault <- 0.98 * boundingradius(L)
   breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
   rmax <- breaks$max
@@ -258,20 +252,22 @@ linearPCFmultiEngine <- function(X, I, J, ..., r=NULL, reweight=NULL, denom=1,
      edgewt <- 1
   else {
      # inverse m weights (Ang's correction)
+     # determine tolerance
+     toler <- default.linnet.tolerance(L)
      # compute m[i,j]
      m <- matrix(1, nI, nJ)
-     XPI <- XP[I]
+     XI <- X[I]
      if(!has.clash) {
        for(k in seq_len(nJ)) {
          j <- whichJ[k]
-         m[,k] <- countends(L, XPI, DIJ[, k])
+         m[,k] <- countends(L, XI, DIJ[, k], toler=toler)
        }
      } else {
        # don't count identical pairs
        for(k in seq_len(nJ)) {
          j <- whichJ[k]
          inotj <- (whichI != j)
-         m[inotj, k] <- countends(L, XPI[inotj], DIJ[inotj, k])
+         m[inotj, k] <- countends(L, XI[inotj], DIJ[inotj, k], toler=toler)
        }
      }
      edgewt <- 1/m

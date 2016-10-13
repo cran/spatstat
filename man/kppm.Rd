@@ -157,7 +157,6 @@
   require additional arguments passed through \code{\dots}; see
   \code{\link{rLGCP}} for details on argument names).
   The first four models are Neyman-Scott cluster processes.
-  Fitting the LGCP model requires the \pkg{RandomFields} package.
   
   The algorithm first estimates the intensity function
   of the point process using \code{\link{ppm}}.
@@ -277,14 +276,22 @@
   Useful control arguments include
   \code{trace}, \code{maxit} and \code{abstol}
   (documented in the help for \code{\link[stats]{optim}}).
+
+  Fitting the LGCP model requires the \pkg{RandomFields} package
+  except in the default case where the exponential covariance
+  is assumed.
 }
 \value{
   An object of class \code{"kppm"} representing the fitted model.
   There are methods for printing, plotting, predicting, simulating
   and updating objects of this class.
 }
+\section{Error and warning messages}{
+  See \code{\link{ppm.ppp}} for a list of common error messages
+  and warnings originating from the first stage of model-fitting.
+}
 \seealso{
-  methods for \code{kppm} objects:
+  Methods for \code{kppm} objects:
   \code{\link{plot.kppm}},
   \code{\link{fitted.kppm}},
   \code{\link{predict.kppm}},
@@ -351,13 +358,15 @@
 
   kppm(redwood ~ x, "MatClust") 
   kppm(redwood ~ x, "MatClust", statistic="pcf", statargs=list(stoyan=0.2)) 
-  kppm(redwood ~ 1, "LGCP", statistic="pcf")
   kppm(redwood ~ x, cluster="Cauchy", statistic="K")
   kppm(redwood, cluster="VarGamma", nu = 0.5, statistic="pcf")
-  if(requireNamespace("RandomFields")) {
-     kppm(redwood ~ x, "LGCP", statistic="pcf",
-           model="matern", nu=0.3,
-           control=list(maxit=10))
+
+  # LGCP models
+  kppm(redwood ~ 1, "LGCP", statistic="pcf")
+  if(require("RandomFields")) {
+    kppm(redwood ~ x, "LGCP", statistic="pcf",
+                              model="matern", nu=0.3,
+                              control=list(maxit=10))
   }
 
   # fit intensity with quasi-likelihood method

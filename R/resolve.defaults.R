@@ -1,7 +1,7 @@
 #
 #   resolve.defaults.R
 #
-#  $Revision: 1.27 $ $Date: 2016/04/25 02:34:40 $
+#  $Revision: 1.31 $ $Date: 2016/09/23 04:32:13 $
 #
 # Resolve conflicts between several sets of defaults
 # Usage:
@@ -12,9 +12,10 @@
 resolve.defaults <- function(..., .MatchNull=TRUE, .StripNull=FALSE) {
   # Each argument is a list. Append them.
   argue <- c(...)
-  # is NULL a possible value?
+  # does a NULL value 
+  # overwrite a non-null value occurring later in the sequence?
   if(!.MatchNull) {
-    isnul <- unlist(lapply(argue, is.null))
+    isnul <- sapply(argue, is.null)
     argue <- argue[!isnul]
   }
   if(!is.null(nam <- names(argue))) {
@@ -25,7 +26,7 @@ resolve.defaults <- function(..., .MatchNull=TRUE, .StripNull=FALSE) {
       arg.named <- arg.named[!discard]
     argue <- append(arg.unnamed, arg.named)
   }
-  # should NULL become a missing argument?
+  # should a NULL value mean that the argument is missing?
   if(.StripNull) {
     isnull <- sapply(argue, is.null)
     argue <- argue[!isnull]
@@ -141,6 +142,7 @@ graphicsPars <- local({
     list(plot = PlotArgs,
          image = c(
            "main", "asp", "sub", "axes", "ann",
+           "xlim", "ylim",
            "box",  # note 'box' is not an argument of image.default
            "cex", "font", 
            "cex.axis", "cex.lab", "cex.main", "cex.sub",
@@ -155,6 +157,7 @@ graphicsPars <- local({
            "mgp", "xaxp", "yaxp", "tck", "tcl", "las", "fg", "xpd"),
          owin = c(
            "sub",
+           "xlim", "ylim",
            "cex", "font", "col",
            "border", "box", 
            "cex.main", "cex.sub",
@@ -164,7 +167,15 @@ graphicsPars <- local({
            "claim.title.space"),
          lines = c("lwd", "lty", "col", "lend", "ljoin", "lmitre"),
          symbols = c(PlotArgs, "fg", "bg"),
-         text = TextArgs
+         text = TextArgs,
+         persp = c("x", "y", "z",
+           "xlim", "ylim", "zlim",
+           "xlab", "ylab", "zlab",
+           "main", "sub",
+           "theta", "phi", "r", "d", "scale",
+           "expand", "col", "border",
+           "ltheta", "lphi", "shade", "box",
+           "axes", "nticks", "ticktype")
          )
 
     TheTable$ppp <- unique(c(TheTable$owin,

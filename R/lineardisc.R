@@ -2,7 +2,7 @@
 #
 #   disc.R
 #
-#   $Revision: 1.21 $ $Date: 2015/10/21 09:06:57 $
+#   $Revision: 1.25 $ $Date: 2016/07/17 04:16:06 $
 #
 #   Compute the disc of radius r in a linear network
 #
@@ -159,26 +159,33 @@ countends <- function(L, x=locator(1), r, toler=NULL) {
   # get x
   if(missing(x))
     x <- clickppp(1, win, add=TRUE)
-  else
-    x <- as.ppp(x, win)
+  if(!inherits(x, "lpp"))
+    x <- as.lpp(x, L=L)
   #
   np <- npoints(x)
   if(length(r) != np)
     stop("Length of vector r does not match number of points in x")
-  # project x to nearest segment
-  pro <- project2segment(x, lines)
-  # which segment?
-  startsegment <- pro$mapXY
+  #
+  if(!spatstat.options("Ccountends")) {
+    #' interpreted code
+    result <- integer(np)
+    for(i in seq_len(np)) 
+      result[i] <- npoints(lineardisc(L, x[i], r[i], plotit=FALSE)$endpoints)
+    return(result)
+  }
+  # extract coordinates
+  coo <- coords(x)
+  #' which segment
+  startsegment <- coo$seg 
   # parametric position of x along this segment
-  startfraction <- pro$tp
-
+  startfraction <- coo$tp
   # convert indices to C 
   seg0 <- startsegment - 1L
   from0 <- L$from - 1L
   to0   <- L$to - 1L
+  # determine numerical tolerance
   if(is.null(toler)) {
-    toler <- 0.001 * min(lengths[lengths > 0])
-    toler <- max(.Machine$double.xmin, toler, finite=TRUE)
+    toler <- default.linnet.tolerance(L)
   } else {
     check.1.real(toler)
     stopifnot(toler > 0)
@@ -200,3 +207,23 @@ countends <- function(L, x=locator(1), r, toler=NULL) {
            nendpoints = as.integer(integer(np)))
   zz$nendpoints
 }
+
+default.linnet.tolerance <- function(L) {
+  # L could be a linnet or psp
+  if(!is.null(toler <- L$toler)) return(toler)
+  len2 <- lengths.psp(as.psp(L), squared=TRUE)
+  len2pos <- len2[len2 > 0]
+  toler <- if(length(len2pos) == 0) 0 else (0.001 * sqrt(min(len2pos)))
+  toler <- makeLinnetTolerance(toler)
+  return(toler)
+}
+
+makeLinnetTolerance <- function(toler) {
+  max(sqrt(.Machine$double.xmin),
+      toler[is.finite(toler)], na.rm=TRUE)
+}
+
+
+
+
+  

@@ -1,7 +1,7 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.20 $   $Date: 2015/05/10 01:44:48 $
+#   $Revision: 1.23 $   $Date: 2016/09/23 07:42:46 $
 #
 #
 
@@ -79,6 +79,7 @@ makeunits <- function(sing="unit", plur="units", mul = 1) {
 }
   
 as.units <- function(s) {
+  if(inherits(s, "units")) return(s)
   s <- as.list(s)
   n <- length(s)
   if(n > 3)
@@ -170,3 +171,38 @@ compatible.units <- function(A, B, ..., coerce=TRUE) {
   # recursion
   return(compatible.units(B, ...))
 }
+
+# class 'numberwithunit':  numeric value(s) with unit of length
+
+numberwithunit <- function(x, u) {
+  u <- as.units(u)
+  x <- as.numeric(x)
+  unitname(x) <- u
+  class(x) <- c(class(x), "numberwithunit")
+  return(x)
+}
+
+"%unit%" <- function(x, u) {
+  numberwithunit(x, u)
+}
+
+format.numberwithunit <- function(x, ..., collapse=" x ", modifier=NULL) {
+  u <- summary(unitname(x))
+  uname <- if(all(x == 1)) u$singular else u$plural
+  y <- format(as.numeric(x), ...)
+  z <- pasteN(paste(y, collapse=collapse), 
+              modifier, uname, u$explain)
+  return(z)
+}
+
+as.character.numberwithunit <- function(x, ...) {
+  return(format(x))
+}
+
+print.numberwithunit <- function(x, ...) {
+  cat(format(x, ...), fill=TRUE)
+  return(invisible(NULL))
+}
+
+
+    

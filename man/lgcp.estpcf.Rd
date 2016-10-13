@@ -3,7 +3,6 @@
 \title{Fit a Log-Gaussian Cox Point Process by Minimum Contrast}
 \description{
   Fits a log-Gaussian Cox point process model
-  (with exponential covariance function)
   to a point pattern dataset by the Method of Minimum Contrast
   using the pair correlation function.
 }
@@ -48,9 +47,13 @@ lgcp.estpcf(X,
   }
 }
 \details{
-  This algorithm fits a log-Gaussian Cox point process model
-  to a point pattern dataset
-  by the Method of Minimum Contrast, using the pair correlation function.
+  This algorithm fits a log-Gaussian Cox point process (LGCP) model
+  to a point pattern dataset by the Method of Minimum Contrast,
+  using the estimated pair correlation function of the point pattern.
+
+  The shape of the covariance of the LGCP must be specified:
+  the default is the exponential covariance function,
+  but other covariance models can be selected.
 
   The argument \code{X} can be either
   \describe{
@@ -191,8 +194,6 @@ lgcp.estpcf(X,
 }
 \author{
   \adrian
-  
-  
   with modifications by Shen Guochun and 
   Rasmus Waagepetersen
   \email{rw@math.auc.dk}

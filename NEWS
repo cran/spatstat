@@ -1,4 +1,271 @@
 
+        CHANGES IN spatstat VERSION 1.47-0
+
+OVERVIEW
+
+    o We thank Marcel Austenfeld, Guy Bayegnak, Tilman Davies, Cenk Icos, 
+    Jorge Mateu, Frederico Mestre, Mehdi Moradi, Virginia Morera Pujol,
+    Suman Rakshit and Sven Wagner for contributions.
+
+    o Non-Gaussian smoothing kernels.
+
+    o Important bug fix in linearK, linearpcf
+
+    o Changed internal format of linnet and lpp objects.
+
+    o Faster computation in linear networks.
+
+    o Bias correction techniques.
+
+    o Bounding circle of a spatial object.
+
+    o Minkowski sum also applicable to point patterns and line segment patterns.
+
+    o Option to plot marked points as arrows.
+
+    o Kernel smoothing accelerated.
+
+    o Workaround for bug in some graphics drivers affecting image orientation.
+
+    o Bug fixes and improvements.
+
+    o Version nickname: 'Responsible Gambler'
+
+NEW FUNCTIONS
+
+    o anyNA.im
+    Method for 'anyNA' for pixel images.
+
+    o bc
+    Bias correction (Newton-Raphson) for fitted model parameters. 
+    See also 'rex'.
+
+    o boundingcircle, boundingcentre
+    Find the smallest circle enclosing a window or point pattern.
+
+    o "[.linim"
+    Subset operator for pixel images on a linear network.
+
+    o mean.linim, median.linim, quantile.linim
+    The mean, median, or quantiles of pixel values in a 
+    pixel image on a linear network.
+
+    o rex
+    Richardson extrapolation for numerical integrals and 
+    statistical model parameter estimates. 
+
+    o weighted.median, weighted.quantile
+    Median or quantile of numerical data with associated weights.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o linear networks
+    The internal format of a 'linnet' (linear network) object
+    has been changed. Existing datasets of class 'linnet' and 'lpp'
+    are still supported. However, computation will be faster if they
+    are converted to the new format. To convert a linnet object L
+    to the new format, use L <- as.linnet(L). To convert an lpp object X 
+    to the new format, use X <- as.lpp(X).
+
+    o density.ppp, Smooth.ppp
+    New argument 'kernel' allows the user to specify the smoothing kernel.
+
+    o density.ppp, Smooth.ppp
+    Argument 'weights' can now be a pixel image.
+
+    o MinkowskiSum, %(+)%
+    Now accepts arguments which are point patterns or line segment patterns
+    as well as windows.
+
+    o plot.im
+    New argument 'workaround' to avoid a bug in some device drivers
+    that causes the image to be displayed in the wrong spatial orientation.
+    [Thanks to Marcel Austenfeld for drawing attention to this.]
+
+    o sumouter
+    New argument 'y' allows computation of asymmetric outer products.
+
+    o linearKinhom, linearpcfinhom
+    New argument 'normpower'.
+
+    o rmh.default, rmh.ppm
+    New arguments 'nsim', 'saveinfo'.
+
+    o symbolmap, plot.ppp, plot.lpp
+    New option: shape="arrows" 
+
+    o rcellnumber
+    New argument 'mu'.
+
+    o lengths.psp
+    New argument 'squared'.
+
+    o plot.linfun
+    Now passes arguments to the function being plotted.
+
+    o as.linnet.psp
+    If the line segment pattern has marks, then the resulting linear network
+    also carries these marks in the $lines component.
+
+    o summary.owin, summary.im
+    The fraction of frame area that is occupied by the window/image
+    is now reported.
+
+    o density.ppp, Smooth.ppp
+    Computation accelerated by about 15% 
+    in the case where at='points' and kernel='gaussian'.
+
+    o linearK, linearpcf
+    Accelerated by about 40%.
+
+    o pixellate.ppp
+    Accelerated in the case where weights are given
+
+    o density.ppp
+    Accelerated in the cases where weights are given or 'diggle=TRUE'
+    
+    o dilation.ppp
+    Improved geometrical accuracy.
+    Now accepts arguments to control resolution of polygonal approximation.
+
+    o discs
+    New argument 'npoly'. 
+    Accelerated in some cases. 
+
+    o plot.pp3
+    New arguments 'box.front', 'box.back' control plotting of the box.
+
+    o grow.rectangle
+    New argument 'fraction'.
+
+    o nnfun.lpp
+    New argument 'k'.
+
+    o bw.ppl
+    New argument 'sigma'.
+
+    o lppm
+    New argument 'random' controls placement of dummy points.
+
+    o rhohat.lpp
+    New argument 'random' controls placement of dummy points.
+
+    o quadrat.test.ppm
+    Accelerated in the case where the original window is a rectangle.
+
+    o kppm, mincontrast, cauchy.estpcf, lgcp.estpcf, matclust.estpcf,
+    thomas.estpcf, vargamma.estpcf
+    A warning about infinite values of the summary function 
+    no longer occurs when the default settings are used.
+
+    o circumradius
+    This function is now deprecated, in favour of 'boundingradius'
+
+    o print.quad
+    More information is printed.
+
+BUG FIXES
+
+    o linearK, linearpcf, and relatives:
+    These functions were sometimes greatly underestimated
+    when the network had segments shorter than 10 coordinate units.
+    [Bug introduced in spatstat 1.44-0, december 2015.]
+    Fixed.
+
+    o integral.linim, integral.linfun
+    Results were slightly inaccurate because of a bias in the
+    distribution of sample points.
+    [Bug introduced in spatstat 1.41-0, february 2015.]
+    Fixed.
+
+    o intensity.ppm
+    Result was incorrect for Gibbs models if the model was *exactly* 
+    equivalent to a Poisson process (i.e. if all interaction
+    coefficients were exactly zero).
+    [Bug introduced in spatstat 1.28-1, june 2012.]
+    Fixed.
+
+    o rSSI
+    Sometimes terminated prematurely.
+    [Spotted by Frederico Mestre.]
+    Fixed.
+
+    o perspPoints
+    Crashed if the image Z contained NA 
+    (i.e. if Z was only defined on a subset of the bounding frame).
+    Spotted by Guy Bayegnak.
+    Fixed.
+
+    o plot.ppp, plot.lpp
+    Crashed if the argument 'shape' was given.
+    Fixed.
+
+    o plot.kppm
+    Crashed if the model was not fitted by minimum contrast.
+    Fixed.
+
+    o superimpose
+    Crashed if the argument was a 'solist' containing line segment patterns.
+    Fixed.
+
+    o Jest
+    Crashed sometimes, depending on the shape of the observation window.
+    [Spotted by Cenk Icos.]
+    Fixed.
+
+    o plot.studpermutest
+    Crashed when the summary statistic was a multitype pair correlation 
+    function or multitype K function. [Spotted by Sven Wagner.]
+    Fixed.
+
+    o pool.anylist
+    Crashed with a message about buffer size,
+    if the list was longer than about 100 items.
+    Fixed.
+
+    o diagnose.ppm, plot.diagppm
+    Crashed in some cases when cumulative=FALSE.
+    Fixed.
+
+    o leverage.ppm, influence.ppm, dfbetas.ppm
+    Crashed sometimes with a message about wrong replacement length.
+    [Spotted by Virginia Morera Pujol.]
+    Fixed.
+
+    o as.linnet.psp
+    Crashed with marked segment patterns, if any segments were very short.
+    [Spotted by Suman Rakshit.]
+    Fixed.
+
+    o stieltjes
+    Returned NA if some values of f were not finite.
+    Fixed.
+
+    o plot.symbolmap
+    If a new plot window was initialised, it was sometimes too small
+    to contain the geometric figures (circles, squares etc) in the symbol map.
+    Fixed.
+
+    o plot.ppp, plot.im
+    Ignored xlim, ylim. 
+    Fixed.
+
+    o rhohat.lpp
+    Ignored nd, eps.
+    Fixed.
+
+    o nnfun.lpp
+    Print method gave incorrect information about the point pattern.
+    Fixed.
+
+    o "[.fv"
+    The default plot formula was not updated.
+    Fixed.
+
+    o fitted.ppm
+    The result was sometimes a 1-dimensional array rather than a numeric vector.
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.46-1
 
 OVERVIEW

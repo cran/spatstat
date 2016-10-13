@@ -5,10 +5,12 @@
   Compute a kernel smoothed intensity function from a point pattern.
 }
 \usage{
-  \method{density}{ppp}(x, sigma, \dots,
+  \method{density}{ppp}(x, sigma=NULL, \dots,
         weights=NULL, edge=TRUE, varcov=NULL,
         at="pixels", leaveoneout=TRUE,
         adjust=1, diggle=FALSE, se=FALSE,
+        kernel="gaussian",
+        scalekernel=is.character(kernel), 
         positive=FALSE) 
 }
 \arguments{
@@ -16,13 +18,14 @@
     Point pattern (object of class \code{"ppp"}).
   }
   \item{sigma}{
-    Standard deviation of isotropic Gaussian smoothing kernel.
+    Standard deviation of isotropic smoothing kernel.
     Either a numerical value, or a function that computes an
     appropriate value of \code{sigma}.
   }
   \item{weights}{
     Optional weights to be attached to the points.
-    A numeric vector, numeric matrix, or an \code{expression}.
+    A numeric vector, numeric matrix, an \code{expression},
+    or a pixel image.
   }
   \item{\dots}{
     Additional arguments passed to \code{\link{pixellate.ppp}}
@@ -33,7 +36,7 @@
     Logical value indicating whether to apply edge correction.
   }
   \item{varcov}{
-    Variance-covariance matrix of anisotropic Gaussian kernel.
+    Variance-covariance matrix of anisotropic smoothing kernel.
     Incompatible with \code{sigma}.
   }
   \item{at}{
@@ -49,9 +52,27 @@
     Optional. Adjustment factor for the smoothing parameter.
   }
   \item{diggle}{
-    Logical. If \code{TRUE}, use Diggle's edge correction,
-    which is more accurate but slower to compute than the
-    correction described under Details.
+    Logical. If \code{TRUE}, use Diggle's improved edge correction,
+    which is more accurate but slower to compute than the default
+    correction.
+  }
+  \item{kernel}{
+    The smoothing kernel.
+    A character string specifying the smoothing kernel
+    (current options are \code{"gaussian"}, \code{"epanechnikov"},
+    \code{"quartic"} or \code{"disc"}),
+    or a pixel image (object of class \code{"im"})
+    containing values of the kernel, or a \code{function(x,y)} which
+    yields values of the kernel.
+  }
+  \item{scalekernel}{
+    Logical value.
+    If \code{scalekernel=TRUE}, then the kernel will be rescaled
+    to the bandwidth determined by \code{sigma} and \code{varcov}:
+    this is the default behaviour when \code{kernel} is a character string.
+    If \code{scalekernel=FALSE}, then \code{sigma} and \code{varcov}
+    will be ignored: this is the default behaviour when \code{kernel} is a
+    function or a pixel image.
   }
   \item{se}{
     Logical value indicating whether to compute standard errors as well.
@@ -102,6 +123,7 @@
     \item If \code{diggle=FALSE} (the default) the intensity estimate is
     correted by dividing it by the convolution of the
     Gaussian kernel with the window of observation.
+    This is the approach originally described in Diggle (1985).
     Thus the intensity value at a point \eqn{u} is
     \deqn{
       \hat\lambda(u) = e(u) \sum_i k(x_i - u) w_i
@@ -112,8 +134,10 @@
     \eqn{e(u)} is an edge correction factor, 
     and \eqn{w_i}{w[i]} are the weights.
     \item
-    If \code{diggle=TRUE} then the method of Diggle (1985)
-    is followed exactly.
+    If \code{diggle=TRUE} then the code uses the improved edge correction
+    described in equation (18.9) of Diggle (2010), which has been shown
+    to have better performance (Jones, 1993) but is slightly slower to
+    compute. 
     The intensity value at a point \eqn{u} is 
     \deqn{
       \hat\lambda(u) = \sum_i k(x_i - u) w_i e(x_i)
@@ -123,7 +147,6 @@
     where again \eqn{k} is the Gaussian smoothing kernel,
     \eqn{e(x_i)}{e(x[i])} is an edge correction factor, 
     and \eqn{w_i}{w[i]} are the weights.
-    This computation is slightly slower but more accurate.
   }
   In both cases, the edge correction term \eqn{e(u)} is the reciprocal of the
   kernel mass inside the window:
@@ -213,6 +236,11 @@
   coordinates, the symbol \code{marks} representing the mark values
   if there is only one column of marks, and the names of the columns of
   marks if there are several columns.  
+
+  The argument \code{weights} can also be a pixel image
+  (object of class \code{"im"}). numerical weights for the data points
+  will be extracted from this image (by looking up the pixel values
+  at the locations of the data points in \code{x}).
   
   To select the bandwidth \code{sigma} automatically by
   cross-validation, use \code{\link{bw.diggle}} or \code{\link{bw.ppl}}.
@@ -259,7 +287,7 @@
   Inspecting an estimate of the intensity function is usually the
   first step in exploring a spatial point pattern dataset.
   For more explanation, see Baddeley, Rubak and Turner (2015)
-  or Diggle (2003).
+  or Diggle (2003, 2010).
 
   If you have two (or more) types of points, and you want a
   probability map or relative risk surface (the spatially-varying
@@ -300,6 +328,14 @@
   plot(density(cells, bw.diggle))
   # evaluate intensity at points
   density(cells, 0.05, at="points")
+
+  plot(density(cells, sigma=0.4, kernel="epanechnikov"))
+
+  # relative risk 
+  lung <- split(chorley)$lung
+  larynx <- split(chorley)$larynx
+  D <- density(lung, sigma=2)
+  plot(density(larynx, weights=1/D))
 }
 \references{
   Baddeley, A., Rubak, E. and Turner, R. (2015)
@@ -314,12 +350,21 @@
   Diggle, P.J. (2003)
   \emph{Statistical analysis of spatial point patterns},
   Second edition. Arnold.
+
+  Diggle, P.J. (2010)
+  Nonparametric methods.
+  Chapter 18, pp. 299--316 in
+  A.E. Gelfand, P.J. Diggle, M. Fuentes and P. Guttorp (eds.)
+  \emph{Handbook of Spatial Statistics},
+  CRC Press, Boca Raton, FL.
+
+  Jones, M.C. (1993)
+  Simple boundary corrections for kernel density estimation.
+  \emph{Statistics and Computing} \bold{3}, 135--146.
 }
 
 \author{
-  \adrian
-  and
-  \rolf
+  \spatstatAuthors
 }
 \keyword{spatial}
 \keyword{methods}

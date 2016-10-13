@@ -75,9 +75,11 @@
 \alias{check.nmatrix}
 \alias{check.1.integer}
 \alias{check.1.real}
+\alias{check.1.string}
 \alias{check.range}
 \alias{check.testfun}
 \alias{choptext}
+\alias{choptextline}
 \alias{circticks}
 \alias{clarkevansCalc}
 \alias{clip.psp}
@@ -111,6 +113,7 @@
 \alias{datagen.runifpoisppOnLines}
 \alias{datagen.rpoisppOnLines}
 \alias{default.clipwindow}
+\alias{default.linnet.tolerance}
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{deltasuffstat}
@@ -172,6 +175,7 @@
 \alias{evalInteraction}
 \alias{evalInterEngine}
 \alias{evalPairPotential}
+\alias{evaluate2Dkernel}
 \alias{even.breaks.owin}
 \alias{evenly.spaced}
 \alias{exactdt}              
@@ -207,6 +211,7 @@
 \alias{fontify}
 \alias{forbidNA}
 \alias{forbid.logi}
+\alias{format.numberwithunit}
 \alias{FormatFaspFormulae}
 \alias{framebottomleft}
 \alias{fvexprmap}
@@ -216,6 +221,7 @@
 \alias{fvlegend}
 \alias{g3engine}
 \alias{g3Cengine}
+\alias{geomseq}
 \alias{greatest.common.divisor}
 \alias{getdataname}
 \alias{getdataobjects}
@@ -227,6 +233,7 @@
 \alias{getlastshift}
 \alias{getppmdatasubset}
 \alias{getppmOriginalCovariates}
+\alias{getRandomFieldsModelGen}
 \alias{getSpatstatVariable}
 \alias{getSumFun}
 \alias{geyercounts}
@@ -235,6 +242,7 @@
 \alias{good.names}
 \alias{good.correction.K}
 \alias{graphicsPars}            
+%\alias{gridadjacencymatrix} %DoNotExport
 \alias{gridindex}            
 \alias{grid1index}
 \alias{grokIndexVector}
@@ -322,13 +330,13 @@
 \alias{kppmMinCon}
 \alias{kppmPalmLik}
 \alias{kraever}
+\alias{kraeverRandomFields}
 \alias{labels.ppm}
 \alias{least.common.multiple}
 \alias{levels.im}
 \alias{levels<-.im}
 \alias{levelsAsFactor}
 \alias{lhs.of.formula}
-\alias{linequad}
 \alias{linearKengine}
 \alias{linearKmulti}
 \alias{linearKmulti.inhom}
@@ -347,13 +355,16 @@
 \alias{logi.engine}
 \alias{logLik.vblogit}
 \alias{lty2char}
+\alias{makeLinnetTolerance}
 \alias{maskLaslett}
 \alias{matsqrt}
 \alias{matchNameOrPosition}
+\alias{match2DkernelName}
 \alias{padtowidth}
 \alias{parbreak}
 \alias{passthrough}
 \alias{paste.expr}
+\alias{pasteN}
 \alias{plan.legend.layout}
 \alias{PoisSaddleApp}
 \alias{polyLaslett}
@@ -363,6 +374,7 @@
 \alias{prettydiscrete}
 \alias{putSpatstatVariable}
 \alias{lookup.im}
+\alias{lookup2DkernelInfo}
 \alias{majorminorversion}
 \alias{make.even.breaks}
 \alias{makefvlabel}
@@ -427,6 +439,7 @@
 \alias{no.trend.ppm}
 \alias{n.quad}
 \alias{numalign}
+\alias{numberwithunit}
 \alias{numeric.columns}
 \alias{nzpaste}
 \alias{objsurfEngine}
@@ -436,6 +449,7 @@
 \alias{orderstats}
 \alias{orderwhich}
 \alias{ordinal}
+\alias{ordinalsuffix}
 \alias{\%orifnull\%}  %DoNotExport
 %NAMESPACE export("%orifnull%")
 \alias{outdated.interact}
@@ -524,6 +538,7 @@
 \alias{print.mppm}
 \alias{print.msr}
 \alias{print.nnfun}
+\alias{print.numberwithunit}
 \alias{print.onearrow}
 \alias{print.parres}
 \alias{print.plotpairsim}
@@ -574,6 +589,7 @@
 \alias{quadBlockSizes}
 \alias{RandomFieldsSafe}
 \alias{ratfv}
+\alias{ratiotweak}
 \alias{recognise.spatstat.type}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
@@ -736,9 +752,12 @@
 \alias{trap.extra.arguments}
 \alias{trianglediameters}
 \alias{trim.mask}        
-\alias{truncline}        
+\alias{truncline}
+\alias{tapplysum}
 \alias{tweak.fv.entry}
 \alias{tweak.coefs}
+\alias{\%unit\%} %DoNotExport
+%NAMESPACE export("%unit%")
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unparen}
@@ -749,12 +768,13 @@
 \alias{update.ippm}
 \alias{update.rmhstart}
 \alias{uptrimat}
-\alias{validradius}        
+\alias{validradius}
+\alias{validate2Dkernel}
 \alias{validate.angles}        
 \alias{validate.lpp.coords}
 \alias{validate.mask}        
 \alias{validate.quad}        
-\alias{validposint}        
+\alias{validposint}
 \alias{vanilla.fv}
 \alias{varcountEngine}
 \alias{variablesinformula}
@@ -772,7 +792,6 @@
 \alias{warn.ignored.args}
 \alias{warn.once}
 \alias{waxlyrical}
-\alias{weighted.var}
 \alias{windows.mppm}
 \alias{w.quad}               
 \alias{x.quad}
@@ -885,7 +904,7 @@ change.default.expand(x, newdefault)
 checkbigmatrix(n, m, fatal, silent)
 checkfields(X,L)
 checksolve(M, action, descrip, target)
-check.finespacing(r, eps, win, context, action, rname)
+check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
 check.finite(x, context, xname, fatal, usergiven)
 check.hist.lengths(hist,breaks)
 check.in.range(x, r, fatal)
@@ -897,9 +916,11 @@ check.nvector(v, npoints, fatal, things, naok, warn, vname, oneok)
 check.nmatrix(m, npoints, fatal, things, naok, squarematrix, matchto, warn)
 check.1.integer(x, context, fatal)
 check.1.real(x, context, fatal)
+check.1.string(x, context, fatal)
 check.range(x, fatal)
 check.testfun(f, f1, X)
-choptext(\dots, prefix)
+choptext(\dots, prefix, indent)
+choptextline(st, w, prefix, indent)
 circticks(R, at, unit, start, clockwise, labels)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check=TRUE)
@@ -933,6 +954,7 @@ datagen.runifpointOnLines(n, L)
 datagen.runifpoisppOnLines(lambda, L)
 datagen.rpoisppOnLines(lambda, L, lmax, \dots, check)
 default.clipwindow(object, epsilon)
+default.linnet.tolerance(L)
 default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
 deltasuffstat(model, \dots, restrict, dataonly, force, quadsub, sparseOK)
@@ -942,6 +964,7 @@ densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     weights, edge, varcov,
                     diggle, sorted)
 densitypointsEngine(x, sigma, \dots,
+                    kernel, scalekernel,
                     weights, edge, varcov,
                     leaveoneout, diggle, sorted, spill, cutoff)
 diagnose.ppm.engine(object, \dots, type, typename, opt,
@@ -1024,6 +1047,7 @@ evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,
                 Reach,precomputed,savecomputed)
 evalPairPotential(X,P,E,pairpot,potpars,R)
+evaluate2Dkernel(kernel, x, y, sigma, varcov, \dots, scalekernel)
 even.breaks.owin(w)
 evenly.spaced(x, tol)
 exactdt(X, \dots)              
@@ -1059,6 +1083,7 @@ flipxypolygon(p)
 fontify(x, font)
 forbidNA(x, context, xname, fatal, usergiven)
 forbid.logi(object)
+\method{format}{numberwithunit}(x, \dots, collapse, modifier)
 FormatFaspFormulae(f, argname)
 framebottomleft(w)
 fvexprmap(x)
@@ -1068,6 +1093,7 @@ fvlabelmap(x, dot=TRUE)
 fvlegend(object, elang)
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
+geomseq(from, to, length.out)
 greatest.common.divisor(n,m)
 getdataname(defaultvalue, \dots, dataname)
 getdataobjects(nama, envir, datalist, fatal)
@@ -1079,6 +1105,7 @@ getlambda.lpp(lambda, X, \dots, update)
 getlastshift(X)
 getppmdatasubset(object)
 getppmOriginalCovariates(object)
+getRandomFieldsModelGen(model)
 getSpatstatVariable(name)
 getSumFun(abbreviation, classname, ismarked, fatal)
 geyercounts(U,X,r,sat,Xcounts,EqualPairs)
@@ -1087,6 +1114,7 @@ GLMpredict(fit, data, coefs, changecoef, type)
 good.names(nama, defaults, suffices)
 good.correction.K(X)
 graphicsPars(key)
+%gridadjacencymatrix(dims)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
 grokIndexVector(ind, len, nama)
@@ -1179,16 +1207,17 @@ kppmMinCon(X, Xname, po, clusters, control, statistic, statargs,
 kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax, 
            algorithm, DPP, \dots)
 kraever(package, fatal)
+kraeverRandomFields()
 \method{labels}{ppm}(object, \dots)
 least.common.multiple(n,m)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 levelsAsFactor(x)
 lhs.of.formula(x)
-linequad(X, Y, \dots, eps, nd)
 linearKengine(X, \dots, r, reweight, denom, correction, showworking)
 linearKmulti(X, I, J, r, \dots, correction)
-linearKmulti.inhom(X, I, J, lambdaI, lambdaJ, r, \dots, correction, normalise)
+linearKmulti.inhom(X, I, J, lambdaI, lambdaJ, r, \dots, correction,
+             normalise)
 linearpcfengine(X, \dots, r, reweight, denom, correction)
 linearpcfmulti(X, I, J, r, \dots, correction)
 linearpcfmulti.inhom(X, I, J, lambdaI, lambdaJ, r, \dots,
@@ -1210,13 +1239,16 @@ logi.engine(Q, trend, interaction, \dots,
             VB)
 \method{logLik}{vblogit}(object, \dots) 
 lty2char(i)
+makeLinnetTolerance
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
 matsqrt(x)
 matchNameOrPosition(expected, avail)
+match2DkernelName(kernel)
 padtowidth(a, b, justify)
 parbreak(terse)
 passthrough(.Fun, \dots, .Fname)
 paste.expr(x)
+pasteN(\dots)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
 PoisSaddleApp(beta, fi)
@@ -1231,6 +1263,7 @@ putSpatstatVariable(name, value)
 \method{[}{localpcfmatrix}(x, i, \dots)
 \method{[}{pp3}(x, i, drop, \dots)
 lookup.im(Z, x, y, naok, strict)
+lookup2DkernelInfo(kernel)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
 makefvlabel(op, accent, fname, sub, argname)
@@ -1305,6 +1338,7 @@ nndcumfun(X, \dots, r)
 no.trend.ppm(x)
 n.quad(Q)
 numalign(i, nmax, zero)
+numberwithunit(x, u)
 numeric.columns(M, logical, others)
 nzpaste(\dots, sep, collapse)
 objsurfEngine(objfun, optpar, objargs,
@@ -1318,6 +1352,7 @@ signalStatus(x, errors.only)
 orderstats(x, k, decreasing)
 orderwhich(x, k, decreasing)
 ordinal(k)
+ordinalsuffix(k)
 a \%orifnull\% b
 outdated.interact(object)
 overlap.trapezium(xa, ya, xb, yb, verb = FALSE)
@@ -1433,6 +1468,7 @@ primesbelow(nmax)
 \method{print}{mppm}(x, \dots)
 \method{print}{msr}(x, \dots)
 \method{print}{nnfun}(x, \dots)
+\method{print}{numberwithunit}(x, \dots)
 \method{print}{onearrow}(x, \dots)
 \method{print}{parres}(x, \dots)
 \method{print}{plotppm}(x, \dots)
@@ -1483,6 +1519,7 @@ quad.mppm(x)
 quadBlockSizes(nX, nD, p, nMAX, announce)
 RandomFieldsSafe()
 ratfv(df, numer, denom, \dots, ratio)
+ratiotweak(a, b, overzero, zerozero)
 recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
@@ -1615,7 +1652,7 @@ slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
                     weights, varcov, sorted)
 smoothpointsEngine(x, values, sigma, \dots,
-                    weights, varcov, leaveoneout, sorted)
+                    weights, varcov, leaveoneout, sorted, cutoff)
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
 spatstat.rawdata.location(\dots)
@@ -1670,9 +1707,10 @@ trap.extra.arguments(\dots, .Context, .Fatal)
 trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
 trim.mask(M, R, tolerant)
 truncline(x, nc)
-tweak.fv.entry(x, current.tag, new.labl=NULL, new.desc=NULL,
-new.tag=NULL)
+tapplysum(x, flist, do.names)
+tweak.fv.entry(x, current.tag, new.labl, new.desc, new.tag)
 tweak.coefs(model, new.coef)
+x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unparen(x)
@@ -1684,6 +1722,7 @@ unstackFilter(x)
 \method{update}{rmhstart}(object, \dots)
 uptrimat(x)
 validradius(r, caller)
+validate2Dkernel(kernel, fatal)
 validate.angles(angles, unit, guess)
 validate.lpp.coords(X, fatal, context)
 validate.mask(w, fatal=TRUE)        
@@ -1706,7 +1745,6 @@ verify.xypolygon(p, fatal=TRUE)
 warn.ignored.args(\dots, context)
 warn.once(key, \dots)
 waxlyrical(type, terse)
-weighted.var(x, w, na.rm)
 windows.mppm(x)
 w.quad(Q)               
 x.quad(Q)

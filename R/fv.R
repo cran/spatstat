@@ -4,7 +4,7 @@
 ##
 ##    class "fv" of function value objects
 ##
-##    $Revision: 1.139 $   $Date: 2016/04/25 02:34:40 $
+##    $Revision: 1.143 $   $Date: 2016/09/21 07:36:51 $
 ##
 ##
 ##    An "fv" object represents one or more related functions
@@ -67,7 +67,7 @@ fv <- function(x, argu="r", ylab=NULL, valu, fmla=NULL,
   if(missing(alim)) {
     ## Note: if alim is given as NULL, it is not changed.
     argue <- x[[argu]]
-    alim <- range(argue[is.finite(argue)], na.rm=TRUE)
+    alim <- range(argue[is.finite(argue)])
   } else if(!is.null(alim)) {
     if(!is.numeric(alim) || length(alim) != 2)
       stop(paste(sQuote("alim"), "should be a vector of length 2"))
@@ -815,6 +815,7 @@ rebadge.as.dotfun <- function(x, main, sub=NULL, i) {
     selected <- as.vector(nameindices[j])
   }
 
+  # validate choice of selected/dropped columns
   nama <- names(z)
   argu <- attr(x, "argu")
   if(!(argu %in% nama))
@@ -824,6 +825,12 @@ rebadge.as.dotfun <- function(x, main, sub=NULL, i) {
     stop(paste("The default column of function values",
                sQuote(valu), "must not be removed"))
 
+  # if the plot formula involves explicit mention of dropped columns,
+  # replace it by a generic formula
+  fmla <- as.formula(attr(x, "fmla"))
+  if(!all(variablesinformula(fmla) %in% nama)) 
+    fmla <- as.formula(. ~ .x, env=environment(fmla))
+  
   ## If range of argument was implicitly changed, adjust "alim"
   alim <- attr(x, "alim")
   rang <- range(z[[argu]])
@@ -832,7 +839,7 @@ rebadge.as.dotfun <- function(x, main, sub=NULL, i) {
   result <- fv(z, argu=attr(x, "argu"),
                ylab=attr(x, "ylab"),
                valu=attr(x, "valu"),
-               fmla=attr(x, "fmla"),
+               fmla=fmla,
                alim=alim,
                labl=attr(x, "labl")[selected],
                desc=attr(x, "desc")[selected],
@@ -1036,19 +1043,20 @@ with.fv <- function(data, expr, ..., fun=NULL, enclos=NULL) {
 
 range.fv <- local({
 
-  range1fv <- function(x, ..., na.rm=TRUE, finite=na.rm) {
+  getValues <- function(x) {
     xdat <- as.matrix(as.data.frame(x))
     yall <- fvnames(x, ".")
-    ydat <- xdat[, yall]
-    range(ydat, na.rm=na.rm, finite=finite)
+    vals <- xdat[, yall]
+    return(as.vector(vals))
   }
   
   range.fv <- function(..., na.rm=TRUE, finite=na.rm) {
     aarg <- list(...)
     isfun <- sapply(aarg, is.fv)
     if(any(isfun)) 
-      aarg[isfun] <- lapply(aarg[isfun], range1fv, na.rm=na.rm, finite=finite)
-    do.call(range, append(aarg, list(na.rm=na.rm, finite=finite)))
+      aarg[isfun] <- lapply(aarg[isfun], getValues)
+    z <- do.call(range, append(aarg, list(na.rm=na.rm, finite=finite)))
+    return(z)
   }
 
   range.fv
@@ -1083,9 +1091,10 @@ stieltjes <- function(f, M, ...) {
   ## increments of measure
   dM <- apply(Mother, 2, diff)
   dM <- rbind(dM, 0)
-  dM[is.na(dM)] <- 0
   ## integrate f(x) dM(x)
-  results <- apply(fx * dM, 2, sum)
+  f.dM <- fx * dM
+  f.dM[!is.finite(f.dM)] <- 0
+  results <- colSums(f.dM)
   results <- as.list(results)
   names(results) <- valuenames
   return(results)

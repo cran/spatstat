@@ -3,7 +3,7 @@
 #
 #  class of three-dimensional point patterns in rectangular boxes
 #
-#  $Revision: 1.24 $  $Date: 2016/02/11 10:17:12 $
+#  $Revision: 1.26 $  $Date: 2016/09/23 11:02:36 $
 #
 
 box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
@@ -145,9 +145,18 @@ print.summary.pp3 <- function(x, ...) {
 }
 
 plot.pp3 <- function(x, ..., eye=NULL, org=NULL, theta=25, phi=15,
-                     type=c("p", "n", "h")) {
+                     type=c("p", "n", "h"),
+                     box.back=list(col="pink"),
+                     box.front=list(col="blue", lwd=2)) {
   xname <- short.deparse(substitute(x))
   type <- match.arg(type)
+  # given arguments
+  argh <- list(...)
+  if(!missing(box.front)) argh$box.front <- box.front
+  if(!missing(box.back))  argh$box.back  <- box.back
+  # Now apply formal defaults above
+  formaldefaults <- list(box.front=box.front, box.back=box.back)
+  #'
   coo <- as.matrix(coords(x))
   xlim <- x$domain$xrange
   ylim <- x$domain$yrange
@@ -163,12 +172,13 @@ plot.pp3 <- function(x, ..., eye=NULL, org=NULL, theta=25, phi=15,
   ## determine default eye position and centre of view
   do.call(plot3Dpoints,
           resolve.defaults(list(xyz=coo, eye=eye, org=org, type=type),
-                           list(...),
+                           argh,
                            deefolts,
+                           formaldefaults,
                            list(main=xname,
-                                xlim=x$domain$xrange,
-                                ylim=x$domain$yrange,
-                                zlim=x$domain$zrange)))
+                                xlim=xlim,
+                                ylim=ylim,
+                                zlim=zlim)))
 }
 
 "[.pp3" <- function(x, i, drop=FALSE, ...) {

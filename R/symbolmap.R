@@ -1,13 +1,14 @@
 ##
 ## symbolmap.R
 ##
-##   $Revision: 1.28 $  $Date: 2016/04/25 02:34:40 $
+##   $Revision: 1.34 $  $Date: 2016/09/12 10:50:51 $
 ##
 
 symbolmap <- local({
 
   known.unknowns <- c("shape", "pch", "chars",
                       "size", "cex",
+                      "direction", "arrowtype", "headlength", "headangle", 
                       "col", "cols", "fg", "bg",
                       "lty", "lwd", "border", "fill",
                       "etch")
@@ -113,7 +114,7 @@ symbolmap <- local({
   reptolength <- function(z, n) { rep.int(z, n)[1:n] }
   
   MapDiscrete <- function(f, x, i) {
-    if(is.function(f)) f(x) else f[i]
+    if(is.function(f)) f(x) else if(length(f) == 1) rep.int(f, length(x)) else f[i]
   }
   
   MapContinuous <- function(f, x) {
@@ -264,14 +265,14 @@ invoke.symbolmap <- local({
       ## plot
       if(any(i <- (shape == "circles") & as.logical(etch))) 
         do.call.matched(symbols,
-                        c(list(x=x[i], y=y[i], circles=size[i]),
+                        c(list(x=x[i], y=y[i], circles=size[i]/2),
                           other.fixed,
                           lapply(other.vec, "[", i=i),
                           list(lwd=anti.lwd[i], fg=anti.fg[i])),
                         extrargs=c("lwd", "lty"))
       if(any(i <- (shape == "circles")))
         do.call.matched(symbols,
-                        c(list(x=x[i], y=y[i], circles=size[i]),
+                        c(list(x=x[i], y=y[i], circles=size[i]/2),
                           other.fixed,
                           lapply(other.vec, "[", i=i),
                           list(lwd=lwd[i], fg=fg[i])),
@@ -290,24 +291,81 @@ invoke.symbolmap <- local({
                           lapply(other.vec, "[", i=i),
                           list(lwd=lwd[i], fg=fg[i])),
                         extrargs=c("lwd", "lty"))
+      if(any(i <- (shape == "arrows") & as.logical(etch)))
+        do.call.matched(do.arrows,
+                        c(list(x=x[i], y=y[i], len=size[i]),
+                          other.fixed,
+                          lapply(other.vec, "[", i=i),
+                          list(lwd=anti.lwd[i], cols=anti.fg[i])),
+                        extrargs=c("cols", "col", "lwd", "lty"))
+      if(any(i <- (shape == "arrows"))) 
+        do.call.matched(do.arrows,
+                        c(list(x=x[i], y=y[i], len=size[i]),
+                          other.fixed,
+                          lapply(other.vec, "[", i=i),
+                          list(lwd=lwd[i], cols=fg[i])),
+                        extrargs=c("cols", "col", "lwd", "lty"))
     }
-    return(max(size * ifelse(shape == "circles", 2, 1)))
+    return(max(size))
   }
 
+  do.arrows <- function(x, y, len, direction=0, arrowtype=2, ...,
+                        headlength=len * 0.4, 
+                        headangle=40,
+                        cols=col, col=par('fg'),
+                        lwd=1, lty=1) {
+    #' vectorise all arguments
+    df <- data.frame(x=x, y=y, len=len, direction=direction,
+                     arrowtype=arrowtype, headangle=headangle,
+                     cols=cols, lwd=lwd, lty=lty)
+    with(df, {
+      alpha <- direction * pi/180
+      dx <- len * cos(alpha)/2
+      dy <- len * sin(alpha)/2
+      x0 <- x - dx
+      x1 <- x + dx
+      y0 <- y - dy
+      y1 <- y + dy
+      segments(x0, y0, x1, y1, ..., col=cols, lty=lty, lwd=lwd)
+      if(any(arrowtype != 0)) {
+        halfangle <- (headangle/2) * pi/180
+        beta1 <- alpha + halfangle
+        beta2 <- alpha - halfangle
+        hx1 <- headlength * cos(beta1)
+        hy1 <- headlength * sin(beta1)
+        hx2 <- headlength * cos(beta2)
+        hy2 <- headlength * sin(beta2)
+        if(any(left <- (arrowtype %in% c(1,3)))) {
+          segments(x0[left], y0[left], (x0 + hx1)[left], (y0 + hy1)[left],
+                   ..., col=cols[left], lwd=lwd[left], lty=lty[left])
+          segments(x0[left], y0[left], (x0 + hx2)[left], (y0 + hy2)[left],
+                   ..., col=cols[left], lwd=lwd[left], lty=lty[left])
+        }
+        if(any(right <- (arrowtype %in% c(2,3)))) {
+          segments(x1[right], y1[right], (x1 - hx1)[right], (y1 - hy1)[right],
+                   ..., col=cols[right], lwd=lwd[right], lty=lty[right])
+          segments(x1[right], y1[right], (x1 - hx2)[right], (y1 - hy2)[right],
+                   ..., col=cols[right], lwd=lwd[right], lty=lty[right])
+        }
+      }
+    })
+    return(invisible(NULL))
+  }
+  
   ## main function
-  invoke.symbolmap <- function(map, values, x, y=NULL, ...,
+  invoke.symbolmap <- function(map, values, x=NULL, y=NULL, ...,
                                  add=FALSE, do.plot=TRUE,
                                  started = add && do.plot) {
     if(!inherits(map, "symbolmap"))
       stop("map should be an object of class 'symbolmap'")
-    ## function will return maximum size of symbols plotted.
-    maxsize <- 0
-    if(do.plot) {
+    if(hasxy <- (!is.null(x) || !is.null(y))) {
       xy <- xy.coords(x, y)
       x <- xy$x
       y <- xy$y
-      if(!add) plot(x, y, type="n", ...)
-    }
+    } 
+    ## function will return maximum size of symbols plotted.
+    maxsize <- 0
+    if(do.plot && !add) plot(x, y, type="n", ...)
     force(values)
     g <- map(values)
     parnames <- colnames(g)
@@ -342,7 +400,7 @@ invoke.symbolmap <- local({
       ## value is max(cex)
       ## guess size of one character
       charsize <- if(started) max(par('cxy')) else
-                    max(sidelengths(boundingbox(x,y))/40)
+                  if(hasxy) max(sidelengths(boundingbox(x,y))/40) else 1/40
       maxsize <- max(maxsize, charsize * ms)
     }
     ## display using 'symbols'
@@ -418,7 +476,8 @@ plot.symbolmap <- function(x, ..., main,
     if(is.null(ylim)) ylim <- usr[3:4]
   } else {
     ## create new plot
-    zz <- c(0, 1)
+    maxdiam <- invoke.symbolmap(map, vv, do.plot=FALSE, started=FALSE)
+    zz <- c(0, max(1, maxdiam))
     if(is.null(xlim) && is.null(ylim)) {
       if(vertical) {
         xlim <- zz

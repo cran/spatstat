@@ -1,7 +1,7 @@
 #
 # linearpcf.R
 #
-# $Revision: 1.14 $ $Date: 2015/10/21 09:06:57 $
+# $Revision: 1.18 $ $Date: 2016/07/18 03:48:05 $
 #
 # pair correlation function for point pattern on linear network
 #
@@ -14,9 +14,8 @@ linearpcf <- function(X, r=NULL, ..., correction="Ang") {
                              best="Ang"),
                            multi=FALSE)
   # extract info about pattern
-  sX <- summary(X)
-  np <- sX$npoints
-  lengthL <- sX$totlength
+  np <- npoints(X)
+  lengthL <- volume(domain(X))
   # compute
   denom <- np * (np - 1)/lengthL
   g <- linearpcfengine(X, r=r, ..., denom=denom, correction=correction)
@@ -35,7 +34,7 @@ linearpcf <- function(X, r=NULL, ..., correction="Ang") {
 }
 
 linearpcfinhom <- function(X, lambda=NULL, r=NULL,  ...,
-                           correction="Ang", normalise=TRUE) {
+                           correction="Ang", normalise=TRUE, normpower=1) {
   stopifnot(inherits(X, "lpp"))
   correction <- pickoption("correction", correction,
                            c(none="none",
@@ -44,16 +43,20 @@ linearpcfinhom <- function(X, lambda=NULL, r=NULL,  ...,
                            multi=FALSE)
   if(is.null(lambda))
     linearpcf(X, r=r, ..., correction=correction)
+  if(normalise) {
+    check.1.real(normpower)
+    stopifnot(normpower >= 1)
+  }
   # extract info about pattern
-  sX <- summary(X)
-#  np <- sX$npoints
-  lengthL <- sX$totlength
+  lengthL <- volume(domain(X))
   #
   lambdaX <- getlambda.lpp(lambda, X, ...)
   #
   invlam <- 1/lambdaX
   invlam2 <- outer(invlam, invlam, "*")
-  denom <- if(!normalise) lengthL else sum(invlam)
+  denom <- if(!normalise) lengthL else
+           if(normpower == 1) sum(invlam) else
+           lengthL * (sum(invlam)/lengthL)^normpower
   g <- linearpcfengine(X, ..., r=r,
                        reweight=invlam2, denom=denom, correction=correction)
   # extract bandwidth
@@ -81,17 +84,12 @@ linearpcfengine <- function(X, ..., r=NULL,
   # ensure distance information is present
   X <- as.lpp(X, sparse=FALSE)
   # extract info about pattern
-#  sX <- summary(X)
-#  np <- sX$npoints
-#  lengthL <- sX$totlength
   np <- npoints(X)
   # extract linear network
-  L <- X$domain
-  # extract points
-  Y <- as.ppp(X)
-  W <- Y$window
+  L <- domain(X)
+  W <- Window(L)
   # determine r values
-  rmaxdefault <- 0.98 * circumradius(L)
+  rmaxdefault <- 0.98 * boundingradius(L)
   breaks <- handle.r.b.args(r, NULL, W, rmaxdefault=rmaxdefault)
   r <- breaks$r
   rmax <- breaks$max
@@ -125,10 +123,12 @@ linearpcfengine <- function(X, ..., r=NULL,
      edgewt <- 1
   else {
      # inverse m weights (Wei's correction)
+     # determine tolerance
+     toler <- default.linnet.tolerance(L)
      # compute m[i,j]
      m <- matrix(1, np, np)
      for(j in 1:np) 
-       m[ -j, j] <- countends(L, Y[-j], D[-j,j])
+       m[ -j, j] <- countends(L, X[-j], D[-j,j], toler=toler)
      edgewt <- 1/m
   }
   # compute pcf

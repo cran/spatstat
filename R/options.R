@@ -3,7 +3,7 @@
 #
 #     Spatstat options and other internal states
 #
-#    $Revision: 1.71 $   $Date: 2016/07/06 07:15:05 $
+#    $Revision: 1.76 $   $Date: 2016/09/13 04:51:32 $
 #
 #
 
@@ -124,7 +124,7 @@ warn.once <- function(key, ...) {
        ),
        densityTransform=list(
          ## use experimental new C routines for 'density.ppp'
-         default=FALSE,
+         default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        ),
@@ -470,13 +470,31 @@ warn.once <- function(key, ...) {
          valid="a single logical value"
        ),
        check.RandomFields.loaded=list(
-         # this is working OK so no need to check
+         # this is working OK so no need to check unless debugging
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       check.RandomFieldsUtils.loaded=list(
+         # this is working OK so no need to check unless debugging
          default=FALSE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        ),
        Clinequad = list(
          # use C code for 'linequad'
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       Ccountends = list(
+         # use C code for 'countends'
+         default=TRUE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       Clinearradius = list(
+         # use C code for 'boundingradius.linnet'
          default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"

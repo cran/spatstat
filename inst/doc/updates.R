@@ -10,16 +10,17 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:41-45
+### code chunk number 2: updates.Rnw:41-46
 ###################################################
 z <- read.table("packagesizes.txt", header=TRUE)
 z$date <- as.Date(z$date)
 changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
-newdat <- changes[["ndatasets"]]
+newobj <- changes[["nobjects"]]
+newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:55-60
+### code chunk number 3: updates.Rnw:56-61
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -29,7 +30,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:66-71
+### code chunk number 4: updates.Rnw:67-72
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -40,7 +41,7 @@ text(as.Date("2013-01-01"), 50, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:1079-1083
+### code chunk number 5: updates.Rnw:1250-1254
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -49,7 +50,7 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:1089-1090 (eval = FALSE)
+### code chunk number 6: updates.Rnw:1260-1261 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

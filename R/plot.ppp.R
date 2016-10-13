@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.87 $	$Date: 2016/06/14 02:26:13 $
+#	$Revision: 1.90 $	$Date: 2016/07/25 09:26:31 $
 #
 #
 #--------------------------------------------------------------------------
@@ -101,7 +101,7 @@ plot.ppp <- local({
         shapedefault <-
           if(!assumecircles) list() else list(shape="circles")
         cexfun <- function(x, scal=1) { scal * x }
-        circfun <- function(x, scal=1) { scal * x/2 }
+        circfun <- function(x, scal=1) { scal * x }
         formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
         sizedefault <-
           if(sizegiven) list() else
@@ -112,7 +112,7 @@ plot.ppp <- local({
           if(!assumecircles) list() else
           list(shape=function(x) { ifelse(x >= 0, "circles", "squares") })
         cexfun <- function(x, scal=1) { scal * abs(x) }
-        circfun <- function(x, scal=1) { scal * ifelse(x >= 0, x/2, -x) }
+        circfun <- function(x, scal=1) { scal * abs(x) }
         formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
         sizedefault <-
           if(sizegiven) list() else
@@ -129,11 +129,25 @@ plot.ppp <- local({
     ##  ...........  non-numeric marks .........................
     um <- if(is.factor(marx)) levels(marx) else sort(unique(marx))
     ntypes <- length(um)
-    ## resolve parameters 'chars' and 'cols'
-    chars <- default.charmap(ntypes, chars)
     if(!is.null(cols))
       cols <- rep.int(cols, ntypes)[1:ntypes]
-    g <- symbolmap(inputs=um, ..., chars=chars, cols=cols)
+    if(shapegiven && sizegiven) {
+      #' values mapped to symbols (shape and size specified)
+      g <- symbolmap(inputs=um, ..., cols=cols)
+    } else if(!shapegiven) {
+      #' values mapped to 'pch'
+      chars <- default.charmap(ntypes, chars)
+      g <- symbolmap(inputs=um, ..., chars=chars, cols=cols)
+    } else {
+      #' values mapped to symbols
+      #' determine size
+      scal <- mark.scale.default(rep(1, npoints(x)),
+                                 Window(x), 
+                                 maxsize=maxsize,
+                                 meansize=meansize,
+                                 characters=FALSE)
+      g <- symbolmap(inputs=um, ..., size=scal, cols=cols)
+    }
     return(g)
   }
                                   
@@ -333,9 +347,12 @@ plot.ppp <- local({
   main <- pt$main
   nlines <- pt$nlines
   blankmain <- if(nlines == 0) "" else rep("  ", nlines)
-  cex.main <- resolve.1.default(list(cex.main=1), list(...))
+  rez <- resolve.defaults(list(...),
+                          list(cex.main=1,
+                               xlim=NULL,
+                               ylim=NULL))
   plot(BB, type="n", add=add, main=blankmain, show.all=show.all,
-       cex.main=cex.main)
+       cex.main=rez$cex.main, xlim=rez$xlim, ylim=rez$ylim)
 
   if(sick) {
     if(show.window) {

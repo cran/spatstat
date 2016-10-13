@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.46-1
-Nickname: Spoiler Alert
-Date: 2016-07-08
+Version: 1.47-0
+Nickname: Responsible Gambler
+Date: 2016-10-12
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -20,6 +20,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	by M. Adepeju;
         C. Anderson; 
         Q.W. Ang; 
+        M. Austenfeld;
 	S. Azaele; 
 	M. Baddeley;
 	C. Beale; 
@@ -47,6 +48,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	P. Dalgaard; 
 	M. D'Antuono;
         S. Das;
+	T. Davies;
 	P.J. Diggle; 
 	P. Donnelly;
 	I. Dryden; 
@@ -80,7 +82,8 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	K. Hornik; 
 	P. Hunziker; 
 	J. Hywood;
-	R. Ihaka; 
+	R. Ihaka;
+	C. Icos; 
 	A. Jammalamadaka;
 	R. John-Chandran; 
 	D. Johnson; 
@@ -105,12 +108,14 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	J. Mateu;
 	P. McCullagh; 
 	U. Mehlig;
+	F. Mestre;
 	S. Meyer; 
 	X.C. Mi;
 	L. De Middeleer;
 	R.K. Milne; 
         E. Miranda;
 	J. Moller; 
+	M. Moradi;
 	V. Morera Pujol; 
 	E. Mudrak;
         G.M. Nair;
@@ -187,7 +192,7 @@ Depends: R (>= 3.3.0), stats, graphics, grDevices, utils, methods,
 Imports: mgcv, Matrix, deldir (>= 0.0-21), abind, tensor, polyclip (>=
         1.5-0), goftest
 Suggests: sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
-        RandomFields (>= 3.0.0)
+        RandomFields (>= 3.1.24.1), RandomFieldsUtils(>= 0.3.3.1)
 Description: Comprehensive open-source toolbox for analysing Spatial Point Patterns. Focused mainly on two-dimensional point patterns, including multitype/marked points, in any spatial region. Also supports three-dimensional point patterns, space-time point patterns in any number of dimensions, point patterns on a linear network, and patterns of other geometrical objects. Supports spatial covariate data such as pixel images. 
 	Contains over 2000 functions for plotting spatial data, exploratory data analysis, model-fitting, simulation, spatial sampling, model diagnostics, and formal inference. 
 	Data types include point patterns, line segment patterns, spatial windows, pixel images, tessellations, and linear networks. 
@@ -201,6 +206,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2016-07-08 09:01:51 UTC; adrian
+Packaged: 2016-10-12 08:04:08 UTC; adrian
 Repository: CRAN
-Date/Publication: 2016-07-08 17:23:44
+Date/Publication: 2016-10-13 01:00:59

@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.209 $    $Date: 2016/06/30 01:37:39 $
+#    $Revision: 1.226 $    $Date: 2016/10/04 02:58:56 $
 #
 #
 matrowsum <- function(x) {
@@ -42,41 +42,6 @@ apply23sum <- function(x) {
     result[,k] <- matcolsum(x[,,k])
   }
   result
-}
-    
-#######################
-#
-#    whist      weighted histogram
-#
-
-whist <- function(x, breaks, weights=NULL) {
-    N <- length(breaks)
-    if(length(x) == 0) 
-      h <- numeric(N+1)
-    else {
-      # classify data into histogram cells (breaks need not span range of data)
-      cell <- findInterval(x, breaks, rightmost.closed=TRUE)
-      # values of 'cell' range from 0 to N.
-      nb <- N + 1L
-      if(is.null(weights)) {
-        ## histogram
-        h <- tabulate(cell+1L, nbins=nb)
-      } else {
-        ##  weighted histogram
-        if(!spatstat.options("Cwhist")) {
-          cell <- factor(cell, levels=0:N)
-          h <- unlist(lapply(split(weights, cell), sum, na.rm=TRUE))
-        } else {
-          h <- .Call("Cwhist",
-                     as.integer(cell), as.double(weights), as.integer(nb))
-        }
-      }
-    }
-    h <- as.numeric(h)
-    y <- h[2:N]
-    attr(y, "low") <- h[1]
-    attr(y, "high") <- h[N+1]
-    return(y)
 }
 
 ######################
@@ -284,7 +249,9 @@ prange <- function(x) {
 }
 
   
-ordinal <- function(k) {
+ordinal <- function(k) paste(k, ordinalsuffix(k), sep="")
+
+ordinalsuffix <- function(k) {
   last <- abs(k) %% 10
   lasttwo <- abs(k) %% 100
   isteen <- (lasttwo > 10 & lasttwo < 20)
@@ -293,7 +260,7 @@ ordinal <- function(k) {
                           ifelse(last == 2, "nd",
                                  ifelse(last == 3, "rd",
                                         "th"))))
-  return(paste(k, ending, sep=""))
+  return(ending)
 }
 
 articlebeforenumber <- function(k) {
@@ -322,6 +289,8 @@ revcumsum <- function(x) {
     return(z$x)
   }
 }
+
+## ............. sequences ...................
 
 prolongseq <- function(x, newrange, step=NULL) {
   ## Extend a sequence x so that it covers the new range.
@@ -395,6 +364,16 @@ fillseq <- function(x, step=NULL) {
   return(list(xnew=y, i=i))
 }
 
+geomseq <- function(from, to, length.out) {
+  if(from <= 0 || to <= 0) stop("range limits must be positive")
+  y <- exp(seq(from=log(from), to=log(to), length.out=length.out))
+  y[1] <- from  #' avoid numerical error
+  y[length.out] <- to
+  return(y)
+}
+
+## ............. ranges ...................
+
 intersect.ranges <- function(a, b, fatal=TRUE) {
   if(!is.null(a) && !is.null(b)) {
     lo <- max(a[1],b[1])
@@ -463,6 +442,8 @@ niceround <- function(x, m=c(1,2,5,10)) {
   z <- y[which.min(abs(y - x))]
   return(z)
 }
+
+## ........... progress reports .....................
 
 progressreport <- local({
 
@@ -978,6 +959,16 @@ check.1.integer <- function(x, context="", fatal=TRUE) {
   return(TRUE)
 }
 
+check.1.string <- function(x, context="", fatal=TRUE) {
+  xname <- deparse(substitute(x))
+  if(!is.character(x) || length(x) != 1) {
+    whinge <-  paste(sQuote(xname), "should be a single character string")
+    if(nzchar(context)) whinge <- paste(context, whinge)
+    return(complaining(whinge, fatal=fatal, value=FALSE))
+  }
+  return(TRUE)
+}
+
 explain.ifnot <- function(expr, context="") {
   ex <- deparse(substitute(expr))
   ans <- expr
@@ -1093,6 +1084,13 @@ nzpaste <- function(..., sep=" ", collapse=NULL) {
   v <- list(...)
   ok <- sapply(lapply(v, nzchar), any)
   do.call(paste, append(v[ok], list(sep=sep, collapse=collapse)))
+}
+
+pasteN <- function(...) {
+  # remove NULL arguments then paste
+  argh <- list(...)
+  argh <- argh[!sapply(argh, is.null)]
+  do.call(paste, argh)
 }
 
 substringcount <- function(x, y) {
@@ -1336,20 +1334,6 @@ print.timed <- function(x, ...) {
   return(invisible(NULL))
 }
 
-# wrapper for computing weighted variance of a vector
-# Note: this includes a factor 1 - sum(v^2) in the denominator
-# where v = w/sum(w). See help(cov.wt)
-
-weighted.var <- function(x, w, na.rm=FALSE) {
-  bad <- is.na(w) | is.na(x)
-  if(any(bad)) {
-    if(!na.rm) return(NA_real_)
-    ok <- !bad
-    x <- x[ok]
-    w <- w[ok]
-  }
-  cov.wt(matrix(x, ncol=1),w)$cov[]
-}
 
 # efficient replacements for ifelse()
 # 'a' and 'b' are single values
@@ -1561,25 +1545,6 @@ there.is.no.try <- function(...) {
   return(y)
 }
 
-# require a namespace and optionally check whether it is attached
-kraever <- function(package, fatal=TRUE) {
-  if(!requireNamespace(package, quietly=TRUE)) {
-    if(fatal)
-      stop(paste("The package", sQuote(package), "is required"),
-           call.=FALSE)
-    return(FALSE)
-  }
-  if(spatstat.options(paste("check", package, "loaded", sep=".")) &&
-    !isNamespaceLoaded(package)){
-    if(fatal)
-      stop(paste("The package", sQuote(package),
-                 "must be loaded: please type",
-                 sQuote(paste0("library", paren(package)))),
-           call.=FALSE)
-    return(FALSE)
-  }
-  return(TRUE)
-}
 
 ## replace recognise keywords by other keywords
 mapstrings <- function(x, map=NULL) {
@@ -1731,6 +1696,18 @@ matchNameOrPosition <- function(expected, avail) {
   return(j)
 }
 
+ratiotweak <- function(a, b, overzero=NA, zerozero=overzero) {
+  # map x/0 to 'overzero' and 0/0 to 'zerozero'
+  result <- a/b
+  bzero <- (b == 0)
+  result[ bzero ] <- overzero
+  if(!missing(zerozero)) {
+    abzero <- bzero & (a == 0)
+    result[ abzero ] <- zerozero
+  }
+  return(result)
+}
+
 natozero <- function(x) {
   #' map NA to zero (e.g. in tapply)
   x[is.na(x)] <- 0
@@ -1743,4 +1720,3 @@ indexCartesian <- function(nn) {
   as.matrix(do.call(expand.grid, lapply(nn, seq_len)))
 }
 
-  
