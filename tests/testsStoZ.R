@@ -1,7 +1,7 @@
 #
 #  tests/segments.R
 #
-#  $Revision: 1.8 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.10 $  $Date: 2016/12/03 02:57:32 $
 
 require(spatstat)
 
@@ -16,6 +16,11 @@ X[W]
 X <- psp(runif(10),runif(10),runif(10),runif(10), window=owin())
 Z <- as.mask.psp(X)
 Z <- pixellate(X)
+
+# more tests of lppm code
+
+fit <- lppm(unmark(chicago) ~ polynom(x,y,2))
+Z <- predict(fit)
 
 # test of distppll pointed out by Ang Qi Wei
 
@@ -81,6 +86,16 @@ if(abs(s1 - s2)/s2 > 0.01) {
              "sum(pixellate(X)) = ", s1,
              "!=", s2, "= sum(lengths.psp(X))"))
 }
+
+#' tests of density.psp
+Y <- as.psp(simplenet)
+YC <- density(Y, 0.2, method="C", edge=FALSE, dimyx=64)
+YI <- density(Y, 0.2, method="interpreted", edge=FALSE, dimyx=64)
+YF <- density(Y, 0.2, method="FFT", edge=FALSE, dimyx=64)
+xCI <- max(abs(YC/YI - 1))
+xFI <- max(abs(YF/YI - 1))
+if(xCI > 0.01) stop(paste("density.psp C algorithm relative error =", xCI))
+if(xFI > 0.01) stop(paste("density.psp FFT algorithm relative error =", xFI))
 
 })
 #
@@ -386,7 +401,7 @@ local({
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.1 $   $Date: 2013/07/25 10:26:09 $
+#   $Revision: 1.2 $   $Date: 2016/12/12 09:14:05 $
 #
 #  Test undocumented hacks, etc
 
@@ -394,6 +409,18 @@ require(spatstat)
 local({
   # pixellate.ppp accepts a data frame of weights
   pixellate(cells, weights=data.frame(a=1:42, b=42:1))
+
+  # tapplysum
+  aa <- factor(letters[1:3])
+  bb <- factor(letters[1:4])[c(1,2,2)]
+  xx <- round(runif(3), 3)
+  yy <- tapplysum(xx, list(A=aa, B=bb), do.names=TRUE)
+  zz <- tapply(xx, list(A=aa, B=bb), sum)
+  zz[is.na(zz)] <- 0
+  if(any(yy != zz))
+    stop("tapplysum does not agree with tapply(, sum)")
+  # tapplysum with zero-length data
+  tapplysum(xx[FALSE], list(A=aa[FALSE], B=bb[FALSE]), do.names=TRUE)
 })
 
 

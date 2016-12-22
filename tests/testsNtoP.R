@@ -34,7 +34,7 @@ local({
 #
 # Also test whether minnndist(X) == min(nndist(X))
 #
-#   $Revision: 1.16 $  $Date: 2015/12/29 08:54:49 $
+#   $Revision: 1.17 $  $Date: 2016/11/29 06:25:15 $
 #
 
 require(spatstat)
@@ -188,6 +188,26 @@ local({
     stop("maxnndist(X) disagrees with max(nndist(X))")
 })
 
+local({
+  # tests for has.close()
+  # (the default method uses nndist or pairdist, and can be trusted!)
+  a <- has.close(redwood, 0.05)
+  b <- has.close.default(redwood, 0.05)
+  if(any(a != b)) stop("Incorrect result for has.close(X, r)")
+
+  a <- has.close(redwood, 0.05, periodic=TRUE)
+  a <- has.close.default(redwood, 0.05, periodic=TRUE)
+  if(any(a != b)) stop("Incorrect result for has.close(X, r, periodic=TRUE)")
+
+  Y <- split(amacrine)
+  a <- with(Y, has.close(on, 0.05, off))
+  b <- with(Y, has.close.default(on, 0.05, off))
+  if(any(a != b)) stop("Incorrect result for has.close(X, r, Y)")
+
+  a <- with(Y, has.close(on, 0.05, off, periodic=TRUE))
+  b <- with(Y, has.close.default(on, 0.05, off, periodic=TRUE))
+  if(any(a != b)) stop("Incorrect result for has.close(X, r, Y, periodic=TRUE)")
+})
 
 ## 
 ##    tests/percy.R
@@ -335,7 +355,7 @@ local({
 #
 # Tests of ppm(method='logi')
 #
-# $Revision: 1.3 $  Date$
+# $Revision: 1.4 $  Date$
 #
 
 require(spatstat)
@@ -343,9 +363,11 @@ local({
   fit <- ppm(cells ~x, method="logi")
   f <- fitted(fit)
   p <- predict(fit)
+  u <- summary(fit)
   fitS <- ppm(cells ~x, Strauss(0.08), method="logi")
   fS <- fitted(fitS)
   pS <- predict(fitS)
+  uS <- summary(fitS)
   if(spatstat.options("allow.logi.influence")) {
     a <- leverage(fit)
     b <- influence(fit)
@@ -354,6 +376,16 @@ local({
     bS <- influence(fitS)
     dS <- dfbetas(fitS)
   }
+})
+
+local({
+  #' logistic fit to data frame of covariates
+  z <- c(rep(TRUE, 5), rep(FALSE, 5))
+  df <- data.frame(A=z + 2* runif(10),
+                   B=runif(10))
+  Y <- quadscheme.logi(runifpoint(5), runifpoint(5))
+  fut <- ppm(Y ~ A+B, data=df, method="logi")
+  sf <- summary(fut)
 })
 #
 #   tests/ppmmarkorder.R

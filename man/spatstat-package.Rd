@@ -1722,16 +1722,20 @@
 }
 \section{Acknowledgements}{
   Kasper Klitgaard Berthelsen,
-  Ottmar Cronie, 
+  Ottmar Cronie,
+  Yongtao Guan,
   Ute Hahn,
   Abdollah Jalilian,
   Marie-Colette van Lieshout,
   Tuomas Rajala,
-  Dominic Schuhmacher and
+  Suman Rakshit,
+  Dominic Schuhmacher,
   Rasmus Waagepetersen
+  and
+  Hangsheng Wang
   made substantial contributions of code.
 
-  Additional contributions by
+  Additional contributions and suggestions from
   Monsuru Adepeju,
   Corey Anderson,
   Ang Qi Wei,
@@ -1759,6 +1763,7 @@
   Y.C. Chin,
   Bjarke Christensen,
   Jean-Francois Coeurjolly,
+  Kim Colyvas,
   Robin Corria Ainslie,
   Marcelino de la Cruz,
   Peter Dalgaard,
@@ -1836,6 +1841,7 @@
   Virginia Morera Pujol,
   Erika Mudrak,
   Gopalan Nair,
+  Nader Najari,
   Nicoletta Nava,
   Linda Stougaard Nielsen,
   Felipe Nunes,

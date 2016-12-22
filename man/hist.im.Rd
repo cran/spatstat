@@ -49,11 +49,15 @@
 \seealso{
   \code{\link{spatialcdf}} for the cumulative distribution function
   of an image.
-  
+
   \code{\link{hist}},
   \code{\link{hist.default}},
   \code{\link{barplot}}.
 
+  For other statistical graphics such as Q-Q plots,
+  use \code{X[]} to extract the pixel values of image \code{X},
+  and apply the usual statistical graphics commands.
+  
   For information about pixel images see
   \code{\link{im.object}},
   \code{\link{summary.im}}.
@@ -63,11 +67,9 @@
   hist(X)
   hist(cut(X,3))
 }
-\author{\adrian
-  
-  
+\author{
+  \adrian
   and \rolf
-  
 }
 \keyword{spatial}
 \keyword{methods}

@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.98 $	$Date: 2016/03/27 07:17:21 $
+#	$Revision: 1.100 $	$Date: 2016/12/19 09:13:07 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -460,7 +460,7 @@ predict.ppm <- local({
                                 changecoef=changedcoef)
       ##
       if(type == "intensity") 
-        z <- PoisSaddleApp(z, fitin(model))
+        z <- PoisSaddle(z, fitin(model))
       
       ##
       if(needSE) {
@@ -693,7 +693,7 @@ GLMpredict <- function(fit, data, coefs, changecoef=TRUE,
     # do it by hand
     fmla <- formula(fit)
     data$.mpl.Y <- 1
-    fram <- model.frame(fmla, data=data)
+    fram <- model.frame(fmla, data=data, na.action=NULL)
     # linear predictor
     mm <- model.matrix(fmla, data=fram)
     # ensure all required coefficients are present

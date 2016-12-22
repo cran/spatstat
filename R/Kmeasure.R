@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.54 $    $Date: 2016/07/10 08:06:15 $
+#           $Revision: 1.58 $    $Date: 2016/11/07 09:05:24 $
 #
 #     Kmeasure()         compute an estimate of the second order moment measure
 #
@@ -40,20 +40,19 @@ Kmeasure <- function(X, sigma, edge=TRUE, ..., varcov=NULL) {
 }
 
 second.moment.calc <- function(x, sigma=NULL, edge=TRUE,
-                               what="Kmeasure", debug=FALSE, ...,
-                               varcov=NULL, expand=FALSE) {
+                               what=c("Kmeasure", "kernel", "smooth", 
+                                 "Bartlett", "edge", "smoothedge", "all"),
+                               ..., 
+                               varcov=NULL, expand=FALSE, debug=FALSE) {
   if(is.null(sigma) && is.null(varcov))
     stop("must specify sigma or varcov")
-  choices <- c("kernel", "smooth", "Kmeasure", "Bartlett", "edge", "all", "smoothedge")
-  if(!(what %in% choices))
-    stop(paste("Unknown choice: what = ", sQuote(what),
-               "; available options are:",
-               paste(sQuote(choices), collapse=", ")))
+  what <- match.arg(what)
   sig <- if(!is.null(sigma)) sigma else max(c(diag(varcov), sqrt(det(varcov))))
 
   xtype <- if(is.ppp(x)) "ppp" else
-           if(is.im(x)) "im" else 
-           if(all(unlist(lapply(x, is.im)))) "imlist" else
+           if(is.im(x)) "im" else
+           if(inherits(x, "imlist")) "imlist" else 
+           if(all(sapply(x, is.im))) "imlist" else
            stop("x should be a point pattern or a pixel image")
 
   nimages <- switch(xtype,
@@ -148,9 +147,15 @@ second.moment.engine <-
            npts=NULL, debug=FALSE)
 {
   what <- match.arg(what)
-
   validate2Dkernel(kernel)
+
+  is.second.order <- what %in% c("Kmeasure", "Bartlett", "all")
+  needs.kernel <- what %in% c("kernel", "all", "Kmeasure")
+  returns.several <- what %in% c("all", "smoothedge")
   
+  if(returns.several)
+    result <- list() # several results will be returned in a list
+
   if(is.ppp(x)) {
     # convert list of points to mass distribution
     X <- pixellate(x, ..., padzero=TRUE)
@@ -174,9 +179,6 @@ second.moment.engine <-
   # go to work
   Y <- X$v
   Ylist <- lapply(Xlist, getElement, name="v")
-  #
-#  xw <- X$xrange
-#  yw <- X$yrange
   # pad with zeroes
   nr <- nrow(Y)
   nc <- ncol(Y)
@@ -187,64 +189,74 @@ second.moment.engine <-
   Ypad <- Ypadlist[[1]]
   lengthYpad <- 4 * nc * nr
   # corresponding coordinates
-#  xw.pad <- xw[1] + 2 * c(0, diff(xw))
-#  yw.pad <- yw[1] + 2 * c(0, diff(yw))
   xcol.pad <- X$xcol[1] + X$xstep * (0:(2*nc-1))
   yrow.pad <- X$yrow[1] + X$ystep * (0:(2*nr-1))
-  # set up kernel
-  xcol.ker <- X$xstep * c(0:(nc-1),-(nc:1))
-  yrow.ker <- X$ystep * c(0:(nr-1),-(nr:1))
-  kerpixarea <- X$xstep * X$ystep
-  if(identical(kernel, "gaussian")) {
-    if(!is.null(sigma)) {
-      densX.ker <- dnorm(xcol.ker, sd=sigma)
-      densY.ker <- dnorm(yrow.ker, sd=sigma)
-      Kern <- outer(densY.ker, densX.ker, "*") * kerpixarea
-    } else if(!is.null(varcov)) {
-      ## anisotropic kernel
-      detSigma <- det(varcov)
-      Sinv <- solve(varcov)
-      halfSinv <- Sinv/2
-      constker <- kerpixarea/(2 * pi * sqrt(detSigma))
-      xsq <- matrix((xcol.ker^2)[col(Ypad)], ncol=2*nc, nrow=2*nr)
-      ysq <- matrix((yrow.ker^2)[row(Ypad)], ncol=2*nc, nrow=2*nr)
-      xy <- outer(yrow.ker, xcol.ker, "*")
-      Kern <- constker * exp(-(xsq * halfSinv[1,1]
-                               + xy * (halfSinv[1,2]+halfSinv[2,1])
-                               + ysq * halfSinv[2,2]))
-    } else 
-      stop("Must specify either sigma or varcov")
+  # compute kernel and its Fourier transform
+  if(!needs.kernel && 
+     identical(kernel, "gaussian") &&
+     is.numeric(sigma) && (length(sigma) == 1) &&
+     spatstat.options('developer')) {
+    # compute Fourier transform of kernel directly (*experimental*)
+    ii <- c(0:(nr-1), nr:1)
+    jj <- c(0:(nc-1), nc:1)
+    zz <- -sigma^2 * pi^2/2
+    uu <- exp(zz * ii^2)
+    vv <- exp(zz * jj^2)
+    fK <- outer(uu, vv, "*")
   } else {
-    ## non-Gaussian kernel
-    ## evaluate kernel at array of points
-    xker <- as.vector(xcol.ker[col(Ypad)])
-    yker <- as.vector(yrow.ker[row(Ypad)])
-    Kern <- evaluate2Dkernel(kernel, xker, yker,
-                             sigma=sigma, varcov=varcov, ...) * kerpixarea
-    Kern <- matrix(Kern, ncol=2*nc, nrow=2*nr)
-  }
-  # these options call for several image outputs
-  if(what %in% c("all", "smoothedge"))
-    result <- list()
-  
-  if(what %in% c("kernel", "all")) {
-    # return the kernel
-    # first rearrange it into spatially sensible order (monotone x and y)
-    rtwist <- ((-nr):(nr-1)) %% (2 * nr) + 1
-    ctwist <- (-nc):(nc-1) %% (2*nc) + 1
-    if(debug) {
-      if(any(fave.order(xcol.ker) != rtwist))
-        cat("something round the twist\n")
+    # set up kernel
+    xcol.ker <- X$xstep * c(0:(nc-1),-(nc:1))
+    yrow.ker <- X$ystep * c(0:(nr-1),-(nr:1))
+    kerpixarea <- X$xstep * X$ystep
+    if(identical(kernel, "gaussian")) {
+      if(!is.null(sigma)) {
+        densX.ker <- dnorm(xcol.ker, sd=sigma)
+        densY.ker <- dnorm(yrow.ker, sd=sigma)
+        Kern <- outer(densY.ker, densX.ker, "*") * kerpixarea
+      } else if(!is.null(varcov)) {
+        ## anisotropic kernel
+        detSigma <- det(varcov)
+        Sinv <- solve(varcov)
+        halfSinv <- Sinv/2
+        constker <- kerpixarea/(2 * pi * sqrt(detSigma))
+        xsq <- matrix((xcol.ker^2)[col(Ypad)], ncol=2*nc, nrow=2*nr)
+        ysq <- matrix((yrow.ker^2)[row(Ypad)], ncol=2*nc, nrow=2*nr)
+        xy <- outer(yrow.ker, xcol.ker, "*")
+        Kern <- constker * exp(-(xsq * halfSinv[1,1]
+                                 + xy * (halfSinv[1,2]+halfSinv[2,1])
+                                 + ysq * halfSinv[2,2]))
+      } else 
+        stop("Must specify either sigma or varcov")
+    } else {
+      ## non-Gaussian kernel
+      ## evaluate kernel at array of points
+      xker <- as.vector(xcol.ker[col(Ypad)])
+      yker <- as.vector(yrow.ker[row(Ypad)])
+      Kern <- evaluate2Dkernel(kernel, xker, yker,
+                               sigma=sigma, varcov=varcov, ...) * kerpixarea
+      Kern <- matrix(Kern, ncol=2*nc, nrow=2*nr)
     }
-    Kermit <- Kern[ rtwist, ctwist]
-    ker <- im(Kermit, xcol.ker[ctwist], yrow.ker[ rtwist], unitname=unitsX)
-    if(what == "kernel")
-      return(ker)
-    else 
-      result$kernel <- ker
+
+    if(what %in% c("kernel", "all")) {
+      ## kernel will be returned
+      ## first rearrange it into spatially sensible order (monotone x and y)
+      rtwist <- ((-nr):(nr-1)) %% (2 * nr) + 1
+      ctwist <- (-nc):(nc-1) %% (2*nc) + 1
+      if(debug) {
+        if(any(fave.order(xcol.ker) != rtwist))
+          cat("something round the twist\n")
+      }
+      Kermit <- Kern[ rtwist, ctwist]
+      ker <- im(Kermit, xcol.ker[ctwist], yrow.ker[ rtwist], unitname=unitsX)
+      if(what == "kernel")
+        return(ker)
+      else 
+        result$kernel <- ker
+    }
+    ## convolve using fft
+    fK <- fft(Kern)
   }
-  # convolve using fft
-  fK <- fft(Kern)
+  
   if(what != "edge") {
     if(nimages == 1) {
       fY <- fft(Ypad)
@@ -272,7 +284,7 @@ second.moment.engine <-
     }
   }
   if(what %in% c("smooth", "all", "smoothedge")) {
-    # return the smoothed point pattern without edge correction
+    # compute smoothed point pattern without edge correction
     if(nimages == 1) {
       smo <- im(Re(sm)[1:nr, 1:nc],
                 xcol.pad[1:nc], yrow.pad[1:nr],
@@ -297,7 +309,7 @@ second.moment.engine <-
     }
   }
 
-  if(what != "edge") {
+  if(is.second.order) {
     # compute Bartlett spectrum
     if(nimages == 1) {
       bart <- BartCalc(fY, fK)  ##  bart <- Mod(fY)^2 * fK
@@ -307,7 +319,7 @@ second.moment.engine <-
   }
   
   if(what %in% c("Bartlett", "all")) {
-     # return Bartlett spectrum
+     # Bartlett spectrum will be returned
      # rearrange into spatially sensible order (monotone x and y)
     rtwist <- ((-nr):(nr-1)) %% (2 * nr) + 1
     ctwist <- (-nc):(nc-1) %% (2*nc) + 1
@@ -334,7 +346,7 @@ second.moment.engine <-
   
   #### ------- Second moment measure --------------
   #
-  if(what != "edge") {
+  if(is.second.order) {
     if(nimages == 1) {
       mom <- fft(bart, inverse=TRUE)/lengthYpad
       if(debug) {
@@ -371,14 +383,14 @@ second.moment.engine <-
   }
   # edge correction
   if(edge || what %in% c("edge", "all", "smoothedge")) {
-    # compute kernel-smoothed set covariance
     M <- as.mask(obswin, dimyx=c(nr, nc))$m
     # previous line ensures M has same dimensions and scale as Y 
     Mpad <- matrix(0, ncol=2*nc, nrow=2*nr)
     Mpad[1:nr, 1:nc] <- M
     lengthMpad <- 4 * nc * nr
     fM <- fft(Mpad)
-    if(edge && what != "edge") {
+    if(edge && is.second.order) {
+      # compute kernel-smoothed set covariance
       # apply edge correction      
       co <- fft(Mod(fM)^2 * fK, inverse=TRUE)/lengthMpad
       co <- Mod(co) 
@@ -403,8 +415,9 @@ second.moment.engine <-
       }
     }
   }
-  if(what != "edge") {
-    # rearrange into spatially sensible order (monotone x and y)
+  if(is.second.order) {
+    # rearrange second moment measure
+    # into spatially sensible order (monotone x and y)
     rtwist <- ((-nr):(nr-1)) %% (2 * nr) + 1
     ctwist <- (-nc):(nc-1) %% (2*nc) + 1
     if(nimages == 1) {

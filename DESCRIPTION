@@ -1,7 +1,7 @@
 Package: spatstat
-Version: 1.47-0
-Nickname: Responsible Gambler
-Date: 2016-10-12
+Version: 1.48-0
+Nickname: Model Prisoner
+Date: 2016-12-22
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -9,13 +9,15 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	with substantial contributions of code by 
 	Kasper Klitgaard Berthelsen;
 	Ottmar Cronie;
+	Yongtao Guan;
 	Ute Hahn;
 	Abdollah Jalilian;
 	Marie-Colette van Lieshout;
 	Tuomas Rajala;
+	Suman Rakshit;
 	Dominic Schuhmacher;
-	and 
-	Rasmus Waagepetersen.
+	Rasmus Waagepetersen;
+ 	and Hangsheng Wang.
 	Additional contributions 
 	by M. Adepeju;
         C. Anderson; 
@@ -43,6 +45,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Y.C. Chin; 
 	B. Christensen; 
 	J.-F. Coeurjolly;
+	K. Colyvas;
 	R. Corria Ainslie;
 	M. de la Cruz; 
 	P. Dalgaard; 
@@ -119,6 +122,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	V. Morera Pujol; 
 	E. Mudrak;
         G.M. Nair;
+	N. Najari;
 	N. Nava;
 	L.S. Nielsen; 
 	F. Nunes; 
@@ -206,6 +210,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2016-10-12 08:04:08 UTC; adrian
+Packaged: 2016-12-22 04:12:10 UTC; adrian
 Repository: CRAN
-Date/Publication: 2016-10-13 01:00:59
+Date/Publication: 2016-12-22 10:53:41

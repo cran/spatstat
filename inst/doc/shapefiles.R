@@ -89,7 +89,7 @@ class(fylk)
 ###################################################
 ### code chunk number 13: shapefiles.Rnw:262-263 (eval = FALSE)
 ###################################################
-## curvegroup <- lapply(out, function(z) { do.call("superimposePSP", z)})
+## curvegroup <- lapply(out, function(z) { do.call("superimpose", z)})
 
 
 ###################################################

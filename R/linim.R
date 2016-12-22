@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.24 $   $Date: 2016/07/17 04:05:37 $
+#  $Revision: 1.30 $   $Date: 2016/12/03 10:51:56 $
 #
 #  Image/function on a linear network
 #
@@ -307,11 +307,21 @@ integral.linim <- function(f, domain=NULL, ...){
   if(!is.null(domain)) 
     f <- f[domain]
   #' extract data
-  df <- attr(f, "df")
   L <- as.linnet(f)
-  #' take average of data on each segment
-  seg <- factor(df$mapXY, levels=1:nsegments(L))
+  ns <- nsegments(L)
+  df <- attr(f, "df")
   vals <- df$values
+  seg <- factor(df$mapXY, levels=1:ns)
+  #' ensure each segment has at least one sample point
+  nper <- table(seg)
+  if(any(missed <- (nper == 0))) {
+    missed <- unname(which(missed))
+    xy <- midpoints.psp(as.psp(L)[missed])
+    valxy <- f[xy]
+    seg <- c(seg, factor(missed, levels=1:ns))
+    vals <- c(vals, valxy)
+  }
+  #' take average of data on each segment
   mu <- as.numeric(by(vals, seg, mean, ..., na.rm=TRUE))
   mu[is.na(mu)] <- 0
   #' weighted sum
@@ -392,3 +402,62 @@ as.data.frame.linim <- function(x, ...) {
   return(df)
 }
 
+pairs.linim <- function(..., plot=TRUE, eps=NULL) {
+  argh <- list(...)
+  ## unpack single argument which is a list of images
+  if(length(argh) == 1) {
+    arg1 <- argh[[1]]
+    if(is.list(arg1) && all(sapply(arg1, is.im)))
+      argh <- arg1
+  }
+  ## identify which arguments are images
+  isim <- sapply(argh, is.im)
+  nim <- sum(isim)
+  if(nim == 0) 
+    stop("No images provided")
+  ## separate image arguments from others
+  imlist <- argh[isim]
+  rest   <- argh[!isim]
+  ## identify which arguments are images on a network
+  islinim <- sapply(imlist, inherits, what="linim")
+  if(!any(islinim)) # shouldn't be here
+    return(pairs.im(argh, plot=plot))
+  ## adjust names
+  imnames <- names(imlist) %orifnull% rep("", length(imlist))
+  if(any(needsname <- !nzchar(imnames))) 
+    imnames[needsname] <- paste0("V", seq_len(nim)[needsname])
+  names(imlist) <- imnames
+  ## choose resolution
+  if(is.null(eps)) {
+    xstep <- min(sapply(imlist, getElement, name="xstep"))
+    ystep <- min(sapply(imlist, getElement, name="ystep"))
+    eps <- min(xstep, ystep)
+  }
+  ## extract linear network
+  Z1 <- imlist[[min(which(islinim))]]
+  L <- as.linnet(Z1)
+  ## construct equally-spaced sample points
+  X <- pointsOnLines(as.psp(L), eps=eps)
+  ## sample each image
+  pixvals <- lapply(imlist, "[", i=X, drop=FALSE)
+  pixdf <- as.data.frame(pixvals)
+  ## pairs plot
+  if(plot) {
+    if(nim > 1) {
+      do.call(pairs.default, resolve.defaults(list(x=pixdf),
+                                              rest,
+                                              list(labels=imnames, pch=".")))
+      labels <- resolve.defaults(rest, list(labels=imnames))$labels
+      colnames(pixdf) <- labels
+    } else {
+      do.call(hist.default,
+              resolve.defaults(list(x=pixdf[,1]),
+                               rest,
+                               list(main=paste("Histogram of", imnames[1]),
+                                    xlab=imnames[1])))
+    }
+  }
+  class(pixdf) <- unique(c("plotpairsim", class(pixdf)))
+  attr(pixdf, "eps") <- eps
+  return(invisible(pixdf))
+}

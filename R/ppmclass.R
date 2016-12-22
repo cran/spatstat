@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.129 $	$Date: 2016/02/15 04:34:14 $
+#	$Revision: 2.132 $	$Date: 2016/12/19 06:09:50 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -707,13 +707,32 @@ model.frame.ppm <- function(formula, ...) {
   }
 #  gd <- getglmdata(object)
 #  model.frame(gf, data=gd, ...)
-  model.frame(gf, ...)
+  if(object$fitter == "gam") modelFrameGam(gf, ...) else model.frame(gf, ...)
+}
+
+#' a hacked version of model.frame.glm that works for gam objects (mgcv)
+modelFrameGam <- function(formula, ...) {
+  dots <- list(...)
+  nargs <- dots[match(c("data", "na.action", "subset"), names(dots), 
+                      0L)]
+  if (length(nargs) || is.null(formula$model)) {
+    fcall <- formula$call
+#    fcall$method <- "model.frame"
+    fcall[[1L]] <- quote(mgcv::gam)
+    fcall[names(nargs)] <- nargs
+    env <- environment(formula$terms)
+    if (is.null(env)) 
+      env <- parent.frame()
+    refut <- eval(fcall, env)
+    refut$model
+  } else formula$model
 }
 
 #
 # method for model.matrix
 
-model.matrix.ppm <- function(object, data=model.frame(object),
+model.matrix.ppm <- function(object,
+                             data=model.frame(object, na.action=NULL),
                              ..., Q=NULL, keepNA=TRUE) {
   data.given <- !missing(data) && !is.null(data)
   if(!is.null(Q)) {
@@ -753,12 +772,12 @@ model.matrix.ppm <- function(object, data=model.frame(object),
   if(!keepNA) {
     # extract model matrix of glm fit object
     # restricting to its 'subset' 
-    mm <- model.matrix(gf, data=data, ...)
+    mm <- model.matrix(gf, ...)
     return(mm)
   }
   
   # extract model matrix for all cases
-  mm <- model.matrix(gf, data, ..., subset=NULL)
+  mm <- model.matrix(gf, ..., subset=NULL, na.action=NULL)
   cn <- colnames(mm)
   gd <- getglmdata(object, drop=FALSE)
   if(nrow(mm) != nrow(gd)) {

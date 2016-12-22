@@ -3,7 +3,7 @@
 #
 # Infinite lines
 #
-# $Revision: 1.21 $ $Date: 2016/02/11 10:17:12 $
+# $Revision: 1.27 $ $Date: 2016/12/01 09:29:35 $
 #
 
 infline <- function(a=NULL, b=NULL, h=NULL, v=NULL, p=NULL, theta=NULL) {
@@ -62,8 +62,7 @@ plot.infline <- function(x, ...) {
 
 print.infline <- function(x, ...) {
   n <- nrow(x)
-  cat(paste(if(n > 1) n else NULL, "infinite ",
-            ngettext(n, "line", "lines"), "\n"))
+  splat(n, "infinite", ngettext(n, "line", "lines"))
   print(as.data.frame(x), ...)
   return(invisible(NULL))
 }
@@ -72,6 +71,10 @@ clip.infline <- function(L, win) {
   # clip a set of infinite straight lines to a window
   win <- as.owin(win)
   stopifnot(inherits(L, "infline"))
+  nL <- nrow(L)
+  if(nL == 0)
+    return(psp(numeric(0),numeric(0),numeric(0),numeric(0), window=win))
+  seqL <- seq_len(nL)
   # determine circumcircle of win
   xr <- win$xrange
   yr <- win$yrange
@@ -81,21 +84,27 @@ clip.infline <- function(L, win) {
   height <- diff(yr)
   rmax <- sqrt(width^2 + height^2)/2
   boundbox <- owin(xmid + c(-1,1) * rmax, ymid + c(-1,1) * rmax)
-  # compute intersection points with circumcircle 
+  # convert line coordinates to origin (xmid, ymid)
   p <- L$p
   theta <- L$theta
+  co <- cos(theta)
+  si <- sin(theta)
+  p <- p - xmid * co - ymid * si
+  # compute intersection points with circumcircle 
   hit <- (abs(p) < rmax)
   if(!any(hit)) 
     return(psp(numeric(0),numeric(0),numeric(0),numeric(0), window=win))
   p <- p[hit]
   theta <- theta[hit]
   q <- sqrt(rmax^2 - p^2)
-  co <- cos(theta)
-  si <- sin(theta)
+  co <- co[hit]
+  si <- si[hit]
+  id <- seqL[hit]
   X <- psp(x0= xmid + p * co + q * si,
            y0= ymid + p * si - q * co,
            x1= xmid + p * co - q * si,
            y1= ymid + p * si + q * co,
+           marks = factor(id, levels=seqL),
            window=boundbox, check=FALSE)
   # clip to window
   X <- X[win]
@@ -125,7 +134,7 @@ chop.tess <- function(X, L) {
       } else if(!is.na(v <- L[i, "v"])) {
         # vertical line
         if(v > xr[1] && v < xr[2])
-          Zmat <- 2 * Zmat + (xmat < h)
+          Zmat <- 2 * Zmat + (xmat < v)
       } else {
         # generic line y = a + bx
         a <- L[i, "a"]
@@ -191,5 +200,56 @@ chop.tess <- function(X, L) {
   return(X)
 }
 
+whichhalfplane <- function(L, x, y=NULL) {
+  verifyclass(L, "infline")
+  xy <- xy.coords(x, y)
+  x <- xy$x
+  y <- xy$y
+  m <- length(x)
+  n <- nrow(L)
+  Z <- matrix(as.logical(NA_integer_), n, m)
+  for(i in seq_len(n)) {
+    if(!is.na(h <- L[i, "h"])) {
+      #' horizontal line
+      Z[i,] <- (y < h)
+    } else if(!is.na(v <- L[i, "v"])) {
+      #' vertical line
+      Z[i,] <- (x < v)
+    } else {
+      #' generic line y = a + bx
+      a <- L[i, "a"]
+      b <- L[i, "b"]
+      Z[i,] <- (y < a + b * x)
+    }
+  }
+  return(Z)
+}
 
+rotate.infline <- function(X, angle=pi/2, ...) {
+  if(nrow(X) == 0) return(X)
+  Y <- with(X, infline(p = p, theta=theta + angle))
+  return(Y)
+}
+
+shift.infline <- function(X, vec=c(0,0), ...) {
+  if(nrow(X) == 0) return(X)
+  vec <- as2vector(vec)
+  Y <- with(X, infline(p = p + vec[1L] * cos(theta) + vec[2L] * sin(theta),
+                       theta=theta))
+  return(Y)
+}
+
+reflect.infline <- function(X) {
+  if(nrow(X) == 0) return(X)
+  Y <- with(X, infline(p = p,
+                       theta=(theta + pi) %% (2 * pi)))
+  return(Y)
+}
+
+flipxy.infline <- function(X) {
+  if(nrow(X) == 0) return(X)
+  Y <- with(X, infline(p = p,
+                       theta=(pi/2 - theta) %% (2 * pi)))
+  return(Y)
+}
 

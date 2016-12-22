@@ -1,7 +1,7 @@
 #
 #    util.S    miscellaneous utilities
 #
-#    $Revision: 1.226 $    $Date: 2016/10/04 02:58:56 $
+#    $Revision: 1.232 $    $Date: 2016/12/02 09:51:01 $
 #
 #
 matrowsum <- function(x) {
@@ -931,6 +931,12 @@ onecolumn <- function(m) {
          NA)
 }
 
+assignDFcolumn <- function(x, name, value, ...) {    # for use in mapply 
+  dx <- list(value)
+  names(dx) <- name
+  data.frame(append(c(as.list(x), dx), list(...)))
+}
+
 # errors and checks
 
 complaining <- function(whinge, fatal=FALSE, value=NULL) {
@@ -1312,12 +1318,14 @@ dropifsingle <- function(x) if(length(x) == 1) x[[1]] else x
 # timed objects
 
 timed <- function(x, ..., starttime=NULL, timetaken=NULL) {
-  if(is.null(starttime)) # time starts now.
+  if(is.null(starttime) && is.null(timetaken)) # time starts now.
     starttime <- proc.time()
   # evaluate expression if any
   object <- x
-  timetaken <- proc.time() - starttime
-  class(object) <- c("timed", class(object))
+  if(is.null(timetaken))
+    timetaken <- proc.time() - starttime
+  if(!inherits(object, "timed"))
+    class(object) <- c("timed", class(object))
   attr(object, "timetaken") <- timetaken
   return(object)
 }
@@ -1334,6 +1342,16 @@ print.timed <- function(x, ...) {
   return(invisible(NULL))
 }
 
+timeTaken <- function(..., warn=TRUE) {
+  allargs <- list(...)
+  hastime <- sapply(allargs, inherits, what="timed")
+  if(warn && !all(hastime))
+    warning("Some arguments did not contain timing information")
+  times <- sapply(allargs[hastime], attr, which="timetaken")
+  tottime <- rowSums(times)
+  class(tottime) <- "proc_time"
+  return(tottime)
+}
 
 # efficient replacements for ifelse()
 # 'a' and 'b' are single values
@@ -1661,7 +1679,8 @@ requireversion <- function(pkg, ver) {
                sQuote(pkgname),
                "is out of date: version >=",
                ver,
-               "is needed"))
+               "is needed"),
+         call.=FALSE)
   invisible(NULL)
 }
 

@@ -31,12 +31,12 @@
 
   This function extracts the vector of coefficients of the fitted model.
   This is the estimate of the parameter vector
-  \eqn{\theta}{theta} such that the conditional intensity of the model
+  \eqn{\theta}{\theta} such that the conditional intensity of the model
   is of the form
   \deqn{
     \lambda(u,x) = \exp(\theta S(u,x))
   }{
-    lambda(u,x) = exp(theta . S(u,x))
+    \lambda(u,x) = exp(\theta . S(u,x))
   }
   where \eqn{S(u,x)} is a (vector-valued) statistic.
 

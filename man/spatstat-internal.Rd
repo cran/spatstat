@@ -33,9 +33,11 @@
 \alias{as.double.im}
 \alias{as.list.hyperframe}
 \alias{as.listof}
+\alias{as.owin.lintess}
 \alias{as.units}
 \alias{as2vector}
 \alias{asNumericMatrix}
+\alias{assignDFcolumn}
 \alias{augment.msr}
 \alias{BartCalc}
 \alias{badprobability}
@@ -53,6 +55,11 @@
 \alias{breakpts.from.r}
 \alias{bt.frame}
 \alias{bw.optim}
+\alias{calc.DR}
+\alias{calc.NNIR}
+\alias{calc.SAVE}
+\alias{calc.SIR}
+\alias{calc.TSE}
 \alias{can.be.formula}
 \alias{cannot.update}
 \alias{cartesian}
@@ -357,7 +364,6 @@
 \alias{lty2char}
 \alias{makeLinnetTolerance}
 \alias{maskLaslett}
-\alias{matsqrt}
 \alias{matchNameOrPosition}
 \alias{match2DkernelName}
 \alias{padtowidth}
@@ -366,7 +372,10 @@
 \alias{paste.expr}
 \alias{pasteN}
 \alias{plan.legend.layout}
-\alias{PoisSaddleApp}
+\alias{PoisSaddle}
+\alias{PoisSaddleArea}
+\alias{PoisSaddleGeyer}
+\alias{PoisSaddlePairwise}
 \alias{polyLaslett}
 \alias{polytileareaEngine}
 \alias{positiveIndex}
@@ -417,6 +426,7 @@
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{model.se.image}
+\alias{modelFrameGam}
 \alias{mpl.engine}
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
@@ -477,7 +487,6 @@
 \alias{plot.barplotdata}
 \alias{plot.bw.frac}
 \alias{plot.bw.optim}
-\alias{plot.lintess}
 \alias{plot.localpcfmatrix}
 \alias{plot.lurk}
 \alias{plot.minconfit}
@@ -508,6 +517,7 @@
 \alias{print.anylist}    
 \alias{print.autoexec}    
 \alias{print.bt.frame}
+\alias{print.bugtable}
 \alias{print.bw.frac}
 \alias{print.bw.optim}
 \alias{print.colourmap}
@@ -608,6 +618,8 @@
 \alias{rMaternInhibition}
 \alias{RmhExpandRule}
 \alias{rmhsnoop}
+\alias{rocData}
+\alias{rocModel}
 \alias{romansort}
 \alias{roseContinuous}
 \alias{ruletextline}
@@ -787,6 +799,7 @@
 \alias{versionstring.spatstat}
 \alias{verifyclass}
 \alias{verify.xypolygon}
+\alias{Window.lintess}
 \alias{Window<-.linnet}
 \alias{Window<-.lpp}
 \alias{warn.ignored.args}
@@ -872,9 +885,11 @@ as.breakpts(\dots)
 \method{as.double}{im}(x, \dots)
 \method{as.list}{hyperframe}(x, \dots)
 as.listof(x)
+\method{as.owin}{lintess}(W, \dots)
 as.units(s)
 as2vector(x)
 asNumericMatrix(x)
+assignDFcolumn(x, name, value, \dots)
 augment.msr(x, \dots, sigma)
 BartCalc(fY, fK)
 badprobability(x, NAvalue)
@@ -893,6 +908,11 @@ breakpts.from.r(r)
 bt.frame(Q, trend, interaction, \dots, covariates,
          correction, rbord, use.gam, allcovar)
 bw.optim(cv, h, iopt, \dots, cvname, hname, criterion)
+calc.DR(COV, z, Dim)
+calc.NNIR(COV, z, pos, Dim)
+calc.SAVE(COV, z, Dim)
+calc.SIR(COV, z)
+calc.TSE(COV, z, pos, Dim1, Dim2)
 can.be.formula(x)
 cannot.update(\dots)
 cartesian(pp, markset, fac = TRUE)
@@ -1241,7 +1261,6 @@ logi.engine(Q, trend, interaction, \dots,
 lty2char(i)
 makeLinnetTolerance
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
-matsqrt(x)
 matchNameOrPosition(expected, avail)
 match2DkernelName(kernel)
 padtowidth(a, b, justify)
@@ -1251,7 +1270,10 @@ paste.expr(x)
 pasteN(\dots)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
-PoisSaddleApp(beta, fi)
+PoisSaddle(beta, fi)
+PoisSaddleArea(beta, fi)
+PoisSaddleGeyer(beta, fi)
+PoisSaddlePairwise(beta, fi)
 polyLaslett(X, \dots, oldX, verbose, plotit)
 polytileareaEngine(P, xrange, yrange, nx, ny)
 positiveIndex(i, nama, len)
@@ -1304,9 +1326,11 @@ meanlistfv(z, \dots)
 meanX.owin(w)            
 meanY.owin(w)
 model.se.image(fit, W, \dots, what)
+modelFrameGam(formula, \dots)
 mpl.engine(Q, trend, interaction, \dots,
          covariates, subsetexpr, covfunargs, correction,
-	 rbord, use.gam, gcontrol, famille,
+	 rbord, use.gam, gcontrol,
+         GLM, GLMfamily, GLMcontrol, famille,
          forcefit, nd, eps, allcovar, callstring,
          precomputed, savecomputed, preponly,
          rename.intercept, justQ, weightfactor)
@@ -1390,7 +1414,6 @@ plotPolygonBdry(x, \dots)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.frac}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, showopt, optargs)
-\method{plot}{lintess}(x, \dots, main)
 \method{plot}{lurk}(x, \dots, shade)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
@@ -1439,6 +1462,7 @@ primesbelow(nmax)
 \method{print}{anylist}(x, \dots)
 \method{print}{autoexec}(x, \dots)
 \method{print}{bt.frame}(x, \dots)
+\method{print}{bugtable}(x, \dots)
 \method{print}{bw.frac}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
@@ -1545,6 +1569,8 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
            covunits, modelcall, callstring, savestuff)
 rMaternInhibition(type, kappa, r, win, stationary, \dots, nsim, drop)
 RmhExpandRule(nama)
+rocData(covariate, nullmodel, \dots, high)
+rocModel(lambda, nullmodel, \dots, high)
 romansort(x)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
      proptype, proplocn, propmark, propindx, numerator, denominator)
@@ -1625,8 +1651,8 @@ scanmeasure(X, \dots)
 \method{scanmeasure}{im}(X, r, \dots)
 scanPoisLRTS(nZ, nG, muZ, muG, alternative)
 scanBinomLRTS(nZ, nG, muZ, muG, alternative)
-second.moment.calc(x, sigma=NULL, edge=TRUE, what="Kmeasure", debug=FALSE,
-\dots, varcov=NULL, expand=FALSE)
+second.moment.calc(x, sigma, edge, what, \dots,
+                   varcov=NULL, expand=FALSE, debug=FALSE)
 second.moment.engine(x, sigma, edge, what, \dots,
       kernel, obswin, varcov, npts, debug)
 sensiblevarname(guess, fallback, maxlen)
@@ -1704,10 +1730,11 @@ there.is.no.try(\dots)
 thinjump(n, p)
 tilecentroids(W, nx, ny)
 trap.extra.arguments(\dots, .Context, .Fatal)
-trianglediameters(iedge, jedge, edgelength, \dots, nvert, check)
+trianglediameters(iedge, jedge, edgelength, \dots,
+                  nvert, dmax, check)
 trim.mask(M, R, tolerant)
 truncline(x, nc)
-tapplysum(x, flist, do.names)
+tapplysum(x, flist, do.names, na.rm)
 tweak.fv.entry(x, current.tag, new.labl, new.desc, new.tag)
 tweak.coefs(model, new.coef)
 x \%unit\% u
@@ -1740,6 +1767,7 @@ versionstring.ppm(object)
 versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 verify.xypolygon(p, fatal=TRUE)
+\method{Window}{lintess}(X, \dots)
 \method{Window}{linnet}(X, \dots, check=TRUE) <- value
 \method{Window}{lpp}(X, \dots, check=TRUE) <- value
 warn.ignored.args(\dots, context)

@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.124 $ $Date: 2016/08/30 01:38:40 $
+# $Revision: 1.125 $ $Date: 2016/10/22 07:56:22 $
 #
 
 kppm <- function(X, ...) {
@@ -1528,18 +1528,22 @@ as.owin.kppm <- as.owin.dppm <- function(W, ..., from=c("points", "covariates"),
   as.owin(as.ppm(W), ..., from=from, fatal=fatal)
 }
 
-domain.kppm <- Window.kppm <- domain.dppm <- Window.dppm <- function(X, ..., from=c("points", "covariates")) {
+domain.kppm <- Window.kppm <- domain.dppm <-
+  Window.dppm <- function(X, ..., from=c("points", "covariates")) {
   from <- match.arg(from)
   as.owin(X, from=from)
 }
 
-model.images.kppm <- model.images.dppm <- function(object, W=as.owin(object), ...) {
+model.images.kppm <-
+  model.images.dppm <- function(object, W=as.owin(object), ...) {
   model.images(as.ppm(object), W=W, ...)
 }
 
-model.matrix.kppm <- model.matrix.dppm <- function(object, data=model.frame(object), ...,
-                              Q=NULL, 
-                              keepNA=TRUE) {
+model.matrix.kppm <-
+  model.matrix.dppm <- function(object,
+                                data=model.frame(object, na.action=NULL), ...,
+                                Q=NULL, 
+                                keepNA=TRUE) {
   if(missing(data)) data <- NULL
   model.matrix(as.ppm(object), data=data, ..., Q=Q, keepNA=keepNA)
 }
@@ -1577,3 +1581,16 @@ extractAIC.kppm <- extractAIC.dppm <- function (fit, scale = 0, k = 2, ...)
 
 nobs.kppm <- nobs.dppm <- function(object, ...) { nobs(as.ppm(object)) }
 
+psib <- function(object) UseMethod("psib")
+
+psib.kppm <- function(object) {
+  clus <- object$clusters
+  info <- spatstatClusterModelInfo(clus)
+  if(!info$isPCP) {
+    warning("The model is not a cluster process")
+    return(NA)
+  }
+  g <- pcfmodel(object)
+  p <- 1 - 1/g(0)
+  return(p)
+}

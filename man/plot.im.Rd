@@ -351,6 +351,7 @@
   \code{\link{colourmap}},
   \code{\link{contour.im}},
   \code{\link{persp.im}},
+  \code{\link{hist.im}},
   \code{\link[graphics]{image.default}},
   \code{\link{spatstat.options}}
 }
