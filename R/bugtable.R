@@ -1,7 +1,7 @@
 #'
 #'        bugtable.R
 #' 
-#'    $Revision: 1.2 $ $Date: 2016/12/16 06:34:24 $
+#'    $Revision: 1.3 $ $Date: 2017/01/07 04:20:31 $
 
 bugfixes <- function(sinceversion=NULL, sincedate=NULL,
                      package="spatstat",
@@ -38,14 +38,14 @@ bugfixes <- function(sinceversion=NULL, sincedate=NULL,
   #' split each entry into lines
   alines <- strsplit(a$Text, "\n")
   #' extract first line
-  f <- unname(sapply(alines, "[", i=1))
+  f <- unname(sapply(alines, "[", i=1L))
   #' extract body
-  b <- unname(sapply(alines, "[", i=-1))
+  b <- unname(lapply(alines, "[", i=-1L))
   b <- unname(sapply(b, paste, collapse="\n"))
   #' extract header from first line
-  h <- unname(sapply(strsplit(f, ":"), "[", i=1))
-  h <- unname(sapply(strsplit(h, ","), "[", i=1))
-  h <- unname(sapply(strsplit(h, " "), "[", i=1))
+  h <- unname(sapply(strsplit(f, ":"), "[", i=1L))
+  h <- unname(sapply(strsplit(h, ","), "[", i=1L))
+  h <- unname(sapply(strsplit(h, " "), "[", i=1L))
   #' sort by header
   oo <- order(h, f)
   #' rebuild

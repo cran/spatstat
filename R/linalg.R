@@ -3,7 +3,7 @@
 #
 #  Linear Algebra
 #
-# $Revision: 1.20 $ $Date: 2016/11/13 01:51:03 $
+# $Revision: 1.22 $ $Date: 2017/02/07 08:12:05 $
 #
 
 sumouter <- function(x, w=NULL, y=x) {
@@ -133,7 +133,7 @@ bilinearform <- function(x, v, y) {
   # transpose (evaluate quadratic form for each column)
   tx <- t(x)
   ty <- t(y)
-  ok <- apply(is.finite(tx), 2, all) & apply(is.finite(ty), 2, all)
+  ok <- matcolall(is.finite(tx)) & matcolall(is.finite(ty))
   allok <- all(ok)
   if(!allok) {
     tx <- tx[ , ok, drop=FALSE]
@@ -173,15 +173,15 @@ sumsymouter <- function(x, w=NULL) {
     return(sumsymouterSparse(x, w))
   x <- as.array(x)
   stopifnot(length(dim(x)) == 3)
-  if(dim(x)[2] != dim(x)[3])
+  if(dim(x)[2L] != dim(x)[3L])
     stop("The second and third dimensions of x should be equal")
   if(!is.null(w)) {
     w <- as.matrix(w)
-    if(!all(dim(w) == dim(x)[-1]))
+    if(!all(dim(w) == dim(x)[-1L]))
       stop("Dimensions of w should match the second and third dimensions of x")
   }
-  p <- dim(x)[1]
-  n <- dim(x)[2]
+  p <- dim(x)[1L]
+  n <- dim(x)[2L]
   if(is.null(w)) {
     zz <- .C("Csumsymouter",
              x = as.double(x),

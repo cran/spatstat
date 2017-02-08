@@ -1,7 +1,7 @@
 #
 #     ewcdf.R
 #
-#     $Revision: 1.9 $  $Date: 2016/02/16 01:39:12 $
+#     $Revision: 1.11 $  $Date: 2017/01/04 07:27:39 $
 #
 #  With contributions from Kevin Ummel
 #
@@ -58,21 +58,33 @@ print.ewcdf <- function (x, digits = getOption("digits") - 2L, ...) {
   invisible(x)
 }
 
-quantile.ewcdf <- function(x, probs=seq(0,1,0.25), names=TRUE, ..., type=1) {
+quantile.ewcdf <- function(x, probs=seq(0,1,0.25), names=TRUE, ...,
+                           normalise=TRUE, type=1) {
   trap.extra.arguments(..., .Context="quantile.ewcdf")
   if(!(type %in% c(1,2)))
     stop("Only quantiles of type 1 and 2 are implemented", call.=FALSE)
   env <- environment(x)
   xx <- get("x", envir=env)
-  Fxx <- get("y", envir=env)
   n <- length(xx)
+  Fxx <- get("y", envir=env)
+  maxFxx <- max(Fxx)
   eps <- 100 * .Machine$double.eps
-  if(any((p.ok <- !is.na(probs)) & (probs < -eps | probs > 1 + eps))) 
-    stop("'probs' outside [0,1]")
+  if(normalise) {
+    Fxx <- Fxx/maxFxx
+    maxp <- 1
+  } else {
+    maxp <- maxFxx
+  }
+  if(any((p.ok <- !is.na(probs)) &
+         (probs/maxp < -eps | probs/maxp > 1 + eps))) {
+    allowed <- if(normalise) "[0,1]" else
+               paste("permitted range", prange(c(0, maxp)))
+    stop(paste("'probs' outside", allowed), call.=FALSE)
+  }
   if (na.p <- any(!p.ok)) {
     o.pr <- probs
     probs <- probs[p.ok]
-    probs <- pmax(0, pmin(1, probs))
+    probs <- pmax(0, pmin(maxp, probs))
   }
   np <- length(probs)
   if (n > 0 && np > 0) {
@@ -85,7 +97,7 @@ quantile.ewcdf <- function(x, probs=seq(0,1,0.25), names=TRUE, ..., type=1) {
       for(k in 1:np) {
         pk <- probs[k]
         ik <- min(which(Fxx >= probs[k]))
-        qs[k] <- if(Fxx[ik] > pk) (xx[ik] + xx[ik-1])/2 else xx[ik]
+        qs[k] <- if(Fxx[ik] > pk) (xx[ik] + xx[ik-1L])/2 else xx[ik]
       }
     }
   } else {
@@ -93,10 +105,16 @@ quantile.ewcdf <- function(x, probs=seq(0,1,0.25), names=TRUE, ..., type=1) {
   }
   if (names && np > 0L) {
     dig <- max(2L, getOption("digits"))
-    probnames <-
-      if(np < 100) formatC(100 * probs, format="fg", width=1, digits=dig) else
-      format(100 * probs, trim = TRUE, digits = dig)
-    names(qs) <- paste0(probnames, "%")
+    if(normalise) {
+      probnames <-
+        if(np < 100) formatC(100 * probs, format="fg", width=1, digits=dig) else
+        format(100 * probs, trim = TRUE, digits = dig)
+      names(qs) <- paste0(probnames, "%")
+    } else {
+      names(qs) <-
+        if(np < 100) formatC(probs, format="fg", width=1, digits=dig) else
+        format(probs, trim=TRUE, digits=dig)
+    }
   }
   if (na.p) {
     o.pr[p.ok] <- qs

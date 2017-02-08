@@ -23,200 +23,12 @@ importFrom(mgcv,
 
 
 
-
 # .................................................. 
-# Automatically-generated list of entry points       
+#  load dynamic library
+#      (native routines are now registered in init.c)
 # .................................................. 
 
-useDynLib(spatstat, 
-"acrdenspt",
-"acrsmoopt",
-"adenspt",
-"areaBdif",
-"areadifs",
-"asmoopt",
-"auctionbf",
-"awtcrdenspt",
-"awtcrsmoopt",
-"awtdenspt",
-"awtsmoopt",
-"bdrymask",
-"Cbiform",
-"Cclosepaircounts",
-"Ccountends",
-"Ccrossdist",
-"Ccrosspaircounts",
-"CcrossPdist",
-"Cidw",
-"ClineMquad",
-"Clinequad",
-"ClineRMquad",
-"ClineRquad",
-"Clixellate",
-"close3IJpairs",
-"close3pairs",
-"Cmatchxy",
-"cocoGraph",
-"cocoImage",
-"Corput",
-"Cpairdist",
-"CpairPdist",
-"Cquadform",
-"crdenspt",
-"cross3IJpairs",
-"cross3pairs",
-"crosscount",
-"crsmoopt",
-"CspaSumSymOut",
-"CspaWtSumSymOut",
-"Csum2outer",
-"Csumouter",
-"Csumsymouter",
-"Cwhist",
-"Cwsum2outer",
-"Cwsumouter",
-"Cwsumsymouter",
-"Cxypolyselfint",
-"Cxysegint",
-"CxysegXint",
-"D3crossdist",
-"D3crossPdist",
-"D3pairdist",
-"D3pairPdist",
-"Ddist2dpath",
-"delta2area",
-"denspt",
-"digberJ",
-"dinfty_R",
-"discareapoly",
-"discs2grid",
-"distmapbin",
-"drevcumsum",
-"dwpure",
-"Ediggatsti",
-"Ediggra",
-"Efiksel",
-"Egeyer",
-"exact_dt_R",
-"fardist2grid",
-"fardistgrid",
-"fastinterv",
-"Fclosepairs",
-"Fcrosspairs",
-"Gdenspt",
-"graphVees",
-"Gsmoopt",
-"Gwtdenspt",
-"Gwtsmoopt",
-"hasX3close",
-"hasX3pclose",
-"hasXclose",
-"hasXpclose",
-"hasXYclose",
-"hasXYpclose",
-"Idist2dpath",
-"idwloo",
-"inxyp",
-"irevcumsum",
-"KborderD",
-"KborderI",
-"knnd3D",
-"knndMD",
-"knndsort",
-"knnGinterface",
-"knnsort",
-"knnw3D",
-"knnwMD",
-"knnX3Dinterface",
-"knnXinterface",
-"KnoneD",
-"KnoneI",
-"knownCif",
-"KrectDbl",
-"KrectInt",
-"KrectWtd",
-"Kwborder",
-"Kwnone",
-"lincrossdist",
-"linearradius",
-"linknncross",
-"linknnd",
-"linndcross",
-"linndxcross",
-"linnndist",
-"linnnwhich",
-"linpairdist",
-"linSnndwhich",
-"locpcfx",
-"locprod",
-"locWpcfx",
-"locxprod",
-"maxnnd2",
-"maxPnnd2",
-"minnnd2",
-"minPnnd2",
-"nnd3D",
-"nndist2segs",
-"nndistsort",
-"nndMD",
-"nnGinterface",
-"nnw3D",
-"nnwhichsort",
-"nnwMD",
-"nnX3Dinterface",
-"nnXinterface",
-"paircount",
-"PerfectDGS",
-"PerfectDiggleGratton",
-"PerfectHardcore",
-"PerfectPenttinen",
-"PerfectStrauss",
-"PerfectStraussHard",
-"ply2sum",
-"ply3sum",
-"poly2imA",
-"poly2imI",
-"prdist2segs",
-"ps_exact_dt_R",
-"RcallF3",
-"RcallF3cen",
-"RcallG3",
-"RcallG3cen",
-"RcallK3",
-"Rcallpcf3",
-"ripleybox",
-"ripleypoly",
-"scantrans",
-"seg2pixI",
-"seg2pixL",
-"seg2pixN",
-"segdens",
-"smoopt",
-"thinjumpequal",
-"triDgraph",
-"triDRgraph",
-"trigraf",
-"trigrafS",
-"triograph",
-"trioxgraph",
-"VcloseIJDpairs",
-"VcloseIJpairs",
-"Vclosepairs",
-"Vclosethresh",
-"VcrossIJDpairs",
-"VcrossIJpairs",
-"Vcrosspairs",
-"wtcrdenspt",
-"wtcrsmoopt",
-"wtdenspt",
-"wtsmoopt",
-"xmethas",
-"xypsi",
-"xysegint",
-"xysegXint",
-"xysi",
-"xysiANY",
-"xysxi")
+useDynLib(spatstat, .registration=TRUE)
 
 # .................................................. 
 # Automatically-generated list of documented objects 
@@ -305,8 +117,11 @@ export("as.data.frame.tess")
 export("as.double.im")
 export("as.function.fv")
 export("as.function.im")
+export("as.function.leverage.ppm")
 export("as.function.linfun")
+export("as.function.owin")
 export("as.function.rhohat")
+export("as.function.ssf")
 export("as.function.tess")
 export("as.fv")
 export("as.fv.bw.optim")
@@ -648,6 +463,7 @@ export("complaining")
 export("complementarycolour")
 export("complement.owin")
 export("Complex.im")
+export("Complex.imlist")
 export("Complex.linim")
 export("concatxy")
 export("Concom")
@@ -754,6 +570,7 @@ export("diameter.box3")
 export("diameter.boxx")
 export("diameter.linnet")
 export("diameter.owin")
+export("digestCovariates")
 export("DiggleGatesStibbard")
 export("DiggleGratton")
 export("digital.volume")
@@ -969,6 +786,7 @@ export("fasp")
 export("fastFindInterval")
 export("fave.order")
 export("Fest")
+export("fft2D")
 export("Fhazard")
 export("fii")
 export("Fiksel")
@@ -979,6 +797,7 @@ export("findbestlegendpos")
 export("findcbind")
 export("findCovariate")
 export("findfirstfactor")
+export("findprimefactors")       
 export("Finhom")
 export("firstfactor")
 export("fitin")
@@ -1114,6 +933,7 @@ export("head.psp")
 export("head.tess")
 export("HermiteCoefs")
 export("Hest")
+export("hexagon")
 export("hexgrid")
 export("hextess")
 export("hierarchicalordering")
@@ -1286,6 +1106,7 @@ export("is.prime")
 export("is.psp")
 export("is.rectangle")
 export("isRelevantZero")
+export("is.scov")
 export("is.slrm")
 export("is.sob")
 export("is.stationary")
@@ -1517,6 +1338,7 @@ export("matcolall")
 export("matcolany")
 export("matcolsum")
 export("Math.im")
+export("Math.imlist")
 export("Math.linim")
 export("Math.sparse3Darray")
 export("matrixinvsqrt")
@@ -1528,7 +1350,6 @@ export("matrowany")
 export("matrowsum")
 export("maxflow")
 export("max.fv")
-export("max.im")
 export("maxnndist")
 export("max.ssf")
 export("mctest.progress")
@@ -1539,13 +1360,15 @@ export("mean.linim")
 export("meanlistfv")
 export("meanX.owin")
 export("meanY.owin")
+export("measureNegative")
+export("measurePositive")
+export("measureVariation")
 export("median.im")
 export("median.linim")
 export("mergeLevels")
 export("midpoints.psp")
 export("mincontrast")
 export("min.fv")
-export("min.im")
 export("MinkowskiSum")
 export("minnndist")
 export("min.ssf")
@@ -1680,7 +1503,9 @@ export("opening.owin")
 export("opening.ppp")
 export("opening.psp")
 export("Ops.im")
+export("Ops.imlist")
 export("Ops.linim")
+export("Ops.msr")
 export("Ops.sparse3Darray")
 export("optimStatus")
 export("Ord")
@@ -1945,6 +1770,7 @@ export("print.hasenvelope")
 export("print.hierarchicalordering")
 export("print.hyperframe")
 export("print.im")
+export("print.indicfun")       
 export("print.infline")
 export("print.influence.ppm")       
 export("print.interact")       
@@ -2093,7 +1919,6 @@ export("ragsMultiHard")
 export("RandomFieldsSafe")
 export("ranef.mppm")
 export("range.fv")
-export("range.im")
 export("range.ssf")
 export("rastersample")
 export("raster.x")
@@ -2144,6 +1969,7 @@ export("reflect.im")
 export("reflect.infline")
 export("reflect.layered")
 export("reflect.tess") 
+export("regularpolygon")
 export("reheat")
 export("reincarnate.interact")
 export("relatively.prime")
@@ -2507,7 +2333,6 @@ export("suffloc")
 export("suffstat")
 export("suffstat.generic")
 export("suffstat.poisson")
-export("sum.im")
 export("summarise.trend")
 export("summary.anylist")
 export("summary.envelope")
@@ -2516,6 +2341,7 @@ export("summary.funxy")
 export("summary.hyperframe")
 export("summary.im")
 export("Summary.im")
+export("Summary.imlist")
 export("summary.kppm")
 export("summary.linfun")
 export("summary.linim")
@@ -2597,6 +2423,7 @@ export("timed")
 export("timeTaken")
 export("to.grey")
 export("to.opaque")
+export("totalVariation")
 export("to.transparent")
 export("transect.im")
 export("transmat")
@@ -2781,6 +2608,9 @@ export("xtfrm.im")
 export("xy.grid")
 export("xypolygon2psp")
 export("xypolyselfint")
+export("xysegMcircle")
+export("xysegPcircle")
+export("xysegXcircle")
 export("yardstick")
 export("y.quad")
 export("zapsmall.im")
@@ -2796,14 +2626,19 @@ export("%msub%")
 export("%orifnull%")
 export("%unit%")
 S3method("Complex", "im")
+S3method("Complex", "imlist")
 S3method("Complex", "linim")
 S3method("Math", "im")
+S3method("Math", "imlist")
 S3method("Math", "linim")
 S3method("Math", "sparse3Darray")
 S3method("Ops", "im")
+S3method("Ops", "imlist")
 S3method("Ops", "linim")
+S3method("Ops", "msr")
 S3method("Ops", "sparse3Darray")
 S3method("Summary", "im")
+S3method("Summary", "imlist")
 S3method("Summary", "linim")
 S3method("Summary", "sparse3Darray")
 # .......  End of special cases  ... 
@@ -2853,8 +2688,11 @@ S3method("as.data.frame", "tess")
 S3method("as.double", "im")
   S3method("as.function", "fv")
  S3method("as.function", "im")
+ S3method("as.function", "leverage.ppm")
   S3method("as.function", "linfun")
+ S3method("as.function", "owin")
   S3method("as.function", "rhohat")
+  S3method("as.function", "ssf")
   S3method("as.function", "tess")
   S3method("as.fv", "bw.optim")
   S3method("as.fv", "data.frame")
@@ -3297,14 +3135,12 @@ S3method("marks", "quad")
   S3method("marks", "ssf")
 S3method("marks", "tess")
   S3method("max", "fv")
-  S3method("max", "im")
   S3method("max", "ssf")
   S3method("mean", "im")
   S3method("mean", "linim")
   S3method("median", "im")
   S3method("median", "linim")
   S3method("min", "fv")
-  S3method("min", "im")
   S3method("min", "ssf")
  S3method("model.frame", "dppm")
  S3method("model.frame", "kppm")
@@ -3528,6 +3364,7 @@ S3method("print", "hasenvelope")
 S3method("print", "hierarchicalordering")
 S3method("print", "hyperframe")
   S3method("print", "im")
+S3method("print", "indicfun")
 S3method("print", "infline")
 S3method("print", "influence.ppm")
 S3method("print", "interact")
@@ -3636,7 +3473,6 @@ S3method("quantile", "im")
   S3method("quantile", "linim")
  S3method("ranef", "mppm")
   S3method("range", "fv")
-  S3method("range", "im")
   S3method("range", "ssf")
 S3method("rbind", "hyperframe")
   S3method("reach", "detpointprocfamily")
@@ -3791,7 +3627,6 @@ S3method("subset", "lpp")
 S3method("subset", "pp3")
 S3method("subset", "ppp")
 S3method("subset", "ppx")
-  S3method("sum", "im")
  S3method("summary", "anylist")
 S3method("summary", "envelope")
 S3method("summary", "fii")

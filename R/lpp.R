@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.50 $   $Date: 2016/10/28 07:18:23 $
+#  $Revision: 1.52 $   $Date: 2017/02/07 08:12:05 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -275,7 +275,7 @@ as.lpp <- function(x=NULL, y=NULL, seg=NULL, tp=NULL, ...,
       X <- lpp(data.frame(seg=seg, tp=tp), L=L)
     } else {
       if(is.numeric(x) && length(x) == 2 && is.null(y)) {
-        xy <- list(x=x[1], y=x[2])
+        xy <- list(x=x[1L], y=x[2L])
       } else  {
         xy <- xy.coords(x,y)[c("x", "y")]
       }
@@ -299,7 +299,10 @@ as.ppp.lpp <- function(X, ..., fatal=TRUE) {
   L <- X$domain
   Y <- as.ppp(coords(X, temporal=FALSE, local=FALSE),
               W=L$window, check=FALSE)
-  marks(Y) <- marks(X)
+  if(!is.null(marx <- marks(X))) {
+    if(is.hyperframe(marx)) marx <- as.data.frame(marx)
+    marks(Y) <- marx
+  }
   return(Y)
 }
 
@@ -514,7 +517,7 @@ superimpose.lpp <- function(..., L=NULL) {
     if(length(nets) > 1)
       stop("Argument L is a different linear network")
   }
-  L <- nets[[1]]
+  L <- nets[[1L]]
   ## convert list(x,y) to linear network, etc
   if(any(!islpp))
     objects[!islpp] <- lapply(objects[!islpp], lpp, L=L)
@@ -595,7 +598,7 @@ cut.lpp <- function(x, z=marks(x), ...) {
   if(is.data.frame(z) || is.matrix(z)) {
     stopifnot(nrow(z) == npoints(x))
     # take first column 
-    z <- z[,1]
+    z <- z[,1L]
     g <- if(is.numeric(z)) cut(z, ...) else factor(z)
     marks(x) <- g
     return(x)

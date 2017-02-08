@@ -40,15 +40,15 @@ bw.diggle <- local({
     ## check that K values can be passed to C code
     if(any(bad <- !is.finite(K[[yname]]))) {
       ## throw out bad values
-      lastgood <- min(which(bad)) - 1
-      if(lastgood < 2)
+      lastgood <- min(which(bad)) - 1L
+      if(lastgood < 2L)
         stop("K function yields too many NA/NaN values")
       K <- K[1:lastgood, ]
     }
     rvals <- K$r
     ## evaluation of M(r) requires K(2r)
     rmax2 <- max(rvals)/2
-    if(!is.null(alim <- attr(K, "alim"))) rmax2 <- min(alim[2], rmax2)
+    if(!is.null(alim <- attr(K, "alim"))) rmax2 <- min(alim[2L], rmax2)
     ok <- (rvals <= rmax2)
     switch(method,
            interpreted = {
@@ -82,7 +82,8 @@ bw.diggle <- local({
                        creator="bw.diggle",
                        criterion="Berman-Diggle Cross-Validation",
                        J=J,
-                       lambda=lambda)
+                       lambda=lambda,
+                       unitname=unitname(X))
     return(result)
   }
 

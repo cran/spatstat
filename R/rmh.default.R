@@ -1,5 +1,5 @@
 #
-# $Id: rmh.default.R,v 1.105 2016/07/31 08:21:00 adrian Exp adrian $
+# $Id: rmh.default.R,v 1.107 2017/01/29 06:58:18 adrian Exp adrian $
 #
 rmh.default <- function(model,start=NULL,
                         control=default.rmhcontrol(model),
@@ -107,7 +107,7 @@ rmh.default <- function(model,start=NULL,
     if(is.im(trend))
       as.owin(trend)
     else if(is.list(trend) && any(ok <- unlist(lapply(trend, is.im))))
-      as.owin((trend[ok])[[1]])
+      as.owin((trend[ok])[[1L]])
     else NULL
 
 ##  Clipping window (for final result)
@@ -622,7 +622,7 @@ rmhEngine <- function(InfoList, ...,
 #############################################  
   
   if(!exists(".Random.seed"))
-    runif(1)
+    runif(1L)
 
   saved.seed <- .Random.seed
   
@@ -709,7 +709,7 @@ rmhEngine <- function(InfoList, ...,
              },
              x = {
                # x.start given
-               as.integer(marks(x.start, dfok=FALSE))-1
+               as.integer(marks(x.start, dfok=FALSE))-1L
              },
              stop("internal error: start$given unrecognised")
              )
@@ -738,21 +738,21 @@ rmhEngine <- function(InfoList, ...,
     x <- c(x.condpp$x, x)
     y <- c(x.condpp$y, y)
     if(mtype)
-      Cmarks <- c(as.integer(marks(x.condpp))-1, Cmarks)
+      Cmarks <- c(as.integer(marks(x.condpp))-1L, Cmarks)
   }
 
   if(!is.null(overrideXstart)) {
     #' override the previous data
     x <- overrideXstart$x
     y <- overrideXstart$y
-    if(mtype) Cmarks <- as.integer(marks(overrideXstart))-1
+    if(mtype) Cmarks <- as.integer(marks(overrideXstart))-1L
   }
 
 # decide whether to activate visual debugger
   if(snoop) {
     Xinit <- ppp(x, y, window=w.sim)
     if(mtype)
-      marks(Xinit) <- Cmarks + 1
+      marks(Xinit) <- Cmarks + 1L
     if(verbose) cat("\nCreating debugger environment..")
     snoopenv <- rmhSnoopEnv(Xinit=Xinit, Wclip=w.clip, R=reach(model))
     if(verbose) cat("Done.\n")
@@ -793,28 +793,13 @@ rmhEngine <- function(InfoList, ...,
   nburn   <- control$nburn
   track   <- control$track
   thin    <- control$internal$thin
+  pstage  <- control$pstage %orifnull% "start"
+  if(pstage == "block" && !saving) pstage <- "start"
   temper  <- FALSE
   invertemp <- 1.0
-  
-  if(verbose)
-    cat("Proposal points...")
-           
-# If the pattern is multitype, generate the mark proposals (0 to ntypes-1)
-  Cmprop <- if(mtype) sample(Ctypes,nrep,TRUE,prob=ptypes) else 0
-		
-# Generate the ``proposal points'' in the expanded window.
-  xy <-
-    if(trendy)
-      rpoint.multi(nrep,trend,tmax,
-                   factor(Cmprop, levels=Ctypes),
-                   w.sim, ..., warn=FALSE)
-    else
-      runifpoint(nrep, w.sim, warn=FALSE)
-  xprop <- xy$x
-  yprop <- xy$y
 
   if(verbose)
-    cat("Start simulation.\n")
+    cat("Ready to simulate. ")
 
   storage.mode(ncif)   <- "integer"
   storage.mode(C.id)   <- "character"
@@ -822,8 +807,6 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(ipar)    <- "double"
   storage.mode(iparlen) <- "integer"
   storage.mode(period) <- "double"
-  storage.mode(xprop)  <- storage.mode(yprop) <- "double"
-  storage.mode(Cmprop) <- "integer"
   storage.mode(ntypes) <- "integer"
   storage.mode(nrep)   <- "integer"
   storage.mode(p) <- storage.mode(q) <- "double"
@@ -837,11 +820,35 @@ rmhEngine <- function(InfoList, ...,
   storage.mode(temper) <- "integer"
   storage.mode(invertemp) <- "double"
 
+  if(pstage == "start" || !saving) {
+    #' generate all proposal points now.
+    if(verbose)
+      cat("Generating proposal points...")
+
+    #' If the pattern is multitype, generate the mark proposals (0 to ntypes-1)
+    Cmprop <- if(mtype) sample(Ctypes,nrep,TRUE,prob=ptypes) else 0
+    storage.mode(Cmprop) <- "integer"
+
+    #' Generate the ``proposal points'' in the expanded window.
+    xy <- if(trendy) {
+      rpoint.multi(nrep,trend,tmax,
+                   factor(Cmprop, levels=Ctypes),
+                   w.sim, ..., warn=FALSE)
+    } else runifpoint(nrep, w.sim, warn=FALSE)
+    xprop <- xy$x
+    yprop <- xy$y
+    storage.mode(xprop)  <- storage.mode(yprop) <- "double"
+  }
+  
   if(!saving) {
     # ////////// Single block /////////////////////////////////
+
     nrep0 <- 0
     storage.mode(nrep0)  <- "integer"
+
     # Call the Metropolis-Hastings C code:
+    if(verbose)
+      cat("Running Metropolis-Hastings.\n")
     out <- .Call("xmethas",
                  ncif,
                  C.id,
@@ -866,10 +873,10 @@ rmhEngine <- function(InfoList, ...,
 #                 PACKAGE="spatstat")
   
     # Extract the point pattern returned from C
-    X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
+    X <- ppp(x=out[[1L]], y=out[[2L]], window=w.state, check=FALSE)
     if(mtype) {
       # convert integer marks from C to R
-      marx <- factor(out[[3]], levels=0:(ntypes-1))
+      marx <- factor(out[[3L]], levels=0:(ntypes-1))
       # then restore original type levels
       levels(marx) <- types
       # glue to points
@@ -899,10 +906,10 @@ rmhEngine <- function(InfoList, ...,
   } else {
     # ////////// Multiple blocks /////////////////////////////////
     # determine length of each block of simulations
-    nblocks <- as.integer(1 + ceiling((nrep - nburn)/nsave))
-    block <- c(nburn, rep.int(nsave, nblocks-1))
+    nblocks <- as.integer(1L + ceiling((nrep - nburn)/nsave))
+    block <- c(nburn, rep.int(nsave, nblocks-1L))
     block[nblocks] <- block[nblocks] - (sum(block)-nrep)
-    block <- block[block >= 1]
+    block <- block[block >= 1L]
     nblocks <- length(block)
     blockend <- cumsum(block)
     # set up list to contain the saved point patterns
@@ -922,16 +929,41 @@ rmhEngine <- function(InfoList, ...,
       # number of previous iterations
       nrep0 <- if(I == 1) 0 else blockend[I-1]
       storage.mode(nrep0)  <- "integer"
-      # proposals
-      seqI <- 1:nrepI
-      xpropI <- xprop[seqI]
-      ypropI <- yprop[seqI]
-      CmpropI <- Cmprop[seqI]
-      storage.mode(xpropI) <- storage.mode(ypropI) <- "double"
-      storage.mode(CmpropI) <- "integer"
+      # Generate or extract proposals
+      switch(pstage,
+             start = {
+               #' extract proposals from previously-generated vectors
+               if(verbose)
+                 cat("Extracting proposal points...")
+               seqI <- 1:nrepI
+               xpropI <- xprop[seqI]
+               ypropI <- yprop[seqI]
+               CmpropI <- Cmprop[seqI]
+               storage.mode(xpropI) <- storage.mode(ypropI) <- "double"
+               storage.mode(CmpropI) <- "integer"
+             },
+             block = {
+               # generate 'nrepI' random proposals
+               if(verbose)
+                 cat("Generating proposal points...")
+               #' If the pattern is multitype, generate the mark proposals 
+               CmpropI <- if(mtype) sample(Ctypes,nrepI,TRUE,prob=ptypes) else 0
+               storage.mode(CmpropI) <- "integer"
+               #' Generate the ``proposal points'' in the expanded window.
+               xy <- if(trendy) {
+                 rpoint.multi(nrepI,trend,tmax,
+                              factor(Cmprop, levels=Ctypes),
+                              w.sim, ..., warn=FALSE)
+               } else runifpoint(nrepI, w.sim, warn=FALSE)
+               xpropI <- xy$x
+               ypropI <- xy$y
+               storage.mode(xpropI)  <- storage.mode(ypropI) <- "double"
+             })
       # no thinning in subsequent blocks
       if(I > 1) thin <- thinFALSE
-      # call
+      #' call
+      if(verbose)
+        cat("Running Metropolis-Hastings.\n")
       out <- .Call("xmethas",
                    ncif,
                    C.id,
@@ -953,12 +985,11 @@ rmhEngine <- function(InfoList, ...,
                    snoopenv,
                    temper,
                    invertemp)
-#                   PACKAGE="spatstat")
       # Extract the point pattern returned from C
-      X <- ppp(x=out[[1]], y=out[[2]], window=w.state, check=FALSE)
+      X <- ppp(x=out[[1L]], y=out[[2L]], window=w.state, check=FALSE)
       if(mtype) {
         # convert integer marks from C to R
-        marx <- factor(out[[3]], levels=0:(ntypes-1))
+        marx <- factor(out[[3L]], levels=0:(ntypes-1))
         # then restore original type levels
         levels(marx) <- types
         # glue to points
@@ -992,16 +1023,18 @@ rmhEngine <- function(InfoList, ...,
       }
 
       # update 'previous state'
-      xprev <- out[[1]]
-      yprev <- out[[2]]
+      xprev <- out[[1L]]
+      yprev <- out[[2L]]
       Cmarksprev <- if(!mtype) 0 else out[[3]]
       storage.mode(xprev) <- storage.mode(yprev) <- "double"
       storage.mode(Cmarksprev) <- "integer"
 
-      # discard used proposals
-      xprop <- xprop[-seqI]
-      yprop <- yprop[-seqI]
-      Cmprop <- Cmprop[-seqI]
+      if(pstage == "start") {
+        #' discard used proposals
+        xprop <- xprop[-seqI]
+        yprop <- yprop[-seqI]
+        Cmprop <- Cmprop[-seqI]
+      }
     }
     # .............. end loop ...............................
     
@@ -1039,8 +1072,8 @@ summarise.trend <- local({
     } else {
       Z  <- as.im(x, w)[w, drop=FALSE]
       ran <- range(Z)
-      mini <- ran[1]
-      maxi <- ran[2]
+      mini <- ran[1L]
+      maxi <- ran[2L]
       integ <- integral.im(Z)
     }
     return(list(min=mini, max=maxi, integral=integ))

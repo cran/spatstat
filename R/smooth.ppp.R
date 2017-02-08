@@ -3,7 +3,7 @@
 #
 #  Smooth the marks of a point pattern
 # 
-#  $Revision: 1.35 $  $Date: 2016/11/13 01:55:53 $
+#  $Revision: 1.37 $  $Date: 2017/01/28 06:30:10 $
 #
 
 smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
@@ -189,7 +189,7 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                  if(!is.matrix(numerators))
                    numerators <- matrix(numerators, ncol=1)
                  ratio <- numerators/denominator
-                 if(any(badpoints <- apply(!is.finite(ratio), 1, any))) {
+                 if(any(badpoints <- matrowany(!is.finite(ratio)))) {
                    whichnnX <- nnwhich(X)
                    ratio[badpoints,] <-
                      as.matrix(marx[whichnnX[badpoints], , drop=FALSE])
@@ -567,7 +567,8 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
   result <- bw.optim(cv, h, iopt,
                      hname="sigma",
                      creator="bw.smoothppp",
-                     criterion="Least Squares Cross-Validation")
+                     criterion="Least Squares Cross-Validation",
+                     unitname=unitname(X))
   return(result)
 }
 

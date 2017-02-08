@@ -130,6 +130,7 @@
 \alias{densitypointsEngine}
 \alias{diagnose.ppm.engine}
 \alias{diagramobj}
+\alias{digestCovariates}
 \alias{digital.volume}
 \alias{dilate.owin}
 \alias{dim.fasp}               
@@ -203,6 +204,7 @@
 \alias{f3Cengine}
 \alias{fasp}
 \alias{fastFindInterval}
+\alias{fft2D}
 \alias{fill.coefs}
 \alias{fillseq}
 \alias{findbestlegendpos}
@@ -322,6 +324,7 @@
 \alias{is.ppx}
 \alias{is.prime}
 \alias{is.psp}
+\alias{is.scov}
 \alias{is.sob}
 \alias{is.tess}
 \alias{k3engine}
@@ -497,7 +500,6 @@
 \alias{plot.qqppm}
 \alias{plot.spatialcdf}
 \alias{plot.studpermutest}
-\alias{polynom}
 \alias{ppllengine}
 \alias{ppm.default}
 \alias{ppmCovariates}
@@ -511,6 +513,7 @@
 \alias{prefixfv}
 \alias{prepareTitle}
 \alias{primefactors}       
+\alias{findprimefactors}       
 \alias{primesbelow}
 \alias{printStatus}
 \alias{print.addvar}    
@@ -534,6 +537,7 @@
 \alias{print.hasenvelope}       
 \alias{print.hierarchicalordering}
 \alias{print.hyperframe}
+\alias{print.indicfun}       
 \alias{print.influence.ppm}       
 \alias{print.interact}       
 \alias{print.intermaker}       
@@ -814,6 +818,9 @@
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
+\alias{xysegXcircle}
+\alias{xysegMcircle}
+\alias{xysegPcircle}
 %%%% sparse 3D arrays
 \alias{sparse3Darray}
 \alias{as.sparse3Darray}
@@ -907,7 +914,7 @@ breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 bt.frame(Q, trend, interaction, \dots, covariates,
          correction, rbord, use.gam, allcovar)
-bw.optim(cv, h, iopt, \dots, cvname, hname, criterion)
+bw.optim(cv, h, iopt, \dots, cvname, hname, criterion, unitname)
 calc.DR(COV, z, Dim)
 calc.NNIR(COV, z, pos, Dim)
 calc.SAVE(COV, z, Dim)
@@ -992,6 +999,7 @@ diagnose.ppm.engine(object, \dots, type, typename, opt,
                          envelope, nsim, nrank,
                          rv, oldstyle, splineargs, verbose)
 diagramobj(X, \dots)
+digestCovariates(\dots, W)
 digital.volume(range, nval, vside)
 dilate.owin(\dots)
 \method{dim}{fasp}(x)
@@ -1059,9 +1067,9 @@ erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, \dots)
 \method{evalCovar}{ppm}(model, covariate, \dots, lambdatype,
-          dimyx, eps, jitter, modelname, covname, dataname) 
+          dimyx, eps, interpolate, jitter, modelname, covname, dataname) 
 \method{evalCovar}{lppm}(model, covariate, \dots, lambdatype, 
-          eps, nd, jitter, modelname, covname, dataname)
+          eps, nd, interpolate, jitter, modelname, covname, dataname)
 evalCovariate(covariate, locations)
 evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,
@@ -1088,6 +1096,7 @@ f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
 fastFindInterval(x, b, labels, reltol)
+fft2D(z, inverse, west)
 fill.coefs(coefs, required)
 fillseq(x, step)
 findbestlegendpos(\dots)
@@ -1209,6 +1218,7 @@ is.pp3(x)
 is.ppx(x)
 is.prime(n)
 is.psp(x)
+is.scov(x)
 is.sob(x)
 is.tess(x)
 k3engine(x, y, z, box, rmax, nrval, correction)
@@ -1351,8 +1361,8 @@ na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
 natozero(x)
-nearest.pixel(x, y, im)
-nearest.valid.pixel(x, y, im)
+nearest.pixel(x, y, Z)
+nearest.valid.pixel(x, y, Z)
 newformula(old, change, eold, enew)
 newstyle.coeff.handling(object)
 niceround(x, m)
@@ -1433,7 +1443,6 @@ plotPolygonBdry(x, \dots)
         main = if (meanonly) "group means" else NULL,
         xlim = NULL, ylim = NULL, ylab = NULL, legend = !add,
         legendpos = "topleft", lbox = FALSE, add = FALSE)
-polynom(x, \dots)
 ppllengine(X, Y, action="project", check=FALSE)
 \method{ppm}{default}(Q, trend, interaction,
        \dots, covariates, data, covfunargs, subset, 
@@ -1456,7 +1465,8 @@ prange(x)
                           terms, na.action, \dots)
 prefixfv(x, tagprefix, descprefix, lablprefix, whichtags)
 prepareTitle(main)
-primefactors(n, prmax)
+primefactors(n, method)
+findprimefactors(n, primes)
 primesbelow(nmax)
 \method{print}{addvar}(x, \dots)
 \method{print}{anylist}(x, \dots)
@@ -1479,6 +1489,7 @@ primesbelow(nmax)
 \method{print}{hasenvelope}(x, \dots)
 \method{print}{hierarchicalordering}(x, \dots)
 \method{print}{hyperframe}(x, \dots)
+\method{print}{indicfun}(x, \dots)
 \method{print}{influence.ppm}(x, \dots)
 \method{print}{interact}(x, \dots, family, brief, banner)       
 \method{print}{intermaker}(x, \dots)
@@ -1689,7 +1700,8 @@ spatstatLocator(n, type, \dots)
 spatstatRmhInfo(cifname)
 spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
-         dimyx, eps, jitter, nsim, verbose, modelname, covname, dataname)
+         dimyx, eps, interpolate, jitter,
+         nsim, verbose, modelname, covname, dataname)
 sphere.volume(range, nval = 10)
 %splat(\dots, indent)
 splitHybridInteraction(coeffs, inte)
@@ -1783,6 +1795,9 @@ X2testEngine(OBS, EXP, \dots, method, CR, df, nsim,
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w, check)
+xysegXcircle(xcentres, ycentres, radii,  x0, y0, x1, y1, check)
+xysegMcircle(xcentres, ycentres, radmat, x0, y0, x1, y1, check)
+xysegPcircle(xc, yc, rc, x0, y0, x1, y1, check)
 %%% sparse 3D arrays
 sparse3Darray(i,j,k,x,dims,dimnames,strict,nonzero)
 as.sparse3Darray(x, \dots)

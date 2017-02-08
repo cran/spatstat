@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.67 $  $Date: 2016/09/16 03:27:38 $
+#  $Revision: 1.70 $  $Date: 2017/02/07 08:12:05 $
 #
 
 leverage <- function(model, ...) {
@@ -181,7 +181,7 @@ ppmInfluenceEngine <- function(fit,
              fush <- sumouter(mom, wlam)
              if(gotHess) {
                # integral term
-               isfin <- is.finite(wlam) & apply(is.finite(ihessmat), 1, all)
+               isfin <- is.finite(wlam) & matrowall(is.finite(ihessmat))
                vintegral <-
                  if(all(isfin)) wlam %*% ihessmat else
                              wlam[isfin] %*% ihessmat[isfin,, drop=FALSE]
@@ -354,7 +354,7 @@ ppmInfluenceEngine <- function(fit,
         ## model matrix after addition/deletion of each U[j]
         ## mombefore[i,j,] <- mom[i,]
         di <- dim(ddS)
-        mombefore <- array(apply(momB, 2, rep, times=di[2]), dim=di)
+        mombefore <- array(apply(momB, 2L, rep, times=di[2L]), dim=di)
         momchange <- ddS
         momchange[ , isdataB, ] <- - momchange[, isdataB, ]
         momafter <- mombefore + momchange
@@ -373,7 +373,7 @@ ppmInfluenceEngine <- function(fit,
         momchange[ , isdataB, ] <- - momchange[, isdataB, ]
         momafter <- mombefore + momchange
         ## lamarray[i,j,k] <- lam[i]
-        lamarray <- mapSparseEntries(ddS, 1, lamB, conform=TRUE, across=3)
+        lamarray <- mapSparseEntries(ddS, 1L, lamB, conform=TRUE, across=3)
         lamratiominus1 <- expm1(tenseur(momchange[,,REG,drop=FALSE],
                                           theta, 3, 1))
         lamratiominus1 <- as.sparse3Darray(lamratiominus1)
@@ -514,7 +514,7 @@ ppmDerivatives <- function(fit, what=c("gradient", "hessian"),
            ## construct array containing Hessian matrices
            biga <- do.call(blockdiagarray, Dlist)
            ## flatten matrices 
-           result <- matrix(biga, nrow=dim(biga)[1])
+           result <- matrix(biga, nrow=dim(biga)[1L])
          })
   return(result)
 }
@@ -591,7 +591,13 @@ persp.leverage.ppm <- function(x, ..., main) {
 }
   
 as.im.leverage.ppm <- function(X, ...) {
-  return(X$lev$smo)
+  return(X$lev$smo) # could be either an image or a list of images
+}
+
+as.function.leverage.ppm <- function(x, ...) {
+  X <- x$lev$val
+  S <- ssf(unmark(X), marks(X))
+  return(as.function(S))
 }
 
 as.ppp.influence.ppm <- function(X, ...) {
@@ -600,7 +606,7 @@ as.ppp.influence.ppm <- function(X, ...) {
 
 as.owin.leverage.ppm <- function(W, ..., fatal=TRUE) {
   y <- as.im(W)
-  if(inherits(y, "imlist")) y <- y[[1]]
+  if(inherits(y, "imlist")) y <- y[[1L]]
   as.owin(y, ..., fatal=fatal)
 }
 

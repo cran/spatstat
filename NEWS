@@ -1,4 +1,167 @@
 
+        CHANGES IN spatstat VERSION 1.49-0
+
+OVERVIEW
+
+    o We thank Tilman Davies, Kassel Hingee, Abdollah Jalilian,
+    Brian Ripley and Dominic Schuhmacher for contributions.
+
+    o spatstat now 'Suggests' the package 'fftwtools'.
+
+    o Operations on signed measures.
+
+    o Operations on lists of pixel images.
+
+    o Improved pixellation of point patterns.
+
+    o Stieltjes integral extended.
+
+    o Subset operators extended.
+
+    o Greatly accelerated 'rmh' when using 'nsave'
+
+    o Some computations accelerated.
+
+    o Size of namespace reduced, for efficiency.
+
+    o Bug fixes.
+
+    o Version nickname: 'So-Called Software'
+
+NEW DEPENDENCIES
+
+    o fftwtools
+    spatstat now 'Suggests' the package 'fftwtools'.
+    This package provides a very fast implementation of 
+    the Fast Fourier Transform, leading to much faster computation
+    in the spatstat functions 'density.ppp', 'relrisk.ppp', 'convolve.im',
+    'blur', 'scan.test' and many other functions.
+    The 'fftwtools' package requires the external software library 'fftw'.
+    We strongly recommend installing this library if possible.
+
+NEW FUNCTIONS
+
+    o hexagon, regularpolygon
+    Create regular polygons.
+
+    o Ops.msr
+    Arithmetic operations for measures.
+
+    o Math.imlist, Ops.imlist, Summary.imlist, Complex.imlist
+    Arithmetic operations for lists of pixel images.
+
+    o measurePositive, measureNegative, measureVariation, totalVariation
+    Positive and negative parts of a measure, and variation of a measure.
+
+    o as.function.owin
+    Convert a spatial window to a function (x,y), the indicator function.
+
+    o as.function.ssf
+    Convert an object of class 'ssf' to a function(x,y)
+
+    o as.function.leverage.ppm
+    Convert an object of class 'leverage.ppm' to a function(x,y)
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o stieltjes
+    Argument 'M' can be a stepfun object (such as an empirical CDF).
+
+    o quantile.ewcdf
+    The function is now normalised to the range [0,1]
+    before the quantiles are computed. 
+    This can be suppressed by setting normalise=FALSE.
+
+    o pixellate.ppp
+    New arguments 'fractional' and 'preserve' for more accurate discretisation.
+
+    o "[.layered"
+    Subset index i can now be an 'owin' object.
+
+    o "[.solist"
+    Subset index i can now be an 'owin' object.
+
+    o plot.solist, plot.imlist, plot.anylist
+    Result is now an (invisible) list containing the result
+    from executing the plot of each panel.
+
+    o ppp
+    New argument 'checkdup'.
+
+    o Summary.im
+    Argument 'na.rm' is no longer ignored.
+
+    o cdf.test 
+    The methods for classes ppp, ppm, lpp, lppm, slrm
+    have a new argument 'interpolate'.
+
+    o as.solist
+    The argument x can now be a spatial object;
+    as.solist(cells) is the same as solist(cells).
+
+    o bw.diggle, bw.ppl, bw.relrisk, bw.smoothppp
+    These functions now extract and store the name of the unit of length
+    from the point pattern dataset. When the bandwidth selection criterion
+    is plotted, the name of the unit of length is shown on the x-axis.
+    
+    o polynom
+    This function now has a help file.
+
+    o rmhcontrol
+    New parameter 'pstage' determines when to generate random proposal points.
+
+    o rmh
+    Accelerated, in the case where multiple patterns are saved using 'nsave'.
+
+    o bdist.pixels
+    Accelerated for polygonal windows. New argument 'method'.
+
+    o spatstat namespace
+    The namespace of the spatstat package has been shortened
+    (by internally registering the native routines) which should
+    make the package run faster.
+
+    o sum.im, range.im, max.im, min.im
+    These functions have been removed, as they are now subsumed in Summary.im.
+
+BUG FIXES
+
+    o plot.msr
+    If one of 'nrows' or 'ncols' was specified, but not both,
+    an obscure error occurred.
+    Fixed.
+
+    o plot.solist, plot.imlist, plot.anylist
+    Crashed if 'nrows' and 'ncols' were given values implying
+    that some rows or columns would not contain any plots.
+    Fixed.
+
+    o as.ppp.lpp
+    Crashed if there was more than one column of marks.
+    Fixed.
+
+    o has.close.pp3
+    Results were incorrect, or a crash occurred, when argument 'Y' was given.
+    Fixed.
+
+    o rmpoispp
+    If 'lambda' was a list of images, 'names(lambda)' was ignored,
+    rather than serving as the default value of 'types'.
+    Fixed.
+
+    o bugfixes
+    Output was garbled, in rare cases.
+    Fixed.
+
+    o kppm
+    Result was malformed when clusters="VarGamma" and method="clik2".
+    Spotted by Abdollah Jalilian.
+    Fixed.
+
+    o QQversion
+    Plotting labels were malformed.
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.48-0
 
 OVERVIEW

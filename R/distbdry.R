@@ -1,7 +1,7 @@
 #
 #	distbdry.S		Distance to boundary
 #
-#	$Revision: 4.39 $	$Date: 2015/02/17 07:02:46 $
+#	$Revision: 4.42 $	$Date: 2017/02/01 10:26:09 $
 #
 # -------- functions ----------------------------------------
 #
@@ -46,7 +46,7 @@ function(X)
                    py <- polly$y
                    nsegs <- length(px)
                    for(j in seq_len(nsegs)) {
-                     j1 <- if(j < nsegs) j + 1 else 1
+                     j1 <- if(j < nsegs) j + 1L else 1L
                      seg <- c(px[j],  py[j],
                               px[j1], py[j1])
                      result <- pmin.int(result, distppl(xy, seg))
@@ -63,7 +63,8 @@ function(X)
         return(result)
 }
 
-"bdist.pixels" <- function(w, ..., style="image") {
+"bdist.pixels" <- function(w, ..., style="image",
+                           method=c("C", "interpreted")) {
 	verifyclass(w, "owin")
 
         masque <- as.mask(w, ...)
@@ -78,14 +79,15 @@ function(X)
                  rxy <- rasterxy.mask(masque)
                  x <- rxy$x
                  y <- rxy$y
-                 xmin <- w$xrange[1]
-                 xmax <- w$xrange[2]
-                 ymin <- w$yrange[1]
-                 ymax <- w$yrange[2]
+                 xmin <- w$xrange[1L]
+                 xmax <- w$xrange[2L]
+                 ymin <- w$yrange[1L]
+                 ymax <- w$yrange[2L]
                  b <- pmin.int(x - xmin, xmax - x, y - ymin, ymax - y)
                },
                polygonal = {
                  # set up pixel raster
+                 method <- match.arg(method)
                  rxy <- rasterxy.mask(masque)
                  x <- rxy$x
                  y <- rxy$y
@@ -94,25 +96,34 @@ function(X)
                  inside <- inside.owin(x, y, w)
                  # compute distances for these pixels
                  xy <- cbind(x[inside], y[inside])
-                 dxy <- rep.int(Inf, sum(inside))
-                 bdry <- w$bdry
-                 for(i in seq_along(bdry)) {
-                   polly <- bdry[[i]]
-                   nsegs <- length(polly$x)
-                   for(j in 1:nsegs) {
-                     j1 <- if(j < nsegs) j + 1 else 1
-                     seg <- c(polly$x[j],  polly$y[j],
-                              polly$x[j1], polly$y[j1])
-                     dxy <- pmin.int(dxy, distppl(xy, seg))
-                   }
-                 }
+                 switch(method,
+                        C = {
+                          #' C code
+                          ll <- as.data.frame(edges(w))
+                          dxy <- distppllmin(xy, ll)$min.d
+                        },
+                        interpreted = {
+                          #' ancient R code
+                          dxy <- rep.int(Inf, sum(inside))
+                          bdry <- w$bdry
+                          for(i in seq_along(bdry)) {
+                            polly <- bdry[[i]]
+                            nsegs <- length(polly$x)
+                            for(j in 1:nsegs) {
+                              j1 <- if(j < nsegs) j + 1L else 1L
+                              seg <- c(polly$x[j],  polly$y[j],
+                                       polly$x[j1], polly$y[j1])
+                              dxy <- pmin.int(dxy, distppl(xy, seg))
+                            }
+                          }
+                        })
                  b[inside] <- dxy
                },
                stop("unrecognised window type", w$type)
                )
 
         # reshape it
-        b <- matrix(b, nrow=masque$dim[1], ncol=masque$dim[2])
+        b <- matrix(b, nrow=masque$dim[1L], ncol=masque$dim[2L])
 
         switch(style,
                coords={
@@ -136,7 +147,7 @@ erodemask <- function(w, r, strict=FALSE) {
   verifyclass(w, "owin")
   if(w$type != "mask")
     stop(paste("window w is not of type", sQuote("mask")))
-  if(!is.numeric(r) || length(r) != 1)
+  if(!is.numeric(r) || length(r) != 1L)
     stop("r must be a single number")
   if(r < 0)
     stop("r must be nonnegative")
@@ -180,8 +191,8 @@ rebound.owin <- function(x, rect) {
   switch(w$type,
          rectangle={
            return(owin(xr, yr,
-                       poly=list(x=w$xrange[c(1,2,2,1)],
-                                 y=w$yrange[c(1,1,2,2)]),
+                       poly=list(x=w$xrange[c(1L,2L,2L,1L)],
+                                 y=w$yrange[c(1L,1L,2L,2L)]),
                        check=FALSE))
          },
          polygonal={
@@ -190,10 +201,10 @@ rebound.owin <- function(x, rect) {
          mask={
            newseq <- function(oldseq, newrange, dstep) {
              oldends <- range(oldseq)
-             nleft <- max(0, floor((oldends[1] - newrange[1])/dstep))
-             nright <- max(0, floor((newrange[2] - oldends[2])/dstep))
-             newstart <- max(oldends[1] - nleft * dstep, newrange[1])
-             newend <- min(oldends[2] + nright * dstep, newrange[2])
+             nleft <- max(0, floor((oldends[1L] - newrange[1L])/dstep))
+             nright <- max(0, floor((newrange[2L] - oldends[2L])/dstep))
+             newstart <- max(oldends[1L] - nleft * dstep, newrange[1L])
+             newend <- min(oldends[2L] + nright * dstep, newrange[2L])
              seq(from=newstart, by=dstep, to=newend)
            }
            xcol <- newseq(w$xcol, xr, mean(diff(w$xcol)))

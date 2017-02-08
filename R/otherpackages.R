@@ -3,8 +3,14 @@
 #' 
 #'    Dealing with other packages
 #' 
-#'    $Revision: 1.13 $  $Date: 2016/10/12 01:28:18 $
+#'    $Revision: 1.16 $  $Date: 2017/02/08 08:34:29 $
 
+fft2D <- function(z, inverse=FALSE,
+                  west=requireNamespace("fftwtools", quietly=TRUE)) {
+  if(west) return(fftwtools::fftw2d(data=z, inverse=inverse))
+  return(stats::fft(z=z, inverse=inverse))
+}
+  
 kraeverRandomFields <- function() {
   kraever("RandomFieldsUtils")
   kraever("RandomFields")

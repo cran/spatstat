@@ -7,7 +7,7 @@
 ##
 ## plot.solist is defined in plot.solist.R
 ##
-## $Revision: 1.13 $ $Date: 2016/06/27 06:59:28 $
+## $Revision: 1.14 $ $Date: 2017/01/20 10:06:37 $
 
 anylist <- function(...) {
   x <- list(...)
@@ -101,7 +101,7 @@ solist <- function(..., check=TRUE, promote=TRUE, demote=FALSE) {
 as.solist <- function(x, ...) {
   if(inherits(x, "solist") && length(list(...)) == 0)
     return(x)
-  if(!is.list(x))
+  if(!is.list(x) || is.sob(x))
     x <- list(x)
   return(do.call(solist, append(x, list(...))))
 }
@@ -117,8 +117,13 @@ print.solist <- function (x, ...) {
 
 "[.solist" <- function(x, i, ...) {
   cl <- oldClass(x)
-  ## invoke list method
-  y <- NextMethod("[")
+  if(!missing(i) && is.owin(i)) {
+    ## spatial subset
+    y <- lapply(unclass(x), "[", i=i)
+  } else {
+    ## invoke list method
+    y <- NextMethod("[")
+  }
   if(length(y) == 0) return(list())
   class(y) <- cl
   return(y)

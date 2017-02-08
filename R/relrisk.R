@@ -3,7 +3,7 @@
 #
 #   Estimation of relative risk
 #
-#  $Revision: 1.31 $  $Date: 2016/09/25 10:22:46 $
+#  $Revision: 1.33 $  $Date: 2017/01/28 06:29:07 $
 #
 
 relrisk <- function(X, ...) UseMethod("relrisk")
@@ -308,7 +308,7 @@ relrisk.ppp <- local({
                probs <- clamp01(probs)
                ## trap NaN values
                bad <- badvalues(probs)
-               badrow <- apply(bad, 1, any)
+               badrow <- matrowany(bad)
                if(any(badrow)) {
                  ## apply l'Hopital's rule
                  typenn <- imarks[nnwhich(X)]
@@ -479,7 +479,8 @@ bw.relrisk <- function(X, method="likelihood",
   result <- bw.optim(cv, h, iopt,
                      hname="sigma", 
                      creator="bw.relrisk",
-                     criterion=paste(methodname, "Cross-Validation"))
+                     criterion=paste(methodname, "Cross-Validation"),
+                     unitname=unitname(X))
   return(result)
 }
 
