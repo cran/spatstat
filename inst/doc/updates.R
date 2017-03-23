@@ -10,18 +10,37 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:41-47
+### code chunk number 2: updates.Rnw:41-66
 ###################################################
-fname <- system.file("doc", "packagesizes.txt", package="spatstat")
-z <- read.table(fname, header=TRUE)
-z$date <- as.Date(z$date)
+getSizeTable <- function(packagename="spatstat") {
+  fname <- system.file("doc", "packagesizes.txt", package=packagename)
+  if(!file.exists(fname)) 
+    return(NULL)
+  a <- read.table(fname, header=TRUE)
+  a$date <- as.Date(a$date)
+  return(a)
+}
+counts <- c("nhelpfiles", "nobjects", "ndatasets", "Rlines", "srclines")
+mergeSizeTables <- function(a, b) {
+  if(is.null(b)) return(a)
+  for(i in seq_len(nrow(a))) {
+    j <- which(b$date <= a$date[i])
+    if(length(j) > 0) 
+      a[i,counts] <- a[i,counts] + b[max(j), counts]
+  }
+  return(a)
+}
+z <- getSizeTable()
+zutils <- getSizeTable("spatstat.utils")
+z <- mergeSizeTables(z, zutils)
+#
 changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
 newobj <- changes[["nobjects"]]
 newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:57-62
+### code chunk number 3: updates.Rnw:76-81
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -31,7 +50,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:68-73
+### code chunk number 4: updates.Rnw:87-92
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -42,7 +61,7 @@ text(as.Date("2013-01-01"), 50, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:1390-1394
+### code chunk number 5: updates.Rnw:1583-1587
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -51,7 +70,7 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:1400-1401 (eval = FALSE)
+### code chunk number 6: updates.Rnw:1593-1594 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

@@ -1,4 +1,101 @@
 
+        CHANGES IN spatstat VERSION 1.50-0
+
+OVERVIEW
+
+    o We thank Richard Cotton, Adrian Heyner, Abdollah Jalilian,
+    Dominic Schuhmacher and Rasmus Waagepetersen for contributions.
+
+    o spatstat now 'Imports' the package 'spatstat.utils'.
+
+    o Bandwidth selection for pair correlation function.
+
+    o Improvements and bug fixes.
+
+    o Version nickname: 'Bunyip Aristocracy'
+
+NEW PACKAGE STRUCTURE
+
+    o spatstat is being split into several sub-packages, to satisfy
+    the requirements of CRAN. This should not affect the user:
+    existing code will continue to work in the same way.
+    Currently there are two sub-packages, called 'spatstat.utils'
+    and 'spatstat'. Typing 'library(spatstat)' will load the familiar
+    'spatstat' package which can be used as before, and will silently
+    import the 'spatstat.utils' package. The 'spatstat.utils' package
+    contains utility functions that were originally written for 'spatstat':
+    they were undocumented internal functions in 'spatstat', but are now
+    documented and accessible in a separate package because they may be
+    useful for other purposes. To access these functions, you need to
+    type 'library(spatstat.utils)'. 
+    
+
+NEW FUNCTIONS
+
+    o bw.pcf
+    Bandwidth selection for pair correlation function.
+    Original code contributed by Abdollah Jalilian and Rasmus Waagepetersen.
+
+    o grow.box3
+    Expand a three-dimensional box.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o as.owin
+    Now refuses to convert a 'box3' to a two-dimensional window.
+
+    o pixellate.ppp
+    If the pattern is empty, the result is an integer-valued image
+    (by default) for consistency with the results for non-empty patterns.
+
+    o ppp
+    If the coordinate vectors x and y contain NA, NaN or infinite values,
+    these points are deleted with a warning, instead of causing a fatal error.
+
+    o ppm
+    Argument 'interaction' can now be a function that makes an interaction,
+    such as Poisson, Hardcore, MultiHard.
+
+    o pcf, pcfinhom
+    New argument 'close' for advanced use.
+
+    o runifpointx, rpoisppx
+    New argument 'drop'.
+
+    o shapley, ponderosa
+    In these installed datasets, the functions shapley.extra$plotit
+    and ponderosa.extra$plotit have changed slightly (to accommodate the
+    dependence on the package spatstat.utils).
+
+    o kppm
+    Improved printed output.
+
+BUG FIXES
+
+    o rMaternI, rMaternII
+    If 'win' was a three-dimensional box of class 'box3', 
+    the result was a two-dimensional point pattern.
+    [Spotted by Adrian Heyner.]
+    Fixed.
+
+    o rmhmodel.ppm, simulate.ppm
+    Crashed when applied to a fitted Lennard-Jones model.
+    [Spotted by Dominic Schuhmacher.]
+    Fixed.
+    
+    o leverage.ppm, influence.ppm, dfbetas.ppm
+    Crashed when applied to some hard-core models.
+    Fixed.
+
+    o "[.ppx"
+    The format of the result was slightly malformed 
+    if exactly one point was selected.
+    Fixed.
+
+    o unmark.lpp, marks<-.lpp
+    The result had class c("lpp", "lpp", "ppx") instead of c("lpp", "ppx").
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.49-0
 
 OVERVIEW

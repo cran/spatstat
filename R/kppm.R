@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.127 $ $Date: 2017/02/07 07:50:52 $
+# $Revision: 1.132 $ $Date: 2017/02/24 05:52:53 $
 #
 
 kppm <- function(X, ...) {
@@ -108,6 +108,8 @@ kppm.ppp <- kppm.quad <-
   if(is.null(weightfun) && method != "mincon") {
     RmaxW <- (rmax %orifnull% rmax.rule("K", Window(XX), intensity(XX))) / 2
     weightfun <- function(d, rr=RmaxW) { as.integer(d <= rr) }
+    formals(weightfun)[[2]] <- RmaxW
+    attr(weightfun, "selfprint") <- paste0("Indicator(distance <= ", RmaxW, ")")
   }
   # fit
   out <- switch(method,
@@ -306,6 +308,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
        usecanonical <- FALSE
      }
   }
+  startpar.human <- startpar
   if(usecanonical) {
     htheo <- theoret
     startpar <- tocanonical(startpar)
@@ -332,9 +335,21 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   }
   
   mcfit <- do.call(mincontrast, mcargs)
+  # extract fitted parameters and reshape
+  if(!usecanonical) {
+    optpar.canon <- NULL
+    optpar.human <- mcfit$par
+    names(optpar.human) <- names(startpar.human)
+  } else {
+    optpar.canon <- mcfit$par
+    names(optpar.canon) <- names(startpar)
+    optpar.human <- tohuman(optpar.canon)
+    names(optpar.human) <- names(startpar.human)
+  }
+  mcfit$par       <- optpar.human
+  mcfit$par.canon <- optpar.canon
   # Return results for DPPs
   if(isDPP){
-    names(mcfit$par) <- names(startpar)
     extra <- list(Stat      = Stat,
                   StatFun   = StatFun,
                   StatName  = StatName,
@@ -345,16 +360,8 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   }
   ## Extra stuff for ordinary cluster/lgcp models
   ## imbue with meaning
-  if(!usecanonical) {
-    par <- mcfit$par
-  } else {
-    mcfit$par.canon <- can <- mcfit$par
-    par <- tohuman(can)
-  }
-  names(par) <- info$parnames
-  mcfit$par <- par
   ## infer model parameters
-  mcfit$modelpar <- info$interpret(par, lambda)
+  mcfit$modelpar <- info$interpret(optpar.human, lambda)
   mcfit$internal <- list(model=ifelse(isPCP, clusters, "lgcp"))
   mcfit$covmodel <- dots$covmodel
   
@@ -472,6 +479,23 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   } else clargs <- NULL
   # determine starting parameter values
   startpar <- selfstart(X)
+  #' ............ experimental .........................
+  usecanonical <- spatstat.options("kppm.canonical")
+  if(usecanonical) {
+     tocanonical <- info$tocanonical
+     tohuman <- info$tohuman
+     if(is.null(tocanonical) || is.null(tohuman)) {
+       warning("Canonical parameters are not yet supported for this model")
+       usecanonical <- FALSE
+     }
+  }
+  startpar.human <- startpar
+  if(usecanonical) {
+    pcftheo <- pcfun
+    startpar <- tocanonical(startpar)
+    pcfun <- function(par, ...) { pcftheo(tohuman(par), ...) }
+  } 
+  # .....................................................
   # create local function to evaluate pair correlation
   #  (with additional parameters 'pcfunargs' in its environment)
   paco <- function(d, par) {
@@ -521,7 +545,8 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   ## DPP resolving algorithm and checking startpar
   changealgorithm <- length(startpar)==1 && algorithm=="Nelder-Mead"
   if(isDPP){
-    alg <- dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
+    alg <- dppmFixAlgorithm(algorithm, changealgorithm, clusters,
+                            startpar.human)
     algorithm <- optargs$method <- alg$algorithm
     if(algorithm=="Brent" && changealgorithm){
       optargs$lower <- alg$lower
@@ -532,9 +557,21 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   opt <- do.call(optim, optargs)
   # raise warning/error if something went wrong
   signalStatus(optimStatus(opt), errors.only=TRUE)
+  # fitted parameters
+  if(!usecanonical) {
+    optpar.canon <- NULL
+    optpar.human <- opt$par
+    names(optpar.human) <- names(startpar.human)
+  } else {
+    optpar.canon <- opt$par
+    names(optpar.canon) <- names(startpar)
+    optpar.human <- tohuman(optpar.canon)
+    names(optpar.human) <- names(startpar.human)
+  }
+  opt$par       <- optpar.human
+  opt$par.canon <- optpar.canon
   # Finish in DPP case
   if(!is.null(DPP)){
-    names(opt$par) <- names(startpar)
     # all info that depends on the fitting method:
     Fit <- list(method    = "clik2",
                 clfit     = opt,
@@ -555,17 +592,16 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
     return(result)
   }
   # meaningful model parameters
-  optpar <- opt$par
-  modelpar <- info$interpret(optpar, lambda)
+  modelpar <- info$interpret(optpar.human, lambda)
   # infer parameter 'mu'
   if(isPCP) {
     # Poisson cluster process: extract parent intensity kappa
-    kappa <- optpar[["kappa"]]
+    kappa <- optpar.human[["kappa"]]
     # mu = mean cluster size
     mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
   } else {
     # LGCP: extract variance parameter sigma2
-    sigma2 <- optpar[["sigma2"]]
+    sigma2 <- optpar.human[["sigma2"]]
     # mu = mean of log intensity 
     mu <- if(stationary) log(lambda) - sigma2/2 else
           eval.im(log(lambda) - sigma2/2)    
@@ -587,8 +623,9 @@ kppmComLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
                  po         = po,
                  lambda     = lambda,
                  mu         = mu,
-                 par        = optpar,
-                 clustpar   = info$checkpar(par=optpar, old=FALSE),
+                 par        = optpar.human,
+                 par.canon  = optpar.canon,
+                 clustpar   = info$checkpar(par=optpar.human, old=FALSE),
                  clustargs  = info$checkclustargs(clargs$margs, old=FALSE), #clargs$margs,
                  modelpar   = modelpar,
                  covmodel   = clargs,
@@ -680,6 +717,23 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   } else clargs <- NULL
   # determine starting parameter values
   startpar <- selfstart(X)
+  #' ............ experimental .........................
+  usecanonical <- spatstat.options("kppm.canonical")
+  if(usecanonical) {
+     tocanonical <- info$tocanonical
+     tohuman <- info$tohuman
+     if(is.null(tocanonical) || is.null(tohuman)) {
+       warning("Canonical parameters are not yet supported for this model")
+       usecanonical <- FALSE
+     }
+  }
+  startpar.human <- startpar
+  if(usecanonical) {
+    pcftheo <- pcfun
+    startpar <- tocanonical(startpar)
+    pcfun <- function(par, ...) { pcftheo(tohuman(par), ...) }
+  }
+  # .....................................................
   # create local function to evaluate pair correlation
   #  (with additional parameters 'pcfunargs' in its environment)
   paco <- function(d, par) {
@@ -727,7 +781,8 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   ## DPP resolving algorithm and checking startpar
   changealgorithm <- length(startpar)==1 && algorithm=="Nelder-Mead"
   if(isDPP){
-    alg <- dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
+    alg <- dppmFixAlgorithm(algorithm, changealgorithm, clusters,
+                            startpar.human)
     algorithm <- optargs$method <- alg$algorithm
     if(algorithm=="Brent" && changealgorithm){
       optargs$lower <- alg$lower
@@ -738,9 +793,21 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
   opt <- do.call(optim, optargs)
   # raise warning/error if something went wrong
   signalStatus(optimStatus(opt), errors.only=TRUE)
+  # Extract optimal values of parameters
+  if(!usecanonical) {
+    optpar.canon <- NULL
+    optpar.human <- opt$par
+    names(optpar.human) <- names(startpar.human)
+  } else {
+    optpar.canon <- opt$par
+    names(optpar.canon) <- names(startpar)
+    optpar.human <- tohuman(optpar.canon)
+    names(optpar.human) <- names(startpar.human)
+  }
   # Finish in DPP case
   if(!is.null(DPP)){
-    names(opt$par) <- names(startpar)
+    opt$par <- optpar.human
+    opt$par.canon <- optpar.canon
     # all info that depends on the fitting method:
     Fit <- list(method    = "palm",
                 clfit     = opt,
@@ -749,7 +816,7 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
                 objfun    = obj,
                 objargs   = objargs)
     # pack up
-    clusters <- update(clusters, as.list(opt$par))
+    clusters <- update(clusters, as.list(optpar.human))
     result <- list(Xname      = Xname,
                    X          = X,
                    stationary = stationary,
@@ -761,17 +828,16 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
     return(result)
   }
   # meaningful model parameters
-  optpar <- opt$par
-  modelpar <- info$interpret(optpar, lambda)
+  modelpar <- info$interpret(optpar.human, lambda)
   # infer parameter 'mu'
   if(isPCP) {
     # Poisson cluster process: extract parent intensity kappa
-    kappa <- optpar[["kappa"]]
+    kappa <- optpar.human[["kappa"]]
     # mu = mean cluster size
     mu <- if(stationary) lambda/kappa else eval.im(lambda/kappa)
   } else {
     # LGCP: extract variance parameter sigma2
-    sigma2 <- optpar[["sigma2"]]
+    sigma2 <- optpar.human[["sigma2"]]
     # mu = mean of log intensity 
     mu <- if(stationary) log(lambda) - sigma2/2 else
           eval.im(log(lambda) - sigma2/2)    
@@ -791,8 +857,9 @@ kppmPalmLik <- function(X, Xname, po, clusters, control, weightfun, rmax,
                  po         = po,
                  lambda     = lambda,
                  mu         = mu,
-                 par        = optpar,
-                 clustpar   = info$checkpar(par=optpar, old=FALSE),
+                 par        = optpar.human,
+                 par.canon  = optpar.canon,
+                 clustpar   = info$checkpar(par=optpar.human, old=FALSE),
                  clustargs  = info$checkclustargs(clargs$margs, old=FALSE), #clargs$margs,
                  modelpar   = modelpar,
                  covmodel   = clargs,
@@ -1007,22 +1074,24 @@ print.kppm <- print.dppm <- function(x, ...) {
              splat("Fitted by maximum second order composite likelihood")
              splat("\trmax =", x$Fit$rmax)
              if(!is.null(wtf <- x$Fit$weightfun)) {
-               cat("\tweight function: ")
-               print(wtf)
+               a <- attr(wtf, "selfprint") %orifnull% pasteFormula(wtf)
+               splat("\tweight function:", a)
              }
            },
            palm = {
              splat("Fitted by maximum Palm likelihood")
              splat("\trmax =", x$Fit$rmax)
              if(!is.null(wtf <- x$Fit$weightfun)) {
-               cat("\tweight function: ")
-               print(wtf)
+               a <- attr(wtf, "selfprint") %orifnull% pasteFormula(wtf)
+               splat("\tweight function:", a)
              }
            },
            warning(paste("Unrecognised fitting method", sQuote(x$Fit$method)))
            )
   }
 
+  parbreak(terselevel)
+  
   # ............... trend .........................
 
   if(!(isDPP && is.null(x$fitted$intensity)))
