@@ -200,6 +200,8 @@ sortalongsegment <- function(df) {
 as.im.linim <- function(X, ...) {
   attr(X, "L") <- attr(X, "df") <- NULL
   class(X) <- "im"
+  if(length(list(...)) > 0)
+    X <- as.im(X, ...)
   return(X)
 }
 
@@ -207,14 +209,54 @@ as.linim <- function(X, ...) {
   UseMethod("as.linim")
 }
 
-as.linim.default <- function(X, L, ...) {
+as.linim.default <- function(X, L, ..., eps = NULL, dimyx = NULL, xy = NULL,
+                                        delta = NULL) {
   stopifnot(inherits(L, "linnet"))
-  Y <- as.im(X, W=as.rectangle(as.owin(L)), ...)
+  Y <- as.im(X, W=as.rectangle(as.owin(L)), ..., eps=eps, dimyx=dimyx, xy=xy)
   M <- as.mask.psp(as.psp(L), as.owin(Y))
   Y[complement.owin(M)] <- NA
-  out <- linim(L, Y)
+  df <- NULL
+  if(!is.null(delta)) {
+    df <- pointsAlongNetwork(L, delta)
+    pix <- nearest.valid.pixel(df$x, df$y, Y)
+    df$xc <- Y$xcol[pix$col]
+    df$yc <- Y$yrow[pix$row]
+    df$values <- Y$v[cbind(pix$row, pix$col)]
+    df <- df[,c("xc", "yc", "x", "y", "seg", "tp", "values")]
+    names(df)[names(df) == "seg"] <- "mapXY"
+  }
+  out <- linim(L, Y, df=df)
   return(out)
 }
+
+pointsAlongNetwork <- local({
+
+  pointsAlongNetwork <- function(L, delta) {
+    #' sample points evenly spaced along each segment
+    stopifnot(inherits(L, "linnet"))
+    S <- as.psp(L)
+    ns <- nsegments(S)
+    seglen <- lengths.psp(S)
+    ends <- as.data.frame(S)
+    nsample <- pmax(1, ceiling(seglen/delta))
+    df <- NULL
+    x0 <- ends$x0
+    y0 <- ends$y0
+    x1 <- ends$x1
+    y1 <- ends$y1
+    for(i in seq_len(ns)) {
+      nn <- nsample[i] + 1L
+      tcut <- seq(0, 1, length.out=nn)
+      tp <- (tcut[-1] + tcut[-nn])/2
+      x <- x0[i] * (1-tp) + x1[i] * tp
+      y <- y0[i] * (1-tp) + y1[i] * tp
+      df <- rbind(df, data.frame(x=x, y=y, seg=i, tp=tp))
+    }
+    return(df)          
+  }
+
+  pointsAlongNetwork
+})
 
 as.linim.linim <- function(X, ...) {
   if(length(list(...)) == 0)
@@ -271,6 +313,19 @@ eval.linim <- function(expr, envir, harmonize=TRUE) {
     }
     dfempty <- unlist(lapply(dframes, is.null))
     if(!any(dfempty)) {
+      # ensure data frames are compatible
+      if(length(dframes) > 1 && (
+          length(unique(nr <- sapply(dframes, nrow))) > 1   ||
+           !allElementsIdentical(dframes, "seg")            ||
+   	   !allElementsIdentical(dframes, "tp")
+	)) {
+        # find the one with finest spacing
+	imax <- which.max(nr)
+	# resample the others
+	dframes[-imax] <- lapply(dframes[-imax],
+	                         resampleNetworkDataFrame,
+	                         template=dframes[[imax]])
+      }
       # replace each image variable by its data frame column of values
       vars[islinim] <- lapply(dframes, getElement, "values")
       # now evaluate expression
@@ -284,12 +339,62 @@ eval.linim <- function(expr, envir, harmonize=TRUE) {
   return(result)
 }
 
+resampleNetworkDataFrame <- function(df, template) {
+  # resample 'df' at the points of 'template'
+  invalues  <- df$values
+  insegment <- df$mapXY
+  inteepee  <- df$tp
+  out <- template
+  n <- nrow(out)
+  outvalues <- vector(mode = typeof(invalues), length=n)
+  outsegment <- out$mapXY
+  outteepee  <- out$tp
+  for(i in seq_len(n)) {
+    relevant <- which(insegment == outsegment[i])
+    if(length(relevant) > 0) {
+      j <- which.min(abs(inteepee[relevant] - outteepee[i]))
+      outvalues[i] <- invalues[relevant[j]]
+    }
+  }
+  out$values <- outvalues
+  return(out)
+}
+
 as.linnet.linim <- function(X, ...) {
   attr(X, "L")
 }
 
-"[.linim" <- function(x, i, ...) {
-  #' first apply subset method for 'im'
+"[.linim" <- function(x, i, ..., drop=TRUE) {
+  if(!missing(i) && is.lpp(i)) {
+    n <- npoints(i)
+    result <- vector(mode=typeof(x$v), length=n)
+    if(n == 0) return(result)
+    if(!is.null(df <- attr(x, "df"))) {
+      #' use data frame of sample points along network
+      knownseg <- df$mapXY
+      knowntp  <- df$tp
+      knownval <- df$values
+      #' extract local coordinates of query points
+      coo <- coords(i)
+      queryseg <- coo$seg
+      querytp  <- coo$tp
+      #' match to nearest sample point
+      for(j in 1:n) {
+        relevant <- (knownseg == queryseg[j])
+        if(!any(relevant)) {
+          result[j] <- NA
+        } else {
+          k <- which.min(abs(knowntp[relevant] - querytp[j]))
+          result[j] <- knownval[relevant][k]
+        }
+      }
+      if(drop && anyNA(result))
+        result <- result(!is.na(result))
+      return(result)
+    }
+    #' give up and use pixel image
+  }
+  #' apply subset method for 'im'
   y <- NextMethod("[")
   if(!is.im(y)) return(y) # vector of pixel values
   #' handle linear network info

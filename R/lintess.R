@@ -68,6 +68,41 @@ print.lintess <- function(x, ...) {
   splat("Tessellation on a linear network")
   nt <- length(levels(x$df$tile))
   splat(nt, "tiles")
+  if(anyNA(x$df$tile)) splat("[An additional tile is labelled NA]")
+  return(invisible(NULL))
+}
+
+summary.lintess <- function(object, ...) {
+  df <- object$df
+  lev <- levels(df$tile)
+  nt <- length(lev)
+  nr <- nrow(df)
+  seglen <- lengths.psp(as.psp(object$L))
+  df$fraglen <- with(df, seglen[seg] * (t1-t0))
+  tilelen <- with(df, tapplysum(fraglen, list(tile)))
+  hasna <- anyNA(df$tile)
+  nalen <- if(hasna) (sum(seglen) - sum(tilelen)) else 0
+  y <- list(nt=nt, nr=nr, lev=lev, seglen=seglen, tilelen=tilelen,
+            hasna=hasna, nalen=nalen)
+  class(y) <- c("summary.lintess", class(y))
+  return(y)
+}
+
+print.summary.lintess <- function(x, ...) {
+  splat("Tessellation on a linear network")
+  with(x, {
+    splat(nt, "tiles")
+    if(hasna) splat("[An additional tile is labelled NA]")
+    if(nt <= 30) {
+      splat("Tile labels:", paste(lev, collapse=" "))
+      splat("Tile lengths:")
+      print(signif(tilelen, 4))
+    } else {
+      splat("Tile lengths (summary):")
+      print(summary(tilelen))
+    }
+    if(hasna) splat("Tile labelled NA has length", nalen)
+  })
   return(invisible(NULL))
 }
 
@@ -121,19 +156,26 @@ as.owin.lintess <- function(W, ...) { as.owin(as.linnet(W), ...) }
 
 Window.lintess <- function(X, ...) { as.owin(as.linnet(X)) }
 
-as.linnet.lintess <- function(X, ...) { X$L }
+domain.lintess <- as.linnet.lintess <- function(X, ...) { X$L }
 
-as.linfun.lintess <- function(X, ...) {
+as.linfun.lintess <- function(X, ..., values, navalue=NA) {
   L <- X$L
   df <- X$df
+  if(missing(values) || is.null(values)) {
+    rowvalues <- df$tile
+  } else {
+    if(length(values) != length(levels(df$tile)))
+      stop("Length of 'values' should equal the number of tiles", call.=FALSE)
+    rowvalues <- values[as.integer(df$tile)]    
+  }
   f <- function(x, y, seg, tp) {
-    result <- df$tile[integer(0)]
+    result <- rowvalues[integer(0)]
     for(i in seq_along(seg)) {
       tpi <- tp[i]
       segi <- seg[i]
       j <- which(df$seg == segi)
       kk <- which(df[j, "t0"] <= tpi & df[j, "t1"] >= tpi)
-      result[i] <- if(length(kk) == 0) NA else df$tile[j[min(kk)]]
+      result[i] <- if(length(kk) == 0) navalue else rowvalues[j[min(kk)]]
     }
     return(result)
   }

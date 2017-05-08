@@ -577,7 +577,7 @@
 \references{
   Baddeley, A., Diggle, P.J., Hardegen, A., Lawrence, T., Milne,
   R.K. and Nair, G. (2014) On tests of spatial pattern based on
-  simulation envelopes. \emph{Ecological Monographs}, to appear.
+  simulation envelopes. \emph{Ecological Monographs} \bold{84} (3) 477--489.
   
   Cressie, N.A.C. \emph{Statistics for spatial data}.
     John Wiley and Sons, 1991.
@@ -801,11 +801,8 @@ nsim=3, global=TRUE))
  EG <- envelope(X, Gest, nsim=3, simulate=EK)
 }
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \spatstatAuthors.
 }
 \keyword{spatial}
 \keyword{htest}

@@ -75,8 +75,8 @@ as.sparse3Darray <- function(x, ...) {
                          dims=dimx, dimnames=dimnames(x))
     }
   } else if(inherits(x, "sparseVector")) {
-    one <- if(length(z@i) > 0) 1L else integer(0)
-    y <- sparse3Darray(i=z@i, j=one, k=one, x=z@x,
+    one <- if(length(x@i) > 0) 1L else integer(0)
+    y <- sparse3Darray(i=x@i, j=one, k=one, x=x@x,
                        dims=c(x@length, 1L, 1L))
   } else if(is.null(dim(x)) && is.atomic(x)) {
     n <- length(x)
@@ -226,26 +226,37 @@ as.array.sparse3Darray <- function(x, ...) {
       nvary <- sum(varies)
       varying <- which(varies)
       if(nvary == 3) {
+        ## ---- older code -----
         ## convert triples of integers to character codes
-        ## icode <- apply(i, 1, paste, collapse=",") << is too slow >>
-        icode <- paste(i[,1], i[,2], i[,3], sep=",")
-        dcode <- paste(x$i, x$j, x$k, sep=",")
+        #### icode <- apply(i, 1, paste, collapse=",") << is too slow >>
+        ## icode <- paste(i[,1], i[,2], i[,3], sep=",")
+        ## dcode <- paste(x$i, x$j, x$k, sep=",")
+	## ------------------
+	m <- matchIntegerDataFrames(i, cbind(x$i, x$j, x$k))
       } else if(nvary == 2) {
         ## effectively a sparse matrix
-        icode <- paste(i[,varying[1]], i[,varying[2]], sep=",")
-        ijk <- cbind(x$i, x$j, x$k)
-        dcode <- paste(ijk[,varying[1]], ijk[,varying[2]], sep=",")
+        ## ---- older code -----
+        ## icode <- paste(i[,varying[1]], i[,varying[2]], sep=",")
+        ## ijk <- cbind(x$i, x$j, x$k)
+        ## dcode <- paste(ijk[,varying[1]], ijk[,varying[2]], sep=",")
+	## ------------------
+	ijk <- cbind(x$i, x$j, x$k)
+	m <- matchIntegerDataFrames(i[,varying,drop=FALSE],
+	                            ijk[,varying,drop=FALSE])
       } else if(nvary == 1) {
         ## effectively a sparse vector
-        icode <- i[,varying]
-        dcode <- switch(varying, x$i, x$j, x$k)
+        ## ---- older code -----
+        ## icode <- i[,varying]
+        ## dcode <- switch(varying, x$i, x$j, x$k)
+	## ------------------
+	m <- match(i[,varying], switch(varying, x$i, x$j, x$k))
       } else {
         ## effectively a single value
-        icode <- rep(1, nrow(i))
-        dcode <- 1  # since we know length(x$x) > 0
+        ## ---- older code -----
+        ## icode <- rep(1, nrow(i))
+        ## dcode <- 1  # since we know length(x$x) > 0
+	m <- 1
       }
-      ## match them
-      m <- match(icode, dcode)
       ## insert any found elements
       found <- !is.na(m)
       answer[found] <- x$x[m[found]]
@@ -381,13 +392,15 @@ rbindCompatibleDataFrames <- function(x) {
       return(x) # no items to replace
     ## assemble data frame
     xdata <- data.frame(i=x$i, j=x$j, k=x$k, x=x$x)
-    ##
+    ## match xdata into ijk (not necessarily the first match in original order)
+    m <- matchIntegerDataFrames(xdata[,1:3,drop=FALSE], ijk)
+    ## ------- OLDER VERSION: --------
     ## convert triples of integers to character codes
     ## icode <- apply(ijk, 1, paste, collapse=",") << is too slow >>
-    icode <- paste(ijk[,1], ijk[,2], ijk[,3], sep=",")
-    xcode <- paste(x$i, x$j, x$k, sep=",")
-    ## match them *backwards*
-    m <- match(xcode, icode)
+    ## icode <- paste(ijk[,1], ijk[,2], ijk[,3], sep=",")
+    ## xcode <- paste(x$i, x$j, x$k, sep=",")
+    ##  m <- match(xcode, icode)
+    ## -------------------------------
     ## remove any matches, retaining only data that do not match 'i'
     xdata <- xdata[is.na(m), , drop=FALSE]   # sic
     ## ensure replacement value is vector-like
@@ -595,9 +608,8 @@ isRelevantZero <- function(x) identical(x, RelevantZero(x))
 RelevantEmpty <- function(x) vector(mode=typeof(x), length=0L)
 
 unionOfSparseIndices <- function(A, B) {
-  ijk <- rbind(data.frame(i=A$i, j=A$j, k=A$k),
-               data.frame(i=B$i, j=B$j, k=B$k))
-  ijk <- ijk[!duplicated(ijk), , drop=FALSE]
+  #' A, B are data frames of indices i, j, k
+  ijk <- unique(rbind(A, B))
   colnames(ijk) <- c("i", "j", "k")
   return(ijk)
 }
@@ -685,11 +697,20 @@ Ops.sparse3Darray <- function(e1,e2=NULL){
   # Result is sparse
   if(identical(dim1, dim2)) {
     #' extents are identical
-    ijk <- unionOfSparseIndices(e1, e2)
-    xijk <- as.vector(do.call(.Generic, list(e1[ijk], e2[ijk])))
+    ijk1 <- SparseIndices(e1)
+    ijk2 <- SparseIndices(e2)
+    if(identical(ijk1, ijk2)) {
+      #' patterns of nonzero entries are identical
+      ijk <- ijk1
+      values <- do.call(.Generic, list(e1$x, e2$x))
+    } else {			   
+      #' different patterns of nonzero entries
+      ijk <- unionOfSparseIndices(ijk1, ijk2)
+      values <- as.vector(do.call(.Generic, list(e1[ijk], e2[ijk])))
+    }			      
     dn <- dimnames(e1) %orifnull% dimnames(e2)
-    result <- sparse3Darray(i=ijk$i, j=ijk$j, k=ijk$k, x=xijk,
-                            dims=dim1, dimnames=dn, strict=TRUE)
+    result <- sparse3Darray(i=ijk$i, j=ijk$j, k=ijk$k, x=values,
+                              dims=dim1, dimnames=dn, strict=TRUE)
     return(result)
   }
 
@@ -789,6 +810,24 @@ Summary.sparse3Darray <- function(..., na.rm=FALSE) {
 }
 
 
+SparseIndices <- function(x) {
+  #' extract indices of entries of sparse vector/matrix/array
+  nd <- length(dim(x))
+  if(nd > 3)
+    stop("Arrays of more than 3 dimensions are not supported", call.=FALSE)
+  if(nd == 0 || nd == 1) {
+    x <- as(x, "sparseVector")
+    df <- data.frame(i=x@i)
+  } else if(nd == 2) {
+    x <- as(x, "TsparseMatrix")
+    df <- data.frame(i=x@i + 1L, j=x@j + 1L)
+  } else if(nd == 3) {
+    x <- as.sparse3Darray(x)
+    df <- data.frame(i=x$i, j=x$j, k=x$k)
+  }
+  return(df)
+}
+
 SparseEntries <- function(x) {
   #' extract entries of sparse vector/matrix/array
   nd <- length(dim(x))
@@ -835,3 +874,44 @@ EntriesToSparse <- function(df, dims) {
   return(result)
 }
 
+evalSparse3Dentrywise <- function(expr, envir) {
+  ## DANGER: this assumes all sparse arrays in the expression
+  ##         have the same pattern of nonzero elements!
+  e <- as.expression(substitute(expr))
+  ## get names of all variables in the expression
+  varnames <- all.vars(e)
+  allnames <- all.names(e, unique=TRUE)
+  funnames <- allnames[!(allnames %in% varnames)]
+  if(length(varnames) == 0)
+    stop("No variables in this expression")
+  ## get the values of the variables
+  if(missing(envir)) {
+    envir <- parent.frame() # WAS: sys.parent()
+  } else if(is.list(envir)) {
+    envir <- list2env(envir, parent=parent.frame())
+  }
+  vars <- mget(varnames, envir=envir, inherits=TRUE, ifnotfound=list(NULL))
+  funs <- mget(funnames, envir=envir, inherits=TRUE, ifnotfound=list(NULL))
+  ## find out which variables are sparse3Darray
+  isSpud <- sapply(vars, inherits, what="sparse3Darray")
+  if(!any(isSpud))
+    stop("No sparse 3D arrays in this expression")
+  spuds <- vars[isSpud]
+  nspud <- sum(isSpud)
+  template <- spuds[[1L]]
+  ## replace each array by its entries, and evaluate
+  spudvalues <- lapply(spuds, getElement, name="x")
+  ## minimal safety check
+  if(length(unique(lengths(spudvalues))) > 1)
+    stop("Different numbers of sparse entries", call.=FALSE)
+  vars[isSpud] <- spudvalues
+  v <- eval(e, append(vars, funs))
+  ## reshape as 3D array
+  result <- sparse3Darray(x=v,
+  	                  i=template$i,
+  	                  j=template$j,
+  	                  k=template$k,
+			  dims=dim(template),
+			  dimnames=dimnames(template))
+  return(result)
+}

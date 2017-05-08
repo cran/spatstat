@@ -349,3 +349,43 @@ spatstatDiagnostic <- function(msg) {
   invisible(NULL)
 }
 
+"lhs.of.formula<-" <- function(x, value) {
+   if(!inherits(x, "formula"))
+      stop("x must be a formula")
+   if(length(as.list(x)) == 2) 
+      x[[3L]] <- x[[2L]]
+   x[[2L]] <- value
+   return(x)
+}
+
+"rhs.of.formula<-" <- function(x, value) {
+   if(!inherits(x, "formula"))
+      stop("x must be a formula")
+   x[[3L]] <- value
+   return(x)
+}
+
+allElementsIdentical <- function(x, entry=NULL) {
+  if(length(x) <= 1) return(TRUE)
+  if(!is.null(entry)) {
+    x1 <- x[[1]]
+    for(i in 2:length(x))
+      if(!identical(x[[i]], x1)) return(FALSE)
+  } else {
+    e1 <- x[[1]][[entry]]
+    for(i in 2:length(x))
+      if(!identical(x[[i]][[entry]], e1)) return(FALSE)
+  }
+  return(TRUE)
+}
+
+representativeRows <- function(x) {
+  # select a unique representative of each equivalence class of rows,
+  # in a numeric matrix or data frame of numeric values.
+  ord <- do.call(order, as.list(as.data.frame(x)))
+  y <- x[ord, , drop=FALSE]
+  dy <- apply(y, 2, diff)
+  answer <- logical(nrow(y))
+  answer[ord] <- c(TRUE, !matrowall(dy == 0))
+  return(answer)
+}

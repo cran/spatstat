@@ -51,11 +51,13 @@ print.linfun <- function(x, ...) {
 
 summary.linfun <- function(object, ...) { print(object, ...) }
 
-as.linim.linfun <- function(X, L, ..., eps = NULL, dimyx = NULL, xy = NULL) {
-  if(missing(L) || is.null(L))
-    L <- as.linnet(X)
+as.linim.linfun <- function(X, L=domain(X),
+                            ..., eps = NULL, dimyx = NULL, xy = NULL,
+                                       delta=NULL) {
+  if(is.null(L))
+    L <- domain(X)
   # create template
-  Y <- as.linim(1, L, eps=eps, dimyx=dimyx, xy=xy)
+  Y <- as.linim(1, L, eps=eps, dimyx=dimyx, xy=xy, delta=delta)
   # extract coordinates of sample points along network
   df <- attr(Y, "df")
   coo <- df[, c("x", "y", "mapXY", "tp")]
@@ -64,11 +66,13 @@ as.linim.linfun <- function(X, L, ..., eps = NULL, dimyx = NULL, xy = NULL) {
   vals <- do.call(X, append(as.list(coo), list(...)))
   # write values in data frame
   df$values <- vals
-  # write values in pixel array
-  typ <- typeof(vals)
-  storage.mode(Y$v) <- typ
-  Y[] <- vals
+  # overwrite values in pixel array 
+  storage.mode(Y$v) <- typ <- typeof(vals)
   Y$type <- if(typ == "double") "real" else typ
+  pix <- nearest.raster.point(df$xc, df$yc, Y)
+  Y$v[] <- NA
+  Y$v[cbind(pix$row, pix$col)] <- vals
+  #
   attr(Y, "df") <- df
   return(Y)
 }
@@ -95,21 +99,15 @@ as.linfun.linim <- function(X, ...) {
   return(g)
 }
 
-plot.linfun <- function(x, ..., L=NULL, eps = NULL, dimyx = NULL, xy = NULL,
-                        main) {
+plot.linfun <- function(x, ..., L=NULL, main) {
   if(missing(main)) main <- short.deparse(substitute(x))
   if(is.null(L)) L <- as.linnet(x)
   argh <- list(...)
-  otherfargs <- get("otherfargs", envir=environment(x))
-  xtra <- names(argh) %in% otherfargs
-  if(!any(xtra)) {
-    Z <- as.linim(x, eps=eps, dimyx=dimyx, xy=xy, L=L)
-    rslt <- plot(Z, ..., main=main)
-  } else {
-    Z <- do.call(as.linim, append(list(x, eps=eps, dimyx=dimyx, xy=xy, L=L),
-                                  argh[xtra]))
-    rslt <- do.call(plot.linim, append(list(Z, main=main), argh[!xtra]))
-  }
+  fargnames <- get("otherfargs", envir=environment(x))
+  resolution <- c("eps", "dimyx", "xy", "delta")
+  convert <- names(argh) %in% c(fargnames, resolution)
+  Z <- do.call(as.linim, append(list(x, L=L), argh[convert]))
+  rslt <- do.call(plot.linim, append(list(Z, main=main), argh[!convert]))
   return(invisible(rslt))
 }
 
@@ -117,7 +115,7 @@ as.owin.linfun <- function(W, ...) {
   as.owin(as.linnet(W))
 }
 
-as.linnet.linfun <- function(X, ...) {
+domain.linfun <- as.linnet.linfun <- function(X, ...) {
   attr(X, "L")
 }
 
@@ -130,11 +128,13 @@ as.function.linfun <- function(x, ...) {
   return(x)
 }
 
-integral.linfun <- function(f, domain=NULL, ...) {
-  integral(as.linim(f), domain=domain, ...)
+integral.linfun <- function(f, domain=NULL, ..., delta) {
+  if(missing(delta)) delta <- NULL
+  integral(as.linim(f, delta=delta), domain=domain, ...)
 }
 
 as.linfun <- function(X, ...) {
   UseMethod("as.linfun")
 }
 
+as.linfun.linfun <- function(X, ...) { return(X) }

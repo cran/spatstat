@@ -889,6 +889,7 @@ improve.kppm <- local({
     wt <- wt[mask]
     Uxy <- rasterxy.mask(mask)
     U <- ppp(Uxy$x, Uxy$y, window = win, check=FALSE)
+    U <- U[mask]
 #    nU <- npoints(U)
     Yu <- pixellate(X, W = mask)
     Yu <- Yu[mask]
@@ -1422,7 +1423,7 @@ labels.kppm <- labels.dppm <- function(object, ...) {
   labels(object$po, ...)
 }
 
-update.kppm <- function(object, ...) {
+update.kppm <- function(object, ..., evaluate=TRUE) {
   argh <- list(...)
   nama <- names(argh)
   callframe <- object$callframe
@@ -1466,26 +1467,51 @@ update.kppm <- function(object, ...) {
     X <- object$X
     jX <- integer(0)
   }
+  Xexpr <- if(length(jX) > 0) sys.call()[[2L + jX]] else NULL
   #' remove arguments just recognised, if any
   jused <- c(jf, jX)
   if(length(jused) > 0)
     argh <- argh[-jused]
-  #' update
-  if(is.null(lhs.of.formula(fmla))) {
-    #' kppm(X, ~trend, ...) 
-    out <- do.call(kppm,
-                   resolve.defaults(list(X=X, trend=fmla),
-                                    argh,
-                                    object$ClusterArgs,
-                                    list(clusters=object$clusters)))
-  } else {
-    #' kppm(X ~trend, ...) 
-    out <- do.call(kppm,
-                   resolve.defaults(list(X=fmla), 
-                                    argh,
-                                    object$ClusterArgs,
-                                    list(clusters=object$clusters)))
-  }
+  #' update the matched call
+  thecall <- getCall(object)
+  methodname <- as.character(thecall[[1L]])
+  switch(methodname,
+         kppm.formula = {
+	   # original call has X = [formula with lhs]
+	   if(!is.null(Xexpr)) {
+	     lhs.of.formula(fmla) <- Xexpr
+	   } else if(is.null(lhs.of.formula(fmla))) {
+	     lhs.of.formula(fmla) <- as.name('.')
+	   }
+           oldformula <- as.formula(getCall(object)$X)
+           thecall$X <- newformula(oldformula, fmla, callframe, envir)
+         },
+         {
+	   # original call has X = ppp and trend = [formula without lhs]
+           oldformula <- as.formula(getCall(object)$trend)
+	   fom <-  newformula(oldformula, fmla, callframe, envir)
+	   if(!is.null(Xexpr))
+	      lhs.of.formula(fom) <- Xexpr
+	   if(is.null(lhs.of.formula(fom))) {
+	      # new call has same format
+	      thecall$trend <- fom
+  	      if(length(jX) > 0)
+  	        thecall$X <- X
+	   } else {
+	      # new call has formula with lhs
+	      thecall$trend <- NULL
+	      thecall$X <- fom
+	   }
+         })
+  knownnames <- union(names(formals(kppm.ppp)), names(formals(mincontrast)))
+  knownnames <- setdiff(knownnames, c("X", "trend", "observed", "theoretical"))
+  ok <- nama %in% knownnames
+  thecall <- replace(thecall, nama[ok], argh[ok])
+  thecall$formula <- NULL # artefact of 'step', etc
+  thecall[[1L]] <- as.name("kppm")
+  if(!evaluate)
+    return(thecall)
+  out <- eval(thecall, envir=parent.frame(), enclos=envir)
   #' update name of data
   if(length(jX) == 1) {
     mc <- match.call()

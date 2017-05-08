@@ -27,6 +27,7 @@
 \alias{as.data.frame.bw.optim}
 \alias{as.data.frame.fv}
 \alias{as.double.im}
+\alias{as.linfun.linfun}
 \alias{as.list.hyperframe}
 \alias{as.listof}
 \alias{as.owin.lintess}
@@ -141,6 +142,7 @@
 \alias{evalInteraction}
 \alias{evalInterEngine}
 \alias{evalPairPotential}
+\alias{evalSparse3Dentrywise}
 \alias{evaluate2Dkernel}
 \alias{even.breaks.owin}
 \alias{exactdt}              
@@ -155,6 +157,7 @@
 \alias{f3engine}
 \alias{f3Cengine}
 \alias{fasp}
+\alias{FDMKERNEL}
 \alias{fft2D}
 \alias{fftwAvailable}
 \alias{fill.coefs}
@@ -288,6 +291,7 @@
 \alias{match2DkernelName}
 \alias{parbreak}
 \alias{plan.legend.layout}
+\alias{PDEdensityLPP}
 \alias{PoisSaddle}
 \alias{PoisSaddleArea}
 \alias{PoisSaddleGeyer}
@@ -460,6 +464,7 @@
 \alias{print.summary.listof}
 \alias{print.summary.linim}
 \alias{print.summary.linnet}
+\alias{print.summary.lintess}
 \alias{print.summary.logiquad}
 \alias{print.summary.lut}
 \alias{print.summary.mppm}
@@ -493,6 +498,7 @@
 \alias{RelevantDeviation}
 \alias{repair.image.xycoords}
 \alias{replacementIndex}
+\alias{representativeRows}
 \alias{resolveEinfo}
 \alias{resolve.vargamma.shape}
 \alias{rgbNA}
@@ -607,6 +613,7 @@
 \alias{summary.envelope}
 \alias{summary.funxy}
 \alias{summary.hyperframe}
+\alias{summary.lintess}
 \alias{summary.logiquad}
 \alias{summary.lut}
 \alias{summary.mppm}
@@ -629,6 +636,7 @@
 \alias{trim.mask}        
 \alias{tweak.fv.entry}
 \alias{tweak.coefs}
+\alias{twostage.test}
 \alias{\%unit\%} %DoNotExport
 %NAMESPACE export("%unit%")
 \alias{unitname.default}
@@ -689,6 +697,7 @@
 \alias{Summary.sparse3Darray}
 \alias{inside3Darray}
 \alias{SparseEntries}
+\alias{SparseIndices}
 \alias{EntriesToSparse}
 \alias{mapSparseEntries}
 \alias{applySparseEntries}
@@ -699,6 +708,17 @@
 \alias{bind.sparse3Darray}
 %%%%
 \alias{spatstatDiagnostic}
+%%
+\alias{lhs.of.formula<-}
+\alias{rhs.of.formula<-}
+\alias{as.ppplist}
+\alias{as.imlist}
+\alias{pointsAlongNetwork}
+\alias{expandSparse}
+\alias{allElementsIdentical}
+\alias{resampleNetworkDataFrame}
+\alias{sparseVectorCumul}
+%%%%%%%
 \description{
   Internal spatstat functions.
 }
@@ -731,6 +751,7 @@ as.breakpts(\dots)
 \method{as.data.frame}{fv}(x, \dots)
 \method{as.data.frame}{bw.optim}(x, \dots)
 \method{as.double}{im}(x, \dots)
+\method{as.linfun}{linfun}(X, \dots)
 \method{as.list}{hyperframe}(x, \dots)
 as.listof(x)
 \method{as.owin}{lintess}(W, \dots)
@@ -878,6 +899,7 @@ evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,
                 Reach,precomputed,savecomputed)
 evalPairPotential(X,P,E,pairpot,potpars,R)
+evalSparse3Dentrywise(expr, envir)
 evaluate2Dkernel(kernel, x, y, sigma, varcov, \dots, scalekernel)
 even.breaks.owin(w)
 exactdt(X, \dots)              
@@ -892,6 +914,7 @@ fakemaintitle(bb, main, \dots)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
+FDMKERNEL(lppobj, sigma, dtt, weights, iterMax, sparse, dtx)
 fft2D(z, inverse, west)
 fftwAvailable()
 fill.coefs(coefs, required)
@@ -1038,6 +1061,7 @@ match2DkernelName(kernel)
 parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
+PDEdensityLPP(x, sigma, \dots, weights, dx, dt)
 PoisSaddle(beta, fi)
 PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
@@ -1187,7 +1211,7 @@ ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
               drop, method, precomputed, sparseOK,
-              fitname, multitypeOK)
+              fitname, multitypeOK, entrywise)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
@@ -1256,6 +1280,7 @@ prepareTitle(main)
 \method{print}{summary.hyperframe}(x, \dots)
 \method{print}{summary.linim}(x, \dots)
 \method{print}{summary.linnet}(x, \dots)
+\method{print}{summary.lintess}(x, \dots)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.logiquad}(x, \dots, dp=3)
 \method{print}{summary.lut}(x, \dots)
@@ -1290,6 +1315,7 @@ reheat(model, invtemp)
 RelevantDeviation(x, alternative, clamp, scaling)
 repair.image.xycoords(x)
 replacementIndex(ii, stuff)
+representativeRows(x)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
 rgbNA(red, green, blue, alpha, maxColorValue)
@@ -1429,6 +1455,7 @@ summarise.trend(trend, w, a)
 \method{summary}{envelope}(object,\dots)
 \method{summary}{funxy}(object,\dots)
 \method{summary}{hyperframe}(object, \dots, brief=FALSE)
+\method{summary}{lintess}(object, \dots)
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
 \method{summary}{lut}(object, \dots)
 \method{summary}{mppm}(object, \dots, brief=FALSE)
@@ -1452,6 +1479,9 @@ trianglediameters(iedge, jedge, edgelength, \dots,
 trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl, new.desc, new.tag)
 tweak.coefs(model, new.coef)
+twostage.test(X, \dots, exponent, nsim, nsimsub,
+              alternative, reuse, leaveout, interpolate,
+              savefuns, savepatterns, verbose, testblurb)
 x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
@@ -1515,6 +1545,7 @@ unionOfSparseIndices(A,B)
 %NAMESPACE S3method("Summary", "sparse3Darray")
 inside3Darray(d, i, j, k)
 SparseEntries(x)
+SparseIndices(x)
 EntriesToSparse(df, dims)
 mapSparseEntries(x, margin, values, conform, across)
 applySparseEntries(x, f, \dots)
@@ -1525,6 +1556,17 @@ rbindCompatibleDataFrames(x)
 bind.sparse3Darray(A, B, along)
 %%
 spatstatDiagnostic(msg)
+%%
+lhs.of.formula(x) <- value
+rhs.of.formula(x) <- value
+as.ppplist(x, check)
+as.imlist(x, check)
+pointsAlongNetwork(L, delta)
+expandSparse(x, n, across)
+allElementsIdentical(x, entry)
+resampleNetworkDataFrame(df, template)
+sparseVectorCumul(x, i, length)
+%%%%%%%
 }
 \details{
   These internal \pkg{spatstat} functions are not usually called

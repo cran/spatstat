@@ -1,4 +1,128 @@
 
+        CHANGES IN spatstat VERSION 1.51-0
+
+OVERVIEW
+
+    o We thank Greg McSwiggan, Mehdi Moradi and Tammy L Silva for contributions.
+
+    o New fast algorithm for kernel smoothing on a linear network.
+
+    o Leverage and influence diagnostics extended to Poisson/Gibbs models
+      fitted by logistic composite likelihood.
+      
+    o Two-stage Monte Carlo test.
+    
+    o Dirichlet/Voronoi tessellation on a linear network.
+
+    o Thinning of point patterns on a linear network.
+
+    o More support for functions and tessellations on a linear network.
+
+    o Improvements and bug fixes.
+
+    o Version nickname: 'Poetic Licence'
+
+NEW FUNCTIONS
+
+    o bits.test:
+    Balanced Independent Two-Stage Monte Carlo test,
+    an improvement on the Dao-Genton test.
+
+    o lineardirichlet
+    Computes the Dirichlet-Voronoi tessellation associated with a
+    point pattern on a linear network.
+
+    o domain.lintess, domain.linfun
+    Extract the linear network from a 'lintess' or 'linfun' object.
+
+    o summary.lintess
+    Summary of a tessellation on a linear network.
+
+    o clicklpp
+    Interactively add points on a linear network.
+    
+    o envelopeArray
+    Generate an array of envelopes using a function that returns 'fasp' objects.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o density.lpp
+    New fast algorithm (up to 1000 times faster) for the default case
+    where kernel="gaussian" and continuous=TRUE.
+    Generously contributed by Greg McSwiggan.
+    
+    o leverage.ppm, influence.ppm, dfbetas.ppm
+    These methods now work for models that were fitted by logistic
+    composite likelihood (method='logi'). 
+    
+    o rthin
+    Argument X can now be a point pattern on a linear network (class 'lpp').
+
+    o fitted.ppm
+    New option: type = "link"
+    
+    o update.kppm
+    New argument 'evaluate'.
+
+    o integral.linfun
+    New argument 'delta' controls step length of approximation to integral.
+
+    o as.linim.default
+    New argument 'delta' controls spacing of sample points in internal data.
+
+    o as.linfun.lintess
+    New argument 'values' specifies the function value for each tile.
+    New argument 'navalue'.
+
+BUG FIXES
+
+    o leverage.ppm, influence.ppm, dfbetas.ppm
+    Results for Gibbs models were incorrect due to a mathematical error.
+    (Results for Poisson models were correct). 
+    Fixed.
+    
+    o leverage.ppm, influence.ppm, dfbetas.ppm, ppmInfluence
+    Calculations were incorrect for a Geyer model fitted using
+    an edge correction other than "border" or "none".
+    Fixed.
+    
+    o step, kppm, update.kppm
+    'step' did not work for kppm objects in some cases
+    due to a scoping problem in update.kppm.
+    Fixed.
+    
+    o improve.kppm
+    Crashed if the window was not a rectangle.
+    Fixed.
+
+    o pcf.ppp, pcfinhom
+    Crashed if kernel="epa" rather than "epanechnikov".
+    Fixed.
+
+    o alltypes
+    Crashed if envelope=TRUE and reuse=FALSE.
+    Fixed.
+
+    o pairdist.lpp, nndist.lpp, nnwhich.lpp, nncross.lpp
+    Crashed if the network was disconnected.
+    Fixed.
+
+    o as.im.linim, as.linim.linim
+    Additional arguments such as 'eps' and 'dimyx' were ignored.
+    Fixed.
+    
+    o as.im.default
+    Arguments 'eps and 'xy' were ignored if X was a single numeric value.
+    Fixed.
+    
+    o 'timed' class
+    Printing of these objects did not work in some locales.
+    Fixed.
+
+    o runifpoint
+    Ignored 'drop' argument if the window was a rectangle.
+    Fixed.
+    
         CHANGES IN spatstat VERSION 1.50-0
 
 OVERVIEW

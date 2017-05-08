@@ -29,7 +29,6 @@ dg.test(X, \dots,
     Useful arguments include \code{fun} to determine the summary
     function, \code{rinterval} to determine the range of
     \eqn{r} values used in the test, 
-    \code{verbose=FALSE} to turn off the messages,
     and \code{use.theory} described under Details. 
   }
   \item{exponent}{
@@ -83,7 +82,7 @@ dg.test(X, \dots,
 }
 \details{
   Performs the Dao-Genton (2014) adjusted Monte Carlo goodness-of-fit
-  test, in the modified form described by Baddeley et al (2015).
+  test, in the equivalent form described by Baddeley et al (2014).
   
   If \code{X} is a point pattern, the null hypothesis is CSR.
 
@@ -104,6 +103,10 @@ dg.test(X, \dots,
   where the \code{reference} is the mean of simulated values.
   The value \code{leaveout=2} gives the leave-two-out discrepancy
   proposed by Dao and Genton (2014).
+
+  The Dao-Genton test is biased when the significance level is very small
+  (small \eqn{p}-values are not reliable) and
+  we recommend \code{\link{bits.test}} in this case.
 }
 \value{
   A hypothesis test (object of class \code{"htest"}
@@ -116,10 +119,14 @@ dg.test(X, \dots,
   \emph{Journal of Graphical and Computational Statistics}
   \bold{23}, 497--517.
 
+  Baddeley, A., Diggle, P.J., Hardegen, A., Lawrence, T., Milne,
+  R.K. and Nair, G. (2014) On tests of spatial pattern based on
+  simulation envelopes. \emph{Ecological Monographs} \bold{84} (3) 477--489.
+  
   Baddeley, A., Hardegen, A., Lawrence, L., 
-  Milne, R.K., Nair, G.M. and Rakshit, S. (2015)
-  Pushing the envelope: extensions of graphical
-  Monte Carlo tests. Submitted for publication.
+  Milne, R.K., Nair, G.M. and Rakshit, S. (2017)
+  On two-stage Monte Carlo tests of composite hypotheses.
+  \emph{Computational Statistics and Data Analysis}, in press.
 }
 \author{
   Adrian Baddeley, Andrew Hardegen, Tom Lawrence,
@@ -127,6 +134,7 @@ dg.test(X, \dots,
   Implemented by \spatstatAuthors.
 }
 \seealso{
+  \code{\link{bits.test}},
   \code{\link{dclf.test}},
   \code{\link{mad.test}}
 }

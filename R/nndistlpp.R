@@ -12,17 +12,34 @@
 nndist.lpp <- function(X, ..., k=1, method="C") {
   stopifnot(inherits(X, "lpp"))
   stopifnot(method %in% c("C", "interpreted"))
+  n <- npoints(X)
   k <- as.integer(k)
   stopifnot(all(k > 0))
   kmax <- max(k)
 
-  n <- npoints(X)
-
+  L <- as.linnet(X)
+  if(is.null(br <- L$boundingradius) || is.infinite(br)) {
+    # network may be disconnected
+    lab <- connected(L, what="labels")
+    if(length(levels(lab)) > 1L) {
+      # network is disconnected
+      result <- matrix(Inf, n, length(k))
+      # handle each connected component separately
+      subsets <- split(seq_len(nvertices(L)), lab)
+      for(i in seq_along(subsets)) {
+        Xi <- thinNetwork(X, retainvertices=subsets[[i]])
+        relevant <- attr(Xi, "retainpoints")      
+        result[relevant, ] <- nndist.lpp(Xi, k=k, method=method)
+      }
+      return(result)
+    }
+  }
+  
   toomany <- (kmax >= n-1)
   if(toomany) {
     ## not enough points to define kmax nearest neighbours
     result <- matrix(Inf, nrow=n, ncol=kmax)
-    if(n <= 1) return(result[,,drop=TRUE])
+    if(n <= 1) return(result[,k,drop=TRUE])
     ## reduce kmax to feasible value
     kmax <- n-1
     kuse <- k[k <= kmax]
@@ -31,7 +48,6 @@ nndist.lpp <- function(X, ..., k=1, method="C") {
   }
   
   Y <- as.ppp(X)
-  L <- as.linnet(X)
   sparse <- identical(L$sparse, TRUE)
 
   ## find nearest segment for each point
@@ -156,11 +172,29 @@ nnwhich.lpp <- function(X, ..., k=1, method="C") {
 
   n <- npoints(X)
 
+  L <- as.linnet(X)
+  if(is.null(br <- L$boundingradius) || is.infinite(br)) {
+    # network may be disconnected
+    lab <- connected(L, what="labels")
+    if(length(levels(lab)) > 1L) {
+      # network is disconnected
+      result <- matrix(NA_integer_, n, length(k))
+      # handle each connected component separately
+      subsets <- split(seq_len(nvertices(L)), lab)
+      for(i in seq_along(subsets)) {
+        Xi <- thinNetwork(X, retainvertices=subsets[[i]])
+        relevant <- attr(Xi, "retainpoints")      
+        result[relevant, ] <- nnwhich.lpp(Xi, k=k, method=method)
+      }
+      return(result)
+    }
+  }
+  
   toomany <- (kmax >= n-1)
   if(toomany) {
     ## not enough points to define kmax nearest neighbours
     result <- matrix(NA_integer_, nrow=n, ncol=kmax)
-    if(n <= 1) return(result[,,drop=TRUE])
+    if(n <= 1) return(result[,k,drop=TRUE])
     ## reduce kmax to feasible value
     kmax <- n-1
     kuse <- k[k <= kmax]
@@ -170,7 +204,6 @@ nnwhich.lpp <- function(X, ..., k=1, method="C") {
   
   #
   Y <- as.ppp(X)
-  L <- as.linnet(X)
   sparse <- identical(L$sparse, TRUE)
   
   ## find nearest segment for each point
@@ -308,8 +341,44 @@ nncross.lpp <- local({
                          as.linnet(Y, sparse=TRUE)))
     stop("X and Y are on different linear networks")
 
+  # internal use only
+  format <- resolve.defaults(list(...), list(format="data.frame"))$format
+
   nX <- npoints(X)
   nY <- npoints(Y)
+
+  L <- domain(X)
+  if(is.null(br <- L$boundingradius) || is.infinite(br)) {
+    # network may be disconnected
+    lab <- connected(L, what="labels")
+    if(length(levels(lab)) > 1L) {
+      # network is disconnected
+      # handle each connected component separately
+      subsets <- split(seq_len(nvertices(L)), lab)
+      nndistmat <- if("dist" %in% what) matrix(Inf, nX, length(k)) else NULL
+      nnwhichmat <-
+         if("which" %in% what) matrix(NA_integer_, nX, length(k)) else NULL
+      for(i in seq_along(subsets)) {
+        subi <- subsets[[i]]
+        Xi <- thinNetwork(X, retainvertices=subi)
+        useX <- attr(Xi, "retainpoints")      
+        Yi <- thinNetwork(Y, retainvertices=subi)
+        useY <- attr(Yi, "retainpoints")
+	z <- nncross.lpp(Xi, Yi,
+	                 iX = iX[useX], iY=iY[useY],
+	                 what=what, k=k, method=method,
+			 format="list")
+        if("dist" %in% what)
+	   nndistmat[useX, ] <- z$dist
+        if("which" %in% what)
+	   nnwhichmat[useX, ] <- which(useY)[z$which]
+      }
+      result <- list(dist=nndistmat, which=nnwhichmat)[what]
+      if(format == "data.frame")
+        result <- as.data.frame(result)[,,drop=TRUE]
+      return(result)
+    }
+  }
 
   koriginal <- k <- as.integer(k)
   stopifnot(all(k > 0))
@@ -573,7 +642,8 @@ nncross.lpp <- local({
     nnw <- nnw[,koriginal]
   }
   result <- list(dist=nnd, which=nnw)[what]
-  result <- as.data.frame(result)[,,drop=TRUE]
+  if(format == "data.frame")
+    result <- as.data.frame(result)[,,drop=TRUE]
   return(result)
 }
 
