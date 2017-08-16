@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.20 $	$Date: 2016/10/04 01:02:27 $
+#	$Revision: 1.21 $	$Date: 2017/06/05 10:31:58 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -176,6 +176,10 @@ handle.r.b.args <- function(r=NULL, breaks=NULL, window, pixeps=NULL,
         } else if(!is.null(r)) {
           breaks <- breakpts.from.r(r)
 	} else {
+	   #' determine rmax
+	   #' ignore infinite or NA values of rmaxdefault
+          if(!is.null(rmaxdefault) && !is.finite(rmaxdefault))
+	     rmaxdefault <- NULL
           rmax <- rmaxdefault %orifnull% diameter(Frame(window))
           if(is.null(pixeps)) {
             pixeps <- if(is.mask(window))

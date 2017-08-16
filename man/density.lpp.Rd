@@ -13,7 +13,9 @@
         weights=NULL,
         kernel="gaussian",
         continuous=TRUE,
-        epsilon = 1e-06, verbose = TRUE, debug = FALSE, savehistory = TRUE)
+        epsilon = 1e-06, verbose = TRUE,
+        debug = FALSE, savehistory = TRUE,
+        old=FALSE)
 
 \method{density}{splitppx}(x, sigma, \dots)
 }
@@ -58,6 +60,10 @@
     Logical value indicating whether to save the entire history of the
     algorithm, for the purposes of evaluating performance.
   }
+  \item{old}{
+    Logical value indicating whether to use the old, very slow algorithm
+    for the equal-split continuous estimator.
+  }
 }
 \details{
   Kernel smoothing is applied to the points of \code{x}
@@ -77,7 +83,8 @@
   resulting function is not continuous.
 
   In the default case
-  (where \code{continuous=TRUE} and \code{kernel="gaussian"}),
+  (where \code{continuous=TRUE} and \code{kernel="gaussian"}
+  and \code{old=FALSE}),
   computation is performed rapidly by solving the classical heat equation
   on the network, as described in McSwiggan et al (2016).
   Computational time is short, but increases quadratically with \code{sigma}.
@@ -92,8 +99,7 @@
   (class \code{"splitppx"}) which will return a list of pixel images.
 }
 \value{
-  Pixel image on the linear network (class
-  \code{"linim"}) or a function on the linear network (class \code{"linfun"}).
+  A pixel image on the linear network (object of class \code{"linim"}).
 }
 \references{
 McSwiggan, G., Baddeley, A. and Nair, G. (2016)

@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.86 $ $Date: 2017/01/02 09:00:40 $
+#  $Revision: 1.87 $ $Date: 2017/06/05 10:31:58 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -345,9 +345,10 @@ plot.psp <- function(x, ..., main, add=FALSE,
   if(!do.ribbon) {
     ## window of x only
     bb.all <- as.rectangle(as.owin(x))
-    if(do.plot && !add)
+    if(do.plot && (!add || show.window))
       do.call.plotfun(plot.owin, 
-                      resolve.defaults(list(x=x$window, main=main,
+                      resolve.defaults(list(x=x$window,
+		                            main=if(show.all) main else "",
                                             add=add,
                                             type = if(show.window) "w" else "n",
                                             show.all=show.all),
@@ -595,7 +596,7 @@ print.summary.psp <- function(x, ...) {
 ########################################################
 
 "[.psp" <-
-  function(x, i, j, drop, ...) {
+  function(x, i, j, drop, ..., fragments=TRUE) {
 
     verifyclass(x, "psp")
     
@@ -606,7 +607,7 @@ print.summary.psp <- function(x, ...) {
       style <- if(inherits(i, "owin")) "window" else "index"
       switch(style,
              window={
-               x <- clip.psp(x, window=i, check=FALSE)
+               x <- clip.psp(x, window=i, check=FALSE, fragments=fragments)
              },
              index={
                enz <- x$ends[i, ]

@@ -11,7 +11,7 @@
         adjust=1, diggle=FALSE, se=FALSE,
         kernel="gaussian",
         scalekernel=is.character(kernel), 
-        positive=FALSE) 
+        positive=FALSE, verbose=TRUE) 
 }
 \arguments{
   \item{x}{
@@ -52,7 +52,7 @@
     Optional. Adjustment factor for the smoothing parameter.
   }
   \item{diggle}{
-    Logical. If \code{TRUE}, use Diggle's improved edge correction,
+    Logical. If \code{TRUE}, use the Jones-Diggle improved edge correction,
     which is more accurate but slower to compute than the default
     correction.
   }
@@ -80,6 +80,10 @@
   \item{positive}{
     Logical value indicating whether to force all density values to
     be positive numbers. Default is \code{FALSE}.
+  }
+  \item{verbose}{
+    Logical value indicating whether to issue warnings
+    about numerical problems and conditions.
   }
 }
 \value{
@@ -135,9 +139,9 @@
     and \eqn{w_i}{w[i]} are the weights.
     \item
     If \code{diggle=TRUE} then the code uses the improved edge correction
-    described in equation (18.9) of Diggle (2010), which has been shown
-    to have better performance (Jones, 1993) but is slightly slower to
-    compute. 
+    described by Jones (1993) and Diggle (2010, equation 18.9).
+    This has been shown to have better performance (Jones, 1993)
+    but is slightly slower to compute. 
     The intensity value at a point \eqn{u} is 
     \deqn{
       \hat\lambda(u) = \sum_i k(x_i - u) w_i e(x_i)

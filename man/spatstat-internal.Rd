@@ -2,6 +2,7 @@
 \title{Internal spatstat functions}
 \alias{[.pp3}
 \alias{[.localpcfmatrix}
+\alias{[.rat}
 \alias{[.splitppx}
 \alias{[.diagramobj}
 \alias{[<-.splitppx}
@@ -9,10 +10,12 @@
 \alias{acedist.noshow}
 \alias{active.interactions}
 \alias{adaptcoef}
+\alias{adjust.ratfv}
 \alias{affinexy}
 \alias{affinexypolygon}
 \alias{ang2rad}
 \alias{anycrossing.psp}
+\alias{ApplyConnected}
 \alias{applytolayers}
 \alias{applyPolyclipArgs}
 \alias{areadelta2}       
@@ -150,6 +153,7 @@
 \alias{existsSpatstatVariable}
 \alias{expandSpecialLists}
 \alias{expandwinPerfect}
+\alias{ExpSmoothLog}
 \alias{extractAIC.slrm}
 \alias{extractAtomicQtests}
 \alias{fakemaintitle}
@@ -299,6 +303,7 @@
 \alias{polyLaslett}
 \alias{polytileareaEngine}
 \alias{positiveIndex}
+\alias{PPMmodelmatrix}
 \alias{putSpatstatVariable}
 \alias{lookup.im}
 \alias{lookup2DkernelInfo}
@@ -531,6 +536,7 @@
 \alias{rebound.psp}
 \alias{rebound.owin}
 \alias{reconcile.fv}
+\alias{rename.fv}
 \alias{repair.old.factor.image}
 \alias{reincarnate.interact}
 \alias{resid4plot}
@@ -635,6 +641,7 @@
 \alias{trianglediameters}
 \alias{trim.mask}        
 \alias{tweak.fv.entry}
+\alias{tweak.ratfv.entry}
 \alias{tweak.coefs}
 \alias{twostage.test}
 \alias{\%unit\%} %DoNotExport
@@ -709,8 +716,6 @@
 %%%%
 \alias{spatstatDiagnostic}
 %%
-\alias{lhs.of.formula<-}
-\alias{rhs.of.formula<-}
 \alias{as.ppplist}
 \alias{as.imlist}
 \alias{pointsAlongNetwork}
@@ -718,6 +723,10 @@
 \alias{allElementsIdentical}
 \alias{resampleNetworkDataFrame}
 \alias{sparseVectorCumul}
+%%
+\alias{as.ppm.lppm}
+\alias{as.ppm.rppm}
+\alias{predict.profilepl}
 %%%%%%%
 \description{
   Internal spatstat functions.
@@ -726,14 +735,17 @@
 \method{[}{splitppx}(x, \dots)
 \method{[}{splitppx}(x, \dots) <- value
 \method{[}{diagramobj}(x, \dots)
+\method{[}{rat}(x, \dots)
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
 active.interactions(object)
 adaptcoef(new.coef, fitcoef, drop)
+adjust.ratfv(f, columns, numfactor, denfactor)
 affinexy(X, mat, vec, invert)
 affinexypolygon(p, mat, vec, detmat)
 ang2rad(ang, unit, start, clockwise)
 anycrossing.psp(A,B)
+ApplyConnected(X, Engine, r, \dots, rule, auxdata)
 applytolayers(L, FUN, \dots)
 applyPolyclipArgs(x, p)
 areadelta2(X, r, \dots, sparseOK)
@@ -748,8 +760,8 @@ assemble.plot.objects(xlim, ylim, \dots, lines, polygon)
 AsymmDistance.psp(X, Y, metric, method)
 as.breakpts(\dots)
 \method{as.character}{units}(x, \dots)
-\method{as.data.frame}{fv}(x, \dots)
 \method{as.data.frame}{bw.optim}(x, \dots)
+\method{as.data.frame}{fv}(x, \dots)
 \method{as.double}{im}(x, \dots)
 \method{as.linfun}{linfun}(X, \dots)
 \method{as.list}{hyperframe}(x, \dots)
@@ -759,9 +771,11 @@ as.units(s)
 augment.msr(x, \dots, sigma)
 BartCalc(fY, fK)
 bbEngine(\dots)
-bermantestEngine(model, covariate, which, alternative, \dots, modelname, covname, dataname)
+bermantestEngine(model, covariate, which, alternative, \dots,
+                 modelname, covname, dataname)
 bdry.mask(W)
-bind.ratfv(x, numerator, denominator, labl, desc, preferred, ratio)
+bind.ratfv(x, numerator, denominator, labl, desc, preferred,
+           ratio, quotient)
 blankcoefnames(x)
 bounding.box3(\dots)
 break.holes(x, splitby, depth, maxdepth)
@@ -790,9 +804,9 @@ check.mat.mul(A, B, Acols, Brows, fatal)
 check.testfun(f, f1, X)
 circticks(R, at, unit, start, clockwise, labels)
 clarkevansCalc(X, correction, clipregion, working)
-clip.psp(x, window, check=TRUE)
-cliprect.psp(x, window)
-clippoly.psp(s, window)
+clip.psp(x, window, check, fragments)
+cliprect.psp(x, window, fragments)
+clippoly.psp(s, window, fragments)
 closethresh(X,R,S,twice,\dots)
 \method{coef}{summary.kppm}(object, \dots)
 \method{coef}{summary.ppm}(object, \dots)
@@ -907,6 +921,7 @@ exactPdt(w)
 existsSpatstatVariable(name)
 expandSpecialLists(x, special)
 expandwinPerfect(W, expand, amount)
+ExpSmoothLog(X, \dots, at, weights)
 \method{extractAIC}{slrm}(fit, scale = 0, k = 2, \dots)
 extractAtomicQtests(x)
 fakemaintitle(bb, main, \dots)
@@ -941,7 +956,8 @@ getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
 getglmfit(object)
 getglmsubset(object)
-getlambda.lpp(lambda, X, \dots, update)
+getlambda.lpp(lambda, X, subset, \dots,
+              update, leaveoneout, loo.given, lambdaname)
 getlastshift(X)
 getppmdatasubset(object)
 getppmOriginalCovariates(object)
@@ -1031,11 +1047,12 @@ kraeverRandomFields()
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 levelsAsFactor(x)
-linearKengine(X, \dots, r, reweight, denom, correction, showworking)
+linearKengine(X, \dots, r, reweight, denom, correction,
+              ratio, showworking)
 linearKmulti(X, I, J, r, \dots, correction)
 linearKmulti.inhom(X, I, J, lambdaI, lambdaJ, r, \dots, correction,
              normalise)
-linearpcfengine(X, \dots, r, reweight, denom, correction)
+linearpcfengine(X, \dots, r, reweight, denom, correction, ratio)
 linearpcfmulti(X, I, J, r, \dots, correction)
 linearpcfmulti.inhom(X, I, J, lambdaI, lambdaJ, r, \dots,
                      correction, normalise)
@@ -1061,7 +1078,7 @@ match2DkernelName(kernel)
 parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
-PDEdensityLPP(x, sigma, \dots, weights, dx, dt)
+PDEdensityLPP(x, sigma, \dots, weights, dx, dt, fun)
 PoisSaddle(beta, fi)
 PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
@@ -1069,6 +1086,7 @@ PoisSaddlePairwise(beta, fi)
 polyLaslett(X, \dots, oldX, verbose, plotit)
 polytileareaEngine(P, xrange, yrange, nx, ny)
 positiveIndex(i, nama, len)
+PPMmodelmatrix(object, data, \dots, Q, keepNA, irregular)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 putSpatstatVariable(name, value)
@@ -1211,7 +1229,8 @@ ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
               drop, method, precomputed, sparseOK,
-              fitname, multitypeOK, entrywise)
+              fitname, multitypeOK, entrywise, matrix.action,
+              geomsmooth)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
 pppdist.prohorov(X, Y, n, dfix, type, cutoff, matching,
@@ -1360,6 +1379,7 @@ rebound(x, rect)
 \method{rebound}{psp}(x, rect) 
 \method{rebound}{owin}(x, rect)
 reconcile.fv(\dots)
+rename.fv(x, fname, ylab, yexp)
 repair.old.factor.image(x)
 reincarnate.interact(object)
 resid4plot(RES, plot.neg, plot.smooth,
@@ -1478,6 +1498,7 @@ trianglediameters(iedge, jedge, edgelength, \dots,
                   nvert, dmax, check)
 trim.mask(M, R, tolerant)
 tweak.fv.entry(x, current.tag, new.labl, new.desc, new.tag)
+tweak.ratfv.entry(x, \dots)
 tweak.coefs(model, new.coef)
 twostage.test(X, \dots, exponent, nsim, nsimsub,
               alternative, reuse, leaveout, interpolate,
@@ -1557,8 +1578,6 @@ bind.sparse3Darray(A, B, along)
 %%
 spatstatDiagnostic(msg)
 %%
-lhs.of.formula(x) <- value
-rhs.of.formula(x) <- value
 as.ppplist(x, check)
 as.imlist(x, check)
 pointsAlongNetwork(L, delta)
@@ -1566,6 +1585,10 @@ expandSparse(x, n, across)
 allElementsIdentical(x, entry)
 resampleNetworkDataFrame(df, template)
 sparseVectorCumul(x, i, length)
+%%
+\method{as.ppm}{lppm}(object)
+\method{as.ppm}{rppm}(object)
+\method{predict}{profilepl}(object, \dots)
 %%%%%%%
 }
 \details{

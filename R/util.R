@@ -1,7 +1,7 @@
 #
 #    util.R    miscellaneous utilities
 #
-#    $Revision: 1.236 $    $Date: 2016/12/30 03:24:37 $
+#    $Revision: 1.237 $    $Date: 2017/06/05 10:31:58 $
 #
 
 # common invocation of matrixsample
@@ -347,22 +347,6 @@ spatstatDiagnostic <- function(msg) {
   cat(paste(" >>> Spatstat Diagnostic: ", msg, "<<<\n"))
   cat("-----------------------------\n")
   invisible(NULL)
-}
-
-"lhs.of.formula<-" <- function(x, value) {
-   if(!inherits(x, "formula"))
-      stop("x must be a formula")
-   if(length(as.list(x)) == 2) 
-      x[[3L]] <- x[[2L]]
-   x[[2L]] <- value
-   return(x)
-}
-
-"rhs.of.formula<-" <- function(x, value) {
-   if(!inherits(x, "formula"))
-      stop("x must be a formula")
-   x[[3L]] <- value
-   return(x)
 }
 
 allElementsIdentical <- function(x, entry=NULL) {

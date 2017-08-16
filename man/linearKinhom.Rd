@@ -9,7 +9,8 @@
 }
 \usage{
 linearKinhom(X, lambda=NULL, r=NULL, ..., correction="Ang",
-             normalise=TRUE, normpower=1)
+             normalise=TRUE, normpower=1,
+	     update=TRUE, leaveoneout=TRUE, ratio=FALSE)
 }
 \arguments{
   \item{X}{
@@ -36,12 +37,35 @@ linearKinhom(X, lambda=NULL, r=NULL, ..., correction="Ang",
   \item{normalise}{
     Logical. If \code{TRUE} (the default), the denominator of the estimator is 
     data-dependent (equal to the sum of the reciprocal intensities at the data
-    points), which reduces the sampling variability.
+    points, raised to \code{normpower}), which reduces the sampling variability.
     If \code{FALSE}, the denominator is the length of the network.
   }
   \item{normpower}{
     Integer (usually either 1 or 2).
     Normalisation power. See Details.
+  }
+  \item{update}{
+    Logical value indicating what to do when \code{lambda} is a fitted model
+    (class \code{"lppm"} or \code{"ppm"}).
+    If \code{update=TRUE} (the default),
+    the model will first be refitted to the data \code{X}
+    (using \code{\link{update.lppm}} or \code{\link{update.ppm}})
+    before the fitted intensity is computed.
+    If \code{update=FALSE}, the fitted intensity of the
+    model will be computed without re-fitting it to \code{X}.
+  }
+  \item{leaveoneout}{
+    Logical value (passed to \code{\link{fitted.lppm}} or
+    \code{\link{fitted.ppm}}) specifying whether to use a
+    leave-one-out rule when calculating the intensity,
+    when \code{lambda} is a fitted model.
+    Supported only when \code{update=TRUE}.
+  }
+  \item{ratio}{
+    Logical. 
+    If \code{TRUE}, the numerator and denominator of
+    the estimate will also be saved,
+    for use in analysing replicated point patterns.
   }
 }
 \details{
@@ -131,7 +155,7 @@ linearKinhom(X, lambda=NULL, r=NULL, ..., correction="Ang",
 \examples{
   data(simplenet)
   X <- rpoislpp(5, simplenet)
-  fit <- lppm(X, ~x)
+  fit <- lppm(X ~x)
   K <- linearKinhom(X, lambda=fit)
   plot(K)
 }

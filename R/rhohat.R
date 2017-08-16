@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.70 $  $Date: 2016/11/29 09:45:40 $
+#  $Revision: 1.71 $  $Date: 2017/06/05 10:31:58 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -475,7 +475,8 @@ rhohatCalc <- local({
                unitname=covunits,
                fname="rho",
                yexp=substitute(rho(X), list(X=as.name(covname))))
-    attr(rslt, "dotnames") <- c("rho", "hi", "lo")
+    fvnames(rslt, ".")  <- c("rho", "hi", "lo")
+    fvnames(rslt, ".s") <- c("hi", "lo")
     ## pack up
     class(rslt) <- c("rhohat", class(rslt))
     ## add info
@@ -583,19 +584,21 @@ plot.rhohat <- function(x, ..., do.rug=TRUE) {
   invisible(NULL)
 }
 
-predict.rhohat <- function(object, ..., relative=FALSE) {
+predict.rhohat <- function(object, ..., relative=FALSE,
+                    what=c("rho", "lo", "hi", "se")) {
   trap.extra.arguments(..., .Context="in predict.rhohat")
+  what <- match.arg(what)
   # extract info
   s <- attr(object, "stuff")
   reference <- s$reference
   # convert to (linearly interpolated) function 
   x <- with(object, .x)
-  y <- with(object, .y)
-  rho <- approxfun(x, y, rule=2)
+  y <- if(what == "se") sqrt(object[["var"]]) else object[[what]]
+  fun <- approxfun(x, y, rule=2)
   # extract image of covariate
   Z <- s$Zimage
-  # apply rho to Z
-  Y <- if(inherits(Z, "linim")) eval.linim(rho(Z)) else eval.im(rho(Z))
+  # apply fun to Z
+  Y <- if(inherits(Z, "linim")) eval.linim(fun(Z)) else eval.im(fun(Z))
   # adjust to reference baseline
   if(reference != "Lebesgue" && !relative) {
     lambda <- s$lambda

@@ -1,7 +1,7 @@
 #
 # ippm.R
 #
-#   $Revision: 2.21 $   $Date: 2017/02/07 07:47:20 $
+#   $Revision: 2.24 $   $Date: 2017/07/18 00:38:31 $
 #
 # Fisher scoring algorithm for irregular parameters in ppm trend
 #
@@ -9,12 +9,14 @@
 ippm <- local({
 
   chucknames <- c("iScore", "start", "nlm.args", "silent", "warn.unused")
+
+  hasarg <- function(f,a) { a %in% names(formals(f)) }
   
   ippm <- function(Q, ...,
                    iScore=NULL, 
                    start=list(),
                    covfunargs=start,
-                   nlm.args=list(),
+                   nlm.args=list(stepmax=1/2),
                    silent=FALSE,
                    warn.unused=TRUE) {
     ## remember call
@@ -35,7 +37,7 @@ ippm <- local({
       if(!is.list(iScore) || length(iScore) != length(start))
         stop("iScore should be a list of the same length as start")
       stopifnot(identical(names(iScore), names(start)))
-      if(!all(unlist(lapply(iScore, is.function))))
+      if(!all(sapply(iScore, is.function)))
         stop("iScore should be a list of functions")
     }
     ##
@@ -50,16 +52,15 @@ ippm <- local({
 #    p <- length(coef(fit0))
     ## examine covariates and trend
     covariates <- fit0$covariates
-    isfun <- unlist(lapply(covariates, is.function))
+    isfun <- sapply(covariates, is.function)
     covfuns <- covariates[isfun]
     ## determine which covariates depend on which irregular parameters
     pnames <- names(start)
-    hasarg <- function(f,a) { a %in% names(formals(f)) }
     depmat <- matrix(FALSE, nrow=length(covfuns), ncol=length(pnames))
     rownames(depmat) <- names(covfuns)
     colnames(depmat) <- pnames
     for(j in 1:length(pnames))
-      depmat[,j] <- unlist(lapply(covfuns, hasarg, pnames[j]))
+      depmat[,j] <- sapply(covfuns, hasarg, pnames[j])
     ## find covariates that depend on ANY irregular parameter 
     depvar <- rownames(depmat)[apply(depmat, 1L, any)]
     ## check that these covariates appear only in offset terms
@@ -106,7 +107,7 @@ ippm <- local({
                                        p=startvec,
                                        thedata=fdata),
                                   nlm.args,
-                                  list(stepmax=1/2, typsize=typsize)))
+                                  list(typsize=typsize)))
     popt <- g$estimate
     ## detect error states
     icode <- g$code
@@ -125,6 +126,7 @@ ippm <- local({
     fit$call <- cl
     fit$callstring <- callstring
     fit$callframe <- callframe
+    fit$iScore <- iScore
     class(fit) <- c("ippm", class(fit))
     return(fit)
   }
@@ -141,10 +143,10 @@ ippm <- local({
       ## return negative logL because nlm performs *minimisation*
       value <- -as.numeric(lpl)
       ## compute derivatives
-      stuff <- ppmInfluence(fit, what="derivatives",
+      stuff <- ppmInfluence(fit, what="score",
                             iScore=iScore,
                             iArgs=param)
-      score <- stuff$deriv$score
+      score <- stuff$score
       if(length(score) == length(coef(fit)) + length(param)) 
         attr(value, "gradient") <- -score[-(1:nreg), drop=FALSE]
       ## attr(value, "hessian") <- -hess[-(1:nreg), -(1:nreg), drop=FALSE]
@@ -161,7 +163,7 @@ ippm <- local({
                      "lower than current estimate. ",
                      "Either current estimate is an approximate ",
                      "local minimum of the function ",
-                     "or 'steptol' is too large"),
+                     "or 'steptol' is too small"),
                    "Iteration limit exceeded",
                    c("Maximum step size 'stepmax' ",
                      "exceeded five consecutive times. ",
@@ -190,7 +192,7 @@ update.ippm <- local({
     old.callframe <- object$callframe
     Qold <- eval(old.call$Q, as.list(envir), enclos=old.callframe)
     argh <- list(...)
-    if(any(isfmla <- unlist(lapply(argh, inherits, what="formula")))) {
+    if(any(isfmla <- sapply(argh, inherits, what="formula"))) {
       if(sum(isfmla) > 1)
         stop("Syntax not understood: several arguments are formulas")
       i <- min(which(isfmla))

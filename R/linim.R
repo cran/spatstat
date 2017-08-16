@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.31 $   $Date: 2017/02/07 08:12:05 $
+#  $Revision: 1.35 $   $Date: 2017/07/13 02:43:30 $
 #
 #  Image/function on a linear network
 #
@@ -107,24 +107,63 @@ print.summary.linim <- function(x, ...) {
 }
 
 
-plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1,
+plot.linim <- function(x, ..., style=c("colour", "width"),
+                       scale, adjust=1,
+		       legend=TRUE,
+                       leg.side=c("right", "left", "bottom", "top"),
+                       leg.sep=0.1,
+                       leg.wid=0.1,
+                       leg.args=list(),
+                       leg.scale=1,
                        do.plot=TRUE) {
   xname <- short.deparse(substitute(x))
   style <- match.arg(style)
+  leg.side <- match.arg(leg.side)
+  ribstuff <- list(ribside  = leg.side,
+                   ribsep   = leg.sep,
+                   ribwid   = leg.wid,
+                   ribargs  = leg.args,
+                   ribscale = leg.scale)
   # colour style: plot as pixel image
   if(style == "colour" || !do.plot)
     return(do.call(plot.im,
                    resolve.defaults(list(x),
                                     list(...),
-                                    list(main=xname, do.plot=do.plot))))
+                                    ribstuff,
+                                    list(main=xname,
+				         legend=legend,
+					 do.plot=do.plot))))
   # width style
   L <- attr(x, "L")
   df <- attr(x, "df")
   Llines <- as.psp(L)
-  # initialise plot
   W <- as.owin(L)
+  # plan layout
+  if(legend) {
+    # use layout procedure in plot.im
+    z <- do.call(plot.im,
+		 resolve.defaults(list(x, do.plot=FALSE, legend=TRUE),
+                                  list(...),
+                                  ribstuff,
+                                  list(main=xname)))
+    bb.all <- attr(z, "bbox")
+    bb.leg <- attr(z, "bbox.legend")
+  } else {
+    bb.all <- Frame(W)
+    bb.leg <- NULL
+  }
+  legend <- !is.null(bb.leg)
+  if(legend) {
+    # expand plot region to accommodate text annotation in legend
+    if(leg.side %in% c("left", "right")) {
+      delta <- 2 * sidelengths(bb.leg)[1]
+      xmargin <- if(leg.side == "right") c(0, delta) else c(delta, 0)
+      bb.all <- grow.rectangle(bb.all, xmargin=xmargin)
+    }
+  }
+  # initialise plot
   bb <- do.call.matched(plot.owin,
-                        resolve.defaults(list(x=W, type="n"),
+                        resolve.defaults(list(x=bb.all, type="n"),
                                          list(...), list(main=xname)),
                         extrargs="type")
   # resolve graphics parameters for polygons
@@ -190,7 +229,52 @@ plot.linim <- function(x, ..., style=c("colour", "width"), scale, adjust=1,
     # now draw main
     do.call(polygon, append(list(x=xx, y=yy), grafpar))
   }
-  return(invisible(bb))
+  result <- adjust * scale
+  attr(result, "bbox") <- bb
+  if(legend) {
+    attr(result, "bbox.legend") <- bb.leg
+    ## get graphical arguments
+    grafpar <- resolve.defaults(leg.args, grafpar)
+    grafpar <- grafpar[names(grafpar) %in% names(formals(polygon))]
+    ## set up scale of typical pixel values
+    gvals <- leg.args$at %orifnull% prettyinside(range(x))
+    # corresponding widths
+    wvals <- adjust * scale * gvals
+    # glyph positions
+    ng <- length(gvals)
+    xr <- bb.leg$xrange
+    yr <- bb.leg$yrange
+    switch(leg.side,
+           right = ,
+	   left = {
+	     y <- seq(yr[1], yr[2], length.out=ng+1L)
+	     y <- (y[-1L] + y[-(ng+1L)])/2
+	     for(j in 1:ng) {
+               xx <- xr[c(1L,2L,2L,1L)]
+	       yy <- (y[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
+	       do.call(polygon, append(list(xx, yy), grafpar))
+	     }
+	   },
+	   bottom = ,
+	   top = {
+	     x <- seq(xr[1], xr[2], length.out=ng+1L)
+	     x <- (x[-1L] + x[-(ng+1L)])/2
+	     for(j in 1:ng) {
+	       xx <- (x[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
+               yy <- yr[c(1L,2L,2L,1L)]
+	       do.call(polygon, append(list(xx, yy), grafpar))
+	     }
+	   })
+     # add text labels
+     check.1.real(leg.scale)
+     glabs <- leg.args$labels %orifnull% signif(leg.scale * gvals, 2)
+     switch(leg.side,
+            right  = text(xr[2], y,     pos=4, labels=glabs),
+            left   = text(xr[1], y,     pos=2, labels=glabs),
+	    bottom = text(x,     yr[1], pos=1, labels=glabs),
+	    top    = text(x,     yr[2], pos=3, labels=glabs))
+  }
+  return(invisible(result))
 }
 
 sortalongsegment <- function(df) {

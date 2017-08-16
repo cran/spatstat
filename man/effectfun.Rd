@@ -6,12 +6,13 @@
   as a function of one of its covariates.
 }
 \usage{
-  effectfun(model, covname, ..., se.fit=FALSE)
+  effectfun(model, covname, \dots, se.fit=FALSE)
 }
 \arguments{
   \item{model}{
     A fitted point process model (object of class
-    \code{"ppm"}, \code{"kppm"} or \code{"lppm"}).
+    \code{"ppm"}, \code{"kppm"}, \code{"lppm"}, \code{"dppm"}, \code{"rppm"}
+    or \code{"profilepl"}).
   }
   \item{covname}{
     The name of the covariate. A character string.
@@ -28,7 +29,8 @@
 }
 \details{
   The object \code{model} should be an object of class
-  \code{"ppm"}, \code{"kppm"} or \code{"lppm"}
+  \code{"ppm"}, \code{"kppm"}, \code{"lppm"}, \code{"dppm"}, \code{"rppm"}
+    or \code{"profilepl"}
   representing a point process model fitted to point pattern data.
 
   The model's trend formula should involve a spatial covariate
@@ -65,6 +67,12 @@
   \code{\link{ppm}}, the trend is the only part of the model that
   depends on the covariates.
 }
+\section{Determinantal point process models with fixed intensity}{
+  The function \code{\link{dppm}} which fits 
+  a determinantal point process model allows the user to specify the
+  intensity \code{lambda}. In such cases the effect function is
+  undefined, and \code{effectfun} stops with an error message.
+}
 \value{
   A data frame containing a column of values of the covariate and a column
   of values of the fitted trend.
@@ -81,24 +89,18 @@
   \code{\link{fv.object}}
 }
 \examples{
-  data(copper)
   X <- copper$SouthPoints
-  D <- distmap(copper$SouthLines)
-  fit <- ppm(X, ~polynom(Z, 5), covariates=list(Z=D))
-  \donttest{
-     plot(effectfun(fit, "Z"))
-  } 
-  plot(effectfun(fit, "Z", se.fit=TRUE), shade=c("hi", "lo"))
-  fit <- ppm(X, ~x + polynom(Z, 5), covariates=list(Z=D))
-  plot(effectfun(fit, "Z", x=20))
-  fit <- ppm(X, ~x)
-  plot(effectfun(fit, "x"))
+  D <- distfun(copper$SouthLines)
+  fit <- ppm(X ~ polynom(D, 5))
+  effectfun(fit)
+  plot(effectfun(fit, se.fit=TRUE))
+
+  fitx <- ppm(X ~ x + polynom(D, 5))
+  plot(effectfun(fitx, "D", x=20))
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \adrian
+  and \rolf.
 }
 \keyword{spatial}
 \keyword{models}

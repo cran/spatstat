@@ -1,22 +1,35 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.19 $ $Date: 2016/02/11 10:17:12 $
+#   $Revision: 1.20 $ $Date: 2017/06/05 10:31:58 $
 #
 
 effectfun <- local({
 
+  okclasses <- c("ppm", "kppm", "lppm", "dppm", "rppm", "profilepl")
+
 effectfun <-  function(model, covname, ..., se.fit=FALSE) {
-  if(!is.ppm(model)) {
-    if(is.kppm(model)) model <- as.ppm(model) else
-    if(is.lppm(model)) model <- model$fit else
-    stop("First argument 'model' should be a ppm, kppm or lppm object")
-  }
+  if(!inherits(model, okclasses))
+    stop(paste("First argument 'model' should be a fitted model of class",
+               commasep(sQuote(okclasses), " or ")),
+	 call.=FALSE)
+  orig.model <- model	 
+  model <- as.ppm(model)
   dotargs <- list(...)
   # determine names of covariates involved
   intern.names <-
     if(is.marked.ppm(model)) c("x", "y", "marks") else c("x", "y")
   needed.names <- variablesinformula(rhs.of.formula(formula(model)))
+  # check for clashes/quirks
+  if("lambda" %in% needed.names) {
+    if(is.dppm(orig.model) && (
+       identical.formulae(formula(model), ~offset(log(lambda))-1) ||
+       identical.formulae(formula(model), ~log(lambda)-1)
+       ))
+      stop("effectfun is not defined for a DPP model with fixed intensity",
+           call.=FALSE)
+    intensityname <- setdiff(c("Lambda", "intensity"), needed.names)[1]
+  } else intensityname <- "lambda"
   ## validate the relevant covariate 
   if(missing(covname) || is.null(covname)) {
     mc <- model.covariates(model)
@@ -122,7 +135,7 @@ effectfun <-  function(model, covname, ..., se.fit=FALSE) {
   fakecov <- if(length(fakecov) > 0) do.call(data.frame, fakecov) else NULL
   #
   # Now predict
-  pred <- predict(model, locations=fakeloc, covariates=fakecov, se=se.fit)
+  pred <- predict(orig.model, locations=fakeloc, covariates=fakecov, se=se.fit)
   if(!se.fit) lambda <- pred else {
     lambda <- pred$estimate
     se     <- pred$se
@@ -133,7 +146,9 @@ effectfun <-  function(model, covname, ..., se.fit=FALSE) {
   #
   dfin <- if(!is.null(fakecov)) cbind(fakeloc, fakecov) else fakeloc 
   dfin <- dfin[covname]
-  df <- cbind(dfin, data.frame(lambda=lambda))
+  dflam <- data.frame(lambda=lambda)
+  names(dflam) <- intensityname
+  df <- cbind(dfin, dflam)
   #
   if(covtype != "real") {
     result <- df
@@ -141,13 +156,15 @@ effectfun <-  function(model, covname, ..., se.fit=FALSE) {
   } else {
     bc <- paren(covname)
     result <- fv(df, argu=covname, 
-                 ylab=substitute(lambda(X), list(X=as.name(covname))),
+                 ylab=substitute(lambda(X),
+		                 list(X=as.name(covname),
+				      lambda=as.name(intensityname))),
                  labl=c(covname,
                    paste("hat(%s)", bc)),
-                 valu="lambda", alim=Zr,
+                 valu=intensityname, alim=Zr,
                  desc=c(paste("value of covariate", covname),
                    "fitted intensity"),
-                 fname="lambda")
+                 fname=intensityname)
     if(se.fit) {
       result <- bind.fv(result, sedf,
                         labl=c(paste("se[%s]", bc),
@@ -156,7 +173,7 @@ effectfun <-  function(model, covname, ..., se.fit=FALSE) {
                         desc=c("standard error of fitted trend",
                           "upper limit of pointwise 95%% CI for trend",
                           "lower limit of pointwise 95%% CI for trend"))
-      fvnames(result, ".") <- c("lambda", "hi", "lo")
+      fvnames(result, ".") <- c(intensityname, "hi", "lo")
       fvnames(result, ".s") <- c("hi", "lo")
       formula(result) <- paste(". ~ ", covname)
     }

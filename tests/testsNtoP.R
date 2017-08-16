@@ -350,13 +350,14 @@ local({
   prd <- predict(fit)
 })
 
-#
-#  tests/ppmlogi.R
-#
-# Tests of ppm(method='logi')
-#
-# $Revision: 1.4 $  Date$
-#
+#'
+#'  tests/ppmlogi.R
+#'
+#' Tests of ppm(method='logi')
+#'    and related code (predict, leverage etc)
+#'
+#' $Revision: 1.7 $  $Date: 2017/07/11 08:13:18 $
+#'
 
 require(spatstat)
 local({
@@ -364,20 +365,30 @@ local({
   f <- fitted(fit)
   p <- predict(fit)
   u <- summary(fit)
-  fitS <- ppm(cells ~x, Strauss(0.08), method="logi")
+  fitS <- ppm(cells ~x, Strauss(0.12), method="logi")
   fS <- fitted(fitS)
   pS <- predict(fitS)
   uS <- summary(fitS)
-  if(FALSE) { # fix later
-    a <- leverage(fit)
-    b <- influence(fit)
-    d <- dfbetas(fit)
-    aS <- leverage(fitS)
-    bS <- influence(fitS)
-    dS <- dfbetas(fitS)
-  }
+
+  plot(leverage(fit))
+  plot(influence(fit))
+  plot(dfbetas(fit))
+  plot(leverage(fitS))
+  plot(influence(fitS))
+  plot(dfbetas(fitS))
 })
 
+local({
+  #' same with hard core - A1 is singular
+  fitH <- ppm(cells ~x, Strauss(0.08), method="logi")
+  fH <- fitted(fitH)
+  pH <- predict(fitH)
+  uH <- summary(fitH)
+  plot(leverage(fitH))
+  plot(influence(fitH))
+  plot(dfbetas(fitH))
+})
+  
 local({
   #' logistic fit to data frame of covariates
   z <- c(rep(TRUE, 5), rep(FALSE, 5))
@@ -502,6 +513,11 @@ local({
 
   stopifnot(identical(unmark(chicago[1]),
                       unmark(chicago)[1]))
+
+  #' ppx with zero points
+  U <- chicago[integer(0)]
+  V <- U %mark% 1
+  V <- U %mark% factor("a")
 })
 #
 # tests/prediction.R

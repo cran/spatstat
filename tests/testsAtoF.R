@@ -187,7 +187,7 @@ local({
 #
 #  Test behaviour of density methods and inhomogeneous summary functions
 #
-#  $Revision: 1.8 $  $Date: 2017/01/22 01:50:49 $
+#  $Revision: 1.9 $  $Date: 2017/08/10 02:01:54 $
 #
 
 require(spatstat)
@@ -291,6 +291,10 @@ local({
   Z <- Smooth(X, 5)
 
   ZZ <- bw.smoothppp(finpines, hmin=0.01, hmax=0.012, nh=2) # reshaping problem
+
+  ## geometric-mean smoothing
+  U <- Smooth(longleaf, 5, geometric=TRUE)
+  UU <- Smooth(X, 5, geometric=TRUE)
 })
 #'
 #'  tests/discarea.R
@@ -307,6 +311,57 @@ local({
   areaGain(u, cells, 0.1, W=B)
 
   areaLoss(cells[square(0.4)], 0.1, exact=TRUE)
+})
+#'
+#'   tests/disconnected.R
+#'
+#'   disconnected linear networks
+#'
+#'    $Revision: 1.2 $ $Date: 2017/06/05 14:58:36 $
+
+require(spatstat)
+
+local({
+
+#'   disconnected network
+m <- simplenet$m
+m[4,5] <- m[5,4] <- m[6,10] <- m[10,6] <- m[4,6] <- m[6,4] <- FALSE
+L <- linnet(vertices(simplenet), m)
+L
+summary(L)
+Z <- connected(L, what="components")
+
+#' point pattern with no points in one connected component
+set.seed(42)
+X <- rpoislpp(lambda=function(x,y) { 10 * (x < 0.5)}, L)
+B <- lineardirichlet(X)
+plot(B)
+summary(B)
+D <- pairdist(X)
+A <- nndist(X)
+H <- nnwhich(X)
+Y <- rpoislpp(lambda=function(x,y) { 10 * (x < 0.5)}, L)
+G <- nncross(X, Y)
+J <- crossdist(X, Y)
+plot(distfun(X))  # includes evaluation of nncross(what="dist")
+
+#' K functions in disconnected network
+K <- linearK(X)
+lamX <- intensity(X)
+nX <- npoints(X)
+KI <- linearKinhom(X, lambda=rep(lamX, nX))
+P <- linearpcf(X)
+PJ <- linearpcfinhom(X, lambda=rep(lamX, nX))
+Y <- X %mark% factor(rep(1:2, nX)[1:nX])
+Y1 <- split(Y)[[1]]
+Y2 <- split(Y)[[2]]
+KY <- linearKcross(Y)
+PY <- linearpcfcross(Y)
+KYI <- linearKcross.inhom(Y, lambdaI=rep(intensity(Y1), npoints(Y1)),
+                       lambdaJ=rep(intensity(Y2), npoints(Y2)))
+PYI <- linearpcfcross.inhom(Y, lambdaI=rep(intensity(Y1), npoints(Y1)),
+                    lambdaJ=rep(intensity(Y2), npoints(Y2)))
+
 })
 #  tests/emptymarks.R
 #
@@ -397,6 +452,15 @@ E2r <- envelope(cells, Kest, nsim=12, savefuns=TRUE, global=TRUE,
                 ginterval=c(0.05, 0.15))
 p12r <- pool(E1r, E2r)
 })
+
+local({
+  #' as.data.frame.envelope
+  Nsim <- 5
+  E <- envelope(cells, nsim=Nsim, savefuns=TRUE)
+  A <- as.data.frame(E)
+  B <- as.data.frame(E, simfuns=TRUE)
+  stopifnot(ncol(B) - ncol(A) == Nsim)
+})
 #
 #    tests/factorbugs.R
 #
@@ -475,7 +539,7 @@ local({
 #
 # check fast and slow code for Kest
 #
-#   $Revision: 1.2 $   $Date: 2015/12/29 08:54:49 $
+#   $Revision: 1.3 $   $Date: 2017/07/02 08:41:46 $
 #
 require(spatstat)
 local({
@@ -485,6 +549,14 @@ local({
   Kbu <- Kest(cells, correction=c("none", "border"))
   ## slow code, full set of corrections, sqrt transformation
   Ldd <- Lest(unmark(demopat), correction="all", var.approx=TRUE)
+  ## Kinhom
+  lam <- density(cells, at="points", leaveoneout=TRUE)
+  ## fast code
+  Kib <- Kinhom(cells, lam, nlarge=0)
+  Kiu <- Kest(cells, lam, correction="none")
+  Kibu <- Kest(cells, lam, correction=c("none", "border"))
+  ## slow code
+  Lidd <- Linhom(unmark(demopat), sigma=bw.scott)
 })
 
 

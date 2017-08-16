@@ -3,7 +3,7 @@
 #    
 #    Linear networks
 #
-#    $Revision: 1.61 $    $Date: 2017/02/07 08:12:05 $
+#    $Revision: 1.62 $    $Date: 2017/06/05 10:31:58 $
 #
 # An object of class 'linnet' defines a linear network.
 # It includes the following components
@@ -555,7 +555,7 @@ connected.linnet <- function(X, ..., what=c("labels", "components")) {
   what <- match.arg(what)
   nv <- npoints(vertices(X))
   ie <- X$from - 1L
-  je   <- X$to   - 1L
+  je   <- X$to - 1L
   ne <- length(ie)
   zz <- .C("cocoGraph",
            nv = as.integer(nv),
@@ -577,6 +577,14 @@ connected.linnet <- function(X, ..., what=c("labels", "components")) {
   for(i in seq_along(subsets)) 
     nets[[i]] <- thinNetwork(X, retainvertices=subsets[[i]])
   return(nets)
+}
+
+is.connected.linnet <- function(X, ...) {
+  if(!is.null(dpath <- X$dpath))
+    return(all(is.finite(dpath)))
+  lab <- connected(X, what="labels")
+  npieces <- length(levels(lab))
+  return(npieces == 1)
 }
 
 crossing.linnet <- function(X, Y) {

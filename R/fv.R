@@ -4,7 +4,7 @@
 ##
 ##    class "fv" of function value objects
 ##
-##    $Revision: 1.146 $   $Date: 2017/02/07 07:22:47 $
+##    $Revision: 1.148 $   $Date: 2017/07/13 01:26:02 $
 ##
 ##
 ##    An "fv" object represents one or more related functions
@@ -502,7 +502,7 @@ fvlegend <- local({
 })
 
 
-bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
+bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL, clip=FALSE) {
   verifyclass(x, "fv")
   ax <- attributes(x)
   if(is.fv(y)) {
@@ -521,9 +521,18 @@ bind.fv <- function(x, y, labl=NULL, desc=NULL, preferred=NULL) {
     yr <- ay$argu
     rx <- x[[xr]]
     ry <- y[[yr]]
-    if((length(rx) != length(rx)) || 
-               (max(abs(rx-ry)) > .Machine$double.eps))
-      stop("fv objects x and y have incompatible domains")
+    if(length(rx) != length(ry)) {
+      if(!clip) 
+        stop("fv objects x and y have incompatible domains")
+      # restrict both objects to a common domain
+      ra <- intersect.ranges(range(rx), range(ry))
+      x <- x[inside.range(rx, ra), ]
+      y <- y[inside.range(ry, ra), ]
+      rx <- x[[xr]]
+      ry <- y[[yr]]
+    }
+    if(length(rx) != length(ry) || max(abs(rx-ry)) > .Machine$double.eps)
+      stop("fv objects x and y have incompatible values of r")
     ## reduce y to data frame and strip off 'r' values
     ystrip <- as.data.frame(y)
     yrpos <- which(colnames(ystrip) == yr)
@@ -786,6 +795,24 @@ rebadge.as.dotfun <- function(x, main, sub=NULL, i) {
                        list(main=main, sub=sub, i=i))
   }
   y <- rebadge.fv(x, new.ylab=ylab, new.fname=fname, new.yexp=yexp)
+  return(y)
+}
+
+## even simpler wrapper for rebadge.fv
+rename.fv <- function(x, fname, ylab, yexp=ylab) {
+  stopifnot(is.fv(x))
+  stopifnot(is.character(fname) && (length(fname) %in% 1:2))
+  argu <- fvnames(x, ".x")
+  if(missing(ylab) || is.null(ylab))
+    ylab <- switch(length(fname),
+                   substitute(fn(argu), list(fn=as.name(fname),
+                                             argu=as.name(argu))),
+                   substitute(fn[fsub](argu), list(fn=as.name(fname[1]),
+                                                   fsub=as.name(fname[2]),
+                                                   argu=as.name(argu))))
+  if(missing(yexp) || is.null(yexp))
+    yexp <- ylab
+  y <- rebadge.fv(x, new.fname=fname, new.ylab=ylab, new.yexp=yexp)
   return(y)
 }
 
@@ -1182,6 +1209,7 @@ reconcile.fv <- local({
 
 as.function.fv <- function(x, ..., value=".y", extrapolate=FALSE) {
   trap.extra.arguments(...)
+  value.orig <- value
   ## extract function argument
   xx <- with(x, .x)
   ## extract all function values 
@@ -1195,16 +1223,16 @@ as.function.fv <- function(x, ..., value=".y", extrapolate=FALSE) {
       value <- expandvalue
     } else stop("Unable to determine columns of x")
   }
-  yy <- yy[,value]
+  yy <- yy[,value, drop=FALSE]
   argname <- fvnames(x, ".x")
   ## determine extrapolation rule (1=NA, 2=most extreme value)
   stopifnot(is.logical(extrapolate))
   stopifnot(length(extrapolate) %in% 1:2)
   endrule <- 1 + extrapolate
   ## make function(s)
-  if(length(value) == 1) {
+  if(length(value) == 1 && !identical(value.orig, "*")) {
     ## make a single 'approxfun' and return it
-    f <- approxfun(xx, yy, rule=endrule)
+    f <- approxfun(xx, yy[,,drop=TRUE], rule=endrule)
     ## magic
     names(formals(f))[1L] <- argname
     body(f)[[4L]] <- as.name(argname)
@@ -1366,12 +1394,15 @@ ratfv <- function(df, numer, denom, ..., ratio=TRUE) {
 
 ## Tack new column(s) onto a ratio fv object
 
-bind.ratfv <- function(x, numerator, denominator, 
+bind.ratfv <- function(x, numerator=NULL, denominator=NULL, 
                        labl = NULL, desc = NULL, preferred = NULL,
-                       ratio=TRUE) {
+                       ratio=TRUE,
+		       quotient=NULL) {
   if(ratio && !inherits(x, "rat"))
     stop("ratio=TRUE is set, but x has no ratio information", call.=FALSE)
-  if(missing(denominator) && inherits(numerator, "rat")) {
+  if(is.null(numerator) && !is.null(denominator) && !is.null(quotient))
+    numerator <- quotient * denominator
+  if(is.null(denominator) && inherits(numerator, "rat")) {
     ## extract numerator & denominator from ratio object
     both <- numerator
     denominator <- attr(both, "denominator")
@@ -1384,10 +1415,17 @@ bind.ratfv <- function(x, numerator, denominator,
     if(is.null(labl)) labl <- attr(both, "labl")
   }
   # calculate ratio
-  y <- bind.fv(x, numerator/denominator,
+  #    The argument 'quotient' is rarely needed 
+  #    except to avoid 0/0 or to improve accuracy
+  if(is.null(quotient))
+    quotient <- numerator/denominator
+    
+  # bind new column to x   
+  y <- bind.fv(x, quotient,
                labl=labl, desc=desc, preferred=preferred)
   if(!ratio)
     return(y)
+    
   ## convert scalar denominator to data frame
   if(!is.data.frame(denominator)) {
     if(!is.numeric(denominator) || !is.vector(denominator))

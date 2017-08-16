@@ -1,7 +1,7 @@
 #'
 #'     dppm.R
 #'
-#'     $Revision: 1.7 $   $Date: 2016/04/25 02:34:40 $
+#'     $Revision: 1.8 $   $Date: 2017/06/05 10:31:58 $
 
 dppm <-
   function(formula, family, data=NULL,
@@ -129,18 +129,17 @@ dppmFixIntensity <- function(DPP, lambda, po){
     ## Overwrite po object with fake version
     X <- po$Q$data
     dont.complain.about(X)
-    po <- ppm(X~log(lambda)-1)
-    po <- tweak.coefs(po, 1)
+    po <- ppm(X~offset(log(lambda))-1)
     po$fitter <- "dppm"
     ## update pseudolikelihood value using code in logLik.ppm
     po$maxlogpl.orig <- po$maxlogpl
-    po$maxlogpl <- logLik(po, new.coef=1, warn=FALSE)
+    po$maxlogpl <- logLik(po, warn=FALSE)
     #########################################
   }
   return(list(clusters=clusters, lambda=lambda, po=po))
 }
 
-## Auxilliary function used for DPP stuff in kppm.R
+## Auxiliary function used for DPP stuff in kppm.R
 dppmFixAlgorithm <- function(algorithm, changealgorithm, clusters, startpar){
   if(!setequal(clusters$freepar, names(startpar)))
     stop("Names of startpar vector does not match the free parameters of the model.")

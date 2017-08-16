@@ -1,7 +1,7 @@
 #
 #	Kinhom.S	Estimation of K function for inhomogeneous patterns
 #
-#	$Revision: 1.86 $	$Date: 2015/03/20 07:56:43 $
+#	$Revision: 1.93 $	$Date: 2017/07/18 10:14:42 $
 #
 #	Kinhom()	compute estimate of K_inhom
 #
@@ -67,7 +67,8 @@
             lambda2=NULL,
             reciplambda=NULL, reciplambda2=NULL,
 	    diagonal=TRUE,
-            sigma=NULL, varcov=NULL)
+            sigma=NULL, varcov=NULL,
+	    ratio=FALSE)
 {
     verifyclass(X, "ppp")
     nlarge.given <- !missing(nlarge)
@@ -204,7 +205,6 @@
       } 
     }
 
-    
     # recommended range of r values
     alim <- c(0, min(rmax, rmaxdefault))
         
@@ -250,25 +250,28 @@
       ## border method
       if(bord) {
         Kb <- Kborder.engine(X, max(r), length(r), correction,
-                             weights=reciplambda)
+                             weights=reciplambda, ratio=ratio)
         if(renormalise) {
           ynames <- setdiff(fvnames(Kb, "*"), "theo")
-          Kb[,ynames] <- renorm.factor * as.data.frame(Kb)[,ynames]
+	  Kb <- adjust.ratfv(Kb, ynames, denfactor=1/renorm.factor)
         }
-        Kb <- tweak.fv.entry(Kb, "border", new.labl="{hat(%s)[%s]^{bord}} (r)")
-        Kb <- tweak.fv.entry(Kb, "bord.modif", new.labl="{hat(%s)[%s]^{bordm}} (r)")
+        Kb <- tweak.ratfv.entry(Kb, "border", new.labl="{hat(%s)[%s]^{bord}} (r)")
+        Kb <- tweak.ratfv.entry(Kb, "bord.modif", new.labl="{hat(%s)[%s]^{bordm}} (r)")
       }
       ## uncorrected
       if(none) {
-        Kn <- Knone.engine(X, max(r), length(r), weights=reciplambda)
+        Kn <- Knone.engine(X, max(r), length(r), weights=reciplambda,
+	                   ratio=ratio)
         if(renormalise) 
-          Kn$un <- Kn$un * renorm.factor
-        Kn <- tweak.fv.entry(Kn, "un", new.labl="{hat(%s)[%s]^{un}} (r)")
+	  Kn <- adjust.ratfv(Kn, "un", denfactor=1/renorm.factor)
+        Kn <- tweak.ratfv.entry(Kn, "un", new.labl="{hat(%s)[%s]^{un}} (r)")
       }
       K <-
         if(bord && !none) Kb else
-        if(!bord && none) Kn else 
-      cbind.fv(Kb, Kn[, names(Kn) != "theo"])
+        if(!bord && none) Kn else
+	if(!ratio) cbind.fv(Kb,  Kn[, c("r", "un")]) else 
+	bind.ratfv(Kb,  Kn[, c("r", "un")], ratio=TRUE)
+	
       ## tweak labels
       K <- rebadge.fv(K, quote(K[inhom](r)), c("K", "inhom"))
       if(danger)
@@ -282,10 +285,11 @@
 
   if(can.do.fast && is.rectangle(W) && spatstat.options("use.Krect")) {
     K <-  Krect.engine(X, rmax, length(r), correction,
-                        weights=reciplambda, fname=c("K", "inhom"))
+                        weights=reciplambda,
+			ratio=ratio, fname=c("K", "inhom"))
     if(renormalise) {
       allfun <- setdiff(fvnames(K, "*"), "theo")
-      K[, allfun] <- renorm.factor * as.data.frame(K)[, allfun]
+      K <- adjust.ratfv(K, allfun, denfactor=1/renorm.factor)
     }
     K <- rebadge.fv(K, quote(K[inhom](r)), c("K", "inhom"))
     attr(K, "alim") <- alim
@@ -302,9 +306,17 @@
     # this will be the output data frame
     K <- data.frame(r=r, theo= pi * r^2)
     desc <- c("distance argument r", "theoretical Poisson %s")
-    K <- fv(K, "r", quote(K[inhom](r)),
-            "theo", , alim, c("r","{%s[%s]^{pois}}(r)"), desc,
-            fname=c("K", "inhom"))
+    denom <- if(renormalise) (areaW / renorm.factor) else areaW
+    K <- ratfv(K, NULL, denom,
+               argu="r",
+	       ylab=quote(K[inhom](r)),
+               valu="theo",
+	       fmla=NULL,
+	       alim=alim,
+	       labl=c("r","{%s[%s]^{pois}}(r)"),
+	       desc=desc,
+               fname=c("K", "inhom"),
+	       ratio=ratio)
 
     # identify all close pairs
     rmax <- max(r)
@@ -332,17 +344,27 @@
       RS <- Kwtsum(dIJ, bI, wIJ, b, w=reciplambda, breaks)
       if(any(correction == "border")) {
         Kb <- RS$ratio
-        if(renormalise) Kb <- Kb * renorm.factor
-        K <- bind.fv(K, data.frame(border=Kb), "{hat(%s)[%s]^{bord}}(r)",
-                     "border-corrected estimate of %s",
-                     "border")
+        if(renormalise)
+          Kb <- Kb * renorm.factor
+        K <- bind.ratfv(K,
+	                quotient = data.frame(border=Kb),
+			denominator = denom,
+	                labl = "{hat(%s)[%s]^{bord}}(r)",
+                        desc = "border-corrected estimate of %s",
+                        preferred = "border",
+		        ratio=ratio)
       }
       if(any(correction == "bord.modif")) {
         Kbm <- RS$numerator/eroded.areas(W, r)
-        if(renormalise) Kbm <- Kbm * renorm.factor
-        K <- bind.fv(K, data.frame(bord.modif=Kbm), "{hat(%s)[%s]^{bordm}}(r)",
-                     "modified border-corrected estimate of %s",
-                     "bord.modif")
+        if(renormalise)
+          Kbm <- Kbm * renorm.factor
+    	K <- bind.ratfv(K,
+	                quotient = data.frame(bord.modif=Kbm),
+			denominator = denom,
+			labl = "{hat(%s)[%s]^{bordm}}(r)",
+                        desc = "modified border-corrected estimate of %s",
+                        preferred = "bord.modif",
+			ratio=ratio)
       }
     }
     if(any(correction == "translate")) {
@@ -351,12 +373,17 @@
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
       Ktrans <- cumsum(wh)/areaW
-      if(renormalise) Ktrans <- Ktrans * renorm.factor
+      if(renormalise)
+        Ktrans <- Ktrans * renorm.factor
       rmax <- diamW/2
       Ktrans[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(trans=Ktrans), "{hat(%s)[%s]^{trans}}(r)",
-                   "translation-correction estimate of %s",
-                   "trans")
+      K <- bind.ratfv(K,
+                      quotient = data.frame(trans=Ktrans),
+		      denominator = denom,
+		      labl ="{hat(%s)[%s]^{trans}}(r)",
+                      desc = "translation-correction estimate of %s",
+                      preferred = "trans",
+		      ratio=ratio)
     }
     if(any(correction == "isotropic" | correction == "Ripley")) {
       # Ripley isotropic correction
@@ -364,12 +391,17 @@
       allweight <- edgewt * wIJ
       wh <- whist(dIJ, breaks$val, allweight)
       Kiso <- cumsum(wh)/areaW
-      if(renormalise) Kiso <- Kiso * renorm.factor
+      if(renormalise)
+        Kiso <- Kiso * renorm.factor
       rmax <- diamW/2
       Kiso[r >= rmax] <- NA
-      K <- bind.fv(K, data.frame(iso=Kiso), "{hat(%s)[%s]^{iso}}(r)",
-                   "Ripley isotropic correction estimate of %s",
-                   "iso")
+      K <- bind.ratfv(K,
+                      quotient = data.frame(iso=Kiso),
+		      denominator = denom,
+		      labl = "{hat(%s)[%s]^{iso}}(r)",
+                      desc = "Ripley isotropic correction estimate of %s",
+                      preferred = "iso",
+		      ratio=ratio)
     }
 
     # default is to display them all

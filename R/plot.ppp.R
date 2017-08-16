@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.90 $	$Date: 2016/07/25 09:26:31 $
+#	$Revision: 1.91 $	$Date: 2017/06/05 10:31:58 $
 #
 #
 #--------------------------------------------------------------------------
@@ -179,6 +179,7 @@ plot.ppp <- local({
     main <- short.deparse(substitute(x))
 
   type <- match.arg(type)
+  if(missing(legend)) legend <- (type == "p")
 
   if(!missing(maxsize) || !missing(markscale) || !missing(meansize))
     warn.once("circlescale",

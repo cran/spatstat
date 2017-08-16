@@ -1,7 +1,7 @@
 #
 # anova.mppm.R
 #
-# $Revision: 1.10 $ $Date: 2016/10/23 10:36:58 $
+# $Revision: 1.13 $ $Date: 2017/08/08 07:18:43 $
 #
 
 anova.mppm <- local({
@@ -105,11 +105,12 @@ anova.mppm <- local({
       objex <- lapply(objex, update, use.gam=TRUE)
     }
 
-    opt <- list(test=test, dispersion=1)
-    if(fitter == "glmmPQL") opt <- list(test=test)
-
     ## Finally do the appropriate ANOVA
-    result <- do.call(anova, append(fitz, opt))
+    opt <- list(test=test)
+    if(fitter != "glmmPQL") opt <- append(opt, list(dispersion=1))
+    result <- try(do.call(anova, append(fitz, opt)))
+    if(inherits(result, "try-error"))
+      stop("anova failed")
   
     ## Remove approximation-dependent columns if present
     result[, "Resid. Dev"] <- NULL

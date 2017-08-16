@@ -10,15 +10,17 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:41-66
+### code chunk number 2: updates.Rnw:41-70
 ###################################################
-getSizeTable <- function(packagename="spatstat") {
-  fname <- system.file("doc", "packagesizes.txt", package=packagename)
-  if(!file.exists(fname)) 
-    return(NULL)
+readSizeTable <- function(fname) {
+  if(is.null(fname) || !file.exists(fname)) return(NULL)
   a <- read.table(fname, header=TRUE)
   a$date <- as.Date(a$date)
   return(a)
+}
+getSizeTable <- function(packagename="spatstat", tablename="packagesizes.txt") {
+  fname <- system.file("doc", tablename, package=packagename)
+  readSizeTable(fname)
 }
 counts <- c("nhelpfiles", "nobjects", "ndatasets", "Rlines", "srclines")
 mergeSizeTables <- function(a, b) {
@@ -32,7 +34,9 @@ mergeSizeTables <- function(a, b) {
 }
 z <- getSizeTable()
 zutils <- getSizeTable("spatstat.utils")
+zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 z <- mergeSizeTables(z, zutils)
+z <- mergeSizeTables(z, zlocal)
 #
 changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
 newobj <- changes[["nobjects"]]
@@ -40,7 +44,7 @@ newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:76-81
+### code chunk number 3: updates.Rnw:80-85
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -50,18 +54,18 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:87-92
+### code chunk number 4: updates.Rnw:91-96
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
      main="Spatstat growth")
 lines(srclines/1000 ~ date, data=z)
-text(as.Date("2013-01-01"), 9.5, "C code")
-text(as.Date("2013-01-01"), 50, "R code")
+text(as.Date("2015-01-01"), 9.5, "C code")
+text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:1654-1658
+### code chunk number 5: updates.Rnw:1789-1793
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -70,7 +74,7 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:1664-1665 (eval = FALSE)
+### code chunk number 6: updates.Rnw:1799-1800 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

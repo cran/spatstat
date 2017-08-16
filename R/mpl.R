@@ -1,6 +1,6 @@
 #    mpl.R
 #
-#	$Revision: 5.204 $	$Date: 2016/12/14 06:33:07 $
+#	$Revision: 5.208 $	$Date: 2017/07/19 06:55:15 $
 #
 #    mpl.engine()
 #          Fit a point process model to a two-dimensional point pattern
@@ -91,6 +91,7 @@ mpl.engine <-
     ## rbord applies only to border correction
     if(correction != "border") rbord <- 0 
     ##
+    covfunargs <- as.list(covfunargs)
     ##
     ## Interpret the call
     if(is.null(trend)) {
@@ -105,7 +106,7 @@ mpl.engine <-
     the.version <- list(major=spv$major,
                         minor=spv$minor,
                         release=spv$patchlevel,
-                        date="$Date: 2016/12/14 06:33:07 $")
+                        date="$Date: 2017/07/19 06:55:15 $")
 
     if(want.inter) {
       ## ensure we're using the latest version of the interaction object
@@ -717,6 +718,20 @@ mpl.prepare <- local({
     if(!is.null(subsetexpr)) {
       ## user-defined subset expression
       USER.SUBSET <- eval(subsetexpr, glmdata, environment(trend))
+      if(is.owin(USER.SUBSET)) {
+        USER.SUBSET <- inside.owin(P$x, P$y, USER.SUBSET)
+      } else if(is.im(USER.SUBSET)) {
+        USER.SUBSET <- as.logical(USER.SUBSET[P, drop=FALSE])
+        if(anyNA(USER.SUBSET)) 
+          USER.SUBSET[is.na(USER.SUBSET)] <- FALSE
+      }
+      if(!(is.logical(USER.SUBSET) || is.numeric(USER.SUBSET)))
+        stop("Argument 'subset' should yield logical values", call.=FALSE)
+      if(anyNA(USER.SUBSET)) {
+        USER.SUBSET[is.na(USER.SUBSET)] <- FALSE
+        warning("NA values in argument 'subset' were changed to FALSE",
+                call.=FALSE)
+      }
       .mpl$SUBSET <- .mpl$SUBSET & USER.SUBSET
     }
                         

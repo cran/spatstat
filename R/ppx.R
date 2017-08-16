@@ -3,7 +3,7 @@
 #
 #  class of general point patterns in any dimension
 #
-#  $Revision: 1.59 $  $Date: 2017/03/02 01:27:04 $
+#  $Revision: 1.60 $  $Date: 2017/06/05 10:31:58 $
 #
 
 ppx <- local({
@@ -278,6 +278,8 @@ marks.ppx <- function(x, ..., drop=TRUE) {
       newdata <- coorddata
       newctype <- ctype[retain]
     } else {
+      if(nrow(coorddata) == 0) 
+        value <- value[integer(0), , drop=FALSE]
       newdata <- cbind(coorddata, value)
       newctype <- factor(c(as.character(ctype[retain]),
                            rep.int("mark", ncol(value))),

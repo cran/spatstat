@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.132 $ $Date: 2017/02/24 05:52:53 $
+# $Revision: 1.134 $ $Date: 2017/07/19 07:18:54 $
 #
 
 kppm <- function(X, ...) {
@@ -63,6 +63,7 @@ kppm.ppp <- kppm.quad <-
            data=NULL,
            ...,
            covariates = data,
+           subset, 
            method = c("mincon", "clik2", "palm"),
            improve.type = c("none", "clik1", "wclik1", "quasi"),
            improve.args = list(),
@@ -100,6 +101,18 @@ kppm.ppp <- kppm.quad <-
     stop("X should be a point pattern (ppp) or quadrature scheme (quad)")
   if(is.marked(X))
     stop("Sorry, cannot handle marked point patterns")
+  if(!missing(subset)) {
+    W <- eval(subset, covariates, parent.frame())
+    if(!is.null(W)) {
+      if(is.im(W)) {
+        W <- solutionset(W)
+      } else if(!is.owin(W)) {
+        stop("Argument 'subset' should yield a window or logical image",
+             call.=FALSE)
+      }
+      X <- X[W]
+    }
+  }
   po <- ppm(Q=X, trend=trend, covariates=covariates,
             forcefit=TRUE, rename.intercept=FALSE,
             covfunargs=covfunargs, use.gam=use.gam, nd=nd, eps=eps)
@@ -299,6 +312,24 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   desc <- paste("minimum contrast fit of", info$descname)
 
   #' ............ experimental .........................
+  do.adjust <- spatstat.options("kppm.adjusted")
+  if(do.adjust) {
+    W <- Window(X)
+    adjdata <- list(paircorr = info[["pcf"]],
+                    pairWcdf = distcdf(W),
+		    tohuman  = NULL)
+    adjfun <- function(theo, par, auxdata, ...) {
+      with(auxdata, {
+        if(!is.null(tohuman))
+	  par <- tohuman(par)
+        a <- as.numeric(stieltjes(paircorr, pairWcdf, par=par, ...))
+	return(theo/a)
+      })
+    }
+    adjustment <- list(fun=adjfun, auxdata=adjdata)
+  } else adjustment <- NULL
+    
+  #' ............ experimental .........................
   usecanonical <- spatstat.options("kppm.canonical")
   if(usecanonical) {
      tocanonical <- info$tocanonical
@@ -313,6 +344,8 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
     htheo <- theoret
     startpar <- tocanonical(startpar)
     theoret <- function(par, ...) { htheo(tohuman(par), ...) }
+    if(do.adjust)
+      adjustment$data$tohuman <- tohuman
   }
   #' ...................................................
   
@@ -328,7 +361,8 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                                       modelname=info$modelname),
                                   margs=dots$margs,
                                   model=dots$model,
-                                  funaux=info$funaux),
+                                  funaux=info$funaux,
+				  adjustment=adjustment),
                              list(...))
   if(isDPP && algorithm=="Brent" && changealgorithm){
     mcargs <- resolve.defaults(mcargs, list(lower=alg$lower, upper=alg$upper))
@@ -1205,7 +1239,7 @@ plot.kppm <- local({
                       dmain=c(xname, Fit$StatName))
              },
              cluster={
-               plotem(clusterfield(x, locations = loc), ...,
+               plotem(clusterfield(x, locations = loc, verbose=FALSE), ...,
                       dmain=c(xname, "Fitted cluster"))
              })
     if(pause) par(opa)
@@ -1689,3 +1723,4 @@ psib.kppm <- function(object) {
   p <- 1 - 1/g(0)
   return(p)
 }
+

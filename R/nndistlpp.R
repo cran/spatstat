@@ -1,7 +1,7 @@
 #
 # nndistlpp.R
 #
-#  $Revision: 1.19 $ $Date: 2016/12/07 10:06:39 $
+#  $Revision: 1.20 $ $Date: 2017/06/05 10:31:58 $
 #
 # Methods for nndist, nnwhich, nncross for linear networks
 #
@@ -408,7 +408,8 @@ nncross.lpp <- local({
     nnd <- nnd[,k,drop=TRUE]
     nnw <- nnw[,k,drop=TRUE]
     result <- list(dist=nnd, which=nnw)[what]
-    result <- as.data.frame(result)[,,drop=TRUE]
+    if(format == "data.frame")
+      result <- as.data.frame(result)[,,drop=TRUE]
     return(result)
   }
   

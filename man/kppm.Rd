@@ -26,6 +26,7 @@
        data = NULL,
        ...,
        covariates=data,
+       subset,
        method = c("mincon", "clik2", "palm"),
        improve.type = c("none", "clik1", "wclik1", "quasi"),
        improve.args = list(),
@@ -45,6 +46,7 @@
        data = NULL,
        ...,
        covariates=data,
+       subset,
        method = c("mincon", "clik2", "palm"),
        improve.type = c("none", "clik1", "wclik1", "quasi"),
        improve.args = list(),
@@ -82,6 +84,15 @@
   }
   \item{\dots}{
     Additional arguments. See Details.
+  }
+  \item{subset}{
+    Optional.
+    A subset of the spatial domain,
+    to which the model-fitting should be restricted.
+    A window (object of class \code{"owin"})
+    or a logical-valued pixel image (object of class \code{"im"}),
+    or an expression (possibly involving the names of entries in \code{data})
+    which can be evaluated to yield a window or pixel image.
   }
   \item{method}{
     The fitting method. Either 
@@ -277,9 +288,38 @@
   \code{trace}, \code{maxit} and \code{abstol}
   (documented in the help for \code{\link[stats]{optim}}).
 
-  Fitting the LGCP model requires the \pkg{RandomFields} package
+  Fitting the LGCP model requires the \pkg{RandomFields} package,
   except in the default case where the exponential covariance
   is assumed.
+}
+\section{Log-Gaussian Cox Models}{
+  To fit a log-Gaussian Cox model with non-exponential covariance,
+  specify \code{clusters="LGCP"} and use additional arguments
+  to specify the covariance structure. These additional arguments can
+  be given individually in the call to \code{kppm}, or they can be
+  collected together in a list called \code{covmodel}.
+
+  For example a Matern model with parameter \eqn{\nu=0.5} could be specified
+  either by \code{kppm(X, clusters="LGCP", model="matern", nu=0.5)} or by
+  \code{kppm(X, clusters="LGCP", covmodel=list(model="matern", nu=0.5))}.
+
+  The argument \code{model} specifies the type of covariance
+  model: the default is \code{model="exp"} for an exponential covariance.
+  Alternatives include \code{"matern"}, \code{"cauchy"} and \code{"spheric"}.
+  Model names correspond to functions beginning with \code{RM} in the
+  \pkg{RandomFields} package: for example \code{model="matern"}
+  corresponds to the function \code{RMmatern} in the 
+  \pkg{RandomFields} package.
+  
+  Additional arguments are passed to the
+  relevant function in the \pkg{RandomFields} package:
+  for example if \code{model="matern"} then the additional argument
+  \code{nu} is required, and is passed to the function
+  \code{RMmatern} in the \pkg{RandomFields} package.
+
+  Note that it is not possible to use \emph{anisotropic} covariance models
+  because the \code{kppm} technique assumes the pair correlation function
+  is isotropic.
 }
 \value{
   An object of class \code{"kppm"} representing the fitted model.
@@ -335,7 +375,7 @@
 
   Jalilian, A., Guan, Y. and Waagepetersen, R. (2012)
   Decomposition of variance for spatial Cox processes.
-  \emph{Scandinavian Journal of Statistics}, in press.
+  \emph{Scandinavian Journal of Statistics} \bold{40}, 119--137.
 
   Tanaka, U. and Ogata, Y. and Stoyan, D. (2008)
   Parameter estimation and model selection for
@@ -371,7 +411,7 @@
 
   # fit with composite likelihood method
   kppm(redwood ~ x, "VarGamma", method="clik2", nu.ker=-3/8)
-  
+
   # fit intensity with quasi-likelihood method
   kppm(redwood ~ x, "Thomas", improve.type = "quasi")
 }

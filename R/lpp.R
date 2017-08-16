@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.54 $   $Date: 2017/03/02 01:27:45 $
+#  $Revision: 1.56 $   $Date: 2017/08/08 03:24:35 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -106,11 +106,14 @@ plot.lpp <- function(x, ..., main, add=FALSE,
     main <- short.deparse(substitute(x))
   ## Handle multiple columns of marks as separate plots
   ##  (unless add=TRUE or which.marks selects a single column
-  ##   or multipage = FALSE)
-  if(use.marks && is.data.frame(mx <- marks(x))) {
+  ##   or multiplot = FALSE)
+  mx <- marks(x)
+  if(use.marks && !is.null(dim(mx))) {
     implied.all <- is.null(which.marks)
-    want.several <- implied.all || is.data.frame(mx <- mx[,which.marks])
+    want.several <- implied.all || !is.null(dim(mx <- mx[,which.marks]))
     do.several <- want.several && !add && multiplot
+    if(want.several)
+      mx <- as.data.frame(mx) #' ditch hyperframe columns
     if(do.several) {
       ## generate one plot for each column of marks
       y <- solapply(mx, setmarks, x=x)
@@ -119,7 +122,7 @@ plot.lpp <- function(x, ..., main, add=FALSE,
                             show.window=show.window),
                        list(...)))
       return(invisible(out))
-    } 
+    }
     if(is.null(which.marks)) {
       which.marks <- 1
       if(do.plot) message("Plotting the first column of marks")
@@ -604,4 +607,58 @@ cut.lpp <- function(x, z=marks(x), ...) {
 
 points.lpp <- function(x, ...) {
   points(coords(x, spatial=TRUE, local=FALSE), ...)
+}
+
+connected.lpp <- function(X, R=Inf, ..., dismantle=TRUE) {
+  if(!dismantle) {
+    if(is.infinite(R)) {
+      Y <- X %mark% factor(1)
+      attr(Y, "retainpoints") <- attr(X, "retainpoints")
+      return(Y)
+    }
+    check.1.real(R)
+    stopifnot(R >= 0)
+    nv <- npoints(X)
+    close <- (pairdist(X) <= R)
+    diag(close) <- FALSE
+    ij <- which(close, arr.ind=TRUE)
+    ie <- ij[,1] - 1L
+    je <- ij[,2] - 1L
+    ne <- length(ie)
+    zz <- .C("cocoGraph",
+           nv=as.integer(nv),
+           ne=as.integer(ne),
+           ie=as.integer(ie),
+           je=as.integer(je),
+           label=as.integer(integer(nv)),
+           status=as.integer(integer(1L)),
+           PACKAGE = "spatstat")
+    if(zz$status != 0)
+      stop("Internal error: connected.ppp did not converge")
+    lab <- zz$label + 1L
+    # Renumber labels sequentially 
+    lab <- as.integer(factor(lab))
+    # Convert labels to factor
+    lab <- factor(lab)
+    # Apply to points
+    Y <- X %mark% lab
+    attr(Y, "retainpoints") <- attr(X, "retainpoints")
+    return(Y)
+  }
+  # first break the *network* into connected components
+  L <- domain(X)
+  lab <- connected(L, what="labels")
+  if(length(levels(lab)) == 1) {
+    XX <- solist(X)
+  } else {
+    subsets <- split(seq_len(nvertices(L)), lab)
+    XX <- solist()
+    for(i in seq_along(subsets)) 
+      XX[[i]] <- thinNetwork(X, retainvertices=subsets[[i]])
+  }
+  # now find R-connected components in each dismantled piece
+  YY <- solapply(XX, connected.lpp, R=R, dismantle=FALSE)
+  if(length(YY) == 1)
+    YY <- YY[[1]]
+  return(YY)
 }

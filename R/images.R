@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.144 $     $Date: 2017/02/07 07:47:20 $
+#      $Revision: 1.145 $     $Date: 2017/06/05 10:31:58 $
 #
 #      The class "im" of raster images
 #
@@ -849,8 +849,8 @@ as.double.im <- function(x, ...) { as.double(x[], ...) }
 
 ##
 
-hist.im <- function(x, ..., probability=FALSE) {
-  xname <- short.deparse(substitute(x))
+hist.im <- function(x, ..., probability=FALSE, xname) {
+  if(missing(xname) || is.null(xname)) xname <- short.deparse(substitute(x))
   verifyclass(x, "im")
   main <- paste("Histogram of", xname)
   # default plot arguments

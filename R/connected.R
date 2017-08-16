@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.18 $  $Date: 2016/04/25 02:34:40 $
+#    $Revision: 1.19 $  $Date: 2017/06/05 10:31:58 $
 #
 # Interpreted code for pixel images by Julian Burgos <jmburgos@u.washington.edu>
 # Rewritten in C by Adrian Baddeley
@@ -178,3 +178,22 @@ connected.ppp <- function(X, R, ...) {
   return(Y)
 }
 
+# .................................................
+
+is.connected <- function(X, ...) {
+  UseMethod("is.connected")
+}
+
+is.connected.default <- function(X, ...) {
+  y <- connected(X, ...)
+  npieces <- length(levels(y))
+  if(npieces == 0)
+    stop("Unable to determine connectedness")
+  return(npieces == 1)
+}
+
+is.connected.ppp <- function(X, R, ...) {
+  lab <- connected(X, R, internal=TRUE)
+  npieces <- length(unique(lab))
+  return(npieces == 1)
+}

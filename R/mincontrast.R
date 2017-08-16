@@ -16,6 +16,13 @@ mincontrast <- local({
         stop("theoretical function did not return a numeric vector")
       if(length(theo) != nrvals)
         stop("theoretical function did not return the correct number of values")
+      if(!is.null(adjustment)) {
+        theo <- adjustment$fun(theo=theo, par=par, auxdata=adjustment$auxdata)
+        if(!is.vector(theo) || !is.numeric(theo))
+	  stop("adjustment did not return a numeric vector")
+        if(length(theo) != nrvals)
+          stop("adjustment did not return the correct number of values")
+      }	
       discrep <- (abs(theo^qq - obsq))^pp
       value <- mean(discrep)
       value <- min(value, .Machine$double.xmax)
@@ -28,8 +35,10 @@ mincontrast <- local({
                           ctrl=list(q = 1/4, p = 2, rmin=NULL, rmax=NULL),
                           fvlab=list(label=NULL, desc="minimum contrast fit"),
                           explain=list(dataname=NULL,
-                            modelname=NULL, fname=NULL)) {
+                            modelname=NULL, fname=NULL),
+			  adjustment=NULL) {
     verifyclass(observed, "fv")
+
     stopifnot(is.function(theoretical))
     if(!any("par" %in% names(formals(theoretical))))
       stop(paste("Theoretical function does not include an argument called",
@@ -99,7 +108,8 @@ mincontrast <- local({
                     qq          = ctrl$q,
                     pp          = ctrl$p,
                     rmin        = rmin,
-                    rmax        = rmax)
+                    rmax        = rmax,
+		    adjustment  = adjustment)
     ## go
     minimum <- optim(startpar, fn=contrast.objective, objargs=objargs, ...)
     ## if convergence failed, issue a warning 
@@ -107,13 +117,20 @@ mincontrast <- local({
     ## evaluate the fitted theoretical curve
     fittheo <- theoretical(minimum$par, rvals, ...)
     ## pack it up as an `fv' object
-    label <- fvlab$label
+    label <- fvlab$label %orifnull% "%s[fit](r)"
     desc  <- fvlab$desc
-    if(is.null(label))
-      label <- paste("fit(", argu, ")", collapse="")
     fitfv <- bind.fv(observed[sub, ],
                      data.frame(fit=fittheo),
                      label, desc)
+    if(!is.null(adjustment)) {
+      adjtheo <- adjustment$fun(theo=fittheo,
+      	                        par=minimum$par,
+				auxdata=adjustment$auxdata)
+      fitfv <- bind.fv(fitfv,
+                       data.frame(adjfit=adjtheo),
+		       "%s[adjfit](r)",
+		       paste("adjusted", desc))
+    }				
     result <- list(par      = minimum$par,
                    fit      = fitfv,
                    opt      = minimum,

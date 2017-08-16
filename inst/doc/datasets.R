@@ -174,7 +174,7 @@ plot(cells)
 ### code chunk number 21: datasets.Rnw:369-372
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-plot(chicago, main="Chicago Street Crimes", col="grey",
+plot(chicago, main="Chicago Crimes", col="grey",
      cols=c("red", "blue", "black", "blue", "red", "blue", "blue"),
      chars=c(16,2,22,17,24,15,6), leg.side="left", show.window=FALSE)
 

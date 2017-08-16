@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#          CORRECTED VERSION !!
+#  $Revision: 1.81 $ $Date: 2017/08/10 02:31:47 $
 #
 
 leverage <- function(model, ...) {
@@ -75,7 +75,7 @@ ppmInfluence <- function(fit,
 
 ppmInfluenceEngine <- function(fit,
                          what=c("leverage", "influence", "dfbetas",
-                           "derivatives", "increments"),
+                           "score", "derivatives", "increments"),
                          ...,
                          iScore=NULL, iHessian=NULL, iArgs=NULL,
                          drop=FALSE,
@@ -84,64 +84,87 @@ ppmInfluenceEngine <- function(fit,
                          sparseOK=TRUE,
                          fitname=NULL,
                          multitypeOK=FALSE,
-                         entrywise = TRUE) {
-  logi <- fit$method == "logi"
+                         entrywise = TRUE,
+                         matrix.action = c("warn", "fatal", "silent"),
+                         geomsmooth = TRUE) {
+  logi <- identical(fit$method, "logi")
   if(is.null(fitname)) 
     fitname <- short.deparse(substitute(fit))
   stopifnot(is.ppm(fit))
-  what <- match.arg(what, several.ok=TRUE)
+
+  ## type of calculation
   method <- match.arg(method)
-  info <- list(fitname=fitname, fit.is.poisson=is.poisson(fit))
+  what <- match.arg(what, several.ok=TRUE)
+  matrix.action <- match.arg(matrix.action)
+
+  influencecalc <- any(what %in% c("leverage", "influence", "dfbetas"))
+  hesscalc <- influencecalc || any(what == "derivatives")
+  sparse <- sparseOK 
+  target <- paste(what, collapse=",")
+  
+  ## Detect presence of irregular parameters
   if(is.null(iArgs))
     iArgs <- fit$covfunargs
   gotScore <- !is.null(iScore)
   gotHess <- !is.null(iHessian)
-  influencecalc <- any(what %in% c("leverage", "influence", "dfbetas"))
-  needHess <- gotScore && influencecalc
+  needHess <- gotScore && hesscalc  # may be updated later
   if(!gotHess && needHess)
     stop("Must supply iHessian", call.=FALSE)
-  sparse <- sparseOK 
-  #
-  # extract precomputed values if given
+
+  ## extract values from model, using precomputed values if given
   theta  <- precomputed$coef   %orifnull% coef(fit)
   lam    <- precomputed$lambda %orifnull% fitted(fit, check=FALSE)
   mom    <- precomputed$mom    %orifnull% model.matrix(fit)
-  # 
   p <- length(theta)
+  Q <- quad.ppm(fit)
+  w <- w.quad(Q)
+  loc <- union.quad(Q)
+  isdata <- is.data(Q)
+  if(length(w) != length(lam))
+    stop(paste("Internal error: length(w) = ", length(w),
+               "!=", length(lam), "= length(lam)"))
+	       
+  ## extract negative Hessian matrix of regular part of log composite likelihood
+  ##  hess = negative Hessian H
+  ##  fgrad = Fisher-scoring-like gradient G = estimate of E[H]
   if(logi){
     ## Intensity of dummy points
     rho <- fit$Q$param$rho %orifnull% intensity(as.ppp(fit$Q))
     logiprob <- lam / (lam + rho)
-    vclist <- vcov(fit, what = "internals")
+    vclist <- vcov(fit, what = "internals", matrix.action="silent")
     hess <- vclist$Slog
-    fush <- vclist$fisher
-    invhess <- solve(hess)
-    vc <- invhess %*% (vclist$Sigma1log+vclist$Sigma2log) %*% invhess
-  } else{
-  vc <- vcov(fit, hessian=TRUE)
-  fush <- hess <- solve(vc)
+    fgrad <- vclist$fisher
+    invhess <- if(is.null(hess)) NULL else checksolve(hess, "silent")
+    invfgrad <- if(is.null(fgrad)) NULL else checksolve(fgrad, "silent")
+    if(is.null(invhess) || is.null(invfgrad)) {
+      #' use more expensive estimate of variance terms
+      vclist <- vcov(fit, what = "internals", fine=TRUE,
+                     matrix.action=matrix.action)
+      hess <- vclist$Slog
+      fgrad <- vclist$fisher
+      #' try again - exit if really singular
+      invhess <- checksolve(hess, matrix.action, "Hessian", target)
+      invfgrad <- checksolve(fgrad, matrix.action, "gradient matrix", target)
+    }
+#    vc <- invhess %*% (vclist$Sigma1log+vclist$Sigma2log) %*% invhess
+  } else {
+    invfgrad <- vcov(fit, hessian=TRUE, matrix.action="silent")
+    fgrad <- hess <-
+      if(is.null(invfgrad)) NULL else checksolve(invfgrad, "silent")
+    if(is.null(fgrad)) {
+      invfgrad <- vcov(fit, hessian=TRUE, fine=TRUE,
+                       matrix.action=matrix.action)
+      fgrad <- hess <- checksolve(invfgrad, matrix.action, "Hessian", target)
+    }
   }
-  Q <- quad.ppm(fit)
-  # hess = negative hessian of log (pseudo) likelihood
-  # fush = E(hess)
-  # invhess = solve(hess)
-  # vc = solve(fush)
-  #
-  w <- w.quad(Q)
-  loc <- union.quad(Q)
-  isdata <- is.data(Q)
-  #
-  if(length(w) != length(lam))
-    stop(paste("Internal error: length(w) = ", length(w),
-               "!=", length(lam), "= length(lam)\n"))
 
-  ## evaluate additional (`irregular') components of score
+  ## evaluate additional (`irregular') components of score, if any
   iscoremat <- ppmDerivatives(fit, "gradient", iScore, loc, covfunargs=iArgs)
   gotScore <- !is.null(iscoremat)
-  needHess <- gotScore && influencecalc
-  if(gotScore) {
-    if(logi)
-      stop("ppm influence measures are not yet implemented for method=logi with irregular parameters.")
+  needHess <- gotScore && hesscalc
+  if(!gotScore) {
+    REG <- 1:ncol(mom)
+  } else {
     ## count regular and irregular parameters
     nreg <- ncol(mom)
     nirr <- ncol(iscoremat)
@@ -150,75 +173,125 @@ ppmInfluenceEngine <- function(fit,
     REG <- 1:nreg
     IRR <- nreg + 1:nirr
     ## evaluate additional (`irregular') entries of Hessian
-    ihessmat <- ppmDerivatives(fit, "hessian", iHessian, loc, covfunargs=iArgs)
-    if(gotHess <- !is.null(ihessmat))
-    ## recompute negative Hessian of log PL and its mean
-    fush <- hessextra <- matrix(0, ncol(mom), ncol(mom))
-    ## integral over domain
-    switch(method,
-           interpreted = {
-             for(i in seq(loc$n)) {
-               # weight for integrand
-               wti <- lam[i] * w[i]
-               if(all(is.finite(wti))) {
-                 # integral of outer product of score 
+    ihessmat <- if(!needHess) NULL else
+                ppmDerivatives(fit, "hessian", iHessian, loc, covfunargs=iArgs)
+    if(gotHess <- !is.null(ihessmat)) {
+      ## recompute negative Hessian of log PL and its mean
+      fgrad <- hessextra <- matrix(0, ncol(mom), ncol(mom))
+    }  
+    if(!logi) {
+      ## pseudolikelihood
+      switch(method,
+             interpreted = {
+               for(i in seq(loc$n)) {
+                 # weight for integrand
+                 wti <- lam[i] * w[i]
+                 if(all(is.finite(wti))) {
+                   # integral of outer product of score 
+                   momi <- mom[i, ]
+                   v1 <- outer(momi, momi, "*") * wti
+                   if(all(is.finite(v1)))
+                     fgrad <- fgrad + v1
+                   # integral of Hessian
+                   # contributions nonzero for irregular parameters
+                   if(gotHess) {
+                     v2 <- matrix(as.numeric(ihessmat[i,]), nirr, nirr) * wti
+                     if(all(is.finite(v2)))
+                       hessextra[IRR, IRR] <- hessextra[IRR, IRR] + v2
+                   }
+                 }
+               }
+               # subtract sum over data points
+               if(gotHess) {
+                 for(i in which(isdata)) {
+                   v2 <- matrix(as.numeric(ihessmat[i,]), nirr, nirr) 
+                   if(all(is.finite(v2)))
+                     hessextra[IRR, IRR] <- hessextra[IRR, IRR] - v2
+                 }
+                 hess <- fgrad + hessextra
+                 invhess <- checksolve(hess, matrix.action, "Hessian", target)
+               } else {
+                 invhess <- hess <- NULL
+               }
+             },
+             C = {
+               wlam <- lam * w
+               fgrad <- sumouter(mom, wlam)
+               if(gotHess) {
+                 # integral term
+                 isfin <- is.finite(wlam) & matrowall(is.finite(ihessmat))
+                 vintegral <-
+                   if(all(isfin)) wlam %*% ihessmat else
+                               wlam[isfin] %*% ihessmat[isfin,, drop=FALSE]
+                 # sum over data points
+                 vdata <- .colSums(ihessmat[isdata, , drop=FALSE],
+                                   sum(isdata), ncol(ihessmat),
+                                   na.rm=TRUE)
+                 vcontrib <- vintegral - vdata
+                 hessextra[IRR, IRR] <-
+                   hessextra[IRR, IRR] + matrix(vcontrib, nirr, nirr)
+                 hess <- fgrad + hessextra
+                 invhess <- checksolve(hess, matrix.action, "Hessian", target)
+               } else {
+                 invhess <- hess <- NULL
+               }
+             })
+    } else {
+      if(!spatstat.options('developer'))
+        stop("Logistic fits are not yet supported")
+      ## logistic fit
+      switch(method,
+             interpreted = {
+	       oweight <- logiprob * (1 - logiprob)
+	       hweight <- ifelse(isdata, -(1 - logiprob), logiprob)
+               for(i in seq(loc$n)) {
+                 ## outer product of score 
                  momi <- mom[i, ]
-                 v1 <- outer(momi, momi, "*") * wti
+                 v1 <- outer(momi, momi, "*") * oweight[i]
                  if(all(is.finite(v1)))
-                   fush <- fush + v1
-                 # integral of Hessian
-                 # contributions nonzero for irregular parameters
+                   fgrad <- fgrad + v1
+		 ## Hessian term
+                 ## contributions nonzero for irregular parameters
                  if(gotHess) {
-                   v2 <- matrix(as.numeric(ihessmat[i,]), nirr, nirr) * wti
+                   v2 <- hweight[i] *
+		         matrix(as.numeric(ihessmat[i,]), nirr, nirr)
                    if(all(is.finite(v2)))
                      hessextra[IRR, IRR] <- hessextra[IRR, IRR] + v2
                  }
                }
-             }
-             # subtract sum over data points
-             if(gotHess) {
-               for(i in which(isdata)) {
-                 v2 <- matrix(as.numeric(ihessmat[i,]), nirr, nirr) 
-                 if(all(is.finite(v2)))
-                   hessextra[IRR, IRR] <- hessextra[IRR, IRR] - v2
+	       if(gotHess) {
+                 hess <- fgrad + hessextra
+                 invhess <- checksolve(hess, matrix.action, "Hessian", target)
+               } else {
+                 invhess <- hess <- NULL
+	       }
+             },
+             C = {
+	       oweight <- logiprob * (1 - logiprob)
+	       hweight <- ifelse(isdata, -(1 - logiprob), logiprob)
+               fgrad <- sumouter(mom, oweight)
+               if(gotHess) {
+                 # Hessian term
+                 isfin <- is.finite(hweight) & matrowall(is.finite(ihessmat))
+                 vcontrib <-
+                   if(all(isfin)) hweight %*% ihessmat else
+                               hweight[isfin] %*% ihessmat[isfin,, drop=FALSE]
+                 hessextra[IRR, IRR] <-
+                   hessextra[IRR, IRR] + matrix(vcontrib, nirr, nirr)
+                 hess <- fgrad + hessextra
+                 invhess <- checksolve(hess, matrix.action, "Hessian", target)
+               } else {
+                 invhess <- hess <- NULL
                }
-               hess <- fush + hessextra
-               invhess <- solve(hess)
-             } else {
-               invhess <- hess <- NULL
-             }
-           },
-           C = {
-             wlam <- lam * w
-             fush <- sumouter(mom, wlam)
-             if(gotHess) {
-               # integral term
-               isfin <- is.finite(wlam) & matrowall(is.finite(ihessmat))
-               vintegral <-
-                 if(all(isfin)) wlam %*% ihessmat else
-                             wlam[isfin] %*% ihessmat[isfin,, drop=FALSE]
-               # sum over data points
-               vdata <- .colSums(ihessmat[isdata, , drop=FALSE],
-                                 sum(isdata), ncol(ihessmat),
-                                 na.rm=TRUE)
-               vcontrib <- vintegral - vdata
-               hessextra[IRR, IRR] <-
-                 hessextra[IRR, IRR] + matrix(vcontrib, nirr, nirr)
-               hess <- fush + hessextra
-               invhess <- solve(hess)
-             } else {
-               invhess <- hess <- NULL
-             }
-           })
-    vc <- solve(fush)
-  } else {
-    REG <- 1:ncol(mom)
+             })
+    }
+    invfgrad <- checksolve(fgrad, matrix.action, "gradient matrix", target)
   }
   
   if(!needHess) {
     if(!logi){
-    hess <- fush
-    invhess <- vc
+    hess <- fgrad
+    invhess <- invfgrad
     }
   }
   #
@@ -243,19 +316,26 @@ ppmInfluenceEngine <- function(fit,
 
   # ........  start assembling results .....................
   # 
-  result <- as.list(info)
+  ## start building result
+  result <- list(fitname=fitname, fit.is.poisson=is.poisson(fit))
   class(result) <- "ppmInfluence"
-  # 
-  if("derivatives" %in% what) {
-    rawresid <- isdata - lam * w
-    score <- matrix(rawresid, nrow=1) %*% mom
-    result$deriv <- list(mom=mom, score=score,
-                         fush=fush, vc=vc,
-                         hess=hess, invhess=invhess)
-  }
-  if(all(what == "derivatives"))
-    return(result)
 
+  if(any(c("score", "derivatives") %in% what)) {
+    ## calculate the composite score
+    rawmean <- if(logi) logiprob else (lam * w)
+    rawresid <- isdata - rawmean
+    score <- matrix(rawresid, nrow=1) %*% mom
+
+    if("score" %in% what)
+      result$score <- score
+    if("derivatives" %in% what) 
+      result$deriv <- list(mom=mom, score=score,
+                           fgrad=fgrad, invfgrad=invfgrad,
+                           hess=hess, invhess=invhess)
+    if(all(what %in% c("score", "derivatives")))
+      return(result)
+  }
+    
   # compute effect of adding/deleting each quadrature point
   #    columns index the point being added/deleted
   #    rows index the points affected
@@ -522,11 +602,14 @@ ppmInfluenceEngine <- function(fit,
       h <- data.frame(leverage=h, type=marks(loc))
     levval <- (loc %mark% h)[ok]
     levvaldum <- levval[!isdata[ok]]
+    geomsmooth <- geomsmooth && all(marks(levvaldum) >= 0)
     if(!mt) {
-      levsmo <- Smooth(levvaldum, sigma=maxnndist(loc))
+      levsmo <- Smooth(levvaldum, sigma=maxnndist(loc), geometric=geomsmooth)
     } else {
       levsplitdum <- split(levvaldum, reduce=TRUE)
-      levsmo <- Smooth(levsplitdum, sigma=max(sapply(levsplitdum, maxnndist)))
+      levsmo <- Smooth(levsplitdum,
+                       sigma=max(sapply(levsplitdum, maxnndist)),
+                       geometric=geomsmooth)
     }
     ## nominal mean level
     a <- area(Window(loc)) * markspace.integral(loc)
@@ -740,37 +823,38 @@ domain.leverage.ppm <- domain.influence.ppm <-
   function(X, ...) { as.owin(X) } 
 
 print.leverage.ppm <- function(x, ...) {
-  cat("Point process leverage function\n")
+  splat("Point process leverage function")
   fitname <- x$fitname
-  cat(paste("for model:", fitname, "\n"))
+  splat("for model:", fitname)
   lev <- x$lev
-  cat("\nExact values:\n")
+  splat("\nExact values:")
   print(lev$val)
-  cat("\nSmoothed values:\n")
+  splat("\nSmoothed values:")
   print(lev$smo)
   ## for compatibility we retain the x$fit usage
   if(x$fit.is.poisson %orifnull% is.poisson(x$fit))
-    cat(paste("\nAverage value:", lev$ave, "\n"))
+    splat("\nAverage value:", lev$ave)
   return(invisible(NULL))
 }
 
 print.influence.ppm <- function(x, ...) {
-  cat("Point process influence measure\n")  
+  splat("Point process influence measure")  
   fitname <- x$fitname
-  cat(paste("for model:", fitname, "\n"))
-  cat("\nExact values:\n")
+  splat("for model:", fitname)
+  splat("\nExact values:")
   print(x$infl)
   return(invisible(NULL))
 }
 
-"[.leverage.ppm" <- function(x, i, ...) {
+"[.leverage.ppm" <- function(x, i, ..., update=TRUE) {
   if(missing(i)) return(x)
   y <- x$lev
   smoi <- if(is.im(y$smo)) y$smo[i, ...] else solapply(y$smo, "[", i=i, ...)
   if(!inherits(smoi, c("im", "imlist"))) return(smoi)
   y$smo <- smoi
   y$val <- y$val[i, ...]
-  y$ave <- if(is.im(smoi)) mean(smoi) else mean(sapply(smoi, mean))
+  if(update) 
+    y$ave <- if(is.im(smoi)) mean(smoi) else mean(sapply(smoi, mean))
   x$lev <- y
   return(x)
 }

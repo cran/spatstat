@@ -3,7 +3,7 @@
 #' 
 #'  Recursive Partitioning for Point Process Models
 #'
-#'  $Revision: 1.11 $  $Date: 2016/05/04 02:22:17 $
+#'  $Revision: 1.12 $  $Date: 2017/06/05 10:31:58 $
 
 rppm <- function(..., rpargs=list()) {
   ## do the equivalent of ppm(...)
@@ -29,6 +29,9 @@ rppm <- function(..., rpargs=list()) {
   class(result) <- c("rppm", class(result))
   return(result)
 }
+
+# undocumented
+as.ppm.rppm <- function(object) { object$pfit }
 
 print.rppm <- function(x, ...) {
   splat("Point process model with recursive partitioning")
