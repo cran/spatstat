@@ -270,6 +270,7 @@
 \alias{kraever}
 \alias{kraeverRandomFields}
 \alias{labels.ppm}
+\alias{ldtEngine}
 \alias{levels.im}
 \alias{levels<-.im}
 \alias{levelsAsFactor}
@@ -598,7 +599,6 @@
 \alias{smoothpointsEngine}              
 \alias{sort.im}
 \alias{sortalongsegment}
-\alias{spatstat.rawdata.location}
 \alias{spatstat.xy.coords}
 \alias{spatstatClusterModelInfo}
 \alias{spatstatDPPModelInfo}
@@ -660,6 +660,7 @@
 \alias{validate.lpp.coords}
 \alias{validate.mask}        
 \alias{validate.quad}        
+\alias{validate.weights}        
 \alias{vanilla.fv}
 \alias{varcountEngine}
 %\alias{vblogit} %DoNotExport
@@ -668,6 +669,7 @@
 \alias{versionstring.ppm}
 \alias{versionstring.spatstat}
 \alias{verifyclass}
+\alias{vnnFind}
 \alias{Window.lintess}
 \alias{Window<-.linnet}
 \alias{Window<-.lpp}
@@ -905,9 +907,11 @@ erodemask(w,r,strict)
 erode.owin(\dots)
 evalCovar(model, covariate, \dots)
 \method{evalCovar}{ppm}(model, covariate, \dots, lambdatype,
-          dimyx, eps, interpolate, jitter, modelname, covname, dataname) 
+          dimyx, eps, interpolate, jitter, modelname, covname, dataname,
+          subset) 
 \method{evalCovar}{lppm}(model, covariate, \dots, lambdatype, 
-          eps, nd, interpolate, jitter, modelname, covname, dataname)
+          eps, nd, interpolate, jitter, modelname, covname, dataname,
+          subset)
 evalCovariate(covariate, locations)
 evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,
@@ -1044,6 +1048,8 @@ kppmPalmLik(X, Xname, po, clusters, control, weightfun, rmax,
 kraever(package, fatal)
 kraeverRandomFields()
 \method{labels}{ppm}(object, \dots)
+ldtEngine(nv, ns, from, to, seglen, huge,
+          coUXord, vnndist, vnnwhich, vnnlab)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 levelsAsFactor(x)
@@ -1068,7 +1074,8 @@ local2lpp(L, seg, tp, X, df.only)
 logicalIndex(i, nama, len)
 logi.dummy(X, dummytype, nd, mark.repeat, \dots)
 logi.engine(Q, trend, interaction, \dots, 
-            covariates, subsetexpr, correction, rbord, covfunargs, allcovar, 
+            covariates, subsetexpr, clipwin,
+            correction, rbord, covfunargs, allcovar, 
             vnamebase, vnameprefix, justQ, savecomputed, precomputed,
             VB)
 \method{logLik}{vblogit}(object, \dots) 
@@ -1078,7 +1085,8 @@ match2DkernelName(kernel)
 parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
-PDEdensityLPP(x, sigma, \dots, weights, dx, dt, fun)
+PDEdensityLPP(x, sigma, \dots, weights, dx, dt,
+              fun, finespacing, finedata)
 PoisSaddle(beta, fi)
 PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
@@ -1105,7 +1113,7 @@ markformat(x)
 \method{markformat}{ppx}(x) 
 \method{markformat}{psp}(x) 
 \method{markformat}{default}(x) 
-mark.scale.default(marx, w, markscale, maxsize, meansize, characters)
+mark.scale.default(marx, w, \dots, markscale, maxsize, meansize, characters)
 markspace.integral(X)
 \method{marks}{default}(x, \dots)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
@@ -1127,7 +1135,7 @@ meanY.owin(w)
 model.se.image(fit, W, \dots, what)
 modelFrameGam(formula, \dots)
 mpl.engine(Q, trend, interaction, \dots,
-         covariates, subsetexpr, covfunargs, correction,
+         covariates, subsetexpr, clipwin, covfunargs, correction,
 	 rbord, use.gam, gcontrol,
          GLM, GLMfamily, GLMcontrol, famille,
          forcefit, nd, eps, allcovar, callstring,
@@ -1220,7 +1228,7 @@ plotPolygonBdry(x, \dots)
         legendpos = "topleft", lbox = FALSE, add = FALSE)
 ppllengine(X, Y, action="project", check=FALSE)
 \method{ppm}{default}(Q, trend, interaction,
-       \dots, covariates, data, covfunargs, subset, 
+       \dots, covariates, data, covfunargs, subset, clipwin,
        correction, rbord, use.gam, method, forcefit, emend, project,
        prior.mean, prior.var,
        nd, eps, gcontrol, nsim, nrmh, start, control,
@@ -1339,7 +1347,7 @@ resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
 rgbNA(red, green, blue, alpha, maxColorValue)
 rhohatEngine(model, covariate, reference, volume, \dots,
-               weights, method, horvitz, smoother, resolution, 
+               subset, weights, method, horvitz, smoother, resolution, 
                n, bw, adjust, from, to, 
                bwref, covname, covunits, confidence, modelcall, callstring)
 rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
@@ -1452,7 +1460,6 @@ smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted, cutoff)
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
-spatstat.rawdata.location(\dots)
 spatstat.xy.coords(x, y)
 spatstatClusterModelInfo(name, onlyPCP)
 spatstatDPPModelInfo(model)
@@ -1518,6 +1525,7 @@ validate.angles(angles, unit, guess)
 validate.lpp.coords(X, fatal, context)
 validate.mask(w, fatal=TRUE)        
 validate.quad(Q, fatal, repair, announce)
+validate.weights(x, recip, how, allowzero, allowinf)
 vanilla.fv(x)
 varcountEngine(g, B, lambdaB, f)
 %vblogit(y, X, offset, eps, m0, S0, S0i, xi0, verb, maxiter, \dots)
@@ -1526,6 +1534,7 @@ versionstring.interact(object)
 versionstring.ppm(object)
 versionstring.spatstat()
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
+vnnFind(seg, tp, ns, nv, from, to, seglen, huge, tol, kmax)
 \method{Window}{lintess}(X, \dots)
 \method{Window}{linnet}(X, \dots, check=TRUE) <- value
 \method{Window}{lpp}(X, \dots, check=TRUE) <- value

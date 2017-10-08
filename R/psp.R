@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.87 $ $Date: 2017/06/05 10:31:58 $
+#  $Revision: 1.89 $ $Date: 2017/09/13 09:52:15 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -689,10 +689,12 @@ rotate.psp <- function(X, angle=pi/2, ..., centre=NULL) {
 
 is.empty.psp <- function(x) { return(x$n == 0) } 
 
-identify.psp <- function(x, ..., labels=seq_len(nsegments(x)), n=nsegments(x), plot=TRUE) {
+identify.psp <- function(x, ..., labels=seq_len(nsegments(x)),
+                         n=nsegments(x), plot=TRUE) {
   Y <- x
   W <- as.owin(Y)
   mids <- midpoints.psp(Y)
+  poz <- c(1, 2,4, 3)[(floor(angles.psp(Y)/(pi/4)) %% 4) + 1L]
   if(!(is.numeric(n) && (length(n) == 1) && (n %% 1 == 0) && (n >= 0)))
     stop("n should be a single integer")
   out <- integer(0)
@@ -712,7 +714,11 @@ identify.psp <- function(x, ..., labels=seq_len(nsegments(x)), n=nsegments(x), p
         # Display
         mi <- mids[ident]
         li <- labels[ident]
-        text(mi$x, mi$y, labels=li)
+        po <- poz[ident]
+        do.call.matched(graphics::text.default,
+                        resolve.defaults(list(x=mi$x, y=mi$y, labels=li),
+                                         list(...),
+                                         list(pos=po)))
       }
       out <- c(out, ident)
     }
@@ -751,3 +757,13 @@ edit.psp <- function(name, ...) {
   return(xnew)
 }
 
+text.psp <- function(x, ...) {
+  mids <- midpoints.psp(x)
+  poz <- c(1, 2,4, 3)[(floor(angles.psp(x)/(pi/4)) %% 4) + 1L]
+  do.call.matched(graphics::text.default,
+                  resolve.defaults(list(x=mids$x, y=mids$y),
+                                   list(...),
+                                   list(pos=poz),
+                                   .StripNull=TRUE))
+  return(invisible(NULL))
+}

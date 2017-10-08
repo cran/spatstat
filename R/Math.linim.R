@@ -1,7 +1,7 @@
 ##
 ##   Math.linim.R
 ##
-##   $Revision: 1.3 $ $Date: 2015/02/15 10:50:01 $
+##   $Revision: 1.5 $ $Date: 2017/09/19 09:16:08 $
 ##
 
 Ops.linim <- function(e1,e2=NULL){
@@ -24,16 +24,24 @@ Math.linim <- function(x, ...){
     df <- attr(x, "df")
     df$values <- do.call(.Generic, list(df$values, ...))
     L <- attr(x, "L")
-    rslt <- linim(L, Z, df=df)
+    rslt <- linim(L, Z, df=df, restrict=FALSE)
     return(rslt)
 }
 
-Summary.linim <- function(..., na.rm){
-    args <- list(...)
-    argp <- lapply(args, "[")
-    argd <- if(is.element(.Generic, c("sum", "prod"))) list() else 
-            lapply(lapply(args, attr, which="df"), getElement, name="values")
-    do.call(.Generic, c(argp, argd, na.rm = na.rm))
+Summary.linim <- function(..., na.rm, finite){
+  if(missing(finite)) finite <- FALSE
+  if(missing(na.rm)) na.rm <- FALSE
+  argh <- list(...)
+  values <- lapply(argh, "[")
+  dfvalues <- if(is.element(.Generic, c("sum", "prod"))) list() else 
+              lapply(lapply(argh, attr, which="df"), getElement, name="values")
+  vals <- as.numeric(unlist(c(values, dfvalues)))
+  if(finite) {
+    vals <- vals[is.finite(vals)]
+  } else if(na.rm) {
+    vals <- vals[!is.na(vals)]
+  }
+  do.call(.Generic, list(vals))
 }
 
 Complex.linim <- function(z){
@@ -43,6 +51,6 @@ Complex.linim <- function(z){
     Z <- im(m, xcol = z$xcol, yrow = z$yrow, xrange = z$xrange,
                yrange = z$yrange, unitname = unitname(z))
     df$values <- do.call(.Generic, list(z=df$values))
-    rslt <- linim(L, Z, df=df)
+    rslt <- linim(L, Z, df=df, restrict=FALSE)
     return(rslt)
 }

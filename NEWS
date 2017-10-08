@@ -1,4 +1,243 @@
 
+        CHANGES IN spatstat VERSION 1.53-2
+
+OVERVIEW
+
+    o We thank Christophe Biscio and Rasmus Waagepetersen for contributions.
+
+    o Correction to 'lohboot'
+
+    o Improvements to ppm and update.ppm
+
+    o Bug fixes and minor improvements.
+    
+    o Nickname: "Quantum Entanglement"
+
+NEW FUNCTIONS
+
+    o fitin.profilepl
+    Extract the fitted interaction from a model fitted by profile likelihood.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o lohboot
+    Algorithm has been corrected and extended
+    thanks to Christophe Biscio and Rasmus Waagepetersen.
+    New arguments 'block', 'basicboot', 'Vcorrection'.
+
+    o ppm.ppp, ppm.quad
+    New argument 'clipwin'
+
+    o update.ppm
+    For the case 'update(model, X)' where X is a point pattern,
+    if the window of X is different from the original window,
+    then the model is re-fitted from scratch (i.e. use.internal=FALSE).
+    
+    o plot.leverage.ppm
+    A contour line showing the average value of leverage
+    is now drawn on the colour ribbon, as well as on the main image.
+    New argument 'args.contour'.
+    
+BUG FIXES
+
+    o lohboot
+    Implementation was completely incorrect.
+    [Spotted and fixed by Christophe Biscio and Rasmus Waagepetersen.]
+    Fixed.
+    
+    o update.ppm
+    Did not always work correctly with formulae that included 'polynom()' terms.
+    Fixed.
+
+        CHANGES IN spatstat VERSION 1.53-1
+
+OVERVIEW
+
+    o We thank Suman Rakshit for contributions.
+    
+    o Bug fix in plot.linim
+
+    o Nickname: "Drongo"
+
+BUG FIXES
+
+    o plot.linim
+    Colour map was mangled if log=TRUE.
+    Fixed.
+    
+        CHANGES IN spatstat VERSION 1.53-0
+
+OVERVIEW
+
+    o We thank Tilman Davies and Mehdi Moradi for contributions.
+
+    o Numerous bug fixes for linear networks code.
+
+    o spatstat now requires the sub-package 'spatstat.data'
+    which contains the datasets.
+    
+    o Minor enhancements and bug fixes.
+
+    o Nickname: "Tinfoil Hat"
+
+NEW FUNCTIONS
+
+    o "[<-.linim"
+    Subset assignment method for pixel images on a linear network.
+
+    o nnfromvertex
+    Given a point pattern on a linear network,
+    find the nearest data point from each vertex of the network.
+    
+    o tile.lengths
+    Calculate the length of each tile in a tessellation on a network.
+
+    o text.ppp, text.lpp, text.psp
+    Methods for 'text' for spatial patterns.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o datasets
+    All datasets installed in 'spatstat' have now been moved
+    into the sub-package 'spatstat.data'. This should not have any effect
+    on normal use. The 'spatstat.data' package is automatically loaded
+    when spatstat is loaded, and the datasets are lazy-loaded so that
+    they are available in the usual way. To list all datasets you now need
+    to type 'data(package="spatstat.data")'
+    
+    o nbfires
+    This dataset now includes information about the different 
+    land and sea borders of New Brunswick.
+
+    o rhohat
+    New argument 'subset' allows computation for a subset of the data.
+
+    o predict.lppm
+    Argument 'locations' can now be an 'lpp' object.
+
+    o ewcdf
+    Argument 'weights' can now be NULL.
+
+    o plot.msr
+    New arguments 'equal.markscale' and 'equal.ribbon'.
+
+    o plot.im
+    The number of tick marks in the colour ribbon can now be controlled
+    using the argument 'nint' in 'ribargs'.
+
+    o plot.symbolmap
+    New argument 'nsymbols' controls the number of symbols plotted.
+
+    o square
+    Handles a common error in the format of the arguments.
+
+    o [.linim
+    More robust against artefacts.
+    
+    o [.linnet
+    More robust against artefacts when the subset index is a pixel mask.
+
+    o linim
+    The image Z is now automatically restricted to the network.
+    New argument 'restrict'.
+
+    o plot.linim
+    When style="width", negative values are plotted in red (by default).
+    New argument 'negative.args' controls this.
+
+    o plot.linim
+    New argument 'zlim' specifies the range of values to be mapped.
+
+    o Summary.linim
+    Recognises the argument 'finite' so that range(x, finite=TRUE)
+    works for a linim object x.
+    
+    o identify.psp
+    Improved placement of labels.
+    Arguments can be passed to text.default to control the plotting of labels.
+    
+    o as.polygonal
+    Accelerated when w is a pixel mask.
+
+    o density.lpp
+    Accelerated in the default case.
+    
+    o Kinhom
+    Stops gracefully if 'lambda' contains any zero values.
+    
+    o print.linim
+    Prints more information.
+
+BUG FIXES
+
+    o with.msr
+    The value of 'atommass' was incorrect, due to a coding error.
+    Fixed.
+
+    o [.linim
+    Internal data was sometimes corrupted.
+    Fixed.
+    
+    o as.linim
+    The result had incorrect internal format when Window(X) was a mask
+    and one of the arguments 'eps', 'dimyx', 'xy' was present.
+    Fixed.
+
+    o as.im.im
+    If W was a rectangle or polygonal window, the pixel resolution of the 
+    result was determined by the spatstat defaults, rather than being
+    determined by the image argument X. This was contrary to the
+    rule advertised in help(as.im). 
+    Fixed.
+
+    o density.lpp
+    In the 'slow' case (kernel not Gaussian, or continuous=FALSE),
+    occasionally a pixel could incorrectly be assigned the value 1.
+    [Spotted by Mehdi Moradi.]
+    Fixed.
+    
+    o "[.solist"
+    Ignored the "..." arguments in some cases.
+    Fixed.
+
+    o density.lpp
+    Ignored the resolution arguments 'eps', 'dimyx' in the default case.
+    Fixed.
+
+    o plot.msr
+    Plotted the panel titles on top of each other, if how="contour".
+    Fixed.
+    
+    o contour.im
+    Plotted the title text at the wrong place when add=TRUE and show.all=TRUE.
+    Fixed.
+    
+    o predict.lppm
+    Crashed if 'locations' was an 'lpp' object.
+    Fixed.
+
+    o plot.ppp
+    Crashed if the window had height 0 and width 0
+    and the pattern had several columns of marks.
+    Fixed.
+    
+    o plot.solist
+    Crashed if all panels had windows of height 0 and width 0.
+    Fixed.
+
+    o linearK, linearKinhom, linearpcf, linearpcfinhom
+    Crashed if the linear network was disconnected and one component
+    of the network contained fewer than 2 points.
+    Fixed.
+
+    o integral.linim
+    Crashed in some cases.
+    Fixed.
+    
+    o "[.linim"
+    Crashed in some cases.
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.52-1
 
 OVERVIEW

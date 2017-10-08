@@ -10,7 +10,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:41-70
+### code chunk number 2: updates.Rnw:41-72
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -34,8 +34,10 @@ mergeSizeTables <- function(a, b) {
 }
 z <- getSizeTable()
 zutils <- getSizeTable("spatstat.utils")
+zdata <- getSizeTable("spatstat.data")
 zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 z <- mergeSizeTables(z, zutils)
+z <- mergeSizeTables(z, zdata)
 z <- mergeSizeTables(z, zlocal)
 #
 changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
@@ -44,7 +46,7 @@ newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:80-85
+### code chunk number 3: updates.Rnw:82-87
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -54,7 +56,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:91-96
+### code chunk number 4: updates.Rnw:93-98
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -65,7 +67,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:1789-1793
+### code chunk number 5: updates.Rnw:1906-1910
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -74,7 +76,7 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:1799-1800 (eval = FALSE)
+### code chunk number 6: updates.Rnw:1916-1917 (eval = FALSE)
 ###################################################
 ## news(grepl("^BUG", Category), package="spatstat")
 

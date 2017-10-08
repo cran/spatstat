@@ -8,7 +8,9 @@
 \usage{
   lohboot(X,
           fun=c("pcf", "Kest", "Lest", "pcfinhom", "Kinhom", "Linhom"),
-          \dots, nsim=200, confidence=0.95, global=FALSE, type=7)
+          \dots,
+           block=FALSE, global=FALSE, basicboot=FALSE, Vcorrection=FALSE,
+           confidence=0.95, nx = 4, ny = nx, nsim=200, type=7) 
 }
 \arguments{
   \item{X}{
@@ -25,22 +27,41 @@
     Arguments passed to the corresponding local version of the summary
     function (see Details).
   }
-  \item{nsim}{
-    Number of bootstrap simulations.
-  }
-  \item{confidence}{
-    Confidence level, as a fraction between 0 and 1.
+  \item{block}{
+    Logical value indicating whether to use Loh's block bootstrap
+    as originally proposed. Default is \code{FALSE} for consistency
+    with older code. See Details.
   }
   \item{global}{
     Logical. If \code{FALSE} (the default), pointwise confidence intervals
     are constructed. If \code{TRUE}, a global (simultaneous) confidence band is
     constructed.
   }
+  \item{basicboot}{
+    Logical value indicating whether to use the so-called basic
+    bootstrap confidence interval. See Details.
+  }
+  \item{Vcorrection}{
+    Logical value indicating whether to use a variance correction
+    when \code{fun="Kest"} or \code{fun="Kinhom"}.
+    See Details.
+  }
+  \item{confidence}{
+    Confidence level, as a fraction between 0 and 1.
+  }
+  \item{nx,ny}{
+    Integers.
+    If \code{block=TRUE}, divide the window into \code{nx*ny} rectangles.
+  }
+  \item{nsim}{
+    Number of bootstrap simulations.
+  }
   \item{type}{
-    Integer. Argument passed to \code{\link[stats]{quantile}}
+    Integer. Type of quantiles.
+    Argument passed to \code{\link[stats]{quantile.default}}
     controlling the way the quantiles are calculated.
   }
-} 
+}
 \value{
   A function value table
   (object of class \code{"fv"})
@@ -51,7 +72,8 @@
 \details{
   This algorithm computes 
   confidence bands for the true value of the summary function
-  \code{fun} using the bootstrap method of Loh (2008).
+  \code{fun} using the bootstrap method of Loh (2008)
+  and a modification described in Baddeley, Rubak, Turner (2015).
 
   If \code{fun="pcf"}, for example, the algorithm computes a pointwise
   \code{(100 * confidence)}\% confidence interval for the true value of
@@ -62,14 +84,43 @@
   \code{\link{localpcf}}, of the data pattern \code{X}.
   This array consists of the contributions to the estimate of the
   pair correlation function from each
-  data point. Then these contributions are resampled \code{nsim} times
-  with replacement; from each resampled dataset the total contribution
+  data point. 
+  
+  If  \code{block=FALSE}, these contributions are resampled \code{nsim} times
+  with replacement as described in Baddeley, Rubak, Turner (2015);
+  from each resampled dataset the total contribution
   is computed, yielding \code{nsim} random pair correlation functions.
+  
+  If \code{block=TRUE}, the (bounding box of the) window is divided
+  into \eqn{nx * ny} rectangles (blocks).
+  The average contribution of a block
+  is obtained by averaging the contribution of each point included in the block.
+  Then, the average contributions on each block are resampled \code{nsim} times
+  with replacement as described in Loh (2008) and Loh (2010);
+  from each resampled dataset the total contribution
+  is computed, yielding \code{nsim} random pair correlation functions.
+  Notice that for non-rectangular windows any blocks not fully contained in the
+  window are discarded before doing the resampling, so the effective number of
+  blocks may be substantially smaller than \eqn{nx * ny} in this case.
+  
   The pointwise \code{alpha/2} and \code{1 - alpha/2} quantiles of
   these functions are computed, where \code{alpha = 1 - confidence}.
   The average of the local functions is also computed as an estimate
   of the pair correlation function.
 
+  There are several ways to define a bootstrap confidence interval. 
+  If \code{basicbootstrap=TRUE},
+  the so-called basic confidence bootstrap interval
+  is used as described in Loh (2008).
+
+  It has been noticed in Loh (2010) that
+  when the intensity of the point process is unknown, 
+  the bootstrap error estimate is larger than it should be.
+  When the \eqn{K} function is used, 
+  an adjustment procedure has been proposed in Loh (2010)
+  that is used if \code{Vcorrection=TRUE}.
+  In this case, the basic confidence bootstrap interval is implicitly used. 
+  
   To control the estimation algorithm, use the 
   arguments \code{\dots}, which are passed to the local version
   of the summary function, as shown below:
@@ -108,9 +159,17 @@
   An alternative to \code{lohboot} is \code{\link{varblock}}.
 }
 \references{
+  Baddeley, A., Rubak, E. and Turner, R. (2015)
+  \emph{Spatial Point Patterns: Methodology and Applications with R}.
+  Chapman and Hall/CRC Press.
+
   Loh, J.M. (2008)
   A valid and fast spatial bootstrap for correlation functions.
   \emph{The Astrophysical Journal}, \bold{681}, 726--734.
+  
+  Loh, J.M. (2010)
+  Bootstrapping an inhomogeneous point process.
+  \emph{Journal of Statistical Planning and Inference}, \bold{140}, 734--749.
 }
 \seealso{
   Summary functions
@@ -129,11 +188,9 @@
   p <- lohboot(simdat, stoyan=0.5)
   plot(p)
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \spatstatAuthors
+  and Christophe Biscio.
 }
 \keyword{spatial}
 \keyword{nonparametric}
