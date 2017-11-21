@@ -2,7 +2,7 @@
 #
 #    strausshard.S
 #
-#    $Revision: 2.22 $	$Date: 2016/02/16 01:39:12 $
+#    $Revision: 2.25 $	$Date: 2017/11/19 10:18:52 $
 #
 #    The Strauss/hard core process
 #
@@ -20,9 +20,13 @@ StraussHard <- local({
          name   = "Strauss - hard core process",
          creator = "StraussHard",
          family  = "pairwise.family",  # evaluated later
-         pot    = function(d, par) {
-           v <- 1 * (d <= par$r)
-           v[ d <= par$hc ] <-  (-Inf)
+         pot    = function(d, par, finite=FALSE) {
+           v <- (d <= par$r)
+           if(!finite) {
+             v[ d <= par$hc ] <-  (-Inf)
+           } else {
+             attr(v, "-Inf") <- (d <= par$hc)
+           }
            v
          },
          par    = list(r = NULL, hc = NULL), # filled in later
@@ -121,8 +125,39 @@ StraussHard <- local({
          r <- self$par$r
          hc <- self$par$hc
          return(pi * (hc^2 + (1-gamma) * (r^2 - hc^2)))
+       },
+       delta2 = function(X, inte, correction, ..., sparseOK=FALSE) {
+         r  <- inte$par$r
+         hc <- inte$par$hc
+         #' positive part
+         U <- as.ppp(X)
+         nU <- npoints(U)
+         cl <- weightedclosepairs(U, r, correction)
+         if(is.null(cl))
+           return(NULL)
+         v <- sparseMatrix(i=cl$i, j=cl$j, x=cl$weight,
+                           dims=c(nU, nU))
+         if(!sparseOK)
+           v <- as.matrix(v)
+         #' hard core part
+         hcl <- if(is.ppp(X)) {
+                  closepairs(X, hc, what="indices")
+                } else if(inherits(X, "quad")) {
+                  #' only data points enforce hard core
+                  crosspairquad(X, hc, what="indices")
+                } else stop("X should be a ppp or quad object")
+         nhit <- as.integer(table(factor(hcl$j, levels=seq_len(nU))))
+         changes <- (nhit == 1)
+         if(any(changes)) {
+           vh <- sparseMatrix(i=hcl$i, j=hcl$j, x=changes[hcl$j],
+                              dims=c(nU, nU))
+           if(!sparseOK)
+             vh <- as.matrix(vh)
+           attr(v, "-Inf") <- vh
+         }
+         return(v)
        }
-         )
+    )
   class(BlankStraussHard) <- "interact"
   
   StraussHard <- function(r, hc=NA) {

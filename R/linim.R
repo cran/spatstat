@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.45 $   $Date: 2017/09/27 09:31:17 $
+#  $Revision: 1.48 $   $Date: 2017/11/13 14:13:11 $
 #
 #  Image/function on a linear network
 #
@@ -15,12 +15,17 @@ linim <- function(L, Z, ..., restrict=TRUE, df=NULL) {
     stopifnot(is.data.frame(df))
     neednames <- c("xc", "yc", "x", "y", "mapXY", "tp", "values")
     ok <- neednames %in% names(df)
-    if(any(!ok)) {
-      nn <- sum(!ok)
-      stop(paste(ngettext(nn, "A column", "Columns"),
-                 "named", commasep(sQuote(neednames[!ok])),
-                 ngettext(nn, "is", "are"),
-                 "missing from argument", sQuote("df")))
+    dfcomplete <- all(ok)
+    if(!dfcomplete) {
+      #' omission of "values" column is permissible, but not other columns
+      mapnames <- setdiff(neednames, "values")
+      if(!all(mapnames %in% names(df))) {
+        nn <- sum(!ok)
+        stop(paste(ngettext(nn, "A column", "Columns"),
+                   "named", commasep(sQuote(neednames[!ok])),
+                   ngettext(nn, "is", "are"),
+                   "missing from argument", sQuote("df")))
+      }
     }
   }
   if(restrict) {
@@ -51,6 +56,10 @@ linim <- function(L, Z, ..., restrict=TRUE, df=NULL) {
     values <- Z[pixelcentres]
     # bundle
     df <- cbind(pixdf, projloc, projmap, data.frame(values=values))
+  } else if(!dfcomplete) {
+    #' look up values
+    pixelcentres <- ppp(df$xc, df$yc, window=as.rectangle(Z), check=FALSE)
+    df$values <- safelookup(Z, pixelcentres)
   }
   out <- Z
   attr(out, "L") <- L
@@ -625,19 +634,26 @@ integral.linim <- function(f, domain=NULL, ...){
   if(any(missed <- (nper == 0))) {
     missed <- unname(which(missed))
     mp <- midpoints.psp(as.psp(L)[missed])
-    mp <- lpp(data.frame(x=mp$x, y=mp$y, seg=missed, tp=0.5), L=L)
-    valmid <- f[mp, drop=FALSE]
-    seg <- c(seg, factor(missed, levels=1:ns))
+    #' nearest pixel value
+    valmid <- safelookup(f, mp)
+    #' concatenate factors
+    seg <- unlist(list(seg, factor(missed, levels=1:ns)))
     vals <- c(vals, valmid)
+    #' update
+    nper <- table(seg)
   }
   #' take average of data on each segment
-  mu <- as.numeric(by(vals, seg, mean, ..., na.rm=TRUE))
-  mu[is.na(mu)] <- 0
+  ##  mu <- as.numeric(by(vals, seg, mean, ..., na.rm=TRUE))
+  ## mu[is.na(mu)] <- 0
+  num <- tapplysum(vals, list(seg), na.rm=TRUE)
+  mu <- num/nper
   #' weighted sum
   len <- lengths.psp(as.psp(L))
   if(anyNA(vals)) {
-    p <- as.numeric(by(!is.na(vals), seg, mean, ..., na.rm=TRUE))
-    p[is.na(p)] <- 0
+    ##    p <- as.numeric(by(!is.na(vals), seg, mean, ..., na.rm=TRUE))
+    ##    p[is.na(p)] <- 0
+    pnum <- tapplysum(!is.na(vals), list(seg), na.rm=FALSE)
+    p <- pnum/nper
     len <- len * p
   }
   return(sum(mu * len))

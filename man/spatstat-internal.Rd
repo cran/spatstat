@@ -23,10 +23,11 @@
 \alias{areaGain.grid}       
 \alias{areaLoss.diri}       
 \alias{areaLoss.grid}
+\alias{areaLoss.poly}
 \alias{assemble.plot.objects}       
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
-\alias{as.character.units}
+\alias{as.character.unitname}
 \alias{as.data.frame.bw.optim}
 \alias{as.data.frame.fv}
 \alias{as.double.im}
@@ -34,7 +35,7 @@
 \alias{as.list.hyperframe}
 \alias{as.listof}
 \alias{as.owin.lintess}
-\alias{as.units}
+\alias{as.unitname}
 \alias{augment.msr}
 \alias{BartCalc}
 \alias{bbEngine}
@@ -82,8 +83,6 @@
 \alias{cobble.xy}
 \alias{codetime}
 \alias{col.args.to.grey}
-\alias{colouroutputs}
-\alias{colouroutputs<-}
 \alias{commonPolyclipArgs}
 \alias{conform.imagelist}
 \alias{countingweights}
@@ -181,6 +180,7 @@
 \alias{fvlabels<-}
 \alias{fvlabelmap}
 \alias{fvlegend}
+\alias{gammabreaks}
 \alias{g3engine}
 \alias{g3Cengine}
 \alias{getdataname}
@@ -255,6 +255,7 @@
 \alias{is.scov}
 \alias{is.sob}
 \alias{is.tess}
+\alias{is.vanilla}
 \alias{k3engine}
 \alias{Kborder.engine}
 \alias{Knone.engine}
@@ -296,6 +297,7 @@
 \alias{match2DkernelName}
 \alias{parbreak}
 \alias{plan.legend.layout}
+\alias{PairPotentialType}
 \alias{PDEdensityLPP}
 \alias{PoisSaddle}
 \alias{PoisSaddleArea}
@@ -311,7 +313,7 @@
 \alias{majorminorversion}
 \alias{make.even.breaks}
 \alias{makefvlabel}
-\alias{makeunits}
+\alias{makeunitname}
 \alias{markappend}
 \alias{markcbind}
 \alias{markformat}
@@ -481,7 +483,7 @@
 \alias{print.summary.solist}
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
-\alias{print.summary.units}
+\alias{print.summary.unitname}
 \alias{print.symbolmap}       
 \alias{print.textstring}
 \alias{print.texturemap}
@@ -495,6 +497,7 @@
 \alias{quad.mppm}
 \alias{quadBlockSizes}
 \alias{RandomFieldsSafe}
+\alias{rasterfilter}
 \alias{ratfv}
 \alias{recognise.spatstat.type}
 \alias{rectquadrat.breaks}
@@ -596,7 +599,8 @@
 \alias{slrAssemblePixelData}
 \alias{Smooth.solist}
 \alias{smoothcrossEngine}              
-\alias{smoothpointsEngine}              
+\alias{smoothpointsEngine}
+\alias{smudge}
 \alias{sort.im}
 \alias{sortalongsegment}
 \alias{spatstat.xy.coords}
@@ -675,6 +679,7 @@
 \alias{Window<-.lpp}
 \alias{warn.once}
 \alias{waxlyrical}
+\alias{weightedclosepairs}
 \alias{windows.mppm}
 \alias{w.quad}               
 \alias{x.quad}
@@ -758,10 +763,11 @@ areaLoss.grid(X, r, \dots, W, subset,
                          method = c("count", "distmap"),
                          ngrid = spatstat.options("ngrid.disc"),
                          exact = FALSE)
+areaLoss.poly(X, r, \dots, W, subset, splitem)
 assemble.plot.objects(xlim, ylim, \dots, lines, polygon)
 AsymmDistance.psp(X, Y, metric, method)
 as.breakpts(\dots)
-\method{as.character}{units}(x, \dots)
+\method{as.character}{unitname}(x, \dots)
 \method{as.data.frame}{bw.optim}(x, \dots)
 \method{as.data.frame}{fv}(x, \dots)
 \method{as.double}{im}(x, \dots)
@@ -769,7 +775,7 @@ as.breakpts(\dots)
 \method{as.list}{hyperframe}(x, \dots)
 as.listof(x)
 \method{as.owin}{lintess}(W, \dots)
-as.units(s)
+as.unitname(s)
 augment.msr(x, \dots, sigma)
 BartCalc(fY, fK)
 bbEngine(\dots)
@@ -821,8 +827,6 @@ crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms, what)
 col.args.to.grey(x, \dots)
-colouroutputs(x)
-colouroutputs(x) <- value
 commonPolyclipArgs(\dots, p)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
@@ -916,7 +920,7 @@ evalCovariate(covariate, locations)
 evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
 evalInterEngine(X,P,E,interaction,correction,\dots,
                 Reach,precomputed,savecomputed)
-evalPairPotential(X,P,E,pairpot,potpars,R)
+evalPairPotential(X,P,E,pairpot,potpars,R,finite)
 evalSparse3Dentrywise(expr, envir)
 evaluate2Dkernel(kernel, x, y, sigma, varcov, \dots, scalekernel)
 even.breaks.owin(w)
@@ -953,6 +957,7 @@ fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
 fvlabelmap(x, dot=TRUE)
 fvlegend(object, elang)
+gammabreaks(ra, n, gamma)
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
 getdataname(defaultvalue, \dots, dataname)
@@ -1030,6 +1035,7 @@ is.psp(x)
 is.scov(x)
 is.sob(x)
 is.tess(x)
+is.vanilla(u)
 k3engine(x, y, z, box, rmax, nrval, correction)
 Kborder.engine(X, rmax, nr, correction, weights, ratio)
 Knone.engine(X, rmax, nr, weights, ratio)
@@ -1085,6 +1091,7 @@ match2DkernelName(kernel)
 parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
+PairPotentialType(pairpot)
 PDEdensityLPP(x, sigma, \dots, weights, dx, dt,
               fun, finespacing, finedata)
 PoisSaddle(beta, fi)
@@ -1092,7 +1099,7 @@ PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
 PoisSaddlePairwise(beta, fi)
 polyLaslett(X, \dots, oldX, verbose, plotit)
-polytileareaEngine(P, xrange, yrange, nx, ny)
+polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 positiveIndex(i, nama, len)
 PPMmodelmatrix(object, data, \dots, Q, keepNA, irregular)
 \method{print}{localpcfmatrix}(x, \dots)
@@ -1105,7 +1112,7 @@ lookup2DkernelInfo(kernel)
 majorminorversion(v)
 make.even.breaks(bmax, npos, bstep)
 makefvlabel(op, accent, fname, sub, argname)
-makeunits(sing, plur, mul)
+makeunitname(sing, plur, mul)
 markappend(\dots)
 markcbind(\dots)
 markformat(x)
@@ -1148,7 +1155,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             subsetexpr,
             covfunargs, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix, warn.illegal, warn.unidentifiable,
-            weightfactor, skip.border)
+            weightfactor, skip.border, clip.interaction)
 mpl.usable(x)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook, asymmok)
 multiplicityNumeric(x)
@@ -1236,7 +1243,7 @@ ppllengine(X, Y, action="project", check=FALSE)
 ppmCovariates(model)
 ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
-              drop, method, precomputed, sparseOK,
+              drop, method, fine, precomputed, sparseOK,
               fitname, multitypeOK, entrywise, matrix.action,
               geomsmooth)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
@@ -1319,7 +1326,7 @@ prepareTitle(main)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
-\method{print}{summary.units}(x, \dots)
+\method{print}{summary.unitname}(x, \dots)
 \method{print}{symbolmap}(x, \dots)
 \method{print}{textstring}(x, \dots)
 \method{print}{texturemap}(x, \dots)
@@ -1333,6 +1340,7 @@ quad(data, dummy, w, param)
 quad.mppm(x)
 quadBlockSizes(nX, nD, p, nMAX, announce)
 RandomFieldsSafe()
+rasterfilter(X, f)
 ratfv(df, numer, denom, \dots, ratio)
 recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
@@ -1458,6 +1466,7 @@ smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
                     weights, varcov, sorted)
 smoothpointsEngine(x, values, sigma, \dots,
                     weights, varcov, leaveoneout, sorted, cutoff)
+smudge(X)
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
 spatstat.xy.coords(x, y)
@@ -1540,6 +1549,7 @@ vnnFind(seg, tp, ns, nv, from, to, seglen, huge, tol, kmax)
 \method{Window}{lpp}(X, \dots, check=TRUE) <- value
 warn.once(key, \dots)
 waxlyrical(type, terse)
+weightedclosepairs(X, r, correction)
 windows.mppm(x)
 w.quad(Q)               
 x.quad(Q)

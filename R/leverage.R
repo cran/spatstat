@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.82 $ $Date: 2017/10/03 02:04:21 $
+#  $Revision: 1.87 $ $Date: 2017/11/20 00:57:34 $
 #
 
 leverage <- function(model, ...) {
@@ -80,6 +80,7 @@ ppmInfluenceEngine <- function(fit,
                          iScore=NULL, iHessian=NULL, iArgs=NULL,
                          drop=FALSE,
                          method=c("C", "interpreted"),
+                         fine=FALSE,
                          precomputed=list(),
                          sparseOK=TRUE,
                          fitname=NULL,
@@ -122,8 +123,13 @@ ppmInfluenceEngine <- function(fit,
   isdata <- is.data(Q)
   if(length(w) != length(lam))
     stop(paste("Internal error: length(w) = ", length(w),
-               "!=", length(lam), "= length(lam)"))
-	       
+               "!=", length(lam), "= length(lam)"),
+         call.=FALSE)
+
+  ## domain of composite likelihood
+  ## (e.g. eroded window in border correction)
+  inside <- getglmsubset(fit) %orifnull% rep(TRUE, npoints(loc))
+  
   ## extract negative Hessian matrix of regular part of log composite likelihood
   ##  hess = negative Hessian H
   ##  fgrad = Fisher-scoring-like gradient G = estimate of E[H]
@@ -131,7 +137,7 @@ ppmInfluenceEngine <- function(fit,
     ## Intensity of dummy points
     rho <- fit$Q$param$rho %orifnull% intensity(as.ppp(fit$Q))
     logiprob <- lam / (lam + rho)
-    vclist <- vcov(fit, what = "internals", matrix.action="silent")
+    vclist <- vcov(fit, what = "internals", fine=fine, matrix.action="silent")
     hess <- vclist$Slog
     fgrad <- vclist$fisher
     invhess <- if(is.null(hess)) NULL else checksolve(hess, "silent")
@@ -148,9 +154,9 @@ ppmInfluenceEngine <- function(fit,
     }
 #    vc <- invhess %*% (vclist$Sigma1log+vclist$Sigma2log) %*% invhess
   } else {
-    invfgrad <- vcov(fit, hessian=TRUE, matrix.action="silent")
+    invfgrad <- vcov(fit, hessian=TRUE, fine=fine, matrix.action="silent")
     fgrad <- hess <-
-      if(is.null(invfgrad)) NULL else checksolve(invfgrad, "silent")
+      if(is.null(invfgrad) || anyNA(invfgrad)) NULL else checksolve(invfgrad, "silent")
     if(is.null(fgrad)) {
       invfgrad <- vcov(fit, hessian=TRUE, fine=TRUE,
                        matrix.action=matrix.action)
@@ -311,13 +317,15 @@ ppmInfluenceEngine <- function(fit,
       lam <- lam[ok]
       w   <- w[ok]
       isdata <- isdata[ok]
+      inside <- inside[ok]
     }
   } 
 
   # ........  start assembling results .....................
   # 
   ## start building result
-  result <- list(fitname=fitname, fit.is.poisson=is.poisson(fit))
+  fit.is.poisson <- is.poisson(fit)
+  result <- list(fitname=fitname, fit.is.poisson=fit.is.poisson)
   class(result) <- "ppmInfluence"
 
   if(any(c("score", "derivatives") %in% what)) {
@@ -335,19 +343,29 @@ ppmInfluenceEngine <- function(fit,
     if(all(what %in% c("score", "derivatives")))
       return(result)
   }
-    
-  # compute effect of adding/deleting each quadrature point
-  #    columns index the point being added/deleted
-  #    rows index the points affected
-  #  ........ Poisson case ..................................
-  eff <- mom
-  # ........  Gibbs case ....................................
-  ## second order interaction terms
-  ddS <- ddSintegrand <- NULL
-  if(!is.poisson(fit)) {
+
+  ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ## NOTE: set model matrix to zero outside the domain
+  mom[!inside, ] <- 0
+  ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  
+  ## compute effect of adding/deleting each quadrature point
+  if(fit.is.poisson) {
+    ##  ........ Poisson case ..................................
+    eff <- mom
+    ddS <- ddSintegrand <- NULL
+  } else {
+    ## ........  Gibbs case ....................................
+    ## initialise
+    eff <- mom
+    ## second order interaction terms
+    ##    columns index the point being added/deleted
+    ##    rows index the points affected
     ## goal is to compute these effect matrices:
     eff.data <- eff.back  <- matrix(0, nrow(eff), ncol(eff),
                                     dimnames=dimnames(eff))
+    ## 
     U <- union.quad(Q)
     nU <- npoints(U)
     zerocif <- (lam == 0)
@@ -389,6 +407,8 @@ ppmInfluenceEngine <- function(fit,
         anyzerocifB <- any(zerocifB)
         momB <- mom[requested, , drop=FALSE]
         lamB <- lam[requested]
+        #' unused:
+        #'     insideB <- inside[requested]
         if(logi) logiprobB <- logiprob[requested]
         wB <- w[requested]
         currentB <- seq_along(current)
@@ -399,6 +419,8 @@ ppmInfluenceEngine <- function(fit,
         anyzerocifB <- anyzerocif
         momB <- mom
         lamB <- lam
+        #'  unused:
+        #'     insideB <- inside
         if(logi) logiprobB <- logiprob
         wB <- w
       }
@@ -526,7 +548,8 @@ ppmInfluenceEngine <- function(fit,
             mombefore <- mapSparseEntries(ddS, 1, momB, conform=TRUE, across=3)
             momchange <- ddS
             momchange[ , isdataB, ] <- - momchange[, isdataB, ]
-            momafter <- evalSparse3Dentrywise(mombefore + momchange)
+            ##            momafter <- evalSparse3Dentrywise(mombefore + momchange)
+            momafter <- mombefore + momchange
             ## lamarray[i,j,k] <- lam[i]
             lamarray <- mapSparseEntries(ddS, 1, lamB, conform=TRUE, across=3)
             if(gotScore){
@@ -536,7 +559,8 @@ ppmInfluenceEngine <- function(fit,
               lamratiominus1 <- expm1(tenseur(momchange,theta, 3, 1))
             }
             lamratiominus1 <- expandSparse(lamratiominus1, n = dim(ddS)[3], across = 3)
-            ddSintegrand <- evalSparse3Dentrywise(lamarray * (momafter* lamratiominus1 + momchange))
+            ##            ddSintegrand <- evalSparse3Dentrywise(lamarray * (momafter* lamratiominus1 + momchange))
+            ddSintegrand <- lamarray * (momafter* lamratiominus1 + momchange)
           }
           rm(lamratiominus1, lamarray, momafter)
         }
@@ -560,7 +584,7 @@ ppmInfluenceEngine <- function(fit,
         eff.back[current,] <- as.matrix(eff.back.B[currentB, , drop=FALSE])
       }
     }
-    
+
     ## total
     eff <- eff + eff.data - eff.back
     eff <- as.matrix(eff)
@@ -619,9 +643,14 @@ ppmInfluenceEngine <- function(fit,
   }
   # .......... influence .............
   if("influence" %in% what) {
+    if(!fit.is.poisson && anyzerocif) 
+      warn.once("influence.hard",
+                "influence calculation is slightly incorrect",
+                "when the model has a hard core;",
+                "this is a known bug")
     if(logi){
       X <- loc
-      effX <- as.numeric(isdata) * eff - mom * logiprob
+      effX <- as.numeric(isdata) * eff - mom * (inside * logiprob)
     } else{
       # values of influence at data points
       X <- loc[isdata]
@@ -639,8 +668,13 @@ ppmInfluenceEngine <- function(fit,
   }
   # .......... dfbetas .............
   if("dfbetas" %in% what) {
+    if(!fit.is.poisson && anyzerocif) 
+      warn.once("dfbeta.hard",
+                "dfbetas calculation is slightly incorrect",
+                "when the model has a hard core;",
+                "this is a known bug")
     if(logi){
-      M <- as.numeric(isdata) * eff - mom * logiprob
+      M <- as.numeric(isdata) * eff - mom * (inside * logiprob)
       M <- t(invhess %*% t(M))
       Mdum <- M
       Mdum[isdata,] <- 0
@@ -656,14 +690,14 @@ ppmInfluenceEngine <- function(fit,
                  vexi <- vex[,i, drop=FALSE]
                  dexi <- dex[,i, drop=FALSE]
                  dis[i, ] <- if(isdata[i]) dexi else 0
-                 con[i, ] <- - lam[i] * vexi
+                 con[i, ] <- if(inside[i]) (- lam[i] * vexi) else 0
                }
              },
              C = {
                dis <- t(dex)
                dis[!isdata,] <- 0
                con <- - lam * t(vex)
-               con[lam == 0,] <- 0
+               con[(lam == 0 | !inside), ] <- 0
              })
       colnames(dis) <- colnames(con) <- colnames(mom)
       # result is a vector valued measure

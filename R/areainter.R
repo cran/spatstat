@@ -2,7 +2,7 @@
 #
 #    areainter.R
 #
-#    $Revision: 1.44 $	$Date: 2017/06/05 10:31:58 $
+#    $Revision: 1.47 $	$Date: 2017/11/03 08:17:58 $
 #
 #    The area interaction
 #
@@ -15,10 +15,13 @@
 
 AreaInter <- local({
 
-  # area-interaction conditional intensity potential
-  #     corresponds to potential -C(x) = n(x) - A(x)/\pi r^2
+  #' area-interaction conditional intensity potential
+  #'     corresponds to potential -C(x) = n(x) - A(x)/\pi r^2
+
   areapot <- 
     function(X,U,EqualPairs,pars,correction, ..., W=as.owin(X)) {
+      #' W is the window to which computations of area will be clipped.
+      #' W=NULL is permissible, meaning no clipping.
       uhoh <- !(correction %in% c("border", "none"))
       if(any(uhoh)) {
         nuh <- sum(uhoh)
@@ -30,14 +33,30 @@ AreaInter <- local({
       }
       r <- pars$r
       if(is.null(r)) stop("internal error: r parameter not found")
+      #'
+      if(Poly <- spatstat.options('areainter.polygonal')) {
+        if(is.mask(W)) W <- as.polygonal(W)
+        if(is.mask(Window(X))) Window(X) <- as.polygonal(Window(X))
+        if(is.mask(Window(U))) Window(U) <- as.polygonal(Window(U))
+      }
       n <- U$n
       areas <- numeric(n)
-      dummies <- !(seq_len(n) %in% EqualPairs[,2L])
-      if(sum(dummies) > 0)
-        areas[dummies] <- areaGain(U[dummies], X, r, W=W)
+      #' dummy points
+      dummies <- setdiff(seq_len(n), EqualPairs[,2L])
+      if(length(dummies)) 
+        areas[dummies] <- areaGain(U[dummies], X, r, W=W, exact=Poly)
+      #' data points represented in U
       ii <- EqualPairs[,1L]
       jj <- EqualPairs[,2L]
-      areas[jj] <- areaLoss(X, r, subset=ii, W=W)
+      inborder <- (bdist.points(X[ii]) <= r) # sic
+      #' points in border region need clipping
+      if(any(inborder))
+        areas[jj[inborder]] <- areaLoss(X, r, subset=ii[inborder], exact=Poly)
+      #' points in eroded region do not necessarily
+      if(any(ineroded <- !inborder)) {
+        areas[jj[ineroded]] <-
+          areaLoss(X, r, subset=ii[ineroded], W=W, exact=Poly)
+      }
       return(1 - areas/(pi * r^2))
     }
 

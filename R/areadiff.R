@@ -1,7 +1,7 @@
 #
 # areadiff.R
 #
-#  $Revision: 1.33 $  $Date: 2017/06/05 10:31:58 $
+#  $Revision: 1.36 $  $Date: 2017/11/03 08:10:56 $
 #
 # Computes sufficient statistic for area-interaction process
 #
@@ -25,10 +25,74 @@ areaGain <- function(u, X, r, ..., W=as.owin(X), exact=FALSE,
   if(exact)
     areaGain.diri(u, X, r, ..., W=W)
   else
-    areaGain.grid(u, X, r, W=W, ngrid=ngrid)
+    areaGain.grid(u, X, r, W=W, ..., ngrid=ngrid)
 }
 
+#////////////////////////////////////////////////////////////
+#    algorithms using polygon geometry
+#///////////////////////////////////////////////////////////
 
+areaLoss.poly <- local({
+
+  areaLoss.poly <- function(X, r, ..., W=as.owin(X), subset=NULL,
+                            splitem=TRUE) {
+    check.1.real(r)
+    nX <- npoints(X)
+    if(r <= 0 || nX == 0) return(numeric(nX))
+    cooX <- coords(X)
+    if(useW <- is.owin(W))
+      W <- as.polygonal(W)
+    #' initialise result
+    result <- rep(pi * r^2, nX)
+    wanted <- 1:nX
+    if(!is.null(subset))
+      wanted <- wanted[subset]
+    #' split into connected components
+    if(splitem) {
+      Y <- connected(X, 2 * r)
+      Z <- split(Y)
+      V <- lapply(Z, areaLoss.poly, r=r, W=W, splitem=FALSE)
+      return(unsplit(V, marks(Y))[wanted])
+    }
+    #' determine which pairs of points interact
+    cl <- closepairs(X, 2 * r, what="indices")
+    if(length(cl$i) == 0)
+      return(result[wanted])
+    #' determine scale parameters for polyclip
+    p <- commonPolyclipArgs(Frame(X))
+    #' template disc
+    ball0 <- disc(r, c(0,0), ...)
+    #' discs centred on data points
+    balls <- vector(mode="list", length=nX)
+    for(i in seq_len(nX))
+      balls[[i]] <- shift(ball0, vec=cooX[i,])
+    balls <- as.solist(balls, check=FALSE)
+    #' start computin'
+    for(i in wanted) {
+      jj <- cl$j[cl$i == i]
+      nn <- length(jj)
+      if(nn > 0) {
+        #' union of balls close to i
+        u <- if(nn == 1) balls[[ jj ]] else union.owin(balls[jj], p=p)
+        #' subtract from ball i
+        v <- setminus.owin(balls[[i]], u)
+        #' clip to window
+        if(useW) 
+          v <- intersect.owin(v, W)
+        #' compute
+        result[i] <- area(v)
+      }
+    }
+    return(result[wanted])
+  }
+
+  extract.reversed.polygons <- function(w) {
+    lapply(w$bdry, reverse.xypolygon)
+  }
+
+
+  areaLoss.poly
+})
 #////////////////////////////////////////////////////////////
 #    algorithms using Dirichlet tessellation
 #///////////////////////////////////////////////////////////
@@ -46,38 +110,46 @@ areaLoss.diri <- function(X, r, ..., W=as.owin(X), subset=NULL) {
     return(matrix(, nrow=0, ncol=nr))
   else if(npts == 1) 
     return(matrix(discpartarea(X, r, W), nrow=1))
-  # set up output array
+  #' set up output array
   indices <- 1L:npts
   if(!is.null(subset))
     indices <- indices[subset]
-  out <- matrix(, nrow=length(indices), ncol=nr)
-  #
-  w <- X$window
-  pir2 <- pi * r^2
+  out <- matrix(0, nrow=length(indices), ncol=nr)
+  #' handle duplicate points
+  retain <- !duplicated(X)
+  getzero <- (multiplicity(X) > 1)
+  uX <- X[retain]
+  newserial <- cumsum(retain)
   # dirichlet neighbour relation in entire pattern 
-  dd <- deldir(X$x, X$y, rw=c(w$xrange, w$yrange))
+  w <- X$window
+  dd <- deldir(uX$x, uX$y, rw=c(w$xrange, w$yrange))
   a <- dd$delsgs[,5L]
   b <- dd$delsgs[,6L]
+  pir2 <- pi * r^2
   for(k in seq_along(indices)) {
-    i <- indices[k]
-    # find all Delaunay neighbours of i 
-    jj <- c(b[a==i], a[b==i])
-    jj <- sort(unique(jj))
-    # extract only these points
-    Yminus <- X[jj]
-    Yplus  <- X[c(jj, i)]
-    # dilate
-    aplus <- dilated.areas(Yplus, r, W, exact=TRUE)
-    aminus <- dilated.areas(Yminus, r, W, exact=TRUE)
-    areas <- aplus - aminus
-    # area/(pi * r^2) must be positive and nonincreasing
-    y <- ifelseAX(r == 0, 1, areas/pir2)
-    y <- pmin.int(1, y)
-    ok <- is.finite(y)
-    y[ok] <- rev(cummax(rev(y[ok])))
-    areas <- pmax.int(0, y * pir2)
-    # save
-    out[k, ] <- areas
+    ind <- indices[k]
+    if(!getzero[ind]) {
+      #' find serial number in uX
+      i <- newserial[ind]
+      #' find all Delaunay neighbours of i 
+      jj <- c(b[a==i], a[b==i])
+      jj <- sort(unique(jj))
+      #' extract only these points
+      Yminus <- uX[jj]
+      Yplus  <- uX[c(jj, i)]
+      #' dilate
+      aplus <- dilated.areas(Yplus, r, W, exact=TRUE, ...)
+      aminus <- dilated.areas(Yminus, r, W, exact=TRUE, ...)
+      areas <- aplus - aminus
+      #' area/(pi * r^2) must be positive and nonincreasing
+      y <- ifelseAX(r == 0, 1, areas/pir2)
+      y <- pmin.int(1, y)
+      ok <- is.finite(y)
+      y[ok] <- rev(cummax(rev(y[ok])))
+      areas <- pmax.int(0, y * pir2)
+      #' save
+      out[k, ] <- areas
+    }
   }
   return(out)
 }
@@ -158,12 +230,16 @@ areaGain.grid <- function(u, X, r, ..., W=NULL, ngrid=spatstat.options("ngrid.di
     # vector of radii below which b(u,r) is disjoint from U(X,r)
     rcrit.u <- nncross(u, X, what="dist")/2
     rcrit.min <- min(rcrit.u)
-    # Use distance transform and set covariance
-    D <- distmap(X, ...)
+    #' determine pixel resolution
+    eps <- unclass(as.mask(Window(X), ...))[c("xstep", "ystep")]
+    eps <- as.numeric(eps)
+    eps <- eps * min(1, (rmax/4)/max(eps))
+    #' Use distance transform and set covariance
+    D <- distmap(X, eps=eps)
     DW <- D[W, drop=FALSE]
     # distance from (0,0) - thresholded to make digital discs
     discWin <- owin(c(-rmax,rmax),c(-rmax,rmax))
-    discWin <- as.mask(discWin, eps=min(D$xstep, rmax/4))
+    discWin <- as.mask(discWin, eps=eps)
     rad <- as.im(function(x,y){sqrt(x^2+y^2)}, W=discWin)
     # 
     for(j in which(r > rcrit.min)) {
@@ -244,7 +320,7 @@ areaLoss.grid <- function(X, r, ...,
            for(k in seq_along(indices)) {
              i <- indices[k]
              answer[k,] <- areaGain(X[i], X[-i], r, W=W,
-                                    ngrid=ngrid, exact=exact)
+                                    ngrid=ngrid, exact=exact, ...)
            }
          },
          distmap = {

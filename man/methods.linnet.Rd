@@ -89,8 +89,8 @@ vertexdegree(x)
   \code{\link{nsegments}},
   \code{\link{nvertices}},
   \code{\link{pixellate}},
-  \code{\link{print}},
-  \code{\link{summary}},
+  \code{\link[base]{print}},
+  \code{\link[base]{summary}},
   \code{\link{unitname}},
   \code{\link{unitname<-}},
   \code{\link{vertices}},
@@ -153,6 +153,7 @@ vertexdegree(x)
   summary(simplenet)
   nsegments(simplenet)
   nvertices(simplenet)
+  pixellate(simplenet)
   volume(simplenet)
   unitname(simplenet) <- c("cubit", "cubits")
   Window(simplenet)

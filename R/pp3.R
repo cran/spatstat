@@ -3,7 +3,7 @@
 #
 #  class of three-dimensional point patterns in rectangular boxes
 #
-#  $Revision: 1.26 $  $Date: 2016/09/23 11:02:36 $
+#  $Revision: 1.28 $  $Date: 2017/11/06 02:03:15 $
 #
 
 box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
@@ -11,7 +11,7 @@ box3 <- function(xrange=c(0,1), yrange=xrange, zrange=yrange, unitname=NULL) {
   stopifnot(is.numeric(yrange) && length(yrange) == 2 && diff(yrange) > 0)
   stopifnot(is.numeric(zrange) && length(zrange) == 2 && diff(zrange) > 0)
   out <- list(xrange=xrange, yrange=yrange, zrange=zrange,
-              units=as.units(unitname))
+              units=as.unitname(unitname))
   class(out) <- "box3"
   return(out)
 }
@@ -55,10 +55,10 @@ print.box3 <- function(x, ...) {
   invisible(NULL)
 }
 
-unitname.box3 <- function(x) { x$units }
+unitname.box3 <- function(x) { as.unitname(x$units) }
 
 "unitname<-.box3" <- function(x, value) {
-  x$units <- as.units(value)
+  x$units <- as.unitname(value)
   return(x)
 }
 
@@ -114,10 +114,33 @@ is.pp3 <- function(x) { inherits(x, "pp3") }
 npoints.pp3 <- function(x) { nrow(x$data) }
 
 print.pp3 <- function(x, ...) {
-  splat("Three-dimensional point pattern")
-  sd <- summary(x$data)
-  np <- sd$ncases
-  splat(np, ngettext(np, "point", "points"))
+  ism <- is.marked(x, dfok=TRUE)
+  nx <- npoints(x)
+  splat(if(ism) "Marked three-dimensional" else "Three-dimensional",
+        "point pattern:",
+        nx, ngettext(nx, "point", "points"))
+  if(ism) {
+    mks <- marks(x, dfok=TRUE)
+    if(is.data.frame(mks) | is.hyperframe(mks)) {
+      ## data frame of marks
+      exhibitStringList("Mark variables:", names(mks))
+    } else {
+      ## vector of marks
+      if(is.factor(mks)) {
+        exhibitStringList("Multitype, with levels =", levels(mks))
+      } else {
+        ## Numeric, or could be dates
+        if(inherits(mks, "Date")) {
+          splat("marks are dates, of class", sQuote("Date"))
+        } else if(inherits(mks, "POSIXt")) {
+          splat("marks are dates, of class", sQuote("POSIXt"))
+        } else {
+          splat(paste0("marks are", if(is.numeric(mks)) " numeric," else NULL),
+                "of storage type ", sQuote(typeof(mks)))
+        }
+      }
+    }
+  }
   print(x$domain)
   invisible(NULL)
 }

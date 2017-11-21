@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.53-2
-Date: 2017-10-08
+Version: 1.54-0
+Date: 2017-11-21
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -46,6 +46,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	B. Christensen; 
 	J.-F. Coeurjolly;
 	K. Colyvas;
+	R. Constantine;
 	R. Corria Ainslie;
 	R. Cotton;
 	M. de la Cruz; 
@@ -94,6 +95,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	M. Khanmohammadi;
 	R. Klaver;
 	P. Kovesi;
+	L. Kozmian-Ledward;
 	M. Kuhn; 
 	J. Laake; 
 	F. Lavancier;
@@ -173,6 +175,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	P. Surovy; 
 	B. Taylor; 
 	T. Thorarinsdottir;
+	L. Torres;
 	B. Turlach; 
 	T. Tvedebrink;
         K. Ummer;
@@ -194,9 +197,9 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	and
 	A. Zeileis.
 Maintainer: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>
-Depends: R (>= 3.3.0), spatstat.data (>= 1.1-0), stats, graphics,
+Depends: R (>= 3.3.0), spatstat.data (>= 1.2-0), stats, graphics,
         grDevices, utils, methods, nlme, rpart
-Imports: spatstat.utils (>= 1.7-1), mgcv, Matrix, deldir (>= 0.0-21),
+Imports: spatstat.utils (>= 1.8-0), mgcv, Matrix, deldir (>= 0.0-21),
         abind, tensor, polyclip (>= 1.5-0), goftest
 Suggests: sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
         RandomFields (>= 3.1.24.1), RandomFieldsUtils(>= 0.3.3.1),
@@ -214,6 +217,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2017-10-08 08:32:19 UTC; adrian
+Packaged: 2017-11-21 01:40:19 UTC; adrian
 Repository: CRAN
-Date/Publication: 2017-10-08 22:07:12 UTC
+Date/Publication: 2017-11-21 08:39:44 UTC
