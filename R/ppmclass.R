@@ -4,7 +4,7 @@
 #	Class 'ppm' representing fitted point process models.
 #
 #
-#	$Revision: 2.134 $	$Date: 2017/07/13 02:03:11 $
+#	$Revision: 2.142 $	$Date: 2018/01/24 08:15:01 $
 #
 #       An object of class 'ppm' contains the following:
 #
@@ -265,6 +265,9 @@ coef.ppm <- function(object, ...) {
   object$coef
 }
 
+hasglmfit <- function(object) {
+  return(!is.null(object$internal$glmfit))
+}
 
 getglmfit <- function(object) {
   verifyclass(object, "ppm")
@@ -706,9 +709,14 @@ model.frame.ppm <- function(formula, ...) {
     object <- update(object, forcefit=TRUE)
     gf <- getglmfit(object)
   }
-#  gd <- getglmdata(object)
-#  model.frame(gf, data=gd, ...)
-  if(object$fitter == "gam") modelFrameGam(gf, ...) else model.frame(gf, ...)
+  argh <- resolve.defaults(list(formula=gf),
+                           list(...),
+                           list(data = getglmdata(object),
+                                subset = TRUE))
+  result <- switch(object$fitter,
+                   gam = do.call(modelFrameGam, argh),
+                   do.call(model.frame, argh))
+  return(result)
 }
 
 #' a hacked version of model.frame.glm that works for gam objects (mgcv)
@@ -735,21 +743,22 @@ modelFrameGam <- function(formula, ...) {
 model.matrix.ppm <- function(object,
                              data=model.frame(object, na.action=NULL),
                              ..., Q=NULL, keepNA=TRUE) {
-  if(missing(data)) data <- NULL			     
+  if(missing(data)) data <- NULL
   PPMmodelmatrix(object, data=data, ..., Q=Q, keepNA=keepNA)
 }
 
 model.matrix.ippm <- function(object,
                               data=model.frame(object, na.action=NULL),
                               ..., Q=NULL, keepNA=TRUE, irregular=FALSE) {
-  if(missing(data)) data <- NULL			     
+  if(missing(data)) data <- NULL 
   PPMmodelmatrix(object, data=data, ...,
                  Q=Q, keepNA=keepNA, irregular=irregular)
 }
 
 PPMmodelmatrix <- function(object,
-                           data=model.frame(object, na.action=NULL),
-                           ..., Q=NULL, keepNA=TRUE, irregular=FALSE) {
+                           data, 
+                           ...,
+                           subset, Q=NULL, keepNA=TRUE, irregular=FALSE) {
   # handles ppm and ippm			      
   data.given <- !is.null(data)
   irregular <- irregular && inherits(object, "ippm") && !is.null(object$iScore)
@@ -765,21 +774,33 @@ PPMmodelmatrix <- function(object,
     ## compute model matrix
     mf <- model.frame(bt$fmla, bt$glmdata, ...)
     mm <- model.matrix(bt$fmla, mf, ...)
+    ass <- attr(mm, "assign")
     if(irregular) {
-       ## add irregular score components
-       U <- union.quad(Q)
-       mi <- sapply(object$iScore, do.call,
-                    args=append(list(x=U$x, y=U$y), object$covfunargs),
-		    envir=environment(terms(object)))
-       if(nrow(mi) != nrow(mm))
-         stop("Internal error: incorrect number of rows in iScore")
-       mm <- cbind(mm, mi)
+      ## add irregular score components
+      U <- union.quad(Q)
+      mi <- sapply(object$iScore, do.call,
+                   args=append(list(x=U$x, y=U$y), object$covfunargs),
+                   envir=environment(terms(object)))
+      if(nrow(mi) != nrow(mm))
+        stop("Internal error: incorrect number of rows in iScore")
+      mm <- cbind(mm, mi)
+      attr(mm, "assign") <- ass 
+    }
+    ## subset
+    if(!missing(subset)) {
+      ok <- eval(substitute(subset), envir=bt$glmdata)
+      mm <- mm[ok, , drop=FALSE]
+      attr(mm, "assign") <- ass 
     }
     ## remove NA's ?
-    if(!keepNA)
+    if(!keepNA) {
       mm <- mm[complete.cases(mm), , drop=FALSE]
+      attr(mm, "assign") <- ass
+    }
     return(mm)
   }
+
+  #' extract GLM fit 
   gf <- getglmfit(object)
   if(is.null(gf)) {
     warning("Model re-fitted with forcefit=TRUE")
@@ -788,28 +809,33 @@ PPMmodelmatrix <- function(object,
     if(is.null(gf))
       stop("internal error: unable to extract a glm fit")
   }
-  
+
   if(data.given) {
-    # new data. Must contain the Berman-Turner variables as well.
+    #' new data. Must contain the Berman-Turner variables as well.
     bt <- list(.mpl.Y=1, .mpl.W=1, .mpl.SUBSET=TRUE)
     if(any(forgot <- !(names(bt) %in% names(data)))) 
       data <- do.call(cbind, append(list(data), bt[forgot]))
-    mm <- model.matrix(gf, data=data, ...)
+    mm <- model.matrix(gf, data=data, ..., subset=NULL)
+    ass <- attr(mm, "assign")
     if(irregular) {
-       ## add irregular score components 
-       mi <- sapply(object$iScore, do.call,
-                    args=append(list(x=data$x, y=data$y), object$covfunargs),
-		    envir=environment(terms(object)))
-       if(nrow(mi) != nrow(mm))
-         stop("Internal error: incorrect number of rows in iScore")
-       mm <- cbind(mm, mi)
+      ## add irregular score components 
+      mi <- sapply(object$iScore, do.call,
+                   args=append(list(x=data$x, y=data$y), object$covfunargs),
+                   envir=environment(terms(object)))
+      if(nrow(mi) != nrow(mm))
+        stop("Internal error: incorrect number of rows in iScore")
+      mm <- cbind(mm, mi)
+      attr(mm, "assign") <- ass
     }
     if(inherits(gf, "gam")) 
       attr(mm, "assign") <- gf$assign
     return(mm)
   }
 
-  if(!keepNA && !irregular) {
+  scrambled <- object$scrambled %orifnull% FALSE
+  ## if TRUE, this object was produced by 'subfits' using jittered covariate
+
+  if(!keepNA && !irregular && !scrambled) {
     # extract model matrix of glm fit object
     # restricting to its 'subset' 
     mm <- model.matrix(gf, ...)
@@ -818,10 +844,25 @@ PPMmodelmatrix <- function(object,
     return(mm)
   }
   
-  # extract model matrix for all cases
-  mm <- model.matrix(gf, ..., subset=NULL, na.action=NULL)
+  ## extract model matrix for all cases
+  gd <- getglmdata(object, drop=FALSE) 
+  if(!scrambled) {
+    ## 'gf' was fitted to correct data. Use internals.
+    mm <- model.matrix(gf, ..., subset=NULL, na.action=NULL)
+    ass <- attr(mm, "assign")
+  } else {
+    ## 'gf' was originally fitted using jittered data:
+    ## Use correct data given by 'gd'
+    ## Temporarily add scrambled data to avoid singular matrices etc
+    gds <- object$internal$glmdata.scrambled
+    gdplus <- rbind(gd, gds)
+    mm <- model.matrix(gf, ..., data=gdplus, subset=NULL, na.action=NULL)
+    ass <- attr(mm, "assign")
+    ## Now remove rows corresponding to scrambled data
+    mm <- mm[seq_len(nrow(gd)), , drop=FALSE]
+    attr(mm, "assign") <- ass
+  } 
   cn <- colnames(mm)
-  gd <- getglmdata(object, drop=FALSE)
   if(nrow(mm) != nrow(gd)) {
     # can occur if covariates include NA's or interaction is -Inf
     insubset <- getglmsubset(object)
@@ -832,22 +873,33 @@ PPMmodelmatrix <- function(object,
       mmplus[isna, ] <- NA
       mmplus[!isna, ] <- mm
       mm <- mmplus
+      attr(mm, "assign") <- ass
     } else 
     stop("internal error: model matrix does not match glm data frame")
   }
   if(irregular) {
-     ## add irregular score components 
-     U <- union.quad(quad.ppm(object, drop=FALSE))
-     mi <- sapply(object$iScore, do.call,
-                  args=append(list(x=U$x, y=U$y), object$covfunargs),
-		  envir=environment(terms(object)))
-     if(nrow(mi) != nrow(mm))
-       stop("Internal error: incorrect number of rows in iScore")
-     mm <- cbind(mm, mi)
-     cn <- c(cn, colnames(mi))
+    ## add irregular score components 
+    U <- union.quad(quad.ppm(object, drop=FALSE))
+    mi <- sapply(object$iScore, do.call,
+                 args=append(list(x=U$x, y=U$y), object$covfunargs),
+	  envir=environment(terms(object)))
+    if(nrow(mi) != nrow(mm))
+      stop("Internal error: incorrect number of rows in iScore")
+    mm <- cbind(mm, mi)
+    attr(mm, "assign") <- ass
+    cn <- c(cn, colnames(mi))
   }
-  if(!keepNA)
+  ## subset
+  if(!missing(subset)) {
+    ok <- eval(substitute(subset), envir=gd)
+    mm <- mm[ok, , drop=FALSE]
+    attr(mm, "assign") <- ass
+  }
+  ## remove NA's
+  if(!keepNA) {
     mm <- mm[complete.cases(mm), , drop=FALSE]
+    attr(mm, "assign") <- ass
+  }
   if(inherits(gf, "gam")) 
     attr(mm, "assign") <- gf$assign
   colnames(mm) <- cn

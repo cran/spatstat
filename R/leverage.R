@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.87 $ $Date: 2017/11/20 00:57:34 $
+#  $Revision: 1.100 $ $Date: 2018/01/24 08:16:47 $
 #
 
 leverage <- function(model, ...) {
@@ -70,8 +70,15 @@ ppmInfluence <- function(fit,
   }
   other <- setdiff(names(stuff), c("lev", "infl", "dfbetas"))
   result[other] <- stuff[other]
+  class(result) <- "ppmInfluence"
   return(result)
 }
+
+leverage.ppmInfluence <- function(model, ...) { model$leverage }
+influence.ppmInfluence <- function(model, ...) { model$influence }
+dfbetas.ppmInfluence <- function(model, ...) { model$dfbetas }
+
+avenndist <- function(X) mean(nndist(X))
 
 ppmInfluenceEngine <- function(fit,
                          what=c("leverage", "influence", "dfbetas",
@@ -87,12 +94,19 @@ ppmInfluenceEngine <- function(fit,
                          multitypeOK=FALSE,
                          entrywise = TRUE,
                          matrix.action = c("warn", "fatal", "silent"),
+                         dimyx=NULL, eps=NULL,
                          geomsmooth = TRUE) {
   logi <- identical(fit$method, "logi")
   if(is.null(fitname)) 
     fitname <- short.deparse(substitute(fit))
   stopifnot(is.ppm(fit))
 
+  #' ensure object contains GLM fit
+  if(!hasglmfit(fit)) {
+    fit <- update(fit, forcefit=TRUE)
+    precomputed <- list()
+  }
+  
   ## type of calculation
   method <- match.arg(method)
   what <- match.arg(what, several.ok=TRUE)
@@ -121,10 +135,17 @@ ppmInfluenceEngine <- function(fit,
   w <- w.quad(Q)
   loc <- union.quad(Q)
   isdata <- is.data(Q)
+  mt <- is.multitype(loc)
   if(length(w) != length(lam))
     stop(paste("Internal error: length(w) = ", length(w),
                "!=", length(lam), "= length(lam)"),
          call.=FALSE)
+
+  ## smoothing bandwidth and resolution for smoothed images of densities
+  smallsigma <- if(!mt) avenndist(loc) else max(sapply(split(loc), avenndist))
+  ## previously used 'maxnndist' instead of 'avenndist'
+  if(is.null(dimyx) && is.null(eps)) 
+    eps <- sqrt(prod(sidelengths(Frame(loc))))/256
 
   ## domain of composite likelihood
   ## (e.g. eroded window in border correction)
@@ -326,7 +347,6 @@ ppmInfluenceEngine <- function(fit,
   ## start building result
   fit.is.poisson <- is.poisson(fit)
   result <- list(fitname=fitname, fit.is.poisson=fit.is.poisson)
-  class(result) <- "ppmInfluence"
 
   if(any(c("score", "derivatives") %in% what)) {
     ## calculate the composite score
@@ -622,23 +642,29 @@ ppmInfluenceEngine <- function(fit,
     ## values of leverage (diagonal) at points of 'loc'
     h <- b * lam
     ok <- is.finite(h)
-    if(mt <- is.multitype(loc))
+    geomsmooth <- geomsmooth && all(h[!isdata & ok] >= 0)
+    if(mt)
       h <- data.frame(leverage=h, type=marks(loc))
     levval <- (loc %mark% h)[ok]
     levvaldum <- levval[!isdata[ok]]
-    geomsmooth <- geomsmooth && all(marks(levvaldum) >= 0)
     if(!mt) {
-      levsmo <- Smooth(levvaldum, sigma=maxnndist(loc), geometric=geomsmooth)
+      levsmo <- Smooth(levvaldum,
+                       sigma=smallsigma,
+                       geometric=geomsmooth,
+                       dimyx=dimyx, eps=eps)
+      levnearest <- nnmark(levvaldum, dimyx=dimyx, eps=eps)
     } else {
       levsplitdum <- split(levvaldum, reduce=TRUE)
       levsmo <- Smooth(levsplitdum,
-                       sigma=max(sapply(levsplitdum, maxnndist)),
-                       geometric=geomsmooth)
+                       sigma=smallsigma,
+                       geometric=geomsmooth,
+                       dimyx=dimyx, eps=eps)
+      levnearest <- solapply(levsplitdum, nnmark, dimyx=dimyx, eps=eps)
     }
     ## nominal mean level
     a <- area(Window(loc)) * markspace.integral(loc)
     levmean <- p/a
-    lev <- list(val=levval, smo=levsmo, ave=levmean)
+    lev <- list(val=levval, smo=levsmo, ave=levmean, nearest=levnearest)
     result$lev <- lev
   }
   # .......... influence .............
@@ -679,8 +705,8 @@ ppmInfluenceEngine <- function(fit,
       Mdum <- M
       Mdum[isdata,] <- 0
       Mdum <- Mdum / w.quad(Q)
-      result$dfbetas <- msr(Q, M[isdata, ], Mdum)
-    } else{
+      DFB <- msr(Q, M[isdata, ], Mdum)
+    } else {
       vex <- invhess %*% t(mom)
       dex <- invhess %*% t(eff)
       switch(method,
@@ -700,9 +726,11 @@ ppmInfluenceEngine <- function(fit,
                con[(lam == 0 | !inside), ] <- 0
              })
       colnames(dis) <- colnames(con) <- colnames(mom)
-      # result is a vector valued measure
-      result$dfbetas <- msr(Q, dis[isdata, ], con)
+      DFB <- msr(Q, dis[isdata, ], con)
     }
+    #' add smooth component
+    DFB <- augment.msr(DFB, sigma=smallsigma, dimyx=dimyx, eps=eps)
+    result$dfbetas <- DFB
   }
   return(result)
 }
@@ -743,36 +771,108 @@ ppmDerivatives <- function(fit, what=c("gradient", "hessian"),
   return(result)
 }
 
-plot.leverage.ppm <- function(x, ..., showcut=TRUE, col.cut=par("fg"),
-                              args.contour=list(),
+plot.leverage.ppm <- function(x, ...,
+                              what=c("smooth", "nearest", "exact"),
+                              showcut=TRUE,
+                              args.cut=list(drawlabels=FALSE),
                               multiplot=TRUE) {
+  what <- match.arg(what)
   fitname <- x$fitname
   defaultmain <- paste("Leverage for", fitname)
+
   y <- x$lev
-  smo <- y$smo
+
+  if(what == "exact") {
+    #' plot exact quadrature locations and leverage values
+    z <- do.call(plot,
+                 resolve.defaults(list(x=y$val, multiplot=multiplot),
+                                  list(...),
+                                  list(main=defaultmain)))
+    return(invisible(z))
+  }
+
+  smo <- as.im(x, what=what)
+  if(is.null(smo)) return(invisible(NULL))
+  
   ave <- y$ave
   if(!multiplot && inherits(smo, "imlist")) {
     ave <- ave * length(smo)
     smo <- Reduce("+", smo)
     defaultmain <- c(defaultmain, "(sum over all types of point)")
   }
+  args.contour <- resolve.defaults(args.cut, list(levels=ave))
   cutinfo <- list(addcontour=showcut,
-                  args.contour=append(list(levels=ave, col=col.cut),
-                                      args.contour))
+                  args.contour=args.contour)
   if(is.im(smo)) {
     do.call(plot.im,
             resolve.defaults(list(smo),
-                             list(...),
                              cutinfo,
+                             list(...),
                              list(main=defaultmain)))
   } else if(inherits(smo, "imlist")) {
     do.call(plot.solist,
             resolve.defaults(list(smo),
-                             list(...),
                              cutinfo,
+                             list(...),
                              list(main=defaultmain)))
   } 
   invisible(NULL)
+}
+
+
+persp.leverage.ppm <- function(x, ..., what=c("smooth", "nearest"),
+                               main, zlab="leverage") {
+  if(missing(main)) main <- deparse(substitute(x))
+  what <- match.arg(what)
+  y <- as.im(x, what=what)
+  if(is.null(y)) return(invisible(NULL))
+  if(is.im(y)) return(persp(y, main=main, ..., zlab=zlab))
+  pa <- par(ask=TRUE)
+  lapply(y, persp, main=main, ..., zlab=zlab)
+  par(pa)
+  return(invisible(NULL))
+}
+  
+contour.leverage.ppm <- function(x, ...,
+                                 what=c("smooth", "nearest"),
+                                 showcut=TRUE,
+                                 args.cut=list(col=3, lwd=3, drawlabels=FALSE),
+                                 multiplot=TRUE) {
+  defaultmain <- paste("Leverage for", x$fitname)
+  smo <- as.im(x, what=what)
+  y <- x$lev
+  ave <- y$ave
+  if(!multiplot && inherits(smo, "imlist")) {
+    ave <- ave * length(smo)
+    smo <- Reduce("+", smo)
+    defaultmain <- c(defaultmain, "(sum over all types of point)")
+  }
+  
+  argh1 <- resolve.defaults(list(...),
+                            list(main=defaultmain))
+  argh2 <- resolve.defaults(args.cut,
+                            list(levels=ave),
+                            list(...))
+
+  if(is.im(smo)) {
+    #' single panel
+    out <- do.call(contour, append(list(x=smo), argh1))
+    if(showcut)
+      do.call(contour, append(list(x=smo, add=TRUE), argh2))
+  } else if(inherits(smo, "imlist")) {
+    #' multiple panels
+    argh <- append(list(x=smo, plotcommand ="contour"), argh1)
+    if(showcut) {
+      argh <- append(argh,
+                     list(panel.end=function(i, y, ...) contour(y, ...),
+                          panel.end.args=argh2))
+    } 
+    out <- do.call(plot.solist, argh) 
+  } else {
+    warning("Unrecognised format")
+    out <- NULL
+  }
+  return(invisible(out))
 }
 
 plot.influence.ppm <- function(x, ..., multiplot=TRUE) {
@@ -803,18 +903,17 @@ plot.influence.ppm <- function(x, ..., multiplot=TRUE) {
                                 which.marks=1)))
 }
 
-persp.leverage.ppm <- function(x, ..., main) {
-  if(missing(main)) main <- deparse(substitute(x))
-  y <- as.im(x)
-  if(is.im(y)) return(persp(y, main=main, ...))
-  pa <- par(ask=TRUE)
-  lapply(y, persp, main=main, ...)
-  par(pa)
-  return(invisible(NULL))
-}
-  
-as.im.leverage.ppm <- function(X, ...) {
-  return(X$lev$smo) # could be either an image or a list of images
+
+as.im.leverage.ppm <- function(X, ..., what=c("smooth", "nearest")) {
+  what <- match.arg(what)
+  y <- switch(what,
+              smooth = X$lev$smo,
+              nearest = X$lev$nearest)
+  if(is.null(y))
+    warning(paste("Data for", sQuote(what), "image are not available:",
+                  "please recompute the leverage using the current spatstat"),
+            call.=FALSE)
+  return(y) # could be either an image or a list of images
 }
 
 as.function.leverage.ppm <- function(x, ...) {

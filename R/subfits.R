@@ -1,6 +1,6 @@
 #
 #
-#  $Revision: 1.48 $   $Date: 2016/04/25 02:34:40 $
+#  $Revision: 1.52 $   $Date: 2017/12/10 06:11:16 $
 #
 #
 
@@ -151,7 +151,7 @@ subfits.new <- local({
     fake.version <- list(major=spv$major,
                          minor=spv$minor,
                          release=spv$patchlevel,
-                         date="$Date: 2016/04/25 02:34:40 $")
+                         date="$Date: 2017/12/10 06:11:16 $")
     fake.call <- call("cannot.update", Q=NULL, trend=trend,
                       interaction=NULL, covariates=NULL,
                       correction=object$Info$correction,
@@ -305,6 +305,18 @@ subfits.old <- local({
     }
     announce("done.\n")
 
+    ## This code is currently not usable because the mapping is wrong
+    reconcile <- FALSE
+    if(reconcile) {
+      ## determine which coefficients of main model are interaction terms
+      announce("Identifying interaction coefficients...")
+      md <- model.depends(object$Fit$FIT)
+      usetags <- unlist(lapply(implcoef, colnames))
+      isVname <- apply(md[, usetags, drop=FALSE], 1, any)
+      mainVnames <- row.names(md)[isVname]
+      announce("done.\n")
+    }
+
     ## Fisher information and vcov
     fisher <- varcov <- NULL
     if(what == "models") {
@@ -380,6 +392,7 @@ subfits.old <- local({
       Yi <- Y[[i]]
       Wi <- if(is.ppp(Yi)) Yi$window else Yi$data$window
       ## assemble relevant covariate images
+      scrambled <- FALSE
       if(!has.covar) { 
         covariates <- NULL
       } else {
@@ -389,6 +402,7 @@ subfits.old <- local({
           imrowi <- lapply(covariates[dfvar], as.im, W=Wi)
           ## Problem: constant covariate leads to singular fit
           ## --------------- Hack: ---------------------------
+          scrambled <- TRUE
           ##  Construct fake data by resampling from possible values
           covar.vals <- lapply(as.list(covariates[dfvar, drop=FALSE]), possible)
           fake.imrowi <- lapply(covar.vals, scramble, W=Wi, Y=Yi$data)
@@ -401,6 +415,7 @@ subfits.old <- local({
         if(any(spatialfactors)) {
           ## problem: factor levels may be dropped
           ## more fakery...
+          scrambled <- TRUE
           spfnames <- names(spatialfactors)[spatialfactors]
           covariates[spatialfactors] <-
             lapply(levelslist[spfnames],
@@ -423,9 +438,18 @@ subfits.old <- local({
                       allcovar=has.random,
                       use.gam=use.gam)
       }
-      ## fiti determines which coefficients are required
+      fiti$scrambled <- scrambled
+      ## fiti determines which coefficients are required 
       coefi.fitted <- fiti$coef
-      coefnames.wanted <- names(coefi.fitted)
+      coefnames.wanted <- coefnames.fitted <- names(coefi.fitted)
+      ## reconcile interaction coefficient names
+      if(reconcile) {
+        coefnames.translated <- coefnames.wanted
+        ma <- match(coefnames.fitted, fiti$internal$Vnames)
+        hit <- !is.na(ma)
+        if(any(hit)) 
+          coefnames.translated[hit] <- mainVnames[ ma[hit] ]
+      }
       ## take the required coefficients from the full mppm fit
       coefs.avail  <- coefs.full[i,]
       names(coefs.avail) <- coefs.names
@@ -436,6 +460,7 @@ subfits.old <- local({
         ## overwrite any existing values of coefficients; add new ones.
         coefs.avail[names(coefs.implied)] <- coefs.implied
       }
+      ## check
       if(!all(coefnames.wanted %in% names(coefs.avail))) 
         stop("Internal error: some fitted coefficients not accessible")
       coefi.new <- coefs.avail[coefnames.wanted]
@@ -445,7 +470,9 @@ subfits.old <- local({
       fiti$method <- "mppm"
       ## ... and replace fake data by true data
       if(has.design) {
-        for(nam in names(imrowi)) {
+        fiti$internal$glmdata.scrambled <- gd <- fiti$internal$glmdata
+        fixnames <- intersect(names(imrowi), colnames(gd))
+        for(nam in fixnames) {
           fiti$covariates[[nam]] <- imrowi[[nam]]
           fiti$internal$glmdata[[nam]] <- data[i, nam, drop=TRUE]
         }
@@ -455,10 +482,30 @@ subfits.old <- local({
       fiti$internal$glmfit$rank <- sum(is.finite(fiti$coef))
       ## Fisher information and variance-covariance if known
       ## Extract submatrices for relevant parameters
-      if(!is.null(fisher)) 
-        fiti$fisher <- fisher[coefnames.wanted, coefnames.wanted, drop=FALSE]
-      if(!is.null(varcov))
-        fiti$varcov <- varcov[coefnames.wanted, coefnames.wanted, drop=FALSE]
+      if(reconcile) {
+        #' currently disabled because mapping is wrong
+        if(!is.null(fisher)) {
+          if(!reconcile) {
+            fiti$fisher <-
+              fisher[coefnames.wanted, coefnames.wanted, drop=FALSE]
+          } else {
+            fush <-
+              fisher[coefnames.translated, coefnames.translated, drop=FALSE]
+            dimnames(fush) <- list(coefnames.wanted, coefnames.wanted)
+            fiti$fisher <- fush
+          }
+        }
+        if(!is.null(varcov)) {
+          if(!reconcile) {
+            fiti$varcov <-
+              varcov[coefnames.wanted, coefnames.wanted, drop=FALSE]
+          } else {
+            vc <- varcov[coefnames.translated, coefnames.translated, drop=FALSE]
+            dimnames(vc) <- list(coefnames.wanted, coefnames.wanted)
+            fiti$varcov <- vc
+          }
+        }
+      }
       ## store in list
       results[[i]] <- fiti
     }

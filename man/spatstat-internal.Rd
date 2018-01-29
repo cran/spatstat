@@ -18,7 +18,7 @@
 \alias{ApplyConnected}
 \alias{applytolayers}
 \alias{applyPolyclipArgs}
-\alias{areadelta2}       
+\alias{areadelta2}
 \alias{areaGain.diri}       
 \alias{areaGain.grid}       
 \alias{areaLoss.diri}       
@@ -37,8 +37,10 @@
 \alias{as.owin.lintess}
 \alias{as.unitname}
 \alias{augment.msr}
+\alias{avenndist}
 \alias{BartCalc}
 \alias{bbEngine}
+\alias{bermantestCalc}
 \alias{bermantestEngine}
 \alias{bdry.mask}
 \alias{bind.ratfv}
@@ -101,6 +103,7 @@
 \alias{default.ntile}
 \alias{deltasuffstat}
 \alias{Deviation}
+\alias{dfbetas.ppmInfluence}
 \alias{dflt.redraw}
 \alias{densitycrossEngine}
 \alias{densitypointsEngine}
@@ -206,6 +209,7 @@
 \alias{grow.mask}
 \alias{hackglmmPQL}
 \alias{hasenvelope}
+\alias{hasglmfit}
 \alias{HermiteCoefs}
 \alias{handle.r.b.args}
 \alias{handle.rshift.args}
@@ -220,6 +224,7 @@
 \alias{implemented.for.K}
 \alias{impliedpresence}
 \alias{impliedcoefficients}
+\alias{influence.ppmInfluence}
 \alias{inpoint}
 \alias{instantiate.interact}
 \alias{interactionfamilyname}
@@ -275,6 +280,7 @@
 \alias{levels.im}
 \alias{levels<-.im}
 \alias{levelsAsFactor}
+\alias{leverage.ppmInfluence}
 \alias{linearKengine}
 \alias{linearKmulti}
 \alias{linearKmulti.inhom}
@@ -442,6 +448,7 @@
 \alias{print.leverage.ppm}
 \alias{print.lintess}
 \alias{print.localpcfmatrix}
+\alias{print.lurk}
 \alias{print.lut}
 \alias{print.minconfit}
 \alias{print.mppm}
@@ -468,6 +475,8 @@
 \alias{print.Smoothfun}       
 \alias{print.solist}
 \alias{print.splitppx}
+\alias{print.summary.distfun}
+\alias{print.summary.funxy}
 \alias{print.summary.hyperframe}
 \alias{print.summary.listof}
 \alias{print.summary.linim}
@@ -620,6 +629,7 @@
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summarise.trend}
+\alias{summary.distfun}
 \alias{summary.envelope}
 \alias{summary.funxy}
 \alias{summary.hyperframe}
@@ -627,6 +637,7 @@
 \alias{summary.logiquad}
 \alias{summary.lut}
 \alias{summary.mppm}
+\alias{summary.msr}
 \alias{summary.profilepl}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
@@ -638,8 +649,6 @@
 \alias{symbolmaptype}
 \alias{tail.hyperframe}
 \alias{tensor1x1}
-\alias{test.crossing.psp}
-\alias{test.selfcrossing.psp}
 \alias{thinjump}
 \alias{tilecentroids}        
 \alias{trianglediameters}
@@ -777,8 +786,10 @@ as.listof(x)
 \method{as.owin}{lintess}(W, \dots)
 as.unitname(s)
 augment.msr(x, \dots, sigma)
+avenndist(X)
 BartCalc(fY, fK)
 bbEngine(\dots)
+bermantestCalc(fram, which, alternative, \dots)
 bermantestEngine(model, covariate, which, alternative, \dots,
                  modelname, covname, dataname)
 bdry.mask(W)
@@ -845,6 +856,7 @@ default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
 deltasuffstat(model, \dots, restrict, dataonly, force, quadsub, sparseOK)
 Deviation(x, ref, leaveout, n, xi)
+\method{dfbetas}{ppmInfluence}(model, \dots)
 dflt.redraw(button, name, env)
 densitycrossEngine(Xdata, Xquery, sigma, \dots,
                     weights, edge, varcov,
@@ -985,6 +997,7 @@ grow.mask(M, xmargin=0, ymargin=xmargin)
 hackglmmPQL(fixed, random, family, data, correlation, weights,
             control, niter, verbose, subset, \dots, reltol)
 hasenvelope(X, E)
+hasglmfit(object)
 HermiteCoefs(order)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
 handle.rshift.args(W, \dots, radius, width, height, edge, clip,
@@ -1000,6 +1013,7 @@ illegal.iformula(ifmla, itags, dfvarnames)
 implemented.for.K(correction, windowtype, explicit)
 impliedpresence(tags, formula, df, extranames=character(0))
 impliedcoefficients(object, tag)
+\method{influence}{ppmInfluence}(model, \dots)
 inpoint(W)
 instantiate.interact(x, par)
 interactionfamilyname(x)
@@ -1059,6 +1073,7 @@ ldtEngine(nv, ns, from, to, seglen, huge,
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 levelsAsFactor(x)
+\method{leverage}{ppmInfluence}(model, \dots)
 linearKengine(X, \dots, r, reweight, denom, correction,
               ratio, showworking)
 linearKmulti(X, I, J, r, \dots, correction)
@@ -1101,7 +1116,7 @@ PoisSaddlePairwise(beta, fi)
 polyLaslett(X, \dots, oldX, verbose, plotit)
 polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 positiveIndex(i, nama, len)
-PPMmodelmatrix(object, data, \dots, Q, keepNA, irregular)
+PPMmodelmatrix(object, data, \dots, subset, Q, keepNA, irregular)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 putSpatstatVariable(name, value)
@@ -1245,6 +1260,7 @@ ppmDerivatives(fit, what, Dcovfun, loc, covfunargs)
 ppmInfluenceEngine(fit, what, \dots, iScore, iHessian, iArgs,
               drop, method, fine, precomputed, sparseOK,
               fitname, multitypeOK, entrywise, matrix.action,
+              dimyx, eps,
               geomsmooth)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
@@ -1285,6 +1301,7 @@ prepareTitle(main)
 \method{print}{layered}(x, \dots)
 \method{print}{leverage.ppm}(x, \dots)
 \method{print}{lintess}(x, \dots)
+\method{print}{lurk}(x, \dots)
 \method{print}{lut}(x, \dots)
 \method{print}{minconfit}(x, \dots)
 \method{print}{mppm}(x, \dots)
@@ -1311,6 +1328,8 @@ prepareTitle(main)
 \method{print}{solist}(x, \dots)
 \method{print}{splitppp}(x, \dots)
 \method{print}{splitppx}(x, \dots)
+\method{print}{summary.distfun}(x, \dots)
+\method{print}{summary.funxy}(x, \dots)
 \method{print}{summary.hyperframe}(x, \dots)
 \method{print}{summary.linim}(x, \dots)
 \method{print}{summary.linnet}(x, \dots)
@@ -1488,6 +1507,7 @@ suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summarise.trend(trend, w, a)
+\method{summary}{distfun}(object,\dots)
 \method{summary}{envelope}(object,\dots)
 \method{summary}{funxy}(object,\dots)
 \method{summary}{hyperframe}(object, \dots, brief=FALSE)
@@ -1495,6 +1515,7 @@ summarise.trend(trend, w, a)
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
 \method{summary}{lut}(object, \dots)
 \method{summary}{mppm}(object, \dots, brief=FALSE)
+\method{summary}{msr}(object, \dots)
 \method{summary}{profilepl}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
@@ -1506,8 +1527,6 @@ superimposeMarks(arglist, nobj)
 symbolmaptype(x)
 \method{tail}{hyperframe}(x,n,\dots)
 tensor1x1(A,B)
-test.crossing.psp(A,B)
-test.selfcrossing.psp(A)
 thinjump(n, p)
 tilecentroids(W, nx, ny)
 trianglediameters(iedge, jedge, edgelength, \dots,

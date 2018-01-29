@@ -1,32 +1,59 @@
 # Lurking variable plot for arbitrary covariate.
 #
 #
-# $Revision: 1.52 $ $Date: 2017/02/07 08:12:05 $
+# $Revision: 1.63 $ $Date: 2017/12/08 03:46:08 $
 #
 
-lurking <- local({
+lurking <- function(object, ...) {
+  UseMethod("lurking")
+}
+
+lurking.ppp <- lurking.ppm <- local({
 
   cumsumna <- function(x) { cumsum(ifelse(is.na(x), 0, x)) }
 
   ## main function
-  lurking <- function(object, covariate, type="eem",
-                      cumulative=TRUE,
-                      clipwindow=default.clipwindow(object),
-                      rv = NULL,
-                      plot.sd=is.poisson(object), 
-                      envelope=FALSE, nsim=39, nrank=1,
-                      plot.it=TRUE,
-                      typename,
-                      covname, oldstyle=FALSE,
-                      check=TRUE, ..., splineargs=list(spar=0.5),
-                      verbose=TRUE) {
+  Lurking.ppm <- function(object, covariate,
+                          type="eem",
+                          cumulative=TRUE,
+                          ..., 
+                          plot.it=TRUE,
+                          plot.sd=is.poisson(object), 
+                          clipwindow=default.clipwindow(object),
+                          rv = NULL,
+                          envelope=FALSE, nsim=39, nrank=1,
+                          typename,
+                          covname, oldstyle=FALSE,
+                          check=TRUE,
+                          verbose=TRUE,
+                          nx=128,
+                          splineargs=list(spar=0.5),
+                          internal=NULL) {
     cl <- match.call()
+
+    ## validate object
+    if(is.ppp(object)) {
+      X <- object
+      object <- ppm(X ~1, forcefit=TRUE)
+      dont.complain.about(X)
+    } else verifyclass(object, "ppm")
+
     ## default name for covariate
     if(missing(covname) || is.null(covname)) {
-      covname <- if(is.name(cl$covariate)) as.character(cl$covariate) else
-                 if(is.expression(cl$covariate)) cl$covariate else NULL
+      co <- cl$covariate
+      covname <- if(is.name(co)) as.character(co) else
+                 if(is.expression(co)) format(co[[1]]) else NULL
     }
 
+    ## handle secret data
+    internal <- resolve.defaults(internal,
+                                 list(saveworking=FALSE,
+                                      Fisher=NULL,
+                                      covrange=NULL))
+    saveworking <- internal$saveworking
+    Fisher      <- internal$Fisher  # possibly from a larger model
+    covrange    <- internal$covrange
+    
     if(!identical(envelope, FALSE)) {
       ## compute simulation envelope
       Xsim <- NULL
@@ -50,13 +77,6 @@ lurking <- local({
       }
     }
     
-    ## validate object
-    if(is.ppp(object)) {
-      X <- object
-      object <- ppm(X ~1, forcefit=TRUE)
-      dont.complain.about(X)
-    } else verifyclass(object, "ppm")
-
     ## may need to refit the model
     if(plot.sd && is.null(getglmfit(object)))
       object <- update(object, forcefit=TRUE, use.internal=TRUE)
@@ -90,8 +110,10 @@ lurking <- local({
     
     if(is.im(covariate)) {
       covvalues <- covariate[quadpoints, drop=FALSE]
+      covrange <- covrange %orifnull% range(covariate, finite=TRUE)
     } else if(is.vector(covariate) && is.numeric(covariate)) {
       covvalues <- covariate
+      covrange <- covrange %orifnull% range(covariate, finite=TRUE)
       if(length(covvalues) != quadpoints$n)
         stop("Length of covariate vector,", length(covvalues), "!=",
              quadpoints$n, ", number of quadrature points")
@@ -123,12 +145,18 @@ lurking <- local({
       ## Evaluate expression
       sp <- parent.frame()
       covvalues <- eval(covariate, envir= glmdata, enclos=sp)
+      covrange <- covrange %orifnull% range(covvalues, finite=TRUE)
       if(!is.numeric(covvalues))
         stop("The evaluated covariate is not numeric")
     } else 
       stop(paste("The", sQuote("covariate"), "should be either",
                  "a pixel image, an expression or a numeric vector"))
 
+    #################################################################
+    ## Secret exit
+    if(identical(internal$getrange, TRUE))
+      return(covrange)
+    
     #################################################################
     ## Validate covariate values
 
@@ -214,7 +242,12 @@ lurking <- local({
     markscovres <- marks(covres)
     o <- fave.order(markscovres)
     covsort <- markscovres[o]
-    cummark <- cumsumna(marks(res)[o]) 
+    cummark <- cumsumna(marks(res)[o])
+    if(anyDuplicated(covsort)) {
+      right <- !duplicated(covsort, fromLast=TRUE)
+      covsort <- covsort[right]
+      cummark <- cummark[right]
+    }
     ## we'll plot(covsort, cummark) in the cumulative case
 
     ## (B) THEORETICAL MEAN CUMULATIVE FUNCTION
@@ -222,15 +255,22 @@ lurking <- local({
     
     ## Range of covariate values
     covqmarks <- marks(covq)
-    covrange <- range(covqmarks, na.rm=TRUE)
-    ## Suitable breakpoints
-    cvalues <- seq(from=covrange[1L], to=covrange[2L], length.out=100)
-    csmall <- cvalues[1L] - diff(cvalues[1:2])
-    cbreaks <- c(csmall, cvalues)
-    ## cumulative area as function of covariate values
-    covclass <- cut(covqmarks, breaks=cbreaks)
-    increm <- tapply(wts, covclass, sum)
-    cumarea <- cumsumna(increm)
+    covrange <- covrange %orifnull% range(covqmarks, na.rm=TRUE)
+    if(diff(covrange) > 0) {
+      ## Suitable breakpoints
+      cvalues <- seq(from=covrange[1L], to=covrange[2L], length.out=nx)
+      csmall <- cvalues[1L] - diff(cvalues[1:2])
+      cbreaks <- c(csmall, cvalues)
+      ## cumulative area as function of covariate values
+      covclass <- cut(covqmarks, breaks=cbreaks)
+      increm <- tapply(wts, covclass, sum)
+      cumarea <- cumsumna(increm)
+    } else {
+      ## Covariate is constant
+      cvalues <- covrange[1L]
+      covclass <- factor(rep(1, length(wts)))
+      cumarea <- increm <- sum(wts)
+    }
     ## compute theoretical mean (when model is true)
     mean0 <- if(type == "eem") cumarea else numeric(length(cumarea))
     ## we'll plot(cvalues, mean0) in the cumulative case
@@ -281,7 +321,7 @@ lurking <- local({
       lambda <- lambda[ok]
       ## Fisher information for coefficients
       asymp <- vcov(object,what="internals")
-      Fisher <- asymp$fisher
+      Fisher <- Fisher %orifnull% asymp$fisher
       ## Local sufficient statistic at quadrature points
       suff <- asymp$suff
       suff <- suff[ok, ,drop=FALSE]
@@ -313,16 +353,26 @@ lurking <- local({
                varI <- cumsum(dvar)
              })
 
+
       ## variance-covariance matrix of coefficients
       V <- try(solve(Fisher), silent=TRUE)
       if(inherits(V, "try-error")) {
         warning("Fisher information is singular; reverting to oldstyle=TRUE")
         oldstyle <- TRUE
       }
+      if(any(dim(V) != ncol(suff))) {
+        #' drop rows and columns
+        nama <- colnames(suff)
+        V <- V[nama, nama, drop=FALSE]
+      }
+
+      working <- NULL
       
       ## Second term: B' V B
       if(oldstyle) {
         varII <- 0
+        if(saveworking) 
+          working <- data.frame(varI=varI)
       } else {
         ## lamp = lambda^(p + 1)
         lamp <- switch(type,
@@ -332,15 +382,21 @@ lurking <- local({
                        eem     = as.integer(lambda > 0))
         ## Compute sum of w * lamp * suff for quad points in intervals
         Bcontrib <- as.vector(wts * lamp) * suff
-        dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib))
+        dB <- matrix(, nrow=length(cumarea), ncol=ncol(Bcontrib),
+                     dimnames=list(NULL, colnames(suff)))
         for(j in seq_len(ncol(dB))) 
           dB[,j] <- tapply(Bcontrib[,j], covclass, sum, na.rm=TRUE)
         ## tapply() returns NA when the table is empty
         dB[is.na(dB)] <- 0
         ## Cumulate columns
         B <- apply(dB, 2, cumsum)
+        if(!is.matrix(B)) B <- matrix(B, nrow=1)
         ## compute B' V B for each i 
-        varII <- diag(B %*% V %*% t(B))
+        varII <- quadform(B, V)
+        ##  was:   varII <- diag(B %*% V %*% t(B))
+        if(saveworking) 
+          working <- cbind(data.frame(varI=varI, varII=varII),
+                           as.data.frame(B))
       }
       ##
       ## variance of residuals
@@ -398,15 +454,20 @@ lurking <- local({
     attr(stuff, "info") <- list(typename=typename,
                                 cumulative=cumulative,
                                 covrange=covrange,
-                                covname=covname)
+                                covname=covname,
+                                oldstyle=oldstyle)
+    if(saveworking) attr(stuff, "working") <- working
     class(stuff) <- "lurk"
     ## ---------------  PLOT THEM  ----------------------------------
-    if(plot.it) 
+    if(plot.it) {
       plot(stuff, ...)
-    return(invisible(stuff))
+      return(invisible(stuff))
+    } else {
+      return(stuff)
+    }
   }
 
-  lurking
+  Lurking.ppm
 })
 
 
@@ -478,5 +539,29 @@ plot.lurk <- function(x, ..., shade="grey") {
   return(invisible(NULL))
 }
 
+#'  print a lurk object
 
-
+print.lurk <- function(x, ...) {
+  splat("Lurking variable plot (object of class 'lurk')")
+  info <- attr(x, "info")
+  with(info, {
+    splat("Residual type: ", typename)
+    splat("Covariate on horizontal axis: ", covname)
+    splat("Range of covariate values: ", prange(covrange))
+    splat(if(cumulative) "Cumulative" else "Non-cumulative", "plot")
+  })
+  has.bands <- !is.null(x$theoretical$upper)
+  has.sd    <- !is.null(x$theoretical$sd)
+  if(!has.bands && !has.sd) {
+    splat("No confidence bands computed")
+  } else {
+    splat("Includes",
+          if(has.sd) "standard deviation for" else NULL,
+          "confidence bands")
+    if(!is.null(info$oldstyle)) 
+      splat("Variance calculation:",
+            if(info$oldstyle) "old" else "new",
+            "style")
+  }
+  return(invisible(NULL))
+}

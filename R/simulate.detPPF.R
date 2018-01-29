@@ -1,5 +1,5 @@
 ##   simulate.detPPF.R
-##            $Revision: 1.3 $  $Date: 2017/11/04 04:12:17 $
+##            $Revision: 1.6 $  $Date: 2017/12/14 00:56:09 $
 ##
 ## This file contains functions to simulate DPP models.
 ## Two simulation functions are visible:
@@ -284,6 +284,7 @@ simulate.detpointprocfamily <- function(object, nsim = 1, seed = NULL, ..., W = 
   if(dim!=ncol(r))
     stop(paste("The dimension of the window:", ncol(r), "is inconsistent with the dimension of the model:", dim))
   Wscale <- as.numeric(r[2,]-r[1,])
+  Wcenter <- as.numeric(colMeans(r))
   if(correction=="border"){
     if(!is.numeric(rbord)||any(rbord<0))
       stop(paste(sQuote("rbord"), "must be a non-negative numeric"))
@@ -309,13 +310,13 @@ simulate.detpointprocfamily <- function(object, nsim = 1, seed = NULL, ..., W = 
       X <- X[affine.owin(as.owin(X), mat = diag(1/borderscale))]
     }
     if(is.ppp(X)){
-      X <- affine(X, matrix(c(Wscale[1],0,0,Wscale[2]), 2, 2), c(mean(r[,1]), mean(r[,2])))
+      X <- affine(X, matrix(c(Wscale[1],0,0,Wscale[2]), 2, 2), Wcenter)
       if(!is.null(win))
         X <- X[win]
     } else{
       X <- ppx(X$data, domain = as.boxx(X$domain), coord.type = rep("spatial", dim))
       X$data <- as.hyperframe(as.data.frame(X$data)*matrix(Wscale, nrow(X$data), ncol(X$data), byrow = TRUE))
-      X$domain$ranges <- X$domain$ranges*matrix(Wscale, 2, dim, byrow = TRUE)
+      X$domain$ranges <- X$domain$ranges*matrix(Wscale, 2, dim, byrow = TRUE) + matrix(Wcenter, 2, dim, byrow = TRUE)
       X <- ppx(X$data, X$domain, simplify = TRUE)
     }
     attr(X, "dpp") <- a
@@ -338,7 +339,7 @@ simulate.detpointprocfamily <- function(object, nsim = 1, seed = NULL, ..., W = 
     if(!statmodel)
         rslt <- lapply(rslt, rthin, P=thin)
     names(rslt) <- paste("Simulation", 1:nsim)
-    rslt <- as.solist(rslt)
+    rslt <- if(dim == 2) as.solist(rslt) else as.anylist(rslt)
   }
   attr(rslt, "seed") <- RNGstate
   return(rslt)
