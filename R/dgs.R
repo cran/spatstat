@@ -2,7 +2,7 @@
 #
 #    dgs.R
 #
-#    $Revision: 1.9 $	$Date: 2017/06/05 10:31:58 $
+#    $Revision: 1.12 $	$Date: 2018/03/19 14:41:54 $
 #
 #    Diggle-Gates-Stibbard process
 #
@@ -37,7 +37,7 @@ DiggleGatesStibbard <- local({
             rrho     = as.double(rho),
             values   = as.double(double(nX)),
             PACKAGE = "spatstat")
-    answer <- integer(nX)
+    answer <- numeric(nX)
     answer[oX] <- out$values
     return(answer)
   }
@@ -56,7 +56,8 @@ DiggleGatesStibbard <- local({
            v
          },
          par    = list(rho = NULL),  # to be filled in later
-         parnames = "interaction range", 
+         parnames = "interaction range",
+         hasInf = TRUE,
          init   = function(self) {
            rho <- self$par$rho
            if(!is.numeric(rho) || length(rho) != 1L || rho <= 0)
@@ -82,12 +83,14 @@ DiggleGatesStibbard <- local({
          can.do.fast=function(X,correction,par) {
            return(all(correction %in% c("border", "none")))
          },
-         fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
+         fasteval=function(X,U,EqualPairs,pairpot,potpars,correction,
+                        splitInf=FALSE, ...) {
            # fast evaluator for DiggleGatesStibbard interaction
            if(!all(correction %in% c("border", "none")))
              return(NULL)
            if(spatstat.options("fasteval") == "test")
              message("Using fast eval for DiggleGatesStibbard")
+           dont.complain.about(splitInf)
            rho <- potpars$rho
            idX <- seq_len(npoints(X))
            idU <- rep.int(-1L, npoints(U))

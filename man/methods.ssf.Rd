@@ -7,6 +7,7 @@
 \alias{as.function.ssf}
 \alias{as.ppp.ssf}
 \alias{print.ssf}
+\alias{summary.ssf}
 \alias{range.ssf}
 \alias{min.ssf}
 \alias{max.ssf}
@@ -31,6 +32,8 @@
 
   \method{print}{ssf}(x, \dots, brief=FALSE)
 
+  \method{summary}{ssf}(object, \dots)
+
   \method{range}{ssf}(x, \dots)
 
   \method{min}{ssf}(x, \dots)
@@ -40,14 +43,14 @@
   \method{integral}{ssf}(f, domain=NULL, ..., weights=attr(f, "weights"))
 }
 \arguments{
-  \item{x,X,f}{
+  \item{x,X,f,object}{
     A spatially sampled function (object of class \code{"ssf"}). 
   }
   \item{\dots}{Arguments passed to the default method.}
   \item{brief}{Logical value controlling the amount of detail printed.}
   \item{value}{Matrix of replacement values for the function.}
   \item{domain}{Optional.
-    Domain of integration. An object of class\code{"owin"}.
+    Domain of integration. An object of class\code{"owin"} or \code{"tess"}.
   }
   \item{weights}{
     Optional. Numeric vector of weights associated with the
@@ -68,11 +71,21 @@
   
   \code{print} returns \code{NULL}.
 
+  \code{summary} returns an object of class
+  \code{"summary.ssf"} which has a print method.
+  
   \code{range} returns a numeric vector of length 2.
   \code{min} and \code{max} return a single numeric value.
 
-  \code{integral} returns a numeric value (if \code{x} had numeric
-  values) or a numeric vector (if \code{x} had vector values).
+  \code{integral} returns a numeric or complex value, vector, or matrix.
+  \code{integral(f)} returns a numeric or complex value
+  (if \code{f} had numeric or complex values)
+  or a numeric vector (if \code{f} had vector values).
+  If \code{domain} is a tessellation then \code{integral(f, domain)}
+  returns a numeric or complex vector with one entry for each tile
+  (if \code{f} had numeric or complex values)
+  or a numeric matrix with one row for each tile
+  (if \code{f} had vector values).
 }
 \details{
   An object of class \code{"ssf"} represents a
@@ -85,24 +98,29 @@
   \code{\link[spatstat]{marks<-}},
   \code{\link[spatstat]{unmark}},
   \code{\link[spatstat]{as.im}},
-  \code{\link{as.function}},
+  \code{\link[base]{as.function}},
   \code{\link[spatstat]{as.ppp}},
-  \code{\link{print}},
-  \code{\link{range}},
-  \code{\link{min}},
-  \code{\link{max}}
+  \code{\link[base]{print}},
+  \code{\link[base]{summary}},
+  \code{\link[base]{range}},
+  \code{\link[base]{min}},
+  \code{\link[base]{max}}
   and \code{\link[spatstat]{integral}}.
 }
 \seealso{
   \code{\link{ssf}}
 }
 \examples{
-  X <- cells[1:4]
-  f <- ssf(X, nndist(X, k=1:3))
+  g <- distfun(cells[1:4])
+  X <- rsyst(Window(cells), 10)
+  f <- ssf(X, g(X))
   f
+  summary(f)
   marks(f)
   as.ppp(f)
   as.im(f)
+  integral(f)
+  integral(f, quadrats(Window(f), 3))
 }
 \author{Adrian Baddeley}
 \keyword{spatial}

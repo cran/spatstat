@@ -243,6 +243,7 @@
 \alias{is.expandable.rmhmodel}
 \alias{is.fv}
 \alias{is.hyperframe}
+\alias{is.imlist}
 \alias{is.infline}
 \alias{is.interact}
 \alias{is.marked.default}    
@@ -254,11 +255,14 @@
 \alias{is.multitype.quad}    
 \alias{is.multitype.default}    
 \alias{is.poisson.mppm}
+\alias{is.ppplist}
 \alias{is.pp3}
 \alias{is.ppx}
 \alias{is.psp}
+\alias{is.quad}
 \alias{is.scov}
 \alias{is.sob}
+\alias{is.solist}
 \alias{is.tess}
 \alias{is.vanilla}
 \alias{k3engine}
@@ -489,6 +493,7 @@
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
 \alias{print.summary.rmhexpand}
+\alias{print.summary.ssf}
 \alias{print.summary.solist}
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
@@ -618,6 +623,7 @@
 \alias{spatstatRmhInfo}
 \alias{spatialCDFframe}
 \alias{spatialCDFtest}
+\alias{spatialCDFtestCalc}
 \alias{splitHybridInteraction}
 \alias{sp.foundclass}
 \alias{sp.foundclasses}
@@ -629,9 +635,7 @@
 \alias{suffstat.generic}
 \alias{suffstat.poisson}
 \alias{summarise.trend}
-\alias{summary.distfun}
 \alias{summary.envelope}
-\alias{summary.funxy}
 \alias{summary.hyperframe}
 \alias{summary.lintess}
 \alias{summary.logiquad}
@@ -646,6 +650,7 @@
 \alias{summary.vblogit}
 \alias{sumsymouter}
 \alias{superimposeMarks}
+\alias{symbolmapdomain}
 \alias{symbolmaptype}
 \alias{tail.hyperframe}
 \alias{tensor1x1}
@@ -661,8 +666,6 @@
 %NAMESPACE export("%unit%")
 \alias{unitname.default}
 \alias{unitname<-.default}
-\alias{unstack.solist}
-\alias{unstack.layered}
 \alias{unstackFilter}
 \alias{update.im}
 \alias{update.ippm}
@@ -785,7 +788,7 @@ as.breakpts(\dots)
 as.listof(x)
 \method{as.owin}{lintess}(W, \dots)
 as.unitname(s)
-augment.msr(x, \dots, sigma)
+augment.msr(x, \dots, sigma, recompute)
 avenndist(X)
 BartCalc(fY, fK)
 bbEngine(\dots)
@@ -854,7 +857,9 @@ default.clipwindow(object, epsilon)
 default.linnet.tolerance(L)
 default.n.tiling(X, nd, ntile, npix, eps, random, quasi, verbose)
 default.ntile(X)
-deltasuffstat(model, \dots, restrict, dataonly, force, quadsub, sparseOK)
+deltasuffstat(model, \dots,
+              restrict, dataonly, sparseOK, quadsub,
+              force, warn.forced, verbose, use.special)
 Deviation(x, ref, leaveout, n, xi)
 \method{dfbetas}{ppmInfluence}(model, \dots)
 dflt.redraw(button, name, env)
@@ -929,10 +934,11 @@ evalCovar(model, covariate, \dots)
           eps, nd, interpolate, jitter, modelname, covname, dataname,
           subset)
 evalCovariate(covariate, locations)
-evalInteraction(X,P,E,interaction,correction,\dots,precomputed,savecomputed)
-evalInterEngine(X,P,E,interaction,correction,\dots,
+evalInteraction(X,P,E,interaction,correction,splitInf,\dots,
+                precomputed,savecomputed)
+evalInterEngine(X,P,E,interaction,correction,splitInf,\dots,
                 Reach,precomputed,savecomputed)
-evalPairPotential(X,P,E,pairpot,potpars,R,finite)
+evalPairPotential(X,P,E,pairpot,potpars,R)
 evalSparse3Dentrywise(expr, envir)
 evaluate2Dkernel(kernel, x, y, sigma, varcov, \dots, scalekernel)
 even.breaks.owin(w)
@@ -986,7 +992,7 @@ getRandomFieldsModelGen(model)
 getSpatstatVariable(name)
 getSumFun(abbreviation, classname, ismarked, fatal)
 geyercounts(U,X,r,sat,Xcounts,EqualPairs)
-geyerdelta2(X,r,sat,\dots,sparseOK)
+geyerdelta2(X,r,sat,\dots,sparseOK, correction)
 GLMpredict(fit, data, coefs, changecoef, type)
 good.correction.K(X)
 %gridadjacencymatrix(dims)
@@ -1032,6 +1038,7 @@ is.expandable(x)
 \method{is.expandable}{rmhmodel}(x) 
 is.fv(x)
 is.hyperframe(x)
+is.imlist(x)
 is.infline(x)
 is.interact(x)
 \method{is.marked}{default}(\dots)  
@@ -1043,10 +1050,13 @@ is.mppm(x)
 \method{is.multitype}{msr}(X, \dots)
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 \method{is.poisson}{mppm}(x)
+is.ppplist(x)
 is.pp3(x)
 is.ppx(x)
 is.psp(x)
+is.quad(x)
 is.scov(x)
+is.solist(x)
 is.sob(x)
 is.tess(x)
 is.vanilla(u)
@@ -1116,7 +1126,8 @@ PoisSaddlePairwise(beta, fi)
 polyLaslett(X, \dots, oldX, verbose, plotit)
 polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 positiveIndex(i, nama, len)
-PPMmodelmatrix(object, data, \dots, subset, Q, keepNA, irregular)
+PPMmodelmatrix(object, data, \dots, subset, Q, keepNA, irregular,
+               splitInf)
 \method{print}{localpcfmatrix}(x, \dots)
 \method{plot}{localpcfmatrix}(x, \dots)
 putSpatstatVariable(name, value)
@@ -1170,7 +1181,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             subsetexpr,
             covfunargs, allcovar, precomputed, savecomputed,
             vnamebase, vnameprefix, warn.illegal, warn.unidentifiable,
-            weightfactor, skip.border, clip.interaction)
+            weightfactor, skip.border, clip.interaction, splitInf)
 mpl.usable(x)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook, asymmok)
 multiplicityNumeric(x)
@@ -1342,6 +1353,7 @@ prepareTitle(main)
 \method{print}{summary.ppp}(x, \dots, dp)
 \method{print}{summary.psp}(x, \dots)
 \method{print}{summary.rmhexpand}(x, \dots)
+\method{print}{summary.ssf}(x, \dots)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
@@ -1496,6 +1508,7 @@ spatialCDFframe(model, covariate, \dots)
 spatialCDFtest(model, covariate, test, \dots,
          dimyx, eps, interpolate, jitter,
          nsim, verbose, modelname, covname, dataname)
+spatialCDFtestCalc(fra, test, \dots, details)
 sphere.volume(range, nval = 10)
 splitHybridInteraction(coeffs, inte)
 sp.foundclass(cname, inlist, formalname, argsgiven)             
@@ -1507,9 +1520,7 @@ suffloc(object)
 suffstat.generic(model, X, callstring)
 suffstat.poisson(model, X, callstring)
 summarise.trend(trend, w, a)
-\method{summary}{distfun}(object,\dots)
 \method{summary}{envelope}(object,\dots)
-\method{summary}{funxy}(object,\dots)
 \method{summary}{hyperframe}(object, \dots, brief=FALSE)
 \method{summary}{lintess}(object, \dots)
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
@@ -1524,6 +1535,7 @@ summarise.trend(trend, w, a)
 \method{summary}{vblogit}(object, \dots)
 sumsymouter(x, w)
 superimposeMarks(arglist, nobj)
+symbolmapdomain(x)
 symbolmaptype(x)
 \method{tail}{hyperframe}(x,n,\dots)
 tensor1x1(A,B)
@@ -1541,8 +1553,6 @@ twostage.test(X, \dots, exponent, nsim, nsimsub,
 x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
-\method{unstack}{solist}(x, \dots)
-\method{unstack}{layered}(x, \dots)
 unstackFilter(x)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
@@ -1568,7 +1578,7 @@ vnnFind(seg, tp, ns, nv, from, to, seglen, huge, tol, kmax)
 \method{Window}{lpp}(X, \dots, check=TRUE) <- value
 warn.once(key, \dots)
 waxlyrical(type, terse)
-weightedclosepairs(X, r, correction)
+weightedclosepairs(X, r, correction, what)
 windows.mppm(x)
 w.quad(Q)               
 x.quad(Q)

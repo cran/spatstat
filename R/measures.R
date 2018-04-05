@@ -3,10 +3,10 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.73 $  $Date: 2018/01/24 08:35:58 $
+#  $Revision: 1.79 $  $Date: 2018/03/21 15:27:10 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
-  if(!inherits(qscheme, "quad"))
+  if(!is.quad(qscheme))
     stop("qscheme should be a quadrature scheme")
   nquad <- n.quad(qscheme)
   U <- union.quad(qscheme)
@@ -202,24 +202,31 @@ split.msr <- function(x, f, drop=FALSE, ...) {
 
 integral.msr <- function(f, domain=NULL, ...) {
   stopifnot(inherits(f, "msr"))
-  if(!is.null(domain)) {
-    if (is.tess(domain)) 
-      return(sapply(tiles(domain), integral.msr, f = f))
-    f <- f[domain]
+  if(is.tess(domain)) {
+    result <- sapply(tiles(domain), integral.msr, f = f)
+    if(length(dim(result)) > 1) result <- t(result)
+    return(result)
   }
+  if(!is.null(domain)) 
+    f <- f[domain]
   y <- with(f, "increment")
-  if(is.matrix(y)) apply(y, 2, sum) else sum(y)
+  z <- if(is.matrix(y)) apply(y, 2, sum) else sum(y)
+  return(z)
 }
 
-augment.msr <- function(x, ..., sigma) {
+augment.msr <- function(x, ..., sigma, recompute=FALSE) {
   ## add a pixel image of the smoothed density component
   stopifnot(inherits(x, "msr"))
-  if(!is.null(attr(x, "smoothdensity"))) return(x)
+  if(!recompute && !is.null(attr(x, "smoothdensity"))) return(x)
   d <- ncol(as.matrix(x$val))
   xloc <- x$loc
   W <- as.owin(xloc)
-  if(missing(sigma)) sigma <- maxnndist(xloc, positive=TRUE)
-  if(is.multitype(xloc)) {
+  mt <- is.multitype(xloc)
+  if(missing(sigma)) {
+    ## WAS:  sigma <- maxnndist(xloc, positive=TRUE)
+    sigma <- if(!mt) avenndist(xloc) else max(sapply(split(xloc), avenndist))
+  }
+  if(mt) {
     ## multitype case - split by type, smooth, sum
     y <- lapply(split(x), augment.msr, sigma=sigma, ...)
     z <- lapply(y, attr, which="smoothdensity")
@@ -233,6 +240,7 @@ augment.msr <- function(x, ..., sigma) {
         smo[[j]] <- Reduce("+", lapply(z, "[[", i=j))
       smo <- as.solist(smo)
     }
+    attr(smo, "sigma") <- sigma
     attr(x, "smoothdensity") <- smo
     return(x)
   }   
@@ -261,6 +269,7 @@ augment.msr <- function(x, ..., sigma) {
                              as.im, W=W)
     smo <- as.solist(smo)
   }
+  attr(smo, "sigma") <- sigma
   attr(x, "smoothdensity") <- smo
   return(x)
 }
@@ -305,7 +314,7 @@ plot.msr <- function(x, ..., add=FALSE,
     y <- split(x)
     typenames <- names(y)
     vecnames <- colnames(x$val)
-    y <- as.solist(Reduce(append, lapply(y, unstack)))
+    y <- unstack(y)
     names(y) <- as.vector(t(outer(typenames, vecnames, paste, sep=".")))
   } 
   #' ensure image of density is present
@@ -524,6 +533,8 @@ Ops.msr <- function(e1,e2=NULL){
            call.=FALSE)
     e1 <- unclass(e1)
     e1[vn] <- lapply(e1[vn], .Generic)
+    if(!is.null(sm <- attr(e1, "smoothdensity")))
+      attr(e1, "smoothdensity") <- do.call(.Generic, sm)
     class(e1) <- "msr"
     return(e1)
   } else {
@@ -553,6 +564,22 @@ Ops.msr <- function(e1,e2=NULL){
       e1[vn] <- mapply(.Generic, e1[vn], e2[vn],
                        SIMPLIFY=FALSE)
       class(e1) <- "msr"
+      #' handle smoothed densities
+      sm1 <- attr(e1, "smoothdensity")
+      sm2 <- attr(e2, "smoothdensity")
+      sm <-
+        if(is.null(sm1) || is.null(sm2)) {
+          NULL
+        } else if(is.im(sm1) && is.im(sm2)) {
+          do.call(.Generic, list(sm1, sm2))
+        } else if(is.im(sm1) && is.solist(sm2)) {
+          mapply(.Generic, e2=sm2, MoreArgs=list(e1=sm1), SIMPLIFY=FALSE)
+        } else if(is.solist(sm1) && is.im(sm2)) {
+          mapply(.Generic, e1=sm1, MoreArgs=list(e2=sm2), SIMPLIFY=FALSE)
+        } else if(is.solist(sm1) && is.solist(sm2)) {
+          mapply(.Generic, e1=sm1, e2=sm2, SIMPLIFY=FALSE)
+        } else NULL
+      attr(e1, "smoothdensity") <- sm
       return(e1)
     } else if(m1 && is.numeric(e2)) {
       if(!is.element(.Generic, c("/", "*")))
@@ -563,6 +590,12 @@ Ops.msr <- function(e1,e2=NULL){
       e1 <- unclass(e1)
       e1[vn] <- lapply(e1[vn], .Generic, e2=e2)
       class(e1) <- "msr"
+      #' handle smoothed density
+      sm1 <- attr(e1, "smoothdensity")
+      sm <- if(is.null(sm1)) NULL else
+            if(is.im(sm1)) do.call(.Generic, list(e1=sm1, e2=e2)) else
+            if(is.solist(sm1)) solapply(sm1, .Generic, e2=e2) else NULL
+      attr(e1, "smoothdensity") <- sm
       return(e1)
     } else if(m2 && is.numeric(e1)) {
       if(.Generic != "*") 
@@ -573,6 +606,12 @@ Ops.msr <- function(e1,e2=NULL){
       e2 <- unclass(e2)
       e2[vn] <- lapply(e2[vn], .Generic, e1=e1)
       class(e2) <- "msr"
+      #' handle smoothed density
+      sm2 <- attr(e2, "smoothdensity")
+      sm <- if(is.null(sm2)) NULL else
+            if(is.im(sm2)) do.call(.Generic, list(e1=e1, e2=sm2)) else
+            if(is.solist(sm2)) solapply(sm2, .Generic, e1=e1) else NULL
+      attr(e2, "smoothdensity") <- sm
       return(e2)
     }
     stop(paste("Operation", sQuote(paste0("e1", .Generic, "e2")),

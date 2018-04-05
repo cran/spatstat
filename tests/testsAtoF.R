@@ -25,20 +25,21 @@ local({
 
 
 ## tests/cdf.test.R
-## check cdf.test with strange data
 require(spatstat)
 local({
-  # Marked point patterns with some marks not represented
+  ## (1) check cdf.test with strange data
+  ## Marked point patterns with some marks not represented
   AC <- split(ants, un=FALSE)$Cataglyphis
   AM <- split(ants, un=FALSE)$Messor
   DM <- distmap(AM)
-  # should produce a warning, rather than a crash:
+  ## should produce a warning, rather than a crash:
   cdf.test(AC, DM)
-  # should be OK:
+  ## should be OK:
   cdf.test(unmark(AC), DM)
   cdf.test(unmark(AC), DM, "cvm")
   cdf.test(unmark(AC), DM, "ad")
-  # linear networks
+
+  ## (2) linear networks
   set.seed(42)
   X <- runiflpp(20, simplenet)
   fit <- lppm(X ~1)
@@ -50,7 +51,7 @@ local({
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.5 $ $Date: 2016/03/28 04:21:07 $
+## $Revision: 1.7 $ $Date: 2018/04/04 09:50:30 $
 
 local({
   r <- 0.12
@@ -101,6 +102,28 @@ local({
   if(!isSymmetric(G))
     stop("crosspairs is not symmetric in Rasmus example")
 
+  #' periodic distance
+  pclose <- function(X, R, method=c("raw", "C")) {
+    method <- match.arg(method)
+    switch(method,
+           raw = {
+             D <- pairdist(X, periodic=TRUE)
+             diag(D) <- Inf
+             result <- which(D <= R, arr.ind=TRUE)
+           },
+           C = {
+             result <- closepairs(X, R, periodic=TRUE, what="indices")
+           })
+    result <- as.data.frame(result)
+    colnames(result) <- c("i","j")
+    return(result)
+  }
+  #' pick a threshold value which avoids GCC bug 323
+  RR <- 0.193
+  A <- pclose(redwood, RR, "raw")
+  B <- pclose(redwood, RR, "C")
+  if(!samesame(A,B))
+    stop("closepairs.ppp(periodic=TRUE) gives wrong answer")
 })
 ## tests/colour.R
 ##
@@ -182,12 +205,49 @@ local({
     stop("Algorithms for whist disagree")
   spatstat.options(op)
 })
+#'
+#'    tests/deltasuffstat.R
+#' 
+#'    Explicit tests of 'deltasuffstat'
+#' 
+#' $Revision: 1.2 $ $Date: 2018/03/28 09:04:06 $
+
+require(spatstat)
+local({
+  
+  disagree <- function(x, y, tol=1e-7) { !is.null(x) && !is.null(y) && max(abs(x-y)) > tol }
+
+  flydelta <- function(model, modelname="") {
+    ## Check execution of different algorithms for 'deltasuffstat' 
+    dSS <- deltasuffstat(model, sparseOK=TRUE)
+    dBS <- deltasuffstat(model, sparseOK=TRUE,  use.special=FALSE, force=TRUE)
+    dBF <- deltasuffstat(model, sparseOK=FALSE, use.special=FALSE, force=TRUE)
+    ## Compare results
+    if(disagree(dBS, dSS))
+      stop(paste(modelname, "model: Brute force algorithm disagrees with special algorithm"))
+    if(disagree(dBF, dBS))
+      stop(paste(modelname, "model: Sparse and full versions of brute force algorithm disagree"))
+    return(invisible(NULL))
+  }
+
+  modelS <- ppm(cells ~ x, Strauss(0.13), nd=10)
+  flydelta(modelS, "Strauss")
+
+  antsub <- ants[c(FALSE,TRUE,FALSE)]
+  rmat <- matrix(c(130, 90, 90, 60), 2, 2)
+  
+  modelM <- ppm(antsub ~ 1, MultiStrauss(rmat), nd=16)
+  flydelta(modelM, "MultiStrauss")
+                
+  modelA <- ppm(antsub ~ 1, HierStrauss(rmat, archy=c(2,1)), nd=16)
+  flydelta(modelA, "HierStrauss")
+})
 #
 #  tests/density.R
 #
 #  Test behaviour of density methods and inhomogeneous summary functions
 #
-#  $Revision: 1.10 $  $Date: 2018/01/18 05:54:21 $
+#  $Revision: 1.12 $  $Date: 2018/02/15 04:43:59 $
 #
 
 require(spatstat)
@@ -201,13 +261,18 @@ local({
     Z <- density(cells, ..., at="points")
     return(invisible(NULL))
   }
-  
+
+  V <- diag(c(0.05^2, 0.07^2))
+  wdf <- data.frame(a=1:42,b=42:1)
+
   tryit(0.05)
   tryit(0.05, diggle=TRUE)
   tryit(0.05, se=TRUE)
-  tryit(varcov=diag(c(0.05^2, 0.07^2)))
-  tryit(0.05, weights=data.frame(a=1:42,b=42:1))
   tryit(0.05, weights=expression(x))
+  tryit(0.05, weights=wdf)
+  tryit(varcov=V)
+  tryit(varcov=V, weights=expression(x))
+  tryit(varcov=V, weights=wdf)
 
   # apply different discretisation rules
   Z <- density(cells, 0.05, fractional=TRUE)
@@ -392,7 +457,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.5 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.6 $  $Date: 2018/02/28 03:11:23 $
 #
 
 require(spatstat)
@@ -462,6 +527,14 @@ local({
   A <- as.data.frame(E)
   B <- as.data.frame(E, simfuns=TRUE)
   stopifnot(ncol(B) - ncol(A) == Nsim)
+})
+
+local({
+  #' cases not covered elsewhere
+  A <- envelope(cells, nsim=5, alternative="less",
+                do.pwrong=TRUE, use.theory=FALSE,
+                savepatterns=TRUE, savefuns=TRUE)
+  B <- envelope(A, nsim=5, savefuns=TRUE)
 })
 #
 #    tests/factorbugs.R

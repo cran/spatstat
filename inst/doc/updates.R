@@ -10,7 +10,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:41-72
+### code chunk number 2: updates.Rnw:38-69
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -46,7 +46,7 @@ newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:82-87
+### code chunk number 3: updates.Rnw:83-88
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -56,7 +56,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:93-98
+### code chunk number 4: updates.Rnw:94-99
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -67,7 +67,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:2028-2032
+### code chunk number 5: updates.Rnw:2094-2098
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -76,8 +76,20 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:2038-2039 (eval = FALSE)
+### code chunk number 6: updates.Rnw:2108-2109 (eval = FALSE)
 ###################################################
-## news(grepl("^BUG", Category), package="spatstat")
+## bugfixes
+
+
+###################################################
+### code chunk number 7: updates.Rnw:2115-2116 (eval = FALSE)
+###################################################
+## bugfixes(sincedate="2017-06-30")
+
+
+###################################################
+### code chunk number 8: updates.Rnw:2119-2120 (eval = FALSE)
+###################################################
+## bugfixes(sinceversion="1.42-0")
 
 

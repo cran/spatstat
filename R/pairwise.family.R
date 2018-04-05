@@ -2,7 +2,7 @@
 #
 #    pairwise.family.S
 #
-#    $Revision: 1.64 $	$Date: 2016/07/15 10:22:11 $
+#    $Revision: 1.70 $	$Date: 2018/03/27 08:42:43 $
 #
 #    The pairwise interaction family of point process models
 #
@@ -136,7 +136,7 @@ pairwise.family <-
        # end of function `plot'
        # ----------------------------------------------------
     eval  = function(X,U,EqualPairs,pairpot,potpars,correction,
-                     finite=FALSE,
+                     splitInf=FALSE,
                      ..., Reach=NULL,
                      precomputed=NULL, savecomputed=FALSE,
                      pot.only=FALSE) {
@@ -188,7 +188,7 @@ pairwise.family <-
   # and
   #  par is a list of parameters for the potential.
   #         
-  # The additional argument 'finite' is also permitted.
+  # The additional argument 'splitInf' is also permitted.
   #         
   # It must return a matrix with the same dimensions as d
   # or an array with its first two dimensions the same as the dimensions of d.
@@ -233,17 +233,16 @@ dimM <- c(nX, nU)
 # Evaluate the pairwise potential without edge correction
 
 if(use.closepairs) {
-  POT <- evalPairPotential(X,U,EqualPairs,pairpot,potpars,Reach,finite=finite)
+  POT <- evalPairPotential(X,U,EqualPairs,pairpot,potpars,Reach)
 } else {
   POT <- do.call.matched(pairpot,
                          list(d=M,
                               tx=marks(X),
                               tu=marks(U),
-                              par=potpars,
-                              finite=finite))
+                              par=potpars))
 }
 
-# Determine whether each column of potential is an offset
+# Determine whether each component of potential is an offset
 
   IsOffset <- attr(POT, "IsOffset")
 
@@ -266,8 +265,18 @@ if(length(dim(POT)) == 1 || any(dim(POT)[1:2] != dimM)) {
 
 # make it a 3D array
 if(length(dim(POT))==2)
-        POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
-                          
+  POT <- array(POT, dim=c(dim(POT),1), dimnames=NULL)
+
+#' positive case
+
+  if(splitInf) {
+    IsNegInf <- (POT == -Inf)
+    POT[IsNegInf] <- 0
+  }
+      
+
+# handle corrections      
+
 if(correction == "translate" || correction == "translation") {
         edgewt <- edge.Trans(X, U)
         # sanity check ("everybody knows there ain't no...")
@@ -289,21 +298,32 @@ if(correction == "translate" || correction == "translation") {
 # No pair potential term between a point and itself
 if(length(EqualPairs) > 0) {
   nplanes <- dim(POT)[3]
-  for(k in 1:nplanes)
+  for(k in 1:nplanes) {
     POT[cbind(EqualPairs, k)] <- 0
+    if(splitInf) IsNegInf[cbind(EqualPairs, k)] <- FALSE
+  }
 }
 
+# reattach the negative infinity for re-use by special code 
+if(splitInf) attr(POT, "IsNegInf") <- IsNegInf
+      
 # Return just the pair potential?
-if(pot.only)
+if(pot.only) 
   return(POT)
 
-# Sum the pairwise potentials 
+# Sum the pairwise potentials over data points for each quadrature point
 
 V <- apply(POT, c(2,3), sum)
 
+# Handle positive case      
+
+if(splitInf) 
+  attr(V, "-Inf") <- apply(IsNegInf, 2, any)
+      
 # attach the original pair potentials
 attr(V, "POT") <- POT
 
+      
 # attach the offset identifier
 attr(V, "IsOffset") <- IsOffset
 
@@ -370,20 +390,76 @@ return(V)
   return(result)
   },
 ######### end of function $suffstat
-  delta2 = function(X, inte, correction, ..., finite=FALSE) {
-  # Sufficient statistic for second order conditional intensity
-  # for pairwise interaction processes
-  # Equivalent to evaluating pair potential.
-    X <- as.ppp(X)
-    seqX <- seq_len(npoints(X))
-    E <- cbind(seqX, seqX)
-    R <- reach(inte)
-    result <- pairwise.family$eval(X,X,E,
-                                 inte$pot,inte$par,
-                                 correction,
-                                 pot.only=TRUE,
-                                 Reach=R,
-                                 finite=finite)
+  delta2 = function(X, inte, correction, ...) {
+    #' Sufficient statistic for second order conditional intensity
+    #' for pairwise interaction processes
+    #' Equivalent to evaluating pair potential.
+    if(is.ppp(X)) {
+      seqX <- seq_len(npoints(X))
+      E <- cbind(seqX, seqX)
+      R <- reach(inte)
+      result <- pairwise.family$eval(X,X,E,
+                                     inte$pot,inte$par,
+                                     correction,
+                                     pot.only=TRUE,
+                                     Reach=R, splitInf=TRUE)
+      M <- attr(result, "IsNegInf")
+      if(!is.null(M)) {
+        #' validate
+        if(length(dim(M)) != 3)
+          stop("Internal error: IsNegInf is not a 3D array")
+        #' collapse vector-valued potential, yielding a matrix
+        M <- apply(M, c(1,2), any)
+        if(!is.matrix(M)) M <- matrix(M, nrow=nX)
+        #' count conflicts
+        hits <- colSums(M)
+        #'  hits[j] == 1 implies that X[j] violates hard core with only one X[i]
+        #'  and therefore changes status if X[i] is deleted.
+        deltaInf <- M
+        deltaInf[, hits != 1] <- FALSE
+        #' 
+        attr(result, "deltaInf") <- deltaInf
+      }
+    } else if(is.quad(X)) {
+      U <- union.quad(X)
+      izdat <- is.data(X)
+      nU <- npoints(U)
+      nX <- npoints(X$data)
+      seqU <- seq_len(nU)
+      E <- cbind(seqU, seqU)
+      R <- reach(inte)
+      result <- pairwise.family$eval(U,U,E,
+                                     inte$pot,inte$par,
+                                     correction,
+                                     pot.only=TRUE,
+                                     Reach=R, splitInf=TRUE)
+      M <- attr(result, "IsNegInf")
+      if(!is.null(M)) {
+        #' validate
+        if(length(dim(M)) != 3)
+          stop("Internal error: IsNegInf is not a 3D array")
+        #' consider conflicts with data points
+        MXU <- M[izdat, , , drop=FALSE]
+        #' collapse vector-valued potential, yielding a matrix
+        MXU <- apply(MXU, c(1,2), any)
+        if(!is.matrix(MXU)) MXU <- matrix(MXU, nrow=nX)
+        #' count data points conflicting with each quadrature point
+        nhitdata <- colSums(MXU)
+        #' for a conflicting pair U[i], U[j],
+        #' status of U[j] will change when U[i] is added/deleted
+        #' iff EITHER
+        #'     U[i] = X[i] is a data point and
+        #'     U[j] is only in conflict with X[i],
+        deltaInf <- apply(M, c(1,2), any)
+        deltaInf[izdat, nhitdata != 1] <- FALSE
+        #' OR
+        #'     U[i] is a dummy point,
+        #'     U[j] has no conflicts with X.
+        deltaInf[!izdat, nhitdata != 0] <- FALSE
+        #'
+        attr(result, "deltaInf") <- deltaInf
+      }
+    }
     return(result)
   }
 ######### end of function $delta2
@@ -400,18 +476,15 @@ PairPotentialType <- function(pairpot) {
   fop <- names(formals(pairpot))
   v <- match(list(fop),
              list(c("d", "par"),
-                  c("d", "par", "finite"),
-                  c("d", "tx", "tu", "par"),
-                  c("d", "tx", "tu", "par", "finite")))
+                  c("d", "tx", "tu", "par")))
   if(is.na(v))
     stop("Formal arguments of pair potential function are not understood",
          call.=FALSE)
-  has.finite <- (v %in% c(2,4))
-  marked <- (v %in% 3:4)
-  return(list(marked=marked, has.finite=has.finite))
+  marked <- (v == 2)
+  return(list(marked=marked))
 }
 
-evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
+evalPairPotential <- function(X, P, E, pairpot, potpars, R) {
   # Evaluate pair potential without edge correction weights
   nX <- npoints(X)
   nP <- npoints(P)
@@ -421,8 +494,7 @@ evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
                              list(d=matrix(, 0, 0),
                                   tx=marks(X)[integer(0)],
                                   tu=marks(P)[integer(0)],
-                                  par=potpars,
-                                  finite=finite))
+                                  par=potpars))
   IsOffset <- attr(fakePOT, "IsOffset")
   fakePOT <- ensure3Darray(fakePOT)
   Vnames <- dimnames(fakePOT)[[3]]
@@ -434,7 +506,9 @@ evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
   D <- matrix(cl$d, ncol=1)
   # deal with empty cases
   if(nX == 0 || nP == 0 || length(I) == 0) {
-    result <- array(0, dim=c(nX, nP, p), dimnames=list(NULL, NULL, Vnames))
+    di <- c(nX, nP, p)
+    dn <- list(NULL, NULL, Vnames)
+    result <- array(0, dim=di, dimnames=dn)
     attr(result, "IsOffset") <- IsOffset
     return(result)
   }
@@ -444,8 +518,7 @@ evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
     # unmarked
     POT <- do.call.matched(pairpot,
                            list(d=D,
-                                par=potpars,
-                                finite=finite))
+                                par=potpars))
     IsOffset <- attr(POT, "IsOffset")
   } else {
     # marked
@@ -466,13 +539,12 @@ evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
                                 list(d=D[relevant,  , drop=FALSE],
                                      tx=mI[relevant],
                                      tu=fk,
-                                     par=potpars,
-                                     finite=finite))
+                                     par=potpars))
         POTk <- ensure3Darray(POTk)
         if(is.null(POT)) {
-          # use first result of 'pairpot' to determine dimension
+          #' use first result of 'pairpot' to determine dimension
           POT <- array(, dim=c(length(I), 1, dim(POTk)[3]))
-          # capture information about offsets, and names of interaction terms
+          #' capture information about offsets, and names of interaction terms
           IsOffset <- attr(POTk, "IsOffset")
           Vnames <- dimnames(POTk)[[3]]
         }
@@ -490,7 +562,8 @@ evalPairPotential <- function(X, P, E, pairpot, potpars, R, finite=FALSE) {
   II <- rep(I, p)
   JJ <- rep(J, p)
   KK <- rep(1:p, each=length(I))
-  result[cbind(II,JJ,KK)] <- POT
+  IJK <- cbind(II, JJ, KK)
+  result[IJK] <- POT
   # finally identify identical pairs and set value to 0
   if(length(E) > 0) {
     E.rep <- apply(E, 2, rep, times=p)

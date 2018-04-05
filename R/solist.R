@@ -7,7 +7,7 @@
 ##
 ## plot.solist is defined in plot.solist.R
 ##
-## $Revision: 1.18 $ $Date: 2017/11/20 04:23:36 $
+## $Revision: 1.19 $ $Date: 2018/02/25 04:39:50 $
 
 anylist <- function(...) {
   x <- list(...)
@@ -106,10 +106,13 @@ as.solist <- function(x, ...) {
     class(x) <- c("solist", "anylist", "listof")
     return(x)
   }
-  if(!is.list(x) || is.sob(x))
+  #' needs to be enclosed in list() ?
+  if(!is.list(x) || (is.sob(x) && !inherits(x, "layered")))
     x <- list(x)
   return(do.call(solist, append(x, list(...))))
 }
+
+is.solist <- function(x) inherits(x, "solist")
 
 print.solist <- function (x, ...) {
   what <- if(inherits(x, "ppplist")) "point patterns" else
@@ -177,6 +180,8 @@ as.ppplist <- function(x, check=TRUE) {
   return(x)
 }
 
+is.ppplist <- function(x) inherits(x, "ppplist")
+
 as.imlist <- function(x, check=TRUE) {
   if(check) {
     x <- as.solist(x, promote=TRUE, check=TRUE)
@@ -186,6 +191,8 @@ as.imlist <- function(x, check=TRUE) {
   class(x) <- unique(c("imlist", "solist", "anylist", "listof", class(x)))
   return(x)
 }
+
+is.imlist <- function(x) inherits(x, "imlist")
 
 # --------------- counterparts of 'lapply' --------------------
 

@@ -77,6 +77,7 @@ static const R_CMethodDef CEntries[] = {
     {"Ediggra",          (DL_FUNC) &Ediggra,          11},
     {"Efiksel",          (DL_FUNC) &Efiksel,           9},
     {"Egeyer",           (DL_FUNC) &Egeyer,           11},
+    {"ESdiggra",         (DL_FUNC) &ESdiggra,         12},
     {"exact_dt_R",       (DL_FUNC) &exact_dt_R,       14},
     {"fardist2grid",     (DL_FUNC) &fardist2grid,     10},
     {"fardistgrid",      (DL_FUNC) &fardistgrid,      10},
@@ -180,6 +181,7 @@ static const R_CMethodDef CEntries[] = {
 static const R_CallMethodDef CallEntries[] = {
     {"close3IJpairs",        (DL_FUNC) &close3IJpairs,         5},
     {"close3pairs",          (DL_FUNC) &close3pairs,           5},
+    {"closePpair",           (DL_FUNC) &closePpair,            5},
     {"cross3IJpairs",        (DL_FUNC) &cross3IJpairs,         8},
     {"cross3pairs",          (DL_FUNC) &cross3pairs,           8},
     {"Cwhist",               (DL_FUNC) &Cwhist,                3},

@@ -34,9 +34,6 @@ options(useFancyQuotes=FALSE)
 This is a summary of changes that have been made 
 to the \spst\ package since the publication of the 
 accompanying book \cite{baddrubaturn15}.
-The book, published in December 2015,
-covers everything in \spst\ up to version \texttt{1.42-0}, 
-released in May 2015.
 
 <<echo=FALSE,results=hide>>=
 readSizeTable <- function(fname) {
@@ -72,12 +69,16 @@ newobj <- changes[["nobjects"]]
 newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 @ %$
 
+The book \cite{baddrubaturn15}, published in December 2015,
+covers everything in \spst\ up to version \texttt{1.42-0}, 
+released in May 2015.
 The current version of \spst\ is \texttt{\Sexpr{sversion}}.
 It contains \Sexpr{newobj} new functions
 and \Sexpr{newdat} new datasets
-introduced after May 2015. This document summarises the most important changes.
+introduced after May 2015. 
 
-This document also lists all \emph{important} bugs detected \emph{since 2010}.
+This document summarises the most important changes.
+It also lists all \emph{important} bugs detected \emph{since 2010}.
 
 <<echo=FALSE,results=hide,fig=FALSE>>=
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
@@ -150,8 +151,12 @@ the News and Release Notes for each update.
 
   \item Class \code{units} has been renamed \code{unitname} to avoid package collision.
 
-  \item Improvements and bug fixes for leverage and influence diagnostics.
+  \item More support for tessellations.
     
+  \item Fixed longstanding bug in leverage and influence diagnostics.
+    
+  \item Improvements and bug fixes for leverage and influence diagnostics.
+
   \item Tighter bounding box for \code{psp}, \code{lpp}, \code{linnet} objects.
     
   \item Improved layout in \code{plot.solist}
@@ -376,6 +381,14 @@ The following datasets have been added to the package.
 Following is a list of all the functions that have been added.
 
 \begin{itemize}
+    \item \code{summary.ssf}:
+      Summary method for a spatially sampled function (class \code{ssf}).
+      
+    \item \code{unstack.tess}:
+    Given a tessellation with multiple columns of marks,
+    take the columns one at a time, and return a list of tessellations,
+    each carrying only one of the original columns of marks.
+      
     \item \code{contour.leverage.ppm}:
     Method for \code{contour} for leverage functions of class 
     \code{leverage.ppm}
@@ -938,8 +951,15 @@ listed alphabetically.
 If the line segment pattern has marks, then the resulting linear network
 also carries these marks in the \verb!$lines! component.
 
-\item \texttt{as.owin}:
-    Now refuses to convert a \code{box3} to a two-dimensional window.
+\item \texttt{as.owin.default}:
+  \begin{itemize}
+  \item Now refuses to convert a \code{box3} to a two-dimensional window.
+  \item Now accepts a structure with entries named
+    \code{xmin},\code{xmax}, \code{ymin}, \code{ymax} in any order.
+    This handles objects of class \code{bbox} in the \pkg{sf} package.
+  \item Now detects objects of class \code{SpatialPolygons} and issues a
+    more helpful error message.
+  \end{itemize}
 
   \item \texttt{as.owin.data.frame}:
     New argument \texttt{step}
@@ -977,6 +997,7 @@ also carries these marks in the \verb!$lines! component.
    \item    Calculations are more robust against numerical rounding effects.
    \item The methods for classes \texttt{ppp}, \texttt{ppm}, \texttt{lpp}, 
      \texttt{lppm}, \texttt{slrm} have a new argument \texttt{interpolate}.
+   \item Monte Carlo test runs much faster.
    \end{itemize}
 
    
@@ -993,6 +1014,9 @@ also carries these marks in the \verb!$lines! component.
   \item \texttt{clickpoly}:
     The polygon is now drawn progressively as the user clicks new vertices.
 
+ \item \texttt{closepairs.ppp}:
+   New argument \code{periodic}.
+   
  \item \texttt{closepairs.ppp}, \texttt{closepairs.pp3}:
    \begin{itemize}
    \item New arguments \texttt{distinct} and \texttt{neat} allow more options.
@@ -1183,7 +1207,11 @@ also carries these marks in the \verb!$lines! component.
   allows leave-one-out computation of fitted value.
   
  \item \texttt{fitted.ppm}:
-  New option, \texttt{type="link"}.
+   \begin{itemize}
+   \item   New option, \texttt{type="link"}.
+   \item New argument \code{ignore.hardcore}.
+   \end{itemize}
+
   
   \item \texttt{funxy}:
     When the user calls a function that was created by \texttt{funxy},
@@ -1219,8 +1247,17 @@ also carries these marks in the \verb!$lines! component.
     so the code can handle larger datasets and finer quadrature schemes.
 
  \item \texttt{integral.linfun}:
-   New argument \texttt{delta} controls step length of
+   \begin{itemize}
+   \item    New argument \texttt{delta} controls step length of
    approximation to integral.
+   \item    Argument \code{domain} can be a tessellation.
+   \end{itemize}
+
+ \item \texttt{integral.linim}:
+   Argument \code{domain} can be a tessellation.
+
+ \item \texttt{integral.ssf}:
+   Argument \code{domain} can be a tessellation.
 
 \item \texttt{intensity.ppm}:
    Intensity approximation is now implemented for
@@ -1302,8 +1339,16 @@ also carries these marks in the \verb!$lines! component.
   \end{itemize}
 
  \item \texttt{leverage.ppm}, \texttt{influence.ppm}, \texttt{dfbetas.ppm}:
-    These methods now work for models that were fitted by logistic
+   \begin{itemize}
+   \item These methods now work for models that were fitted by logistic
     composite likelihood (\texttt{method='logi'}).
+  \item Computation has been vastly accelerated for models 
+    with Geyer interaction
+    fitted using isotropic or translation edge corrections.
+  \item  Virtually all models and edge corrections are now supported,
+    using a ``brute force'' algorithm. This can be slow in some cases.
+   \end{itemize}
+
 
  \item \texttt{linearK}, \texttt{linearpcf} and relatives: \\ 
    \begin{itemize}
@@ -1465,6 +1510,9 @@ also carries these marks in the \verb!$lines! component.
      New argument \texttt{close} for advanced use.
    \end{itemize}
 
+ \item \code{persp.funxy}:
+   Improved $z$-axis label.
+   
   \item \texttt{pixellate.ppp}:
     \begin{itemize}
     \item If the pattern is empty, the result is an integer-valued image
@@ -1576,17 +1624,25 @@ also carries these marks in the \verb!$lines! component.
      \item  The default colour for the points is now a transparent grey,
        if this is supported by the plot device.
      \item For a point pattern with continuous marks (``real numbers'')
-    the colour arguments \texttt{cols}, \texttt{fg}, \texttt{bg} can now 
-    be vectors of colour values, and will be used to determine
-    the default colour map for the marks.
-  \item Now recognises graphics parameters for text, such as 
-    \texttt{family} and \texttt{srt}
-  \item 
-    When \texttt{clipwin} is given, any parts of the boundary 
-    of the window of \texttt{x} that lie inside \texttt{clipwin} 
-    will also be plotted.
-  \end{itemize}
+       the colour arguments \texttt{cols}, \texttt{fg}, \texttt{bg} can now 
+       be vectors of colour values, and will be used to determine
+       the default colour map for the marks.
+     \item Now recognises graphics parameters for text, such as 
+       \texttt{family} and \texttt{srt}
+     \item 
+       When \texttt{clipwin} is given, any parts of the boundary 
+       of the window of \texttt{x} that lie inside \texttt{clipwin} 
+       will also be plotted.
+     \item 
+       Improved placement of symbol map legend when argument \texttt{symap} is given.
+     \end{itemize}
 
+  \item \code{plot.tess}:
+    This plot method can now fill each tile with a different colour.
+    New arguments \code{do.col}, \code{values}, \code{col} and 
+    \code{ribargs}.
+    Old argument \code{col} has been renamed \code{border} for consistency.
+    
    \item \texttt{plot.profilepl} ,\texttt{plot.quadratcount}, 
      \texttt{plot.quadrattest}, \texttt{plot.tess}:
      Now recognise graphics parameters for text, such as 
@@ -1669,8 +1725,12 @@ also carries these marks in the \verb!$lines! component.
     all the available options. [This is also the default.]
 
   \item \texttt{predict.ppm}:
-   Now recognises the arguments \code{dimyx} and \code{eps} for specifying the
-    resolution of the grid of prediction points.
+    \begin{itemize}
+    \item    Now recognises the arguments 
+      \code{dimyx} and \code{eps} for specifying the
+      resolution of the grid of prediction points.
+    \item New argument \code{ignore.hardcore}.
+    \end{itemize}
 
   \item \texttt{predict.rhohat}:    
      New argument \texttt{what} determines which value should be calculated:
@@ -1688,6 +1748,12 @@ also carries these marks in the \verb!$lines! component.
     \item New option: \verb!style="tk"!
     \end{itemize}
 
+    
+  \item \code{pseudoR2.ppm}, \code{pseudoR2.lppm}:
+    \begin{itemize}
+    \item     The null model now includes any offset terms, by default.
+    \item     New argument \code{keepoffset}.
+    \end{itemize}
 
 %%Q
    
@@ -1881,11 +1947,11 @@ also carries these marks in the \verb!$lines! component.
      Recognises the argument \texttt{finite} so that 
      \texttt{range(x, finite=TRUE)} works for a linim object \texttt{x}.
     
-   \item \texttt{summary.distfun}:
-     More information is printed.
-
-   \item \texttt{summary.funxy}:
-     More information is printed.
+   \item \texttt{summary.distfun}, \texttt{summary.funxy}:
+     \begin{itemize}
+     \item      More information is printed.
+     \item Pixel resolution can now be controlled.
+     \end{itemize}
 
    \item \texttt{summary.ppm}:
     New argument \texttt{fine} selects the algorithm for variance estimation.
@@ -2032,15 +2098,29 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
                    package="spatstat"))
 @ 
 
-Hundreds of bugs have been detected and fixed in \spst.
+\subsection{Bug history}
+
+Thousands of bugs have been detected and fixed in \spst.
 Bugs that may have affected the user are listed in the 
-package \texttt{NEWS} file. To read all these bug reports, type
+package \texttt{NEWS} file, and can be searched
+using the \R\ command \texttt{news} or the \spst\ command \texttt{bugfixes}. 
+To see all bugs in the history of \spst\ that may have affected the user, type
 <<eval=FALSE>>=
-news(grepl("^BUG", Category), package="spatstat")
+bugfixes
 @ 
 which currently produces a list of \Sexpr{nbugs} bugs,
 of which \Sexpr{nbugssince} were detected after publication of the
 book \cite{baddrubaturn15}.
+To see all bugs in \spst\ that were fixed after 30 June 2017, type
+<<eval=FALSE>>=
+bugfixes(sincedate="2017-06-30")
+@ 
+To see all bugs fixed after the book \cite{baddrubaturn15} was written, type
+<<eval=FALSE>>=
+bugfixes(sinceversion="1.42-0")
+@ 
+
+\subsection{Bug history}
 
 Following is a list of the {\bf most serious bugs} only, in order
 of potential impact.
@@ -2050,11 +2130,11 @@ of potential impact.
   {\small (Bug introduced in \texttt{spatstat {#1}}, {#2}; %
     fixed in \texttt{spatstat {#3}}, {#4})}%
 }
-  
+
+  %%% LEVEL 1
+\subsubsection{Serious Bugs, Always Wrong, Broad Impact} 
+
 \begin{itemize}
-  
-  %% LEVEL 1: always completely wrong, broad impact
-  
 \item \texttt{nncross.ppp}:
   Results were completely incorrect if $k > 1$.
   \bugger{1.31-2}{april 2013}{1.35-0}{december 2013}
@@ -2119,6 +2199,11 @@ of potential impact.
      \bugger{1.17-0}{october 2009}{1.31-1}{march 2013}
    \end{itemize}
 
+\item \texttt{nnmark, as.im.ssf}:
+  If \code{marks(X)} was a matrix rather than a data frame,
+  the results were completely incorrect.
+  \bugger{1.32-0}{august 2013}{1.55-1}{april 2018}
+
  \item \texttt{rVarGamma}:
    Simulations were incorrect; they were generated using the wrong value
    of the parameter \texttt{nu.ker}.  
@@ -2147,11 +2232,20 @@ of potential impact.
    due to a mathematical error.
    \bugger{1.25-0}{december 2011}{1.51-0}{may 2017}
 
-   %% LEVEL 2: often completely wrong, moderate impact
-   
+ \end{itemize}
+ 
+  %%% LEVEL 2
+ \subsubsection{Serious Bugs, Often Completely Wrong, Moderate Impact}
+
+ \begin{itemize}
  \item \texttt{bw.pcf}:
    Results were totally incorrect due to a typo.
    \bugger{1.51-0}{may 2017}{1.52-0}{august 2017}   
+
+ \item \texttt{predict.mppm}:
+   If the model included random effects, and if the library \pkg{MASS} was not loaded,
+   the predictions were on the log scale (i.e.\ they were logarithms of the correct values).
+   \bugger{1.43-0}{october 2015}{1.55-1}{april 2018}   
    
  \item \texttt{nnmap}, \texttt{nnmark}:
    Values were incorrect if the resulting pixel image
@@ -2216,13 +2310,37 @@ of potential impact.
    Results were completely incorrect.
    \bugger{1.39-0}{october 2014}{1.40-0}{december 2014}
 
-  %% LEVEL 3: substantially incorrect, moderate impact
+    \item \texttt{leverage.ppm}, \texttt{influence.ppm}, \texttt{dfbetas.ppm}:
+   Results were slightly incorrect for models with a hard core,
+   due to a mathematical error.
+   \bugger{1.51-0}{may 2017}{1.55-1}{april 2018}
 
+    \item \texttt{Ops.msr}:
+    If the input data contained a pixel image of the smoothed density,
+    this image was not updated; it was copied to the output unchanged.
+    Plots of the resulting measure were incorrect. 
+    \bugger{1.52-0}{august 2017}{1.55-1}{april 2018}
+
+  \item \verb![.linnet!: 
+    in calculating \verb!L[W]! where \texttt{W} is a window,
+    the code ignored segments of \code{L} that crossed \code{W}
+    without having a vertex in \code{W}.
+    \bugger{1.53-0}{september 2017}{1.55-1}{april 2015}
+  \end{itemize}
+  
+  %%% LEVEL 3
+  \subsubsection{Bugs, Substantially Incorrect, Moderate Impact}
+
+  \begin{itemize}
    \item \texttt{simulate.dppm}, \texttt{simulate.detpointprocfamily}:
     In dimensions higher than 2, the result was shifted so that
     it was centred at the origin.
     \bugger{1.54-0}{december 2017}{1.55-0}{january 2018}   
 
+    \item \texttt{integral.msr}: If the result was a matrix, 
+      it was the transpose of the correct answer.
+    \bugger{1.35-0}{december 2012}{1.55-1}{april 2018}   
+      
 \item \texttt{density.ppp}:
   Values of \verb!density(X, at="points")!
   and \verb!Smooth(X, at="points")!
@@ -2273,8 +2391,11 @@ of potential impact.
    Did not correctly handle one-line functions. 
    The resulting objects evaluated the wrong function in some cases.
    \bugger{1.45-0}{march 2016}{1.46-0}{july 2016}   
+ \end{itemize}   
 
-%% LEVEL 4: partially incorrect
+ %% LEVEL 4: 
+ \subsubsection{Partially Incorrect}
+ \begin{itemize}
    
  \item \texttt{model.matrix.ppm}:
    The attribute \texttt{assign} was omitted in some cases.
@@ -2304,6 +2425,11 @@ of potential impact.
  \item \texttt{leverage.ppm}, \texttt{influence.ppm}, \texttt{dfbetas.ppm}:
    Results were slightly incorrect for models fitted using the border
    correction.
+   \bugger{1.25-0}{december 2011}{1.54-0}{november 2017}
+
+ \item \texttt{leverage.ppm}:
+   The mean leverage value (shown as a contour level in \texttt{plot.leverage.ppm})
+   was slightly incorrect for Gibbs models.
    \bugger{1.25-0}{december 2011}{1.54-0}{november 2017}
 
  \item \texttt{vcov.ppm}, \texttt{suffstat}:
@@ -2462,8 +2588,9 @@ of potential impact.
   then \texttt{adjust} was effectively set to \texttt{FALSE}.
   \bugger{1.39-0}{october 2014}{1.44-1}{december 2015}
 
+  \item \verb![.linim!: the result sometimes had the wrong class.
+  \bugger{1.53-0}{september 2017}{1.55-1}{april 2015}
 \end{itemize}
-
 
 \begin{thebibliography}{1}
 \bibitem{badd10wshop}

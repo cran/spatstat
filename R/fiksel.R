@@ -2,7 +2,7 @@
 #
 #    fiksel.R
 #
-#    $Revision: 1.14 $	$Date: 2017/06/05 10:31:58 $
+#    $Revision: 1.18 $	$Date: 2018/03/15 07:37:41 $
 #
 #    Fiksel interaction 
 #    
@@ -68,7 +68,8 @@ Fiksel <- local({
          par    = list(r = NULL, hc = NULL, kappa=NULL),  # filled in later
          parnames = c("interaction distance",
                       "hard core distance",
-                      "rate parameter"), 
+                      "rate parameter"),
+         hasInf = TRUE, 
          selfstart = function(X, self) {
            # self starter for Fiksel
            nX <- npoints(X)
@@ -138,8 +139,9 @@ Fiksel <- local({
        can.do.fast=function(X,correction,par) {
          return(all(correction %in% c("border", "none")))
        },
-       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction, ...) {
-         # fast evaluator for Fiksel interaction
+       fasteval=function(X,U,EqualPairs,pairpot,potpars,correction,
+                         splitInf=FALSE, ...) {
+         ## fast evaluator for Fiksel interaction
          if(!all(correction %in% c("border", "none")))
            return(NULL)
          if(spatstat.options("fasteval") == "test")
@@ -147,10 +149,18 @@ Fiksel <- local({
          r <- potpars$r
          hc <- potpars$hc
          kappa <- potpars$kappa
-         hclose <- strausscounts(U, X, hc, EqualPairs)
+         hclose <- (strausscounts(U, X, hc, EqualPairs) != 0)
          fikselbit <- fikselterms(U, X, r, kappa, EqualPairs)
-         answer <- ifelseXB(hclose == 0, fikselbit, -Inf)
-         return(matrix(answer, ncol=1))
+         if(!splitInf) {
+           answer <- ifelseAX(hclose, -Inf, fikselbit)
+           answer <- matrix(answer, ncol=1L)
+         } else {
+           answer <- fikselbit
+           answer <- matrix(answer, ncol=1L)
+           attr(answer, "-Inf") <- hclose
+         }
+         return(answer)
+           
        },
        Mayer=function(coeffs, self) {
          # second Mayer cluster integral

@@ -73,13 +73,15 @@
 }
 \value{
   A \code{function} with arguments \code{x,y}.
-  The function also belongs to the class \code{"distfun"} which has
-  a method for \code{print}.
+  The function belongs to the class \code{"distfun"} which has
+  methods for \code{print} and \code{summary}.
   It also belongs to the class \code{"funxy"} which has methods
   for \code{plot}, \code{contour} and \code{persp}.
 }
 \seealso{
   \code{\link{distmap}},
+  \code{\link{summary.distfun}},
+  \code{\link{methods.funxy}},
   \code{\link{plot.funxy}}
 }
 \examples{
@@ -95,6 +97,8 @@
    d2 <- distfun(cells, k=2)
    d(0.5, 0.5)
    d2(0.5, 0.5)
+   domain(d)
+   summary(d)
 
    z <- d(japanesepines)
 }

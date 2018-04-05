@@ -3,7 +3,7 @@
 #
 #  spatially sampled functions
 #
-#  $Revision: 1.17 $  $Date: 2017/01/26 00:55:22 $
+#  $Revision: 1.19 $  $Date: 2018/03/07 03:31:17 $
 #
 
 ssf <- function(loc, val) {
@@ -24,9 +24,9 @@ ssf <- function(loc, val) {
 
 print.ssf <- function(x, ..., brief=FALSE) {
   if(brief) {
-    cat(paste("Spatial function sampled at", npoints(x), "locations\n"))
+    splat("Spatial function sampled at", npoints(x), "locations")
   } else {
-    cat("Spatially sampled function\n")
+    splat("Spatially sampled function")
     cat("Locations:\n\t")
     print(unmark(x))
   }
@@ -37,11 +37,23 @@ print.ssf <- function(x, ..., brief=FALSE) {
   } else d <- ncol(val) 
   if(!brief) {
     type <- if(d == 1) "Scalar" else paste(d, "-vector", sep="")
-    cat(paste(type, "valued function\n"))
+    splat(type, "valued function")
   }
   if(d > 1 && !is.null(nama <- colnames(val)))
-    cat(paste("Component names:", commasep(sQuote(nama)), "\n"))
+    splat("Component names:", commasep(sQuote(nama)))
   return(invisible(NULL))
+}
+
+summary.ssf <- function(object, ...) {
+  z <- NextMethod("summary")
+  class(z) <- c("summary.ssf", class(z))
+  return(z)
+}
+
+print.summary.ssf <- function(x, ...) {
+  splat("Spatially sampled function")
+  cat("Locations:\n\t")
+  NextMethod("print")
 }
 
 image.ssf <- function(x, ...) {
@@ -220,6 +232,11 @@ integral.ssf <- function(f, domain=NULL, ..., weights=attr(f, "weights")) {
     check.nvector(weights, npoints(f), oneok=TRUE)
     if(length(weights) == 1) weights <- rep(weights, npoints(f))
   }
+  if(is.tess(domain)) {
+    result <- sapply(tiles(domain), integral.ssf, f=f, weights=weights)
+    if(length(dim(result)) > 1) result <- t(result)
+    return(result)
+  }
   if(!is.null(domain)) {
     ok <- inside.owin(f, w=domain)
     f <- f[ok,]
@@ -234,5 +251,6 @@ integral.ssf <- function(f, domain=NULL, ..., weights=attr(f, "weights")) {
          apply(y, 2, weighted.mean, w=weights, na.rm=TRUE)
     a <- sum(weights)
   }
+  z[!is.finite(z)] <- 0
   return(z * a)
 }

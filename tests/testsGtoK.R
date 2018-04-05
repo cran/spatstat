@@ -59,7 +59,7 @@ local({
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.7 $   $Date: 2015/12/29 08:54:49 $
+#   $Revision: 1.8 $   $Date: 2018/02/25 03:44:33 $
 #
 
 require(spatstat)
@@ -82,11 +82,39 @@ local({
   ##
   d <- distmap(cells, dimyx=32)
   Z <- connected(d <= 0.06, method="interpreted")
+
+  ## smudge() and rasterfilter()
+  dd <- smudge(d)
 })
 
 
 
 
+#' indices.R
+#' Tests of code for understanding index vectors etc
+#' $Revision: 1.1 $ $Date: 2018/03/01 03:38:07 $
+
+require(spatstat)
+local({
+
+  a <- grokIndexVector(c(FALSE,TRUE),         10)
+  b <- grokIndexVector(rep(c(FALSE,TRUE), 7), 10)
+  d <- grokIndexVector(c(2,12),               10)
+  e <- grokIndexVector(letters[4:2], nama=letters)
+  f <- grokIndexVector(letters[10:1], nama=letters[1:5])
+  g <- grokIndexVector(-c(2, 5),              10)
+  h <- grokIndexVector(-c(2, 5, 15),          10)
+
+  Nam <- letters[1:10]
+  j  <- positiveIndex(-c(2,5), nama=Nam)
+  jj <- logicalIndex(-c(2,5), nama=Nam)
+  k  <- positiveIndex(-c(2,5), nama=Nam)
+  kk <- logicalIndex(-c(2,5), nama=Nam)
+  mm <- positiveIndex(c(FALSE,TRUE), nama=Nam)
+  nn <- positiveIndex(FALSE, nama=Nam)
+
+  aa <- ppsubset(cells, square(0.1))
+})
 #'   tests/ippm.R
 #'   Tests of 'ippm' class
 #'   $Revision: 1.1 $ $Date: 2017/06/06 06:32:00 $
@@ -134,7 +162,7 @@ local({
 })#
 # tests/kppm.R
 #
-# $Revision: 1.15 $ $Date: 2016/09/13 02:30:05 $
+# $Revision: 1.16 $ $Date: 2018/02/15 03:35:14 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -148,12 +176,18 @@ local({
  fitC <- update(fit, cells)
  fitCx <- update(fit, cells ~ x)
 
+ # vcov.kppm different algorithms
+ vc  <- vcov(fitx)
+ vc2 <- vcov(fitx, fast=TRUE)
+ vc3 <- vcov(fitx, fast=TRUE, splitup=TRUE)
+ vc4 <- vcov(fitx,            splitup=TRUE)
+ 
  # improve.kppm
  fitI <- update(fit, improve.type="quasi")
  fitxI <- update(fitx, improve.type="quasi")
  # vcov.kppm
- vc <- vcov(fitxI)
-
+ vcI <- vcov(fitxI)
+ 
   # plot.kppm including predict.kppm
  fitMC <- kppm(redwood ~ x, "Thomas")
  fitCL <- kppm(redwood ~ x, "Thomas", method="c")

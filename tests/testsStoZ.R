@@ -134,13 +134,44 @@ local({
 
 
 #'    tests/sparse3Darrays.R
-#'  Basic tests of sparse3array.R code
-#'  $Revision: 1.8 $ $Date: 2017/02/22 09:00:27 $
+#'  Basic tests of code in sparse3Darray.R and sparsecommon.R
+#'  $Revision: 1.10 $ $Date: 2018/03/01 14:39:11 $
 
 require(spatstat)
 local({
 
+  #' forming arrays
+  A1 <- matrix(c(1,0,0,2,
+                 3,0,4,0,
+                 0,0,0,5),
+               3, 4, byrow=TRUE)
+  A2 <- matrix(c(0,0,1,0,
+                 0,0,0,1,
+                 1,0,0,0),
+               3, 4, byrow=TRUE)
+  AA <- as.sparse3Darray(list(A1, A2))
+  dim(AA) <- dim(AA) + 1
+  
   if(require(Matrix)) {
+    A1 <- as(A1, "sparseMatrix")
+    A2 <- as(A2, "sparseMatrix")
+    AA <- as.sparse3Darray(list(A1, A2))
+
+    df <- data.frame(i=c(1,3,5), j=3:1, k=rep(2, 3), x=runif(3))
+    aa <- EntriesToSparse(df, NULL)
+    bb <- EntriesToSparse(df, 7)
+    cc <- EntriesToSparse(df, c(7, 4))
+    dd <- EntriesToSparse(df, c(7, 4, 3))
+  }
+
+  BB <- evalSparse3Dentrywise(AA + AA/2)
+})
+
+    
+local({
+
+  if(require(Matrix)) {
+
     M <- sparse3Darray(i=1:4, j=sample(1:4, replace=TRUE),
                        k=c(1,2,1,2), x=1:4, dims=c(5,5,2))
 
@@ -221,6 +252,25 @@ local({
     # no entries indexed
     Z[integer(0), integer(0), integer(0)] <- 42
     Z[matrix(, 0, 3)] <- 42
+
+    #' -----------  sparsecommon.R -----------------------
+    B <- sparseMatrix(i=1:3, j=3:1, x= 10 * (1:3), dims=c(4,4))
+    #' (and using sparse 3D array M and sparse vector V from above)
+
+    Bmap <- mapSparseEntries(B, 1, 4:1)
+    Mmap1 <- mapSparseEntries(M, 1, 5:1, across=3)
+    Mmap2 <- mapSparseEntries(M, 3, 2:1, conform=FALSE)
+    Mmap3 <- mapSparseEntries(M, 1, matrix(1:10, 5, 2), across=3)
+    
+    Vthrice  <- expandSparse(V, 3)
+    VthriceT <- expandSparse(V, 3, 1)
+
+    VV <- sparseVectorCumul(rep(1:3,2), rep(c(3,1,2), 2), 5)
+
+    Vsum <- applySparseEntries(V, sum)
+    Bdouble <- applySparseEntries(B, function(x) { 2 * x })
+    Mminus <- applySparseEntries(M, function(x) -x)
+    
   }
 })
 
@@ -512,7 +562,7 @@ local({
 #
 #  Thanks to Ege Rubak
 #
-#  $Revision: 1.6 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.9 $  $Date: 2018/03/28 08:41:20 $
 #
 
 require(spatstat)
@@ -539,7 +589,7 @@ local({
     stop("Non-symmetric matrix produced by vcov.ppm 'vectorclip' algorithm")
   if(asymmetric(vn))
     stop("Non-symmetric matrix produced by vcov.ppm Strauss algorithm")
-  
+    
   if(disagree(v, b))
     stop("Disagreement between vcov.ppm algorithms 'vector' and 'basic' ")
   if(disagree(v, vc))
@@ -586,7 +636,9 @@ local({
     stop("Disagreement between vcov.ppm algorithms for MultiStrauss model")
 
   ## Test that 'deltasuffstat' works for Hybrids
-  modHyb <- ppm(japanesepines ~ 1, Hybrid(Strauss(0.05), Strauss(0.1)))
+  modelHyb <- ppm(japanesepines ~ 1, Hybrid(Strauss(0.05), Strauss(0.1)))
+  vHyb <- vcov(modelHyb)
+
 })
 #
 # tests/windows.R

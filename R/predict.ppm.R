@@ -1,7 +1,7 @@
 #
 #    predict.ppm.S
 #
-#	$Revision: 1.101 $	$Date: 2018/01/13 09:30:28 $
+#	$Revision: 1.104 $	$Date: 2018/03/09 02:43:15 $
 #
 #    predict.ppm()
 #	   From fitted model obtained by ppm(),	
@@ -65,6 +65,7 @@ predict.ppm <- local({
                           level = 0.95,
                           X=data.ppm(object),
                           correction,
+                          ignore.hardcore=FALSE,
                           ...,
                           dimyx=NULL, eps=NULL, 
                           new.coef=NULL, check=TRUE, repair=TRUE) {
@@ -439,6 +440,8 @@ predict.ppm <- local({
     ## #############################################################
 
     needSE <- se || (interval != "none")
+
+    attribeauts <- list()
     
     if(trivial) {
       ## ###########  UNIFORM POISSON PROCESS #####################
@@ -523,10 +526,17 @@ predict.ppm <- local({
     
       ## evaluate interaction
       Vnew <- evalInteraction(X, U, E, inter, correction=correction,
+                              splitInf=ignore.hardcore,
                               check=check)
 
-      ## Negative infinite values signify cif = zero
-      cif.equals.zero <- matrowany(Vnew == -Inf)
+      if(!ignore.hardcore) {
+        ## Negative infinite values of potential signify cif = zero
+        cif.equals.zero <- matrowany(Vnew == -Inf)
+      } else {
+        ## returned as attribute, unless vacuous
+        cif.equals.zero <- attr(Vnew, "-Inf") %orifnull% logical(nrow(Vnew))
+      }
+      attribeauts <- c(attribeauts, list(isZero=cif.equals.zero))
     
       ## Insert the potential into the relevant column(s) of `newdata'
       if(ncol(Vnew) == 1) {
@@ -566,7 +576,7 @@ predict.ppm <- local({
                       changecoef=changedcoef)
     
       ## reset to zero if potential was zero
-      if(any(cif.equals.zero))
+      if(!ignore.hardcore && any(cif.equals.zero))
         z[cif.equals.zero] <- 0
     
       ## ###############################################################    
@@ -579,11 +589,15 @@ predict.ppm <- local({
     ##
     if(!want.image) {
       if(!se) {
-        out <- as.vector(z)
+        z <- as.vector(z)
+	attributes(z) <- c(attributes(z), attribeauts)
+        out <- z
       } else if(seonly) {
         out <- as.vector(zse)
       } else {
-        out <- list(as.vector(z), as.vector(zse))
+        z <- as.vector(z)
+	attributes(z) <- c(attributes(z), attribeauts)
+        out <- list(z, as.vector(zse))
         names(out) <- c(estimatename, "se")
       }
     }
