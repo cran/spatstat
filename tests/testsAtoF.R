@@ -1,3 +1,20 @@
+#'  tests/aucroc.R
+#'
+#'  AUC and ROC code
+#'
+#'  $Revision: 1.1 $ $Date: 2018/05/13 23:56:20 $
+
+require(spatstat)
+local({
+  fit <- kppm(redwood ~ I(y-x))
+  a <- roc(fit)
+  b <- auc(fit)
+  d <- roc(spiders, "x")
+  e <- auc(spiders, "y")
+  fut <- lppm(spiders ~ I(y-x))
+  f <- roc(fut)
+  g <- roc(fut)
+})
 ## badwindowcheck.R
 ## $Revision: 1.2 $  $Date: 2014/01/27 07:18:41 $
 ##
@@ -42,22 +59,29 @@ local({
   ## (2) linear networks
   set.seed(42)
   X <- runiflpp(20, simplenet)
+  cdf.test(X, "x")
+  cdf.test(X, "x", "cvm")
   fit <- lppm(X ~1)
   cdf.test(fit, "y")
   cdf.test(fit, "y", "cvm")
   cdf.test(fit, "y", "ad")
+
+  ## (3) Monte Carlo test for Gibbs model
+  fit <- ppm(cells ~ 1, Strauss(0.07))
+  cdf.test(fit, "x", nsim=9)
 })
 
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.7 $ $Date: 2018/04/04 09:50:30 $
+## $Revision: 1.13 $ $Date: 2018/06/07 05:55:00 $
 
 local({
   r <- 0.12
   close.all <- closepairs(redwood, r)
   close.ij <- closepairs(redwood, r, what="indices")
   close.ijd <- closepairs(redwood, r, what="ijd")
+  close.every <- closepairs(redwood, r, what="all", distinct=FALSE)
   stopifnot(identical(close.ij, close.all[c("i","j")]))
   stopifnot(identical(close.ijd, close.all[c("i","j","d")]))
 
@@ -67,6 +91,7 @@ local({
   cross.all <- crosspairs(on, off, r)
   cross.ij <- crosspairs(on, off, r, what="indices")
   cross.ijd <- crosspairs(on, off, r, what="ijd")
+  cross.every <- crosspairs(on, off, r, what="all", distinct=FALSE)
   stopifnot(identical(cross.ij, cross.all[c("i","j")]))
   stopifnot(identical(cross.ijd, cross.all[c("i","j","d")]))
 
@@ -78,7 +103,6 @@ local({
   if(!identical(cl, clt))
     stop("closepairs and closethresh disagree")
 
-  # compare with older, slower code
   reordered <- function(a) {
     o <- with(a, order(i,j))
     as.list(as.data.frame(a)[o,,drop=FALSE])
@@ -86,12 +110,32 @@ local({
   samesame <- function(a, b) {
     identical(reordered(a), reordered(b))
   }
-  spatstat.options(closepairs.newcode=FALSE)
+  
+  ## ...............................................
+  #' compare with older, slower code
+  op <- spatstat.options(closepairs.newcode=FALSE,
+                         crosspairs.newcode=FALSE)
+  ## ...............................................
   old.close.ij <- closepairs(redwood, r, what="indices")
   old.cross.ij <- crosspairs(on, off, r, what="indices")
   stopifnot(samesame(close.ij, old.close.ij))
   stopifnot(samesame(cross.ij, old.cross.ij))
-  spatstat.options(closepairs.newcode=TRUE)
+  # execute only:
+  old.close.every <- closepairs(redwood, r, what="all", distinct=FALSE)
+  old.cross.every <- crosspairs(on, off, r, what="all", distinct=FALSE)
+  ## ...............................................
+  spatstat.options(op)
+  ## ...............................................
+
+  ## ...............................................
+  #' alternative code - execution only
+  op <- spatstat.options(closepairs.newcode=FALSE,
+                         closepairs.altcode=TRUE)
+  alt.close.ij <- closepairs(redwood, r, what="indices")
+  alt.close.ijd <- closepairs(redwood, r, what="ijd")
+  alt.close.all <- closepairs(redwood, r, what="all")
+  spatstat.options(op)
+  ## ...............................................
   
   # Rasmus' example
   R <- 0.04
@@ -124,10 +168,33 @@ local({
   B <- pclose(redwood, RR, "C")
   if(!samesame(A,B))
     stop("closepairs.ppp(periodic=TRUE) gives wrong answer")
+
+  #' other functions that don't have a help file
+  niets <- crosspairquad(quadscheme(cells), 0.1)
+
+  #' other code blocks
+  u <- closepairs(cells, 0.09, periodic=TRUE, what="all")
+  v <- closepairs(cells, 0.07, twice=FALSE, neat=TRUE)
+  #' tight cluster - guess count does not work
+  Xc <- runifpoint(100, square(0.01))
+  Window(Xc) <- square(1)
+  z <- closepairs(Xc, 0.02, what="indices", distinct=FALSE)
+  z <- closepairs(Xc, 0.02, what="ijd",     distinct=FALSE)
+  z <- closepairs(Xc, 0.02, what="all",     distinct=FALSE)
+  #' same task, older code
+  aop <- spatstat.options(closepairs.newcode=FALSE)
+  z <- closepairs(Xc, 0.02, what="indices", distinct=FALSE)
+  z <- closepairs(Xc, 0.02, what="ijd",     distinct=FALSE)
+  z <- closepairs(Xc, 0.02, what="all",     distinct=FALSE)
+  spatstat.options(aop)
 })
+
+reset.spatstat.options()
 ## tests/colour.R
 ##
-## $Revision: 1.1 $ $Date: 2015/12/29 08:54:49 $
+##  Colour value manipulation and colour maps
+##
+## $Revision: 1.3 $ $Date: 2018/06/08 13:33:39 $
 ##
 
 require(spatstat)
@@ -135,6 +202,15 @@ require(spatstat)
 local({
    f <- function(n) grey(seq(0,1,length=n))
    z <- to.grey(f)
+
+   a <- colourmap(rainbow(12), range=as.Date(c("2018-01-01", "2018-12-31")))
+   print(a)
+   print(summary(a))
+
+   b <- colourmap(rainbow(12), inputs=month.name)
+   plot(b, vertical=FALSE)
+   plot(b, vertical=TRUE)
+   
 })
 # tests/correctC.R
 # check for agreement between C and interpreted code
@@ -205,6 +281,9 @@ local({
     stop("Algorithms for whist disagree")
   spatstat.options(op)
 })
+
+reset.spatstat.options()
+
 #'
 #'    tests/deltasuffstat.R
 #' 
@@ -242,44 +321,52 @@ local({
   modelA <- ppm(antsub ~ 1, HierStrauss(rmat, archy=c(2,1)), nd=16)
   flydelta(modelA, "HierStrauss")
 })
-#
-#  tests/density.R
-#
-#  Test behaviour of density methods and inhomogeneous summary functions
-#
-#  $Revision: 1.12 $  $Date: 2018/02/15 04:43:59 $
-#
+#'
+#'  tests/density.R
+#'
+#'  Test behaviour of density() methods,
+#'                    relrisk(), Smooth()
+#'                    and inhomogeneous summary functions
+#'
+#'  $Revision: 1.21 $  $Date: 2018/06/11 06:56:44 $
+#'
 
 require(spatstat)
 
 local({
 
-  # test all cases of density.ppp
+  # test all cases of density.ppp and densityfun.ppp
   
-  tryit <- function(...) {
+  tryit <- function(..., do.fun=TRUE) {
     Z <- density(cells, ..., at="pixels")
     Z <- density(cells, ..., at="points")
+    if(do.fun) {
+      f <- densityfun(cells, ...)
+      U <- f(0.1, 0.3)
+    }
     return(invisible(NULL))
   }
 
-  V <- diag(c(0.05^2, 0.07^2))
-  wdf <- data.frame(a=1:42,b=42:1)
 
   tryit(0.05)
   tryit(0.05, diggle=TRUE)
   tryit(0.05, se=TRUE)
   tryit(0.05, weights=expression(x))
-  tryit(0.05, weights=wdf)
+
+  V <- diag(c(0.05^2, 0.07^2))
   tryit(varcov=V)
   tryit(varcov=V, weights=expression(x))
-  tryit(varcov=V, weights=wdf)
+
+  wdf <- data.frame(a=1:42,b=42:1)
+  tryit(0.05, weights=wdf, do.fun=FALSE)
+  tryit(varcov=V, weights=wdf, do.fun=FALSE)
 
   # apply different discretisation rules
   Z <- density(cells, 0.05, fractional=TRUE)
   Z <- density(cells, 0.05, preserve=TRUE)
   Z <- density(cells, 0.05, fractional=TRUE, preserve=TRUE)
         
-  ## compare density.ppp(at="points") results with different algorithms
+  ## compare results with different algorithms
   crosscheque <- function(expr) {
     e <- as.expression(substitute(expr))
     ename <- sQuote(deparse(substitute(expr)))
@@ -303,7 +390,13 @@ local({
     invisible(NULL)
   }
 
+  ## execute & compare results of density(at="points") with different algorithms
+  wdfr <- cbind(1:npoints(redwood), 2)
   crosscheque(density(redwood, at="points", sigma=0.13, edge=FALSE))
+  crosscheque(density(redwood, at="points", sigma=0.13, edge=FALSE,
+                      weights=wdfr[,1]))
+  crosscheque(density(redwood, at="points", sigma=0.13, edge=FALSE,
+                      weights=wdfr))
 
   lam <- density(redwood)
   K <- Kinhom(redwood, lam)
@@ -317,6 +410,10 @@ local({
     return(TRUE)
   }
   pants()
+  pants(diggle=TRUE)
+  pants(edge=FALSE)
+  pants(diggle=TRUE, at="points")
+  pants(edge=FALSE, at="points")
   pants(casecontrol=FALSE)
   pants(relative=TRUE)
   pants(casecontrol=FALSE, relative=TRUE)
@@ -324,19 +421,69 @@ local({
   pants(casecontrol=FALSE,at="points")
   pants(relative=TRUE,at="points")
   pants(casecontrol=FALSE, relative=TRUE,at="points")
+  pants(relative=TRUE, control="Cataglyphis", case="Messor")
+  pants(relative=TRUE, control="Cataglyphis", case="Messor", at="points")
 
   ## more than 2 types
   pants(X=sporophores)
   pants(X=sporophores, at="points")
   pants(X=sporophores, relative=TRUE, at="points")
 
-  ## Smooth.ppp
-  Z <- Smooth(longleaf, 5, diggle=TRUE)
-  Z <- Smooth(longleaf, 1e-6) # generates warning about small bandwidth
+  ## likewise 'relrisk.ppm'
+  fit <- ppm(ants ~ x)
+  rants <- function(..., model=fit) {
+    a <- relrisk(model, sigma=100, se=TRUE, ...)
+    return(TRUE)
+  }
+  rants()
+  rants(diggle=TRUE)
+  rants(edge=FALSE)
+  rants(diggle=TRUE, at="points")
+  rants(edge=FALSE, at="points")
+  rants(casecontrol=FALSE)
+  rants(relative=TRUE)
+  rants(casecontrol=FALSE, relative=TRUE)
+  rants(at="points")
+  rants(casecontrol=FALSE,at="points")
+  rants(relative=TRUE,at="points")
+  rants(casecontrol=FALSE, relative=TRUE,at="points")
+  rants(relative=TRUE, control="Cataglyphis", case="Messor")
+  rants(relative=TRUE, control="Cataglyphis", case="Messor", at="points")
 
-  ## Smooth.ppp(at='points')
+  ## more than 2 types
+  fut <- ppm(sporophores ~ x)
+  rants(model=fut)
+  rants(model=fut, at="points")
+  rants(model=fut, relative=TRUE, at="points")
+  
+  ## execute Smooth.ppp and Smoothfun.ppp in all cases
+  stroke <- function(...) {
+    Z <- Smooth(longleaf, ..., at="pixels")
+    Z <- Smooth(longleaf, ..., at="points")
+    f <- Smoothfun(longleaf, ...)
+    f(120, 80)
+    return(invisible(NULL))
+  }
+  stroke()
+  stroke(5, diggle=TRUE)
+  stroke(1e-6) # generates warning about small bandwidth
+  stroke(varcov=diag(c(25, 36)))
+  stroke(5, weights=runif(npoints(longleaf)))
+  stroke(5, weights=expression(x))
+  strike <- function(...) {
+    Z <- Smooth(finpines, ..., at="pixels")
+    Z <- Smooth(finpines, ..., at="points")
+    f <- Smoothfun(finpines, ...)
+    f(4, 1)
+    return(invisible(NULL))
+  }
+  strike()
+  strike(varcov=diag(c(1.2, 2.1)))
+  strike(1.5, weights=runif(npoints(finpines)))
+  strike(1.5, weights=expression(y))
+
+  ## validity of Smooth.ppp(at='points')
   Y <- longleaf %mark% runif(npoints(longleaf), min=41, max=43)
-
   Z <- Smooth(Y, 5, at="points", leaveoneout=TRUE)
   rZ <- range(Z)
   if(rZ[1] < 40 || rZ[2] > 44)
@@ -349,6 +496,11 @@ local({
 
   ## compare Smooth.ppp results with different algorithms
   crosscheque(Smooth(longleaf, at="points", sigma=6))
+  wt <- runif(npoints(longleaf))
+  vc <- diag(c(25,36))
+  crosscheque(Smooth(longleaf, at="points", sigma=6, weights=wt))
+  crosscheque(Smooth(longleaf, at="points", varcov=vc))
+  crosscheque(Smooth(longleaf, at="points", varcov=vc, weights=wt))
 
   ## drop-dimension coding errors
   X <- longleaf
@@ -362,6 +514,66 @@ local({
   UU <- Smooth(X, 5, geometric=TRUE)
   V <- Smooth(longleaf, 5, geometric=TRUE, at="points")
   VV <- Smooth(X, 5, geometric=TRUE, at="points")
+})
+
+reset.spatstat.options()
+
+local({
+  #' Kmeasure, second.moment.engine
+  #' Expansion of window
+  Zno  <- Kmeasure(redwood, sigma=0.2, expand=FALSE)
+  Zyes <- Kmeasure(redwood, sigma=0.2, expand=TRUE)
+  #' All code blocks
+  A <- second.moment.calc(redwood, 0.1, what="all", debug=TRUE)
+  B <- second.moment.calc(redwood, varcov=diag(c(0.1,0.1)^2), what="all")
+  PR <- pixellate(redwood)
+  DR <- second.moment.calc(list(PR, PR), 0.1, debug=TRUE,
+                             npts=npoints(redwood), obswin=Window(redwood))
+})
+
+local({
+  #' bandwidth selection
+  op <- spatstat.options(n.bandwidth=8)
+#  bw.relrisk(urkiola, hmax=20) is tested in man/bw.relrisk.Rd
+  bw.relrisk(urkiola, hmax=20, method="leastsquares")
+  bw.relrisk(urkiola, hmax=20, method="weightedleastsquares")
+  spatstat.options(op)
+})
+
+local({
+  #' code in kernels.R
+  kernames <- c("gaussian", "rectangular", "triangular",
+                "epanechnikov", "biweight", "cosine", "optcosine")
+  X <- rnorm(20)
+  U <- runif(20)
+  for(ker in kernames) {
+    dX <- dkernel(X, ker)
+    fX <- pkernel(X, ker)
+    qU <- qkernel(U, ker)
+    m0 <- kernel.moment(0, 0, ker)
+    m1 <- kernel.moment(1, 0, ker)
+    m2 <- kernel.moment(2, 0, ker)
+    m3 <- kernel.moment(3, 0, ker)
+  }
+})
+
+reset.spatstat.options()
+
+#'
+#'      tests/diagnostique.R
+#'
+#'  Diagnostic tools such as diagnose.ppm, qqplot.ppm
+#'
+#'  $Revision: 1.1 $  $Date: 2018/05/22 11:57:12 $
+#'
+
+require(spatstat)
+local({
+  fit <- ppm(cells ~ x)
+  e <- envelope(cells, nsim=4, savepatterns=TRUE, savefuns=TRUE)
+  qf <- qqplot.ppm(fit, nsim=4, expr=e, plot.it=FALSE)
+  print(qf)
+  qg <- qqplot.ppm(fit, nsim=5, style="classical", plot.it=FALSE)
 })
 #'
 #'  tests/discarea.R
@@ -430,6 +642,20 @@ PYI <- linearpcfcross.inhom(Y, lambdaI=rep(intensity(Y1), npoints(Y1)),
                     lambdaJ=rep(intensity(Y2), npoints(Y2)))
 
 })
+#'
+#'   tests/dominic.R
+#'
+#'   Additional tests for Dominic Schuhmacher's code
+#'
+#'   $Revision: 1.1 $  $Date: 2018/04/29 11:01:30 $
+
+require(spatstat)
+local({
+  X <- runifpoint(10)
+  Y <- runifpoint(10)
+  d <- pppdist(X, Y, type="ace", show.rprimal=TRUE)
+  m <- pppdist.mat(X, Y, q=Inf, cutoff=0.001)
+})
 #  tests/emptymarks.R
 #
 # test cases where there are no (rows or columns of) marks
@@ -457,7 +683,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.6 $  $Date: 2018/02/28 03:11:23 $
+#  $Revision: 1.10 $  $Date: 2018/05/02 09:02:43 $
 #
 
 require(spatstat)
@@ -504,15 +730,24 @@ Ep <- envelope(fit, Kest, nsim=4, savepatterns=TRUE, global=TRUE)
 e1 <- envelope(cells, Kest, nsim=4, fix.n=TRUE)
 e2 <- envelope(amacrine, Kest, nsim=4, fix.n=TRUE)
 e3 <- envelope(amacrine, Kcross, nsim=4, fix.marks=TRUE)
+e4 <- envelope(finpines, Kest, nsim=4, fix.n=TRUE) # multiple columns of marks
+e5 <- envelope(finpines, Kest, nsim=4, fix.marks=TRUE)
 fit <- ppm(japanesepines ~ 1, Strauss(0.04))
-e4 <- envelope(fit, Kest, nsim=4, fix.n=TRUE)
+e6 <- envelope(fit, Kest, nsim=4, fix.n=TRUE)
 fit2 <- ppm(amacrine ~ 1, Strauss(0.03))
-e5 <- envelope(fit2, Gcross, nsim=4, fix.marks=TRUE)
+e7 <- envelope(fit2, Gcross, nsim=4, fix.marks=TRUE)
 
 # check pooling of envelopes in global case
 E1 <- envelope(cells, Kest, nsim=5, savefuns=TRUE, global=TRUE)
 E2 <- envelope(cells, Kest, nsim=12, savefuns=TRUE, global=TRUE)
 p12 <- pool(E1, E2)
+p12 <- pool(E1, E2, savefuns=TRUE)
+F1 <- envelope(cells, Kest, nsim=5,
+               savefuns=TRUE, savepatterns=TRUE, global=TRUE)
+F2 <- envelope(cells, Kest, nsim=12,
+               savefuns=TRUE, savepatterns=TRUE, global=TRUE)
+p12 <- pool(F1, F2)
+p12 <- pool(F1, F2, savefuns=TRUE, savepatterns=TRUE)
 E1r <- envelope(cells, Kest, nsim=5, savefuns=TRUE, global=TRUE,
                 ginterval=c(0.05, 0.15))
 E2r <- envelope(cells, Kest, nsim=12, savefuns=TRUE, global=TRUE,
@@ -534,7 +769,44 @@ local({
   A <- envelope(cells, nsim=5, alternative="less",
                 do.pwrong=TRUE, use.theory=FALSE,
                 savepatterns=TRUE, savefuns=TRUE)
+  print(A)
   B <- envelope(A, nsim=5, savefuns=TRUE)
+  D <- envelope(cells, "Lest", nsim=5)
+  fit <- ppm(cells ~ 1, Strauss(0.07))
+  U <- envelope(fit, nsim=3, simulate=expression(runifpoint(20)))
+  #'  envelopes based on sample variance
+  E <- envelope(cells, nsim=8, VARIANCE=TRUE)
+  G <- envelope(cells, nsim=8, VARIANCE=TRUE,
+                use.theory=FALSE, do.pwrong=TRUE)
+  print(G)
+  #' summary method
+  summary(E)
+  summary(envelope(cells, nsim=5, simulate=expression(runifpoint(42))))
+  #' weights argument
+  H1 <- envelope(cells, nsim=4, weights=npoints, savefuns=TRUE)
+  H2 <- envelope(cells, nsim=4, weights=npoints, savefuns=TRUE)
+  J <- envelope(cells, nsim=4, weights=npoints, VARIANCE=TRUE)
+  #' pooling with weights
+  H <- pool(H1, H2)
+  #' pooling envelopes with non-identical attributes
+  H0 <- envelope(cells, nsim=4, savefuns=TRUE)
+  HH <- pool(H0, H1)
+  #' undocumented/secret
+  K <- envelope(cells, nsim=4, saveresultof=npoints, collectrubbish=TRUE)
+  #' so secret I've even forgotten how to do it
+  M <- envelope(cells, nsim=4, internal=list(eject="patterns"))
+})
+
+local({
+  #' envelope computations in other functions
+  P <- lurking(cells, expression(x), envelope=TRUE, nsim=9)
+  print(P)
+  #' re-using envelope objects in other functions
+  A <- envelope(cells, nsim=9, savepatterns=TRUE, savefuns=TRUE)
+  S <- lurking(cells, expression(x), envelope=A, nsim=9)
+  #' envelope.envelope
+  B <- envelope(cells, nsim=5, savepatterns=TRUE, savefuns=FALSE)
+  envelope(B)
 })
 #
 #    tests/factorbugs.R
@@ -613,8 +885,9 @@ local({
 #  tests/fastK.R
 #
 # check fast and slow code for Kest
+#       and options not tested elsewhere
 #
-#   $Revision: 1.3 $   $Date: 2017/07/02 08:41:46 $
+#   $Revision: 1.4 $   $Date: 2018/04/13 04:01:25 $
 #
 require(spatstat)
 local({
@@ -622,8 +895,19 @@ local({
   Kb <- Kest(cells, nlarge=0)
   Ku <- Kest(cells, correction="none")
   Kbu <- Kest(cells, correction=c("none", "border"))
-  ## slow code, full set of corrections, sqrt transformation
-  Ldd <- Lest(unmark(demopat), correction="all", var.approx=TRUE)
+  ## slow code, full set of corrections, sqrt transformation, ratios
+  Ldd <- Lest(unmark(demopat), correction="all", var.approx=TRUE, ratio=TRUE)
+  ## Lotwick-Silverman var approx (rectangular window)
+  Loo <- Lest(cells, correction="all", var.approx=TRUE, ratio=TRUE)
+  ## Code for large dataset
+  nbig <- .Machine$integer.max
+  if(!is.null(nbig)) {
+    nn <- ceiling(sqrt(nbig))
+    if(nn < 1e6) Kbig <- Kest(runifpoint(nn),
+                              correction=c("border", "bord.modif", "none"),
+                              ratio=TRUE)
+  }
+  
   ## Kinhom
   lam <- density(cells, at="points", leaveoneout=TRUE)
   ## fast code
@@ -707,7 +991,7 @@ local({
 ##     tests/funnymarks.R
 ##
 ## tests involving strange mark values
-## $Revision: 1.3 $ $Date: 2015/12/29 08:54:49 $
+## $Revision: 1.5 $ $Date: 2018/06/14 01:50:19 $
 
 require(spatstat)
 local({
@@ -747,6 +1031,23 @@ local({
   print(X)
   Y <- X %mark% data.frame(id=1:42, date=endoftime, dd=eotDate)
   print(Y)
+  md <- markformat(endoftime)
+  
+  ## mark formats
+  Z <- Y
+  marks(Z) <- marks(Z)[1,,drop=FALSE]
+  ms <- markformat(solist(cells, redwood))
+  marks(Z) <- factor(1:npoints(Z))
+  marks(Z)[12] <- NA
+  mz <- is.multitype(Z)
+  cZ <- coerce.marks.numeric(Z)
+  stopifnot(is.multitype(cells %mark% data.frame(a=factor(1:npoints(cells)))))
+
+  a <- numeric.columns(finpines)
+  b1 <- numeric.columns(amacrine)
+  b2 <- coerce.marks.numeric(amacrine)
+  d <- numeric.columns(cells)
+  f <- numeric.columns(longleaf)
 })
 # 
 #    tests/fvproblems.R
@@ -825,4 +1126,23 @@ local({
   JX <- Jest(X)
 })
 
-  
+## various functionality in fv.R
+
+local({
+  M <- cbind(1:20, matrix(runif(100), 20, 5))
+  A <- as.fv(M)
+  fvlabels(A) <- c("r","%s(r)", "%s[A](r)", "%s[B](r)", "%s[C](r)", "%s[D](r)")
+  A <- rename.fv(A, "M", quote(M(r)))
+  A <- tweak.fv.entry(A, "V1", new.tag="r")
+  A[,3] <- NULL
+  A$hogwash <- runif(nrow(A))
+  #' bind.fv with qualitatively different functions
+  GK <- harmonise(G=Gest(cells), K=Kest(cells))
+  G <- GK$G
+  K <- GK$K
+  ss <- c(rep(TRUE, nrow(K)-10), rep(FALSE, 10))
+  U <- bind.fv(G, K[ss, ], clip=TRUE)
+  #'
+  H <- rebadge.as.crossfun(K, "H", "inhom", 1, 2)
+  H <- rebadge.as.dotfun(K, "H", "inhom", 3)
+})

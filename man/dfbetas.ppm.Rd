@@ -1,7 +1,7 @@
 \name{dfbetas.ppm}
 \alias{dfbetas.ppm}
 \title{
-  Parameter influence measure
+  Parameter Influence Measure
 }
 \description{
   Computes the deletion influence measure for each parameter
@@ -70,7 +70,7 @@
 }
 \value{
   An object of class \code{"msr"} representing a signed or vector-valued
-  measure. 
+  measure. This object can be printed and plotted. 
 }
 \references{
   Baddeley, A. and Chang, Y.M. and Song, Y. (2013)
@@ -83,13 +83,15 @@
 \seealso{
   \code{\link{leverage.ppm}},
   \code{\link{influence.ppm}},
-  \code{\link{ppmInfluence}}
+  \code{\link{ppmInfluence}}.
+
+  See \code{\link{msr}} for information on how to use a measure.
 }
 \examples{
    \testonly{op <- spatstat.options(npixel=32)}
    X <- rpoispp(function(x,y) { exp(3+3*x) })
-   fit <- ppm(X, ~x+y)
-   \testonly{fit <- ppm(X, ~x+y, nd=16)}
+   fit <- ppm(X ~x+y)
+   \testonly{fit <- ppm(X ~x+y, nd=16)}
    plot(dfbetas(fit))
    plot(Smooth(dfbetas(fit)))
    \testonly{spatstat.options(op)}

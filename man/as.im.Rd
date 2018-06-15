@@ -9,6 +9,7 @@
 \alias{as.im.funxy}
 \alias{as.im.distfun}
 \alias{as.im.nnfun}
+\alias{as.im.densityfun}
 \alias{as.im.Smoothfun}
 \alias{as.im.data.frame}
 \alias{as.im.default}
@@ -35,7 +36,7 @@
 
   \method{as.im}{function}(X, W=NULL, \dots,
         eps=NULL, dimyx=NULL, xy=NULL,
-        na.replace=NULL, strict=FALSE)
+        na.replace=NULL, strict=FALSE, drop=TRUE)
 
   \method{as.im}{funxy}(X, W=Window(X), \dots)
 
@@ -45,9 +46,11 @@
 
   \method{as.im}{nnfun}(X, W=NULL, \dots,
         eps=NULL, dimyx=NULL, xy=NULL,
-        na.replace=NULL)
+        na.replace=NULL, approx=TRUE)
 
-  \method{as.im}{Smoothfun}(X, W=NULL, \dots)
+  \method{as.im}{densityfun}(X, W=Window(X), \dots, approx=TRUE)
+
+  \method{as.im}{Smoothfun}(X, W=Window(X), \dots, approx=TRUE)
 
   \method{as.im}{leverage.ppm}(X, \dots, what=c("smooth", "nearest"))
 
@@ -96,15 +99,16 @@
     issued and \code{NULL} is returned.
   }
   \item{drop}{
-    Logical value indicating what to do when \code{X}
-    is a data frame with 3 columns. If \code{drop=TRUE} (the default),
-    the result is a pixel image. If \code{drop=FALSE}, the result is
-    a list containing one image.
+    Logical value indicating what to do if the result would
+    normally be a list of pixel images but the list contains
+    only one image.
+    If \code{drop=TRUE} (the default), the pixel image is extracted
+    and the result is a pixel image.
+    If \code{drop=FALSE}, this list is returned as the result.
   }
   \item{approx}{
    Logical value indicating whether to compute an approximate result
-   at faster speed, by using \code{\link{distmap}}, when \code{X} is
-   a distance function.
+   at faster speed.
  }
  \item{what}{
    Character string (partially matched) specifying which image data
@@ -154,13 +158,39 @@
     vector or factor of the same length as the input vectors,
     giving the pixel values.
     \item
-    an object of class \code{"funxy"} representing a \code{function(x,y,...)}
+    an object of class \code{"funxy"} representing a
+    \code{function(x,y,...)} defined in a spatial region.
+    The function will be evaluated as described above.
+    The window \code{W} defaults to the domain of definition of the function.
     \item
-    an object of class \code{"distfun"} representing a distance function
-    (created by the command \code{\link{distfun}}).
-    \item
-    an object of class \code{"nnfun"} representing a nearest neighbour function
-    (created by the command \code{\link{nnfun}}).
+    an object of class \code{"funxy"} which also belongs to one of
+    the following special classes. If \code{approx=TRUE} (the default),
+    the function will be evaluated approximately using a very fast
+    algorithm. If \code{approx=FALSE}, the function will be evaluated
+    exactly at each grid location as described above.
+    \itemize{
+      \item
+      an object of class \code{"distfun"} representing a distance function
+      (created by the command \code{\link{distfun}}).
+      The fast approximation is 
+      the distance transform \code{\link{distmap}}.
+      \item
+      an object of class \code{"nnfun"}
+      representing a nearest neighbour function
+      (created by the command \code{\link{nnfun}}).
+      The fast approximation is \code{\link{nnmap}}.
+      \item
+      an object of class \code{"densityfun"} representing a kernel
+      estimate of intensity (created by the command \code{\link{densityfun}}).
+      The fast approximation is the Fast Fourier Transform
+      algorithm in \code{\link{density.ppp}}.
+      \item
+      an object of class \code{"Smoothfun"} 
+      representing kernel-smoothed values
+      (created by the command \code{\link{Smoothfun}}).
+      The fast approximation is the Fast Fourier Transform
+      algorithm in \code{\link{Smooth.ppp}}.
+    }
     \item
     a list with entries \code{x, y, z} in the format expected by
     the standard \code{R} functions
@@ -223,6 +253,9 @@
   images, belonging to the class \code{"imlist"}.
   If \code{m = 3} and \code{drop=TRUE} (the default), then the
   result is a pixel image rather than a list containing this image.
+
+  If \code{X} is a \code{function(x,y)} which returns a matrix of
+  values, then \code{as.im(X, W)} will be a list of pixel images.
 }
 \value{
   A pixel image (object of class \code{"im"}),

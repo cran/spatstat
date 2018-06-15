@@ -67,7 +67,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:2094-2098
+### code chunk number 5: updates.Rnw:2198-2202
 ###################################################
 nbugs <- nrow(news(grepl("^BUG", Category), 
                    package="spatstat"))
@@ -76,19 +76,19 @@ nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category),
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:2108-2109 (eval = FALSE)
+### code chunk number 6: updates.Rnw:2212-2213 (eval = FALSE)
 ###################################################
 ## bugfixes
 
 
 ###################################################
-### code chunk number 7: updates.Rnw:2115-2116 (eval = FALSE)
+### code chunk number 7: updates.Rnw:2219-2220 (eval = FALSE)
 ###################################################
 ## bugfixes(sincedate="2017-06-30")
 
 
 ###################################################
-### code chunk number 8: updates.Rnw:2119-2120 (eval = FALSE)
+### code chunk number 8: updates.Rnw:2223-2224 (eval = FALSE)
 ###################################################
 ## bugfixes(sinceversion="1.42-0")
 

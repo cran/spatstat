@@ -3,7 +3,7 @@
 #
 #     Spatstat options and other internal states
 #
-#    $Revision: 1.80 $   $Date: 2017/06/05 10:31:58 $
+#    $Revision: 1.82 $   $Date: 2018/06/08 13:17:02 $
 #
 #
 
@@ -109,6 +109,12 @@ warn.once <- function(key, ...) {
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        ),
+       closepairs.altcode=list(
+         ## use alternative code for 'closepairs'
+         default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
        crossing.psp.useCall=list(
          ## use new code for 'crossing.psp'
          default=TRUE,
@@ -182,6 +188,12 @@ warn.once <- function(key, ...) {
        fastK.lgcp=list(
          ## whether to cut a few corners in 'lgcp.estK'
          default=FALSE,
+         check=function(x) { is.logical(x) && length(x) == 1 },
+         valid="a single logical value"
+       ),
+       fast.trigraph=list(
+         ## whether to use C function triograph or trigraph in edges2triangles
+         default=TRUE,
          check=function(x) { is.logical(x) && length(x) == 1 },
          valid="a single logical value"
        ),

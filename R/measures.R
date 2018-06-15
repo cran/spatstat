@@ -3,7 +3,7 @@
 #
 #  signed/vector valued measures with atomic and diffuse components
 #
-#  $Revision: 1.79 $  $Date: 2018/03/21 15:27:10 $
+#  $Revision: 1.83 $  $Date: 2018/04/19 09:00:18 $
 #
 msr <- function(qscheme, discrete, density, check=TRUE) {
   if(!is.quad(qscheme))
@@ -67,12 +67,22 @@ msr <- function(qscheme, discrete, density, check=TRUE) {
     colnames(discretepad) <- colnames(density)
   }
 
-  #
-  #
-  # Discretised measure (value of measure for each quadrature tile)
+  ##
+  ## Discretised measure (value of measure for each quadrature tile)
+  ## 
   val <- discretepad + wt * density
   if(is.matrix(density)) colnames(val) <- colnames(density)
-  #
+  ##
+  ##
+  
+  if(check && !all(ok <- complete.cases(val))) {
+    warning("Some infinite, NA or NaN increments were removed", call.=FALSE)
+    val         <- ok * val
+    discretepad <- ok * discretepad
+    density     <- ok * density
+  }
+  
+  ## finished
   out <- list(loc = U,
               val = val,
               atoms = Z,
@@ -81,6 +91,9 @@ msr <- function(qscheme, discrete, density, check=TRUE) {
               wt = wt)
   class(out) <- "msr"
   return(out)
+}
+
+weed.msr <- function(x) {
 }
 
 # Translation table for usage of measures
@@ -243,9 +256,13 @@ augment.msr <- function(x, ..., sigma, recompute=FALSE) {
     attr(smo, "sigma") <- sigma
     attr(x, "smoothdensity") <- smo
     return(x)
-  }   
-  ## smooth density unless constant
+  }
+  ## Single-type 
   xdensity <- as.matrix(x$density)
+  ## first weed out Inf, NA, NaN
+  if(!all(ok <- complete.cases(xdensity))) 
+    xdensity <- ok * xdensity
+  ## smooth density unless constant
   ra <- apply(xdensity, 2, range)
   varble <- apply(as.matrix(ra), 2, diff) > sqrt(.Machine$double.eps)
   ##
@@ -272,6 +289,15 @@ augment.msr <- function(x, ..., sigma, recompute=FALSE) {
   attr(smo, "sigma") <- sigma
   attr(x, "smoothdensity") <- smo
   return(x)
+}
+
+update.msr <- function(object, ...) {
+  #' reconcile internal data
+  if(!is.null(smo <- attr(object, "smoothdensity"))) {
+    sigma <- attr(smo, "sigma")
+    object <- augment.msr(object, ..., sigma=sigma, recompute=TRUE)
+  }
+  return(object)
 }
 
 plot.msr <- function(x, ..., add=FALSE,
@@ -451,9 +477,9 @@ plot.msr <- function(x, ..., add=FALSE,
     loc   <- unmark(loci)
     id    <- marks(loci)
     # extract
-    valu  <- valu[id, ]
-    disc  <- disc[id, ]
-    dens  <- dens[id, ]
+    valu  <- valu[id, , drop=FALSE]
+    disc  <- disc[id, , drop=FALSE]
+    dens  <- dens[id, , drop=FALSE]
     wt    <- wt[id]
     atoms <- atoms[id]
   }
@@ -627,6 +653,7 @@ measurePositive <- function(x) {
   y$discrete <- pmax(0, x$discrete)
   y$density  <- pmax(0, x$density)
   y$val      <- y$discrete + y$wt * y$density
+  y <- update(y)
   return(y)
 }
 
@@ -637,6 +664,7 @@ measureNegative <- function(x) {
   y$discrete <- -pmin(0, x$discrete)
   y$density  <- -pmin(0, x$density)
   y$val      <- y$discrete + y$wt * y$density
+  y <- update(y)
   return(y)
 }
 
@@ -647,11 +675,32 @@ measureVariation <- function(x) {
   y$discrete <- abs(x$discrete)
   y$density  <- abs(x$density)
   y$val      <- y$discrete + y$wt * y$density
+  y <- update(y)
   return(y)
 }
 
 totalVariation <- function(x) integral(measureVariation(x))
-  
+
+measureDiscrete <- function(x) {
+  if(!inherits(x, "msr"))
+    stop("x must be a measure", call.=FALSE)
+  y <- x
+  y$density[]  <- 0
+  y$val        <- y$discrete
+  y <- update(y)
+  return(y)
+}
+
+measureContinuous <- function(x) {
+  if(!inherits(x, "msr"))
+    stop("x must be a measure", call.=FALSE)
+  y <- x
+  y$discrete[] <- 0
+  y$val        <- y$wt * y$density
+  y <- update(y)
+  return(y)
+}
+
 harmonise.msr <- local({
 
   harmonise.msr <- function(...) {

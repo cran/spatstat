@@ -133,6 +133,7 @@ static const R_CMethodDef CEntries[] = {
     {"locxprod",         (DL_FUNC) &locxprod,         10},
     {"maxnnd2",          (DL_FUNC) &maxnnd2,           5},
     {"maxPnnd2",         (DL_FUNC) &maxPnnd2,          5},
+    {"mdtPOrect",        (DL_FUNC) &mdtPOrect,        14},
     {"minnnd2",          (DL_FUNC) &minnnd2,           5},
     {"minPnnd2",         (DL_FUNC) &minPnnd2,          5},
     {"nnd3D",            (DL_FUNC) &nnd3D,             7},
@@ -179,6 +180,9 @@ static const R_CMethodDef CEntries[] = {
 };
 
 static const R_CallMethodDef CallEntries[] = {
+    {"altVcloseIJDpairs",    (DL_FUNC) &altVcloseIJDpairs,     4},
+    {"altVcloseIJpairs",     (DL_FUNC) &altVcloseIJpairs,      4},
+    {"altVclosepairs",       (DL_FUNC) &altVclosepairs,        4},
     {"close3IJpairs",        (DL_FUNC) &close3IJpairs,         5},
     {"close3pairs",          (DL_FUNC) &close3pairs,           5},
     {"closePpair",           (DL_FUNC) &closePpair,            5},
@@ -197,6 +201,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"thinjumpequal",        (DL_FUNC) &thinjumpequal,         3},
     {"triDgraph",            (DL_FUNC) &triDgraph,             4},
     {"triDRgraph",           (DL_FUNC) &triDRgraph,            5},
+    {"trigraph",             (DL_FUNC) &trigraph,              3},
     {"triograph",            (DL_FUNC) &triograph,             3},
     {"trioxgraph",           (DL_FUNC) &trioxgraph,            4},
     {"VcloseIJDpairs",       (DL_FUNC) &VcloseIJDpairs,        4},

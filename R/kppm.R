@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.136 $ $Date: 2017/10/16 03:24:24 $
+# $Revision: 1.139 $ $Date: 2018/05/12 16:20:53 $
 #
 
 kppm <- function(X, ...) {
@@ -43,9 +43,9 @@ kppm.formula <-
     thecall[ncall + 1:nargh] <- argh
     names(thecall)[ncall + 1:nargh] <- names(argh)
   }
-#  result <- eval(thecall, 
-#                 envir=if(!is.null(data)) data else parent.frame(),
-#                 enclos=if(!is.null(data)) parent.frame() else baseenv())
+##  result <- eval(thecall, 
+##                 envir=if(!is.null(data)) data else parent.frame(),
+##                 enclos=if(!is.null(data)) parent.frame() else baseenv())
   callenv <- list2env(as.list(data), parent=parent.frame())
   result <- eval(thecall, envir=callenv, enclos=baseenv())
 
@@ -1095,8 +1095,13 @@ print.kppm <- print.dppm <- function(x, ...) {
         if(isDPP) "determinantal" else if(isPCP) "cluster" else "Cox",
         "point process model")
 
-  if(waxlyrical('extras', terselevel) && nchar(x$Xname) < 20)
-    splat("Fitted to point pattern dataset", sQuote(x$Xname))
+  Xname <- x$Xname
+  if(waxlyrical('extras', terselevel) && nchar(Xname) < 20) {
+    has.subset <- ("subset" %in% names(x$call))
+    splat("Fitted to",
+          if(has.subset) "(a subset of)" else NULL,
+          "point pattern dataset", sQuote(Xname))
+  }
 
   if(waxlyrical('gory', terselevel)) {
     switch(x$Fit$method,
@@ -1432,14 +1437,8 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
   }
   if(verbose)
     cat("Done.\n")
-  # pack up
-  if(nsim == 1 && drop) {
-    out <- out[[1L]]
-  } else {
-    out <- as.solist(out)
-    if(nsim > 0)
-      names(out) <- paste("Simulation", 1:nsim)
-  }
+  #' pack up
+  out <- simulationresult(out, nsim, drop)
   out <- timed(out, starttime=starttime)
   attr(out, "seed") <- RNGstate
   return(out)

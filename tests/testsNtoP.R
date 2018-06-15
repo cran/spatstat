@@ -447,7 +447,7 @@ local({
   sl2fitup <- update(sl2fit, use.internal=TRUE)
 })
 
-#
+grep#
 #   tests/ppmtricks.R
 #
 #   Test backdoor exits and hidden options in ppm
@@ -455,7 +455,7 @@ local({
 #
 #   Plus assorted tricks
 #
-#   $Revision: 1.6 $  $Date: 2018/02/15 04:06:40 $
+#   $Revision: 1.9 $  $Date: 2018/05/11 02:19:32 $
 #
 require(spatstat)
 local({
@@ -483,9 +483,10 @@ local({
   mungp   <- profilepl(ss, StraussHard, trend=~dM, Q=cats)
 
   ## (4) splitting large quadschemes into blocks
-  op <- spatstat.options(maxmatrix=5000)
+  mop <- spatstat.options(maxmatrix=5000)
   pr <- predict(ppm(cells ~ x, AreaInter(0.05)))
-
+  spatstat.options(mop)
+  
   ## (5) shortcuts in summary.ppm
   ## and corresponding behaviour of print.summary.ppm
   print(summary(fit, quick=TRUE))
@@ -498,27 +499,116 @@ local({
   suffstat.poisson(fitP, cells)
   fit0 <- killinteraction(fit)
   suffstat.poisson(fit0, cells)
-  
+
+  ## (7) support for class ppm
+  Z <- as.im(function(x,y){x}, Window(cells))
+  fitZ <- ppm(cells ~ Z)
+  U <- getppmOriginalCovariates(fitZ)
+  logLik(fitZ, absolute=TRUE)
+  fitNot <- ppm(redwood ~1, Strauss(0.1))
+  fitFast <- emend(fitNot, trace=TRUE)
+  op <- spatstat.options(project.fast=TRUE)
+  fitFast <- emend(fitNot, trace=TRUE)
   spatstat.options(op)
+  
+  fut <- kppm(redwood ~ x)
+  A <- quad.ppm(fut)
+
+  ## (8) support for class profilepl
+  rr <- data.frame(r=seq(0.05, 0.15, by=0.02))
+  ps <- profilepl(rr, Strauss, cells)
+  plot(ps)
+  simulate(ps, nrep=1e4)
+  parameters(ps)
+  fitin(ps)
+  predict(ps, type="cif")
 })
 
+reset.spatstat.options()
+#'
+#'   tests/ppp.R
+#'
+#'   $Revision: 1.2 $ $Date: 2018/06/03 09:06:56 $
+#'
+#'  Untested cases in ppp() or associated code
+
+require(spatstat)
+local({
+  X <- runifpoint(10, letterR)
+  Y <- runifpoint(3, complement.owin(letterR))
+
+  #' test handling of points out-of-bounds
+  df <- rbind(as.data.frame(X), as.data.frame(Y))
+  A <- ppp(df$x, df$y, window=letterR, marks=1:13)
+  #' test handling of points with bad coordinates
+  B <- ppp(X$x, c(X$y[1:7], c(Inf, NA, NaN)), window=letterR, marks=1:10)
+  D <- ppp(X$x, c(X$y[1:7], c(Inf, NA, NaN)), window=letterR,
+           marks=data.frame(id=1:10, u=runif(10)))
+
+  #' test print/summary methods on these bad objects
+  print(A)
+  print(B)
+  print(D)
+  summary(A)
+  summary(B)
+  summary(D)
+  
+  #' subset operator --- cases not covered elsewhere
+  #'   subset index is a logical image
+  Z <- distmap(letterR, invert=TRUE)
+  V <- (Z > 0.2)
+  XV <- X[V]
+  #'   multiple columns of marks
+  fun3 <- finpines[1:3]
+  #'   multiple columns of marks, one of which is a factor
+  U <- finpines
+  marks(U)[,2] <- factor(c(rep("A", 60), rep("B", npoints(U)-60)))
+  UU <- U[1:3, drop=TRUE]
+
+  #' test as.ppp for spatial package if it is not installed
+  FR <- Frame(letterR)
+  as.ppp(list(x=X$x, y=X$y,
+              xl=FR$xrange[1], xu=FR$xrange[2],
+              yl=FR$yrange[1], yu=FR$yrange[2]))
+
+  #' various utilities
+  periodify(cells, 2)
+  periodify(demopat, 2)
+})
 #
 # tests/ppx.R
 #
 # Test operations for ppx objects
 #
-#  $Revision: 1.3 $ $Date: 2017/03/02 01:19:13 $
+#  $Revision: 1.4 $ $Date: 2018/04/30 09:28:15 $
 #
 
 require(spatstat)
 
 local({
-  df <- data.frame(x=c(1,2,2,1), y=c(1,2,3,1), z=c(2,3,4,2))
+  #' general tests
+  df <- data.frame(x=c(1,2,2,1)/4, y=c(1,2,3,1)/4, z=c(2,3,4,3)/5)
   X <- ppx(data=df, coord.type=rep("s", 3), domain=box3())
   unique(X)
   duplicated(X)
   multiplicity(X)
+  print(X)
+  plot(X)
+  domain(X)
+  unitname(X) <- c("metre", "metres")
+  unitname(X)
+  
+  #' subset operator
+  X[integer(0)]
+  Y <- X %mark% data.frame(a=df$x, b=1:4)
+  Y[1:2]
+  Y[FALSE]
 
+  #' two dimensions
+  A <- ppx(data=df[,1:2], coord.type=rep("s", 2), domain=square(1))
+  plot(A)
+  
+  #' bug
   stopifnot(identical(unmark(chicago[1]),
                       unmark(chicago)[1]))
 
@@ -526,13 +616,14 @@ local({
   U <- chicago[integer(0)]
   V <- U %mark% 1
   V <- U %mark% factor("a")
+
 })
 #
 # tests/prediction.R
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.4 $ $Date: 2016/03/04 03:14:40 $
+#  $Revision: 1.5 $ $Date: 2018/04/30 04:32:49 $
 #
 
 require(spatstat)
@@ -571,7 +662,23 @@ local({
   a <- relrisk(fut, control=2, relative=TRUE)
   a <- relrisk(fut, se=TRUE)
   a <- relrisk(fut, relative=TRUE, se=TRUE)
-  
+
+  ## untested cases of predict.ppm
+  fit0 <- ppm(cells)
+  a <- predict(fit0, interval="confidence")
+  a <- predict(fit0, interval="confidence", type="count")
+  fit  <- ppm(cells ~ x)
+  b <- predict(fit, type="count",                            se=TRUE)
+  b <- predict(fit, type="count", window=square(0.5),        se=TRUE)
+  b <- predict(fit, type="count", window=quadrats(cells, 3), se=TRUE)
+  ## superseded usages
+  b <- predict(fit, type="se", getoutofjail=TRUE)
+  b <- predict(fit, total=TRUE)
+  b <- predict(fit, total=square(0.5))
+  b <- predict(fit, total=quadrats(cells, 3))
+
+  ## supporting code
+  u <- model.se.image(fit, square(0.5), what="cv")
 })
 
 #

@@ -13,7 +13,9 @@
                       do.labels=FALSE,
                       labels=tilenames(x), labelargs=list(),
                       do.col=FALSE,
-                      values=marks(x), col=NULL, ribargs=list())
+                      values=marks(x),
+                      multiplot=TRUE, 
+                      col=NULL, ribargs=list())
 }
 \arguments{
   \item{x}{Tessellation (object of class \code{"tess"}) to be plotted.}
@@ -55,6 +57,10 @@
     or if the argument \code{values=NULL} is given, the default is
     a factor giving the tile identifier.
   }
+  \item{multiplot}{
+    Logical value giving permission to display multiple plot panels.
+    This applies when \code{do.col=TRUE} and \code{ncol(values) > 1}.
+  }
   \item{col}{
     A vector of colours for each of the \code{values},
     or a \code{\link{colourmap}} that maps these values to colours.
@@ -68,10 +74,26 @@
   This is a method for the generic \code{\link{plot}} function
   for the class \code{"tess"} of tessellations (see \code{\link{tess}}).
 
-  The arguments \code{\dots} control the appearance of the plot.
-  They are passed to \code{\link{segments}},
-  \code{\link{plot.owin}} or \code{\link{plot.im}}, depending on the
-  type of tessellation. 
+  The window of the tessellation is plotted, and then the tiles of the
+  tessellation are plotted in their correct positions in the window.
+
+  Rectangular or polygonal tiles are plotted individually
+  using \code{\link{plot.owin}}, while a
+  tessellation represented by a pixel image
+  is plotted using \code{\link{plot.im}}.
+  The arguments \code{\dots} control the appearance of the plot,
+  and are passed to \code{\link{segments}},
+  \code{\link{plot.owin}} or \code{\link{plot.im}} as appropriate.
+
+  If \code{do.col=TRUE}, then the tiles of the tessellation are filled
+  with colours determined by the argument \code{values}.
+  By default, these values are the marks associated with each of the tiles.
+  If there is more than one column of marks or values,
+  then the default behaviour (if \code{multiplot=TRUE})
+  is to display several plot panels, one for
+  each column of mark values. Then the arguments \code{\dots} are
+  passed to \code{\link{plot.solist}} to determine the arrangement of
+  the panels. 
 }
 \value{
   (Invisible) window of class \code{"owin"} specifying a bounding box
@@ -84,16 +106,25 @@
   \code{\link{tess}}
 }
 \examples{
-  A <- tess(xgrid=0:4,ygrid=0:4)
-  plot(A, border="blue", lwd=2, lty=2)
-  plot(A, do.col=TRUE, values=runif(16), border="white")
-  B <- A[c(1, 2, 5, 7, 9)]
+  Rect <- tess(xgrid=0:4,ygrid=0:4)
+  Diri <- dirichlet(runifpoint(7))
+  plot(Diri)
+  plot(Rect, border="blue", lwd=2, lty=2)
+  plot(Rect, do.col=TRUE, border="white")
+  plot(Rect, do.col=TRUE, values=runif(16), border="white")
+  B <- Rect[c(1, 2, 5, 7, 9)]
   plot(B, hatch=TRUE)
+  plot(Diri, do.col=TRUE)
+  plot(Diri, do.col=TRUE, do.labels=TRUE, labelargs=list(col="white"),
+             ribbon=FALSE)
   v <- as.im(function(x,y){factor(round(5 * (x^2 + y^2)))}, W=owin())
   levels(v) <- letters[seq(length(levels(v)))]
-  E <- tess(image=v)
-  plot(E)
-  plot(E, col=rainbow(11), ribargs=list(las=1))
+  Img <- tess(image=v)
+  plot(Img)
+  plot(Img, col=rainbow(11), ribargs=list(las=1))
+  a <- tile.areas(Diri)
+  marks(Diri) <- data.frame(area=a, random=runif(7, max=max(a)))
+  plot(Diri, do.col=TRUE, equal.ribbon=TRUE)
 }
 
 \author{

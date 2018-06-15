@@ -227,6 +227,8 @@
 \alias{influence.ppmInfluence}
 \alias{inpoint}
 \alias{instantiate.interact}
+\alias{integral.leverage.ppm}
+\alias{integral.influence.ppm}
 \alias{interactionfamilyname}
 \alias{intermaker}
 \alias{intX.owin}     
@@ -349,6 +351,7 @@
 \alias{match.kernel}
 \alias{maxflow}
 \alias{mctestSigtraceEngine}
+\alias{mean.leverage.ppm}
 \alias{meanlistfv}
 \alias{meanX.owin}
 \alias{meanY.owin}
@@ -399,6 +402,7 @@
 \alias{plot.barplotdata}
 \alias{plot.bw.frac}
 \alias{plot.bw.optim}
+\alias{plot.indicfun}
 \alias{plot.localpcfmatrix}
 \alias{plot.lurk}
 \alias{plot.minconfit}
@@ -408,7 +412,6 @@
 \alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{plot.spatialcdf}
-\alias{plot.studpermutest}
 \alias{ppllengine}
 \alias{ppm.default}
 \alias{ppmCovariates}
@@ -430,6 +433,7 @@
 \alias{print.bw.optim}
 \alias{print.colourmap}
 \alias{print.diagppm}
+\alias{print.densityfun}
 \alias{print.distfun}
 \alias{print.detpointprocfamily}
 \alias{print.detpointprocfamilyfun}
@@ -608,15 +612,19 @@
 \alias{shiftxypolygon}              
 \alias{signalStatus}
 \alias{simulate.profilepl}
+\alias{simulationresult}
 \alias{simulrecipe}              
 \alias{slr.prepare}
 \alias{slrAssemblePixelData}
 \alias{Smooth.solist}
+\alias{Smooth.leverage.ppm}
+\alias{Smooth.influence.ppm}
 \alias{smoothcrossEngine}              
 \alias{smoothpointsEngine}
 \alias{smudge}
 \alias{sort.im}
 \alias{sortalongsegment}
+\alias{spatstat.deldir.setopt}
 \alias{spatstat.xy.coords}
 \alias{spatstatClusterModelInfo}
 \alias{spatstatDPPModelInfo}
@@ -669,6 +677,7 @@
 \alias{unstackFilter}
 \alias{update.im}
 \alias{update.ippm}
+\alias{update.msr}
 \alias{update.rmhstart}
 \alias{validradius}
 \alias{validate2Dkernel}
@@ -1022,6 +1031,8 @@ impliedcoefficients(object, tag)
 \method{influence}{ppmInfluence}(model, \dots)
 inpoint(W)
 instantiate.interact(x, par)
+\method{integral}{leverage.ppm}(f, domain, \dots)
+\method{integral}{influence.ppm}(f, domain, \dots)
 interactionfamilyname(x)
 intermaker(f, blank)
 intX.owin(w)
@@ -1162,6 +1173,7 @@ match.kernel(kernel)
 maxflow(costm)
 mctestSigtraceEngine(R, devdata, devsim, \dots,
      interpolate, confint, alpha, exponent, unitname)
+\method{mean}{leverage.ppm}(x, ...)
 meanlistfv(z, \dots)
 meanX.owin(w)            
 meanY.owin(w)
@@ -1240,6 +1252,7 @@ plotPolygonBdry(x, \dots)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{bw.frac}(x, \dots)
 \method{plot}{bw.optim}(x, \dots, showopt, optargs)
+\method{plot}{indicfun}(x, W, \dots, main)
 \method{plot}{lurk}(x, \dots, shade)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
@@ -1251,14 +1264,6 @@ plotPolygonBdry(x, \dots)
            monochrome=spatstat.options('monochrome'),
            limcol=if(monochrome) "black" else "red")
 \method{plot}{spatialcdf}(x, \dots, xlab, ylab)
-\method{plot}{studpermutest}(x, fmla, \dots,
-        lty = NULL, col = NULL, lwd = NULL,
-        lty.theo = NULL, col.theo = NULL, lwd.theo = NULL,
-        lwd.mean = if (meanonly) 1 else NULL, lty.mean = lty, col.mean = col, 
-        separately = FALSE, meanonly = FALSE,
-        main = if (meanonly) "group means" else NULL,
-        xlim = NULL, ylim = NULL, ylab = NULL, legend = !add,
-        legendpos = "topleft", lbox = FALSE, add = FALSE)
 ppllengine(X, Y, action="project", check=FALSE)
 \method{ppm}{default}(Q, trend, interaction,
        \dots, covariates, data, covfunargs, subset, clipwin,
@@ -1290,6 +1295,7 @@ prepareTitle(main)
 \method{print}{bw.frac}(x, \dots)
 \method{print}{bw.optim}(x, \dots)
 \method{print}{colourmap}(x, \dots)
+\method{print}{densityfun}(x, \dots)
 \method{print}{diagppm}(x, \dots)
 \method{print}{distfun}(x, \dots)
 \method{print}{detpointprocfamily}(x, \dots)
@@ -1462,7 +1468,7 @@ rmpoint.I.allim(n, f, types)
 \method{row.names}{hyperframe}(x) <- value
 rpoint.multi(n, f, fmax, marks, win, giveup, verbose, warn, nsim, drop)
 runifpoispp(lambda, win, \dots, nsim, drop)
-runifpoisppOnLines(lambda, L, nsim)
+runifpoisppOnLines(lambda, L, nsim, drop)
 runifrect(n, win, nsim, drop)
 safedeldir(X)
 safelookup(Z, x, factor, warn)
@@ -1489,10 +1495,13 @@ sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 shiftxy(X, vec = c(0, 0))
 shiftxypolygon(p, vec = c(0, 0))
 \method{simulate}{profilepl}(object, \dots)
+simulationresult(resultlist, nsim, drop, NameBase)
 simulrecipe(type, expr, envir, csr, pois, constraints)
 slr.prepare(CallInfo, envir, data, dataAtPoints, splitby, clip)
 slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 \method{Smooth}{solist}(X, \dots)
+\method{Smooth}{leverage.ppm}(X, \dots)
+\method{Smooth}{influence.ppm}(X, \dots)
 smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
                     weights, varcov, sorted)
 smoothpointsEngine(x, values, sigma, \dots,
@@ -1500,11 +1509,12 @@ smoothpointsEngine(x, values, sigma, \dots,
 smudge(X)
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
+spatstat.deldir.setopt(use.trigrafS, use.trigraf, debug.delaunay)
 spatstat.xy.coords(x, y)
 spatstatClusterModelInfo(name, onlyPCP)
 spatstatDPPModelInfo(model)
 spatstatRmhInfo(cifname)
-spatialCDFframe(model, covariate, \dots)
+spatialCDFframe(model, covariate, \dots, jitter)
 spatialCDFtest(model, covariate, test, \dots,
          dimyx, eps, interpolate, jitter,
          nsim, verbose, modelname, covname, dataname)
@@ -1556,6 +1566,7 @@ x \%unit\% u
 unstackFilter(x)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
+\method{update}{msr}(object, \dots) 
 \method{update}{rmhstart}(object, \dots)
 validradius(r, caller)
 validate2Dkernel(kernel, fatal)

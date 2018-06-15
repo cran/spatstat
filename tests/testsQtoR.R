@@ -1,6 +1,25 @@
+#'
+#'    tests/quadschemes.R
+#'
+#'   $Revision: 1.2 $ $Date: 2018/06/11 08:36:39 $
+#'
+
+require(spatstat)
+local({
+  qu <- quadscheme(cells)
+  qm <- quadscheme(amacrine)
+  plot(qu)
+  plot(qm)
+  a <- param.quad(qu)
+  a <- param.quad(qm)
+  a <- equals.quad(qu)
+  a <- equals.quad(qm)
+  a <- domain(qu)
+  unitname(qu) <- c("Furlong", "Furlongs")
+})
 #'  tests/randoms.R
 #'   Further tests of random generation code
-#'  $Revision: 1.1 $ $Date: 2016/04/02 04:03:46 $
+#'  $Revision: 1.2 $ $Date: 2018/04/16 13:56:34 $
 
 require(spatstat)
 local({
@@ -14,14 +33,22 @@ local({
   A <- rstrat(nx=4, nsim=2)
   A <- rsyst(nx=4, nsim=2)
   A <- rthin(cells, P=0.5, nsim=2)
+  A <- rthin(cells, runif(42))
   A <- rjitter(cells, nsim=2, retry=FALSE)
+
+  op <- spatstat.options(fastpois=FALSE)
+  A <- runifpoispp(5, nsim=2)
+  spatstat.options(op)
 })
+
+reset.spatstat.options()
+
 
 #'  tests/resid.R
 #'
 #'  Stuff related to residuals and residual diagnostics
 #'
-#'   $Revision: 1.1 $  $Date: 2016/09/02 10:56:59 $
+#'   $Revision: 1.2 $  $Date: 2018/06/11 07:07:31 $
 #'
 
 require(spatstat)
@@ -29,6 +56,40 @@ local({
   fit <- ppm(cells ~x, Strauss(r=0.15))
   diagnose.ppm(fit, cumulative=FALSE)
   diagnose.ppm(fit, cumulative=FALSE, type="pearson")
+
+  fitoff <- ppm(cells ~ sin(x) + offset(y))
+  plot(a <- parres(fitoff, "x"))
+  plot(b <- parres(fitoff, "y"))
+  print(a)
+  print(b)
+
+  d <- diagnose.ppm(fit, which="marks")
+  plot(d, plot.neg="discrete")
+  plot(d, plot.neg="imagecontour")
+
+  d <- diagnose.ppm(fit, type="pearson", which="smooth")
+  plot(d, plot.smooth="image")
+  plot(d, plot.smooth="contour")
+  plot(d, plot.smooth="imagecontour")
+  
+  d <- diagnose.ppm(fit, type="pearson", which="x")
+  plot(d)
+  d <- diagnose.ppm(fit, type="pearson", which="y")
+  plot(d)
+  
+  diagnose.ppm(fit, type="pearson", which="x", cumulative=FALSE)
+  diagnose.ppm(fit, type="pearson", which="x", cumulative=FALSE)
+  diagnose.ppm(fit, type="raw", plot.neg="discrete", plot.smooth="image")
+  diagnose.ppm(fit, type="pearson", plot.neg="contour", plot.smooth="contour")
+
+  diagnose.ppm(fitoff, type="raw", which="smooth", plot.smooth="persp")
+  diagnose.ppm(fitoff, type="pearson", plot.neg="imagecontour")
+
+  plot(Frame(letterR), main="")
+  ploterodewin(letterR, erosion(letterR, 0.05), main="jeans")
+  W <- as.mask(letterR)
+  plot(Frame(W), main="")
+  ploterodewin(W, erosion(W, 0.05), main="JeAnS")
 })
 
 
@@ -37,15 +98,23 @@ local({
 ##
 ## Test all combinations of options for rhohatCalc
 ##
-## $Revision: 1.2 $ $Date: 2015/12/29 08:54:49 $
+## $Revision: 1.3 $ $Date: 2018/05/13 04:42:21 $
 
 local({
   require(spatstat)
   X <-  rpoispp(function(x,y){exp(3+3*x)})
+  ## rhohat.ppp
   ## done in example(rhohat):
   ## rhoA <- rhohat(X, "x")
   ## rhoB <- rhohat(X, "x", method="reweight")
   ## rhoC <- rhohat(X, "x", method="transform")
+
+  ## alternative smoother (if package locfit available)
+  rhoA <- rhohat(X, "x", smoother="local")
+  rhoB <- rhohat(X, "x", smoother="local", method="reweight")
+  rhoC <- rhohat(X, "x", smoother="local", method="transform")
+
+  ## rhohat.ppm
   fit <- ppm(X, ~x)
   rhofitA <- rhohat(fit, "x")
   rhofitB <- rhohat(fit, "x", method="reweight")
@@ -64,6 +133,22 @@ local({
   rhofitAH <- rhohat(fit, "x", horvitz=TRUE)
   rhofitBH <- rhohat(fit, "x", method="reweight", horvitz=TRUE)
   rhofitCH <- rhohat(fit, "x", method="transform", horvitz=TRUE)
+
+  ## class support
+  plot(rhoA)
+  plot(rhoA, rho ~ x, shade=NULL)
+  plot(rhoA, log(rho) ~ x, shade=NULL)
+  plot(rhoA, log(.) ~ x)
+
+  ## rho2hat
+  r2xy <- rho2hat(X, "x", "y")
+  r2xyw <- rho2hat(X, "x", "y", method="reweight")
+  plot(r2xy, do.points=TRUE)
+  xcoord <- function(x,y) x
+  ycoord <- function(x,y) y
+  xim <- as.im(xcoord, W=Window(X))
+  r2fi <- rho2hat(X, ycoord, xim)
+  r2if <- rho2hat(X, xim, ycoord)
 })
 #
 #  tests/rmhAux.R
@@ -274,7 +359,24 @@ spatstat.options(expand=1.1)
    X1.strauss.trend <- rmh(model=mod17,start=list(n.start=90),
                            control=list(nrep=nr))
 
+   #' Test other code blocks
+   #'  nsim > 1
+   Xlist <- rmh(model=mod01,start=list(n.start=80),
+             control=list(nrep=nr),
+             nsim=2)
+   #' Condition on contents of window
+   XX <- Xlist[[1]]
+   YY <- XX[square(2)]
+   XXwindow <- rmh(model=mod01, start=list(n.start=80),
+                   control=list(nrep=nr, x.cond=YY))
+   #' Palm conditioning
+   XXpalm <- rmh(model=mod01,start=list(n.start=80),
+             control=list(nrep=nr, x.cond=coords(YY)))
+
+
 })
+
+reset.spatstat.options()
 ##
 ##     tests/rmhErrors.R
 ##
@@ -308,7 +410,7 @@ if(!inherits(out, "try-error"))
 
 require(spatstat)
 local({
-fit <- ppm(cells, ~x)
+fit <- ppm(cells ~x)
 
 # check rmhmodel.ppm
 mod <- rmhmodel(fit)
@@ -506,6 +608,8 @@ checkp(ks.test(Fy2(X2$y), "punif")$p.value,
        "Kolmogorov-Smirnov test of uniformity of transformed y coordinates of type 2 points")
 
 })
+
+reset.spatstat.options()
 #
 # tests/rmhTrend.R
 #
@@ -765,7 +869,7 @@ local({
 #
 #  tests/rmh.ppm.R
 #
-#  $Revision: 1.2 $ $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.3 $ $Date: 2018/05/27 05:27:34 $
 #
 #  Examples removed from rmh.ppm.Rd
 #  stripped down to minimal tests of validity
@@ -806,6 +910,10 @@ local({
      fit <- ppm(X ~1, AreaInter(r=7))
      Xsim <- rmh(fit, start=list(n.start=X$n))
   
+   # Penttinen process
+     fit <- ppm(X ~1, Penttinen(r=7))
+     Xsim <- rmh(fit, start=list(n.start=X$n))
+  
      # soft core interaction process
 #     X <- quadscheme(X, nd=50)
 #     fit <- ppm(X ~1, Softcore(kappa=0.1), correction="isotropic")
@@ -825,7 +933,7 @@ local({
    # marked point pattern
    Y <- amacrine
 
-   # marked Poisson models
+   #' marked Poisson models
    fit <- ppm(Y)
    Ysim <- rmh(fit)
 
@@ -834,21 +942,27 @@ local({
 
    fit <- ppm(Y~x)
    Ysim <- rmh(fit)
-#   fit <- ppm(Y~polynom(x,2))
-#   Ysim <- rmh(fit)
 
    fit <- ppm(Y~marks+x)
    Ysim <- rmh(fit)
-#   fit <- ppm(Y~marks+polynom(x,2))
-#   Ysim <- rmh(fit)
 
-   # multitype Strauss models
-   MS <- MultiStrauss(types = levels(Y$marks),
+   #' multitype Strauss
+   typ <- levels(Y$marks)
+   MS <- MultiStrauss(types = typ,
                       radii=matrix(0.07, ncol=2, nrow=2))
 
-#   fit <- ppm(Y~marks*polynom(x,2), MS)
-    fit <- ppm(Y~marks*x, MS)
+   fit <- ppm(Y~marks*x, MS)
    Ysim <- rmh(fit)
 
+   #' multitype Hardcore
+   h0 <- minnndist(unmark(Y)) * 0.95
+   MH <- MultiHard(types = typ,
+                   hradii=matrix(h0, ncol=2, nrow=2))
+   fit <- ppm(Y ~ marks+x, MH)
+   Ysim <- rmh(fit)
+   
    spatstat.options(op)
  })
+
+
+reset.spatstat.options()

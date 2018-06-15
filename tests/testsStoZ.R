@@ -1,7 +1,20 @@
+#'   tests/sdr.R
+#'
+#'   $Revision: 1.1 $ $Date: 2018/05/13 03:14:49 $
+
+require(spatstat)
+local({
+  AN <- sdr(bei, bei.extra, method="NNIR")
+  AV <- sdr(bei, bei.extra, method="SAVE")
+  AI <- sdr(bei, bei.extra, method="SIR")
+  AT <- sdr(bei, bei.extra, method="TSE")
+  subspaceDistance(AN$B, AV$B)
+  dimhat(AN$M)
+})
 #
 #  tests/segments.R
 #
-#  $Revision: 1.11 $  $Date: 2017/02/20 10:15:30 $
+#  $Revision: 1.12 $  $Date: 2018/05/02 05:55:25 $
 
 require(spatstat)
 
@@ -16,6 +29,9 @@ X[W]
 X <- psp(runif(10),runif(10),runif(10),runif(10), window=owin())
 Z <- as.mask.psp(X)
 Z <- pixellate(X)
+
+#' misc
+PX <- periodify(X, 2)
 
 # more tests of lppm code
 
@@ -88,6 +104,28 @@ xFI <- max(abs(YF/YI - 1))
 if(xCI > 0.01) stop(paste("density.psp C algorithm relative error =", xCI))
 if(xFI > 0.01) stop(paste("density.psp FFT algorithm relative error =", xFI))
 
+#' as.psp.data.frame
+
+  df <- as.data.frame(matrix(runif(40), ncol=4))
+  A <- as.psp(df, window=square(1))
+  colnames(df) <- c("x0","y0","x1","y1")
+  df <- cbind(df, data.frame(marks=1:nrow(df)))
+  B <- as.psp(df, window=square(1))
+  colnames(df) <- c("xmid", "ymid", "length", "angle", "marks")
+  E <- as.psp(df, window=square(c(-1,2)))
+
+#' print and summary methods
+  A
+  B
+  E
+  summary(B)
+  M <- B
+  marks(M) <- data.frame(id=marks(B), len=lengths.psp(B))
+  M
+  summary(M)
+
+#' undocumented  
+  as.ppp(B)
 })
 #
 ## tests/sigtraceprogress.R
@@ -135,28 +173,66 @@ local({
 
 #'    tests/sparse3Darrays.R
 #'  Basic tests of code in sparse3Darray.R and sparsecommon.R
-#'  $Revision: 1.10 $ $Date: 2018/03/01 14:39:11 $
+#'  $Revision: 1.15 $ $Date: 2018/05/04 03:56:37 $
 
 require(spatstat)
 local({
-
   #' forming arrays
-  A1 <- matrix(c(1,0,0,2,
-                 3,0,4,0,
-                 0,0,0,5),
-               3, 4, byrow=TRUE)
-  A2 <- matrix(c(0,0,1,0,
-                 0,0,0,1,
-                 1,0,0,0),
-               3, 4, byrow=TRUE)
+
+  #' creation by specifying nonzero elements
+  M <- sparse3Darray(i=1:3, j=c(3,1,2), k=4:2,
+                     x=runif(3), dims=rep(4, 3))
+  #' duplicate entries
+  Mn <- sparse3Darray(i=c(1,1,2), j=c(2,2,1), k=c(3,3,2),
+                     x=runif(3), dims=rep(3, 3))
+  #' cumulate entries in duplicate positions
+  Ms <- sparse3Darray(i=c(1,1,2), j=c(2,2,1), k=c(3,3,2),
+                      x=runif(3), dims=rep(3, 3), strict=TRUE)
+
+  #' print method
+  print(M)
+  
+  #' conversion of other data
+  A <- array(c(1,3,0,0,0,0,0,4,0,2,0,5,
+               0,0,1,0,0,0,1,0,0,0,1,0),
+             dim=c(3,4,2))
+  A1 <- A[,,1]
+  A2 <- A[,,2]
+  Z <- A[integer(0), , ]
+  
+  #' array to sparse array
+  AA <- as.sparse3Darray(A) # positive extent
+  ZZ <- as.sparse3Darray(Z) # zero extent
+  #' list of matrices to sparse array
   AA <- as.sparse3Darray(list(A1, A2))
+  #' matrix to sparse array
+  AA1 <- as.sparse3Darray(A1)
+  #' vector to sparse array
+  A11 <- A[,1,1]
+  AA11 <- as.sparse3Darray(A11)
+
+  #' 
   dim(AA) <- dim(AA) + 1
+
+  I1 <- SparseIndices(A1)
+  I11 <- SparseIndices(A11)
   
   if(require(Matrix)) {
+    #' sparse matrices from Matrix package
     A1 <- as(A1, "sparseMatrix")
     A2 <- as(A2, "sparseMatrix")
+    A11 <- as(A11, "sparseVector")
+    #' convert a list of sparse matrices to sparse array
     AA <- as.sparse3Darray(list(A1, A2))
+    #' sparse matrix to sparse array
+    AA1 <- as.sparse3Darray(A1)
+    #' sparse vector to sparse array
+    AA11 <- as.sparse3Darray(A11)
 
+    #' internals 
+    E1  <- SparseEntries(A1)
+    I1  <- SparseIndices(A1)
+    I11 <- SparseIndices(A11)
     df <- data.frame(i=c(1,3,5), j=3:1, k=rep(2, 3), x=runif(3))
     aa <- EntriesToSparse(df, NULL)
     bb <- EntriesToSparse(df, 7)
@@ -165,6 +241,9 @@ local({
   }
 
   BB <- evalSparse3Dentrywise(AA + AA/2)
+
+  MM <- bind.sparse3Darray(M, M, along=1)
+  MM <- bind.sparse3Darray(M, M, along=2)
 })
 
     
@@ -182,20 +261,26 @@ local({
     
     U <- aperm(M, c(1,3,2))
     U
-    
-    M[ 3:4, , ]
-    
-    M[ 3:4, 2:4, ]
-    
-    M[, 3, ]
 
+    #' tests of [.sparse3Darray
+    M[ 3:4, , ]
+    M[ 3:4, 2:4, ]
+    M[ 4:3, 4:2, 1:2]
+    M[, 3, ]
     M[, 3, , drop=FALSE]
+    M[c(FALSE,TRUE,FALSE,FALSE,TRUE), , ]
+    M[, , c(FALSE,FALSE), drop=FALSE]
+    # matrix index
+    M[cbind(3:5, 3:5, c(1,2,1))]
+    M[cbind(3:5, 3:5, 2)]
+    M[cbind(3:5,   2, 2)]
+    M[cbind(c(2,2,4), c(3,3,2), 1)] # repeated indices
     
     MA <- as.array(M)
     UA <- as.array(U)
 
     ## tests of "[<-.sparse3Darray"
-    Mflip <- Mzero <- MandM <- M
+    Mflip <- Mzero <- MandM <- Mnew <- M
     Mflip[ , , 2:1] <- M
     stopifnot(Mflip[3,1,1] == M[3,1,2])
     Mzero[1:3,1:3,] <- 0
@@ -204,25 +289,47 @@ local({
     M2d <- M[,,2,drop=TRUE]
     MandM[,,1] <- M2a
     MandM[,,1] <- M2d
+    ## slices of different dimensions
+    M[ , 3, 1] <- 1:5
+    M[2,  , 2] <- 1:5
+    M[ 1, 3:5, 2] <- 4:6
+    M[ 2, 5:3, 2] <- 4:6
+    V3 <- sparseVector(x=1, i=2, length=3)
+    M[ 1, 3:5, 2] <- V3
+    M[ 2, 5:3, 2] <- V3
+    M[,,2] <- M2a
+    M[,,2] <- (M2a + 1)
+    ## integer matrix index
+    Mnew[cbind(3:5, 3:5, c(1,2,1))] <- 1:3
+    Mnew[cbind(3:5, 3:5, 2)] <- 1:3
+    Mnew[cbind(3:5,   2, 2)] <- 1:3
+    Mnew[cbind(3:5, 3:5, c(1,2,1))] <- V3
+    Mnew[cbind(3:5, 3:5, 2)] <- V3
+    Mnew[cbind(3:5,   2, 2)] <- V3
 
-    # matrix index
-    M[cbind(3:5, 2, 2)]
-    
     ## tests of arithmetic (Math, Ops, Summary)
     negM <- -M
     oneM <- 1 * M
+    oneM <- M * 1
     twoM <- M + M
     range(M)
 
     cosM <- cos(M)  # non-sparse
     sinM <- sin(M)  # sparse
-    
+
+    Mpos <- (M > 0) # sparse
+    Mzero <- !Mpos # non-sparse
+
     stopifnot(all((M+M) == 2*M))     # non-sparse
     stopifnot(!any((M+M) != 2*M))    # sparse
 
     ztimesM <- (1:5) * M  # sparse
     zplusM <- (1:5) + M  # non-sparse
-    
+
+    ## reconcile dimensions
+    Msub <- M[,,1,drop=FALSE]
+    Mdif <- M - Msub
+
     ## tensor operator
 
     tenseur(c(1,-1), M, 1, 3)
@@ -270,7 +377,13 @@ local({
     Vsum <- applySparseEntries(V, sum)
     Bdouble <- applySparseEntries(B, function(x) { 2 * x })
     Mminus <- applySparseEntries(M, function(x) -x)
-    
+
+    #'  -------------- sparselinalg.R -------------------------
+    U <- aperm(M,c(3,1,2))  # 2 x 5 x 5
+    w <- matrix(0, 5, 5)
+    w[cbind(1:3,2:4)] <- 0.5
+    w <- as(w, "sparseMatrix")
+    UU <- sumsymouterSparse(U, w)
   }
 })
 
@@ -385,6 +498,52 @@ local({
   invoke.symbolmap(g1, 50, x=numeric(0), y=numeric(0), add=TRUE)
 
 })
+#'   tests/tessera.R
+#'   Tessellation code, not elsewhere tested
+#'   $Revision: 1.1 $ $Date: 2018/04/14 03:25:12 $
+#'
+require(spatstat)
+local({
+  W <- owin()
+  Wsub <- square(0.5)
+  X <- runifpoint(7, W)
+  A <- dirichlet(X)
+  Z <- distmap(letterR, invert=TRUE)[letterR, drop=FALSE]
+  H <- tess(xgrid=0:2, ygrid=0:3)
+  #' discretisation of tiles
+  V <- as.im(A)
+  B <- tess(window=as.mask(W), tiles=tiles(A))
+  #' logical images
+  D <- tess(image=(Z > 0.2))
+  U <- (Z > -0.2) # TRUE or NA
+  E <- tess(image=U, keepempty=TRUE)
+  G <- tess(image=U, keepempty=FALSE)
+  #' methods
+  flay <- function(op, ..., Rect=H, Poly=A, Img=E) {
+    a <- do.call(op, list(Rect, ...))
+    b <- do.call(op, list(Poly, ...))
+    e <- do.call(op, list(Img, ...))
+  }
+  flay(reflect)
+  flay(shift, vec=c(1,2))
+  flay(scalardilate, f=2) 
+  flay(rotate, angle=pi/3)
+  flay(affine, mat=matrix(c(1,2,0,1), 2, 2), vec=c(1,2))
+  ## 
+  unitname(B) <- c("metre", "metres")
+  unitname(B)
+  print(B)
+  Bsub <- B[c(3,5,7)]
+  print(Bsub)
+  tilenames(H) <- letters[seq_along(tilenames(H))]
+  #'
+  Pe <- intersect.tess(A, Wsub)
+  Pm <- intersect.tess(A, as.mask(Wsub))
+  b <- bdist.tiles(D)
+  b <- bdist.tiles(A[c(3,5,7)])
+  #'
+  Eim <- as.im(E, W=letterR)
+})
 #
 #   tests/testaddvar.R
 #
@@ -422,6 +581,50 @@ parres(model, "x", subregion=w, bw.input="quad")
 mod2 <- update(model, ~x)
 parres(mod2, "x")
 })
+#'
+#'     tests/threedee.R
+#'
+#'     Tests of 3D code 
+#'
+#'      $Revision: 1.2 $ $Date: 2018/06/06 03:05:12 $
+#'
+
+require(spatstat)
+local({
+  X <- runifpoint3(30)
+  Y <- runifpoint3(20)
+  d <- pairdist(X, periodic=TRUE, squared=TRUE)
+  d <- crossdist(X, Y, squared=TRUE)
+  d <- crossdist(X, Y, squared=TRUE, periodic=TRUE)
+  #' older code
+  gg1 <- g3engine(X$x, X$y, X$z, correction="Hanisch G3")
+  gg2 <- g3engine(X$x, X$y, X$z, correction="minus sampling")
+  ff1 <- f3engine(X$x, X$y, X$z, correction="no")
+  ff2 <- f3engine(X$x, X$y, X$z, correction="minus sampling")
+})
+#'    tests/trigraph.R
+#'
+#'   Tests for C code in trigraf.c
+#'   
+#'  $Revision: 1.2 $  $Date: 2018/06/08 13:14:16 $
+#'
+require(spatstat)
+local({
+  #' called from deldir.R
+  spatstat.deldir.setopt(FALSE, TRUE)
+  A <- delaunay(redwood)
+  spatstat.deldir.setopt(FALSE, FALSE)
+  B <- delaunay(redwood)
+  spatstat.deldir.setopt(TRUE, TRUE)
+  #' called from edges2triangles.R
+  op <- spatstat.options(fast.trigraph=FALSE)
+  fut <- ppm(cells ~ 1, Triplets(0.15))
+  spatstat.options(op)
+})
+
+reset.spatstat.options()
+
+
 #
 # tests/triplets.R
 #
@@ -446,14 +649,41 @@ local({
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.3 $   $Date: 2017/02/20 10:51:56 $
+#   $Revision: 1.5 $   $Date: 2018/04/27 09:31:24 $
 #
 #  Test undocumented hacks, etc
 
 require(spatstat)
 local({
-  # pixellate.ppp accepts a data frame of weights
+  ## pixellate.ppp accepts a data frame of weights
   pixellate(cells, weights=data.frame(a=1:42, b=42:1))
+  ## test parts of 'rmhsnoop' that don't require interaction with user
+  rmhSnoopEnv(cells, Window(cells), 0.1)
+  ## linim helper functions
+  df <- pointsAlongNetwork(simplenet, 0.2)
+  ## Berman-Turner frame
+  A <- bt.frame(quadscheme(cells), ~x, Strauss(0.07), rbord=0.07)
+  print(A)
+  ## digestCovariates
+  D <- distfun(cells)
+  Z <- distmap(cells)
+  U <- dirichlet(cells)
+  stopifnot(is.scov(D))
+  stopifnot(is.scov(Z))
+  stopifnot(is.scov(U))
+  stopifnot(is.scov("x"))
+  dg <- digestCovariates(D=D,Z=Z,U=U,"x",list(A="x", B=D))
+  ##
+  a <- getfields(dg, c("A", "D", "niets"), fatal=FALSE)
+  ## util.R
+  gg <- pointgrid(owin(), 7)
+  checkbigmatrix(1000000L, 1000000L, FALSE, TRUE)
+  spatstatDiagnostic("whatever")
+  M <- list(list(a=2, b=FALSE),
+            list(a=2, b=TRUE))
+  stopifnot(!allElementsIdentical(M))
+  stopifnot(allElementsIdentical(M, "a"))
+  
 })
 
 
@@ -645,7 +875,7 @@ local({
 #
 # Tests of owin geometry code
 #
-#  $Revision: 1.3 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.5 $  $Date: 2018/05/22 10:35:24 $
 
 require(spatstat)
 local({
@@ -670,6 +900,44 @@ local({
   R <- as.mask(square(1))
   stopifnot(area(bdry.mask(R)) > 0)
   stopifnot(area(convexhull(R)) > 0)
+
+  #' as.owin.data.frame
+  V <- as.mask(letterR, eps=0.2)
+  Vdf <- as.data.frame(V)
+  Vnew <- as.owin(Vdf)
+  zz <- mask2df(V)
+
+  #' as.owin
+  U <- as.owin(quadscheme(cells))
+  U2 <- as.owin(list(xmin=0, xmax=1, ymin=0, ymax=1))
+  
+  #' intersections involving masks
+  B1 <- square(1)
+  B2 <- as.mask(shift(B1, c(0.2, 0.3)))
+  o12 <- overlap.owin(B1, B2)
+  o21 <- overlap.owin(B2, B1)
+  i12 <- intersect.owin(B1, B2, eps=0.01)
+  i21 <- intersect.owin(B2, B1, eps=0.01)
+
+  #' geometry
+  inradius(B1)
+  inradius(B2)
+  inradius(letterR)
+  inpoint(B1)
+  inpoint(B2)
+  inpoint(letterR)
+  is.convex(B1)
+  is.convex(B2)
+  is.convex(letterR)
+
+  X <- longleaf[square(50)]
+  marks(X) <- marks(X)/8
+  D <- discs(X, delta=5, separate=TRUE)
+
+  periodify(B1, 2)
+  periodify(union.owin(B1, B2), 2)
+  periodify(letterR, 2)
+
 })
 
 ##
@@ -677,7 +945,7 @@ local({
 ##
 ##    Test weird problems and boundary cases for line segment code
 ##
-##    $Version$ $Date: 2016/02/12 08:18:08 $ 
+##    $Version$ $Date: 2018/05/13 04:22:28 $ 
 ##
 require(spatstat)
 local({
@@ -693,4 +961,10 @@ local({
   Y <- selfcut.psp(X)
   marks(X) <- data.frame(A=1:10, B=factor(letters[1:10]))
   Z <- selfcut.psp(X)
+
+  #' psp class support
+  S <- as.psp(simplenet)
+  marks(S) <- sample(factor(c("A","B")), nobjects(S), replace=TRUE)
+  intensity(S)
+  intensity(S, weights=runif(nsegments(S)))
 })

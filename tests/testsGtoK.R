@@ -40,9 +40,11 @@ local({
 #
 # test "[.hyperframe" etc
 #
-#  $Revision: 1.3 $  $Date: 2014/08/25 04:43:07 $
+#  $Revision: 1.4 $  $Date: 2018/05/15 14:20:38 $
 #
 
+require(spatstat)
+local({
   lambda <- runif(4, min=50, max=100)
   X <- lapply(as.list(lambda), function(x) { rpoispp(x) })
   h <- hyperframe(lambda=lambda, X=X)
@@ -55,20 +57,29 @@ local({
   names(h) <- LETTERS[1:5]
   print(h)
 
+  summary(h)
+  str(h)
+  head(h)
+  tail(h)
+})
+
 
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.8 $   $Date: 2018/02/25 03:44:33 $
+#   $Revision: 1.14 $   $Date: 2018/05/27 05:12:57 $
 #
 
 require(spatstat)
 local({
-  A <- as.im(owin())
-  B <- as.im(owin(c(1.1, 1.9), c(0,1)))
+  AA <- A <- as.im(owin())
+  BB <- B <- as.im(owin(c(1.1, 1.9), c(0,1)))
   Z <- imcov(A, B)
   stopifnot(abs(max(Z) - 0.8) < 0.1)
 
+  Frame(AA) <- Frame(B)
+  Frame(BB) <- Frame(A)
+  
   ## handling images with 1 row or column
   ycov <- function(x, y) y
   E <- as.im(ycov, owin(), dimyx = c(2,1))
@@ -79,17 +90,64 @@ local({
   G12 <- cut(E12, 2)
   H12 <- as.tess(G12)
 
+  AAA <- as.array(AA)
+  EEE <- as.array(E)
+  AAD <- as.double(AA)
+  EED <- as.double(E)
+  aaa <- xtfrm(AAA)
+  eee <- xtfrm(E)
+  
   ##
   d <- distmap(cells, dimyx=32)
   Z <- connected(d <= 0.06, method="interpreted")
 
+  a <- where.max(d, first=FALSE)
+  a <- where.min(d, first=FALSE)
+
+  dx <- raster.x(d)
+  dy <- raster.y(d)
+  dxy <- raster.xy(d)
+  xyZ <- raster.xy(Z, drop=TRUE)
+
+  horosho <- conform.imagelist(cells, list(d, Z))
+
+  #' split.im
+  W <- square(1)
+  X <- as.im(function(x,y){x}, W)
+  Y <- dirichlet(runifpoint(7, W))
+  Z <- split(X, as.im(Y))
+  
+  ## cases of "[.im"
+  ee  <- d[simplenet, drop=FALSE]
+  eev <- d[simplenet]
+  Empty <- cells[FALSE]
+  EmptyFun <- ssf(Empty, numeric(0))
+  ff <- d[Empty]
+  ff <- d[EmptyFun]
+  gg <- d[2,]
+  gg <- d[,2]
+  gg <- d[2:4, 3:5]
+  hh <- d[2:4, 3:5, rescue=TRUE]
+  if(!is.im(hh)) stop("rectangle was not rescued in [.im")
+  ## cases of "[<-.im"
+  d[Empty] <- 42
+  d[EmptyFun] <- 42
+  
   ## smudge() and rasterfilter()
   dd <- smudge(d)
+
+  ## rgb/hsv options
+  X <- setcov(owin())
+  M <- Window(X)
+  Y <- as.im(function(x,y) x, W=M)
+  Z <- as.im(function(x,y) y, W=M)
+  # convert after rescaling
+  RGBscal <- rgbim(X, Y, Z, autoscale=TRUE, maxColorValue=1)
+  HSVscal <- hsvim(X, Y, Z, autoscale=TRUE)
+
+  #' miscellaneous
+  ZZ <- zapsmall(Z, digits=6)
 })
-
-
-
-
 #' indices.R
 #' Tests of code for understanding index vectors etc
 #' $Revision: 1.1 $ $Date: 2018/03/01 03:38:07 $
@@ -159,10 +217,48 @@ local({
   Ai <- model.matrix(fit, irregular=TRUE)
   Zr <- model.images(fit)
   Zi <- model.images(fit, irregular=TRUE)
-})#
+})#'
+#'   tests/Kfuns.R
+#'
+#'   Various K and L functions
+#'
+#'   $Revision: 1.2 $  $Date: 2018/05/06 05:45:38 $
+#'
+
+require(spatstat)
+myfun <- function(x,y){(x+1) * y }
+local({
+  #' supporting code
+  implemented.for.K(c("border", "bord.modif", "translate", "good", "best"),
+                    "mask", TRUE)
+  #' Kest special code blocks
+  K <- Kest(cells, var.approx=TRUE, ratio=FALSE)
+  Z <- distmap(cells) + 1
+  Kb <- Kest(cells, correction=c("border","bord.modif"),
+             weights=Z, ratio=TRUE)
+  Kn <- Kest(cells, correction="none",
+             weights=Z, ratio=TRUE)
+  #' inhomogeneous multitype
+  fit <- ppm(amacrine ~ marks)
+  K1 <- Kcross.inhom(amacrine, lambdaX=fit)
+  K2 <- Kcross.inhom(amacrine, lambdaX=densityfun(amacrine))
+  K3 <- Kcross.inhom(amacrine, lambdaX=density(amacrine, at="points"))
+  On <- split(amacrine)$on
+  Off <- split(amacrine)$off
+  K4 <- Kcross.inhom(amacrine, lambdaI=ppm(On), lambdaJ=ppm(Off))
+  K5 <- Kcross.inhom(amacrine, correction="bord.modif")
+  #' Kmark, markcorr
+  X <- runifpoint(100) %mark% runif(100)
+  km <- Kmark(X, f=atan2)
+  km <- Kmark(X, f1=sin)
+  km <- Kmark(X, f="myfun")
+  Y <- X %mark% data.frame(u=runif(100), v=runif(100))
+  mk <- markcorr(Y)
+})
+#
 # tests/kppm.R
 #
-# $Revision: 1.16 $ $Date: 2018/02/15 03:35:14 $
+# $Revision: 1.22 $ $Date: 2018/05/14 09:26:51 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -170,12 +266,24 @@ local({
 require(spatstat)
 local({
 
- fit <- kppm(redwood, ~1, "Thomas")
+ fit <- kppm(redwood ~1, "Thomas") # sic
  fitx <- update(fit, ~ . + x)
  fitM <- update(fit, clusters="MatClust")
  fitC <- update(fit, cells)
  fitCx <- update(fit, cells ~ x)
 
+ #'
+ Wsub <- owin(c(0, 0.5), c(-0.5, 0))
+ fitsub <- kppm(redwood ~1, "Thomas", subset=Wsub)
+ fitsub
+ 
+ #' various methods
+ ff <- as.fv(fitx)
+ Y <- simulate(fitx, seed=42)[[1]]
+ uu <- unitname(fitx)
+ unitname(fitCx) <- "furlong"
+ mo <- model.images(fitCx)
+ 
  # vcov.kppm different algorithms
  vc  <- vcov(fitx)
  vc2 <- vcov(fitx, fast=TRUE)
@@ -198,26 +306,41 @@ local({
 
  # fit with composite likelihood method [thanks to Abdollah Jalilian]
  fut <- kppm(redwood ~ x, "VarGamma", method="clik2", nu.ker=-3/8)
-  
+ kfut <- as.fv(fut)
+ 
  if(require(RandomFields)) {
    fit0 <- kppm(redwood ~1, "LGCP")
+   is.poisson(fit0)
    Y0 <- simulate(fit0)[[1]]
    stopifnot(is.ppp(Y0))
 
-   # fit LGCP using K function: slow
+   ## fit LGCP using K function: slow
    fit1 <- kppm(redwood ~x, "LGCP",
                 covmodel=list(model="matern", nu=0.3),
                 control=list(maxit=3))
    Y1 <- simulate(fit1)[[1]]
    stopifnot(is.ppp(Y1))
 
-   # fit LGCP using pcf
+   ## fit LGCP using pcf
    fit1p <- kppm(redwood ~x, "LGCP",
                  covmodel=list(model="matern", nu=0.3),
                  statistic="pcf")
    Y1p <- simulate(fit1p)[[1]]
    stopifnot(is.ppp(Y1p))
-  
+
+   ## .. and using different fitting methods
+   fit1pClik <- update(fit1p, method="clik")
+   fit1pPalm <- update(fit1p, method="palm")
+   
+   ## image covariate (a different code block) 
+   xx <- as.im(function(x,y) x, Window(redwood))
+   fit1xx <- update(fit1p, . ~ xx, data=solist(xx=xx))
+   Y1xx <- simulate(fit1xx)[[1]]
+   stopifnot(is.ppp(Y1xx))
+   fit1xxVG <- update(fit1xx, clusters="VarGamma", nu=-1/4)
+   Y1xxVG <- simulate(fit1xxVG)[[1]]
+   stopifnot(is.ppp(Y1xxVG))
+   
    # ... and Abdollah's code
 
    fit2 <- kppm(redwood ~x, cluster="Cauchy", statistic="K")
@@ -228,4 +351,51 @@ local({
 
 })
 
+local({
+  #' various code blocks
+  fut <- kppm(redwood, ~x)
+  fet <- update(fut, redwood3)
+  fot <- update(fut, trend=~y)
+  fit <- kppm(redwoodfull ~ x)
+  Y <- simulate(fit, window=redwoodfull.extra$regionII)
+  gut <- improve.kppm(fit, type="wclik1")
+  gut <- improve.kppm(fit, vcov=TRUE, fast.vcov=TRUE, save.internals=TRUE)
+  hut <- kppm(redwood ~ x, method="clik", weightfun=NULL)
+  hut <- kppm(redwood ~ x, method="palm", weightfun=NULL)
+})
 
+local({
+  K <- Kest(redwood)
+  a <- matclust.estK(K)
+  a <- thomas.estK(K)
+  a <- cauchy.estK(K)
+  a <- lgcp.estK(K)
+  g <- pcf(redwood)
+  a <- matclust.estpcf(g)
+  a <- thomas.estpcf(g)
+  a <- cauchy.estpcf(g)
+  a <- lgcp.estpcf(g)
+})
+
+local({
+  #'  experimental
+  spatstat.options(kppm.canonical=TRUE, kppm.adjusted=TRUE)
+  futTT1 <- kppm(redwood)
+  futTT2 <- kppm(redwood, method="palm")
+  futTT3 <- kppm(redwood, method="clik2")
+  spatstat.options(kppm.canonical=TRUE, kppm.adjusted=FALSE)
+  futTF1 <- kppm(redwood)
+  futTF2 <- kppm(redwood, method="palm")
+  futTF3 <- kppm(redwood, method="clik2")
+  spatstat.options(kppm.canonical=FALSE, kppm.adjusted=TRUE)
+  futFT1 <- kppm(redwood)
+  futFT2 <- kppm(redwood, method="palm")
+  futFT3 <- kppm(redwood, method="clik2")
+  spatstat.options(kppm.canonical=FALSE, kppm.adjusted=FALSE)
+  futFF1 <- kppm(redwood)
+  futFF2 <- kppm(redwood, method="palm")
+  futFF3 <- kppm(redwood, method="clik2")
+})
+
+reset.spatstat.options()
+  

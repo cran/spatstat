@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.109 $ $Date: 2018/04/05 03:30:11 $
+#  $Revision: 1.114 $ $Date: 2018/05/24 08:08:31 $
 #
 
 leverage <- function(model, ...) {
@@ -84,7 +84,7 @@ avenndist <- function(X) mean(nndist(X))
 
 ppmInfluenceEngine <- function(fit,
                          what=c("leverage", "influence", "dfbetas",
-                           "score", "derivatives", "increments"),
+                           "score", "derivatives", "increments", "all"),
                          ...,
                          iScore=NULL, iHessian=NULL, iArgs=NULL,
                          drop=FALSE,
@@ -104,6 +104,9 @@ ppmInfluenceEngine <- function(fit,
   ## type of calculation to be performed
   method <- match.arg(method)
   what <- match.arg(what, several.ok=TRUE)
+  if("all" %in% what)
+    what <- c("leverage", "influence", "dfbetas",
+              "score", "derivatives", "increments")
   matrix.action <- match.arg(matrix.action)
 
   influencecalc <- any(what %in% c("leverage", "influence", "dfbetas"))
@@ -1116,6 +1119,42 @@ print.influence.ppm <- function(x, ...) {
   x$infl <- y
   return(x)
 }
+
+## >>>>>>>>>>>>>>>>  SMOOTHING, INTEGRATION <<<<<<<<<<<<<<<<<<<<<
+
+integral.leverage.ppm <- function(f, domain=NULL, ...) {
+  y <- as.im(f, what="nearest")
+  z <- if(is.im(y)) {
+         integral(y, domain=domain, ...)
+       } else if(is.solist(y)) {
+         sapply(y, integral, domain=domain, ...)
+       } else stop("Internal format is not understood")
+  if(length(dim(z))) z <- t(z)
+  return(z)
+}
+
+integral.influence.ppm <- function(f, domain=NULL, ...) {
+  if(!is.null(domain)) {
+    if(is.tess(domain)) {
+      z <- sapply(tiles(domain), integral, f=f)
+      if(length(dim(z))) z <- t(z)
+      return(z)
+    }
+    f <- f[domain]
+  }
+  #' actual computation
+  y <- as.ppp(f)
+  return(colSums(as.matrix(marks(y))))
+}
+
+mean.leverage.ppm <- function(x, ...) {
+  y <- as.im(x, what="nearest")
+  mean(y, ...)
+}
+
+Smooth.leverage.ppm <- function(X, ...) Smooth(X$lev$val, ...)
+
+Smooth.influence.ppm <- function(X, ...) Smooth(as.ppp(X), ...)
 
 ## >>>>>>>>>>>>>>>>  GEOMETRICAL OPERATIONS <<<<<<<<<<<<<<<<<<<<<
 

@@ -3,7 +3,7 @@
 #'
 #' Sparse 3D arrays represented as list(i,j,k,x)
 #' 
-#' $Revision: 1.28 $  $Date: 2018/03/01 15:16:09 $
+#' $Revision: 1.33 $  $Date: 2018/05/04 03:14:11 $
 #'
 
 sparse3Darray <- function(i=integer(0), j=integer(0), k=integer(0),
@@ -18,9 +18,9 @@ sparse3Darray <- function(i=integer(0), j=integer(0), k=integer(0),
               "are not yet supported by the Matrix package")
   stopifnot(length(dims) == 3)
   dims <- as.integer(dims)
-  if(!all(inside.range(i, c(1, dims[1])))) stop("indices i are outside range")
-  if(!all(inside.range(j, c(1, dims[2])))) stop("indices j are outside range")
-  if(!all(inside.range(k, c(1, dims[3])))) stop("indices k are outside range")
+  if(!all(i >= 1 & i <= dims[1])) stop("indices i are outside range")
+  if(!all(j >= 1 & j <= dims[2])) stop("indices j are outside range")
+  if(!all(k >= 1 & k <= dims[3])) stop("indices k are outside range")
   if(!is.null(dimnames)) {
     stopifnot(is.list(dimnames))
     stopifnot(length(dimnames) == 3)
@@ -154,6 +154,8 @@ dimnames.sparse3Darray <- function(x) { x$dimnames }
 print.sparse3Darray <- function(x, ...) {
   dimx <- dim(x)
   cat("Sparse 3D array of dimensions", paste(dimx, collapse="x"), fill=TRUE)
+  if(prod(dimx) == 0)
+    return(invisible(NULL))
   dn <- dimnames(x) %orifnull% rep(list(NULL), 3)
   d3 <- dimx[3]
   dn3 <- dn[[3]] %orifnull% as.character(seq_len(d3))
@@ -300,18 +302,21 @@ as.array.sparse3Darray <- function(x, ...) {
         outdf <- df
       } else {
         #' invert map to determine output positions (reorder/repeat entries)
-        imap <- Imap %orifnull% df$i
-        jmap <- Jmap %orifnull% df$j
-        kmap <- Kmap %orifnull% df$k
-        sn <- seq_len(nrow(df))
-        whichi <- split(seq_along(imap), factor(imap, levels=sn))
-        whichj <- split(seq_along(jmap), factor(jmap, levels=sn))
-        whichk <- split(seq_along(kmap), factor(kmap, levels=sn))
+        snI <- seq_len(I$n)
+        snJ <- seq_len(J$n)
+        snK <- seq_len(K$n)
+        imap <- Imap %orifnull% snI
+        jmap <- Jmap %orifnull% snJ
+        kmap <- Kmap %orifnull% snK
+        whichi <- split(seq_along(imap), factor(imap, levels=snI))
+        whichj <- split(seq_along(jmap), factor(jmap, levels=snJ))
+        whichk <- split(seq_along(kmap), factor(kmap, levels=snK))
         dat.i <- whichi[df$i]
         dat.j <- whichj[df$j]
         dat.k <- whichk[df$k]
         stuff <- mapply(expandwithdata,
-                        i=dat.i, j=dat.j, k=dat.k, x=df$x)
+                        i=dat.i, j=dat.j, k=dat.k, x=df$x,
+                        SIMPLIFY=FALSE)
         outdf <- rbindCompatibleDataFrames(stuff)
       }
       x <- sparse3Darray(i=outdf$i, j=outdf$j, k=outdf$k, x=outdf$x,
