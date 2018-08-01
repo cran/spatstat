@@ -1,3 +1,33 @@
+#'
+#'   tests/layered.R
+#'
+#'   Tests of 'layered' class
+#'
+#'   $Revision: 1.1 $  $Date: 2018/07/14 06:23:45 $
+#'
+require(spatstat)
+local({
+  D <- distmap(cells)
+  L <- layered(D, cells,
+               plotargs=list(list(ribbon=FALSE), list(pch=16)))
+  #'
+  plot(L, which=2, plotargs=list(list(pch=3)))
+  plot(L, plotargs=list(list(pch=3)))
+  #'
+  W <- as.owin(L)
+  V <- domain(L)
+  #' methods
+  L2 <- L[square(0.5)]
+  Lr <- reflect(L)
+  Lf <- flipxy(L)
+  Ls <- scalardilate(L, 2)
+  La <- shift(L, origin="midpoint")
+  Lo <- rotate(L, pi/3, origin="bottomleft")
+  Lu <- rescale(L, 0.1, "parsec")
+  #' as.layered 
+  M <- as.layered(finpines)
+  M2 <- as.layered(split(amacrine))
+})
 ## 
 ##    tests/legacy.R
 ##
@@ -25,7 +55,7 @@ local({
 #'
 #'   leverage and influence for Gibbs models
 #' 
-#'   $Revision: 1.21 $ $Date: 2018/05/17 07:22:25 $
+#'   $Revision: 1.22 $ $Date: 2018/07/22 02:19:45 $
 #' 
 
 require(spatstat)
@@ -48,6 +78,10 @@ local({
   fitD <- ppm(cells ~ 1, DiggleGatesStibbard(0.12), rbord=0)
   levD <- Leverage(fitD)
   infD <- Influence(fitD)
+  # DiggleGratton() special code
+  fitDG <- ppm(cells ~ 1, DiggleGratton(0.05, 0.12), rbord=0)
+  levDG <- Leverage(fitDG)
+  infDG <- Influence(fitDG)
   # ppmInfluence; offset is present; coefficient vector has length 0
   fitH <- ppm(cells ~ 1, Hardcore(0.07))
   levH <- Leverage(fitH)
@@ -283,7 +317,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.14 $  $Date: 2018/06/03 09:32:17 $
+#  $Revision: 1.21 $  $Date: 2018/07/21 03:00:17 $
 
 
 require(spatstat)
@@ -300,6 +334,8 @@ local({
   plot(K)
   g <- linearpcfinhom(X, lambda=fit, normalise=TRUE)
   plot(g)
+  ## other code blocks
+  K <- linearKinhom(X, lambda=fit, correction="none", ratio=TRUE)
   # check empty patterns OK
   X <- runiflpp(0, simplenet)
   print(X)
@@ -425,6 +461,7 @@ local({
 
   ## Test algorithms for boundingradius.linnet
   L <- as.linnet(chicago, sparse=TRUE)
+  L$boundingradius <- NULL # artificially remove
   opa <- spatstat.options(Clinearradius=FALSE)
   bR <- as.linnet(L, sparse=FALSE)$boundingradius
   spatstat.options(Clinearradius=TRUE)
@@ -433,12 +470,24 @@ local({
   if(abs(bR-bC) > 0.001 * (bR+bC)/2)
     stop("Disagreement between R and C algorithms for boundingradius.linnet",
          call.=FALSE)
-    
+
+  ## linnet things
+  is.connected(as.linnet(dendrite))
+  zik <- rescale(chicago, 39.37/12, "m")
+  Simon <- simplenet
+  unitname(Simon) <- list("metre", "metres", 0.5)
+  b <- rescale(Simon)
+  ds <- density(simplenet, 0.05)
+
   ## integral.linim with missing entries
   xcoord <- linfun(function(x,y,seg,tp) { x }, domain(chicago))
   xcoord <- as.linim(xcoord, dimyx=32)
   integral(xcoord)
 
+  ## options to plot.linim
+  plot(xcoord, legend=FALSE)
+  plot(xcoord, leg.side="top")
+  
   ## as.linim.linim
   xxcc <- as.linim(xcoord)
   xxcceps <- as.linim(xcoord, eps=15)
@@ -447,6 +496,12 @@ local({
   df2 <- attr(xxccdel, "df")
   df3 <- resampleNetworkDataFrame(df1, df2)
 
+  ## linim with complex values
+  Zc <- as.im(function(x,y){(x-y) + x * 1i}, Frame(simplenet))
+  Fc <- linim(simplenet, Zc)
+  print(Fc)
+  print(summary(Fc))
+  
   ## linim with df provided
   Z <- as.im(function(x,y) {x-y}, Frame(simplenet))
   X <- linim(simplenet, Z)
@@ -463,7 +518,14 @@ local({
   marks(M) <- cbind(type=marks(M), data.frame(distnearest=nndist(M)))
   plot(M, main="")
   summary(M)
+  MM <- cut(M)
 
+  #' other cases
+  CX <- cut(chicago)
+  nd <- nndist(spiders)
+  SX <- cut(spiders %mark% nd, breaks=3)
+  SX <- cut(spiders, nd, breaks=c(0,100,200,Inf), include.lowest=TRUE)
+  
   ## linequad
   X <- runiflpp(6, simplenet)
   Y <- X %mark% factor(rep(c("A", "B"), 3))

@@ -55,6 +55,8 @@ local({
   cdf.test(unmark(AC), DM)
   cdf.test(unmark(AC), DM, "cvm")
   cdf.test(unmark(AC), DM, "ad")
+  ## other code blocks
+  cdf.test(finpines, "x")
 
   ## (2) linear networks
   set.seed(42)
@@ -65,11 +67,20 @@ local({
   cdf.test(fit, "y")
   cdf.test(fit, "y", "cvm")
   cdf.test(fit, "y", "ad")
+  ## marked
+  cdf.test(chicago, "y")
 
   ## (3) Monte Carlo test for Gibbs model
   fit <- ppm(cells ~ 1, Strauss(0.07))
   cdf.test(fit, "x", nsim=9)
+
+  ## cdf.test.slrm
+  fut <- slrm(japanesepines ~ x + y)
+  Z <- distmap(japanesepines)
+  cdf.test(fut, Z)
 })
+
+
 
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
@@ -212,6 +223,30 @@ local({
    plot(b, vertical=TRUE)
    
 })
+#'
+#'   tests/contrib.R
+#'
+#'   Tests for user-contributed code in spatstat
+#'
+#'   $Revision: 1.1 $  $Date: 2018/07/01 04:48:25 $
+
+require(spatstat)
+local({
+  #' Jinhom
+  #' Marie-Colette van Lieshout and Ottmar Cronie
+  X <- redwood3
+  fit <- ppm(X ~ polynom(x,y,2))
+  lam <- predict(fit)
+  lamX <- fitted(fit, dataonly=TRUE)
+  lmin <- 0.9 * min(lam)
+  g1 <- Ginhom(X, lambda=fit, update=TRUE)
+  g2 <- Ginhom(X, lambda=fit, update=FALSE, lmin = lmin)
+  g3 <- Ginhom(X, lambda=lam,  lmin=lmin)
+  g4 <- Ginhom(X, lambda=lamX, lmin=lmin)
+  f1 <- Finhom(X, lambda=fit, update=TRUE)
+  f2 <- Finhom(X, lambda=fit, update=FALSE)
+  f3 <- Finhom(X, lambda=lam,  lmin=lmin)
+})
 # tests/correctC.R
 # check for agreement between C and interpreted code
 # for interpoint distances etc.
@@ -328,7 +363,7 @@ local({
 #'                    relrisk(), Smooth()
 #'                    and inhomogeneous summary functions
 #'
-#'  $Revision: 1.21 $  $Date: 2018/06/11 06:56:44 $
+#'  $Revision: 1.22 $  $Date: 2018/07/12 02:14:08 $
 #'
 
 require(spatstat)
@@ -347,7 +382,6 @@ local({
     return(invisible(NULL))
   }
 
-
   tryit(0.05)
   tryit(0.05, diggle=TRUE)
   tryit(0.05, se=TRUE)
@@ -355,11 +389,26 @@ local({
 
   V <- diag(c(0.05^2, 0.07^2))
   tryit(varcov=V)
+  tryit(varcov=V, diggle=TRUE)
   tryit(varcov=V, weights=expression(x))
+  tryit(varcov=V, weights=expression(x), diggle=TRUE)
+  Z <- distmap(runifpoint(5, Window(cells)))
+  tryit(0.05, weights=Z)
+  tryit(0.05, weights=Z, diggle=TRUE)
 
   wdf <- data.frame(a=1:42,b=42:1)
   tryit(0.05, weights=wdf, do.fun=FALSE)
   tryit(varcov=V, weights=wdf, do.fun=FALSE)
+  tryit(varcov=V, weights=expression(cbind(x,y)), do.fun=FALSE)
+
+  crossit <- function(..., sigma=NULL) {
+    U <- runifpoint(20, Window(cells))
+    a <- densitycrossEngine(cells, U, sigma=sigma, ...)
+    a <- densitycrossEngine(cells, U, sigma=sigma, ..., diggle=TRUE)
+    invisible(NULL)
+  }
+  crossit(varcov=V, weights=cells$x)
+  crossit(varcov=V, weights=wdf)
 
   # apply different discretisation rules
   Z <- density(cells, 0.05, fractional=TRUE)
@@ -596,7 +645,7 @@ local({
 #'
 #'   disconnected linear networks
 #'
-#'    $Revision: 1.2 $ $Date: 2017/06/05 14:58:36 $
+#'    $Revision: 1.3 $ $Date: 2018/07/21 03:00:09 $
 
 require(spatstat)
 
@@ -608,6 +657,7 @@ m[4,5] <- m[5,4] <- m[6,10] <- m[10,6] <- m[4,6] <- m[6,4] <- FALSE
 L <- linnet(vertices(simplenet), m)
 L
 summary(L)
+is.connected(L)
 Z <- connected(L, what="components")
 
 #' point pattern with no points in one connected component
@@ -641,6 +691,8 @@ KYI <- linearKcross.inhom(Y, lambdaI=rep(intensity(Y1), npoints(Y1)),
 PYI <- linearpcfcross.inhom(Y, lambdaI=rep(intensity(Y1), npoints(Y1)),
                     lambdaJ=rep(intensity(Y2), npoints(Y2)))
 
+#' internal utilities
+K <- ApplyConnected(X, linearK, rule=function(...) list())
 })
 #'
 #'   tests/dominic.R
@@ -683,7 +735,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.10 $  $Date: 2018/05/02 09:02:43 $
+#  $Revision: 1.11 $  $Date: 2018/07/12 02:14:13 $
 #
 
 require(spatstat)
@@ -725,6 +777,10 @@ B <- envelope(cells, Kest, nsim=4, transform=expression(sqrt(./pi) - .x))
 fit <- ppm(cells~x)
 Ef <- envelope(fit, Kest, nsim=4, savefuns=TRUE, global=TRUE)
 Ep <- envelope(fit, Kest, nsim=4, savepatterns=TRUE, global=TRUE)
+
+#' check handling of 'dangerous' cases
+fut <- ppm(redwood ~ x)
+Ek <- envelope(fut, Kinhom, update=FALSE, nsim=4)
 
 # check conditional simulation
 e1 <- envelope(cells, Kest, nsim=4, fix.n=TRUE)

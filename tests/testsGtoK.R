@@ -64,6 +64,23 @@ local({
 })
 
 
+#'     tests/hypotests.R
+#'     Hypothesis tests
+#' 
+#'  $Revision: 1.2 $ $Date: 2018/07/21 03:02:20 $
+
+require(spatstat)
+local({
+  hopskel.test(redwood, method="MonteCarlo", nsim=5)
+  
+  berman.test(spiders, "x")
+  berman.test(lppm(spiders ~ x), "y")
+
+  #' quadrat test - spatial methods
+  a <- quadrat.test(redwood, 3)
+  domain(a)
+  shift(a, c(1,1))
+})
 #
 #  tests/imageops.R
 #
@@ -220,9 +237,9 @@ local({
 })#'
 #'   tests/Kfuns.R
 #'
-#'   Various K and L functions
+#'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.2 $  $Date: 2018/05/06 05:45:38 $
+#'   $Revision: 1.4 $  $Date: 2018/07/13 05:15:00 $
 #'
 
 require(spatstat)
@@ -238,6 +255,10 @@ local({
              weights=Z, ratio=TRUE)
   Kn <- Kest(cells, correction="none",
              weights=Z, ratio=TRUE)
+  #' pcf.ppp special code blocks
+  pr  <- pcf(cells, ratio=TRUE, var.approx=TRUE)
+  pc  <- pcf(cells, domain=square(0.5))
+  pcr <- pcf(cells, domain=square(0.5), ratio=TRUE)
   #' inhomogeneous multitype
   fit <- ppm(amacrine ~ marks)
   K1 <- Kcross.inhom(amacrine, lambdaX=fit)
@@ -254,11 +275,21 @@ local({
   km <- Kmark(X, f="myfun")
   Y <- X %mark% data.frame(u=runif(100), v=runif(100))
   mk <- markcorr(Y)
+  #'
+  rr <- rep(0.1, npoints(cells))
+  eC <- edge.Ripley(cells, rr)
+  eI <- edge.Ripley(cells, rr, method="interpreted")
+  if(max(abs(eC-eI)) > 0.1)
+    stop("Ripley edge correction results do not match")
+
+  a <- rmax.Ripley(square(1))
+  a <- rmax.Ripley(as.polygonal(square(1)))
+  a <- rmax.Ripley(letterR)
 })
 #
 # tests/kppm.R
 #
-# $Revision: 1.22 $ $Date: 2018/05/14 09:26:51 $
+# $Revision: 1.23 $ $Date: 2018/07/21 00:49:50 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -289,6 +320,11 @@ local({
  vc2 <- vcov(fitx, fast=TRUE)
  vc3 <- vcov(fitx, fast=TRUE, splitup=TRUE)
  vc4 <- vcov(fitx,            splitup=TRUE)
+
+ ## other code blocks
+ a <- varcount(fitx, function(x,y){x+1}) # always positive
+ a <- varcount(fitx, function(x,y){y-1}) # always negative
+ a <- varcount(fitx, function(x,y){x+y}) # positive or negative
  
  # improve.kppm
  fitI <- update(fit, improve.type="quasi")

@@ -34,7 +34,7 @@ local({
 #
 # Also test whether minnndist(X) == min(nndist(X))
 #
-#   $Revision: 1.17 $  $Date: 2016/11/29 06:25:15 $
+#   $Revision: 1.18 $  $Date: 2018/07/21 00:37:26 $
 #
 
 require(spatstat)
@@ -209,6 +209,9 @@ local({
   if(any(a != b)) stop("Incorrect result for has.close(X, r, Y, periodic=TRUE)")
 })
 
+local({
+  b <- bdist.pixels(letterR, style="coords")
+})
 ## 
 ##    tests/percy.R
 ##
@@ -263,12 +266,16 @@ local({
 ## 
 ## tests/polygons.R
 ##
-##  $Revision: 1.2 $ $Date: 2015/12/29 08:54:49 $
+##  $Revision: 1.3 $ $Date: 2018/07/22 02:10:07 $
 ##
 require(spatstat)
 local({
   co <- as.ppp(corners(letterR), letterR, check=FALSE)
   co[letterR]
+
+  b <- letterR$bdry
+  a <- sapply(b, xypolyselfint, yesorno=TRUE)
+  a <- lapply(b, xypolyselfint, proper=TRUE)
 })
 
 # 
@@ -574,6 +581,10 @@ local({
   #' various utilities
   periodify(cells, 2)
   periodify(demopat, 2)
+
+  #'
+  a <- multiplicity(finpines)
+  a <- multiplicity(longleaf)
 })
 #
 # tests/ppx.R
@@ -623,7 +634,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.5 $ $Date: 2018/04/30 04:32:49 $
+#  $Revision: 1.7 $ $Date: 2018/07/14 06:07:25 $
 #
 
 require(spatstat)
@@ -678,7 +689,16 @@ local({
   b <- predict(fit, total=quadrats(cells, 3))
 
   ## supporting code
+  u <- model.se.image(fit, square(0.5))
   u <- model.se.image(fit, square(0.5), what="cv")
+  u <- model.se.image(fit, square(0.5), what="ce")
+
+  ##
+  fut <- ppm(cells ~ x, Strauss(0.1))
+  df <- data.frame(x=runif(10), y=runif(10),
+                   Interaction=sample(0:1, 10, TRUE))
+  m10 <- PPMmodelmatrix(fut, data=df)
+  mmm <- PPMmodelmatrix(fut, Q=quad.ppm(fut))
 })
 
 #
@@ -706,7 +726,13 @@ local({
   fit3 <- ppm(amacrine ~1, MultiStraussHard(types=c("off", "on"),
                                             iradii=r, hradii=r/5))
   chk(emend(fit3))
-  
+
+  #' code coverage
+  op <- spatstat.options(project.fast=TRUE)
+  fut <- emend(fit, trace=TRUE)
+  chk(fut)
+  spatstat.options(op)
+
   # hierarchical
   ra <- r
   r[2,1] <- NA
@@ -737,3 +763,5 @@ local({
   chk(f7)
 
 })
+
+reset.spatstat.options()

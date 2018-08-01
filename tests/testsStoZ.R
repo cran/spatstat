@@ -14,7 +14,7 @@ local({
 #
 #  tests/segments.R
 #
-#  $Revision: 1.12 $  $Date: 2018/05/02 05:55:25 $
+#  $Revision: 1.13 $  $Date: 2018/07/22 02:15:02 $
 
 require(spatstat)
 
@@ -126,7 +126,15 @@ if(xFI > 0.01) stop(paste("density.psp FFT algorithm relative error =", xFI))
 
 #' undocumented  
   as.ppp(B)
+
+  #' segment crossing code
+  X <- psp(runif(30),runif(30),runif(30),runif(30), window=owin())
+  spatstat.options(selfcrossing.psp.useCall=FALSE)
+  selfcrossing.psp(X)
+  spatstat.options(selfcrossing.psp.useCall=TRUE)
 })
+
+reset.spatstat.options()
 #
 ## tests/sigtraceprogress.R
 #
@@ -173,7 +181,7 @@ local({
 
 #'    tests/sparse3Darrays.R
 #'  Basic tests of code in sparse3Darray.R and sparsecommon.R
-#'  $Revision: 1.15 $ $Date: 2018/05/04 03:56:37 $
+#'  $Revision: 1.16 $ $Date: 2018/07/06 01:54:17 $
 
 require(spatstat)
 local({
@@ -299,6 +307,9 @@ local({
     M[ 2, 5:3, 2] <- V3
     M[,,2] <- M2a
     M[,,2] <- (M2a + 1)
+    V5 <- sparseVector(x=1:2, i=2:3, length=5)
+    M[,2,2] <- V5
+    M[,,2] <- V5
     ## integer matrix index
     Mnew[cbind(3:5, 3:5, c(1,2,1))] <- 1:3
     Mnew[cbind(3:5, 3:5, 2)] <- 1:3
@@ -500,7 +511,7 @@ local({
 })
 #'   tests/tessera.R
 #'   Tessellation code, not elsewhere tested
-#'   $Revision: 1.1 $ $Date: 2018/04/14 03:25:12 $
+#'   $Revision: 1.3 $ $Date: 2018/07/16 08:51:44 $
 #'
 require(spatstat)
 local({
@@ -525,6 +536,7 @@ local({
     e <- do.call(op, list(Img, ...))
   }
   flay(reflect)
+  flay(flipxy)
   flay(shift, vec=c(1,2))
   flay(scalardilate, f=2) 
   flay(rotate, angle=pi/3)
@@ -543,6 +555,36 @@ local({
   b <- bdist.tiles(A[c(3,5,7)])
   #'
   Eim <- as.im(E, W=letterR)
+  #'
+  #' chop.tess
+  #'    horiz/vert lines
+  W <- square(1)
+  H <- infline(h=(2:4)/5)
+  V <- infline(v=(3:4)/5)
+  WH <- chop.tess(W, H)
+  WV <- chop.tess(W, V)
+  #'     polygonal tessellation
+  D <- dirichlet(runifpoint(4))
+  DH <- chop.tess(D, H)
+  DV <- chop.tess(D, V)
+  #'     image-based tessellation
+  f <- function(x,y){factor(round(4* (x^2 + y^2)))}
+  A <- tess(image=as.im(f, W=W))
+  L <- infline(p=(1:3)/3, theta=pi/4)
+  AL <- chop.tess(A, L)
+  AH <- chop.tess(A, H)
+  AV <- chop.tess(A, V)
+  #'
+  #' quantess
+  a <- quantess(square(1), "x", 3)
+  a <- quantess(square(1), "y", 3)
+  b <- quantess(letterR, "y", 3)
+  d <- quantess(cells, "y", 4)
+  g <- quantess(demopat, "x", 5)
+  g <- quantess(demopat, "y", 5)
+  D <- distmap(demopat)
+  h <- quantess(D, "y", 4)
+  h <- quantess(D, function(x,y){x+y}, 5)
 })
 #
 #   tests/testaddvar.R
@@ -563,7 +605,7 @@ addvar(model, "x", subregion=w, bw.input="points")
 #
 # additional test of parres
 #
-#  $Revision: 1.2 $  $Date: 2015/12/29 08:54:49 $
+#  $Revision: 1.3 $  $Date: 2018/07/13 05:07:57 $
 #
 require(spatstat)
 local({
@@ -580,13 +622,20 @@ parres(model, "x", subregion=w, bw.input="quad")
 # check whether 'update.ppm' has messed up internals
 mod2 <- update(model, ~x)
 parres(mod2, "x")
+
+#' other kinds of covariates
+mod3 <- ppm(X ~ x + offset(y))
+parres(mod3, "offset(y)")
+Z <- distmap(runifpoint(3))
+parres(mod3, Z)
+
 })
 #'
 #'     tests/threedee.R
 #'
 #'     Tests of 3D code 
 #'
-#'      $Revision: 1.2 $ $Date: 2018/06/06 03:05:12 $
+#'      $Revision: 1.3 $ $Date: 2018/07/02 15:40:29 $
 #'
 
 require(spatstat)
@@ -596,6 +645,11 @@ local({
   d <- pairdist(X, periodic=TRUE, squared=TRUE)
   d <- crossdist(X, Y, squared=TRUE)
   d <- crossdist(X, Y, squared=TRUE, periodic=TRUE)
+  #' 
+  h <- has.close(X, 0.2)
+  h <- has.close(X, 0.2, periodic=TRUE)
+  h <- has.close(X, 0.2, Y=Y)
+  h <- has.close(X, 0.2, Y=Y, periodic=TRUE)
   #' older code
   gg1 <- g3engine(X$x, X$y, X$z, correction="Hanisch G3")
   gg2 <- g3engine(X$x, X$y, X$z, correction="minus sampling")
@@ -628,23 +682,26 @@ reset.spatstat.options()
 #
 # tests/triplets.R
 #
-# test code for triplet interaction
+# test code for triplet interaction and associated summary function Tstat 
 #
-# $Revision: 1.5 $ $Date: 2015/12/29 08:54:49 $
+# $Revision: 1.6 $ $Date: 2018/07/02 15:51:26 $
 #
 require(spatstat)
 local({
   fit <- ppm(redwood ~1, Triplets(0.1))
   fit
   suffstat(fit)
-  # hard core (zero triangles, coefficient is NA)
+  #' hard core (zero triangles, coefficient is NA)
   fit0 <- ppm(cells ~1, Triplets(0.05))
   fit0
   suffstat(fit0)
-  # bug case (1 triangle in data)
+  #' bug case (1 triangle in data)
   fit1 <- ppm(cells ~1, Triplets(0.15))
   fit1
   suffstat(fit1)
+  #' Tstat function, all code blocks
+  a <- Tstat(redwood, ratio=TRUE,
+             correction=c("none", "border", "bord.modif", "translate"))
 })
 #
 #  tests/undoc.R

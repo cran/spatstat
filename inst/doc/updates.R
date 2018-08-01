@@ -46,7 +46,7 @@ newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:83-88
+### code chunk number 3: updates.Rnw:82-87
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -56,7 +56,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:94-99
+### code chunk number 4: updates.Rnw:93-98
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -64,32 +64,5 @@ Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)",
 lines(srclines/1000 ~ date, data=z)
 text(as.Date("2015-01-01"), 9.5, "C code")
 text(as.Date("2015-01-01"), 60, "R code")
-
-
-###################################################
-### code chunk number 5: updates.Rnw:2198-2202
-###################################################
-nbugs <- nrow(news(grepl("^BUG", Category), 
-                   package="spatstat"))
-nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category), 
-                   package="spatstat"))
-
-
-###################################################
-### code chunk number 6: updates.Rnw:2212-2213 (eval = FALSE)
-###################################################
-## bugfixes
-
-
-###################################################
-### code chunk number 7: updates.Rnw:2219-2220 (eval = FALSE)
-###################################################
-## bugfixes(sincedate="2017-06-30")
-
-
-###################################################
-### code chunk number 8: updates.Rnw:2223-2224 (eval = FALSE)
-###################################################
-## bugfixes(sinceversion="1.42-0")
 
 

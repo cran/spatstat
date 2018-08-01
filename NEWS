@@ -1,4 +1,95 @@
 
+        CHANGES IN spatstat VERSION 1.56-1
+
+OVERVIEW
+
+    o We thank Agustin Lobo for contributions.
+
+    o Improvements to infrastructure.
+    
+    o Bug fixes.
+
+    o Version nickname: "Invisible Friend"
+
+NEW FUNCTIONS
+
+    o as.im.expression
+    New method for 'as.im' for expressions.
+
+    o flipxy.tess
+    Method for 'flipxy' for tessellations.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o sdr
+    This is now a generic function, with a method for class 'ppp'.
+    
+    o pointsOnLines
+    The result now has an attribute named "map"
+    which maps each point to its parent line segment.
+    
+    o summary.lpp
+    Improved output.
+
+    o intersect.owin
+    Argument 'fatal' now defaults to FALSE.
+
+    o quadrature schemes (class "quad" and "logiquad")
+    Improved print and summary methods.
+    
+BUG FIXES
+
+    o cut.lpp
+    Crashed if the marks were a data frame or hyperframe.
+    Fixed.
+    
+    o summary.lpp, print.summary.lpp
+    Output was garbled if the marks were a data frame or hyperframe.
+    Fixed.
+
+    o integral.linim
+    Crashed if the function had NA values.
+    Fixed.
+
+    o Tstat
+    Crashed if ratio=TRUE.
+    Fixed.
+
+    o intersect.owin
+    Ignored argument 'fatal' in some cases.
+    [Spotted by Agustin Lobo.]
+    Fixed.
+
+    o plot.tess
+    Crashed if do.col=TRUE and 'values' was a factor.
+    Fixed.
+
+    o pcf.ppp
+    Crashed if 'domain' was given and ratio=TRUE.
+    Fixed.
+    
+    o "[<-.sparse3Darray"
+    Crashed if 'value' was one-dimensional
+    and the indices i, j, k specified a two-dimensional subset of x.
+    Fixed.
+    
+    o plot.quad
+    Crashed if tiles=TRUE for a quadrature scheme
+    created by quadscheme(method="dirichlet", exact=TRUE).
+    Fixed.
+
+    o bugtable
+    Crashed if there were no bugs!
+    Fixed.
+    
+    o sparse array code
+    An array bounds violation (segmentation fault) could occur.
+    Fixed.
+    
+    o internal code
+    Numerous internal bugs have been fixed.
+
+
         CHANGES IN spatstat VERSION 1.56-0
 
 OVERVIEW
