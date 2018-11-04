@@ -6,6 +6,7 @@
 \alias{[.splitppx}
 \alias{[.diagramobj}
 \alias{[<-.splitppx}
+\alias{accumulateStatus}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{active.interactions}
@@ -38,6 +39,7 @@
 \alias{as.unitname}
 \alias{augment.msr}
 \alias{avenndist}
+\alias{bandwidth.is.infinite}
 \alias{BartCalc}
 \alias{bbEngine}
 \alias{bermantestCalc}
@@ -91,6 +93,7 @@
 \alias{CressieReadStatistic}
 \alias{CressieReadSymbol}
 \alias{CressieReadName}
+\alias{cutoff2Dkernel}
 \alias{CVforPCF}
 \alias{damaged.ppm}
 \alias{data.mppm}
@@ -424,6 +427,7 @@
 \alias{prefixfv}
 \alias{prepareTitle}
 \alias{printStatus}
+\alias{printStatusList}
 \alias{print.addvar}    
 \alias{print.anylist}    
 \alias{print.autoexec}    
@@ -694,6 +698,7 @@
 \alias{versionstring.ppm}
 \alias{versionstring.spatstat}
 \alias{verifyclass}
+\alias{veryunique}
 \alias{vnnFind}
 \alias{Window.lintess}
 \alias{Window<-.linnet}
@@ -764,6 +769,7 @@
 \method{[}{splitppx}(x, \dots) <- value
 \method{[}{diagramobj}(x, \dots)
 \method{[}{rat}(x, \dots)
+accumulateStatus(x, stats)
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
 active.interactions(object)
@@ -799,6 +805,7 @@ as.listof(x)
 as.unitname(s)
 augment.msr(x, \dots, sigma, recompute)
 avenndist(X)
+bandwidth.is.infinite(sigma)
 BartCalc(fY, fK)
 bbEngine(\dots)
 bermantestCalc(fram, which, alternative, \dots)
@@ -856,6 +863,7 @@ countingweights(id, areas, check = TRUE)
 CressieReadStatistic(OBS,EXP,lambda)
 CressieReadSymbol(lambda)
 CressieReadName(lambda)
+cutoff2Dkernel(kernel, sigma, varcov, \dots, scalekernel, cutoff, fatal)
 CVforPCF(bw, stuff)
 damaged.ppm(object)
 data.mppm(x)
@@ -873,8 +881,9 @@ Deviation(x, ref, leaveout, n, xi)
 \method{dfbetas}{ppmInfluence}(model, \dots)
 dflt.redraw(button, name, env)
 densitycrossEngine(Xdata, Xquery, sigma, \dots,
+                    kernel, scalekernel,
                     weights, edge, varcov,
-                    diggle, sorted)
+                    diggle, sorted, cutoff)
 densitypointsEngine(x, sigma, \dots,
                     kernel, scalekernel,
                     weights, edge, varcov,
@@ -1076,7 +1085,7 @@ Kborder.engine(X, rmax, nr, correction, weights, ratio)
 Knone.engine(X, rmax, nr, weights, ratio)
 Krect.engine(X, rmax, nr, correction, weights, ratio, fname)
 Kount(dIJ, bI, b, breaks)
-Kwtsum(dIJ, bI, wIJ, b, w, breaks)
+Kwtsum(dIJ, bI, wIJ, b, w, breaks, fatal)
 Kpcf.kppm(model, what)
 killinteraction(model)
 km.rs.opt(o, cc, d, breaks, KM, RS)
@@ -1219,6 +1228,7 @@ objsurfEngine(objfun, optpar, objargs,
 onecolumn(m)
 optimStatus(x, call)
 printStatus(x, errors.only)
+printStatusList(stats)
 signalStatus(x, errors.only)
 outdated.interact(object)
 oversize.quad(Q, \dots, nU, nX, p)
@@ -1399,14 +1409,15 @@ rhohatCalc(ZX, Zvalues, lambda, denom, \dots,
            weights, lambdaX,
            method, horvitz, smoother,
            n, bw, adjust, from, to, 
-           bwref, covname, confidence,
+           bwref, covname, confidence, positiveCI, markovCI,
            covunits, modelcall, callstring, savestuff)
 rMaternInhibition(type, kappa, r, win, stationary, \dots, nsim, drop)
 RmhExpandRule(nama)
 rocData(covariate, nullmodel, \dots, high)
 rocModel(lambda, nullmodel, \dots, high)
 rmhsnoop(\dots, Wsim, Wclip, R, xcoords, ycoords, mlevels, mcodes, irep, itype, 
-     proptype, proplocn, propmark, propindx, numerator, denominator)
+     proptype, proplocn, propmark, propindx, numerator, denominator,
+     panel.only)
 roseContinuous(ang, rad, unit, \dots,
                start, clockwise, main, labels, at, do.plot)
 ruletextline(ch, n, terse)
@@ -1483,7 +1494,7 @@ scanBinomLRTS(nZ, nG, muZ, muG, alternative)
 second.moment.calc(x, sigma, edge, what, \dots,
                    varcov=NULL, expand=FALSE, debug=FALSE)
 second.moment.engine(x, sigma, edge, what, \dots,
-      kernel, obswin, varcov, npts, debug)
+      kernel, scalekernel, obswin, varcov, npts, debug)
 sewpcf(d, w, denargs, lambda2area, divisor)
 sewsmod(d, ff, wt, Ef, rvals, method="smrep", \dots, nwtsteps=500)
 \method{shift}{diagramobj}(X, \dots)
@@ -1503,9 +1514,11 @@ slrAssemblePixelData(Y, Yname, W, covimages, dataAtPoints, pixelarea)
 \method{Smooth}{leverage.ppm}(X, \dots)
 \method{Smooth}{influence.ppm}(X, \dots)
 smoothcrossEngine(Xdata, Xquery, values, sigma, \dots,
-                    weights, varcov, sorted)
+                    weights, varcov,
+                    kernel, scalekernel, sorted, cutoff)
 smoothpointsEngine(x, values, sigma, \dots,
-                    weights, varcov, leaveoneout, sorted, cutoff)
+                   kernel, scalekernel,
+                   weights, varcov, leaveoneout, sorted, cutoff)
 smudge(X)
 \method{sort}{im}(x, \dots)
 sortalongsegment(df)
@@ -1582,6 +1595,7 @@ varcountEngine(g, B, lambdaB, f)
 versionstring.interact(object)
 versionstring.ppm(object)
 versionstring.spatstat()
+veryunique(z)
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 vnnFind(seg, tp, ns, nv, from, to, seglen, huge, tol, kmax)
 \method{Window}{lintess}(X, \dots)

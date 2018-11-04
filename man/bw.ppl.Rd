@@ -72,10 +72,12 @@
 \seealso{
   \code{\link{density.ppp}},
   \code{\link{bw.diggle}},
-  \code{\link{bw.scott}}
+  \code{\link{bw.scott}},
+  \code{\link{bw.CvL}},
+  \code{\link{bw.frac}}.
 }
 \examples{
-  \donttest{
+  if(interactive()) {
     b <- bw.ppl(redwood)
     plot(b, main="Likelihood cross validation for redwoods")
     plot(density(redwood, b))
@@ -89,11 +91,8 @@
   \emph{Local Regression and Likelihood}.
   Springer, New York.
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \spatstatAuthors.
 }
 \keyword{spatial}
 \keyword{methods}

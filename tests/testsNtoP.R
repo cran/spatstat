@@ -34,7 +34,9 @@ local({
 #
 # Also test whether minnndist(X) == min(nndist(X))
 #
-#   $Revision: 1.18 $  $Date: 2018/07/21 00:37:26 $
+# Also test nnorient()
+#
+#   $Revision: 1.20 $  $Date: 2018/10/02 01:37:12 $
 #
 
 require(spatstat)
@@ -212,6 +214,14 @@ local({
 local({
   b <- bdist.pixels(letterR, style="coords")
 })
+
+local({
+  #' test nnorient
+  nnorient(cells, domain=erosion(Window(cells), 0.1))
+  #' degenerate case
+  X <- cells[nndist(cells) > bdist.points(cells)]
+  f <- nnorient(X)
+})
 ## 
 ##    tests/percy.R
 ##
@@ -244,7 +254,7 @@ local({
 ## tests/pixelgripes.R
 ##     Problems related to pixellation of windows
 ##
-## $Revision: 1.3 $ $Date: 2015/12/29 08:54:49 $
+## $Revision: 1.4 $ $Date: 2018/10/10 08:04:10 $
 
 require(spatstat)
 local({
@@ -263,6 +273,15 @@ local({
   fit1 <- kppm(X ~ distorigin, clusters="MatClust")
   Y1 <- simulate(fit1, retry=0)
 })
+
+local({
+  ## pixellate.ppp includes mapping from (x,y) to (row, col)
+  Z <- pixellate(cells, savemap=TRUE)
+  ind <- attr(Z, "map")
+  m <- (as.matrix(Z))[ind]
+  if(!all(m == 1)) stop("Coordinate mismatch in pixellate.ppp")
+})
+
 ## 
 ## tests/polygons.R
 ##
@@ -452,6 +471,22 @@ local({
   sl2fit <- update(slfit, ~grad + I(grad^2))
   slfitup <- update(slfit, use.internal=TRUE)
   sl2fitup <- update(sl2fit, use.internal=TRUE)
+
+  ## (4) anova.ppm
+  fut1  <- ppm(cells ~ 1, Strauss(0.1))
+  futx  <- ppm(cells ~ x, Strauss(0.1))
+  anova(fut1, test="Chi")
+  anova(futx, test="Chi")
+  fut1a <- ppm(cells ~ 1, Strauss(0.1), rbord=0)
+  anova(fut1a, futx, test="Chi")
+  fut1d <- ppm(cells ~ 1, Strauss(0.1), nd=23)
+  anova(fut1d, futx, test="Chi")
+  ## The following doesn't work yet
+  ## futxyg <- ppm(cells ~ x + s(y), Strauss(0.1), use.gam=TRUE)
+  ## anova(futx, futxyg)
+  fatP <- ppm(amacrine ~ marks)
+  fatM <- ppm(amacrine ~ marks, MultiStrauss(matrix(0.07, 2, 2)))
+  anova(fatP, fatM, test="Chi")
 })
 
 grep#
@@ -535,7 +570,7 @@ reset.spatstat.options()
 #'
 #'   tests/ppp.R
 #'
-#'   $Revision: 1.2 $ $Date: 2018/06/03 09:06:56 $
+#'   $Revision: 1.3 $ $Date: 2018/09/16 04:40:00 $
 #'
 #'  Untested cases in ppp() or associated code
 
@@ -585,6 +620,13 @@ local({
   #'
   a <- multiplicity(finpines)
   a <- multiplicity(longleaf)
+
+  ## superimpose.ppp, extra cases
+  X <- runifpoint(20)
+  A <- superimpose(cells, X, W="convex")
+  A <- superimpose(cells, X, W=ripras)
+  ## superimpose.splitppp
+  Y <- superimpose(split(amacrine))
 })
 #
 # tests/ppx.R
@@ -634,7 +676,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.7 $ $Date: 2018/07/14 06:07:25 $
+#  $Revision: 1.8 $ $Date: 2018/11/01 13:20:23 $
 #
 
 require(spatstat)
@@ -699,6 +741,9 @@ local({
                    Interaction=sample(0:1, 10, TRUE))
   m10 <- PPMmodelmatrix(fut, data=df)
   mmm <- PPMmodelmatrix(fut, Q=quad.ppm(fut))
+  fut1 <- ppm(cells ~ 1, Strauss(0.1))
+  effectfun(fut1, "x")
+  effectfun(fut1, "y")
 })
 
 #

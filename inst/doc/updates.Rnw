@@ -64,20 +64,29 @@ z <- mergeSizeTables(z, zutils)
 z <- mergeSizeTables(z, zdata)
 z <- mergeSizeTables(z, zlocal)
 #
-changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
+currentcount <- z[nrow(z), counts]
+bookcount    <- z[z$version == "1.42-0", counts]
+changes <- currentcount - bookcount
 newobj <- changes[["nobjects"]]
 newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
+newcode  <- changes[["Rlines"]] + changes[["srclines"]]
+bookcode <- bookcount[["Rlines"]] + bookcount[["srclines"]]
+growth <- signif((100 * newcode)/bookcode, digits=2)
 @ %$
 
 The book \cite{baddrubaturn15}, published in December 2015,
 covers everything in \spst\ up to version \texttt{1.42-0}, 
 released in May 2015.
+
+The \spst\ package has grown by \Sexpr{growth}\% 
+since the book was published.
+This document summarises the most important changes.
+
 The current version of \spst\ is \texttt{\Sexpr{sversion}}.
 It contains \Sexpr{newobj} new functions
 and \Sexpr{newdat} new datasets
 introduced after May 2015. 
 
-This document summarises the most important changes.
 
 <<echo=FALSE,results=hide,fig=FALSE>>=
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
@@ -105,29 +114,50 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 \section{\pkg{spatstat} is splitting into parts}
 
-    \pkg{spatstat} is being split into several sub-packages, to satisfy
+    \pkg{spatstat} is being split into sub-packages, to satisfy
     the requirements of CRAN. This should not affect the user:
     existing code will continue to work in the same way.
 
+    Typing \code{library(spatstat)} will load the familiar
+    \pkg{spatstat} package which can be used as before.
+
+    \subsection{The parts of \pkg{spatstat}}
+    
     Currently there are three sub-packages, called 
     \pkg{spatstat.utils},
     \pkg{spatstat.data} 
     and \pkg{spatstat}.
 
-    Typing \code{library(spatstat)} will load the familiar
-    \pkg{spatstat} package which can be used as before.
-    This will automatically load the \pkg{spatstat.data} package 
-    and will silently ``import'' the \pkg{spatstat.utils} package.
-
-    The \pkg{spatstat.data} package now contains all the datasets
-    for \pkg{spatstat}.
+    \begin{itemize}
+    \item 
+      The \code{spatstat} package contains the main code.
+    \item 
+      The \pkg{spatstat.data} package now contains all the datasets
+      for \pkg{spatstat}.
+    \item
+      The \pkg{spatstat.utils} package
+      contains utility functions for \pkg{spatstat}.
+    \end{itemize}
     
-    The \pkg{spatstat.utils} package
-    contains utility functions that were originally written for \pkg{spatstat}:
-    they were undocumented internal functions in \pkg{spatstat}, but are now
-    documented and accessible in a separate package because they may be
-    useful for other purposes. To access these functions, you need to
+    Typing \code{library(spatstat)} 
+    will automatically load \pkg{spatstat.data}
+    and silently ``import'' \pkg{spatstat.utils}.
+
+    To access the functions in \pkg{spatstat.utils} directly, you would need to
     type \code{library(spatstat.utils)}. 
+
+    \subsection{Extension packages}
+    
+    There are also extension packages which provide additional capabilities
+    and must be loaded explicitly when you need them. 
+    Currently there are two extension packages:
+    
+    \begin{itemize}
+    \item \pkg{spatstat.local} for local model-fitting, 
+    \item \pkg{spatstat.sphere} for analysing point patterns on a sphere.
+    \end{itemize}
+
+\pagebreak
 
 \section{Precis of all changes}
 
@@ -383,6 +413,7 @@ The following datasets have been added to the package.
 \item \texttt{austates}: The states and large mainland territories of Australia
    represented as polygonal regions forming a tessellation.
  \item \texttt{redwood3}: a more accurate version of the \texttt{redwood} data.
+ \item \texttt{cetaceans}: point patterns of whale and dolphin sightings.
 \end{itemize}
 
 \section{New classes}
@@ -397,6 +428,11 @@ The following datasets have been added to the package.
 Following is a list of all the functions that have been added.
 
 \begin{itemize}
+    \item \texttt{bw.CvL}: Cronie-van Lieshout bandwidth selection
+      for density estimation.
+      
+    \item \texttt{subset.psp}: subset method for line segment patterns.
+      
     \item \texttt{densityfun}, \texttt{densityfun.ppp}:
     Compute a kernel estimate of intensity of a point pattern
     and return it as a function of spatial location.
@@ -1055,15 +1091,18 @@ also carries these marks in the \verb!$lines! component.
  \item \texttt{bind.fv}:
    New argument \texttt{clip}.
    
- \item \texttt{bw.ppl}:
-   New arguments \texttt{weights} and \texttt{sigma}.
-   
  \item \texttt{bw.diggle}, \texttt{bw.ppl}, \texttt{bw.relrisk}, 
-   \texttt{bw.smoothppp}, 
+   \texttt{bw.smoothppp}:
     These functions now extract and store the name of the unit of length
     from the point pattern dataset. When the bandwidth selection criterion
     is plotted, the name of the unit of length is shown on the x-axis.
    
+ \item \texttt{bw.ppl}:
+   New arguments \texttt{weights} and \texttt{sigma}.
+   
+  \item \texttt{bw.scott}: the two bandwidth values in the result
+    now have names \texttt{sigma.x} and \texttt{sigma.y}.
+    
 %%C
  \item \texttt{cdf.test}:
    \begin{itemize}
@@ -1126,6 +1165,8 @@ also carries these marks in the \verb!$lines! component.
    If \texttt{col} is a colour map, then the contours are drawn 
    in different colours.
 
+  \item \texttt{convolve.im}: the name of the unit of length is preserved.
+   
  \item \texttt{crossing.psp}:
     New argument \texttt{details} gives more information about the intersections
     between the segments.
@@ -1187,6 +1228,7 @@ also carries these marks in the \verb!$lines! component.
    \item A non-Gaussian kernel can now be specified
    using the argument \texttt{kernel}.
  \item Argument \texttt{weights} can now be a pixel image.
+ \item Infinite bandwidth \texttt{sigma=Inf} is supported.
    \item
      Accelerated by about 30\% when \texttt{at="pixels"}.
    \item Accelerated by about 15\%
@@ -1270,6 +1312,10 @@ also carries these marks in the \verb!$lines! component.
     allow envelopes to be computed
     using simulations conditional on the observed number of points.   
 
+ \item \texttt{eval.im}:  New argument \texttt{warn}.
+   
+ \item \texttt{eval.linim}:  New argument \texttt{warn}.
+   
  \item \texttt{ewcdf}: Argument \texttt{weights} can now be \texttt{NULL}.
    
 %%F
@@ -1316,7 +1362,9 @@ also carries these marks in the \verb!$lines! component.
  \item \texttt{identify.psp}: Improved placement of labels.
    Arguments can be passed to \texttt{text.default}
    to control the plotting of labels.
-   
+
+  \item \texttt{imcov}: the name of the unit of length is preserved.
+    
  \item \texttt{influence.ppm}:
     For Gibbs models, memory usage has been dramatically reduced, 
     so the code can handle larger datasets and finer quadrature schemes.
@@ -1337,6 +1385,9 @@ also carries these marks in the \verb!$lines! component.
 \item \texttt{intensity.ppm}:
    Intensity approximation is now implemented for
    area-interaction model, and Geyer saturation model.
+
+\item \texttt{interp.im}:
+  New argument \texttt{bilinear}.
 
  \item \texttt{ippm}:
    \begin{itemize}
@@ -1603,6 +1654,7 @@ also carries these marks in the \verb!$lines! component.
     \item      Accelerated in the case where weights are given.
     \item New arguments \texttt{fractional} and \texttt{preserve}
       for more accurate discretisation.
+    \item New argument \texttt{savemap}.
     \end{itemize}
 
 
@@ -1618,6 +1670,11 @@ also carries these marks in the \verb!$lines! component.
     from executing the plot of each panel.
    \end{itemize}
 
+ \item \texttt{plot.colourmap}:
+   New argument \texttt{increasing} specifies whether the colours are
+    displayed in order left-to-right/bottom-to-top.
+    Changed default behaviour for discrete colour maps 
+    when \texttt{vertical=FALSE}.
 
  \item \texttt{plot.im}:
    \begin{itemize}
@@ -1628,6 +1685,7 @@ also carries these marks in the \verb!$lines! component.
    \item The number of tick marks in the colour ribbon can now be controlled
     using the argument \texttt{nint} in \texttt{ribargs}.
   \item Improved behaviour when all pixel values are \texttt{NA}.
+  \item Improved handling of tickmarks on colour ribbon.
    \end{itemize}
 
  \item \texttt{plot.imlist}:
@@ -1885,8 +1943,24 @@ also carries these marks in the \verb!$lines! component.
    \item \texttt{rgb2hex}:
    New argument \texttt{maxColorValue}
 
+   \item \texttt{relrisk.ppp}:
+     \begin{itemize}
+     \item 
+       If \texttt{se=TRUE} and \texttt{at="pixels"}, the result belongs
+       to class \texttt{solist}.
+     \item
+       The arguments \texttt{adjust}, \texttt{edge}, \texttt{diggle}
+       are now explicit formal arguments.
+     \end{itemize}
+     
    \texttt{rhohat}:
+   \begin{itemize}
+   \item 
    New argument \texttt{subset} allows computation for a subset of the data.
+   \item
+   New argument \texttt{positiveCI} specifies whether confidence limits
+   should always be positive. 
+   \end{itemize}
    
    \texttt{rhohat.lpp}:
    New argument \texttt{random} controls placement of dummy points.
@@ -1943,6 +2017,8 @@ also carries these marks in the \verb!$lines! component.
  \item \texttt{rStrauss, rHardcore, rStraussHard, rDiggleGratton, rDGS, rPenttinen:}
    New argument \texttt{drop}.
 
+   \item \texttt{rtemper:} new argument \texttt{track}.
+     
    \item \texttt{rthin}
    \begin{itemize}
       \item	
@@ -1969,7 +2045,9 @@ also carries these marks in the \verb!$lines! component.
    	New argument \code{drop}.
 	
 %%S   
-   \item Simulation:
+  \item \texttt{setcov}: the name of the unit of length is preserved.
+
+  \item Simulation:
    Several basic simulation algorithms have been accelerated.
    Consequently, simulation outcomes are not identical to 
    those obtained with previous versions of \spst, even when the
@@ -1991,12 +2069,15 @@ also carries these marks in the \verb!$lines! component.
    \item A non-Gaussian kernel can now be specified
    using the argument \texttt{kernel}.
    \item Argument \texttt{weights} can now be a pixel image.
+   \item Infinite bandwidth \texttt{sigma=Inf} is supported.
    \item Accelerated by about 30\% in the case where \texttt{at="pixels"}.
    \item Accelerated by about 15\% in the case where \texttt{at="points"}
      and \texttt{kernel="gaussian"}.
    \item Now exits gracefully if any mark values are \texttt{NA}, \texttt{NaN}
      or \texttt{Inf}.
    \item New argument \texttt{geometric} supports geometric-mean smoothing.
+   \item The arguments \texttt{adjust}, \texttt{edge}, \texttt{diggle}
+     are now explicit formal arguments.
    \end{itemize}
 
  \item \texttt{solist}:
@@ -2008,7 +2089,7 @@ also carries these marks in the \verb!$lines! component.
    Set these options to \texttt{FALSE} to reproduce results obtained with
    previous versions of \spst.
 
-   \item \texttt{split.ppp}
+   \item \texttt{split.ppp}, \texttt{split.ppx}:
    The splitting variable \texttt{f} can now be a logical vector.
 
    \item \texttt{square}: 

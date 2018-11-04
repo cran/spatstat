@@ -3,7 +3,7 @@
 #
 #   model compensated K-function
 #
-# $Revision: 1.14 $ $Date: 2015/10/21 09:06:57 $
+# $Revision: 1.16 $ $Date: 2018/10/19 03:20:51 $
 #
 
 Kcom <- local({
@@ -180,7 +180,8 @@ Kcom <- local({
                  "border")
     # reduced sample for adjustment integral
     RSD <- Kwtsum(dIJ[okI], bI[okI], wcIJ[okI],
-                  b[Z & USED], rep.int(1, npts.used), breaks)
+                  b[Z & USED], rep.int(1, npts.used), breaks,
+                  fatal=FALSE)
 #    lambdaU <- (npts.used + 1)/area.used
     lambdaU <- (npts + 1)/areaW
     Kb <- RSD$numerator/((RSD$denominator + 1) * lambdaU)
@@ -244,7 +245,7 @@ Kcom <- local({
       iOK <- I[okI]
       denom <- lambda2U * area.used
       variso <- varsumiso <- 0 * Kiso
-      for(i in sort(unique(iOK))) {
+      for(i in sortunique(iOK)) {
         relevant <- (iOK == i)
         tincrem <- whist(dOK[relevant], breaks$val, eOK[relevant])
         localterm <- cumsum(tincrem)/denom

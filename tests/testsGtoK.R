@@ -84,7 +84,7 @@ local({
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.14 $   $Date: 2018/05/27 05:12:57 $
+#   $Revision: 1.15 $   $Date: 2018/10/28 10:42:36 $
 #
 
 require(spatstat)
@@ -162,8 +162,35 @@ local({
   RGBscal <- rgbim(X, Y, Z, autoscale=TRUE, maxColorValue=1)
   HSVscal <- hsvim(X, Y, Z, autoscale=TRUE)
 
+  #' cases of [.im
+  Ma <- as.mask(M, dimyx=37)
+  ZM <- Z[raster=Ma, drop=FALSE]
+  ZM[solutionset(Y+Z > 0.4)] <- NA
+  ZF <- cut(ZM, breaks=5)
+  ZL <- (ZM > 0)
+  P <- list(x=c(0.511, 0.774, 0.633, 0.248, 0.798),
+            y=c(0.791, 0.608, 0.337, 0.613, 0.819))
+  zmp <- ZM[P, drop=TRUE]
+  zfp <- ZF[P, drop=TRUE]
+  zlp <- ZL[P, drop=TRUE]
+  P <- as.ppp(P, owin())
+  zmp <- ZM[P, drop=TRUE]
+  zfp <- ZF[P, drop=TRUE]
+  zlp <- ZL[P, drop=TRUE]
+
   #' miscellaneous
   ZZ <- zapsmall(Z, digits=6)
+  ZZ <- zapsmall(Z)
+
+  ZS <- shift(Z, origin="centroid")
+  ZS <- shift(Z, origin="bottomleft")
+
+  plot(Z, ribside="left")
+  plot(Z, ribside="top")
+  
+  h <- hist(Z)
+  plot(h)
+  
 })
 #' indices.R
 #' Tests of code for understanding index vectors etc
@@ -239,7 +266,7 @@ local({
 #'
 #'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.4 $  $Date: 2018/07/13 05:15:00 $
+#'   $Revision: 1.7 $  $Date: 2018/11/01 13:26:16 $
 #'
 
 require(spatstat)
@@ -247,7 +274,10 @@ myfun <- function(x,y){(x+1) * y }
 local({
   #' supporting code
   implemented.for.K(c("border", "bord.modif", "translate", "good", "best"),
+                    "polygonal", TRUE)
+  implemented.for.K(c("border", "bord.modif", "translate", "good", "best"),
                     "mask", TRUE)
+  implemented.for.K(c("border", "isotropic"), "mask", FALSE)
   #' Kest special code blocks
   K <- Kest(cells, var.approx=TRUE, ratio=FALSE)
   Z <- distmap(cells) + 1
@@ -255,6 +285,18 @@ local({
              weights=Z, ratio=TRUE)
   Kn <- Kest(cells, correction="none",
              weights=Z, ratio=TRUE)
+  Knb <- Kest(cells, correction=c("border","bord.modif","none"),
+              weights=Z, ratio=TRUE)
+  bigint <- 50000 # This is only "big" on a 32-bit system where
+                  # sqrt(.Machine$integer.max) = 46340.9
+  X <- runifpoint(bigint)
+  Z <- as.im(1/bigint, owin())
+  Kb <- Kest(X, correction=c("border","bord.modif"),
+             rmax=0.02, weights=Z, ratio=TRUE)
+  Kn <- Kest(X, correction="none",
+             rmax=0.02, weights=Z, ratio=TRUE)
+  Knb <- Kest(X, correction=c("border","bord.modif","none"),
+             rmax=0.02, weights=Z, ratio=TRUE)
   #' pcf.ppp special code blocks
   pr  <- pcf(cells, ratio=TRUE, var.approx=TRUE)
   pc  <- pcf(cells, domain=square(0.5))
@@ -285,11 +327,22 @@ local({
   a <- rmax.Ripley(square(1))
   a <- rmax.Ripley(as.polygonal(square(1)))
   a <- rmax.Ripley(letterR)
+  #'
+  #'   local K functions
+  #'
+  fut <- ppm(swedishpines ~ polynom(x,y,2))
+  Z <- predict(fut)
+  Lam <- fitted(fut, dataonly=TRUE)
+  a <- localLinhom(swedishpines, lambda=fut)
+  a <- localLinhom(swedishpines, lambda=Z)
+  a <- localLinhom(swedishpines, lambda=Lam)
+  a <- localLinhom(swedishpines, lambda=Z, correction="none")
+  a <- localLinhom(swedishpines, lambda=Z, correction="translate")
 })
 #
 # tests/kppm.R
 #
-# $Revision: 1.23 $ $Date: 2018/07/21 00:49:50 $
+# $Revision: 1.24 $ $Date: 2018/10/21 03:10:37 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -401,16 +454,32 @@ local({
 })
 
 local({
+  #' minimum contrast code
   K <- Kest(redwood)
   a <- matclust.estK(K)
   a <- thomas.estK(K)
   a <- cauchy.estK(K)
+  a <- vargamma.estK(K)
   a <- lgcp.estK(K)
+
+  print(a)
+  u <- unitname(a)
+  
   g <- pcf(redwood)
   a <- matclust.estpcf(g)
   a <- thomas.estpcf(g)
   a <- cauchy.estpcf(g)
+  a <- vargamma.estpcf(g)
   a <- lgcp.estpcf(g)
+
+  #' auxiliary functions
+  b <- resolve.vargamma.shape(nu.pcf=1.5)
+
+  aa <- NULL
+  aa <- accumulateStatus(simpleMessage("Woof"), aa)
+  aa <- accumulateStatus(simpleMessage("Sit"),  aa)
+  aa <- accumulateStatus(simpleMessage("Woof"), aa)
+  printStatusList(aa)
 })
 
 local({

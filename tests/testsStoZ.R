@@ -140,7 +140,7 @@ reset.spatstat.options()
 #
 ## Tests of *.sigtrace and *.progress
 #
-## $Revision: 1.3 $ $Date: 2015/12/29 08:54:49 $
+## $Revision: 1.4 $ $Date: 2018/11/02 00:53:45 $
 
 require(spatstat)
 local({
@@ -160,6 +160,81 @@ local({
   b <- dg.sigtrace(redwood, Lest, nsim=5, use.theory=FALSE, leaveout=2)
   bb <- dg.progress(redwood, Lest, nsim=5, use.theory=FALSE, leaveout=2,
                     verbose=FALSE)
+  ## other code blocks
+  e <- mad.progress(redwood, nsim=5)
+  e <- mad.progress(redwood, nsim=19, alpha=0.05)
+  f <- dclf.progress(redwood, nsim=5, scale=function(x) x^2)
+  f <- dclf.progress(redwood, nsim=5, normalize=TRUE, deflate=TRUE)
+  g <- dg.progress(redwood, nsim=5, scale=function(x) x^2)
+  g <- dg.progress(redwood, nsim=5, normalize=TRUE, deflate=TRUE)
+})
+#'
+#'     tests/simplepan.R
+#'
+#'   Tests of user interaction in simplepanel
+#'   Handled by spatstatLocator()
+#'
+#'   $Revision: 1.2 $  $Date: 2018/10/16 00:46:41 $
+#'
+
+require(spatstat)
+
+local({
+  ## Adapted from example(simplepanel)
+  ## make boxes
+  outerbox <- owin(c(0,4), c(0,1))
+  buttonboxes <- layout.boxes(outerbox, 4, horizontal=TRUE, aspect=1)
+  ## make environment containing an integer count
+  myenv <- new.env()
+  assign("answer", 0, envir=myenv)
+  ## what to do when finished: return the count.
+  myexit <- function(e) { return(get("answer", envir=e)) }
+  ## button clicks
+  ## decrement the count
+  Cminus <- function(e, xy) {
+    ans <- get("answer", envir=e)
+    assign("answer", ans - 1, envir=e)
+    return(TRUE)
+  }
+  ## display the count (clicking does nothing)
+  Cvalue <- function(...) { TRUE }
+  ## increment the count
+  Cplus <- function(e, xy) {
+    ans <- get("answer", envir=e)
+    assign("answer", ans + 1, envir=e)
+    return(TRUE)
+  }
+  ## 'Clear' button
+  Cclear <- function(e, xy) {
+    assign("answer", 0, envir=e)
+    return(TRUE)
+  }
+  ## quit button
+  Cdone <- function(e, xy) { return(FALSE) }
+
+  myclicks <- list("-"=Cminus,
+                   value=Cvalue,
+                   "+"=Cplus,
+                   done=Cdone)
+  ## redraw the button that displays the current value of the count
+  Rvalue <- function(button, nam, e) {
+     plot(button, add=TRUE)
+     ans <- get("answer", envir=e)
+     text(centroid.owin(button), labels=ans)
+     return(TRUE)
+  }
+  ## make the panel
+  P <- simplepanel("Counter",
+                   B=outerbox, boxes=buttonboxes,
+                   clicks=myclicks,
+                   redraws = list(NULL, Rvalue, NULL, NULL),
+                   exit=myexit, env=myenv)
+  ## queue up a sequence of inputs
+  boxcentres <- do.call(concatxy, unname(lapply(buttonboxes[c(3,3,1,3,2,4)],
+                                                centroid.owin)))
+  spatstat.utils::queueSpatstatLocator(boxcentres$x, boxcentres$y)
+  ## go
+  run.simplepanel(P)
 })
 #
 # tests/slrm.R
@@ -470,6 +545,35 @@ Y <- split(X, "age")
 Y <- split(X, "mineral", drop=TRUE)
 
 })
+#'
+#'    tests/ssf.R
+#'
+#'   Tests of 'ssf' class
+#'
+#'   $Revision: 1.2 $ $Date: 2018/10/21 04:05:33 $
+#'
+
+require(spatstat)
+local({
+  Y <- cells[1:5]
+  X <- rsyst(Window(Y), 5)
+  Z <- runifpoint(3, Window(Y))
+  f1 <- ssf(X, nncross(X,Y,what="dist"))
+  f2 <- ssf(X, nncross(X,Y,what="dist", k=1:2))
+  image(f1)
+  g1 <- as.function(f1)
+  g1(Z)
+  g2 <- as.function(f2)
+  g2(Z)
+  plot(f1, style="contour")
+  plot(f1, style="imagecontour")
+  contour(f1)
+  apply.ssf(f2, 1, sum)
+  range(f1)
+  min(f1)
+  max(f1)
+  integral(f1, weights=tile.areas(dirichlet(X)))
+})
 #
 #   tests/step.R
 #
@@ -660,7 +764,7 @@ local({
 #'
 #'   Tests for C code in trigraf.c
 #'   
-#'  $Revision: 1.2 $  $Date: 2018/06/08 13:14:16 $
+#'  $Revision: 1.3 $  $Date: 2018/09/23 09:37:29 $
 #'
 require(spatstat)
 local({
@@ -671,9 +775,19 @@ local({
   B <- delaunay(redwood)
   spatstat.deldir.setopt(TRUE, TRUE)
   #' called from edges2triangles.R
-  op <- spatstat.options(fast.trigraph=FALSE)
-  fut <- ppm(cells ~ 1, Triplets(0.15))
-  spatstat.options(op)
+  tryangles <- function(iedge, jedge, nt=0) {
+    spatstat.options(fast.trigraph=FALSE)
+    A <- edges2triangles(iedge, jedge)
+    spatstat.options(fast.trigraph=TRUE)
+    B <- edges2triangles(iedge, jedge)
+    if(!all(dim(A) == dim(B)) || !all(A == B))
+      stop(paste("Discrepancy in edges2triangles (with", nt, "triangles)"))
+  }
+  ii <- simplenet$from
+  jj <- simplenet$to
+  tryangles(ii,          jj,          0)
+  tryangles(c(ii, 1),    c(jj, 5),    1)
+  tryangles(c(ii, 1, 8), c(jj, 5, 9), 2)
 })
 
 reset.spatstat.options()
@@ -706,7 +820,7 @@ local({
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.5 $   $Date: 2018/04/27 09:31:24 $
+#   $Revision: 1.6 $   $Date: 2018/10/19 09:45:52 $
 #
 #  Test undocumented hacks, etc
 
@@ -740,7 +854,9 @@ local({
             list(a=2, b=TRUE))
   stopifnot(!allElementsIdentical(M))
   stopifnot(allElementsIdentical(M, "a"))
-  
+  ##
+  A <- Strauss(0.1)
+  A <- reincarnate.interact(A)
 })
 
 
@@ -932,7 +1048,7 @@ local({
 #
 # Tests of owin geometry code
 #
-#  $Revision: 1.5 $  $Date: 2018/05/22 10:35:24 $
+#  $Revision: 1.6 $  $Date: 2018/10/28 10:31:56 $
 
 require(spatstat)
 local({
@@ -964,6 +1080,8 @@ local({
   Vnew <- as.owin(Vdf)
   zz <- mask2df(V)
 
+  RM <- owinpoly2mask(letterR, as.mask(Frame(letterR)), check=TRUE)
+
   #' as.owin
   U <- as.owin(quadscheme(cells))
   U2 <- as.owin(list(xmin=0, xmax=1, ymin=0, ymax=1))
@@ -975,7 +1093,10 @@ local({
   o21 <- overlap.owin(B2, B1)
   i12 <- intersect.owin(B1, B2, eps=0.01)
   i21 <- intersect.owin(B2, B1, eps=0.01)
-
+  E2 <- emptywindow(square(2))
+  e12 <- intersect.owin(B1, E2)
+  e21 <- intersect.owin(E2, B1)
+  
   #' geometry
   inradius(B1)
   inradius(B2)
@@ -986,7 +1107,13 @@ local({
   is.convex(B1)
   is.convex(B2)
   is.convex(letterR)
-
+  volume(letterR)
+  perimeter(as.mask(letterR))
+  
+  spatstat.options(Cbdrymask=FALSE)
+  bb <- bdry.mask(letterR)
+  spatstat.options(Cbdrymask=TRUE)
+  
   X <- longleaf[square(50)]
   marks(X) <- marks(X)/8
   D <- discs(X, delta=5, separate=TRUE)
@@ -997,6 +1124,7 @@ local({
 
 })
 
+reset.spatstat.options()
 ##
 ## tests/xysegment.R
 ##

@@ -3,7 +3,7 @@
 #
 #  Smooth the marks of a point pattern
 # 
-#  $Revision: 1.48 $  $Date: 2018/04/13 06:42:11 $
+#  $Revision: 1.68 $  $Date: 2018/10/05 03:49:46 $
 #
 
 # smooth.ppp <- function(X, ..., weights=rep(1, npoints(X)), at="pixels") {
@@ -22,7 +22,11 @@ Smooth.solist <- function(X, ...) {
 
 Smooth.ppp <- function(X, sigma=NULL, ...,
                        weights=rep(1, npoints(X)), at="pixels",
-                       edge=TRUE, diggle=FALSE, geometric=FALSE) {
+                       adjust=1, varcov=NULL, 
+                       edge=TRUE, diggle=FALSE, 
+                       kernel="gaussian",
+                       scalekernel=is.character(kernel),
+                       geometric=FALSE) {
   verifyclass(X, "ppp")
   if(!is.marked(X, dfok=TRUE, na.action="fatal"))
     stop("X should be a marked point pattern", call.=FALSE)
@@ -32,7 +36,26 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
   at <- pickoption("output location type", at,
                    c(pixels="pixels",
                      points="points"))
-  ## weights
+  ## trivial case
+  if(npoints(X) == 0) {
+    cn <- colnames(marks(X))
+    nc <- length(cn)
+    switch(at,
+           points = {
+             result <- if(nc == 0) numeric(0) else
+             matrix(, 0, nc, dimnames=list(NULL, cn))
+           },
+           pixels = {
+             result <- as.im(NA_real_, Window(X))
+             if(nc) {
+               result <- as.solist(rep(list(result), nc))
+               names(result) <- cn
+             }
+           })
+    return(result)
+  }
+
+  ## ensure weights are numeric
   weightsgiven <- !missing(weights) && !is.null(weights) 
   if(weightsgiven) {
     # convert to numeric
@@ -46,20 +69,68 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
   if(weightsgiven) {
     check.nvector(weights, npoints(X))
   } else weights <- NULL
+
   ## geometric mean smoothing
   if(geometric) 
     return(ExpSmoothLog(X, sigma=sigma, ..., at=at,
+                        adjust=adjust, varcov=varcov,
+                        kernel=kernel, scalekernel=scalekernel,
                         weights=weights, edge=edge, diggle=diggle))
+
   ## determine smoothing parameters
-  ker <- resolve.2D.kernel(sigma=sigma, ...,
-                           x=X, bwfun=bw.smoothppp, allow.zero=TRUE)
-  sigma <- ker$sigma
-  varcov <- ker$varcov
+  if(scalekernel) {
+    ker <- resolve.2D.kernel(sigma=sigma, ...,
+                             adjust=adjust, varcov=varcov,
+                             kernel=kernel, 
+                             x=X, bwfun=bw.smoothppp, allow.zero=TRUE)
+    sigma <- ker$sigma
+    varcov <- ker$varcov
+    adjust <- 1
+  } 
+  
+  ## infinite bandwidth
+  if(bandwidth.is.infinite(sigma)) {
+    #' uniform estimate
+    nX <- npoints(X)
+    if(is.null(weights)) weights <- rep(1, nX)
+    marx <- marks(X)
+    single <- is.null(dim(marx))
+    wtmark <- weights * marx 
+    totwt <- sum(weights)
+    totwtmark <- if(single) sum(wtmark) else colSums(wtmark)
+    W <- Window(X)
+    switch(at,
+           pixels = {
+             result <- solapply(totwtmark/totwt, as.im, W=W, ...)
+             names(result) <- colnames(marx)
+             if(single) result <- result[[1L]]
+           },
+           points = {
+             denominator <- rep(totwt, nX)
+             numerator <- rep(totwtmark, each=nX)
+             if(!single) numerator <- matrix(numerator, nrow=nX)
+             leaveoneout <- resolve.1.default(list(leaveoneout=TRUE), list(...))
+             if(leaveoneout) {
+               numerator <- numerator - wtmark
+               denominator <- denominator - weights
+             }
+             result <- numerator/denominator
+             if(!single)
+               colnames(result) <- colnames(marx)
+           })
+    return(result)
+  }
+
   ## Diggle's edge correction?
   if(diggle && !edge) warning("Option diggle=TRUE overridden by edge=FALSE")
   diggle <- diggle && edge
+  ##
+  ## cutoff distance (beyond which the kernel value is treated as zero)
+  cutoff <- cutoff2Dkernel(kernel, sigma=sigma, varcov=varcov,
+                           scalekernel=scalekernel, adjust=adjust, ...,
+                           fatal=TRUE)
   ## 
-  if(ker$cutoff < minnndist(X)) {
+  if(cutoff < minnndist(X)) {
     # very small bandwidth
     leaveoneout <- resolve.1.default("leaveoneout",
                                      list(...), list(leaveoneout=TRUE))
@@ -77,7 +148,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
 
   if(diggle) {
     ## absorb Diggle edge correction into weights vector
-    edg <- second.moment.calc(X, sigma, what="edge", ..., varcov=varcov)
+    edg <- second.moment.calc(X, sigma, what="edge", ...,                                                     varcov=varcov, adjust=adjust,
+                              kernel=kernel, scalekernel=scalekernel)
     ei <- safelookup(edg, X, warn=FALSE)
     weights <- if(weightsgiven) weights/ei else 1/ei
     weights[!is.finite(weights)] <- 0
@@ -115,6 +187,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                          resolve.defaults(list(x=X,
                                                values=values, weights=weights,
                                                sigma=sigma, varcov=varcov,
+                                               kernel=kernel,
+                                               scalekernel=scalekernel,
                                                edge=FALSE),
                                           list(...)))
              },
@@ -126,6 +200,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                                                at="pixels",
                                                weights = values.weights,
                                                sigma=sigma, varcov=varcov,
+                                               kernel=kernel,
+                                               scalekernel=scalekernel,
                                                edge=FALSE),
                                           list(...)))
                denominator <-
@@ -135,6 +211,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                                                weights = weights,
                                                sigma=sigma,
                                                varcov=varcov,
+                                               kernel=kernel,
+                                               scalekernel=scalekernel,
                                                edge=FALSE),
                                           list(...)))
                result <- eval.im(numerator/denominator)
@@ -175,6 +253,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                                       at=at,
                                       weights = weights,
                                       sigma=sigma, varcov=varcov,
+                                      kernel=kernel,
+                                      scalekernel=scalekernel,
                                       edge=FALSE),
                                  list(...)))
       ## compute numerator for each column of marks
@@ -185,6 +265,8 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
                                       at=at,
                                       weights = marx.weights,
                                       sigma=sigma, varcov=varcov,
+                                      kernel=kernel,
+                                      scalekernel=scalekernel,
                                       edge=FALSE),
                                  list(...)))
       uhoh <- attr(numerators, "warnings")
@@ -265,11 +347,17 @@ Smooth.ppp <- function(X, sigma=NULL, ...,
 
 
 smoothpointsEngine <- function(x, values, sigma, ...,
+                               kernel="gaussian", 
+                               scalekernel=is.character(kernel),
                                weights=NULL, varcov=NULL,
                                leaveoneout=TRUE,
                                sorted=FALSE, cutoff=NULL) {
   debugging <- spatstat.options("developer")
   stopifnot(is.logical(leaveoneout))
+
+  if(!is.null(dim(values)))
+    stop("Internal error: smoothpointsEngine does not support multidimensional values")
+  
   #' detect constant values
   if(diff(range(values, na.rm=TRUE)) == 0) { 
     result <- values
@@ -277,18 +365,44 @@ smoothpointsEngine <- function(x, values, sigma, ...,
     attr(result, "varcov") <- varcov
     return(result)
   }
-  #' Contributions from pairs of distinct points
-  #' closer than 8 standard deviations
-  sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
-  if(is.null(cutoff)) 
-    cutoff <- 8 * sd
+
+  validate2Dkernel(kernel)
+  if(is.character(kernel)) kernel <- match2DkernelName(kernel)
+  isgauss <- identical(kernel, "gaussian")
+
+  ## Handle weights that are meant to be null
+  if(length(weights) == 0)
+     weights <- NULL
+
+  ## infinite bandwidth
+  if(bandwidth.is.infinite(sigma)) {
+    #' uniform estimate
+    nX <- npoints(x)
+    if(is.null(weights)) weights <- rep(1, nX)
+    wtval <- weights * values
+    totwt <- sum(weights)
+    totwtval <- sum(wtval) 
+    denominator <- rep(totwt, nX)
+    numerator <- rep(totwtval, nX)
+    if(leaveoneout) {
+      numerator <- numerator - wtval
+      denominator <- denominator - weights
+    }
+    result <- numerator/denominator
+    return(result)
+  }
+  
+  ## cutoff distance (beyond which the kernel value is treated as zero)
+  ## NB: input argument 'cutoff' is either NULL or
+  ##     an absolute distance (if scalekernel=FALSE)
+  ##     a number of standard deviations (if scalekernel=TRUE)
+  cutoff <- cutoff2Dkernel(kernel, sigma=sigma, varcov=varcov,
+                           scalekernel=scalekernel, cutoff=cutoff,
+                           fatal=TRUE)
+  ## cutoff is now an absolute distance
   if(debugging)
     cat(paste("cutoff=", cutoff, "\n"))
   
-  ## Handle weights that are meant to be null
-  if(length(weights) == 0 || (!is.null(dim(weights)) && nrow(weights) == 0))
-     weights <- NULL
-     
   # detect very small bandwidth
   nnd <- nndist(x)
   nnrange <- range(nnd)
@@ -305,11 +419,17 @@ smoothpointsEngine <- function(x, values, sigma, ...,
     attr(result, "warnings") <- "underflow"
     return(result)
   }
+
   if(leaveoneout) {
     # ensure cutoff includes at least one point
     cutoff <- max(1.1 * nnrange[2], cutoff)
   }
-  if(spatstat.options("densityTransform") && spatstat.options("densityC")) {
+
+  sd <- if(is.null(varcov)) sigma else sqrt(max(eigen(varcov)$values))
+  
+  if(isgauss &&
+     spatstat.options("densityTransform") &&
+     spatstat.options("densityC")) {
     ## .................. experimental C code .....................
     if(debugging)
       cat('Using experimental code!\n')
@@ -369,7 +489,7 @@ smoothpointsEngine <- function(x, values, sigma, ...,
       # Use mark of nearest neighbour (by l'Hopital's rule)
       result[nbg] <- values[nnwhich(x)[nbg]]
     }
-  } else if(spatstat.options("densityC")) {
+  } else if(isgauss && spatstat.options("densityC")) {
     # .................. C code ...........................
     if(debugging)
       cat('Using standard code.\n')
@@ -453,46 +573,58 @@ smoothpointsEngine <- function(x, values, sigma, ...,
       result[nbg] <- values[nnwhich(x)[nbg]]
     }
   } else {
-    # previous, partly interpreted code
-    # compute weighted densities
+    #' Either a non-Gaussian kernel or using older, partly interpreted code
+    #' compute weighted densities
     if(is.null(weights)) {
       # weights are implicitly equal to 1
       numerator <- do.call(density.ppp,
-                         resolve.defaults(list(x=x, at="points"),
-                                          list(weights = values),
-                                          list(sigma=sigma, varcov=varcov),
-                                          list(leaveoneout=leaveoneout),
-                                          list(sorted=sorted),
+                         resolve.defaults(list(x=x, at="points",
+                                               weights = values,
+                                               sigma=sigma,
+                                               varcov=varcov,
+                                               leaveoneout=leaveoneout,
+                                               sorted=sorted,
+                                               kernel=kernel,
+                                               scalekernel=scalekernel),
                                           list(...),
                                           list(edge=FALSE)))
       denominator <- do.call(density.ppp,
-                             resolve.defaults(list(x=x, at="points"),
-                                              list(sigma=sigma, varcov=varcov),
-                                              list(leaveoneout=leaveoneout),
-                                              list(sorted=sorted),
+                             resolve.defaults(list(x=x, at="points",
+                                                   sigma=sigma,
+                                                   varcov=varcov,
+                                                   leaveoneout=leaveoneout,
+                                                   sorted=sorted,
+                                                   kernel=kernel,
+                                                   scalekernel=scalekernel),
                                               list(...),
                                               list(edge=FALSE)))
     } else {
       numerator <- do.call(density.ppp,
-                           resolve.defaults(list(x=x, at="points"),
-                                            list(weights = values * weights),
-                                            list(sigma=sigma, varcov=varcov),
-                                            list(leaveoneout=leaveoneout),
-                                            list(sorted=sorted),
+                           resolve.defaults(list(x=x, at="points",
+                                                 weights = values * weights,
+                                                 sigma=sigma,
+                                                 varcov=varcov,
+                                                 leaveoneout=leaveoneout,
+                                                 sorted=sorted,
+                                                 kernel=kernel,
+                                                 scalekernel=scalekernel),
                                             list(...),
                                             list(edge=FALSE)))
       denominator <- do.call(density.ppp,
-                             resolve.defaults(list(x=x, at="points"),
-                                              list(weights = weights),
-                                              list(sigma=sigma, varcov=varcov),
-                                              list(leaveoneout=leaveoneout),
-                                              list(sorted=sorted),
+                             resolve.defaults(list(x=x, at="points",
+                                                   weights = weights,
+                                                   sigma=sigma,
+                                                   varcov=varcov,
+                                                   leaveoneout=leaveoneout,
+                                                   sorted=sorted,
+                                                   kernel=kernel,
+                                                   scalekernel=scalekernel),
                                               list(...),
                                               list(edge=FALSE)))
     }
     if(is.null(uhoh <- attr(numerator, "warnings"))) {
       result <- numerator/denominator
-      result <- ifelseXB(is.finite(result), result, NA)
+      result <- ifelseXB(is.finite(result), result, NA_real_)
     } else {
       warning("returning original values")
       result <- values
@@ -527,7 +659,8 @@ markvar  <- function(X, sigma=NULL, ..., weights=NULL, varcov=NULL) {
 }
 
 bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
-                       hmin=NULL, hmax=NULL, warn=TRUE) {
+                         hmin=NULL, hmax=NULL, warn=TRUE,
+                         kernel="gaussian") {
   stopifnot(is.ppp(X))
   stopifnot(is.marked(X))
   X <- coerce.marks.numeric(X)
@@ -565,6 +698,7 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
   # compute cross-validation criterion
   for(i in seq_len(nh)) {
     yhat <- Smooth(X, sigma=h[i], at="points", leaveoneout=TRUE,
+                   kernel=kernel, 
                    sorted=TRUE)
     if(!is.null(dimmarx))
       yhat <- as.matrix(as.data.frame(yhat))
@@ -593,36 +727,74 @@ bw.smoothppp <- function(X, nh=spatstat.options("n.bandwidth"),
 
 smoothcrossEngine <- function(Xdata, Xquery, values, sigma, ...,
                               weights=NULL, varcov=NULL,
-                              sorted=FALSE) {
-#  if(is.null(varcov)) {
-#    const <- 1/(2 * pi * sigma^2)
-#  } else {
-#    detSigma <- det(varcov)
-#    Sinv <- solve(varcov)
-#    const <- 1/(2 * pi * sqrt(detSigma))
-#  }
+                              kernel="gaussian", 
+                              scalekernel=is.character(kernel),
+                              sorted=FALSE,
+                              cutoff=NULL) {
+
+  validate2Dkernel(kernel)
+  if(is.character(kernel)) kernel <- match2DkernelName(kernel)
+  isgauss <- identical(kernel, "gaussian") && scalekernel
+
   if(!is.null(dim(weights)))
     stop("weights must be a vector")
 
-  if(npoints(Xquery) == 0 || npoints(Xdata) == 0) {
-    if(is.null(dim(values))) return(rep(NA, npoints(Xquery)))
-    nuttin <- matrix(NA, nrow=npoints(Xquery), ncol=ncol(values))
+  ndata <- npoints(Xdata)
+  nquery <- npoints(Xquery)
+  
+  if(nquery == 0 || ndata == 0) {
+    if(is.null(dim(values))) return(rep(NA_real_, nquery))
+    nuttin <- matrix(NA_real_, nrow=nquery, ncol=ncol(values))
     colnames(nuttin) <- colnames(values)
     return(nuttin)
   }
+
+  # validate weights
+  if(is.matrix(values) || is.data.frame(values)) {
+    k <- ncol(values)
+    stopifnot(nrow(values) == npoints(Xdata))
+    values <- as.data.frame(values)
+  } else {
+    k <- 1L
+    stopifnot(length(values) == npoints(Xdata) || length(values) == 1)
+    if(length(values) == 1L)
+      values <- rep(values, ndata)
+  }
+
+  ## infinite bandwidth
+  if(bandwidth.is.infinite(sigma)) {
+    #' uniform estimate
+    if(is.null(weights)) weights <- rep(1, ndata)
+    single <- is.null(dim(values))
+    wtval <- weights * values 
+    totwt <- sum(weights)
+    totwtval <- if(single) sum(wtval) else colSums(wtval)
+    denominator <- rep(totwt, nquery)
+    numerator <- rep(totwtval, each=nquery)
+    if(!single) numerator <- matrix(numerator, nrow=nquery)
+    result <- numerator/denominator
+    if(!single)
+      colnames(result) <- colnames(values)
+    return(result)
+  }
   
-  ## Contributions from pairs of distinct points
-  ## closer than 8 standard deviations
-  sd <- if(is.null(varcov)) sigma else sqrt(sum(diag(varcov)))
-  cutoff <- 8 * sd
+  ## cutoff distance (beyond which the kernel value is treated as zero)
+  ## NB: input argument 'cutoff' is either NULL or
+  ##     an absolute distance (if scalekernel=FALSE)
+  ##     a number of standard deviations (if scalekernel=TRUE)
+  cutoff.orig <- cutoff
+  cutoff <- cutoff2Dkernel(kernel, sigma=sigma, varcov=varcov,
+                           scalekernel=scalekernel, cutoff=cutoff,
+                           fatal=TRUE)
+  ## cutoff is now an absolute distance
 
   ## detect very small bandwidth
   nnc <- nncross(Xquery, Xdata)
   if(cutoff < min(nnc$dist)) {
-    if(npoints(Xdata) > 1) {
+    if(ndata > 1) {
       warning("Very small bandwidth; values of nearest neighbours returned")
       nw <- nnc$which
-      result <- if(is.null(dim(values))) values[nw] else values[nw,,drop=FALSE]
+      result <- if(k == 1) values[nw] else values[nw,,drop=FALSE]
     } else {
       warning("Very small bandwidth; original values returned")
       result <- values
@@ -636,13 +808,57 @@ smoothcrossEngine <- function(Xdata, Xquery, values, sigma, ...,
   ## Handle weights that are meant to be null
   if(length(weights) == 0)
      weights <- NULL
-     
+
+  if(!isgauss) {
+    ## .................. non-Gaussian kernel ........................
+    close <- crosspairs(Xdata, Xquery, cutoff)
+    kerij <- evaluate2Dkernel(kernel, close$dx, close$dy,
+                            sigma=sigma, varcov=varcov,
+                            scalekernel=scalekernel, ...)
+    ## sum the (weighted) contributions
+    i <- close$i # data point
+    j <- close$j # query point
+    jfac <- factor(j, levels=seq_len(nquery))
+    wkerij <- if(is.null(weights)) kerij else kerij * weights[i]
+    denominator <- tapplysum(wkerij, list(jfac))
+    if(k == 1L) {
+      contribij <- wkerij * values[i]
+      numerator <- tapplysum(contribij, list(jfac))
+      result <- numerator/denominator
+    } else {
+      for(kk in 1:k) {
+        contribij <- wkerij * values[i, kk]
+        numeratorkk <- tapplysum(contribij, list(jfac))
+        result[,kk] <- numeratorkk/denominator
+      }
+    }
+    ## trap bad values
+    if(any(nbg <- (is.infinite(result) | is.nan(result)))) {
+      ## NaN or +/-Inf can occur if bandwidth is small
+      ## Use value at nearest neighbour (by l'Hopital's rule)
+      nnw <- nnc$which
+      if(k == 1L) {
+        result[nbg] <- values[nnw[nbg]]
+      } else {
+        bad <- which(nbg, arr.ind=TRUE)
+        badrow <- bad[,"row"]
+        badcol <- bad[,"col"]
+        result[nbg] <- values[cbind(nnw[badrow], badcol)]
+      }
+    }
+    attr(result, "sigma") <- sigma
+    attr(result, "varcov") <- varcov
+    return(result)
+  } 
+
+  ## .................. Gaussian kernel henceforth ........................
+  
   ## handle multiple columns of values
   if(is.matrix(values) || is.data.frame(values)) {
     k <- ncol(values)
     stopifnot(nrow(values) == npoints(Xdata))
     values <- as.data.frame(values)
-    result <- matrix(, npoints(Xquery), k)
+    result <- matrix(, nquery, k)
     colnames(result) <- colnames(values)
     if(!sorted) {
       ood <- fave.order(Xdata$x)
@@ -654,8 +870,10 @@ smoothcrossEngine <- function(Xdata, Xquery, values, sigma, ...,
     for(j in 1:k) 
       result[,j] <- smoothcrossEngine(Xdata, Xquery, values[,j],
                                       sigma=sigma, varcov=varcov,
-                                      weights=weights, sorted=TRUE,
-                                      ...)
+                                      weights=weights,
+                                      kernel=kernel, scalekernel=scalekernel,
+                                      cutoff=cutoff.orig,
+                                      sorted=TRUE, ...)
     if(!sorted) {
       sortresult <- result
       result[ooq,] <- sortresult
@@ -667,10 +885,8 @@ smoothcrossEngine <- function(Xdata, Xquery, values, sigma, ...,
 
   ## values must be a vector
   stopifnot(length(values) == npoints(Xdata) || length(values) == 1)
-  if(length(values) == 1) values <- rep(values, npoints(Xdata))
+  if(length(values) == 1) values <- rep(values, ndata)
 
-  ndata <- npoints(Xdata)
-  nquery <- npoints(Xquery)
   result <- numeric(nquery) 
   ## coordinates and values
   xq <- Xquery$x
@@ -688,6 +904,7 @@ smoothcrossEngine <- function(Xdata, Xquery, values, sigma, ...,
     yd <- yd[ood]
     vd <- vd[ood] 
   }
+  sd <- if(is.null(varcov)) sigma else sqrt(min(eigen(varcov)$values))
   if(is.null(varcov)) {
     ## isotropic kernel
     if(is.null(weights)) {

@@ -3,28 +3,23 @@
 #
 #   Estimation of relative risk
 #
-#  $Revision: 1.33 $  $Date: 2017/01/28 06:29:07 $
+#  $Revision: 1.40 $  $Date: 2018/10/05 04:04:29 $
 #
 
 relrisk <- function(X, ...) UseMethod("relrisk")
                                       
 relrisk.ppp <- local({
 
-  relrisk.ppp <- function(X, sigma=NULL, ..., varcov=NULL, at="pixels",
-                      relative=FALSE, se=FALSE,
-                      casecontrol=TRUE, control=1, case) {
+  relrisk.ppp <- function(X, sigma=NULL, ..., varcov=NULL,
+                          at=c("pixels", "points"), 
+                          relative=FALSE,
+                          adjust=1, edge=TRUE, diggle=FALSE, se=FALSE,
+                          casecontrol=TRUE, control=1, case) {
     stopifnot(is.ppp(X))
     stopifnot(is.multitype(X))
     control.given <- !missing(control)
     case.given <- !missing(case)
-    if(!relative && (control.given || case.given)) {
-      aa <- c("control", "case")[c(control.given, case.given)]
-      nn <- length(aa)
-      warning(paste(ngettext(nn, "Argument", "Arguments"),
-                    paste(sQuote(aa), collapse=" and "),
-                    ngettext(nn, "was", "were"),
-                    "ignored, because relative=FALSE"))
-    }
+    at <- match.arg(at)
     npts <- npoints(X)
     Y <- split(X)
     uX <- unmark(X)
@@ -32,34 +27,50 @@ relrisk.ppp <- local({
     ntypes <- length(Y)
     if(ntypes == 1)
       stop("Data contains only one type of points")
+    casecontrol <- casecontrol && (ntypes == 2)
+    if((control.given || case.given) && !(casecontrol || relative)) {
+      aa <- c("control", "case")[c(control.given, case.given)]
+      nn <- length(aa)
+      warning(paste(ngettext(nn, "Argument", "Arguments"),
+                    paste(sQuote(aa), collapse=" and "),
+                    ngettext(nn, "was", "were"),
+                    "ignored, because relative=FALSE and",
+                    if(ntypes==2) "casecontrol=FALSE" else
+                    "there are more than 2 types of points"))
+    }
     marx <- marks(X)
     imarks <- as.integer(marx)
     lev <- levels(marx)
-    ## trap arguments
-    dotargs <- list(...)
-    isbwarg <- names(dotargs) %in% c("method", "nh", "hmin", "hmax", "warn")
-    bwargs <- dotargs[isbwarg]
-    dargs  <- dotargs[!isbwarg]
-    ## using edge corrections?
-    edge   <- resolve.1.default(list(edge=TRUE), list(...))
-    diggle <- resolve.1.default(list(diggle=FALSE), list(...))
-    ## bandwidth
-    if(is.null(sigma) && is.null(varcov)) 
-      sigma <- do.call(bw.relrisk, append(list(X), bwargs))
-    SmoothPars <- append(list(sigma=sigma, varcov=varcov, at=at), dargs)
+    ## compute bandwidth (default bandwidth selector is bw.relrisk)
+    ker <- resolve.2D.kernel(...,
+                             sigma=sigma, varcov=varcov, adjust=adjust,
+                             bwfun=bw.relrisk, x=X)
+    sigma <- ker$sigma
+    varcov <- ker$varcov
+
+    ## determine smoothing parameters   
+    if(bandwidth.is.infinite(sigma))
+      edge <- FALSE
+    SmoothPars <- resolve.defaults(list(sigma=sigma, varcov=varcov, at=at,
+                                        edge=edge, diggle=diggle),
+                                   list(...))
+    ## 
     if(se) {
       ## determine other bandwidth for variance estimation
-      if(is.null(varcov)) {
+      VarPars <- SmoothPars
+      if(bandwidth.is.infinite(sigma)) {
+        varconst <- 1
+      } else if(is.null(varcov)) {
         varconst <- 1/(4 * pi * prod(sigma))
-        VarPars <- append(list(sigma=sigma/sqrt(2), at=at), dargs)
+        VarPars$sigma <- sigma/sqrt(2)
       } else {
         varconst <- 1/(4 * pi * sqrt(det(varcov)))
-        VarPars <- append(list(varcov=varcov/2, at=at), dargs)
+        VarPars$varcov <- varcov/2
       }
       if(edge) {
         ## evaluate edge correction weights
-        edgeim <- second.moment.calc(uX, sigma, what="edge", ...,
-                                     varcov=varcov)
+        edgeim <- do.call(second.moment.calc,
+                          append(list(x=uX, what="edge"), SmoothPars))
         if(diggle || at == "points") {
           edgeX <- safelookup(edgeim, uX, warn=FALSE)
           diggleX <- 1/edgeX
@@ -188,7 +199,7 @@ relrisk.ppp <- local({
                    Vcase <- Veach[[icase]]
                    NUM <- eval.im(Vcase * (1-2*pcase) + Vall * pcase^2)
                    SE <- eval.im(sqrt(pmax(NUM, 0))/Dall)
-                   result <- list(estimate=pcase, SE=SE)
+                   result <- solist(estimate=pcase, SE=SE)
                  }
                } else {
                  rcase <- eval.im(ifelse(pcase < 1, pcase/(1-pcase), NA))
@@ -200,7 +211,7 @@ relrisk.ppp <- local({
                    Dctrl <- Deach[[icontrol]]
                    NUM <- eval.im(Vcase + Vctrl * rcase^2)
                    SE <- eval.im(sqrt(pmax(NUM, 0))/Dctrl)
-                   result <- list(estimate=rcase, SE=SE)
+                   result <- solist(estimate=rcase, SE=SE)
                  }
                }
              },
@@ -281,9 +292,7 @@ relrisk.ppp <- local({
                  }
                } else {
                  risks <- as.solist(lapply(probs,
-                                           function(z, d) {
-                                             eval.im(ifelse(d > 0, z/d, NA))
-                                           },
+                                           divideifpositive,
                                            d = probs[[icontrol]]))
                  if(!se) {
                    result <- risks
@@ -351,6 +360,8 @@ relrisk.ppp <- local({
   }
 
   reciprocal <- function(x) 1/x
+
+  divideifpositive <- function(z, d) { eval.im(ifelse(d > 0, z/d, NA)) }
   
   relrisk.ppp
 })

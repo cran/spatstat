@@ -235,7 +235,7 @@ local({
 ##
 ##   tests/rmhBasic.R
 ##
-##   $Revision: 1.11 $  $Date: 2015/12/29 08:54:49 $
+##   $Revision: 1.12 $  $Date: 2018/10/22 09:31:43 $
 #
 # Test examples for rmh.default
 # run to reasonable length
@@ -416,6 +416,14 @@ spatstat.options(expand=1.1)
    XXpalm <- rmh(model=mod01,start=list(n.start=80),
              control=list(nrep=nr, x.cond=coords(YY)))
 
+
+   #' code blocks for various interactions, not otherwise tested
+   rr <- seq(0,0.2,length=8)[-1]
+   gmma <- c(0.5,0.6,0.7,0.8,0.7,0.6,0.5)
+   mod18 <- list(cif="badgey",par=list(beta=4000, gamma=gmma,r=rr,sat=5),
+                 w=square(1))
+   Xbg <- rmh(model=mod18,start=list(n.start=20),
+              control=list(nrep=1e4, periodic=TRUE))
 
 })
 
@@ -1010,3 +1018,50 @@ local({
 
 
 reset.spatstat.options()
+#'
+#'   tests/rmhsnoopy.R
+#'
+#'   Test the rmh interactive debugger
+#' 
+#'   $Revision: 1.8 $  $Date: 2018/10/17 08:57:32 $
+
+require(spatstat)
+local({
+  ## fit a model and prepare to simulate
+  R <- 0.1
+  fit <- ppm(cells ~ 1, Strauss(R))
+  siminfo <- rmh(fit, preponly=TRUE)
+  Wsim <- siminfo$control$internal$w.sim
+  Wclip <- siminfo$control$internal$w.clip
+  if(is.null(Wclip)) Wclip <- Window(cells)
+
+  ## determine debugger interface panel geometry
+  P <- rmhsnoop(Wsim=Wsim, Wclip=Wclip, R=R,
+                xcoords=runif(40),
+                ycoords=runif(40),
+                mlevels=NULL, mcodes=NULL,
+                irep=3, itype=1,
+                proptype=1, proplocn=c(0.5, 0.5), propmark=0, propindx=0,
+                numerator=42, denominator=24,
+                panel.only=TRUE)
+  boxes <- P$boxes
+  clicknames <- names(P$clicks)
+  boxcentres <- do.call(concatxy, lapply(boxes, centroid.owin))
+
+  ## design a sequence of clicks
+  actionsequence <- c("Up", "Down", "Left", "Right",
+                      "At Proposal", "Zoom Out", "Zoom In", "Reset",
+                      "Accept", "Reject", "Print Info",
+                      "Next Iteration", "Next Shift", "Next Death",
+                      "Skip 10", "Skip 100", "Skip 1000", "Skip 10,000",
+                      "Skip 100,000", "Exit Debugger")
+  actionsequence <- match(actionsequence, clicknames)
+  actionsequence <- actionsequence[!is.na(actionsequence)]
+  xy <- lapply(boxcentres, "[", actionsequence)
+
+  ## queue the click sequence
+  spatstat.utils::queueSpatstatLocator(xy$x,xy$y)
+
+  ## go
+  rmh(fit, snoop=TRUE)
+})

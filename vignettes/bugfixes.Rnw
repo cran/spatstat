@@ -69,6 +69,7 @@ To see all bugs fixed after the book \cite{baddrubaturn15} was written, type
 bugfixes(sinceversion="1.42-0")
 @ 
 
+\pagebreak
 \section{Serious bugs}
 
 Following is a list of the {\bf most serious bugs} only, in order
@@ -81,7 +82,7 @@ of potential impact.
 }
 
   %%% LEVEL 1
-\subsubsection{Serious Bugs, Always Wrong, Broad Impact} 
+\subsection{Serious Bugs, Always Wrong, Broad Impact} 
 
 \begin{itemize}
 \item \texttt{nncross.ppp}:
@@ -184,13 +185,24 @@ of potential impact.
  \end{itemize}
  
   %%% LEVEL 2
- \subsubsection{Serious Bugs, Often Completely Wrong, Moderate Impact}
+ \subsection{Serious Bugs, Often Completely Wrong, Moderate Impact}
 
  \begin{itemize}
  \item \texttt{bw.pcf}:
    Results were totally incorrect due to a typo.
    \bugger{1.51-0}{may 2017}{1.52-0}{august 2017}   
 
+ \item \texttt{density.ppp}:
+   The standard error (calculated when \texttt{se=TRUE})
+   was incorrect when \texttt{sigma} was a single numeric value.
+   The output was equal to \texttt{sqrt(sigma)} times the correct answer.
+   \bugger{1.41-1}{february 2015}{1.57-0}{october 2018}   
+   
+ \item \texttt{rthin}:
+   If \texttt{P} was close to 1, the result was sometimes an empty point pattern
+   when it should have been identical to \texttt{X}.
+   \bugger{1.43-0}{october 2015}{1.57-0}{october 2018}   
+   
  \item \texttt{predict.mppm}:
    If the model included random effects, and if the library \pkg{MASS} was not loaded,
    the predictions were on the log scale (i.e.\ they were logarithms of the correct values).
@@ -220,7 +232,12 @@ of potential impact.
    Results were incorrect for a \texttt{rho2hat} object computed
    from a point pattern.
    \bugger{1.42-0}{may 2015}{1.52-0}{august 2017}   
-   
+
+\item \texttt{density.ppp}:
+  Result was incorrect for non-Gaussian kernels when
+  \texttt{at="points"} and \texttt{leaveoneout=FALSE}.
+   \bugger{1.47-0}{october 2016}{1.57-0}{october 2018}   
+  
 \item \texttt{envelope.ppm}:
    If the model was an inhomogeneous Poisson process, 
    the resulting envelope object was incorrect
@@ -275,10 +292,17 @@ of potential impact.
     the code ignored segments of \code{L} that crossed \code{W}
     without having a vertex in \code{W}.
     \bugger{1.53-0}{september 2017}{1.55-1}{april 2015}
+    
+  \item \verb!as.im.function!:
+    if the function domain was not a rectangle
+    and the function values were categorical (factor) values,
+    the result was an empty image.
+    \bugger{1.42-0}{may 2015}{1.57-0}{october 2018}
+    
   \end{itemize}
   
   %%% LEVEL 3
-  \subsubsection{Bugs, Substantially Incorrect, Moderate Impact}
+  \subsection{Bugs, Substantially Incorrect, Moderate Impact}
 
   \begin{itemize}
    \item \texttt{simulate.dppm}, \texttt{simulate.detpointprocfamily}:
@@ -297,6 +321,11 @@ of potential impact.
   the contribution from the data point with the smallest $x$ coordinate.
   \bugger{1.26-0}{april 2012}{1.46-1}{july 2016}
   
+  \item \texttt{multiplicity.default}:
+    The first occurrence of any value in the input
+    was incorrectly assigned a multiplicity of 1.
+    \bugger{1.32-0}{december 2013}{1.57-1}{november 2018}   
+    
  \item \texttt{update.ppm}:
    If the argument \texttt{Q} was given,
    the results were usually incorrect, or an error was generated.
@@ -355,10 +384,14 @@ of potential impact.
     their pixel resolutions were ignored, and reset to the default 
     $128 \times 128$.
    {\small (Bug fixed in \texttt{spatstat 1.56-0}, june 2018)}   
+   
+ \item \texttt{nnorient}:
+   crashed if the point pattern was empty.
+   \bugger{1.40-0}{december 2015}{1.57-0}{october 2018}   
  \end{itemize}   
 
  %% LEVEL 4: 
- \subsubsection{Partially Incorrect}
+ \subsection{Partially Incorrect}
  \begin{itemize}
    
  \item \texttt{model.matrix.ppm}:

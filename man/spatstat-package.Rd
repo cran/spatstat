@@ -809,6 +809,8 @@
                                for \code{\link{density.ppp}}\cr
     \code{\link{bw.ppl}} \tab likelihood cross-validated bandwidth selection
                                for \code{\link{density.ppp}}\cr
+    \code{\link{bw.CvL}} \tab Cronie-Van Lieshout bandwidth selection
+                                for density estimation\cr
     \code{\link{bw.scott}} \tab Scott's rule of thumb 
                                 for density estimation\cr
     \code{\link{bw.relrisk}} \tab cross-validated bandwidth selection
@@ -1751,6 +1753,7 @@
   Monsuru Adepeju,
   Corey Anderson,
   Ang Qi Wei,
+  Ryan Arellano,
   Jens \ifelse{latex}{\out{{\AA}str{\" o}m}}{Astrom},
   Marcel Austenfeld,
   Sandro Azaele,
@@ -1777,6 +1780,7 @@
   Bjarke Christensen,
   Jean-Francois Coeurjolly,
   Kim Colyvas,
+  Hadrien Commenges,
   Rochelle Constantine,
   Robin Corria Ainslie,
   Richard Cotton,
@@ -1813,6 +1817,7 @@
   Juha Heikkinen,
   Mandy Hering,
   Markus Herrmann,
+  Maximilian Hesselbarth,
   Paul Hewson,
   Kassel Hingee,
   Kurt Hornik,
@@ -1829,9 +1834,10 @@
   Peter Kovesi,
   Mike Kuhn,
   Jeff Laake,
-  Frederic Lavancier,
-  Tom Lawrence,
   Robert Lamb,
+  \ifelse{latex}{\out{Fr\'{e}d\'{e}ric}}{Frederic} Lavancier,
+  Tom Lawrence,
+  Tomas Lazauskas,
   Jonathan Lee,
   George Leser,
   Angela Li,

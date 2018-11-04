@@ -1,7 +1,7 @@
 #
 #  rhohat.R
 #
-#  $Revision: 1.73 $  $Date: 2018/02/19 07:34:47 $
+#  $Revision: 1.79 $  $Date: 2018/09/23 10:33:25 $
 #
 #  Non-parametric estimation of a transformation rho(z) determining
 #  the intensity function lambda(u) of a point process in terms of a
@@ -21,10 +21,12 @@ rhohat.ppp <- rhohat.quad <-
            subset=NULL,
            dimyx=NULL, eps=NULL,
            n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-           bwref=bw, covname, confidence=0.95) {
+           bwref=bw, covname, confidence=0.95, positiveCI) {
   callstring <- short.deparse(sys.call())
   smoother <- match.arg(smoother)
   method <- match.arg(method)
+  if(missing(positiveCI))
+    positiveCI <- (smoother == "local")
   if(missing(covname)) 
     covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
   if(is.null(adjust))
@@ -69,6 +71,7 @@ rhohat.ppp <- rhohat.quad <-
                n=n, bw=bw, adjust=adjust, from=from, to=to,
                bwref=bwref, covname=covname, covunits=covunits,
                confidence=confidence,
+               positiveCI=positiveCI, 
                modelcall=modelcall, callstring=callstring)
 }
 
@@ -80,10 +83,13 @@ rhohat.ppm <- function(object, covariate, ...,
                        subset=NULL,
                        dimyx=NULL, eps=NULL,
                        n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-                       bwref=bw, covname, confidence=0.95) {
+                       bwref=bw, covname, confidence=0.95,
+                       positiveCI) {
   callstring <- short.deparse(sys.call())
   smoother <- match.arg(smoother)
   method <- match.arg(method)
+  if(missing(positiveCI))
+    positiveCI <- (smoother == "local")
   if(missing(covname)) 
     covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
   if(is.null(adjust))
@@ -125,7 +131,7 @@ rhohat.ppm <- function(object, covariate, ...,
                resolution=list(dimyx=dimyx, eps=eps),
                n=n, bw=bw, adjust=adjust, from=from, to=to,
                bwref=bwref, covname=covname, covunits=covunits,
-               confidence=confidence,
+               confidence=confidence, positiveCI=positiveCI,
                modelcall=modelcall, callstring=callstring)
 }
 
@@ -138,10 +144,12 @@ rhohat.lpp <- rhohat.lppm <-
            subset=NULL,
            nd=1000, eps=NULL, random=TRUE, 
            n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
-           bwref=bw, covname, confidence=0.95) {
+           bwref=bw, covname, confidence=0.95, positiveCI) {
   callstring <- short.deparse(sys.call())
   smoother <- match.arg(smoother)
   method <- match.arg(method)
+  if(missing(positiveCI))
+    positiveCI <- (smoother == "local")
   if(missing(covname)) 
     covname <- sensiblevarname(short.deparse(substitute(covariate)), "X")
   if(is.null(adjust))
@@ -192,7 +200,7 @@ rhohat.lpp <- rhohat.lppm <-
                resolution=list(nd=nd, eps=eps, random=random),
                n=n, bw=bw, adjust=adjust, from=from, to=to,
                bwref=bwref, covname=covname, covunits=covunits,
-               confidence=confidence,
+               confidence=confidence, positiveCI=positiveCI,
                modelcall=modelcall, callstring=callstring)
 }
 
@@ -299,6 +307,8 @@ rhohatCalc <- local({
                          smoother=c("kernel", "local"),
                          n=512, bw="nrd0", adjust=1, from=NULL, to=NULL, 
                          bwref=bw, covname, confidence=0.95,
+                         positiveCI=(smoother == "local"),
+                         markovCI=TRUE,
                          covunits = NULL, modelcall=NULL, callstring=NULL,
                          savestuff=list()) {
     method <- match.arg(method)
@@ -413,8 +423,20 @@ rhohatCalc <- local({
       vvvname <- "Variance of estimator"
       vvvlabel <- paste("bold(Var)~hat(%s)", paren(covname), sep="")
       sd <- sqrt(vvv)
-      hi <- yyy + crit * sd
-      lo <- yyy - crit * sd
+      if(!positiveCI) {
+        hi <- yyy + crit * sd
+        lo <- yyy - crit * sd
+      } else {
+        sdlog <- ifelse(yyy > 0, sd/yyy, 0)
+        sss <- exp(crit * sdlog)
+        hi <- yyy * sss
+        lo <- yyy / sss
+        if(markovCI) {
+          ## truncate extremely large confidence intervals
+          ## using Markov's Inequality
+          hi <- pmin(hi, yyy/(1-confidence))
+        }
+      }
     } else {
       ## .................. local likelihood smoothing .......................
       xlim <- c(from, to)
@@ -463,9 +485,20 @@ rhohatCalc <- local({
              })
       vvvname <- "Variance of log of estimator"
       vvvlabel <- paste("bold(Var)~log(hat(%s)", paren(covname), ")", sep="")
-      sss <- exp(crit * sqrt(vvv))
-      hi <- yyy * sss
-      lo <- yyy / sss
+      sdlog <- sqrt(vvv)
+      if(positiveCI) {
+        sss <- exp(crit * sdlog)
+        hi <- yyy * sss
+        lo <- yyy / sss
+        if(markovCI) {
+          ## truncate extremely large confidence intervals
+          ## using Markov's Inequality
+          hi <- pmin(hi, yyy/(1-confidence))
+        }
+      } else {
+        hi <- yyy * (1 + crit * sdlog)
+        lo <- yyy * (1 - crit * sdlog)
+      }
     }
     ## pack into fv object
     df <- data.frame(xxx=xxx, rho=yyy, var=vvv, hi=hi, lo=lo)
@@ -503,7 +536,9 @@ rhohatCalc <- local({
            ZX         = ZX,
            lambda     = lambda,
            method     = method,
-           smoother   = smoother)
+           smoother   = smoother,
+           confidence = confidence,
+           positiveCI = positiveCI)
     attr(rslt, "stuff") <- append(stuff, savestuff)
     return(rslt)
   }
@@ -545,13 +580,18 @@ print.rhohat <- function(x, ...) {
   switch(s$smoother,
          kernel={
            splat("Kernel density estimator")
-           splat("Actual smoothing bandwidth sigma = ",
+           splat("\tActual smoothing bandwidth sigma = ",
                  signif(s$sigma,5))
          },
          local ={ splat("Local likelihood density estimator") }
          )
+  positiveCI <- s$positiveCI %orifnull% (s$smoother == "local")
+  confidence <- s$confidence %orifnull% 0.95
+  splat("Pointwise", paste0(100 * confidence, "%"),
+        "confidence bands for rho(x)\n\t based on asymptotic variance of",
+        if(positiveCI) "log(rhohat(x))" else "rhohat(x)")
   splat("Call:", s$callstring)
-
+  cat("\n")
   NextMethod("print")
 }
 

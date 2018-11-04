@@ -1,4 +1,203 @@
 
+        CHANGES IN spatstat VERSION 1.57-1
+
+OVERVIEW
+
+    o Bug fixes.
+
+    o Version nickname: 'Cartoon Physics'
+   
+BUG FIXES
+
+    o multiplicity.default
+    Some entries of the result were incorrectly set to 1.
+    Fixed.
+    
+    o anova.ppm
+    Crashed if adjust=TRUE and the models were fitted with use.gam=TRUE.
+    Fixed.
+
+        CHANGES IN spatstat VERSION 1.57-0
+
+OVERVIEW
+
+    o We thank Corey Anderson, Ryan Arellano, Hadrien Commenges,
+    Ottmar Cronie, Tilman Davies, Maximilian Hesselbarth, Kassel Hingee,
+    Tomas Lazauskas, Marie-Colette van Lieshout, Rasmus Waagepetersen
+    and 'daitakahashi' for contributions.
+
+    o Cronie-van Lieshout bandwidth selection.
+    
+    o Smoothing functions handle non-Gaussian kernels.
+
+    o Infinite smoothing bandwidths permitted.
+    
+    o Positive confidence limits for rhohat.
+
+    o Improved bivariate interpolation.
+    
+    o subset() method for line segment patterns.
+    
+    o Important bug fixes in rthin and density.ppp
+
+    o Minor bug fixes and improvements.
+
+    o Version nickname: 'Zombie apocalypse'
+
+NEW FUNCTIONS
+
+    o bw.CvL
+    Cronie-Van Lieshout bandwidth selection for density estimation.
+    [Contributed by Ottmar Cronie and Marie-Colette van Lieshout.]
+    
+    o subset.psp
+    Method for 'subset' for line segment patterns.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o densityfun.ppp, Smoothfun.ppp, Smooth.ppp
+    These commands now handle non-Gaussian kernels.
+
+    o density.ppp, relrisk.ppp, Smooth.ppp, densityfun.ppp, Smoothfun.ppp
+    Argument 'sigma' can be infinite.
+    
+    o interp.im
+    New argument 'bilinear' specifies the choice of interpolation rule.
+
+    o rhohat
+    Methods for rhohat have a new argument 'positiveCI'
+    specifying whether confidence limits should be positive.
+
+    o plot.colourmap
+    New argument 'increasing' specifies whether the colours are
+    displayed in order left-to-right/bottom-to-top.
+    Changed default behaviour for discrete colour maps when vertical=FALSE.
+
+    o split.ppx
+    Argument 'f' can be a logical vector.
+
+    o relrisk.ppp
+    If se=TRUE and at="pixels", the result belongs to class 'solist'.
+
+    o imcov, setcov, convolve.im
+    The name of the unit of length is preserved.
+
+    o density.ppp
+    Slightly accelerated for non-Gaussian kernels.
+
+    o bw.scott
+    The two bandwidth values in the result
+    now have names ('sigma.x' and 'sigma.y').
+
+    o pairdist.default
+    Now checks whether the data are valid 2-dimensional coordinates.
+
+    o pixellate.ppp
+    New argument 'savemap'
+
+    o rtemper
+    New argument 'track'.
+    Code runs slightly faster.
+    
+    o eval.im, eval.linim
+    New argument 'warn'.
+
+    o Kres, Kcom, Gcom, psstG
+    If any of the calculated weights for the summary function
+    are infinite or NA, they are reset to zero, with a warning,
+    instead of a fatal error.
+    
+BUG FIXES
+
+    o rthin
+    If P was close to 1, the result was sometimes an empty point pattern
+    when it should have been identical to X.
+    [Spotted by Maximilian Hesselbarth.]
+    Fixed.
+
+    o density.ppp
+    Standard error calculations were incorrect
+    when sigma was a single numeric value.
+    The output was equal to 'sqrt(sigma)' times the correct answer.
+    Fixed.
+    
+    o density.ppp
+    Result was incorrect for non-Gaussian kernels when
+    at="points" and leaveoneout=FALSE.
+    Fixed.
+
+    o density.ppp
+    Did not pass additional arguments "..." to a user-supplied
+    kernel function, in some cases.
+    Fixed.
+
+    o as.im.function, as.im.funxy
+    If the function values were factor values and the window was
+    not a rectangle, the result was an image with all pixel values NA.
+    [Spotted by Corey Anderson.]
+    Fixed.
+    
+    o plot.funxy
+    If the function values were factor values and the window was
+    not a rectangle, the plot was empty.
+    [Spotted by Corey Anderson.]
+    Fixed.
+
+    o nnorient
+    Crashed if the border correction did not retain any data points.
+    [Spotted by Tomas Lazauskas.]
+    Fixed.
+    
+    o linim
+    Crashed in some cases with a message about unitnames.
+    Fixed.
+    
+    o density.lpp
+    Default value of 'dx' was sometimes incorrect.
+    Fixed.
+    
+    o rMatClust, rThomas, rCauchy, rVarGamma
+    Issued a spurious warning about bandwidth selection
+    when saveLambda=TRUE.
+    Fixed.
+
+    o density.ppp
+    Issued a spurious warning about bandwidth selection
+    when 'kernel' was a user-supplied function.
+    Fixed.
+
+    o clusterfield.function
+    Issued a spurious warning about bandwidth selection.
+    Fixed.
+
+   o relrisk.ppp
+   Issued a spurious warning if the argument 'case' or 'control'
+   was given, for a bivariate point pattern.
+   Fixed.
+
+   o superimpose.ppp
+   If 'W' was a character string or function, the behaviour was
+   not exactly as described in the help file. 
+   Fixed.
+
+   o plot.psp
+   If the marks were factor values, the colour map was displayed upside down.
+   Fixed.
+
+   o eval.fv
+   If one of the 'fv' objects included ratio information (class 'rat')
+   then this was erroneously retained, in some cases.
+   Fixed.
+
+   o linearKcross
+   Crashed (with a message about a missing value of 'correction')
+   if there were no pairs of points to count.
+   Fixed.
+
+   o envelope.lpp
+   Crashed (randomly) when fix.n=TRUE and fix.marks=TRUE.
+   Fixed.
+   
         CHANGES IN spatstat VERSION 1.56-1
 
 OVERVIEW

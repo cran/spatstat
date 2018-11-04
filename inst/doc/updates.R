@@ -10,7 +10,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:38-69
+### code chunk number 2: updates.Rnw:38-74
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -40,13 +40,18 @@ z <- mergeSizeTables(z, zutils)
 z <- mergeSizeTables(z, zdata)
 z <- mergeSizeTables(z, zlocal)
 #
-changes <- z[nrow(z), ] - z[z$version == "1.42-0", ]
+currentcount <- z[nrow(z), counts]
+bookcount    <- z[z$version == "1.42-0", counts]
+changes <- currentcount - bookcount
 newobj <- changes[["nobjects"]]
 newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
+newcode  <- changes[["Rlines"]] + changes[["srclines"]]
+bookcode <- bookcount[["Rlines"]] + bookcount[["srclines"]]
+growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:82-87
+### code chunk number 3: updates.Rnw:91-96
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -56,7 +61,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:93-98
+### code chunk number 4: updates.Rnw:102-107
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 

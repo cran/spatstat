@@ -11,9 +11,10 @@
   cross-validation.
 }
 \usage{
-\method{relrisk}{ppp}(X, sigma = NULL, ..., varcov = NULL, at = "pixels",
+\method{relrisk}{ppp}(X, sigma = NULL, ..., varcov = NULL,
+           at = c("pixels", "points"),
            relative=FALSE,
-           se=FALSE,
+           adjust=1, edge=TRUE, diggle=FALSE, se=FALSE,
            casecontrol=TRUE, control=1, case)
 }
 \arguments{
@@ -38,7 +39,7 @@
     smoothing kernel. Incompatible with \code{sigma}.
   }
   \item{at}{
-    String specifying whether to compute the probability values
+    Character string specifying whether to compute the probability values
     at a grid of pixel locations (\code{at="pixels"}) or
     only at the points of \code{X} (\code{at="points"}).
   }
@@ -49,6 +50,17 @@
     If \code{TRUE}, it computes the    
     \emph{relative risk}, the ratio of probabilities
     of each type relative to the probability of a control.
+  }
+  \item{adjust}{
+    Optional. Adjustment factor for the bandwidth \code{sigma}.
+  }
+  \item{edge}{
+    Logical value indicating whether to apply edge correction.
+  }
+  \item{diggle}{
+    Logical. If \code{TRUE}, use the Jones-Diggle improved edge correction,
+    which is more accurate but slower to compute than the default
+    correction.
   }
   \item{se}{
     Logical value indicating whether to compute standard errors
@@ -155,10 +167,14 @@
     are both missing or null. Then a \bold{common}
     smoothing bandwidth \code{sigma}
     will be selected by cross-validation using \code{\link{bw.relrisk}}.
+    \item
+    An infinite smoothing bandwidth, \code{sigma=Inf}, is permitted
+    and yields a constant estimate of relative risk.
   }
 
   If \code{se=TRUE} then standard errors will also be computed,
   based on asymptotic theory, \emph{assuming a Poisson process}.
+
 }
 \value{
   If \code{se=FALSE} (the default), the format is described below.
@@ -227,11 +243,9 @@
   \emph{Statistical analysis of spatial point patterns},
   Second edition. Arnold.
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \adrian
+  and \rolf.
 }
 \keyword{spatial}
 \keyword{methods}

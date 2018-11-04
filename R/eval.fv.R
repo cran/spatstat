@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.35 $     $Date: 2016/07/26 10:30:13 $
+#     $Revision: 1.36 $     $Date: 2018/10/13 06:59:50 $
 #
 
 eval.fv <- local({
@@ -52,6 +52,9 @@ eval.fv <- local({
     }
     # copy first object as template
     result <- funs[[1L]]
+    # remove potential ratio info
+    class(result) <- setdiff(class(result), "rat")
+    attr(result, "numerator") <- attr(result, "denominator") <- NULL
     labl <- attr(result, "labl")
     origdotnames   <- fvnames(result, ".")
     origshadenames <- fvnames(result, ".s")

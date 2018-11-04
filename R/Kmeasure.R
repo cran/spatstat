@@ -1,7 +1,7 @@
 #
 #           Kmeasure.R
 #
-#           $Revision: 1.65 $    $Date: 2017/11/19 04:32:28 $
+#           $Revision: 1.68 $    $Date: 2018/10/04 09:15:16 $
 #
 #     Kmeasure()         compute an estimate of the second order moment measure
 #
@@ -144,6 +144,7 @@ second.moment.engine <-
              "Bartlett", "edge", "smoothedge", "all"),
            ...,
            kernel="gaussian",
+           scalekernel=is.character(kernel),
            obswin = as.owin(x), varcov=NULL,
            npts=NULL, debug=FALSE)
 {
@@ -213,7 +214,7 @@ second.moment.engine <-
     # set up kernel
     xcol.ker <- xstep * c(0:(nc-1),-(nc:1))
     yrow.ker <- ystep * c(0:(nr-1),-(nr:1))
-    kerpixarea <- xstep * ystep
+    #' kerpixarea <- xstep * ystep
     if(identical(kernel, "gaussian")) {
       if(!is.null(sigma)) {
         densX.ker <- dnorm(xcol.ker, sd=sigma)
@@ -223,16 +224,18 @@ second.moment.engine <-
         Kern <- Kern/sum(Kern)
       } else if(!is.null(varcov)) {
         ## anisotropic kernel
-        detSigma <- det(varcov)
         Sinv <- solve(varcov)
         halfSinv <- Sinv/2
-        constker <- kerpixarea/(2 * pi * sqrt(detSigma))
+        #' WAS:
+        #'      detSigma <- det(varcov)
+        #'      constker <- kerpixarea/(2 * pi * sqrt(detSigma))
         xsq <- matrix((xcol.ker^2)[col(Ypad)], ncol=2*nc, nrow=2*nr)
         ysq <- matrix((yrow.ker^2)[row(Ypad)], ncol=2*nc, nrow=2*nr)
         xy <- outer(yrow.ker, xcol.ker, "*")
-        Kern <- constker * exp(-(xsq * halfSinv[1,1]
-                                 + xy * (halfSinv[1,2]+halfSinv[2,1])
-                                 + ysq * halfSinv[2,2]))
+        #' WAS: Kern <- constker * exp(....
+        Kern <- exp(-(xsq * halfSinv[1,1]
+                      + xy * (halfSinv[1,2]+halfSinv[2,1])
+                      + ysq * halfSinv[2,2]))
         Kern <- Kern/sum(Kern)
       } else 
         stop("Must specify either sigma or varcov")
@@ -241,8 +244,11 @@ second.moment.engine <-
       ## evaluate kernel at array of points
       xker <- as.vector(xcol.ker[col(Ypad)])
       yker <- as.vector(yrow.ker[row(Ypad)])
+      #' WAS: Kern <- kerpixarea * evaluate2Dkernel(...
       Kern <- evaluate2Dkernel(kernel, xker, yker,
-                               sigma=sigma, varcov=varcov, ...) * kerpixarea
+                               sigma=sigma, varcov=varcov,
+                               scalekernel=scalekernel,
+                               ...) 
       Kern <- matrix(Kern, ncol=2*nc, nrow=2*nr)
       Kern <- Kern/sum(Kern)
     }
