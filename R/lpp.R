@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.60 $   $Date: 2018/07/01 06:23:11 $
+#  $Revision: 1.61 $   $Date: 2019/01/10 00:04:11 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -22,9 +22,9 @@ lpp <- function(X, L, ...) {
       #' validate local coordinates
       if(nrow(X) > 0) {
         nedge <- nsegments(L)
-        if(with(X, any(seg < 1 || seg > nedge)))
+        if(with(X, any(seg < 1 | seg > nedge)))
           stop("Segment index coordinate 'seg' exceeds bounds")
-        if(with(X, any(tp < 0 || tp > 1)))
+        if(with(X, any(tp < 0 | tp > 1)))
           stop("Local coordinate 'tp' outside [0,1]")
       }
       if(!checkfields(X, spatialnames)) {

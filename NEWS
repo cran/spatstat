@@ -1,4 +1,99 @@
 
+        CHANGES IN spatstat VERSION 1.58-2
+
+OVERVIEW
+
+    o Venn diagram tessellation
+
+    o Internal bug fixes.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o venn.tess
+    Venn diagram tessellation.
+
+        CHANGES IN spatstat VERSION 1.58-1
+
+OVERVIEW
+
+    o Bug fixes.
+
+    o Version nickname: "Compliment Sandwich"
+    
+BUG FIXES
+
+    o lpp
+    Did not correctly detect some situations where the input data are invalid.
+    Fixed.
+
+    o lurking.ppp, lurking.ppm
+    Did not correctly detect some situations where the input data are invalid.
+    Fixed.
+    
+        CHANGES IN spatstat VERSION 1.58-0
+
+OVERVIEW
+
+    o We thank Andrew Bevan, Hamidreza Heydarian and Andrew P Webster
+    for contributions.
+    
+    o Mark-mark scatter plot.
+
+    o Standard error calculation for inverse-distance weighting
+    
+    o Minor improvements and extensions.
+
+    o Version nickname: 'Drop Bear'
+
+NEW FUNCTIONS
+
+    o markmarkscatter
+    Mark-mark scatterplot
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o idw
+    Standard errors can now be calculated by setting 'se=TRUE'.
+
+    o im.apply
+    Computation accelerated, especially when NA's are absent.
+    New arguments 'fun.handles.na' and 'check'.
+    
+    o kppm, dppm, clusterfit
+    Changed precedence rule for handling the algorithm parameters
+    in the minimum contrast algorithm. Individually-named arguments
+    'q,p,rmax,rmin' now take precedence over entries
+    with the same names in the list 'ctrl'.
+
+    o rotmean
+    Improved algorithm stability
+    
+    o summary.kppm
+    Prints more information about algorithm convergence.
+
+    o closepairs.pp3, crosspairs.pp3
+    Argument 'what' can take the value "ijd"
+
+    o plot.onearrow
+    Graphical parameters, specified when the object was created,
+    are now taken as the defaults for graphical parameters to the plot.
+
+BUG FIXES
+
+    o rotmean
+    When result="im" the resulting image did not have the same dimensions
+    as the input. [Spotted by Hamidreza Heydarian.]
+    Fixed.
+
+    o rotmean
+    If argument 'origin' was given, and if result="im" was specified,
+    the resulting image was wrongly displaced.
+    Fixed.
+
+    o runifpointx
+    Result was mangled when n=0 or n=1.
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.57-1
 
 OVERVIEW

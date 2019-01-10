@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.57-1
-Date: 2018-11-03
+Version: 1.58-2
+Date: 2019-01-10
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -87,6 +87,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	M. Herrmann;
 	M. Hesselbarth;
 	P. Hewson;
+	H. Heydarian;
 	K. Hingee;
 	K. Hornik; 
 	P. Hunziker; 
@@ -224,6 +225,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2018-11-03 04:19:28 UTC; adrian
+Packaged: 2019-01-10 14:23:59 UTC; adrian
 Repository: CRAN
-Date/Publication: 2018-11-04 17:10:03 UTC
+Date/Publication: 2019-01-10 16:30:04 UTC

@@ -94,7 +94,9 @@ void hasX3pclose(int *, double *, double *, double *, double *, double *, int *)
 void hasXY3close(int *, double *, double *, double *, int *, double *, double *, double *, double *, int *); 
 void hasXY3pclose(int *, double *, double *, double *, int *, double *, double *, double *, double *, double *, int *);
 void Cidw(double *, double *, double *, int *, double *, double *, int *, double *, double *, int *, double *, double *, double *, double *); 
-void idwloo(double *, double *, double *, int *, double *, double *, double *, double *);
+void Cidw2(double *, double *, double *, int *, double *, double *, int *, double *, double *, int *, double *, double *, double *, double *, double *, double *); 
+void idwloo(double *, double *, double *, int *, double *, double *, double *, double *); 
+void idwloo2(double *, double *, double *, int *, double *, double *, double *, double *, double *, double *);
 void locprod(int *, double *, double *, double *, int *, double *, double *); 
 void locxprod(int *, double *, double *, int *, double *, double *, double *, int *, double *, double *);
 void KborderI(int *, double *, double *, double *, int *, double *, int *, int *); 
@@ -199,8 +201,10 @@ void discs2grid(int *, double *, double *, int *, double *, double *, int *, dou
 */
 SEXP close3pairs(SEXP, SEXP, SEXP, SEXP, SEXP); 
 SEXP close3IJpairs(SEXP, SEXP, SEXP, SEXP, SEXP); 
+SEXP close3IJDpairs(SEXP, SEXP, SEXP, SEXP, SEXP); 
 SEXP cross3pairs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP); 
-SEXP cross3IJpairs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP cross3IJpairs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP); 
+SEXP cross3IJDpairs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP closePpair(SEXP, SEXP, SEXP, SEXP, SEXP); 
 SEXP Vclosepairs(SEXP, SEXP, SEXP, SEXP); 
 SEXP VcloseIJpairs(SEXP, SEXP, SEXP, SEXP); 
