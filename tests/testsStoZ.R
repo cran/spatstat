@@ -481,7 +481,7 @@ local({
 #
 #  Thanks to Marcelino de la Cruz
 #
-#  $Revision: 1.11 $  $Date: 2016/03/05 01:33:47 $
+#  $Revision: 1.12 $  $Date: 2019/01/18 01:58:29 $
 #
 
 require(spatstat)
@@ -543,7 +543,12 @@ df <- data.frame(x=runif(4),y=runif(4),t=runif(4),
 X <- ppx(data=df, coord.type=c("s","s","t","m", "m","m"))
 Y <- split(X, "age")
 Y <- split(X, "mineral", drop=TRUE)
-
+Y <- split(X, "mineral")
+print(Y)
+print(summary(Y))
+Y[c(TRUE,FALSE,TRUE)]
+Y[1:2]
+Y[3] <- Y[1]
 })
 #'
 #'    tests/ssf.R
@@ -615,7 +620,7 @@ local({
 })
 #'   tests/tessera.R
 #'   Tessellation code, not elsewhere tested
-#'   $Revision: 1.3 $ $Date: 2018/07/16 08:51:44 $
+#'   $Revision: 1.4 $ $Date: 2019/03/14 03:45:58 $
 #'
 require(spatstat)
 local({
@@ -680,15 +685,27 @@ local({
   AV <- chop.tess(A, V)
   #'
   #' quantess
+  #' quantess.owin
   a <- quantess(square(1), "x", 3)
   a <- quantess(square(1), "y", 3)
+  a <- quantess(square(1), "rad", 5, origin=c(1/2, 1/3))
+  a <- quantess(square(1), "ang", 7, origin=c(1/2, 1/3))
+  ZFUN <- function(x,y){y-x}
+  a <- quantess(square(1), ZFUN, 3)
   b <- quantess(letterR, "y", 3)
+  #' quantess.ppp
   d <- quantess(cells, "y", 4)
   g <- quantess(demopat, "x", 5)
   g <- quantess(demopat, "y", 5)
+  g <- quantess(demopat, "rad", 5, origin=c(4442, 4214))
+  g <- quantess(demopat, "ang", 5, origin=c(4442, 4214))
+  g <- quantess(demopat, ZFUN, 7)
+  #' quantess.im
   D <- distmap(demopat)
   h <- quantess(D, "y", 4)
-  h <- quantess(D, function(x,y){x+y}, 5)
+  h <- quantess(D, ZFUN, 5)
+  g <- quantess(D, "rad", 5, origin=c(4442, 4214))
+  g <- quantess(D, "ang", 5, origin=c(4442, 4214))
 })
 #
 #   tests/testaddvar.R
@@ -742,7 +759,7 @@ parres(mod4, "B")
 #'
 #'     Tests of 3D code 
 #'
-#'      $Revision: 1.3 $ $Date: 2018/07/02 15:40:29 $
+#'      $Revision: 1.5 $ $Date: 2019/02/21 01:35:06 $
 #'
 
 require(spatstat)
@@ -757,11 +774,20 @@ local({
   h <- has.close(X, 0.2, periodic=TRUE)
   h <- has.close(X, 0.2, Y=Y)
   h <- has.close(X, 0.2, Y=Y, periodic=TRUE)
+  #' code blocks not otherwise reached
+  rmax <- 0.6 * max(nndist(X))
+  g <- G3est(X, rmax=rmax, correction="rs")
+  g <- G3est(X, rmax=rmax, correction="km")
+  g <- G3est(X, rmax=rmax, correction="Hanisch")
   #' older code
-  gg1 <- g3engine(X$x, X$y, X$z, correction="Hanisch G3")
-  gg2 <- g3engine(X$x, X$y, X$z, correction="minus sampling")
-  ff1 <- f3engine(X$x, X$y, X$z, correction="no")
-  ff2 <- f3engine(X$x, X$y, X$z, correction="minus sampling")
+  co <- coords(X)
+  xx <- co$x
+  yy <- co$y
+  zz <- co$z
+  gg1 <- g3engine(xx, yy, zz, correction="Hanisch G3")
+  gg2 <- g3engine(xx, yy, zz, correction="minus sampling")
+  ff1 <- f3engine(xx, yy, zz, correction="no")
+  ff2 <- f3engine(xx, yy, zz, correction="minus sampling")
 })
 #'    tests/trigraph.R
 #'
@@ -968,7 +994,7 @@ local({
 #
 #  Thanks to Ege Rubak
 #
-#  $Revision: 1.9 $  $Date: 2018/03/28 08:41:20 $
+#  $Revision: 1.10 $  $Date: 2019/02/10 07:12:06 $
 #
 
 require(spatstat)
@@ -1045,13 +1071,27 @@ local({
   modelHyb <- ppm(japanesepines ~ 1, Hybrid(Strauss(0.05), Strauss(0.1)))
   vHyb <- vcov(modelHyb)
 
+  ## Code blocks for other choices of 'what'
+  model <- ppm(X ~ 1, Strauss(.05))
+  cG <- vcov(model, what="corr")
+  cP <- vcov(update(model, Poisson()), what="corr")
+
+  ## Model with zero-length coefficient vector
+  lam <- intensity(X)
+  f <- function(x,y) { rep(lam, length(x)) }
+  model0 <- ppm(X ~ offset(log(f)) - 1)
+  dd <- vcov(model0)
+  cc <- vcov(model0, what="corr")
+
+  ## Other weird stuff
+  su <- suffloc(ppm(X ~ x))
 })
 #
 # tests/windows.R
 #
 # Tests of owin geometry code
 #
-#  $Revision: 1.6 $  $Date: 2018/10/28 10:31:56 $
+#  $Revision: 1.9 $  $Date: 2019/02/10 06:52:45 $
 
 require(spatstat)
 local({
@@ -1121,10 +1161,32 @@ local({
   marks(X) <- marks(X)/8
   D <- discs(X, delta=5, separate=TRUE)
 
+  AD <- dilated.areas(cells,
+                      r=0.01 * matrix(1:10, 10,1),
+                      constrained=FALSE, exact=FALSE)
+  
   periodify(B1, 2)
   periodify(union.owin(B1, B2), 2)
   periodify(letterR, 2)
 
+  #' Ancient bug in inside.owin
+  W5 <- owin(poly=1e5*cbind(c(-1,1,1,-1),c(-1,-1,1,1)))
+  W6 <- owin(poly=1e6*cbind(c(-1,1,1,-1),c(-1,-1,1,1)))
+  i5 <- inside.owin(0,0,W5)
+  i6 <- inside.owin(0,0,W6)
+  if(!i5) stop("Wrong answer from inside.owin")
+  if(i5 != i6) stop("Results from inside.owin are scale-dependent")
+  
+  #' miscellaneous utilities
+  thrash <- function(f) {
+    f(letterR)
+    f(Frame(letterR))
+    f(as.mask(letterR))
+  }
+  thrash(meanX.owin)
+  thrash(meanY.owin)
+  thrash(intX.owin)
+  thrash(intY.owin)
 })
 
 reset.spatstat.options()

@@ -1780,6 +1780,7 @@
   Igor Chernayavsky,
   Y.C. Chin,
   Bjarke Christensen,
+  \ifelse{latex}{\out{Luc\'{\i{}}a}}{Lucia} Cobo Sanchez,
   Jean-Francois Coeurjolly,
   Kim Colyvas,
   Hadrien Commenges,
@@ -1914,6 +1915,7 @@
   Malte Spiess,
   Mark Stevenson,
   Kaspar Stucki,
+  Jan Sulavik,
   Michael Sumner,
   P. Surovy,
   Ben Taylor,
@@ -1936,6 +1938,7 @@
   Carl G. Witthoft,
   Selene Wong,
   Maxime Woringer,
+  Luke Yates,
   Mike Zamboni
   and
   Achim Zeileis.

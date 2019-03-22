@@ -82,10 +82,30 @@ local({
 
 
 
+#'    tests/circular.R
+#'
+#'    Circular data and periodic distributions
+#'
+#'    $Revision: 1.2 $  $Date: 2019/03/16 04:18:34 $
+
+require(spatstat)
+local({
+  a <- pairorient(redwood, 0.05, 0.15, correction="none")
+  b <- pairorient(redwood, 0.05, 0.15, correction="best")
+  rose(a)
+  rose(b, start="N", clockwise=TRUE)
+
+  #' arcs on the circle 
+  set.seed(19171025)
+  aa <- replicate(7, runif(1, 0, 2*pi) + c(0, runif(1, 0, pi)), simplify=FALSE)
+  bb <- circunion(aa)
+})
+
+  
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.15 $ $Date: 2018/11/27 02:07:30 $
+## $Revision: 1.17 $ $Date: 2019/01/25 03:57:38 $
 
 local({
   r <- 0.12
@@ -203,15 +223,29 @@ local({
 local({
   #' Three-dimensional
   X <- runifpoint3(100)
-  Y <- runifpoint3(100)
   cl <- closepairs(X, 0.2, what="indices")
   cl <- closepairs(X, 0.2, what="ijd")
+  cl <- closepairs(X, 0.2, distinct=FALSE)
+  cl <- closepairs(X, 0.2, distinct=FALSE, what="indices")
+  cl <- closepairs(X, 0.2, distinct=FALSE, what="ijd")
+  cl <- closepairs(X, 0.2, twice=FALSE, neat=TRUE)
+  #' trap obsolete usage
+  cl <- closepairs(X, 0.2, ordered=FALSE)
+  #' crosspairs
+  Y <- runifpoint3(100)
   cr <- crosspairs(X, Y, 0.2, what="indices")
   cr <- crosspairs(X, Y, 0.2, what="ijd")
   #' markmarkscatter uses closepairs.pp3
   marks(X) <- runif(npoints(X))
   markmarkscatter(X, 0.2)
   markmarkscatter(X[FALSE], 0.2)
+})
+
+local({
+  #' weightedclosepairs is currently in strauss.R
+  wi <- weightedclosepairs(redwood, 0.05, "isotropic")
+  wt <- weightedclosepairs(redwood, 0.05, "translate")
+  wp <- weightedclosepairs(redwood, 0.05, "periodic")
 })
 
 reset.spatstat.options()
@@ -421,8 +455,9 @@ local({
 #'  Test behaviour of density() methods,
 #'                    relrisk(), Smooth()
 #'                    and inhomogeneous summary functions
+#'                    and idw, adaptive.density
 #'
-#'  $Revision: 1.33 $  $Date: 2018/10/21 10:09:11 $
+#'  $Revision: 1.39 $  $Date: 2019/02/11 09:49:23 $
 #'
 
 require(spatstat)
@@ -627,11 +662,15 @@ local({
   stroke(varcov=diag(c(25, 36)), weights=runif(npoints(longleaf)))
   stroke(5, Y=longleaf %mark% 1)
   stroke(5, Y=cut(longleaf,breaks=3))
+  heavY <- longleaf %mark% cbind(a=1:npoints(longleaf), b=1)
+  stroke(5, Y=heavY)
+  stroke(5, Y=heavY[FALSE])
   Z <- as.im(function(x,y){abs(x)+1}, Window(longleaf))
   stroke(5, weights=Z)
   stroke(5, weights=Z, geometric=TRUE)
 
   stroke(sigma=Inf)
+  stroke(sigma=Inf, Y=heavY)
   
   markmean(longleaf, 9)
   
@@ -703,11 +742,20 @@ local({
   Zno  <- Kmeasure(redwood, sigma=0.2, expand=FALSE)
   Zyes <- Kmeasure(redwood, sigma=0.2, expand=TRUE)
   #' All code blocks
+  diagmat <- diag(c(1,1))
+  generalmat <- matrix(c(1, 0.5, 0.5, 1), 2, 2)
   A <- second.moment.calc(redwood, 0.1, what="all", debug=TRUE)
-  B <- second.moment.calc(redwood, varcov=diag(c(0.1,0.1)^2), what="all")
+  B <- second.moment.calc(redwood, varcov=diagmat/100,    what="all")
+  D <- second.moment.calc(redwood, varcov=generalmat/100, what="all")
   PR <- pixellate(redwood)
   DR <- second.moment.calc(list(PR, PR), 0.1, debug=TRUE,
-                             npts=npoints(redwood), obswin=Window(redwood))
+                           npts=npoints(redwood), obswin=Window(redwood))
+  isoGauss <- function(x,y) {dnorm(x) * dnorm(y)}
+  ee <- evaluate2Dkernel(isoGauss, runif(10), runif(10),
+                         varcov=generalmat, scalekernel=TRUE)
+  isoGaussIm <- as.im(isoGauss, square(c(-3,3)))
+  gg <- evaluate2Dkernel(isoGaussIm, runif(10), runif(10),
+                         varcov=generalmat, scalekernel=TRUE)
 })
 
 local({
@@ -739,7 +787,14 @@ local({
 local({
   ## idw
   Z <- idw(longleaf, power=4)
+  Z <- idw(longleaf, power=4, se=TRUE)
   ZX <- idw(longleaf, power=4, at="points")
+  ZX <- idw(longleaf, power=4, at="points", se=TRUE)
+  ## dodgy code blocks in densityVoronoi.R
+  A <- adaptive.density(nztrees, nrep=2, f=0.5, counting=TRUE)
+  B <- adaptive.density(nztrees, nrep=2, f=0.5, counting=TRUE, fixed=TRUE)
+  D <- adaptive.density(nztrees, nrep=2, f=0.5, counting=FALSE)
+  E <- adaptive.density(nztrees, nrep=2, f=0.5, counting=FALSE, fixed=TRUE)
 })
 
 reset.spatstat.options()
@@ -763,7 +818,7 @@ local({
 #'
 #'  tests/discarea.R
 #'
-#'   $Revision: 1.1 $ $Date: 2016/03/28 09:16:03 $
+#'   $Revision: 1.2 $ $Date: 2019/01/20 08:44:50 $
 #'
 
 require(spatstat)
@@ -774,7 +829,13 @@ local({
   areaGain(u, cells, 0.1, W=NULL)
   areaGain(u, cells, 0.1, W=B)
 
-  areaLoss(cells[square(0.4)], 0.1, exact=TRUE)
+  X <- cells[square(0.4)]
+  areaLoss(X, 0.1, exact=TRUE)  # -> areaLoss.diri
+  areaLoss(X, 0.1, exact=FALSE) # -> areaLoss.grid
+  areaLoss.poly(X, 0.1)
+
+  areaLoss(X, 0.1, exact=FALSE, method="distmap")          # -> areaLoss.grid
+  areaLoss(X, c(0.1, 0.15), exact=FALSE, method="distmap") # -> areaLoss.grid
 })
 #'
 #'   tests/disconnected.R
@@ -856,7 +917,7 @@ local({
 #'
 #'    Tests for determinantal point process models
 #' 
-#'    $Revision: 1.2 $ $Date: 2018/11/05 10:32:31 $
+#'    $Revision: 1.4 $ $Date: 2019/01/29 05:33:09 $
 
 require(spatstat)
 local({
@@ -868,6 +929,12 @@ local({
   #' simulate.detpointprocfamily - code blocks
   model <- dppGauss(lambda=100, alpha=.05, d=2)
   simulate(model, seed=1999, correction="border")
+  #' dppeigen code blocks
+  mod <- dppMatern(lambda=2, alpha=0.01, nu=1, d=2)
+  uT <- dppeigen(mod, trunc=1.1,  Wscale=c(1,1), stationary=TRUE)
+  uF <- dppeigen(mod, trunc=1.1,  Wscale=c(1,1), stationary=FALSE)
+  vT <- dppeigen(mod, trunc=0.98, Wscale=c(1,1), stationary=TRUE)
+  vF <- dppeigen(mod, trunc=0.98, Wscale=c(1,1), stationary=FALSE)
 })
 #'
 #'   tests/duplicity.R

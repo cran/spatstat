@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.88 $ $Date: 2019/01/10 08:45:23 $
+#   $Revision: 1.92 $ $Date: 2019/03/16 11:15:58 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, marks=NULL, keepempty=FALSE,
@@ -213,7 +213,8 @@ plot.tess <- local({
              none = {
                #' no values assigned.
                #' default is tile name
-               values <- factor(tilenames(x))
+               tn <- tilenames(x)
+               values <- factor(tn, levels=tn)
              },
              vector = {
                #' vector of values.
@@ -696,8 +697,14 @@ tileindex <- function(x, y, Z) {
            m <- factor(m, levels=lev, labels=lab)
          },
          image={
-           Zim <- Z$image
-           m <- factor(Zim[list(x=x, y=y), drop=FALSE], levels=levels(Zim))
+           Zim   <- Z$image
+           m <- lookup.im(Zim, x, y, naok=TRUE)
+           if(anyNA(m)) {
+             #' look up neighbouring pixels
+             isna <- is.na(m)
+             rc <- nearest.valid.pixel(x[isna], y[isna], Zim, nsearch=2)
+             m[isna] <- Zim$v[cbind(rc$row, rc$col)]
+           }
          }
          )
   return(m)
@@ -735,8 +742,9 @@ as.tess.owin <- function(X) {
 
 domain.tess <- Window.tess <- function(X, ...) { as.owin(X) } 
 
-intersect.tess <- function(X, Y, ..., keepmarks=FALSE) {
+intersect.tess <- function(X, Y, ..., keepmarks=FALSE, sep="x") {
   X <- as.tess(X)
+  check.1.string(sep)
   if(is.owin(Y) && Y$type == "mask") {
     # special case
     # convert to pixel image 
@@ -791,6 +799,7 @@ intersect.tess <- function(X, Y, ..., keepmarks=FALSE) {
         }
       } else keepmarks <- FALSE
     }
+    Xtrivial <- (length(Xtiles) == 1)
     for(i in seq_along(Xtiles)) {
       Xi <- Xtiles[[i]]
       Ti <- lapply(Ytiles, intersect.owin, B=Xi, ..., fatal=FALSE)
@@ -798,7 +807,8 @@ intersect.tess <- function(X, Y, ..., keepmarks=FALSE) {
       nonempty <- !isempty
       if(any(nonempty)) {
         Ti <- Ti[nonempty]
-        names(Ti) <- paste(namesX[i], namesY[nonempty], sep="x")
+        names(Ti) <- if(Xtrivial) namesY[nonempty] else
+                     paste(namesX[i], namesY[nonempty], sep=sep)
         Ztiles <- append(Ztiles, Ti)
         if(keepmarks) {
           extra <- if(gotXmarks && gotYmarks) {

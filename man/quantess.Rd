@@ -10,11 +10,11 @@
 \usage{
 quantess(M, Z, n, \dots)
 
-\method{quantess}{owin}(M, Z, n, \dots, type=2)
+\method{quantess}{owin}(M, Z, n, \dots, type=2, origin=c(0,0), eps=NULL)
 
-\method{quantess}{ppp}(M, Z, n, \dots, type=2)
+\method{quantess}{ppp}(M, Z, n, \dots, type=2, origin=c(0,0), eps=NULL)
 
-\method{quantess}{im}(M, Z, n, \dots, type=2)
+\method{quantess}{im}(M, Z, n, \dots, type=2, origin=c(0,0))
 }
 \arguments{
   \item{M}{
@@ -25,7 +25,8 @@ quantess(M, Z, n, \dots)
   \item{Z}{
     A spatial covariate (a pixel image or a \code{function(x,y)})
     or one of the strings \code{"x"} or \code{"y"} indicating the
-    \eqn{x} or \eqn{y} coordinate.
+    Cartesian coordinates \eqn{x} or \eqn{y}, or one of the strings
+    \code{"rad"} or \code{"ang"} indicating polar coordinates.
     The range of values of \code{Z} will be broken into \code{n}
     bands containing equal amounts of stuff.
   }
@@ -40,6 +41,23 @@ quantess(M, Z, n, \dots)
     Additional arguments passed to \code{\link{quadrats}} or
     \code{\link{tess}} defining another tessellation
     which should be intersected with the quantile tessellation.
+  }
+  \item{origin}{
+    Location of the origin of polar coordinates,
+    if \code{Z="rad"} or \code{Z="ang"}.
+    Either a numeric vector of length 2 giving the location,
+    or a point pattern containing only one point,
+    or a list with two entries named \code{x} and \code{y},
+    or one of the character strings
+    \code{"centroid"}, \code{"midpoint"},
+    \code{"left"}, \code{"right"}, \code{"top"}, \code{"bottom"},
+    \code{"topleft"}, \code{"bottomleft"}, \code{"topright"} or
+    \code{"bottomright"} (partially matched).
+  }
+  \item{eps}{
+    Optional. The size of pixels in the approximation which is used
+    to compute the quantiles. A positive numeric value, or vector of two
+    positive numeric values.
   }
 }
 \details{
@@ -69,7 +87,10 @@ quantess(M, Z, n, \dots)
   with weights given by \code{M}.
 
   For convenience, additional arguments \code{\dots} can be given,
-  to further subdivide the tiles of the tessellation.
+  to further subdivide the tiles of the tessellation. These arguments
+  should be recognised by one of the functions
+  \code{\link{quadrats}} or \code{\link{tess}}. The tessellation
+  determined by these arguments is intersected with the quantile tessellation.
 
   The result of \code{quantess} is a tessellation of \code{as.owin(M)}
   determined by the quantiles of \code{Z}.
@@ -91,6 +112,9 @@ quantess(M, Z, n, \dots)
 
   plot(quantess(bronzefilter, "x", 6))
   points(unmark(bronzefilter))
+
+  plot(quantess(letterR, "rad", 7, origin=c(2.8, 1.5)))
+  plot(quantess(letterR, "ang", 7, origin=c(2.8, 1.5)))
 
   opa <- par(mar=c(0,0,2,5))
   A <- quantess(Window(bei), bei.extra$elev, 4)

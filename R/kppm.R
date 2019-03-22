@@ -3,7 +3,7 @@
 #
 # kluster/kox point process models
 #
-# $Revision: 1.140 $ $Date: 2018/12/08 10:49:03 $
+# $Revision: 1.143 $ $Date: 2019/03/19 07:59:00 $
 #
 
 kppm <- function(X, ...) {
@@ -223,11 +223,13 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                        q=1/4, p=2, rmin=NULL, rmax=NULL, 
                        ctrl=list(q=q, p=p, rmin=rmin, rmax=rmax),
                        statistic = NULL, statargs = NULL,
-                       algorithm="Nelder-Mead"){
+                       algorithm="Nelder-Mead", verbose=FALSE){
+  if(verbose) splat("Fitting cluster model")
   ## If possible get dataname from dots
   dataname <- list(...)$dataname
   ## Cluster info:
   info <- spatstatClusterModelInfo(clusters)
+  if(verbose) splat("Retrieved cluster model information")
   ## Determine model type
   isPCP <- info$isPCP
   isDPP <- inherits(clusters, "detpointprocfamily")
@@ -243,8 +245,14 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                   if(missing(rmin)) NULL else list(rmin=rmin),
                   if(missing(rmax)) NULL else list(rmax=rmax))
   ctrl <- resolve.defaults(given.args, given.ctrl, default.ctrl)
+  if(verbose) {
+    splat("Algorithm parameters:")
+    print(ctrl)
+  }
   ##
   if(inherits(X, "ppp")){
+      if(verbose) 
+        splat("Using point pattern data")
       if(is.null(dataname))
          dataname <- getdataname(short.deparse(substitute(X), 20), ...)
       if(is.null(statistic))
@@ -253,6 +261,11 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
       if(is.null(startpar))
           startpar <- info$selfstart(X)
       stationary <- is.null(lambda) || (is.numeric(lambda) && length(lambda)==1)
+      if(verbose) {
+        splat("Starting parameters:")
+        print(startpar)
+        cat("Calculating summary function...")
+      }
       # compute summary function
       if(stationary) {
           if(is.null(lambda)) lambda <- intensity(X)
@@ -272,7 +285,10 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                                            statargs,
                                            list(correction="best")))
       }
+      if(verbose) splat("Done.")
   } else if(inherits(X, "fv")){
+      if(verbose) 
+        splat("Using the given summary function")
       Stat <- X
       ## Get statistic type
       stattype <- attr(Stat, "fname")
@@ -303,9 +319,11 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   
   ## avoid using g(0) as it may be infinite
   if(statistic=="pcf"){
+      if(verbose) splat("Checking g(0)")
       argu <- fvnames(Stat, ".x")
       rvals <- Stat[[argu]]
       if(rvals[1L] == 0 && (is.null(rmin) || rmin == 0)) {
+          if(verbose) splat("Ignoring g(0)")
           rmin <- rvals[2L]
       }
   }
@@ -313,6 +331,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   ## DPP resolving algorithm and checking startpar
   changealgorithm <- length(startpar)==1 && algorithm=="Nelder-Mead"
   if(isDPP){
+    if(verbose) splat("Invoking dppmFixAlgorithm")
     alg <- dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
     algorithm <- alg$algorithm
   }
@@ -327,6 +346,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   #' ............ experimental .........................
   do.adjust <- spatstat.options("kppm.adjusted")
   if(do.adjust) {
+    if(verbose) splat("Applying kppm adjustment")
     W <- Window(X)
     adjdata <- list(paircorr = info[["pcf"]],
                     pairWcdf = distcdf(W),
@@ -345,12 +365,14 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
   #' ............ experimental .........................
   usecanonical <- spatstat.options("kppm.canonical")
   if(usecanonical) {
+    if(verbose) splat("Converting to canonical parameters")
      tocanonical <- info$tocanonical
      tohuman <- info$tohuman
      if(is.null(tocanonical) || is.null(tohuman)) {
        warning("Canonical parameters are not yet supported for this model")
        usecanonical <- FALSE
-     }
+     } 
+
   }
   startpar.human <- startpar
   if(usecanonical) {
@@ -380,8 +402,10 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
 
   if(isDPP && algorithm=="Brent" && changealgorithm)
     mcargs <- resolve.defaults(mcargs, list(lower=alg$lower, upper=alg$upper))
-  
+
+  if(verbose) splat("Starting minimum contrast fit")
   mcfit <- do.call(mincontrast, mcargs)
+  if(verbose) splat("Returned from minimum contrast fit")
   # extract fitted parameters and reshape
   if(!usecanonical) {
     optpar.canon <- NULL
@@ -403,6 +427,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                   modelname  = info$modelabbrev,
                   lambda     = lambda)
     attr(mcfit, "info") <- extra
+    if(verbose) splat("Returning from clusterfit (DPP case)")
     return(mcfit)
   }
   ## Extra stuff for ordinary cluster/lgcp models
@@ -439,6 +464,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
                 isPCP      = isPCP,
                 lambda     = lambda)
   attr(mcfit, "info") <- extra
+  if(verbose) splat("Returning from clusterfit")
   return(mcfit)
 }
 
@@ -1356,26 +1382,26 @@ simulate.kppm <- function(object, nsim=1, seed=NULL, ...,
          Thomas={
            kappa <- mp$kappa
            sigma <- mp$sigma
-           cmd <- expression(rThomas(kappa,sigma,mu,win))
+           cmd <- expression(rThomas(kappa,sigma,mu,win, ...))
            dont.complain.about(kappa, sigma, mu)
          },
          MatClust={
            kappa <- mp$kappa
            r     <- mp$R
-           cmd   <- expression(rMatClust(kappa,r,mu,win))
+           cmd   <- expression(rMatClust(kappa,r,mu,win, ...))
            dont.complain.about(kappa, r)
          },
          Cauchy = {
            kappa <- mp$kappa
            omega <- mp$omega
-           cmd   <- expression(rCauchy(kappa, omega, mu, win))
+           cmd   <- expression(rCauchy(kappa, omega, mu, win, ...))
            dont.complain.about(kappa, omega, mu)
          },
          VarGamma = {
            kappa  <- mp$kappa
            omega  <- mp$omega
            nu.ker <- object$covmodel$margs$nu.ker
-           cmd    <- expression(rVarGamma(kappa, nu.ker, omega, mu, win))
+           cmd    <- expression(rVarGamma(kappa, nu.ker, omega, mu, win, ...))
            dont.complain.about(kappa, nu.ker, omega, mu)
          },
          LGCP={
@@ -1536,7 +1562,7 @@ update.kppm <- function(object, ..., evaluate=TRUE) {
          },
          {
 	   # original call has X = ppp and trend = [formula without lhs]
-           oldformula <- as.formula(getCall(object)$trend)
+           oldformula <- as.formula(getCall(object)$trend %orifnull% (~1))
 	   fom <-  newformula(oldformula, fmla, callframe, envir)
 	   if(!is.null(Xexpr))
 	      lhs.of.formula(fom) <- Xexpr

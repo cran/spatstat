@@ -436,7 +436,7 @@ redwoodfull.extra$plotit()
 ### code chunk number 56: datasets.Rnw:763-765
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-plot(as.listof(residualspaper[c("Fig1", "Fig4a", "Fig4b", "Fig4c")]), 
+plot(as.solist(residualspaper[c("Fig1", "Fig4a", "Fig4b", "Fig4c")]), 
      main="")
 
 

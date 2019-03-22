@@ -55,7 +55,7 @@ local({
 #'
 #'   leverage and influence for Gibbs models
 #' 
-#'   $Revision: 1.22 $ $Date: 2018/07/22 02:19:45 $
+#'   $Revision: 1.24 $ $Date: 2019/02/11 09:40:50 $
 #' 
 
 require(spatstat)
@@ -74,6 +74,10 @@ local({
   fitG <- ppm(redwood ~ 1, Geyer(0.1, 2), rbord=0)
   levG <- Leverage(fitG)
   infG <- Influence(fitG)
+  # AreaInter()$delta2
+  fitA <- ppm(cells ~ 1, AreaInter(0.07), rbord=0, nd=11)
+  levA <- Leverage(fitA)
+  infA <- Influence(fitA)
   # pairwise.family$delta2
   fitD <- ppm(cells ~ 1, DiggleGatesStibbard(0.12), rbord=0)
   levD <- Leverage(fitD)
@@ -160,6 +164,9 @@ local({
   ## run all code segments
   Everything <- function(model, ...) { ppmInfluence(model, ..., what="all") }
 
+  cat("Run full code on AreaInteraction model...", fill=TRUE)
+  pmiA <- Everything(fitA)
+  
   ## sparse algorithm, with blocks
   cat("Run sparse algorithm with blocks...", fill=TRUE)
   pmiSSB <- Everything(fitS, sparseOK=TRUE)
@@ -195,8 +202,13 @@ local({
   a <- Everything(fitS) 
   a <- Everything(fitS, method="interpreted") 
   a <- Everything(fitS, method="interpreted", entrywise=FALSE)
-  a <- Everything(fitS,                       entrywise=FALSE) 
-  #' NOTE: code for irregular parameters is tested in 'make bookcheck'
+  a <- Everything(fitS,                       entrywise=FALSE)
+  #' zero cif
+  b <- Everything(fitSH) 
+  b <- Everything(fitSH, method="interpreted") 
+  b <- Everything(fitSH, method="interpreted", entrywise=FALSE)
+  b <- Everything(fitSH,                       entrywise=FALSE) 
+  #' NOTE: code for irregular parameters is tested below, and in 'make bookcheck'
 
   ## ...........  logistic fits .......................
   cat("Logistic fits...", fill=TRUE)
@@ -252,6 +264,18 @@ local({
   d <- gogo("b", futx, method="interpreted") 
   d <- gogo("c", futx, method="interpreted", entrywise=FALSE)
   d <- gogo("d", futx,                       entrywise=FALSE)
+  cat("Offset model Strauss ...", fill=TRUE)
+  futS <- ippm(X ~ offset(ytoa), Strauss(0.07), start=list(alpha=1))
+  d <- gogo("a", futS)
+  d <- gogo("b", futS, method="interpreted") 
+  d <- gogo("c", futS, method="interpreted", entrywise=FALSE)
+  d <- gogo("d", futS,                       entrywise=FALSE) 
+  cat("Offset+x model Strauss ...", fill=TRUE)
+  futxS <- ippm(X ~ x + offset(ytoa), Strauss(0.07), start=list(alpha=1))
+  d <- gogo("a", futxS) 
+  d <- gogo("b", futxS, method="interpreted") 
+  d <- gogo("c", futxS, method="interpreted", entrywise=FALSE)
+  d <- gogo("d", futxS,                       entrywise=FALSE)
 
   #'
   set.seed(452)
@@ -265,29 +289,33 @@ reset.spatstat.options()
 ##
 ## checks validity of linear algebra code
 ##
-##  $Revision: 1.3 $ $Date: 2015/12/29 08:54:49 $
+##  $Revision: 1.4 $ $Date: 2019/02/21 02:21:43 $
 ##
 require(spatstat)
 local({
   p <- 3
   n <- 4
-
+  k <- 2
+  
   x <- matrix(1:(n*p), n, p)
-  w <- rep(2, n)
-  z <- matrix(0, p, p)
-  for(i in 1:n)
-    z <- z + w[i] * outer(x[i,],x[i,])
-  zC <- sumouter(x, w)
-  if(!identical(zC, z))
-    stop("sumouter gives incorrect result in symmetric case")
-
-  y <- matrix(1:(2*n), n, 2)
-  z <- matrix(0, p, 2)
-  for(i in 1:n)
-    z <- z + w[i] * outer(x[i,],y[i,])
-  zC <- sumouter(x, w, y)
-  if(!identical(zC, z))
-      stop("sumouter gives incorrect result in ASYMMETRIC case")
+  w <- runif(n)
+  y <- matrix(1:(2*n), n, k)
+  zUS <- zWS <- matrix(0, p, p)
+  zUA <- zWA <- matrix(0, p, k)
+  for(i in 1:n) {
+    zUS <- zUS +        outer(x[i,],x[i,])
+    zWS <- zWS + w[i] * outer(x[i,],x[i,])
+    zUA <- zUA +        outer(x[i,],y[i,])
+    zWA <- zWA + w[i] * outer(x[i,],y[i,])
+  }
+  if(!identical(zUS, sumouter(x)))
+    stop("sumouter gives incorrect result in Unweighted Symmetric case")
+  if(!identical(zWS, sumouter(x,w)))
+    stop("sumouter gives incorrect result in Weighted Symmetric case")
+  if(!identical(zUA, sumouter(x, y=y)))
+    stop("sumouter gives incorrect result in Unweighted Asymmetric case")
+  if(!identical(zWA, sumouter(x, w, y)))
+    stop("sumouter gives incorrect result in Weighted Asymmetric case")
   
   x <- array(as.numeric(1:(p * n * n)), dim=c(p, n, n))
   w <- matrix(1:(n*n), n, n)
@@ -317,7 +345,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.23 $  $Date: 2018/11/27 01:58:47 $
+#  $Revision: 1.27 $  $Date: 2019/02/07 00:45:51 $
 
 
 require(spatstat)
@@ -550,6 +578,36 @@ local({
   X <- runiflpp(20, simplenet) %mark% runif(20)
   markmarkscatter(X, 0.2)
   markmarkscatter(X[FALSE], 0.1)
+
+  ## tree branches
+  # make a simple tree
+  m <- simplenet$m
+  m[8,10] <- m[10,8] <- FALSE
+  L <- linnet(vertices(simplenet), m)
+  tb <- treebranchlabels(L, 1)
+  X <- runiflpp(50, L)
+  # delete branch B
+  XminusB <- deletebranch(X, "b", tb)
+  # extract branch B
+  XB <- extractbranch(X, "b", tb)
+
+  ## linear tessellations infrastructure
+  nX <- 100
+  nY <- 20
+  X <- runiflpp(nX, simplenet)
+  Y <- runiflpp(nY, simplenet)
+  tes <- divide.linnet(Y)
+  cX <- coords(X)
+  iI <- lineartileindex(cX$seg, cX$tp, tes, method="interpreted")
+  iC <- lineartileindex(cX$seg, cX$tp, tes, method="C")
+  iE <- lineartileindex(cX$seg, cX$tp, tes, method="encode")
+  if(!identical(iI,iC))
+    stop("conflicting results from lineartileindex (interpreted vs C)")
+  if(!identical(iI,iE))
+    stop("conflicting results from lineartileindex (interpreted vs encoded)")
+  iA <- as.linfun(tes)(X)
+  if(!identical(iI, iA))
+    stop("disagreement between as.linfun.lintess and lineartileindex")
 })
 
 reset.spatstat.options()
@@ -727,7 +785,7 @@ reset.spatstat.options()
 #
 # Basic tests of mppm
 #
-# $Revision: 1.9 $ $Date: 2017/12/07 15:11:20 $
+# $Revision: 1.12 $ $Date: 2019/02/20 04:05:43 $
 # 
 
 require(spatstat)
@@ -768,6 +826,23 @@ local({
   p2 <- solapply(s2, predict)
 #  p3 <- solapply(s3, predict)
 
+})
+
+local({
+  ## cases of predict.mppm
+  W <- solapply(waterstriders, Window)
+  Fakes <- solapply(W, runifpoint, n=30)
+  FakeDist <- solapply(Fakes, distfun)
+  H <- hyperframe(Bugs=waterstriders,
+                  D=FakeDist)
+  fit <- mppm(Bugs ~ D, data=H)
+  p1 <- predict(fit)
+  p2 <- predict(fit, locations=Fakes)
+  p3 <- predict(fit, locations=solapply(W, erosion, r=4))
+  locn <- as.data.frame(do.call(cbind, lapply(Fakes, coords)))
+  df <- data.frame(id=sample(1:3, nrow(locn), replace=TRUE),
+                   D=runif(nrow(locn)))
+  p4 <- predict(fit, locations=locn, newdata=df)
 })
 
 local({
@@ -860,5 +935,50 @@ local({
   lurking(fit, expression(Z), type="P")
   lurking(fit, expression(V), type="raw") # design covariate
   lurking(fit, expression(U), type="raw") # image, constant in each row
+  lurking(fit, H$Z,           type="P")   # list of images
 })
 
+local({
+  ## test anova.mppm code blocks and scoping problem
+  H <- hyperframe(X=waterstriders)
+  mod0 <- mppm(X~1, data=H, Poisson())
+  modxy <- mppm(X~x+y, data=H, Poisson())
+  mod0S <- mppm(X~1, data=H, Strauss(2))
+  modxyS <- mppm(X~x+y, data=H, Strauss(2))
+  anova(mod0, modxy, test="Chi")
+  anova(mod0S, modxyS, test="Chi")
+  anova(modxy, test="Chi")
+  anova(modxyS, test="Chi")
+})
+
+#'
+#'     tests/msr.R
+#'
+#'     $Revision: 1.1 $ $Date: 2019/02/15 01:37:55 $
+#'
+#'     Tests of code for measures
+#'
+
+require(spatstat)
+
+local({
+  rr <- residuals(ppm(cells ~ x))
+
+  a <- summary(rr)
+  b <- is.marked(rr)
+  w <- as.owin(rr)
+  z <- domain(rr)
+  ss <- scalardilate(rr, 2)
+
+  rrr <- augment.msr(rr, sigma=0.08)
+  uuu <- update(rrr)
+
+  mm <- residuals(ppm(amacrine ~ x))
+  ss <- residuals(ppm(amacrine ~ x), type="score")
+
+  plot(mm)
+  plot(mm, multiplot=FALSE)
+  plot(mm, equal.markscale=TRUE, equal.ribbon=TRUE)
+  plot(ss)
+  plot(ss, multiplot=FALSE)
+})

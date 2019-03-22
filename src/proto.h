@@ -71,6 +71,7 @@ void knnwMD(int *, int *, int *, double *, double *, int *, double *);
 void distmapbin(double *, double *, double *, double *, int *, int *, int *, double *, double *);
 void ripleybox(int *, double *, double *, double *, int *, double *, double *, double *, double *, double *, double *); 
 void ripleypoly(int *, double *, double *, int *, double *, int *, double *, double *, double *, double *, double *);
+void tabsumweight(int *, double *, double *, int *, double *, double *);
 void exact_dt_R(double *, double *, int *, double *, double *, double *, double *, int *, int *, int *, int *, double *, int *, double *);
 void ps_exact_dt_R(double *, double *, double *, double *, int *, int *, int *, int *, int *, double *, int *, int *, double *);
 void fardist2grid(int *, double *, double *, int *, double *, double *, int *, double *, double *, double *); 
@@ -97,6 +98,7 @@ void Cidw(double *, double *, double *, int *, double *, double *, int *, double
 void Cidw2(double *, double *, double *, int *, double *, double *, int *, double *, double *, int *, double *, double *, double *, double *, double *, double *); 
 void idwloo(double *, double *, double *, int *, double *, double *, double *, double *); 
 void idwloo2(double *, double *, double *, int *, double *, double *, double *, double *, double *, double *);
+void nearestvalidpixel(int *, double *, double *, int *, int *, double *, int *, int *, int *, int *);
 void locprod(int *, double *, double *, double *, int *, double *, double *); 
 void locxprod(int *, double *, double *, int *, double *, double *, double *, int *, double *, double *);
 void KborderI(int *, double *, double *, double *, int *, double *, int *, int *); 
@@ -123,6 +125,7 @@ void ClineMquad(int *, int *, int *, int *, double *, double *, double *, int *,
 void ClineRMquad(int *, int *, int *, int *, double *, double *, double *, int *, int *, double *, double *, int *, int *, double *, double *, int *, double *, double *, int *, int *, double *, double *, int *);
 void linearradius(int *, int *, int *, double *, int *, double *, double *, double *); 
 void cocoGraph(int *, int *, int *, int *, int *, int *);
+void lintileindex(int *, int *, double *, int *, int *, double *, double *, int *, int *); 
 void cocoGraph(int *, int *, int *, int *, int *, int *);
 void Clixellate(int *, int *, int *, int *, int *, int *, double *, double *, int *, double *, int *, int *, int *, double *, int *, double *);
 void locpcfx(int *, double *, double *, int *, int *, double *, double *, int *, int *, double *, double *, double *); 
@@ -149,7 +152,7 @@ void linndxcross(int *, double *, double *, int *, double *, double *, int *, do
 void nndistsort(int *, double *, double *, double *, double *); 
 void knndsort(int *, int *, double *, double *, double *, double *); 
 void nnwhichsort(int *, double *, double *, int *, double *); 
-void knnsort(int *, int *, double *, double *, double *, int *, double *);
+void knnwhich(int *, int *, double *, double *, int *, double *);
 void Clinvwhichdist(int *, int *, double *, int *, int *, int *, int *, double *, double *, double *, double *, int *); 
 void linvknndist(int *, int *, int *, double *, int *, int *, int *, int *, double *, double *, double *, double *, int *);
 void nnGinterface(int *, double *, double *, int *, double *, double *, int *, double *, double *, int *, int *, double *, int *, double *); 

@@ -65,12 +65,15 @@
 \alias{change.default.expand}          
 \alias{checkbigmatrix}          
 \alias{checkfields}          
-\alias{checksolve}          
+\alias{checksolve}
+\alias{check.arc}
+\alias{check.anySparseVector}
 \alias{check.finespacing}
 \alias{check.hist.lengths}
 \alias{check.mat.mul}
 \alias{check.testfun}
 \alias{circticks}
+\alias{circunion}
 \alias{clarkevansCalc}
 \alias{clip.psp}
 \alias{cliprect.psp}
@@ -105,6 +108,8 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{deltasuffstat}
+\alias{DoCountCrossEnds}
+\alias{DoCountEnds}
 \alias{Deviation}
 \alias{dfbetas.ppmInfluence}
 \alias{dflt.redraw}
@@ -229,11 +234,13 @@
 \alias{impliedcoefficients}
 \alias{influence.ppmInfluence}
 \alias{inpoint}
+\alias{inside.arc}
 \alias{instantiate.interact}
 \alias{integral.leverage.ppm}
 \alias{integral.influence.ppm}
 \alias{interactionfamilyname}
 \alias{intermaker}
+\alias{interpretAsOrigin}
 \alias{intX.owin}     
 \alias{intX.xypolygon}     
 \alias{intY.owin}     
@@ -307,6 +314,7 @@
 \alias{logi.dummy}
 \alias{logi.engine}
 \alias{logLik.vblogit}
+\alias{looVoronoiLPP}
 \alias{makeLinnetTolerance}
 \alias{maskLaslett}
 \alias{match2DkernelName}
@@ -364,6 +372,7 @@
 \alias{mpl.get.covariates}
 \alias{mpl.prepare}
 \alias{mpl.usable}
+\alias{MinimalTess}
 \alias{MultiPair.checkmatrix}
 \alias{multiply.only.finite.entries}
 \alias{multiplicityNumeric}
@@ -515,6 +524,7 @@
 \alias{print.yardstick}
 \alias{project3Dhom}
 \alias{putlastshift}
+\alias{qtPrepareCoordinate}
 \alias{quad}
 \alias{quad.mppm}
 \alias{quadBlockSizes}
@@ -669,7 +679,8 @@
 \alias{thinjump}
 \alias{tilecentroids}        
 \alias{trianglediameters}
-\alias{trim.mask}        
+\alias{trim.mask}
+\alias{tweak.closepairs}
 \alias{tweak.fv.entry}
 \alias{tweak.ratfv.entry}
 \alias{tweak.coefs}
@@ -715,6 +726,8 @@
 \alias{xtfrm.im}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
+\alias{ZeroValue}
+\alias{ZeroValue.im}
 %%%% sparse 3D arrays
 \alias{sparse3Darray}
 \alias{as.sparse3Darray}
@@ -836,11 +849,15 @@ change.default.expand(x, newdefault)
 checkbigmatrix(n, m, fatal, silent)
 checkfields(X,L)
 checksolve(M, action, descrip, target)
+check.arc(arc, fatal)
+check.anySparseVector(v, npoints, fatal, things,
+                      naok, warn, vname, oneok)
 check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
 check.hist.lengths(hist,breaks)
 check.mat.mul(A, B, Acols, Brows, fatal)
 check.testfun(f, f1, X)
 circticks(R, at, unit, start, clockwise, labels)
+circunion(arcs)
 clarkevansCalc(X, correction, clipregion, working)
 clip.psp(x, window, check, fragments)
 cliprect.psp(x, window, fragments)
@@ -877,6 +894,8 @@ default.ntile(X)
 deltasuffstat(model, \dots,
               restrict, dataonly, sparseOK, quadsub,
               force, warn.forced, verbose, use.special)
+DoCountEnds(X, D, toler)
+DoCountCrossEnds(X, I, J, DIJ, toler)
 Deviation(x, ref, leaveout, n, xi)
 \method{dfbetas}{ppmInfluence}(model, \dots)
 dflt.redraw(button, name, env)
@@ -921,7 +940,9 @@ envelopeEngine(X, fun, simul,
            savefuns, savepatterns, saveresultof,
            weights,
            nsim2, VARIANCE, nSD,
-           Yname, maxnerr, internal, cl,
+           Yname,
+           silent, maxnerr, maxerr.action,
+           internal, cl,
            envir.user, expected.arg, do.pwrong,
            foreignclass, collectrubbish)
 envelopeProgressData(X, fun, \dots, exponent,
@@ -937,7 +958,7 @@ envelopeTest(X, \dots, exponent, alternative,
 \method{envelope}{matrix}(Y, \dots, rvals, observed, theory, funX,
   nsim, nsim2, jsim, jsim.mean,
   type, alternative, scale, clamp, csr, use.theory, nrank, ginterval, nSD,
-  savefuns, check, Yname, do.pwrong, weights, precomputed)
+  savefuns, check, Yname, do.pwrong, weights, precomputed, gaveup)
 equalpairs(U, X, marked=FALSE)
 equalpairs.quad(Q)
 equals.quad(Q)          
@@ -1039,11 +1060,13 @@ impliedpresence(tags, formula, df, extranames=character(0))
 impliedcoefficients(object, tag)
 \method{influence}{ppmInfluence}(model, \dots)
 inpoint(W)
+inside.arc(theta, arc)
 instantiate.interact(x, par)
 \method{integral}{leverage.ppm}(f, domain, \dots)
 \method{integral}{influence.ppm}(f, domain, \dots)
 interactionfamilyname(x)
 intermaker(f, blank)
+interpretAsOrigin(x, W)
 intX.owin(w)
 intX.xypolygon(polly)
 intY.owin(w)
@@ -1129,7 +1152,8 @@ logi.engine(Q, trend, interaction, \dots,
             correction, rbord, covfunargs, allcovar, 
             vnamebase, vnameprefix, justQ, savecomputed, precomputed,
             VB)
-\method{logLik}{vblogit}(object, \dots) 
+\method{logLik}{vblogit}(object, \dots)
+looVoronoiLPP(X)
 makeLinnetTolerance
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
 match2DkernelName(kernel)
@@ -1204,6 +1228,7 @@ mpl.prepare(Q, X, P, trend, interaction, covariates,
             vnamebase, vnameprefix, warn.illegal, warn.unidentifiable,
             weightfactor, skip.border, clip.interaction, splitInf)
 mpl.usable(x)
+MinimalTess(W, \dots)
 MultiPair.checkmatrix(mat, n, matname, naok, zerook, asymmok)
 multiplicityNumeric(x)
 multiply.only.finite.entries(x, a)
@@ -1212,7 +1237,7 @@ na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, Z)
-nearest.valid.pixel(x, y, Z)
+nearest.valid.pixel(x, y, Z, method, nsearch)
 newformula(old, change, eold, enew)
 newstyle.coeff.handling(object)
 nncleanEngine(kthNND, k, d, \dots, tol, maxit,
@@ -1383,6 +1408,7 @@ prepareTitle(main)
 \method{print}{yardstick}(x, \dots)
 project3Dhom(xyz, eye, org, vert)
 putlastshift(X, vec)
+qtPrepareCoordinate(covname, W, origin)
 quad(data, dummy, w, param)
 quad.mppm(x)
 quadBlockSizes(nX, nD, p, nMAX, announce)
@@ -1567,6 +1593,7 @@ tilecentroids(W, nx, ny)
 trianglediameters(iedge, jedge, edgelength, \dots,
                   nvert, dmax, check)
 trim.mask(M, R, tolerant)
+tweak.closepairs(cl, rmax, i, deltax, deltay, deltaz)
 tweak.fv.entry(x, current.tag, new.labl, new.desc, new.tag)
 tweak.ratfv.entry(x, \dots)
 tweak.coefs(model, new.coef)
@@ -1614,6 +1641,8 @@ X2testEngine(OBS, EXP, \dots, method, CR, df, nsim,
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w, check)
+ZeroValue(x)
+\method{ZeroValue}{im}
 %%% sparse 3D arrays
 sparse3Darray(i,j,k,x,dims,dimnames,strict,nonzero)
 as.sparse3Darray(x, \dots)

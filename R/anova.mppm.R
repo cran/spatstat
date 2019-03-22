@@ -1,7 +1,7 @@
 #
 # anova.mppm.R
 #
-# $Revision: 1.13 $ $Date: 2017/08/08 07:18:43 $
+# $Revision: 1.15 $ $Date: 2019/01/22 01:18:32 $
 #
 
 anova.mppm <- local({
@@ -48,11 +48,13 @@ anova.mppm <- local({
       if((nT <- length(Terms)) > 0) {
         ## generate models by adding terms sequentially
         objex <- vector(mode="list", length=nT+1)
+        envy <- environment(terms(object))
         for(n in 1L:nT) {
           ## model containing terms 1, ..., n-1
           fmla <- paste(". ~ . - ", paste(Terms[n:nT], collapse=" - "))
           fmla <- as.formula(fmla)
-          objex[[n]] <- update(object, fmla)
+          calln <- update(object, fmla, evaluate=FALSE)
+          objex[[n]] <- eval(calln, envy)
         }
         ## full model
         objex[[nT+1L]] <- object

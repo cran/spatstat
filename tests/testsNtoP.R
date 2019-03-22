@@ -36,7 +36,7 @@ local({
 #
 # Also test nnorient()
 #
-#   $Revision: 1.20 $  $Date: 2018/10/02 01:37:12 $
+#   $Revision: 1.22 $  $Date: 2019/02/21 03:01:30 $
 #
 
 require(spatstat)
@@ -93,6 +93,23 @@ local({
   if(any(nw5 != nw5P))
     stop("nnwhich.pp3(k=5) does not agree with pairdist")
 
+  Y <- runifpoint3(17)
+  a <- nncross(X,Y)
+  a <- nncross(X,Y, what="dist")
+  a <- nncross(X,Y, what="which")
+  a2 <- nncross(X,Y, k=2)
+  a2 <- nncross(X,Y, what="dist", k=2)
+  a2 <- nncross(X,Y, what="which", k=2)
+  iX <- 1:42
+  iZ <- 30:42
+  Z <- X[iZ]
+  b <- nncross(X, Z, iX=iX, iY=iZ)
+  b <- nncross(X, Z, iX=iX, iY=iZ, what="which")
+  b <- nncross(X, Z, iX=iX, iY=iZ, what="dist")
+  b2 <- nncross(X, Z, iX=iX, iY=iZ, k=2)
+  b2 <- nncross(X, Z, iX=iX, iY=iZ, what="which", k=2)
+  b2 <- nncross(X, Z, iX=iX, iY=iZ, what="dist", k=2)
+  
   # m dimensions
 
   X <- runifpointx(42, boxx(c(0,1),c(0,1),c(0,1),c(0,1)))
@@ -171,6 +188,16 @@ local({
   truewhich <- t(apply(crossdist(cells,flipcells), 1, order))[,1:4]
   if(any(calcwhich != truewhich))
     stop("nncross(k > 1) gives wrong answer")
+
+  #' cover some C code blocks
+  Z <- runifpoint(50)
+  X <- Z[1:30]
+  Y <- Z[20:50]
+  iX <- 1:30
+  iY <- 20:50
+  Ndw <- nncross(X,Y, iX, iY, k=3)
+  Nw  <- nncross(X,Y, iX, iY, k=3, what="which")
+  Nd  <- nncross(X,Y, iX, iY, k=3, what="dist")
   
   # test of agreement between nngrid.h and knngrid.h
   #    dimyx=23 (found by trial-and-error) ensures that there are no ties 
@@ -497,7 +524,7 @@ grep#
 #
 #   Plus assorted tricks
 #
-#   $Revision: 1.9 $  $Date: 2018/05/11 02:19:32 $
+#   $Revision: 1.10 $  $Date: 2019/02/10 07:00:38 $
 #
 require(spatstat)
 local({
@@ -564,6 +591,13 @@ local({
   parameters(ps)
   fitin(ps)
   predict(ps, type="cif")
+
+  ## (9) class 'plotppm'
+  fut <- ppm(amacrine ~ marks + polynom(x,y,2), Strauss(0.07))
+  p <- plot(fut, plot.it=FALSE)
+  print(p)
+  plot(p, how="contour")
+  plot(p, how="persp")
 })
 
 reset.spatstat.options()
@@ -705,7 +739,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.8 $ $Date: 2018/11/01 13:20:23 $
+#  $Revision: 1.10 $ $Date: 2019/01/14 07:07:20 $
 #
 
 require(spatstat)
@@ -734,7 +768,11 @@ local({
     stop("new.coef mechanism is broken!")
   if(max(abs(pn-p0)) > 0.01)
     stop("new.coef mechanism gives wrong answer, for unnamed vectors")
-
+  #' adaptcoef     
+  a <- c(A=1,B=2,Z=42)
+  b <- c(B=41,A=0)
+  ab <- adaptcoef(a, b, drop=TRUE)
+  
   # tests of relrisk.ppm
   fut <- ppm(amacrine ~ x * marks)
   a <- relrisk(fut, control=2, relative=TRUE)
@@ -773,6 +811,15 @@ local({
   fut1 <- ppm(cells ~ 1, Strauss(0.1))
   effectfun(fut1, "x")
   effectfun(fut1, "y")
+
+  ## ppm with covariate values in data frame
+  X <- rpoispp(42)
+  Q <- quadscheme(X)
+  weirdfunction <- function(x,y){ 10 * x^2 + 5 * sin(10 * y) }
+  Zvalues <- weirdfunction(x.quad(Q), y.quad(Q))
+  fot <- ppm(Q ~ y + Z, data=data.frame(Z=Zvalues))
+  effectfun(fot, "y", Z=0)
+  effectfun(fot, "Z", y=0)
 })
 
 #

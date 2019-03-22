@@ -110,7 +110,10 @@
 
   To construct particular tessellations, see
   \code{\link{quadrats}}, \code{\link{hextess}}, 
-  \code{\link{dirichlet}}, \code{\link{delaunay}}
+  \code{\link{dirichlet}}, \code{\link{delaunay}},
+  \code{\link{venn.tess}},
+  \code{\link{polartess}},
+  \code{\link{quantess}}
   and \code{\link{rpoislinetess}}.
 }
 \value{
@@ -131,8 +134,10 @@
   \code{\link{as.function.tess}}.
 
   To construct particular tessellations, see
-  \code{\link{quadrats}}, \code{\link{hextess}}, \code{\link{venn.tess}}
-  \code{\link{dirichlet}}, \code{\link{delaunay}}
+  \code{\link{quadrats}}, \code{\link{hextess}},
+  \code{\link{venn.tess}},
+  \code{\link{polartess}},
+  \code{\link{dirichlet}}, \code{\link{delaunay}}, \code{\link{quantess}}
   and \code{\link{rpoislinetess}}.
 
   To divide space into pieces containing equal

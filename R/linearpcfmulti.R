@@ -1,7 +1,7 @@
 #
 # linearpcfmulti.R
 #
-# $Revision: 1.12 $ $Date: 2017/02/07 08:12:05 $
+# $Revision: 1.14 $ $Date: 2019/03/21 02:55:10 $
 #
 # pair correlation functions for multitype point pattern on linear network
 #
@@ -219,25 +219,19 @@ linearPCFmultiEngine <- function(X, I, J, ..., r=NULL, reweight=NULL, denom=1,
     return(g)
   }
   #
-  nI <- sum(I)
-  nJ <- sum(J)
-  whichI <- which(I)
-  whichJ <- which(J)
+  ##  nI <- sum(I)
+  ## nJ <- sum(J)
+  ## whichI <- which(I)
+  ## whichJ <- which(J)
   clash <- I & J
   has.clash <- any(clash)
-  # compute pairwise distances
-  if(exists("crossdist.lpp")) {
-    DIJ <- crossdist(X[I], X[J], check=FALSE)
-    if(has.clash) {
-      # exclude pairs of identical points from consideration
-      Iclash <- which(clash[I])
-      Jclash <- which(clash[J])
-      DIJ[cbind(Iclash,Jclash)] <- Inf
-    }
-  } else {
-    D <- pairdist(X)
-    diag(D) <- Inf
-    DIJ <- D[I, J]
+  ## compute pairwise distances
+  DIJ <- crossdist(X[I], X[J], check=FALSE)
+  if(has.clash) {
+    ## exclude pairs of identical points from consideration
+    Iclash <- which(clash[I])
+    Jclash <- which(clash[J])
+    DIJ[cbind(Iclash,Jclash)] <- Inf
   }
   #---  compile into pair correlation function ---
   if(correction == "none" && is.null(reweight)) {
@@ -248,29 +242,15 @@ linearPCFmultiEngine <- function(X, I, J, ..., r=NULL, reweight=NULL, denom=1,
     attr(g, "correction") <- correction
     return(g)
   }
-  if(correction == "none")
+  if(correction == "none") {
      edgewt <- 1
-  else {
-     # inverse m weights (Ang's correction)
-     # determine tolerance
-     toler <- default.linnet.tolerance(L)
-     # compute m[i,j]
-     m <- matrix(1, nI, nJ)
-     XI <- X[I]
-     if(!has.clash) {
-       for(k in seq_len(nJ)) {
-         j <- whichJ[k]
-         m[,k] <- countends(L, XI, DIJ[, k], toler=toler)
-       }
-     } else {
-       # don't count identical pairs
-       for(k in seq_len(nJ)) {
-         j <- whichJ[k]
-         inotj <- (whichI != j)
-         m[inotj, k] <- countends(L, XI[inotj], DIJ[inotj, k], toler=toler)
-       }
-     }
-     edgewt <- 1/m
+  } else {
+    ## inverse m weights (Ang's correction)
+    ## determine tolerance
+    toler <- default.linnet.tolerance(L)
+    ## compute m[i,j]
+    m <- DoCountCrossEnds(X, I, J, DIJ, toler)
+    edgewt <- 1/m
   }
   # compute pcf
   wt <- if(!is.null(reweight)) edgewt * reweight else edgewt

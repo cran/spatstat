@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.125 $   $Date: 2018/10/18 09:36:06 $
+#  $Revision: 1.127 $   $Date: 2019/03/08 10:13:03 $
 #
 #  Plotting code for pixel images
 #
@@ -332,23 +332,22 @@ plot.im <- local({
                col <- s$outputs
              } 
              trivial <- (diff(vrange) <= .Machine$double.eps)
-             if(!trivial) {
-               # ribbonvalues: domain of colour map (pixel values)
-               # ribbonrange: (min, max) of pixel values in image
-               # nominalrange: range of values shown on ribbon 
-               # nominalmarks: values shown on ribbon at tick marks
-               # ribbonticks: pixel values of tick marks 
-               # ribbonlabels: text displayed at tick marks
-               ribbonvalues <- seq(from=vrange[1], to=vrange[2],
-                                   length.out=ribn)
-               ribbonrange <- vrange
-               nominalrange <- Log(ribscale * Exp(ribbonrange))
-               nominalmarks <- user.ticks %orifnull% Ticks(nominalrange,
-                                                           log=do.log,
-                                                           nint=user.nint)
-               ribbonticks <- Log(nominalmarks/ribscale)
-               ribbonlabels <- paste(nominalmarks)
-             }
+             #' ribbonvalues: domain of colour map (pixel values)
+             #' ribbonrange: (min, max) of pixel values in image
+             #' nominalrange: range of values shown on ribbon 
+             #' nominalmarks: values shown on ribbon at tick marks
+             #' ribbonticks: pixel values of tick marks 
+             #' ribbonlabels: text displayed at tick marks
+             ribbonvalues <- if(trivial) vrange[1] else
+                             seq(from=vrange[1], to=vrange[2], length.out=ribn)
+             ribbonrange <- vrange
+             nominalrange <- Log(ribscale * Exp(ribbonrange))
+             nominalmarks <- if(trivial) nominalrange[1] else
+                             (user.ticks %orifnull% Ticks(nominalrange,
+                                                         log=do.log,
+                                                         nint=user.nint))
+             ribbonticks <- Log(nominalmarks/ribscale)
+             ribbonlabels <- paste(nominalmarks)
            },
            integer = {
              values <- as.vector(x$v)
@@ -369,8 +368,8 @@ plot.im <- local({
                }
                ribbonticks <- Log(nominalmarks/ribscale)
                ribbonlabels <- paste(nominalmarks)
-               if(!do.log && identical(all.equal(ribbonticks,
-                                                 vrange[1]:vrange[2]), TRUE)) {
+               if(!do.log && isTRUE(all.equal(ribbonticks,
+                                              vrange[1]:vrange[2]))) {
                  # each possible pixel value will appear in ribbon
                  ribbonvalues <- vrange[1]:vrange[2]
                  imagebreaks <- c(ribbonvalues - 0.5, vrange[2] + 0.5)
@@ -453,6 +452,7 @@ plot.im <- local({
       colourinfo <- list(breaks=imagebreaks, col=col)
     } else if(!is.null(colfun)) {
       ## Function colfun(n)
+      if(trivial) ncolours <- 1
       colourinfo <-
         if(is.null(imagebreaks)) list(col=colfun(ncolours)) else
         list(breaks=imagebreaks, col=colfun(length(imagebreaks) - 1L))

@@ -84,7 +84,7 @@ local({
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.15 $   $Date: 2018/10/28 10:42:36 $
+#   $Revision: 1.17 $   $Date: 2019/02/19 04:49:41 $
 #
 
 require(spatstat)
@@ -190,7 +190,28 @@ local({
   
   h <- hist(Z)
   plot(h)
-  
+
+  #' safelookup (including extrapolation case)
+  Z <- as.im(function(x,y) { x - y }, letterR)
+  B <- grow.rectangle(Frame(letterR), 1)
+  X <- superimpose(runifpoint(10,letterR),
+                   runifpoint(20, setminus.owin(B, letterR)),
+                   W=B)
+  a <- safelookup(Z, X)
+
+  #' check nearest.valid.pixel
+  W <- Window(demopat)
+  set.seed(911911)
+  X <- runifpoint(1000, W)
+  Z <- quantess(W, function(x,y) { x }, 9)$image
+  x <- X$x
+  y <- X$y
+  a <- nearest.valid.pixel(x, y, Z, method="interpreted")
+  b <- nearest.valid.pixel(x, y, Z, method="C")
+  if(!isTRUE(all.equal(a,b)))
+    stop("Unequal results in nearest.valid.pixel")
+  if(!identical(a,b)) 
+    stop("Equal, but not identical, results in nearest.valid.pixel")
 })
 #' indices.R
 #' Tests of code for understanding index vectors etc
@@ -219,7 +240,7 @@ local({
 })
 #'   tests/ippm.R
 #'   Tests of 'ippm' class
-#'   $Revision: 1.1 $ $Date: 2017/06/06 06:32:00 $
+#'   $Revision: 1.3 $ $Date: 2019/02/15 10:08:26 $
 
 require(spatstat)
 
@@ -255,18 +276,56 @@ local({
               iScore=Dlogf,
               start=list(gamma=1, delta=1),
               nd=nd)
+  # fit model with logistic likelihood but without iScore
+  fitlo <- ippm(X ~Z + offset(log(f)),
+                method="logi",
+                covariates=list(Z=Z, f=f),
+                start=list(gamma=1, delta=1),
+                nd=nd)
 
-  # ............. test .............................
+  ## ............. test ippm class support ......................
   Ar <- model.matrix(fit)
   Ai <- model.matrix(fit, irregular=TRUE)
   Zr <- model.images(fit)
   Zi <- model.images(fit, irregular=TRUE)
-})#'
+  ## update.ippm
+  fit2 <- update(fit, . ~ . + I(Z^2))
+  fit0 <- update(fit,
+                 . ~ . - Z,
+                 start=list(gamma=2, delta=4))
+  oldfit <- ippm(X,
+              ~Z + offset(log(f)),
+              covariates=list(Z=Z, f=f),
+              iScore=Dlogf,
+              start=list(gamma=1, delta=1),
+              nd=nd)
+  oldfit2 <- update(oldfit, . ~ . + I(Z^2))
+  oldfit0 <- update(oldfit,
+                    . ~ . - Z,
+                    start=list(gamma=2, delta=4))
+  ## again with logistic
+  fitlo2 <- update(fitlo, . ~ . + I(Z^2))
+  fitlo0 <- update(fitlo,
+                   . ~ . - Z,
+                   start=list(gamma=2, delta=4))
+  oldfitlo <- ippm(X,
+                   ~Z + offset(log(f)),
+                   method="logi",
+                   covariates=list(Z=Z, f=f),
+                   start=list(gamma=1, delta=1),
+                   nd=nd)
+  oldfitlo2 <- update(oldfitlo, . ~ . + I(Z^2))
+  oldfitlo0 <- update(oldfitlo,
+                      . ~ . - Z,
+                      start=list(gamma=2, delta=4))
+
+})
+#'
 #'   tests/Kfuns.R
 #'
 #'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.7 $  $Date: 2018/11/01 13:26:16 $
+#'   $Revision: 1.12 $  $Date: 2019/02/13 07:00:15 $
 #'
 
 require(spatstat)
@@ -301,6 +360,8 @@ local({
   pr  <- pcf(cells, ratio=TRUE, var.approx=TRUE)
   pc  <- pcf(cells, domain=square(0.5))
   pcr <- pcf(cells, domain=square(0.5), ratio=TRUE)
+  pw <- pcf(redwood, correction="none")
+  pwr <- pcf(redwood, correction="none", ratio=TRUE)
   #' inhomogeneous multitype
   fit <- ppm(amacrine ~ marks)
   K1 <- Kcross.inhom(amacrine, lambdaX=fit)
@@ -325,8 +386,31 @@ local({
     stop("Ripley edge correction results do not match")
 
   a <- rmax.Ripley(square(1))
+  a <- rmax.Rigid(square(1))
   a <- rmax.Ripley(as.polygonal(square(1)))
+  a <- rmax.Rigid(as.polygonal(square(1)))
   a <- rmax.Ripley(letterR)
+  a <- rmax.Rigid(letterR)
+
+  #' run slow code for edge correction and compare results
+  X <- redwood[c(TRUE, FALSE, FALSE)]
+  Window(X) <- as.polygonal(Window(X))
+  Eapprox <- edge.Trans(X)
+  Eexact <- edge.Trans(X, exact=TRUE)
+  maxrelerr <- max(abs(1 - range(Eapprox/Eexact)))
+  if(maxrelerr > 0.1)
+    stop(paste("Exact and approximate algorithms for edge.Trans disagree by",
+               paste0(round(100*maxrelerr), "%")),
+         call.=FALSE)
+  #'
+  #'   directional K functions
+  #'
+    a <- Ksector(swedishpines,
+                 -pi/2, pi/2, units="radians",
+                 correction=c("none", "border", "bord.modif", "Ripley", "translate"),
+                 ratio=TRUE)
+    plot(a)
+                 
   #'
   #'   local K functions
   #'
@@ -338,11 +422,25 @@ local({
   a <- localLinhom(swedishpines, lambda=Lam)
   a <- localLinhom(swedishpines, lambda=Z, correction="none")
   a <- localLinhom(swedishpines, lambda=Z, correction="translate")
+  #'
+  #'   lohboot code blocks
+  #'
+  Ared <- lohboot(redwood, block=TRUE, Vcorrection=TRUE, global=FALSE)
+  Bred <- lohboot(redwood, block=TRUE, basicboot=TRUE, global=FALSE)
+  X <- runifpoint(100, letterR)
+  AX <- lohboot(X, block=TRUE, nx=7, ny=10)
+  #'
+  #'  residual K functions etc
+  #'
+  rco <- compareFit(cells, Kcom,
+                    interaction=anylist(P=Poisson(), S=Strauss(0.08)),
+                    same="trans", different="tcom")
 })
+  
 #
 # tests/kppm.R
 #
-# $Revision: 1.25 $ $Date: 2018/12/15 10:22:17 $
+# $Revision: 1.27 $ $Date: 2019/02/22 10:20:11 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -451,6 +549,8 @@ local({
   gut <- improve.kppm(fit, vcov=TRUE, fast.vcov=TRUE, save.internals=TRUE)
   hut <- kppm(redwood ~ x, method="clik", weightfun=NULL)
   hut <- kppm(redwood ~ x, method="palm", weightfun=NULL)
+  mut <- kppm(redwood)
+  nut <- update(mut, Y)
 })
 
 local({
@@ -474,7 +574,8 @@ local({
 
   #' auxiliary functions
   b <- resolve.vargamma.shape(nu.pcf=1.5)
-
+  Z <- clusterfield("Thomas", kappa=1, scale=0.2)
+  
   aa <- NULL
   aa <- accumulateStatus(simpleMessage("Woof"), aa)
   aa <- accumulateStatus(simpleMessage("Sit"),  aa)
