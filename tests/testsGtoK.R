@@ -325,11 +325,11 @@ local({
 #'
 #'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.12 $  $Date: 2019/02/13 07:00:15 $
+#'   $Revision: 1.23 $  $Date: 2019/06/23 03:00:51 $
 #'
 
 require(spatstat)
-myfun <- function(x,y){(x+1) * y }
+myfun <- function(x,y){(x+1) * y } # must be outside
 local({
   #' supporting code
   implemented.for.K(c("border", "bord.modif", "translate", "good", "best"),
@@ -422,6 +422,20 @@ local({
   a <- localLinhom(swedishpines, lambda=Lam)
   a <- localLinhom(swedishpines, lambda=Z, correction="none")
   a <- localLinhom(swedishpines, lambda=Z, correction="translate")
+  a <- localLcross(amacrine)
+  a <- localKdot(amacrine)
+  a <- localLdot(amacrine)
+  a <- localKcross.inhom(amacrine)
+  a <- localLcross.inhom(amacrine)
+  fat <- ppm(amacrine ~ x * marks)
+  Zed <- predict(fat)
+  Lum <- fitted(fat, dataonly=TRUE)
+  moff <- (marks(amacrine) == "off")
+  a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=Zed)
+  a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=Lum)
+  a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=fat)
+  a <- localLcross.inhom(amacrine, from="off", to="on",
+                         lambdaFrom=Lum[moff], lambdaTo=Lum[!moff])
   #'
   #'   lohboot code blocks
   #'
@@ -429,6 +443,18 @@ local({
   Bred <- lohboot(redwood, block=TRUE, basicboot=TRUE, global=FALSE)
   X <- runifpoint(100, letterR)
   AX <- lohboot(X, block=TRUE, nx=7, ny=10)
+  Lred <- lohboot(redwood, Linhom)
+  Zred <- predict(ppm(redwood ~ x+y))
+  Lred <- lohboot(redwood, Linhom, lambda=Zred)
+  #'    multitype
+  b <- lohboot(amacrine, Lcross)
+  b <- lohboot(amacrine, Ldot)
+  b <- lohboot(amacrine, Lcross.inhom)
+  b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", lambdaX=Zed)
+  b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", lambdaX=Lum)
+  b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", lambdaX=fat)
+  b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", 
+                         lambdaFrom=Lum[moff], lambdaTo=Lum[!moff])
   #'
   #'  residual K functions etc
   #'
@@ -437,10 +463,50 @@ local({
                     same="trans", different="tcom")
 })
   
+local({
+  #' From Ege, in response to a stackoverflow question.
+  #' The following example has two points separated by r = 1 with 1/4 of the
+  #' circumference outside the 10x10 window (i.e. area 100).
+  #' Thus the value of K^(r) should jump from 0 to 
+  #' 100/(2\cdot 1)\cdot ((3/4)^{-1} + (3/4)^{-1}) = 100 \cdot 4/3 = 133.333.
+  x <- c(4.5,5.5)
+  y <- c(10,10)-sqrt(2)/2
+  W <- square(10)
+  X <- ppp(x, y, W)
+  compere <- function(a, b, where, tol=1e-6) {
+    descrip <- paste("discrepancy in isotropic edge correction", where)
+    err <- as.numeric(a) - as.numeric(b)
+    maxerr <- max(abs(err))
+    blurb <- paste(descrip, "is", paste0(signif(maxerr, 4), ","), 
+                   if(maxerr > tol) "exceeding" else "within",
+                   "tolerance of", tol)
+    message(blurb)
+    if(maxerr > tol) {
+      message(paste("Discrepancies:", paste(err, collapse=", ")))
+      stop(paste("excessive", descrip), call.=FALSE)
+    }
+    invisible(TRUE)
+  }
+  ## Testing:
+  eX <- edge.Ripley(X, c(1,1))
+  compere(eX, c(4/3,4/3), "at interior point of rectangle")
+  ## Corner case:
+  Y <- X
+  Y$x <- X$x-4.5+sqrt(2)/2
+  eY <- edge.Ripley(Y, c(1,1))
+  compere(eY, c(2,4/3), "near corner of rectangle")
+  ## Invoke polygonal code
+  Z <- rotate(Y, pi/4)
+  eZdebug <- edge.Ripley(Z, c(1,1), method="debug")
+  compere(eZdebug, c(2,4/3), "at interior point of polygon (debug on)")
+  ## test validity without debugger, in case of quirks of compiler optimisation
+  eZ <- edge.Ripley(Z, c(1,1))
+  compere(eZ,      c(2,4/3), "at interior point of polygon (debug off)")
+})
 #
 # tests/kppm.R
 #
-# $Revision: 1.27 $ $Date: 2019/02/22 10:20:11 $
+# $Revision: 1.28 $ $Date: 2019/04/05 09:27:59 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -461,7 +527,7 @@ local({
  
  #' various methods
  ff <- as.fv(fitx)
- Y <- simulate(fitx, seed=42)[[1]]
+ Y <- simulate(fitx, seed=42, saveLambda=TRUE)[[1]]
  uu <- unitname(fitx)
  unitname(fitCx) <- "furlong"
  mo <- model.images(fitCx)
@@ -498,21 +564,21 @@ local({
  if(require(RandomFields)) {
    fit0 <- kppm(redwood ~1, "LGCP")
    is.poisson(fit0)
-   Y0 <- simulate(fit0)[[1]]
+   Y0 <- simulate(fit0, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y0))
 
    ## fit LGCP using K function: slow
    fit1 <- kppm(redwood ~x, "LGCP",
                 covmodel=list(model="matern", nu=0.3),
                 control=list(maxit=3))
-   Y1 <- simulate(fit1)[[1]]
+   Y1 <- simulate(fit1, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y1))
 
    ## fit LGCP using pcf
    fit1p <- kppm(redwood ~x, "LGCP",
                  covmodel=list(model="matern", nu=0.3),
                  statistic="pcf")
-   Y1p <- simulate(fit1p)[[1]]
+   Y1p <- simulate(fit1p, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y1p))
 
    ## .. and using different fitting methods
@@ -522,16 +588,16 @@ local({
    ## image covariate (a different code block) 
    xx <- as.im(function(x,y) x, Window(redwood))
    fit1xx <- update(fit1p, . ~ xx, data=solist(xx=xx))
-   Y1xx <- simulate(fit1xx)[[1]]
+   Y1xx <- simulate(fit1xx, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y1xx))
    fit1xxVG <- update(fit1xx, clusters="VarGamma", nu=-1/4)
-   Y1xxVG <- simulate(fit1xxVG)[[1]]
+   Y1xxVG <- simulate(fit1xxVG, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y1xxVG))
    
    # ... and Abdollah's code
 
    fit2 <- kppm(redwood ~x, cluster="Cauchy", statistic="K")
-   Y2 <- simulate(fit2)[[1]]
+   Y2 <- simulate(fit2, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y2))
 
  }
@@ -544,7 +610,7 @@ local({
   fet <- update(fut, redwood3)
   fot <- update(fut, trend=~y)
   fit <- kppm(redwoodfull ~ x)
-  Y <- simulate(fit, window=redwoodfull.extra$regionII)
+  Y <- simulate(fit, window=redwoodfull.extra$regionII, saveLambda=TRUE)
   gut <- improve.kppm(fit, type="wclik1")
   gut <- improve.kppm(fit, vcov=TRUE, fast.vcov=TRUE, save.internals=TRUE)
   hut <- kppm(redwood ~ x, method="clik", weightfun=NULL)
@@ -617,6 +683,14 @@ local({
   futFF1 <- kppm(redwood)
   futFF2 <- kppm(redwood, method="palm")
   futFF3 <- kppm(redwood, method="clik2")
+})
+
+local({
+  #' cover a few code blocks
+  fut <- kppm(redwood ~ x, method="clik")
+  summary(fut)
+  fut2 <- kppm(redwood ~ x, "LGCP", method="palm")
+  summary(fut2)
 })
 
 reset.spatstat.options()

@@ -36,7 +36,7 @@ local({
 #
 # Also test nnorient()
 #
-#   $Revision: 1.22 $  $Date: 2019/02/21 03:01:30 $
+#   $Revision: 1.24 $  $Date: 2019/04/29 06:34:29 $
 #
 
 require(spatstat)
@@ -248,7 +248,17 @@ local({
   #' degenerate case
   X <- cells[nndist(cells) > bdist.points(cells)]
   f <- nnorient(X)
+  #' nnclean
+  A <- nnclean(shapley, k=17, edge.correct=TRUE)
+  B <- nnclean(runifpoint3(300), 3)
+  #' stienen set
+  #' bug when disc radius is zero
+  Y <- unmark(humberside)[40:100] # contains duplicated points
+  stienen(Y)
+  Z <- stienenSet(Y)
 })
+
+  
 ## 
 ##    tests/percy.R
 ##
@@ -409,7 +419,7 @@ local({
 #' Tests of ppm(method='logi')
 #'    and related code (predict, leverage etc)
 #'
-#' $Revision: 1.7 $  $Date: 2017/07/11 08:13:18 $
+#' $Revision: 1.11 $  $Date: 2019/04/12 03:35:12 $
 #'
 
 require(spatstat)
@@ -450,6 +460,15 @@ local({
   Y <- quadscheme.logi(runifpoint(5), runifpoint(5))
   fut <- ppm(Y ~ A+B, data=df, method="logi")
   sf <- summary(fut)
+})
+
+local({
+  #' vblogit code, just to check that it runs.
+  fee <- ppm(cells ~ x, method="VBlogi", nd=21)
+  print(fee)
+  summary(fee)
+  Z <- predict(fee)
+  summary(Z)
 })
 #
 #   tests/ppmmarkorder.R
@@ -739,7 +758,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.10 $ $Date: 2019/01/14 07:07:20 $
+#  $Revision: 1.11 $ $Date: 2019/04/27 09:25:59 $
 #
 
 require(spatstat)
@@ -808,9 +827,22 @@ local({
                    Interaction=sample(0:1, 10, TRUE))
   m10 <- PPMmodelmatrix(fut, data=df)
   mmm <- PPMmodelmatrix(fut, Q=quad.ppm(fut))
-  fut1 <- ppm(cells ~ 1, Strauss(0.1))
-  effectfun(fut1, "x")
-  effectfun(fut1, "y")
+  #' effectfun for Gibbs
+  effectfun(fut, "x")
+  effectfun(fut, "x", se.fit=TRUE)
+  #' implicit covariate when there is only one
+  effectfun(fut)
+  effectfun(fut, se.fit=TRUE)
+  #' 
+  dlin <- distfun(copper$SouthLines)
+  copfit <- ppm(copper$SouthPoints ~ dlin, Geyer(1,1))
+  effectfun(copfit, "dlin")
+  effectfun(copfit)
+  # external covariate
+  effectfun(fut, "y", x=0)
+  futS <- ppm(cells ~ 1, Strauss(0.1))
+  effectfun(futS, "x")
+  effectfun(futS, "y")
 
   ## ppm with covariate values in data frame
   X <- rpoispp(42)

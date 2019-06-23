@@ -226,6 +226,7 @@
 \alias{hiermat}
 \alias{ho.engine}
 \alias{hsvNA}
+\alias{IdenticalRowPair}
 \alias{IdenticalRows}
 \alias{idorempty}
 \alias{illegal.iformula}
@@ -307,6 +308,7 @@
 \alias{linearPCFmultiEngine}
 \alias{listof}
 \alias{localKengine}
+\alias{localKmultiEngine}
 \alias{localpcfengine}
 \alias{localpcfmatrix}
 \alias{local2lpp}
@@ -542,6 +544,8 @@
 \alias{representativeRows}
 \alias{resolveEinfo}
 \alias{resolve.vargamma.shape}
+\alias{resolve.lambda}
+\alias{resolve.lambda.cross}
 \alias{rgbNA}
 \alias{rhohatEngine}
 \alias{rhohatCalc}
@@ -685,6 +689,7 @@
 \alias{tweak.ratfv.entry}
 \alias{tweak.coefs}
 \alias{twostage.test}
+\alias{twostage.envelope}
 \alias{\%unit\%} %DoNotExport
 %NAMESPACE export("%unit%")
 \alias{unitname.default}
@@ -1052,6 +1057,7 @@ hierarchicalordering(i, s)
 hiermat(x, h)
 ho.engine(model, \dots, nsim, nrmh, start, control, verb)
 hsvNA(h, s, v, alpha)
+IdenticalRowPair(i,j,a,b)
 IdenticalRows(i,j,a,b)
 idorempty(w, r, caller)
 illegal.iformula(ifmla, itags, dfvarnames)
@@ -1141,7 +1147,12 @@ linearKmultiEngine(X, I, J, \dots,
 linearPCFmultiEngine(X, I, J, \dots,
                    r, reweight, denom, correction, showworking)
 listof(\dots)
-localKengine(X, \dots, wantL, lambda, correction, verbose, rvalue)
+localKengine(X, \dots, wantL, lambda, rmax, correction, verbose, rvalue)
+localKmultiEngine(X, from, to,
+           lambdaFrom, lambdaTo, \dots, rmax, wantL,
+           correction, verbose, rvalue, sigma, varcov,
+           lambdaX, update, leaveoneout,
+           Iexplain, Jexplain, Ikey, Jkey, miss.update, miss.leave)
 localpcfengine(X, \dots, delta, rmax, nr, stoyan, lambda)
 localpcfmatrix(X, i, \dots, lambda, delta, rmax, nr, stoyan)
 local2lpp(L, seg, tp, X, df.only)
@@ -1426,6 +1437,11 @@ replacementIndex(ii, stuff)
 representativeRows(x)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
+resolve.lambda(X, lambda, \dots, sigma, varcov, leaveoneout, update)
+resolve.lambda.cross(X, I, J, lambdaI, lambdaJ, \dots, lambdaX,
+                     sigma, varcov, leaveoneout, update, lambdaIJ,
+                     Iexplain, Jexplain, miss.update, miss.leave,
+                     caller)
 rgbNA(red, green, blue, alpha, maxColorValue)
 rhohatEngine(model, covariate, reference, volume, \dots,
                subset, weights, method, horvitz, smoother, resolution, 
@@ -1600,6 +1616,9 @@ tweak.coefs(model, new.coef)
 twostage.test(X, \dots, exponent, nsim, nsimsub,
               alternative, reuse, leaveout, interpolate,
               savefuns, savepatterns, verbose, testblurb)
+twostage.envelope(X, \dots, nsim, nsimsub, nrank,
+                  alternative, reuse, leaveout, interpolate,
+                  savefuns, savepatterns, verbose, testlabel)
 x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 

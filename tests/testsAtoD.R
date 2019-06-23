@@ -105,7 +105,7 @@ local({
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.17 $ $Date: 2019/01/25 03:57:38 $
+## $Revision: 1.19 $ $Date: 2019/04/29 06:00:38 $
 
 local({
   r <- 0.12
@@ -145,6 +145,7 @@ local({
   ## ...............................................
   #' compare with older, slower code
   op <- spatstat.options(closepairs.newcode=FALSE,
+                         closepairs.altcode=FALSE,
                          crosspairs.newcode=FALSE)
   ## ...............................................
   old.close.ij <- closepairs(redwood, r, what="indices")
@@ -153,7 +154,7 @@ local({
   stopifnot(samesame(cross.ij, old.cross.ij))
   # execute only:
   old.close.every <- closepairs(redwood, r, what="all", distinct=FALSE)
-  old.cross.every <- crosspairs(on, off, r, what="all", distinct=FALSE)
+  old.close.once <- closepairs(redwood, r, what="all", twice=FALSE)
   ## ...............................................
   spatstat.options(op)
   ## ...............................................
@@ -248,6 +249,18 @@ local({
   wp <- weightedclosepairs(redwood, 0.05, "periodic")
 })
 
+local({
+  #' experimental
+  r <- 0.08
+  a <- closepairs(redwood, r)
+  b <- tweak.closepairs(a, r, 26, 0.1, 0.1)
+  X <- runifpoint3(30)
+  rr <- 0.2
+  cl <- closepairs(X, rr)
+  ii <- cl$i[[1]]
+  xl <- tweak.closepairs(cl, rr, ii, 0.05, -0.05, 0.05)
+})
+
 reset.spatstat.options()
 #'
 #'   tests/cluck.R
@@ -255,7 +268,7 @@ reset.spatstat.options()
 #'   Tests of "click*" functions
 #'   using queueing feature of spatstatLocator
 #'
-#'   $Revision: 1.1 $ $Date: 2018/10/19 10:03:23 $
+#'   $Revision: 1.2 $ $Date: 2019/04/28 02:20:37 $
 
 require(spatstat)
 local({
@@ -284,12 +297,17 @@ local({
   XL <- clicklpp(simplenet)
   spatstat.utils::queueSpatstatLocator(Y)
   XM <- clicklpp(simplenet, n=3, types=c("a", "b"))
+  #' identify.psp
+  E <- edges(letterR)[c(FALSE, TRUE)]
+  Z <- ppp(c(2.86, 3.65, 3.15), c(1.69, 1.98, 2.56), window=Frame(letterR))
+  spatstat.utils::queueSpatstatLocator(Z)
+  identify(E)
 })
 ## tests/colour.R
 ##
 ##  Colour value manipulation and colour maps
 ##
-## $Revision: 1.3 $ $Date: 2018/06/08 13:33:39 $
+## $Revision: 1.4 $ $Date: 2019/04/05 09:23:24 $
 ##
 
 require(spatstat)
@@ -305,7 +323,12 @@ local({
    b <- colourmap(rainbow(12), inputs=month.name)
    plot(b, vertical=FALSE)
    plot(b, vertical=TRUE)
-   
+   to.grey(b)
+   to.grey(b, transparent=TRUE)
+
+   argh <- list(a="iets", e="niets", col=b, f=42)
+   arr <- col.args.to.grey(argh)
+   rrgh <- col.args.to.grey(argh, transparent=TRUE)
 })
 #'
 #'   tests/contrib.R
@@ -941,18 +964,21 @@ local({
 #'
 #'  Tests of duplicated/multiplicity code
 #'
-#' $Revision: 1.2 $ $Date: 2018/11/02 01:23:09 $
+#' $Revision: 1.3 $ $Date: 2019/05/20 05:09:51 $
 
 require(spatstat)
 local({
    X <- ppp(c(1,1,0.5,1), c(2,2,1,2), window=square(3), check=FALSE)
-   m <- multiplicity(X)
    Y <- X %mark% factor(letters[c(3,2,4,3)])
+   ZM <- Y %mark% matrix(c(3,2,4,3), 4, 2)
+   ZD <- ZM
+   marks(ZD) <- as.data.frame(marks(ZM))
+
+   #' multiplicity
+   m <- multiplicity(X)
    mf <- multiplicity(Y)
-   Z <- Y %mark% matrix(c(3,2,4,3), 4, 2)
-   mm <- multiplicity(Z)
-   marks(Z) <- as.data.frame(marks(Z))
-   mz <- multiplicity(Z)
+   mm <- multiplicity(ZM)
+   mz <- multiplicity(ZD)
    ## default method
    kk <- c(1,2,3,1,1,2)
    mk <- multiplicity(kk)
@@ -966,4 +992,17 @@ local({
    df <- data.frame(x=c(1:4, 1,3,2,4, 0,0, 3,4),
                     y=factor(rep(letters[1:4], 3)))
    md <- multiplicity(df)
+
+   ## uniquemap.ppp
+   checkum <- function(X, blurb) {
+     a <- uniquemap(X)
+     if(any(a > seq_along(a)))
+       stop(paste("uniquemap", blurb,
+                  "does not respect sequential ordering"))
+     return(invisible(NULL))
+   }
+   checkum(X, "<unmarked pattern>")
+   checkum(Y, "<multitype pattern>")
+   checkum(ZM, "<pattern with matrix of marks>")
+   checkum(ZD, "<pattern with several columns of marks>")
 })

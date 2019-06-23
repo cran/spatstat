@@ -1,14 +1,71 @@
 #
 #  lohboot.R
 #
-#  $Revision: 1.19 $   $Date: 2019/01/21 10:34:36 $
+#  $Revision: 1.23 $   $Date: 2019/06/23 02:48:06 $
 #
 #  Loh's bootstrap CI's for local pcf, local K etc
 #
 
+
+spatstatLocalFunctionInfo <- function(key) {
+  ## This table has to be built on the fly.
+  TheTable <- list(
+    pcf          = list(Global=pcf,
+                        Local=localpcf,
+                        L=FALSE,  inhom=FALSE,  indices=0),
+    Kest         = list(Global=Kest,
+                        Local=localK,
+                        L=FALSE,  inhom=FALSE,  indices=0),
+    Lest         = list(Global=Lest,
+                        Local=localK,  # stet!
+                        L=TRUE,   inhom=FALSE,  indices=0),
+    pcfinhom     = list(Global=pcfinhom,
+                        Local=localpcfinhom,
+                        L=FALSE,  inhom=TRUE,   indices=0),
+    Kinhom       = list(Global=Kinhom,
+                        Local=localKinhom,
+                        L=FALSE,  inhom=TRUE,   indices=0),
+    Linhom       = list(Global=Linhom,
+                        Local=localKinhom,  # stet!
+                        L=TRUE,   inhom=TRUE,   indices=0),
+    Kcross       = list(Global=Kcross,
+                        Local=localKcross,
+                        L=FALSE,  inhom=FALSE,  indices=2),
+    Lcross       = list(Global=Lcross,
+                        Local=localKcross,  # stet!
+                        L=TRUE,   inhom=FALSE,  indices=2), 
+    Kdot         = list(Global=Kdot,
+                        Local=localKdot,
+                        L=FALSE,  inhom=FALSE,  indices=1),
+    Ldot         = list(Global=Ldot,
+                        Local=localKdot,  # stet!
+                        L=TRUE,   inhom=FALSE,  indices=1), 
+    Kcross.inhom = list(Global=Kcross.inhom,
+                        Local=localKcross.inhom,
+                        L=FALSE,  inhom=TRUE,   indices=2),
+    Lcross.inhom = list(Global=Lcross.inhom,
+                        Local=localKcross.inhom,  # stet!
+                        L=TRUE,   inhom=TRUE,   indices=2)
+  )
+  if(length(key) != 1)
+    stop("Argument must be a single character string or function", call.=FALSE)
+  nama <- names(TheTable)
+  pos <- if(is.character(key)) {
+           match(key, nama)
+         } else if(is.function(key)) {
+           match(list(key), lapply(TheTable, getElement, name="Global"))
+         } else NULL
+  if(is.na(pos)) return(NULL)
+  out <- TheTable[[pos]]
+  out$GlobalName <- nama[pos]
+  return(out)
+}
+
 lohboot <-
   function(X,
-           fun=c("pcf", "Kest", "Lest", "pcfinhom", "Kinhom", "Linhom"),
+           fun=c("pcf", "Kest", "Lest", "pcfinhom", "Kinhom", "Linhom",
+                 "Kcross", "Lcross", "Kdot", "Ldot",
+                 "Kcross.inhom", "Lcross.inhom"),
            ...,
            block=FALSE,
            global=FALSE,
@@ -17,20 +74,20 @@ lohboot <-
            confidence=0.95,
            nx = 4, ny = nx,
            nsim=200,
-           type=7) {
+           type=7)
+{
   stopifnot(is.ppp(X))
+  ## validate 'fun'
   fun.name <- short.deparse(substitute(fun))
-  if(is.character(fun)) {
+  if(is.character(fun)) 
     fun <- match.arg(fun)
-  } else if(is.function(fun)) {
-    flist <- list(pcf=pcf, Kest=Kest, Lest=Lest,
-                  pcfinhom=pcfinhom, Kinhom=Kinhom, Linhom=Linhom)
-    id <- match(list(fun), flist)
-    if(is.na(id))
-      stop(paste("Loh's bootstrap is not supported for the function",
-                 sQuote(fun.name)))
-    fun <- names(flist)[id]
-  } else stop("Unrecognised format for argument fun")
+  info <- spatstatLocalFunctionInfo(fun)
+  if(is.null(info))
+    stop(paste("Loh's bootstrap is not supported for the function",
+               sQuote(fun.name)),
+         call.=FALSE)
+  fun      <- info$GlobalName
+  localfun <- info$Local
   # validate confidence level
   stopifnot(confidence > 0.5 && confidence < 1)
   alpha <- 1 - confidence
@@ -45,25 +102,42 @@ lohboot <-
     warning(paste("confidence level", confidence,
                   "corresponds to a non-integer rank", paren(rank),
                   "so quantiles will be interpolated"))
-  n <- npoints(X)
-  # compute local functions
-  localfun <- switch(fun,
-                     pcf=localpcf,
-                     Kest=localK,
-                     Lest=localL,
-                     pcfinhom=localpcfinhom,
-                     Kinhom=localKinhom,
-                     Linhom=localLinhom)
+  ## compute local functions
   f <- localfun(X, ...)
   theo <- f$theo
-  # parse edge correction info
+  ## parse edge correction info
   correction <- attr(f, "correction")
   switch(correction,
-         none      = { ctag <- "un";    cadj <- "uncorrected" },
-         border    = { ctag <- "bord";  cadj <- "border-corrected" },
-         translate = { ctag <- "trans"; cadj <- "translation-corrected" },
-         isotropic = { ctag <- "iso";   cadj <- "Ripley isotropic corrected" })
+         none = {
+           ckey <- clab <- "un"
+           cadj <- "uncorrected"
+         },
+         border = {
+           ckey <- "border"
+           clab <- "bord"
+           cadj <- "border-corrected"
+         },
+         translate = {
+           ckey <- clab <- "trans"
+           cadj <- "translation-corrected"
+         },
+         isotropic = {
+           ckey <- clab <- "iso"
+           cadj <- "Ripley isotropic corrected"
+         })
+  ## determine indices for Kcross etc
+  types <- levels(marks(X))
+  from <- resolve.1.default(list(from=types[1]), list(...))
+  to <- resolve.1.default(list(to=types[2]), list(...))
+  fromName <- make.parseable(paste(from))
+  toName <- make.parseable(paste(to))
+  ## TEMPORARY HACK for cross/dot functions.
+  ## Uses a possibly temporary attribute to overwrite X with only "from" points.
+  if(info$indices > 0) {
+    X <- attr(f, "Xfrom")
+  }
   # first n columns are the local pcfs (etc) for the n points of X
+  n <- npoints(X)
   y <- as.matrix(as.data.frame(f))[, 1:n]
   nr <- nrow(y)
     
@@ -159,40 +233,112 @@ lohboot <-
   }
     
   ## =============  End Modification by Christophe Biscio ===================
-    
-  # create fv object
+
+  ## Transform to L function if required
+  if(info$L) {
+    theo <- sqrt(theo/pi)
+    ymean <- sqrt(ymean/pi)
+    hilo <- sqrt(hilo/pi)
+    warn.once("lohbootLfun",
+              "The calculation of confidence intervals for L functions",
+              "in lohboot() has changed in spatstat 1.60-0 and later;",
+              "they are now computed by transforming the confidence intervals",
+              "for the corresponding K functions.")
+  }
+
+  ## create fv object
   df <- data.frame(r=f$r,
                    theo=theo,
                    ymean,
                    lo=hilo[1L,],
                    hi=hilo[2L,])
-  colnames(df)[3L] <- ctag
+  
+  colnames(df)[3L] <- ckey
   CIlevel <- paste(100 * confidence, "%% confidence", sep="")
   desc <- c("distance argument r",
             "theoretical Poisson %s",
             paste(cadj, "estimate of %s"),
             paste("lower", CIlevel, "limit for %s"),
             paste("upper", CIlevel, "limit for %s"))
-  clabl <- paste("hat(%s)[", ctag, "](r)", sep="")
-  labl <- c("r", "%s[pois](r)", clabl, "%s[loCI](r)", "%s[hiCI](r)")
   switch(fun,
-         pcf={ fname <- "g" ; ylab <- quote(g(r)) },
-         Kest={ fname <- "K" ; ylab <- quote(K(r)) },
-         Lest={ fname <- "L" ; ylab <- quote(L(r)) },
-         pcfinhom={ fname <- "g[inhom]" ; ylab <- quote(g[inhom](r)) },
-         Kinhom={ fname <- "K[inhom]" ; ylab <- quote(K[inhom](r)) },
-         Linhom={ fname <- "L[inhom]" ; ylab <- quote(L[inhom](r)) })
-  g <- fv(df, "r", ylab, ctag, , c(0, max(f$r)), labl, desc, fname=fname)
+         pcf={
+           fname <- "g"
+           yexp <- ylab <- quote(g(r))
+         },
+         Kest={
+           fname <- "K"
+           yexp <- ylab <- quote(K(r))
+         },
+         Lest={
+           fname <- "L"
+           yexp <- ylab <- quote(L(r))
+         },
+         pcfinhom={
+           fname <- c("g", "inhom") 
+           yexp <- ylab <- quote(g[inhom](r))
+         },
+         Kinhom={
+           fname <- c("K", "inhom")
+           yexp <- ylab <- quote(K[inhom](r))
+         },
+         Linhom={
+           fname <- c("L", "inhom")
+           yexp <- ylab <- quote(L[inhom](r))
+         },
+         Kcross={
+           fname <- c("K", paste0("list(", fromName, ",", toName, ")"))
+           ylab <- substitute(K[fra,til](r),
+                              list(fra=fromName,til=toName))
+           yexp <- substitute(K[list(fra,til)](r),
+                              list(fra=fromName,til=toName))
+         },
+         Lcross={
+           fname <- c("L", paste0("list(", fromName, ",", toName, ")"))
+           ylab <- substitute(L[fra,til](r),
+                              list(fra=fromName,til=toName))
+           yexp <- substitute(L[list(fra,til)](r),
+                              list(fra=fromName,til=toName))
+         },
+         Kdot={
+           fname <- c("K", paste0(fromName, "~ symbol(\"\\267\")"))
+           ylab <- substitute(K[fra ~ dot](r),
+                              list(fra=fromName))
+           yexp <- substitute(K[fra ~ symbol("\267")](r),
+                              list(fra=fromName))
+         },
+         Ldot={
+           fname <- c("L", paste0(fromName, "~ symbol(\"\\267\")"))
+           ylab <- substitute(L[fra ~ dot](r),
+                              list(fra=fromName))
+           yexp <- substitute(L[fra ~ symbol("\267")](r),
+                              list(fra=fromName))
+         },
+         Kcross.inhom={
+           fname <- c("K", paste0("list(inhom,", fromName, ",", toName, ")"))
+           ylab <- substitute(K[inhom,fra,til](r),
+                              list(fra=fromName,til=toName))
+           yexp <- substitute(K[list(inhom,fra,til)](r),
+                              list(fra=fromName,til=toName))
+         },
+         Lcross.inhom={
+           fname <- c("L", paste0("list(inhom,", fromName, ",", toName, ")"))
+           ylab <- substitute(L[inhom,fra,til](r),
+                              list(fra=fromName,til=toName))
+           yexp <- substitute(L[list(inhom,fra,til)](r),
+                              list(fra=fromName,til=toName))
+         })
+  labl <- c("r",
+            makefvlabel(NULL, NULL, fname, "pois"),
+            makefvlabel(NULL, "hat", fname, clab),
+            makefvlabel(NULL, NULL, fname, "loCI"),
+            makefvlabel(NULL, NULL, fname, "hiCI"))
+  g <- fv(df, "r", ylab=ylab,
+          ckey, , c(0, max(f$r)), labl, desc,
+          fname=fname, yexp=yexp)
   formula(g) <- . ~ r
-  fvnames(g, ".") <- c(ctag, "theo", "hi", "lo")
+  fvnames(g, ".") <- c(ckey, "theo", "hi", "lo")
   fvnames(g, ".s") <- c("hi", "lo")
   unitname(g) <- unitname(X)
   g
 }
 
-
-    
-  
-  
-  
-  

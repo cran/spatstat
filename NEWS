@@ -1,4 +1,142 @@
 
+        CHANGES IN spatstat VERSION 1.60-1
+
+OVERVIEW
+
+    o Version number incremented for administrative reasons.
+
+        CHANGES IN spatstat VERSION 1.60-0
+
+OVERVIEW
+
+    o We thank Ottmar Cronie, Tilman Davies, Andrew Hardegen,
+    Tom Lawrence, Robin Milne, Mehdi Moradi, Gopalan Nair,
+    Tim Pollington and Suman Rakshit for contributions.
+    
+    o Random thinning and random labelling of spatial patterns
+    extended to different types of pattern.
+
+    o Confidence intervals for multitype K functions.
+
+    o Envelopes for balanced two-stage test
+    
+    o Accelerated some code.
+
+    o Minor bug fixes and improvements.
+
+    o Package built under R 3.6.0.
+    
+    o Version nickname: 'Swinging Sixties'
+
+NEW FUNCTIONS
+
+    o bits.envelope
+    Global simulation envelope corresponding to bits.test,
+    the balanced independent two-stage Monte Carlo test.
+    
+    o extrapolate.psp
+    Extrapolate line segments to obtain infinite lines.
+    
+    o uniquemap
+    Map duplicate points to unique representatives.
+    Generic with methods for ppp, lpp, ppx
+    
+    o uniquemap.data.frame
+    Map duplicate rows to unique representatives
+
+    o localKcross, localLcross, localKdot, localLdot,
+    localKcross.inhom, localLcross.inhom
+    Multitype local K functions.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o lohboot
+    Now works for multitype K functions Kcross, Kdot, Lcross, Ldot,
+    Kcross.inhom, Lcross.inhom.
+    
+    o Kinhom, pcfinhom
+    Leave-one-out calculation is implemented when 'lambda' is a fitted model
+    of class 'dppm'.
+    
+    o Kcross.inhom, Kdot.inhom, Lcross.inhom, Ldot.inhom
+    Leave-one-out calculation is implemented when 'lambdaX' is a fitted model
+    of class 'dppm'.
+    
+    o rthin, rlabel
+    These functions now work on point patterns of all classes
+    (ppp, lpp, pp3, ppx) and line segment patterns (psp).
+
+    o bw.abram
+    New argument 'smoother' determines how the pilot estimate is computed.
+    Formal arguments rearranged. 
+    
+    o plot.im
+    New argument 'riblab'.
+    
+    o rlabel
+    New arguments 'nsim' and 'drop'.
+
+    o localK, localKinhom
+    New argument 'rmax'.
+    
+    o rLGCP
+    Accelerated.
+
+    o anyDuplicated.ppp
+    Accelerated.
+    
+    o duplicated.ppp
+    Accelerated, in most cases.
+    
+    o simulate.kppm
+    Accelerated, for LGCP models. 
+
+    o predict.ppm
+    Accelerated, for models fitted with method="VBlogi"
+
+    o print.rmhmodel
+    Output improved.
+    
+BUG FIXES
+
+    o plot.linim, plot.linfun
+    Not all the entries of 'leg.args' were passed to text.default.
+    Fixed.
+
+    o densityVoronoi.ppp
+    Did not correctly handle patterns containing duplicated points.
+    Fixed.
+
+    o markcorr
+    The argument 'correction="none"' did not generate any results.
+    [Spotted by Tim Pollington.]
+    Fixed.
+    
+    o names<-.fv
+    Did not adjust the plotting formula, so that a subsequent call to plot.fv
+    would complain about missing variables.
+    Fixed.
+    
+    o im.apply
+    Crashed if 'FUN' returned factor values.
+    Fixed.
+
+    o stienenSet
+    Crashed if the data contained duplicated points.
+    Fixed.
+
+    o predict.ppm, effectfun
+    Crashed in some cases, with the message 'ncol(x)=nrow(v) is not TRUE'.
+    Fixed.
+
+    o parres
+    Crashed in some cases, with the message 'logical subscript too long'.
+    Fixed.
+
+    o dclf.test, mad.test, dg.test, bits.test
+    Crashed in some cases if the summary function values were infinite or NA.
+    Fixed.
+    
         CHANGES IN spatstat VERSION 1.59-0
 
 OVERVIEW

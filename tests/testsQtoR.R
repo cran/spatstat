@@ -59,7 +59,7 @@ local({
 })
 #'  tests/randoms.R
 #'   Further tests of random generation code
-#'  $Revision: 1.4 $ $Date: 2018/07/06 03:14:39 $
+#'  $Revision: 1.7 $ $Date: 2019/04/13 14:39:48 $
 
 require(spatstat)
 local({
@@ -86,6 +86,35 @@ local({
   b4 <- boxx(c(0,1), c(0,1), c(0,1), c(0,1))
   X <- rMaternInhibition(2, kappa=20, r=0.1, win=b3)
   Y <- rMaternInhibition(2, kappa=20, r=0.1, win=b4)
+})
+
+local({
+  f1 <- function(x,y){(x^2 + y^3)/10}
+  f2 <- function(x,y){(x^3 + y^2)/10}
+  ZZ <- solist(A=as.im(f1, letterR),
+               B=as.im(f2, letterR))
+  XX <- rmpoispp(ZZ, nsim=3)
+  YY <- rmpoint(10, f=ZZ, nsim=3)
+  g <- function(x,y,m){(10+as.integer(m)) * (x^2 + y^3)}
+  VV <- rpoint.multi(10, f=g,
+                     marks=factor(sample(letters[1:3], 10, replace=TRUE)),
+                     nsim=3)
+  L <- edges(letterR)
+  E <- runifpoisppOnLines(5, L)
+  G <- rpoisppOnLines(ZZ, L)
+})
+
+local({
+  #' cluster models + bells + whistles
+  X <- rThomas(10, 0.2, 5, saveLambda=TRUE)
+  X <- rMatClust(10, 0.05, 4, saveLambda=TRUE)
+  X <- rCauchy(30, 0.01, 5, saveLambda=TRUE)
+  X <- rVarGamma(30, 2, 0.02, 5, saveLambda=TRUE)
+  Z <- as.im(function(x,y){ 5 * exp(2 * x - 1) }, owin())
+  Y <- rThomas(10, 0.2, Z, saveLambda=TRUE)
+  Y <- rMatClust(10, 0.05, Z, saveLambda=TRUE)
+  Y <- rCauchy(30, 0.01, Z, saveLambda=TRUE)
+  Y <- rVarGamma(30, 2, 0.02, Z, saveLambda=TRUE)
 })
 
 reset.spatstat.options()
@@ -239,7 +268,7 @@ local({
 ##
 ##   tests/rmhBasic.R
 ##
-##   $Revision: 1.16 $  $Date: 2019/02/11 10:24:31 $
+##   $Revision: 1.17 $  $Date: 2019/04/25 03:11:55 $
 #
 # Test examples for rmh.default
 # run to reasonable length
@@ -423,7 +452,7 @@ spatstat.options(expand=1.1)
       X.lookup <- rmh(model=mod17,start=list(n.start=100),
                       control=list(nrep=nr, periodic=TRUE))
       X.lookup2 <- rmh(model=mod17,start=list(n.start=100),
-                       control=list(nrep=nr, periodic=FALSE))
+                       control=list(nrep=nr, expand=1, periodic=FALSE))
 
    # Strauss with trend
    tr <- function(x,y){x <- x/250; y <- y/250;
@@ -522,7 +551,7 @@ if(!identical(wsim, wcel))
 #
 #  tests of rmh, running multitype point processes
 #
-#   $Revision: 1.6 $  $Date: 2015/12/29 08:54:49 $
+#   $Revision: 1.8 $  $Date: 2019/04/17 09:12:41 $
 
 require(spatstat)
 
@@ -564,11 +593,30 @@ spatstat.options(expand=1.1)
                                    nrep=nr,nverb=nv))
    stopifnot(all(table(X3.straussm$marks) == c(60,20)))
 
-   # Multitype Strauss hardcore:
+   # Multitype hardcore:
    rhc  <- matrix(c(9.1,5.0,5.0,2.5),2,2)
+   mod085 <- list(cif="multihard",par=list(beta=beta,hradii=rhc),
+                  w=c(0,250,0,250))
+   X.multihard <- rmh(model=mod085,start=list(n.start=80),
+                      control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
+   X.multihardP <- rmh(model=mod085,start=list(n.start=80),
+                       control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv,
+                                    periodic=TRUE))
+   #' check handling of initial state which violates hard core
+   Xclose <- ppp(c(10,12,20),c(10,10,10), marks=factor(c(1,1,2)),
+              c(0,250),c(0,250))
+   X.multihard.close <- rmh(model=mod085,start=list(x.start=Xclose),
+                            control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
+   X.multihard.closeP <- rmh(model=mod085,start=list(x.start=Xclose),
+                             control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv,
+                                          periodic=TRUE))
+
+   # Multitype Strauss hardcore:
    mod09 <- list(cif="straushm",par=list(beta=beta,gamma=gmma,
                 iradii=r,hradii=rhc),w=c(0,250,0,250))
    X.straushm <- rmh(model=mod09,start=list(n.start=80),
+                     control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
+   X.straushm.close <- rmh(model=mod09,start=list(x.start=Xclose),
                      control=list(ptypes=c(0.75,0.25),nrep=nr,nverb=nv))
 
    # Multitype Strauss hardcore with trends for each type:

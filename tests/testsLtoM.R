@@ -345,7 +345,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.27 $  $Date: 2019/02/07 00:45:51 $
+#  $Revision: 1.28 $  $Date: 2019/04/05 09:48:27 $
 
 
 require(spatstat)
@@ -440,6 +440,14 @@ local({
     stop("nndist.lpp disagrees with nncross.lpp(iX, iY)")
   if(max(abs(d2-d3)) > eps)
     stop("Different results for nncross.lpp(iX, iY, 'dist') using R and C")
+  spatstat.options(Cnncrosslpp=FALSE)
+  w4 <- nncross(XX, XX, iX=ii, iY=ii, what="which")
+  d4 <- nncross(XX, XX, iX=ii, iY=ii, what="dist")
+  if(any(w2 != w4))
+    stop("Different results for nncross.lpp(iX, iY, 'which') fast and slow C")
+  if(max(abs(d2-d4)) > eps)
+    stop("Different results for nncross.lpp(iX, iY, 'dist') fast and slow C")
+  spatstat.options(Cnncrosslpp=TRUE)
 
   spatstat.options(op)
   reset.spatstat.options()
@@ -737,7 +745,7 @@ local({
 #' tests/mctests.R
 #' Monte Carlo tests
 #'        (mad.test, dclf.test, envelopeTest, hasenvelope)
-#' $Revision: 1.1 $ $Date: 2018/04/19 01:33:42 $
+#' $Revision: 1.2 $ $Date: 2019/06/03 10:39:31 $
 
 require(spatstat)
 local({
@@ -748,6 +756,11 @@ local({
   
   fitx <- ppm(redwood~x)
   envelopeTest(fitx, exponent=2, nsim=9, savefuns=TRUE)
+
+  envelopeTest(redwood, Lest, exponent=1, nsim=19,
+               rinterval=c(0, 0.1), alternative="greater", clamp=TRUE)
+  envelopeTest(redwood, pcf, exponent=Inf, nsim=19,
+               rinterval=c(0, 0.1), alternative="greater", clamp=TRUE)
 })
 
 #'  tests/morpho.R
