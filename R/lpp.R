@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.62 $   $Date: 2019/02/07 05:13:00 $
+#  $Revision: 1.64 $   $Date: 2019/09/12 03:07:45 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -128,9 +128,11 @@ plot.lpp <- function(x, ..., main, add=FALSE,
       if(do.plot) message("Plotting the first column of marks")
     }
   }
+  ## single plot
   ## determine space required, including legend
   P <- as.ppp(x)
-  a <- plot(P, ..., do.plot=FALSE)
+  a <- plot(P, ..., do.plot=FALSE,
+            use.marks=use.marks, which.marks=which.marks)
   if(!do.plot) return(a)
   ## initialise graphics space
   if(!add) {
@@ -479,7 +481,11 @@ affine.lpp <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
 shift.lpp <- function(X, vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "lpp")
   Y <- X
-  Y$domain <- shift(X$domain, vec=vec, ..., origin=origin)
+  Y$domain <- if(missing(vec)) {
+                shift(X$domain, ..., origin=origin)
+              } else {
+                shift(X$domain, vec=vec, ..., origin=origin)
+              }
   vec <- getlastshift(Y$domain)
   Y$data[, c("x","y")] <- shiftxy(X$data[, c("x","y")], vec=vec)
   # tack on shift vector

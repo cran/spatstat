@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.54 $   $Date: 2019/04/21 09:15:27 $
+#  $Revision: 1.56 $   $Date: 2019/09/11 09:29:52 $
 #
 #  Image/function on a linear network
 #
@@ -187,6 +187,12 @@ plot.linim <- local({
     df <- attr(x, "df")
     Llines <- as.psp(L)
     W <- as.owin(L)
+    #' ensure function values are numeric
+    vals <- try(as.numeric(df$values))
+    if(!inherits(vals, "try-error")) {
+      df$values <- vals
+    } else stop("Function values should be numeric: unable to convert them",
+                call.=FALSE)
     #' plan layout
     if(legend) {
       #' use layout procedure in plot.im
@@ -554,6 +560,10 @@ as.linnet.linim <- function(X, ...) {
   if(!missing(i) && is.lpp(i)) {
     n <- npoints(i)
     result <- vector(mode=typeof(x$v), length=n)
+    if(is.factor(x$v)) {
+      lev <- levels(x$v)
+      result <- factor(result, levels=seq_along(lev), labels=lev)
+    }
     if(n == 0) return(result)
     if(!is.null(df <- attr(x, "df"))) {
       #' use data frame of sample points along network

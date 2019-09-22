@@ -638,7 +638,7 @@ local({
 })
 #'   tests/tessera.R
 #'   Tessellation code, not elsewhere tested
-#'   $Revision: 1.4 $ $Date: 2019/03/14 03:45:58 $
+#'   $Revision: 1.6 $ $Date: 2019/08/07 06:56:16 $
 #'
 require(spatstat)
 local({
@@ -646,6 +646,7 @@ local({
   Wsub <- square(0.5)
   X <- runifpoint(7, W)
   A <- dirichlet(X)
+  marks(A) <- 1:nobjects(A)
   Z <- distmap(letterR, invert=TRUE)[letterR, drop=FALSE]
   H <- tess(xgrid=0:2, ygrid=0:3)
   #' discretisation of tiles
@@ -666,8 +667,11 @@ local({
   flay(flipxy)
   flay(shift, vec=c(1,2))
   flay(scalardilate, f=2) 
-  flay(rotate, angle=pi/3)
+  flay(rotate, angle=pi/3, centre=c(0, 0))
+  flay(rotate, angle=pi/2)
   flay(affine, mat=matrix(c(1,2,0,1), 2, 2), vec=c(1,2))
+  flay(affine, mat=diag(c(1,2)))
+  flay(as.data.frame)
   ## 
   unitname(B) <- c("metre", "metres")
   unitname(B)
@@ -676,8 +680,8 @@ local({
   print(Bsub)
   tilenames(H) <- letters[seq_along(tilenames(H))]
   #'
-  Pe <- intersect.tess(A, Wsub)
-  Pm <- intersect.tess(A, as.mask(Wsub))
+  Pe <- intersect.tess(A, Wsub, keepmarks=TRUE)
+  Pm <- intersect.tess(A, as.mask(Wsub), keepmarks=TRUE)
   b <- bdist.tiles(D)
   b <- bdist.tiles(A[c(3,5,7)])
   #'
@@ -877,12 +881,17 @@ local({
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.6 $   $Date: 2018/10/19 09:45:52 $
+#   $Revision: 1.10 $   $Date: 2019/08/07 06:16:45 $
 #
-#  Test undocumented hacks, etc
+#  Test undocumented hacks, experimental code, etc
 
 require(spatstat)
 local({
+  ## cases of 'pickoption'
+  aliases <- c(Lenin="Ulyanov", Stalin="Djugashvili", Trotsky="Bronstein")
+  surname <- "Trot"
+  pickoption("leader", surname,  aliases)
+  pickoption("leader", surname,  aliases, exact=TRUE, die=FALSE)
   ## pixellate.ppp accepts a data frame of weights
   pixellate(cells, weights=data.frame(a=1:42, b=42:1))
   ## test parts of 'rmhsnoop' that don't require interaction with user
@@ -914,10 +923,48 @@ local({
   ##
   A <- Strauss(0.1)
   A <- reincarnate.interact(A)
+  ##
+  ## special lists
+  B <- solist(a=cells, b=redwood, c=japanesepines)
+  BB <- as.ppplist(B)
+  BL <- as.layered(B)
+  DB <- as.imlist(lapply(B, density))
+  is.solist(B)
+  is.ppplist(B)
+  is.imlist(DB)
+  ## case of density.ppplist 
+  DEB <- density(BB, se=TRUE)
+  
+  ## fft
+  z <- matrix(1:16, 4, 4)
+  a <- fft2D(z, west=FALSE)
+  if(fftwAvailable())
+    b <- fft2D(z, west=TRUE)
+
+  ## experimental interactions
+  pot <- function(d, par) { d <= 0.1 }
+  Saturated(pot)
+  ppm(amacrine ~ x, Saturated(pot), rbord=0.1)
+
+  ## infrastructure of iplot, istat
+  fakepanel <- list(x=redwood,
+                    xname="redwood",
+                    envel="none",
+                    stat="data",
+                    sigma=0.08,
+                    pcfbw=0.01,
+                    simx=rpoispp(ex=redwood, nsim=39))
+  a <- do.istat(fakepanel)
+  for(envel in c("none", "pointwise", "simultaneous")) {
+    fakepanel$envel <- envel
+    for(stat in c("density",
+                  "Kest", "Lest", "pcf",
+                  "Kinhom", "Linhom", "Fest", "Gest", "Jest")) {
+      fakepanel$stat <- stat
+      a <- do.istat(fakepanel)
+    }
+  }
 })
-
-
-
 
 ##
 ##  tests/updateppm.R

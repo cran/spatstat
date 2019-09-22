@@ -18,25 +18,25 @@ sversion <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
 
 
 ###################################################
-### code chunk number 3: shapefiles.Rnw:109-110 (eval = FALSE)
+### code chunk number 3: shapefiles.Rnw:140-141 (eval = FALSE)
 ###################################################
 ## library(maptools)
 
 
 ###################################################
-### code chunk number 4: shapefiles.Rnw:114-115 (eval = FALSE)
+### code chunk number 4: shapefiles.Rnw:145-146 (eval = FALSE)
 ###################################################
 ## x <- readShapeSpatial("mydata.shp")
 
 
 ###################################################
-### code chunk number 5: shapefiles.Rnw:125-126 (eval = FALSE)
+### code chunk number 5: shapefiles.Rnw:156-157 (eval = FALSE)
 ###################################################
 ## class(x)
 
 
 ###################################################
-### code chunk number 6: shapefiles.Rnw:143-147
+### code chunk number 6: shapefiles.Rnw:174-178
 ###################################################
 baltim <- columbus <- fylk <- list()
 class(baltim) <- "SpatialPointsDataFrame"
@@ -45,7 +45,7 @@ class(fylk) <- "SpatialLinesDataFrame"
 
 
 ###################################################
-### code chunk number 7: shapefiles.Rnw:149-153 (eval = FALSE)
+### code chunk number 7: shapefiles.Rnw:180-184 (eval = FALSE)
 ###################################################
 ## setwd(system.file("shapes", package="maptools"))
 ## baltim   <- readShapeSpatial("baltim.shp")
@@ -54,7 +54,7 @@ class(fylk) <- "SpatialLinesDataFrame"
 
 
 ###################################################
-### code chunk number 8: shapefiles.Rnw:155-158
+### code chunk number 8: shapefiles.Rnw:186-189
 ###################################################
 class(baltim)
 class(columbus)
@@ -62,38 +62,38 @@ class(fylk)
 
 
 ###################################################
-### code chunk number 9: shapefiles.Rnw:186-187 (eval = FALSE)
+### code chunk number 9: shapefiles.Rnw:217-218 (eval = FALSE)
 ###################################################
 ## X <- X[W]
 
 
 ###################################################
-### code chunk number 10: shapefiles.Rnw:204-205 (eval = FALSE)
+### code chunk number 10: shapefiles.Rnw:235-236 (eval = FALSE)
 ###################################################
 ## y <- as(x, "ppp")
 
 
 ###################################################
-### code chunk number 11: shapefiles.Rnw:220-222 (eval = FALSE)
+### code chunk number 11: shapefiles.Rnw:251-253 (eval = FALSE)
 ###################################################
 ## balt <- as(baltim, "ppp")
 ## bdata <- slot(baltim, "data")
 
 
 ###################################################
-### code chunk number 12: shapefiles.Rnw:270-271 (eval = FALSE)
+### code chunk number 12: shapefiles.Rnw:301-302 (eval = FALSE)
 ###################################################
 ## out <- lapply(x@lines, function(z) { lapply(z@Lines, as.psp) })
 
 
 ###################################################
-### code chunk number 13: shapefiles.Rnw:284-285 (eval = FALSE)
+### code chunk number 13: shapefiles.Rnw:315-316 (eval = FALSE)
 ###################################################
 ## curvegroup <- lapply(out, function(z) { do.call("superimpose", z)})
 
 
 ###################################################
-### code chunk number 14: shapefiles.Rnw:328-332 (eval = FALSE)
+### code chunk number 14: shapefiles.Rnw:359-363 (eval = FALSE)
 ###################################################
 ## out <- lapply(x@lines, function(z) { lapply(z@Lines, as.psp) })
 ## dat <- x@data
@@ -102,7 +102,7 @@ class(fylk)
 
 
 ###################################################
-### code chunk number 15: shapefiles.Rnw:357-359
+### code chunk number 15: shapefiles.Rnw:388-390
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 data(chorley)
@@ -110,7 +110,7 @@ plot(as.owin(chorley), lwd=3, main="polygon")
 
 
 ###################################################
-### code chunk number 16: shapefiles.Rnw:372-374
+### code chunk number 16: shapefiles.Rnw:403-405
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 data(demopat)
@@ -118,7 +118,7 @@ plot(as.owin(demopat), col="blue", main="polygonal region")
 
 
 ###################################################
-### code chunk number 17: shapefiles.Rnw:410-413 (eval = FALSE)
+### code chunk number 17: shapefiles.Rnw:441-444 (eval = FALSE)
 ###################################################
 ## regions <- slot(x, "polygons")
 ## regions <- lapply(regions, function(x) { SpatialPolygons(list(x)) })
@@ -126,19 +126,19 @@ plot(as.owin(demopat), col="blue", main="polygonal region")
 
 
 ###################################################
-### code chunk number 18: shapefiles.Rnw:418-419 (eval = FALSE)
+### code chunk number 18: shapefiles.Rnw:449-450 (eval = FALSE)
 ###################################################
 ## te <- tess(tiles=windows)
 
 
 ###################################################
-### code chunk number 19: shapefiles.Rnw:459-460 (eval = FALSE)
+### code chunk number 19: shapefiles.Rnw:490-491 (eval = FALSE)
 ###################################################
 ## y <- as(x, "SpatialPolygons")
 
 
 ###################################################
-### code chunk number 20: shapefiles.Rnw:470-474 (eval = FALSE)
+### code chunk number 20: shapefiles.Rnw:501-505 (eval = FALSE)
 ###################################################
 ## cp      <- as(columbus, "SpatialPolygons")
 ## cregions <- slot(cp, "polygons")
@@ -147,14 +147,14 @@ plot(as.owin(demopat), col="blue", main="polygonal region")
 
 
 ###################################################
-### code chunk number 21: shapefiles.Rnw:484-486 (eval = FALSE)
+### code chunk number 21: shapefiles.Rnw:515-517 (eval = FALSE)
 ###################################################
 ## ch <- hyperframe(window=cwindows)
 ## ch <- cbind.hyperframe(ch, columbus@data)
 
 
 ###################################################
-### code chunk number 22: shapefiles.Rnw:506-508 (eval = FALSE)
+### code chunk number 22: shapefiles.Rnw:537-539 (eval = FALSE)
 ###################################################
 ##   y <- as(x, "im")
 ##   ylist <- lapply(slot(x, "data"), function(z, y) { y[,] <- z; y }, y=y)

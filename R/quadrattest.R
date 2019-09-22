@@ -1,7 +1,7 @@
 #
 #   quadrattest.R
 #
-#   $Revision: 1.55 $  $Date: 2019/02/18 07:43:31 $
+#   $Revision: 1.62 $  $Date: 2019/08/31 05:07:15 $
 #
 
 quadrat.test <- function(X, ...) {
@@ -13,7 +13,7 @@ quadrat.test.ppp <-
            alternative = c("two.sided", "regular", "clustered"),
            method = c("Chisq", "MonteCarlo"),
            conditional=TRUE, CR=1,
-           lambda=NULL, 
+           lambda=NULL, df.est=NULL,
            ...,
            xbreaks=NULL, ybreaks=NULL,
            tess=NULL, nsim=1999)
@@ -28,6 +28,7 @@ quadrat.test.ppp <-
                                 conditional=conditional,
                                 CR=CR,
                                 fit=lambda,
+                                df.est=df.est,
                                 xbreaks=xbreaks, ybreaks=ybreaks,
                                 tess=tess,
                                 nsim=nsim),
@@ -47,7 +48,7 @@ quadrat.test.ppm <-
   function(X, nx=5, ny=nx,
            alternative = c("two.sided", "regular", "clustered"),      
            method=c("Chisq", "MonteCarlo"),
-           conditional=TRUE, CR=1, ...,
+           conditional=TRUE, CR=1, df.est=NULL, ...,
            xbreaks=NULL, ybreaks=NULL,
            tess=NULL, nsim=1999)
 {
@@ -67,7 +68,8 @@ quadrat.test.ppm <-
                                 xbreaks=xbreaks, ybreaks=ybreaks,
                                 tess=tess,
                                 nsim=nsim, 
-                                fit=X),
+                                fit=X,
+                                df.est=df.est),
                            list(...),
                            list(Xname=dataname, fitname=fitname)))
 }
@@ -77,7 +79,7 @@ quadrat.test.quadratcount <-
            alternative = c("two.sided", "regular", "clustered"),
            method=c("Chisq", "MonteCarlo"),
            conditional=TRUE, CR=1,
-           lambda=NULL, 
+           lambda=NULL, df.est=NULL,
            ...,
            nsim=1999) {
    trap.extra.arguments(...)
@@ -85,7 +87,7 @@ quadrat.test.quadratcount <-
    alternative <- match.arg(alternative)
    quadrat.testEngine(Xcount=X,
                       alternative=alternative,
-                      fit=lambda,
+                      fit=lambda, df.est=df.est,
                       method=method, conditional=conditional, CR=CR, nsim=nsim)
 }
 
@@ -97,7 +99,8 @@ quadrat.testEngine <- function(X, nx, ny,
                                nsim=1999,
                                Xcount=NULL,
                                xbreaks=NULL, ybreaks=NULL, tess=NULL,
-                               fit=NULL, Xname=NULL, fitname=NULL) {
+                               fit=NULL, df.est=NULL,
+                               Xname=NULL, fitname=NULL) {
   trap.extra.arguments(...)
   method <- match.arg(method)
   alternative <- match.arg(alternative)
@@ -105,17 +108,14 @@ quadrat.testEngine <- function(X, nx, ny,
     check.1.real(nsim)
     explain.ifnot(nsim > 0)
   }
+  if(!is.null(df.est)) check.1.integer(df.est)
   if(is.null(Xcount))
     Xcount <- quadratcount(X, nx=nx, ny=ny, xbreaks=xbreaks, ybreaks=ybreaks,
                            tess=tess)
   tess <- attr(Xcount, "tess")
-  testname <- switch(method,
-                     Chisq = "Chi-squared test",
-                     MonteCarlo = paste(
-                       if(conditional) "Conditional" else "Unconditional",
-                       "Monte Carlo test")
-                     )
-  # determine expected values under model
+  
+  ## determine expected values under model
+  normalised <- FALSE
   if(is.null(fit)) {
     nullname <- "CSR"
     if(tess$type == "rect") 
@@ -123,6 +123,7 @@ quadrat.testEngine <- function(X, nx, ny,
     else 
       areas <- unlist(lapply(tiles(tess), area))
     fitmeans <- sum(Xcount) * areas/sum(areas)
+    normalised <- TRUE
     df <- switch(method,
                  Chisq      = length(fitmeans) - 1,
                  MonteCarlo = NULL)
@@ -131,8 +132,9 @@ quadrat.testEngine <- function(X, nx, ny,
     fit <- as.im(fit, W=Window(tess))
     areas <- integral(fit, tess)
     fitmeans <- sum(Xcount) * areas/sum(areas)
+    normalised <- TRUE
     df <- switch(method,
-                 Chisq      = length(fitmeans) - 1,
+                 Chisq      = length(fitmeans) - df.est %orifnull% 1,
                  MonteCarlo = NULL)    
   } else {
     if(!is.ppm(fit))
@@ -156,14 +158,12 @@ quadrat.testEngine <- function(X, nx, ny,
                                           weights=masses)
       fitmeans <- as.vector(t(fitmeans))
     } else {
-      U <- as.ppp(Q)
-      V <- marks(cut(U, tess), dfok=FALSE)
-      fitmeans <- tapply(masses, list(tile=V), sum)
-      fitmeans[is.na(fitmeans)] <- 0
+      V <- tileindex(as.ppp(Q), Z=tess)
+      fitmeans <- tapplysum(masses, list(tile=V))
     }
     switch(method,
            Chisq = {
-             df <- length(fitmeans) - length(coef(fit))
+             df <- length(fitmeans) - df.est %orifnull% length(coef(fit))
              if(df < 1)
                stop(paste("Not enough quadrats: degrees of freedom df =", df))
            },
@@ -171,31 +171,58 @@ quadrat.testEngine <- function(X, nx, ny,
              df <- NA
            })
   }
+
+  ## assemble data for test
+  
   OBS <- as.vector(t(as.table(Xcount)))
   EXP <- as.vector(fitmeans)
-  testname <- paste(testname, "of", nullname, "using quadrat counts")
 
-  testname <- c(testname, CressieReadName(CR))
+  if(!normalised)
+    EXP <- EXP * sum(OBS)/sum(EXP)
 
+  ## label it
+  switch(method,
+         Chisq = {
+           if(CR == 1) {
+             testname <- "Chi-squared test"
+             reference <- statname <- NULL
+           } else {
+             testname <- CressieReadTestName(CR)
+             statname <- paste("Test statistic:", CressieReadName(CR))
+             reference <- "(p-value obtained from chi-squared distribution)"
+           }
+         },
+         MonteCarlo = {
+           testname <- paste(if(conditional) "Conditional" else "Unconditional",
+                             "Monte Carlo test")
+           statname <- paste("Test statistic:", CressieReadName(CR))
+           reference <- NULL
+         })
+  testblurb <- paste(testname, "of", nullname, "using quadrat counts")
+  testblurb <- c(testblurb, statname, reference)
+
+  #' perform test
   result <- X2testEngine(OBS, EXP,
                          method=method, df=df, nsim=nsim,
                          conditional=conditional, CR=CR,
                          alternative=alternative,
-                         testname=testname, dataname=Xname)
+                         testname=testblurb, dataname=Xname)
 
   class(result) <- c("quadrattest", class(result))
   attr(result, "quadratcount") <- Xcount
   return(result)
 }
 
-CressieReadStatistic <- function(OBS, EXP, lambda=1) {
+CressieReadStatistic <- function(OBS, EXP, lambda=1,
+                                 normalise=FALSE, named=TRUE) {
+  if(normalise) EXP <- sum(OBS) * EXP/sum(EXP)
   y <- if(lambda == 1) sum((OBS - EXP)^2/EXP) else
        if(lambda == 0) 2 * sum(ifelse(OBS > 0, OBS * log(OBS/EXP), 0)) else
        if(lambda == -1) 2 * sum(EXP * log(EXP/OBS)) else
        (2/(lambda * (lambda + 1))) * sum(ifelse(OBS > 0,
                                                 OBS * ((OBS/EXP)^lambda - 1),
                                                 0))
-  names(y) <- CressieReadSymbol(lambda)
+  names(y) <- if(named) CressieReadSymbol(lambda) else NULL
   return(y)
 }
 
@@ -220,13 +247,26 @@ CressieReadName <- function(lambda) {
         )
 }
 
+CressieReadTestName <- function(lambda) {
+  if(lambda == 1) "Chi-squared test" else
+  if(lambda == 0) "Likelihood ratio test" else
+  if(lambda == -1/2) "Freeman-Tukey test" else
+  if(lambda == -1) "Modified likelihood ratio test" else
+  if(lambda == -2) "Neyman modified chi-squared test" else
+  paste("Cressie-Read power divergence test",
+        paren(paste("lambda =",
+                    if(abs(lambda - 2/3) < 1e-7) "2/3" else lambda)
+              )
+        )
+}
+
 X2testEngine <- function(OBS, EXP, ...,
                          method=c("Chisq", "MonteCarlo"),
                          CR=1,
-                         df=NULL, nsim=NULL, 
+                         df=NULL, nsim=NULL,
                          conditional, alternative, testname, dataname) {
   method <- match.arg(method)
-  if(method == "Chisq" & any(EXP < 5)) 
+  if(method == "Chisq" && any(EXP < 5)) 
     warning(paste("Some expected counts are small;",
                   "chi^2 approximation may be inaccurate"),
             call.=FALSE)
@@ -253,7 +293,8 @@ X2testEngine <- function(OBS, EXP, ...,
              ne <- length(EXP)
              SIM  <- matrix(rpois(nsim*ne,EXP),nrow=ne)
            }
-           simstats <- apply(SIM, 2, CressieReadStatistic, EXP=EXP)
+           simstats <- apply(SIM, 2, CressieReadStatistic,
+                             EXP=EXP, lambda=CR, normalise=!conditional)
            if(anyDuplicated(simstats))
              simstats <- jitter(simstats)
            phi <- (1 + sum(simstats >= X2))/(1+nsim)

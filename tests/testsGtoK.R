@@ -40,7 +40,7 @@ local({
 #
 # test "[.hyperframe" etc
 #
-#  $Revision: 1.4 $  $Date: 2018/05/15 14:20:38 $
+#  $Revision: 1.5 $  $Date: 2019/09/11 11:33:37 $
 #
 
 require(spatstat)
@@ -61,6 +61,16 @@ local({
   str(h)
   head(h)
   tail(h)
+
+  rn <- rownames(h)
+  r.n <- row.names(h)
+  if(!identical(rn, r.n))
+    stop("rownames and row.names conflict for hyperframes")
+
+  dn <- dimnames(h)
+  dimnames(h) <- dn
+  dimnames(h)[[2]][2] <- "copacetic"
+  dimnames(h)[[1]][2] <- "second"
 })
 
 
@@ -84,11 +94,22 @@ local({
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.17 $   $Date: 2019/02/19 04:49:41 $
+#   $Revision: 1.19 $   $Date: 2019/08/31 05:30:31 $
 #
 
 require(spatstat)
 local({
+  #' cases of 'im' data
+  tab <- table(sample(factor(letters[1:10]), 30, replace=TRUE))
+  b <- im(tab, xrange=c(0,1), yrange=c(0,10))
+  b <- update(b)
+
+  mat <- matrix(sample(0:4, 12, replace=TRUE), 3, 4)
+  levels(mat) <- 0:4
+  b <- im(mat)
+  b <- update(b)
+
+  #' various manipulations
   AA <- A <- as.im(owin())
   BB <- B <- as.im(owin(c(1.1, 1.9), c(0,1)))
   Z <- imcov(A, B)
@@ -98,6 +119,7 @@ local({
   Frame(BB) <- Frame(A)
   
   ## handling images with 1 row or column
+  
   ycov <- function(x, y) y
   E <- as.im(ycov, owin(), dimyx = c(2,1))
   G <- cut(E, 2)
@@ -147,9 +169,9 @@ local({
   hh <- d[2:4, 3:5, rescue=TRUE]
   if(!is.im(hh)) stop("rectangle was not rescued in [.im")
   ## cases of "[<-.im"
+  d[,] <- d[] + 1
   d[Empty] <- 42
   d[EmptyFun] <- 42
-  
   ## smudge() and rasterfilter()
   dd <- smudge(d)
 
@@ -185,11 +207,21 @@ local({
   ZS <- shift(Z, origin="centroid")
   ZS <- shift(Z, origin="bottomleft")
 
-  plot(Z, ribside="left")
-  plot(Z, ribside="top")
-  
   h <- hist(Z)
   plot(h)
+
+  #' plot.im code blocks
+  plot(Z, ribside="left")
+  plot(Z, ribside="top")
+  plot(Z, clipwin=square(0.5))
+  plot(Z - mean(Z), log=TRUE)
+
+  #' handling and plotting of character and factor images
+  Afactor    <- as.im(col2hex("green"), letterR, na.replace=col2hex("blue"))
+  Acharacter <- as.im(col2hex("green"), letterR, na.replace=col2hex("blue"),
+                      stringsAsFactors=FALSE)
+  plot(Afactor)
+  plot(Acharacter, valuesAreColours=TRUE)
 
   #' safelookup (including extrapolation case)
   Z <- as.im(function(x,y) { x - y }, letterR)
@@ -325,7 +357,7 @@ local({
 #'
 #'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.23 $  $Date: 2019/06/23 03:00:51 $
+#'   $Revision: 1.26 $  $Date: 2019/08/01 06:32:48 $
 #'
 
 require(spatstat)
@@ -371,13 +403,15 @@ local({
   Off <- split(amacrine)$off
   K4 <- Kcross.inhom(amacrine, lambdaI=ppm(On), lambdaJ=ppm(Off))
   K5 <- Kcross.inhom(amacrine, correction="bord.modif")
-  #' Kmark, markcorr
+  #' Kmark (=markcorrint)
   X <- runifpoint(100) %mark% runif(100)
   km <- Kmark(X, f=atan2)
   km <- Kmark(X, f1=sin)
   km <- Kmark(X, f="myfun")
-  Y <- X %mark% data.frame(u=runif(100), v=runif(100))
-  mk <- markcorr(Y)
+  aa <- Kmark(X, normalise=FALSE, returnL=FALSE)
+  aa <- Kmark(X, normalise=FALSE, returnL=TRUE)
+  aa <- Kmark(X, normalise=TRUE,  returnL=FALSE)
+  aa <- Kmark(X, normalise=TRUE,  returnL=TRUE)
   #'
   rr <- rep(0.1, npoints(cells))
   eC <- edge.Ripley(cells, rr)
@@ -436,6 +470,27 @@ local({
   a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=fat)
   a <- localLcross.inhom(amacrine, from="off", to="on",
                          lambdaFrom=Lum[moff], lambdaTo=Lum[!moff])
+  a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=Zed,
+                         correction="none")
+  a <- localLcross.inhom(amacrine, from="off", to="on", lambdaX=Zed,
+                         correction="translate")
+  #'
+  #' cases of resolve.lambda.cross
+  #'
+  h <- resolve.lambda.cross(amacrine, moff, !moff)
+  h <- resolve.lambda.cross(amacrine, moff, !moff, lambdaX=Zed)
+  h <- resolve.lambda.cross(amacrine, moff, !moff, lambdaX=Lum)
+  h <- resolve.lambda.cross(amacrine, moff, !moff, lambdaX=fat)
+  h <- resolve.lambda.cross(amacrine, moff, !moff, lambdaX=fat, update=FALSE)
+  h <- resolve.lambda.cross(amacrine, moff, !moff,
+                            lambdaI=Zed[["off"]], lambdaJ=Zed[["on"]])
+  h <- resolve.lambda.cross(amacrine, moff, !moff,
+                            lambdaI=Lum[moff], lambdaJ=Lum[!moff])
+  h <- resolve.lambda.cross(amacrine, moff, !moff,
+                            lambdaI=fat, lambdaJ=fat)
+  h <- resolve.lambda.cross(amacrine, moff, !moff,
+                            lambdaI=fat, lambdaJ=fat,
+                            update=FALSE)
   #'
   #'   lohboot code blocks
   #'
@@ -506,7 +561,7 @@ local({
 #
 # tests/kppm.R
 #
-# $Revision: 1.28 $ $Date: 2019/04/05 09:27:59 $
+# $Revision: 1.30 $ $Date: 2019/08/14 03:14:55 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -689,8 +744,18 @@ local({
   #' cover a few code blocks
   fut <- kppm(redwood ~ x, method="clik")
   summary(fut)
+  a <- residuals(fut)
   fut2 <- kppm(redwood ~ x, "LGCP", method="palm")
   summary(fut2)
+  b <- residuals(fut2)
+  #'
+  po <- ppm(redwood ~ 1)
+  A <- kppmComLik(redwood, Xname="redwood", po=po, clusters="Thomas",
+                  statistic="pcf", statargs=list(), control=list(),
+                  weightfun=NULL, rmax=0.1)
+  A <- kppmPalmLik(redwood, Xname="redwood", po=po, clusters="Thomas",
+                   statistic="pcf", statargs=list(), control=list(),
+                   weightfun=NULL, rmax=0.1)
 })
 
 reset.spatstat.options()

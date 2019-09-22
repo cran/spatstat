@@ -1,4 +1,188 @@
 
+        CHANGES IN spatstat VERSION 1.61-0
+
+OVERVIEW
+
+    o We thank Jordan Brown, Tilman Davies and Greg McSwiggan for contributions.
+    
+    o Fast kernel estimation on a linear network using 2D kernels.
+
+    o Nonparametric maximum likelihood estimation of 'rho'.
+
+    o Extension of Scott's rule for bandwidth selection.
+
+    o Cross-validated bandwidth selection on a linear network.
+
+    o More support for character-valued images.
+
+    o Random thinning of clumps.
+
+    o Bug fixes and minor improvements.
+
+    o Nickname: 'Puppy zoomies'
+    
+NEW FUNCTIONS
+
+    o densityQuick.lpp
+    Fast kernel estimator of point process intensity on a network
+    using 2D smoothing kernel.
+
+    o bw.scott.iso
+    Isotropic version of Scott's rule (for point patterns in any dimension).
+
+    o data.lppm
+    Extract the original data point pattern from a fitted model of class 'lppm'.
+
+    o rthinclumps
+    Divide a spatial region into clumps and randomly delete some of them.
+
+    o dimnames.hyperframe, dimnames<-.hyperframe
+    Methods for extracting and changing the 'dimnames' of a hyperframe.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o rhohat
+    Estimation by nonparametric maximum likelihood is now supported,
+    assuming the intensity is a monotone function of the covariate.
+    New options: smoother="increasing" and smoother="decreasing".
+    
+    o density.lpp
+    New argument 'distance' offers a choice of different kernel methods.
+
+    o bw.scott
+    Now handles point patterns of any dimension.
+    New arguments 'isotropic' and 'd'.
+
+    o bw.ppl
+    New argument 'shortcut' allows faster computation.
+    Additional arguments '...' are now passed to density.ppp.
+    
+    o [<-.im
+    New argument 'drop' controls behaviour when indices are missing
+    as in 'x[] <- value'
+
+    o mppm
+    Now supports 'self-starting' interactions.
+
+    o as.im
+    New argument 'stringsAsFactors' is recognised by many methods.
+    It enables the creation of character-string-valued images.
+
+    o plot.im
+    Axes are now prevented from extending outside the image rectangle.
+
+    o plot.im
+    New argument 'zap'.
+
+    o blur
+    New argument 'kernel'.
+    
+    o Smooth.im
+    New argument 'kernel'.
+
+    o quadrat.test
+    New argument 'df.est'.
+
+    o edge.Ripley
+    Numerical stability has been improved on some platforms.
+    Results may have changed in marginal cases (e.g. where the circle
+    of radius r centred at X is tangent to an edge of the polygonal window). 
+    
+    o rownames, rownames<-, colnames, colnames<-
+    These operations now work for hyperframes.
+    
+    o quadrat.test
+    Improved labelling of test when argument 'CR' is given.
+
+    o plot.pppmatching
+    This existing function now has a help file.
+    New argument 'adjust'.
+
+    o solist, is.sob, lintess
+    Objects of class 'lintess' are now recognised as 2D spatial objects
+    for the purposes of solist() and is.sob().
+    
+    o as.linfun.lintess
+    Functions created by as.linfun.lintess() now generate better output
+    when the function is printed.
+
+BUG FIXES
+
+    o densityVoronoi.lpp
+    Did not correctly handle patterns containing duplicated points.
+    Fixed.
+
+    o quadrat.test
+    Argument 'CR' was ignored when method="MonteCarlo".
+    Fixed.
+    
+    o localKcross.inhom, localLcross.inhom
+    Argument lambdaX was ignored.
+    Fixed.
+
+    o "[.linim"
+    Factor values were erroneously converted to integers, in some cases.
+    Fixed.
+
+    o "[<-.hyperframe"
+    Did not handle some classes of objects correctly.
+    Fixed.
+
+    o effectfun
+    In a multitype point process model, effectfun() ignored any
+    user-specified value of 'marks'.
+    Fixed.
+
+    o as.linim.linfun
+    Additional arguments (other than spatial coordinates) were ignored.
+    Fixed.
+
+    o plot.solist
+    Display output was mangled if one entry in the list was
+    an object that would normally generate multiple panels of graphics,
+    such as an 'lpp' or 'tess' object with multiple columns of marks,
+    or a marked 'msr', 'leverage.ppm' or 'influence.ppm' object.
+    Fixed.
+
+    o plot.lpp
+    Return value was mangled when x had multiple columns of marks.
+    Fixed.
+    
+    o colourtable
+    Crashed in some cases when 'breaks' was given.
+    Fixed.
+    
+    o rLGCP
+    Crashed if 'win' was not a rectangle and 'mu' was not a constant.
+    Fixed.
+
+    o intersect.tess
+    Crashed if 'Y' was a window object and 'keepmarks=TRUE'.
+    Fixed.
+
+    o envelope.lppm
+    Crashed if argument 'simulate' was given.
+    Fixed.
+
+    o unstack.solist
+    Did not correctly handle objects of class 'lintess'.
+    
+    o unstack.solist
+    Did not correctly handle objects of class 'tess' if they had multiple
+    columns of marks.
+    
+    o plot.pppmatching
+    Issued spurious warnings about unrecognised plot arguments.
+    Fixed.
+
+    o plot.lintess
+    Issued spurious warnings about unrecognised plot arguments.
+    Fixed.
+
+    o shift.lpp, rotate.lpp
+    Issued spurious warnings if argument 'origin' was given.
+    Fixed.
+
         CHANGES IN spatstat VERSION 1.60-1
 
 OVERVIEW

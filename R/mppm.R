@@ -1,7 +1,7 @@
 #
 # mppm.R
 #
-#  $Revision: 1.85 $   $Date: 2017/12/10 03:47:42 $
+#  $Revision: 1.90 $   $Date: 2019/09/10 02:11:48 $
 #
 
 mppm <- local({
@@ -136,14 +136,16 @@ mppm <- local({
     if(Yclass == "ppp") {
       ## convert to quadrature schemes, for efficiency's sake
       Y <- solapply(Y, quadscheme)
-    } else {
-      if(Yclass != "quad")
-        stop(paste("Column", dQuote(Yname), "of data",
-                   "does not consist of point patterns (class ppp)",
-                   "nor of quadrature schemes (class quad)"))
+      ## Ydescrip <- "point patterns" ## not used
+    } else if(Yclass == "quad") {
       Y <- as.solist(Y)
+      ## Ydescrip <- "quadrature schemes" ## not used
+    } else {
+      stop(paste("Column", dQuote(Yname), "of data",
+                 "does not consist of point patterns (class ppp)",
+                 "nor of quadrature schemes (class quad)"),
+           call.=FALSE)
     }
-  
     ## Extract sub-hyperframe of data named in formulae
     datanames <- names(data)
     used.cov.names <- allvars[allvars %in% datanames]
@@ -270,6 +272,8 @@ mppm <- local({
       ## now the nontrivial interaction terms
       for(j in (1:ninteract)[iused & !trivial]) {
         inter <- interaction[i,j,drop=TRUE]
+        if(!is.null(ss <- inter$selfstart)) 
+          interaction[i,j] <- inter <- ss(Yi$data, inter)
         prepj <- bt.frame(Yi, ~1, inter, ..., covariates=covariates,
                           allcovar=TRUE, use.gam=use.gam,
                           vnamebase=itags[j], vnameprefix=itags[j])
@@ -529,6 +533,8 @@ mppm <- local({
 
   allpoisson <- function(x) all(sapply(x, is.poisson.interact))
 
+  marklevels <- function(x) { levels(marks(x)) }
+  
   errorInconsistentRows <- function(what, offending) {
     stop(paste("There are inconsistent",
                what,

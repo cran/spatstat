@@ -1,18 +1,10 @@
 ##
 ## bw.diggle.R
 ##
-## bandwidth selection rules bw.diggle and bw.scott (for density.ppp)
+## bandwidth selection rule bw.diggle (for density.ppp)
 ##
-## $Revision: 1.5 $ $Date: 2017/06/05 10:31:58 $
+## $Revision: 1.6 $ $Date: 2019/07/22 11:40:05 $
 ##
-
-bw.scott <- function(X) {
-  stopifnot(is.ppp(X))
-  n <- npoints(X)
-  sdx <- sqrt(var(X$x))
-  sdy <- sqrt(var(X$y))
-  return(c(sigma.x=sdx, sigma.y=sdy) * n^(-1/6))
-}
 
 bw.diggle <- local({
 

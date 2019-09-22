@@ -108,6 +108,8 @@
 \alias{default.n.tiling}
 \alias{default.ntile}
 \alias{deltasuffstat}
+\alias{dimnames.hyperframe}
+\alias{dimnames<-.hyperframe}
 \alias{DoCountCrossEnds}
 \alias{DoCountEnds}
 \alias{Deviation}
@@ -422,7 +424,6 @@
 \alias{plot.minconfit}
 \alias{plot.parres}
 \alias{plot.plotpairsim}
-\alias{plot.pppmatching}
 \alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{plot.spatialcdf}
@@ -526,6 +527,7 @@
 \alias{print.yardstick}
 \alias{project3Dhom}
 \alias{putlastshift}
+\alias{qkdeEngine}
 \alias{qtPrepareCoordinate}
 \alias{quad}
 \alias{quad.mppm}
@@ -543,6 +545,7 @@
 \alias{replacementIndex}
 \alias{representativeRows}
 \alias{resolveEinfo}
+\alias{resolve.foxall.window}
 \alias{resolve.vargamma.shape}
 \alias{resolve.lambda}
 \alias{resolve.lambda.cross}
@@ -695,6 +698,7 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unstackFilter}
+\alias{unstack.lintess}
 \alias{update.im}
 \alias{update.ippm}
 \alias{update.msr}
@@ -882,7 +886,7 @@ col.args.to.grey(x, \dots)
 commonPolyclipArgs(\dots, p)
 conform.imagelist(X, Zlist)
 countingweights(id, areas, check = TRUE)
-CressieReadStatistic(OBS,EXP,lambda)
+CressieReadStatistic(OBS,EXP,lambda,normalise,named)
 CressieReadSymbol(lambda)
 CressieReadName(lambda)
 cutoff2Dkernel(kernel, sigma, varcov, \dots, scalekernel, cutoff, fatal)
@@ -899,6 +903,8 @@ default.ntile(X)
 deltasuffstat(model, \dots,
               restrict, dataonly, sparseOK, quadsub,
               force, warn.forced, verbose, use.special)
+\method{dimnames}{hyperframe}(x)
+\method{dimnames}{hyperframe}(x) <- value
 DoCountEnds(X, D, toler)
 DoCountCrossEnds(X, I, J, DIJ, toler)
 Deviation(x, ref, leaveout, n, xi)
@@ -1302,7 +1308,6 @@ plotPolygonBdry(x, \dots)
 \method{plot}{lurk}(x, \dots, shade)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
-\method{plot}{pppmatching}(x, addmatch = NULL, main = NULL, \dots)
 \method{plot}{plotpairsim}(x, \dots)
 \method{plot}{profilepl}(x, \dots, add, main, tag, coeff, xvariable,
                          col, lty, lwd, col.opt, lty.opt, lwd.opt)
@@ -1419,6 +1424,10 @@ prepareTitle(main)
 \method{print}{yardstick}(x, \dots)
 project3Dhom(xyz, eye, org, vert)
 putlastshift(X, vec)
+qkdeEngine(X, sigma, \dots, at, what,
+           leaveoneout, diggle, raw, edge2D, edge,
+           weights, varcov, positive, shortcut,
+           precomputed, savecomputed) 
 qtPrepareCoordinate(covname, W, origin)
 quad(data, dummy, w, param)
 quad.mppm(x)
@@ -1436,7 +1445,8 @@ repair.image.xycoords(x)
 replacementIndex(ii, stuff)
 representativeRows(x)
 resolveEinfo(x, what, fallback, warn, atomic)
-resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default = FALSE)
+resolve.foxall.window(X, Y, W)
+resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default)
 resolve.lambda(X, lambda, \dots, sigma, varcov, leaveoneout, update)
 resolve.lambda.cross(X, I, J, lambdaI, lambdaJ, \dots, lambdaX,
                      sigma, varcov, leaveoneout, update, lambdaIJ,
@@ -1464,7 +1474,7 @@ roseContinuous(ang, rad, unit, \dots,
                start, clockwise, main, labels, at, do.plot)
 ruletextline(ch, n, terse)
 quadrat.testEngine(X, nx, ny, alternative, method, conditional, CR, 
-     \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, Xname, fitname)
+     \dots, nsim, Xcount, xbreaks, ybreaks, tess, fit, df.est, Xname, fitname)
 quadscheme.replicated(data, dummy, method, \dots)
 quadscheme.spatial(data, dummy, method, \dots)
 pointgrid(W, ngrid)
@@ -1623,6 +1633,7 @@ x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unstackFilter(x)
+\method{unstack}{lintess}(x, \dots)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
 \method{update}{msr}(object, \dots) 

@@ -3,7 +3,7 @@
 #'
 #'    densityVoronoi.lpp
 #'
-#'    $Revision: 1.10 $  $Date: 2019/03/21 03:01:49 $
+#'    $Revision: 1.12 $  $Date: 2019/08/12 08:34:19 $
 #' 
 
 densityVoronoi.lpp <- function(X, f = 1, ..., nrep = 1, verbose = TRUE){
@@ -29,9 +29,18 @@ densityVoronoi.lpp <- function(X, f = 1, ..., nrep = 1, verbose = TRUE){
   }
   if(f == 1) {
     #' Voronoi estimate
-    tes <- lineardirichlet(X)
+    if(!anyDuplicated(X)) {
+      tes <- lineardirichlet(X)
+      num <- 1
+    } else {
+      um <- uniquemap(X)
+      first <- (um == seq_along(um))
+      UX <- X[first]
+      tes <- lineardirichlet(UX)
+      num <- as.integer(table(factor(um, levels=um[first])))
+    }
     v <- tile.lengths(tes)
-    g <- as.linfun(tes, values=1/v, navalue=0)
+    g <- as.linfun(tes, values=num/v, navalue=0)
     if(what == "image") g <- as.linim(g, ...)
     return(g)
   }
@@ -51,9 +60,19 @@ densityVoronoi.lpp <- function(X, f = 1, ..., nrep = 1, verbose = TRUE){
       tilevalueslist[[i]] <- 0
       dflist[[i]]         <- blankentry
     } else {
-      rslt <- lineardirichlet(Xthin)
-      tilevalueslist[[i]] <- 1/tile.lengths(rslt)
-      dflist[[i]] <- rslt$df
+      if(!anyDuplicated(Xthin)) {
+        tes <- lineardirichlet(Xthin)
+        num <- 1
+      } else {
+        um <- uniquemap(Xthin)
+        first <- (um == seq_along(um))
+        UXthin <- Xthin[first]
+        tes <- lineardirichlet(UXthin)
+        num <- as.integer(table(factor(um, levels=um[first])))
+      }
+      v <- tile.lengths(tes)
+      tilevalueslist[[i]] <- num/v
+      dflist[[i]] <- tes$df
     }
   }
   #' Make the result into a function on the linear network 

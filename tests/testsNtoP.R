@@ -543,7 +543,7 @@ grep#
 #
 #   Plus assorted tricks
 #
-#   $Revision: 1.10 $  $Date: 2019/02/10 07:00:38 $
+#   $Revision: 1.12 $  $Date: 2019/08/14 03:28:35 $
 #
 require(spatstat)
 local({
@@ -572,8 +572,10 @@ local({
 
   ## (4) splitting large quadschemes into blocks
   mop <- spatstat.options(maxmatrix=5000)
+  qr <- quadBlockSizes(quadscheme(cells))
   pr <- predict(ppm(cells ~ x, AreaInter(0.05)))
   spatstat.options(mop)
+  qr <- quadBlockSizes(quadscheme(cells))
   
   ## (5) shortcuts in summary.ppm
   ## and corresponding behaviour of print.summary.ppm
@@ -593,14 +595,26 @@ local({
   fitZ <- ppm(cells ~ Z)
   U <- getppmOriginalCovariates(fitZ)
   logLik(fitZ, absolute=TRUE)
+  fitOK  <- ppm(redwood ~1, Strauss(0.1), emend=TRUE)
+  print(fitOK)
   fitNot <- ppm(redwood ~1, Strauss(0.1))
   fitFast <- emend(fitNot, trace=TRUE)
+  print(fitFast)
   op <- spatstat.options(project.fast=TRUE)
   fitFast <- emend(fitNot, trace=TRUE)
+  print(fitFast)
   spatstat.options(op)
   
   fut <- kppm(redwood ~ x)
   A <- quad.ppm(fut)
+
+  fat <- ppm(cells ~ x, Strauss(0.12))
+  op <- spatstat.options(print.ppm.SE='always')
+  print(fat)
+  spatstat.options(print.ppm.SE='never')
+  print(fat)
+  print(fitZ)
+  spatstat.options(op)
 
   ## (8) support for class profilepl
   rr <- data.frame(r=seq(0.05, 0.15, by=0.02))
@@ -623,7 +637,7 @@ reset.spatstat.options()
 #'
 #'   tests/ppp.R
 #'
-#'   $Revision: 1.4 $ $Date: 2018/11/05 00:50:01 $
+#'   $Revision: 1.5 $ $Date: 2019/07/17 11:56:37 $
 #'
 #'  Untested cases in ppp() or associated code
 
@@ -663,6 +677,16 @@ local({
   marks(U)[,2] <- factor(c(rep("A", 60), rep("B", npoints(U)-60)))
   UU <- U[1:3, drop=TRUE]
 
+  #' cases of [<-.ppp
+  set.seed(999)
+  X <- cells
+  B <- square(0.2)
+  X[B] <- runifpoint(3, B)
+  # deprecated use of second argument
+  X[,1:4] <- runifpoint(3)  # deprecated
+  X[,B] <- runifpoint(3, B) # deprecated 
+  X[1:3, B] <- runifpoint(3, B) # deprecated but does not crash
+  
   #' test as.ppp for spatial package if it is not installed
   FR <- Frame(letterR)
   as.ppp(list(x=X$x, y=X$y,

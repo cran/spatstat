@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.154 $     $Date: 2019/02/22 09:16:49 $
+#      $Revision: 1.157 $     $Date: 2019/08/31 05:19:39 $
 #
 #      The class "im" of raster images
 #
@@ -41,6 +41,7 @@ im <- function(mat, xcol=seq_len(ncol(mat)), yrow=seq_len(nrow(mat)),
       #' handle one-dimensional tables
       nc <- 1
       nr <- length(mat)
+      if(missing(xcol)) xcol <- seq_len(nc)
     }
     if(length(xcol) != nc)
       stop("Length of xcol does not match ncol(mat)")
@@ -422,7 +423,7 @@ update.im <- function(object, ...) {
   return(X)
 }
 
-"[<-.im" <- function(x, i, j, value) {
+"[<-.im" <- function(x, i, j, ..., drop=TRUE, value) {
   # detect 'blank' arguments like second argument of x[i, ] 
   ngiven <- length(sys.call())
   nmatched <- length(match.call())
@@ -445,14 +446,23 @@ update.im <- function(object, ...) {
     value <- value$v
 
   if(itype == "missing" && jtype == "missing") {
-    # no index provided
-    # set all pixels to 'value'
+    #' no index provided
+    #' set all pixels to 'value'
+    #' (if drop=TRUE, this applies only to pixels inside the window)
     v <- X$v
     if(!is.factor(value)) {
-      v[!is.na(v)] <- value
+      if(!drop) {
+        v[] <- value
+      } else {
+        v[!is.na(v)] <- value
+      }
     } else {
       vnew <- matrix(NA_integer_, ncol(v), nrow(v))
-      vnew[!is.na(v)] <- as.integer(value)
+      if(!drop) {
+        vnew[] <- as.integer(value)
+      } else {
+        vnew[!is.na(v)] <- as.integer(value)
+      }
       v <- factor(vnew, labels=levels(value))
     }
     X$v <- v
@@ -678,6 +688,11 @@ lookup.im <- function(Z, x, y, naok=FALSE, strict=TRUE) {
 
   if(Z$type == "factor")
     Z <- repair.old.factor.image(Z)
+
+  if((missing(y) || is.null(y)) && all(c("x", "y") %in% names(x))) {
+    y <- x$y
+    x <- x$x
+  }
   
   if(length(x) != length(y))
     stop("x and y must be numeric vectors of equal length")
