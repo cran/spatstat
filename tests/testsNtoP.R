@@ -3,7 +3,7 @@
 #
 # Testing the response to the presence of NA's in covariates
 #
-# $Revision: 1.5 $ $Date: 2015/12/29 08:54:49 $
+# $Revision: 1.6 $ $Date: 2019/10/14 08:39:58 $
 
 require(spatstat)
 local({
@@ -18,6 +18,9 @@ local({
   v <- vcov(misfit)
   ss <- vcov(misfit, what="internals")
   NULL
+  #' quantile.ewcdf
+  f <- ewcdf(runif(100), runif(100))
+  qf <- quantile(f, probs=c(0.1, NA, 0.8))
 })
 
 
@@ -36,7 +39,7 @@ local({
 #
 # Also test nnorient()
 #
-#   $Revision: 1.24 $  $Date: 2019/04/29 06:34:29 $
+#   $Revision: 1.26 $  $Date: 2019/12/04 09:08:02 $
 #
 
 require(spatstat)
@@ -45,7 +48,7 @@ local({
   f <- function(mat,k) { apply(mat, 1, function(z,n) { sort(z)[n]  }, n=k+1) }
   g <- function(mat,k) { apply(mat, 1, function(z,n) { order(z)[n] }, n=k+1) }
 
-  # Two dimensions
+  ## .......  Two dimensions ................
 
   X <- runifpoint(42)
 
@@ -69,7 +72,70 @@ local({
   if(any(nw5 != nw5P))
     stop("nnwhich.ppp(k=5) does not agree with pairdist")
 
-  # Three dimensions
+  ## nncross.ppp without options
+  Y <- runifpoint(30)
+  Y <- Y[nndist(Y) > 0.02]
+  nc <- nncross(X,Y)
+  ncd <- nc$dist
+  ncw <- nc$which
+  cd <- crossdist(X,Y)
+  cdd <- apply(cd, 1, min)
+  cdw <- apply(cd, 1, which.min)
+  if(any(abs(ncd - cdd) > eps))
+    stop("nncross()$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("nncross()$which does not agree with apply(crossdist(), 1, which.min)")
+
+  ## nncross with sort on x
+  nc <- nncross(X,Y, sortby="x")
+  ncd <- nc$dist
+  ncw <- nc$which
+  if(any(abs(ncd - cdd) > eps))
+    stop("nncross(sortby=x)$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("nncross(sortby=x)$which does not agree with apply(crossdist(), 1, which.min)")
+
+  ## nncross with data pre-sorted on x
+  Y <- Y[order(Y$x)]
+  nc <- nncross(X,Y, is.sorted.Y=TRUE, sortby="x")
+  ncd <- nc$dist
+  ncw <- nc$which
+  cd <- crossdist(X,Y)
+  cdd <- apply(cd, 1, min)
+  cdw <- apply(cd, 1, which.min)
+  if(any(abs(ncd - cdd) > eps))
+    stop("For sorted data, nncross()$dist does not agree with apply(crossdist(), 1, min)")
+  if(any(ncw != cdw))
+    stop("For sorted data, nncross()$which does not agree with apply(crossdist(), 1, which.min)")
+
+  ## sanity check for nncross with k > 1
+  ndw <- nncross(X, Y, k=1:4, what="which")
+  if(any(is.na(ndw)))
+    stop("NA's returned by nncross.ppp(k > 1, what='which')")
+  nnc4 <- nncross(X, Y, k=1:4)
+  iswhich <- (substr(colnames(nnc4), 1, nchar("which")) == "which")
+  ndw <- nnc4[,iswhich]
+  if(any(is.na(ndw)))
+    stop("NA's returned by nncross.ppp(k > 1)$which")
+  
+  ## test of correctness for nncross with k > 1
+  flipcells <- flipxy(cells)
+  calcwhich <- nncross(cells, flipcells, k=1:4, what="which")
+  truewhich <- t(apply(crossdist(cells,flipcells), 1, order))[,1:4]
+  if(any(calcwhich != truewhich))
+    stop("nncross(k > 1) gives wrong answer")
+
+  #' cover some C code blocks
+  Z <- runifpoint(50)
+  X <- Z[1:30]
+  Y <- Z[20:50]
+  iX <- 1:30
+  iY <- 20:50
+  Ndw <- nncross(X,Y, iX, iY, k=3)
+  Nw  <- nncross(X,Y, iX, iY, k=3, what="which")
+  Nd  <- nncross(X,Y, iX, iY, k=3, what="dist")
+  
+  ## .......  Three dimensions ................
 
   X <- runifpoint3(42)
 
@@ -93,13 +159,22 @@ local({
   if(any(nw5 != nw5P))
     stop("nnwhich.pp3(k=5) does not agree with pairdist")
 
-  Y <- runifpoint3(17)
+  ff <- function(mat,k) { apply(mat, 1, function(z,n) { sort(z)[n]  }, n=k) }
+  gg <- function(mat,k) { apply(mat, 1, function(z,n) { order(z)[n] }, n=k) }
+
+  Y <- runifpoint3(20)
+  Y <- Y[nndist(Y) > 0.02]
+  DXY <- crossdist(X,Y)
   a <- nncross(X,Y)
   a <- nncross(X,Y, what="dist")
   a <- nncross(X,Y, what="which")
+  if(any(a != gg(DXY, 1)))
+    stop("incorrect result from nncross.pp3(what='which')")
   a2 <- nncross(X,Y, k=2)
   a2 <- nncross(X,Y, what="dist", k=2)
   a2 <- nncross(X,Y, what="which", k=2)
+  if(any(a2 != gg(DXY, 2)))
+    stop("incorrect result from nncross.pp3(k=2, what='which')")
   iX <- 1:42
   iZ <- 30:42
   Z <- X[iZ]
@@ -109,11 +184,15 @@ local({
   b2 <- nncross(X, Z, iX=iX, iY=iZ, k=2)
   b2 <- nncross(X, Z, iX=iX, iY=iZ, what="which", k=2)
   b2 <- nncross(X, Z, iX=iX, iY=iZ, what="dist", k=2)
+
+  ## .......  m dimensions ................
+
+  B <- boxx(c(0,1),c(0,1),c(0,1),c(0,1))
+  X <- runifpointx(42, B)
+  Y <- runifpointx(50, B)
+  Y <- Y[nndist(Y) > 0.02]
+  DXY <- crossdist(X,Y)
   
-  # m dimensions
-
-  X <- runifpointx(42, boxx(c(0,1),c(0,1),c(0,1),c(0,1)))
-
   nn <- nndist(X)
   nnP <- f(pairdist(X), 1)
   if(any(abs(nn - nnP) > eps))
@@ -134,79 +213,43 @@ local({
   if(any(nw5 != nw5P))
     stop("nnwhich.ppx(k=5) does not agree with pairdist")
 
-  #### nncross in two dimensions
-  X <- runifpoint(42)
-  Y <- runifpoint(42, win=owin(c(1,2),c(1,2)))
+  a <- nncross(X,Y)
+  ncd <- nncross(X,Y, what="dist")
+  ncw <- nncross(X,Y, what="which")
+  if(any(ncw != gg(DXY, 1)))
+    stop("incorrect result from nncross.ppx(what='which')")
+  a2 <- nncross(X,Y, k=2)
+  ncd <- nncross(X,Y, what="dist", k=2)
+  ncw <- nncross(X,Y, what="which", k=2)
+  if(any(ncw != gg(DXY, 2)))
+    stop("incorrect result from nncross.ppx(k=2, what='which')")
 
-  # default nncross
-  nc <- nncross(X,Y)
-  ncd <- nc$dist
-  ncw <- nc$which
-  cd <- crossdist(X,Y)
-  cdd <- apply(cd, 1, min)
-  cdw <- apply(cd, 1, which.min)
-  if(any(abs(ncd - cdd) > eps))
-    stop("nncross()$dist does not agree with apply(crossdist(), 1, min)")
-  if(any(ncw != cdw))
-    stop("nncross()$which does not agree with apply(crossdist(), 1, which.min)")
+  ## special cases
+  nndist(X[FALSE])
+  nndist(X[1])
+  nndist(X[1:3], k=4)
+  nndist(X[1:3], k=1:4)
+  nnwhich(X[FALSE])
+  nnwhich(X[1])
+  nnwhich(X[1:3], k=4)
+  nnwhich(X[1:3], k=1:4)
+  nncross(X[1:3], Y[FALSE])
+  nncross(X[1:3], Y[1])
+  nncross(X[1:3], Y[1:3], k=4)
+  nncross(X[1:3], Y[1:3], k=1:4)
+})
 
-  # sort on x
-  nc <- nncross(X,Y, sortby="x")
-  ncd <- nc$dist
-  ncw <- nc$which
-  if(any(abs(ncd - cdd) > eps))
-    stop("nncross(sortby=x)$dist does not agree with apply(crossdist(), 1, min)")
-  if(any(ncw != cdw))
-    stop("nncross(sortby=x)$which does not agree with apply(crossdist(), 1, which.min)")
-
-  # pre-sorted on x
-  Y <- Y[order(Y$x)]
-  nc <- nncross(X,Y, is.sorted.Y=TRUE, sortby="x")
-  ncd <- nc$dist
-  ncw <- nc$which
-  cd <- crossdist(X,Y)
-  cdd <- apply(cd, 1, min)
-  cdw <- apply(cd, 1, which.min)
-  if(any(abs(ncd - cdd) > eps))
-    stop("For sorted data, nncross()$dist does not agree with apply(crossdist(), 1, min)")
-  if(any(ncw != cdw))
-    stop("For sorted data, nncross()$which does not agree with apply(crossdist(), 1, which.min)")
-
-  # sanity check for nncross with k > 1
-  ndw <- nncross(X, Y, k=1:4, what="which")
-  if(any(is.na(ndw)))
-    stop("NA's returned by nncross.ppp(k > 1, what='which')")
-  nnc4 <- nncross(X, Y, k=1:4)
-  iswhich <- (substr(colnames(nnc4), 1, nchar("which")) == "which")
-  ndw <- nnc4[,iswhich]
-  if(any(is.na(ndw)))
-    stop("NA's returned by nncross.ppp(k > 1)$which")
-  
-  # test of correctness for nncross with k > 1
-  flipcells <- flipxy(cells)
-  calcwhich <- nncross(cells, flipcells, k=1:4, what="which")
-  truewhich <- t(apply(crossdist(cells,flipcells), 1, order))[,1:4]
-  if(any(calcwhich != truewhich))
-    stop("nncross(k > 1) gives wrong answer")
-
-  #' cover some C code blocks
-  Z <- runifpoint(50)
-  X <- Z[1:30]
-  Y <- Z[20:50]
-  iX <- 1:30
-  iY <- 20:50
-  Ndw <- nncross(X,Y, iX, iY, k=3)
-  Nw  <- nncross(X,Y, iX, iY, k=3, what="which")
-  Nd  <- nncross(X,Y, iX, iY, k=3, what="dist")
-  
-  # test of agreement between nngrid.h and knngrid.h
-  #    dimyx=23 (found by trial-and-error) ensures that there are no ties 
+local({
+  ## test of agreement between nngrid.h and knngrid.h
+  ##    dimyx=23 (found by trial-and-error) ensures that there are no ties 
   a <- as.matrix(nnmap(cells, what="which", dimyx=23))
   b <- as.matrix(nnmap(cells, what="which", dimyx=23, k=1:2)[[1]])
   if(any(a != b))
     stop("algorithms in nngrid.h and knngrid.h disagree")
-
+    
   ## minnndist
+  X <- redwood3
+  eps <- sqrt(.Machine$double.eps)
   mfast <- minnndist(X)
   mslow <- min(nndist(X))
   if(abs(mfast-mslow) > eps)
@@ -259,6 +302,15 @@ local({
 })
 
   
+#' spatstat/tests/package.R
+#' Package information
+#' $Revision$ $Date$
+
+require(spatstat)
+local({
+  a <- bugfixes("book", show=FALSE)
+  bugfixes(package="deldir")
+})
 ## 
 ##    tests/percy.R
 ##
@@ -322,7 +374,7 @@ local({
 ## 
 ## tests/polygons.R
 ##
-##  $Revision: 1.3 $ $Date: 2018/07/22 02:10:07 $
+##  $Revision: 1.4 $ $Date: 2019/11/03 03:18:05 $
 ##
 require(spatstat)
 local({
@@ -332,6 +384,10 @@ local({
   b <- letterR$bdry
   a <- sapply(b, xypolyselfint, yesorno=TRUE)
   a <- lapply(b, xypolyselfint, proper=TRUE)
+  
+  ## Simple example of self-crossing polygon
+  x <- read.table("selfcross.txt", header=TRUE)
+  y <- xypolyselfint(x)
 })
 
 # 
@@ -543,7 +599,7 @@ grep#
 #
 #   Plus assorted tricks
 #
-#   $Revision: 1.12 $  $Date: 2019/08/14 03:28:35 $
+#   $Revision: 1.15 $  $Date: 2019/11/24 03:26:44 $
 #
 require(spatstat)
 local({
@@ -595,14 +651,23 @@ local({
   fitZ <- ppm(cells ~ Z)
   U <- getppmOriginalCovariates(fitZ)
   logLik(fitZ, absolute=TRUE)
+  unitname(fitZ)
+  unitname(fitZ) <- c("metre", "metres")
+
+  ## (7a) emend.ppm
+  fitZe <- emend(fitZ, trace=TRUE)
+  ZZ <- Z
+  fitZZ <- ppm(cells ~ Z + ZZ)
+  fitZZe <- emend(fitZZ, trace=TRUE)
   fitOK  <- ppm(redwood ~1, Strauss(0.1), emend=TRUE)
   print(fitOK)
   fitNot <- ppm(redwood ~1, Strauss(0.1))
-  fitFast <- emend(fitNot, trace=TRUE)
-  print(fitFast)
+  fitSlow <- emend(fitNot, trace=TRUE)
+  print(fitSlow)
   op <- spatstat.options(project.fast=TRUE)
   fitFast <- emend(fitNot, trace=TRUE)
   print(fitFast)
+  fitZZe <- emend(fitZZ, trace=TRUE)
   spatstat.options(op)
   
   fut <- kppm(redwood ~ x)
@@ -631,39 +696,53 @@ local({
   print(p)
   plot(p, how="contour")
   plot(p, how="persp")
+
+  ## (10) ppm -> mpl.engine -> mpl.prepare
+  fit <- ppm(cells, NULL)
+  fit <- ppm(cells ~ x, clipwin=square(0.7))
+  fit <- ppm(cells ~ x, subset=square(0.7))
+  DG <- as.im(function(x,y){x+y < 1}, square(1))
+  fit <- ppm(cells ~ x, subset=DG)
+  fit <- ppm(cells ~ x, GLM=glm)
+  fit <- ppm(cells ~ x, famille=quasi(link='log', variance='mu'))
+  fit <- ppm(cells ~ x, Hardcore(0.07), skip.border=TRUE, splitInf=TRUE)
 })
 
 reset.spatstat.options()
 #'
 #'   tests/ppp.R
 #'
-#'   $Revision: 1.5 $ $Date: 2019/07/17 11:56:37 $
+#'   $Revision: 1.9 $ $Date: 2019/12/03 03:05:34 $
 #'
 #'  Untested cases in ppp() or associated code
 
 require(spatstat)
 local({
   X <- runifpoint(10, letterR)
-  Y <- runifpoint(3, complement.owin(letterR))
+  Y <- runifpoint(10, complement.owin(letterR))
 
   #' test handling of points out-of-bounds
   df <- rbind(as.data.frame(X), as.data.frame(Y))
-  A <- ppp(df$x, df$y, window=letterR, marks=1:13)
+  A <- ppp(df$x, df$y, window=letterR, marks=1:20)
   #' test handling of points with bad coordinates
-  B <- ppp(X$x, c(X$y[1:7], c(Inf, NA, NaN)), window=letterR, marks=1:10)
-  D <- ppp(X$x, c(X$y[1:7], c(Inf, NA, NaN)), window=letterR,
-           marks=data.frame(id=1:10, u=runif(10)))
-
+  df$x[1:3] <- c(Inf, NA, NaN)
+  df$y[18:20] <- c(Inf, NA, NaN)
+  B <- ppp(df$x, df$y, window=letterR, marks=1:20)
+  D <- ppp(df$x, df$y, window=letterR, marks=data.frame(id=1:20, u=runif(20)))
+  
   #' test print/summary/plot methods on these bad objects
   print(A)
   print(B)
   print(D)
-  summary(A)
-  summary(B)
-  summary(D)
+  print(summary(A))
+  print(summary(B))
+  print(summary(D))
   plot(A)
   plot(B)
   plot(D)
+  plot(attr(A, "rejects"))
+  plot(attr(B, "rejects"))
+  plot(attr(D, "rejects"))
   
   #' subset operator --- cases not covered elsewhere
   #'   subset index is a logical image
@@ -705,8 +784,23 @@ local({
   X <- runifpoint(20)
   A <- superimpose(cells, X, W="convex")
   A <- superimpose(cells, X, W=ripras)
+  B <- superimpose(concatxy(cells), concatxy(X), W=NULL)
   ## superimpose.splitppp
   Y <- superimpose(split(amacrine))
+
+  ## catch outdated usage of scanpp
+  d <- system.file("rawdata", "amacrine", package="spatstat.data")
+  if(nzchar(d)) {
+    W <- owin(c(0, 1060/662), c(0, 1))
+    Y <- scanpp("amacrine.txt", dir=d, window=W, multitype=TRUE)
+    print(Y)
+  }
+  ## (bad) usage of cobble.xy
+  xx <- runif(10)
+  yy <- runif(10)
+  W1 <- cobble.xy(xx, yy)
+  W2 <- cobble.xy(xx, yy, boundingbox)
+  Wnope <- cobble.xy(xx, yy, function(x,y) {cbind(x,y)}, fatal=FALSE)
 })
 #
 # tests/ppx.R
@@ -782,7 +876,7 @@ local({
 #
 # Things that might go wrong with predict()
 #
-#  $Revision: 1.11 $ $Date: 2019/04/27 09:25:59 $
+#  $Revision: 1.14 $ $Date: 2019/10/17 03:44:24 $
 #
 
 require(spatstat)
@@ -834,6 +928,8 @@ local({
   b <- predict(fit, type="count",                            se=TRUE)
   b <- predict(fit, type="count", window=square(0.5),        se=TRUE)
   b <- predict(fit, type="count", window=quadrats(cells, 3), se=TRUE)
+  d <- predict(fit, type="count", interval="prediction", se=TRUE)
+  d <- predict(fit, type="count", interval="confidence", se=TRUE)
   ## superseded usages
   b <- predict(fit, type="se", getoutofjail=TRUE)
   b <- predict(fit, total=TRUE)
@@ -876,6 +972,15 @@ local({
   fot <- ppm(Q ~ y + Z, data=data.frame(Z=Zvalues))
   effectfun(fot, "y", Z=0)
   effectfun(fot, "Z", y=0)
+
+  #' multitype
+  modX <- ppm(amacrine ~ polynom(x,2))
+  effectfun(modX)
+  effectfun(modX, "x")
+  modXM <- ppm(amacrine ~ marks*polynom(x,2))
+  effectfun(modXM, "x", marks="on")
+  modXYM <- ppm(amacrine ~ marks*polynom(x,y,2))
+  effectfun(modXYM, "x", y=0, marks="on")
 })
 
 #

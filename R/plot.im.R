@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.130 $   $Date: 2019/07/03 03:33:42 $
+#  $Revision: 1.133 $   $Date: 2019/11/27 03:32:04 $
 #
 #  Plotting code for pixel images
 #
@@ -212,20 +212,22 @@ plot.im <- local({
       # argument given - validate
       stopifnot(is.logical(valuesAreColours))
       if(valuesAreColours) {
-        # pixel values must be factor or character
+        ## pixel values must be factor or character
         if(!xtype %in% c("factor", "character")) {
-          warning(paste("Pixel values of type", sQuote(xtype),
-                        "are not interpretable as colours"))
+          if(do.plot)
+            warning(paste("Pixel values of type", sQuote(xtype),
+                          "are not interpretable as colours"))
           valuesAreColours <- FALSE
         } else if(col.given) {
-          # colour info provided: contradictory
-          warning(paste("Pixel values are taken to be colour values,",
-                        "because valuesAreColours=TRUE;", 
-                        "the colour map (argument col) is ignored"),
-                  call.=FALSE)
+          ## colour info provided: contradictory
+          if(do.plot)
+            warning(paste("Pixel values are taken to be colour values,",
+                          "because valuesAreColours=TRUE;", 
+                          "the colour map (argument col) is ignored"),
+                    call.=FALSE)
           col <- NULL
         }
-        if(do.log) 
+        if(do.log && do.plot) 
           warning(paste("Pixel values are taken to be colour values,",
                         "because valuesAreColours=TRUE;", 
                         "the argument log=TRUE is ignored"),
@@ -244,8 +246,9 @@ plot.im <- local({
                         { NULL })
       valuesAreColours <- is.character(strings) && 
       !inherits(try(col2rgb(strings), silent=TRUE), "try-error")
-      if(valuesAreColours)
-        cat("Interpreting pixel values as colours\n")
+      if(valuesAreColours && do.plot)
+        splat("Interpreting pixel values as colours",
+              "(valuesAreColours=TRUE)")
     }
     # 
     if(valuesAreColours) {
@@ -261,8 +264,9 @@ plot.im <- local({
                col <- levels(x)
              },
              {
-               warning(paste("Pixel values of type", sQuote(xtype),
-                             "are not interpretable as colours"))
+               if(do.plot)
+                 warning(paste("Pixel values of type", sQuote(xtype),
+                               "are not interpretable as colours"))
              })
       # colours not suitable for ribbon
       ribbon <- FALSE
@@ -274,12 +278,12 @@ plot.im <- local({
       if(all(rx > 0)) {
         x <- eval.im(log10(x))
       } else {
-        if(any(rx < 0)) 
+        if(do.plot && any(rx < 0)) 
           warning(paste("Negative pixel values",
                         "omitted from logarithmic colour map;",
                         "range of values =", prange(rx)),
                   call.=FALSE)
-        if(!all(rx < 0))
+        if(do.plot && !all(rx < 0))
           warning("Zero pixel values omitted from logarithmic colour map",
                   call.=FALSE)
         x <- eval.im(log10orNA(x))
@@ -720,7 +724,7 @@ plot.im <- local({
                                xaxp=c(bb.rib$xrange, length(ribbonticks)))
              })
       do.call.plotfun(graphics::axis,
-                      resolve.defaults(ribargs, axisargs, dotargs, posargs),
+                      resolve.defaults(axisargs, ribargs, dotargs, posargs),
                       extrargs=graphicsPars("axis"))
     }
     if(!is.null(riblab)) {

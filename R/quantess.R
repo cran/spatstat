@@ -2,7 +2,7 @@
 #' 
 #'     Quantile Tessellation
 #'
-#'   $Revision: 1.18 $  $Date: 2019/03/21 02:56:53 $
+#'   $Revision: 1.22 $  $Date: 2019/10/17 01:49:01 $
 
 quantess <- function(M, Z, n, ...) {
   UseMethod("quantess")
@@ -41,11 +41,9 @@ quantess.owin <- function(M, Z, n, ..., type=2, origin=c(0,0), eps=NULL) {
                      rad = polartess(B, radii=qZ, origin=origin),
                      ang = polartess(B, angles=qZ, origin=origin))
     out <- intersect.tess(strips, tess(tiles=list(W)))
-    qzz <- signif(qZ, 3)
-    tilenames(out) <- paste0("[", qzz[1:n], ",",
-                             qzz[-1], c(rep(")", n-1), "]"))
+    tilenames(out) <- makeCutLabels(qZ, include.lowest=TRUE)
   } else {
-    ZC <- cut(Zim, breaks=qZ, include.lowest=TRUE, right=FALSE)
+    ZC <- cut(Zim, breaks=qZ, include.lowest=TRUE)
     out <- tess(image=ZC)
   }
   if(!is.null(tcross)) out <- intersect.tess(out, tcross)
@@ -140,9 +138,7 @@ quantess.ppp <- function(M, Z, n, ..., type=2, origin=c(0,0), eps=NULL) {
                      rad = polartess(B, radii=qZ, origin=origin),
                      ang = polartess(B, angles=qZ, origin=origin))
     out <- intersect.tess(strips, tess(tiles=list(W)))
-    qzz <- signif(qZ, 3)
-    tilenames(out) <- paste0("[", qzz[1:n], ",",
-                             qzz[-1], c(rep(")", n-1), "]"))
+    tilenames(out) <- makeCutLabels(qZ, include.lowest=TRUE)
   } else {
     ZC <- cut(Zim, breaks=qZ, include.lowest=TRUE)
     out <- tess(image=ZC)
@@ -172,9 +168,7 @@ quantess.im <- function(M, Z, n, ..., type=2, origin=c(0,0)) {
   qZ <- c(Zrange[1], qZ, Zrange[2])
   ZC <- cut(Z, breaks=qZ, include.lowest=TRUE)
   out <- tess(image=ZC)
-  qzz <- signif(qZ, 3)
-  tilenames(out) <- paste0("[", qzz[1:(n-1)], ",",
-                           qzz[-1], c(rep(")", n-1), "]"))
+  tilenames(out) <- makeCutLabels(qZ, include.lowest=TRUE)
   if(!is.null(tcross)) out <- intersect.tess(out, tcross)
   return(out)
 }

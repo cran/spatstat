@@ -25,7 +25,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.17 $  $Date: 2019/08/13 07:48:15 $
+#  $Revision: 1.20 $  $Date: 2019/12/02 06:29:20 $
 #
 
 require(spatstat)
@@ -145,9 +145,11 @@ local({
   #' weights argument
   H1 <- envelope(cells, nsim=4, weights=npoints, savefuns=TRUE)
   H2 <- envelope(cells, nsim=4, weights=npoints, savefuns=TRUE)
-  J <- envelope(cells, nsim=4, weights=npoints, VARIANCE=TRUE)
+  J1 <- envelope(cells, nsim=4, weights=npoints, VARIANCE=TRUE)
+  J2 <- envelope(cells, nsim=4, weights=npoints, VARIANCE=TRUE)
   #' pooling with weights
   H <- pool(H1, H2)
+  J <- pool(J1, J2)
   #' pooling envelopes with non-identical attributes
   H0 <- envelope(cells, nsim=4, savefuns=TRUE)
   HH <- pool(H0, H1)
@@ -196,14 +198,64 @@ local({
   #' Fails with spatstat.utils 1.12-0
   set.seed(42)
   EP <- envelope(longleaf, pcf, nsim=10, nrank=2)
-})
 
-local({
   #' Test case when the maximum permitted number of failures is exceeded
   X <- amacrine[1:153] # contains exactly one point with mark='off'
   #' High probability of generating a pattern with no marks = 'off'
   E <- envelope(X, Kcross, nsim=39, maxnerr=2, maxerr.action="warn")
   A <- alltypes(X, Kcross, envelope=TRUE, nsim=39, maxnerr=2)
+})
+
+local({
+  #' Internals: envelope.matrix
+  Y <- matrix(rnorm(200), 10, 20)
+  rr <- 1:10
+  oo <- rnorm(10)
+  zz <- numeric(10)
+  E <- envelope(Y, rvals=rr, observed=oo, nsim=10)
+  E <- envelope(Y, rvals=rr, observed=oo, jsim=1:10)
+  E <- envelope(Y, rvals=rr, observed=oo, theory=zz,
+                type="global", use.theory=TRUE)
+  E <- envelope(Y, rvals=rr, observed=oo, theory=zz,
+                type="global", use.theory=TRUE, nsim=10)
+  E <- envelope(Y, rvals=rr, observed=oo, type="global",
+                nsim=10, nsim2=10)
+  E <- envelope(Y, rvals=rr, observed=oo, type="global",
+                jsim=1:10, jsim.mean=11:20)
+  print(E)
+  E <- envelope(Y, rvals=rr, observed=oo, type="global",
+                nsim=10, jsim.mean=11:20)
+  E <- envelope(Y, rvals=rr, observed=oo, type="global",
+                jsim=1:10, nsim2=10)
+})
+
+local({
+  #' quirk with handmade summary functions ('conserve' attribute)
+  Kdif <- function(X, r=NULL) { # note no ellipsis
+    Y <- split(X)
+    K1 <- Kest(Y[[1]], r=r)
+    K2 <- Kest(Y[[2]], r=r)
+    D <- eval.fv(K1-K2)
+    return(D)
+  }
+  envelope(amacrine, Kdif, nsim=3)
+})
+#'  tests/enveltest.R
+#'     Envelope tests (dclf.test, mad.test)
+#'     and two-stage tests (bits.test, dg.test, bits.envelope, dg.envelope)
+#' 
+#'     $Revision: 1.1 $  $Date: 2019/10/09 06:28:21 $ 
+#'
+require(spatstat)
+local({
+  #' handling of NA function values (due to empty point patterns)
+  set.seed(1234)
+  X <- rThomas(5, 0.05, 10) 
+  fit <- kppm(X ~ 1, "Thomas")
+  set.seed(100000)
+  dclf.test(fit)
+  set.seed(909)
+  dg.test(fit, nsim=9)
 })
 #
 #    tests/factorbugs.R
@@ -325,7 +377,7 @@ local({
 #'
 #'  Test machinery for manipulating formulae
 #' 
-#' $Revision: 1.4 $  $Date: 2017/02/20 07:35:47 $
+#' $Revision: 1.5 $  $Date: 2019/10/05 11:03:26 $
 
 require(spatstat)
 local({
@@ -350,6 +402,7 @@ local({
 
   ff(y ~ poly(x,2) + poly(z,3), "x", y ~poly(z,3))
 
+  illegal.iformula(~str*g, itags="str", dfvarnames=c("marks", "g", "x", "y"))
 })
 
 
@@ -459,16 +512,17 @@ local({
   d <- numeric.columns(cells)
   f <- numeric.columns(longleaf)
 })
-# 
-#    tests/fvproblems.R
-#
-#    $Revision: 1.7 $  $Date: 2016/03/08 00:26:23 $
-#
+## 
+##    tests/fvproblems.R
+##
+##    problems with fv and fasp code
+##
+##    $Revision: 1.10 $  $Date: 2019/12/06 02:51:36 $
 
 require(spatstat)
 
-# This appears in the workshop notes
-# Problem detected by Martin Bratschi
+#' This appears in the workshop notes
+#' Problem detected by Martin Bratschi
 
 local({
   Jdif <- function(X, ..., i) {
@@ -479,9 +533,9 @@ local({
   }
   Z <- Jdif(amacrine, i="on")
 })
-#
-#  Test mathlegend code
-#
+#'
+#'  Test mathlegend code
+#'
 local({
   K <- Kest(cells)
   plot(K)
@@ -510,8 +564,8 @@ local({
   plot(alltypes(amacrine, pcfcross))
 })
 
-#
-#  Test quirks related to 'alim' attribute
+#'
+#'  Test quirks related to 'alim' attribute
 
 local({
   K <- Kest(cells)
@@ -521,8 +575,8 @@ local({
   plot(tail(K))
 })
 
-#
-# Check that default 'r' vector passes the test for fine spacing
+#'
+#' Check that default 'r' vector passes the test for fine spacing
 
 local({
   a <- Fest(cells)
@@ -536,7 +590,7 @@ local({
   JX <- Jest(X)
 })
 
-## various functionality in fv.R
+##' various functionality in fv.R
 
 local({
   M <- cbind(1:20, matrix(runif(100), 20, 5))
@@ -555,4 +609,26 @@ local({
   #'
   H <- rebadge.as.crossfun(K, "H", "inhom", 1, 2)
   H <- rebadge.as.dotfun(K, "H", "inhom", 3)
+})
+
+local({
+  ## bug in Jmulti.R colliding with breakpts.R
+  B <- owin(c(0,3), c(0,10))
+  Y <- superimpose(A=runifpoint(1212, B), B=runifpoint(496, B))
+  JDX <- Jdot(Y)
+  JCX <- Jcross(Y)
+  Jdif <- function(X, ..., i) {
+    Jidot <- Jdot(X, ..., i=i)
+    J <- Jest(X, ...)
+    dif <- eval.fv(Jidot - J)
+    return(dif)
+  }
+  E <- envelope(Y, Jdif, nsim=19, i="A", simulate=expression(rlabel(Y)))
+})
+
+local({
+  #' fasp axes and title
+  a <- alltypes(amacrine)
+  a$title <- NULL
+  plot(a, samex=TRUE, samey=TRUE)
 })

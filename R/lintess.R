@@ -3,27 +3,30 @@
 #'
 #'   Tessellations on a Linear Network
 #'
-#'   $Revision: 1.33 $   $Date: 2019/09/12 04:08:58 $
+#'   $Revision: 1.41 $   $Date: 2019/09/17 07:23:27 $
 #'
 
-lintess <- function(L, df) {
+lintess <- function(L, df, marks=NULL) {
   verifyclass(L, "linnet")
+
   if(missing(df) || is.null(df)) {
     # tessellation consisting of a single tile
     ns <- nsegments(L)
     df <- data.frame(seg=seq_len(ns), t0=0, t1=1, tile=factor(1))
-    out <- list(L=L, df=df)
-    class(out) <- c("lintess", class(out))
-    return(out)
-  } 
-  # validate 'df'
+    return(lintess(L, df, marks))
+  }
+  
+  #' validate 'df'
   stopifnot(is.data.frame(df))
+  dfnames <- colnames(df)
   needed <- c("seg", "t0", "t1", "tile")
-  if(any(bad <- is.na(match(needed, colnames(df)))))
+  if(any(bad <- is.na(match(needed, dfnames))))
     stop(paste(ngettext(sum(bad), "Column", "Columns"),
                commasep(sQuote(needed[bad])),
                "missing from data frame"),
          call.=FALSE)
+  #' straighten out
+  df <- df[, needed]
   df$seg <- as.integer(df$seg)
   df$tile <- as.factor(df$tile)
   if(any(reversed <- with(df, t1 < t0)))
@@ -59,7 +62,23 @@ lintess <- function(L, df) {
              call.=FALSE)
     }
   })
-  out <- list(L=L, df=df)
+  #' validate marks
+  if(!is.null(marks)) {
+    marks <- as.data.frame(marks)
+    nr <- nrow(marks)
+    nt <- length(levels(df$tile))
+    if(nr == 1L) {
+      marks <- marks[rep(1, nt), , drop=FALSE]
+      row.names(marks) <- 1:nt
+      nr <- nt
+    } else if(nr != nt) {
+      stop(paste("Wrong number of",
+                 ngettext(ncol(marks), "mark values:", "rows of mark values:"),
+                 nr, "should be", nt),
+           call.=FALSE)
+    }
+  }
+  out <- list(L=L, df=df, marks=marks)
   class(out) <- c("lintess", class(out))
   return(out)
 }
@@ -69,7 +88,20 @@ print.lintess <- function(x, ...) {
   nt <- length(levels(x$df$tile))
   splat(nt, ngettext(nt, "tile", "tiles"))
   if(anyNA(x$df$tile)) splat("[An additional tile is labelled NA]")
+  if(!is.null(marx <- x$marks)) {
+    mvt <- markvaluetype(marx)
+    if(length(mvt) == 1) {
+      splat("Tessellation has", mvt, "marks")
+    } else {
+      splat("Tessellation has mark variables",
+            commasep(paste(colnames(marx), paren(mvt))))
+    }
+  }
   return(invisible(NULL))
+}
+
+nobjects.lintess <- function(x) {
+  length(levels(x$df$tile))
 }
 
 tile.lengths <- function(x) {
@@ -82,7 +114,38 @@ tile.lengths <- function(x) {
   tilelen <- with(df, tapplysum(fraglen, list(tile)))
   return(tilelen)
 }
-  
+
+tilenames.lintess <- function(x) {
+ levels(x$df$tile) 
+}
+
+"tilenames<-.lintess" <- function(x, value) {
+  levels(x$df$tile) <- value
+  return(x)
+}
+
+marks.lintess <- function(x, ...) { x$marks }
+
+"marks<-.lintess" <- function(x, ..., value) {
+  if(!is.null(value)) {
+    value <- as.data.frame(value)
+    nt <- length(levels(x$df$tile))
+    if(nrow(value) != nt)
+      stop(paste("replacement value for marks has wrong length:",
+                 nrow(value), "should be", nt),
+           call.=FALSE)
+    rownames(value) <- NULL
+    if(ncol(value) == 1) colnames(value) <- "marks"
+  }
+  x$marks <- value
+  return(x)
+}
+
+unmark.lintess <- function(X) {
+  X$marks <- NULL
+  return(X)
+}
+
 summary.lintess <- function(object, ...) {
   df <- object$df
   lev <- levels(df$tile)
@@ -93,8 +156,14 @@ summary.lintess <- function(object, ...) {
   tilelen <- with(df, tapplysum(fraglen, list(tile)))
   hasna <- anyNA(df$tile)
   nalen <- if(hasna) (sum(seglen) - sum(tilelen)) else 0
+  marx <- object$marks
+  if(!is.null(marx)) {
+    mvt <- markvaluetype(marx)
+    names(mvt) <- colnames(marx)
+    marx <- summary(marx)
+  } else mvt <- NULL
   y <- list(nt=nt, nr=nr, lev=lev, seglen=seglen, tilelen=tilelen,
-            hasna=hasna, nalen=nalen)
+            hasna=hasna, nalen=nalen, marx=marx, mvt=mvt)
   class(y) <- c("summary.lintess", class(y))
   return(y)
 }
@@ -113,60 +182,122 @@ print.summary.lintess <- function(x, ...) {
       print(summary(tilelen))
     }
     if(hasna) splat("Tile labelled NA has length", nalen)
+    if(!is.null(marx)) {
+      splat("Tessellation is marked")
+      if(length(mvt) == 1) {
+        splat("Marks are of type", sQuote(mvt))
+      } else {
+        splat("Mark variables:",
+              commasep(paste(names(mvt), paren(unname(mvt)))))
+      }
+      splat("Summary of marks:")
+      print(marx)
+    }
   })
   return(invisible(NULL))
 }
 
-plot.lintess <- function(x, ..., main, add=FALSE,
-                         style=c("segments", "image"),
-                         col=NULL) {
-  if(missing(main)) main <- short.deparse(substitute(x))
-  style <- match.arg(style)
-  if(style == "image") {
-    z <- plot(as.linfun(x), main=main, ..., add=add)
-    return(invisible(z))
+plot.lintess <- local({
+  
+  plot.lintess <- function(x, ..., main, add=FALSE,
+                           style=c("colour", "width", "image"),
+                           col=NULL,
+                           values=marks(x),
+                           ribbon=TRUE,
+                           ribargs=list(),
+                           multiplot=TRUE,
+                           do.plot=TRUE
+                           ) {
+    if(missing(main)) main <- short.deparse(substitute(x))
+    style <- match.arg(style)
+    df <- x$df
+    ntiles <- length(levels(df$tile))
+    #' Associate 'values' with tiles
+    if(markformat(values) == "hyperframe") 
+      values <- as.data.frame(values) #' automatic warning
+    switch(markformat(values),
+           none = {
+             #' no values assigned.
+             #' default is tile name
+             tn <- tilenames(x)
+             values <- factor(tn, levels=tn)
+           },
+           vector = {
+             #' vector of values.
+             #' validate length of vector
+             check.anyvector(values, ntiles, things="tiles")
+           },
+           dataframe = {
+             #' data frame or matrix of values.
+             values <- as.data.frame(values)
+             if(nrow(values) != ntiles)
+               stop(paste("Number of rows of values =", nrow(values),
+                          "!=", ntiles, "= number of tiles"),
+                    call.=FALSE)
+               if(multiplot && ncol(values) > 1 && !add) {
+                 #' Multiple Panel Plot
+                 result <- multi.plot.lintess(x, ..., style=style, 
+                                              main=main, do.plot=do.plot,
+                                              ribbon=ribbon, ribargs=ribargs,
+                                              col=col)
+                 return(invisible(result))
+               }
+               if(ncol(values) > 1)
+                 warning("Using only the first column of values")
+                 values <- values[,1]
+           },
+           stop("Format of values is not understood")
+           )
+  
+    #' Single Panel Plot
+    if(style == "image") {
+      z <- plot(as.linfun(x, values=values),
+                main=main, ..., add=add, do.plot=do.plot,
+                ribbon=ribbon, ribargs=ribargs, col=col)
+      return(invisible(z))
+    }
+    #' convert to marked psp object
+    L <- as.linnet(x)
+    from <- L$from[df$seg]
+    to   <- L$to[df$seg]
+    V <- vertices(L)
+    vx <- V$x
+    vy <- V$y
+    segdata <- with(df, list(x0=vx[from] * (1-t0) + vx[to] * t0,
+                             y0=vy[from] * (1-t0) + vy[to] * t0,
+                             x1=vx[from] * (1-t1) + vx[to] * t1,
+                             y1=vy[from] * (1-t1) + vy[to] * t1,
+                             marks=values[as.integer(tile)]))
+    S <- as.psp(segdata, window=Window(L))
+    cmap <- plot(S, style=style, add=add, do.plot=do.plot, main=main, 
+                 ribbon=ribbon, ribargs=ribargs, col=col, ...)
+    return(invisible(cmap))
   }
-  #' determine colour map
-  df <- x$df
-  lev <- levels(df$tile)
-  if(is.null(col)) {
-    col <- rainbow(length(lev))
-    cmap <- colourmap(col, inputs=lev)
-  } else if(inherits(col, "colourmap")) {
-    cmap <- col
-    col <- cmap(lev)
-  } else if(is.colour(col)) {
-    if(length(col) == 1) col <- rep(col, length(lev))
-    if(length(col) != length(lev))
-      stop(paste(length(col), "colours provided but",
-                 length(lev), "colours needed"))
-    cmap <- colourmap(col, inputs=lev)
-  } else stop("col should be a vector of colours, or a colourmap object")
-  #' determine segment coordinates
-  L <- as.linnet(x)
-  from <- L$from[df$seg]
-  to   <- L$to[df$seg]
-  V <- vertices(L)
-  vx <- V$x
-  vy <- V$y
-  #' plot
-  if(!add) plot(Frame(x), main=main, type="n")
-  segdata <- with(df, list(
-                        x0=vx[from] * (1-t0) + vx[to] * t0,
-                        y0=vy[from] * (1-t0) + vy[to] * t0,
-                        x1=vx[from] * (1-t1) + vx[to] * t1,
-                        y1=vy[from] * (1-t1) + vy[to] * t1,
-                        col=col[as.integer(tile)]))
-  do.call.plotfun(segments,
-                  resolve.defaults(segdata,
-                                   list(...),
-                                   .StripNull=TRUE),
-                  extrargs=names(par()))
-  return(invisible(cmap))
-}
 
-#' currently lintess does not have 'marks' so cannot be unstacked
-unstack.lintess <- function(x, ...) { solist(x) } 
+  multi.plot.lintess <- function(x, ...,
+                                 zlim=NULL, col=NULL, equal.ribbon=FALSE) {
+    if(equal.ribbon && is.null(zlim) && !inherits(col, "colourmap"))
+      zlim <- range(marks(x))
+    if(!is.null(zlim)) {
+      result <- plot(unstack(x), ..., zlim=zlim, col=col)
+    } else {
+      result <- plot(unstack(x), ..., col=col)
+    }
+    return(invisible(result))
+  }
+  
+  plot.lintess
+})
+
+  
+unstack.lintess <- function(x, ...) {
+  marx <- marks(x)
+  if(is.null(marx) || is.null(dim(marx)) || ncol(marx) <= 1)
+    return(solist(x))
+  ux <- unmark(x)
+  y <- solapply(as.list(marx), setmarks, x=ux)
+  return(y)
+} 
 
 as.owin.lintess <- function(W, ...) { as.owin(as.linnet(W), ...) }
 
@@ -174,6 +305,17 @@ Window.lintess <- function(X, ...) { as.owin(as.linnet(X)) }
 
 domain.lintess <- as.linnet.lintess <- function(X, ...) { X$L }
 
+as.data.frame.lintess <- function(x, ...) {
+  df <- x$df
+  if(!is.null(marx <- marks(x))) {
+    marx <- as.data.frame(marx)
+    if(ncol(marx) == 1L) colnames(marx) <- "marks"
+    marx <- marx[as.integer(df$tile), , drop=FALSE]
+    df <- cbind(df, marx)
+  }
+  df <- as.data.frame(df, ...)
+  return(df)
+}
 
 lineartileindex <- function(seg, tp, Z,
                             method=c("encode", "C", "interpreted")) {
@@ -248,13 +390,14 @@ lineartileindex <- function(seg, tp, Z,
 
 as.linfun.lintess <- local({
 
-  as.linfun.lintess <- function(X, ..., values, navalue=NA) {
+  as.linfun.lintess <- function(X, ..., values=marks(X), navalue=NA) {
     Xdf <- X$df
     tilenames <- levels(Xdf$tile)
-    value.is.tile <- missing(values) || is.null(values)
+    value.is.tile <- is.null(values)
     if(value.is.tile) {
       tilevalues <- factor(tilenames, levels=tilenames)
     } else {
+      if(!is.null(dim(values))) values <- values[,1]
       if(length(values) != length(tilenames))
         stop("Length of 'values' should equal the number of tiles", call.=FALSE)
       tilevalues <- values
@@ -297,79 +440,5 @@ as.linfun.lintess <- local({
   }
 
   as.linfun.lintess
-})
-
-#'  Divide a linear network into tiles demarcated by
-#' the points of a point pattern
-
-divide.linnet <- local({
-  
-  divide.linnet <- function(X) {
-    stopifnot(is.lpp(X))
-    L <- as.linnet(X)
-    coo <- coords(X)
-    #' add identifiers of endpoints
-    coo$from <- L$from[coo$seg]
-    coo$to   <- L$to[coo$seg]
-    #' group data by segment, sort by increasing 'tp'
-    coo <- coo[with(coo, order(seg, tp)), , drop=FALSE]
-    bits <- split(coo, coo$seg)
-    #' expand as a sequence of intervals
-    bits <- lapply(bits, expanddata)
-    #' reassemble as data frame
-    df <- Reduce(rbind, bits)
-    #' find all undivided segments
-    other <- setdiff(seq_len(nsegments(L)), unique(coo$seg))
-    #' add a single line for each undivided segment
-    if(length(other) > 0)
-      df <- rbind(df, data.frame(seg=other, t0=0, t1=1,
-                                 from=L$from[other], to=L$to[other]))
-    #' We now have a tessellation 
-    #' Sort again
-    df <- df[with(df, order(seg, t0)), , drop=FALSE]
-    #' Now identify connected components
-    #' Two intervals are connected if they share an endpoint
-    #' that is a vertex of the network.
-    nvert <- nvertices(L)
-    nbits <- nrow(df)
-    iedge <- jedge <- integer(0)
-    for(iv in seq_len(nvert)) {
-      joined <- with(df, which(from == iv | to == iv))
-      njoin <- length(joined)
-      if(njoin > 1)
-        iedge <- c(iedge, joined[-njoin])
-      jedge <- c(jedge, joined[-1L])
-    }
-    nedge <- length(iedge)
-    zz <- .C("cocoGraph",
-             nv = as.integer(nbits),
-             ne = as.integer(nedge), 
-             ie = as.integer(iedge - 1L),
-             je = as.integer(jedge - 1L),
-             label = as.integer(integer(nbits)), 
-             status = as.integer(integer(1L)),
-             PACKAGE = "spatstat")
-    if (zz$status != 0) 
-      stop("Internal error: connectedness algorithm did not converge")
-    lab <- zz$label + 1L
-    lab <- as.integer(factor(lab))
-    df <- df[,c("seg", "t0", "t1")]
-    df$tile <- lab
-    return(lintess(L, df))
-  }
-
-  expanddata <- function(z) {
-    df <- with(z,
-               data.frame(seg=c(seg[1L], seg),
-                          t0 = c(0, tp),
-                          t1 = c(tp, 1),
-                          from=NA_integer_,
-                          to=NA_integer_))
-    df$from[1L] <- z$from[1L]
-    df$to[nrow(df)] <- z$to[1L]
-    return(df)
-  }
-
-  divide.linnet
 })
 

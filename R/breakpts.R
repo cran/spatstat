@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.21 $	$Date: 2017/06/05 10:31:58 $
+#	$Revision: 1.24 $	$Date: 2019/11/01 01:07:53 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -166,30 +166,28 @@ breakpts.from.r <- function(r) {
 
 handle.r.b.args <- function(r=NULL, breaks=NULL, window, pixeps=NULL,
                             rmaxdefault=NULL) {
-
-        if(!is.null(r) && !is.null(breaks))
-          stop(paste("Do not specify both",
-                     sQuote("r"), "and", sQuote("breaks")))
-  
-        if(!is.null(breaks)) {
-          breaks <- as.breakpts(breaks)
-        } else if(!is.null(r)) {
-          breaks <- breakpts.from.r(r)
-	} else {
-	   #' determine rmax
-	   #' ignore infinite or NA values of rmaxdefault
-          if(!is.null(rmaxdefault) && !is.finite(rmaxdefault))
-	     rmaxdefault <- NULL
-          rmax <- rmaxdefault %orifnull% diameter(Frame(window))
-          if(is.null(pixeps)) {
-            pixeps <- if(is.mask(window))
-                      min(window$xstep, window$ystep) else rmax/128
-          }
-          rstep <- pixeps/4
-          breaks <- make.even.breaks(rmax, bstep=rstep)
-        }
-
-        return(breaks)
+  if(!is.null(r) && !is.null(breaks))
+    stop(paste("Do not specify both",
+               sQuote("r"), "and", sQuote("breaks")))
+  if(!is.null(breaks)) {
+    breaks <- as.breakpts(breaks)
+  } else if(!is.null(r)) {
+    breaks <- breakpts.from.r(r)
+  } else {
+    #' determine rmax
+    #' ignore infinite or NA values of rmaxdefault
+    if(!isTRUE(is.finite(rmaxdefault)))
+      rmaxdefault <- NULL
+    rmax <- rmaxdefault %orifnull% diameter(Frame(window))
+    #' determine spacing
+    if(is.null(pixeps)) {
+      pixeps <-
+        if(is.mask(window)) min(window$xstep, window$ystep) else rmax/128
+    }
+    rstep <- pixeps/4
+    breaks <- make.even.breaks(rmax, bstep=rstep)
+  }
+  return(breaks)
 }
 
 check.finespacing <- function(r, eps=NULL, win=NULL,

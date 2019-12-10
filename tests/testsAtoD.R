@@ -2,18 +2,21 @@
 #'
 #'  AUC and ROC code
 #'
-#'  $Revision: 1.1 $ $Date: 2018/05/13 23:56:20 $
+#'  $Revision: 1.3 $ $Date: 2019/12/06 06:32:06 $
 
 require(spatstat)
 local({
+  A <- roc(spiders, "x")
+  B <- auc(spiders, "y")
   fit <- kppm(redwood ~ I(y-x))
   a <- roc(fit)
   b <- auc(fit)
-  d <- roc(spiders, "x")
-  e <- auc(spiders, "y")
+  fet <- ppm(amacrine~x+y+marks)
+  d <- roc(fet)
+  e <- auc(fet)
   fut <- lppm(spiders ~ I(y-x))
   f <- roc(fut)
-  g <- roc(fut)
+  g <- auc(fut)
 })
 ## badwindowcheck.R
 ## $Revision: 1.2 $  $Date: 2014/01/27 07:18:41 $
@@ -31,7 +34,7 @@ local({
   b <- split(b, factor(b$i))
   b <- lapply(b, function(z) { as.list(z[,-3]) })
   ## make owin without checking
-  W <- owin(poly=b, check=FALSE)
+  W <- owin(poly=b, check=FALSE, fix=FALSE)
   ## Apply stringent checks
   owinpolycheck(W,verbose=FALSE)
   ## Auto-repair
@@ -86,7 +89,7 @@ local({
 #'
 #'    Circular data and periodic distributions
 #'
-#'    $Revision: 1.2 $  $Date: 2019/03/16 04:18:34 $
+#'    $Revision: 1.3 $  $Date: 2019/12/06 06:15:22 $
 
 require(spatstat)
 local({
@@ -99,13 +102,31 @@ local({
   set.seed(19171025)
   aa <- replicate(7, runif(1, 0, 2*pi) + c(0, runif(1, 0, pi)), simplify=FALSE)
   bb <- circunion(aa)
+
+  assertsingle <- function(x, a, id) {
+    y <- circunion(x)
+    if(length(y) != 1 || max(abs(y[[1]] - a)) > .Machine$double.eps)
+      stop(paste("Incorrect result from circunion in case", id),
+           call.=FALSE)
+    invisible(NULL)
+  }
+
+  assertsingle(list(c(pi/3, pi), c(pi/2, 3*pi/2)),
+               c(pi/3, 3*pi/2),
+               1)
+  assertsingle(list(c(0, pi/2), c(pi/4, pi)),
+               c(0,pi),
+               2)
+  assertsingle(list(c(-pi/4, pi/2), c(pi/4, pi)),
+               c((2-1/4)*pi, pi),
+               3)
 })
 
   
 ##  tests/closeshave.R
 ## check 'closepairs/crosspairs' code
 ## validity and memory allocation
-## $Revision: 1.19 $ $Date: 2019/04/29 06:00:38 $
+## $Revision: 1.20 $ $Date: 2019/10/28 08:52:46 $
 
 local({
   r <- 0.12
@@ -116,6 +137,9 @@ local({
   stopifnot(identical(close.ij, close.all[c("i","j")]))
   stopifnot(identical(close.ijd, close.all[c("i","j","d")]))
 
+  #' test memory overflow code
+  close.cigar <- closepairs(redwood, r, what="ijd", nsize=2)
+  
   Y <- split(amacrine)
   on <- Y$on
   off <- Y$off
@@ -155,6 +179,8 @@ local({
   # execute only:
   old.close.every <- closepairs(redwood, r, what="all", distinct=FALSE)
   old.close.once <- closepairs(redwood, r, what="all", twice=FALSE)
+  #' test memory overflow code
+  old.close.cigar <- closepairs(redwood, r, what="ijd", nsize=2)
   ## ...............................................
   spatstat.options(op)
   ## ...............................................
@@ -166,6 +192,8 @@ local({
   alt.close.ij <- closepairs(redwood, r, what="indices")
   alt.close.ijd <- closepairs(redwood, r, what="ijd")
   alt.close.all <- closepairs(redwood, r, what="all")
+  #' test memory overflow code
+  alt.close.cigar <- closepairs(redwood, r, what="ijd", nsize=2)
   spatstat.options(op)
   ## ...............................................
   
@@ -230,6 +258,8 @@ local({
   cl <- closepairs(X, 0.2, distinct=FALSE, what="indices")
   cl <- closepairs(X, 0.2, distinct=FALSE, what="ijd")
   cl <- closepairs(X, 0.2, twice=FALSE, neat=TRUE)
+  #' Test memory overflow code
+  cl <- closepairs(X, 0.2, what="ijd", nsize=2)
   #' trap obsolete usage
   cl <- closepairs(X, 0.2, ordered=FALSE)
   #' crosspairs
@@ -307,7 +337,7 @@ local({
 ##
 ##  Colour value manipulation and colour maps
 ##
-## $Revision: 1.5 $ $Date: 2019/08/03 06:50:40 $
+## $Revision: 1.6 $ $Date: 2019/12/10 01:09:02 $
 ##
 
 require(spatstat)
@@ -349,6 +379,15 @@ local({
    arr <- col.args.to.grey(argh)
    rrgh <- col.args.to.grey(argh, transparent=TRUE)
 
+   #' constant colour map
+   colourmap("grey", range=c(0.01, 0.1))
+   colourmap("grey", range=as.Date(c("2018-01-01", "2018-12-31")))
+   colourmap("grey",
+             breaks=as.Date(c("2018-01-01", "2018-04-01",
+                              "2018-07-01", "2018-10-01", "2018-12-31")))
+   colourmap("grey", inputs=month.name)
+
+   #' empty colour map
    niets <- lut()
    print(niets)
    summary(niets)
@@ -362,7 +401,7 @@ local({
 #'
 #'   Check machinery for first contact distributions
 #'
-#'   $Revision: 1.4 $  $Date: 2019/08/12 09:51:55 $
+#'   $Revision: 1.5 $  $Date: 2019/10/14 08:34:27 $
 
 require(spatstat)
 local({
@@ -377,7 +416,13 @@ local({
   X <- runifpoint(100, win = complement.owin(Y))
   G <- Gfox(X, Y)
   J <- Jfox(X, Y)
+
+  op <- spatstat.options(exactdt.checks.data=TRUE)
+  U <- exactdt(X)
+  spatstat.options(op)
 })
+
+reset.spatstat.options()
 #'
 #'   tests/contrib.R
 #'
@@ -528,7 +573,7 @@ local({
 #'                    and inhomogeneous summary functions
 #'                    and idw, adaptive.density
 #'
-#'  $Revision: 1.39 $  $Date: 2019/02/11 09:49:23 $
+#'  $Revision: 1.43 $  $Date: 2019/11/01 09:03:42 $
 #'
 
 require(spatstat)
@@ -813,20 +858,34 @@ local({
   Zno  <- Kmeasure(redwood, sigma=0.2, expand=FALSE)
   Zyes <- Kmeasure(redwood, sigma=0.2, expand=TRUE)
   #' All code blocks
-  diagmat <- diag(c(1,1))
-  generalmat <- matrix(c(1, 0.5, 0.5, 1), 2, 2)
+  sigmadouble <- rep(0.1, 2)
+  diagmat <- diag(sigmadouble^2)
+  generalmat <- matrix(c(1, 0.5, 0.5, 1)/100, 2, 2)
+  Z <- Kmeasure(redwood, sigma=sigmadouble)
+  Z <- Kmeasure(redwood, varcov=diagmat)
+  Z <- Kmeasure(redwood, varcov=generalmat)
   A <- second.moment.calc(redwood, 0.1, what="all", debug=TRUE)
-  B <- second.moment.calc(redwood, varcov=diagmat/100,    what="all")
-  D <- second.moment.calc(redwood, varcov=generalmat/100, what="all")
+  B <- second.moment.calc(redwood, varcov=diagmat,    what="all")
+  B <- second.moment.calc(redwood, varcov=diagmat,    what="all")
+  D <- second.moment.calc(redwood, varcov=generalmat, what="all")
   PR <- pixellate(redwood)
-  DR <- second.moment.calc(list(PR, PR), 0.1, debug=TRUE,
-                           npts=npoints(redwood), obswin=Window(redwood))
+  DRno  <- second.moment.calc(PR, 0.2, debug=TRUE, expand=FALSE,
+                              npts=npoints(redwood), obswin=Window(redwood))
+  DRyes <- second.moment.calc(PR, 0.2, debug=TRUE, expand=TRUE,
+                              npts=npoints(redwood), obswin=Window(redwood))
+  DR2 <- second.moment.calc(solist(PR, PR), 0.2, debug=TRUE, expand=TRUE,
+                            npts=npoints(redwood), obswin=Window(redwood))
+  Gmat <- generalmat * 100
   isoGauss <- function(x,y) {dnorm(x) * dnorm(y)}
   ee <- evaluate2Dkernel(isoGauss, runif(10), runif(10),
-                         varcov=generalmat, scalekernel=TRUE)
+                         varcov=Gmat, scalekernel=TRUE)
   isoGaussIm <- as.im(isoGauss, square(c(-3,3)))
   gg <- evaluate2Dkernel(isoGaussIm, runif(10), runif(10),
-                         varcov=generalmat, scalekernel=TRUE)
+                         varcov=Gmat, scalekernel=TRUE)
+  ## experimental code
+  op <- spatstat.options(developer=TRUE)
+  DR <- density(redwood, 0.1)
+  spatstat.options(op)
 })
 
 local({
@@ -835,6 +894,10 @@ local({
 #  bw.relrisk(urkiola, hmax=20) is tested in man/bw.relrisk.Rd
   bw.relrisk(urkiola, hmax=20, method="leastsquares")
   bw.relrisk(urkiola, hmax=20, method="weightedleastsquares")
+  ZX <- density(swedishpines, at="points")
+  bw.pcf(swedishpines, lambda=ZX)
+  bw.pcf(swedishpines, lambda=ZX,
+         bias.correct=FALSE, simple=FALSE, cv.method="leastSQ")
   spatstat.options(op)
 })
 
@@ -866,6 +929,15 @@ local({
   B <- adaptive.density(nztrees, nrep=2, f=0.5, counting=TRUE, fixed=TRUE)
   D <- adaptive.density(nztrees, nrep=2, f=0.5, counting=FALSE)
   E <- adaptive.density(nztrees, nrep=2, f=0.5, counting=FALSE, fixed=TRUE)
+  #' adaptive kernel estimation
+  d10 <- nndist(nztrees, k=10)
+  d10fun <- distfun(nztrees, k=10)
+  d10im  <- as.im(d10fun)
+  uN <- 2 * runif(npoints(nztrees))
+  AA <- densityAdaptiveKernel(nztrees, bw=d10)
+  BB <- densityAdaptiveKernel(nztrees, bw=d10, weights=uN)
+  DD <- densityAdaptiveKernel(nztrees, bw=d10fun, weights=uN)
+  EE <- densityAdaptiveKernel(nztrees, bw=d10im, weights=uN)
 })
 
 reset.spatstat.options()
@@ -875,16 +947,26 @@ reset.spatstat.options()
 #'
 #'  Diagnostic tools such as diagnose.ppm, qqplot.ppm
 #'
-#'  $Revision: 1.1 $  $Date: 2018/05/22 11:57:12 $
+#'  $Revision: 1.2 $  $Date: 2019/10/02 10:36:42 $
 #'
 
 require(spatstat)
 local({
   fit <- ppm(cells ~ x)
+  diagE <- diagnose.ppm(fit, type="eem")
+  diagI <- diagnose.ppm(fit, type="inverse")
+  diagP <- diagnose.ppm(fit, type="Pearson")
+  plot(diagE, which="all")
+  plot(diagI, which="smooth")
+  plot(diagP, which="x")
+  #'
   e <- envelope(cells, nsim=4, savepatterns=TRUE, savefuns=TRUE)
   qf <- qqplot.ppm(fit, nsim=4, expr=e, plot.it=FALSE)
   print(qf)
   qg <- qqplot.ppm(fit, nsim=5, style="classical", plot.it=FALSE)
+  #' infinite reach, not border-corrected
+  fut <- ppm(cells ~ x, Softcore(0.5), correction="isotropic")
+  diagnose.ppm(fut)
 })
 #'
 #'  tests/discarea.R
@@ -967,18 +1049,29 @@ K <- ApplyConnected(X, linearK, rule=function(...) list())
 #'
 #'   Additional tests for Dominic Schuhmacher's code
 #'
-#'   $Revision: 1.2 $  $Date: 2018/10/26 08:12:26 $
+#'   $Revision: 1.3 $  $Date: 2019/10/11 04:33:29 $
 
 require(spatstat)
 local({
   X <- runifpoint(10)
   Y <- runifpoint(10)
-  d <- pppdist(X, Y, type="ace", show.rprimal=TRUE)
-  d2 <- pppdist(X, Y, type="spa", ccode=FALSE)
-  d3 <- pppdist(X, Y, type="mat", ccode=TRUE, auction=FALSE)
-  m <- pppdist.mat(X, Y, q=Inf, cutoff=0.001)
+
+  d  <- pppdist(X, Y, type="ace", show.rprimal=TRUE)
   a <- matchingdist(d, type="ace")
   b <- matchingdist(d, type="mat")
+
+  d2 <- pppdist(X, Y, type="spa", ccode=FALSE)
+  d2 <- pppdist(X, Y, type="spa", ccode=TRUE, auction=FALSE)
+  d3 <- pppdist(X, Y, type="mat", ccode=TRUE, auction=FALSE)
+  d4 <- pppdist(X[FALSE], Y[FALSE], matching=TRUE, type="spa")
+  d4 <- pppdist(X[FALSE], Y[FALSE], matching=FALSE, type="spa")
+  d4 <- pppdist(X[FALSE], Y[FALSE], matching=TRUE, type="ace")
+  d4 <- pppdist(X[FALSE], Y[FALSE], matching=FALSE, type="ace")
+
+  m  <- pppdist.mat(X, Y, q=Inf, cutoff=0.001)
+  m2 <- pppdist.mat(X[FALSE], Y[FALSE], q=Inf, cutoff=0.001)
+  m3 <- pppdist.mat(X[FALSE], Y[FALSE], q=2, cutoff=0.001)
+
 })
 
 
@@ -1017,21 +1110,22 @@ local({
 #'
 #'  Tests of duplicated/multiplicity code
 #'
-#' $Revision: 1.3 $ $Date: 2019/05/20 05:09:51 $
+#' $Revision: 1.7 $ $Date: 2019/12/06 02:41:32 $
 
 require(spatstat)
 local({
    X <- ppp(c(1,1,0.5,1), c(2,2,1,2), window=square(3), check=FALSE)
    Y <- X %mark% factor(letters[c(3,2,4,3)])
+   ZC <- X %mark% letters[c(3,2,4,3)]
    ZM <- Y %mark% matrix(c(3,2,4,3), 4, 2)
-   ZD <- ZM
-   marks(ZD) <- as.data.frame(marks(ZM))
+   ZD <- Y %mark% as.data.frame(marks(ZM))
 
    #' multiplicity
    m <- multiplicity(X)
    mf <- multiplicity(Y)
    mm <- multiplicity(ZM)
    mz <- multiplicity(ZD)
+   mc <- multiplicity(ZC)
    ## default method
    kk <- c(1,2,3,1,1,2)
    mk <- multiplicity(kk)
@@ -1054,8 +1148,43 @@ local({
                   "does not respect sequential ordering"))
      return(invisible(NULL))
    }
-   checkum(X, "<unmarked pattern>")
-   checkum(Y, "<multitype pattern>")
-   checkum(ZM, "<pattern with matrix of marks>")
-   checkum(ZD, "<pattern with several columns of marks>")
+   checkum(X, "<unmarked point pattern>")
+   checkum(Y, "<multitype point pattern>")
+   checkum(ZC, "<point pattern with character marks>")
+   checkum(ZM, "<point pattern with matrix of marks>")
+   checkum(ZD, "<point pattern with several columns of marks>")
+
+   ## uniquemap.data.frame
+   dfbase <- as.data.frame(replicate(3, sample(1:20, 10), simplify=FALSE))
+   df <- dfbase[sample(1:10, 30, replace=TRUE), , drop=FALSE]
+   #' faster algorithm for numeric values
+   checkum(df, "<numeric data frame>")
+   a <- uniquemap(df)
+   #' general algorithm using 'duplicated' and 'match'
+   dfletters <- as.data.frame(matrix(letters[as.matrix(df)], nrow=nrow(df)))
+   checkum(dfletters, "<character data frame>")
+   b <- uniquemap(dfletters)
+   if(!isTRUE(all.equal(a,b)))
+     stop("inconsistency between algorithms in uniquemap.data.frame")
+
+   ## uniquemap.matrix
+   M0 <- matrix(1:12, 3, 4)
+   ii <- sample(1:3, 5, replace=TRUE)
+   M4 <- M0[ii, , drop=FALSE]
+   checkum(M4, "<integer matrix>")
+   u4 <- uniquemap(M4)
+   C4 <- matrix(letters[M4], 5, 4)
+   uc4 <- uniquemap(C4)
+   checkum(C4, "<character matrix>")
+   if(!isTRUE(all.equal(u4, uc4)))
+     stop("Inconsistency between algorithms in uniquemap.matrix")
+   
+   ## uniquemap.default
+   a <- letters[c(1, 1:4, 3:2)]
+   checkum(a, "<character>")
+   checkum(as.list(a), "<list>")
+   u1 <- uniquemap(a)
+   u2 <- uniquemap(as.list(a))
+   if(!isTRUE(all.equal(u1, u2)))
+     stop("Inconsistency between algorithms in uniquemap.default")
 })

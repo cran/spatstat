@@ -1,7 +1,7 @@
 #
 #  psp.R
 #
-#  $Revision: 1.97 $ $Date: 2019/05/31 05:50:13 $
+#  $Revision: 1.101 $ $Date: 2019/11/18 07:05:03 $
 #
 # Class "psp" of planar line segment patterns
 #
@@ -150,7 +150,7 @@ as.psp.data.frame <- function(x, ..., window=NULL, marks=NULL,
   }
 
   if(!is.null(marks)) {
-    if(identical(ncol(marks), 1L)) marks <- marks[,1L]
+    #' SUPPRESSED: if(identical(ncol(marks), 1L)) marks <- marks[,1L]
     #' assign marks directly to avoid infinite recursion
     out$marks <- marks
     out$markformat <- markformat(marks)
@@ -241,6 +241,8 @@ as.data.frame.psp <- function(x, row.names=NULL, ...) {
 #######  manipulation ##########################
 
 append.psp <- function(A,B) {
+  if(is.null(A) && (is.psp(B) || is.null(B))) return(B)
+  if(is.null(B) && is.psp(A)) return(A)
   verifyclass(A, "psp")
   verifyclass(B, "psp")
   stopifnot(identical(A$window, B$window))
@@ -338,6 +340,7 @@ plot.psp <- function(x, ..., main, add=FALSE,
                      show.window=show.all,
                      which.marks=1,
                      style=c("colour", "width", "none"),
+                     col=NULL,
                      ribbon=show.all, ribsep=0.15, ribwid=0.05, ribn=1024,
                      do.plot=TRUE) {
   if(missing(main) || is.null(main))
@@ -357,7 +360,7 @@ plot.psp <- function(x, ..., main, add=FALSE,
     if(length(dim(marx))) marx <- marx[,which.marks]
     f <- function(x,y,seg,tp, values=marx) { values[seg] }
     g <- linfun(f, L)
-    out <- plot(g, style="width", ..., main=main, add=add,
+    out <- plot(g, style="width", ..., main=main, add=add, col=col,
                 show.all=show.all, show.window=show.window, do.plot=do.plot)
     return(invisible(out))
   }
@@ -421,39 +424,52 @@ plot.psp <- function(x, ..., main, add=FALSE,
     return(invisible(result))
   }
   
-  # determine colours if any
-  if(!use.marks) {
-    # black
-    col <- colmap <- NULL
-  } else {
-    # multicoloured 
+  ## determine colours if any
+  colmap <- NULL
+  if(use.marks) {
+    ## use colours
     marx <- as.data.frame(marx)[, which.marks]
     if(is.character(marx) || length(unique(marx)) == 1)
       marx <- factor(marx)
-    if(is.factor(marx)) {
-      lev <- levels(marx)
-      colmap <- colourmap(col=rainbow(length(lev)), inputs=factor(lev))
-    } else {
-      if(!all(is.finite(marx)))
-        warning("Some mark values are infinite or NaN or NA")
-      colmap <- colourmap(col=rainbow(ribn), range=range(marx, finite=TRUE))
+    if(is.null(col)) {
+      ## no colour info: use default colour palette
+      nc <- if(is.factor(marx)) {
+              length(levels(marx))
+            } else {
+              min(256, length(unique(marx)))
+            }
+      colfun <- spatstat.options("image.colfun")
+      col <- colfun(nc)
     }
+    ## determine colour map
+    if(inherits(col, "colourmap")) {
+      colmap <- colourmap
+    } else if(is.colour(col)) {
+      ## colour values given; create colour map
+      if(is.factor(marx)) {
+        lev <- levels(marx)
+        colmap <- colourmap(col=col, inputs=factor(lev))
+      } else {
+        if(!all(is.finite(marx)))
+          warning("Some mark values are infinite or NaN or NA")
+        colmap <- colourmap(col=col, range=range(marx, finite=TRUE))
+      }
+    } else stop("Format of argument 'col' is not recognised")
+    #' map the mark values to colours
     col <- colmap(marx)
   }
-
   ## convert to greyscale?
   if(spatstat.options("monochrome")) {
     col <- to.grey(col)
     colmap <- to.grey(colmap)
   }
-
   if(do.plot) {
     ## plot segments
     do.call.plotfun(segments,
                     resolve.defaults(as.list(x$ends),
                                      list(...),
                                      list(col=col),
-                                     .StripNull=TRUE),
+                                     .MatchNull=FALSE, .StripNull=TRUE),
                     extrargs=names(par()))
     ## plot ribbon
     if(do.ribbon) 

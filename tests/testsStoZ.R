@@ -11,10 +11,12 @@ local({
   subspaceDistance(AN$B, AV$B)
   dimhat(AN$M)
 })
-#
-#  tests/segments.R
-#
-#  $Revision: 1.14 $  $Date: 2019/04/28 02:06:12 $
+##
+##  tests/segments.R
+##   Tests of psp class and related code
+##                      [SEE ALSO: tests/xysegment.R]
+##
+##  $Revision: 1.19 $  $Date: 2019/12/10 01:01:35 $
 
 require(spatstat)
 
@@ -94,6 +96,12 @@ if(abs(s1 - s2)/s2 > 0.01) {
              "!=", s2, "= sum(lengths.psp(X))"))
 }
 
+#' cases of superimpose.psp
+A <- as.psp(matrix(runif(40), 10, 4), window=owin())
+B <- as.psp(matrix(runif(40), 10, 4), window=owin())
+superimpose(A, B, W=ripras)
+superimpose(A, B, W="convex")
+
 #' tests of density.psp
 Y <- as.psp(simplenet)
 YC <- density(Y, 0.2, method="C", edge=FALSE, dimyx=64)
@@ -103,6 +111,12 @@ xCI <- max(abs(YC/YI - 1))
 xFI <- max(abs(YF/YI - 1))
 if(xCI > 0.01) stop(paste("density.psp C algorithm relative error =", xCI))
 if(xFI > 0.01) stop(paste("density.psp FFT algorithm relative error =", xFI))
+B <- square(0.3)
+density(Y, 0.2, at=B)
+density(Y, 0.2, at=B, edge=TRUE, method="C")
+Z <- runifpoint(3, B)
+density(Y, 0.2, at=Z)
+density(Y, 0.2, at=Z, edge=TRUE, method="C")
 
 #' as.psp.data.frame
 
@@ -127,29 +141,57 @@ if(xFI > 0.01) stop(paste("density.psp FFT algorithm relative error =", xFI))
   summary(M)
   subset(M, select=len)
 
-#' miscellaneous cases
-  marks(M) <- marks(M)[1,,drop=FALSE]
-
-#' plot method cases  
+  #' plot method cases  
   spatstat.options(monochrome=TRUE)
   plot(B)
   plot(G)
+  plot(M)
   spatstat.options(monochrome=FALSE)
   plot(B)
   plot(G)
+  plot(M)
+  #' misuse of 'col' argument - several cases
+  plot(G, col="grey") # discrete
+  plot(B, col="grey") 
+  plot(unmark(B), col="grey") 
+  plot(M, col="grey") 
   
-#' undocumented  
+  #' miscellaneous class support cases
+  marks(M) <- marks(M)[1,,drop=FALSE]
+
+  #' undocumented  
   as.ppp(B)
 
   #' segment crossing code
   X <- psp(runif(30),runif(30),runif(30),runif(30), window=owin())
+  A <- selfcut.psp(X, eps=1e-11)
+  B <- selfcut.psp(X[1])
+  #' 
   Y <- psp(runif(30),runif(30),runif(30),runif(30), window=owin())
   Z <- edges(letterR)[c(FALSE,TRUE)]
-  spatstat.options(selfcrossing.psp.useCall=FALSE)
-  selfcrossing.psp(X)
-  selfcrossing.psp(Z)
-  crossing.psp(X,Y,details=TRUE)
-  spatstat.options(selfcrossing.psp.useCall=TRUE)
+  spatstat.options(selfcrossing.psp.useCall=FALSE, crossing.psp.useCall=FALSE)
+  A <- selfcrossing.psp(X)
+  B <- selfcrossing.psp(Z)
+  D <- crossing.psp(X,Y,details=TRUE)
+  spatstat.options(selfcrossing.psp.useCall=TRUE, crossing.psp.useCall=TRUE)
+  A <- selfcrossing.psp(X)
+  B <- selfcrossing.psp(Z)
+  D <- crossing.psp(X,Y,details=TRUE)
+})
+
+local({
+  #' test rshift.psp and append.psp with marks (Ute Hahn)
+  m <- data.frame(A=1:10, B=letters[1:10])
+  g <- gl(3, 3, length=10)
+  X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin(), marks=m)
+  Y <- rshift(X, radius = 0.1)
+  Y <- rshift(X, radius = 0.1, group=g)
+  #' mark management
+  b <- data.frame(A=1:10)
+  X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin(), marks=b)
+  stopifnot(is.data.frame(marks(X)))
+  Y <- rshift(X, radius = 0.1)
+  Y <- rshift(X, radius = 0.1, group=g)
 })
 
 reset.spatstat.options()
@@ -274,7 +316,7 @@ local({
 
 #'    tests/sparse3Darrays.R
 #'  Basic tests of code in sparse3Darray.R and sparsecommon.R
-#'  $Revision: 1.16 $ $Date: 2018/07/06 01:54:17 $
+#'  $Revision: 1.20 $ $Date: 2019/11/28 04:18:22 $
 
 require(spatstat)
 local({
@@ -311,6 +353,8 @@ local({
   #' vector to sparse array
   A11 <- A[,1,1]
   AA11 <- as.sparse3Darray(A11)
+  #' NULL with warning
+  as.sparse3Darray(list())
 
   #' 
   dim(AA) <- dim(AA) + 1
@@ -339,12 +383,20 @@ local({
     bb <- EntriesToSparse(df, 7)
     cc <- EntriesToSparse(df, c(7, 4))
     dd <- EntriesToSparse(df, c(7, 4, 3))
+    #' duplicated entries
+    dfdup <- df[c(1:3, 2), ]
+    aa <- EntriesToSparse(dfdup, NULL)
+    bb <- EntriesToSparse(dfdup, 7)
+    cc <- EntriesToSparse(dfdup, c(7, 4))
+    dd <- EntriesToSparse(dfdup, c(7, 4, 3))
   }
 
   BB <- evalSparse3Dentrywise(AA + AA/2)
 
   MM <- bind.sparse3Darray(M, M, along=1)
   MM <- bind.sparse3Darray(M, M, along=2)
+
+  RelevantEmpty(42)
 })
 
     
@@ -371,17 +423,26 @@ local({
     M[, 3, , drop=FALSE]
     M[c(FALSE,TRUE,FALSE,FALSE,TRUE), , ]
     M[, , c(FALSE,FALSE), drop=FALSE]
+    M[1:2, 1, 2:3] # exceeds array bounds
     # matrix index
     M[cbind(3:5, 3:5, c(1,2,1))]
     M[cbind(3:5, 3:5, 2)]
     M[cbind(3:5,   2, 2)]
     M[cbind(c(2,2,4), c(3,3,2), 1)] # repeated indices
-    
+    M[cbind(1:4, 1, 2:3)] # exceeds array bounds
+
     MA <- as.array(M)
     UA <- as.array(U)
 
+    Mfix <- sparse3Darray(i=1:3, j=c(3,1,2), k=4:2,
+                          x=runif(3), dims=rep(4, 3))
+    Mfix[cbind(1,3,4)] # single entry - occupied
+    Mfix[cbind(1,2,4)] # single entry - unoccupied
+    Mfix[cbind(1,c(2,3,2,3),4)] # sparse vector with repeated entries
+    
+
     ## tests of "[<-.sparse3Darray"
-    Mflip <- Mzero <- MandM <- Mnew <- M
+    Mflip <- Mzero <- MandM <- Mnew <- Mext <- M
     Mflip[ , , 2:1] <- M
     stopifnot(Mflip[3,1,1] == M[3,1,2])
     Mzero[1:3,1:3,] <- 0
@@ -403,6 +464,7 @@ local({
     V5 <- sparseVector(x=1:2, i=2:3, length=5)
     M[,2,2] <- V5
     M[,,2] <- V5
+    Mext[1,2,3] <- 4 # exceeds array bounds
     ## integer matrix index
     Mnew[cbind(3:5, 3:5, c(1,2,1))] <- 1:3
     Mnew[cbind(3:5, 3:5, 2)] <- 1:3
@@ -410,7 +472,6 @@ local({
     Mnew[cbind(3:5, 3:5, c(1,2,1))] <- V3
     Mnew[cbind(3:5, 3:5, 2)] <- V3
     Mnew[cbind(3:5,   2, 2)] <- V3
-
     ## tests of arithmetic (Math, Ops, Summary)
     negM <- -M
     oneM <- 1 * M
@@ -433,9 +494,9 @@ local({
     ## reconcile dimensions
     Msub <- M[,,1,drop=FALSE]
     Mdif <- M - Msub
-
+    Mduf <- Msub - M
+    
     ## tensor operator
-
     tenseur(c(1,-1), M, 1, 3)
     tenseur(M, M, 1:2, 1:2)
     tenseur(M, M, 1:2, 2:1)
@@ -463,6 +524,12 @@ local({
     # no entries indexed
     Z[integer(0), integer(0), integer(0)] <- 42
     Z[matrix(, 0, 3)] <- 42
+
+    ## complex valued arrays
+    Mcplx <- sparse3Darray(i=1:3, j=c(3,1,2), k=4:2,
+                           x=runif(3)+runif(3)*1i, dims=rep(4, 3))
+    print(Mcplx)
+    
 
     #' -----------  sparsecommon.R -----------------------
     B <- sparseMatrix(i=1:3, j=3:1, x= 10 * (1:3), dims=c(4,4))
@@ -638,7 +705,7 @@ local({
 })
 #'   tests/tessera.R
 #'   Tessellation code, not elsewhere tested
-#'   $Revision: 1.6 $ $Date: 2019/08/07 06:56:16 $
+#'   $Revision: 1.7 $ $Date: 2019/10/17 01:45:56 $
 #'
 require(spatstat)
 local({
@@ -728,6 +795,11 @@ local({
   h <- quantess(D, ZFUN, 5)
   g <- quantess(D, "rad", 5, origin=c(4442, 4214))
   g <- quantess(D, "ang", 5, origin=c(4442, 4214))
+  #'
+  X <- shift(chorley, vec = c(1e6, 0))
+  tes <- quantess(X, "x", 4)
+  if(anyDuplicated(tilenames(tes)))
+    stop("quantess produced non-unique tilenames")
 })
 #
 #   tests/testaddvar.R
@@ -748,19 +820,22 @@ addvar(model, "x", subregion=w, bw.input="points")
 #
 # additional test of parres
 #
-#  $Revision: 1.4 $  $Date: 2019/01/02 08:27:51 $
+#  $Revision: 1.5 $  $Date: 2019/12/03 07:10:07 $
 #
 require(spatstat)
 local({
 X <-  rpoispp(function(x,y){exp(3+x+2*x^2)})
 model <- ppm(X ~x+y)
 
-# options in parres
+# options in parres (and code blocks in print.parres)
 parres(model, "x")
+parres(model, "x", smooth.effect=TRUE)
 parres(model, "x", bw.input="quad")
 w <- square(0.5)
 parres(model, "x", subregion=w)
 parres(model, "x", subregion=w, bw.input="quad")
+f <- function(x,y) { x + y }
+parres(model, f)
 
 # check whether 'update.ppm' has messed up internals
 mod2 <- update(model, ~x)
@@ -881,7 +956,7 @@ local({
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.10 $   $Date: 2019/08/07 06:16:45 $
+#   $Revision: 1.11 $   $Date: 2019/11/29 03:41:54 $
 #
 #  Test undocumented hacks, experimental code, etc
 
@@ -964,6 +1039,13 @@ local({
       a <- do.istat(fakepanel)
     }
   }
+
+  #' version-checking
+  now <- Sys.Date()
+  versioncurrency.spatstat(now + 80, FALSE)
+  versioncurrency.spatstat(now + 140, FALSE)
+  versioncurrency.spatstat(now + 400, FALSE)
+  versioncurrency.spatstat(now + 1000)
 })
 
 ##
@@ -1166,7 +1248,7 @@ local({
 #
 # Tests of owin geometry code
 #
-#  $Revision: 1.9 $  $Date: 2019/02/10 06:52:45 $
+#  $Revision: 1.10 $  $Date: 2019/10/02 10:16:09 $
 
 require(spatstat)
 local({
@@ -1264,9 +1346,35 @@ local({
   thrash(intY.owin)
 })
 
+
+local({
+  #' mask conversion
+  M <- as.mask(letterR)
+  D2 <- as.data.frame(M)              # two-column
+  D3 <- as.data.frame(M, drop=FALSE)  # three-column
+  M2 <- as.owin(D2)
+  M3 <- as.owin(D3)
+  W2 <- owin(mask=D2)
+  W3 <- owin(mask=D3)
+  #' void/empty cases
+  nix <- nearest.raster.point(numeric(0), numeric(0), M)
+  E <- emptywindow(Frame(letterR))
+  print(E)
+  #' cases of summary.owin
+  print(summary(E)) # empty
+  print(summary(Window(humberside))) # single polygon
+  #' additional cases of owin()
+  B <- owin(mask=M$m) # no pixel size or coordinate info
+  xy <- as.data.frame(letterR)
+  xxyy <- split(xy[,1:2], xy$id)
+  spatstat.options(checkpolygons=TRUE)
+  H <- owin(poly=xxyy, check=TRUE)
+})
+
 reset.spatstat.options()
 ##
 ## tests/xysegment.R
+##                      [SEE ALSO tests/segments.R]
 ##
 ##    Test weird problems and boundary cases for line segment code
 ##

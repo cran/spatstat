@@ -138,6 +138,7 @@
 \alias{doMultiStraussHard}
 \alias{dppmFixAlgorithm}
 \alias{dppmFixIntensity}
+\alias{drawSignedPoly}
 \alias{emptywindow}
 \alias{envelopeEngine}
 \alias{envelopeProgressData}
@@ -188,6 +189,7 @@
 \alias{format.numberwithunit}
 \alias{FormatFaspFormulae}
 \alias{framebottomleft}
+\alias{fullIndexSequence}
 \alias{fvexprmap}
 \alias{fvlabels}
 \alias{fvlabels<-}
@@ -320,12 +322,15 @@
 \alias{logLik.vblogit}
 \alias{looVoronoiLPP}
 \alias{makeLinnetTolerance}
+\alias{markvaluetype}
 \alias{maskLaslett}
 \alias{match2DkernelName}
+\alias{packupNNdata}
 \alias{parbreak}
-\alias{plan.legend.layout}
 \alias{PairPotentialType}
 \alias{PDEdensityLPP}
+\alias{plan.legend.layout}
+\alias{plotWidthMap}
 \alias{PoisSaddle}
 \alias{PoisSaddleArea}
 \alias{PoisSaddleGeyer}
@@ -659,6 +664,7 @@
 \alias{sphere.volume}
 \alias{store.versionstring.spatstat}
 \alias{str.hyperframe}
+\alias{strictIndexSequence}
 \alias{strausscounts}
 \alias{suffloc}
 \alias{suffstat.generic}
@@ -698,7 +704,6 @@
 \alias{unitname.default}
 \alias{unitname<-.default}
 \alias{unstackFilter}
-\alias{unstack.lintess}
 \alias{update.im}
 \alias{update.ippm}
 \alias{update.msr}
@@ -714,6 +719,7 @@
 \alias{varcountEngine}
 %\alias{vblogit} %DoNotExport
 %\alias{vblogit.fmla} %DoNotExport
+\alias{versioncurrency.spatstat}
 \alias{versionstring.interact}
 \alias{versionstring.ppm}
 \alias{versionstring.spatstat}
@@ -751,9 +757,11 @@
 \alias{[<-.sparse3Darray}
 \alias{anyNA.sparse3Darray}
 \alias{RelevantZero}
+\alias{RelevantNA}
 \alias{RelevantEmpty}
 \alias{isRelevantZero}
 \alias{unionOfSparseIndices}
+\alias{Complex.sparse3Darray}
 \alias{Math.sparse3Darray}
 \alias{Ops.sparse3Darray}
 \alias{Summary.sparse3Darray}
@@ -843,7 +851,8 @@ breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
 breakpts.from.r(r)
 bt.frame(Q, trend, interaction, \dots, covariates,
          correction, rbord, use.gam, allcovar)
-bw.optim(cv, h, iopt, \dots, cvname, hname, criterion, unitname)
+bw.optim(cv, h, iopt, \dots, cvname, hname, criterion,
+         warnextreme, hargnames, unitname)
 calc.DR(COV, z, Dim)
 calc.NNIR(COV, z, pos, Dim)
 calc.SAVE(COV, z, Dim)
@@ -942,6 +951,7 @@ do.istat(panel)
 doMultiStraussHard(iradii, hradii, types)
 dppmFixIntensity(DPP, lambda, po)
 dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
+drawSignedPoly(x,y,pars,sgn)
 emptywindow(w)
 envelopeEngine(X, fun, simul,
            nsim, nrank, \dots, funargs, funYargs,
@@ -952,7 +962,7 @@ envelopeEngine(X, fun, simul,
            weights,
            nsim2, VARIANCE, nSD,
            Yname,
-           silent, maxnerr, maxerr.action,
+           maxnerr, rejectNA, silent, maxerr.action,
            internal, cl,
            envir.user, expected.arg, do.pwrong,
            foreignclass, collectrubbish)
@@ -964,7 +974,7 @@ envelopeTest(X, \dots, exponent, alternative,
             rinterval, leaveout, scale, clamp, tie.rule,
             interpolate, save.interpolant,
             save.envelope, savefuns, savepatterns,
-            Xname, verbose)
+            Xname, badXfatal, verbose)
 \method{envelope}{hasenvelope}(Y, \dots, Yname)
 \method{envelope}{matrix}(Y, \dots, rvals, observed, theory, funX,
   nsim, nsim2, jsim, jsim.mean,
@@ -1005,7 +1015,7 @@ fakemaintitle(bb, main, \dots)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
-FDMKERNEL(lppobj, sigma, dtt, weights, iterMax, sparse, dtx)
+FDMKERNEL(lppobj, sigma, dtt, weights, iterMax, sparse, dtx, stepnames)
 fft2D(z, inverse, west)
 fftwAvailable()
 fill.coefs(coefs, required)
@@ -1020,6 +1030,7 @@ forbid.logi(object)
 \method{format}{numberwithunit}(x, \dots, collapse, modifier)
 FormatFaspFormulae(f, argname)
 framebottomleft(w)
+fullIndexSequence(g)
 fvexprmap(x)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
@@ -1173,13 +1184,16 @@ logi.engine(Q, trend, interaction, \dots,
 looVoronoiLPP(X)
 makeLinnetTolerance
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
+markvaluetype(x)
 match2DkernelName(kernel)
+packupNNdata(NND, NNW, what, k)
 parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
 PairPotentialType(pairpot)
-PDEdensityLPP(x, sigma, \dots, weights, dx, dt,
+PDEdensityLPP(x, sigma, \dots, weights, dx, dt, iterMax,
               fun, finespacing, finedata)
+plotWidthMap(bb.leg, zlim, phys.scale, leg.scale, leg.side, leg.args, grafpar)
 PoisSaddle(beta, fi)
 PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
@@ -1544,7 +1558,7 @@ scanmeasure(X, \dots)
 scanPoisLRTS(nZ, nG, muZ, muG, alternative)
 scanBinomLRTS(nZ, nG, muZ, muG, alternative)
 second.moment.calc(x, sigma, edge, what, \dots,
-                   varcov=NULL, expand=FALSE, debug=FALSE)
+                   varcov, expand, obswin, npts, debug)
 second.moment.engine(x, sigma, edge, what, \dots,
       kernel, scalekernel, obswin, varcov, npts, debug)
 sewpcf(d, w, denargs, lambda2area, divisor)
@@ -1590,6 +1604,7 @@ sp.foundclass(cname, inlist, formalname, argsgiven)
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
 store.versionstring.spatstat()
 \method{str}{hyperframe}(object, \dots)
+strictIndexSequence(g)
 strausscounts(U,X,r,EqualPairs)
 suffloc(object)
 suffstat.generic(model, X, callstring)
@@ -1625,15 +1640,14 @@ tweak.ratfv.entry(x, \dots)
 tweak.coefs(model, new.coef)
 twostage.test(X, \dots, exponent, nsim, nsimsub,
               alternative, reuse, leaveout, interpolate,
-              savefuns, savepatterns, verbose, testblurb)
+              savefuns, savepatterns, verbose, badXfatal, testblurb)
 twostage.envelope(X, \dots, nsim, nsimsub, nrank,
                   alternative, reuse, leaveout, interpolate,
-                  savefuns, savepatterns, verbose, testlabel)
+                  savefuns, savepatterns, verbose, badXfatal, testlabel)
 x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
 unstackFilter(x)
-\method{unstack}{lintess}(x, \dots)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 
 \method{update}{msr}(object, \dots) 
@@ -1649,6 +1663,7 @@ vanilla.fv(x)
 varcountEngine(g, B, lambdaB, f)
 %vblogit(y, X, offset, eps, m0, S0, S0i, xi0, verb, maxiter, \dots)
 %vblogit.fmla(formula, offset, data, subset, weights, verbose, epsilon, \dots)
+versioncurrency.spatstat(today, checkR)
 versionstring.interact(object)
 versionstring.ppm(object)
 versionstring.spatstat()
@@ -1687,12 +1702,15 @@ as.sparse3Darray(x, \dots)
 \method{[}{sparse3Darray}(x, i, j, k, \dots) <- value
 \method{anyNA}{sparse3Darray}(x, recursive)
 RelevantZero(x)
+RelevantNA(x)
 RelevantEmpty(x)
 isRelevantZero(x)
 unionOfSparseIndices(A,B)
+\special{Complex(z)}
 \special{Math(x, \dots)}
 \special{Ops(e1, e2)}
 \special{Summary(\dots, na.rm = FALSE)}
+%NAMESPACE S3method("Complex", "sparse3Darray")
 %NAMESPACE S3method("Math", "sparse3Darray")
 %NAMESPACE S3method("Ops", "sparse3Darray")
 %NAMESPACE S3method("Summary", "sparse3Darray")

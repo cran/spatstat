@@ -380,7 +380,7 @@ clusterfit <- function(X, clusters, lambda = NULL, startpar = NULL,
     startpar <- tocanonical(startpar)
     theoret <- function(par, ...) { htheo(tohuman(par), ...) }
     if(do.adjust)
-      adjustment$data$tohuman <- tohuman
+      adjustment$auxdata$tohuman <- tohuman
   }
   #' ...................................................
   
@@ -1223,6 +1223,11 @@ print.kppm <- print.dppm <- function(x, ...) {
       splat("Fitted mean of log of random intensity:",
             if(!is.im(mu)) signif(mu, digits) else "[pixel image]")
     }
+  }
+  if(isDPP) {
+    rx <- repul(x)
+    splat(if(is.im(rx)) "(Average) strength" else "Strength",
+          "of repulsion:", signif(mean(rx), 4))
   }
   invisible(NULL)
 }

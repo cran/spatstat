@@ -3,7 +3,7 @@
 #    
 #    Linear networks
 #
-#    $Revision: 1.68 $    $Date: 2019/01/31 08:40:24 $
+#    $Revision: 1.71 $    $Date: 2019/10/29 04:24:45 $
 #
 # An object of class 'linnet' defines a linear network.
 # It includes the following components
@@ -305,8 +305,15 @@ as.linnet.psp <- function(X, ..., eps, sparse=FALSE) {
   second <- endpoints.psp(X, "second")
   from <- nncross(first, V, what="which")
   to   <- nncross(second, V, what="which")
-  nontrivial <- (from != to)
-  join <- cbind(from, to)[nontrivial, , drop=FALSE]
+  if(any(reverse <- (from > to))) {
+    newfrom <- ifelse(reverse, to, from)
+    newto   <- ifelse(reverse, from, to)
+    from <- newfrom
+    to   <- newto
+  }
+  fromto <- cbind(from, to)
+  nontrivial <- (from != to) & !duplicated(fromto)
+  join <- fromto[nontrivial, , drop=FALSE]
   result <- linnet(V, edges=join, sparse=sparse)
   if(is.marked(X)) marks(result$lines) <- marks(X[nontrivial])
   return(result)
@@ -464,7 +471,13 @@ affine.linnet <- function(X,  mat=diag(c(1,1)), vec=c(0,0), ...) {
 shift.linnet <- function(X, vec=c(0,0), ..., origin=NULL) {
   verifyclass(X, "linnet")
   Y <- X
-  Y$window  <- W <- shift(X$window, vec=vec, ..., origin=origin)
+  if(!is.null(origin)) {
+    if(!missing(vec)) 
+      warning("argument vec ignored; argument origin has precedence")
+    locn <- interpretAsOrigin(origin, Window(X))
+    vec <- -locn
+  }
+  Y$window <- W <- shift(X$window, vec=vec, ...)
   v <- getlastshift(W)
   Y$vertices <- shift(X$vertices, vec=v, ...)
   Y$lines    <- shift(X$lines, vec=v, ...)
@@ -499,6 +512,7 @@ rescale.linnet <- function(X, s, unitname) {
 "[.linnet" <- function(x, i, ..., snip=TRUE) {
   if(!is.owin(i))
     stop("In [.linnet: the index i should be a window", call.=FALSE)
+  x <- repairNetwork(x)
   w <- i
   wp <- as.polygonal(w)
   if(is.mask(w)) {

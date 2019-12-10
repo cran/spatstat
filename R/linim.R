@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.56 $   $Date: 2019/09/11 09:29:52 $
+#  $Revision: 1.63 $   $Date: 2019/11/12 07:13:55 $
 #
 #  Image/function on a linear network
 #
@@ -151,6 +151,7 @@ plot.linim <- local({
                          leg.args=list(),
                          leg.scale=1,
                          zlim,
+                         box=FALSE,
                          do.plot=TRUE) {
     xname <- short.deparse(substitute(x))
     style <- match.arg(style)
@@ -181,7 +182,8 @@ plot.linim <- local({
                                       zliminfo, 
                                       list(main=xname,
                                            legend=legend,
-                                           do.plot=do.plot))))
+                                           do.plot=do.plot,
+                                           box=box))))
     #' width style
     L <- attr(x, "L")
     df <- attr(x, "df")
@@ -189,18 +191,20 @@ plot.linim <- local({
     W <- as.owin(L)
     #' ensure function values are numeric
     vals <- try(as.numeric(df$values))
-    if(!inherits(vals, "try-error")) {
-      df$values <- vals
-    } else stop("Function values should be numeric: unable to convert them",
-                call.=FALSE)
+    if(inherits(vals, "try-error")) 
+      stop("Function values should be numeric: unable to convert them",
+           call.=FALSE)
+    #' convert non-finite values to zero width
+    vals[!is.finite(vals)] <- 0
+    df$values <- vals
     #' plan layout
     if(legend) {
       #' use layout procedure in plot.im
       z <- do.call(plot.im,
-                   resolve.defaults(list(x, do.plot=FALSE, legend=TRUE),
+                   resolve.defaults(list(x, do.plot=FALSE, ribbon=TRUE),
                                     list(...),
                                     ribstuff,
-                                    list(main=xname)))
+                                    list(main=xname, valuesAreColours=FALSE)))
       bb.all <- attr(z, "bbox")
       bb.leg <- attr(z, "bbox.legend")
     } else {
@@ -221,6 +225,8 @@ plot.linim <- local({
                           resolve.defaults(list(x=bb.all, type="n"),
                                            list(...), list(main=xname)),
                           extrargs="type")
+    if(box)
+      plot(Frame(W), add=TRUE)
     #' resolve graphics parameters for polygons
     names(negative.args) <- paste0(names(negative.args), ".neg")
     grafpar <- resolve.defaults(negative.args,
@@ -270,18 +276,18 @@ plot.linim <- local({
       rright <- vv[length(vv)]
       ## first add dodecagonal 'joints'
       if(Ljoined[ileft] && rleft != 0) 
-        pltpoly(x=rleft * dodo$x + leftend$x,
-                y=rleft * dodo$y + leftend$y,
-                grafpar, sign(rleft))
+        drawSignedPoly(x=rleft * dodo$x + leftend$x,
+                      y=rleft * dodo$y + leftend$y,
+                      grafpar, sign(rleft))
       if(Ljoined[iright] && rright != 0)
-        pltpoly(x=rright * dodo$x + rightend$x,
-                y=rright * dodo$y + rightend$y,
-                grafpar, sign(rright))
+        drawSignedPoly(x=rright * dodo$x + rightend$x,
+                      y=rright * dodo$y + rightend$y,
+                      grafpar, sign(rright))
       ## Now render main polygon
       ang <- Lperp[segid]
       switch(signtype,
-             positive = pltseg(xx, yy, vv, ang, grafpar),
-             negative = pltseg(xx, yy, vv, ang, grafpar),
+             positive = drawseg(xx, yy, vv, ang, grafpar),
+             negative = drawseg(xx, yy, vv, ang, grafpar),
              mixed = {
                ## find zero-crossings
                xing <- (diff(sign(vv)) != 0)
@@ -290,60 +296,25 @@ plot.linim <- local({
                elist <- split(data.frame(xx=xx, yy=yy, vv=vv), excu)
                ## plot each excursion
                for(e in elist) 
-                 with(e, pltseg(xx, yy, vv, ang, grafpar))
+                 with(e, drawseg(xx, yy, vv, ang, grafpar))
              })
     }
     result <- adjust * scale
     attr(result, "bbox") <- bb
     if(legend) {
       attr(result, "bbox.legend") <- bb.leg
-      ## get graphical arguments
-      grafpar <- resolve.defaults(leg.args, grafpar)
-      ## set up scale of typical pixel values
-      gvals <- leg.args$at %orifnull% prettyinside(zlim)
-      ## corresponding widths
-      wvals <- adjust * scale * gvals
-      ## glyph positions
-      ng <- length(gvals)
-      xr <- bb.leg$xrange
-      yr <- bb.leg$yrange
-      switch(leg.side,
-             right = ,
-             left = {
-               y <- seq(yr[1], yr[2], length.out=ng+1L)
-               y <- (y[-1L] + y[-(ng+1L)])/2
-               for(j in 1:ng) {
-                 xx <- xr[c(1L,2L,2L,1L)]
-                 yy <- (y[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
-                 pltpoly(x = xx, y = yy, grafpar, sign(wvals[j]))
-	     }
-	   },
-	   bottom = ,
-	   top = {
-	     x <- seq(xr[1], xr[2], length.out=ng+1L)
-	     x <- (x[-1L] + x[-(ng+1L)])/2
-	     for(j in 1:ng) {
-	       xx <- (x[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
-               yy <- yr[c(1L,2L,2L,1L)]
-               pltpoly(x = xx, y = yy, grafpar, sign(wvals[j]))
-	     }
-	   })
-      ## add text labels
-      glabs <- signif(leg.scale * gvals, 2)
-      textpos <- switch(leg.side,
-                        right  = list(x=xr[2], y=y,     pos=4),
-                        left   = list(x=xr[1], y=y,     pos=2),
-                        bottom = list(x=x,     y=yr[1], pos=1),
-                        top    = list(x=x,     y=yr[2], pos=3))
-      textargs <- resolve.defaults(textpos,
-                                   leg.args,
-                                   list(labels=glabs))
-      do.call.matched(text, textargs, extrargs=graphicsPars("text"))
+      plotWidthMap(bb.leg     = bb.leg,
+                   zlim       = zlim,
+                   phys.scale = adjust * scale, 
+                   leg.scale  = leg.scale,
+                   leg.side   = leg.side,
+                   leg.args   = leg.args,
+                   grafpar    = grafpar)
     }
     return(invisible(result))
   }
 
-  pltseg <- function(xx, yy, vv, ang, pars) {
+  drawseg <- function(xx, yy, vv, ang, pars) {
     ## draw polygon around segment
     sgn <- sign(mean(vv))
     xx <- c(xx, rev(xx))
@@ -351,15 +322,31 @@ plot.linim <- local({
     vv <- c(vv, -rev(vv))
     xx <- xx + cos(ang) * vv
     yy <- yy + sin(ang) * vv
-    pltpoly(xx, yy, pars, sgn)
+    drawSignedPoly(xx, yy, pars, sgn)
     invisible(NULL)
   }
+
+  plot.linim
+})
+
+drawSignedPoly <- local({
+  
+  ## internal function to plot line segments for style="width"
+  ## with sign-dependent colours, etc
 
   pNames <- c("density", "angle", "border", "col", "lty")
   posnames <- paste(pNames, ".pos", sep="")
   negnames <- paste(pNames, ".neg", sep="")
   
-  pltpoly <- function(x, y, pars, sgn) {
+  redub <- function(from, to, x) {
+    #' rename entry x$from to x$to
+    m <- match(from, names(x))
+    if(any(ok <- !is.na(m))) 
+      names(x)[m[ok]] <- to[ok]
+    return(resolve.defaults(x))
+  }
+  
+  drawSignedPoly <- function(x, y, pars, sgn) {
     #' plot polygon using parameters appropriate to "sign"
     if(sgn >= 0) {
       pars <- redub(posnames, pNames, pars)
@@ -371,17 +358,59 @@ plot.linim <- local({
     do.call(polygon, append(list(x=x, y=y), pars))
     invisible(NULL)
   }
-  
-  redub <- function(from, to, x) {
-    #' rename entry x$from to x$to
-    m <- match(from, names(x))
-    if(any(ok <- !is.na(m))) 
-      names(x)[m[ok]] <- to[ok]
-    return(resolve.defaults(x))
-  }
-  
-  plot.linim
+
+  drawSignedPoly
 })
+
+## internal function to plot the map of pixel values to line widths
+
+plotWidthMap <- function(bb.leg, zlim, phys.scale,
+                         leg.scale, leg.side,
+                         leg.args, grafpar) {
+  ## get graphical arguments
+  grafpar <- resolve.defaults(leg.args, grafpar)
+  ## set up scale of typical pixel values
+  gvals <- leg.args$at %orifnull% prettyinside(zlim)
+  ## corresponding widths
+  wvals <- phys.scale * gvals
+  ## glyph positions
+  ng <- length(gvals)
+  xr <- bb.leg$xrange
+  yr <- bb.leg$yrange
+  switch(leg.side,
+         right = ,
+         left = {
+           y <- seq(yr[1], yr[2], length.out=ng+1L)
+           y <- (y[-1L] + y[-(ng+1L)])/2
+           for(j in 1:ng) {
+             xx <- xr[c(1L,2L,2L,1L)]
+             yy <- (y[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
+             drawSignedPoly(x = xx, y = yy, grafpar, sign(wvals[j]))
+           }
+         },
+         bottom = ,
+         top = {
+           x <- seq(xr[1], xr[2], length.out=ng+1L)
+           x <- (x[-1L] + x[-(ng+1L)])/2
+           for(j in 1:ng) {
+             xx <- (x[j] + c(-1,1) * wvals[j]/2)[c(1L,1L,2L,2L)]
+             yy <- yr[c(1L,2L,2L,1L)]
+             drawSignedPoly(x = xx, y = yy, grafpar, sign(wvals[j]))
+           }
+         })
+  ## add text labels
+  glabs <- signif(leg.scale * gvals, 2)
+  textpos <- switch(leg.side,
+                    right  = list(x=xr[2], y=y,     pos=4),
+                    left   = list(x=xr[1], y=y,     pos=2),
+                    bottom = list(x=x,     y=yr[1], pos=1),
+                    top    = list(x=x,     y=yr[2], pos=3))
+  textargs <- resolve.defaults(textpos,
+                               leg.args,
+                               list(labels=glabs))
+  do.call.matched(text, textargs, extrargs=graphicsPars("text"))
+  return(invisible(NULL))
+}
 
 sortalongsegment <- function(df) {
   df[fave.order(df$tp), , drop=FALSE]
@@ -666,7 +695,7 @@ integral.linim <- function(f, domain=NULL, ...){
   #' take average of data on each segment
   ##  mu <- as.numeric(by(vals, seg, mean, ..., na.rm=TRUE))
   ## mu[is.na(mu)] <- 0
-  num <- tapplysum(vals, list(seg), na.rm=TRUE)
+  num <- tapplysum(as.numeric(vals), list(seg), na.rm=TRUE)
   mu <- num/nper
   #' weighted sum
   len <- lengths.psp(as.psp(L))

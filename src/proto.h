@@ -67,11 +67,15 @@ void CcrossPdist(int *, double *, double *, int *, double *, double *, double *,
 void nndMD(int *, int *, double *, double *, double *); 
 void knndMD(int *, int *, int *, double *, double *, double *); 
 void nnwMD(int *, int *, double *, double *, int *, double *); 
-void knnwMD(int *, int *, int *, double *, double *, int *, double *);
+void knnwMD(int *, int *, int *, double *, double *, int *, double *); 
+void nnXwMD(int *, int *, double *, int *, double *, double *, int *, double *); 
+void nnXxMD(int *, int *, double *, int *, int *, double *, int *, double *, int *, double *); 
+void knnXwMD(int *, int *, double *, int *, double *, int *, double *, int *, double *); 
+void knnXxMD(int *, int *, double *, int *, int *, double *, int *, int *, double *, int *, double *);
 void distmapbin(double *, double *, double *, double *, int *, int *, int *, double *, double *);
 void ripleybox(int *, double *, double *, double *, int *, double *, double *, double *, double *, double *, double *); 
-void ripleypoly(int *, double *, double *, int *, double *, int *, double *, double *, double *, double *, double *); 
-void rippolDebug(int *, double *, double *, int *, double *, int *, double *, double *, double *, double *, double *);
+void ripleypoly(int *, double *, double *, double *, int *, double *, int *, double *, double *, double *, double *, double *); 
+void rippolDebug(int *, double *, double *, double *, int *, double *, int *, double *, double *, double *, double *, double *);
 void tabsumweight(int *, double *, double *, int *, double *, double *);
 void exact_dt_R(double *, double *, int *, double *, double *, double *, double *, int *, int *, int *, int *, double *, int *, double *);
 void ps_exact_dt_R(double *, double *, double *, double *, int *, int *, int *, int *, int *, double *, int *, int *, double *);
@@ -126,8 +130,8 @@ void ClineMquad(int *, int *, int *, int *, double *, double *, double *, int *,
 void ClineRMquad(int *, int *, int *, int *, double *, double *, double *, int *, int *, double *, double *, int *, int *, double *, double *, int *, double *, double *, int *, int *, double *, double *, int *);
 void linearradius(int *, int *, int *, double *, int *, double *, double *, double *); 
 void cocoGraph(int *, int *, int *, int *, int *, int *);
-void lintileindex(int *, int *, double *, int *, int *, double *, double *, int *, int *); 
 void cocoGraph(int *, int *, int *, int *, int *, int *);
+void lintileindex(int *, int *, double *, int *, int *, double *, double *, int *, int *);
 void Clixellate(int *, int *, int *, int *, int *, int *, double *, double *, int *, double *, int *, int *, int *, double *, int *, double *);
 void locpcfx(int *, double *, double *, int *, int *, double *, double *, int *, int *, double *, double *, double *); 
 void locWpcfx(int *, double *, double *, int *, int *, double *, double *, int *, double *, int *, double *, double *, double *);

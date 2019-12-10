@@ -3,7 +3,7 @@
 #
 #   computes simulation envelopes 
 #
-#   $Revision: 2.96 $  $Date: 2019/08/12 01:19:56 $
+#   $Revision: 2.106 $  $Date: 2019/12/10 00:28:26 $
 #
 
 envelope <- function(Y, fun, ...) {
@@ -55,7 +55,9 @@ envelope.ppp <-
            scale=NULL, clamp=FALSE, 
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, maxnerr=nsim, do.pwrong=FALSE,
+           Yname=NULL,
+           maxnerr=nsim, rejectNA=FALSE, silent=FALSE,
+           do.pwrong=FALSE,
            envir.simul=NULL) {
   cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
@@ -185,8 +187,9 @@ envelope.ppp <-
                  alternative=alternative, scale=scale, clamp=clamp,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user, do.pwrong=do.pwrong)
+                 Yname=Yname,
+                 maxnerr=maxnerr, rejectNA=rejectNA, silent=silent,
+                 cl=cl, envir.user=envir.user, do.pwrong=do.pwrong)
 }
 
 envelope.ppm <- 
@@ -201,7 +204,9 @@ envelope.ppm <-
            scale=NULL, clamp=FALSE, 
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
-           Yname=NULL, maxnerr=nsim, do.pwrong=FALSE,
+           Yname=NULL,
+           maxnerr=nsim, rejectNA=FALSE, silent=FALSE,
+           do.pwrong=FALSE,
            envir.simul=NULL) {
   cl <- short.deparse(sys.call())
   if(is.null(Yname)) Yname <- short.deparse(substitute(Y))
@@ -262,8 +267,9 @@ envelope.ppm <-
                  alternative=alternative, scale=scale, clamp=clamp, 
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user, do.pwrong=do.pwrong)
+                 Yname=Yname,
+                 maxnerr=maxnerr, rejectNA=rejectNA, silent=silent,
+                 cl=cl, envir.user=envir.user, do.pwrong=do.pwrong)
 }
 
 envelope.kppm <-
@@ -274,7 +280,8 @@ envelope.kppm <-
            alternative=c("two.sided", "less", "greater"),
            scale=NULL, clamp=FALSE,
            savefuns=FALSE, savepatterns=FALSE, nsim2=nsim,
-           VARIANCE=FALSE, nSD=2, Yname=NULL, maxnerr=nsim,
+           VARIANCE=FALSE, nSD=2, Yname=NULL, 
+           maxnerr=nsim, rejectNA=FALSE, silent=FALSE,
            do.pwrong=FALSE, envir.simul=NULL)
 {
   cl <- short.deparse(sys.call())
@@ -314,8 +321,9 @@ envelope.kppm <-
                  alternative=alternative, scale=scale, clamp=clamp,
                  savefuns=savefuns, savepatterns=savepatterns, nsim2=nsim2,
                  VARIANCE=VARIANCE, nSD=nSD,
-                 Yname=Yname, maxnerr=maxnerr, cl=cl,
-                 envir.user=envir.user, do.pwrong=do.pwrong)
+                 Yname=Yname, 
+                 maxnerr=maxnerr, rejectNA=rejectNA, silent=silent,
+                 cl=cl, envir.user=envir.user, do.pwrong=do.pwrong)
 
 }
 
@@ -340,8 +348,9 @@ envelopeEngine <-
            nsim2=nsim,
            VARIANCE=FALSE, nSD=2,
            Yname=NULL,
-           silent=FALSE,
            maxnerr=nsim,
+           rejectNA=FALSE,
+           silent=FALSE,
            maxerr.action=c("fatal", "warn", "null"),
            internal=NULL, cl=NULL,
            envir.user=envir.user,
@@ -556,6 +565,12 @@ envelopeEngine <-
     stop(paste("The function", fname,
                "must return an object of class", sQuote("fv")))
 
+  ## catch 'conservation' parameters
+  conserveargs <- attr(funX, "conserve")
+  if(!is.null(conserveargs) && !any(c("conserve", "...") %in% fargs))
+    stop(paste("In this usage, the function", fname,
+               "should have an argument named 'conserve' or '...'"))
+
   ## warn about 'dangerous' arguments
   if(!is.null(dang <- attr(funX, "dangerous")) &&
      any(uhoh <- dang %in% names(list(...)))) {
@@ -749,7 +764,11 @@ envelopeEngine <-
     resolve.defaults(funargs,
                      inferred.r.args,
                      list(...),
+                     conserveargs,
                      if(usecorrection) list(correction="best") else NULL)
+
+  # reject simulated pattern if function values are all NA (etc)
+  rejectNA <- isTRUE(rejectNA)
   
   # start simulation loop
   nerr <- 0
@@ -792,21 +811,34 @@ envelopeEngine <-
       ## apply function safely
       funXsim <- try(do.call(fun, c(list(Xsim), funargs)), silent=silent)
 
-      success <- !inherits(funXsim, "try-error")
+      success <-
+        !inherits(funXsim, "try-error") &&
+        inherits(funXsim, "fv") &&
+        (!rejectNA || any(is.finite(funXsim[[valname]])))
 
       if(!success) {
         #' error in computing summary function
         nerr <- nerr + 1L 
         if(nerr > maxnerr) {
           gaveup <- TRUE
-          whinge <- paste("Exceeded maximum number of errors",
-                          paren(maxnerr),
-                          "when evaluating summary function for",
-                          if(simtype == "list") "supplied" else "simulated",
-                          "point patterns")
+          errtype <- if(rejectNA) "fatal errors or NA function values"
+          if(simtype == "list") {
+            whinge <- paste("Exceeded maximum possible number of errors",
+                          "when evaluating summary function:",
+                          length(SimDataList), "patterns provided,",
+                          nsim, "patterns required,",
+                          nerr, ngettext(nerr, "pattern", "pattern"),
+                          "rejected due to", errtype)
+          } else {
+            whinge <- paste("Exceeded maximum permissible number of",
+                            errtype,
+                            paren(paste("maxnerr =", maxnerr)),
+                            "when evaluating summary function",
+                            "for simulated point patterns")
+          }
           switch(maxerr.action,
-                 fatal = stop(whinge),
-                 warn  = warning(whinge),
+                 fatal = stop(whinge, call.=FALSE),
+                 warn  = warning(whinge, call.=FALSE),
                  null  = {})
         } else if(!silent) cat("[retrying]\n")
       }
@@ -1003,10 +1035,21 @@ print.envelope <- function(x, ...) {
   splat("Obtained from", nsim, descrip)
   #
   if(waxlyrical('extras')) {
-    if(!is.null(e$dual) && e$dual) 
-      splat("Theoretical (i.e. null) mean value of", fname,
-            "estimated from a separate set of",
-            e$nsim2, "simulations")
+    dual <- isTRUE(e$dual)
+    usetheory <- isTRUE(e$use.theory)
+    hownull <- if(usetheory) {
+                 "(known exactly)"
+               } else if(dual) {
+                 paste("(estimated from a separate set of",
+                       e$nsim2, "simulations)")
+               } else NULL
+    formodel <- if(csr) "for CSR" else NULL
+    if(g) {
+      splat("Envelope based on maximum deviation of", fname,
+            "from null value", formodel, hownull)
+    } else if(dual) {
+      splat("Null value of", fname, formodel, hownull)
+    }
     if(!is.null(attr(x, "simfuns"))) 
       splat("(All simulated function values are stored)")
     if(!is.null(attr(x, "simpatterns"))) 
@@ -1214,21 +1257,32 @@ envelope.matrix <- function(Y, ...,
     Ncol <- if(!gaveup) ncol(simvals) else Inf
     if(Ncol < 2)
       stop("Need at least 2 columns of function values")
-      
-    if(is.null(jsim) && !is.null(nsim)) {
-      ## usual case - 'nsim' determines 'jsim'
+
+    ## all columns are used unless 'nsim' or 'jsim' given.
+    if(!(is.null(nsim) && is.null(jsim))) {
+      if(is.null(jsim)) {
+        jsim <- 1:nsim
+      } else if(is.null(nsim)) {
+        nsim <- length(jsim)
+      } else stopifnot(length(jsim) == nsim)
       if(nsim > Ncol)
         stop(paste(nsim, "simulations are not available; only",
                    Ncol, "columns provided"))
-      jsim <- 1:nsim
-      if(!is.null(nsim2)) {
-        ## 'nsim2' determines 'jsim.mean'
-        if(nsim + nsim2 > Ncol)
-          stop(paste(nsim, "+", nsim2, "=", nsim+nsim2, 
-                     "simulations are not available; only",
-                     Ncol, "columns provided"))
-        jsim.mean <- nsim + 1:nsim2
-      }
+    }
+    
+    ## nsim2 or jsim.mean may be given, and imply dual calculation
+    if(!(is.null(nsim2) && is.null(jsim.mean))) {
+      if(is.null(jsim.mean)) {
+        jsim.mean <- setdiff(seq_len(Ncol), jsim)[1:nsim2]
+      } else if(is.null(nsim2)) {
+        nsim2 <- length(jsim.mean)
+      } else stopifnot(length(jsim.mean) == nsim2)
+      if(nsim + nsim2 > Ncol)
+        stop(paste(nsim, "+", nsim2, "=", nsim+nsim2, 
+                   "simulations are not available; only",
+                   Ncol, "columns provided"))
+      if(length(intersect(jsim, jsim.mean)))
+        warning("Internal warning: Indices in jsim and jsim.mean overlap")
     }
       
     restrict.columns <- !is.null(jsim)
@@ -1376,8 +1430,8 @@ envelope.matrix <- function(Y, ...,
                }
                # mmean <-
                reference <- 
-                 if(!use.weights) apply(simvals.mean, 1L, mean, na.rm=TRUE) else
-                 apply(simvals.mean, 1L, weighted.mean, w=weights, na.rm=TRUE)
+                 if(!use.weights) apply(simvals, 1L, mean, na.rm=TRUE) else
+                 apply(simvals, 1L, weighted.mean, w=weights, na.rm=TRUE)
              }
              nsim <- ncol(simvals)
              # compute deviations

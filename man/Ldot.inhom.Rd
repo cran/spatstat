@@ -8,7 +8,7 @@
   estimate the inhomogeneous version of the dot \eqn{L} function.
 }
 \usage{
-Ldot.inhom(X, i, \dots)
+Ldot.inhom(X, i, \dots, correction)
 }
 \arguments{
   \item{X}{The observed point pattern, 
@@ -23,7 +23,7 @@ Ldot.inhom(X, i, \dots)
     character string).
     Defaults to the first level of \code{marks(X)}.
   }
-  \item{\dots}{
+  \item{correction,\dots}{
     Other arguments passed to \code{\link{Kdot.inhom}}.
   }
 }
@@ -56,7 +56,7 @@ Ldot.inhom(X, i, \dots)
   transformed by taking \eqn{L(r) = \sqrt{K(r)/\pi}}{L(r) = sqrt(K(r)/pi)}.
 }
 \references{
-  \ifelse{latex}{\out{M\o ller}}{Moller}, J. and Waagepetersen, R.
+  \Moller, J. and Waagepetersen, R.
   Statistical Inference and Simulation for Spatial Point Processes
   Chapman and Hall/CRC
   Boca Raton, 2003.

@@ -77,7 +77,7 @@ local({
 #'     tests/hypotests.R
 #'     Hypothesis tests
 #' 
-#'  $Revision: 1.2 $ $Date: 2018/07/21 03:02:20 $
+#'  $Revision: 1.4 $ $Date: 2019/10/16 02:38:39 $
 
 require(spatstat)
 local({
@@ -90,11 +90,25 @@ local({
   a <- quadrat.test(redwood, 3)
   domain(a)
   shift(a, c(1,1))
+
+  #' cases of studpermu.test
+  #' X is a hyperframe
+  b <- studpermu.test(pyramidal, nperm=9)
+  b <- studpermu.test(pyramidal, nperm=9, use.Tbar=TRUE)
+  #' X is a list of lists of ppp
+  ZZ <- split(pyramidal$Neurons, pyramidal$group)
+  bb <- studpermu.test(ZZ, nperm=9)
+
+  #' Issue #115
+  X <- runifpoint(50, nsim = 3)
+  Y <- runifpoint(3000, nsim = 3)
+  h <- hyperframe(ppp = c(X, Y), group = rep(1:2, 3))
+  studpermu.test(h, ppp ~ group)
 })
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.19 $   $Date: 2019/08/31 05:30:31 $
+#   $Revision: 1.20 $   $Date: 2019/12/03 07:29:10 $
 #
 
 require(spatstat)
@@ -207,14 +221,26 @@ local({
   ZS <- shift(Z, origin="centroid")
   ZS <- shift(Z, origin="bottomleft")
 
+  #' hist.im
   h <- hist(Z)
-  plot(h)
+  h <- hist(Z, plot=FALSE)
+  Zcut <- cut(Z, breaks=5)
+  h <- hist(Zcut) # barplot
+  plot(h) # plot.barplotdata
 
   #' plot.im code blocks
   plot(Z, ribside="left")
   plot(Z, ribside="top")
+  plot(Z, riblab="value")
   plot(Z, clipwin=square(0.5))
   plot(Z - mean(Z), log=TRUE)
+  plot(Z, valuesAreColours=TRUE) # rejected with a warning
+  IX <- as.im(function(x,y) { as.integer(round(3*x)) }, square(1))
+  co <- colourmap(rainbow(4), inputs=0:3)
+  plot(IX, col=co)
+  CX <- eval.im(col2hex(IX+1L))
+  plot(CX, valuesAreColours=TRUE)
+  plot(CX, valuesAreColours=FALSE)
 
   #' handling and plotting of character and factor images
   Afactor    <- as.im(col2hex("green"), letterR, na.replace=col2hex("blue"))
@@ -244,6 +270,12 @@ local({
     stop("Unequal results in nearest.valid.pixel")
   if(!identical(a,b)) 
     stop("Equal, but not identical, results in nearest.valid.pixel")
+
+  #' cases of distcdf
+  distcdf(cells[1:5])
+  distcdf(W=cells[1:5], dW=1:5)
+  distcdf(W=Window(cells), V=cells[1:5])
+  distcdf(W=Window(cells), V=cells[1:5], dV=1:5)
 })
 #' indices.R
 #' Tests of code for understanding index vectors etc
@@ -269,6 +301,24 @@ local({
   nn <- positiveIndex(FALSE, nama=Nam)
 
   aa <- ppsubset(cells, square(0.1))
+})
+#'
+#'  tests/interact.R
+#'
+#'  Support for interaction objects
+#'
+#'  $Revision: 1.1 $ $Date: 2019/12/10 01:57:18 $
+
+require(spatstat)
+local({
+  #' print.intermaker
+  Strauss
+  Geyer
+  Ord
+  #' intermaker
+  BS <- get("BlankStrauss", envir=environment(Strauss))
+  BD <- function(r) { instantiate.interact(BS, list(r=r)) }
+  BlueDanube <- intermaker(BD, BS) 
 })
 #'   tests/ippm.R
 #'   Tests of 'ippm' class
@@ -357,7 +407,7 @@ local({
 #'
 #'   Various K and L functions and pcf
 #'
-#'   $Revision: 1.26 $  $Date: 2019/08/01 06:32:48 $
+#'   $Revision: 1.30 $  $Date: 2019/12/08 02:19:15 $
 #'
 
 require(spatstat)
@@ -387,13 +437,23 @@ local({
   Kn <- Kest(X, correction="none",
              rmax=0.02, weights=Z, ratio=TRUE)
   Knb <- Kest(X, correction=c("border","bord.modif","none"),
-             rmax=0.02, weights=Z, ratio=TRUE)
+              rmax=0.02, weights=Z, ratio=TRUE)
   #' pcf.ppp special code blocks
   pr  <- pcf(cells, ratio=TRUE, var.approx=TRUE)
   pc  <- pcf(cells, domain=square(0.5))
   pcr <- pcf(cells, domain=square(0.5), ratio=TRUE)
   pw <- pcf(redwood, correction="none")
   pwr <- pcf(redwood, correction="none", ratio=TRUE)
+  #' Kinhom code blocks
+  X <- rpoispp(function(x,y) { 100 * x }, 100, square(1))
+  lambda <- 100 * X$x
+  Kin <- Kinhom(X, lambda, correction=c("none", "border"))
+  lambda2 <- outer(lambda, lambda, "*")
+  Ki2 <- Kinhom(X, lambda2=lambda2, diagonal=FALSE,
+                correction=c("translate", "isotropic"))
+  fut <- ppm(X ~ x)
+  Kio <- Kinhom(X, fut, update=FALSE)
+  Kiu <- Kinhom(X, fut, update=TRUE, diagonal=FALSE)
   #' inhomogeneous multitype
   fit <- ppm(amacrine ~ marks)
   K1 <- Kcross.inhom(amacrine, lambdaX=fit)
@@ -494,16 +554,26 @@ local({
   #'
   #'   lohboot code blocks
   #'
-  Ared <- lohboot(redwood, block=TRUE, Vcorrection=TRUE, global=FALSE)
+  Ared <- lohboot(redwood, fun="Kest", block=TRUE,
+                  Vcorrection=TRUE, global=FALSE, correction="none")
   Bred <- lohboot(redwood, block=TRUE, basicboot=TRUE, global=FALSE)
-  X <- runifpoint(100, letterR)
-  AX <- lohboot(X, block=TRUE, nx=7, ny=10)
+  Cred <- lohboot(redwood, fun=Kest, block=TRUE, global=TRUE,
+                  correction="translate")
+  Dred <- lohboot(redwood, Lest)
+  Kred <- lohboot(redwood, Kinhom)
   Lred <- lohboot(redwood, Linhom)
+  gred <- lohboot(redwood, pcfinhom, sigma=0.1)
   Zred <- predict(ppm(redwood ~ x+y))
   Lred <- lohboot(redwood, Linhom, lambda=Zred)
+  #'
+  X <- runifpoint(100, letterR)
+  AX <- lohboot(X, block=TRUE, nx=7, ny=10)
   #'    multitype
+  b <- lohboot(amacrine, Kcross)
   b <- lohboot(amacrine, Lcross)
+  b <- lohboot(amacrine, Kdot)
   b <- lohboot(amacrine, Ldot)
+  b <- lohboot(amacrine, Kcross.inhom)
   b <- lohboot(amacrine, Lcross.inhom)
   b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", lambdaX=Zed)
   b <- lohboot(amacrine, Lcross.inhom, from="off", to="on", lambdaX=Lum)
@@ -552,7 +622,7 @@ local({
   compere(eY, c(2,4/3), "near corner of rectangle")
   ## Invoke polygonal code
   Z <- rotate(Y, pi/4)
-  eZdebug <- edge.Ripley(Z, c(1,1), method="debug")
+  eZdebug <- edge.Ripley(Z, c(1,1), internal=list(debug=TRUE))
   compere(eZdebug, c(2,4/3), "at interior point of polygon (debug on)")
   ## test validity without debugger, in case of quirks of compiler optimisation
   eZ <- edge.Ripley(Z, c(1,1))
@@ -561,7 +631,7 @@ local({
 #
 # tests/kppm.R
 #
-# $Revision: 1.30 $ $Date: 2019/08/14 03:14:55 $
+# $Revision: 1.31 $ $Date: 2019/11/28 21:43:33 $
 #
 # Test functionality of kppm that depends on RandomFields
 # Test update.kppm for old style kppm objects
@@ -570,6 +640,7 @@ require(spatstat)
 local({
 
  fit <- kppm(redwood ~1, "Thomas") # sic
+ fitx <- kppm(redwood ~x, "Thomas", verbose=TRUE)
  fitx <- update(fit, ~ . + x)
  fitM <- update(fit, clusters="MatClust")
  fitC <- update(fit, cells)
@@ -577,8 +648,10 @@ local({
 
  #'
  Wsub <- owin(c(0, 0.5), c(-0.5, 0))
- fitsub <- kppm(redwood ~1, "Thomas", subset=Wsub)
- fitsub
+ Zsub <- (bdist.pixels(Window(redwood)) > 0.1)
+ fitWsub <- kppm(redwood ~1, "Thomas", subset=Wsub)
+ fitZsub <- kppm(redwood ~1, "Thomas", subset=Zsub)
+ fitWsub
  
  #' various methods
  ff <- as.fv(fitx)
@@ -586,6 +659,8 @@ local({
  uu <- unitname(fitx)
  unitname(fitCx) <- "furlong"
  mo <- model.images(fitCx)
+ p <- psib(fit)
+ px <- psib(fitx)
  
  # vcov.kppm different algorithms
  vc  <- vcov(fitx)
@@ -601,6 +676,7 @@ local({
  # improve.kppm
  fitI <- update(fit, improve.type="quasi")
  fitxI <- update(fitx, improve.type="quasi")
+ fitxIs <- update(fitx, improve.type="quasi", fast=FALSE) 
  # vcov.kppm
  vcI <- vcov(fitxI)
  
@@ -621,6 +697,7 @@ local({
    is.poisson(fit0)
    Y0 <- simulate(fit0, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y0))
+   p0 <- psib(fit0) # issues a warning
 
    ## fit LGCP using K function: slow
    fit1 <- kppm(redwood ~x, "LGCP",
@@ -648,6 +725,11 @@ local({
    fit1xxVG <- update(fit1xx, clusters="VarGamma", nu=-1/4)
    Y1xxVG <- simulate(fit1xxVG, saveLambda=TRUE)[[1]]
    stopifnot(is.ppp(Y1xxVG))
+   fit1xxLG <- update(fit1xx, clusters="LGCP",
+                      covmodel=list(model="matern", nu=0.3),
+                      statistic="pcf")
+   Y1xxLG <- simulate(fit1xxLG, saveLambda=TRUE, drop=TRUE)
+   stopifnot(is.ppp(Y1xxLG))
    
    # ... and Abdollah's code
 
@@ -738,15 +820,24 @@ local({
   futFF1 <- kppm(redwood)
   futFF2 <- kppm(redwood, method="palm")
   futFF3 <- kppm(redwood, method="clik2")
+  ## unsupported options that give a warning
+  spatstat.options(kppm.canonical=TRUE, kppm.adjusted=TRUE)
+  futXX1 <- kppm(redwood, clusters="MatClust") 
+  futXX2 <- kppm(redwood, clusters="MatClust", method="palm")
+  futXX3 <- kppm(redwood, clusters="MatClust", method="clik2")
+  jpines <- residualspaper$Fig1
+  fut <- dppm(jpines ~ 1, dppGauss)
+  print(fut)
+  spatstat.options(kppm.canonical=FALSE, kppm.adjusted=FALSE)
 })
 
 local({
   #' cover a few code blocks
   fut <- kppm(redwood ~ x, method="clik")
-  summary(fut)
+  print(summary(fut))
   a <- residuals(fut)
   fut2 <- kppm(redwood ~ x, "LGCP", method="palm")
-  summary(fut2)
+  print(summary(fut2))
   b <- residuals(fut2)
   #'
   po <- ppm(redwood ~ 1)

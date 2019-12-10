@@ -172,6 +172,24 @@ the News and Release Notes for each update.
 
   \item \spst\ now suggests the package \pkg{fftwtools}.
 
+   \item Tessellations on a linear network can now have marks.
+
+   \item More functions for manipulating tessellations on a linear network.
+    
+   \item New functions for simulating point processes on a linear network.
+
+   \item Nearest Neighbour Index function can now return mark values.
+
+   \item Index of repulsion strength for determinantal point process models.
+
+   \item Nearest neighbours between two point patterns in any number of dimensions.
+    
+   \item More options for handling bad simulation outcomes in \texttt{envelope}.
+
+   \item \texttt{mppm} accepts case weights.
+     
+   \item Bandwidth selectors warn about extreme values of bandwidth.
+     
   \item Fast kernel estimation on a linear network using 2D kernels.
 
   \item Extension of Scott's rule for bandwidth selection.
@@ -448,6 +466,52 @@ Following is a list of all the functions that have been added.
 
 \begin{itemize}
   
+    \item \texttt{rcelllpp}:
+    Simulate the cell point process on a linear network.
+    
+    \item \texttt{rSwitzerlpp}:
+    Simulate the Switzer-type point process on a linear network.
+
+    \item \texttt{intersect.lintess}:
+    Form the intersection of two tessellations on a linear network.
+    
+    \item \texttt{chop.linnet}:
+    Divide a linear network into tiles using infinite lines.
+    
+   \item \texttt{repairNetwork}:
+     Detect and repair inconsistencies in internal data
+     in a \texttt{linnet} or \texttt{lpp} object.
+
+   \item \verb!marks<-.lintess!, \texttt{unmark.lintess}:
+    Assign marks to the tiles of a tessellation on a linear network.
+
+   \item \texttt{marks.lintess}:
+    Extract the marks of the tiles of a tessellation on a linear network.
+    
+   \item \texttt{tilenames.lintess}:
+    Extract the names of the tiles in a tessellation on a linear network
+
+   \item \verb!tilenames<-.lintess!:
+    Change the names of the tiles in a tessellation on a linear network
+
+   \item \texttt{nobjects.lintess}:
+    Count the number of tiles in a tessellation on a linear network
+
+   \item \texttt{as.data.frame.lintess}:
+    Convert a tessellation on a linear network into a data frame.
+
+   \item \texttt{repul}:
+    Repulsiveness index for a determinantal point process model.
+
+   \item \texttt{reach.kppm}:
+    Reach (interaction distance) for a Cox or cluster point process model.
+
+   \item \texttt{summary.dppm}, \texttt{print.summary.dppm}:
+    Summary method for determinantal point process models.
+
+   \item \texttt{nncross.ppx}:
+    Nearest neighbours between two point patterns in any number of dimensions.
+  
     \item \texttt{rthinclumps}: 
           Divide a spatial region into clumps and randomly delete some of them.
           
@@ -473,7 +537,7 @@ Following is a list of all the functions that have been added.
     Map duplicate points to unique representatives.
     Generic with methods for \texttt{ppp}, \texttt{lpp}, \texttt{ppx}
     
-    \item \texttt{uniquemap.data.frame}:
+    \item \texttt{uniquemap.data.frame}, \texttt{uniquemap.matrix}:
     Map duplicate rows to unique representatives
 
     \item \texttt{localKcross}, \texttt{localLcross}, 
@@ -1108,6 +1172,8 @@ listed alphabetically.
 
 \item \texttt{anyDuplicated.ppp}: Accelerated.
   
+\item \texttt{append.psp}: arguments may be \texttt{NULL}.
+  
  \item \texttt{as.function.tess}:
     New argument \texttt{values} specifies the function values.
 
@@ -1138,8 +1204,9 @@ listed alphabetically.
 \item \texttt{as.linfun.lintess}:
 \begin{itemize}
 \item New argument \texttt{values} specifies the function value for each tile.
+\item The default \texttt{values} are the marks, if present.
 \item New argument \texttt{navalue}.
-    \item Computation accelerated.
+\item Computation accelerated.
 \end{itemize}
 
 \item \texttt{as.linim.default}:
@@ -1174,7 +1241,10 @@ listed alphabetically.
       Can now repair errors in polygon data, if \texttt{repair=TRUE}.
     \item Accelerated when \texttt{w} is a pixel mask.
     \end{itemize}
-
+    
+  \item \texttt{as.psp}: now permits a data frame of marks
+    to have only one column, instead of coercing it to a vector.
+    
   \item \texttt{as.solist}:
     The argument \texttt{x} can now be a spatial object;
     \texttt{as.solist(cells)} is the same as \texttt{solist(cells)}.
@@ -1206,9 +1276,16 @@ listed alphabetically.
 
  \item \texttt{bw.diggle}, \texttt{bw.ppl}, \texttt{bw.relrisk}, 
    \texttt{bw.smoothppp}:
+   \begin{itemize}
+   \item 
     These functions now extract and store the name of the unit of length
     from the point pattern dataset. When the bandwidth selection criterion
     is plotted, the name of the unit of length is shown on the x-axis.
+  \item 
+    A warning is issued if the optimal value of the cross-validation criterion
+    occurs at an endpoint of the search interval.
+    New argument \texttt{warn}.
+   \end{itemize}
    
  \item \texttt{bw.ppl}:
    \begin{itemize}
@@ -1234,6 +1311,11 @@ listed alphabetically.
     so that a finite bandwidth value is returned.
     
 %%C
+    
+  \item \texttt{cbind.hyperframe}:
+    The result now retains the \texttt{row.names}
+    of the original arguments.
+    
  \item \texttt{cdf.test}:
    \begin{itemize}
    \item    Calculations are more robust against numerical rounding effects.
@@ -1290,6 +1372,10 @@ listed alphabetically.
   \item New argument \texttt{verbose}.
   \end{itemize}
 
+\item \texttt{colourmap}: argument \texttt{col} have have length 1,
+  representing a trivial colour map in which all data values are
+  mapped to the same colour.
+  
 \item \texttt{collapse.fv}:
    This is now treated as a method for the \texttt{nlme} 
    generic \texttt{collapse}.
@@ -1343,6 +1429,9 @@ listed alphabetically.
    \item
      New argument \texttt{interpolate} supports interpolation of 
      critical value of test.
+   \item Function values which are infinite, \texttt{NaN} or \texttt{NA}
+     are now ignored in the calculation (with a warning) instead of causing
+     an error. Warning messages are more detailed.
    \end{itemize}
  
 
@@ -1404,12 +1493,23 @@ listed alphabetically.
    \end{itemize}
     
   \item \texttt{diagnose.ppm}:
+    \begin{itemize}
+    \item 
     Infinite values of \texttt{rbord} are now ignored and treated as zero.
     This ensures that \texttt{diagnose.ppm} has a sensible default
     when the fitted model has infinite reach.
+  \item Accelerated, when \texttt{type="inverse"}, for models
+    without a hard core.
+    \end{itemize}
   
   \item \texttt{diagnose.ppm, plot.diagppm}:
+    \begin{itemize}
+    \item 
    New arguments \texttt{col.neg, col.smooth} control the colour maps.
+    \item Accelerated, when \texttt{type="inverse"}, for models without
+   a hard core.
+    \end{itemize}
+
 
   \item \texttt{dilation.ppp}:
     Improved geometrical accuracy.
@@ -1469,12 +1569,18 @@ listed alphabetically.
      The argument \texttt{simulate} can now be a function
      (such as \texttt{rlabel}). The function will be applied repeatedly
      to the original data pattern.
+  \item \texttt{rejectNA} and \texttt{silent}.
    \end{itemize}
 
  \item \texttt{envelope.lpp}, \texttt{envelope.lppm}:
+   \begin{itemize}
+   \item 
     New arguments \texttt{fix.n} and \texttt{fix.marks}
     allow envelopes to be computed
     using simulations conditional on the observed number of points.   
+  \item New arguments \texttt{maxnerr}, \texttt{rejectNA} and \texttt{silent}.
+   \end{itemize}
+
 
  \item \texttt{eval.im}:  New argument \texttt{warn}.
    
@@ -1638,8 +1744,15 @@ listed alphabetically.
 
 
  \item \texttt{Kest}
+   \begin{itemize}
+   \item 
     Accelerated computation (for translation and rigid corrections)
     when window is an irregular shape.
+  \item 
+    Calculation of isotropic edge correction for polygonal windows
+    has changed slightly. Results are believed to be more accurate.
+    Computation has been accelerated by about 20 percent in typical cases.
+   \end{itemize}
     
  \item \texttt{Kest.fft}:
    Now has \verb!...! arguments allowing control of spatial resolution.
@@ -1697,7 +1810,11 @@ listed alphabetically.
     New arguments \texttt{update}, \texttt{leaveoneout}, \texttt{lambdaX}.
 
  \item \texttt{lengths.psp}: New argument \texttt{squared}.
-   
+
+   \item \texttt{Lest}, \texttt{Linhom}, \texttt{Ldot},
+     \texttt{Lcross}, \texttt{Ldot.inhom}, \texttt{Lcross.inhom}:
+     These summary functions now have explicit argument \texttt{"correction"}.
+     
  \item \texttt{leverage.ppm}:
    \begin{itemize}
    \item 
@@ -1768,8 +1885,11 @@ listed alphabetically.
    \end{itemize}
 
   \item \texttt{lintess}:
-    Argument \texttt{df} can be missing or \texttt{NULL}, 
-    resulting in a tesellation with only one tile.
+    \begin{itemize}
+    \item Argument \texttt{df} can be missing or \texttt{NULL}, 
+      resulting in a tesellation with only one tile.
+    \item Tessellations can now have marks. New argument \texttt{marks}.
+    \end{itemize}
   
   \item \texttt{localpcfinhom}:
     \begin{itemize}
@@ -1835,6 +1955,11 @@ listed alphabetically.
    \end{itemize}
 
 \item \texttt{lurking.ppm}: accelerated.
+  
+\item \texttt{lut}: argument \texttt{outputs} may have length 1, 
+  representing a lookup table in which all data values are mapped
+  to the same output value.
+  
 %%M
    
  \item \texttt{markcorr}:
@@ -1854,6 +1979,8 @@ listed alphabetically.
    \item 
      New arguments \texttt{gcontrol} and \texttt{reltol.pql} control 
      the fitting algorithm. 
+   \item 
+     New argument \texttt{weights} specifies case weights for each row of data.
    \end{itemize}
 
  \item \texttt{msr}:
@@ -1878,7 +2005,28 @@ listed alphabetically.
    New argument \texttt{k} allows computation of $k$-th nearest point.
    Computation accelerated.
 
-   \texttt{nnfun.lpp}: New argument \texttt{k}.
+   \texttt{nnfun.lpp}: 
+   \begin{itemize}
+   \item New argument \texttt{k}.
+   \item New argument \texttt{value} specifies whether to return the
+     index of the nearest neighbour or the mark value of the nearest
+     neighbour.
+   \end{itemize}
+
+   \texttt{nnfun.ppp}: 
+   \begin{itemize}
+   \item New argument \texttt{value} specifies whether to return the
+     index of the nearest neighbour or the mark value of the nearest
+     neighbour.
+   \end{itemize}
+
+   \texttt{nnfun.psp}: 
+   \begin{itemize}
+   \item New argument \texttt{value} specifies whether to return the
+     index of the nearest neighbour or the mark value of the nearest
+     neighbour.
+   \end{itemize}
+   
 %%O
 %%P
    
@@ -1981,6 +2129,7 @@ listed alphabetically.
   \item New argument \texttt{riblab}.
   \item Axes are prevented from extending outside the image rectangle.
   \item New argument \texttt{zap}.
+  \item Some warnings are suppressed when \texttt{do.plot=FALSE}.
    \end{itemize}
 
  \item \texttt{plot.imlist}:
@@ -2025,10 +2174,17 @@ listed alphabetically.
    \item When \texttt{style="width"}, negative values are plotted in
      red (by default). New argument \texttt{negative.args} controls this.
    \item New argument \texttt{zlim} specifies the range of values to be mapped.
+   \item New explicit argument \texttt{box} determines whether to plot a 
+     bounding box; default is \texttt{FALSE} in all cases.
    \end{itemize}
 
  \item \texttt{plot.lintess}:
-   Improved plot method, with more options.
+   \begin{itemize}
+   \item Improved plot method, with more options.
+   \item Modified to display the marks attached to the tiles.
+   \item Options: \verb!style=c("colour", "width", "image")!.
+   \end{itemize}
+
 
    \item \texttt{plot.lpp}:
      \begin{itemize}
@@ -2060,6 +2216,8 @@ listed alphabetically.
     \begin{itemize}
     \item Segments can be plotted with widths proportional to their mark values.
     \item New argument \texttt{style}.
+    \item New argument \texttt{col} gives control over the colour map
+      representing the values of marks attached to the segments.
     \end{itemize}
 
   \item \texttt{plot.pp3}:
@@ -2198,6 +2356,8 @@ listed alphabetically.
     standard error.
 
   \item \texttt{print.linim}: More information is printed.
+
+  \item \texttt{print.lintess}: Output includes information about marks.
     
   \item \texttt{print.quad}: More information is printed.
 
@@ -2244,6 +2404,11 @@ listed alphabetically.
     
 %%R
    
+  \item \texttt{rbind.hyperframe}:
+    The result now retains the \texttt{row.names}
+    of the original arguments.
+    
+
    \item \texttt{rcellnumber}:
      New argument \texttt{mu}.
 
@@ -2332,8 +2497,12 @@ listed alphabetically.
    \end{itemize}
 
   \item \texttt{rmhcontrol}:
+    \begin{itemize}
+    \item 
     New parameter \texttt{pstage} determines when to generate
     random proposal points.
+  \item The parameter \texttt{nsave} can now be a vector of integers.
+    \end{itemize}
     
  \item \texttt{rose.default}
    New argument \texttt{weights}.
@@ -2516,6 +2685,9 @@ listed alphabetically.
    \item \texttt{summary.kppm}:
      prints more information about algorithm convergence.
      
+   \item \texttt{summary.lintess}:
+     prints information about marks.
+     
    \item \texttt{summary.ppm}:
     New argument \texttt{fine} selects the algorithm for variance estimation.
 
@@ -2546,7 +2718,11 @@ listed alphabetically.
     
    \item \texttt{textureplot}: 
      Argument \texttt{x} can now be something acceptable to \texttt{as.im}.
-     
+   
+   \item \texttt{tilenames}, \verb!tilenames<-!:
+    These functions are now generic, with methods for \texttt{tess}
+    and \texttt{lintess}.
+
    \item \texttt{to.grey}
    New argument \texttt{transparent}.
 
@@ -2555,6 +2731,8 @@ listed alphabetically.
   \item \texttt{union.owin}:
    Improved behaviour when there are more than 2 windows.
 
+   \item \texttt{unstack.lintess}: now handles marks.
+     
    \item \texttt{update}: now works for models of class \texttt{"mppm"}.
      
    \item \texttt{update.kppm}:
@@ -2576,10 +2754,24 @@ listed alphabetically.
    This is now a method for the generic function \texttt{valid}.
 
    \item \texttt{vcov.mppm}:
-     Now handles models with Gibbs interactions.
+     \begin{itemize}
+     \item      Now handles models with Gibbs interactions.
+     \item New argument \texttt{nacoef.action} specifies what to do
+       if some of the fitted coefficients are \texttt{NA}, \texttt{NaN}
+       or \texttt{Inf}.
+     \end{itemize}
+
+
 
    \item \texttt{vcov.ppm}:
+     \begin{itemize}
+     \item 
      Performance slightly improved, for Gibbs models.
+   \item New argument \texttt{nacoef.action} specifies what to do if
+     some of the fitted model coefficients are \texttt{NA}, \texttt{NaN}
+     or infinite.
+     \end{itemize}
+
 
 %%W
 %%X

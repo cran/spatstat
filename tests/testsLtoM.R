@@ -345,7 +345,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.30 $  $Date: 2019/09/12 04:31:48 $
+#  $Revision: 1.38 $  $Date: 2019/10/29 04:14:33 $
 
 
 require(spatstat)
@@ -411,6 +411,7 @@ local({
   #' sparse network, older C code
   opa <- spatstat.options(Cnndistlpp=FALSE)
   Bd <- nndist(dendrite) 
+  Bw <- nnwhich(dendrite) 
   spatstat.options(opa)
   #' undefined nearest neighbours
   Ed <- nndist(spiders[1:3], k=1:3)
@@ -473,7 +474,15 @@ local({
 
   # test handling marginal cases
   xyd <- nncross(XX, YY[1])
+  A <- runiflpp(5, simplenet)
+  B <- runiflpp(2, simplenet)
+  aaa <- nncross(A,B,k=3:5) #' all undefined
+  spatstat.options(Cnncrosslpp=FALSE)
+  bbb <- nncross(B,A, iX=1:2, iY=1:5) # another code block
+  spatstat.options(Cnncrosslpp=TRUE)
 
+  reset.spatstat.options()
+  
   ## as.linnet.psp (Suman's example)
   Lines <- as.data.frame(as.psp(simplenet))
   newseg <- c(Lines[1,1:2], Lines[10,3:4])
@@ -514,7 +523,19 @@ local({
   testcountends(X)
   # finer scale
   testcountends(X, s=1000)
-
+  #' disconnected
+  L <- thinNetwork(simplenet, retainedges = -c(3,8))
+  S <- as.psp(L)
+  x <- midpoints.psp(S)[1]
+  len <- lengths.psp(S)[1]
+  A <- lineardisc(L, x, len,  plotit=FALSE) # involves many segments of network
+  B <- lineardisc(L, x, len/5, plotit=FALSE) # involves one segment of network
+  op <- spatstat.options(Ccountends=FALSE)
+  A <- lineardisc(L, x, len,  plotit=FALSE)
+  B <- lineardisc(L, x, len/5, plotit=FALSE)
+  spatstat.options(op)
+  reset.spatstat.options()
+  
   ## Test algorithms for boundingradius.linnet
   L <- as.linnet(chicago, sparse=TRUE)
   L$boundingradius <- NULL # artificially remove
@@ -618,6 +639,22 @@ local({
   # extract branch B
   XB <- extractbranch(X, "b", tb)
 
+  ## cases of lintess()
+  A <- lintess(simplenet) # argument df missing 
+  S <- as.psp(simplenet)
+  ns <- nsegments(S)
+  df <- data.frame(seg=1:ns, t0=0, t1=1, tile=letters[1:ns])
+  M <- data.frame(len=lengths.psp(S), ang=angles.psp(S))
+  V <- lintess(simplenet, df, marks=M)
+
+  ## methods for class lintess
+  U <- unmark(V)
+  U <- unstack(V)
+  print(summary(V))
+  W <- Window(V)
+  plot(V, style="image")
+  plot(V, style="width")
+
   ## linear tessellations infrastructure
   nX <- 100
   nY <- 20
@@ -656,8 +693,56 @@ local({
   kapow <- unstack(shebang)
   plot(kapow)
 })
-  
+
 reset.spatstat.options()
+
+local({
+  #' densityVoronoi.lpp and related code
+  X <- runiflpp(5, simplenet)
+  densityVoronoi(X, f=0)
+  densityVoronoi(X, f=1e-8)
+  densityVoronoi(X, f=1)
+  densityVoronoi(X[FALSE], f=0.5)
+  XX <- X[rep(1:5, 4)]
+  densityVoronoi(XX, f=0.99999, nrep=5)
+  #' bandwidth selection
+  bw.voronoi(X, nrep=4, prob=c(0.2, 0.4, 0.6))
+})
+
+local({
+  #' complex-valued functions and images
+  f <- function(x,y,seg,tp) { x + y * 1i }
+  g <- linfun(f, simplenet)
+  h <- as.linim(g)
+  plot(Re(h))
+  plot(h)
+  plot(g)
+  integral(h)
+  integral(g)
+})
+  
+local({
+  ## bug in 'lixellate' (Jakob Gulddahl Rasmussen)
+  X <- ppp(c(0,1), c(0,0), owin())
+  L <- linnet(X, edges = matrix(1:2, ncol=2))
+  Y <- lpp(X, L)
+  ## The left end point is OK
+  lixellate(Y[1], nsplit=30)
+  d <- density(Y[1], .1)
+  ## The right end point gave an error
+  lixellate(Y[2], nsplit=30)
+  d <- density(Y[2], .1)
+})
+
+local({
+  ## make some bad data and repair it
+  X <- runiflpp(4, simplenet)
+  sx1 <- coords(X)$seg[1]
+  ns <- nsegments(X)
+  X$domain$from <- X$domain$from[c(1:ns, sx1)]
+  X$domain$to   <- X$domain$to[c(1:ns, sx1)]
+  Y <- repairNetwork(X)
+})
 #'
 #'   lppmodels.R
 #'
@@ -852,7 +937,7 @@ reset.spatstat.options()
 #
 # Basic tests of mppm
 #
-# $Revision: 1.12 $ $Date: 2019/02/20 04:05:43 $
+# $Revision: 1.13 $ $Date: 2019/12/06 10:01:08 $
 # 
 
 require(spatstat)
@@ -865,17 +950,22 @@ local({
   fit2 <- mppm(Points ~ group, simba,
                hyperframe(po=Poisson(), str=Strauss(0.1)),
                iformula=~str/id)
+  fit2w <- mppm(Points ~ group, simba,
+                hyperframe(po=Poisson(), str=Strauss(0.1)),
+                iformula=~str/id, weights=runif(nrow(simba)))
 # currently invalid  
 #  fit3 <- mppm(Points ~ group, simba,
 #               hyperframe(po=Poisson(), pie=PairPiece(c(0.05,0.1))),
 #        iformula=~I((group=="control") * po) + I((group=="treatment") * pie))
   fit1
   fit2
+  fit2w
 #  fit3
 
   ## run summary.mppm which currently sits in spatstat-internal.Rd
   summary(fit1)
   summary(fit2)
+  summary(fit2w)
 #  summary(fit3)
 
   ## test vcov algorithm

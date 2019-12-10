@@ -6,7 +6,7 @@
 #
 #        compatible.fv()       Check whether two fv objects are compatible
 #
-#     $Revision: 1.38 $     $Date: 2019/05/24 07:45:25 $
+#     $Revision: 1.40 $     $Date: 2019/12/10 00:20:22 $
 #
 
 eval.fv <- local({
@@ -52,7 +52,13 @@ eval.fv <- local({
     }
     # copy first object as template
     result <- funs[[1L]]
-    # remove potential ratio info
+    ## ensure 'conservation' info is retained
+    conserve <- unname(lapply(funs, attr, which="conserve"))
+    if(any(present <- !sapply(conserve, is.null))) {
+      conserve <- do.call(resolve.defaults, conserve[present])
+      attr(result, "conserve") <- conserve
+    }
+    ## remove potential ratio info
     class(result) <- setdiff(class(result), "rat")
     attr(result, "numerator") <- attr(result, "denominator") <- NULL
     labl <- attr(result, "labl")
