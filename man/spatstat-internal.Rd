@@ -14,6 +14,7 @@
 \alias{adjust.ratfv}
 \alias{affinexy}
 \alias{affinexypolygon}
+\alias{affine.msr}
 \alias{ang2rad}
 \alias{anycrossing.psp}
 \alias{ApplyConnected}
@@ -121,7 +122,6 @@
 \alias{diagramobj}
 \alias{digestCovariates}
 \alias{digital.volume}
-\alias{dilate.owin}
 \alias{dim.fasp}               
 \alias{dim.hyperframe}               
 \alias{dim.im}               
@@ -150,7 +150,6 @@
 \alias{equals.quad}          
 \alias{equalsfun.quad}          
 \alias{erodemask}
-\alias{erode.owin}
 \alias{evalCovar}
 \alias{evalCovar.ppm}
 \alias{evalCovar.lppm}
@@ -185,6 +184,7 @@
 \alias{fillNA}
 \alias{flatfname}
 \alias{flipxypolygon}
+\alias{flipxy.msr}
 \alias{forbid.logi}
 \alias{format.numberwithunit}
 \alias{FormatFaspFormulae}
@@ -429,7 +429,6 @@
 \alias{plot.minconfit}
 \alias{plot.parres}
 \alias{plot.plotpairsim}
-\alias{plot.profilepl}
 \alias{plot.qqppm}
 \alias{plot.spatialcdf}
 \alias{ppllengine}
@@ -549,6 +548,7 @@
 \alias{repair.image.xycoords}
 \alias{replacementIndex}
 \alias{representativeRows}
+\alias{rescale.msr}
 \alias{resolveEinfo}
 \alias{resolve.foxall.window}
 \alias{resolve.vargamma.shape}
@@ -595,6 +595,7 @@
 \alias{reversePolyclipArgs}
 \alias{rmax.Rigid}
 \alias{rmax.rule}
+\alias{rotate.msr}
 \alias{rotxy}
 \alias{rotxypolygon}
 \alias{row.names.hyperframe}
@@ -703,6 +704,8 @@
 %NAMESPACE export("%unit%")
 \alias{unitname.default}
 \alias{unitname<-.default}
+\alias{unitname.msr}
+\alias{unitname<-.msr}
 \alias{unstackFilter}
 \alias{update.im}
 \alias{update.ippm}
@@ -807,6 +810,7 @@ adaptcoef(new.coef, fitcoef, drop)
 adjust.ratfv(f, columns, numfactor, denfactor)
 affinexy(X, mat, vec, invert)
 affinexypolygon(p, mat, vec, detmat)
+\method{affine}{msr}(X, mat, vec, \dots)
 ang2rad(ang, unit, start, clockwise)
 anycrossing.psp(A,B)
 ApplyConnected(X, Engine, r, \dots, rule, auxdata)
@@ -934,7 +938,6 @@ diagnose.ppm.engine(object, \dots, type, typename, opt,
 diagramobj(X, \dots)
 digestCovariates(\dots, W)
 digital.volume(range, nval, vside)
-dilate.owin(\dots)
 \method{dim}{fasp}(x)
 \method{dim}{hyperframe}(x)
 \method{dim}{im}(x)
@@ -985,7 +988,6 @@ equalpairs.quad(Q)
 equals.quad(Q)          
 equalsfun.quad(Q)
 erodemask(w,r,strict)
-erode.owin(\dots)
 evalCovar(model, covariate, \dots)
 \method{evalCovar}{ppm}(model, covariate, \dots, lambdatype,
           dimyx, eps, interpolate, jitter, modelname, covname, dataname,
@@ -1026,6 +1028,7 @@ fii(interaction, coefs, Vnames, IsOffset)
 fillNA(x, value)
 flatfname(x)
 flipxypolygon(p)
+\method{flipxy}{msr}(X)
 forbid.logi(object)
 \method{format}{numberwithunit}(x, \dots, collapse, modifier)
 FormatFaspFormulae(f, argname)
@@ -1129,7 +1132,8 @@ is.vanilla(u)
 k3engine(x, y, z, box, rmax, nrval, correction)
 Kborder.engine(X, rmax, nr, correction, weights, ratio)
 Knone.engine(X, rmax, nr, weights, ratio)
-Krect.engine(X, rmax, nr, correction, weights, ratio, fname)
+Krect.engine(X, rmax, nr, correction, weights,
+             ratio, fname, use.integers)
 Kount(dIJ, bI, b, breaks)
 Kwtsum(dIJ, bI, wIJ, b, w, breaks, fatal)
 Kpcf.kppm(model, what)
@@ -1323,8 +1327,6 @@ plotPolygonBdry(x, \dots)
 \method{plot}{minconfit}(x, \dots)
 \method{plot}{parres}(x, \dots)
 \method{plot}{plotpairsim}(x, \dots)
-\method{plot}{profilepl}(x, \dots, add, main, tag, coeff, xvariable,
-                         col, lty, lwd, col.opt, lty.opt, lwd.opt)
 \method{plot}{qqppm}(x, \dots, limits=TRUE,
            monochrome=spatstat.options('monochrome'),
            limcol=if(monochrome) "black" else "red")
@@ -1458,6 +1460,7 @@ RelevantDeviation(x, alternative, clamp, scaling)
 repair.image.xycoords(x)
 replacementIndex(ii, stuff)
 representativeRows(x)
+\method{rescale}{msr}(X, s, unitname)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.foxall.window(X, Y, W)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default)
@@ -1527,6 +1530,7 @@ restrict.mask(M, W)
 reversePolyclipArgs(x, p)
 rmax.Rigid(X, g)
 rmax.rule(fun, W, lambda)
+\method{rotate}{msr}(X, angle, \dots, centre)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
 rmhResolveControl(control, model)
@@ -1647,6 +1651,8 @@ twostage.envelope(X, \dots, nsim, nsimsub, nrank,
 x \%unit\% u
 \method{unitname}{default}(x) 
 \method{unitname}{default}(x) <- value 
+\method{unitname}{msr}(x) 
+\method{unitname}{msr}(x) <- value 
 unstackFilter(x)
 \method{update}{im}(object, \dots) 
 \method{update}{ippm}(object, \dots, envir) 

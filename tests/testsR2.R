@@ -1,247 +1,3 @@
-#'
-#'    tests/quadschemes.R
-#'
-#'    Quadrature schemes, dummy points etc
-#' 
-#'   $Revision: 1.6 $ $Date: 2019/01/20 05:49:40 $
-#'
-
-require(spatstat)
-local({
-  ##  class 'quad' 
-  qu <- quadscheme(cells)
-  qm <- quadscheme(amacrine)
-  plot(qu)
-  plot(qm)
-  is.multitype(qu)
-  is.multitype(qm)
-  a <- param.quad(qu)
-  a <- param.quad(qm)
-  a <- equals.quad(qu)
-  a <- equals.quad(qm)
-  a <- domain(qu)
-  unitname(qu) <- c("Furlong", "Furlongs")
-  
-  ## utilities
-  b <- cellmiddles(square(1), 3, 4)
-  b <- cellmiddles(letterR, 3, 4, distances=FALSE)
-  b <- cellmiddles(letterR, 3, 4, distances=TRUE)
-  v <- tilecentroids(square(1), 3, 4)
-  v <- tilecentroids(letterR, 3, 4)
-  n <- default.n.tiling(cells)
-  n <- default.n.tiling(cells, nd=4)
-  n <- default.n.tiling(cells, ntile=4)
-  n <- default.n.tiling(cells, ntile=4, quasi=TRUE)
-
-  ## quadrature weights - special cases
-  X <- runifpoint(10, as.mask(letterR))
-  gr <- gridweights(X, ntile=12, npix=7) # causes warnings about zero digital area
-  
-  ## plot.quad 
-  plot(quadscheme(cells, method="dirichlet", nd=7),              tiles=TRUE)
-  plot(quadscheme(cells, method="dirichlet", nd=7, exact=FALSE), tiles=TRUE)
-  
-  ## logistic
-  d <- quadscheme.logi(cells, logi.dummy(cells, "binomial"))
-  print(summary(d))
-  d <- quadscheme.logi(cells, logi.dummy(cells, "poisson"))
-  print(summary(d))
-  d <- quadscheme.logi(cells, logi.dummy(cells, "grid"))
-  print(summary(d))
-  d <- quadscheme.logi(cells, logi.dummy(cells, "transgrid"))
-  print(summary(d))
-  d <- quadscheme.logi(amacrine,
-                       logi.dummy(amacrine, "binomial", mark.repeat=TRUE))
-  print(summary(d))
-  d <- quadscheme.logi(amacrine,
-                       logi.dummy(amacrine, "poisson", mark.repeat=FALSE))
-  print(summary(d))
-})
-#'  tests/randoms.R
-#'   Further tests of random generation code
-#'  $Revision: 1.9 $ $Date: 2019/12/06 02:08:57 $
-
-require(spatstat)
-local({
-  A <- runifrect(6, nsim=2)
-  A <- runifdisc(6, nsim=2)
-  A <- runifpoispp(5, nsim=2)
-  A <- runifpoispp(0, nsim=2)
-  A <- rSSI(0.05, 6, nsim=2)
-  A <- rSSI(0.05, 10, win=square(c(-0.5, 1.5)), x.init=A[[1]], nsim=2)  
-  A <- rstrat(nx=4, nsim=2)
-  A <- rsyst(nx=4, nsim=2)
-  A <- rthin(cells, P=0.5, nsim=2)
-  A <- rthin(cells, runif(42))
-  A <- rjitter(cells, nsim=2, retry=FALSE)
-  A <- rcell(square(1), nx=5, nsim=2)
-
-  f <- function(x,y) { 10*x }
-  Z <- as.im(f, square(1))
-  A <- rpoint(n=6, f=f, fmax=10, nsim=2)
-  A <- rpoint(n=6, f=Z, fmax=10, nsim=2)
-  A <- rpoint(n=0, f=f, fmax=10, nsim=2)
-  A <- rpoint(n=0, f=Z, fmax=10, nsim=2)
-
-  op <- spatstat.options(fastpois=FALSE)
-  A <- runifpoispp(5, nsim=2)
-  A <- rpoispp(Z)
-  spatstat.options(op)
-
-  b3 <- box3(c(0,1))
-  b4 <- boxx(c(0,1), c(0,1), c(0,1), c(0,1))
-  X <- rMaternInhibition(2, kappa=20, r=0.1, win=b3)
-  Y <- rMaternInhibition(2, kappa=20, r=0.1, win=b4)
-
-  X <- rSSI(0.05, 6)
-  Y <- rSSI(0.05, 6, x.init=X) # no extra points
-
-  Z <- rlabel(finpines)
-})
-
-local({
-  f1 <- function(x,y){(x^2 + y^3)/10}
-  f2 <- function(x,y){(x^3 + y^2)/10}
-  ZZ <- solist(A=as.im(f1, letterR),
-               B=as.im(f2, letterR))
-  XX <- rmpoispp(ZZ, nsim=3)
-  YY <- rmpoint(10, f=ZZ, nsim=3)
-  g <- function(x,y,m){(10+as.integer(m)) * (x^2 + y^3)}
-  VV <- rpoint.multi(10, f=g,
-                     marks=factor(sample(letters[1:3], 10, replace=TRUE)),
-                     nsim=3)
-  L <- edges(letterR)
-  E <- runifpoisppOnLines(5, L)
-  G <- rpoisppOnLines(ZZ, L)
-})
-
-local({
-  #' cluster models + bells + whistles
-  X <- rThomas(10, 0.2, 5, saveLambda=TRUE)
-  if(is.null(attr(X, "Lambda")))
-    stop("rThomas did not save Lambda image")
-  Y <- rThomas(0, 0.2, 5, saveLambda=TRUE)
-  if(is.null(attr(Y, "Lambda")))
-    stop("rThomas did not save Lambda image when kappa=0")
-  X <- rMatClust(10, 0.05, 4, saveLambda=TRUE)
-  X <- rCauchy(30, 0.01, 5, saveLambda=TRUE)
-  X <- rVarGamma(30, 2, 0.02, 5, saveLambda=TRUE)
-  Z <- as.im(function(x,y){ 5 * exp(2 * x - 1) }, owin())
-  Y <- rThomas(10, 0.2, Z, saveLambda=TRUE)
-  Y <- rMatClust(10, 0.05, Z, saveLambda=TRUE)
-  Y <- rCauchy(30, 0.01, Z, saveLambda=TRUE)
-  Y <- rVarGamma(30, 2, 0.02, Z, saveLambda=TRUE)
-})
-
-reset.spatstat.options()
-
-
-#'  tests/resid.R
-#'
-#'  Stuff related to residuals and residual diagnostics
-#'
-#'   $Revision: 1.2 $  $Date: 2018/06/11 07:07:31 $
-#'
-
-require(spatstat)
-local({
-  fit <- ppm(cells ~x, Strauss(r=0.15))
-  diagnose.ppm(fit, cumulative=FALSE)
-  diagnose.ppm(fit, cumulative=FALSE, type="pearson")
-
-  fitoff <- ppm(cells ~ sin(x) + offset(y))
-  plot(a <- parres(fitoff, "x"))
-  plot(b <- parres(fitoff, "y"))
-  print(a)
-  print(b)
-
-  d <- diagnose.ppm(fit, which="marks")
-  plot(d, plot.neg="discrete")
-  plot(d, plot.neg="imagecontour")
-
-  d <- diagnose.ppm(fit, type="pearson", which="smooth")
-  plot(d, plot.smooth="image")
-  plot(d, plot.smooth="contour")
-  plot(d, plot.smooth="imagecontour")
-  
-  d <- diagnose.ppm(fit, type="pearson", which="x")
-  plot(d)
-  d <- diagnose.ppm(fit, type="pearson", which="y")
-  plot(d)
-  
-  diagnose.ppm(fit, type="pearson", which="x", cumulative=FALSE)
-  diagnose.ppm(fit, type="pearson", which="x", cumulative=FALSE)
-  diagnose.ppm(fit, type="raw", plot.neg="discrete", plot.smooth="image")
-  diagnose.ppm(fit, type="pearson", plot.neg="contour", plot.smooth="contour")
-
-  diagnose.ppm(fitoff, type="raw", which="smooth", plot.smooth="persp")
-  diagnose.ppm(fitoff, type="pearson", plot.neg="imagecontour")
-
-  plot(Frame(letterR), main="")
-  ploterodewin(letterR, erosion(letterR, 0.05), main="jeans")
-  W <- as.mask(letterR)
-  plot(Frame(W), main="")
-  ploterodewin(W, erosion(W, 0.05), main="JeAnS")
-})
-
-
-##
-## tests/rhohat.R
-##
-## Test all combinations of options for rhohatCalc
-##
-## $Revision: 1.3 $ $Date: 2018/05/13 04:42:21 $
-
-local({
-  require(spatstat)
-  X <-  rpoispp(function(x,y){exp(3+3*x)})
-  ## rhohat.ppp
-  ## done in example(rhohat):
-  ## rhoA <- rhohat(X, "x")
-  ## rhoB <- rhohat(X, "x", method="reweight")
-  ## rhoC <- rhohat(X, "x", method="transform")
-
-  ## alternative smoother (if package locfit available)
-  rhoA <- rhohat(X, "x", smoother="local")
-  rhoB <- rhohat(X, "x", smoother="local", method="reweight")
-  rhoC <- rhohat(X, "x", smoother="local", method="transform")
-
-  ## rhohat.ppm
-  fit <- ppm(X, ~x)
-  rhofitA <- rhohat(fit, "x")
-  rhofitB <- rhohat(fit, "x", method="reweight")
-  rhofitC <- rhohat(fit, "x", method="transform")
-
-  ## Baseline
-  lam <- predict(fit)
-  rhoAb <- rhohat(X, "x", baseline=lam)
-  rhoBb <- rhohat(X, "x", method="reweight", baseline=lam)
-  rhoCb <- rhohat(X, "x", method="transform", baseline=lam)
-
-  ## Horvitz-Thompson
-  rhoAH <- rhohat(X, "x", horvitz=TRUE) 
-  rhoBH <- rhohat(X, "x", method="reweight", horvitz=TRUE)
-  rhoCH <- rhohat(X, "x", method="transform", horvitz=TRUE)
-  rhofitAH <- rhohat(fit, "x", horvitz=TRUE)
-  rhofitBH <- rhohat(fit, "x", method="reweight", horvitz=TRUE)
-  rhofitCH <- rhohat(fit, "x", method="transform", horvitz=TRUE)
-
-  ## class support
-  plot(rhoA)
-  plot(rhoA, rho ~ x, shade=NULL)
-  plot(rhoA, log(rho) ~ x, shade=NULL)
-  plot(rhoA, log(.) ~ x)
-
-  ## rho2hat
-  r2xy <- rho2hat(X, "x", "y")
-  r2xyw <- rho2hat(X, "x", "y", method="reweight")
-  plot(r2xy, do.points=TRUE)
-  xcoord <- function(x,y) x
-  ycoord <- function(x,y) y
-  xim <- as.im(xcoord, W=Window(X))
-  r2fi <- rho2hat(X, ycoord, xim)
-  r2if <- rho2hat(X, xim, ycoord)
-})
 #
 #  tests/rmhAux.R
 #
@@ -284,7 +40,7 @@ local({
 ##
 ##   tests/rmhBasic.R
 ##
-##   $Revision: 1.18 $  $Date: 2019/10/23 01:26:01 $
+##   $Revision: 1.20 $  $Date: 2019/12/31 05:01:21 $
 #
 # Test examples for rmh.default
 # run to reasonable length
@@ -295,7 +51,7 @@ require(spatstat)
 
 local({
 if(!exists("nr"))
-   nr   <- 5e3
+   nr   <- 2e3
 
 spatstat.options(expand=1.1)
    
@@ -486,7 +242,19 @@ spatstat.options(expand=1.1)
    X1.strauss.trend <- rmh(model=mod17,start=list(n.start=90),
                            control=list(nrep=nr))
 
-   #' Test other code blocks
+   #' trend is an image
+   mod18 <- mod17
+   mod18$trend <- as.im(mod18$trend, square(10))
+   X1.strauss.trendim <- rmh(model=mod18,start=list(n.start=90),
+                             control=list(nrep=nr))
+
+
+   #'.....  Test other code blocks .................
+
+   #' argument passing to rmhcontrol
+   X1S <- rmh(model=mod01, control=NULL, nrep=nr)
+   X1f <- rmh(model=mod01, fixall=TRUE,  nrep=nr) # issues a warning
+
    #'  nsim > 1
    Xlist <- rmh(model=mod01,start=list(n.start=80),
              control=list(nrep=nr),
@@ -496,9 +264,13 @@ spatstat.options(expand=1.1)
    YY <- XX[square(2)]
    XXwindow <- rmh(model=mod01, start=list(n.start=80),
                    control=list(nrep=nr, x.cond=YY))
+   XXwindowTrend <- rmh(model=mod17, start=list(n.start=80),
+                        control=list(nrep=nr, x.cond=YY))
    #' Palm conditioning
    XXpalm <- rmh(model=mod01,start=list(n.start=80),
                  control=list(nrep=nr, x.cond=coords(YY)))
+   XXpalmTrend <- rmh(model=mod17,start=list(n.start=80),
+                      control=list(nrep=nr, x.cond=coords(YY)))
 
    #' nsave, nburn
    chq <- function(X) {
@@ -511,6 +283,9 @@ spatstat.options(expand=1.1)
    XXburn <- rmh(model=mod01,start=list(n.start=80), verbose=FALSE,
                  control=list(nrep=nr, nsave=500, nburn=100))
    chq(XXburn)
+   XXburnTrend <- rmh(model=mod17,start=list(n.start=80), verbose=FALSE,
+                      control=list(nrep=nr, nsave=500, nburn=100))
+   chq(XXburnTrend)
    XXburn0 <- rmh(model=mod01,start=list(n.start=80), verbose=FALSE,
                   control=list(nrep=nr, nsave=500, nburn=0))
    chq(XXburn0)
@@ -531,6 +306,23 @@ spatstat.options(expand=1.1)
    Xbg2 <- rmh(model=mod18,start=list(n.start=20),
               control=list(nrep=1e4, periodic=FALSE))
 
+})
+
+local({
+  #' supporting classes
+  rs <- rmhstart()
+  print(rs)
+  rs <- rmhstart(x.start=cells)
+  print(rs)
+  
+  rc <- rmhcontrol(x.cond=as.list(as.data.frame(cells)))
+  print(rc)
+  rc <- rmhcontrol(x.cond=as.data.frame(cells)[FALSE, , drop=FALSE])
+  print(rc)
+  rc <- rmhcontrol(nsave=100, ptypes=c(0.7, 0.3), x.cond=amacrine)
+  print(rc)
+  rc <- rmhcontrol(ptypes=c(0.7, 0.3), x.cond=as.data.frame(amacrine))
+  print(rc)
 })
 
 reset.spatstat.options()
@@ -587,7 +379,7 @@ if(!identical(wsim, wcel))
 #
 #  tests of rmh, running multitype point processes
 #
-#   $Revision: 1.11 $  $Date: 2019/10/21 06:42:07 $
+#   $Revision: 1.12 $  $Date: 2019/12/13 00:57:28 $
 
 require(spatstat)
 
@@ -604,7 +396,13 @@ spatstat.options(expand=1.1)
    modp2 <- list(cif="poisson",
                  par=list(beta=2), types=letters[1:3], w = square(10))
    Xp2 <- rmh(modp2, start=list(n.start=0), control=list(p=1))
-    
+
+   # Multinomial 
+   Xp2fix <- rmh(modp2, start=list(n.start=c(10,20,30)),
+                 control=list(fixall=TRUE, p=1))
+   Xp2fixr <- rmh(modp2, start=list(x.start=Xp2fix),
+                 control=list(fixall=TRUE, p=1))
+  
    # Multitype Strauss:
    beta <- c(0.027,0.008)
    gmma <- matrix(c(0.43,0.98,0.98,0.36),2,2)
@@ -684,6 +482,24 @@ spatstat.options(expand=1.1)
    X2.straushm.trend <- rmh(model=mod11,start=list(n.start=350),
                             control=list(ptypes=c(0.75,0.25),expand=1,
                             nrep=nr,nverb=nv))
+
+
+   #' nsave, nburn
+   chq <- function(X) {
+     Xname <- deparse(substitute(X))
+     A <- attr(X, "saved")
+     if(length(A) == 0)
+       stop(paste(Xname, "did not include a saved list of patterns"))
+     return("ok")
+   }
+   XburnMS <- rmh(model=mod08,start=list(n.start=80), verbose=FALSE,
+                  control=list(ptypes=c(0.75,0.25),
+                               nrep=nr,nsave=500, nburn=100))
+   chq(XburnMS)
+   XburnMStrend <- rmh(model=mod10,start=list(n.start=350), verbose=FALSE,
+                        control=list(ptypes=c(0.75,0.25),
+                                     nrep=nr,nsave=500, nburn=100))
+   chq(XburnMStrend)
 
 
 #######################################################################

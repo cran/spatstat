@@ -25,7 +25,7 @@ local({
 #
 #  Test validity of envelope data
 #
-#  $Revision: 1.20 $  $Date: 2019/12/02 06:29:20 $
+#  $Revision: 1.21 $  $Date: 2019/12/14 02:15:38 $
 #
 
 require(spatstat)
@@ -218,6 +218,8 @@ local({
                 type="global", use.theory=TRUE)
   E <- envelope(Y, rvals=rr, observed=oo, theory=zz,
                 type="global", use.theory=TRUE, nsim=10)
+  E <- envelope(Y, rvals=rr, observed=oo, theory=zz,
+                type="global", use.theory=FALSE, nsim=10)
   E <- envelope(Y, rvals=rr, observed=oo, type="global",
                 nsim=10, nsim2=10)
   E <- envelope(Y, rvals=rr, observed=oo, type="global",
@@ -244,7 +246,7 @@ local({
 #'     Envelope tests (dclf.test, mad.test)
 #'     and two-stage tests (bits.test, dg.test, bits.envelope, dg.envelope)
 #' 
-#'     $Revision: 1.1 $  $Date: 2019/10/09 06:28:21 $ 
+#'     $Revision: 1.2 $  $Date: 2020/01/10 06:41:04 $ 
 #'
 require(spatstat)
 local({
@@ -256,6 +258,9 @@ local({
   dclf.test(fit)
   set.seed(909)
   dg.test(fit, nsim=9)
+  #' other code blocks
+  dclf.test(fit, rinterval=c(0, 3), nsim=9)
+  envelopeTest(X, exponent=3, clamp=TRUE, nsim=9)
 })
 #
 #    tests/factorbugs.R
@@ -377,7 +382,7 @@ local({
 #'
 #'  Test machinery for manipulating formulae
 #' 
-#' $Revision: 1.5 $  $Date: 2019/10/05 11:03:26 $
+#' $Revision: 1.6 $  $Date: 2020/01/08 01:38:24 $
 
 require(spatstat)
 local({
@@ -402,6 +407,11 @@ local({
 
   ff(y ~ poly(x,2) + poly(z,3), "x", y ~poly(z,3))
 
+  ff(y ~ x + z, "g", y ~ x + z)
+
+  reduceformula(y ~ x+z, "g", verbose=TRUE)
+  reduceformula(y ~ sin(x-z), "z", verbose=TRUE)
+  
   illegal.iformula(~str*g, itags="str", dfvarnames=c("marks", "g", "x", "y"))
 })
 
@@ -454,7 +464,7 @@ local({
 ##     tests/funnymarks.R
 ##
 ## tests involving strange mark values
-## $Revision: 1.5 $ $Date: 2018/06/14 01:50:19 $
+## $Revision: 1.6 $ $Date: 2020/01/05 02:32:34 $
 
 require(spatstat)
 local({
@@ -504,6 +514,9 @@ local({
   marks(Z)[12] <- NA
   mz <- is.multitype(Z)
   cZ <- coerce.marks.numeric(Z)
+  marks(Z) <- data.frame(n=1:npoints(Z),
+                         a=factor(sample(letters, npoints(Z), replace=TRUE)))
+  cZ <- coerce.marks.numeric(Z)
   stopifnot(is.multitype(cells %mark% data.frame(a=factor(1:npoints(cells)))))
 
   a <- numeric.columns(finpines)
@@ -511,13 +524,25 @@ local({
   b2 <- coerce.marks.numeric(amacrine)
   d <- numeric.columns(cells)
   f <- numeric.columns(longleaf)
+  ff <- data.frame(a=factor(letters[1:10]), y=factor(sample(letters, 10)))
+  numeric.columns(ff)
+
+  ## mark operations
+  df <- data.frame(x=1:2, y=sample(letters, 2))
+  h <- hyperframe(z=1:2, p=solist(cells, cells))
+  a <- NULL %mrep% 3
+  a <- 1:4 %mrep% 3
+  a <- df %mrep% 3
+  a <- h %mrep% 3
+  b <- markcbind(df, h)
+  b <- markcbind(h, df)
 })
 ## 
 ##    tests/fvproblems.R
 ##
-##    problems with fv and fasp code
+##    problems with fv, ratfv and fasp code
 ##
-##    $Revision: 1.10 $  $Date: 2019/12/06 02:51:36 $
+##    $Revision: 1.14 $  $Date: 2020/01/10 03:11:49 $
 
 require(spatstat)
 
@@ -600,6 +625,7 @@ local({
   A <- tweak.fv.entry(A, "V1", new.tag="r")
   A[,3] <- NULL
   A$hogwash <- runif(nrow(A))
+  fvnames(A, ".") <- NULL
   #' bind.fv with qualitatively different functions
   GK <- harmonise(G=Gest(cells), K=Kest(cells))
   G <- GK$G
@@ -609,7 +635,35 @@ local({
   #'
   H <- rebadge.as.crossfun(K, "H", "inhom", 1, 2)
   H <- rebadge.as.dotfun(K, "H", "inhom", 3)
+  #' text layout
+  op <- options(width=27)
+  print(K)
+  options(width=18)
+  print(K)
+  options(op)
+  #' collapse.fv
+  Kb <- Kest(cells, correction="border")
+  Ki <- Kest(cells, correction="isotropic")
+  collapse.fv(Kb, Ki, same="theo")
+  collapse.fv(anylist(B=Kb, I=Ki), same="theo")
+  collapse.fv(anylist(B=Kb), I=Ki, same="theo")
+  Xlist <- replicate(3, runifpoint(30), simplify=FALSE)
+  Klist <- anylapply(Xlist, Kest) 
+  collapse.fv(Klist, same="theo", different=c("iso", "border"))
+  names(Klist) <- LETTERS[24:26]
+  collapse.fv(Klist, same="theo", different=c("iso", "border"))
 })
+
+local({
+  ## rat
+  K <- Kest(cells, ratio=TRUE)
+  G <- Gest(cells, ratio=TRUE)
+  print(K)
+  compatible(K, K)
+  compatible(K, G)
+  H <- rat(K, attr(K, "numerator"), attr(K, "denominator"), check=TRUE)
+})
+
 
 local({
   ## bug in Jmulti.R colliding with breakpts.R
@@ -627,8 +681,18 @@ local({
 })
 
 local({
-  #' fasp axes and title
+  #' fasp axes, title, dimnames
   a <- alltypes(amacrine)
   a$title <- NULL
   plot(a, samex=TRUE, samey=TRUE)
+  dimnames(a) <- lapply(dimnames(a), toupper)
+
+  b <- as.fv(a)
+})
+
+local({
+  ## plot.anylist (fv)
+  b <- anylist(A=Kcross(amacrine), B=Kest(amacrine))
+  plot(b, equal.scales=TRUE, main=expression(sqrt(pi)))
+  plot(b, arrange=FALSE)
 })

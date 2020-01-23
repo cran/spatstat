@@ -96,7 +96,7 @@ Plot <- function(fmla, ..., dat=z) {
 }
 @ 
 \SweaveOpts{eps=TRUE}
-\setkeys{Gin}{width=0.45\textwidth}
+\setkeys{Gin}{width=0.4\textwidth}
 
 \centerline{
 <<fig=TRUE,echo=FALSE,results=hide>>=
@@ -150,11 +150,13 @@ text(as.Date("2015-01-01"), 60, "R code")
     
     There are also extension packages which provide additional capabilities
     and must be loaded explicitly when you need them. 
-    Currently there are two extension packages:
+    Currently there are three extension packages:
     
     \begin{itemize}
     \item \pkg{spatstat.local} for local model-fitting, 
-    \item \pkg{spatstat.sphere} for analysing point patterns on a sphere.
+    \item \pkg{spatstat.sphere} for analysing point patterns on a sphere,
+    \item \pkg{spatstat.Knet} for analysing point patterns
+      on a network.
     \end{itemize}
 
 \pagebreak
@@ -1256,7 +1258,15 @@ listed alphabetically.
  \item \texttt{bdist.points}:
    Accelerated for polygonal windows. 
 
- \item \texttt{beachcolours}, \texttt{beachcolourmap}:
+ \item \texttt{beachcolours}:
+   \begin{itemize}
+   \item  Improved positioning of the yellow colour band.
+   \item  If \texttt{sealevel} lies outside \texttt{srange}, 
+     then \texttt{srange} will be extended
+     to include it (without a warning).
+   \end{itemize}
+   
+ \item \texttt{beachcolourmap}:
    Improved positioning of the yellow colour band.
    
  \item \texttt{bind.fv}:
@@ -1838,6 +1848,11 @@ listed alphabetically.
     using a ``brute force'' algorithm. This can be slow in some cases.
    \end{itemize}
 
+ \item \texttt{lineardisc}:
+   \begin{itemize}
+   \item New argument \texttt{add}.
+   \item Default plotting behaviour has changed.
+   \end{itemize}
 
  \item \texttt{linearK}, \texttt{linearpcf} and relatives: \\ 
    \begin{itemize}
@@ -1966,6 +1981,12 @@ listed alphabetically.
    New argument \texttt{weights} allows computation of the weighted version
    of the mark correlation function.
 
+   
+ \item \texttt{minnndist}, \texttt{maxnndist}:
+   New  argument \texttt{by} makes it possible to find the minimum or maximum
+   nearest neighbour distance between each pair of possible types
+   in a multitype pattern.
+    
  \item \texttt{mppm}:
    \begin{itemize}
    \item 
@@ -2212,6 +2233,13 @@ listed alphabetically.
      Graphical parameters, specified when the object was created,
      are now taken as the defaults for graphical parameters to the plot.
 
+   \item \texttt{plot.owin:} 
+     New argument \texttt{use.polypath} controls how to plot
+     a filled polygon when it has holes.
+     
+  \item \texttt{plot.profilepl}:
+        This function has now been documented, and the graphics improved.
+        
   \item \texttt{plot.psp}:
     \begin{itemize}
     \item Segments can be plotted with widths proportional to their mark values.
@@ -2481,8 +2509,15 @@ listed alphabetically.
     \texttt{win} is of class \texttt{box3} or \texttt{boxx}.
 
   \item \texttt{rmh}:
-    Accelerated, in the case where multiple patterns are saved 
-    using \texttt{nsave}.
+    \begin{itemize}
+    \item 
+      Accelerated, in the case where multiple patterns are saved 
+      using \texttt{nsave}.
+    \item 
+      The printed output of the debugger (invoked by \texttt{snoop=TRUE})
+      has been improved.
+    \end{itemize}
+
   
   \item \texttt{rmh.ppm, rmhmodel.ppm, simulate.ppm}:
    A model fitted using the \texttt{Penttinen} interaction can now be simulated.
@@ -2494,6 +2529,9 @@ listed alphabetically.
      for the Penttinen interaction.
    \item 
      New arguments \texttt{nsim}, \texttt{saveinfo}.
+    \item 
+      The printed output of the debugger (invoked by \texttt{snoop=TRUE})
+      has been improved.
    \end{itemize}
 
   \item \texttt{rmhcontrol}:
@@ -2636,6 +2674,10 @@ listed alphabetically.
 
    \item \texttt{split.ppp}, \texttt{split.ppx}:
    The splitting variable \texttt{f} can now be a logical vector.
+
+   \item \verb!split<-.ppp!:
+     The default for argument \texttt{un} in \verb!split<-.ppp!
+     now agrees with the default for the same argument in \texttt{split.ppp}.
 
    \item \texttt{square}: 
      Handles a common error in the format of the arguments.

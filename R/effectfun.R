@@ -1,7 +1,7 @@
 #
 #  effectfun.R
 #
-#   $Revision: 1.23 $ $Date: 2019/07/10 08:58:46 $
+#   $Revision: 1.25 $ $Date: 2020/01/23 05:36:51 $
 #
 
 effectfun <- local({
@@ -35,9 +35,10 @@ effectfun <-  function(model, covname, ..., se.fit=FALSE, nvalues=256) {
     mc <- model.covariates(model)
     if(length(mc) == 1) covname <- mc else stop("covname must be provided")
   }
-  if(!(covname %in% c(intern.names, needed.names)))
-    stop(paste("model does not have a covariate called", sQuote(covname)),
-         call.=FALSE)
+  if(!is.character(covname))
+    stop("covname should be a character string", call.=FALSE)
+  if(length(covname) != 1L)
+    stop("covname should be a single character string", call.=FALSE)
   # check that fixed values for all other covariates are provided 
   given.covs <- names(dotargs)
   if(any(uhoh <- !(needed.names %in% c(given.covs, covname)))) {
