@@ -55,7 +55,7 @@ local({
 #'
 #'   leverage and influence for Gibbs models
 #' 
-#'   $Revision: 1.25 $ $Date: 2020/01/19 12:27:18 $
+#'   $Revision: 1.28 $ $Date: 2020/02/06 08:03:59 $
 #' 
 
 require(spatstat)
@@ -287,6 +287,14 @@ local({
   set.seed(452)
   foo <- ppm(cells ~ 1, Strauss(0.15), method="ho", nsim=5)
   aa <- Everything(foo)
+
+  #' Gradient and Hessian obtained by symbolic differentiation
+  f <- deriv(expression((1+x)^a),
+             "a", function.arg=c("x", "y", "a"),
+             hessian=TRUE)
+  #' check they can be extracted
+  fit <- ippm(cells ~offset(f), start=list(a=0.7))
+  Everything(fit)
 })
 
 reset.spatstat.options()
@@ -364,7 +372,7 @@ local({
 #
 # Tests for lpp code
 #
-#  $Revision: 1.45 $  $Date: 2020/01/11 14:37:23 $
+#  $Revision: 1.50 $  $Date: 2020/02/02 03:25:57 $
 
 
 require(spatstat)
@@ -382,6 +390,7 @@ local({
   #' geometry etc
   rotate(X, pi/3, centre=c(0.2,0.3))
   superimpose.lpp(L=simplenet)
+  W <- Window(X)
   #' cut.lpp
   tes <- lineardirichlet(runiflpp(4, simplenet))
   f <- as.linfun(tes)
@@ -602,6 +611,7 @@ local({
   ## options to plot.linim
   plot(xcoord, legend=FALSE)
   plot(xcoord, leg.side="top")
+  plot(xcoord, style="width", leg.side="bottom")
   
   ## as.linim.linim
   xxcc <- as.linim(xcoord)
@@ -710,6 +720,15 @@ local({
   iA <- as.linfun(tes)(X)
   if(!identical(iI, iA))
     stop("disagreement between as.linfun.lintess and lineartileindex")
+
+  ## intersection of lintess
+  X <- divide.linnet(runiflpp(4, simplenet))
+  Y <- divide.linnet(runiflpp(3, simplenet))
+  marks(X) <- factor(letters[c(1,2,1,2)])
+  marks(Y) <- runif(3)
+  Zmm <- intersect.lintess(X,Y)
+  Zum <- intersect.lintess(unmark(X),Y)
+  Zmu <- intersect.lintess(X,unmark(Y))
 })
 
 reset.spatstat.options()
@@ -792,6 +811,11 @@ local({
 })
 
 local({
+  ## 'lixellate'
+  ## Cases where no subdivision occurs
+  P <- runiflpp(4, simplenet)
+  A <- lixellate(P, nsplit=1)
+  B <- lixellate(P, eps=2)
   ## bug in 'lixellate' (Jakob Gulddahl Rasmussen)
   X <- ppp(c(0,1), c(0,0), owin())
   L <- linnet(X, edges = matrix(1:2, ncol=2))
@@ -832,6 +856,22 @@ local({
   stopifnot(is.multitype(rlpp(c(10,5), list(a=D,b=D))))
   stopifnot(is.multitype(rlpp(5,       list(a=D,b=D))))
   stopifnot(is.multitype(rlpp(c(10,5), D)))
+})
+
+local({
+  ## rhohat.lppm
+  fut <- lppm(spiders ~ 1)
+  rx <- rhohat(fut, "x")
+  Z <- linfun(function(x,y,seg,tp) { x }, domain(spiders))
+  rZ <- rhohat(fut, Z)
+  U <- predict(rx)
+  U <- predict(rZ)
+  Y <- simulate(rx)
+  Y <- simulate(rZ)
+  futm <- lppm(chicago ~ x + marks)
+  ry <- rhohat(futm, "y")
+  U <- predict(ry)
+  Y <- simulate(ry)
 })
 #'
 #'   lppmodels.R

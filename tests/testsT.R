@@ -132,7 +132,7 @@ local({
 #
 # additional test of parres
 #
-#  $Revision: 1.5 $  $Date: 2019/12/03 07:10:07 $
+#  $Revision: 1.6 $  $Date: 2020/02/04 03:23:38 $
 #
 require(spatstat)
 local({
@@ -176,6 +176,12 @@ parres(copfit)
 #' infrastructure
 ltuae <- evalCovariate(42, cells)
 LTUAE <- evalCovariate(ltuae, cells)
+
+fit <- ppm(amacrine ~ x * marks, nd=16)
+dmat <- model.depends(fit)
+check.separable(dmat, "x", c(x=FALSE, marks=FALSE), FALSE)
+check.separable(dmat, "x", c(FALSE, FALSE), FALSE)
+check.separable(dmat, "x", c(x=FALSE, marks=TRUE), FALSE)
 })
 #'
 #'     tests/threedee.R
@@ -266,13 +272,18 @@ reset.spatstat.options()
 #
 # test code for triplet interaction and associated summary function Tstat 
 #
-# $Revision: 1.6 $ $Date: 2018/07/02 15:51:26 $
+# $Revision: 1.7 $ $Date: 2020/01/26 04:49:09 $
 #
 require(spatstat)
 local({
-  fit <- ppm(redwood ~1, Triplets(0.1))
+  #' valid model
+  fit <- ppm(cells ~1, Triplets(0.1))
   fit
   suffstat(fit)
+  #' invalid model 
+  fitR <- ppm(redwood ~1, Triplets(0.1))
+  fitR
+  suffstat(fitR)
   #' hard core (zero triangles, coefficient is NA)
   fit0 <- ppm(cells ~1, Triplets(0.05))
   fit0
@@ -284,4 +295,11 @@ local({
   #' Tstat function, all code blocks
   a <- Tstat(redwood, ratio=TRUE,
              correction=c("none", "border", "bord.modif", "translate"))
+  #' simulation
+  X <- simulate(fit)
+  mod <- list(cif="triplets",par=list(beta=50,gamma=0.2,r=0.07), w=square(1))
+  Xm <- rmh(model=mod,start=list(n.start=5), control=list(nrep=1e5))
+  #' hard core
+  mod$par$gamma <- 0
+  XmHard <- rmh(model=mod,start=list(n.start=5), control=list(nrep=1e5))
 })

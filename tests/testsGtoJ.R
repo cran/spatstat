@@ -136,7 +136,7 @@ local({
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.23 $   $Date: 2020/01/21 04:52:56 $
+#   $Revision: 1.27 $   $Date: 2020/02/04 06:07:48 $
 #
 
 require(spatstat)
@@ -211,6 +211,7 @@ local({
   ff <- d[EmptyFun]
   gg <- d[2,]
   gg <- d[,2]
+  gg <- d[j=2]
   gg <- d[2:4, 3:5]
   hh <- d[2:4, 3:5, rescue=TRUE]
   if(!is.im(hh)) stop("rectangle was not rescued in [.im")
@@ -247,16 +248,21 @@ local({
   zlp <- ZL[P, drop=TRUE]
 
   #' miscellaneous
-  ZZ <- zapsmall(Z, digits=6)
-  ZZ <- zapsmall(Z)
+  ZZ <- zapsmall.im(Z, digits=6)
+  ZZ <- zapsmall.im(Z)
 
   ZS <- shift(Z, origin="centroid")
   ZS <- shift(Z, origin="bottomleft")
 
   ZA <- affine(Z, mat=diag(c(-1,-2)))
+
+  U <- scaletointerval(Z)
+  C <- as.im(1, W=U)
+  U <- scaletointerval(C)
   
   #' hist.im
   h <- hist(Z)
+  h <- hist(Z, probability=TRUE)
   h <- hist(Z, plot=FALSE)
   Zcut <- cut(Z, breaks=5)
   h <- hist(Zcut) # barplot
@@ -294,9 +300,14 @@ local({
   B <- grow.rectangle(Frame(letterR), 1)
   X <- superimpose(runifpoint(10,letterR),
                    runifpoint(20, setminus.owin(B, letterR)),
+                   vertices(Frame(B)),
                    W=B)
   a <- safelookup(Z, X)
+  b <- safelookup(cut(Z, breaks=4), X)
 
+  #' Smooth.im -> blur.im with sigma=NULL
+  ZS <- Smooth(Z)
+  
   #' check nearest.valid.pixel
   W <- Window(demopat)
   set.seed(911911)

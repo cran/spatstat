@@ -3,7 +3,7 @@
 #
 # Code related to intensity and intensity approximations
 #
-#  $Revision: 1.20 $ $Date: 2017/06/05 10:31:58 $
+#  $Revision: 1.22 $ $Date: 2020/01/27 09:17:20 $
 #
 
 intensity <- function(X, ...) {
@@ -22,21 +22,8 @@ intensity.ppp <- function(X, ..., weights=NULL) {
     } else answer <- n/a
     return(answer)
   }
-  ## weighted case 
-  if(is.numeric(weights)) {
-    check.nvector(weights, n)
-  } else if(is.expression(weights)) {
-    # evaluate expression in data frame of coordinates and marks
-    df <- as.data.frame(X)
-    pf <- parent.frame()
-    eval.weights <- try(eval(weights, envir=df, enclos=pf))
-    if(inherits(eval.weights, "try-error"))
-      stop("Unable to evaluate expression for weights", call.=FALSE)
-    if(!check.nvector(eval.weights, n, fatal=FALSE, warn=TRUE))
-      stop("Result of evaluating the expression for weights has wrong format")
-    weights <- eval.weights
-  } else stop("Unrecognised format for argument 'weights'")
-  ##
+  ## weighted case
+  weights <- pointweights(X, weights=weights, parent=parent.frame())
   if(is.multitype(X)) {
     mks <- marks(X)
     answer <- as.vector(tapply(weights, mks, sum))/a

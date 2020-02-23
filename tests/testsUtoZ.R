@@ -1,7 +1,7 @@
 #
 #  tests/undoc.R
 #
-#   $Revision: 1.11 $   $Date: 2019/11/29 03:41:54 $
+#   $Revision: 1.12 $   $Date: 2020/01/26 04:38:19 $
 #
 #  Test undocumented hacks, experimental code, etc
 
@@ -93,6 +93,14 @@ local({
   versioncurrency.spatstat(now + 140, FALSE)
   versioncurrency.spatstat(now + 400, FALSE)
   versioncurrency.spatstat(now + 1000)
+
+  #' general Ord interaction
+  gradual <- function(d, pars) {
+    y <- pmax(0, 0.005 - d)/0.005
+    if(is.matrix(d)) y <- matrix(y, nrow(d), ncol(d))
+    return(y)
+  }
+  B <- Ord(gradual, "gradual Ord process")
 })
 
 ##
@@ -301,7 +309,7 @@ local({
 #
 # Tests of owin geometry code
 #
-#  $Revision: 1.14 $  $Date: 2020/01/23 04:02:20 $
+#  $Revision: 1.15 $  $Date: 2020/02/06 05:48:33 $
 
 require(spatstat)
 local({
@@ -379,6 +387,7 @@ local({
   
   X <- longleaf[square(50)]
   marks(X) <- marks(X)/8
+  D <- discs(X)
   D <- discs(X, delta=5, separate=TRUE)
 
   AD <- dilated.areas(cells,
@@ -442,6 +451,27 @@ local({
   xxyy <- split(xy[,1:2], xy$id)
   spatstat.options(checkpolygons=TRUE)
   H <- owin(poly=xxyy, check=TRUE)
+})
+
+local({
+  #' Code for/using intersection and union of windows
+  Empty <- emptywindow(Frame(letterR))
+  a <- intersect.owin()
+  a <- intersect.owin(Empty)
+  a <- intersect.owin(Empty, letterR)
+  a <- intersect.owin(letterR, Empty)
+  b <- intersect.owin()
+  b <- intersect.owin(Empty)
+  b <- intersect.owin(Empty, letterR)
+  b <- intersect.owin(letterR, Empty)
+  d <- union.owin(as.mask(square(1)), as.mask(square(2)))
+  #' [.owin
+  A <- erosion(letterR, 0.2)
+  Alogi <- as.im(TRUE, W=A)
+  B <- letterR[A]
+  B <- letterR[Alogi]
+  #' miscellaneous
+  D <- convexhull(Alogi)
 })
 
 reset.spatstat.options()

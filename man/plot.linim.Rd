@@ -10,7 +10,7 @@
 }
 \usage{
 \method{plot}{linim}(x, ..., style = c("colour", "width"),
-             scale, adjust = 1,
+             scale, adjust = 1, fatten = 0, 
              negative.args = list(col=2),
              legend=TRUE,
              leg.side=c("right", "left", "bottom", "top"),
@@ -40,7 +40,12 @@
     line widths. 
   }
   \item{adjust}{
-    Adjustment factor for the default scale.
+    Adjustment factor for the conversion of 
+    pixel value to line width, when \code{style="width"}.
+  }
+  \item{fatten}{
+    Distance by which the line segments should be thickened,
+    when \code{style="colour"}. 
   }
   \item{negative.args}{
     A list of arguments to be passed to \code{\link[graphics]{polygon}}
@@ -96,7 +101,7 @@
   using \code{\link{plot.im}}.
   The mapping from pixel values to colours is determined by any
   additional arguments \code{\dots} which are passed to \code{\link{plot.im}}.
-
+  
   If \code{style="width"} then
   the pixel values of \code{x} are used to determine the widths of
   thick lines centred on the line segments of the linear network.
@@ -121,6 +126,18 @@
   the arguments \code{ribside}, \code{ribsep}, \code{ribwid},
   \code{ribscale} and \code{ribargs} respectively, which are passed
   to \code{\link{plot.im}}.
+}
+\section{Thin lines}{
+  When \code{style="colour"} it often appears that the lines are
+  drawn too thin. This occurs because \code{x} is a pixel image,
+  in which the only pixels that have a defined value are those which lie
+  directly over the network. To make the lines appear thicker in the
+  plot, use the argument \code{fatten}. The domain of the image will be
+  expanded by a distance equal to \code{fatten/2} in every direction
+  using \code{\link{dilation.owin}}; the pixel values will
+  be extrapolated to this expanded domain using
+  \code{\link{nearestValue}}. This may improve the visual appearance
+  of the plot.
 }
 \value{
   If \code{style="colour"}, the result is
@@ -152,7 +169,9 @@
   X <- linfun(function(x,y,seg,tp){y^2+x}, simplenet)
   X <- as.linim(X)
   
-  plot(X)
+  plot(X, main="Colour represents function value")
+  plot(X, fatten=0.02, main="fattened")
+
   plot(X, style="width", main="Width proportional to function value")
 
   # signed values
@@ -161,5 +180,6 @@
 
   plot(f, style="w", negative.args=list(density=10),
        main="Negative values are hatched")
+
 }
 \keyword{spatial}

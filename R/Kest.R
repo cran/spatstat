@@ -1,7 +1,7 @@
 #
 #	Kest.R		Estimation of K function
 #
-#	$Revision: 5.126 $	$Date: 2019/12/11 23:46:36 $
+#	$Revision: 5.129 $	$Date: 2020/02/10 09:44:52 $
 #
 #
 # -------- functions ----------------------------------------
@@ -733,9 +733,9 @@ rmax.rule <- function(fun="K", W, lambda) {
   gotall <- gotW && gotL
   switch(fun,
          K = {
-           # Ripley's Rule
+           ## Ripley's Rule
            ripley <- if(gotW) shortside(Frame(W))/4 else Inf
-           # Count at most 1000 neighbours per point
+           ## Count at most 1000 neighbours per point
            rlarge <- if(gotL) sqrt(1000 /(pi * lambda)) else Inf
            rmax <- min(rlarge, ripley)
          },

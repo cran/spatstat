@@ -11,7 +11,7 @@
 markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
          correction=c("isotropic", "Ripley", "translate"),
          method="density", \dots, weights=NULL,
-         f1=NULL, normalise=TRUE, fargs=NULL)
+         f1=NULL, normalise=TRUE, fargs=NULL, internal=NULL)
 }
 \arguments{
   \item{X}{The observed point pattern.
@@ -48,7 +48,11 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
     selected by \code{method}.
   }
   \item{weights}{
-    Optional numeric vector of weights for each data point in \code{X}.
+    Optional. Numeric weights for each data point in \code{X}.
+    A numeric vector, a pixel image, or a \code{function(x,y)}.
+    Alternatively, an \code{expression} to be evaluated to yield the
+    weights; the expression may involve the variables
+    \code{x,y,marks} representing the coordinates and marks of\code{X}. 
   }
   \item{f1}{
     An alternative to \code{f}. If this argument is given,
@@ -64,6 +68,7 @@ markcorr(X, f = function(m1, m2) { m1 * m2}, r=NULL,
     Optional. A list of extra arguments to be passed to the function
     \code{f} or \code{f1}.
   }
+  \item{internal}{Do not use this argument.}
 }
 \value{
   A function value table (object of class \code{"fv"})

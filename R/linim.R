@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.65 $   $Date: 2020/01/11 11:37:11 $
+#  $Revision: 1.71 $   $Date: 2020/02/05 01:22:28 $
 #
 #  Image/function on a linear network
 #
@@ -67,6 +67,8 @@ linim <- function(L, Z, ..., restrict=TRUE, df=NULL) {
   class(out) <- c("linim", class(out))
   return(out)
 }
+
+is.linim <- function(x) { inherits(x, "linim") }
 
 print.linim <- function(x, ...) {
   splat("Image on linear network")
@@ -142,7 +144,7 @@ print.summary.linim <- function(x, ...) {
 plot.linim <- local({
 
   plot.linim <- function(x, ..., style=c("colour", "width"),
-                         scale, adjust=1,
+                         scale, adjust=1, fatten=0, 
                          negative.args=list(col=2),
                          legend=TRUE,
                          leg.side=c("right", "left", "bottom", "top"),
@@ -158,6 +160,13 @@ plot.linim <- local({
     leg.side <- match.arg(leg.side)
     check.1.real(leg.scale)
 
+    if(!missing(fatten)) {
+      check.1.real(fatten)
+      if(fatten != 0 && style == "width")
+        warning("Argument 'fatten' is ignored when style='width'", call.=FALSE)
+      stopifnot(fatten >= 0)
+    }
+    
     if(missing(zlim) || is.null(zlim)) {
       zlim <- NULL
       zliminfo <- list()
@@ -173,8 +182,17 @@ plot.linim <- local({
                      ribwid   = leg.wid,
                      ribargs  = leg.args,
                      ribscale = leg.scale)
-    #' colour style: plot as pixel image
-    if(style == "colour" || !do.plot)
+    
+    if(style == "colour" || !do.plot) {
+      #' colour style: plot as pixel image
+      if(fatten > 0) {
+        #' first fatten the lines 
+        L <- attr(x, "L")
+        S <- as.psp(L)
+        D <- distmap(as.mask.psp(S, xy=x))
+        fatwin <- levelset(D, fatten)
+        x <- nearestValue(x)[fatwin, drop=FALSE]
+      }
       return(do.call(plot.im,
                      resolve.defaults(list(x),
                                       list(...),
@@ -184,6 +202,7 @@ plot.linim <- local({
                                            legend=legend,
                                            do.plot=do.plot,
                                            box=box))))
+    }
     #' width style
     L <- attr(x, "L")
     df <- attr(x, "df")

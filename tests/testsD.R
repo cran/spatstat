@@ -43,7 +43,7 @@ local({
 #'                    and inhomogeneous summary functions
 #'                    and idw, adaptive.density, intensity
 #'
-#'  $Revision: 1.50 $  $Date: 2019/12/31 04:09:18 $
+#'  $Revision: 1.52 $  $Date: 2020/02/04 01:54:56 $
 #'
 
 require(spatstat)
@@ -174,6 +174,11 @@ local({
   bw.ppl(redwood, srange=sigran, ns=5)
   bw.CvL(redwood, sigma=sigvec)
   bw.CvL(redwood, srange=sigran, ns=5)
+
+  ## adaptive bandwidth
+  a <- bw.abram(redwood)
+  a <- bw.abram(redwood, pilot=density(redwood, 0.2))
+  a <- bw.abram(redwood, smoother="densityVoronoi", at="pixels")
   
   ## Kinhom 
   lam <- density(redwood)
@@ -254,6 +259,7 @@ local({
     f(120, 80)
     f(Y[1:2])
     f(Y[FALSE])
+    U <- as.im(f)
     return(invisible(NULL))
   }
   stroke()
@@ -283,6 +289,7 @@ local({
     f(4, 1)
     f(Y[1:2])
     f(Y[FALSE])
+    U <- as.im(f)
     return(invisible(NULL))
   }
   strike()
@@ -306,12 +313,19 @@ local({
 
   ## detect special cases
   Smooth(longleaf[FALSE])
+  Smooth(longleaf, minnndist(longleaf))
   Xconst <- cells %mark% 1
   Smooth(Xconst, 0.1)
   Smooth(Xconst, 0.1, at="points")
   Smooth(cells %mark% runif(42), sigma=Inf)
   Smooth(cells %mark% runif(42), sigma=Inf, at="points")
   Smooth(cells %mark% runif(42), sigma=Inf, at="points", leaveoneout=FALSE)
+  Smooth(cut(longleaf, breaks=4))
+
+  ## code not otherwise reached
+  smoothpointsEngine(cells, values=rep(1, npoints(cells)), sigma=0.2)
+  smoothpointsEngine(cells, values=runif(npoints(cells)), sigma=Inf)
+  smoothpointsEngine(cells, values=runif(npoints(cells)), sigma=1e-16)
   
   ## validity of Smooth.ppp(at='points')
   Y <- longleaf %mark% runif(npoints(longleaf), min=41, max=43)

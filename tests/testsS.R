@@ -16,7 +16,7 @@ local({
 ##   Tests of psp class and related code
 ##                      [SEE ALSO: tests/xysegment.R]
 ##
-##  $Revision: 1.22 $  $Date: 2020/01/18 02:29:37 $
+##  $Revision: 1.24 $  $Date: 2020/01/27 09:29:59 $
 
 require(spatstat)
 
@@ -31,6 +31,12 @@ X[W]
 X <- psp(runif(10),runif(10),runif(10),runif(10), window=owin())
 Z <- as.mask.psp(X)
 Z <- pixellate(X)
+
+# add short segment
+Shorty <- psp(0.5, 0.6, 0.5001, 0.6001, window=Window(X))
+XX <- superimpose(X[1:5], Shorty, X[6:10])
+ZZ <- as.mask.psp(XX)
+ZZ <- pixellate(XX)
 
 #' misc
 PX <- periodify(X, 2)
@@ -787,7 +793,7 @@ local({
 #'   Tests of code for summary functions
 #'       including score residual functions etc
 #'
-#'   $Revision: 1.3 $ $Date: 2020/01/05 01:55:10 $
+#'   $Revision: 1.5 $ $Date: 2020/02/06 05:38:15 $
 
 require(spatstat)
 local({
@@ -821,6 +827,12 @@ local({
   a <- compileCDF(D=nndist(redwood),
                   B=bdist.points(redwood),
                   r=seq(0, 1, length=256))
+
+  ## distance argument spacing and breakpoints
+  e <- check.finespacing(c(0,1,2), eps=0.1, action="silent")
+  b <- as.breakpts(pi, 20)
+  b <- as.breakpts(42, max=pi, npos=20)
+  b <- even.breaks.owin(letterR)
 })
 ##
 ## tests/symbolmaps.R

@@ -72,6 +72,7 @@
 \alias{check.finespacing}
 \alias{check.hist.lengths}
 \alias{check.mat.mul}
+\alias{check.separable}
 \alias{check.testfun}
 \alias{circticks}
 \alias{circunion}
@@ -331,6 +332,7 @@
 \alias{PDEdensityLPP}
 \alias{plan.legend.layout}
 \alias{plotWidthMap}
+\alias{pointweights}
 \alias{PoisSaddle}
 \alias{PoisSaddleArea}
 \alias{PoisSaddleGeyer}
@@ -877,6 +879,7 @@ check.anySparseVector(v, npoints, fatal, things,
 check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
 check.hist.lengths(hist,breaks)
 check.mat.mul(A, B, Acols, Brows, fatal)
+check.separable(dmat, covname, isconstant, fatal)
 check.testfun(f, f1, X)
 circticks(R, at, unit, start, clockwise, labels)
 circunion(arcs)
@@ -1198,6 +1201,7 @@ PairPotentialType(pairpot)
 PDEdensityLPP(x, sigma, \dots, weights, dx, dt, iterMax,
               fun, finespacing, finedata)
 plotWidthMap(bb.leg, zlim, phys.scale, leg.scale, leg.side, leg.args, grafpar)
+pointweights(X, \dots, weights, parent)
 PoisSaddle(beta, fi)
 PoisSaddleArea(beta, fi)
 PoisSaddleGeyer(beta, fi)
@@ -1462,7 +1466,7 @@ replacementIndex(ii, stuff)
 representativeRows(x)
 \method{rescale}{msr}(X, s, unitname)
 resolveEinfo(x, what, fallback, warn, atomic)
-resolve.foxall.window(X, Y, W)
+resolve.foxall.window(X, Y, W, warn.trim)
 resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default)
 resolve.lambda(X, lambda, \dots, sigma, varcov, leaveoneout, update)
 resolve.lambda.cross(X, I, J, lambdaI, lambdaJ, \dots, lambdaX,
