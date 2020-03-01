@@ -1,10 +1,28 @@
 
+        CHANGES IN spatstat VERSION 1.63-3
+
+OVERVIEW
+
+    o Minor changes for compatibility with future versions of R
+
+    o Minor improvements
+
+    o Version nickname: "Wet paint"
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o plot.ppp
+    The coordinate axes will be plotted if axes=TRUE.
+    Axis labels xlab, ylab will be plotted if ann=TRUE.
+
+
         CHANGES IN spatstat VERSION 1.63-2
 
 OVERVIEW
 
     o Minor changes to satisfy the package checker.
 
+    o Version nickname: "I'm sorry Dave, I'm afraid I can't do that"
 
         CHANGES IN spatstat VERSION 1.63-1
 
