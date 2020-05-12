@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 1.63-3
-Date: 2020-03-01
+Version: 1.64-1
+Date: 2020-05-10
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	Rolf Turner <r.turner@auckland.ac.nz> 
@@ -25,6 +25,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
         Q.W. Ang;
 	R. Arellano;
 	J. Astrom;
+	R. Aue;
         M. Austenfeld;
 	S. Azaele; 
 	M. Baddeley;
@@ -164,6 +165,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
 	E. Rosenbaum; 
 	B. Rowlingson; 
 	J. Rudokas;
+	T. Rudolph;
 	J. Rudge;
 	C. Ryan; 
 	F. Safavimanesh;
@@ -199,6 +201,7 @@ Author: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>,
         M. Vihtakari;
 	A. Villers; 
         F. Vinatier;
+        M. Vogtland;
         S. Voss;
 	S. Wagner;
 	H. Wang; 
@@ -216,9 +219,9 @@ Depends: R (>= 3.3.0), spatstat.data (>= 1.4-2), stats, graphics,
         grDevices, utils, methods, nlme, rpart
 Imports: spatstat.utils (>= 1.17-0), mgcv, Matrix, deldir (>= 0.0-21),
         abind, tensor, polyclip (>= 1.10-0), goftest (>= 1.2-2)
-Suggests: sm, maptools, gsl, locfit, spatial, rpanel, tkrplot,
-        RandomFields (>= 3.1.24.1), RandomFieldsUtils(>= 0.3.3.1),
-        fftwtools (>= 0.9-8)
+Suggests: sm, maptools (>= 0.9-9), gsl, locfit, spatial, RandomFields
+        (>= 3.1.24.1), RandomFieldsUtils(>= 0.3.3.1), fftwtools (>=
+        0.9-8)
 Description: Comprehensive open-source toolbox for analysing Spatial Point Patterns. Focused mainly on two-dimensional point patterns, including multitype/marked points, in any spatial region. Also supports three-dimensional point patterns, space-time point patterns in any number of dimensions, point patterns on a linear network, and patterns of other geometrical objects. Supports spatial covariate data such as pixel images. 
 	Contains over 2000 functions for plotting spatial data, exploratory data analysis, model-fitting, simulation, spatial sampling, model diagnostics, and formal inference. 
 	Data types include point patterns, line segment patterns, spatial windows, pixel images, tessellations, and linear networks. 
@@ -232,6 +235,6 @@ LazyData: true
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2020-03-01 11:45:46 UTC; adrian
+Packaged: 2020-05-10 03:00:50 UTC; adrian
 Repository: CRAN
-Date/Publication: 2020-03-01 16:00:02 UTC
+Date/Publication: 2020-05-12 17:10:02 UTC

@@ -1,7 +1,7 @@
 #
 # linim.R
 #
-#  $Revision: 1.71 $   $Date: 2020/02/05 01:22:28 $
+#  $Revision: 1.75 $   $Date: 2020/04/17 08:57:40 $
 #
 #  Image/function on a linear network
 #
@@ -476,7 +476,7 @@ pointsAlongNetwork <- local({
     stopifnot(inherits(L, "linnet"))
     S <- as.psp(L)
     ns <- nsegments(S)
-    seglen <- lengths.psp(S)
+    seglen <- lengths_psp(S)
     ends <- as.data.frame(S)
     nsample <- pmax(1, ceiling(seglen/delta))
     df <- NULL
@@ -670,7 +670,7 @@ as.linnet.linim <- function(X, ...) {
   pos <- cbind(pos$row, pos$col)
   yvalue <- y$v[pos]
   xvalue <- x$v[pos]
-  changed <- (yvalue != xvalue)
+  changed <- (is.na(yvalue) != is.na(xvalue)) | (yvalue != xvalue)
   df$values[changed] <- yvalue[changed]
   #' restrict main pixel image to network
   m <- as.mask.psp(L, as.mask(y))$m
@@ -712,12 +712,11 @@ integral.linim <- function(f, domain=NULL, ...){
     nper <- table(seg)
   }
   #' take average of data on each segment
-  ##  mu <- as.numeric(by(vals, seg, mean, ..., na.rm=TRUE))
-  ## mu[is.na(mu)] <- 0
-  num <- tapplysum(as.numeric(vals), list(seg), na.rm=TRUE)
+  if(!is.complex(vals)) vals <- as.numeric(vals)
+  num <- tapplysum(vals, list(seg), na.rm=TRUE)
   mu <- num/nper
   #' weighted sum
-  len <- lengths.psp(as.psp(L))
+  len <- lengths_psp(as.psp(L))
   if(anyNA(vals)) {
     ##    p <- as.numeric(by(!is.na(vals), seg, mean, ..., na.rm=TRUE))
     ##    p[is.na(p)] <- 0
@@ -731,7 +730,7 @@ integral.linim <- function(f, domain=NULL, ...){
 
 mean.linim <- function(x, ...) {
   trap.extra.arguments(...)
-  integral(x)/sum(lengths.psp(as.psp(as.linnet(x))))
+  integral(x)/sum(lengths_psp(as.psp(as.linnet(x))))
 }
 
 quantile.linim <- function(x, probs = seq(0,1,0.25), ...) {
@@ -744,7 +743,7 @@ quantile.linim <- function(x, probs = seq(0,1,0.25), ...) {
   seg <- factor(df$mapXY, levels=1:nsegments(L))
   nvals <- table(seg)
   #' calculate weights
-  len <- lengths.psp(as.psp(L))
+  len <- lengths_psp(as.psp(L))
   iseg <- as.integer(seg)
   wts <- len[iseg]/nvals[iseg]
   return(weighted.quantile(vals, wts, probs))
@@ -855,11 +854,12 @@ pairs.linim <- function(..., plot=TRUE, eps=NULL) {
       labels <- resolve.defaults(rest, list(labels=imnames))$labels
       colnames(pixdf) <- labels
     } else {
+      xname <- imnames[1L]
       do.call(hist.default,
               resolve.defaults(list(x=pixdf[,1L]),
                                rest,
-                               list(xname=imnames[1L],
-                                    xlab=imnames[1L])))
+                               list(main=paste("Histogram of", xname),
+                                    xlab=xname)))
     }
   }
   class(pixdf) <- unique(c("plotpairsim", class(pixdf)))

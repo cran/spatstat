@@ -10,7 +10,7 @@
 }
 \usage{
    bw.lppl(X, \dots, srange=NULL, ns=16, sigma=NULL, weights=NULL,
-           distance="euclidean", shortcut=FALSE, warn=TRUE)
+           distance=c("euclidean", "path"), shortcut=TRUE, warn=TRUE)
 }
 \arguments{
   \item{X}{
@@ -113,10 +113,13 @@
   Loader, C. (1999)
   \emph{Local Regression and Likelihood}.
   Springer, New York.
+
+  McSwiggan, G., Baddeley, A. and Nair, G. (2019)
+  Estimation of relative risk for events on a linear network.
+  \emph{Statistics and Computing} \bold{30} (2) 469--484.
 }
 \author{
-  Suman Rakshit.
-  Tweaks by \adrian.
+  Greg McSwiggan, Suman Rakshit and \adrian.
 }
 \keyword{spatial}
 \keyword{methods}

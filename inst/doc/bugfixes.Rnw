@@ -86,6 +86,9 @@ book \cite{baddrubaturn15}.
 Following is a list of the {\bf most serious bugs}, 
 in decreasing order of potential impact.
 
+Bugs which cause an error exit are not listed, because these 
+are immediately obvious.
+
 \newcommand\bugger[4]{%
   \\  {} %
   {\small (Bug introduced in \texttt{spatstat {#1}}, {#2}; %
@@ -208,6 +211,12 @@ in decreasing order of potential impact.
    Results were totally incorrect due to a typo.
    \bugger{1.51-0}{may 2017}{1.52-0}{august 2017}   
 
+  \item \texttt{density.ppp}: 
+    edge correction factors were calculated incorrectly when
+    the window was not a rectangle, causing a negative bias in
+    the estimated intensity.
+    \bugger{1.57-0}{oct 2018}{1.64-0}{april 2020}.
+    
  \item \texttt{density.ppp}:
    The standard error (calculated when \texttt{se=TRUE})
    was incorrect when \texttt{sigma} was a single numeric value.
@@ -327,6 +336,11 @@ in decreasing order of potential impact.
   \subsection{Bugs, Substantially Incorrect, Moderate Impact}
 
   \begin{itemize}
+  \item \texttt{vcov.ppm}:
+    Result was sometimes incorrect for Gibbs models.
+    The Fisher information was slightly underestimated.
+    \bugger{1.31-1}{march 2013}{1.64-1}{may 2020}
+    
   \item \texttt{as.linnet.psp}:
     Sometimes produced a network with duplicated segments.
     [Such objects can be repaired using \texttt{repairNetwork}.]
@@ -465,7 +479,18 @@ in decreasing order of potential impact.
  %% LEVEL 4: 
  \subsection{Partially Incorrect}
  \begin{itemize}
+   
+ \item \texttt{mppm}:
+   Internal data were malformed if the interaction was \texttt{Hardcore}
+    or \texttt{MultiHard} or a hybrid involving these interactions.
+    This caused various errors when the fitted model was used.
+    \bugger{1.61-0}{september 2019}{1.64-0}{april 2020}.
 
+ \item \texttt{mppm}:
+   Ignored the arguments \texttt{nd} and \texttt{eps} controlling the 
+   quadrature scheme. 
+    \bugger{1.35-0}{december 2013}{1.64-0}{april 2020}.
+    
  \item \texttt{kppm}, \texttt{AIC}:
     For kppm models fitted with \verb!method='clik2'!, 
     the resulting value of \texttt{logLik()}

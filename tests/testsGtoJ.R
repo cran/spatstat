@@ -1,9 +1,23 @@
+#'
+#'   Header for all (concatenated) test files
+#'
+#'   Require spatstat.
+#'   Obtain environment variable controlling tests.
+#'
+#'   $Revision: 1.5 $ $Date: 2020/04/30 05:31:37 $
+
+require(spatstat)
+FULLTEST <- (nchar(Sys.getenv("SPATSTAT_TEST", unset="")) > 0)
+ALWAYS   <- TRUE
+cat(paste("--------- Executing",
+          if(FULLTEST) "** ALL **" else "**RESTRICTED** subset of",
+          "test code -----------\n"))
 ##
 ##    tests/gcc323.R
 ##
-##    $Revision: 1.2 $  $Date: 2015/12/29 08:54:49 $
+##    $Revision: 1.3 $  $Date: 2020/04/28 12:58:26 $
 ##
-require(spatstat)
+if(ALWAYS) { # depends on hardware
 local({
   # critical R values that provoke GCC bug #323
   a <- marktable(lansing, R=0.25)
@@ -11,14 +25,15 @@ local({
   a <- marktable(lansing, R=0.20)
   a <- marktable(lansing, R=0.10)
 })
+}
 #       
 #        tests/hobjects.R
 #
 #   Validity of methods for ppm(... method="ho")
 #
 
-require(spatstat)
 
+if(FULLTEST) {
 local({
   set.seed(42)
   fit  <- ppm(cells ~1,         Strauss(0.1), method="ho", nsim=10)
@@ -33,6 +48,7 @@ local({
   p  <- predict(fit)
   px <- predict(fitx)
 })
+}
 
 
 #
@@ -40,10 +56,10 @@ local({
 #
 # test "[.hyperframe" etc
 #
-#  $Revision: 1.7 $  $Date: 2020/01/11 04:55:17 $
+#  $Revision: 1.8 $  $Date: 2020/04/28 12:58:26 $
 #
 
-require(spatstat)
+if(FULLTEST) {
 local({
   lambda <- runif(4, min=50, max=100)
   X <- lapply(as.list(lambda), function(x) { rpoispp(x) })
@@ -88,14 +104,13 @@ local({
   G[["a"]]$B <- 42
   split(H, f) <- G
 })
-
-
+}
 #'     tests/hypotests.R
 #'     Hypothesis tests
 #' 
-#'  $Revision: 1.5 $ $Date: 2019/12/14 03:11:05 $
+#'  $Revision: 1.6 $ $Date: 2020/04/28 12:58:26 $
 
-require(spatstat)
+if(FULLTEST) {
 local({
   hopskel.test(redwood, method="MonteCarlo", nsim=5)
   
@@ -133,13 +148,14 @@ local({
   scan.test(cells, rr, nsim=5,
             method="poisson", baseline=lam, alternative="less")
 })
+}
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.27 $   $Date: 2020/02/04 06:07:48 $
+#   $Revision: 1.29 $   $Date: 2020/04/28 12:58:26 $
 #
 
-require(spatstat)
+if(FULLTEST) {
 local({
   #' cases of 'im' data
   tab <- table(sample(factor(letters[1:10]), 30, replace=TRUE))
@@ -147,6 +163,10 @@ local({
   b <- update(b)
 
   mat <- matrix(sample(0:4, 12, replace=TRUE), 3, 4)
+  a <- im(mat)
+  levels(a$v) <- 0:4
+  a <- update(a)
+  
   levels(mat) <- 0:4
   b <- im(mat)
   b <- update(b)
@@ -202,7 +222,7 @@ local({
   Y <- dirichlet(runifpoint(7, W))
   Z <- split(X, as.im(Y))
   
-  ## cases of "[.im"
+  ## ...........  cases of "[.im" ........................
   ee  <- d[simplenet, drop=FALSE]
   eev <- d[simplenet]
   Empty <- cells[FALSE]
@@ -215,7 +235,15 @@ local({
   gg <- d[2:4, 3:5]
   hh <- d[2:4, 3:5, rescue=TRUE]
   if(!is.im(hh)) stop("rectangle was not rescued in [.im")
-  ## cases of "[<-.im"
+  ## factor and NA values
+  f <- cut(d, breaks=4)
+  f <- f[f != levels(f)[1], drop=FALSE]
+  fff <- f[, , drop=FALSE]
+  fff <- f[cells]
+  fff <- f[cells, drop=FALSE]
+  fff <- f[Empty]
+
+  ## ...........  cases of "[<-.im"  .......................
   d[,] <- d[] + 1
   d[Empty] <- 42
   d[EmptyFun] <- 42
@@ -266,6 +294,7 @@ local({
   h <- hist(Z, plot=FALSE)
   Zcut <- cut(Z, breaks=5)
   h <- hist(Zcut) # barplot
+  hp <- hist(Zcut, probability=TRUE) # barplot
   plot(h) # plot.barplotdata
 
   #' plot.im code blocks
@@ -304,24 +333,11 @@ local({
                    W=B)
   a <- safelookup(Z, X)
   b <- safelookup(cut(Z, breaks=4), X)
-
+  aa <- lookup.im(Z, X)
+  
   #' Smooth.im -> blur.im with sigma=NULL
   ZS <- Smooth(Z)
   
-  #' check nearest.valid.pixel
-  W <- Window(demopat)
-  set.seed(911911)
-  X <- runifpoint(1000, W)
-  Z <- quantess(W, function(x,y) { x }, 9)$image
-  x <- X$x
-  y <- X$y
-  a <- nearest.valid.pixel(x, y, Z, method="interpreted")
-  b <- nearest.valid.pixel(x, y, Z, method="C")
-  if(!isTRUE(all.equal(a,b)))
-    stop("Unequal results in nearest.valid.pixel")
-  if(!identical(a,b)) 
-    stop("Equal, but not identical, results in nearest.valid.pixel")
-
   #' cases of distcdf
   distcdf(cells[1:5])
   distcdf(W=cells[1:5], dW=1:5)
@@ -345,39 +361,35 @@ local({
   #' rotmean
   U <- rotmean(Z, origin="midpoint", result="im", padzero=FALSE)
 })
-#' indices.R
-#' Tests of code for understanding index vectors etc
-#' $Revision: 1.1 $ $Date: 2018/03/01 03:38:07 $
+}
 
-require(spatstat)
-local({
+if(ALWAYS) {
+  local({
+    #' check nearest.valid.pixel
+    W <- Window(demopat)
+    set.seed(911911)
+    X <- runifpoint(1000, W)
+    Z <- quantess(W, function(x,y) { x }, 9)$image
+    nearest.valid.pixel(numeric(0), numeric(0), Z)
+    x <- X$x
+    y <- X$y
+    a <- nearest.valid.pixel(x, y, Z, method="interpreted")
+    b <- nearest.valid.pixel(x, y, Z, method="C")
+    if(!isTRUE(all.equal(a,b)))
+      stop("Unequal results in nearest.valid.pixel")
+      if(!identical(a,b)) 
+        stop("Equal, but not identical, results in nearest.valid.pixel")
+  })
+}
 
-  a <- grokIndexVector(c(FALSE,TRUE),         10)
-  b <- grokIndexVector(rep(c(FALSE,TRUE), 7), 10)
-  d <- grokIndexVector(c(2,12),               10)
-  e <- grokIndexVector(letters[4:2], nama=letters)
-  f <- grokIndexVector(letters[10:1], nama=letters[1:5])
-  g <- grokIndexVector(-c(2, 5),              10)
-  h <- grokIndexVector(-c(2, 5, 15),          10)
-
-  Nam <- letters[1:10]
-  j  <- positiveIndex(-c(2,5), nama=Nam)
-  jj <- logicalIndex(-c(2,5), nama=Nam)
-  k  <- positiveIndex(-c(2,5), nama=Nam)
-  kk <- logicalIndex(-c(2,5), nama=Nam)
-  mm <- positiveIndex(c(FALSE,TRUE), nama=Nam)
-  nn <- positiveIndex(FALSE, nama=Nam)
-
-  aa <- ppsubset(cells, square(0.1))
-})
 #'
 #'  tests/interact.R
 #'
 #'  Support for interaction objects
 #'
-#'  $Revision: 1.1 $ $Date: 2019/12/10 01:57:18 $
+#'  $Revision: 1.2 $ $Date: 2020/04/28 12:58:26 $
 
-require(spatstat)
+if(FULLTEST) {
 local({
   #' print.intermaker
   Strauss
@@ -388,12 +400,13 @@ local({
   BD <- function(r) { instantiate.interact(BS, list(r=r)) }
   BlueDanube <- intermaker(BD, BS) 
 })
+}
+
 #'   tests/ippm.R
 #'   Tests of 'ippm' class
-#'   $Revision: 1.4 $ $Date: 2020/01/07 09:36:42 $
+#'   $Revision: 1.6 $ $Date: 2020/04/28 12:58:26 $
 
-require(spatstat)
-
+if(FULLTEST) {
 local({
   # .......... set up example from help file .................
   nd <- 10
@@ -436,6 +449,9 @@ local({
   ## ............. test ippm class support ......................
   Ar <- model.matrix(fit)
   Ai <- model.matrix(fit, irregular=TRUE)
+  An <- model.matrix(fit, irregular=TRUE, keepNA=FALSE)
+  AS <- model.matrix(fit, irregular=TRUE, subset=(abs(Z) < 0.5))
+
   Zr <- model.images(fit)
   Zi <- model.images(fit, irregular=TRUE)
   ## update.ippm
@@ -474,3 +490,4 @@ local({
   A <- anova(fit0, fit)
   Alo <- anova(fit0lo, fitlo)
 })
+}

@@ -3,7 +3,7 @@
 #
 #  leverage and influence
 #
-#  $Revision: 1.117 $ $Date: 2020/02/03 10:06:52 $
+#  $Revision: 1.119 $ $Date: 2020/05/02 09:32:54 $
 #
 
 leverage <- function(model, ...) {
@@ -532,7 +532,7 @@ ppmInfluenceEngine <- function(fit,
       ## interior for border correction by earlier call to
       ## deltasuffstat(..., restrict = "first"))
       ddSX <- ddS[isdataB, , , drop=FALSE]
-      eff.data.B <- marginSums(ddSX, c(2,3))
+      eff.data.B <- marginSumsSparse(ddSX, c(2,3))
       ## check if any quadrature points have zero conditional intensity;
       ## these do not contribute to this term
       if(anyzerocifB)
@@ -599,9 +599,9 @@ ppmInfluenceEngine <- function(fit,
           ## Evaluate theta^T %*% ddS (with sign -1/+1 according to data/dummy)
           ## as triplet sparse matrix
           if(gotScore){
-            momchangeeffect <- tenseur(momchange[,,REG,drop=FALSE], theta, 3, 1)
+            momchangeeffect <- tensorSparse(momchange[,,REG,drop=FALSE], theta, 3, 1)
           } else{
-            momchangeeffect <- tenseur(momchange, theta, 3, 1)
+            momchangeeffect <- tensorSparse(momchange, theta, 3, 1)
           }
           ## Copy to each slice 
           momchangeeffect <- expandSparse(momchangeeffect,
@@ -645,10 +645,10 @@ ppmInfluenceEngine <- function(fit,
             momchange <- ddS
             momchange[ , isdataB, ] <- - momchange[, isdataB, ]
             if(gotScore){
-              lamratiominus1 <- expm1(tenseur(momchange[,,REG,drop=FALSE],
+              lamratiominus1 <- expm1(tensorSparse(momchange[,,REG,drop=FALSE],
                                               theta, 3, 1))
             } else{
-              lamratiominus1 <- expm1(tenseur(momchange, theta, 3, 1))
+              lamratiominus1 <- expm1(tensorSparse(momchange, theta, 3, 1))
             }
             lamratiominus1 <- expandSparse(lamratiominus1,
                                            n = dim(ddS)[3], across = 3)
@@ -691,10 +691,10 @@ ppmInfluenceEngine <- function(fit,
             ## lamarray[i,j,k] <- lam[i]
             lamarray <- mapSparseEntries(ddS, 1, lamB, conform=TRUE, across=3)
             if(gotScore){
-              lamratiominus1 <- expm1(tenseur(momchange[,,REG,drop=FALSE],
+              lamratiominus1 <- expm1(tensorSparse(momchange[,,REG,drop=FALSE],
                                               theta, 3, 1))
             } else{
-              lamratiominus1 <- expm1(tenseur(momchange,theta, 3, 1))
+              lamratiominus1 <- expm1(tensorSparse(momchange,theta, 3, 1))
             }
             lamratiominus1 <- expandSparse(lamratiominus1,
                                            n = dim(ddS)[3], across = 3)
@@ -729,10 +729,10 @@ ppmInfluenceEngine <- function(fit,
       }
       ## integrate
       if(logi){
-        # eff.back.B <- tenseur(ddSintegrand, rep(1, length(wB)), 1, 1)
-        eff.back.B <- marginSums(ddSintegrand, c(2,3))
+        # eff.back.B <- tensorSparse(ddSintegrand, rep(1, length(wB)), 1, 1)
+        eff.back.B <- marginSumsSparse(ddSintegrand, c(2,3))
       } else{
-        eff.back.B <- changesignB * tenseur(ddSintegrand, wB, 1, 1)
+        eff.back.B <- changesignB * tensorSparse(ddSintegrand, wB, 1, 1)
       }
       ## save contribution
       if(is.null(requested)) {

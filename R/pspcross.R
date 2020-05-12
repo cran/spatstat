@@ -3,7 +3,7 @@
 #
 #    Intersections of line segments
 #    
-#    $Revision: 1.24 $   $Date: 2019/01/31 08:11:34 $
+#    $Revision: 1.26 $   $Date: 2020/03/23 01:15:26 $
 #
 #
 crossing.psp <- function(A,B,fatal=TRUE,details=FALSE) {
@@ -336,9 +336,10 @@ selfcut.psp <- function(A, ..., eps) {
   marx <- marks(A)
   marxout <- if(is.null(marx)) NULL else
              as.data.frame(marx)[camefrom, , drop=FALSE]
-  Y <- psp(x0out, y0out, x1out, y1out, window=Window(A), marks=marxout)
+  Y <- psp(x0out, y0out, x1out, y1out, window=Window(A), marks=marxout,
+           check=FALSE)
   if(eps > 0) {
-    ok <- (lengths.psp(Y) > eps)
+    ok <- (lengths_psp(Y) > eps)
     if(!all(ok)) {
       Y <- Y[ok]
       camefrom <- camefrom[ok]

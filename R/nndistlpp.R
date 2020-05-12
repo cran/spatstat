@@ -1,7 +1,7 @@
 #
 # nndistlpp.R
 #
-#  $Revision: 1.25 $ $Date: 2020/01/28 01:01:57 $
+#  $Revision: 1.27 $ $Date: 2020/04/24 03:52:39 $
 #
 # Methods for nndist, nnwhich, nncross for linear networks
 #
@@ -9,13 +9,16 @@
 #   Calculates the nearest neighbour distances in the shortest-path metric
 #   for a point pattern on a linear network.
 
-nndist.lpp <- function(X, ..., k=1, method="C") {
+nndist.lpp <- function(X, ..., k=1, by=NULL, method="C") {
   stopifnot(inherits(X, "lpp"))
   stopifnot(method %in% c("C", "interpreted"))
   n <- npoints(X)
   k <- as.integer(k)
   stopifnot(all(k > 0))
   kmax <- max(k)
+
+  if(!is.null(by)) 
+    return(genericNNdistBy(X, by, k=k))
 
   L <- as.linnet(X)
   if(is.null(br <- L$boundingradius) || is.infinite(br)) {
@@ -74,7 +77,7 @@ nndist.lpp <- function(X, ..., k=1, method="C") {
     segmap <- pro - 1L
     nseg <- length(from0)
     # upper bound on interpoint distance
-    huge <- max(dpath) + 2 * max(lengths.psp(Lseg))
+    huge <- max(dpath) + 2 * max(lengths_psp(Lseg))
     # space for result
     ans <- double(n)
     # call C
@@ -102,7 +105,7 @@ nndist.lpp <- function(X, ..., k=1, method="C") {
     to    <- L$to
     ##
     nseg <- length(from)
-    seglen <- lengths.psp(Lseg)
+    seglen <- lengths_psp(Lseg)
     ## convert indices to start at 0
     from0 <- from - 1L
     to0   <- to - 1L
@@ -230,7 +233,7 @@ nnwhich.lpp <- function(X, ..., k=1, method="C") {
     segmap <- pro - 1L
     nseg <- length(from0)
     # upper bound on interpoint distance
-    huge <- max(dpath) + 2 * max(lengths.psp(Lseg))
+    huge <- max(dpath) + 2 * max(lengths_psp(Lseg))
     # space for result
     nnd <- double(n)
     nnw <- integer(n)
@@ -263,7 +266,7 @@ nnwhich.lpp <- function(X, ..., k=1, method="C") {
     to    <- L$to
     ##
     nseg <- length(from)
-    seglen <- lengths.psp(Lseg)
+    seglen <- lengths_psp(Lseg)
     ## convert indices to start at 0
     from0 <- from - 1L
     to0   <- to - 1L
@@ -439,7 +442,7 @@ nncross.lpp <- local({
   from  <- L$from
   to    <- L$to
   if(fast) {
-    seglengths <- lengths.psp(as.psp(L))
+    seglengths <- lengths_psp(as.psp(L))
   } else {
     dpath <- L$dpath
   }

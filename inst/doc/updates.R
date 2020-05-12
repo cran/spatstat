@@ -10,7 +10,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:38-74
+### code chunk number 2: updates.Rnw:38-76
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -36,9 +36,11 @@ z <- getSizeTable()
 zutils <- getSizeTable("spatstat.utils")
 zdata <- getSizeTable("spatstat.data")
 zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
+zgui <- getSizeTable("spatstat", "spatstatguisize.txt")
 z <- mergeSizeTables(z, zutils)
 z <- mergeSizeTables(z, zdata)
 z <- mergeSizeTables(z, zlocal)
+z <- mergeSizeTables(z, zgui)
 #
 currentcount <- z[nrow(z), counts]
 bookcount    <- z[z$version == "1.42-0", counts]
@@ -51,7 +53,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:91-96
+### code chunk number 3: updates.Rnw:93-98
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -61,7 +63,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:102-107
+### code chunk number 4: updates.Rnw:104-109
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 

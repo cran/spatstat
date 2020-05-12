@@ -3,7 +3,7 @@
 #    
 #    Linear networks
 #
-#    $Revision: 1.71 $    $Date: 2019/10/29 04:24:45 $
+#    $Revision: 1.78 $    $Date: 2020/04/27 04:24:18 $
 #
 # An object of class 'linnet' defines a linear network.
 # It includes the following components
@@ -138,7 +138,7 @@ summary.linnet <- function(object, ...) {
                  nline = object$lines$n,
                  nedge = sum(deg)/2,
                  unitinfo = summary(unitname(object)),
-                 totlength = sum(lengths.psp(object$lines)),
+                 totlength = sum(lengths_psp(object$lines)),
                  maxdegree = max(deg),
 		 ncomponents = length(levels(connected(object, what="labels"))),
                  win = as.owin(object),
@@ -250,7 +250,7 @@ as.linnet <- function(X, ...) {
   UseMethod("as.linnet")
 }
 
-as.linnet.linnet <- function(X, ..., sparse) {
+as.linnet.linnet <- function(X, ..., sparse, maxsize=30000) {
   if(missing(sparse)) return(X)
   if(is.null(X$sparse)) X$sparse <- is.null(X$dpath)
   if(sparse && !(X$sparse)) {
@@ -260,7 +260,13 @@ as.linnet.linnet <- function(X, ..., sparse) {
     X$m <- as(X$m, "sparseMatrix")
     X$sparse <- TRUE
   } else if(!sparse && X$sparse) {
-    # convert adjacency to matrix
+    # convert adjacency matrix to path-distance matrix
+    nv <- nvertices(X)
+    if(nv > maxsize) {
+      stop(paste("Unable to create a matrix of size", nv, "x", nv,
+                 paren(paste("max permitted size", maxsize, "x", maxsize))),
+           call.=FALSE)
+    }
     X$m <- m <- as.matrix(X$m)
     edges <- which(m, arr.ind=TRUE)
     from <- edges[,1L]
@@ -288,6 +294,7 @@ as.linnet.linnet <- function(X, ..., sparse) {
 
 as.linnet.psp <- function(X, ..., eps, sparse=FALSE) {
   X <- selfcut.psp(X)
+  camefrom <- attr(X, "camefrom")
   V <- unique(endpoints.psp(X))
   if(missing(eps) || is.null(eps)) {
     eps <- sqrt(.Machine$double.eps) * diameter(Frame(X))
@@ -316,6 +323,7 @@ as.linnet.psp <- function(X, ..., eps, sparse=FALSE) {
   join <- fromto[nontrivial, , drop=FALSE]
   result <- linnet(V, edges=join, sparse=sparse)
   if(is.marked(X)) marks(result$lines) <- marks(X[nontrivial])
+  attr(result, "camefrom") <- camefrom[nontrivial]
   return(result)
 }
 
@@ -341,7 +349,7 @@ diameter.linnet <- function(x) {
 }
 
 volume.linnet <- function(x) {
-  sum(lengths.psp(x$lines))
+  sum(lengths_psp(x$lines))
 }
 
 vertexdegree <- function(x) {
@@ -368,7 +376,7 @@ boundingradius.linnet <- function(x, ...) {
   to    <- x$to
   lines <- x$lines
   nseg  <- lines$n
-  leng  <- lengths.psp(lines)
+  leng  <- lengths_psp(lines)
   if(spatstat.options("Clinearradius")) {
     fromC <- from - 1L
     toC   <- to - 1L
@@ -539,8 +547,9 @@ rescale.linnet <- function(X, s, unitname) {
     ## extract relevant subset of network graph
     x <- thinNetwork(x, retainedges=okedge)
     ## Now add vertices at crossing points with boundary of 'w'
-    b <- crossing.psp(xlines, wlines)
-    x <- insertVertices(x, unique(b))
+    b <- unique(crossing.psp(xlines, wlines))
+    novel <- (nncross(b, x$vertices, what="dist") > 0)
+    x <- insertVertices(x, b[novel])
     boundarypoints <- attr(x, "id")
     ## update data
     from <- x$from
@@ -550,30 +559,14 @@ rescale.linnet <- function(X, s, unitname) {
   }
   ## find segments whose endpoints BOTH lie in 'w'
   edgeinside <- vertinside[from] & vertinside[to]
+  ## .. and which are not trivial
+  umap <- uniquemap(x$vertices)
+  nontrivial <- (umap[from] != umap[to])
   ## extract relevant subset of network
-  xnew <- thinNetwork(x, retainedges=edgeinside)
+  xnew <- thinNetwork(x, retainedges=edgeinside & nontrivial)
   ## adjust window efficiently
   Window(xnew, check=FALSE) <- w
   return(xnew)
-}
-
-#
-# interactive plot for linnet objects
-#
-
-iplot.linnet <- function(x, ..., xname) {
-  if(missing(xname))
-    xname <- short.deparse(substitute(x))
-  if(!inherits(x, "linnet"))
-    stop("x should be a linnet object")
-  ## predigest
-  v <- vertices(x)
-  deg <- vertexdegree(x)
-  dv <- textstring(v, txt=paste(deg))
-  y <- layered(lines=as.psp(x),
-               vertices=v,
-               degree=dv)
-  iplot(y, ..., xname=xname, visible=c(TRUE, FALSE, FALSE))
 }
 
 pixellate.linnet <- function(x, ...) {

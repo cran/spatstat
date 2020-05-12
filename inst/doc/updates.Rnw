@@ -60,9 +60,11 @@ z <- getSizeTable()
 zutils <- getSizeTable("spatstat.utils")
 zdata <- getSizeTable("spatstat.data")
 zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
+zgui <- getSizeTable("spatstat", "spatstatguisize.txt")
 z <- mergeSizeTables(z, zutils)
 z <- mergeSizeTables(z, zdata)
 z <- mergeSizeTables(z, zlocal)
+z <- mergeSizeTables(z, zgui)
 #
 currentcount <- z[nrow(z), counts]
 bookcount    <- z[z$version == "1.42-0", counts]
@@ -150,13 +152,15 @@ text(as.Date("2015-01-01"), 60, "R code")
     
     There are also extension packages which provide additional capabilities
     and must be loaded explicitly when you need them. 
-    Currently there are three extension packages:
+    Currently there are four extension packages:
     
     \begin{itemize}
     \item \pkg{spatstat.local} for local model-fitting, 
     \item \pkg{spatstat.sphere} for analysing point patterns on a sphere,
     \item \pkg{spatstat.Knet} for analysing point patterns
       on a network.
+    \item \pkg{spatstat.gui} containing interactive graphics
+      functions.
     \end{itemize}
 
 \pagebreak
@@ -168,11 +172,25 @@ the News and Release Notes for each update.
 
 \begin{itemize}
 
+  \item The interactive graphics functions \texttt{iplot} and \texttt{istat}
+    have been removed from \spst\ into a new package \pkg{spatstat.gui}.
+
+  \item The packages \pkg{tcltk} and \pkg{rpanel} are no longer 
+    Suggested by \spst.
+    
   \item \spst\ now Imports the package \pkg{spatstat.utils}.
 
   \item \spst\ now requires the package \pkg{spatstat.data} which contains the datasets.
 
   \item \spst\ now suggests the package \pkg{fftwtools}.
+
+  \item Relative risk estimation on a network.
+    
+  \item Leave-one-out density estimation on a network.
+    
+  \item Add new vertices to a linear network.
+    
+   \item Function \texttt{lengths.psp} has been renamed \verb!lengths_psp!.
 
    \item Tessellations on a linear network can now have marks.
 
@@ -467,7 +485,47 @@ The following datasets have been added to the package.
 Following is a list of all the functions that have been added.
 
 \begin{itemize}
+
+  \item \texttt{relrisk.lpp}: 
+    nonparametric estimation of relative risk on a network.
+    
+  \item \texttt{bw.relrisklpp}: 
+  Bandwidth selection for relative risk estimation on a network.
+    
+\item \texttt{bw.lppl}:
+  Bandwidth selection for kernel density estimation
+  of point patterns on a linear network,
+  using likelihood cross-validation.
   
+  \item  \texttt{densityfun.lpp}: a method for \texttt{densityfun}
+    for point patterns on a linear network.
+    
+  \item \texttt{addVertices}:
+    Add new vertices to a network, at locations outside the
+    existing network.
+
+  \item \verb!lengths_psp!: this is the new name of the 
+    function \texttt{lengths.psp}, which had to be changed because of
+    a conflict with the generic \texttt{lengths}.
+  
+    
+  \item \texttt{densityEqualSplit}:
+    The equal-split algorithm for kernel density estimation on a network
+    is now visible as a separate function.
+
+  \item \texttt{densityHeat}:
+    The heat-equation algorithm for kernel density estimation on a network
+    is now visible as a separate function. It has also been extended
+    to computing leave-one-out density estimates at the data points.
+
+   
+  \item \texttt{hotrod}:
+    Compute the heat kernel $\kappa(u,v)$ on a one-dimensional line segment.
+
+  \item \texttt{heatkernelapprox}:
+    Calculate an approximation to the value of the heat kernel
+    on a network evaluated at the source point, $\kappa(u,u)$.
+    
   \item \texttt{is.linim}: test whether an object is 
       a pixel image on a linear network (class \verb!"linim"!).
   
@@ -1218,14 +1276,30 @@ listed alphabetically.
    New argument \texttt{delta} controls spacing of sample points
    in internal data.
 
+ \item \texttt{as.linnet.linnet}:
+   New argument \texttt{maxsize}.
+   
   \item \texttt{as.linnet.psp}:
     \begin{itemize}
     \item 
       If the line segment pattern has marks, then the resulting linear network
       also carries these marks in the \verb!$lines! component.
     \item Computation accelerated.
+    \item The resulting network has attribute \texttt{"camefrom"} 
+      indicating the provenance of each line segment in the network.
     \end{itemize}
 
+    
+  \item \texttt{as.lpp}: accepts more data formats:
+    \begin{itemize}
+    \item 
+      Now handles the case where coordinates
+      \texttt{seg} and \texttt{tp} are given
+      but \texttt{x} and \texttt{y} are missing.
+    \item Now handles the case where \texttt{x} is a data frame
+      with columns named \texttt{x,y,seg,tp} or 
+      \texttt{x,y} or \texttt{seg,tp}.
+    \end{itemize}
 
 \item \texttt{as.owin.default}:
   \begin{itemize}
@@ -1390,9 +1464,13 @@ listed alphabetically.
   mapped to the same colour.
   
 \item \texttt{collapse.fv}:
+  \begin{itemize}
+  \item 
    This is now treated as a method for the \texttt{nlme} 
    generic \texttt{collapse}.
    Its syntax has been adjusted slightly.
+ \item Recognises the abbreviations used by \texttt{fvnames()}.
+  \end{itemize}
 
 \item \texttt{connected.im}:
     Now handles a logical-valued image properly.
@@ -1408,6 +1486,15 @@ listed alphabetically.
 
   \item \texttt{convolve.im}: the name of the unit of length is preserved.
    
+  \item \texttt{crossdist.lpp}:
+    \begin{itemize}
+    \item 
+      Now handles much larger networks, using the sparse representation
+      of the network.
+    \item 
+      New argument \texttt{check}.
+    \end{itemize}
+
  \item \texttt{crossing.psp}:
     New argument \texttt{details} gives more information about the intersections
     between the segments.
@@ -1470,6 +1557,8 @@ listed alphabetically.
      New arguments \texttt{weights} and \texttt{old}.
    \item New argument \texttt{distance} offers a choice of different
      kernel methods.
+   \item Infinite bandwidth (\texttt{sigma=Inf}) is now permitted,
+     and results in a density estimate that is constant over all locations.
    \end{itemize}
    
  \item \texttt{density.ppp}:
@@ -1494,6 +1583,8 @@ listed alphabetically.
    \item Accelerated by 1 to 2 orders of magnitude.
    \end{itemize}
 
+ \item \texttt{density.splitppp}: New argument \texttt{weights}.
+   
  \item \texttt{dfbetas.ppm}:
    \begin{itemize}
    \item 
@@ -1543,6 +1634,13 @@ listed alphabetically.
     object for the argument \texttt{x},
     instead of giving two coordinate vectors \texttt{x} and \texttt{y}.
 
+ \item \texttt{distfun.lpp}:
+   \begin{itemize}
+   \item    New argument \texttt{k} allows computation of $k$-th nearest point.
+   \item    Computation accelerated.
+   \end{itemize}
+
+    
     \item \texttt{dppm}:
     Changed precedence rule for handling the algorithm parameters
     in the minimum contrast algorithm. Individually-named arguments
@@ -1705,10 +1803,15 @@ listed alphabetically.
    \item    New argument \texttt{delta} controls step length of
    approximation to integral.
    \item    Argument \code{domain} can be a tessellation.
+   \item Now handles complex-valued functions.
    \end{itemize}
 
  \item \texttt{integral.linim}:
-   Argument \code{domain} can be a tessellation.
+   \begin{itemize}
+   \item    Argument \code{domain} can be a tessellation.
+   \item Now handles complex-valued functions.
+
+   \end{itemize}
 
  \item \texttt{integral.ssf}:
    Argument \code{domain} can be a tessellation.
@@ -1720,6 +1823,13 @@ listed alphabetically.
 \item \texttt{interp.im}:
   New argument \texttt{bilinear}.
 
+
+ 
+\item \texttt{iplot}, \texttt{iplot.ppp}, 
+  \texttt{iplot.layered}, \texttt{iplot.linnet}, \texttt{iplot.default}:
+    These interactive plotting functions have been removed from 
+    \pkg{spatstat} into a new package \pkg{spatstat.gui}.
+
  \item \texttt{ippm}:
    \begin{itemize}
    \item Accelerated.
@@ -1727,8 +1837,12 @@ listed alphabetically.
    The internal format of the result has been extended slightly.
    \item Improved defaults for numerical algorithm parameters.
    \end{itemize}
-
    
+   
+ \item \texttt{istat}:
+    This interactive analysis function has been removed from \pkg{spatstat}
+    into a new package \pkg{spatstat.gui}.
+    
 %%J
 
  \item \texttt{Jfox}: new argument \texttt{warn.trim}.
@@ -1768,11 +1882,11 @@ listed alphabetically.
     has changed slightly. Results are believed to be more accurate.
     Computation has been accelerated by about 20 percent in typical cases.
    \end{itemize}
-    
- \item \texttt{Kest.fft}:
+
+\item \texttt{Kest.fft}:
    Now has \verb!...! arguments allowing control of spatial resolution.
 
- \item \texttt{Kinhom}:
+\item \texttt{Kinhom}:
    \begin{itemize}
    \item 
    New argument \texttt{ratio}.
@@ -1824,7 +1938,12 @@ listed alphabetically.
     a fitted point process model.
     New arguments \texttt{update}, \texttt{leaveoneout}, \texttt{lambdaX}.
 
- \item \texttt{lengths.psp}: New argument \texttt{squared}.
+ \item \texttt{lengths.psp}: 
+   \begin{itemize}
+   \item    New argument \texttt{squared}.
+   \item This function will soon be Deprecated in favour of the
+     new name \verb!lengths_psp!.
+   \end{itemize}
 
    \item \texttt{Lest}, \texttt{Linhom}, \texttt{Ldot},
      \texttt{Lcross}, \texttt{Ldot.inhom}, \texttt{Lcross.inhom}:
@@ -1961,12 +2080,11 @@ listed alphabetically.
    \item
      \texttt{X} can be missing or \texttt{NULL}, 
      resulting in an empty point pattern.
+   \item 
+     Now handles the case where coordinates
+     \texttt{seg} and \texttt{tp} are given
+     but \texttt{x} and \texttt{y} are missing.
    \end{itemize}
-
-  \item \texttt{lpp}, \texttt{as.lpp}: 
-   These functions now handle the case where coordinates
-   \texttt{seg} and \texttt{tp} are given
-    but \texttt{x} and \texttt{y} are missing.
 
  \item \texttt{lppm}:
    \begin{itemize}
@@ -2035,9 +2153,36 @@ listed alphabetically.
  \item \texttt{nncorr,nnmean,nnvario}:
    New argument \texttt{na.action}.
    
- \item \texttt{nndist.lpp, nnwhich.lpp, nncross.lpp, distfun.lpp}:
-   New argument \texttt{k} allows computation of $k$-th nearest point.
-   Computation accelerated.
+ \item \texttt{nncross.lpp}:
+   \begin{itemize}
+   \item    New argument \texttt{k} allows computation of $k$-th nearest point.
+   \item    Computation accelerated.
+   \end{itemize}
+
+ \item \texttt{nndist.pp3}:
+   New argument \texttt{by} allows computation of the nearest 
+     distance to each group of points.
+
+ \item \texttt{nndist.ppx}:
+   New argument \texttt{by} allows computation of the nearest 
+     distance to each group of points.
+
+ \item \texttt{nndist.lpp}:
+   \begin{itemize}
+   \item    New argument \texttt{k} allows computation of $k$-th nearest point.
+   \item new argument \texttt{by} allows computation of the nearest 
+     distance to each group of points.
+   \item    Computation accelerated.
+   \end{itemize}
+
+ \item \texttt{nnwhich.lpp}:
+   \begin{itemize}
+   \item    New argument \texttt{k} allows computation of $k$-th nearest point.
+   \item new argument \texttt{by} allows computation of the nearest 
+     distance to each group of points.
+   \item    Computation accelerated.
+   \end{itemize}
+
 
    \texttt{nnfun.lpp}: 
    \begin{itemize}
@@ -2068,6 +2213,10 @@ listed alphabetically.
    New argument \texttt{W} allows an image to be padded out to fill any window.
 
    
+ \item \texttt{pairdist.lpp}: 
+   Now handles much larger networks, using the sparse representation
+   of the network.
+
  \item \texttt{pairorient}: Default edge corrections now include 
    \texttt{"bord.modif"}.
    
@@ -2481,6 +2630,8 @@ listed alphabetically.
      \item
        The arguments \texttt{adjust}, \texttt{edge}, \texttt{diggle}
        are now explicit formal arguments.
+     \item 
+       New argument \texttt{weights}.
      \end{itemize}
      
    \texttt{rhohat}:
@@ -2584,6 +2735,9 @@ listed alphabetically.
      If \texttt{lambda} is a list of \texttt{"linim"} or \texttt{"linfun"}
      objects, then the argument \texttt{L} can be omitted.
 
+   \item \texttt{rshift.ppp}, \texttt{rshift.splitppp}: 
+     new argument \texttt{nsim}.
+     
  \item \texttt{rStrauss, rHardcore, rStraussHard, rDiggleGratton, rDGS, rPenttinen:}
    New argument \texttt{drop}.
 
@@ -2622,6 +2776,7 @@ listed alphabetically.
         \item Computation accelerated.
         \item The result now has an attribute \texttt{"camefrom"}
           indicating the provenance of each segment in the result.
+        \item No longer checks for validity of the resulting segments.
         \end{itemize}
         
   \item \texttt{setcov}: the name of the unit of length is preserved.
@@ -2788,6 +2943,7 @@ listed alphabetically.
    \item \texttt{to.grey}
    New argument \texttt{transparent}.
 
+   \item \texttt{transect.im}: new argument \texttt{nsample}.
 %%U
    
   \item \texttt{union.owin}:

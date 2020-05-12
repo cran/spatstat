@@ -1,12 +1,26 @@
 #'
+#'   Header for all (concatenated) test files
+#'
+#'   Require spatstat.
+#'   Obtain environment variable controlling tests.
+#'
+#'   $Revision: 1.5 $ $Date: 2020/04/30 05:31:37 $
+
+require(spatstat)
+FULLTEST <- (nchar(Sys.getenv("SPATSTAT_TEST", unset="")) > 0)
+ALWAYS   <- TRUE
+cat(paste("--------- Executing",
+          if(FULLTEST) "** ALL **" else "**RESTRICTED** subset of",
+          "test code -----------\n"))
+#'
 #'    tests/quadschemes.R
 #'
 #'    Quadrature schemes, dummy points etc
 #' 
-#'   $Revision: 1.6 $ $Date: 2019/01/20 05:49:40 $
+#'   $Revision: 1.7 $ $Date: 2020/05/01 02:42:58 $
 #'
 
-require(spatstat)
+if(FULLTEST) {
 local({
   ##  class 'quad' 
   qu <- quadscheme(cells)
@@ -57,3 +71,4 @@ local({
                        logi.dummy(amacrine, "poisson", mark.repeat=FALSE))
   print(summary(d))
 })
+}

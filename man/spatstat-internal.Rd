@@ -66,12 +66,9 @@
 \alias{change.default.expand}          
 \alias{checkbigmatrix}          
 \alias{checkfields}          
-\alias{checksolve}
 \alias{check.arc}
-\alias{check.anySparseVector}
 \alias{check.finespacing}
 \alias{check.hist.lengths}
-\alias{check.mat.mul}
 \alias{check.separable}
 \alias{check.testfun}
 \alias{circticks}
@@ -119,6 +116,7 @@
 \alias{dflt.redraw}
 \alias{densitycrossEngine}
 \alias{densitypointsEngine}
+\alias{densitypointsLPP}
 \alias{diagnose.ppm.engine}
 \alias{diagramobj}
 \alias{digestCovariates}
@@ -135,7 +133,6 @@
 \alias{dist2dpath}
 \alias{do.as.im}
 \alias{do.call.plotfun}
-\alias{do.istat}
 \alias{doMultiStraussHard}
 \alias{dppmFixAlgorithm}
 \alias{dppmFixIntensity}
@@ -158,7 +155,6 @@
 \alias{evalInteraction}
 \alias{evalInterEngine}
 \alias{evalPairPotential}
-\alias{evalSparse3Dentrywise}
 \alias{evaluate2Dkernel}
 \alias{even.breaks.owin}
 \alias{exactdt}              
@@ -183,6 +179,8 @@
 \alias{findcbind}
 \alias{fii}
 \alias{fillNA}
+\alias{flatdensityfunlpp}
+\alias{flatdensityatpointslpp}
 \alias{flatfname}
 \alias{flipxypolygon}
 \alias{flipxy.msr}
@@ -190,7 +188,6 @@
 \alias{format.numberwithunit}
 \alias{FormatFaspFormulae}
 \alias{framebottomleft}
-\alias{fullIndexSequence}
 \alias{fvexprmap}
 \alias{fvlabels}
 \alias{fvlabels<-}
@@ -199,6 +196,7 @@
 \alias{gammabreaks}
 \alias{g3engine}
 \alias{g3Cengine}
+\alias{genericNNdistBy}
 \alias{getdataname}
 \alias{getfields}
 \alias{getglmdata}
@@ -218,7 +216,6 @@
 %\alias{gridadjacencymatrix} %DoNotExport
 \alias{gridindex}            
 \alias{grid1index}
-\alias{grokIndexVector}
 \alias{grow.mask}
 \alias{hackglmmPQL}
 \alias{hasenvelope}
@@ -235,6 +232,8 @@
 \alias{IdenticalRows}
 \alias{idorempty}
 \alias{illegal.iformula}
+\alias{imageOp}
+\alias{imagelistOp}
 \alias{implemented.for.K}
 \alias{impliedpresence}
 \alias{impliedcoefficients}
@@ -321,6 +320,7 @@
 \alias{logi.dummy}
 \alias{logi.engine}
 \alias{logLik.vblogit}
+\alias{looHeatLPP}
 \alias{looVoronoiLPP}
 \alias{makeLinnetTolerance}
 \alias{markvaluetype}
@@ -329,7 +329,6 @@
 \alias{packupNNdata}
 \alias{parbreak}
 \alias{PairPotentialType}
-\alias{PDEdensityLPP}
 \alias{plan.legend.layout}
 \alias{plotWidthMap}
 \alias{pointweights}
@@ -548,14 +547,13 @@
 \alias{reheat}
 \alias{RelevantDeviation}
 \alias{repair.image.xycoords}
-\alias{replacementIndex}
-\alias{representativeRows}
 \alias{rescale.msr}
 \alias{resolveEinfo}
 \alias{resolve.foxall.window}
-\alias{resolve.vargamma.shape}
+\alias{resolve.heat.steps}
 \alias{resolve.lambda}
 \alias{resolve.lambda.cross}
+\alias{resolve.vargamma.shape}
 \alias{rgbNA}
 \alias{rhohatEngine}
 \alias{rhohatCalc}
@@ -667,7 +665,6 @@
 \alias{sphere.volume}
 \alias{store.versionstring.spatstat}
 \alias{str.hyperframe}
-\alias{strictIndexSequence}
 \alias{strausscounts}
 \alias{suffloc}
 \alias{suffstat.generic}
@@ -686,12 +683,10 @@
 \alias{summary.splitppx}
 \alias{summary.rmhexpand}
 \alias{summary.vblogit}
-\alias{sumsymouter}
 \alias{superimposeMarks}
 \alias{symbolmapdomain}
 \alias{symbolmaptype}
 \alias{tail.hyperframe}
-\alias{tensor1x1}
 \alias{thinjump}
 \alias{tilecentroids}        
 \alias{trianglediameters}
@@ -748,6 +743,17 @@
 \alias{xypolyselfint}
 \alias{ZeroValue}
 \alias{ZeroValue.im}
+%%%%%%%%%%%%%%% BEGIN SPARSE %%%%%%%%%%%%%%%%%%%%%%%%
+%%%% indices
+\alias{fullIndexSequence}
+\alias{grokIndexVector}
+\alias{replacementIndex}
+\alias{representativeRows}
+\alias{strictIndexSequence}
+%%%%  undocumented linear algebra
+\alias{checksolve}
+\alias{check.mat.mul}
+\alias{sumsymouter}
 %%%% sparse 3D arrays
 \alias{sparse3Darray}
 \alias{as.sparse3Darray}
@@ -777,20 +783,24 @@
 \alias{mapSparseEntries}
 \alias{applySparseEntries}
 \alias{sumsymouterSparse}
-\alias{tenseur}
-\alias{marginSums}
+\alias{tensorSparse}
+\alias{marginSumsSparse}
 \alias{rbindCompatibleDataFrames}
 \alias{bind.sparse3Darray}
+\alias{check.anySparseVector}
+\alias{evalSparse3Dentrywise}
+\alias{expandSparse}
+\alias{sparseVectorCumul}
+\alias{tensor1x1}
+%%%%%%%%%%%%%%%%%%%%%  END SPARSE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%
 \alias{spatstatDiagnostic}
 %%
 \alias{as.ppplist}
 \alias{as.imlist}
 \alias{pointsAlongNetwork}
-\alias{expandSparse}
 \alias{allElementsIdentical}
 \alias{resampleNetworkDataFrame}
-\alias{sparseVectorCumul}
 %%
 \alias{as.ppm.lppm}
 \alias{as.ppm.rppm}
@@ -858,7 +868,7 @@ breakpts.from.r(r)
 bt.frame(Q, trend, interaction, \dots, covariates,
          correction, rbord, use.gam, allcovar)
 bw.optim(cv, h, iopt, \dots, cvname, hname, criterion,
-         warnextreme, hargnames, unitname)
+         optimum, warnextreme, hargnames, unitname)
 calc.DR(COV, z, Dim)
 calc.NNIR(COV, z, pos, Dim)
 calc.SAVE(COV, z, Dim)
@@ -872,13 +882,9 @@ censtimeCDFest(o, cc, d, breaks, \dots,
 change.default.expand(x, newdefault)
 checkbigmatrix(n, m, fatal, silent)
 checkfields(X,L)
-checksolve(M, action, descrip, target)
 check.arc(arc, fatal)
-check.anySparseVector(v, npoints, fatal, things,
-                      naok, warn, vname, oneok)
 check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
 check.hist.lengths(hist,breaks)
-check.mat.mul(A, B, Acols, Brows, fatal)
 check.separable(dmat, covname, isconstant, fatal)
 check.testfun(f, f1, X)
 circticks(R, at, unit, start, clockwise, labels)
@@ -934,6 +940,10 @@ densitypointsEngine(x, sigma, \dots,
                     kernel, scalekernel,
                     weights, edge, varcov,
                     leaveoneout, diggle, sorted, spill, cutoff)
+densitypointsLPP(x, sigma, \dots,
+                 weights, nsigma, leaveoneout, fast,
+                 fastmethod, floored,
+                 dx, dt, iterMax, verbose, debug)
 diagnose.ppm.engine(object, \dots, type, typename, opt,
                          sigma, rbord, compute.sd, compute.cts,
                          envelope, nsim, nrank,
@@ -953,7 +963,6 @@ distributecbind(x)
 dist2dpath(dist, method="C")
 do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
 do.call.plotfun(fun, arglist, \dots)
-do.istat(panel)
 doMultiStraussHard(iradii, hradii, types)
 dppmFixIntensity(DPP, lambda, po)
 dppmFixAlgorithm(algorithm, changealgorithm, clusters, startpar)
@@ -1004,7 +1013,6 @@ evalInteraction(X,P,E,interaction,correction,splitInf,\dots,
 evalInterEngine(X,P,E,interaction,correction,splitInf,\dots,
                 Reach,precomputed,savecomputed)
 evalPairPotential(X,P,E,pairpot,potpars,R)
-evalSparse3Dentrywise(expr, envir)
 evaluate2Dkernel(kernel, x, y, sigma, varcov, \dots, scalekernel)
 even.breaks.owin(w)
 exactdt(X, \dots)              
@@ -1020,15 +1028,18 @@ fakemaintitle(bb, main, \dots)
 f3engine(x, y, z, box, vside, range, nval, correction)
 f3Cengine(x, y, z, box, vside, rmax, nrval)
 fasp(fns, which, formulae, dataname, title, rowNames, colNames, checkfv)
-FDMKERNEL(lppobj, sigma, dtt, weights, iterMax, sparse, dtx, stepnames)
+FDMKERNEL(lppobj, dtt, dtx, M, nsave, weights,
+          stepnames, setuponly, verbose)
 fft2D(z, inverse, west)
 fftwAvailable()
 fill.coefs(coefs, required)
 findbestlegendpos(\dots)
 findCovariate(covname, scope, scopename=NULL)
 findcbind(root, depth, maxdepth)
-fii(interaction, coefs, Vnames, IsOffset)
+fii(interaction, coefs, Vnames, IsOffset, vnameprefix)
 fillNA(x, value)
+flatdensityfunlpp(X, \dots, disconnect, weights, what)
+flatdensityatpointslpp(X, \dots, leaveoneout, disconnect, weights, what)
 flatfname(x)
 flipxypolygon(p)
 \method{flipxy}{msr}(X)
@@ -1036,7 +1047,6 @@ forbid.logi(object)
 \method{format}{numberwithunit}(x, \dots, collapse, modifier)
 FormatFaspFormulae(f, argname)
 framebottomleft(w)
-fullIndexSequence(g)
 fvexprmap(x)
 fvlabels(x, expand=FALSE)
 fvlabels(x) <- value
@@ -1045,6 +1055,7 @@ fvlegend(object, elang)
 gammabreaks(ra, n, gamma)
 g3engine(x, y, z, box, rmax, nrval, correction)
 g3Cengine(x, y, z, box, rmax, nrval)
+genericNNdistBy(X, by, k)
 getdataname(defaultvalue, \dots, dataname)
 getfields(X, L, fatal = TRUE)
 getglmdata(object, drop=FALSE)
@@ -1065,7 +1076,6 @@ good.correction.K(X)
 %gridadjacencymatrix(dims)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
-grokIndexVector(ind, len, nama)
 grow.mask(M, xmargin=0, ymargin=xmargin)
 hackglmmPQL(fixed, random, family, data, correlation, weights,
             control, niter, verbose, subset, \dots, reltol)
@@ -1084,6 +1094,8 @@ IdenticalRowPair(i,j,a,b)
 IdenticalRows(i,j,a,b)
 idorempty(w, r, caller)
 illegal.iformula(ifmla, itags, dfvarnames)
+imageOp(e1, e2, op)
+imagelistOp(e1, e2, op)
 implemented.for.K(correction, windowtype, explicit)
 impliedpresence(tags, formula, df, extranames=character(0))
 impliedcoefficients(object, tag)
@@ -1188,8 +1200,10 @@ logi.engine(Q, trend, interaction, \dots,
             vnamebase, vnameprefix, justQ, savecomputed, precomputed,
             VB)
 \method{logLik}{vblogit}(object, \dots)
+looHeatLPP(U0, Amatrix, npts, niter, nsave,
+           lixelweight, lixelmap, verbose) 
 looVoronoiLPP(X)
-makeLinnetTolerance
+makeLinnetTolerance(toler)
 maskLaslett(X, \dots, eps, dimyx, xy, oldX, verbose, plotit)
 markvaluetype(x)
 match2DkernelName(kernel)
@@ -1198,8 +1212,6 @@ parbreak(terse)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
 PairPotentialType(pairpot)
-PDEdensityLPP(x, sigma, \dots, weights, dx, dt, iterMax,
-              fun, finespacing, finedata)
 plotWidthMap(bb.leg, zlim, phys.scale, leg.scale, leg.side, leg.args, grafpar)
 pointweights(X, \dots, weights, parent)
 PoisSaddle(beta, fi)
@@ -1462,17 +1474,22 @@ reduceformula(fmla, deletevar, verbose)
 reheat(model, invtemp)
 RelevantDeviation(x, alternative, clamp, scaling)
 repair.image.xycoords(x)
-replacementIndex(ii, stuff)
-representativeRows(x)
 \method{rescale}{msr}(X, s, unitname)
 resolveEinfo(x, what, fallback, warn, atomic)
 resolve.foxall.window(X, Y, W, warn.trim)
-resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default)
+resolve.heat.steps(sigma, \dots, dx, dt,
+                   niter, iterMax, nsave,
+                   seglengths, maxdegree, AMbound, L,
+                   finespacing, fineNsplit, fineNlixels,
+                   W, eps, dimyx, xy, 
+                   allow.adjust, warn.adjust,
+                   verbose, stepnames)
 resolve.lambda(X, lambda, \dots, sigma, varcov, leaveoneout, update)
 resolve.lambda.cross(X, I, J, lambdaI, lambdaJ, \dots, lambdaX,
                      sigma, varcov, leaveoneout, update, lambdaIJ,
                      Iexplain, Jexplain, miss.update, miss.leave,
                      caller)
+resolve.vargamma.shape(\dots, nu.ker, nu.pcf, default)
 rgbNA(red, green, blue, alpha, maxColorValue)
 rhohatEngine(model, covariate, reference, volume, \dots,
                subset, weights, method, horvitz, smoother, resolution, 
@@ -1612,7 +1629,6 @@ sp.foundclass(cname, inlist, formalname, argsgiven)
 sp.foundclasses(cnames, inlist, formalname, argsgiven)
 store.versionstring.spatstat()
 \method{str}{hyperframe}(object, \dots)
-strictIndexSequence(g)
 strausscounts(U,X,r,EqualPairs)
 suffloc(object)
 suffstat.generic(model, X, callstring)
@@ -1631,12 +1647,10 @@ summarise.trend(trend, w, a)
 \method{summary}{rmhexpand}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
 \method{summary}{vblogit}(object, \dots)
-sumsymouter(x, w)
 superimposeMarks(arglist, nobj)
 symbolmapdomain(x)
 symbolmaptype(x)
 \method{tail}{hyperframe}(x,n,\dots)
-tensor1x1(A,B)
 thinjump(n, p)
 tilecentroids(W, nx, ny)
 trianglediameters(iedge, jedge, edgelength, \dots,
@@ -1698,6 +1712,17 @@ xypolyselfint(p, eps, proper, yesorno, checkinternal)
 xypolygon2psp(p, w, check)
 ZeroValue(x)
 \method{ZeroValue}{im}
+%%%%%%%%%%%%%  BEGIN SPARSE %%%%%%%%%%%%%%%%%%%%%%%%
+%%% indices
+fullIndexSequence(g)
+grokIndexVector(ind, len, nama)
+replacementIndex(ii, stuff)
+representativeRows(x)
+strictIndexSequence(g)
+%%% undocumented linear algebra
+checksolve(M, action, descrip, target)
+check.mat.mul(A, B, Acols, Brows, fatal)
+sumsymouter(x, w, distinct)
 %%% sparse 3D arrays
 sparse3Darray(i,j,k,x,dims,dimnames,strict,nonzero)
 as.sparse3Darray(x, \dots)
@@ -1730,21 +1755,26 @@ SparseIndices(x)
 EntriesToSparse(df, dims)
 mapSparseEntries(x, margin, values, conform, across)
 applySparseEntries(x, f, \dots)
-sumsymouterSparse(x, w, dbg)
-tenseur(A, B, alongA, alongB)
-marginSums(X, MARGIN)
+sumsymouterSparse(x, w, distinct, dbg)
+tensorSparse(A, B, alongA, alongB)
+marginSumsSparse(X, MARGIN)
 rbindCompatibleDataFrames(x)
 bind.sparse3Darray(A, B, along)
+check.anySparseVector(v, npoints, fatal, things,
+                      naok, warn, vname, oneok)
+evalSparse3Dentrywise(expr, envir)
+expandSparse(x, n, across)
+sparseVectorCumul(x, i, length)
+tensor1x1(A,B)
+%%%%%%%%%%%%%  END SPARSE %%%%%%%%%%%%%%%%%%%%%%%%
 %%
 spatstatDiagnostic(msg)
 %%
 as.ppplist(x, check)
 as.imlist(x, check)
 pointsAlongNetwork(L, delta)
-expandSparse(x, n, across)
 allElementsIdentical(x, entry)
 resampleNetworkDataFrame(df, template)
-sparseVectorCumul(x, i, length)
 %%
 \method{as.ppm}{lppm}(object)
 \method{as.ppm}{rppm}(object)

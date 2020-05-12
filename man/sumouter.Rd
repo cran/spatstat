@@ -22,15 +22,18 @@
 \details{
   The matrices \code{x} and \code{y} will be interpreted as
   collections of row vectors. They must have the same number of rows.
+  The entries of \code{x} and \code{y} may be
+  numeric, integer, logical or complex values.
 
   The command \code{sumouter} computes the sum of the outer
   products of corresponding row vectors, weighted by the entries of \code{w}:
   \deqn{
-    M = \sum_i w_i x_i y_i^\top
+    M = \sum_i w_i x_i^\top y_i
   }{
     M = sum[i] (w[i] * outer(x[i,], y[i,]))
   }
-  where the sum is over all rows of \code{x} 
+  where \eqn{x_i}{x[i,]} is the \code{i}-th row of \code{x}
+  and \eqn{y_i}{y[i,]} is the \code{i}-th row of \code{y}
   (after removing any rows containing \code{NA} or other non-finite
   values).
   If \code{w} is missing, the weights will be taken as 1.
@@ -81,11 +84,9 @@
   sumouter(x, w)
   quadform(x, v)
 }
-\author{\adrian
-  
-  
+\author{
+  \adrian
   and \rolf
-  
 }
 \keyword{array}
  

@@ -1,7 +1,7 @@
 #
 # mppm.R
 #
-#  $Revision: 1.93 $   $Date: 2020/01/01 05:33:32 $
+#  $Revision: 1.95 $   $Date: 2020/03/11 05:29:58 $
 #
 
 mppm <- local({
@@ -143,7 +143,7 @@ mppm <- local({
     Yclass <- data.sumry$classes[Yname]
     if(Yclass == "ppp") {
       ## convert to quadrature schemes, for efficiency's sake
-      Y <- solapply(Y, quadscheme)
+      Y <- solapply(Y, quadscheme, ...)
       ## Ydescrip <- "point patterns" ## not used
     } else if(Yclass == "quad") {
       Y <- as.solist(Y)
@@ -492,7 +492,8 @@ mppm <- local({
                      fmla=fmla,
                      FIT=FIT,
                      moadf=moadf,
-                     Vnamelist=Vnamelist
+                     Vnamelist=Vnamelist,
+                     Isoffsetlist=Isoffsetlist
                      ),
                    Inter =
                    list(

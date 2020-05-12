@@ -325,7 +325,7 @@
       \tabular{ll}{
 	\code{\link{plot.ppp}} \tab
 	plot a point pattern (e.g. \code{plot(X)}) \cr
-	\code{\link{iplot}} \tab
+	\code{spatstat.gui::iplot} \tab
 	plot a point pattern interactively \cr
 	\code{\link{edit.ppp}} \tab interactive text editor \cr
 	\code{\link{[.ppp}} \tab
@@ -590,7 +590,7 @@
       \code{\link{midpoints.psp}} \tab
       compute the midpoints of line segments \cr
       \code{\link{endpoints.psp}} \tab extract the endpoints of line segments \cr
-      \code{\link{lengths.psp}} \tab compute the lengths of line segments \cr
+      \code{\link{lengths_psp}} \tab compute the lengths of line segments \cr
       \code{\link{angles.psp}} \tab compute the orientation angles of line segments \cr
       \code{\link{superimpose}} \tab combine several line segment patterns  \cr
       \code{\link{flipxy}} \tab swap \eqn{x} and \eqn{y} coordinates \cr      
@@ -719,13 +719,19 @@
     \tabular{ll}{
       \code{\link{linnet}} \tab create a linear network \cr
       \code{\link{clickjoin}} \tab interactively join vertices in network \cr
-      \code{\link{iplot.linnet}} \tab interactively plot network \cr
+      \code{spatstat.gui::iplot.linnet} \tab interactively plot network \cr
       \code{\link[spatstat.data]{simplenet}} \tab simple example of network \cr
       \code{\link{lineardisc}} \tab disc in a linear network \cr
       \code{\link{delaunayNetwork}} \tab network of Delaunay triangulation \cr
       \code{\link{dirichletNetwork}} \tab network of Dirichlet edges \cr
       \code{\link{methods.linnet}} \tab methods for \code{linnet} objects\cr
-      \code{\link{vertices.linnet}} \tab nodes of network \cr 
+      \code{\link{vertices.linnet}} \tab nodes of network \cr
+      \code{\link{joinVertices}} \tab join existing vertices in a network \cr
+      \code{\link{insertVertices}} \tab insert new vertices at positions
+      along a network \cr
+      \code{\link{addVertices}} \tab add new vertices, extending a network \cr
+      \code{\link{thinNetwork}} \tab remove vertices or lines from a network \cr
+      \code{\link{repairNetwork}} \tab repair internal format \cr
       \code{\link{pixellate.linnet}} \tab approximate by pixel image
     }
     
@@ -803,7 +809,7 @@
     print basic description of point pattern \code{X}  \cr
     \code{any(duplicated(X))} \tab
     check for duplicated points in pattern \code{X} \cr
-    \code{\link{istat}(X)} \tab Interactive exploratory analysis \cr
+    \code{spatstat.gui::istat(X)} \tab Interactive exploratory analysis \cr
     \code{\link{View}(X)} \tab spreadsheet-style viewer
   }
 
@@ -1781,6 +1787,7 @@
   Ang Qi Wei,
   Ryan Arellano,
   Jens \ifelse{latex}{\out{{\AA}str{\" o}m}}{Astrom},
+  Robert Aue,
   Marcel Austenfeld,
   Sandro Azaele,
   Malissa Baddeley,
@@ -1839,7 +1846,7 @@
   C. Graf,
   Ute Hahn,
   Andrew Hardegen,
-  Martin \ifelse{latex}{\out{B{\o}gsted}}{Bogsted} Hansen,
+  Martin \Bogsted Hansen,
   Martin Hazelton,
   Juha Heikkinen,
   Mandy Hering,
@@ -1900,7 +1907,7 @@
   Linda Stougaard Nielsen,
   Felipe Nunes,
   Jens Randel Nyengaard,
-  Jens \ifelse{latex}{\out{Oehlschl\"{a}gel}}{Oehlschlaegel},
+  Jens \Oehlschlaegel,
   Thierry Onkelinx,
   Sean O'Riordan,
   Evgeni Parilov,
@@ -1922,10 +1929,11 @@
   Ted Rosenbaum,
   Barry Rowlingson,
   Jason Rudokas,
+  Tyler Rudolph,
   John Rudge,
   Christopher Ryan,
   Farzaneh Safavimanesh,
-  Aila \ifelse{latex}{\out{S\"{a}rkk\"{a}}}{Sarkka},
+  Aila \Sarkka,
   Cody Schank,
   Katja Schladitz,
   Sebastian Schutte,
@@ -1957,6 +1965,7 @@
   Mikko Vihtakari,
   Alexendre Villers,
   Fabrice Vinatier,
+  Maximilian Vogtland,
   Sasha Voss,
   Sven Wagner,
   Hao Wang,

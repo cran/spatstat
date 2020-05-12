@@ -1,7 +1,7 @@
 #
 # lpp.R
 #
-#  $Revision: 1.66 $   $Date: 2019/10/29 04:16:59 $
+#  $Revision: 1.69 $   $Date: 2020/03/18 06:05:22 $
 #
 # Class "lpp" of point patterns on linear networks
 
@@ -244,7 +244,7 @@ print.summary.lpp <- function(x, ...) {
 }
 
 intensity.lpp <- function(X, ...) {
-  len <- sum(lengths.psp(as.psp(as.linnet(X))))
+  len <- sum(lengths_psp(as.psp(as.linnet(X))))
   if(is.multitype(X)) table(marks(X))/len else npoints(X)/len
 }
 
@@ -288,6 +288,11 @@ as.lpp <- function(x=NULL, y=NULL, seg=NULL, tp=NULL, ...,
       L <- as.linnet(L, sparse=sparse)
     if(is.ppp(x) && nomore) {
       X <- lpp(x, L)
+    } else if(is.data.frame(x) && nomore) {
+      X <- do.call(as.lpp,
+                   resolve.defaults(as.list(x),
+                                    list(...),
+                                    list(marks=marks, L=L, check=check)))
     } else if(is.null(x) && is.null(y) && !is.null(seg) && !is.null(tp)){
       X <- lpp(data.frame(seg=seg, tp=tp), L=L)
     } else {
@@ -549,26 +554,6 @@ superimpose.lpp <- function(..., L=NULL) {
   Y <- lpp(locns, L)
   marks(Y) <- marx
   return(Y)
-}
-
-#
-# interactive plot for lpp objects
-#
-
-iplot.lpp <- function(x, ..., xname) {
-  if(missing(xname))
-    xname <- short.deparse(substitute(x))
-  stopifnot(is.lpp(x))
-  ## predigest
-  L <- domain(x)
-  v <- vertices(L)
-  deg <- vertexdegree(L)
-  dv <- textstring(v, txt=paste(deg))
-  y <- layered(lines=as.psp(L),
-               vertices=v,
-               degree=dv,
-               points=as.ppp(x))
-  iplot(y, ..., xname=xname, visible=c(TRUE, FALSE, FALSE, TRUE))
 }
 
 identify.lpp <- function(x, ...) {
