@@ -70,6 +70,7 @@ that are supplied with the current installation of \sdat:
 
 \newcommand{\recto}{\framebox{\hphantom{re}\vphantom{re}}}
 \newcommand{\irregpoly}{\includegraphics*[width=6mm]{irregpoly}}
+\newcommand{\masque}{\includegraphics*[width=6mm]{mask}}
 \newcommand{\convpoly}{\includegraphics*[width=4mm]{hexagon}}
 \newcommand{\disc}{$\bigcirc$}
 \newcommand{\nomarks}{$\cdot$}
@@ -102,6 +103,8 @@ that are supplied with the current installation of \sdat:
             cause, size, date & 
             \shortstack[c]{elevation, orientation,\\ slope, land use}  
             & \irregpoly \\
+{\tt concrete} & air bubbles in concrete & 
+             \nomarks & \nocov & \masque  \\
 {\tt copper} & copper deposits & 
              \nomarks & fault lines & \recto  \\
 {\tt demopat} & artificial data & 
@@ -151,7 +154,8 @@ that are supplied with the current installation of \sdat:
 \noindent
 The shape of the window containing the point pattern
 is indicated by the symbols \recto\ (rectangle), 
-\disc\ (disc), \convpoly\ (convex polygon) and \irregpoly\ (irregular polygon).
+\disc\ (disc), \convpoly\ (convex polygon), \irregpoly\ (irregular polygon)
+and \masque (binary mask).
 
 Additional information about the data set \texttt{\em name}
 may be stored in a separate list \texttt{{\em name}.extra}.
@@ -321,7 +325,10 @@ plot(bei.extra$elev, main="Beilschmiedia")
 plot(bei, add=TRUE, pch=16, cex=0.3)
 @ 
 
-<<fig=TRUE>>=
+The following command gives a perspective display
+similar to the front cover of Baddeley, Rubak and Turner (2015):
+
+<<eval=FALSE>>=
 M <- persp(bei.extra$elev, 
            theta=-45, phi=18, expand=7,
            border=NA, apron=TRUE, shade=0.3, 
@@ -346,7 +353,9 @@ plot(betacells)
 plot(bramblecanes, cols=1:3)
 @ 
 
-<<fig=TRUE>>=
+Try the following 
+
+<<eval=FALSE>>=
 plot(split(bramblecanes))
 @ 
 
@@ -429,8 +438,20 @@ named \texttt{elevation}, \texttt{orientation},
 \texttt{slope} and \texttt{landuse}. 
 
 <<fig=TRUE>>=
-plot(clmfires.extra$clmcov200, main="Covariates for forest fires")
+plot(clmfires.extra$clmcov100$elevation, main="Elevation")
 @ %$ 
+
+\subsubsection*{\texttt{concrete}: Air bubbles in concrete}
+
+Prof.\ Shin-ichi Igarashi's data:  a point pattern of the locations
+of centroids of air bubbles seen in a cross-section of concrete.
+Air bubbles are present in the matrix of cement paste
+which surrounds the particles of aggregate. The outline of the aggregate,
+and the locations of the centroids of the bubble profiles, are recorded.
+
+<<fig=TRUE>>=
+plot(concrete,chars="+",cols="blue",col="yellow")
+@ 
 
 \subsubsection*{\texttt{copper}: Queensland copper data}
 
@@ -551,6 +572,11 @@ A list with three entries, representing the same data at
 different spatial resolutions.
   
 <<fig=TRUE>>=
+plot(heather$coarse)
+@ 
+
+Type the following to see all three images:
+<<eval=FALSE>>=
 plot(heather)
 @ 
 
@@ -598,7 +624,10 @@ Includes duplicated points.
 plot(lansing)
 @ 
 
-<<fig=TRUE>>=
+Type the following to see 6 plots, each showing the location
+of one of the types of points:
+
+<<eval=FALSE>>=
 plot(split(lansing))
 @ 
 
@@ -632,10 +661,27 @@ A list of three elements:
 \item \texttt{greenstone}, the subregion of greenstone outcrop.
 \end{itemize}
 
+Type the following to see the full Murchison dataset:
+
 <<fig=TRUE>>=
 plot(murchison$greenstone, main="Murchison data", col="lightgreen")
 plot(murchison$gold, add=TRUE, pch=3, col="blue")
 plot(murchison$faults, add=TRUE, col="red")
+@ 
+
+Some analysis of the data uses a rectangle close to the abandoned town
+of Reedy:
+
+<<>>=
+reedy <- owin(c(580, 650), c(6986, 7026))
+@ 
+
+Here are the data in that area:
+
+<<fig=TRUE>>=
+plot(murchison$greenstone[reedy], main="Murchison data", col="lightgreen")
+plot(murchison$gold[reedy], add=TRUE, pch=3, col="blue")
+plot(murchison$faults[reedy], add=TRUE, col="red")
 @ 
 
 \subsubsection*{\texttt{nbfires}: New Brunswick Fires}
@@ -647,7 +693,10 @@ with marks giving information about each fire.
 plot(nbfires, use.marks=FALSE, pch=".")
 @ 
 
-<<fig=TRUE>>=
+The following command would show the data for each year
+in a separate panel:
+
+<<eval=FALSE>>=
 plot(split(nbfires), use.marks=FALSE, chars=".")
 @ 
 
@@ -680,7 +729,7 @@ and explanatory variables.
   
   
 <<fig=TRUE>>=
-plot(osteo[1:10,], main.panel="", pch=21, bg='white')
+plot(osteo[1:4,], main.panel="", pch=21, bg='white')
 @ 
 
 For demonstration and instruction purposes, the 
@@ -717,9 +766,13 @@ The subjects are divided into three groups:
 controls (12 subjects), schizoaffective (9  subjects)
 and schizophrenic (10 subjects).
 
+To reduce space, we show only the odd-numbered patterns:
+<<>>=
+pyr <- pyramidal[c(FALSE,TRUE), ]
+@ 
+
 <<fig=TRUE>>=
-pyr <- pyramidal
-pyr$grp <- abbreviate(pyramidal$group, minlength=7)
+pyr$grp <- abbreviate(pyr$group, minlength=7)
 plot(pyr, quote(plot(Neurons, pch=16, main=grp)), main="Pyramidal Neurons")
 @ 
 

@@ -47,24 +47,65 @@ getSizeTable <- function(packagename="spatstat", tablename="packagesizes.txt") {
   readSizeTable(fname)
 }
 counts <- c("nhelpfiles", "nobjects", "ndatasets", "Rlines", "srclines")
-mergeSizeTables <- function(a, b) {
+mergeSizeTables <- function(a, b, breakupdate) {
+  #' a is the running total for spatstat; b is a sub-package.
+  #' breakupdate is the date when the code in b was removed from spatstat
+  #' so that the size of 'b' must be added to 'a' for all dates >= breakupdate
   if(is.null(b)) return(a)
-  for(i in seq_len(nrow(a))) {
-    j <- which(b$date <= a$date[i])
-    if(length(j) > 0) 
-      a[i,counts] <- a[i,counts] + b[max(j), counts]
+  adates <- a$date
+  bdates <- b$date
+  alldates <- sort(unique(c(adates,bdates)))
+  if(missing(breakupdate)) breakupdate <- min(bdates)
+  #' functions to determine, for any given date,
+  #' the relevant (latest) row of the table
+  aok <- rev(!duplicated(rev(adates)))
+  arowfun <- approxfun(adates[aok], seq_along(adates)[aok], 
+                       method="constant", f=0, rule=2, yleft=0)
+  bok <- rev(!duplicated(rev(bdates)))
+  browfun <- approxfun(bdates[bok], seq_along(bdates)[bok], 
+                       method="constant", f=0, rule=2, yleft=0)
+  result <- NULL
+  for(k in seq_along(alldates)) {
+    thedate <- alldates[k]
+    i <- arowfun(thedate)
+    j <- browfun(thedate)
+    #' i > 0 because spatstat's founding date is earlier than any sub-package
+    nextrow <- a[i, ]
+    if(j > 0 && thedate >= breakupdate) {
+      #' add contribution from 'b'
+      nextrow[, counts] <- nextrow[, counts] + b[j, counts]
+    }
+    result <- rbind(result, nextrow)
   }
-  return(a)
+  return(result)
 }
 z <- getSizeTable()
+## handle the case where spatstat is the umbrella package
+isumb <- existsSpatstatVariable("Spatstat.Is.Umbrella") && 
+         isTRUE(getSpatstatVariable("Spatstat.Is.Umbrella"))
+if(isumb) {
+  Bday <- "2020-12-14"
+  zgeom <- getSizeTable("spatstat.geom")
+  z <- mergeSizeTables(z, zgeom, Bday)
+  zcore <- getSizeTable("spatstat.core")
+  z <- mergeSizeTables(z, zcore, Bday)
+  zlin <- getSizeTable("spatstat.linnet")
+  z <- mergeSizeTables(z, zlin, Bday)
+} 
+## sub-packages- access via the sub-package
 zutils <- getSizeTable("spatstat.utils")
 zdata <- getSizeTable("spatstat.data")
+zsparse <- getSizeTable("spatstat.sparse")
+z <- mergeSizeTables(z, zutils, "2017-03-22")
+z <- mergeSizeTables(z, zdata,  "2017-09-23")
+z <- mergeSizeTables(z, zsparse, "2020-11-04")
+## extension packages - use copy of package size file stored in spatstat
 zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 zgui <- getSizeTable("spatstat", "spatstatguisize.txt")
-z <- mergeSizeTables(z, zutils)
-z <- mergeSizeTables(z, zdata)
+zKnet <- getSizeTable("spatstat", "spatstatKnetsize.txt")
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
+z <- mergeSizeTables(z, zKnet)
 #
 currentcount <- z[nrow(z), counts]
 bookcount    <- z[z$version == "1.42-0", counts]
@@ -114,39 +155,74 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 \newpage
 
-\section{\pkg{spatstat} is splitting into parts}
+\section{\pkg{spatstat} has been split into parts}
 
-    \pkg{spatstat} is being split into sub-packages, to satisfy
-    the requirements of CRAN. This should not affect the user:
-    existing code will continue to work in the same way.
+The original \pkg{spatstat} package has been split into sub-packages, to satisfy
+the requirements of CRAN. 
 
-    Typing \code{library(spatstat)} will load the familiar
-    \pkg{spatstat} package which can be used as before.
+This should not affect the user:
+existing code will continue to work in the same way.
 
-    \subsection{The parts of \pkg{spatstat}}
-    
-    Currently there are three sub-packages, called 
+Typing \code{library(spatstat)} will load the familiar
+\pkg{spatstat} package which can be used as before.
+
+\subsection{The parts of \pkg{spatstat}}
+
+    Currently there are 
+    seven
+    sub-packages, called 
     \pkg{spatstat.utils},
-    \pkg{spatstat.data} 
+    \pkg{spatstat.data},
+    \pkg{spatstat.sparse},
+    \pkg{spatstat.geom},
+    \pkg{spatstat.core},
+    \pkg{spatstat.linnet},
     and \pkg{spatstat}.
 
     \begin{itemize}
     \item 
-      The \code{spatstat} package contains the main code.
+      The \code{spatstat} package now contains
+      only documentation and introductory material.
+      It provides beginner's introductions, vignettes, interactive demonstration
+      scripts, and a few help files summarising the package.
     \item 
       The \pkg{spatstat.data} package now contains all the datasets
       for \pkg{spatstat}.
     \item
       The \pkg{spatstat.utils} package
       contains utility functions for \pkg{spatstat}.
+    \item
+      The \pkg{spatstat.sparse} package
+      contains functions for manipulating sparse arrays
+      and performing linear algebra.
+    \item
+      The \pkg{spatstat.geom} package
+      contains definitions of spatial objects (such as point patterns, windows
+      and pixel images) and code which performs geometrical operations.
+    \item
+      The \pkg{spatstat.core} package
+      contains the main code for statistical analysis of spatial point patterns
+      and other spatial data.
+    \item
+      The \pkg{spatstat.linnet} package
+      defines spatial data on a linear network,
+      and performs geometrical operations 
+      and statistical analysis on such data.
     \end{itemize}
-    
-    Typing \code{library(spatstat)} 
-    will automatically load \pkg{spatstat.data}
-    and silently ``import'' \pkg{spatstat.utils}.
 
+    \noindent\textbf{Installing:}
+    If you install \pkg{spatstat}, then the system will install all the 
+    other sub-packages listed above.
+    
+    \noindent\textbf{Running:}
+    If you type \code{library(spatstat)} in an \textsf{R} session,
+    the system will automatically load 
+    \pkg{spatstat.data}, \pkg{spatstat.geom},
+    \pkg{spatstat.core} and \pkg{spatstat.linnet}.
+    It will also silently \textbf{``import''}
+    \pkg{spatstat.utils} and \pkg{spatstat.sparse}.
     To access the functions in \pkg{spatstat.utils} directly, you would need to
-    type \code{library(spatstat.utils)}. 
+    type \code{library(spatstat.utils)}. Similarly for \pkg{spatstat.sparse}.
 
     \subsection{Extension packages}
     
@@ -156,14 +232,15 @@ text(as.Date("2015-01-01"), 60, "R code")
     
     \begin{itemize}
     \item \pkg{spatstat.local} for local model-fitting, 
-    \item \pkg{spatstat.sphere} for analysing point patterns on a sphere,
-    \item \pkg{spatstat.Knet} for analysing point patterns
-      on a network.
+    \item \pkg{spatstat.Knet} provides additional code for
+      analysing point patterns on a network.
     \item \pkg{spatstat.gui} containing interactive graphics
-      functions.
+      functions,
+    \item \pkg{spatstat.sphere} for analysing point patterns on a sphere
+      (under development!)
     \end{itemize}
 
-\pagebreak
+%\pagebreak
 
 \section{Precis of all changes}
 
@@ -172,23 +249,47 @@ the News and Release Notes for each update.
 
 \begin{itemize}
 
+  \item the original \spst package has now been split into 7 sub-packages
+    (\pkg{spatstat.utils}, \pkg{spatstat.data}, \pkg{spatstat.sparse},
+    \pkg{spatstat.geom}, \pkg{spatstat.core}, \pkg{spatstat.linnet}
+    and \pkg{spatstat}).
+
   \item The interactive graphics functions \texttt{iplot} and \texttt{istat}
-    have been removed from \spst\ into a new package \pkg{spatstat.gui}.
+    have been removed from \spst\ into a new 
+    extension package \pkg{spatstat.gui}.
 
   \item The packages \pkg{tcltk} and \pkg{rpanel} are no longer 
     Suggested by \spst.
     
+  \item \spst\ now Imports the package \pkg{spatstat.sparse}.
+    
   \item \spst\ now Imports the package \pkg{spatstat.utils}.
 
   \item \spst\ now requires the package \pkg{spatstat.data} which contains the datasets.
-
+    
   \item \spst\ now suggests the package \pkg{fftwtools}.
 
+  \item Increased speed for large datasets.
+
+  \item Variance calculations handle larger datasets.
+
+  \item Important bug fix in simulation of log-Gaussian Cox processes.
+    
   \item Relative risk estimation on a network.
     
   \item Leave-one-out density estimation on a network.
     
   \item Add new vertices to a linear network.
+
+  \item More support for multi-dimensional patterns.
+
+  \item \texttt{predict.mppm} now works for multitype point process models.
+    
+  \item Improved handling of \texttt{newdata} in \texttt{predict.mppm}
+    
+  % \item New dataset \texttt{concrete}.
+    
+  \item Changed default value of \texttt{stringsAsFactors}.
     
    \item Function \texttt{lengths.psp} has been renamed \verb!lengths_psp!.
 
@@ -464,13 +565,15 @@ the News and Release Notes for each update.
    
 \section{New datasets}  
 
-The following datasets have been added to the package.
+The following new datasets have been added.
+These are now provided in the sub-package \pkg{spatstat.data}.
 
 \begin{itemize}
 \item \texttt{austates}: The states and large mainland territories of Australia
    represented as polygonal regions forming a tessellation.
  \item \texttt{redwood3}: a more accurate version of the \texttt{redwood} data.
  \item \texttt{cetaceans}: point patterns of whale and dolphin sightings.
+% \item \texttt{concrete}: air bubbles in concrete.
 \end{itemize}
 
 \section{New classes}
@@ -486,6 +589,18 @@ Following is a list of all the functions that have been added.
 
 \begin{itemize}
 
+   \item \texttt{intersect.boxx}:
+    Compute intersection of boxes in multi-dimensional space
+
+    \item \texttt{scale.boxx}, \texttt{scale.ppx}:
+    Methods for \texttt{scale} for boxes and patterns in multi-dimensional space
+
+    \item \texttt{shift.boxx}, \texttt{shift.ppx}:
+    Methods for \texttt{shift} for boxes and patterns in multi-dimensional space
+
+    \item \texttt{is.boxx}:
+    Determine whether an object is a multidimensional box
+    
   \item \texttt{relrisk.lpp}: 
     nonparametric estimation of relative risk on a network.
     
@@ -639,6 +754,7 @@ Following is a list of all the functions that have been added.
 
     \item \texttt{as.im.densityfun}:
     Convert \texttt{function(x,y)} to a pixel image.
+
 
     \item \texttt{measureDiscrete}, \texttt{measureContinuous}:
     Extract the discrete and continuous components of a measure.
@@ -1229,9 +1345,17 @@ listed alphabetically.
     the summary function for the simulated patterns, then instead
     of triggering a fatal error, the envelope limits will be set to \texttt{NA}.
 
-\item \texttt{anova.mppm}: Now handles Gibbs models,
+\item \texttt{anova.mppm}:
+  \begin{itemize}
+  \item 
+  Now handles Gibbs models,
   and performs the adjusted composite likelihood ratio test.
+  \item 
   New argument \texttt{fine}.
+  \item 
+    Issues a warning when applied to random-effects models
+    (models fitted using the argument \texttt{random}).
+  \end{itemize}
 
 \item \texttt{anyDuplicated.ppp}: Accelerated.
   
@@ -1247,6 +1371,11 @@ listed alphabetically.
     \begin{itemize}
     \item   New argument \texttt{strict}.
     \item   New argument \texttt{stringsAsFactors}.
+    \item 
+   The formal default value of \texttt{stringsAsFactors}
+   has been changed to \texttt{NULL}
+   to conform to changes in R. (The actual default value is \texttt{TRUE}
+   for \texttt{R < 4.1.0} and \texttt{FALSE} for \texttt{R >= 4.1.0}).
     \end{itemize}
 
 
@@ -1346,6 +1475,9 @@ listed alphabetically.
  \item \texttt{beachcolourmap}:
    Improved positioning of the yellow colour band.
    
+  \item \texttt{bilinearform}: This function has been moved
+    to the sub-package \texttt{spatstat.sparse}.
+    
  \item \texttt{bind.fv}:
    New argument \texttt{clip}.
 
@@ -1400,8 +1532,12 @@ listed alphabetically.
 %%C
     
   \item \texttt{cbind.hyperframe}:
+    \begin{itemize}
+    \item 
     The result now retains the \texttt{row.names}
     of the original arguments.
+  \item 
+    \end{itemize}
     
  \item \texttt{cdf.test}:
    \begin{itemize}
@@ -1538,7 +1674,12 @@ listed alphabetically.
  \item \texttt{default.rmhcontrol, default.rmhexpand}:
    New argument \texttt{w}.
 
-   
+ \item \texttt{densityHeat}: 
+   \begin{itemize}
+   \item    default behaviour has changed slightly.
+   \item new argument \texttt{finespacing}.
+   \end{itemize}
+
  \item \texttt{density.lpp}:
    \begin{itemize}
    \item
@@ -1546,6 +1687,7 @@ listed alphabetically.
     where \texttt{kernel="gaussian"} and \texttt{continuous=TRUE}.
     Generously contributed by Greg McSwiggan.
   \item Fast algorithm has been further accelerated.
+  \item Further accelerated when the point pattern contains duplicated points.
    \item 
      New argument \texttt{kernel} specifies the smoothing kernel.
      Any of the standard one-dimensional smoothing kernels can be used.
@@ -1619,6 +1761,10 @@ listed alphabetically.
     Improved geometrical accuracy.
     Now accepts arguments to control resolution of polygonal approximation.
 
+    
+  \item \texttt{dirichletEdges}:
+    New argument \texttt{clip}.
+    
  \item \texttt{discs}:
    \begin{itemize}
    \item     Now accepts a single numeric value for \texttt{radii}.
@@ -1750,6 +1896,10 @@ listed alphabetically.
 
 %%G
     
+ \item \texttt{Gcross}: 
+   Function labels (shown on the plot legend) have been improved when 
+   \texttt{i = j}.
+   
   \item \texttt{Geyer}:
    The saturation parameter \texttt{sat} can now be less than 1.
    
@@ -1767,6 +1917,11 @@ listed alphabetically.
      New argument \texttt{fraction}.
 %%H
    
+     
+   \item \texttt{harmonise.im}:
+     The result belongs to classes \texttt{solist} and \texttt{imlist}
+     so that it can be plotted.
+     
  \item \texttt{Hest}:
    \begin{itemize}
    \item Argument \texttt{X} can now be a pixel image with logical values.
@@ -1775,6 +1930,16 @@ listed alphabetically.
    \end{itemize}
    
  \item \texttt{hist.im}: New argument \texttt{xname}.
+   
+ 
+ \item \texttt{hyperframe}: 
+   \begin{itemize}
+   \item 
+   The formal default value of \texttt{stringsAsFactors}
+   has been changed to \texttt{NULL}
+   to conform to changes in R. (The actual default value is \texttt{TRUE}
+   for \texttt{R < 4.1.0} and \texttt{FALSE} for \texttt{R >= 4.1.0}).
+   \end{itemize}
    
 %%I
  \item \texttt{identify.psp}: Improved placement of labels.
@@ -1798,6 +1963,9 @@ listed alphabetically.
     For Gibbs models, memory usage has been dramatically reduced, 
     so the code can handle larger datasets and finer quadrature schemes.
 
+ \item \texttt{integral.im}:
+   Accelerated in the case where \texttt{domain} is a tessellation.
+   
  \item \texttt{integral.linfun}:
    \begin{itemize}
    \item    New argument \texttt{delta} controls step length of
@@ -1845,6 +2013,10 @@ listed alphabetically.
     
 %%J
 
+ \item \texttt{Jcross}: 
+   Function labels (shown on the plot legend) have been improved when 
+   \texttt{i = j}.
+   
  \item \texttt{Jfox}: new argument \texttt{warn.trim}.
    
  \item \texttt{Jinhom}:
@@ -1859,6 +2031,10 @@ listed alphabetically.
    
 %%K
 
+ \item \texttt{Kcross}: 
+   Function labels (shown on the plot legend) have been improved when 
+   \texttt{i = j}.
+   
  \item \texttt{Kcross.inhom}, \texttt{Kdot.inhom}, \texttt{Kmulti.inhom}:
    \begin{itemize}
    \item 
@@ -1924,6 +2100,8 @@ listed alphabetically.
     with the same names in the list \texttt{ctrl}.
     \item
     Improved printed output.
+    \item
+    Improved numerical robustness.
   \end{itemize}
   
 %%L
@@ -2030,9 +2208,12 @@ listed alphabetically.
     \item Tessellations can now have marks. New argument \texttt{marks}.
     \end{itemize}
   
+  \item \texttt{localpcf}:
+    New argument \texttt{rvalue}.
+    
   \item \texttt{localpcfinhom}:
     \begin{itemize}
-    \item New arguments \texttt{update} and \texttt{leaveoneout}.
+    \item New arguments \texttt{update}, \texttt{leaveoneout}, \texttt{rvalue}.
     \end{itemize}
     
   \item \texttt{logLik.ppm}:
@@ -2112,7 +2293,13 @@ listed alphabetically.
 
  \item \texttt{markvario}:
    Accepts the argument \texttt{weights} which is passed to \texttt{markcorr}.
+
    
+ \item \texttt{mincontrast}:
+   New argument \texttt{action.bad.values} specifies what action is taken
+    when the summary function produces \texttt{NA} or \texttt{NaN}
+    or infinite values.
+    
  \item \texttt{minnndist}, \texttt{maxnndist}:
    New  argument \texttt{by} makes it possible to find the minimum or maximum
    nearest neighbour distance between each pair of possible types
@@ -2410,6 +2597,10 @@ listed alphabetically.
     \item New argument \texttt{style}.
     \item New argument \texttt{col} gives control over the colour map
       representing the values of marks attached to the segments.
+    \item The code for \texttt{style="width"} has been completely rewritten,
+    so that it no longer depends on \texttt{plot.linim}, 
+    and is much more efficient.
+  \item The formal argument list has been extended.
     \end{itemize}
 
   \item \texttt{plot.pp3}:
@@ -2530,8 +2721,13 @@ listed alphabetically.
     Argument \texttt{locations} can now be an \texttt{lpp} object.
 
   \item \texttt{predict.mppm}:
+    \begin{itemize}
+    \item 
     The argument \texttt{type="all"} is now recognised: it selects
     all the available options. [This is also the default.]
+  \item Now supports multitype point process models.
+  \item Improved handling of argument \texttt{newdata}.
+    \end{itemize}
 
   \item \texttt{predict.ppm}:
     \begin{itemize}
@@ -2570,7 +2766,11 @@ listed alphabetically.
     \end{itemize}
 
 %%Q
-   
+
+    
+  \item \texttt{quadform}: This function has been moved
+    to the sub-package \texttt{spatstat.sparse}.
+    
  \item \texttt{quadratcount.ppp}:
    Computation accelerated in some cases.
 
@@ -2653,6 +2853,10 @@ listed alphabetically.
 
    \item \texttt{rlabel}: 
      \begin{itemize}
+     \item New argument \texttt{group} specifies that the points are 
+       divided into several groups, and that relabelling is applied
+       within each group.
+       
      \item New arguments \texttt{nsim} and \texttt{drop}.
      \item 
        \texttt{X} can now be a point pattern of any type
@@ -2660,6 +2864,10 @@ listed alphabetically.
        \texttt{ppx}) or a line segment pattern (\texttt{psp}).
      \end{itemize}
 
+     \item \texttt{rlabel.ppp}:
+       New argument \texttt{group} specifies that the points are divided into
+       several groups, and that relabelling is applied within each group.
+     
      \item \texttt{rLGCP}:
        \begin{itemize}
        \item Accelerated.
@@ -2720,6 +2928,8 @@ listed alphabetically.
    \item    New argument \texttt{padzero}. 
    \item Default behaviour has changed.
    \item Improved algorithm stability.
+   \item The result now has the same \texttt{unitname} as the input object.
+   \item New argument \texttt{adjust} controls the smoothing bandwidth.
    \end{itemize}
 
    \item \texttt{rpoispp}:
@@ -2737,6 +2947,9 @@ listed alphabetically.
 
    \item \texttt{rshift.ppp}, \texttt{rshift.splitppp}: 
      new argument \texttt{nsim}.
+     
+     
+   \item \texttt{rSSI}: Accelerated.
      
  \item \texttt{rStrauss, rHardcore, rStraussHard, rDiggleGratton, rDGS, rPenttinen:}
    New argument \texttt{drop}.
@@ -2779,6 +2992,12 @@ listed alphabetically.
         \item No longer checks for validity of the resulting segments.
         \end{itemize}
         
+      \item \texttt{sessionInfo}: 
+        Output now includes a list of packages that are imported but not loaded.
+        
+      \item \texttt{sessionLibs}: 
+        Package names are now sorted alphabetically
+        
   \item \texttt{setcov}: the name of the unit of length is preserved.
 
    \item \code{shapley}:
@@ -2808,8 +3027,15 @@ listed alphabetically.
 
    
    \item \texttt{simulate.ppm}:
+     \begin{itemize}
+     \item 
    New argument \texttt{w} controls the window of the simulated patterns.
+     \item 
    New argument \texttt{verbose}.
+     \item 
+       Now recognises the argument \texttt{window} as an alternative to 
+       \texttt{w}.
+     \end{itemize}
    
  \item \texttt{Smooth.ppp}:
    \begin{itemize}
@@ -2913,7 +3139,12 @@ listed alphabetically.
     is now reported.
 
   \item \texttt{sumouter}:
-    New argument \texttt{y} allows computation of asymmetric outer products.
+    \begin{itemize}
+    \item New argument \texttt{y} allows computation of asymmetric outer products.
+    \item This function has now been moved to the 
+      sub-package \texttt{spatstat.sparse}
+    \end{itemize}
+
   
   \item \texttt{symbolmap}:
     \begin{itemize}
@@ -2985,6 +3216,8 @@ listed alphabetically.
      \begin{itemize}
      \item 
      Performance slightly improved, for Gibbs models.
+   \item Variance calculations now handle larger datasets
+     because they use sparse arrays, by default.
    \item New argument \texttt{nacoef.action} specifies what to do if
      some of the fitted model coefficients are \texttt{NA}, \texttt{NaN}
      or infinite.
@@ -3029,7 +3262,10 @@ listed alphabetically.
    \end{itemize}
 
  \item \verb![.linim!:
-    More robust against artefacts.
+   \begin{itemize}
+   \item More robust against artefacts.
+  \item Accelerated.
+   \end{itemize}
     
  \item \verb![.lpp!:
     New argument \texttt{snip} determines what to do with segments 
@@ -3037,8 +3273,13 @@ listed alphabetically.
     Default behaviour has changed.
 
 \item \verb![.ppx!:
+  \begin{itemize}
+  \item 
   The subset index \texttt{i} may now be a spatial domain
   of class \texttt{boxx} or \texttt{box3}.
+  \item 
+    New argument \texttt{clip}.
+  \end{itemize}
 
    \item \verb![.ppp!
    New argument \texttt{clip} determines whether the window is clipped.
