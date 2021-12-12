@@ -1,6 +1,6 @@
 Package: spatstat
-Version: 2.2-0
-Date: 2021-06-23
+Version: 2.3-0
+Date: 2021-12-12
 Title: Spatial Point Pattern Analysis, Model-Fitting, Simulation, Tests
 Authors@R: c(person("Adrian", "Baddeley", 
                     role = c("aut", "cre"),
@@ -13,7 +13,7 @@ Authors@R: c(person("Adrian", "Baddeley",
 		    email = "rubak@math.aau.dk"))
 Maintainer: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>
 Depends: R (>= 3.5.0), spatstat.data (>= 2.1-0), spatstat.geom (>=
-        2.2-0), spatstat.core (>= 2.2-0), spatstat.linnet (>= 2.2-0),
+        2.3-0), spatstat.core (>= 2.3-0), spatstat.linnet (>= 2.3-0),
         utils
 Imports: spatstat.utils (>= 2.2-0)
 Suggests:
@@ -29,9 +29,9 @@ URL: http://spatstat.org/
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat/issues
-Packaged: 2021-06-23 06:43:23 UTC; adrian
+Packaged: 2021-12-12 09:58:04 UTC; adrian
 Author: Adrian Baddeley [aut, cre],
   Rolf Turner [aut],
   Ege Rubak [aut]
 Repository: CRAN
-Date/Publication: 2021-06-23 07:40:02 UTC
+Date/Publication: 2021-12-12 10:40:02 UTC
