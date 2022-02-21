@@ -12,7 +12,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:38-125
+### code chunk number 2: updates.Rnw:38-127
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -70,6 +70,7 @@ mergeSizeTables <- function(a, b, breakupdate, allow.devel=FALSE) {
 z <- getSizeTable()
 ## sub-packages- access via the sub-package
 zgeom <- getSizeTable("spatstat.geom")
+zrandom <- getSizeTable("spatstat.random")
 zcore <- getSizeTable("spatstat.core")
 zlin <- getSizeTable("spatstat.linnet")
 zutils <- getSizeTable("spatstat.utils")
@@ -84,6 +85,7 @@ z <- mergeSizeTables(z, zlin, Bday)
 z <- mergeSizeTables(z, zutils, "2017-03-22")
 z <- mergeSizeTables(z, zdata,  "2017-09-23")
 z <- mergeSizeTables(z, zsparse, "2020-11-04")
+z <- mergeSizeTables(z, zrandom, "2022-02-12")
 ## extension packages - use copy of package size file stored in spatstat
 zlocal <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 zgui <- getSizeTable("spatstat", "spatstatguisize.txt")
@@ -104,7 +106,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:137-142
+### code chunk number 3: updates.Rnw:139-144
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -114,7 +116,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:148-153
+### code chunk number 4: updates.Rnw:150-155
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -125,7 +127,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:170-188
+### code chunk number 5: updates.Rnw:172-191
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -137,6 +139,7 @@ AppendVersion <- function(pkg, sizetable, v, allow.devel=FALSE) {
   rbind(v, data.frame(package=pkg, version=lastrow[,"version"], date=as.Date(lastrow[,"date"])))
 }
 vtable <- AppendVersion("spatstat.geom", zgeom, vtable)
+vtable <- AppendVersion("spatstat.random", zrandom, vtable)
 vtable <- AppendVersion("spatstat.core", zcore, vtable)
 vtable <- AppendVersion("spatstat.linnet", zlin, vtable)
 vtable <- AppendVersion("spatstat.sparse", zsparse, vtable)
@@ -148,7 +151,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:194-195
+### code chunk number 6: updates.Rnw:197-198
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 
