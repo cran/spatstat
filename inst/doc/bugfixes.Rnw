@@ -38,10 +38,8 @@ This vignette lists all \emph{important} bugs detected and fixed in the
 all recorded bugs in the \spst\ famil of packages.
 
 <<echo=FALSE,results=hide>>=
-nbugs <- nrow(news(grepl("^BUG", Category), 
-                   package="spatstat"))
-nbugssince <- nrow(news(Version > "1.42-0" & grepl("^BUG", Category), 
-                   package="spatstat"))
+nbugs      <- nrow(bugfixes("all",  show=FALSE))
+nbugssince <- nrow(bugfixes("book", show=FALSE))
 @ 
 
 \tableofcontents
@@ -84,7 +82,8 @@ book \cite{baddrubaturn15}.
 
 Recently \spst\ was divided into a family of sub-packages.
 The command \texttt{bugfixes} now covers the bug history in 
-all of these sub-packages. See the help for \texttt{bugfixes} for further details.
+all of these sub-packages. See the help for \texttt{bugfixes} 
+for further details.
 
 <<echo=FALSE,results=hide>>=
 getstuff <- function(pkg) {
@@ -100,7 +99,8 @@ vtable <- do.call(rbind,
                            "spatstat.sparse",
                            "spatstat.geom",
                            "spatstat.random",
-                           "spatstat.core",
+                           "spatstat.explore",
+                           "spatstat.model",
                            "spatstat.linnet",
                            "spatstat"),
                          getstuff))
@@ -122,7 +122,7 @@ in decreasing order of potential impact.
 A bug is classified as ``serious'' if it produced incorrect results
 without the user's knowledge.
 
-Bugs which cause an error exit are not listed here, because '
+Bugs which cause an error exit are not listed here, because 
 the presence of a bug is obvious, and the bug would not have misled the user.
 
 \newcommand\bugger[4]{%  
@@ -255,6 +255,11 @@ the presence of a bug is obvious, and the bug would not have misled the user.
  \subsection{Serious Bugs, Often Completely Wrong, Moderate Impact}
 
  \begin{itemize}
+ \item \texttt{matrixsqrt}, \texttt{matrixinvsqrt}, \texttt{matrixpower}
+    If the result was a complex-valued matrix, the values were completely 
+    incorrect.
+    \bugin{spatstat 1.48-0}{december 2016}{spatstat.sparse 2.1-1}{february 2021}
+    
   \item \texttt{rLGCP}, \texttt{simulate.kppm}:
     Simulation results for log-Gaussian Cox processes were incorrect
     unless the pixel dimensions and pixel spacings were identical
@@ -396,6 +401,11 @@ the presence of a bug is obvious, and the bug would not have misled the user.
     and the function values were categorical (factor) values,
     the result was an empty image.
     \bugger{1.42-0}{may 2015}{1.57-0}{october 2018}
+
+  \item \texttt{density.lpp}:
+    If \texttt{weights} were given, the results were completely incorrect
+    if \texttt{leaveoneout=TRUE} (the default) and \texttt{at="points"}.
+    \bugin{spatstat 1.51-0}{may 2017}{spatstat.linnet 3.0-0}{june 2022}
     
   \end{itemize}
   
@@ -422,12 +432,12 @@ the presence of a bug is obvious, and the bug would not have misled the user.
  \item \texttt{vcov.mppm}:
     For Gibbs (non-Poisson) models, the variance matrix was
     calculated incorrectly in some cases. 
-   \bugger{1.45-1}{may 2016}{spatstat.core 2.4-1}{may 2022}   
+   \bugin{spatstat 1.45-1}{may 2016}{spatstat.core 2.4-1}{may 2022}   
 
  \item \texttt{vcov.mppm}:
     Results were sometimes incorrect if the two models
     had different interactions (e.g. Strauss vs Poisson).
-   \bugger{1.45-1}{may 2016}{spatstat.core 2.4-1}{may 2022}   
+   \bugin{spatstat 1.45-1}{may 2016}{spatstat.core 2.4-1}{may 2022}   
 
  \item \texttt{distmap.owin}:
    If the window was a binary mask, the distance values were
@@ -587,12 +597,40 @@ the presence of a bug is obvious, and the bug would not have misled the user.
    \item \verb!as.im.data.frame!:
      Results were incorrect for factor-valued data.
     \bugger{1.45-2}{may 2016}{1.63-0}{january 2020}
+
+  \item \texttt{predict.ppm}:
+   Argument \texttt{new.coef} was ignored in calculating the standard error
+   when \texttt{se=TRUE}.
+   \bugin{spatstat 1.29-0}{october 2012}{spatstat.model 3.0-0}{june 2022}
+
+ \item \texttt{predict.ppm}:
+   Argument \texttt{new.coef} was ignored in calculating the standard error
+   (and therefore the width of the interval) when \texttt{type="count"} and
+   (\texttt{interval="confidence"} or \texttt{interval="prediction"}).
+   \bugin{spatstat 1.29-0}{october 2012}{spatstat.model 3.0-0}{june 2022}
+
  \end{itemize}   
 
  %% LEVEL 4: 
  \subsection{Partially Incorrect}
  \begin{itemize}
    
+  \item \texttt{rhohat.lpp}:
+    The argument \texttt{subset} was not handled correctly in the internal data.
+    The estimated function \texttt{rho} was correct, but if
+    \texttt{predict.rhohat} was applied,
+    predictions were computed only in the \texttt{subset}, 
+    and were possibly incorrect values.
+    \bugbefore{spatstat 1.65-0}{december 2020}{spatstat.linnet 3.0-0}{june 2022}
+
+  \item \texttt{rhohat.ppp}:
+    The argument \texttt{subset} was not handled correctly in the internal data.
+    The estimated function \texttt{rho} was correct, but if
+    \texttt{predict.rhohat} was applied,
+    predictions were computed only in the \texttt{subset}, 
+    and were possibly incorrect values.
+    \bugbefore{spatstat 1.65-0}{december 2020}{spatstat.explore 3.0-0}{june 2022}
+
  \item \texttt{density.lpp}:
    The result had the wrong length if \texttt{x} contained duplicated points
     when \texttt{weights} were given and \texttt{at="points"}.
