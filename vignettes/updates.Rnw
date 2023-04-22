@@ -2,13 +2,10 @@
 \usepackage{graphicx}
 \usepackage{Sweave}
 \usepackage{bm}
-\usepackage{anysize}
-
-\marginsize{2cm}{2cm}{2cm}{2cm}
 
 % \VignetteIndexEntry{Summary of Recent Updates to the Spatstat Family}
 
-% $Revision: 1.61 $ $Date: 2023/01/27 21:41:45 $
+% $Revision: 1.65 $ $Date: 2023/04/22 03:23:30 $
 
 \newcommand{\pkg}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
@@ -91,7 +88,7 @@ mergeSizeTables <- function(a, b, breakupdate, allow.devel=FALSE) {
 ## Get histories of all sub-packages
 ## Package formerly known as 'spatstat'
 z <- getSizeTable() 
-## installed sub-packages - access via the sub-package
+## installed sub-packages - access via the installed sub-packages
 zutils   <- getSizeTable("spatstat.utils")
 zdata    <- getSizeTable("spatstat.data")
 zsparse  <- getSizeTable("spatstat.sparse")
@@ -100,9 +97,10 @@ zrandom  <- getSizeTable("spatstat.random")
 zexplore <- getSizeTable("spatstat.explore")
 zmodel   <- getSizeTable("spatstat.model")
 zlinnet  <- getSizeTable("spatstat.linnet")
-## defunct package core - use copy of package size file stored in spatstat
+## other sub-packages - access via stored copies of package size files
+##       defunct package spatstat.core 
 zcore    <- getSizeTable("spatstat", "spatstatcoresize.txt")
-## extension packages - use copy of package size file stored in spatstat
+##       extension packages 
 zlocal   <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 zgui     <- getSizeTable("spatstat", "spatstatguisize.txt")
 zKnet    <- getSizeTable("spatstat", "spatstatKnetsize.txt")
@@ -118,7 +116,7 @@ z <- mergeSizeTables(z, zrandom, "2022-02-12")
 CoreSplitDay <- "2020-05-25"   # size of 'core' drops to 0 on this date
 z <- mergeSizeTables(z, zexplore, CoreSplitDay)
 z <- mergeSizeTables(z, zmodel,   CoreSplitDay)
-## extension packages never overlapped
+## extension packages: these never overlapped spatstat
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
 z <- mergeSizeTables(z, zKnet)
@@ -308,16 +306,44 @@ the News and Release Notes for each update.
 \begin{itemize}
   
   
-\item The package \texttt{spatstat.core} has been split into two packages called
-    \texttt{spatstat.explore} (for exploratory data analysis)
-    and \texttt{spatstat.model} (for modelling and formal inference).
+%% \item The package \texttt{spatstat.core} has been split into two packages called
+%%    \texttt{spatstat.explore} (for exploratory data analysis)
+%%    and \texttt{spatstat.model} (for modelling and formal inference).
 
-  \item The original \spst\ package has now been split into 9 sub-packages
-    (\pkg{spatstat.utils}, \pkg{spatstat.data}, \pkg{spatstat.sparse},
-    \pkg{spatstat.geom}, \pkg{spatstat.random},
-    \pkg{spatstat.explore}, \pkg{spatstat.model}, \pkg{spatstat.linnet}
-    and \pkg{spatstat}).
+%%   \item The original \spst\ package has now been split into 9 sub-packages
+%%     (\pkg{spatstat.utils}, \pkg{spatstat.data}, \pkg{spatstat.sparse},
+%%     \pkg{spatstat.geom}, \pkg{spatstat.random},
+%%     \pkg{spatstat.explore}, \pkg{spatstat.model}, \pkg{spatstat.linnet}
+%%     and \pkg{spatstat}).
 
+  \item Standard errors are now available for \texttt{ppm} models
+    fitted using \texttt{gam}.
+    
+  \item \texttt{linearKinhom} and \texttt{linearpcfinhom} 
+    now automatically estimate the intensity.
+
+  \item \texttt{density.lpp} accepts bandwidth selection rules,
+    and has a simple default bandwidth.
+  
+  \item Pair correlation functions allow more control over smoothing parameters.
+    
+  \item Extension to support for one-dimensional smoothing kernels.
+    
+  \item Improvements to \texttt{update} methods for point process models.
+
+  \item New \texttt{update} methods for classes \texttt{dppm} and \texttt{rppm}.
+    
+  \item Generate truncated Poisson random variables.
+
+  \item reciprocal moment of Poisson variable conditioned to be positive.
+    
+  \item Methods for \verb![[! and \verb![[<-! for hyperframes.
+
+  \item Colour map for \textsf{pH} values.
+
+  \item Restrict a colour map to a narrower range of values.
+
+  \item Integral of a one-dimensional density estimate.
     
   \item \texttt{kppm} has been accelerated when 
     \texttt{method="palm"} or \texttt{"clik2"}.
@@ -773,7 +799,29 @@ Following is a list of all the functions that have been added,
 starting with the most recent additions.
 
 \begin{itemize}
+
+\item \texttt{update.dppm}:
+    Update method for determinantal point process models.
+    
+\item \texttt{update.rppm}:
+      Update method for recursively partitioned point process models.
   
+
+    \item \verb![[.hyperframe!, \verb![[<-.hyperframe!:
+    Methods for \verb![[! and \verb![[<-! for hyperframes.
+
+    \item \texttt{pHcolourmap}, \texttt{pHcolour}:
+    Colour map for values of pH
+
+    \item \texttt{restrict.colourmap}:
+    Restrict a colourmap to a narrower range of values.
+
+    \item \texttt{integral.density}:
+    Compute the integral of a one-dimensional kernel density estimate.
+
+    \item \texttt{as.colourmap}:
+    Extract colour information from an object.
+    
 \item \texttt{panysib}:
   Probability that a point in a cluster process has \emph{any} siblings.
 
@@ -792,6 +840,9 @@ Generate Poisson random variables conditioned to be positive.
   Generate `truncated' Poisson random variables,
   conditioned to be greater than or equal to a specified minimum value.
 
+  \item \texttt{recipEnzpois}:
+        Calculate the first reciprocal moment of nonzero Poisson variable.
+        
 \item \texttt{rclusterBKBC}:
   (Advanced use) Internal algorithm to simulate any Neyman-Scott cluster
   process using either the naive, Brix-Kendall, or Baddeley-Chang algorithm.
@@ -1827,6 +1878,8 @@ listed alphabetically.
    
  \item \texttt{bw.abram}:
    \begin{itemize}
+   \item
+     This function is now generic, with a method for class \texttt{ppp}.
    \item 
      New argument \texttt{smoother} determines 
      how the pilot estimate is computed.
@@ -2054,6 +2107,14 @@ listed alphabetically.
 
  \item \texttt{density.lpp}:
    \begin{itemize}
+   \item 
+    Argument \texttt{sigma} can now be a function in the R language,
+    assumed to provide a bandwidth selection rule. This function
+    will be applied to the point pattern \texttt{x} to compute the bandwidth.
+  \item 
+    Argument \texttt{sigma=NULL} 
+    is now accepted. The default value is one-eighth
+    of the length of the shortest side of the bounding box of \texttt{x}.
    \item
     New fast algorithm (up to 1000 times faster) for the default case
     where \texttt{kernel="gaussian"} and \texttt{continuous=TRUE}.
@@ -2090,6 +2151,10 @@ listed alphabetically.
      Accelerated in the cases where weights are given or \texttt{diggle=TRUE}.
    \item New argument \texttt{verbose}.
    \end{itemize}
+   
+   
+ \item \texttt{densityQuick.lpp}:
+   Argument \texttt{X} changed to \texttt{x} for consistency.
 
  \item \texttt{density.psp}:
    \begin{itemize}
@@ -2208,6 +2273,8 @@ listed alphabetically.
     Now works for \texttt{ppm}, \texttt{kppm}, 
     \texttt{lppm}, \texttt{dppm}, \texttt{rppm} and \texttt{profilepl} objects.
     \item New argument \texttt{nvalues}.
+    \item Standard error calculation (\texttt{se.fit=TRUE}) now works 
+      for models fitted with \texttt{use.gam=TRUE}.
     \end{itemize}
     
  \item \texttt{envelope}:
@@ -2512,7 +2579,16 @@ listed alphabetically.
 \item \texttt{Kmulti}:
   Now accepts the option \texttt{correction="periodic"}
   to compute the periodic (toroidal) edge correction estimate.
-    
+
+\item \texttt{kernel.moment}:
+  \begin{itemize}
+  \item    New arguments \texttt{mean} and \texttt{sd}.
+  \item Computation accelerated for \texttt{kernel='cosine'} or 
+    \texttt{'optcosine'}.
+  \item All cases are now computed using analytic expressions, for 
+    \texttt{m=0,1,2}.
+  \end{itemize}
+
  \item \texttt{kppm}:
    \begin{itemize}
    \item 
@@ -2630,17 +2706,47 @@ listed alphabetically.
      \item new argument \texttt{ratio}.
      \end{itemize}
      
+     
+   \item \texttt{linearKEuclidInhom}, \texttt{linearpcfEuclidInhom}:
+     Argument \texttt{lambda=NULL}
+     is now interpreted to mean that the intensity
+     should be estimated by kernel smoothing. A warning is issued that this
+     is different from the previous behaviour.
+     
  \item \texttt{linearKinhom}:
    new argument \texttt{normpower}.
    
+ \item \texttt{linearKdot.inhom}, \texttt{linearpcfdot.inhom}
+   Argument \texttt{lambdaI=NULL} or \texttt{lambdadot=NULL} 
+   is now interpreted to mean
+   that the intensity should be estimated by kernel smoothing.
+   
+ \item \texttt{linearKcross.inhom}, \texttt{linearpcfcross.inhom}
+   Argument \texttt{lambdaI=NULL} or \texttt{lambdaJ=NULL} 
+   is now interpreted to mean
+   that the intensity should be estimated by kernel smoothing.
+   
  \item \texttt{linearKinhom}, \texttt{linearpcfinhom}:
    \begin{itemize}
+   \item Argument \texttt{lambda=NULL}
+     is now interpreted to mean that the intensity
+     should be estimated by kernel smoothing. A warning is issued that this
+     is different from the previous behaviour.
    \item Changed behaviour when \texttt{lambda} is a fitted model.
    \item New arguments \texttt{update} and \texttt{leaveoneout}.
    \end{itemize}
    
  \item \texttt{linearpcf}:
    new argument \texttt{normpower}.
+
+ \item \texttt{linearpcfinhom}:
+   New arguments \texttt{adjust.sigma}, \texttt{bw} and \texttt{adjust.bw}.
+
+ \item \texttt{linearpcfcross.inhom}, \texttt{linearpcfdot.inhom}:
+   New arguments \texttt{adjust.sigma}, \texttt{bw} and \texttt{adjust.bw}.
+
+ \item \texttt{linearpcfEuclidInhom}:
+   New arguments \texttt{adjust.sigma}, \texttt{bw} and \texttt{adjust.bw}.
 
 
  \item \texttt{linim}:
@@ -2920,10 +3026,17 @@ listed alphabetically.
    \item Now accepts \texttt{correction="none"}.
    \end{itemize}
 
+ \item \texttt{pcfcross.inhom}, \texttt{pcfdor.inhom}:
+   New arguments \texttt{adjust.sigma} and \texttt{adjust.bw} allow
+   separate adjustment of the one-dimensional smoothing bandwidth \texttt{bw}
+    and the spatial smoothing bandwidth \texttt{sigma}.
 
-   
  \item \texttt{pcfinhom}:
    \begin{itemize}
+   \item  
+     New arguments \texttt{adjust.sigma} and \texttt{adjust.bw} allow
+    separate adjustment of the one-dimensional smoothing bandwidth \texttt{bw}
+    and the spatial smoothing bandwidth \texttt{sigma}.
    \item
 	New argument \code{close} for advanced use.
    \item 
@@ -3064,7 +3177,10 @@ listed alphabetically.
      \end{itemize}
 
    \item \texttt{plot.mppm}:
-   New argument \texttt{se}.
+     \begin{itemize}
+     \item New argument \texttt{main}.
+     \item New argument \texttt{se}.
+     \end{itemize}
    
    \item \texttt{plot.msr}:
      \begin{itemize}
@@ -3159,6 +3275,8 @@ listed alphabetically.
       
     \item \texttt{plot.symbolmap}:
       \begin{itemize}
+      \item New argument \texttt{colour.only} makes
+        it possible to display only the colour map information in a symbol map.
       \item New argument \texttt{warn}.
       \item Issues a warning if the plot of a discrete symbol map does not
         represent every possible input value, due to space restrictions.
@@ -3252,6 +3370,8 @@ listed alphabetically.
       resolution of the grid of prediction points.
     \item New argument \code{ignore.hardcore}.
     \item Accelerated for models fitted with \texttt{method="VBlogi"}
+    \item Standard error calculation (\texttt{se=TRUE}) now works 
+      for models fitted with \texttt{use.gam=TRUE}.
     \end{itemize}
 
   \item \texttt{predict.rhohat}:    
@@ -3266,6 +3386,9 @@ listed alphabetically.
   \item \texttt{print.linim}: More information is printed.
 
   \item \texttt{print.lintess}: Output includes information about marks.
+
+  \item \texttt{print.lppm}: The name of the original point pattern dataset 
+    (to which the model was fitted) is now printed.
     
   \item \texttt{print.quad}: More information is printed.
 
@@ -3539,6 +3662,12 @@ listed alphabetically.
        New argument \texttt{saveparents}.
      \end{itemize}
 
+     
+   \item \texttt{runiflpp}, \texttt{rpoislpp}:
+     The simulation parameters can be determined from an example
+    point pattern, given as the argument \texttt{ex}.
+    
+
    \item \texttt{runifpointOnLines}, \texttt{rpoisppOnLines}:
    	New argument \code{drop}.
      
@@ -3715,6 +3844,9 @@ listed alphabetically.
    \item \texttt{summary.lintess}:
      prints information about marks.
      
+  \item \texttt{summary.lppm}: The name of the original point pattern dataset 
+    (to which the model was fitted) is now printed.
+    
    \item \texttt{summary.mppm}:
      Improved summary of the dependence of the
     interpoint interaction on the covariates.
@@ -3772,6 +3904,7 @@ listed alphabetically.
      \begin{itemize}
      \item Argument \texttt{weights} may have length 1.
      \item New argument \texttt{defaults}.
+     \item Computation accelerated.
      \end{itemize}
 
      
@@ -3828,6 +3961,9 @@ listed alphabetically.
 %%Y
 %%Z
    
+ \item \verb![<-.hyperframe!:
+   Improved error message when the format of the index is not supported.
+     
  \item \verb![<-.im!
    \begin{itemize}
    \item 
@@ -3880,12 +4016,14 @@ listed alphabetically.
     New argument \texttt{clip}.
   \end{itemize}
 
-   \item \verb![.ppp!
-   New argument \texttt{clip} determines whether the window is clipped.
-
-   \item \verb![.ppp!
-   The previously-unused argument \texttt{drop} now determines whether 
-   to remove unused levels of a factor.
+   \item \verb![.ppp!:
+     \begin{itemize}
+     \item 
+       New argument \texttt{clip} determines whether the window is clipped.
+     \item 
+       The previously-unused argument \texttt{drop} now determines whether 
+       to remove unused levels of a factor.
+     \end{itemize}
 
    \item \verb![.pp3!, \verb![.lpp!, \verb![.ppx!, 
      \texttt{subset.ppp, subset.pp3, subset.lpp, subset.ppx}:

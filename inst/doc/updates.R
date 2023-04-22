@@ -1,7 +1,7 @@
 ### R code from vignette source 'updates.Rnw'
 
 ###################################################
-### code chunk number 1: updates.Rnw:22-28
+### code chunk number 1: updates.Rnw:19-25
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
@@ -12,7 +12,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:38-134
+### code chunk number 2: updates.Rnw:35-132
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -69,7 +69,7 @@ mergeSizeTables <- function(a, b, breakupdate, allow.devel=FALSE) {
 ## Get histories of all sub-packages
 ## Package formerly known as 'spatstat'
 z <- getSizeTable() 
-## installed sub-packages - access via the sub-package
+## installed sub-packages - access via the installed sub-packages
 zutils   <- getSizeTable("spatstat.utils")
 zdata    <- getSizeTable("spatstat.data")
 zsparse  <- getSizeTable("spatstat.sparse")
@@ -78,9 +78,10 @@ zrandom  <- getSizeTable("spatstat.random")
 zexplore <- getSizeTable("spatstat.explore")
 zmodel   <- getSizeTable("spatstat.model")
 zlinnet  <- getSizeTable("spatstat.linnet")
-## defunct package core - use copy of package size file stored in spatstat
+## other sub-packages - access via stored copies of package size files
+##       defunct package spatstat.core 
 zcore    <- getSizeTable("spatstat", "spatstatcoresize.txt")
-## extension packages - use copy of package size file stored in spatstat
+##       extension packages 
 zlocal   <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 zgui     <- getSizeTable("spatstat", "spatstatguisize.txt")
 zKnet    <- getSizeTable("spatstat", "spatstatKnetsize.txt")
@@ -96,7 +97,7 @@ z <- mergeSizeTables(z, zrandom, "2022-02-12")
 CoreSplitDay <- "2020-05-25"   # size of 'core' drops to 0 on this date
 z <- mergeSizeTables(z, zexplore, CoreSplitDay)
 z <- mergeSizeTables(z, zmodel,   CoreSplitDay)
-## extension packages never overlapped
+## extension packages: these never overlapped spatstat
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
 z <- mergeSizeTables(z, zKnet)
@@ -113,7 +114,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:146-151
+### code chunk number 3: updates.Rnw:144-149
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -123,7 +124,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:157-162
+### code chunk number 4: updates.Rnw:155-160
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -134,7 +135,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:179-200
+### code chunk number 5: updates.Rnw:177-198
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -160,7 +161,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:206-207
+### code chunk number 6: updates.Rnw:204-205
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 

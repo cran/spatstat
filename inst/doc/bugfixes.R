@@ -1,7 +1,7 @@
 ### R code from vignette source 'bugfixes.Rnw'
 
 ###################################################
-### code chunk number 1: bugfixes.Rnw:20-26
+### code chunk number 1: bugfixes.Rnw:17-23
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
@@ -12,44 +12,44 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: bugfixes.Rnw:40-42
+### code chunk number 2: bugfixes.Rnw:37-39
 ###################################################
 nbugs      <- nrow(bugfixes("all",  show=FALSE))
 nbugssince <- nrow(bugfixes("book", show=FALSE))
 
 
 ###################################################
-### code chunk number 3: bugfixes.Rnw:58-59 (eval = FALSE)
+### code chunk number 3: bugfixes.Rnw:55-56 (eval = FALSE)
 ###################################################
 ## bugfixes
 
 
 ###################################################
-### code chunk number 4: bugfixes.Rnw:63-64 (eval = FALSE)
+### code chunk number 4: bugfixes.Rnw:60-61 (eval = FALSE)
 ###################################################
 ## bugfixes(sinceversion="1.50-0")
 
 
 ###################################################
-### code chunk number 5: bugfixes.Rnw:68-69 (eval = FALSE)
+### code chunk number 5: bugfixes.Rnw:65-66 (eval = FALSE)
 ###################################################
 ## bugfixes(sincedate="2017-06-30")
 
 
 ###################################################
-### code chunk number 6: bugfixes.Rnw:72-73 (eval = FALSE)
+### code chunk number 6: bugfixes.Rnw:69-70 (eval = FALSE)
 ###################################################
 ## bugfixes("book")
 
 
 ###################################################
-### code chunk number 7: bugfixes.Rnw:76-77 (eval = FALSE)
+### code chunk number 7: bugfixes.Rnw:73-74 (eval = FALSE)
 ###################################################
 ## bugfixes("all")
 
 
 ###################################################
-### code chunk number 8: bugfixes.Rnw:88-106
+### code chunk number 8: bugfixes.Rnw:85-103
 ###################################################
 getstuff <- function(pkg) {
   x <- read.dcf(file=system.file("DESCRIPTION", package=pkg),
@@ -72,7 +72,7 @@ vtable <- do.call(rbind,
 
 
 ###################################################
-### code chunk number 9: bugfixes.Rnw:112-113
+### code chunk number 9: bugfixes.Rnw:109-110
 ###################################################
 print(vtable, row.names=FALSE)
 

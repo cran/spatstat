@@ -1,4 +1,21 @@
 
+        CHANGES IN spatstat VERSION 3.0-5
+
+OVERVIEW
+
+    o Package documentation repaired (latex package issues).
+    
+
+        CHANGES IN spatstat VERSION 3.0-4
+
+OVERVIEW
+
+    o Package version information updated.
+
+    o Minor omissions corrected in vignettes.
+
+    o Package documentation corrected and updated.
+
         CHANGES IN spatstat VERSION 3.0-3
 
 OVERVIEW
