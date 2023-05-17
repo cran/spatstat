@@ -1,7 +1,7 @@
 ### R code from vignette source 'updates.Rnw'
 
 ###################################################
-### code chunk number 1: updates.Rnw:19-25
+### code chunk number 1: updates.Rnw:20-26
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
@@ -12,7 +12,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:35-132
+### code chunk number 2: updates.Rnw:36-133
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -114,7 +114,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:144-149
+### code chunk number 3: updates.Rnw:145-150
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -124,7 +124,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:155-160
+### code chunk number 4: updates.Rnw:156-161
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -135,7 +135,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:177-198
+### code chunk number 5: updates.Rnw:178-199
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -161,7 +161,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:204-205
+### code chunk number 6: updates.Rnw:205-206
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 
