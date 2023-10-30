@@ -6,7 +6,7 @@
 
 % \VignetteIndexEntry{Summary of Recent Updates to the Spatstat Family}
 
-% $Revision: 1.67 $ $Date: 2023/05/17 01:10:53 $
+% $Revision: 1.68 $ $Date: 2023/10/21 09:22:40 $
 
 \newcommand{\pkg}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
@@ -306,7 +306,21 @@ the News and Release Notes for each update.
 
 \begin{itemize}
   
-  
+
+  \item The \spst\ family no longer depends on the packages 
+    \pkg{maptools}, \pkg{sp} and \pkg{RandomFields}.
+
+  \item code for fitting and simulating log-Gaussian Cox models has changed.
+
+  \item New vignette on function objects (class \texttt{"fv"} and 
+    \texttt{"envelope"})
+
+   \item Vignette on shapefiles temporarily removed.
+
+  \item Integration of functions.
+    
+  \item \texttt{clarkevans.test} modified.
+    
 %% \item The package \texttt{spatstat.core} has been split into two packages called
 %%    \texttt{spatstat.explore} (for exploratory data analysis)
 %%    and \texttt{spatstat.model} (for modelling and formal inference).
@@ -318,6 +332,18 @@ the News and Release Notes for each update.
 %%     and \pkg{spatstat}).
 
   
+\item Improvements to \texttt{envelope} methods.
+  
+\item Conditional simulation for Matern cluster process.
+
+\item Improvements to \texttt{runifpoint} and \texttt{rpoispp}.  
+  
+\item Extension of distance transform algorithm.
+
+\item Improvement to progress reports.
+    
+\item Suppress annoying warnings.
+ 
 \item Changed the calculation of standard errors in \texttt{density.ppp}
   and \texttt{relrisk.ppp}.
 
@@ -814,6 +840,13 @@ Following is a list of all the functions that have been added,
 starting with the most recent additions.
 
 \begin{itemize}
+\item \texttt{integral.fv}:
+  Compute the integral of a function object.
+  
+\item \texttt{compileCDF}:
+      Low level utility for calculating cumulative distribution function
+    of distance variable. 
+
 \item \texttt{Math.fv}, \texttt{Complex.fv}, \texttt{Summary.fv}, \texttt{Ops.fv}:
     Methods for arithmetic operations for function tables (class \texttt{"fv"})
 \item \texttt{Math.fasp}, \texttt{Complex.fasp}, \texttt{Summary.fasp}, \texttt{Ops.fasp}:
@@ -1797,6 +1830,9 @@ listed alphabetically.
   \item \texttt{as.im.distfun}:
   New argument \texttt{approx} specifies the choice of algorithm.
 
+  \item \texttt{as.im.tess}:
+  New argument \texttt{values}.
+
   \item \texttt{as.im.function}:
     \begin{itemize}
     \item   New argument \texttt{strict}.
@@ -2018,11 +2054,26 @@ listed alphabetically.
    \item     Now handles Gibbs models.
    \item     Now recognises \texttt{covariate="x"} or \texttt{"y"}.
    \end{itemize}
+   
+ \item \texttt{circdensity}:
+   Improved output of \texttt{print} method.
     
  \item \texttt{clarkevans}:
     The argument \texttt{correction="all"} is now recognised: it selects
     all the available options. [This is also the default.]
 
+ \item \texttt{clarkevans.test}:
+   \begin{itemize}
+   \item 
+    The asymptotic test is now available for any choice of edge correction.
+  \item 
+    New argument \texttt{method} determines whether to use the asymptotic test
+    or Monte Carlo test. The default has changed to
+    \texttt{method="asymptotic"}.
+  \item 
+    Default edge correction has changed, to avoid bias.
+  \end{itemize}
+  
   \item \texttt{clickpoly}:
     The polygon is now drawn progressively as the user clicks new vertices.
 
@@ -2313,11 +2364,15 @@ listed alphabetically.
 
     
  \item \texttt{distmap.owin}:
+   \begin{itemize}
+   \item New argument \texttt{connect}.
+   \item 
     Behaviour has been altered so that, when \texttt{X} is a binary mask, the results of
     \texttt{distmap(X, invert=TRUE)} and \texttt{distmap(complement.owin(X))} are identical.
     This affects a few pixels close to the edge of the frame.
-   
- \item \texttt{distmap.ppp}:
+  \end{itemize}
+
+\item \texttt{distmap.ppp}:
    New argument \texttt{clip}.
 
  \item \texttt{distmap.psp}:
@@ -2355,6 +2410,10 @@ listed alphabetically.
     
  \item \texttt{envelope}:
    \begin{itemize}
+   \item 
+     All methods for \texttt{envelope} now accept a summary function 
+    in which the function argument is not named \texttt{r}.
+    This includes functions such as \texttt{transect.im} and \texttt{roc}.
    \item 
      New argument \texttt{clamp} gives greater control
      over one-sided envelopes.
@@ -2670,6 +2729,13 @@ listed alphabetically.
  \item \texttt{kppm}:
    \begin{itemize}
    \item 
+     The code for fitting log-Gaussian Cox process models 
+     (\texttt{clusters="LGCP"})
+    has been re-implemented without using the package \pkg{RandomFields}.
+    The current code supports the \texttt{"exponential"}, 
+    \texttt{"gauss"}, \texttt{"stable"},
+    \texttt{"gencauchy"} and \texttt{"matern"} covariance models.
+   \item 
     Computation accelerated when \texttt{method="palm"} or 
     \texttt{method="clik2"}.
     [Kindly contributed by Bethany Macdonald.]
@@ -2772,6 +2838,15 @@ listed alphabetically.
   \item  Virtually all models and edge corrections are now supported,
     using a ``brute force'' algorithm. This can be slow in some cases.
    \end{itemize}
+   
+  \item \texttt{lgcp.estK}, \texttt{lgcp.estpcf}:
+    This code for fitting log-Gaussian Cox process models 
+    has been re-implemented without using the package \pkg{RandomFields}.
+    The current code supports the \texttt{"exponential"}, 
+    \texttt{"gauss"}, \texttt{"stable"},
+    \texttt{"gencauchy"} and \texttt{"matern"} covariance models.
+
+   
 
  \item \texttt{lineardisc}:
    \begin{itemize}
@@ -2922,6 +2997,7 @@ listed alphabetically.
 
  \item \texttt{lppm}:
    \begin{itemize}
+   \item Covariates can be objects of class \texttt{lintess}.
    \item New argument \texttt{random} controls placement of dummy points.
    \item    Computation accelerated.
    \end{itemize}
@@ -3169,6 +3245,10 @@ listed alphabetically.
    \item  Result is now an (invisible) list containing the result
     from executing the plot of each panel.
    \end{itemize}
+   
+   
+ \item \texttt{plot.bermantest}:
+   Improved layout for plots of Berman's \texttt{Z2} test.
 
  \item \texttt{plot.colourmap}:
    \begin{itemize}
@@ -3181,7 +3261,9 @@ listed alphabetically.
     when \texttt{vertical=FALSE}.
    \end{itemize}
 
-
+ \item \texttt{plot.fv}:
+   New argument \texttt{clip.xlim}.
+   
  \item \texttt{plot.im}:
    \begin{itemize}
    \item New argument \texttt{addcontour} specifies that contour lines should be drawn
@@ -3489,6 +3571,8 @@ listed alphabetically.
     
   \item \texttt{progressreport}
     \begin{itemize}
+    \item  The estimated time of completion is also printed, 
+      if the remaining time is longer than 10 minutes.
     \item Behaviour improved. 
     \item New arguments \texttt{state}, \texttt{tick}, \texttt{showtime}.
     \item New option: \verb!style="tk"!
@@ -3657,10 +3741,15 @@ listed alphabetically.
      
      \item \texttt{rLGCP}:
        \begin{itemize}
-       \item Accelerated.
        \item 
-         This function no longer requires the package \pkg{RandomFields}
-         to be loaded explicitly. 
+         This function has been completely re-implemented
+         so that it no longer requires the package \pkg{RandomFields},
+         which is defunct (and sadly missed). 
+       \item 
+         The current implementation supports only the 
+         \texttt{"exponential"}, \texttt{"gauss"},
+         \texttt{"stable"}, \texttt{"gencauchy"} and 
+         \texttt{"matern"} covariance functions.
        \item 
          Now recognises argument \texttt{rule.eps} passed to \texttt{as.mask}.
        \end{itemize}
@@ -3671,6 +3760,13 @@ listed alphabetically.
     three dimensions and higher dimensions, when the argument
     \texttt{win} is of class \texttt{box3} or \texttt{boxx}.
 
+   \item \texttt{rMatClust}: 
+     \begin{itemize}
+     \item Can now perform conditional simulation given a
+       fixed number of points.
+     \item New arguments \texttt{n.cond} and \texttt{w.cond}.
+     \end{itemize}
+     
   \item \texttt{rmh}:
     \begin{itemize}
     \item 
@@ -3834,18 +3930,23 @@ listed alphabetically.
 
    \item \texttt{simulate.kppm}:
      \begin{itemize}
-       \item Conditional simulation of the model, 
-         given a fixed number of points,
-         is now supported using the new arguments \texttt{n.cond}
-         and \texttt{w.cond}.
-     \item Accelerated for LGCP models.
+     \item
+       For log-Gaussian Cox process models (\texttt{clusters="LGCP"})
+       the simulation algorithm has been completely re-implemented
+       without using the package \pkg{RandomFields}.
+       The current code supports the \texttt{"exponential"}, 
+       \texttt{"gauss"}, \texttt{"stable"},
+       \texttt{"gencauchy"} and \texttt{"matern"} covariance models.
+     \item Conditional simulation of the model, 
+       given a fixed number of points,
+       is now supported using the new arguments \texttt{n.cond}
+       and \texttt{w.cond}.
      \item 
      Additional arguments \verb!...! are now passed to
     the function that performs the simulation.
      \end{itemize}
 
-   
-   \item \texttt{simulate.ppm}:
+      \item \texttt{simulate.ppm}:
      \begin{itemize}
      \item 
    New argument \texttt{w} controls the window of the simulated patterns.
@@ -4026,6 +4127,8 @@ listed alphabetically.
 
    \item \texttt{unnormdensity}:
      \begin{itemize}
+     \item Suppress annoying warning messages from \texttt{density.default}.
+           This affects many functions in the \spst\ family of packages.
      \item Argument \texttt{weights} may have length 1.
      \item New argument \texttt{defaults}.
      \item Computation accelerated.

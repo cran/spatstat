@@ -1,4 +1,27 @@
 
+        CHANGES IN spatstat VERSION 3.0-7
+
+OVERVIEW
+
+    o New vignette on function objects (class 'fv' and 'envelope')
+
+    o Vignette on shapefiles temporarily removed.
+    
+    o Updated cross-references to sub-packages.
+
+    o Minor changes to package information.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Vignette 'fv'
+    New vignette which explains how to manipulate and plot
+    objects of class 'fv' and 'envelope'.
+
+    o Vignette 'shapefiles'
+    This vignette has been temporarily removed because of its dependence
+    on the defunct packages 'sp' and 'maptools'. It will be rewritten
+    and reinstated soon.
+    
         CHANGES IN spatstat VERSION 3.0-6
 
 OVERVIEW
