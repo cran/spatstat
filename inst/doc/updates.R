@@ -12,7 +12,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:36-133
+### code chunk number 2: updates.Rnw:36-140
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -21,8 +21,13 @@ readSizeTable <- function(fname) {
   return(a)
 }
 getSizeTable <- function(packagename="spatstat", tablename="packagesizes.txt") {
-  fname <- system.file("doc", tablename, package=packagename)
-  readSizeTable(fname)
+  fname <- system.file("info", tablename, package=packagename)
+  out <- readSizeTable(fname)
+  if(is.null(out)) {
+    fname <- system.file("doc", tablename, package=packagename)
+    out <- readSizeTable(fname)
+  }
+  return(out)
 }
 RemoveDevel <- function(sizetable) {
   ## remove entries with fractional version numbers
@@ -72,6 +77,7 @@ z <- getSizeTable()
 ## installed sub-packages - access via the installed sub-packages
 zutils   <- getSizeTable("spatstat.utils")
 zdata    <- getSizeTable("spatstat.data")
+zunivar  <- getSizeTable("spatstat.univar")
 zsparse  <- getSizeTable("spatstat.sparse")
 zgeom    <- getSizeTable("spatstat.geom")
 zrandom  <- getSizeTable("spatstat.random")
@@ -97,6 +103,7 @@ z <- mergeSizeTables(z, zrandom, "2022-02-12")
 CoreSplitDay <- "2020-05-25"   # size of 'core' drops to 0 on this date
 z <- mergeSizeTables(z, zexplore, CoreSplitDay)
 z <- mergeSizeTables(z, zmodel,   CoreSplitDay)
+z <- mergeSizeTables(z, zunivar,  "2024-04-21")
 ## extension packages: these never overlapped spatstat
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
@@ -114,7 +121,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:145-150
+### code chunk number 3: updates.Rnw:152-157
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z) {
@@ -124,7 +131,7 @@ Plot <- function(fmla, ..., dat=z) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:156-161
+### code chunk number 4: updates.Rnw:163-168
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -135,7 +142,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:178-199
+### code chunk number 5: updates.Rnw:185-207
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -154,6 +161,7 @@ vtable <- AppendVersion("spatstat.model", zmodel, vtable)
 vtable <- AppendVersion("spatstat.linnet", zlinnet, vtable)
 vtable <- AppendVersion("spatstat.sparse", zsparse, vtable)
 vtable <- AppendVersion("spatstat.data", zdata, vtable)
+vtable <- AppendVersion("spatstat.univar", zunivar, vtable)
 vtable <- AppendVersion("spatstat.utils", zutils, vtable)
 vtable <- AppendVersion("spatstat.local", zlocal, vtable)
 vtable <- AppendVersion("spatstat.Knet", zKnet, vtable)
@@ -161,7 +169,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:205-206
+### code chunk number 6: updates.Rnw:213-214
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 

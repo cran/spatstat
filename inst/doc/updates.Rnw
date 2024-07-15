@@ -6,7 +6,7 @@
 
 % \VignetteIndexEntry{Summary of Recent Updates to the Spatstat Family}
 
-% $Revision: 1.71 $ $Date: 2024/02/28 07:22:30 $
+% $Revision: 1.73 $ $Date: 2024/06/17 09:33:36 $
 
 \newcommand{\pkg}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
@@ -41,8 +41,13 @@ readSizeTable <- function(fname) {
   return(a)
 }
 getSizeTable <- function(packagename="spatstat", tablename="packagesizes.txt") {
-  fname <- system.file("doc", tablename, package=packagename)
-  readSizeTable(fname)
+  fname <- system.file("info", tablename, package=packagename)
+  out <- readSizeTable(fname)
+  if(is.null(out)) {
+    fname <- system.file("doc", tablename, package=packagename)
+    out <- readSizeTable(fname)
+  }
+  return(out)
 }
 RemoveDevel <- function(sizetable) {
   ## remove entries with fractional version numbers
@@ -92,6 +97,7 @@ z <- getSizeTable()
 ## installed sub-packages - access via the installed sub-packages
 zutils   <- getSizeTable("spatstat.utils")
 zdata    <- getSizeTable("spatstat.data")
+zunivar  <- getSizeTable("spatstat.univar")
 zsparse  <- getSizeTable("spatstat.sparse")
 zgeom    <- getSizeTable("spatstat.geom")
 zrandom  <- getSizeTable("spatstat.random")
@@ -117,6 +123,7 @@ z <- mergeSizeTables(z, zrandom, "2022-02-12")
 CoreSplitDay <- "2020-05-25"   # size of 'core' drops to 0 on this date
 z <- mergeSizeTables(z, zexplore, CoreSplitDay)
 z <- mergeSizeTables(z, zmodel,   CoreSplitDay)
+z <- mergeSizeTables(z, zunivar,  "2024-04-21")
 ## extension packages: these never overlapped spatstat
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
@@ -193,6 +200,7 @@ vtable <- AppendVersion("spatstat.model", zmodel, vtable)
 vtable <- AppendVersion("spatstat.linnet", zlinnet, vtable)
 vtable <- AppendVersion("spatstat.sparse", zsparse, vtable)
 vtable <- AppendVersion("spatstat.data", zdata, vtable)
+vtable <- AppendVersion("spatstat.univar", zunivar, vtable)
 vtable <- AppendVersion("spatstat.utils", zutils, vtable)
 vtable <- AppendVersion("spatstat.local", zlocal, vtable)
 vtable <- AppendVersion("spatstat.Knet", zKnet, vtable)
@@ -219,10 +227,11 @@ Typing \code{library(spatstat)} will load the familiar
 
 \subsection{Sub-packages}
 
-    Currently there are nine
+    Currently there are ten
     sub-packages, called 
     \pkg{spatstat.utils},
     \pkg{spatstat.data},
+    \pkg{spatstat.univar},
     \pkg{spatstat.sparse},
     \pkg{spatstat.geom},
     \pkg{spatstat.random},
@@ -242,7 +251,11 @@ Typing \code{library(spatstat)} will load the familiar
       for \pkg{spatstat}.
     \item
       The \pkg{spatstat.utils} package
-      contains utility functions for \pkg{spatstat}.
+      contains basic utility functions for \pkg{spatstat}.
+    \item
+      The \pkg{spatstat.univar} package
+      contains functions for estimating and manipulating
+      probability distributions of one-dimensional random variables.
     \item
       The \pkg{spatstat.sparse} package
       contains functions for manipulating sparse arrays
@@ -274,7 +287,7 @@ Typing \code{library(spatstat)} will load the familiar
     \noindent\textbf{Running:}
     If you type \code{library(spatstat)} in an \textsf{R} session,
     the system will automatically load 
-    \pkg{spatstat.data}, \pkg{spatstat.geom}, \pkg{spatstat.random},
+    \pkg{spatstat.data}, \pkg{spatstat.univar}, \pkg{spatstat.geom}, \pkg{spatstat.random},
     \pkg{spatstat.explore}, \pkg{spatstat.model} and \pkg{spatstat.linnet}.
     It will also silently \textbf{``import''}
     \pkg{spatstat.utils} and \pkg{spatstat.sparse}.
@@ -305,7 +318,19 @@ Here is the text from the `overview' sections of
 the News and Release Notes for each update. 
 
 \begin{itemize}
-  
+
+  \item New package \pkg{spatstat.univar}.
+
+  \item Some functions from \pkg{spatstat.geom}, \pkg{spatstat.random}
+    and \pkg{spatstat.explore} have been moved to \pkg{spatstat.univar}.
+    
+  \item packages \pkg{spatstat.geom}, \pkg{spatstat.random}
+    and \pkg{spatstat.explore} now depend on \pkg{spatstat.univar}.
+    
+  \item Digits in the decimal representation of a number.
+
+  \item Easier control over quadrature schemes.
+
   \item Some geometry code accelerated.
   
   \item Corrected format of \texttt{gorillas} dataset.
@@ -330,17 +355,6 @@ the News and Release Notes for each update.
     
   \item \texttt{clarkevans.test} modified.
     
-%% \item The package \texttt{spatstat.core} has been split into two packages called
-%%    \texttt{spatstat.explore} (for exploratory data analysis)
-%%    and \texttt{spatstat.model} (for modelling and formal inference).
-
-%%   \item The original \spst\ package has now been split into 9 sub-packages
-%%     (\pkg{spatstat.utils}, \pkg{spatstat.data}, \pkg{spatstat.sparse},
-%%     \pkg{spatstat.geom}, \pkg{spatstat.random},
-%%     \pkg{spatstat.explore}, \pkg{spatstat.model}, \pkg{spatstat.linnet}
-%%     and \pkg{spatstat}).
-
-  
 \item Improvements to \texttt{envelope} methods.
   
 \item Conditional simulation for Matern cluster process.
@@ -849,7 +863,16 @@ Following is a list of all the functions that have been added,
 starting with the most recent additions.
 
 \begin{itemize}
+  
+\item \texttt{firstdigit}, \texttt{lastdigit}, \texttt{ndigits}:
+  digits in the decimal representation of a number.
+  
+\item \texttt{bw.abram.default}: Abramson adaptive bandwidths.
+  Default method for \texttt{bw.abram}, applicable to numerical vectors.
 
+\item \texttt{default.symbolmap.ppp}:  
+  Algorithm for determining the graphical symbol map used by \texttt{plot.ppp}.
+  
 \item \texttt{summary.symbolmap}:
   Method for \texttt{summary} for symbol maps.
   
@@ -1981,7 +2004,11 @@ listed alphabetically.
     to the sub-package \texttt{spatstat.sparse}.
     
  \item \texttt{bind.fv}:
-   New argument \texttt{clip}.
+   \begin{itemize}
+   \item Additional arguments may be functions in the R language.
+   \item New argument \texttt{clip}.
+   \end{itemize}
+
 
  \item \texttt{blur}:
    New argument \texttt{kernel}.
@@ -1990,6 +2017,8 @@ listed alphabetically.
    \begin{itemize}
    \item
      This function is now generic, with a method for class \texttt{ppp}.
+   \item 
+     Default method added.
    \item 
      New argument \texttt{smoother} determines 
      how the pilot estimate is computed.
@@ -2053,6 +2082,11 @@ listed alphabetically.
     
 %%C
     
+ \item \texttt{cbind.fv}:
+   \begin{itemize}
+   \item Additional arguments may be functions in the R language.
+   \end{itemize}
+
   \item \texttt{cbind.hyperframe}:
     \begin{itemize}
     \item 
@@ -2514,7 +2548,18 @@ listed alphabetically.
    \item New argument \code{ignore.hardcore}.
    \end{itemize}
 
-  \item \texttt{funxy}:
+ \item \texttt{fitted.slrm}:
+   \begin{itemize}
+   \item   New argument \texttt{type} allows calculation of fitted
+     probabilities, intensities or link function values.
+   \item 
+      New arguments \texttt{dataonly} and \texttt{leaveoneout}
+      allow calculation of fitted
+      values at the data points only, 
+      using leave-one-out calculation if desired.
+   \end{itemize}
+ 
+ \item \texttt{funxy}:
     \begin{itemize}
     \item 
     When the user calls a function that was created by \texttt{funxy},
@@ -2577,10 +2622,19 @@ listed alphabetically.
    \end{itemize}
    
 %%I
- \item \texttt{identify.psp}: Improved placement of labels.
-   Arguments can be passed to \texttt{text.default}
-   to control the plotting of labels.
+ \item \texttt{identify.ppp}: 
+   Automatically starts a new plot device if none is open.
 
+   \item \texttt{identify.psp}: 
+   \begin{itemize}
+   \item Identified segments are highlighted.
+   \item Automatically starts a new plot device if none is open.
+   \item 
+     Improved placement of labels.
+   \item 
+     Arguments can be passed to \texttt{text.default}
+     to control the plotting of labels.
+   \end{itemize}
    
  \item \texttt{idw}: Standard errors can now be calculated by
    setting \texttt{se=TRUE}.
@@ -2822,6 +2876,10 @@ listed alphabetically.
   Now prints news documentation for the current major version, by default.
   New argument \texttt{major}.
 
+  \item \texttt{layout.boxes}: Argument \code{aspect} can be 
+    \code{NA} or \code{Inf} indicating that the aspect ratio
+    of the boxes is unconstrained.
+    
 \item \texttt{Lcross}:
   Now accepts  the option \texttt{correction="periodic"}
   to compute the periodic (toroidal) edge correction estimate.
@@ -3303,6 +3361,12 @@ listed alphabetically.
   \item 
     Changed default behaviour for discrete colour maps 
     when \texttt{vertical=FALSE}.
+  \item 
+    New argument \texttt{nticks} controls the number of axis tick marks
+    when the colourmap is defined on a continuous range of numerical values.
+  \item 
+    New argument \texttt{box} controls whether a box will be drawn
+    around the colours.
    \end{itemize}
 
  \item \texttt{plot.fv}:
@@ -3375,6 +3439,12 @@ listed alphabetically.
      bounding box; default is \texttt{FALSE} in all cases.
    \end{itemize}
 
+ 
+ \item \texttt{plot.linnet}:
+   \begin{itemize}
+   \item New argument \texttt{adj.main}.
+   \end{itemize}
+   
  \item \texttt{plot.lintess}:
    \begin{itemize}
    \item Improved plot method, with more options.
@@ -3385,6 +3455,7 @@ listed alphabetically.
 
    \item \texttt{plot.lpp}:
      \begin{itemize}
+   \item New argument \texttt{adj.main}.
      \item New argument \texttt{show.network}.
      \item 
      For a point pattern with continuous marks (``real numbers'')
@@ -3415,8 +3486,14 @@ listed alphabetically.
      are now taken as the defaults for graphical parameters to the plot.
 
    \item \texttt{plot.owin:} 
-     New argument \texttt{use.polypath} controls how to plot
-     a filled polygon when it has holes.
+     \begin{itemize}
+     \item 
+       New argument \texttt{use.polypath} controls how to plot
+       a filled polygon when it has holes.
+     \item 
+       New argument \texttt{adj.main} controls the justification of the text
+       in the main title.
+     \end{itemize}
      
   \item \texttt{plot.profilepl}:
         This function has now been documented, and the graphics improved.
@@ -3467,6 +3544,7 @@ listed alphabetically.
     \item  Now generates a separate plot panel for each column of marks,
     if \texttt{do.col=TRUE}.
   \item New argument \texttt{multiplot}.
+  \item Changed the default values for \code{do.col} and \code{do.labels}.
     \end{itemize}
 
   \item \texttt{plot.palmdiag}: Improved calculation of $y$ axis limits.
@@ -3544,6 +3622,10 @@ listed alphabetically.
       New argument \texttt{emend}, equivalent to \texttt{project}.
     \item 
       New arguments \texttt{subset} and \texttt{clipwin}.
+    \item 
+      New argument \texttt{quad.args} is a list of arguments passed
+      to \texttt{quadscheme} to control the construction of the quadrature 
+      scheme. 
     \end{itemize}
 
   \item \code{ppmInfluence}:
@@ -3655,10 +3737,19 @@ listed alphabetically.
    \item New argument \texttt{eps} controls the accuracy of the calculation.
    \end{itemize}
    
+ \item \texttt{quantile.ecdf}:
+   \begin{itemize}
+   \item Now supports \texttt{type=4} (linear interpolation).
+   \end{itemize}
+ 
  \item \texttt{quantile.ewcdf}:
+   \begin{itemize}
+   \item Now supports \texttt{type=4} (linear interpolation).
+   \item 
     The function is now normalised to the range \verb![0,1]!
     before the quantiles are computed. 
     This can be suppressed by setting \texttt{normalise=FALSE}.
+   \end{itemize}
 
  \item \texttt{qqplot.ppm}
     Argument \texttt{expr} can now be a list of point patterns,
@@ -3963,7 +4054,7 @@ listed alphabetically.
   \item \texttt{shift.im}, \texttt{shift.owin},
     \texttt{shift.ppp}, \texttt{shift.psp}:
     More options for the argument \texttt{origin}.
-
+    
   \item Simulation:
    Several basic simulation algorithms have been accelerated.
    Consequently, simulation outcomes are not identical to 
@@ -4156,6 +4247,9 @@ listed alphabetically.
    \item \texttt{textureplot}: 
      Argument \texttt{x} can now be something acceptable to \texttt{as.im}.
    
+   \item \texttt{thinNetwork}:
+     \texttt{X} can be a pixel image on a network.
+
    \item \texttt{tilenames}, \verb!tilenames<-!:
     These functions are now generic, with methods for \texttt{tess}
     and \texttt{lintess}.
