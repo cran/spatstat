@@ -107,6 +107,8 @@
     \item \pkg{spatstat.utils} containing basic utilities
     \item \pkg{spatstat.sparse} containing linear algebra utilities
     \item \pkg{spatstat.data} containing datasets
+    \item \pkg{spatstat.univar} containing functions for estimating
+    probability distributions of random variables
     \item \pkg{spatstat.geom} containing functionality for geometrical
     operations, and defining the main classes of spatial objects
     \item \pkg{spatstat.explore} containing the main functions for exploratory
@@ -365,13 +367,20 @@
 	\code{\link[spatstat.data]{waterstriders}} \tab Insects on water surface 
       }
 
-      \bold{To manipulate a point pattern:}
+      \bold{To display a 2D point pattern:}
 
       \tabular{ll}{
 	\code{\link[spatstat.geom]{plot.ppp}} \tab
 	plot a point pattern (e.g. \code{plot(X)}) \cr
 	\code{spatstat.gui::iplot} \tab
 	plot a point pattern interactively \cr
+	\code{\link[spatstat.geom]{persp.ppp}} \tab
+	perspective plot of marked point pattern
+      }
+
+      \bold{To manipulate a 2D point pattern:}
+
+      \tabular{ll}{
 	\code{\link[spatstat.geom]{edit.ppp}} \tab interactive text editor \cr
 	\code{\link[spatstat.geom]{[.ppp}} \tab
 	extract or replace a subset of a point pattern \cr
