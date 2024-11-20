@@ -142,7 +142,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:185-207
+### code chunk number 5: updates.Rnw:185-209
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -153,23 +153,25 @@ AppendVersion <- function(pkg, sizetable, v, allow.devel=FALSE) {
   if(is.null(lastrow)) return(v)
   rbind(v, data.frame(package=pkg, version=lastrow[,"version"], date=as.Date(lastrow[,"date"])))
 }
+vtable <- AppendVersion("spatstat.utils", zutils, vtable)
+vtable <- AppendVersion("spatstat.data", zdata, vtable)
+vtable <- AppendVersion("spatstat.sparse", zsparse, vtable)
+vtable <- AppendVersion("spatstat.univar", zunivar, vtable)
 vtable <- AppendVersion("spatstat.geom", zgeom, vtable)
 vtable <- AppendVersion("spatstat.random", zrandom, vtable)
 vtable <- AppendVersion("spatstat.explore", zexplore, vtable)
 vtable <- AppendVersion("spatstat.model", zmodel, vtable)
-##vtable <- AppendVersion("spatstat.core", zcore, vtable)
 vtable <- AppendVersion("spatstat.linnet", zlinnet, vtable)
-vtable <- AppendVersion("spatstat.sparse", zsparse, vtable)
-vtable <- AppendVersion("spatstat.data", zdata, vtable)
-vtable <- AppendVersion("spatstat.univar", zunivar, vtable)
-vtable <- AppendVersion("spatstat.utils", zutils, vtable)
+## move spatstat to the bottom
+vtable <- rbind(vtable[-1, ], vtable[1, ])
+## add extras
 vtable <- AppendVersion("spatstat.local", zlocal, vtable)
 vtable <- AppendVersion("spatstat.Knet", zKnet, vtable)
 vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:213-214
+### code chunk number 6: updates.Rnw:215-216
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 
