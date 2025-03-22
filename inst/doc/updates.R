@@ -121,17 +121,18 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:152-157
+### code chunk number 3: updates.Rnw:152-158
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
-Plot <- function(fmla, ..., dat=z) {
+Plot <- function(fmla, ..., dat=z, ylim=NULL) {
   yvals <- eval(as.expression(fmla[[2]]), envir=dat)
-  plot(fmla, ..., data=dat, type="l", xlab="", lwd=2, ylim=c(0, max(yvals)))
+  if(is.null(ylim)) ylim <- c(0, max(yvals))
+  plot(fmla, ..., data=dat, type="l", xlab="", ylim=ylim, lwd=2, las=1)
 }
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:163-168
+### code chunk number 4: updates.Rnw:164-169
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -142,7 +143,7 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:185-209
+### code chunk number 5: updates.Rnw:186-210
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -171,7 +172,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:215-216
+### code chunk number 6: updates.Rnw:216-217
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 
