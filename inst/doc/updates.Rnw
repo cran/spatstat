@@ -323,13 +323,23 @@ the News and Release Notes for each update.
 
 \begin{itemize}
 
-  \item New package \pkg{spatstat.univar}.
+  \item Shrinkage estimator of relative risk.
 
-  \item Some functions from \pkg{spatstat.geom}, \pkg{spatstat.random}
-    and \pkg{spatstat.explore} have been moved to \pkg{spatstat.univar}.
+  \item Normalised relative risk.
+
+  \item Extensions to cross-validated bandwidth selection for smoothing.
+  
+  \item Conditional simulation (fixed number of points)
+    in log-Gaussian Cox processes and Neyman-Scott cluster processes.
     
-  \item packages \pkg{spatstat.geom}, \pkg{spatstat.random}
-    and \pkg{spatstat.explore} now depend on \pkg{spatstat.univar}.
+  \item Nonlinear colour maps and symbol maps.
+
+  \item Backgrounds for image plots.
+
+  \item \texttt{quadratcount.ppp} supports 
+    left-closed, right-open rectangular tiles. 
+    
+  \item More support for interpolated CDF objects
 
   \item Improvements to plotting of images, and arrays of images.
 
@@ -349,9 +359,18 @@ the News and Release Notes for each update.
     
   \item Helper functions for measuring estimator performance.
     
+  \item Conditional simulation in \texttt{rLGCP},
+    \texttt{rThomas}, \texttt{rMatClust}, \texttt{rCauchy}, \texttt{rVarGamma}.
+    
   \item Recognise powers of an integer.
     
   \item Prime factorisation computation improved.
+
+  \item More support for \texttt{interpolatedCDF} objects.
+    
+  \item Nonlinear colour maps and symbol maps.
+    
+  \item Simulation of \texttt{zclustermodel} objects.
     
   \item Shortest path between two points on a network.
     
@@ -879,6 +898,7 @@ These are now provided in the sub-package \pkg{spatstat.data}.
  \item \texttt{btb}: bovine tuberculosis occurrences.
  \item \texttt{stonetools}: palaeolithic stone tools and bone fragments.
  \item \texttt{shelling}: artillery impacts in Ukraine.
+ \item \texttt{meningitis}: meningitis cases in Germany.
 \end{itemize}
 
 \section{New classes}
@@ -915,6 +935,10 @@ starting with the most recent additions.
 
 \begin{itemize}
   
+\item \texttt{plot.interpolatedCDF}, \texttt{print.interpolatedCDF}:
+  methods for plotting and printing objects of class \texttt{"interpolatedCDF"}.
+\item \texttt{simulate.zclustermodel}: method for simulating 
+  objects of class \texttt{zclustermodel}.
 \item \texttt{integral.tessfun}:
   Integral of a function which is constant on each tile of a tessellation.
 \item \texttt{print.tessfun, plot.tessfun, as.tess.tessfun}:
@@ -2205,7 +2229,10 @@ listed alphabetically.
     \end{itemize}
 
   \item  \texttt{bw.smoothppp}:
-    New argument \texttt{varcov1} for anisotropic bandwidth selection.
+    \begin{itemize}
+    \item New arguments \texttt{train} and \texttt{test} for cross-validation.
+    \item New argument \texttt{varcov1} for anisotropic bandwidth selection.
+    \end{itemize}
 
   \item \texttt{bw.stoyan}: 
     \begin{itemize}
@@ -2309,9 +2336,17 @@ listed alphabetically.
   \item New argument \texttt{verbose}.
   \end{itemize}
 
-\item \texttt{colourmap}: argument \texttt{col} have have length 1,
-  representing a trivial colour map in which all data values are
-  mapped to the same colour.
+\item \texttt{colourmap}:
+  \begin{itemize}
+  \item New arguments \texttt{compress}, \texttt{decompress} for nonlinear colour maps.
+  \item 
+    argument \texttt{col} can have length 1,
+    representing a trivial colour map in which all data values are
+    mapped to the same colour.
+  \item 
+    New arguments \texttt{compress}, \texttt{decompress}
+    for nonlinear colour maps.
+  \end{itemize}
   
 \item \texttt{collapse.fv}:
   \begin{itemize}
@@ -2399,6 +2434,8 @@ listed alphabetically.
  \item \texttt{default.rmhcontrol, default.rmhexpand}:
    New argument \texttt{w}.
 
+ \item \texttt{default.symbolmap.ppp}:
+   Argument \texttt{marktransform} renamed \texttt{transform} for consistency.
    
  \item \texttt{densityfun.ppp}:
    The resulting function can now handle query points which lie
@@ -2676,6 +2713,10 @@ listed alphabetically.
      New arguments \texttt{warn.bias} and \texttt{savelambda}.
    \end{itemize}
    
+ \item \texttt{fastFindInterval}:
+   New argument \texttt{left.open} controls whether intervals are
+   left-open and right-closed, or left-closed and right-open.
+   
  \item \texttt{fitted.lppm}:
   New argument \texttt{leaveoneout}
   allows leave-one-out computation of fitted value.
@@ -2788,6 +2829,8 @@ listed alphabetically.
     \item Computation accelerated
     \item New argument \texttt{fun.handles.na}
     \item New argument \texttt{check}
+    \item Improved algorithm avoids violating memory limits, 
+      handles larger datasets. 
     \end{itemize}
     
  \item \texttt{influence.ppm}:
@@ -3241,9 +3284,16 @@ listed alphabetically.
 
 \item \texttt{lurking.ppm}: accelerated.
   
-\item \texttt{lut}: argument \texttt{outputs} may have length 1, 
+\item \texttt{lut}:
+  \begin{itemize}
+  \item 
+    argument \texttt{outputs} may have length 1, 
   representing a lookup table in which all data values are mapped
   to the same output value.
+\item 
+  New arguments \texttt{compress}, \texttt{decompress} for nonlinear
+  lookup tables.
+\end{itemize}
   
 %%M
    
@@ -3536,6 +3586,8 @@ listed alphabetically.
   \item 
     New argument \texttt{box} controls whether a box will be drawn
     around the colours.
+  \item 
+    New argument \texttt{at} determines the position of tick marks on the axis.
    \end{itemize}
 
  \item \texttt{plot.fv}:
@@ -3547,6 +3599,9 @@ listed alphabetically.
    
  \item \texttt{plot.im}:
    \begin{itemize}
+   \item New arguments \texttt{background} and \texttt{clip.background} 
+     allow the user to specify an object that will be plotted before the
+     image \texttt{x}, and will therefore appear underneath it.
    \item 
      New argument \texttt{drop.ribbon} determines whether a ribbon
      will be displayed
@@ -3571,6 +3626,8 @@ listed alphabetically.
   \item Axes are prevented from extending outside the image rectangle.
   \item New argument \texttt{zap}.
   \item Some warnings are suppressed when \texttt{do.plot=FALSE}.
+  \item Return value has attribute \texttt{"at"} giving the position of 
+    the tick marks on the axis next to the colour ribbon.
    \end{itemize}
 
  \item \texttt{plot.imlist}:
@@ -3937,7 +3994,13 @@ listed alphabetically.
     to the sub-package \texttt{spatstat.sparse}.
     
  \item \texttt{quadratcount.ppp}:
-   Computation accelerated in some cases.
+   \begin{itemize}
+   \item    Computation accelerated in some cases.
+   \item New argument \texttt{left.open} controls the treatment of data points
+    which lie on the boundary between two rectangular quadrats.
+   \end{itemize}
+
+
 
  \item \texttt{quadrat.test.ppm}:
    Computation accelerated in some cases.
@@ -3983,6 +4046,14 @@ listed alphabetically.
 
    \item \texttt{rebound.owin}: Now preserves unitnames of the objects.
      
+   \item \texttt{relrisk.ppp}:
+     \begin{itemize}
+     \item New argument \texttt{shrink} supports Bithell's shrinkage estimator.
+     \item New argument \texttt{normalise} controls whether the estimate 
+       will be normalised so that constant relative risk
+       corresponds to the value 1.
+     \end{itemize}
+
    \item \texttt{rescale.owin}, \texttt{rescale.ppp}, \texttt{rescale.psp}:
      The geometrical type of the window is now preserved in all cases.
      (Previously if the window was polygonal but was equivalent to a 
@@ -4091,6 +4162,11 @@ listed alphabetically.
      
      \item \texttt{rLGCP}:
        \begin{itemize}
+       \item New arguments \texttt{n.cond} and \texttt{w.cond}
+         specify conditional simulation. Every realisation will have
+         exactly \texttt{n.cond} points in total, 
+         or exactly \texttt{n.cond} points inside window \texttt{w.cond}
+         if it is given.
        \item 
          This function has been completely re-implemented
          so that it no longer requires the package \pkg{RandomFields},
@@ -4102,6 +4178,12 @@ listed alphabetically.
          \texttt{"matern"} covariance functions.
        \item 
          Now recognises argument \texttt{rule.eps} passed to \texttt{as.mask}.
+       \item 
+         New arguments \texttt{n.cond} and \texttt{w.cond} specify 
+         conditional simulation. Every realisation will have exactly 
+         \texttt{n = n.cond} points,
+         or exactly \texttt{n.cond} points inside window \texttt{w.cond}
+         if it is given.
        \end{itemize}
 
 
@@ -4229,6 +4311,11 @@ listed alphabetically.
 
    \item \texttt{rThomas, rMatClust, rCauchy, rVarGamma}:
      \begin{itemize}
+     \item New arguments \texttt{n.cond} and \texttt{w.cond}
+       specify conditional simulation. Every realisation will have
+       exactly \texttt{n.cond} points in total, 
+       or exactly \texttt{n.cond} points inside window \texttt{w.cond}
+       if it is given.
      \item 
        These algorithms have been accelerated by several orders of magnitude
        in the case where the cluster radius is large.
@@ -4242,6 +4329,12 @@ listed alphabetically.
        New argument \texttt{poisthresh} controls this behaviour.
      \item 
        New argument \texttt{saveparents}.
+     \item 
+       New arguments \texttt{n.cond} and \texttt{w.cond} specify 
+       conditional simulation. Every realisation will have exactly 
+       \texttt{n = n.cond} points,
+       or exactly \texttt{n.cond} points inside window \texttt{w.cond}
+       if it is given.
      \end{itemize}
 
      
@@ -4448,7 +4541,8 @@ listed alphabetically.
 
   \item \texttt{sumouter}:
     \begin{itemize}
-    \item New argument \texttt{y} allows computation of asymmetric outer products.
+    \item New argument \texttt{y} 
+      allows computation of asymmetric outer products.
     \item This function has now been moved to the 
       sub-package \texttt{spatstat.sparse}
     \end{itemize}
@@ -4461,6 +4555,8 @@ listed alphabetically.
      \texttt{cols}, \texttt{fg}, \texttt{bg} if the argument \texttt{range}
      is given.
    \item New option: \texttt{shape="arrows"}.
+   \item New arguments \texttt{transform}, \texttt{compress}, 
+     \texttt{decompress} for nonlinear symbol maps.
     \end{itemize}
 
 
