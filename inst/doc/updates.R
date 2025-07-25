@@ -1,18 +1,19 @@
 ### R code from vignette source 'updates.Rnw'
 
 ###################################################
-### code chunk number 1: updates.Rnw:20-26
+### code chunk number 1: updates.Rnw:20-27
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
               fields = c("Version", "Date"))
 sversion <- as.character(x[,"Version"])
 sdate    <- as.character(x[,"Date"])
+sdevel   <- length(unlist(package_version(x[,"Version"]))) > 3 
 options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:36-140
+### code chunk number 2: updates.Rnw:37-141
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -38,7 +39,7 @@ RemoveDevel <- function(sizetable) {
   return(st)
 }
 counts <- c("nhelpfiles", "nobjects", "ndatasets", "Rlines", "srclines")
-mergeSizeTables <- function(a, b, breakupdate, allow.devel=FALSE) {
+mergeSizeTables <- function(a, b, breakupdate, allow.devel=sdevel) {
   #' a is the running total for spatstat; b is a sub-package.
   #' breakupdate is the date when the code in b was removed from spatstat
   #' so that the size of 'b' must be added to 'a' for all dates >= breakupdate
@@ -121,7 +122,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:152-158
+### code chunk number 3: updates.Rnw:153-159
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z, ylim=NULL) {
@@ -132,7 +133,7 @@ Plot <- function(fmla, ..., dat=z, ylim=NULL) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:164-169
+### code chunk number 4: updates.Rnw:165-170
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -143,11 +144,11 @@ text(as.Date("2015-01-01"), 60, "R code")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:186-210
+### code chunk number 5: updates.Rnw:187-211
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
-AppendVersion <- function(pkg, sizetable, v, allow.devel=FALSE) {
+AppendVersion <- function(pkg, sizetable, v, allow.devel=sdevel) {
   if(!allow.devel) sizetable <- RemoveDevel(sizetable)
   if(is.null(sizetable)) return(v)
   lastrow <- sizetable[nrow(sizetable), , drop=FALSE]
@@ -172,7 +173,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:216-217
+### code chunk number 6: updates.Rnw:217-218
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 

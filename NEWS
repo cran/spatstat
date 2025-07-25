@@ -1,4 +1,15 @@
 
+        CHANGES IN spatstat VERSION 3.4-0
+
+OVERVIEW
+
+    o Updated version dependencies for spatstat package family.
+
+    o Updated documentation.
+
+    o Updated demo(spatstat)
+    
+
         CHANGES IN spatstat VERSION 3.3-3
 
 OVERVIEW
