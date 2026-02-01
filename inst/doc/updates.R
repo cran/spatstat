@@ -114,7 +114,7 @@ currentcount <- z[nrow(z), counts]
 bookcount    <- z[z$version == "1.42-0", counts]
 changes <- currentcount - bookcount
 newobj <- changes[["nobjects"]]
-newdat <- changes[["ndatasets"]] + 1  # counting rule doesn't detect redwood3
+newdat <- changes[["ndatasets"]] + 2  # redwood3, shelling2
 newcode  <- changes[["Rlines"]] + changes[["srclines"]]
 bookcode <- bookcount[["Rlines"]] + bookcount[["srclines"]]
 currentcode <- currentcount[["Rlines"]] + currentcount[["srclines"]]
@@ -128,23 +128,32 @@ options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z, ylim=NULL) {
   yvals <- eval(as.expression(fmla[[2]]), envir=dat)
   if(is.null(ylim)) ylim <- c(0, max(yvals))
-  plot(fmla, ..., data=dat, type="l", xlab="", ylim=ylim, lwd=2, las=1)
+  plot(fmla, ..., data=dat, type="n", xlab="", ylim=ylim, las=1)
 }
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:165-170
+### code chunk number 4: updates.Rnw:165-179
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
      main="Spatstat growth")
-lines(srclines/1000 ~ date, data=z)
-text(as.Date("2015-01-01"), 9.5, "C code")
-text(as.Date("2015-01-01"), 60, "R code")
+with(z, {
+  polygon(c(date, rev(date)),
+          c(srclines, rep(0, length(srclines)))/1000,
+          angle=45, density=5, col="pink")
+  polygon(c(date, rev(date)),
+          c(srclines+Rlines, rev(srclines))/1000,
+          angle=135, density=5, col="lightblue")
+})
+text(as.Date("2019-01-01"), 90, "R code", col="blue")
+text(as.Date("2021-01-01"), 15, "C code", col="red")
+lines((Rlines + srclines)/1000 ~ date, data=z, lwd=3)
+lines(srclines/1000 ~ date, data=z, col="red")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:187-211
+### code chunk number 5: updates.Rnw:196-220
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -173,7 +182,7 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:217-218
+### code chunk number 6: updates.Rnw:226-227
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
 
