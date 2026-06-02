@@ -524,5 +524,3 @@ quadrat.test(fit2, nx=2)
 ### code chunk number 73: replicated.Rnw:1421-1422 (eval = FALSE)
 ###################################################
 ## kstest.mppm(model, covariate)
-
-

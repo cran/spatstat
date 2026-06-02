@@ -75,5 +75,3 @@ vtable <- do.call(rbind,
 ### code chunk number 9: bugfixes.Rnw:116-117
 ###################################################
 print(vtable, row.names=FALSE)
-
-

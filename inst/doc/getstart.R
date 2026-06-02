@@ -147,5 +147,3 @@ mypattern <-finpines
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(Smooth(mypattern, sigma=1.2), main="Smooth(mypattern)")
-
-

@@ -135,5 +135,3 @@ plot(as.owin(demopat), col="blue", main="polygonal region")
 ###################################################
 ## h <- hyperframe(window=windows)
 ## h <- cbind.hyperframe(h, df)
-
-

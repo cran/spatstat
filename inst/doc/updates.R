@@ -1,19 +1,21 @@
 ### R code from vignette source 'updates.Rnw'
 
 ###################################################
-### code chunk number 1: updates.Rnw:20-27
+### code chunk number 1: updates.Rnw:20-29
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
               fields = c("Version", "Date"))
-sversion <- as.character(x[,"Version"])
 sdate    <- as.character(x[,"Date"])
-sdevel   <- length(unlist(package_version(x[,"Version"]))) > 3 
+sversion <- as.character(x[,"Version"])
+## recognise fractional version number
+IsDevel <- function(ver) { length(unlist(package_version(ver))) > 3 }
+sdevel   <- IsDevel(x[,"Version"])
 options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:37-141
+### code chunk number 2: updates.Rnw:39-142
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -33,8 +35,7 @@ getSizeTable <- function(packagename="spatstat", tablename="packagesizes.txt") {
 RemoveDevel <- function(sizetable) {
   ## remove entries with fractional version numbers
   if(is.null(sizetable)) return(NULL)
-  ver <- sizetable$version
-  isdevel <- sapply(ver, function(x) { length(unlist(package_version(x))) > 3 })
+  isdevel <- sapply(sizetable$version, IsDevel)
   st <- if(all(isdevel)) NULL else sizetable[!isdevel, , drop=FALSE]
   return(st)
 }
@@ -122,7 +123,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:153-159
+### code chunk number 3: updates.Rnw:154-160
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z, ylim=NULL) {
@@ -133,7 +134,7 @@ Plot <- function(fmla, ..., dat=z, ylim=NULL) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:165-179
+### code chunk number 4: updates.Rnw:166-180
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -147,13 +148,13 @@ with(z, {
           angle=135, density=5, col="lightblue")
 })
 text(as.Date("2019-01-01"), 90, "R code", col="blue")
-text(as.Date("2021-01-01"), 15, "C code", col="red")
+text(as.Date("2020-01-01"), 15, "C and C++ code", col="red")
 lines((Rlines + srclines)/1000 ~ date, data=z, lwd=3)
 lines(srclines/1000 ~ date, data=z, col="red")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:196-220
+### code chunk number 5: updates.Rnw:197-221
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -182,8 +183,6 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:226-227
+### code chunk number 6: updates.Rnw:227-228
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
-
-

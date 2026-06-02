@@ -456,5 +456,3 @@ E
 ## E1 <- envelope(cells, Kest, nsim=10, savefuns=TRUE)
 ## E2 <- envelope(cells, Kest, nsim=20, savefuns=TRUE)
 ## E <- pool(E1, E2)
-
-

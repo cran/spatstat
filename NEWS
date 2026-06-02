@@ -1,4 +1,12 @@
 
+        CHANGES IN spatstat VERSION 3.6-1
+
+OVERVIEW
+
+    o New functionality in spatstat.sparse, spatstat.univar, spatstat.random
+
+    o More changes in spatstat.explore
+
         CHANGES IN spatstat VERSION 3.6-0
 
 OVERVIEW

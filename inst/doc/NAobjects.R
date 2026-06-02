@@ -163,5 +163,3 @@ K <- with(m, Kest(Y))
 m$G <- with(m, Gest(Y))
 m$u <- with(m, clarkevans.test(Y))
 with(m, u$p.value)
-
-

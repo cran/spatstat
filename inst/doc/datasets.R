@@ -584,5 +584,3 @@ plot(ve$activezone, add=TRUE, lwd=3)
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 plot(waterstriders)
-
-
