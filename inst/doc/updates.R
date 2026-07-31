@@ -1,7 +1,7 @@
 ### R code from vignette source 'updates.Rnw'
 
 ###################################################
-### code chunk number 1: updates.Rnw:20-29
+### code chunk number 1: updates.Rnw:20-30
 ###################################################
 library(spatstat)
 x <- read.dcf(file = system.file("DESCRIPTION", package = "spatstat"),
@@ -11,11 +11,12 @@ sversion <- as.character(x[,"Version"])
 ## recognise fractional version number
 IsDevel <- function(ver) { length(unlist(package_version(ver))) > 3 }
 sdevel   <- IsDevel(x[,"Version"])
+outed <- if(sdevel) "compiled" else "released"
 options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:39-142
+### code chunk number 2: updates.Rnw:40-143
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -123,7 +124,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:154-160
+### code chunk number 3: updates.Rnw:155-161
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z, ylim=NULL) {
@@ -134,7 +135,7 @@ Plot <- function(fmla, ..., dat=z, ylim=NULL) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:166-180
+### code chunk number 4: updates.Rnw:167-183
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -147,14 +148,16 @@ with(z, {
           c(srclines+Rlines, rev(srclines))/1000,
           angle=135, density=5, col="lightblue")
 })
-text(as.Date("2019-01-01"), 90, "R code", col="blue")
+text(as.Date("2020-01-01"), 90, "R code", col="blue")
 text(as.Date("2020-01-01"), 15, "C and C++ code", col="red")
 lines((Rlines + srclines)/1000 ~ date, data=z, lwd=3)
 lines(srclines/1000 ~ date, data=z, col="red")
+abline(v = as.Date("2015-05-27"), lty=3, col="purple", lwd=2)
+text(as.Date("2014-10-01"), 175, "version covered in book", srt=90, col="purple")
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:197-221
+### code chunk number 5: updates.Rnw:200-224
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -183,6 +186,6 @@ vtable <- AppendVersion("spatstat.gui", zgui, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:227-228
+### code chunk number 6: updates.Rnw:230-231
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
