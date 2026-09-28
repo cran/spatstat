@@ -16,7 +16,7 @@ options(useFancyQuotes=FALSE)
 
 
 ###################################################
-### code chunk number 2: updates.Rnw:40-143
+### code chunk number 2: updates.Rnw:40-149
 ###################################################
 readSizeTable <- function(fname) {
   if(is.null(fname) || !file.exists(fname)) return(NULL)
@@ -94,7 +94,12 @@ zcore    <- getSizeTable("spatstat", "spatstatcoresize.txt")
 zlocal   <- getSizeTable("spatstat", "spatstatlocalsize.txt")
 zgui     <- getSizeTable("spatstat", "spatstatguisize.txt")
 zKnet    <- getSizeTable("spatstat", "spatstatKnetsize.txt")
+zconvert <- getSizeTable("spatstat", "spatstatconvertsize.txt")
 ## Merge histories starting at the 'split dates'
+## This applies to sub-packages which were created by forking
+## (progressively copying existing code to a new package and modifying it)
+## At the 'split date' the new package is released and the 
+## duplicated code in the old package is deleted
 z <- mergeSizeTables(z, zutils,  "2017-03-22")
 z <- mergeSizeTables(z, zdata,   "2017-09-23")
 z <- mergeSizeTables(z, zsparse, "2020-11-04")
@@ -111,6 +116,7 @@ z <- mergeSizeTables(z, zunivar,  "2024-04-21")
 z <- mergeSizeTables(z, zlocal)
 z <- mergeSizeTables(z, zgui)
 z <- mergeSizeTables(z, zKnet)
+z <- mergeSizeTables(z, zconvert)
 ## Now summarise
 currentcount <- z[nrow(z), counts]
 bookcount    <- z[z$version == "1.42-0", counts]
@@ -124,7 +130,7 @@ growth <- signif((100 * newcode)/bookcode, digits=2)
 
 
 ###################################################
-### code chunk number 3: updates.Rnw:155-161
+### code chunk number 3: updates.Rnw:161-167
 ###################################################
 options(SweaveHooks=list(fig=function() par(mar=0.2+c(2,4,2,0))))
 Plot <- function(fmla, ..., dat=z, ylim=NULL) {
@@ -135,7 +141,7 @@ Plot <- function(fmla, ..., dat=z, ylim=NULL) {
 
 
 ###################################################
-### code chunk number 4: updates.Rnw:167-183
+### code chunk number 4: updates.Rnw:173-189
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 Plot((Rlines + srclines)/1000 ~ date, ylab="Lines of code (x 1000)", 
@@ -157,7 +163,7 @@ text(as.Date("2014-10-01"), 175, "version covered in book", srt=90, col="purple"
 
 
 ###################################################
-### code chunk number 5: updates.Rnw:200-224
+### code chunk number 5: updates.Rnw:206-231
 ###################################################
 ## Tabulate latest version numbers of packages
 vtable <- data.frame(package="spatstat", version=sversion, date=as.Date(sdate))
@@ -183,9 +189,10 @@ vtable <- rbind(vtable[-1, ], vtable[1, ])
 vtable <- AppendVersion("spatstat.local", zlocal, vtable)
 vtable <- AppendVersion("spatstat.Knet", zKnet, vtable)
 vtable <- AppendVersion("spatstat.gui", zgui, vtable)
+vtable <- AppendVersion("spatstat.convert", zconvert, vtable)
 
 
 ###################################################
-### code chunk number 6: updates.Rnw:230-231
+### code chunk number 6: updates.Rnw:237-238
 ###################################################
 print(vtable[,c(3,1,2)], row.names=FALSE)
